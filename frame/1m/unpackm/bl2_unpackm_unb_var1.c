@@ -1,0 +1,117 @@
+/*
+
+   BLIS    
+   An object-based framework for developing high-performance BLAS-like
+   libraries.
+
+   Copyright (C) 2012, The University of Texas
+
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are
+   met:
+    - Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    - Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    - Neither the name of The University of Texas nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+   HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+*/
+
+#include "blis2.h"
+
+#define FUNCPTR_T unpackm_fp
+
+typedef void (*FUNCPTR_T)(
+                           doff_t  diagoffp,
+                           uplo_t  uplop,
+                           trans_t transp,
+                           dim_t   m,
+                           dim_t   n,
+                           void*   p, inc_t rs_p, inc_t cs_p,
+                           void*   c, inc_t rs_c, inc_t cs_c
+                         );
+
+static FUNCPTR_T GENARRAY(ftypes,unpackm_unb_var1);
+
+
+void bl2_unpackm_unb_var1( obj_t*     p,
+                           obj_t*     c,
+                           unpackm_t* cntl )
+{
+	num_t     dt_pc     = bl2_obj_datatype( *p );
+
+	doff_t    diagoffp  = bl2_obj_diag_offset( *p );
+	uplo_t    uplop     = bl2_obj_uplo( *p );
+	trans_t   transc    = bl2_obj_trans_status( *c );
+
+	dim_t     m_c       = bl2_obj_length( *c );
+	dim_t     n_c       = bl2_obj_width( *c );
+
+	void*     buf_p     = bl2_obj_buffer_at_off( *p );
+	inc_t     rs_p      = bl2_obj_row_stride( *p );
+	inc_t     cs_p      = bl2_obj_col_stride( *p );
+
+	void*     buf_c     = bl2_obj_buffer_at_off( *c );
+	inc_t     rs_c      = bl2_obj_row_stride( *c );
+	inc_t     cs_c      = bl2_obj_col_stride( *c );
+
+	FUNCPTR_T f;
+
+	// Index into the type combination array to extract the correct
+	// function pointer.
+	f = ftypes[dt_pc];
+
+	// Invoke the function.
+	f( diagoffp,
+	   uplop,
+	   transc,
+	   m_c,
+	   n_c,
+	   buf_p, rs_p, cs_p,
+	   buf_c, rs_c, cs_c );
+}
+
+
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, opname, varname ) \
+\
+void PASTEMAC(ch,varname)( \
+                           doff_t  diagoffp, \
+                           uplo_t  uplop, \
+                           trans_t transp, \
+                           dim_t   m, \
+                           dim_t   n, \
+                           void*   p, inc_t rs_p, inc_t cs_p, \
+                           void*   c, inc_t rs_c, inc_t cs_c \
+                         ) \
+{ \
+	ctype* p_cast = p; \
+	ctype* c_cast = c; \
+\
+	PASTEMAC2(ch,ch,copym)( diagoffp,\
+	                        BLIS_NONUNIT_DIAG, \
+	                        uplop, \
+		                    transp, \
+	                        m, \
+	                        n, \
+	                        p_cast, rs_p, cs_p, \
+	                        c_cast, rs_c, cs_c ); \
+}
+
+INSERT_GENTFUNC_BASIC( unpackm, unpackm_unb_var1 )
+

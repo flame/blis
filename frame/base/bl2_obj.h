@@ -1,0 +1,102 @@
+/*
+
+   BLIS    
+   An object-based framework for developing high-performance BLAS-like
+   libraries.
+
+   Copyright (C) 2012, The University of Texas
+
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are
+   met:
+    - Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    - Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    - Neither the name of The University of Texas nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+   HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+*/
+
+#include "bl2_obj_check.h"
+
+void bl2_obj_create( num_t  dt,
+                     dim_t  m,
+                     dim_t  n,
+                     inc_t  rs,
+                     inc_t  cs,
+                     obj_t* obj );
+
+void bl2_obj_create_with_attached_buffer( num_t  dt,
+                                          dim_t  m,
+                                          dim_t  n,
+                                          void*  p,
+                                          inc_t  rs,
+                                          inc_t  cs,
+                                          obj_t* obj );
+
+void bl2_obj_create_without_buffer( num_t  dt,
+                                    dim_t  m,
+                                    dim_t  n,
+                                    obj_t* obj );
+
+void bl2_obj_alloc_buffer( inc_t  rs,
+                           inc_t  cs,
+                           obj_t* obj );
+
+void bl2_obj_attach_buffer( void*  p,
+                            inc_t  rs,
+                            inc_t  cs,
+                            obj_t* obj );
+
+void bl2_obj_attach_internal_buffer( obj_t* obj );
+
+void bl2_obj_init_scalar_copy_of( num_t  dt,
+                                  conj_t conj,
+                                  obj_t* a,
+                                  obj_t* b );
+
+void bl2_obj_create_scalar( num_t  dt,
+                            obj_t* obj );
+
+void bl2_obj_create_scalar_with_attached_buffer( num_t  dt,
+                                                 void*  p,
+                                                 obj_t* obj );
+
+void bl2_obj_free( obj_t* obj );
+
+void bl2_obj_create_const( double value, obj_t* obj );
+
+void bl2_obj_create_const_copy_of( obj_t* a, obj_t* b );
+
+void bl2_adjust_strides( dim_t  m,
+                         dim_t  n,
+                         dim_t* rs,
+                         dim_t* cs );
+
+siz_t bl2_datatype_size( num_t dt );
+
+dim_t bl2_align_dim_to_mult( dim_t dim, dim_t dim_mult );
+
+dim_t bl2_align_dim_to_sys( dim_t dim, dim_t elem_size );
+
+dim_t bl2_align_dim( dim_t dim, dim_t dim_mult, dim_t elem_size );
+
+num_t bl2_datatype_union( num_t dt1, num_t dt2 );
+
+void bl2_obj_print( char* label, obj_t* obj );
+

@@ -1,0 +1,123 @@
+/*
+
+   BLIS    
+   An object-based framework for developing high-performance BLAS-like
+   libraries.
+
+   Copyright (C) 2012, The University of Texas
+
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are
+   met:
+    - Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    - Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    - Neither the name of The University of Texas nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+   HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+*/
+
+#include "blis2.h"
+
+#define FUNCPTR_T ger_fp
+
+typedef void (*FUNCPTR_T)( obj_t*  alpha,
+                           obj_t*  x,
+                           obj_t*  y,
+                           obj_t*  a,
+                           ger_t*  cntl );
+
+static FUNCPTR_T vars[4][3] =
+{
+	// unblocked          unblocked with fusing   blocked
+	{ bl2_ger_unb_var1,   NULL,                   bl2_ger_blk_var1, },
+	{ bl2_ger_unb_var2,   NULL,                   bl2_ger_blk_var2, },
+	{ NULL,               NULL,                   NULL,             },
+	{ NULL,               NULL,                   NULL,             },
+};
+
+void bl2_ger_int( conj_t  conjx,
+                  conj_t  conjy,
+                  obj_t*  alpha,
+                  obj_t*  x,
+                  obj_t*  y,
+                  obj_t*  a,
+                  ger_t*  cntl )
+{
+	varnum_t  n;
+	impl_t    i;
+	FUNCPTR_T f;
+	obj_t     alpha_local;
+	obj_t     x_local;
+	obj_t     y_local;
+	obj_t     a_local;
+
+	// Check parameters.
+	if ( bl2_error_checking_is_enabled() )
+		bl2_ger_int_check( alpha, x, y, a, cntl );
+
+	// Return early if one of the operands has a zero dimension.
+	if ( bl2_obj_has_zero_dim( *x ) ) return;
+	if ( bl2_obj_has_zero_dim( *y ) ) return;
+	if ( bl2_obj_has_zero_dim( *a ) ) return;
+
+	// Alias the objects, applying conjx and conjy to x and y, respectively.
+	bl2_obj_alias_with_conj( conjx, *x, x_local );
+	bl2_obj_alias_with_conj( conjy, *y, y_local );
+	bl2_obj_alias_to( *a, a_local );
+
+	// If matrix A is marked for conjugation, we interpret this as a request
+	// to apply a conjugation to the other operands.
+	if ( bl2_obj_has_conj( a_local ) )
+	{
+		bl2_obj_toggle_conj( a_local );
+
+		bl2_obj_toggle_conj( x_local );
+		bl2_obj_toggle_conj( y_local );
+
+		bl2_obj_init_scalar_copy_of( bl2_obj_datatype( *alpha ),
+		                             BLIS_CONJUGATE,
+		                             alpha,
+		                             &alpha_local );
+	}
+	else
+	{
+		bl2_obj_alias_to( *alpha, alpha_local );
+	}
+
+	// If we are about the call a leaf-level implementation, and matrix A
+	// still needs a transposition, then we must induce one by swapping the
+	// strides and dimensions.
+	if ( cntl_is_leaf( cntl ) && bl2_obj_has_trans( a_local ) )
+		bl2_obj_induce_trans( a_local );
+
+	// Extract the variant number and implementation type.
+	n = cntl_var_num( cntl );
+	i = cntl_impl_type( cntl );
+
+	// Index into the variant array to extract the correct function pointer.
+	f = vars[n][i];
+
+	// Invoke the variant.
+	f( &alpha_local,
+	   &x_local,
+	   &y_local,
+	   &a_local,
+	   cntl );
+}
+

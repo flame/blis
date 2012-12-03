@@ -1,0 +1,30 @@
+# generic files to ignore
+
+*~      # emacs backup files
+*.swp   # vim swap file
+*.out   # anything
+
+# compiler-related
+
+*.o     # object files
+*.a     # static library archives
+*.x     # test executables
+
+# build system files
+
+config.mk
+
+# directories with build products
+
+lib
+obj
+
+# makefile fragments
+
+.fragment.mk
+fragment.mk
+
+# misc.
+
+output*.m
+

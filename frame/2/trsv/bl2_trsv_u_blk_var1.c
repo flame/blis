@@ -1,0 +1,123 @@
+/*
+
+   BLIS    
+   An object-based framework for developing high-performance BLAS-like
+   libraries.
+
+   Copyright (C) 2012, The University of Texas
+
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are
+   met:
+    - Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    - Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    - Neither the name of The University of Texas nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+   HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+*/
+
+#include "blis2.h"
+
+void bl2_trsv_u_blk_var1( obj_t*  alpha,
+                          obj_t*  a,
+                          obj_t*  x,
+                          trsv_t* cntl )
+{
+	obj_t   a11, a11_pack;
+	obj_t   a12;
+	obj_t   x1, x1_pack;
+	obj_t   x2;
+
+	dim_t   mn;
+	dim_t   ij;
+	dim_t   b_alg;
+
+	// Initialize objects for packing.
+	bl2_obj_init_pack( &a11_pack );
+	bl2_obj_init_pack( &x1_pack );
+
+	// Query dimension.
+	mn = bl2_obj_length( *a );
+
+	// x = alpha * x;
+	bl2_scalv_int( alpha,
+	               x,
+	               cntl_sub_scalv( cntl ) );
+
+	// Partition diagonally.
+	for ( ij = 0; ij < mn; ij += b_alg )
+	{
+		// Determine the current algorithmic blocksize.
+		b_alg = bl2_determine_blocksize_b( ij, mn,
+		                                   a,
+		                                   cntl_blocksize( cntl ) );
+
+		// Acquire partitions for A11, A12, x1, and x2.
+		bl2_acquire_mpart_br2tl( BLIS_SUBPART11,
+		                         ij, b_alg, a, &a11 );
+		bl2_acquire_mpart_br2tl( BLIS_SUBPART12,
+		                         ij, b_alg, a, &a12 );
+		bl2_acquire_vpart_b2f( BLIS_SUBPART1,
+		                       ij, b_alg, x, &x1 );
+		bl2_acquire_vpart_b2f( BLIS_SUBPART2,
+		                       ij, b_alg, x, &x2 );
+
+		// Initialize objects for packing A11 and x1 (if needed).
+		bl2_packm_init( &a11, &a11_pack,
+		                cntl_sub_packm_a11( cntl ) );
+		bl2_packv_init( &x1, &x1_pack,
+		                cntl_sub_packv_x1( cntl ) );
+
+		// Copy/pack A11, x1 (if needed).
+		bl2_packm_int( &BLIS_ONE,
+		               &a11,
+		               &a11_pack,
+		               cntl_sub_packm_a11( cntl ) );
+		bl2_packv_int( &x1,
+		               &x1_pack,
+		               cntl_sub_packv_x1( cntl ) );
+
+		// x1 = x1 - A12 * x2;
+		bl2_gemv_int( BLIS_NO_TRANSPOSE,
+		              BLIS_NO_CONJUGATE,
+	                  &BLIS_MINUS_ONE,
+		              &a12,
+		              &x2,
+		              &BLIS_ONE,
+		              &x1_pack,
+		              cntl_sub_gemv_rp( cntl ) );
+
+		// x1 = x1 / tril( A11 );
+		bl2_trsv_int( &BLIS_ONE,
+		              &a11_pack,
+		              &x1_pack,
+		              cntl_sub_trsv( cntl ) );
+
+		// Copy/unpack x1 (if x1 was packed).
+		bl2_unpackv_int( &x1_pack,
+		                 &x1,
+		                 cntl_sub_unpackv_x1( cntl ) );
+	}
+
+	// If any packing buffers were acquired within packm, release them back
+	// to the memory manager.
+	bl2_obj_release_pack( &a11_pack );
+	bl2_obj_release_pack( &x1_pack );
+}
+

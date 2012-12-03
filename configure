@@ -1,0 +1,226 @@
+#!/bin/bash
+#
+#  BLIS    
+#  An object-based framework for developing high-performance BLAS-like
+#  libraries.
+#
+#  Copyright (C) 2012, The University of Texas
+#
+#  Redistribution and use in source and binary forms, with or without
+#  modification, are permitted provided that the following conditions are
+#  met:
+#   - Redistributions of source code must retain the above copyright
+#     notice, this list of conditions and the following disclaimer.
+#   - Redistributions in binary form must reproduce the above copyright
+#     notice, this list of conditions and the following disclaimer in the
+#     documentation and/or other materials provided with the distribution.
+#   - Neither the name of The University of Texas nor the names of its
+#     contributors may be used to endorse or promote products derived
+#     from this software without specific prior written permission.
+#
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+#  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+#  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+#  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+#  HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+#  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+#  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+#  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+#  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+#  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+#  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+#
+
+print_usage()
+{
+	# Echo usage info.
+	echo " "
+	echo " ${script_name}"
+	echo " "
+	echo " Field G. Van Zee"
+	echo " "
+	echo " Configure BLIS's build system for compilation using a specified"
+	echo " configuration directory."
+	echo " "
+	echo " Usage:"
+	echo " "
+	echo "   ${script_name} [options] confname"
+	echo " "
+	echo " Arguments:"
+	echo " "
+	echo "   confname    The name of the sub-directory inside of the 'config'"
+	echo "               directory containing the desired BLIS configuration."
+	echo "               If confname is not specified, then it defaults to"
+	echo "               'reference'."
+	echo " "
+	echo " Options:"
+	echo " "
+	echo "   -p PREFIX   install prefix"
+	echo "                 The path to which make will install buid products."
+	echo "                 If not given, PREFIX defaults to \$(HOME)/blis."
+	echo " "
+	echo "   -q          quiet"
+	echo "                 Suppress informational output. By default, configure"
+	echo "                 is verbose. (NOTE: -q is not yet implemented)"
+	echo " "
+
+	# Exit with non-zero exit status
+	exit 1
+}
+
+main()
+{
+	# The name of the script, stripped of any preceeding path.
+	script_name=${0##*/}
+
+	# Option variables.
+	quiet_flag=""
+
+	# The name of the build directory. This is where the template
+	# config.mk.in file lives.
+	build_dir='build'
+	config_mk_in='config.mk.in'
+	config_mk_out='config.mk'
+	config_mk_in_path="${build_dir}/${config_mk_in}"
+	config_mk_out_path="./${config_mk_out}"
+
+	# Path to 'mirror-tree.sh' script.
+	mirror_tree_sh="./${build_dir}/mirror-tree.sh"
+
+	# The root directory of the BLIS framework.
+	frame_dir='frame'
+	frame_path="./${frame_dir}"
+
+	# The name of the (top-level) configuration directory.
+	config_dir='config'
+
+	# The name of the default configuration sub-directory.
+	config_name_def='reference'
+
+	# The name of the chosen configuration sub-directory.
+	config_name=''
+
+	# The name of the directory in which object files will be kept.
+	obj_dir='obj'
+
+	# The install prefix flag.
+	install_prefix_def="${HOME}/blis"
+	install_prefix=''
+	prefix_flag=''
+
+
+	# Process our command line options.
+	while getopts ":hp:q" opt; do
+		case $opt in
+			h  ) print_usage ;;
+			p  ) prefix_flag=1
+			     install_prefix=$OPTARG ;;
+			q  ) quiet_flag=1 ;;
+			\? ) print_usage
+		esac
+	done
+	shift $(($OPTIND - 1))
+
+
+	# Set config_name based on the number of arguments leftover (after command
+	# line option processing).
+	if [ $# = "0" ]; then
+
+		config_name=${config_name_def}
+		echo "${script_name}: no configuration sub-directory given; defaulting to '${config_name}'."
+
+	elif [ $# = "1" ]; then
+
+		config_name=$1
+		echo "${script_name}: configuring with '${config_name}' configuration sub-directory."
+	else
+
+		print_usage
+	fi
+
+	# Build the config directory path
+	config_path="${config_dir}/${config_name}"
+
+
+	# Set the install prefix if it was not already set when parsing the install
+	# prefix flag.
+	if [ -n "${prefix_flag}" ]; then
+		echo "${script_name}: detected -p option; using install prefix ${install_prefix}."
+	else
+		install_prefix="${install_prefix_def}"
+		echo "${script_name}: no install prefix given; defaulting to ${install_prefix}."
+	fi
+
+	# Insert escape characters into path.
+	install_prefix=$(echo "${install_prefix}" | sed 's/\//\\\//g')
+	#echo "${install_prefix}"
+	#exit 1
+
+
+	# Begin substituting information into the config_mk_in file, outputting
+	# to config_mk_out.
+	echo "${script_name}: creating ${config_mk_out_path} from ${config_mk_in_path}"
+	cat "${config_mk_in_path}" \
+	    | sed "s/@config_name@/${config_name}/g" \
+	    | sed "s/@install_prefix@/${install_prefix}/g" \
+	    > "${config_mk_out_path}"
+
+
+	# Create obj sub-directories (if they do not already exist).
+	base_obj_path="${obj_dir}/${config_name}"
+
+	echo "${script_name}: creating ${base_obj_path}"
+	mkdir -p ${base_obj_path}
+
+	obj_config_path="${base_obj_path}/${config_dir}"
+
+	echo "${script_name}: creating ${obj_config_path}"
+	mkdir -p ${obj_config_path}
+
+	obj_frame_path="${base_obj_path}/${frame_dir}"
+
+	echo "${script_name}: creating ${obj_frame_path}"
+	mkdir -p ${obj_frame_path}
+
+
+	# Mirror source trees to the object directory.
+	echo "${script_name}: mirroring ${config_path} to ${obj_config_path}"
+
+	${mirror_tree_sh} ${config_path} ${obj_config_path}
+
+	echo "${script_name}: mirroring ${frame_path} to ${obj_frame_path}"
+
+	${mirror_tree_sh} ${frame_path} ${obj_frame_path}
+exit 1
+
+	# Generate makefile fragments in the chosen configuration directory.
+	./build/gen-make-frags/gen-make-frag.sh \
+	         -h -r -d -v1 \
+	         -o ${script_name} \
+	         -p 'CONFIG' \
+	         ${config_path} \
+	         build/gen-make-frags/fragment.mk \
+	         build/gen-make-frags/suffix_list \
+	         build/gen-make-frags/ignore_list \
+	         build/gen-make-frags/special_list
+
+	# Generate makefile fragments in the framework directory.
+	./build/gen-make-frags/gen-make-frag.sh \
+	         -h -r -d -v1 \
+	         -o ${script_name} \
+	         -p 'FRAME' \
+	         ${frame_path} \
+	         build/gen-make-frags/fragment.mk \
+	         build/gen-make-frags/suffix_list \
+	         build/gen-make-frags/ignore_list \
+	         build/gen-make-frags/special_list
+
+
+	# Exit peacefully.
+	return 0
+}
+
+
+# The script's main entry point, passing all parameters given.
+main "$@"
