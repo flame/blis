@@ -32,74 +32,15 @@
 
 */
 
-#include "blis2.h"
-
-#undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, varname ) \
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, varname ) \
 \
 void PASTEMAC(ch,varname)( \
-                           conj_t  conjp, \
+                           conj_t  conja, \
                            dim_t   n, \
                            void*   beta, \
-                           void*   p, \
-                           void*   a, inc_t inca, inc_t lda  \
-                         ) \
-{ \
-	ctype* restrict beta_cast = beta; \
-	ctype* restrict pi1       = p; \
-	ctype* restrict alpha1    = a; \
-\
-	if ( PASTEMAC(ch,eq1)( *beta_cast ) ) \
-	{ \
-		if ( bl2_is_conj( conjp ) ) \
-		{ \
-			for ( ; n != 0; --n ) \
-			{ \
-				PASTEMAC2(ch,ch,copyjs)( *(pi1 + 0), *(alpha1 + 0*inca) ); \
-				PASTEMAC2(ch,ch,copyjs)( *(pi1 + 1), *(alpha1 + 1*inca) ); \
-\
-				pi1    += 2; \
-				alpha1 += lda; \
-			} \
-		} \
-		else \
-		{ \
-			for ( ; n != 0; --n ) \
-			{ \
-				PASTEMAC2(ch,ch,copys)( *(pi1 + 0), *(alpha1 + 0*inca) ); \
-				PASTEMAC2(ch,ch,copys)( *(pi1 + 1), *(alpha1 + 1*inca) ); \
-\
-				pi1    += 2; \
-				alpha1 += lda; \
-			} \
-		} \
-	} \
-	else \
-	{ \
-		if ( bl2_is_conj( conjp ) ) \
-		{ \
-			for ( ; n != 0; --n ) \
-			{ \
-				PASTEMAC3(ch,ch,ch,scal2js)( *beta_cast, *(pi1 + 0), *(alpha1 + 0*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *beta_cast, *(pi1 + 1), *(alpha1 + 1*inca) ); \
-\
-				pi1    += 2; \
-				alpha1 += lda; \
-			} \
-		} \
-		else \
-		{ \
-			for ( ; n != 0; --n ) \
-			{ \
-				PASTEMAC3(ch,ch,ch,scal2s)( *beta_cast, *(pi1 + 0), *(alpha1 + 0*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *beta_cast, *(pi1 + 1), *(alpha1 + 1*inca) ); \
-\
-				pi1    += 2; \
-				alpha1 += lda; \
-			} \
-		} \
-	} \
-}
+                           void*   a, inc_t inca, inc_t lda, \
+                           void*   p  \
+                         );
 
-INSERT_GENTFUNC_BASIC( unpackm_2xk, unpackm_2xk )
-
+INSERT_GENTPROT_BASIC( packm_ref_6xk )

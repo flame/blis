@@ -42,9 +42,11 @@ void PASTEMAC(ch,varname)( \
                            dim_t   n, \
                            void*   beta, \
                            void*   a, inc_t inca, inc_t lda, \
-                           void*   p  \
+                           void*   p \
                          ) \
 { \
+	const inc_t     ldp       = 2; \
+\
 	ctype* restrict beta_cast = beta; \
 	ctype* restrict alpha1    = a; \
 	ctype* restrict pi1       = p; \
@@ -59,7 +61,7 @@ void PASTEMAC(ch,varname)( \
 				PASTEMAC2(ch,ch,copyjs)( *(alpha1 + 1*inca), *(pi1 + 1) ); \
 \
 				alpha1 += lda; \
-				pi1    += 2; \
+				pi1    += ldp; \
 			} \
 		} \
 		else \
@@ -70,7 +72,7 @@ void PASTEMAC(ch,varname)( \
 				PASTEMAC2(ch,ch,copys)( *(alpha1 + 1*inca), *(pi1 + 1) ); \
 \
 				alpha1 += lda; \
-				pi1    += 2; \
+				pi1    += ldp; \
 			} \
 		} \
 	} \
@@ -84,7 +86,7 @@ void PASTEMAC(ch,varname)( \
 				PASTEMAC3(ch,ch,ch,scal2js)( *beta_cast, *(alpha1 + 1*inca), *(pi1 + 1) ); \
 \
 				alpha1 += lda; \
-				pi1    += 2; \
+				pi1    += ldp; \
 			} \
 		} \
 		else \
@@ -95,11 +97,11 @@ void PASTEMAC(ch,varname)( \
 				PASTEMAC3(ch,ch,ch,scal2s)( *beta_cast, *(alpha1 + 1*inca), *(pi1 + 1) ); \
 \
 				alpha1 += lda; \
-				pi1    += 2; \
+				pi1    += ldp; \
 			} \
 		} \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC( packm_2xk, packm_2xk )
+INSERT_GENTFUNC_BASIC( packm_ref_6xk, packm_ref_6xk )
 

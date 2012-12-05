@@ -32,10 +32,14 @@
 
 */
 
+#include "bl2_lsame.h"
+#include "bl2_slamch.h"
+#include "bl2_dlamch.h"
+
 //
 // Prototype object-based interface.
 //
-void bl2_machval( machval_t machval,
+void bl2_machval( machval_t mval,
                   obj_t*    v );
 
 
@@ -46,8 +50,8 @@ void bl2_machval( machval_t machval,
 #define GENTPROT( ctype, ch, opname ) \
 \
 void PASTEMAC(ch,opname)( \
-                          machval_t machval, \
-                          ctype*    val \
+                          machval_t mval, \
+                          void*     v \
                         );
 
 INSERT_GENTPROT_BASIC( machval )

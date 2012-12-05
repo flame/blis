@@ -77,8 +77,12 @@ LIB_DIR           := lib
 
 NOOPT_DIR         := noopt
 
-# Construct a path to the framework source tree.
+NOOPT_TEXT        := "(NOTE: optimizations disabled)"
+
+# Construct some paths.
 FRAME_PATH        := ./$(FRAME_DIR)
+OBJ_PATH          := ./$(OBJ_DIR)
+LIB_PATH          := ./$(LIB_DIR)
 
 
 
@@ -106,9 +110,9 @@ endif
 CONFIG_PATH       := ./$(CONFIG_DIR)/$(CONFIG_NAME)
 
 # Construct base paths for the object file tree.
-BASE_OBJ_DIR           := ./$(OBJ_DIR)/$(CONFIG_NAME)
-BASE_OBJ_CONFIG_PATH   := $(BASE_OBJ_DIR)/$(CONFIG_DIR)
-BASE_OBJ_FRAME_PATH    := $(BASE_OBJ_DIR)/$(FRAME_DIR)
+BASE_OBJ_PATH          := ./$(OBJ_DIR)/$(CONFIG_NAME)
+BASE_OBJ_CONFIG_PATH   := $(BASE_OBJ_PATH)/$(CONFIG_DIR)
+BASE_OBJ_FRAME_PATH    := $(BASE_OBJ_PATH)/$(FRAME_DIR)
 
 # Construct base path for the library.
 BASE_LIB_PATH          := ./$(LIB_DIR)/$(CONFIG_NAME)
@@ -144,7 +148,7 @@ endif
 # Construct the architecture-version string, which will be used to name the
 # library upon installation.
 VERSION                := $(shell cat version)
-CONF_VERS              := $(CONFIG_NAME)-$(VERSION)
+VERS_CONF              := $(VERSION)-$(CONFIG_NAME)
 
 # --- Library names ---
 
@@ -172,33 +176,33 @@ MK_CONFIG_OBJS         :=
 MK_CONFIG_NOOPT_OBJS   :=
 
 # Append the base library path to the library name.
-MK_ALL_BLIS_LIB        := $(BASE_LIB_DIR)/$(BLIS_LIB_NAME)
+MK_ALL_BLIS_LIB        := $(BASE_LIB_PATH)/$(BLIS_LIB_NAME)
 
 # --- Define install target names for static libraries ---
 
 MK_BLIS_LIB                  := $(MK_ALL_BLIS_LIB)
-MK_BLIS_LIB_INST             := $(patsubst $(BASE_LIB_DIR)/%.a, \
+MK_BLIS_LIB_INST             := $(patsubst $(BASE_LIB_PATH)/%.a, \
                                            $(INSTALL_PREFIX)/lib/%.a, \
                                            $(MK_BLIS_LIB))
-MK_BLIS_LIB_INST_W_CONF_VERS := $(patsubst $(BASE_LIB_DIR)/%.a, \
-                                           $(INSTALL_PREFIX)/lib/%-$(CONF_VERS).a, \
+MK_BLIS_LIB_INST_W_VERS_CONF := $(patsubst $(BASE_LIB_PATH)/%.a, \
+                                           $(INSTALL_PREFIX)/lib/%-$(VERS_CONF).a, \
                                            $(MK_BLIS_LIB))
 
 # --- Determine which libraries to build ---
 
 MK_LIBS                           :=
 MK_LIBS_INST                      :=
-MK_LIBS_INST_W_CONF_VERS          :=
+MK_LIBS_INST_W_VERS_CONF          :=
 
 ifeq ($(BLIS_ENABLE_STATIC_BUILD),yes)
 MK_LIBS                           += $(MK_BLIS_LIB)
 MK_LIBS_INST                      += $(MK_BLIS_LIB_INST)
-MK_LIBS_INST_W_CONF_VERS          += $(MK_BLIS_LIB_INST_W_CONF_VERS)
+MK_LIBS_INST_W_VERS_CONF          += $(MK_BLIS_LIB_INST_W_VERS_CONF)
 endif
 
 # Set the include directory names
 MK_INCL_DIR_INST                  := $(INSTALL_PREFIX)/include
-MK_INCL_DIR_INST_W_CONF_VERS      := $(INSTALL_PREFIX)/include-$(CONF_VERS)
+MK_INCL_DIR_INST_W_VERS_CONF      := $(INSTALL_PREFIX)/include-$(VERS_CONF)
 
 
 
@@ -212,16 +216,21 @@ MK_INCL_DIR_INST_W_CONF_VERS      := $(INSTALL_PREFIX)/include-$(CONF_VERS)
 # makefile fragments reside.
 FRAGMENT_DIR_PATHS :=
 
-# The only fragment sub-directories that we build from are the config and
-# and frame directories.
-FRAGMENT_SUB_DIRS  := $(CONFIG_PATH) $(FRAME_PATH)
-
 # This variable is used by the include statements as they recursively include
-# one another. We initialize it to the current directory.
+# one another. For the framework source tree, we initialize it to the current
+# directory since '.' is its parent.
 PARENT_PATH        := .
 
-# Recursively include all the makefile fragments.
--include $(addsuffix /$(FRAGMENT_MK), $(FRAGMENT_SUB_DIRS))
+# Recursively include all the makefile fragments in the framework itself.
+-include $(addsuffix /$(FRAGMENT_MK), $(FRAME_PATH))
+
+# Now set PARENT_PATH to ./config in preparation to include the fragments in
+# the configuration sub-directory.
+PARENT_PATH        := ./$(CONFIG_DIR)
+
+# Recursively include all the makefile fragments in the configuration
+# sub-directory.
+-include $(addsuffix /$(FRAGMENT_MK), $(CONFIG_PATH))
 
 # Create a list of the makefile fragments.
 MAKEFILE_FRAGMENTS := $(addsuffix /$(FRAGMENT_MK), $(FRAGMENT_DIR_PATHS))
@@ -317,17 +326,17 @@ check: check-make-defs check-fragments check-config
 
 check-config:
 ifeq ($(CONFIG_MK_PRESENT),no)
-    $(error Cannot proceed: config.mk not detected! Run configure first)
+	$(error Cannot proceed: config.mk not detected! Run configure first)
 endif
 
 check-fragments: check-config
 ifeq ($(MAKEFILE_FRAGMENTS_PRESENT),no)
-    $(error Cannot proceed: makefile fragments not detected! Run configure first)
+	$(error Cannot proceed: makefile fragments not detected! Run configure first)
 endif
 
 check-make-defs: check-fragments
 ifeq ($(MAKE_DEFS_MK_PRESENT),no)
-    $(error Cannot proceed: make_defs.mk not detected! Invalid configuration)
+	$(error Cannot proceed: make_defs.mk not detected! Invalid configuration)
 endif
 
 
@@ -337,26 +346,31 @@ endif
 
 # --- General source code / object code rules ---
 
-$(BASE_OBJ_FRAME_DIR)/%.o: $(FRAME_PATH)/%.c $(CONFIG_MK_PATH)
+#$(BASE_OBJ_FRAME_PATH)/%.o: $(FRAME_PATH)/%.c $(CONFIG_MK_PATH)
+#ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+#	$(CC) $(CFLAGS) -c $< -o $@
+#else
+#	@echo "Compiling $<"
+#	@$(CC) $(CFLAGS) -c $< -o $@
+#endif
+
+$(BASE_OBJ_FRAME_PATH)/%.o: $(FRAME_PATH)/%.c $(CONFIG_MK_PATH)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-    $(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(if $(findstring $(NOOPT_DIR),$@),$(CFLAGS_NOOPT),$(CFLAGS)) -c $< -o $@
 else
-ifeq ($(findstring $(NOOPT_DIR),$@),)
-    @echo "Compiling $<"
-    @$(CC) $(CFLAGS) -c $< -o $@
-else
-    @echo "Compiling (no opt) $<"
-    @$(CC) $(CFLAGS_NOOPT) -c $< -o $@
-endif
+	@echo "Compiling $<" $(if $(findstring $(NOOPT_DIR),$@),$(NOOPT_TEXT),)
+	@$(CC) $(if $(findstring $(NOOPT_DIR),$@),$(CFLAGS_NOOPT),$(CFLAGS)) -c $< -o $@
 endif
 
-$(BASE_OBJ_CONFIG_DIR)/%.o: $(CONFIG_PATH)/%.c $(CONFIG_MK_PATH)
+$(BASE_OBJ_CONFIG_PATH)/%.o: $(CONFIG_PATH)/%.c $(CONFIG_MK_PATH)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-    $(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(if $(findstring $(NOOPT_DIR),$@),$(CFLAGS_NOOPT),$(CFLAGS)) -c $< -o $@
 else
-    @echo "Compiling $<"
-    @$(CC) $(CFLAGS) -c $< -o $@
+	@echo "Compiling $<" $(if $(findstring $(NOOPT_DIR),$@),$(NOOPT_TEXT),)
+	@$(CC) $(if $(findstring $(NOOPT_DIR),$@),$(CFLAGS_NOOPT),$(CFLAGS)) -c $< -o $@
 endif
+
+#ifeq ($(findstring $(NOOPT_DIR),$@),)
 
 
 # --- Static library archiver rules ---
@@ -374,28 +388,28 @@ endif
 
 # --- Install rules ---
 
-install-libs: check $(MK_LIBS_INST_W_CONF_VERS)
+install-libs: check $(MK_LIBS_INST_W_VERS_CONF)
 
-install-headers: check $(MK_INCL_DIR_INST_W_CONF_VERS)
+install-headers: check $(MK_INCL_DIR_INST_W_VERS_CONF)
 
-$(MK_INCL_DIR_INST_W_CONF_VERS): $(MK_HEADER_FILES)
+$(MK_INCL_DIR_INST_W_VERS_CONF): $(MK_HEADER_FILES)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-    $(INSTALL) -m 0755 -d $(@)
-    $(INSTALL) -m 0644 $(MK_HEADER_FILES) $(@)
+	$(INSTALL) -m 0755 -d $(@)
+	$(INSTALL) -m 0644 $(MK_HEADER_FILES) $(@)
 else
-    @$(INSTALL) -m 0755 -d $(@)
-    @echo "Installing C header files into $(@)"
-    @$(INSTALL) -m 0644 $(MK_HEADER_FILES) $(@)
+	@$(INSTALL) -m 0755 -d $(@)
+	@echo "Installing C header files into $(@)"
+	@$(INSTALL) -m 0644 $(MK_HEADER_FILES) $(@)
 endif
 
-$(INSTALL_PREFIX)/lib/%-$(CONF_VERS).a: $(BASE_LIB_DIR)/%.a
+$(INSTALL_PREFIX)/lib/%-$(VERS_CONF).a: $(BASE_LIB_PATH)/%.a
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-    $(INSTALL) -m 0755 -d $(@D)
-    $(INSTALL) -m 0644 $< $@
+	$(INSTALL) -m 0755 -d $(@D)
+	$(INSTALL) -m 0644 $< $@
 else
-    @echo "Installing $(@F) into $(INSTALL_PREFIX)/lib/"
-    @$(INSTALL) -m 0755 -d $(@D)
-    @$(INSTALL) -m 0644 $< $@
+	@echo "Installing $(@F) into $(INSTALL_PREFIX)/lib/"
+	@$(INSTALL) -m 0755 -d $(@D)
+	@$(INSTALL) -m 0644 $< $@
 endif
 
 
@@ -405,40 +419,62 @@ install-lib-symlinks: check $(MK_LIBS_INST)
 
 install-header-symlinks: check $(MK_INCL_DIR_INST)
 
-$(MK_INCL_DIR_INST): $(MK_INCL_DIR_INST_W_CONF_VERS)
+$(MK_INCL_DIR_INST): $(MK_INCL_DIR_INST_W_VERS_CONF)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-    $(SYMLINK) $(<F) $(@F)
-    $(MV) $(@F) $(INSTALL_PREFIX)
+	$(SYMLINK) $(<F) $(@F)
+	$(MV) $(@F) $(INSTALL_PREFIX)
 else
-    @echo "Installing symlink $(@F) into $(INSTALL_PREFIX)/"
-    @$(SYMLINK) $(<F) $(@F)
-    @$(MV) $(@F) $(INSTALL_PREFIX)
+	@echo "Installing symlink $(@F) into $(INSTALL_PREFIX)/"
+	@$(SYMLINK) $(<F) $(@F)
+	@$(MV) $(@F) $(INSTALL_PREFIX)
 endif
 
-$(INSTALL_PREFIX)/lib/%.a: $(INSTALL_PREFIX)/lib/%-$(CONF_VERS).a
+$(INSTALL_PREFIX)/lib/%.a: $(INSTALL_PREFIX)/lib/%-$(VERS_CONF).a
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-    $(SYMLINK) $(<F) $(@F)
-    $(MV) $(@F) $(INSTALL_PREFIX)/lib/
+	$(SYMLINK) $(<F) $(@F)
+	$(MV) $(@F) $(INSTALL_PREFIX)/lib/
 else
-    @echo "Installing symlink $(@F) into $(INSTALL_PREFIX)/lib/"
-    @$(SYMLINK) $(<F) $(@F)
-    @$(MV) $(@F) $(INSTALL_PREFIX)/lib/
+	@echo "Installing symlink $(@F) into $(INSTALL_PREFIX)/lib/"
+	@$(SYMLINK) $(<F) $(@F)
+	@$(MV) $(@F) $(INSTALL_PREFIX)/lib/
 endif
 
 
 # --- Clean rules ---
 
 cleanmost: check
-	- $(FIND) $(BASE_OBJ_DIR) -name "*.o" | $(XARGS) $(RM_F)
-	- $(FIND) $(BASE_LIB_DIR) -name "*.a" | $(XARGS) $(RM_F)
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	- $(FIND) $(BASE_OBJ_PATH) -name "*.o" | $(XARGS) $(RM_F)
+	- $(FIND) $(BASE_LIB_PATH) -name "*.a" | $(XARGS) $(RM_F)
+else
+	@echo "Removing .o files from $(BASE_OBJ_PATH)."
+	@- $(FIND) $(BASE_OBJ_PATH) -name "*.o" | $(XARGS) $(RM_F)
+	@echo "Removing .a files from $(BASE_LIB_PATH)."
+	@- $(FIND) $(BASE_LIB_PATH) -name "*.a" | $(XARGS) $(RM_F)
+endif
 
-distclean: check cleanmost cleanmk
+distclean: check cleanmk cleanmost
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	- $(RM_F) $(CONFIG_MK_PATH)
-	- $(RM_RF) $(OBJ_DIR)
-	- $(RM_RF) $(LIB_DIR)
+	- $(RM_RF) $(OBJ_PATH)
+	- $(RM_RF) $(LIB_PATH)
+else
+	@echo "Removing $(CONFIG_MK_PATH)."
+	@- $(RM_F) $(CONFIG_MK_PATH)
+	@echo "Removing $(OBJ_PATH)."
+	@- $(RM_RF) $(OBJ_PATH)
+	@echo "Removing $(LIB_PATH)."
+	@- $(RM_RF) $(LIB_PATH)
+endif
 
 cleanmk: check
-    - $(FIND) $(CONFIG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
-    - $(FIND) $(FRAME_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
-
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	- $(FIND) $(CONFIG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
+	- $(FIND) $(FRAME_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
+else
+	@echo "Removing makefile fragments from $(CONFIG_PATH)."
+	@- $(FIND) $(CONFIG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
+	@echo "Removing makefile fragments from $(FRAME_PATH)."
+	@- $(FIND) $(FRAME_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
+endif
 

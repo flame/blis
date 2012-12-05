@@ -32,15 +32,4 @@
 
 */
 
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTEMAC(ch,varname)( \
-                           conj_t  conjp, \
-                           dim_t   n, \
-                           void*   beta, \
-                           void*   p, \
-                           void*   a, inc_t inca, inc_t lda  \
-                         );
-
-INSERT_GENTPROT_BASIC( unpackm_4xk )
+real bl2_slamch( char* cmach, ftnlen cmach_len );

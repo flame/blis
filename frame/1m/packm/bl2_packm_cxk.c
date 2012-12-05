@@ -34,104 +34,112 @@
 
 #include "blis2.h"
 
-#define FUNCPTR_T unpackm_cxk_fp
+#define FUNCPTR_T packm_cxk_fp
 
 typedef void (*FUNCPTR_T)(
-                           conj_t  conjp,
+                           conj_t  conja,
                            dim_t   n,
                            void*   beta,
-                           void*   p,
-                           void*   a, inc_t inca, inc_t lda
+                           void*   a, inc_t inca, inc_t lda,
+                           void*   p
                          );
 
-static FUNCPTR_T ftypes[10][BLIS_NUM_FP_TYPES] =
-{
-	// panel width = 0
-	{
-		NULL,
-		NULL,
-		NULL,
-		NULL,
-	},
-	// panel width = 1
-	{
-		NULL,
-		NULL,
-		NULL,
-		NULL,
-	},
-	// panel width = 2
-	{
-		PASTEMAC(s,unpackm_2xk),
-		PASTEMAC(c,unpackm_2xk),
-		PASTEMAC(d,unpackm_2xk),
-		PASTEMAC(z,unpackm_2xk),
-	},
-	// panel width = 3
-	{
-		NULL,
-		NULL,
-		NULL,
-		NULL,
-	},
-	// panel width = 4
-	{
-		PASTEMAC(s,unpackm_4xk),
-		PASTEMAC(c,unpackm_4xk),
-		PASTEMAC(d,unpackm_4xk),
-		PASTEMAC(z,unpackm_4xk),
-	},
-	// panel width = 5
-	{
-		NULL,
-		NULL,
-		NULL,
-		NULL,
-	},
-	// panel width = 6
-	{
-		NULL,
-		NULL,
-		NULL,
-		NULL,
-	},
-	// panel width = 7
-	{
-		NULL,
-		NULL,
-		NULL,
-		NULL,
-	},
-	// panel width = 8
-	{
-		NULL,
-		NULL,
-		NULL,
-		NULL,
-	},
-	// panel width = 9
-	{
-		NULL,
-		NULL,
-		NULL,
-		NULL,
-	}
+
+#undef  GENARRAY
+#define GENARRAY( kername2, kername4, kername6, kername8 ) \
+\
+static FUNCPTR_T ftypes[10][BLIS_NUM_FP_TYPES] = \
+{ \
+	/* panel width = 0 */ \
+	{ \
+		NULL, \
+		NULL, \
+		NULL, \
+		NULL, \
+	}, \
+	/* panel width = 1 */ \
+	{ \
+		NULL, \
+		NULL, \
+		NULL, \
+		NULL, \
+	}, \
+	/* panel width = 2 */ \
+	{ \
+		PASTEMAC(s,kername2), \
+		PASTEMAC(c,kername2), \
+		PASTEMAC(d,kername2), \
+		PASTEMAC(z,kername2), \
+	}, \
+	/* panel width = 3 */ \
+	{ \
+		NULL, \
+		NULL, \
+		NULL, \
+		NULL, \
+	}, \
+	/* panel width = 4 */ \
+	{ \
+		PASTEMAC(s,kername4), \
+		PASTEMAC(c,kername4), \
+		PASTEMAC(d,kername4), \
+		PASTEMAC(z,kername4), \
+	}, \
+	/* panel width = 5 */ \
+	{ \
+		NULL, \
+		NULL, \
+		NULL, \
+		NULL, \
+	}, \
+	/* panel width = 6 */ \
+	{ \
+		PASTEMAC(s,kername6), \
+		PASTEMAC(c,kername6), \
+		PASTEMAC(d,kername6), \
+		PASTEMAC(z,kername6), \
+	}, \
+	/* panel width = 7 */ \
+	{ \
+		NULL, \
+		NULL, \
+		NULL, \
+		NULL, \
+	}, \
+	/* panel width = 8 */ \
+	{ \
+		PASTEMAC(s,kername8), \
+		PASTEMAC(c,kername8), \
+		PASTEMAC(d,kername8), \
+		PASTEMAC(z,kername8), \
+	}, \
+	/* panel width = 9 */ \
+	{ \
+		NULL, \
+		NULL, \
+		NULL, \
+		NULL, \
+	} \
 };
 
+GENARRAY( PACKM_2XK_KERNEL,
+          PACKM_4XK_KERNEL,
+          PACKM_6XK_KERNEL,
+          PACKM_8XK_KERNEL ) 
 
 
 
 #undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, varname ) \
+#define GENTFUNC( ctype, ch, opname, copyvker ) \
 \
-void PASTEMAC(ch,varname)( \
-                           conj_t  conjp, \
-                           dim_t   m, \
-                           dim_t   n, \
-                           void*   beta, \
-                           void*   p,             inc_t ldp, \
-                           void*   a, inc_t inca, inc_t lda  \
-                         ) \
+void PASTEMAC(ch,opname)( \
+                          conj_t  conja, \
+                          dim_t   m, \
+                          dim_t   n, \
+                          void*   beta, \
+                          void*   a, inc_t inca, inc_t lda, \
+                          void*   p,             inc_t ldp  \
+                        ) \
 { \
 	dim_t     panel_dim; \
 	num_t     dt; \
@@ -146,6 +154,17 @@ void PASTEMAC(ch,varname)( \
 	/* Index into the array to extract the correct function pointer. */ \
 	f = ftypes[panel_dim][dt]; \
 \
+	/* If the panel dimension is unit, then we recognize that this allows
+	   the kernel to reduce to a copyv, so we call that kernel directly. */ \
+	if ( m == 1 ) \
+	{ \
+		PASTEMAC2(ch,ch,copyvker)( conja, \
+		                           n, \
+		                           a, lda, \
+		                           p, 1 ); \
+		return; \
+	} \
+\
 	/* If there exists a kernel implementation for the panel dimension
 	   provided, and the "width" of the panel is equal to the leading
 	   dimension, we invoke the implementation. Otherwise, we use scal2m.
@@ -153,11 +172,11 @@ void PASTEMAC(ch,varname)( \
 	   allow the kernel implementations to remain very simple. */ \
 	if ( f != NULL && m == panel_dim ) \
 	{ \
-		f( conjp, \
+		f( conja, \
 		   n, \
 		   beta, \
-		   p, \
-		   a, inca, lda ); \
+		   a, inca, lda, \
+		   p ); \
 	} \
 	else \
 	{ \
@@ -165,14 +184,14 @@ void PASTEMAC(ch,varname)( \
 		PASTEMAC3(ch,ch,ch,scal2m)( 0, \
 		                            BLIS_NONUNIT_DIAG, \
 		                            BLIS_DENSE, \
-		                            conjp, \
+		                            conja, \
 		                            m, \
 		                            n, \
 		                            beta, \
-		                            p, 1,    ldp, \
-		                            a, inca, lda ); \
+		                            a, inca, lda, \
+		                            p, 1,    ldp ); \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC( unpackm_cxk, unpackm_cxk )
+INSERT_GENTFUNC_BASIC( packm_cxk, COPYV_KERNEL )
 

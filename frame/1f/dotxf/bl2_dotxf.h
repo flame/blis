@@ -36,6 +36,24 @@
 
 
 //
+// Define fusing factors (if they are not already defined by the user
+// in bl2_kernel.h).
+//
+#ifndef bl2_sdotxf_fuse_fac
+#define bl2_sdotxf_fuse_fac BLIS_DEFAULT_FUSING_FACTOR_S
+#endif
+#ifndef bl2_ddotxf_fuse_fac
+#define bl2_ddotxf_fuse_fac BLIS_DEFAULT_FUSING_FACTOR_D
+#endif
+#ifndef bl2_cdotxf_fuse_fac
+#define bl2_cdotxf_fuse_fac BLIS_DEFAULT_FUSING_FACTOR_C
+#endif
+#ifndef bl2_zdotxf_fuse_fac
+#define bl2_zdotxf_fuse_fac BLIS_DEFAULT_FUSING_FACTOR_Z
+#endif
+
+
+//
 // Prototype BLAS-like interfaces with homogeneous-typed operands.
 //
 #undef  GENTPROT

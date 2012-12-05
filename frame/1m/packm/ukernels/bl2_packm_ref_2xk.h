@@ -43,4 +43,4 @@ void PASTEMAC(ch,varname)( \
                            void*   p  \
                          );
 
-INSERT_GENTPROT_BASIC( packm_2xk )
+INSERT_GENTPROT_BASIC( packm_ref_2xk )

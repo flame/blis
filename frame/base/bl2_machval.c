@@ -37,24 +37,18 @@
 #define FUNCPTR_T machval_fp
 
 typedef void (*FUNCPTR_T)(
-                           machval_t machval,
-                           void*     val
+                           machval_t mval,
+                           void*     v
                          );
 
-// Manually initialize a function pointer array.
-static FUNCPTR_T ftypes[BLIS_NUM_FP_TYPES] = 
-{
-	bl2_smachval,
-	NULL,
-	bl2_dmachval,
-	NULL
-};
+static FUNCPTR_T GENARRAY(ftypes,machval);
+
 
 
 //
 // Define object-based interface.
 //
-void bl2_machval( machval_t machval,
+void bl2_machval( machval_t mval,
                   obj_t*    v )
 {
 	num_t     dt_v  = bl2_obj_datatype( *v );
@@ -67,7 +61,7 @@ void bl2_machval( machval_t machval,
 	f = ftypes[dt_v];
 
 	// Invoke the function.
-	f( machval,
+	f( mval,
 	   buf_v );
 }
 
@@ -75,34 +69,37 @@ void bl2_machval( machval_t machval,
 //
 // Define BLAS-like interfaces.
 //
-#undef  GENTFUNC
-#define GENTFUNC3( ctype, ctype_r, ch, chr, opname, varname ) \
+#undef  GENTFUNC1R
+#define GENTFUNC1R( ctype, ctype_r, ch, chr, opname, varname ) \
 \
 void PASTEMAC(ch,opname)( \
-                          machvar_t machval, \
-                          ctype*    val, \
+                          machval_t mval, \
+                          void*     v     \
                         ) \
 { \
 	static ctype_r pvals[ BLIS_NUM_MACH_PARAMS ]; \
+\
 	static bool_t  first_time = TRUE; \
-	dim_t          val_i      = machval - BLIS_MACH_PARAM_FIRST; \
+\
+	dim_t          val_i      = mval - BLIS_MACH_PARAM_FIRST; \
+	ctype*         v_cast     = v; \
 \
 	/* If this is the first time through, call the underlying
 	   code to discover each machine parameter. */ \
 	if ( first_time ) \
 	{ \
-		char  lapack_machval; \
-		dim_t i; \
+		char  lapack_mval; \
+		dim_t m, i; \
 \
-		for( m = BLIS_MACH_PARAM_FIRST, i = 0; \
-		     m <= BLIS_MACH_PARAM_LAST; \
-		     ++m, ++i ) \
+		for( i = 0, m = BLIS_MACH_PARAM_FIRST; \
+		     i < BLIS_NUM_MACH_PARAMS - 1; \
+		     ++i, ++m ) \
 		{ \
-			bl2_param_map_to_netlib_machval( m, &lapack_machval ); \
+			bl2_param_map_blis_to_netlib_machval( m, &lapack_mval ); \
 \
-			/*printf( "bl2_machval: querying %u %c\n", m, lapack_machval );*/ \
+			/*printf( "bl2_machval: querying %u %c\n", m, lapack_mval );*/ \
 \
-			pvals[i] = PASTEMAC(chr,varname)( &lapack_machval, 1 ); \
+			pvals[i] = PASTEMAC(chr,varname)( &lapack_mval, 1 ); \
 \
 			/*printf( "bl2_machval: got back %34.29e\n", pvals[i] ); */ \
 		} \
@@ -116,12 +113,11 @@ void PASTEMAC(ch,opname)( \
 	/* Copy the requested parameter value to the output buffer, which
 	   may involve a demotion from the complex to real domain. */ \
 	PASTEMAC2(chr,ch,copys)( pvals[ val_i ], \
-	                         *val ); \
+	                         *v_cast ); \
 }
 
-
-GENTFUNC( float,    float,  s, s, machval, lamch )
-GENTFUNC( double,   double, d, d, machval, lamch )
-GENTFUNC( scomplex, float,  c, s, machval, lamch )
-GENTFUNC( dcomplex, double, z, d, machval, lamch )
+GENTFUNC1R( float,    float,  s, s, machval, lamch )
+GENTFUNC1R( double,   double, d, d, machval, lamch )
+GENTFUNC1R( scomplex, float,  c, s, machval, lamch )
+GENTFUNC1R( dcomplex, double, z, d, machval, lamch )
 

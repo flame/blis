@@ -62,7 +62,7 @@ void PASTEMAC(ch,opname)( \
 	                             y, incy ); \
 }
 
-INSERT_GENTFUNC_BASIC( axpyf, axpyf_opt_var1 )
+INSERT_GENTFUNC_BASIC( axpyf, AXPYF_KERNEL )
 
 
 //
@@ -94,13 +94,13 @@ void PASTEMAC3(cha,chx,chy,opname)( \
 
 // Define the basic set of functions unconditionally, and then also some
 // mixed datatype functions if requested.
-INSERT_GENTFUNC3U12_BASIC( axpyf, axpyf_opt_var1 )
+INSERT_GENTFUNC3U12_BASIC( axpyf, AXPYF_KERNEL )
 
 #ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTFUNC3U12_MIX_D( axpyf, axpyf_opt_var1 )
+INSERT_GENTFUNC3U12_MIX_D( axpyf, AXPYF_KERNEL )
 #endif
 
 #ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTFUNC3U12_MIX_P( axpyf, axpyf_opt_var1 )
+INSERT_GENTFUNC3U12_MIX_P( axpyf, AXPYF_KERNEL )
 #endif
 

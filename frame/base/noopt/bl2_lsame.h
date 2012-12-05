@@ -32,15 +32,4 @@
 
 */
 
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTEMAC(ch,varname)( \
-                           conj_t  conja, \
-                           dim_t   n, \
-                           void*   beta, \
-                           void*   a, inc_t inca, inc_t lda, \
-                           void*   p  \
-                         );
-
-INSERT_GENTPROT_BASIC( packm_4xk )
+logical bl2_lsame( char* ca, char* cb, ftnlen ca_len, ftnlen cb_len );

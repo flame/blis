@@ -45,6 +45,8 @@ void PASTEMAC(ch,varname)( \
                            void*   p \
                          ) \
 { \
+	const inc_t     ldp       = 8; \
+\
 	ctype* restrict beta_cast = beta; \
 	ctype* restrict alpha1    = a; \
 	ctype* restrict pi1       = p; \
@@ -59,9 +61,13 @@ void PASTEMAC(ch,varname)( \
 				PASTEMAC2(ch,ch,copyjs)( *(alpha1 + 1*inca), *(pi1 + 1) ); \
 				PASTEMAC2(ch,ch,copyjs)( *(alpha1 + 2*inca), *(pi1 + 2) ); \
 				PASTEMAC2(ch,ch,copyjs)( *(alpha1 + 3*inca), *(pi1 + 3) ); \
+				PASTEMAC2(ch,ch,copyjs)( *(alpha1 + 4*inca), *(pi1 + 4) ); \
+				PASTEMAC2(ch,ch,copyjs)( *(alpha1 + 5*inca), *(pi1 + 5) ); \
+				PASTEMAC2(ch,ch,copyjs)( *(alpha1 + 6*inca), *(pi1 + 6) ); \
+				PASTEMAC2(ch,ch,copyjs)( *(alpha1 + 7*inca), *(pi1 + 7) ); \
 \
 				alpha1 += lda; \
-				pi1    += 4; \
+				pi1    += ldp; \
 			} \
 		} \
 		else \
@@ -72,9 +78,13 @@ void PASTEMAC(ch,varname)( \
 				PASTEMAC2(ch,ch,copys)( *(alpha1 + 1*inca), *(pi1 + 1) ); \
 				PASTEMAC2(ch,ch,copys)( *(alpha1 + 2*inca), *(pi1 + 2) ); \
 				PASTEMAC2(ch,ch,copys)( *(alpha1 + 3*inca), *(pi1 + 3) ); \
+				PASTEMAC2(ch,ch,copys)( *(alpha1 + 4*inca), *(pi1 + 4) ); \
+				PASTEMAC2(ch,ch,copys)( *(alpha1 + 5*inca), *(pi1 + 5) ); \
+				PASTEMAC2(ch,ch,copys)( *(alpha1 + 6*inca), *(pi1 + 6) ); \
+				PASTEMAC2(ch,ch,copys)( *(alpha1 + 7*inca), *(pi1 + 7) ); \
 \
 				alpha1 += lda; \
-				pi1    += 4; \
+				pi1    += ldp; \
 			} \
 		} \
 	} \
@@ -88,9 +98,13 @@ void PASTEMAC(ch,varname)( \
 				PASTEMAC3(ch,ch,ch,scal2js)( *beta_cast, *(alpha1 + 1*inca), *(pi1 + 1) ); \
 				PASTEMAC3(ch,ch,ch,scal2js)( *beta_cast, *(alpha1 + 2*inca), *(pi1 + 2) ); \
 				PASTEMAC3(ch,ch,ch,scal2js)( *beta_cast, *(alpha1 + 3*inca), *(pi1 + 3) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *beta_cast, *(alpha1 + 4*inca), *(pi1 + 4) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *beta_cast, *(alpha1 + 5*inca), *(pi1 + 5) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *beta_cast, *(alpha1 + 6*inca), *(pi1 + 6) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *beta_cast, *(alpha1 + 7*inca), *(pi1 + 7) ); \
 \
 				alpha1 += lda; \
-				pi1    += 4; \
+				pi1    += ldp; \
 			} \
 		} \
 		else \
@@ -101,13 +115,17 @@ void PASTEMAC(ch,varname)( \
 				PASTEMAC3(ch,ch,ch,scal2s)( *beta_cast, *(alpha1 + 1*inca), *(pi1 + 1) ); \
 				PASTEMAC3(ch,ch,ch,scal2s)( *beta_cast, *(alpha1 + 2*inca), *(pi1 + 2) ); \
 				PASTEMAC3(ch,ch,ch,scal2s)( *beta_cast, *(alpha1 + 3*inca), *(pi1 + 3) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *beta_cast, *(alpha1 + 4*inca), *(pi1 + 4) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *beta_cast, *(alpha1 + 5*inca), *(pi1 + 5) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *beta_cast, *(alpha1 + 6*inca), *(pi1 + 6) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *beta_cast, *(alpha1 + 7*inca), *(pi1 + 7) ); \
 \
 				alpha1 += lda; \
-				pi1    += 4; \
+				pi1    += ldp; \
 			} \
 		} \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC( packm_4xk, packm_4xk )
+INSERT_GENTFUNC_BASIC( packm_ref_6xk, packm_ref_6xk )
 

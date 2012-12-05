@@ -49,8 +49,8 @@ void bl2_param_map_blis_to_netlib_trans( trans_t trans, char* blas_trans )
 
 void bl2_param_map_blis_to_netlib_uplo( uplo_t uplo, char* blas_uplo )
 {
-	if      ( uplo == BLIS_LOWER_TRIANGULAR ) *blas_uplo = 'L';
-	else if ( uplo == BLIS_UPPER_TRIANGULAR ) *blas_uplo = 'U';
+	if      ( uplo == BLIS_LOWER ) *blas_uplo = 'L';
+	else if ( uplo == BLIS_UPPER ) *blas_uplo = 'U';
 	else
 	{
 		bl2_check_error_code( BLIS_INVALID_UPLO );
@@ -111,8 +111,8 @@ void bl2_param_map_netlib_to_blis_trans( char* trans, trans_t* blis_trans )
 
 void bl2_param_map_netlib_to_blis_uplo( char* uplo, uplo_t* blis_uplo )
 {
-	if      ( *uplo == 'l' || *uplo == 'L' ) *blis_uplo = BLIS_LOWER_TRIANGULAR;
-	else if ( *uplo == 'u' || *uplo == 'U' ) *blis_uplo = BLIS_UPPER_TRIANGULAR;
+	if      ( *uplo == 'l' || *uplo == 'L' ) *blis_uplo = BLIS_LOWER;
+	else if ( *uplo == 'u' || *uplo == 'U' ) *blis_uplo = BLIS_UPPER;
 	else
 	{
 		bl2_check_error_code( BLIS_INVALID_UPLO );
@@ -156,8 +156,8 @@ void bl2_param_map_char_to_blis_trans( char* trans, trans_t* blis_trans )
 
 void bl2_param_map_char_to_blis_uplo( char* uplo, uplo_t* blis_uplo )
 {
-	if      ( *uplo == 'l' || *uplo == 'L' ) *blis_uplo = BLIS_LOWER_TRIANGULAR;
-	else if ( *uplo == 'u' || *uplo == 'U' ) *blis_uplo = BLIS_UPPER_TRIANGULAR;
+	if      ( *uplo == 'l' || *uplo == 'L' ) *blis_uplo = BLIS_LOWER;
+	else if ( *uplo == 'u' || *uplo == 'U' ) *blis_uplo = BLIS_UPPER;
 	else
 	{
 		bl2_check_error_code( BLIS_INVALID_UPLO );

@@ -32,15 +32,24 @@
 
 */
 
+// Include headers for various unpackm kernels.
+#include "bl2_unpackm_ref_2xk.h"
+#include "bl2_unpackm_ref_4xk.h"
+#include "bl2_unpackm_ref_6xk.h"
+#include "bl2_unpackm_ref_8xk.h"
+
+
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, varname ) \
 \
 void PASTEMAC(ch,varname)( \
                            conj_t  conjp, \
+                           dim_t   m, \
                            dim_t   n, \
                            void*   beta, \
-                           void*   p, \
+                           void*   p,             inc_t ldp, \
                            void*   a, inc_t inca, inc_t lda  \
                          );
 
-INSERT_GENTPROT_BASIC( unpackm_4xk )
+INSERT_GENTPROT_BASIC( unpackm_cxk )
+

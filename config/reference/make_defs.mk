@@ -72,10 +72,10 @@ INSTALL    := install -c
 
 # --- Determine the C compiler and related flags ---
 CC           := gcc
-CPPROCFLAGS  := 
+CPPROCFLAGS  :=
 CMISCFLAGS   := -std=c99 # -fopenmp -pg
 CDBGFLAGS    := -g
-CWARNFLAGS   := -Wall # -Wno-comment
+CWARNFLAGS   := -Wall
 COPTFLAGS    := -O2 -malign-double
 CVECFLAGS    := -msse3 -march=native # -mfpmath=sse
 

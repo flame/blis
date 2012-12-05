@@ -36,7 +36,9 @@ print_usage()
 {
 	# Echo usage info.
 	echo " "
-	echo " ${script_name}"
+	echo " ${script_name} (BLIS ${version})"
+	#echo " "
+	#echo " BLIS ${version}"
 	echo " "
 	echo " Field G. Van Zee"
 	echo " "
@@ -58,7 +60,9 @@ print_usage()
 	echo " "
 	echo "   -p PREFIX   install prefix"
 	echo "                 The path to which make will install buid products."
-	echo "                 If not given, PREFIX defaults to \$(HOME)/blis."
+	echo "                 If not given, PREFIX defaults to \$(HOME)/blis. If"
+	echo "                 the path refers to a directory that does not exist,"
+	echo "                 it will be created."
 	echo " "
 	echo "   -q          quiet"
 	echo "                 Suppress informational output. By default, configure"
@@ -75,7 +79,13 @@ main()
 	script_name=${0##*/}
 
 	# Option variables.
-	quiet_flag=""
+	quiet_flag=''
+
+	# The file in which the version string is kept.
+	version_file='version'
+
+	# The contents of version_file.
+	version=''
 
 	# The name of the build directory. This is where the template
 	# config.mk.in file lives.
@@ -104,10 +114,17 @@ main()
 	# The name of the directory in which object files will be kept.
 	obj_dir='obj'
 
+	# The name of the directory in which libraries will be kept.
+	lib_dir='lib'
+
 	# The install prefix flag.
 	install_prefix_def="${HOME}/blis"
 	install_prefix=''
 	prefix_flag=''
+
+
+	# Query which version of BLIS this is.
+	version=$(cat "${version_file}")
 
 
 	# Process our command line options.
@@ -121,6 +138,10 @@ main()
 		esac
 	done
 	shift $(($OPTIND - 1))
+
+
+	# Initial message.
+	echo "${script_name}: starting configuration of BLIS ${version}."
 
 
 	# Set config_name based on the number of arguments leftover (after command
@@ -140,7 +161,7 @@ main()
 	fi
 
 	# Build the config directory path
-	config_path="${config_dir}/${config_name}"
+	config_path="./${config_dir}/${config_name}"
 
 
 	# Set the install prefix if it was not already set when parsing the install
@@ -168,7 +189,7 @@ main()
 
 
 	# Create obj sub-directories (if they do not already exist).
-	base_obj_path="${obj_dir}/${config_name}"
+	base_obj_path="./${obj_dir}/${config_name}"
 
 	echo "${script_name}: creating ${base_obj_path}"
 	mkdir -p ${base_obj_path}
@@ -184,19 +205,25 @@ main()
 	mkdir -p ${obj_frame_path}
 
 
-	# Mirror source trees to the object directory.
-	echo "${script_name}: mirroring ${config_path} to ${obj_config_path}"
+	# Create lib directory (if it does not already exist).
+	base_lib_path="./${lib_dir}/${config_name}"
 
+	echo "${script_name}: creating ${base_lib_path}"
+	mkdir -p ${base_lib_path}
+
+
+	# Mirror config source tree to the object config sub-directory.
+	echo "${script_name}: mirroring ${config_path} to ${obj_config_path}"
 	${mirror_tree_sh} ${config_path} ${obj_config_path}
 
+	# Mirror frame source tree to the object frame sub-directory.
 	echo "${script_name}: mirroring ${frame_path} to ${obj_frame_path}"
-
 	${mirror_tree_sh} ${frame_path} ${obj_frame_path}
-exit 1
+
 
 	# Generate makefile fragments in the chosen configuration directory.
 	./build/gen-make-frags/gen-make-frag.sh \
-	         -h -r -d -v1 \
+	         -h -r -v1 \
 	         -o ${script_name} \
 	         -p 'CONFIG' \
 	         ${config_path} \
@@ -207,7 +234,7 @@ exit 1
 
 	# Generate makefile fragments in the framework directory.
 	./build/gen-make-frags/gen-make-frag.sh \
-	         -h -r -d -v1 \
+	         -h -r -v1 \
 	         -o ${script_name} \
 	         -p 'FRAME' \
 	         ${frame_path} \

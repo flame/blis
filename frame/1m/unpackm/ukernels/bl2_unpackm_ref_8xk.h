@@ -43,4 +43,4 @@ void PASTEMAC(ch,varname)( \
                            void*   a, inc_t inca, inc_t lda  \
                          );
 
-INSERT_GENTPROT_BASIC( unpackm_2xk )
+INSERT_GENTPROT_BASIC( unpackm_ref_8xk )

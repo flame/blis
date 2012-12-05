@@ -368,7 +368,7 @@ typedef enum
 
 typedef enum
 {
-    BLIS_MACH_EPS,
+    BLIS_MACH_EPS = 0,
     BLIS_MACH_SFMIN,
     BLIS_MACH_BASE,
     BLIS_MACH_PREC,

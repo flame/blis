@@ -72,7 +72,7 @@ void PASTEMAC(ch,opname)( \
 	                             z, incz ); \
 }
 
-INSERT_GENTFUNC_BASIC( dotxaxpyf, dotxaxpyf_opt_var1 )
+INSERT_GENTFUNC_BASIC( dotxaxpyf, DOTXAXPYF_KERNEL )
 
 
 //
@@ -114,13 +114,13 @@ void PASTEMAC3(cha,chb,chc,opname)( \
 
 // Define the basic set of functions unconditionally, and then also some
 // mixed datatype functions if requested.
-INSERT_GENTFUNC3U12_BASIC( dotxaxpyf, dotxaxpyf_opt_var1 )
+INSERT_GENTFUNC3U12_BASIC( dotxaxpyf, DOTXAXPYF_KERNEL )
 
 #ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTFUNC3U12_MIX_D( dotxaxpyf, dotxaxpyf_opt_var1 )
+INSERT_GENTFUNC3U12_MIX_D( dotxaxpyf, DOTXAXPYF_KERNEL )
 #endif
 
 #ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTFUNC3U12_MIX_P( dotxaxpyf, dotxaxpyf_opt_var1 )
+INSERT_GENTFUNC3U12_MIX_P( dotxaxpyf, DOTXAXPYF_KERNEL )
 #endif
 

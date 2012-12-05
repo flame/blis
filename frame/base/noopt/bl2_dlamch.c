@@ -9,6 +9,8 @@ extern "C" {
 #include "bl2_f2c.h"
 #include "stdio.h"
 
+double bl2_pow_di( doublereal* a, integer* n );
+
 /* Table of constant values */
 
 //static integer c__1 = 1;

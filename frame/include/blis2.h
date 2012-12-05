@@ -62,11 +62,8 @@ extern "C" {
 #include <stdlib.h>
 #include <math.h>
 
-// Handle the results of checking for time.h and sys/time.h.
 // gettimeofday() needs this.
-#if HAVE_SYS_TIME_H
-  #include <sys/time.h>
-#endif
+#include <sys/time.h>
 #include <time.h>
 
 
@@ -78,6 +75,8 @@ extern "C" {
 #include "bl2_cntl.h"
 
 #include "bl2_extern_defs.h"
+
+#include "bl2_f2c.h"
 
 
 // -- Base operation prototypes --
