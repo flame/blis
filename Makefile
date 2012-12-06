@@ -53,7 +53,6 @@
 
 
 
-
 #
 # --- Makefile initialization --------------------------------------------------
 #
@@ -75,8 +74,12 @@ FRAME_DIR         := frame
 OBJ_DIR           := obj
 LIB_DIR           := lib
 
+# The name of directories in which make expects to find special source code
+# that must be compiled with out optimizations.
 NOOPT_DIR         := noopt
 
+# The text to append to (non-verbose) make output when CFLAGS_NOOPT is used
+# instead of CFLAGS.
 NOOPT_TEXT        := "(NOTE: optimizations disabled)"
 
 # Construct some paths.
@@ -340,19 +343,7 @@ ifeq ($(MAKE_DEFS_MK_PRESENT),no)
 endif
 
 
-# --- Special source code / object code rules ---
-
-
-
 # --- General source code / object code rules ---
-
-#$(BASE_OBJ_FRAME_PATH)/%.o: $(FRAME_PATH)/%.c $(CONFIG_MK_PATH)
-#ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-#	$(CC) $(CFLAGS) -c $< -o $@
-#else
-#	@echo "Compiling $<"
-#	@$(CC) $(CFLAGS) -c $< -o $@
-#endif
 
 $(BASE_OBJ_FRAME_PATH)/%.o: $(FRAME_PATH)/%.c $(CONFIG_MK_PATH)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
@@ -369,8 +360,6 @@ else
 	@echo "Compiling $<" $(if $(findstring $(NOOPT_DIR),$@),$(NOOPT_TEXT),)
 	@$(CC) $(if $(findstring $(NOOPT_DIR),$@),$(CFLAGS_NOOPT),$(CFLAGS)) -c $< -o $@
 endif
-
-#ifeq ($(findstring $(NOOPT_DIR),$@),)
 
 
 # --- Static library archiver rules ---

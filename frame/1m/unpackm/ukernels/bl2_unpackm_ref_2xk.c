@@ -103,5 +103,5 @@ void PASTEMAC(ch,varname)( \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC( unpackm_ref_4xk, unpackm_ref_4xk )
+INSERT_GENTFUNC_BASIC( unpackm_ref_2xk, unpackm_ref_2xk )
 
