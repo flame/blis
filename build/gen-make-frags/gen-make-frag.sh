@@ -470,7 +470,7 @@ main()
 	fi
 
 	# If an output script name was given, overwrite script_name with it.
-	if [ -n ${output_name} ]; then
+	if [ -n "${output_name}" ]; then
 		script_name="${output_name}"
 	fi
 	

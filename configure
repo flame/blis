@@ -98,6 +98,9 @@ main()
 	# Path to 'mirror-tree.sh' script.
 	mirror_tree_sh="./${build_dir}/mirror-tree.sh"
 
+	# Path to 'update-version-file.sh' script.
+	update_version_file_sh="./${build_dir}/update-version-file.sh"
+
 	# The root directory of the BLIS framework.
 	frame_dir='frame'
 	frame_path="./${frame_dir}"
@@ -121,6 +124,10 @@ main()
 	install_prefix_def="${HOME}/blis"
 	install_prefix=''
 	prefix_flag=''
+
+
+	# Check whether we need to update the version file.
+	${update_version_file_sh} -o "${script_name}" "./${version_file}"
 
 
 	# Query which version of BLIS this is.
@@ -167,10 +174,10 @@ main()
 	# Set the install prefix if it was not already set when parsing the install
 	# prefix flag.
 	if [ -n "${prefix_flag}" ]; then
-		echo "${script_name}: detected -p option; using install prefix ${install_prefix}."
+		echo "${script_name}: detected -p option; using install prefix '${install_prefix}'."
 	else
 		install_prefix="${install_prefix_def}"
-		echo "${script_name}: no install prefix given; defaulting to ${install_prefix}."
+		echo "${script_name}: no install prefix given; defaulting to '${install_prefix}'."
 	fi
 
 	# Insert escape characters into path.
