@@ -34,9 +34,8 @@
 
 #include "blis2.h"
 
-#define SMEM_M 256
-#define SMEM_N 5000
-double  smem[ SMEM_M * SMEM_N ];
+
+double  smem[ BLIS_STATIC_MEM_POOL_SIZE / sizeof( double ) ];
 
 double* mc      = smem;
 int     counter = 0;

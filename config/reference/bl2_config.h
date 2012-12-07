@@ -46,6 +46,10 @@
   #define BLIS_MEMORY_ALIGNMENT_BOUNDARY 16
 #endif
 
+// Static memory pool size.
+#define BLIS_STATIC_MEM_POOL_SIZE (256 * 5000 * sizeof(double))
+
+
 // Enable mixed domain operations?
 //#define BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
 
