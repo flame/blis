@@ -49,6 +49,7 @@
         check check-config check-fragments check-make-defs \
         install-libs install-headers \
         install-lib-symlinks install-header-symlinks \
+        showconfig \
         cleanmost distclean cleanmk cleanleaves
 
 
@@ -345,7 +346,7 @@ endif
 
 # --- General source code / object code rules ---
 
-$(BASE_OBJ_FRAME_PATH)/%.o: $(FRAME_PATH)/%.c $(CONFIG_MK_PATH)
+$(BASE_OBJ_FRAME_PATH)/%.o: $(FRAME_PATH)/%.c $(MK_HEADER_FILES) $(MAKE_DEFS_MK_PATH)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	$(CC) $(if $(findstring $(NOOPT_DIR),$@),$(CFLAGS_NOOPT),$(CFLAGS)) -c $< -o $@
 else
@@ -353,7 +354,7 @@ else
 	@$(CC) $(if $(findstring $(NOOPT_DIR),$@),$(CFLAGS_NOOPT),$(CFLAGS)) -c $< -o $@
 endif
 
-$(BASE_OBJ_CONFIG_PATH)/%.o: $(CONFIG_PATH)/%.c $(CONFIG_MK_PATH)
+$(BASE_OBJ_CONFIG_PATH)/%.o: $(CONFIG_PATH)/%.c $(MK_HEADER_FILES) $(MAKE_DEFS_MK_PATH)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	$(CC) $(if $(findstring $(NOOPT_DIR),$@),$(CFLAGS_NOOPT),$(CFLAGS)) -c $< -o $@
 else
@@ -381,7 +382,7 @@ install-libs: check $(MK_LIBS_INST_W_VERS_CONF)
 
 install-headers: check $(MK_INCL_DIR_INST_W_VERS_CONF)
 
-$(MK_INCL_DIR_INST_W_VERS_CONF): $(MK_HEADER_FILES)
+$(MK_INCL_DIR_INST_W_VERS_CONF): $(MK_HEADER_FILES) $(CONFIG_MK_PATH)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	$(INSTALL) -m 0755 -d $(@)
 	$(INSTALL) -m 0644 $(MK_HEADER_FILES) $(@)
@@ -391,7 +392,7 @@ else
 	@$(INSTALL) -m 0644 $(MK_HEADER_FILES) $(@)
 endif
 
-$(INSTALL_PREFIX)/lib/%-$(VERS_CONF).a: $(BASE_LIB_PATH)/%.a
+$(INSTALL_PREFIX)/lib/%-$(VERS_CONF).a: $(BASE_LIB_PATH)/%.a $(CONFIG_MK_PATH)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	$(INSTALL) -m 0755 -d $(@D)
 	$(INSTALL) -m 0644 $< $@
@@ -427,6 +428,12 @@ else
 	@$(SYMLINK) $(<F) $(@F)
 	@$(MV) $(@F) $(INSTALL_PREFIX)/lib/
 endif
+
+
+# --- Query current configuration ---
+
+showconfig: check
+	@echo "Current configuration is '$(CONFIG_NAME)', located in '$(CONFIG_PATH)'"
 
 
 # --- Clean rules ---
