@@ -1,0 +1,72 @@
+commit e4e5404d26aded4873278e85faf6f14ac32115b5 (HEAD, master)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Dec 7 17:34:53 2012 -0600
+
+    Define static memory pool size in bl2_config.h.
+
+commit 19bb507d0de6a2bd3ce37cf616bdcd6b419ed641
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Dec 7 17:18:00 2012 -0600
+
+    Refined INSTALL text; added 'showconfig' target.
+    
+    Details:
+    - Added 'showconfig' target to Makefile.
+    - Added header files and ./config/<configname>/make_defs.mk as prerequisites
+      to object file rules.
+    - Added config.mk as prerequisite to library install rules.
+    - Edited and added to INSTALL file.
+
+commit 26cb659dd79636489db5a051aa60fff80273a7b9
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Dec 6 15:34:53 2012 -0600
+
+    Added auto-detection of version string (via git).
+    
+    Details:
+    - Added build/update-version-file.sh script for auto-detecting "version"
+      string and updating 'version' file accordingly. (If .git directory is
+      not present, then it is assumed this copy of BLIS is a downloaded
+      release, in which case 'version' file is left unchanged.)
+    - Added invocation of update-version-file.sh to configure script.
+
+commit b0ecd0ff52fa6ffc9e1d9eb44c365f7f009a6204
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Dec 6 14:27:11 2012 -0600
+
+    Wrote first draft of INSTALL file.
+
+commit bcbe81235a35ccfdbcc2f2319a0ca6e04f75a785 (tag: 0.0.0)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Dec 6 12:42:35 2012 -0600
+
+    Updated standalone test Makefile and other fixes.
+    
+    Details:
+    - Major edits to test/Makefile to bring up-to-date wrt new build system;
+      should no longer be broken.
+    - Minor edits to top-level Makefile.
+    - Fixed copy-and-paste bugs in
+      - frame/1m/packm/ukernels/bl2_packm_ref_?xk.c
+      - frame/1m/unpackm/ukernels/bl2_unpackm_ref_?xk.c
+
+commit 2f272b40f43307909736327f49d17737c7a05d37
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Dec 4 19:22:14 2012 -0600
+
+    Added build system and continued reorganization.
+    
+    Details:
+    - Added/renamed packm, unpackm kernels.
+    - Added machine value routines.
+    - Added param_map facility.
+    - Renamed AUTHORS to CREDITS.
+    - Added Makefile; continued to expand upon existing configure script.
+    - #define fuse_fac macros in operation headers if not defined already
+      (by the user in bl2_kernels.h).
+
+commit 00f3498a8943be1b387f0d5c029c8c7891687ad5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Dec 3 12:36:11 2012 -0600
+
+    Initial commit.

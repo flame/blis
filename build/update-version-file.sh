@@ -143,7 +143,7 @@ main()
 	# Check if the .git dir exists; if it does not, we do nothing.
 	if [ -d "${gitdir}" ]; then
 
-		echo "${script_name}: found ${gitdir} directory; assuming git clone."
+		echo "${script_name}: found '${gitdir}' directory; assuming git clone."
 
 		echo "${script_name}: executing git describe --tags."
 

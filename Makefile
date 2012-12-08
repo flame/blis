@@ -50,7 +50,8 @@
         install-libs install-headers \
         install-lib-symlinks install-header-symlinks \
         showconfig \
-        cleanmost distclean cleanmk cleanleaves
+        cleanmost distclean cleanmk cleanleaves \
+        changelog
 
 
 
@@ -87,6 +88,9 @@ NOOPT_TEXT        := "(NOTE: optimizations disabled)"
 FRAME_PATH        := ./$(FRAME_DIR)
 OBJ_PATH          := ./$(OBJ_DIR)
 LIB_PATH          := ./$(LIB_DIR)
+
+# CHANGELOG file.
+CHANGELOG         := CHANGELOG
 
 
 
@@ -473,4 +477,12 @@ else
 	@echo "Removing makefile fragments from $(FRAME_PATH)."
 	@- $(FIND) $(FRAME_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 endif
+
+
+# --- CHANGELOG rules ---
+
+changelog: check
+	@echo "Updating '$(CHANGELOG)' via '$(GIT_LOG)'."
+	@$(GIT_LOG) > $(CHANGELOG) 
+
 

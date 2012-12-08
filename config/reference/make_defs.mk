@@ -64,6 +64,10 @@ XARGS      := xargs
 RANLIB     := ranlib
 INSTALL    := install -c
 
+# Used to refresh CHANGELOG.
+GIT        := git
+GIT_LOG    := $(GIT) log --decorate
+
 
 
 #
