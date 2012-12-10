@@ -26,7 +26,6 @@ obj
 # -- makefile fragments --
 
 .fragment.mk
-fragment.mk
 
 # -- misc. --
 
