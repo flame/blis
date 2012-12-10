@@ -55,11 +55,6 @@ typedef enum
 	BLIS_VARIANT9,
 } varnum_t;
 
-typedef struct blksz_s
-{
-	dim_t v[BLIS_NUM_FP_TYPES];
-} blksz_t;
-
 
 void bl2_cntl_obj_free( void* cntl );
 

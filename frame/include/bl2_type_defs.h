@@ -71,6 +71,13 @@ typedef struct mem_s
 	dim_t  n;
 } mem_t;
 
+// Blocksize object type
+
+typedef struct blksz_s
+{
+	dim_t v[BLIS_NUM_FP_TYPES];
+} blksz_t;
+
 // Atom type
 // Note: atom types are used to hold "bufferless" scalar object values. Note
 // that it needs to be as large as the largest possible scalar value we might

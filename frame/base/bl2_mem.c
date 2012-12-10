@@ -34,8 +34,9 @@
 
 #include "blis2.h"
 
+#define N_ELEM_SMEM ( BLIS_STATIC_MEM_POOL_SIZE / sizeof( double ) )
 
-double  smem[ BLIS_STATIC_MEM_POOL_SIZE / sizeof( double ) ];
+double  smem[ N_ELEM_SMEM ];
 
 double* mc      = smem;
 int     counter = 0;
@@ -109,7 +110,7 @@ void* bl2_malloc_s( siz_t buf_size )
 	rmem = ( void* )mc;
 	mc += ( buf_size / sizeof( double ) );
 
-	if ( mc >= smem + ( SMEM_M * SMEM_N ) )
+	if ( mc >= smem + ( N_ELEM_SMEM ) )
 		bl2_abort();
 
 	++counter;
@@ -127,7 +128,7 @@ void bl2_free_s( void* p )
 
 void bl2_mm_clear_smem( void )
 {
-	dim_t n = SMEM_M * SMEM_N;
+	dim_t n = N_ELEM_SMEM;
 	dim_t i;
 
 	for ( i = 0; i < n; ++i )

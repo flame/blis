@@ -33,8 +33,8 @@
 #
 
 # Only include this block of code once.
-ifndef CONFIG_MK_INCLUDED
-CONFIG_MK_INCLUDED := yes
+ifndef MAKE_DEFS_MK_INCLUDED
+MAKE_DEFS_MK_INCLUDED := yes
 
 
 
@@ -42,19 +42,10 @@ CONFIG_MK_INCLUDED := yes
 # --- Build definitions --------------------------------------------------------
 #
 
-# This variable will identify the machine architecture (ie: i686, x86_64, etc.)
-# It will be used to construct a string that is appended to the BLIS library
-# name.
-ARCH                            := x86_64
-
-# The install prefix tell us where to install the libraries and header file
-# directory. Notice that we support the use of DESTDIR so that advanced users
-# may install to a temporary location.
-PREFIX                          := $(HOME)/flame
-INSTALL_PREFIX                  := $(DESTDIR)$(PREFIX)
-
 # Variables corresponding to other configure-time options.
 BLIS_ENABLE_VERBOSE_MAKE_OUTPUT := no
+BLIS_ENABLE_STATIC_BUILD        := yes
+BLIS_ENABLE_DYNAMIC_BUILD       := no
 
 
 
@@ -73,6 +64,10 @@ XARGS      := xargs
 RANLIB     := ranlib
 INSTALL    := install -c
 
+# Used to refresh CHANGELOG.
+GIT        := git
+GIT_LOG    := $(GIT) log --decorate
+
 
 
 #
@@ -81,11 +76,11 @@ INSTALL    := install -c
 
 # --- Determine the C compiler and related flags ---
 CC           := gcc
-CPPROCFLAGS  := 
+CPPROCFLAGS  :=
 CMISCFLAGS   := -std=c99 # -fopenmp -pg
-CDBGFLAGS    := # -g
-CWARNFLAGS   := -Wall -Wno-comment
-COPTFLAGS    := -O2
+CDBGFLAGS    := -g
+CWARNFLAGS   := -Wall
+COPTFLAGS    := -O2 #-malign-double
 CVECFLAGS    := -msse3 -march=nocona -mfpmath=sse
 
 # Aggregate all of the flags into two groups: one for optimizable code, and
@@ -103,5 +98,5 @@ LDFLAGS      :=
 
 
 
-# end of ifndef CONFIG_MK_INCLUDED conditional block
+# end of ifndef MAKE_DEFS_MK_INCLUDED conditional block
 endif

@@ -53,7 +53,6 @@ extern "C" {
 
 #include "bl2_config.h"
 #include "bl2_arch.h"
-#include "bl2_kernel.h"
 
 
 // -- System headers --
@@ -72,11 +71,12 @@ extern "C" {
 #include "bl2_type_defs.h"
 #include "bl2_macro_defs.h"
 #include "bl2_const_defs.h"
-#include "bl2_cntl.h"
-
 #include "bl2_extern_defs.h"
 
-#include "bl2_f2c.h"
+
+// -- BLIS architecture / kernel definitions --
+
+#include "bl2_kernel.h"
 
 
 // -- Base operation prototypes --
@@ -92,7 +92,11 @@ extern "C" {
 #include "bl2_clock.h"
 #include "bl2_check.h"
 #include "bl2_error.h"
+#include "bl2_f2c.h"
 #include "bl2_machval.h"
+
+// Control tree definitions.
+#include "bl2_cntl.h"
 
 
 // -- Level-0 operations --

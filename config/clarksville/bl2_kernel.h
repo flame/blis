@@ -57,6 +57,24 @@
 
 
 
+// -- LEVEL-1M KERNEL DEFINITIONS ----------------------------------------------
+
+// -- packm --
+
+#define PACKM_2XK_KERNEL     packm_ref_2xk
+#define PACKM_4XK_KERNEL     packm_ref_4xk
+#define PACKM_6XK_KERNEL     packm_ref_6xk
+#define PACKM_8XK_KERNEL     packm_ref_8xk
+
+// -- unpackm --
+
+#define UNPACKM_2XK_KERNEL   unpackm_ref_2xk
+#define UNPACKM_4XK_KERNEL   unpackm_ref_4xk
+#define UNPACKM_6XK_KERNEL   unpackm_ref_6xk
+#define UNPACKM_8XK_KERNEL   unpackm_ref_8xk
+
+
+
 // -- LEVEL-1F KERNEL DEFINITIONS ----------------------------------------------
 
 #include "bl2_axpy2v_opt_var1.h"
