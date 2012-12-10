@@ -1,4 +1,34 @@
-commit e4e5404d26aded4873278e85faf6f14ac32115b5 (HEAD, master)
+commit 7ad4ebef38b8e6eea9b6091844ba7294ec870271 (HEAD, tag: 0.0.1, origin/master, master)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Dec 10 16:18:40 2012 -0600
+
+    Tweaks to get BLIS compiling again on clarksville.
+    
+    Details:
+    - Updated header files and make_defs.mk in config/clarksville.
+    - Fixes to bl2_mem.c (now that SMEM_M, SMEM_N are gone).
+    - Moved definition of blksz_t from bl2_cntl.h to bl2_type_defs.h.
+    - Shuffled include statements in blis2.h.
+
+commit cc58ea86010b1f046134d13b546c878389df9af5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Dec 10 14:55:12 2012 -0600
+
+    Added template fragment.mk; updated .gitignore.
+
+commit 714c527b0eb153b7e2040b79349edc8372f743fd
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Dec 7 19:54:04 2012 -0600
+
+    Added 'changelog' make target; other tweaks.
+    
+    Details:
+    - Updated CHANGELOG.
+    - Added 'changelog' target to Makefile that runs 'git log --decorate' and
+      overwrites CHANGELOG with the output.
+    - Other trivial changes.
+
+commit e4e5404d26aded4873278e85faf6f14ac32115b5
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Fri Dec 7 17:34:53 2012 -0600
 
