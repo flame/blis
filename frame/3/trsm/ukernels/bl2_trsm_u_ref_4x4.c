@@ -68,14 +68,17 @@ void PASTEMAC(ch,varname)( \
 	b01 = *(b + 0*rs_b + 1*cs_b); \
 	b02 = *(b + 0*rs_b + 2*cs_b); \
 	b03 = *(b + 0*rs_b + 3*cs_b); \
+\
 	b10 = *(b + 1*rs_b + 0*cs_b); \
 	b11 = *(b + 1*rs_b + 1*cs_b); \
 	b12 = *(b + 1*rs_b + 2*cs_b); \
 	b13 = *(b + 1*rs_b + 3*cs_b); \
+\
 	b20 = *(b + 2*rs_b + 0*cs_b); \
 	b21 = *(b + 2*rs_b + 1*cs_b); \
 	b22 = *(b + 2*rs_b + 2*cs_b); \
 	b23 = *(b + 2*rs_b + 3*cs_b); \
+\
 	b30 = *(b + 3*rs_b + 0*cs_b); \
 	b31 = *(b + 3*rs_b + 1*cs_b); \
 	b32 = *(b + 3*rs_b + 2*cs_b); \
@@ -95,6 +98,7 @@ void PASTEMAC(ch,varname)( \
 	*(b + 3*rs_b + 1*cs_b) = b31; \
 	*(b + 3*rs_b + 2*cs_b) = b32; \
 	*(b + 3*rs_b + 3*cs_b) = b33; \
+\
 	*(c + 3*rs_c + 0*cs_c) = b30; \
 	*(c + 3*rs_c + 1*cs_c) = b31; \
 	*(c + 3*rs_c + 2*cs_c) = b32; \
@@ -120,6 +124,7 @@ void PASTEMAC(ch,varname)( \
 	*(b + 2*rs_b + 1*cs_b) = b21; \
 	*(b + 2*rs_b + 2*cs_b) = b22; \
 	*(b + 2*rs_b + 3*cs_b) = b23; \
+\
 	*(c + 2*rs_c + 0*cs_c) = b20; \
 	*(c + 2*rs_c + 1*cs_c) = b21; \
 	*(c + 2*rs_c + 2*cs_c) = b22; \
@@ -151,6 +156,7 @@ void PASTEMAC(ch,varname)( \
 	*(b + 1*rs_b + 1*cs_b) = b11; \
 	*(b + 1*rs_b + 2*cs_b) = b12; \
 	*(b + 1*rs_b + 3*cs_b) = b13; \
+\
 	*(c + 1*rs_c + 0*cs_c) = b10; \
 	*(c + 1*rs_c + 1*cs_c) = b11; \
 	*(c + 1*rs_c + 2*cs_c) = b12; \
@@ -188,6 +194,7 @@ void PASTEMAC(ch,varname)( \
 	*(b + 0*rs_b + 1*cs_b) = b01; \
 	*(b + 0*rs_b + 2*cs_b) = b02; \
 	*(b + 0*rs_b + 3*cs_b) = b03; \
+\
 	*(c + 0*rs_c + 0*cs_c) = b00; \
 	*(c + 0*rs_c + 1*cs_c) = b01; \
 	*(c + 0*rs_c + 2*cs_c) = b02; \

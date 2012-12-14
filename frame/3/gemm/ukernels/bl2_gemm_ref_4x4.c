@@ -163,25 +163,25 @@ void PASTEMAC(ch,varname)( \
 	PASTEMAC(ch,scals)( *beta, *c23 ); \
 	PASTEMAC(ch,scals)( *beta, *c33 ); \
 \
-	PASTEMAC(ch,dots)( *c00, *alpha, ab00 ); \
-	PASTEMAC(ch,dots)( *c10, *alpha, ab10 ); \
-	PASTEMAC(ch,dots)( *c20, *alpha, ab20 ); \
-	PASTEMAC(ch,dots)( *c30, *alpha, ab30 ); \
+	PASTEMAC(ch,dots)( *alpha, ab00, *c00 ); \
+	PASTEMAC(ch,dots)( *alpha, ab10, *c10 ); \
+	PASTEMAC(ch,dots)( *alpha, ab20, *c20 ); \
+	PASTEMAC(ch,dots)( *alpha, ab30, *c30 ); \
 \
-	PASTEMAC(ch,dots)( *c01, *alpha, ab01 ); \
-	PASTEMAC(ch,dots)( *c11, *alpha, ab11 ); \
-	PASTEMAC(ch,dots)( *c21, *alpha, ab21 ); \
-	PASTEMAC(ch,dots)( *c31, *alpha, ab31 ); \
+	PASTEMAC(ch,dots)( *alpha, ab01, *c01 ); \
+	PASTEMAC(ch,dots)( *alpha, ab11, *c11 ); \
+	PASTEMAC(ch,dots)( *alpha, ab21, *c21 ); \
+	PASTEMAC(ch,dots)( *alpha, ab31, *c31 ); \
 \
-	PASTEMAC(ch,dots)( *c02, *alpha, ab02 ); \
-	PASTEMAC(ch,dots)( *c12, *alpha, ab12 ); \
-	PASTEMAC(ch,dots)( *c22, *alpha, ab22 ); \
-	PASTEMAC(ch,dots)( *c32, *alpha, ab32 ); \
+	PASTEMAC(ch,dots)( *alpha, ab02, *c02 ); \
+	PASTEMAC(ch,dots)( *alpha, ab12, *c12 ); \
+	PASTEMAC(ch,dots)( *alpha, ab22, *c22 ); \
+	PASTEMAC(ch,dots)( *alpha, ab32, *c32 ); \
 \
-	PASTEMAC(ch,dots)( *c03, *alpha, ab03 ); \
-	PASTEMAC(ch,dots)( *c13, *alpha, ab13 ); \
-	PASTEMAC(ch,dots)( *c23, *alpha, ab23 ); \
-	PASTEMAC(ch,dots)( *c33, *alpha, ab33 ); \
+	PASTEMAC(ch,dots)( *alpha, ab03, *c03 ); \
+	PASTEMAC(ch,dots)( *alpha, ab13, *c13 ); \
+	PASTEMAC(ch,dots)( *alpha, ab23, *c23 ); \
+	PASTEMAC(ch,dots)( *alpha, ab33, *c33 ); \
 }
 
 INSERT_GENTFUNC_BASIC( gemm_ref_4x4, gemm_ref_4x4 )
