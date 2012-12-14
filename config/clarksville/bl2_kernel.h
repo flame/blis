@@ -65,6 +65,10 @@
 #define PACKM_4XK_KERNEL     packm_ref_4xk
 #define PACKM_6XK_KERNEL     packm_ref_6xk
 #define PACKM_8XK_KERNEL     packm_ref_8xk
+#define PACKM_10XK_KERNEL    packm_ref_10xk
+#define PACKM_12XK_KERNEL    packm_ref_12xk
+#define PACKM_14XK_KERNEL    packm_ref_14xk
+#define PACKM_16XK_KERNEL    packm_ref_16xk
 
 // -- unpackm --
 
@@ -72,6 +76,10 @@
 #define UNPACKM_4XK_KERNEL   unpackm_ref_4xk
 #define UNPACKM_6XK_KERNEL   unpackm_ref_6xk
 #define UNPACKM_8XK_KERNEL   unpackm_ref_8xk
+#define UNPACKM_10XK_KERNEL  unpackm_ref_10xk
+#define UNPACKM_12XK_KERNEL  unpackm_ref_12xk
+#define UNPACKM_14XK_KERNEL  unpackm_ref_14xk
+#define UNPACKM_16XK_KERNEL  unpackm_ref_16xk
 
 
 

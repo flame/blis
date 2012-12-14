@@ -44,25 +44,22 @@ typedef void (*FUNCPTR_T)(
                            void*   a, inc_t inca, inc_t lda
                          );
 
+#undef  FUNCPTR_ARRAY_LENGTH
+#define FUNCPTR_ARRAY_LENGTH 18
 
 #undef  GENARRAY
-#define GENARRAY( kername2, kername4, kername6, kername8 ) \
+#define GENARRAY( kername2,  kername4,  kername6,  kername8,   \
+                  kername10, kername12, kername14, kername16 ) \
 \
-static FUNCPTR_T ftypes[10][BLIS_NUM_FP_TYPES] = \
+static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] = \
 { \
 	/* panel width = 0 */ \
 	{ \
-		NULL, \
-		NULL, \
-		NULL, \
-		NULL, \
+		NULL, NULL, NULL, NULL, \
 	}, \
 	/* panel width = 1 */ \
 	{ \
-		NULL, \
-		NULL, \
-		NULL, \
-		NULL, \
+		NULL, NULL, NULL, NULL, \
 	}, \
 	/* panel width = 2 */ \
 	{ \
@@ -73,10 +70,7 @@ static FUNCPTR_T ftypes[10][BLIS_NUM_FP_TYPES] = \
 	}, \
 	/* panel width = 3 */ \
 	{ \
-		NULL, \
-		NULL, \
-		NULL, \
-		NULL, \
+		NULL, NULL, NULL, NULL, \
 	}, \
 	/* panel width = 4 */ \
 	{ \
@@ -87,10 +81,7 @@ static FUNCPTR_T ftypes[10][BLIS_NUM_FP_TYPES] = \
 	}, \
 	/* panel width = 5 */ \
 	{ \
-		NULL, \
-		NULL, \
-		NULL, \
-		NULL, \
+		NULL, NULL, NULL, NULL, \
 	}, \
 	/* panel width = 6 */ \
 	{ \
@@ -101,10 +92,7 @@ static FUNCPTR_T ftypes[10][BLIS_NUM_FP_TYPES] = \
 	}, \
 	/* panel width = 7 */ \
 	{ \
-		NULL, \
-		NULL, \
-		NULL, \
-		NULL, \
+		NULL, NULL, NULL, NULL, \
 	}, \
 	/* panel width = 8 */ \
 	{ \
@@ -115,17 +103,62 @@ static FUNCPTR_T ftypes[10][BLIS_NUM_FP_TYPES] = \
 	}, \
 	/* panel width = 9 */ \
 	{ \
-		NULL, \
-		NULL, \
-		NULL, \
-		NULL, \
+		NULL, NULL, NULL, NULL, \
+	}, \
+	/* panel width = 10 */ \
+	{ \
+		PASTEMAC(s,kername10), \
+		PASTEMAC(c,kername10), \
+		PASTEMAC(d,kername10), \
+		PASTEMAC(z,kername10), \
+	}, \
+	/* panel width = 11 */ \
+	{ \
+		NULL, NULL, NULL, NULL, \
+	}, \
+	/* panel width = 12 */ \
+	{ \
+		PASTEMAC(s,kername12), \
+		PASTEMAC(c,kername12), \
+		PASTEMAC(d,kername12), \
+		PASTEMAC(z,kername12), \
+	}, \
+	/* panel width = 13 */ \
+	{ \
+		NULL, NULL, NULL, NULL, \
+	}, \
+	/* panel width = 14 */ \
+	{ \
+		PASTEMAC(s,kername14), \
+		PASTEMAC(c,kername14), \
+		PASTEMAC(d,kername14), \
+		PASTEMAC(z,kername14), \
+	}, \
+	/* panel width = 15 */ \
+	{ \
+		NULL, NULL, NULL, NULL, \
+	}, \
+	/* panel width = 16 */ \
+	{ \
+		PASTEMAC(s,kername16), \
+		PASTEMAC(c,kername16), \
+		PASTEMAC(d,kername16), \
+		PASTEMAC(z,kername16), \
+	}, \
+	/* panel width = 17 */ \
+	{ \
+		NULL, NULL, NULL, NULL, \
 	} \
 };
 
 GENARRAY( UNPACKM_2XK_KERNEL,
           UNPACKM_4XK_KERNEL,
           UNPACKM_6XK_KERNEL,
-          UNPACKM_8XK_KERNEL )
+          UNPACKM_8XK_KERNEL,
+          UNPACKM_10XK_KERNEL,
+          UNPACKM_12XK_KERNEL,
+          UNPACKM_14XK_KERNEL,
+          UNPACKM_16XK_KERNEL )
 
 
 
@@ -146,15 +179,6 @@ void PASTEMAC(ch,opname)( \
 	num_t     dt; \
 	FUNCPTR_T f; \
 \
-	/* The panel dimension is always equal to the leading dimension of p. */ \
-	panel_dim = ldp; \
-\
-	/* Acquire the datatype for the current function. */ \
-	dt = PASTEMAC(ch,type); \
-\
-	/* Index into the array to extract the correct function pointer. */ \
-	f = ftypes[panel_dim][dt]; \
-\
 	/* If the panel dimension is unit, then we recognize that this allows
 	   the kernel to reduce to a copyv, so we call that kernel directly. */ \
 	if ( m == 1 ) \
@@ -165,6 +189,19 @@ void PASTEMAC(ch,opname)( \
 		                           a, lda ); \
 		return; \
 	} \
+\
+	/* The panel dimension is always equal to the leading dimension of p. */ \
+	panel_dim = ldp; \
+\
+	/* Acquire the datatype for the current function. */ \
+	dt = PASTEMAC(ch,type); \
+\
+	/* Index into the array to extract the correct function pointer.
+	   If the panel dimension is too big to be within the array of
+	   explicitly handled kernels, then we treat that kernel the same
+	   as if it were in range but unimplemented. */ \
+	if ( panel_dim < FUNCPTR_ARRAY_LENGTH ) f = ftypes[panel_dim][dt]; \
+	else                                    f = NULL; \
 \
 	/* If there exists a kernel implementation for the panel dimension
 	   provided, and the "width" of the panel is equal to the leading
@@ -181,7 +218,7 @@ void PASTEMAC(ch,opname)( \
 	} \
 	else \
 	{ \
-		/* Treat the panel as m x n and column-stored (unit row stride).*/ \
+		/* Treat the panel as m x n and column-stored (unit row stride). */ \
 		PASTEMAC3(ch,ch,ch,scal2m)( 0, \
 		                            BLIS_NONUNIT_DIAG, \
 		                            BLIS_DENSE, \

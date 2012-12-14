@@ -1,4 +1,10 @@
-commit 7ad4ebef38b8e6eea9b6091844ba7294ec870271 (HEAD, tag: 0.0.1, origin/master, master)
+commit 17455a8bce038dd570356ab0c5c11d9a89f20248 (HEAD, origin/master, master)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Dec 10 17:23:32 2012 -0600
+
+    Minor updates towards to 0.0.1.
+
+commit 7ad4ebef38b8e6eea9b6091844ba7294ec870271 (tag: 0.0.1)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Mon Dec 10 16:18:40 2012 -0600
 

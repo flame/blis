@@ -37,6 +37,10 @@
 #include "bl2_unpackm_ref_4xk.h"
 #include "bl2_unpackm_ref_6xk.h"
 #include "bl2_unpackm_ref_8xk.h"
+#include "bl2_unpackm_ref_10xk.h"
+#include "bl2_unpackm_ref_12xk.h"
+#include "bl2_unpackm_ref_14xk.h"
+#include "bl2_unpackm_ref_16xk.h"
 
 
 #undef  GENTPROT

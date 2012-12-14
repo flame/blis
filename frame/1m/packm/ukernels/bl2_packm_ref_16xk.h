@@ -32,28 +32,15 @@
 
 */
 
-// Include headers for various packm kernels.
-#include "bl2_packm_ref_2xk.h"
-#include "bl2_packm_ref_4xk.h"
-#include "bl2_packm_ref_6xk.h"
-#include "bl2_packm_ref_8xk.h"
-#include "bl2_packm_ref_10xk.h"
-#include "bl2_packm_ref_12xk.h"
-#include "bl2_packm_ref_14xk.h"
-#include "bl2_packm_ref_16xk.h"
-
-
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, varname ) \
 \
 void PASTEMAC(ch,varname)( \
                            conj_t  conja, \
-                           dim_t   m, \
                            dim_t   n, \
                            void*   beta, \
                            void*   a, inc_t inca, inc_t lda, \
-                           void*   p,             inc_t ldp \
+                           void*   p  \
                          );
 
-INSERT_GENTPROT_BASIC( packm_cxk )
-
+INSERT_GENTPROT_BASIC( packm_ref_16xk )
