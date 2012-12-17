@@ -6,10 +6,11 @@ INSTALL
 INTRODUCTION
 
 This file contains an abbreviated description of how to configure, compile,
-and install a BLIS library on your local system. Note that this file is
-mainly for those of us who are impatient! If you have time, PLEASE check the
-BLIS homepage for a wiki page that describes the build process in much more
-detail. The BLIS homepage is located at:
+and install a BLIS library on your local system.
+
+NOTE: This file is mainly for those of us who are impatient! It is probably
+out-of-date. If you have time, PLEASE check the BLIS homepage for a wiki
+page that describes the build process. The BLIS homepage is located at:
 
   http://code.google.com/p/blis/
 
@@ -42,7 +43,7 @@ configuration as a template:
   > ls config/x86-64opt
   bl2_config.h  bl2_kernel.h  make_defs.mk
 
-Then you would edit each of these four files. Here are some special notes
+Then you would edit each of these three files. Here are some special notes
 about each file:
 
   o bl2_config.h

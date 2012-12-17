@@ -52,9 +52,6 @@
 
 // -- MEMORY ALLOCATOR ---------------------------------------------------------
 
-// Static memory pool size.
-#define BLIS_STATIC_MEM_POOL_SIZE        (256 * 5000 * sizeof(double))
-
 // Enable memory alignment?
 #define BLIS_ENABLE_MEMORY_ALIGNMENT     1
 
@@ -62,6 +59,9 @@
 #ifndef BLIS_MEMORY_ALIGNMENT_BOUNDARY
   #define BLIS_MEMORY_ALIGNMENT_BOUNDARY 16
 #endif
+
+// Static memory pool size.
+#define BLIS_STATIC_MEM_POOL_SIZE        (256 * 5000 * sizeof(double))
 
 // The page size is used by the memory allocator so that static memory
 // can be allocated with alignment to the beginning of a page boundary.
