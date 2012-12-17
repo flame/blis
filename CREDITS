@@ -1,12 +1,13 @@
-Acknowledgements
 
+BLIS framework
+Acknowledgements
 ---
 
 The BLIS framework was primarily authored by
 
   Field Van Zee               (The University of Texas at Austin)
 
-but many others gave input and feedback as it was initially
+but many others contributed input and feedback as it was initially
 conceived, designed, and developed, including:
 
   John Gunnels                (IBM, T.J. Watson Research Center)
@@ -27,4 +28,3 @@ of BLIS to new architectures as proofs-of-concept:
 BLIS's development was partially funded by grants from Microsoft and
 the National Science Foundation (Awards CCF-0917167 and OCI-1148125).
 
-  

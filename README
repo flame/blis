@@ -8,7 +8,7 @@ Thank you for deciding to try out the BLIS framework!
 BLIS is a portable framework for instantiating BLAS-like libraries. The
 framework was designed to isolate essential kernels of computation that,
 when optimized, immediately enable optimized implementations of most of
-the commonly used and computationally intensive operations.
+its commonly used and computationally intensive operations.
 
 BLIS has many features. For more detailed information about the project,
 please check the BLIS homepage:

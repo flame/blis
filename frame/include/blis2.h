@@ -46,13 +46,11 @@ extern "C" {
 
 // -- BLIS configuration definition --
 
-// NOTE: These definitions are placed here mainly because there might be
-// something in bl2_config.h that is needed within one of the system
-// headers. A good example: posix_memalign() needs _GNU_SOURCE on GNU
-// systems (I think).
+// NOTE: We include bl2_config.h here because there might be something
+// defined there that is needed within one of the system headers. A good
+// example: posix_memalign() needs _GNU_SOURCE on GNU systems (I think).
 
 #include "bl2_config.h"
-#include "bl2_arch.h"
 
 
 // -- System headers --
@@ -74,7 +72,7 @@ extern "C" {
 #include "bl2_extern_defs.h"
 
 
-// -- BLIS architecture / kernel definitions --
+// -- BLIS kernel definitions --
 
 #include "bl2_kernel.h"
 

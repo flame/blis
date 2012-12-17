@@ -37,33 +37,28 @@ When creating your configuration sub-directory, you can use the reference
 configuration as a template:
 
   > ls config/reference
-  bl2_arch.h  bl2_config.h  bl2_kernel.h  make_defs.mk
+  bl2_config.h  bl2_kernel.h  make_defs.mk
   > cp -r config/reference config/x86-64opt
   > ls config/x86-64opt
-  bl2_arch.h  bl2_config.h  bl2_kernel.h  make_defs.mk
+  bl2_config.h  bl2_kernel.h  make_defs.mk
 
 Then you would edit each of these four files. Here are some special notes
 about each file:
 
-  o bl2_arch.h
-    - This is where you specify architectural details such as register and
-      cache blocksizes used by the micro-kernel(s).
-
   o bl2_config.h
-    - This file is where you could place C preprocessor macros that would
-      typically be defined by the arguments to an autoconf-style configure
-      script. It contains just a few basic definitions such as whether to
-      use memory alignment and, if so, what boundary multiple to use.
+    - This is where you specify most of the parameters of your BLIS
+      configuration, including (but not limited to) such things as register
+      and cache blocksizes used by the micro-kernel(s).
 
   o bl2_kernel.h
     - This file defines C preprocessor macros associated with various kernels
       and micro-kernels. The reference configuration defines all kernels to
       use reference implementations (which are provided as part of the BLIS
       framework). If you end up writing your own optimized kernel for some
-      operation, be sure and set it here. Notice that you only have to set
-      ONE definition for each operation, as BLIS prepends s,d,c,z (as well as
-      the BLIS function prefix, currently 'bl2_') to the names to create the
-      actual datatype instances.
+      operation, be sure and enable its use here. Notice that you only have to
+      set ONE definition for each operation, as BLIS prepends s,d,c,z (as well
+      as the BLIS function prefix, currently 'bl2_') to the names to create
+      the actual datatype instances.
     - IMPORTANT: If you add your own kernels, OR if you use kernels provided
       with the BLIS framework distribution (i.e., in the 'kernels' directory),
       you MUST add a symbolic link to those kernels to the configuration
@@ -74,11 +69,12 @@ about each file:
         > pwd
         /home/field/google_code/blis/config/x86-64opt
         > ls
-        bl2_arch.h  bl2_config.h  bl2_kernel.h  make_defs.mk
+        bl2_config.h  bl2_kernel.h  make_defs.mk
         > ls ../../kernels
         x86  x86_64
         > ln -s ../../kernels/x86_64 kernels
-        > ls bl2_arch.h  bl2_config.h  bl2_kernel.h  kernels  make_defs.mk
+        > ls
+        bl2_config.h  bl2_kernel.h  kernels  make_defs.mk
         > ls -l kernels
         lrwxrwxrwx 1 field dept 20 Dec  1 18:13 kernels -> ../../kernels/x86_64
 
@@ -303,52 +299,51 @@ ever unsure which configuration is "active", simply run:
 
 This will tell you which configuration is specified by the config.mk file.
 
-Another benefit to switching configuration is that a previous configuration's
+Another benefit to configuration switching is that a previous configuration's
 object files are saved from the previous build. For example, suppose you
 configure a configuration named 'debug'. You run 'make' followed by 'make
 install'. You use that debug-enabled library for a while and then you create
 a configuration named 'opt', which is the same configuration in optimized
 form. You compile, install, and test that library. But then you want to return
 to developing with the 'debug' configuration. Simply run './configure debug'
-again to switch to the 'debug' configuration. If haven't run any of the
-'clean' targets in the interim, then the previously created object files for
-the 'debug' configuration will still be there (inside './obj/debug'). If you
+again to switch to the 'debug' configuration. If you haven't run any of the
+'clean' targets in the interim, the previously created object files for the
+'debug' configuration will still be there (inside './obj/debug'). If you
 change a .c source file (not a header file; see "Caveats" section below), you
 won't have to recompile the whole library. Rather, only the source files that
 changed since the previous configuration and compilation will need to be
-recompiled, because the object files created by the initial 'debug' build (and
-their modification times) are preserved even after you switch away to another
-configuration.
+recompiled.
 
 Now, while the object files are "remembered" from previous configurations,
 the library archives (and headers) are not. So, 'make install' will always
 re-install the build products after returning to a previous configuration,
 even if no source files (or header files) changed. We must re-install the
 libraries unconditionally after switching back to a previous configuration
-because while the configuration name might be the same, the installation
-prefix might have changed. Thus, we must install the build products just
-in case. But the installation itself is a relatively low overhead task,
-and so shouldn't be much of a burden to a developer who switches his or her
-configurations.
+because while the configuration name (e.g., 'debug' or 'opt') might be the
+same, the installation prefix might have changed. Thus, we must install the
+build products just in case. But the installation itself is a relatively
+low overhead task, and so shouldn't be much of a burden to a developer who
+switches his or her configurations frequently.
 
 -- Caveats --
 
-Due to the way the BLIS framework handles header files, any change to any
-header file will result in the entire library being rebuilt. This policty is
-mostly out of an abundance of caution. If two or more files use definitions in
-a header that is modified, and one or more of those files somehow does not get
-recompiled to reflect the updated definitions, you could end up sinking hours
-of time trying to track down a bug that didn't ever need to be an issue to
-begin with. Thus, to prevent developers from shooting themselves in the foot
-with this problem, the BLIS build system recompiles *all* object files if
-a header file--any header file--is touched.
+Due to the way the BLIS framework handles header files, *any* change to *any*
+header file will result in the entire library being rebuilt. This policy is
+in place mostly out of an abundance of caution. If two or more files use
+definitions in a header that is modified, and one or more of those files
+somehow does not get recompiled to reflect the updated definitions, you could
+end up sinking hours of time trying to track down a bug that didn't ever need
+to be an issue to begin with. Thus, to prevent developers (including the
+framework developer(s)) from shooting themselves in the foot with this
+problem, the BLIS build system recompiles *all* object files if a header
+file--any header file--is touched.
 
 
 CONCLUSION
 
-That's it! The BLIS framework's build system adheres to the familiar
-"./configure; make ; make install" build process that many of us are
-used to.
+That's it! While the BLIS framework's build system has some nice features, it
+essentially adheres to the familiar "./configure; make ; make install" build
+process that many of us are used to.
 
 If you have feedback, please consider keeping in touch with the project
 maintainers, contributors, and other users by joining and participating
@@ -357,5 +352,4 @@ in the BLIS mailing lists (see the README for details).
 Thanks for using BLIS!
 
 Field Van Zee
-
 
