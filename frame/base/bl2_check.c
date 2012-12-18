@@ -537,3 +537,7 @@ err_t bl2_check_packv_schema_on_unpack( obj_t* a )
 	return e_val;
 }
 
+
+// -- Memory allocator checks --------------------------------------------------
+
+

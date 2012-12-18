@@ -461,7 +461,10 @@ typedef enum
 	// Packing-specific errors
 	BLIS_PACK_SCHEMA_NOT_SUPPORTED_FOR_UNPACK  = ( -90),
 
-	BLIS_ERROR_CODE_MAX                        = (-100)
+	// Memory allocator errors
+	BLIS_EXHAUSTED_STATIC_MEMORY_POOL          = (-100),
+
+	BLIS_ERROR_CODE_MAX                        = (-110)
 } err_t;
 
 #endif

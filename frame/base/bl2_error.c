@@ -162,5 +162,8 @@ void bl2_error_msgs_init( void )
 
 	sprintf( bl2_error_string_for_code(BLIS_PACK_SCHEMA_NOT_SUPPORTED_FOR_UNPACK),
 	         "Pack schema not yet supported/implemented for use with unpacking." );
+
+	sprintf( bl2_error_string_for_code(BLIS_EXHAUSTED_STATIC_MEMORY_POOL),
+	         "Attempted to allocate more memory from static pool than is available." );
 }
 

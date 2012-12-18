@@ -38,7 +38,7 @@
 // -- Error-related macros --
 
 // Used to determine the size of the array of error strings.
-#define BLIS_MAX_NUM_ERR_MSGS    100
+#define BLIS_MAX_NUM_ERR_MSGS    200
 #define BLIS_MAX_ERR_MSG_LENGTH  200
 
 // Used to insert filenames and line numbers into error-checking code.

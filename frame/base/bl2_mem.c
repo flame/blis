@@ -34,11 +34,29 @@
 
 #include "blis2.h"
 
-#define N_ELEM_SMEM ( BLIS_STATIC_MEM_POOL_SIZE / sizeof( double ) )
+// Static memory pool size (in units of doubles).
+#define BLIS_NUM_ELEM_SMEM   ( \
+                               BLIS_NUM_MC_X_KC_BLOCKS * \
+                               ( BLIS_DEFAULT_MC_D * \
+                                 BLIS_DEFAULT_KC_D   \
+                               ) + \
+                               BLIS_NUM_KC_X_NC_BLOCKS * \
+                               ( BLIS_DEFAULT_KC_D * \
+                                 BLIS_DEFAULT_NC_D   \
+                               ) + \
+                               2 * \
+                               ( BLIS_MAX_PREFETCH_BYTE_OFFSET / \
+                                 sizeof(double) \
+                               ) \
+                             )
 
-double  smem[ N_ELEM_SMEM ];
+// Static memory pool.
+double  smem[ BLIS_NUM_ELEM_SMEM ];
 
+// Pointer to current "stack" location in the memory pool.
 double* mc      = smem;
+
+// A counter that keeps track of how many chunks have been allocated.
 int     counter = 0;
 
 
@@ -110,8 +128,8 @@ void* bl2_malloc_s( siz_t buf_size )
 	rmem = ( void* )mc;
 	mc += ( buf_size / sizeof( double ) );
 
-	if ( mc >= smem + ( N_ELEM_SMEM ) )
-		bl2_abort();
+	if ( mc >= smem + BLIS_NUM_ELEM_SMEM )
+		bl2_check_error_code( BLIS_EXHAUSTED_STATIC_MEMORY_POOL );
 
 	++counter;
 
@@ -128,10 +146,9 @@ void bl2_free_s( void* p )
 
 void bl2_mm_clear_smem( void )
 {
-	dim_t n = N_ELEM_SMEM;
 	dim_t i;
 
-	for ( i = 0; i < n; ++i )
+	for ( i = 0; i < BLIS_NUM_ELEM_SMEM; ++i )
 	{
 		smem[i] = 0.0;
 	}
