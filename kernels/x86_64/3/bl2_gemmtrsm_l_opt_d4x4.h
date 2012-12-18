@@ -48,5 +48,5 @@ void PASTEMAC(ch,varname)( \
                            ctype*  c11, inc_t rs_c, inc_t cs_c \
                          );
 
-INSERT_GENTPROT_BASIC( gemmtrsm_l_opt_4x2 )
+INSERT_GENTPROT_BASIC( gemmtrsm_l_opt_d4x4 )
 

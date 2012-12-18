@@ -40,6 +40,7 @@
 
 // -- Default cache blocksizes --
 
+//
 // Constraints:
 //
 // (1) MC must be a multiple of:
@@ -175,9 +176,9 @@
 
 // -- LEVEL-3 KERNEL DEFINITIONS -----------------------------------------------
 
-#include "bl2_gemm_opt_4x4.h"
-#include "bl2_gemmtrsm_l_opt_4x4.h"
-#include "bl2_gemmtrsm_u_opt_4x4.h"
+#include "bl2_gemm_opt_d4x4.h"
+#include "bl2_gemmtrsm_l_opt_d4x4.h"
+#include "bl2_gemmtrsm_u_opt_d4x4.h"
 
 // -- dupl --
 
@@ -185,15 +186,15 @@
 
 // -- gemm --
 
-#define GEMM_UKERNEL         gemm_opt_4x4
+#define GEMM_UKERNEL         gemm_opt_d4x4
 
 // -- trsm-related --
 
-#define GEMMTRSM_L_UKERNEL   gemmtrsm_l_opt_4x4
-#define GEMMTRSM_U_UKERNEL   gemmtrsm_u_opt_4x4
+#define GEMMTRSM_L_UKERNEL   gemmtrsm_l_opt_d4x4
+#define GEMMTRSM_U_UKERNEL   gemmtrsm_u_opt_d4x4
 
-#define TRSM_L_UKERNEL       trsm_l_ref_4x4
-#define TRSM_U_UKERNEL       trsm_u_ref_4x4
+#define TRSM_L_UKERNEL       trsm_l_ref_d4x4
+#define TRSM_U_UKERNEL       trsm_u_ref_d4x4
 
 
 
@@ -253,7 +254,7 @@
 
 
 
-// -- LEVEL-1 KERNEL DEFINITIONS -----------------------------------------------
+// -- LEVEL-1V KERNEL DEFINITIONS ----------------------------------------------
 
 #include "bl2_axpyv_opt_var1.h"
 #include "bl2_dotv_opt_var1.h"

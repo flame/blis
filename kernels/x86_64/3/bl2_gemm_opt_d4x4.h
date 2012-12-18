@@ -40,13 +40,12 @@
 \
 void PASTEMAC(ch,varname)( \
                            dim_t   k, \
-                           ctype*  a10, \
-                           ctype*  a11, \
-                           ctype*  bd01, \
-                           ctype*  bd11, \
-                           ctype*  b11, \
-                           ctype*  c11, inc_t rs_c, inc_t cs_c \
+                           ctype*  alpha, \
+                           ctype*  a, \
+                           ctype*  b, \
+                           ctype*  beta, \
+                           ctype*  c, inc_t rs_c, inc_t cs_c \
                          );
 
-INSERT_GENTPROT_BASIC( gemmtrsm_l_opt_4x4 )
+INSERT_GENTPROT_BASIC( gemm_opt_d4x4 )
 

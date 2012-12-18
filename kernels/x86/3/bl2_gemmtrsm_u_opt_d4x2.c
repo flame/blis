@@ -34,28 +34,28 @@
 
 #include "blis2.h"
 
-void bl2_sgemmtrsm_u_opt_4x2(
-                              dim_t     k,
-                              float*    a12,
-                              float*    a11,
-                              float*    bd21,
-                              float*    bd11,
-                              float*    b11,
-                              float*    c11, inc_t rs_c, inc_t cs_c
-                            )
+void bl2_sgemmtrsm_u_opt_d4x2(
+                               dim_t     k,
+                               float*    a12,
+                               float*    a11,
+                               float*    bd21,
+                               float*    bd11,
+                               float*    b11,
+                               float*    c11, inc_t rs_c, inc_t cs_c
+                             )
 {
 	bl2_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 }
 
-void bl2_dgemmtrsm_u_opt_4x2(
-                              dim_t     k,
-                              double*   a12,
-                              double*   a11,
-                              double*   bd21,
-                              double*   bd11,
-                              double*   b11,
-                              double*   c11, inc_t rs_c, inc_t cs_c
-                        )
+void bl2_dgemmtrsm_u_opt_d4x2(
+                               dim_t     k,
+                               double*   a12,
+                               double*   a11,
+                               double*   bd21,
+                               double*   bd11,
+                               double*   b11,
+                               double*   c11, inc_t rs_c, inc_t cs_c
+                             )
 {
 	dim_t k_iter;
 	dim_t k_left;
@@ -407,28 +407,28 @@ void bl2_dgemmtrsm_u_opt_4x2(
 
 }
 
-void bl2_cgemmtrsm_u_opt_4x2(
-                              dim_t     k,
-                              scomplex* a12,
-                              scomplex* a11,
-                              scomplex* bd21,
-                              scomplex* bd11,
-                              scomplex* b11,
-                              scomplex* c11, inc_t rs_c, inc_t cs_c
-                        )
+void bl2_cgemmtrsm_u_opt_d4x2(
+                               dim_t     k,
+                               scomplex* a12,
+                               scomplex* a11,
+                               scomplex* bd21,
+                               scomplex* bd11,
+                               scomplex* b11,
+                               scomplex* c11, inc_t rs_c, inc_t cs_c
+                             )
 {
 	bl2_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 }
 
-void bl2_zgemmtrsm_u_opt_4x2(
-                              dim_t     k,
-                              dcomplex* a12,
-                              dcomplex* a11,
-                              dcomplex* bd21,
-                              dcomplex* bd11,
-                              dcomplex* b11,
-                              dcomplex* c11, inc_t rs_c, inc_t cs_c
-                        )
+void bl2_zgemmtrsm_u_opt_d4x2(
+                               dim_t     k,
+                               dcomplex* a12,
+                               dcomplex* a11,
+                               dcomplex* bd21,
+                               dcomplex* bd11,
+                               dcomplex* b11,
+                               dcomplex* c11, inc_t rs_c, inc_t cs_c
+                             )
 {
 	bl2_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 }

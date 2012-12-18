@@ -34,26 +34,26 @@
 
 #include "blis2.h"
 
-void bl2_sgemm_opt_2x4(
-                        dim_t     k,
-                        float*    alpha,
-                        float*    a,
-                        float*    b,
-                        float*    beta,
-                        float*    c, inc_t rs_c, inc_t cs_c
-                      )
+void bl2_sgemm_opt_d2x4(
+                         dim_t     k,
+                         float*    alpha,
+                         float*    a,
+                         float*    b,
+                         float*    beta,
+                         float*    c, inc_t rs_c, inc_t cs_c
+                       )
 {
 	bl2_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 }
 
-void bl2_dgemm_opt_2x4(
-                        dim_t     k,
-                        double*   alpha,
-                        double*   a,
-                        double*   b,
-                        double*   beta,
-                        double*   c, inc_t rs_c, inc_t cs_c
-                      )
+void bl2_dgemm_opt_d2x4(
+                         dim_t     k,
+                         double*   alpha,
+                         double*   a,
+                         double*   b,
+                         double*   beta,
+                         double*   c, inc_t rs_c, inc_t cs_c
+                       )
 {
 	dim_t   k_iter;
 	dim_t   k_left;
@@ -365,26 +365,26 @@ void bl2_dgemm_opt_2x4(
 
 }
 
-void bl2_cgemm_opt_2x4(
-                        dim_t     k,
-                        scomplex* alpha,
-                        scomplex* a,
-                        scomplex* b,
-                        scomplex* beta,
-                        scomplex* c, inc_t rs_c, inc_t cs_c
-                      )
+void bl2_cgemm_opt_d2x4(
+                         dim_t     k,
+                         scomplex* alpha,
+                         scomplex* a,
+                         scomplex* b,
+                         scomplex* beta,
+                         scomplex* c, inc_t rs_c, inc_t cs_c
+                       )
 {
 	bl2_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 }
 
-void bl2_zgemm_opt_2x4(
-                        dim_t     k,
-                        dcomplex* alpha,
-                        dcomplex* a,
-                        dcomplex* b,
-                        dcomplex* beta,
-                        dcomplex* c, inc_t rs_c, inc_t cs_c
-                      )
+void bl2_zgemm_opt_d2x4(
+                         dim_t     k,
+                         dcomplex* alpha,
+                         dcomplex* a,
+                         dcomplex* b,
+                         dcomplex* beta,
+                         dcomplex* c, inc_t rs_c, inc_t cs_c
+                       )
 {
 	bl2_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 }

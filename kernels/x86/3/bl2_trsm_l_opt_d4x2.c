@@ -34,22 +34,22 @@
 
 #include "blis2.h"
 
-void bl2_strsm_l_opt_4x2(
-                          float*   a11,
-                          float*   b11,
-                          float*   bd11,
-                          float*   c11, inc_t rs_c, inc_t cs_c
-                        )
+void bl2_strsm_l_opt_d4x2(
+                           float*   a11,
+                           float*   b11,
+                           float*   bd11,
+                           float*   c11, inc_t rs_c, inc_t cs_c
+                         )
 {
 	bl2_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 }
 
-void bl2_dtrsm_l_opt_4x2(
-                          double*  a11,
-                          double*  b11,
-                          double*  bd11,
-                          double*  c11, inc_t rs_c, inc_t cs_c
-                        )
+void bl2_dtrsm_l_opt_d4x2(
+                           double*  a11,
+                           double*  b11,
+                           double*  bd11,
+                           double*  c11, inc_t rs_c, inc_t cs_c
+                         )
 {
 	__asm__ volatile
 	(
@@ -184,22 +184,22 @@ void bl2_dtrsm_l_opt_4x2(
 
 }
 
-void bl2_ctrsm_l_opt_4x2(
-                          scomplex* a11,
-                          scomplex* b11,
-                          scomplex* bd11,
-                          scomplex* c11, inc_t rs_c, inc_t cs_c
-                        )
+void bl2_ctrsm_l_opt_d4x2(
+                           scomplex* a11,
+                           scomplex* b11,
+                           scomplex* bd11,
+                           scomplex* c11, inc_t rs_c, inc_t cs_c
+                         )
 {
 	bl2_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 }
 
-void bl2_ztrsm_l_opt_4x2(
-                          dcomplex* a11,
-                          dcomplex* b11,
-                          dcomplex* bd11,
-                          dcomplex* c11, inc_t rs_c, inc_t cs_c
-                        )
+void bl2_ztrsm_l_opt_d4x2(
+                           dcomplex* a11,
+                           dcomplex* b11,
+                           dcomplex* bd11,
+                           dcomplex* c11, inc_t rs_c, inc_t cs_c
+                         )
 {
 	bl2_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 }
