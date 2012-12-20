@@ -97,8 +97,8 @@ void PASTEMAC(ch,varname)( \
 	ctype    omega; \
 	double   max_m_n; \
 	uplo_t   uplox_eff; \
-	dim_t    n_iter_max, n_iter; \
-	dim_t    n_elem_max, n_elem; \
+	dim_t    n_iter; \
+	dim_t    n_elem, n_elem_max; \
 	inc_t    ldx, incx; \
 	dim_t    j, i; \
 	dim_t    ij0, n_shift; \

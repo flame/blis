@@ -115,8 +115,8 @@ void PASTEMAC2(chx,chy,varname)( \
 	ctype_y* y1; \
 	uplo_t   uplox_eff; \
 	conj_t   conjx; \
-	dim_t    n_iter_max, n_iter; \
-	dim_t    n_elem_max, n_elem; \
+	dim_t    n_iter; \
+	dim_t    n_elem, n_elem_max; \
 	inc_t    ldx, incx; \
 	inc_t    ldy, incy; \
 	dim_t    j, i; \
@@ -129,7 +129,7 @@ void PASTEMAC2(chx,chy,varname)( \
 	/* Set various loop parameters. */ \
 	bl2_set_dims_incs_uplo_2m( diagoffx, BLIS_NONUNIT_DIAG, transx, \
 	                           uplox, m, n, rs_x, cs_x, rs_y, cs_y, \
-	                           uplox_eff, n_elem_max, n_iter_max, incx, ldx, incy, ldy, \
+	                           uplox_eff, n_elem_max, n_iter, incx, ldx, incy, ldy, \
 	                           ij0, n_shift ); \
 \
 	if ( bl2_is_zeros( uplox_eff ) ) return; \

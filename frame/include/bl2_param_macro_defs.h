@@ -513,8 +513,8 @@
 // argument.
 
 #define bl2_set_dims_incs_uplo_1m( diagoffa, diaga, \
-                                   uploa,    m,      n,      rs_a, cs_a, \
-                                   uplo_eff, n_elem, n_iter, inca, lda, \
+                                   uploa,    m,          n,      rs_a, cs_a, \
+                                   uplo_eff, n_elem_max, n_iter, inca, lda, \
                                    ij0, n_shift ) \
 { \
 	/* If matrix A is entirely "unstored", that is, if either:
@@ -529,6 +529,7 @@
 	{ \
 		doff_t diagoffa_use = diagoffa; \
 		doff_t diagoff_eff; \
+		dim_t  n_iter_max; \
 \
 		if ( bl2_is_unit_diag( diaga ) ) \
 			bl2_shift_diag_offset_to_shrink_uplo( uploa, diagoffa_use ); \
@@ -599,8 +600,8 @@
 
 #define bl2_set_dims_incs_uplo_2m( \
           diagoffa, diaga, transa, \
-          uploa,    m,          n,          rs_a, cs_a, rs_b, cs_b, \
-          uplo_eff, n_elem_max, n_iter_max, inca, lda,  incb, ldb, \
+          uploa,    m,          n,      rs_a, cs_a, rs_b, cs_b, \
+          uplo_eff, n_elem_max, n_iter, inca, lda,  incb, ldb, \
           ij0, n_shift \
         ) \
 { \
@@ -616,6 +617,7 @@
 	{ \
 		doff_t diagoffa_use = diagoffa; \
 		doff_t diagoff_eff; \
+		dim_t  n_iter_max; \
 \
 		if ( bl2_is_unit_diag( diaga ) ) \
 			bl2_shift_diag_offset_to_shrink_uplo( uploa, diagoffa_use ); \
