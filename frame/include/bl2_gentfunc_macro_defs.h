@@ -57,6 +57,17 @@ GENTFUNC( scomplex, c, tfuncname, varname ) \
 GENTFUNC( dcomplex, z, tfuncname, varname )
 
 
+// -- Basic one-operand with real projection --
+
+
+#define INSERT_GENTFUNCR_BASIC( tfuncname, varname ) \
+\
+GENTFUNCR( float,    float,  s, s, tfuncname, varname ) \
+GENTFUNCR( double,   double, d, d, tfuncname, varname ) \
+GENTFUNCR( scomplex, float,  c, s, tfuncname, varname ) \
+GENTFUNCR( dcomplex, double, z, d, tfuncname, varname )
+
+
 // -- Basic one-operand macros --
 // -- (with two auxiliary arguments) --
 

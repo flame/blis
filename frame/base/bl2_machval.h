@@ -46,13 +46,13 @@ void bl2_machval( machval_t mval,
 //
 // Prototype BLAS-like interfaces.
 //
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
+#undef  GENTPROTR
+#define GENTPROTR( ctype_v, ctype_vr, chv, chvr, opname ) \
 \
-void PASTEMAC(ch,opname)( \
-                          machval_t mval, \
-                          void*     v \
-                        );
+void PASTEMAC(chv,opname)( \
+                           machval_t mval, \
+                           void*     v \
+                         );
 
-INSERT_GENTPROT_BASIC( machval )
+INSERT_GENTPROTR_BASIC( machval )
 

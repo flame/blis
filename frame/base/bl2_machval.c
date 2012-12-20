@@ -69,20 +69,20 @@ void bl2_machval( machval_t mval,
 //
 // Define BLAS-like interfaces.
 //
-#undef  GENTFUNC1R
-#define GENTFUNC1R( ctype, ctype_r, ch, chr, opname, varname ) \
+#undef  GENTFUNCR
+#define GENTFUNCR( ctype_v, ctype_vr, chv, chvr, opname, varname ) \
 \
-void PASTEMAC(ch,opname)( \
-                          machval_t mval, \
-                          void*     v     \
-                        ) \
+void PASTEMAC(chv,opname)( \
+                           machval_t mval, \
+                           void*     v     \
+                         ) \
 { \
-	static ctype_r pvals[ BLIS_NUM_MACH_PARAMS ]; \
+	static ctype_vr pvals[ BLIS_NUM_MACH_PARAMS ]; \
 \
-	static bool_t  first_time = TRUE; \
+	static bool_t   first_time = TRUE; \
 \
-	dim_t          val_i      = mval - BLIS_MACH_PARAM_FIRST; \
-	ctype*         v_cast     = v; \
+	dim_t           val_i      = mval - BLIS_MACH_PARAM_FIRST; \
+	ctype_v*        v_cast     = v; \
 \
 	/* If this is the first time through, call the underlying
 	   code to discover each machine parameter. */ \
@@ -99,7 +99,7 @@ void PASTEMAC(ch,opname)( \
 \
 			/*printf( "bl2_machval: querying %u %c\n", m, lapack_mval );*/ \
 \
-			pvals[i] = PASTEMAC(chr,varname)( &lapack_mval, 1 ); \
+			pvals[i] = PASTEMAC(chvr,varname)( &lapack_mval, 1 ); \
 \
 			/*printf( "bl2_machval: got back %34.29e\n", pvals[i] ); */ \
 		} \
@@ -112,12 +112,8 @@ void PASTEMAC(ch,opname)( \
 \
 	/* Copy the requested parameter value to the output buffer, which
 	   may involve a demotion from the complex to real domain. */ \
-	PASTEMAC2(chr,ch,copys)( pvals[ val_i ], \
-	                         *v_cast ); \
+	PASTEMAC2(chvr,chv,copys)( pvals[ val_i ], *v_cast ); \
 }
 
-GENTFUNC1R( float,    float,  s, s, machval, lamch )
-GENTFUNC1R( double,   double, d, d, machval, lamch )
-GENTFUNC1R( scomplex, float,  c, s, machval, lamch )
-GENTFUNC1R( dcomplex, double, z, d, machval, lamch )
+INSERT_GENTFUNCR_BASIC( machval, lamch )
 

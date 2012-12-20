@@ -56,6 +56,17 @@ GENTPROT( scomplex, c, funcname ) \
 GENTPROT( dcomplex, z, funcname )
 
 
+// -- Basic one-operand with real projection --
+
+
+#define INSERT_GENTPROTR_BASIC( tfuncname ) \
+\
+GENTPROTR( float,    float,  s, s, tfuncname ) \
+GENTPROTR( double,   double, d, d, tfuncname ) \
+GENTPROTR( scomplex, float,  c, s, tfuncname ) \
+GENTPROTR( dcomplex, double, z, d, tfuncname )
+
+
 
 
 // -- Macros for functions with two primary operands ---------------------------
