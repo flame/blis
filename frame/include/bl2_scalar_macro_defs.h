@@ -72,6 +72,8 @@
 #include "bl2_dots.h"
 #include "bl2_dotjs.h"
 
+#include "bl2_grabis.h"
+
 #include "bl2_inverts.h"
 
 #include "bl2_invscals.h"
@@ -119,7 +121,7 @@
 
 // -- Miscellaneous macros --
 
-// min, max
+// min, max, abs
 
 #define bl2_min( a, b ) ( (a) < (b) ? (a) : (b) )
 #define bl2_max( a, b ) ( (a) > (b) ? (a) : (b) )

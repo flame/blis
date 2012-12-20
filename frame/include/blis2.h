@@ -114,6 +114,7 @@ extern "C" {
 #include "bl2_copynzv.h"
 #include "bl2_dotv.h"
 #include "bl2_dotxv.h"
+#include "bl2_fnormv.h"
 #include "bl2_scal2v.h"
 #include "bl2_packv.h"
 #include "bl2_unpackv.h"
@@ -149,6 +150,7 @@ extern "C" {
 #include "bl2_axpym.h"
 #include "bl2_copym.h"
 #include "bl2_copynzm.h"
+#include "bl2_fnormm.h"
 #include "bl2_scal2m.h"
 #include "bl2_packm.h"
 #include "bl2_unpackm.h"
@@ -194,6 +196,7 @@ extern "C" {
 #include "bl2_randv.h"
 #include "bl2_randm.h"
 #include "bl2_sets.h"
+#include "bl2_sumsqv.h"
 
 
 // End extern "C" construct block.
