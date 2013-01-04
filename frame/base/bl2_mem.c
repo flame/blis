@@ -89,6 +89,15 @@ void bl2_mm_acquire_m( num_t  dt,
 	buf_size       = ( m * n ) * elem_size + BLIS_MAX_PREFETCH_BYTE_OFFSET;
 
 #if 0
+	printf( "libblis: Attempting to malloc block from static pool.\n" );
+	printf( "libblis: requested dimensions:     %lu x %lu\n", m, n );
+	printf( "libblis: requested element size:   %lu\n", elem_size );
+	printf( "libblis: max prefetch byte offset: %lu\n", ( siz_t )BLIS_MAX_PREFETCH_BYTE_OFFSET );
+	printf( "libblis: total requested size:     %lu\n", buf_size );
+	printf( "libblis: total pool size:          %lu\n", BLIS_NUM_ELEM_SMEM * sizeof(double) );
+#endif
+
+#if 0
 	mem->buf       = bl2_malloc( buf_size );
 #else
 	mem->buf       = bl2_malloc_s( buf_size );
