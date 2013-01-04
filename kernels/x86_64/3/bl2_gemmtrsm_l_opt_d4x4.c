@@ -512,7 +512,7 @@ void bl2_cgemmtrsm_l_opt_d4x4(
 	bl2_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 }
 
-void bl2_zgemmtrsm_l_opt_4x4(
+void bl2_zgemmtrsm_l_opt_d4x4(
                                dim_t     k,
                                dcomplex* a10,
                                dcomplex* a11,
