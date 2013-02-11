@@ -1,4 +1,106 @@
-commit be94fb84c0351602d7585269f29998e3bf83f899 (HEAD, origin/master, master)
+commit 768fcebaa8be0eb936a6e7a02cd8a19438c79d99 (HEAD, tag: 0.0.2, origin/master, master)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Feb 11 13:20:44 2013 -0600
+
+    Added unified test suite, and many fixes.
+    
+    Details:
+    - Added a highly configurable, unified test suite.
+    
+    - Removed DUPB configuration constant from bl2_kernel.h and macro-kernel
+      header files. Now, instead, DUPB is computed as (NDUP != 1) within each
+      macro-kernel. This fixes a bug in trmm/trsm whereby bp was indexed into
+      incorrectly when DUPB was set to FALSE but the NDUP was still non-unit.
+      By encoding both pieces of information into one constant in _kernel.h,
+      it seems somewhat less likely others will encounter this bug in the
+      future.
+    - Added level-2 cache blocksizes to _kernel.h for reference configuration,
+      and defined blocksizes in _cntl.c files to these default values.
+    
+    - Changed semantics of her2k and syr2k such that these operations no longer
+      expect the B matrix to already be conjugate-transposed (or just transposed
+      for syr2k). However, these semantics are preserved for the internal
+      mechanics of the implementations, including the internal back-end and all
+      blocked variants.
+    - Inserted checks for real-valued alpha and beta for herk/her2k and herk,
+      respectively.
+    
+    - Relaxed general object structure constraints in _basic_check() for gemv, ger.
+    - Changed her front-end to NOT copy-cast to real projection; instead, this is
+      replaced by selecting either the real part or both parts within the unblocked
+      algorithm implementation, depending on the value of conjh.
+    - Added conjh to all _check routines for her so that the code knows when to
+      verify that alpha has an imaginary component equal to zero (for her, but
+      not syr).
+    - Changed control tree for her to forgo packing.
+    
+    - Added unit diagonal support to fnormm.
+    - Redefined real versions of abval2s macros in terms of fabs(), fabsf().
+    - Redefined complex versions of sqrt2s macros using the actual "complex square
+      root" formula.
+    - Created new level-0 object-based routines, suffixed with "sc" (for "scalar").
+    - Defined new level-1v, -1d, and -1m versions of add and sub operations
+      (two-operand add and subtract).
+    - Added new scalar macros:
+      - getris: acquire real and imaginary components.
+      - setris: set real and imaginary components.
+      - addjs: addition with conjugated x.
+      - subjs: subtraction with conjugated x.
+    - Defined new utility operations:
+      - absumv: element-wise sum of absolute values for vector elements.
+      - absumm: element-wise sum of absolute values for matrix elements.
+      - mkherm: convert existing matrix to Hermitian.
+      - mksymm: convert existing matrix to symmetric.
+      - mktrim: convert existing matrix to triangular.
+    
+    - Added various error checking routines.
+    - Added bl2_clock_min_diff(), which is used to more cleanly measure the
+      wall clock time of a code block.
+    - Added general stride support to bl2_obj_alloc_buffer().
+    - Added bl2_obj_init_scalar().
+    - Updated parameter mapping in bl2_param_map.c.
+    - Added support for queriable version string.
+    
+    - Fixed a bug in the her2k macro-kernels (which currently are simply
+      implemented in terms of two invocations of herk) whereby beta was being
+      applied to both the first and second rank-k updates, rather than only
+      the first.
+    - Fixed a bug in trmm/trsm whereby transpose and right side cases were not
+      properly implemented due to erroneous assumptions regarding aliasing and
+      root objects.
+    - Fixed a bug in the upper triangular trsm macro-kernel in which the wrong
+      MR x NR block of B was being updated.
+    - Fixed a bug in the inverts macro in the double real case whereby the
+      value was typecast to float before inversion. This affected non-unit cases
+      of dtrsm.
+    - Fixed a bug in the reference kernels for gemmtrsm whereby the minus one
+      constant was being applied incorrectly.
+    - Fixed a bug in the overall treatment of non-unit alpha for trsm. The code
+      now mimics the rank-k strategy of gemm, whereby alpah is applied during
+      the first iteration of variant 3, with BLIS_ONE passed in instead for
+      subsequent iterations. This also required passing alpha into the macro-
+      kernels as well as the fused gemmtrsm micro-kernels.
+    - Fixed a bug in trsm_u_blk_var1 whereby the gemm macro-kernel was being
+      called for blocks strictly above the diagonal. While this sounds good in
+      theory, this cannot be done because gemm_ker_var2 expects row panels of
+      A to be packed from top to bottom, while for trsm_u, A is actually packed
+      from bottom to top due to the reverse (BR->TL) nature of the algorithm.
+    - Fixed a bug in packm_cxk() whereby panel packings with unit panel
+      dimensions were mishandled due to incorrect arguments to the copyv kernel.
+      Also changed the copyv kernel invocation to scal2v so that these edge
+      cases are properly handled when scaling is requested.
+    - Fixed a bug in packv_int() whereby an uninitialized object is passed in
+      instead of the source object.
+    - Fixed a bug whereby level-2 code could allocate memory dynamically via
+      bl2_malloc() and then attempt to free it via bl2_mm_release(). Also fixed
+      a potential future bug whereby a mem_t object that is actually no longer
+      "allocated" from the static pool is mistaken for being allocated due to
+      failure to NULLify the buffer when the block was most recently released.
+    - Fixed a bug in bl2_acquire_mpart_*() whreby the uplo field was mistakenly
+      toggled when the requested subpartition needed to be "reflected" due to it
+      residing in an unstored region.
+
+commit be94fb84c0351602d7585269f29998e3bf83f899
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Fri Jan 4 10:55:21 2013 -0600
 
