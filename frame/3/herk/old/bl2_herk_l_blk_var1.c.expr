@@ -3,7 +3,7 @@
    An object-based infrastructure for developing high-performance
    dense linear algebra libraries.
 
-   Copyright (C) 2012, The University of Texas
+   Copyright (C) 2013, The University of Texas
 
    libblis is free software; you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as
