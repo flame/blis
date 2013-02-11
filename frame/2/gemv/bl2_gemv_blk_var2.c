@@ -89,8 +89,6 @@ void bl2_gemv_blk_var2( obj_t*  alpha,
 		               &x1_pack,
 		               cntl_sub_packv_x( cntl ) );
 
-//printf( "blk_var2: entering gemv_int: m x n: %u x %u\n", bl2_obj_length( a1 ),
-//                                               bl2_obj_width( a1 )   );
 		// y = y + alpha * A1 * x1;
 		bl2_gemv_int( BLIS_NO_TRANSPOSE,
 		              BLIS_NO_CONJUGATE,

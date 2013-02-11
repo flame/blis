@@ -44,13 +44,11 @@
 
 #define bl2_ssabval2s( x, a ) \
 { \
-	bl2_ssabsq2s( x, a ); \
-	bl2_sssqrt2s( a, a ); \
+	a = ( float  )fabsf( ( float  )x ); \
 }
 #define bl2_dsabval2s( x, a ) \
 { \
-	bl2_dsabsq2s( x, a ); \
-	bl2_sssqrt2s( a, a ); \
+	a = ( float  )fabs( ( double )x ); \
 }
 #define bl2_csabval2s( x, a ) \
 { \
@@ -66,13 +64,11 @@
 
 #define bl2_sdabval2s( x, a ) \
 { \
-	bl2_sdabsq2s( x, a ); \
-	bl2_ddsqrt2s( a, a ); \
+	a = ( double )fabsf( ( float  )x ); \
 }
 #define bl2_ddabval2s( x, a ) \
 { \
-	bl2_ddabsq2s( x, a ); \
-	bl2_ddsqrt2s( a, a ); \
+	a = ( double )fabs( ( double )x ); \
 }
 #define bl2_cdabval2s( x, a ) \
 { \
@@ -88,13 +84,13 @@
 
 #define bl2_scabval2s( x, a ) \
 { \
-	bl2_scabsq2s( x, a ); \
-	bl2_ccsqrt2s( a, a ); \
+	(a).real = ( float  )fabsf( ( float  )x ); \
+	(a).imag = 0.0F; \
 }
 #define bl2_dcabval2s( x, a ) \
 { \
-	bl2_dcabsq2s( x, a ); \
-	bl2_ccsqrt2s( a, a ); \
+	(a).real = ( float  )fabs( ( double )x ); \
+	(a).imag = 0.0F; \
 }
 #define bl2_ccabval2s( x, a ) \
 { \
@@ -110,13 +106,13 @@
 
 #define bl2_szabval2s( x, a ) \
 { \
-	bl2_szabsq2s( x, a ); \
-	bl2_zzsqrt2s( a, a ); \
+	(a).real = ( double )fabsf( ( float  )x ); \
+	(a).imag = 0.0F; \
 }
 #define bl2_dzabval2s( x, a ) \
 { \
-	bl2_dzabsq2s( x, a ); \
-	bl2_zzsqrt2s( a, a ); \
+	(a).real = ( double )fabs( ( double )x ); \
+	(a).imag = 0.0F; \
 }
 #define bl2_czabval2s( x, a ) \
 { \

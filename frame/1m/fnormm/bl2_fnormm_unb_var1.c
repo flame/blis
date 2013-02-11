@@ -113,9 +113,13 @@ void PASTEMAC(chx,varname)( \
 { \
 	ctype_x*  x_cast     = x; \
 	ctype_xr* norm_cast  = norm; \
-	ctype_xr* zero       = PASTEMAC(chxr,0); \
-	ctype_xr* one        = PASTEMAC(chxr,1); \
+	ctype_x*  one        = PASTEMAC(chx,1); \
+	ctype_xr* one_r      = PASTEMAC(chxr,1); \
+	ctype_xr* zero_r     = PASTEMAC(chxr,0); \
+	ctype_x*  x0; \
 	ctype_x*  x1; \
+	ctype_x*  x2; \
+	ctype_x*  chi1; \
 	ctype_xr  scale; \
 	ctype_xr  sumsq; \
 	ctype_xr  sqrt_sumsq; \
@@ -126,9 +130,6 @@ void PASTEMAC(chx,varname)( \
 	dim_t     j, i; \
 	dim_t     ij0, n_shift; \
 \
-	if ( bl2_is_unit_diag( diagx ) ) \
-		bl2_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \
-\
 	/* Return a norm of zero if either dimension is zero. */ \
 	if ( bl2_zero_dim2( m, n ) ) \
 	{ \
@@ -136,22 +137,23 @@ void PASTEMAC(chx,varname)( \
 		return; \
 	} \
 \
-	/* Set various loop parameters. */ \
-	bl2_set_dims_incs_uplo_1m( diagoffx, diagx, \
+	/* Set various loop parameters. Here, we pretend that diagx is equal to
+	   BLIS_NONUNIT_DIAG because we handle the unit diagonal case manually. */ \
+	bl2_set_dims_incs_uplo_1m( diagoffx, BLIS_NONUNIT_DIAG, \
 	                           uplox, m, n, rs_x, cs_x, \
 	                           uplox_eff, n_elem_max, n_iter, incx, ldx, \
 	                           ij0, n_shift ); \
 \
 	/* Check the effective uplo; if it's zeros, then our norm is zero. */ \
-	if ( bl2_is_zeros( uplox_eff ) ) return; \
+	if ( bl2_is_zeros( uplox_eff ) ) \
 	{ \
 		PASTEMAC(chxr,set0)( *norm_cast ); \
 		return; \
 	} \
 \
 	/* Initialize scale and sumsq to begin the summation. */ \
-	PASTEMAC2(chxr,chxr,copys)( *zero, scale ); \
-	PASTEMAC2(chxr,chxr,copys)( *one,  sumsq ); \
+	PASTEMAC2(chxr,chxr,copys)( *zero_r, scale ); \
+	PASTEMAC2(chxr,chxr,copys)( *one_r,  sumsq ); \
 \
 	/* Handle dense and upper/lower storage cases separately. */ \
 	if ( bl2_is_dense( uplox_eff ) ) \
@@ -177,9 +179,20 @@ void PASTEMAC(chx,varname)( \
 				n_elem = bl2_min( n_shift + j + 1, n_elem_max ); \
 \
 				x1     = x_cast + (ij0+j  )*ldx + (0  )*incx; \
+				x0     = x1; \
+				chi1   = one; \
+\
+				if ( bl2_is_unit_diag( diagx ) ) \
+				{ \
+					PASTEMAC(chx,kername)( 1, \
+					                       chi1, incx, \
+					                       &scale, \
+					                       &sumsq ); \
+					--n_elem; \
+				} \
 \
 				PASTEMAC(chx,kername)( n_elem, \
-				                       x1, incx, \
+				                       x0, incx, \
 				                       &scale, \
 				                       &sumsq ); \
 			} \
@@ -192,9 +205,20 @@ void PASTEMAC(chx,varname)( \
 				n_elem = n_elem_max - i; \
 \
 				x1     = x_cast + (j  )*ldx + (ij0+i  )*incx; \
+				x2     = x1 + incx; \
+				chi1   = one; \
+\
+				if ( bl2_is_unit_diag( diagx ) ) \
+				{ \
+					PASTEMAC(chx,kername)( 1, \
+					                       chi1, incx, \
+					                       &scale, \
+					                       &sumsq ); \
+					--n_elem; \
+				} \
 \
 				PASTEMAC(chx,kername)( n_elem, \
-				                       x1, incx, \
+				                       x2, incx, \
 				                       &scale, \
 				                       &sumsq ); \
 			} \

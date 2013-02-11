@@ -133,7 +133,7 @@ void PASTEMAC2(chb,chx,varname)( \
 	if ( PASTEMAC(chb,eq1)( *beta_cast ) ) return; \
 \
 	/* Set various loop parameters. */ \
-	bl2_set_dims_incs_uplo_1m( diagoffx, diagx, \
+	bl2_set_dims_incs_uplo_1m( diagoffx, BLIS_NONUNIT_DIAG, \
 	                           uplox, m, n, rs_x, cs_x, \
 	                           uplox_eff, n_elem_max, n_iter, incx, ldx, \
 	                           ij0, n_shift ); \

@@ -136,8 +136,8 @@ int main( int argc, char** argv )
 		bl2_randm( &c );
 
 
-		bl2_sets(  (2.0/1.0), &alpha );
-		bl2_sets( -(1.0/1.0), &beta );
+		bl2_setsc(  (2.0/1.0), 0.0, &alpha );
+		bl2_setsc( -(1.0/1.0), 0.0, &beta );
 
 		mr = bl2_blksz_obj_create( 2, 4, 2, 2 );
 		kr = bl2_blksz_obj_create( 1, 2, 1, 1 );

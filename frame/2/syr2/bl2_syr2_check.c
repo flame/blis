@@ -40,7 +40,7 @@ void bl2_syr2_basic_check( obj_t*   alpha,
                            obj_t*   c )
 {
 	// The basic properties of syr2 are identical to that of her2.
-	bl2_her2_basic_check( alpha, x, y, c );
+	bl2_her2_basic_check( BLIS_NO_CONJUGATE, alpha, x, y, c );
 }
 
 void bl2_syr2_check( obj_t*   alpha,

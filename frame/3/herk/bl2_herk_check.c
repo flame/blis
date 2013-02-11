@@ -87,12 +87,20 @@ void bl2_herk_check( obj_t*  alpha,
 	err_t e_val;
 	obj_t ah;
 
-	// Alias A to A^T so we can perform dimension checks.
-	bl2_obj_alias_with_trans( BLIS_TRANSPOSE, *a, ah );
+	// Alias A to A^H so we can perform dimension checks.
+	bl2_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, *a, ah );
 
 	// Check basic properties of the operation.
 
 	bl2_herk_basic_check( alpha, a, &ah, beta, c );
+
+	// Check for real-valued alpha and beta.
+
+	e_val = bl2_check_real_valued_object( alpha );
+	bl2_check_error_code( e_val );
+
+	e_val = bl2_check_real_valued_object( beta );
+	bl2_check_error_code( e_val );
 
 	// Check matrix squareness.
 

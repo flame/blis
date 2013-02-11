@@ -53,6 +53,13 @@ err_t bl2_check_nonconstant_datatype( num_t dt );
 err_t bl2_check_nonconstant_object( obj_t* a );
 err_t bl2_check_floating_datatype( num_t dt );
 err_t bl2_check_floating_object( obj_t* a );
+err_t bl2_check_real_datatype( num_t dt );
+err_t bl2_check_real_object( obj_t* a );
+err_t bl2_check_consistent_datatypes( num_t dt_a, num_t dt_b );
+err_t bl2_check_consistent_object_datatypes( obj_t* a, obj_t* b );
+err_t bl2_check_datatype_real_proj_of( num_t dt_c, num_t dt_r );
+err_t bl2_check_object_real_proj_of( obj_t* c, obj_t* r );
+err_t bl2_check_real_valued_object( obj_t* a );
 
 err_t bl2_check_conformal_dims( obj_t* a, obj_t* b );
 err_t bl2_check_level3_dims( obj_t* a, obj_t* b, obj_t* c );
@@ -63,6 +70,7 @@ err_t bl2_check_square_object( obj_t* a );
 err_t bl2_check_object_length_equals( obj_t* a, dim_t m );
 err_t bl2_check_object_width_equals( obj_t* a, dim_t n );
 err_t bl2_check_vector_dim_equals( obj_t* a, dim_t n );
+err_t bl2_check_object_diag_offset_equals( obj_t* a, doff_t offset );
 
 err_t bl2_check_matrix_strides( dim_t m, dim_t n, dim_t rs, dim_t cs );
 
@@ -70,6 +78,8 @@ err_t bl2_check_general_object( obj_t* a );
 err_t bl2_check_hermitian_object( obj_t* a );
 err_t bl2_check_symmetric_object( obj_t* a );
 err_t bl2_check_triangular_object( obj_t* a );
+
+err_t bl2_check_upper_or_lower_object( obj_t* a );
 
 err_t bl2_check_valid_3x1_subpart( subpart_t part );
 err_t bl2_check_valid_1x3_subpart( subpart_t part );

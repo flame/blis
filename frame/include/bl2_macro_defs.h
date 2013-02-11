@@ -49,6 +49,8 @@
 
 // -- Concatenation macros --
 
+#define BLIS_FUNC_PREFIX_STR      "bl2"
+
 #define PASTEMAC0(op)             bl2_ ## op
 
 #define PASTEMAC(ch,op)           bl2_ ## ch  ## op

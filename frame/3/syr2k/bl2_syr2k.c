@@ -35,33 +35,33 @@
 #include "blis2.h"
 
 extern her2k_t* her2k_cntl;
+extern herk_t*  herk_cntl;
 
 //
 // Define object-based interface.
 //
 void bl2_syr2k( obj_t*  alpha,
                 obj_t*  a,
-                obj_t*  bt,
+                obj_t*  b,
                 obj_t*  beta,
                 obj_t*  c )
 {
 	her2k_t* cntl;
 	obj_t    alpha_local;
-	obj_t    alpha_conj_local;
 	obj_t    beta_local;
-	obj_t    b;
 	obj_t    at;
+	obj_t    bt;
 	num_t    dt_targ_a;
-	num_t    dt_targ_bt;
+	num_t    dt_targ_b;
 	num_t    dt_targ_c;
 	num_t    dt_exec;
 	num_t    dt_alpha;
 	num_t    dt_beta;
-	bool_t   pack_c = FALSE;
+	//bool_t   pack_c = FALSE;
 
 	// Check parameters.
 	if ( bl2_error_checking_is_enabled() )
-		bl2_syr2k_check( alpha, a, bt, beta, c );
+		bl2_syr2k_check( alpha, a, b, beta, c );
 
 	// If alpha is zero, scale by beta and return.
 	if ( bl2_obj_scalar_equals( alpha, &BLIS_ZERO ) )
@@ -69,6 +69,10 @@ void bl2_syr2k( obj_t*  alpha,
 		bl2_scalm( beta, c );
 		return;
 	}
+
+	// Create objects to track A^T and B^T (for the second rank-k update).
+	bl2_obj_alias_with_trans( BLIS_TRANSPOSE, *a, at );
+	bl2_obj_alias_with_trans( BLIS_TRANSPOSE, *b, bt );
 
 	// Determine the target datatype of each matrix object.
 	//bl2_syr2k_get_target_datatypes( a,
@@ -79,26 +83,22 @@ void bl2_syr2k( obj_t*  alpha,
 	//                                &dt_targ_c,
 	//                                &pack_c );
 
-	dt_targ_a  = bl2_obj_datatype( *a  );
-	dt_targ_bt = bl2_obj_datatype( *bt );
-	dt_targ_c  = bl2_obj_datatype( *c  );
+	dt_targ_a = bl2_obj_datatype( *a );
+	dt_targ_b = bl2_obj_datatype( *b );
+	dt_targ_c = bl2_obj_datatype( *c );
 
 	// Set the target datatypes for each matrix object.
-	bl2_obj_set_target_datatype( dt_targ_a,  *a  );
-	bl2_obj_set_target_datatype( dt_targ_bt, *bt );
-	bl2_obj_set_target_datatype( dt_targ_c,  *c  );
+	bl2_obj_set_target_datatype( dt_targ_a, *a );
+	bl2_obj_set_target_datatype( dt_targ_b, *b );
+	bl2_obj_set_target_datatype( dt_targ_c, *c );
 
 	// Determine the execution datatype.
 	dt_exec = dt_targ_a;
 
 	// Embed the execution datatype in all matrix operands.
-	bl2_obj_set_execution_datatype( dt_exec, *a  );
-	bl2_obj_set_execution_datatype( dt_exec, *bt );
-	bl2_obj_set_execution_datatype( dt_exec, *c  );
-
-	// Create objects to track B and A^T (for the second rank-k update).
-	bl2_obj_alias_with_trans( BLIS_TRANSPOSE, *bt, b );
-	bl2_obj_alias_with_trans( BLIS_TRANSPOSE, *a, at );
+	bl2_obj_set_execution_datatype( dt_exec, *a );
+	bl2_obj_set_execution_datatype( dt_exec, *b );
+	bl2_obj_set_execution_datatype( dt_exec, *c );
 
 
 	// Create an object to hold a copy-cast of alpha. Notice that we use
@@ -111,13 +111,6 @@ void bl2_syr2k( obj_t*  alpha,
 	                             BLIS_NO_CONJUGATE,
 	                             alpha,
 	                             &alpha_local );
-
-	// Create an object to hold a copy-cast of conj(alpha).
-	dt_alpha = dt_targ_bt;
-	bl2_obj_init_scalar_copy_of( dt_alpha,
-	                             BLIS_CONJUGATE,
-	                             alpha,
-	                             &alpha_conj_local );
 
 	// Create an object to hold a copy-cast of beta. Notice that we use
 	// the datatype of c. Here's why: If c is real and beta is complex,
@@ -134,7 +127,7 @@ void bl2_syr2k( obj_t*  alpha,
 	// to pack c.
 	//if ( pack_c ) syr2k_cntl = her2k_cntl_packabc;
 	//else          syr2k_cntl = her2k_cntl_packab;
-	if ( pack_c ) bl2_abort();
+	//if ( pack_c ) bl2_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 
 	// Choose the control tree. We can just use her2k since the algorithm
 	// is nearly identical to that of syr2k.
@@ -143,13 +136,27 @@ void bl2_syr2k( obj_t*  alpha,
 	// Invoke the internal back-end.
 	bl2_her2k_int( &alpha_local,
 	               a,
-	               bt,
-	               &alpha_conj_local,
-	               &b,
+	               &bt,
+	               &alpha_local,
+	               b,
 	               &at,
 	               &beta_local,
 	               c,
 	               cntl );
+/*
+	bl2_herk_int( &alpha_local,
+	              a,
+	              &bt,
+	              &beta_local,
+	              c,
+	              herk_cntl );
+	bl2_herk_int( &alpha_local,
+	              b,
+	              &at,
+	              &BLIS_ONE,
+	              c,
+	              herk_cntl );
+*/
 }
 
 //
@@ -171,34 +178,34 @@ void PASTEMAC(ch,opname)( \
                           ctype*  c, inc_t rs_c, inc_t cs_c  \
                         ) \
 { \
-    const num_t dt = PASTEMAC(ch,type); \
+	const num_t dt = PASTEMAC(ch,type); \
 \
-    obj_t       alphao, ao, bo, betao, co; \
+	obj_t       alphao, ao, bo, betao, co; \
 \
-    dim_t       m_a, n_a; \
-    dim_t       m_b, n_b; \
+	dim_t       m_a, n_a; \
+	dim_t       m_b, n_b; \
 \
-    bl2_set_dims_with_trans( transa, m, k, m_a, n_a ); \
-    bl2_set_dims_with_trans( transb, m, k, m_b, n_b ); \
+	bl2_set_dims_with_trans( transa, m, k, m_a, n_a ); \
+	bl2_set_dims_with_trans( transb, m, k, m_b, n_b ); \
 \
-    bl2_obj_create_scalar_with_attached_buffer( dt, alpha, &alphao ); \
-    bl2_obj_create_scalar_with_attached_buffer( dt, beta,  &betao  ); \
+	bl2_obj_create_scalar_with_attached_buffer( dt, alpha, &alphao ); \
+	bl2_obj_create_scalar_with_attached_buffer( dt, beta,  &betao  ); \
 \
-    bl2_obj_create_with_attached_buffer( dt, m_a, n_a, a, rs_a, cs_a, &ao ); \
-    bl2_obj_create_with_attached_buffer( dt, m_b, n_b, b, rs_b, cs_b, &bo ); \
-    bl2_obj_create_with_attached_buffer( dt, m,   m,   c, rs_c, cs_c, &co ); \
+	bl2_obj_create_with_attached_buffer( dt, m_a, n_a, a, rs_a, cs_a, &ao ); \
+	bl2_obj_create_with_attached_buffer( dt, m_b, n_b, b, rs_b, cs_b, &bo ); \
+	bl2_obj_create_with_attached_buffer( dt, m,   m,   c, rs_c, cs_c, &co ); \
 \
-    bl2_obj_set_uplo( uploc, co ); \
-    bl2_obj_set_conjtrans( transa, ao ); \
-    bl2_obj_set_conjtrans( transb, bo ); \
+	bl2_obj_set_uplo( uploc, co ); \
+	bl2_obj_set_conjtrans( transa, ao ); \
+	bl2_obj_set_conjtrans( transb, bo ); \
 \
-    bl2_obj_set_struc( BLIS_SYMMETRIC, co ); \
+	bl2_obj_set_struc( BLIS_SYMMETRIC, co ); \
 \
-    PASTEMAC0(opname)( &alphao, \
-                       &ao, \
-                       &bo, \
-                       &betao, \
-                       &co ); \
+	PASTEMAC0(opname)( &alphao, \
+	                   &ao, \
+	                   &bo, \
+	                   &betao, \
+	                   &co ); \
 }
 
 INSERT_GENTFUNC_BASIC( syr2k, syr2k )

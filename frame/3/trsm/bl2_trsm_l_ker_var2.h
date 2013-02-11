@@ -41,25 +41,21 @@
 // when initializing its control tree node.
 //
 
-#define bl2_strsm_l_ker_var2_dupb          BLIS_DEFAULT_DUPLICATE_B
 #define bl2_strsm_l_ker_var2_ndup          BLIS_DEFAULT_NUM_DUPL_S
 #define bl2_strsm_l_ker_var2_kc            BLIS_DEFAULT_KC_S
 #define bl2_strsm_l_ker_var2_mr            BLIS_DEFAULT_MR_S
 #define bl2_strsm_l_ker_var2_nr            BLIS_DEFAULT_NR_S
 
-#define bl2_dtrsm_l_ker_var2_dupb          BLIS_DEFAULT_DUPLICATE_B
 #define bl2_dtrsm_l_ker_var2_ndup          BLIS_DEFAULT_NUM_DUPL_D
 #define bl2_dtrsm_l_ker_var2_kc            BLIS_DEFAULT_KC_D
 #define bl2_dtrsm_l_ker_var2_mr            BLIS_DEFAULT_MR_D
 #define bl2_dtrsm_l_ker_var2_nr            BLIS_DEFAULT_NR_D
 
-#define bl2_ctrsm_l_ker_var2_dupb          BLIS_DEFAULT_DUPLICATE_B
 #define bl2_ctrsm_l_ker_var2_ndup          BLIS_DEFAULT_NUM_DUPL_C
 #define bl2_ctrsm_l_ker_var2_kc            BLIS_DEFAULT_KC_C
 #define bl2_ctrsm_l_ker_var2_mr            BLIS_DEFAULT_MR_C
 #define bl2_ctrsm_l_ker_var2_nr            BLIS_DEFAULT_NR_C
 
-#define bl2_ztrsm_l_ker_var2_dupb          BLIS_DEFAULT_DUPLICATE_B
 #define bl2_ztrsm_l_ker_var2_ndup          BLIS_DEFAULT_NUM_DUPL_Z
 #define bl2_ztrsm_l_ker_var2_kc            BLIS_DEFAULT_KC_Z
 #define bl2_ztrsm_l_ker_var2_mr            BLIS_DEFAULT_MR_Z
@@ -88,6 +84,7 @@ void PASTEMAC(ch,varname)( \
                            dim_t   m, \
                            dim_t   n, \
                            dim_t   k, \
+                           void*   alpha, \
                            void*   a, inc_t rs_a, inc_t cs_a, inc_t ps_a, \
                            void*   b, inc_t rs_b, inc_t cs_b, inc_t ps_b, \
                            void*   c, inc_t rs_c, inc_t cs_c \

@@ -105,20 +105,25 @@ void bl2_her2k_basic_check( obj_t*   alpha,
 
 void bl2_her2k_check( obj_t*   alpha,
                       obj_t*   a,
-                      obj_t*   bh,
+                      obj_t*   b,
                       obj_t*   beta,
                       obj_t*   c )
 {
 	err_t e_val;
-	obj_t ah, b;
+	obj_t ah, bh;
 
-	// Alias A and B to A^T and B^T so we can perform dimension checks.
-	bl2_obj_alias_with_trans( BLIS_TRANSPOSE, *a, ah );
-	bl2_obj_alias_with_trans( BLIS_TRANSPOSE, *bh, b );
+	// Alias A and B to A^H and B^H so we can perform dimension checks.
+	bl2_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, *a, ah );
+	bl2_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, *b, bh );
 
 	// Check basic properties of the operation.
 
-	bl2_her2k_basic_check( alpha, a, bh, alpha, &b, &ah, beta, c );
+	bl2_her2k_basic_check( alpha, a, &bh, alpha, b, &ah, beta, c );
+
+	// Check for real-valued beta.
+
+	e_val = bl2_check_real_valued_object( beta );
+	bl2_check_error_code( e_val );
 
 	// Check matrix squareness.
 

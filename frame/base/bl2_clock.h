@@ -33,4 +33,5 @@
 */
 
 double bl2_clock( void );
+double bl2_clock_min_diff( double time_min, double time_start );
 

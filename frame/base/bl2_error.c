@@ -116,6 +116,14 @@ void bl2_error_msgs_init( void )
 	         "Expected non-integer datatype value." );
 	sprintf( bl2_error_string_for_code(BLIS_EXPECTED_NONCONSTANT_DATATYPE),
 	         "Expected non-constant datatype value." );
+	sprintf( bl2_error_string_for_code(BLIS_EXPECTED_REAL_DATATYPE),
+	         "Expected real datatype value." );
+	sprintf( bl2_error_string_for_code(BLIS_INCONSISTENT_DATATYPES),
+	         "Expected consistent datatypes (equal, or one being constant)." );
+	sprintf( bl2_error_string_for_code(BLIS_EXPECTED_REAL_PROJ_OF),
+	         "Expected second datatype to be real projection of first." );
+	sprintf( bl2_error_string_for_code(BLIS_EXPECTED_REAL_VALUED_OBJECT),
+	         "Expected real-valued object (ie: if complex, imaginary component equals zero)." );
 
 	sprintf( bl2_error_string_for_code(BLIS_NONCONFORMAL_DIMENSIONS),
 	         "Encountered non-conformal dimensions between objects." );
@@ -133,6 +141,8 @@ void bl2_error_msgs_init( void )
 	         "Unexpected object width." );
 	sprintf( bl2_error_string_for_code(BLIS_UNEXPECTED_VECTOR_DIM),
 	         "Unexpected vector dimension." );
+	sprintf( bl2_error_string_for_code(BLIS_UNEXPECTED_DIAG_OFFSET),
+	         "Unexpected object diagonal offset." );
 
 	sprintf( bl2_error_string_for_code(BLIS_INVALID_ROW_STRIDE),
 	         "Encountered invalid row stride relative to n dimension." );
@@ -149,6 +159,9 @@ void bl2_error_msgs_init( void )
 	         "Expected symmetric object." );
 	sprintf( bl2_error_string_for_code(BLIS_EXPECTED_TRIANGULAR_OBJECT),
 	         "Expected triangular object." );
+
+	sprintf( bl2_error_string_for_code(BLIS_EXPECTED_UPPER_OR_LOWER_OBJECT),
+	         "Expected upper or lower triangular object." );
 
 	sprintf( bl2_error_string_for_code(BLIS_INVALID_3x1_SUBPART),
 	         "Encountered invalid 3x1 (vertical) subpartition label." );

@@ -41,6 +41,7 @@ typedef void (*FUNCPTR_T)(
                            dim_t   m,
                            dim_t   n,
                            dim_t   k,
+                           void*   alpha,
                            void*   a, inc_t rs_a, inc_t cs_a, inc_t ps_a,
                            void*   b, inc_t rs_b, inc_t cs_b, inc_t ps_b,
                            void*   c, inc_t rs_c, inc_t cs_c
@@ -78,6 +79,9 @@ void bl2_trsm_u_ker_var2( obj_t*  alpha,
 	inc_t     rs_c      = bl2_obj_row_stride( *c );
 	inc_t     cs_c      = bl2_obj_col_stride( *c );
 
+	num_t     dt_alpha;
+	void*     buf_alpha;
+
 	FUNCPTR_T f;
 
 /*
@@ -98,6 +102,11 @@ void bl2_trsm_u_ker_var2( obj_t*  alpha,
 	}
 */
 
+	// If alpha is a scalar constant, use dt_exec to extract the address of the
+	// corresponding constant value; otherwise, use the datatype encoded
+	// within the alpha object and extract the buffer at the alpha offset.
+	bl2_set_scalar_dt_buffer( alpha, dt_exec, dt_alpha, buf_alpha );
+
 	// Index into the type combination array to extract the correct
 	// function pointer.
 	f = ftypes[dt_exec];
@@ -107,6 +116,7 @@ void bl2_trsm_u_ker_var2( obj_t*  alpha,
 	   m,
 	   n,
 	   k,
+	   buf_alpha,
 	   buf_a, rs_a, cs_a, ps_a,
 	   buf_b, rs_b, cs_b, ps_b,
 	   buf_c, rs_c, cs_c );
@@ -121,6 +131,7 @@ void PASTEMAC(ch,varname)( \
                            dim_t   m, \
                            dim_t   n, \
                            dim_t   k, \
+                           void*   alpha, \
                            void*   a, inc_t rs_a, inc_t cs_a, inc_t ps_a, \
                            void*   b, inc_t rs_b, inc_t cs_b, inc_t ps_b, \
                            void*   c, inc_t rs_c, inc_t cs_c \
@@ -135,21 +146,21 @@ void PASTEMAC(ch,varname)( \
 	/* Temporary C buffer for edge cases. */ \
 	ctype           ct[ PASTEMAC2(ch,varname,_mr) * \
 	                    PASTEMAC2(ch,varname,_nr) ]; \
-	const inc_t     rs_ct = 1; \
-	const inc_t     cs_ct = PASTEMAC2(ch,varname,_mr); \
+	const inc_t     rs_ct      = 1; \
+	const inc_t     cs_ct      = PASTEMAC2(ch,varname,_mr); \
 \
 	/* Alias constants to shorter names. */ \
-	const dim_t     MR        = PASTEMAC2(ch,varname,_mr); \
-	const dim_t     NR        = PASTEMAC2(ch,varname,_nr); \
-	const bool_t    DUPB      = PASTEMAC2(ch,varname,_dupb); \
-	const dim_t     NDUP      = PASTEMAC2(ch,varname,_ndup); \
+	const dim_t     MR         = PASTEMAC2(ch,varname,_mr); \
+	const dim_t     NR         = PASTEMAC2(ch,varname,_nr); \
+	const dim_t     NDUP       = PASTEMAC2(ch,varname,_ndup); \
+	const bool_t    DUPB       = NDUP != 1; \
 \
-	ctype* restrict one       = PASTEMAC(ch,1); \
-	ctype* restrict zero      = PASTEMAC(ch,0); \
-	ctype* restrict minus_one = PASTEMAC(ch,m1); \
-	ctype* restrict a_cast    = a; \
-	ctype* restrict b_cast    = b; \
-	ctype* restrict c_cast    = c; \
+	ctype* restrict zero       = PASTEMAC(ch,0); \
+	ctype* restrict minus_one  = PASTEMAC(ch,m1); \
+	ctype* restrict a_cast     = a; \
+	ctype* restrict b_cast     = b; \
+	ctype* restrict c_cast     = c; \
+	ctype* restrict alpha_cast = alpha; \
 	ctype* restrict a1; \
 	ctype* restrict b1; \
 	ctype* restrict c1; \
@@ -172,7 +183,7 @@ void PASTEMAC(ch,varname)( \
 	dim_t           off_a1112, off_b11; \
 	dim_t           i, j, ib; \
 	dim_t           rstep_a; \
-	dim_t           rstep_b, cstep_b; \
+	dim_t           cstep_b; \
 	dim_t           rstep_c, cstep_c; \
 \
 	/*
@@ -241,7 +252,6 @@ void PASTEMAC(ch,varname)( \
 	/* Determine some increments used to step through A, B, and C. */ \
 	rstep_a = k * MR; \
 \
-	rstep_b = NR * MR; \
 	cstep_b = ps_b; \
 \
 	rstep_c = rs_c * MR; \
@@ -263,13 +273,12 @@ void PASTEMAC(ch,varname)( \
 	{ \
 		a1  = a_cast; \
 		c11 = c1 + (m_iter-1)*rstep_c; \
-		b11 = b1 + (m_iter-1)*rstep_b; \
 \
 		n_cur = ( bl2_is_not_edge_f( j, n_iter, n_left ) ? NR : n_left ); \
 \
 		/* If duplication is needed, copy the current iteration's NR
 		   columns of B to a local buffer with each value duplicated. */ \
-		if ( DUPB ) PASTEMAC(ch,dupl)( k_nr, b1, bd ); \
+		if ( DUPB ) PASTEMAC(ch,dupl)( k_nr, b1, bp ); \
 		else        bp = b1; \
 \
 		/* Loop over the m dimension (MR rows at a time). */ \
@@ -293,9 +302,13 @@ void PASTEMAC(ch,varname)( \
 				   in bp. Then compute the length of that panel. */ \
 				off_a1112 = bl2_max( diagoffa_i, 0 ); \
 				k_a1112   = k - off_a1112;; \
-				k_a12     = k_a1112 - m_cur; \
+				k_a12     = k_a1112 - MR; \
 				k_a11     = MR; \
 \
+				/* Index into b1 (if the diagonal offset is positive) to
+				   locate the MR x NR block of b1 that will be updated by the
+				   trsm subproblem. */ \
+				b11  = b1 + off_a1112 * NR; \
 				bp_i = bp + off_a1112 * NR * NDUP; \
 \
 				/* Compute the addresses of the A12 panel and triangular
@@ -306,11 +319,29 @@ void PASTEMAC(ch,varname)( \
 				bp11 = bp_i; \
 				bp21 = bp_i + k_a11 * NR * NDUP; \
 \
+/*
+PASTEMAC(ch,fprintm)( stdout, "trsm_u_ker_var2: a1 (diag)", MR, k_a1112, a1, 1, MR, "%5.2f", "" ); \
+PASTEMAC(ch,fprintm)( stdout, "trsm_u_ker_var2: b1 (diag)", k_a1112, NR, bp_i, NR, 1, "%6.3f", "" ); \
+PASTEMAC(ch,fprintm)( stdout, "trsm_u_ker_var2: b11 (diag)", MR, NR, b11, NR, 1, "%6.3f", "" ); \
+printf( "m_iter     = %lu\n", m_iter ); \
+printf( "m_cur      = %lu\n", m_cur ); \
+printf( "k          = %lu\n", k ); \
+printf( "diagoffa_i = %lu\n", diagoffa_i ); \
+printf( "off_a1112  = %lu\n", off_a1112 ); \
+printf( "k_a1112    = %lu\n", k_a1112 ); \
+printf( "k_a12      = %lu\n", k_a12 ); \
+printf( "k_a11      = %lu\n", k_a11 ); \
+printf( "rs_c,cs_c  = %lu %lu\n", rs_c, cs_c ); \
+printf( "rs_ct,cs_ct= %lu %lu\n", rs_ct, cs_ct ); \
+*/ \
+ \
+\
 				/* Handle interior and edge cases separately. */ \
 				if ( m_cur == MR && n_cur == NR ) \
 				{ \
 					/* Invoke the fused gemm/trsm micro-kernel. */ \
 					PASTEMAC(ch,gemmtrsmukr)( k_a12, \
+					                          alpha_cast, \
 					                          a12, \
 					                          a11, \
 					                          bp21, \
@@ -322,6 +353,7 @@ void PASTEMAC(ch,varname)( \
 				{ \
 					/* Invoke the fused gemm/trsm micro-kernel. */ \
 					PASTEMAC(ch,gemmtrsmukr)( k_a12, \
+					                          alpha_cast, \
 					                          a12, \
 					                          a11, \
 					                          bp21, \
@@ -329,6 +361,11 @@ void PASTEMAC(ch,varname)( \
 					                          b11, \
 					                          ct, rs_ct, cs_ct ); \
 \
+/*
+PASTEMAC(ch,fprintm)( stdout, "trsm_u_ker_var2: bp11 after (diag)", MR, NR, bp11, NR, 1, "%5.2f", "" ); \
+PASTEMAC(ch,fprintm)( stdout, "trsm_u_ker_var2: b11 after (diag)", MR, NR, b11, NR, 1, "%5.2f", "" ); \
+PASTEMAC(ch,fprintm)( stdout, "trsm_u_ker_var2: ct after (diag)", m_cur, n_cur, ct, rs_ct, cs_ct, "%5.2f", "" ); \
+*/ \
 					/* Copy the result to the bottom edge of C. */ \
 					PASTEMAC2(ch,ch,copys_mxn)( m_cur, n_cur, \
 					                            ct,  rs_ct, cs_ct, \
@@ -347,7 +384,7 @@ void PASTEMAC(ch,varname)( \
 					                      minus_one, \
 					                      a1, \
 					                      bp, \
-					                      one, \
+					                      alpha_cast, \
 					                      c11, rs_c, cs_c ); \
 				} \
 				else \
@@ -361,15 +398,15 @@ void PASTEMAC(ch,varname)( \
 					                      ct, rs_ct, cs_ct ); \
 \
 					/* Add the result to the edge of C. */ \
-					PASTEMAC2(ch,ch,adds_mxn)( m_cur, n_cur, \
-					                           ct,  rs_ct, cs_ct, \
-					                           c11, rs_c,  cs_c ); \
+					PASTEMAC3(ch,ch,ch,xpbys_mxn)( m_cur, n_cur, \
+					                               ct,  rs_ct, cs_ct, \
+					                               alpha_cast, \
+					                               c11, rs_c,  cs_c ); \
 				} \
 \
 				a1 += rstep_a; \
 			} \
 \
-			b11  -= rstep_b; \
 			c11  -= rstep_c; \
 		} \
 \

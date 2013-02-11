@@ -128,8 +128,9 @@ void PASTEMAC2(chb,chx,varname)( \
 	/* When the diagonal of x is implicitly unit, we update ONLY the stored
 	   region strictly above or below the diagonal. */ \
 \
-	/* Set various loop parameters. */ \
-	bl2_set_dims_incs_uplo_1m( diagoffx, diagx, \
+	/* Set various loop parameters. Here, we pretend that diagx is equal to
+	   BLIS_NONUNIT_DIAG because the actual value does not affect us here. */ \
+	bl2_set_dims_incs_uplo_1m( diagoffx, BLIS_NONUNIT_DIAG, \
 	                           uplox, m, n, rs_x, cs_x, \
 	                           uplox_eff, n_elem_max, n_iter, incx, ldx, \
 	                           ij0, n_shift ); \

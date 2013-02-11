@@ -158,8 +158,7 @@ void bl2_trsm_cntl_init()
 	                           BLIS_VARIANT2,
 	                           trsm_mr, // IMPORTANT: m dim multiple must be mr since
 	                           trsm_nr, // B_pack is updated (ie: serves as C) in trsm
-	                           TRUE,  // scale by alpha (must scale B instead of A to
-	                                  // avoid having to invert alpha)
+	                           FALSE, // do NOT scale by alpha
 	                           FALSE, // already dense; densify not necessary
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?

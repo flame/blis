@@ -34,7 +34,8 @@
 
 #include "blis2.h"
 
-void bl2_her_basic_check( obj_t*  alpha,
+void bl2_her_basic_check( conj_t  conjh,
+                          obj_t*  alpha,
                           obj_t*  x,
                           obj_t*  c )
 {
@@ -51,6 +52,14 @@ void bl2_her_basic_check( obj_t*  alpha,
 	e_val = bl2_check_floating_object( c );
 	bl2_check_error_code( e_val );
 
+	// If conjh is BLIS_CONJUGATE, we are being called from her, which means
+	// we must enforce alpha.imag == 0.
+	if ( bl2_is_conj( conjh ) )
+	{
+		e_val = bl2_check_real_valued_object( alpha );
+		bl2_check_error_code( e_val );
+	}
+
 	// Check object dimensions.
 
 	e_val = bl2_check_scalar_object( alpha );
@@ -66,7 +75,8 @@ void bl2_her_basic_check( obj_t*  alpha,
 	bl2_check_error_code( e_val );
 }
 
-void bl2_her_check( obj_t*  alpha,
+void bl2_her_check( conj_t  conjh,
+                    obj_t*  alpha,
                     obj_t*  x,
                     obj_t*  c )
 {
@@ -74,7 +84,7 @@ void bl2_her_check( obj_t*  alpha,
 
 	// Check basic properties of the operation.
 
-	bl2_her_basic_check( alpha, x, c );
+	bl2_her_basic_check( conjh, alpha, x, c );
 
 	// Check matrix structure.
 
@@ -92,7 +102,7 @@ void bl2_her_int_check( conj_t  conjh,
 
 	// Check basic properties of the operation.
 
-	bl2_her_basic_check( alpha, x, c );
+	bl2_her_basic_check( conjh, alpha, x, c );
 
 	// Check matrix structure.
 

@@ -53,7 +53,7 @@ void bl2_her( obj_t*  alpha,
 
 	// Check parameters.
 	if ( bl2_error_checking_is_enabled() )
-		bl2_her_check( alpha, x, c );
+		bl2_her_check( BLIS_CONJUGATE, alpha, x, c );
 
 
 	// Query the target datatypes of each object.
@@ -66,11 +66,8 @@ void bl2_her( obj_t*  alpha,
 	                bl2_obj_is_col_stored( *c ) );
 
 
-	// Create an object to hold a copy-cast of alpha. Notice that we use
-	// the real projection of the datatype of x to create the object.
-	// If alpha has an imaginary component, it will be dropped since
-	// the operation requires real scalars anyway.
-	dt_alpha = bl2_datatype_proj_to_real( dt_targ_x );
+	// Create object to hold a copy-cast of alpha.
+	dt_alpha = dt_targ_x;
 	bl2_obj_init_scalar_copy_of( dt_alpha,
 	                             BLIS_NO_CONJUGATE,
 	                             alpha,

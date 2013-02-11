@@ -40,6 +40,7 @@
 \
 void PASTEMAC(ch,varname)( \
                            dim_t   k, \
+                           ctype*  alpha, \
                            ctype*  aR, \
                            ctype*  a, \
                            ctype*  bdB, \

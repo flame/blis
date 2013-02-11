@@ -428,6 +428,10 @@ typedef enum
 	BLIS_EXPECTED_FLOATING_POINT_DATATYPE      = ( -31),
 	BLIS_EXPECTED_NONINTEGER_DATATYPE          = ( -32),
 	BLIS_EXPECTED_NONCONSTANT_DATATYPE         = ( -33),
+	BLIS_EXPECTED_REAL_DATATYPE                = ( -34),
+	BLIS_INCONSISTENT_DATATYPES                = ( -35),
+	BLIS_EXPECTED_REAL_PROJ_OF                 = ( -36),
+	BLIS_EXPECTED_REAL_VALUED_OBJECT           = ( -37),
 
 	// Dimension-specific errors
 	BLIS_NONCONFORMAL_DIMENSIONS               = ( -40),
@@ -438,6 +442,7 @@ typedef enum
 	BLIS_UNEXPECTED_OBJECT_LENGTH              = ( -45),
 	BLIS_UNEXPECTED_OBJECT_WIDTH               = ( -46),
 	BLIS_UNEXPECTED_VECTOR_DIM                 = ( -47),
+	BLIS_UNEXPECTED_DIAG_OFFSET                = ( -48),
 
 	// Stride-specific errors
 	BLIS_INVALID_ROW_STRIDE                    = ( -50),
@@ -450,21 +455,24 @@ typedef enum
 	BLIS_EXPECTED_SYMMETRIC_OBJECT             = ( -62),
 	BLIS_EXPECTED_TRIANGULAR_OBJECT            = ( -63),
 
+	// Storage-specific errors    
+	BLIS_EXPECTED_UPPER_OR_LOWER_OBJECT        = ( -70),
+
 	// Partitioning-specific errors
-	BLIS_INVALID_3x1_SUBPART                   = ( -70),
-	BLIS_INVALID_1x3_SUBPART                   = ( -71),
-	BLIS_INVALID_3x3_SUBPART                   = ( -72),
+	BLIS_INVALID_3x1_SUBPART                   = ( -80),
+	BLIS_INVALID_1x3_SUBPART                   = ( -81),
+	BLIS_INVALID_3x3_SUBPART                   = ( -82),
 
 	// Control tree-specific errors
-	BLIS_UNEXPECTED_NULL_CONTROL_TREE          = ( -80),
+	BLIS_UNEXPECTED_NULL_CONTROL_TREE          = ( -90),
 
 	// Packing-specific errors
-	BLIS_PACK_SCHEMA_NOT_SUPPORTED_FOR_UNPACK  = ( -90),
+	BLIS_PACK_SCHEMA_NOT_SUPPORTED_FOR_UNPACK  = (-100),
 
 	// Memory allocator errors
-	BLIS_EXHAUSTED_STATIC_MEMORY_POOL          = (-100),
+	BLIS_EXHAUSTED_STATIC_MEMORY_POOL          = (-110),
 
-	BLIS_ERROR_CODE_MAX                        = (-110)
+	BLIS_ERROR_CODE_MAX                        = (-120)
 } err_t;
 
 #endif

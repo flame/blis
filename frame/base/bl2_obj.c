@@ -123,12 +123,6 @@ void bl2_obj_alloc_buffer( inc_t  rs,
 	// Query the size of one element.
 	elem_size = bl2_obj_elem_size( *obj );
 
-	// Interpret rs = cs = 0 as request for column storage.
-	if ( rs == 0 && cs == 0 )
-	{
-		rs = 1; cs = m;
-	}
-
 	// Determine how much object to allocate.
 	if ( rs == 1 )
 	{
@@ -142,8 +136,22 @@ void bl2_obj_alloc_buffer( inc_t  rs,
 	}
 	else
 	{
-		// Creation of objects with general stride not yet implemented.
-		bl2_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
+		if ( rs < cs )
+		{
+			// Note this case is identical to that of rs == 1 above.
+			cs     = bl2_align_dim_to_sys( cs, elem_size );
+			n_elem = cs * n;
+		}
+		else if ( cs < rs )
+		{
+			// Note this case is identical to that of cs == 1 above.
+			rs     = bl2_align_dim_to_sys( rs, elem_size );
+			n_elem = rs * m;
+		}
+		else
+		{
+			bl2_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
+		}
 	}
 
 	// Compute the size of the total buffer to be allocated, which includes
@@ -191,6 +199,14 @@ void bl2_obj_attach_internal_buffer( obj_t* obj )
 	// Update the object.
 	bl2_obj_set_buffer( p, *obj );
 	bl2_obj_set_incs( 1, 1, *obj );
+}
+
+void bl2_obj_init_scalar( num_t  dt,
+                          obj_t* b )
+{
+	// Initialize b without a buffer and then attach its internal buffer.
+	bl2_obj_create_without_buffer( dt, 1, 1, b );
+	bl2_obj_attach_internal_buffer( b );
 }
 
 void bl2_obj_init_scalar_copy_of( num_t  dt,
@@ -486,7 +502,11 @@ void bl2_obj_print( char* label, obj_t* obj )
 	fprintf( file, " - is d. prec    %u\n",  bl2_obj_is_double_precision( *obj ) );
 	fprintf( file, " - has trans     %u\n",  bl2_obj_has_trans( *obj ) );
 	fprintf( file, " - has conj      %u\n",  bl2_obj_has_conj( *obj ) );
+	fprintf( file, " - struc type    %lu\n", bl2_obj_struc( *obj ) );
 	fprintf( file, " - uplo type     %lu\n", bl2_obj_uplo( *obj ) );
+	fprintf( file, "   - is upper    %u\n",  bl2_obj_is_upper( *obj ) );
+	fprintf( file, "   - is lower    %u\n",  bl2_obj_is_lower( *obj ) );
+	fprintf( file, "   - is dense    %u\n",  bl2_obj_is_dense( *obj ) );
 	fprintf( file, " - datatype      %lu\n", bl2_obj_datatype( *obj ) );
 	fprintf( file, " - target dt     %lu\n", bl2_obj_target_datatype( *obj ) );
 	fprintf( file, " - exec dt       %lu\n", bl2_obj_execution_datatype( *obj ) );

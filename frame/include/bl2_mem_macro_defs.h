@@ -50,6 +50,14 @@
 \
 	( (mem_p)->n )
 
+#define bl2_mem_is_alloc( mem_p ) \
+\
+	( bl2_mem_buffer( mem_p ) != NULL )
+
+#define bl2_mem_is_unalloc( mem_p ) \
+\
+	( bl2_mem_buffer( mem_p ) == NULL )
+
 
 // Mem entry modification
 
@@ -66,6 +74,12 @@
 #define bl2_mem_set_width( n0, mem_p ) \
 { \
     mem_p->n = n0; \
+}
+
+#define bl2_mem_set_dims( m0, n0, mem_p ) \
+{ \
+    bl2_mem_set_length( m0, mem_p ); \
+    bl2_mem_set_width( n0, mem_p ); \
 }
 
 #endif 

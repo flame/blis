@@ -38,6 +38,8 @@
 //           side   uplo   trans  diag   m     n     alpha    a        lda   b        ldb
 void dtrsm_( char*, char*, char*, char*, int*, int*, double*, double*, int*, double*, int* );
 
+#define PRINT 1
+
 int main( int argc, char** argv )
 {
 	obj_t a, b, c;
@@ -90,8 +92,8 @@ int main( int argc, char** argv )
 	p_end   = 16;
 	p_inc   = 1;
 
-	m_input = 10;
-	n_input = 10;
+	m_input = 16;
+	n_input = 4;
 #endif
 
 	dt_a = BLIS_DOUBLE;
@@ -124,8 +126,8 @@ int main( int argc, char** argv )
 		bl2_obj_create( dt_c, m, n, 0, 0, &c_save );
 
 		bl2_obj_set_struc( BLIS_TRIANGULAR, a );
-		//bl2_obj_set_uplo( BLIS_UPPER, a );
-		bl2_obj_set_uplo( BLIS_LOWER, a );
+		bl2_obj_set_uplo( BLIS_UPPER, a );
+		//bl2_obj_set_uplo( BLIS_LOWER, a );
 
 		bl2_randm( &a );
 		bl2_randm( &c );
@@ -142,8 +144,8 @@ int main( int argc, char** argv )
 		bl2_obj_set_diag( BLIS_NONUNIT_DIAG, a );
 #endif
 
-		bl2_sets(  (2.0/1.0), &alpha );
-		bl2_sets( -(1.0/1.0), &beta );
+		bl2_setsc(  (2.0/1.0), 0.0, &alpha );
+		bl2_setsc( -(1.0/1.0), 0.0, &beta );
 
 		mr = bl2_blksz_obj_create( 2, 4, 2, 2 );
 		kr = bl2_blksz_obj_create( 1, 1, 1, 1 );
@@ -248,13 +250,14 @@ int main( int argc, char** argv )
 
 
 #ifdef PRINT
-			bl2_printm( "c", &c, "%5.2f", "" );
 			bl2_printm( "a", &a, "%5.2f", "" );
+			bl2_printm( "c", &c, "%6.3f", "" );
 #endif
 
 #ifdef BLIS
 			//bl2_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
 
+/*
 			bl2_trsm_int( side,
 			              &alpha,
 			              &a,
@@ -263,11 +266,19 @@ int main( int argc, char** argv )
 			              &c,
 			              trsm_cntl_mm_op );
 			              //trmm_cntl_vl_mm );
+*/
+			//bl2_obj_set_diag( BLIS_UNIT_DIAG, a );
+			//bl2_obj_set_conjtrans( BLIS_TRANSPOSE, a );
+
+			bl2_trsm( side,
+			          &alpha,
+			          &a,
+			          &c );
 
 #else
 
 			char    side   = 'L';
-			char    uplo   = 'L';
+			char    uplo   = 'U';
 			char    transa = 'N';
 			char    diag   = 'N';
 			int     mm     = bl2_obj_length( c );
@@ -290,15 +301,12 @@ int main( int argc, char** argv )
 #endif
 
 #ifdef PRINT
-			bl2_printm( "c after", &c, "%5.2f", "" );
+			bl2_printm( "c after", &c, "%6.3f", "" );
 			exit(1);
 #endif
 
 
-			dtime = bl2_clock() - dtime;
-
-			dtime_save = bl2_min( dtime, dtime_save );
-
+			dtime_save = bl2_clock_min_diff( dtime_save, dtime );
 		}
 
 		if ( bl2_is_left( side ) )

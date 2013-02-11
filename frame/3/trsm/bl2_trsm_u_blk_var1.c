@@ -90,21 +90,21 @@ void bl2_trsm_u_blk_var1( obj_t*  alpha,
 		               cntl_sub_packm_a( cntl ) );
 
 		// Perform trsm subproblem.
-		if ( bl2_obj_intersects_diag( a1_pack ) )
-			bl2_trsm_int( BLIS_LEFT,
-			              alpha,
-			              &a1_pack,
-			              &b_pack,
-			              beta,
-			              &c1,
-			              cntl_sub_trsm( cntl ) );
-		else
-			bl2_gemm_int( &BLIS_MINUS_ONE,
-			              &a1_pack,
-			              &b_pack,
-			              &BLIS_ONE,
-			              &c1,
-			              cntl_sub_gemm( cntl ) );
+		// NOTE: We cannot use the trsm macro-kernel for blocks that
+		// intersect the diagonal and the gemm macro-kernel for blocks
+		// above the diagonal because the latter expects A to be packed
+		// by row panels in forward (top to bottom) order. But here, A
+		// has already been packed in backward (bottom to top) order
+		// due to the fact that upper triangular trsm iterates from
+		// bottom-right to top-left. Thus, we must use only the trsm
+		// macro-kernel.
+		bl2_trsm_int( BLIS_LEFT,
+		              alpha,
+		              &a1_pack,
+		              &b_pack,
+		              beta,
+		              &c1,
+		              cntl_sub_trsm( cntl ) );
 	}
 
 	// If any packing buffers were acquired within packm, release them back

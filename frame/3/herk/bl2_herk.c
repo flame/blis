@@ -54,7 +54,7 @@ void bl2_herk( obj_t*  alpha,
 	num_t   dt_exec;
 	num_t   dt_alpha;
 	num_t   dt_beta;
-	bool_t  pack_c = FALSE;
+	//bool_t  pack_c = FALSE;
 
 	// Check parameters.
 	if ( bl2_error_checking_is_enabled() )
@@ -66,6 +66,9 @@ void bl2_herk( obj_t*  alpha,
 		bl2_scalm( beta, c );
 		return;
 	}
+
+	// For herk, the right-hand "B" operand is simply A'.
+	bl2_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, *a, ah );
 
 	// Determine the target datatype of each matrix object.
 	//bl2_herk_get_target_datatypes( a,
@@ -91,9 +94,6 @@ void bl2_herk( obj_t*  alpha,
 	bl2_obj_set_execution_datatype( dt_exec, *a );
 	bl2_obj_set_execution_datatype( dt_exec, ah );
 	bl2_obj_set_execution_datatype( dt_exec, *c );
-
-	// For herk, the right-hand "B" operand is simply A'.
-	bl2_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, *a, ah );
 
 	// Note that the precisions of the target datatypes of a and c
 	// match. The domains, however, are not necessarily the same. There
@@ -134,7 +134,7 @@ void bl2_herk( obj_t*  alpha,
 	//if ( pack_c ) herk_cntl = herk_cntl_packabc;
 	//else          herk_cntl = herk_cntl_packab;
 	cntl = herk_cntl;
-	if ( pack_c ) bl2_abort();
+	//if ( pack_c ) bl2_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 
 	// Invoke the internal back-end.
 	bl2_herk_int( &alpha_local,
@@ -162,29 +162,29 @@ void PASTEMAC(ch,opname)( \
                           ctype*  c, inc_t rs_c, inc_t cs_c  \
                         ) \
 { \
-    const num_t dt = PASTEMAC(ch,type); \
+	const num_t dt = PASTEMAC(ch,type); \
 \
-    obj_t       alphao, ao, betao, co; \
+	obj_t       alphao, ao, betao, co; \
 \
 	dim_t       m_a, n_a; \
 \
 	bl2_set_dims_with_trans( transa, m, k, m_a, n_a ); \
 \
-    bl2_obj_create_scalar_with_attached_buffer( dt, alpha, &alphao ); \
-    bl2_obj_create_scalar_with_attached_buffer( dt, beta,  &betao  ); \
+	bl2_obj_create_scalar_with_attached_buffer( dt, alpha, &alphao ); \
+	bl2_obj_create_scalar_with_attached_buffer( dt, beta,  &betao  ); \
 \
-    bl2_obj_create_with_attached_buffer( dt, m_a, n_a, a, rs_a, cs_a, &ao ); \
-    bl2_obj_create_with_attached_buffer( dt, m,   m,   c, rs_c, cs_c, &co ); \
+	bl2_obj_create_with_attached_buffer( dt, m_a, n_a, a, rs_a, cs_a, &ao ); \
+	bl2_obj_create_with_attached_buffer( dt, m,   m,   c, rs_c, cs_c, &co ); \
 \
-    bl2_obj_set_uplo( uploc, co ); \
-    bl2_obj_set_conjtrans( transa, ao ); \
+	bl2_obj_set_uplo( uploc, co ); \
+	bl2_obj_set_conjtrans( transa, ao ); \
 \
-    bl2_obj_set_struc( BLIS_HERMITIAN, co ); \
+	bl2_obj_set_struc( BLIS_HERMITIAN, co ); \
 \
-    PASTEMAC0(opname)( &alphao, \
-                       &ao, \
-                       &betao, \
-                       &co ); \
+	PASTEMAC0(opname)( &alphao, \
+	                   &ao, \
+	                   &betao, \
+	                   &co ); \
 }
 
 INSERT_GENTFUNC_BASIC( herk, herk )

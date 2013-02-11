@@ -84,12 +84,10 @@ void bl2_symm( side_t  side,
 	// sure matrix A is on the correct side for our gemm kernel. We assume
 	// gemm is implemented with a block-panel kernel, thus, we will only
 	// directly support the BLIS_LEFT case. We handle the BLIS_RIGHT case by
-	// transposing the operation. Since A is Hermitian, we can mark it for
-	// conjugation instead of transpostion (though transposition should be
-	// correctly handled as well).
+	// transposing the operation. Since A is symmetric, we do not mark it
+	// for any conjugation or transposition.
 	if ( bl2_is_right( side ) )
 	{
-		bl2_obj_toggle_conj( a_local );
 		bl2_obj_toggle_trans( b_local );
 		bl2_obj_toggle_trans( c_local );
 	}
@@ -147,18 +145,18 @@ void PASTEMAC(ch,opname)( \
 \
     obj_t       alphao, ao, bo, betao, co; \
 \
-	dim_t       m_a, n_a; \
+	dim_t       mn_a; \
 	dim_t       m_b, n_b; \
 \
-	bl2_set_dims_with_side(  side,   m, n, m_a, n_a ); \
+	bl2_set_dim_with_side(   side,   m, n, mn_a ); \
 	bl2_set_dims_with_trans( transb, m, n, m_b, n_b ); \
 \
     bl2_obj_create_scalar_with_attached_buffer( dt, alpha, &alphao ); \
     bl2_obj_create_scalar_with_attached_buffer( dt, beta,  &betao  ); \
 \
-	bl2_obj_create_with_attached_buffer( dt, m_a, n_a, a, rs_a, cs_a, &ao ); \
-	bl2_obj_create_with_attached_buffer( dt, m_b, n_b, b, rs_b, cs_b, &bo ); \
-	bl2_obj_create_with_attached_buffer( dt, m,   n,   c, rs_c, cs_c, &co ); \
+    bl2_obj_create_with_attached_buffer( dt, mn_a, mn_a, a, rs_a, cs_a, &ao ); \
+	bl2_obj_create_with_attached_buffer( dt, m_b,  n_b,  b, rs_b, cs_b, &bo ); \
+	bl2_obj_create_with_attached_buffer( dt, m,    n,    c, rs_c, cs_c, &co ); \
 \
     bl2_obj_set_uplo( uploa, ao ); \
     bl2_obj_set_conj( conja, ao ); \

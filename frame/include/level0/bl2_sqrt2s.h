@@ -52,11 +52,17 @@
 }
 #define bl2_cssqrt2s( x, a ) \
 { \
-	(a) = ( float  )sqrtf( (x).real ); \
+	float  mag = sqrtf( (x).real * (x).real + \
+	                    (x).imag * (x).imag ); \
+\
+	(a)      = ( float  )sqrt( ( mag + (x).real ) / 2.0F ); \
 }
 #define bl2_zssqrt2s( x, a ) \
 { \
-	(a) = ( float  )sqrt( (x).real ); \
+	double mag = sqrt( (x).real * (x).real + \
+	                   (x).imag * (x).imag ); \
+\
+	(a)      = ( float  )sqrt( ( mag + (x).real ) / 2.0 ); \
 }
 
 
@@ -70,11 +76,17 @@
 }
 #define bl2_cdsqrt2s( x, a ) \
 { \
-	(a) = ( double )sqrtf( (x).real ); \
+	float  mag = sqrtf( (x).real * (x).real + \
+	                    (x).imag * (x).imag ); \
+\
+	(a)      = ( double )sqrt( ( mag + (x).real ) / 2.0F ); \
 }
 #define bl2_zdsqrt2s( x, a ) \
 { \
-	(a) = ( double )sqrt( (x).real ); \
+	double mag = sqrt( (x).real * (x).real + \
+	                   (x).imag * (x).imag ); \
+\
+	(a)      = ( double )sqrt( ( mag + (x).real ) / 2.0 ); \
 }
 
 
@@ -90,13 +102,19 @@
 }
 #define bl2_ccsqrt2s( x, a ) \
 { \
-	(a).real = ( float  )sqrtf( (x).real ); \
-	(a).imag = 0.0F; \
+	float  mag = sqrtf( (x).real * (x).real + \
+	                    (x).imag * (x).imag ); \
+\
+	(a).real = ( float  )sqrtf( ( mag + (x).real ) / 2.0F ); \
+	(a).imag = ( float  )sqrtf( ( mag - (x).imag ) / 2.0F ); \
 }
 #define bl2_zcsqrt2s( x, a ) \
 { \
-	(a).real = ( float  )sqrt( (x).real ); \
-	(a).imag = 0.0F; \
+	double mag = sqrt( (x).real * (x).real + \
+	                   (x).imag * (x).imag ); \
+\
+	(a).real = ( float  )sqrt( ( mag + (x).real ) / 2.0 ); \
+	(a).imag = ( float  )sqrt( ( mag - (x).imag ) / 2.0 ); \
 }
 
 
@@ -112,13 +130,19 @@
 }
 #define bl2_czsqrt2s( x, a ) \
 { \
-	(a).real = ( double )sqrtf( (x).real ); \
-	(a).imag = 0.0F; \
+	float  mag = sqrtf( (x).real * (x).real + \
+	                    (x).imag * (x).imag ); \
+\
+	(a).real = ( double )sqrtf( ( mag + (x).real ) / 2.0F ); \
+	(a).imag = ( double )sqrtf( ( mag - (x).imag ) / 2.0F ); \
 }
 #define bl2_zzsqrt2s( x, a ) \
 { \
-	(a).real = ( double )sqrt( (x).real ); \
-	(a).imag = 0.0F; \
+	double mag = sqrt( (x).real * (x).real + \
+	                   (x).imag * (x).imag ); \
+\
+	(a).real = ( double )sqrt( ( mag + (x).real ) / 2.0 ); \
+	(a).imag = ( double )sqrt( ( mag - (x).imag ) / 2.0 ); \
 }
 
 

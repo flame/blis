@@ -48,20 +48,20 @@ void bl2_syr2k_basic_check( obj_t*   alpha,
 
 void bl2_syr2k_check( obj_t*   alpha,
                       obj_t*   a,
-                      obj_t*   bt,
+                      obj_t*   b,
                       obj_t*   beta,
                       obj_t*   c )
 {
 	err_t e_val;
-	obj_t at, b;
+	obj_t at, bt;
 
 	// Alias A and B to A^T and B^T so we can perform dimension checks.
 	bl2_obj_alias_with_trans( BLIS_TRANSPOSE, *a, at );
-	bl2_obj_alias_with_trans( BLIS_TRANSPOSE, *bt, b );
+	bl2_obj_alias_with_trans( BLIS_TRANSPOSE, *b, bt );
 
 	// Check basic properties of the operation.
 
-	bl2_syr2k_basic_check( alpha, a, bt, &b, &at, beta, c );
+	bl2_syr2k_basic_check( alpha, a, &bt, b, &at, beta, c );
 
 	// Check matrix squareness.
 

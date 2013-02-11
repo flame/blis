@@ -47,6 +47,10 @@ void bl2_her2k_u_ker_var2( obj_t*   alpha,
 	// Implement her2k kernel in terms of two calls to the corresponding
 	// herk kernel.
 
+	// Note we have to use BLIS_ONE for the second rank-k product since we
+	// only want to apply beta once. (And beta might be unit anyway if this
+	// is not the first iteration of variant 3.)
+
 	bl2_herk_u_ker_var2( alpha,
 	                     a,
 	                     bh,
@@ -57,7 +61,7 @@ void bl2_her2k_u_ker_var2( obj_t*   alpha,
 	bl2_herk_u_ker_var2( alpha_conj,
 	                     b,
 	                     ah,
-	                     beta,
+	                     &BLIS_ONE,
 	                     c,
 	                     NULL );
 }

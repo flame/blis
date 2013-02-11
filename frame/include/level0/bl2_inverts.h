@@ -47,7 +47,7 @@
 
 #define bl2_dinverts( x ) \
 { \
-	(x) = 1.0 / ( float  ) (x); \
+	(x) = 1.0  / ( double ) (x); \
 }
 
 #define bl2_cinverts( x ) \

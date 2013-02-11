@@ -61,7 +61,7 @@ void bl2_packv_int( obj_t*   a,
 	//  4. no-op: The control tree sometimes directs us to skip the
 	//     pack operation entirely. Alias p to a and return.
 
-	obj_t     c;
+	//obj_t     c;
 
 	varnum_t  n;
 	impl_t    i;
@@ -119,7 +119,7 @@ void bl2_packv_int( obj_t*   a,
 	f = vars[n][i];
 
 	// Invoke the variant.
-	f( &c,
+	f( a,
 	   p,
 	   cntl );
 }

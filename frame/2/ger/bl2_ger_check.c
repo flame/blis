@@ -102,11 +102,6 @@ void bl2_ger_int_check( obj_t*  alpha,
 
 	bl2_ger_basic_check( alpha, x, y, a );
 
-	// Check matrix structure.
-
-	e_val = bl2_check_general_object( a );
-	bl2_check_error_code( e_val );
-
 	// Check control tree pointer
 
 	e_val = bl2_check_valid_cntl( ( void* )cntl );

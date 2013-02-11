@@ -50,7 +50,7 @@ static FUNCPTR_T vars[2][5][3] =
 	    // unblocked            optimized unblocked    blocked
 	    { NULL,                 NULL,                  bl2_trsm_l_blk_var1 },
 	    { NULL,                 bl2_trsm_l_ker_var2,   bl2_trsm_l_blk_var2 },
-	    { NULL,                 bl2_trsm_l_ker_var3,   bl2_trsm_l_blk_var3 },
+	    { NULL,                 NULL,                  bl2_trsm_l_blk_var3 },
 	    { NULL,                 NULL,                  bl2_trsm_l_blk_var4 },
 	    { NULL,                 NULL,                  NULL                },
 	},
@@ -59,7 +59,7 @@ static FUNCPTR_T vars[2][5][3] =
 	    // unblocked            optimized unblocked    blocked
 	    { NULL,                 NULL,                  bl2_trsm_u_blk_var1 },
 	    { NULL,                 bl2_trsm_u_ker_var2,   bl2_trsm_u_blk_var2 },
-	    { NULL,                 bl2_trsm_u_ker_var3,   bl2_trsm_u_blk_var3 },
+	    { NULL,                 NULL,                  bl2_trsm_u_blk_var3 },
 	    { NULL,                 NULL,                  bl2_trsm_u_blk_var4 },
 	    { NULL,                 NULL,                  NULL,               },
 	}

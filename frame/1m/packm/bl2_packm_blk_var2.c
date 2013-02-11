@@ -349,7 +349,7 @@ void PASTEMAC(ch,varname )( \
 			PASTEMAC3(ch,ch,ch,scal2m)( 0, \
 			                            BLIS_NONUNIT_DIAG, \
 			                            uploc, \
-			                            BLIS_NO_TRANSPOSE, \
+			                            conjc, \
 			                            p11_m, \
 			                            p11_n, \
 			                            beta_cast, \
@@ -366,6 +366,12 @@ void PASTEMAC(ch,varname )( \
 			                        c_begin, incc, ldc, \
 			                        p_begin,       ldp ); \
 \
+/*
+		PASTEMAC(ch,fprintm)( stdout, "packm_blk_var2: c", panel_len, panel_dim_i, \
+		                      c_begin, ldc, incc, "%5.2f", "" ); \
+		PASTEMAC(ch,fprintm)( stdout, "packm_blk_var2: p copied", panel_len, panel_dim_i, \
+		                      p_begin, ldp, 1, "%5.2f", "" ); \
+*/ \
 		} \
 \
 		/* The packed memory region was acquired/allocated with "aligned"
@@ -410,10 +416,10 @@ void PASTEMAC(ch,varname )( \
 /*
 		if ( rs_p == 1 ) \
 		PASTEMAC(ch,fprintm)( stdout, "packm_blk_var2: a copied", m_panel_max, n_panel_max, \
-		                      p_begin, 1, panel_dim, "%4.1f", "" ); \
-		else if ( cs_p == 1 ) \
+		                      p_begin, 1, panel_dim, "%5.2f", "" ); \
+		if ( cs_p == 1 ) \
 		PASTEMAC(ch,fprintm)( stdout, "packm_blk_var2: b copied", m_panel_max, n_panel_max, \
-		                      p_begin, panel_dim, 1, "%4.1f", "" ); \
+		                      p_begin, panel_dim, 1, "%6.3f", "" ); \
 */ \
 	} \
 }

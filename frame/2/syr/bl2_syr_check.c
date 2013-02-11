@@ -39,7 +39,7 @@ void bl2_syr_basic_check( obj_t*  alpha,
                           obj_t*  c )
 {
 	// The basic properties of syr are identical to that of her.
-	bl2_her_basic_check( alpha, x, c );
+	bl2_her_basic_check( BLIS_NO_CONJUGATE, alpha, x, c );
 }
 
 void bl2_syr_check( obj_t*  alpha,

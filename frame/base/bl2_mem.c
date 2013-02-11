@@ -51,13 +51,13 @@
                              )
 
 // Static memory pool.
-double  smem[ BLIS_NUM_ELEM_SMEM ];
+static double  smem[ BLIS_NUM_ELEM_SMEM ];
 
 // Pointer to current "stack" location in the memory pool.
-double* mc      = smem;
+static double* mc      = smem;
 
 // A counter that keeps track of how many chunks have been allocated.
-int     counter = 0;
+static int     counter = 0;
 
 
 // -- Memory Manager -----------------------------------------------------------
@@ -68,13 +68,20 @@ void bl2_mm_acquire_v( num_t  dt,
 {
 	siz_t elem_size = bl2_datatype_size( dt );
 	siz_t buf_size;
+	void* buf;
 
 	// Compute the number of bytes needed for an m-length vector of type dt.
-	buf_size       = m * elem_size;
+	buf_size       = m * elem_size + BLIS_MAX_PREFETCH_BYTE_OFFSET;
 
-	mem->buf       = bl2_malloc( buf_size );
-	mem->m         = m;
-	mem->n         = 1;
+#if 0
+	buf = bl2_malloc( buf_size );
+#else
+	buf = bl2_malloc_s( buf_size );
+#endif
+
+	bl2_mem_set_buffer( buf, mem );
+
+	bl2_mem_set_dims( m, 1, mem );
 }
 
 void bl2_mm_acquire_m( num_t  dt,
@@ -84,6 +91,7 @@ void bl2_mm_acquire_m( num_t  dt,
 {
 	siz_t elem_size = bl2_datatype_size( dt );
 	siz_t buf_size;
+	void* buf;
 
 	// Compute the number of bytes needed for an m x n matrix of type dt.
 	buf_size       = ( m * n ) * elem_size + BLIS_MAX_PREFETCH_BYTE_OFFSET;
@@ -92,18 +100,22 @@ void bl2_mm_acquire_m( num_t  dt,
 	printf( "libblis: Attempting to malloc block from static pool.\n" );
 	printf( "libblis: requested dimensions:     %lu x %lu\n", m, n );
 	printf( "libblis: requested element size:   %lu\n", elem_size );
-	printf( "libblis: max prefetch byte offset: %lu\n", ( siz_t )BLIS_MAX_PREFETCH_BYTE_OFFSET );
+	//printf( "libblis: max prefetch byte offset: %lu\n", ( siz_t )BLIS_MAX_PREFETCH_BYTE_OFFSET );
 	printf( "libblis: total requested size:     %lu\n", buf_size );
-	printf( "libblis: total pool size:          %lu\n", BLIS_NUM_ELEM_SMEM * sizeof(double) );
+	printf( "libblis: mc:                       %lu (of %lu)\n", ( unsigned long )mc, ( unsigned long )(smem + BLIS_NUM_ELEM_SMEM) );
+	printf( "libblis: counter:                  %d\n", counter );
+	printf( "libblis: total pool size:          %lu\n", ( unsigned long )BLIS_NUM_ELEM_SMEM * sizeof(double) );
 #endif
 
 #if 0
-	mem->buf       = bl2_malloc( buf_size );
+	buf = bl2_malloc( buf_size );
 #else
-	mem->buf       = bl2_malloc_s( buf_size );
+	buf = bl2_malloc_s( buf_size );
 #endif
-	mem->m         = m;
-	mem->n         = n;
+
+	bl2_mem_set_buffer( buf, mem );
+
+	bl2_mem_set_dims( m, n, mem );
 }
 
 
@@ -114,8 +126,13 @@ void bl2_mm_release( mem_t* mem )
 #else
 	bl2_free_s( mem->buf );
 #endif
-	mem->m         = 0;
-	mem->n         = 0;
+
+	// Set the buffer to NULL so that upon future inspection the mem_t
+	// object appears to NOT contain a cached allocated buffer.
+	bl2_mem_set_buffer( NULL, mem );
+
+	// Set the dimensions to zero (just because we are polite).
+	bl2_mem_set_dims( 0, 0, mem );
 }
 
 
@@ -140,6 +157,10 @@ void* bl2_malloc_s( siz_t buf_size )
 	if ( mc >= smem + BLIS_NUM_ELEM_SMEM )
 		bl2_check_error_code( BLIS_EXHAUSTED_STATIC_MEMORY_POOL );
 
+#if 0
+	printf( "libblis: incrementing counter      from %d to %d\n", counter, counter+1 );
+#endif
+
 	++counter;
 
 	return rmem;
@@ -147,6 +168,10 @@ void* bl2_malloc_s( siz_t buf_size )
 
 void bl2_free_s( void* p )
 {
+#if 0
+	printf( "libblis: decrementing counter      from %d to %d\n", counter, counter-1 );
+#endif
+
 	--counter;
 
 	if ( counter == 0 )

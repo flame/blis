@@ -57,7 +57,7 @@ void bl2_her2( obj_t*  alpha,
 
 	// Check parameters.
 	if ( bl2_error_checking_is_enabled() )
-		bl2_her2_check( alpha, x, y, c );
+		bl2_her2_check( BLIS_CONJUGATE, alpha, x, y, c );
 
 
 	// Query the target datatypes of each object.

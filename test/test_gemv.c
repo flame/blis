@@ -105,8 +105,8 @@ int main( int argc, char** argv )
 		bl2_randm( &y );
 
 
-		bl2_sets(  (2.0/1.0), &alpha );
-		bl2_sets( -(1.0/1.0), &beta );
+		bl2_setsc(  (2.0/1.0), 0.0, &alpha );
+		bl2_setsc( -(1.0/1.0), 0.0, &beta );
 
 #if 0
 		m_tl = 200;
@@ -184,10 +184,7 @@ int main( int argc, char** argv )
 #endif
 
 
-			dtime = bl2_clock() - dtime;
-
-			dtime_save = bl2_min( dtime, dtime_save );
-
+			dtime_save = bl2_clock_min_diff( dtime_save, dtime );
 		}
 
 		//gflops = ( 2.0 * m * n ) / ( dtime_save * 1.0e9 );

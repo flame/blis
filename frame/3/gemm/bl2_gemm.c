@@ -101,7 +101,7 @@ void bl2_gemm( obj_t*  alpha,
 	// are eight possible combinations of target domains:
 	//
 	//   case  input     target    exec    pack  notes  
-    //         domain    domain    domain  c?      
+	//         domain    domain    domain  c?      
 	//         c+=a*b    c+=a*b     
 	//   (0)   r  r r    r  r r    r              
 	//   (1)   r  r c    r  r r    r             b demoted to real

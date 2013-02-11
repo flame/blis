@@ -68,6 +68,19 @@ GENTFUNCR( scomplex, float,  c, s, tfuncname, varname ) \
 GENTFUNCR( dcomplex, double, z, d, tfuncname, varname )
 
 
+/*
+// -- Mixed one-operand with real projection --
+
+
+#define INSERT_GENTFUNCR_MIXED( tfuncname, varname ) \
+\
+GENTFUNCR( float,    double, s, d, tfuncname, varname ) \
+GENTFUNCR( double,   float,  d, s, tfuncname, varname ) \
+GENTFUNCR( scomplex, double, c, d, tfuncname, varname ) \
+GENTFUNCR( dcomplex, float,  z, s, tfuncname, varname )
+*/
+
+
 // -- Basic one-operand macros --
 // -- (with two auxiliary arguments) --
 

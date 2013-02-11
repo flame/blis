@@ -134,7 +134,7 @@ BLAS_LIB_PATH  := $(HOME)/flame/lib
 OPENBLAS_LIB   := $(BLAS_LIB_PATH)/libopenblas.a
 ATLAS_LIB      := $(BLAS_LIB_PATH)/libf77blas.a \
                   $(BLAS_LIB_PATH)/libatlas.a
-MKL_LIB        := -L/opt/intel/mkl/10.2.2.025/lib/em64t/ \
+#MKL_LIB        := -L/opt/intel/mkl/10.2.2.025/lib/em64t/ \
                   -lmkl_sequential -lmkl_core -lmkl_intel_lp64
 
 
@@ -168,10 +168,7 @@ LDFLAGS        := -L/usr/lib/gcc/i486-linux-gnu/4.4.3 -L/usr/lib/gcc/i486-linux-
 # --- Targets/rules ------------------------------------------------------------
 #
 
-all: blis \
-     openblas \
-     atlas \
-     mkl
+all: blis openblas atlas
 
 blis: test_gemv_blis.x \
       test_ger_blis.x \

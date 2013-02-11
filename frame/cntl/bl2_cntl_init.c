@@ -61,6 +61,7 @@ void bl2_cntl_init( void )
 	bl2_herk_cntl_init();
 	bl2_her2k_cntl_init();
 	bl2_trmm_cntl_init();
+	bl2_trmm3_cntl_init();
 	bl2_trsm_cntl_init();
 }
 
@@ -91,6 +92,7 @@ void bl2_cntl_finalize( void )
 	bl2_herk_cntl_finalize();
 	bl2_her2k_cntl_finalize();
 	bl2_trmm_cntl_finalize();
+	bl2_trmm3_cntl_finalize();
 	bl2_trsm_cntl_finalize();
 }
 

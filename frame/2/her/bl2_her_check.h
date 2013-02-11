@@ -32,11 +32,13 @@
 
 */
 
-void bl2_her_basic_check( obj_t*  alpha,
+void bl2_her_basic_check( conj_t  conjh,
+                          obj_t*  alpha,
                           obj_t*  x,
                           obj_t*  c );
 
-void bl2_her_check( obj_t*  alpha,
+void bl2_her_check( conj_t  conjh,
+                    obj_t*  alpha,
                     obj_t*  x,
                     obj_t*  c );
 
@@ -45,3 +47,4 @@ void bl2_her_int_check( conj_t  conjh,
                         obj_t*  x,
                         obj_t*  c,
                         her_t*  cntl );
+

@@ -55,31 +55,16 @@ ger_t*            ger_cntl_ge_col;
 
 // Cache blocksizes.
 
-#if 0
+#define BLIS_GER_MC_S BLIS_DEFAULT_L2_MC_S
+#define BLIS_GER_MC_D BLIS_DEFAULT_L2_MC_D
+#define BLIS_GER_MC_C BLIS_DEFAULT_L2_MC_C
+#define BLIS_GER_MC_Z BLIS_DEFAULT_L2_MC_Z
 
-#define BLIS_GER_MC_S 1000
-#define BLIS_GER_MC_D 1000
-#define BLIS_GER_MC_C 1000
-#define BLIS_GER_MC_Z 1000
+#define BLIS_GER_NC_S BLIS_DEFAULT_L2_NC_S
+#define BLIS_GER_NC_D BLIS_DEFAULT_L2_NC_D
+#define BLIS_GER_NC_C BLIS_DEFAULT_L2_NC_C
+#define BLIS_GER_NC_Z BLIS_DEFAULT_L2_NC_Z
 
-#define BLIS_GER_NC_S 1000
-#define BLIS_GER_NC_D 1000
-#define BLIS_GER_NC_C 1000
-#define BLIS_GER_NC_Z 1000
-
-#else
-
-#define BLIS_GER_MC_S 4
-#define BLIS_GER_MC_D 4
-#define BLIS_GER_MC_C 4
-#define BLIS_GER_MC_Z 4
-
-#define BLIS_GER_NC_S 4
-#define BLIS_GER_NC_D 4
-#define BLIS_GER_NC_C 4
-#define BLIS_GER_NC_Z 4
-
-#endif
 
 
 void bl2_ger_cntl_init()

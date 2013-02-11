@@ -282,6 +282,18 @@ CFLAGS_NOOPT    := $(CFLAGS_NOOPT) $(INCLUDE_PATHS)
 
 
 #
+# --- Special preprocessor macro definitions -----------------------------------
+#
+
+# Define a C preprocessor macro to communicate the current version so that it
+# can be embedded into the library and queried later.
+VERS_DEF     := -DBLIS_VERSION_STRING=\"$(VERSION)\"
+CFLAGS       := $(CFLAGS) $(VERS_DEF)
+CFLAGS_NOOPT := $(CFLAGS) $(VERS_DEF)
+
+
+
+#
 # --- Library object definitions -----------------------------------------------
 #
 

@@ -163,7 +163,7 @@ GENARRAY( PACKM_2XK_KERNEL,
 
 
 #undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, copyvker ) \
+#define GENTFUNC( ctype, ch, opname, scal2vker ) \
 \
 void PASTEMAC(ch,opname)( \
                           conj_t  conja, \
@@ -182,10 +182,11 @@ void PASTEMAC(ch,opname)( \
 	   the kernel to reduce to a copyv, so we call that kernel directly. */ \
 	if ( m == 1 ) \
 	{ \
-		PASTEMAC2(ch,ch,copyvker)( conja, \
-		                           n, \
-		                           a, lda, \
-		                           p, 1 ); \
+		PASTEMAC3(ch,ch,ch,scal2vker)( conja, \
+		                               n, \
+		                               beta, \
+		                               a, lda, \
+		                               p, ldp ); \
 		return; \
 	} \
 \
@@ -230,5 +231,5 @@ void PASTEMAC(ch,opname)( \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC( packm_cxk, COPYV_KERNEL )
+INSERT_GENTFUNC_BASIC( packm_cxk, SCAL2V_KERNEL )
 

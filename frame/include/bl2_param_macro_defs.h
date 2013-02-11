@@ -74,7 +74,11 @@
 
 #define bl2_datatype_proj_to_real( dt ) \
 \
-	( dt & ~BLIS_DOMAIN_BIT )
+	( dt & ~BLIS_BITVAL_COMPLEX )
+
+#define bl2_datatype_proj_to_complex( dt ) \
+\
+	( dt &  BLIS_BITVAL_COMPLEX )
 
 
 // side
@@ -93,7 +97,7 @@
 
 #define bl2_toggle_side( side ) \
 { \
-	side = bl2_uplo_toggled( side ); \
+	side = bl2_side_toggled( side ); \
 }
 
 
@@ -277,10 +281,10 @@
 \
 	( (n) == 1 )
 
-#define bl2_set_dims_with_side( side, m, n, mout, nout ) \
+#define bl2_set_dim_with_side( side, m, n, dim ) \
 { \
-	if ( bl2_is_left( side ) ) { mout = nout = m; } \
-	else                       { mout = nout = n; } \
+	if ( bl2_is_left( side ) ) { dim = m; } \
+	else                       { dim = n; } \
 }
 
 #define bl2_set_dims_with_trans( trans, m, n, mtrans, ntrans ) \

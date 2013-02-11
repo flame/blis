@@ -64,6 +64,14 @@
 \
 	(   (obj).info & BLIS_DATATYPE_BITS )
 
+#define bl2_obj_datatype_proj_to_real( obj ) \
+\
+	( ( (obj).info & BLIS_DATATYPE_BITS ) & ~BLIS_BITVAL_COMPLEX )
+
+#define bl2_obj_datatype_proj_to_complex( obj ) \
+\
+	( ( (obj).info & BLIS_DATATYPE_BITS ) &  BLIS_BITVAL_COMPLEX )
+
 #define bl2_obj_target_datatype( obj ) \
 \
 	( ( (obj).info & BLIS_TARGET_DT_BITS ) >> BLIS_TARGET_DT_SHIFT )
@@ -135,6 +143,16 @@
 #define bl2_obj_is_lower( obj ) \
 \
 	( ( (obj).info & BLIS_UPLO_BITS ) == BLIS_BITVAL_LOWER )
+
+#define bl2_obj_is_upper_after_trans( obj ) \
+\
+	( bl2_obj_has_trans( (obj) ) ? bl2_obj_is_lower( (obj) ) \
+	                             : bl2_obj_is_upper( (obj) ) )
+
+#define bl2_obj_is_lower_after_trans( obj ) \
+\
+	( bl2_obj_has_trans( (obj) ) ? bl2_obj_is_upper( (obj) ) \
+	                             : bl2_obj_is_lower( (obj) ) )
 
 #define bl2_obj_is_upper_or_lower( obj ) \
 \
@@ -310,8 +328,6 @@
 #define bl2_obj_root_is_lower( obj ) \
 \
 	bl2_obj_is_lower( *bl2_obj_root( obj ) ) \
-
-
 
 
 // Root matrix modification
@@ -872,7 +888,7 @@ bl2_obj_width_stored( obj )
 	   control tree (and to the system alignment). */ \
 	m_needed = bl2_align_dim( m, mult_m, elem_size ); \
 \
-	if ( bl2_mem_buffer( mem_p ) == NULL ) \
+	if ( bl2_mem_is_unalloc( mem_p ) ) \
 	{ \
 		needs_alloc = TRUE; \
 	} \
@@ -930,12 +946,14 @@ bl2_obj_width_stored( obj )
 #define bl2_obj_release_pack( obj_p ) \
 { \
 	mem_t* pack_mem = bl2_obj_pack_mem( *(obj_p) ); \
-	if ( bl2_mem_buffer( pack_mem ) != NULL ) \
+	if ( bl2_mem_is_alloc( pack_mem ) ) \
 		bl2_mm_release( pack_mem ); \
 \
+/*
 	mem_t* cast_mem = bl2_obj_cast_mem( *(obj_p) ); \
-	if ( bl2_mem_buffer( cast_mem ) != NULL ) \
+	if ( bl2_mem_is_alloc( cast_mem ) ) \
 		bl2_mm_release( cast_mem ); \
+*/ \
 }
 
 
@@ -993,6 +1011,7 @@ bl2_obj_width_stored( obj )
 // this macro look a lot like an induced transposition, except that the row
 // and column strides are left unchanged (which, of course, drastically
 // changes the effect of the macro).
+
 #define bl2_obj_reflect_about_diag( obj ) \
 { \
 	{ \

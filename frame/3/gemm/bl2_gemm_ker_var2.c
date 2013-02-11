@@ -152,13 +152,14 @@ void PASTEMAC(ch,varname)( \
 	/* Temporary C buffer for edge cases. */ \
 	ctype           ct[ PASTEMAC2(ch,varname,_mr) * \
 	                    PASTEMAC2(ch,varname,_nr) ]; \
-	const inc_t     rs_ct  = 1; \
-	const inc_t     cs_ct  = PASTEMAC2(ch,varname,_mr); \
+	const inc_t     rs_ct      = 1; \
+	const inc_t     cs_ct      = PASTEMAC2(ch,varname,_mr); \
 \
 	/* Alias some constants to shorter names. */ \
-	const dim_t     MR     = PASTEMAC2(ch,varname,_mr); \
-	const dim_t     NR     = PASTEMAC2(ch,varname,_nr); \
-	const bool_t    DUPB   = PASTEMAC2(ch,varname,_dupb); \
+	const dim_t     MR         = PASTEMAC2(ch,varname,_mr); \
+	const dim_t     NR         = PASTEMAC2(ch,varname,_nr); \
+	const dim_t     NDUP       = PASTEMAC2(ch,varname,_ndup); \
+	const bool_t    DUPB       = NDUP != 1; \
 \
 	ctype* restrict zero       = PASTEMAC(ch,0); \
 	ctype* restrict a_cast     = a; \
@@ -234,7 +235,7 @@ void PASTEMAC(ch,varname)( \
 \
 		/* If duplication is needed, copy the current iteration's NR
 		   columns of B to a local buffer with each value duplicated. */ \
-		if ( DUPB ) PASTEMAC(ch,dupl)( k_nr, b1, bd ); \
+		if ( DUPB ) PASTEMAC(ch,dupl)( k_nr, b1, bp ); \
 		else        bp = b1; \
 \
 		/* Interior loop over the m dimension (MR rows at a time). */ \
@@ -281,7 +282,7 @@ void PASTEMAC(ch,varname)( \
 \
 		/* If duplication is needed, copy the n_left (+ padding) columns
 		   of B to a local buffer with each value duplicated. */ \
-		if ( DUPB ) PASTEMAC(ch,dupl)( k_nr, b1, bd ); \
+		if ( DUPB ) PASTEMAC(ch,dupl)( k_nr, b1, bp ); \
 		else        bp = b1; \
 \
 		/* Right edge loop over the m dimension (MR rows at a time). */ \

@@ -112,8 +112,8 @@ int main( int argc, char** argv )
 		//bl2_obj_set_uplo( BLIS_UPPER, a );
 
 
-		bl2_sets(  (2.0/1.0), &alpha );
-		bl2_sets( -(1.0/1.0), &beta );
+		bl2_setsc(  (2.0/1.0), 0.0, &alpha );
+		bl2_setsc( -(1.0/1.0), 0.0, &beta );
 
 
 		bl2_copym( &y, &y_save );
@@ -186,10 +186,7 @@ int main( int argc, char** argv )
 			exit(1);
 #endif
 
-			dtime = bl2_clock() - dtime;
-
-			dtime_save = bl2_min( dtime, dtime_save );
-
+			dtime_save = bl2_clock_min_diff( dtime_save, dtime );
 		}
 
 		gflops = ( 2.0 * m * m ) / ( dtime_save * 1.0e9 );

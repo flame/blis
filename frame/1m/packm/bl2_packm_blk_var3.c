@@ -176,9 +176,12 @@ void PASTEMAC(ch,varname )( \
 	if ( bl2_is_row_stored( rs_p, cs_p ) )  \
 		bl2_abort(); \
 \
-	/* This variant only supports packing lower/upper-stored matrices. */ \
-	if ( !bl2_is_upper_or_lower( uploc ) )  \
+	/* This variant only supports packing lower/upper triangular matrices. */ \
+	if ( !bl2_is_triangular( strucc ) || bl2_is_dense( uploc ) )  \
 		bl2_abort(); \
+\
+	/* If C is zeros, then we don't need to pack it. */ \
+	if ( bl2_is_zeros( uploc ) ) return; \
 \
 	/* Extract the conjugation bit from the transposition argument. */ \
 	conjc = bl2_extract_conj( transc ); \
@@ -424,7 +427,6 @@ void PASTEMAC(ch,varname )( \
 		if ( panel_dim_i != panel_dim && \
 		     panel_len_i != panel_len_max_i ) \
 		{ \
-			doff_t diagoffp = diagoffc_i - panel_off_i; \
 			ctype* one      = PASTEMAC(ch,1); \
 \
 			dim_t  i        = panel_dim_i; \
@@ -435,16 +437,26 @@ void PASTEMAC(ch,varname )( \
 			inc_t  cs_pe    = panel_dim; \
 			ctype* p_edge   = p_begin + (i  )*rs_pe + (j  )*cs_pe; \
 \
-			PASTEMAC2(ch,ch,setd_unb_var1)( diagoffp, \
+/*
+			PASTEMAC(ch,fprintm)( stdout, "packm_var3: p setting br unit diag", m_br, n_br, \
+			                      p_edge, rs_pe, cs_pe, "%5.2f", "" ); \
+*/ \
+\
+			PASTEMAC2(ch,ch,setd_unb_var1)( 0, \
 			                                m_br, \
 			                                n_br, \
 			                                one, \
 			                                p_edge, rs_pe, cs_pe ); \
+\
+/*
+			PASTEMAC(ch,fprintm)( stdout, "packm_var3: setting br unit diag", m_br, n_br, \
+			                      p_edge, rs_pe, cs_pe, "%5.2f", "" ); \
+*/ \
 		} \
 \
 /*
 		PASTEMAC(ch,fprintm)( stdout, "packm_var3: p copied", panel_dim, panel_len_max_i, \
-		                      p_begin, rs_p, cs_p, "%4.1f", "" ); \
+		                      p_begin, rs_p, cs_p, "%5.2f", "" ); \
 */ \
 \
 	 	p_begin += p_inc; \

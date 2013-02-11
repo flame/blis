@@ -40,6 +40,7 @@
 \
 void PASTEMAC(ch,varname)( \
                            dim_t   k, \
+                           ctype*  alpha, \
                            ctype*  aL, \
                            ctype*  a, \
                            ctype*  bdT, \
@@ -48,17 +49,16 @@ void PASTEMAC(ch,varname)( \
                            ctype*  c, inc_t rs_c, inc_t cs_c \
                          ) \
 { \
-	ctype*      one       = PASTEMAC(ch,1); \
 	ctype*      minus_one = PASTEMAC(ch,m1); \
 \
 	const inc_t rs_b      = 4; \
 	const inc_t cs_b      = 1; \
 \
 	PASTEMAC(ch,gemmukr)( k, \
-	                      one, \
+	                      minus_one, \
 	                      aL, \
 	                      bdT, \
-	                      minus_one, \
+	                      alpha, \
 	                      b, rs_b, cs_b ); \
 \
 	PASTEMAC(ch,trsmukr)( a, \

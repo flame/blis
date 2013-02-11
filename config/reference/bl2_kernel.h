@@ -118,15 +118,18 @@
 
 // -- Default switch for duplication of B --
 
-// NOTE: If BLIS_DEFAULT_DUPLICATE_B is set to FALSE, then the
-// NUM_DUPL definitions are not used.
+// NOTE: Setting these values to 1 disables duplication. Any value
+// d > 1 results in a d-1 duplicates created within special macro-kernel
+// buffer of dimension k x NR*d.
 
-//#define BLIS_DEFAULT_DUPLICATE_B       TRUE
-#define BLIS_DEFAULT_DUPLICATE_B       FALSE
-#define BLIS_DEFAULT_NUM_DUPL_S        BLIS_NUM_ELEM_PER_REG_S
-#define BLIS_DEFAULT_NUM_DUPL_D        BLIS_NUM_ELEM_PER_REG_D
-#define BLIS_DEFAULT_NUM_DUPL_C        BLIS_NUM_ELEM_PER_REG_C
-#define BLIS_DEFAULT_NUM_DUPL_Z        BLIS_NUM_ELEM_PER_REG_Z
+//#define BLIS_DEFAULT_NUM_DUPL_S        BLIS_NUM_ELEM_PER_REG_S
+//#define BLIS_DEFAULT_NUM_DUPL_D        BLIS_NUM_ELEM_PER_REG_D
+//#define BLIS_DEFAULT_NUM_DUPL_C        BLIS_NUM_ELEM_PER_REG_C
+//#define BLIS_DEFAULT_NUM_DUPL_Z        BLIS_NUM_ELEM_PER_REG_Z
+#define BLIS_DEFAULT_NUM_DUPL_S        1
+#define BLIS_DEFAULT_NUM_DUPL_D        1
+#define BLIS_DEFAULT_NUM_DUPL_C        1
+#define BLIS_DEFAULT_NUM_DUPL_Z        1
 
 // -- Default incremental packing blocksizes (n dimension) --
 
@@ -139,6 +142,30 @@
 #define BLIS_DEFAULT_NI_D              (BLIS_DEFAULT_NI_FAC * BLIS_DEFAULT_NR_D)
 #define BLIS_DEFAULT_NI_C              (BLIS_DEFAULT_NI_FAC * BLIS_DEFAULT_NR_C)
 #define BLIS_DEFAULT_NI_Z              (BLIS_DEFAULT_NI_FAC * BLIS_DEFAULT_NR_Z)
+
+
+
+// -- LEVEL-2 KERNEL CONSTANTS -------------------------------------------------
+
+// NOTE: These values determine high-level cache blocking for level-2
+// operations ONLY. So, if gemv is performed with a 2000x2000 matrix A and
+// MC = NC = 1000, then a total of four unblocked (or unblocked fused)
+// gemv subproblems are called. The blocked algorithms are only useful in
+// that they provide the opportunity for packing vectors. (Matrices can also
+// be packed here, but this tends to be much too expensive in practice to
+// actually employ.)
+
+#define BLIS_DEFAULT_L2_MC_S           1000
+#define BLIS_DEFAULT_L2_NC_S           1000
+
+#define BLIS_DEFAULT_L2_MC_D           1000
+#define BLIS_DEFAULT_L2_NC_D           1000
+
+#define BLIS_DEFAULT_L2_MC_C           1000
+#define BLIS_DEFAULT_L2_NC_C           1000
+
+#define BLIS_DEFAULT_L2_MC_Z           1000
+#define BLIS_DEFAULT_L2_NC_Z           1000
 
 
 
@@ -244,6 +271,10 @@
 
 // -- LEVEL-1V KERNEL DEFINITIONS ----------------------------------------------
 
+// -- addv --
+
+#define ADDV_KERNEL          addv_unb_var1
+
 // -- axpyv --
 
 #define AXPYV_KERNEL         axpyv_unb_var1
@@ -279,6 +310,10 @@
 // -- setv --
 
 #define SETV_KERNEL          setv_unb_var1
+
+// -- subv --
+
+#define SUBV_KERNEL          subv_unb_var1
 
 
 

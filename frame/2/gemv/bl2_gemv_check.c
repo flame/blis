@@ -111,11 +111,6 @@ void bl2_gemv_int_check( obj_t*  alpha,
 
 	bl2_gemv_basic_check( alpha, a, x, beta, y );
 
-	// Check matrix structure.
-
-	e_val = bl2_check_general_object( a );
-	bl2_check_error_code( e_val );
-
 	// Check control tree pointer.
 
 	e_val = bl2_check_valid_cntl( ( void* )cntl );

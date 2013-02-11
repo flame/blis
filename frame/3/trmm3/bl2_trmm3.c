@@ -69,6 +69,19 @@ void bl2_trmm3( side_t  side,
 		return;
 	}
 
+	// Alias A, B, and C so we can tweak the objects if necessary.
+	bl2_obj_alias_to( *a, a_local );
+	bl2_obj_alias_to( *b, b_local );
+	bl2_obj_alias_to( *c, c_local );
+
+	// Set each alias as the root object. This makes life easier when
+	// implementing right side and transpose cases because we don't actually
+	// the root objects but rather the root objects after we are done
+	// fiddling with them.
+	bl2_obj_set_as_root( a_local );
+	bl2_obj_set_as_root( b_local );
+	bl2_obj_set_as_root( c_local );
+
 	// For now, assume the storage datatypes are the desired target
 	// datatypes.
 	dt_targ_a = bl2_obj_datatype( *a );
@@ -152,36 +165,36 @@ void PASTEMAC(ch,opname)( \
                           ctype*  c, inc_t rs_c, inc_t cs_c  \
                         ) \
 { \
-    const num_t dt = PASTEMAC(ch,type); \
+	const num_t dt = PASTEMAC(ch,type); \
 \
-    obj_t       alphao, ao, bo, betao, co; \
+	obj_t       alphao, ao, bo, betao, co; \
 \
-    dim_t       m_a, n_a; \
-    dim_t       m_b, n_b; \
+	dim_t       mn_a; \
+	dim_t       m_b, n_b; \
 \
-    bl2_set_dims_with_side(  side,   m, n, m_a, n_a ); \
+	bl2_set_dim_with_side(   side,   m, n, mn_a ); \
 	bl2_set_dims_with_trans( transb, m, n, m_b, n_b ); \
 \
-    bl2_obj_create_scalar_with_attached_buffer( dt, alpha, &alphao ); \
+	bl2_obj_create_scalar_with_attached_buffer( dt, alpha, &alphao ); \
 	bl2_obj_create_scalar_with_attached_buffer( dt, beta,  &betao  ); \
 \
-    bl2_obj_create_with_attached_buffer( dt, m_a, n_a, a, rs_a, cs_a, &ao ); \
-    bl2_obj_create_with_attached_buffer( dt, m_b, n_b, b, rs_b, cs_b, &bo ); \
-	bl2_obj_create_with_attached_buffer( dt, m,   n,   c, rs_c, cs_c, &co ); \
+	bl2_obj_create_with_attached_buffer( dt, mn_a, mn_a, a, rs_a, cs_a, &ao ); \
+	bl2_obj_create_with_attached_buffer( dt, m_b,  n_b,  b, rs_b, cs_b, &bo ); \
+	bl2_obj_create_with_attached_buffer( dt, m,    n,    c, rs_c, cs_c, &co ); \
 \
-    bl2_obj_set_uplo( uploa, ao ); \
-    bl2_obj_set_diag( diaga, ao ); \
-    bl2_obj_set_conjtrans( transa, ao ); \
-    bl2_obj_set_conjtrans( transb, bo ); \
+	bl2_obj_set_uplo( uploa, ao ); \
+	bl2_obj_set_diag( diaga, ao ); \
+	bl2_obj_set_conjtrans( transa, ao ); \
+	bl2_obj_set_conjtrans( transb, bo ); \
 \
-    bl2_obj_set_struc( BLIS_TRIANGULAR, ao ); \
+	bl2_obj_set_struc( BLIS_TRIANGULAR, ao ); \
 \
-    PASTEMAC0(opname)( side, \
-                       &alphao, \
-                       &ao, \
-                       &bo, \
-                       &betao, \
-                       &co ); \
+	PASTEMAC0(opname)( side, \
+	                   &alphao, \
+	                   &ao, \
+	                   &bo, \
+	                   &betao, \
+	                   &co ); \
 }
 
 INSERT_GENTFUNC_BASIC( trmm3, trmm3 )

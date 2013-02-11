@@ -41,13 +41,14 @@ void bl2_trsm_u_blk_var3( obj_t*  alpha,
                           obj_t*  c,
                           trsm_t* cntl )
 {
-	obj_t a1, a1_pack;
-	obj_t b1, b1_pack;
-	obj_t c_pack;
+	obj_t  a1, a1_pack;
+	obj_t  b1, b1_pack;
+	obj_t  c_pack;
+	obj_t* alpha_use;
 
-	dim_t i;
-	dim_t b_alg;
-	dim_t k_trans;
+	dim_t  i;
+	dim_t  b_alg;
+	dim_t  k_trans;
 
 	// Initialize all pack objects that are passed into packm_init().
 	bl2_obj_init_pack( &a1_pack );
@@ -100,9 +101,14 @@ void bl2_trsm_u_blk_var3( obj_t*  alpha,
 		               &b1, &b1_pack,
 		               cntl_sub_packm_b( cntl ) );
 
+		// Since this variant executes multiple rank-k updates, we must use
+		// alpha only for the first iteration and BLIS_ONE for all others.
+		if ( i == 0 ) alpha_use = alpha;
+		else          alpha_use = &BLIS_ONE;
+
 		// Perform trsm subproblem.
 		bl2_trsm_int( BLIS_LEFT,
-		              alpha,
+		              alpha_use,
 		              &a1_pack,
 		              &b1_pack,
 		              beta,

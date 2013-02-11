@@ -41,25 +41,21 @@
 // when initializing its control tree node.
 //
 
-#define bl2_strmm_u_ker_var2_dupb BLIS_DEFAULT_DUPLICATE_B
 #define bl2_strmm_u_ker_var2_ndup BLIS_DEFAULT_NUM_DUPL_S
 #define bl2_strmm_u_ker_var2_kc   BLIS_DEFAULT_KC_S
 #define bl2_strmm_u_ker_var2_mr   BLIS_DEFAULT_MR_S
 #define bl2_strmm_u_ker_var2_nr   BLIS_DEFAULT_NR_S
 
-#define bl2_dtrmm_u_ker_var2_dupb BLIS_DEFAULT_DUPLICATE_B
 #define bl2_dtrmm_u_ker_var2_ndup BLIS_DEFAULT_NUM_DUPL_D
 #define bl2_dtrmm_u_ker_var2_kc   BLIS_DEFAULT_KC_D
 #define bl2_dtrmm_u_ker_var2_mr   BLIS_DEFAULT_MR_D
 #define bl2_dtrmm_u_ker_var2_nr   BLIS_DEFAULT_NR_D
 
-#define bl2_ctrmm_u_ker_var2_dupb BLIS_DEFAULT_DUPLICATE_B
 #define bl2_ctrmm_u_ker_var2_ndup BLIS_DEFAULT_NUM_DUPL_C
 #define bl2_ctrmm_u_ker_var2_kc   BLIS_DEFAULT_KC_C
 #define bl2_ctrmm_u_ker_var2_mr   BLIS_DEFAULT_MR_C
 #define bl2_ctrmm_u_ker_var2_nr   BLIS_DEFAULT_NR_C
 
-#define bl2_ztrmm_u_ker_var2_dupb BLIS_DEFAULT_DUPLICATE_B
 #define bl2_ztrmm_u_ker_var2_ndup BLIS_DEFAULT_NUM_DUPL_Z
 #define bl2_ztrmm_u_ker_var2_kc   BLIS_DEFAULT_KC_Z
 #define bl2_ztrmm_u_ker_var2_mr   BLIS_DEFAULT_MR_Z

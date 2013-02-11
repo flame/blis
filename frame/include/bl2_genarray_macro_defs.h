@@ -51,6 +51,19 @@ arrayname[BLIS_NUM_FP_TYPES] = \
 	PASTEMAC(z,op)  \
 }
 
+/*
+#define GENARRAYR(arrayname,op) \
+\
+arrayname[BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES] = \
+{ \
+	{ PASTEMAC2(s,s,op), NULL,              PASTEMAC2(s,d,op), NULL,             }, \
+	{ PASTEMAC2(c,s,op), NULL,              PASTEMAC2(c,d,op), NULL,             }, \
+	{ PASTEMAC2(d,s,op), NULL,              PASTEMAC2(d,d,op), NULL,             }, \
+	{ PASTEMAC2(z,s,op), NULL,              PASTEMAC2(z,d,op), NULL,             }  \
+}
+*/
+
+
 
 // -- Two-operand macros --
 

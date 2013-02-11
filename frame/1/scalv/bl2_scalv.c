@@ -67,6 +67,7 @@ void PASTEMAC0(opname)( \
 
 GENFRONT( scalv, SCALV_KERNEL )
 
+
 //
 // Define BLAS-like interfaces with homogeneous-typed operands.
 //

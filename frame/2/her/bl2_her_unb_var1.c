@@ -85,9 +85,11 @@ void bl2_her_unb_var1( conj_t  conjh,
 
 	FUNCPTR_T f;
 
-	// The datatype of alpha MUST be the real projection of the datatype of x.
-	dt_alpha  = bl2_datatype_proj_to_real( dt_x );
-	buf_alpha = bl2_obj_scalar_buffer( dt_alpha, *alpha );
+
+	// If alpha is a scalar constant, use dt_x to extract the address of the
+	// corresponding constant value; otherwise, use the datatype encoded
+	// within the alpha object and extract the buffer at the alpha offset.
+	bl2_set_scalar_dt_buffer( alpha, dt_x, dt_alpha, buf_alpha );
 
 	// Index into the type combination array to extract the correct
 	// function pointer.
@@ -104,8 +106,8 @@ void bl2_her_unb_var1( conj_t  conjh,
 }
 
 
-#undef  GENTFUNC2R
-#define GENTFUNC2R( ctype_x, ctype_c, ctype_xr, chx, chc, chxr, varname, kername ) \
+#undef  GENTFUNC2
+#define GENTFUNC2( ctype_x, ctype_c, chx, chc, varname, kername ) \
 \
 void PASTEMAC2(chx,chc,varname)( \
                                  uplo_t  uplo, \
@@ -117,13 +119,14 @@ void PASTEMAC2(chx,chc,varname)( \
                                  void*   c, inc_t rs_c, inc_t cs_c \
                                ) \
 { \
-	ctype_xr* alpha_cast = alpha; \
+	ctype_x*  alpha_cast = alpha; \
 	ctype_x*  x_cast     = x; \
 	ctype_c*  c_cast     = c; \
 	ctype_x*  x0; \
 	ctype_x*  chi1; \
 	ctype_c*  c10t; \
 	ctype_c*  gamma11; \
+	ctype_x   alpha_local; \
 	ctype_x   alpha_chi1; \
 	ctype_x   alpha_chi1_chi1; \
 	ctype_x   conjx0_chi1; \
@@ -134,6 +137,14 @@ void PASTEMAC2(chx,chc,varname)( \
 	conj_t    conj0, conj1; \
 \
 	if ( bl2_zero_dim1( m ) ) return; \
+\
+	/* Make a local copy of alpha and zero out the imaginary component if
+	   we are being invoked as her, since her requires alpha to be real. */ \
+	PASTEMAC2(chx,chx,copys)( *alpha_cast, alpha_local ); \
+	if ( bl2_is_conj( conjh ) ) \
+	{ \
+		PASTEMAC(chx,setimag0)( alpha_local ); \
+	} \
 \
 	/* The algorithm will be expressed in terms of the lower triangular case;
 	   the upper triangular case is supported by swapping the row and column
@@ -172,7 +183,7 @@ void PASTEMAC2(chx,chc,varname)( \
 		PASTEMAC2(chx,chx,copycjs)( conj1, *chi1, conjx1_chi1 ); \
 \
 		/* Compute scalar for vector subproblem. */ \
-		PASTEMAC3(chxr,chx,chx,scal2s)( *alpha_cast, conjx0_chi1, alpha_chi1 ); \
+		PASTEMAC3(chx,chx,chx,scal2s)( alpha_local, conjx0_chi1, alpha_chi1 ); \
 \
 		/* Compute alpha * chi1 * conj(chi1) after chi1 has already been
 		   conjugated, if needed, by conjx. */ \
@@ -197,13 +208,13 @@ void PASTEMAC2(chx,chc,varname)( \
 
 // Define the basic set of functions unconditionally, and then also some
 // mixed datatype functions if requested.
-INSERT_GENTFUNC2R_BASIC( her_unb_var1, AXPYV_KERNEL )
+INSERT_GENTFUNC2_BASIC( her_unb_var1, AXPYV_KERNEL )
 
 #ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTFUNC2R_MIX_D( her_unb_var1, AXPYV_KERNEL )
+INSERT_GENTFUNC2_MIX_D( her_unb_var1, AXPYV_KERNEL )
 #endif
 
 #ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTFUNC2R_MIX_P( her_unb_var1, AXPYV_KERNEL )
+INSERT_GENTFUNC2_MIX_P( her_unb_var1, AXPYV_KERNEL )
 #endif
 

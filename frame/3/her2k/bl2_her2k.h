@@ -56,7 +56,7 @@
 //
 void bl2_her2k( obj_t*  alpha,
                 obj_t*  a,
-                obj_t*  bh,
+                obj_t*  b,
                 obj_t*  beta,
                 obj_t*  c );
 

@@ -36,14 +36,13 @@
 
 // --- BLIS to BLAS/LAPACK mappings --------------------------------------------
 
-void bl2_param_map_blis_to_netlib_trans( trans_t trans, char* blas_trans )
+void bl2_param_map_blis_to_netlib_side( side_t side, char* blas_side )
 {
-	if      ( trans == BLIS_NO_TRANSPOSE   ) *blas_trans = 'N';
-	else if ( trans == BLIS_TRANSPOSE      ) *blas_trans = 'T';
-	else if ( trans == BLIS_CONJ_TRANSPOSE ) *blas_trans = 'C';
+	if      ( side == BLIS_LEFT  ) *blas_side = 'L';
+	else if ( side == BLIS_RIGHT ) *blas_side = 'R';
 	else
 	{
-		bl2_check_error_code( BLIS_INVALID_TRANS );
+		bl2_check_error_code( BLIS_INVALID_SIDE );
 	}
 }
 
@@ -57,13 +56,14 @@ void bl2_param_map_blis_to_netlib_uplo( uplo_t uplo, char* blas_uplo )
 	}
 }
 
-void bl2_param_map_blis_to_netlib_side( side_t side, char* blas_side )
+void bl2_param_map_blis_to_netlib_trans( trans_t trans, char* blas_trans )
 {
-	if      ( side == BLIS_LEFT  ) *blas_side = 'L';
-	else if ( side == BLIS_RIGHT ) *blas_side = 'R';
+	if      ( trans == BLIS_NO_TRANSPOSE   ) *blas_trans = 'N';
+	else if ( trans == BLIS_TRANSPOSE      ) *blas_trans = 'T';
+	else if ( trans == BLIS_CONJ_TRANSPOSE ) *blas_trans = 'C';
 	else
 	{
-		bl2_check_error_code( BLIS_INVALID_SIDE );
+		bl2_check_error_code( BLIS_INVALID_TRANS );
 	}
 }
 
@@ -98,41 +98,41 @@ void bl2_param_map_blis_to_netlib_machval( machval_t machval, char* blas_machval
 
 // --- BLAS/LAPACK to BLIS mappings --------------------------------------------
 
-void bl2_param_map_netlib_to_blis_trans( char* trans, trans_t* blis_trans )
+void bl2_param_map_netlib_to_blis_side( char side, side_t* blis_side )
 {
-	if      ( *trans == 'n' || *trans == 'N' ) *blis_trans = BLIS_NO_TRANSPOSE;
-	else if ( *trans == 't' || *trans == 'T' ) *blis_trans = BLIS_TRANSPOSE;
-	else if ( *trans == 'c' || *trans == 'C' ) *blis_trans = BLIS_CONJ_TRANSPOSE;
-	else
-	{
-		bl2_check_error_code( BLIS_INVALID_TRANS );
-	}
-}
-
-void bl2_param_map_netlib_to_blis_uplo( char* uplo, uplo_t* blis_uplo )
-{
-	if      ( *uplo == 'l' || *uplo == 'L' ) *blis_uplo = BLIS_LOWER;
-	else if ( *uplo == 'u' || *uplo == 'U' ) *blis_uplo = BLIS_UPPER;
-	else
-	{
-		bl2_check_error_code( BLIS_INVALID_UPLO );
-	}
-}
-
-void bl2_param_map_netlib_to_blis_side( char* side, side_t* blis_side )
-{
-	if      ( *side == 'l' || *side == 'L' ) *blis_side = BLIS_LEFT;
-	else if ( *side == 'r' || *side == 'R' ) *blis_side = BLIS_RIGHT;
+	if      ( side == 'l' || side == 'L' ) *blis_side = BLIS_LEFT;
+	else if ( side == 'r' || side == 'R' ) *blis_side = BLIS_RIGHT;
 	else
 	{
 		bl2_check_error_code( BLIS_INVALID_SIDE );
 	}
 }
 
-void bl2_param_map_netlib_to_blis_diag( char* diag, diag_t* blis_diag )
+void bl2_param_map_netlib_to_blis_uplo( char uplo, uplo_t* blis_uplo )
 {
-	if      ( *diag == 'n' || *diag == 'N' ) *blis_diag = BLIS_NONUNIT_DIAG;
-	else if ( *diag == 'u' || *diag == 'U' ) *blis_diag = BLIS_UNIT_DIAG;
+	if      ( uplo == 'l' || uplo == 'L' ) *blis_uplo = BLIS_LOWER;
+	else if ( uplo == 'u' || uplo == 'U' ) *blis_uplo = BLIS_UPPER;
+	else
+	{
+		bl2_check_error_code( BLIS_INVALID_UPLO );
+	}
+}
+
+void bl2_param_map_netlib_to_blis_trans( char trans, trans_t* blis_trans )
+{
+	if      ( trans == 'n' || trans == 'N' ) *blis_trans = BLIS_NO_TRANSPOSE;
+	else if ( trans == 't' || trans == 'T' ) *blis_trans = BLIS_TRANSPOSE;
+	else if ( trans == 'c' || trans == 'C' ) *blis_trans = BLIS_CONJ_TRANSPOSE;
+	else
+	{
+		bl2_check_error_code( BLIS_INVALID_TRANS );
+	}
+}
+
+void bl2_param_map_netlib_to_blis_diag( char diag, diag_t* blis_diag )
+{
+	if      ( diag == 'n' || diag == 'N' ) *blis_diag = BLIS_NONUNIT_DIAG;
+	else if ( diag == 'u' || diag == 'U' ) *blis_diag = BLIS_UNIT_DIAG;
 	else
 	{
 		bl2_check_error_code( BLIS_INVALID_DIAG );
@@ -142,42 +142,108 @@ void bl2_param_map_netlib_to_blis_diag( char* diag, diag_t* blis_diag )
 
 // --- BLIS char to BLIS mappings ----------------------------------------------
 
-void bl2_param_map_char_to_blis_trans( char* trans, trans_t* blis_trans )
+void bl2_param_map_char_to_blis_side( char side, side_t* blis_side )
 {
-	if      ( *trans == 'n' || *trans == 'N' ) *blis_trans = BLIS_NO_TRANSPOSE;
-	else if ( *trans == 't' || *trans == 'T' ) *blis_trans = BLIS_TRANSPOSE;
-	else if ( *trans == 'c' || *trans == 'C' ) *blis_trans = BLIS_CONJ_NO_TRANSPOSE;
-	else if ( *trans == 'h' || *trans == 'H' ) *blis_trans = BLIS_CONJ_TRANSPOSE;
-	else
-	{
-		bl2_check_error_code( BLIS_INVALID_TRANS );
-	}
-}
-
-void bl2_param_map_char_to_blis_uplo( char* uplo, uplo_t* blis_uplo )
-{
-	if      ( *uplo == 'l' || *uplo == 'L' ) *blis_uplo = BLIS_LOWER;
-	else if ( *uplo == 'u' || *uplo == 'U' ) *blis_uplo = BLIS_UPPER;
-	else
-	{
-		bl2_check_error_code( BLIS_INVALID_UPLO );
-	}
-}
-
-void bl2_param_map_char_to_blis_side( char* side, side_t* blis_side )
-{
-	if      ( *side == 'l' || *side == 'L' ) *blis_side = BLIS_LEFT;
-	else if ( *side == 'r' || *side == 'R' ) *blis_side = BLIS_RIGHT;
+	if      ( side == 'l' || side == 'L' ) *blis_side = BLIS_LEFT;
+	else if ( side == 'r' || side == 'R' ) *blis_side = BLIS_RIGHT;
 	else
 	{
 		bl2_check_error_code( BLIS_INVALID_SIDE );
 	}
 }
 
-void bl2_param_map_char_to_blis_diag( char* diag, diag_t* blis_diag )
+void bl2_param_map_char_to_blis_uplo( char uplo, uplo_t* blis_uplo )
 {
-	if      ( *diag == 'n' || *diag == 'N' ) *blis_diag = BLIS_NONUNIT_DIAG;
-	else if ( *diag == 'u' || *diag == 'U' ) *blis_diag = BLIS_UNIT_DIAG;
+	if      ( uplo == 'l' || uplo == 'L' ) *blis_uplo = BLIS_LOWER;
+	else if ( uplo == 'u' || uplo == 'U' ) *blis_uplo = BLIS_UPPER;
+	else if ( uplo == 'e' || uplo == 'E' ) *blis_uplo = BLIS_DENSE;
+	else
+	{
+		bl2_check_error_code( BLIS_INVALID_UPLO );
+	}
+}
+
+void bl2_param_map_char_to_blis_trans( char trans, trans_t* blis_trans )
+{
+	if      ( trans == 'n' || trans == 'N' ) *blis_trans = BLIS_NO_TRANSPOSE;
+	else if ( trans == 't' || trans == 'T' ) *blis_trans = BLIS_TRANSPOSE;
+	else if ( trans == 'c' || trans == 'C' ) *blis_trans = BLIS_CONJ_NO_TRANSPOSE;
+	else if ( trans == 'h' || trans == 'H' ) *blis_trans = BLIS_CONJ_TRANSPOSE;
+	else
+	{
+		bl2_check_error_code( BLIS_INVALID_TRANS );
+	}
+}
+
+void bl2_param_map_char_to_blis_conj( char conj, conj_t* blis_conj )
+{
+	if      ( conj == 'n' || conj == 'N' ) *blis_conj = BLIS_NO_CONJUGATE;
+	else if ( conj == 'c' || conj == 'C' ) *blis_conj = BLIS_CONJUGATE;
+	else
+	{
+		bl2_check_error_code( BLIS_INVALID_CONJ );
+	}
+}
+
+void bl2_param_map_char_to_blis_diag( char diag, diag_t* blis_diag )
+{
+	if      ( diag == 'n' || diag == 'N' ) *blis_diag = BLIS_NONUNIT_DIAG;
+	else if ( diag == 'u' || diag == 'U' ) *blis_diag = BLIS_UNIT_DIAG;
+	else
+	{
+		bl2_check_error_code( BLIS_INVALID_DIAG );
+	}
+}
+
+
+// --- BLIS to BLIS char mappings ----------------------------------------------
+
+void bl2_param_map_blis_to_char_side( side_t blis_side, char* side )
+{
+	if      ( blis_side == BLIS_LEFT  ) *side = 'l';
+	else if ( blis_side == BLIS_RIGHT ) *side = 'r';
+	else
+	{
+		bl2_check_error_code( BLIS_INVALID_SIDE );
+	}
+}
+
+void bl2_param_map_blis_to_char_uplo( uplo_t blis_uplo, char* uplo )
+{
+	if      ( blis_uplo == BLIS_LOWER ) *uplo = 'l';
+	else if ( blis_uplo == BLIS_UPPER ) *uplo = 'u';
+	else
+	{
+		bl2_check_error_code( BLIS_INVALID_UPLO );
+	}
+}
+
+void bl2_param_map_blis_to_char_trans( trans_t blis_trans, char* trans )
+{
+	if      ( blis_trans == BLIS_NO_TRANSPOSE      ) *trans = 'n';
+	else if ( blis_trans == BLIS_TRANSPOSE         ) *trans = 't';
+	else if ( blis_trans == BLIS_CONJ_NO_TRANSPOSE ) *trans = 'c';
+	else if ( blis_trans == BLIS_CONJ_TRANSPOSE    ) *trans = 'h';
+	else
+	{
+		bl2_check_error_code( BLIS_INVALID_TRANS );
+	}
+}
+
+void bl2_param_map_blis_to_char_conj( trans_t blis_conj, char* conj )
+{
+	if      ( blis_conj == BLIS_NO_CONJUGATE ) *conj = 'n';
+	else if ( blis_conj == BLIS_CONJUGATE    ) *conj = 'c';
+	else
+	{
+		bl2_check_error_code( BLIS_INVALID_CONJ );
+	}
+}
+
+void bl2_param_map_blis_to_char_diag( diag_t blis_diag, char* diag )
+{
+	if      ( blis_diag == BLIS_NONUNIT_DIAG ) *diag = 'n';
+	else if ( blis_diag == BLIS_UNIT_DIAG    ) *diag = 'u';
 	else
 	{
 		bl2_check_error_code( BLIS_INVALID_DIAG );

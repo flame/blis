@@ -69,16 +69,16 @@ void bl2_hemm( side_t  side,
 		return;
 	}
 
+	// Alias A and B in case we need to induce the right side case.
+	bl2_obj_alias_to( *a, a_local );
+	bl2_obj_alias_to( *b, b_local );
+	bl2_obj_alias_to( *c, c_local );
+
 	// For now, assume the storage datatypes are the desired target
 	// datatypes.
 	dt_targ_a = bl2_obj_datatype( *a );
 	dt_targ_b = bl2_obj_datatype( *b );
 	dt_targ_c = bl2_obj_datatype( *c );
-
-	// Alias A and B in case we need to induce the right side case.
-	bl2_obj_alias_to( *a, a_local );
-	bl2_obj_alias_to( *b, b_local );
-	bl2_obj_alias_to( *c, c_local );
 
 	// We implement hemm in terms of gemm. But in order to do so we must make
 	// sure matrix A is on the correct side for our gemm kernel. We assume
@@ -142,35 +142,35 @@ void PASTEMAC(ch,opname)( \
                           ctype*  c, inc_t rs_c, inc_t cs_c  \
                         ) \
 { \
-    const num_t dt = PASTEMAC(ch,type); \
+	const num_t dt = PASTEMAC(ch,type); \
 \
-    obj_t       alphao, ao, bo, betao, co; \
+	obj_t       alphao, ao, bo, betao, co; \
 \
-	dim_t       m_a, n_a; \
+	dim_t       mn_a; \
 	dim_t       m_b, n_b; \
 \
-	bl2_set_dims_with_side(  side,   m, n, m_a, n_a ); \
+	bl2_set_dim_with_side(   side,   m, n, mn_a ); \
 	bl2_set_dims_with_trans( transb, m, n, m_b, n_b ); \
 \
-    bl2_obj_create_scalar_with_attached_buffer( dt, alpha, &alphao ); \
-    bl2_obj_create_scalar_with_attached_buffer( dt, beta,  &betao  ); \
+	bl2_obj_create_scalar_with_attached_buffer( dt, alpha, &alphao ); \
+	bl2_obj_create_scalar_with_attached_buffer( dt, beta,  &betao  ); \
 \
-    bl2_obj_create_with_attached_buffer( dt, m_a, n_a, a, rs_a, cs_a, &ao ); \
-    bl2_obj_create_with_attached_buffer( dt, m_b, n_b, b, rs_b, cs_b, &bo ); \
-    bl2_obj_create_with_attached_buffer( dt, m,   n,   c, rs_c, cs_c, &co ); \
+	bl2_obj_create_with_attached_buffer( dt, mn_a, mn_a, a, rs_a, cs_a, &ao ); \
+	bl2_obj_create_with_attached_buffer( dt, m_b,  n_b,  b, rs_b, cs_b, &bo ); \
+	bl2_obj_create_with_attached_buffer( dt, m,    n,    c, rs_c, cs_c, &co ); \
 \
-    bl2_obj_set_uplo( uploa, ao ); \
-    bl2_obj_set_conj( conja, ao ); \
-    bl2_obj_set_conjtrans( transb, bo ); \
+	bl2_obj_set_uplo( uploa, ao ); \
+	bl2_obj_set_conj( conja, ao ); \
+	bl2_obj_set_conjtrans( transb, bo ); \
 \
 	bl2_obj_set_struc( BLIS_HERMITIAN, ao ); \
 \
-    PASTEMAC0(opname)( side, \
+	PASTEMAC0(opname)( side, \
 	                   &alphao, \
-                       &ao, \
-                       &bo, \
-                       &betao, \
-                       &co ); \
+	                   &ao, \
+	                   &bo, \
+	                   &betao, \
+	                   &co ); \
 }
 
 INSERT_GENTFUNC_BASIC( hemm, hemm )

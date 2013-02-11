@@ -65,6 +65,9 @@ void bl2_obj_attach_buffer( void*  p,
 
 void bl2_obj_attach_internal_buffer( obj_t* obj );
 
+void bl2_obj_init_scalar( num_t  dt,
+                          obj_t* b );
+
 void bl2_obj_init_scalar_copy_of( num_t  dt,
                                   conj_t conj,
                                   obj_t* a,

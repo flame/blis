@@ -1,0 +1,11 @@
+1         Number of repeats per experiment (where best result is reported)
+crg       Matrix storage scheme(s) to test ('c' = col-major; 'r' = row-major; 'g' = general stride)
+crji      Vector storage scheme(s) to test ('c' = colvec/unit; 'r' = rowvec/unit; 'j' = colvec/non-unit; 'i' = rowvec/non-unit)
+1         Test all combinations of storage schemes?
+32        General stride spacing (for cases when testing general stride)
+sdcz      Datatype(s) to test
+300      Problem size: first to test
+600      Problem size: maximum to test
+300      Problem size: increment between experiments
+i         Reaction to test failure ('i' = ignore; 's' = sleep() and continue; 'a' = abort)
+0         Output results to stdout AND matlab files (0 = output only to stdout)

@@ -52,21 +52,11 @@ trmv_t*           trmv_cntl_ge_ncol_trow;
 
 // Cache blocksizes.
 
-#if 0
+#define BLIS_TRMV_MC_S BLIS_DEFAULT_L2_MC_S
+#define BLIS_TRMV_MC_D BLIS_DEFAULT_L2_MC_D
+#define BLIS_TRMV_MC_C BLIS_DEFAULT_L2_MC_C
+#define BLIS_TRMV_MC_Z BLIS_DEFAULT_L2_MC_Z
 
-#define BLIS_TRMV_MC_S 1000
-#define BLIS_TRMV_MC_D 1000
-#define BLIS_TRMV_MC_C 1000
-#define BLIS_TRMV_MC_Z 1000
-
-#else
-
-#define BLIS_TRMV_MC_S 4
-#define BLIS_TRMV_MC_D 4
-#define BLIS_TRMV_MC_C 4
-#define BLIS_TRMV_MC_Z 4
-
-#endif
 
 
 void bl2_trmv_cntl_init()

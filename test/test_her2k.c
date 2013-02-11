@@ -38,6 +38,8 @@
 //            uploa  transa m     k     alpha    a        lda   b        ldb   beta     c        ldc
 void dsyr2k_( char*, char*, int*, int*, double*, double*, int*, double*, int*, double*, double*, int* );
 
+#define PRINT 1
+
 int main( int argc, char** argv )
 {
 	obj_t a, bh, b, ah, c;
@@ -88,8 +90,8 @@ int main( int argc, char** argv )
 	p_end   = 16;
 	p_inc   = 1;
 
-	m_input = 15;
-	k_input = 13;
+	m_input = 10;
+	k_input = 10;
 #endif
 
 	dt_a = BLIS_DOUBLE;
@@ -121,12 +123,13 @@ int main( int argc, char** argv )
 
 		bl2_obj_set_struc( BLIS_HERMITIAN, c );
 		bl2_obj_set_uplo( BLIS_LOWER, c );
+		//bl2_obj_set_uplo( BLIS_UPPER, c );
 
 		bl2_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, a, ah );
 		bl2_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, b, bh );
 
-		bl2_sets(  (2.0/1.0), &alpha );
-		bl2_sets( -(1.0/1.0), &beta );
+		bl2_setsc(  (1.0/1.0), 0.0, &alpha );
+		bl2_setsc(  (0.0/1.0), 0.0, &beta );
 
 		mr = bl2_blksz_obj_create( 2, 4, 2, 2 );
 		kr = bl2_blksz_obj_create( 1, 1, 1, 1 );
@@ -221,7 +224,7 @@ int main( int argc, char** argv )
 
 #ifdef PRINT
 			bl2_printm( "a", &a, "%4.1f", "" );
-			bl2_printm( "b", &a, "%4.1f", "" );
+			bl2_printm( "b", &b, "%4.1f", "" );
 			bl2_printm( "c", &c, "%4.1f", "" );
 #endif
 
@@ -240,7 +243,7 @@ int main( int argc, char** argv )
 			               &c,
 			               her2k_cntl_mm_op );
 */
-
+/*
 			bl2_herk_int( &alpha,
 			              &a,
 			              &bh,
@@ -253,10 +256,18 @@ int main( int argc, char** argv )
 			              &BLIS_ONE,
 			              &c,
 			              herk_cntl_mm_op );
+*/
+
+			bl2_her2k( &alpha,
+			           &a,
+			           &b,
+			           &beta,
+			           &c );
 
 #else
 
 			char    uploa  = 'L';
+			//char    uploa  = 'U';
 			char    transa = 'N';
 			int     mm     = bl2_obj_length( c );
 			int     kk     = bl2_obj_width_after_trans( a );
@@ -286,10 +297,7 @@ int main( int argc, char** argv )
 #endif
 
 
-			dtime = bl2_clock() - dtime;
-
-			dtime_save = bl2_min( dtime, dtime_save );
-
+			dtime_save = bl2_clock_min_diff( dtime_save, dtime );
 		}
 
 		gflops = ( 2.0 * m * k * m ) / ( dtime_save * 1.0e9 );

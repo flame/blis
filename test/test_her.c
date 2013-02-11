@@ -37,6 +37,9 @@
 
 //          uplo   m     alpha    x        incx  a        lda
 void dsyr_( char*, int*, double*, double*, int*, double*, int* );
+void zher_( char*, int*, double*, dcomplex*, int*, dcomplex*, int* );
+
+#define PRINT 1
 
 int main( int argc, char** argv )
 {
@@ -73,7 +76,7 @@ int main( int argc, char** argv )
 	m_input = 6;
 #endif
 
-#if 1
+#if 0
 	dt_alpha = BLIS_DOUBLE;
 	dt_x = BLIS_DOUBLE;
 	dt_a = BLIS_DOUBLE;
@@ -105,7 +108,7 @@ int main( int argc, char** argv )
 		//bl2_obj_set_uplo( BLIS_UPPER, a );
 
 
-		bl2_sets(  (2.0/1.0), &alpha );
+		bl2_setsc(  (2.0/1.0), 0.0, &alpha );
 
 
 		bl2_copym( &a, &a_save );
@@ -149,10 +152,15 @@ int main( int argc, char** argv )
 			int     incx   = bl2_obj_vector_inc( x );
 			int     lda    = bl2_obj_col_stride( a );
 			double* alphap = bl2_obj_buffer( alpha );
+/*
 			double* xp     = bl2_obj_buffer( x );
 			double* ap     = bl2_obj_buffer( a );
+*/
+			dcomplex* xp   = bl2_obj_buffer( x );
+			dcomplex* ap   = bl2_obj_buffer( a );
 
-			dsyr_( &uplo,
+			//dsyr_( &uplo,
+			zher_( &uplo,
 			       &mm,
 			       alphap,
 			       xp, &incx,
@@ -165,10 +173,7 @@ int main( int argc, char** argv )
 #endif
 
 
-			dtime = bl2_clock() - dtime;
-
-			dtime_save = bl2_min( dtime, dtime_save );
-
+			dtime_save = bl2_clock_min_diff( dtime_save, dtime );
 		}
 
 		gflops = ( 1.0 * m * m ) / ( dtime_save * 1.0e9 );

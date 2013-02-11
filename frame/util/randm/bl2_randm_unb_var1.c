@@ -105,7 +105,8 @@ void PASTEMAC(ch,varname)( \
 \
 	if ( bl2_zero_dim2( m, n ) ) return; \
 \
-	/* Set various loop parameters. */ \
+	/* Set various loop parameters. Here, we pretend that diagx is equal to
+	   BLIS_NONUNIT_DIAG because we handle the unit diagonal case manually. */ \
 	bl2_set_dims_incs_uplo_1m( diagoffx, BLIS_NONUNIT_DIAG, \
 	                           uplox, m, n, rs_x, cs_x, \
 	                           uplox_eff, n_elem_max, n_iter, incx, ldx, \
@@ -130,7 +131,7 @@ void PASTEMAC(ch,varname)( \
 	{ \
 		max_m_n = bl2_max( m, n ); \
 \
-		PASTEMAC(ch,sets)( max_m_n, &omega ); \
+		PASTEMAC2(d,ch,setris)( max_m_n, 0.0, omega ); \
 		PASTEMAC2(ch,ch,copys)( *one, beta ); \
 		PASTEMAC2(ch,ch,invscals)( omega, beta ); \
 \

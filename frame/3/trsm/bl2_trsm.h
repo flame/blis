@@ -51,9 +51,6 @@
 #include "bl2_trsm_l_ker_var2.h"
 #include "bl2_trsm_u_ker_var2.h"
 
-#include "bl2_trsm_l_ker_var3.h"
-#include "bl2_trsm_u_ker_var3.h"
-
 #include "bl2_gemmtrsm_l_ref_4x4.h"
 #include "bl2_gemmtrsm_u_ref_4x4.h"
 

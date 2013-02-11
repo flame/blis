@@ -58,6 +58,7 @@ static FUNCPTR_T GENARRAY2_MIN(ftypes,copynzm_unb_var1);
 #endif
 #endif
 
+
 void bl2_copynzm_unb_var1( obj_t*  x,
                            obj_t*  y )
 {

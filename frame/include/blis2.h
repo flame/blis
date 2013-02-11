@@ -92,6 +92,7 @@ extern "C" {
 #include "bl2_error.h"
 #include "bl2_f2c.h"
 #include "bl2_machval.h"
+#include "bl2_version.h"
 
 // Control tree definitions.
 #include "bl2_cntl.h"
@@ -99,7 +100,18 @@ extern "C" {
 
 // -- Level-0 operations --
 
+#include "bl2_absqsc.h"
+#include "bl2_addsc.h"
 #include "bl2_copysc.h"
+#include "bl2_divsc.h"
+#include "bl2_fnormsc.h"
+#include "bl2_getsc.h"
+#include "bl2_mulsc.h"
+#include "bl2_setsc.h"
+#include "bl2_sqrtsc.h"
+#include "bl2_subsc.h"
+#include "bl2_zipsc.h"
+#include "bl2_unzipsc.h"
 
 
 // -- Level-1 operations --
@@ -109,6 +121,7 @@ extern "C" {
 #include "bl2_scalv.h"
 #include "bl2_setv.h"
 // two vector operands
+#include "bl2_addv.h"
 #include "bl2_axpyv.h"
 #include "bl2_copyv.h"
 #include "bl2_copynzv.h"
@@ -116,6 +129,7 @@ extern "C" {
 #include "bl2_dotxv.h"
 #include "bl2_fnormv.h"
 #include "bl2_scal2v.h"
+#include "bl2_subv.h"
 #include "bl2_packv.h"
 #include "bl2_unpackv.h"
 
@@ -127,9 +141,11 @@ extern "C" {
 #include "bl2_scald.h"
 #include "bl2_setd.h"
 // two diagonal operands
+#include "bl2_addd.h"
 #include "bl2_axpyd.h"
 #include "bl2_copyd.h"
 #include "bl2_scal2d.h"
+#include "bl2_subd.h"
 
 
 // -- Level-1f operations --
@@ -147,11 +163,13 @@ extern "C" {
 #include "bl2_scalm.h"
 #include "bl2_setm.h"
 // two matrix operands
+#include "bl2_addm.h"
 #include "bl2_axpym.h"
 #include "bl2_copym.h"
 #include "bl2_copynzm.h"
 #include "bl2_fnormm.h"
 #include "bl2_scal2m.h"
+#include "bl2_subm.h"
 #include "bl2_packm.h"
 #include "bl2_unpackm.h"
 
@@ -191,11 +209,15 @@ extern "C" {
 
 // -- Utility operations --
 
+#include "bl2_absumv.h"
+#include "bl2_absumm.h"
+#include "bl2_mkherm.h"
+#include "bl2_mksymm.h"
+#include "bl2_mktrim.h"
 #include "bl2_printv.h"
 #include "bl2_printm.h"
 #include "bl2_randv.h"
 #include "bl2_randm.h"
-#include "bl2_sets.h"
 #include "bl2_sumsqv.h"
 
 

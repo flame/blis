@@ -40,6 +40,8 @@ extern unpackm_t* unpackm_cntl;
 
 extern ger_t*     ger_cntl_rp_bs_row;
 extern ger_t*     ger_cntl_cp_bs_col;
+extern ger_t*     ger_cntl_bs_ke_row;
+extern ger_t*     ger_cntl_bs_ke_col;
 
 static blksz_t*   her_mc;
 
@@ -51,21 +53,11 @@ her_t*            her_cntl_ge_col;
 
 // Cache blocksizes.
 
-#if 0
+#define BLIS_HER_MC_S BLIS_DEFAULT_L2_MC_S
+#define BLIS_HER_MC_D BLIS_DEFAULT_L2_MC_D
+#define BLIS_HER_MC_C BLIS_DEFAULT_L2_MC_C
+#define BLIS_HER_MC_Z BLIS_DEFAULT_L2_MC_Z
 
-#define BLIS_HER_MC_S 1000
-#define BLIS_HER_MC_D 1000
-#define BLIS_HER_MC_C 1000
-#define BLIS_HER_MC_Z 1000
-
-#else
-
-#define BLIS_HER_MC_S 4
-#define BLIS_HER_MC_D 4
-#define BLIS_HER_MC_C 4
-#define BLIS_HER_MC_Z 4
-
-#endif
 
 
 void bl2_her_cntl_init()
@@ -99,23 +91,23 @@ void bl2_her_cntl_init()
 	her_cntl_ge_row
 	=
 	bl2_her_cntl_obj_create( BLIS_BLOCKED,
-	                         BLIS_VARIANT1,      // use var1 for row storage
+	                         BLIS_VARIANT1,        // use var1 for row storage
 	                         her_mc,
-	                         packv_cntl,         // pack x1 (if needed)
-	                         packm_cntl_noscale, // pack C11 (if needed)
+	                         packv_cntl,           // pack x1 (if needed)
+	                         NULL,                 // do NOT pack C11
 	                         ger_cntl_rp_bs_row,
 	                         her_cntl_bs_ke_row,
-	                         unpackm_cntl );     // unpack C11 (if packed)
+	                         NULL );               // no unpacking needed
 	her_cntl_ge_col
 	=
 	bl2_her_cntl_obj_create( BLIS_BLOCKED,
-	                         BLIS_VARIANT2,      // use var2 for col storage
+	                         BLIS_VARIANT2,        // use var2 for col storage
 	                         her_mc,
-	                         packv_cntl,         // pack x1 (if needed)
-	                         packm_cntl_noscale, // pack C11 (if needed)
+	                         packv_cntl,           // pack x1 (if needed)
+	                         NULL,                 // do NOT pack C11
 	                         ger_cntl_cp_bs_col,
 	                         her_cntl_bs_ke_col,
-	                         unpackm_cntl );     // unpack C11 (if packed)
+	                         NULL );               // no unpacking needed
 }
 
 void bl2_her_cntl_finalize()

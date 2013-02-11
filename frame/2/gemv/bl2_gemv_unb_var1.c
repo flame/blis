@@ -174,7 +174,6 @@ void PASTEMAC3(cha,chx,chy,varname)( \
 		                                beta_cast, \
 		                                psi1 ); \
 	} \
-\
 }
 
 // Define the basic set of functions unconditionally, and then also some

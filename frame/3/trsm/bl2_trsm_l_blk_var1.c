@@ -104,7 +104,7 @@ void bl2_trsm_l_blk_var1( obj_t*  alpha,
 			bl2_gemm_int( &BLIS_MINUS_ONE,
 			              &a1_pack,
 			              &b_pack,
-			              &BLIS_ONE,
+			              alpha,
 			              &c1,
 			              cntl_sub_gemm( cntl ) );
 	}

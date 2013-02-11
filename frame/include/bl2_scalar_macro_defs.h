@@ -52,6 +52,7 @@
 #include "bl2_abval2s.h"
 
 #include "bl2_adds.h"
+#include "bl2_addjs.h"
 
 #include "bl2_axpys.h"
 #include "bl2_axpyjs.h"
@@ -72,6 +73,8 @@
 #include "bl2_dots.h"
 #include "bl2_dotjs.h"
 
+#include "bl2_getris.h"
+
 #include "bl2_grabis.h"
 
 #include "bl2_inverts.h"
@@ -91,9 +94,12 @@
 #include "bl2_scal2s.h"
 #include "bl2_scal2js.h"
 
+#include "bl2_setris.h"
+
 #include "bl2_sqrt2s.h"
 
 #include "bl2_subs.h"
+#include "bl2_subjs.h"
 
 #include "bl2_xpbys.h"
 
@@ -126,6 +132,24 @@
 #define bl2_min( a, b ) ( (a) < (b) ? (a) : (b) )
 #define bl2_max( a, b ) ( (a) > (b) ? (a) : (b) )
 #define bl2_abs( a )    ( (a) < 0 ? -(a) : (a) )
+
+// fmin, fmax, fabs
+
+#define bl2_min( a, b ) ( (a) < (b) ? (a) : (b) )
+#define bl2_fmin( a, b ) bl2_min( a, b )
+#define bl2_fmax( a, b ) bl2_max( a, b )
+#define bl2_fabs( a )    ( (a) < 0.0 ? -(a) : (a) )
+
+// fminabs, fmaxabs
+#define bl2_fminabs( a, b ) \
+\
+	bl2_fmin( bl2_fabs( a ), \
+	          bl2_fabs( b ) )
+
+#define bl2_fmaxabs( a, b ) \
+\
+	bl2_fmax( bl2_fabs( a ), \
+	          bl2_fabs( b ) )
 
 // swap_types
 

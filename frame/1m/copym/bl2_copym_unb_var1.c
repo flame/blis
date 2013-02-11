@@ -59,6 +59,7 @@ static FUNCPTR_T GENARRAY2_MIN(ftypes,copym_unb_var1);
 #endif
 #endif
 
+
 void bl2_copym_unb_var1( obj_t*  x,
                          obj_t*  y )
 {
@@ -147,7 +148,6 @@ void PASTEMAC2(chx,chy,varname)( \
 	{ \
 		for ( j = 0; j < n_iter; ++j ) \
 		{ \
-/*printf( "copym_unb_var1: dense: iter %u\n", j );*/ \
 			n_elem = n_elem_max; \
 \
 			x1     = x_cast + (j  )*ldx + (0  )*incx; \
@@ -166,7 +166,6 @@ void PASTEMAC2(chx,chy,varname)( \
 			for ( j = 0; j < n_iter; ++j ) \
 			{ \
 				n_elem = bl2_min( n_shift + j + 1, n_elem_max ); \
-/*printf( "copym_unb_var1: upper: iter %u, j0+j = %u, n_elem = %u\n", j, ij0+j, n_elem );*/ \
 \
 				x1     = x_cast + (ij0+j  )*ldx + (0  )*incx; \
 				y1     = y_cast + (ij0+j  )*ldy + (0  )*incy; \
@@ -183,7 +182,6 @@ void PASTEMAC2(chx,chy,varname)( \
 			{ \
 				i      = bl2_max( 0, ( doff_t )j - ( doff_t )n_shift ); \
 				n_elem = n_elem_max - i; \
-/*printf( "copym_unb_var1: lower: iter %u, i = %u, n_elem = %u\n", j, i, n_elem );*/ \
 \
 				x1     = x_cast + (j  )*ldx + (ij0+i  )*incx; \
 				y1     = y_cast + (j  )*ldy + (ij0+i  )*incy; \

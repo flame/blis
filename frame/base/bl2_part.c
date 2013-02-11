@@ -172,13 +172,11 @@ void bl2_acquire_mpart_t2b( subpart_t  requested_part,
 			if ( bl2_obj_root_is_hermitian( *sub_obj ) )
 			{
 				bl2_obj_reflect_about_diag( *sub_obj );
-				bl2_obj_toggle_uplo( *sub_obj );
 				bl2_obj_toggle_conj( *sub_obj );
 			}
 			else if ( bl2_obj_root_is_symmetric( *sub_obj ) )
 			{
 				bl2_obj_reflect_about_diag( *sub_obj );
-				bl2_obj_toggle_uplo( *sub_obj );
 			}
 			else if ( bl2_obj_root_is_triangular( *sub_obj ) )
 			{
@@ -340,13 +338,11 @@ void bl2_acquire_mpart_l2r( subpart_t  requested_part,
 			if ( bl2_obj_root_is_hermitian( *sub_obj ) )
 			{
 				bl2_obj_reflect_about_diag( *sub_obj );
-				bl2_obj_toggle_uplo( *sub_obj );
 				bl2_obj_toggle_conj( *sub_obj );
 			}
 			else if ( bl2_obj_root_is_symmetric( *sub_obj ) )
 			{
 				bl2_obj_reflect_about_diag( *sub_obj );
-				bl2_obj_toggle_uplo( *sub_obj );
 			}
 			else if ( bl2_obj_root_is_triangular( *sub_obj ) )
 			{
@@ -590,13 +586,11 @@ void bl2_acquire_mpart_tl2br( subpart_t  requested_part,
 			if ( bl2_obj_root_is_hermitian( *sub_obj ) )
 			{
 				bl2_obj_reflect_about_diag( *sub_obj );
-				bl2_obj_toggle_uplo( *sub_obj );
 				bl2_obj_toggle_conj( *sub_obj );
 			}
 			else if ( bl2_obj_root_is_symmetric( *sub_obj ) )
 			{
 				bl2_obj_reflect_about_diag( *sub_obj );
-				bl2_obj_toggle_uplo( *sub_obj );
 			}
 			else if ( bl2_obj_root_is_triangular( *sub_obj ) )
 			{

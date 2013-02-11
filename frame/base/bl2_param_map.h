@@ -36,25 +36,35 @@
 
 // --- BLIS to BLAS/LAPACK mappings --------------------------------------------
 
-void bl2_param_map_blis_to_netlib_trans( trans_t trans, char* blas_trans );
-void bl2_param_map_blis_to_netlib_uplo( uplo_t uplo, char* blas_uplo );
 void bl2_param_map_blis_to_netlib_side( side_t side, char* blas_side );
+void bl2_param_map_blis_to_netlib_uplo( uplo_t uplo, char* blas_uplo );
+void bl2_param_map_blis_to_netlib_trans( trans_t trans, char* blas_trans );
 void bl2_param_map_blis_to_netlib_diag( diag_t diag, char* blas_diag );
 void bl2_param_map_blis_to_netlib_machval( machval_t machval, char* blas_machval );
 
 
 // --- BLAS/LAPACK to BLIS mappings --------------------------------------------
 
-void bl2_param_map_netlib_to_blis_trans( char* trans, trans_t* blis_trans );
-void bl2_param_map_netlib_to_blis_uplo( char* uplo, uplo_t* blis_uplo );
-void bl2_param_map_netlib_to_blis_side( char* side, side_t* blis_side );
-void bl2_param_map_netlib_to_blis_diag( char* diag, diag_t* blis_diag );
+void bl2_param_map_netlib_to_blis_side( char side, side_t* blis_side );
+void bl2_param_map_netlib_to_blis_uplo( char uplo, uplo_t* blis_uplo );
+void bl2_param_map_netlib_to_blis_trans( char trans, trans_t* blis_trans );
+void bl2_param_map_netlib_to_blis_diag( char diag, diag_t* blis_diag );
 
 
 // --- BLIS char to BLIS mappings ----------------------------------------------
 
-void bl2_param_map_char_to_blis_trans( char* trans, trans_t* blis_trans );
-void bl2_param_map_char_to_blis_uplo( char* uplo, uplo_t* blis_uplo );
-void bl2_param_map_char_to_blis_side( char* side, side_t* blis_side );
-void bl2_param_map_char_to_blis_diag( char* diag, diag_t* blis_diag );
+void bl2_param_map_char_to_blis_side( char side, side_t* blis_side );
+void bl2_param_map_char_to_blis_uplo( char uplo, uplo_t* blis_uplo );
+void bl2_param_map_char_to_blis_trans( char trans, trans_t* blis_trans );
+void bl2_param_map_char_to_blis_conj( char conj, conj_t* blis_conj );
+void bl2_param_map_char_to_blis_diag( char diag, diag_t* blis_diag );
+
+
+// --- BLIS to BLIS char mappings ----------------------------------------------
+
+void bl2_param_map_blis_to_char_side( side_t blis_side, char* side );
+void bl2_param_map_blis_to_char_uplo( uplo_t blis_uplo, char* uplo );
+void bl2_param_map_blis_to_char_trans( trans_t blis_trans, char* trans );
+void bl2_param_map_blis_to_char_conj( trans_t blis_conj, char* conj );
+void bl2_param_map_blis_to_char_diag( diag_t blis_diag, char* diag );
 

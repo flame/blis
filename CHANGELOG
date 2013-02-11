@@ -1,4 +1,138 @@
-commit 17455a8bce038dd570356ab0c5c11d9a89f20248 (HEAD, origin/master, master)
+commit be94fb84c0351602d7585269f29998e3bf83f899 (HEAD, origin/master, master)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jan 4 10:55:21 2013 -0600
+
+    Added missing 'd' to fused gemmtrsm function name.
+
+commit 879a179e1dee36f0c56765f2ab91a26861019b34
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jan 4 10:37:27 2013 -0600
+
+    Added debug statements to bl2_mm_acquire_m().
+    
+    Details:
+    - Added printf() statements to bl2_mm_acquire_m() to help debug issues
+      with prematurely exhausted memory pool.
+    - Removed 'd' from kernel names of reference kernels in clarksville
+      configuration's bl2_kernel.h
+
+commit 806e74beb4eafeef620a555ffbb3f6779e29c7b6
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Dec 20 17:07:50 2012 -0600
+
+    Defined Frobenius norm operations.
+    
+    Details:
+    - Added level-0 grabis macro operation to grab imaginary component of one
+      variable and copy it to the real component of another variable.
+    - Defined sumsqv operation, which computes the sum of the absolute squares
+      of the elements of a vector. This implementation is modeled after ?lassq
+      in netlib LAPACK.
+    - Defined fnormv and fnormm operations, which compute the Frobenius norm on
+      vectors and matrices, respectively. These operations are treated as one-
+      operand operations where the output norm value is the real projection of
+      the datatype of the input operand. Both operations are implemented in terms
+      of sumsqv.
+
+commit 66e80ce1aec099b2b2b0c4f295e38add2c921383
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Dec 20 17:02:55 2012 -0600
+
+    Added GENT*R macros; tweaked bl2_machval defs.
+    
+    Details:
+    - Added function and prototype macro-generating macros for GENTFUNCR and
+      GENTPROTR, which are one-operand macros with auxiliary real projection
+      types.
+    - Tweaked bl2_machval files to use new macros.
+
+commit 2fecc88ca22142020573f168da715e8e9f3dd7de
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Dec 20 11:35:14 2012 -0600
+
+    Fixed harmless macro bug in level-1m operations.
+    
+    Details:
+    - Fixed some inconsistent usage of n_iter_max and n_iter in the two
+      bl2_set_dims_incs_uplo_[12]m macros. The right thing ended up happening
+      despite the bug, which is why I had not discovered it until now.
+
+commit 8945db6ec9f82168cf72411ad408b4fdb44ae0d1
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Dec 18 15:07:36 2012 -0600
+
+    Renamed x86,x86_64 kernels to indicate 'd' fusing.
+    
+    Details:
+    - Renamed x86 and x86_64 kernels to contain a 'd' before the fusing shape
+      to emphasize that the fusing shape is not for all datatype instances, but
+      rather just for one (that of double-precision real). Other fusing shapes
+      would be proportional to their precision and domain "byte footprints".
+    - Corresponding changes to config/clarksville/bl2_kernel.h.
+
+commit 6fbbdd4e194d06096ad08c5db61127be338067db
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Dec 18 14:34:02 2012 -0600
+
+    More tweaks to _config.h, _kernel.h; smem tweaks.
+    
+    Details:
+    - Moved kernel-related definitions form bl2_config.h to bl2_kernel.h.
+    - Replaced #define of _GNU_SOURCE with #define of _POSIX_C_SOURCE. This
+      accomplishes the same thing (enabling posix_memalign()) without enabling
+      all of the GNU extensions we don't need.
+    - Defined the size of the static memory pool in terms of MC, KC, and NC,
+      as well as two new constants that determine how many MCxKC blocks and
+      how many KCxNC blocks should be allocated (defined in bl2_config.h).
+    - In the case of static memory pool exhaustion, replaced the generic
+      bl2_abort() with a specific error code call.
+
+commit 5d8bdb21c48e8fb11bef6128a242122cc1470a99
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Dec 17 16:07:36 2012 -0600
+
+    Minor reordering of bl2_config.h definitions.
+
+commit 4a83f67490136a898f558e273b76a687aed8b893
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Dec 17 12:35:54 2012 -0600
+
+    Consolidated configuration headers.
+    
+    Details:
+    - Merged contents of bl2_arch.h into bl2_config.h for reference and
+      clarksville configurations.
+    - Updated CREDITS, INSTALL, LICENSE, README files.
+
+commit 0670c33cc14612f636ef09ede4133404ae0af6ba
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Dec 14 12:45:26 2012 -0600
+
+    Fixed bug in reference gemm ukernels.
+    
+    Details:
+    - Fixed a bug whereby, for the reference gemm ukernels, the matrix product
+      was not correctly accumulated and scaled (by alpha) into the output matrix
+      C. (Thanks to Fran for finding this bug.)
+    - Whitespace changes to reference trsm kernels.
+
+commit e2e7cb2fbe615be4d375bc2dce88d03d98fadc9e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Dec 13 18:17:54 2012 -0600
+
+    Expanded reference packm/unpackm kernel set to 16.
+    
+    Details:
+    - Added 10xk, 12xk, 14xk, and 16xk reference kernels for packm and
+      unpackm.
+    - Updated bl2_[un]packm_cxk() to silently use scal2m if "out of range"
+      kernel size is requested. (Thanks to Tyler for finding this bug.)
+    - Updated bl2_kernel.h to contain new _KERNEL definitions, according
+      to above changes, for 'reference' and 'clarksville' configurations.
+    - Updated CHANGELOG.
+    - Removed "output*.m" from .gitignore.
+
+commit 17455a8bce038dd570356ab0c5c11d9a89f20248
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Mon Dec 10 17:23:32 2012 -0600
 

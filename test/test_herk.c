@@ -122,8 +122,8 @@ int main( int argc, char** argv )
 
 		bl2_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, a, ah );
 
-		bl2_sets(  (2.0/1.0), &alpha );
-		bl2_sets( -(1.0/1.0), &beta );
+		bl2_setsc(  (2.0/1.0), 0.0, &alpha );
+		bl2_setsc( -(1.0/1.0), 0.0, &beta );
 
 		mr = bl2_blksz_obj_create( 2, 4, 2, 2 );
 		kr = bl2_blksz_obj_create( 1, 1, 1, 1 );
@@ -261,10 +261,7 @@ int main( int argc, char** argv )
 #endif
 
 
-			dtime = bl2_clock() - dtime;
-
-			dtime_save = bl2_min( dtime, dtime_save );
-
+			dtime_save = bl2_clock_min_diff( dtime_save, dtime );
 		}
 
 		gflops = ( 1.0 * m * k * m ) / ( dtime_save * 1.0e9 );

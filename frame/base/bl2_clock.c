@@ -53,3 +53,27 @@ double bl2_clock()
 	return the_time;
 }
 
+double bl2_clock_min_diff( double time_min, double time_start )
+{
+	double time_min_prev;
+	double time_diff;
+
+	// Save the old value.
+	time_min_prev = time_min;
+
+	time_diff = bl2_clock() - time_start;
+
+	time_min = bl2_fmin( time_min, time_diff );
+
+	// Assume that anything:
+	// - under or equal to zero,
+	// - over an hour, or
+	// - under a nanosecond
+	// is actually garbled due to the clocks being taken too closely together.
+	if      ( time_min <= 0.0    ) time_min = time_min_prev;
+	else if ( time_min >  3600.0 ) time_min = time_min_prev;
+	else if ( time_min <  1.0e-9 ) time_min = time_min_prev;
+
+	return time_min;
+}
+
