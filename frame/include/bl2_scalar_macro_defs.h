@@ -75,8 +75,6 @@
 
 #include "bl2_getris.h"
 
-#include "bl2_grabis.h"
-
 #include "bl2_inverts.h"
 
 #include "bl2_invscals.h"
@@ -84,8 +82,6 @@
 #include "bl2_invscalcjs.h"
 
 #include "bl2_neg2s.h"
-
-#include "bl2_projrs.h"
 
 #include "bl2_scals.h"
 #include "bl2_scaljs.h"

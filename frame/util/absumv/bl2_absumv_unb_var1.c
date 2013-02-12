@@ -114,9 +114,8 @@ void PASTEMAC(chx,varname)( \
 \
 	for ( i = 0; i < n; ++i ) \
 	{ \
-		/* Grab real and imaginary components of chi1. */ \
-		PASTEMAC2(chx,chxr,projrs)( *chi1, chi1_r ); \
-		PASTEMAC2(chx,chxr,grabis)( *chi1, chi1_i ); \
+		/* Get the real and imaginary components of chi1. */ \
+		PASTEMAC2(chx,chxr,getris)( *chi1, chi1_r, chi1_i ); \
 \
 		/* Replace chi1_r and chi1_i with their absolute values. */ \
 		chi1_r = bl2_abs( chi1_r ); \
