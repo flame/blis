@@ -133,7 +133,7 @@ void PASTEMAC(chx,varname)( \
 		   needed. */ \
 		if ( chi1_r != *zero ) \
 		{ \
-			abs_chi1_r = bl2_abs( chi1_r ); \
+			abs_chi1_r = bl2_fabs( chi1_r ); \
 \
 			if ( scale_r < abs_chi1_r ) \
 			{ \
@@ -154,7 +154,7 @@ void PASTEMAC(chx,varname)( \
 		   needed. */ \
 		if ( chi1_i != *zero ) \
 		{ \
-			abs_chi1_r = bl2_abs( chi1_i ); \
+			abs_chi1_r = bl2_fabs( chi1_i ); \
 \
 			if ( scale_r < abs_chi1_r ) \
 			{ \

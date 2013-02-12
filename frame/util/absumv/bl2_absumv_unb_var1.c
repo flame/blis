@@ -118,8 +118,8 @@ void PASTEMAC(chx,varname)( \
 		PASTEMAC2(chx,chxr,getris)( *chi1, chi1_r, chi1_i ); \
 \
 		/* Replace chi1_r and chi1_i with their absolute values. */ \
-		chi1_r = bl2_abs( chi1_r ); \
-		chi1_i = bl2_abs( chi1_i ); \
+		chi1_r = bl2_fabs( chi1_r ); \
+		chi1_i = bl2_fabs( chi1_i ); \
 \
 		/* Accumulate the real and imaginary components into absum. */ \
 		PASTEMAC2(chxr,chxr,adds)( chi1_r, absum_r ); \

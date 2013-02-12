@@ -91,7 +91,7 @@ void PASTEMAC(chx,varname)( \
 	if ( bl2_is_real( PASTEMAC(chx,type) ) ) \
 	{ \
 		/* norm = abs( chi_r ); */ \
-		*norm_cast = bl2_abs( chi_r ); \
+		*norm_cast = bl2_fabs( chi_r ); \
 	} \
 	else \
 	{ \
