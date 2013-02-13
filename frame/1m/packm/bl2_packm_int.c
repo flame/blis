@@ -38,13 +38,12 @@
 
 typedef void (*FUNCPTR_T)( obj_t*   beta,
                            obj_t*   a,
-                           obj_t*   p,
-                           packm_t* cntl );
+                           obj_t*   p );
 
 static FUNCPTR_T vars[6][3] =
 {
 	// unblocked          optimized unblocked    blocked
-	{ bl2_packm_unb_var1, NULL,                  bl2_packm_blk_var1 },
+	{ NULL,               NULL,                  NULL,              },
 	{ NULL,               NULL,                  bl2_packm_blk_var2 },
 	{ NULL,               NULL,                  bl2_packm_blk_var3 },
 	{ NULL,               NULL,                  NULL,              },
@@ -124,7 +123,6 @@ void bl2_packm_int( obj_t*   beta,
 	// Invoke the variant with beta_use.
 	f( beta_use,
 	   a,
-	   p,
-	   cntl );
+	   p );
 }
 

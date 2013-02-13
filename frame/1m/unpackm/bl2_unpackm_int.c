@@ -150,6 +150,7 @@ void bl2_unpackm_int( obj_t*     p,
 */
 }
 
+/*
 void bl2_unpackm_init_cast( obj_t*  p,
                             obj_t*  a,
                             obj_t*  c )
@@ -199,4 +200,4 @@ void bl2_unpackm_init_cast( obj_t*  p,
     rs_c = 1;
     bl2_obj_set_incs( rs_c, cs_c, *c );
 }
-
+*/

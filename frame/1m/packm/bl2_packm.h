@@ -38,10 +38,6 @@
 #include "bl2_packm_int.h"
 
 #include "bl2_packm_part.h"
-#include "bl2_packm_densify.h"
-
-#include "bl2_packm_unb_var1.h"
-#include "bl2_packm_blk_var1.h"
 
 #include "bl2_packm_blk_var2.h"
 

@@ -36,11 +36,18 @@ void bl2_packm_init( obj_t*   a,
                      obj_t*   p,
                      packm_t* cntl );
 
+void bl2_packm_init_pack( bool_t    densify,
+                          invdiag_t invert_diag,
+                          pack_t    pack_schema,
+                          packord_t pack_ord_if_up,
+                          packord_t pack_ord_if_lo,
+                          dim_t     mult_m,
+                          dim_t     mult_n,
+                          obj_t*    c,
+                          obj_t*    p );
+
+/*
 void bl2_packm_init_cast( obj_t*  a,
                           obj_t*  p,
                           obj_t*  c );
-
-void bl2_packm_init_pack( obj_t*   c,
-                          obj_t*   p,
-                          packm_t* cntl );
-
+*/

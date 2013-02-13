@@ -42,7 +42,6 @@ typedef void (*FUNCPTR_T)(
                            diag_t  diagc,
                            uplo_t  uploc,
                            trans_t transc,
-                           bool_t  densify,
                            dim_t   m,
                            dim_t   n,
                            dim_t   m_max,
@@ -57,8 +56,7 @@ static FUNCPTR_T GENARRAY(ftypes,packm_blk_var2);
 
 void bl2_packm_blk_var2( obj_t*   beta,
                          obj_t*   c,
-                         obj_t*   p,
-                         packm_t* cntl )
+                         obj_t*   p )
 {
 	num_t     dt_cp     = bl2_obj_datatype( *c );
 	mem_t*    mem_p     = bl2_obj_pack_mem( *p );
@@ -68,7 +66,6 @@ void bl2_packm_blk_var2( obj_t*   beta,
 	diag_t    diagc     = bl2_obj_diag( *c );
 	uplo_t    uploc     = bl2_obj_uplo( *c );
 	trans_t   transc    = bl2_obj_conjtrans_status( *c );
-	bool_t    densify   = cntl_does_densify( cntl );
 
 	dim_t     m_p       = bl2_obj_length( *p );
 	dim_t     n_p       = bl2_obj_width( *p );
@@ -98,7 +95,6 @@ void bl2_packm_blk_var2( obj_t*   beta,
 	   diagc,
 	   uploc,
 	   transc,
-	   densify,
 	   m_p,
 	   n_p,
 	   m_max_p,
@@ -118,7 +114,6 @@ void PASTEMAC(ch,varname )( \
                             diag_t  diagc, \
                             uplo_t  uploc, \
                             trans_t transc, \
-                            bool_t  densify, \
                             dim_t   m, \
                             dim_t   n, \
                             dim_t   m_max, \
@@ -248,7 +243,7 @@ void PASTEMAC(ch,varname )( \
 		/* If the current panel intersects the diagonal and C is either
 		   upper- or lower-stored, then we assume C is symmetric or
 		   Hermitian and that it must be densified (note we don't even
-		   bother checking the densify parameter), in which case we pack
+		   bother passing in a densify parameter), in which case we pack
 		   the panel in three stages. 
 		   Otherwise, we pack the panel all at once. */ \
 		if ( bl2_intersects_diag_n( diagoffc_i, *m_panel, *n_panel ) && \

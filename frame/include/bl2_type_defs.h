@@ -92,22 +92,25 @@ typedef dcomplex atom_t;
 
 typedef unsigned long int info_t;
 
-#define BLIS_DOMAIN_BIT           0x01
-#define BLIS_PRECISION_BIT        0x02
-#define BLIS_SPECIAL_BIT          0x04
-#define BLIS_DATATYPE_BITS        0x07
-#define BLIS_TRANS_BIT            0x08
-#define BLIS_CONJ_BIT             0x10
-#define BLIS_CONJTRANS_BITS       0x18
-#define BLIS_UPPER_BIT            0x20
-#define BLIS_DIAG_BIT             0x40
-#define BLIS_LOWER_BIT            0x80
-#define BLIS_UPLO_BITS            0xE0
-#define BLIS_UNIT_DIAG_BIT        0x100
-#define BLIS_TARGET_DT_BITS       0xE00
-#define BLIS_EXECUTION_DT_BITS    0x7000
-#define BLIS_PACK_BITS            0x38000
-#define BLIS_STRUC_BITS           0xC0000
+#define BLIS_DOMAIN_BIT            0x01
+#define BLIS_PRECISION_BIT         0x02
+#define BLIS_SPECIAL_BIT           0x04
+#define BLIS_DATATYPE_BITS         0x07
+#define BLIS_TRANS_BIT             0x08
+#define BLIS_CONJ_BIT              0x10
+#define BLIS_CONJTRANS_BITS        0x18
+#define BLIS_UPPER_BIT             0x20
+#define BLIS_DIAG_BIT              0x40
+#define BLIS_LOWER_BIT             0x80
+#define BLIS_UPLO_BITS             0xE0
+#define BLIS_UNIT_DIAG_BIT         0x100
+#define BLIS_INVERT_DIAG_BIT       0x200
+#define BLIS_TARGET_DT_BITS        0x1C00
+#define BLIS_EXECUTION_DT_BITS     0xE000
+#define BLIS_PACK_BITS             0x70000
+#define BLIS_PACK_REV_IF_UPPER_BIT 0x80000
+#define BLIS_PACK_REV_IF_LOWER_BIT 0x100000
+#define BLIS_STRUC_BITS            0x600000
 
 #define BLIS_BITVAL_REAL              0x00
 #define BLIS_BITVAL_COMPLEX           0x01
@@ -129,25 +132,30 @@ typedef unsigned long int info_t;
 #define BLIS_BITVAL_DENSE             0xE0
 #define BLIS_BITVAL_NONUNIT_DIAG      0x0
 #define BLIS_BITVAL_UNIT_DIAG         0x100
+#define BLIS_BITVAL_INVERT_DIAG       0x200
 #define BLIS_BITVAL_NOT_PACKED        0x0
-#define BLIS_BITVAL_PACKED_UNSPEC     0x8000
-#define BLIS_BITVAL_PACKED_VECTOR     0x10000
-#define BLIS_BITVAL_PACKED_ROWS       0x18000
-#define BLIS_BITVAL_PACKED_COLUMNS    0x20000
-#define BLIS_BITVAL_PACKED_ROW_PANELS 0x28000
-#define BLIS_BITVAL_PACKED_COL_PANELS 0x30000
+#define BLIS_BITVAL_PACKED_UNSPEC     0x10000
+#define BLIS_BITVAL_PACKED_VECTOR     0x20000
+#define BLIS_BITVAL_PACKED_ROWS       0x30000
+#define BLIS_BITVAL_PACKED_COLUMNS    0x40000
+#define BLIS_BITVAL_PACKED_ROW_PANELS 0x50000
+#define BLIS_BITVAL_PACKED_COL_PANELS 0x60000
+#define BLIS_BITVAL_PACK_FWD_IF_UPPER 0x0
+#define BLIS_BITVAL_PACK_REV_IF_UPPER 0x80000
+#define BLIS_BITVAL_PACK_FWD_IF_LOWER 0x0
+#define BLIS_BITVAL_PACK_REV_IF_LOWER 0x100000
 #define BLIS_BITVAL_GENERAL           0x0
-#define BLIS_BITVAL_HERMITIAN         0x40000
-#define BLIS_BITVAL_SYMMETRIC         0x80000
-#define BLIS_BITVAL_TRIANGULAR        0xC0000
+#define BLIS_BITVAL_HERMITIAN         0x200000
+#define BLIS_BITVAL_SYMMETRIC         0x400000
+#define BLIS_BITVAL_TRIANGULAR        0x600000
 
-#define BLIS_TARGET_DT_SHIFT          9
-#define BLIS_EXECUTION_DT_SHIFT       12
+#define BLIS_TARGET_DT_SHIFT          10
+#define BLIS_EXECUTION_DT_SHIFT       13
 
 /*
   info field description
 
-  13 12 11 10 F E D C B A 9 8 7 6 5 4 3 2 1 0
+  16 15 14 13 12 11 10 F E D C B A 9 8 7 6 5 4 3 2 1 0
 
   bit(s)   purpose
   ------   -------
@@ -162,15 +170,16 @@ typedef unsigned long int info_t;
            - 6: diagonal
            - 7: strictly lower triangular
        8   Implicit unit diagonal?
-   B ~ 9   Target numerical datatype
-           - 9: domain    (0 == real, 1 == complex)
-           - A: precision (0 == single, 1 == double)
-           - B: unused
-   E ~ C   Execution numerical datatype
-           - C: domain    (0 == real, 1 == complex)
-           - D: precision (0 == single, 1 == double)
-           - E: unused
-  11 ~ F   Packed type/status
+       9   Invert diagonal required [during pack]?
+   C ~ A   Target numerical datatype
+           - A: domain    (0 == real, 1 == complex)
+           - B: precision (0 == single, 1 == double)
+           - C: unused
+   F ~ D   Execution numerical datatype
+           - D: domain    (0 == real, 1 == complex)
+           - E: precision (0 == single, 1 == double)
+           - F: unused
+  12 ~ 10  Packed type/status
            - 0 == not packed
            - 1 == packed (unspecified; row or column)
            - 2 == packed vector
@@ -179,7 +188,13 @@ typedef unsigned long int info_t;
            - 5 == packed by row panels
            - 6 == packed by column panels
            - 7 == unused
-  13 ~ 12  Structure type
+       13  Packed panel order if upper-stored
+           - 0 == forward order if upper
+           - 1 == reverse order if upper
+       14  Packed panel order if lower-stored
+           - 0 == forward order if lower
+           - 1 == reverse order if lower
+  16 ~ 15  Structure type
            - (00 == general, 01 == Hermitian)
            - (10 == symmetric, 11 == triangular)
 */
@@ -304,6 +319,12 @@ typedef enum
 
 typedef enum
 {
+	BLIS_NO_INVERT_DIAG    = 0x0,
+	BLIS_INVERT_DIAG       = BLIS_BITVAL_INVERT_DIAG
+} invdiag_t;
+
+typedef enum
+{
 	BLIS_GENERAL           = BLIS_BITVAL_GENERAL,
 	BLIS_HERMITIAN         = BLIS_BITVAL_HERMITIAN,
 	BLIS_SYMMETRIC         = BLIS_BITVAL_SYMMETRIC,
@@ -348,6 +369,15 @@ typedef enum
 	BLIS_PACKED_ROW_PANELS = BLIS_BITVAL_PACKED_ROW_PANELS,
 	BLIS_PACKED_COL_PANELS = BLIS_BITVAL_PACKED_COL_PANELS
 } pack_t;
+
+typedef enum
+{
+	BLIS_PACK_FWD_IF_UPPER = BLIS_BITVAL_PACK_FWD_IF_UPPER,
+	BLIS_PACK_REV_IF_UPPER = BLIS_BITVAL_PACK_REV_IF_UPPER,
+
+	BLIS_PACK_FWD_IF_LOWER = BLIS_BITVAL_PACK_FWD_IF_LOWER,
+	BLIS_PACK_REV_IF_LOWER = BLIS_BITVAL_PACK_REV_IF_LOWER
+} packord_t;
 
 
 // Subpartition type

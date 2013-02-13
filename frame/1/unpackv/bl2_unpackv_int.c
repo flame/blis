@@ -147,6 +147,7 @@ void bl2_unpackv_int( obj_t*     p,
 	}
 }
 
+/*
 void bl2_unpackv_init_cast( obj_t*  p,
                             obj_t*  a,
                             obj_t*  c )
@@ -191,4 +192,4 @@ void bl2_unpackv_init_cast( obj_t*  p,
 	// buffer of c to the cached address of the cast memory.
 	bl2_obj_set_buffer_with_cached_cast_mem( *p, *c );
 }
-
+*/

@@ -179,6 +179,18 @@
 \
 	( ( (obj).info & BLIS_UNIT_DIAG_BIT ) == BLIS_BITVAL_UNIT_DIAG )
 
+#define bl2_obj_has_inverted_diag( obj ) \
+\
+	( ( (obj).info & BLIS_INVERT_DIAG_BIT ) == BLIS_BITVAL_INVERT_DIAG )
+
+#define bl2_obj_is_pack_rev_if_upper( obj ) \
+\
+	( ( (obj).info & BLIS_PACK_REV_IF_UPPER_BIT ) == BLIS_BITVAL_PACK_REV_IF_UPPER )
+
+#define bl2_obj_is_pack_rev_if_lower( obj ) \
+\
+	( ( (obj).info & BLIS_PACK_REV_IF_LOWER_BIT ) == BLIS_BITVAL_PACK_REV_IF_LOWER )
+
 #define bl2_obj_pack_status( obj ) \
 \
 	(   (obj).info & BLIS_PACK_BITS )
@@ -231,6 +243,11 @@
 	(obj).info = ( (obj).info & ~BLIS_UNIT_DIAG_BIT ) | (diag); \
 }
 
+#define bl2_obj_set_invert_diag( inv_diag, obj ) \
+{ \
+	(obj).info = ( (obj).info & ~BLIS_INVERT_DIAG_BIT ) | (inv_diag); \
+}
+
 #define bl2_obj_set_datatype( dt, obj ) \
 { \
 	(obj).info = ( (obj).info & ~BLIS_DATATYPE_BITS ) | (dt); \
@@ -249,6 +266,16 @@
 #define bl2_obj_set_pack_schema( pack, obj ) \
 { \
 	(obj).info = ( (obj).info & ~BLIS_PACK_BITS ) | (pack); \
+}
+
+#define bl2_obj_set_pack_order_if_upper( packordifup, obj ) \
+{ \
+	(obj).info = ( (obj).info & ~BLIS_PACK_REV_IF_UPPER_BIT ) | (packordifup); \
+}
+
+#define bl2_obj_set_pack_order_if_lower( packordiflo, obj ) \
+{ \
+	(obj).info = ( (obj).info & ~BLIS_PACK_REV_IF_LOWER_BIT ) | (packordiflo); \
 }
 
 #define bl2_obj_set_struc( struc, obj ) \
@@ -813,15 +840,13 @@ bl2_obj_width_stored( obj )
 // Set an object's buffer to one previously cached for packing
 // matrices (or acquire one and cache it)
 
-#define bl2_obj_set_buffer_with_cached_packm_mem( p, obj, cntl ) \
+#define bl2_obj_set_buffer_with_cached_packm_mem( p, obj, mult_m, mult_n ) \
 { \
 	mem_t* mem_p       = bl2_obj_pack_mem( p ); \
 	num_t  dt          = bl2_obj_datatype( obj ); \
 	siz_t  elem_size   = bl2_obj_elem_size( obj ); \
 	dim_t  m           = bl2_obj_length( obj ); \
 	dim_t  n           = bl2_obj_width( obj ); \
-	dim_t  mult_m      = bl2_blksz_for_type( dt, cntl_mult_m( cntl ) ); \
-	dim_t  mult_n      = bl2_blksz_for_type( dt, cntl_mult_n( cntl ) ); \
 	bool_t needs_alloc; \
 	dim_t  m_needed; \
 	dim_t  n_needed; \
@@ -872,13 +897,12 @@ bl2_obj_width_stored( obj )
 // Set an object's buffer to one previously cached for packing
 // vectors (or acquire one and cache it)
 
-#define bl2_obj_set_buffer_with_cached_packv_mem( p, obj, cntl ) \
+#define bl2_obj_set_buffer_with_cached_packv_mem( p, obj, mult_m ) \
 { \
 	mem_t* mem_p     = bl2_obj_pack_mem( p ); \
 	num_t  dt        = bl2_obj_datatype( obj ); \
 	siz_t  elem_size = bl2_obj_elem_size( obj ); \
 	dim_t  m         = bl2_obj_vector_dim( obj ); \
-	dim_t  mult_m    = bl2_blksz_for_type( dt, cntl_mult_dim( cntl ) ); \
 	bool_t needs_alloc; \
 	dim_t  m_needed; \
 	void*  buf; \

@@ -36,6 +36,8 @@ void bl2_unpackm_int( obj_t*     p,
                       obj_t*     a,
                       unpackm_t* cntl );
 
+/*
 void bl2_unpackm_init_cast( obj_t*  p,
                             obj_t*  a,
                             obj_t*  c );
+*/

@@ -34,8 +34,7 @@
 
 void bl2_packm_blk_var2( obj_t*   beta,
                          obj_t*   c,
-                         obj_t*   p,
-                         packm_t* cntl );
+                         obj_t*   p );
 
 
 #undef  GENTPROT
@@ -47,7 +46,6 @@ void PASTEMAC(ch,varname)( \
                            diag_t  diagc, \
                            uplo_t  uploc, \
                            trans_t transc, \
-                           bool_t  densify, \
                            dim_t   m, \
                            dim_t   n, \
                            dim_t   m_max, \

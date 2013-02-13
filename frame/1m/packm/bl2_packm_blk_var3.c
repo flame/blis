@@ -42,7 +42,6 @@ typedef void (*FUNCPTR_T)(
                            diag_t  diagc,
                            uplo_t  uploc,
                            trans_t transc,
-                           bool_t  densify,
                            bool_t  invdiag,
                            bool_t  revifup,
                            bool_t  reviflo,
@@ -60,8 +59,7 @@ static FUNCPTR_T GENARRAY(ftypes,packm_blk_var3);
 
 void bl2_packm_blk_var3( obj_t*   beta,
                          obj_t*   c,
-                         obj_t*   p,
-                         packm_t* cntl )
+                         obj_t*   p )
 {
 	num_t     dt_cp     = bl2_obj_datatype( *c );
 	mem_t*    mem_p     = bl2_obj_pack_mem( *p );
@@ -71,10 +69,9 @@ void bl2_packm_blk_var3( obj_t*   beta,
 	diag_t    diagc     = bl2_obj_diag( *c );
 	uplo_t    uploc     = bl2_obj_uplo( *c );
 	trans_t   transc    = bl2_obj_conjtrans_status( *c );
-	bool_t    densify   = cntl_does_densify( cntl );
-	bool_t    invdiag   = cntl_does_invert_diag( cntl );
-	bool_t    revifup   = cntl_rev_iter_if_upper( cntl );
-	bool_t    reviflo   = cntl_rev_iter_if_lower( cntl );
+	bool_t    invdiag   = bl2_obj_has_inverted_diag( *p );
+	bool_t    revifup   = bl2_obj_is_pack_rev_if_upper( *p );
+	bool_t    reviflo   = bl2_obj_is_pack_rev_if_lower( *p );
 
 	dim_t     m_p       = bl2_obj_length( *p );
 	dim_t     n_p       = bl2_obj_width( *p );
@@ -104,7 +101,6 @@ void bl2_packm_blk_var3( obj_t*   beta,
 	   diagc,
 	   uploc,
 	   transc,
-	   densify,
 	   invdiag,
 	   revifup,
 	   reviflo,
@@ -127,7 +123,6 @@ void PASTEMAC(ch,varname )( \
                             diag_t  diagc, \
                             uplo_t  uploc, \
                             trans_t transc, \
-                            bool_t  densify, \
                             bool_t  invdiag, \
                             bool_t  revifup, \
                             bool_t  reviflo, \
@@ -335,8 +330,7 @@ void PASTEMAC(ch,varname )( \
 				                               p_use, rs_p, cs_p ); \
 			} \
 \
-			/* If requested, densify the unstored part of the packed panel. */ \
-			if ( densify == TRUE ) \
+			/* Always densify the unstored part of the packed panel. */ \
 			{ \
 				doff_t diagoffp = diagoffc_i - panel_off_i; \
 				uplo_t uplop    = uploc; \

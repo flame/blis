@@ -36,11 +36,13 @@ void bl2_packv_init( obj_t*   a,
                      obj_t*   p,
                      packv_t* cntl );
 
+void bl2_packv_init_pack( pack_t pack_schema,
+                          dim_t  mult_dim,
+                          obj_t* c,
+                          obj_t* p );
+
+/*
 void bl2_packv_init_cast( obj_t*  a,
                           obj_t*  p,
                           obj_t*  c );
-
-void bl2_packv_init_pack( obj_t*   c,
-                          obj_t*   p,
-                          packv_t* cntl );
-
+*/
