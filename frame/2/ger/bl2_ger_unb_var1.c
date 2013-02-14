@@ -138,6 +138,8 @@ void PASTEMAC3(chx,chy,cha,varname)( \
 \
 	if ( bl2_zero_dim2( m, n ) ) return; \
 \
+	if ( PASTEMAC(chxy,eq0)( *alpha_cast ) ) return; \
+\
 	for ( i = 0; i < m; ++i ) \
 	{ \
 		a1t  = a_cast + (i  )*rs_a + (0  )*cs_a; \

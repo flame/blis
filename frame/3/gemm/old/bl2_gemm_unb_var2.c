@@ -141,7 +141,7 @@ void PASTEMAC(ch,varname)( \
 			alpha11 = a1; \
 			beta11  = b1; \
 \
-			PASTEMAC(ch,set0)( rho ); \
+			PASTEMAC(ch,set0s)( rho ); \
 \
 			for ( h = 0; h < k; ++h ) \
 			{ \

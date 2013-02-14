@@ -130,22 +130,22 @@
 
 // set to constant
 
-// set0
+// set0s
 
-#define bl2_sset0( a ) \
+#define bl2_sset0s( a ) \
 { \
 	(a) = 0.0F; \
 }
-#define bl2_dset0( a ) \
+#define bl2_dset0s( a ) \
 { \
 	(a) = 0.0; \
 }
-#define bl2_cset0( a ) \
+#define bl2_cset0s( a ) \
 { \
 	(a).real = 0.0F; \
 	(a).imag = 0.0F; \
 }
-#define bl2_zset0( a ) \
+#define bl2_zset0s( a ) \
 { \
 	(a).real = 0.0; \
 	(a).imag = 0.0; \

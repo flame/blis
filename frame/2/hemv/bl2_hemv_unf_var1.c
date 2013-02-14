@@ -147,6 +147,7 @@ void PASTEMAC3(cha,chx,chy,varname)( \
 	ctype_x*  x_cast     = x; \
 	ctype_y*  y_cast     = y; \
 	ctype_y*  one        = PASTEMAC(chy,1); \
+	ctype_y*  zero       = PASTEMAC(chy,0); \
 	ctype_a*  A10; \
 	ctype_a*  A11; \
 	ctype_a*  a10t; \
@@ -192,14 +193,25 @@ void PASTEMAC3(cha,chx,chy,varname)( \
 		conj1 = conja; \
 	} \
 \
+	/* If beta is zero, use setv. Otherwise, scale by beta. */ \
+	if ( PASTEMAC(chy,eq0)( *beta_cast ) ) \
+	{ \
+		/* y = 0; */ \
+		PASTEMAC2(chy,chy,setv)( m, \
+		                         zero, \
+		                         y_cast, incy ); \
+	} \
+	else \
+	{ \
+		/* y = beta * y; */ \
+		PASTEMAC2(chy,chy,scalv)( BLIS_NO_CONJUGATE, \
+		                          m, \
+		                          beta_cast, \
+		                          y_cast, incy ); \
+	} \
+\
 	/* Query the fusing factor from the dotxaxpyf implementation. */ \
 	b_fuse = PASTEMAC(chax,dotxaxpyf_fuse_fac); \
-\
-	/* y = beta * y; */ \
-	PASTEMAC2(chy,chy,scalv)( BLIS_NO_CONJUGATE, \
-	                          m, \
-	                          beta_cast, \
-	                          y, incy ); \
 \
 	for ( i = 0; i < m; i += f ) \
 	{ \

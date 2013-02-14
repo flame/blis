@@ -193,7 +193,7 @@ void PASTEMAC2(cha,chx,varname)( \
 				PASTEMAC2(chax,chx,scals)( alpha_alpha11_conj, *chi11 ); \
 \
 				/* chi11 = chi11 + alpha * a12t * x21; */ \
-				PASTEMAC(chax,set0)( rho1 ); \
+				PASTEMAC(chax,set0s)( rho1 ); \
 				if ( bl2_is_conj( conja ) ) \
 				{ \
 					for ( j = 0; j < f_ahead; ++j ) \
@@ -248,7 +248,7 @@ void PASTEMAC2(cha,chx,varname)( \
 				PASTEMAC2(chax,chx,scals)( alpha_alpha11_conj, *chi11 ); \
 \
 				/* chi11 = chi11 + alpha * a10t * x01; */ \
-				PASTEMAC(chax,set0)( rho1 ); \
+				PASTEMAC(chax,set0s)( rho1 ); \
 				if ( bl2_is_conj( conja ) ) \
 				{ \
 					for ( j = 0; j < f_ahead; ++j ) \

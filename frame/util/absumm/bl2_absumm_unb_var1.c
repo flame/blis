@@ -106,7 +106,7 @@ void PASTEMAC(chx,varname)( \
 	dim_t     ij0, n_shift; \
 \
 	/* Initialize the absolute sum accumulator to zero. */ \
-	PASTEMAC(chxr,set0)( absum_r ); \
+	PASTEMAC(chxr,set0s)( absum_r ); \
 \
 	/* If either dimension is zero, return swith absum equal to zero. */ \
 	if ( bl2_zero_dim2( m, n ) ) \

@@ -116,7 +116,7 @@
 #include "bl2_adds_mxn.h"
 #include "bl2_adds_mxn_uplo.h"
 #include "bl2_copys_mxn.h"
-#include "bl2_set0_mxn.h"
+#include "bl2_set0s_mxn.h"
 #include "bl2_xpbys_mxn.h"
 #include "bl2_xpbys_mxn_uplo.h"
 

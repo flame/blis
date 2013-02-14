@@ -117,11 +117,11 @@ void PASTEMAC3(chx,chy,chr,varname)( \
 \
 	if ( bl2_zero_dim1( n ) ) \
 	{ \
-		PASTEMAC(chr,set0)( *rho_cast ); \
+		PASTEMAC(chr,set0s)( *rho_cast ); \
 		return; \
 	} \
 \
-	PASTEMAC(chr,set0)( dotxy ); \
+	PASTEMAC(chr,set0s)( dotxy ); \
 \
 	chi1 = x_cast; \
 	psi1 = y_cast; \

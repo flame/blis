@@ -140,13 +140,19 @@ void PASTEMAC3(chx,chy,chr,varname)( \
 	dim_t     i; \
 	conj_t    conjx_use; \
 \
-	if ( bl2_zero_dim1( n ) ) \
+	/* If beta is zero, clear rho. Otherwise, scale by beta. */ \
+	if ( PASTEMAC(chr,eq0)( *beta_cast ) ) \
+	{ \
+		PASTEMAC(chr,set0s)( *rho_cast ); \
+	} \
+	else \
 	{ \
 		PASTEMAC2(chr,chr,scals)( *beta_cast, *rho_cast ); \
-		return; \
 	} \
 \
-	PASTEMAC(chxy,set0)( dotxy ); \
+	if ( bl2_zero_dim1( n ) ) return; \
+\
+	PASTEMAC(chxy,set0s)( dotxy ); \
 \
 	chi1 = x_cast; \
 	psi1 = y_cast; \
@@ -183,7 +189,6 @@ void PASTEMAC3(chx,chy,chr,varname)( \
 	if ( bl2_is_conj( conjy ) ) \
 		PASTEMAC(chxy,conjs)( dotxy ); \
 \
-	PASTEMAC2(chr,chr,scals)( *beta_cast, *rho_cast ); \
 	PASTEMAC3(chxy,chxy,chr,axpys)( *alpha_cast, dotxy, *rho_cast ); \
 }
 

@@ -87,25 +87,25 @@ void PASTEMAC(ch,varname)( \
 	c23 = (c + 2*rs_c + 3*cs_c); \
 	c33 = (c + 3*rs_c + 3*cs_c); \
 \
-	PASTEMAC(ch,set0)( ab00 ); \
-	PASTEMAC(ch,set0)( ab10 ); \
-	PASTEMAC(ch,set0)( ab20 ); \
-	PASTEMAC(ch,set0)( ab30 ); \
+	PASTEMAC(ch,set0s)( ab00 ); \
+	PASTEMAC(ch,set0s)( ab10 ); \
+	PASTEMAC(ch,set0s)( ab20 ); \
+	PASTEMAC(ch,set0s)( ab30 ); \
 \
-	PASTEMAC(ch,set0)( ab01 ); \
-	PASTEMAC(ch,set0)( ab11 ); \
-	PASTEMAC(ch,set0)( ab21 ); \
-	PASTEMAC(ch,set0)( ab31 ); \
+	PASTEMAC(ch,set0s)( ab01 ); \
+	PASTEMAC(ch,set0s)( ab11 ); \
+	PASTEMAC(ch,set0s)( ab21 ); \
+	PASTEMAC(ch,set0s)( ab31 ); \
 \
-	PASTEMAC(ch,set0)( ab02 ); \
-	PASTEMAC(ch,set0)( ab12 ); \
-	PASTEMAC(ch,set0)( ab22 ); \
-	PASTEMAC(ch,set0)( ab32 ); \
+	PASTEMAC(ch,set0s)( ab02 ); \
+	PASTEMAC(ch,set0s)( ab12 ); \
+	PASTEMAC(ch,set0s)( ab22 ); \
+	PASTEMAC(ch,set0s)( ab32 ); \
 \
-	PASTEMAC(ch,set0)( ab03 ); \
-	PASTEMAC(ch,set0)( ab13 ); \
-	PASTEMAC(ch,set0)( ab23 ); \
-	PASTEMAC(ch,set0)( ab33 ); \
+	PASTEMAC(ch,set0s)( ab03 ); \
+	PASTEMAC(ch,set0s)( ab13 ); \
+	PASTEMAC(ch,set0s)( ab23 ); \
+	PASTEMAC(ch,set0s)( ab33 ); \
 \
 	for ( i = 0; i < k; ++i ) \
 	{ \
@@ -143,25 +143,50 @@ void PASTEMAC(ch,varname)( \
 		b += 4; \
 	} \
 \
-	PASTEMAC(ch,scals)( *beta, *c00 ); \
-	PASTEMAC(ch,scals)( *beta, *c10 ); \
-	PASTEMAC(ch,scals)( *beta, *c20 ); \
-	PASTEMAC(ch,scals)( *beta, *c30 ); \
+	if ( PASTEMAC(ch,eq0)( *beta ) ) \
+	{ \
+		PASTEMAC(ch,set0s)( *c00 ); \
+		PASTEMAC(ch,set0s)( *c10 ); \
+		PASTEMAC(ch,set0s)( *c20 ); \
+		PASTEMAC(ch,set0s)( *c30 ); \
 \
-	PASTEMAC(ch,scals)( *beta, *c01 ); \
-	PASTEMAC(ch,scals)( *beta, *c11 ); \
-	PASTEMAC(ch,scals)( *beta, *c21 ); \
-	PASTEMAC(ch,scals)( *beta, *c31 ); \
+		PASTEMAC(ch,set0s)( *c01 ); \
+		PASTEMAC(ch,set0s)( *c11 ); \
+		PASTEMAC(ch,set0s)( *c21 ); \
+		PASTEMAC(ch,set0s)( *c31 ); \
 \
-	PASTEMAC(ch,scals)( *beta, *c02 ); \
-	PASTEMAC(ch,scals)( *beta, *c12 ); \
-	PASTEMAC(ch,scals)( *beta, *c22 ); \
-	PASTEMAC(ch,scals)( *beta, *c32 ); \
+		PASTEMAC(ch,set0s)( *c02 ); \
+		PASTEMAC(ch,set0s)( *c12 ); \
+		PASTEMAC(ch,set0s)( *c22 ); \
+		PASTEMAC(ch,set0s)( *c32 ); \
 \
-	PASTEMAC(ch,scals)( *beta, *c03 ); \
-	PASTEMAC(ch,scals)( *beta, *c13 ); \
-	PASTEMAC(ch,scals)( *beta, *c23 ); \
-	PASTEMAC(ch,scals)( *beta, *c33 ); \
+		PASTEMAC(ch,set0s)( *c03 ); \
+		PASTEMAC(ch,set0s)( *c13 ); \
+		PASTEMAC(ch,set0s)( *c23 ); \
+		PASTEMAC(ch,set0s)( *c33 ); \
+	} \
+	else \
+	{ \
+		PASTEMAC(ch,scals)( *beta, *c00 ); \
+		PASTEMAC(ch,scals)( *beta, *c10 ); \
+		PASTEMAC(ch,scals)( *beta, *c20 ); \
+		PASTEMAC(ch,scals)( *beta, *c30 ); \
+\
+		PASTEMAC(ch,scals)( *beta, *c01 ); \
+		PASTEMAC(ch,scals)( *beta, *c11 ); \
+		PASTEMAC(ch,scals)( *beta, *c21 ); \
+		PASTEMAC(ch,scals)( *beta, *c31 ); \
+\
+		PASTEMAC(ch,scals)( *beta, *c02 ); \
+		PASTEMAC(ch,scals)( *beta, *c12 ); \
+		PASTEMAC(ch,scals)( *beta, *c22 ); \
+		PASTEMAC(ch,scals)( *beta, *c32 ); \
+\
+		PASTEMAC(ch,scals)( *beta, *c03 ); \
+		PASTEMAC(ch,scals)( *beta, *c13 ); \
+		PASTEMAC(ch,scals)( *beta, *c23 ); \
+		PASTEMAC(ch,scals)( *beta, *c33 ); \
+	} \
 \
 	PASTEMAC(ch,dots)( *alpha, ab00, *c00 ); \
 	PASTEMAC(ch,dots)( *alpha, ab10, *c10 ); \

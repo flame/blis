@@ -196,8 +196,8 @@ void PASTEMAC(ch,varname)( \
 	if ( bl2_zero_dim3( m, n, k ) ) return; \
 \
 	/* Clear the temporary C buffer in case it has any infs or NaNs. */ \
-	PASTEMAC(ch,set0_mxn)( MR, NR, \
-	                       ct, rs_ct, cs_ct ); \
+	PASTEMAC(ch,set0s_mxn)( MR, NR, \
+	                        ct, rs_ct, cs_ct ); \
 \
 	/* Compute number of primary and leftover components of the m and n
 	   dimensions. */ \

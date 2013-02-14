@@ -97,7 +97,7 @@ void bl2_scal2v_unb_var1( obj_t*  beta,
 
 
 #undef  GENTFUNC3
-#define GENTFUNC3( ctype_b, ctype_x, ctype_y, chb, chx, chy, opname, varname ) \
+#define GENTFUNC3( ctype_b, ctype_x, ctype_y, chb, chx, chy, varname, setvker ) \
 \
 void PASTEMAC3(chb,chx,chy,varname)( \
                                      conj_t conjx, \
@@ -115,6 +115,17 @@ void PASTEMAC3(chb,chx,chy,varname)( \
 	dim_t    i; \
 \
 	if ( bl2_zero_dim1( n ) ) return; \
+\
+	/* If beta is zero, use setv. */ \
+	if ( PASTEMAC(chb,eq0)( *beta_cast ) ) \
+	{ \
+		ctype_y* zero = PASTEMAC(chy,0); \
+\
+		PASTEMAC2(chy,chy,setvker)( n, \
+		                            zero, \
+		                            y, incy ); \
+		return; \
+	} \
 \
 	chi1 = x_cast; \
 	psi1 = y_cast; \
@@ -144,13 +155,13 @@ void PASTEMAC3(chb,chx,chy,varname)( \
 
 // Define the basic set of functions unconditionally, and then also some
 // mixed datatype functions if requested.
-INSERT_GENTFUNC3_BASIC( scal2v, scal2v_unb_var1 )
+INSERT_GENTFUNC3_BASIC( scal2v_unb_var1, SETV_KERNEL )
 
 #ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTFUNC3_MIX_D( scal2v, scal2v_unb_var1 )
+INSERT_GENTFUNC3_MIX_D( scal2v_unb_var1, SETV_KERNEL )
 #endif
 
 #ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTFUNC3_MIX_P( scal2v, scal2v_unb_var1 )
+INSERT_GENTFUNC3_MIX_P( scal2v_unb_var1, SETV_KERNEL )
 #endif
 

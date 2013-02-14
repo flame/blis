@@ -97,7 +97,7 @@ void bl2_axpyv_unb_var1( obj_t*  alpha,
 
 
 #undef  GENTFUNC3
-#define GENTFUNC3( ctype_a, ctype_x, ctype_y, cha, chx, chy, opname, varname ) \
+#define GENTFUNC3( ctype_a, ctype_x, ctype_y, cha, chx, chy, varname, copyvker ) \
 \
 void PASTEMAC3(cha,chx,chy,varname)( \
                                      conj_t conjx, \
@@ -115,6 +115,19 @@ void PASTEMAC3(cha,chx,chy,varname)( \
 	dim_t    i; \
 \
 	if ( bl2_zero_dim1( n ) ) return; \
+\
+	/* If alpha is zero, return. */ \
+	if ( PASTEMAC(cha,eq0)( *alpha_cast ) ) return; \
+\
+	/* If alpha is one, use copyv. */ \
+	if ( PASTEMAC(cha,eq1)( *alpha_cast ) ) \
+	{ \
+		PASTEMAC2(chx,chy,copyvker)( conjx, \
+		                             n, \
+		                             x, incx, \
+		                             y, incy ); \
+		return; \
+	} \
 \
 	chi1 = x_cast; \
 	psi1 = y_cast; \
@@ -143,13 +156,13 @@ void PASTEMAC3(cha,chx,chy,varname)( \
 
 // Define the basic set of functions unconditionally, and then also some
 // mixed datatype functions if requested.
-INSERT_GENTFUNC3_BASIC( axpyv, axpyv_unb_var1 )
+INSERT_GENTFUNC3_BASIC( axpyv_unb_var1, COPYV_KERNEL )
 
 #ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTFUNC3_MIX_D( axpyv, axpyv_unb_var1 )
+INSERT_GENTFUNC3_MIX_D( axpyv_unb_var1, COPYV_KERNEL )
 #endif
 
 #ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTFUNC3_MIX_P( axpyv, axpyv_unb_var1 )
+INSERT_GENTFUNC3_MIX_P( axpyv_unb_var1, COPYV_KERNEL )
 #endif
 

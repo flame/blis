@@ -133,7 +133,7 @@ void PASTEMAC(chx,varname)( \
 	/* Return a norm of zero if either dimension is zero. */ \
 	if ( bl2_zero_dim2( m, n ) ) \
 	{ \
-		PASTEMAC(chxr,set0)( *norm_cast ); \
+		PASTEMAC(chxr,set0s)( *norm_cast ); \
 		return; \
 	} \
 \
@@ -147,7 +147,7 @@ void PASTEMAC(chx,varname)( \
 	/* Check the effective uplo; if it's zeros, then our norm is zero. */ \
 	if ( bl2_is_zeros( uplox_eff ) ) \
 	{ \
-		PASTEMAC(chxr,set0)( *norm_cast ); \
+		PASTEMAC(chxr,set0s)( *norm_cast ); \
 		return; \
 	} \
 \

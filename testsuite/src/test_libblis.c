@@ -1207,9 +1207,13 @@ void libblis_test_vobj_create( test_params_t* params, num_t dt, char storage, di
 {
 	dim_t gs = params->gs_spacing;
 
+	// Column vector (unit stride)
 	if      ( storage == 'c' ) bl2_obj_create( dt, m, 1,  1,  m,    x );
+	// Row vector (unit stride)
 	else if ( storage == 'r' ) bl2_obj_create( dt, 1, m,  m,  1,    x );
+	// Column vector (non-unit stride)
 	else if ( storage == 'j' ) bl2_obj_create( dt, m, 1,  gs, gs*m, x );
+	// Row vector (non-unit stride)
 	else if ( storage == 'i' ) bl2_obj_create( dt, 1, m,  gs*m, gs, x );
 	else
 	{

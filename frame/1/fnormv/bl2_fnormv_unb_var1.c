@@ -90,7 +90,7 @@ void PASTEMAC(chx,varname)( \
 	/* Return a norm of zero if either dimension is zero. */ \
 	if ( bl2_zero_dim1( m ) ) \
 	{ \
-		PASTEMAC(chxr,set0)( *norm_cast ); \
+		PASTEMAC(chxr,set0s)( *norm_cast ); \
 		return; \
 	} \
 \

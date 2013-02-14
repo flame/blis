@@ -101,11 +101,23 @@ void PASTEMAC2(chb,chx,varname)( \
 \
 	if ( bl2_zero_dim1( n ) ) return; \
 \
-	for ( i = 0; i < n; ++i ) \
+	if ( PASTEMAC(chb,eq0)( *beta_cast ) ) \
 	{ \
-		PASTEMAC2(chb,chx,copys)( *beta_cast, *chi1 ); \
+		for ( i = 0; i < n; ++i ) \
+		{ \
+			PASTEMAC(chx,set0s)( *chi1 ); \
 \
-		chi1 += incx; \
+			chi1 += incx; \
+		} \
+	} \
+	else \
+	{ \
+		for ( i = 0; i < n; ++i ) \
+		{ \
+			PASTEMAC2(chb,chx,copys)( *beta_cast, *chi1 ); \
+\
+			chi1 += incx; \
+		} \
 	} \
 }
 

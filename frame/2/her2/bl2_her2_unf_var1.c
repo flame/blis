@@ -156,6 +156,8 @@ void PASTEMAC3(chx,chy,chc,varname)( \
 \
 	if ( bl2_zero_dim1( m ) ) return; \
 \
+	if ( PASTEMAC(chxy,eq0)( *alpha_cast ) ) return; \
+\
 	/* The algorithm will be expressed in terms of the lower triangular case;
 	   the upper triangular case is supported by swapping the row and column
 	   strides of A and toggling some conj parameters. */ \

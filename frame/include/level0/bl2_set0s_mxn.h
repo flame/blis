@@ -32,49 +32,49 @@
 
 */
 
-#ifndef BLIS_SET0_MXN_H
-#define BLIS_SET0_MXN_H
+#ifndef BLIS_SET0S_MXN_H
+#define BLIS_SET0S_MXN_H
 
-// set0_mxn
+// set0s_mxn
 
 // Notes:
 // - The first char encodes the type of x.
 // - The second char encodes the type of y.
 
-#define bl2_sset0_mxn( m, n, y, rs_y, cs_y ) \
+#define bl2_sset0s_mxn( m, n, y, rs_y, cs_y ) \
 { \
 	dim_t i, j; \
 \
 	for ( j = 0; j < n; ++j ) \
 	for ( i = 0; i < m; ++i ) \
-	bl2_sset0( *(y + i*rs_y + j*cs_y) ); \
+	bl2_sset0s( *(y + i*rs_y + j*cs_y) ); \
 }
 
-#define bl2_dset0_mxn( m, n, y, rs_y, cs_y ) \
+#define bl2_dset0s_mxn( m, n, y, rs_y, cs_y ) \
 { \
 	dim_t i, j; \
 \
 	for ( j = 0; j < n; ++j ) \
 	for ( i = 0; i < m; ++i ) \
-	bl2_dset0( *(y + i*rs_y + j*cs_y) ); \
+	bl2_dset0s( *(y + i*rs_y + j*cs_y) ); \
 }
 
-#define bl2_cset0_mxn( m, n, y, rs_y, cs_y ) \
+#define bl2_cset0s_mxn( m, n, y, rs_y, cs_y ) \
 { \
 	dim_t i, j; \
 \
 	for ( j = 0; j < n; ++j ) \
 	for ( i = 0; i < m; ++i ) \
-	bl2_cset0( *(y + i*rs_y + j*cs_y) ); \
+	bl2_cset0s( *(y + i*rs_y + j*cs_y) ); \
 }
 
-#define bl2_zset0_mxn( m, n, y, rs_y, cs_y ) \
+#define bl2_zset0s_mxn( m, n, y, rs_y, cs_y ) \
 { \
 	dim_t i, j; \
 \
 	for ( j = 0; j < n; ++j ) \
 	for ( i = 0; i < m; ++i ) \
-	bl2_zset0( *(y + i*rs_y + j*cs_y) ); \
+	bl2_zset0s( *(y + i*rs_y + j*cs_y) ); \
 }
 
 

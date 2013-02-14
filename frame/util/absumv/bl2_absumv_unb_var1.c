@@ -101,7 +101,7 @@ void PASTEMAC(chx,varname)( \
 	dim_t     i; \
 \
 	/* Initialize the absolute sum accumulator to zero. */ \
-	PASTEMAC(chxr,set0)( absum_r ); \
+	PASTEMAC(chxr,set0s)( absum_r ); \
 \
 	/* If x is zero length, return swith absum equal to zero. */ \
 	if ( bl2_zero_dim1( n ) ) \

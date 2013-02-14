@@ -90,7 +90,7 @@ void bl2_scalv_unb_var1( obj_t*  beta,
 
 
 #undef  GENTFUNC2
-#define GENTFUNC2( ctype_b, ctype_x, chb, chx, opname, varname ) \
+#define GENTFUNC2( ctype_b, ctype_x, chb, chx, varname, setvker ) \
 \
 void PASTEMAC2(chb,chx,varname)( \
                                  conj_t conjbeta, \
@@ -107,7 +107,19 @@ void PASTEMAC2(chb,chx,varname)( \
 \
 	if ( bl2_zero_dim1( n ) ) return; \
 \
+	/* If beta is one, return. */ \
 	if ( PASTEMAC(chb,eq1)( *beta_cast ) ) return; \
+\
+	/* If beta is zero, use setv. */ \
+	if ( PASTEMAC(chb,eq0)( *beta_cast ) ) \
+	{ \
+		ctype_x* zero = PASTEMAC(chb,0); \
+\
+		PASTEMAC2(chx,chx,setvker)( n, \
+		                            zero, \
+		                            x, incx ); \
+		return; \
+	} \
 \
 	PASTEMAC(chb,copycjs)( conjbeta, *beta_cast, beta_conj ); \
 \
@@ -123,13 +135,13 @@ void PASTEMAC2(chb,chx,varname)( \
 
 // Define the basic set of functions unconditionally, and then also some
 // mixed datatype functions if requested.
-INSERT_GENTFUNC2_BASIC( scalv, scalv_unb_var1 )
+INSERT_GENTFUNC2_BASIC( scalv_unb_var1, SETV_KERNEL )
 
 #ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTFUNC2_MIX_D( scalv, scalv_unb_var1 )
+INSERT_GENTFUNC2_MIX_D( scalv_unb_var1, SETV_KERNEL )
 #endif
 
 #ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTFUNC2_MIX_P( scalv, scalv_unb_var1 )
+INSERT_GENTFUNC2_MIX_P( scalv_unb_var1, SETV_KERNEL )
 #endif
 

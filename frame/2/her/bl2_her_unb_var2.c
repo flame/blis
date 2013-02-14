@@ -138,6 +138,8 @@ void PASTEMAC2(chx,chc,varname)( \
 \
 	if ( bl2_zero_dim1( m ) ) return; \
 \
+	if ( PASTEMAC(chx,eq0)( *alpha_cast ) ) return; \
+\
 	/* Make a local copy of alpha and zero out the imaginary component if
 	   we are being invoked as her, since her requires alpha to be real. */ \
 	PASTEMAC2(chx,chx,copys)( *alpha_cast, alpha_local ); \

@@ -146,6 +146,7 @@ void PASTEMAC3(cha,chx,chy,varname)( \
 	ctype_a*  a_cast     = a; \
 	ctype_x*  x_cast     = x; \
 	ctype_y*  y_cast     = y; \
+	ctype_y*  zero       = PASTEMAC(chy,0); \
 	ctype_a*  a10t; \
 	ctype_a*  alpha11; \
 	ctype_x*  x0; \
@@ -183,11 +184,22 @@ void PASTEMAC3(cha,chx,chy,varname)( \
 		conj1 = conja; \
 	} \
 \
-	/* y = beta * y; */ \
-	PASTEMAC2(chy,chy,scalv)( BLIS_NO_CONJUGATE, \
-	                          m, \
-	                          beta_cast, \
-	                          y, incy ); \
+	/* If beta is zero, use setv. Otherwise, scale by beta. */ \
+	if ( PASTEMAC(chy,eq0)( *beta_cast ) ) \
+	{ \
+		/* y = 0; */ \
+		PASTEMAC2(chy,chy,setv)( m, \
+		                         zero, \
+		                         y_cast, incy ); \
+	} \
+	else \
+	{ \
+		/* y = beta * y; */ \
+		PASTEMAC2(chy,chy,scalv)( BLIS_NO_CONJUGATE, \
+		                          m, \
+		                          beta_cast, \
+		                          y_cast, incy ); \
+	} \
 \
 	for ( i = 0; i < m; ++i ) \
 	{ \

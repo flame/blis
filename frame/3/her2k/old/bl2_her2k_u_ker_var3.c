@@ -236,8 +236,8 @@ void PASTEMAC(ch,varname)( \
 			if ( bl2_intersects_diag_n( diagoffc_ij, MR, NR ) ) \
 			{ \
 				/* Zero the temporary C buffer. */ \
-				PASTEMAC(ch,set0_mxn)( MR, NR, \
-				                       ct, rs_ct, cs_ct ); \
+				PASTEMAC(ch,set0s_mxn)( MR, NR, \
+				                        ct, rs_ct, cs_ct ); \
 \
 				/* Invoke the micro-kernel. */ \
 				PASTEMAC2(ch,varname,_ukr)( k, \
@@ -302,8 +302,8 @@ void PASTEMAC(ch,varname)( \
 		for ( i = 0; i < m_iter; ++i ) \
 		{ \
 			/* Zero the temporary C buffer. */ \
-			PASTEMAC(ch,set0_mxn)( MR, n_left, \
-			                       ct, rs_ct, cs_ct ); \
+			PASTEMAC(ch,set0s_mxn)( MR, n_left, \
+			                        ct, rs_ct, cs_ct ); \
 \
 			/* Invoke the micro-kernel. */ \
 			PASTEMAC2(ch,varname,_ukr)( k, \
@@ -332,8 +332,8 @@ void PASTEMAC(ch,varname)( \
 		if ( m_left ) \
 		{ \
 			/* Zero the temporary C buffer. */ \
-			PASTEMAC(ch,set0_mxn)( m_left, n_left, \
-			                       ct, rs_ct, cs_ct ); \
+			PASTEMAC(ch,set0s_mxn)( m_left, n_left, \
+			                        ct, rs_ct, cs_ct ); \
 \
 			/* Invoke the micro-kernel. */ \
 			PASTEMAC2(ch,varname,_ukr)( k, \
