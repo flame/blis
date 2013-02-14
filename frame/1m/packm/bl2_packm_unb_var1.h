@@ -34,8 +34,7 @@
 
 void bl2_packm_unb_var1( obj_t*   beta,
                          obj_t*   c,
-                         obj_t*   p,
-                         packm_t* cntl );
+                         obj_t*   p );
 
 
 #undef  GENTPROT

@@ -57,8 +57,7 @@ static FUNCPTR_T GENARRAY(ftypes,packm_unb_var1);
 
 void bl2_packm_unb_var1( obj_t*   beta,
                          obj_t*   c,
-                         obj_t*   p,
-                         packm_t* cntl )
+                         obj_t*   p )
 {
 	num_t     dt_cp     = bl2_obj_datatype( *c );
 	mem_t*    mem_p     = bl2_obj_pack_mem( *p );
@@ -68,7 +67,7 @@ void bl2_packm_unb_var1( obj_t*   beta,
 	diag_t    diagc     = bl2_obj_diag( *c );
 	uplo_t    uploc     = bl2_obj_uplo( *c );
 	trans_t   transc    = bl2_obj_conjtrans_status( *c );
-	bool_t    densify   = cntl_does_densify( cntl );
+	bool_t    densify;
 
 	dim_t     m_p       = bl2_obj_length( *p );
 	dim_t     n_p       = bl2_obj_width( *p );
@@ -86,6 +85,10 @@ void bl2_packm_unb_var1( obj_t*   beta,
 	void*     buf_beta  = bl2_obj_scalar_buffer( dt_cp, *beta );
 
 	FUNCPTR_T f;
+
+	// Set densify based on the uplo property of p.
+	if ( bl2_obj_is_dense( *p ) ) densify = TRUE;
+	else                          densify = FALSE;
 
 	// Index into the type combination array to extract the correct
 	// function pointer.
