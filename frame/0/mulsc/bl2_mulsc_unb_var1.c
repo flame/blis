@@ -97,9 +97,15 @@ void PASTEMAC2(chx,chy,varname)( \
 	ctype_y* psi_cast = psi; \
 	ctype_x  chi_conj; \
 \
-	PASTEMAC2(chx,chx,copycjs)( conjchi, *chi_cast, chi_conj ); \
-\
-	PASTEMAC2(chx,chy,scals)( chi_conj, *psi_cast ); \
+	if ( PASTEMAC(chx,eq0)( *chi_cast ) ) \
+	{ \
+		PASTEMAC(chy,set0s)( *psi_cast ); \
+	} \
+	else \
+	{ \
+		PASTEMAC2(chx,chx,copycjs)( conjchi, *chi_cast, chi_conj ); \
+		PASTEMAC2(chx,chy,scals)( chi_conj, *psi_cast ); \
+	} \
 }
 
 
