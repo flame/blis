@@ -317,10 +317,6 @@ void libblis_test_trmm_check( side_t  side,
 	bl2_setsc( 1.0/( double )n, 0.0, &kappa );
 	bl2_scalv( &kappa, &t );
 
-	bl2_setv( &BLIS_ZERO, &v );
-	bl2_setv( &BLIS_ZERO, &w );
-	bl2_setv( &BLIS_ZERO, &z );
-
 	bl2_gemv( &BLIS_ONE, b, &t, &BLIS_ZERO, &v );
 
 	if ( bl2_is_left( side ) )

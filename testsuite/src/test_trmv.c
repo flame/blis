@@ -262,7 +262,7 @@ void libblis_test_trmv_check( obj_t*  alpha,
 	//
 	// is functioning correctly if
 	//
-	//   fnorm( x - y )
+	//   fnorm( y - x )
 	//
 	// is negligible, where
 	//
@@ -283,12 +283,10 @@ void libblis_test_trmv_check( obj_t*  alpha,
 	bl2_obj_set_struc( BLIS_GENERAL, a_local );
 	bl2_obj_set_uplo( BLIS_DENSE, a_local );
 
-	bl2_setv( &BLIS_ZERO, &y );
-
 	bl2_gemv( alpha, &a_local, x_orig, &BLIS_ZERO, &y );
 
-	bl2_subv( &y, x );
-	bl2_fnormv( x, &norm );
+	bl2_subv( x, &y );
+	bl2_fnormv( &y, &norm );
 	bl2_getsc( &norm, resid, &junk );
 
 	bl2_obj_free( &y );

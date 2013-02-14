@@ -236,7 +236,7 @@ void libblis_test_her_check( obj_t*  alpha,
 	dim_t  m_a     = bl2_obj_length( *a );
 
 	obj_t  xh, t, v, w;
-	obj_t  rho, norm;
+	obj_t  tau, rho, norm;
 
 	double junk;
 
@@ -271,6 +271,7 @@ void libblis_test_her_check( obj_t*  alpha,
 	bl2_obj_set_uplo( BLIS_DENSE, *a );
 	bl2_obj_set_uplo( BLIS_DENSE, *a_orig );
 
+	bl2_obj_init_scalar( dt,      &tau );
 	bl2_obj_init_scalar( dt,      &rho );
 	bl2_obj_init_scalar( dt_real, &norm );
 
@@ -280,11 +281,8 @@ void libblis_test_her_check( obj_t*  alpha,
 
 	bl2_obj_alias_with_conj( BLIS_CONJUGATE, *x, xh );
 
-	bl2_setsc( 1.0/( double )m_a, -1.0/( double )m_a, &rho );
-	bl2_setv( &rho, &t );
-
-	bl2_setv( &BLIS_ZERO, &v );
-	bl2_setv( &BLIS_ZERO, &w );
+	bl2_setsc( 1.0/( double )m_a, -1.0/( double )m_a, &tau );
+	bl2_setv( &tau, &t );
 
 	bl2_gemv( &BLIS_ONE, a, &t, &BLIS_ZERO, &v );
 

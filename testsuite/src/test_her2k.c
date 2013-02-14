@@ -323,11 +323,6 @@ void libblis_test_her2k_check( obj_t*  alpha,
 	bl2_setsc( 1.0/( double )m, 0.0, &kappa );
 	bl2_scalv( &kappa, &t );
 
-	bl2_setv( &BLIS_ZERO, &v );
-	bl2_setv( &BLIS_ZERO, &w1 );
-	bl2_setv( &BLIS_ZERO, &w2 );
-	bl2_setv( &BLIS_ZERO, &z );
-
 	bl2_hemv( &BLIS_ONE, c, &t, &BLIS_ZERO, &v );
 
 	bl2_gemv( &BLIS_ONE, &ah, &t, &BLIS_ZERO, &w2 );

@@ -236,7 +236,7 @@ void libblis_test_ger_check( obj_t*  alpha,
 	dim_t  n_a     = bl2_obj_width( *a );
 
 	obj_t  t, v, w;
-	obj_t  rho, norm;
+	obj_t  tau, rho, norm;
 
 	double junk;
 
@@ -266,6 +266,7 @@ void libblis_test_ger_check( obj_t*  alpha,
 	//     =   A_orig * t + w
 	//
 
+	bl2_obj_init_scalar( dt,      &tau );
 	bl2_obj_init_scalar( dt,      &rho );
 	bl2_obj_init_scalar( dt_real, &norm );
 
@@ -273,11 +274,8 @@ void libblis_test_ger_check( obj_t*  alpha,
 	bl2_obj_create( dt, m_a, 1, 0, 0, &v );
 	bl2_obj_create( dt, m_a, 1, 0, 0, &w );
 
-	bl2_setsc( 1.0/( double )n_a, -1.0/( double )n_a, &rho );
-	bl2_setv( &rho, &t );
-
-	bl2_setv( &BLIS_ZERO, &v );
-	bl2_setv( &BLIS_ZERO, &w );
+	bl2_setsc( 1.0/( double )n_a, -1.0/( double )n_a, &tau );
+	bl2_setv( &tau, &t );
 
 	bl2_gemv( &BLIS_ONE, a, &t, &BLIS_ZERO, &v );
 

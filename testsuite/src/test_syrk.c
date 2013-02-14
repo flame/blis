@@ -305,10 +305,6 @@ void libblis_test_syrk_check( obj_t*  alpha,
 	bl2_setsc( 1.0/( double )m, 0.0, &kappa );
 	bl2_scalv( &kappa, &t );
 
-	bl2_setv( &BLIS_ZERO, &v );
-	bl2_setv( &BLIS_ZERO, &w );
-	bl2_setv( &BLIS_ZERO, &z );
-
 	bl2_symv( &BLIS_ONE, c, &t, &BLIS_ZERO, &v );
 
 	bl2_gemv( &BLIS_ONE, &at, &t, &BLIS_ZERO, &w );
