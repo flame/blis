@@ -452,6 +452,7 @@ typedef enum
 	BLIS_INVALID_CONJ                          = ( -23),
 	BLIS_INVALID_DIAG                          = ( -24),
 	BLIS_INVALID_MACHVAL                       = ( -25),
+	BLIS_EXPECTED_NONUNIT_DIAG                 = ( -26),
 
 	// Datatype-specific errors
 	BLIS_INVALID_DATATYPE                      = ( -30),

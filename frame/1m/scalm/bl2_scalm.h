@@ -55,7 +55,6 @@ void bl2_scalm( obj_t* beta,
 void PASTEMAC(ch,opname)( \
                           conj_t  conjbeta, \
                           doff_t  diagoffx, \
-                          diag_t  diagx, \
                           uplo_t  uplox, \
                           dim_t   m, \
                           dim_t   n, \
@@ -75,7 +74,6 @@ INSERT_GENTPROT_BASIC( scalm )
 void PASTEMAC2(chb,chx,opname)( \
                                 conj_t   conjbeta, \
                                 doff_t   diagoffx, \
-                                diag_t   diagx, \
                                 uplo_t   uplox, \
                                 dim_t    m, \
                                 dim_t    n, \

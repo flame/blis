@@ -128,6 +128,16 @@ err_t bl2_check_valid_diag( diag_t diag )
 	return e_val;
 }
 
+err_t bl2_check_nonunit_diag( obj_t* a )
+{
+	err_t e_val = BLIS_SUCCESS;
+
+	if ( !bl2_obj_has_nonunit_diag( *a ) )
+		e_val = BLIS_EXPECTED_NONUNIT_DIAG;
+
+	return e_val;
+}
+
 // -- Datatype-related checks --------------------------------------------------
 
 err_t bl2_check_valid_datatype( num_t dt )

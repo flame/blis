@@ -51,6 +51,11 @@ void bl2_scalm_basic_check( obj_t*   beta,
 
 	e_val = bl2_check_scalar_object( beta );
 	bl2_check_error_code( e_val );
+
+	// Check object properties.
+
+	e_val = bl2_check_nonunit_diag( x );
+	bl2_check_error_code( e_val );
 }
 
 void bl2_scalm_check( obj_t*   beta,

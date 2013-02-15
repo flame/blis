@@ -42,7 +42,6 @@ void bl2_scalm_unb_var1( obj_t*  beta,
 void PASTEMAC2(chb,chx,varname)( \
                                  conj_t  conjbeta, \
                                  doff_t  diagoffx, \
-                                 diag_t  diagx, \
                                  uplo_t  uplox, \
                                  dim_t   m, \
                                  dim_t   n, \

@@ -62,7 +62,6 @@ void bl2_scalm( obj_t* beta,
 void PASTEMAC(ch,opname)( \
                           conj_t  conjbeta, \
                           doff_t  diagoffx, \
-                          diag_t  diagx, \
                           uplo_t  uplox, \
                           dim_t   m, \
                           dim_t   n, \
@@ -72,7 +71,6 @@ void PASTEMAC(ch,opname)( \
 { \
 	PASTEMAC2(ch,ch,varname)( conjbeta, \
 	                          diagoffx, \
-	                          diagx, \
 	                          uplox, \
 	                          m, \
 	                          n, \
@@ -92,7 +90,6 @@ INSERT_GENTFUNC_BASIC( scalm, scalm_unb_var1 )
 void PASTEMAC2(chb,chx,opname)( \
                                 conj_t   conjbeta, \
                                 doff_t   diagoffx, \
-                                diag_t   diagx, \
                                 uplo_t   uplox, \
                                 dim_t    m, \
                                 dim_t    n, \
@@ -102,7 +99,6 @@ void PASTEMAC2(chb,chx,opname)( \
 { \
 	PASTEMAC2(chb,chx,varname)( conjbeta, \
 	                            diagoffx, \
-	                            diagx, \
 	                            uplox, \
 	                            m, \
 	                            n, \

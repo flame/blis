@@ -107,6 +107,8 @@ void bl2_error_msgs_init( void )
 	         "Invalid conj parameter value." );
 	sprintf( bl2_error_string_for_code(BLIS_INVALID_DIAG),
 	         "Invalid diag parameter value." );
+	sprintf( bl2_error_string_for_code(BLIS_EXPECTED_NONUNIT_DIAG),
+	         "Expected object with non-unit diagonal." );
 
 	sprintf( bl2_error_string_for_code(BLIS_INVALID_DATATYPE),
 	         "Invalid datatype value." );

@@ -39,7 +39,6 @@
 typedef void (*FUNCPTR_T)(
                            conj_t  conjbeta,
                            doff_t  diagoffx,
-                           diag_t  diagx,
                            uplo_t  uplox,
                            dim_t   m,
                            dim_t   n,
@@ -67,7 +66,6 @@ void bl2_scalm_unb_var1( obj_t*  beta,
 
 	conj_t    conjbeta  = bl2_obj_conj_status( *beta );
 	doff_t    diagoffx  = bl2_obj_diag_offset( *x );
-	diag_t    diagx     = bl2_obj_diag( *x );
 	uplo_t    uplox     = bl2_obj_uplo( *x );
 
 	dim_t     m         = bl2_obj_length( *x );
@@ -94,7 +92,6 @@ void bl2_scalm_unb_var1( obj_t*  beta,
 	// Invoke the function.
 	f( conjbeta,
 	   diagoffx,
-	   diagx,
 	   uplox,
 	   m,
 	   n,
@@ -109,7 +106,6 @@ void bl2_scalm_unb_var1( obj_t*  beta,
 void PASTEMAC2(chb,chx,varname)( \
                                  conj_t  conjbeta, \
                                  doff_t  diagoffx, \
-                                 diag_t  diagx, \
                                  uplo_t  uplox, \
                                  dim_t   m, \
                                  dim_t   n, \
@@ -132,7 +128,8 @@ void PASTEMAC2(chb,chx,varname)( \
 	/* If beta is unit, the entire operation is a no-op. */ \
 	if ( PASTEMAC(chb,eq1)( *beta_cast ) ) return; \
 \
-	/* Set various loop parameters. */ \
+	/* Set various loop parameters. Here, we assume diagx is BLIS_NONUNIT_DIAG
+	   because in _check() we disallow scalm on unit diagonal matrices. */ \
 	bl2_set_dims_incs_uplo_1m( diagoffx, BLIS_NONUNIT_DIAG, \
 	                           uplox, m, n, rs_x, cs_x, \
 	                           uplox_eff, n_elem_max, n_iter, incx, ldx, \

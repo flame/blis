@@ -44,6 +44,7 @@ err_t bl2_check_valid_side( side_t side );
 err_t bl2_check_valid_uplo( uplo_t uplo );
 err_t bl2_check_valid_trans( trans_t trans );
 err_t bl2_check_valid_diag( diag_t diag );
+err_t bl2_check_nonunit_diag( obj_t* a );
 
 err_t bl2_check_valid_datatype( num_t dt );
 err_t bl2_check_object_valid_datatype( obj_t* a );
