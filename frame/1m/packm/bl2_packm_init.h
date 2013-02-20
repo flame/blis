@@ -41,8 +41,8 @@ void bl2_packm_init_pack( bool_t    densify,
                           pack_t    pack_schema,
                           packord_t pack_ord_if_up,
                           packord_t pack_ord_if_lo,
-                          dim_t     mult_m,
-                          dim_t     mult_n,
+                          blksz_t*  mult_m,
+                          blksz_t*  mult_n,
                           obj_t*    c,
                           obj_t*    p );
 

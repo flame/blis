@@ -48,10 +48,9 @@ void bl2_packv_init( obj_t*   a,
 	//  3. cast only: Not yet supported / not used.
 	//  4. no-op: The control tree sometimes directs us to skip the
 	//     pack operation entirely. Alias p to a and return.
-	num_t  datatype;
-	pack_t pack_schema;
-	dim_t  mult_dim;
-	obj_t  c;
+	pack_t   pack_schema;
+	blksz_t* mult_m;
+	obj_t    c;
 
 	// Check parameters.
 	if ( bl2_error_checking_is_enabled() )
@@ -107,13 +106,12 @@ void bl2_packv_init( obj_t*   a,
 	// Extract various fields from the control tree and pass them in
 	// explicitly into _init_pack(). This allows external code generators
 	// the option of bypassing usage of control trees altogether.
-	datatype    = bl2_obj_datatype( *a );
 	pack_schema = cntl_pack_schema( cntl );
-	mult_dim    = bl2_blksz_for_type( datatype, cntl_mult_dim( cntl ) );
+	mult_m      = cntl_mult_dim( cntl );
 
 	// Initialize object p for the final packed vector.
 	bl2_packv_init_pack( pack_schema,
-	                     mult_dim,
+	                     mult_m,
 	                     &c,
 	                     p );
 
@@ -121,10 +119,10 @@ void bl2_packv_init( obj_t*   a,
 }
 
 
-void bl2_packv_init_pack( pack_t pack_schema,
-                          dim_t  mult_dim,
-                          obj_t* c,
-                          obj_t* p )
+void bl2_packv_init_pack( pack_t   pack_schema,
+                          blksz_t* mult_m,
+                          obj_t*   c,
+                          obj_t*   p )
 {
 	// In this function, we initialize an object p to represent the packed
 	// copy of the intermediate object c. At this point, the datatype of
@@ -150,7 +148,9 @@ void bl2_packv_init_pack( pack_t pack_schema,
 	//  original vector is, say, 1xm because we like to think of our packed
 	//  vectors as always column vectors.)
 
+	num_t  datatype     = bl2_obj_datatype( *c );
 	dim_t  dim_c        = bl2_obj_vector_dim( *c );
+	dim_t  mult_m_dim   = bl2_blksz_for_type( datatype, mult_m );
 	inc_t  rs_p, cs_p;
 
 	// We begin by copying the basic fields of c.
@@ -171,7 +171,7 @@ void bl2_packv_init_pack( pack_t pack_schema,
 	// it to p. (Otherwise, if it is non-NULL, then memory has already been
 	// acquired from the memory manager and cached.) We then set the main
 	// buffer of p to the cached address of the pack memory.
-	bl2_obj_set_buffer_with_cached_packv_mem( *p, *p, mult_dim );
+	bl2_obj_set_buffer_with_cached_packv_mem( *p, *p, mult_m_dim );
 
 	// Set the row and column strides of p based on the pack schema.
 	if ( pack_schema == BLIS_PACKED_VECTOR )

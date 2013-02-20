@@ -48,14 +48,13 @@ void bl2_packm_init( obj_t*   a,
 	//  3. cast only: Not yet supported / not used.
 	//  4. no-op: The control tree sometimes directs us to skip the
 	//     pack operation entirely. Alias p to a and return.
-	num_t     datatype;
 	bool_t    needs_densify;
 	invdiag_t invert_diag;
 	pack_t    pack_schema;
 	packord_t pack_ord_if_up;
 	packord_t pack_ord_if_lo;
-	dim_t     mult_m;
-	dim_t     mult_n;
+	blksz_t*  mult_m;
+	blksz_t*  mult_n;
 	obj_t     c;
 
 	// Check parameters.
@@ -127,11 +126,10 @@ void bl2_packm_init( obj_t*   a,
 	// Extract various fields from the control tree and pass them in
 	// explicitly into _init_pack(). This allows external code generators
 	// the option of bypassing usage of control trees altogether.
-	datatype       = bl2_obj_datatype( *a );
 	needs_densify  = cntl_does_densify( cntl );
 	pack_schema    = cntl_pack_schema( cntl );
-	mult_m         = bl2_blksz_for_type( datatype, cntl_mult_m( cntl ) );
-	mult_n         = bl2_blksz_for_type( datatype, cntl_mult_n( cntl ) );
+	mult_m         = cntl_mult_m( cntl );
+	mult_n         = cntl_mult_n( cntl );
 
 	if ( cntl_does_invert_diag( cntl ) ) invert_diag = BLIS_INVERT_DIAG;
 	else                                 invert_diag = BLIS_NO_INVERT_DIAG;
@@ -162,8 +160,8 @@ void bl2_packm_init_pack( bool_t    densify,
                           pack_t    pack_schema,
                           packord_t pack_ord_if_up,
                           packord_t pack_ord_if_lo,
-                          dim_t     mult_m,
-                          dim_t     mult_n,
+                          blksz_t*  mult_m,
+                          blksz_t*  mult_n,
                           obj_t*    c,
                           obj_t*    p )
 {
@@ -192,9 +190,12 @@ void bl2_packm_init_pack( bool_t    densify,
 	//  (6) object p gets new stride information based on the pack schema
 	//      embedded in the control tree node.
 
+	num_t   datatype     = bl2_obj_datatype( *c );
 	trans_t transc       = bl2_obj_trans_status( *c );
 	dim_t   m_c          = bl2_obj_length( *c );
 	dim_t   n_c          = bl2_obj_width( *c );
+	dim_t   mult_m_dim   = bl2_blksz_for_type( datatype, mult_m );
+	dim_t   mult_n_dim   = bl2_blksz_for_type( datatype, mult_n );
 	inc_t   rs_p, cs_p;
 
 	// We begin by copying the basic fields of c.
@@ -238,7 +239,7 @@ void bl2_packm_init_pack( bool_t    densify,
 	// it to p. (Otherwise, if it is non-NULL, then memory has already been
 	// acquired from the memory manager and cached.) We then set the main
 	// buffer of p to the cached address of the pack memory.
-	bl2_obj_set_buffer_with_cached_packm_mem( *p, *p, mult_m, mult_n );
+	bl2_obj_set_buffer_with_cached_packm_mem( *p, *p, mult_m_dim, mult_n_dim );
 
 	// Set the row and column strides of p based on the pack schema.
 	if      ( pack_schema == BLIS_PACKED_ROWS )
@@ -283,7 +284,7 @@ void bl2_packm_init_pack( bool_t    densify,
 
 		// The maximum panel length (for each datatype) should be equal to
 		// the m dimension multiple field of the control tree node.
-		m_panel = mult_m;
+		m_panel = mult_m_dim;
 
 		// The "column stride" of a row panel packed object is interpreted as
 		// the column stride WITHIN a panel. Thus, this is equal to the panel
@@ -314,7 +315,7 @@ void bl2_packm_init_pack( bool_t    densify,
 
 		// The maximum panel width (for each datatype) should be equal to
 		// the n dimension multiple field of the control tree node.
-		n_panel = mult_n;
+		n_panel = mult_n_dim;
 
 		// The "row stride" of a column panel packed object is interpreted as
 		// the row stride WITHIN a panel. Thus, it is equal to the panel
