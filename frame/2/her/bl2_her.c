@@ -112,19 +112,20 @@ void bl2_her( obj_t*  alpha,
 //
 // Define BLAS-like interfaces with homogeneous-typed operands.
 //
-#undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, varname ) \
+#undef  GENTFUNCR
+#define GENTFUNCR( ctype, ctype_r, ch, chr, opname, varname ) \
 \
 void PASTEMAC(ch,opname)( \
                           uplo_t    uploc, \
                           conj_t    conjx, \
                           dim_t     m, \
-                          ctype*    alpha, \
+                          ctype_r*  alpha, \
                           ctype*    x, inc_t incx, \
                           ctype*    c, inc_t rs_c, inc_t cs_c \
                         ) \
 { \
-	const num_t dt = PASTEMAC(ch,type); \
+	const num_t dt_r = PASTEMAC(chr,type); \
+	const num_t dt   = PASTEMAC(ch,type); \
 \
 	obj_t       alphao, xo, co; \
 \
@@ -132,7 +133,7 @@ void PASTEMAC(ch,opname)( \
 \
 	rs_x = incx; cs_x = m * incx; \
 \
-	bl2_obj_create_scalar_with_attached_buffer( dt, alpha, &alphao ); \
+	bl2_obj_create_scalar_with_attached_buffer( dt_r, alpha, &alphao ); \
 \
 	bl2_obj_create_with_attached_buffer( dt, m, 1, x, rs_x, cs_x, &xo ); \
 	bl2_obj_create_with_attached_buffer( dt, m, m, c, rs_c, cs_c, &co ); \
@@ -145,7 +146,7 @@ void PASTEMAC(ch,opname)( \
 	                   &co ); \
 }
 
-INSERT_GENTFUNC_BASIC( her, her )
+INSERT_GENTFUNCR_BASIC( her, her )
 
 
 //

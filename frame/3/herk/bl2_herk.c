@@ -148,21 +148,22 @@ void bl2_herk( obj_t*  alpha,
 //
 // Define BLAS-like interfaces with homogeneous-typed operands.
 //
-#undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, varname ) \
+#undef  GENTFUNCR
+#define GENTFUNCR( ctype, ctype_r, ch, chr, opname, varname ) \
 \
 void PASTEMAC(ch,opname)( \
-                          uplo_t  uploc, \
-                          trans_t transa, \
-                          dim_t   m, \
-                          dim_t   k, \
-                          ctype*  alpha, \
-                          ctype*  a, inc_t rs_a, inc_t cs_a, \
-                          ctype*  beta, \
-                          ctype*  c, inc_t rs_c, inc_t cs_c  \
+                          uplo_t    uploc, \
+                          trans_t   transa, \
+                          dim_t     m, \
+                          dim_t     k, \
+                          ctype_r*  alpha, \
+                          ctype*    a, inc_t rs_a, inc_t cs_a, \
+                          ctype_r*  beta, \
+                          ctype*    c, inc_t rs_c, inc_t cs_c  \
                         ) \
 { \
-	const num_t dt = PASTEMAC(ch,type); \
+	const num_t dt_r = PASTEMAC(chr,type); \
+	const num_t dt   = PASTEMAC(ch,type); \
 \
 	obj_t       alphao, ao, betao, co; \
 \
@@ -170,8 +171,8 @@ void PASTEMAC(ch,opname)( \
 \
 	bl2_set_dims_with_trans( transa, m, k, m_a, n_a ); \
 \
-	bl2_obj_create_scalar_with_attached_buffer( dt, alpha, &alphao ); \
-	bl2_obj_create_scalar_with_attached_buffer( dt, beta,  &betao  ); \
+	bl2_obj_create_scalar_with_attached_buffer( dt_r, alpha, &alphao ); \
+	bl2_obj_create_scalar_with_attached_buffer( dt_r, beta,  &betao  ); \
 \
 	bl2_obj_create_with_attached_buffer( dt, m_a, n_a, a, rs_a, cs_a, &ao ); \
 	bl2_obj_create_with_attached_buffer( dt, m,   m,   c, rs_c, cs_c, &co ); \
@@ -187,7 +188,7 @@ void PASTEMAC(ch,opname)( \
 	                   &co ); \
 }
 
-INSERT_GENTFUNC_BASIC( herk, herk )
+INSERT_GENTFUNCR_BASIC( herk, herk )
 
 
 //

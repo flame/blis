@@ -64,23 +64,23 @@ void bl2_her2k( obj_t*  alpha,
 //
 // Prototype BLAS-like interfaces with homogeneous-typed operands.
 //
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
+#undef  GENTPROTR
+#define GENTPROTR( ctype, ctype_r, ch, chr, opname ) \
 \
 void PASTEMAC(ch,opname)( \
-                          uplo_t  uploc, \
-                          trans_t transa, \
-                          trans_t transb, \
-                          dim_t   m, \
-                          dim_t   k, \
-                          ctype*  alpha, \
-                          ctype*  a, inc_t rs_a, inc_t cs_a, \
-                          ctype*  b, inc_t rs_b, inc_t cs_b, \
-                          ctype*  beta, \
-                          ctype*  c, inc_t rs_c, inc_t cs_c  \
+                          uplo_t    uploc, \
+                          trans_t   transa, \
+                          trans_t   transb, \
+                          dim_t     m, \
+                          dim_t     k, \
+                          ctype*    alpha, \
+                          ctype*    a, inc_t rs_a, inc_t cs_a, \
+                          ctype*    b, inc_t rs_b, inc_t cs_b, \
+                          ctype_r*  beta, \
+                          ctype*    c, inc_t rs_c, inc_t cs_c  \
                         );
 
-INSERT_GENTPROT_BASIC( her2k )
+INSERT_GENTPROTR_BASIC( her2k )
 
 
 //

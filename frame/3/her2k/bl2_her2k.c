@@ -167,23 +167,24 @@ void bl2_her2k( obj_t*  alpha,
 //
 // Define BLAS-like interfaces with homogeneous-typed operands.
 //
-#undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, varname ) \
+#undef  GENTFUNCR
+#define GENTFUNCR( ctype, ctype_r, ch, chr, opname, varname ) \
 \
 void PASTEMAC(ch,opname)( \
-                          uplo_t  uploc, \
-                          trans_t transa, \
-                          trans_t transb, \
-                          dim_t   m, \
-                          dim_t   k, \
-                          ctype*  alpha, \
-                          ctype*  a, inc_t rs_a, inc_t cs_a, \
-                          ctype*  b, inc_t rs_b, inc_t cs_b, \
-                          ctype*  beta, \
-                          ctype*  c, inc_t rs_c, inc_t cs_c  \
+                          uplo_t    uploc, \
+                          trans_t   transa, \
+                          trans_t   transb, \
+                          dim_t     m, \
+                          dim_t     k, \
+                          ctype*    alpha, \
+                          ctype*    a, inc_t rs_a, inc_t cs_a, \
+                          ctype*    b, inc_t rs_b, inc_t cs_b, \
+                          ctype_r*  beta, \
+                          ctype*    c, inc_t rs_c, inc_t cs_c  \
                         ) \
 { \
-	const num_t dt = PASTEMAC(ch,type); \
+	const num_t dt_r = PASTEMAC(chr,type); \
+	const num_t dt   = PASTEMAC(ch,type); \
 \
 	obj_t       alphao, ao, bo, betao, co; \
 \
@@ -193,8 +194,8 @@ void PASTEMAC(ch,opname)( \
 	bl2_set_dims_with_trans( transa, m, k, m_a, n_a ); \
 	bl2_set_dims_with_trans( transb, m, k, m_b, n_b ); \
 \
-	bl2_obj_create_scalar_with_attached_buffer( dt, alpha, &alphao ); \
-	bl2_obj_create_scalar_with_attached_buffer( dt, beta,  &betao  ); \
+	bl2_obj_create_scalar_with_attached_buffer( dt,   alpha, &alphao ); \
+	bl2_obj_create_scalar_with_attached_buffer( dt_r, beta,  &betao  ); \
 \
 	bl2_obj_create_with_attached_buffer( dt, m_a, n_a, a, rs_a, cs_a, &ao ); \
 	bl2_obj_create_with_attached_buffer( dt, m_b, n_b, b, rs_b, cs_b, &bo ); \
@@ -213,7 +214,7 @@ void PASTEMAC(ch,opname)( \
 	                   &co ); \
 }
 
-INSERT_GENTFUNC_BASIC( her2k, her2k )
+INSERT_GENTFUNCR_BASIC( her2k, her2k )
 
 
 //
