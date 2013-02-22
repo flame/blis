@@ -66,6 +66,8 @@ void bl2_finalize( void )
 	bl2_finalize_const();
 
 	bl2_cntl_finalize();
+
+	// Don't need to do anything to finalize error messages.
 }
 
 void bl2_init_const( void )
@@ -88,5 +90,36 @@ void bl2_finalize_const( void )
 	bl2_obj_free( &BLIS_MINUS_ONE_HALF );
 	bl2_obj_free( &BLIS_MINUS_ONE );
 	bl2_obj_free( &BLIS_MINUS_TWO );
+}
+
+void bl2_init_safe( err_t* init_result )
+{
+	if ( bl2_initialized )
+	{
+		*init_result = BLIS_FAILURE;
+	}
+	else
+	{
+		bl2_init();
+		*init_result = BLIS_SUCCESS;
+	}
+}
+
+void bl2_finalize_safe( err_t init_result )
+{
+#ifdef BLIS_ENABLE_STAY_AUTO_INITIALIZED
+
+	// If BLIS was configured to stay initialized after being automatically
+	// initialized, we honor the configuration request and do nothing.
+	// BLIS will remain initialized unless and until the user explicitly
+	// calls bl2_finalize().
+
+#else
+	// Only finalize if the corresponding bl2_init_safe() actually
+	// resulted in BLIS being initialized; if it did nothing, we
+	// similarly do nothing here.
+	if ( init_result == BLIS_SUCCESS )
+		bl2_finalize();
+#endif
 }
 

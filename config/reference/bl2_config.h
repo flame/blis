@@ -90,4 +90,19 @@
 
 
 
+// -- MISCELLANEOUS OPTIONS ----------------------------------------------------
+
+// Stay initialized after auto-initialization, unless and until the user
+// explicitly calls bl2_finalize().
+#define BLIS_ENABLE_STAY_AUTO_INITIALIZED
+
+
+
+// -- BLAS-to-BLIS COMPATIBILITY LAYER -----------------------------------------
+
+// Enable the BLAS compatibility layer?
+#define BLIS_ENABLE_BLAS2BLIS
+
+
+
 #endif

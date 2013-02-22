@@ -326,6 +326,10 @@
 
 #define SUBV_KERNEL          subv_unb_var1
 
+// -- swapv --
+
+#define SWAPV_KERNEL         swapv_unb_var1
+
 
 
 #endif

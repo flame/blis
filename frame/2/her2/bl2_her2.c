@@ -87,30 +87,30 @@ void bl2_her2( obj_t*  alpha,
 	                             &alpha_conj_local );
 
 
-    // If all operands are contiguous, we choose a control tree for calling
-    // the unblocked implementation directly without any blocking.
-    if ( x_is_contig &&
-         y_is_contig &&
-         c_is_contig )
-    {
-        // Use different control trees depending on storage of the matrix
+	// If all operands are contiguous, we choose a control tree for calling
+	// the unblocked implementation directly without any blocking.
+	if ( x_is_contig &&
+	     y_is_contig &&
+	     c_is_contig )
+	{
+		// Use different control trees depending on storage of the matrix
 		// operand.
-        if ( bl2_obj_is_row_stored( *c ) ) her2_cntl = her2_cntl_bs_ke_row;
-        else                               her2_cntl = her2_cntl_bs_ke_col;
-    }
-    else
-    {
-        // Mark objects with unit stride as already being packed. This prevents
-        // unnecessary packing from happening within the blocked algorithm.
-        if ( x_is_contig ) bl2_obj_set_pack_schema( BLIS_PACKED_VECTOR, *x );
-        if ( y_is_contig ) bl2_obj_set_pack_schema( BLIS_PACKED_VECTOR, *y );
-        if ( c_is_contig ) bl2_obj_set_pack_schema( BLIS_PACKED_UNSPEC, *c );
+		if ( bl2_obj_is_row_stored( *c ) ) her2_cntl = her2_cntl_bs_ke_row;
+		else                               her2_cntl = her2_cntl_bs_ke_col;
+	}
+	else
+	{
+		// Mark objects with unit stride as already being packed. This prevents
+		// unnecessary packing from happening within the blocked algorithm.
+		if ( x_is_contig ) bl2_obj_set_pack_schema( BLIS_PACKED_VECTOR, *x );
+		if ( y_is_contig ) bl2_obj_set_pack_schema( BLIS_PACKED_VECTOR, *y );
+		if ( c_is_contig ) bl2_obj_set_pack_schema( BLIS_PACKED_UNSPEC, *c );
 
 		// Here, we make a similar choice as above, except that (1) we look
 		// at storage tilt, and (2) we choose a tree that performs blocking.
-        if ( bl2_obj_is_row_tilted( *c ) ) her2_cntl = her2_cntl_ge_row;
-        else                               her2_cntl = her2_cntl_ge_col;
-    }
+		if ( bl2_obj_is_row_tilted( *c ) ) her2_cntl = her2_cntl_ge_row;
+		else                               her2_cntl = her2_cntl_ge_col;
+	}
 
 
 	// Invoke the internal back-end with the copy-cast scalar and the
@@ -149,6 +149,9 @@ void PASTEMAC(ch,opname)( \
 \
 	inc_t       rs_x, cs_x; \
 	inc_t       rs_y, cs_y; \
+	err_t       init_result; \
+\
+	bl2_init_safe( &init_result ); \
 \
 	rs_x = incx; cs_x = m * incx; \
 	rs_y = incy; cs_y = m * incy; \
@@ -167,6 +170,8 @@ void PASTEMAC(ch,opname)( \
 	                   &xo, \
 	                   &yo, \
 	                   &co ); \
+\
+	bl2_finalize_safe( init_result ); \
 }
 
 INSERT_GENTFUNC_BASIC( her2, her2 )

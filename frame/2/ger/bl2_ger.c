@@ -64,7 +64,7 @@ void bl2_ger( obj_t*  alpha,
 	dt_targ_y = bl2_obj_target_datatype( *y );
 	dt_targ_a = bl2_obj_target_datatype( *a );
 
-    // Determine whether each operand is stored contiguously.
+	// Determine whether each operand is stored contiguously.
 	x_is_contig = ( bl2_obj_vector_inc( *x ) == 1 );
 	y_is_contig = ( bl2_obj_vector_inc( *y ) == 1 );
 	a_is_contig = ( bl2_obj_is_row_stored( *a ) ||
@@ -142,6 +142,9 @@ void PASTEMAC(ch,opname)( \
 	dim_t       m_y; \
 	inc_t       rs_x, cs_x; \
 	inc_t       rs_y, cs_y; \
+	err_t       init_result; \
+\
+	bl2_init_safe( &init_result ); \
 \
 	bl2_set_dims_with_trans( BLIS_NO_TRANSPOSE, m, n, m_x, m_y ); \
 \
@@ -161,6 +164,8 @@ void PASTEMAC(ch,opname)( \
 	                   &xo, \
 	                   &yo, \
 	                   &ao ); \
+\
+	bl2_finalize_safe( init_result ); \
 }
 
 INSERT_GENTFUNC_BASIC( ger, ger )

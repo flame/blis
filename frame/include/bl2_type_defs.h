@@ -85,6 +85,19 @@ typedef struct blksz_s
 
 typedef dcomplex atom_t;
 
+// Fortran-77 types (used only by blas2blis compatibility layer)
+
+#ifdef BLIS_ENABLE_BLAS2BLIS
+
+typedef char        fchar;
+typedef signed int  fint;
+typedef float       f77_float;
+typedef double      f77_double;
+typedef scomplex    f77_scomplex;
+typedef dcomplex    f77_dcomplex;
+
+#endif
+
 
 // -- BLIS object type definitions ---------------------------------------------
 

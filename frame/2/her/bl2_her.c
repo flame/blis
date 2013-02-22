@@ -84,18 +84,18 @@ void bl2_her( obj_t*  alpha,
 		if ( bl2_obj_is_row_stored( *c ) ) her_cntl = her_cntl_bs_ke_row;
 		else                               her_cntl = her_cntl_bs_ke_col;
 	}
-    else
-    {
+	else
+	{
 		// Mark objects with unit stride as already being packed. This prevents
 		// unnecessary packing from happening within the blocked algorithm.
-        if ( x_is_contig ) bl2_obj_set_pack_schema( BLIS_PACKED_VECTOR, *x );
-        if ( c_is_contig ) bl2_obj_set_pack_schema( BLIS_PACKED_UNSPEC, *c );
+		if ( x_is_contig ) bl2_obj_set_pack_schema( BLIS_PACKED_VECTOR, *x );
+		if ( c_is_contig ) bl2_obj_set_pack_schema( BLIS_PACKED_UNSPEC, *c );
 
 		// Here, we make a similar choice as above, except that (1) we look
 		// at storage tilt, and (2) we choose a tree that performs blocking.
-        if ( bl2_obj_is_row_tilted( *c ) ) her_cntl = her_cntl_ge_row;
-        else                               her_cntl = her_cntl_ge_col;
-    }
+		if ( bl2_obj_is_row_tilted( *c ) ) her_cntl = her_cntl_ge_row;
+		else                               her_cntl = her_cntl_ge_col;
+	}
 
 
 	// Invoke the internal back-end with the copy-cast scalar and the
@@ -130,6 +130,9 @@ void PASTEMAC(ch,opname)( \
 	obj_t       alphao, xo, co; \
 \
 	inc_t       rs_x, cs_x; \
+	err_t       init_result; \
+\
+	bl2_init_safe( &init_result ); \
 \
 	rs_x = incx; cs_x = m * incx; \
 \
@@ -144,6 +147,8 @@ void PASTEMAC(ch,opname)( \
 	PASTEMAC0(opname)( &alphao, \
 	                   &xo, \
 	                   &co ); \
+\
+	bl2_finalize_safe( init_result ); \
 }
 
 INSERT_GENTFUNCR_BASIC( her, her )

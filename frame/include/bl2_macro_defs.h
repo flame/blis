@@ -71,6 +71,7 @@
 #include "bl2_param_macro_defs.h"
 #include "bl2_scalar_macro_defs.h"
 #include "bl2_error_macro_defs.h"
+#include "bl2_blas_macro_defs.h"
 
 
 #endif

@@ -40,6 +40,7 @@
 
 // -- Default cache blocksizes --
 
+//
 // Constraints:
 //
 // (1) MC must be a multiple of:
@@ -314,6 +315,10 @@
 // -- subv --
 
 #define SUBV_KERNEL          subv_unb_var1
+
+// -- swapv --
+
+#define SWAPV_KERNEL         swapv_unb_var1
 
 
 

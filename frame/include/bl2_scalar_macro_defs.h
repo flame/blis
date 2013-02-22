@@ -97,6 +97,8 @@
 #include "bl2_subs.h"
 #include "bl2_subjs.h"
 
+#include "bl2_swaps.h"
+
 #include "bl2_xpbys.h"
 
 

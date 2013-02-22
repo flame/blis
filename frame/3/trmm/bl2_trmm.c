@@ -71,7 +71,7 @@ void bl2_trmm( side_t  side,
 
 	// Set each alias as the root object. This makes life easier when
 	// implementing right side and transpose cases because we don't actually
-	// the root objects but rather the root objects after we are done
+	// want the root objects but rather the root objects after we are done
 	// fiddling with them.
 	bl2_obj_set_as_root( a_local );
 	bl2_obj_set_as_root( b_local );
@@ -153,6 +153,9 @@ void PASTEMAC(ch,opname)( \
 	obj_t       alphao, ao, bo; \
 \
 	dim_t       mn_a; \
+	err_t       init_result; \
+\
+	bl2_init_safe( &init_result ); \
 \
 	bl2_set_dim_with_side( side, m, n, mn_a ); \
 \
@@ -171,6 +174,8 @@ void PASTEMAC(ch,opname)( \
 	                   &alphao, \
 	                   &ao, \
 	                   &bo ); \
+\
+	bl2_finalize_safe( init_result ); \
 }
 
 INSERT_GENTFUNC_BASIC( trmm, trmm )
@@ -194,7 +199,7 @@ void PASTEMAC2(cha,chb,opname)( \
                                 ctype_b*  b, inc_t rs_b, inc_t cs_b  \
                               ) \
 { \
-    bl2_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \
+	bl2_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \
 }
 
 INSERT_GENTFUNC2_BASIC( trmm, trmm )

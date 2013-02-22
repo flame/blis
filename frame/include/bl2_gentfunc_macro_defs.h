@@ -42,11 +42,103 @@
 
 
 
+// -- Macros for generating BLAS routines --------------------------------------
+
+
+// -- Basic one-operand macro --
+
+
+#define INSERT_GENTFUNC_BLAS( blasname, blisname ) \
+\
+GENTFUNC( float,    s, blasname, blisname ) \
+GENTFUNC( double,   d, blasname, blisname ) \
+GENTFUNC( scomplex, c, blasname, blisname ) \
+GENTFUNC( dcomplex, z, blasname, blisname )
+
+
+// -- Basic one-operand macro with real domain only --
+
+
+#define INSERT_GENTFUNCRO_BLAS( blasname, blisname ) \
+\
+GENTFUNCRO( float,    s, blasname, blisname ) \
+GENTFUNCRO( double,   d, blasname, blisname )
+
+
+// -- Basic one-operand macro with complex domain only and real projection --
+
+
+#define INSERT_GENTFUNCCO_BLAS( blasname, blisname ) \
+\
+GENTFUNCCO( scomplex, float,  c, s, blasname, blisname ) \
+GENTFUNCCO( dcomplex, double, z, d, blasname, blisname )
+
+
+// -- Basic one-operand macro with conjugation (used only for dot, ger) --
+
+
+#define INSERT_GENTFUNCDOT_BLAS( blasname, blisname ) \
+\
+GENTFUNCDOT( float,    s,  , BLIS_NO_CONJUGATE, blasname, blisname ) \
+GENTFUNCDOT( double,   d,  , BLIS_NO_CONJUGATE, blasname, blisname ) \
+GENTFUNCDOT( scomplex, c, c, BLIS_CONJUGATE,    blasname, blisname ) \
+GENTFUNCDOT( scomplex, c, u, BLIS_NO_CONJUGATE, blasname, blisname ) \
+GENTFUNCDOT( dcomplex, z, c, BLIS_CONJUGATE,    blasname, blisname ) \
+GENTFUNCDOT( dcomplex, z, u, BLIS_NO_CONJUGATE, blasname, blisname )
+
+
+// -- Basic one-operand macro with real projection --
+
+
+#define INSERT_GENTFUNCR_BLAS( rblasname, cblasname, blisname ) \
+\
+GENTFUNCR( float,    float,  s, s, rblasname, blisname ) \
+GENTFUNCR( double,   double, d, d, rblasname, blisname ) \
+GENTFUNCR( scomplex, float,  c, s, cblasname, blisname ) \
+GENTFUNCR( dcomplex, double, z, d, cblasname, blisname )
+
+
+// -- Alternate two-operand macro (one char for complex, one for real proj) --
+
+
+#define INSERT_GENTFUNCR2_BLAS( blasname, blisname ) \
+\
+GENTFUNCR2( float,    float,  s,  , blasname, blisname ) \
+GENTFUNCR2( double,   double, d,  , blasname, blisname ) \
+GENTFUNCR2( scomplex, float,  c, s, blasname, blisname ) \
+GENTFUNCR2( dcomplex, double, z, d, blasname, blisname )
+
+
+// -- Alternate two-operand macro (one char for complex, one for int) --
+
+
+#define INSERT_GENTFUNC2I_BLAS( blasname, blisname ) \
+\
+GENTFUNC2I( float,    fint, s, i, blasname, blisname ) \
+GENTFUNC2I( double,   fint, d, i, blasname, blisname ) \
+GENTFUNC2I( scomplex, fint, c, i, blasname, blisname ) \
+GENTFUNC2I( dcomplex, fint, z, i, blasname, blisname )
+
+
+// -- Extended two-operand macro (used only for scal) --
+
+
+#define INSERT_GENTFUNCSCAL_BLAS( blasname, blisname ) \
+\
+GENTFUNCSCAL( float,    float,     , s, blasname, blisname ) \
+GENTFUNCSCAL( double,   double,    , d, blasname, blisname ) \
+GENTFUNCSCAL( scomplex, scomplex,  , c, blasname, blisname ) \
+GENTFUNCSCAL( dcomplex, dcomplex,  , z, blasname, blisname ) \
+GENTFUNCSCAL( float,    scomplex, s, c, blasname, blisname ) \
+GENTFUNCSCAL( double,   dcomplex, d, z, blasname, blisname )
+
+
+
 
 // -- Macros for functions with one operand ------------------------------------
 
 
-// -- Basic one-operand macros --
+// -- Basic one-operand macro --
 
 
 #define INSERT_GENTFUNC_BASIC( tfuncname, varname ) \
@@ -68,21 +160,8 @@ GENTFUNCR( scomplex, float,  c, s, tfuncname, varname ) \
 GENTFUNCR( dcomplex, double, z, d, tfuncname, varname )
 
 
-/*
-// -- Mixed one-operand with real projection --
 
-
-#define INSERT_GENTFUNCR_MIXED( tfuncname, varname ) \
-\
-GENTFUNCR( float,    double, s, d, tfuncname, varname ) \
-GENTFUNCR( double,   float,  d, s, tfuncname, varname ) \
-GENTFUNCR( scomplex, double, c, d, tfuncname, varname ) \
-GENTFUNCR( dcomplex, float,  z, s, tfuncname, varname )
-*/
-
-
-// -- Basic one-operand macros --
-// -- (with two auxiliary arguments) --
+// -- Basic one-operand macro (with two auxiliary arguments) --
 
 
 #define INSERT_GENTFUNC_BASIC2( tfuncname, varname1, varname2 ) \
@@ -98,7 +177,7 @@ GENTFUNC( dcomplex, z, tfuncname, varname1, varname2 )
 // -- Macros for functions with two primary operands ---------------------------
 
 
-// -- Basic two-operand macros --
+// -- Basic two-operand macro --
 
 
 #define INSERT_GENTFUNC2_BASIC( tfuncname, varname ) \
@@ -109,7 +188,7 @@ GENTFUNC2( scomplex, scomplex, c, c, tfuncname, varname ) \
 GENTFUNC2( dcomplex, dcomplex, z, z, tfuncname, varname )
 
 
-// -- Mixed domain two-operand macros --
+// -- Mixed domain two-operand macro --
 
 
 #define INSERT_GENTFUNC2_MIX_D( tfuncname, varname ) \
@@ -121,7 +200,7 @@ GENTFUNC2( double,   dcomplex, d, z, tfuncname, varname ) \
 GENTFUNC2( dcomplex, double,   z, d, tfuncname, varname )
 
 
-// -- Mixed precision two-operand macros --
+// -- Mixed precision two-operand macro --
 
 
 #define INSERT_GENTFUNC2_MIX_P( tfuncname, varname ) \
@@ -227,7 +306,7 @@ GENTFUNC2R( dcomplex, scomplex, double,   z, c, d, tfuncname, varname )
 // -- Macros for functions with three primary operands -------------------------
 
 
-// -- Basic three-operand macros --
+// -- Basic three-operand macro --
 
 
 #define INSERT_GENTFUNC3_BASIC( tfuncname, varname ) \
@@ -247,7 +326,7 @@ GENTFUNC3( dcomplex, dcomplex, dcomplex, z, z, z, tfuncname, varname1, varname2 
 
 
 
-// -- Mixed domain three-operand macros --
+// -- Mixed domain three-operand macro --
 
 
 #define INSERT_GENTFUNC3_MIX_D( tfuncname, varname ) \
@@ -269,7 +348,7 @@ GENTFUNC3( dcomplex, double,   dcomplex, z, d, z, tfuncname, varname ) \
 GENTFUNC3( dcomplex, dcomplex, double,   z, z, d, tfuncname, varname )
 
 
-// -- Mixed precision three-operand macros --
+// -- Mixed precision three-operand macro --
 
 
 #define INSERT_GENTFUNC3_MIX_P( tfuncname, varname ) \

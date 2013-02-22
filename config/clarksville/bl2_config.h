@@ -90,4 +90,19 @@
 
 
 
+// -- MISCELLANEOUS OPTIONS ----------------------------------------------------
+
+// Stay initialized after auto-initialization, unless and until explicitly
+// finalized.
+#define BLIS_ENABLE_STAY_AUTO_INITIALIZED
+
+
+
+// -- BLAS-to-BLIS COMPATIBILITY LAYER -----------------------------------------
+
+// Enable the BLAS compatibility layer?
+#define BLIS_ENABLE_BLAS2BLIS
+
+
+
 #endif

@@ -194,6 +194,9 @@ void PASTEMAC(ch,opname)( \
 \
 	dim_t       m_a, n_a; \
 	dim_t       m_b, n_b; \
+	err_t       init_result; \
+\
+	bl2_init_safe( &init_result ); \
 \
 	bl2_set_dims_with_trans( transa, m, k, m_a, n_a ); \
 	bl2_set_dims_with_trans( transb, k, n, m_b, n_b ); \
@@ -213,6 +216,8 @@ void PASTEMAC(ch,opname)( \
 	                   &bo, \
 	                   &betao, \
 	                   &co ); \
+\
+	bl2_finalize_safe( init_result ); \
 }
 
 INSERT_GENTFUNC_BASIC( gemm, gemm )

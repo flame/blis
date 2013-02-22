@@ -34,6 +34,9 @@
 
 void bl2_init( void );
 void bl2_finalize( void );
+
 void bl2_init_const( void );
 void bl2_finalize_const( void );
 
+void bl2_init_safe( err_t* init_result );
+void bl2_finalize_safe( err_t init_result );

@@ -41,11 +41,103 @@
 
 
 
+// -- Macros for generating BLAS routines --------------------------------------
+
+
+// -- Basic one-operand macro --
+
+
+#define INSERT_GENTPROT_BLAS( blasname ) \
+\
+GENTPROT( float,    s, blasname ) \
+GENTPROT( double,   d, blasname ) \
+GENTPROT( scomplex, c, blasname ) \
+GENTPROT( dcomplex, z, blasname )
+
+
+// -- Basic one-operand macro with real domain only --
+
+
+#define INSERT_GENTPROTRO_BLAS( blasname ) \
+\
+GENTPROTRO( float,    s, blasname ) \
+GENTPROTRO( double,   d, blasname )
+
+
+// -- Basic one-operand macro with complex domain only and real projection --
+
+
+#define INSERT_GENTPROTCO_BLAS( blasname ) \
+\
+GENTPROTCO( scomplex, float,  c, s, blasname ) \
+GENTPROTCO( dcomplex, double, z, d, blasname )
+
+
+// -- Basic one-operand macro with conjugation (used only for dot, ger) --
+
+
+#define INSERT_GENTPROTDOT_BLAS( blasname ) \
+\
+GENTPROTDOT( float,    s,  , blasname ) \
+GENTPROTDOT( double,   d,  , blasname ) \
+GENTPROTDOT( scomplex, c, c, blasname ) \
+GENTPROTDOT( scomplex, c, u, blasname ) \
+GENTPROTDOT( dcomplex, z, c, blasname ) \
+GENTPROTDOT( dcomplex, z, u, blasname )
+
+
+// -- Basic one-operand macro with real projection --
+
+
+#define INSERT_GENTPROTR_BLAS( rblasname, cblasname ) \
+\
+GENTPROTR( float,    float,  s, s, rblasname ) \
+GENTPROTR( double,   double, d, d, rblasname ) \
+GENTPROTR( scomplex, float,  c, s, cblasname ) \
+GENTPROTR( dcomplex, double, z, d, cblasname )
+
+
+// -- Alternate two-operand macro (one char for complex, one for real proj) --
+
+
+#define INSERT_GENTPROTR2_BLAS( blasname ) \
+\
+GENTPROTR2( float,    float,   , s, blasname ) \
+GENTPROTR2( double,   double,  , d, blasname ) \
+GENTPROTR2( scomplex, float,  c, s, blasname ) \
+GENTPROTR2( dcomplex, double, z, d, blasname )
+
+
+// -- Alternate two-operand macro (one char for complex, one for int) --
+
+
+#define INSERT_GENTPROT2I_BLAS( blasname ) \
+\
+GENTPROT2I( float,    fint, s, i, blasname ) \
+GENTPROT2I( double,   fint, d, i, blasname ) \
+GENTPROT2I( scomplex, fint, c, i, blasname ) \
+GENTPROT2I( dcomplex, fint, z, i, blasname )
+
+
+// -- Extended two-operand macro (used only for scal) --
+
+
+#define INSERT_GENTPROTSCAL_BLAS( blasname ) \
+\
+GENTPROTSCAL( float,    float,     , s, blasname ) \
+GENTPROTSCAL( double,   double,    , d, blasname ) \
+GENTPROTSCAL( scomplex, scomplex,  , c, blasname ) \
+GENTPROTSCAL( dcomplex, dcomplex,  , z, blasname ) \
+GENTPROTSCAL( float,    scomplex, s, c, blasname ) \
+GENTPROTSCAL( double,   dcomplex, d, z, blasname )
+
+
+
 
 // -- Macros for functions with one operand ------------------------------------
 
 
-// -- Basic one-operand macros --
+// -- Basic one-operand macro --
 
 
 #define INSERT_GENTPROT_BASIC( funcname ) \
@@ -72,7 +164,7 @@ GENTPROTR( dcomplex, double, z, d, tfuncname )
 // -- Macros for functions with two primary operands ---------------------------
 
 
-// -- Basic two-operand macros --
+// -- Basic two-operand macro --
 
 
 #define INSERT_GENTPROT2_BASIC( funcname ) \
@@ -83,7 +175,7 @@ GENTPROT2( scomplex, scomplex, c, c, funcname ) \
 GENTPROT2( dcomplex, dcomplex, z, z, funcname )
 
 
-// -- Mixed domain two-operand macros --
+// -- Mixed domain two-operand macro --
 
 
 #define INSERT_GENTPROT2_MIX_D( funcname ) \
@@ -95,7 +187,7 @@ GENTPROT2( double,   dcomplex, d, z, funcname ) \
 GENTPROT2( dcomplex, double,   z, d, funcname )
 
 
-// -- Mixed precision two-operand macros --
+// -- Mixed precision two-operand macro --
 
 
 #define INSERT_GENTPROT2_MIX_P( funcname ) \
@@ -202,7 +294,7 @@ GENTPROT2R( dcomplex, scomplex, double,   z, c, d, funcname )
 // -- Macros for functions with three primarcy operands ------------------------
 
 
-// -- Basic three-operand macros --
+// -- Basic three-operand macro --
 
 
 #define INSERT_GENTPROT3_BASIC( funcname ) \
@@ -213,7 +305,7 @@ GENTPROT3( scomplex, scomplex, scomplex, c, c, c, funcname ) \
 GENTPROT3( dcomplex, dcomplex, dcomplex, z, z, z, funcname )
 
 
-// -- Mixed domain three-operand macros --
+// -- Mixed domain three-operand macro --
 
 
 #define INSERT_GENTPROT3_MIX_D( funcname ) \
@@ -235,7 +327,7 @@ GENTPROT3( dcomplex, double,   dcomplex, z, d, z, funcname ) \
 GENTPROT3( dcomplex, dcomplex, double,   z, z, d, funcname )
 
 
-// -- Mixed precision three-operand macros --
+// -- Mixed precision three-operand macro --
 
 
 #define INSERT_GENTPROT3_MIX_P( funcname ) \

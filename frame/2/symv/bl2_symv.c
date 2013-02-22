@@ -176,6 +176,9 @@ void PASTEMAC(ch,opname)( \
 \
 	inc_t       rs_x, cs_x; \
 	inc_t       rs_y, cs_y; \
+	err_t       init_result; \
+\
+	bl2_init_safe( &init_result ); \
 \
 	rs_x = incx; cs_x = m * incx; \
 	rs_y = incy; cs_y = m * incy; \
@@ -196,6 +199,8 @@ void PASTEMAC(ch,opname)( \
 	                   &xo, \
 	                   &betao, \
 	                   &yo ); \
+\
+	bl2_finalize_safe( init_result ); \
 }
 
 INSERT_GENTFUNC_BASIC( symv, symv )

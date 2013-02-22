@@ -130,6 +130,7 @@ extern "C" {
 #include "bl2_fnormv.h"
 #include "bl2_scal2v.h"
 #include "bl2_subv.h"
+#include "bl2_swapv.h"
 #include "bl2_packv.h"
 #include "bl2_unpackv.h"
 
@@ -219,6 +220,11 @@ extern "C" {
 #include "bl2_randv.h"
 #include "bl2_randm.h"
 #include "bl2_sumsqv.h"
+
+
+// -- BLAS-to-BLIS headers --
+
+#include "bl2_blas.h"
 
 
 // End extern "C" construct block.
