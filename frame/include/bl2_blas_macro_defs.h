@@ -35,22 +35,18 @@
 #ifndef BLIS_BLAS_MACRO_DEFS_H
 #define BLIS_BLAS_MACRO_DEFS_H
 
+// -- Various Fortran compatibility macros --
 
-// -- Fortran-77 name-mangling macros --
-
-//#define F77_FUNC(name,NAME)     name ## _
-
-#define PASTEF77(ch1,name)       ch1        ## name ## _
-#define PASTEF772(ch1,ch2,name)  ch1 ## ch2 ## name ## _
-
-
-// -- Other compatibility macros --
+// Macro to treat negative dimensions as zero.
 
 #define bl2_convert_blas_dim1( n_blas, n_blis )\
 { \
 	if ( n_blas < 0 ) n_blis = 0; \
 	else              n_blis = n_blas; \
 }
+
+// Macro to reposition vector pointers and flip signs of increments
+// if input increments are negative.
 
 #define bl2_convert_blas_incv( n, x_blas, incx_blas, \
                                   x_blis, incx_blis ) \

@@ -103,6 +103,12 @@
 // Enable the BLAS compatibility layer?
 #define BLIS_ENABLE_BLAS2BLIS
 
+// Fortran-77 name-mangling macros.
+#define PASTEF77(ch1,name)       ch1        ## name ## _
+#define PASTEF772(ch1,ch2,name)  ch1 ## ch2 ## name ## _
+
+
 
 
 #endif
+
