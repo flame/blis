@@ -32,67 +32,57 @@
 
 */
 
-// -- Level-1 BLAS --
+#include "blis2.h"
 
-#include "bla_amax.h"
-#include "bla_asum.h"
-#include "bla_axpy.h"
-#include "bla_copy.h"
-#include "bla_dot.h"
-#include "bla_nrm2.h"
-#include "bla_rot.h"
-#include "bla_rotg.h"
-#include "bla_rotm.h"
-#include "bla_rotmg.h"
-#include "bla_scal.h"
-#include "bla_swap.h"
+#ifdef BLIS_ENABLE_BLAS2BLIS
 
+#include "bl2_f2c.h"
+#include "stdio.h"
 
-// -- Level-2 BLAS --
+/* xerbla.f -- translated by f2c (version 19991025).
+   You must link the resulting object file with the libraries:
+	-lf2c -lm   (in that order)
+*/
 
-// dense
+/* Table of constant values */
 
-#include "bla_gemv.h"
-#include "bla_ger.h"
-#include "bla_hemv.h"
-#include "bla_her.h"
-#include "bla_her2.h"
-#include "bla_symv.h"
-#include "bla_syr.h"
-#include "bla_syr2.h"
-#include "bla_trmv.h"
-#include "bla_trsv.h"
+/* Subroutine */ int xerbla_(char *srname, integer *info, ftnlen srname_len)
+{
+/*  -- LAPACK auxiliary routine (preliminary version) -- */
+/*     Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd., */
+/*     Courant Institute, Argonne National Lab, and Rice University */
+/*     February 29, 1992 */
 
-// packed
+/*     .. Scalar Arguments .. */
+/*     .. */
 
-//#include "bla_hpmv.h"
-//#include "bla_hpr.h"
-//#include "bla_hpr2.h"
-//#include "bla_spmv.h"
-//#include "bla_spr.h"
-//#include "bla_spr2.h"
-//#include "bla_tpmv.h"
-//#include "bla_tpsv.h"
+/*  Purpose */
+/*  ======= */
 
-// banded
+/*  XERBLA  is an error handler for the LAPACK routines. */
+/*  It is called by an LAPACK routine if an input parameter has an */
+/*  invalid value.  A message is printed and execution stops. */
 
-//#include "bla_gbmv.h"
-//#include "bla_hbmv.h"
-//#include "bla_sbmv.h"
-//#include "bla_tbmv.h"
-//#include "bla_tbsv.h"
+/*  Installers may consider modifying the STOP statement in order to */
+/*  call system-specific exception-handling facilities. */
 
+/*  Arguments */
+/*  ========= */
 
-// -- Level-3 BLAS --
+/*  SRNAME  (input) CHARACTER*6 */
+/*          The name of the routine which called XERBLA. */
 
-#include "bla_gemm.h"
-#include "bla_hemm.h"
-#include "bla_herk.h"
-#include "bla_her2k.h"
-#include "bla_symm.h"
-#include "bla_syrk.h"
-#include "bla_syr2k.h"
-#include "bla_trmm.h"
-#include "bla_trsm.h"
+/*  INFO    (input) INTEGER */
+/*          The position of the invalid parameter in the parameter list */
+/*          of the calling routine. */
 
+    printf("** On entry to %6s, parameter number %2i had an illegal value\n",
+        srname, (int)*info);
+
+/*     End of XERBLA */
+
+    return 0;
+} /* xerbla_ */
+
+#endif
 

@@ -32,67 +32,17 @@
 
 */
 
-// -- Level-1 BLAS --
+#include "blis2.h"
 
-#include "bla_amax.h"
-#include "bla_asum.h"
-#include "bla_axpy.h"
-#include "bla_copy.h"
-#include "bla_dot.h"
-#include "bla_nrm2.h"
-#include "bla_rot.h"
-#include "bla_rotg.h"
-#include "bla_rotm.h"
-#include "bla_rotmg.h"
-#include "bla_scal.h"
-#include "bla_swap.h"
+#ifdef BLIS_ENABLE_BLAS2BLIS
 
+#include "bl2_f2c.h"
 
-// -- Level-2 BLAS --
+void d_cnjg(doublecomplex *dest, doublecomplex *src)
+{
+	dest->r =   src->r ;
+	dest->i = -(src->i);
+}
 
-// dense
-
-#include "bla_gemv.h"
-#include "bla_ger.h"
-#include "bla_hemv.h"
-#include "bla_her.h"
-#include "bla_her2.h"
-#include "bla_symv.h"
-#include "bla_syr.h"
-#include "bla_syr2.h"
-#include "bla_trmv.h"
-#include "bla_trsv.h"
-
-// packed
-
-//#include "bla_hpmv.h"
-//#include "bla_hpr.h"
-//#include "bla_hpr2.h"
-//#include "bla_spmv.h"
-//#include "bla_spr.h"
-//#include "bla_spr2.h"
-//#include "bla_tpmv.h"
-//#include "bla_tpsv.h"
-
-// banded
-
-//#include "bla_gbmv.h"
-//#include "bla_hbmv.h"
-//#include "bla_sbmv.h"
-//#include "bla_tbmv.h"
-//#include "bla_tbsv.h"
-
-
-// -- Level-3 BLAS --
-
-#include "bla_gemm.h"
-#include "bla_hemm.h"
-#include "bla_herk.h"
-#include "bla_her2k.h"
-#include "bla_symm.h"
-#include "bla_syrk.h"
-#include "bla_syr2k.h"
-#include "bla_trmm.h"
-#include "bla_trsm.h"
-
+#endif
 
