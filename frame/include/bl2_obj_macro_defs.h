@@ -1026,7 +1026,11 @@ bl2_obj_width_stored( obj )
 		if ( bl2_obj_is_upper_or_lower( obj ) ) \
 			bl2_obj_toggle_uplo( obj ); \
 \
-		bl2_obj_toggle_trans( obj ); \
+		/* Note that this macro DOES NOT touch the transposition bit! If
+		   the calling code is using this macro to handle an object whose
+		   transposition bit is set prior to computation, that code needs
+		   to manually clear or toggle the bit, via bl2_obj_set_trans() or
+		   bl2_obj_toggle_trans(), respectively. */ \
 	} \
 }
 

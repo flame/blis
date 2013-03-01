@@ -96,7 +96,10 @@ void bl2_herk_int( obj_t*  alpha,
 	// be handled explicitly in the packing of C, but if C is not being
 	// packed, this is our last chance to handle the transposition.
 	if ( cntl_is_leaf( cntl ) && bl2_obj_has_trans( *c ) )
+	{
 		bl2_obj_induce_trans( c_local );
+		bl2_obj_set_trans( BLIS_NO_TRANSPOSE, c_local );
+	}
 
 	// Set a bool based on the uplo field of C's root object.
 	if ( bl2_obj_root_is_lower( c_local ) ) uplo = 0;

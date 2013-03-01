@@ -300,6 +300,9 @@ void PASTEMAC(ch,varname)( \
 \
 				bp_i = bp + off_a1112 * NR * NDUP; \
 \
+/*PASTEMAC(ch,fprintm)( stdout, "trmm_u_ker_var2: a1", MR, k_a1112, a1, 1, MR, "%4.1f", "" );*/ \
+/*PASTEMAC(ch,fprintm)( stdout, "trmm_u_ker_var2: b1", k_a1112, NR, bp_i, NR, 1, "%4.1f", "" );*/ \
+\
 				/* Handle interior and edge cases separately. */ \
 				if ( m_cur == MR && n_cur == NR ) \
 				{ \

@@ -113,6 +113,7 @@ void bl2_trmm3( side_t  side,
 	if ( bl2_obj_has_trans( a_local ) )
 	{
 		bl2_obj_induce_trans( a_local );
+		bl2_obj_set_trans( BLIS_NO_TRANSPOSE, a_local );
 	}
 
 	// Create an object to hold a copy-cast of alpha. Notice that we use

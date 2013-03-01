@@ -9,6 +9,7 @@ The BLIS framework was primarily authored by
 
 but many others have contributed input and feedback, including:
 
+  Jed Brown                   (Argonne National Laboratory)
   John Gunnels                (IBM, T.J. Watson Research Center)
   Jeff Hammond                (Argonne National Laboratory)
   Francisco Igual             (Universidad Complutense de Madrid)
@@ -19,12 +20,12 @@ but many others have contributed input and feedback, including:
   Rhys Ulerich                (The University of Texas at Austin)
   Robert van de Geijn         (The University of Texas at Austin)
 
-Thanks go the following individuals for porting very early versions
-of BLIS to new architectures as proofs-of-concept:
+Thanks go the following individuals for porting very early versions of
+BLIS to new architectures as proofs-of-concept:
 
   Francisco Igual             (The University of Texas at Austin)
   Tyler Smith                 (The University of Texas at Austin)
 
-BLIS's development was partially funded by grants from Microsoft and
-the National Science Foundation (Awards CCF-0917167 and OCI-1148125).
+BLIS's development was partially funded by grants from Microsoft and the
+National Science Foundation (NSF Awards CCF-0917167 and OCI-1148125).
 

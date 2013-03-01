@@ -104,7 +104,10 @@ void bl2_ger_int( conj_t  conjx,
 	// still needs a transposition, then we must induce one by swapping the
 	// strides and dimensions.
 	if ( cntl_is_leaf( cntl ) && bl2_obj_has_trans( a_local ) )
+	{
 		bl2_obj_induce_trans( a_local );
+		bl2_obj_set_trans( BLIS_NO_TRANSPOSE, a_local );
+	}
 
 	// Extract the variant number and implementation type.
 	n = cntl_var_num( cntl );

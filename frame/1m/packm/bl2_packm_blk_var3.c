@@ -450,7 +450,7 @@ void PASTEMAC(ch,varname )( \
 \
 /*
 		PASTEMAC(ch,fprintm)( stdout, "packm_var3: p copied", panel_dim, panel_len_max_i, \
-		                      p_begin, rs_p, cs_p, "%5.2f", "" ); \
+		                      p_begin, rs_p, cs_p, "%4.1f", "" ); \
 */ \
 \
 	 	p_begin += p_inc; \

@@ -98,17 +98,17 @@ void bl2_trsv_int( obj_t*  alpha,
 	// thing. Alternatively, we could accomplish the same end goal by
 	// inducing a transposition, via bl2_obj_induce_trans(), in the code
 	// block below. That macro function swaps dimensions, strides, and
-	// offsets, and also clears the transposition bit. As an example, given
-	// a lower triangular, column-major matrix that needs a transpose, we
-	// would induce that transposition by recasting the object as an upper
-	// triangular, row-major matrix (with no transpose needed). Note that
-	// how we choose to handle transposition here does NOT affect the
-	// optimal choice of kernel (ie: a column-major column panel matrix with
-	// transpose times a vector would use the same kernel as a row-major
-	// row panel matrix with no transpose times a vector).
+	// offsets. As an example, given a lower triangular, column-major matrix
+	// that needs a transpose, we would induce that transposition by recasting
+	// the object as an upper triangular, row-major matrix (with no transpose
+	// needed). Note that how we choose to handle transposition here does NOT
+	// affect the optimal choice of kernel (ie: a column-major column panel
+	// matrix with transpose times a vector would use the same kernel as a
+	// row-major row panel matrix with no transpose times a vector).
 	if ( bl2_obj_has_trans( a_local ) )
 	{
 		//bl2_obj_induce_trans( a_local );
+		//bl2_obj_set_trans( BLIS_NO_TRANSPOSE, a_local );
 		bl2_toggle_bool( uplo );
 	}
 
