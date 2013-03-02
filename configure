@@ -87,9 +87,11 @@ main()
 	# The contents of version_file.
 	version=''
 
-	# The name of the build directory. This is where the template
-	# config.mk.in file lives.
+	# The name of the build directory.
 	build_dir='build'
+
+	# The names/paths for the template config.mk.in and its instantiated
+	# counterpart.
 	config_mk_in='config.mk.in'
 	config_mk_out='config.mk'
 	config_mk_in_path="${build_dir}/${config_mk_in}"
