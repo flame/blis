@@ -17,6 +17,7 @@
 # -- build system files --
 
 config.mk
+version
 
 # -- directories with build products --
 
