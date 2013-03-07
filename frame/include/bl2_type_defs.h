@@ -69,6 +69,8 @@ typedef struct mem_s
 	void*  buf;
 	dim_t  m;
 	dim_t  n;
+	dim_t  m_alloc;
+	dim_t  n_alloc;
 } mem_t;
 
 // Blocksize object type

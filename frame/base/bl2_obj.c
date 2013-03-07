@@ -464,7 +464,7 @@ void bl2_obj_print( char* label, obj_t* obj )
 {
 	FILE*  file     = stdout;
 	mem_t* pack_mem = bl2_obj_pack_mem( *obj );
-	mem_t* cast_mem = bl2_obj_cast_mem( *obj );
+	//mem_t* cast_mem = bl2_obj_cast_mem( *obj );
 
 	if ( bl2_error_checking_is_enabled() )
 		bl2_obj_print_check( label, obj );
@@ -486,14 +486,16 @@ void bl2_obj_print( char* label, obj_t* obj )
 	fprintf( file, " elem size       %lu\n", bl2_obj_elem_size( *obj ) );
 	fprintf( file, " rs, cs          %lu, %lu\n", bl2_obj_row_stride( *obj ),
 	                                              bl2_obj_col_stride( *obj ) );
-	fprintf( file, " cast_mem          \n" );
-	fprintf( file, " - buf           %p\n",  bl2_mem_buffer( cast_mem ) );
-	fprintf( file, " - m             %lu\n", bl2_mem_length( cast_mem ) );
-	fprintf( file, " - n             %lu\n", bl2_mem_width( cast_mem ) );
+	//fprintf( file, " cast_mem          \n" );
+	//fprintf( file, " - buf           %p\n",  bl2_mem_buffer( cast_mem ) );
+	//fprintf( file, " - m             %lu\n", bl2_mem_length( cast_mem ) );
+	//fprintf( file, " - n             %lu\n", bl2_mem_width( cast_mem ) );
 	fprintf( file, " pack_mem          \n" );
 	fprintf( file, " - buf           %p\n",  bl2_mem_buffer( pack_mem ) );
-	fprintf( file, " - m             %lu\n", bl2_mem_length( pack_mem ) );
-	fprintf( file, " - n             %lu\n", bl2_mem_width( pack_mem ) );
+	fprintf( file, " - m allocated   %lu\n", bl2_mem_length_alloc( pack_mem ) );
+	fprintf( file, " - n allocated   %lu\n", bl2_mem_width_alloc( pack_mem ) );
+	fprintf( file, " - m used        %lu\n", bl2_mem_length( pack_mem ) );
+	fprintf( file, " - n used        %lu\n", bl2_mem_width( pack_mem ) );
 	fprintf( file, " ps              %lu\n", bl2_obj_panel_stride( *obj ) );
 	fprintf( file, "\n" );
 

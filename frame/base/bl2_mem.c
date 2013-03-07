@@ -81,6 +81,7 @@ void bl2_mm_acquire_v( num_t  dt,
 
 	bl2_mem_set_buffer( buf, mem );
 
+	bl2_mem_set_dims_alloc( m, 1, mem );
 	bl2_mem_set_dims( m, 1, mem );
 }
 
@@ -115,6 +116,7 @@ void bl2_mm_acquire_m( num_t  dt,
 
 	bl2_mem_set_buffer( buf, mem );
 
+	bl2_mem_set_dims_alloc( m, n, mem );
 	bl2_mem_set_dims( m, n, mem );
 }
 
@@ -132,6 +134,7 @@ void bl2_mm_release( mem_t* mem )
 	bl2_mem_set_buffer( NULL, mem );
 
 	// Set the dimensions to zero (just because we are polite).
+	bl2_mem_set_dims_alloc( 0, 0, mem );
 	bl2_mem_set_dims( 0, 0, mem );
 }
 

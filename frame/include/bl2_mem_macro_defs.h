@@ -50,6 +50,14 @@
 \
 	( (mem_p)->n )
 
+#define bl2_mem_length_alloc( mem_p ) \
+\
+	( (mem_p)->m_alloc )
+
+#define bl2_mem_width_alloc( mem_p ) \
+\
+	( (mem_p)->n_alloc )
+
 #define bl2_mem_is_alloc( mem_p ) \
 \
 	( bl2_mem_buffer( mem_p ) != NULL )
@@ -80,6 +88,22 @@
 { \
     bl2_mem_set_length( m0, mem_p ); \
     bl2_mem_set_width( n0, mem_p ); \
+}
+
+#define bl2_mem_set_length_alloc( m0, mem_p ) \
+{ \
+    mem_p->m_alloc = m0; \
+}
+
+#define bl2_mem_set_width_alloc( n0, mem_p ) \
+{ \
+    mem_p->n_alloc = n0; \
+}
+
+#define bl2_mem_set_dims_alloc( m0, n0, mem_p ) \
+{ \
+    bl2_mem_set_length_alloc( m0, mem_p ); \
+    bl2_mem_set_width_alloc( n0, mem_p ); \
 }
 
 #endif 

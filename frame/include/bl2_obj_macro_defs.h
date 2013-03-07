@@ -860,20 +860,31 @@ bl2_obj_width_stored( obj )
 	m_needed = bl2_align_dim( m, mult_m, elem_size ); \
 	n_needed = bl2_align_dim( n, mult_n, elem_size ); \
 \
-	/* If the pack_mem buffer is NULL, or if it is non-NULL but currently too
-	   small for the matrix represented by obj, we set a flag to allocate a
-	   memory region. (In the latter case, we first release the previous
-	   buffer.) If neither of those conditions is met, then we can assume
-	   the buffer exists and is sufficiently large. */ \
-	if ( bl2_mem_buffer( mem_p ) == NULL ) \
+	if ( bl2_mem_is_unalloc( mem_p ) ) \
 	{ \
+		/* If the mem_t object is currently unallocated (NULL), mark it for
+		   allocation. */ \
 		needs_alloc = TRUE; \
 	} \
 	else \
 	{ \
-		if ( bl2_mem_length( mem_p ) < m_needed || \
-		     bl2_mem_width( mem_p )  < n_needed ) \
+		if ( m_needed <= bl2_mem_length_alloc( mem_p ) && \
+		     n_needed <= bl2_mem_width_alloc( mem_p )  )  \
 		{ \
+			/* If the mem_t object is currently allocated, AND what is
+			   allocated and available is equal to or larger than what is
+			   needed, then set the dimensions according to how much we
+			   need. This allows us to avoid unnecessarily releasing and
+			   re-allocating when all we need is a subset of what is already
+			   available. */ \
+			bl2_mem_set_dims( m_needed, n_needed, mem_p ); \
+			needs_alloc = FALSE; \
+		} \
+		else if ( bl2_mem_length_alloc( mem_p ) < m_needed || \
+		          bl2_mem_width_alloc( mem_p )  < n_needed )  \
+		{ \
+			/* If the mem_t object is currently allocated and smaller than is
+			   needed, release the memory and mark for re-allocation. */ \
 			bl2_mm_release( mem_p ); \
 			needs_alloc = TRUE; \
 		} \
@@ -888,8 +899,8 @@ bl2_obj_width_stored( obj )
 		bl2_mm_acquire_m( dt, m_needed, n_needed, mem_p ); \
 	} \
 \
-	/* Grab the buffer from the mem_t object and copy it to the main object
-	   buffer. */ \
+	/* Grab the buffer address from the mem_t object and copy it to the main
+	   object buffer. */ \
 	buf = bl2_mem_buffer( mem_p ); \
 	bl2_obj_set_buffer( buf, obj ); \
 } \
@@ -914,12 +925,27 @@ bl2_obj_width_stored( obj )
 \
 	if ( bl2_mem_is_unalloc( mem_p ) ) \
 	{ \
+		/* If the mem_t object is currently unallocated (NULL), mark it for
+		   allocation. */ \
 		needs_alloc = TRUE; \
 	} \
 	else \
 	{ \
-		if ( bl2_mem_length( mem_p ) < m_needed ) \
+		if ( m_needed <= bl2_mem_length_alloc( mem_p ) ) \
 		{ \
+			/* If the mem_t object is currently allocated, AND what is
+			   allocated and available is equal to or larger than what is
+			   needed, then set the dimension according to how much we
+			   need. This allows us to avoid unnecessarily releasing and
+			   re-allocating when all we need is a subset of what is already
+			   available. */ \
+			bl2_mem_set_dims( m_needed, 1, mem_p ); \
+			needs_alloc = FALSE; \
+		} \
+		if ( bl2_mem_length_alloc( mem_p ) < m_needed ) \
+		{ \
+			/* If the mem_t object is currently allocated and smaller than is
+			   needed, release the memory and mark for re-allocation. */ \
 			bl2_mm_release( mem_p ); \
 			needs_alloc = TRUE; \
 		} \
@@ -934,8 +960,8 @@ bl2_obj_width_stored( obj )
 		bl2_mm_acquire_v( dt, m_needed, mem_p ); \
 	} \
 \
-	/* Grab the buffer from the mem_t object and copy it to the main object
-	   buffer. */ \
+	/* Grab the buffer address from the mem_t object and copy it to the main
+	   object buffer. */ \
 	buf = bl2_mem_buffer( mem_p ); \
 	bl2_obj_set_buffer( buf, obj ); \
 } \
