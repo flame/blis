@@ -250,7 +250,7 @@ void PASTEMAC(ch,varname)( \
 			diagoffc_ij = diagoffc - (doff_t)j*NR + (doff_t)i*MR; \
 \
 			/* If the diagonal intersects the current MR x NR submatrix, we
-			   compute in the temporary buffer and then add in the elements
+			   compute it the temporary buffer and then add in the elements
 			   on or below the diagonal.
 			   Otherwise, if the submatrix is strictly above the diagonal,
 			   we compute and store as we normally would.

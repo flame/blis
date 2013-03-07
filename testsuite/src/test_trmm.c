@@ -212,10 +212,7 @@ void libblis_test_trmm_experiment( test_params_t* params,
 	}
 
 	// Estimate the performance of the best experiment repeat.
-	if ( bl2_is_left( side ) )
-		*perf = ( 1.0 * m * m * n ) / time_min / FLOPS_PER_UNIT_PERF;
-	else // if ( bl2_is_right( side ) )
-		*perf = ( 1.0 * m * n * n ) / time_min / FLOPS_PER_UNIT_PERF;
+	*perf = ( 1.0 * mn_side * m * n ) / time_min / FLOPS_PER_UNIT_PERF;
 	if ( bl2_obj_is_complex( b ) ) *perf *= 4.0;
 
 	// Perform checks.
