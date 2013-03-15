@@ -38,21 +38,18 @@ void bl2_packm_init( obj_t*   a,
                      obj_t*   p,
                      packm_t* cntl )
 {
-	// The packm operation consists of an optional typecasting pre-process.
-	// Here are the following possible ways packm can execute:
-	//  1. cast and pack: When typecasting and packing are both
-	//     precribed, typecast a to temporary matrix c and then pack
-	//     c to p.
-	//  2. pack only: Typecasting is skipped when it is not needed;
-	//     simply pack a directly to p.
-	//  3. cast only: Not yet supported / not used.
-	//  4. no-op: The control tree sometimes directs us to skip the
-	//     pack operation entirely. Alias p to a and return.
+	// The purpose of packm_init() is to initialize an object P so that
+	// a source object A can be packed into P via one of the packm
+	// implementations. This initialization includes acquiring a suitable
+	// block of memory from the memory allocator, if such a block of memory
+	// has not already been allocated previously.
+
 	bool_t    needs_densify;
 	invdiag_t invert_diag;
 	pack_t    pack_schema;
 	packord_t pack_ord_if_up;
 	packord_t pack_ord_if_lo;
+	packbuf_t pack_buf_type;
 	blksz_t*  mult_m;
 	blksz_t*  mult_n;
 	obj_t     c;
@@ -128,6 +125,7 @@ void bl2_packm_init( obj_t*   a,
 	// the option of bypassing usage of control trees altogether.
 	needs_densify  = cntl_does_densify( cntl );
 	pack_schema    = cntl_pack_schema( cntl );
+	pack_buf_type  = cntl_pack_buf_type( cntl );
 	mult_m         = cntl_mult_m( cntl );
 	mult_n         = cntl_mult_n( cntl );
 
@@ -146,6 +144,7 @@ void bl2_packm_init( obj_t*   a,
 	                     pack_schema,
 	                     pack_ord_if_up,
 	                     pack_ord_if_lo,
+	                     pack_buf_type,
 	                     mult_m,
 	                     mult_n,
 	                     &c,
@@ -160,43 +159,25 @@ void bl2_packm_init_pack( bool_t    densify,
                           pack_t    pack_schema,
                           packord_t pack_ord_if_up,
                           packord_t pack_ord_if_lo,
+                          packbuf_t pack_buf_type,
                           blksz_t*  mult_m,
                           blksz_t*  mult_n,
                           obj_t*    c,
                           obj_t*    p )
 {
-	// In this function, we initialize an object p to represent the packed
-	// copy of the intermediate object c. At this point, the datatype of
-	// object c should be equal to the target datatype of the original
-	// object, either because:
-	//  (1) c is set up to contain the typecast of the original object, or
-	//  (2) c is aliased to the original object, which would only happen
-	//      when the original object's datatype and target datatype are
-	//      equal.
-	// So here, we want to create an object p that is identical to c, except
-	// that:
-	//  (1) the dimensions of p are explicitly transposed, if c needs
-	//      transposition,
-	//  (2) if c needs transposition, we adjust the diagonal offset of p
-	//      and we also either set the uplo of p to dense (if we are going
-	//      to densify), or to its toggled value.
-	//  (3) the view offset of p is reset to (0,0),
-	//  (4) object p contains a pack schema field that reflects its desired
-	//      packing,
-	//  (5) object p's main buffer is set to a new memory region acquired
-	//      from the memory manager, or extracted from p if a mem entry is
-	//      already available, (After acquring a mem entry from the memory
-	//      manager, it is cached within p for quick access later on.)
-	//  (6) object p gets new stride information based on the pack schema
-	//      embedded in the control tree node.
-
 	num_t   datatype     = bl2_obj_datatype( *c );
 	trans_t transc       = bl2_obj_trans_status( *c );
 	dim_t   m_c          = bl2_obj_length( *c );
 	dim_t   n_c          = bl2_obj_width( *c );
 	dim_t   mult_m_dim   = bl2_blksz_for_type( datatype, mult_m );
 	dim_t   mult_n_dim   = bl2_blksz_for_type( datatype, mult_n );
+
+	mem_t*  mem_p;
+	dim_t   m_p_pad, n_p_pad;
+	siz_t   elem_size_p;
 	inc_t   rs_p, cs_p;
+	void*   buf;
+
 
 	// We begin by copying the basic fields of c.
 	bl2_obj_alias_to( *c, *p );
@@ -234,56 +215,70 @@ void bl2_packm_init_pack( bool_t    densify,
 	bl2_obj_set_pack_order_if_upper( pack_ord_if_up, *p );
 	bl2_obj_set_pack_order_if_lower( pack_ord_if_lo, *p );
 
-	// Check the mem_t entry of p associated with the pack buffer. If it is
-	// NULL, then acquire memory sufficient to hold the object data and cache
-	// it to p. (Otherwise, if it is non-NULL, then memory has already been
-	// acquired from the memory manager and cached.) We then set the main
-	// buffer of p to the cached address of the pack memory.
-	bl2_obj_set_buffer_with_cached_packm_mem( *p, *p, mult_m_dim, mult_n_dim );
+	// Extract the address of the mem_t object within p that will track
+	// properties of the packed buffer.
+	mem_p = bl2_obj_pack_mem( *p );
+
+	// Compute the dimensions padded by the dimension multiples. These
+	// dimensions are those that the macro- and micro-kernels will use.
+	// We compute them by starting with the effective dimensions of c (now
+	// in p) and aligning them to the dimension multiples (typically equal
+	// to register blocksizes). This does waste a little bit of space for
+	// level-2 operations, but that's okay with us.
+	m_p_pad     = bl2_align_dim_to_mult( bl2_obj_length( *p ), mult_m_dim );
+	n_p_pad     = bl2_align_dim_to_mult( bl2_obj_width( *p ),  mult_n_dim );
+	elem_size_p = bl2_obj_elem_size( *p );
+
+	// Check the mem_t entry of p. If it is not yet allocated, then acquire
+	// a memory block of type pack_buf_type. If the mem_t object has already
+	// been allocated a buffer, then update the dimensions embedded in the
+	// object according to the latest values in m_p_pad and n_p_pad.
+	bl2_mem_alloc_update_m( m_p_pad,
+	                        n_p_pad,
+	                        elem_size_p,
+	                        pack_buf_type,
+	                        mem_p );
+
+	// Grab the buffer address from the mem_t object and copy it to the
+	// main object buffer field. (Sometimes this buffer address will be
+	// copied when the value is already up-to-date, because it persists
+	// in the main object buffer field across loop iterations.)
+	buf = bl2_mem_buffer( mem_p );
+	bl2_obj_set_buffer( buf, *p );
+
 
 	// Set the row and column strides of p based on the pack schema.
 	if      ( pack_schema == BLIS_PACKED_ROWS )
 	{
-		mem_t* mem;
-
-		// Access the mem_t entry cached in p.
-		mem = bl2_obj_pack_mem( *p );
-
-		// For regular row storage, the n dimension used when acquiring the
-		// pack memory should be used for our row stride, with the column
-		// stride set to one. By using the WIDTH of the mem_t region, we
-		// allow for zero-padding (if necessary/desired) along the right
-		// edge of the matrix.
-		rs_p = bl2_mem_width( mem );
+		// For regular row storage, the padded n dimension used when
+		// acquiring the pack memory should be used for our row stride,
+		// with the column stride set to one. By using the WIDTH of the mem_t
+		// region, we allow for zero-padding (if necessary/desired) along
+		// the right edge of the matrix.
+		rs_p = bl2_mem_width( mem_p );
 		cs_p = 1;
 
 		bl2_obj_set_incs( rs_p, cs_p, *p );
 	}
 	else if ( pack_schema == BLIS_PACKED_COLUMNS )
 	{
-		mem_t* mem;
-
-		// Access the mem_t entry cached in p.
-		mem = bl2_obj_pack_mem( *p );
-
-		// For regular column storage, the m dimension used when acquiring the
-		// pack memory should be used for our column stride, with the row
-		// stride set to one. By using the LENGTH of the mem_t region, we
-		// allow for zero-padding (if necessary/desired) along the bottom
-		// edge of the matrix.
-		cs_p = bl2_mem_length( mem );
+		// For regular column storage, the padded m dimension used when
+		// acquiring the pack memory should be used for our column stride,
+		// with the row stride set to one. By using the LENGTH of the mem_t
+		// region, we allow for zero-padding (if necessary/desired) along
+		// the bottom edge of the matrix.
+		cs_p = bl2_mem_length( mem_p );
 		rs_p = 1;
 
 		bl2_obj_set_incs( rs_p, cs_p, *p );
 	}
 	else if ( pack_schema == BLIS_PACKED_ROW_PANELS )
 	{
-		mem_t*   mem     = bl2_obj_pack_mem( *p );
-		dim_t    m_panel;
-		dim_t    ps_p;
+		dim_t m_panel;
+		dim_t ps_p;
 
 		// The maximum panel length (for each datatype) should be equal to
-		// the m dimension multiple field of the control tree node.
+		// the m dimension multiple.
 		m_panel = mult_m_dim;
 
 		// The "column stride" of a row panel packed object is interpreted as
@@ -301,7 +296,7 @@ void bl2_packm_init_pack( bool_t    densify,
 		// determine the panel "width"; this will allow for zero-padding
 		// (if necessary/desired) along the far end of each panel (ie: the
 		// right edge of the matrix).
-		ps_p = cs_p * bl2_mem_width( mem );
+		ps_p = cs_p * bl2_mem_width( mem_p );
 
 		// Store the strides in p.
 		bl2_obj_set_incs( rs_p, cs_p, *p );
@@ -309,12 +304,11 @@ void bl2_packm_init_pack( bool_t    densify,
 	}
 	else if ( pack_schema == BLIS_PACKED_COL_PANELS )
 	{
-		mem_t*   mem     = bl2_obj_pack_mem( *p );
-		dim_t    n_panel;
-		dim_t    ps_p;
+		dim_t n_panel;
+		dim_t ps_p;
 
 		// The maximum panel width (for each datatype) should be equal to
-		// the n dimension multiple field of the control tree node.
+		// the n dimension multiple.
 		n_panel = mult_n_dim;
 
 		// The "row stride" of a column panel packed object is interpreted as
@@ -332,7 +326,7 @@ void bl2_packm_init_pack( bool_t    densify,
 		// determine the panel "length"; this will allow for zero-padding
 		// (if necessary/desired) along the far end of each panel (ie: the
 		// bottom edge of the matrix).
-		ps_p = bl2_mem_length( mem ) * rs_p;
+		ps_p = bl2_mem_length( mem_p ) * rs_p;
 
 		// Store the strides in p.
 		bl2_obj_set_incs( rs_p, cs_p, *p );

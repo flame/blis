@@ -149,7 +149,8 @@ void bl2_hemm_cntl_init()
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
 	                           FALSE, // reverse iteration if lower?
-	                           BLIS_PACKED_ROW_PANELS );
+	                           BLIS_PACKED_ROW_PANELS,
+	                           BLIS_BUFFER_FOR_A_BLOCK );
 
 	hemm_packb_cntl
 	=
@@ -162,7 +163,8 @@ void bl2_hemm_cntl_init()
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
 	                           FALSE, // reverse iteration if lower?
-	                           BLIS_PACKED_COL_PANELS );
+	                           BLIS_PACKED_COL_PANELS,
+	                           BLIS_BUFFER_FOR_B_PANEL );
 
 	hemm_packc_cntl
 	=
@@ -175,7 +177,8 @@ void bl2_hemm_cntl_init()
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
 	                           FALSE, // reverse iteration if lower?
-	                           BLIS_PACKED_COLUMNS );
+	                           BLIS_PACKED_COLUMNS,
+	                           BLIS_BUFFER_FOR_GEN_USE );
 
 	hemm_unpackc_cntl
 	=

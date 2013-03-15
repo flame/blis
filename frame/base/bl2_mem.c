@@ -34,162 +34,345 @@
 
 #include "blis2.h"
 
-// Static memory pool size (in units of doubles).
-#define BLIS_NUM_ELEM_SMEM   ( \
-                               BLIS_NUM_MC_X_KC_BLOCKS * \
-                               ( BLIS_DEFAULT_MC_D * \
-                                 BLIS_DEFAULT_KC_D   \
-                               ) + \
-                               BLIS_NUM_KC_X_NC_BLOCKS * \
-                               ( BLIS_DEFAULT_KC_D * \
-                                 BLIS_DEFAULT_NC_D   \
-                               ) + \
-                               2 * \
-                               ( BLIS_MAX_PREFETCH_BYTE_OFFSET / \
-                                 sizeof(double) \
-                               ) \
-                             )
 
-// Static memory pool.
-static double  smem[ BLIS_NUM_ELEM_SMEM ];
+// Define the size of pool blocks. These may be adjusted so that they can
+// handle inflated blocksizes at edge cases.
+#define BLIS_POOL_MC_Z     BLIS_DEFAULT_MC_Z
+#define BLIS_POOL_KC_Z     BLIS_DEFAULT_KC_Z
+#define BLIS_POOL_NC_Z     BLIS_DEFAULT_NC_Z
 
-// Pointer to current "stack" location in the memory pool.
-static double* mc      = smem;
+// Define each pool's block size.
+#define BLIS_MK_BLOCK_SIZE ( BLIS_POOL_MC_Z * \
+                             BLIS_POOL_KC_Z * \
+                             sizeof( dcomplex ) \
+                           )
+#define BLIS_KN_BLOCK_SIZE ( BLIS_POOL_KC_Z * \
+                             BLIS_POOL_NC_Z * \
+                             sizeof( dcomplex ) \
+                           )
+#define BLIS_MN_BLOCK_SIZE ( BLIS_POOL_MC_Z * \
+                             BLIS_POOL_NC_Z * \
+                             sizeof( dcomplex ) \
+                           )
 
-// A counter that keeps track of how many chunks have been allocated.
-static int     counter = 0;
+// Define each pool's total size.
+#define BLIS_MK_POOL_SIZE  ( \
+                             BLIS_NUM_MC_X_KC_BLOCKS * \
+                             ( BLIS_MK_BLOCK_SIZE + \
+                               BLIS_PAGE_SIZE \
+                             ) + \
+                             BLIS_MAX_PREFETCH_BYTE_OFFSET \
+                           )
+
+#define BLIS_KN_POOL_SIZE  ( \
+                             BLIS_NUM_KC_X_NC_BLOCKS * \
+                             ( BLIS_KN_BLOCK_SIZE + \
+                               BLIS_PAGE_SIZE \
+                             ) + \
+                             BLIS_MAX_PREFETCH_BYTE_OFFSET \
+                           )
+
+#define BLIS_MN_POOL_SIZE  ( \
+                             BLIS_NUM_MC_X_NC_BLOCKS * \
+                             ( BLIS_MN_BLOCK_SIZE + \
+                               BLIS_PAGE_SIZE \
+                             ) + \
+                             BLIS_MAX_PREFETCH_BYTE_OFFSET \
+                           )
+
+// Declare one memory pool structure for each block size/shape we want to
+// be able to allocate.
+
+static pool_t pools[3];
 
 
-// -- Memory Manager -----------------------------------------------------------
+// Physically contiguous memory for each pool.
 
-void bl2_mm_acquire_v( num_t  dt,
-                       dim_t  m,
-                       mem_t* mem )
+static void*  pool_mk_blk_ptrs[ BLIS_NUM_MC_X_KC_BLOCKS ];
+static char   pool_mk_mem[ BLIS_MK_POOL_SIZE ];
+
+static void*  pool_kn_blk_ptrs[ BLIS_NUM_KC_X_NC_BLOCKS ];
+static char   pool_kn_mem[ BLIS_KN_POOL_SIZE ];
+
+static void*  pool_mn_blk_ptrs[ BLIS_NUM_MC_X_NC_BLOCKS ];
+static char   pool_mn_mem[ BLIS_MN_POOL_SIZE ];
+
+
+
+
+
+void bl2_mem_acquire_m( dim_t     m_req,
+                        dim_t     n_req,
+                        siz_t     elem_size,
+                        packbuf_t buf_type,
+                        mem_t*    mem )
 {
-	siz_t elem_size = bl2_datatype_size( dt );
-	siz_t buf_size;
-	void* buf;
-
-	// Compute the number of bytes needed for an m-length vector of type dt.
-	buf_size       = m * elem_size + BLIS_MAX_PREFETCH_BYTE_OFFSET;
-
-#if 0
-	buf = bl2_malloc( buf_size );
-#else
-	buf = bl2_malloc_s( buf_size );
-#endif
-
-	bl2_mem_set_buffer( buf, mem );
-
-	bl2_mem_set_dims_alloc( m, 1, mem );
-	bl2_mem_set_dims( m, 1, mem );
-}
-
-void bl2_mm_acquire_m( num_t  dt,
-                       dim_t  m,
-                       dim_t  n,
-                       mem_t* mem )
-{
-	siz_t elem_size = bl2_datatype_size( dt );
-	siz_t buf_size;
-	void* buf;
-
-	// Compute the number of bytes needed for an m x n matrix of type dt.
-	buf_size       = ( m * n ) * elem_size + BLIS_MAX_PREFETCH_BYTE_OFFSET;
-
-#if 0
-	printf( "libblis: Attempting to malloc block from static pool.\n" );
-	printf( "libblis: requested dimensions:     %lu x %lu\n", m, n );
-	printf( "libblis: requested element size:   %lu\n", elem_size );
-	//printf( "libblis: max prefetch byte offset: %lu\n", ( siz_t )BLIS_MAX_PREFETCH_BYTE_OFFSET );
-	printf( "libblis: total requested size:     %lu\n", buf_size );
-	printf( "libblis: mc:                       %lu (of %lu)\n", ( unsigned long )mc, ( unsigned long )(smem + BLIS_NUM_ELEM_SMEM) );
-	printf( "libblis: counter:                  %d\n", counter );
-	printf( "libblis: total pool size:          %lu\n", ( unsigned long )BLIS_NUM_ELEM_SMEM * sizeof(double) );
-#endif
-
-#if 0
-	buf = bl2_malloc( buf_size );
-#else
-	buf = bl2_malloc_s( buf_size );
-#endif
-
-	bl2_mem_set_buffer( buf, mem );
-
-	bl2_mem_set_dims_alloc( m, n, mem );
-	bl2_mem_set_dims( m, n, mem );
-}
+	siz_t   req_size;
+	siz_t   block_size;
+	dim_t   pool_index;
+	pool_t* pool;
+	void**  block_ptrs;
+	void*   block;
+	int     i;
 
 
-void bl2_mm_release( mem_t* mem )
-{
-#if 0
-	bl2_free( mem->buf );
-#else
-	bl2_free_s( mem->buf );
-#endif
+	// Compute the size of the requested contiguous memory region.
+	req_size = m_req * n_req * elem_size;
 
-	// Set the buffer to NULL so that upon future inspection the mem_t
-	// object appears to NOT contain a cached allocated buffer.
-	bl2_mem_set_buffer( NULL, mem );
-
-	// Set the dimensions to zero (just because we are polite).
-	bl2_mem_set_dims_alloc( 0, 0, mem );
-	bl2_mem_set_dims( 0, 0, mem );
-}
-
-
-void* bl2_malloc_s( siz_t buf_size )
-{
-	void* rmem;
-	siz_t padding;
-
-	if ( ( siz_t )mc % BLIS_PAGE_SIZE != 0 )
+	if ( buf_type == BLIS_BUFFER_FOR_GEN_USE )
 	{
-		// We assume mc begins 16 byte-aligned. If this assumption holds, then
-		// mc % 4096 is also a multiple of 16 bytes. and so padding is also a 
-		// multiple of 16 bytes. Thus, we don't need to adjust mc any further
-		// after the following two lines.
-		padding = BLIS_PAGE_SIZE - ( ( siz_t )mc % BLIS_PAGE_SIZE );
-		mc += padding / sizeof( double );
+		// For general-use buffer requests, such as those used by level-2
+		// operations, using bl2_malloc() is sufficient, since using
+		// physically contiguous memory is not as important there.
+		block = bl2_malloc( req_size );
+
+		// Initialize the mem_t object with:
+		// - the address of the memory block,
+		// - the buffer type (a packbuf_t value),
+		// - the size of the requested region, and
+		// - the requested dimensions, which are presumably already aligned to
+		//   dimension multiples (typically equal to register blocksizes).
+		// NOTE: We do not initialize the pool field since this block did not
+		// come from a contiguous memory pool.
+		bl2_mem_set_buffer( block, mem );
+		bl2_mem_set_buf_type( buf_type, mem );
+		bl2_mem_set_size( req_size, mem );
+		bl2_mem_set_dims( m_req, n_req, mem );
+		bl2_mem_set_elem_size( elem_size, mem );
+	}
+	else
+	{
+		// This branch handles cases where the memory block needs to come
+		// from one of the contiguous memory pools.
+
+		// Map the requested packed buffer type to a zero-based index, which
+		// we then use to select the corresponding memory pool.
+		pool_index = bl2_packbuf_index( buf_type );
+		pool       = &pools[ pool_index ];
+
+		// Perform error checking, if enabled.
+		if ( bl2_error_checking_is_enabled() )
+		{
+			err_t e_val;
+
+			// Make sure that the requested matrix size fits inside of a block
+			// of the corresponding pool.
+			e_val = bl2_check_requested_block_size_for_pool( req_size, pool );
+			bl2_check_error_code( e_val );
+
+			// Make sure that the pool contains at least one block to check out
+			// to the thread.
+			e_val = bl2_check_if_exhausted_pool( pool );
+			bl2_check_error_code( e_val );
+		}
+
+		// Access the block pointer array from the memory pool data structure.
+		block_ptrs = bl2_pool_block_ptrs( pool );
+
+
+		// BEGIN CRITICAL SECTION
+
+
+		// Query the index of the contiguous memory block that resides at the
+		// "top" of the pool.
+		i = bl2_pool_top_index( pool );
+	
+		// Extract the address of the top block from the block pointer array.
+		block = block_ptrs[i];
+
+		// Clear the entry from the block pointer array. (This is actually not
+		// necessary.)
+		//block_ptrs[i] = NULL; 
+
+		// Decrement the top of the memory pool.
+		bl2_pool_dec_top_index( pool );
+
+
+		// END CRITICAL SECTION
+
+		// Query the size of the blocks in the pool so we can store it in the
+		// mem_t object.
+		block_size = bl2_pool_block_size( pool );
+
+		// Initialize the mem_t object with:
+		// - the address of the memory block,
+		// - the buffer type (a packbuf_t value),
+		// - the address of the memory pool to which it belongs,
+		// - the size of the contiguous memory block (NOT the size of the
+		//   requested region), and
+		// - the requested dimensions, which are presumably already aligned to
+		//   dimension multiples (typically equal to register blocksizes).
+		bl2_mem_set_buffer( block, mem );
+		bl2_mem_set_buf_type( buf_type, mem );
+		bl2_mem_set_pool( pool, mem );
+		bl2_mem_set_size( block_size, mem );
+		bl2_mem_set_dims( m_req, n_req, mem );
+		bl2_mem_set_elem_size( elem_size, mem );
+	}
+}
+
+
+void bl2_mem_release( mem_t* mem )
+{
+	packbuf_t buf_type;
+	pool_t*   pool;
+	void**    block_ptrs;
+	void*     block;
+	int       i;
+
+	// Extract the address of the memory block we are trying to
+	// release.
+	block = bl2_mem_buffer( mem );
+
+	// Extract the buffer type so we know what kind of memory was allocated.
+	buf_type = bl2_mem_buf_type( mem );
+
+	if ( buf_type == BLIS_BUFFER_FOR_GEN_USE )
+	{
+		// For general-use buffers, we allocate with bl2_malloc(), and so
+		// here we need to call bl2_free().
+		bl2_free( block );
+	}
+	else
+	{
+		// This branch handles cases where the memory block came from one
+		// of the contiguous memory pools.
+
+		// Extract the pool from which the block was allocated.
+		pool = bl2_mem_pool( mem );
+
+		// Extract the block pointer array associated with the pool.
+		block_ptrs = bl2_pool_block_ptrs( pool );
+
+
+		// BEGIN CRITICAL SECTION
+
+
+		// Increment the top of the memory pool.
+		bl2_pool_inc_top_index( pool );
+
+		// Query the newly incremented top index.
+		i = bl2_pool_top_index( pool );
+
+		// Place the address of the block back onto the top of the memory pool.
+		block_ptrs[i] = block;
+
+
+		// END CRITICAL SECTION
 	}
 
-	rmem = ( void* )mc;
-	mc += ( buf_size / sizeof( double ) );
 
-	if ( mc >= smem + BLIS_NUM_ELEM_SMEM )
-		bl2_check_error_code( BLIS_EXHAUSTED_STATIC_MEMORY_POOL );
-
-#if 0
-	printf( "libblis: incrementing counter      from %d to %d\n", counter, counter+1 );
-#endif
-
-	++counter;
-
-	return rmem;
+	// Clear the mem_t object so that it appears unallocated. We clear:
+	// - the buffer field,
+	// - the pool field,
+	// - the size field, and
+	// - the dimension fields.
+	// NOTE: We do not clear the buf_type field since there is no
+	// "uninitialized" value for packbuf_t.
+	bl2_mem_set_buffer( NULL, mem );
+	bl2_mem_set_pool( NULL, mem );
+	bl2_mem_set_size( 0, mem );
+	bl2_mem_set_dims( 0, 0, mem );
+	bl2_mem_set_elem_size( 0, mem );
 }
 
-void bl2_free_s( void* p )
+
+void bl2_mem_acquire_v( dim_t     m_req,
+                        siz_t     elem_size,
+                        mem_t*    mem )
 {
-#if 0
-	printf( "libblis: decrementing counter      from %d to %d\n", counter, counter-1 );
-#endif
-
-	--counter;
-
-	if ( counter == 0 )
-		mc = smem;
+	bl2_mem_acquire_m( m_req,
+	                   1,
+	                   elem_size,
+	                   BLIS_BUFFER_FOR_GEN_USE,
+	                   mem );
 }
 
-void bl2_mm_clear_smem( void )
+
+
+void bl2_mem_init()
+{
+	dim_t index_a;
+	dim_t index_b;
+	dim_t index_c;
+
+	// Map each of the packbuf_t values to an index starting at zero.
+	index_a = bl2_packbuf_index( BLIS_BUFFER_FOR_A_BLOCK );
+	index_b = bl2_packbuf_index( BLIS_BUFFER_FOR_B_PANEL );
+	index_c = bl2_packbuf_index( BLIS_BUFFER_FOR_C_PANEL );
+
+	// Initialize contiguous memory pool for MC x KC blocks.
+	bl2_mem_init_pool( pool_mk_mem,
+	                   BLIS_MK_BLOCK_SIZE,
+	                   BLIS_NUM_MC_X_KC_BLOCKS,
+	                   pool_mk_blk_ptrs,
+	                   &pools[ index_a ] );
+
+	// Initialize contiguous memory pool for KC x NC blocks.
+	bl2_mem_init_pool( pool_kn_mem,
+	                   BLIS_KN_BLOCK_SIZE,
+	                   BLIS_NUM_KC_X_NC_BLOCKS,
+	                   pool_kn_blk_ptrs,
+	                   &pools[ index_b ] );
+
+	// Initialize contiguous memory pool for MC x NC blocks.
+	bl2_mem_init_pool( pool_mn_mem,
+	                   BLIS_MN_BLOCK_SIZE,
+	                   BLIS_NUM_MC_X_NC_BLOCKS,
+	                   pool_mn_blk_ptrs,
+	                   &pools[ index_c ] );
+}
+
+
+void bl2_mem_init_pool( char*   pool_mem,
+                        siz_t   block_size,
+                        dim_t   num_blocks,
+                        void**  block_ptrs,
+                        pool_t* pool )
 {
 	dim_t i;
 
-	for ( i = 0; i < BLIS_NUM_ELEM_SMEM; ++i )
+	// If the pool starting address is not already aligned to the page size,
+	// advance it to the beginning of the next page. (Here, we assign that
+	// the page size is a multiple of the memory alignment boundary.)
+	if ( bl2_is_unaligned_to( pool_mem, BLIS_PAGE_SIZE ) )
 	{
-		smem[i] = 0.0;
+		// Notice that this works even if the page size is not a power of two.
+		pool_mem += ( BLIS_PAGE_SIZE - ( ( siz_t )pool_mem % BLIS_PAGE_SIZE ) );
 	}
+
+	// Step through the memory pool, beginning with the page-aligned address
+	// determined above, assigning pointers to the beginning of each m x n
+	// block to the ith element of the block_ptrs array.
+	for ( i = 0; i < num_blocks; ++i )
+	{
+		// Save the address of pool, which is guaranteed to be page-aligned.
+		block_ptrs[i] = pool_mem;
+
+		// Advance pool by one block.
+		pool_mem += block_size;
+
+		// Advance pool a bit further if needed in order to get to the
+		// beginning of a page.
+		if ( bl2_is_unaligned_to( pool_mem, BLIS_PAGE_SIZE ) )
+		{
+			pool_mem += ( BLIS_PAGE_SIZE - ( ( siz_t )pool_mem % BLIS_PAGE_SIZE ) );
+		}
+	}
+
+	// Now that we have initialized the array of pointers to the individual
+	// blocks in the pool, we initialize a pool_t data structure so that we
+	// can easily manage this pool.
+	bl2_pool_init( num_blocks,
+	               block_size,
+	               block_ptrs,
+	               pool );
 }
 
-// -- Memory pool implementation -----------------------------------------------
+
+
+void bl2_mem_finalize()
+{
+	// Nothing to do.
+}
 

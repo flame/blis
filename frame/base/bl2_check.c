@@ -663,4 +663,36 @@ err_t bl2_check_packv_schema_on_unpack( obj_t* a )
 
 // -- Memory allocator checks --------------------------------------------------
 
+err_t bl2_check_valid_packbuf( packbuf_t buf_type )
+{
+	err_t e_val = BLIS_SUCCESS;
+
+	if ( buf_type != BLIS_BUFFER_FOR_A_BLOCK &&
+	     buf_type != BLIS_BUFFER_FOR_B_PANEL &&
+	     buf_type != BLIS_BUFFER_FOR_C_PANEL &&
+	     buf_type != BLIS_BUFFER_FOR_GEN_USE )
+		e_val = BLIS_INVALID_PACKBUF;
+
+	return e_val;
+}
+
+err_t bl2_check_requested_block_size_for_pool( siz_t req_size, pool_t* pool )
+{
+	err_t e_val = BLIS_SUCCESS;
+
+	if ( bl2_pool_block_size( pool ) < req_size )
+		e_val = BLIS_REQUESTED_CONTIG_BLOCK_TOO_BIG;
+
+	return e_val;
+}
+
+err_t bl2_check_if_exhausted_pool( pool_t* pool )
+{
+	err_t e_val = BLIS_SUCCESS;
+
+	if ( bl2_pool_is_exhausted( pool ) )
+		e_val = BLIS_EXHAUSTED_CONTIG_MEMORY_POOL;
+
+	return e_val;
+}
 

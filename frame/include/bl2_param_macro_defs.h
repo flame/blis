@@ -38,6 +38,17 @@
 
 // -- Parameter query macros --
 
+// buffer
+
+#define bl2_is_aligned_to( p, size ) \
+\
+	( ( siz_t )(p) % (size) == 0 )
+
+#define bl2_is_unaligned_to( p, size ) \
+\
+	( ( siz_t )(p) % (size) != 0 )
+
+
 // datatype
 
 #define bl2_is_float( dt ) \
@@ -416,6 +427,13 @@
 #define bl2_is_not_edge_b( i1, iter, left ) \
 \
 	( i1 != 0 || left == 0 )
+
+
+// packbuf_t-related
+
+#define bl2_packbuf_index( buf_type ) \
+\
+	( ( (buf_type) & BLIS_PACK_BUFFER_BITS ) >> BLIS_PACK_BUFFER_SHIFT )
 
 
 // return value for char

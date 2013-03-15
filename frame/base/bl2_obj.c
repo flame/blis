@@ -66,7 +66,7 @@ void bl2_obj_create_without_buffer( num_t  dt,
 {
 	siz_t  elem_size;
 	mem_t* pack_mem;
-	mem_t* cast_mem;
+	//mem_t* cast_mem;
 
 	if ( bl2_error_checking_is_enabled() )
 		bl2_obj_create_without_buffer_check( dt, m, n, obj );
@@ -95,9 +95,9 @@ void bl2_obj_create_without_buffer( num_t  dt,
 	bl2_obj_set_diag_offset( 0, *obj );
 
 	pack_mem = bl2_obj_pack_mem( *obj );
-	cast_mem = bl2_obj_cast_mem( *obj );
+	//cast_mem = bl2_obj_cast_mem( *obj );
 	bl2_mem_set_buffer( NULL, pack_mem );
-	bl2_mem_set_buffer( NULL, cast_mem );
+	//bl2_mem_set_buffer( NULL, cast_mem );
 }
 
 void bl2_obj_alloc_buffer( inc_t  rs,
@@ -435,14 +435,6 @@ dim_t bl2_align_dim_to_sys( dim_t dim, dim_t elem_size )
 	return dim;
 }
 
-dim_t bl2_align_dim( dim_t dim, dim_t dim_mult, dim_t elem_size )
-{
-	dim = bl2_align_dim_to_mult( dim, dim_mult );
-	dim = bl2_align_dim_to_sys( dim, elem_size );
-
-	return dim;
-}
-
 static num_t type_union[BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES] =
 {
             // s             c              d              z
@@ -492,8 +484,8 @@ void bl2_obj_print( char* label, obj_t* obj )
 	//fprintf( file, " - n             %lu\n", bl2_mem_width( cast_mem ) );
 	fprintf( file, " pack_mem          \n" );
 	fprintf( file, " - buf           %p\n",  bl2_mem_buffer( pack_mem ) );
-	fprintf( file, " - m allocated   %lu\n", bl2_mem_length_alloc( pack_mem ) );
-	fprintf( file, " - n allocated   %lu\n", bl2_mem_width_alloc( pack_mem ) );
+	fprintf( file, " - buf_type      %u\n",  bl2_mem_buf_type( pack_mem ) );
+	fprintf( file, " - size          %lu\n", bl2_mem_size( pack_mem ) );
 	fprintf( file, " - m used        %lu\n", bl2_mem_length( pack_mem ) );
 	fprintf( file, " - n used        %lu\n", bl2_mem_width( pack_mem ) );
 	fprintf( file, " ps              %lu\n", bl2_obj_panel_stride( *obj ) );

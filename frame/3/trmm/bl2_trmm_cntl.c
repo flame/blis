@@ -150,7 +150,8 @@ void bl2_trmm_cntl_init()
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
 	                           FALSE, // reverse iteration if lower?
-	                           BLIS_PACKED_ROW_PANELS );
+	                           BLIS_PACKED_ROW_PANELS,
+	                           BLIS_BUFFER_FOR_A_BLOCK );
 
 	trmm_packb_cntl
 	=
@@ -163,7 +164,8 @@ void bl2_trmm_cntl_init()
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
 	                           FALSE, // reverse iteration if lower?
-	                           BLIS_PACKED_COL_PANELS );
+	                           BLIS_PACKED_COL_PANELS,
+	                           BLIS_BUFFER_FOR_B_PANEL );
 
 	trmm_packc_cntl
 	=
@@ -176,7 +178,8 @@ void bl2_trmm_cntl_init()
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
 	                           FALSE, // reverse iteration if lower?
-	                           BLIS_PACKED_COLUMNS );
+	                           BLIS_PACKED_COLUMNS,
+	                           BLIS_BUFFER_FOR_GEN_USE );
 
 	trmm_unpackc_cntl
 	=

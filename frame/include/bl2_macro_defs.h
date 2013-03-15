@@ -67,6 +67,7 @@
 #include "bl2_gentprot_macro_defs.h"
 
 #include "bl2_mem_macro_defs.h"
+#include "bl2_pool_macro_defs.h"
 #include "bl2_obj_macro_defs.h"
 #include "bl2_param_macro_defs.h"
 #include "bl2_scalar_macro_defs.h"

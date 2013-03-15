@@ -90,3 +90,7 @@ err_t bl2_check_valid_cntl( void* cntl );
 
 err_t bl2_check_packm_schema_on_unpack( obj_t* a );
 err_t bl2_check_packv_schema_on_unpack( obj_t* a );
+
+err_t bl2_check_valid_packbuf( packbuf_t buf_type );
+err_t bl2_check_requested_block_size_for_pool( siz_t req_size, pool_t* pool );
+err_t bl2_check_if_exhausted_pool( pool_t* pool );

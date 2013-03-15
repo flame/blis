@@ -42,6 +42,18 @@
 \
 	( (mem_p)->buf )
 
+#define bl2_mem_buf_type( mem_p ) \
+\
+    ( (mem_p)->buf_type )
+
+#define bl2_mem_pool( mem_p ) \
+\
+    ( (mem_p)->pool )
+
+#define bl2_mem_size( mem_p ) \
+\
+	( (mem_p)->size )
+
 #define bl2_mem_length( mem_p ) \
 \
 	( (mem_p)->m )
@@ -50,13 +62,9 @@
 \
 	( (mem_p)->n )
 
-#define bl2_mem_length_alloc( mem_p ) \
+#define bl2_mem_elem_size( mem_p ) \
 \
-	( (mem_p)->m_alloc )
-
-#define bl2_mem_width_alloc( mem_p ) \
-\
-	( (mem_p)->n_alloc )
+	( (mem_p)->elem_size )
 
 #define bl2_mem_is_alloc( mem_p ) \
 \
@@ -74,6 +82,21 @@
     mem_p->buf = buf0; \
 }
 
+#define bl2_mem_set_buf_type( buf_type0, mem_p ) \
+{ \
+    mem_p->buf_type = buf_type0; \
+}
+
+#define bl2_mem_set_pool( pool0, mem_p ) \
+{ \
+    mem_p->pool = pool0; \
+}
+
+#define bl2_mem_set_size( size0, mem_p ) \
+{ \
+    mem_p->size = size0; \
+}
+
 #define bl2_mem_set_length( m0, mem_p ) \
 { \
     mem_p->m = m0; \
@@ -84,26 +107,124 @@
     mem_p->n = n0; \
 }
 
+#define bl2_mem_set_elem_size( elem_size0, mem_p ) \
+{ \
+    mem_p->elem_size = elem_size0; \
+}
+
 #define bl2_mem_set_dims( m0, n0, mem_p ) \
 { \
     bl2_mem_set_length( m0, mem_p ); \
     bl2_mem_set_width( n0, mem_p ); \
 }
 
-#define bl2_mem_set_length_alloc( m0, mem_p ) \
-{ \
-    mem_p->m_alloc = m0; \
-}
 
-#define bl2_mem_set_width_alloc( n0, mem_p ) \
-{ \
-    mem_p->n_alloc = n0; \
-}
+// Allocate a mem_t object if it is unallocated, or update its dimensions
+// if it is allocated. This macro is used for matrices.
 
-#define bl2_mem_set_dims_alloc( m0, n0, mem_p ) \
+#define bl2_mem_alloc_update_m( m_padded, n_padded, elem_size, buf_type, mem_p ) \
 { \
-    bl2_mem_set_length_alloc( m0, mem_p ); \
-    bl2_mem_set_width_alloc( n0, mem_p ); \
-}
+	bool_t needs_alloc; \
+	siz_t  size_needed; \
+\
+	if ( bl2_mem_is_unalloc( mem_p ) ) \
+	{ \
+		/* If the mem_t object is currently unallocated (NULL), mark it for
+		   allocation. */ \
+		needs_alloc = TRUE; \
+	} \
+	else \
+	{ \
+		/* Compute the total buffer size needed. */ \
+		size_needed = m_padded * n_padded * elem_size; \
+\
+		if ( size_needed <= bl2_mem_size( mem_p ) ) \
+		{ \
+			/* If the mem_t object is currently allocated, AND what is
+			   allocated and available is equal to or greater than what is
+			   needed, then set the dimensions according to how much we
+			   need. This allows us to avoid unnecessarily releasing and
+			   re-allocating when all we need is a subset of what is already
+			   available. This case will occur when, for example, handling
+			   both forward and backward edge cases. */ \
+			bl2_mem_set_dims( m_padded, n_padded, mem_p ); \
+\
+			needs_alloc = FALSE; \
+		} \
+		else /* if ( bl2_mem_size( mem_p ) < size_needed ) */ \
+		{ \
+			/* If the mem_t object is currently allocated and smaller than is
+			   needed, then something is very wrong, since the cache blocksizes
+			   that drive the level-3 blocked algorithms are the same ones that
+			   determine the sizes of the blocks within our memory allocator's
+			   memory pools. This branch should never be executed. */ \
+			bl2_abort(); \
+\
+			needs_alloc = FALSE; \
+		} \
+	} \
+\
+	if ( needs_alloc ) \
+	{ \
+		bl2_mem_acquire_m( m_padded, \
+		                   n_padded, \
+		                   elem_size, \
+		                   buf_type, \
+		                   mem_p ); \
+	} \
+} \
+
+
+// Allocate a mem_t object if it is unallocated, or update its dimensions
+// if it is allocated. This macro is used for vectors.
+
+#define bl2_mem_alloc_update_v( m_padded, elem_size, mem_p ) \
+{ \
+	bool_t needs_alloc; \
+	siz_t  size_needed; \
+\
+	if ( bl2_mem_is_unalloc( mem_p ) ) \
+	{ \
+		/* If the mem_t object is currently unallocated (NULL), mark it for
+		   allocation. */ \
+		needs_alloc = TRUE; \
+	} \
+	else \
+	{ \
+		/* Compute the total buffer size needed. */ \
+		size_needed = m_padded * elem_size; \
+\
+		if ( size_needed <= bl2_mem_size( mem_p ) ) \
+		{ \
+			/* If the mem_t object is currently allocated, AND what is
+			   allocated and available is equal to or larger than what is
+			   needed, then set the dimension according to how much we
+			   need. This allows us to avoid unnecessarily releasing and
+			   re-allocating when all we need is a subset of what is already
+			   available. This case will occur when, for example, handling
+			   both forward and backward edge cases. */ \
+			bl2_mem_set_dims( m_padded, 1, mem_p ); \
+\
+			needs_alloc = FALSE; \
+		} \
+		else /* if ( bl2_mem_size( mem_p ) < size_needed ) */ \
+		{ \
+			/* If the mem_t object is currently allocated and smaller than is
+			   needed, then release the memory and re-allocate. */ \
+			bl2_mem_release( mem_p ); \
+\
+			needs_alloc = TRUE; \
+		} \
+	} \
+\
+	if ( needs_alloc ) \
+	{ \
+		bl2_mem_acquire_v( m_padded, \
+		                   elem_size, \
+		                   mem_p ); \
+	} \
+} \
+
+
 
 #endif 

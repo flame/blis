@@ -38,16 +38,12 @@ void bl2_packv_init( obj_t*   a,
                      obj_t*   p,
                      packv_t* cntl )
 {
-	// The packv operation consists of an optional typecasting pre-process.
-	// Here are the following possible ways packv can execute:
-	//  1. cast and pack: When typecasting and packing are both
-	//     precribed, typecast a to temporary vector c and then pack
-	//     c to p.
-	//  2. pack only: Typecasting is skipped when it is not needed;
-	//     simply pack a directly to p.
-	//  3. cast only: Not yet supported / not used.
-	//  4. no-op: The control tree sometimes directs us to skip the
-	//     pack operation entirely. Alias p to a and return.
+	// The purpose of packm_init() is to initialize an object P so that
+	// a source object A can be packed into P via one of the packv
+	// implementations. This initialization includes acquiring a suitable
+	// block of memory from the memory allocator, if such a block of memory
+	// has not already been allocated previously.
+
 	pack_t   pack_schema;
 	blksz_t* mult_m;
 	obj_t    c;
@@ -124,34 +120,16 @@ void bl2_packv_init_pack( pack_t   pack_schema,
                           obj_t*   c,
                           obj_t*   p )
 {
-	// In this function, we initialize an object p to represent the packed
-	// copy of the intermediate object c. At this point, the datatype of
-	// object c should be equal to the target datatype of the original
-	// object, either because:
-	//  (1) c is set up to contain the typecast of the original object, or
-	//  (2) c is aliased to the original object, which would only happen
-	//      when the original object's datatype and target datatype are
-	//      equal.
-	// So here, we want to create an object p that is identical to c, except
-	// that:
-	//  (1) object p is marked as being stored in a standard, contiguous
-	//      format (ie: a column vector),
-	//  (2) the view offset of p is reset to (0,0),
-	//  (3) object p contains a pack schema field that reflects its desired
-	//      packing (ie: a contiguous vector), and
-	//  (4) object p's main buffer is set to a new memory region acquired
-	//      from the memory manager, or extracted from p if a mem entry is
-	//      already available. (After acquring a mem entry from the memory
-	//      manager, it is cached within p for quick access later on.)
-	//  We also explicitly set the dimensions and strides of p in case c
-	//  is just an alias to the original vector. (This is done in case that
-	//  original vector is, say, 1xm because we like to think of our packed
-	//  vectors as always column vectors.)
-
 	num_t  datatype     = bl2_obj_datatype( *c );
 	dim_t  dim_c        = bl2_obj_vector_dim( *c );
 	dim_t  mult_m_dim   = bl2_blksz_for_type( datatype, mult_m );
+
+	mem_t* mem_p;
+	dim_t  m_p_pad;
+	siz_t  elem_size_p;
 	inc_t  rs_p, cs_p;
+	void*  buf;
+
 
 	// We begin by copying the basic fields of c.
 	bl2_obj_alias_to( *c, *p );
@@ -166,27 +144,39 @@ void bl2_packv_init_pack( pack_t   pack_schema,
 	// node.
 	bl2_obj_set_pack_schema( pack_schema, *p );
 
-	// Check the mem_t entry of p associated with the pack buffer. If it is
-	// NULL, then acquire memory sufficient to hold the object data and cache
-	// it to p. (Otherwise, if it is non-NULL, then memory has already been
-	// acquired from the memory manager and cached.) We then set the main
-	// buffer of p to the cached address of the pack memory.
-	bl2_obj_set_buffer_with_cached_packv_mem( *p, *p, mult_m_dim );
+	// Extract the address of the mem_t object within p that will track
+	// properties of the packed buffer.
+	mem_p = bl2_obj_pack_mem( *p );
+
+	// Compute the dimensions padded by the dimension multiples.
+	m_p_pad     = bl2_align_dim_to_mult( bl2_obj_vector_dim( *p ), mult_m_dim );
+	elem_size_p = bl2_obj_elem_size( *p );
+
+	// Check the mem_t entry of p. If it is not yet allocated, then acquire
+	// a memory block suitable for a vector. If the mem_t object has already
+	// been allocated a buffer, then update the dimensions embedded in the
+	// object according to the latest value in m_p_pad.
+	bl2_mem_alloc_update_v( m_p_pad,
+	                        elem_size_p,
+	                        mem_p );
+
+	// Grab the buffer address from the mem_t object and copy it to the
+	// main object buffer field. (Sometimes this buffer address will be
+	// copied when the value is already up-to-date, because it persists
+	// in the main object buffer field across loop iterations.)
+	buf = bl2_mem_buffer( mem_p );
+	bl2_obj_set_buffer( buf, *p );
+
 
 	// Set the row and column strides of p based on the pack schema.
 	if ( pack_schema == BLIS_PACKED_VECTOR )
 	{
-		mem_t* mem;
-
-		// Access the mem_t entry cached in p.
-		mem = bl2_obj_pack_mem( *p );
-
 		// Set the strides to reflect a column-stored vector. Note that the
 		// column stride may never be used, and is only useful to determine
 		// how much space beyond the vector would need to be zero-padded, if
 		// zero-padding was needed.
 		rs_p = 1;
-		cs_p = bl2_mem_length( mem );
+		cs_p = bl2_mem_length( mem_p );
 
 		bl2_obj_set_incs( rs_p, cs_p, *p );
 	}

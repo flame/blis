@@ -100,13 +100,13 @@ void bl2_error_msgs_init( void )
 	sprintf( bl2_error_string_for_code(BLIS_INVALID_SIDE),
 	         "Invalid side parameter value." );
 	sprintf( bl2_error_string_for_code(BLIS_INVALID_UPLO),
-	         "Invalid uplo parameter value." );
+	         "Invalid uplo_t parameter value." );
 	sprintf( bl2_error_string_for_code(BLIS_INVALID_TRANS),
-	         "Invalid trans parameter value." );
+	         "Invalid trans_t parameter value." );
 	sprintf( bl2_error_string_for_code(BLIS_INVALID_CONJ),
-	         "Invalid conj parameter value." );
+	         "Invalid conj_t parameter value." );
 	sprintf( bl2_error_string_for_code(BLIS_INVALID_DIAG),
-	         "Invalid diag parameter value." );
+	         "Invalid diag_t parameter value." );
 	sprintf( bl2_error_string_for_code(BLIS_EXPECTED_NONUNIT_DIAG),
 	         "Expected object with non-unit diagonal." );
 
@@ -178,7 +178,11 @@ void bl2_error_msgs_init( void )
 	sprintf( bl2_error_string_for_code(BLIS_PACK_SCHEMA_NOT_SUPPORTED_FOR_UNPACK),
 	         "Pack schema not yet supported/implemented for use with unpacking." );
 
-	sprintf( bl2_error_string_for_code(BLIS_EXHAUSTED_STATIC_MEMORY_POOL),
-	         "Attempted to allocate more memory from static pool than is available." );
+	sprintf( bl2_error_string_for_code(BLIS_INVALID_PACKBUF),
+	         "Invalid packbuf_t value." );
+	sprintf( bl2_error_string_for_code(BLIS_REQUESTED_CONTIG_BLOCK_TOO_BIG ),
+	         "Attempted to allocate contiguous memory block that is too big for implementation." );
+	sprintf( bl2_error_string_for_code(BLIS_EXHAUSTED_CONTIG_MEMORY_POOL),
+	         "Attempted to allocate more memory from contiguous pool than is available." );
 }
 

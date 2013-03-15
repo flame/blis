@@ -32,23 +32,72 @@
 
 */
 
-void bl2_packm_init( obj_t*   a,
-                     obj_t*   p,
-                     packm_t* cntl );
+#ifndef BLIS_POOL_MACRO_DEFS_H
+#define BLIS_POOL_MACRO_DEFS_H
 
-void bl2_packm_init_pack( bool_t    densify,
-                          invdiag_t invert_diag,
-                          pack_t    pack_schema,
-                          packord_t pack_ord_if_up,
-                          packord_t pack_ord_if_lo,
-                          packbuf_t pack_buf_type,
-                          blksz_t*  mult_m,
-                          blksz_t*  mult_n,
-                          obj_t*    c,
-                          obj_t*    p );
 
-/*
-void bl2_packm_init_cast( obj_t*  a,
-                          obj_t*  p,
-                          obj_t*  c );
-*/
+// Pool entry query
+
+#define bl2_pool_block_ptrs( pool_p ) \
+\
+	( (pool_p)->block_ptrs )
+
+#define bl2_pool_num_blocks( pool_p ) \
+\
+	( (pool_p)->num_blocks )
+
+#define bl2_pool_block_size( pool_p ) \
+\
+	( (pool_p)->block_size )
+
+#define bl2_pool_top_index( pool_p ) \
+\
+	( (pool_p)->top_index )
+
+#define bl2_pool_is_exhausted( pool_p ) \
+\
+	( bl2_pool_top_index( pool_p ) == -1 )
+
+
+// Pool entry modification
+
+#define bl2_pool_set_block_ptrs( block_ptrs0, pool_p ) \
+{ \
+    pool_p->block_ptrs = block_ptrs0; \
+}
+
+#define bl2_pool_set_num_blocks( num_blocks0, pool_p ) \
+{ \
+    pool_p->num_blocks = num_blocks0; \
+}
+
+#define bl2_pool_set_block_size( block_size0, pool_p ) \
+{ \
+    pool_p->block_size = block_size0; \
+}
+
+#define bl2_pool_set_top_index( top_index0, pool_p ) \
+{ \
+    pool_p->top_index = top_index0; \
+}
+
+#define bl2_pool_dec_top_index( pool_p ) \
+{ \
+    (pool_p->top_index)--; \
+}
+
+#define bl2_pool_inc_top_index( pool_p ) \
+{ \
+    (pool_p->top_index)++; \
+}
+
+#define bl2_pool_init( num_blocks, block_size, block_ptrs, pool_p ) \
+{ \
+	bl2_pool_set_num_blocks( num_blocks, pool_p ); \
+	bl2_pool_set_block_size( block_size, pool_p ); \
+	bl2_pool_set_block_ptrs( block_ptrs, pool_p ); \
+	bl2_pool_set_top_index( num_blocks - 1, pool_p ); \
+}
+
+
+#endif 

@@ -195,6 +195,10 @@
 \
 	(   (obj).info & BLIS_PACK_BITS )
 
+#define bl2_obj_pack_buffer_type( obj ) \
+\
+	(   (obj).info & BLIS_PACK_BUFFER_BITS )
+
 #define bl2_obj_struc( obj ) \
 \
 	(   (obj).info & BLIS_STRUC_BITS )
@@ -276,6 +280,11 @@
 #define bl2_obj_set_pack_order_if_lower( packordiflo, obj ) \
 { \
 	(obj).info = ( (obj).info & ~BLIS_PACK_REV_IF_LOWER_BIT ) | (packordiflo); \
+}
+
+#define bl2_obj_set_pack_buffer_type( packbuf, obj ) \
+{ \
+	(obj).info = ( (obj).info & ~BLIS_PACK_BUFFER_BITS ) | (packbuf); \
 }
 
 #define bl2_obj_set_struc( struc, obj ) \
@@ -818,10 +827,10 @@ bl2_obj_width_stored( obj )
 #define bl2_obj_init_pack( obj_p ) \
 { \
 	mem_t* pack_mem = bl2_obj_pack_mem( *obj_p ); \
-	mem_t* cast_mem = bl2_obj_cast_mem( *obj_p ); \
+	/*mem_t* cast_mem = bl2_obj_cast_mem( *obj_p );*/ \
 \
 	bl2_mem_set_buffer( NULL, pack_mem ); \
-	bl2_mem_set_buffer( NULL, cast_mem ); \
+	/*bl2_mem_set_buffer( NULL, cast_mem );*/ \
 }
 
 
@@ -837,172 +846,18 @@ bl2_obj_width_stored( obj )
 		: FALSE ) \
 
 
-// Set an object's buffer to one previously cached for packing
-// matrices (or acquire one and cache it)
-
-#define bl2_obj_set_buffer_with_cached_packm_mem( p, obj, mult_m, mult_n ) \
-{ \
-	mem_t* mem_p       = bl2_obj_pack_mem( p ); \
-	num_t  dt          = bl2_obj_datatype( obj ); \
-	siz_t  elem_size   = bl2_obj_elem_size( obj ); \
-	dim_t  m           = bl2_obj_length( obj ); \
-	dim_t  n           = bl2_obj_width( obj ); \
-	bool_t needs_alloc; \
-	dim_t  m_needed; \
-	dim_t  n_needed; \
-	void*  buf; \
-\
-	/* When determining the size of the pack buffer, always align m and n to
-	   dimension multiples (typically the micro-kernel's register blocksizes)
-	   encoded within the control tree (and to the system alignment). This
-	   may result in a little wasted space in certain situations, such as
-	   level-2 operations. */ \
-	m_needed = bl2_align_dim( m, mult_m, elem_size ); \
-	n_needed = bl2_align_dim( n, mult_n, elem_size ); \
-\
-	if ( bl2_mem_is_unalloc( mem_p ) ) \
-	{ \
-		/* If the mem_t object is currently unallocated (NULL), mark it for
-		   allocation. */ \
-		needs_alloc = TRUE; \
-	} \
-	else \
-	{ \
-		if ( m_needed <= bl2_mem_length_alloc( mem_p ) && \
-		     n_needed <= bl2_mem_width_alloc( mem_p )  )  \
-		{ \
-			/* If the mem_t object is currently allocated, AND what is
-			   allocated and available is equal to or larger than what is
-			   needed, then set the dimensions according to how much we
-			   need. This allows us to avoid unnecessarily releasing and
-			   re-allocating when all we need is a subset of what is already
-			   available. */ \
-			bl2_mem_set_dims( m_needed, n_needed, mem_p ); \
-			needs_alloc = FALSE; \
-		} \
-		else if ( bl2_mem_length_alloc( mem_p ) < m_needed || \
-		          bl2_mem_width_alloc( mem_p )  < n_needed )  \
-		{ \
-			/* If the mem_t object is currently allocated and smaller than is
-			   needed, release the memory and mark for re-allocation. */ \
-			bl2_mm_release( mem_p ); \
-			needs_alloc = TRUE; \
-		} \
-		else \
-		{ \
-			needs_alloc = FALSE; \
-		} \
-	} \
-\
-	if ( needs_alloc ) \
-	{ \
-		bl2_mm_acquire_m( dt, m_needed, n_needed, mem_p ); \
-	} \
-\
-	/* Grab the buffer address from the mem_t object and copy it to the main
-	   object buffer. */ \
-	buf = bl2_mem_buffer( mem_p ); \
-	bl2_obj_set_buffer( buf, obj ); \
-} \
-
-// Set an object's buffer to one previously cached for packing
-// vectors (or acquire one and cache it)
-
-#define bl2_obj_set_buffer_with_cached_packv_mem( p, obj, mult_m ) \
-{ \
-	mem_t* mem_p     = bl2_obj_pack_mem( p ); \
-	num_t  dt        = bl2_obj_datatype( obj ); \
-	siz_t  elem_size = bl2_obj_elem_size( obj ); \
-	dim_t  m         = bl2_obj_vector_dim( obj ); \
-	bool_t needs_alloc; \
-	dim_t  m_needed; \
-	void*  buf; \
-\
-	/* When determining the size of the pack buffer, always align the
-	   vector dimension to the dimension multiple encoded in the
-	   control tree (and to the system alignment). */ \
-	m_needed = bl2_align_dim( m, mult_m, elem_size ); \
-\
-	if ( bl2_mem_is_unalloc( mem_p ) ) \
-	{ \
-		/* If the mem_t object is currently unallocated (NULL), mark it for
-		   allocation. */ \
-		needs_alloc = TRUE; \
-	} \
-	else \
-	{ \
-		if ( m_needed <= bl2_mem_length_alloc( mem_p ) ) \
-		{ \
-			/* If the mem_t object is currently allocated, AND what is
-			   allocated and available is equal to or larger than what is
-			   needed, then set the dimension according to how much we
-			   need. This allows us to avoid unnecessarily releasing and
-			   re-allocating when all we need is a subset of what is already
-			   available. */ \
-			bl2_mem_set_dims( m_needed, 1, mem_p ); \
-			needs_alloc = FALSE; \
-		} \
-		if ( bl2_mem_length_alloc( mem_p ) < m_needed ) \
-		{ \
-			/* If the mem_t object is currently allocated and smaller than is
-			   needed, release the memory and mark for re-allocation. */ \
-			bl2_mm_release( mem_p ); \
-			needs_alloc = TRUE; \
-		} \
-		else \
-		{ \
-			needs_alloc = FALSE; \
-		} \
-	} \
-\
-	if ( needs_alloc ) \
-	{ \
-		bl2_mm_acquire_v( dt, m_needed, mem_p ); \
-	} \
-\
-	/* Grab the buffer address from the mem_t object and copy it to the main
-	   object buffer. */ \
-	buf = bl2_mem_buffer( mem_p ); \
-	bl2_obj_set_buffer( buf, obj ); \
-} \
-
-// Set an object's buffer to one previously cached for casting
-// (or acquire one and cache it)
-
-#define bl2_obj_set_buffer_with_cached_cast_mem( p, obj ) \
-{ \
-	void*  buf; \
-	mem_t* mem_p = bl2_obj_cast_mem( p ); \
-\
-	if ( bl2_mem_buffer( mem_p ) == NULL ) \
-	{ \
-		num_t  dt = bl2_obj_datatype( obj ); \
-		dim_t  m  = bl2_obj_length( obj ); \
-		dim_t  n  = bl2_obj_width( obj ); \
-\
-		/* Notice that we do not need m and n to be multiples of anything
-		   because inner kernel never touches the cast buffer. So we can
-		   simply use 1 as the dimension multiples. */ \
-\
-		bl2_mm_acquire_m( dt, m, n, mem_p ); \
-	} \
-\
-	buf = bl2_mem_buffer( mem_p ); \
-	bl2_obj_set_buffer( buf, obj ); \
-} \
-
 // Release object's pack (and cast) memory entries back to memory manager
 
 #define bl2_obj_release_pack( obj_p ) \
 { \
 	mem_t* pack_mem = bl2_obj_pack_mem( *(obj_p) ); \
 	if ( bl2_mem_is_alloc( pack_mem ) ) \
-		bl2_mm_release( pack_mem ); \
+		bl2_mem_release( pack_mem ); \
 \
 /*
 	mem_t* cast_mem = bl2_obj_cast_mem( *(obj_p) ); \
 	if ( bl2_mem_is_alloc( cast_mem ) ) \
-		bl2_mm_release( cast_mem ); \
+		bl2_mem_release( cast_mem ); \
 */ \
 }
 

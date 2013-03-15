@@ -51,9 +51,17 @@
 
 
 
+// -- MULTITHREADING -----------------------------------------------------------
+
+// The maximum number of BLIS threads that will run concurrently.
+#define BLIS_MAX_NUM_THREADS             24
+
+
+
 // -- MEMORY ALLOCATOR ---------------------------------------------------------
 
 // Enable memory alignment?
+// NOTE: This should stay enabled!
 #define BLIS_ENABLE_MEMORY_ALIGNMENT     1
 
 // If memory alignment is enabled, set the alignment boundary.
@@ -61,10 +69,11 @@
   #define BLIS_MEMORY_ALIGNMENT_BOUNDARY 16
 #endif
 
-// The number of MC x KC and KC x NC blocks to reserve in the static memory
-// pool.
-#define BLIS_NUM_MC_X_KC_BLOCKS          2
+// The number of MC x KC, KC x NC, and MC x NC blocks to reserve in the
+// contiguous memory pools.
+#define BLIS_NUM_MC_X_KC_BLOCKS          BLIS_MAX_NUM_THREADS
 #define BLIS_NUM_KC_X_NC_BLOCKS          1
+#define BLIS_NUM_MC_X_NC_BLOCKS          0
 
 // The page size is used by the memory allocator so that static memory
 // can be allocated with alignment to the beginning of a page boundary.

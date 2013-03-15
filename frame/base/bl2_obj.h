@@ -97,8 +97,6 @@ dim_t bl2_align_dim_to_mult( dim_t dim, dim_t dim_mult );
 
 dim_t bl2_align_dim_to_sys( dim_t dim, dim_t elem_size );
 
-dim_t bl2_align_dim( dim_t dim, dim_t dim_mult, dim_t elem_size );
-
 num_t bl2_datatype_union( num_t dt1, num_t dt2 );
 
 void bl2_obj_print( char* label, obj_t* obj );

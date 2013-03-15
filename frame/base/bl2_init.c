@@ -57,6 +57,8 @@ void bl2_init( void )
 	bl2_cntl_init();
 
 	bl2_error_msgs_init();
+
+	bl2_mem_init();
 }
 
 void bl2_finalize( void )
@@ -68,6 +70,8 @@ void bl2_finalize( void )
 	bl2_cntl_finalize();
 
 	// Don't need to do anything to finalize error messages.
+
+	bl2_mem_finalize();
 }
 
 void bl2_init_const( void )

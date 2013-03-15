@@ -95,7 +95,8 @@ void bl2_packm_cntl_init()
 	                           FALSE,            // do NOT invert diagonal
 	                           FALSE,            // do NOT iterate backwards if upper
 	                           FALSE,            // do NOT iterate backwards if lower
-	                           BLIS_PACKED_ROWS );
+	                           BLIS_PACKED_ROWS,
+	                           BLIS_BUFFER_FOR_GEN_USE );
 	packm_cntl_row_scale
 	=
 	bl2_packm_cntl_obj_create( BLIS_UNBLOCKED,
@@ -107,7 +108,8 @@ void bl2_packm_cntl_init()
 	                           FALSE,            // do NOT invert diagonal
 	                           FALSE,            // do NOT iterate backwards if upper
 	                           FALSE,            // do NOT iterate backwards if lower
-	                           BLIS_PACKED_ROWS );
+	                           BLIS_PACKED_ROWS,
+	                           BLIS_BUFFER_FOR_GEN_USE );
 
 
 	// Create control trees to pack by columns (with and without scaling).
@@ -122,7 +124,8 @@ void bl2_packm_cntl_init()
 	                           FALSE,            // do NOT invert diagonal
 	                           FALSE,            // do NOT iterate backwards if upper
 	                           FALSE,            // do NOT iterate backwards if lower
-	                           BLIS_PACKED_COLUMNS );
+	                           BLIS_PACKED_COLUMNS,
+	                           BLIS_BUFFER_FOR_GEN_USE );
 	packm_cntl_col_scale
 	=
 	bl2_packm_cntl_obj_create( BLIS_UNBLOCKED,
@@ -134,7 +137,8 @@ void bl2_packm_cntl_init()
 	                           FALSE,            // do NOT invert diagonal
 	                           FALSE,            // do NOT iterate backwards if upper
 	                           FALSE,            // do NOT iterate backwards if lower
-	                           BLIS_PACKED_COLUMNS );
+	                           BLIS_PACKED_COLUMNS,
+	                           BLIS_BUFFER_FOR_GEN_USE );
 
 
 	// Create control trees to pack by row panels (with and without scaling).
@@ -149,7 +153,8 @@ void bl2_packm_cntl_init()
 	                           FALSE,            // do NOT invert diagonal
 	                           FALSE,            // do NOT iterate backwards if upper
 	                           FALSE,            // do NOT iterate backwards if lower
-	                           BLIS_PACKED_ROW_PANELS );
+	                           BLIS_PACKED_ROW_PANELS,
+	                           BLIS_BUFFER_FOR_GEN_USE );
 	packm_cntl_rpn_scale
 	=
 	bl2_packm_cntl_obj_create( BLIS_UNBLOCKED,
@@ -161,7 +166,8 @@ void bl2_packm_cntl_init()
 	                           FALSE,            // do NOT invert diagonal
 	                           FALSE,            // do NOT iterate backwards if upper
 	                           FALSE,            // do NOT iterate backwards if lower
-	                           BLIS_PACKED_ROW_PANELS );
+	                           BLIS_PACKED_ROW_PANELS,
+	                           BLIS_BUFFER_FOR_GEN_USE );
 
 
 	// Create control trees to pack by column panels (with and without scaling).
@@ -176,7 +182,8 @@ void bl2_packm_cntl_init()
 	                           FALSE,            // do NOT invert diagonal
 	                           FALSE,            // do NOT iterate backwards if upper
 	                           FALSE,            // do NOT iterate backwards if lower
-	                           BLIS_PACKED_COL_PANELS );
+	                           BLIS_PACKED_COL_PANELS,
+	                           BLIS_BUFFER_FOR_GEN_USE );
 	packm_cntl_cpn_scale
 	=
 	bl2_packm_cntl_obj_create( BLIS_UNBLOCKED,
@@ -188,7 +195,8 @@ void bl2_packm_cntl_init()
 	                           FALSE,            // do NOT invert diagonal
 	                           FALSE,            // do NOT iterate backwards if upper
 	                           FALSE,            // do NOT iterate backwards if lower
-	                           BLIS_PACKED_COL_PANELS );
+	                           BLIS_PACKED_COL_PANELS,
+	                           BLIS_BUFFER_FOR_GEN_USE );
 
 
 	// Set defaults when we don't care whether the packing is by rows or
@@ -222,7 +230,8 @@ packm_t* bl2_packm_cntl_obj_create( impl_t     impl_type,
                                     bool_t     does_invert_diag,
                                     bool_t     rev_iter_if_upper,
                                     bool_t     rev_iter_if_lower,
-                                    pack_t     pack_schema )
+                                    pack_t     pack_schema,
+                                    packbuf_t  pack_buf_type )
 {
 	packm_t* cntl;
 
@@ -238,6 +247,7 @@ packm_t* bl2_packm_cntl_obj_create( impl_t     impl_type,
 	cntl->rev_iter_if_upper = rev_iter_if_upper;
 	cntl->rev_iter_if_lower = rev_iter_if_lower;
 	cntl->pack_schema       = pack_schema;
+	cntl->pack_buf_type     = pack_buf_type;
 
 	return cntl;
 }
@@ -252,7 +262,8 @@ void bl2_packm_cntl_obj_init( packm_t*   cntl,
                               bool_t     does_invert_diag,
                               bool_t     rev_iter_if_upper,
                               bool_t     rev_iter_if_lower,
-                              pack_t     pack_schema )
+                              pack_t     pack_schema,
+                              packbuf_t  pack_buf_type )
 {
 	cntl->impl_type         = impl_type;
 	cntl->var_num           = var_num;
@@ -264,5 +275,6 @@ void bl2_packm_cntl_obj_init( packm_t*   cntl,
 	cntl->rev_iter_if_upper = rev_iter_if_upper;
 	cntl->rev_iter_if_lower = rev_iter_if_lower;
 	cntl->pack_schema       = pack_schema;
+	cntl->pack_buf_type     = pack_buf_type;
 }
 

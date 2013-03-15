@@ -32,18 +32,24 @@
 
 */
 
-// -- Memory manager -----------------------------------------------------------
+void bl2_mem_acquire_m( dim_t     m_req,
+                        dim_t     n_req,
+                        siz_t     elem_size,
+                        packbuf_t buf_type,
+                        mem_t*    mem );
 
-void  bl2_mm_acquire_v( num_t  dt,
-                        dim_t  m,
-                        mem_t* mem );
-void  bl2_mm_acquire_m( num_t  dt,
-                        dim_t  m,
-                        dim_t  n,
-                        mem_t* mem );
-void  bl2_mm_release( mem_t* mem );
+void bl2_mem_acquire_v( dim_t     m_req,
+                        siz_t     elem_size,
+                        mem_t*    mem );
 
-void* bl2_malloc_s( siz_t buf_size );
-void  bl2_free_s( void* p );
+void bl2_mem_release( mem_t* mem );
 
-void  bl2_mm_clear_smem( void );
+void bl2_mem_init( void );
+void bl2_mem_finalize( void );
+
+void bl2_mem_init_pool( char*   pool_mem,
+                        siz_t   block_size,
+                        dim_t   n_blocks,
+                        void**  block_ptrs,
+                        pool_t* pool_struct );
+

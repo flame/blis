@@ -35,266 +35,79 @@
 #ifndef BLIS_TYPE_DEFS_H
 #define BLIS_TYPE_DEFS_H
 
-// -- Basic types --------------------------------------------------------------
+// -- BLIS info bit field masks ------------------------------------------------
 
-// Boolean type
-
-typedef   signed long int bool_t;
-
-// Integer types
-
-typedef unsigned long int dim_t;  // dimension type
-typedef unsigned long int inc_t;  // increment/stride type
-typedef   signed long int doff_t; // diagonal offset type
-typedef unsigned long int siz_t;  // byte size type
-
-// Complex types
-
-typedef struct scomplex_s
-{
-	float  real;
-	float  imag;
-} scomplex;
-
-typedef struct dcomplex_s
-{
-	double real;
-	double imag;
-} dcomplex;
-
-// Memory object type
-
-typedef struct mem_s
-{
-	void*  buf;
-	dim_t  m;
-	dim_t  n;
-	dim_t  m_alloc;
-	dim_t  n_alloc;
-} mem_t;
-
-// Blocksize object type
-
-typedef struct blksz_s
-{
-	dim_t v[BLIS_NUM_FP_TYPES];
-} blksz_t;
-
-// Atom type
-// Note: atom types are used to hold "bufferless" scalar object values. Note
-// that it needs to be as large as the largest possible scalar value we might
-// want to hold. Thus, for now, it is a dcomplex.
-
-typedef dcomplex atom_t;
-
-// Fortran-77 types (used only by blas2blis compatibility layer)
-
-#ifdef BLIS_ENABLE_BLAS2BLIS
-
-typedef char        fchar;
-typedef signed int  fint;
-typedef float       f77_float;
-typedef double      f77_double;
-typedef scomplex    f77_scomplex;
-typedef dcomplex    f77_dcomplex;
-
-#endif
+#define BLIS_DOMAIN_BIT                    0x01
+#define BLIS_PRECISION_BIT                 0x02
+#define BLIS_SPECIAL_BIT                   0x04
+#define BLIS_DATATYPE_BITS                 0x07
+#define BLIS_TRANS_BIT                     0x08
+#define BLIS_CONJ_BIT                      0x10
+#define BLIS_CONJTRANS_BITS                0x18
+#define BLIS_UPPER_BIT                     0x20
+#define BLIS_DIAG_BIT                      0x40
+#define BLIS_LOWER_BIT                     0x80
+#define BLIS_UPLO_BITS                     0xE0
+#define BLIS_UNIT_DIAG_BIT                 0x100
+#define BLIS_INVERT_DIAG_BIT               0x200
+#define BLIS_TARGET_DT_BITS                0x1C00
+#define BLIS_EXECUTION_DT_BITS             0xE000
+#define BLIS_PACK_BITS                     0x70000
+#define BLIS_PACK_REV_IF_UPPER_BIT         0x80000
+#define BLIS_PACK_REV_IF_LOWER_BIT         0x100000
+#define BLIS_PACK_BUFFER_BITS              0x600000
+#define BLIS_STRUC_BITS                    0x1800000
 
 
-// -- BLIS object type definitions ---------------------------------------------
+// -- BLIS enumerated type value definitions -----------------------------------
 
-// Object information bit field
+#define BLIS_BITVAL_REAL                   0x00
+#define BLIS_BITVAL_COMPLEX                0x01
+#define BLIS_BITVAL_SINGLE_PREC            0x00
+#define BLIS_BITVAL_DOUBLE_PREC            0x02
+#define   BLIS_BITVAL_FLOAT_TYPE           0x00
+#define   BLIS_BITVAL_SCOMPLEX_TYPE        0x01
+#define   BLIS_BITVAL_DOUBLE_TYPE          0x02
+#define   BLIS_BITVAL_DCOMPLEX_TYPE        0x03
+#define   BLIS_BITVAL_INT_TYPE             0x04
+#define   BLIS_BITVAL_CONST_TYPE           0x05
+#define BLIS_BITVAL_NO_TRANS               0x0
+#define BLIS_BITVAL_TRANS                  0x08
+#define BLIS_BITVAL_NO_CONJ                0x0
+#define BLIS_BITVAL_CONJ                   0x10
+#define BLIS_BITVAL_ZEROS                  0x0 
+#define BLIS_BITVAL_UPPER                  0x60 
+#define BLIS_BITVAL_LOWER                  0xC0
+#define BLIS_BITVAL_DENSE                  0xE0
+#define BLIS_BITVAL_NONUNIT_DIAG           0x0
+#define BLIS_BITVAL_UNIT_DIAG              0x100
+#define BLIS_BITVAL_INVERT_DIAG            0x200
+#define BLIS_BITVAL_NOT_PACKED             0x0
+#define BLIS_BITVAL_PACKED_UNSPEC          0x10000
+#define BLIS_BITVAL_PACKED_VECTOR          0x20000
+#define BLIS_BITVAL_PACKED_ROWS            0x30000
+#define BLIS_BITVAL_PACKED_COLUMNS         0x40000
+#define BLIS_BITVAL_PACKED_ROW_PANELS      0x50000
+#define BLIS_BITVAL_PACKED_COL_PANELS      0x60000
+#define BLIS_BITVAL_PACK_FWD_IF_UPPER      0x0
+#define BLIS_BITVAL_PACK_REV_IF_UPPER      0x80000
+#define BLIS_BITVAL_PACK_FWD_IF_LOWER      0x0
+#define BLIS_BITVAL_PACK_REV_IF_LOWER      0x100000
+#define BLIS_BITVAL_BUFFER_FOR_A_BLOCK     0x0
+#define BLIS_BITVAL_BUFFER_FOR_B_PANEL     0x200000
+#define BLIS_BITVAL_BUFFER_FOR_C_PANEL     0x400000
+#define BLIS_BITVAL_BUFFER_FOR_GEN_USE     0x600000
+#define BLIS_BITVAL_GENERAL                0x0
+#define BLIS_BITVAL_HERMITIAN              0x800000
+#define BLIS_BITVAL_SYMMETRIC              0x1000000
+#define BLIS_BITVAL_TRIANGULAR             0x1800000
 
-typedef unsigned long int info_t;
-
-#define BLIS_DOMAIN_BIT            0x01
-#define BLIS_PRECISION_BIT         0x02
-#define BLIS_SPECIAL_BIT           0x04
-#define BLIS_DATATYPE_BITS         0x07
-#define BLIS_TRANS_BIT             0x08
-#define BLIS_CONJ_BIT              0x10
-#define BLIS_CONJTRANS_BITS        0x18
-#define BLIS_UPPER_BIT             0x20
-#define BLIS_DIAG_BIT              0x40
-#define BLIS_LOWER_BIT             0x80
-#define BLIS_UPLO_BITS             0xE0
-#define BLIS_UNIT_DIAG_BIT         0x100
-#define BLIS_INVERT_DIAG_BIT       0x200
-#define BLIS_TARGET_DT_BITS        0x1C00
-#define BLIS_EXECUTION_DT_BITS     0xE000
-#define BLIS_PACK_BITS             0x70000
-#define BLIS_PACK_REV_IF_UPPER_BIT 0x80000
-#define BLIS_PACK_REV_IF_LOWER_BIT 0x100000
-#define BLIS_STRUC_BITS            0x600000
-
-#define BLIS_BITVAL_REAL              0x00
-#define BLIS_BITVAL_COMPLEX           0x01
-#define BLIS_BITVAL_SINGLE_PREC       0x00
-#define BLIS_BITVAL_DOUBLE_PREC       0x02
-#define   BLIS_BITVAL_FLOAT_TYPE      0x00
-#define   BLIS_BITVAL_SCOMPLEX_TYPE   0x01
-#define   BLIS_BITVAL_DOUBLE_TYPE     0x02
-#define   BLIS_BITVAL_DCOMPLEX_TYPE   0x03
-#define   BLIS_BITVAL_INT_TYPE        0x04
-#define   BLIS_BITVAL_CONST_TYPE      0x05
-#define BLIS_BITVAL_NO_TRANS          0x0
-#define BLIS_BITVAL_TRANS             0x08
-#define BLIS_BITVAL_NO_CONJ           0x0
-#define BLIS_BITVAL_CONJ              0x10
-#define BLIS_BITVAL_ZEROS             0x0 
-#define BLIS_BITVAL_UPPER             0x60 
-#define BLIS_BITVAL_LOWER             0xC0
-#define BLIS_BITVAL_DENSE             0xE0
-#define BLIS_BITVAL_NONUNIT_DIAG      0x0
-#define BLIS_BITVAL_UNIT_DIAG         0x100
-#define BLIS_BITVAL_INVERT_DIAG       0x200
-#define BLIS_BITVAL_NOT_PACKED        0x0
-#define BLIS_BITVAL_PACKED_UNSPEC     0x10000
-#define BLIS_BITVAL_PACKED_VECTOR     0x20000
-#define BLIS_BITVAL_PACKED_ROWS       0x30000
-#define BLIS_BITVAL_PACKED_COLUMNS    0x40000
-#define BLIS_BITVAL_PACKED_ROW_PANELS 0x50000
-#define BLIS_BITVAL_PACKED_COL_PANELS 0x60000
-#define BLIS_BITVAL_PACK_FWD_IF_UPPER 0x0
-#define BLIS_BITVAL_PACK_REV_IF_UPPER 0x80000
-#define BLIS_BITVAL_PACK_FWD_IF_LOWER 0x0
-#define BLIS_BITVAL_PACK_REV_IF_LOWER 0x100000
-#define BLIS_BITVAL_GENERAL           0x0
-#define BLIS_BITVAL_HERMITIAN         0x200000
-#define BLIS_BITVAL_SYMMETRIC         0x400000
-#define BLIS_BITVAL_TRIANGULAR        0x600000
-
-#define BLIS_TARGET_DT_SHIFT          10
-#define BLIS_EXECUTION_DT_SHIFT       13
-
-/*
-  info field description
-
-  16 15 14 13 12 11 10 F E D C B A 9 8 7 6 5 4 3 2 1 0
-
-  bit(s)   purpose
-  ------   -------
-   2 ~ 0   Stored numerical datatype
-           - 0: domain    (0 == real, 1 == complex)
-           - 1: precision (0 == single, 1 == double)
-           - 2: special   (100 = int; 101 = const)
-       3   Transposition required [during pack]?
-       4   Conjugation required [during pack]?
-   7 ~ 5   Part of matrix stored:
-           - 5: strictly upper triangular
-           - 6: diagonal
-           - 7: strictly lower triangular
-       8   Implicit unit diagonal?
-       9   Invert diagonal required [during pack]?
-   C ~ A   Target numerical datatype
-           - A: domain    (0 == real, 1 == complex)
-           - B: precision (0 == single, 1 == double)
-           - C: unused
-   F ~ D   Execution numerical datatype
-           - D: domain    (0 == real, 1 == complex)
-           - E: precision (0 == single, 1 == double)
-           - F: unused
-  12 ~ 10  Packed type/status
-           - 0 == not packed
-           - 1 == packed (unspecified; row or column)
-           - 2 == packed vector
-           - 3 == packed by rows
-           - 4 == packed by columns
-           - 5 == packed by row panels
-           - 6 == packed by column panels
-           - 7 == unused
-       13  Packed panel order if upper-stored
-           - 0 == forward order if upper
-           - 1 == reverse order if upper
-       14  Packed panel order if lower-stored
-           - 0 == forward order if lower
-           - 1 == reverse order if lower
-  16 ~ 15  Structure type
-           - (00 == general, 01 == Hermitian)
-           - (10 == symmetric, 11 == triangular)
-*/
-
-typedef struct obj_s
-{
-	// Basic fields
-	struct obj_s* root;
-
-	dim_t         offm;
-	dim_t         offn;
-	dim_t         m;
-	dim_t         n;
-	doff_t        diag_off;
-
-	info_t        info;
-	siz_t         elem_size;
-
-	void*         buffer;
-	inc_t         rs;
-	inc_t         cs;
-
-	// Bufferless scalar storage
-	atom_t        scalar;
-
-	// Pack-related fields
-	mem_t         pack_mem; // cached memory region for packing
-	mem_t         cast_mem; // cached memory region for casting
-	inc_t         ps;       // panel stride (distance to next panel)
-
-} obj_t;
+#define BLIS_TARGET_DT_SHIFT               10
+#define BLIS_EXECUTION_DT_SHIFT            13
+#define BLIS_PACK_BUFFER_SHIFT             21
 
 
-// Define these macros here since they must be updated if contents of
-// obj_t changes.
-#define bl2_obj_init_as_copy_of( a, b ) \
-{ \
-	(b).root      = (a).root; \
-\
-	(b).offm      = (a).offm; \
-	(b).offn      = (a).offn; \
-	(b).m         = (a).m; \
-	(b).n         = (a).n; \
-	(b).diag_off  = (a).diag_off; \
-\
-	(b).info      = (a).info; \
-	(b).elem_size = (a).elem_size; \
-\
-	(b).buffer    = (a).buffer; \
-	(b).rs        = (a).rs; \
-	(b).cs        = (a).cs; \
-\
-	/* We must NOT copy pack_mem field since this macro forms the basis of
-	   bl2_obj_alias_to(), which is used in packm. There, we want to copy
-	   over the basic fields of the obj_t but PRESERVE the pack_mem field
-	   of the destination object since it holds the cached mem_t buffer
-	   (and dimensions). */ \
-}
-
-#define bl2_obj_init_subpart_from( a, b ) \
-{ \
-	(b).root      = (a).root; \
-\
-	(b).offm      = (a).offm; \
-	(b).offn      = (a).offn; \
-\
-\
-	(b).diag_off  = (a).diag_off; \
-\
-	(b).info      = (a).info; \
-	(b).elem_size = (a).elem_size; \
-\
-	(b).buffer    = (a).buffer; \
-	(b).rs        = (a).rs; \
-	(b).cs        = (a).cs; \
-\
-	/* We want to copy the pack_mem field here because this macro is used
-	   when creating subpartitions, including those of packed objects. In
-	   those situations, we want the subpartition to inherit the pack_mem
-	   field of its parent. */ \
-	(b).pack_mem  = (a).pack_mem; \
-	(b).cast_mem  = (a).cast_mem; \
-	(b).ps        = (a).ps; \
-}
-
+// -- BLIS enumerated type definitions -----------------------------------------
 
 // Operational parameter types
 
@@ -385,6 +198,9 @@ typedef enum
 	BLIS_PACKED_COL_PANELS = BLIS_BITVAL_PACKED_COL_PANELS
 } pack_t;
 
+
+// Pack order type
+
 typedef enum
 {
 	BLIS_PACK_FWD_IF_UPPER = BLIS_BITVAL_PACK_FWD_IF_UPPER,
@@ -394,6 +210,232 @@ typedef enum
 	BLIS_PACK_REV_IF_LOWER = BLIS_BITVAL_PACK_REV_IF_LOWER
 } packord_t;
 
+
+// Pack buffer type
+
+typedef enum
+{
+	BLIS_BUFFER_FOR_A_BLOCK = BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
+	BLIS_BUFFER_FOR_B_PANEL = BLIS_BITVAL_BUFFER_FOR_B_PANEL,
+	BLIS_BUFFER_FOR_C_PANEL = BLIS_BITVAL_BUFFER_FOR_C_PANEL,
+	BLIS_BUFFER_FOR_GEN_USE = BLIS_BITVAL_BUFFER_FOR_GEN_USE,
+} packbuf_t;
+
+
+// -- BLIS basic types ---------------------------------------------------------
+
+// Boolean type
+
+typedef   signed long int bool_t;
+
+// Integer types
+
+typedef unsigned long int dim_t;  // dimension type
+typedef unsigned long int inc_t;  // increment/stride type
+typedef   signed long int doff_t; // diagonal offset type
+typedef unsigned long int siz_t;  // byte size type
+typedef unsigned long int info_t; // object information bit field
+
+// Complex types
+
+typedef struct scomplex_s
+{
+	float  real;
+	float  imag;
+} scomplex;
+
+typedef struct dcomplex_s
+{
+	double real;
+	double imag;
+} dcomplex;
+
+// Atom type
+// Note: atom types are used to hold "bufferless" scalar object values. Note
+// that it needs to be as large as the largest possible scalar value we might
+// want to hold. Thus, for now, it is a dcomplex.
+
+typedef dcomplex atom_t;
+
+// Memory pool type
+
+typedef struct
+{
+    void** block_ptrs;
+    int    top_index;
+    siz_t  num_blocks;
+    siz_t  block_size;
+} pool_t;
+
+// Memory object type
+
+typedef struct mem_s
+{
+	void*     buf;
+	packbuf_t buf_type;
+	pool_t*   pool;
+	siz_t     size;
+	dim_t     m;
+	dim_t     n;
+	siz_t     elem_size;
+} mem_t;
+
+// Blocksize object type
+
+typedef struct blksz_s
+{
+	dim_t v[BLIS_NUM_FP_TYPES];
+} blksz_t;
+
+// Fortran-77 types (used only by blas2blis compatibility layer)
+
+#ifdef BLIS_ENABLE_BLAS2BLIS
+
+typedef char        fchar;
+typedef signed int  fint;
+typedef float       f77_float;
+typedef double      f77_double;
+typedef scomplex    f77_scomplex;
+typedef dcomplex    f77_dcomplex;
+
+#endif
+
+
+// -- BLIS object type definitions ---------------------------------------------
+
+/*
+  info field description
+
+  bit(s)   purpose
+  -------  -------
+   2 ~ 0   Stored numerical datatype
+           - 0: domain    (0 == real, 1 == complex)
+           - 1: precision (0 == single, 1 == double)
+           - 2: special   (100 = int; 101 = const)
+       3   Transposition required [during pack]?
+       4   Conjugation required [during pack]?
+   7 ~ 5   Part of matrix stored:
+           - 5: strictly upper triangular
+           - 6: diagonal
+           - 7: strictly lower triangular
+       8   Implicit unit diagonal?
+       9   Invert diagonal required [during pack]?
+  12 ~ 10  Target numerical datatype
+           - 10: domain    (0 == real, 1 == complex)
+           - 11: precision (0 == single, 1 == double)
+           - 12: unused
+  15 ~ 13  Execution numerical datatype
+           - 13 domain    (0 == real, 1 == complex)
+           - 14: precision (0 == single, 1 == double)
+           - 15: unused
+  18 ~ 16  Packed type/status
+           - 0 == not packed
+           - 1 == packed (unspecified; row or column)
+           - 2 == packed vector
+           - 3 == packed by rows
+           - 4 == packed by columns
+           - 5 == packed by row panels
+           - 6 == packed by column panels
+           - 7 == unused
+       19  Packed panel order if upper-stored
+           - 0 == forward order if upper
+           - 1 == reverse order if upper
+       20  Packed panel order if lower-stored
+           - 0 == forward order if lower
+           - 1 == reverse order if lower
+  22 ~ 21  Packed buffer type
+           - 0 == block of A
+           - 1 == panel of B
+           - 2 == panel of C
+           - 3 == general use
+  24 ~ 23  Structure type
+           - (00 == general, 01 == Hermitian)
+           - (10 == symmetric, 11 == triangular)
+*/
+
+typedef struct obj_s
+{
+	// Basic fields
+	struct obj_s* root;
+
+	dim_t         offm;
+	dim_t         offn;
+	dim_t         m;
+	dim_t         n;
+	doff_t        diag_off;
+
+	info_t        info;
+	siz_t         elem_size;
+
+	void*         buffer;
+	inc_t         rs;
+	inc_t         cs;
+
+	// Bufferless scalar storage
+	atom_t        scalar;
+
+	// Pack-related fields
+	mem_t         pack_mem; // cached memory region for packing
+	//mem_t         cast_mem; // cached memory region for casting
+	inc_t         ps;       // panel stride (distance to next panel)
+
+} obj_t;
+
+
+// Define these macros here since they must be updated if contents of
+// obj_t changes.
+#define bl2_obj_init_as_copy_of( a, b ) \
+{ \
+	(b).root      = (a).root; \
+\
+	(b).offm      = (a).offm; \
+	(b).offn      = (a).offn; \
+	(b).m         = (a).m; \
+	(b).n         = (a).n; \
+	(b).diag_off  = (a).diag_off; \
+\
+	(b).info      = (a).info; \
+	(b).elem_size = (a).elem_size; \
+\
+	(b).buffer    = (a).buffer; \
+	(b).rs        = (a).rs; \
+	(b).cs        = (a).cs; \
+\
+	/* We must NOT copy pack_mem field since this macro forms the basis of
+	   bl2_obj_alias_to(), which is used in packm. There, we want to copy
+	   over the basic fields of the obj_t but PRESERVE the pack_mem field
+	   of the destination object since it holds the cached mem_t buffer
+	   (and dimensions). */ \
+}
+
+#define bl2_obj_init_subpart_from( a, b ) \
+{ \
+	(b).root      = (a).root; \
+\
+	(b).offm      = (a).offm; \
+	(b).offn      = (a).offn; \
+\
+\
+	(b).diag_off  = (a).diag_off; \
+\
+	(b).info      = (a).info; \
+	(b).elem_size = (a).elem_size; \
+\
+	(b).buffer    = (a).buffer; \
+	(b).rs        = (a).rs; \
+	(b).cs        = (a).cs; \
+\
+	/* We want to copy the pack_mem field here because this macro is used
+	   when creating subpartitions, including those of packed objects. In
+	   those situations, we want the subpartition to inherit the pack_mem
+	   field of its parent. */ \
+	(b).pack_mem  = (a).pack_mem; \
+	/*(b).cast_mem  = (a).cast_mem;*/ \
+	(b).ps        = (a).ps; \
+}
+
+
+// -- Other BLIS enumerated type definitions -----------------------------------
 
 // Subpartition type
 
@@ -516,7 +558,9 @@ typedef enum
 	BLIS_PACK_SCHEMA_NOT_SUPPORTED_FOR_UNPACK  = (-100),
 
 	// Memory allocator errors
-	BLIS_EXHAUSTED_STATIC_MEMORY_POOL          = (-110),
+	BLIS_INVALID_PACKBUF                       = (-110),
+	BLIS_REQUESTED_CONTIG_BLOCK_TOO_BIG        = (-111),
+	BLIS_EXHAUSTED_CONTIG_MEMORY_POOL          = (-112),
 
 	BLIS_ERROR_CODE_MAX                        = (-120)
 } err_t;

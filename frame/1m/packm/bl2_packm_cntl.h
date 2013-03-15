@@ -44,6 +44,7 @@ struct packm_s
 	bool_t         rev_iter_if_upper;
 	bool_t         rev_iter_if_lower;
 	pack_t         pack_schema;
+	packbuf_t      pack_buf_type;
 };
 typedef struct packm_s packm_t;
 
@@ -56,6 +57,7 @@ typedef struct packm_s packm_t;
 #define cntl_rev_iter_if_upper( cntl ) cntl->rev_iter_if_upper
 #define cntl_rev_iter_if_lower( cntl ) cntl->rev_iter_if_lower
 #define cntl_pack_schema( cntl )       cntl->pack_schema
+#define cntl_pack_buf_type( cntl )     cntl->pack_buf_type
 
 #define cntl_sub_packm( cntl )         cntl->sub_packm
 #define cntl_sub_packm_a( cntl )       cntl->sub_packm_a
@@ -76,7 +78,8 @@ packm_t* bl2_packm_cntl_obj_create( impl_t     impl_type,
                                     bool_t     does_invert_diag,
                                     bool_t     rev_iter_if_upper,
                                     bool_t     rev_iter_if_lower,
-                                    pack_t     pack_schema );
+                                    pack_t     pack_schema,
+                                    packbuf_t  pack_buf_type );
 void bl2_packm_cntl_obj_init( packm_t*   cntl,
                               impl_t     impl_type,
                               varnum_t   var_num,
@@ -87,5 +90,6 @@ void bl2_packm_cntl_obj_init( packm_t*   cntl,
                               bool_t     does_invert_diag,
                               bool_t     rev_iter_if_upper,
                               bool_t     rev_iter_if_lower,
-                              pack_t     pack_schema );
+                              pack_t     pack_schema,
+                              packbuf_t  pack_buf_type );
 
