@@ -174,7 +174,7 @@ void bl2_packm_init_pack( bool_t    densify,
 
 	mem_t*  mem_p;
 	dim_t   m_p_pad, n_p_pad;
-	siz_t   elem_size_p;
+	siz_t   size_p;
 	inc_t   rs_p, cs_p;
 	void*   buf;
 
@@ -220,24 +220,40 @@ void bl2_packm_init_pack( bool_t    densify,
 	mem_p = bl2_obj_pack_mem( *p );
 
 	// Compute the dimensions padded by the dimension multiples. These
-	// dimensions are those that the macro- and micro-kernels will use.
+	// dimensions represent the dimensions of the packed matrices, including
+	// zero-padding, and will be used by the macro- and micro-kernels.
 	// We compute them by starting with the effective dimensions of c (now
 	// in p) and aligning them to the dimension multiples (typically equal
 	// to register blocksizes). This does waste a little bit of space for
 	// level-2 operations, but that's okay with us.
-	m_p_pad     = bl2_align_dim_to_mult( bl2_obj_length( *p ), mult_m_dim );
-	n_p_pad     = bl2_align_dim_to_mult( bl2_obj_width( *p ),  mult_n_dim );
-	elem_size_p = bl2_obj_elem_size( *p );
+	m_p_pad = bl2_align_dim_to_mult( bl2_obj_length( *p ), mult_m_dim );
+	n_p_pad = bl2_align_dim_to_mult( bl2_obj_width( *p ),  mult_n_dim );
 
-	// Check the mem_t entry of p. If it is not yet allocated, then acquire
-	// a memory block of type pack_buf_type. If the mem_t object has already
-	// been allocated a buffer, then update the dimensions embedded in the
-	// object according to the latest values in m_p_pad and n_p_pad.
-	bl2_mem_alloc_update_m( m_p_pad,
-	                        n_p_pad,
-	                        elem_size_p,
-	                        pack_buf_type,
-	                        mem_p );
+	// Compute the size of the packed buffer.
+	size_p = m_p_pad * n_p_pad * bl2_obj_elem_size( *p );
+
+	if ( bl2_mem_is_unalloc( mem_p ) )
+	{
+		// If the mem_t object of p has not yet been allocated, then acquire
+		// a memory block of type pack_buf_type.
+		bl2_mem_acquire_m( size_p,
+		                   pack_buf_type,
+		                   mem_p );
+	}
+	else
+	{
+		// If the mem_t object is currently allocated and smaller than is
+		// needed, then something is very wrong, since the cache blocksizes
+		// that drive the level-3 blocked algorithms are the same ones that
+		// determine the sizes of the blocks within our memory allocator's
+		// memory pools. This branch should never be executed.
+		if ( bl2_mem_size( mem_p ) < size_p ) bl2_abort();
+	}
+
+	// Save the padded (packed) dimensions into the packed object. It is
+	// important to save these dimensions since they represent the actual
+	// dimensions of the zero-padded matrix.
+	bl2_obj_set_packed_dims( m_p_pad, n_p_pad, *p );
 
 	// Grab the buffer address from the mem_t object and copy it to the
 	// main object buffer field. (Sometimes this buffer address will be
@@ -250,24 +266,24 @@ void bl2_packm_init_pack( bool_t    densify,
 	// Set the row and column strides of p based on the pack schema.
 	if      ( pack_schema == BLIS_PACKED_ROWS )
 	{
-		// For regular row storage, the padded n dimension used when
-		// acquiring the pack memory should be used for our row stride,
-		// with the column stride set to one. By using the WIDTH of the mem_t
-		// region, we allow for zero-padding (if necessary/desired) along
-		// the right edge of the matrix.
-		rs_p = bl2_mem_width( mem_p );
+		// For regular row storage, the packed width of our mem_t region
+		// should be used for the row stride, with the column stride set
+		// to one. By using the WIDTH of the mem_t region, we allow for
+		// zero-padding (if necessary/desired) along the right edge of
+		// the matrix.
+		rs_p = bl2_obj_packed_width( *p );
 		cs_p = 1;
 
 		bl2_obj_set_incs( rs_p, cs_p, *p );
 	}
 	else if ( pack_schema == BLIS_PACKED_COLUMNS )
 	{
-		// For regular column storage, the padded m dimension used when
-		// acquiring the pack memory should be used for our column stride,
-		// with the row stride set to one. By using the LENGTH of the mem_t
-		// region, we allow for zero-padding (if necessary/desired) along
-		// the bottom edge of the matrix.
-		cs_p = bl2_mem_length( mem_p );
+		// For regular column storage, the packed length of our mem_t region
+		// should be used for the column stride, with the row stride set
+		// to one. By using the LENGTH of the mem_t region, we allow for
+		// zero-padding (if necessary/desired) along the bottom edge of
+		// the matrix.
+		cs_p = bl2_obj_packed_length( *p );
 		rs_p = 1;
 
 		bl2_obj_set_incs( rs_p, cs_p, *p );
@@ -292,11 +308,11 @@ void bl2_packm_init_pack( bool_t    densify,
 
 		// The "panel stride" of a panel packed object is interpreted as the
 		// distance between the (0,0) element of panel k and the (0,0)
-		// element of panel k+1. We use the WIDTH of the mem_t region to
-		// determine the panel "width"; this will allow for zero-padding
+		// element of panel k+1. We use the WIDTH of the packed mem_t region
+		// to determine the panel "width"; this will allow for zero-padding
 		// (if necessary/desired) along the far end of each panel (ie: the
 		// right edge of the matrix).
-		ps_p = cs_p * bl2_mem_width( mem_p );
+		ps_p = cs_p * bl2_obj_packed_width( *p );
 
 		// Store the strides in p.
 		bl2_obj_set_incs( rs_p, cs_p, *p );
@@ -322,11 +338,11 @@ void bl2_packm_init_pack( bool_t    densify,
 
 		// The "panel stride" of a panel packed object is interpreted as the
 		// distance between the (0,0) element of panel k and the (0,0)
-		// element of panel k+1. We use the LENGTH of the mem_t region to
-		// determine the panel "length"; this will allow for zero-padding
+		// element of panel k+1. We use the LENGTH of the packed mem_t region
+		// to determine the panel "length"; this will allow for zero-padding
 		// (if necessary/desired) along the far end of each panel (ie: the
 		// bottom edge of the matrix).
-		ps_p = bl2_mem_length( mem_p ) * rs_p;
+		ps_p = bl2_obj_packed_length( *p ) * rs_p;
 
 		// Store the strides in p.
 		bl2_obj_set_incs( rs_p, cs_p, *p );

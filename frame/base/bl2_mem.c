@@ -101,13 +101,10 @@ static char   pool_mn_mem[ BLIS_MN_POOL_SIZE ];
 
 
 
-void bl2_mem_acquire_m( dim_t     m_req,
-                        dim_t     n_req,
-                        siz_t     elem_size,
+void bl2_mem_acquire_m( siz_t     req_size,
                         packbuf_t buf_type,
                         mem_t*    mem )
 {
-	siz_t   req_size;
 	siz_t   block_size;
 	dim_t   pool_index;
 	pool_t* pool;
@@ -115,9 +112,6 @@ void bl2_mem_acquire_m( dim_t     m_req,
 	void*   block;
 	int     i;
 
-
-	// Compute the size of the requested contiguous memory region.
-	req_size = m_req * n_req * elem_size;
 
 	if ( buf_type == BLIS_BUFFER_FOR_GEN_USE )
 	{
@@ -128,17 +122,13 @@ void bl2_mem_acquire_m( dim_t     m_req,
 
 		// Initialize the mem_t object with:
 		// - the address of the memory block,
-		// - the buffer type (a packbuf_t value),
-		// - the size of the requested region, and
-		// - the requested dimensions, which are presumably already aligned to
-		//   dimension multiples (typically equal to register blocksizes).
+		// - the buffer type (a packbuf_t value), and
+		// - the size of the requested region.
 		// NOTE: We do not initialize the pool field since this block did not
 		// come from a contiguous memory pool.
 		bl2_mem_set_buffer( block, mem );
 		bl2_mem_set_buf_type( buf_type, mem );
 		bl2_mem_set_size( req_size, mem );
-		bl2_mem_set_dims( m_req, n_req, mem );
-		bl2_mem_set_elem_size( elem_size, mem );
 	}
 	else
 	{
@@ -197,17 +187,13 @@ void bl2_mem_acquire_m( dim_t     m_req,
 		// Initialize the mem_t object with:
 		// - the address of the memory block,
 		// - the buffer type (a packbuf_t value),
-		// - the address of the memory pool to which it belongs,
+		// - the address of the memory pool to which it belongs, and
 		// - the size of the contiguous memory block (NOT the size of the
-		//   requested region), and
-		// - the requested dimensions, which are presumably already aligned to
-		//   dimension multiples (typically equal to register blocksizes).
+		//   requested region).
 		bl2_mem_set_buffer( block, mem );
 		bl2_mem_set_buf_type( buf_type, mem );
 		bl2_mem_set_pool( pool, mem );
 		bl2_mem_set_size( block_size, mem );
-		bl2_mem_set_dims( m_req, n_req, mem );
-		bl2_mem_set_elem_size( elem_size, mem );
 	}
 }
 
@@ -264,26 +250,20 @@ void bl2_mem_release( mem_t* mem )
 
 	// Clear the mem_t object so that it appears unallocated. We clear:
 	// - the buffer field,
-	// - the pool field,
-	// - the size field, and
-	// - the dimension fields.
+	// - the pool field, and
+	// - the size field.
 	// NOTE: We do not clear the buf_type field since there is no
 	// "uninitialized" value for packbuf_t.
 	bl2_mem_set_buffer( NULL, mem );
 	bl2_mem_set_pool( NULL, mem );
 	bl2_mem_set_size( 0, mem );
-	bl2_mem_set_dims( 0, 0, mem );
-	bl2_mem_set_elem_size( 0, mem );
 }
 
 
-void bl2_mem_acquire_v( dim_t     m_req,
-                        siz_t     elem_size,
-                        mem_t*    mem )
+void bl2_mem_acquire_v( siz_t  req_size,
+                        mem_t* mem )
 {
-	bl2_mem_acquire_m( m_req,
-	                   1,
-	                   elem_size,
+	bl2_mem_acquire_m( req_size,
 	                   BLIS_BUFFER_FOR_GEN_USE,
 	                   mem );
 }

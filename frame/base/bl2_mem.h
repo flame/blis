@@ -32,14 +32,11 @@
 
 */
 
-void bl2_mem_acquire_m( dim_t     m_req,
-                        dim_t     n_req,
-                        siz_t     elem_size,
+void bl2_mem_acquire_m( siz_t     req_size,
                         packbuf_t buf_type,
                         mem_t*    mem );
 
-void bl2_mem_acquire_v( dim_t     m_req,
-                        siz_t     elem_size,
+void bl2_mem_acquire_v( siz_t     req_size,
                         mem_t*    mem );
 
 void bl2_mem_release( mem_t* mem );

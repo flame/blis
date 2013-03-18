@@ -74,22 +74,23 @@ void bl2_packm_acquire_mpart_t2b( subpart_t requested_part,
 	// Modify offsets and dimensions of requested partition.
 	bl2_obj_set_dims( b, n, *sub_obj );
 
-	// Tweak the width of the pack_mem region of the subpartition to trick
-	// the underlying implementation into only zero-padding for the narrow
-	// submatrix of interest. Usually, the value we want is b (for non-edge
-	// cases), but at the edges, we want the remainder of the mem_t region
-	// in the m dimension. Edge cases are defined as occurring when i + b is
-	// exactly equal to the length of the parent object. In these cases, we
-	// arrive at the new pack_mem region width by simply subtracting off i.
+	// Tweak the packed length of the subpartition to trick the underlying
+	// implementation into only zero-padding for the narrow submatrix of
+	// interest. Usually, the value we want is b (for non-edge cases), but
+	// at the edges, we want the remainder of the mem_t region in the m
+	// dimension. Edge cases are defined as occurring when i + b is exactly
+	// equal to the inherited sub-object's length (which happens since the
+	// determine_blocksize function would have returned a smaller value of
+	// b for the edge iteration). In these cases, we arrive at the new
+	// packed length by simply subtracting off i.
 	{
-		mem_t* pack_mem  = bl2_obj_pack_mem( *sub_obj );
-		dim_t  m_max     = bl2_mem_length( pack_mem );
-		dim_t  m_mem;
+		dim_t  m_pack_max = bl2_obj_packed_length( *sub_obj );
+		dim_t  m_pack_cur;
 
-		if ( i + b == m ) m_mem = m_max - i;
-		else              m_mem = b;
+		if ( i + b == m ) m_pack_cur = m_pack_max - i;
+		else              m_pack_cur = b;
 
-		bl2_mem_set_length( m_mem, pack_mem );
+		bl2_obj_set_packed_length( m_pack_cur, *sub_obj );
 	}
 
 	// Translate the desired offsets to a panel offset and adjust the
@@ -97,13 +98,16 @@ void bl2_packm_acquire_mpart_t2b( subpart_t requested_part,
 	{
 		char* buf_p        = bl2_obj_buffer( *sub_obj );
 		siz_t elem_size    = bl2_obj_elem_size( *sub_obj );
-		inc_t cs_p         = bl2_obj_col_stride( *sub_obj );
-		dim_t off_to_elem  = i * cs_p;
+		dim_t off_to_panel = bl2_packm_offset_to_panel_for( i, sub_obj );
 
-		buf_p = buf_p + elem_size * off_to_elem;
+		buf_p = buf_p + elem_size * off_to_panel;
 
 		bl2_obj_set_buffer( ( void* )buf_p, *sub_obj );
 	}
+
+	// Don't have any code that utilizes this function yet. This abort is
+	// here to force someone to make sure the above works!
+	bl2_abort();
 }
 
 
@@ -148,40 +152,23 @@ void bl2_packm_acquire_mpart_l2r( subpart_t requested_part,
 	// Modify offsets and dimensions of requested partition.
 	bl2_obj_set_dims( m, b, *sub_obj );
 
-/* DON'T NEED THIS NOW THAT COPYING IS DONE IN _INIT_SUBPART_FROM().
-	// Copy the pack_mem and cast_mem entries.
+	// Tweak the packed width of the subpartition to trick the underlying
+	// implementation into only zero-padding for the narrow submatrix of
+	// interest. Usually, the value we want is b (for non-edge cases), but
+	// at the edges, we want the remainder of the mem_t region in the n
+	// dimension. Edge cases are defined as occurring when j + b is exactly
+	// equal to the inherited sub-object's width (which happens since the
+	// determine_blocksize function would have returned a smaller value of
+	// b for the edge iteration). In these cases, we arrive at the new
+	// packed width by simply subtracting off j.
 	{
-		mem_t* pack_mem = bl2_obj_pack_mem( *obj );
-		mem_t* cast_mem = bl2_obj_cast_mem( *obj );
+		dim_t  n_pack_max = bl2_obj_packed_width( *sub_obj );
+		dim_t  n_pack_cur;
 
-		bl2_obj_set_pack_mem( pack_mem, *sub_obj );
-		bl2_obj_set_cast_mem( cast_mem, *sub_obj );
-	}
+		if ( j + b == n ) n_pack_cur = n_pack_max - j;
+		else              n_pack_cur = b;
 
-	// Copy the panel stride from the original object.
-	{
-		inc_t ps = bl2_obj_panel_stride( *obj );
-
-		bl2_obj_set_panel_stride( ps, *sub_obj );
-	}
-*/
-
-	// Tweak the width of the pack_mem region of the subpartition to trick
-	// the underlying implementation into only zero-padding for the narrow
-	// submatrix of interest. Usually, the value we want is b (for non-edge
-	// cases), but at the edges, we want the remainder of the mem_t region
-	// in the n dimension. Edge cases are defined as occurring when j + b is
-	// exactly equal to the width of the parent object. In these cases, we
-	// arrive at the new pack_mem region width by simply subtracting off j.
-	{
-		mem_t* pack_mem  = bl2_obj_pack_mem( *sub_obj );
-		dim_t  n_max     = bl2_mem_width( pack_mem );
-		dim_t  n_mem;
-
-		if ( j + b == n ) n_mem = n_max - j;
-		else              n_mem = b;
-
-		bl2_mem_set_width( n_mem, pack_mem );
+		bl2_obj_set_packed_width( n_pack_cur, *sub_obj );
 	}
 
 	// Translate the desired offsets to a panel offset and adjust the

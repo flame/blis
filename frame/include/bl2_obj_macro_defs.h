@@ -570,21 +570,6 @@ bl2_obj_width_stored( obj )
 }
 
 
-// Panel stride query
-
-#define bl2_obj_panel_stride( obj ) \
-\
-	((obj).ps)
-
-
-// Panel stride modification
-
-#define bl2_obj_set_panel_stride( panel_stride, obj ) \
-{ \
-	(obj).ps = panel_stride; \
-}
-
-
 // Offset query
 
 #define bl2_obj_row_offset( obj ) \
@@ -709,13 +694,13 @@ bl2_obj_width_stored( obj )
 }
 
 
-// Pack mem entry query
+// Pack mem_t entry query
 
 #define bl2_obj_pack_mem( obj ) \
 \
 	( &((obj).pack_mem) )
 
-// Pack mem entry modification
+// Pack mem_t entry modification
 
 #define bl2_obj_set_pack_mem( mem_p, obj ) \
 { \
@@ -723,6 +708,50 @@ bl2_obj_width_stored( obj )
 }
 
 
+// Packed dimensions query
+
+#define bl2_obj_packed_length( obj ) \
+\
+	( (obj).m_packed )
+
+#define bl2_obj_packed_width( obj ) \
+\
+	( (obj).n_packed )
+
+// Packed dimensions modification
+
+#define bl2_obj_set_packed_length( m0, obj ) \
+{ \
+    (obj).m_packed = m0; \
+}
+
+#define bl2_obj_set_packed_width( n0, obj ) \
+{ \
+    (obj).n_packed = n0; \
+}
+
+#define bl2_obj_set_packed_dims( m0, n0, obj ) \
+{ \
+	bl2_obj_set_packed_length( m0, obj ); \
+	bl2_obj_set_packed_width( n0, obj ); \
+}
+
+
+// Packed panel stride query
+
+#define bl2_obj_panel_stride( obj ) \
+\
+	((obj).ps)
+
+// Packed panel stride modification
+
+#define bl2_obj_set_panel_stride( panel_stride, obj ) \
+{ \
+	(obj).ps = panel_stride; \
+}
+
+
+/*
 // Cast mem entry query
 
 #define bl2_obj_cast_mem( obj ) \
@@ -734,48 +763,6 @@ bl2_obj_width_stored( obj )
 #define bl2_obj_set_cast_mem( mem_p, obj ) \
 { \
 	(obj).cast_mem = *mem_p; \
-}
-
-/*
-// Mem entry query
-
-#define bl2_mem_buffer( mem_p ) \
-\
-	( (mem_p)->buf )
-
-#define bl2_mem_elem_size( mem_p ) \
-\
-	( (mem_p)->elem_size )
-
-#define bl2_mem_length( mem_p ) \
-\
-	( (mem_p)->m )
-
-#define bl2_mem_width( mem_p ) \
-\
-	( (mem_p)->n )
-
-
-// Mem entry modification
-
-#define bl2_mem_set_buffer( buf0, mem_p ) \
-{ \
-    mem_p->buf = buf0; \
-}
-
-#define bl2_mem_set_elem_size( elem_size0, mem_p ) \
-{ \
-    mem_p->elem_size = elem_size0; \
-}
-
-#define bl2_mem_set_length( m0, mem_p ) \
-{ \
-    mem_p->m = m0; \
-}
-
-#define bl2_mem_set_width( n0, mem_p ) \
-{ \
-    mem_p->n = n0; \
 }
 */
  

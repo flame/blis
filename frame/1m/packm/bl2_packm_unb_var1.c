@@ -60,7 +60,6 @@ void bl2_packm_unb_var1( obj_t*   beta,
                          obj_t*   p )
 {
 	num_t     dt_cp     = bl2_obj_datatype( *c );
-	mem_t*    mem_p     = bl2_obj_pack_mem( *p );
 
 	struc_t   strucc    = bl2_obj_struc( *c );
 	doff_t    diagoffc  = bl2_obj_diag_offset( *c );
@@ -71,8 +70,8 @@ void bl2_packm_unb_var1( obj_t*   beta,
 
 	dim_t     m_p       = bl2_obj_length( *p );
 	dim_t     n_p       = bl2_obj_width( *p );
-	dim_t     m_max_p   = bl2_mem_length( mem_p );
-	dim_t     n_max_p   = bl2_mem_width( mem_p );
+	dim_t     m_max_p   = bl2_obj_packed_length( *p );
+	dim_t     n_max_p   = bl2_obj_packed_width( *p );
 
 	void*     buf_c     = bl2_obj_buffer_at_off( *c );
 	inc_t     rs_c      = bl2_obj_row_stride( *c );

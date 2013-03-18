@@ -478,16 +478,12 @@ void bl2_obj_print( char* label, obj_t* obj )
 	fprintf( file, " elem size       %lu\n", bl2_obj_elem_size( *obj ) );
 	fprintf( file, " rs, cs          %lu, %lu\n", bl2_obj_row_stride( *obj ),
 	                                              bl2_obj_col_stride( *obj ) );
-	//fprintf( file, " cast_mem          \n" );
-	//fprintf( file, " - buf           %p\n",  bl2_mem_buffer( cast_mem ) );
-	//fprintf( file, " - m             %lu\n", bl2_mem_length( cast_mem ) );
-	//fprintf( file, " - n             %lu\n", bl2_mem_width( cast_mem ) );
 	fprintf( file, " pack_mem          \n" );
 	fprintf( file, " - buf           %p\n",  bl2_mem_buffer( pack_mem ) );
 	fprintf( file, " - buf_type      %u\n",  bl2_mem_buf_type( pack_mem ) );
 	fprintf( file, " - size          %lu\n", bl2_mem_size( pack_mem ) );
-	fprintf( file, " - m used        %lu\n", bl2_mem_length( pack_mem ) );
-	fprintf( file, " - n used        %lu\n", bl2_mem_width( pack_mem ) );
+	fprintf( file, " m_packed        %lu\n", bl2_obj_packed_length( *obj ) );
+	fprintf( file, " n_packed        %lu\n", bl2_obj_packed_width( *obj ) );
 	fprintf( file, " ps              %lu\n", bl2_obj_panel_stride( *obj ) );
 	fprintf( file, "\n" );
 

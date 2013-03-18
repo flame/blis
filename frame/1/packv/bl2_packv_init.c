@@ -126,7 +126,7 @@ void bl2_packv_init_pack( pack_t   pack_schema,
 
 	mem_t* mem_p;
 	dim_t  m_p_pad;
-	siz_t  elem_size_p;
+	siz_t  size_p;
 	inc_t  rs_p, cs_p;
 	void*  buf;
 
@@ -149,16 +149,33 @@ void bl2_packv_init_pack( pack_t   pack_schema,
 	mem_p = bl2_obj_pack_mem( *p );
 
 	// Compute the dimensions padded by the dimension multiples.
-	m_p_pad     = bl2_align_dim_to_mult( bl2_obj_vector_dim( *p ), mult_m_dim );
-	elem_size_p = bl2_obj_elem_size( *p );
+	m_p_pad = bl2_align_dim_to_mult( bl2_obj_vector_dim( *p ), mult_m_dim );
 
-	// Check the mem_t entry of p. If it is not yet allocated, then acquire
-	// a memory block suitable for a vector. If the mem_t object has already
-	// been allocated a buffer, then update the dimensions embedded in the
-	// object according to the latest value in m_p_pad.
-	bl2_mem_alloc_update_v( m_p_pad,
-	                        elem_size_p,
-	                        mem_p );
+	// Compute the size of the packed buffer.
+	size_p = m_p_pad * 1 * bl2_obj_elem_size( *p );
+
+	if ( bl2_mem_is_unalloc( mem_p ) )
+	{
+		// If the mem_t object of p has not yet been allocated, then acquire
+		// a memory block suitable for a vector.
+		bl2_mem_acquire_v( size_p,
+		                   mem_p );
+	}
+	else
+	{
+ 		// If the mem_t object has already been allocated, then release and
+		// re-acquire the memory so there is sufficient space.
+		if ( bl2_mem_size( mem_p ) < size_p )
+		{
+			bl2_mem_release( mem_p ); 
+
+			bl2_mem_acquire_v( size_p,
+			                   mem_p );
+		}
+	}
+
+	// Save the padded (packed) dimensions into the packed object.
+	bl2_obj_set_packed_dims( m_p_pad, 1, *p );
 
 	// Grab the buffer address from the mem_t object and copy it to the
 	// main object buffer field. (Sometimes this buffer address will be
@@ -176,7 +193,7 @@ void bl2_packv_init_pack( pack_t   pack_schema,
 		// how much space beyond the vector would need to be zero-padded, if
 		// zero-padding was needed.
 		rs_p = 1;
-		cs_p = bl2_mem_length( mem_p );
+		cs_p = bl2_obj_packed_length( *p );
 
 		bl2_obj_set_incs( rs_p, cs_p, *p );
 	}

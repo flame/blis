@@ -275,9 +275,6 @@ typedef struct mem_s
 	packbuf_t buf_type;
 	pool_t*   pool;
 	siz_t     size;
-	dim_t     m;
-	dim_t     n;
-	siz_t     elem_size;
 } mem_t;
 
 // Blocksize object type
@@ -376,8 +373,11 @@ typedef struct obj_s
 
 	// Pack-related fields
 	mem_t         pack_mem; // cached memory region for packing
-	//mem_t         cast_mem; // cached memory region for casting
+	dim_t         m_packed;
+	dim_t         n_packed;
 	inc_t         ps;       // panel stride (distance to next panel)
+
+	//mem_t         cast_mem; // cached memory region for casting
 
 } obj_t;
 
@@ -402,10 +402,10 @@ typedef struct obj_s
 	(b).cs        = (a).cs; \
 \
 	/* We must NOT copy pack_mem field since this macro forms the basis of
-	   bl2_obj_alias_to(), which is used in packm. There, we want to copy
-	   over the basic fields of the obj_t but PRESERVE the pack_mem field
-	   of the destination object since it holds the cached mem_t buffer
-	   (and dimensions). */ \
+	   bl2_obj_alias_to(), which is used in packm_init(). There, we want to
+	   copy the basic fields of the obj_t but PRESERVE the pack_mem field
+	   (and the corresponding dimensions and stride) of the destination
+	   object since it holds the cached mem_t object and buffer. */ \
 }
 
 #define bl2_obj_init_subpart_from( a, b ) \
@@ -428,10 +428,13 @@ typedef struct obj_s
 	/* We want to copy the pack_mem field here because this macro is used
 	   when creating subpartitions, including those of packed objects. In
 	   those situations, we want the subpartition to inherit the pack_mem
-	   field of its parent. */ \
+	   field, and the corresponding packed dimensions, of its parent. */ \
 	(b).pack_mem  = (a).pack_mem; \
-	/*(b).cast_mem  = (a).cast_mem;*/ \
+	(b).m_packed  = (a).m_packed; \
+	(b).n_packed  = (a).n_packed; \
 	(b).ps        = (a).ps; \
+\
+	/*(b).cast_mem  = (a).cast_mem;*/ \
 }
 
 
