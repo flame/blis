@@ -1,4 +1,342 @@
-commit 768fcebaa8be0eb936a6e7a02cd8a19438c79d99 (HEAD, tag: 0.0.2, origin/master, master)
+commit e7d41229d3b1674e74f47d7f29fae004a745201a (HEAD, tag: 0.0.4, origin/master, master)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Mar 15 17:12:36 2013 -0500
+
+    Re-implemented contiguous memory allocator.
+    
+    Details:
+    - Completely re-wrote the contiguous memory allocator (bl2_mem.c). The new
+      allocator instantiates and initializes three separate memory pool objects,
+      each one associated with a separate array of contiguous memory blocks, each
+      block of fixed and uniform size. (The three pools are for allocating mc-by-kc
+      blocks of A, kc-by-nc panels of B, and mc-by-nc panels of C.) The pool
+      objects use a stack structure internally to track which blocks in the region
+      have been "checked out" to a thread and which are still available. Critical
+      regions are now clearly marked and adaptable to parallel environments (e.g.
+      OpenMP). Memory pools are set up when bl2_init() is called.
+    - Added a new field to the packm control tree node, which indicates what kind
+      of packed buffer is being allocated. The enumerated type for this argument
+      is defined as packbuf_t in bl2_type_defs.h.
+    - Updated level-3 _cntl.c files to pass in the appropriate value for a new
+      packbuf_t argument to bl2_packm_cntl_obj_create().
+    - Moved some macros called by packm_init_pack() from bl2_obj_macro_defs.h to
+      bl2_mem_macro_defs.h.
+    - Added BLIS_MAX_NUM_THREADS to bl2_config.h, which we use as the default
+      number of blocks of A reserved for the memory allocator.
+    - Deprecated bl2_align_dim(). Replaced usage with that of
+      bl2_align_dim_to_mult(). Turns out that typically we don't need to align
+      a dimension to the system alignment, since that value has to do with
+      starting addresses, whereas the values we are dealing with are unitless
+      dimensions.
+
+commit 1e76cae00cb0a04544aaae1ade878686b238d283
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Mar 15 12:21:42 2013 -0500
+
+    Perform her2k var1 loops in sequence.
+    
+    Details:
+    - Changed variant 1 of her2k so that the two rank-k products are computed
+      and accumulated in sequence rather than fused into one loop. This is
+      necessary if BLIS is to be configured to provide only enough contiguous
+      memory for one panel of B.
+
+commit c95c270eba91ae4efc26603beddfd0292caa919b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Mar 7 14:42:15 2013 -0600
+
+    Enhanced tracking of dimensions for mem_t objects.
+    
+    Details:
+    - Added new fields to mem_t struct definition to track the allocated (as
+      opposed to the currently used) dimensions of the memory region. This
+      allows packm_init() to be more robust in situations where memory is
+      already allocated but is more than needed for the current packing job.
+    - Updated logic in bl2_obj_set_buffer_with_cached_packm_mem() macro, used
+      in packm_init(), to update the "currently used" dimensions of the mem_t
+      object if the requested dimensions are smaller than the allocated
+      dimensions.
+
+commit e99281a0f41d482fddeffa239bfc8e13e6d13d4b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Mar 7 14:00:10 2013 -0600
+
+    Fixed test suite flop formulas for ops with side.
+    
+    Details:
+    - Fixed incorrect flop counts in test suite modules for hemm, symm, trmm,
+      trmm3, and trsm.
+    - Comment updates in herk macro-kernels.
+
+commit ef8cbfc44dd620fdcbdb51cdb173217194bebe31
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Mar 2 12:47:06 2013 -0600
+
+    Added "version" to .gitignore.
+    
+    Details:
+    - Added "version" to .gitignore file so that the file does not show up when
+      running 'git status', or accidentally get pulled into the index when
+      running 'git add' or 'git add --all'.
+
+commit e9e0747c2f6c178f53ac46ab794acbb7b8c4fea8
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Mar 2 12:43:54 2013 -0600
+
+    Removed version file from version control.
+    
+    Details:
+    - Removed version file from version control to prevent git errors that occur
+      when trying to pull new commits.
+
+commit bb612f864e9c17dd9805e9446840f02259619469
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Mar 1 12:55:42 2013 -0600
+
+    Updated behavior of bl2_obj_induce_trans() macro.
+    
+    Details:
+    - Changed bl2_obj_induce_trans() so that the transposition bit is no longer
+      updated as part of the macro. All current uses of the macro have been
+      coupled with instances of bl2_obj_set_trans() to clear the bit.
+    - Added Jed to CREDITS file.
+
+commit f24e29b789e7314764a818ceb3063126936c986f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Feb 22 18:15:41 2013 -0600
+
+    Replaced banded/packed BLAS2 stubs with f2c code.
+    
+    Details:
+    - Retired the blas2blis wrappers that simply called abort with a "not yet
+      implemented" message. This includes all of the level-2 banded and packed
+      routines.
+    - Replaced the aforementioned with the corresponding netlib implementations
+      having been run through f2c (with some customization).
+    - Added directories named 'attic' to build/gen-make-frags/ignore_list.
+
+commit 1454c1a14207766dfed372b8e38b47fa384f5198
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Feb 22 12:38:45 2013 -0600
+
+    Moved Fortran name-mangling macro to bl2_config.h.
+    
+    Details:
+    - Moved the Fortran-77 name-mangling macros from bl2_blas_macro_defs.h to the
+      configuration directory (bl2_config.h, specifically) given that it can be
+      expected to be tweaked by some developers.
+
+commit ede75693e5a36c6006087c4a7df834175b604504 (tag: 0.0.3)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Feb 22 12:11:24 2013 -0600
+
+    Implemented blas2blis compatibility layer.
+    
+    Details:
+    - Added the blas2blis compatibility layer, located in frame/compat. This
+      includes virtually all of the BLAS, including banded and packed level-2
+      operations.
+    
+    - Defined bl2_init_safe(), bl2_finalize_safe(). The former allows a conditional
+      initialization, which stores the "exit status" in an err_t, which is then
+      read by the latter function to determine whether finalization should actually
+      take place.
+    - Added calls to bl2_init_safe(), bl2_finalize_safe() to all level-2 and
+      level-3 BLAS-like wrappers.
+    - Added configuration option to instruct BLIS to remain initialized whenever
+      it automatically initializes itself (via bl2_init_safe()), until/unless the
+      application code explicitly calls bl2_finalize().
+    
+    - Added INSERT_GENTFUNC* and INSERT_GENTPROT* macros to facilitate type
+      templatization of blas2blis wrappers.
+    - Defined level-0 scalar macro bl2_??swaps().
+    - Defined level-1v operation bl2_swapv().
+    - Defined some "Fortran" types to bl2_type_defs.h for use with BLAS
+      wrappers.
+
+commit 995edf43e21c1868732dbdd7fee14b08730218bd
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Feb 21 14:30:50 2013 -0600
+
+    Updated version file. (Forgot to in prev commit).
+
+commit e823b08aaf7b65ecc6ddc30570709ea8a4b52aa7
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Feb 21 12:00:17 2013 -0600
+
+    Fixed some scalar types in BLAS-like Herm APIs.
+    
+    Details:
+    - Some of the scalars of Hermitian operations, such as alpha in her,
+      alpha and beta in herk, and beta in her2k, need to be real. These
+      arguments were typed incorrectly as the complex types. This has been
+      fixed. Note the issue was only present in the BLAS-like APIs for
+      these operations (not the native object-based interfaces).
+
+commit 5ece050a669e74ba4a711d1d4669239d22d45642
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Feb 20 15:50:54 2013 -0600
+
+    Updated version file. (Forgot to in prev commit).
+
+commit f243034b8b430d4684680ea8eddfd246e73fefc0
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Feb 20 14:11:36 2013 -0600
+
+    Changed API of packm_init_pack() to use blksz_t.
+    
+    Details:
+    - Changed the interface of packm_init_pack() so that mult_m and mult_n
+      are passed in as type blksz_t* instead of dim_t.
+    - Make similar change for packv_init_pack().
+
+commit da0c22f24107be9f33e0ea2dae52e5534b1fd0e5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Feb 15 09:59:48 2013 -0600
+
+    Minor changes to lower levels of scalm and setm.
+    
+    Details:
+    - Removed diagx parameter from lower-level interfaces of scalm.
+    - Modified scalm_basic_check() to expect an object with a nonunit diagonal.
+    - Changed setm_unb_var1() so that having an implicit unit diagonal results
+      in only the strictly lower or upper triangle of the matrix being modified.
+
+commit 2c836adadcd2a7d7f217033ac4d7fcad03d5bd55
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Feb 14 10:42:56 2013 -0600
+
+    Updated beta == zero semantics of mulsc.
+    
+    Details:
+    - Updated beta == zero semantics of mulsc. Hopefully this is the last
+      operation that needed updating.
+    - Added Devin to CREDITS file.
+
+commit 722b66c7dcaaaa1b109e7c8b1d53fd71a9af8240
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Feb 14 10:18:00 2013 -0600
+
+    Removed some calls to setv() in test modules.
+    
+    Details:
+    - Removed calls to setv() in test modules whose sole purpose was to
+      initialize vectors to zero to ensure that nan's and inf's would not
+      taint the computation. Now that beta == zero semantics have been
+      updated to clear the output operand (when beta is zero), rather than
+      multiply against it, these setv() calls are no longer needed.
+
+commit e6ac623a902f776c42f85eadbf76996d9770a0db
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Feb 13 18:44:59 2013 -0600
+
+    Properly implemented beta == 0 semantics.
+    
+    Details:
+    - Changed name of set0 and set0_mxn macros to set0s and set0s_mxn,
+      respectively.
+    - Added code to the following operations that sets the output operand to
+      zero if the corresponding scalar is zero (rather than performing the
+      floating-point multiply, or in the case of setv, copying the value).
+      This will prevent nan's and inf's from creeping into results from
+      uninitialized memory.
+      - axpy
+      - dotxv
+      - scalv
+      - scal2v
+      - setv
+      - gemv
+      - ger
+      - hemv
+      - her
+      - her2
+      - gemm reference ukernels
+
+commit aedccbc85d491e41711a0c6eb0d246d8700a199a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Feb 13 18:29:53 2013 -0600
+
+    Fixed stale interface to packm_unb_var1().
+    
+    Details:
+    - Removed the control tree from the interface to packm_unb_var1(), which
+      I meant to do when it was un-deprecated.
+
+commit c23135669f7a8a545e2e11ef559bf284be8bc65c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Feb 13 13:21:00 2013 -0600
+
+    Un-deprecated packm_unb_var1.c (needed by l2 ops).
+    
+    Details:
+    - Added bl2_packm_unb_var1() back into the mix once I realized that level-2
+      operations still need this routine for packing matrices. Now, whether
+      level-2 operations should be packing matrices to begin with is another
+      matter. But this fixes the segmentation fault one would have gotten when
+      running bl2_gemv() on a general stride matrix.
+
+commit cf49e35f9819f9d93ebdca4703ade5abab28f6f6
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Feb 12 18:39:35 2013 -0600
+
+    Removed cntl tree usage from packm implementation.
+    
+    Details:
+    - Added new fields to obj_t info field:
+      - invert_diag
+      - pack_order_if_upper
+      - pack_order_if_lower
+      These fields allow packm_init() to embed information that begins
+      in the control tree into the object so that the packm implementation
+      does not need to use control trees at all. This is being done to aid
+      Bryan's DxT code generation.
+    - Added macros that operate on above fields.
+    - Changed packm_init(), packm_blk_var2(), and packm_blk_var3() according
+      to above changes.
+    - Made similar (but much simpler) changes to packv.
+    - Deprecated packm_blk_var1(), packm_unb_var1(), and packm_densify().
+      These were part of prototype implementations and are no longer needed.
+
+commit eb139ae256651af7820b93ef982626180195b87f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Feb 12 12:39:30 2013 -0600
+
+    Replaced bl2_abs() with _fabs() where appropriate.
+
+commit 474bac30c99928f9e87315972bcb45c632c0b7ec
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Feb 12 12:23:48 2013 -0600
+
+    Removed level-0 macros projrs, grabis.
+    
+    Details:
+    - Replaced instances of projrs and grabis macros with newer,
+      more general-purpose getris.
+
+commit 03a260a457c8964e4603a655cee0d40ac17affba
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Feb 12 11:45:34 2013 -0600
+
+    Restored executable permissions to scripts.
+    
+    Details:
+    - Restored executable (0755) permissions to scripts that were touched by
+      the recursive sed script that updated the copyright headers in the
+      previous commit.
+
+commit 1274e1243775e5e705114257a43176f63635227f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Feb 11 14:37:47 2013 -0600
+
+    Updated copyright headers from 2012 to 2013.
+
+commit 3b620cc8e90c53c79129bd9dd89ae6b77c2446f1
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Feb 11 13:38:07 2013 -0600
+
+    CHANGELOG update.
+
+commit 768fcebaa8be0eb936a6e7a02cd8a19438c79d99 (tag: 0.0.2)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Mon Feb 11 13:20:44 2013 -0600
 
