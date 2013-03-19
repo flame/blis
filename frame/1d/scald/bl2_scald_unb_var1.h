@@ -40,6 +40,7 @@ void bl2_scald_unb_var1( obj_t* beta,
 #define GENTPROT2( ctype_b, ctype_x, chb, chx, varname ) \
 \
 void PASTEMAC2(chb,chx,varname)( \
+                                 conj_t  conjbeta, \
                                  doff_t  diagoffx, \
                                  dim_t   m, \
                                  dim_t   n, \

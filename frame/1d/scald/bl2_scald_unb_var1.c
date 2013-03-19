@@ -37,6 +37,7 @@
 #define FUNCPTR_T scald_fp
 
 typedef void (*FUNCPTR_T)(
+                           conj_t  conjbeta,
                            doff_t  diagoffx,
                            dim_t   m,
                            dim_t   n,
@@ -62,6 +63,8 @@ void bl2_scald_unb_var1( obj_t*  beta,
 {
 	num_t     dt_x      = bl2_obj_datatype( *x );
 
+	conj_t    conjbeta  = bl2_obj_conj_status( *beta );
+
 	doff_t    diagoffx  = bl2_obj_diag_offset( *x );
 
 	dim_t     m         = bl2_obj_length( *x );
@@ -86,7 +89,8 @@ void bl2_scald_unb_var1( obj_t*  beta,
 	f = ftypes[dt_beta][dt_x];
 
 	// Invoke the function.
-	f( diagoffx,
+	f( conjbeta,
+	   diagoffx,
 	   m,
 	   n,
 	   buf_beta,
@@ -98,6 +102,7 @@ void bl2_scald_unb_var1( obj_t*  beta,
 #define GENTFUNC2( ctype_b, ctype_x, chb, chx, varname, kername ) \
 \
 void PASTEMAC2(chb,chx,varname)( \
+                                 conj_t  conjbeta, \
                                  doff_t  diagoffx, \
                                  dim_t   m, \
                                  dim_t   n, \
@@ -127,7 +132,7 @@ void PASTEMAC2(chb,chx,varname)( \
 \
 	x1 = x_cast + offx; \
 \
-	PASTEMAC2(chb,chx,kername)( BLIS_NO_CONJUGATE, \
+	PASTEMAC2(chb,chx,kername)( conjbeta, \
 	                            n_elem, \
 	                            beta_cast, \
 	                            x1, incx ); \

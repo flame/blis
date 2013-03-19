@@ -49,6 +49,7 @@ void bl2_scald( obj_t* beta,
 #define GENTPROT( ctype, ch, opname ) \
 \
 void PASTEMAC(ch,opname)( \
+                          conj_t  conjbeta, \
                           doff_t  diagoffx, \
                           dim_t   m, \
                           dim_t   n, \
@@ -66,6 +67,7 @@ INSERT_GENTPROT_BASIC( scald )
 #define GENTPROT2( ctype_b, ctype_x, chb, chx, opname ) \
 \
 void PASTEMAC2(chb,chx,opname)( \
+                                conj_t   conjbeta, \
                                 doff_t   diagoff, \
                                 dim_t    m, \
                                 dim_t    n, \

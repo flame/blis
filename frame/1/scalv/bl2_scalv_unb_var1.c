@@ -62,6 +62,7 @@ void bl2_scalv_unb_var1( obj_t*  beta,
 	num_t     dt_x      = bl2_obj_datatype( *x );
 
 	conj_t    conjbeta  = bl2_obj_conj_status( *beta );
+
 	dim_t     n         = bl2_obj_vector_dim( *x );
 
 	inc_t     inc_x     = bl2_obj_vector_inc( *x );

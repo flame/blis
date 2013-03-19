@@ -52,6 +52,7 @@ void bl2_scald( obj_t* beta,
 #define GENTFUNC( ctype, ch, opname, varname ) \
 \
 void PASTEMAC(ch,opname)( \
+                          conj_t  conjbeta, \
                           doff_t  diagoffx, \
                           dim_t   m, \
                           dim_t   n, \
@@ -59,7 +60,8 @@ void PASTEMAC(ch,opname)( \
                           ctype*  x, inc_t rs_x, inc_t cs_x \
                         ) \
 { \
-	PASTEMAC2(ch,ch,varname)( diagoffx, \
+	PASTEMAC2(ch,ch,varname)( conjbeta, \
+	                          diagoffx, \
 	                          m, \
 	                          n, \
 	                          beta, \
@@ -76,6 +78,7 @@ INSERT_GENTFUNC_BASIC( scald, scald_unb_var1 )
 #define GENTFUNC2( ctype_b, ctype_x, chb, chx, opname, varname ) \
 \
 void PASTEMAC2(chb,chx,opname)( \
+                                conj_t   conjbeta, \
                                 doff_t   diagoffx, \
                                 dim_t    m, \
                                 dim_t    n, \
@@ -83,7 +86,8 @@ void PASTEMAC2(chb,chx,opname)( \
                                 ctype_x* x, inc_t rs_x, inc_t cs_x \
                               ) \
 { \
-	PASTEMAC2(chb,chx,varname)( diagoffx, \
+	PASTEMAC2(chb,chx,varname)( conjbeta, \
+	                            diagoffx, \
 	                            m, \
 	                            n, \
 	                            beta, \
