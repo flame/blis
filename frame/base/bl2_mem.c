@@ -61,7 +61,7 @@
                              ( BLIS_MK_BLOCK_SIZE + \
                                BLIS_PAGE_SIZE \
                              ) + \
-                             BLIS_MAX_PREFETCH_BYTE_OFFSET \
+                             BLIS_MAX_PRELOAD_BYTE_OFFSET \
                            )
 
 #define BLIS_KN_POOL_SIZE  ( \
@@ -69,7 +69,7 @@
                              ( BLIS_KN_BLOCK_SIZE + \
                                BLIS_PAGE_SIZE \
                              ) + \
-                             BLIS_MAX_PREFETCH_BYTE_OFFSET \
+                             BLIS_MAX_PRELOAD_BYTE_OFFSET \
                            )
 
 #define BLIS_MN_POOL_SIZE  ( \
@@ -77,7 +77,7 @@
                              ( BLIS_MN_BLOCK_SIZE + \
                                BLIS_PAGE_SIZE \
                              ) + \
-                             BLIS_MAX_PREFETCH_BYTE_OFFSET \
+                             BLIS_MAX_PRELOAD_BYTE_OFFSET \
                            )
 
 // Declare one memory pool structure for each block size/shape we want to

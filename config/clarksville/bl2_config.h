@@ -79,11 +79,11 @@
 // can be allocated with alignment to the beginning of a page boundary.
 #define BLIS_PAGE_SIZE                   4096
 
-// The maximum prefetch byte offset is used to pad the end of any static
+// The maximum preload byte offset is used to pad the end of any static
 // memory allocation request so that the micro-kernel can exceed the
 // bounds of the usable portion of a memory region without causing a
 // segmentation fault.
-#define BLIS_MAX_PREFETCH_BYTE_OFFSET    128
+#define BLIS_MAX_PRELOAD_BYTE_OFFSET     128
 
 
 
