@@ -230,7 +230,12 @@ typedef   signed long int bool_t;
 
 // Integer types
 
+// This cpp guards provide a temporary hack to allow libflame
+// interoperability with BLIS.
+#ifndef _DEFINED_DIM_T
+#define _DEFINED_DIM_T
 typedef unsigned long int dim_t;  // dimension type
+#endif
 typedef unsigned long int inc_t;  // increment/stride type
 typedef   signed long int doff_t; // diagonal offset type
 typedef unsigned long int siz_t;  // byte size type
@@ -238,17 +243,27 @@ typedef unsigned long int info_t; // object information bit field
 
 // Complex types
 
-typedef struct scomplex_s
+// This cpp guards provide a temporary hack to allow libflame
+// interoperability with BLIS.
+#ifndef _DEFINED_SCOMPLEX
+#define _DEFINED_SCOMPLEX
+typedef struct
 {
 	float  real;
 	float  imag;
 } scomplex;
+#endif
 
-typedef struct dcomplex_s
+// This cpp guards provide a temporary hack to allow libflame
+// interoperability with BLIS.
+#ifndef _DEFINED_DCOMPLEX
+#define _DEFINED_DCOMPLEX
+typedef struct
 {
 	double real;
 	double imag;
 } dcomplex;
+#endif
 
 // Atom type
 // Note: atom types are used to hold "bufferless" scalar object values. Note
