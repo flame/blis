@@ -94,7 +94,7 @@ dim_t bl2_determine_blocksize_f( dim_t    i,
 	// to bottom-right).
 
 	// Extract the execution datatype and use it to query the corresponding
-	// blocksize.
+	// blocksize value from the blksz_t object.
 	dt    = bl2_obj_execution_datatype( *obj );
 	b_alg = bl2_blksz_for_type( dt, b );
 
@@ -120,7 +120,7 @@ dim_t bl2_determine_blocksize_b( dim_t    i,
 	// to top-left).
 
 	// Extract the execution datatype and use it to query the corresponding
-	// blocksize.
+	// blocksize value from the blksz_t object.
 	dt    = bl2_obj_execution_datatype( *obj );
 	b_alg = bl2_blksz_for_type( dt, b );
 

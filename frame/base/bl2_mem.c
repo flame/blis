@@ -322,8 +322,8 @@ void bl2_mem_init_pool( char*   pool_mem,
 	}
 
 	// Step through the memory pool, beginning with the page-aligned address
-	// determined above, assigning pointers to the beginning of each m x n
-	// block to the ith element of the block_ptrs array.
+	// determined above, assigning pointers to the beginning of each block_size
+	// bytes to the ith element of the block_ptrs array.
 	for ( i = 0; i < num_blocks; ++i )
 	{
 		// Save the address of pool, which is guaranteed to be page-aligned.
