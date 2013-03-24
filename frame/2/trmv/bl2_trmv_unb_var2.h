@@ -32,7 +32,6 @@
 
 */
 
-#include "blis2.h"
 
 void bl2_trmv_unb_var2( obj_t*  alpha,
                         obj_t*  a,

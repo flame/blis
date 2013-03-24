@@ -32,7 +32,6 @@
 
 */
 
-#include "blis2.h"
 
 //
 // Define macro-kernel blocksizes.

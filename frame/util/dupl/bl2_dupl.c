@@ -32,8 +32,7 @@
 
 */
 
-#include "bl2_dupl_unb_var1.h"
-
+#include "blis2.h"
 
 //
 // Define BLAS-like interfaces.

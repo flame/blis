@@ -32,7 +32,6 @@
 
 */
 
-#include "blis2.h"
 
 void bl2_her2_unf_var4( conj_t   conjh,
                         obj_t*   alpha,

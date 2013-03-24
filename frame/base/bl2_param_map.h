@@ -32,7 +32,6 @@
 
 */
 
-#include "blis2.h"
 
 // --- BLIS to BLAS/LAPACK mappings --------------------------------------------
 

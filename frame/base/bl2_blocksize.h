@@ -32,7 +32,6 @@
 
 */
 
-#include "blis2.h"
 
 blksz_t* bl2_blksz_obj_create( dim_t b_s,
                                dim_t b_d,

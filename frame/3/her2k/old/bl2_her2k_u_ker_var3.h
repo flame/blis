@@ -32,7 +32,6 @@
 
 */
 
-#include "blis2.h"
 
 //
 // Default register blocksizes and micro-kernel shapes

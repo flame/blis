@@ -32,7 +32,6 @@
 
 */
 
-#include "blis2.h"
 
 err_t bl2_check_error_code_helper( int code, char* file, unsigned int line );
 

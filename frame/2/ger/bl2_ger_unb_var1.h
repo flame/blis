@@ -32,7 +32,6 @@
 
 */
 
-#include "blis2.h"
 
 void bl2_ger_unb_var1( obj_t*  alpha,
                        obj_t*  x,

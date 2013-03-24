@@ -32,8 +32,6 @@
 
 */
 
-#include "blis2.h"
-
 
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, varname ) \

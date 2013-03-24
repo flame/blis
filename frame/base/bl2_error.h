@@ -32,7 +32,6 @@
 
 */
 
-#include "blis2.h"
 
 errlev_t bl2_error_checking_level( void );
 errlev_t bl2_error_checking_level_set( errlev_t new_level );
