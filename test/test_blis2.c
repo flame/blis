@@ -33,7 +33,7 @@
 */
 
 #include <unistd.h>
-#include "blis2.h"
+#include "blis.h"
 
 double FLA_Clock( void );
 
@@ -113,7 +113,7 @@ int main( int argc, char** argv )
 	double dtime_save;
 	double gflops;
 
-	bl2_init();
+	bli_init();
 
 	n_repeats = 3;
 
@@ -166,79 +166,79 @@ int main( int argc, char** argv )
 		else               k =     ( dim_t )    k_input;
 
 
-		bl2_obj_create( dt_alpha, 1, 1, 0, 0, &alpha );
-		bl2_obj_create( dt_beta,  1, 1, 0, 0, &beta );
+		bli_obj_create( dt_alpha, 1, 1, 0, 0, &alpha );
+		bli_obj_create( dt_beta,  1, 1, 0, 0, &beta );
 
 #if 1
-		bl2_obj_create( dt_a, m, k, 0, 0, &a );
-		bl2_obj_create( dt_b, k, n, 0, 0, &b );
-		bl2_obj_create( dt_c, m, n, 0, 0, &c );
-		bl2_obj_create( dt_c, m, n, 0, 0, &w );
-		bl2_obj_create( dt_c, m, n, 0, 0, &c_save );
+		bli_obj_create( dt_a, m, k, 0, 0, &a );
+		bli_obj_create( dt_b, k, n, 0, 0, &b );
+		bli_obj_create( dt_c, m, n, 0, 0, &c );
+		bli_obj_create( dt_c, m, n, 0, 0, &w );
+		bli_obj_create( dt_c, m, n, 0, 0, &c_save );
 
-		bl2_randm( &a );
-		bl2_randm( &b );
-		bl2_randm( &c );
-		bl2_randm( &w );
+		bli_randm( &a );
+		bli_randm( &b );
+		bli_randm( &c );
+		bli_randm( &w );
 #elif 0
-		bl2_obj_create( dt_a, m, k, 0, 0, &a );
-		bl2_obj_create( dt_b, m, k, 0, 0, &b );
-		bl2_obj_create( dt_c, m, m, 0, 0, &c );
-		bl2_obj_create( dt_c, m, m, 0, 0, &c_save );
+		bli_obj_create( dt_a, m, k, 0, 0, &a );
+		bli_obj_create( dt_b, m, k, 0, 0, &b );
+		bli_obj_create( dt_c, m, m, 0, 0, &c );
+		bli_obj_create( dt_c, m, m, 0, 0, &c_save );
 
-		bl2_randm( &a );
-		bl2_randm( &b );
-		bl2_randm( &c );
-		bl2_setm( &BLIS_ZERO, &c );
+		bli_randm( &a );
+		bli_randm( &b );
+		bli_randm( &c );
+		bli_setm( &BLIS_ZERO, &c );
 #else
-		bl2_obj_create( dt_a, m, m, 0, 0, &a );
-		bl2_obj_create( dt_b, m, n, 0, 0, &b );
-		bl2_obj_create( dt_c, m, n, 0, 0, &c );
-		bl2_obj_create( dt_c, m, n, 0, 0, &c_save );
+		bli_obj_create( dt_a, m, m, 0, 0, &a );
+		bli_obj_create( dt_b, m, n, 0, 0, &b );
+		bli_obj_create( dt_c, m, n, 0, 0, &c );
+		bli_obj_create( dt_c, m, n, 0, 0, &c_save );
 
-		bl2_obj_set_struc( BLIS_TRIANGULAR, a );
-		//bl2_obj_set_uplo( BLIS_UPPER, a );
-		bl2_obj_set_uplo( BLIS_LOWER, a );
-		//bl2_obj_set_diag_offset( 4, a );
+		bli_obj_set_struc( BLIS_TRIANGULAR, a );
+		//bli_obj_set_uplo( BLIS_UPPER, a );
+		bli_obj_set_uplo( BLIS_LOWER, a );
+		//bli_obj_set_diag_offset( 4, a );
 
-		bl2_randm( &a );
-		bl2_randm( &c );
-		bl2_randm( &b );
+		bli_randm( &a );
+		bli_randm( &c );
+		bli_randm( &b );
 #endif
 
 
-		bl2_obj_init_pack( &a_pack );
-		bl2_obj_init_pack( &b_pack );
-		bl2_obj_init_pack( &c_pack );
+		bli_obj_init_pack( &a_pack );
+		bli_obj_init_pack( &b_pack );
+		bli_obj_init_pack( &c_pack );
 
 #if 0
-		bl2_obj_set_struc( BLIS_TRIANGULAR, a );
-		//bl2_obj_set_uplo( BLIS_LOWER, a );
-		bl2_obj_set_uplo( BLIS_UPPER, a );
-		bl2_obj_set_diag( BLIS_UNIT_DIAG, a );
-		bl2_setm( &BLIS_ZERO, &a );
-		bl2_obj_set_struc( BLIS_GENERAL, a );
-		bl2_obj_set_uplo( BLIS_DENSE, a );
-		bl2_obj_set_diag( BLIS_NONUNIT_DIAG, a );
+		bli_obj_set_struc( BLIS_TRIANGULAR, a );
+		//bli_obj_set_uplo( BLIS_LOWER, a );
+		bli_obj_set_uplo( BLIS_UPPER, a );
+		bli_obj_set_diag( BLIS_UNIT_DIAG, a );
+		bli_setm( &BLIS_ZERO, &a );
+		bli_obj_set_struc( BLIS_GENERAL, a );
+		bli_obj_set_uplo( BLIS_DENSE, a );
+		bli_obj_set_diag( BLIS_NONUNIT_DIAG, a );
 #endif
 
-		bl2_setsc(  (2.0/1.0), 0.0, &alpha );
-		bl2_setsc( -(1.0/1.0), 0.0, &beta );
+		bli_setsc(  (2.0/1.0), 0.0, &alpha );
+		bli_setsc( -(1.0/1.0), 0.0, &beta );
 
-		mr = bl2_blksz_obj_create( 2, 4, 2, 2 );
-		kr = bl2_blksz_obj_create( 1, 1, 1, 1 );
-		nr = bl2_blksz_obj_create( 1, 4, 1, 1 );
-		mc = bl2_blksz_obj_create( 128, 384, 128, 128 );
-		kc = bl2_blksz_obj_create( 256, 384, 256, 256 );
-		nc = bl2_blksz_obj_create( 512, 512, 512, 512 );
-		ni = bl2_blksz_obj_create(  16,  32,  16,  16 );
+		mr = bli_blksz_obj_create( 2, 4, 2, 2 );
+		kr = bli_blksz_obj_create( 1, 1, 1, 1 );
+		nr = bli_blksz_obj_create( 1, 4, 1, 1 );
+		mc = bli_blksz_obj_create( 128, 384, 128, 128 );
+		kc = bli_blksz_obj_create( 256, 384, 256, 256 );
+		nc = bli_blksz_obj_create( 512, 512, 512, 512 );
+		ni = bli_blksz_obj_create(  16,  32,  16,  16 );
 
 		scalm_cntl =
-		bl2_scalm_cntl_obj_create( BLIS_UNBLOCKED,
+		bli_scalm_cntl_obj_create( BLIS_UNBLOCKED,
 		                           BLIS_VARIANT1 );
 
 		packm_cntl_a =
-		bl2_packm_cntl_obj_create( BLIS_BLOCKED,
+		bli_packm_cntl_obj_create( BLIS_BLOCKED,
 		                           BLIS_VARIANT2,
 		                           mr,
 		                           kr, 
@@ -250,7 +250,7 @@ int main( int argc, char** argv )
 		                           BLIS_PACKED_ROW_PANELS );
 
 		packm_cntl_b =
-		bl2_packm_cntl_obj_create( BLIS_BLOCKED,
+		bli_packm_cntl_obj_create( BLIS_BLOCKED,
 		                           BLIS_VARIANT2,
 		                           kr,
 		                           nr, 
@@ -262,13 +262,13 @@ int main( int argc, char** argv )
 		                           BLIS_PACKED_COL_PANELS );
 
 		gemm_cntl_bp_ke =
-		bl2_gemm_cntl_obj_create( BLIS_UNB_OPT,
+		bli_gemm_cntl_obj_create( BLIS_UNB_OPT,
 		                          BLIS_VARIANT2,
 		                          NULL, NULL, NULL, NULL,
 		                          NULL, NULL, NULL, NULL );
 
 		gemm_cntl_op_bp =
-		bl2_gemm_cntl_obj_create( BLIS_BLOCKED,
+		bli_gemm_cntl_obj_create( BLIS_BLOCKED,
 		                          BLIS_VARIANT4,
 		                          //BLIS_VARIANT1,
 		                          mc,
@@ -281,7 +281,7 @@ int main( int argc, char** argv )
 		                          NULL );
 
 		gemm_cntl_mm_op =
-		bl2_gemm_cntl_obj_create( BLIS_BLOCKED,
+		bli_gemm_cntl_obj_create( BLIS_BLOCKED,
 		                          BLIS_VARIANT3,
 		                          kc,
 		                          NULL,
@@ -293,7 +293,7 @@ int main( int argc, char** argv )
 		                          NULL );
 
 		gemm_cntl_vl_mm =
-		bl2_gemm_cntl_obj_create( BLIS_BLOCKED,
+		bli_gemm_cntl_obj_create( BLIS_BLOCKED,
 		                          BLIS_VARIANT2,
 		                          nc,
 		                          NULL,
@@ -305,13 +305,13 @@ int main( int argc, char** argv )
 		                          NULL );
 
 		herk_cntl_bp_ke =
-		bl2_herk_cntl_obj_create( BLIS_UNB_OPT,
+		bli_herk_cntl_obj_create( BLIS_UNB_OPT,
 		                          BLIS_VARIANT2,
 		                          NULL, NULL, NULL, NULL,
 		                          NULL, NULL, NULL, NULL );
 
 		herk_cntl_op_bp =
-		bl2_herk_cntl_obj_create( BLIS_BLOCKED,
+		bli_herk_cntl_obj_create( BLIS_BLOCKED,
 		                          //BLIS_VARIANT4,
 		                          BLIS_VARIANT1,
 		                          mc,
@@ -324,7 +324,7 @@ int main( int argc, char** argv )
 		                          NULL );
 
 		herk_cntl_mm_op =
-		bl2_herk_cntl_obj_create( BLIS_BLOCKED,
+		bli_herk_cntl_obj_create( BLIS_BLOCKED,
 		                          BLIS_VARIANT3,
 		                          kc,
 		                          NULL,
@@ -336,7 +336,7 @@ int main( int argc, char** argv )
 		                          NULL );
 
 		herk_cntl_vl_mm =
-		bl2_herk_cntl_obj_create( BLIS_BLOCKED,
+		bli_herk_cntl_obj_create( BLIS_BLOCKED,
 		                          BLIS_VARIANT2,
 		                          nc,
 		                          NULL,
@@ -348,13 +348,13 @@ int main( int argc, char** argv )
 		                          NULL );
 
 		her2k_cntl_bp_ke =
-		bl2_her2k_cntl_obj_create( BLIS_UNB_OPT,
+		bli_her2k_cntl_obj_create( BLIS_UNB_OPT,
 		                           BLIS_VARIANT2,
 		                           NULL, NULL, NULL, NULL, NULL,
 		                           NULL, NULL, NULL, NULL );
 
 		her2k_cntl_op_bp =
-		bl2_her2k_cntl_obj_create( BLIS_BLOCKED,
+		bli_her2k_cntl_obj_create( BLIS_BLOCKED,
 		                           //BLIS_VARIANT4,
 		                           BLIS_VARIANT1,
 		                           mc,
@@ -368,7 +368,7 @@ int main( int argc, char** argv )
 		                           NULL );
 
 		her2k_cntl_mm_op =
-		bl2_her2k_cntl_obj_create( BLIS_BLOCKED,
+		bli_her2k_cntl_obj_create( BLIS_BLOCKED,
 		                           BLIS_VARIANT3,
 		                           kc,
 		                           NULL,
@@ -381,7 +381,7 @@ int main( int argc, char** argv )
 		                           NULL );
 
 		her2k_cntl_vl_mm =
-		bl2_her2k_cntl_obj_create( BLIS_BLOCKED,
+		bli_her2k_cntl_obj_create( BLIS_BLOCKED,
 		                           BLIS_VARIANT2,
 		                           nc,
 		                           NULL,
@@ -394,7 +394,7 @@ int main( int argc, char** argv )
 		                           NULL );
 
 		trmm_packm_cntl_a =
-		bl2_packm_cntl_obj_create( BLIS_BLOCKED,
+		bli_packm_cntl_obj_create( BLIS_BLOCKED,
 		                           BLIS_VARIANT3,
 		                           mr,
 		                           kr, 
@@ -406,7 +406,7 @@ int main( int argc, char** argv )
 		                           BLIS_PACKED_ROW_PANELS );
 
 		trmm_packm_cntl_b =
-		bl2_packm_cntl_obj_create( BLIS_BLOCKED,
+		bli_packm_cntl_obj_create( BLIS_BLOCKED,
 		                           BLIS_VARIANT2,
 		                           kr,
 		                           nr, 
@@ -418,13 +418,13 @@ int main( int argc, char** argv )
 		                           BLIS_PACKED_COL_PANELS );
 
 		trmm_cntl_bp_ke =
-		bl2_trmm_cntl_obj_create( BLIS_UNB_OPT,
+		bli_trmm_cntl_obj_create( BLIS_UNB_OPT,
 		                          BLIS_VARIANT2,
 		                          NULL, NULL, NULL, NULL, NULL,
 		                          NULL, NULL, NULL, NULL );
 
 		trmm_cntl_op_bp =
-		bl2_trmm_cntl_obj_create( BLIS_BLOCKED,
+		bli_trmm_cntl_obj_create( BLIS_BLOCKED,
 		                          //BLIS_VARIANT4,
 		                          BLIS_VARIANT1,
 		                          mc,
@@ -438,7 +438,7 @@ int main( int argc, char** argv )
 		                          NULL );
 
 		trmm_cntl_mm_op =
-		bl2_trmm_cntl_obj_create( BLIS_BLOCKED,
+		bli_trmm_cntl_obj_create( BLIS_BLOCKED,
 		                          BLIS_VARIANT3,
 		                          kc,
 		                          NULL,
@@ -451,7 +451,7 @@ int main( int argc, char** argv )
 		                          NULL );
 
 		trmm_cntl_vl_mm =
-		bl2_trmm_cntl_obj_create( BLIS_BLOCKED,
+		bli_trmm_cntl_obj_create( BLIS_BLOCKED,
 		                          BLIS_VARIANT2,
 		                          nc,
 		                          NULL,
@@ -464,7 +464,7 @@ int main( int argc, char** argv )
 		                          NULL );
 
 		trmm3_cntl_mm_op =
-		bl2_trmm_cntl_obj_create( BLIS_BLOCKED,
+		bli_trmm_cntl_obj_create( BLIS_BLOCKED,
 		                          BLIS_VARIANT3,
 		                          kc,
 		                          NULL,
@@ -477,7 +477,7 @@ int main( int argc, char** argv )
 		                          NULL );
 
 		trsm_packm_cntl_a =
-		bl2_packm_cntl_obj_create( BLIS_BLOCKED,
+		bli_packm_cntl_obj_create( BLIS_BLOCKED,
 		                           BLIS_VARIANT3,
 		                           mr,    // IMPORTANT: n dim multiple must be mr to
 		                           mr,    // support right and bottom-right edge cases
@@ -489,7 +489,7 @@ int main( int argc, char** argv )
 		                           BLIS_PACKED_ROW_PANELS );
 
 		trsm_packm_cntl_b =
-		bl2_packm_cntl_obj_create( BLIS_BLOCKED,
+		bli_packm_cntl_obj_create( BLIS_BLOCKED,
 		                           BLIS_VARIANT2,
 		                           mr,    // IMPORTANT: m dim multiple must be mr since
 		                           nr,    // B_pack is updated (ie: serves as C) in trsm
@@ -501,19 +501,19 @@ int main( int argc, char** argv )
 		                           BLIS_PACKED_COL_PANELS );
 
 		trsm_unpackm_cntl_b =
-		bl2_unpackm_cntl_obj_create( BLIS_BLOCKED,
+		bli_unpackm_cntl_obj_create( BLIS_BLOCKED,
 		                             BLIS_VARIANT2,
 		                             NULL );
 
 		trsm_cntl_bp_ke =
-		bl2_trsm_cntl_obj_create( BLIS_UNB_OPT,
+		bli_trsm_cntl_obj_create( BLIS_UNB_OPT,
 		                          //BLIS_VARIANT2,
 		                          BLIS_VARIANT3,
 		                          NULL, NULL, NULL, NULL, NULL,
 		                          NULL, NULL, NULL, NULL );
 
 		trsm_cntl_op_bp =
-		bl2_trsm_cntl_obj_create( BLIS_BLOCKED,
+		bli_trsm_cntl_obj_create( BLIS_BLOCKED,
 		                          BLIS_VARIANT4,
 		                          //BLIS_VARIANT1,
 		                          mc,
@@ -527,7 +527,7 @@ int main( int argc, char** argv )
 		                          NULL );
 
 		trsm_cntl_mm_op =
-		bl2_trsm_cntl_obj_create( BLIS_BLOCKED,
+		bli_trsm_cntl_obj_create( BLIS_BLOCKED,
 		                          BLIS_VARIANT3,
 		                          kc,
 		                          NULL,
@@ -540,7 +540,7 @@ int main( int argc, char** argv )
 		                          NULL );
 
 		trsm_cntl_vl_mm =
-		bl2_trsm_cntl_obj_create( BLIS_BLOCKED,
+		bli_trsm_cntl_obj_create( BLIS_BLOCKED,
 		                          BLIS_VARIANT2,
 		                          nc,
 		                          NULL,
@@ -554,35 +554,35 @@ int main( int argc, char** argv )
 
 
 
-		//bl2_printm( "a", &a, "%8.1e", "" );
-		//bl2_printm( "b", &b, "%8.1e", "" );
-		//bl2_printm( "c", &c, "%8.1e", "" );
-		//bl2_printm( "alpha", &alpha, "%8.1e", "" );
-		//bl2_printm( "beta", &beta, "%8.1e", "" );
+		//bli_printm( "a", &a, "%8.1e", "" );
+		//bli_printm( "b", &b, "%8.1e", "" );
+		//bli_printm( "c", &c, "%8.1e", "" );
+		//bli_printm( "alpha", &alpha, "%8.1e", "" );
+		//bli_printm( "beta", &beta, "%8.1e", "" );
 
-		bl2_copym( &c, &c_save );
+		bli_copym( &c, &c_save );
 	
 		dtime_save = 1.0e9;
 
 		for ( r = 0; r < n_repeats; ++r )
 		{
-			bl2_copym( &c_save, &c );
+			bli_copym( &c_save, &c );
 
 
 
-			dtime = bl2_clock();
+			dtime = bli_clock();
 
 
 #if 0
-			//bl2_mm_clear_smem();
+			//bli_mm_clear_smem();
 
-			bl2_packm_init( &a, &a_pack, packm_cntl_a );
-			bl2_packm_int( &BLIS_ONE, &a, &a_pack, packm_cntl_a );
+			bli_packm_init( &a, &a_pack, packm_cntl_a );
+			bli_packm_int( &BLIS_ONE, &a, &a_pack, packm_cntl_a );
 
-			bl2_packm_init( &b, &b_pack, packm_cntl_b );
-			bl2_packm_int( &BLIS_ONE, &b, &b_pack, packm_cntl_b );
+			bli_packm_init( &b, &b_pack, packm_cntl_b );
+			bli_packm_int( &BLIS_ONE, &b, &b_pack, packm_cntl_b );
 
-			bl2_gemm_ker_var2( &BLIS_ONE,
+			bli_gemm_ker_var2( &BLIS_ONE,
 			                   &a_pack,
 			                   &b_pack,
 			                   &BLIS_ONE,
@@ -591,27 +591,27 @@ int main( int argc, char** argv )
 #endif
 
 #if 0
-			bl2_packm_init( &b, &b_pack, packm_cntl_b );
+			bli_packm_init( &b, &b_pack, packm_cntl_b );
 
 			{
 				dim_t bn_alg  = 32;
 				dim_t bn_use, j;
-				dim_t n_trans = bl2_obj_width_after_trans( b );
+				dim_t n_trans = bli_obj_width_after_trans( b );
 				obj_t c1_fuse, b1_fuse;
 
-				bl2_packm_init( &a, &a_pack, packm_cntl_a );
-				bl2_packm_int( &BLIS_ONE, &a, &a_pack, packm_cntl_a );
+				bli_packm_init( &a, &a_pack, packm_cntl_a );
+				bli_packm_int( &BLIS_ONE, &a, &a_pack, packm_cntl_a );
 
 				for ( j = 0; j < n_trans; j += bn_alg )
 				{
-					bn_use = bl2_min( bn_alg, n_trans - j );
+					bn_use = bli_min( bn_alg, n_trans - j );
 
-					bl2_acquire_mpart_l2r( BLIS_SUBPART1, j, bn_use, &c, &c1_fuse );
-					bl2_acquire_mpart_l2r( BLIS_SUBPART1, j, bn_use, &b_pack, &b1_fuse );
+					bli_acquire_mpart_l2r( BLIS_SUBPART1, j, bn_use, &c, &c1_fuse );
+					bli_acquire_mpart_l2r( BLIS_SUBPART1, j, bn_use, &b_pack, &b1_fuse );
 
-					bl2_packm_int( &BLIS_ONE, &b, &b1_fuse, packm_cntl_b );
+					bli_packm_int( &BLIS_ONE, &b, &b1_fuse, packm_cntl_b );
 
-					bl2_gemm_ker_var2( &BLIS_ONE,
+					bli_gemm_ker_var2( &BLIS_ONE,
 					                   &a_pack,
 					                   &b1_fuse,
 					                   &BLIS_ONE,
@@ -622,16 +622,16 @@ int main( int argc, char** argv )
 #endif
 
 #if 1
-			//bl2_obj_set_struc( BLIS_HERMITIAN, a );
-			//bl2_obj_set_uplo( BLIS_LOWER, a );
-			//bl2_obj_set_uplo( BLIS_UPPER, a );
+			//bli_obj_set_struc( BLIS_HERMITIAN, a );
+			//bli_obj_set_uplo( BLIS_LOWER, a );
+			//bli_obj_set_uplo( BLIS_UPPER, a );
 
-			//bl2_printm( "a", &a, "%4.1f", "" );
-			//bl2_printm( "b", &b, "%4.1f", "" );
-			//bl2_printm( "c", &c, "%4.1f", "" );
+			//bli_printm( "a", &a, "%4.1f", "" );
+			//bli_printm( "b", &b, "%4.1f", "" );
+			//bli_printm( "c", &c, "%4.1f", "" );
 
-			bl2_gemm_int( &BLIS_ONE,
-			//bl2_gemm_int( &alpha,
+			bli_gemm_int( &BLIS_ONE,
+			//bli_gemm_int( &alpha,
 			              &a,
 			              &b,
 			              &BLIS_ONE,
@@ -639,20 +639,20 @@ int main( int argc, char** argv )
 			              //gemm_cntl_op_bp );
 			              gemm_cntl_mm_op );
 
-			//bl2_copym( &c, &w );
+			//bli_copym( &c, &w );
 
-			//bl2_printm( "c after", &c, "%4.1f", "" );
+			//bli_printm( "c after", &c, "%4.1f", "" );
 			//exit(1);
 #endif
 
 #if 0
-			bl2_obj_set_struc( BLIS_HERMITIAN, a );
-			bl2_obj_set_uplo( BLIS_LOWER, a );
-			//bl2_obj_set_uplo( BLIS_UPPER, a );
+			bli_obj_set_struc( BLIS_HERMITIAN, a );
+			bli_obj_set_uplo( BLIS_LOWER, a );
+			//bli_obj_set_uplo( BLIS_UPPER, a );
 
-			bl2_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
+			bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
 
-			bl2_gemm_int( &BLIS_ONE,
+			bli_gemm_int( &BLIS_ONE,
 			              &a,
 			              &b,
 			              &BLIS_ONE,
@@ -662,51 +662,51 @@ int main( int argc, char** argv )
 #endif
 
 #if 0
-			bl2_obj_set_struc( BLIS_HERMITIAN, c );
-			bl2_obj_set_uplo( BLIS_UPPER, c );
+			bli_obj_set_struc( BLIS_HERMITIAN, c );
+			bli_obj_set_uplo( BLIS_UPPER, c );
 
 			obj_t a1, c1, ar = a;
-			bl2_obj_toggle_conj( ar );
-			bl2_obj_toggle_trans( ar );
+			bli_obj_toggle_conj( ar );
+			bli_obj_toggle_trans( ar );
 
-			dim_t bm = bl2_min( bl2_obj_length( a ), 128 );
-			bl2_acquire_mpart_t2b( BLIS_SUBPART1, 0, bm, &a, &a1 );
-			bl2_acquire_mpart_t2b( BLIS_SUBPART1, 0, bm, &c, &c1 );
+			dim_t bm = bli_min( bli_obj_length( a ), 128 );
+			bli_acquire_mpart_t2b( BLIS_SUBPART1, 0, bm, &a, &a1 );
+			bli_acquire_mpart_t2b( BLIS_SUBPART1, 0, bm, &c, &c1 );
 
 
-			dtime = bl2_clock();
+			dtime = bli_clock();
 
-			bl2_packm_init( &a1, &a_pack, packm_cntl_a );
-			bl2_packm_int( &BLIS_ONE, &a1, &a_pack, packm_cntl_a );
+			bli_packm_init( &a1, &a_pack, packm_cntl_a );
+			bli_packm_int( &BLIS_ONE, &a1, &a_pack, packm_cntl_a );
 
-			bl2_packm_init( &ar, &b_pack, packm_cntl_b );
-			bl2_packm_int( &BLIS_ONE, &ar, &b_pack, packm_cntl_b );
+			bli_packm_init( &ar, &b_pack, packm_cntl_b );
+			bli_packm_int( &BLIS_ONE, &ar, &b_pack, packm_cntl_b );
 
-			//bl2_printm( "a", &a, "%4.1f", "" );
-			//bl2_printm( "c", &c, "%4.1f", "" );
-			bl2_herk_u_ker_var2( &BLIS_ONE,
+			//bli_printm( "a", &a, "%4.1f", "" );
+			//bli_printm( "c", &c, "%4.1f", "" );
+			bli_herk_u_ker_var2( &BLIS_ONE,
 			                     &a_pack,
 			                     &b_pack,
 			                     &BLIS_ONE,
 			                     &c1,
 			                     NULL );
-			//bl2_printm( "c after", &c, "%4.1f", "" );
+			//bli_printm( "c after", &c, "%4.1f", "" );
 			//exit(1);
 #endif
 
 #if 0
-			bl2_obj_set_struc( BLIS_HERMITIAN, c );
-			//bl2_obj_set_uplo( BLIS_LOWER, c );
-			bl2_obj_set_uplo( BLIS_UPPER, c );
+			bli_obj_set_struc( BLIS_HERMITIAN, c );
+			//bli_obj_set_uplo( BLIS_LOWER, c );
+			bli_obj_set_uplo( BLIS_UPPER, c );
 
-			bl2_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
+			bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
 
 			obj_t ah;
-			bl2_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, a, ah );
+			bli_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, a, ah );
 
-			//bl2_printm( "a", &a, "%4.1f", "" );
-			//bl2_printm( "c", &c, "%4.1f", "" );
-			bl2_herk_int( &BLIS_ONE,
+			//bli_printm( "a", &a, "%4.1f", "" );
+			//bli_printm( "c", &c, "%4.1f", "" );
+			bli_herk_int( &BLIS_ONE,
 			              &a,
 			              &ah,
 			              &BLIS_ONE,
@@ -714,26 +714,26 @@ int main( int argc, char** argv )
 			              herk_cntl_op_bp );
 			              //herk_cntl_mm_op );
 			              //herk_cntl_vl_mm );
-			//bl2_printm( "c after", &c, "%4.1f", "" );
+			//bli_printm( "c after", &c, "%4.1f", "" );
 			//exit(1);
 #endif
 
 #if 0
-			bl2_obj_set_struc( BLIS_HERMITIAN, c );
-			//bl2_obj_set_uplo( BLIS_LOWER, c );
-			bl2_obj_set_uplo( BLIS_UPPER, c );
+			bli_obj_set_struc( BLIS_HERMITIAN, c );
+			//bli_obj_set_uplo( BLIS_LOWER, c );
+			bli_obj_set_uplo( BLIS_UPPER, c );
 
-			bl2_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
+			bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
 
 			obj_t ah, bh;
-			bl2_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, a, ah );
-			bl2_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, b, bh );
+			bli_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, a, ah );
+			bli_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, b, bh );
 
-			//bl2_printm( "a", &a, "%4.1f", "" );
-			//bl2_printm( "b", &b, "%4.1f", "" );
-			//bl2_printm( "c", &c, "%4.1f", "" );
+			//bli_printm( "a", &a, "%4.1f", "" );
+			//bli_printm( "b", &b, "%4.1f", "" );
+			//bli_printm( "c", &c, "%4.1f", "" );
 /*
-			bl2_her2k_int( &BLIS_ONE,
+			bli_her2k_int( &BLIS_ONE,
 			               &a,
 			               &bh,
 			               &BLIS_ONE,
@@ -746,52 +746,52 @@ int main( int argc, char** argv )
 			               //her2k_cntl_vl_mm );
 */
 
-			bl2_herk_int( &BLIS_ONE,
+			bli_herk_int( &BLIS_ONE,
 			              &a,
 			              &bh,
 			              &BLIS_ONE,
 			              &c,
 			              herk_cntl_op_bp );
-			bl2_herk_int( &BLIS_ONE,
+			bli_herk_int( &BLIS_ONE,
 			              &b,
 			              &ah,
 			              &BLIS_ONE,
 			              &c,
 			              herk_cntl_op_bp );
 
-			//bl2_printm( "c after", &c, "%4.1f", "" );
+			//bli_printm( "c after", &c, "%4.1f", "" );
 			//exit(1);
 #endif
 
 #if 0
-			bl2_obj_set_struc( BLIS_TRIANGULAR, a );
-			bl2_obj_set_uplo( BLIS_LOWER, a );
-			//bl2_obj_set_diag( BLIS_UNIT_DIAG, a );
+			bli_obj_set_struc( BLIS_TRIANGULAR, a );
+			bli_obj_set_uplo( BLIS_LOWER, a );
+			//bli_obj_set_diag( BLIS_UNIT_DIAG, a );
 
-			bl2_packm_init( &a, &a_pack, packm_cntl_a );
-			bl2_packm_int( &BLIS_ONE, &a, &a_pack, packm_cntl_a );
+			bli_packm_init( &a, &a_pack, packm_cntl_a );
+			bli_packm_int( &BLIS_ONE, &a, &a_pack, packm_cntl_a );
 
-			bl2_packm_init( &c, &b_pack, packm_cntl_b );
-			bl2_packm_int( &BLIS_ONE, &c, &b_pack, packm_cntl_b );
+			bli_packm_init( &c, &b_pack, packm_cntl_b );
+			bli_packm_int( &BLIS_ONE, &c, &b_pack, packm_cntl_b );
 
 
-			bl2_printm( "a", &a, "%4.1f", "" );
-			bl2_printm( "b", &c, "%4.1f", "" );
+			bli_printm( "a", &a, "%4.1f", "" );
+			bli_printm( "b", &c, "%4.1f", "" );
 
-			bl2_trmm_l_ker_var2( &BLIS_ONE,
+			bli_trmm_l_ker_var2( &BLIS_ONE,
 			                     &a_pack,
 			                     &b_pack,
 			                     &BLIS_ZERO,
 			                     &c,
 			                     NULL );
 
-			bl2_printm( "b after", &c, "%4.1f", "" );
+			bli_printm( "b after", &c, "%4.1f", "" );
 			exit(1);
 #endif
 
 #if 0
-			bl2_printm( "b", &c, "%4.1f", "" );
-			bl2_printm( "a", &a, "%4.1f", "" );
+			bli_printm( "b", &c, "%4.1f", "" );
+			bli_printm( "a", &a, "%4.1f", "" );
 
 			obj_t a1, a2;
 			obj_t c1, c2;
@@ -800,50 +800,50 @@ int main( int argc, char** argv )
 			dim_t m1   = off2;
 			dim_t m2   = m - m1;
 
-			bl2_acquire_mpart_t2b( BLIS_SUBPART1, off1, m1, &a, &a1 );
-			bl2_acquire_mpart_t2b( BLIS_SUBPART1, off2, m2, &a, &a2 );
+			bli_acquire_mpart_t2b( BLIS_SUBPART1, off1, m1, &a, &a1 );
+			bli_acquire_mpart_t2b( BLIS_SUBPART1, off2, m2, &a, &a2 );
 
-			bl2_acquire_mpart_t2b( BLIS_SUBPART1, off1, m1, &c, &c1 );
-			bl2_acquire_mpart_t2b( BLIS_SUBPART1, off2, m2, &c, &c2 );
+			bli_acquire_mpart_t2b( BLIS_SUBPART1, off1, m1, &c, &c1 );
+			bli_acquire_mpart_t2b( BLIS_SUBPART1, off2, m2, &c, &c2 );
 
-			bl2_packm_init(           &c, &b_pack, trmm_packm_cntl_b );
-			bl2_packm_int( &BLIS_ONE, &c, &b_pack, trmm_packm_cntl_b );
+			bli_packm_init(           &c, &b_pack, trmm_packm_cntl_b );
+			bli_packm_int( &BLIS_ONE, &c, &b_pack, trmm_packm_cntl_b );
 
-			bl2_packm_init(           &a1, &a_pack, trmm_packm_cntl_a );
-			bl2_packm_int( &BLIS_ONE, &a1, &a_pack, trmm_packm_cntl_a );
+			bli_packm_init(           &a1, &a_pack, trmm_packm_cntl_a );
+			bli_packm_int( &BLIS_ONE, &a1, &a_pack, trmm_packm_cntl_a );
 
-			bl2_trmm_u_ker_var2( &BLIS_ONE,
+			bli_trmm_u_ker_var2( &BLIS_ONE,
 			                     &a_pack,
 			                     &b_pack,
 			                     &BLIS_ZERO,
 			                     &c1,
 			                     NULL );
 
-			bl2_packm_init(           &a2, &a_pack, trmm_packm_cntl_a );
-			bl2_packm_int( &BLIS_ONE, &a2, &a_pack, trmm_packm_cntl_a );
+			bli_packm_init(           &a2, &a_pack, trmm_packm_cntl_a );
+			bli_packm_int( &BLIS_ONE, &a2, &a_pack, trmm_packm_cntl_a );
 
-			bl2_trmm_u_ker_var2( &BLIS_ONE,
+			bli_trmm_u_ker_var2( &BLIS_ONE,
 			                     &a_pack,
 			                     &b_pack,
 			                     &BLIS_ZERO,
 			                     &c2,
 			                     NULL );
 
-			bl2_printm( "b after", &c, "%4.1f", "" );
+			bli_printm( "b after", &c, "%4.1f", "" );
 
 			exit(1);
 #endif
 
 #if 0
-			bl2_obj_set_struc( BLIS_TRIANGULAR, a );
-			bl2_obj_set_uplo( BLIS_LOWER, a );
-			//bl2_obj_set_uplo( BLIS_UPPER, a );
+			bli_obj_set_struc( BLIS_TRIANGULAR, a );
+			bli_obj_set_uplo( BLIS_LOWER, a );
+			//bli_obj_set_uplo( BLIS_UPPER, a );
 
-			bl2_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
+			bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
 
-			//bl2_printm( "a", &a, "%4.1f", "" );
-			//bl2_printm( "b", &c, "%4.1f", "" );
-			bl2_trmm_int( BLIS_LEFT,
+			//bli_printm( "a", &a, "%4.1f", "" );
+			//bli_printm( "b", &c, "%4.1f", "" );
+			bli_trmm_int( BLIS_LEFT,
 			              &BLIS_ONE,
 			              &a,
 			              &c,
@@ -851,21 +851,21 @@ int main( int argc, char** argv )
 			              &c,
 			              trmm_cntl_mm_op );
 			              //trmm_cntl_vl_mm );
-			//bl2_printm( "b after", &c, "%4.1f", "" );
+			//bli_printm( "b after", &c, "%4.1f", "" );
 			//exit(1);
 #endif
 
 #if 0
-			bl2_obj_set_struc( BLIS_TRIANGULAR, a );
-			//bl2_obj_set_uplo( BLIS_LOWER, a );
-			bl2_obj_set_uplo( BLIS_UPPER, a );
+			bli_obj_set_struc( BLIS_TRIANGULAR, a );
+			//bli_obj_set_uplo( BLIS_LOWER, a );
+			bli_obj_set_uplo( BLIS_UPPER, a );
 
-			bl2_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
+			bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
 
-			bl2_printm( "a", &a, "%4.1f", "" );
-			bl2_printm( "b", &b, "%4.1f", "" );
-			bl2_printm( "c", &c, "%4.1f", "" );
-			bl2_trmm_int( BLIS_LEFT,
+			bli_printm( "a", &a, "%4.1f", "" );
+			bli_printm( "b", &b, "%4.1f", "" );
+			bli_printm( "c", &c, "%4.1f", "" );
+			bli_trmm_int( BLIS_LEFT,
 			              &BLIS_ONE,
 			              &a,
 			              &b,
@@ -873,13 +873,13 @@ int main( int argc, char** argv )
 			              &c,
 			              trmm_cntl_mm_op );
 			              //trmm_cntl_vl_mm );
-			bl2_printm( "c after", &c, "%4.1f", "" );
+			bli_printm( "c after", &c, "%4.1f", "" );
 			exit(1);
 #endif
 
 #if 0
-			bl2_printm( "b", &c, "%4.1f", "" );
-			bl2_printm( "a", &a, "%4.1f", "" );
+			bli_printm( "b", &c, "%4.1f", "" );
+			bli_printm( "a", &a, "%4.1f", "" );
 
 			obj_t a1, a2;
 			obj_t c1, c2;
@@ -888,46 +888,46 @@ int main( int argc, char** argv )
 			dim_t m1   = off2;
 			dim_t m2   = m - m1;
 
-			bl2_acquire_mpart_t2b( BLIS_SUBPART1, off1, m1, &a, &a1 );
-			bl2_acquire_mpart_t2b( BLIS_SUBPART1, off2, m2, &a, &a2 );
+			bli_acquire_mpart_t2b( BLIS_SUBPART1, off1, m1, &a, &a1 );
+			bli_acquire_mpart_t2b( BLIS_SUBPART1, off2, m2, &a, &a2 );
 
-			bl2_acquire_mpart_t2b( BLIS_SUBPART1, off1, m1, &c, &c1 );
-			bl2_acquire_mpart_t2b( BLIS_SUBPART1, off2, m2, &c, &c2 );
+			bli_acquire_mpart_t2b( BLIS_SUBPART1, off1, m1, &c, &c1 );
+			bli_acquire_mpart_t2b( BLIS_SUBPART1, off2, m2, &c, &c2 );
 
-			bl2_packm_init(           &c, &b_pack, trsm_packm_cntl_b );
-			bl2_packm_int( &BLIS_ONE, &c, &b_pack, trsm_packm_cntl_b );
+			bli_packm_init(           &c, &b_pack, trsm_packm_cntl_b );
+			bli_packm_int( &BLIS_ONE, &c, &b_pack, trsm_packm_cntl_b );
 
-			bl2_packm_init(           &a1, &a_pack, trsm_packm_cntl_a );
-			bl2_packm_int( &BLIS_ONE, &a1, &a_pack, trsm_packm_cntl_a );
+			bli_packm_init(           &a1, &a_pack, trsm_packm_cntl_a );
+			bli_packm_int( &BLIS_ONE, &a1, &a_pack, trsm_packm_cntl_a );
 
-			bl2_trsm_l_ker_var2( &BLIS_ONE,
+			bli_trsm_l_ker_var2( &BLIS_ONE,
 			                     &a_pack,
 			                     &b_pack,
 			                     &BLIS_ZERO,
 			                     &c1,
 			                     NULL );
 
-			bl2_packm_init(           &a2, &a_pack, trsm_packm_cntl_a );
-			bl2_packm_int( &BLIS_ONE, &a2, &a_pack, trsm_packm_cntl_a );
+			bli_packm_init(           &a2, &a_pack, trsm_packm_cntl_a );
+			bli_packm_int( &BLIS_ONE, &a2, &a_pack, trsm_packm_cntl_a );
 
-			bl2_trsm_l_ker_var2( &BLIS_ONE,
+			bli_trsm_l_ker_var2( &BLIS_ONE,
 			                     &a_pack,
 			                     &b_pack,
 			                     &BLIS_ZERO,
 			                     &c2,
 			                     NULL );
 
-			bl2_printm( "b after", &c, "%4.1f", "" );
+			bli_printm( "b after", &c, "%4.1f", "" );
 
-			//bl2_unpackm_int( &b_pack, &d, trsm_unpackm_cntl_b );
-			//bl2_printm( "d (b after unpack2)", &d, "%4.1f", "" );
+			//bli_unpackm_int( &b_pack, &d, trsm_unpackm_cntl_b );
+			//bli_printm( "d (b after unpack2)", &d, "%4.1f", "" );
 
 			exit(1);
 #endif
 
 #if 0
-			bl2_printm( "b", &c, "%4.1f", "" );
-			bl2_printm( "a", &a, "%4.1f", "" );
+			bli_printm( "b", &c, "%4.1f", "" );
+			bli_printm( "a", &a, "%4.1f", "" );
 
 			obj_t a1, a2;
 			obj_t c1, c2;
@@ -936,29 +936,29 @@ int main( int argc, char** argv )
 			dim_t m1   = off2;
 			dim_t m2   = m - m1;
 
-			bl2_acquire_mpart_t2b( BLIS_SUBPART1, off1, m1, &a, &a1 );
-			bl2_acquire_mpart_t2b( BLIS_SUBPART1, off2, m2, &a, &a2 );
+			bli_acquire_mpart_t2b( BLIS_SUBPART1, off1, m1, &a, &a1 );
+			bli_acquire_mpart_t2b( BLIS_SUBPART1, off2, m2, &a, &a2 );
 
-			bl2_acquire_mpart_t2b( BLIS_SUBPART1, off1, m1, &c, &c1 );
-			bl2_acquire_mpart_t2b( BLIS_SUBPART1, off2, m2, &c, &c2 );
+			bli_acquire_mpart_t2b( BLIS_SUBPART1, off1, m1, &c, &c1 );
+			bli_acquire_mpart_t2b( BLIS_SUBPART1, off2, m2, &c, &c2 );
 
-			bl2_packm_init(           &c, &b_pack, trsm_packm_cntl_b );
-			bl2_packm_int( &BLIS_ONE, &c, &b_pack, trsm_packm_cntl_b );
+			bli_packm_init(           &c, &b_pack, trsm_packm_cntl_b );
+			bli_packm_int( &BLIS_ONE, &c, &b_pack, trsm_packm_cntl_b );
 
-			bl2_packm_init(           &a2, &a_pack, trsm_packm_cntl_a );
-			bl2_packm_int( &BLIS_ONE, &a2, &a_pack, trsm_packm_cntl_a );
+			bli_packm_init(           &a2, &a_pack, trsm_packm_cntl_a );
+			bli_packm_int( &BLIS_ONE, &a2, &a_pack, trsm_packm_cntl_a );
 
-			bl2_trsm_u_ker_var2( &BLIS_ONE,
+			bli_trsm_u_ker_var2( &BLIS_ONE,
 			                     &a_pack,
 			                     &b_pack,
 			                     &BLIS_ZERO,
 			                     &c2,
 			                     NULL );
 
-			bl2_packm_init(           &a1, &a_pack, trsm_packm_cntl_a );
-			bl2_packm_int( &BLIS_ONE, &a1, &a_pack, trsm_packm_cntl_a );
+			bli_packm_init(           &a1, &a_pack, trsm_packm_cntl_a );
+			bli_packm_int( &BLIS_ONE, &a1, &a_pack, trsm_packm_cntl_a );
 
-			bl2_trsm_u_ker_var2( &BLIS_ONE,
+			bli_trsm_u_ker_var2( &BLIS_ONE,
 			                     &a_pack,
 			                     &b_pack,
 			                     &BLIS_ZERO,
@@ -966,15 +966,15 @@ int main( int argc, char** argv )
 			                     NULL );
 
 
-			bl2_printm( "b after", &c, "%4.1f", "" );
-			//bl2_printm( "b after", &c, "%7.4f", "" );
+			bli_printm( "b after", &c, "%4.1f", "" );
+			//bli_printm( "b after", &c, "%7.4f", "" );
 
 			exit(1);
 #endif
 
 
 #if 0
-			bl2_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
+			bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
 /*
 			obj_t a1, a2;
 			obj_t c1, c2;
@@ -983,66 +983,66 @@ int main( int argc, char** argv )
 			dim_t m1   = off2;
 			dim_t m2   = m - m1;
 
-			bl2_acquire_mpart_t2b( BLIS_SUBPART1, off1, m1, &a, &a1 );
-			bl2_acquire_mpart_t2b( BLIS_SUBPART1, off2, m2, &a, &a2 );
+			bli_acquire_mpart_t2b( BLIS_SUBPART1, off1, m1, &a, &a1 );
+			bli_acquire_mpart_t2b( BLIS_SUBPART1, off2, m2, &a, &a2 );
 
-			bl2_acquire_mpart_t2b( BLIS_SUBPART1, off1, m1, &c, &c1 );
-			bl2_acquire_mpart_t2b( BLIS_SUBPART1, off2, m2, &c, &c2 );
+			bli_acquire_mpart_t2b( BLIS_SUBPART1, off1, m1, &c, &c1 );
+			bli_acquire_mpart_t2b( BLIS_SUBPART1, off2, m2, &c, &c2 );
 
-			bl2_packm_init(           &c, &b_pack, trsm_packm_cntl_b );
-			bl2_packm_int( &BLIS_ONE, &c, &b_pack, trsm_packm_cntl_b );
+			bli_packm_init(           &c, &b_pack, trsm_packm_cntl_b );
+			bli_packm_int( &BLIS_ONE, &c, &b_pack, trsm_packm_cntl_b );
 
-			bl2_packm_init(           &a1, &a_pack, trsm_packm_cntl_a );
-			bl2_packm_int( &BLIS_ONE, &a1, &a_pack, trsm_packm_cntl_a );
+			bli_packm_init(           &a1, &a_pack, trsm_packm_cntl_a );
+			bli_packm_int( &BLIS_ONE, &a1, &a_pack, trsm_packm_cntl_a );
 
-			bl2_trsm_l_ker_var2( &BLIS_ONE,
+			bli_trsm_l_ker_var2( &BLIS_ONE,
 			                     &a_pack,
 			                     &b_pack,
 			                     &BLIS_ZERO,
 			                     &c1,
 			                     NULL );
 
-			bl2_packm_init(           &a2, &a_pack, trsm_packm_cntl_a );
-			bl2_packm_int( &BLIS_ONE, &a2, &a_pack, trsm_packm_cntl_a );
+			bli_packm_init(           &a2, &a_pack, trsm_packm_cntl_a );
+			bli_packm_int( &BLIS_ONE, &a2, &a_pack, trsm_packm_cntl_a );
 
-			bl2_trsm_l_ker_var2( &BLIS_ONE,
+			bli_trsm_l_ker_var2( &BLIS_ONE,
 			                     &a_pack,
 			                     &b_pack,
 			                     &BLIS_ZERO,
 			                     &c2,
 			                     NULL );
 
-			//bl2_unpackm_int( &b_pack, &d, trsm_unpackm_cntl_b );
+			//bli_unpackm_int( &b_pack, &d, trsm_unpackm_cntl_b );
 */
 /*
-			bl2_packm_init(           &c, &b_pack, trsm_packm_cntl_b );
-			bl2_packm_int( &BLIS_ONE, &c, &b_pack, trsm_packm_cntl_b );
+			bli_packm_init(           &c, &b_pack, trsm_packm_cntl_b );
+			bli_packm_int( &BLIS_ONE, &c, &b_pack, trsm_packm_cntl_b );
 
-			bl2_packm_init(           &a, &a_pack, trsm_packm_cntl_a );
-			bl2_packm_int( &BLIS_ONE, &a, &a_pack, trsm_packm_cntl_a );
+			bli_packm_init(           &a, &a_pack, trsm_packm_cntl_a );
+			bli_packm_int( &BLIS_ONE, &a, &a_pack, trsm_packm_cntl_a );
 
-			bl2_trsm_l_ker_var2( &BLIS_ONE,
+			bli_trsm_l_ker_var2( &BLIS_ONE,
 			                     &a_pack,
 			                     &b_pack,
 			                     &BLIS_ZERO,
 			                     &c,
 			                     NULL );
 
-			bl2_unpackm_int( &b_pack, &c, trsm_unpackm_cntl_b );
+			bli_unpackm_int( &b_pack, &c, trsm_unpackm_cntl_b );
 */
 
-			//bl2_printm( "d (b after unpack2)", &d, "%4.1f", "" );
+			//bli_printm( "d (b after unpack2)", &d, "%4.1f", "" );
 
 			//exit(1);
 #endif
 
 #if 0
-			bl2_obj_set_struc( BLIS_TRIANGULAR, a );
-			bl2_obj_set_uplo( BLIS_LOWER, a );
+			bli_obj_set_struc( BLIS_TRIANGULAR, a );
+			bli_obj_set_uplo( BLIS_LOWER, a );
 
-			bl2_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
+			bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
 
-			bl2_trsm_int( BLIS_LEFT,
+			bli_trsm_int( BLIS_LEFT,
 			              &BLIS_ONE,
 			              &a,
 			              &c,
@@ -1052,13 +1052,13 @@ int main( int argc, char** argv )
 #endif
 
 #if 0
-			//bl2_obj_set_struc( BLIS_TRIANGULAR, a );
-			//bl2_obj_set_uplo( BLIS_LOWER, a );
+			//bli_obj_set_struc( BLIS_TRIANGULAR, a );
+			//bli_obj_set_uplo( BLIS_LOWER, a );
 
-			bl2_printm( "a", &a, "%4.1f", "" );
-			bl2_printm( "b", &c, "%4.1f", "" );
+			bli_printm( "a", &a, "%4.1f", "" );
+			bli_printm( "b", &c, "%4.1f", "" );
 
-			bl2_trsm_int( BLIS_LEFT,
+			bli_trsm_int( BLIS_LEFT,
 			              &BLIS_ONE,
 			              &a,
 			              &c,
@@ -1067,18 +1067,18 @@ int main( int argc, char** argv )
 			              trsm_cntl_mm_op );
 			              //trmm_cntl_vl_mm );
 
-			bl2_printm( "c after", &c, "%4.1f", "" );
+			bli_printm( "c after", &c, "%4.1f", "" );
 			exit(1);
 #endif
 
 
 #if 0
-			//bl2_obj_set_struc( BLIS_TRIANGULAR, a );
-			//bl2_obj_set_uplo( BLIS_LOWER, a );
+			//bli_obj_set_struc( BLIS_TRIANGULAR, a );
+			//bli_obj_set_uplo( BLIS_LOWER, a );
 
-			bl2_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
+			bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
 
-			bl2_trsm_int( BLIS_LEFT,
+			bli_trsm_int( BLIS_LEFT,
 			              &BLIS_ONE,
 			              &a,
 			              &c,
@@ -1092,12 +1092,12 @@ int main( int argc, char** argv )
 #if 0
 			char transa = 'N';
 			char transb = 'N';
-			int mm  = bl2_obj_length( c );
-			int kk  = bl2_obj_width_after_trans( a );
-			int nn  = bl2_obj_width( c );
-			int lda  = bl2_obj_col_stride( a );
-			int ldb  = bl2_obj_col_stride( b );
-			int ldc  = bl2_obj_col_stride( c );
+			int mm  = bli_obj_length( c );
+			int kk  = bli_obj_width_after_trans( a );
+			int nn  = bli_obj_width( c );
+			int lda  = bli_obj_col_stride( a );
+			int ldb  = bli_obj_col_stride( b );
+			int ldc  = bli_obj_col_stride( c );
 			dgemm_( &transa,
 			        &transb,
 			        &mm, &nn, &kk,
@@ -1117,30 +1117,30 @@ int main( int argc, char** argv )
 
 
 #if 0
-			bl2_gemv( &alpha, &a, &b1, &beta, &c1 );
-			//bl2_gemv_unf_var2( &alpha, &a, &b1, &beta, &c1, NULL );
-			//bl2_gemv( &alpha, &a11, &b1, &beta, &c11 );
-			//bl2_gemv_unf_var1( &alpha, &a, &b1, &beta, &c1, NULL );
-			//bl2_gemv_unb_var2( &alpha, &a11, &b1, &beta, &c1, NULL );
-			//bl2_gemv_unf_var2( &alpha, &a11, &b11, &beta, &c11, NULL );
+			bli_gemv( &alpha, &a, &b1, &beta, &c1 );
+			//bli_gemv_unf_var2( &alpha, &a, &b1, &beta, &c1, NULL );
+			//bli_gemv( &alpha, &a11, &b1, &beta, &c11 );
+			//bli_gemv_unf_var1( &alpha, &a, &b1, &beta, &c1, NULL );
+			//bli_gemv_unb_var2( &alpha, &a11, &b1, &beta, &c1, NULL );
+			//bli_gemv_unf_var2( &alpha, &a11, &b11, &beta, &c11, NULL );
 
-			//bl2_gemv( &alpha, &a, &b, &beta, &c );
-			//bl2_gemv_unb_var1( &alpha, &a, &b, &beta, &c, NULL );
-			//bl2_gemv_unf_var1( &alpha, &a, &b, &beta, &c, NULL );
-			//bl2_gemv_unb_var2( &alpha, &a, &b, &beta, &c, NULL );
-			//bl2_gemv_unf_var2( &alpha, &a, &b, &beta, &c, NULL );
+			//bli_gemv( &alpha, &a, &b, &beta, &c );
+			//bli_gemv_unb_var1( &alpha, &a, &b, &beta, &c, NULL );
+			//bli_gemv_unf_var1( &alpha, &a, &b, &beta, &c, NULL );
+			//bli_gemv_unb_var2( &alpha, &a, &b, &beta, &c, NULL );
+			//bli_gemv_unf_var2( &alpha, &a, &b, &beta, &c, NULL );
 //#else
 			char trans = 'N';
 			//char trans = 'T';
-			//int mm  = bl2_obj_length( a11 );
-			//int kk  = bl2_obj_width( a11 );
-			//int lda  = bl2_obj_col_stride( a11 );
-			int mm  = bl2_obj_length( a );
-			int kk  = bl2_obj_width( a );
-			int lda  = bl2_obj_col_stride( a );
+			//int mm  = bli_obj_length( a11 );
+			//int kk  = bli_obj_width( a11 );
+			//int lda  = bli_obj_col_stride( a11 );
+			int mm  = bli_obj_length( a );
+			int kk  = bli_obj_width( a );
+			int lda  = bli_obj_col_stride( a );
 			//int one = 1;
-			int incb = bl2_obj_vector_inc( b1 );
-			int incc = bl2_obj_vector_inc( c1 );
+			int incb = bli_obj_vector_inc( b1 );
+			int incc = bli_obj_vector_inc( c1 );
 			dgemv_( &trans,
 			        &mm, &kk,
 			        alpha.buffer,
@@ -1152,8 +1152,8 @@ int main( int argc, char** argv )
 
 
 #if 0
-			//bl2_ger_unb_var1( &alpha, &a, &b, &c, NULL );
-			//bl2_ger_unb_var2( &alpha, &a, &b, &c, NULL );
+			//bli_ger_unb_var1( &alpha, &a, &b, &c, NULL );
+			//bli_ger_unb_var2( &alpha, &a, &b, &c, NULL );
 //#else
 			int one = 1; int mm  = m; int nn  = n;
 			dger_( &mm, &nn,
@@ -1165,13 +1165,13 @@ int main( int argc, char** argv )
 
 
 #if 0
-			bl2_obj_set_uplo( BLIS_LOWER, a );
-			//bl2_hemv_unb_var1( &alpha, &a, &b, &beta, &c, NULL );
-			//bl2_hemv_unb_var3( &alpha, &a, &b, &beta, &c, NULL );
-			//bl2_hemv_unf_var1a( &alpha, &a, &b, &beta, &c, NULL );
-			//bl2_hemv_unf_var3a( &alpha, &a, &b, &beta, &c, NULL );
-			bl2_hemv_unf_var1( &alpha, &a, &b, &beta, &c, NULL );
-			//bl2_hemv_unf_var3( &alpha, &a, &b, &beta, &c, NULL );
+			bli_obj_set_uplo( BLIS_LOWER, a );
+			//bli_hemv_unb_var1( &alpha, &a, &b, &beta, &c, NULL );
+			//bli_hemv_unb_var3( &alpha, &a, &b, &beta, &c, NULL );
+			//bli_hemv_unf_var1a( &alpha, &a, &b, &beta, &c, NULL );
+			//bli_hemv_unf_var3a( &alpha, &a, &b, &beta, &c, NULL );
+			bli_hemv_unf_var1( &alpha, &a, &b, &beta, &c, NULL );
+			//bli_hemv_unf_var3( &alpha, &a, &b, &beta, &c, NULL );
 //#else
 			int one = 1; int mm  = m; char uplo = 'L';
 			dsymv_( &uplo,
@@ -1185,8 +1185,8 @@ int main( int argc, char** argv )
 
 
 #if 0
-			bl2_obj_set_uplo( BLIS_LOWER, c );
-			bl2_her_unb_var2( &alpha, &a, &c, NULL );
+			bli_obj_set_uplo( BLIS_LOWER, c );
+			bli_her_unb_var2( &alpha, &a, &c, NULL );
 //#else
 			int one = 1; int mm  = m; char uplo = 'L';
 			dsyr_( &uplo,
@@ -1198,14 +1198,14 @@ int main( int argc, char** argv )
 
 
 #if 0
-			bl2_obj_set_uplo( BLIS_LOWER, c );
-			//bl2_her2( &alpha, &a, &b, &c );
-			//bl2_her2_unb_var1( &alpha, &a, &b, &c, NULL );
-			//bl2_her2_unb_var4( &alpha, &a, &b, &c, NULL );
-			//bl2_her2_unf_var1( &alpha, &a, &b, &c, NULL );
-			//bl2_her2_unf_var4( &alpha, &a, &b, &c, NULL );
+			bli_obj_set_uplo( BLIS_LOWER, c );
+			//bli_her2( &alpha, &a, &b, &c );
+			//bli_her2_unb_var1( &alpha, &a, &b, &c, NULL );
+			//bli_her2_unb_var4( &alpha, &a, &b, &c, NULL );
+			//bli_her2_unf_var1( &alpha, &a, &b, &c, NULL );
+			//bli_her2_unf_var4( &alpha, &a, &b, &c, NULL );
 //#else
-			int one = 1; int mm = bl2_obj_col_stride( c ); char uplo = 'L';
+			int one = 1; int mm = bli_obj_col_stride( c ); char uplo = 'L';
 			dsyr2_( &uplo,
 			        &mm,
 			        alpha.buffer,
@@ -1216,14 +1216,14 @@ int main( int argc, char** argv )
 
 
 #if 0
-			bl2_setsc(  (1.0/1.0), &alpha );
-			bl2_obj_set_uplo( BLIS_LOWER, c );
-			bl2_obj_set_conjtrans( BLIS_NO_TRANSPOSE, c );
-			//bl2_trmv( &alpha, &c, &a );
-			//bl2_trmv_unb_var1( &alpha, &c, &a, NULL );
-			//bl2_trmv_unb_var2( &alpha, &c, &a, NULL );
-			bl2_trmv_unf_var1( &alpha, &c, &a, NULL );
-			//bl2_trmv_unf_var2( &alpha, &c, &a, NULL );
+			bli_setsc(  (1.0/1.0), &alpha );
+			bli_obj_set_uplo( BLIS_LOWER, c );
+			bli_obj_set_conjtrans( BLIS_NO_TRANSPOSE, c );
+			//bli_trmv( &alpha, &c, &a );
+			//bli_trmv_unb_var1( &alpha, &c, &a, NULL );
+			//bli_trmv_unb_var2( &alpha, &c, &a, NULL );
+			bli_trmv_unf_var1( &alpha, &c, &a, NULL );
+			//bli_trmv_unf_var2( &alpha, &c, &a, NULL );
 //#else
 			int one = 1; int mm  = m; char uplo = 'U'; char trans = 'T'; char diag = 'N';
 			dtrmv_( &uplo,
@@ -1236,14 +1236,14 @@ int main( int argc, char** argv )
 
 
 #if 0
-			bl2_setsc(  (1.0/1.0), &alpha );
-			bl2_obj_set_uplo( BLIS_UPPER, c );
-			bl2_obj_set_conjtrans( BLIS_NO_TRANSPOSE, c );
-			//bl2_trsv( &alpha, &c, &a );
-			//bl2_trsv_unb_var1( &alpha, &c, &a, NULL );
-			//bl2_trsv_unb_var2( &alpha, &c, &a, NULL );
-			bl2_trsv_unf_var1( &alpha, &c, &a, NULL );
-			//bl2_trsv_unf_var2( &alpha, &c, &a, NULL );
+			bli_setsc(  (1.0/1.0), &alpha );
+			bli_obj_set_uplo( BLIS_UPPER, c );
+			bli_obj_set_conjtrans( BLIS_NO_TRANSPOSE, c );
+			//bli_trsv( &alpha, &c, &a );
+			//bli_trsv_unb_var1( &alpha, &c, &a, NULL );
+			//bli_trsv_unb_var2( &alpha, &c, &a, NULL );
+			bli_trsv_unf_var1( &alpha, &c, &a, NULL );
+			//bli_trsv_unf_var2( &alpha, &c, &a, NULL );
 //#else
 			int one = 1; int mm  = m; char uplo = 'L'; char trans = 'T'; char diag = 'N';
 			dtrsv_( &uplo,
@@ -1257,84 +1257,84 @@ int main( int argc, char** argv )
 			//obj_t c_part;
 			//dim_t ij = 3;
 			//dim_t bb = 2;
-			//bl2_acquire_mpart_tl2br( BLIS_SUBPART22,
+			//bli_acquire_mpart_tl2br( BLIS_SUBPART22,
 			//                         ij,
 			//                         bb,
 			//                         &c,
 			//                         &c_part );
-			//bl2_printm( "c_part", &c_part, "%8.1e", "" );
+			//bli_printm( "c_part", &c_part, "%8.1e", "" );
 
-			dtime = bl2_clock() - dtime;
+			dtime = bli_clock() - dtime;
 
-			dtime_save = bl2_min( dtime, dtime_save );
+			dtime_save = bli_min( dtime, dtime_save );
 
 		}
 
-		//bl2_printm( "c after", &c, "%8.1e", "" );
+		//bli_printm( "c after", &c, "%8.1e", "" );
 		gflops = ( 2.0 * m * k * n ) / ( dtime_save * 1.0e9 );
 		//gflops = ( 2.0 * a_pack.m * k * n - a_pack.m * a_pack.m * k ) / ( dtime_save * 1.0e9 );
-		if ( bl2_obj_is_hermitian( c ) || bl2_obj_is_triangular( a ) ) gflops /= 2.0;
+		if ( bli_obj_is_hermitian( c ) || bli_obj_is_triangular( a ) ) gflops /= 2.0;
 		//gflops /= 4.0;
 
-		//gflops = ( 2.0 * bl2_obj_length( a11 ) * bl2_obj_width( a11 ) ) / ( dtime_save * 1.0e9 );
-		//gflops = ( 2.0 * bl2_obj_length( a ) * bl2_obj_width( a ) ) / ( dtime_save * 1.0e9 );
+		//gflops = ( 2.0 * bli_obj_length( a11 ) * bli_obj_width( a11 ) ) / ( dtime_save * 1.0e9 );
+		//gflops = ( 2.0 * bli_obj_length( a ) * bli_obj_width( a ) ) / ( dtime_save * 1.0e9 );
 
 		printf( "data_blis( %2ld, 1:5 ) = [ %4lu %4lu %4lu  %10.3e  %6.3f ];\n",
 		        (p - p_begin + 1)/p_inc + 1, m, k, n, dtime_save, gflops );
 
-		bl2_obj_release_pack( &a_pack );
-		bl2_obj_release_pack( &b_pack );
-		bl2_obj_release_pack( &c_pack );
+		bli_obj_release_pack( &a_pack );
+		bli_obj_release_pack( &b_pack );
+		bli_obj_release_pack( &c_pack );
 
-		bl2_blksz_obj_free( mr );
-		bl2_blksz_obj_free( nr );
-		bl2_blksz_obj_free( kr );
-		bl2_blksz_obj_free( mc );
-		bl2_blksz_obj_free( nc );
-		bl2_blksz_obj_free( kc );
-		bl2_blksz_obj_free( ni );
+		bli_blksz_obj_free( mr );
+		bli_blksz_obj_free( nr );
+		bli_blksz_obj_free( kr );
+		bli_blksz_obj_free( mc );
+		bli_blksz_obj_free( nc );
+		bli_blksz_obj_free( kc );
+		bli_blksz_obj_free( ni );
 
-		bl2_cntl_obj_free( scalm_cntl );
-		bl2_cntl_obj_free( packm_cntl_a );
-		bl2_cntl_obj_free( packm_cntl_b );
-		bl2_cntl_obj_free( trmm_packm_cntl_a );
-		bl2_cntl_obj_free( trmm_packm_cntl_b );
-		bl2_cntl_obj_free( trsm_packm_cntl_a );
-		bl2_cntl_obj_free( trsm_packm_cntl_b );
-		bl2_cntl_obj_free( trsm_unpackm_cntl_b );
-		bl2_cntl_obj_free( gemm_cntl_bp_ke );
-		bl2_cntl_obj_free( gemm_cntl_op_bp );
-		bl2_cntl_obj_free( gemm_cntl_mm_op );
-		bl2_cntl_obj_free( gemm_cntl_vl_mm );
-		bl2_cntl_obj_free( herk_cntl_bp_ke );
-		bl2_cntl_obj_free( herk_cntl_op_bp );
-		bl2_cntl_obj_free( herk_cntl_mm_op );
-		bl2_cntl_obj_free( herk_cntl_vl_mm );
-		bl2_cntl_obj_free( her2k_cntl_bp_ke );
-		bl2_cntl_obj_free( her2k_cntl_op_bp );
-		bl2_cntl_obj_free( her2k_cntl_mm_op );
-		bl2_cntl_obj_free( her2k_cntl_vl_mm );
-		bl2_cntl_obj_free( trmm_cntl_bp_ke );
-		bl2_cntl_obj_free( trmm_cntl_op_bp );
-		bl2_cntl_obj_free( trmm_cntl_mm_op );
-		bl2_cntl_obj_free( trmm_cntl_vl_mm );
-		bl2_cntl_obj_free( trmm3_cntl_mm_op );
-		bl2_cntl_obj_free( trsm_cntl_bp_ke );
-		bl2_cntl_obj_free( trsm_cntl_op_bp );
-		bl2_cntl_obj_free( trsm_cntl_mm_op );
-		bl2_cntl_obj_free( trsm_cntl_vl_mm );
+		bli_cntl_obj_free( scalm_cntl );
+		bli_cntl_obj_free( packm_cntl_a );
+		bli_cntl_obj_free( packm_cntl_b );
+		bli_cntl_obj_free( trmm_packm_cntl_a );
+		bli_cntl_obj_free( trmm_packm_cntl_b );
+		bli_cntl_obj_free( trsm_packm_cntl_a );
+		bli_cntl_obj_free( trsm_packm_cntl_b );
+		bli_cntl_obj_free( trsm_unpackm_cntl_b );
+		bli_cntl_obj_free( gemm_cntl_bp_ke );
+		bli_cntl_obj_free( gemm_cntl_op_bp );
+		bli_cntl_obj_free( gemm_cntl_mm_op );
+		bli_cntl_obj_free( gemm_cntl_vl_mm );
+		bli_cntl_obj_free( herk_cntl_bp_ke );
+		bli_cntl_obj_free( herk_cntl_op_bp );
+		bli_cntl_obj_free( herk_cntl_mm_op );
+		bli_cntl_obj_free( herk_cntl_vl_mm );
+		bli_cntl_obj_free( her2k_cntl_bp_ke );
+		bli_cntl_obj_free( her2k_cntl_op_bp );
+		bli_cntl_obj_free( her2k_cntl_mm_op );
+		bli_cntl_obj_free( her2k_cntl_vl_mm );
+		bli_cntl_obj_free( trmm_cntl_bp_ke );
+		bli_cntl_obj_free( trmm_cntl_op_bp );
+		bli_cntl_obj_free( trmm_cntl_mm_op );
+		bli_cntl_obj_free( trmm_cntl_vl_mm );
+		bli_cntl_obj_free( trmm3_cntl_mm_op );
+		bli_cntl_obj_free( trsm_cntl_bp_ke );
+		bli_cntl_obj_free( trsm_cntl_op_bp );
+		bli_cntl_obj_free( trsm_cntl_mm_op );
+		bli_cntl_obj_free( trsm_cntl_vl_mm );
 
-		bl2_obj_free( &alpha );
-		bl2_obj_free( &beta );
+		bli_obj_free( &alpha );
+		bli_obj_free( &beta );
 
-		bl2_obj_free( &a );
-		bl2_obj_free( &b );
-		bl2_obj_free( &c );
-		bl2_obj_free( &w );
-		bl2_obj_free( &c_save );
+		bli_obj_free( &a );
+		bli_obj_free( &b );
+		bli_obj_free( &c );
+		bli_obj_free( &w );
+		bli_obj_free( &c_save );
 	}
 
-	bl2_finalize();
+	bli_finalize();
 
 	return 0;
 }
@@ -1360,40 +1360,40 @@ int main( int argc, char** argv )
 	m = 6;
 	n = 11;
 	
-	bl2_init();
+	bli_init();
 
-	bl2_obj_create( dt_alpha, 1, 1, 0, 0, &alpha );
-	bl2_obj_create( dt_a,     n, m, 0, 0, &a );
-	bl2_obj_create( dt_b,     m, n, 0, 0, &b );
+	bli_obj_create( dt_alpha, 1, 1, 0, 0, &alpha );
+	bli_obj_create( dt_a,     n, m, 0, 0, &a );
+	bli_obj_create( dt_b,     m, n, 0, 0, &b );
 
-	bl2_setsc( -(3.0/1.0), &alpha );
-	bl2_setm( &BLIS_TWO, &a );
-	bl2_setm( &BLIS_ONE, &b );
+	bli_setsc( -(3.0/1.0), &alpha );
+	bli_setm( &BLIS_TWO, &a );
+	bli_setm( &BLIS_ONE, &b );
 
-	bl2_printm( "alpha", &alpha, "%4.1f", "" );
-	bl2_printm( "a before", &a, "%4.1f", "" );
-	bl2_printm( "b before", &b, "%4.1f", "" );
+	bli_printm( "alpha", &alpha, "%4.1f", "" );
+	bli_printm( "a before", &a, "%4.1f", "" );
+	bli_printm( "b before", &b, "%4.1f", "" );
 
-	//bl2_obj_set_struc( BLIS_SYMMETRIC, a );
-	bl2_obj_set_struc( BLIS_GENERAL, a );
-	bl2_obj_set_uplo( BLIS_DENSE, a );
-	//bl2_obj_set_uplo( BLIS_UPPER, a );
-	//bl2_obj_set_uplo( BLIS_LOWER, a );
-	bl2_obj_set_diag_offset( -7, a );
-	bl2_obj_set_diag( BLIS_UNIT_DIAG, a );
-	bl2_obj_set_trans( BLIS_TRANSPOSE, a );
-	//bl2_obj_set_conj( BLIS_CONJUGATE, a );
+	//bli_obj_set_struc( BLIS_SYMMETRIC, a );
+	bli_obj_set_struc( BLIS_GENERAL, a );
+	bli_obj_set_uplo( BLIS_DENSE, a );
+	//bli_obj_set_uplo( BLIS_UPPER, a );
+	//bli_obj_set_uplo( BLIS_LOWER, a );
+	bli_obj_set_diag_offset( -7, a );
+	bli_obj_set_diag( BLIS_UNIT_DIAG, a );
+	bli_obj_set_trans( BLIS_TRANSPOSE, a );
+	//bli_obj_set_conj( BLIS_CONJUGATE, a );
 
-	bl2_axpyd( &alpha, &a, &b );
+	bli_axpyd( &alpha, &a, &b );
 
-	bl2_printm( "b after", &b, "%4.1f", "" );
+	bli_printm( "b after", &b, "%4.1f", "" );
 
 
-	bl2_obj_free( &alpha );
-	bl2_obj_free( &a );
-	bl2_obj_free( &b );
+	bli_obj_free( &alpha );
+	bli_obj_free( &a );
+	bli_obj_free( &b );
 
-	bl2_finalize();
+	bli_finalize();
 
 	return 0;
 }
@@ -1411,36 +1411,36 @@ int main( int argc, char** argv )
 	m = 6;
 	n = 11;
 	
-	bl2_init();
+	bli_init();
 
-	bl2_obj_create( dt_a,     n, m, 0, 0, &a );
-	bl2_obj_create( dt_b,     m, n, 0, 0, &b );
+	bli_obj_create( dt_a,     n, m, 0, 0, &a );
+	bli_obj_create( dt_b,     m, n, 0, 0, &b );
 
-	bl2_setm( &BLIS_TWO, &a );
-	bl2_setm( &BLIS_ZERO, &b );
+	bli_setm( &BLIS_TWO, &a );
+	bli_setm( &BLIS_ZERO, &b );
 
-	bl2_printm( "a before", &a, "%4.1f", "" );
-	bl2_printm( "b before", &b, "%4.1f", "" );
+	bli_printm( "a before", &a, "%4.1f", "" );
+	bli_printm( "b before", &b, "%4.1f", "" );
 
-	//bl2_obj_set_struc( BLIS_SYMMETRIC, a );
-	bl2_obj_set_struc( BLIS_GENERAL, a );
-	bl2_obj_set_uplo( BLIS_DENSE, a );
-	//bl2_obj_set_uplo( BLIS_UPPER, a );
-	//bl2_obj_set_uplo( BLIS_LOWER, a );
-	bl2_obj_set_diag_offset( -7, a );
-	bl2_obj_set_diag( BLIS_NONUNIT_DIAG, a );
-	bl2_obj_set_trans( BLIS_TRANSPOSE, a );
-	//bl2_obj_set_conj( BLIS_CONJUGATE, a );
+	//bli_obj_set_struc( BLIS_SYMMETRIC, a );
+	bli_obj_set_struc( BLIS_GENERAL, a );
+	bli_obj_set_uplo( BLIS_DENSE, a );
+	//bli_obj_set_uplo( BLIS_UPPER, a );
+	//bli_obj_set_uplo( BLIS_LOWER, a );
+	bli_obj_set_diag_offset( -7, a );
+	bli_obj_set_diag( BLIS_NONUNIT_DIAG, a );
+	bli_obj_set_trans( BLIS_TRANSPOSE, a );
+	//bli_obj_set_conj( BLIS_CONJUGATE, a );
 
-	bl2_copyd( &a, &b );
+	bli_copyd( &a, &b );
 
-	bl2_printm( "b after", &b, "%4.1f", "" );
+	bli_printm( "b after", &b, "%4.1f", "" );
 
 
-	bl2_obj_free( &a );
-	bl2_obj_free( &b );
+	bli_obj_free( &a );
+	bli_obj_free( &b );
 
-	bl2_finalize();
+	bli_finalize();
 
 	return 0;
 }
@@ -1459,87 +1459,40 @@ int main( int argc, char** argv )
 	m = 6;
 	n = 11;
 	
-	bl2_init();
+	bli_init();
 
-	bl2_obj_create( dt_beta, 1, 1, 0, 0, &beta );
-	bl2_obj_create( dt_a,    n, m, 0, 0, &a );
-	bl2_obj_create( dt_b,    m, n, 0, 0, &b );
+	bli_obj_create( dt_beta, 1, 1, 0, 0, &beta );
+	bli_obj_create( dt_a,    n, m, 0, 0, &a );
+	bli_obj_create( dt_b,    m, n, 0, 0, &b );
 
-	bl2_setsc( -(3.0/1.0), &beta );
-	bl2_setm( &BLIS_MINUS_TWO, &a );
-	bl2_setm( &BLIS_ONE, &b );
+	bli_setsc( -(3.0/1.0), &beta );
+	bli_setm( &BLIS_MINUS_TWO, &a );
+	bli_setm( &BLIS_ONE, &b );
 
-	bl2_printm( "beta", &beta, "%4.1f", "" );
-	bl2_printm( "a before", &a, "%4.1f", "" );
-	bl2_printm( "b before", &b, "%4.1f", "" );
+	bli_printm( "beta", &beta, "%4.1f", "" );
+	bli_printm( "a before", &a, "%4.1f", "" );
+	bli_printm( "b before", &b, "%4.1f", "" );
 
-	//bl2_obj_set_struc( BLIS_SYMMETRIC, a );
-	bl2_obj_set_struc( BLIS_GENERAL, a );
-	bl2_obj_set_uplo( BLIS_DENSE, a );
-	//bl2_obj_set_uplo( BLIS_UPPER, a );
-	//bl2_obj_set_uplo( BLIS_LOWER, a );
-	bl2_obj_set_diag_offset( 2, a );
-	bl2_obj_set_diag( BLIS_NONUNIT_DIAG, a );
-	bl2_obj_set_trans( BLIS_TRANSPOSE, a );
-	//bl2_obj_set_conj( BLIS_CONJUGATE, a );
+	//bli_obj_set_struc( BLIS_SYMMETRIC, a );
+	bli_obj_set_struc( BLIS_GENERAL, a );
+	bli_obj_set_uplo( BLIS_DENSE, a );
+	//bli_obj_set_uplo( BLIS_UPPER, a );
+	//bli_obj_set_uplo( BLIS_LOWER, a );
+	bli_obj_set_diag_offset( 2, a );
+	bli_obj_set_diag( BLIS_NONUNIT_DIAG, a );
+	bli_obj_set_trans( BLIS_TRANSPOSE, a );
+	//bli_obj_set_conj( BLIS_CONJUGATE, a );
 
-	bl2_scal2d( &beta, &a, &b );
+	bli_scal2d( &beta, &a, &b );
 
-	bl2_printm( "b after", &b, "%4.1f", "" );
+	bli_printm( "b after", &b, "%4.1f", "" );
 
 
-	bl2_obj_free( &beta );
-	bl2_obj_free( &a );
-	bl2_obj_free( &b );
+	bli_obj_free( &beta );
+	bli_obj_free( &a );
+	bli_obj_free( &b );
 
-	bl2_finalize();
-
-	return 0;
-}
-#endif
-
-#if 0
-{
-	num_t dt_a, dt_alpha;
-	obj_t alpha, a;
-	dim_t m, n;
-
-	dt_alpha = BLIS_DOUBLE;
-	dt_a     = BLIS_DOUBLE;
-
-	m = 6;
-	n = 11;
-	
-	bl2_init();
-
-	bl2_obj_create( dt_alpha, 1, 1, 0, 0, &alpha );
-	bl2_obj_create( dt_a,     m, n, 0, 0, &a );
-
-	bl2_setsc( -(4.0/1.0), &alpha );
-	bl2_setm( &BLIS_TWO, &a );
-
-	bl2_printm( "alpha", &alpha, "%4.1f", "" );
-	bl2_printm( "a before", &a, "%4.1f", "" );
-
-	//bl2_obj_set_struc( BLIS_GENERAL, a );
-	//bl2_obj_set_uplo( BLIS_DENSE, a );
-
-	//bl2_obj_set_struc( BLIS_SYMMETRIC, a );
-	bl2_obj_set_struc( BLIS_GENERAL, a );
-	bl2_obj_set_uplo( BLIS_DENSE, a );
-	//bl2_obj_set_uplo( BLIS_UPPER, a );
-	//bl2_obj_set_uplo( BLIS_LOWER, a );
-	bl2_obj_set_diag_offset( -2, a );
-	bl2_obj_set_diag( BLIS_UNIT_DIAG, a );
-
-	bl2_scald( &alpha, &a );
-
-	bl2_printm( "a after", &a, "%4.1f", "" );
-
-	bl2_obj_free( &alpha );
-	bl2_obj_free( &a );
-
-	bl2_finalize();
+	bli_finalize();
 
 	return 0;
 }
@@ -1557,36 +1510,83 @@ int main( int argc, char** argv )
 	m = 6;
 	n = 11;
 	
-	bl2_init();
+	bli_init();
 
-	bl2_obj_create( dt_alpha, 1, 1, 0, 0, &alpha );
-	bl2_obj_create( dt_a,     m, n, 0, 0, &a );
+	bli_obj_create( dt_alpha, 1, 1, 0, 0, &alpha );
+	bli_obj_create( dt_a,     m, n, 0, 0, &a );
 
-	bl2_setsc( -(4.0/1.0), &alpha );
-	bl2_setm( &BLIS_TWO, &a );
+	bli_setsc( -(4.0/1.0), &alpha );
+	bli_setm( &BLIS_TWO, &a );
 
-	bl2_printm( "alpha", &alpha, "%4.1f", "" );
-	bl2_printm( "a before", &a, "%4.1f", "" );
+	bli_printm( "alpha", &alpha, "%4.1f", "" );
+	bli_printm( "a before", &a, "%4.1f", "" );
 
-	//bl2_obj_set_struc( BLIS_GENERAL, a );
-	//bl2_obj_set_uplo( BLIS_DENSE, a );
+	//bli_obj_set_struc( BLIS_GENERAL, a );
+	//bli_obj_set_uplo( BLIS_DENSE, a );
 
-	//bl2_obj_set_struc( BLIS_SYMMETRIC, a );
-	bl2_obj_set_struc( BLIS_GENERAL, a );
-	bl2_obj_set_uplo( BLIS_DENSE, a );
-	//bl2_obj_set_uplo( BLIS_UPPER, a );
-	//bl2_obj_set_uplo( BLIS_LOWER, a );
-	bl2_obj_set_diag_offset( 7, a );
-	bl2_obj_set_diag( BLIS_NONUNIT_DIAG, a );
+	//bli_obj_set_struc( BLIS_SYMMETRIC, a );
+	bli_obj_set_struc( BLIS_GENERAL, a );
+	bli_obj_set_uplo( BLIS_DENSE, a );
+	//bli_obj_set_uplo( BLIS_UPPER, a );
+	//bli_obj_set_uplo( BLIS_LOWER, a );
+	bli_obj_set_diag_offset( -2, a );
+	bli_obj_set_diag( BLIS_UNIT_DIAG, a );
 
-	bl2_setd( &alpha, &a );
+	bli_scald( &alpha, &a );
 
-	bl2_printm( "a after", &a, "%4.1f", "" );
+	bli_printm( "a after", &a, "%4.1f", "" );
 
-	bl2_obj_free( &alpha );
-	bl2_obj_free( &a );
+	bli_obj_free( &alpha );
+	bli_obj_free( &a );
 
-	bl2_finalize();
+	bli_finalize();
+
+	return 0;
+}
+#endif
+
+#if 0
+{
+	num_t dt_a, dt_alpha;
+	obj_t alpha, a;
+	dim_t m, n;
+
+	dt_alpha = BLIS_DOUBLE;
+	dt_a     = BLIS_DOUBLE;
+
+	m = 6;
+	n = 11;
+	
+	bli_init();
+
+	bli_obj_create( dt_alpha, 1, 1, 0, 0, &alpha );
+	bli_obj_create( dt_a,     m, n, 0, 0, &a );
+
+	bli_setsc( -(4.0/1.0), &alpha );
+	bli_setm( &BLIS_TWO, &a );
+
+	bli_printm( "alpha", &alpha, "%4.1f", "" );
+	bli_printm( "a before", &a, "%4.1f", "" );
+
+	//bli_obj_set_struc( BLIS_GENERAL, a );
+	//bli_obj_set_uplo( BLIS_DENSE, a );
+
+	//bli_obj_set_struc( BLIS_SYMMETRIC, a );
+	bli_obj_set_struc( BLIS_GENERAL, a );
+	bli_obj_set_uplo( BLIS_DENSE, a );
+	//bli_obj_set_uplo( BLIS_UPPER, a );
+	//bli_obj_set_uplo( BLIS_LOWER, a );
+	bli_obj_set_diag_offset( 7, a );
+	bli_obj_set_diag( BLIS_NONUNIT_DIAG, a );
+
+	bli_setd( &alpha, &a );
+
+	bli_printm( "a after", &a, "%4.1f", "" );
+
+	bli_obj_free( &alpha );
+	bli_obj_free( &a );
+
+	bli_finalize();
 
 	return 0;
 }
@@ -1611,39 +1611,39 @@ int main( int argc, char** argv )
 	m = 6;
 	n = 11;
 	
-	bl2_init();
+	bli_init();
 
-	bl2_obj_create( dt_alpha, 1, 1, 0, 0, &alpha );
-	bl2_obj_create( dt_a,    n, m, 0, 0, &a );
-	bl2_obj_create( dt_b,    m, n, 0, 0, &b );
+	bli_obj_create( dt_alpha, 1, 1, 0, 0, &alpha );
+	bli_obj_create( dt_a,    n, m, 0, 0, &a );
+	bli_obj_create( dt_b,    m, n, 0, 0, &b );
 
-	bl2_setsc( -(3.0/1.0), &alpha );
-	bl2_setm( &BLIS_TWO, &a );
-	bl2_setm( &BLIS_ONE, &b );
+	bli_setsc( -(3.0/1.0), &alpha );
+	bli_setm( &BLIS_TWO, &a );
+	bli_setm( &BLIS_ONE, &b );
 
-	bl2_printm( "alpha", &alpha, "%4.1f", "" );
-	bl2_printm( "a before", &a, "%4.1f", "" );
-	bl2_printm( "b before", &b, "%4.1f", "" );
+	bli_printm( "alpha", &alpha, "%4.1f", "" );
+	bli_printm( "a before", &a, "%4.1f", "" );
+	bli_printm( "b before", &b, "%4.1f", "" );
 
-	bl2_obj_set_struc( BLIS_SYMMETRIC, a );
-	//bl2_obj_set_struc( BLIS_GENERAL, a );
-	//bl2_obj_set_uplo( BLIS_DENSE, a );
-	bl2_obj_set_uplo( BLIS_UPPER, a );
-	//bl2_obj_set_uplo( BLIS_LOWER, a );
-	bl2_obj_set_diag_offset( 2, a );
-	bl2_obj_set_diag( BLIS_UNIT_DIAG, a );
-	bl2_obj_set_trans( BLIS_TRANSPOSE, a );
-	//bl2_obj_set_conj( BLIS_CONJUGATE, a );
+	bli_obj_set_struc( BLIS_SYMMETRIC, a );
+	//bli_obj_set_struc( BLIS_GENERAL, a );
+	//bli_obj_set_uplo( BLIS_DENSE, a );
+	bli_obj_set_uplo( BLIS_UPPER, a );
+	//bli_obj_set_uplo( BLIS_LOWER, a );
+	bli_obj_set_diag_offset( 2, a );
+	bli_obj_set_diag( BLIS_UNIT_DIAG, a );
+	bli_obj_set_trans( BLIS_TRANSPOSE, a );
+	//bli_obj_set_conj( BLIS_CONJUGATE, a );
 
-	bl2_axpym( &alpha, &a, &b );
+	bli_axpym( &alpha, &a, &b );
 
-	bl2_printm( "b after", &b, "%4.1f", "" );
+	bli_printm( "b after", &b, "%4.1f", "" );
 
-	bl2_obj_free( &alpha );
-	bl2_obj_free( &a );
-	bl2_obj_free( &b );
+	bli_obj_free( &alpha );
+	bli_obj_free( &a );
+	bli_obj_free( &b );
 
-	bl2_finalize();
+	bli_finalize();
 
 	return 0;
 }
@@ -1661,35 +1661,35 @@ int main( int argc, char** argv )
 	m = 11;
 	n = 6;
 	
-	bl2_init();
+	bli_init();
 
-	bl2_obj_create( dt_a,     n, m, 0, 0, &a );
-	bl2_obj_create( dt_b,     m, n, 0, 0, &b );
+	bli_obj_create( dt_a,     n, m, 0, 0, &a );
+	bli_obj_create( dt_b,     m, n, 0, 0, &b );
 
-	//bl2_setm( &BLIS_MINUS_ONE, &a );
-	bl2_randm( &a );
-	bl2_setm( &BLIS_ZERO, &b );
+	//bli_setm( &BLIS_MINUS_ONE, &a );
+	bli_randm( &a );
+	bli_setm( &BLIS_ZERO, &b );
 
-	bl2_printm( "a before", &a, "%4.1f", "" );
-	bl2_printm( "b before", &b, "%4.1f", "" );
+	bli_printm( "a before", &a, "%4.1f", "" );
+	bli_printm( "b before", &b, "%4.1f", "" );
 
-	//bl2_obj_set_struc( BLIS_GENERAL, a );
-	//bl2_obj_set_uplo( BLIS_DENSE, a );
+	//bli_obj_set_struc( BLIS_GENERAL, a );
+	//bli_obj_set_uplo( BLIS_DENSE, a );
 
-	bl2_obj_set_diag_offset( 2, a );
-	bl2_obj_set_struc( BLIS_TRIANGULAR, a );
-	//bl2_obj_set_uplo( BLIS_UPPER, a );
-	bl2_obj_set_uplo( BLIS_LOWER, a );
-	bl2_obj_set_trans( BLIS_TRANSPOSE, a );
+	bli_obj_set_diag_offset( 2, a );
+	bli_obj_set_struc( BLIS_TRIANGULAR, a );
+	//bli_obj_set_uplo( BLIS_UPPER, a );
+	bli_obj_set_uplo( BLIS_LOWER, a );
+	bli_obj_set_trans( BLIS_TRANSPOSE, a );
 
-	bl2_copym( &a, &b );
+	bli_copym( &a, &b );
 
-	bl2_printm( "b after", &b, "%4.1f", "" );
+	bli_printm( "b after", &b, "%4.1f", "" );
 
-	bl2_obj_free( &a );
-	bl2_obj_free( &b );
+	bli_obj_free( &a );
+	bli_obj_free( &b );
 
-	bl2_finalize();
+	bli_finalize();
 
 	return 0;
 }
@@ -1707,33 +1707,33 @@ int main( int argc, char** argv )
 	m = 6;
 	n = 1;
 	
-	bl2_init();
+	bli_init();
 
-	bl2_obj_create( dt_a,     m, n, 0, 0, &a );
-	bl2_obj_create( dt_alpha, 1, 1, 0, 0, &alpha );
+	bli_obj_create( dt_a,     m, n, 0, 0, &a );
+	bli_obj_create( dt_alpha, 1, 1, 0, 0, &alpha );
 
-	bl2_setm( &BLIS_ONE, &a );
-	bl2_setsc( -(4.0/1.0), &alpha );
+	bli_setm( &BLIS_ONE, &a );
+	bli_setsc( -(4.0/1.0), &alpha );
 
-	bl2_printm( "alpha", &alpha, "%4.1f", "" );
-	bl2_printm( "a before", &a, "%4.1f", "" );
+	bli_printm( "alpha", &alpha, "%4.1f", "" );
+	bli_printm( "a before", &a, "%4.1f", "" );
 
-	//bl2_obj_set_struc( BLIS_GENERAL, a );
-	//bl2_obj_set_uplo( BLIS_DENSE, a );
+	//bli_obj_set_struc( BLIS_GENERAL, a );
+	//bli_obj_set_uplo( BLIS_DENSE, a );
 
-	bl2_obj_set_diag_offset( -7, a );
-	bl2_obj_set_struc( BLIS_TRIANGULAR, a );
-	bl2_obj_set_uplo( BLIS_UPPER, a );
-	//bl2_obj_set_uplo( BLIS_LOWER, a );
+	bli_obj_set_diag_offset( -7, a );
+	bli_obj_set_struc( BLIS_TRIANGULAR, a );
+	bli_obj_set_uplo( BLIS_UPPER, a );
+	//bli_obj_set_uplo( BLIS_LOWER, a );
 
-	bl2_scalm( &alpha, &a );
+	bli_scalm( &alpha, &a );
 
-	bl2_printm( "a after", &a, "%4.1f", "" );
+	bli_printm( "a after", &a, "%4.1f", "" );
 
-	bl2_obj_free( &a );
-	bl2_obj_free( &alpha );
+	bli_obj_free( &a );
+	bli_obj_free( &alpha );
 
-	bl2_finalize();
+	bli_finalize();
 
 	return 0;
 }
@@ -1752,39 +1752,39 @@ int main( int argc, char** argv )
 	m = 6;
 	n = 11;
 	
-	bl2_init();
+	bli_init();
 
-	bl2_obj_create( dt_beta, 1, 1, 0, 0, &beta );
-	bl2_obj_create( dt_a,    n, m, 0, 0, &a );
-	bl2_obj_create( dt_b,    m, n, 0, 0, &b );
+	bli_obj_create( dt_beta, 1, 1, 0, 0, &beta );
+	bli_obj_create( dt_a,    n, m, 0, 0, &a );
+	bli_obj_create( dt_b,    m, n, 0, 0, &b );
 
-	bl2_setsc( -(3.0/1.0), &beta );
-	bl2_setm( &BLIS_TWO, &a );
-	bl2_setm( &BLIS_ONE, &b );
+	bli_setsc( -(3.0/1.0), &beta );
+	bli_setm( &BLIS_TWO, &a );
+	bli_setm( &BLIS_ONE, &b );
 
-	bl2_printm( "beta", &beta, "%4.1f", "" );
-	bl2_printm( "a before", &a, "%4.1f", "" );
-	bl2_printm( "b before", &b, "%4.1f", "" );
+	bli_printm( "beta", &beta, "%4.1f", "" );
+	bli_printm( "a before", &a, "%4.1f", "" );
+	bli_printm( "b before", &b, "%4.1f", "" );
 
-	bl2_obj_set_struc( BLIS_SYMMETRIC, a );
-	//bl2_obj_set_struc( BLIS_GENERAL, a );
-	//bl2_obj_set_uplo( BLIS_DENSE, a );
-	bl2_obj_set_uplo( BLIS_UPPER, a );
-	//bl2_obj_set_uplo( BLIS_LOWER, a );
-	bl2_obj_set_diag_offset( -2, a );
-	bl2_obj_set_diag( BLIS_UNIT_DIAG, a );
-	bl2_obj_set_trans( BLIS_TRANSPOSE, a );
-	//bl2_obj_set_conj( BLIS_CONJUGATE, a );
+	bli_obj_set_struc( BLIS_SYMMETRIC, a );
+	//bli_obj_set_struc( BLIS_GENERAL, a );
+	//bli_obj_set_uplo( BLIS_DENSE, a );
+	bli_obj_set_uplo( BLIS_UPPER, a );
+	//bli_obj_set_uplo( BLIS_LOWER, a );
+	bli_obj_set_diag_offset( -2, a );
+	bli_obj_set_diag( BLIS_UNIT_DIAG, a );
+	bli_obj_set_trans( BLIS_TRANSPOSE, a );
+	//bli_obj_set_conj( BLIS_CONJUGATE, a );
 
-	bl2_scal2m( &beta, &a, &b );
+	bli_scal2m( &beta, &a, &b );
 
-	bl2_printm( "b after", &b, "%4.1f", "" );
+	bli_printm( "b after", &b, "%4.1f", "" );
 
-	bl2_obj_free( &beta );
-	bl2_obj_free( &a );
-	bl2_obj_free( &b );
+	bli_obj_free( &beta );
+	bli_obj_free( &a );
+	bli_obj_free( &b );
 
-	bl2_finalize();
+	bli_finalize();
 
 	return 0;
 }
@@ -1805,33 +1805,33 @@ int main( int argc, char** argv )
 	m = 6;
 	n = 11;
 	
-	bl2_init();
+	bli_init();
 
-	bl2_obj_create( dt_beta, 1, 1, 0, 0, &beta );
-	bl2_obj_create( dt_a,    n, m, 0, 0, &a );
+	bli_obj_create( dt_beta, 1, 1, 0, 0, &beta );
+	bli_obj_create( dt_a,    n, m, 0, 0, &a );
 
-	bl2_setsc( -(1.0/1.0), &beta );
-	//bl2_setm( &BLIS_TWO, &a );
-	bl2_randm( &a );
+	bli_setsc( -(1.0/1.0), &beta );
+	//bli_setm( &BLIS_TWO, &a );
+	bli_randm( &a );
 
-	bl2_printm( "beta", &beta, "%4.1f", "" );
-	bl2_printm( "a before", &a, "%4.1f", "" );
+	bli_printm( "beta", &beta, "%4.1f", "" );
+	bli_printm( "a before", &a, "%4.1f", "" );
 
-	//bl2_obj_set_struc( BLIS_SYMMETRIC, a );
-	bl2_obj_set_struc( BLIS_TRIANGULAR, a );
-	//bl2_obj_set_struc( BLIS_GENERAL, a );
-	//bl2_obj_set_uplo( BLIS_DENSE, a );
-	bl2_obj_set_uplo( BLIS_UPPER, a );
-	//bl2_obj_set_uplo( BLIS_LOWER, a );
-	bl2_obj_set_diag_offset( -2, a );
-	bl2_obj_set_diag( BLIS_NONUNIT_DIAG, a );
-	bl2_obj_set_trans( BLIS_TRANSPOSE, a );
-	//bl2_obj_set_conj( BLIS_CONJUGATE, a );
+	//bli_obj_set_struc( BLIS_SYMMETRIC, a );
+	bli_obj_set_struc( BLIS_TRIANGULAR, a );
+	//bli_obj_set_struc( BLIS_GENERAL, a );
+	//bli_obj_set_uplo( BLIS_DENSE, a );
+	bli_obj_set_uplo( BLIS_UPPER, a );
+	//bli_obj_set_uplo( BLIS_LOWER, a );
+	bli_obj_set_diag_offset( -2, a );
+	bli_obj_set_diag( BLIS_NONUNIT_DIAG, a );
+	bli_obj_set_trans( BLIS_TRANSPOSE, a );
+	//bli_obj_set_conj( BLIS_CONJUGATE, a );
 
-	mult_m = bl2_blksz_obj_create( 2, 4, 2, 2 );
-	mult_n = bl2_blksz_obj_create( 1, 2, 1, 1 );
+	mult_m = bli_blksz_obj_create( 2, 4, 2, 2 );
+	mult_n = bli_blksz_obj_create( 1, 2, 1, 1 );
 
-	cntl = bl2_packm_cntl_obj_create( BLIS_UNBLOCKED,
+	cntl = bli_packm_cntl_obj_create( BLIS_UNBLOCKED,
 	                                  BLIS_VARIANT1,
 	                                  mult_m,
 	                                  mult_n, 
@@ -1841,25 +1841,25 @@ int main( int argc, char** argv )
 	                                  TRUE,  // densify?
 	                                  BLIS_PACKED_ROWS );
 	                                  //BLIS_PACKED_COLUMNS );
-	bl2_obj_init_pack( &p );
+	bli_obj_init_pack( &p );
 
-	bl2_packm_int( &beta, &a, &p, cntl );
+	bli_packm_int( &beta, &a, &p, cntl );
 
-	bl2_printm( "p after", &p, "%4.1f", "" );
+	bli_printm( "p after", &p, "%4.1f", "" );
 p.m = p.pack_mem->m;
 p.n = p.pack_mem->n;
-	bl2_printm( "p mem", &p, "%4.1f", "" );
+	bli_printm( "p mem", &p, "%4.1f", "" );
 
-	bl2_obj_release_pack( &p );
+	bli_obj_release_pack( &p );
 
-	bl2_obj_free( &beta );
-	bl2_obj_free( &a );
+	bli_obj_free( &beta );
+	bli_obj_free( &a );
 
-	bl2_blksz_obj_free( mult_m );
-	bl2_blksz_obj_free( mult_n );
-	bl2_cntl_obj_free( cntl );
+	bli_blksz_obj_free( mult_m );
+	bli_blksz_obj_free( mult_n );
+	bli_cntl_obj_free( cntl );
 
-	bl2_finalize();
+	bli_finalize();
 
 	return 0;
 }
@@ -1880,34 +1880,34 @@ p.n = p.pack_mem->n;
 	m = 7;
 	n = 11;
 	
-	bl2_init();
+	bli_init();
 
-	bl2_obj_create( dt_beta, 1, 1, 0, 0, &beta );
-	bl2_obj_create( dt_a,    m, n, 0, 0, &a );
+	bli_obj_create( dt_beta, 1, 1, 0, 0, &beta );
+	bli_obj_create( dt_a,    m, n, 0, 0, &a );
 
-	bl2_setsc( -(1.0/1.0), &beta );
-	//bl2_setm( &BLIS_TWO, &a );
-	bl2_randm( &a );
+	bli_setsc( -(1.0/1.0), &beta );
+	//bli_setm( &BLIS_TWO, &a );
+	bli_randm( &a );
 
-	bl2_printm( "beta", &beta, "%4.1f", "" );
-	bl2_printm( "a before", &a, "%4.1f", "" );
+	bli_printm( "beta", &beta, "%4.1f", "" );
+	bli_printm( "a before", &a, "%4.1f", "" );
 
-	//bl2_obj_set_struc( BLIS_SYMMETRIC, a );
-	//bl2_obj_set_struc( BLIS_TRIANGULAR, a );
-	bl2_obj_set_struc( BLIS_GENERAL, a );
-	bl2_obj_set_uplo( BLIS_DENSE, a );
-	//bl2_obj_set_uplo( BLIS_UPPER, a );
-	//bl2_obj_set_uplo( BLIS_LOWER, a );
-	//bl2_obj_set_diag_offset( -2, a );
-	bl2_obj_set_diag_offset( 0, a );
-	//bl2_obj_set_diag( BLIS_UNIT_DIAG, a );
-	//bl2_obj_set_trans( BLIS_TRANSPOSE, a );
-	//bl2_obj_set_conj( BLIS_CONJUGATE, a );
+	//bli_obj_set_struc( BLIS_SYMMETRIC, a );
+	//bli_obj_set_struc( BLIS_TRIANGULAR, a );
+	bli_obj_set_struc( BLIS_GENERAL, a );
+	bli_obj_set_uplo( BLIS_DENSE, a );
+	//bli_obj_set_uplo( BLIS_UPPER, a );
+	//bli_obj_set_uplo( BLIS_LOWER, a );
+	//bli_obj_set_diag_offset( -2, a );
+	bli_obj_set_diag_offset( 0, a );
+	//bli_obj_set_diag( BLIS_UNIT_DIAG, a );
+	//bli_obj_set_trans( BLIS_TRANSPOSE, a );
+	//bli_obj_set_conj( BLIS_CONJUGATE, a );
 
-	mult_m = bl2_blksz_obj_create( 2, 4, 2, 2 );
-	mult_n = bl2_blksz_obj_create( 1, 2, 1, 1 );
+	mult_m = bli_blksz_obj_create( 2, 4, 2, 2 );
+	mult_n = bli_blksz_obj_create( 1, 2, 1, 1 );
 
-	cntl = bl2_packm_cntl_obj_create( BLIS_BLOCKED,
+	cntl = bli_packm_cntl_obj_create( BLIS_BLOCKED,
 	                                  BLIS_VARIANT1,
 	                                  mult_m,
 	                                  mult_n, 
@@ -1916,26 +1916,26 @@ p.n = p.pack_mem->n;
 	                                  //FALSE, // densify?
 	                                  TRUE,  // densify?
 	                                  BLIS_PACKED_COL_PANELS );
-	bl2_obj_init_pack( &p );
+	bli_obj_init_pack( &p );
 
-	bl2_packm_int( &beta, &a, &p, cntl );
+	bli_packm_int( &beta, &a, &p, cntl );
 
 p.m = p.pack_mem->m;
 p.n = p.pack_mem->n;
 p.rs = 1;
 p.cs = p.pack_mem->m;
-	bl2_printm( "p mem", &p, "%4.1f", "" );
+	bli_printm( "p mem", &p, "%4.1f", "" );
 
-	bl2_obj_release_pack( &p );
+	bli_obj_release_pack( &p );
 
-	bl2_obj_free( &beta );
-	bl2_obj_free( &a );
+	bli_obj_free( &beta );
+	bli_obj_free( &a );
 
-	bl2_blksz_obj_free( mult_m );
-	bl2_blksz_obj_free( mult_n );
-	bl2_cntl_obj_free( cntl );
+	bli_blksz_obj_free( mult_m );
+	bli_blksz_obj_free( mult_n );
+	bli_cntl_obj_free( cntl );
 
-	bl2_finalize();
+	bli_finalize();
 
 	return 0;
 }
@@ -1968,54 +1968,54 @@ p.cs = p.pack_mem->m;
 	n = 13;
 	K = 4;
 
-	bl2_init();
+	bli_init();
 
-	//bl2_obj_create( dt_a, m, n, n, 1, &a );
-	//bl2_obj_create( dt_a, m, n, 0, 0, &a );
-	bl2_obj_create( dt_a, m, n, 0, 0, &a );
-	bl2_obj_create( dt_x, K, n, 0, 0, &xK );
-	bl2_obj_create( dt_y, K, m, 0, 0, &yK );
+	//bli_obj_create( dt_a, m, n, n, 1, &a );
+	//bli_obj_create( dt_a, m, n, 0, 0, &a );
+	bli_obj_create( dt_a, m, n, 0, 0, &a );
+	bli_obj_create( dt_x, K, n, 0, 0, &xK );
+	bli_obj_create( dt_y, K, m, 0, 0, &yK );
 
-	bl2_acquire_mpart_t2b( BLIS_SUBPART1, 0, 1, &xK, &x );
-	bl2_acquire_mpart_t2b( BLIS_SUBPART1, 0, 1, &yK, &y );
+	bli_acquire_mpart_t2b( BLIS_SUBPART1, 0, 1, &xK, &x );
+	bli_acquire_mpart_t2b( BLIS_SUBPART1, 0, 1, &yK, &y );
 
-	bl2_obj_create( dt_alpha, 1, 1, 0, 0, &alpha );
-	bl2_obj_create( dt_beta,  1, 1, 0, 0, &beta );
+	bli_obj_create( dt_alpha, 1, 1, 0, 0, &alpha );
+	bli_obj_create( dt_beta,  1, 1, 0, 0, &beta );
 
-	bl2_setm( &BLIS_ZERO, &a );
-	bl2_setm( &BLIS_ZERO, &x );
-	bl2_setm( &BLIS_ZERO, &y );
-	bl2_randm( &a );
-	bl2_randm( &x );
-	bl2_randm( &y );
+	bli_setm( &BLIS_ZERO, &a );
+	bli_setm( &BLIS_ZERO, &x );
+	bli_setm( &BLIS_ZERO, &y );
+	bli_randm( &a );
+	bli_randm( &x );
+	bli_randm( &y );
 
-	bl2_setsc(  (2.0/1.0), &alpha );
-	bl2_setsc( -(1.0/1.0), &beta );
-	//bl2_setsc(  (1.0/1.0), &alpha );
-	//bl2_setsc(  (0.0/1.0), &beta );
+	bli_setsc(  (2.0/1.0), &alpha );
+	bli_setsc( -(1.0/1.0), &beta );
+	//bli_setsc(  (1.0/1.0), &alpha );
+	//bli_setsc(  (0.0/1.0), &beta );
 
-	bl2_printm( "a", &a, "%4.1f", "" );
-	bl2_printm( "x", &x, "%4.1f", "" );
-	bl2_printm( "y", &y, "%4.1f", "" );
+	bli_printm( "a", &a, "%4.1f", "" );
+	bli_printm( "x", &x, "%4.1f", "" );
+	bli_printm( "y", &y, "%4.1f", "" );
 
-	//bl2_obj_set_conjtrans( BLIS_CONJ_NO_TRANSPOSE, a );
-	//bl2_obj_set_conj( BLIS_CONJUGATE, x );
+	//bli_obj_set_conjtrans( BLIS_CONJ_NO_TRANSPOSE, a );
+	//bli_obj_set_conj( BLIS_CONJUGATE, x );
 
-	bl2_gemv( &alpha, &a, &x, &beta, &y );
-	//bl2_gemv_unb_var1( &alpha, &a, &x, &beta, &y, NULL );
-	//bl2_gemv_unf_var1( &alpha, &a, &x, &beta, &y, NULL );
-	//bl2_gemv_unb_var2( &alpha, &a, &x, &beta, &y, NULL );
-	//bl2_gemv_unf_var2( &alpha, &a, &x, &beta, &y, NULL );
+	bli_gemv( &alpha, &a, &x, &beta, &y );
+	//bli_gemv_unb_var1( &alpha, &a, &x, &beta, &y, NULL );
+	//bli_gemv_unf_var1( &alpha, &a, &x, &beta, &y, NULL );
+	//bli_gemv_unb_var2( &alpha, &a, &x, &beta, &y, NULL );
+	//bli_gemv_unf_var2( &alpha, &a, &x, &beta, &y, NULL );
 
-	bl2_printm( "y after", &y, "%4.1f", "" );
+	bli_printm( "y after", &y, "%4.1f", "" );
 
-	bl2_obj_free( &a );
-	bl2_obj_free( &xK );
-	bl2_obj_free( &yK );
-	bl2_obj_free( &alpha );
-	bl2_obj_free( &beta );
+	bli_obj_free( &a );
+	bli_obj_free( &xK );
+	bli_obj_free( &yK );
+	bli_obj_free( &alpha );
+	bli_obj_free( &beta );
 
-	bl2_finalize();
+	bli_finalize();
 
 	return 0;
 }
@@ -2040,47 +2040,47 @@ p.cs = p.pack_mem->m;
 	n = 13;
 	K = 4;
 
-	bl2_init();
+	bli_init();
 
 
-	bl2_obj_create( dt_a, m, n, 0, 0, &a );
-	//bl2_obj_create( dt_a, m, n, n, 1, &a );
-	bl2_obj_create( dt_x, K, m, 0, 0, &xK );
-	bl2_obj_create( dt_y, K, n, 0, 0, &yK );
+	bli_obj_create( dt_a, m, n, 0, 0, &a );
+	//bli_obj_create( dt_a, m, n, n, 1, &a );
+	bli_obj_create( dt_x, K, m, 0, 0, &xK );
+	bli_obj_create( dt_y, K, n, 0, 0, &yK );
 
-	bl2_acquire_mpart_t2b( BLIS_SUBPART1, 0, 1, &xK, &x );
-	bl2_acquire_mpart_t2b( BLIS_SUBPART1, 0, 1, &yK, &y );
+	bli_acquire_mpart_t2b( BLIS_SUBPART1, 0, 1, &xK, &x );
+	bli_acquire_mpart_t2b( BLIS_SUBPART1, 0, 1, &yK, &y );
 
-	bl2_obj_create( dt_alpha, 1, 1, 0, 0, &alpha );
+	bli_obj_create( dt_alpha, 1, 1, 0, 0, &alpha );
 
-	bl2_setm( &BLIS_ZERO, &a );
-	bl2_setm( &BLIS_ZERO, &x );
-	bl2_setm( &BLIS_ZERO, &y );
-	bl2_randm( &a );
-	bl2_randm( &x );
-	bl2_randm( &y );
+	bli_setm( &BLIS_ZERO, &a );
+	bli_setm( &BLIS_ZERO, &x );
+	bli_setm( &BLIS_ZERO, &y );
+	bli_randm( &a );
+	bli_randm( &x );
+	bli_randm( &y );
 
-	bl2_setsc(  (2.0/1.0), &alpha );
+	bli_setsc(  (2.0/1.0), &alpha );
 
-	bl2_printm( "a", &a, "%4.1f", "" );
-	bl2_printm( "x", &x, "%4.1f", "" );
-	bl2_printm( "y", &y, "%4.1f", "" );
+	bli_printm( "a", &a, "%4.1f", "" );
+	bli_printm( "x", &x, "%4.1f", "" );
+	bli_printm( "y", &y, "%4.1f", "" );
 
-	bl2_obj_set_conj( BLIS_NO_CONJUGATE, x );
-	bl2_obj_set_conj( BLIS_NO_CONJUGATE, y );
+	bli_obj_set_conj( BLIS_NO_CONJUGATE, x );
+	bli_obj_set_conj( BLIS_NO_CONJUGATE, y );
 
-	bl2_ger( &alpha, &x, &y, &a );
-	//bl2_ger_unb_var1( &alpha, &x, &y, &a, NULL );
-	//bl2_ger_unb_var2( &alpha, &x, &y, &a, NULL );
+	bli_ger( &alpha, &x, &y, &a );
+	//bli_ger_unb_var1( &alpha, &x, &y, &a, NULL );
+	//bli_ger_unb_var2( &alpha, &x, &y, &a, NULL );
 
-	bl2_printm( "a after", &a, "%4.1f", "" );
+	bli_printm( "a after", &a, "%4.1f", "" );
 
-	bl2_obj_free( &a );
-	bl2_obj_free( &xK );
-	bl2_obj_free( &yK );
-	bl2_obj_free( &alpha );
+	bli_obj_free( &a );
+	bli_obj_free( &xK );
+	bli_obj_free( &yK );
+	bli_obj_free( &alpha );
 
-	bl2_finalize();
+	bli_finalize();
 
 	return 0;
 }
@@ -2106,61 +2106,61 @@ p.cs = p.pack_mem->m;
 	m = 11;
 	K = 4;
 
-	bl2_init();
+	bli_init();
 
-	bl2_obj_create( dt_a, m, m, 0, 0, &a );
-	//bl2_obj_create( dt_a, m, m, m, 1, &a );
-	bl2_obj_create( dt_x, K, m, 0, 0, &xK );
-	bl2_obj_create( dt_y, K, m, 0, 0, &yK );
+	bli_obj_create( dt_a, m, m, 0, 0, &a );
+	//bli_obj_create( dt_a, m, m, m, 1, &a );
+	bli_obj_create( dt_x, K, m, 0, 0, &xK );
+	bli_obj_create( dt_y, K, m, 0, 0, &yK );
 
-	bl2_acquire_mpart_t2b( BLIS_SUBPART1, 0, 1, &xK, &x );
-	bl2_acquire_mpart_t2b( BLIS_SUBPART1, 0, 1, &yK, &y );
+	bli_acquire_mpart_t2b( BLIS_SUBPART1, 0, 1, &xK, &x );
+	bli_acquire_mpart_t2b( BLIS_SUBPART1, 0, 1, &yK, &y );
 
-	bl2_obj_create( dt_alpha, 1, 1, 0, 0, &alpha );
-	bl2_obj_create( dt_beta,  1, 1, 0, 0, &beta );
+	bli_obj_create( dt_alpha, 1, 1, 0, 0, &alpha );
+	bli_obj_create( dt_beta,  1, 1, 0, 0, &beta );
 
-	bl2_setm( &BLIS_ZERO, &a );
-	bl2_setm( &BLIS_ZERO, &x );
-	bl2_setm( &BLIS_ZERO, &y );
-	bl2_randm( &a );
-	bl2_randm( &x );
-	bl2_randm( &y );
+	bli_setm( &BLIS_ZERO, &a );
+	bli_setm( &BLIS_ZERO, &x );
+	bli_setm( &BLIS_ZERO, &y );
+	bli_randm( &a );
+	bli_randm( &x );
+	bli_randm( &y );
 
-	bl2_setsc(  (2.0/1.0), &alpha );
-	bl2_setsc( -(1.0/1.0), &beta );
-	//bl2_setsc(  (1.0/1.0), &alpha );
-	//bl2_setsc(  (1.0/1.0), &beta );
+	bli_setsc(  (2.0/1.0), &alpha );
+	bli_setsc( -(1.0/1.0), &beta );
+	//bli_setsc(  (1.0/1.0), &alpha );
+	//bli_setsc(  (1.0/1.0), &beta );
 
-	bl2_printm( "a", &a, "%4.1f", "" );
-	bl2_printm( "x", &x, "%4.1f", "" );
-	bl2_printm( "y", &y, "%4.1f", "" );
+	bli_printm( "a", &a, "%4.1f", "" );
+	bli_printm( "x", &x, "%4.1f", "" );
+	bli_printm( "y", &y, "%4.1f", "" );
 
-	//bl2_obj_set_uplo( BLIS_LOWER, a );
-	bl2_obj_set_uplo( BLIS_UPPER, a );
-	bl2_obj_set_conj( BLIS_NO_CONJUGATE, a );
-	//bl2_obj_set_conj( BLIS_CONJUGATE, x );
+	//bli_obj_set_uplo( BLIS_LOWER, a );
+	bli_obj_set_uplo( BLIS_UPPER, a );
+	bli_obj_set_conj( BLIS_NO_CONJUGATE, a );
+	//bli_obj_set_conj( BLIS_CONJUGATE, x );
 
-	bl2_hemv( &alpha, &a, &x, &beta, &y );
+	bli_hemv( &alpha, &a, &x, &beta, &y );
 
-	//bl2_hemv_unb_var1( &alpha, &a, &x, &beta, &y, NULL );
-	//bl2_hemv_unb_var2( &alpha, &a, &x, &beta, &y, NULL );
-	//bl2_hemv_unb_var3( &alpha, &a, &x, &beta, &y, NULL );
-	//bl2_hemv_unb_var4( &alpha, &a, &x, &beta, &y, NULL );
+	//bli_hemv_unb_var1( &alpha, &a, &x, &beta, &y, NULL );
+	//bli_hemv_unb_var2( &alpha, &a, &x, &beta, &y, NULL );
+	//bli_hemv_unb_var3( &alpha, &a, &x, &beta, &y, NULL );
+	//bli_hemv_unb_var4( &alpha, &a, &x, &beta, &y, NULL );
 
-	//bl2_hemv_unf_var1a( &alpha, &a, &x, &beta, &y, NULL );
-	//bl2_hemv_unf_var1( &alpha, &a, &x, &beta, &y, NULL );
-	//bl2_hemv_unf_var3a( &alpha, &a, &x, &beta, &y, NULL );
-	//bl2_hemv_unf_var3( &alpha, &a, &x, &beta, &y, NULL );
+	//bli_hemv_unf_var1a( &alpha, &a, &x, &beta, &y, NULL );
+	//bli_hemv_unf_var1( &alpha, &a, &x, &beta, &y, NULL );
+	//bli_hemv_unf_var3a( &alpha, &a, &x, &beta, &y, NULL );
+	//bli_hemv_unf_var3( &alpha, &a, &x, &beta, &y, NULL );
 
-	bl2_printm( "y after", &y, "%4.1f", "" );
+	bli_printm( "y after", &y, "%4.1f", "" );
 
-	bl2_obj_free( &a );
-	bl2_obj_free( &xK );
-	bl2_obj_free( &yK );
-	bl2_obj_free( &alpha );
-	bl2_obj_free( &beta );
+	bli_obj_free( &a );
+	bli_obj_free( &xK );
+	bli_obj_free( &yK );
+	bli_obj_free( &alpha );
+	bli_obj_free( &beta );
 
-	bl2_finalize();
+	bli_finalize();
 
 	return 0;
 }
@@ -2176,48 +2176,48 @@ p.cs = p.pack_mem->m;
 	//dt_a     = BLIS_DCOMPLEX;
 	dt_x     = BLIS_DOUBLE;
 	dt_a     = BLIS_DOUBLE;
-	dt_alpha = bl2_datatype_proj_to_real( dt_x );
+	dt_alpha = bli_datatype_proj_to_real( dt_x );
 
 	m = 13;
 	K = 4;
 
-	bl2_init();
+	bli_init();
 
-	bl2_obj_create( dt_x, K, m, 0, 0, &xK );
-	//bl2_obj_create( dt_a, m, m, 0, 0, &a );
-	bl2_obj_create( dt_a, m, m, m, 1, &a );
+	bli_obj_create( dt_x, K, m, 0, 0, &xK );
+	//bli_obj_create( dt_a, m, m, 0, 0, &a );
+	bli_obj_create( dt_a, m, m, m, 1, &a );
 
-	bl2_acquire_mpart_t2b( BLIS_SUBPART1, 0, 1, &xK, &x );
+	bli_acquire_mpart_t2b( BLIS_SUBPART1, 0, 1, &xK, &x );
 
-	bl2_obj_create( dt_alpha, 1, 1, 0, 0, &alpha );
+	bli_obj_create( dt_alpha, 1, 1, 0, 0, &alpha );
 
-	bl2_setm( &BLIS_ZERO, &x );
-	bl2_setm( &BLIS_ZERO, &a );
-	bl2_randm( &x );
-	bl2_randm( &a );
+	bli_setm( &BLIS_ZERO, &x );
+	bli_setm( &BLIS_ZERO, &a );
+	bli_randm( &x );
+	bli_randm( &a );
 
-	bl2_setsc(  (2.0/1.0), &alpha );
-	//bl2_setsc(  (1.0/1.0), &alpha );
+	bli_setsc(  (2.0/1.0), &alpha );
+	//bli_setsc(  (1.0/1.0), &alpha );
 
-	bl2_printm( "x", &x, "%4.1f", "" );
-	bl2_printm( "a", &a, "%4.1f", "" );
+	bli_printm( "x", &x, "%4.1f", "" );
+	bli_printm( "a", &a, "%4.1f", "" );
 
-	//bl2_obj_set_uplo( BLIS_LOWER, a );
-	bl2_obj_set_uplo( BLIS_UPPER, a );
-	//bl2_obj_set_conj( BLIS_CONJUGATE, x );
+	//bli_obj_set_uplo( BLIS_LOWER, a );
+	bli_obj_set_uplo( BLIS_UPPER, a );
+	//bli_obj_set_conj( BLIS_CONJUGATE, x );
 
-	bl2_her( &alpha, &x, &a );
+	bli_her( &alpha, &x, &a );
 
-	//bl2_her_unb_var1( &alpha, &x, &a, NULL );
-	//bl2_her_unb_var2( &alpha, &x, &a, NULL );
+	//bli_her_unb_var1( &alpha, &x, &a, NULL );
+	//bli_her_unb_var2( &alpha, &x, &a, NULL );
 
-	bl2_printm( "a after", &a, "%4.1f", "" );
+	bli_printm( "a after", &a, "%4.1f", "" );
 
-	bl2_obj_free( &xK );
-	bl2_obj_free( &a );
-	bl2_obj_free( &alpha );
+	bli_obj_free( &xK );
+	bli_obj_free( &a );
+	bli_obj_free( &alpha );
 
-	bl2_finalize();
+	bli_finalize();
 
 	return 0;
 }
@@ -2241,54 +2241,54 @@ p.cs = p.pack_mem->m;
 	m = 13;
 	K = 4;
 
-	bl2_init();
+	bli_init();
 
-	bl2_obj_create( dt_x, K, m, 0, 0, &xK );
-	bl2_obj_create( dt_y, K, m, 0, 0, &yK );
-	//bl2_obj_create( dt_a, m, m, m, 1, &a );
-	bl2_obj_create( dt_a, m, m, 0, 0, &a );
+	bli_obj_create( dt_x, K, m, 0, 0, &xK );
+	bli_obj_create( dt_y, K, m, 0, 0, &yK );
+	//bli_obj_create( dt_a, m, m, m, 1, &a );
+	bli_obj_create( dt_a, m, m, 0, 0, &a );
 
-	bl2_acquire_mpart_t2b( BLIS_SUBPART1, 0, 1, &xK, &x );
-	bl2_acquire_mpart_t2b( BLIS_SUBPART1, 0, 1, &yK, &y );
+	bli_acquire_mpart_t2b( BLIS_SUBPART1, 0, 1, &xK, &x );
+	bli_acquire_mpart_t2b( BLIS_SUBPART1, 0, 1, &yK, &y );
 
-	bl2_obj_create( dt_alpha, 1, 1, 0, 0, &alpha );
+	bli_obj_create( dt_alpha, 1, 1, 0, 0, &alpha );
 
-	bl2_setm( &BLIS_ZERO, &x );
-	bl2_setm( &BLIS_ZERO, &y );
-	bl2_setm( &BLIS_ZERO, &a );
-	bl2_randm( &x );
-	bl2_randm( &y );
-	bl2_randm( &a );
+	bli_setm( &BLIS_ZERO, &x );
+	bli_setm( &BLIS_ZERO, &y );
+	bli_setm( &BLIS_ZERO, &a );
+	bli_randm( &x );
+	bli_randm( &y );
+	bli_randm( &a );
 
-	//bl2_randv( &alpha );
-	bl2_setsc(  (2.0/1.0), &alpha );
-	//bl2_setsc(  (1.0/1.0), &alpha );
+	//bli_randv( &alpha );
+	bli_setsc(  (2.0/1.0), &alpha );
+	//bli_setsc(  (1.0/1.0), &alpha );
 
-	bl2_printm( "x", &x, "%4.1f", "" );
-	bl2_printm( "y", &y, "%4.1f", "" );
-	bl2_printm( "a", &a, "%4.1f", "" );
-	//bl2_printv( "alpha", &alpha, "%4.1f", "" );
+	bli_printm( "x", &x, "%4.1f", "" );
+	bli_printm( "y", &y, "%4.1f", "" );
+	bli_printm( "a", &a, "%4.1f", "" );
+	//bli_printv( "alpha", &alpha, "%4.1f", "" );
 
-	//bl2_obj_set_uplo( BLIS_LOWER, a );
-	bl2_obj_set_uplo( BLIS_UPPER, a );
-	//bl2_obj_set_conj( BLIS_CONJUGATE, x );
+	//bli_obj_set_uplo( BLIS_LOWER, a );
+	bli_obj_set_uplo( BLIS_UPPER, a );
+	//bli_obj_set_conj( BLIS_CONJUGATE, x );
 
-	bl2_her2( &alpha, &x, &y, &a );
+	bli_her2( &alpha, &x, &y, &a );
 
-	//bl2_her2_unb_var1( &alpha, &x, &y, &a, NULL );
-	//bl2_her2_unb_var2( &alpha, &x, &y, &a, NULL );
-	//bl2_her2_unb_var3( &alpha, &x, &y, &a, NULL );
-	//bl2_her2_unb_var4( &alpha, &x, &y, &a, NULL );
-	//bl2_her2_unf_var4( &alpha, &x, &y, &a, NULL );
+	//bli_her2_unb_var1( &alpha, &x, &y, &a, NULL );
+	//bli_her2_unb_var2( &alpha, &x, &y, &a, NULL );
+	//bli_her2_unb_var3( &alpha, &x, &y, &a, NULL );
+	//bli_her2_unb_var4( &alpha, &x, &y, &a, NULL );
+	//bli_her2_unf_var4( &alpha, &x, &y, &a, NULL );
 
-	bl2_printm( "a after", &a, "%4.1f", "" );
+	bli_printm( "a after", &a, "%4.1f", "" );
 
-	bl2_obj_free( &xK );
-	bl2_obj_free( &yK );
-	bl2_obj_free( &a );
-	bl2_obj_free( &alpha );
+	bli_obj_free( &xK );
+	bli_obj_free( &yK );
+	bli_obj_free( &a );
+	bli_obj_free( &alpha );
 
-	bl2_finalize();
+	bli_finalize();
 
 	return 0;
 }
@@ -2310,45 +2310,45 @@ p.cs = p.pack_mem->m;
 	m = 13;
 	K = 4;
 
-	bl2_init();
+	bli_init();
 
-	//bl2_obj_create( dt_a, m, m, 0, 0, &a );
-	bl2_obj_create( dt_a, m, m, m, 1, &a );
-	bl2_obj_create( dt_x, K, m, 0, 0, &xK );
-	bl2_obj_create( dt_x, 1, 1, 0, 0, &alpha );
+	//bli_obj_create( dt_a, m, m, 0, 0, &a );
+	bli_obj_create( dt_a, m, m, m, 1, &a );
+	bli_obj_create( dt_x, K, m, 0, 0, &xK );
+	bli_obj_create( dt_x, 1, 1, 0, 0, &alpha );
 
-	bl2_acquire_mpart_t2b( BLIS_SUBPART1, 0, 1, &xK, &x );
+	bli_acquire_mpart_t2b( BLIS_SUBPART1, 0, 1, &xK, &x );
 
-	bl2_setm( &BLIS_ZERO, &a );
-	bl2_setm( &BLIS_ZERO, &x );
-	bl2_randm( &a );
-	bl2_randm( &x );
+	bli_setm( &BLIS_ZERO, &a );
+	bli_setm( &BLIS_ZERO, &x );
+	bli_randm( &a );
+	bli_randm( &x );
 
-	bl2_setsc(  (1.0/1.0), &alpha );
+	bli_setsc(  (1.0/1.0), &alpha );
 
-	bl2_obj_set_uplo( BLIS_UPPER, a );
-	//bl2_obj_set_uplo( BLIS_LOWER, a );
-	bl2_obj_set_conjtrans( BLIS_NO_TRANSPOSE, a );
-	//bl2_obj_set_conjtrans( BLIS_TRANSPOSE, a );
-	bl2_obj_set_diag( BLIS_NONUNIT_DIAG, a );
+	bli_obj_set_uplo( BLIS_UPPER, a );
+	//bli_obj_set_uplo( BLIS_LOWER, a );
+	bli_obj_set_conjtrans( BLIS_NO_TRANSPOSE, a );
+	//bli_obj_set_conjtrans( BLIS_TRANSPOSE, a );
+	bli_obj_set_diag( BLIS_NONUNIT_DIAG, a );
 
-	bl2_printm( "a", &a, "%4.1f", "" );
-	bl2_printm( "x", &x, "%4.1f", "" );
+	bli_printm( "a", &a, "%4.1f", "" );
+	bli_printm( "x", &x, "%4.1f", "" );
 
-	bl2_trmv( &alpha, &a, &x );
+	bli_trmv( &alpha, &a, &x );
 
-	//bl2_trmv_unb_var2( &alpha, &a, &x, NULL );
-	//bl2_trmv_unb_var1( &alpha, &a, &x, NULL );
-	//bl2_trmv_unf_var1( &alpha, &a, &x, NULL );
-	//bl2_trmv_unf_var2( &alpha, &a, &x, NULL );
+	//bli_trmv_unb_var2( &alpha, &a, &x, NULL );
+	//bli_trmv_unb_var1( &alpha, &a, &x, NULL );
+	//bli_trmv_unf_var1( &alpha, &a, &x, NULL );
+	//bli_trmv_unf_var2( &alpha, &a, &x, NULL );
 
-	bl2_printm( "x after", &x, "%4.1f", "" );
+	bli_printm( "x after", &x, "%4.1f", "" );
 
-	bl2_obj_free( &alpha );
-	bl2_obj_free( &a );
-	bl2_obj_free( &xK );
+	bli_obj_free( &alpha );
+	bli_obj_free( &a );
+	bli_obj_free( &xK );
 
-	bl2_finalize();
+	bli_finalize();
 
 	return 0;
 }
@@ -2367,43 +2367,43 @@ p.cs = p.pack_mem->m;
 	m = 13;
 	K = 4;
 
-	bl2_init();
+	bli_init();
 
-	//bl2_obj_create( dt_a, m, m, 0, 0, &a );
-	bl2_obj_create( dt_a, m, m, m, 1, &a );
-	bl2_obj_create( dt_x, K, m, 0, 0, &xK );
-	bl2_obj_create( dt_x, 1, 1, 0, 0, &alpha );
+	//bli_obj_create( dt_a, m, m, 0, 0, &a );
+	bli_obj_create( dt_a, m, m, m, 1, &a );
+	bli_obj_create( dt_x, K, m, 0, 0, &xK );
+	bli_obj_create( dt_x, 1, 1, 0, 0, &alpha );
 
-	bl2_acquire_mpart_t2b( BLIS_SUBPART1, 0, 1, &xK, &x );
+	bli_acquire_mpart_t2b( BLIS_SUBPART1, 0, 1, &xK, &x );
 
-	bl2_setm( &BLIS_ZERO, &a );
-	bl2_setm( &BLIS_ZERO, &x );
-	bl2_randm( &a );
-	bl2_randm( &x );
+	bli_setm( &BLIS_ZERO, &a );
+	bli_setm( &BLIS_ZERO, &x );
+	bli_randm( &a );
+	bli_randm( &x );
 
-	bl2_setsc(  (2.0/1.0), &alpha );
+	bli_setsc(  (2.0/1.0), &alpha );
 
-	bl2_obj_set_uplo( BLIS_UPPER, a );
-	//bl2_obj_set_uplo( BLIS_LOWER, a );
-	bl2_obj_set_conjtrans( BLIS_NO_TRANSPOSE, a );
-	bl2_obj_set_diag( BLIS_NONUNIT_DIAG, a );
+	bli_obj_set_uplo( BLIS_UPPER, a );
+	//bli_obj_set_uplo( BLIS_LOWER, a );
+	bli_obj_set_conjtrans( BLIS_NO_TRANSPOSE, a );
+	bli_obj_set_diag( BLIS_NONUNIT_DIAG, a );
 
-	bl2_printm( "a", &a, "%4.1f", "" );
-	bl2_printm( "x", &x, "%4.1f", "" );
+	bli_printm( "a", &a, "%4.1f", "" );
+	bli_printm( "x", &x, "%4.1f", "" );
 
-	bl2_trsv( &alpha, &a, &x );
-	//bl2_trsv_unb_var1( &alpha, &a, &x, NULL );
-	//bl2_trsv_unb_var2( &alpha, &a, &x, NULL );
-	//bl2_trsv_unf_var1( &alpha, &a, &x, NULL );
-	//bl2_trsv_unf_var2( &alpha, &a, &x, NULL );
+	bli_trsv( &alpha, &a, &x );
+	//bli_trsv_unb_var1( &alpha, &a, &x, NULL );
+	//bli_trsv_unb_var2( &alpha, &a, &x, NULL );
+	//bli_trsv_unf_var1( &alpha, &a, &x, NULL );
+	//bli_trsv_unf_var2( &alpha, &a, &x, NULL );
 
-	bl2_printm( "x after", &x, "%4.1f", "" );
+	bli_printm( "x after", &x, "%4.1f", "" );
 
-	bl2_obj_free( &alpha );
-	bl2_obj_free( &a );
-	bl2_obj_free( &xK );
+	bli_obj_free( &alpha );
+	bli_obj_free( &a );
+	bli_obj_free( &xK );
 
-	bl2_finalize();
+	bli_finalize();
 
 	return 0;
 }
@@ -2430,44 +2430,44 @@ p.cs = p.pack_mem->m;
 	m = 9;
 	n = 5;
 
-	bl2_init();
+	bli_init();
 
-	bl2_obj_create( dt_a,  m, m, 0, 0, &a );
-	//bl2_obj_create( dt_b,  m, n, 0, 0, &b );
-	bl2_obj_create( dt_b,  n, m, 0, 0, &b );
-	bl2_obj_create( dt_al, 1, 1, 0, 0, &alpha );
+	bli_obj_create( dt_a,  m, m, 0, 0, &a );
+	//bli_obj_create( dt_b,  m, n, 0, 0, &b );
+	bli_obj_create( dt_b,  n, m, 0, 0, &b );
+	bli_obj_create( dt_al, 1, 1, 0, 0, &alpha );
 
-	bl2_setm( &BLIS_ZERO, &a );
-	bl2_setm( &BLIS_ZERO, &b );
-	bl2_randm( &a );
-	bl2_randm( &b );
+	bli_setm( &BLIS_ZERO, &a );
+	bli_setm( &BLIS_ZERO, &b );
+	bli_randm( &a );
+	bli_randm( &b );
 
-	//bl2_setsc(  (2.0/1.0), &alpha );
-	bl2_setsc(  (1.0/1.0), &alpha );
+	//bli_setsc(  (2.0/1.0), &alpha );
+	bli_setsc(  (1.0/1.0), &alpha );
 
-	bl2_obj_set_uplo( BLIS_LOWER, a );
-	//bl2_obj_set_uplo( BLIS_UPPER, a );
-	bl2_obj_set_conjtrans( BLIS_TRANSPOSE, a );
-	bl2_obj_set_diag( BLIS_NONUNIT_DIAG, a );
+	bli_obj_set_uplo( BLIS_LOWER, a );
+	//bli_obj_set_uplo( BLIS_UPPER, a );
+	bli_obj_set_conjtrans( BLIS_TRANSPOSE, a );
+	bli_obj_set_diag( BLIS_NONUNIT_DIAG, a );
 
-	bl2_printm( "a", &a, "%4.1f", "" );
-	bl2_printm( "b", &b, "%4.1f", "" );
+	bli_printm( "a", &a, "%4.1f", "" );
+	bli_printm( "b", &b, "%4.1f", "" );
 
-	//bl2_trmm_lu_unb_var3( &alpha, &a, &b, NULL );
-	//bl2_trmm_lu_unb_var2( &alpha, &a, &b, NULL );
-	//bl2_trmm_lu_unb_var1( &alpha, &a, &b, NULL );
-	//bl2_trmm_ll_unb_var3( &alpha, &a, &b, NULL );
-	//bl2_trmm_ll_unb_var2( &alpha, &a, &b, NULL );
-	//bl2_trmm_ll_unb_var1( &alpha, &a, &b, NULL );
-	//bl2_trmm( BLIS_LEFT, &alpha, &a, &b );
-	bl2_trmm( BLIS_RIGHT, &alpha, &a, &b );
+	//bli_trmm_lu_unb_var3( &alpha, &a, &b, NULL );
+	//bli_trmm_lu_unb_var2( &alpha, &a, &b, NULL );
+	//bli_trmm_lu_unb_var1( &alpha, &a, &b, NULL );
+	//bli_trmm_ll_unb_var3( &alpha, &a, &b, NULL );
+	//bli_trmm_ll_unb_var2( &alpha, &a, &b, NULL );
+	//bli_trmm_ll_unb_var1( &alpha, &a, &b, NULL );
+	//bli_trmm( BLIS_LEFT, &alpha, &a, &b );
+	bli_trmm( BLIS_RIGHT, &alpha, &a, &b );
 
-	bl2_printm( "b after", &b, "%4.1f", "" );
+	bli_printm( "b after", &b, "%4.1f", "" );
 
-	bl2_obj_free( &a );
-	bl2_obj_free( &b );
+	bli_obj_free( &a );
+	bli_obj_free( &b );
 
-	bl2_finalize();
+	bli_finalize();
 
 	return 0;
 }

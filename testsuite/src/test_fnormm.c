@@ -32,7 +32,7 @@
 
 */
 
-#include "blis2.h"
+#include "blis.h"
 #include "test_libblis.h"
 
 
@@ -115,7 +115,7 @@ void libblis_test_fnormm_experiment( test_params_t* params,
 	unsigned int n_repeats = params->n_repeats;
 	unsigned int i;
 
-	num_t        dt_real   = bl2_datatype_proj_to_real( datatype );
+	num_t        dt_real   = bli_datatype_proj_to_real( datatype );
 
 	double       time_min  = 1e9;
 	double       time;
@@ -134,38 +134,38 @@ void libblis_test_fnormm_experiment( test_params_t* params,
 
 
 	// Create test scalars.
-	bl2_obj_init_scalar( datatype, &beta );
-	bl2_obj_init_scalar( dt_real,  &norm );
+	bli_obj_init_scalar( datatype, &beta );
+	bli_obj_init_scalar( dt_real,  &norm );
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
 	                          sc_str[0], m, n, &x );
 
 	// Initialize beta to 2 - 2i.
-	bl2_setsc( 2.0, -2.0, &beta );
+	bli_setsc( 2.0, -2.0, &beta );
 
 	// Set all elements of x to beta.
-	bl2_setm( &beta, &x );
+	bli_setm( &beta, &x );
 
 	// Repeat the experiment n_repeats times and record results. 
 	for ( i = 0; i < n_repeats; ++i )
 	{
-		time = bl2_clock();
+		time = bli_clock();
 
 		libblis_test_fnormm_impl( impl, &x, &norm );
 
-		time_min = bl2_clock_min_diff( time_min, time );
+		time_min = bli_clock_min_diff( time_min, time );
 	}
 
 	// Estimate the performance of the best experiment repeat.
 	*perf = ( 2.0 * m * n ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bl2_obj_is_complex( x ) ) *perf *= 2.0;
+	if ( bli_obj_is_complex( x ) ) *perf *= 2.0;
 
 	// Perform checks.
 	libblis_test_fnormm_check( &beta, &x, &norm, resid );
 
 	// Free the test objects.
-	bl2_obj_free( &x );
+	bli_obj_free( &x );
 }
 
 
@@ -177,7 +177,7 @@ void libblis_test_fnormm_impl( mt_impl_t impl,
 	switch ( impl )
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
-		bl2_fnormm( x, norm );
+		bli_fnormm( x, norm );
 		break;
 
 		default:
@@ -192,9 +192,9 @@ void libblis_test_fnormm_check( obj_t*  beta,
                                 obj_t*  norm,
                                 double* resid )
 {
-	num_t  dt_real = bl2_obj_datatype_proj_to_real( *x );
-	dim_t  m       = bl2_obj_length( *x );
-	dim_t  n       = bl2_obj_width( *x );
+	num_t  dt_real = bli_obj_datatype_proj_to_real( *x );
+	dim_t  m       = bli_obj_length( *x );
+	dim_t  n       = bli_obj_width( *x );
 
 	obj_t  m_r, n_r, temp_r;
 
@@ -218,19 +218,19 @@ void libblis_test_fnormm_check( obj_t*  beta,
 	// where m and n are the dimensions of x.
 	//
 
-	bl2_obj_init_scalar( dt_real, &temp_r );
-	bl2_obj_init_scalar( dt_real, &m_r );
-	bl2_obj_init_scalar( dt_real, &n_r );
+	bli_obj_init_scalar( dt_real, &temp_r );
+	bli_obj_init_scalar( dt_real, &m_r );
+	bli_obj_init_scalar( dt_real, &n_r );
 
-	bl2_setsc( ( double )m, 0.0, &m_r );
-	bl2_setsc( ( double )n, 0.0, &n_r );
+	bli_setsc( ( double )m, 0.0, &m_r );
+	bli_setsc( ( double )n, 0.0, &n_r );
 
-	bl2_absqsc( beta, &temp_r );
-	bl2_mulsc( &m_r, &temp_r );
-	bl2_mulsc( &n_r, &temp_r );
-	bl2_sqrtsc( &temp_r, &temp_r );
-	bl2_subsc( &temp_r, norm );
+	bli_absqsc( beta, &temp_r );
+	bli_mulsc( &m_r, &temp_r );
+	bli_mulsc( &n_r, &temp_r );
+	bli_sqrtsc( &temp_r, &temp_r );
+	bli_subsc( &temp_r, norm );
 
-	bl2_getsc( norm, resid, &junk );
+	bli_getsc( norm, resid, &junk );
 }
 

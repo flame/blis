@@ -32,11 +32,11 @@
 
 */
 
-#include "blis2.h"
+#include "blis.h"
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-#include "bl2_f2c.h"
+#include "bli_f2c.h"
 
 void z_div(doublecomplex *cp, doublecomplex *ap, doublecomplex *bp)
 {

@@ -32,7 +32,7 @@
 
 */
 
-#include "blis2.h"
+#include "blis.h"
 
 
 //
@@ -58,13 +58,13 @@ void PASTEF772(chxy,blasname,chc)( \
 	inc_t   rs_a, cs_a; \
 \
 	/* Convert negative values of m and n to zero. */ \
-	bl2_convert_blas_dim1( *m, m0 ); \
-	bl2_convert_blas_dim1( *n, n0 ); \
+	bli_convert_blas_dim1( *m, m0 ); \
+	bli_convert_blas_dim1( *n, n0 ); \
 \
 	/* If the input increments are negative, adjust the pointers so we can
 	   use positive increments instead. */ \
-	bl2_convert_blas_incv( m0, x, *incx, x0, incx0 ); \
-	bl2_convert_blas_incv( n0, y, *incy, y0, incy0 ); \
+	bli_convert_blas_incv( m0, x, *incx, x0, incx0 ); \
+	bli_convert_blas_incv( n0, y, *incy, y0, incy0 ); \
 \
 	/* Set the row and column strides of A. */ \
 	rs_a = 1; \

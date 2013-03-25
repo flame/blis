@@ -32,7 +32,7 @@
 
 */
 
-#include "blis2.h"
+#include "blis.h"
 #include "test_libblis.h"
 
 
@@ -136,10 +136,10 @@ void libblis_test_scal2v_experiment( test_params_t* params,
 	m = libblis_test_get_dim_from_prob_size( op->dim_spec[0], p_cur );
 
 	// Map parameter characters to BLIS constants.
-	bl2_param_map_char_to_blis_conj( pc_str[0], &conjx );
+	bli_param_map_char_to_blis_conj( pc_str[0], &conjx );
 
 	// Create test scalars.
-	bl2_obj_init_scalar( datatype, &alpha );
+	bli_obj_init_scalar( datatype, &alpha );
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_vobj_create( params, datatype, sc_str[0], m, &x );
@@ -147,44 +147,44 @@ void libblis_test_scal2v_experiment( test_params_t* params,
 	libblis_test_vobj_create( params, datatype, sc_str[1], m, &y_save );
 
 	// Set alpha.
-	//bl2_setsc( sqrt(2.0)/2.0, sqrt(2.0)/2.0, &alpha );
-	//bl2_copysc( &BLIS_TWO, &alpha );
-	if ( bl2_obj_is_real( y ) )
-		bl2_setsc( -2.0,  0.0, &alpha );
+	//bli_setsc( sqrt(2.0)/2.0, sqrt(2.0)/2.0, &alpha );
+	//bli_copysc( &BLIS_TWO, &alpha );
+	if ( bli_obj_is_real( y ) )
+		bli_setsc( -2.0,  0.0, &alpha );
 	else
-		bl2_setsc(  0.0, -2.0, &alpha );
+		bli_setsc(  0.0, -2.0, &alpha );
 
 	// Randomize x and y, and save y.
-	bl2_randv( &x );
-	bl2_randv( &y );
-	bl2_copyv( &y, &y_save );
+	bli_randv( &x );
+	bli_randv( &y );
+	bli_copyv( &y, &y_save );
 
 	// Apply the parameters.
-	bl2_obj_set_conj( conjx, x );
+	bli_obj_set_conj( conjx, x );
 
 	// Repeat the experiment n_repeats times and record results. 
 	for ( i = 0; i < n_repeats; ++i )
 	{
-		bl2_copyv( &y_save, &y );
+		bli_copyv( &y_save, &y );
 
-		time = bl2_clock();
+		time = bli_clock();
 
 		libblis_test_scal2v_impl( impl, &alpha, &x, &y );
 
-		time_min = bl2_clock_min_diff( time_min, time );
+		time_min = bli_clock_min_diff( time_min, time );
 	}
 
 	// Estimate the performance of the best experiment repeat.
 	*perf = ( 2.0 * m ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bl2_obj_is_complex( y ) ) *perf *= 4.0;
+	if ( bli_obj_is_complex( y ) ) *perf *= 4.0;
 
 	// Perform checks.
 	libblis_test_scal2v_check( &alpha, &x, &y, &y_save, resid );
 
 	// Free the test objects.
-	bl2_obj_free( &x );
-	bl2_obj_free( &y );
-	bl2_obj_free( &y_save );
+	bli_obj_free( &x );
+	bli_obj_free( &y );
+	bli_obj_free( &y_save );
 }
 
 
@@ -197,7 +197,7 @@ void libblis_test_scal2v_impl( mt_impl_t impl,
 	switch ( impl )
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
-		bl2_scal2v( alpha, x, y );
+		bli_scal2v( alpha, x, y );
 		break;
 
 		default:
@@ -213,10 +213,10 @@ void libblis_test_scal2v_check( obj_t*  alpha,
                                 obj_t*  y_orig,
                                 double* resid )
 {
-	num_t  dt      = bl2_obj_datatype( *y );
-	num_t  dt_real = bl2_obj_datatype_proj_to_real( *y );
+	num_t  dt      = bli_obj_datatype( *y );
+	num_t  dt_real = bli_obj_datatype_proj_to_real( *y );
 
-	dim_t  m       = bl2_obj_vector_dim( *y );
+	dim_t  m       = bli_obj_vector_dim( *y );
 
 	obj_t  x_temp;
 	obj_t  norm;
@@ -242,18 +242,18 @@ void libblis_test_scal2v_check( obj_t*  alpha,
 	// is negligible.
 	//
 
-	bl2_obj_init_scalar( dt_real, &norm );
+	bli_obj_init_scalar( dt_real, &norm );
 
-	bl2_obj_create( dt, m, 1, 0, 0, &x_temp );
+	bli_obj_create( dt, m, 1, 0, 0, &x_temp );
 
-	bl2_copyv( x, &x_temp );
+	bli_copyv( x, &x_temp );
 
-	bl2_scalv( alpha, &x_temp );
+	bli_scalv( alpha, &x_temp );
 
-	bl2_subv( &x_temp, y );
-	bl2_fnormv( y, &norm );
-	bl2_getsc( &norm, resid, &junk );
+	bli_subv( &x_temp, y );
+	bli_fnormv( y, &norm );
+	bli_getsc( &norm, resid, &junk );
 
-	bl2_obj_free( &x_temp );
+	bli_obj_free( &x_temp );
 }
 

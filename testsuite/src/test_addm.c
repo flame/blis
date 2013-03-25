@@ -32,7 +32,7 @@
 
 */
 
-#include "blis2.h"
+#include "blis.h"
 #include "test_libblis.h"
 
 
@@ -130,11 +130,11 @@ void libblis_test_addm_experiment( test_params_t* params,
 	n = libblis_test_get_dim_from_prob_size( op->dim_spec[1], p_cur );
 
 	// Map parameter characters to BLIS constants.
-	bl2_param_map_char_to_blis_trans( pc_str[0], &transx );
+	bli_param_map_char_to_blis_trans( pc_str[0], &transx );
 
 	// Create test scalars.
-	bl2_obj_init_scalar( datatype, &alpha );
-	bl2_obj_init_scalar( datatype, &beta );
+	bli_obj_init_scalar( datatype, &alpha );
+	bli_obj_init_scalar( datatype, &beta );
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_mobj_create( params, datatype, transx,
@@ -143,36 +143,36 @@ void libblis_test_addm_experiment( test_params_t* params,
 	                          sc_str[1], m, n, &y );
 
 	// Initialize alpha and beta.
-	bl2_setsc( -1.0, -1.0, &alpha );
-	bl2_setsc(  3.0,  3.0, &beta );
+	bli_setsc( -1.0, -1.0, &alpha );
+	bli_setsc(  3.0,  3.0, &beta );
 
 	// Randomize x.
-	bl2_setm( &alpha, &x );
-	bl2_setm( &beta,  &y );
+	bli_setm( &alpha, &x );
+	bli_setm( &beta,  &y );
 
 	// Apply the parameters.
-	bl2_obj_set_conjtrans( transx, x );
+	bli_obj_set_conjtrans( transx, x );
 
-	// Disable repeats since bl2_copym() is not yet tested.
+	// Disable repeats since bli_copym() is not yet tested.
 	//for ( i = 0; i < n_repeats; ++i )
 	{
-		time = bl2_clock();
+		time = bli_clock();
 
 		libblis_test_addm_impl( impl, &x, &y );
 
-		time_min = bl2_clock_min_diff( time_min, time );
+		time_min = bli_clock_min_diff( time_min, time );
 	}
 
 	// Estimate the performance of the best experiment repeat.
 	*perf = ( 1.0 * m * n ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bl2_obj_is_complex( x ) ) *perf *= 2.0;
+	if ( bli_obj_is_complex( x ) ) *perf *= 2.0;
 
 	// Perform checks.
 	libblis_test_addm_check( &alpha, &beta, &x, &y, resid );
 
 	// Free the test objects.
-	bl2_obj_free( &x );
-	bl2_obj_free( &y );
+	bli_obj_free( &x );
+	bli_obj_free( &y );
 }
 
 
@@ -184,7 +184,7 @@ void libblis_test_addm_impl( mt_impl_t impl,
 	switch ( impl )
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
-		bl2_addm( x, y );
+		bli_addm( x, y );
 		break;
 
 		default:
@@ -200,12 +200,12 @@ void libblis_test_addm_check( obj_t*  alpha,
                               obj_t*  y,
                               double* resid )
 {
-	num_t  dt      = bl2_obj_datatype( *y );
-	num_t  dt_real = bl2_obj_datatype_proj_to_real( *y );
-	dim_t  m       = bl2_obj_length( *y );
-	dim_t  n       = bl2_obj_width( *y );
+	num_t  dt      = bli_obj_datatype( *y );
+	num_t  dt_real = bli_obj_datatype_proj_to_real( *y );
+	dim_t  m       = bli_obj_length( *y );
+	dim_t  n       = bli_obj_width( *y );
 
-	conj_t conjx   = bl2_obj_conj_status( *x );
+	conj_t conjx   = bli_obj_conj_status( *x );
 
 	obj_t  aplusb;
 	obj_t  alpha_conj;
@@ -232,28 +232,28 @@ void libblis_test_addm_check( obj_t*  alpha,
 	// is negligible.
 	//
 
-	bl2_obj_init_scalar( dt,      &aplusb );
-	bl2_obj_init_scalar( dt_real, &temp_r );
-	bl2_obj_init_scalar( dt_real, &norm_r );
-	bl2_obj_init_scalar( dt_real, &m_r );
-	bl2_obj_init_scalar( dt_real, &n_r );
+	bli_obj_init_scalar( dt,      &aplusb );
+	bli_obj_init_scalar( dt_real, &temp_r );
+	bli_obj_init_scalar( dt_real, &norm_r );
+	bli_obj_init_scalar( dt_real, &m_r );
+	bli_obj_init_scalar( dt_real, &n_r );
 
-	bl2_obj_init_scalar_copy_of( dt, conjx, alpha, &alpha_conj );
+	bli_obj_init_scalar_copy_of( dt, conjx, alpha, &alpha_conj );
 
-	bl2_fnormm( y, &norm_r );
+	bli_fnormm( y, &norm_r );
 
-	bl2_copysc( beta, &aplusb );
-	bl2_addsc( &alpha_conj, &aplusb );
+	bli_copysc( beta, &aplusb );
+	bli_addsc( &alpha_conj, &aplusb );
 
-	bl2_setsc( ( double )m, 0.0, &m_r );
-	bl2_setsc( ( double )n, 0.0, &n_r );
+	bli_setsc( ( double )m, 0.0, &m_r );
+	bli_setsc( ( double )n, 0.0, &n_r );
 
-	bl2_absqsc( &aplusb, &temp_r );
-	bl2_mulsc( &m_r, &temp_r );
-	bl2_mulsc( &n_r, &temp_r );
-	bl2_sqrtsc( &temp_r, &temp_r );
-	bl2_subsc( &temp_r, &norm_r );
+	bli_absqsc( &aplusb, &temp_r );
+	bli_mulsc( &m_r, &temp_r );
+	bli_mulsc( &n_r, &temp_r );
+	bli_sqrtsc( &temp_r, &temp_r );
+	bli_subsc( &temp_r, &norm_r );
 
-	bl2_getsc( &norm_r, resid, &junk );
+	bli_getsc( &norm_r, resid, &junk );
 }
 

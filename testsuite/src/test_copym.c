@@ -32,7 +32,7 @@
 
 */
 
-#include "blis2.h"
+#include "blis.h"
 #include "test_libblis.h"
 
 
@@ -128,7 +128,7 @@ void libblis_test_copym_experiment( test_params_t* params,
 	n = libblis_test_get_dim_from_prob_size( op->dim_spec[1], p_cur );
 
 	// Map parameter characters to BLIS constants.
-	bl2_param_map_char_to_blis_trans( pc_str[0], &transx );
+	bli_param_map_char_to_blis_trans( pc_str[0], &transx );
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_mobj_create( params, datatype, transx,
@@ -137,32 +137,32 @@ void libblis_test_copym_experiment( test_params_t* params,
 	                          sc_str[1], m, n, &y );
 
 	// Randomize x and set y to one.
-	bl2_randm( &x );
-	bl2_setm( &BLIS_ONE, &y );
+	bli_randm( &x );
+	bli_setm( &BLIS_ONE, &y );
 
 	// Apply the parameters.
-	bl2_obj_set_conjtrans( transx, x );
+	bli_obj_set_conjtrans( transx, x );
 
-	// Disable repeats since bl2_copym() is not yet tested.
+	// Disable repeats since bli_copym() is not yet tested.
 	//for ( i = 0; i < n_repeats; ++i )
 	{
-		time = bl2_clock();
+		time = bli_clock();
 
 		libblis_test_copym_impl( impl, &x, &y );
 
-		time_min = bl2_clock_min_diff( time_min, time );
+		time_min = bli_clock_min_diff( time_min, time );
 	}
 
 	// Estimate the performance of the best experiment repeat.
 	*perf = ( 1.0 * m * n ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bl2_obj_is_complex( x ) ) *perf *= 2.0;
+	if ( bli_obj_is_complex( x ) ) *perf *= 2.0;
 
 	// Perform checks.
 	libblis_test_copym_check( &x, &y, resid );
 
 	// Free the test objects.
-	bl2_obj_free( &x );
-	bl2_obj_free( &y );
+	bli_obj_free( &x );
+	bli_obj_free( &y );
 }
 
 
@@ -174,7 +174,7 @@ void libblis_test_copym_impl( mt_impl_t impl,
 	switch ( impl )
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
-		bl2_copym( x, y );
+		bli_copym( x, y );
 		break;
 
 		default:
@@ -188,7 +188,7 @@ void libblis_test_copym_check( obj_t*  x,
                                obj_t*  y,
                                double* resid )
 {
-	num_t  dt_real = bl2_obj_datatype_proj_to_real( *x );
+	num_t  dt_real = bli_obj_datatype_proj_to_real( *x );
 
 	obj_t  norm_y_r;
 
@@ -209,12 +209,12 @@ void libblis_test_copym_check( obj_t*  x,
 	// is negligible.
 	//
 
-	bl2_obj_init_scalar( dt_real, &norm_y_r );
+	bli_obj_init_scalar( dt_real, &norm_y_r );
 
-	bl2_subm( x, y );
+	bli_subm( x, y );
 
-	bl2_fnormm( y, &norm_y_r );
+	bli_fnormm( y, &norm_y_r );
 
-	bl2_getsc( &norm_y_r, resid, &junk );
+	bli_getsc( &norm_y_r, resid, &junk );
 }
 

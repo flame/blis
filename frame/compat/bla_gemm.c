@@ -32,7 +32,7 @@
 
 */
 
-#include "blis2.h"
+#include "blis.h"
 
 
 //
@@ -62,13 +62,13 @@ void PASTEF77(ch,blasname)( \
 	inc_t   rs_c, cs_c; \
 \
 	/* Map BLAS chars to their corresponding BLIS enumerated type value. */ \
-	bl2_param_map_netlib_to_blis_trans( *transa, &blis_transa ); \
-	bl2_param_map_netlib_to_blis_trans( *transb, &blis_transb ); \
+	bli_param_map_netlib_to_blis_trans( *transa, &blis_transa ); \
+	bli_param_map_netlib_to_blis_trans( *transb, &blis_transb ); \
 \
 	/* Convert negative values of m, n, and k to zero. */ \
-	bl2_convert_blas_dim1( *m, m0 ); \
-	bl2_convert_blas_dim1( *n, n0 ); \
-	bl2_convert_blas_dim1( *k, k0 ); \
+	bli_convert_blas_dim1( *m, m0 ); \
+	bli_convert_blas_dim1( *n, n0 ); \
+	bli_convert_blas_dim1( *k, k0 ); \
 \
 	/* Set the row and column strides of the matrix operands. */ \
 	rs_a = 1; \

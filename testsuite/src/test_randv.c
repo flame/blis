@@ -32,7 +32,7 @@
 
 */
 
-#include "blis2.h"
+#include "blis.h"
 #include "test_libblis.h"
 
 
@@ -137,16 +137,16 @@ void libblis_test_randv_experiment( test_params_t* params,
 	// Repeat the experiment n_repeats times and record results. 
 	for ( i = 0; i < n_repeats; ++i )
 	{
-		time = bl2_clock();
+		time = bli_clock();
 
 		libblis_test_randv_impl( impl, &x );
 
-		time_min = bl2_clock_min_diff( time_min, time );
+		time_min = bli_clock_min_diff( time_min, time );
 	}
 
 	// Estimate the performance of the best experiment repeat.
 	*perf = ( 2.0 * m ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bl2_obj_is_complex( x ) ) *perf *= 2.0;
+	if ( bli_obj_is_complex( x ) ) *perf *= 2.0;
 
 	// Perform checks.
 	// For randv(), we don't return a meaningful residual/diff, since we can't
@@ -156,7 +156,7 @@ void libblis_test_randv_experiment( test_params_t* params,
 	libblis_test_randv_check( &x, resid );
 
 	// Free the test objects.
-	bl2_obj_free( &x );
+	bli_obj_free( &x );
 }
 
 
@@ -167,7 +167,7 @@ void libblis_test_randv_impl( mt_impl_t impl,
 	switch ( impl )
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
-		bl2_randv( x );
+		bli_randv( x );
 		break;
 
 		default:
@@ -180,9 +180,9 @@ void libblis_test_randv_impl( mt_impl_t impl,
 void libblis_test_randv_check( obj_t*  x,
                                double* resid )
 {
-	dim_t m_x   = bl2_obj_vector_dim( *x );
-	inc_t inc_x = bl2_obj_vector_inc( *x );
-	void* buf_x = bl2_obj_buffer_at_off( *x );
+	dim_t m_x   = bli_obj_vector_dim( *x );
+	inc_t inc_x = bli_obj_vector_inc( *x );
+	void* buf_x = bli_obj_buffer_at_off( *x );
 
 	*resid = 0.0;
 
@@ -193,48 +193,48 @@ void libblis_test_randv_check( obj_t*  x,
 	// absolute values of the elements of x.
 	//
 
-	if      ( bl2_obj_is_float( *x ) )
+	if      ( bli_obj_is_float( *x ) )
 	{
 		float  sum_x;
 
-		bl2_sabsumv( m_x,
+		bli_sabsumv( m_x,
 		             buf_x, inc_x,
 		             &sum_x );
 
-		if      ( sum_x == *bl2_s0   ) *resid = 1.0;
+		if      ( sum_x == *bli_s0   ) *resid = 1.0;
 		else if ( sum_x >= 1.0 * m_x ) *resid = 2.0;
 	}
-	else if ( bl2_obj_is_double( *x ) )
+	else if ( bli_obj_is_double( *x ) )
 	{
 		double sum_x;
 
-		bl2_dabsumv( m_x,
+		bli_dabsumv( m_x,
 		             buf_x, inc_x,
 		             &sum_x );
 
-		if      ( sum_x == *bl2_d0   ) *resid = 1.0;
+		if      ( sum_x == *bli_d0   ) *resid = 1.0;
 		else if ( sum_x >= 1.0 * m_x ) *resid = 2.0;
 	}
-	else if ( bl2_obj_is_scomplex( *x ) )
+	else if ( bli_obj_is_scomplex( *x ) )
 	{
 		float  sum_x;
 
-		bl2_cabsumv( m_x,
+		bli_cabsumv( m_x,
 		             buf_x, inc_x,
 		             &sum_x );
 
-		if      ( sum_x == *bl2_s0   ) *resid = 1.0;
+		if      ( sum_x == *bli_s0   ) *resid = 1.0;
 		else if ( sum_x >= 2.0 * m_x ) *resid = 2.0;
 	}
-	else // if ( bl2_obj_is_dcomplex( *x ) )
+	else // if ( bli_obj_is_dcomplex( *x ) )
 	{
 		double sum_x;
 
-		bl2_zabsumv( m_x,
+		bli_zabsumv( m_x,
 		             buf_x, inc_x,
 		             &sum_x );
 
-		if      ( sum_x == *bl2_d0   ) *resid = 1.0;
+		if      ( sum_x == *bli_d0   ) *resid = 1.0;
 		else if ( sum_x >= 2.0 * m_x ) *resid = 2.0;
 	}
 }

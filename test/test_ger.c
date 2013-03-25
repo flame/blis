@@ -33,7 +33,7 @@
 */
 
 #include <unistd.h>
-#include "blis2.h"
+#include "blis.h"
 
 //          m     n     alpha    x        incx  y        incy  a        lda
 void dger_( int*, int*, double*, double*, int*, double*, int*, double*, int* );
@@ -55,7 +55,7 @@ int main( int argc, char** argv )
 	double dtime_save;
 	double gflops;
 
-	bl2_init();
+	bli_init();
 
 	n_repeats = 3;
 
@@ -89,56 +89,56 @@ int main( int argc, char** argv )
 		else               n =     ( dim_t )    n_input;
 
 
-		bl2_obj_create( dt_alpha, 1, 1, 0, 0, &alpha );
+		bli_obj_create( dt_alpha, 1, 1, 0, 0, &alpha );
 
-		bl2_obj_create( dt_x, m, 1, 0, 0, &x );
-		bl2_obj_create( dt_y, n, 1, 0, 0, &y );
-		bl2_obj_create( dt_a, m, n, 0, 0, &a );
-		bl2_obj_create( dt_a, m, n, 0, 0, &a_save );
+		bli_obj_create( dt_x, m, 1, 0, 0, &x );
+		bli_obj_create( dt_y, n, 1, 0, 0, &y );
+		bli_obj_create( dt_a, m, n, 0, 0, &a );
+		bli_obj_create( dt_a, m, n, 0, 0, &a_save );
 
-		bl2_randm( &x );
-		bl2_randm( &y );
-		bl2_randm( &a );
-
-
-		bl2_setsc(  (2.0/1.0), 0.0, &alpha );
+		bli_randm( &x );
+		bli_randm( &y );
+		bli_randm( &a );
 
 
-		bl2_copym( &a, &a_save );
+		bli_setsc(  (2.0/1.0), 0.0, &alpha );
+
+
+		bli_copym( &a, &a_save );
 	
 		dtime_save = 1.0e9;
 
 		for ( r = 0; r < n_repeats; ++r )
 		{
-			bl2_copym( &a_save, &a );
+			bli_copym( &a_save, &a );
 
 
-			dtime = bl2_clock();
+			dtime = bli_clock();
 
 #ifdef PRINT
-			bl2_printm( "x", &x, "%4.1f", "" );
-			bl2_printm( "y", &y, "%4.1f", "" );
-			bl2_printm( "a", &a, "%4.1f", "" );
+			bli_printm( "x", &x, "%4.1f", "" );
+			bli_printm( "y", &y, "%4.1f", "" );
+			bli_printm( "a", &a, "%4.1f", "" );
 #endif
 
 #ifdef BLIS
 
-			bl2_ger( &alpha,
+			bli_ger( &alpha,
 			         &x,
 			         &y,
 			         &a );
 
 #else
 
-			int     mm     = bl2_obj_length( a );
-			int     nn     = bl2_obj_width( a );
-			int     incx   = bl2_obj_vector_inc( x );
-			int     incy   = bl2_obj_vector_inc( y );
-			int     lda    = bl2_obj_col_stride( a );
-			double* alphap = bl2_obj_buffer( alpha );
-			double* xp     = bl2_obj_buffer( x );
-			double* yp     = bl2_obj_buffer( y );
-			double* ap     = bl2_obj_buffer( a );
+			int     mm     = bli_obj_length( a );
+			int     nn     = bli_obj_width( a );
+			int     incx   = bli_obj_vector_inc( x );
+			int     incy   = bli_obj_vector_inc( y );
+			int     lda    = bli_obj_col_stride( a );
+			double* alphap = bli_obj_buffer( alpha );
+			double* xp     = bli_obj_buffer( x );
+			double* yp     = bli_obj_buffer( y );
+			double* ap     = bli_obj_buffer( a );
 
 			dger_( &mm,
 			       &nn,
@@ -149,12 +149,12 @@ int main( int argc, char** argv )
 #endif
 
 #ifdef PRINT
-			bl2_printm( "a after", &a, "%4.1f", "" );
+			bli_printm( "a after", &a, "%4.1f", "" );
 			exit(1);
 #endif
 
 
-			dtime_save = bl2_clock_min_diff( dtime_save, dtime );
+			dtime_save = bli_clock_min_diff( dtime_save, dtime );
 		}
 
 		gflops = ( 2.0 * m * n ) / ( dtime_save * 1.0e9 );
@@ -167,15 +167,15 @@ int main( int argc, char** argv )
 		printf( "( %2ld, 1:4 ) = [ %4lu %4lu  %10.3e  %6.3f ];\n",
 		        (p - p_begin + 1)/p_inc + 1, m, n, dtime_save, gflops );
 
-		bl2_obj_free( &alpha );
+		bli_obj_free( &alpha );
 
-		bl2_obj_free( &x );
-		bl2_obj_free( &y );
-		bl2_obj_free( &a );
-		bl2_obj_free( &a_save );
+		bli_obj_free( &x );
+		bli_obj_free( &y );
+		bli_obj_free( &a );
+		bli_obj_free( &a_save );
 	}
 
-	bl2_finalize();
+	bli_finalize();
 
 	return 0;
 }

@@ -32,7 +32,7 @@
 
 */
 
-#include "blis2.h"
+#include "blis.h"
 #include "test_libblis.h"
 
 
@@ -153,18 +153,18 @@ void libblis_test_hemm_experiment( test_params_t* params,
 	n = libblis_test_get_dim_from_prob_size( op->dim_spec[1], p_cur );
 
 	// Map parameter characters to BLIS constants.
-	bl2_param_map_char_to_blis_side( pc_str[0], &side );
-	bl2_param_map_char_to_blis_uplo( pc_str[1], &uploa );
-	bl2_param_map_char_to_blis_conj( pc_str[2], &conja );
-	bl2_param_map_char_to_blis_trans( pc_str[3], &transb );
+	bli_param_map_char_to_blis_side( pc_str[0], &side );
+	bli_param_map_char_to_blis_uplo( pc_str[1], &uploa );
+	bli_param_map_char_to_blis_conj( pc_str[2], &conja );
+	bli_param_map_char_to_blis_trans( pc_str[3], &transb );
 
 	// Create test scalars.
-	bl2_obj_init_scalar( datatype, &kappa );
-	bl2_obj_init_scalar( datatype, &alpha );
-	bl2_obj_init_scalar( datatype, &beta );
+	bli_obj_init_scalar( datatype, &kappa );
+	bli_obj_init_scalar( datatype, &alpha );
+	bli_obj_init_scalar( datatype, &beta );
 
 	// Create test operands (vectors and/or matrices).
-	bl2_set_dim_with_side( side, m, n, mn_side );
+	bli_set_dim_with_side( side, m, n, mn_side );
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
 		                      sc_str[0], mn_side, mn_side, &a );
 	libblis_test_mobj_create( params, datatype, transb,
@@ -175,64 +175,64 @@ void libblis_test_hemm_experiment( test_params_t* params,
 		                      sc_str[2], m,       n,       &c_save );
 
 	// Set alpha and beta.
-	if ( bl2_obj_is_real( c ) )
+	if ( bli_obj_is_real( c ) )
 	{
-		bl2_setsc(  1.2,  0.0, &alpha );
-		bl2_setsc( -1.0,  0.0, &beta );
+		bli_setsc(  1.2,  0.0, &alpha );
+		bli_setsc( -1.0,  0.0, &beta );
 	}
 	else
 	{
-		bl2_setsc(  1.2,  0.8, &alpha );
-		bl2_setsc( -1.0,  1.0, &beta );
+		bli_setsc(  1.2,  0.8, &alpha );
+		bli_setsc( -1.0,  1.0, &beta );
 	}
 
 	// Set the structure and uplo properties of A.
-	bl2_obj_set_struc( BLIS_HERMITIAN, a );
-	bl2_obj_set_uplo( uploa, a );
+	bli_obj_set_struc( BLIS_HERMITIAN, a );
+	bli_obj_set_uplo( uploa, a );
 
 	// Randomize A, make it densely Hermitian, and zero the unstored triangle
 	// to ensure the implementation reads only from the stored region.
-	bl2_randm( &a );
-	bl2_mkherm( &a );
-	bl2_mktrim( &a );
+	bli_randm( &a );
+	bli_mkherm( &a );
+	bli_mktrim( &a );
 
 	// Randomize B and C, and save C.
-	bl2_randm( &b );
-	bl2_randm( &c );
-	bl2_copym( &c, &c_save );
+	bli_randm( &b );
+	bli_randm( &c );
+	bli_copym( &c, &c_save );
 
 	// Normalize by m.
-	bl2_setsc( 1.0/( double )m, 0.0, &kappa );
-	bl2_scalm( &kappa, &b );
+	bli_setsc( 1.0/( double )m, 0.0, &kappa );
+	bli_scalm( &kappa, &b );
 
 	// Apply the remaining parameters.
-	bl2_obj_set_conj( conja, a );
-	bl2_obj_set_conjtrans( transb, b );
+	bli_obj_set_conj( conja, a );
+	bli_obj_set_conjtrans( transb, b );
 
 	// Repeat the experiment n_repeats times and record results. 
 	for ( i = 0; i < n_repeats; ++i )
 	{
-		bl2_copym( &c_save, &c );
+		bli_copym( &c_save, &c );
 
-		time = bl2_clock();
+		time = bli_clock();
 
 		libblis_test_hemm_impl( impl, side, &alpha, &a, &b, &beta, &c );
 
-		time_min = bl2_clock_min_diff( time_min, time );
+		time_min = bli_clock_min_diff( time_min, time );
 	}
 
 	// Estimate the performance of the best experiment repeat.
 	*perf = ( 2.0 * mn_side * m * n ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bl2_obj_is_complex( c ) ) *perf *= 4.0;
+	if ( bli_obj_is_complex( c ) ) *perf *= 4.0;
 
 	// Perform checks.
 	libblis_test_hemm_check( side, &alpha, &a, &b, &beta, &c, &c_save, resid );
 
 	// Free the test objects.
-	bl2_obj_free( &a );
-	bl2_obj_free( &b );
-	bl2_obj_free( &c );
-	bl2_obj_free( &c_save );
+	bli_obj_free( &a );
+	bli_obj_free( &b );
+	bli_obj_free( &c );
+	bli_obj_free( &c_save );
 }
 
 
@@ -248,7 +248,7 @@ void libblis_test_hemm_impl( mt_impl_t impl,
 	switch ( impl )
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
-		bl2_hemm( side, alpha, a, b, beta, c );
+		bli_hemm( side, alpha, a, b, beta, c );
 		break;
 
 		default:
@@ -267,11 +267,11 @@ void libblis_test_hemm_check( side_t  side,
                               obj_t*  c_orig,
                               double* resid )
 {
-	num_t  dt      = bl2_obj_datatype( *c );
-	num_t  dt_real = bl2_obj_datatype_proj_to_real( *c );
+	num_t  dt      = bli_obj_datatype( *c );
+	num_t  dt_real = bli_obj_datatype_proj_to_real( *c );
 
-	dim_t  m       = bl2_obj_length( *c );
-	dim_t  n       = bl2_obj_width( *c );
+	dim_t  m       = bli_obj_length( *c );
+	dim_t  n       = bli_obj_width( *c );
 
 	obj_t  kappa, norm;
 	obj_t  t, v, w, z;
@@ -310,50 +310,50 @@ void libblis_test_hemm_check( side_t  side,
 	//     = beta * C_orig * t + alpha * transb(B) * w
 	//     = beta * C_orig * t + z
 
-	bl2_obj_init_scalar( dt,      &kappa );
-	bl2_obj_init_scalar( dt_real, &norm );
+	bli_obj_init_scalar( dt,      &kappa );
+	bli_obj_init_scalar( dt_real, &norm );
 
-	if ( bl2_is_left( side ) )
+	if ( bli_is_left( side ) )
 	{
-		bl2_obj_create( dt, n, 1, 0, 0, &t );
-		bl2_obj_create( dt, m, 1, 0, 0, &v );
-		bl2_obj_create( dt, m, 1, 0, 0, &w );
-		bl2_obj_create( dt, m, 1, 0, 0, &z );
+		bli_obj_create( dt, n, 1, 0, 0, &t );
+		bli_obj_create( dt, m, 1, 0, 0, &v );
+		bli_obj_create( dt, m, 1, 0, 0, &w );
+		bli_obj_create( dt, m, 1, 0, 0, &z );
 	}
-	else // else if ( bl2_is_left( side ) )
+	else // else if ( bli_is_left( side ) )
 	{
-		bl2_obj_create( dt, n, 1, 0, 0, &t );
-		bl2_obj_create( dt, m, 1, 0, 0, &v );
-		bl2_obj_create( dt, n, 1, 0, 0, &w );
-		bl2_obj_create( dt, m, 1, 0, 0, &z );
+		bli_obj_create( dt, n, 1, 0, 0, &t );
+		bli_obj_create( dt, m, 1, 0, 0, &v );
+		bli_obj_create( dt, n, 1, 0, 0, &w );
+		bli_obj_create( dt, m, 1, 0, 0, &z );
 	}
 
-	bl2_randv( &t );
-	bl2_setsc( 1.0/( double )n, 0.0, &kappa );
-	bl2_scalv( &kappa, &t );
+	bli_randv( &t );
+	bli_setsc( 1.0/( double )n, 0.0, &kappa );
+	bli_scalv( &kappa, &t );
 
-	bl2_gemv( &BLIS_ONE, c, &t, &BLIS_ZERO, &v );
+	bli_gemv( &BLIS_ONE, c, &t, &BLIS_ZERO, &v );
 
-	if ( bl2_is_left( side ) )
+	if ( bli_is_left( side ) )
 	{
-		bl2_gemv( &BLIS_ONE, b, &t, &BLIS_ZERO, &w );
-		bl2_hemv( alpha, a, &w, &BLIS_ZERO, &z );
+		bli_gemv( &BLIS_ONE, b, &t, &BLIS_ZERO, &w );
+		bli_hemv( alpha, a, &w, &BLIS_ZERO, &z );
 	}
 	else
 	{
-		bl2_hemv( &BLIS_ONE, a, &t, &BLIS_ZERO, &w );
-		bl2_gemv( alpha, b, &w, &BLIS_ZERO, &z );
+		bli_hemv( &BLIS_ONE, a, &t, &BLIS_ZERO, &w );
+		bli_gemv( alpha, b, &w, &BLIS_ZERO, &z );
 	}
 
-	bl2_gemv( beta, c_orig, &t, &BLIS_ONE, &z );
+	bli_gemv( beta, c_orig, &t, &BLIS_ONE, &z );
 	
-	bl2_subv( &z, &v );
-	bl2_fnormv( &v, &norm );
-	bl2_getsc( &norm, resid, &junk );
+	bli_subv( &z, &v );
+	bli_fnormv( &v, &norm );
+	bli_getsc( &norm, resid, &junk );
 
-	bl2_obj_free( &t );
-	bl2_obj_free( &v );
-	bl2_obj_free( &w );
-	bl2_obj_free( &z );
+	bli_obj_free( &t );
+	bli_obj_free( &v );
+	bli_obj_free( &w );
+	bli_obj_free( &z );
 }
 

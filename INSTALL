@@ -38,27 +38,27 @@ When creating your configuration sub-directory, you can use the reference
 configuration as a template:
 
   > ls config/reference
-  bl2_config.h  bl2_kernel.h  make_defs.mk
+  bli_config.h  bli_kernel.h  make_defs.mk
   > cp -r config/reference config/x86-64opt
   > ls config/x86-64opt
-  bl2_config.h  bl2_kernel.h  make_defs.mk
+  bli_config.h  bli_kernel.h  make_defs.mk
 
 Then you would edit each of these three files. Here are some special notes
 about each file:
 
-  o bl2_config.h
+  o bli_config.h
     - This is where you specify most of the parameters of your BLIS
       configuration, including (but not limited to) such things as register
       and cache blocksizes used by the micro-kernel(s).
 
-  o bl2_kernel.h
+  o bli_kernel.h
     - This file defines C preprocessor macros associated with various kernels
       and micro-kernels. The reference configuration defines all kernels to
       use reference implementations (which are provided as part of the BLIS
       framework). If you end up writing your own optimized kernel for some
       operation, be sure and enable its use here. Notice that you only have to
       set ONE definition for each operation, as BLIS prepends s,d,c,z (as well
-      as the BLIS function prefix, currently 'bl2_') to the names to create
+      as the BLIS function prefix, currently 'bli_') to the names to create
       the actual datatype instances.
     - IMPORTANT: If you add your own kernels, OR if you use kernels provided
       with the BLIS framework distribution (i.e., in the 'kernels' directory),
@@ -70,12 +70,12 @@ about each file:
         > pwd
         /home/field/google_code/blis/config/x86-64opt
         > ls
-        bl2_config.h  bl2_kernel.h  make_defs.mk
+        bli_config.h  bli_kernel.h  make_defs.mk
         > ls ../../kernels
         x86  x86_64
         > ln -s ../../kernels/x86_64 kernels
         > ls
-        bl2_config.h  bl2_kernel.h  kernels  make_defs.mk
+        bli_config.h  bli_kernel.h  kernels  make_defs.mk
         > ls -l kernels
         lrwxrwxrwx 1 field dept 20 Dec  1 18:13 kernels -> ../../kernels/x86_64
 
@@ -169,14 +169,14 @@ a library by running 'make':
 
 Running 'make' will result in output similar to:
 
-  Compiling frame/1/axpyv/bl2_axpyv.c
-  Compiling frame/1/axpyv/bl2_axpyv_check.c
-  Compiling frame/1/axpyv/bl2_axpyv_unb_var1.c
-  Compiling frame/1/copynzv/bl2_copynzv.c
-  Compiling frame/1/copynzv/bl2_copynzv_check.c
-  Compiling frame/1/copynzv/bl2_copynzv_unb_var1.c
-  Compiling frame/1/copyv/bl2_copyv.c
-  Compiling frame/1/copyv/bl2_copyv_check.c
+  Compiling frame/1/axpyv/bli_axpyv.c
+  Compiling frame/1/axpyv/bli_axpyv_check.c
+  Compiling frame/1/axpyv/bli_axpyv_unb_var1.c
+  Compiling frame/1/copynzv/bli_copynzv.c
+  Compiling frame/1/copynzv/bli_copynzv_check.c
+  Compiling frame/1/copynzv/bli_copynzv_unb_var1.c
+  Compiling frame/1/copyv/bli_copyv.c
+  Compiling frame/1/copyv/bli_copyv_check.c
 
 If you want to see the individual command line invocations of the compiler,
 edit your configuration's make_defs.mk to contain:
@@ -201,12 +201,12 @@ STEP 4: INSTALLATION
 
 Toward the end of compilation, you should get output similar to:
 
-  Compiling frame/util/randv/bl2_randv.c
-  Compiling frame/util/randv/bl2_randv_unb_var1.c
-  Compiling frame/util/sets/bl2_sets.c
-  Compiling frame/base/noopt/bl2_dlamch.c (NOTE: optimizations disabled)
-  Compiling frame/base/noopt/bl2_lsame.c (NOTE: optimizations disabled)
-  Compiling frame/base/noopt/bl2_slamch.c (NOTE: optimizations disabled)
+  Compiling frame/util/randv/bli_randv.c
+  Compiling frame/util/randv/bli_randv_unb_var1.c
+  Compiling frame/util/sets/bli_sets.c
+  Compiling frame/base/noopt/bli_dlamch.c (NOTE: optimizations disabled)
+  Compiling frame/base/noopt/bli_lsame.c (NOTE: optimizations disabled)
+  Compiling frame/base/noopt/bli_slamch.c (NOTE: optimizations disabled)
   Archiving lib/reference/libblis.a
 
 Now you have a BLIS library sitting in the 'lib/<configname>/' directory. To

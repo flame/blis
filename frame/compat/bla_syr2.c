@@ -32,7 +32,7 @@
 
 */
 
-#include "blis2.h"
+#include "blis.h"
 
 
 //
@@ -59,15 +59,15 @@ void PASTEF77(ch,blasname)( \
 	inc_t   rs_a, cs_a; \
 \
 	/* Map BLAS chars to their corresponding BLIS enumerated type value. */ \
-	bl2_param_map_netlib_to_blis_uplo( *uploa, &blis_uploa ); \
+	bli_param_map_netlib_to_blis_uplo( *uploa, &blis_uploa ); \
 \
 	/* Convert negative values of m to zero. */ \
-	bl2_convert_blas_dim1( *m, m0 ); \
+	bli_convert_blas_dim1( *m, m0 ); \
 \
 	/* If the input increments are negative, adjust the pointers so we can
 	   use positive increments instead. */ \
-	bl2_convert_blas_incv( m0, x, *incx, x0, incx0 ); \
-	bl2_convert_blas_incv( m0, y, *incy, y0, incy0 ); \
+	bli_convert_blas_incv( m0, x, *incx, x0, incx0 ); \
+	bli_convert_blas_incv( m0, y, *incy, y0, incy0 ); \
 \
 	/* Set the row and column strides of A. */ \
 	rs_a = 1; \

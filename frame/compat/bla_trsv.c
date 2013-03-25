@@ -32,7 +32,7 @@
 
 */
 
-#include "blis2.h"
+#include "blis.h"
 
 
 //
@@ -64,16 +64,16 @@ void PASTEF77(ch,blasname)( \
 	PASTEMAC(ch,setris)( 1.0, 0.0, one ); \
 \
 	/* Map BLAS chars to their corresponding BLIS enumerated type value. */ \
-	bl2_param_map_netlib_to_blis_uplo( *uploa, &blis_uploa ); \
-	bl2_param_map_netlib_to_blis_trans( *transa, &blis_transa ); \
-	bl2_param_map_netlib_to_blis_diag( *diaga, &blis_diaga ); \
+	bli_param_map_netlib_to_blis_uplo( *uploa, &blis_uploa ); \
+	bli_param_map_netlib_to_blis_trans( *transa, &blis_transa ); \
+	bli_param_map_netlib_to_blis_diag( *diaga, &blis_diaga ); \
 \
 	/* Convert negative values of m to zero. */ \
-	bl2_convert_blas_dim1( *m, m0 ); \
+	bli_convert_blas_dim1( *m, m0 ); \
 \
 	/* If the input increments are negative, adjust the pointers so we can
 	   use positive increments instead. */ \
-	bl2_convert_blas_incv( m0, x, *incx, x0, incx0 ); \
+	bli_convert_blas_incv( m0, x, *incx, x0, incx0 ); \
 \
 	/* Set the row and column strides of A. */ \
 	rs_a = 1; \

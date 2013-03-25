@@ -32,7 +32,7 @@
 
 */
 
-#include "blis2.h"
+#include "blis.h"
 
 
 //
@@ -52,13 +52,13 @@ ftype_i PASTEF772(chi,chx,blasname)( \
 	ftype_i  index; \
 \
 	/* Convert negative values of n to zero. */ \
-	bl2_convert_blas_dim1( *n, n0 ); \
+	bli_convert_blas_dim1( *n, n0 ); \
 \
 	/* If the input increments are negative, adjust the pointers so we can
 	   use positive increments instead. */ \
-	bl2_convert_blas_incv( n0, x, *incx, x0, incx0 ); \
+	bli_convert_blas_incv( n0, x, *incx, x0, incx0 ); \
 \
-	bl2_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \
+	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \
 	index = 0; \
 \
 	return index; \

@@ -32,11 +32,11 @@
 
 */
 
-#include "blis2.h"
+#include "blis.h"
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-#include "bl2_f2c.h"
+#include "bli_f2c.h"
 
 /* dspmv.f -- translated by f2c (version 19991025).
    You must link the resulting object file with the libraries:

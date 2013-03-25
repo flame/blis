@@ -32,7 +32,7 @@
 
 */
 
-#include "blis2.h"
+#include "blis.h"
 #include "test_libblis.h"
 
 
@@ -54,7 +54,7 @@ int main( int argc, char** argv )
 	test_ops_t    ops;
 
 	// Initialize libblis.
-	bl2_init();
+	bli_init();
 
 	// Initialize some strings.
 	libblis_test_init_strings();
@@ -84,7 +84,7 @@ int main( int argc, char** argv )
 	libblis_test_level3_ops( &params, &ops );
 
 	// Finalize libblis.
-	bl2_finalize();
+	bli_finalize();
 
 	// Return peacefully.
 	return 0;
@@ -452,7 +452,7 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "--- BLIS library info -------------------------------------\n" );
 	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "version string              %s\n", bl2_version() );
+	libblis_test_fprintf_c( os, "version string              %s\n", bli_version() );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "--- BLIS config header ---\n" );
 	libblis_test_fprintf_c( os, "\n" );
@@ -651,7 +651,7 @@ dim_t libblis_test_get_dim_from_prob_size( int   dim_spec,
 {
 	dim_t dim;
 
-	if ( dim_spec < 0 ) dim = p_size / bl2_abs(dim_spec);
+	if ( dim_spec < 0 ) dim = p_size / bli_abs(dim_spec);
 	else                dim = dim_spec;
 
 	return dim;
@@ -996,7 +996,7 @@ void libblis_test_op_driver( test_params_t* params,
 					       &perf, &resid );
 
 					// Remove the sign of the residual, if there is one.
-					resid = bl2_fabs( resid );
+					resid = bli_fabs( resid );
 					if ( resid == -0.0 ) resid = 0.0;
 
 					// Query the string corresponding to the residual's
@@ -1185,16 +1185,16 @@ void libblis_test_mobj_create( test_params_t* params, num_t dt, trans_t trans, c
 	dim_t cs_g;
 	
 	// Apply the trans parameter to the dimensions (if needed).
-	bl2_set_dims_with_trans( trans, m, n, m_trans, n_trans );
+	bli_set_dims_with_trans( trans, m, n, m_trans, n_trans );
 
 	// In case of general strides, use the general stride spacing specified by the
 	// user to create strides with a column-major tilt.
 	rs_g = gs * 1;
 	cs_g = gs * m_trans;
 
-	if      ( storage == 'c' ) bl2_obj_create( dt, m_trans, n_trans, 0,       0, a );
-	else if ( storage == 'r' ) bl2_obj_create( dt, m_trans, n_trans, n_trans, 1, a );
-	else if ( storage == 'g' ) bl2_obj_create( dt, m_trans, n_trans, rs_g, cs_g, a );
+	if      ( storage == 'c' ) bli_obj_create( dt, m_trans, n_trans, 0,       0, a );
+	else if ( storage == 'r' ) bli_obj_create( dt, m_trans, n_trans, n_trans, 1, a );
+	else if ( storage == 'g' ) bli_obj_create( dt, m_trans, n_trans, rs_g, cs_g, a );
 	else
 	{
 		libblis_test_printf_error( "Invalid storage character: %c\n", storage );
@@ -1208,13 +1208,13 @@ void libblis_test_vobj_create( test_params_t* params, num_t dt, char storage, di
 	dim_t gs = params->gs_spacing;
 
 	// Column vector (unit stride)
-	if      ( storage == 'c' ) bl2_obj_create( dt, m, 1,  1,  m,    x );
+	if      ( storage == 'c' ) bli_obj_create( dt, m, 1,  1,  m,    x );
 	// Row vector (unit stride)
-	else if ( storage == 'r' ) bl2_obj_create( dt, 1, m,  m,  1,    x );
+	else if ( storage == 'r' ) bli_obj_create( dt, 1, m,  m,  1,    x );
 	// Column vector (non-unit stride)
-	else if ( storage == 'j' ) bl2_obj_create( dt, m, 1,  gs, gs*m, x );
+	else if ( storage == 'j' ) bli_obj_create( dt, m, 1,  gs, gs*m, x );
 	// Row vector (non-unit stride)
-	else if ( storage == 'i' ) bl2_obj_create( dt, 1, m,  gs*m, gs, x );
+	else if ( storage == 'i' ) bli_obj_create( dt, 1, m,  gs*m, gs, x );
 	else
 	{
 		libblis_test_printf_error( "Invalid storage character: %c\n", storage );
@@ -1269,7 +1269,7 @@ void libblis_test_fopen_mfile( char* op_str, mt_impl_t impl, FILE** output_strea
 	char filename_str[ MAX_FILENAME_LENGTH ];
 
 	if ( impl == BLIS_TEST_MT_FRONT_END )
-		bl2_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
+		bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 
 	// Construct a filename string for the current operation.
 	libblis_test_build_filename_string( BLIS_FILE_PREFIX_STR,

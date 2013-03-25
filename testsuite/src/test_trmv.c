@@ -32,7 +32,7 @@
 
 */
 
-#include "blis2.h"
+#include "blis.h"
 #include "test_libblis.h"
 
 
@@ -141,13 +141,13 @@ void libblis_test_trmv_experiment( test_params_t* params,
 	m = libblis_test_get_dim_from_prob_size( op->dim_spec[0], p_cur );
 
 	// Map parameter characters to BLIS constants.
-	bl2_param_map_char_to_blis_uplo( pc_str[0], &uploa );
-	bl2_param_map_char_to_blis_trans( pc_str[1], &transa );
-	bl2_param_map_char_to_blis_diag( pc_str[2], &diaga );
+	bli_param_map_char_to_blis_uplo( pc_str[0], &uploa );
+	bli_param_map_char_to_blis_trans( pc_str[1], &transa );
+	bli_param_map_char_to_blis_diag( pc_str[2], &diaga );
 
 	// Create test scalars.
-	bl2_obj_init_scalar( datatype, &alpha );
-	bl2_obj_init_scalar( datatype, &kappa );
+	bli_obj_init_scalar( datatype, &alpha );
+	bli_obj_init_scalar( datatype, &kappa );
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
@@ -158,55 +158,55 @@ void libblis_test_trmv_experiment( test_params_t* params,
 		                      sc_str[1], m,    &x_save );
 
 	// Set alpha.
-	if ( bl2_obj_is_real( x ) )
-		bl2_setsc( -1.0,  0.0, &alpha );
+	if ( bli_obj_is_real( x ) )
+		bli_setsc( -1.0,  0.0, &alpha );
 	else
-		bl2_setsc(  0.0, -1.0, &alpha );
+		bli_setsc(  0.0, -1.0, &alpha );
 
 	// Set the structure and uplo properties of A.
-	bl2_obj_set_struc( BLIS_TRIANGULAR, a );
-	bl2_obj_set_uplo( uploa, a );
+	bli_obj_set_struc( BLIS_TRIANGULAR, a );
+	bli_obj_set_uplo( uploa, a );
 
 	// Randomize A, make it densely triangular.
-	bl2_randm( &a );
-	bl2_mktrim( &a );
+	bli_randm( &a );
+	bli_mktrim( &a );
 
 	// Randomize x and save.
-	bl2_randv( &x );
-	bl2_copyv( &x, &x_save );
+	bli_randv( &x );
+	bli_copyv( &x, &x_save );
 
 	// Normalize vectors by m.
-	bl2_setsc( 1.0/( double )m, 0.0, &kappa );
-	bl2_scalv( &kappa, &x );
-	bl2_scalv( &kappa, &x_save );
+	bli_setsc( 1.0/( double )m, 0.0, &kappa );
+	bli_scalv( &kappa, &x );
+	bli_scalv( &kappa, &x_save );
 
 	// Apply the remaining parameters.
-	bl2_obj_set_conjtrans( transa, a );
-	bl2_obj_set_diag( diaga, a );
+	bli_obj_set_conjtrans( transa, a );
+	bli_obj_set_diag( diaga, a );
 
 	// Repeat the experiment n_repeats times and record results. 
 	for ( i = 0; i < n_repeats; ++i )
 	{
-		bl2_copym( &x_save, &x );
+		bli_copym( &x_save, &x );
 
-		time = bl2_clock();
+		time = bli_clock();
 
 		libblis_test_trmv_impl( impl, &alpha, &a, &x );
 
-		time_min = bl2_clock_min_diff( time_min, time );
+		time_min = bli_clock_min_diff( time_min, time );
 	}
 
 	// Estimate the performance of the best experiment repeat.
 	*perf = ( 1.0 * m * m ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bl2_obj_is_complex( x ) ) *perf *= 4.0;
+	if ( bli_obj_is_complex( x ) ) *perf *= 4.0;
 
 	// Perform checks.
 	libblis_test_trmv_check( &alpha, &a, &x, &x_save, resid );
 
 	// Free the test objects.
-	bl2_obj_free( &a );
-	bl2_obj_free( &x );
-	bl2_obj_free( &x_save );
+	bli_obj_free( &a );
+	bli_obj_free( &x );
+	bli_obj_free( &x_save );
 }
 
 
@@ -219,7 +219,7 @@ void libblis_test_trmv_impl( mt_impl_t impl,
 	switch ( impl )
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
-		bl2_trmv( alpha, a, x );
+		bli_trmv( alpha, a, x );
 		break;
 
 		default:
@@ -235,13 +235,13 @@ void libblis_test_trmv_check( obj_t*  alpha,
                               obj_t*  x_orig,
                               double* resid )
 {
-	num_t   dt      = bl2_obj_datatype( *x );
-	num_t   dt_real = bl2_obj_datatype_proj_to_real( *x );
+	num_t   dt      = bli_obj_datatype( *x );
+	num_t   dt_real = bli_obj_datatype_proj_to_real( *x );
 
-	dim_t   m       = bl2_obj_vector_dim( *x );
+	dim_t   m       = bli_obj_vector_dim( *x );
 
-	uplo_t  uploa   = bl2_obj_uplo( *a );
-	trans_t transa  = bl2_obj_conjtrans_status( *a );
+	uplo_t  uploa   = bli_obj_uplo( *a );
+	trans_t transa  = bli_obj_conjtrans_status( *a );
 
 	obj_t   a_local, y;
 	obj_t   norm;
@@ -269,27 +269,27 @@ void libblis_test_trmv_check( obj_t*  alpha,
 	//   y = alpha * conja(A_dense) * x_orig
 	//
 
-	bl2_obj_init_scalar( dt_real, &norm );
+	bli_obj_init_scalar( dt_real, &norm );
 
-	bl2_obj_create( dt, m, 1, 0, 0, &y );
-	bl2_obj_create( dt, m, m, 0, 0, &a_local );
+	bli_obj_create( dt, m, 1, 0, 0, &y );
+	bli_obj_create( dt, m, m, 0, 0, &a_local );
 
-	bl2_obj_set_struc( BLIS_TRIANGULAR, a_local );
-	bl2_obj_set_uplo( uploa, a_local );
-	bl2_obj_toggle_uplo_if_trans( transa, a_local );
-	bl2_copym( a, &a_local );
-	bl2_mktrim( &a_local );
+	bli_obj_set_struc( BLIS_TRIANGULAR, a_local );
+	bli_obj_set_uplo( uploa, a_local );
+	bli_obj_toggle_uplo_if_trans( transa, a_local );
+	bli_copym( a, &a_local );
+	bli_mktrim( &a_local );
 
-	bl2_obj_set_struc( BLIS_GENERAL, a_local );
-	bl2_obj_set_uplo( BLIS_DENSE, a_local );
+	bli_obj_set_struc( BLIS_GENERAL, a_local );
+	bli_obj_set_uplo( BLIS_DENSE, a_local );
 
-	bl2_gemv( alpha, &a_local, x_orig, &BLIS_ZERO, &y );
+	bli_gemv( alpha, &a_local, x_orig, &BLIS_ZERO, &y );
 
-	bl2_subv( x, &y );
-	bl2_fnormv( &y, &norm );
-	bl2_getsc( &norm, resid, &junk );
+	bli_subv( x, &y );
+	bli_fnormv( &y, &norm );
+	bli_getsc( &norm, resid, &junk );
 
-	bl2_obj_free( &y );
-	bl2_obj_free( &a_local );
+	bli_obj_free( &y );
+	bli_obj_free( &a_local );
 }
 

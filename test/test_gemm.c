@@ -33,7 +33,7 @@
 */
 
 #include <unistd.h>
-#include "blis2.h"
+#include "blis.h"
 
 //           transa transb m     n     k     alpha    a        lda   b        ldb   beta     c        ldc
 void dgemm_( char*, char*, int*, int*, int*, double*, double*, int*, double*, int*, double*, double*, int* );
@@ -73,7 +73,7 @@ int main( int argc, char** argv )
 	double dtime_save;
 	double gflops;
 
-	bl2_init();
+	bli_init();
 
 	n_repeats = 3;
 
@@ -114,36 +114,36 @@ int main( int argc, char** argv )
 		else               k =     ( dim_t )    k_input;
 
 
-		bl2_obj_create( dt_alpha, 1, 1, 0, 0, &alpha );
-		bl2_obj_create( dt_beta,  1, 1, 0, 0, &beta );
+		bli_obj_create( dt_alpha, 1, 1, 0, 0, &alpha );
+		bli_obj_create( dt_beta,  1, 1, 0, 0, &beta );
 
-		bl2_obj_create( dt_a, m, k, 0, 0, &a );
-		bl2_obj_create( dt_b, k, n, 0, 0, &b );
-		bl2_obj_create( dt_c, m, n, 0, 0, &c );
-		bl2_obj_create( dt_c, m, n, 0, 0, &c_save );
+		bli_obj_create( dt_a, m, k, 0, 0, &a );
+		bli_obj_create( dt_b, k, n, 0, 0, &b );
+		bli_obj_create( dt_c, m, n, 0, 0, &c );
+		bli_obj_create( dt_c, m, n, 0, 0, &c_save );
 
-		bl2_randm( &a );
-		bl2_randm( &b );
-		bl2_randm( &c );
+		bli_randm( &a );
+		bli_randm( &b );
+		bli_randm( &c );
 
 
-		bl2_setsc(  (2.0/1.0), 0.0, &alpha );
-		bl2_setsc( -(1.0/1.0), 0.0, &beta );
+		bli_setsc(  (2.0/1.0), 0.0, &alpha );
+		bli_setsc( -(1.0/1.0), 0.0, &beta );
 
-		mr = bl2_blksz_obj_create( 2, 4, 2, 2 );
-		kr = bl2_blksz_obj_create( 1, 1, 1, 1 );
-		nr = bl2_blksz_obj_create( 1, 4, 1, 1 );
-		mc = bl2_blksz_obj_create( 128, 368, 128, 128 );
-		kc = bl2_blksz_obj_create( 256, 256, 256, 256 );
-		nc = bl2_blksz_obj_create( 512,3000, 512, 512 );
-		ni = bl2_blksz_obj_create(  16,  16,  16,  16 );
+		mr = bli_blksz_obj_create( 2, 4, 2, 2 );
+		kr = bli_blksz_obj_create( 1, 1, 1, 1 );
+		nr = bli_blksz_obj_create( 1, 4, 1, 1 );
+		mc = bli_blksz_obj_create( 128, 368, 128, 128 );
+		kc = bli_blksz_obj_create( 256, 256, 256, 256 );
+		nc = bli_blksz_obj_create( 512,3000, 512, 512 );
+		ni = bli_blksz_obj_create(  16,  16,  16,  16 );
 
 		scalm_cntl =
-		bl2_scalm_cntl_obj_create( BLIS_UNBLOCKED,
+		bli_scalm_cntl_obj_create( BLIS_UNBLOCKED,
 		                           BLIS_VARIANT1 );
 
 		packm_cntl_a =
-		bl2_packm_cntl_obj_create( BLIS_BLOCKED,
+		bli_packm_cntl_obj_create( BLIS_BLOCKED,
 		                           BLIS_VARIANT2,
 		                           mr,
 		                           kr, 
@@ -155,7 +155,7 @@ int main( int argc, char** argv )
 		                           BLIS_PACKED_ROW_PANELS );
 
 		packm_cntl_b =
-		bl2_packm_cntl_obj_create( BLIS_BLOCKED,
+		bli_packm_cntl_obj_create( BLIS_BLOCKED,
 		                           BLIS_VARIANT2,
 		                           kr,
 		                           nr, 
@@ -167,13 +167,13 @@ int main( int argc, char** argv )
 		                           BLIS_PACKED_COL_PANELS );
 
 		gemm_cntl_bp_ke =
-		bl2_gemm_cntl_obj_create( BLIS_UNB_OPT,
+		bli_gemm_cntl_obj_create( BLIS_UNB_OPT,
 		                          BLIS_VARIANT2,
 		                          NULL, NULL, NULL, NULL,
 		                          NULL, NULL, NULL, NULL );
 
 		gemm_cntl_op_bp =
-		bl2_gemm_cntl_obj_create( BLIS_BLOCKED,
+		bli_gemm_cntl_obj_create( BLIS_BLOCKED,
 		                          //BLIS_VARIANT4,
 		                          BLIS_VARIANT1,
 		                          mc,
@@ -186,7 +186,7 @@ int main( int argc, char** argv )
 		                          NULL );
 
 		gemm_cntl_mm_op =
-		bl2_gemm_cntl_obj_create( BLIS_BLOCKED,
+		bli_gemm_cntl_obj_create( BLIS_BLOCKED,
 		                          BLIS_VARIANT3,
 		                          kc,
 		                          NULL,
@@ -198,7 +198,7 @@ int main( int argc, char** argv )
 		                          NULL );
 
 		gemm_cntl_vl_mm =
-		bl2_gemm_cntl_obj_create( BLIS_BLOCKED,
+		bli_gemm_cntl_obj_create( BLIS_BLOCKED,
 		                          BLIS_VARIANT2,
 		                          nc,
 		                          NULL,
@@ -209,32 +209,32 @@ int main( int argc, char** argv )
 		                          gemm_cntl_mm_op,
 		                          NULL );
 
-		bl2_obj_init_pack( &a_pack );
-		bl2_obj_init_pack( &b_pack );
+		bli_obj_init_pack( &a_pack );
+		bli_obj_init_pack( &b_pack );
 
 
-		bl2_copym( &c, &c_save );
+		bli_copym( &c, &c_save );
 	
 		dtime_save = 1.0e9;
 
 		for ( r = 0; r < n_repeats; ++r )
 		{
-			bl2_copym( &c_save, &c );
+			bli_copym( &c_save, &c );
 
 
-			dtime = bl2_clock();
+			dtime = bli_clock();
 
 
 #ifdef PRINT
-			bl2_printm( "a", &a, "%4.1f", "" );
-			bl2_printm( "b", &b, "%4.1f", "" );
-			bl2_printm( "c", &c, "%4.1f", "" );
+			bli_printm( "a", &a, "%4.1f", "" );
+			bli_printm( "b", &b, "%4.1f", "" );
+			bli_printm( "c", &c, "%4.1f", "" );
 #endif
 
 #ifdef BLIS
-			//bl2_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
+			//bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
 
-			bl2_gemm_int( &alpha,
+			bli_gemm_int( &alpha,
 			              &a,
 			              &b,
 			              &beta,
@@ -246,17 +246,17 @@ int main( int argc, char** argv )
 
 			char    transa = 'N';
 			char    transb = 'N';
-			int     mm     = bl2_obj_length( c );
-			int     kk     = bl2_obj_width_after_trans( a );
-			int     nn     = bl2_obj_width( c );
-			int     lda    = bl2_obj_col_stride( a );
-			int     ldb    = bl2_obj_col_stride( b );
-			int     ldc    = bl2_obj_col_stride( c );
-			double* alphap = bl2_obj_buffer( alpha );
-			double* ap     = bl2_obj_buffer( a );
-			double* bp     = bl2_obj_buffer( b );
-			double* betap  = bl2_obj_buffer( beta );
-			double* cp     = bl2_obj_buffer( c );
+			int     mm     = bli_obj_length( c );
+			int     kk     = bli_obj_width_after_trans( a );
+			int     nn     = bli_obj_width( c );
+			int     lda    = bli_obj_col_stride( a );
+			int     ldb    = bli_obj_col_stride( b );
+			int     ldc    = bli_obj_col_stride( c );
+			double* alphap = bli_obj_buffer( alpha );
+			double* ap     = bli_obj_buffer( a );
+			double* bp     = bli_obj_buffer( b );
+			double* betap  = bli_obj_buffer( beta );
+			double* cp     = bli_obj_buffer( c );
 
 			dgemm_( &transa,
 			        &transb,
@@ -271,12 +271,12 @@ int main( int argc, char** argv )
 #endif
 
 #ifdef PRINT
-			bl2_printm( "c after", &c, "%4.1f", "" );
+			bli_printm( "c after", &c, "%4.1f", "" );
 			exit(1);
 #endif
 
 
-			dtime_save = bl2_clock_min_diff( dtime_save, dtime );
+			dtime_save = bli_clock_min_diff( dtime_save, dtime );
 		}
 
 		gflops = ( 2.0 * m * k * n ) / ( dtime_save * 1.0e9 );
@@ -289,35 +289,35 @@ int main( int argc, char** argv )
 		printf( "( %2ld, 1:5 ) = [ %4lu %4lu %4lu  %10.3e  %6.3f ];\n",
 		        (p - p_begin + 1)/p_inc + 1, m, k, n, dtime_save, gflops );
 
-		bl2_obj_release_pack( &a_pack );
-		bl2_obj_release_pack( &b_pack );
+		bli_obj_release_pack( &a_pack );
+		bli_obj_release_pack( &b_pack );
 
-		bl2_blksz_obj_free( mr );
-		bl2_blksz_obj_free( nr );
-		bl2_blksz_obj_free( kr );
-		bl2_blksz_obj_free( mc );
-		bl2_blksz_obj_free( nc );
-		bl2_blksz_obj_free( kc );
-		bl2_blksz_obj_free( ni );
+		bli_blksz_obj_free( mr );
+		bli_blksz_obj_free( nr );
+		bli_blksz_obj_free( kr );
+		bli_blksz_obj_free( mc );
+		bli_blksz_obj_free( nc );
+		bli_blksz_obj_free( kc );
+		bli_blksz_obj_free( ni );
 
-		bl2_cntl_obj_free( scalm_cntl );
-		bl2_cntl_obj_free( packm_cntl_a );
-		bl2_cntl_obj_free( packm_cntl_b );
-		bl2_cntl_obj_free( gemm_cntl_bp_ke );
-		bl2_cntl_obj_free( gemm_cntl_op_bp );
-		bl2_cntl_obj_free( gemm_cntl_mm_op );
-		bl2_cntl_obj_free( gemm_cntl_vl_mm );
+		bli_cntl_obj_free( scalm_cntl );
+		bli_cntl_obj_free( packm_cntl_a );
+		bli_cntl_obj_free( packm_cntl_b );
+		bli_cntl_obj_free( gemm_cntl_bp_ke );
+		bli_cntl_obj_free( gemm_cntl_op_bp );
+		bli_cntl_obj_free( gemm_cntl_mm_op );
+		bli_cntl_obj_free( gemm_cntl_vl_mm );
 
-		bl2_obj_free( &alpha );
-		bl2_obj_free( &beta );
+		bli_obj_free( &alpha );
+		bli_obj_free( &beta );
 
-		bl2_obj_free( &a );
-		bl2_obj_free( &b );
-		bl2_obj_free( &c );
-		bl2_obj_free( &c_save );
+		bli_obj_free( &a );
+		bli_obj_free( &b );
+		bli_obj_free( &c );
+		bli_obj_free( &c_save );
 	}
 
-	bl2_finalize();
+	bli_finalize();
 
 	return 0;
 }

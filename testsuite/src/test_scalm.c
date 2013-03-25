@@ -32,7 +32,7 @@
 
 */
 
-#include "blis2.h"
+#include "blis.h"
 #include "test_libblis.h"
 
 
@@ -133,10 +133,10 @@ void libblis_test_scalm_experiment( test_params_t* params,
 	n = libblis_test_get_dim_from_prob_size( op->dim_spec[1], p_cur );
 
 	// Map parameter characters to BLIS constants.
-	bl2_param_map_char_to_blis_conj( pc_str[0], &conjbeta );
+	bli_param_map_char_to_blis_conj( pc_str[0], &conjbeta );
 
 	// Create test scalars.
-	bl2_obj_init_scalar( datatype, &beta );
+	bli_obj_init_scalar( datatype, &beta );
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
@@ -145,41 +145,41 @@ void libblis_test_scalm_experiment( test_params_t* params,
 	                          sc_str[0], m, n, &y_save );
 
 	// Set beta to 0 + i.
-	//bl2_setsc( 0.0, 1.0, &beta );
-	if ( bl2_obj_is_real( y ) )
-		bl2_setsc( -2.0,  0.0, &beta );
+	//bli_setsc( 0.0, 1.0, &beta );
+	if ( bli_obj_is_real( y ) )
+		bli_setsc( -2.0,  0.0, &beta );
 	else
-		bl2_setsc(  0.0, -2.0, &beta );
+		bli_setsc(  0.0, -2.0, &beta );
 
 	// Randomize and save y.
-	bl2_randm( &y );
-	bl2_copym( &y, &y_save );
+	bli_randm( &y );
+	bli_copym( &y, &y_save );
 
 	// Apply the parameters.
-	bl2_obj_set_conj( conjbeta, beta );
+	bli_obj_set_conj( conjbeta, beta );
 
 	// Repeat the experiment n_repeats times and record results. 
 	for ( i = 0; i < n_repeats; ++i )
 	{
-		bl2_copym( &y_save, &y );
+		bli_copym( &y_save, &y );
 
-		time = bl2_clock();
+		time = bli_clock();
 
 		libblis_test_scalm_impl( impl, &beta, &y );
 
-		time_min = bl2_clock_min_diff( time_min, time );
+		time_min = bli_clock_min_diff( time_min, time );
 	}
 
 	// Estimate the performance of the best experiment repeat.
 	*perf = ( 1.0 * m * n ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bl2_obj_is_complex( y ) ) *perf *= 6.0;
+	if ( bli_obj_is_complex( y ) ) *perf *= 6.0;
 
 	// Perform checks.
 	libblis_test_scalm_check( &beta, &y, &y_save, resid );
 
 	// Free the test objects.
-	bl2_obj_free( &y );
-	bl2_obj_free( &y_save );
+	bli_obj_free( &y );
+	bli_obj_free( &y_save );
 }
 
 
@@ -191,7 +191,7 @@ void libblis_test_scalm_impl( mt_impl_t impl,
 	switch ( impl )
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
-		bl2_scalm( beta, y );
+		bli_scalm( beta, y );
 		break;
 
 		default:
@@ -206,11 +206,11 @@ void libblis_test_scalm_check( obj_t*  beta,
                                obj_t*  y_orig,
                                double* resid )
 {
-	num_t  dt      = bl2_obj_datatype( *y );
-	num_t  dt_real = bl2_obj_datatype_proj_to_real( *y );
+	num_t  dt      = bli_obj_datatype( *y );
+	num_t  dt_real = bli_obj_datatype_proj_to_real( *y );
 
-	dim_t  m       = bl2_obj_length( *y );
-	dim_t  n       = bl2_obj_width( *y );
+	dim_t  m       = bli_obj_length( *y );
+	dim_t  n       = bli_obj_width( *y );
 
 	obj_t  norm_y_r;
 	obj_t  nbeta;
@@ -237,22 +237,22 @@ void libblis_test_scalm_check( obj_t*  beta,
 	// is negligible.
 	//
 
-	bl2_obj_create( dt, m, n, 0, 0, &y2 );
-	bl2_copym( y_orig, &y2 );
+	bli_obj_create( dt, m, n, 0, 0, &y2 );
+	bli_copym( y_orig, &y2 );
 
-	bl2_obj_init_scalar( dt,      &nbeta );
-	bl2_obj_init_scalar( dt_real, &norm_y_r );
+	bli_obj_init_scalar( dt,      &nbeta );
+	bli_obj_init_scalar( dt_real, &norm_y_r );
 
-	bl2_copysc( beta, &nbeta );
-	bl2_mulsc( &BLIS_MINUS_ONE, &nbeta );
+	bli_copysc( beta, &nbeta );
+	bli_mulsc( &BLIS_MINUS_ONE, &nbeta );
 
-	bl2_scalm( &nbeta, &y2 );
-	bl2_addm( &y2, y );
+	bli_scalm( &nbeta, &y2 );
+	bli_addm( &y2, y );
 	
-	bl2_fnormm( y, &norm_y_r );
+	bli_fnormm( y, &norm_y_r );
 
-	bl2_getsc( &norm_y_r, resid, &junk );
+	bli_getsc( &norm_y_r, resid, &junk );
 
-	bl2_obj_free( &y2 );
+	bli_obj_free( &y2 );
 }
 

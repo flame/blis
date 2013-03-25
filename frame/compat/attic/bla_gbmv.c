@@ -32,7 +32,7 @@
 
 */
 
-#include "blis2.h"
+#include "blis.h"
 
 
 //
@@ -63,22 +63,22 @@ void PASTEF77(ch,blasname)( \
 	inc_t   incy0; \
 \
 	/* Map BLAS chars to their corresponding BLIS enumerated type value. */ \
-	bl2_param_map_netlib_to_blis_trans( *transa, &blis_transa ); \
+	bli_param_map_netlib_to_blis_trans( *transa, &blis_transa ); \
 \
 	/* Convert negative values of m and n to zero. */ \
-	bl2_convert_blas_dim1( *m, m0 ); \
-	bl2_convert_blas_dim1( *n, n0 ); \
+	bli_convert_blas_dim1( *m, m0 ); \
+	bli_convert_blas_dim1( *n, n0 ); \
 \
 	/* Determine the dimensions of x and y so we can adjust the increments,
 	   if necessary.*/ \
-	bl2_set_dims_with_trans( blis_transa, m0, n0, m_y, n_x ); \
+	bli_set_dims_with_trans( blis_transa, m0, n0, m_y, n_x ); \
 \
 	/* If the input increments are negative, adjust the pointers so we can
 	   use positive increments instead. */ \
-	bl2_convert_blas_incv( n_x, x, *incx, x0, incx0 ); \
-	bl2_convert_blas_incv( m_y, y, *incy, y0, incy0 ); \
+	bli_convert_blas_incv( n_x, x, *incx, x0, incx0 ); \
+	bli_convert_blas_incv( m_y, y, *incy, y0, incy0 ); \
 \
-	bl2_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \
+	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \
 }
 
 #ifdef BLIS_ENABLE_BLAS2BLIS

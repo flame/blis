@@ -32,7 +32,7 @@
 
 */
 
-#include "blis2.h"
+#include "blis.h"
 
 
 //
@@ -53,11 +53,11 @@ void PASTEF772(chx,cha,blasname)( \
 	ftype_x  alpha_cast; \
 \
 	/* Convert negative values of n to zero. */ \
-	bl2_convert_blas_dim1( *n, n0 ); \
+	bli_convert_blas_dim1( *n, n0 ); \
 \
 	/* If the input increments are negative, adjust the pointers so we can
 	   use positive increments instead. */ \
-	bl2_convert_blas_incv( n0, x, *incx, x0, incx0 ); \
+	bli_convert_blas_incv( n0, x, *incx, x0, incx0 ); \
 \
 	/* NOTE: We do not natively implement BLAS's csscal/zdscal in BLIS
 	   UNLESS mixed domain functionality is enabled at configure-time.

@@ -32,7 +32,7 @@
 
 */
 
-#include "blis2.h"
+#include "blis.h"
 #include "test_libblis.h"
 
 
@@ -145,14 +145,14 @@ void libblis_test_hemv_experiment( test_params_t* params,
 	m = libblis_test_get_dim_from_prob_size( op->dim_spec[0], p_cur );
 
 	// Map parameter characters to BLIS constants.
-	bl2_param_map_char_to_blis_uplo( pc_str[0], &uploa );
-	bl2_param_map_char_to_blis_conj( pc_str[1], &conja );
-	bl2_param_map_char_to_blis_conj( pc_str[2], &conjx );
+	bli_param_map_char_to_blis_uplo( pc_str[0], &uploa );
+	bli_param_map_char_to_blis_conj( pc_str[1], &conja );
+	bli_param_map_char_to_blis_conj( pc_str[2], &conjx );
 
 	// Create test scalars.
-	bl2_obj_init_scalar( datatype, &alpha );
-	bl2_obj_init_scalar( datatype, &beta );
-	bl2_obj_init_scalar( datatype, &kappa );
+	bli_obj_init_scalar( datatype, &alpha );
+	bli_obj_init_scalar( datatype, &beta );
+	bli_obj_init_scalar( datatype, &kappa );
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
@@ -165,66 +165,66 @@ void libblis_test_hemv_experiment( test_params_t* params,
 		                      sc_str[2], m,    &y_save );
 
 	// Set alpha and beta.
-	if ( bl2_obj_is_real( y ) )
+	if ( bli_obj_is_real( y ) )
 	{
-		bl2_setsc(  1.0,  0.0, &alpha );
-		bl2_setsc( -1.0,  0.0, &beta );
+		bli_setsc(  1.0,  0.0, &alpha );
+		bli_setsc( -1.0,  0.0, &beta );
 	}
 	else
 	{
-		bl2_setsc(  0.0,  1.0, &alpha );
-		bl2_setsc(  0.0, -1.0, &beta );
+		bli_setsc(  0.0,  1.0, &alpha );
+		bli_setsc(  0.0, -1.0, &beta );
 	}
 
 	// Set the structure and uplo properties of A.
-	bl2_obj_set_struc( BLIS_HERMITIAN, a );
-	bl2_obj_set_uplo( uploa, a );
+	bli_obj_set_struc( BLIS_HERMITIAN, a );
+	bli_obj_set_uplo( uploa, a );
 
 	// Randomize A, make it densely Hermitian, and zero the unstored triangle
 	// to ensure the implementation reads only from the stored region.
-	bl2_randm( &a );
-	bl2_mkherm( &a );
-	bl2_mktrim( &a );
+	bli_randm( &a );
+	bli_mkherm( &a );
+	bli_mktrim( &a );
 
 	// Randomize x and y, and save y.
-	bl2_randv( &x );
-	bl2_randv( &y );
-	bl2_copyv( &y, &y_save );
+	bli_randv( &x );
+	bli_randv( &y );
+	bli_copyv( &y, &y_save );
 
 	// Normalize vectors by m.
-	bl2_setsc( 1.0/( double )m, 0.0, &kappa );
-	bl2_scalv( &kappa, &x );
-	bl2_scalv( &kappa, &y );
-	bl2_scalv( &kappa, &y_save );
+	bli_setsc( 1.0/( double )m, 0.0, &kappa );
+	bli_scalv( &kappa, &x );
+	bli_scalv( &kappa, &y );
+	bli_scalv( &kappa, &y_save );
 
 	// Apply the remaining parameters.
-	bl2_obj_set_conj( conja, a );
-	bl2_obj_set_conj( conjx, x );
+	bli_obj_set_conj( conja, a );
+	bli_obj_set_conj( conjx, x );
 
 	// Repeat the experiment n_repeats times and record results. 
 	for ( i = 0; i < n_repeats; ++i )
 	{
-		bl2_copym( &y_save, &y );
+		bli_copym( &y_save, &y );
 
-		time = bl2_clock();
+		time = bli_clock();
 
 		libblis_test_hemv_impl( impl, &alpha, &a, &x, &beta, &y );
 
-		time_min = bl2_clock_min_diff( time_min, time );
+		time_min = bli_clock_min_diff( time_min, time );
 	}
 
 	// Estimate the performance of the best experiment repeat.
 	*perf = ( 1.0 * m * m ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bl2_obj_is_complex( y ) ) *perf *= 4.0;
+	if ( bli_obj_is_complex( y ) ) *perf *= 4.0;
 
 	// Perform checks.
 	libblis_test_hemv_check( &alpha, &a, &x, &beta, &y, &y_save, resid );
 
 	// Free the test objects.
-	bl2_obj_free( &a );
-	bl2_obj_free( &x );
-	bl2_obj_free( &y );
-	bl2_obj_free( &y_save );
+	bli_obj_free( &a );
+	bli_obj_free( &x );
+	bli_obj_free( &y );
+	bli_obj_free( &y_save );
 }
 
 
@@ -239,7 +239,7 @@ void libblis_test_hemv_impl( mt_impl_t impl,
 	switch ( impl )
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
-		bl2_hemv( alpha, a, x, beta, y );
+		bli_hemv( alpha, a, x, beta, y );
 		break;
 
 		default:
@@ -257,10 +257,10 @@ void libblis_test_hemv_check( obj_t*  alpha,
                               obj_t*  y_orig,
                               double* resid )
 {
-	num_t  dt      = bl2_obj_datatype( *y );
-	num_t  dt_real = bl2_obj_datatype_proj_to_real( *y );
+	num_t  dt      = bli_obj_datatype( *y );
+	num_t  dt_real = bli_obj_datatype_proj_to_real( *y );
 
-	dim_t  m       = bl2_obj_vector_dim( *y );
+	dim_t  m       = bli_obj_vector_dim( *y );
 
 	obj_t  v;
 	obj_t  norm;
@@ -289,22 +289,22 @@ void libblis_test_hemv_check( obj_t*  alpha,
 	//   v = beta * y_orig + alpha * conja(A_dense) * x
 	//
 
-	bl2_obj_init_scalar( dt_real, &norm );
+	bli_obj_init_scalar( dt_real, &norm );
 
-	bl2_obj_create( dt, m, 1, 0, 0, &v );
+	bli_obj_create( dt, m, 1, 0, 0, &v );
 
-	bl2_copyv( y_orig, &v );
+	bli_copyv( y_orig, &v );
 
-	bl2_mkherm( a );
-	bl2_obj_set_struc( BLIS_GENERAL, *a );
-	bl2_obj_set_uplo( BLIS_DENSE, *a );
+	bli_mkherm( a );
+	bli_obj_set_struc( BLIS_GENERAL, *a );
+	bli_obj_set_uplo( BLIS_DENSE, *a );
 
-	bl2_gemv( alpha, a, x, beta, &v );
+	bli_gemv( alpha, a, x, beta, &v );
 
-	bl2_subv( &v, y );
-	bl2_fnormv( y, &norm );
-	bl2_getsc( &norm, resid, &junk );
+	bli_subv( &v, y );
+	bli_fnormv( y, &norm );
+	bli_getsc( &norm, resid, &junk );
 
-	bl2_obj_free( &v );
+	bli_obj_free( &v );
 }
 

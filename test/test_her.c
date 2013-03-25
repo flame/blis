@@ -33,7 +33,7 @@
 */
 
 #include <unistd.h>
-#include "blis2.h"
+#include "blis.h"
 
 //          uplo   m     alpha    x        incx  a        lda
 void dsyr_( char*, int*, double*, double*, int*, double*, int* );
@@ -58,7 +58,7 @@ int main( int argc, char** argv )
 	double dtime_save;
 	double gflops;
 
-	bl2_init();
+	bli_init();
 
 	n_repeats = 3;
 
@@ -93,53 +93,53 @@ int main( int argc, char** argv )
 		else               m =     ( dim_t )    m_input;
 
 
-		bl2_obj_create( dt_alpha, 1, 1, 0, 0, &alpha );
+		bli_obj_create( dt_alpha, 1, 1, 0, 0, &alpha );
 
-		bl2_obj_create( dt_x, m, 1, 0, 0, &x );
-		bl2_obj_create( dt_a, m, m, 0, 0, &a );
-		bl2_obj_create( dt_a, m, m, 0, 0, &a_save );
+		bli_obj_create( dt_x, m, 1, 0, 0, &x );
+		bli_obj_create( dt_a, m, m, 0, 0, &a );
+		bli_obj_create( dt_a, m, m, 0, 0, &a_save );
 
-		bl2_randm( &x );
-		bl2_randm( &a );
+		bli_randm( &x );
+		bli_randm( &a );
 
-		bl2_obj_set_struc( BLIS_HERMITIAN, a );
-		//bl2_obj_set_struc( BLIS_SYMMETRIC, a );
-		bl2_obj_set_uplo( BLIS_LOWER, a );
-		//bl2_obj_set_uplo( BLIS_UPPER, a );
-
-
-		bl2_setsc(  (2.0/1.0), 0.0, &alpha );
+		bli_obj_set_struc( BLIS_HERMITIAN, a );
+		//bli_obj_set_struc( BLIS_SYMMETRIC, a );
+		bli_obj_set_uplo( BLIS_LOWER, a );
+		//bli_obj_set_uplo( BLIS_UPPER, a );
 
 
-		bl2_copym( &a, &a_save );
+		bli_setsc(  (2.0/1.0), 0.0, &alpha );
+
+
+		bli_copym( &a, &a_save );
 	
 		dtime_save = 1.0e9;
 
 		for ( r = 0; r < n_repeats; ++r )
 		{
-			bl2_copym( &a_save, &a );
+			bli_copym( &a_save, &a );
 
 
-			dtime = bl2_clock();
+			dtime = bli_clock();
 
 #ifdef PRINT
-			bl2_printm( "x", &x, "%4.1f", "" );
-			bl2_printm( "a", &a, "%4.1f", "" );
+			bli_printm( "x", &x, "%4.1f", "" );
+			bli_printm( "a", &a, "%4.1f", "" );
 #endif
 
 #ifdef BLIS
 
-			//bl2_obj_toggle_conj( x );
+			//bli_obj_toggle_conj( x );
 
 #if 1
-			bl2_her( &alpha,
+			bli_her( &alpha,
 #else
-			bl2_syr( &alpha,
+			bli_syr( &alpha,
 #endif
 			         &x,
 			         &a );
 /*
-			bl2_her_unb_var2( BLIS_CONJUGATE,
+			bli_her_unb_var2( BLIS_CONJUGATE,
 			                  &BLIS_TWO,
 			                  &x,
 			                  &a, NULL );
@@ -148,16 +148,16 @@ int main( int argc, char** argv )
 #else
 
 			char    uplo   = 'L';
-			int     mm     = bl2_obj_length( a );
-			int     incx   = bl2_obj_vector_inc( x );
-			int     lda    = bl2_obj_col_stride( a );
-			double* alphap = bl2_obj_buffer( alpha );
+			int     mm     = bli_obj_length( a );
+			int     incx   = bli_obj_vector_inc( x );
+			int     lda    = bli_obj_col_stride( a );
+			double* alphap = bli_obj_buffer( alpha );
 /*
-			double* xp     = bl2_obj_buffer( x );
-			double* ap     = bl2_obj_buffer( a );
+			double* xp     = bli_obj_buffer( x );
+			double* ap     = bli_obj_buffer( a );
 */
-			dcomplex* xp   = bl2_obj_buffer( x );
-			dcomplex* ap   = bl2_obj_buffer( a );
+			dcomplex* xp   = bli_obj_buffer( x );
+			dcomplex* ap   = bli_obj_buffer( a );
 
 			//dsyr_( &uplo,
 			zher_( &uplo,
@@ -168,12 +168,12 @@ int main( int argc, char** argv )
 #endif
 
 #ifdef PRINT
-			bl2_printm( "a after", &a, "%4.1f", "" );
+			bli_printm( "a after", &a, "%4.1f", "" );
 			exit(1);
 #endif
 
 
-			dtime_save = bl2_clock_min_diff( dtime_save, dtime );
+			dtime_save = bli_clock_min_diff( dtime_save, dtime );
 		}
 
 		gflops = ( 1.0 * m * m ) / ( dtime_save * 1.0e9 );
@@ -186,14 +186,14 @@ int main( int argc, char** argv )
 		printf( "( %2ld, 1:3 ) = [ %4lu  %10.3e  %6.3f ];\n",
 		        (p - p_begin + 1)/p_inc + 1, m, dtime_save, gflops );
 
-		bl2_obj_free( &alpha );
+		bli_obj_free( &alpha );
 
-		bl2_obj_free( &x );
-		bl2_obj_free( &a );
-		bl2_obj_free( &a_save );
+		bli_obj_free( &x );
+		bli_obj_free( &a );
+		bli_obj_free( &a_save );
 	}
 
-	bl2_finalize();
+	bli_finalize();
 
 	return 0;
 }

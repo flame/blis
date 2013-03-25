@@ -32,7 +32,7 @@
 
 */
 
-#include "blis2.h"
+#include "blis.h"
 #include "test_libblis.h"
 
 
@@ -130,36 +130,36 @@ void libblis_test_setv_experiment( test_params_t* params,
 
 
 	// Create test scalars.
-	bl2_obj_init_scalar( datatype, &beta );
+	bli_obj_init_scalar( datatype, &beta );
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_vobj_create( params, datatype, sc_str[0], m, &x );
 
 	// Initialize beta to unit.
-	bl2_copysc( &BLIS_ONE, &beta );
+	bli_copysc( &BLIS_ONE, &beta );
 
 	// Randomize x.
-	bl2_randv( &x );
+	bli_randv( &x );
 
 	// Repeat the experiment n_repeats times and record results. 
 	for ( i = 0; i < n_repeats; ++i )
 	{
-		time = bl2_clock();
+		time = bli_clock();
 
 		libblis_test_setv_impl( impl, &beta, &x );
 
-		time_min = bl2_clock_min_diff( time_min, time );
+		time_min = bli_clock_min_diff( time_min, time );
 	}
 
 	// Estimate the performance of the best experiment repeat.
 	*perf = ( 1.0 * m ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bl2_obj_is_complex( x ) ) *perf *= 2.0;
+	if ( bli_obj_is_complex( x ) ) *perf *= 2.0;
 
 	// Perform checks.
 	libblis_test_setv_check( &beta, &x, resid );
 
 	// Free the test objects.
-	bl2_obj_free( &x );
+	bli_obj_free( &x );
 }
 
 
@@ -171,7 +171,7 @@ void libblis_test_setv_impl( mt_impl_t impl,
 	switch ( impl )
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
-		bl2_setv( beta, x );
+		bli_setv( beta, x );
 		break;
 
 		default:
@@ -185,10 +185,10 @@ void libblis_test_setv_check( obj_t*  beta,
                               obj_t*  x,
                               double* resid )
 {
-	dim_t m_x      = bl2_obj_vector_dim( *x );
-	inc_t inc_x    = bl2_obj_vector_inc( *x );
-	void* buf_x    = bl2_obj_buffer_at_off( *x );
-	void* buf_beta = bl2_obj_buffer_at_off( *beta );
+	dim_t m_x      = bli_obj_vector_dim( *x );
+	inc_t inc_x    = bli_obj_vector_inc( *x );
+	void* buf_x    = bli_obj_buffer_at_off( *x );
+	void* buf_beta = bli_obj_buffer_at_off( *beta );
 	dim_t i;
 
 	*resid = 0.0;
@@ -198,50 +198,50 @@ void libblis_test_setv_check( obj_t*  beta,
 	// that each element of x is equal to beta.
 	//
 
-	if      ( bl2_obj_is_float( *x ) )
+	if      ( bli_obj_is_float( *x ) )
 	{
 		float*    chi1      = buf_x;
 		float*    beta_cast = buf_beta;
 
 		for ( i = 0; i < m_x; ++i )
 		{
-			if ( !bl2_seq( *chi1, *beta_cast ) ) { *resid = 1.0; return; }
+			if ( !bli_seq( *chi1, *beta_cast ) ) { *resid = 1.0; return; }
 			
 			chi1 += inc_x;
 		}
 	}
-	else if ( bl2_obj_is_double( *x ) )
+	else if ( bli_obj_is_double( *x ) )
 	{
 		double*   chi1      = buf_x;
 		double*   beta_cast = buf_beta;
 
 		for ( i = 0; i < m_x; ++i )
 		{
-			if ( !bl2_deq( *chi1, *beta_cast ) ) { *resid = 1.0; return; }
+			if ( !bli_deq( *chi1, *beta_cast ) ) { *resid = 1.0; return; }
 			
 			chi1 += inc_x;
 		}
 	}
-	else if ( bl2_obj_is_scomplex( *x ) )
+	else if ( bli_obj_is_scomplex( *x ) )
 	{
 		scomplex* chi1      = buf_x;
 		scomplex* beta_cast = buf_beta;
 
 		for ( i = 0; i < m_x; ++i )
 		{
-			if ( !bl2_ceq( *chi1, *beta_cast ) ) { *resid = 1.0; return; }
+			if ( !bli_ceq( *chi1, *beta_cast ) ) { *resid = 1.0; return; }
 			
 			chi1 += inc_x;
 		}
 	}
-	else // if ( bl2_obj_is_dcomplex( *x ) )
+	else // if ( bli_obj_is_dcomplex( *x ) )
 	{
 		dcomplex* chi1      = buf_x;
 		dcomplex* beta_cast = buf_beta;
 
 		for ( i = 0; i < m_x; ++i )
 		{
-			if ( !bl2_zeq( *chi1, *beta_cast ) ) { *resid = 1.0; return; }
+			if ( !bli_zeq( *chi1, *beta_cast ) ) { *resid = 1.0; return; }
 			
 			chi1 += inc_x;
 		}

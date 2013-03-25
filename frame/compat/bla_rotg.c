@@ -32,7 +32,7 @@
 
 */
 
-#include "blis2.h"
+#include "blis.h"
 
 
 //
@@ -48,7 +48,7 @@ void PASTEF77(chxy,blasname)( \
                               ftype_r*   s  \
                             ) \
 { \
-	bl2_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \
+	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \
 }
 
 #ifdef BLIS_ENABLE_BLAS2BLIS

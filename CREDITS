@@ -23,7 +23,7 @@ but many others have contributed input and feedback, including:
 Thanks go the following individuals for porting very early versions of
 BLIS to new architectures as proofs-of-concept:
 
-  Francisco Igual             (The University of Texas at Austin)
+  Francisco Igual             (Universidad Complutense de Madrid)
   Tyler Smith                 (The University of Texas at Austin)
 
 BLIS's development was partially funded by grants from Microsoft and the

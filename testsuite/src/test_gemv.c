@@ -32,7 +32,7 @@
 
 */
 
-#include "blis2.h"
+#include "blis.h"
 #include "test_libblis.h"
 
 
@@ -144,13 +144,13 @@ void libblis_test_gemv_experiment( test_params_t* params,
 	n = libblis_test_get_dim_from_prob_size( op->dim_spec[1], p_cur );
 
 	// Map parameter characters to BLIS constants.
-	bl2_param_map_char_to_blis_trans( pc_str[0], &transa );
-	bl2_param_map_char_to_blis_conj( pc_str[1], &conjx );
+	bli_param_map_char_to_blis_trans( pc_str[0], &transa );
+	bli_param_map_char_to_blis_conj( pc_str[1], &conjx );
 
 	// Create test scalars.
-	bl2_obj_init_scalar( datatype, &kappa );
-	bl2_obj_init_scalar( datatype, &alpha );
-	bl2_obj_init_scalar( datatype, &beta );
+	bli_obj_init_scalar( datatype, &kappa );
+	bli_obj_init_scalar( datatype, &alpha );
+	bli_obj_init_scalar( datatype, &beta );
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_mobj_create( params, datatype, transa,
@@ -163,55 +163,55 @@ void libblis_test_gemv_experiment( test_params_t* params,
 		                      sc_str[2], m,    &y_save );
 
 	// Set alpha and beta.
-	if ( bl2_obj_is_real( y ) )
+	if ( bli_obj_is_real( y ) )
 	{
-		bl2_setsc(  2.0,  0.0, &alpha );
-		bl2_setsc( -1.0,  0.0, &beta );
+		bli_setsc(  2.0,  0.0, &alpha );
+		bli_setsc( -1.0,  0.0, &beta );
 	}
 	else
 	{
-		bl2_setsc(  0.0,  2.0, &alpha );
-		bl2_setsc(  0.0, -1.0, &beta );
+		bli_setsc(  0.0,  2.0, &alpha );
+		bli_setsc(  0.0, -1.0, &beta );
 	}
 
 	// Initialize diagonal of matrix A.
-	bl2_setsc( 2.0, -1.0, &kappa );
-	bl2_setm( &BLIS_ZERO, &a );
-	bl2_setd( &kappa, &a );
+	bli_setsc( 2.0, -1.0, &kappa );
+	bli_setm( &BLIS_ZERO, &a );
+	bli_setd( &kappa, &a );
 
 	// Randomize x and y, and save y.
-	bl2_randv( &x );
-	bl2_randv( &y );
-	bl2_copyv( &y, &y_save );
+	bli_randv( &x );
+	bli_randv( &y );
+	bli_copyv( &y, &y_save );
 
 	// Apply the parameters.
-	bl2_obj_set_conjtrans( transa, a );
-	bl2_obj_set_conj( conjx, x );
+	bli_obj_set_conjtrans( transa, a );
+	bli_obj_set_conj( conjx, x );
 
 	// Repeat the experiment n_repeats times and record results. 
 	for ( i = 0; i < n_repeats; ++i )
 	{
-		bl2_copym( &y_save, &y );
+		bli_copym( &y_save, &y );
 
-		time = bl2_clock();
+		time = bli_clock();
 
 		libblis_test_gemv_impl( impl, &alpha, &a, &x, &beta, &y );
 
-		time_min = bl2_clock_min_diff( time_min, time );
+		time_min = bli_clock_min_diff( time_min, time );
 	}
 
 	// Estimate the performance of the best experiment repeat.
 	*perf = ( 2.0 * m * n ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bl2_obj_is_complex( y ) ) *perf *= 4.0;
+	if ( bli_obj_is_complex( y ) ) *perf *= 4.0;
 
 	// Perform checks.
 	libblis_test_gemv_check( &kappa, &alpha, &a, &x, &beta, &y, &y_save, resid );
 
 	// Free the test objects.
-	bl2_obj_free( &a );
-	bl2_obj_free( &x );
-	bl2_obj_free( &y );
-	bl2_obj_free( &y_save );
+	bli_obj_free( &a );
+	bli_obj_free( &x );
+	bli_obj_free( &y );
+	bli_obj_free( &y_save );
 }
 
 
@@ -226,7 +226,7 @@ void libblis_test_gemv_impl( mt_impl_t impl,
 	switch ( impl )
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
-		bl2_gemv( alpha, a, x, beta, y );
+		bli_gemv( alpha, a, x, beta, y );
 		break;
 
 		default:
@@ -245,15 +245,15 @@ void libblis_test_gemv_check( obj_t*  kappa,
                               obj_t*  y_orig,
                               double* resid )
 {
-	num_t  dt      = bl2_obj_datatype( *y );
-	num_t  dt_real = bl2_obj_datatype_proj_to_real( *y );
+	num_t  dt      = bli_obj_datatype( *y );
+	num_t  dt_real = bli_obj_datatype_proj_to_real( *y );
 
-	conj_t conja   = bl2_obj_conj_status( *a );
+	conj_t conja   = bli_obj_conj_status( *a );
 
-	dim_t  n_x     = bl2_obj_vector_dim( *x );
-	dim_t  m_y     = bl2_obj_vector_dim( *y );
+	dim_t  n_x     = bli_obj_vector_dim( *x );
+	dim_t  m_y     = bli_obj_vector_dim( *y );
 
-	dim_t  min_m_n = bl2_min( m_y, n_x );
+	dim_t  min_m_n = bli_min( m_y, n_x );
 
 	obj_t  x_temp, y_temp;
 	obj_t  kappac, norm;
@@ -283,31 +283,31 @@ void libblis_test_gemv_check( obj_t*  kappa,
 	//   z = beta * y_orig + alpha * conja(kappa) * x
 	//
 
-	bl2_obj_init_scalar_copy_of( dt, conja, kappa, &kappac );
-	bl2_obj_init_scalar( dt_real, &norm );
+	bli_obj_init_scalar_copy_of( dt, conja, kappa, &kappac );
+	bli_obj_init_scalar( dt_real, &norm );
 
-	bl2_obj_create( dt, n_x, 1, 0, 0, &x_temp );
-	bl2_obj_create( dt, m_y, 1, 0, 0, &y_temp );
+	bli_obj_create( dt, n_x, 1, 0, 0, &x_temp );
+	bli_obj_create( dt, m_y, 1, 0, 0, &y_temp );
 
-	bl2_copyv( x,      &x_temp );
-	bl2_copyv( y_orig, &y_temp );
+	bli_copyv( x,      &x_temp );
+	bli_copyv( y_orig, &y_temp );
 
-	bl2_acquire_vpart_f2b( BLIS_SUBPART1, 0, min_m_n, 
+	bli_acquire_vpart_f2b( BLIS_SUBPART1, 0, min_m_n, 
 	                       &x_temp, &xT_temp );
-	bl2_acquire_vpart_f2b( BLIS_SUBPART1, 0, min_m_n, 
+	bli_acquire_vpart_f2b( BLIS_SUBPART1, 0, min_m_n, 
 	                       &y_temp, &yT_temp );
-	bl2_acquire_vpart_f2b( BLIS_SUBPART1, 0, min_m_n, 
+	bli_acquire_vpart_f2b( BLIS_SUBPART1, 0, min_m_n, 
 	                       y, &yT );
 
-	bl2_scalv( &kappac, &xT_temp );
-	bl2_scalv( beta, &yT_temp );
-	bl2_axpyv( alpha, &xT_temp, &yT_temp );
+	bli_scalv( &kappac, &xT_temp );
+	bli_scalv( beta, &yT_temp );
+	bli_axpyv( alpha, &xT_temp, &yT_temp );
 
-	bl2_subv( &yT_temp, &yT );
-	bl2_fnormv( &yT, &norm );
-	bl2_getsc( &norm, resid, &junk );
+	bli_subv( &yT_temp, &yT );
+	bli_fnormv( &yT, &norm );
+	bli_getsc( &norm, resid, &junk );
 
-	bl2_obj_free( &x_temp );
-	bl2_obj_free( &y_temp );
+	bli_obj_free( &x_temp );
+	bli_obj_free( &y_temp );
 }
 
