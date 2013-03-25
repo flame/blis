@@ -1,4 +1,108 @@
-commit e7d41229d3b1674e74f47d7f29fae004a745201a (HEAD, tag: 0.0.4, origin/master, master)
+commit b65cdc57d9e51fa00e3c03539cfb7e045707d0f4 (HEAD, tag: 0.0.5, origin/master, master)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Mar 24 20:01:49 2013 -0500
+
+    Migrated 'bl2' prefix to 'bli'.
+    
+    Details:
+    - Changed all filename and function prefixes from 'bl2' to 'bli'.
+    - Changed the "blis2.h" header filename to "blis.h" and changed all
+      corresponding #include statements accordingly.
+    - Fixed incorrect association for Fran in CREDITS file.
+
+commit 132bffcef7441f32d02cc7485aef6a0648e0ef1e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Mar 24 18:49:36 2013 -0500
+
+    Removed several 'old' directories and files.
+    
+    Details:
+    - Removed most of the 'old' directories scattered throughout the framework,
+      which includes alternate/half-baked/broken implementations.
+
+commit 551ea4767a3ea6c263f12aaca94bc2642cee4cfa
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Mar 24 18:00:10 2013 -0500
+
+    Removed #include "blis2.h" from low-level headers.
+    
+    Details:
+    - Removed #include of "blis2.h" from various lower-level, operation-specific
+      header files throughout the framework. Given that these low-level headers
+      are included within #blis2.h in a very specific order, #include'ing blis2.h
+      within them directly is unnecessary.
+
+commit bc7b318ed0960edeb4537797dd8c91de0d942ca9
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Mar 22 17:18:58 2013 -0500
+
+    Added cpp guards to conflicting libflame typedefs.
+    
+    Details:
+    - Added cpp guards around the definitions of dim_t, scomplex, and dcomplex.
+      This is a temporary hack to allow interoperability with libflame. (Similarly
+      temporary changes are being made to libflame's type definitions file.)
+
+commit f469907503fcdc24dff0174c569170e6e756e045
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Mar 22 15:20:15 2013 -0500
+
+    Renamed MAX_PREFETCH_BYTE_OFFSET to MAX_PRELOAD_.
+    
+    Details:
+    - Renamed BLIS_MAX_PREFETCH_BYTE_OFFSET to
+      BLIS_MAX_PRELOAD_BYTE_OFFSET since "prefetch" is kind of a loaded word
+      (e.g. "prefetch" instructions, which are different than the particular
+      kind of prefetching/preloading referred to by this constant).
+
+commit d1023bfbc6668a58a01ee4f82ded2319911e7b19
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Mar 22 15:09:59 2013 -0500
+
+    Removed build/old directory.
+
+commit 718888849c48d99f83eea6b8f83bc1998cffef7e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Mar 22 15:07:01 2013 -0500
+
+    Deprecated 'flame' configuration.
+    
+    Details:
+    - Removed 'flame' configuration, as it was horribly out-of-date.
+    - Comment changes to bl2_blocksize.c and bl2_mem.c.
+
+commit bba38cf4e9d28058c14483f44fa074a6d2852ad9
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Mar 19 18:07:40 2013 -0500
+
+    Added missing conjbeta argument to scald.
+
+commit 1f82b51d06d0279dded3f2b87ba59403f3ed0af6
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Mar 18 15:37:20 2013 -0500
+
+    Relocated packed mem_t dimension fields to obj_t.
+    
+    Details:
+    - Removed the m and n (and elem_size) fields from the mem_t object, and added
+      m_packed and n_packed fields to obj_t. These new fields track the same as
+      the old ones. From an abstraction standpoint, it seemed awkward to store
+      those dimensions inside the mem_t.
+    - Updated interfaces to bl2_mem_acquire_*() so that only a byte size argument
+      is passed in, instead of m, n, and elem_size.
+    - Updated bl2_packm_init_pack() and bl2_packv_init_pack() to inline the
+      functionality of bl2_mem_alloc_update_m() and bl2_mem_alloc_update_v(),
+      respectively.
+    - Updated packm variants to access the packed length and width fields from
+      their new locations.
+
+commit 36c782857bf9b8ac1b1dac47a70f689a4407e2cc
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Mar 18 10:37:03 2013 -0500
+
+    CHANGELOG update.
+
+commit e7d41229d3b1674e74f47d7f29fae004a745201a (tag: 0.0.4)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Fri Mar 15 17:12:36 2013 -0500
 
