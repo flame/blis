@@ -37,22 +37,33 @@
 
 // Define the size of pool blocks. These may be adjusted so that they can
 // handle inflated blocksizes at edge cases.
-#define BLIS_POOL_MC_Z     BLIS_DEFAULT_MC_Z
-#define BLIS_POOL_KC_Z     BLIS_DEFAULT_KC_Z
-#define BLIS_POOL_NC_Z     BLIS_DEFAULT_NC_Z
+#define BLIS_POOL_MC_D     BLIS_DEFAULT_MC_D
+#define BLIS_POOL_KC_D     BLIS_DEFAULT_KC_D
+#define BLIS_POOL_NC_D     BLIS_DEFAULT_NC_D
 
 // Define each pool's block size.
-#define BLIS_MK_BLOCK_SIZE ( BLIS_POOL_MC_Z * \
-                             BLIS_POOL_KC_Z * \
-                             sizeof( dcomplex ) \
+// NOTE: Here we assume the "worst" case of the register blocking
+// being unit and every row of A and column of B needing maximum
+// padding to conform to the system alignment.
+#define BLIS_MK_BLOCK_SIZE ( BLIS_POOL_MC_D * \
+                             ( BLIS_POOL_KC_D + \
+                               ( BLIS_MEMORY_ALIGNMENT_BOUNDARY / \
+                                 sizeof( double ) \
+                               ) \
+                             ) * \
+                             sizeof( double ) \
                            )
-#define BLIS_KN_BLOCK_SIZE ( BLIS_POOL_KC_Z * \
-                             BLIS_POOL_NC_Z * \
-                             sizeof( dcomplex ) \
+#define BLIS_KN_BLOCK_SIZE ( ( BLIS_POOL_KC_D + \
+                               ( BLIS_MEMORY_ALIGNMENT_BOUNDARY / \
+                                 sizeof( double ) \
+                               ) \
+                             ) * \
+                             BLIS_POOL_NC_D * \
+                             sizeof( double ) \
                            )
-#define BLIS_MN_BLOCK_SIZE ( BLIS_POOL_MC_Z * \
-                             BLIS_POOL_NC_Z * \
-                             sizeof( dcomplex ) \
+#define BLIS_MN_BLOCK_SIZE ( BLIS_POOL_MC_D * \
+                             BLIS_POOL_NC_D * \
+                             sizeof( double ) \
                            )
 
 // Define each pool's total size.

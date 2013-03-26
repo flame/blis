@@ -425,7 +425,7 @@ dim_t bli_align_dim_to_mult( dim_t dim, dim_t dim_mult )
 	return dim;
 }
 
-dim_t bli_align_dim_to_sys( dim_t dim, dim_t elem_size )
+dim_t bli_align_dim_to_sys( dim_t dim, siz_t elem_size )
 {
 	dim = ( ( dim * elem_size + BLIS_MEMORY_ALIGNMENT_BOUNDARY - 1 ) /
 	        BLIS_MEMORY_ALIGNMENT_BOUNDARY ) *
