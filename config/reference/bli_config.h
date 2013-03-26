@@ -64,10 +64,8 @@
 // NOTE: This should stay enabled!
 #define BLIS_ENABLE_MEMORY_ALIGNMENT     1
 
-// If memory alignment is enabled, set the alignment boundary.
-#ifdef BLIS_ENABLE_MEMORY_ALIGNMENT
-  #define BLIS_MEMORY_ALIGNMENT_SIZE     16
-#endif
+// Set the memory alignment boundary size.
+#define BLIS_MEMORY_ALIGNMENT_SIZE       16
 
 // The number of MC x KC, KC x NC, and MC x NC blocks to reserve in the
 // contiguous memory pools.
