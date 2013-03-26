@@ -309,9 +309,10 @@ void bli_packm_init_pack( bool_t    densify,
 		// of each panel (ie: the right edge of the matrix).
 		ps_p = cs_p * n_p_pad;
 
-		// Align the panel dimension according to the system alignment so
-		// that the second, third, etc panels begin at aligned addresses.
-		ps_p = bli_align_dim_to_sys( ps_p, elem_size_p );
+		// Align the panel dimension according to the contiguous memory
+		// alignment so that the second, third, etc panels begin at aligned
+		// addresses.
+		ps_p = bli_align_dim_to_cmem( ps_p, elem_size_p );
 
 		// Store the strides in p.
 		bli_obj_set_incs( rs_p, cs_p, *p );
@@ -345,9 +346,10 @@ void bli_packm_init_pack( bool_t    densify,
 		// of each panel (ie: the bottom edge of the matrix).
 		ps_p = m_p_pad * rs_p;
 
-		// Align the panel dimension according to the system alignment so
-		// that the second, third, etc panels begin at aligned addresses.
-		ps_p = bli_align_dim_to_sys( ps_p, elem_size_p );
+		// Align the panel dimension according to the contiguous memory
+		// alignment so that the second, third, etc panels begin at aligned
+		// addresses.
+		ps_p = bli_align_dim_to_cmem( ps_p, elem_size_p );
 
 		// Store the strides in p.
 		bli_obj_set_incs( rs_p, cs_p, *p );

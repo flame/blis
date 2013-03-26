@@ -60,12 +60,15 @@
 
 // -- MEMORY ALLOCATOR ---------------------------------------------------------
 
-// Enable memory alignment?
-// NOTE: This should stay enabled!
-#define BLIS_ENABLE_MEMORY_ALIGNMENT     1
+// Enable memory alignment when allocating memory from operating system?
+#define BLIS_ENABLE_SYSTEM_MEM_ALIGN     1
 
-// Set the memory alignment boundary size.
-#define BLIS_MEMORY_ALIGNMENT_SIZE       16
+// Alignment size used when allocating memory from operating system.
+#define BLIS_SYSTEM_MEM_ALIGN_SIZE       16
+
+// Alignment size used when allocating contiguous memory from memory
+// allocator.
+#define BLIS_CONTIG_MEM_ALIGN_SIZE       16
 
 // The number of MC x KC, KC x NC, and MC x NC blocks to reserve in the
 // contiguous memory pools.
@@ -99,8 +102,8 @@
 
 // -- MISCELLANEOUS OPTIONS ----------------------------------------------------
 
-// Stay initialized after auto-initialization, unless and until explicitly
-// finalized.
+// Stay initialized after auto-initialization, unless and until the user
+// explicitly calls bli_finalize().
 #define BLIS_ENABLE_STAY_AUTO_INITIALIZED
 
 

@@ -47,14 +47,14 @@
 // padding to conform to the system alignment.
 #define BLIS_MK_BLOCK_SIZE ( BLIS_POOL_MC_D * \
                              ( BLIS_POOL_KC_D + \
-                               ( BLIS_MEMORY_ALIGNMENT_SIZE / \
+                               ( BLIS_CONTIG_MEM_ALIGN_SIZE / \
                                  sizeof( double ) \
                                ) \
                              ) * \
                              sizeof( double ) \
                            )
 #define BLIS_KN_BLOCK_SIZE ( ( BLIS_POOL_KC_D + \
-                               ( BLIS_MEMORY_ALIGNMENT_SIZE / \
+                               ( BLIS_CONTIG_MEM_ALIGN_SIZE / \
                                  sizeof( double ) \
                                ) \
                              ) * \
