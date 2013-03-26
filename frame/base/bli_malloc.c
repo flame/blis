@@ -42,7 +42,9 @@ void* bli_malloc( siz_t size )
 	if ( size == 0 ) return NULL;
 
 #ifdef BLIS_ENABLE_MEMORY_ALIGNMENT
-	r_val = posix_memalign( &p, ( size_t ) BLIS_MEMORY_ALIGNMENT_BOUNDARY, ( size_t ) size );
+	r_val = posix_memalign( &p,
+	                        ( size_t ) BLIS_MEMORY_ALIGNMENT_SIZE,
+	                        ( size_t ) size );
 
 	if ( r_val != 0 ) bli_abort();
 #else

@@ -457,7 +457,7 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "--- BLIS config header ---\n" );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "enable memory alignment?    %u\n", BLIS_ENABLE_MEMORY_ALIGNMENT );
-	libblis_test_fprintf_c( os, "  alignment boundary        %u\n", BLIS_MEMORY_ALIGNMENT_BOUNDARY );
+	libblis_test_fprintf_c( os, "  alignment size            %u\n", BLIS_MEMORY_ALIGNMENT_SIZE );
 	libblis_test_fprintf_c( os, "static memory pool            \n" );
 	libblis_test_fprintf_c( os, "  # of mc x kc blocks       %u\n", BLIS_NUM_MC_X_KC_BLOCKS );
 	libblis_test_fprintf_c( os, "  # of kc x nc blocks       %u\n", BLIS_NUM_KC_X_NC_BLOCKS );
