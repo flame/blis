@@ -254,6 +254,27 @@ err_t bli_check_real_object( obj_t* a )
 	return e_val;
 }
 
+err_t bli_check_integer_datatype( num_t dt )
+{
+	err_t e_val = BLIS_SUCCESS;
+
+	if ( dt != BLIS_INT )
+		e_val = BLIS_EXPECTED_INTEGER_DATATYPE;
+
+	return e_val;
+}
+
+err_t bli_check_integer_object( obj_t* a )
+{
+	err_t e_val;
+	num_t dt;
+
+	dt = bli_obj_datatype( *a );
+	e_val = bli_check_integer_datatype( dt );
+
+	return e_val;
+}
+
 err_t bli_check_consistent_datatypes( num_t dt_a, num_t dt_b )
 {
 	err_t e_val = BLIS_SUCCESS;

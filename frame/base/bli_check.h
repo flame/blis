@@ -55,6 +55,8 @@ err_t bli_check_floating_datatype( num_t dt );
 err_t bli_check_floating_object( obj_t* a );
 err_t bli_check_real_datatype( num_t dt );
 err_t bli_check_real_object( obj_t* a );
+err_t bli_check_integer_datatype( num_t dt );
+err_t bli_check_integer_object( obj_t* a );
 err_t bli_check_consistent_datatypes( num_t dt_a, num_t dt_b );
 err_t bli_check_consistent_object_datatypes( obj_t* a, obj_t* b );
 err_t bli_check_datatype_real_proj_of( num_t dt_c, num_t dt_r );

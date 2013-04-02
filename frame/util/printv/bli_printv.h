@@ -51,5 +51,5 @@ void PASTEMAC(ch,opname)( \
                           char*  s2 \
                         );
 
-INSERT_GENTPROT_BASIC( printv )
+INSERT_GENTPROT_BASIC_I( printv )
 

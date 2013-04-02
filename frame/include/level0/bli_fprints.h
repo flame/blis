@@ -59,6 +59,10 @@
 	fprintf( file, spec, (x).imag ); \
 	fprintf( file, " " ); \
 }
+#define bli_ifprints( file, spec, x ) \
+{ \
+	fprintf( file, spec, (x) ); \
+}
 
 
 #endif

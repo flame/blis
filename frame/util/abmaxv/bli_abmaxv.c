@@ -34,43 +34,55 @@
 
 #include "blis.h"
 
+/*
+void bli_abmaxv( obj_t* x,
+                 obj_t* scale,
+                 obj_t* sumsq )
+{
+	if ( bli_error_checking_is_enabled() )
+		bli_abmaxv_check( x, scale, sumsq );
+
+	bli_abmaxv_unb_var1( x, scale, sumsq );
+}
+*/
 
 //
-// Define BLAS-to-BLIS interfaces.
+// Define object-based interface.
 //
-#undef  GENTFUNC2I
-#define GENTFUNC2I( ftype_x, ftype_i, chx, chi, blasname, blisname ) \
+#undef  GENFRONT
+#define GENFRONT( opname, varname ) \
 \
-ftype_i PASTEF772(chi,chx,blasname)( \
-                                     fint*    n, \
-                                     ftype_x* x, fint* incx  \
-                                   ) \
+void PASTEMAC0(opname)( \
+                        obj_t* x, \
+                        obj_t* abmax_i  \
+                      ) \
 { \
-	dim_t    n0; \
-	ftype_x* x0; \
-	inc_t    incx0; \
-	ftype_i  index; \
+	if ( bli_error_checking_is_enabled() ) \
+		PASTEMAC(opname,_check)( x, abmax_i ); \
 \
-	/* Convert negative values of n to zero. */ \
-	bli_convert_blas_dim1( *n, n0 ); \
-\
-	/* If the input increments are negative, adjust the pointers so we can
-	   use positive increments instead. */ \
-	bli_convert_blas_incv( n0, x, *incx, x0, incx0 ); \
-\
-	/* Call BLIS interface. */ \
-	PASTEMAC(chx,abmaxv)( n0, \
-	                      x0, incx0, \
-	                      &index ); \
-\
-	/* Convert zero-based BLIS (C) index to one-based BLAS (Fortran)
-	   index. */ \
-	index++; \
-\
-	return index; \
+	PASTEMAC0(varname)( x, \
+	                    abmax_i ); \
 }
 
-#ifdef BLIS_ENABLE_BLAS2BLIS
-INSERT_GENTFUNC2I_BLAS( amax, abmaxv )
-#endif
+GENFRONT( abmaxv, abmaxv_unb_var1 )
+
+
+//
+// Define BLAS-like interfaces.
+//
+#undef  GENTFUNCI
+#define GENTFUNCI( ctype_x, ctype_i, chx, chi, opname, varname ) \
+\
+void PASTEMAC(chx,opname)( \
+                           dim_t    n, \
+                           ctype_x* x, inc_t incx, \
+                           ctype_i* abmax_i  \
+                         ) \
+{ \
+	PASTEMAC(chx,varname)( n, \
+	                       x, incx, \
+	                       abmax_i ); \
+}
+
+INSERT_GENTFUNCI_BASIC( abmaxv, abmaxv_unb_var1 )
 

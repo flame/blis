@@ -117,6 +117,11 @@
 	(y).imag = ( double ) (x).imag; \
 }
 
+#define bli_iicopys( x, y ) \
+{ \
+	(y) = ( int    ) (x); \
+}
+
 
 #define bli_scopys( x, y ) \
 { \
@@ -133,6 +138,10 @@
 #define bli_zcopys( x, y ) \
 { \
 	bli_zzcopys( x, y ); \
+}
+#define bli_icopys( x, y ) \
+{ \
+	bli_iicopys( x, y ); \
 }
 
 

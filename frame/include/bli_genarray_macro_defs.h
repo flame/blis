@@ -51,6 +51,17 @@ arrayname[BLIS_NUM_FP_TYPES] = \
 	PASTEMAC(z,op)  \
 }
 
+#define GENARRAY_I(arrayname,op) \
+\
+arrayname[BLIS_NUM_FP_TYPES+1] = \
+{ \
+	PASTEMAC(s,op), \
+	PASTEMAC(c,op), \
+	PASTEMAC(d,op), \
+	PASTEMAC(z,op), \
+	PASTEMAC(i,op)  \
+}
+
 /*
 #define GENARRAYR(arrayname,op) \
 \

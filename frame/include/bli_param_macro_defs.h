@@ -476,6 +476,7 @@
 #define bli_dformatspec() "%9.2e"
 #define bli_cformatspec() "%9.2e + %9.2e "
 #define bli_zformatspec() "%9.2e + %9.2e "
+#define bli_iformatspec() "%6d"
 
 
 // project dt to real if imaginary component is zero

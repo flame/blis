@@ -210,6 +210,7 @@ extern "C" {
 
 // -- Utility operations --
 
+#include "bli_abmaxv.h"
 #include "bli_absumv.h"
 #include "bli_absumm.h"
 #include "bli_mkherm.h"

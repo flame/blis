@@ -66,8 +66,8 @@
 // Alignment size used when allocating memory from operating system.
 #define BLIS_SYSTEM_MEM_ALIGN_SIZE       16
 
-// Alignment size used when allocating contiguous memory from memory
-// allocator.
+// Alignment size used when sizing packed panels of contiguous memory
+// acquired from the contiguous memory allocator.
 #define BLIS_CONTIG_MEM_ALIGN_SIZE       16
 
 // The number of MC x KC, KC x NC, and MC x NC blocks to reserve in the
@@ -76,14 +76,14 @@
 #define BLIS_NUM_KC_X_NC_BLOCKS          1
 #define BLIS_NUM_MC_X_NC_BLOCKS          0
 
-// The page size is used by the memory allocator so that static memory
-// can be allocated with alignment to the beginning of a page boundary.
+// The page size is used by the contiguous memory allocator to align each
+// allocatable block to the beginning of a page boundary.
 #define BLIS_PAGE_SIZE                   4096
 
-// The maximum preload byte offset is used to pad the end of any static
-// memory allocation request so that the micro-kernel can exceed the
-// bounds of the usable portion of a memory region without causing a
-// segmentation fault.
+// The maximum preload byte offset is used to pad the end of the contiguous
+// memory pools so that the micro-kernel, when computing with the end of the
+// last block, can exceed the bounds of the usable portion of the memory
+// region without causing a segmentation fault.
 #define BLIS_MAX_PRELOAD_BYTE_OFFSET     128
 
 

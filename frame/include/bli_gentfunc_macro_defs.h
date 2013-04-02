@@ -149,6 +149,29 @@ GENTFUNC( scomplex, c, tfuncname, varname ) \
 GENTFUNC( dcomplex, z, tfuncname, varname )
 
 
+// -- Basic one-operand macro with integer instance --
+
+
+#define INSERT_GENTFUNC_BASIC_I( tfuncname, varname ) \
+\
+GENTFUNC( float,    s, tfuncname, varname ) \
+GENTFUNC( double,   d, tfuncname, varname ) \
+GENTFUNC( scomplex, c, tfuncname, varname ) \
+GENTFUNC( dcomplex, z, tfuncname, varname ) \
+GENTFUNC( int,      i, tfuncname, varname )
+
+
+// -- Basic one-operand with integer projection --
+
+
+#define INSERT_GENTFUNCI_BASIC( tfuncname, varname ) \
+\
+GENTFUNCI( float,    int, s, i, tfuncname, varname ) \
+GENTFUNCI( double,   int, d, i, tfuncname, varname ) \
+GENTFUNCI( scomplex, int, c, i, tfuncname, varname ) \
+GENTFUNCI( dcomplex, int, z, i, tfuncname, varname )
+
+
 // -- Basic one-operand with real projection --
 
 
@@ -159,6 +182,16 @@ GENTFUNCR( double,   double, d, d, tfuncname, varname ) \
 GENTFUNCR( scomplex, float,  c, s, tfuncname, varname ) \
 GENTFUNCR( dcomplex, double, z, d, tfuncname, varname )
 
+
+// -- Basic one-operand with real and integer projections --
+
+
+#define INSERT_GENTFUNCRI_BASIC( tfuncname, varname ) \
+\
+GENTFUNCRI( float,    float,  int, s, s, i, tfuncname, varname ) \
+GENTFUNCRI( double,   double, int, d, d, i, tfuncname, varname ) \
+GENTFUNCRI( scomplex, float,  int, c, s, i, tfuncname, varname ) \
+GENTFUNCRI( dcomplex, double, int, z, d, i, tfuncname, varname )
 
 
 // -- Basic one-operand macro (with two auxiliary arguments) --

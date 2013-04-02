@@ -32,45 +32,18 @@
 
 */
 
-#include "blis.h"
+void bli_abmaxv_unb_var1( obj_t* x,
+                          obj_t* abmax_i );
 
 
-//
-// Define BLAS-to-BLIS interfaces.
-//
-#undef  GENTFUNC2I
-#define GENTFUNC2I( ftype_x, ftype_i, chx, chi, blasname, blisname ) \
+#undef  GENTPROTRI
+#define GENTPROTRI( ctype_x, ctype_xr, ctype_i, chx, chxr, chi, varname ) \
 \
-ftype_i PASTEF772(chi,chx,blasname)( \
-                                     fint*    n, \
-                                     ftype_x* x, fint* incx  \
-                                   ) \
-{ \
-	dim_t    n0; \
-	ftype_x* x0; \
-	inc_t    incx0; \
-	ftype_i  index; \
-\
-	/* Convert negative values of n to zero. */ \
-	bli_convert_blas_dim1( *n, n0 ); \
-\
-	/* If the input increments are negative, adjust the pointers so we can
-	   use positive increments instead. */ \
-	bli_convert_blas_incv( n0, x, *incx, x0, incx0 ); \
-\
-	/* Call BLIS interface. */ \
-	PASTEMAC(chx,abmaxv)( n0, \
-	                      x0, incx0, \
-	                      &index ); \
-\
-	/* Convert zero-based BLIS (C) index to one-based BLAS (Fortran)
-	   index. */ \
-	index++; \
-\
-	return index; \
-}
+void PASTEMAC(chx,varname)( \
+                            dim_t  n, \
+                            void*  x, inc_t incx, \
+                            void*  abmax_i  \
+                          );
 
-#ifdef BLIS_ENABLE_BLAS2BLIS
-INSERT_GENTFUNC2I_BLAS( amax, abmaxv )
-#endif
+INSERT_GENTPROTRI_BASIC( abmaxv_unb_var1 )
 

@@ -535,9 +535,10 @@ typedef enum
 	BLIS_EXPECTED_NONINTEGER_DATATYPE          = ( -32),
 	BLIS_EXPECTED_NONCONSTANT_DATATYPE         = ( -33),
 	BLIS_EXPECTED_REAL_DATATYPE                = ( -34),
-	BLIS_INCONSISTENT_DATATYPES                = ( -35),
-	BLIS_EXPECTED_REAL_PROJ_OF                 = ( -36),
-	BLIS_EXPECTED_REAL_VALUED_OBJECT           = ( -37),
+	BLIS_EXPECTED_INTEGER_DATATYPE             = ( -35),
+	BLIS_INCONSISTENT_DATATYPES                = ( -36),
+	BLIS_EXPECTED_REAL_PROJ_OF                 = ( -37),
+	BLIS_EXPECTED_REAL_VALUED_OBJECT           = ( -38),
 
 	// Dimension-specific errors
 	BLIS_NONCONFORMAL_DIMENSIONS               = ( -40),

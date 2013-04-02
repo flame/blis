@@ -148,15 +148,49 @@ GENTPROT( scomplex, c, funcname ) \
 GENTPROT( dcomplex, z, funcname )
 
 
+// -- Basic one-operand macro with integer instance --
+
+
+#define INSERT_GENTPROT_BASIC_I( funcname ) \
+\
+GENTPROT( float,    s, funcname ) \
+GENTPROT( double,   d, funcname ) \
+GENTPROT( scomplex, c, funcname ) \
+GENTPROT( dcomplex, z, funcname ) \
+GENTPROT( int,      i, funcname )
+
+
+// -- Basic one-operand with integer projection --
+
+
+#define INSERT_GENTPROTI_BASIC( funcname ) \
+\
+GENTPROTI( float,    int, s, i, funcname ) \
+GENTPROTI( double,   int, d, i, funcname ) \
+GENTPROTI( scomplex, int, c, i, funcname ) \
+GENTPROTI( dcomplex, int, z, i, funcname )
+
+
 // -- Basic one-operand with real projection --
 
 
-#define INSERT_GENTPROTR_BASIC( tfuncname ) \
+#define INSERT_GENTPROTR_BASIC( funcname ) \
 \
-GENTPROTR( float,    float,  s, s, tfuncname ) \
-GENTPROTR( double,   double, d, d, tfuncname ) \
-GENTPROTR( scomplex, float,  c, s, tfuncname ) \
-GENTPROTR( dcomplex, double, z, d, tfuncname )
+GENTPROTR( float,    float,  s, s, funcname ) \
+GENTPROTR( double,   double, d, d, funcname ) \
+GENTPROTR( scomplex, float,  c, s, funcname ) \
+GENTPROTR( dcomplex, double, z, d, funcname )
+
+
+// -- Basic one-operand with real and integer projections --
+
+
+#define INSERT_GENTPROTRI_BASIC( funcname ) \
+\
+GENTPROTRI( float,    float,  int, s, s, i, funcname ) \
+GENTPROTRI( double,   double, int, d, d, i, funcname ) \
+GENTPROTRI( scomplex, float,  int, c, s, i, funcname ) \
+GENTPROTRI( dcomplex, double, int, z, d, i, funcname )
 
 
 

@@ -458,11 +458,13 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "enable system mem align?    %u\n", BLIS_ENABLE_SYSTEM_MEM_ALIGN );
 	libblis_test_fprintf_c( os, "  system alignment size     %u\n", BLIS_SYSTEM_MEM_ALIGN_SIZE );
-	libblis_test_fprintf_c( os, "contig mem alignment size   %u\n", BLIS_CONTIG_MEM_ALIGN_SIZE );
-	libblis_test_fprintf_c( os, "static memory pool            \n" );
+	libblis_test_fprintf_c( os, "\n" );
+	libblis_test_fprintf_c( os, "contig memory allocator       \n" );
 	libblis_test_fprintf_c( os, "  # of mc x kc blocks       %u\n", BLIS_NUM_MC_X_KC_BLOCKS );
 	libblis_test_fprintf_c( os, "  # of kc x nc blocks       %u\n", BLIS_NUM_KC_X_NC_BLOCKS );
+	libblis_test_fprintf_c( os, "  # of mc x nc blocks       %u\n", BLIS_NUM_MC_X_NC_BLOCKS );
 	libblis_test_fprintf_c( os, "  page size                 %u\n", BLIS_PAGE_SIZE );
+	libblis_test_fprintf_c( os, "  panel alignment size      %u\n", BLIS_CONTIG_MEM_ALIGN_SIZE );
 	libblis_test_fprintf_c( os, "  max preload byte offset   %u\n", BLIS_MAX_PRELOAD_BYTE_OFFSET );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "--- BLIS kernel header ---\n" );

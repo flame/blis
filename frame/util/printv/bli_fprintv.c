@@ -45,7 +45,7 @@ typedef void (*FUNCPTR_T)(
                            char*  s2
                          );
 
-static FUNCPTR_T GENARRAY(ftypes,fprintv);
+static FUNCPTR_T GENARRAY_I(ftypes,fprintv);
 
 
 void bli_fprintv( FILE* file, char* s1, obj_t* x, char* format, char* s2 )
@@ -107,5 +107,5 @@ void PASTEMAC(ch,opname)( \
 	fprintf( file, "%s\n", s2 ); \
 }
 
-INSERT_GENTFUNC_BASIC( fprintv, fprintv )
+INSERT_GENTFUNC_BASIC_I( fprintv, fprintv )
 

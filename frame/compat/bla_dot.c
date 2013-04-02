@@ -79,6 +79,8 @@ INSERT_GENTFUNCDOT_BLAS( dot, DOTV_KERNEL )
 
 // -- "Black sheep" dot product function definitions --
 
+// Input vectors stored in single precision, computed in double precision,
+// with result returned in single precision.
 float PASTEF77(sd,sdot)( fint*  n,
                          float* x, fint* incx,
                          float* y, fint* incy
@@ -89,6 +91,8 @@ float PASTEF77(sd,sdot)( fint*  n,
 	return 0.0F;
 }
 
+// Input vectors stored in single precision, computed in double precision,
+// with result returned in double precision.
 double PASTEF77(d,sdot)( fint*  n,
                          float* x, fint* incx,
                          float* y, fint* incy

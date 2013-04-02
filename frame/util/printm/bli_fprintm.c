@@ -46,7 +46,7 @@ typedef void (*FUNCPTR_T)(
                            char*  s2
                          );
 
-static FUNCPTR_T GENARRAY(ftypes,fprintm);
+static FUNCPTR_T GENARRAY_I(ftypes,fprintm);
 
 
 void bli_fprintm( FILE* file, char* s1, obj_t* x, char* format, char* s2 )
@@ -80,8 +80,6 @@ void bli_fprintm( FILE* file, char* s1, obj_t* x, char* format, char* s2 )
 		fprintf( file, "\n" );
 		return;
 	}
-
-	if ( dt_x == BLIS_INT ) bli_abort();
 
 	// Index into the type combination array to extract the correct
 	// function pointer.
@@ -135,5 +133,5 @@ void PASTEMAC(ch,opname)( \
 	fprintf( file, "%s\n", s2 ); \
 }
 
-INSERT_GENTFUNC_BASIC( fprintm, fprintm )
+INSERT_GENTFUNC_BASIC_I( fprintm, fprintm )
 

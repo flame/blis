@@ -55,6 +55,10 @@
 \
 	( BLIS_CONST_Z_PTR( BLIS_TWO ) )
 
+#define bli_i2 \
+\
+	( BLIS_CONST_I_PTR( BLIS_TWO ) )
+
 // 1
 
 #define bli_s1 \
@@ -72,6 +76,10 @@
 #define bli_z1 \
 \
 	( BLIS_CONST_Z_PTR( BLIS_ONE ) )
+
+#define bli_i1 \
+\
+	( BLIS_CONST_I_PTR( BLIS_ONE ) )
 
 // 0
 
@@ -91,6 +99,10 @@
 \
 	( BLIS_CONST_Z_PTR( BLIS_ZERO ) )
 
+#define bli_i0 \
+\
+	( BLIS_CONST_I_PTR( BLIS_ZERO ) )
+
 // -1
 
 #define bli_sm1 \
@@ -109,6 +121,10 @@
 \
 	( BLIS_CONST_Z_PTR( BLIS_MINUS_ONE ) )
 
+#define bli_im1 \
+\
+	( BLIS_CONST_I_PTR( BLIS_MINUS_ONE ) )
+
 // -2
 
 #define bli_sm2 \
@@ -126,6 +142,10 @@
 #define bli_zm2 \
 \
 	( BLIS_CONST_Z_PTR( BLIS_MINUS_TWO ) )
+
+#define bli_im2 \
+\
+	( BLIS_CONST_I_PTR( BLIS_MINUS_TWO ) )
 
 
 // set to constant

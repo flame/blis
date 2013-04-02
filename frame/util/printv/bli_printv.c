@@ -59,5 +59,5 @@ void PASTEMAC(ch,opname)( \
 	                      s2 ); \
 }
 
-INSERT_GENTFUNC_BASIC( printv, fprintv )
+INSERT_GENTFUNC_BASIC_I( printv, fprintv )
 

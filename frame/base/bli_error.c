@@ -120,6 +120,8 @@ void bli_error_msgs_init( void )
 	         "Expected non-constant datatype value." );
 	sprintf( bli_error_string_for_code(BLIS_EXPECTED_REAL_DATATYPE),
 	         "Expected real datatype value." );
+	sprintf( bli_error_string_for_code(BLIS_EXPECTED_INTEGER_DATATYPE),
+	         "Expected integer datatype value." );
 	sprintf( bli_error_string_for_code(BLIS_INCONSISTENT_DATATYPES),
 	         "Expected consistent datatypes (equal, or one being constant)." );
 	sprintf( bli_error_string_for_code(BLIS_EXPECTED_REAL_PROJ_OF),
