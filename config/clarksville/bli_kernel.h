@@ -44,21 +44,21 @@
 // Constraints:
 //
 // (1) MC must be a multiple of:
-//     (a) MR (for zero-padding purposes) and
-//     (b) NR.
+//     (a) MR (for zero-padding purposes)
 // (2) NC must be a multiple of
-//     (a) NR (for zero-padding purposes) and
-//     (b) MR.
-// (3) KC does not need to be multiple of anything, unless the micro-kernel
-//     specifically requires it (and typically it does not).
+//     (a) NR (for zero-padding purposes)
+// (3) KC must be a multiple of
+//     (a) MR and
+//     (b) NR
+//     for triangular operations such as trmm and trsm.
 // 
-// NOTE: For BLIS libraries built on block-panel macro-kernels, constraint
-// (2b) is relaxed. In this case, (1b) is needed for operation implementations
-// involving matrices with diagonals (trmm, trsm). In these cases, we want the
-// diagonal offset of any panel of packed matrix A to have a diagonal offset
-// that is a multiple of MR. If, instead, the library were to be built on
-// block-panel macro-kernels, matrix B would be the one with structure, not A,
-// and thus it would be constraint (2b) that would be needed instead of (1b).
+// NOTE: For BLIS libraries built on block-panel macro-kernels, constraint (3b)
+// is relaxed. In this case, (3a) is needed for operations where matrix A is
+// triangular (trmm, trsm), because we want the diagonal offset of any packed
+// panel of matrix A to be a multiple of MR. If, instead, the library were to
+// be built on block-panel macro-kernels, the matrix with structure would be
+// on the right, rather than the left, and thus it would be constraint (3b)
+// that would be needed instead of (3a).
 //
 
 #define BLIS_DEFAULT_MC_S              128

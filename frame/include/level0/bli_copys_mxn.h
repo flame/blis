@@ -82,5 +82,21 @@
 }
 
 
+#define bli_scopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
+{ \
+	bli_sscopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ); \
+}
+#define bli_dcopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
+{ \
+	bli_ddcopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ); \
+}
+#define bli_ccopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
+{ \
+	bli_cccopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ); \
+}
+#define bli_zcopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
+{ \
+	bli_zzcopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ); \
+}
 
 #endif

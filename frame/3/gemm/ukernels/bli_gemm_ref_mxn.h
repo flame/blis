@@ -33,15 +33,36 @@
 */
 
 
+//
+// Define micro-kernel blocksizes.
+//
+#define bli_sgemm_ref_mxn_mr   BLIS_DEFAULT_MR_S
+#define bli_sgemm_ref_mxn_nr   BLIS_DEFAULT_NR_S
+
+#define bli_dgemm_ref_mxn_mr   BLIS_DEFAULT_MR_D
+#define bli_dgemm_ref_mxn_nr   BLIS_DEFAULT_NR_D
+
+#define bli_cgemm_ref_mxn_mr   BLIS_DEFAULT_MR_C
+#define bli_cgemm_ref_mxn_nr   BLIS_DEFAULT_NR_C
+
+#define bli_zgemm_ref_mxn_mr   BLIS_DEFAULT_MR_Z
+#define bli_zgemm_ref_mxn_nr   BLIS_DEFAULT_NR_Z
+
+
+//
+// Prototype micro-kernel interfaces.
+//
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, varname ) \
 \
 void PASTEMAC(ch,varname)( \
+                           dim_t           k, \
+                           ctype* restrict alpha, \
                            ctype* restrict a, \
                            ctype* restrict b, \
-                           ctype* restrict bd, \
+                           ctype* restrict beta, \
                            ctype* restrict c, inc_t rs_c, inc_t cs_c \
                          );
 
-INSERT_GENTPROT_BASIC( trsm_l_ref_4x4 )
+INSERT_GENTPROT_BASIC( gemm_ref_mxn )
 

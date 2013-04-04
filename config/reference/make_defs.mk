@@ -80,7 +80,7 @@ CPPROCFLAGS  :=
 CMISCFLAGS   := -std=c99 # -fopenmp -pg
 CDBGFLAGS    := -g
 CWARNFLAGS   := -Wall
-COPTFLAGS    := -O2 -malign-double
+COPTFLAGS    := -O2 -malign-double -funroll-loops
 CVECFLAGS    := -msse3 -march=native # -mfpmath=sse
 
 # Aggregate all of the flags into two groups: one for optimizable code, and

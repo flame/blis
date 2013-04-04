@@ -87,5 +87,21 @@
 }
 
 
+#define bli_sxpbys_mxn( m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ) \
+{\
+	bli_sssxpbys_mxn( m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ); \
+}
+#define bli_dxpbys_mxn( m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ) \
+{\
+	bli_dddxpbys_mxn( m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ); \
+}
+#define bli_cxpbys_mxn( m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ) \
+{\
+	bli_cccxpbys_mxn( m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ); \
+}
+#define bli_zxpbys_mxn( m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ) \
+{\
+	bli_zzzxpbys_mxn( m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ); \
+}
 
 #endif

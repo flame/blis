@@ -39,10 +39,10 @@
 #define GENTFUNC( ctype, ch, varname, kername ) \
 \
 void PASTEMAC(ch,varname)( \
-                           ctype*  a, \
-                           ctype*  b, \
-                           ctype*  bd, \
-                           ctype*  c, inc_t rs_c, inc_t cs_c \
+                           ctype* restrict a, \
+                           ctype* restrict b, \
+                           ctype* restrict bd, \
+                           ctype* restrict c, inc_t rs_c, inc_t cs_c \
                          ) \
 { \
 	const dim_t rs_a = 1; \

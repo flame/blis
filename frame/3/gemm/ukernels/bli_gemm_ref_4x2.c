@@ -39,12 +39,12 @@
 #define GENTFUNC( ctype, ch, varname, kername ) \
 \
 void PASTEMAC(ch,varname)( \
-                           dim_t   k, \
-                           ctype*  alpha, \
-                           ctype*  a, \
-                           ctype*  b, \
-                           ctype*  beta, \
-                           ctype*  c, inc_t rs_c, inc_t cs_c \
+                           dim_t           k, \
+                           ctype* restrict alpha, \
+                           ctype* restrict a, \
+                           ctype* restrict b, \
+                           ctype* restrict beta, \
+                           ctype* restrict c, inc_t rs_c, inc_t cs_c \
                          ) \
 { \
 	ctype  a0; \

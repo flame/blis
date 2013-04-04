@@ -82,5 +82,21 @@
 }
 
 
+#define bli_sadds_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
+{ \
+	bli_ssadds_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ); \
+}
+#define bli_dadds_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
+{ \
+	bli_ddadds_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ); \
+}
+#define bli_cadds_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
+{ \
+	bli_ccadds_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ); \
+}
+#define bli_zadds_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
+{ \
+	bli_zzadds_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ); \
+}
 
 #endif

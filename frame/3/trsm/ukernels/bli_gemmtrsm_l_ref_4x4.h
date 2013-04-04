@@ -37,14 +37,14 @@
 #define GENTPROT( ctype, ch, varname ) \
 \
 void PASTEMAC(ch,varname)( \
-                           dim_t   k, \
-                           ctype*  alpha, \
-                           ctype*  aL, \
-                           ctype*  a, \
-                           ctype*  bdT, \
-                           ctype*  bd, \
-                           ctype*  b, \
-                           ctype*  c, inc_t rs_c, inc_t cs_c \
+                           dim_t           k, \
+                           ctype* restrict alpha, \
+                           ctype* restrict aL, \
+                           ctype* restrict a, \
+                           ctype* restrict bdT, \
+                           ctype* restrict bd, \
+                           ctype* restrict b, \
+                           ctype* restrict c, inc_t rs_c, inc_t cs_c \
                          );
 
 INSERT_GENTPROT_BASIC( gemmtrsm_l_ref_4x4 )

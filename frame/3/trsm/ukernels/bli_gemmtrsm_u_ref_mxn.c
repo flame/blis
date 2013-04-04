@@ -32,16 +32,42 @@
 
 */
 
+#include "blis.h"
 
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
+
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, varname, gemmukr, trsmukr ) \
 \
 void PASTEMAC(ch,varname)( \
+                           dim_t           k, \
+                           ctype* restrict alpha, \
+                           ctype* restrict aR, \
                            ctype* restrict a, \
-                           ctype* restrict b, \
+                           ctype* restrict bdB, \
                            ctype* restrict bd, \
+                           ctype* restrict b, \
                            ctype* restrict c, inc_t rs_c, inc_t cs_c \
-                         );
+                         ) \
+{ \
+	const dim_t     NR        = PASTEMAC2(ch,varname,_nr); \
+\
+	const inc_t     rs_b      = NR; \
+	const inc_t     cs_b      = 1; \
+\
+	ctype* restrict minus_one = PASTEMAC(ch,m1); \
+\
+	PASTEMAC(ch,gemmukr)( k, \
+	                      minus_one, \
+	                      aR, \
+	                      bdB, \
+	                      alpha, \
+	                      b, rs_b, cs_b ); \
+\
+	PASTEMAC(ch,trsmukr)( a, \
+	                      b, \
+	                      bd, \
+	                      c, rs_c, cs_c ); \
+}
 
-INSERT_GENTPROT_BASIC( trsm_l_ref_4x4 )
+INSERT_GENTFUNC_BASIC2( gemmtrsm_u_ref_mxn, gemm_ref_mxn, trsm_u_ref_mxn )
 

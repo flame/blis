@@ -36,36 +36,92 @@
 
 
 #undef  GENTFUNC
-#define GENTFUNC( ctype, ch, varname, gemmukr, trsmukr ) \
+#define GENTFUNC( ctype, ch, varname, kername ) \
 \
 void PASTEMAC(ch,varname)( \
                            dim_t           k, \
                            ctype* restrict alpha, \
-                           ctype* restrict aL, \
                            ctype* restrict a, \
-                           ctype* restrict bdT, \
-                           ctype* restrict bd, \
                            ctype* restrict b, \
+                           ctype* restrict beta, \
                            ctype* restrict c, inc_t rs_c, inc_t cs_c \
                          ) \
 { \
-	ctype*      minus_one = PASTEMAC(ch,m1); \
+	const dim_t     MR    = PASTEMAC2(ch,varname,_mr); \
+	const dim_t     NR    = PASTEMAC2(ch,varname,_nr); \
 \
-	const inc_t rs_b      = 4; \
-	const inc_t cs_b      = 1; \
+	const dim_t     m     = MR; \
+	const dim_t     n     = NR; \
 \
-	PASTEMAC(ch,gemmukr)( k, \
-	                      minus_one, \
-	                      aL, \
-	                      bdT, \
-	                      alpha, \
-	                      b, rs_b, cs_b ); \
+	const inc_t     cs_a  = MR; \
 \
-	PASTEMAC(ch,trsmukr)( a, \
-	                      b, \
-	                      bd, \
-	                      c, rs_c, cs_c ); \
+	const inc_t     rs_b  = NR; \
+\
+	const inc_t     rs_ab = 1; \
+	const inc_t     cs_ab = MR; \
+\
+	dim_t           k0, j0, i0; \
+\
+	ctype           ab[ MR * NR ]; \
+	ctype* restrict ab00; \
+	ctype           a0; \
+	ctype           b0; \
+\
+\
+	/* Initialize the accumulator elements in ab to zero. */ \
+	for ( i0 = 0; i0 < m * n; ++i0 ) \
+	{ \
+		PASTEMAC(ch,set0s)( *(ab + i0) ); \
+	} \
+\
+	/* Perform a series of k rank-1 updates into ab. */ \
+	for ( k0 = 0; k0 < k; ++k0 ) \
+	{ \
+		ab00 = ab; \
+\
+		for ( j0 = 0; j0 < n; ++j0 ) \
+		{ \
+			b0 = *(b + j0); \
+\
+			for ( i0 = 0; i0 < m; ++i0 ) \
+			{ \
+				a0 = *(a + i0); \
+\
+				PASTEMAC(ch,dots)( a0, \
+				                   b0, \
+				                   *ab00 ); \
+				ab00 += rs_ab; \
+			} \
+		} \
+\
+		a += cs_a; \
+		b += rs_b; \
+	} \
+\
+	/* Scale the result in ab by alpha. */ \
+	for ( i0 = 0; i0 < m * n; ++i0 ) \
+	{ \
+		PASTEMAC(ch,scals)( *alpha, *(ab + i0) ); \
+	} \
+\
+	/* If beta is zero, overwrite c with the scaled result in ab. Otherwise,
+	   scale by beta and then add the scaled redult in ab. */ \
+	if ( PASTEMAC(ch,eq0)( *beta ) ) \
+	{ \
+		PASTEMAC(ch,copys_mxn)( m, \
+		                        n, \
+		                        ab, rs_ab, cs_ab, \
+		                        c,  rs_c,  cs_c ); \
+	} \
+	else \
+	{ \
+		PASTEMAC(ch,xpbys_mxn)( m, \
+		                        n, \
+		                        ab, rs_ab, cs_ab, \
+		                        beta, \
+		                        c,  rs_c,  cs_c ); \
+	} \
 }
 
-INSERT_GENTFUNC_BASIC2( gemmtrsm_l_ref_4x4, gemm_ref_4x4, trsm_l_ref_4x4 )
+INSERT_GENTFUNC_BASIC( gemm_ref_mxn, gemm_ref_mxn )
 

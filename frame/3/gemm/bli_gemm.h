@@ -46,6 +46,7 @@
 
 #include "bli_gemm_ref_4x2.h"
 #include "bli_gemm_ref_4x4.h"
+#include "bli_gemm_ref_mxn.h"
 
 
 //

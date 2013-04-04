@@ -32,16 +32,83 @@
 
 */
 
+#include "blis.h"
 
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
+
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, varname, kername ) \
 \
 void PASTEMAC(ch,varname)( \
                            ctype* restrict a, \
                            ctype* restrict b, \
                            ctype* restrict bd, \
                            ctype* restrict c, inc_t rs_c, inc_t cs_c \
-                         );
+                         ) \
+{ \
+	const dim_t     MR    = PASTEMAC2(ch,varname,_mr); \
+	const dim_t     NR    = PASTEMAC2(ch,varname,_nr); \
+\
+	const dim_t     m     = MR; \
+	const dim_t     n     = NR; \
+\
+	const inc_t     rs_a  = 1; \
+	const inc_t     cs_a  = MR; \
+\
+	const inc_t     rs_b  = NR; \
+	const inc_t     cs_b  = 1; \
+\
+	dim_t           iter, i, j, k; \
+	dim_t           n_behind; \
+\
+	ctype* restrict alpha11; \
+	ctype* restrict a10t; \
+	ctype* restrict alpha10; \
+	ctype* restrict X0; \
+	ctype* restrict x1; \
+	ctype* restrict x01; \
+	ctype* restrict chi01; \
+	ctype* restrict chi11; \
+	ctype* restrict gamma11; \
+	ctype           rho11; \
+\
+	for ( iter = 0; iter < m; ++iter ) \
+	{ \
+		i        = iter; \
+		n_behind = i; \
+		alpha11  = a + (i  )*rs_a + (i  )*cs_a; \
+		a10t     = a + (i  )*rs_a + (0  )*cs_a; \
+		X0       = b + (0  )*rs_b + (0  )*cs_b; \
+		x1       = b + (i  )*rs_b + (0  )*cs_b; \
+\
+		/* x1 = x1 - a10t * X0; */ \
+		/* x1 = x1 / alpha11; */ \
+		for ( j = 0; j < n; ++j ) \
+		{ \
+			x01     = X0 + (0  )*rs_b + (j  )*cs_b; \
+			chi11   = x1 + (0  )*rs_b + (j  )*cs_b; \
+			gamma11 = c  + (i  )*rs_c + (j  )*cs_c; \
+\
+			/* chi11 = chi11 - a10t * x01; */ \
+			PASTEMAC(ch,set0s)( rho11 ); \
+			for ( k = 0; k < n_behind; ++k ) \
+			{ \
+				alpha10 = a10t + (k  )*cs_a; \
+				chi01   = x01  + (k  )*rs_b; \
+\
+				PASTEMAC(ch,axpys)( *alpha10, *chi01, rho11 ); \
+			} \
+			PASTEMAC(ch,subs)( rho11, *chi11 ); \
+\
+			/* chi11 = chi11 / alpha11; */ \
+			/* NOTE: 1.0/alpha11 is stored instead of alpha11, so we
+			   need to multiply rather than divide. */ \
+			PASTEMAC(ch,scals)( *alpha11, *chi11 ); \
+\
+			/* Output final result to matrix C. */ \
+			PASTEMAC(ch,copys)( *chi11, *gamma11 ); \
+		} \
+	} \
+}
 
-INSERT_GENTPROT_BASIC( trsm_l_ref_4x4 )
+INSERT_GENTFUNC_BASIC( trsm_l_ref_mxn, trsm_l_ref_mxn )
 
