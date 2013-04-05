@@ -324,9 +324,27 @@ void PASTEMAC(ch,varname)( \
 		/* Right edge loop over the m dimension (MR rows at a time). */ \
 		for ( i = 0; i < m_iter; ++i ) \
 		{ \
-			/* All of these iterations would touch unstored parts of the
-			   matrix. So, we do nothing except increment the pointers for
-			   the bottom-right corner case. */ \
+			/* Compute the diagonal offset for the submatrix at (i,j). */ \
+			diagoffc_ij = diagoffc - (doff_t)j*NR + (doff_t)i*MR; \
+\
+			if ( bli_intersects_diag_n( diagoffc_ij, MR, n_left ) ) \
+			{ \
+				/* Invoke the gemm micro-kernel. */ \
+				PASTEMAC(ch,ukrname)( k, \
+				                      alpha_cast, \
+				                      a1, \
+				                      bp, \
+				                      zero, \
+				                      ct, rs_ct, cs_ct ); \
+\
+				/* Scale C and add the result to only the stored part. */ \
+				PASTEMAC3(ch,ch,ch,xpbys_mxn_l)( diagoffc_ij, \
+				                                 MR, n_left, \
+				                                 ct,  rs_ct, cs_ct, \
+				                                 beta_cast, \
+				                                 c11, rs_c,  cs_c ); \
+			} \
+\
 			a1  += rstep_a; \
 			c11 += rstep_c; \
 		} \

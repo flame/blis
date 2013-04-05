@@ -83,16 +83,16 @@
 // in the m and n dimensions should all be equal to the size expected by
 // the reference micro-kernel(s).
 
-#define BLIS_DEFAULT_MR_S              4
+#define BLIS_DEFAULT_MR_S              8
 #define BLIS_DEFAULT_NR_S              4
 
-#define BLIS_DEFAULT_MR_D              4
+#define BLIS_DEFAULT_MR_D              8
 #define BLIS_DEFAULT_NR_D              4
 
-#define BLIS_DEFAULT_MR_C              4
+#define BLIS_DEFAULT_MR_C              8
 #define BLIS_DEFAULT_NR_C              4
 
-#define BLIS_DEFAULT_MR_Z              4
+#define BLIS_DEFAULT_MR_Z              8
 #define BLIS_DEFAULT_NR_Z              4
 
 // NOTE: If the micro-kernel, which is typically unrolled to a factor

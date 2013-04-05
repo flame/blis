@@ -288,12 +288,32 @@ void PASTEMAC(ch,varname)( \
 			c11 += rstep_c; \
 		} \
 \
-		/* Bottom edge handling. This case never occurs since the bottom
-		   edge is never reached as part of the interior loop. (It is only
-		   updated as part of the bottom-right corner handling below.) */ \
+		/* Bottom edge handling. */ \
 		if ( m_left ) \
 		{ \
-			; \
+			/* Compute the diagonal offset for the submatrix at (i,j). */ \
+			diagoffc_ij = diagoffc - (doff_t)j*NR + (doff_t)i*MR; \
+\
+			/* The following conditional only executes when the bottom edge
+			   case for this particular column panel happens to intersect the
+			   diagonal. */ \
+			if ( bli_intersects_diag_n( diagoffc_ij, m_left, NR ) ) \
+			{ \
+				/* Invoke the gemm micro-kernel. */ \
+				PASTEMAC(ch,ukrname)( k, \
+				                      alpha_cast, \
+				                      a1, \
+				                      bp, \
+				                      zero, \
+				                      ct, rs_ct, cs_ct ); \
+\
+				/* Scale C and add the result to only the stored part. */ \
+				PASTEMAC3(ch,ch,ch,xpbys_mxn_u)( diagoffc_ij, \
+				                                 m_left, NR, \
+				                                 ct,  rs_ct, cs_ct, \
+				                                 beta_cast, \
+				                                 c11, rs_c,  cs_c ); \
+			} \
 		} \
 \
 		b1 += cstep_b; \
