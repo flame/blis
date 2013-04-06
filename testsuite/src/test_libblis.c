@@ -469,7 +469,7 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "--- BLIS kernel header ---\n" );
 	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "cache blocksizes            s     d     c     z \n" );
+	libblis_test_fprintf_c( os, "level-3 cache blocksizes    s     d     c     z \n" );
 	libblis_test_fprintf_c( os, "  m dimension           %5u %5u %5u %5u\n",
 	                        BLIS_DEFAULT_MC_S,
 	                        BLIS_DEFAULT_MC_D,
@@ -486,7 +486,7 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	                        BLIS_DEFAULT_NC_C,
 	                        BLIS_DEFAULT_NC_Z );
 	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "register blocksizes         s     d     c     z \n" );
+	libblis_test_fprintf_c( os, "level-3 register blocksizes                     \n" );
 	libblis_test_fprintf_c( os, "  m dimension           %5u %5u %5u %5u\n",
 	                        BLIS_DEFAULT_MR_S,
 	                        BLIS_DEFAULT_MR_D,
@@ -498,8 +498,31 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	                        BLIS_DEFAULT_NR_C,
 	                        BLIS_DEFAULT_NR_Z );
 	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "level-1f fusing factors     s     d     c     z \n" );
-	libblis_test_fprintf_c( os, "                        %5u %5u %5u %5u\n",
+	libblis_test_fprintf_c( os, "level-3 packing duplication                     \n" );
+	libblis_test_fprintf_c( os, "  dupl. factors for B   %5u %5u %5u %5u\n",
+	                        BLIS_DEFAULT_NUM_DUPL_S,
+	                        BLIS_DEFAULT_NUM_DUPL_D,
+	                        BLIS_DEFAULT_NUM_DUPL_C,
+	                        BLIS_DEFAULT_NUM_DUPL_Z );
+	libblis_test_fprintf_c( os, "  elements per register %5u %5u %5u %5u\n",
+	                        BLIS_NUM_ELEM_PER_REG_S,
+	                        BLIS_NUM_ELEM_PER_REG_D,
+	                        BLIS_NUM_ELEM_PER_REG_C,
+	                        BLIS_NUM_ELEM_PER_REG_Z );
+	libblis_test_fprintf_c( os, "\n" );
+	libblis_test_fprintf_c( os, "level-2 cache blocksizes                        \n" );
+	libblis_test_fprintf_c( os, "  m dimension           %5u %5u %5u %5u\n",
+	                        BLIS_DEFAULT_L2_MC_S,
+	                        BLIS_DEFAULT_L2_MC_D,
+	                        BLIS_DEFAULT_L2_MC_C,
+	                        BLIS_DEFAULT_L2_MC_Z );
+	libblis_test_fprintf_c( os, "  n dimension           %5u %5u %5u %5u\n",
+	                        BLIS_DEFAULT_L2_NC_S,
+	                        BLIS_DEFAULT_L2_NC_D,
+	                        BLIS_DEFAULT_L2_NC_C,
+	                        BLIS_DEFAULT_L2_NC_Z );
+	libblis_test_fprintf_c( os, "\n" );
+	libblis_test_fprintf_c( os, "level-1f fusing factors %5u %5u %5u %5u\n",
 	                        BLIS_DEFAULT_FUSING_FACTOR_S,
 	                        BLIS_DEFAULT_FUSING_FACTOR_D,
 	                        BLIS_DEFAULT_FUSING_FACTOR_C,
@@ -511,24 +534,24 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "--- BLIS test suite parameters ----------------------------\n" );
 	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "n_repeats                   %u\n", params->n_repeats );
-	libblis_test_fprintf_c( os, "n_mstorage                  %u\n", params->n_mstorage );
+	libblis_test_fprintf_c( os, "num repeats per experiment  %u\n", params->n_repeats );
+	libblis_test_fprintf_c( os, "num matrix storage schemes  %u\n", params->n_mstorage );
 	libblis_test_fprintf_c( os, "storage[ matrix ]           %s\n", params->storage[ BLIS_TEST_MATRIX_OPERAND ] );
-	libblis_test_fprintf_c( os, "n_vstorage                  %u\n", params->n_vstorage );
+	libblis_test_fprintf_c( os, "num vector storage schemes  %u\n", params->n_vstorage );
 	libblis_test_fprintf_c( os, "storage[ vector ]           %s\n", params->storage[ BLIS_TEST_VECTOR_OPERAND ] );
-	libblis_test_fprintf_c( os, "mix_all_storage             %u\n", params->mix_all_storage );
-	libblis_test_fprintf_c( os, "gs_spacing                  %d\n", params->gs_spacing );
-	libblis_test_fprintf_c( os, "n_datatypes                 %u\n", params->n_datatypes );
+	libblis_test_fprintf_c( os, "mix all storage schemes?    %u\n", params->mix_all_storage );
+	libblis_test_fprintf_c( os, "general stride spacing      %d\n", params->gs_spacing );
+	libblis_test_fprintf_c( os, "num datatypes               %u\n", params->n_datatypes );
 	libblis_test_fprintf_c( os, "datatype[0]                 %d (%c)\n", params->datatype[0],
 	                                                                params->datatype_char[0] );
 	for( i = 1; i < params->n_datatypes; ++i )
 	libblis_test_fprintf_c( os, "        [%d]                 %d (%c)\n", i, params->datatype[i],
 	                                                                    params->datatype_char[i] );
-	libblis_test_fprintf_c( os, "p_first                     %u\n", params->p_first );
-	libblis_test_fprintf_c( os, "p_max                       %u\n", params->p_max );
-	libblis_test_fprintf_c( os, "p_inc                       %u\n", params->p_inc );
-	libblis_test_fprintf_c( os, "reaction_to_failure         %c\n", params->reaction_to_failure );
-	libblis_test_fprintf_c( os, "output_matlab_files         %u\n", params->output_matlab_files );
+	libblis_test_fprintf_c( os, "problem size: first to test %u\n", params->p_first );
+	libblis_test_fprintf_c( os, "problem size: max to test   %u\n", params->p_max );
+	libblis_test_fprintf_c( os, "problem size increment      %u\n", params->p_inc );
+	libblis_test_fprintf_c( os, "reaction to failure         %c\n", params->reaction_to_failure );
+	libblis_test_fprintf_c( os, "output matlab files?        %u\n", params->output_matlab_files );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf( os, "\n" );
 }
@@ -539,7 +562,7 @@ void libblis_test_output_op_struct( FILE* os, test_op_t* op, char* op_str )
 {
 	dimset_t dimset = op->dimset;
 
-	libblis_test_fprintf_c( os, "%s seq_front              %d\n", op_str, op->front_seq );
+	libblis_test_fprintf_c( os, "test %s seq front-end?    %d\n", op_str, op->front_seq );
 
 	if (      dimset == BLIS_TEST_DIMS_MNK )
 	{
