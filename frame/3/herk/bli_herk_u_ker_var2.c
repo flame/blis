@@ -220,8 +220,8 @@ void PASTEMAC(ch,varname)( \
 \
 	cstep_b = ps_b; \
 \
-	rstep_c = MR * rs_c; \
-	cstep_c = NR * cs_c; \
+	rstep_c = rs_c * MR; \
+	cstep_c = cs_c * NR; \
 \
 	b1  = b_cast; \
 	c1  = c_cast; \

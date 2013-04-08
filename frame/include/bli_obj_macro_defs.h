@@ -827,7 +827,7 @@ bli_obj_width_stored( obj )
 
 #define bli_obj_is_packed( obj ) \
 \
-	( bli_obj_pack_status( obj ) != BLIS_NOT_PACKED ) \
+	( bli_obj_pack_status( obj ) != BLIS_NOT_PACKED )
 
 
 // Release object's pack (and cast) memory entries back to memory manager
