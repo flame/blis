@@ -246,7 +246,7 @@ dim_t bli_packm_offset_to_panel_for( dim_t offmn, obj_t* p )
 	else
 	{
 		panel_off = 0;
-		bli_abort();
+		bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 	}
 
 	return panel_off;

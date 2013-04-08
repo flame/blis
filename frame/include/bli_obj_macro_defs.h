@@ -822,15 +822,12 @@ bli_obj_width_stored( obj )
 
 
 // Check if an object is a packed object
-// (ie: was a pack buffer acquired for this object; TRUE here does not mean
-// the actual packing is complete, such as with incremental packing.)
+// NOTE: TRUE here does not mean the actual packing is complete, such as with
+// incremental packing.)
 
 #define bli_obj_is_packed( obj ) \
 \
-	( bli_obj_buffer( obj ) == bli_mem_buffer( bli_obj_pack_mem( obj ) ) && \
-	  bli_obj_buffer( obj ) != NULL \
-		? TRUE \
-		: FALSE ) \
+	( bli_obj_pack_status( obj ) != BLIS_NOT_PACKED ) \
 
 
 // Release object's pack (and cast) memory entries back to memory manager
