@@ -69,5 +69,5 @@ void PASTEMAC(ch,varname)( \
 	                      c, rs_c, cs_c ); \
 }
 
-INSERT_GENTFUNC_BASIC2( gemmtrsm_l_ref_mxn, gemm_ref_mxn, trsm_l_ref_mxn )
+INSERT_GENTFUNC_BASIC2( gemmtrsm_l_ref_mxn, GEMM_UKERNEL, TRSM_L_UKERNEL )
 
