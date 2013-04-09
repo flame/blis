@@ -847,18 +847,29 @@ bli_obj_width_stored( obj )
 
 
 
-// Submatrix acquisition
+// Submatrix/scalar buffer acquisition
+
+#define BLIS_CONSTANT_SLOT_SIZE  sizeof(dcomplex)
+#define BLIS_CONSTANT_SIZE       ( 5 * BLIS_CONSTANT_SLOT_SIZE )
+
+#define bli_obj_buffer_for_const( dt, obj ) \
+\
+	( void* )( \
+	           ( ( char* )( (obj).buffer ) ) + dt * BLIS_CONSTANT_SLOT_SIZE \
+	         )
 
 #define bli_obj_buffer_at_off( obj ) \
 \
-	( void* )( ( ( char* ) (obj).buffer ) + (obj).elem_size * ( (obj).offn * (obj).cs + \
-                                                                (obj).offm * (obj).rs ) \
+	( void* )( \
+	           ( ( char* )( (obj).buffer ) ) + (obj).elem_size * \
+	                                                ( (obj).offn * (obj).cs + \
+                                                      (obj).offm * (obj).rs ) \
 	         )
 
 #define bli_obj_scalar_buffer( dt, obj ) \
 \
-	( void* )( bli_obj_is_const( obj ) ? ( ( char* ) (obj).buffer ) + ( (dt) * BLIS_CONSTANT_SLOT_SIZE ) \
-                                       :             (obj).buffer                                        \
+	( void* )( bli_obj_is_const( obj ) ? ( bli_obj_buffer_for_const( dt, obj ) ) \
+	                                   : ( bli_obj_buffer_at_off( obj ) ) \
 	         )
 
 // Swap object pointers

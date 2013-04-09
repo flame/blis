@@ -273,19 +273,19 @@ void bli_obj_create_const( double value, obj_t* obj )
 
 	bli_obj_create( BLIS_CONSTANT, 1, 1, 1, 1, obj );
 
-	temp_i       = BLIS_CONST_I_PTR( *obj );
-	temp_s       = BLIS_CONST_S_PTR( *obj );
-	temp_d       = BLIS_CONST_D_PTR( *obj );
-	temp_c       = BLIS_CONST_C_PTR( *obj );
-	temp_z       = BLIS_CONST_Z_PTR( *obj );
+	temp_s = bli_obj_buffer_for_const( BLIS_FLOAT,    *obj );
+	temp_d = bli_obj_buffer_for_const( BLIS_DOUBLE,   *obj );
+	temp_c = bli_obj_buffer_for_const( BLIS_SCOMPLEX, *obj );
+	temp_z = bli_obj_buffer_for_const( BLIS_DCOMPLEX, *obj );
+	temp_i = bli_obj_buffer_for_const( BLIS_INT,      *obj );
 
-	*temp_i      = ( int   ) value;
 	*temp_s      = ( float ) value;
 	*temp_d      =           value;
 	temp_c->real = ( float ) value;
 	temp_c->imag = ( float ) 0.0;
 	temp_z->real =           value;
 	temp_z->imag =           0.0;
+	*temp_i      = ( int   ) value;
 }
 
 void bli_obj_create_const_copy_of( obj_t* a, obj_t* b )
@@ -302,11 +302,11 @@ void bli_obj_create_const_copy_of( obj_t* a, obj_t* b )
 
 	bli_obj_create( BLIS_CONSTANT, 1, 1, 1, 1, b );
 
-	temp_i       = BLIS_CONST_I_PTR( *b );
-	temp_s       = BLIS_CONST_S_PTR( *b );
-	temp_d       = BLIS_CONST_D_PTR( *b );
-	temp_c       = BLIS_CONST_C_PTR( *b );
-	temp_z       = BLIS_CONST_Z_PTR( *b );
+	temp_s = bli_obj_buffer_for_const( BLIS_FLOAT,    *b );
+	temp_d = bli_obj_buffer_for_const( BLIS_DOUBLE,   *b );
+	temp_c = bli_obj_buffer_for_const( BLIS_SCOMPLEX, *b );
+	temp_z = bli_obj_buffer_for_const( BLIS_DCOMPLEX, *b );
+	temp_i = bli_obj_buffer_for_const( BLIS_INT,      *b );
 
 	value.real = 0.0;
 	value.imag = 0.0;
@@ -333,16 +333,16 @@ void bli_obj_create_const_copy_of( obj_t* a, obj_t* b )
 	}
 	else
 	{
-		bli_abort();
+		bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 	}
 
-	*temp_i      = ( int   ) value.real;
 	*temp_s      = ( float ) value.real;
 	*temp_d      =           value.real;
 	temp_c->real = ( float ) value.real;
 	temp_c->imag = ( float ) value.imag;
 	temp_z->real =           value.real;
 	temp_z->imag =           value.imag;
+	*temp_i      = ( int   ) value.real;
 }
 
 void bli_adjust_strides( dim_t  m,

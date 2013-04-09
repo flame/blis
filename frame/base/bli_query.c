@@ -50,7 +50,12 @@ bli_printm( "b:", b, "%9.2e", "" );
 	dt_a = bli_obj_datatype( *a );
 	dt_b = bli_obj_datatype( *b );
 
-	if ( dt_a != BLIS_CONSTANT ) dt = dt_a;
+	//if      ( dt_a != BLIS_CONSTANT && dt_b != BLIS_CONSTANT ) dt = dt_a;
+	//else if ( dt_a != BLIS_CONSTANT && dt_b == BLIS_CONSTANT ) dt = dt_a;
+	//else if ( dt_a == BLIS_CONSTANT && dt_b != BLIS_CONSTANT ) dt = dt_b;
+	//else if ( dt_a == BLIS_CONSTANT && dt_b == BLIS_CONSTANT ) dt = dt_a;
+
+	if ( dt_b == BLIS_CONSTANT ) dt = dt_a;
 	else                         dt = dt_b;
 
 	buf_a = bli_obj_scalar_buffer( dt, *a );
@@ -64,12 +69,20 @@ printf( "bufb: %p\n", buf_b );
 */
 	if      ( dt == BLIS_CONSTANT )
 	{
-		r_val = r_val || ( *BLIS_CONST_S_PTR( *a ) == *BLIS_CONST_S_PTR( *b ) );
-		r_val = r_val || ( *BLIS_CONST_D_PTR( *a ) == *BLIS_CONST_D_PTR( *b ) );
-		r_val = r_val || (  BLIS_CONST_C_PTR( *a )->real == BLIS_CONST_C_PTR( *b )->real &&
-                            BLIS_CONST_C_PTR( *a )->imag == BLIS_CONST_C_PTR( *b )->imag );
-		r_val = r_val || (  BLIS_CONST_Z_PTR( *a )->real == BLIS_CONST_Z_PTR( *b )->real &&
-                            BLIS_CONST_Z_PTR( *a )->imag == BLIS_CONST_Z_PTR( *b )->imag );
+		float*    ap_s = bli_obj_buffer_for_const( BLIS_FLOAT,    *a );
+		double*   ap_d = bli_obj_buffer_for_const( BLIS_DOUBLE,   *a );
+		scomplex* ap_c = bli_obj_buffer_for_const( BLIS_SCOMPLEX, *a );
+		dcomplex* ap_z = bli_obj_buffer_for_const( BLIS_DCOMPLEX, *a );
+
+		float*    bp_s = bli_obj_buffer_for_const( BLIS_FLOAT,    *b );
+		double*   bp_d = bli_obj_buffer_for_const( BLIS_DOUBLE,   *b );
+		scomplex* bp_c = bli_obj_buffer_for_const( BLIS_SCOMPLEX, *b );
+		dcomplex* bp_z = bli_obj_buffer_for_const( BLIS_DCOMPLEX, *b );
+
+		r_val = r_val || ( *ap_s == *bp_s );
+		r_val = r_val || ( *ap_d == *bp_d );
+		r_val = r_val || (  ap_c->real == bp_c->real && ap_c->imag == bp_c->imag );
+		r_val = r_val || (  ap_z->real == bp_z->real && ap_z->imag == bp_z->imag );
 	}
 	else if ( dt == BLIS_FLOAT )    r_val = bli_seqa( buf_a, buf_b );
 	else if ( dt == BLIS_DOUBLE )   r_val = bli_deqa( buf_a, buf_b );

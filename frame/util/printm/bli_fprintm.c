@@ -65,11 +65,11 @@ void bli_fprintm( FILE* file, char* s1, obj_t* x, char* format, char* s2 )
 	// Handle constants up front.
 	if ( dt_x == BLIS_CONSTANT )
 	{
-		float*    sp = BLIS_CONST_S_PTR( *x );
-		double*   dp = BLIS_CONST_D_PTR( *x );
-		scomplex* cp = BLIS_CONST_C_PTR( *x );
-		dcomplex* zp = BLIS_CONST_Z_PTR( *x );
-		int*      ip = BLIS_CONST_I_PTR( *x );
+		float*    sp = bli_obj_buffer_for_const( BLIS_FLOAT,    *x );
+		double*   dp = bli_obj_buffer_for_const( BLIS_DOUBLE,   *x );
+		scomplex* cp = bli_obj_buffer_for_const( BLIS_SCOMPLEX, *x );
+		dcomplex* zp = bli_obj_buffer_for_const( BLIS_DCOMPLEX, *x );
+		int*      ip = bli_obj_buffer_for_const( BLIS_INT,      *x );
 
 		fprintf( file, "%s\n", s1 );
 		fprintf( file, " float:     %9.2e\n", *sp );

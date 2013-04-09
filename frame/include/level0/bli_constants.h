@@ -41,112 +41,111 @@
 
 #define bli_s2 \
 \
-	( BLIS_CONST_S_PTR( BLIS_TWO ) )
+	( ( float*    ) bli_obj_buffer_for_const( BLIS_FLOAT,    BLIS_TWO ) )
 
 #define bli_d2 \
 \
-	( BLIS_CONST_D_PTR( BLIS_TWO ) )
+	( ( double*   ) bli_obj_buffer_for_const( BLIS_DOUBLE,   BLIS_TWO ) )
 
 #define bli_c2 \
 \
-	( BLIS_CONST_C_PTR( BLIS_TWO ) )
+	( ( scomplex* ) bli_obj_buffer_for_const( BLIS_SCOMPLEX, BLIS_TWO ) )
 
 #define bli_z2 \
 \
-	( BLIS_CONST_Z_PTR( BLIS_TWO ) )
+	( ( dcomplex* ) bli_obj_buffer_for_const( BLIS_DCOMPLEX, BLIS_TWO ) )
 
 #define bli_i2 \
 \
-	( BLIS_CONST_I_PTR( BLIS_TWO ) )
+	( ( int*      ) bli_obj_buffer_for_const( BLIS_INT,      BLIS_TWO ) )
 
 // 1
 
 #define bli_s1 \
 \
-	( BLIS_CONST_S_PTR( BLIS_ONE ) )
+	( ( float*    ) bli_obj_buffer_for_const( BLIS_FLOAT,    BLIS_ONE ) )
 
 #define bli_d1 \
 \
-	( BLIS_CONST_D_PTR( BLIS_ONE ) )
+	( ( double*   ) bli_obj_buffer_for_const( BLIS_DOUBLE,   BLIS_ONE ) )
 
 #define bli_c1 \
 \
-	( BLIS_CONST_C_PTR( BLIS_ONE ) )
+	( ( scomplex* ) bli_obj_buffer_for_const( BLIS_SCOMPLEX, BLIS_ONE ) )
 
 #define bli_z1 \
 \
-	( BLIS_CONST_Z_PTR( BLIS_ONE ) )
+	( ( dcomplex* ) bli_obj_buffer_for_const( BLIS_DCOMPLEX, BLIS_ONE ) )
 
 #define bli_i1 \
 \
-	( BLIS_CONST_I_PTR( BLIS_ONE ) )
+	( ( int*      ) bli_obj_buffer_for_const( BLIS_INT,      BLIS_ONE ) )
 
 // 0
 
 #define bli_s0 \
 \
-	( BLIS_CONST_S_PTR( BLIS_ZERO ) )
+	( ( float*    ) bli_obj_buffer_for_const( BLIS_FLOAT,    BLIS_ZERO ) )
 
 #define bli_d0 \
 \
-	( BLIS_CONST_D_PTR( BLIS_ZERO ) )
+	( ( double*   ) bli_obj_buffer_for_const( BLIS_DOUBLE,   BLIS_ZERO ) )
 
 #define bli_c0 \
 \
-	( BLIS_CONST_C_PTR( BLIS_ZERO ) )
+	( ( scomplex* ) bli_obj_buffer_for_const( BLIS_SCOMPLEX, BLIS_ZERO ) )
 
 #define bli_z0 \
 \
-	( BLIS_CONST_Z_PTR( BLIS_ZERO ) )
+	( ( dcomplex* ) bli_obj_buffer_for_const( BLIS_DCOMPLEX, BLIS_ZERO ) )
 
 #define bli_i0 \
 \
-	( BLIS_CONST_I_PTR( BLIS_ZERO ) )
+	( ( int*      ) bli_obj_buffer_for_const( BLIS_INT,      BLIS_ZERO ) )
 
 // -1
 
 #define bli_sm1 \
 \
-	( BLIS_CONST_S_PTR( BLIS_MINUS_ONE ) )
+	( ( float*    ) bli_obj_buffer_for_const( BLIS_FLOAT,    BLIS_MINUS_ONE ) )
 
 #define bli_dm1 \
 \
-	( BLIS_CONST_D_PTR( BLIS_MINUS_ONE ) )
+	( ( double*   ) bli_obj_buffer_for_const( BLIS_DOUBLE,   BLIS_MINUS_ONE ) )
 
 #define bli_cm1 \
 \
-	( BLIS_CONST_C_PTR( BLIS_MINUS_ONE ) )
+	( ( scomplex* ) bli_obj_buffer_for_const( BLIS_SCOMPLEX, BLIS_MINUS_ONE ) )
 
 #define bli_zm1 \
 \
-	( BLIS_CONST_Z_PTR( BLIS_MINUS_ONE ) )
+	( ( dcomplex* ) bli_obj_buffer_for_const( BLIS_DCOMPLEX, BLIS_MINUS_ONE ) )
 
 #define bli_im1 \
 \
-	( BLIS_CONST_I_PTR( BLIS_MINUS_ONE ) )
+	( ( int*      ) bli_obj_buffer_for_const( BLIS_INT,      BLIS_MINUS_ONE ) )
 
 // -2
 
 #define bli_sm2 \
 \
-	( BLIS_CONST_S_PTR( BLIS_MINUS_TWO ) )
+	( ( float*    ) bli_obj_buffer_for_const( BLIS_FLOAT,    BLIS_MINUS_TWO ) )
 
 #define bli_dm2 \
 \
-	( BLIS_CONST_D_PTR( BLIS_MINUS_TWO ) )
+	( ( double*   ) bli_obj_buffer_for_const( BLIS_DOUBLE,   BLIS_MINUS_TWO ) )
 
 #define bli_cm2 \
 \
-	( BLIS_CONST_C_PTR( BLIS_MINUS_TWO ) )
+	( ( scomplex* ) bli_obj_buffer_for_const( BLIS_SCOMPLEX, BLIS_MINUS_TWO ) )
 
 #define bli_zm2 \
 \
-	( BLIS_CONST_Z_PTR( BLIS_MINUS_TWO ) )
+	( ( dcomplex* ) bli_obj_buffer_for_const( BLIS_DCOMPLEX, BLIS_MINUS_TWO ) )
 
 #define bli_im2 \
 \
-	( BLIS_CONST_I_PTR( BLIS_MINUS_TWO ) )
-
+	( ( int*      ) bli_obj_buffer_for_const( BLIS_INT,      BLIS_MINUS_TWO ) )
 
 // set to constant
 

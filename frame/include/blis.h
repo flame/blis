@@ -68,7 +68,6 @@ extern "C" {
 
 #include "bli_type_defs.h"
 #include "bli_macro_defs.h"
-#include "bli_const_defs.h"
 #include "bli_extern_defs.h"
 
 
