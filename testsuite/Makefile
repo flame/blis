@@ -157,7 +157,7 @@ BLIS_LIB       := $(BLIS_LIB_PATH)/libblis.a
 #
 
 TEST_SRC_PATH  := src
-TEST_OBJ_PATH  := src
+TEST_OBJ_PATH  := obj
 
 # Gather all local object files.
 TEST_OBJS      := $(patsubst $(TEST_SRC_PATH)/%.c, \
