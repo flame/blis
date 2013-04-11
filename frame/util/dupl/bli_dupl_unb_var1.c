@@ -35,11 +35,6 @@
 #include "blis.h"
 
 
-#define bli_sndup BLIS_NUM_ELEM_PER_REG_S
-#define bli_dndup BLIS_NUM_ELEM_PER_REG_D
-#define bli_cndup BLIS_NUM_ELEM_PER_REG_C
-#define bli_zndup BLIS_NUM_ELEM_PER_REG_Z
-
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, varname, kername ) \
 \

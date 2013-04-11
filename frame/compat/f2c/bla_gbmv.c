@@ -336,8 +336,8 @@
 		    i__2 = 1, i__3 = j - *ku;
 /* Computing MIN */
 		    i__5 = *m, i__6 = j + *kl;
-		    i__4 = min(i__5,i__6);
-		    for (i__ = max(i__2,i__3); i__ <= i__4; ++i__) {
+		    i__4 = f2c_min(i__5,i__6);
+		    for (i__ = f2c_max(i__2,i__3); i__ <= i__4; ++i__) {
 			i__2 = i__;
 			i__3 = i__;
 			i__5 = k + i__ + j * a_dim1;
@@ -369,8 +369,8 @@
 		    i__4 = 1, i__2 = j - *ku;
 /* Computing MIN */
 		    i__5 = *m, i__6 = j + *kl;
-		    i__3 = min(i__5,i__6);
-		    for (i__ = max(i__4,i__2); i__ <= i__3; ++i__) {
+		    i__3 = f2c_min(i__5,i__6);
+		    for (i__ = f2c_max(i__4,i__2); i__ <= i__3; ++i__) {
 			i__4 = iy;
 			i__2 = iy;
 			i__5 = k + i__ + j * a_dim1;
@@ -406,8 +406,8 @@
 		    i__3 = 1, i__4 = j - *ku;
 /* Computing MIN */
 		    i__5 = *m, i__6 = j + *kl;
-		    i__2 = min(i__5,i__6);
-		    for (i__ = max(i__3,i__4); i__ <= i__2; ++i__) {
+		    i__2 = f2c_min(i__5,i__6);
+		    for (i__ = f2c_max(i__3,i__4); i__ <= i__2; ++i__) {
 			i__3 = k + i__ + j * a_dim1;
 			i__4 = i__;
 			q__2.r = a[i__3].r * x[i__4].r - a[i__3].i * x[i__4]
@@ -422,8 +422,8 @@
 		    i__2 = 1, i__3 = j - *ku;
 /* Computing MIN */
 		    i__5 = *m, i__6 = j + *kl;
-		    i__4 = min(i__5,i__6);
-		    for (i__ = max(i__2,i__3); i__ <= i__4; ++i__) {
+		    i__4 = f2c_min(i__5,i__6);
+		    for (i__ = f2c_max(i__2,i__3); i__ <= i__4; ++i__) {
 			r_cnjg(&q__3, &a[k + i__ + j * a_dim1]);
 			i__2 = i__;
 			q__2.r = q__3.r * x[i__2].r - q__3.i * x[i__2].i, 
@@ -454,8 +454,8 @@
 		    i__4 = 1, i__2 = j - *ku;
 /* Computing MIN */
 		    i__5 = *m, i__6 = j + *kl;
-		    i__3 = min(i__5,i__6);
-		    for (i__ = max(i__4,i__2); i__ <= i__3; ++i__) {
+		    i__3 = f2c_min(i__5,i__6);
+		    for (i__ = f2c_max(i__4,i__2); i__ <= i__3; ++i__) {
 			i__4 = k + i__ + j * a_dim1;
 			i__2 = ix;
 			q__2.r = a[i__4].r * x[i__2].r - a[i__4].i * x[i__2]
@@ -471,8 +471,8 @@
 		    i__3 = 1, i__4 = j - *ku;
 /* Computing MIN */
 		    i__5 = *m, i__6 = j + *kl;
-		    i__2 = min(i__5,i__6);
-		    for (i__ = max(i__3,i__4); i__ <= i__2; ++i__) {
+		    i__2 = f2c_min(i__5,i__6);
+		    for (i__ = f2c_max(i__3,i__4); i__ <= i__2; ++i__) {
 			r_cnjg(&q__3, &a[k + i__ + j * a_dim1]);
 			i__3 = ix;
 			q__2.r = q__3.r * x[i__3].r - q__3.i * x[i__3].i, 
@@ -775,8 +775,8 @@
 		    i__2 = 1, i__3 = j - *ku;
 /* Computing MIN */
 		    i__5 = *m, i__6 = j + *kl;
-		    i__4 = min(i__5,i__6);
-		    for (i__ = max(i__2,i__3); i__ <= i__4; ++i__) {
+		    i__4 = f2c_min(i__5,i__6);
+		    for (i__ = f2c_max(i__2,i__3); i__ <= i__4; ++i__) {
 			y[i__] += temp * a[k + i__ + j * a_dim1];
 /* L50: */
 		    }
@@ -795,8 +795,8 @@
 		    i__4 = 1, i__2 = j - *ku;
 /* Computing MIN */
 		    i__5 = *m, i__6 = j + *kl;
-		    i__3 = min(i__5,i__6);
-		    for (i__ = max(i__4,i__2); i__ <= i__3; ++i__) {
+		    i__3 = f2c_min(i__5,i__6);
+		    for (i__ = f2c_max(i__4,i__2); i__ <= i__3; ++i__) {
 			y[iy] += temp * a[k + i__ + j * a_dim1];
 			iy += *incy;
 /* L70: */
@@ -823,8 +823,8 @@
 		i__3 = 1, i__4 = j - *ku;
 /* Computing MIN */
 		i__5 = *m, i__6 = j + *kl;
-		i__2 = min(i__5,i__6);
-		for (i__ = max(i__3,i__4); i__ <= i__2; ++i__) {
+		i__2 = f2c_min(i__5,i__6);
+		for (i__ = f2c_max(i__3,i__4); i__ <= i__2; ++i__) {
 		    temp += a[k + i__ + j * a_dim1] * x[i__];
 /* L90: */
 		}
@@ -842,8 +842,8 @@
 		i__2 = 1, i__3 = j - *ku;
 /* Computing MIN */
 		i__5 = *m, i__6 = j + *kl;
-		i__4 = min(i__5,i__6);
-		for (i__ = max(i__2,i__3); i__ <= i__4; ++i__) {
+		i__4 = f2c_min(i__5,i__6);
+		for (i__ = f2c_max(i__2,i__3); i__ <= i__4; ++i__) {
 		    temp += a[k + i__ + j * a_dim1] * x[ix];
 		    ix += *incx;
 /* L110: */
@@ -1133,8 +1133,8 @@
 		    i__2 = 1, i__3 = j - *ku;
 /* Computing MIN */
 		    i__5 = *m, i__6 = j + *kl;
-		    i__4 = min(i__5,i__6);
-		    for (i__ = max(i__2,i__3); i__ <= i__4; ++i__) {
+		    i__4 = f2c_min(i__5,i__6);
+		    for (i__ = f2c_max(i__2,i__3); i__ <= i__4; ++i__) {
 			y[i__] += temp * a[k + i__ + j * a_dim1];
 /* L50: */
 		    }
@@ -1153,8 +1153,8 @@
 		    i__4 = 1, i__2 = j - *ku;
 /* Computing MIN */
 		    i__5 = *m, i__6 = j + *kl;
-		    i__3 = min(i__5,i__6);
-		    for (i__ = max(i__4,i__2); i__ <= i__3; ++i__) {
+		    i__3 = f2c_min(i__5,i__6);
+		    for (i__ = f2c_max(i__4,i__2); i__ <= i__3; ++i__) {
 			y[iy] += temp * a[k + i__ + j * a_dim1];
 			iy += *incy;
 /* L70: */
@@ -1181,8 +1181,8 @@
 		i__3 = 1, i__4 = j - *ku;
 /* Computing MIN */
 		i__5 = *m, i__6 = j + *kl;
-		i__2 = min(i__5,i__6);
-		for (i__ = max(i__3,i__4); i__ <= i__2; ++i__) {
+		i__2 = f2c_min(i__5,i__6);
+		for (i__ = f2c_max(i__3,i__4); i__ <= i__2; ++i__) {
 		    temp += a[k + i__ + j * a_dim1] * x[i__];
 /* L90: */
 		}
@@ -1200,8 +1200,8 @@
 		i__2 = 1, i__3 = j - *ku;
 /* Computing MIN */
 		i__5 = *m, i__6 = j + *kl;
-		i__4 = min(i__5,i__6);
-		for (i__ = max(i__2,i__3); i__ <= i__4; ++i__) {
+		i__4 = f2c_min(i__5,i__6);
+		for (i__ = f2c_max(i__2,i__3); i__ <= i__4; ++i__) {
 		    temp += a[k + i__ + j * a_dim1] * x[ix];
 		    ix += *incx;
 /* L110: */
@@ -1521,8 +1521,8 @@
 		    i__2 = 1, i__3 = j - *ku;
 /* Computing MIN */
 		    i__5 = *m, i__6 = j + *kl;
-		    i__4 = min(i__5,i__6);
-		    for (i__ = max(i__2,i__3); i__ <= i__4; ++i__) {
+		    i__4 = f2c_min(i__5,i__6);
+		    for (i__ = f2c_max(i__2,i__3); i__ <= i__4; ++i__) {
 			i__2 = i__;
 			i__3 = i__;
 			i__5 = k + i__ + j * a_dim1;
@@ -1554,8 +1554,8 @@
 		    i__4 = 1, i__2 = j - *ku;
 /* Computing MIN */
 		    i__5 = *m, i__6 = j + *kl;
-		    i__3 = min(i__5,i__6);
-		    for (i__ = max(i__4,i__2); i__ <= i__3; ++i__) {
+		    i__3 = f2c_min(i__5,i__6);
+		    for (i__ = f2c_max(i__4,i__2); i__ <= i__3; ++i__) {
 			i__4 = iy;
 			i__2 = iy;
 			i__5 = k + i__ + j * a_dim1;
@@ -1591,8 +1591,8 @@
 		    i__3 = 1, i__4 = j - *ku;
 /* Computing MIN */
 		    i__5 = *m, i__6 = j + *kl;
-		    i__2 = min(i__5,i__6);
-		    for (i__ = max(i__3,i__4); i__ <= i__2; ++i__) {
+		    i__2 = f2c_min(i__5,i__6);
+		    for (i__ = f2c_max(i__3,i__4); i__ <= i__2; ++i__) {
 			i__3 = k + i__ + j * a_dim1;
 			i__4 = i__;
 			z__2.r = a[i__3].r * x[i__4].r - a[i__3].i * x[i__4]
@@ -1607,8 +1607,8 @@
 		    i__2 = 1, i__3 = j - *ku;
 /* Computing MIN */
 		    i__5 = *m, i__6 = j + *kl;
-		    i__4 = min(i__5,i__6);
-		    for (i__ = max(i__2,i__3); i__ <= i__4; ++i__) {
+		    i__4 = f2c_min(i__5,i__6);
+		    for (i__ = f2c_max(i__2,i__3); i__ <= i__4; ++i__) {
 			d_cnjg(&z__3, &a[k + i__ + j * a_dim1]);
 			i__2 = i__;
 			z__2.r = z__3.r * x[i__2].r - z__3.i * x[i__2].i, 
@@ -1639,8 +1639,8 @@
 		    i__4 = 1, i__2 = j - *ku;
 /* Computing MIN */
 		    i__5 = *m, i__6 = j + *kl;
-		    i__3 = min(i__5,i__6);
-		    for (i__ = max(i__4,i__2); i__ <= i__3; ++i__) {
+		    i__3 = f2c_min(i__5,i__6);
+		    for (i__ = f2c_max(i__4,i__2); i__ <= i__3; ++i__) {
 			i__4 = k + i__ + j * a_dim1;
 			i__2 = ix;
 			z__2.r = a[i__4].r * x[i__2].r - a[i__4].i * x[i__2]
@@ -1656,8 +1656,8 @@
 		    i__3 = 1, i__4 = j - *ku;
 /* Computing MIN */
 		    i__5 = *m, i__6 = j + *kl;
-		    i__2 = min(i__5,i__6);
-		    for (i__ = max(i__3,i__4); i__ <= i__2; ++i__) {
+		    i__2 = f2c_min(i__5,i__6);
+		    for (i__ = f2c_max(i__3,i__4); i__ <= i__2; ++i__) {
 			d_cnjg(&z__3, &a[k + i__ + j * a_dim1]);
 			i__3 = ix;
 			z__2.r = z__3.r * x[i__3].r - z__3.i * x[i__3].i, 

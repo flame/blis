@@ -152,23 +152,23 @@ struct Namelist {
 	};
 typedef struct Namelist Namelist;
 
-#ifndef abs
-  #define abs(x) ((x) >= 0 ? (x) : -(x))
+#ifndef f2c_abs
+  #define f2c_abs(x) ((x) >= 0 ? (x) : -(x))
 #endif
-#ifndef dabs
-  #define dabs(x) (doublereal)abs(x)
+#ifndef f2c_dabs
+  #define f2c_dabs(x) (doublereal)f2c_abs(x)
 #endif
-#ifndef min
-  #define min(a,b) ((a) <= (b) ? (a) : (b))
+#ifndef f2c_min
+  #define f2c_min(a,b) ((a) <= (b) ? (a) : (b))
 #endif
-#ifndef max
-  #define max(a,b) ((a) >= (b) ? (a) : (b))
+#ifndef f2c_max
+  #define f2c_max(a,b) ((a) >= (b) ? (a) : (b))
 #endif
-#ifndef dmin
-  #define dmin(a,b) (doublereal)min(a,b)
+#ifndef f2c_dmin
+  #define f2c_dmin(a,b) (doublereal)f2c_min(a,b)
 #endif
-#ifndef dmax
-  #define dmax(a,b) (doublereal)max(a,b)
+#ifndef f2c_dmax
+  #define f2c_dmax(a,b) (doublereal)f2c_max(a,b)
 #endif
 
 #define bit_test(a,b)	((a) >> (b) & 1)

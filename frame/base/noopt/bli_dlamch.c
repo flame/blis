@@ -557,7 +557,7 @@ explicitly.\002,/)";
 	d__1 = -half;
 	b = bli_dlamc3(&third, &d__1);
 	b = bli_dlamc3(&b, &sixth);
-	b = abs(b);
+	b = f2c_abs(b);
 	if (b < leps) {
 	    b = leps;
 	}
@@ -622,38 +622,38 @@ L10:
 /*            ( Non twos-complement machines, with gradual underflow; */
 /*              e.g., IEEE standard followers ) */
 	    } else {
-		lemin = min(ngpmin,gpmin);
+		lemin = f2c_min(ngpmin,gpmin);
 /*            ( A guess; no known machine ) */
 		iwarn = TRUE_;
 	    }
 
 	} else if (ngpmin == gpmin && ngnmin == gnmin) {
-	    if ((i__1 = ngpmin - ngnmin, abs(i__1)) == 1) {
-		lemin = max(ngpmin,ngnmin);
+	    if ((i__1 = ngpmin - ngnmin, f2c_abs(i__1)) == 1) {
+		lemin = f2c_max(ngpmin,ngnmin);
 /*            ( Twos-complement machines, no gradual underflow; */
 /*              e.g., CYBER 205 ) */
 	    } else {
-		lemin = min(ngpmin,ngnmin);
+		lemin = f2c_min(ngpmin,ngnmin);
 /*            ( A guess; no known machine ) */
 		iwarn = TRUE_;
 	    }
 
-	} else if ((i__1 = ngpmin - ngnmin, abs(i__1)) == 1 && gpmin == gnmin)
+	} else if ((i__1 = ngpmin - ngnmin, f2c_abs(i__1)) == 1 && gpmin == gnmin)
 		 {
-	    if (gpmin - min(ngpmin,ngnmin) == 3) {
-		lemin = max(ngpmin,ngnmin) - 1 + lt;
+	    if (gpmin - f2c_min(ngpmin,ngnmin) == 3) {
+		lemin = f2c_max(ngpmin,ngnmin) - 1 + lt;
 /*            ( Twos-complement machines with gradual underflow; */
 /*              no known machine ) */
 	    } else {
-		lemin = min(ngpmin,ngnmin);
+		lemin = f2c_min(ngpmin,ngnmin);
 /*            ( A guess; no known machine ) */
 		iwarn = TRUE_;
 	    }
 
 	} else {
 /* Computing MIN */
-	    i__1 = min(ngpmin,ngnmin), i__1 = min(i__1,gpmin);
-	    lemin = min(i__1,gnmin);
+	    i__1 = f2c_min(ngpmin,ngnmin), i__1 = f2c_min(i__1,gpmin);
+	    lemin = f2c_min(i__1,gnmin);
 /*         ( A guess; no known machine ) */
 	    iwarn = TRUE_;
 	}
@@ -885,7 +885,7 @@ L10:
 /*  ======= */
 
 /*  DLAMC5 attempts to compute RMAX, the largest machine floating-point */
-/*  number, without overflow.  It assumes that EMAX + abs(EMIN) sum */
+/*  number, without overflow.  It assumes that EMAX + f2c_abs(EMIN) sum */
 /*  approximately to a power of 2.  It will fail on machines where this */
 /*  assumption does not hold, for example, the Cyber 205 (EMIN = -28625, */
 /*  EMAX = 28718).  It will also fail if the value supplied for EMIN is */
@@ -927,8 +927,8 @@ L10:
 /*     .. Executable Statements .. */
 
 /*     First compute LEXP and UEXP, two powers of 2 that bound */
-/*     abs(EMIN). We then assume that EMAX + abs(EMIN) will sum */
-/*     approximately to the bound that is closest to abs(EMIN). */
+/*     f2c_abs(EMIN). We then assume that EMAX + f2c_abs(EMIN) will sum */
+/*     approximately to the bound that is closest to f2c_abs(EMIN). */
 /*     (EMAX is the exponent of the required number RMAX). */
 
     lexp = 1;
