@@ -38,10 +38,6 @@
 
 // -- OPERATING SYSTEM ---------------------------------------------------------
 
-// Enable IEEE Standard 1003.1-2004 (POSIX.1d). 
-// NOTE: This is needed to enable posix_memalign().
-#define _POSIX_C_SOURCE 200112L
-
 
 
 // -- FLOATING-POINT PROPERTIES ------------------------------------------------
