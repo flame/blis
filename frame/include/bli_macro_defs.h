@@ -66,6 +66,7 @@
 #include "bli_gentfunc_macro_defs.h"
 #include "bli_gentprot_macro_defs.h"
 
+#include "bli_kernel_macro_defs.h"
 #include "bli_mem_macro_defs.h"
 #include "bli_pool_macro_defs.h"
 #include "bli_obj_macro_defs.h"

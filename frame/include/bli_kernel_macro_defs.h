@@ -32,35 +32,55 @@
 
 */
 
-
-//
-// Prototype object-based interface.
-//
-void bli_trmm_l_ker_var2( obj_t*  alpha,
-                          obj_t*  a,
-                          obj_t*  b,
-                          obj_t*  beta,
-                          obj_t*  c,
-                          trmm_t* cntl );
+#ifndef BLIS_KERNEL_MACRO_DEFS_H
+#define BLIS_KERNEL_MACRO_DEFS_H
 
 
-//
-// Prototype BLAS-like interfaces.
-//
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTEMAC(ch,varname)( \
-                           doff_t  diagoffa, \
-                           dim_t   m, \
-                           dim_t   n, \
-                           dim_t   k, \
-                           void*   alpha, \
-                           void*   a, inc_t rs_a, inc_t cs_a, inc_t ps_a, \
-                           void*   b, inc_t rs_b, inc_t cs_b, inc_t ps_b, \
-                           void*   beta, \
-                           void*   c, inc_t rs_c, inc_t cs_c \
-                         );
+// Redefine kernel blocksizes, defined in bli_kernel.h, to shorter
+// names that can be derived via PASTEMAC macro.
 
-INSERT_GENTPROT_BASIC( trmm_l_ker_var2 )
+// Cache blocksizes
 
+#define bli_smc  BLIS_DEFAULT_MC_S 
+#define bli_snc  BLIS_DEFAULT_NC_S
+#define bli_skc  BLIS_DEFAULT_KC_S
+
+#define bli_dmc  BLIS_DEFAULT_MC_D 
+#define bli_dnc  BLIS_DEFAULT_NC_D
+#define bli_dkc  BLIS_DEFAULT_KC_D
+
+#define bli_cmc  BLIS_DEFAULT_MC_C 
+#define bli_cnc  BLIS_DEFAULT_NC_C
+#define bli_ckc  BLIS_DEFAULT_KC_C
+
+#define bli_zmc  BLIS_DEFAULT_MC_Z 
+#define bli_znc  BLIS_DEFAULT_NC_Z
+#define bli_zkc  BLIS_DEFAULT_KC_Z
+
+// Register blocksizes
+
+#define bli_smr  BLIS_DEFAULT_MR_S 
+#define bli_snr  BLIS_DEFAULT_NR_S
+#define bli_skr  BLIS_DEFAULT_KR_S
+
+#define bli_dmr  BLIS_DEFAULT_MR_D 
+#define bli_dnr  BLIS_DEFAULT_NR_D
+#define bli_dkr  BLIS_DEFAULT_KR_D
+
+#define bli_cmr  BLIS_DEFAULT_MR_C 
+#define bli_cnr  BLIS_DEFAULT_NR_C
+#define bli_ckr  BLIS_DEFAULT_KR_C
+
+#define bli_zmr  BLIS_DEFAULT_MR_Z 
+#define bli_znr  BLIS_DEFAULT_NR_Z
+#define bli_zkr  BLIS_DEFAULT_KR_Z
+
+// Duplication
+
+#define bli_sndup  BLIS_DEFAULT_NUM_DUPL_S
+#define bli_dndup  BLIS_DEFAULT_NUM_DUPL_D
+#define bli_cndup  BLIS_DEFAULT_NUM_DUPL_C
+#define bli_zndup  BLIS_DEFAULT_NUM_DUPL_Z
+
+
+#endif 

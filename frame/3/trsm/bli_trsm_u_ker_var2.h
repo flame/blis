@@ -34,34 +34,6 @@
 
 
 //
-// Define macro-kernel blocksizes.
-//
-// NOTE: These MR and NR values below MUST match the values that packm uses
-// when initializing its control tree node.
-//
-
-#define bli_strsm_u_ker_var2_ndup          BLIS_DEFAULT_NUM_DUPL_S
-#define bli_strsm_u_ker_var2_kc            BLIS_DEFAULT_KC_S
-#define bli_strsm_u_ker_var2_mr            BLIS_DEFAULT_MR_S
-#define bli_strsm_u_ker_var2_nr            BLIS_DEFAULT_NR_S
-
-#define bli_dtrsm_u_ker_var2_ndup          BLIS_DEFAULT_NUM_DUPL_D
-#define bli_dtrsm_u_ker_var2_kc            BLIS_DEFAULT_KC_D
-#define bli_dtrsm_u_ker_var2_mr            BLIS_DEFAULT_MR_D
-#define bli_dtrsm_u_ker_var2_nr            BLIS_DEFAULT_NR_D
-
-#define bli_ctrsm_u_ker_var2_ndup          BLIS_DEFAULT_NUM_DUPL_C
-#define bli_ctrsm_u_ker_var2_kc            BLIS_DEFAULT_KC_C
-#define bli_ctrsm_u_ker_var2_mr            BLIS_DEFAULT_MR_C
-#define bli_ctrsm_u_ker_var2_nr            BLIS_DEFAULT_NR_C
-
-#define bli_ztrsm_u_ker_var2_ndup          BLIS_DEFAULT_NUM_DUPL_Z
-#define bli_ztrsm_u_ker_var2_kc            BLIS_DEFAULT_KC_Z
-#define bli_ztrsm_u_ker_var2_mr            BLIS_DEFAULT_MR_Z
-#define bli_ztrsm_u_ker_var2_nr            BLIS_DEFAULT_NR_Z
-
-
-//
 // Prototype object-based interface.
 //
 void bli_trsm_u_ker_var2( obj_t*  alpha,

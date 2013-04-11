@@ -148,21 +148,21 @@ void PASTEMAC(ch,varname)( \
                          ) \
 { \
 	/* Temporary buffer for duplicating elements of B. */ \
-	ctype           bd[ PASTEMAC2(ch,varname,_kc) * \
-	                    PASTEMAC2(ch,varname,_nr) * \
-	                    PASTEMAC2(ch,varname,_ndup) ]; \
+	ctype           bd[ PASTEMAC(ch,kc) * \
+	                    PASTEMAC(ch,nr) * \
+	                    PASTEMAC(ch,ndup) ]; \
 	ctype* restrict bp; \
 \
 	/* Temporary C buffer for edge cases. */ \
-	ctype           ct[ PASTEMAC2(ch,varname,_mr) * \
-	                    PASTEMAC2(ch,varname,_nr) ]; \
+	ctype           ct[ PASTEMAC(ch,mr) * \
+	                    PASTEMAC(ch,nr) ]; \
 	const inc_t     rs_ct      = 1; \
-	const inc_t     cs_ct      = PASTEMAC2(ch,varname,_mr); \
+	const inc_t     cs_ct      = PASTEMAC(ch,mr); \
 \
 	/* Alias some constants to shorter names. */ \
-	const dim_t     MR         = PASTEMAC2(ch,varname,_mr); \
-	const dim_t     NR         = PASTEMAC2(ch,varname,_nr); \
-	const bool_t    NDUP       = PASTEMAC2(ch,varname,_ndup); \
+	const dim_t     MR         = PASTEMAC(ch,mr); \
+	const dim_t     NR         = PASTEMAC(ch,nr); \
+	const bool_t    NDUP       = PASTEMAC(ch,ndup); \
 	const bool_t    DUPB       = NDUP != 1; \
 \
 	ctype* restrict zero       = PASTEMAC(ch,0); \
