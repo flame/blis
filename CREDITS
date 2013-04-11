@@ -9,22 +9,28 @@ The BLIS framework was primarily authored by
 
 but many others have contributed input and feedback, including:
 
+  Vernon Austel               (IBM, T.J. Watson Research Center)
   Jed Brown                   (Argonne National Laboratory)
   John Gunnels                (IBM, T.J. Watson Research Center)
   Jeff Hammond                (Argonne National Laboratory)
   Francisco Igual             (Universidad Complutense de Madrid)
   Lee Killough                (Appro International)
+  Mike Kistler                (IBM, Austin Research Laboratory)
+  Bryan Marker                (The University of Texas at Austin)
   Devin Matthews              (The University of Texas at Austin)
   Tze Meng Low                (The University of Texas at Austin)
-  Bryan Marker                (The University of Texas at Austin)
+  Mikhail Smelyanskiy         (Intel, Parallel Computing Lab)
   Rhys Ulerich                (The University of Texas at Austin)
   Robert van de Geijn         (The University of Texas at Austin)
+  Zhang Xianyi                (Chinese Academy of Sciences)
 
-Thanks go the following individuals for porting very early versions of
+Thanks go the following individuals for porting early versions of
 BLIS to new architectures as proofs-of-concept:
 
   Francisco Igual             (Universidad Complutense de Madrid)
+  Mike Kistler                (IBM, Austin Research Laboratory)
   Tyler Smith                 (The University of Texas at Austin)
+  Zhang Xianyi                (Chinese Academy of Sciences)
 
 BLIS's development was partially funded by grants from Microsoft and the
 National Science Foundation (NSF Awards CCF-0917167 and OCI-1148125).
