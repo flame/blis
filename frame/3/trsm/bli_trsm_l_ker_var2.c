@@ -140,12 +140,14 @@ void PASTEMAC(ch,varname)( \
 	/* Temporary buffer for duplicating elements of B. */ \
 	ctype           bd[ PASTEMAC(ch,kc) * \
 	                    PASTEMAC(ch,nr) * \
-	                    PASTEMAC(ch,ndup) ]; \
+	                    PASTEMAC(ch,ndup) ] \
+	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
 	ctype* restrict bp; \
 \
 	/* Temporary C buffer for edge cases. */ \
 	ctype           ct[ PASTEMAC(ch,mr) * \
-	                    PASTEMAC(ch,nr) ]; \
+	                    PASTEMAC(ch,nr) ] \
+	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
 	const inc_t     rs_ct      = 1; \
 	const inc_t     cs_ct      = PASTEMAC(ch,mr); \
 \

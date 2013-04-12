@@ -126,12 +126,14 @@ void bli_obj_alloc_buffer( inc_t  rs,
 	// Determine how much object to allocate.
 	if ( rs == 1 )
 	{
-		cs     = bli_align_dim_to_sys( cs, elem_size );
+		cs     = bli_align_dim_to_size( cs, elem_size,
+		                                BLIS_HEAP_STRIDE_ALIGN_SIZE );
 		n_elem = cs * n;
 	}
 	else if ( cs == 1 )
 	{
-		rs     = bli_align_dim_to_sys( rs, elem_size );
+		rs     = bli_align_dim_to_size( rs, elem_size,
+		                                BLIS_HEAP_STRIDE_ALIGN_SIZE );
 		n_elem = rs * m;
 	}
 	else
@@ -139,13 +141,15 @@ void bli_obj_alloc_buffer( inc_t  rs,
 		if ( rs < cs )
 		{
 			// Note this case is identical to that of rs == 1 above.
-			cs     = bli_align_dim_to_sys( cs, elem_size );
+			cs     = bli_align_dim_to_size( cs, elem_size,
+			                                BLIS_HEAP_STRIDE_ALIGN_SIZE );
 			n_elem = cs * n;
 		}
 		else if ( cs < rs )
 		{
 			// Note this case is identical to that of cs == 1 above.
-			rs     = bli_align_dim_to_sys( rs, elem_size );
+			rs     = bli_align_dim_to_size( rs, elem_size,
+			                                BLIS_HEAP_STRIDE_ALIGN_SIZE );
 			n_elem = rs * m;
 		}
 		else
@@ -425,21 +429,11 @@ dim_t bli_align_dim_to_mult( dim_t dim, dim_t dim_mult )
 	return dim;
 }
 
-dim_t bli_align_dim_to_sys( dim_t dim, siz_t elem_size )
+dim_t bli_align_dim_to_size( dim_t dim, siz_t elem_size, siz_t align_size )
 {
-	dim = ( ( dim * elem_size + BLIS_SYSTEM_MEM_ALIGN_SIZE - 1 ) /
-	        BLIS_SYSTEM_MEM_ALIGN_SIZE ) *
-	        BLIS_SYSTEM_MEM_ALIGN_SIZE /
-	        elem_size;
-
-	return dim;
-}
-
-dim_t bli_align_dim_to_cmem( dim_t dim, siz_t elem_size )
-{
-	dim = ( ( dim * elem_size + BLIS_CONTIG_MEM_ALIGN_SIZE - 1 ) /
-	        BLIS_CONTIG_MEM_ALIGN_SIZE ) *
-	        BLIS_CONTIG_MEM_ALIGN_SIZE /
+	dim = ( ( dim * elem_size + align_size - 1 ) /
+	        align_size ) *
+	        align_size /
 	        elem_size;
 
 	return dim;

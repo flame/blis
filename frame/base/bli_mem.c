@@ -47,14 +47,14 @@
 // padding to conform to the system alignment.
 #define BLIS_MK_BLOCK_SIZE ( BLIS_POOL_MC_D * \
                              ( BLIS_POOL_KC_D + \
-                               ( BLIS_CONTIG_MEM_ALIGN_SIZE / \
+                               ( BLIS_CONTIG_STRIDE_ALIGN_SIZE / \
                                  sizeof( double ) \
                                ) \
                              ) * \
                              sizeof( double ) \
                            )
 #define BLIS_KN_BLOCK_SIZE ( ( BLIS_POOL_KC_D + \
-                               ( BLIS_CONTIG_MEM_ALIGN_SIZE / \
+                               ( BLIS_CONTIG_STRIDE_ALIGN_SIZE / \
                                  sizeof( double ) \
                                ) \
                              ) * \
@@ -70,7 +70,7 @@
 #define BLIS_MK_POOL_SIZE  ( \
                              BLIS_NUM_MC_X_KC_BLOCKS * \
                              ( BLIS_MK_BLOCK_SIZE + \
-                               BLIS_PAGE_SIZE \
+                               BLIS_CONTIG_ADDR_ALIGN_SIZE \
                              ) + \
                              BLIS_MAX_PRELOAD_BYTE_OFFSET \
                            )
@@ -78,7 +78,7 @@
 #define BLIS_KN_POOL_SIZE  ( \
                              BLIS_NUM_KC_X_NC_BLOCKS * \
                              ( BLIS_KN_BLOCK_SIZE + \
-                               BLIS_PAGE_SIZE \
+                               BLIS_CONTIG_ADDR_ALIGN_SIZE \
                              ) + \
                              BLIS_MAX_PRELOAD_BYTE_OFFSET \
                            )
@@ -86,7 +86,7 @@
 #define BLIS_MN_POOL_SIZE  ( \
                              BLIS_NUM_MC_X_NC_BLOCKS * \
                              ( BLIS_MN_BLOCK_SIZE + \
-                               BLIS_PAGE_SIZE \
+                               BLIS_CONTIG_ADDR_ALIGN_SIZE \
                              ) + \
                              BLIS_MAX_PRELOAD_BYTE_OFFSET \
                            )
@@ -321,33 +321,35 @@ void bli_mem_init_pool( char*   pool_mem,
                         void**  block_ptrs,
                         pool_t* pool )
 {
-	dim_t i;
+	const siz_t align_size = BLIS_CONTIG_ADDR_ALIGN_SIZE;
+	dim_t       i;
 
-	// If the pool starting address is not already aligned to the page size,
-	// advance it to the beginning of the next page. (Here, we assign that
-	// the page size is a multiple of the memory alignment boundary.)
-	if ( bli_is_unaligned_to( pool_mem, BLIS_PAGE_SIZE ) )
+	// If the pool starting address is not already aligned, advance it
+	// accordingly.
+	if ( bli_is_unaligned_to( pool_mem, align_size ) )
 	{
-		// Notice that this works even if the page size is not a power of two.
-		pool_mem += ( BLIS_PAGE_SIZE - ( ( siz_t )pool_mem % BLIS_PAGE_SIZE ) );
+		// Notice that this works even if the alignment is not a power of two.
+		pool_mem += ( align_size - 
+		              ( ( siz_t )pool_mem % align_size ) );
 	}
 
-	// Step through the memory pool, beginning with the page-aligned address
+	// Step through the memory pool, beginning with the aligned address
 	// determined above, assigning pointers to the beginning of each block_size
 	// bytes to the ith element of the block_ptrs array.
 	for ( i = 0; i < num_blocks; ++i )
 	{
-		// Save the address of pool, which is guaranteed to be page-aligned.
+		// Save the address of pool, which is guaranteed to be aligned.
 		block_ptrs[i] = pool_mem;
 
 		// Advance pool by one block.
 		pool_mem += block_size;
 
 		// Advance pool a bit further if needed in order to get to the
-		// beginning of a page.
-		if ( bli_is_unaligned_to( pool_mem, BLIS_PAGE_SIZE ) )
+		// beginning of an alignment boundary.
+		if ( bli_is_unaligned_to( pool_mem, align_size ) )
 		{
-			pool_mem += ( BLIS_PAGE_SIZE - ( ( siz_t )pool_mem % BLIS_PAGE_SIZE ) );
+			pool_mem += ( align_size -
+			              ( ( siz_t )pool_mem % align_size ) );
 		}
 	}
 

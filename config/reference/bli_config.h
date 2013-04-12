@@ -54,17 +54,9 @@
 
 
 
-// -- MEMORY ALLOCATOR ---------------------------------------------------------
+// -- MEMORY ALLOCATION --------------------------------------------------------
 
-// Enable memory alignment when allocating memory from operating system?
-#define BLIS_ENABLE_SYSTEM_MEM_ALIGN     1
-
-// Alignment size used when allocating memory from operating system.
-#define BLIS_SYSTEM_MEM_ALIGN_SIZE       16
-
-// Alignment size used when sizing packed panels of contiguous memory
-// acquired from the contiguous memory allocator.
-#define BLIS_CONTIG_MEM_ALIGN_SIZE       16
+// -- Contiguous (static) memory allocator --
 
 // The number of MC x KC, KC x NC, and MC x NC blocks to reserve in the
 // contiguous memory pools.
@@ -72,15 +64,40 @@
 #define BLIS_NUM_KC_X_NC_BLOCKS          1
 #define BLIS_NUM_MC_X_NC_BLOCKS          0
 
-// The page size is used by the contiguous memory allocator to align each
-// allocatable block to the beginning of a page boundary.
-#define BLIS_PAGE_SIZE                   4096
-
 // The maximum preload byte offset is used to pad the end of the contiguous
 // memory pools so that the micro-kernel, when computing with the end of the
 // last block, can exceed the bounds of the usable portion of the memory
 // region without causing a segmentation fault.
 #define BLIS_MAX_PRELOAD_BYTE_OFFSET     128
+
+// -- Memory alignment --
+
+// It is sometimes useful to define the various memory alignments in terms
+// of some other characteristics of the system, such as the cache line size
+// and the page size.
+#define BLIS_CACHE_LINE_SIZE             64
+#define BLIS_PAGE_SIZE                   4096
+
+// Alignment size used to align local stack buffers within macro-kernel
+// functions.
+#define BLIS_STACK_BUF_ALIGN_SIZE        16
+
+// Alignment size used when allocating memory dynamically from the operating
+// system (eg: posix_memalign()). To disable heap alignment and just use
+// malloc() instead, set this to 1.
+#define BLIS_HEAP_ADDR_ALIGN_SIZE        16
+
+// Alignment size used when sizing leading dimensions of dynamically
+// allocated memory.
+#define BLIS_HEAP_STRIDE_ALIGN_SIZE      16
+
+// Alignment size used when allocating entire blocks of contiguous memory
+// from the contiguous memory allocator.
+#define BLIS_CONTIG_ADDR_ALIGN_SIZE      BLIS_PAGE_SIZE
+
+// Alignment size used when sizing strides (eg: of packed micro-panels)
+// within a block of contiguous memory.
+#define BLIS_CONTIG_STRIDE_ALIGN_SIZE    16
 
 
 

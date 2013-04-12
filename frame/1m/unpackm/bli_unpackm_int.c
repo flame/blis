@@ -196,7 +196,8 @@ void bli_unpackm_init_cast( obj_t*  p,
 	// Update the strides. We set the increments to reflect column-major order
 	// storage. We start the leading dimension out as m(a) and increment it if
 	// necessary so that the beginning of each column is aligned.
-    cs_c = bli_align_dim_to_sys( m_a, elem_size_c );
+	cs_c = bli_align_dim_to_size( m_a, elem_size_c,
+	                              BLIS_HEAP_STRIDE_ALIGN_SIZE );
     rs_c = 1;
     bli_obj_set_incs( rs_c, cs_c, *c );
 }

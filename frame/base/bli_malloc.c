@@ -41,14 +41,14 @@ void* bli_malloc( siz_t size )
 
 	if ( size == 0 ) return NULL;
 
-#ifdef BLIS_ENABLE_SYSTEM_MEM_ALIGN
+#if BLIS_HEAP_ADDR_ALIGN_SIZE == 1
+	p = malloc( size );
+#else
 	r_val = posix_memalign( &p,
-	                        ( size_t ) BLIS_SYSTEM_MEM_ALIGN_SIZE,
+	                        ( size_t ) BLIS_HEAP_ADDR_ALIGN_SIZE,
 	                        ( size_t ) size );
 
 	if ( r_val != 0 ) bli_abort();
-#else
-	p = malloc( size );
 #endif
 
 	if ( p == NULL ) bli_abort();

@@ -254,9 +254,11 @@ void bli_packm_init_pack( bool_t    densify,
 		rs_p = n_p_pad;
 		cs_p = 1;
 
-		// Align the leading dimension according to the system alignment so
-		// that the second, third, etc rows begin at aligned addresses.
-		rs_p = bli_align_dim_to_sys( rs_p, elem_size_p );
+		// Align the leading dimension according to the heap stride
+		// alignment size so that the second, third, etc rows begin at
+		// aligned addresses.
+		rs_p = bli_align_dim_to_size( rs_p, elem_size_p,
+		                              BLIS_HEAP_STRIDE_ALIGN_SIZE );
 
 		// Store the strides in p.
 		bli_obj_set_incs( rs_p, cs_p, *p );
@@ -274,9 +276,11 @@ void bli_packm_init_pack( bool_t    densify,
 		cs_p = m_p_pad;
 		rs_p = 1;
 
-		// Align the leading dimension according to the system alignment so
-		// that the second, third, etc columns begin at aligned addresses.
-		cs_p = bli_align_dim_to_sys( cs_p, elem_size_p );
+		// Align the leading dimension according to the heap stride
+		// alignment size so that the second, third, etc columns begin at
+		// aligned addresses.
+		cs_p = bli_align_dim_to_size( cs_p, elem_size_p,
+		                              BLIS_HEAP_STRIDE_ALIGN_SIZE );
 
 		// Store the strides in p.
 		bli_obj_set_incs( rs_p, cs_p, *p );
@@ -310,9 +314,10 @@ void bli_packm_init_pack( bool_t    densify,
 		ps_p = cs_p * n_p_pad;
 
 		// Align the panel dimension according to the contiguous memory
-		// alignment so that the second, third, etc panels begin at aligned
-		// addresses.
-		ps_p = bli_align_dim_to_cmem( ps_p, elem_size_p );
+		// stride alignment size so that the second, third, etc panels begin
+		// at aligned addresses.
+		ps_p = bli_align_dim_to_size( ps_p, elem_size_p,
+		                              BLIS_CONTIG_STRIDE_ALIGN_SIZE );
 
 		// Store the strides in p.
 		bli_obj_set_incs( rs_p, cs_p, *p );
@@ -347,9 +352,10 @@ void bli_packm_init_pack( bool_t    densify,
 		ps_p = m_p_pad * rs_p;
 
 		// Align the panel dimension according to the contiguous memory
-		// alignment so that the second, third, etc panels begin at aligned
-		// addresses.
-		ps_p = bli_align_dim_to_cmem( ps_p, elem_size_p );
+		// stride alignment size so that the second, third, etc panels begin
+		// at aligned addresses.
+		ps_p = bli_align_dim_to_size( ps_p, elem_size_p,
+		                              BLIS_CONTIG_STRIDE_ALIGN_SIZE );
 
 		// Store the strides in p.
 		bli_obj_set_incs( rs_p, cs_p, *p );
@@ -440,7 +446,8 @@ void bli_packm_init_cast( obj_t*  a,
 	// Update the strides. We set the increments to reflect column-major order
 	// storage. We start the leading dimension out as m(a) and increment it if
 	// necessary so that the beginning of each column is aligned.
-	cs_c = bli_align_dim_to_sys( m_a, elem_size_c );
+	cs_c = bli_align_dim_to_size( m_a, elem_size_c,
+	                                   BLIS_HEAP_STRIDE_ALIGN_SIZE );
 	rs_c = 1;
 	bli_obj_set_incs( rs_c, cs_c, *c );
 }
