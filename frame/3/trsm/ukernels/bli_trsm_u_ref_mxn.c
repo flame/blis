@@ -45,8 +45,8 @@ void PASTEMAC(ch,varname)( \
                            ctype* restrict c, inc_t rs_c, inc_t cs_c \
                          ) \
 { \
-	const dim_t     MR    = PASTEMAC2(ch,varname,_mr); \
-	const dim_t     NR    = PASTEMAC2(ch,varname,_nr); \
+	const dim_t     MR    = PASTEMAC(ch,mr); \
+	const dim_t     NR    = PASTEMAC(ch,nr); \
 \
 	const dim_t     m     = MR; \
 	const dim_t     n     = NR; \

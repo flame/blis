@@ -49,13 +49,14 @@ void PASTEMAC(ch,varname)( \
                            ctype* restrict c, inc_t rs_c, inc_t cs_c \
                          ) \
 { \
-	const dim_t     NR        = PASTEMAC2(ch,varname,_nr); \
+	const dim_t     NR        = PASTEMAC(ch,nr); \
 \
 	const inc_t     rs_b      = NR; \
 	const inc_t     cs_b      = 1; \
 \
 	ctype* restrict minus_one = PASTEMAC(ch,m1); \
 \
+	/* b = alpha * b - aR * bdB; */ \
 	PASTEMAC(ch,gemmukr)( k, \
 	                      minus_one, \
 	                      aR, \
@@ -63,6 +64,9 @@ void PASTEMAC(ch,varname)( \
 	                      alpha, \
 	                      b, rs_b, cs_b ); \
 \
+	/* b = inv(a) * b;
+	   bd = b; (if gemm ukernel needs duplicated B)
+	   c = b;                       */ \
 	PASTEMAC(ch,trsmukr)( a, \
 	                      b, \
 	                      bd, \
