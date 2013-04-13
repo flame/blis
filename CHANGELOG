@@ -1,4 +1,314 @@
-commit b65cdc57d9e51fa00e3c03539cfb7e045707d0f4 (HEAD, tag: 0.0.5, origin/master, master)
+commit ec16c52f2ecf419c749175ce0a297441c10f1c68 (HEAD, tag: 0.0.6, origin/master, master)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Apr 13 16:41:16 2013 -0500
+
+    Updated INSTALL file (now redirects to website).
+
+commit 0020ef7c82711a7ebf08e5174f939bee2563184c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Apr 13 15:26:35 2013 -0500
+
+    Removed gemmtrsm-, trsm-specific blocksize macros.
+    
+    Details:
+    - Modified gemmtrsm micro-kernel wrappers to use new aliased blocksize macros
+      instead of operation-specific ones.
+    - Removed local, gemmtrsm-specific blocksize macro definitions found in
+      micro-kernel header files.
+      (Meant to include above changes in 31b100e7bf4a.)
+    - Added comments to reference gemmtrsm micro-kernel wrapper implementation.
+
+commit 1a9f427b85bb95aaa9e54c8ff8ecad8734b361ee
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Apr 12 15:25:54 2013 -0500
+
+    Added/renamed alignment constants to _config.h.
+    
+    Details:
+    - Added new memory alignment constants:
+        BLIS_HEAP_STRIDE_ALIGN_SIZE   (previously assumed to be same as SYSTEM_MEM)
+        BLIS_CONTIG_ADDR_ALIGN_SIZE   (previously assumed to be same as PAGE_SIZE)
+        BLIS_STACK_BUF_ALIGN_SIZE     (previously not enforced)
+      and renamed existing ones
+        BLIS_SYSTEM_MEM_ALIGN_SIZE -> BLIS_HEAP_ADDR_ALIGN_SIZE
+        BLIS_CONTIG_MEM_ALIGN_SIZE -> BLIS_CONTIG_STRIDE_ALIGN_SIZE
+      to better convey what the alignment factor is used for (and what it is
+      not used for).
+    - Removed BLIS_ENABLE_SYSTEM_MEM_ALIGN. Dynamic memory alignment is now
+      disabled by setting BLIS_HEAP_STRIDE_ALIGN_SIZE to 1.
+    - Inserted instances of __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE)))
+      into macro-kernels to specify stack alignment of temporary buffers.
+    - Modified test suite driver to output new constants.
+    - Removed bli_align_dim_to_sys() and bli_align_dim_to_cmem(). Instead, we now
+      use bli_align_dim_to_size(), which takes a third argument (the desired
+      alignment).
+
+commit a77d10e87e3c0ab55ec14d74c285bc95c06285c3
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Apr 12 11:40:55 2013 -0500
+
+    Fixed an bug in axpyv/axpym when alpha is unit.
+    
+    Details:
+    - Fixed bug whereby axpyv and axpym were incorrectly simplifying to a copy,
+      rather than an add, when alpha = 1. Thanks to Bryan Marker for identifying
+      this bug.
+
+commit 0495bd1d6de5995fe2fb79b321eec79e961eb7a5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Apr 11 16:39:25 2013 -0500
+
+    Moved _POSIX_C_SOURCE def to compiler cmd line.
+    
+    Details:
+    - Removed the #define of _POSIX_C_SOURCE in bli_config.h (for both reference
+      and clarksville configurations) and added "-D_POSIX_C_SOURCE=200112L" to
+      the compiler command line arguments in make_defs.mk (for both configs).
+      Thanks to Devin Matthews for suggesting this change.
+
+commit d43d1a0a2ef6de4bc57627566aef8e3fdb458b8c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Apr 11 16:28:17 2013 -0500
+
+    Appended 'f2c_' to abs, min, max macros in f2c.h.
+    
+    Details:
+    - Renamed abs, min, max, dmin, and dmax macros in bli_f2c.h so that they
+      would not conflict with anything defined by the user (or the language).
+      Thanks to Devin Matthews for suggesting this fix.
+    - Updated all instances of the above macros accordingly.
+
+commit 31b100e7bf4aeaa4ceafefd2b6c3102d5fbc4cbb
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Apr 11 11:11:52 2013 -0500
+
+    Added new kernel blocksize macro aliases.
+    
+    Details:
+    - Added new macros that alias level-3 cache and register blocksize macros
+      to names that can be constructed via the PASTEMAC macro. These aliased
+      macro definitions live inside bli_kernel_macro_defs.h, which is now
+      #included after bli_kernel.h.
+    - Modified macro-kernels to use new aliased blocksize macros instead of
+      operation-specific ones.
+    - Removed local, operation-specific kernel blocksize macro definitions
+      (found in macro-kernel header files).
+
+commit bd2b24ba65b36d7c07c5918a3838ce2ff57c4b48
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Apr 11 10:35:39 2013 -0500
+
+    Updated CREDITS file.
+
+commit 79328c15410215737f3f14cd069328cf52aa11fd
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Apr 11 10:32:14 2013 -0500
+
+    Reverted testsuite object files' home to 'obj'.
+    
+    Details:
+    - Removed 'obj' and 'lib' from .gitignore.
+    - Added testsuite/obj/.gitkeep (which is an empty file).
+    - Updated testsuite/Makefile accordingly.
+    - Thanks to Vernon Austel for pointing out the .gitkeep trick to tracking
+      empty directories in git.
+
+commit 4afe3bfd82c03e1e97b58b7d250588a0d28541e5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Apr 9 17:45:39 2013 -0500
+
+    Renamed/moved object scalar constant macros.
+    
+    Details:
+    - Replaced scalar constant macro definitions in bli_const_defs.h with a single,
+      simplier macro in bli_obj_macro_defs.h.
+    - Updated invocations of old macros accordingly.
+    - Removed bli_const_defs.h.
+
+commit 357893f5be5c56ab7b062874005e77e614b23f06
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Apr 9 14:48:15 2013 -0500
+
+    Applied fix from prev commit to gemmtrsm_?_ref_4x4
+    
+    Details:
+    - Fixed hard-coded kernels in bli_gemmtrsm_l_ref_4x4.c and
+      bli_gemmtrsm_u_ref_4x4.c.
+
+commit 54988e8dca44475610bcaee5a7bc1c40e8921402
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Apr 8 19:08:43 2013 -0500
+
+    Fixed a performance bug in trsm.
+    
+    Details:
+    - Fixed a bug in the reference implementations of the gemmtrsm wrappers
+      (bli_gemmtrsm_l_ref_mxn.c and bli_gemmtrsm_u_ref_mxn.c) whereby the
+      reference gemm microkernel was hard-coded, and thus always called, even
+      when GEMM_UKERNEL was defined to point to an optimzied microkernel. This
+      manifested as artificially low trsm performance for all problem sizes, but
+      especially for small problem sizes as it only affected blocks of A that
+      intersected the diagonal. Thanks to Mike Kistler of IBM for helping me
+      find this bug.
+
+commit a7252e40b5c351eef9a1df531ea0ef25cb5fb705
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Apr 8 16:08:22 2013 -0500
+
+    Generate testsuite objects 'src'.
+    
+    Details:
+    - Tweaked the testsuite makefile so that object files are stored in 'src'
+      rather than 'obj', since (a) the top-level .gitignore dictates that
+      obj directories are to be ignored, and (b) since git has problems
+      tracking empty directories. Now, users do not need to create their own
+      obj directories within their own local clones of BLIS.
+
+commit 803871c55b60d3c225ad9a0607fa507a9c16aab7
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Apr 8 15:18:42 2013 -0500
+
+    Minor formatting changes.
+
+commit a571af816d72727e16cad37007e7043b9d6fa362
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Apr 8 15:00:13 2013 -0500
+
+    Fixed definition of bli_is_packed_object() macro.
+    
+    Details:
+    - Changed the definition of bli_is_packed_object() so that it keys off of the
+      value of the pack schema bits in the info field of obj_t, rather than
+      comparing the obj_t buffer with that of the mem_t entry. This was the cause
+      of a very low probability bug whereby uninitialized memory caused the macro
+      to evaluate to TRUE even though the object in question was not packed.
+      Thanks to Vernon Austel of IBM for helping discover this bug.
+    - Changed an abort() in bli_packm_part() to a not-yet-implemented.
+
+commit 3be14c32f735ecc6169d3ab6370cf8b69162acec
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Apr 6 12:54:45 2013 -0500
+
+    Updated information in testsuite output header.
+    
+    Details:
+    - Added to the information that is echoed at the beginning of the test suite's
+      output, and also re-labeled some existing information.
+
+commit 874707c1b183a4dd9a91dbfd4ea1522384c190df
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Apr 5 17:19:43 2013 -0500
+
+    Fixed edge case handling bug in herk macrokernels.
+    
+    Details:
+    - Fixed a bug present in bli_herk_l_ker_var2() and bli_herk_u_ker_var2() that
+      only manifests when BLIS is configured such that MR != NR. The bug involves
+      incorrectly detecting edge cases, which resulted in some parts of matrix C
+      potentially being skipped and not updated, depending on the problem size.
+    - Updated the default values of MR and NR in config/reference/bli_kernel.h to
+      8 and 4, respectively, so that I can better stress the framework on a
+      day-to-day basis. (The fact that they were both equal to 4 for so long is
+      why I did not stumble upon this bug much sooner.)
+
+commit 7cbda15291d3e01300e71c286b9657b7ef0708bf
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Apr 4 15:25:43 2013 -0500
+
+    Added reference microkernels for arbitrary MR, NR.
+    
+    Details:
+    - Added a new set of reference gemm, gemmtrsm, and trsm micro-kernels that
+      contain explicit loops over MR and NR, thus allowing them to be used
+      unmodified by developers who want to build a reference library with
+      custom register blocksizes.
+    - Changed config/reference/bli_kernel.h to use above ukernels by default.
+    - Changed interfaces of new and existing gemm, gemmtrsm, and trsm micro-kernels
+      to use 'restrict' keyword.
+    - Added -funroll-loops option to config/reference/make_defs.mk.
+    - Updated comments in bli_kernel.h describing constraints on register and
+      cache blocksizes.
+    - Updated _adds_mxn.h, _copys_mxn.h, and _xpbys_mxn.h macros files so that
+      single-char macros are also defined.
+
+commit 6684b73d5501f91d24a79e26655a42819c9b3114
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Apr 2 13:06:20 2013 -0500
+
+    Implemented amax operation and related changes.
+    
+    Details:
+    - Implemented amax operation in BLIS.
+    - Activated BLAS2BLIS routine mapping for new amax BLIS implementation.
+    - Added integer support to [f]printv, [f]printm.
+    - Added integer support to level-0 copys macros.
+    - Updated printing of configuration information in test suite driver.
+    - Comment changes to _config.h files.
+    - Added comments to bla_dot.c to reminder reader what sdsdot()/dsdot() are
+      used for.
+
+commit fb68087f8727cd5fd656a742a110e54fb1c91db9
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Mar 26 15:10:16 2013 -0500
+
+    More memory alignment-related tweaks.
+    
+    Details:
+    - Renamed BLIS_MEMORY_ALIGNMENT_SIZE to BLIS_CONTIG_MEM_ALIGN_SIZE.
+    - Renamed BLIS_ENABLE_MEMORY_ALIGNMENT to BLIS_ENABLE_SYSTEM_MEM_ALIGN.
+    - Added BLIS_SYSTEM_MEM_ALIGN_SIZE, which controls only the alignment
+      passed into posix_memalign() or equivalent.
+    - Defined new function, bli_align_dim_to_cmem(), which applies the
+      contiguous memory alignment (rather than the system/malloc alignment).
+
+commit 9682ef61dbf9a8846c8b0826d4de24bc216cd641
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Mar 26 14:14:53 2013 -0500
+
+    Always define memory alignment size cpp constant.
+    
+    Details:
+    - Removed guard around #define for memory alignment size constant.
+      Memory alignment should always be enabled, and so this value should
+      always be defined.
+
+commit 3a787cccaae16531474f34398e3c0cf4f49b8cd8
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Mar 26 13:59:19 2013 -0500
+
+    Renamed memory alignment macro constant.
+    
+    Details:
+    - Renamed all occurrences of BLIS_MEMORY_ALIGNMENT_BOUNDARY to
+      BLIS_MEMORY_ALIGNMENT_SIZE.
+
+commit 37308f9a502b56d94fa52a7df71c676a46c3be3d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Mar 26 12:43:14 2013 -0500
+
+    Align packed panel strides with system alignment.
+    
+    Details:
+    - Pass panel strides through bli_align_dim_to_sys() to ensure that each
+      subsequent packed panel of A and B begins at an aligned address. (The
+      first panel is presumably aligned to system alignment because it is
+      aligned to a page boundary, which is typically much larger.)
+    - Rearranged code in packm_init_pack() to prevent additional conditional
+      blocks as a result of the aforementioned change.
+    - Adjusted contiguous memory allocator so that the system memory alignment
+      is used to allocate enough space for each block no matter what kind of
+      register blocking is used (even if register blocksize is unit and every
+      row/column needs maximal padding).
+    - Adjusted default blocksizes in reference configuration so that MC*KC
+      and KC*NC result in identical footprints for all datatypes.
+
+commit 40a0654ada5f256beb3da80ebba015a3c71fb61f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Mar 24 20:18:12 2013 -0500
+
+    CHANGELOG update.
+
+commit b65cdc57d9e51fa00e3c03539cfb7e045707d0f4 (tag: 0.0.5)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Sun Mar 24 20:01:49 2013 -0500
 
