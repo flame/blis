@@ -190,6 +190,7 @@ void PASTEMAC(ch,opname)( \
 	bli_obj_create_with_attached_buffer( dt, m, 1, x, rs_x, cs_x, &xo ); \
 	bli_obj_create_with_attached_buffer( dt, m, 1, y, rs_y, cs_y, &yo ); \
 \
+	bli_obj_set_struc( BLIS_HERMITIAN, ao ); \
 	bli_obj_set_uplo( uploa, ao ); \
 	bli_obj_set_conj( conja, ao ); \
 	bli_obj_set_conj( conjx, xo ); \

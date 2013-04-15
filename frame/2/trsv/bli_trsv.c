@@ -155,6 +155,7 @@ void PASTEMAC(ch,opname)( \
 	bli_obj_create_with_attached_buffer( dt, m, m, a, rs_a, cs_a, &ao ); \
 	bli_obj_create_with_attached_buffer( dt, m, 1, x, rs_x, cs_x, &xo ); \
 \
+	bli_obj_set_struc( BLIS_TRIANGULAR, ao ); \
 	bli_obj_set_uplo( uploa, ao ); \
 	bli_obj_set_conjtrans( transa, ao ); \
 	bli_obj_set_diag( diaga, ao ); \
