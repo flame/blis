@@ -64,16 +64,17 @@ extern "C" {
 #include <time.h>
 
 
-// -- BLIS kernel definitions --
-
-#include "bli_kernel.h"
-
-
 // -- BLIS definitions --
 
 #include "bli_type_defs.h"
 #include "bli_macro_defs.h"
 #include "bli_extern_defs.h"
+
+
+// -- BLIS kernel definitions --
+
+#include "bli_kernel.h"
+#include "bli_kernel_macro_defs.h"
 
 
 // -- Base operation prototypes --
