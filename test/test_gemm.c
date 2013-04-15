@@ -38,6 +38,8 @@
 //           transa transb m     n     k     alpha    a        lda   b        ldb   beta     c        ldc
 void dgemm_( char*, char*, int*, int*, int*, double*, double*, int*, double*, int*, double*, double*, int* );
 
+//#define PRINT
+
 int main( int argc, char** argv )
 {
 	obj_t a, b, c;
@@ -152,7 +154,8 @@ int main( int argc, char** argv )
 		                           FALSE, // invert diagonal?
 		                           FALSE, // reverse iteration if upper?
 		                           FALSE, // reverse iteration if lower?
-		                           BLIS_PACKED_ROW_PANELS );
+		                           BLIS_PACKED_ROW_PANELS,
+		                           BLIS_BUFFER_FOR_A_BLOCK );
 
 		packm_cntl_b =
 		bli_packm_cntl_obj_create( BLIS_BLOCKED,
@@ -164,7 +167,8 @@ int main( int argc, char** argv )
 		                           FALSE, // invert diagonal?
 		                           FALSE, // reverse iteration if upper?
 		                           FALSE, // reverse iteration if lower?
-		                           BLIS_PACKED_COL_PANELS );
+		                           BLIS_PACKED_COL_PANELS,
+		                           BLIS_BUFFER_FOR_B_PANEL );
 
 		gemm_cntl_bp_ke =
 		bli_gemm_cntl_obj_create( BLIS_UNB_OPT,
@@ -234,13 +238,15 @@ int main( int argc, char** argv )
 #ifdef BLIS
 			//bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
 
-			bli_gemm_int( &alpha,
+			//bli_gemm_int( &alpha,
+			bli_gemm( &alpha,
 			              &a,
 			              &b,
 			              &beta,
-			              &c,
+			              &c );
+			              //&c,
 			              //gemm_cntl_op_bp );
-			              gemm_cntl_mm_op );
+			              //gemm_cntl_mm_op );
 
 #else
 

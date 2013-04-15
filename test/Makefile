@@ -168,7 +168,7 @@ LDFLAGS        := -L/usr/lib/gcc/i486-linux-gnu/4.4.3 -L/usr/lib/gcc/i486-linux-
 # --- Targets/rules ------------------------------------------------------------
 #
 
-all: blis openblas atlas
+all: blis openblas
 
 blis: test_gemv_blis.x \
       test_ger_blis.x \
@@ -251,17 +251,22 @@ test_%_blis.o: test_%.c
 
 # -- Executable file rules --
 
+# NOTE: For the BLAS test drivers, we place the BLAS libraries before BLIS
+# on the link command line in case BLIS was configured with the BLAS
+# compatibility layer. This prevents BLIS from inadvertently getting called
+# for the BLAS routines we are trying to test with.
+
 test_%_openblas.x: test_%_openblas.o $(BLIS_LIB)
-	$(LINKER) $<             $(BLIS_LIB) $(OPENBLAS_LIB) $(LDFLAGS) -o $@
+	$(LINKER) $<             $(OPENBLAS_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@
 
 test_%_atlas.x: test_%_atlas.o $(BLIS_LIB)
-	$(LINKER) $<             $(BLIS_LIB) $(ATLAS_LIB) $(LDFLAGS) -o $@
+	$(LINKER) $<             $(ATLAS_LIB)    $(BLIS_LIB) $(LDFLAGS) -o $@
 
 test_%_mkl.x: test_%_mkl.o $(BLIS_LIB)
-	$(LINKER) $<             $(BLIS_LIB) $(MKL_LIB) $(LDFLAGS) -o $@
+	$(LINKER) $<             $(MKL_LIB)      $(BLIS_LIB) $(LDFLAGS) -o $@
 
 test_%_blis.x: test_%_blis.o $(BLIS_LIB)
-	$(LINKER) $<             $(BLIS_LIB)             $(LDFLAGS) -o $@
+	$(LINKER) $<                             $(BLIS_LIB) $(LDFLAGS) -o $@
 
 
 # -- Clean rules --

@@ -153,7 +153,8 @@ int main( int argc, char** argv )
 		                           FALSE, // invert diagonal?
 		                           FALSE, // reverse iteration if upper?
 		                           FALSE, // reverse iteration if lower?
-		                           BLIS_PACKED_ROW_PANELS );
+		                           BLIS_PACKED_ROW_PANELS,
+		                           BLIS_BUFFER_FOR_A_BLOCK );
 
 		packm_cntl_b =
 		bli_packm_cntl_obj_create( BLIS_BLOCKED,
@@ -165,7 +166,8 @@ int main( int argc, char** argv )
 		                           FALSE, // invert diagonal?
 		                           FALSE, // reverse iteration if upper?
 		                           FALSE, // reverse iteration if lower?
-		                           BLIS_PACKED_COL_PANELS );
+		                           BLIS_PACKED_COL_PANELS,
+		                           BLIS_BUFFER_FOR_B_PANEL );
 
 		herk_cntl_bp_ke =
 		bli_herk_cntl_obj_create( BLIS_UNB_OPT,

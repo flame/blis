@@ -35,24 +35,24 @@
 #include "blis.h"
 
 void bli_sgemm_opt_d4x2(
-                         dim_t     k,
-                         float*    alpha,
-                         float*    a,
-                         float*    b,
-                         float*    beta,
-                         float*    c, inc_t rs_c, inc_t cs_c
+                         dim_t           k,
+                         float* restrict alpha,
+                         float* restrict a,
+                         float* restrict b,
+                         float* restrict beta,
+                         float* restrict c, inc_t rs_c, inc_t cs_c
                        )
 {
 	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 }
 
 void bli_dgemm_opt_d4x2(
-                         dim_t     k,
-                         double*   alpha,
-                         double*   a,
-                         double*   b,
-                         double*   beta,
-                         double*   c, inc_t rs_c, inc_t cs_c
+                         dim_t            k,
+                         double* restrict alpha,
+                         double* restrict a,
+                         double* restrict b,
+                         double* restrict beta,
+                         double* restrict c, inc_t rs_c, inc_t cs_c
                        )
 {
 	dim_t   k_iter;
@@ -320,24 +320,24 @@ void bli_dgemm_opt_d4x2(
 }
 
 void bli_cgemm_opt_d4x2(
-                         dim_t     k,
-                         scomplex* alpha,
-                         scomplex* a,
-                         scomplex* b,
-                         scomplex* beta,
-                         scomplex* c, inc_t rs_c, inc_t cs_c
+                         dim_t              k,
+                         scomplex* restrict alpha,
+                         scomplex* restrict a,
+                         scomplex* restrict b,
+                         scomplex* restrict beta,
+                         scomplex* restrict c, inc_t rs_c, inc_t cs_c
                        )
 {
 	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 }
 
 void bli_zgemm_opt_d4x2(
-                         dim_t     k,
-                         dcomplex* alpha,
-                         dcomplex* a,
-                         dcomplex* b,
-                         dcomplex* beta,
-                         dcomplex* c, inc_t rs_c, inc_t cs_c
+                         dim_t              k,
+                         dcomplex* restrict alpha,
+                         dcomplex* restrict a,
+                         dcomplex* restrict b,
+                         dcomplex* restrict beta,
+                         dcomplex* restrict c, inc_t rs_c, inc_t cs_c
                        )
 {
 	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );

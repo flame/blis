@@ -51,7 +51,7 @@ void PASTEMAC(ch,varname)( \
 	{ \
 		for ( d = 0; d < ndup; ++d ) \
 		{ \
-			*(bd + d + i) = *(b + i); \
+			*(bd + i*ndup + d) = *(b + i); \
 		} \
 	} \
 }
