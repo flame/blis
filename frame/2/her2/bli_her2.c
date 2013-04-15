@@ -164,8 +164,9 @@ void PASTEMAC(ch,opname)( \
 \
 	bli_obj_set_conj( conjx, xo ); \
 	bli_obj_set_conj( conjy, yo ); \
-	bli_obj_set_struc( BLIS_HERMITIAN, co ); \
 	bli_obj_set_uplo( uploc, co ); \
+\
+	bli_obj_set_struc( BLIS_HERMITIAN, co ); \
 \
 	PASTEMAC0(opname)( &alphao, \
 	                   &xo, \

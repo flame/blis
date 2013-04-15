@@ -143,8 +143,9 @@ void PASTEMAC(ch,opname)( \
 	bli_obj_create_with_attached_buffer( dt, m, m, c, rs_c, cs_c, &co ); \
 \
 	bli_obj_set_conj( conjx, xo ); \
-	bli_obj_set_struc( BLIS_SYMMETRIC, co ); \
 	bli_obj_set_uplo( uploc, co ); \
+\
+	bli_obj_set_struc( BLIS_SYMMETRIC, co ); \
 \
 	PASTEMAC0(opname)( &alphao, \
 	                   &xo, \
