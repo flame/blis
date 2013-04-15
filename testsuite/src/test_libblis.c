@@ -1135,7 +1135,13 @@ void libblis_test_build_function_string( char*        prefix_str,
 {
 	sprintf( funcname_str, "%s_%c%s", prefix_str, dt_char, op_str );
 
-	if ( n_param_combos > 1 )
+	// We check the string length of pc_str in case the user is running an
+	// operation that has parameters (and thus generally more than one
+	// parameter combination), but has fixed all parameters in the input
+	// file, which would result in n_param_combos to equal one. This way,
+	// the function string contains the parameter string associated with
+	// the parameters that were fixed.
+	if ( n_param_combos > 1 || strlen(pc_str) > 0 )
 		sprintf( &funcname_str[strlen(funcname_str)], "_%s_%s", pc_str, sc_str );
 	else
 		sprintf( &funcname_str[strlen(funcname_str)], "_%s", sc_str );
