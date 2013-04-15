@@ -34,22 +34,6 @@
 
 
 //
-// Define micro-kernel blocksizes.
-//
-#define bli_sgemm_ref_mxn_mr   BLIS_DEFAULT_MR_S
-#define bli_sgemm_ref_mxn_nr   BLIS_DEFAULT_NR_S
-
-#define bli_dgemm_ref_mxn_mr   BLIS_DEFAULT_MR_D
-#define bli_dgemm_ref_mxn_nr   BLIS_DEFAULT_NR_D
-
-#define bli_cgemm_ref_mxn_mr   BLIS_DEFAULT_MR_C
-#define bli_cgemm_ref_mxn_nr   BLIS_DEFAULT_NR_C
-
-#define bli_zgemm_ref_mxn_mr   BLIS_DEFAULT_MR_Z
-#define bli_zgemm_ref_mxn_nr   BLIS_DEFAULT_NR_Z
-
-
-//
 // Prototype micro-kernel interfaces.
 //
 #undef  GENTPROT
