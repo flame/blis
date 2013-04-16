@@ -53,8 +53,11 @@ void bli_acquire_mpart_t2b( subpart_t  requested_part,
 	doff_t diag_off_inc;
 
 
-	// Call a special function for partitioning packed objects.
-	if ( bli_obj_is_packed( *obj ) )
+	// Call a special function for partitioning packed objects. (By only
+	// catching those objects packed to panels, we omit cases where the
+	// object is packed to row or column storage, as such objects can be
+	// partitioned through normally.)
+	if ( bli_obj_is_panel_packed( *obj ) )
 	{
 		bli_packm_acquire_mpart_t2b( requested_part, i, b, obj, sub_obj );
 		return;
@@ -220,8 +223,11 @@ void bli_acquire_mpart_l2r( subpart_t  requested_part,
 	doff_t diag_off_inc;
 
 
-	// Call a special function for partitioning packed objects.
-	if ( bli_obj_is_packed( *obj ) )
+	// Call a special function for partitioning packed objects. (By only
+	// catching those objects packed to panels, we omit cases where the
+	// object is packed to row or column storage, as such objects can be
+	// partitioned through normally.)
+	if ( bli_obj_is_panel_packed( *obj ) )
 	{
 		bli_packm_acquire_mpart_l2r( requested_part, j, b, obj, sub_obj );
 		return;
@@ -387,8 +393,11 @@ void bli_acquire_mpart_tl2br( subpart_t  requested_part,
 	doff_t diag_off_inc;
 
 
-	// Call a special function for partitioning packed objects.
-	if ( bli_obj_is_packed( *obj ) )
+	// Call a special function for partitioning packed objects. (By only
+	// catching those objects packed to panels, we omit cases where the
+	// object is packed to row or column storage, as such objects can be
+	// partitioned through normally.)
+	if ( bli_obj_is_panel_packed( *obj ) )
 	{
 		bli_packm_acquire_mpart_tl2br( requested_part, ij, b, obj, sub_obj );
 		return;

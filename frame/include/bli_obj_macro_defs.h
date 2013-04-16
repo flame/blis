@@ -823,11 +823,12 @@ bli_obj_width_stored( obj )
 
 // Check if an object is a packed object
 // NOTE: TRUE here does not mean the actual packing is complete, such as with
-// incremental packing.)
+// incremental packing.
 
-#define bli_obj_is_packed( obj ) \
+#define bli_obj_is_panel_packed( obj ) \
 \
-	( bli_obj_pack_status( obj ) != BLIS_NOT_PACKED )
+	( bli_obj_pack_status( obj ) == BLIS_PACKED_ROW_PANELS || \
+	  bli_obj_pack_status( obj ) == BLIS_PACKED_COL_PANELS )
 
 
 // Release object's pack (and cast) memory entries back to memory manager
