@@ -47,6 +47,7 @@ void bli_herk( obj_t*  alpha,
 	herk_t* cntl;
 	obj_t   alpha_local;
 	obj_t   beta_local;
+	obj_t   c_local;
 	obj_t   ah;
 	num_t   dt_targ_a;
 	num_t   dt_targ_ah;
@@ -66,6 +67,11 @@ void bli_herk( obj_t*  alpha,
 		bli_scalm( beta, c );
 		return;
 	}
+
+	// Alias C so we can reset it as the root object (in case it is not
+	// already a root object).
+	bli_obj_alias_to( *c, c_local );
+	bli_obj_set_as_root( c_local );
 
 	// For herk, the right-hand "B" operand is simply A'.
 	bli_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, *a, ah );
@@ -141,7 +147,7 @@ void bli_herk( obj_t*  alpha,
 	              a,
 	              &ah,
 	              &beta_local,
-	              c,
+	              &c_local,
 	              cntl );
 }
 

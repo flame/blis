@@ -49,6 +49,7 @@ void bli_syr2k( obj_t*  alpha,
 	her2k_t* cntl;
 	obj_t    alpha_local;
 	obj_t    beta_local;
+	obj_t    c_local;
 	obj_t    at;
 	obj_t    bt;
 	num_t    dt_targ_a;
@@ -69,6 +70,11 @@ void bli_syr2k( obj_t*  alpha,
 		bli_scalm( beta, c );
 		return;
 	}
+
+	// Alias C so we can reset it as the root object (in case it is not
+	// already a root object).
+	bli_obj_alias_to( *c, c_local );
+	bli_obj_set_as_root( c_local );
 
 	// Create objects to track A^T and B^T (for the second rank-k update).
 	bli_obj_alias_with_trans( BLIS_TRANSPOSE, *a, at );
@@ -141,20 +147,20 @@ void bli_syr2k( obj_t*  alpha,
 	               b,
 	               &at,
 	               &beta_local,
-	               c,
+	               &c_local,
 	               cntl );
 /*
 	bli_herk_int( &alpha_local,
 	              a,
 	              &bt,
 	              &beta_local,
-	              c,
+	              &c_local,
 	              herk_cntl );
 	bli_herk_int( &alpha_local,
 	              b,
 	              &at,
 	              &BLIS_ONE,
-	              c,
+	              &c_local,
 	              herk_cntl );
 */
 }
