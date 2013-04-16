@@ -68,9 +68,9 @@ void bli_addsc_unb_var1( obj_t*  chi,
 
 	FUNCPTR_T f;
 
-	// If beta is a scalar constant, use dt_chi_r to extract the address of the
+	// If chi is a scalar constant, use dt_psi to extract the address of the
 	// corresponding constant value; otherwise, use the datatype encoded
-	// within the beta object and extract the buffer at the beta offset.
+	// within the chi object and extract the buffer at the chi offset.
 	bli_set_scalar_dt_buffer( chi, dt_psi, dt_chi, buf_chi );
 
 	// Index into the type combination array to extract the correct

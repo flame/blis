@@ -317,12 +317,12 @@ void bli_obj_create_const_copy_of( obj_t* a, obj_t* b )
 
 	if ( bli_obj_is_float( *a ) )
 	{
-		value.real = *(( float*  )( bli_obj_buffer_at_off( *a ) ));
+		value.real = *(( float*    )( bli_obj_buffer_at_off( *a ) ));
 		value.imag = 0.0;
 	}
 	else if ( bli_obj_is_double( *a ) )
 	{
-		value.real = *(( double* )( bli_obj_buffer_at_off( *a ) ));
+		value.real = *(( double*   )( bli_obj_buffer_at_off( *a ) ));
 		value.imag = 0.0;
 	}
 	else if ( bli_obj_is_scomplex( *a ) )

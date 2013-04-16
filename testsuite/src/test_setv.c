@@ -185,10 +185,11 @@ void libblis_test_setv_check( obj_t*  beta,
                               obj_t*  x,
                               double* resid )
 {
+	num_t dt_x     = bli_obj_datatype( *x );
 	dim_t m_x      = bli_obj_vector_dim( *x );
 	inc_t inc_x    = bli_obj_vector_inc( *x );
 	void* buf_x    = bli_obj_buffer_at_off( *x );
-	void* buf_beta = bli_obj_buffer_at_off( *beta );
+	void* buf_beta = bli_obj_scalar_buffer( dt_x, *beta );
 	dim_t i;
 
 	*resid = 0.0;

@@ -50,13 +50,23 @@ void bli_getsc( obj_t*  chi,
                 double* beta_i )
 {
 	num_t     dt_chi   = bli_obj_datatype( *chi );
+	num_t     dt_def   = BLIS_DCOMPLEX;
+	num_t     dt_use;
 
-	void*     buf_chi  = bli_obj_buffer_at_off( *chi );
+	// If chi is a constant object, default to using the dcomplex
+	// value within since we don't know if the caller needs just the
+	// real or the real and imaginary parts.
+	void*     buf_chi  = bli_obj_scalar_buffer( dt_def, *chi );
 
 	FUNCPTR_T f;
 
 	if ( bli_error_checking_is_enabled() )
 		bli_getsc_check( chi, beta_r, beta_i );
+
+	// The _check() routine prevents integer types, so we know that chi
+	// is either a constant or an actual floating-point type.
+	if ( bli_is_constant( dt_chi ) ) dt_use = dt_def;
+	else                             dt_use = dt_chi;
 
 	// Index into the type combination array to extract the correct
 	// function pointer.

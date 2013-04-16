@@ -42,7 +42,7 @@ void bli_getsc_check( obj_t*  chi,
 
 	// Check object datatypes.
 
-	e_val = bli_check_floating_object( chi );
+	e_val = bli_check_noninteger_object( chi );
 	bli_check_error_code( e_val );
 
 	// Check object dimensions.

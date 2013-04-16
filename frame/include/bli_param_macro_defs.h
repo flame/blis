@@ -67,6 +67,10 @@
 \
 	( dt == BLIS_DCOMPLEX )
 
+#define bli_is_constant( dt ) \
+\
+	( dt == BLIS_CONSTANT )
+
 #define bli_is_real( dt ) \
 \
     ( ( dt & BLIS_DOMAIN_BIT ) == BLIS_BITVAL_REAL )

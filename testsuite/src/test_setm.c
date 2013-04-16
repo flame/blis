@@ -187,12 +187,13 @@ void libblis_test_setm_check( obj_t*  beta,
                               obj_t*  x,
                               double* resid )
 {
+	num_t dt_x     = bli_obj_datatype( *x );
 	dim_t m_x      = bli_obj_length( *x );
 	dim_t n_x      = bli_obj_width( *x );
 	inc_t rs_x     = bli_obj_row_stride( *x );
 	inc_t cs_x     = bli_obj_col_stride( *x );
 	void* buf_x    = bli_obj_buffer_at_off( *x );
-	void* buf_beta = bli_obj_buffer_at_off( *beta );
+	void* buf_beta = bli_obj_scalar_buffer( dt_x, *beta );
 	dim_t i, j;
 
 	*resid = 0.0;
