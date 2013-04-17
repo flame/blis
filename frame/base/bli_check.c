@@ -483,9 +483,10 @@ err_t bli_check_matrix_strides( dim_t m, dim_t n, dim_t rs, dim_t cs )
 	// not try to merge the general and row-/column-major sections. It might
 	// be possible, but it would be a lot less readable.
 
-	// Note: The default case (whereby we interpret rs == cs == 0 as a request
-	// for column-major order) is handled prior to calling this function, so
-	// we never see zero strides here.
+	// The default case (whereby we interpret rs == cs == 0 as a request for
+	// column-major order) is handled prior to calling this function, so the
+	// only time we should see zero strides here is if the matrix is empty.
+	if ( m == 0 || n == 0 ) return e_val;
 
 	// Disallow either of the strides to be zero.
 	if ( ( rs == 0 || cs == 0 ) )

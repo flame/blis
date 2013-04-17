@@ -81,7 +81,9 @@ void bli_obj_create_without_buffer( num_t  dt,
 	// into a larger matrix. This is the ONLY time this field is ever set;
 	// henceforth, subpartitions and aliases to this object will get copies
 	// of this field, and thus always have access to its "greatest-grand"
-	// parent (ie: the original parent, or "root", object).
+	// parent (ie: the original parent, or "root", object). (There is an
+	// exception to this: there are a few places where root status is
+	// reset explicitly via bli_obj_set_as_root().)
 	bli_obj_set_as_root( *obj );
 
 	// Set individual fields.
@@ -124,7 +126,13 @@ void bli_obj_alloc_buffer( inc_t  rs,
 	elem_size = bli_obj_elem_size( *obj );
 
 	// Determine how much object to allocate.
-	if ( rs == 1 )
+	if ( m == 0 || n == 0 )
+	{
+		// For empty objects, set n_elem to zero. Row and column strides
+		// should remain unchanged (because alignment is not needed).
+		n_elem = 0;
+	}
+	else if ( rs == 1 )
 	{
 		cs     = bli_align_dim_to_size( cs, elem_size,
 		                                BLIS_HEAP_STRIDE_ALIGN_SIZE );
@@ -357,12 +365,28 @@ void bli_adjust_strides( dim_t  m,
 	// Here, we check the strides that were input from the user and modify
 	// them if needed.
 
+	// Handle the special "empty" case first. If either dimension is zero,
+	// we set both strides to zero.
+	if ( m == 0 || n == 0 )
+	{
+		*rs = 0;
+		*cs = 0;
+
+		return;
+	}
+		
 	// Interpret rs = cs = 0 as request for column storage.
 	if ( *rs == 0 && *cs == 0 )
 	{
+		// First we handle the scalar case explicitly.
+		if ( m == 1 && n == 1 )
+		{
+			*rs = 1;
+			*cs = 1;
+		}
 		// We use column-major storage, except when m == 1, because we don't
 		// want both strides to be unit.
-		if ( m == 1 && n > 1 )
+		else if ( m == 1 && n > 1 )
 		{
 			*rs = n;
 			*cs = 1;
