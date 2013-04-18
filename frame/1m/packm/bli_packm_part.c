@@ -46,13 +46,15 @@ void bli_packm_acquire_mpart_t2b( subpart_t requested_part,
 {
 	dim_t m, n;
 
+	// For now, we only support acquiring the middle subpartition.
 	if ( requested_part != BLIS_SUBPART1 )
 	{
 		bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 	}
 
-	// Partitioning through packed column-stored rows not yet supported
-	if ( bli_obj_is_col_stored( *obj ) )
+	// Partitioning top-to-bottom through packed column panels (which are
+	// row-stored) is not yet supported.
+	if ( bli_obj_is_row_stored( *obj ) )
 	{
 		bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 	}
@@ -104,10 +106,6 @@ void bli_packm_acquire_mpart_t2b( subpart_t requested_part,
 
 		bli_obj_set_buffer( ( void* )buf_p, *sub_obj );
 	}
-
-	// Don't have any code that utilizes this function yet. This abort is
-	// here to force someone to make sure the above works!
-	bli_abort();
 }
 
 
@@ -124,12 +122,14 @@ void bli_packm_acquire_mpart_l2r( subpart_t requested_part,
 	//if ( bli_error_checking_is_enabled() )
 	//	bli_packm_acquire_mpart_l2r_check( requested_part, j, b, obj, sub_obj );
 
+	// For now, we only support acquiring the middle subpartition.
 	if ( requested_part != BLIS_SUBPART1 )
 	{
 		bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 	}
 
-	// Partitioning through packed column-stored rows not yet supported
+	// Partitioning left-to-right through packed row panels (which are
+	// column-stored) is not yet supported.
 	if ( bli_obj_is_col_stored( *obj ) )
 	{
 		bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
