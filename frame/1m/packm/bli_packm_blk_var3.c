@@ -430,11 +430,6 @@ void PASTEMAC(ch,varname )( \
 			inc_t  cs_pe    = panel_dim; \
 			ctype* p_edge   = p_begin + (i  )*rs_pe + (j  )*cs_pe; \
 \
-/*
-			PASTEMAC(ch,fprintm)( stdout, "packm_var3: p setting br unit diag", m_br, n_br, \
-			                      p_edge, rs_pe, cs_pe, "%5.2f", "" ); \
-*/ \
-\
 			PASTEMAC2(ch,ch,setd_unb_var1)( 0, \
 			                                m_br, \
 			                                n_br, \
@@ -454,9 +449,6 @@ void PASTEMAC(ch,varname )( \
 \
 	 	p_begin += p_inc; \
 	} \
-\
-	/*PASTEMAC(ch,fprintm)( stdout, "p copied", panel_dim, 24, \
-	                      p_cast, rs_p, cs_p, "%4.1f", "" );*/ \
 }
 
 INSERT_GENTFUNC_BASIC( packm, packm_blk_var3 )

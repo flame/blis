@@ -352,13 +352,36 @@ void PASTEMAC(ch,varname )( \
 		} \
 		else \
 		{ \
+			/* We use some c10-specific variables here because we might need
+			   to change them if the current panel is unstored. (The values
+			   below are used if the current panel is stored.) */ \
+			c10     = c_begin; \
+			incc10  = incc; \
+			ldc10   = ldc; \
+			conjc10 = conjc; \
+\
+			/* If the current panel is unstored, we need to make a few
+			   adjustments so we refer to the data where it is actually
+			   stored, and so we take conjugation into account. (Note
+			   this implicitly assumes we are operating on a symmetric or
+			   Hermitian matrix.) */ \
+			if ( bli_is_unstored_subpart_n( diagoffc_i, uploc, panel_dim_i, panel_len ) ) \
+			{ \
+				c10 = c10 + diagoffc_i * ( doff_t )cs_c + \
+				           -diagoffc_i * ( doff_t )rs_c;  \
+				bli_swap_incs( incc10, ldc10 ); \
+\
+				if ( bli_is_hermitian( strucc ) ) \
+					bli_toggle_conj( conjc10 ); \
+			} \
+\
 			/* Pack the current panel. */ \
-			PASTEMAC(ch,packm_cxk)( conjc, \
+			PASTEMAC(ch,packm_cxk)( conjc10, \
 			                        panel_dim_i, \
 			                        panel_len, \
 			                        beta_cast, \
-			                        c_begin, incc, ldc, \
-			                        p_begin,       ldp ); \
+			                        c10,     incc10, ldc10, \
+			                        p_begin,         ldp ); \
 \
 /*
 		PASTEMAC(ch,fprintm)( stdout, "packm_blk_var2: c", panel_len, panel_dim_i, \
@@ -410,7 +433,7 @@ void PASTEMAC(ch,varname )( \
 /*
 		if ( rs_p == 1 ) \
 		PASTEMAC(ch,fprintm)( stdout, "packm_blk_var2: a copied", m_panel_max, n_panel_max, \
-		                      p_begin, 1, panel_dim, "%5.2f", "" ); \
+		                      p_begin, 1, panel_dim, "%4.1f", "" ); \
 		if ( cs_p == 1 ) \
 		PASTEMAC(ch,fprintm)( stdout, "packm_blk_var2: b copied", m_panel_max, n_panel_max, \
 		                      p_begin, panel_dim, 1, "%6.3f", "" ); \
