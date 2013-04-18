@@ -384,11 +384,17 @@ void bli_packm_init_pack( bool_t    densify,
 	else
 	{
 		// If the mem_t object is currently allocated and smaller than is
-		// needed, then something is very wrong, since the cache blocksizes
-		// that drive the level-3 blocked algorithms are the same ones that
-		// determine the sizes of the blocks within our memory allocator's
-		// memory pools. This branch should never be executed.
-		if ( bli_mem_size( mem_p ) < size_p ) bli_abort();
+		// needed, then it must have been allocated for a different type
+		// of object (a different pack_buf_type value), so we must first
+		// release it and then re-acquire it using the new size and new
+		// pack_buf_type value.
+		if ( bli_mem_size( mem_p ) < size_p )
+		{
+			bli_mem_release( mem_p );
+			bli_mem_acquire_m( size_p,
+			                   pack_buf_type,
+			                   mem_p );
+		}
 	}
 
 	// Grab the buffer address from the mem_t object and copy it to the
