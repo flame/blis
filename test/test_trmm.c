@@ -38,7 +38,7 @@
 //           side   uplo   trans  diag   m     n     alpha    a        lda   b        ldb
 void dtrmm_( char*, char*, char*, char*, int*, int*, double*, double*, int*, double*, int* );
 
-#define PRINT 1
+//#define PRINT
 
 int main( int argc, char** argv )
 {
@@ -258,24 +258,15 @@ int main( int argc, char** argv )
 #ifdef BLIS
 			//bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
 			//bli_obj_set_trans( BLIS_TRANSPOSE, a );
-/*
-			bli_trmm_int( side,
-			              &alpha,
-			              &a,
-			              &c,
-			              &BLIS_ZERO,
-			              &c,
-			              trmm_cntl_mm_op );
-			              //trmm_cntl_vl_mm );
-*/
-			bli_trmm( BLIS_RIGHT,
+
+			bli_trmm( BLIS_LEFT,
 			          &alpha,
 			          &a,
 			          &c );
 
 #else
 
-			char    side   = 'R';
+			char    side   = 'L';
 			char    uplo   = 'U';
 			char    transa = 'N';
 			char    diag   = 'N';

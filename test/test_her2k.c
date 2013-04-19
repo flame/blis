@@ -38,7 +38,7 @@
 //            uploa  transa m     k     alpha    a        lda   b        ldb   beta     c        ldc
 void dsyr2k_( char*, char*, int*, int*, double*, double*, int*, double*, int*, double*, double*, int* );
 
-#define PRINT 1
+//#define PRINT
 
 int main( int argc, char** argv )
 {
@@ -233,32 +233,6 @@ int main( int argc, char** argv )
 #ifdef BLIS
 
 			//bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
-
-/*
-			bli_her2k_int( &BLIS_ONE,
-			               &a,
-			               &bh,
-			               &BLIS_ONE,
-			               &b,
-			               &ah,
-			               &BLIS_ONE,
-			               &c,
-			               her2k_cntl_mm_op );
-*/
-/*
-			bli_herk_int( &alpha,
-			              &a,
-			              &bh,
-			              &beta,
-			              &c,
-			              herk_cntl_mm_op );
-			bli_herk_int( &alpha,
-			              &b,
-			              &ah,
-			              &BLIS_ONE,
-			              &c,
-			              herk_cntl_mm_op );
-*/
 
 			bli_her2k( &alpha,
 			           &a,

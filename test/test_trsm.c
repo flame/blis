@@ -38,7 +38,7 @@
 //           side   uplo   trans  diag   m     n     alpha    a        lda   b        ldb
 void dtrsm_( char*, char*, char*, char*, int*, int*, double*, double*, int*, double*, int* );
 
-#define PRINT 1
+//#define PRINT
 
 int main( int argc, char** argv )
 {
@@ -132,17 +132,6 @@ int main( int argc, char** argv )
 		bli_randm( &a );
 		bli_randm( &c );
 		bli_randm( &b );
-
-#if 0
-		bli_obj_set_struc( BLIS_TRIANGULAR, a );
-		//bli_obj_set_uplo( BLIS_LOWER, a );
-		bli_obj_set_uplo( BLIS_UPPER, a );
-		bli_obj_set_diag( BLIS_UNIT_DIAG, a );
-		bli_setm( &BLIS_ZERO, &a );
-		bli_obj_set_struc( BLIS_GENERAL, a );
-		bli_obj_set_uplo( BLIS_DENSE, a );
-		bli_obj_set_diag( BLIS_NONUNIT_DIAG, a );
-#endif
 
 		bli_setsc(  (2.0/1.0), 0.0, &alpha );
 		bli_setsc( -(1.0/1.0), 0.0, &beta );
@@ -259,16 +248,6 @@ int main( int argc, char** argv )
 #ifdef BLIS
 			//bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
 
-/*
-			bli_trsm_int( side,
-			              &alpha,
-			              &a,
-			              &c,
-			              &BLIS_ZERO,
-			              &c,
-			              trsm_cntl_mm_op );
-			              //trmm_cntl_vl_mm );
-*/
 			//bli_obj_set_diag( BLIS_UNIT_DIAG, a );
 			//bli_obj_set_conjtrans( BLIS_TRANSPOSE, a );
 

@@ -38,6 +38,8 @@
 //           uploa  transa m     k     alpha    a        lda   beta     c        ldc
 void dsyrk_( char*, char*, int*, int*, double*, double*, int*, double*, double*, int* );
 
+//#define PRINT
+
 int main( int argc, char** argv )
 {
 	obj_t a, ah, c;
@@ -225,14 +227,12 @@ int main( int argc, char** argv )
 
 #ifdef BLIS
 
-			bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
+			//bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
 
-			bli_herk_int( &alpha,
-			              &a,
-			              &ah,
-			              &beta,
-			              &c,
-			              herk_cntl_mm_op );
+			bli_herk( &alpha,
+			          &a,
+			          &beta,
+			          &c );
 
 #else
 

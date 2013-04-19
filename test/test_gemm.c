@@ -238,15 +238,11 @@ int main( int argc, char** argv )
 #ifdef BLIS
 			//bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
 
-			//bli_gemm_int( &alpha,
 			bli_gemm( &alpha,
-			              &a,
-			              &b,
-			              &beta,
-			              &c );
-			              //&c,
-			              //gemm_cntl_op_bp );
-			              //gemm_cntl_mm_op );
+			          &a,
+			          &b,
+			          &beta,
+			          &c );
 
 #else
 

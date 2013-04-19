@@ -38,6 +38,8 @@
 //           side   uploa  m     n     alpha    a        lda   b        ldb   beta     c        ldc
 void dsymm_( char*, char*, int*, int*, double*, double*, int*, double*, int*, double*, double*, int* );
 
+//#define PRINT
+
 int main( int argc, char** argv )
 {
 	obj_t a, b, c;
@@ -89,8 +91,8 @@ int main( int argc, char** argv )
 	p_end   = 16;
 	p_inc   = 1;
 
-	m_input = 15;
-	n_input = 15;
+	m_input = 12;
+	n_input = 12;
 #endif
 
 	dt_a = BLIS_DOUBLE;
@@ -235,12 +237,12 @@ int main( int argc, char** argv )
 
 			//bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
 
-			bli_gemm_int( &alpha,
-			              &a,
-			              &b,
-			              &beta,
-			              &c,
-			              gemm_cntl_mm_op );
+			bli_hemm( BLIS_LEFT,
+			          &alpha,
+			          &a,
+			          &b,
+			          &beta,
+			          &c );
 
 #else
 
