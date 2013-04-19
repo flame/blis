@@ -79,7 +79,7 @@ void PASTEF77(ch,blasname)( \
 	/* Call BLIS interface. */ \
 	PASTEMAC(ch,blisname)( blis_uploc, \
 	                       blis_transa, \
-	                       BLIS_NO_TRANSPOSE, \
+	                       blis_transa, \
 	                       m0, \
 	                       k0, \
 	                       alpha, \
