@@ -77,6 +77,7 @@
   #error KC must be multiple of KR for all datatypes.
 #endif
 
+/*
 // Verify that cache blocksizes indicate consistent storage.
 // Specifically, verify that:
 //   - MC_D * KC_D >= MC_? * KC_?.
@@ -107,7 +108,6 @@
   #error KC_D*NC_D must be >= that of KC*NC for all other datatypes.
 #endif
 
-/*
 #if ( \
       ( ( BLIS_DEFAULT_MC_D * BLIS_DEFAULT_NC_D * SIZEOF_D ) < \
         ( BLIS_DEFAULT_MC_S * BLIS_DEFAULT_NC_S * SIZEOF_S ) ) || \
