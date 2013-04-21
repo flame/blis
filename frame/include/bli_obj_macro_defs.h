@@ -710,30 +710,44 @@ bli_obj_width_stored( obj )
 
 // Packed dimensions query
 
-#define bli_obj_packed_length( obj ) \
+#define bli_obj_padded_length( obj ) \
 \
-	( (obj).m_packed )
+	( (obj).m_padded )
 
-#define bli_obj_packed_width( obj ) \
+#define bli_obj_padded_width( obj ) \
 \
-	( (obj).n_packed )
+	( (obj).n_padded )
 
 // Packed dimensions modification
 
-#define bli_obj_set_packed_length( m0, obj ) \
+#define bli_obj_set_padded_length( m0, obj ) \
 { \
-    (obj).m_packed = m0; \
+    (obj).m_padded = m0; \
 }
 
-#define bli_obj_set_packed_width( n0, obj ) \
+#define bli_obj_set_padded_width( n0, obj ) \
 { \
-    (obj).n_packed = n0; \
+    (obj).n_padded = n0; \
 }
 
-#define bli_obj_set_packed_dims( m0, n0, obj ) \
+#define bli_obj_set_padded_dims( m0, n0, obj ) \
 { \
-	bli_obj_set_packed_length( m0, obj ); \
-	bli_obj_set_packed_width( n0, obj ); \
+	bli_obj_set_padded_length( m0, obj ); \
+	bli_obj_set_padded_width( n0, obj ); \
+}
+
+
+// Packed panel dimension query
+
+#define bli_obj_panel_dim( obj ) \
+\
+	((obj).pd)
+
+// Packed panel dimension modification
+
+#define bli_obj_set_panel_dim( panel_dim, obj ) \
+{ \
+	(obj).pd = panel_dim; \
 }
 
 

@@ -148,7 +148,7 @@ void PASTEMAC(ch,varname)( \
                          ) \
 { \
 	/* Temporary buffer for duplicating elements of B. */ \
-	ctype           bd[ PASTEMAC(ch,kc) * \
+	ctype           bd[ PASTEMAC(ch,maxkc) * \
 	                    PASTEMAC(ch,nr) * \
 	                    PASTEMAC(ch,ndup) ] \
 	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \

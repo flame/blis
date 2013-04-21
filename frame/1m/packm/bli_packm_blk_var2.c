@@ -48,7 +48,8 @@ typedef void (*FUNCPTR_T)(
                            dim_t   n_max,
                            void*   beta,
                            void*   c, inc_t rs_c, inc_t cs_c,
-                           void*   p, inc_t rs_p, inc_t cs_p, inc_t ps_p
+                           void*   p, inc_t rs_p, inc_t cs_p,
+                                      dim_t pd_p, inc_t ps_p
                          );
 
 static FUNCPTR_T GENARRAY(ftypes,packm_blk_var2);
@@ -68,8 +69,8 @@ void bli_packm_blk_var2( obj_t*   beta,
 
 	dim_t     m_p       = bli_obj_length( *p );
 	dim_t     n_p       = bli_obj_width( *p );
-	dim_t     m_max_p   = bli_obj_packed_length( *p );
-	dim_t     n_max_p   = bli_obj_packed_width( *p );
+	dim_t     m_max_p   = bli_obj_padded_length( *p );
+	dim_t     n_max_p   = bli_obj_padded_width( *p );
 
 	void*     buf_c     = bli_obj_buffer_at_off( *c );
 	inc_t     rs_c      = bli_obj_row_stride( *c );
@@ -78,6 +79,7 @@ void bli_packm_blk_var2( obj_t*   beta,
 	void*     buf_p     = bli_obj_buffer_at_off( *p );
 	inc_t     rs_p      = bli_obj_row_stride( *p );
 	inc_t     cs_p      = bli_obj_col_stride( *p );
+	dim_t     pd_p      = bli_obj_panel_dim( *p );
 	inc_t     ps_p      = bli_obj_panel_stride( *p );
 
 	void*     buf_beta  = bli_obj_scalar_buffer( dt_cp, *beta );
@@ -100,7 +102,8 @@ void bli_packm_blk_var2( obj_t*   beta,
 	   n_max_p,
 	   buf_beta,
 	   buf_c, rs_c, cs_c,
-	   buf_p, rs_p, cs_p, ps_p );
+	   buf_p, rs_p, cs_p,
+	          pd_p, ps_p );
 }
 
 
@@ -119,7 +122,8 @@ void PASTEMAC(ch,varname )( \
                             dim_t   n_max, \
                             void*   beta, \
                             void*   c, inc_t rs_c, inc_t cs_c, \
-                            void*   p, inc_t rs_p, inc_t cs_p, inc_t ps_p \
+                            void*   p, inc_t rs_p, inc_t cs_p, \
+                                       dim_t pd_p, inc_t ps_p  \
                           ) \
 { \
 	ctype* restrict beta_cast = beta; \
@@ -190,12 +194,12 @@ void PASTEMAC(ch,varname )( \
 		/* Prepare to pack to column panels. */ \
 		iter_dim     = n; \
 		panel_len    = m; \
-		panel_dim    = rs_p; \
+		panel_dim    = pd_p; \
 		incc         = cs_c; \
 		ldc          = rs_c; \
 		vs_c         = cs_c; \
 		diagoffc_inc = -( doff_t)panel_dim; \
-		ldp          = panel_dim; \
+		ldp          = rs_p; \
 		m_panel      = &m; \
 		n_panel      = &panel_dim_i; \
 		m_panel_max  = m_max; \
@@ -206,12 +210,12 @@ void PASTEMAC(ch,varname )( \
 		/* Prepare to pack to row panels. */ \
 		iter_dim     = m; \
 		panel_len    = n; \
-		panel_dim    = cs_p; \
+		panel_dim    = pd_p; \
 		incc         = rs_c; \
 		ldc          = cs_c; \
 		vs_c         = rs_c; \
 		diagoffc_inc = ( doff_t )panel_dim; \
-		ldp          = panel_dim; \
+		ldp          = cs_p; \
 		m_panel      = &panel_dim_i; \
 		n_panel      = &n; \
 		m_panel_max  = panel_dim; \
@@ -433,7 +437,7 @@ void PASTEMAC(ch,varname )( \
 /*
 		if ( rs_p == 1 ) \
 		PASTEMAC(ch,fprintm)( stdout, "packm_blk_var2: a copied", m_panel_max, n_panel_max, \
-		                      p_begin, 1, panel_dim, "%4.1f", "" ); \
+		                      p_begin, 1, cs_p, "%4.1f", "" ); \
 		if ( cs_p == 1 ) \
 		PASTEMAC(ch,fprintm)( stdout, "packm_blk_var2: b copied", m_panel_max, n_panel_max, \
 		                      p_begin, panel_dim, 1, "%6.3f", "" ); \

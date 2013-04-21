@@ -50,6 +50,9 @@ packm_t* packm_cntl_scale;
 blksz_t* packm_mult_ldim;
 blksz_t* packm_mult_nvec;
 
+blksz_t* packm_mult_mext;
+blksz_t* packm_mult_next;
+
 void bli_packm_cntl_init()
 {
 	// Create blocksize objects for m and n register blocking. We will attach
@@ -70,6 +73,11 @@ void bli_packm_cntl_init()
 	                                         BLIS_DEFAULT_NR_C,
 	                                         BLIS_DEFAULT_NR_Z );
 
+	// Create blocksize extensions that simply contain zero, as these
+	// fields are not used except by level-3 operations.
+	packm_mult_mext  = bli_blksz_obj_create( 0, 0, 0, 0 );
+	packm_mult_next  = bli_blksz_obj_create( 0, 0, 0, 0 );
+
 	// Generally speaking, the BLIS_PACKED_ROWS and BLIS_PACKED_COLUMNS
 	// are used by the level-2 operations, and thus densification is not
 	// necessary. These schemas amount to simple copies to row or column
@@ -89,7 +97,9 @@ void bli_packm_cntl_init()
 	bli_packm_cntl_obj_create( BLIS_UNBLOCKED,
 	                           BLIS_VARIANT1,    // When packing to rows:
 	                           packm_mult_nvec,  // - nvec multiple is used for m dimension
+	                           packm_mult_mext,  // - m extension is zero / unused
 	                           packm_mult_ldim,  // - ldim multiple is used for n dimension
+	                           packm_mult_next,  // - n extension is zero / unused
 	                           FALSE,            // do NOT scale
 	                           FALSE,            // do NOT densify structure
 	                           FALSE,            // do NOT invert diagonal
@@ -102,7 +112,9 @@ void bli_packm_cntl_init()
 	bli_packm_cntl_obj_create( BLIS_UNBLOCKED,
 	                           BLIS_VARIANT1,    // When packing to rows:
 	                           packm_mult_nvec,  // - nvec multiple is used for m dimension
+	                           packm_mult_mext,  // - m extension is zero / unused
 	                           packm_mult_ldim,  // - ldim multiple is used for n dimension
+	                           packm_mult_next,  // - n extension is zero / unused
 	                           TRUE,             // do scale
 	                           FALSE,            // do NOT densify structure
 	                           FALSE,            // do NOT invert diagonal
@@ -118,7 +130,9 @@ void bli_packm_cntl_init()
 	bli_packm_cntl_obj_create( BLIS_UNBLOCKED,
 	                           BLIS_VARIANT1,    // When packing to columns:
 	                           packm_mult_ldim,  // - ldim multiple is used for m dimension
+	                           packm_mult_mext,  // - m extension is zero / unused
 	                           packm_mult_nvec,  // - nvec multiple is used for n dimension
+	                           packm_mult_next,  // - n extension is zero / unused
 	                           FALSE,            // do NOT scale
 	                           FALSE,            // do NOT densify structure
 	                           FALSE,            // do NOT invert diagonal
@@ -131,71 +145,15 @@ void bli_packm_cntl_init()
 	bli_packm_cntl_obj_create( BLIS_UNBLOCKED,
 	                           BLIS_VARIANT1,    // When packing to columns:
 	                           packm_mult_ldim,  // - ldim multiple is used for m dimension
+	                           packm_mult_mext,  // - m extension is zero / unused
 	                           packm_mult_nvec,  // - nvec multiple is used for n dimension
+	                           packm_mult_next,  // - n extension is zero / unused
 	                           TRUE,             // do scale
 	                           FALSE,            // do NOT densify structure
 	                           FALSE,            // do NOT invert diagonal
 	                           FALSE,            // do NOT iterate backwards if upper
 	                           FALSE,            // do NOT iterate backwards if lower
 	                           BLIS_PACKED_COLUMNS,
-	                           BLIS_BUFFER_FOR_GEN_USE );
-
-
-	// Create control trees to pack by row panels (with and without scaling).
-	packm_cntl_rpn_noscale
-	=
-	bli_packm_cntl_obj_create( BLIS_UNBLOCKED,
-	                           BLIS_VARIANT1,    // When packing to row panels:
-	                           packm_mult_nvec,  // - nvec multiple is used for panel length
-	                           packm_mult_ldim,  // - ldim multiple is used for panel width
-	                           FALSE,            // do NOT scale
-	                           TRUE,             // densify structure
-	                           FALSE,            // do NOT invert diagonal
-	                           FALSE,            // do NOT iterate backwards if upper
-	                           FALSE,            // do NOT iterate backwards if lower
-	                           BLIS_PACKED_ROW_PANELS,
-	                           BLIS_BUFFER_FOR_GEN_USE );
-	packm_cntl_rpn_scale
-	=
-	bli_packm_cntl_obj_create( BLIS_UNBLOCKED,
-	                           BLIS_VARIANT1,    // When packing to row panels:
-	                           packm_mult_nvec,  // - nvec multiple is used for panel length
-	                           packm_mult_ldim,  // - ldim multiple is used for panel width
-	                           TRUE,             // do scale
-	                           TRUE,             // densify structure
-	                           FALSE,            // do NOT invert diagonal
-	                           FALSE,            // do NOT iterate backwards if upper
-	                           FALSE,            // do NOT iterate backwards if lower
-	                           BLIS_PACKED_ROW_PANELS,
-	                           BLIS_BUFFER_FOR_GEN_USE );
-
-
-	// Create control trees to pack by column panels (with and without scaling).
-	packm_cntl_cpn_noscale
-	=
-	bli_packm_cntl_obj_create( BLIS_UNBLOCKED,
-	                           BLIS_VARIANT1,    // When packing to column panels:
-	                           packm_mult_ldim,  // - ldim multiple is used for panel length
-	                           packm_mult_nvec,  // - nvec multiple is used for panel width
-	                           FALSE,            // do NOT scale
-	                           TRUE,             // densify structure
-	                           FALSE,            // do NOT invert diagonal
-	                           FALSE,            // do NOT iterate backwards if upper
-	                           FALSE,            // do NOT iterate backwards if lower
-	                           BLIS_PACKED_COL_PANELS,
-	                           BLIS_BUFFER_FOR_GEN_USE );
-	packm_cntl_cpn_scale
-	=
-	bli_packm_cntl_obj_create( BLIS_UNBLOCKED,
-	                           BLIS_VARIANT1,    // When packing to column panels:
-	                           packm_mult_ldim,  // - ldim multiple is used for panel length
-	                           packm_mult_nvec,  // - nvec multiple is used for panel width
-	                           TRUE,             // do scale
-	                           TRUE,             // densify structure
-	                           FALSE,            // do NOT invert diagonal
-	                           FALSE,            // do NOT iterate backwards if upper
-	                           FALSE,            // do NOT iterate backwards if lower
-	                           BLIS_PACKED_COL_PANELS,
 	                           BLIS_BUFFER_FOR_GEN_USE );
 
 
@@ -212,19 +170,16 @@ void bli_packm_cntl_finalize()
 	bli_cntl_obj_free( packm_cntl_col_noscale );
 	bli_cntl_obj_free( packm_cntl_col_scale );
 
-	bli_cntl_obj_free( packm_cntl_rpn_noscale );
-	bli_cntl_obj_free( packm_cntl_rpn_scale );
-	bli_cntl_obj_free( packm_cntl_cpn_noscale );
-	bli_cntl_obj_free( packm_cntl_cpn_scale );
-
 	bli_blksz_obj_free( packm_mult_ldim );
 	bli_blksz_obj_free( packm_mult_nvec );
 }
 
 packm_t* bli_packm_cntl_obj_create( impl_t     impl_type,
                                     varnum_t   var_num,
-                                    blksz_t*   mult_m,
-                                    blksz_t*   mult_n,
+                                    blksz_t*   mr_def,
+                                    blksz_t*   mr_ext,
+                                    blksz_t*   nr_def,
+                                    blksz_t*   nr_ext,
                                     bool_t     does_scale,
                                     bool_t     does_densify,
                                     bool_t     does_invert_diag,
@@ -239,8 +194,10 @@ packm_t* bli_packm_cntl_obj_create( impl_t     impl_type,
 
 	cntl->impl_type         = impl_type;
 	cntl->var_num           = var_num;
-	cntl->mult_m            = mult_m;
-	cntl->mult_n            = mult_n;
+	cntl->mr_def            = mr_def;
+	cntl->mr_ext            = mr_ext;
+	cntl->nr_def            = nr_def;
+	cntl->nr_ext            = nr_ext;
 	cntl->does_scale        = does_scale;
 	cntl->does_densify      = does_densify;
 	cntl->does_invert_diag  = does_invert_diag;
@@ -255,8 +212,10 @@ packm_t* bli_packm_cntl_obj_create( impl_t     impl_type,
 void bli_packm_cntl_obj_init( packm_t*   cntl,
                               impl_t     impl_type,
                               varnum_t   var_num,
-                              blksz_t*   mult_m,
-                              blksz_t*   mult_n,
+                              blksz_t*   mr_def,
+                              blksz_t*   mr_ext,
+                              blksz_t*   nr_def,
+                              blksz_t*   nr_ext,
                               bool_t     does_scale,
                               bool_t     does_densify,
                               bool_t     does_invert_diag,
@@ -267,8 +226,10 @@ void bli_packm_cntl_obj_init( packm_t*   cntl,
 {
 	cntl->impl_type         = impl_type;
 	cntl->var_num           = var_num;
-	cntl->mult_m            = mult_m;
-	cntl->mult_n            = mult_n;
+	cntl->mr_def            = mr_def;
+	cntl->mr_ext            = mr_ext;
+	cntl->nr_def            = nr_def;
+	cntl->nr_ext            = nr_ext;
 	cntl->does_scale        = does_scale;
 	cntl->does_densify      = does_densify;
 	cntl->does_invert_diag  = does_invert_diag;

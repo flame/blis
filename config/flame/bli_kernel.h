@@ -77,29 +77,9 @@
 #define BLIS_DEFAULT_KC_Z              256
 #define BLIS_DEFAULT_NC_Z              2048
 
-// -- Ccache blocksize extensions (for optimizing edge cases) --
+//#define BLIS_EDGECASE_HACK 1
 
-// NOTE: These cache blocksize "extensions" have the same constraints as
-// the corresponding default blocksizes above.
-
-// NOTE: These values are not yet used.
-#define BLIS_EXTEND_MC_S               0 //(BLIS_DEFAULT_MC_S/4)
-#define BLIS_EXTEND_KC_S               0 //(BLIS_DEFAULT_KC_S/4)
-#define BLIS_EXTEND_NC_S               0 //(BLIS_DEFAULT_NC_S/4)
-
-#define BLIS_EXTEND_MC_D               0 //(BLIS_DEFAULT_MC_D/4)
-#define BLIS_EXTEND_KC_D               0 //(BLIS_DEFAULT_KC_D/4)
-#define BLIS_EXTEND_NC_D               0 //(BLIS_DEFAULT_NC_D/4)
-
-#define BLIS_EXTEND_MC_C               0 //(BLIS_DEFAULT_MC_C/4)
-#define BLIS_EXTEND_KC_C               0 //(BLIS_DEFAULT_KC_C/4)
-#define BLIS_EXTEND_NC_C               0 //(BLIS_DEFAULT_NC_C/4)
-
-#define BLIS_EXTEND_MC_Z               0 //(BLIS_DEFAULT_MC_Z/4)
-#define BLIS_EXTEND_KC_Z               0 //(BLIS_DEFAULT_KC_Z/4)
-#define BLIS_EXTEND_NC_Z               0 //(BLIS_DEFAULT_NC_Z/4)
-
-// -- Default register blocksizes for micro-kernel --
+// -- Default register blocksizes for inner kernel --
 
 // NOTE: When using the reference configuration, these register blocksizes
 // in the m and n dimensions should all be equal to the size expected by
@@ -108,8 +88,8 @@
 #define BLIS_DEFAULT_MR_S              8
 #define BLIS_DEFAULT_NR_S              4
 
-#define BLIS_DEFAULT_MR_D              8
-#define BLIS_DEFAULT_NR_D              4
+#define BLIS_DEFAULT_MR_D              4
+#define BLIS_DEFAULT_NR_D              2
 
 #define BLIS_DEFAULT_MR_C              8
 #define BLIS_DEFAULT_NR_C              4
@@ -125,31 +105,6 @@
 #define BLIS_DEFAULT_KR_D              1
 #define BLIS_DEFAULT_KR_C              1
 #define BLIS_DEFAULT_KR_Z              1
-
-// -- Register blocksize extensions (for packed micro-panels) --
-
-// NOTE: These register blocksize "extensions" determine whether the
-// leading dimensions used within the packed micro-panels are equal to
-// or greater than their corresponding register blocksizes above.
-
-#define BLIS_EXTEND_MR_S               0
-#define BLIS_EXTEND_NR_S               0
-
-#define BLIS_EXTEND_MR_D               0
-#define BLIS_EXTEND_NR_D               0
-
-#define BLIS_EXTEND_MR_C               0
-#define BLIS_EXTEND_NR_C               0
-
-#define BLIS_EXTEND_MR_Z               0
-#define BLIS_EXTEND_NR_Z               0
-
-// Register blocksize extensions in the k dimension are not used.
-
-#define BLIS_EXTEND_KR_S               0
-#define BLIS_EXTEND_KR_D               0
-#define BLIS_EXTEND_KR_C               0
-#define BLIS_EXTEND_KR_Z               0
 
 // -- Number of elements per vector register --
 
@@ -175,7 +130,7 @@
 //#define BLIS_DEFAULT_NUM_DUPL_C        BLIS_NUM_ELEM_PER_REG_C
 //#define BLIS_DEFAULT_NUM_DUPL_Z        BLIS_NUM_ELEM_PER_REG_Z
 #define BLIS_DEFAULT_NUM_DUPL_S        1
-#define BLIS_DEFAULT_NUM_DUPL_D        1
+#define BLIS_DEFAULT_NUM_DUPL_D        2
 #define BLIS_DEFAULT_NUM_DUPL_C        1
 #define BLIS_DEFAULT_NUM_DUPL_Z        1
 
@@ -249,6 +204,8 @@
 
 // -- LEVEL-3 KERNEL DEFINITIONS -----------------------------------------------
 
+#include "bli_gemm_opt_d4x2.h"
+
 // -- dupl --
 
 #define DUPL_KERNEL          dupl_unb_var1
@@ -256,7 +213,7 @@
 // -- gemm --
 
 //#define GEMM_UKERNEL         gemm_ref_4x4
-#define GEMM_UKERNEL         gemm_ref_mxn
+#define GEMM_UKERNEL         gemm_opt_d4x2
 
 // -- trsm-related --
 

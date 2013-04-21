@@ -37,9 +37,9 @@
 
 // Define the size of pool blocks. These may be adjusted so that they can
 // handle inflated blocksizes at edge cases.
-#define BLIS_POOL_MC_D     BLIS_DEFAULT_MC_D
-#define BLIS_POOL_KC_D     BLIS_DEFAULT_KC_D
-#define BLIS_POOL_NC_D     BLIS_DEFAULT_NC_D
+#define BLIS_POOL_MC_D     ( ( BLIS_MAXIMUM_MC_D * BLIS_PACKDIM_MR_D ) / BLIS_DEFAULT_MR_D )
+#define BLIS_POOL_KC_D     ( ( BLIS_MAXIMUM_KC_D * BLIS_PACKDIM_KR_D ) / BLIS_DEFAULT_KR_D )
+#define BLIS_POOL_NC_D     ( ( BLIS_MAXIMUM_NC_D * BLIS_PACKDIM_NR_D ) / BLIS_DEFAULT_NR_D )
 
 // Define each pool's block size.
 // NOTE: Here we assume the "worst" case of the register blocking

@@ -50,8 +50,10 @@ void bli_packm_init( obj_t*   a,
 	packord_t pack_ord_if_up;
 	packord_t pack_ord_if_lo;
 	packbuf_t pack_buf_type;
-	blksz_t*  mult_m;
-	blksz_t*  mult_n;
+	blksz_t*  mr_def;
+	blksz_t*  mr_ext;
+	blksz_t*  nr_def;
+	blksz_t*  nr_ext;
 	obj_t     c;
 
 	// Check parameters.
@@ -126,8 +128,10 @@ void bli_packm_init( obj_t*   a,
 	needs_densify  = cntl_does_densify( cntl );
 	pack_schema    = cntl_pack_schema( cntl );
 	pack_buf_type  = cntl_pack_buf_type( cntl );
-	mult_m         = cntl_mult_m( cntl );
-	mult_n         = cntl_mult_n( cntl );
+	mr_def         = cntl_mr_def( cntl );
+	mr_ext         = cntl_mr_ext( cntl );
+	nr_def         = cntl_nr_def( cntl );
+	nr_ext         = cntl_nr_ext( cntl );
 
 	if ( cntl_does_invert_diag( cntl ) ) invert_diag = BLIS_INVERT_DIAG;
 	else                                 invert_diag = BLIS_NO_INVERT_DIAG;
@@ -145,8 +149,8 @@ void bli_packm_init( obj_t*   a,
 	                     pack_ord_if_up,
 	                     pack_ord_if_lo,
 	                     pack_buf_type,
-	                     mult_m,
-	                     mult_n,
+	                     mr_def, mr_ext,
+	                     nr_def, nr_ext,
 	                     &c,
 	                     p );
 
@@ -160,8 +164,10 @@ void bli_packm_init_pack( bool_t    densify,
                           packord_t pack_ord_if_up,
                           packord_t pack_ord_if_lo,
                           packbuf_t pack_buf_type,
-                          blksz_t*  mult_m,
-                          blksz_t*  mult_n,
+                          blksz_t*  mr_def,
+                          blksz_t*  mr_ext,
+                          blksz_t*  nr_def,
+                          blksz_t*  nr_ext,
                           obj_t*    c,
                           obj_t*    p )
 {
@@ -169,8 +175,13 @@ void bli_packm_init_pack( bool_t    densify,
 	trans_t transc       = bli_obj_trans_status( *c );
 	dim_t   m_c          = bli_obj_length( *c );
 	dim_t   n_c          = bli_obj_width( *c );
-	dim_t   mult_m_dim   = bli_blksz_for_type( datatype, mult_m );
-	dim_t   mult_n_dim   = bli_blksz_for_type( datatype, mult_n );
+	dim_t   mr_def_dim   = bli_blksz_for_type( datatype, mr_def );
+	dim_t   mr_ext_dim   = bli_blksz_for_type( datatype, mr_ext );
+	dim_t   nr_def_dim   = bli_blksz_for_type( datatype, nr_def );
+	dim_t   nr_ext_dim   = bli_blksz_for_type( datatype, nr_ext );
+
+	dim_t   mr_pack_dim  = mr_def_dim + mr_ext_dim;
+	dim_t   nr_pack_dim  = nr_def_dim + nr_ext_dim;
 
 	mem_t*  mem_p;
 	dim_t   m_p_pad, n_p_pad;
@@ -227,13 +238,13 @@ void bli_packm_init_pack( bool_t    densify,
 	// in p) and aligning them to the dimension multiples (typically equal
 	// to register blocksizes). This does waste a little bit of space for
 	// level-2 operations, but that's okay with us.
-	m_p_pad = bli_align_dim_to_mult( bli_obj_length( *p ), mult_m_dim );
-	n_p_pad = bli_align_dim_to_mult( bli_obj_width( *p ),  mult_n_dim );
+	m_p_pad = bli_align_dim_to_mult( bli_obj_length( *p ), mr_def_dim );
+	n_p_pad = bli_align_dim_to_mult( bli_obj_width( *p ),  nr_def_dim );
 
 	// Save the padded dimensions into the packed object. It is important
 	// to save these dimensions since they represent the actual dimensions
 	// of the zero-padded matrix.
-	bli_obj_set_packed_dims( m_p_pad, n_p_pad, *p );
+	bli_obj_set_padded_dims( m_p_pad, n_p_pad, *p );
 
 	// Now we prepare to compute strides, align them, and compute the
 	// total number of bytes needed for the packed buffer. After that,
@@ -294,13 +305,13 @@ void bli_packm_init_pack( bool_t    densify,
 		dim_t ps_p;
 
 		// The maximum panel length (for each datatype) should be equal to
-		// the m dimension multiple.
-		m_panel = mult_m_dim;
+		// the register blocksize in the m dimension.
+		m_panel = mr_def_dim;
 
 		// The "column stride" of a row panel packed object is interpreted as
 		// the column stride WITHIN a panel. Thus, this is equal to the panel
-		// length.
-		cs_p = m_panel;
+		// dimension plus an extension (which may be zero).
+		cs_p = mr_pack_dim;
 
 		// The "row stride" of a row panel packed object is interpreted
 		// as the row stride WITHIN a panel. Thus, it is unit.
@@ -319,8 +330,9 @@ void bli_packm_init_pack( bool_t    densify,
 		ps_p = bli_align_dim_to_size( ps_p, elem_size_p,
 		                              BLIS_CONTIG_STRIDE_ALIGN_SIZE );
 
-		// Store the strides in p.
+		// Store the strides and panel dimension in p.
 		bli_obj_set_incs( rs_p, cs_p, *p );
+		bli_obj_set_panel_dim( m_panel, *p );
 		bli_obj_set_panel_stride( ps_p, *p );
 
 		// Compute the size of the packed buffer.
@@ -332,13 +344,13 @@ void bli_packm_init_pack( bool_t    densify,
 		dim_t ps_p;
 
 		// The maximum panel width (for each datatype) should be equal to
-		// the n dimension multiple.
-		n_panel = mult_n_dim;
+		// the register blocksize in the n dimension.
+		n_panel = nr_def_dim;
 
 		// The "row stride" of a column panel packed object is interpreted as
-		// the row stride WITHIN a panel. Thus, it is equal to the panel
-		// width.
-		rs_p = n_panel;
+		// the row stride WITHIN a panel. Thus, this is equal to the panel
+		// dimension plus an extension (which may be zero).
+		rs_p = nr_pack_dim;
 
 		// The "column stride" of a column panel packed object is interpreted
 		// as the column stride WITHIN a panel. Thus, it is unit.
@@ -357,8 +369,9 @@ void bli_packm_init_pack( bool_t    densify,
 		ps_p = bli_align_dim_to_size( ps_p, elem_size_p,
 		                              BLIS_CONTIG_STRIDE_ALIGN_SIZE );
 
-		// Store the strides in p.
+		// Store the strides and panel dimension in p.
 		bli_obj_set_incs( rs_p, cs_p, *p );
+		bli_obj_set_panel_dim( n_panel, *p );
 		bli_obj_set_panel_stride( ps_p, *p );
 
 		// Compute the size of the packed buffer.

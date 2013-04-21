@@ -55,87 +55,64 @@ blksz_t*          trmm3_kc;
 blksz_t*          trmm3_mr;
 blksz_t*          trmm3_nr;
 blksz_t*          trmm3_kr;
+blksz_t*          trmm3_extmr;
+blksz_t*          trmm3_extnr;
+blksz_t*          trmm3_extkr;
 blksz_t*          trmm3_ni;
-
-// Cache blocksizes.
-
-#define BLIS_TRMM3_KC_S BLIS_DEFAULT_KC_S
-#define BLIS_TRMM3_KC_D BLIS_DEFAULT_KC_D
-#define BLIS_TRMM3_KC_C BLIS_DEFAULT_KC_C
-#define BLIS_TRMM3_KC_Z BLIS_DEFAULT_KC_Z
-
-#define BLIS_TRMM3_MC_S BLIS_DEFAULT_MC_S
-#define BLIS_TRMM3_MC_D BLIS_DEFAULT_MC_D
-#define BLIS_TRMM3_MC_C BLIS_DEFAULT_MC_C
-#define BLIS_TRMM3_MC_Z BLIS_DEFAULT_MC_Z
-
-#define BLIS_TRMM3_NC_S BLIS_DEFAULT_NC_S
-#define BLIS_TRMM3_NC_D BLIS_DEFAULT_NC_D
-#define BLIS_TRMM3_NC_C BLIS_DEFAULT_NC_C
-#define BLIS_TRMM3_NC_Z BLIS_DEFAULT_NC_Z
-
-// Register blocking 
-
-#define BLIS_TRMM3_KR_S BLIS_DEFAULT_KR_S
-#define BLIS_TRMM3_KR_D BLIS_DEFAULT_KR_D
-#define BLIS_TRMM3_KR_C BLIS_DEFAULT_KR_C
-#define BLIS_TRMM3_KR_Z BLIS_DEFAULT_KR_Z
-
-#define BLIS_TRMM3_MR_S BLIS_DEFAULT_MR_S
-#define BLIS_TRMM3_MR_D BLIS_DEFAULT_MR_D
-#define BLIS_TRMM3_MR_C BLIS_DEFAULT_MR_C
-#define BLIS_TRMM3_MR_Z BLIS_DEFAULT_MR_Z
-
-#define BLIS_TRMM3_NR_S BLIS_DEFAULT_NR_S
-#define BLIS_TRMM3_NR_D BLIS_DEFAULT_NR_D
-#define BLIS_TRMM3_NR_C BLIS_DEFAULT_NR_C
-#define BLIS_TRMM3_NR_Z BLIS_DEFAULT_NR_Z
-
-// Incremental pack blocking
-
-#define BLIS_TRMM3_NI_S BLIS_DEFAULT_NI_S
-#define BLIS_TRMM3_NI_D BLIS_DEFAULT_NI_D
-#define BLIS_TRMM3_NI_C BLIS_DEFAULT_NI_C
-#define BLIS_TRMM3_NI_Z BLIS_DEFAULT_NI_Z
 
 
 void bli_trmm3_cntl_init()
 {
 	// Create blocksize objects for each dimension.
-	trmm3_mc = bli_blksz_obj_create( BLIS_TRMM3_MC_S,
-	                                 BLIS_TRMM3_MC_D,
-	                                 BLIS_TRMM3_MC_C,
-	                                 BLIS_TRMM3_MC_Z );
+	trmm3_mc = bli_blksz_obj_create( BLIS_DEFAULT_MC_S,
+	                                 BLIS_DEFAULT_MC_D,
+	                                 BLIS_DEFAULT_MC_C,
+	                                 BLIS_DEFAULT_MC_Z );
 
-	trmm3_nc = bli_blksz_obj_create( BLIS_TRMM3_NC_S,
-	                                 BLIS_TRMM3_NC_D,
-	                                 BLIS_TRMM3_NC_C,
-	                                 BLIS_TRMM3_NC_Z );
+	trmm3_nc = bli_blksz_obj_create( BLIS_DEFAULT_NC_S,
+	                                 BLIS_DEFAULT_NC_D,
+	                                 BLIS_DEFAULT_NC_C,
+	                                 BLIS_DEFAULT_NC_Z );
 
-	trmm3_kc = bli_blksz_obj_create( BLIS_TRMM3_KC_S,
-	                                 BLIS_TRMM3_KC_D,
-	                                 BLIS_TRMM3_KC_C,
-	                                 BLIS_TRMM3_KC_Z );
+	trmm3_kc = bli_blksz_obj_create( BLIS_DEFAULT_KC_S,
+	                                 BLIS_DEFAULT_KC_D,
+	                                 BLIS_DEFAULT_KC_C,
+	                                 BLIS_DEFAULT_KC_Z );
 
-	trmm3_mr = bli_blksz_obj_create( BLIS_TRMM3_MR_S,
-	                                 BLIS_TRMM3_MR_D,
-	                                 BLIS_TRMM3_MR_C,
-	                                 BLIS_TRMM3_MR_Z );
+	trmm3_mr = bli_blksz_obj_create( BLIS_DEFAULT_MR_S,
+	                                 BLIS_DEFAULT_MR_D,
+	                                 BLIS_DEFAULT_MR_C,
+	                                 BLIS_DEFAULT_MR_Z );
 
-	trmm3_nr = bli_blksz_obj_create( BLIS_TRMM3_NR_S,
-	                                 BLIS_TRMM3_NR_D,
-	                                 BLIS_TRMM3_NR_C,
-	                                 BLIS_TRMM3_NR_Z );
+	trmm3_nr = bli_blksz_obj_create( BLIS_DEFAULT_NR_S,
+	                                 BLIS_DEFAULT_NR_D,
+	                                 BLIS_DEFAULT_NR_C,
+	                                 BLIS_DEFAULT_NR_Z );
 
-	trmm3_kr = bli_blksz_obj_create( BLIS_TRMM3_KR_S,
-	                                 BLIS_TRMM3_KR_D,
-	                                 BLIS_TRMM3_KR_C,
-	                                 BLIS_TRMM3_KR_Z );
+	trmm3_kr = bli_blksz_obj_create( BLIS_DEFAULT_KR_S,
+	                                 BLIS_DEFAULT_KR_D,
+	                                 BLIS_DEFAULT_KR_C,
+	                                 BLIS_DEFAULT_KR_Z );
 
-	trmm3_ni = bli_blksz_obj_create( BLIS_TRMM3_NI_S,
-	                                 BLIS_TRMM3_NI_D,
-	                                 BLIS_TRMM3_NI_C,
-	                                 BLIS_TRMM3_NI_Z );
+	trmm3_extmr = bli_blksz_obj_create( BLIS_EXTEND_MR_S,
+	                                    BLIS_EXTEND_MR_D,
+	                                    BLIS_EXTEND_MR_C,
+	                                    BLIS_EXTEND_MR_Z );
+
+	trmm3_extnr = bli_blksz_obj_create( BLIS_EXTEND_NR_S,
+	                                    BLIS_EXTEND_NR_D,
+	                                    BLIS_EXTEND_NR_C,
+	                                    BLIS_EXTEND_NR_Z );
+
+	trmm3_extkr = bli_blksz_obj_create( BLIS_EXTEND_KR_S,
+	                                    BLIS_EXTEND_KR_D,
+	                                    BLIS_EXTEND_KR_C,
+	                                    BLIS_EXTEND_KR_Z );
+
+	trmm3_ni = bli_blksz_obj_create( BLIS_DEFAULT_NI_S,
+	                                 BLIS_DEFAULT_NI_D,
+	                                 BLIS_DEFAULT_NI_C,
+	                                 BLIS_DEFAULT_NI_Z );
 
 
 	// Create control tree objects for packm operations on a, b, and c.
@@ -143,8 +120,10 @@ void bli_trmm3_cntl_init()
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
 	                           BLIS_VARIANT3, // pack panels of A compactly
-	                           trmm3_mr, // IMPORTANT: for consistency with trsm, "k" dim
-	                           trmm3_mr, // multiple is set to mr.
+	                           // IMPORTANT: for consistency with trsm, "k" dim
+	                           // multiple is set to mr.
+	                           trmm3_mr, trmm3_extmr,
+	                           trmm3_mr, trmm3_extmr,
 	                           FALSE, // do NOT scale by alpha
 	                           TRUE,  // densify
 	                           FALSE, // do NOT invert diagonal
@@ -157,8 +136,10 @@ void bli_trmm3_cntl_init()
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
 	                           BLIS_VARIANT2,
-	                           trmm3_mr, // IMPORTANT: m dim multiple here must be mr
-	                           trmm3_nr, // since "k" dim multiple is set to mr above.
+	                           // IMPORTANT: m dim multiple here must be mr
+	                           // since "k" dim multiple is set to mr above.
+	                           trmm3_mr, trmm3_extmr,
+	                           trmm3_nr, trmm3_extnr,
 	                           FALSE, // do NOT scale by alpha
 	                           FALSE, // already dense; densify not necessary
 	                           FALSE, // do NOT invert diagonal
@@ -171,8 +152,8 @@ void bli_trmm3_cntl_init()
 	=
 	bli_packm_cntl_obj_create( BLIS_UNBLOCKED,
 	                           BLIS_VARIANT1,
-	                           trmm3_mr,
-	                           trmm3_nr,
+	                           trmm3_mr, trmm3_extmr,
+	                           trmm3_nr, trmm3_extnr,
 	                           FALSE, // do NOT scale by beta
 	                           FALSE, // already dense; densify not necessary
 	                           FALSE, // do NOT invert diagonal

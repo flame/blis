@@ -144,7 +144,7 @@ void PASTEMAC(ch,varname)( \
                          ) \
 { \
 	/* Temporary buffer for duplicating elements of B. */ \
-	ctype           bd[ PASTEMAC(ch,kc) * \
+	ctype           bd[ PASTEMAC(ch,maxkc) * \
 	                    PASTEMAC(ch,nr) * \
 	                    PASTEMAC(ch,ndup) ] \
 	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
@@ -240,9 +240,14 @@ void PASTEMAC(ch,varname)( \
 		if ( DUPB ) PASTEMAC(ch,dupl)( k_nr, b1, bp ); \
 		else        bp = b1; \
 \
+/*PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: b1", k, NR, b1, NR, 1, "%4.1f", "" ); \
+PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: bd", k, NR*NDUP, bp, NR*NDUP, 1, "%4.1f", "" );*/ \
+\
 		/* Interior loop over the m dimension (MR rows at a time). */ \
 		for ( i = 0; i < m_iter; ++i ) \
 		{ \
+/*PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: a1", MR, k, a1, 1, MR, "%4.1f", "" );*/ \
+\
 			/* Invoke the gemm micro-kernel. */ \
 			PASTEMAC(ch,ukrname)( k, \
 			                      alpha_cast, \

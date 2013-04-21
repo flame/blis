@@ -149,8 +149,8 @@ int main( int argc, char** argv )
 		packm_cntl_a =
 		bli_packm_cntl_obj_create( BLIS_BLOCKED,
 		                           BLIS_VARIANT2,
-		                           mr,
-		                           kr, 
+		                           mr, NULL,
+		                           kr, NULL,
 		                           FALSE, // scale?
 		                           TRUE,  // densify?
 		                           FALSE, // invert diagonal?
@@ -162,8 +162,8 @@ int main( int argc, char** argv )
 		packm_cntl_b =
 		bli_packm_cntl_obj_create( BLIS_BLOCKED,
 		                           BLIS_VARIANT2,
-		                           kr,
-		                           nr, 
+		                           kr, NULL,
+		                           nr, NULL,
 		                           FALSE, // scale?
 		                           FALSE, // densify?
 		                           FALSE, // invert diagonal?

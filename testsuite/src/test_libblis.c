@@ -490,6 +490,23 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	                        BLIS_DEFAULT_NC_C,
 	                        BLIS_DEFAULT_NC_Z );
 	libblis_test_fprintf_c( os, "\n" );
+	libblis_test_fprintf_c( os, "level-3 cache blksz exts     s     d     c     z \n" );
+	libblis_test_fprintf_c( os, "  m dimension            %5u %5u %5u %5u\n",
+	                        BLIS_EXTEND_MC_S,
+	                        BLIS_EXTEND_MC_D,
+	                        BLIS_EXTEND_MC_C,
+	                        BLIS_EXTEND_MC_Z );
+	libblis_test_fprintf_c( os, "  k dimension            %5u %5u %5u %5u\n",
+	                        BLIS_EXTEND_KC_S,
+	                        BLIS_EXTEND_KC_D,
+	                        BLIS_EXTEND_KC_C,
+	                        BLIS_EXTEND_KC_Z );
+	libblis_test_fprintf_c( os, "  n dimension            %5u %5u %5u %5u\n",
+	                        BLIS_EXTEND_NC_S,
+	                        BLIS_EXTEND_NC_D,
+	                        BLIS_EXTEND_NC_C,
+	                        BLIS_EXTEND_NC_Z );
+	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "level-3 register blocksizes                     \n" );
 	libblis_test_fprintf_c( os, "  m dimension            %5u %5u %5u %5u\n",
 	                        BLIS_DEFAULT_MR_S,
@@ -501,6 +518,18 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	                        BLIS_DEFAULT_NR_D,
 	                        BLIS_DEFAULT_NR_C,
 	                        BLIS_DEFAULT_NR_Z );
+	libblis_test_fprintf_c( os, "\n" );
+	libblis_test_fprintf_c( os, "level-3 register blksz exts  s     d     c     z \n" );
+	libblis_test_fprintf_c( os, "  m dimension            %5u %5u %5u %5u\n",
+	                        BLIS_EXTEND_MR_S,
+	                        BLIS_EXTEND_MR_D,
+	                        BLIS_EXTEND_MR_C,
+	                        BLIS_EXTEND_MR_Z );
+	libblis_test_fprintf_c( os, "  n dimension            %5u %5u %5u %5u\n",
+	                        BLIS_EXTEND_NR_S,
+	                        BLIS_EXTEND_NR_D,
+	                        BLIS_EXTEND_NR_C,
+	                        BLIS_EXTEND_NR_Z );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "level-3 packing duplication                     \n" );
 	libblis_test_fprintf_c( os, "  dupl. factors for B    %5u %5u %5u %5u\n",

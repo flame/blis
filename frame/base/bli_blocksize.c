@@ -81,11 +81,19 @@ dim_t bli_blksz_for_obj( obj_t*   obj,
 	return b->v[ bli_obj_datatype( *obj ) ];
 }
 
+extern blksz_t* gemm_mc;
+extern blksz_t* gemm_nc;
+extern blksz_t* gemm_kc;
+extern blksz_t* gemm_mr;
+extern blksz_t* gemm_nr;
+extern blksz_t* gemm_kr;
+
 dim_t bli_determine_blocksize_f( dim_t    i,
                                  dim_t    dim,
                                  obj_t*   obj,
                                  blksz_t* b )
 {
+#if 0
 	num_t dt;
 	dim_t b_alg;
 
@@ -103,7 +111,138 @@ dim_t bli_determine_blocksize_f( dim_t    i,
 	// smaller, in which case we return that remaining value.
 	b_alg = bli_min( b_alg, dim - i );
 
+//printf( "bli_determine_blocksize0: returning %lu\n", b_alg );
+
 	return b_alg;
+#endif
+
+#if 0
+	num_t dt;
+	dim_t b_alg, b_now;
+	dim_t mc, nc, kc;
+	dim_t mr, nr, kr;
+	dim_t dim_left_now;
+
+	dt    = bli_obj_execution_datatype( *obj );
+	b_alg = bli_blksz_for_type( dt, b );
+	
+	mc    = bli_blksz_for_type( dt, gemm_mc );
+	nc    = bli_blksz_for_type( dt, gemm_nc );
+	kc    = bli_blksz_for_type( dt, gemm_kc );
+
+	mr    = bli_blksz_for_type( dt, gemm_mr );
+	nr    = bli_blksz_for_type( dt, gemm_nr );
+	kr    = bli_blksz_for_type( dt, gemm_kr );
+
+	dim_left_now = dim - i;
+
+	if ( dim_left_now <= b_alg )
+	{
+		b_now = dim_left_now;
+	}
+	else if ( dim_left_now <= b_alg + (b_alg/4) )
+	{
+		b_now = dim_left_now / 2;
+
+		// This actually wno't work when, for example, mc == kc but mr != kr.
+		if      ( b_alg == mc ) b_now = bli_align_dim_to_mult( b_now, mr );
+		else if ( b_alg == nc ) b_now = bli_align_dim_to_mult( b_now, nr );
+		else if ( b_alg == kc ) b_now = bli_align_dim_to_mult( b_now, kr );
+	}
+	else
+	{
+		b_now = b_alg;
+	}
+
+//printf( "bli_determine_blocksize1: returning %lu\n", b_now );
+
+	return b_now;
+#endif
+
+#if 0
+	num_t dt;
+	dim_t b_alg, b_now;
+	dim_t mc, nc, kc;
+	dim_t mr, nr, kr;
+	dim_t dim_left_now;
+
+	dt    = bli_obj_execution_datatype( *obj );
+	b_alg = bli_blksz_for_type( dt, b );
+	
+	mc    = bli_blksz_for_type( dt, gemm_mc );
+	nc    = bli_blksz_for_type( dt, gemm_nc );
+	kc    = bli_blksz_for_type( dt, gemm_kc );
+
+	mr    = bli_blksz_for_type( dt, gemm_mr );
+	nr    = bli_blksz_for_type( dt, gemm_nr );
+	kr    = bli_blksz_for_type( dt, gemm_kr );
+
+	dim_left_now = dim - i;
+
+	if ( dim_left_now <= b_alg )
+	{
+		b_now = dim_left_now;
+	}
+	else if ( dim_left_now <= 2 * b_alg )
+	{
+		b_now = dim_left_now / 2;
+
+		// This actually wno't work when, for example, mc == kc but mr != kr.
+		if      ( b_alg == mc ) b_now = bli_align_dim_to_mult( b_now, mr );
+		else if ( b_alg == nc ) b_now = bli_align_dim_to_mult( b_now, nr );
+		else if ( b_alg == kc ) b_now = bli_align_dim_to_mult( b_now, kr );
+	}
+	else
+	{
+		b_now = b_alg;
+	}
+
+//printf( "bli_determine_blocksize2: returning %lu\n", b_now );
+
+	return b_now;
+#endif
+
+#ifdef BLIS_EDGECASE_HACK
+	num_t dt;
+	dim_t b_alg, b_now;
+	dim_t dim_left_now;
+
+	dt    = bli_obj_execution_datatype( *obj );
+	b_alg = bli_blksz_for_type( dt, b );
+	
+	dim_left_now = dim - i;
+
+	if ( dim_left_now <= b_alg + b_alg/4 )
+	{
+		b_now = dim_left_now;
+	}
+	else
+	{
+		b_now = b_alg;
+	}
+
+	return b_now;
+#else
+	num_t dt;
+	dim_t b_alg;
+
+	// We assume that this function is being called from an algorithm that
+	// is moving "forward" (ie: top to bottom, left to right, top-left
+	// to bottom-right).
+
+	// Extract the execution datatype and use it to query the corresponding
+	// blocksize value from the blksz_t object.
+	dt    = bli_obj_execution_datatype( *obj );
+	b_alg = bli_blksz_for_type( dt, b );
+
+	// If we are moving "forward" (ie: top to bottom, left to right, or
+	// top-left to bottom-right), then return b_alg, unless dim - 1 is
+	// smaller, in which case we return that remaining value.
+	b_alg = bli_min( b_alg, dim - i );
+
+
+	return b_alg;
+#endif
 }
 
 dim_t bli_determine_blocksize_b( dim_t    i,

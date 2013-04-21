@@ -54,87 +54,64 @@ blksz_t*          gemm_kc;
 blksz_t*          gemm_mr;
 blksz_t*          gemm_nr;
 blksz_t*          gemm_kr;
+blksz_t*          gemm_extmr;
+blksz_t*          gemm_extnr;
+blksz_t*          gemm_extkr;
 blksz_t*          gemm_ni;
-
-// Cache blocksizes.
-
-#define BLIS_GEMM_KC_S BLIS_DEFAULT_KC_S
-#define BLIS_GEMM_KC_D BLIS_DEFAULT_KC_D
-#define BLIS_GEMM_KC_C BLIS_DEFAULT_KC_C
-#define BLIS_GEMM_KC_Z BLIS_DEFAULT_KC_Z
-
-#define BLIS_GEMM_MC_S BLIS_DEFAULT_MC_S
-#define BLIS_GEMM_MC_D BLIS_DEFAULT_MC_D
-#define BLIS_GEMM_MC_C BLIS_DEFAULT_MC_C
-#define BLIS_GEMM_MC_Z BLIS_DEFAULT_MC_Z
-
-#define BLIS_GEMM_NC_S BLIS_DEFAULT_NC_S
-#define BLIS_GEMM_NC_D BLIS_DEFAULT_NC_D
-#define BLIS_GEMM_NC_C BLIS_DEFAULT_NC_C
-#define BLIS_GEMM_NC_Z BLIS_DEFAULT_NC_Z
-
-// Register blocking 
-
-#define BLIS_GEMM_KR_S BLIS_DEFAULT_KR_S
-#define BLIS_GEMM_KR_D BLIS_DEFAULT_KR_D
-#define BLIS_GEMM_KR_C BLIS_DEFAULT_KR_C
-#define BLIS_GEMM_KR_Z BLIS_DEFAULT_KR_Z
-
-#define BLIS_GEMM_MR_S BLIS_DEFAULT_MR_S
-#define BLIS_GEMM_MR_D BLIS_DEFAULT_MR_D
-#define BLIS_GEMM_MR_C BLIS_DEFAULT_MR_C
-#define BLIS_GEMM_MR_Z BLIS_DEFAULT_MR_Z
-
-#define BLIS_GEMM_NR_S BLIS_DEFAULT_NR_S
-#define BLIS_GEMM_NR_D BLIS_DEFAULT_NR_D
-#define BLIS_GEMM_NR_C BLIS_DEFAULT_NR_C
-#define BLIS_GEMM_NR_Z BLIS_DEFAULT_NR_Z
-
-// Incremental pack blocking
-
-#define BLIS_GEMM_NI_S BLIS_DEFAULT_NI_S
-#define BLIS_GEMM_NI_D BLIS_DEFAULT_NI_D
-#define BLIS_GEMM_NI_C BLIS_DEFAULT_NI_C
-#define BLIS_GEMM_NI_Z BLIS_DEFAULT_NI_Z
 
 
 void bli_gemm_cntl_init()
 {
 	// Create blocksize objects for each dimension.
-	gemm_mc = bli_blksz_obj_create( BLIS_GEMM_MC_S,
-	                                BLIS_GEMM_MC_D,
-	                                BLIS_GEMM_MC_C,
-	                                BLIS_GEMM_MC_Z );
+	gemm_mc = bli_blksz_obj_create( BLIS_DEFAULT_MC_S,
+	                                BLIS_DEFAULT_MC_D,
+	                                BLIS_DEFAULT_MC_C,
+	                                BLIS_DEFAULT_MC_Z );
 
-	gemm_nc = bli_blksz_obj_create( BLIS_GEMM_NC_S,
-	                                BLIS_GEMM_NC_D,
-	                                BLIS_GEMM_NC_C,
-	                                BLIS_GEMM_NC_Z );
+	gemm_nc = bli_blksz_obj_create( BLIS_DEFAULT_NC_S,
+	                                BLIS_DEFAULT_NC_D,
+	                                BLIS_DEFAULT_NC_C,
+	                                BLIS_DEFAULT_NC_Z );
 
-	gemm_kc = bli_blksz_obj_create( BLIS_GEMM_KC_S,
-	                                BLIS_GEMM_KC_D,
-	                                BLIS_GEMM_KC_C,
-	                                BLIS_GEMM_KC_Z );
+	gemm_kc = bli_blksz_obj_create( BLIS_DEFAULT_KC_S,
+	                                BLIS_DEFAULT_KC_D,
+	                                BLIS_DEFAULT_KC_C,
+	                                BLIS_DEFAULT_KC_Z );
 
-	gemm_mr = bli_blksz_obj_create( BLIS_GEMM_MR_S,
-	                                BLIS_GEMM_MR_D,
-	                                BLIS_GEMM_MR_C,
-	                                BLIS_GEMM_MR_Z );
+	gemm_mr = bli_blksz_obj_create( BLIS_DEFAULT_MR_S,
+	                                BLIS_DEFAULT_MR_D,
+	                                BLIS_DEFAULT_MR_C,
+	                                BLIS_DEFAULT_MR_Z );
 
-	gemm_nr = bli_blksz_obj_create( BLIS_GEMM_NR_S,
-	                                BLIS_GEMM_NR_D,
-	                                BLIS_GEMM_NR_C,
-	                                BLIS_GEMM_NR_Z );
+	gemm_nr = bli_blksz_obj_create( BLIS_DEFAULT_NR_S,
+	                                BLIS_DEFAULT_NR_D,
+	                                BLIS_DEFAULT_NR_C,
+	                                BLIS_DEFAULT_NR_Z );
 
-	gemm_kr = bli_blksz_obj_create( BLIS_GEMM_KR_S,
-	                                BLIS_GEMM_KR_D,
-	                                BLIS_GEMM_KR_C,
-	                                BLIS_GEMM_KR_Z );
+	gemm_kr = bli_blksz_obj_create( BLIS_DEFAULT_KR_S,
+	                                BLIS_DEFAULT_KR_D,
+	                                BLIS_DEFAULT_KR_C,
+	                                BLIS_DEFAULT_KR_Z );
 
-	gemm_ni = bli_blksz_obj_create( BLIS_GEMM_NI_S,
-	                                BLIS_GEMM_NI_D,
-	                                BLIS_GEMM_NI_C,
-	                                BLIS_GEMM_NI_Z );
+	gemm_extmr = bli_blksz_obj_create( BLIS_EXTEND_MR_S,
+	                                   BLIS_EXTEND_MR_D,
+	                                   BLIS_EXTEND_MR_C,
+	                                   BLIS_EXTEND_MR_Z );
+
+	gemm_extnr = bli_blksz_obj_create( BLIS_EXTEND_NR_S,
+	                                   BLIS_EXTEND_NR_D,
+	                                   BLIS_EXTEND_NR_C,
+	                                   BLIS_EXTEND_NR_Z );
+
+	gemm_extkr = bli_blksz_obj_create( BLIS_EXTEND_KR_S,
+	                                   BLIS_EXTEND_KR_D,
+	                                   BLIS_EXTEND_KR_C,
+	                                   BLIS_EXTEND_KR_Z );
+
+	gemm_ni = bli_blksz_obj_create( BLIS_DEFAULT_NI_S,
+	                                BLIS_DEFAULT_NI_D,
+	                                BLIS_DEFAULT_NI_C,
+	                                BLIS_DEFAULT_NI_Z );
 
 
 	// Create control tree objects for packm operations on a, b, and c.
@@ -142,8 +119,8 @@ void bli_gemm_cntl_init()
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
 	                           BLIS_VARIANT2,
-	                           gemm_mr,
-	                           gemm_kr,
+	                           gemm_mr, gemm_extmr,
+	                           gemm_kr, gemm_extkr,
 	                           FALSE, // do NOT scale by alpha
 	                           FALSE, // already dense; densify not necessary
 	                           FALSE, // do NOT invert diagonal
@@ -156,8 +133,8 @@ void bli_gemm_cntl_init()
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
 	                           BLIS_VARIANT2,
-	                           gemm_kr,
-	                           gemm_nr,
+	                           gemm_kr, gemm_extkr,
+	                           gemm_nr, gemm_extnr,
 	                           FALSE, // do NOT scale by alpha
 	                           FALSE, // already dense; densify not necessary
 	                           FALSE, // do NOT invert diagonal
@@ -170,8 +147,8 @@ void bli_gemm_cntl_init()
 	=
 	bli_packm_cntl_obj_create( BLIS_UNBLOCKED,
 	                           BLIS_VARIANT1,
-	                           gemm_mr,
-	                           gemm_nr,
+	                           gemm_mr, gemm_extmr,
+	                           gemm_nr, gemm_extnr,
 	                           FALSE, // do NOT scale by beta
 	                           FALSE, // already dense; densify not necessary
 	                           FALSE, // do NOT invert diagonal

@@ -151,8 +151,8 @@ int main( int argc, char** argv )
 		packm_cntl_a =
 		bli_packm_cntl_obj_create( BLIS_BLOCKED,
 		                           BLIS_VARIANT3,
-		                           mr,    // IMPORTANT: "k" dim multiple must be mr to
-		                           mr,    // support using ukernel for right/bottom-right
+		                           mr, NULL, // IMPORTANT: "k" dim multiple must be mr to
+		                           mr, NULL, // support using ukernel for right/bottom-right
 		                                  // edge cases (see macro-kernel for comments).
 		                           FALSE, // scale?
 		                           TRUE,  // densify?
@@ -165,8 +165,8 @@ int main( int argc, char** argv )
 		packm_cntl_b =
 		bli_packm_cntl_obj_create( BLIS_BLOCKED,
 		                           BLIS_VARIANT2,
-		                           mr,    // IMPORTANT: m dim multiple here must be mr
-		                           nr,    // since "k" dim multiple is set to mr above.
+		                           mr, NULL, // IMPORTANT: m dim multiple here must be mr
+		                           nr, NULL, // since "k" dim multiple is set to mr above.
 		                           TRUE,  // scale?
 		                           FALSE, // densify?
 		                           FALSE, // invert diagonal?

@@ -138,7 +138,7 @@ void PASTEMAC(ch,varname)( \
                          ) \
 { \
 	/* Temporary buffer for duplicating elements of B. */ \
-	ctype           bd[ PASTEMAC(ch,kc) * \
+	ctype           bd[ PASTEMAC(ch,maxkc) * \
 	                    PASTEMAC(ch,nr) * \
 	                    PASTEMAC(ch,ndup) ] \
 	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
@@ -154,6 +154,8 @@ void PASTEMAC(ch,varname)( \
 	/* Alias constants to shorter names. */ \
 	const dim_t     MR         = PASTEMAC(ch,mr); \
 	const dim_t     NR         = PASTEMAC(ch,nr); \
+	const dim_t     PACKMR     = PASTEMAC(ch,packmr); \
+	const dim_t     PACKNR     = PASTEMAC(ch,packnr); \
 	const dim_t     NDUP       = PASTEMAC(ch,ndup); \
 	const bool_t    DUPB       = NDUP != 1; \
 \
@@ -252,7 +254,7 @@ void PASTEMAC(ch,varname)( \
 	k_nr    = k_a1011 * NR; \
 \
 	/* Determine some increments used to step through A, B, and C. */ \
-	rstep_a = k * MR; \
+	rstep_a = k * PACKMR; \
 \
 	cstep_b = ps_b; \
 \
@@ -305,14 +307,14 @@ void PASTEMAC(ch,varname)( \
 				k_a1011   = bli_min( k, diagoffa_i + MR ); \
 				k_a10     = k_a1011 - MR; \
 \
-				b11  = b1 + diagoffa_i * NR; \
+				b11  = b1 + diagoffa_i * PACKNR; \
 				bp_i = bp + off_a1011 * NR * NDUP; \
 \
 				/* Compute the addresses of the A10 panel and triangular
 				   block A11, and the corresponding panel Bd01 and block
 				   Bd11. */ \
 				a10  = a1; \
-				a11  = a1   + k_a10 * MR; \
+				a11  = a1   + k_a10 * PACKMR; \
 				bp01 = bp_i; \
 				bp11 = bp_i + k_a10 * NR * NDUP; \
 \
@@ -354,7 +356,7 @@ PASTEMAC(ch,fprintm)( stdout, "trsm_l_ker_var2: bp11 (diag)", MR, NR, bp11, NR, 
 					                            c11, rs_c,  cs_c ); \
 				} \
 \
-				a1 += k_a1011 * MR; \
+				a1 += k_a1011 * PACKMR; \
 			} \
 			else if ( bli_is_strictly_below_diag_n( diagoffa_i, MR, k ) ) \
 			{ \

@@ -45,16 +45,13 @@ void PASTEMAC(ch,varname)( \
                            ctype* restrict c, inc_t rs_c, inc_t cs_c \
                          ) \
 { \
-	const dim_t     MR    = PASTEMAC(ch,mr); \
-	const dim_t     NR    = PASTEMAC(ch,nr); \
-\
-	const dim_t     m     = MR; \
-	const dim_t     n     = NR; \
+	const dim_t     m     = PASTEMAC(ch,mr); \
+	const dim_t     n     = PASTEMAC(ch,nr); \
 \
 	const inc_t     rs_a  = 1; \
-	const inc_t     cs_a  = MR; \
+	const inc_t     cs_a  = PASTEMAC(ch,packmr); \
 \
-	const inc_t     rs_b  = NR; \
+	const inc_t     rs_b  = PASTEMAC(ch,packnr); \
 	const inc_t     cs_b  = 1; \
 \
 	dim_t           iter, i, j, k; \

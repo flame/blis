@@ -51,7 +51,8 @@ typedef void (*FUNCPTR_T)(
                            dim_t   n_max,
                            void*   beta,
                            void*   c, inc_t rs_c, inc_t cs_c,
-                           void*   p, inc_t rs_p, inc_t cs_p, inc_t ps_p
+                           void*   p, inc_t rs_p, inc_t cs_p,
+                                      dim_t pd_p, inc_t ps_p
                          );
 
 static FUNCPTR_T GENARRAY(ftypes,packm_blk_var3);
@@ -74,8 +75,8 @@ void bli_packm_blk_var3( obj_t*   beta,
 
 	dim_t     m_p       = bli_obj_length( *p );
 	dim_t     n_p       = bli_obj_width( *p );
-	dim_t     m_max_p   = bli_obj_packed_length( *p );
-	dim_t     n_max_p   = bli_obj_packed_width( *p );
+	dim_t     m_max_p   = bli_obj_padded_length( *p );
+	dim_t     n_max_p   = bli_obj_padded_width( *p );
 
 	void*     buf_c     = bli_obj_buffer_at_off( *c );
 	inc_t     rs_c      = bli_obj_row_stride( *c );
@@ -84,6 +85,7 @@ void bli_packm_blk_var3( obj_t*   beta,
 	void*     buf_p     = bli_obj_buffer_at_off( *p );
 	inc_t     rs_p      = bli_obj_row_stride( *p );
 	inc_t     cs_p      = bli_obj_col_stride( *p );
+	dim_t     pd_p      = bli_obj_panel_dim( *p );
 	inc_t     ps_p      = bli_obj_panel_stride( *p );
 
 	void*     buf_beta  = bli_obj_scalar_buffer( dt_cp, *beta );
@@ -109,7 +111,8 @@ void bli_packm_blk_var3( obj_t*   beta,
 	   n_max_p,
 	   buf_beta,
 	   buf_c, rs_c, cs_c,
-	   buf_p, rs_p, cs_p, ps_p );
+	   buf_p, rs_p, cs_p,
+	          pd_p, ps_p );
 }
 
 
@@ -131,7 +134,8 @@ void PASTEMAC(ch,varname )( \
                             dim_t   n_max, \
                             void*   beta, \
                             void*   c, inc_t rs_c, inc_t cs_c, \
-                            void*   p, inc_t rs_p, inc_t cs_p, inc_t ps_p \
+                            void*   p, inc_t rs_p, inc_t cs_p, \
+                                       dim_t pd_p, inc_t ps_p  \
                           ) \
 { \
 	ctype* restrict beta_cast = beta; \
@@ -159,7 +163,7 @@ void PASTEMAC(ch,varname )( \
 	dim_t           panel_off_i; \
 	inc_t           vs_c; \
 	inc_t           incc, ldc; \
-	inc_t           p_inc; \
+	inc_t           ldp, p_inc; \
 	dim_t*          m_panel; \
 	dim_t*          n_panel; \
 	dim_t           m_panel_use; \
@@ -199,11 +203,12 @@ void PASTEMAC(ch,varname )( \
 		iter_dim      = n; \
 		panel_len     = m; \
 		panel_len_max = m_max; \
-		panel_dim     = rs_p; \
+		panel_dim     = pd_p; \
 		incc          = cs_c; \
 		ldc           = rs_c; \
 		vs_c          = cs_c; \
 		diagoffc_inc  = -( doff_t)panel_dim; \
+		ldp           = rs_p; \
 		m_panel       = &m; \
 		n_panel       = &panel_dim_i; \
 	} \
@@ -213,11 +218,12 @@ void PASTEMAC(ch,varname )( \
 		iter_dim      = m; \
 		panel_len     = n; \
 		panel_len_max = n_max; \
-		panel_dim     = cs_p; \
+		panel_dim     = pd_p; \
 		incc          = rs_c; \
 		ldc           = cs_c; \
 		vs_c          = rs_c; \
 		diagoffc_inc  = ( doff_t )panel_dim; \
+		ldp           = cs_p; \
 		m_panel       = &panel_dim_i; \
 		n_panel       = &n; \
 	} \
@@ -303,7 +309,7 @@ void PASTEMAC(ch,varname )( \
 			                        panel_len_i, \
 			                        beta_cast, \
 			                        c_use, incc, ldc, \
-			                        p_use,       panel_dim ); \
+			                        p_use,       ldp ); \
 \
 			/* If the diagonal of C is implicitly unit, set the diagonal of
 			   the packed panel to unit. */ \
@@ -351,7 +357,7 @@ void PASTEMAC(ch,varname )( \
 				                                p_use, rs_p, cs_p ); \
 			} \
 \
-			p_inc = panel_dim * panel_len_max_i; \
+			p_inc = ldp * panel_len_max_i; \
 		} \
 		else \
 		{ \
@@ -369,9 +375,9 @@ void PASTEMAC(ch,varname )( \
 			                        panel_len_i, \
 			                        beta_cast, \
 			                        c_use, incc, ldc, \
-			                        p_use,       panel_dim ); \
+			                        p_use,       ldp ); \
 \
-			p_inc = panel_dim * panel_len_max_i; \
+			p_inc = ldp * panel_len_max_i; \
 		} \
 \
 		/* If necessary, zero-pad at the edge of the panel dimension (ie: the
@@ -382,7 +388,7 @@ void PASTEMAC(ch,varname )( \
 			dim_t  m_edge = panel_dim - i; \
 			dim_t  n_edge = panel_len_max_i; \
 			inc_t  rs_pe  = 1; \
-			inc_t  cs_pe  = panel_dim; \
+			inc_t  cs_pe  = ldp; \
 			ctype* p_edge = p_begin + (i  )*rs_pe; \
 \
 			PASTEMAC2(ch,ch,setm_unb_var1)( 0, \
@@ -402,7 +408,7 @@ void PASTEMAC(ch,varname )( \
 			dim_t  m_edge = panel_dim; \
 			dim_t  n_edge = panel_len_max_i - j; \
 			inc_t  rs_pe  = 1; \
-			inc_t  cs_pe  = panel_dim; \
+			inc_t  cs_pe  = ldp; \
 			ctype* p_edge = p_begin + (j  )*cs_pe; \
 \
 			PASTEMAC2(ch,ch,setm_unb_var1)( 0, \
@@ -427,7 +433,7 @@ void PASTEMAC(ch,varname )( \
 			dim_t  m_br     = panel_dim       - i; \
 			dim_t  n_br     = panel_len_max_i - j; \
 			inc_t  rs_pe    = 1; \
-			inc_t  cs_pe    = panel_dim; \
+			inc_t  cs_pe    = ldp; \
 			ctype* p_edge   = p_begin + (i  )*rs_pe + (j  )*cs_pe; \
 \
 			PASTEMAC2(ch,ch,setd_unb_var1)( 0, \

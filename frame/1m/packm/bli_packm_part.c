@@ -76,7 +76,7 @@ void bli_packm_acquire_mpart_t2b( subpart_t requested_part,
 	// Modify offsets and dimensions of requested partition.
 	bli_obj_set_dims( b, n, *sub_obj );
 
-	// Tweak the packed length of the subpartition to trick the underlying
+	// Tweak the padded length of the subpartition to trick the underlying
 	// implementation into only zero-padding for the narrow submatrix of
 	// interest. Usually, the value we want is b (for non-edge cases), but
 	// at the edges, we want the remainder of the mem_t region in the m
@@ -86,13 +86,13 @@ void bli_packm_acquire_mpart_t2b( subpart_t requested_part,
 	// b for the edge iteration). In these cases, we arrive at the new
 	// packed length by simply subtracting off i.
 	{
-		dim_t  m_pack_max = bli_obj_packed_length( *sub_obj );
+		dim_t  m_pack_max = bli_obj_padded_length( *sub_obj );
 		dim_t  m_pack_cur;
 
 		if ( i + b == m ) m_pack_cur = m_pack_max - i;
 		else              m_pack_cur = b;
 
-		bli_obj_set_packed_length( m_pack_cur, *sub_obj );
+		bli_obj_set_padded_length( m_pack_cur, *sub_obj );
 	}
 
 	// Translate the desired offsets to a panel offset and adjust the
@@ -152,7 +152,7 @@ void bli_packm_acquire_mpart_l2r( subpart_t requested_part,
 	// Modify offsets and dimensions of requested partition.
 	bli_obj_set_dims( m, b, *sub_obj );
 
-	// Tweak the packed width of the subpartition to trick the underlying
+	// Tweak the padded width of the subpartition to trick the underlying
 	// implementation into only zero-padding for the narrow submatrix of
 	// interest. Usually, the value we want is b (for non-edge cases), but
 	// at the edges, we want the remainder of the mem_t region in the n
@@ -162,13 +162,13 @@ void bli_packm_acquire_mpart_l2r( subpart_t requested_part,
 	// b for the edge iteration). In these cases, we arrive at the new
 	// packed width by simply subtracting off j.
 	{
-		dim_t  n_pack_max = bli_obj_packed_width( *sub_obj );
+		dim_t  n_pack_max = bli_obj_padded_width( *sub_obj );
 		dim_t  n_pack_cur;
 
 		if ( j + b == n ) n_pack_cur = n_pack_max - j;
 		else              n_pack_cur = b;
 
-		bli_obj_set_packed_width( n_pack_cur, *sub_obj );
+		bli_obj_set_padded_width( n_pack_cur, *sub_obj );
 	}
 
 	// Translate the desired offsets to a panel offset and adjust the

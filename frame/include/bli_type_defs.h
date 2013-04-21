@@ -388,9 +388,11 @@ typedef struct obj_s
 
 	// Pack-related fields
 	mem_t         pack_mem; // cached memory region for packing
-	dim_t         m_packed;
-	dim_t         n_packed;
+	dim_t         m_padded; // m dimension of matrix, including any padding
+	dim_t         n_padded; // n dimension of matrix, including any padding
 	inc_t         ps;       // panel stride (distance to next panel)
+	inc_t         pd;       // panel dimension (the "width" of a panel:
+	                        // usually MR or NR)
 
 	//mem_t         cast_mem; // cached memory region for casting
 
@@ -445,8 +447,9 @@ typedef struct obj_s
 	   those situations, we want the subpartition to inherit the pack_mem
 	   field, and the corresponding packed dimensions, of its parent. */ \
 	(b).pack_mem  = (a).pack_mem; \
-	(b).m_packed  = (a).m_packed; \
-	(b).n_packed  = (a).n_packed; \
+	(b).m_padded  = (a).m_padded; \
+	(b).n_padded  = (a).n_padded; \
+	(b).pd        = (a).pd; \
 	(b).ps        = (a).ps; \
 \
 	/*(b).cast_mem  = (a).cast_mem;*/ \

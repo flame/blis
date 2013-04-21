@@ -510,8 +510,8 @@ void bli_obj_print( char* label, obj_t* obj )
 	fprintf( file, " - buf           %p\n",  bli_mem_buffer( pack_mem ) );
 	fprintf( file, " - buf_type      %u\n",  bli_mem_buf_type( pack_mem ) );
 	fprintf( file, " - size          %lu\n", bli_mem_size( pack_mem ) );
-	fprintf( file, " m_packed        %lu\n", bli_obj_packed_length( *obj ) );
-	fprintf( file, " n_packed        %lu\n", bli_obj_packed_width( *obj ) );
+	fprintf( file, " m_padded        %lu\n", bli_obj_padded_length( *obj ) );
+	fprintf( file, " n_padded        %lu\n", bli_obj_padded_width( *obj ) );
 	fprintf( file, " ps              %lu\n", bli_obj_panel_stride( *obj ) );
 	fprintf( file, "\n" );
 

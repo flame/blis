@@ -38,12 +38,11 @@
 //           transa transb m     n     k     alpha    a        lda   b        ldb   beta     c        ldc
 void dgemm_( char*, char*, int*, int*, int*, double*, double*, int*, double*, int*, double*, double*, int* );
 
-//#define PRINT
+#define PRINT
 
 int main( int argc, char** argv )
 {
 	obj_t a, b, c;
-	obj_t a_pack, b_pack;
 	obj_t c_save;
 	obj_t alpha, beta;
 	dim_t m, n, k;
@@ -53,6 +52,9 @@ int main( int argc, char** argv )
 	num_t dt_a, dt_b, dt_c;
 	num_t dt_alpha, dt_beta;
 	int   r, n_repeats;
+
+#if 0
+	obj_t a_pack, b_pack;
 
 	blksz_t* mr;
 	blksz_t* nr;
@@ -70,6 +72,7 @@ int main( int argc, char** argv )
 	gemm_t*  gemm_cntl_op_bp;
 	gemm_t*  gemm_cntl_mm_op;
 	gemm_t*  gemm_cntl_vl_mm;
+#endif
 
 	double dtime;
 	double dtime_save;
@@ -132,6 +135,7 @@ int main( int argc, char** argv )
 		bli_setsc(  (2.0/1.0), 0.0, &alpha );
 		bli_setsc( -(1.0/1.0), 0.0, &beta );
 
+#if 0
 		mr = bli_blksz_obj_create( 2, 4, 2, 2 );
 		kr = bli_blksz_obj_create( 1, 1, 1, 1 );
 		nr = bli_blksz_obj_create( 1, 4, 1, 1 );
@@ -215,7 +219,7 @@ int main( int argc, char** argv )
 
 		bli_obj_init_pack( &a_pack );
 		bli_obj_init_pack( &b_pack );
-
+#endif
 
 		bli_copym( &c, &c_save );
 	
@@ -291,6 +295,7 @@ int main( int argc, char** argv )
 		printf( "( %2ld, 1:5 ) = [ %4lu %4lu %4lu  %10.3e  %6.3f ];\n",
 		        (p - p_begin + 1)/p_inc + 1, m, k, n, dtime_save, gflops );
 
+#if 0
 		bli_obj_release_pack( &a_pack );
 		bli_obj_release_pack( &b_pack );
 
@@ -309,6 +314,7 @@ int main( int argc, char** argv )
 		bli_cntl_obj_free( gemm_cntl_op_bp );
 		bli_cntl_obj_free( gemm_cntl_mm_op );
 		bli_cntl_obj_free( gemm_cntl_vl_mm );
+#endif
 
 		bli_obj_free( &alpha );
 		bli_obj_free( &beta );

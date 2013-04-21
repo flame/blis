@@ -55,7 +55,8 @@ void PASTEMAC(ch,varname)( \
                            dim_t   n_max, \
                            void*   beta, \
                            void*   c, inc_t rs_c, inc_t cs_c, \
-                           void*   p, inc_t rs_p, inc_t cs_p, inc_t ps_p \
+                           void*   p, inc_t rs_p, inc_t cs_p, \
+                                      dim_t pd_p, inc_t ps_p \
                          );
 
 INSERT_GENTPROT_BASIC( packm_blk_var3 )

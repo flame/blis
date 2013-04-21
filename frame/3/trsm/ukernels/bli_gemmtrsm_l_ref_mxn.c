@@ -49,9 +49,7 @@ void PASTEMAC(ch,varname)( \
                            ctype* restrict c, inc_t rs_c, inc_t cs_c \
                          ) \
 { \
-	const dim_t     NR        = PASTEMAC(ch,nr); \
-\
-	const inc_t     rs_b      = NR; \
+	const inc_t     rs_b      = PASTEMAC(ch,packnr); \
 	const inc_t     cs_b      = 1; \
 \
 	ctype* restrict minus_one = PASTEMAC(ch,m1); \

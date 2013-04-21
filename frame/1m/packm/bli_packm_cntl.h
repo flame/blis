@@ -36,8 +36,10 @@ struct packm_s
 {
 	impl_t         impl_type;
 	varnum_t       var_num;
-	blksz_t*       mult_m;
-	blksz_t*       mult_n;
+	blksz_t*       mr_def;
+	blksz_t*       mr_ext;
+	blksz_t*       nr_def;
+	blksz_t*       nr_ext;
 	bool_t         does_scale;
 	bool_t         does_densify;
 	bool_t         does_invert_diag;
@@ -48,8 +50,10 @@ struct packm_s
 };
 typedef struct packm_s packm_t;
 
-#define cntl_mult_m( cntl )            cntl->mult_m
-#define cntl_mult_n( cntl )            cntl->mult_n
+#define cntl_mr_def( cntl )            cntl->mr_def
+#define cntl_mr_ext( cntl )            cntl->mr_ext
+#define cntl_nr_def( cntl )            cntl->nr_def
+#define cntl_nr_ext( cntl )            cntl->nr_ext
 
 #define cntl_does_scale( cntl )        cntl->does_scale
 #define cntl_does_densify( cntl )      cntl->does_densify
@@ -71,8 +75,10 @@ void     bli_packm_cntl_init( void );
 void     bli_packm_cntl_finalize( void );
 packm_t* bli_packm_cntl_obj_create( impl_t     impl_type,
                                     varnum_t   var_num,
-                                    blksz_t*   mult_m,
-                                    blksz_t*   mult_n,
+                                    blksz_t*   mr_def,
+                                    blksz_t*   mr_ext,
+                                    blksz_t*   nr_def,
+                                    blksz_t*   nr_ext,
                                     bool_t     does_scale,
                                     bool_t     does_densify,
                                     bool_t     does_invert_diag,
@@ -83,8 +89,10 @@ packm_t* bli_packm_cntl_obj_create( impl_t     impl_type,
 void bli_packm_cntl_obj_init( packm_t*   cntl,
                               impl_t     impl_type,
                               varnum_t   var_num,
-                              blksz_t*   mult_m,
-                              blksz_t*   mult_n,
+                              blksz_t*   mr_def,
+                              blksz_t*   mr_ext,
+                              blksz_t*   nr_def,
+                              blksz_t*   nr_ext,
                               bool_t     does_scale,
                               bool_t     does_densify,
                               bool_t     does_invert_diag,

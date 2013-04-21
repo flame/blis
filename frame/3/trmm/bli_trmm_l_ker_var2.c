@@ -149,7 +149,7 @@ void PASTEMAC(ch,varname)( \
                          ) \
 { \
 	/* Temporary buffer for duplicating elements of B. */ \
-	ctype           bd[ PASTEMAC(ch,kc) * \
+	ctype           bd[ PASTEMAC(ch,maxkc) * \
 	                    PASTEMAC(ch,nr) * \
 	                    PASTEMAC(ch,ndup) ] \
 	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
@@ -165,6 +165,7 @@ void PASTEMAC(ch,varname)( \
 	/* Alias some constants to shorter names. */ \
 	const dim_t     MR         = PASTEMAC(ch,mr); \
 	const dim_t     NR         = PASTEMAC(ch,nr); \
+	const dim_t     PACKMR     = PASTEMAC(ch,packmr); \
 	const dim_t     NDUP       = PASTEMAC(ch,ndup); \
 	const bool_t    DUPB       = NDUP != 1; \
 \
@@ -252,7 +253,7 @@ void PASTEMAC(ch,varname)( \
 	k_nr    = k_a1011 * NR; \
 \
 	/* Determine some increments used to step through A, B, and C. */ \
-	rstep_a = k * MR; \
+	rstep_a = k * PACKMR; \
 \
 	cstep_b = ps_b; \
 \
@@ -334,7 +335,7 @@ void PASTEMAC(ch,varname)( \
 					                            c11, rs_c,  cs_c ); \
 				} \
 \
-				a1 += k_a1011 * MR; \
+				a1 += k_a1011 * PACKMR; \
 			} \
 			else if ( bli_is_strictly_below_diag_n( diagoffa_i, MR, k ) ) \
 			{ \

@@ -70,8 +70,8 @@ void bli_packm_unb_var1( obj_t*   beta,
 
 	dim_t     m_p       = bli_obj_length( *p );
 	dim_t     n_p       = bli_obj_width( *p );
-	dim_t     m_max_p   = bli_obj_packed_length( *p );
-	dim_t     n_max_p   = bli_obj_packed_width( *p );
+	dim_t     m_max_p   = bli_obj_padded_length( *p );
+	dim_t     n_max_p   = bli_obj_padded_width( *p );
 
 	void*     buf_c     = bli_obj_buffer_at_off( *c );
 	inc_t     rs_c      = bli_obj_row_stride( *c );

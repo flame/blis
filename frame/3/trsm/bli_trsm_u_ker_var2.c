@@ -138,7 +138,7 @@ void PASTEMAC(ch,varname)( \
                          ) \
 { \
 	/* Temporary buffer for duplicating elements of B. */ \
-	ctype           bd[ PASTEMAC(ch,kc) * \
+	ctype           bd[ PASTEMAC(ch,maxkc) * \
 	                    PASTEMAC(ch,nr) * \
 	                    PASTEMAC(ch,ndup) ] \
 	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
@@ -154,6 +154,8 @@ void PASTEMAC(ch,varname)( \
 	/* Alias constants to shorter names. */ \
 	const dim_t     MR         = PASTEMAC(ch,mr); \
 	const dim_t     NR         = PASTEMAC(ch,nr); \
+	const dim_t     PACKMR     = PASTEMAC(ch,packmr); \
+	const dim_t     PACKNR     = PASTEMAC(ch,packnr); \
 	const dim_t     NDUP       = PASTEMAC(ch,ndup); \
 	const bool_t    DUPB       = NDUP != 1; \
 \
@@ -252,7 +254,7 @@ void PASTEMAC(ch,varname)( \
 	k_nr    = k_a1112 * NR; \
 \
 	/* Determine some increments used to step through A, B, and C. */ \
-	rstep_a = k * MR; \
+	rstep_a = k * PACKMR; \
 \
 	cstep_b = ps_b; \
 \
@@ -310,14 +312,14 @@ void PASTEMAC(ch,varname)( \
 				/* Index into b1 (if the diagonal offset is positive) to
 				   locate the MR x NR block of b1 that will be updated by the
 				   trsm subproblem. */ \
-				b11  = b1 + off_a1112 * NR; \
+				b11  = b1 + off_a1112 * PACKNR; \
 				bp_i = bp + off_a1112 * NR * NDUP; \
 \
 				/* Compute the addresses of the A12 panel and triangular
 				   block A11, and the corresponding panel Bd21 and block
 				   Bd11. */ \
 				a11  = a1; \
-				a12  = a1   + k_a11 * MR; \
+				a12  = a1   + k_a11 * PACKMR; \
 				bp11 = bp_i; \
 				bp21 = bp_i + k_a11 * NR * NDUP; \
 \
@@ -374,7 +376,7 @@ PASTEMAC(ch,fprintm)( stdout, "trsm_u_ker_var2: ct after (diag)", m_cur, n_cur, 
 					                            c11, rs_c,  cs_c ); \
 				} \
 \
-				a1 += k_a1112 * MR; \
+				a1 += k_a1112 * PACKMR; \
 			} \
 			else if ( bli_is_strictly_above_diag_n( diagoffa_i, MR, k ) ) \
 			{ \

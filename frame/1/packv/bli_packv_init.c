@@ -175,7 +175,7 @@ void bli_packv_init_pack( pack_t   pack_schema,
 	}
 
 	// Save the padded (packed) dimensions into the packed object.
-	bli_obj_set_packed_dims( m_p_pad, 1, *p );
+	bli_obj_set_padded_dims( m_p_pad, 1, *p );
 
 	// Grab the buffer address from the mem_t object and copy it to the
 	// main object buffer field. (Sometimes this buffer address will be
@@ -193,7 +193,7 @@ void bli_packv_init_pack( pack_t   pack_schema,
 		// how much space beyond the vector would need to be zero-padded, if
 		// zero-padding was needed.
 		rs_p = 1;
-		cs_p = bli_obj_packed_length( *p );
+		cs_p = bli_obj_padded_length( *p );
 
 		bli_obj_set_incs( rs_p, cs_p, *p );
 	}
