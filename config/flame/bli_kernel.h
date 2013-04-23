@@ -252,6 +252,8 @@
 // -- LEVEL-3 KERNEL DEFINITIONS -----------------------------------------------
 
 #include "bli_gemm_opt_d4x2.h"
+#include "bli_gemmtrsm_l_opt_d4x2.h"
+#include "bli_gemmtrsm_u_opt_d4x2.h"
 
 // -- dupl --
 
@@ -263,8 +265,8 @@
 
 // -- trsm-related --
 
-#define GEMMTRSM_L_UKERNEL   gemmtrsm_l_ref_mxn
-#define GEMMTRSM_U_UKERNEL   gemmtrsm_u_ref_mxn
+#define GEMMTRSM_L_UKERNEL   gemmtrsm_l_opt_d4x2
+#define GEMMTRSM_U_UKERNEL   gemmtrsm_u_opt_d4x2
 
 #define TRSM_L_UKERNEL       trsm_l_ref_mxn
 #define TRSM_U_UKERNEL       trsm_u_ref_mxn
