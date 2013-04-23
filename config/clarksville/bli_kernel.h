@@ -61,21 +61,21 @@
 // that would be needed instead of (3a).
 //
 
-#define BLIS_DEFAULT_MC_S              128
+#define BLIS_DEFAULT_MC_S              256
 #define BLIS_DEFAULT_KC_S              256
 #define BLIS_DEFAULT_NC_S              8192
 
 #define BLIS_DEFAULT_MC_D              368
 #define BLIS_DEFAULT_KC_D              256
-#define BLIS_DEFAULT_NC_D              8192
+#define BLIS_DEFAULT_NC_D              4096
 
 #define BLIS_DEFAULT_MC_C              128
 #define BLIS_DEFAULT_KC_C              256
-#define BLIS_DEFAULT_NC_C              8192
+#define BLIS_DEFAULT_NC_C              4096
 
-#define BLIS_DEFAULT_MC_Z              128
+#define BLIS_DEFAULT_MC_Z              64
 #define BLIS_DEFAULT_KC_Z              256
-#define BLIS_DEFAULT_NC_Z              8192
+#define BLIS_DEFAULT_NC_Z              2048
 
 // -- Ccache blocksize extensions (for optimizing edge cases) --
 

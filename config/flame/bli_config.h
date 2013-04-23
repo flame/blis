@@ -93,7 +93,7 @@
 
 // Alignment size used when allocating entire blocks of contiguous memory
 // from the contiguous memory allocator.
-#define BLIS_CONTIG_ADDR_ALIGN_SIZE      16
+#define BLIS_CONTIG_ADDR_ALIGN_SIZE      BLIS_PAGE_SIZE
 
 // Alignment size used when sizing strides (eg: of packed micro-panels)
 // within a block of contiguous memory.

@@ -51,13 +51,9 @@
 #include "bli_trsm_l_ker_var2.h"
 #include "bli_trsm_u_ker_var2.h"
 
-#include "bli_gemmtrsm_l_ref_4x4.h"
-#include "bli_gemmtrsm_u_ref_4x4.h"
 #include "bli_gemmtrsm_l_ref_mxn.h"
 #include "bli_gemmtrsm_u_ref_mxn.h"
 
-#include "bli_trsm_l_ref_4x4.h"
-#include "bli_trsm_u_ref_4x4.h"
 #include "bli_trsm_l_ref_mxn.h"
 #include "bli_trsm_u_ref_mxn.h"
 

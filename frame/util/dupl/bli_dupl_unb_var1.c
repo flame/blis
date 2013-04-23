@@ -44,14 +44,19 @@ void PASTEMAC(ch,varname)( \
                            ctype*  bd \
                          ) \
 { \
-	const dim_t ndup = PASTEMAC(ch,ndup); \
-	dim_t       i, d; \
+	const dim_t NDUP   = PASTEMAC(ch,ndup); \
+	const dim_t NR     = PASTEMAC(ch,nr); \
+	const dim_t PACKNR = PASTEMAC(ch,packnr); \
+	dim_t       i, j, el, d; \
 \
-	for ( i = 0; i < n; ++i ) \
+	for ( el = 0; el < n; ++el ) \
 	{ \
-		for ( d = 0; d < ndup; ++d ) \
+		i = el / NR; \
+		j = el % NR; \
+\
+		for ( d = 0; d < NDUP; ++d ) \
 		{ \
-			*(bd + i*ndup + d) = *(b + i); \
+			*(bd + el*NDUP + d) = *(b + i*PACKNR + j); \
 		} \
 	} \
 }

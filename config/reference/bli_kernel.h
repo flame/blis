@@ -255,18 +255,13 @@
 
 // -- gemm --
 
-//#define GEMM_UKERNEL         gemm_ref_4x4
 #define GEMM_UKERNEL         gemm_ref_mxn
 
 // -- trsm-related --
 
-//#define GEMMTRSM_L_UKERNEL   gemmtrsm_l_ref_4x4
-//#define GEMMTRSM_U_UKERNEL   gemmtrsm_u_ref_4x4
 #define GEMMTRSM_L_UKERNEL   gemmtrsm_l_ref_mxn
 #define GEMMTRSM_U_UKERNEL   gemmtrsm_u_ref_mxn
 
-//#define TRSM_L_UKERNEL       trsm_l_ref_4x4
-//#define TRSM_U_UKERNEL       trsm_u_ref_4x4
 #define TRSM_L_UKERNEL       trsm_l_ref_mxn
 #define TRSM_U_UKERNEL       trsm_u_ref_mxn
 
