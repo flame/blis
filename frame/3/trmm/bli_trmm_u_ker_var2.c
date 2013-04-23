@@ -181,6 +181,8 @@ void PASTEMAC(ch,varname)( \
 	ctype* restrict c1; \
 	ctype* restrict c11; \
 	ctype* restrict bp_i; \
+	ctype* restrict a2; \
+	ctype* restrict b2; \
 \
 	doff_t          diagoffa_i; \
 	dim_t           m_iter, m_left; \
@@ -282,6 +284,9 @@ void PASTEMAC(ch,varname)( \
 		if ( DUPB ) PASTEMAC(ch,dupl)( k_nr, b1, bp ); \
 		else        bp = b1; \
 \
+		/* Compute the address of the next panel of B. */ \
+		b2 = b1 + cstep_b; \
+\
 		/* Loop over the m dimension (MR rows at a time). */ \
 		for ( i = 0; i < m_iter; ++i ) \
 		{ \
@@ -306,6 +311,11 @@ void PASTEMAC(ch,varname)( \
 /*PASTEMAC(ch,fprintm)( stdout, "trmm_u_ker_var2: a1", MR, k_a1112, a1, 1, MR, "%4.1f", "" );*/ \
 /*PASTEMAC(ch,fprintm)( stdout, "trmm_u_ker_var2: b1", k_a1112, NR, bp_i, NR, 1, "%4.1f", "" );*/ \
 \
+				/* Compute the address of the next panel of A. */ \
+				a2 = a1 + k_a1112 * PACKMR; \
+				if ( i == m_iter - 1 ) \
+					a2 = a_cast; \
+\
 				/* Handle interior and edge cases separately. */ \
 				if ( m_cur == MR && n_cur == NR ) \
 				{ \
@@ -315,7 +325,8 @@ void PASTEMAC(ch,varname)( \
 					                      a1, \
 					                      bp_i, \
 					                      beta_cast, \
-					                      c11, rs_c, cs_c ); \
+					                      c11, rs_c, cs_c, \
+					                      a2, b2 ); \
 				} \
 				else \
 				{ \
@@ -330,7 +341,8 @@ void PASTEMAC(ch,varname)( \
 					                      a1, \
 					                      bp_i, \
 					                      beta_cast, \
-					                      ct, rs_ct, cs_ct ); \
+					                      ct, rs_ct, cs_ct, \
+					                      a2, b2 ); \
 \
 					/* Copy the result to the edge of C. */ \
 					PASTEMAC2(ch,ch,copys_mxn)( m_cur, n_cur, \
@@ -342,6 +354,11 @@ void PASTEMAC(ch,varname)( \
 			} \
 			else if ( bli_is_strictly_above_diag_n( diagoffa_i, MR, k ) ) \
 			{ \
+				/* Compute the address of the next panel of A. */ \
+				a2 = a1 + rstep_a; \
+				if ( i == m_iter - 1 ) \
+					a2 = a_cast; \
+\
 				/* Handle interior and edge cases separately. */ \
 				if ( m_cur == MR && n_cur == NR ) \
 				{ \
@@ -351,7 +368,8 @@ void PASTEMAC(ch,varname)( \
 					                      a1, \
 					                      bp, \
 					                      one, \
-					                      c11, rs_c, cs_c ); \
+					                      c11, rs_c, cs_c, \
+					                      a2, b2 ); \
 				} \
 				else \
 				{ \
@@ -361,7 +379,8 @@ void PASTEMAC(ch,varname)( \
 					                      a1, \
 					                      bp, \
 					                      zero, \
-					                      ct, rs_ct, cs_ct ); \
+					                      ct, rs_ct, cs_ct, \
+					                      a2, b2 ); \
 \
 					/* Add the result to the edge of C. */ \
 					PASTEMAC2(ch,ch,adds_mxn)( m_cur, n_cur, \

@@ -40,7 +40,9 @@ void bli_sgemm_opt_d4x2(
                          float* restrict a,
                          float* restrict b,
                          float* restrict beta,
-                         float* restrict c, inc_t rs_c, inc_t cs_c
+                         float* restrict c, inc_t rs_c, inc_t cs_c,
+                         float* restrict a_next,
+                         float* restrict b_next
                        )
 {
 	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
@@ -52,7 +54,9 @@ void bli_dgemm_opt_d4x2(
                          double* restrict a,
                          double* restrict b,
                          double* restrict beta,
-                         double* restrict c, inc_t rs_c, inc_t cs_c
+                         double* restrict c, inc_t rs_c, inc_t cs_c,
+                         double* restrict a_next,
+                         double* restrict b_next
                        )
 {
 	dim_t   k_iter;
@@ -325,7 +329,9 @@ void bli_cgemm_opt_d4x2(
                          scomplex* restrict a,
                          scomplex* restrict b,
                          scomplex* restrict beta,
-                         scomplex* restrict c, inc_t rs_c, inc_t cs_c
+                         scomplex* restrict c, inc_t rs_c, inc_t cs_c,
+                         scomplex* restrict a_next,
+                         scomplex* restrict b_next
                        )
 {
 	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
@@ -337,7 +343,9 @@ void bli_zgemm_opt_d4x2(
                          dcomplex* restrict a,
                          dcomplex* restrict b,
                          dcomplex* restrict beta,
-                         dcomplex* restrict c, inc_t rs_c, inc_t cs_c
+                         dcomplex* restrict c, inc_t rs_c, inc_t cs_c,
+                         dcomplex* restrict a_next,
+                         dcomplex* restrict b_next
                        )
 {
 	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );

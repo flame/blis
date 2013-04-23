@@ -173,6 +173,8 @@ void PASTEMAC(ch,varname)( \
 	ctype* restrict b1; \
 	ctype* restrict c1; \
 	ctype* restrict c11; \
+	ctype* restrict a2; \
+	ctype* restrict b2; \
 \
 	dim_t           k_nr; \
 	dim_t           m_iter, m_left; \
@@ -240,13 +242,22 @@ void PASTEMAC(ch,varname)( \
 		if ( DUPB ) PASTEMAC(ch,dupl)( k_nr, b1, bp ); \
 		else        bp = b1; \
 \
-/*PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: b1", k, NR, b1, NR, 1, "%4.1f", "" ); \
-PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: bd", k, NR*NDUP, bp, NR*NDUP, 1, "%4.1f", "" );*/ \
+		/* Initialize our next panel of B to be the current panel of B. */ \
+		b2 = b1; \
 \
 		/* Interior loop over the m dimension (MR rows at a time). */ \
 		for ( i = 0; i < m_iter; ++i ) \
 		{ \
-/*PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: a1", MR, k, a1, 1, MR, "%4.1f", "" );*/ \
+			/* Compute the addresses of the next panels of A and B. */ \
+			a2 = a1 + rstep_a; \
+			if ( bli_is_last_iter_f( i, m_iter, m_left ) ) \
+			{ \
+				a2 = a_cast; \
+				b2 = b1 + cstep_b; \
+				/*if ( i == n_iter - 1 && n_left == 0 )*/ \
+				if ( bli_is_last_iter_f( i, n_iter, n_left ) ) \
+					b2 = b_cast; \
+			} \
 \
 			/* Invoke the gemm micro-kernel. */ \
 			PASTEMAC(ch,ukrname)( k, \
@@ -254,7 +265,8 @@ PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: bd", k, NR*NDUP, bp, NR*NDUP, 1, "
 			                      a1, \
 			                      bp, \
 			                      beta_cast, \
-			                      c11, rs_c, cs_c ); \
+			                      c11, rs_c, cs_c, \
+			                      a2, b2 ); \
 \
 			a1  += rstep_a; \
 			c11 += rstep_c; \
@@ -263,13 +275,21 @@ PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: bd", k, NR*NDUP, bp, NR*NDUP, 1, "
 		/* Bottom edge handling. */ \
 		if ( m_left ) \
 		{ \
+			/* Compute the addresses of the next panels of A and B. */ \
+			a2 = a_cast; \
+			b2 = b1 + cstep_b; \
+			if ( bli_is_last_iter_f( i, n_iter, n_left ) ) \
+				b2 = b_cast; \
+\
+\
 			/* Invoke the gemm micro-kernel. */ \
 			PASTEMAC(ch,ukrname)( k, \
 			                      alpha_cast, \
 			                      a1, \
 			                      bp, \
 			                      zero, \
-			                      ct, rs_ct, cs_ct ); \
+			                      ct, rs_ct, cs_ct, \
+			                      a2, b2 ); \
 \
 			/* Scale the bottom edge of C and add the result from above. */ \
 			PASTEMAC3(ch,ch,ch,xpbys_mxn)( m_left, NR, \
@@ -292,16 +312,28 @@ PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: bd", k, NR*NDUP, bp, NR*NDUP, 1, "
 		if ( DUPB ) PASTEMAC(ch,dupl)( k_nr, b1, bp ); \
 		else        bp = b1; \
 \
+		/* Initialize our next panel of B to be the current panel of B. */ \
+		b2 = b1; \
+\
 		/* Right edge loop over the m dimension (MR rows at a time). */ \
 		for ( i = 0; i < m_iter; ++i ) \
 		{ \
+			/* Compute the addresses of the next panels of A and B. */ \
+			a2 = a1 + rstep_a; \
+			if ( bli_is_last_iter_f( i, m_iter, m_left ) ) \
+			{ \
+				a2 = a_cast; \
+				b2 = b_cast; \
+			} \
+\
 			/* Invoke the gemm micro-kernel. */ \
 			PASTEMAC(ch,ukrname)( k, \
 			                      alpha_cast, \
 			                      a1, \
 			                      bp, \
 			                      zero, \
-			                      ct, rs_ct, cs_ct ); \
+			                      ct, rs_ct, cs_ct, \
+			                      a2, b2 ); \
 \
 			/* Scale the right edge of C and add the result from above. */ \
 			PASTEMAC3(ch,ch,ch,xpbys_mxn)( MR, n_left, \
@@ -316,13 +348,18 @@ PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: bd", k, NR*NDUP, bp, NR*NDUP, 1, "
 		/* Bottom-right corner handling. */ \
 		if ( m_left ) \
 		{ \
+			/* Compute the address of the next panel of A. */ \
+			a2 = a_cast; \
+			b2 = b_cast; \
+\
 			/* Invoke the gemm micro-kernel. */ \
 			PASTEMAC(ch,ukrname)( k, \
 			                      alpha_cast, \
 			                      a1, \
 			                      bp, \
 			                      zero, \
-			                      ct, rs_ct, cs_ct ); \
+			                      ct, rs_ct, cs_ct, \
+			                      a2, b2 ); \
 \
 			/* Scale the bottom-right corner of C and add the result from above. */ \
 			PASTEMAC3(ch,ch,ch,xpbys_mxn)( m_left, n_left, \
@@ -331,6 +368,10 @@ PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: bd", k, NR*NDUP, bp, NR*NDUP, 1, "
 			                               c11, rs_c,  cs_c ); \
 		} \
 	} \
+\
+/*PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: b1", k, NR, b1, NR, 1, "%4.1f", "" ); \
+PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: bd", k, NR*NDUP, bp, NR*NDUP, 1, "%4.1f", "" );*/ \
+/*PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: a1", MR, k, a1, 1, MR, "%4.1f", "" );*/ \
 }
 
 INSERT_GENTFUNC_BASIC( gemm_ker_var2, GEMM_UKERNEL )

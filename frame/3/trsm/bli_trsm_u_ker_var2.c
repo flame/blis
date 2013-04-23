@@ -175,6 +175,8 @@ void PASTEMAC(ch,varname)( \
 	ctype* restrict bp21; \
 	ctype* restrict bp11; \
 	ctype* restrict bp_i; \
+	ctype* restrict a2; \
+	ctype* restrict b2; \
 \
 	doff_t          diagoffa_i; \
 	dim_t           m_iter, m_left; \
@@ -285,6 +287,9 @@ void PASTEMAC(ch,varname)( \
 		if ( DUPB ) PASTEMAC(ch,dupl)( k_nr, b1, bp ); \
 		else        bp = b1; \
 \
+		/* Compute the address of the next panel of B. */ \
+		b2 = b1 + cstep_b; \
+\
 		/* Loop over the m dimension (MR rows at a time). */ \
 		for ( ib = 0; ib < m_iter; ++ib ) \
 		{ \
@@ -338,7 +343,11 @@ printf( "k_a11      = %lu\n", k_a11 ); \
 printf( "rs_c,cs_c  = %lu %lu\n", rs_c, cs_c ); \
 printf( "rs_ct,cs_ct= %lu %lu\n", rs_ct, cs_ct ); \
 */ \
- \
+\
+				/* Compute the address of the next panel of A. */ \
+				a2 = a1 + k_a1112 * PACKMR; \
+				if ( i == m_iter - 1 ) \
+					a2 = a_cast; \
 \
 				/* Handle interior and edge cases separately. */ \
 				if ( m_cur == MR && n_cur == NR ) \
@@ -351,7 +360,8 @@ printf( "rs_ct,cs_ct= %lu %lu\n", rs_ct, cs_ct ); \
 					                          bp21, \
 					                          bp11, \
 					                          b11, \
-					                          c11, rs_c, cs_c ); \
+					                          c11, rs_c, cs_c, \
+					                          a2, b2 ); \
 				} \
 				else \
 				{ \
@@ -363,7 +373,8 @@ printf( "rs_ct,cs_ct= %lu %lu\n", rs_ct, cs_ct ); \
 					                          bp21, \
 					                          bp11, \
 					                          b11, \
-					                          ct, rs_ct, cs_ct ); \
+					                          ct, rs_ct, cs_ct, \
+					                          a2, b2 ); \
 \
 /*
 PASTEMAC(ch,fprintm)( stdout, "trsm_u_ker_var2: bp11 after (diag)", MR, NR, bp11, NR, 1, "%5.2f", "" ); \
@@ -380,6 +391,11 @@ PASTEMAC(ch,fprintm)( stdout, "trsm_u_ker_var2: ct after (diag)", m_cur, n_cur, 
 			} \
 			else if ( bli_is_strictly_above_diag_n( diagoffa_i, MR, k ) ) \
 			{ \
+				/* Compute the address of the next panel of A. */ \
+				a2 = a1 + rstep_a; \
+				if ( i == m_iter - 1 ) \
+					a2 = a_cast; \
+\
 				/* Handle interior and edge cases separately. */ \
 				if ( m_cur == MR && n_cur == NR ) \
 				{ \
@@ -389,7 +405,8 @@ PASTEMAC(ch,fprintm)( stdout, "trsm_u_ker_var2: ct after (diag)", m_cur, n_cur, 
 					                      a1, \
 					                      bp, \
 					                      alpha_cast, \
-					                      c11, rs_c, cs_c ); \
+					                      c11, rs_c, cs_c, \
+					                      a2, b2 ); \
 				} \
 				else \
 				{ \
@@ -399,7 +416,8 @@ PASTEMAC(ch,fprintm)( stdout, "trsm_u_ker_var2: ct after (diag)", m_cur, n_cur, 
 					                      a1, \
 					                      bp, \
 					                      zero, \
-					                      ct, rs_ct, cs_ct ); \
+					                      ct, rs_ct, cs_ct, \
+					                      a2, b2 ); \
 \
 					/* Add the result to the edge of C. */ \
 					PASTEMAC3(ch,ch,ch,xpbys_mxn)( m_cur, n_cur, \

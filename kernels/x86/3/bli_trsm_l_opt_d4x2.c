@@ -35,20 +35,20 @@
 #include "blis.h"
 
 void bli_strsm_l_opt_d4x2(
-                           float*   a11,
-                           float*   b11,
-                           float*   bd11,
-                           float*   c11, inc_t rs_c, inc_t cs_c
+                           float* restrict   a11,
+                           float* restrict   b11,
+                           float* restrict   bd11,
+                           float* restrict   c11, inc_t rs_c, inc_t cs_c
                          )
 {
 	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 }
 
 void bli_dtrsm_l_opt_d4x2(
-                           double*  a11,
-                           double*  b11,
-                           double*  bd11,
-                           double*  c11, inc_t rs_c, inc_t cs_c
+                           double* restrict  a11,
+                           double* restrict  b11,
+                           double* restrict  bd11,
+                           double* restrict  c11, inc_t rs_c, inc_t cs_c
                          )
 {
 	__asm__ volatile
@@ -185,20 +185,20 @@ void bli_dtrsm_l_opt_d4x2(
 }
 
 void bli_ctrsm_l_opt_d4x2(
-                           scomplex* a11,
-                           scomplex* b11,
-                           scomplex* bd11,
-                           scomplex* c11, inc_t rs_c, inc_t cs_c
+                           scomplex* restrict a11,
+                           scomplex* restrict b11,
+                           scomplex* restrict bd11,
+                           scomplex* restrict c11, inc_t rs_c, inc_t cs_c
                          )
 {
 	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 }
 
 void bli_ztrsm_l_opt_d4x2(
-                           dcomplex* a11,
-                           dcomplex* b11,
-                           dcomplex* bd11,
-                           dcomplex* c11, inc_t rs_c, inc_t cs_c
+                           dcomplex* restrict a11,
+                           dcomplex* restrict b11,
+                           dcomplex* restrict bd11,
+                           dcomplex* restrict c11, inc_t rs_c, inc_t cs_c
                          )
 {
 	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );

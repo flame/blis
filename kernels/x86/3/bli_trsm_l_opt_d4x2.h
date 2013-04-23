@@ -37,10 +37,10 @@
 #define GENTPROT( ctype, ch, varname ) \
 \
 void PASTEMAC(ch,varname)( \
-                           ctype*  a11, \
-                           ctype*  b11, \
-                           ctype*  bd11, \
-                           ctype*  c11, inc_t rs_c, inc_t cs_c \
+                           ctype* restrict a11, \
+                           ctype* restrict b11, \
+                           ctype* restrict bd11, \
+                           ctype* restrict c11, inc_t rs_c, inc_t cs_c \
                          );
 
 INSERT_GENTPROT_BASIC( trsm_l_opt_d4x2 )

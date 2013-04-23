@@ -44,7 +44,9 @@ void PASTEMAC(ch,varname)( \
                            ctype* restrict a, \
                            ctype* restrict b, \
                            ctype* restrict beta, \
-                           ctype* restrict c, inc_t rs_c, inc_t cs_c \
+                           ctype* restrict c, inc_t rs_c, inc_t cs_c, \
+                           ctype* restrict a_next, \
+                           ctype* restrict b_next  \
                          ) \
 { \
 	const dim_t     m     = PASTEMAC(ch,mr); \

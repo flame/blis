@@ -261,10 +261,13 @@
 
 // -- gemm --
 
+//#define GEMM_UKERNEL         gemm_ref_mxn
 #define GEMM_UKERNEL         gemm_opt_d4x2
 
 // -- trsm-related --
 
+//#define GEMMTRSM_L_UKERNEL   gemmtrsm_l_ref_mxn
+//#define GEMMTRSM_U_UKERNEL   gemmtrsm_u_ref_mxn
 #define GEMMTRSM_L_UKERNEL   gemmtrsm_l_opt_d4x2
 #define GEMMTRSM_U_UKERNEL   gemmtrsm_u_opt_d4x2
 

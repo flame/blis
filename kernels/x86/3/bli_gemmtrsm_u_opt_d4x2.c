@@ -35,26 +35,32 @@
 #include "blis.h"
 
 void bli_sgemmtrsm_u_opt_d4x2(
-                               dim_t     k,
-                               float*    a12,
-                               float*    a11,
-                               float*    bd21,
-                               float*    bd11,
-                               float*    b11,
-                               float*    c11, inc_t rs_c, inc_t cs_c
+                               dim_t              k,
+                               float* restrict    alpha,
+                               float* restrict    a12,
+                               float* restrict    a11,
+                               float* restrict    bd21,
+                               float* restrict    bd11,
+                               float* restrict    b11,
+                               float* restrict    c11, inc_t rs_c, inc_t cs_c,
+                               float* restrict    a_next,
+                               float* restrict    b_next
                              )
 {
 	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 }
 
 void bli_dgemmtrsm_u_opt_d4x2(
-                               dim_t     k,
-                               double*   a12,
-                               double*   a11,
-                               double*   bd21,
-                               double*   bd11,
-                               double*   b11,
-                               double*   c11, inc_t rs_c, inc_t cs_c
+                               dim_t              k,
+                               double* restrict   alpha,
+                               double* restrict   a12,
+                               double* restrict   a11,
+                               double* restrict   bd21,
+                               double* restrict   bd11,
+                               double* restrict   b11,
+                               double* restrict   c11, inc_t rs_c, inc_t cs_c,
+                               double* restrict   a_next,
+                               double* restrict   b_next
                              )
 {
 	dim_t k_iter;
@@ -408,26 +414,32 @@ void bli_dgemmtrsm_u_opt_d4x2(
 }
 
 void bli_cgemmtrsm_u_opt_d4x2(
-                               dim_t     k,
-                               scomplex* a12,
-                               scomplex* a11,
-                               scomplex* bd21,
-                               scomplex* bd11,
-                               scomplex* b11,
-                               scomplex* c11, inc_t rs_c, inc_t cs_c
+                               dim_t              k,
+                               scomplex* restrict alpha,
+                               scomplex* restrict a12,
+                               scomplex* restrict a11,
+                               scomplex* restrict bd21,
+                               scomplex* restrict bd11,
+                               scomplex* restrict b11,
+                               scomplex* restrict c11, inc_t rs_c, inc_t cs_c,
+                               scomplex* restrict a_next,
+                               scomplex* restrict b_next
                              )
 {
 	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 }
 
 void bli_zgemmtrsm_u_opt_d4x2(
-                               dim_t     k,
-                               dcomplex* a12,
-                               dcomplex* a11,
-                               dcomplex* bd21,
-                               dcomplex* bd11,
-                               dcomplex* b11,
-                               dcomplex* c11, inc_t rs_c, inc_t cs_c
+                               dim_t              k,
+                               dcomplex* restrict alpha,
+                               dcomplex* restrict a12,
+                               dcomplex* restrict a11,
+                               dcomplex* restrict bd21,
+                               dcomplex* restrict bd11,
+                               dcomplex* restrict b11,
+                               dcomplex* restrict c11, inc_t rs_c, inc_t cs_c,
+                               dcomplex* restrict a_next,
+                               dcomplex* restrict b_next
                              )
 {
 	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );

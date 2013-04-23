@@ -46,7 +46,9 @@ void PASTEMAC(ch,varname)( \
                            ctype* restrict bdT, \
                            ctype* restrict bd, \
                            ctype* restrict b, \
-                           ctype* restrict c, inc_t rs_c, inc_t cs_c \
+                           ctype* restrict c, inc_t rs_c, inc_t cs_c, \
+                           ctype* restrict a_next, \
+                           ctype* restrict b_next  \
                          ) \
 { \
 	const inc_t     rs_b      = PASTEMAC(ch,packnr); \
@@ -60,7 +62,9 @@ void PASTEMAC(ch,varname)( \
 	                      aL, \
 	                      bdT, \
 	                      alpha, \
-	                      b, rs_b, cs_b ); \
+	                      b, rs_b, cs_b, \
+	                      a_next, \
+	                      b_next ); \
 \
 	/* b = inv(a) * b;
 	   bd = b; (if gemm ukernel needs duplicated B)
