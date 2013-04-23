@@ -269,10 +269,17 @@ void bli_dgemmtrsm_l_opt_d4x2(
 		"                                  \n\t" // xmm2 == ( ab20 ab21 )
 		"                                  \n\t" // xmm3 == ( ab30 ab31 )
 		"                                  \n\t"
+		"movl     %10, %%eax               \n\t" // load address of alpha
+		"movddup  (%%eax), %%xmm7          \n\t" // load alpha and duplicate
+		"                                  \n\t"
 		"movapd  0 * 16(%%ebx), %%xmm4     \n\t" // load xmm4 = ( beta00 beta01 )
 		"movapd  1 * 16(%%ebx), %%xmm5     \n\t" // load xmm5 = ( beta10 beta11 )
 		"movapd  2 * 16(%%ebx), %%xmm6     \n\t" // load xmm6 = ( beta20 beta21 )
-		"movapd  3 * 16(%%ebx), %%xmm7     \n\t" // load xmm7 = ( beta30 beta31 )
+		"mulpd    %%xmm7, %%xmm4           \n\t" // xmm4 *= alpha
+		"mulpd    %%xmm7, %%xmm5           \n\t" // xmm5 *= alpha
+		"mulpd    %%xmm7, %%xmm6           \n\t" // xmm6 *= alpha
+		//"movapd  3 * 16(%%ebx), %%xmm7     \n\t" // load xmm7 = ( beta30 beta31 )
+		"mulpd   3 * 16(%%ebx), %%xmm7     \n\t" // xmm7 = alpha * ( beta30 beta31 )
 		"                                  \n\t"
 		"subpd    %%xmm0, %%xmm4           \n\t" // xmm4 -= xmm0
 		"subpd    %%xmm1, %%xmm5           \n\t" // xmm5 -= xmm1
@@ -400,7 +407,8 @@ void bli_dgemmtrsm_l_opt_d4x2(
 		  "m" (b11),
 		  "m" (c11),
 		  "m" (rs_c),
-		  "m" (cs_c)
+		  "m" (cs_c),
+		  "m" (alpha)
 		: // register clobber list
 		  "eax", "ebx", "ecx", "edx", "esi", "edi",
 		  "xmm0", "xmm1", "xmm2", "xmm3",
