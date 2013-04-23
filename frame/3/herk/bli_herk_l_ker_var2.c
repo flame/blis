@@ -302,27 +302,50 @@ void PASTEMAC(ch,varname)( \
 			c11 += rstep_c; \
 		} \
 \
-		/* Bottom edge handling. (Note that the diagonal is guaranteed not
-		   to factor in here.) */ \
+		/* Bottom edge handling. */ \
 		if ( m_left ) \
 		{ \
+			/* Compute the diagonal offset for the submatrix at (i,j). */ \
+			diagoffc_ij = diagoffc - (doff_t)j*NR + (doff_t)i*MR; \
+\
 			/* Compute the address of the next panel of A. */ \
 			a2 = a_cast; \
 \
-			/* Invoke the gemm micro-kernel. */ \
-			PASTEMAC(ch,ukrname)( k, \
-			                      alpha_cast, \
-			                      a1, \
-			                      bp, \
-			                      zero, \
-			                      ct, rs_ct, cs_ct, \
-			                      a2, b2 ); \
+			if ( bli_intersects_diag_n( diagoffc_ij, m_left, NR ) ) \
+			{ \
+				/* Invoke the gemm micro-kernel. */ \
+				PASTEMAC(ch,ukrname)( k, \
+				                      alpha_cast, \
+				                      a1, \
+				                      bp, \
+				                      zero, \
+				                      ct, rs_ct, cs_ct, \
+				                      a2, b2 ); \
 \
-			/* Scale the bottom edge of C and add the result. */ \
-			PASTEMAC3(ch,ch,ch,xpbys_mxn)( m_left, NR, \
-			                               ct,  rs_ct, cs_ct, \
-			                               beta_cast, \
-			                               c11, rs_c,  cs_c ); \
+				/* Scale C and add the result to only the stored part. */ \
+				PASTEMAC3(ch,ch,ch,xpbys_mxn_l)( diagoffc_ij, \
+				                                 m_left, NR, \
+				                                 ct,  rs_ct, cs_ct, \
+				                                 beta_cast, \
+				                                 c11, rs_c,  cs_c ); \
+			} \
+			else if ( bli_is_strictly_below_diag_n( diagoffc_ij, m_left, NR ) ) \
+			{ \
+				/* Invoke the gemm micro-kernel. */ \
+				PASTEMAC(ch,ukrname)( k, \
+				                      alpha_cast, \
+				                      a1, \
+				                      bp, \
+				                      zero, \
+				                      ct, rs_ct, cs_ct, \
+				                      a2, b2 ); \
+\
+				/* Scale the bottom edge of C and add the result. */ \
+				PASTEMAC3(ch,ch,ch,xpbys_mxn)( m_left, NR, \
+				                               ct,  rs_ct, cs_ct, \
+				                               beta_cast, \
+				                               c11, rs_c,  cs_c ); \
+			} \
 		} \
 \
 		b1 += cstep_b; \
