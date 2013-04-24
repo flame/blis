@@ -262,8 +262,8 @@ void PASTEMAC(ch,varname)( \
 	rstep_c = rs_c * MR; \
 	cstep_c = cs_c * NR; \
 \
-	b1  = b_cast; \
-	c1  = c_cast; \
+	b1 = b_cast; \
+	c1 = c_cast; \
 \
 	/* If the micro-kernel needs elements of B duplicated, set bp to
 	   point to the duplication buffer. If no duplication is called for,
@@ -284,8 +284,8 @@ void PASTEMAC(ch,varname)( \
 		if ( DUPB ) PASTEMAC(ch,dupl)( k_nr, b1, bp ); \
 		else        bp = b1; \
 \
-		/* Compute the address of the next panel of B. */ \
-		b2 = b1 + cstep_b; \
+		/* Initialize our next panel of B to be the current panel of B. */ \
+		b2 = b1; \
 \
 		/* Loop over the m dimension (MR rows at a time). */ \
 		for ( i = 0; i < m_iter; ++i ) \
@@ -308,10 +308,15 @@ void PASTEMAC(ch,varname)( \
 \
 				bp_i = bp + off_a1011 * NR * NDUP; \
 \
-				/* Compute the address of the next panel of A. */ \
+				/* Compute the addresses of the next panels of A and B. */ \
 				a2 = a1 + k_a1011 * PACKMR; \
 				if ( i == m_iter - 1 ) \
+				{ \
 					a2 = a_cast; \
+					b2 = b1 + cstep_b; \
+					if ( j == n_iter - 1 ) \
+						b2 = b_cast; \
+				} \
 \
 				/* Handle interior and edge cases separately. */ \
 				if ( m_cur == MR && n_cur == NR ) \
@@ -351,10 +356,15 @@ void PASTEMAC(ch,varname)( \
 			} \
 			else if ( bli_is_strictly_below_diag_n( diagoffa_i, MR, k ) ) \
 			{ \
-				/* Compute the address of the next panel of A. */ \
+				/* Compute the addresses of the next panels of A and B. */ \
 				a2 = a1 + rstep_a; \
 				if ( i == m_iter - 1 ) \
+				{ \
 					a2 = a_cast; \
+					b2 = b1 + cstep_b; \
+					if ( j == n_iter - 1 ) \
+						b2 = b_cast; \
+				} \
 \
 				/* Handle interior and edge cases separately. */ \
 				if ( m_cur == MR && n_cur == NR ) \

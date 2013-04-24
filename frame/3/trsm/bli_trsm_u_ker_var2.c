@@ -287,8 +287,8 @@ void PASTEMAC(ch,varname)( \
 		if ( DUPB ) PASTEMAC(ch,dupl)( k_nr, b1, bp ); \
 		else        bp = b1; \
 \
-		/* Compute the address of the next panel of B. */ \
-		b2 = b1 + cstep_b; \
+		/* Initialize our next panel of B to be the current panel of B. */ \
+		b2 = b1; \
 \
 		/* Loop over the m dimension (MR rows at a time). */ \
 		for ( ib = 0; ib < m_iter; ++ib ) \
@@ -328,26 +328,15 @@ void PASTEMAC(ch,varname)( \
 				bp11 = bp_i; \
 				bp21 = bp_i + k_a11 * NR * NDUP; \
 \
-/*
-PASTEMAC(ch,fprintm)( stdout, "trsm_u_ker_var2: a1 (diag)", MR, k_a1112, a1, 1, MR, "%5.2f", "" ); \
-PASTEMAC(ch,fprintm)( stdout, "trsm_u_ker_var2: b1 (diag)", k_a1112, NR, bp_i, NR, 1, "%6.3f", "" ); \
-PASTEMAC(ch,fprintm)( stdout, "trsm_u_ker_var2: b11 (diag)", MR, NR, b11, NR, 1, "%6.3f", "" ); \
-printf( "m_iter     = %lu\n", m_iter ); \
-printf( "m_cur      = %lu\n", m_cur ); \
-printf( "k          = %lu\n", k ); \
-printf( "diagoffa_i = %lu\n", diagoffa_i ); \
-printf( "off_a1112  = %lu\n", off_a1112 ); \
-printf( "k_a1112    = %lu\n", k_a1112 ); \
-printf( "k_a12      = %lu\n", k_a12 ); \
-printf( "k_a11      = %lu\n", k_a11 ); \
-printf( "rs_c,cs_c  = %lu %lu\n", rs_c, cs_c ); \
-printf( "rs_ct,cs_ct= %lu %lu\n", rs_ct, cs_ct ); \
-*/ \
-\
-				/* Compute the address of the next panel of A. */ \
+				/* Compute the addresses of the next panels of A and B. */ \
 				a2 = a1 + k_a1112 * PACKMR; \
-				if ( i == m_iter - 1 ) \
+				if ( ib == m_iter - 1 ) \
+				{ \
 					a2 = a_cast; \
+					b2 = b1 + cstep_b; \
+					if ( j == n_iter - 1 ) \
+						b2 = b_cast; \
+				} \
 \
 				/* Handle interior and edge cases separately. */ \
 				if ( m_cur == MR && n_cur == NR ) \
@@ -376,11 +365,6 @@ printf( "rs_ct,cs_ct= %lu %lu\n", rs_ct, cs_ct ); \
 					                          ct, rs_ct, cs_ct, \
 					                          a2, b2 ); \
 \
-/*
-PASTEMAC(ch,fprintm)( stdout, "trsm_u_ker_var2: bp11 after (diag)", MR, NR, bp11, NR, 1, "%5.2f", "" ); \
-PASTEMAC(ch,fprintm)( stdout, "trsm_u_ker_var2: b11 after (diag)", MR, NR, b11, NR, 1, "%5.2f", "" ); \
-PASTEMAC(ch,fprintm)( stdout, "trsm_u_ker_var2: ct after (diag)", m_cur, n_cur, ct, rs_ct, cs_ct, "%5.2f", "" ); \
-*/ \
 					/* Copy the result to the bottom edge of C. */ \
 					PASTEMAC2(ch,ch,copys_mxn)( m_cur, n_cur, \
 					                            ct,  rs_ct, cs_ct, \
@@ -391,10 +375,15 @@ PASTEMAC(ch,fprintm)( stdout, "trsm_u_ker_var2: ct after (diag)", m_cur, n_cur, 
 			} \
 			else if ( bli_is_strictly_above_diag_n( diagoffa_i, MR, k ) ) \
 			{ \
-				/* Compute the address of the next panel of A. */ \
+				/* Compute the addresses of the next panels of A and B. */ \
 				a2 = a1 + rstep_a; \
-				if ( i == m_iter - 1 ) \
+				if ( ib == m_iter - 1 ) \
+				{ \
 					a2 = a_cast; \
+					b2 = b1 + cstep_b; \
+					if ( j == n_iter - 1 ) \
+						b2 = b_cast; \
+				} \
 \
 				/* Handle interior and edge cases separately. */ \
 				if ( m_cur == MR && n_cur == NR ) \
@@ -435,6 +424,28 @@ PASTEMAC(ch,fprintm)( stdout, "trsm_u_ker_var2: ct after (diag)", m_cur, n_cur, 
 		b1 += cstep_b; \
 		c1 += cstep_c; \
 	} \
+\
+/*
+PASTEMAC(ch,fprintm)( stdout, "trsm_u_ker_var2: a1 (diag)", MR, k_a1112, a1, 1, MR, "%5.2f", "" ); \
+PASTEMAC(ch,fprintm)( stdout, "trsm_u_ker_var2: b1 (diag)", k_a1112, NR, bp_i, NR, 1, "%6.3f", "" ); \
+PASTEMAC(ch,fprintm)( stdout, "trsm_u_ker_var2: b11 (diag)", MR, NR, b11, NR, 1, "%6.3f", "" ); \
+printf( "m_iter     = %lu\n", m_iter ); \
+printf( "m_cur      = %lu\n", m_cur ); \
+printf( "k          = %lu\n", k ); \
+printf( "diagoffa_i = %lu\n", diagoffa_i ); \
+printf( "off_a1112  = %lu\n", off_a1112 ); \
+printf( "k_a1112    = %lu\n", k_a1112 ); \
+printf( "k_a12      = %lu\n", k_a12 ); \
+printf( "k_a11      = %lu\n", k_a11 ); \
+printf( "rs_c,cs_c  = %lu %lu\n", rs_c, cs_c ); \
+printf( "rs_ct,cs_ct= %lu %lu\n", rs_ct, cs_ct ); \
+*/ \
+\
+/*
+PASTEMAC(ch,fprintm)( stdout, "trsm_u_ker_var2: bp11 after (diag)", MR, NR, bp11, NR, 1, "%5.2f", "" ); \
+PASTEMAC(ch,fprintm)( stdout, "trsm_u_ker_var2: b11 after (diag)", MR, NR, b11, NR, 1, "%5.2f", "" ); \
+PASTEMAC(ch,fprintm)( stdout, "trsm_u_ker_var2: ct after (diag)", m_cur, n_cur, ct, rs_ct, cs_ct, "%5.2f", "" ); \
+*/ \
 }
 
 INSERT_GENTFUNC_BASIC2( trsm_u_ker_var2, GEMMTRSM_U_UKERNEL, GEMM_UKERNEL )

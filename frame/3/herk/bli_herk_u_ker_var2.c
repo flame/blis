@@ -184,6 +184,8 @@ void PASTEMAC(ch,varname)( \
 	dim_t           k_nr; \
 	dim_t           m_iter, m_left; \
 	dim_t           n_iter, n_left; \
+	dim_t           m_cur; \
+	dim_t           n_cur; \
 	dim_t           i, j; \
 	inc_t           rstep_a; \
 	inc_t           cstep_b; \
@@ -216,8 +218,11 @@ void PASTEMAC(ch,varname)( \
 	m_iter = m / MR; \
 	m_left = m % MR; \
 \
+	if ( n_left ) ++n_iter; \
+	if ( m_left ) ++m_iter; \
+\
 	/* Compute the number of elements in B to duplicate per iteration. */ \
-	k_nr   = k * NR; \
+	k_nr = k * NR; \
 \
 	/* Determine some increments used to step through A, B, and C. */ \
 	rstep_a = ps_a; \
@@ -227,8 +232,8 @@ void PASTEMAC(ch,varname)( \
 	rstep_c = rs_c * MR; \
 	cstep_c = cs_c * NR; \
 \
-	b1  = b_cast; \
-	c1  = c_cast; \
+	b1 = b_cast; \
+	c1 = c_cast; \
 \
 	/* If the micro-kernel needs elements of B duplicated, set bp to
 	   point to the duplication buffer. If no duplication is called for,
@@ -242,13 +247,15 @@ void PASTEMAC(ch,varname)( \
 		a1  = a_cast; \
 		c11 = c1; \
 \
+		n_cur = ( bli_is_not_edge_f( j, n_iter, n_left ) ? NR : n_left ); \
+\
 		/* If duplication is needed, copy the current iteration's NR
 		   columns of B to a local buffer with each value duplicated. */ \
 		if ( DUPB ) PASTEMAC(ch,dupl)( k_nr, b1, bp ); \
 		else        bp = b1; \
 \
-		/* Compute the address of the next panel of B. */ \
-		b2 = b1 + cstep_b; \
+		/* Initialize our next panel of B to be the current panel of B. */ \
+		b2 = b1; \
 \
 		/* Interior loop over the m dimension (MR rows at a time). */ \
 		for ( i = 0; i < m_iter; ++i ) \
@@ -256,10 +263,17 @@ void PASTEMAC(ch,varname)( \
 			/* Compute the diagonal offset for the submatrix at (i,j). */ \
 			diagoffc_ij = diagoffc - (doff_t)j*NR + (doff_t)i*MR; \
 \
-			/* Compute the address of the next panel of A. */ \
+			m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left ); \
+\
+			/* Compute the addresses of the next panels of A and B. */ \
 			a2 = a1 + rstep_a; \
-			if ( i == m_iter - 1 && m_left == 0 ) \
+			if ( i == m_iter - 1 ) \
+			{ \
 				a2 = a_cast; \
+				b2 = b1 + cstep_b; \
+				if ( j == n_iter - 1 ) \
+					b2 = b_cast; \
+			} \
 \
 			/* If the diagonal intersects the current MR x NR submatrix, we
 			   compute it the temporary buffer and then add in the elements
@@ -268,7 +282,7 @@ void PASTEMAC(ch,varname)( \
 			   we compute and store as we normally would.
 			   And if we're strictly below the diagonal, we do nothing and
 			   continue. */ \
-			if ( bli_intersects_diag_n( diagoffc_ij, MR, NR ) ) \
+			if ( bli_intersects_diag_n( diagoffc_ij, m_cur, n_cur ) ) \
 			{ \
 				/* Invoke the gemm micro-kernel. */ \
 				PASTEMAC(ch,ukrname)( k, \
@@ -281,129 +295,50 @@ void PASTEMAC(ch,varname)( \
 \
 				/* Scale C and add the result to only the stored part. */ \
 				PASTEMAC3(ch,ch,ch,xpbys_mxn_u)( diagoffc_ij, \
-				                                 MR, NR, \
+				                                 m_cur, n_cur, \
 				                                 ct,  rs_ct, cs_ct, \
 				                                 beta_cast, \
 				                                 c11, rs_c,  cs_c ); \
 			} \
-			else if ( bli_is_strictly_above_diag_n( diagoffc_ij, MR, NR ) ) \
+			else if ( bli_is_strictly_above_diag_n( diagoffc_ij, m_cur, n_cur ) ) \
 			{ \
-				/* Invoke the gemm micro-kernel. */ \
-				PASTEMAC(ch,ukrname)( k, \
-				                      alpha_cast, \
-				                      a1, \
-				                      bp, \
-				                      beta_cast, \
-				                      c11, rs_c, cs_c, \
-				                      a2, b2 ); \
+				/* Handle interior and edge cases separately. */ \
+				if ( m_cur == MR && n_cur == NR ) \
+				{ \
+					/* Invoke the gemm micro-kernel. */ \
+					PASTEMAC(ch,ukrname)( k, \
+					                      alpha_cast, \
+					                      a1, \
+					                      bp, \
+					                      beta_cast, \
+					                      c11, rs_c, cs_c, \
+					                      a2, b2 ); \
+				} \
+				else \
+				{ \
+					/* Invoke the gemm micro-kernel. */ \
+					PASTEMAC(ch,ukrname)( k, \
+					                      alpha_cast, \
+					                      a1, \
+					                      bp, \
+					                      zero, \
+					                      ct, rs_ct, cs_ct, \
+					                      a2, b2 ); \
+\
+					/* Scale the edge of C and add the result. */ \
+					PASTEMAC3(ch,ch,ch,xpbys_mxn)( m_cur, n_cur, \
+					                               ct,  rs_ct, cs_ct, \
+					                               beta_cast, \
+					                               c11, rs_c,  cs_c ); \
+				} \
 			} \
 \
 			a1  += rstep_a; \
 			c11 += rstep_c; \
-		} \
-\
-		/* Bottom edge handling. */ \
-		if ( m_left ) \
-		{ \
-			/* Compute the diagonal offset for the submatrix at (i,j). */ \
-			diagoffc_ij = diagoffc - (doff_t)j*NR + (doff_t)i*MR; \
-\
-			/* Compute the address of the next panel of A. */ \
-			a2 = a_cast; \
-\
-			/* The following conditional only executes when the bottom edge
-			   case for this particular column panel happens to intersect the
-			   diagonal. */ \
-			if ( bli_intersects_diag_n( diagoffc_ij, m_left, NR ) ) \
-			{ \
-				/* Invoke the gemm micro-kernel. */ \
-				PASTEMAC(ch,ukrname)( k, \
-				                      alpha_cast, \
-				                      a1, \
-				                      bp, \
-				                      zero, \
-				                      ct, rs_ct, cs_ct, \
-				                      a2, b2 ); \
-\
-				/* Scale C and add the result to only the stored part. */ \
-				PASTEMAC3(ch,ch,ch,xpbys_mxn_u)( diagoffc_ij, \
-				                                 m_left, NR, \
-				                                 ct,  rs_ct, cs_ct, \
-				                                 beta_cast, \
-				                                 c11, rs_c,  cs_c ); \
-			} \
 		} \
 \
 		b1 += cstep_b; \
 		c1 += cstep_c; \
-	} \
-\
-	if ( n_left ) \
-	{ \
-		a1  = a_cast; \
-		c11 = c1; \
-\
-		/* If duplication is needed, copy the n_left (+ padding) columns
-		   of B to a local buffer with each value duplicated. */ \
-		if ( DUPB ) PASTEMAC(ch,dupl)( k_nr, b1, bp ); \
-		else        bp = b1; \
-\
-		/* Compute the address of the next panel of B. */ \
-		b2 = b1 + cstep_b; \
-\
-		/* Right edge loop over the m dimension (MR rows at a time). */ \
-		/* (Note that the diagonal is guaranteed not to factor in here.) */ \
-		for ( i = 0; i < m_iter; ++i ) \
-		{ \
-			/* Compute the address of the next panel of A. */ \
-			a2 = a1 + rstep_a; \
-			if ( i == m_iter - 1 && m_left == 0 ) \
-				a2 = a_cast; \
-\
-			/* Invoke the gemm micro-kernel. */ \
-			PASTEMAC(ch,ukrname)( k, \
-			                      alpha_cast, \
-			                      a1, \
-			                      bp, \
-			                      zero, \
-			                      ct, rs_ct, cs_ct, \
-			                      a2, b2 ); \
-\
-			/* Scale the right edge of C and add the result. */ \
-			PASTEMAC3(ch,ch,ch,xpbys_mxn)( MR, n_left, \
-			                               ct,  rs_ct, cs_ct, \
-			                               beta_cast, \
-			                               c11, rs_c,  cs_c ); \
-\
-			a1  += rstep_a; \
-			c11 += rstep_c; \
-		} \
-\
-		/* Compute the diagonal offset one last time. */ \
-		diagoffc_ij = diagoffc - (doff_t)j*NR + (doff_t)i*MR; \
-\
-		/* Bottom-right corner handling. */ \
-		if ( m_left ) \
-		{ \
-			/* Compute the address of the next panel of A. */ \
-			a2 = a_cast; \
-\
-			/* Invoke the gemm micro-kernel. */ \
-			PASTEMAC(ch,ukrname)( k, \
-			                      alpha_cast, \
-			                      a1, \
-			                      bp, \
-			                      zero, \
-			                      ct, rs_ct, cs_ct, \
-			                      a2, b2 ); \
-\
-			/* Scale C and add the result to only the stored part. */ \
-			PASTEMAC3(ch,ch,ch,xpbys_mxn_u)( diagoffc_ij, \
-			                                 m_left, n_left, \
-			                                 ct,  rs_ct, cs_ct, \
-			                                 beta_cast, \
-			                                 c11, rs_c,  cs_c ); \
-		} \
 	} \
 }
 
