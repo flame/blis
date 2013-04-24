@@ -212,7 +212,7 @@ void PASTEMAC(ch,varname)( \
 	m_left = m % MR; \
 \
 	/* Compute the number of elements in B to duplicate per iteration. */ \
-	k_nr   = k * NR; \
+	k_nr = k * NR; \
 \
 	/* Determine some increments used to step through A, B, and C. */ \
 	rstep_a = ps_a; \
@@ -222,8 +222,8 @@ void PASTEMAC(ch,varname)( \
 	rstep_c = rs_c * MR; \
 	cstep_c = cs_c * NR; \
 \
-	b1  = b_cast; \
-	c1  = c_cast; \
+	b1 = b_cast; \
+	c1 = c_cast; \
 \
 	/* If the micro-kernel needs elements of B duplicated, set bp to
 	   point to the duplication buffer. If no duplication is called for,
@@ -250,12 +250,11 @@ void PASTEMAC(ch,varname)( \
 		{ \
 			/* Compute the addresses of the next panels of A and B. */ \
 			a2 = a1 + rstep_a; \
-			if ( bli_is_last_iter_f( i, m_iter, m_left ) ) \
+			if ( i == m_iter - 1 && m_left == 0 ) \
 			{ \
 				a2 = a_cast; \
 				b2 = b1 + cstep_b; \
-				/*if ( i == n_iter - 1 && n_left == 0 )*/ \
-				if ( bli_is_last_iter_f( i, n_iter, n_left ) ) \
+				if ( j == n_iter - 1 && n_left == 0 ) \
 					b2 = b_cast; \
 			} \
 \
@@ -278,7 +277,7 @@ void PASTEMAC(ch,varname)( \
 			/* Compute the addresses of the next panels of A and B. */ \
 			a2 = a_cast; \
 			b2 = b1 + cstep_b; \
-			if ( bli_is_last_iter_f( i, n_iter, n_left ) ) \
+			if ( j == n_iter - 1 && n_left == 0 ) \
 				b2 = b_cast; \
 \
 \
@@ -320,7 +319,7 @@ void PASTEMAC(ch,varname)( \
 		{ \
 			/* Compute the addresses of the next panels of A and B. */ \
 			a2 = a1 + rstep_a; \
-			if ( bli_is_last_iter_f( i, m_iter, m_left ) ) \
+			if ( i == m_iter - 1 && m_left == 0 ) \
 			{ \
 				a2 = a_cast; \
 				b2 = b_cast; \
