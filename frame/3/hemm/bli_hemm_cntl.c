@@ -219,8 +219,8 @@ void bli_hemm_cntl_init()
 	                          NULL );
 
 	// Alias the "master" hemm control tree to a shorter name.
-	hemm_cntl = hemm_cntl_mm_op;
-
+	//hemm_cntl = hemm_cntl_mm_op;
+	hemm_cntl = hemm_cntl_vl_mm;
 }
 
 void bli_hemm_cntl_finalize()

@@ -219,8 +219,8 @@ void bli_gemm_cntl_init()
 	                          NULL );
 
 	// Alias the "master" gemm control tree to a shorter name.
-	gemm_cntl = gemm_cntl_mm_op;
-
+	//gemm_cntl = gemm_cntl_mm_op;
+	gemm_cntl = gemm_cntl_vl_mm;
 }
 
 void bli_gemm_cntl_finalize()

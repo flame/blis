@@ -227,8 +227,8 @@ void bli_trmm3_cntl_init()
 	                          NULL );
 
 	// Alias the "master" trmm3 control tree to a shorter name.
-	trmm3_cntl = trmm3_cntl_mm_op;
-
+	//trmm3_cntl = trmm3_cntl_mm_op;
+	trmm3_cntl = trmm3_cntl_vl_mm;
 }
 
 void bli_trmm3_cntl_finalize()

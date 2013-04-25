@@ -219,8 +219,8 @@ void bli_herk_cntl_init()
 	                          NULL );
 
 	// Alias the "master" herk control tree to a shorter name.
-	herk_cntl = herk_cntl_mm_op;
-
+	//herk_cntl = herk_cntl_mm_op;
+	herk_cntl = herk_cntl_vl_mm;
 }
 
 void bli_herk_cntl_finalize()

@@ -227,8 +227,8 @@ void bli_trsm_cntl_init()
 	                          NULL );
 
 	// Alias the "master" trsm control tree to a shorter name.
-	trsm_cntl = trsm_cntl_mm_op;
-
+	//trsm_cntl = trsm_cntl_mm_op;
+	trsm_cntl = trsm_cntl_vl_mm;
 }
 
 void bli_trsm_cntl_finalize()

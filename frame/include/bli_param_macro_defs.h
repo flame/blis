@@ -424,10 +424,6 @@
 \
 	( i1 != iter - 1 || left == 0 )
 
-#define bli_is_last_iter_f( i1, iter, left ) \
-\
-	( i1 == iter - 1 && left == 0 )
-
 #define bli_is_edge_b( i1, iter, left ) \
 \
 	( i1 == 0 && left != 0 )
@@ -435,10 +431,6 @@
 #define bli_is_not_edge_b( i1, iter, left ) \
 \
 	( i1 != 0 || left == 0 )
-
-#define bli_is_last_iter_b( i1, iter, left ) \
-\
-	( i1 == 0 && left == 0 )
 
 
 // packbuf_t-related

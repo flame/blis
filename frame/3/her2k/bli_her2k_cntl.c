@@ -222,8 +222,8 @@ void bli_her2k_cntl_init()
 	                           NULL );
 
 	// Alias the "master" her2k control tree to a shorter name.
-	her2k_cntl = her2k_cntl_mm_op;
-
+	//her2k_cntl = her2k_cntl_mm_op;
+	her2k_cntl = her2k_cntl_vl_mm;
 }
 
 void bli_her2k_cntl_finalize()
