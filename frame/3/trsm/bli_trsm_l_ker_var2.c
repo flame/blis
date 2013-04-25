@@ -361,9 +361,9 @@ void PASTEMAC(ch,varname)( \
 					                          a2, b2 ); \
 \
 					/* Copy the result to the bottom edge of C. */ \
-					PASTEMAC2(ch,ch,copys_mxn)( m_cur, n_cur, \
-					                            ct,  rs_ct, cs_ct, \
-					                            c11, rs_c,  cs_c ); \
+					PASTEMAC(ch,copys_mxn)( m_cur, n_cur, \
+					                        ct,  rs_ct, cs_ct, \
+					                        c11, rs_c,  cs_c ); \
 				} \
 \
 				a1 += k_a1011 * PACKMR; \
@@ -404,10 +404,10 @@ void PASTEMAC(ch,varname)( \
 					                      a2, b2 ); \
 \
 					/* Add the result to the edge of C. */ \
-					PASTEMAC3(ch,ch,ch,xpbys_mxn)( m_cur, n_cur, \
-					                               ct,  rs_ct, cs_ct, \
-					                               alpha_cast, \
-					                               c11, rs_c,  cs_c ); \
+					PASTEMAC(ch,xpbys_mxn)( m_cur, n_cur, \
+					                        ct,  rs_ct, cs_ct, \
+					                        alpha_cast, \
+					                        c11, rs_c,  cs_c ); \
 				} \
 \
 				a1 += rstep_a; \

@@ -333,9 +333,9 @@ void PASTEMAC(ch,varname)( \
 				else \
 				{ \
 					/* Copy edge elements of C to the temporary buffer. */ \
-					PASTEMAC2(ch,ch,copys_mxn)( m_cur, n_cur, \
-					                            c11, rs_c,  cs_c, \
-					                            ct,  rs_ct, cs_ct ); \
+					PASTEMAC(ch,copys_mxn)( m_cur, n_cur, \
+					                        c11, rs_c,  cs_c, \
+					                        ct,  rs_ct, cs_ct ); \
 \
 					/* Invoke the gemm micro-kernel. */ \
 					PASTEMAC(ch,ukrname)( k_a1011, \
@@ -347,9 +347,9 @@ void PASTEMAC(ch,varname)( \
 					                      a2, b2 ); \
 \
 					/* Copy the result to the edge of C. */ \
-					PASTEMAC2(ch,ch,copys_mxn)( m_cur, n_cur, \
-					                            ct,  rs_ct, cs_ct, \
-					                            c11, rs_c,  cs_c ); \
+					PASTEMAC(ch,copys_mxn)( m_cur, n_cur, \
+					                        ct,  rs_ct, cs_ct, \
+					                        c11, rs_c,  cs_c ); \
 				} \
 \
 				a1 += k_a1011 * PACKMR; \
@@ -390,9 +390,9 @@ void PASTEMAC(ch,varname)( \
 					                      a2, b2 ); \
 \
 					/* Add the result to the edge of C. */ \
-					PASTEMAC2(ch,ch,adds_mxn)( m_cur, n_cur, \
-					                           ct,  rs_ct, cs_ct, \
-					                           c11, rs_c,  cs_c ); \
+					PASTEMAC(ch,adds_mxn)( m_cur, n_cur, \
+					                       ct,  rs_ct, cs_ct, \
+					                       c11, rs_c,  cs_c ); \
 				} \
 \
 				a1 += rstep_a; \

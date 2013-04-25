@@ -294,11 +294,11 @@ void PASTEMAC(ch,varname)( \
 				                      a2, b2 ); \
 \
 				/* Scale C and add the result to only the stored part. */ \
-				PASTEMAC3(ch,ch,ch,xpbys_mxn_u)( diagoffc_ij, \
-				                                 m_cur, n_cur, \
-				                                 ct,  rs_ct, cs_ct, \
-				                                 beta_cast, \
-				                                 c11, rs_c,  cs_c ); \
+				PASTEMAC(ch,xpbys_mxn_u)( diagoffc_ij, \
+				                          m_cur, n_cur, \
+				                          ct,  rs_ct, cs_ct, \
+				                          beta_cast, \
+				                          c11, rs_c,  cs_c ); \
 			} \
 			else if ( bli_is_strictly_above_diag_n( diagoffc_ij, m_cur, n_cur ) ) \
 			{ \
@@ -326,10 +326,10 @@ void PASTEMAC(ch,varname)( \
 					                      a2, b2 ); \
 \
 					/* Scale the edge of C and add the result. */ \
-					PASTEMAC3(ch,ch,ch,xpbys_mxn)( m_cur, n_cur, \
-					                               ct,  rs_ct, cs_ct, \
-					                               beta_cast, \
-					                               c11, rs_c,  cs_c ); \
+					PASTEMAC(ch,xpbys_mxn)( m_cur, n_cur, \
+					                        ct,  rs_ct, cs_ct, \
+					                        beta_cast, \
+					                        c11, rs_c,  cs_c ); \
 				} \
 			} \
 \

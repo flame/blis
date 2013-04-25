@@ -184,5 +184,37 @@
 }
 
 
+#define bli_sxpbys_mxn_u( diagoff, m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ) \
+{\
+	bli_sssxpbys_mxn_u( diagoff, m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ); \
+}
+#define bli_dxpbys_mxn_u( diagoff, m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ) \
+{\
+	bli_dddxpbys_mxn_u( diagoff, m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ); \
+}
+#define bli_cxpbys_mxn_u( diagoff, m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ) \
+{\
+	bli_cccxpbys_mxn_u( diagoff, m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ); \
+}
+#define bli_zxpbys_mxn_u( diagoff, m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ) \
+{\
+	bli_zzzxpbys_mxn_u( diagoff, m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ); \
+}
+#define bli_sxpbys_mxn_l( diagoff, m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ) \
+{\
+	bli_sssxpbys_mxn_l( diagoff, m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ); \
+}
+#define bli_dxpbys_mxn_l( diagoff, m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ) \
+{\
+	bli_dddxpbys_mxn_l( diagoff, m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ); \
+}
+#define bli_cxpbys_mxn_l( diagoff, m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ) \
+{\
+	bli_cccxpbys_mxn_l( diagoff, m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ); \
+}
+#define bli_zxpbys_mxn_l( diagoff, m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ) \
+{\
+	bli_zzzxpbys_mxn_l( diagoff, m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ); \
+}
 
 #endif

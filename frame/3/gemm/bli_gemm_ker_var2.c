@@ -291,10 +291,10 @@ void PASTEMAC(ch,varname)( \
 			                      a2, b2 ); \
 \
 			/* Scale the bottom edge of C and add the result from above. */ \
-			PASTEMAC3(ch,ch,ch,xpbys_mxn)( m_left, NR, \
-			                               ct,  rs_ct, cs_ct, \
-			                               beta_cast, \
-			                               c11, rs_c,  cs_c ); \
+			PASTEMAC(ch,xpbys_mxn)( m_left, NR, \
+			                        ct,  rs_ct, cs_ct, \
+			                        beta_cast, \
+			                        c11, rs_c,  cs_c ); \
 		} \
 \
 		b1 += cstep_b; \
@@ -335,10 +335,10 @@ void PASTEMAC(ch,varname)( \
 			                      a2, b2 ); \
 \
 			/* Scale the right edge of C and add the result from above. */ \
-			PASTEMAC3(ch,ch,ch,xpbys_mxn)( MR, n_left, \
-			                               ct,  rs_ct, cs_ct, \
-			                               beta_cast, \
-			                               c11, rs_c,  cs_c ); \
+			PASTEMAC(ch,xpbys_mxn)( MR, n_left, \
+			                        ct,  rs_ct, cs_ct, \
+			                        beta_cast, \
+			                        c11, rs_c,  cs_c ); \
 \
 			a1  += rstep_a; \
 			c11 += rstep_c; \
@@ -361,10 +361,10 @@ void PASTEMAC(ch,varname)( \
 			                      a2, b2 ); \
 \
 			/* Scale the bottom-right corner of C and add the result from above. */ \
-			PASTEMAC3(ch,ch,ch,xpbys_mxn)( m_left, n_left, \
-			                               ct,  rs_ct, cs_ct, \
-			                               beta_cast, \
-			                               c11, rs_c,  cs_c ); \
+			PASTEMAC(ch,xpbys_mxn)( m_left, n_left, \
+			                        ct,  rs_ct, cs_ct, \
+			                        beta_cast, \
+			                        c11, rs_c,  cs_c ); \
 		} \
 	} \
 \

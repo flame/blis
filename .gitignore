@@ -4,6 +4,8 @@
 *~
 # vim backup files
 *.swp
+# NFS file
+.nfs*
 
 # -- compiler-related --
 

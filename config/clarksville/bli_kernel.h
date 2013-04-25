@@ -77,7 +77,7 @@
 #define BLIS_DEFAULT_KC_Z              256
 #define BLIS_DEFAULT_NC_Z              2048
 
-// -- Ccache blocksize extensions (for optimizing edge cases) --
+// -- Cache blocksize extensions (for optimizing edge cases) --
 
 // NOTE: These cache blocksize "extensions" have the same constraints as
 // the corresponding default blocksizes above.

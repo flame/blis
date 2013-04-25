@@ -177,4 +177,37 @@
 }
 
 
+#define bli_sadds_mxn_u( diagoff, m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
+{ \
+	bli_ssadds_mxn_u( diagoff, m, n, x, rs_x, cs_x, y, rs_y, cs_y ); \
+}
+#define bli_dadds_mxn_u( diagoff, m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
+{ \
+	bli_ddadds_mxn_u( diagoff, m, n, x, rs_x, cs_x, y, rs_y, cs_y ); \
+}
+#define bli_cadds_mxn_u( diagoff, m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
+{ \
+	bli_ccadds_mxn_u( diagoff, m, n, x, rs_x, cs_x, y, rs_y, cs_y ); \
+}
+#define bli_zadds_mxn_u( diagoff, m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
+{ \
+	bli_zzadds_mxn_u( diagoff, m, n, x, rs_x, cs_x, y, rs_y, cs_y ); \
+}
+#define bli_sadds_mxn_l( diagoff, m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
+{ \
+	bli_ssadds_mxn_l( diagoff, m, n, x, rs_x, cs_x, y, rs_y, cs_y ); \
+}
+#define bli_dadds_mxn_l( diagoff, m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
+{ \
+	bli_ddadds_mxn_l( diagoff, m, n, x, rs_x, cs_x, y, rs_y, cs_y ); \
+}
+#define bli_cadds_mxn_l( diagoff, m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
+{ \
+	bli_ccadds_mxn_l( diagoff, m, n, x, rs_x, cs_x, y, rs_y, cs_y ); \
+}
+#define bli_zadds_mxn_l( diagoff, m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
+{ \
+	bli_zzadds_mxn_l( diagoff, m, n, x, rs_x, cs_x, y, rs_y, cs_y ); \
+}
+
 #endif
