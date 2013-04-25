@@ -335,6 +335,10 @@ void libblis_test_read_params_file( char* input_filename, test_params_t* params 
 	libblis_test_read_next_line( buffer, input_stream );
 	sscanf( buffer, "%lu ", &(params->p_inc) );
 
+	// Read the requested error-checking level.
+	libblis_test_read_next_line( buffer, input_stream );
+	sscanf( buffer, "%u ", &(params->error_checking_level) );
+
 	// Read the requested course of action if a test fails.
 	libblis_test_read_next_line( buffer, input_stream );
 	sscanf( buffer, "%c ", &(params->reaction_to_failure) );
@@ -583,6 +587,7 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "problem size: first to test  %u\n", params->p_first );
 	libblis_test_fprintf_c( os, "problem size: max to test    %u\n", params->p_max );
 	libblis_test_fprintf_c( os, "problem size increment       %u\n", params->p_inc );
+	libblis_test_fprintf_c( os, "error-checking level         %u\n", params->error_checking_level );
 	libblis_test_fprintf_c( os, "reaction to failure          %c\n", params->reaction_to_failure );
 	libblis_test_fprintf_c( os, "output matlab files?         %u\n", params->output_matlab_files );
 	libblis_test_fprintf_c( os, "\n" );
@@ -868,6 +873,12 @@ void libblis_test_op_driver( test_params_t* params,
 	if ( params->output_matlab_files )
 		libblis_test_fopen_mfile( op_str, impl, &output_stream );
 
+	// Set the error-checking level according to what was specified in the
+	// input file.
+	if ( params->error_checking_level == 0 )
+		bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
+	else
+		bli_error_checking_level_set( BLIS_FULL_ERROR_CHECKING );
 
 	// Obtain the parameter specification (filter) string.
 	p_spec_str = op->params;

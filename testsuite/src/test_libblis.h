@@ -158,6 +158,7 @@ typedef struct
 	dim_t         p_inc;
 	char          reaction_to_failure;
 	unsigned int  output_matlab_files;
+	unsigned int  error_checking_level;
 } test_params_t;
 
 

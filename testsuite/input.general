@@ -7,5 +7,6 @@ sdcz    # Datatype(s) to test
 100     # Problem size: first to test
 400     # Problem size: maximum to test
 100     # Problem size: increment between experiments
+1       # Error-checking level (0 = disable error checking; 1 = full error checking)
 i       # Reaction to test failure ('i' = ignore; 's' = sleep() and continue; 'a' = abort)
 0       # Output results to stdout AND matlab files (0 = output only to stdout)
