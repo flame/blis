@@ -54,64 +54,46 @@ blksz_t*          herk_kc;
 blksz_t*          herk_mr;
 blksz_t*          herk_nr;
 blksz_t*          herk_kr;
-blksz_t*          herk_extmr;
-blksz_t*          herk_extnr;
-blksz_t*          herk_extkr;
 blksz_t*          herk_ni;
 
 
 void bli_herk_cntl_init()
 {
 	// Create blocksize objects for each dimension.
-	herk_mc = bli_blksz_obj_create( BLIS_DEFAULT_MC_S,
-	                                BLIS_DEFAULT_MC_D,
-	                                BLIS_DEFAULT_MC_C,
-	                                BLIS_DEFAULT_MC_Z );
+	herk_mc = bli_blksz_obj_create( BLIS_DEFAULT_MC_S, BLIS_EXTEND_MC_S,
+	                                BLIS_DEFAULT_MC_D, BLIS_EXTEND_MC_D,
+	                                BLIS_DEFAULT_MC_C, BLIS_EXTEND_MC_C,
+	                                BLIS_DEFAULT_MC_Z, BLIS_EXTEND_MC_Z );
 
-	herk_nc = bli_blksz_obj_create( BLIS_DEFAULT_NC_S,
-	                                BLIS_DEFAULT_NC_D,
-	                                BLIS_DEFAULT_NC_C,
-	                                BLIS_DEFAULT_NC_Z );
+	herk_nc = bli_blksz_obj_create( BLIS_DEFAULT_NC_S, BLIS_EXTEND_NC_S,
+	                                BLIS_DEFAULT_NC_D, BLIS_EXTEND_NC_D,
+	                                BLIS_DEFAULT_NC_C, BLIS_EXTEND_NC_C,
+	                                BLIS_DEFAULT_NC_Z, BLIS_EXTEND_NC_Z );
 
-	herk_kc = bli_blksz_obj_create( BLIS_DEFAULT_KC_S,
-	                                BLIS_DEFAULT_KC_D,
-	                                BLIS_DEFAULT_KC_C,
-	                                BLIS_DEFAULT_KC_Z );
+	herk_kc = bli_blksz_obj_create( BLIS_DEFAULT_KC_S, BLIS_EXTEND_KC_S,
+	                                BLIS_DEFAULT_KC_D, BLIS_EXTEND_KC_D,
+	                                BLIS_DEFAULT_KC_C, BLIS_EXTEND_KC_C,
+	                                BLIS_DEFAULT_KC_Z, BLIS_EXTEND_KC_Z );
 
-	herk_mr = bli_blksz_obj_create( BLIS_DEFAULT_MR_S,
-	                                BLIS_DEFAULT_MR_D,
-	                                BLIS_DEFAULT_MR_C,
-	                                BLIS_DEFAULT_MR_Z );
+	herk_mr = bli_blksz_obj_create( BLIS_DEFAULT_MR_S, BLIS_EXTEND_MR_S,
+	                                BLIS_DEFAULT_MR_D, BLIS_EXTEND_MR_D,
+	                                BLIS_DEFAULT_MR_C, BLIS_EXTEND_MR_C,
+	                                BLIS_DEFAULT_MR_Z, BLIS_EXTEND_MR_Z );
 
-	herk_nr = bli_blksz_obj_create( BLIS_DEFAULT_NR_S,
-	                                BLIS_DEFAULT_NR_D,
-	                                BLIS_DEFAULT_NR_C,
-	                                BLIS_DEFAULT_NR_Z );
+	herk_nr = bli_blksz_obj_create( BLIS_DEFAULT_NR_S, BLIS_EXTEND_NR_S,
+	                                BLIS_DEFAULT_NR_D, BLIS_EXTEND_NR_D,
+	                                BLIS_DEFAULT_NR_C, BLIS_EXTEND_NR_C,
+	                                BLIS_DEFAULT_NR_Z, BLIS_EXTEND_NR_Z );
 
-	herk_kr = bli_blksz_obj_create( BLIS_DEFAULT_KR_S,
-	                                BLIS_DEFAULT_KR_D,
-	                                BLIS_DEFAULT_KR_C,
-	                                BLIS_DEFAULT_KR_Z );
+	herk_kr = bli_blksz_obj_create( BLIS_DEFAULT_KR_S, BLIS_EXTEND_KR_S,
+	                                BLIS_DEFAULT_KR_D, BLIS_EXTEND_KR_D,
+	                                BLIS_DEFAULT_KR_C, BLIS_EXTEND_KR_C,
+	                                BLIS_DEFAULT_KR_Z, BLIS_EXTEND_KR_Z );
 
-	herk_extmr = bli_blksz_obj_create( BLIS_EXTEND_MR_S,
-	                                   BLIS_EXTEND_MR_D,
-	                                   BLIS_EXTEND_MR_C,
-	                                   BLIS_EXTEND_MR_Z );
-
-	herk_extnr = bli_blksz_obj_create( BLIS_EXTEND_NR_S,
-	                                   BLIS_EXTEND_NR_D,
-	                                   BLIS_EXTEND_NR_C,
-	                                   BLIS_EXTEND_NR_Z );
-
-	herk_extkr = bli_blksz_obj_create( BLIS_EXTEND_KR_S,
-	                                   BLIS_EXTEND_KR_D,
-	                                   BLIS_EXTEND_KR_C,
-	                                   BLIS_EXTEND_KR_Z );
-
-	herk_ni = bli_blksz_obj_create( BLIS_DEFAULT_NI_S,
-	                                BLIS_DEFAULT_NI_D,
-	                                BLIS_DEFAULT_NI_C,
-	                                BLIS_DEFAULT_NI_Z );
+	herk_ni = bli_blksz_obj_create( BLIS_DEFAULT_NI_S, 0,
+	                                BLIS_DEFAULT_NI_D, 0,
+	                                BLIS_DEFAULT_NI_C, 0,
+	                                BLIS_DEFAULT_NI_Z, 0 );
 
 
 	// Create control tree objects for packm operations on a, b, and c.
@@ -119,8 +101,8 @@ void bli_herk_cntl_init()
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
 	                           BLIS_VARIANT2,
-	                           herk_mr, herk_extmr,
-	                           herk_kr, herk_extkr,
+	                           herk_mr,
+	                           herk_kr,
 	                           FALSE, // do NOT scale by alpha
 	                           FALSE, // already dense; densify not necessary
 	                           FALSE, // do NOT invert diagonal
@@ -133,8 +115,8 @@ void bli_herk_cntl_init()
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
 	                           BLIS_VARIANT2,
-	                           herk_kr, herk_extkr,
-	                           herk_nr, herk_extnr,
+	                           herk_kr,
+	                           herk_nr,
 	                           FALSE, // do NOT scale by alpha
 	                           FALSE, // already dense; densify not necessary
 	                           FALSE, // do NOT invert diagonal
@@ -147,8 +129,8 @@ void bli_herk_cntl_init()
 	=
 	bli_packm_cntl_obj_create( BLIS_UNBLOCKED,
 	                           BLIS_VARIANT1,
-	                           herk_mr, herk_extmr,
-	                           herk_nr, herk_extnr,
+	                           herk_mr,
+	                           herk_nr,
 	                           FALSE, // do NOT scale by beta
 	                           FALSE, // already dense; densify not necessary
 	                           FALSE, // do NOT invert diagonal

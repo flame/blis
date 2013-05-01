@@ -55,64 +55,46 @@ blksz_t*          trsm_kc;
 blksz_t*          trsm_mr;
 blksz_t*          trsm_nr;
 blksz_t*          trsm_kr;
-blksz_t*          trsm_extmr;
-blksz_t*          trsm_extnr;
-blksz_t*          trsm_extkr;
 blksz_t*          trsm_ni;
 
 
 void bli_trsm_cntl_init()
 {
 	// Create blocksize objects for each dimension.
-	trsm_mc = bli_blksz_obj_create( BLIS_DEFAULT_MC_S,
-	                                BLIS_DEFAULT_MC_D,
-	                                BLIS_DEFAULT_MC_C,
-	                                BLIS_DEFAULT_MC_Z );
+	trsm_mc = bli_blksz_obj_create( BLIS_DEFAULT_MC_S, BLIS_EXTEND_MC_S,
+	                                BLIS_DEFAULT_MC_D, BLIS_EXTEND_MC_D,
+	                                BLIS_DEFAULT_MC_C, BLIS_EXTEND_MC_C,
+	                                BLIS_DEFAULT_MC_Z, BLIS_EXTEND_MC_Z );
 
-	trsm_nc = bli_blksz_obj_create( BLIS_DEFAULT_NC_S,
-	                                BLIS_DEFAULT_NC_D,
-	                                BLIS_DEFAULT_NC_C,
-	                                BLIS_DEFAULT_NC_Z );
+	trsm_nc = bli_blksz_obj_create( BLIS_DEFAULT_NC_S, BLIS_EXTEND_NC_S,
+	                                BLIS_DEFAULT_NC_D, BLIS_EXTEND_NC_D,
+	                                BLIS_DEFAULT_NC_C, BLIS_EXTEND_NC_C,
+	                                BLIS_DEFAULT_NC_Z, BLIS_EXTEND_NC_Z );
 
-	trsm_kc = bli_blksz_obj_create( BLIS_DEFAULT_KC_S,
-	                                BLIS_DEFAULT_KC_D,
-	                                BLIS_DEFAULT_KC_C,
-	                                BLIS_DEFAULT_KC_Z );
+	trsm_kc = bli_blksz_obj_create( BLIS_DEFAULT_KC_S, BLIS_EXTEND_KC_S,
+	                                BLIS_DEFAULT_KC_D, BLIS_EXTEND_KC_D,
+	                                BLIS_DEFAULT_KC_C, BLIS_EXTEND_KC_C,
+	                                BLIS_DEFAULT_KC_Z, BLIS_EXTEND_KC_Z );
 
-	trsm_mr = bli_blksz_obj_create( BLIS_DEFAULT_MR_S,
-	                                BLIS_DEFAULT_MR_D,
-	                                BLIS_DEFAULT_MR_C,
-	                                BLIS_DEFAULT_MR_Z );
+	trsm_mr = bli_blksz_obj_create( BLIS_DEFAULT_MR_S, BLIS_EXTEND_MR_S,
+	                                BLIS_DEFAULT_MR_D, BLIS_EXTEND_MR_D,
+	                                BLIS_DEFAULT_MR_C, BLIS_EXTEND_MR_C,
+	                                BLIS_DEFAULT_MR_Z, BLIS_EXTEND_MR_Z );
 
-	trsm_nr = bli_blksz_obj_create( BLIS_DEFAULT_NR_S,
-	                                BLIS_DEFAULT_NR_D,
-	                                BLIS_DEFAULT_NR_C,
-	                                BLIS_DEFAULT_NR_Z );
+	trsm_nr = bli_blksz_obj_create( BLIS_DEFAULT_NR_S, BLIS_EXTEND_NR_S,
+	                                BLIS_DEFAULT_NR_D, BLIS_EXTEND_NR_D,
+	                                BLIS_DEFAULT_NR_C, BLIS_EXTEND_NR_C,
+	                                BLIS_DEFAULT_NR_Z, BLIS_EXTEND_NR_Z );
 
-	trsm_kr = bli_blksz_obj_create( BLIS_DEFAULT_KR_S,
-	                                BLIS_DEFAULT_KR_D,
-	                                BLIS_DEFAULT_KR_C,
-	                                BLIS_DEFAULT_KR_Z );
+	trsm_kr = bli_blksz_obj_create( BLIS_DEFAULT_KR_S, BLIS_EXTEND_KR_S,
+	                                BLIS_DEFAULT_KR_D, BLIS_EXTEND_KR_D,
+	                                BLIS_DEFAULT_KR_C, BLIS_EXTEND_KR_C,
+	                                BLIS_DEFAULT_KR_Z, BLIS_EXTEND_KR_Z );
 
-	trsm_extmr = bli_blksz_obj_create( BLIS_EXTEND_MR_S,
-	                                   BLIS_EXTEND_MR_D,
-	                                   BLIS_EXTEND_MR_C,
-	                                   BLIS_EXTEND_MR_Z );
-
-	trsm_extnr = bli_blksz_obj_create( BLIS_EXTEND_NR_S,
-	                                   BLIS_EXTEND_NR_D,
-	                                   BLIS_EXTEND_NR_C,
-	                                   BLIS_EXTEND_NR_Z );
-
-	trsm_extkr = bli_blksz_obj_create( BLIS_EXTEND_KR_S,
-	                                   BLIS_EXTEND_KR_D,
-	                                   BLIS_EXTEND_KR_C,
-	                                   BLIS_EXTEND_KR_Z );
-
-	trsm_ni = bli_blksz_obj_create( BLIS_DEFAULT_NI_S,
-	                                BLIS_DEFAULT_NI_D,
-	                                BLIS_DEFAULT_NI_C,
-	                                BLIS_DEFAULT_NI_Z );
+	trsm_ni = bli_blksz_obj_create( BLIS_DEFAULT_NI_S, 0,
+	                                BLIS_DEFAULT_NI_D, 0,
+	                                BLIS_DEFAULT_NI_C, 0,
+	                                BLIS_DEFAULT_NI_Z, 0 );
 
 
 	// Create control tree objects for packm operations on a, b, and c.
@@ -122,8 +104,8 @@ void bli_trsm_cntl_init()
 	                           BLIS_VARIANT3, // pack panels of A compactly
 	                           // IMPORTANT: n dim multiple must be mr to
 	                           // support right and bottom-right edge cases
-	                           trsm_mr, trsm_extmr,
-	                           trsm_mr, trsm_extmr,
+	                           trsm_mr,
+	                           trsm_mr,
 	                           FALSE, // do NOT scale by alpha
 	                           TRUE,  // densify
 	                           TRUE,  // invert diagonal
@@ -138,8 +120,8 @@ void bli_trsm_cntl_init()
 	                           BLIS_VARIANT2,
 	                           // IMPORTANT: m dim multiple must be mr since
 	                           // B_pack is updated (ie: serves as C) in trsm
-	                           trsm_mr, trsm_extmr,
-	                           trsm_nr, trsm_extnr,
+	                           trsm_mr,
+	                           trsm_nr,
 	                           FALSE, // do NOT scale by alpha
 	                           FALSE, // already dense; densify not necessary
 	                           FALSE, // do NOT invert diagonal
@@ -152,8 +134,8 @@ void bli_trsm_cntl_init()
 	=
 	bli_packm_cntl_obj_create( BLIS_UNBLOCKED,
 	                           BLIS_VARIANT1,
-	                           trsm_mr, trsm_extmr,
-	                           trsm_nr, trsm_extnr,
+	                           trsm_mr,
+	                           trsm_nr,
 	                           FALSE, // do NOT scale by beta
 	                           FALSE, // already dense; densify not necessary
 	                           FALSE, // do NOT invert diagonal

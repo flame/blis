@@ -62,10 +62,10 @@ trsv_t*           trsv_cntl_ge_ncol_trow;
 void bli_trsv_cntl_init()
 {
 	// Create blocksize objects.
-	trsv_mc = bli_blksz_obj_create( BLIS_TRSV_MC_S,
-	                                BLIS_TRSV_MC_D,
-	                                BLIS_TRSV_MC_C,
-	                                BLIS_TRSV_MC_Z );
+	trsv_mc = bli_blksz_obj_create( BLIS_TRSV_MC_S, 0,
+	                                BLIS_TRSV_MC_D, 0,
+	                                BLIS_TRSV_MC_C, 0,
+	                                BLIS_TRSV_MC_Z, 0 );
 
 	// Create control trees for the lowest-level kernels. These trees induce
 	// operations on (presumably) relatively small block-subvector problems.

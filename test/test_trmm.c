@@ -162,8 +162,8 @@ int main( int argc, char** argv )
 		packm_cntl_a =
 		bli_packm_cntl_obj_create( BLIS_BLOCKED,
 		                           BLIS_VARIANT3,
-		                           mr, NULL, // IMPORTANT: for consistency with trsm, "k" dim
-		                           mr, NULL, // multiple is set to mr.
+		                           mr, // IMPORTANT: for consistency with trsm, "k" dim
+		                           mr, // multiple is set to mr.
 		                           FALSE, // scale?
 		                           TRUE,  // densify?
 		                           FALSE, // invert diagonal?
@@ -175,8 +175,8 @@ int main( int argc, char** argv )
 		packm_cntl_b =
 		bli_packm_cntl_obj_create( BLIS_BLOCKED,
 		                           BLIS_VARIANT2,
-		                           mr, NULL, // IMPORTANT: m dim multiple here must be mr
-		                           nr, NULL, // since "k" dim multiple is set to mr above.
+		                           mr, // IMPORTANT: m dim multiple here must be mr
+		                           nr, // since "k" dim multiple is set to mr above.
 		                           FALSE, // scale?
 		                           FALSE, // densify?
 		                           FALSE, // invert diagonal?

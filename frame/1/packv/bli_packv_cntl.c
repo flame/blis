@@ -40,10 +40,10 @@ blksz_t* packv_mult_dim;
 
 void bli_packv_cntl_init()
 {
-	packv_mult_dim  = bli_blksz_obj_create( BLIS_DEFAULT_VR_S,
-	                                        BLIS_DEFAULT_VR_D,
-	                                        BLIS_DEFAULT_VR_C,
-	                                        BLIS_DEFAULT_VR_Z );
+	packv_mult_dim  = bli_blksz_obj_create( BLIS_DEFAULT_VR_S, 0,
+	                                        BLIS_DEFAULT_VR_D, 0,
+	                                        BLIS_DEFAULT_VR_C, 0,
+	                                        BLIS_DEFAULT_VR_Z, 0 );
 
 	packv_cntl = bli_packv_cntl_obj_create( BLIS_UNBLOCKED,
 	                                        BLIS_VARIANT1,

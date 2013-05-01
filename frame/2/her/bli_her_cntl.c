@@ -63,10 +63,10 @@ her_t*            her_cntl_ge_col;
 void bli_her_cntl_init()
 {
 	// Create blocksize objects.
-	her_mc = bli_blksz_obj_create( BLIS_HER_MC_S,
-	                               BLIS_HER_MC_D,
-	                               BLIS_HER_MC_C,
-	                               BLIS_HER_MC_Z );
+	her_mc = bli_blksz_obj_create( BLIS_HER_MC_S, 0,
+	                               BLIS_HER_MC_D, 0,
+	                               BLIS_HER_MC_C, 0,
+	                               BLIS_HER_MC_Z, 0 );
 
 
 	// Create control trees for the lowest-level kernels. These trees induce

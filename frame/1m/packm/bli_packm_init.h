@@ -42,10 +42,8 @@ void bli_packm_init_pack( bool_t    densify,
                           packord_t pack_ord_if_up,
                           packord_t pack_ord_if_lo,
                           packbuf_t pack_buf_type,
-                          blksz_t*  mr_def,
-                          blksz_t*  mr_ext,
-                          blksz_t*  nr_def,
-                          blksz_t*  nr_ext,
+                          blksz_t*  mr,
+                          blksz_t*  nr,
                           obj_t*    c,
                           obj_t*    p );
 

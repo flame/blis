@@ -70,15 +70,15 @@ ger_t*            ger_cntl_ge_col;
 void bli_ger_cntl_init()
 {
 	// Create blocksize objects.
-	ger_mc = bli_blksz_obj_create( BLIS_GER_MC_S,
-	                               BLIS_GER_MC_D,
-	                               BLIS_GER_MC_C,
-	                               BLIS_GER_MC_Z );
+	ger_mc = bli_blksz_obj_create( BLIS_GER_MC_S, 0,
+	                               BLIS_GER_MC_D, 0,
+	                               BLIS_GER_MC_C, 0,
+	                               BLIS_GER_MC_Z, 0 );
 
-	ger_nc = bli_blksz_obj_create( BLIS_GER_NC_S,
-	                               BLIS_GER_NC_D,
-	                               BLIS_GER_NC_C,
-	                               BLIS_GER_NC_Z );
+	ger_nc = bli_blksz_obj_create( BLIS_GER_NC_S, 0,
+	                               BLIS_GER_NC_D, 0,
+	                               BLIS_GER_NC_C, 0,
+	                               BLIS_GER_NC_Z, 0 );
 
 
 	// Create control trees for the lowest-level kernels. These trees induce

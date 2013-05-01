@@ -54,64 +54,46 @@ blksz_t*          hemm_kc;
 blksz_t*          hemm_mr;
 blksz_t*          hemm_nr;
 blksz_t*          hemm_kr;
-blksz_t*          hemm_extmr;
-blksz_t*          hemm_extnr;
-blksz_t*          hemm_extkr;
 blksz_t*          hemm_ni;
 
 
 void bli_hemm_cntl_init()
 {
 	// Create blocksize objects for each dimension.
-	hemm_mc = bli_blksz_obj_create( BLIS_DEFAULT_MC_S,
-	                                BLIS_DEFAULT_MC_D,
-	                                BLIS_DEFAULT_MC_C,
-	                                BLIS_DEFAULT_MC_Z );
+	hemm_mc = bli_blksz_obj_create( BLIS_DEFAULT_MC_S, BLIS_EXTEND_MC_S,
+	                                BLIS_DEFAULT_MC_D, BLIS_EXTEND_MC_D,
+	                                BLIS_DEFAULT_MC_C, BLIS_EXTEND_MC_C,
+	                                BLIS_DEFAULT_MC_Z, BLIS_EXTEND_MC_Z );
 
-	hemm_nc = bli_blksz_obj_create( BLIS_DEFAULT_NC_S,
-	                                BLIS_DEFAULT_NC_D,
-	                                BLIS_DEFAULT_NC_C,
-	                                BLIS_DEFAULT_NC_Z );
+	hemm_nc = bli_blksz_obj_create( BLIS_DEFAULT_NC_S, BLIS_EXTEND_NC_S,
+	                                BLIS_DEFAULT_NC_D, BLIS_EXTEND_NC_D,
+	                                BLIS_DEFAULT_NC_C, BLIS_EXTEND_NC_C,
+	                                BLIS_DEFAULT_NC_Z, BLIS_EXTEND_NC_Z );
 
-	hemm_kc = bli_blksz_obj_create( BLIS_DEFAULT_KC_S,
-	                                BLIS_DEFAULT_KC_D,
-	                                BLIS_DEFAULT_KC_C,
-	                                BLIS_DEFAULT_KC_Z );
+	hemm_kc = bli_blksz_obj_create( BLIS_DEFAULT_KC_S, BLIS_EXTEND_KC_S,
+	                                BLIS_DEFAULT_KC_D, BLIS_EXTEND_KC_D,
+	                                BLIS_DEFAULT_KC_C, BLIS_EXTEND_KC_C,
+	                                BLIS_DEFAULT_KC_Z, BLIS_EXTEND_KC_Z );
 
-	hemm_mr = bli_blksz_obj_create( BLIS_DEFAULT_MR_S,
-	                                BLIS_DEFAULT_MR_D,
-	                                BLIS_DEFAULT_MR_C,
-	                                BLIS_DEFAULT_MR_Z );
+	hemm_mr = bli_blksz_obj_create( BLIS_DEFAULT_MR_S, BLIS_EXTEND_MR_S,
+	                                BLIS_DEFAULT_MR_D, BLIS_EXTEND_MR_D,
+	                                BLIS_DEFAULT_MR_C, BLIS_EXTEND_MR_C,
+	                                BLIS_DEFAULT_MR_Z, BLIS_EXTEND_MR_Z );
 
-	hemm_nr = bli_blksz_obj_create( BLIS_DEFAULT_NR_S,
-	                                BLIS_DEFAULT_NR_D,
-	                                BLIS_DEFAULT_NR_C,
-	                                BLIS_DEFAULT_NR_Z );
+	hemm_nr = bli_blksz_obj_create( BLIS_DEFAULT_NR_S, BLIS_EXTEND_NR_S,
+	                                BLIS_DEFAULT_NR_D, BLIS_EXTEND_NR_D,
+	                                BLIS_DEFAULT_NR_C, BLIS_EXTEND_NR_C,
+	                                BLIS_DEFAULT_NR_Z, BLIS_EXTEND_NR_Z );
 
-	hemm_kr = bli_blksz_obj_create( BLIS_DEFAULT_KR_S,
-	                                BLIS_DEFAULT_KR_D,
-	                                BLIS_DEFAULT_KR_C,
-	                                BLIS_DEFAULT_KR_Z );
+	hemm_kr = bli_blksz_obj_create( BLIS_DEFAULT_KR_S, BLIS_EXTEND_KR_S,
+	                                BLIS_DEFAULT_KR_D, BLIS_EXTEND_KR_D,
+	                                BLIS_DEFAULT_KR_C, BLIS_EXTEND_KR_C,
+	                                BLIS_DEFAULT_KR_Z, BLIS_EXTEND_KR_Z );
 
-	hemm_extmr = bli_blksz_obj_create( BLIS_EXTEND_MR_S,
-	                                   BLIS_EXTEND_MR_D,
-	                                   BLIS_EXTEND_MR_C,
-	                                   BLIS_EXTEND_MR_Z );
-
-	hemm_extnr = bli_blksz_obj_create( BLIS_EXTEND_NR_S,
-	                                   BLIS_EXTEND_NR_D,
-	                                   BLIS_EXTEND_NR_C,
-	                                   BLIS_EXTEND_NR_Z );
-
-	hemm_extkr = bli_blksz_obj_create( BLIS_EXTEND_KR_S,
-	                                   BLIS_EXTEND_KR_D,
-	                                   BLIS_EXTEND_KR_C,
-	                                   BLIS_EXTEND_KR_Z );
-
-	hemm_ni = bli_blksz_obj_create( BLIS_DEFAULT_NI_S,
-	                                BLIS_DEFAULT_NI_D,
-	                                BLIS_DEFAULT_NI_C,
-	                                BLIS_DEFAULT_NI_Z );
+	hemm_ni = bli_blksz_obj_create( BLIS_DEFAULT_NI_S, 0,
+	                                BLIS_DEFAULT_NI_D, 0,
+	                                BLIS_DEFAULT_NI_C, 0,
+	                                BLIS_DEFAULT_NI_Z, 0 );
 
 
 	// Create control tree objects for packm operations on a, b, and c.
@@ -119,8 +101,8 @@ void bli_hemm_cntl_init()
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
 	                           BLIS_VARIANT2,
-	                           hemm_mr, hemm_extmr,
-	                           hemm_kr, hemm_extkr,
+	                           hemm_mr,
+	                           hemm_kr,
 	                           FALSE, // do NOT scale by alpha
 	                           TRUE,  // densify
 	                           FALSE, // do NOT invert diagonal
@@ -133,8 +115,8 @@ void bli_hemm_cntl_init()
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
 	                           BLIS_VARIANT2,
-	                           hemm_kr, hemm_extkr,
-	                           hemm_nr, hemm_extnr,
+	                           hemm_kr,
+	                           hemm_nr,
 	                           FALSE, // do NOT scale by alpha
 	                           FALSE, // already dense; densify not necessary
 	                           FALSE, // do NOT invert diagonal
@@ -147,8 +129,8 @@ void bli_hemm_cntl_init()
 	=
 	bli_packm_cntl_obj_create( BLIS_UNBLOCKED,
 	                           BLIS_VARIANT1,
-	                           hemm_mr, hemm_extmr,
-	                           hemm_nr, hemm_extnr,
+	                           hemm_mr,
+	                           hemm_nr,
 	                           FALSE, // do NOT scale by beta
 	                           FALSE, // already dense; densify not necessary
 	                           FALSE, // do NOT invert diagonal

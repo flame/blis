@@ -296,7 +296,11 @@ typedef struct mem_s
 
 typedef struct blksz_s
 {
+	// Primary blocksize values.
 	dim_t v[BLIS_NUM_FP_TYPES];
+
+	// Blocksize Extensions.
+	dim_t e[BLIS_NUM_FP_TYPES];
 } blksz_t;
 
 // Fortran-77 types (used only by blas2blis compatibility layer)

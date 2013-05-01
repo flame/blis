@@ -63,10 +63,10 @@ hemv_t*           hemv_cntl_ge_lcol_urow;
 void bli_hemv_cntl_init()
 {
 	// Create blocksize objects.
-	hemv_mc = bli_blksz_obj_create( BLIS_HEMV_MC_S,
-	                                BLIS_HEMV_MC_D,
-	                                BLIS_HEMV_MC_C,
-	                                BLIS_HEMV_MC_Z );
+	hemv_mc = bli_blksz_obj_create( BLIS_HEMV_MC_S, 0,
+	                                BLIS_HEMV_MC_D, 0,
+	                                BLIS_HEMV_MC_C, 0,
+	                                BLIS_HEMV_MC_Z, 0 );
 
 
 	// Create control trees for the lowest-level kernels. These trees induce

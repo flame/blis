@@ -55,64 +55,46 @@ blksz_t*          her2k_kc;
 blksz_t*          her2k_mr;
 blksz_t*          her2k_nr;
 blksz_t*          her2k_kr;
-blksz_t*          her2k_extmr;
-blksz_t*          her2k_extnr;
-blksz_t*          her2k_extkr;
 blksz_t*          her2k_ni;
 
 
 void bli_her2k_cntl_init()
 {
 	// Create blocksize objects for each dimension.
-	her2k_mc = bli_blksz_obj_create( BLIS_DEFAULT_MC_S,
-	                                 BLIS_DEFAULT_MC_D,
-	                                 BLIS_DEFAULT_MC_C,
-	                                 BLIS_DEFAULT_MC_Z );
+	her2k_mc = bli_blksz_obj_create( BLIS_DEFAULT_MC_S, BLIS_EXTEND_MC_S,
+	                                 BLIS_DEFAULT_MC_D, BLIS_EXTEND_MC_D,
+	                                 BLIS_DEFAULT_MC_C, BLIS_EXTEND_MC_C,
+	                                 BLIS_DEFAULT_MC_Z, BLIS_EXTEND_MC_Z );
 
-	her2k_nc = bli_blksz_obj_create( BLIS_DEFAULT_NC_S,
-	                                 BLIS_DEFAULT_NC_D,
-	                                 BLIS_DEFAULT_NC_C,
-	                                 BLIS_DEFAULT_NC_Z );
+	her2k_nc = bli_blksz_obj_create( BLIS_DEFAULT_NC_S, BLIS_EXTEND_NC_S,
+	                                 BLIS_DEFAULT_NC_D, BLIS_EXTEND_NC_D,
+	                                 BLIS_DEFAULT_NC_C, BLIS_EXTEND_NC_C,
+	                                 BLIS_DEFAULT_NC_Z, BLIS_EXTEND_NC_Z );
 
-	her2k_kc = bli_blksz_obj_create( BLIS_DEFAULT_KC_S,
-	                                 BLIS_DEFAULT_KC_D,
-	                                 BLIS_DEFAULT_KC_C,
-	                                 BLIS_DEFAULT_KC_Z );
+	her2k_kc = bli_blksz_obj_create( BLIS_DEFAULT_KC_S, BLIS_EXTEND_KC_S,
+	                                 BLIS_DEFAULT_KC_D, BLIS_EXTEND_KC_D,
+	                                 BLIS_DEFAULT_KC_C, BLIS_EXTEND_KC_C,
+	                                 BLIS_DEFAULT_KC_Z, BLIS_EXTEND_KC_Z );
 
-	her2k_mr = bli_blksz_obj_create( BLIS_DEFAULT_MR_S,
-	                                 BLIS_DEFAULT_MR_D,
-	                                 BLIS_DEFAULT_MR_C,
-	                                 BLIS_DEFAULT_MR_Z );
+	her2k_mr = bli_blksz_obj_create( BLIS_DEFAULT_MR_S, BLIS_EXTEND_MR_S,
+	                                 BLIS_DEFAULT_MR_D, BLIS_EXTEND_MR_D,
+	                                 BLIS_DEFAULT_MR_C, BLIS_EXTEND_MR_C,
+	                                 BLIS_DEFAULT_MR_Z, BLIS_EXTEND_MR_Z );
 
-	her2k_nr = bli_blksz_obj_create( BLIS_DEFAULT_NR_S,
-	                                 BLIS_DEFAULT_NR_D,
-	                                 BLIS_DEFAULT_NR_C,
-	                                 BLIS_DEFAULT_NR_Z );
+	her2k_nr = bli_blksz_obj_create( BLIS_DEFAULT_NR_S, BLIS_EXTEND_NR_S,
+	                                 BLIS_DEFAULT_NR_D, BLIS_EXTEND_NR_D,
+	                                 BLIS_DEFAULT_NR_C, BLIS_EXTEND_NR_C,
+	                                 BLIS_DEFAULT_NR_Z, BLIS_EXTEND_NR_Z );
 
-	her2k_kr = bli_blksz_obj_create( BLIS_DEFAULT_KR_S,
-	                                 BLIS_DEFAULT_KR_D,
-	                                 BLIS_DEFAULT_KR_C,
-	                                 BLIS_DEFAULT_KR_Z );
+	her2k_kr = bli_blksz_obj_create( BLIS_DEFAULT_KR_S, BLIS_EXTEND_KR_S,
+	                                 BLIS_DEFAULT_KR_D, BLIS_EXTEND_KR_D,
+	                                 BLIS_DEFAULT_KR_C, BLIS_EXTEND_KR_C,
+	                                 BLIS_DEFAULT_KR_Z, BLIS_EXTEND_KR_Z );
 
-	her2k_extmr = bli_blksz_obj_create( BLIS_EXTEND_MR_S,
-	                                    BLIS_EXTEND_MR_D,
-	                                    BLIS_EXTEND_MR_C,
-	                                    BLIS_EXTEND_MR_Z );
-
-	her2k_extnr = bli_blksz_obj_create( BLIS_EXTEND_NR_S,
-	                                    BLIS_EXTEND_NR_D,
-	                                    BLIS_EXTEND_NR_C,
-	                                    BLIS_EXTEND_NR_Z );
-
-	her2k_extkr = bli_blksz_obj_create( BLIS_EXTEND_KR_S,
-	                                    BLIS_EXTEND_KR_D,
-	                                    BLIS_EXTEND_KR_C,
-	                                    BLIS_EXTEND_KR_Z );
-
-	her2k_ni = bli_blksz_obj_create( BLIS_DEFAULT_NI_S,
-	                                 BLIS_DEFAULT_NI_D,
-	                                 BLIS_DEFAULT_NI_C,
-	                                 BLIS_DEFAULT_NI_Z );
+	her2k_ni = bli_blksz_obj_create( BLIS_DEFAULT_NI_S, 0,
+	                                 BLIS_DEFAULT_NI_D, 0,
+	                                 BLIS_DEFAULT_NI_C, 0,
+	                                 BLIS_DEFAULT_NI_Z, 0 );
 
 
 	// Create control tree objects for packm operations on a, b, and c.
@@ -120,8 +102,8 @@ void bli_her2k_cntl_init()
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
 	                           BLIS_VARIANT2,
-	                           her2k_mr, her2k_extmr,
-	                           her2k_kr, her2k_extkr,
+	                           her2k_mr,
+	                           her2k_kr,
 	                           FALSE, // do NOT scale by alpha
 	                           FALSE, // already dense; densify not necessary
 	                           FALSE, // do NOT invert diagonal
@@ -134,8 +116,8 @@ void bli_her2k_cntl_init()
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
 	                           BLIS_VARIANT2,
-	                           her2k_kr, her2k_extkr,
-	                           her2k_nr, her2k_extnr,
+	                           her2k_kr,
+	                           her2k_nr,
 	                           FALSE, // do NOT scale by alpha
 	                           FALSE, // already dense; densify not necessary
 	                           FALSE, // do NOT invert diagonal
@@ -148,8 +130,8 @@ void bli_her2k_cntl_init()
 	=
 	bli_packm_cntl_obj_create( BLIS_UNBLOCKED,
 	                           BLIS_VARIANT1,
-	                           her2k_mr, her2k_extmr,
-	                           her2k_nr, her2k_extnr,
+	                           her2k_mr,
+	                           her2k_nr,
 	                           FALSE, // do NOT scale by beta
 	                           FALSE, // already dense; densify not necessary
 	                           FALSE, // do NOT invert diagonal

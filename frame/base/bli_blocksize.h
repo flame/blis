@@ -33,24 +33,30 @@
 */
 
 
-blksz_t* bli_blksz_obj_create( dim_t b_s,
-                               dim_t b_d,
-                               dim_t b_c,
-                               dim_t b_z );
+blksz_t* bli_blksz_obj_create( dim_t b_s, dim_t be_s,
+                               dim_t b_d, dim_t be_d,
+                               dim_t b_c, dim_t be_c,
+                               dim_t b_z, dim_t be_z );
 
 void bli_blksz_obj_init( blksz_t* b,
-                         dim_t    b_s,
-                         dim_t    b_d,
-                         dim_t    b_c,
-                         dim_t    b_z );
+                         dim_t    b_s, dim_t be_s,
+                         dim_t    b_d, dim_t be_d,
+                         dim_t    b_c, dim_t be_c,
+                         dim_t    b_z, dim_t be_z );
 
 void bli_blksz_obj_free( blksz_t* b );
 
 dim_t bli_blksz_for_type( num_t    dt,
                           blksz_t* b );
 
+dim_t bli_blksz_ext_for_type( num_t    dt,
+                              blksz_t* b );
+
 dim_t bli_blksz_for_obj( obj_t*   obj,
                          blksz_t* b );
+
+dim_t bli_blksz_ext_for_obj( obj_t*   obj,
+                             blksz_t* b );
 
 dim_t bli_determine_blocksize_f( dim_t    i,
                                  dim_t    dim,
@@ -60,7 +66,4 @@ dim_t bli_determine_blocksize_b( dim_t    i,
                                  dim_t    dim,
                                  obj_t*   obj,
                                  blksz_t* b );
-
-// -- Blocksize object accessor macros --
-
 

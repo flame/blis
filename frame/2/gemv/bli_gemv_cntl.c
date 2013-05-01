@@ -71,15 +71,15 @@ gemv_t*           gemv_cntl_ge_axpy;
 void bli_gemv_cntl_init()
 {
 	// Create blocksize objects for each dimension.
-	gemv_mc = bli_blksz_obj_create( BLIS_GEMV_MC_S,
-	                                BLIS_GEMV_MC_D,
-	                                BLIS_GEMV_MC_C,
-	                                BLIS_GEMV_MC_Z );
+	gemv_mc = bli_blksz_obj_create( BLIS_GEMV_MC_S, 0,
+	                                BLIS_GEMV_MC_D, 0,
+	                                BLIS_GEMV_MC_C, 0,
+	                                BLIS_GEMV_MC_Z, 0 );
 
-	gemv_nc = bli_blksz_obj_create( BLIS_GEMV_NC_S,
-	                                BLIS_GEMV_NC_D,
-	                                BLIS_GEMV_NC_C,
-	                                BLIS_GEMV_NC_Z );
+	gemv_nc = bli_blksz_obj_create( BLIS_GEMV_NC_S, 0,
+	                                BLIS_GEMV_NC_D, 0,
+	                                BLIS_GEMV_NC_C, 0,
+	                                BLIS_GEMV_NC_Z, 0 );
 
 
 	// Create control trees for the lowest-level kernels. These trees induce

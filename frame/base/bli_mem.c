@@ -35,8 +35,11 @@
 #include "blis.h"
 
 
-// Define the size of pool blocks. These may be adjusted so that they can
-// handle inflated blocksizes at edge cases.
+// Define the size of pool blocks.
+// NOTE: for cases where BLIS_EXTEND_MR_? > 0, we scale the maximum value
+// for MC_? so that enough space will be allocated to accommodate the
+// leading dimension for the packed micro-panels of A. Same goes for
+// NR/NC and KR/KC.
 #define BLIS_POOL_MC_D     ( ( BLIS_MAXIMUM_MC_D * BLIS_PACKDIM_MR_D ) / BLIS_DEFAULT_MR_D )
 #define BLIS_POOL_KC_D     ( ( BLIS_MAXIMUM_KC_D * BLIS_PACKDIM_KR_D ) / BLIS_DEFAULT_KR_D )
 #define BLIS_POOL_NC_D     ( ( BLIS_MAXIMUM_NC_D * BLIS_PACKDIM_NR_D ) / BLIS_DEFAULT_NR_D )

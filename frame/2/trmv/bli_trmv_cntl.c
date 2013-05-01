@@ -62,10 +62,10 @@ trmv_t*           trmv_cntl_ge_ncol_trow;
 void bli_trmv_cntl_init()
 {
 	// Create blocksize objects.
-	trmv_mc = bli_blksz_obj_create( BLIS_TRMV_MC_S,
-	                                BLIS_TRMV_MC_D,
-	                                BLIS_TRMV_MC_C,
-	                                BLIS_TRMV_MC_Z );
+	trmv_mc = bli_blksz_obj_create( BLIS_TRMV_MC_S, 0,
+	                                BLIS_TRMV_MC_D, 0,
+	                                BLIS_TRMV_MC_C, 0,
+	                                BLIS_TRMV_MC_Z, 0 );
 
 
 	// Create control trees for the lowest-level kernels. These trees induce
