@@ -154,8 +154,7 @@ void bli_mem_acquire_m( siz_t     req_size,
 		pool_index = bli_packbuf_index( buf_type );
 		pool       = &pools[ pool_index ];
 
-		// Perform error checking, if enabled.
-		if ( bli_error_checking_is_enabled() )
+		// Unconditionally perform error checking on the memory pool.
 		{
 			err_t e_val;
 
