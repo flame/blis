@@ -1,4 +1,386 @@
-commit ec16c52f2ecf419c749175ce0a297441c10f1c68 (HEAD, tag: 0.0.6, origin/master, master)
+commit 6bfa96f84887dec0b4cf8be5d38dd634c2f8951d (HEAD, tag: 0.0.7, origin/master, master)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Apr 30 19:35:54 2013 -0500
+
+    Absorbed blocksize extensions into main objects.
+    
+    Details:
+    - Revamped some parts of commit b6ef84fad1c9 by adding blocksize extension
+      fields to the blksz_t object rather than have them as separate structs.
+    - Updated all packm interfaces/invocations according to above change.
+    - Generalized bli_determine_blocksize_?() so that edge case optimization
+      happens if and only if cache blocksizes are created with non-zero
+      extensions.
+    - Updated comments in bli_kernel.h files to indicate that the edge case
+      blocksize extension mechanism is now available for use.
+
+commit bc7c8005cedbe50961ac2a99aeeabf4e9f9a8e9e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Apr 25 17:16:59 2013 -0500
+
+    Added option to disable err checking in testsuite.
+    
+    Details:
+    - Added a new line to input.general that allows one to specify the error-
+      checking level to use for each BLIS experiment. The only two levels
+      supported for now are "no error checking" and "full error checking".
+
+commit 096b366ddcfe386f44419ef84d8df8be13825f86
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Apr 25 16:43:43 2013 -0500
+
+    Use cntl trees that block in n dimension.
+    
+    Details:
+    - Updated _cntl.c files for each level-3 operation to induce blocked
+      algorithms that first paritition in the n dimension with a blocksize
+      of NC. Typically this is not an issue since only very large problems
+      exceed that of NC. But developers often run very large problems, and
+      so this extra blocking should be the default.
+    - Removed some recently introduced but now unused macros from
+      bli_param_macro_defs.h.
+
+commit b6e24b23cb4dfc488c1c9c70d596539c2287f72e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Apr 25 12:06:12 2013 -0500
+
+    Use PASTEMAC in macro-kernels (over MAC2 or MAC3).
+    
+    Details:
+    - Replaced multi-type invocations of copys_mxn, xpbys_mxn, etc. (PASTEMAC2
+      and PASTEMAC3) with those that only use a single type (PASTEMAC).
+    - Added extra macros to bli_adds_mxn_uplo.h and bli_xpbys_mxn_uplo.h to
+      accommodate above change.
+    - Fixed comment typo in bli_config.h files.
+    - Added .nfs* pattern to .gitignore.
+
+commit df80acf517dde180ddcc5835c6136b2fa7556d4b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Apr 23 19:43:23 2013 -0500
+
+    Fixed computation of b_next in L3 macro-kernels.
+    
+    Details:
+    - Restructured herk_l and herk_u macro-kernels in the imagine of trmm
+      and trsm, in that the edge cases are captured by the main loop, rather
+      than trying to have "cleanup" sections that result in four distinct
+      parts (interior, bottom edge, right edge, bottom-right edge) of the
+      code.
+    - Fixed the way b_next was being computed in the non-gemm level-3
+      macro-kernels (herk, trmm, trsm). The way they are computed now matches
+      that of gemm.
+
+commit 3671528cf8efe4b445d196665143a5c50c2c6048
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Apr 23 19:12:14 2013 -0500
+
+    Fixed minor bug in computing b_next in gemm.
+
+commit db072a5b4a039a9a668ef951333ecfb5bd3a74b9
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Apr 23 17:49:10 2013 -0500
+
+    Fixed rare edge case bug in herk_l macro-kernel.
+    
+    Details:
+    - Fixed a potential bug in herk_l at the m_left edge case. If MR was
+      chosen to be much larger than NR, then one could encounter edge cases
+      in the the MC dimension that fall entirely below the diagonal, which
+      the previous implementation of the herk_l macro-kernel was not allowing
+      for.
+
+commit 1dab11e37d1cb403cbe75b73a644c00de534f104
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Apr 23 17:17:11 2013 -0500
+
+    Updated x86 gemmtrsm ukernels to use alpha.
+
+commit 9d10d7dd9bc92a993fea7162bfa5983f75506f49
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Apr 23 16:00:18 2013 -0500
+
+    Added a_next, b_next arguments to micro-kernels.
+    
+    Details:
+    - Added two more arguments to the gemm and gemmtrsm microkernels: the
+      addresses of the next micro-panels of A and B. By passing these
+      pointers into the micro-kernel, we allow the micro-kernel author to
+      prefetch micro-panels of A and B as necessary (though this is
+      completely optional; these addresses may also be safely ignored).
+    - Updated all seven macro-kernels so that they compute and pass in
+      a_next and b_next. Note that ONLY the gemm macro-kernel computes
+      a_next and b_next with the precise semantics we want. I will go back
+      and fix the other macro-kernels in the near future.
+    - Added 'restrict' to various micro-kernels from which it was missing.
+
+commit f3815dc84d385c514a5acaf1e925424a57be2f51
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Apr 23 11:12:33 2013 -0500
+
+    Added code for backward edge-case blocking.
+    
+    Disabled:
+    - Edited bli_determine_blocksize_b() to include experimental (and
+      currently disabled) code that computes extended blocks.
+    - Updated commnts relate to above changes.
+    - Enabled use of x86 gemmtrsm ukernel in config/flame/bli_kernel.h.
+
+commit 4fe1435f20e8fc7dd72f795ac58c8e236e6c631b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Apr 22 19:00:43 2013 -0500
+
+    Updated dupl implementation to use PACKNR and NR.
+    
+    Details:
+    - Updated frame/util/dupl/bli_dupl_unb_var1.c to utilize PACKNR and NR
+      explicitly so navigate b1 so that situations where PACKNR > NR are
+      supported.
+    - Moved the 4x2 and 4x4 reference micro-kernels in frame/3/gemm/ukernels and
+      frame/3/trsm/ukernels to kernels/c99/.
+    - Updated clarksville and flame configurations.
+
+commit 2d6f9e83799a46d52d7901e275f8fd67f0a0edc6
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Apr 21 15:10:34 2013 -0500
+
+    Disabled blocksize checks for memory pools.
+    
+    Details:
+    - Temporarily disabled checks that ensure that enough memory will be allocated
+      by the contiguous memory allocator for all types, given that the values for
+      double precision real are the ones used to allocate the space. These checks
+      can easily go awry in certain situations, especially if you are developing for
+      only one datatype. So for now, they are probably more trouble than they are
+      worth.
+
+commit b6ef84fad1c9884c84b7f1350a0bcdfe1737e8f2
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Apr 21 15:00:24 2013 -0500
+
+    Allow ldim of packed micro-panels != MR, NR.
+    
+    Details:
+    - Made substantial changes throughout the framework to decouple the leading
+      dimension (row or column stride) used within each packed micro-panel from
+      the corresponding register blocksize. It appears advantageous on some
+      systems to use, for example, packed micro-panels of A where the column
+      stride is greater than MR (whereas previously it was always equal to MR).
+    - Changes include:
+      - Added BLIS_EXTEND_[MNK]R_? macros, which specify how much extra padding
+        to use when packing micro-panels of A and B.
+      - Adjusted all packing routines and macro-kernels to use PACKMR and PACKNR
+        where appropriate, instead of MR and NR.
+      - Added pd field (panel dimension) to obj_t.
+      - New interface to bli_packm_cntl_obj_create().
+      - Renamed bli_obj_packed_length()/_width() macros to
+        bli_obj_padded_length()/_width().
+      - Removed local #defines for cache/register blocksizes in level-3 *_cntl.c.
+      - Print out new cache and register blocksize extensions in test suite.
+    - Also added new BLIS_EXTEND_[MNK]C_? macros for future use in using a larger
+      blocksize for edge cases, which can improve performance at the margins.
+
+commit 59fca58dbe678d79c1df0916b022afbeac7c48fa
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Apr 19 15:26:29 2013 -0500
+
+    Fixed bug in compatibility layer (her2k/syr2k).
+    
+    Details:
+    - Fixed a bug in the BLAS compatibility layer, specifically in bla_her2k.c
+      and bla_syr2k.c, that caused incorrect computation to occur when the BLAS
+      interface caller requests the [conjugate-]transpose case. Thanks to Bryan
+      Marker for reporting the behavior that led to this bug.
+
+commit 09eacbd1ab1380a95a0e9625726b45e43ed102d6
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Apr 18 19:39:13 2013 -0500
+
+    Changed old level3 test drivers to call front-ends.
+    
+    Details:
+    - Changed old level-3 test drivers, in 'test' directory, to always call the
+      front-end object API instead of the internal back-end with the locally
+      defined control tree.
+
+commit 83e45de23e565138b8fde06fb11cfedc973b7246
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Apr 18 18:33:03 2013 -0500
+
+    Allow packm_init() to reacquire a too-small mem_t.
+    
+    Details:
+    - Changed bli_packm_init() to react differently to a situation where a pack
+      obj_t has an already-allocated mem_t entry that has a buffer that is smaller
+      than what will be needed to hold the block/panel that now needs to be
+      packed. Previously, this situation was treated with an abort() since I
+      assumed something was horribly wrong. I have changed the code so that it now
+      reacts by releasing the previous mem_t and re-acquires a new mem_t with the
+      new information. (This change was done at the request of Bryan Marker to
+      facilitate code generation via DxT.)
+
+commit a6990434173b0cf651f8521194f3aef738deb7d2
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Apr 18 13:52:47 2013 -0500
+
+    Fixed bug in packing block of A for hemm/symm.
+    
+    Details:
+    - Fixed a bug in bli_packm_blk_var2() that affected the packing functionality
+      of hemm and symm. The bug occurs whenever attempting to pack a Hermitian or
+      symmetric matrix where the block of A being packed intersects the diagonal,
+      but some of its micro-panels do not intersect the diagonal and lie completely
+      in the unstored region. Thanks to Francisco Igual for reporting this bug.
+    - Comment updates to both _blk_var2.c and _blk_var3.c.
+
+commit c92e7590e1934f830814ab614c794215ebe0c415
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Apr 17 20:53:29 2013 -0500
+
+    Activated bli_packm_acquire_mpart_t2b().
+    
+    Details:
+    - Removed the overly-paranoid bli_abort() from the end of
+      bli_packm_acquire_mpart_t2b(), to allow others to experiment with
+      partitioning through packed blocks of A. Also, and more importantly,
+      changed an earlier check that was causing an erroneous (but
+      coincidentally redundant) abort(). Also, updated some of the comments
+      in bli_packm_part.c.
+
+commit bea579e9f009a44e08008eb14d09f38748ab2b53
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Apr 16 19:43:14 2013 -0500
+
+    Allow creation of "empty" objects.
+    
+    Details:
+    - Modified bli_obj_alloc_buffer() to allow allocating an empty buffer, and
+      modified bli_adjust_strides() to explicitly handle m = n = 0.
+    - Updated bli_check_matrix_strides() to allow cases where m = n = 0.
+
+commit 7904e20f2e6908571ee5008da2a08084198eefae
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Apr 16 17:37:16 2013 -0500
+
+    Fixed "root" object bug in bli_her[2]k/syr[2]k.
+    
+    Details:
+    - Fixed an obscure bug in the front-ends for herk, her2k, syrk, and syr2k,
+      that manifested as the incorrect triangle being updated. It occurred when
+      the user would pass in a matrix object that was correctly marked as
+      symmetric/Hermitian and lower-stored, but whose root object was never marked
+      as lower (or upper). We now alias and re-assign root status for matrix C
+      within the front-ends. Note that trmm and trsm were already doing this,
+      albeit for a slightly different reason (to allow the internal back-end to
+      choose which algorithm to run--lower or upper--based on the uplo of the root
+      object for both left and right side cases). Thanks to Bryan Marker for
+      leading me to this bug.
+
+commit 19155a768dd97b57cfb59c32fa8e54a344ec66e1
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Apr 16 11:24:03 2013 -0500
+
+    Fixed overzealous type-checking in bli_getsc().
+    
+    Details:
+    - Relaxed type checking in getsc so that the input object could be a constant
+      and not just a proper floating-point type. (If it is a constant, default to
+      extracting the dcomplex values.) Thanks to Bryan Marker for reporting this
+      bug.
+    - Added definition for bli_is_constant() in bli_param_macro_defs.h
+    - Comment updates to various level-0 scalar routines.
+
+commit 2ee6bbca2953d04c967685da9735b3eaf8a4b813
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Apr 15 19:27:57 2013 -0500
+
+    Fixed bug in bli_obj_is_packed() and renamed.
+    
+    Details:
+    - This macro is used to determine whether the partitioning routines should
+      call a corresponding packm_part routine instead. However, it was
+      unintentionally catching matrices that were marked as "packed" by virtue
+      of them simply being marked as BLIS_PACKED_UNSPEC in, say, bli_gemv().
+      The macro has now been renamed to bli_obj_is_panel_packed(), and now only
+      checks for row or column panel packing. (Note that I first attempted to
+      fix this bug in a571af816d72.) Thanks to Bryan Marker for reporting the
+      erroneous behavior that led me to this bug.
+
+commit 99b99eebe70336b5f28039a4a084aa7f5fa7059d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Apr 15 17:54:43 2013 -0500
+
+    Removed local reference ukernel blocksize macros.
+    
+    Details:
+    - Removed locally defined gemm microkernel blocksize macros from _mxn
+      reference microkernel definition and header. Meant to include this in
+      a recent/previous commit (0020ef7c8271).
+
+commit 6a538fa7b164655f41cea5b9c8d3902438bda66b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Apr 15 14:40:31 2013 -0500
+
+    Formatting change to mods in previous commit.
+
+commit ea079d35591e808971d2d98a1a7d9f89bc1f7c2f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Apr 15 14:31:40 2013 -0500
+
+    Set structure of objects in level-2 BLIS APIs.
+    
+    Details:
+    - Added missing statement to set structure field of local objects in
+      top-level BLIS (BLAS-like) API wrappers. Thanks to Bryan Marker for
+      reporting this bug.
+
+commit d9948c541c0446e20e249a1ccc83709ce51b7aa8
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Apr 15 10:21:26 2013 -0500
+
+    Tweak to test suite function string construction.
+    
+    Details:
+    - Fixed a minor bug in the way that the test suite would construct function
+      name strings when the user anchored all parameters in input.operations.
+      In this case, the test driver would mistake this situation for one where
+      the operation simply had no parameters to begin with, and thus would not
+      include the parameter string in the function string that is output for
+      every result.
+
+commit ca9e435c57c5c7a000d2a32681dd8070ba850abd
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Apr 15 09:59:46 2013 -0500
+
+    Fixed a bug in reference implementation of dupl.
+    
+    Details:
+    - Fixed a bug in reference implementation of dupl (bli_dupl_unb_var1.c),
+      which resulted in incorrect duplication.
+    - Updated old test drivers according to recently updated packm control tree
+      creation interface.
+    - Added 'restrict' to x86 gemm microkernel interface.
+
+commit 26cbd52e364bbe439e3744101cd5a6cbcb82dffd
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Apr 14 19:05:33 2013 -0500
+
+    Modified bli_kernel.h include order in blis.h.
+    
+    Details:
+    - Delayed #include of bli_kernel.h in blis.h to prevent a situation where
+      _kernel.h includes an optimized microkernel header, which uses BLIS types
+      such as dim_t and inc_t, which would precede the definition of those types
+      in bli_type_defs.h.
+    - Moved the #include of bli_kernel_macro_defs.h in bli_macro_defs.h to blis.h
+      (immediately after that of bli_kernel.h).
+
+commit 3414a23c38b0de45a8034b3dda2fc4b5a755e4e1
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Apr 13 16:53:16 2013 -0500
+
+    CHANGELOG update.
+
+commit ec16c52f2ecf419c749175ce0a297441c10f1c68 (tag: 0.0.6)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Sat Apr 13 16:41:16 2013 -0500
 
