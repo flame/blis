@@ -74,7 +74,7 @@ void bli_unpackm_blk_var1( obj_t*     p,
 	// the trans status (not the conjugation status), since we probably
 	// don't want to un-conjugate if the original matrix was conjugated
 	// when packed.
-	trans_t   transc    = bli_obj_trans_status( *c );
+	trans_t   transc    = bli_obj_onlytrans_status( *c );
 
 	dim_t     m_c       = bli_obj_length( *c );
 	dim_t     n_c       = bli_obj_width( *c );

@@ -57,7 +57,7 @@ void bli_unpackm_unb_var1( obj_t*     p,
 
 	doff_t    diagoffp  = bli_obj_diag_offset( *p );
 	uplo_t    uplop     = bli_obj_uplo( *p );
-	trans_t   transc    = bli_obj_trans_status( *c );
+	trans_t   transc    = bli_obj_onlytrans_status( *c );
 
 	dim_t     m_c       = bli_obj_length( *c );
 	dim_t     n_c       = bli_obj_width( *c );

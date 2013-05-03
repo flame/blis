@@ -108,7 +108,7 @@
 \
 	(   (obj).info & BLIS_CONJTRANS_BITS )
 
-#define bli_obj_trans_status( obj ) \
+#define bli_obj_onlytrans_status( obj ) \
 \
 	(   (obj).info & BLIS_TRANS_BIT )
 

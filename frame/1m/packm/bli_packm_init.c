@@ -166,7 +166,7 @@ void bli_packm_init_pack( bool_t    densify,
                           obj_t*    p )
 {
 	num_t   datatype     = bli_obj_datatype( *c );
-	trans_t transc       = bli_obj_trans_status( *c );
+	trans_t transc       = bli_obj_onlytrans_status( *c );
 	dim_t   m_c          = bli_obj_length( *c );
 	dim_t   n_c          = bli_obj_width( *c );
 	dim_t   mr_def_dim   = bli_blksz_for_type( datatype, mr );
