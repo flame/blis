@@ -86,7 +86,7 @@ void bli_gemm_int( obj_t*  alpha,
 	if ( cntl_is_leaf( cntl ) && bli_obj_has_trans( *c ) )
 	{
 		bli_obj_induce_trans( c_local );
-		bli_obj_set_trans( BLIS_NO_TRANSPOSE, c_local );
+		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, c_local );
 	}
 
 	// Extract the variant number and implementation type.

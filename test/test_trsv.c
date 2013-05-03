@@ -96,7 +96,7 @@ int main( int argc, char** argv )
 
 		bli_obj_set_struc( BLIS_TRIANGULAR, a );
 		bli_obj_set_uplo( BLIS_LOWER, a );
-		bli_obj_set_trans( BLIS_NO_TRANSPOSE, a );
+		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, a );
 		bli_obj_set_diag( BLIS_NONUNIT_DIAG, a );
 
 		bli_setsc(  (2.0/1.0), 0.0, &alpha );

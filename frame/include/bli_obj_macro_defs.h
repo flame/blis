@@ -227,7 +227,7 @@
 	(obj).info = ( (obj).info & ~BLIS_CONJTRANS_BITS ) | (conjtrans); \
 }
 
-#define bli_obj_set_trans( trans, obj ) \
+#define bli_obj_set_onlytrans( trans, obj ) \
 { \
 	(obj).info = ( (obj).info & ~BLIS_TRANS_BIT ) | (trans); \
 }
@@ -920,8 +920,9 @@ bli_obj_width_stored( obj )
 		/* Note that this macro DOES NOT touch the transposition bit! If
 		   the calling code is using this macro to handle an object whose
 		   transposition bit is set prior to computation, that code needs
-		   to manually clear or toggle the bit, via bli_obj_set_trans() or
-		   bli_obj_toggle_trans(), respectively. */ \
+		   to manually clear or toggle the bit, via
+		   bli_obj_set_onlytrans() or bli_obj_toggle_trans(),
+		   respectively. */ \
 	} \
 }
 

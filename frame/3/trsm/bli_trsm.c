@@ -103,7 +103,7 @@ void bli_trsm( side_t  side,
 	if ( bli_obj_has_trans( a_local ) )
 	{
 		bli_obj_induce_trans( a_local );
-		bli_obj_set_trans( BLIS_NO_TRANSPOSE, a_local );
+		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, a_local );
 	}
 
 	// Create an object to hold a copy-cast of alpha. Notice that we use

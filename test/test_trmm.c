@@ -257,7 +257,7 @@ int main( int argc, char** argv )
 
 #ifdef BLIS
 			//bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
-			//bli_obj_set_trans( BLIS_TRANSPOSE, a );
+			//bli_obj_set_onlytrans( BLIS_TRANSPOSE, a );
 
 			bli_trmm( BLIS_LEFT,
 			          &alpha,

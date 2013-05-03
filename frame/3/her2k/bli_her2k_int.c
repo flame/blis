@@ -106,7 +106,7 @@ void bli_her2k_int( obj_t*   alpha,
 	if ( cntl_is_leaf( cntl ) && bli_obj_has_trans( *c ) )
 	{
 		bli_obj_induce_trans( c_local );
-		bli_obj_set_trans( BLIS_NO_TRANSPOSE, c_local );
+		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, c_local );
 	}
 
 	// Set a bool based on the uplo field of c.

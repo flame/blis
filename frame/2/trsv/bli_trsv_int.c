@@ -108,7 +108,7 @@ void bli_trsv_int( obj_t*  alpha,
 	if ( bli_obj_has_trans( a_local ) )
 	{
 		//bli_obj_induce_trans( a_local );
-		//bli_obj_set_trans( BLIS_NO_TRANSPOSE, a_local );
+		//bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, a_local );
 		bli_toggle_bool( uplo );
 	}
 

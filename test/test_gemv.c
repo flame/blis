@@ -146,7 +146,7 @@ int main( int argc, char** argv )
 #endif
 
 #ifdef BLIS
-			bli_obj_set_trans( BLIS_TRANSPOSE, a_tl );
+			bli_obj_set_onlytrans( BLIS_TRANSPOSE, a_tl );
 
 			bli_gemv( &alpha,
 			          &a_tl,

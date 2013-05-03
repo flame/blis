@@ -106,7 +106,7 @@ void bli_ger_int( conj_t  conjx,
 	if ( cntl_is_leaf( cntl ) && bli_obj_has_trans( a_local ) )
 	{
 		bli_obj_induce_trans( a_local );
-		bli_obj_set_trans( BLIS_NO_TRANSPOSE, a_local );
+		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, a_local );
 	}
 
 	// Extract the variant number and implementation type.

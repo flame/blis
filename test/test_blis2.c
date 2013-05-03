@@ -1381,7 +1381,7 @@ int main( int argc, char** argv )
 	//bli_obj_set_uplo( BLIS_LOWER, a );
 	bli_obj_set_diag_offset( -7, a );
 	bli_obj_set_diag( BLIS_UNIT_DIAG, a );
-	bli_obj_set_trans( BLIS_TRANSPOSE, a );
+	bli_obj_set_onlytrans( BLIS_TRANSPOSE, a );
 	//bli_obj_set_conj( BLIS_CONJUGATE, a );
 
 	bli_axpyd( &alpha, &a, &b );
@@ -1429,7 +1429,7 @@ int main( int argc, char** argv )
 	//bli_obj_set_uplo( BLIS_LOWER, a );
 	bli_obj_set_diag_offset( -7, a );
 	bli_obj_set_diag( BLIS_NONUNIT_DIAG, a );
-	bli_obj_set_trans( BLIS_TRANSPOSE, a );
+	bli_obj_set_onlytrans( BLIS_TRANSPOSE, a );
 	//bli_obj_set_conj( BLIS_CONJUGATE, a );
 
 	bli_copyd( &a, &b );
@@ -1480,7 +1480,7 @@ int main( int argc, char** argv )
 	//bli_obj_set_uplo( BLIS_LOWER, a );
 	bli_obj_set_diag_offset( 2, a );
 	bli_obj_set_diag( BLIS_NONUNIT_DIAG, a );
-	bli_obj_set_trans( BLIS_TRANSPOSE, a );
+	bli_obj_set_onlytrans( BLIS_TRANSPOSE, a );
 	//bli_obj_set_conj( BLIS_CONJUGATE, a );
 
 	bli_scal2d( &beta, &a, &b );
@@ -1632,7 +1632,7 @@ int main( int argc, char** argv )
 	//bli_obj_set_uplo( BLIS_LOWER, a );
 	bli_obj_set_diag_offset( 2, a );
 	bli_obj_set_diag( BLIS_UNIT_DIAG, a );
-	bli_obj_set_trans( BLIS_TRANSPOSE, a );
+	bli_obj_set_onlytrans( BLIS_TRANSPOSE, a );
 	//bli_obj_set_conj( BLIS_CONJUGATE, a );
 
 	bli_axpym( &alpha, &a, &b );
@@ -1680,7 +1680,7 @@ int main( int argc, char** argv )
 	bli_obj_set_struc( BLIS_TRIANGULAR, a );
 	//bli_obj_set_uplo( BLIS_UPPER, a );
 	bli_obj_set_uplo( BLIS_LOWER, a );
-	bli_obj_set_trans( BLIS_TRANSPOSE, a );
+	bli_obj_set_onlytrans( BLIS_TRANSPOSE, a );
 
 	bli_copym( &a, &b );
 
@@ -1773,7 +1773,7 @@ int main( int argc, char** argv )
 	//bli_obj_set_uplo( BLIS_LOWER, a );
 	bli_obj_set_diag_offset( -2, a );
 	bli_obj_set_diag( BLIS_UNIT_DIAG, a );
-	bli_obj_set_trans( BLIS_TRANSPOSE, a );
+	bli_obj_set_onlytrans( BLIS_TRANSPOSE, a );
 	//bli_obj_set_conj( BLIS_CONJUGATE, a );
 
 	bli_scal2m( &beta, &a, &b );
@@ -1825,7 +1825,7 @@ int main( int argc, char** argv )
 	//bli_obj_set_uplo( BLIS_LOWER, a );
 	bli_obj_set_diag_offset( -2, a );
 	bli_obj_set_diag( BLIS_NONUNIT_DIAG, a );
-	bli_obj_set_trans( BLIS_TRANSPOSE, a );
+	bli_obj_set_onlytrans( BLIS_TRANSPOSE, a );
 	//bli_obj_set_conj( BLIS_CONJUGATE, a );
 
 	mult_m = bli_blksz_obj_create( 2, 4, 2, 2 );
@@ -1901,7 +1901,7 @@ p.n = p.pack_mem->n;
 	//bli_obj_set_diag_offset( -2, a );
 	bli_obj_set_diag_offset( 0, a );
 	//bli_obj_set_diag( BLIS_UNIT_DIAG, a );
-	//bli_obj_set_trans( BLIS_TRANSPOSE, a );
+	//bli_obj_set_onlytrans( BLIS_TRANSPOSE, a );
 	//bli_obj_set_conj( BLIS_CONJUGATE, a );
 
 	mult_m = bli_blksz_obj_create( 2, 4, 2, 2 );
