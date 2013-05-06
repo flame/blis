@@ -871,7 +871,7 @@ bli_obj_width_stored( obj )
 
 // Submatrix/scalar buffer acquisition
 
-#define BLIS_CONSTANT_SLOT_SIZE  sizeof(dcomplex)
+#define BLIS_CONSTANT_SLOT_SIZE  BLIS_MAX_TYPE_SIZE
 #define BLIS_CONSTANT_SIZE       ( 5 * BLIS_CONSTANT_SLOT_SIZE )
 
 #define bli_obj_buffer_for_const( dt, obj ) \

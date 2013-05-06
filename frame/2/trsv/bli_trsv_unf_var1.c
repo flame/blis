@@ -216,7 +216,7 @@ void PASTEMAC2(cha,chx,varname)( \
 					for ( j = 0; j < f_behind; ++j ) \
 						PASTEMAC3(cha,chx,chax,dots)( *(a12t + j*cs_at), *(x21 + j*incx), rho1 ); \
 				} \
-				PASTEMAC3(chax,chax,chx,axpys)( *minus_one, rho1, *chi11 ); \
+				PASTEMAC3(chax,chax,chx,subs)( rho1, *chi11 ); \
 \
 				/* chi11 = chi11 / alpha11; */ \
 				if ( bli_is_nonunit_diag( diag ) ) \
@@ -272,7 +272,7 @@ void PASTEMAC2(cha,chx,varname)( \
 					for ( j = 0; j < f_behind; ++j ) \
 						PASTEMAC3(cha,chx,chax,dots)( *(a10t + j*cs_at), *(x01 + j*incx), rho1 ); \
 				} \
-				PASTEMAC3(chax,chax,chx,axpys)( *minus_one, rho1, *chi11 ); \
+				PASTEMAC3(chax,chax,chx,subs)( rho1, *chi11 ); \
 \
 				/* chi11 = chi11 / alpha11; */ \
 				if ( bli_is_nonunit_diag( diag ) ) \
