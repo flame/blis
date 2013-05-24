@@ -160,6 +160,9 @@ void libblis_test_setm_experiment( test_params_t* params,
 	// Perform checks.
 	libblis_test_setm_check( &beta, &x, resid );
 
+	// Zero out performance and residual if output matrix is empty.
+	libblis_test_check_empty_problem( &x, perf, resid );
+
 	// Free the test objects.
 	bli_obj_free( &x );
 }

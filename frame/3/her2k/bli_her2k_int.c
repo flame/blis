@@ -88,12 +88,18 @@ void bli_her2k_int( obj_t*   alpha,
 	if ( bli_error_checking_is_enabled() )
 		bli_her2k_int_check( alpha, a, bh, alpha_conj, b, ah, beta, c, cntl );
 
-	// Return early if one of the matrix operands has a zero dimension.
-	if ( bli_obj_has_zero_dim( *a  ) ) return;
-	if ( bli_obj_has_zero_dim( *bh ) ) return;
-	if ( bli_obj_has_zero_dim( *b  ) ) return;
-	if ( bli_obj_has_zero_dim( *ah ) ) return;
-	if ( bli_obj_has_zero_dim( *c  ) ) return;
+	// If C has a zero dimension, return early.
+	if ( bli_obj_has_zero_dim( *c ) ) return;
+
+	// If A or B has a zero dimension, scale C by beta and return early.
+	if ( bli_obj_has_zero_dim( *a  ) ||
+	     bli_obj_has_zero_dim( *ah ) ||
+	     bli_obj_has_zero_dim( *b  ) ||
+	     bli_obj_has_zero_dim( *bh ) )
+	{
+		bli_scalm( beta, c );
+		return;
+	}
 
 	// Alias C in case we need to induce a transposition.
 	bli_obj_alias_to( *c, c_local );

@@ -485,8 +485,10 @@ bli_obj_width_stored( obj )
 
 #define bli_obj_vector_inc( x ) \
 \
+	( bli_obj_is_scalar( x ) ? 1 : \
 	( bli_obj_length( x ) == 1 ? bli_obj_col_stride( x ) \
-	                           : bli_obj_row_stride( x ) )
+	                           : bli_obj_row_stride( x ) ) \
+	)
 
 #define bli_obj_is_vector( x ) \
 \
@@ -505,6 +507,11 @@ bli_obj_width_stored( obj )
 \
 	( bli_obj_length( obj ) == 0 || \
 	  bli_obj_width( obj )  == 0 )
+
+#define bli_obj_is_scalar( x ) \
+\
+	( bli_obj_length( x ) == 1 && \
+	  bli_obj_width( x )  == 1 )
 
 
 // Dimension modification

@@ -117,11 +117,11 @@ void PASTEMAC3(chx,chy,chr,varname)( \
 \
 	if ( bli_zero_dim1( n ) ) \
 	{ \
-		PASTEMAC(chr,set0)( *rho_cast ); \
+		PASTEMAC(chr,set0s)( *rho_cast ); \
 		return; \
 	} \
 \
-	PASTEMAC(chr,set0)( dotxy ); \
+	PASTEMAC(chr,set0s)( dotxy ); \
 \
 	chi1 = x_cast; \
 	psi1 = y_cast; \
@@ -216,7 +216,7 @@ void bli_ddddotv_opt_var1(
 
 	if ( bli_zero_dim1( n ) ) 
 	{ 
-		PASTEMAC(d,set0)( *rho_cast ); 
+		PASTEMAC(d,set0s)( *rho_cast ); 
 		return; 
 	} 
 
@@ -238,7 +238,7 @@ void bli_ddddotv_opt_var1(
 	x1 = x_cast;
 	y1 = y_cast;
 
-	PASTEMAC(d,set0)( rho1 ); 
+	PASTEMAC(d,set0s)( rho1 ); 
 
 	if ( n_pre == 1 )
 	{

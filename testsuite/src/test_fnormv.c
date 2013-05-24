@@ -162,6 +162,9 @@ void libblis_test_fnormv_experiment( test_params_t* params,
 	// Perform checks.
 	libblis_test_fnormv_check( &beta, &x, &norm, resid );
 
+	// Zero out performance and residual if input vector is empty.
+	libblis_test_check_empty_problem( &x, perf, resid );
+
 	// Free the test objects.
 	bli_obj_free( &x );
 }

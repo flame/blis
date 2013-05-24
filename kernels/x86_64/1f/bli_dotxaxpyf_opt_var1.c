@@ -233,11 +233,11 @@ void bli_ddddotxaxpyf_opt_var1(
 	PASTEMAC2(d,d,scals)( *alpha_cast, chi2 );
 	PASTEMAC2(d,d,scals)( *alpha_cast, chi3 );
 
-	PASTEMAC(d,set0)( rho0 ); 
-	PASTEMAC(d,set0)( rho1 ); 
-	PASTEMAC(d,set0)( rho2 ); 
-	PASTEMAC(d,set0)( rho3 ); 
-	PASTEMAC(d,set0)( zeta1 ); 
+	PASTEMAC(d,set0s)( rho0 ); 
+	PASTEMAC(d,set0s)( rho1 ); 
+	PASTEMAC(d,set0s)( rho2 ); 
+	PASTEMAC(d,set0s)( rho3 ); 
+	PASTEMAC(d,set0s)( zeta1 ); 
 
 	if ( m_pre == 1 )
 	{

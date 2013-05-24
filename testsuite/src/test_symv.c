@@ -220,6 +220,9 @@ void libblis_test_symv_experiment( test_params_t* params,
 	// Perform checks.
 	libblis_test_symv_check( &alpha, &a, &x, &beta, &y, &y_save, resid );
 
+	// Zero out performance and residual if output vector is empty.
+	libblis_test_check_empty_problem( &y, perf, resid );
+
 	// Free the test objects.
 	bli_obj_free( &a );
 	bli_obj_free( &x );

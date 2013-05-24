@@ -75,10 +75,16 @@ void bli_gemv_int( trans_t transa,
 	if ( bli_error_checking_is_enabled() )
 		bli_gemv_int_check( alpha, &a_local, &x_local, beta, y, cntl );
 
-	// Return early if one of the operands has a zero dimension.
-	if ( bli_obj_has_zero_dim( *a ) ) return;
-	if ( bli_obj_has_zero_dim( *x ) ) return;
+	// If y has a zero dimension, return early.
 	if ( bli_obj_has_zero_dim( *y ) ) return;
+
+	// If A or x has a zero dimension, scale y by beta and return early.
+	if ( bli_obj_has_zero_dim( *a ) ||
+	     bli_obj_has_zero_dim( *x ) )
+	{
+		bli_scalm( beta, y );
+		return;
+	}
 
 	// Extract the variant number and implementation type.
 	n = cntl_var_num( cntl );

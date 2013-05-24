@@ -155,6 +155,9 @@ void libblis_test_randm_experiment( test_params_t* params,
 	// we consider to be likely.
 	libblis_test_randm_check( &x, resid );
 
+	// Zero out performance and residual if input matrix is empty.
+	libblis_test_check_empty_problem( &x, perf, resid );
+
 	// Free the test objects.
 	bli_obj_free( &x );
 }

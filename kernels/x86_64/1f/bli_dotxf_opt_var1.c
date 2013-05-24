@@ -267,10 +267,10 @@ void bli_ddddotxf_opt_var1(
 	x3 = x_cast + 3*ldx;
 	y0 = y_cast;
 
-	PASTEMAC(d,set0)( rho0 ); 
-	PASTEMAC(d,set0)( rho1 ); 
-	PASTEMAC(d,set0)( rho2 ); 
-	PASTEMAC(d,set0)( rho3 ); 
+	PASTEMAC(d,set0s)( rho0 ); 
+	PASTEMAC(d,set0s)( rho1 ); 
+	PASTEMAC(d,set0s)( rho2 ); 
+	PASTEMAC(d,set0s)( rho3 ); 
 
 	if ( n_pre == 1 )
 	{

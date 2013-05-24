@@ -166,6 +166,9 @@ void libblis_test_addv_experiment( test_params_t* params,
 	// Perform checks.
 	libblis_test_addv_check( &alpha, &beta, &x, &y, resid );
 
+	// Zero out performance and residual if output vector is empty.
+	libblis_test_check_empty_problem( &y, perf, resid );
+
 	// Free the test objects.
 	bli_obj_free( &x );
 	bli_obj_free( &y );

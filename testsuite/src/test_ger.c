@@ -194,6 +194,9 @@ void libblis_test_ger_experiment( test_params_t* params,
 	// Perform checks.
 	libblis_test_ger_check( &alpha, &x, &y, &a, &a_save, resid );
 
+	// Zero out performance and residual if output matrix is empty.
+	libblis_test_check_empty_problem( &a, perf, resid );
+
 	// Free the test objects.
 	bli_obj_free( &x );
 	bli_obj_free( &y );

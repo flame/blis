@@ -67,9 +67,9 @@ void bli_her_int( conj_t  conjh,
 	if ( bli_error_checking_is_enabled() )
 		bli_her_int_check( conjh, alpha, x, c, cntl );
 
-	// Return early if one of the operands has a zero dimension.
-	if ( bli_obj_has_zero_dim( *x ) ) return;
+	// If C or x has a zero dimension, return early.
 	if ( bli_obj_has_zero_dim( *c ) ) return;
+	if ( bli_obj_has_zero_dim( *x ) ) return;
 
 	// Alias the operands in case we need to apply conjugations.
 	bli_obj_alias_to( *x, x_local );

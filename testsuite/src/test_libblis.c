@@ -1614,3 +1614,12 @@ void libblis_test_parse_command_line( int argc, char** argv )
 
 
 
+void libblis_test_check_empty_problem( obj_t* c, double* perf, double* resid )
+{
+	if ( bli_obj_has_zero_dim( *c ) )
+	{
+		*perf  = 0.0;
+		*resid = 0.0;
+	}
+}
+

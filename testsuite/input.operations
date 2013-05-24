@@ -158,7 +158,7 @@
 
 1         gemm                                          (0 = disable all; 1 = specify)
 1           test sequential front-end                   (0 = disable; 1 = enable)
--1 -3 -2    dimensions: m n k                           (-1 = bind to problem size)
+-1 -2 -3    dimensions: m n k                           (-1 = bind to problem size)
 ??          parameters: transa transb                   (? = test all values)
 
 1         hemm                                          (0 = disable all; 1 = specify)

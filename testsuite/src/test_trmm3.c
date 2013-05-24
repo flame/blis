@@ -229,6 +229,9 @@ void libblis_test_trmm3_experiment( test_params_t* params,
 	// Perform checks.
 	libblis_test_trmm3_check( side, &alpha, &a, &b, &beta, &c, &c_save, resid );
 
+	// Zero out performance and residual if output matrix is empty.
+	libblis_test_check_empty_problem( &c, perf, resid );
+
 	// Free the test objects.
 	bli_obj_free( &a );
 	bli_obj_free( &b );

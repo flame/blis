@@ -182,7 +182,7 @@ void PASTEMAC3(cha,chx,chy,varname)( \
 \
 	for ( i = 0; i < n_iter; i += f ) \
 	{ \
-		f  = bli_min( n_iter - i, b_fuse ); \
+		f  = bli_determine_blocksize_dim_f( i, n_iter, b_fuse ); \
 \
 		A1 = a_cast + (0  )*rs_at + (i  )*cs_at; \
 		x1 = x_cast + (i  )*incx; \

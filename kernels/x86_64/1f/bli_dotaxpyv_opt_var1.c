@@ -133,7 +133,7 @@ void bli_ddddotaxpyv_opt_var1(
 
 	if ( bli_zero_dim1( n ) )
 	{
-		PASTEMAC(d,set0)( *rho_cast );
+		PASTEMAC(d,set0s)( *rho_cast );
 		return;
 	}
 
@@ -153,7 +153,7 @@ void bli_ddddotaxpyv_opt_var1(
 	stepy       = 2 * incy;
 	stepz       = 2 * incz;
 
-	PASTEMAC(d,set0)( rho1c );
+	PASTEMAC(d,set0s)( rho1c );
 
 	alpha1c = *alpha_cast;
 

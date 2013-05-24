@@ -70,10 +70,16 @@ void bli_hemv_int( conj_t  conjh,
 	if ( bli_error_checking_is_enabled() )
 		bli_hemv_int_check( conjh, alpha, a, x, beta, y, cntl );
 
-	// Return early if one of the operands has a zero dimension.
-	if ( bli_obj_has_zero_dim( *a ) ) return;
-	if ( bli_obj_has_zero_dim( *x ) ) return;
+	// If y has a zero dimension, return early.
 	if ( bli_obj_has_zero_dim( *y ) ) return;
+
+	// If A or x has a zero dimension, scale y by beta and return early.
+	if ( bli_obj_has_zero_dim( *a ) ||
+	     bli_obj_has_zero_dim( *x ) )
+	{
+		bli_scalm( beta, y );
+		return;
+	}
 
 	// Alias A in case we need to induce the upper triangular case.
 	bli_obj_alias_to( *a, a_local );

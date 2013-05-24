@@ -36,6 +36,7 @@
 
 void bli_sgemmtrsm_l_opt_d4x4(
                                dim_t              k,
+                               float* restrict    alpha,
                                float* restrict    a10,
                                float* restrict    a11,
                                float* restrict    bd01,
@@ -51,6 +52,7 @@ void bli_sgemmtrsm_l_opt_d4x4(
 
 void bli_dgemmtrsm_l_opt_d4x4(
                                dim_t              k,
+                               double* restrict   alpha,
                                double* restrict   a10,
                                double* restrict   a11,
                                double* restrict   bd01,
@@ -334,14 +336,26 @@ void bli_dgemmtrsm_l_opt_d4x4(
 		"                                \n\t" // xmm2: ( ab20 ab21 ) xmm6: ( ab22 ab23 )
 		"                                \n\t" // xmm3: ( ab30 ab31 ) xmm7: ( ab32 ab33 )
 		"                                \n\t"
-		"movapd  0 * 16(%%rbx), %%xmm8   \n\t"
+		"movq    %10, %%rax              \n\t" // load address of alpha
+		"movddup (%%rax), %%xmm15        \n\t" // load alpha and duplicate
+		"                                \n\t"
+		"movapd  0 * 16(%%rbx), %%xmm8   \n\t" 
 		"movapd  1 * 16(%%rbx), %%xmm12  \n\t"
+		"mulpd    %%xmm15, %%xmm8        \n\t" // xmm8  = alpha * ( beta00 beta01 )
+		"mulpd    %%xmm15, %%xmm12       \n\t" // xmm12 = alpha * ( beta02 beta03 )
 		"movapd  2 * 16(%%rbx), %%xmm9   \n\t"
 		"movapd  3 * 16(%%rbx), %%xmm13  \n\t"
+		"mulpd    %%xmm15, %%xmm9        \n\t" // xmm9  = alpha * ( beta10 beta11 )
+		"mulpd    %%xmm15, %%xmm13       \n\t" // xmm13 = alpha * ( beta12 beta13 )
 		"movapd  4 * 16(%%rbx), %%xmm10  \n\t"
 		"movapd  5 * 16(%%rbx), %%xmm14  \n\t"
+		"mulpd    %%xmm15, %%xmm10       \n\t" // xmm10 = alpha * ( beta20 beta21 )
+		"mulpd    %%xmm15, %%xmm14       \n\t" // xmm14 = alpha * ( beta22 beta23 )
 		"movapd  6 * 16(%%rbx), %%xmm11  \n\t"
-		"movapd  7 * 16(%%rbx), %%xmm15  \n\t"
+		"mulpd    %%xmm15, %%xmm11       \n\t" // xmm11 = alpha * ( beta30 beta31 )
+		"mulpd   7 * 16(%%rbx), %%xmm15  \n\t" // xmm15 = alpha * ( beta32 beta33 )
+		"                                \n\t"
+		"                                \n\t" // (Now scaled by alpha:)
 		"                                \n\t" // xmm8:  ( beta00 beta01 ) xmm12: ( beta02 beta03 )
 		"                                \n\t" // xmm9:  ( beta10 beta11 ) xmm13: ( beta12 beta13 )
 		"                                \n\t" // xmm10: ( beta20 beta21 ) xmm14: ( beta22 beta23 )
@@ -491,7 +505,8 @@ void bli_dgemmtrsm_l_opt_d4x4(
 		  "m" (b11),
 		  "m" (c11),
 		  "m" (rs_c),
-		  "m" (cs_c)
+		  "m" (cs_c),
+		  "m" (alpha)
 		: // register clobber list
 		  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 		  "xmm0", "xmm1", "xmm2", "xmm3",
@@ -505,6 +520,7 @@ void bli_dgemmtrsm_l_opt_d4x4(
 
 void bli_cgemmtrsm_l_opt_d4x4(
                                dim_t              k,
+                               scomplex* restrict alpha,
                                scomplex* restrict a10,
                                scomplex* restrict a11,
                                scomplex* restrict bd01,
@@ -520,6 +536,7 @@ void bli_cgemmtrsm_l_opt_d4x4(
 
 void bli_zgemmtrsm_l_opt_d4x4(
                                dim_t              k,
+                               dcomplex* restrict alpha,
                                dcomplex* restrict a10,
                                dcomplex* restrict a11,
                                dcomplex* restrict bd01,

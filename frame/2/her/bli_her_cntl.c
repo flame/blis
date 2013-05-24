@@ -45,11 +45,11 @@ extern ger_t*     ger_cntl_bs_ke_col;
 
 static blksz_t*   her_mc;
 
-her_t*            her_cntl_bs_ke_row;
-her_t*            her_cntl_bs_ke_col;
+her_t*            her_cntl_bs_ke_lrow_ucol;
+her_t*            her_cntl_bs_ke_lcol_urow;
 
-her_t*            her_cntl_ge_row;
-her_t*            her_cntl_ge_col;
+her_t*            her_cntl_ge_lrow_ucol;
+her_t*            her_cntl_ge_lcol_urow;
 
 // Cache blocksizes.
 
@@ -71,13 +71,13 @@ void bli_her_cntl_init()
 
 	// Create control trees for the lowest-level kernels. These trees induce
 	// operations on (persumably) relatively small block-subvector problems.
-	her_cntl_bs_ke_row
+	her_cntl_bs_ke_lrow_ucol
 	=
 	bli_her_cntl_obj_create( BLIS_UNBLOCKED,
 	                         BLIS_VARIANT1,
 	                         NULL, NULL, NULL,
 	                         NULL, NULL, NULL );
-	her_cntl_bs_ke_col
+	her_cntl_bs_ke_lcol_urow
 	=
 	bli_her_cntl_obj_create( BLIS_UNBLOCKED,
 	                         BLIS_VARIANT2,
@@ -88,34 +88,34 @@ void bli_her_cntl_init()
 	// Create control trees for generally large problems. Here, we choose
 	// variants that partition for ger subproblems in the same direction
 	// as the assumed storage.
-	her_cntl_ge_row
+	her_cntl_ge_lrow_ucol
 	=
 	bli_her_cntl_obj_create( BLIS_BLOCKED,
-	                         BLIS_VARIANT1,        // use var1 for row storage
+	                         BLIS_VARIANT1,
 	                         her_mc,
 	                         packv_cntl,           // pack x1 (if needed)
 	                         NULL,                 // do NOT pack C11
 	                         ger_cntl_rp_bs_row,
-	                         her_cntl_bs_ke_row,
+	                         her_cntl_bs_ke_lrow_ucol,
 	                         NULL );               // no unpacking needed
-	her_cntl_ge_col
+	her_cntl_ge_lcol_urow
 	=
 	bli_her_cntl_obj_create( BLIS_BLOCKED,
-	                         BLIS_VARIANT2,        // use var2 for col storage
+	                         BLIS_VARIANT2,
 	                         her_mc,
 	                         packv_cntl,           // pack x1 (if needed)
 	                         NULL,                 // do NOT pack C11
 	                         ger_cntl_cp_bs_col,
-	                         her_cntl_bs_ke_col,
+	                         her_cntl_bs_ke_lcol_urow,
 	                         NULL );               // no unpacking needed
 }
 
 void bli_her_cntl_finalize()
 {
-	bli_cntl_obj_free( her_cntl_bs_ke_row );
-	bli_cntl_obj_free( her_cntl_bs_ke_col );
-	bli_cntl_obj_free( her_cntl_ge_row );
-	bli_cntl_obj_free( her_cntl_ge_col );
+	bli_cntl_obj_free( her_cntl_bs_ke_lrow_ucol );
+	bli_cntl_obj_free( her_cntl_bs_ke_lcol_urow );
+	bli_cntl_obj_free( her_cntl_ge_lrow_ucol );
+	bli_cntl_obj_free( her_cntl_ge_lcol_urow );
 }
 
 

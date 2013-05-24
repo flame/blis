@@ -43,11 +43,11 @@ extern ger_t*     ger_cntl_cp_bs_col;
 
 static blksz_t*   her2_mc;
 
-her2_t*           her2_cntl_bs_ke_row;
-her2_t*           her2_cntl_bs_ke_col;
+her2_t*           her2_cntl_bs_ke_lrow_ucol;
+her2_t*           her2_cntl_bs_ke_lcol_urow;
 
-her2_t*           her2_cntl_ge_row;
-her2_t*           her2_cntl_ge_col;
+her2_t*           her2_cntl_ge_lrow_ucol;
+her2_t*           her2_cntl_ge_lcol_urow;
 
 // Cache blocksizes.
 
@@ -69,14 +69,14 @@ void bli_her2_cntl_init()
 
 	// Create control trees for the lowest-level kernels. These trees induce
     // operations on (persumably) relatively small block-subvector problems.
-	her2_cntl_bs_ke_row
+	her2_cntl_bs_ke_lrow_ucol
 	=
 	bli_her2_cntl_obj_create( BLIS_UNB_FUSED,
 	                          BLIS_VARIANT1,
 	                          NULL, NULL, NULL,
 	                          NULL, NULL, NULL,
 	                          NULL, NULL );
-	her2_cntl_bs_ke_col
+	her2_cntl_bs_ke_lcol_urow
 	=
 	bli_her2_cntl_obj_create( BLIS_UNB_FUSED,
 	                          BLIS_VARIANT4,
@@ -88,38 +88,38 @@ void bli_her2_cntl_init()
 	// Create control trees for generally large problems. Here, we choose
 	// variants that partition for ger subproblems in the same direction
 	// as the assumed storage.
-	her2_cntl_ge_row   
+	her2_cntl_ge_lrow_ucol
 	=
 	bli_her2_cntl_obj_create( BLIS_BLOCKED,
-	                          BLIS_VARIANT1,       // use var1 for row storage
+	                          BLIS_VARIANT1,
 	                          her2_mc,
 	                          packv_cntl,          // pack x1 (if needed)
 	                          packv_cntl,          // pack y1 (if needed)
 	                          packm_cntl_noscale,  // pack C11 (if needed)
 	                          ger_cntl_rp_bs_row,
 	                          ger_cntl_rp_bs_row,
-	                          her2_cntl_bs_ke_row,
+	                          her2_cntl_bs_ke_lrow_ucol,
 	                          unpackm_cntl );      // unpack C11 (if packed)
-	her2_cntl_ge_col   
+	her2_cntl_ge_lcol_urow
 	=
 	bli_her2_cntl_obj_create( BLIS_BLOCKED,
-	                          BLIS_VARIANT4,       // use var4 for col storage
+	                          BLIS_VARIANT4,
 	                          her2_mc,
 	                          packv_cntl,          // pack x1 (if needed)
 	                          packv_cntl,          // pack y1 (if needed)
 	                          packm_cntl_noscale,  // pack C11 (if needed)
 	                          ger_cntl_cp_bs_col,
 	                          ger_cntl_cp_bs_col,
-	                          her2_cntl_bs_ke_col,
+	                          her2_cntl_bs_ke_lcol_urow,
 	                          unpackm_cntl );      // unpack C11 (if packed)
 }
 
 void bli_her2_cntl_finalize()
 {
-	bli_cntl_obj_free( her2_cntl_bs_ke_row );
-	bli_cntl_obj_free( her2_cntl_bs_ke_col );
-	bli_cntl_obj_free( her2_cntl_ge_row );
-	bli_cntl_obj_free( her2_cntl_ge_col );
+	bli_cntl_obj_free( her2_cntl_bs_ke_lrow_ucol );
+	bli_cntl_obj_free( her2_cntl_bs_ke_lcol_urow );
+	bli_cntl_obj_free( her2_cntl_ge_lrow_ucol );
+	bli_cntl_obj_free( her2_cntl_ge_lcol_urow );
 }
 
 

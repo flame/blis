@@ -314,6 +314,19 @@
 	else                             { mt = n; nt = m; rst = cs; cst = rs; } \
 }
 
+
+// blocksize-related
+
+#define bli_determine_blocksize_dim_f( i, dim, b_alg ) \
+\
+	( bli_min( b_alg, dim - i ) )
+
+#define bli_determine_blocksize_dim_b( i, dim, b_alg ) \
+\
+	( i == 0 && dim % b_alg != 0 ? dim % b_alg \
+	                             : b_alg )
+
+
 // stride-related
 
 #define bli_vector_inc( trans, m, n, rs, cs ) \

@@ -281,8 +281,8 @@ void bli_dgemm_opt_d4x4(
 		"movaps  -5 * 16(%%rax), %%xmm1  \n\t"
 		"                                \n\t"
 		"                                \n\t"
-		"addq   $4 * 4 * 8, %%rax        \n\t" // a += 4 (1 x mr)
-		"addq   $4 * 4 * 8, %%rbx        \n\t" // b += 4 (1 x nr)
+		"addq   $4 * 1 * 8, %%rax        \n\t" // a += 4 (1 x mr)
+		"addq   $4 * 1 * 8, %%rbx        \n\t" // b += 4 (1 x nr)
 		"                                \n\t"
 		"                                \n\t"
 		"decq   %%rsi                    \n\t" // i -= 1;

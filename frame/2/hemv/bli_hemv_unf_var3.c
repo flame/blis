@@ -233,7 +233,7 @@ void PASTEMAC3(cha,chx,chy,varname)( \
 \
 	for ( i = 0; i < m; i += f ) \
 	{ \
-		f        = bli_min( m - i, b_fuse ); \
+		f        = bli_determine_blocksize_dim_f( i, m, b_fuse ); \
 		n_ahead  = m - i - f; \
 		A11      = a_cast + (i  )*rs_at + (i  )*cs_at; \
 		A21      = a_cast + (i+f)*rs_at + (i  )*cs_at; \

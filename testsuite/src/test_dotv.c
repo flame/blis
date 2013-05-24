@@ -181,6 +181,9 @@ void libblis_test_dotv_experiment( test_params_t* params,
 	// Perform checks.
 	libblis_test_dotv_check( &x, &y, &rho, resid );
 
+	// Zero out performance and residual if output scalar is empty.
+	libblis_test_check_empty_problem( &rho, perf, resid );
+
 	// Free the test objects.
 	bli_obj_free( &x );
 	bli_obj_free( &y );

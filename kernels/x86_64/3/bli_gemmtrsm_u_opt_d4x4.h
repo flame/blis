@@ -38,6 +38,7 @@
 \
 void PASTEMAC(ch,varname)( \
                            dim_t           k, \
+                           ctype* restrict alpha, \
                            ctype* restrict a12, \
                            ctype* restrict a11, \
                            ctype* restrict bd21, \

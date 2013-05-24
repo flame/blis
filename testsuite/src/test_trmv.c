@@ -203,6 +203,9 @@ void libblis_test_trmv_experiment( test_params_t* params,
 	// Perform checks.
 	libblis_test_trmv_check( &alpha, &a, &x, &x_save, resid );
 
+	// Zero out performance and residual if output vector is empty.
+	libblis_test_check_empty_problem( &x, perf, resid );
+
 	// Free the test objects.
 	bli_obj_free( &a );
 	bli_obj_free( &x );

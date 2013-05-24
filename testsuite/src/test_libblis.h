@@ -354,6 +354,10 @@ void libblis_test_printf_error( char* message, ... );
 void libblis_test_parse_message( FILE* output_stream, char* message, va_list args );
 void libblis_test_parse_command_line( int argc, char** argv );
 
+// --- Miscellaneous ---
+
+void libblis_test_check_empty_problem( obj_t* c, double* perf, double* resid );
+
 
 //
 // --- Test module headers -----------------------------------------------------

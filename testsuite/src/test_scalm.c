@@ -177,6 +177,9 @@ void libblis_test_scalm_experiment( test_params_t* params,
 	// Perform checks.
 	libblis_test_scalm_check( &beta, &y, &y_save, resid );
 
+	// Zero out performance and residual if output matrix is empty.
+	libblis_test_check_empty_problem( &y, perf, resid );
+
 	// Free the test objects.
 	bli_obj_free( &y );
 	bli_obj_free( &y_save );

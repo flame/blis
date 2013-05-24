@@ -71,10 +71,15 @@ void bli_ger_int( conj_t  conjx,
 	if ( bli_error_checking_is_enabled() )
 		bli_ger_int_check( alpha, x, y, a, cntl );
 
-	// Return early if one of the operands has a zero dimension.
-	if ( bli_obj_has_zero_dim( *x ) ) return;
-	if ( bli_obj_has_zero_dim( *y ) ) return;
+	// If A has a zero dimension, return early.
 	if ( bli_obj_has_zero_dim( *a ) ) return;
+
+	// If x or y has a zero dimension, return early.
+	if ( bli_obj_has_zero_dim( *x ) ||
+	     bli_obj_has_zero_dim( *y ) )
+	{
+		return;
+	}
 
 	// Alias the objects, applying conjx and conjy to x and y, respectively.
 	bli_obj_alias_with_conj( conjx, *x, x_local );

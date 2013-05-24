@@ -155,6 +155,9 @@ void libblis_test_randv_experiment( test_params_t* params,
 	// we consider to be likely.
 	libblis_test_randv_check( &x, resid );
 
+	// Zero out performance and residual if output vector is empty.
+	libblis_test_check_empty_problem( &x, perf, resid );
+
 	// Free the test objects.
 	bli_obj_free( &x );
 }

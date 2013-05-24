@@ -34,10 +34,10 @@
 
 #include "blis.h"
 
-extern her2_t* her2_cntl_bs_ke_row;
-extern her2_t* her2_cntl_bs_ke_col;
-extern her2_t* her2_cntl_ge_row;
-extern her2_t* her2_cntl_ge_col;
+extern her2_t* her2_cntl_bs_ke_lrow_ucol;
+extern her2_t* her2_cntl_bs_ke_lcol_urow;
+extern her2_t* her2_cntl_ge_lrow_ucol;
+extern her2_t* her2_cntl_ge_lcol_urow;
 
 void bli_syr2( obj_t*  alpha,
                obj_t*  x,
@@ -86,10 +86,20 @@ void bli_syr2( obj_t*  alpha,
 	     y_is_contig &&
 	     c_is_contig )
 	{
-		// Use different control trees depending on storage of the matrix
-		// operand.
-		if ( bli_obj_is_row_stored( *c ) ) her2_cntl = her2_cntl_bs_ke_row;
-		else                               her2_cntl = her2_cntl_bs_ke_col;
+		// We use two control trees to handle the four cases corresponding to
+		// combinations of upper/lower triangular storage and row/column-storage.
+		// The row-stored lower triangular and column-stored upper triangular
+		// trees are identical. Same for the remaining two trees.
+		if ( bli_obj_is_lower( *c ) )
+		{
+			if ( bli_obj_is_row_stored( *c ) ) her2_cntl = her2_cntl_bs_ke_lrow_ucol;
+			else                               her2_cntl = her2_cntl_bs_ke_lcol_urow;
+		}
+		else // if ( bli_obj_is_upper( *c ) )
+		{
+			if ( bli_obj_is_row_stored( *c ) ) her2_cntl = her2_cntl_bs_ke_lcol_urow;
+			else                               her2_cntl = her2_cntl_bs_ke_lrow_ucol;
+		}
 	}
 	else
 	{
@@ -101,8 +111,16 @@ void bli_syr2( obj_t*  alpha,
 
 		// Here, we make a similar choice as above, except that (1) we look
 		// at storage tilt, and (2) we choose a tree that performs blocking.
-		if ( bli_obj_is_row_tilted( *c ) ) her2_cntl = her2_cntl_ge_row;
-		else                               her2_cntl = her2_cntl_ge_col;
+		if ( bli_obj_is_lower( *c ) )
+		{
+			if ( bli_obj_is_row_stored( *c ) ) her2_cntl = her2_cntl_ge_lrow_ucol;
+			else                               her2_cntl = her2_cntl_ge_lcol_urow;
+		}
+		else // if ( bli_obj_is_upper( *c ) )
+		{
+			if ( bli_obj_is_row_stored( *c ) ) her2_cntl = her2_cntl_ge_lcol_urow;
+			else                               her2_cntl = her2_cntl_ge_lrow_ucol;
+		}
 	}
 
 

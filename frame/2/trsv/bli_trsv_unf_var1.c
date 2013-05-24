@@ -175,13 +175,13 @@ void PASTEMAC2(cha,chx,varname)( \
 	{ \
 		for ( iter = 0; iter < m; iter += f ) \
 		{ \
-			f        = bli_min( m - iter, b_fuse ); \
-			i        = m - iter; \
+			f        = bli_determine_blocksize_dim_b( iter, m, b_fuse ); \
+			i        = m - iter - f; \
 			n_behind = iter; \
-			A11      = a_cast + (i-f)*rs_at + (i-f)*cs_at; \
-			A12      = a_cast + (i-f)*rs_at + (i  )*cs_at; \
-			x1       = x_cast + (i-f)*incx; \
-			x2       = x_cast + (i  )*incx; \
+			A11      = a_cast + (i  )*rs_at + (i  )*cs_at; \
+			A12      = a_cast + (i  )*rs_at + (i+f)*cs_at; \
+			x1       = x_cast + (i  )*incx; \
+			x2       = x_cast + (i+f)*incx; \
 \
 			/* x1 = x1 - A12 * x2; */ \
 			PASTEMAC3(cha,chx,chx,kername)( conja, \
@@ -231,7 +231,7 @@ void PASTEMAC2(cha,chx,varname)( \
 	{ \
 		for ( iter = 0; iter < m; iter += f ) \
 		{ \
-			f        = bli_min( m - iter, b_fuse ); \
+			f        = bli_determine_blocksize_dim_f( iter, m, b_fuse ); \
 			i        = iter; \
 			n_behind = i; \
 			A11      = a_cast + (i  )*rs_at + (i  )*cs_at; \
