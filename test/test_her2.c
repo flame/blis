@@ -37,6 +37,8 @@
 
 //           uplo   m     alpha    x        incx  y        incy  a        lda
 void dsyr2_( char*, int*, double*, double*, int*, double*, int*, double*, int* );
+ 
+//#define PRINT
 
 int main( int argc, char** argv )
 {
@@ -135,23 +137,11 @@ int main( int argc, char** argv )
 			//bli_obj_toggle_conj( x );
 			//bli_obj_toggle_conj( y );
 
-#if 1
+			//bli_syr2( &alpha,
 			bli_her2( &alpha,
-#else
-			bli_syr2( &alpha,
-#endif
 			          &x,
 			          &y,
 			          &a );
-/*
-			bli_her2_unb_var1( BLIS_NO_CONJUGATE,
-			                   &BLIS_TWO,
-			                   &BLIS_TWO,
-			                   &x,
-			                   &y,
-			                   &a, NULL );
-*/
-
 
 #else
 

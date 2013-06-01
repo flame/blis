@@ -54,6 +54,7 @@ int main( int argc, char** argv )
 	int   r, n_repeats;
 	side_t side;
 
+#if 0
 	blksz_t* mr;
 	blksz_t* nr;
 	blksz_t* kr;
@@ -71,6 +72,7 @@ int main( int argc, char** argv )
 	trmm_t*  trmm_cntl_op_bp;
 	trmm_t*  trmm_cntl_mm_op;
 	trmm_t*  trmm_cntl_vl_mm;
+#endif
 
 	double dtime;
 	double dtime_save;
@@ -126,8 +128,8 @@ int main( int argc, char** argv )
 		bli_obj_create( dt_c, m, n, 0, 0, &c_save );
 
 		bli_obj_set_struc( BLIS_TRIANGULAR, a );
-		bli_obj_set_uplo( BLIS_UPPER, a );
-		//bli_obj_set_uplo( BLIS_LOWER, a );
+		//bli_obj_set_uplo( BLIS_UPPER, a );
+		bli_obj_set_uplo( BLIS_LOWER, a );
 
 		bli_randm( &a );
 		bli_randm( &c );
@@ -144,9 +146,10 @@ int main( int argc, char** argv )
 		bli_obj_set_diag( BLIS_NONUNIT_DIAG, a );
 #endif
 
-		bli_setsc(  (1.2/1.0), 0.0, &alpha );
-		bli_setsc(  (1.0/1.0), 0.0, &beta );
+		bli_setsc(  (2.0/1.0), 0.0, &alpha );
+		bli_setsc( -(1.0/1.0), 0.0, &beta );
 
+#if 0
 		mr = bli_blksz_obj_create( 2, 4, 2, 2 );
 		kr = bli_blksz_obj_create( 1, 1, 1, 1 );
 		nr = bli_blksz_obj_create( 1, 4, 1, 1 );
@@ -237,7 +240,7 @@ int main( int argc, char** argv )
 		                          trmm_cntl_mm_op,
 		                          NULL,
 		                          NULL );
-
+#endif
 
 		bli_copym( &c, &c_save );
 	
@@ -267,7 +270,7 @@ int main( int argc, char** argv )
 #else
 
 			char    side   = 'L';
-			char    uplo   = 'U';
+			char    uplo   = 'L';
 			char    transa = 'N';
 			char    diag   = 'N';
 			int     mm     = bli_obj_length( c );
@@ -312,6 +315,7 @@ int main( int argc, char** argv )
 		printf( "( %2ld, 1:4 ) = [ %4lu %4lu  %10.3e  %6.3f ];\n",
 		        (p - p_begin + 1)/p_inc + 1, m, n, dtime_save, gflops );
 
+#if 0
 		bli_blksz_obj_free( mr );
 		bli_blksz_obj_free( nr );
 		bli_blksz_obj_free( kr );
@@ -327,6 +331,7 @@ int main( int argc, char** argv )
 		bli_cntl_obj_free( trmm_cntl_op_bp );
 		bli_cntl_obj_free( trmm_cntl_mm_op );
 		bli_cntl_obj_free( trmm_cntl_vl_mm );
+#endif
 
 		bli_obj_free( &alpha );
 		bli_obj_free( &beta );

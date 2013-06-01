@@ -71,25 +71,37 @@ void bli_dgemm_opt_d4x4(
 		"                                \n\t"
 		"movq          %2, %%rax         \n\t" // load address of a.
 		"movq          %3, %%rbx         \n\t" // load address of b.
+		"movq          %9, %%r9          \n\t" // load address of b_next.
 		"                                \n\t"
-		"addq     $8 * 16, %%rax         \n\t" // increment pointers to allow byte
-		"addq     $8 * 16, %%rbx         \n\t" // offsets in the unrolled iterations.
+		"subq    $-8 * 16, %%rax         \n\t" // increment pointers to allow byte
+		"subq    $-8 * 16, %%rbx         \n\t" // offsets in the unrolled iterations.
 		"                                \n\t"
 		"movaps  -8 * 16(%%rax), %%xmm0  \n\t" // initialize loop by pre-loading elements
 		"movaps  -7 * 16(%%rax), %%xmm1  \n\t" // of a and b.
 		"movaps  -8 * 16(%%rbx), %%xmm2  \n\t"
+		"                                \n\t"
+		"movq          %6, %%rcx         \n\t" // load address of c
+		"movq          %8, %%rdi         \n\t" // load cs_c
+		"leaq        (,%%rdi,8), %%rdi   \n\t" // cs_c *= sizeof(double)
+		"leaq   (%%rcx,%%rdi,2), %%r10   \n\t" // load address of c + 2*cs_c;
+		"                                \n\t"
+		"prefetcht2   0 * 8(%%r9)        \n\t" // prefetch b_next
 		"                                \n\t"
 		"xorpd     %%xmm3,  %%xmm3       \n\t"
 		"xorpd     %%xmm4,  %%xmm4       \n\t"
 		"xorpd     %%xmm5,  %%xmm5       \n\t"
 		"xorpd     %%xmm6,  %%xmm6       \n\t"
 		"                                \n\t"
+		"prefetcht0   3 * 8(%%rcx)       \n\t" // prefetch c + 0*cs_c
 		"xorpd     %%xmm8,  %%xmm8       \n\t"
 		"movaps    %%xmm8,  %%xmm9       \n\t"
+		"prefetcht0   3 * 8(%%rcx,%%rdi) \n\t" // prefetch c + 1*cs_c
 		"movaps    %%xmm8, %%xmm10       \n\t"
 		"movaps    %%xmm8, %%xmm11       \n\t"
+		"prefetcht0   3 * 8(%%r10)       \n\t" // prefetch c + 2*cs_c
 		"movaps    %%xmm8, %%xmm12       \n\t"
 		"movaps    %%xmm8, %%xmm13       \n\t"
+		"prefetcht0   3 * 8(%%r10,%%rdi) \n\t" // prefetch c + 3*cs_c
 		"movaps    %%xmm8, %%xmm14       \n\t"
 		"movaps    %%xmm8, %%xmm15       \n\t"
 		"                                \n\t"
@@ -103,7 +115,7 @@ void bli_dgemm_opt_d4x4(
 		"                                \n\t"
 		".LOOPKITER:                     \n\t" // MAIN LOOP
 		"                                \n\t"
-		"prefetcht0 1264(%%rax)          \n\t"
+		"prefetcht0  (4*35+1) * 8(%%rax) \n\t"
 		"                                \n\t"
 		"addpd   %%xmm3, %%xmm11         \n\t" // iteration 0
 		"movaps  -7 * 16(%%rbx), %%xmm3  \n\t"
@@ -166,7 +178,7 @@ void bli_dgemm_opt_d4x4(
 		"mulpd   %%xmm1, %%xmm6          \n\t"
 		"movaps  -3 * 16(%%rax), %%xmm1  \n\t"
 		"                                \n\t"
-		"prefetcht0 1328(%%rax)          \n\t"
+		"prefetcht0  (4*37+1) * 8(%%rax) \n\t"
 		"                                \n\t"
 		"addpd   %%xmm3, %%xmm11         \n\t" // iteration 2
 		"movaps  -3 * 16(%%rbx), %%xmm3  \n\t"
@@ -207,13 +219,15 @@ void bli_dgemm_opt_d4x4(
 		"mulpd   %%xmm0, %%xmm2          \n\t"
 		"mulpd   %%xmm1, %%xmm4          \n\t"
 		"                                \n\t"
+		"subq  $-4 * 4 * 8, %%rax        \n\t" // a += 4*4 (unroll x mr)
+		"                                \n\t"
 		"addpd   %%xmm5, %%xmm10         \n\t"
 		"addpd   %%xmm6, %%xmm14         \n\t"
 		"movaps  %%xmm7, %%xmm6          \n\t"
 		"mulpd   %%xmm0, %%xmm7          \n\t"
 		"mulpd   %%xmm1, %%xmm6          \n\t"
 		"                                \n\t"
-		"addq   $4 * 4 * 8, %%rax        \n\t" // a += 4*4 (unroll x mr)
+		"subq  $-4 * 4 * 8, %%r9         \n\t" // b_next += 4*4 (unroll x nr)
 		"                                \n\t"
 		"addpd   %%xmm2, %%xmm9          \n\t"
 		"movaps   0 * 16(%%rbx), %%xmm2  \n\t"
@@ -223,7 +237,7 @@ void bli_dgemm_opt_d4x4(
 		"mulpd   %%xmm0, %%xmm3          \n\t"
 		"mulpd   %%xmm1, %%xmm4          \n\t"
 		"                                \n\t"
-		"addq   $4 * 4 * 8, %%rbx        \n\t" // b += 4*4 (unroll x nr)
+		"subq  $-4 * 4 * 8, %%rbx        \n\t" // b += 4*4 (unroll x nr)
 		"                                \n\t"
 		"addpd   %%xmm7, %%xmm8          \n\t"
 		"addpd   %%xmm6, %%xmm12         \n\t"
@@ -233,6 +247,8 @@ void bli_dgemm_opt_d4x4(
 		"mulpd   %%xmm1, %%xmm6          \n\t"
 		"movaps  -7 * 16(%%rax), %%xmm1  \n\t"
 		"                                \n\t"
+		"prefetcht2        0 * 8(%%r9)   \n\t" // prefetch b_next[0]
+		"prefetcht2        8 * 8(%%r9)   \n\t" // prefetch b_next[8]
 		"                                \n\t"
 		"                                \n\t"
 		"decq   %%rsi                    \n\t" // i -= 1;
@@ -281,8 +297,8 @@ void bli_dgemm_opt_d4x4(
 		"movaps  -5 * 16(%%rax), %%xmm1  \n\t"
 		"                                \n\t"
 		"                                \n\t"
-		"addq   $4 * 1 * 8, %%rax        \n\t" // a += 4 (1 x mr)
-		"addq   $4 * 1 * 8, %%rbx        \n\t" // b += 4 (1 x nr)
+		"subq  $-4 * 1 * 8, %%rax        \n\t" // a += 4 (1 x mr)
+		"subq  $-4 * 1 * 8, %%rbx        \n\t" // b += 4 (1 x nr)
 		"                                \n\t"
 		"                                \n\t"
 		"decq   %%rsi                    \n\t" // i -= 1;
@@ -304,12 +320,18 @@ void bli_dgemm_opt_d4x4(
 		"movddup (%%rbx), %%xmm7         \n\t" // load beta and duplicate
 		"                                \n\t"
 		"                                \n\t"
-		"movq    %6, %%rcx               \n\t" // load address of c
+		//"movq    %6, %%rcx               \n\t" // load address of c
+		//"movq    %8, %%rdi               \n\t" // load cs_c
+		//"salq    $3, %%rdi               \n\t" // cs_c *= sizeof(double)
 		"                                \n\t"
 		"movq    %7, %%rsi               \n\t" // load rs_c
-		"movq    %8, %%rdi               \n\t" // load cs_c
-		"salq    $3, %%rsi               \n\t" // rs_c *= sizeof(double)
-		"salq    $3, %%rdi               \n\t" // cs_c *= sizeof(double)
+		"movq    %%rsi, %%r8             \n\t" // make a copy of rs_c
+		//"salq    $3, %%rsi               \n\t" // rs_c *= sizeof(double)
+		"leaq    (,%%rsi,8), %%rsi       \n\t" // rs_c *= sizeof(double)
+		"                                \n\t"
+		"                                \n\t"
+		"                                \n\t"
+		"                                \n\t"
 		"                                \n\t"
 		"leaq   (%%rcx,%%rsi,2), %%rdx   \n\t" // load address of c + 2*rs_c;
 		"                                \n\t"
@@ -344,6 +366,20 @@ void bli_dgemm_opt_d4x4(
 		"                                \n\t" // xmm12:  xmm13:  xmm14:  xmm15:
 		"                                \n\t" // ( ab20  ( ab21  ( ab22  ( ab23
 		"                                \n\t" //   ab30 )  ab31 )  ab32 )  ab33 )
+		"                                \n\t"
+		"                                \n\t"
+		"                                \n\t" // assert: c % 16 == 0 && rs_c == 1
+		"                                \n\t"
+		"cmpq       $1, %%r8             \n\t" // set ZF if rs_c == 1.
+		"sete           %%bl             \n\t" // bl = ( ZF == 1 ? 1 : 0 );
+		"testq     $15, %%rcx            \n\t" // set ZF if c & 16 is zero.
+		"setz           %%bh             \n\t" // bh = ( ZF == 1 ? 1 : 0 );
+		"andb     %%bl, %%bh             \n\t" // set ZF if bl & bh == 1.
+		"jne     .COLSTORED              \n\t" // jump to column storage case
+		"                                \n\t"
+		"                                \n\t"
+		"                                \n\t"
+		".GENSTORED:                     \n\t"
 		"                                \n\t"
 		"                                \n\t"
 		"                                \n\t"
@@ -423,9 +459,79 @@ void bli_dgemm_opt_d4x4(
 		"addpd  %%xmm15,  %%xmm1         \n\t" // add the gemm result,
 		"movlpd  %%xmm1,  (%%rdx)        \n\t" // and store back to memory.
 		"movhpd  %%xmm1,  (%%rdx,%%rsi)  \n\t"
+		"                                \n\t"
+		"                                \n\t"
+		"                                \n\t"
+		"jmp    .DONE                    \n\t" // jump to end.
+		"                                \n\t"
+		"                                \n\t"
+		"                                \n\t"
+		".COLSTORED:                     \n\t"
+		"                                \n\t"
+		"movaps  (%%rcx),       %%xmm0   \n\t" // load c00 and c10,
+		"mulpd   %%xmm6,  %%xmm8         \n\t" // scale by alpha,
+		"mulpd   %%xmm7,  %%xmm0         \n\t" // scale by beta,
+		"addpd   %%xmm8,  %%xmm0         \n\t" // add the gemm result,
+		"movaps  %%xmm0,  (%%rcx)        \n\t" // and store back to memory.
+		"addq     %%rdi, %%rcx           \n\t"
+		"                                \n\t"
+		"movaps  (%%rdx),       %%xmm1   \n\t" // load c20 and c30,
+		"mulpd   %%xmm6,  %%xmm12        \n\t" // scale by alpha,
+		"mulpd   %%xmm7,  %%xmm1         \n\t" // scale by beta,
+		"addpd  %%xmm12,  %%xmm1         \n\t" // add the gemm result,
+		"movaps  %%xmm1,  (%%rdx)        \n\t" // and store back to memory.
 		"addq     %%rdi, %%rdx           \n\t"
 		"                                \n\t"
 		"                                \n\t"
+		"                                \n\t"
+		"movaps  (%%rcx),       %%xmm0   \n\t" // load c01 and c11,
+		"mulpd   %%xmm6,  %%xmm9         \n\t" // scale by alpha,
+		"mulpd   %%xmm7,  %%xmm0         \n\t" // scale by beta,
+		"addpd   %%xmm9,  %%xmm0         \n\t" // add the gemm result,
+		"movaps  %%xmm0,  (%%rcx)        \n\t" // and store back to memory.
+		"addq     %%rdi, %%rcx           \n\t"
+		"                                \n\t"
+		"movaps  (%%rdx),       %%xmm1   \n\t" // load c21 and c31,
+		"mulpd   %%xmm6,  %%xmm13        \n\t" // scale by alpha,
+		"mulpd   %%xmm7,  %%xmm1         \n\t" // scale by beta,
+		"addpd  %%xmm13,  %%xmm1         \n\t" // add the gemm result,
+		"movaps  %%xmm1,  (%%rdx)        \n\t" // and store back to memory.
+		"addq     %%rdi, %%rdx           \n\t"
+		"                                \n\t"
+		"                                \n\t"
+		"                                \n\t"
+		"movaps  (%%rcx),       %%xmm0   \n\t" // load c02 and c12,
+		"mulpd   %%xmm6,  %%xmm10        \n\t" // scale by alpha,
+		"mulpd   %%xmm7,  %%xmm0         \n\t" // scale by beta,
+		"addpd  %%xmm10,  %%xmm0         \n\t" // add the gemm result,
+		"movaps  %%xmm0,  (%%rcx)        \n\t" // and store back to memory.
+		"addq     %%rdi, %%rcx           \n\t"
+		"                                \n\t"
+		"movaps  (%%rdx),       %%xmm1   \n\t" // load c22 and c32,
+		"mulpd   %%xmm6,  %%xmm14        \n\t" // scale by alpha,
+		"mulpd   %%xmm7,  %%xmm1         \n\t" // scale by beta,
+		"addpd  %%xmm14,  %%xmm1         \n\t" // add the gemm result,
+		"movaps  %%xmm1,  (%%rdx)        \n\t" // and store back to memory.
+		"addq     %%rdi, %%rdx           \n\t"
+		"                                \n\t"
+		"                                \n\t"
+		"                                \n\t"
+		"movaps  (%%rcx),       %%xmm0   \n\t" // load c03 and c13,
+		"mulpd   %%xmm6,  %%xmm11        \n\t" // scale by alpha,
+		"mulpd   %%xmm7,  %%xmm0         \n\t" // scale by beta,
+		"addpd  %%xmm11,  %%xmm0         \n\t" // add the gemm result,
+		"movaps  %%xmm0,  (%%rcx)        \n\t" // and store back to memory.
+		"addq     %%rdi, %%rcx           \n\t"
+		"                                \n\t"
+		"movaps  (%%rdx),       %%xmm1   \n\t" // load c23 and c33,
+		"mulpd   %%xmm6,  %%xmm15        \n\t" // scale by alpha,
+		"mulpd   %%xmm7,  %%xmm1         \n\t" // scale by beta,
+		"addpd  %%xmm15,  %%xmm1         \n\t" // add the gemm result,
+		"movaps  %%xmm1,  (%%rdx)        \n\t" // and store back to memory.
+		"                                \n\t"
+		"                                \n\t"
+		"                                \n\t"
+		".DONE:                          \n\t"
 		"                                \n\t"
 
 		: // output operands (none)
@@ -438,9 +544,10 @@ void bli_dgemm_opt_d4x4(
 		  "m" (beta),
 		  "m" (c),
 		  "m" (rs_c),
-		  "m" (cs_c)
+		  "m" (cs_c),
+		  "m" (b_next)
 		: // register clobber list
-		  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
+		  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "r8", "r9", "r10",
 		  "xmm0", "xmm1", "xmm2", "xmm3",
 		  "xmm4", "xmm5", "xmm6", "xmm7",
 		  "xmm8", "xmm9", "xmm10", "xmm11",

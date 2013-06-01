@@ -89,8 +89,8 @@
 #define BLIS_EXTEND_KC_S               0 //(BLIS_DEFAULT_KC_S/4)
 #define BLIS_EXTEND_NC_S               0 //(BLIS_DEFAULT_NC_S/4)
 
-#define BLIS_EXTEND_MC_D               0 //(BLIS_DEFAULT_MC_D/4)
-#define BLIS_EXTEND_KC_D               0 //(BLIS_DEFAULT_KC_D/4)
+#define BLIS_EXTEND_MC_D               (BLIS_DEFAULT_MC_D/2)
+#define BLIS_EXTEND_KC_D               (BLIS_DEFAULT_KC_D/2)
 #define BLIS_EXTEND_NC_D               0 //(BLIS_DEFAULT_NC_D/4)
 
 #define BLIS_EXTEND_MC_C               0 //(BLIS_DEFAULT_MC_C/4)
@@ -251,6 +251,8 @@
 #include "bli_gemm_opt_d4x4.h"
 #include "bli_gemmtrsm_l_opt_d4x4.h"
 #include "bli_gemmtrsm_u_opt_d4x4.h"
+//#include "bli_trsm_l_ref_4x4.h"
+//#include "bli_trsm_u_ref_4x4.h"
 
 // -- dupl --
 

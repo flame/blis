@@ -38,6 +38,8 @@
 //          m     n     alpha    x        incx  y        incy  a        lda
 void dger_( int*, int*, double*, double*, int*, double*, int*, double*, int* );
 
+//#define PRINT
+
 int main( int argc, char** argv )
 {
 	obj_t a, x, y;

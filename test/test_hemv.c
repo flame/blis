@@ -38,6 +38,8 @@
 //           uploa  m     alpha    a        lda   x        incx  beta     y        incy
 void dsymv_( char*, int*, double*, double*, int*, double*, int*, double*, double*, int* );
 
+//#define PRINT
+
 int main( int argc, char** argv )
 {
 	obj_t a, x, y;
@@ -134,30 +136,15 @@ int main( int argc, char** argv )
 #endif
 
 #ifdef BLIS
-
-
 			//bli_obj_toggle_conj( a );
 			//bli_obj_toggle_conj( x );
 
-
-#if 1
+			//bli_symv( &alpha,
 			bli_hemv( &alpha,
-#else
-			bli_symv( &alpha,
-#endif
 			          &a,
 			          &x,
 			          &beta,
 			          &y );
-
-/*
-			bli_hemv_unf_var3( BLIS_CONJUGATE,
-			                   &alpha,
-			                   &a,
-			                   &x,
-			                   &beta,
-			                   &y, NULL );
-*/
 
 #else
 

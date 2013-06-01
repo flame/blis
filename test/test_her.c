@@ -39,7 +39,7 @@
 void dsyr_( char*, int*, double*, double*, int*, double*, int* );
 void zher_( char*, int*, double*, dcomplex*, int*, dcomplex*, int* );
 
-#define PRINT 1
+//#define PRINT
 
 int main( int argc, char** argv )
 {
@@ -76,7 +76,7 @@ int main( int argc, char** argv )
 	m_input = 6;
 #endif
 
-#if 0
+#if 1
 	dt_alpha = BLIS_DOUBLE;
 	dt_x = BLIS_DOUBLE;
 	dt_a = BLIS_DOUBLE;
@@ -128,22 +128,12 @@ int main( int argc, char** argv )
 #endif
 
 #ifdef BLIS
-
 			//bli_obj_toggle_conj( x );
 
-#if 1
+			//bli_syr( &alpha,
 			bli_her( &alpha,
-#else
-			bli_syr( &alpha,
-#endif
 			         &x,
 			         &a );
-/*
-			bli_her_unb_var2( BLIS_CONJUGATE,
-			                  &BLIS_TWO,
-			                  &x,
-			                  &a, NULL );
-*/
 
 #else
 
@@ -152,15 +142,15 @@ int main( int argc, char** argv )
 			int     incx   = bli_obj_vector_inc( x );
 			int     lda    = bli_obj_col_stride( a );
 			double* alphap = bli_obj_buffer( alpha );
-/*
 			double* xp     = bli_obj_buffer( x );
 			double* ap     = bli_obj_buffer( a );
-*/
+/*
 			dcomplex* xp   = bli_obj_buffer( x );
 			dcomplex* ap   = bli_obj_buffer( a );
+*/
 
-			//dsyr_( &uplo,
-			zher_( &uplo,
+			dsyr_( &uplo,
+			//zher_( &uplo,
 			       &mm,
 			       alphap,
 			       xp, &incx,

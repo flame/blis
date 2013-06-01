@@ -38,7 +38,7 @@
 //           transa transb m     n     k     alpha    a        lda   b        ldb   beta     c        ldc
 void dgemm_( char*, char*, int*, int*, int*, double*, double*, int*, double*, int*, double*, double*, int* );
 
-#define PRINT
+//#define PRINT
 
 int main( int argc, char** argv )
 {
@@ -88,10 +88,9 @@ int main( int argc, char** argv )
 	p_inc   = 40;
 
 	m_input = -1;
-	//m_input = 384;
 	n_input = -1;
-	//k_input = -1;
 	k_input = 200;
+	//k_input = 200;
 #else
 	p_begin = 16;
 	p_end   = 16;

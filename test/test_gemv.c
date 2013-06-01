@@ -38,6 +38,8 @@
 //           transa m     n     alpha    a        lda   x        incx  beta     y        incy
 void dgemv_( char*, int*, int*, double*, double*, int*, double*, int*, double*, double*, int* );
 
+//#define PRINT
+
 int main( int argc, char** argv )
 {
 	obj_t a, x, y;
@@ -146,7 +148,7 @@ int main( int argc, char** argv )
 #endif
 
 #ifdef BLIS
-			bli_obj_set_onlytrans( BLIS_TRANSPOSE, a_tl );
+			//bli_obj_set_onlytrans( BLIS_TRANSPOSE, a_tl );
 
 			bli_gemv( &alpha,
 			          &a_tl,
@@ -156,7 +158,7 @@ int main( int argc, char** argv )
 
 #else
 
-			char    transa = 'T';
+			char    transa = 'N';
 			int     mm     = bli_obj_length( a_tl );
 			int     nn     = bli_obj_width( a_tl );
 			int     lda    = bli_obj_col_stride( a_tl );

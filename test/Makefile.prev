@@ -4,7 +4,7 @@
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
-#  Copyright (C) 2013, The University of Texas
+#  Copyright (C) 2012, The University of Texas
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -134,7 +134,7 @@ BLAS_LIB_PATH  := $(HOME)/flame/lib
 OPENBLAS_LIB   := $(BLAS_LIB_PATH)/libopenblas.a
 ATLAS_LIB      := $(BLAS_LIB_PATH)/libf77blas.a \
                   $(BLAS_LIB_PATH)/libatlas.a
-#MKL_LIB        := -L/opt/intel/mkl/10.2.2.025/lib/em64t/ \
+MKL_LIB        := -L/opt/intel/mkl/10.2.2.025/lib/em64t/ \
                   -lmkl_sequential -lmkl_core -lmkl_intel_lp64
 
 
@@ -168,7 +168,10 @@ LDFLAGS        += -lpthread
 # --- Targets/rules ------------------------------------------------------------
 #
 
-all: blis openblas atlas mkl
+all: blis \
+     openblas \
+     atlas \
+     mkl
 
 blis: test_gemv_blis.x \
       test_ger_blis.x \
@@ -251,22 +254,17 @@ test_%_blis.o: test_%.c
 
 # -- Executable file rules --
 
-# NOTE: For the BLAS test drivers, we place the BLAS libraries before BLIS
-# on the link command line in case BLIS was configured with the BLAS
-# compatibility layer. This prevents BLIS from inadvertently getting called
-# for the BLAS routines we are trying to test with.
-
 test_%_openblas.x: test_%_openblas.o $(BLIS_LIB)
-	$(LINKER) $<             $(OPENBLAS_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@
+	$(LINKER) $<             $(BLIS_LIB) $(OPENBLAS_LIB) $(LDFLAGS) -o $@
 
 test_%_atlas.x: test_%_atlas.o $(BLIS_LIB)
-	$(LINKER) $<             $(ATLAS_LIB)    $(BLIS_LIB) $(LDFLAGS) -o $@
+	$(LINKER) $<             $(BLIS_LIB) $(ATLAS_LIB) $(LDFLAGS) -o $@
 
 test_%_mkl.x: test_%_mkl.o $(BLIS_LIB)
-	$(LINKER) $<             $(MKL_LIB)      $(BLIS_LIB) $(LDFLAGS) -o $@
+	$(LINKER) $<             $(BLIS_LIB) $(MKL_LIB) $(LDFLAGS) -o $@
 
 test_%_blis.x: test_%_blis.o $(BLIS_LIB)
-	$(LINKER) $<                             $(BLIS_LIB) $(LDFLAGS) -o $@
+	$(LINKER) $<             $(BLIS_LIB)             $(LDFLAGS) -o $@
 
 
 # -- Clean rules --

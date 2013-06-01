@@ -121,7 +121,6 @@ void PASTEMAC2(cha,chx,varname)( \
 	ctype_ax* alpha_cast = alpha; \
 	ctype_a*  a_cast     = a; \
 	ctype_x*  x_cast     = x; \
-	ctype_ax* minus_one  = PASTEMAC(chax,m1); \
 	ctype_a*  a10t; \
 	ctype_a*  alpha11; \
 	ctype_a*  a12t; \
@@ -178,7 +177,7 @@ void PASTEMAC2(cha,chx,varname)( \
 			                                 a12t, cs_at, \
 			                                 x2,   incx, \
 			                                 &rho ); \
-			PASTEMAC3(chax,chax,chx,subs)( rho, *chi1 ); \
+			PASTEMAC2(chax,chx,subs)( rho, *chi1 ); \
 \
 			/* chi1 = chi1 / alpha11; */ \
 			if ( bli_is_nonunit_diag( diag ) ) \
@@ -206,7 +205,7 @@ void PASTEMAC2(cha,chx,varname)( \
 			                                 a10t, cs_at, \
 			                                 x0,   incx, \
 			                                 &rho ); \
-			PASTEMAC3(chax,chax,chx,subs)( rho, *chi1 ); \
+			PASTEMAC2(chax,chx,subs)( rho, *chi1 ); \
 \
 			/* chi1 = chi1 / alpha11; */ \
 			if ( bli_is_nonunit_diag( diag ) ) \

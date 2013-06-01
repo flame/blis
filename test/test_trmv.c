@@ -38,6 +38,8 @@
 //           uploa  trans, diag,  m     a        lda   x        incx
 void dtrmv_( char*, char*, char*, int*, double*, int*, double*, int* );
 
+//#define PRINT
+
 int main( int argc, char** argv )
 {
 	obj_t a, x;
@@ -99,7 +101,7 @@ int main( int argc, char** argv )
 		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, a );
 		bli_obj_set_diag( BLIS_NONUNIT_DIAG, a );
 
-		bli_setsc(  (2.0/1.0), 0.0, &alpha );
+		bli_setsc(  (1.0/1.0), 0.0, &alpha );
 
 
 		bli_copym( &x, &x_save );

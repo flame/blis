@@ -80,7 +80,7 @@ CC           := gcc
 # NOTE: This is needed to enable posix_memalign().
 CPPROCFLAGS  := -D_POSIX_C_SOURCE=200112L
 CMISCFLAGS   := -std=c99 # -fopenmp -pg
-CDBGFLAGS    := -g
+CDBGFLAGS    := #-g
 CWARNFLAGS   := -Wall
 COPTFLAGS    := -O2 #-malign-double
 CVECFLAGS    := -msse3 -march=nocona -mfpmath=sse

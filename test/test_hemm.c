@@ -54,6 +54,7 @@ int main( int argc, char** argv )
 	int   r, n_repeats;
 	side_t side;
 
+#if 0
 	blksz_t* mr;
 	blksz_t* nr;
 	blksz_t* kr;
@@ -70,6 +71,7 @@ int main( int argc, char** argv )
 	gemm_t*  gemm_cntl_op_bp;
 	gemm_t*  gemm_cntl_mm_op;
 	gemm_t*  gemm_cntl_vl_mm;
+#endif
 
 	double dtime;
 	double dtime_save;
@@ -134,6 +136,7 @@ int main( int argc, char** argv )
 		bli_setsc(  (2.0/1.0), 0.0, &alpha );
 		bli_setsc( -(1.0/1.0), 0.0, &beta );
 
+#if 0
 		mr = bli_blksz_obj_create( 2, 4, 2, 2 );
 		kr = bli_blksz_obj_create( 1, 1, 1, 1 );
 		nr = bli_blksz_obj_create( 1, 4, 1, 1 );
@@ -214,7 +217,7 @@ int main( int argc, char** argv )
 		                          NULL,
 		                          gemm_cntl_mm_op,
 		                          NULL );
-
+#endif
 
 		bli_copym( &c, &c_save );
 	
@@ -291,6 +294,7 @@ int main( int argc, char** argv )
 		printf( "( %2ld, 1:4 ) = [ %4lu %4lu  %10.3e  %6.3f ];\n",
 		        (p - p_begin + 1)/p_inc + 1, m, n, dtime_save, gflops );
 
+#if 0
 		bli_blksz_obj_free( mr );
 		bli_blksz_obj_free( nr );
 		bli_blksz_obj_free( kr );
@@ -306,7 +310,7 @@ int main( int argc, char** argv )
 		bli_cntl_obj_free( gemm_cntl_op_bp );
 		bli_cntl_obj_free( gemm_cntl_mm_op );
 		bli_cntl_obj_free( gemm_cntl_vl_mm );
-
+#endif
 		bli_obj_free( &alpha );
 		bli_obj_free( &beta );
 

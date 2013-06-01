@@ -1,11 +1,11 @@
 #!/bin/bash
 
 exec_root="test"
-out_root="output"
+out_root="output_sqaure"
 
 # Operations to test.
-l2_ops="gemv ger hemv her her2 trmv trsv"
-#l3_ops="gemm hemm herk her2k trmm trsm"
+#l2_ops="gemv ger hemv her her2 trmv trsv"
+l3_ops="gemm" #"gemm hemm herk her2k trmm trsm"
 test_ops="${l2_ops} ${l3_ops}"
 
 # Implementations to test
@@ -20,6 +20,8 @@ for im in ${test_impls}; do
 
 		# Construct the name of the output file.
 		out_file="${out_root}_${op}_${im}.m"
+
+		echo "Running ${exec_name} > ${out_file}"
 
 		# Run executable.
 		./${exec_name} > ${out_file}

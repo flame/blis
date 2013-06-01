@@ -74,25 +74,37 @@ void bli_dgemmtrsm_l_opt_d4x4(
 		"                                \n\t"
 		"movq          %2, %%rax         \n\t" // load address of a10.
 		"movq          %4, %%rbx         \n\t" // load address of bd01.
+		//"movq         %11, %%r9          \n\t" // load address of b_next.
 		"                                \n\t"
-		"addq     $8 * 16, %%rax         \n\t" // increment pointers to allow byte
-		"addq     $8 * 16, %%rbx         \n\t" // offsets in the unrolled iterations.
+		"subq    $-8 * 16, %%rax         \n\t" // increment pointers to allow byte
+		"subq    $-8 * 16, %%rbx         \n\t" // offsets in the unrolled iterations.
 		"                                \n\t"
 		"movaps  -8 * 16(%%rax), %%xmm0  \n\t" // initialize loop by pre-loading elements
 		"movaps  -7 * 16(%%rax), %%xmm1  \n\t" // of a and b.
 		"movaps  -8 * 16(%%rbx), %%xmm2  \n\t"
+		"                                \n\t"
+		//"movq          %7, %%rcx         \n\t" // load address of c11
+		//"movq          %9, %%rdi         \n\t" // load cs_c
+		//"leaq        (,%%rdi,8), %%rdi   \n\t" // cs_c *= sizeof(double)
+		//"leaq   (%%rcx,%%rdi,2), %%rdx   \n\t" // load address of c + 2*cs_c;
+		"                                \n\t"
+		//"prefetcht2   0 * 8(%%r9)        \n\t" // prefetch b_next
 		"                                \n\t"
 		"xorpd     %%xmm3,  %%xmm3       \n\t"
 		"xorpd     %%xmm4,  %%xmm4       \n\t"
 		"xorpd     %%xmm5,  %%xmm5       \n\t"
 		"xorpd     %%xmm6,  %%xmm6       \n\t"
 		"                                \n\t"
+		//"prefetcht2   3 * 8(%%rcx)       \n\t" // prefetch c + 0*cs_c
 		"xorpd     %%xmm8,  %%xmm8       \n\t"
 		"movaps    %%xmm8,  %%xmm9       \n\t"
+		//"prefetcht2   3 * 8(%%rcx,%%rdi) \n\t" // prefetch c + 1*cs_c
 		"movaps    %%xmm8, %%xmm10       \n\t"
 		"movaps    %%xmm8, %%xmm11       \n\t"
+		//"prefetcht2   3 * 8(%%rdx)       \n\t" // prefetch c + 2*cs_c
 		"movaps    %%xmm8, %%xmm12       \n\t"
 		"movaps    %%xmm8, %%xmm13       \n\t"
+		//"prefetcht2   3 * 8(%%rdx,%%rdi) \n\t" // prefetch c + 3*cs_c
 		"movaps    %%xmm8, %%xmm14       \n\t"
 		"movaps    %%xmm8, %%xmm15       \n\t"
 		"                                \n\t"
@@ -106,7 +118,8 @@ void bli_dgemmtrsm_l_opt_d4x4(
 		"                                \n\t"
 		".LOOPKITER:                     \n\t" // MAIN LOOP
 		"                                \n\t"
-		"prefetcht0 1264(%%rax)          \n\t"
+		//"prefetcht0 1264(%%rax)          \n\t"
+		"prefetcht0  (4*35+1) * 8(%%rax) \n\t"
 		"                                \n\t"
 		"addpd   %%xmm3, %%xmm11         \n\t" // iteration 0
 		"movaps  -7 * 16(%%rbx), %%xmm3  \n\t"
@@ -169,7 +182,8 @@ void bli_dgemmtrsm_l_opt_d4x4(
 		"mulpd   %%xmm1, %%xmm6          \n\t"
 		"movaps  -3 * 16(%%rax), %%xmm1  \n\t"
 		"                                \n\t"
-		"prefetcht0 1328(%%rax)          \n\t"
+		//"prefetcht0 1328(%%rax)          \n\t"
+		"prefetcht0  (4*37+1) * 8(%%rax) \n\t"
 		"                                \n\t"
 		"addpd   %%xmm3, %%xmm11         \n\t" // iteration 2
 		"movaps  -3 * 16(%%rbx), %%xmm3  \n\t"
@@ -210,13 +224,15 @@ void bli_dgemmtrsm_l_opt_d4x4(
 		"mulpd   %%xmm0, %%xmm2          \n\t"
 		"mulpd   %%xmm1, %%xmm4          \n\t"
 		"                                \n\t"
+		"subq  $-4 * 4 * 8, %%rax        \n\t" // a += 4*4 (unroll x mr)
+		"                                \n\t"
 		"addpd   %%xmm5, %%xmm10         \n\t"
 		"addpd   %%xmm6, %%xmm14         \n\t"
 		"movaps  %%xmm7, %%xmm6          \n\t"
 		"mulpd   %%xmm0, %%xmm7          \n\t"
 		"mulpd   %%xmm1, %%xmm6          \n\t"
 		"                                \n\t"
-		"addq   $4 * 4 * 8, %%rax        \n\t" // a += 4*4 (unroll x mr)
+		//"subq  $-4 * 4 * 8, %%r9         \n\t" // b_next += 4*4 (unroll x nr)
 		"                                \n\t"
 		"addpd   %%xmm2, %%xmm9          \n\t"
 		"movaps   0 * 16(%%rbx), %%xmm2  \n\t"
@@ -226,7 +242,7 @@ void bli_dgemmtrsm_l_opt_d4x4(
 		"mulpd   %%xmm0, %%xmm3          \n\t"
 		"mulpd   %%xmm1, %%xmm4          \n\t"
 		"                                \n\t"
-		"addq   $4 * 4 * 8, %%rbx        \n\t" // b += 4*4 (unroll x nr)
+		"subq  $-4 * 4 * 8, %%rbx        \n\t" // b += 4*4 (unroll x nr)
 		"                                \n\t"
 		"addpd   %%xmm7, %%xmm8          \n\t"
 		"addpd   %%xmm6, %%xmm12         \n\t"
@@ -236,6 +252,8 @@ void bli_dgemmtrsm_l_opt_d4x4(
 		"mulpd   %%xmm1, %%xmm6          \n\t"
 		"movaps  -7 * 16(%%rax), %%xmm1  \n\t"
 		"                                \n\t"
+		//"prefetcht2        0 * 8(%%r9)   \n\t" // prefetch b_next[0]
+		//"prefetcht2        8 * 8(%%r9)   \n\t" // prefetch b_next[8]
 		"                                \n\t"
 		"                                \n\t"
 		"decq   %%rsi                    \n\t" // i -= 1;
@@ -284,8 +302,8 @@ void bli_dgemmtrsm_l_opt_d4x4(
 		"movaps  -5 * 16(%%rax), %%xmm1  \n\t"
 		"                                \n\t"
 		"                                \n\t"
-		"addq   $4 * 4 * 8, %%rax        \n\t" // a += 4 (1 x mr)
-		"addq   $4 * 4 * 8, %%rbx        \n\t" // b += 4 (1 x nr)
+		"subq  $-4 * 1 * 8, %%rax        \n\t" // a += 4 (1 x mr)
+		"subq  $-4 * 1 * 8, %%rbx        \n\t" // b += 4 (1 x nr)
 		"                                \n\t"
 		"                                \n\t"
 		"decq   %%rsi                    \n\t" // i -= 1;
@@ -339,19 +357,19 @@ void bli_dgemmtrsm_l_opt_d4x4(
 		"movq    %10, %%rax              \n\t" // load address of alpha
 		"movddup (%%rax), %%xmm15        \n\t" // load alpha and duplicate
 		"                                \n\t"
-		"movapd  0 * 16(%%rbx), %%xmm8   \n\t" 
-		"movapd  1 * 16(%%rbx), %%xmm12  \n\t"
+		"movaps  0 * 16(%%rbx), %%xmm8   \n\t" 
+		"movaps  1 * 16(%%rbx), %%xmm12  \n\t"
 		"mulpd    %%xmm15, %%xmm8        \n\t" // xmm8  = alpha * ( beta00 beta01 )
 		"mulpd    %%xmm15, %%xmm12       \n\t" // xmm12 = alpha * ( beta02 beta03 )
-		"movapd  2 * 16(%%rbx), %%xmm9   \n\t"
-		"movapd  3 * 16(%%rbx), %%xmm13  \n\t"
+		"movaps  2 * 16(%%rbx), %%xmm9   \n\t"
+		"movaps  3 * 16(%%rbx), %%xmm13  \n\t"
 		"mulpd    %%xmm15, %%xmm9        \n\t" // xmm9  = alpha * ( beta10 beta11 )
 		"mulpd    %%xmm15, %%xmm13       \n\t" // xmm13 = alpha * ( beta12 beta13 )
-		"movapd  4 * 16(%%rbx), %%xmm10  \n\t"
-		"movapd  5 * 16(%%rbx), %%xmm14  \n\t"
+		"movaps  4 * 16(%%rbx), %%xmm10  \n\t"
+		"movaps  5 * 16(%%rbx), %%xmm14  \n\t"
 		"mulpd    %%xmm15, %%xmm10       \n\t" // xmm10 = alpha * ( beta20 beta21 )
 		"mulpd    %%xmm15, %%xmm14       \n\t" // xmm14 = alpha * ( beta22 beta23 )
-		"movapd  6 * 16(%%rbx), %%xmm11  \n\t"
+		"movaps  6 * 16(%%rbx), %%xmm11  \n\t"
 		"mulpd    %%xmm15, %%xmm11       \n\t" // xmm11 = alpha * ( beta30 beta31 )
 		"mulpd   7 * 16(%%rbx), %%xmm15  \n\t" // xmm15 = alpha * ( beta32 beta33 )
 		"                                \n\t"
@@ -378,12 +396,12 @@ void bli_dgemmtrsm_l_opt_d4x4(
 		"movq     %3, %%rax                \n\t" // load address of a11
 		"movq     %7, %%rcx                \n\t" // load address of c11
 		"                                  \n\t"
-		"movq     %8, %%rdi                \n\t" // load rs_c
-		"movq     %9, %%rsi                \n\t" // load cs_c
-		"salq     $3, %%rdi                \n\t" // rs_c *= sizeof( double )
-		"salq     $3, %%rsi                \n\t" // cs_c *= sizeof( double )
+		"movq     %8, %%rsi                \n\t" // load rs_c
+		"movq     %9, %%rdi                \n\t" // load cs_c
+		"salq     $3, %%rsi                \n\t" // rs_c *= sizeof( double )
+		"salq     $3, %%rdi                \n\t" // cs_c *= sizeof( double )
 		"                                  \n\t"
-		"leaq   (%%rcx,%%rsi,2), %%rdx     \n\t" // c11_2 = c11 + 2*cs_c
+		"leaq   (%%rcx,%%rdi,2), %%rdx     \n\t" // c11_2 = c11 + 2*cs_c
 		"                                  \n\t"
 		"                                  \n\t"
 		"                                  \n\t"
@@ -394,14 +412,14 @@ void bli_dgemmtrsm_l_opt_d4x4(
 		"mulpd    %%xmm0, %%xmm8           \n\t" // xmm8  *= (1/alpha00);
 		"mulpd    %%xmm0, %%xmm12          \n\t" // xmm12 *= (1/alpha00);
 		"                                  \n\t"
-		"movapd   %%xmm8,  0 * 16(%%rbx)   \n\t" // store ( beta00 beta01 ) = xmm8
-		"movapd   %%xmm12, 1 * 16(%%rbx)   \n\t" // store ( beta02 beta03 ) = xmm12
+		"movaps   %%xmm8,  0 * 16(%%rbx)   \n\t" // store ( beta00 beta01 ) = xmm8
+		"movaps   %%xmm12, 1 * 16(%%rbx)   \n\t" // store ( beta02 beta03 ) = xmm12
 		"movlpd   %%xmm8,  (%%rcx)         \n\t" // store ( gamma00 ) = xmm8[0]
-		"movhpd   %%xmm8,  (%%rcx,%%rsi)   \n\t" // store ( gamma01 ) = xmm8[1]
+		"movhpd   %%xmm8,  (%%rcx,%%rdi)   \n\t" // store ( gamma01 ) = xmm8[1]
 		"movlpd   %%xmm12, (%%rdx)         \n\t" // store ( gamma02 ) = xmm12[0]
-		"movhpd   %%xmm12, (%%rdx,%%rsi)   \n\t" // store ( gamma03 ) = xmm12[1]
-		"addq     %%rdi, %%rcx             \n\t" // c11   += rs_c
-		"addq     %%rdi, %%rdx             \n\t" // c11_2 += rs_c
+		"movhpd   %%xmm12, (%%rdx,%%rdi)   \n\t" // store ( gamma03 ) = xmm12[1]
+		"addq     %%rsi, %%rcx             \n\t" // c11   += rs_c
+		"addq     %%rsi, %%rdx             \n\t" // c11_2 += rs_c
 		"                                  \n\t"
 		"                                  \n\t"
 		"                                  \n\t"
@@ -418,14 +436,14 @@ void bli_dgemmtrsm_l_opt_d4x4(
 		"mulpd    %%xmm1,  %%xmm9          \n\t" // xmm9  *= (1/alpha11);
 		"mulpd    %%xmm1,  %%xmm13         \n\t" // xmm13 *= (1/alpha11);
 		"                                  \n\t"
-		"movapd   %%xmm9,  2 * 16(%%rbx)   \n\t" // store ( beta10 beta11 ) = xmm9
-		"movapd   %%xmm13, 3 * 16(%%rbx)   \n\t" // store ( beta12 beta13 ) = xmm13
+		"movaps   %%xmm9,  2 * 16(%%rbx)   \n\t" // store ( beta10 beta11 ) = xmm9
+		"movaps   %%xmm13, 3 * 16(%%rbx)   \n\t" // store ( beta12 beta13 ) = xmm13
 		"movlpd   %%xmm9,  (%%rcx)         \n\t" // store ( gamma10 ) = xmm9[0]
-		"movhpd   %%xmm9,  (%%rcx,%%rsi)   \n\t" // store ( gamma11 ) = xmm9[1]
+		"movhpd   %%xmm9,  (%%rcx,%%rdi)   \n\t" // store ( gamma11 ) = xmm9[1]
 		"movlpd   %%xmm13, (%%rdx)         \n\t" // store ( gamma12 ) = xmm13[0]
-		"movhpd   %%xmm13, (%%rdx,%%rsi)   \n\t" // store ( gamma13 ) = xmm13[1]
-		"addq     %%rdi, %%rcx             \n\t" // c11   += rs_c
-		"addq     %%rdi, %%rdx             \n\t" // c11_2 += rs_c
+		"movhpd   %%xmm13, (%%rdx,%%rdi)   \n\t" // store ( gamma13 ) = xmm13[1]
+		"addq     %%rsi, %%rcx             \n\t" // c11   += rs_c
+		"addq     %%rsi, %%rdx             \n\t" // c11_2 += rs_c
 		"                                  \n\t"
 		"                                  \n\t"
 		"                                  \n\t"
@@ -448,14 +466,14 @@ void bli_dgemmtrsm_l_opt_d4x4(
 		"mulpd    %%xmm2,  %%xmm10         \n\t" // xmm10 *= (1/alpha22);
 		"mulpd    %%xmm2,  %%xmm14         \n\t" // xmm14 *= (1/alpha22);
 		"                                  \n\t"
-		"movapd   %%xmm10, 4 * 16(%%rbx)   \n\t" // store ( beta20 beta21 ) = xmm10
-		"movapd   %%xmm14, 5 * 16(%%rbx)   \n\t" // store ( beta22 beta23 ) = xmm14
+		"movaps   %%xmm10, 4 * 16(%%rbx)   \n\t" // store ( beta20 beta21 ) = xmm10
+		"movaps   %%xmm14, 5 * 16(%%rbx)   \n\t" // store ( beta22 beta23 ) = xmm14
 		"movlpd   %%xmm10, (%%rcx)         \n\t" // store ( gamma20 ) = xmm10[0]
-		"movhpd   %%xmm10, (%%rcx,%%rsi)   \n\t" // store ( gamma21 ) = xmm10[1]
+		"movhpd   %%xmm10, (%%rcx,%%rdi)   \n\t" // store ( gamma21 ) = xmm10[1]
 		"movlpd   %%xmm14, (%%rdx)         \n\t" // store ( gamma22 ) = xmm14[0]
-		"movhpd   %%xmm14, (%%rdx,%%rsi)   \n\t" // store ( gamma23 ) = xmm14[1]
-		"addq     %%rdi, %%rcx             \n\t" // c11   += rs_c
-		"addq     %%rdi, %%rdx             \n\t" // c11_2 += rs_c
+		"movhpd   %%xmm14, (%%rdx,%%rdi)   \n\t" // store ( gamma23 ) = xmm14[1]
+		"addq     %%rsi, %%rcx             \n\t" // c11   += rs_c
+		"addq     %%rsi, %%rdx             \n\t" // c11_2 += rs_c
 		"                                  \n\t"
 		"                                  \n\t"
 		"                                  \n\t"
@@ -484,12 +502,12 @@ void bli_dgemmtrsm_l_opt_d4x4(
 		"mulpd    %%xmm3,  %%xmm11         \n\t" // xmm11 *= (1/alpha33);
 		"mulpd    %%xmm3,  %%xmm15         \n\t" // xmm15 *= (1/alpha33);
 		"                                  \n\t"
-		"movapd   %%xmm11, 6 * 16(%%rbx)   \n\t" // store ( beta30 beta31 ) = xmm11
-		"movapd   %%xmm15, 7 * 16(%%rbx)   \n\t" // store ( beta32 beta33 ) = xmm15
+		"movaps   %%xmm11, 6 * 16(%%rbx)   \n\t" // store ( beta30 beta31 ) = xmm11
+		"movaps   %%xmm15, 7 * 16(%%rbx)   \n\t" // store ( beta32 beta33 ) = xmm15
 		"movlpd   %%xmm11, (%%rcx)         \n\t" // store ( gamma30 ) = xmm11[0]
-		"movhpd   %%xmm11, (%%rcx,%%rsi)   \n\t" // store ( gamma31 ) = xmm11[1]
+		"movhpd   %%xmm11, (%%rcx,%%rdi)   \n\t" // store ( gamma31 ) = xmm11[1]
 		"movlpd   %%xmm15, (%%rdx)         \n\t" // store ( gamma32 ) = xmm15[0]
-		"movhpd   %%xmm15, (%%rdx,%%rsi)   \n\t" // store ( gamma33 ) = xmm15[1]
+		"movhpd   %%xmm15, (%%rdx,%%rdi)   \n\t" // store ( gamma33 ) = xmm15[1]
 		"                                  \n\t"
 		"                                  \n\t"
 		"                                  \n\t"
@@ -506,9 +524,10 @@ void bli_dgemmtrsm_l_opt_d4x4(
 		  "m" (c11),
 		  "m" (rs_c),
 		  "m" (cs_c),
-		  "m" (alpha)
+		  "m" (alpha),
+		  "m" (b_next)
 		: // register clobber list
-		  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
+		  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", //"r8", "r9", "r10",
 		  "xmm0", "xmm1", "xmm2", "xmm3",
 		  "xmm4", "xmm5", "xmm6", "xmm7",
 		  "xmm8", "xmm9", "xmm10", "xmm11",
