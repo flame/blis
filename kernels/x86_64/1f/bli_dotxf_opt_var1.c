@@ -220,18 +220,50 @@ void bli_ddddotxf_opt_var1(
 	v2df_t            rho0v, rho1v, rho2v, rho3v;
 	v2df_t            x0v, x1v, x2v, x3v, y0v, betav, alphav;
 
+	bool_t            use_ref = FALSE;
+
+
 	if ( bli_zero_dim1( b_m ) ) return;
 
+	// If the vector lengths are zero, scale r by beta and return.
 	if ( bli_zero_dim1( n ) ) 
 	{ 
-		PASTEMAC(d,scals)( *beta_cast, *(r_cast  ) ); 
-		PASTEMAC(d,scals)( *beta_cast, *(r_cast+1) ); 
-		PASTEMAC(d,scals)( *beta_cast, *(r_cast+2) ); 
-		PASTEMAC(d,scals)( *beta_cast, *(r_cast+3) ); 
+		PASTEMAC2(d,d,scalv)( BLIS_NO_CONJUGATE,
+		                      b_m,
+		                      beta_cast,
+		                      r_cast, incr );
 		return; 
 	} 
 
+    n_pre = 0;
+
+    // If there is anything that would interfere with our use of aligned
+    // vector loads/stores, call the reference implementation.
 	if ( b_m < PASTEMAC(d,dotxf_fuse_fac) )
+	{
+		use_ref = TRUE;
+	}
+    else if ( incx != 1 || incy != 1 || incr != 1 )
+    {
+        use_ref = TRUE;
+    }
+	else if ( bli_is_unaligned_to( x, 16 ) ||
+	          bli_is_unaligned_to( y, 16 ) ||
+	          bli_is_unaligned_to( r, 16 ) )
+	{
+		use_ref = TRUE;
+
+		if ( bli_is_unaligned_to( x, 16 ) &&
+		     bli_is_unaligned_to( y, 16 ) &&
+		     bli_is_aligned_to( r, 16 ) ) // Note: r is not affected by x and y being unaligned. 
+		{
+			use_ref = FALSE;
+			n_pre   = 1;
+		}
+	}
+
+	// Call the reference implementation if needed.
+	if ( use_ref == TRUE )
 	{
 		PASTEMAC3(d,d,d,dotxf_unb_var1)( conjx,
 		                                 conjy,
@@ -245,18 +277,6 @@ void bli_ddddotxf_opt_var1(
 		return;
 	}
 
-
-	if ( incx != 1 ||
-	     incy != 1 ) bli_abort();
-
-	n_pre = 0;
-	if ( ( unsigned long ) y % 16 != 0 )
-	{
-		if ( ( unsigned long ) x % 16 == 0 )
-			bli_abort();
-
-		n_pre = 1;
-	}
 
 	n_run       = ( n - n_pre ) / ( n_elem_per_reg * n_iter_unroll );
 	n_left      = ( n - n_pre ) % ( n_elem_per_reg * n_iter_unroll );

@@ -199,9 +199,40 @@ void bli_dddaxpyf_opt_var1(
 	v2df_t            a10v, a11v, a12v, a13v, y1v;
 	v2df_t            chi0v, chi1v, chi2v, chi3v;
 
+	bool_t            use_ref = FALSE;
+
+
 	if ( bli_zero_dim2( m, b_n ) ) return;
 
+	m_pre = 0;
+
+	// If there is anything that would interfere with our use of aligned
+	// vector loads/stores, call the reference implementation.
 	if ( b_n < PASTEMAC(d,axpyf_fuse_fac) )
+	{
+		use_ref = TRUE;
+	}
+	else if ( inca != 1 || incx != 1 || incy != 1 )
+	{
+		use_ref = TRUE;
+	}
+	else if ( bli_is_unaligned_to( a, 16 ) ||
+	          bli_is_unaligned_to( x, 16 ) ||
+	          bli_is_unaligned_to( y, 16 ) )
+	{
+		use_ref = TRUE;
+
+		if ( bli_is_unaligned_to( a, 16 ) &&
+		     bli_is_unaligned_to( x, 16 ) &&
+		     bli_is_unaligned_to( y, 16 ) )
+		{
+			use_ref = FALSE;
+			m_pre   = 1;
+		}
+	}
+
+	// Call the reference implementation if needed.
+	if ( use_ref == TRUE )
 	{
 		PASTEMAC3(d,d,d,axpyf_unb_var1)( conja,
 		                                 conjx,
@@ -214,18 +245,6 @@ void bli_dddaxpyf_opt_var1(
 		return;
 	}
 
-	if ( inca != 1 ||
-	     incx != 1 ||
-	     incy != 1 ) bli_abort();
-
-	m_pre = 0;
-	if ( ( unsigned long ) a % 16 != 0 )
-	{
-		if ( ( unsigned long ) x % 16 == 0 ||
-		     ( unsigned long ) y % 16 == 0 ) bli_abort();
-
-		m_pre = 1;
-	}
 
 	m_run       = ( m - m_pre ) / ( n_elem_per_reg * n_iter_unroll );
 	m_left      = ( m - m_pre ) % ( n_elem_per_reg * n_iter_unroll );

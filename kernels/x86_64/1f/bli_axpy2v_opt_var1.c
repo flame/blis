@@ -166,7 +166,7 @@ void bli_dddaxpy2v_opt_var1(
                             void*  beta,
                             void*  x, inc_t incx,
                             void*  y, inc_t incy,
-                            void*  z,  inc_t incz
+                            void*  z, inc_t incz
                           )
 {
 	double*  restrict alpha_cast  = alpha;
@@ -192,20 +192,48 @@ void bli_dddaxpy2v_opt_var1(
 	v2df_t            x1v, y1v, z1v;
 	v2df_t            x2v, y2v, z2v;
 
+	bool_t            use_ref = FALSE;
+
+
 	if ( bli_zero_dim1( n ) ) return;
 
-	if ( incx != 1 ||
-	     incy != 1 ||
-		 incz != 1 ) bli_abort();
-
 	n_pre = 0;
-	if ( ( unsigned long ) x % 16 != 0 )
-	{
-		if ( ( unsigned long ) y % 16 == 0 ||
-		     ( unsigned long ) z % 16 == 0 ) bli_abort();
 
-		n_pre = 1;
+	// If there is anything that would interfere with our use of aligned
+	// vector loads/stores, call the reference implementation.
+	if ( incx != 1 || incy != 1 || incz != 1 )
+	{
+		use_ref = TRUE;
 	}
+	else if ( bli_is_unaligned_to( x, 16 ) ||
+	          bli_is_unaligned_to( y, 16 ) ||
+	          bli_is_unaligned_to( z, 16 ) )
+	{
+		use_ref = TRUE;
+
+		if ( bli_is_unaligned_to( x, 16 ) &&
+		     bli_is_unaligned_to( y, 16 ) &&
+		     bli_is_unaligned_to( z, 16 ) )
+		{
+			use_ref = FALSE;
+			n_pre   = 1;
+		}
+	}
+
+	// Call the reference implementation if needed.
+	if ( use_ref == TRUE )
+	{
+		bli_dddaxpy2v_unb_var1( conjx,
+		                        conjy,
+		                        n,
+		                        alpha,
+		                        beta,
+		                        x, incx,
+		                        y, incy,
+		                        z, incz );
+		return;
+	}
+
 
 	n_run       = ( n - n_pre ) / ( n_elem_per_reg * n_iter_unroll );
 	n_left      = ( n - n_pre ) % ( n_elem_per_reg * n_iter_unroll );

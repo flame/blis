@@ -1,11 +1,12 @@
 #!/bin/bash
 
 exec_root="test"
-out_root="output_sqaure"
+out_root="output"
+#out_root="output_square"
 
 # Operations to test.
-#l2_ops="gemv ger hemv her her2 trmv trsv"
-l3_ops="gemm" #"gemm hemm herk her2k trmm trsm"
+l2_ops="gemv ger hemv her her2 trmv trsv"
+l3_ops="gemm hemm herk her2k trmm trsm"
 test_ops="${l2_ops} ${l3_ops}"
 
 # Implementations to test

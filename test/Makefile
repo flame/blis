@@ -134,7 +134,7 @@ BLAS_LIB_PATH  := $(HOME)/flame/lib
 OPENBLAS_LIB   := $(BLAS_LIB_PATH)/libopenblas.a
 ATLAS_LIB      := $(BLAS_LIB_PATH)/libf77blas.a \
                   $(BLAS_LIB_PATH)/libatlas.a
-#MKL_LIB        := -L/opt/intel/mkl/10.2.2.025/lib/em64t/ \
+MKL_LIB        := -L$(HOME)/intel/mkl/lib/intel64/ \
                   -lmkl_sequential -lmkl_core -lmkl_intel_lp64
 
 

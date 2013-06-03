@@ -48,6 +48,10 @@
 \
 	( ( siz_t )(p) % (size) != 0 )
 
+#define bli_offset_from_alignment( p, size ) \
+\
+	( ( siz_t )(p) % (size) )
+
 
 // datatype
 

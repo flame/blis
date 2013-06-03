@@ -164,8 +164,12 @@ void bli_ddddotxaxpyf_opt_var1(
 	v2df_t            w2v, z2v;
 	v2df_t            psi0v, psi1v, betav, alphav;
 
+	bool_t            use_ref = FALSE;
+
+
 	if ( bli_zero_dim1( b_n ) ) return;
 
+	// If the vector lengths are zero, scale y by beta and return.
 	if ( bli_zero_dim1( m ) ) 
 	{ 
 		PASTEMAC2(d,d,scalv)( BLIS_NO_CONJUGATE,
@@ -175,7 +179,38 @@ void bli_ddddotxaxpyf_opt_var1(
 		return; 
 	} 
 
+    m_pre = 0;
+
+    // If there is anything that would interfere with our use of aligned
+    // vector loads/stores, call the reference implementation.
 	if ( b_n < PASTEMAC(d,dotxaxpyf_fuse_fac) )
+	{
+		use_ref = TRUE;
+	}
+    else if ( inca != 1 || incw != 1 || incx != 1 || incy != 1 || incz != 1 )
+    {
+        use_ref = TRUE;
+    }
+	else if ( bli_is_unaligned_to( a, 16 ) ||
+	          bli_is_unaligned_to( x, 16 ) ||
+	          bli_is_unaligned_to( x, 16 ) ||
+	          bli_is_unaligned_to( y, 16 ) ||
+	          bli_is_unaligned_to( z, 16 ) )
+	{
+		use_ref = TRUE;
+
+		if ( bli_is_unaligned_to( a, 16 ) &&
+		     bli_is_unaligned_to( w, 16 ) &&
+		     bli_is_unaligned_to( x, 16 ) &&
+		     bli_is_unaligned_to( y, 16 ) &&
+		     bli_is_unaligned_to( z, 16 ) )
+		{
+			use_ref = FALSE;
+			m_pre   = 1;
+		}
+	}
+
+	if ( use_ref == TRUE )
 	{
 		PASTEMAC3(d,d,d,dotxaxpyf_unb_var1)( conjat,
 		                                     conja,
@@ -193,24 +228,6 @@ void bli_ddddotxaxpyf_opt_var1(
 		return;
 	}
 
-
-	if ( inca != 1 ||
-	     incw != 1 ||
-	     incx != 1 ||
-	     incy != 1 ||
-	     incz != 1 ) bli_abort();
-
-	m_pre = 0;
-	if ( ( unsigned long ) a % 16 != 0 )
-	{
-		if ( ( unsigned long ) w % 16 == 0 ||
-		     ( unsigned long ) x % 16 == 0 ||
-		     ( unsigned long ) y % 16 == 0 ||
-		     ( unsigned long ) z % 16 == 0 )
-			bli_abort();
-
-		m_pre = 1;
-	}
 
 	m_run       = ( m - m_pre ) / ( n_elem_per_reg * n_iter_unroll );
 	m_left      = ( m - m_pre ) % ( n_elem_per_reg * n_iter_unroll );

@@ -194,9 +194,34 @@ void bli_dddaxpyv_opt_var1(
 	v2df_t            x1v, x2v, x3v, x4v;
 	v2df_t            y1v, y2v, y3v, y4v;
 
+	bool_t            use_ref = FALSE;
+
+
 	if ( bli_zero_dim1( n ) ) return;
 
+	n_pre = 0;
+
+	// If there is anything that would interfere with our use of aligned
+	// vector loads/stores, call the reference implementation.
 	if ( incx != 1 || incy != 1 )
+	{
+		use_ref = TRUE;
+	}
+	else if ( bli_is_unaligned_to( x, 16 ) ||
+	          bli_is_unaligned_to( y, 16 ) )
+	{
+		use_ref = TRUE;
+
+		if ( bli_is_unaligned_to( x, 16 ) &&
+		     bli_is_unaligned_to( y, 16 ) )
+		{
+			use_ref = FALSE;
+			n_pre   = 1;
+		}
+	}
+
+	// Call the reference implementation if needed.
+	if ( use_ref == TRUE )
 	{
 		bli_dddaxpyv_unb_var1( conjx,
 		                       n,
@@ -206,13 +231,6 @@ void bli_dddaxpyv_opt_var1(
 		return;
 	}
 
-	n_pre = 0;
-	if ( ( unsigned long ) x % 16 != 0 )
-	{
-		if ( ( unsigned long ) y % 16 == 0 ) bli_abort();
-
-		n_pre = 1;
-	}
 
 	n_run       = ( n - n_pre ) / ( n_elem_per_reg * n_iter_unroll );
 	n_left      = ( n - n_pre ) % ( n_elem_per_reg * n_iter_unroll );

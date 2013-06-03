@@ -89,7 +89,7 @@ int main( int argc, char** argv )
 
 	m_input = -1;
 	n_input = -1;
-	k_input = 200;
+	k_input = -1;
 	//k_input = 200;
 #else
 	p_begin = 16;

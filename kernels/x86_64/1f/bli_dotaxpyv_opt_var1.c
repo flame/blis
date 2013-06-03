@@ -128,23 +128,56 @@ void bli_ddddotaxpyv_opt_var1(
 	dim_t             i;
 	inc_t             stepx, stepy, stepz;
 
-	v2df_t    alphav, rhov;
-	v2df_t    x1v, y1v, z1v;
+	v2df_t            alphav, rhov;
+	v2df_t            x1v, y1v, z1v;
 
+	bool_t            use_ref = FALSE;
+
+	// If the vector lengths are zero, set rho to zero and return.
 	if ( bli_zero_dim1( n ) )
 	{
 		PASTEMAC(d,set0s)( *rho_cast );
 		return;
 	}
 
-   n_pre = 0;
-	if ( ( unsigned long ) x % 16 != 0 )
-	{
-		if ( ( unsigned long ) y % 16 == 0 ||
-		     ( unsigned long ) z % 16 == 0 ) bli_abort();
+	n_pre = 0;
 
-		n_pre = 1;
+	// If there is anything that would interfere with our use of aligned
+	// vector loads/stores, call the reference implementation.
+	if ( incx != 1 || incy != 1 || incz != 1 )
+	{
+		use_ref = TRUE;
 	}
+	else if ( bli_is_unaligned_to( x, 16 ) ||
+	          bli_is_unaligned_to( y, 16 ) ||
+	          bli_is_unaligned_to( z, 16 ) )
+	{
+		use_ref = TRUE;
+
+		if ( bli_is_unaligned_to( x, 16 ) &&
+		     bli_is_unaligned_to( y, 16 ) &&
+		     bli_is_unaligned_to( z, 16 ) )
+		{
+			use_ref = FALSE;
+			n_pre   = 1;
+		}
+	}
+
+	// Call the reference implementation if needed.
+	if ( use_ref == TRUE )
+	{
+		bli_ddddotaxpyv_unb_var1( conjxt,
+		                          conjx,
+		                          conjy,
+		                          n,
+		                          alpha,
+		                          x, incx,
+		                          y, incy,
+		                          rho,
+		                          z, incz );
+		return;
+	}
+
 
 	n_run       = ( n - n_pre ) / ( 2 * 1 );
 	n_left      = ( n - n_pre ) % ( 2 * 1 );
