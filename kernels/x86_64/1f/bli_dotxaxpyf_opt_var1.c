@@ -192,18 +192,16 @@ void bli_ddddotxaxpyf_opt_var1(
         use_ref = TRUE;
     }
 	else if ( bli_is_unaligned_to( a, 16 ) ||
-	          bli_is_unaligned_to( x, 16 ) ||
-	          bli_is_unaligned_to( x, 16 ) ||
-	          bli_is_unaligned_to( y, 16 ) ||
-	          bli_is_unaligned_to( z, 16 ) )
+	          bli_is_unaligned_to( w, 16 ) ||
+	          bli_is_unaligned_to( z, 16 ) ||
+	          bli_is_unaligned_to( y, 16 ) )
 	{
 		use_ref = TRUE;
 
 		if ( bli_is_unaligned_to( a, 16 ) &&
 		     bli_is_unaligned_to( w, 16 ) &&
-		     bli_is_unaligned_to( x, 16 ) &&
-		     bli_is_unaligned_to( y, 16 ) &&
-		     bli_is_unaligned_to( z, 16 ) )
+		     bli_is_unaligned_to( z, 16 ) &&
+		     bli_is_aligned_to( y, 16 ) ) // Note: y is not affected by a, w, and z being unaligned. 
 		{
 			use_ref = FALSE;
 			m_pre   = 1;

@@ -217,13 +217,11 @@ void bli_dddaxpyf_opt_var1(
 		use_ref = TRUE;
 	}
 	else if ( bli_is_unaligned_to( a, 16 ) ||
-	          bli_is_unaligned_to( x, 16 ) ||
 	          bli_is_unaligned_to( y, 16 ) )
 	{
 		use_ref = TRUE;
 
 		if ( bli_is_unaligned_to( a, 16 ) &&
-		     bli_is_unaligned_to( x, 16 ) &&
 		     bli_is_unaligned_to( y, 16 ) )
 		{
 			use_ref = FALSE;
