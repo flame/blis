@@ -148,11 +148,11 @@ void libblis_test_syr_experiment( test_params_t* params,
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_vobj_create( params, datatype,
-		                      sc_str[0], m,    &x );
+	                          sc_str[0], m,    &x );
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
-		                      sc_str[1], m, m, &a );
+	                          sc_str[1], m, m, &a );
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
-		                      sc_str[1], m, m, &a_save );
+	                          sc_str[1], m, m, &a_save );
 
 	// Set alpha.
 	//bli_copysc( &BLIS_MINUS_ONE, &alpha );

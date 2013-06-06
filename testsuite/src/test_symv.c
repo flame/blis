@@ -156,13 +156,13 @@ void libblis_test_symv_experiment( test_params_t* params,
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
-		                      sc_str[0], m, m, &a );
+	                          sc_str[0], m, m, &a );
 	libblis_test_vobj_create( params, datatype,
-		                      sc_str[1], m,    &x );
+	                          sc_str[1], m,    &x );
 	libblis_test_vobj_create( params, datatype,
-		                      sc_str[2], m,    &y );
+	                          sc_str[2], m,    &y );
 	libblis_test_vobj_create( params, datatype,
-		                      sc_str[2], m,    &y_save );
+	                          sc_str[2], m,    &y_save );
 
 	// Set alpha and beta.
 	if ( bli_obj_is_real( y ) )

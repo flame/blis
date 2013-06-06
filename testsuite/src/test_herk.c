@@ -156,11 +156,11 @@ void libblis_test_herk_experiment( test_params_t* params,
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_mobj_create( params, datatype, transa,
-		                      sc_str[0], m, k, &a );
+	                          sc_str[0], m, k, &a );
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
-		                      sc_str[1], m, m, &c );
+	                          sc_str[1], m, m, &c );
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
-		                      sc_str[1], m, m, &c_save );
+	                          sc_str[1], m, m, &c_save );
 
 	// Set alpha and beta.
 	if ( bli_obj_is_real( c ) )

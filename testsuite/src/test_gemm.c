@@ -158,19 +158,20 @@ void libblis_test_gemm_experiment( test_params_t* params,
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_mobj_create( params, datatype, transa,
-		                      sc_str[0], m, k, &a );
+	                          sc_str[0], m, k, &a );
 	libblis_test_mobj_create( params, datatype, transb,
-		                      sc_str[1], k, n, &b );
+	                          sc_str[1], k, n, &b );
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
-		                      sc_str[2], m, n, &c );
+	                          sc_str[2], m, n, &c );
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
-		                      sc_str[2], m, n, &c_save );
+	                          sc_str[2], m, n, &c_save );
 
 	// Set alpha and beta.
 	if ( bli_obj_is_real( c ) )
 	{
 		bli_setsc(  1.2,  0.0, &alpha );
 		bli_setsc( -1.0,  0.0, &beta );
+		//bli_setsc( 0.0,  0.0, &beta );
 	}
 	else
 	{
