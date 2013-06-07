@@ -320,22 +320,11 @@ void bli_dgemm_opt_d4x4(
 		"movddup (%%rbx), %%xmm7         \n\t" // load beta and duplicate
 		"                                \n\t"
 		"                                \n\t"
-		//"movq    %6, %%rcx               \n\t" // load address of c
-		//"movq    %8, %%rdi               \n\t" // load cs_c
-		//"salq    $3, %%rdi               \n\t" // cs_c *= sizeof(double)
-		"                                \n\t"
 		"movq    %7, %%rsi               \n\t" // load rs_c
 		"movq    %%rsi, %%r8             \n\t" // make a copy of rs_c
-		//"salq    $3, %%rsi               \n\t" // rs_c *= sizeof(double)
 		"leaq    (,%%rsi,8), %%rsi       \n\t" // rs_c *= sizeof(double)
 		"                                \n\t"
-		"                                \n\t"
-		"                                \n\t"
-		"                                \n\t"
-		"                                \n\t"
 		"leaq   (%%rcx,%%rsi,2), %%rdx   \n\t" // load address of c + 2*rs_c;
-		"                                \n\t"
-		"                                \n\t"
 		"                                \n\t"
 		"                                \n\t" // xmm8:   xmm9:   xmm10:  xmm11:
 		"                                \n\t" // ( ab01  ( ab00  ( ab03  ( ab02
@@ -368,20 +357,32 @@ void bli_dgemm_opt_d4x4(
 		"                                \n\t" //   ab30 )  ab31 )  ab32 )  ab33 )
 		"                                \n\t"
 		"                                \n\t"
-		"                                \n\t" // assert: c % 16 == 0 && rs_c == 1
+		"                                \n\t"
+		"                                \n\t" // determine if
+		"                                \n\t" //   c % 16 == 0, AND
+		"                                \n\t" //   rs_c == 1
+		"                                \n\t" // ie: aligned and column-stored
 		"                                \n\t"
 		"cmpq       $1, %%r8             \n\t" // set ZF if rs_c == 1.
 		"sete           %%bl             \n\t" // bl = ( ZF == 1 ? 1 : 0 );
 		"testq     $15, %%rcx            \n\t" // set ZF if c & 16 is zero.
 		"setz           %%bh             \n\t" // bh = ( ZF == 1 ? 1 : 0 );
+		"                                \n\t" // and(bl,bh) will reveal result
+		"                                \n\t"
+		"                                \n\t" // now avoid loading C if beta == 0
+		"                                \n\t"
+		//"xorpd     %%xmm0,  %%xmm0       \n\t" // set xmm0 to zero.
+		//"ucomisd   %%xmm0,  %%xmm7       \n\t" // check if beta == 0.
+		//"je      .BETAZERO               \n\t" // if ZF = 1, jump to beta == 0 case
+		"                                \n\t"
+		"                                \n\t"
+		"                                \n\t" // check if aligned/column-stored
 		"andb     %%bl, %%bh             \n\t" // set ZF if bl & bh == 1.
 		"jne     .COLSTORED              \n\t" // jump to column storage case
 		"                                \n\t"
 		"                                \n\t"
 		"                                \n\t"
 		".GENSTORED:                     \n\t"
-		"                                \n\t"
-		"                                \n\t"
 		"                                \n\t"
 		"movlpd  (%%rcx),       %%xmm0   \n\t" // load c00 and c10,
 		"movhpd  (%%rcx,%%rsi), %%xmm0   \n\t"
@@ -450,7 +451,7 @@ void bli_dgemm_opt_d4x4(
 		"addpd  %%xmm11,  %%xmm0         \n\t" // add the gemm result,
 		"movlpd  %%xmm0,  (%%rcx)        \n\t" // and store back to memory.
 		"movhpd  %%xmm0,  (%%rcx,%%rsi)  \n\t"
-		"addq     %%rdi, %%rcx           \n\t"
+		"                                \n\t"
 		"                                \n\t"
 		"movlpd  (%%rdx),       %%xmm1   \n\t" // load c23 and c33,
 		"movhpd  (%%rdx,%%rsi), %%xmm1   \n\t"
@@ -459,8 +460,6 @@ void bli_dgemm_opt_d4x4(
 		"addpd  %%xmm15,  %%xmm1         \n\t" // add the gemm result,
 		"movlpd  %%xmm1,  (%%rdx)        \n\t" // and store back to memory.
 		"movhpd  %%xmm1,  (%%rdx,%%rsi)  \n\t"
-		"                                \n\t"
-		"                                \n\t"
 		"                                \n\t"
 		"jmp    .DONE                    \n\t" // jump to end.
 		"                                \n\t"
@@ -521,13 +520,121 @@ void bli_dgemm_opt_d4x4(
 		"mulpd   %%xmm7,  %%xmm0         \n\t" // scale by beta,
 		"addpd  %%xmm11,  %%xmm0         \n\t" // add the gemm result,
 		"movaps  %%xmm0,  (%%rcx)        \n\t" // and store back to memory.
-		"addq     %%rdi, %%rcx           \n\t"
+		"                                \n\t"
 		"                                \n\t"
 		"movaps  (%%rdx),       %%xmm1   \n\t" // load c23 and c33,
 		"mulpd   %%xmm6,  %%xmm15        \n\t" // scale by alpha,
 		"mulpd   %%xmm7,  %%xmm1         \n\t" // scale by beta,
 		"addpd  %%xmm15,  %%xmm1         \n\t" // add the gemm result,
 		"movaps  %%xmm1,  (%%rdx)        \n\t" // and store back to memory.
+		"                                \n\t"
+		"jmp    .DONE                    \n\t" // jump to end.
+		"                                \n\t"
+		"                                \n\t"
+		"                                \n\t"
+		"                                \n\t"
+		".BETAZERO:                      \n\t"
+		"                                \n\t" // check if aligned/column-stored
+		"andb     %%bl, %%bh             \n\t" // set ZF if bl & bh == 1.
+		"jne     .COLSTORBZ              \n\t" // jump to column storage case
+		"                                \n\t"
+		"                                \n\t"
+		"                                \n\t"
+		".GENSTORBZ:                     \n\t"
+		"                                \n\t" // skip loading c00 and c10,
+		"mulpd   %%xmm6,  %%xmm8         \n\t" // scale by alpha,
+		"movlpd  %%xmm8,  (%%rcx)        \n\t" // and store back to memory.
+		"movhpd  %%xmm8,  (%%rcx,%%rsi)  \n\t"
+		"addq     %%rdi, %%rcx           \n\t"
+		"                                \n\t" // skip loading c20 and c30,
+		"mulpd   %%xmm6,  %%xmm12        \n\t" // scale by alpha,
+		"movlpd  %%xmm12, (%%rdx)        \n\t" // and store back to memory.
+		"movhpd  %%xmm12, (%%rdx,%%rsi)  \n\t"
+		"addq     %%rdi, %%rdx           \n\t"
+		"                                \n\t"
+		"                                \n\t"
+		"                                \n\t" // skip loading c01 and c11,
+		"mulpd   %%xmm6,  %%xmm9         \n\t" // scale by alpha,
+		"movlpd  %%xmm9,  (%%rcx)        \n\t" // and store back to memory.
+		"movhpd  %%xmm9,  (%%rcx,%%rsi)  \n\t"
+		"addq     %%rdi, %%rcx           \n\t"
+		"                                \n\t" // skip loading c21 and c31,
+		"mulpd   %%xmm6,  %%xmm13        \n\t" // scale by alpha,
+		"movlpd  %%xmm13, (%%rdx)        \n\t" // and store back to memory.
+		"movhpd  %%xmm13, (%%rdx,%%rsi)  \n\t"
+		"addq     %%rdi, %%rdx           \n\t"
+		"                                \n\t"
+		"                                \n\t"
+		"                                \n\t" // skip loading c02 and c12,
+		"mulpd   %%xmm6,  %%xmm10        \n\t" // scale by alpha,
+		"movlpd  %%xmm10, (%%rcx)        \n\t" // and store back to memory.
+		"movhpd  %%xmm10, (%%rcx,%%rsi)  \n\t"
+		"addq     %%rdi, %%rcx           \n\t"
+		"                                \n\t" // skip loading c22 and c32,
+		"mulpd   %%xmm6,  %%xmm14        \n\t" // scale by alpha,
+		"movlpd  %%xmm14, (%%rdx)        \n\t" // and store back to memory.
+		"movhpd  %%xmm14, (%%rdx,%%rsi)  \n\t"
+		"addq     %%rdi, %%rdx           \n\t"
+		"                                \n\t"
+		"                                \n\t"
+		"                                \n\t" // skip loading c03 and c13,
+		"mulpd   %%xmm6,  %%xmm11        \n\t" // scale by alpha,
+		"movlpd  %%xmm11, (%%rcx)        \n\t" // and store back to memory.
+		"movhpd  %%xmm11, (%%rcx,%%rsi)  \n\t"
+		"                                \n\t"
+		"                                \n\t" // skip loading c23 and c33,
+		"mulpd   %%xmm6,  %%xmm15        \n\t" // scale by alpha,
+		"movlpd  %%xmm15, (%%rdx)        \n\t" // and store back to memory.
+		"movhpd  %%xmm15, (%%rdx,%%rsi)  \n\t"
+		"                                \n\t"
+		"jmp    .DONE                    \n\t" // jump to end.
+		"                                \n\t"
+		"                                \n\t"
+		"                                \n\t"
+		".COLSTORBZ:                     \n\t"
+		"                                \n\t"
+		"                                \n\t" // skip loading c00 and c10,
+		"mulpd   %%xmm6,  %%xmm8         \n\t" // scale by alpha,
+		"movaps  %%xmm8,  (%%rcx)        \n\t" // and store back to memory.
+		"addq     %%rdi, %%rcx           \n\t"
+		"                                \n\t" // skip loading c20 and c30,
+		"mulpd   %%xmm6,  %%xmm12        \n\t" // scale by alpha,
+		"movaps  %%xmm12, (%%rdx)        \n\t" // and store back to memory.
+		"addq     %%rdi, %%rdx           \n\t"
+		"                                \n\t"
+		"                                \n\t"
+		"                                \n\t" // skip loading c01 and c11,
+		"mulpd   %%xmm6,  %%xmm9         \n\t" // scale by alpha,
+		"movaps  %%xmm9,  (%%rcx)        \n\t" // and store back to memory.
+		"addq     %%rdi, %%rcx           \n\t"
+		"                                \n\t" // skip loading c21 and c31,
+		"mulpd   %%xmm6,  %%xmm13        \n\t" // scale by alpha,
+		"movaps  %%xmm13, (%%rdx)        \n\t" // and store back to memory.
+		"addq     %%rdi, %%rdx           \n\t"
+		"                                \n\t"
+		"                                \n\t"
+		"                                \n\t" // skip loading c02 and c12,
+		"mulpd   %%xmm6,  %%xmm10        \n\t" // scale by alpha,
+		"movaps  %%xmm10, (%%rcx)        \n\t" // and store back to memory.
+		"addq     %%rdi, %%rcx           \n\t"
+		"                                \n\t" // skip loading c22 and c32,
+		"mulpd   %%xmm6,  %%xmm14        \n\t" // scale by alpha,
+		"movaps  %%xmm14, (%%rdx)        \n\t" // and store back to memory.
+		"addq     %%rdi, %%rdx           \n\t"
+		"                                \n\t"
+		"                                \n\t"
+		"                                \n\t" // skip loading c03 and c13,
+		"mulpd   %%xmm6,  %%xmm11        \n\t" // scale by alpha,
+		"movaps  %%xmm11, (%%rcx)        \n\t" // and store back to memory.
+		"                                \n\t"
+		"                                \n\t" // skip loading c23 and c33,
+		"mulpd   %%xmm6,  %%xmm15        \n\t" // scale by alpha,
+		"movaps  %%xmm15, (%%rdx)        \n\t" // and store back to memory.
+		"                                \n\t"
+		"                                \n\t"
+		"                                \n\t"
+		"                                \n\t"
+		"                                \n\t"
 		"                                \n\t"
 		"                                \n\t"
 		"                                \n\t"

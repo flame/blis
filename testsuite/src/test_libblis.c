@@ -978,7 +978,34 @@ void libblis_test_op_driver( test_params_t* params,
 		// Only run combinations where all operands of either type (matrices
 		// or vectors) are stored in one storage scheme or another (no mixing
 		// of schemes within the same operand type).
-		n_store_combos = n_mstorage * n_vstorage;
+		unsigned int n_mat_operands = 0;
+		unsigned int n_vec_operands = 0;
+
+		for ( o = 0; o < n_operands; ++o )
+		{
+			operand_t operand_type
+			          = libblis_test_get_operand_type_for_char( o_types[o] );
+			if      ( operand_type == BLIS_TEST_MATRIX_OPERAND ) ++n_mat_operands;
+			else if ( operand_type == BLIS_TEST_VECTOR_OPERAND ) ++n_vec_operands;
+		}
+
+		// We compute the total number of storage combinations based on whether
+		// the current operation has only matrix operands, only vector operands,
+		// or both.
+		if      ( n_vec_operands == 0 )
+		{
+			n_store_combos = n_mstorage;
+			n_vstorage = 1;
+		}
+		else if ( n_mat_operands == 0 )
+		{
+			n_store_combos = n_vstorage;
+			n_mstorage = 1;
+		}
+		else
+		{
+			n_store_combos = n_mstorage * n_vstorage;
+		}
 
 		sc_str = ( char** ) malloc( n_store_combos * sizeof( char* ) );
 
