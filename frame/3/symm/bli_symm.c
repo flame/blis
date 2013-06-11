@@ -52,11 +52,9 @@ void bli_symm( side_t  side,
 	obj_t   a_local;
 	obj_t   b_local;
 	obj_t   c_local;
-	num_t   dt_targ_a;
-	num_t   dt_targ_b;
-	num_t   dt_targ_c;
 	num_t   dt_alpha;
 	num_t   dt_beta;
+	bool_t  pack_c;
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
@@ -69,44 +67,50 @@ void bli_symm( side_t  side,
 		return;
 	}
 
-	// For now, assume the storage datatypes are the desired target
-	// datatypes.
-	dt_targ_a = bli_obj_datatype( *a );
-	dt_targ_b = bli_obj_datatype( *b );
-	dt_targ_c = bli_obj_datatype( *c );
-
-	// Alias A and B in case we need to induce the right side case.
+	// Alias A, B, and C in case we need to apply transformations.
 	bli_obj_alias_to( *a, a_local );
 	bli_obj_alias_to( *b, b_local );
 	bli_obj_alias_to( *c, c_local );
 
-	// We implement symm in terms of gemm. But in order to do so we must make
-	// sure matrix A is on the correct side for our gemm kernel. We assume
-	// gemm is implemented with a block-panel kernel, thus, we will only
-	// directly support the BLIS_LEFT case. We handle the BLIS_RIGHT case by
-	// transposing the operation. Since A is symmetric, we do not mark it
-	// for any conjugation or transposition.
-	if ( bli_is_right( side ) )
+	// An optimization: If C is row-stored, transpose the entire operation
+	// so as to allow the macro-kernel more favorable access patterns
+	// through C.
+	if ( bli_obj_is_row_stored( *c ) )
 	{
-		bli_obj_toggle_trans( b_local );
-		bli_obj_toggle_trans( c_local );
+		bli_toggle_side( side );
+		bli_obj_induce_trans( b_local );
+		bli_obj_induce_trans( c_local );
 	}
 
-	// Create an object to hold a copy-cast of alpha. Notice that we use
-	// the target datatype of matrix A.
-	dt_alpha = dt_targ_a;
+	// Swap A and B if multiplying A from the right so that "B" contains
+	// the symmetric matrix.
+	if ( bli_is_right( side ) )
+	{
+		bli_obj_swap( a_local, b_local );
+	}
+
+    // Set the target and execution datatypes of the objects, and apply
+	// any transformations necessary to handle mixed domain computation.
+	bli_gemm_set_targ_exec_datatypes( &a_local,
+	                                  &b_local,
+	                                  &c_local,
+	                                  &dt_alpha,
+	                                  &dt_beta,
+	                                  &pack_c );
+
+	// Create an object to hold a copy-cast of alpha.
 	bli_obj_init_scalar_copy_of( dt_alpha,
 	                             BLIS_NO_CONJUGATE,
 	                             alpha,
 	                             &alpha_local );
 
-	// Create an object to hold a copy-cast of beta. Notice that we use
-	// the datatype of C.
-	dt_beta = bli_obj_datatype( *c );
+	// Create an object to hold a copy-cast of beta.
 	bli_obj_init_scalar_copy_of( dt_beta,
 	                             BLIS_NO_CONJUGATE,
 	                             beta,
 	                             &beta_local );
+
+	if ( pack_c ) bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 
 	// Choose the control tree. We can just use hemm since the algorithm
 	// is nearly identical to that of symm.

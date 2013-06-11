@@ -34,6 +34,99 @@
 
 #include "blis.h"
 
+void bli_gemm_set_targ_exec_datatypes( obj_t*  a,
+                                       obj_t*  b,
+                                       obj_t*  c,
+                                       num_t*  dt_alpha,
+                                       num_t*  dt_beta,
+                                       bool_t* pack_c )
+{
+	num_t   dt_targ_a;
+	num_t   dt_targ_b;
+	num_t   dt_targ_c;
+	num_t   dt_exec;
+
+	// Determine the target datatype of each matrix object.
+	bli_gemm_get_target_datatypes( a,
+	                               b,
+	                               c,
+	                               &dt_targ_a,
+	                               &dt_targ_b,
+	                               &dt_targ_c,
+	                               pack_c );
+	
+	// Set the target datatypes for each matrix object.
+	bli_obj_set_target_datatype( dt_targ_a, *a );
+	bli_obj_set_target_datatype( dt_targ_b, *b );
+	bli_obj_set_target_datatype( dt_targ_c, *c );
+
+	// Determine the execution datatype. Generally speaking, the
+	// execution datatype is the real projection of the target datatype
+	// of c. This rule holds unless the target datatypes of a and b
+	// are both complex, in which case the execution datatype is also
+	// complex.
+	if ( bli_is_complex( dt_targ_a ) && bli_is_complex( dt_targ_b ) )
+		dt_exec = dt_targ_c;
+	else
+		dt_exec = bli_datatype_proj_to_real( dt_targ_c );
+
+	// Embed the execution datatype in all matrix operands.
+	bli_obj_set_execution_datatype( dt_exec, *a );
+	bli_obj_set_execution_datatype( dt_exec, *b );
+	bli_obj_set_execution_datatype( dt_exec, *c );
+
+	// Note that the precisions of the target datatypes of a, b, and c
+	// match. The domains, however, are not necessarily the same. There
+	// are eight possible combinations of target domains:
+	//
+	//   case  input     target    exec    pack  notes  
+	//         domain    domain    domain  c?      
+	//         c+=a*b    c+=a*b     
+	//   (0)   r  r r    r  r r    r              
+	//   (1)   r  r c    r  r r    r             b demoted to real
+	//   (2)   r  c r    r  r r    r             a demoted to real
+	//   (3)   r  c c    c  c c    c       yes   a*b demoted to real
+	//   (4)   c  r r    r  r r    r       yes   copynzm used to update c
+	//   (5)   c  r c    c  r c    r       yes   transposed to induce (6)
+	//   (6)   c  c r    c  c r    r       ~     c and a treated as real
+	//   (7)   c  c c    c  c c    c              
+	//   ~ Must pack c if not column-stored (ie: row or general storage).
+	//
+	// There are two special cases: (5) and (6). Because the inner kernels
+	// assume column storage, it is easy to implement (6) since we can
+	// simply treat matrices c and a as real matrices with inflated m
+	// dimension and column stride and then proceed with a kernel for real
+	// computation. We cannot pull the same trick with case (5) because it
+	// would result in a mismatch in the k dimension. But we can transform
+	// case (5) into case (6) by transposing all arguments and swapping the
+	// a and b operands. Also, we will need to pack matrix c. That is what
+	// we do here.
+	if ( bli_is_real( dt_targ_a ) && bli_is_complex( dt_targ_b ) )
+	{
+		bli_obj_swap( *a, *b );
+		bli_swap_types( dt_targ_a, dt_targ_b );
+		bli_obj_toggle_trans( *c );
+		bli_obj_toggle_trans( *a );
+		bli_obj_toggle_trans( *b );
+	}
+
+	// Notice that we use the target datatype of matrix a. By inspecting
+	// the table above, this clearly works for cases (0) through (4), (6),
+	// and (7). It also works for case (5) since it is transformed into
+	// case (6) by the above code.
+	*dt_alpha = bli_obj_target_datatype( *a );
+
+	// Notice that we use the target datatype of matrix a. By inspecting
+	// the table above, this clearly works for cases (0) through (4), (6),
+	// and (7). It also works for case (5) since it is transformed into
+	// case (6) by the above code.
+	*dt_beta = bli_obj_datatype( *c );
+
+	// For now disable packing of C.
+	*pack_c = FALSE;
+}
+
+
 void bli_gemm_get_target_datatypes( obj_t*  a,
                                     obj_t*  b,
                                     obj_t*  c,

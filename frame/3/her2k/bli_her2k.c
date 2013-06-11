@@ -51,15 +51,13 @@ void bli_her2k( obj_t*  alpha,
 	obj_t    alpha_conj_local;
 	obj_t    beta_local;
 	obj_t    c_local;
-	obj_t    ah;
-	obj_t    bh;
-	num_t    dt_targ_a;
-	num_t    dt_targ_b;
-	num_t    dt_targ_c;
-	num_t    dt_exec;
+	obj_t    a_local;
+	obj_t    bh_local;
+	obj_t    b_local;
+	obj_t    ah_local;
 	num_t    dt_alpha;
 	num_t    dt_beta;
-	//bool_t   pack_c = FALSE;
+	bool_t   pack_c;
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
@@ -72,84 +70,76 @@ void bli_her2k( obj_t*  alpha,
 		return;
 	}
 
-	// Alias C so we can reset it as the root object (in case it is not
-	// already a root object).
+	// Alias A, B, and C in case we need to apply transformations.
+	bli_obj_alias_to( *a, a_local );
+	bli_obj_alias_to( *b, b_local );
 	bli_obj_alias_to( *c, c_local );
 	bli_obj_set_as_root( c_local );
 
-	// Create objects to track A' and B' (for the second rank-k update).
-	bli_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, *a, ah );
-	bli_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, *b, bh );
+	// For her2k, the first and second right-hand "B" operands are simply B'
+	// and A'.
+	bli_obj_alias_to( *b, bh_local );
+	bli_obj_induce_trans( bh_local );
+	bli_obj_toggle_conj( bh_local );
+	bli_obj_alias_to( *a, ah_local );
+	bli_obj_induce_trans( ah_local );
+	bli_obj_toggle_conj( ah_local );
 
-	// Determine the target datatype of each matrix object.
-	//bli_her2k_get_target_datatypes( a,
-	//                                b,
-	//                                c,
-	//                                &dt_targ_a,
-	//                                &dt_targ_b,
-	//                                &dt_targ_c,
-	//                                &pack_c );
+	// An optimization: If C is row-stored, transpose the entire operation
+	// so as to allow the macro-kernel more favorable access patterns
+	// through C. (The effect of the transposition of A and A' is negligible
+	// because those operands are always packed to contiguous memory.)
+	if ( bli_obj_is_row_stored( c_local ) )
+	{
+		bli_obj_toggle_conj( a_local );
+		bli_obj_toggle_conj( bh_local );
+		bli_obj_toggle_conj( b_local );
+		bli_obj_toggle_conj( ah_local );
 
-	dt_targ_a = bli_obj_datatype( *a );
-	dt_targ_b = bli_obj_datatype( *b );
-	dt_targ_c = bli_obj_datatype( *c );
+		bli_obj_induce_trans( c_local );
+	}
 
-	// Set the target datatypes for each matrix object.
-	bli_obj_set_target_datatype( dt_targ_a, *a  );
-	bli_obj_set_target_datatype( dt_targ_b, *b );
-	bli_obj_set_target_datatype( dt_targ_c, *c  );
+	// Set the target and execution datatypes of the objects, and apply
+	// any transformations necessary to handle mixed domain computation.
+	bli_her2k_set_targ_exec_datatypes( &a_local,
+	                                   &bh_local,
+	                                   &b_local,
+	                                   &ah_local,
+	                                   &c_local,
+	                                   &dt_alpha,
+	                                   &dt_beta,
+	                                   &pack_c );
 
-	// Determine the execution datatype.
-	dt_exec = dt_targ_a;
-
-	// Embed the execution datatype in all matrix operands.
-	bli_obj_set_execution_datatype( dt_exec, *a );
-	bli_obj_set_execution_datatype( dt_exec, *b );
-	bli_obj_set_execution_datatype( dt_exec, *c );
-
-	// Create an object to hold a copy-cast of alpha. Notice that we use
-	// the target datatype of matrix a. By inspecting the table above,
-	// this clearly works for cases (0) through (4), (6), and (7). It
-	// Also works for case (5) since it is transformed into case (6) by
-	// the above code.
-	dt_alpha = dt_targ_a;
+	// Create an object to hold a copy-cast of alpha.
 	bli_obj_init_scalar_copy_of( dt_alpha,
 	                             BLIS_NO_CONJUGATE,
 	                             alpha,
 	                             &alpha_local );
 
 	// Create an object to hold a copy-cast of conj(alpha).
-	dt_alpha = dt_targ_b;
 	bli_obj_init_scalar_copy_of( dt_alpha,
 	                             BLIS_CONJUGATE,
 	                             alpha,
 	                             &alpha_conj_local );
 
-	// Create an object to hold a copy-cast of beta. Notice that we use
-	// the datatype of c. Here's why: If c is real and beta is complex,
-	// there is no reason to keep beta_local in the complex domain since
-	// the complex part of beta*c will not be stored. If c is complex and
-	// beta is real then beta is harmlessly promoted to complex.
-	dt_beta = bli_obj_datatype( *c );
+	// Create an object to hold a copy-cast of beta.
 	bli_obj_init_scalar_copy_of( dt_beta,
 	                             BLIS_NO_CONJUGATE,
 	                             beta,
 	                             &beta_local );
 
-	// Choose the control tree based on whether it was determined we need
-	// to pack c.
-	//if ( pack_c ) her2k_cntl = her2k_cntl_packabc;
-	//else          her2k_cntl = her2k_cntl_packab;
+	if ( pack_c ) bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
+
+	// Choose the control tree.
 	cntl = her2k_cntl;
-	//if ( pack_c ) bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 
 	// Invoke the internal back-end.
 	bli_her2k_int( &alpha_local,
-	               a,
-	               &bh,
+	               &a_local,
+	               &bh_local,
 	               &alpha_conj_local,
-	               b,
-	               &ah,
+	               &b_local,
+	               &ah_local,
 	               &beta_local,
 	               &c_local,
 	               cntl );

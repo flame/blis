@@ -894,6 +894,16 @@ bli_obj_width_stored( obj )
 	                                   : ( bli_obj_buffer_at_off( obj ) ) \
 	         )
 
+
+// Swap objects
+
+#define bli_obj_swap( a, b ) \
+{ \
+       obj_t t; \
+       t = b; b = a; a = t; \
+}
+
+
 // Swap object pointers
 
 #define bli_obj_swap_pointers( a, b ) \
@@ -901,6 +911,7 @@ bli_obj_width_stored( obj )
 	obj_t* t; \
 	t = b; b = a; a = t; \
 }
+
 
 // If a transposition is needed, induce one: swap dimensions, increments
 // and offsets, and then clear the trans bit.

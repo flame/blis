@@ -118,7 +118,8 @@ void bli_hemm_cntl_init()
 	                           hemm_kr,
 	                           hemm_nr,
 	                           FALSE, // do NOT scale by alpha
-	                           FALSE, // already dense; densify not necessary
+	                           //FALSE, // already dense; densify not necessary
+	                           TRUE,  // densify (if needed)
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
 	                           FALSE, // reverse iteration if lower?

@@ -271,7 +271,7 @@ void PASTEMAC(ch,varname )( \
 		} \
 		else if ( bli_intersects_diag_n( diagoffc_i, *m_panel, *n_panel ) ) \
 		{ \
-			/* Only two of four cases implemented, since BLIS2 currently does
+			/* Only two of four cases implemented, since BLIS currently does
 			   not support triangular packing of matrix B. */ \
 			/*if      ( bli_is_row_stored( rs_p, cs_p ) && bli_is_upper( uploc ) )  \
 			{ \

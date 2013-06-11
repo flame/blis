@@ -35,6 +35,7 @@
 #include "bli_her2k_cntl.h"
 #include "bli_her2k_check.h"
 #include "bli_her2k_int.h"
+#include "bli_her2k_target.h"
 
 #include "bli_her2k_l_blk_var1.h"
 #include "bli_her2k_u_blk_var1.h"

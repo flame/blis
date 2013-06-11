@@ -32,34 +32,12 @@
 
 */
 
-void bli_gemm_set_targ_exec_datatypes( obj_t*  a,
-                                       obj_t*  b,
-                                       obj_t*  c,
-                                       num_t*  dt_alpha,
-                                       num_t*  dt_beta,
-                                       bool_t* pack_c );
-
-void bli_gemm_get_target_datatypes( obj_t*  a,
-                                    obj_t*  b,
-                                    obj_t*  c,
-                                    num_t*  dt_a,
-                                    num_t*  dt_b,
-                                    num_t*  dt_c,
-                                    bool_t* pack_c );
-
-void bli_gemm_get_target_domain( obj_t*  a,
-                                 obj_t*  b,
-                                 obj_t*  c,
-                                 dom_t*  td_a,
-                                 dom_t*  td_b,
-                                 dom_t*  td_c,
-                                 bool_t* pack_c );
-
-void bli_gemm_get_target_prec( obj_t*  a,
-                               obj_t*  b,
-                               obj_t*  c,
-                               prec_t* tp_a,
-                               prec_t* tp_b,
-                               prec_t* tp_c,
-                               bool_t* pack_c );
+void bli_her2k_set_targ_exec_datatypes( obj_t*  a,
+                                        obj_t*  bh,
+                                        obj_t*  b,
+                                        obj_t*  ah,
+                                        obj_t*  c,
+                                        num_t*  dt_alpha,
+                                        num_t*  dt_beta,
+                                        bool_t* pack_c );
 
