@@ -76,13 +76,15 @@ FRAME_DIR         := frame
 OBJ_DIR           := obj
 LIB_DIR           := lib
 
-# The name of directories in which make expects to find special source code
-# that must be compiled with out optimizations.
+# The name of the "special" directories, which contain source code that
+# use non-standard compiler flags.
 NOOPT_DIR         := noopt
+KERNELS_DIR       := kernels
 
-# The text to append to (non-verbose) make output when CFLAGS_NOOPT is used
-# instead of CFLAGS.
-NOOPT_TEXT        := "(NOTE: optimizations disabled)"
+# Text strings that alert the user to the fact that special source code is
+# being compiled.
+NOOPT_TEXT        := "(NOTE: using flags for no optimization)"
+KERNELS_TEXT      := "(NOTE: using flags for kernels)"
 
 # Construct some paths.
 FRAME_PATH        := ./$(FRAME_DIR)
@@ -169,19 +171,21 @@ BLIS_LIB_NAME      := libblis.a
 
 # These are the makefile variables that source code files will be accumulated
 # into by the makefile fragments. Notice that we include separate variables
-# for regular and "noopt" source; the latter stands for "no optimization" and
-# is needed because some source code needs to be compiled with a special set
-# of compiler flags that avoid optimization (for numerical reasons).
+# for regular and "special" source.
 MK_FRAME_SRC           :=
 MK_FRAME_NOOPT_SRC     :=
+MK_FRAME_KERNELS_SRC   :=
 MK_CONFIG_SRC          :=
 MK_CONFIG_NOOPT_SRC    :=
+MK_CONFIG_KERNELS_SRC  :=
 
 # These hold object filenames corresponding to above.
 MK_FRAME_OBJS          :=
 MK_FRAME_NOOPT_OBJS    :=
+MK_FRAME_KERNELS_OBJS  :=
 MK_CONFIG_OBJS         :=
 MK_CONFIG_NOOPT_OBJS   :=
+MK_CONFIG_KERNELS_OBJS :=
 
 # Append the base library path to the library name.
 MK_ALL_BLIS_LIB        := $(BASE_LIB_PATH)/$(BLIS_LIB_NAME)
@@ -278,6 +282,7 @@ MK_HEADER_DIR_PATHS := $(dir $(foreach frag_path, $(FRAGMENT_DIR_PATHS), \
 INCLUDE_PATHS   := $(strip $(patsubst %, -I%, $(MK_HEADER_DIR_PATHS)))
 CFLAGS          := $(CFLAGS) $(INCLUDE_PATHS)
 CFLAGS_NOOPT    := $(CFLAGS_NOOPT) $(INCLUDE_PATHS)
+CFLAGS_KERNELS  := $(CFLAGS_KERNELS) $(INCLUDE_PATHS)
 
 
 
@@ -287,9 +292,10 @@ CFLAGS_NOOPT    := $(CFLAGS_NOOPT) $(INCLUDE_PATHS)
 
 # Define a C preprocessor macro to communicate the current version so that it
 # can be embedded into the library and queried later.
-VERS_DEF     := -DBLIS_VERSION_STRING=\"$(VERSION)\"
-CFLAGS       := $(CFLAGS) $(VERS_DEF)
-CFLAGS_NOOPT := $(CFLAGS) $(VERS_DEF)
+VERS_DEF       := -DBLIS_VERSION_STRING=\"$(VERSION)\"
+CFLAGS         := $(CFLAGS) $(VERS_DEF)
+CFLAGS_NOOPT   := $(CFLAGS_NOOPT) $(VERS_DEF)
+CFLAGS_KERNELS := $(CFLAGS_KERNELS) $(VERS_DEF)
 
 
 
@@ -300,15 +306,19 @@ CFLAGS_NOOPT := $(CFLAGS) $(VERS_DEF)
 # Convert source file paths to object file paths by replacing the base source
 # directories with the base object directories, and also replacing the source
 # file suffix (eg: '.c') with '.o'.
-MK_BLIS_CONFIG_OBJS       := $(patsubst $(FRAME_PATH)/%.c, $(BASE_OBJ_FRAME_PATH)/%.o, \
-                                        $(filter %.c, $(MK_FRAME_SRC)))
-MK_BLIS_CONFIG_NOOPT_OBJS := $(patsubst $(FRAME_PATH)/%.c, $(BASE_OBJ_FRAME_PATH)/%.o, \
-                                        $(filter %.c, $(MK_FRAME_NOOPT_SRC)))
+MK_BLIS_CONFIG_OBJS         := $(patsubst $(FRAME_PATH)/%.c, $(BASE_OBJ_FRAME_PATH)/%.o, \
+                                          $(filter %.c, $(MK_FRAME_SRC)))
+MK_BLIS_CONFIG_NOOPT_OBJS   := $(patsubst $(FRAME_PATH)/%.c, $(BASE_OBJ_FRAME_PATH)/%.o, \
+                                          $(filter %.c, $(MK_FRAME_NOOPT_SRC)))
+MK_BLIS_CONFIG_KERNELS_OBJS := $(patsubst $(FRAME_PATH)/%.c, $(BASE_OBJ_FRAME_PATH)/%.o, \
+                                          $(filter %.c, $(MK_FRAME_KERNELS_SRC)))
 
-MK_BLIS_FRAME_OBJS        := $(patsubst $(CONFIG_PATH)/%.c, $(BASE_OBJ_CONFIG_PATH)/%.o, \
-                                        $(filter %.c, $(MK_CONFIG_SRC)))
-MK_BLIS_FRAME_NOOPT_OBJS  := $(patsubst $(CONFIG_PATH)/%.c, $(BASE_OBJ_CONFIG_PATH)/%.o, \
-                                        $(filter %.c, $(MK_CONFIG_NOOPT_SRC)))
+MK_BLIS_FRAME_OBJS          := $(patsubst $(CONFIG_PATH)/%.c, $(BASE_OBJ_CONFIG_PATH)/%.o, \
+                                          $(filter %.c, $(MK_CONFIG_SRC)))
+MK_BLIS_FRAME_NOOPT_OBJS    := $(patsubst $(CONFIG_PATH)/%.c, $(BASE_OBJ_CONFIG_PATH)/%.o, \
+                                          $(filter %.c, $(MK_CONFIG_NOOPT_SRC)))
+MK_BLIS_FRAME_KERNELS_OBJS  := $(patsubst $(CONFIG_PATH)/%.c, $(BASE_OBJ_CONFIG_PATH)/%.o, \
+                                          $(filter %.c, $(MK_CONFIG_KERNELS_SRC)))
 
 # Combine all of the object files into some readily-accessible variables.
 MK_ALL_BLIS_OPT_OBJS      := $(MK_BLIS_CONFIG_OBJS) \
@@ -317,8 +327,12 @@ MK_ALL_BLIS_OPT_OBJS      := $(MK_BLIS_CONFIG_OBJS) \
 MK_ALL_BLIS_NOOPT_OBJS    := $(MK_BLIS_CONFIG_NOOPT_OBJS) \
                              $(MK_BLIS_FRAME_NOOPT_OBJS)
 
+MK_ALL_BLIS_KERNELS_OBJS  := $(MK_BLIS_CONFIG_KERNELS_OBJS) \
+                             $(MK_BLIS_FRAME_KERNELS_OBJS)
+
 MK_ALL_BLIS_OBJS          := $(MK_ALL_BLIS_OPT_OBJS) \
-                             $(MK_ALL_BLIS_NOOPT_OBJS)
+                             $(MK_ALL_BLIS_NOOPT_OBJS) \
+                             $(MK_ALL_BLIS_KERNELS_OBJS)
 
 
 
@@ -362,20 +376,32 @@ endif
 
 # --- General source code / object code rules ---
 
+# Define two functions, each of which takes one argument (an object file
+# path). The functions determine which CFLAGS and text string are needed to
+# compile the object file. Note that we match with a preceding forward slash,
+# so the directory name must begin with the special directory name, but it
+# can have trailing characters (e.g. 'kernels_x86').
+get_cflags_for_obj = $(if $(findstring /$(NOOPT_DIR),$1),$(CFLAGS_NOOPT),\
+                     $(if $(findstring /$(KERNELS_DIR),$1),$(CFLAGS_KERNELS),\
+                     $(CFLAGS)))
+
+get_ctext_for_obj = $(if $(findstring /$(NOOPT_DIR),$1),$(NOOPT_TEXT),\
+                    $(if $(findstring /$(KERNELS_DIR),$1),$(KERNELS_TEXT),))
+
 $(BASE_OBJ_FRAME_PATH)/%.o: $(FRAME_PATH)/%.c $(MK_HEADER_FILES) $(MAKE_DEFS_MK_PATH)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	$(CC) $(if $(findstring $(NOOPT_DIR),$@),$(CFLAGS_NOOPT),$(CFLAGS)) -c $< -o $@
+	$(CC) $(call get_cflags_for_obj,$@) -c $< -o $@
 else
-	@echo "Compiling $<" $(if $(findstring $(NOOPT_DIR),$@),$(NOOPT_TEXT),)
-	@$(CC) $(if $(findstring $(NOOPT_DIR),$@),$(CFLAGS_NOOPT),$(CFLAGS)) -c $< -o $@
+	@echo "Compiling $<" $(call get_ctext_for_obj,$@)
+	@$(CC) $(call get_cflags_for_obj,$@) -c $< -o $@
 endif
 
 $(BASE_OBJ_CONFIG_PATH)/%.o: $(CONFIG_PATH)/%.c $(MK_HEADER_FILES) $(MAKE_DEFS_MK_PATH)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	$(CC) $(if $(findstring $(NOOPT_DIR),$@),$(CFLAGS_NOOPT),$(CFLAGS)) -c $< -o $@
+	$(CC) $(call get_cflags_for_obj,$@) -c $< -o $@
 else
-	@echo "Compiling $<" $(if $(findstring $(NOOPT_DIR),$@),$(NOOPT_TEXT),)
-	@$(CC) $(if $(findstring $(NOOPT_DIR),$@),$(CFLAGS_NOOPT),$(CFLAGS)) -c $< -o $@
+	@echo "Compiling $<" $(call get_ctext_for_obj,$@)
+	@$(CC) $(call get_cflags_for_obj,$@) -c $< -o $@
 endif
 
 

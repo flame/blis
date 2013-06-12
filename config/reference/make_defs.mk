@@ -75,28 +75,31 @@ GIT_LOG    := $(GIT) log --decorate
 #
 
 # --- Determine the C compiler and related flags ---
-CC           := gcc
+CC             := gcc
 # Enable IEEE Standard 1003.1-2004 (POSIX.1d). 
 # NOTE: This is needed to enable posix_memalign().
-CPPROCFLAGS  := -D_POSIX_C_SOURCE=200112L
-CMISCFLAGS   := -std=c99 # -fopenmp -pg
-CDBGFLAGS    := -g
-CWARNFLAGS   := -Wall
-COPTFLAGS    := -O2 -malign-double -funroll-loops
-CVECFLAGS    := -msse3 -march=native # -mfpmath=sse
+CPPROCFLAGS    := -D_POSIX_C_SOURCE=200112L
+CMISCFLAGS     := -std=c99 # -fopenmp -pg
+CDBGFLAGS      := -g
+CWARNFLAGS     := -Wall
+COPTFLAGS      := -O2 -malign-double -funroll-loops
+CKOPTFLAGS     := $(COPTFLAGS)
+CVECFLAGS      := -msse3 -march=native # -mfpmath=sse
 
-# Aggregate all of the flags into two groups: one for optimizable code, and
-# one for code that should not be optimized.
-CFLAGS       := $(CDBGFLAGS) $(COPTFLAGS) $(CVECFLAGS) $(CWARNFLAGS) $(CMISCFLAGS) $(CPPROCFLAGS)
-CFLAGS_NOOPT := $(CDBGFLAGS) $(CWARNFLAGS) $(CMISCFLAGS) $(CPPROCFLAGS)
+# Aggregate all of the flags into multiple groups: one for standard
+# compilation, and one for each of the supported "special" compilation
+# modes.
+CFLAGS         := $(CDBGFLAGS) $(COPTFLAGS)  $(CVECFLAGS) $(CWARNFLAGS) $(CMISCFLAGS) $(CPPROCFLAGS)
+CFLAGS_KERNELS := $(CDBGFLAGS) $(CKOPTFLAGS) $(CVECFLAGS) $(CWARNFLAGS) $(CMISCFLAGS) $(CPPROCFLAGS)
+CFLAGS_NOOPT   := $(CDBGFLAGS)                            $(CWARNFLAGS) $(CMISCFLAGS) $(CPPROCFLAGS)
 
 # --- Determine the archiver and related flags ---
-AR           := ar
-ARFLAGS      := cru
+AR             := ar
+ARFLAGS        := cru
 
 # --- Determine the linker and related flags ---
-LINKER       := $(CC)
-LDFLAGS      := 
+LINKER         := $(CC)
+LDFLAGS        := 
 
 
 
