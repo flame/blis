@@ -1,4 +1,191 @@
-commit 6bfa96f84887dec0b4cf8be5d38dd634c2f8951d (HEAD, tag: 0.0.7, origin/master, master)
+commit 5b641c3bab31eac6a1795b9f6e3f86c59651ca50 (HEAD, tag: 0.0.8, origin/master, origin/HEAD, master)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jun 12 16:02:12 2013 -0500
+
+    Use separate CFLAGS for "kernels" directories.
+    
+    Details:
+    - Added a new "special" directory type: any source code within directories
+      named "kernels" will be compiled with a separate CFLAGS_KERNELS set of
+      compiler flags. This allows the developer to specify a separate set of
+      flags (e.g. optimization flags) for compiling kernels while maintaining a
+      standard set for regular framework code.
+    - Fixed a bug in the top-level Makefile that was causing "noopt" code
+      to be compiled with the standard set of compilation flags.
+    - Updated make_defs.mk in reference, flame, and clarksville configurations
+      according to above changes.
+
+commit 08475e7c7653ba598665071a617d10f0d8f763c2
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jun 11 12:18:39 2013 -0500
+
+    Various level-3 optimizations for row storage.
+    
+    Details:
+    - Implemented remaining two cases within bli_packm_blk_var2(), which allow
+      packing from a lower or upper-stored symmetric/Hermitian matrix to column
+      panels (which are row-stored). Previously one could only pack to row panels
+      (which are column-stored).
+    - Implemented various optimizations in the level-3 front-ends that allow more
+      favorable access through row-stored matrices for gemm, hemm, herk, her2k,
+      symm, syrk, and syr2k.
+    - Cleaned up code in level-3 front-ends that has to do with setting target and
+      execution datatypes.
+
+commit 05a657a6b92e8d34efa5c57ae6a18a4f35ec0841
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jun 7 11:04:10 2013 -0500
+
+    Added beta == 0 optimization to x86_64 ukernel.
+    
+    Details:
+    - Modified x86_64 gemm microkernel so that when beta is zero, C is not read
+      from memory (nor scaled by beta).
+    - Fixed minor bug in test suite driver when "Test all combinations of storage
+      schemes?" switch is disabled, which would result in redundant tests being
+      executed for matrix-only (e.g. level-1m, level-3) operations if multiple
+      vector storage schemes were specified.
+    - Restored debug flags as default in clarksville configuration.
+
+commit f1aa6b81cc421516dd77dd0f18f7c432724e6ef2
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jun 6 13:36:06 2013 -0500
+
+    Whitespace changes to old test drivers.
+    
+    Details:
+    - Replaced tabs with four spaces in places where indention was already
+      in place.
+
+commit 9feb4c23d2e36f3d8b5417a3802c69f94b29f749
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jun 4 14:57:46 2013 -0500
+
+    Fixed unaligned handling in axpyf, dotxaxpyf.
+    
+    Details:
+    - Fixed over-cautious handling of unaligned operands in vector instrinsic
+      implementation of axpyf kernel.
+    - Fixed over- and under-cautious handling of unaligned operands in vector
+      intrinsic implementation of dotxaxpyf kernel.
+
+commit 22b06cfcd2e3205c8325a246c2279e4b1047c066
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jun 3 16:54:52 2013 -0500
+
+    Updated level-1/-1f [vector intrinsic] kernels.
+    
+    Details:
+    - Updated level-1/-1f kernels so that non-unit and un-aligned cases are
+      handled by reference implementation (rather than aborted).
+    - Added -fomit-frame-pointer to default make_defs.mk for clarksville
+      configuration.
+    - Defined bli_offset_from_alignment() macro.
+    - Minor edits to old test drivers.
+
+commit 0288c827d3659bb225ac9c10f168b623ed0106a2
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Jun 1 08:02:23 2013 -0500
+
+    Updated ukernels for x86_64.
+    
+    Details:
+    - Tweaked micro-kernels and configuration for clarksville.
+    - Updated/cleaned up old test drivers in test directory.
+    - Fixed syntax bug in trsv_unb_var1 and trsv_unf_var1 (introduced
+      recently).
+
+commit 85a6d1c9a52c2b27c71a3a3e341c51d7ba263749
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon May 6 11:05:08 2013 -0500
+
+    Replaced axpys usage with subs in trsv.
+    
+    Details:
+    - Replaced instances of axpys with alpha equal to -1 with subs.
+    - Use BLIS_MAX_TYPE_SIZE to define BLIS_CONSTANT_SLOT_SIZE instead of
+      sizeof(dcomplex).
+
+commit 2d9c667f3c48a12cab64e5ad09d5fcb9f4c19d78
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri May 24 16:28:10 2013 -0500
+
+    Fixed x86_64 kernel bugs and other minor issues.
+    
+    Details:
+    - Fixed bugs in trmv_l and trsv_u due to backwards iteration resulting in
+      unaligned subpartitions. We were already going out of our way a bit to
+      handle edge cases in the first iteration for blocked variants, and this
+      was simply the unblocked-fused extension of that idea.
+    - Fixed control tree handling in her/her2/syr/syr2 that was not taking
+      into account how the choice of variant needed to be altered for
+      upper-stored matrices (given that only lower-stored algorithms are
+      explicitly implemented).
+    - Added bli_determine_blocksize_dim_f(), bli_determine_blocksize_dim_b()
+      macros to provide inlined versions of bli_determine_blocksize_[fb]() for
+      use by unblocked-fused variants.
+    - Integrated new blocksize_dim macros into gemv/hemv unf variants for
+      consistency with that of the bugfix for trmv/trsv (both of which now
+      use the same macros).
+    - Modified bli_obj_vector_inc() so that 1 is returned if the object is a
+      vector of length 1 (ie: 1 x 1). This fixes a bug whereby under certain
+      conditions (e.g. dotv_opt_var1), an invalid increment was returned, which
+      was invalid only because the code was expecting 1 (for purposes of
+      performing contiguous vector loads) but got a value greater than 1 because
+      the column stride of the object (e.g. rho) was inflated for alignment
+      purposes (albeit unnecessarily since there is only one element in the
+      object).
+    - Replaced some old invocations of set0 with set0s.
+    - Added alpha parameter to gemmtrsm ukernels for x86_64 and use accordingly.
+    - Fixed increment bug in cleanup loop of gemm ukernel for x86_64.
+    - Added safeguard to test modules so that testing a problem with a zero
+      dimension does not result in a failure.
+    - Tweaked handling of zero dimensions in level-2 and level-3 operations'
+      internal back-ends to correctly handle cases where output operand still
+      needs to be scaled (e.g. by beta, in the case of gemm with k = 0).
+
+commit d57ec42b34f8447c88adeffa95cf22f8c115ad51
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri May 3 17:35:32 2013 -0500
+
+    Renamed _trans_status() macro.
+    
+    Details:
+    - Mistakenly forgot to rename the _trans_status() macro and instances in
+      previous commit.
+
+commit 9e2b227866af429a4a6fb7dbb8c457bbdda2f136
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri May 3 17:24:58 2013 -0500
+
+    Renamed _set_trans(), _trans_status() macros.
+    
+    Details:
+    - Renamed the following macros:
+        bli_obj_set_trans()    -> bli_obj_set_onlytrans()
+        bli_obj_trans_status() -> bli_obj_onlytrans_status()
+      to remove ambiguity as to which bits are read/updated.
+
+commit 2f8174509ea9f844db11ebd9389de5168e85b132
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed May 1 15:06:30 2013 -0500
+
+    Unconditionally check memory pool(s) for errors.
+    
+    Details:
+    - Changed bli_mem_acquire_m() in bli_mem.c so that we still check if the
+      memory pool is exhausted before checking out and returning a block, even
+      if BLIS error checking has been disabled. These errors are useful because
+      they likely indicate that BLIS was improperly configured for the code
+      being run.
+
+commit 75405a2b83679b6aff38d7e7425199d623a7b0a9
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed May 1 15:00:30 2013 -0500
+
+    CHANGELOG update.
+
+commit 6bfa96f84887dec0b4cf8be5d38dd634c2f8951d (tag: 0.0.7)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Tue Apr 30 19:35:54 2013 -0500
 
