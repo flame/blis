@@ -323,7 +323,7 @@ void libblis_test_hemm_check( side_t  side,
 		bli_obj_create( dt, m, 1, 0, 0, &w );
 		bli_obj_create( dt, m, 1, 0, 0, &z );
 	}
-	else // else if ( bli_is_left( side ) )
+	else // else if ( bli_is_right( side ) )
 	{
 		bli_obj_create( dt, n, 1, 0, 0, &t );
 		bli_obj_create( dt, m, 1, 0, 0, &v );
@@ -342,7 +342,7 @@ void libblis_test_hemm_check( side_t  side,
 		bli_gemv( &BLIS_ONE, b, &t, &BLIS_ZERO, &w );
 		bli_hemv( alpha, a, &w, &BLIS_ZERO, &z );
 	}
-	else
+	else // else if ( bli_is_right( side ) )
 	{
 		bli_hemv( &BLIS_ONE, a, &t, &BLIS_ZERO, &w );
 		bli_gemv( alpha, b, &w, &BLIS_ZERO, &z );

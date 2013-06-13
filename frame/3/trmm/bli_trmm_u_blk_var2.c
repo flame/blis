@@ -48,6 +48,7 @@ void bli_trmm_u_blk_var2( obj_t*  alpha,
 	dim_t i;
 	dim_t b_alg;
 	dim_t n_trans;
+	dim_t offB;
 
 	// Initialize all pack objects that are passed into packm_init().
 	bli_obj_init_pack( &a_pack );
@@ -56,6 +57,13 @@ void bli_trmm_u_blk_var2( obj_t*  alpha,
 
 	// Query dimension in partitioning direction.
 	n_trans = bli_obj_width_after_trans( *b );
+
+	// if B is [lower] triangular, use the diagonal offset of B to determine
+	// the width of the non-zero region.
+	if ( bli_obj_is_triangular( *b ) )
+		offB = bli_obj_diag_offset_after_trans( *b );
+	else // if ( bli_obj_is_general( *b )
+		offB = 0;
 
 	// Scale C by beta (if instructed).
 	bli_scalm_int( beta,
@@ -72,7 +80,7 @@ void bli_trmm_u_blk_var2( obj_t*  alpha,
 	               cntl_sub_packm_a( cntl ) );
 
 	// Partition along the n dimension.
-	for ( i = 0; i < n_trans; i += b_alg )
+	for ( i = offB; i < n_trans; i += b_alg )
 	{
 		// Determine the current algorithmic blocksize.
 		b_alg = bli_determine_blocksize_f( i, n_trans, b,

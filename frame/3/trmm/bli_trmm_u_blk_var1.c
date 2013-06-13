@@ -54,9 +54,13 @@ void bli_trmm_u_blk_var1( obj_t*  alpha,
 	bli_obj_init_pack( &b_pack );
 	bli_obj_init_pack( &c1_pack );
 
-	// Query dimension in partitioning direction.
-	mT_trans = bli_abs( bli_obj_diag_offset_after_trans( *a ) ) +
-	           bli_obj_width_after_trans( *a );
+	// If A is [upper] triangular, use the diagonal offset of A to determine
+	// the length of the non-zero region.
+	if ( bli_obj_is_triangular( *a ) )
+		mT_trans = bli_abs( bli_obj_diag_offset_after_trans( *a ) ) +
+		           bli_obj_width_after_trans( *a );
+	else // if ( bli_obj_is_general( *a )
+		mT_trans = bli_obj_length_after_trans( *a );
 
 	// Scale C by beta (if instructed).
 	bli_scalm_int( beta,
@@ -102,21 +106,13 @@ void bli_trmm_u_blk_var1( obj_t*  alpha,
 		               cntl_sub_packm_c( cntl ) );
 
 		// Perform trmm subproblem.
-		if ( bli_obj_intersects_diag( a1_pack ) )
-			bli_trmm_int( BLIS_LEFT,
-			              alpha,
-			              &a1_pack,
-			              &b_pack,
-			              beta,
-			              &c1_pack,
-			              cntl_sub_trmm( cntl ) );
-		else
-			bli_gemm_int( alpha,
-			              &a1_pack,
-			              &b_pack,
-			              &BLIS_ONE,
-			              &c1_pack,
-			              cntl_sub_gemm( cntl ) );
+		bli_trmm_int( BLIS_LEFT,
+		              alpha,
+		              &a1_pack,
+		              &b_pack,
+		              beta,
+		              &c1_pack,
+		              cntl_sub_trmm( cntl ) );
 
 		// Unpack C1 (if C1 was packed).
 		bli_unpackm_int( &c1_pack, &c1,
