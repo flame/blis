@@ -96,7 +96,7 @@ void bli_hemm_cntl_init()
 	                                BLIS_DEFAULT_NI_Z, 0 );
 
 
-	// Create control tree objects for packm operations on a, b, and c.
+	// Create control tree objects for packm operations.
 	hemm_packa_cntl
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
@@ -126,6 +126,7 @@ void bli_hemm_cntl_init()
 	                           BLIS_PACKED_COL_PANELS,
 	                           BLIS_BUFFER_FOR_B_PANEL );
 
+	// Create control tree objects for packm/unpackm operations on C.
 	hemm_packc_cntl
 	=
 	bli_packm_cntl_obj_create( BLIS_UNBLOCKED,
@@ -156,7 +157,7 @@ void bli_hemm_cntl_init()
 	                          NULL, NULL, NULL, NULL );
 
 	// Create control tree object for outer panel (to block-panel)
-	// problem, packing a and b only.
+	// problem.
 	hemm_cntl_op_bp
 	=
 	bli_gemm_cntl_obj_create( BLIS_BLOCKED,
@@ -172,7 +173,7 @@ void bli_hemm_cntl_init()
 	                          NULL );
 
 	// Create control tree object for general problem via multiple
-	// rank-k (outer panel) updates, packing a and b only.
+	// rank-k (outer panel) updates.
 	hemm_cntl_mm_op
 	=
 	bli_gemm_cntl_obj_create( BLIS_BLOCKED,
@@ -187,7 +188,7 @@ void bli_hemm_cntl_init()
 	                          NULL );
 
 	// Create control tree object for very large problem via multiple
-	// general problems, packing a and b only.
+	// general problems.
 	hemm_cntl_vl_mm
 	=
 	bli_gemm_cntl_obj_create( BLIS_BLOCKED,
@@ -202,7 +203,6 @@ void bli_hemm_cntl_init()
 	                          NULL );
 
 	// Alias the "master" hemm control tree to a shorter name.
-	//hemm_cntl = hemm_cntl_mm_op;
 	hemm_cntl = hemm_cntl_vl_mm;
 }
 

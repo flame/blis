@@ -103,8 +103,8 @@ int main( int argc, char** argv )
 	dt_alpha = BLIS_DOUBLE;
 	dt_beta = BLIS_DOUBLE;
 
-	side = BLIS_LEFT;
-	//side = BLIS_RIGHT;
+	//side = BLIS_LEFT;
+	side = BLIS_RIGHT;
 
 	for ( p = p_begin; p <= p_end; p += p_inc )
 	{
@@ -131,7 +131,15 @@ int main( int argc, char** argv )
 		bli_randm( &c );
 
 		bli_obj_set_struc( BLIS_HERMITIAN, a );
-		bli_obj_set_uplo( BLIS_LOWER, a );
+		//bli_obj_set_uplo( BLIS_LOWER, a );
+		bli_obj_set_uplo( BLIS_UPPER, a );
+
+		// Randomize A, make it densely Hermitian, and zero the unstored
+		// triangle to ensure the implementation reads only from the stored
+		// region.
+		bli_randm( &a );
+		bli_mkherm( &a );
+		bli_mktrim( &a );
 
 		bli_setsc(  (2.0/1.0), 0.0, &alpha );
 		bli_setsc( -(1.0/1.0), 0.0, &beta );
@@ -240,7 +248,7 @@ int main( int argc, char** argv )
 
 			//bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
 
-			bli_hemm( BLIS_LEFT,
+			bli_hemm( side,
 			          &alpha,
 			          &a,
 			          &b,
@@ -249,8 +257,8 @@ int main( int argc, char** argv )
 
 #else
 
-			char    side   = 'L';
-			char    uplo   = 'L';
+			char    side   = 'R';
+			char    uplo   = 'U';
 			int     mm     = bli_obj_length( c );
 			int     nn     = bli_obj_width( c );
 			int     lda    = bli_obj_col_stride( a );

@@ -36,20 +36,19 @@
 #include "bli_trsm_check.h"
 #include "bli_trsm_int.h"
 
-#include "bli_trsm_l_blk_var1.h"
-#include "bli_trsm_u_blk_var1.h"
+#include "bli_trsm_blk_var1f.h"
+#include "bli_trsm_blk_var1b.h"
 
-#include "bli_trsm_l_blk_var2.h"
-#include "bli_trsm_u_blk_var2.h"
+#include "bli_trsm_blk_var2f.h"
+#include "bli_trsm_blk_var2b.h"
 
-#include "bli_trsm_l_blk_var3.h"
-#include "bli_trsm_u_blk_var3.h"
+#include "bli_trsm_blk_var3f.h"
+#include "bli_trsm_blk_var3b.h"
 
-#include "bli_trsm_l_blk_var4.h"
-#include "bli_trsm_u_blk_var4.h"
-
-#include "bli_trsm_l_ker_var2.h"
-#include "bli_trsm_u_ker_var2.h"
+#include "bli_trsm_ll_ker_var2.h"
+#include "bli_trsm_lu_ker_var2.h"
+#include "bli_trsm_rl_ker_var2.h"
+#include "bli_trsm_ru_ker_var2.h"
 
 #include "bli_gemmtrsm_l_ref_mxn.h"
 #include "bli_gemmtrsm_u_ref_mxn.h"

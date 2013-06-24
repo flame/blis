@@ -32,8 +32,7 @@
 
 */
 
-void bli_trsm_int( side_t  side,
-                   obj_t*  alpha,
+void bli_trsm_int( obj_t*  alpha,
                    obj_t*  a,
                    obj_t*  b,
                    obj_t*  beta,

@@ -136,8 +136,7 @@ void bli_trmm3( side_t  side,
 	cntl = trmm3_cntl;
 
 	// Invoke the internal back-end.
-	bli_trmm_int( side,
-	              &alpha_local,
+	bli_trmm_int( &alpha_local,
 	              &a_local,
 	              &b_local,
 	              &beta_local,

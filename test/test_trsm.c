@@ -84,18 +84,19 @@ int main( int argc, char** argv )
 
 #ifndef PRINT
 	p_begin = 40;
-	p_end   = 2000;
+	p_end   = 1000;
 	p_inc   = 40;
 
 	m_input = -1;
-	n_input = -1;
+	//n_input = -1;
+	n_input = 600;
 #else
 	p_begin = 16;
 	p_end   = 16;
 	p_inc   = 1;
 
 	m_input = 16;
-	n_input = 4;
+	n_input = 16;
 #endif
 
 	dt_a = BLIS_DOUBLE;
@@ -104,8 +105,8 @@ int main( int argc, char** argv )
 	dt_alpha = BLIS_DOUBLE;
 	dt_beta = BLIS_DOUBLE;
 
-	side = BLIS_LEFT;
-	//side = BLIS_RIGHT;
+	//side = BLIS_LEFT;
+	side = BLIS_RIGHT;
 
 	for ( p = p_begin; p <= p_end; p += p_inc )
 	{
@@ -245,8 +246,10 @@ int main( int argc, char** argv )
 
 
 #ifdef PRINT
-			bli_printm( "a", &a, "%5.2f", "" );
-			bli_printm( "c", &c, "%6.3f", "" );
+			bli_invertd( &a );
+			bli_printm( "a", &a, "%4.1f", "" );
+			bli_invertd( &a );
+			bli_printm( "c", &c, "%4.1f", "" );
 #endif
 
 #ifdef BLIS
@@ -262,7 +265,7 @@ int main( int argc, char** argv )
 
 #else
 
-			char    side   = 'L';
+			char    side   = 'R';
 			char    uplo   = 'L';
 			char    transa = 'N';
 			char    diag   = 'N';
@@ -286,7 +289,7 @@ int main( int argc, char** argv )
 #endif
 
 #ifdef PRINT
-			bli_printm( "c after", &c, "%6.3f", "" );
+			bli_printm( "c after", &c, "%4.1f", "" );
 			exit(1);
 #endif
 

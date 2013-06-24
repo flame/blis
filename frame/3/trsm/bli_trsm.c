@@ -34,7 +34,8 @@
 
 #include "blis.h"
 
-extern trsm_t* trsm_cntl;
+extern trsm_t* trsm_l_cntl;
+extern trsm_t* trsm_r_cntl;
 
 //
 // Define object-based interface.
@@ -48,8 +49,7 @@ void bli_trsm( side_t  side,
 	obj_t   alpha_local;
 	obj_t   a_local;
 	obj_t   b_local;
-	num_t   dt_targ_a;
-	num_t   dt_targ_b;
+	obj_t   c_local;
 	num_t   dt_alpha;
 
 	// Check parameters.
@@ -66,28 +66,7 @@ void bli_trsm( side_t  side,
 	// Alias A and B so we can tweak the objects if necessary.
 	bli_obj_alias_to( *a, a_local );
 	bli_obj_alias_to( *b, b_local );
-
-	// Set each alias as the root object. This makes life easier when
-	// implementing right side and transpose cases because we don't actually
-	// want the root objects but rather the root objects after we are done
-	// fiddling with them.
-	bli_obj_set_as_root( a_local );
-	bli_obj_set_as_root( b_local );
-
-	// For now, assume the storage datatypes are the desired target
-	// datatypes.
-	dt_targ_a = bli_obj_datatype( *a );
-	dt_targ_b = bli_obj_datatype( *b );
-
-	// We assume trsm is implemented with a block-panel kernel, thus, we will
-	// only directly support the BLIS_LEFT case. We handle the BLIS_RIGHT case
-	// by transposing the operation. 
-	if ( bli_is_right( side ) )
-	{
-		bli_obj_toggle_trans( a_local );
-		bli_obj_toggle_trans( b_local );
-		bli_toggle_side( side );
-	}
+	bli_obj_alias_to( *b, c_local );
 
 	// We do not explicitly implement the cases where A is transposed.
 	// However, we can still handle them. Specifically, if A is marked as
@@ -106,24 +85,77 @@ void bli_trsm( side_t  side,
 		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, a_local );
 	}
 
-	// Create an object to hold a copy-cast of alpha. Notice that we use
-	// the target datatype of matrix A.
-	dt_alpha = dt_targ_a;
+#if 0
+	if ( bli_is_right( side ) )
+	{
+		bli_obj_induce_trans( a_local );
+		bli_obj_induce_trans( b_local );
+		bli_obj_induce_trans( c_local );
+
+		bli_toggle_side( side );
+	}
+#endif
+
+#if 1
+	// If A is being solved against from the right, swap A and B so that
+	// the matrix will actually be on the right.
+	if ( bli_is_right( side ) )
+	{
+		bli_obj_swap( a_local, b_local );
+	}
+
+	// An optimization: If C is row-stored, transpose the entire operation
+	// so as to allow the macro-kernel more favorable access patterns
+	// through C. (The effect of the transposition of A and B is negligible
+	// because those operands are always packed to contiguous memory.)
+	if ( bli_obj_is_row_stored( c_local ) )
+	{
+		bli_obj_swap( a_local, b_local );
+
+		bli_obj_induce_trans( a_local );
+		bli_obj_induce_trans( b_local );
+		bli_obj_induce_trans( c_local );
+
+		bli_toggle_side( side );
+	}
+#endif
+
+	// Set each alias as the root object.
+	// NOTE: We MUST wait until we are done potentially swapping the objects
+	// before setting the root fields!
+	bli_obj_set_as_root( a_local );
+	bli_obj_set_as_root( b_local );
+	bli_obj_set_as_root( c_local );
+
+	// Set the target and execution datatypes of the objects, and apply
+	// any transformations necessary to handle mixed domain computation.
+	bli_trmm_set_targ_exec_datatypes( &a_local,
+	                                  &b_local,
+	                                  &c_local,
+	                                  &dt_alpha );
+
+	// Create an object to hold a copy-cast of alpha.
 	bli_obj_init_scalar_copy_of( dt_alpha,
 	                             BLIS_NO_CONJUGATE,
 	                             alpha,
 	                             &alpha_local );
 
+	//
+	// NOTE: we need to disable the use of the right-hand side control tree
+	// if duplication is enabled since the trsm_r macrokernels do not support
+	// duplication.
+	//
+
 	// Choose the control tree.
-	cntl = trsm_cntl;
+	if ( bli_is_left( side ) ) cntl = trsm_l_cntl;
+	else                       cntl = trsm_r_cntl;
 
 	// Invoke the internal back-end.
-	bli_trsm_int( side,
-	              &alpha_local,
+	bli_trsm_int( &alpha_local,
 	              &a_local,
 	              &b_local,
 	              &BLIS_ZERO,
-	              &b_local,
+	              &c_local,
 	              cntl );
 }
 

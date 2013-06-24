@@ -34,15 +34,37 @@
 
 #include "blis.h"
 
+// Determine which of PACKDIM_MR/DEFAULT_MR and PACKDIM_NR/DEFAULT_NR is
+// greater so that the pair of values can be used to scale MAXIMUM_MC and
+// MAXIMUM_NC below. This is needed because the amount of space allocated
+// for a block of A and a panel of B needs to be such that MR and NR are
+// swapped (ie: A is packed with NR and B is packed with MR). This
+// transformation/optimization is needed for right-side trsm when inducing
+// an algorithm that (a) has favorable access patterns for column-stored
+// C and (b) allows the macro-kernel to reuse the existing left-side
+// fused gemmtrsm micro-kernels.
+// NOTE: We cross-multiply so that the comparison can stay in integer
+// arithmetic.
+#if ( BLIS_PACKDIM_MR_D * BLIS_DEFAULT_NR_D ) >= \
+    ( BLIS_PACKDIM_NR_D * BLIS_DEFAULT_MR_D )
+  #define BLIS_PACKDIM_MAXR_D BLIS_PACKDIM_MR_D
+  #define BLIS_DEFAULT_MAXR_D BLIS_DEFAULT_MR_D
+#else
+  #define BLIS_PACKDIM_MAXR_D BLIS_PACKDIM_NR_D
+  #define BLIS_DEFAULT_MAXR_D BLIS_DEFAULT_NR_D
+#endif
 
 // Define the size of pool blocks.
-// NOTE: for cases where BLIS_EXTEND_MR_? > 0, we scale the maximum value
-// for MC_? so that enough space will be allocated to accommodate the
-// leading dimension for the packed micro-panels of A. Same goes for
-// NR/NC and KR/KC.
-#define BLIS_POOL_MC_D     ( ( BLIS_MAXIMUM_MC_D * BLIS_PACKDIM_MR_D ) / BLIS_DEFAULT_MR_D )
-#define BLIS_POOL_KC_D     ( ( BLIS_MAXIMUM_KC_D * BLIS_PACKDIM_KR_D ) / BLIS_DEFAULT_KR_D )
-#define BLIS_POOL_NC_D     ( ( BLIS_MAXIMUM_NC_D * BLIS_PACKDIM_NR_D ) / BLIS_DEFAULT_NR_D )
+// NOTE: for cases where the register blocksize extensions are non-zero,
+// we scale the maximum cache blocksize value so that enough space will
+// be allocated to accommodate the leading dimension for the packed
+// micro-panels of A and B.
+#define BLIS_POOL_MC_D     ( ( BLIS_MAXIMUM_MC_D * BLIS_PACKDIM_MAXR_D ) \
+                                                 / BLIS_DEFAULT_MAXR_D )
+#define BLIS_POOL_NC_D     ( ( BLIS_MAXIMUM_NC_D * BLIS_PACKDIM_MAXR_D ) \
+                                                 / BLIS_DEFAULT_MAXR_D )
+#define BLIS_POOL_KC_D     ( ( BLIS_MAXIMUM_KC_D * BLIS_PACKDIM_KR_D   ) \
+                                                 / BLIS_DEFAULT_KR_D   )
 
 // Define each pool's block size.
 // NOTE: Here we assume the "worst" case of the register blocking

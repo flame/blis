@@ -35,21 +35,20 @@
 #include "bli_trmm_cntl.h"
 #include "bli_trmm_check.h"
 #include "bli_trmm_int.h"
+#include "bli_trmm_target.h"
 
-#include "bli_trmm_l_blk_var1.h"
-#include "bli_trmm_u_blk_var1.h"
+#include "bli_trmm_blk_var1.h"
 
-#include "bli_trmm_l_blk_var2.h"
-#include "bli_trmm_u_blk_var2.h"
+#include "bli_trmm_blk_var2f.h"
+#include "bli_trmm_blk_var2b.h"
 
-#include "bli_trmm_l_blk_var3.h"
-#include "bli_trmm_u_blk_var3.h"
+#include "bli_trmm_blk_var3f.h"
+#include "bli_trmm_blk_var3b.h"
 
-#include "bli_trmm_l_blk_var4.h"
-#include "bli_trmm_u_blk_var4.h"
-
-#include "bli_trmm_l_ker_var2.h"
-#include "bli_trmm_u_ker_var2.h"
+#include "bli_trmm_ll_ker_var2.h"
+#include "bli_trmm_lu_ker_var2.h"
+#include "bli_trmm_rl_ker_var2.h"
+#include "bli_trmm_ru_ker_var2.h"
 
 
 //

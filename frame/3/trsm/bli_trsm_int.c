@@ -43,30 +43,49 @@ typedef void (*FUNCPTR_T)( obj_t*  alpha,
                            obj_t*  c,
                            trsm_t* cntl );
 
-static FUNCPTR_T vars[2][5][3] =
+static FUNCPTR_T vars[2][2][4][3] =
 {
-	// lower
+	// left
 	{
-	    // unblocked            optimized unblocked    blocked
-	    { NULL,                 NULL,                  bli_trsm_l_blk_var1 },
-	    { NULL,                 bli_trsm_l_ker_var2,   bli_trsm_l_blk_var2 },
-	    { NULL,                 NULL,                  bli_trsm_l_blk_var3 },
-	    { NULL,                 NULL,                  bli_trsm_l_blk_var4 },
-	    { NULL,                 NULL,                  NULL                },
+		// lower
+		{
+		    // unblocked            optimized unblocked    blocked
+		    { NULL,                 NULL,                  bli_trsm_blk_var1f  },
+		    { NULL,                 bli_trsm_ll_ker_var2,  bli_trsm_blk_var2f  },
+		    { NULL,                 NULL,                  bli_trsm_blk_var3f  },
+		    { NULL,                 NULL,                  NULL,               },
+		},
+		// upper
+		{
+		    // unblocked            optimized unblocked    blocked
+		    { NULL,                 NULL,                  bli_trsm_blk_var1b  },
+		    { NULL,                 bli_trsm_lu_ker_var2,  bli_trsm_blk_var2b  },
+		    { NULL,                 NULL,                  bli_trsm_blk_var3b  },
+		    { NULL,                 NULL,                  NULL,               },
+		}
 	},
-	// upper
+	// right
 	{
-	    // unblocked            optimized unblocked    blocked
-	    { NULL,                 NULL,                  bli_trsm_u_blk_var1 },
-	    { NULL,                 bli_trsm_u_ker_var2,   bli_trsm_u_blk_var2 },
-	    { NULL,                 NULL,                  bli_trsm_u_blk_var3 },
-	    { NULL,                 NULL,                  bli_trsm_u_blk_var4 },
-	    { NULL,                 NULL,                  NULL,               },
+		// lower
+		{
+		    // unblocked            optimized unblocked    blocked
+		    { NULL,                 NULL,                  bli_trsm_blk_var1b  },
+		    { NULL,                 bli_trsm_rl_ker_var2,  bli_trsm_blk_var2b  },
+		    { NULL,                 NULL,                  bli_trsm_blk_var3b  },
+		    { NULL,                 NULL,                  NULL,               },
+		},
+		// upper
+		{
+		    // unblocked            optimized unblocked    blocked
+		    { NULL,                 NULL,                  bli_trsm_blk_var1f  },
+		    { NULL,                 bli_trsm_ru_ker_var2,  bli_trsm_blk_var2f  },
+		    { NULL,                 NULL,                  bli_trsm_blk_var3f  },
+		    { NULL,                 NULL,                  NULL,               },
+		}
 	}
 };
 
-void bli_trsm_int( side_t  side,
-                   obj_t*  alpha,
+void bli_trsm_int( obj_t*  alpha,
                    obj_t*  a,
                    obj_t*  b,
                    obj_t*  beta,
@@ -74,14 +93,14 @@ void bli_trsm_int( side_t  side,
                    trsm_t* cntl )
 {
 	obj_t     c_local;
-	bool_t    uplo;
+	bool_t    side, uplo;
 	varnum_t  n;
 	impl_t    i;
 	FUNCPTR_T f;
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
-		bli_trsm_int_check( side, alpha, a, b, beta, c, cntl );
+		bli_trsm_int_check( alpha, a, b, beta, c, cntl );
 
 	// If C has a zero dimension, return early.
 	if ( bli_obj_has_zero_dim( *c ) ) return;
@@ -108,16 +127,29 @@ void bli_trsm_int( side_t  side,
 		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, c_local );
 	}
 
-	// Set a bool based on the uplo field of A's root object.
-	if ( bli_obj_root_is_lower( *a ) ) uplo = 0;
-	else                               uplo = 1;
+	// Set two bools: one based on the implied side parameter (the structure
+	// of the root object) and one based on the uplo field of the triangular
+	// matrix's root object (whether that is matrix A or matrix B).
+	if ( bli_obj_root_is_triangular( *a ) )
+	{
+		side = 0;
+		if ( bli_obj_root_is_lower( *a ) ) uplo = 0;
+		else                               uplo = 1;
+	}
+	else // if ( bli_obj_root_is_triangular( *b ) )
+	{
+		side = 1;
+		// Set a bool based on the uplo field of A's root object.
+		if ( bli_obj_root_is_lower( *b ) ) uplo = 0;
+		else                               uplo = 1;
+	}
 
 	// Extract the variant number and implementation type.
 	n = cntl_var_num( cntl );
 	i = cntl_impl_type( cntl );
 
 	// Index into the variant array to extract the correct function pointer.
-	f = vars[uplo][n][i];
+	f = vars[side][uplo][n][i];
 
 	// Invoke the variant.
 	f( alpha,

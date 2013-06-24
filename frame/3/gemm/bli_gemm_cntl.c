@@ -96,7 +96,7 @@ void bli_gemm_cntl_init()
 	                                BLIS_DEFAULT_NI_Z, 0 );
 
 
-	// Create control tree objects for packm operations on a, b, and c.
+	// Create control tree objects for packm operations.
 	gemm_packa_cntl
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
@@ -125,6 +125,7 @@ void bli_gemm_cntl_init()
 	                           BLIS_PACKED_COL_PANELS,
 	                           BLIS_BUFFER_FOR_B_PANEL );
 
+	// Create control tree objects for packm/unpackm operations on C.
 	gemm_packc_cntl
 	=
 	bli_packm_cntl_obj_create( BLIS_UNBLOCKED,
@@ -155,7 +156,7 @@ void bli_gemm_cntl_init()
 	                          NULL, NULL, NULL, NULL );
 
 	// Create control tree object for outer panel (to block-panel)
-	// problem, packing a and b only.
+	// problem.
 	gemm_cntl_op_bp
 	=
 	bli_gemm_cntl_obj_create( BLIS_BLOCKED,
@@ -171,7 +172,7 @@ void bli_gemm_cntl_init()
 	                          NULL );
 
 	// Create control tree object for general problem via multiple
-	// rank-k (outer panel) updates, packing a and b only.
+	// rank-k (outer panel) updates.
 	gemm_cntl_mm_op
 	=
 	bli_gemm_cntl_obj_create( BLIS_BLOCKED,
@@ -186,7 +187,7 @@ void bli_gemm_cntl_init()
 	                          NULL );
 
 	// Create control tree object for very large problem via multiple
-	// general problems, packing a and b only.
+	// general problems.
 	gemm_cntl_vl_mm
 	=
 	bli_gemm_cntl_obj_create( BLIS_BLOCKED,
@@ -201,7 +202,6 @@ void bli_gemm_cntl_init()
 	                          NULL );
 
 	// Alias the "master" gemm control tree to a shorter name.
-	//gemm_cntl = gemm_cntl_mm_op;
 	gemm_cntl = gemm_cntl_vl_mm;
 }
 

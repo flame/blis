@@ -44,8 +44,7 @@ void bli_trsm_check( side_t  side,
                      obj_t*  a,
                      obj_t*  b );
 
-void bli_trsm_int_check( side_t  side,
-                         obj_t*  alpha,
+void bli_trsm_int_check( obj_t*  alpha,
                          obj_t*  a,
                          obj_t*  b,
                          obj_t*  beta,

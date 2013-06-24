@@ -94,8 +94,8 @@ int main( int argc, char** argv )
 	p_end   = 16;
 	p_inc   = 1;
 
-	m_input = 10;
-	n_input = 10;
+	m_input = 16;
+	n_input = 16;
 #endif
 
 	dt_a = BLIS_DOUBLE;
@@ -104,8 +104,8 @@ int main( int argc, char** argv )
 	dt_alpha = BLIS_DOUBLE;
 	dt_beta = BLIS_DOUBLE;
 
-	//side = BLIS_LEFT;
-	side = BLIS_RIGHT;
+	side = BLIS_LEFT;
+	//side = BLIS_RIGHT;
 
 	for ( p = p_begin; p <= p_end; p += p_inc )
 	{
@@ -128,8 +128,8 @@ int main( int argc, char** argv )
 		bli_obj_create( dt_c, m, n, 0, 0, &c_save );
 
 		bli_obj_set_struc( BLIS_TRIANGULAR, a );
-		//bli_obj_set_uplo( BLIS_UPPER, a );
-		bli_obj_set_uplo( BLIS_LOWER, a );
+		bli_obj_set_uplo( BLIS_UPPER, a );
+		//bli_obj_set_uplo( BLIS_LOWER, a );
 
 		bli_randm( &a );
 		bli_randm( &c );
@@ -262,7 +262,7 @@ int main( int argc, char** argv )
 			//bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
 			//bli_obj_set_onlytrans( BLIS_TRANSPOSE, a );
 
-			bli_trmm( BLIS_LEFT,
+			bli_trmm( side,
 			          &alpha,
 			          &a,
 			          &c );
@@ -270,7 +270,7 @@ int main( int argc, char** argv )
 #else
 
 			char    side   = 'L';
-			char    uplo   = 'L';
+			char    uplo   = 'U';
 			char    transa = 'N';
 			char    diag   = 'N';
 			int     mm     = bli_obj_length( c );

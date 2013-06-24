@@ -135,7 +135,7 @@ typedef enum
 
 typedef enum
 {
-	BLIS_LEFT,
+	BLIS_LEFT              = 0x0,
 	BLIS_RIGHT
 } side_t;
 

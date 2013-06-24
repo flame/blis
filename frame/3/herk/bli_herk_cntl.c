@@ -96,7 +96,7 @@ void bli_herk_cntl_init()
 	                                BLIS_DEFAULT_NI_Z, 0 );
 
 
-	// Create control tree objects for packm operations on a, b, and c.
+	// Create control tree objects for packm operations.
 	herk_packa_cntl
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
@@ -125,6 +125,7 @@ void bli_herk_cntl_init()
 	                           BLIS_PACKED_COL_PANELS,
 	                           BLIS_BUFFER_FOR_B_PANEL );
 
+	// Create control tree objects for packm/unpackm operations on C.
 	herk_packc_cntl
 	=
 	bli_packm_cntl_obj_create( BLIS_UNBLOCKED,
@@ -155,7 +156,7 @@ void bli_herk_cntl_init()
 	                          NULL, NULL, NULL, NULL );
 
 	// Create control tree object for outer panel (to block-panel)
-	// problem, packing a (and ah) only.
+	// problem.
 	herk_cntl_op_bp
 	=
 	bli_herk_cntl_obj_create( BLIS_BLOCKED,
@@ -171,7 +172,7 @@ void bli_herk_cntl_init()
 	                          NULL );
 
 	// Create control tree object for general problem via multiple
-	// rank-k (outer panel) updates, packing a (and ah) only.
+	// rank-k (outer panel) updates.
 	herk_cntl_mm_op
 	=
 	bli_herk_cntl_obj_create( BLIS_BLOCKED,
@@ -186,7 +187,7 @@ void bli_herk_cntl_init()
 	                          NULL );
 
 	// Create control tree object for very large problem via multiple
-	// general problems, packing a (and ah) only.
+	// general problems.
 	herk_cntl_vl_mm
 	=
 	bli_herk_cntl_obj_create( BLIS_BLOCKED,
@@ -201,7 +202,6 @@ void bli_herk_cntl_init()
 	                          NULL );
 
 	// Alias the "master" herk control tree to a shorter name.
-	//herk_cntl = herk_cntl_mm_op;
 	herk_cntl = herk_cntl_vl_mm;
 }
 

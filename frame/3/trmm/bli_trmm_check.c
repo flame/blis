@@ -102,8 +102,7 @@ void bli_trmm_check( side_t  side,
 	bli_check_error_code( e_val );
 }
 
-void bli_trmm_int_check( side_t  side,
-                         obj_t*  alpha,
+void bli_trmm_int_check( obj_t*  alpha,
                          obj_t*  a,
                          obj_t*  b,
                          obj_t*  beta,
@@ -114,7 +113,7 @@ void bli_trmm_int_check( side_t  side,
 
 	// Check basic properties of the operation.
 
-	bli_trmm_basic_check( side, alpha, a, b, beta, c );
+	bli_trmm_basic_check( BLIS_LEFT, alpha, a, b, beta, c );
 
 	// Check control tree pointer
 

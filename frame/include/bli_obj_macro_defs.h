@@ -899,8 +899,8 @@ bli_obj_width_stored( obj )
 
 #define bli_obj_swap( a, b ) \
 { \
-       obj_t t; \
-       t = b; b = a; a = t; \
+	obj_t t; \
+	t = b; b = a; a = t; \
 }
 
 

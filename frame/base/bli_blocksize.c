@@ -141,28 +141,6 @@ dim_t bli_determine_blocksize_f( dim_t    i,
 	}
 
 	return b_now;
-
-#if 0
-	num_t dt;
-	dim_t b_alg;
-
-	// We assume that this function is being called from an algorithm that
-	// is moving "forward" (ie: top to bottom, left to right, top-left
-	// to bottom-right).
-
-	// Extract the execution datatype and use it to query the corresponding
-	// blocksize value from the blksz_t object.
-	dt    = bli_obj_execution_datatype( *obj );
-	b_alg = bli_blksz_for_type( dt, b );
-
-	// If we are moving "forward" (ie: top to bottom, left to right, or
-	// top-left to bottom-right), then return b_alg, unless dim - 1 is
-	// smaller, in which case we return that remaining value.
-	b_alg = bli_min( b_alg, dim - i );
-
-
-	return b_alg;
-#endif
 }
 
 
@@ -186,61 +164,40 @@ dim_t bli_determine_blocksize_b( dim_t    i,
 	b_alg = bli_blksz_for_type( dt, b );
 	b_ext = bli_blksz_ext_for_type( dt, b );
 	
-	dim_at_edge = dim % b_alg;
-
-	// If dim is a multiple of b_alg, we can safely return b_alg without
-	// going any further.
-	if ( dim_at_edge == 0 )
-		return b_alg;
-
 	// Compute how much of the matrix dimension is left, including the
 	// chunk that will correspond to the blocksize we are computing now.
 	dim_left_now = dim - i;
 
+	dim_at_edge = dim_left_now % b_alg;
+
+	// If dim_left_now is a multiple of b_alg, we can safely return b_alg
+	// without going any further.
+	if ( dim_at_edge == 0 )
+		return b_alg;
+
 	// If the dimension currently remaining is less than the blocksize
-	// plus its allowed extension, use it instead of the default
-	// blocksize b_alg. Otherwise, use either the edge case dimension
-	// (if this is the first iteration) or use the default blocksize.
+	// plus its allowed extension, use it as the chosen blocksize. If this
+	// is not the case, then we know dim_left_now is greater than the
+	// extended blocksize. To determine how much of it we should use for
+	// the current blocksize, we inspect dim_at_edge; if it is smaller than
+	// (or equal to) b_ext, then we use b_alg + dim_at_edge. Otherwise,
+	// dim_at_edge is greater than b_ext, in which case we use dim_at_edge.
 	if ( dim_left_now <= b_alg + b_ext )
 	{
 		b_now = dim_left_now;
 	}
-	else
+	else // if ( dim_left_now > b_alg + b_ext )
 	{
-		if ( i == 0 ) b_now = dim_at_edge;
-		else          b_now = b_alg;
+		if ( dim_at_edge <= b_ext )
+		{
+			b_now = b_alg + dim_at_edge;
+		}
+		else // if ( dim_at_edge > b_ext )
+		{
+			b_now = dim_at_edge;
+		}
 	}
 
 	return b_now;
-
-#if 0
-	num_t dt;
-	dim_t b_alg;
-	dim_t dim_at_edge;
-
-	// We assume that this function is being called from an algorithm that
-	// is moving "backward" (ie: bottom to top, right to left, bottom-right
-	// to top-left).
-
-	// Extract the execution datatype and use it to query the corresponding
-	// blocksize value from the blksz_t object.
-	dt    = bli_obj_execution_datatype( *obj );
-	b_alg = bli_blksz_for_type( dt, b );
-
-	// If it is the first iteration, AND dim is NOT a multiple of b_alg, then
-	// we want to return the edge-case blocksize first to allow the first
-	// (and subsequent) iterations' subpartitions to be aligned (provided
-	// that the blocksize induces subpartitions and movement along aligned
-	// boundaries, which should always be the case).
-	// If it is the first iteration but dim IS a multiple of b_alg, then we
-	// want to simply return b_alg as it is stored in the blocksize object.
-
-	dim_at_edge = dim % b_alg;
-
-	if ( i == 0 && dim_at_edge != 0 )
-		b_alg = dim_at_edge;
-
-	return b_alg;
-#endif
 }
 
