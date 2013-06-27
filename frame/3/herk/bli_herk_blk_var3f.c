@@ -34,101 +34,95 @@
 
 #include "blis.h"
 
-void bli_herk_l_blk_var2( obj_t*  alpha,
-                          obj_t*  a,
-                          obj_t*  ah,
-                          obj_t*  beta,
-                          obj_t*  c,
-                          herk_t* cntl )
+void bli_herk_blk_var3f( obj_t*  alpha,
+                         obj_t*  a,
+                         obj_t*  ah,
+                         obj_t*  beta,
+                         obj_t*  c,
+                         herk_t* cntl )
 {
-	obj_t a_pack, aB_pack;
-	obj_t ah1, ah1_pack;
-	obj_t c1;
-	obj_t c1B, c1B_pack;
+	obj_t  a1, a1_pack;
+	obj_t  ah1, ah1_pack;
+	obj_t  c_pack;
+	obj_t* beta_use;
 
-	dim_t i;
-	dim_t b_alg;
-	dim_t n_trans;
-	dim_t offB, mB;
+	dim_t  i;
+	dim_t  b_alg;
+	dim_t  k_trans;
 
 	// Initialize all pack objects that are passed into packm_init().
-	bli_obj_init_pack( &a_pack );
+	bli_obj_init_pack( &a1_pack );
 	bli_obj_init_pack( &ah1_pack );
-	bli_obj_init_pack( &c1B_pack );
+	bli_obj_init_pack( &c_pack );
 
 	// Query dimension in partitioning direction.
-	n_trans = bli_obj_width_after_trans( *c );
+	k_trans = bli_obj_width_after_trans( *a );
 
 	// Scale C by beta (if instructed).
 	bli_scalm_int( beta,
 	               c,
 	               cntl_sub_scalm( cntl ) );
 
-	// Initialize object for packing A.
-	bli_packm_init( a, &a_pack,
-	                cntl_sub_packm_a( cntl ) );
+	// Initialize object for packing C.
+	bli_packm_init( c, &c_pack,
+	                cntl_sub_packm_c( cntl ) );
 
-	// Pack A and scale by alpha (if instructed).
-	bli_packm_int( alpha,
-	               a, &a_pack,
-	               cntl_sub_packm_a( cntl ) );
+	// Pack C and scale by beta (if instructed).
+	bli_packm_int( beta,
+	               c, &c_pack,
+	               cntl_sub_packm_c( cntl ) );
 
-	// Partition along the n dimension.
-	for ( i = 0; i < n_trans; i += b_alg )
+	// Partition along the k dimension.
+	for ( i = 0; i < k_trans; i += b_alg )
 	{
 		// Determine the current algorithmic blocksize.
-		b_alg = bli_determine_blocksize_f( i, n_trans, a,
+		b_alg = bli_determine_blocksize_f( i, k_trans, a,
 		                                   cntl_blocksize( cntl ) );
 
-		// Acquire partitions for A1' and C1.
+		// Acquire partitions for A1 and A1'.
 		bli_acquire_mpart_l2r( BLIS_SUBPART1,
+		                       i, b_alg, a, &a1 );
+		bli_acquire_mpart_t2b( BLIS_SUBPART1,
 		                       i, b_alg, ah, &ah1 );
-		bli_acquire_mpart_l2r( BLIS_SUBPART1,
-		                       i, b_alg, c, &c1 );
 
-		// Partition off the stored region of C1 and the corresponding region
-		// of A_pack. We compute the length of the subpartition taking the
-		// location of the diagonal into account.
-		offB = bli_max( 0, -bli_obj_diag_offset_after_trans( c1 ) );
-		mB   = bli_obj_length_after_trans( c1 ) - offB;
-		bli_acquire_mpart_t2b( BLIS_SUBPART1,
-		                       offB, mB, &c1, &c1B );
-		bli_acquire_mpart_t2b( BLIS_SUBPART1,
-		                       offB, mB, &a_pack, &aB_pack );
-
-		// Initialize objects for packing A1' and C1.
+		// Initialize objects for packing A1 and A1'.
+		bli_packm_init( &a1, &a1_pack,
+		                cntl_sub_packm_a( cntl ) );
 		bli_packm_init( &ah1, &ah1_pack,
 		                cntl_sub_packm_b( cntl ) );
-		bli_packm_init( &c1B, &c1B_pack,
-		                cntl_sub_packm_c( cntl ) );
 
-		// Pack A1' and scale by alpha (if instructed).
+		// Pack A1 and scale by alpha (if instructed).
+		bli_packm_int( alpha,
+		               &a1, &a1_pack,
+		               cntl_sub_packm_a( cntl ) );
+
+		// Pack B1 and scale by alpha (if instructed).
 		bli_packm_int( alpha,
 		               &ah1, &ah1_pack,
 		               cntl_sub_packm_b( cntl ) );
 
-		// Pack C1 and scale by beta (if instructed).
-		bli_packm_int( beta,
-		               &c1B, &c1B_pack,
-		               cntl_sub_packm_c( cntl ) );
+		// Since this variant executes multiple rank-k updates, we must use
+		// beta only for the first iteration and BLIS_ONE for all others.
+		if ( i == 0 ) beta_use = beta;
+		else          beta_use = &BLIS_ONE;
 
 		// Perform herk subproblem.
 		bli_herk_int( alpha,
-		              &aB_pack,
+		              &a1_pack,
 		              &ah1_pack,
-		              beta,
-		              &c1B_pack,
+		              beta_use,
+		              &c_pack,
 		              cntl_sub_herk( cntl ) );
-
-		// Unpack C1 (if C1 was packed).
-		bli_unpackm_int( &c1B_pack, &c1B,
-		                 cntl_sub_unpackm_c( cntl ) );
 	}
+
+	// Unpack C (if C was packed).
+	bli_unpackm_int( &c_pack, c,
+	                 cntl_sub_unpackm_c( cntl ) );
 
 	// If any packing buffers were acquired within packm, release them back
 	// to the memory manager.
-	bli_obj_release_pack( &a_pack );
+	bli_obj_release_pack( &a1_pack );
 	bli_obj_release_pack( &ah1_pack );
-	bli_obj_release_pack( &c1B_pack );
+	bli_obj_release_pack( &c_pack );
 }
 

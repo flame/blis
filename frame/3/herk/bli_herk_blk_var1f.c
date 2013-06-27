@@ -34,27 +34,25 @@
 
 #include "blis.h"
 
-void bli_herk_l_blk_var1( obj_t*  alpha,
-                          obj_t*  a,
-                          obj_t*  ah,
-                          obj_t*  beta,
-                          obj_t*  c,
-                          herk_t* cntl )
+void bli_herk_blk_var1f( obj_t*  alpha,
+                         obj_t*  a,
+                         obj_t*  ah,
+                         obj_t*  beta,
+                         obj_t*  c,
+                         herk_t* cntl )
 {
 	obj_t a1, a1_pack;
-	obj_t ah_pack, ahL_pack;
-	obj_t c1;
-	obj_t c1L, c1L_pack;
+	obj_t ah_pack;
+	obj_t c1, c1_pack;
 
 	dim_t i;
 	dim_t b_alg;
 	dim_t m_trans;
-	dim_t offL, nL;
 
 	// Initialize all pack objects that are passed into packm_init().
 	bli_obj_init_pack( &a1_pack );
 	bli_obj_init_pack( &ah_pack );
-	bli_obj_init_pack( &c1L_pack );
+	bli_obj_init_pack( &c1_pack );
 
 	// Query dimension in partitioning direction.
 	m_trans = bli_obj_length_after_trans( *c );
@@ -77,30 +75,19 @@ void bli_herk_l_blk_var1( obj_t*  alpha,
 	for ( i = 0; i < m_trans; i += b_alg )
 	{
 		// Determine the current algorithmic blocksize.
-		b_alg = bli_determine_blocksize_b( i, m_trans, a,
+		b_alg = bli_determine_blocksize_f( i, m_trans, a,
 		                                   cntl_blocksize( cntl ) );
 
 		// Acquire partitions for A1 and C1.
-		bli_acquire_mpart_b2t( BLIS_SUBPART1,
+		bli_acquire_mpart_t2b( BLIS_SUBPART1,
 		                       i, b_alg, a, &a1 );
-		bli_acquire_mpart_b2t( BLIS_SUBPART1,
+		bli_acquire_mpart_t2b( BLIS_SUBPART1,
 		                       i, b_alg, c, &c1 );
-
-		// Partition off the stored region of C1 and the corresponding region
-		// of Ah_pack. We compute the width of the subpartition taking the
-		// location of the diagonal into account.
-		offL = 0;
-		nL   = bli_min( bli_obj_width_after_trans( c1 ),
-		                bli_obj_diag_offset_after_trans( c1 ) + b_alg );
-		bli_acquire_mpart_l2r( BLIS_SUBPART1,
-		                       offL, nL, &c1, &c1L );
-		bli_acquire_mpart_l2r( BLIS_SUBPART1,
-		                       offL, nL, &ah_pack, &ahL_pack );
 
 		// Initialize objects for packing A1 and C1.
 		bli_packm_init( &a1, &a1_pack,
 		                cntl_sub_packm_a( cntl ) );
-		bli_packm_init( &c1L, &c1L_pack,
+		bli_packm_init( &c1, &c1_pack,
 		                cntl_sub_packm_c( cntl ) );
 
 		// Pack A1 and scale by alpha (if instructed).
@@ -110,19 +97,19 @@ void bli_herk_l_blk_var1( obj_t*  alpha,
 
 		// Pack C1 and scale by beta (if instructed).
 		bli_packm_int( beta,
-		               &c1L, &c1L_pack,
+		               &c1, &c1_pack,
 		               cntl_sub_packm_c( cntl ) );
 
 		// Perform herk subproblem.
 		bli_herk_int( alpha,
 		              &a1_pack,
-		              &ahL_pack,
+		              &ah_pack,
 		              beta,
-		              &c1L_pack,
+		              &c1_pack,
 		              cntl_sub_herk( cntl ) );
 
 		// Unpack C1 (if C1 was packed).
-		bli_unpackm_int( &c1L_pack, &c1L,
+		bli_unpackm_int( &c1_pack, &c1,
 		                 cntl_sub_unpackm_c( cntl ) );
 	}
 
@@ -130,6 +117,6 @@ void bli_herk_l_blk_var1( obj_t*  alpha,
 	// to the memory manager.
 	bli_obj_release_pack( &a1_pack );
 	bli_obj_release_pack( &ah_pack );
-	bli_obj_release_pack( &c1L_pack );
+	bli_obj_release_pack( &c1_pack );
 }
 

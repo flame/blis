@@ -99,6 +99,15 @@ void bli_acquire_mpart_t2b( subpart_t  requested_part,
 		m_part   = i;
 		n_part   = n;
 	}
+	if      ( requested_part == BLIS_SUBPART1T )
+	{
+		// A1T (offm,offn) unchanged.
+		// A1T is (i+b) x n.
+		offm_inc = 0;
+		offn_inc = 0;
+		m_part   = i + b;
+		n_part   = n;
+	}
 	else if ( requested_part == BLIS_SUBPART1 )
 	{
 		// A1 (offm,offn) += (i,0).
@@ -106,6 +115,15 @@ void bli_acquire_mpart_t2b( subpart_t  requested_part,
 		offm_inc = i;
 		offn_inc = 0;
 		m_part   = b;
+		n_part   = n;
+	}
+	else if ( requested_part == BLIS_SUBPART1B )
+	{
+		// A1B (offm,offn) += (i,0).
+		// A1B is (m-i) x n.
+		offm_inc = i;
+		offn_inc = 0;
+		m_part   = m - i;
 		n_part   = n;
 	}
 	else // if ( requested_part == BLIS_SUBPART2 )
@@ -269,6 +287,15 @@ void bli_acquire_mpart_l2r( subpart_t  requested_part,
 		m_part   = m;
 		n_part   = j;
 	}
+	if      ( requested_part == BLIS_SUBPART1L )
+	{
+		// A1L (offm,offn) unchanged.
+		// A1L is m x (j+b).
+		offm_inc = 0;
+		offn_inc = 0;
+		m_part   = m;
+		n_part   = j + b;
+	}
 	else if ( requested_part == BLIS_SUBPART1 )
 	{
 		// A1 (offm,offn) += (0,j).
@@ -277,6 +304,15 @@ void bli_acquire_mpart_l2r( subpart_t  requested_part,
 		offn_inc = j;
 		m_part   = m;
 		n_part   = b;
+	}
+	else if ( requested_part == BLIS_SUBPART1R )
+	{
+		// A1R (offm,offn) += (0,j).
+		// A1R is m x (n-j).
+		offm_inc = 0;
+		offn_inc = j;
+		m_part   = m;
+		n_part   = n - j;
 	}
 	else // if ( requested_part == BLIS_SUBPART2 )
 	{
@@ -451,15 +487,6 @@ void bli_acquire_mpart_tl2br( subpart_t  requested_part,
 		m_part   = b;
 		n_part   = ij;
 	}
-	else if ( requested_part == BLIS_SUBPART10B )
-	{
-		// A10B (offm,offn) += (ij,0).
-		// A10B is b x (ij + b).
-		offm_inc = ij;
-		offn_inc = 0;
-		m_part   = b;
-		n_part   = ij + b;
-	}
 	else if ( requested_part == BLIS_SUBPART20 )
 	{
 		// A20 (offm,offn) += (ij+b,0).
@@ -517,15 +544,6 @@ void bli_acquire_mpart_tl2br( subpart_t  requested_part,
 		offn_inc = ij + b;
 		m_part   = b;
 		n_part   = n - ij - b;
-	}
-	else if ( requested_part == BLIS_SUBPART12B )
-	{
-		// A12B (offm,offn) += (ij,ij).
-		// A12B is b x (n-ij).
-		offm_inc = ij;
-		offn_inc = ij;
-		m_part   = b;
-		n_part   = n - ij;
 	}
 	else // if ( requested_part == BLIS_SUBPART22 )
 	{

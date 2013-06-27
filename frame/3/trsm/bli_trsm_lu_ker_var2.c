@@ -207,10 +207,11 @@ void PASTEMAC(ch,varname)( \
 	   values of the corresponding block of B. */ \
 	if ( k % MR != 0 ) k += MR - ( k % MR ); \
 \
-	/* If the diagonal offset of A is positive, adjust the pointer to B and
+	/* If there is a zero region to the left of where the diagonal of A
+	   intersects the top edge of the block, adjust the pointer to B and
 	   treat this case as if the diagonal offset were zero. Note that we
 	   don't need to adjust the pointer to A since packm would have simply
-	   skipped over the panels that were not stored. */ \
+	   skipped over the region that was not stored. */ \
 	if ( diagoffa > 0 ) \
 	{ \
 		i        = diagoffa; \

@@ -206,9 +206,11 @@ void PASTEMAC(ch,varname)( \
 	   values of the corresponding block of B. */ \
 	if ( k % MR != 0 ) k += MR - ( k % MR ); \
 \
-	/* If the diagonal offset of A is negative, adjust the pointer to C and
-	   the effective diagonal offset of A accordingly to skip over the zero
-	   region that was not packed. */ \
+	/* If there is a zero region above where the diagonal of A intersects the
+	   left edge of the block, adjust the pointer to C and treat this case as
+	   if the diagonal offset were zero. This skips over the region (in
+	   increments of MR) that was not packed. (Note we skip in increments of
+	   MR since that is how the region would have been skipped by packm.) */ \
 	if ( diagoffa < 0 ) \
 	{ \
 		i        = ( -diagoffa / MR ) * MR; \

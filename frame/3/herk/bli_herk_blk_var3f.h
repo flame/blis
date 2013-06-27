@@ -32,10 +32,10 @@
 
 */
 
-void bli_herk_l_blk_var1( obj_t*  alpha,
-                          obj_t*  a,
-                          obj_t*  ah,
-                          obj_t*  beta,
-                          obj_t*  c,
-                          herk_t* cntl );
+void bli_herk_blk_var3f( obj_t*  alpha,
+                         obj_t*  a,
+                         obj_t*  ah,
+                         obj_t*  beta,
+                         obj_t*  c,
+                         herk_t* cntl );
 

@@ -205,16 +205,17 @@ void PASTEMAC(ch,varname)( \
 	   handle bottom-right corner edges of the triangle. */ \
 	if ( k % MR != 0 ) k += MR - ( k % MR ); \
 \
-	/* If the diagonal offset of A is positive, adjust the pointer to B and
+	/* If there is a zero region to the left of where the diagonal of A
+	   intersects the top edge of the block, adjust the pointer to B and
 	   treat this case as if the diagonal offset were zero. Note that we
 	   don't need to adjust the pointer to A since packm would have simply
 	   skipped over the region that was not stored. */ \
 	if ( diagoffa > 0 ) \
 	{ \
-		j        = diagoffa; \
-		k        = k - j; \
+		i        = diagoffa; \
+		k        = k - i; \
 		diagoffa = 0; \
-		b_cast   = b_cast + (j  )*rs_b; \
+		b_cast   = b_cast + (i  )*rs_b; \
 	} \
 \
 	/* If there is a zero region below where the diagonal of A intersects the

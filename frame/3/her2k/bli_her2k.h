@@ -37,16 +37,11 @@
 #include "bli_her2k_int.h"
 #include "bli_her2k_target.h"
 
-#include "bli_her2k_l_blk_var1.h"
-#include "bli_her2k_u_blk_var1.h"
+#include "bli_her2k_blk_var1f.h"
 
-#include "bli_her2k_l_blk_var2.h"
-#include "bli_her2k_u_blk_var2.h"
+#include "bli_her2k_blk_var2f.h"
 
-#include "bli_her2k_blk_var3.h"
-
-#include "bli_her2k_l_blk_var4.h"
-#include "bli_her2k_u_blk_var4.h"
+#include "bli_her2k_blk_var3f.h"
 
 #include "bli_her2k_l_ker_var2.h"
 #include "bli_her2k_u_ker_var2.h"

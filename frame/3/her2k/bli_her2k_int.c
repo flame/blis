@@ -46,24 +46,22 @@ typedef void (*FUNCPTR_T)( obj_t*   alpha,
                            obj_t*   c,
                            her2k_t* cntl );
 
-static FUNCPTR_T vars[2][5][3] =
+static FUNCPTR_T vars[2][4][3] =
 {
 	// lower
 	{
 		// unblocked          optimized unblocked    blocked
-		{ NULL,               NULL,                  bli_her2k_l_blk_var1 },
-		{ NULL,               bli_her2k_l_ker_var2,  bli_her2k_l_blk_var2 },
-		{ NULL,               NULL,                  bli_her2k_blk_var3   },
-		{ NULL,               NULL,                  bli_her2k_l_blk_var4 },
+		{ NULL,               NULL,                  bli_her2k_blk_var1f  },
+		{ NULL,               bli_her2k_l_ker_var2,  bli_her2k_blk_var2f  },
+		{ NULL,               NULL,                  bli_her2k_blk_var3f  },
 		{ NULL,               NULL,                  NULL                 },
 	},
 	// upper
 	{
 		// unblocked          optimized unblocked    blocked
-		{ NULL,               NULL,                  bli_her2k_u_blk_var1 },
-		{ NULL,               bli_her2k_u_ker_var2,  bli_her2k_u_blk_var2 },
-		{ NULL,               NULL,                  bli_her2k_blk_var3   },
-		{ NULL,               NULL,                  bli_her2k_u_blk_var4 },
+		{ NULL,               NULL,                  bli_her2k_blk_var1f  },
+		{ NULL,               bli_her2k_u_ker_var2,  bli_her2k_blk_var2f  },
+		{ NULL,               NULL,                  bli_her2k_blk_var3f  },
 		{ NULL,               NULL,                  NULL                 },
 	}
 };

@@ -186,7 +186,7 @@ void PASTEMAC(ch,varname)( \
 	dim_t           n_iter, n_left; \
 	dim_t           m_cur; \
 	dim_t           n_cur; \
-	dim_t           i, j; \
+	dim_t           i, j, ip; \
 	inc_t           rstep_a; \
 	inc_t           cstep_b; \
 	inc_t           rstep_c, cstep_c; \
@@ -205,6 +205,31 @@ void PASTEMAC(ch,varname)( \
 \
 	/* If any dimension is zero, return immediately. */ \
 	if ( bli_zero_dim3( m, n, k ) ) return; \
+\
+	/* Safeguard: If the current panel of C is entirely above the diagonal,
+	   it is not stored. So we do nothing. */ \
+	if ( bli_is_strictly_above_diag_n( diagoffc, m, n ) ) return; \
+\
+	/* If there is a zero region above where the diagonal of C intersects
+	   the left edge of the panel, adjust the pointer to C and A and treat
+	   this case as if the diagonal offset were zero. */ \
+	if ( diagoffc < 0 ) \
+	{ \
+		ip       = -diagoffc / MR; \
+		i        = ip * MR; \
+		m        = m - i; \
+		diagoffc = -diagoffc % MR; \
+		c_cast   = c_cast + (i  )*rs_c; \
+		a_cast   = a_cast + (ip )*ps_a; \
+	} \
+\
+	/* If there is a zero region to the right of where the diagonal
+	   of C intersects the bottom of the panel, shrink it to prevent
+       "no-op" iterations from executing. */ \
+	if ( diagoffc + m < n ) \
+	{ \
+		n = diagoffc + m; \
+	} \
 \
 	/* Clear the temporary C buffer in case it has any infs or NaNs. */ \
 	PASTEMAC(ch,set0s_mxn)( MR, NR, \

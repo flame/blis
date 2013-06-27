@@ -37,16 +37,11 @@
 #include "bli_herk_int.h"
 #include "bli_herk_target.h"
 
-#include "bli_herk_l_blk_var1.h"
-#include "bli_herk_u_blk_var1.h"
+#include "bli_herk_blk_var1f.h"
 
-#include "bli_herk_l_blk_var2.h"
-#include "bli_herk_u_blk_var2.h"
+#include "bli_herk_blk_var2f.h"
 
-#include "bli_herk_blk_var3.h"
-
-#include "bli_herk_l_blk_var4.h"
-#include "bli_herk_u_blk_var4.h"
+#include "bli_herk_blk_var3f.h"
 
 #include "bli_herk_l_ker_var2.h"
 #include "bli_herk_u_ker_var2.h"
