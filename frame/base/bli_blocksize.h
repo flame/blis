@@ -52,11 +52,17 @@ dim_t bli_blksz_for_type( num_t    dt,
 dim_t bli_blksz_ext_for_type( num_t    dt,
                               blksz_t* b );
 
+dim_t bli_blksz_total_for_type( num_t    dt,
+                                blksz_t* b );
+
 dim_t bli_blksz_for_obj( obj_t*   obj,
                          blksz_t* b );
 
 dim_t bli_blksz_ext_for_obj( obj_t*   obj,
                              blksz_t* b );
+
+dim_t bli_blksz_total_for_obj( obj_t*   obj,
+                               blksz_t* b );
 
 dim_t bli_determine_blocksize_f( dim_t    i,
                                  dim_t    dim,

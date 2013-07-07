@@ -206,8 +206,10 @@ void PASTEMAC(ch,opname)( \
 	/* If there exists a kernel implementation for the panel dimension
 	   provided, and the "width" of the panel is equal to the leading
 	   dimension, we invoke the implementation. Otherwise, we use scal2m.
-	   By using scal2m to handle edge cases (where m < panel_dim), we
-	   allow the kernel implementations to remain very simple. */ \
+	   By using scal2m to handle (a) edge cases (where m < panel_dim) and
+	   (b) cases where the panel dimension is less than the panel packing
+	   dimension (e.g. MR < PACKMR), we allow the kernel implementations
+	   to remain very simple. */ \
 	if ( f != NULL && m == panel_dim ) \
 	{ \
 		f( conja, \
