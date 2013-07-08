@@ -46,7 +46,7 @@
 
 /* Table of constant values */
 
-/* Subroutine */ int xerbla_(char *srname, integer *info, ftnlen srname_len)
+/* Subroutine */ int xerbla_(character *srname, integer *info, ftnlen srname_len)
 {
 /*  -- LAPACK auxiliary routine (preliminary version) -- */
 /*     Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd., */

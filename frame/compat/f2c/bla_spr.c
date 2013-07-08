@@ -43,7 +43,7 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(d,spr)(char *uplo, integer *n, doublereal *alpha, 
+/* Subroutine */ int PASTEF77(d,spr)(character *uplo, integer *n, doublereal *alpha, 
 	doublereal *x, integer *incx, doublereal *ap)
 {
     /* System generated locals */
@@ -53,9 +53,9 @@
     integer info;
     doublereal temp;
     integer i__, j, k;
-    extern logical lsame_(char *, char *, ftnlen, ftnlen);
+    extern logical lsame_(character *, character *, ftnlen, ftnlen);
     integer kk, ix, jx, kx = 0;
-    extern /* Subroutine */ int xerbla_(char *, integer *, ftnlen);
+    extern /* Subroutine */ int xerbla_(character *, integer *, ftnlen);
 
 /*     .. Scalar Arguments .. */
 /*     .. Array Arguments .. */
@@ -271,7 +271,7 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(s,spr)(char *uplo, integer *n, real *alpha, real *x, 
+/* Subroutine */ int PASTEF77(s,spr)(character *uplo, integer *n, real *alpha, real *x, 
 	integer *incx, real *ap)
 {
     /* System generated locals */
@@ -281,9 +281,9 @@
     integer info;
     real temp;
     integer i__, j, k;
-    extern logical lsame_(char *, char *, ftnlen, ftnlen);
+    extern logical lsame_(character *, character *, ftnlen, ftnlen);
     integer kk, ix, jx, kx = 0;
-    extern /* Subroutine */ int xerbla_(char *, integer *, ftnlen);
+    extern /* Subroutine */ int xerbla_(character *, integer *, ftnlen);
 
 /*     .. Scalar Arguments .. */
 /*     .. Array Arguments .. */

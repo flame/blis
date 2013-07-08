@@ -42,10 +42,10 @@
 #define GENTFUNCRO( ftype, ch, blasname, blisname ) \
 \
 void PASTEF77(ch,blasname)( \
-                            fint*   n, \
-                            ftype*  x, fint* incx, \
-                            ftype*  y, fint* incy, \
-                            ftype*  dparam  \
+                            f77_int* n, \
+                            ftype*   x, f77_int* incx, \
+                            ftype*   y, f77_int* incy, \
+                            ftype*   dparam  \
                           ) \
 { \
 	dim_t  n0; \

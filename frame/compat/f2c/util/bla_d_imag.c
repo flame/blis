@@ -40,7 +40,7 @@
 
 double d_imag(doublecomplex *z)
 {
-    return(z->i);
+    return(z->imag);
 }
 
 #endif

@@ -109,17 +109,6 @@ GENTFUNCR2( scomplex, float,  c, s, blasname, blisname ) \
 GENTFUNCR2( dcomplex, double, z, d, blasname, blisname )
 
 
-// -- Alternate two-operand macro (one char for complex, one for int) --
-
-
-#define INSERT_GENTFUNC2I_BLAS( blasname, blisname ) \
-\
-GENTFUNC2I( float,    fint, s, i, blasname, blisname ) \
-GENTFUNC2I( double,   fint, d, i, blasname, blisname ) \
-GENTFUNC2I( scomplex, fint, c, i, blasname, blisname ) \
-GENTFUNC2I( dcomplex, fint, z, i, blasname, blisname )
-
-
 // -- Extended two-operand macro (used only for scal) --
 
 
@@ -158,7 +147,7 @@ GENTFUNC( float,    s, tfuncname, varname ) \
 GENTFUNC( double,   d, tfuncname, varname ) \
 GENTFUNC( scomplex, c, tfuncname, varname ) \
 GENTFUNC( dcomplex, z, tfuncname, varname ) \
-GENTFUNC( int,      i, tfuncname, varname )
+GENTFUNC( gint_t,   i, tfuncname, varname )
 
 
 // -- Basic one-operand with integer projection --
@@ -166,10 +155,10 @@ GENTFUNC( int,      i, tfuncname, varname )
 
 #define INSERT_GENTFUNCI_BASIC( tfuncname, varname ) \
 \
-GENTFUNCI( float,    int, s, i, tfuncname, varname ) \
-GENTFUNCI( double,   int, d, i, tfuncname, varname ) \
-GENTFUNCI( scomplex, int, c, i, tfuncname, varname ) \
-GENTFUNCI( dcomplex, int, z, i, tfuncname, varname )
+GENTFUNCI( float,    gint_t, s, i, tfuncname, varname ) \
+GENTFUNCI( double,   gint_t, d, i, tfuncname, varname ) \
+GENTFUNCI( scomplex, gint_t, c, i, tfuncname, varname ) \
+GENTFUNCI( dcomplex, gint_t, z, i, tfuncname, varname )
 
 
 // -- Basic one-operand with real projection --
@@ -188,10 +177,10 @@ GENTFUNCR( dcomplex, double, z, d, tfuncname, varname )
 
 #define INSERT_GENTFUNCRI_BASIC( tfuncname, varname ) \
 \
-GENTFUNCRI( float,    float,  int, s, s, i, tfuncname, varname ) \
-GENTFUNCRI( double,   double, int, d, d, i, tfuncname, varname ) \
-GENTFUNCRI( scomplex, float,  int, c, s, i, tfuncname, varname ) \
-GENTFUNCRI( dcomplex, double, int, z, d, i, tfuncname, varname )
+GENTFUNCRI( float,    float,  gint_t, s, s, i, tfuncname, varname ) \
+GENTFUNCRI( double,   double, gint_t, d, d, i, tfuncname, varname ) \
+GENTFUNCRI( scomplex, float,  gint_t, c, s, i, tfuncname, varname ) \
+GENTFUNCRI( dcomplex, double, gint_t, z, d, i, tfuncname, varname )
 
 
 // -- Basic one-operand macro (with two auxiliary arguments) --

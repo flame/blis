@@ -274,7 +274,7 @@ void bli_obj_free( obj_t* obj )
 
 void bli_obj_create_const( double value, obj_t* obj )
 {
-	int*      temp_i;
+	gint_t*   temp_i;
 	float*    temp_s;
 	double*   temp_d;
 	scomplex* temp_c;
@@ -291,18 +291,18 @@ void bli_obj_create_const( double value, obj_t* obj )
 	temp_z = bli_obj_buffer_for_const( BLIS_DCOMPLEX, *obj );
 	temp_i = bli_obj_buffer_for_const( BLIS_INT,      *obj );
 
-	*temp_s      = ( float ) value;
-	*temp_d      =           value;
-	temp_c->real = ( float ) value;
-	temp_c->imag = ( float ) 0.0;
-	temp_z->real =           value;
-	temp_z->imag =           0.0;
-	*temp_i      = ( int   ) value;
+	*temp_s      = ( float  ) value;
+	*temp_d      =            value;
+	temp_c->real = ( float  ) value;
+	temp_c->imag = ( float  ) 0.0;
+	temp_z->real =            value;
+	temp_z->imag =            0.0;
+	*temp_i      = ( gint_t ) value;
 }
 
 void bli_obj_create_const_copy_of( obj_t* a, obj_t* b )
 {
-	int*      temp_i;
+	gint_t*   temp_i;
 	float*    temp_s;
 	double*   temp_d;
 	scomplex* temp_c;
@@ -348,13 +348,13 @@ void bli_obj_create_const_copy_of( obj_t* a, obj_t* b )
 		bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 	}
 
-	*temp_s      = ( float ) value.real;
-	*temp_d      =           value.real;
-	temp_c->real = ( float ) value.real;
-	temp_c->imag = ( float ) value.imag;
-	temp_z->real =           value.real;
-	temp_z->imag =           value.imag;
-	*temp_i      = ( int   ) value.real;
+	*temp_s      = ( float  ) value.real;
+	*temp_d      =            value.real;
+	temp_c->real = ( float  ) value.real;
+	temp_c->imag = ( float  ) value.imag;
+	temp_z->real =            value.real;
+	temp_z->imag =            value.imag;
+	*temp_i      = ( gint_t ) value.real;
 }
 
 void bli_adjust_strides( dim_t  m,
@@ -432,7 +432,7 @@ static siz_t dt_sizes[6] =
 	sizeof( scomplex ),
 	sizeof( double ),
 	sizeof( dcomplex ),
-	sizeof( int ),
+	sizeof( gint_t ),
 	BLIS_CONSTANT_SIZE
 };
 

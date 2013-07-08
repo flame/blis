@@ -226,22 +226,26 @@ typedef enum
 
 // -- BLIS basic types ---------------------------------------------------------
 
+// General integers
+
+typedef     int64_t gint_t;  // general signed integer
+typedef    uint64_t guint_t; // general unsigned integer
+
 // Boolean type
 
-typedef   signed long int bool_t;
-
-// Integer types
+typedef      gint_t bool_t;
 
 // This cpp guards provide a temporary hack to allow libflame
 // interoperability with BLIS.
 #ifndef _DEFINED_DIM_T
 #define _DEFINED_DIM_T
-typedef unsigned long int dim_t;  // dimension type
+//typedef unsigned long int dim_t;  // dimension type
+typedef     guint_t dim_t;   // dimension type
 #endif
-typedef unsigned long int inc_t;  // increment/stride type
-typedef   signed long int doff_t; // diagonal offset type
-typedef unsigned long int siz_t;  // byte size type
-typedef unsigned long int info_t; // object information bit field
+typedef     guint_t inc_t;   // increment/stride type
+typedef      gint_t doff_t;  // diagonal offset type
+typedef     guint_t siz_t;   // byte size type
+typedef     guint_t info_t;  // object information bit field
 
 // Complex types
 
@@ -274,12 +278,30 @@ typedef struct
 
 typedef dcomplex atom_t;
 
+// Fortran-77 types (used only by blas2blis compatibility layer)
+
+#ifdef BLIS_ENABLE_BLAS2BLIS
+#ifdef BLIS_ENABLE_BLAS2BLIS_INT64
+typedef int64_t   f77_int;
+#else
+typedef int32_t   f77_int;
+#endif
+typedef char      f77_char;
+typedef float     f77_float;
+typedef double    f77_double;
+typedef scomplex  f77_scomplex;
+typedef dcomplex  f77_dcomplex;
+#endif
+
+
+// -- BLIS misc. structure types -----------------------------------------------
+
 // Memory pool type
 
 typedef struct
 {
     void** block_ptrs;
-    int    top_index;
+    gint_t top_index;
     siz_t  num_blocks;
     siz_t  block_size;
 } pool_t;
@@ -304,19 +326,6 @@ typedef struct blksz_s
 	// Blocksize Extensions.
 	dim_t e[BLIS_NUM_FP_TYPES];
 } blksz_t;
-
-// Fortran-77 types (used only by blas2blis compatibility layer)
-
-#ifdef BLIS_ENABLE_BLAS2BLIS
-
-typedef char        fchar;
-typedef signed int  fint;
-typedef float       f77_float;
-typedef double      f77_double;
-typedef scomplex    f77_scomplex;
-typedef dcomplex    f77_dcomplex;
-
-#endif
 
 
 // -- BLIS object type definitions ---------------------------------------------

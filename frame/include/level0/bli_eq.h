@@ -137,7 +137,7 @@
 
 #define bli_ieqa( a, b ) \
 \
-	( *(( int* )(a)) == *(( int* )(b)) )
+	( *(( gint_t* )(a)) == *(( gint_t* )(b)) )
 
 // imageq0
 

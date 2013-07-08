@@ -42,9 +42,9 @@
 #define GENTFUNCSCAL( ftype_a, ftype_x, cha, chx, blasname, blisname ) \
 \
 void PASTEF772(chx,cha,blasname)( \
-                                  fint*     n, \
-                                  ftype_a*  alpha, \
-                                  ftype_x*  x, fint* incx  \
+                                  f77_int* n, \
+                                  ftype_a* alpha, \
+                                  ftype_x* x, f77_int* incx  \
                                 ) \
 { \
 	dim_t    n0; \

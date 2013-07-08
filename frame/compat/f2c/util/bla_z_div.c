@@ -44,10 +44,10 @@ void z_div(doublecomplex *cp, doublecomplex *ap, doublecomplex *bp)
 	doublecomplex b = *bp;
 	double        temp;
 
-	temp = b.r * b.r + b.i * b.i;
+	temp = b.real * b.real + b.imag * b.imag;
 
-	cp->r = ( a.r * b.r + a.i * b.i ) / temp;
-	cp->i = ( a.i * b.r - a.r * b.i ) / temp;
+	cp->real = ( a.real * b.real + a.imag * b.imag ) / temp;
+	cp->imag = ( a.imag * b.real - a.real * b.imag ) / temp;
 }
 
 #endif

@@ -119,7 +119,7 @@
 
 #define bli_iicopys( x, y ) \
 { \
-	(y) = ( int    ) (x); \
+	(y) = ( gint_t ) (x); \
 }
 
 

@@ -42,12 +42,12 @@
 #define GENTFUNCDOT( ftype, chxy, chc, blis_conjy, blasname, blisname ) \
 \
 void PASTEF772(chxy,blasname,chc)( \
-                                   fint*   m, \
-                                   fint*   n, \
-                                   ftype*  alpha, \
-                                   ftype*  x, fint* incx, \
-                                   ftype*  y, fint* incy, \
-                                   ftype*  a, fint* lda   \
+                                   f77_int* m, \
+                                   f77_int* n, \
+                                   ftype*   alpha, \
+                                   ftype*   x, f77_int* incx, \
+                                   ftype*   y, f77_int* incy, \
+                                   ftype*   a, f77_int* lda   \
                                  ) \
 { \
 	dim_t   m0, n0; \

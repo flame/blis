@@ -6,9 +6,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#include "blis.h"
 #include "bli_f2c.h"
 
-logical bli_lsame(char *ca, char *cb, ftnlen ca_len, ftnlen cb_len)
+logical bli_lsame(character *ca, character *cb, ftnlen ca_len, ftnlen cb_len)
 {
     /* System generated locals */
     logical ret_val;

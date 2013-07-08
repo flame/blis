@@ -5,14 +5,14 @@
 #ifndef F2C_INCLUDE
 #define F2C_INCLUDE
 
-typedef long int integer;
-typedef unsigned long int uinteger;
+typedef f77_int integer;
+typedef f77_char character;
 typedef char *address;
 typedef short int shortint;
 typedef float real;
 typedef double doublereal;
-typedef struct { real r, i; } complex;
-typedef struct { doublereal r, i; } doublecomplex;
+typedef scomplex singlecomplex;
+typedef dcomplex doublecomplex;
 typedef long int logical;
 typedef short int shortlogical;
 typedef char logical1;
@@ -129,7 +129,7 @@ union Multitype {	/* for multiple entry points */
 	/* longint j; */
 	real r;
 	doublereal d;
-	complex c;
+	singlecomplex c;
 	doublecomplex z;
 	};
 
@@ -206,7 +206,7 @@ typedef /* Character */ VOID (*H_fp)();
 typedef /* Subroutine */ int (*S_fp)();
 #endif
 /* E_fp is for real functions when -R is not specified */
-typedef VOID C_f;	/* complex function */
+typedef VOID C_f;	/* single complex function */
 typedef VOID H_f;	/* character function */
 typedef VOID Z_f;	/* double complex function */
 typedef doublereal E_f;	/* real function with -R not specified */

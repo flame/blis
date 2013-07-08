@@ -42,8 +42,8 @@
 #define GENTFUNCR2( ftype_x, ftype_r, chx, chr, blasname, blisname ) \
 \
 ftype_r PASTEF772(chr,chx,blasname)( \
-                                     fint*    n, \
-                                     ftype_x* x, fint* incx  \
+                                     f77_int* n, \
+                                     ftype_x* x, f77_int* incx  \
                                    ) \
 { \
 	dim_t    n0; \

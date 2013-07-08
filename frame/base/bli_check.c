@@ -36,7 +36,7 @@
 
 // -- General stuff ------------------------------------------------------------
 
-err_t bli_check_error_code_helper( int code, char* file, unsigned int line )
+err_t bli_check_error_code_helper( gint_t code, char* file, guint_t line )
 {
 	if ( code == BLIS_SUCCESS ) return code;
 

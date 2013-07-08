@@ -108,17 +108,6 @@ GENTPROTR2( scomplex, float,  c, s, blasname ) \
 GENTPROTR2( dcomplex, double, z, d, blasname )
 
 
-// -- Alternate two-operand macro (one char for complex, one for int) --
-
-
-#define INSERT_GENTPROT2I_BLAS( blasname ) \
-\
-GENTPROT2I( float,    fint, s, i, blasname ) \
-GENTPROT2I( double,   fint, d, i, blasname ) \
-GENTPROT2I( scomplex, fint, c, i, blasname ) \
-GENTPROT2I( dcomplex, fint, z, i, blasname )
-
-
 // -- Extended two-operand macro (used only for scal) --
 
 
@@ -157,7 +146,7 @@ GENTPROT( float,    s, funcname ) \
 GENTPROT( double,   d, funcname ) \
 GENTPROT( scomplex, c, funcname ) \
 GENTPROT( dcomplex, z, funcname ) \
-GENTPROT( int,      i, funcname )
+GENTPROT( gint_t,   i, funcname )
 
 
 // -- Basic one-operand with integer projection --
@@ -165,10 +154,10 @@ GENTPROT( int,      i, funcname )
 
 #define INSERT_GENTPROTI_BASIC( funcname ) \
 \
-GENTPROTI( float,    int, s, i, funcname ) \
-GENTPROTI( double,   int, d, i, funcname ) \
-GENTPROTI( scomplex, int, c, i, funcname ) \
-GENTPROTI( dcomplex, int, z, i, funcname )
+GENTPROTI( float,    gint_t, s, i, funcname ) \
+GENTPROTI( double,   gint_t, d, i, funcname ) \
+GENTPROTI( scomplex, gint_t, c, i, funcname ) \
+GENTPROTI( dcomplex, gint_t, z, i, funcname )
 
 
 // -- Basic one-operand with real projection --
@@ -187,10 +176,10 @@ GENTPROTR( dcomplex, double, z, d, funcname )
 
 #define INSERT_GENTPROTRI_BASIC( funcname ) \
 \
-GENTPROTRI( float,    float,  int, s, s, i, funcname ) \
-GENTPROTRI( double,   double, int, d, d, i, funcname ) \
-GENTPROTRI( scomplex, float,  int, c, s, i, funcname ) \
-GENTPROTRI( dcomplex, double, int, z, d, i, funcname )
+GENTPROTRI( float,    float,  gint_t, s, s, i, funcname ) \
+GENTPROTRI( double,   double, gint_t, d, d, i, funcname ) \
+GENTPROTRI( scomplex, float,  gint_t, c, s, i, funcname ) \
+GENTPROTRI( dcomplex, double, gint_t, z, d, i, funcname )
 
 
 

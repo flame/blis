@@ -33,7 +33,7 @@
 */
 
 
-err_t bli_check_error_code_helper( int code, char* file, unsigned int line );
+err_t bli_check_error_code_helper( gint_t code, char* file, guint_t line );
 
 err_t bli_check_valid_error_level( errlev_t level );
 

@@ -38,9 +38,9 @@
 
 #include "bli_f2c.h"
 
-real r_imag(complex *z)
+real r_imag(singlecomplex *z)
 {
-    return(z->i);
+    return(z->imag);
 }
 
 #endif

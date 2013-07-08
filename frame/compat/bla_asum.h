@@ -40,8 +40,8 @@
 #define GENTPROTR2( ftype_x, ftype_r, chx, chr, blasname ) \
 \
 ftype_r PASTEF772(chr,chx,blasname)( \
-                                     fint*    n, \
-                                     ftype_x* x, fint* incx  \
+                                     f77_int* n, \
+                                     ftype_x* x, f77_int* incx  \
                                    ); \
 
 #ifdef BLIS_ENABLE_BLAS2BLIS

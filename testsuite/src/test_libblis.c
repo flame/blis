@@ -293,7 +293,7 @@ void libblis_test_read_params_file( char* input_filename, test_params_t* params 
 
 	// Read the general stride "spacing".
 	libblis_test_read_next_line( buffer, input_stream );
-	sscanf( buffer, "%d ", &(params->gs_spacing) );
+	sscanf( buffer, "%u ", &(params->gs_spacing) );
 
 	// Overwrite the existing storage character arrays with the sets provided.
 	strcpy( libblis_test_store_chars[BLIS_TEST_MATRIX_OPERAND],
@@ -586,7 +586,7 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "num vector storage schemes   %u\n", params->n_vstorage );
 	libblis_test_fprintf_c( os, "storage[ vector ]            %s\n", params->storage[ BLIS_TEST_VECTOR_OPERAND ] );
 	libblis_test_fprintf_c( os, "mix all storage schemes?     %u\n", params->mix_all_storage );
-	libblis_test_fprintf_c( os, "general stride spacing       %d\n", params->gs_spacing );
+	libblis_test_fprintf_c( os, "general stride spacing       %u\n", params->gs_spacing );
 	libblis_test_fprintf_c( os, "num datatypes                %u\n", params->n_datatypes );
 	libblis_test_fprintf_c( os, "datatype[0]                  %d (%c)\n", params->datatype[0],
 	                                                                params->datatype_char[0] );

@@ -42,10 +42,10 @@
 #define GENTFUNCCO( ftype, ftype_r, ch, chr, blasname, blisname ) \
 \
 void PASTEF77(ch,blasname)( \
-                            fchar*    uploa, \
-                            fint*     m, \
+                            f77_char* uploa, \
+                            f77_int*  m, \
                             ftype_r*  alpha, \
-                            ftype*    x, fint* incx, \
+                            ftype*    x, f77_int* incx, \
                             ftype*    a  \
                           ) \
 { \

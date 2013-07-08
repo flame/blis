@@ -134,7 +134,6 @@
 		{ \
 			if ( (doff_t)j - (doff_t)i <= diagoff ) \
 			{ \
-				/*printf( "copying elem (%u,%u) with diagoff %d\n", i, j, diagoff );*/ \
 				bli_ddadds( *(x + i*rs_x + j*cs_x), \
 				            *(y + i*rs_y + j*cs_y) ); \
 			} \

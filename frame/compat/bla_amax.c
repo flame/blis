@@ -38,18 +38,19 @@
 //
 // Define BLAS-to-BLIS interfaces.
 //
-#undef  GENTFUNC2I
-#define GENTFUNC2I( ftype_x, ftype_i, chx, chi, blasname, blisname ) \
+#undef  GENTFUNC
+#define GENTFUNC( ftype_x, chx, blasname, blisname ) \
 \
-ftype_i PASTEF772(chi,chx,blasname)( \
-                                     fint*    n, \
-                                     ftype_x* x, fint* incx  \
-                                   ) \
+f77_int PASTEF772(i,chx,blasname)( \
+                                   f77_int* n, \
+                                   ftype_x* x, f77_int* incx  \
+                                 ) \
 { \
 	dim_t    n0; \
 	ftype_x* x0; \
 	inc_t    incx0; \
-	ftype_i  index; \
+	gint_t   bli_index; \
+	f77_int  f77_index; \
 \
 	/* Convert negative values of n to zero. */ \
 	bli_convert_blas_dim1( *n, n0 ); \
@@ -61,16 +62,16 @@ ftype_i PASTEF772(chi,chx,blasname)( \
 	/* Call BLIS interface. */ \
 	PASTEMAC(chx,abmaxv)( n0, \
 	                      x0, incx0, \
-	                      &index ); \
+	                      &bli_index ); \
 \
 	/* Convert zero-based BLIS (C) index to one-based BLAS (Fortran)
 	   index. */ \
-	index++; \
+	f77_index = bli_index + 1; \
 \
-	return index; \
+	return f77_index; \
 }
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
-INSERT_GENTFUNC2I_BLAS( amax, abmaxv )
+INSERT_GENTFUNC_BLAS( amax, abmaxv )
 #endif
 

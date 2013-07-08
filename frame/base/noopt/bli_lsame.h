@@ -32,4 +32,4 @@
 
 */
 
-logical bli_lsame( char* ca, char* cb, ftnlen ca_len, ftnlen cb_len );
+logical bli_lsame( character* ca, character* cb, ftnlen ca_len, ftnlen cb_len );

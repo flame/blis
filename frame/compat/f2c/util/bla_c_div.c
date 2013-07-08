@@ -38,16 +38,16 @@
 
 #include "bli_f2c.h"
 
-void c_div(complex *cp, complex *ap, complex *bp)
+void c_div(singlecomplex *cp, singlecomplex *ap, singlecomplex *bp)
 {
-	complex a = *ap;
-	complex b = *bp;
-	real    temp;
+	singlecomplex a = *ap;
+	singlecomplex b = *bp;
+	real          temp;
 
-	temp = b.r * b.r + b.i * b.i;
+	temp = b.real * b.real + b.imag * b.imag;
 
-	cp->r = ( a.r * b.r + a.i * b.i ) / temp;
-	cp->i = ( a.i * b.r - a.r * b.i ) / temp;
+	cp->real = ( a.real * b.real + a.imag * b.imag ) / temp;
+	cp->imag = ( a.imag * b.real - a.real * b.imag ) / temp;
 }
 
 #endif

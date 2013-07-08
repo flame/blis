@@ -57,7 +57,7 @@
 
 #define bli_i2 \
 \
-	( ( int*      ) bli_obj_buffer_for_const( BLIS_INT,      BLIS_TWO ) )
+	( ( gint_t*   ) bli_obj_buffer_for_const( BLIS_INT,      BLIS_TWO ) )
 
 // 1
 
@@ -79,7 +79,7 @@
 
 #define bli_i1 \
 \
-	( ( int*      ) bli_obj_buffer_for_const( BLIS_INT,      BLIS_ONE ) )
+	( ( gint_t*   ) bli_obj_buffer_for_const( BLIS_INT,      BLIS_ONE ) )
 
 // 0
 
@@ -101,7 +101,7 @@
 
 #define bli_i0 \
 \
-	( ( int*      ) bli_obj_buffer_for_const( BLIS_INT,      BLIS_ZERO ) )
+	( ( gint_t*   ) bli_obj_buffer_for_const( BLIS_INT,      BLIS_ZERO ) )
 
 // -1
 
@@ -123,7 +123,7 @@
 
 #define bli_im1 \
 \
-	( ( int*      ) bli_obj_buffer_for_const( BLIS_INT,      BLIS_MINUS_ONE ) )
+	( ( gint_t*   ) bli_obj_buffer_for_const( BLIS_INT,      BLIS_MINUS_ONE ) )
 
 // -2
 
@@ -145,7 +145,7 @@
 
 #define bli_im2 \
 \
-	( ( int*      ) bli_obj_buffer_for_const( BLIS_INT,      BLIS_MINUS_TWO ) )
+	( ( gint_t*   ) bli_obj_buffer_for_const( BLIS_INT,      BLIS_MINUS_TWO ) )
 
 // set to constant
 

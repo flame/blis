@@ -66,7 +66,7 @@ bool_t bli_error_checking_is_enabled()
     return bli_error_checking_level() != BLIS_NO_ERROR_CHECKING;
 }
 
-char* bli_error_string_for_code( int code )
+char* bli_error_string_for_code( gint_t code )
 {
 	return bli_error_string[-code];
 }
@@ -78,10 +78,10 @@ void bli_abort( void )
 	abort();
 }
 
-void bli_print_msg( char* str, char* file, unsigned int line )
+void bli_print_msg( char* str, char* file, guint_t line )
 {
 	fprintf( stderr, "\n" );
-	fprintf( stderr, "libblis: %s (line %d):\n", file, line );
+	fprintf( stderr, "libblis: %s (line %u):\n", file, line );
 	fprintf( stderr, "libblis: %s\n", str );
 	fflush( stderr );
 }

@@ -146,7 +146,7 @@ void bli_mem_acquire_m( siz_t     req_size,
 	pool_t* pool;
 	void**  block_ptrs;
 	void*   block;
-	int     i;
+	gint_t  i;
 
 
 	if ( buf_type == BLIS_BUFFER_FOR_GEN_USE )
@@ -239,7 +239,7 @@ void bli_mem_release( mem_t* mem )
 	pool_t*   pool;
 	void**    block_ptrs;
 	void*     block;
-	int       i;
+	gint_t    i;
 
 	// Extract the address of the memory block we are trying to
 	// release.

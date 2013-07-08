@@ -40,12 +40,12 @@
 #define GENTPROTDOT( ftype, chxy, chc, blasname ) \
 \
 void PASTEF772(chxy,blasname,chc)( \
-                                   fint*   m, \
-                                   fint*   n, \
-                                   ftype*  alpha, \
-                                   ftype*  x, fint* incx, \
-                                   ftype*  y, fint* incy, \
-                                   ftype*  a, fint* lda   \
+                                   f77_int* m, \
+                                   f77_int* n, \
+                                   ftype*   alpha, \
+                                   ftype*   x, f77_int* incx, \
+                                   ftype*   y, f77_int* incy, \
+                                   ftype*   a, f77_int* lda   \
                                  );
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
