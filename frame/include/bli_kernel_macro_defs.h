@@ -243,6 +243,12 @@
 #define bli_cndup    BLIS_DEFAULT_NUM_DUPL_C
 #define bli_zndup    BLIS_DEFAULT_NUM_DUPL_Z
 
+// Incremental packing factors
+
+#define bli_snifac   BLIS_DEFAULT_NI_FAC
+#define bli_dnifac   BLIS_DEFAULT_NI_FAC
+#define bli_cnifac   BLIS_DEFAULT_NI_FAC
+#define bli_znifac   BLIS_DEFAULT_NI_FAC
 
 
 #endif 

@@ -34,7 +34,9 @@
 
 #include "blis.h"
 
-extern gemm_t* gemm_cntl;
+extern gemm_t*  gemm_cntl;
+extern gemm_t*  gemm_cntl_packa;
+extern blksz_t* gemm_mc;
 
 //
 // Define object-based interface.
@@ -109,6 +111,15 @@ void bli_gemm( obj_t*  alpha,
 
 	// Choose the control tree.
 	cntl = gemm_cntl;
+
+#if 0
+	if ( bli_obj_length_after_trans( c_local ) <=
+	     bli_blksz_total_for_obj( &c_local, gemm_mc ) )
+	{
+		cntl = gemm_cntl_packa;
+
+	}
+#endif
 
 	// Invoke the internal back-end.
 	bli_gemm_int( &alpha_local,

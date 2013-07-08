@@ -60,7 +60,7 @@
 
 #define BLIS_DEFAULT_MC_D              384
 #define BLIS_DEFAULT_KC_D              256
-#define BLIS_DEFAULT_NC_D              600
+#define BLIS_DEFAULT_NC_D              4096
 
 #define BLIS_DEFAULT_MC_C              128
 #define BLIS_DEFAULT_KC_C              256
@@ -176,7 +176,7 @@
 // used by certain blocked variants. But when the *are* used, they MUST be
 // be an integer multiple of NR!
 
-#define BLIS_DEFAULT_NI_FAC            16
+#define BLIS_DEFAULT_NI_FAC            1
 #define BLIS_DEFAULT_NI_S              (BLIS_DEFAULT_NI_FAC * BLIS_DEFAULT_NR_S)
 #define BLIS_DEFAULT_NI_D              (BLIS_DEFAULT_NI_FAC * BLIS_DEFAULT_NR_D)
 #define BLIS_DEFAULT_NI_C              (BLIS_DEFAULT_NI_FAC * BLIS_DEFAULT_NR_C)

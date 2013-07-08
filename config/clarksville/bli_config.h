@@ -62,7 +62,7 @@
 // contiguous memory pools.
 #define BLIS_NUM_MC_X_KC_BLOCKS          BLIS_MAX_NUM_THREADS
 #define BLIS_NUM_KC_X_NC_BLOCKS          1
-#define BLIS_NUM_MC_X_NC_BLOCKS          0
+#define BLIS_NUM_MC_X_NC_BLOCKS          1
 
 // The maximum preload byte offset is used to pad the end of the contiguous
 // memory pools so that the micro-kernel, when computing with the end of the

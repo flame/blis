@@ -37,11 +37,17 @@
 extern scalm_t*   scalm_cntl;
 
 gemm_t*           gemm_cntl;
+gemm_t*           gemm_cntl_packa;
 
 gemm_t*           gemm_cntl_bp_ke;
 gemm_t*           gemm_cntl_op_bp;
 gemm_t*           gemm_cntl_mm_op;
 gemm_t*           gemm_cntl_vl_mm;
+
+gemm_t*           gemm_cntl_bp_ke5;
+gemm_t*           gemm_cntl_pm_bp;
+gemm_t*           gemm_cntl_mm_pm;
+gemm_t*           gemm_cntl_vl_mm5;
 
 packm_t*          gemm_packa_cntl;
 packm_t*          gemm_packb_cntl;
@@ -138,7 +144,7 @@ void bli_gemm_cntl_init()
 	                           FALSE, // reverse iteration if upper?
 	                           FALSE, // reverse iteration if lower?
 	                           BLIS_PACKED_COLUMNS,
-	                           BLIS_BUFFER_FOR_GEN_USE );
+	                           BLIS_BUFFER_FOR_C_PANEL );
 
 	gemm_unpackc_cntl
 	=
@@ -146,6 +152,10 @@ void bli_gemm_cntl_init()
 	                             BLIS_VARIANT1,
 	                             NULL ); // no blocksize needed
 
+
+	//
+	// Create a control tree for packing A and B, and streaming C.
+	//
 
 	// Create control tree object for lowest-level block-panel kernel.
 	gemm_cntl_bp_ke
@@ -160,7 +170,6 @@ void bli_gemm_cntl_init()
 	gemm_cntl_op_bp
 	=
 	bli_gemm_cntl_obj_create( BLIS_BLOCKED,
-	                          //BLIS_VARIANT4,  // var1 with incremental pack in iter 0
 	                          BLIS_VARIANT1,
 	                          gemm_mc,
 	                          gemm_ni,
@@ -180,7 +189,7 @@ void bli_gemm_cntl_init()
 	                          gemm_kc,
 	                          NULL,
 	                          NULL,
-	                          NULL, 
+	                          NULL,
 	                          NULL,
 	                          NULL,
 	                          gemm_cntl_op_bp,
@@ -203,6 +212,60 @@ void bli_gemm_cntl_init()
 
 	// Alias the "master" gemm control tree to a shorter name.
 	gemm_cntl = gemm_cntl_vl_mm;
+
+
+	//
+	// Create a control tree for packing A, and streaming B and C.
+	//
+
+	gemm_cntl_bp_ke5
+	=
+	bli_gemm_cntl_obj_create( BLIS_UNB_OPT,
+	                          BLIS_VARIANT5,
+	                          NULL, NULL, NULL, NULL,
+	                          NULL, NULL, NULL, NULL );
+	gemm_cntl_pm_bp
+	=
+	bli_gemm_cntl_obj_create( BLIS_BLOCKED,
+	                          BLIS_VARIANT3,
+	                          gemm_kc,
+	                          NULL,
+	                          NULL,
+	                          gemm_packa_cntl,
+	                          NULL,
+	                          //gemm_packc_cntl,
+	                          NULL,
+	                          gemm_cntl_bp_ke5,
+	                          //gemm_unpackc_cntl );
+	                          NULL );
+
+	gemm_cntl_mm_pm
+	=
+	bli_gemm_cntl_obj_create( BLIS_BLOCKED,
+	                          BLIS_VARIANT1,
+	                          gemm_mc,
+	                          NULL,
+	                          NULL,
+	                          NULL,
+	                          NULL,
+	                          NULL,
+	                          gemm_cntl_pm_bp,
+	                          NULL );
+
+	gemm_cntl_vl_mm5
+	=
+	bli_gemm_cntl_obj_create( BLIS_BLOCKED,
+	                          BLIS_VARIANT2,
+	                          gemm_nc,
+	                          NULL,
+	                          NULL,
+	                          NULL,
+	                          NULL,
+	                          NULL,
+	                          gemm_cntl_mm_pm,
+	                          NULL );
+
+	gemm_cntl_packa = gemm_cntl_vl_mm5;
 }
 
 void bli_gemm_cntl_finalize()
@@ -224,6 +287,11 @@ void bli_gemm_cntl_finalize()
 	bli_cntl_obj_free( gemm_cntl_op_bp );
 	bli_cntl_obj_free( gemm_cntl_mm_op );
 	bli_cntl_obj_free( gemm_cntl_vl_mm );
+
+	bli_cntl_obj_free( gemm_cntl_bp_ke5 );
+	bli_cntl_obj_free( gemm_cntl_pm_bp );
+	bli_cntl_obj_free( gemm_cntl_mm_pm );
+	bli_cntl_obj_free( gemm_cntl_vl_mm5 );
 }
 
 gemm_t* bli_gemm_cntl_obj_create( impl_t     impl_type,

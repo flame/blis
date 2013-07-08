@@ -534,6 +534,15 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	                        BLIS_EXTEND_NR_D,
 	                        BLIS_EXTEND_NR_C,
 	                        BLIS_EXTEND_NR_Z );
+/*
+	libblis_test_fprintf_c( os, "\n" );
+	libblis_test_fprintf_c( os, "level-3 incremental packing blocksizes          \n" );
+	libblis_test_fprintf_c( os, "  n dimension            %5u %5u %5u %5u\n",
+	                        BLIS_DEFAULT_NI_S,
+	                        BLIS_DEFAULT_NI_D,
+	                        BLIS_DEFAULT_NI_C,
+	                        BLIS_DEFAULT_NI_Z );
+*/
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "level-3 packing duplication                     \n" );
 	libblis_test_fprintf_c( os, "  dupl. factors for B    %5u %5u %5u %5u\n",

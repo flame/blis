@@ -373,8 +373,12 @@ void bli_packm_init_pack( bool_t    densify,
 	}
 	else
 	{
-		// If the pack schema is something else, we assume stride information
-		// of p is set later on, by the implementation.
+		// NOTE: When implementing block storage, we only need to implement
+		// the following two cases:
+		// - row-stored blocks in row-major order
+		// - column-stored blocks in column-major order
+		// The other two combinations coincide with that of packed row-panel
+		// and packed column- panel storage.
 
 		size_p = 0;
 	}
