@@ -35,7 +35,98 @@
 #ifndef BLIS_TYPE_DEFS_H
 #define BLIS_TYPE_DEFS_H
 
+
+//
+// -- BLIS basic types ---------------------------------------------------------
+//
+
+#ifdef __cplusplus
+  // For C++, include stdint.h.
+  #include <stdint.h>
+#elif __STDC_VERSION__ == 199901L
+  // For C99, include stdint.h.
+  #include <stdint.h>
+#else
+  // Since stdint.h is not available, we have to manually typedef the
+  // types we will use.
+  typedef   signed long int  int64_t;
+  typedef unsigned long int  uint64_t;
+#endif
+
+// -- General-purpose integers --
+
+typedef     int64_t gint_t;  // general signed integer
+typedef    uint64_t guint_t; // general unsigned integer
+
+// -- Boolean type --
+
+typedef      gint_t bool_t;
+
+// -- Special-purpose integers --
+
+// This cpp guards provide a temporary hack to allow libflame
+// interoperability with BLIS.
+#ifndef _DEFINED_DIM_T
+#define _DEFINED_DIM_T
+//typedef unsigned long int dim_t;  // dimension type
+typedef     guint_t dim_t;   // dimension type
+#endif
+typedef     guint_t inc_t;   // increment/stride type
+typedef      gint_t doff_t;  // diagonal offset type
+typedef     guint_t siz_t;   // byte size type
+typedef     guint_t info_t;  // object information bit field
+
+// -- Complex types --
+
+// This cpp guards provide a temporary hack to allow libflame
+// interoperability with BLIS.
+#ifndef _DEFINED_SCOMPLEX
+#define _DEFINED_SCOMPLEX
+typedef struct
+{
+	float  real;
+	float  imag;
+} scomplex;
+#endif
+
+// This cpp guards provide a temporary hack to allow libflame
+// interoperability with BLIS.
+#ifndef _DEFINED_DCOMPLEX
+#define _DEFINED_DCOMPLEX
+typedef struct
+{
+	double real;
+	double imag;
+} dcomplex;
+#endif
+
+// -- Atom type --
+
+// Note: atom types are used to hold "bufferless" scalar object values. Note
+// that it needs to be as large as the largest possible scalar value we might
+// want to hold. Thus, for now, it is a dcomplex.
+typedef dcomplex atom_t;
+
+// -- Fortran-77 types --
+
+// Note: These types are used only by BLAS compatibility layer.
+#ifdef BLIS_ENABLE_BLAS2BLIS
+#ifdef BLIS_ENABLE_BLAS2BLIS_INT64
+typedef int64_t   f77_int;
+#else
+typedef int32_t   f77_int;
+#endif
+typedef char      f77_char;
+typedef float     f77_float;
+typedef double    f77_double;
+typedef scomplex  f77_scomplex;
+typedef dcomplex  f77_dcomplex;
+#endif
+
+
+//
 // -- BLIS info bit field masks ------------------------------------------------
+//
 
 #define BLIS_DOMAIN_BIT                    0x01
 #define BLIS_PRECISION_BIT                 0x02
@@ -59,7 +150,9 @@
 #define BLIS_STRUC_BITS                    0x1800000
 
 
+//
 // -- BLIS enumerated type value definitions -----------------------------------
+//
 
 #define BLIS_BITVAL_REAL                   0x00
 #define BLIS_BITVAL_COMPLEX                0x01
@@ -108,9 +201,11 @@
 #define BLIS_PACK_BUFFER_SHIFT             21
 
 
+//
 // -- BLIS enumerated type definitions -----------------------------------------
+//
 
-// Operational parameter types
+// -- Operational parameter types --
 
 typedef enum
 {
@@ -161,7 +256,7 @@ typedef enum
 } struc_t;
 
 
-// Data type
+// -- Data type --
 
 typedef enum
 {
@@ -186,7 +281,7 @@ typedef enum
 } prec_t;
 
 
-// Pack schema type
+// -- Pack schema type --
 
 typedef enum
 {
@@ -201,7 +296,7 @@ typedef enum
 } pack_t;
 
 
-// Pack order type
+// -- Pack order type --
 
 typedef enum
 {
@@ -213,7 +308,7 @@ typedef enum
 } packord_t;
 
 
-// Pack buffer type
+// -- Pack buffer type --
 
 typedef enum
 {
@@ -224,79 +319,11 @@ typedef enum
 } packbuf_t;
 
 
-// -- BLIS basic types ---------------------------------------------------------
-
-// General integers
-
-typedef     int64_t gint_t;  // general signed integer
-typedef    uint64_t guint_t; // general unsigned integer
-
-// Boolean type
-
-typedef      gint_t bool_t;
-
-// This cpp guards provide a temporary hack to allow libflame
-// interoperability with BLIS.
-#ifndef _DEFINED_DIM_T
-#define _DEFINED_DIM_T
-//typedef unsigned long int dim_t;  // dimension type
-typedef     guint_t dim_t;   // dimension type
-#endif
-typedef     guint_t inc_t;   // increment/stride type
-typedef      gint_t doff_t;  // diagonal offset type
-typedef     guint_t siz_t;   // byte size type
-typedef     guint_t info_t;  // object information bit field
-
-// Complex types
-
-// This cpp guards provide a temporary hack to allow libflame
-// interoperability with BLIS.
-#ifndef _DEFINED_SCOMPLEX
-#define _DEFINED_SCOMPLEX
-typedef struct
-{
-	float  real;
-	float  imag;
-} scomplex;
-#endif
-
-// This cpp guards provide a temporary hack to allow libflame
-// interoperability with BLIS.
-#ifndef _DEFINED_DCOMPLEX
-#define _DEFINED_DCOMPLEX
-typedef struct
-{
-	double real;
-	double imag;
-} dcomplex;
-#endif
-
-// Atom type
-// Note: atom types are used to hold "bufferless" scalar object values. Note
-// that it needs to be as large as the largest possible scalar value we might
-// want to hold. Thus, for now, it is a dcomplex.
-
-typedef dcomplex atom_t;
-
-// Fortran-77 types (used only by blas2blis compatibility layer)
-
-#ifdef BLIS_ENABLE_BLAS2BLIS
-#ifdef BLIS_ENABLE_BLAS2BLIS_INT64
-typedef int64_t   f77_int;
-#else
-typedef int32_t   f77_int;
-#endif
-typedef char      f77_char;
-typedef float     f77_float;
-typedef double    f77_double;
-typedef scomplex  f77_scomplex;
-typedef dcomplex  f77_dcomplex;
-#endif
-
-
+//
 // -- BLIS misc. structure types -----------------------------------------------
+//
 
-// Memory pool type
+// -- Memory pool type --
 
 typedef struct
 {
@@ -306,7 +333,7 @@ typedef struct
     siz_t  block_size;
 } pool_t;
 
-// Memory object type
+// -- Memory object type --
 
 typedef struct mem_s
 {
@@ -316,7 +343,7 @@ typedef struct mem_s
 	siz_t     size;
 } mem_t;
 
-// Blocksize object type
+// -- Blocksize object type --
 
 typedef struct blksz_s
 {
@@ -328,7 +355,9 @@ typedef struct blksz_s
 } blksz_t;
 
 
+//
 // -- BLIS object type definitions ---------------------------------------------
+//
 
 /*
   info field description
@@ -471,9 +500,11 @@ typedef struct obj_s
 }
 
 
+//
 // -- Other BLIS enumerated type definitions -----------------------------------
+//
 
-// Subpartition type
+// -- Subpartition type --
 
 typedef enum
 {
@@ -496,7 +527,7 @@ typedef enum
 } subpart_t;
 
 
-// Machine parameter types
+// -- Machine parameter types --
 
 typedef enum
 {
@@ -518,7 +549,7 @@ typedef enum
 #define BLIS_MACH_PARAM_LAST   BLIS_MACH_EPS2
 
 
-// Error types
+// -- Error types --
 
 typedef enum
 {

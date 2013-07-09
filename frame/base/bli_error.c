@@ -81,7 +81,7 @@ void bli_abort( void )
 void bli_print_msg( char* str, char* file, guint_t line )
 {
 	fprintf( stderr, "\n" );
-	fprintf( stderr, "libblis: %s (line %u):\n", file, line );
+	fprintf( stderr, "libblis: %s (line %lu):\n", file, line );
 	fprintf( stderr, "libblis: %s\n", str );
 	fflush( stderr );
 }

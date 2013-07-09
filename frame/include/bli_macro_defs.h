@@ -36,6 +36,19 @@
 #define BLIS_MACRO_DEFS_H
 
 
+// -- Undefine restrict for C++ and C89/90 --
+
+#ifdef __cplusplus
+  // Language is C++; define restrict as nothing.
+  #define restrict
+#elif __STDC_VERSION__ == 199901L
+  // Language is C99; do nothing since restrict is recognized.
+#else
+  // Language is pre-C99; define restrict as nothing.
+  #define restrict
+#endif
+
+
 // -- Boolean values --
 
 #ifndef TRUE
