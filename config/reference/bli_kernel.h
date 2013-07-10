@@ -322,10 +322,6 @@
 
 #define AXPYV_KERNEL         axpyv_unb_var1
 
-// -- copynzv --
-
-#define COPYNZV_KERNEL       copynzv_unb_var1
-
 // -- copyv --
 
 #define COPYV_KERNEL         copyv_unb_var1
