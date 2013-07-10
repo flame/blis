@@ -128,6 +128,7 @@ void bli_unpackv_int( obj_t*     p,
 	// Now, if necessary, we cast the contents of c to vector a. If casting
 	// was not necessary, then we are done because the call to the unpackv
 	// implementation would have unpacked directly to vector a.
+/*
 	if ( bli_obj_datatype( *p ) != bli_obj_datatype( *a ) )
 	{
 		// Copy/typecast vector c to vector a.
@@ -144,7 +145,18 @@ void bli_unpackv_int( obj_t*     p,
 		// that I can think of).
 		bli_copynzv( &c,
 		             a );
+
+		// NOTE: The above code/comment is outdated. What should happen is
+		// as follows:
+		// - If dt(a) is complex and dt(p) is real, then create an alias of
+		//   a and then tweak it so that it looks like a real domain object.
+		//   This will involve:
+		//   - projecting the datatype to real domain
+		//   - scaling both the row and column strides by 2
+		//   ALL OF THIS should be done in the front-end, NOT here, as
+		//   unpackv() won't even be needed in that case.
 	}
+*/
 }
 
 /*

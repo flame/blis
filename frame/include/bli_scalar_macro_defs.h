@@ -67,9 +67,6 @@
 #include "bli_copyjs.h"
 #include "bli_copycjs.h"
 
-#include "bli_copynzs.h"
-#include "bli_copynzjs.h"
-
 #include "bli_dots.h"
 #include "bli_dotjs.h"
 

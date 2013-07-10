@@ -146,6 +146,16 @@ void bli_unpackm_int( obj_t*     p,
 		// that I can think of).
 		bli_copynzm( &c,
 		             a );
+
+		// NOTE: The above code/comment is outdated. What should happen is
+		// as follows:
+		// - If dt(a) is complex and dt(p) is real, then create an alias of
+		//   a and then tweak it so that it looks like a real domain object.
+		//   This will involve:
+		//   - projecting the datatype to real domain
+		//   - scaling both the row and column strides by 2
+		//   ALL OF THIS should be done in the front-end, NOT here, as
+		//   unpackm() won't even be needed in that case.
 	}
 */
 }
