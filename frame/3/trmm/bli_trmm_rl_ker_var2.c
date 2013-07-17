@@ -199,13 +199,6 @@ void PASTEMAC(ch,varname)( \
 	   it is implicitly zero. So we do nothing. */ \
 	if ( bli_is_strictly_above_diag_n( diagoffb, k, n ) ) return; \
 \
-	/* For consistency with the trsm macro-kernels, we inflate k to be a
-	   multiple of NR, if necessary. This is needed because we typically
-	   use the same packm variant for trmm as for trsm, and trsm has this
-	   constraint that k must be a multiple of NR so that it can safely
-	   handle bottom-right corner edges of the triangle. */ \
-	if ( k % NR != 0 ) k += NR - ( k % NR ); \
-\
 	/* If there is a zero region above where the diagonal of B intersects
 	   the left edge of the panel, adjust the pointer to A and treat this
 	   case as if the diagonal offset were zero. Note that we don't need to
@@ -226,6 +219,13 @@ void PASTEMAC(ch,varname)( \
 	{ \
 		n = diagoffb + k; \
 	} \
+\
+	/* For consistency with the trsm macro-kernels, we inflate k to be a
+	   multiple of NR, if necessary. This is needed because we typically
+	   use the same packm variant for trmm as for trsm, and trsm has this
+	   constraint that k must be a multiple of NR so that it can safely
+	   handle bottom-right corner edges of the triangle. */ \
+	if ( k % NR != 0 ) k += NR - ( k % NR ); \
 \
 	/* Clear the temporary C buffer in case it has any infs or NaNs. */ \
 	PASTEMAC(ch,set0s_mxn)( MR, NR, \

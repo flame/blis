@@ -198,13 +198,6 @@ void PASTEMAC(ch,varname)( \
 	   it is implicitly zero. So we do nothing. */ \
 	if ( bli_is_strictly_below_diag_n( diagoffa, m, k ) ) return; \
 \
-	/* For consistency with the trsm macro-kernels, we inflate k to be a
-	   multiple of MR, if necessary. This is needed because we typically
-	   use the same packm variant for trmm as for trsm, and trsm has this
-	   constraint that k must be a multiple of MR so that it can safely
-	   handle bottom-right corner edges of the triangle. */ \
-	if ( k % MR != 0 ) k += MR - ( k % MR ); \
-\
 	/* If there is a zero region to the left of where the diagonal of A
 	   intersects the top edge of the block, adjust the pointer to B and
 	   treat this case as if the diagonal offset were zero. Note that we
@@ -223,8 +216,15 @@ void PASTEMAC(ch,varname)( \
 	   executing. */ \
     if ( -diagoffa + k < m ) \
     { \
-        n = -diagoffa + k; \
+        m = -diagoffa + k; \
     } \
+\
+	/* For consistency with the trsm macro-kernels, we inflate k to be a
+	   multiple of MR, if necessary. This is needed because we typically
+	   use the same packm variant for trmm as for trsm, and trsm has this
+	   constraint that k must be a multiple of MR so that it can safely
+	   handle bottom-right corner edges of the triangle. */ \
+	if ( k % MR != 0 ) k += MR - ( k % MR ); \
 \
 	/* Clear the temporary C buffer in case it has any infs or NaNs. */ \
 	PASTEMAC(ch,set0s_mxn)( MR, NR, \

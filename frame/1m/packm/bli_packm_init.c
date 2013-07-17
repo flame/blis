@@ -304,7 +304,8 @@ void bli_packm_init_pack( bool_t    densify,
 
 		// The "column stride" of a row panel packed object is interpreted as
 		// the column stride WITHIN a panel. Thus, this is equal to the panel
-		// dimension plus an extension (which may be zero).
+		// dimension plus an extension (which may be zero, meaning there is
+		// no extension).
 		cs_p = mr_pack_dim;
 
 		// The "row stride" of a row panel packed object is interpreted
@@ -315,7 +316,9 @@ void bli_packm_init_pack( bool_t    densify,
 		// distance between the (0,0) element of panel k and the (0,0)
 		// element of panel k+1. We use the padded width computed above to
 		// allow for zero-padding (if necessary/desired) along the far end
-		// of each panel (ie: the right edge of the matrix).
+		// of each panel (ie: the right edge of the matrix). Zero-padding
+		// can also occur along the long edge of the last panel if the m
+		// dimension of the matrix is not a whole multiple of MR.
 		ps_p = cs_p * n_p_pad;
 
 		// Align the panel dimension according to the contiguous memory
@@ -343,7 +346,8 @@ void bli_packm_init_pack( bool_t    densify,
 
 		// The "row stride" of a column panel packed object is interpreted as
 		// the row stride WITHIN a panel. Thus, this is equal to the panel
-		// dimension plus an extension (which may be zero).
+		// dimension plus an extension (which may be zero, meaning there is
+		// no extension).
 		rs_p = nr_pack_dim;
 
 		// The "column stride" of a column panel packed object is interpreted
@@ -354,7 +358,9 @@ void bli_packm_init_pack( bool_t    densify,
 		// distance between the (0,0) element of panel k and the (0,0)
 		// element of panel k+1. We use the padded length computed above to
 		// allow for zero-padding (if necessary/desired) along the far end
-		// of each panel (ie: the bottom edge of the matrix).
+		// of each panel (ie: the bottom edge of the matrix). Zero-padding
+		// can also occur along the long edge of the last panel if the n
+		// dimension of the matrix is not a whole multiple of NR.
 		ps_p = m_p_pad * rs_p;
 
 		// Align the panel dimension according to the contiguous memory

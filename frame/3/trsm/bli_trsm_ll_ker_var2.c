@@ -193,19 +193,6 @@ void PASTEMAC(ch,varname)( \
 	   So we do nothing. */ \
 	if ( bli_is_strictly_above_diag_n( diagoffa, m, k ) ) return; \
 \
-	/* The first thing we do is check the k dimension, which needs to be
-	   a multiple of MR. If k isn't a multiple of MR, we adjust it higher.
-	   This allows us to use a single micro-kernel, which performs an
-	   MR x MR triangular solve, even for cases when k isn't actually a
-	   multiple of MR. The key is that when A was packed, its edges were
-	   first zero padded, and further, the panel that stores the bottom-
-	   right corner of the matrix has its diagonal extended into the
-	   zero-padded region (as identity). This allows the trsm of that
-	   bottom-right panel to proceed without producing any infs or NaNs
-	   or any other numerical funny business that would infect the "good"
-	   values of the corresponding block of B. */ \
-	if ( k % MR != 0 ) k += MR - ( k % MR ); \
-\
 	/* If there is a zero region above where the diagonal of A intersects the
 	   left edge of the block, adjust the pointer to C and treat this case as
 	   if the diagonal offset were zero. This skips over the region (in
@@ -218,6 +205,23 @@ void PASTEMAC(ch,varname)( \
 		diagoffa = -diagoffa % MR; \
 		c_cast   = c_cast + (i  )*rs_c; \
 	} \
+\
+	/* Check the k dimension, which needs to be a multiple of MR. If k
+	   isn't a multiple of MR, we adjust it higher to satisfy the micro-
+	   kernel, which is expecting to perform an MR x MR triangular solve.
+	   This adjustment of k is consistent with what happened when A was
+	   packed: all of its bottom/right edges were zero-padded, and
+	   furthermore, the panel that stores the bottom-right corner of the
+	   matrix has its diagonal extended into the zero-padded region (as
+	   identity). This allows the trsm of that bottom-right panel to
+	   proceed without producing any infs or NaNs that would infect the
+	   "good" values of the corresponding block of B. */ \
+	if ( k % MR != 0 ) k += MR - ( k % MR ); \
+\
+	/* NOTE: We don't need to check that m is a multiple of PACKMR since we
+	   know that the underlying buffer was already allocated to have an m
+	   dimension that is a multiple of PACKMR, with the region between the
+	   last row and the next multiple of MR zero-padded accordingly. */ \
 \
 	/* Clear the temporary C buffer in case it has any infs or NaNs. */ \
 	PASTEMAC(ch,set0s_mxn)( MR, NR, \
