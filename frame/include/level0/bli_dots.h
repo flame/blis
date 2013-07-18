@@ -42,360 +42,100 @@
 // - The second char encodes the type of y.
 // - The third char encodes the type of rho.
 
-// -- (xyr) = (ss?) ------------------------------------------------------------
 
-#define bli_sssdots( x, y, a ) \
-{ \
-	(a)      += ( float  ) (x) * ( float  ) (y); \
-}
-#define bli_ssddots( x, y, a ) \
-{ \
-	(a)      += ( double ) (x) * ( double ) (y); \
-}
-#define bli_sscdots( x, y, a ) \
-{ \
-	(a).real += ( float  ) (x) * ( float  ) (y); \
-	/* (a).imag += ( float  ) 0.0; */ \
-}
-#define bli_sszdots( x, y, a ) \
-{ \
-	(a).real += ( double ) (x) * ( double ) (y); \
-	/* (a).imag += ( double ) 0.0; */ \
-}
+#define bli_sssdots( x, y, a )  bli_sssaxpys( x, y, a )
+#define bli_dssdots( x, y, a )  bli_dssaxpys( x, y, a )
+#define bli_cssdots( x, y, a )  bli_cssaxpys( x, y, a )
+#define bli_zssdots( x, y, a )  bli_zssaxpys( x, y, a )
 
-// -- (xyr) = (sd?) ------------------------------------------------------------
+#define bli_sdsdots( x, y, a )  bli_sdsaxpys( x, y, a )
+#define bli_ddsdots( x, y, a )  bli_ddsaxpys( x, y, a )
+#define bli_cdsdots( x, y, a )  bli_cdsaxpys( x, y, a )
+#define bli_zdsdots( x, y, a )  bli_zdsaxpys( x, y, a )
 
-#define bli_sdsdots( x, y, a ) \
-{ \
-	(a)      += ( float  ) (x) * ( float  ) (y); \
-}
-#define bli_sdddots( x, y, a ) \
-{ \
-	(a)      += ( double ) (x) * ( double ) (y); \
-}
-#define bli_sdcdots( x, y, a ) \
-{ \
-	(a).real += ( float  ) (x) * ( float  ) (y); \
-	/* (a).imag += ( float  ) 0.0; */ \
-}
-#define bli_sdzdots( x, y, a ) \
-{ \
-	(a).real += ( double ) (x) * ( double ) (y); \
-	/* (a).imag += ( double ) 0.0; */ \
-}
+#define bli_scsdots( x, y, a )  bli_scsaxpys( x, y, a )
+#define bli_dcsdots( x, y, a )  bli_dcsaxpys( x, y, a )
+#define bli_ccsdots( x, y, a )  bli_ccsaxpys( x, y, a )
+#define bli_zcsdots( x, y, a )  bli_zcsaxpys( x, y, a )
 
-// -- (xyr) = (sc?) ------------------------------------------------------------
-
-#define bli_scsdots( x, y, a ) \
-{ \
-	(a)      += ( float  ) (x) * ( float  ) (y).real; \
-}
-#define bli_scddots( x, y, a ) \
-{ \
-	(a)      += ( double ) (x) * ( double ) (y).real; \
-}
-#define bli_sccdots( x, y, a ) \
-{ \
-	(a).real += ( float  ) (x) * ( float  ) (y).real; \
-	/* (a).imag += ( float  ) 0.0; */ \
-}
-#define bli_sczdots( x, y, a ) \
-{ \
-	(a).real += ( double ) (x) * ( double ) (y).real; \
-	/* (a).imag += ( double ) 0.0; */ \
-}
-
-// -- (xyr) = (sz?) ------------------------------------------------------------
-
-#define bli_szsdots( x, y, a ) \
-{ \
-	(a)      += ( float  ) (x) * ( float  ) (y).real; \
-}
-#define bli_szddots( x, y, a ) \
-{ \
-	(a)      += ( double ) (x) * ( double ) (y).real; \
-}
-#define bli_szcdots( x, y, a ) \
-{ \
-	(a).real += ( float  ) (x) * ( float  ) (y).real; \
-	/* (a).imag += ( float  ) 0.0; */ \
-}
-#define bli_szzdots( x, y, a ) \
-{ \
-	(a).real += ( double ) (x) * ( double ) (y).real; \
-	/* (a).imag += ( double ) 0.0; */ \
-}
-
-// -- (xyr) = (ds?) ------------------------------------------------------------
-
-#define bli_dssdots( x, y, a ) \
-{ \
-	(a)      += ( float  ) (x) * ( float  ) (y); \
-}
-#define bli_dsddots( x, y, a ) \
-{ \
-	(a)      += ( double ) (x) * ( double ) (y); \
-}
-#define bli_dscdots( x, y, a ) \
-{ \
-	(a).real += ( float  ) (x) * ( float  ) (y); \
-	/* (a).imag += ( float  ) 0.0; */ \
-}
-#define bli_dszdots( x, y, a ) \
-{ \
-	(a).real += ( double ) (x) * ( double ) (y); \
-	/* (a).imag += ( double ) 0.0; */ \
-}
-
-// -- (xyr) = (dd?) ------------------------------------------------------------
-
-#define bli_ddsdots( x, y, a ) \
-{ \
-	(a)      += ( float  ) (x) * ( float  ) (y); \
-}
-#define bli_ddddots( x, y, a ) \
-{ \
-	(a)      += ( double ) (x) * ( double ) (y); \
-}
-#define bli_ddcdots( x, y, a ) \
-{ \
-	(a).real += ( float  ) (x) * ( float  ) (y); \
-	/* (a).imag += ( float  ) 0.0; */ \
-}
-#define bli_ddzdots( x, y, a ) \
-{ \
-	(a).real += ( double ) (x) * ( double ) (y); \
-	/* (a).imag += ( double ) 0.0; */ \
-}
-
-// -- (xyr) = (dc?) ------------------------------------------------------------
-
-#define bli_dcsdots( x, y, a ) \
-{ \
-	(a)      += ( float  ) (x) * ( float  ) (y).real; \
-}
-#define bli_dcddots( x, y, a ) \
-{ \
-	(a)      += ( double ) (x) * ( double ) (y).real; \
-}
-#define bli_dccdots( x, y, a ) \
-{ \
-	(a).real += ( float  ) (x) * ( float  ) (y).real; \
-	/* (a).imag += ( float  ) 0.0; */ \
-}
-#define bli_dczdots( x, y, a ) \
-{ \
-	(a).real += ( double ) (x) * ( double ) (y).real; \
-	/* (a).imag += ( double ) 0.0; */ \
-}
-
-// -- (xyr) = (dz?) ------------------------------------------------------------
-
-#define bli_dzsdots( x, y, a ) \
-{ \
-	(a)      += ( float  ) (x) * ( float  ) (y).real; \
-}
-#define bli_dzddots( x, y, a ) \
-{ \
-	(a)      += ( double ) (x) * ( double ) (y).real; \
-}
-#define bli_dzcdots( x, y, a ) \
-{ \
-	(a).real += ( float  ) (x) * ( float  ) (y).real; \
-	/* (a).imag += ( float  ) 0.0; */ \
-}
-#define bli_dzzdots( x, y, a ) \
-{ \
-	(a).real += ( double ) (x) * ( double ) (y).real; \
-	/* (a).imag += ( double ) 0.0; */ \
-}
-
-// -- (xyr) = (cs?) ------------------------------------------------------------
-
-#define bli_cssdots( x, y, a ) \
-{ \
-	(a)      += ( float  ) (x).real * ( float  ) (y); \
-}
-#define bli_csddots( x, y, a ) \
-{ \
-	(a)      += ( double ) (x).real * ( double ) (y); \
-}
-#define bli_cscdots( x, y, a ) \
-{ \
-	(a).real += ( float  ) (x).real * ( float  ) (y); \
-	(a).imag += ( float  ) (x).imag * ( float  ) (y); \
-}
-#define bli_cszdots( x, y, a ) \
-{ \
-	(a).real += ( double ) (x).real * ( double ) (y); \
-	(a).imag += ( double ) (x).imag * ( double ) (y); \
-}
-
-// -- (xyr) = (cd?) ------------------------------------------------------------
-
-#define bli_cdsdots( x, y, a ) \
-{ \
-	(a)      += ( float  ) (x).real * ( float  ) (y); \
-}
-#define bli_cdddots( x, y, a ) \
-{ \
-	(a)      += ( double ) (x).real * ( double ) (y); \
-}
-#define bli_cdcdots( x, y, a ) \
-{ \
-	(a).real += ( float  ) (x).real * ( float  ) (y); \
-	(a).imag += ( float  ) (x).imag * ( float  ) (y); \
-}
-#define bli_cdzdots( x, y, a ) \
-{ \
-	(a).real += ( double ) (x).real * ( double ) (y); \
-	(a).imag += ( double ) (x).imag * ( double ) (y); \
-}
-
-// -- (xyr) = (cc?) ------------------------------------------------------------
-
-#define bli_ccsdots( x, y, a ) \
-{ \
-	(a)      += ( float  ) (x).real * ( float  ) (y).real - ( float  ) (x).imag * ( float  ) (y).imag; \
-}
-#define bli_ccddots( x, y, a ) \
-{ \
-	(a)      += ( double ) (x).real * ( double ) (y).real - ( double ) (x).imag * ( double ) (y).imag; \
-}
-#define bli_cccdots( x, y, a ) \
-{ \
-	(a).real += ( float  ) (x).real * ( float  ) (y).real - ( float  ) (x).imag * ( float  ) (y).imag; \
-	(a).imag += ( float  ) (x).real * ( float  ) (y).imag + ( float  ) (x).imag * ( float  ) (y).real; \
-}
-#define bli_cczdots( x, y, a ) \
-{ \
-	(a).real += ( double ) (x).real * ( double ) (y).real - ( double ) (x).imag * ( double ) (y).imag; \
-	(a).imag += ( double ) (x).real * ( double ) (y).imag + ( double ) (x).imag * ( double ) (y).real; \
-}
-
-// -- (xyr) = (cz?) ------------------------------------------------------------
-
-#define bli_czsdots( x, y, a ) \
-{ \
-	(a)      += ( float  ) (x).real * ( float  ) (y).real - ( float  ) (x).imag * ( float  ) (y).imag; \
-}
-#define bli_czddots( x, y, a ) \
-{ \
-	(a)      += ( double ) (x).real * ( double ) (y).real - ( double ) (x).imag * ( double ) (y).imag; \
-}
-#define bli_czcdots( x, y, a ) \
-{ \
-	(a).real += ( float  ) (x).real * ( float  ) (y).real - ( float  ) (x).imag * ( float  ) (y).imag; \
-	(a).imag += ( float  ) (x).real * ( float  ) (y).imag + ( float  ) (x).imag * ( float  ) (y).real; \
-}
-#define bli_czzdots( x, y, a ) \
-{ \
-	(a).real += ( double ) (x).real * ( double ) (y).real - ( double ) (x).imag * ( double ) (y).imag; \
-	(a).imag += ( double ) (x).real * ( double ) (y).imag + ( double ) (x).imag * ( double ) (y).real; \
-}
-
-// -- (xyr) = (zs?) ------------------------------------------------------------
-
-#define bli_zssdots( x, y, a ) \
-{ \
-	(a)      += ( float  ) (x).real * ( float  ) (y); \
-}
-#define bli_zsddots( x, y, a ) \
-{ \
-	(a)      += ( double ) (x).real * ( double ) (y); \
-}
-#define bli_zscdots( x, y, a ) \
-{ \
-	(a).real += ( float  ) (x).real * ( float  ) (y); \
-	(a).imag += ( float  ) (x).imag * ( float  ) (y); \
-}
-#define bli_zszdots( x, y, a ) \
-{ \
-	(a).real += ( double ) (x).real * ( double ) (y); \
-	(a).imag += ( double ) (x).imag * ( double ) (y); \
-}
-
-// -- (xyr) = (zd?) ------------------------------------------------------------
-
-#define bli_zdsdots( x, y, a ) \
-{ \
-	(a)      += ( float  ) (x).real * ( float  ) (y); \
-}
-#define bli_zdddots( x, y, a ) \
-{ \
-	(a)      += ( double ) (x).real * ( double ) (y); \
-}
-#define bli_zdcdots( x, y, a ) \
-{ \
-	(a).real += ( float  ) (x).real * ( float  ) (y); \
-	(a).imag += ( float  ) (x).imag * ( float  ) (y); \
-}
-#define bli_zdzdots( x, y, a ) \
-{ \
-	(a).real += ( double ) (x).real * ( double ) (y); \
-	(a).imag += ( double ) (x).imag * ( double ) (y); \
-}
-
-// -- (xyr) = (zc?) ------------------------------------------------------------
-
-#define bli_zcsdots( x, y, a ) \
-{ \
-	(a)      += ( float  ) (x).real * ( float  ) (y).real - ( float  ) (x).imag * ( float  ) (y).imag; \
-}
-#define bli_zcddots( x, y, a ) \
-{ \
-	(a)      += ( double ) (x).real * ( double ) (y).real - ( double ) (x).imag * ( double ) (y).imag; \
-}
-#define bli_zccdots( x, y, a ) \
-{ \
-	(a).real += ( float  ) (x).real * ( float  ) (y).real - ( float  ) (x).imag * ( float  ) (y).imag; \
-	(a).imag += ( float  ) (x).real * ( float  ) (y).imag + ( float  ) (x).imag * ( float  ) (y).real; \
-}
-#define bli_zczdots( x, y, a ) \
-{ \
-	(a).real += ( double ) (x).real * ( double ) (y).real - ( double ) (x).imag * ( double ) (y).imag; \
-	(a).imag += ( double ) (x).real * ( double ) (y).imag + ( double ) (x).imag * ( double ) (y).real; \
-}
-
-// -- (xyr) = (zz?) ------------------------------------------------------------
-
-#define bli_zzsdots( x, y, a ) \
-{ \
-	(a)      += ( float  ) (x).real * ( float  ) (y).real - ( float  ) (x).imag * ( float  ) (y).imag; \
-}
-#define bli_zzddots( x, y, a ) \
-{ \
-	(a)      += ( double ) (x).real * ( double ) (y).real - ( double ) (x).imag * ( double ) (y).imag; \
-}
-#define bli_zzcdots( x, y, a ) \
-{ \
-	(a).real += ( float  ) (x).real * ( float  ) (y).real - ( float  ) (x).imag * ( float  ) (y).imag; \
-	(a).imag += ( float  ) (x).real * ( float  ) (y).imag + ( float  ) (x).imag * ( float  ) (y).real; \
-}
-#define bli_zzzdots( x, y, a ) \
-{ \
-	(a).real += ( double ) (x).real * ( double ) (y).real - ( double ) (x).imag * ( double ) (y).imag; \
-	(a).imag += ( double ) (x).real * ( double ) (y).imag + ( double ) (x).imag * ( double ) (y).real; \
-}
+#define bli_szsdots( x, y, a )  bli_szsaxpys( x, y, a )
+#define bli_dzsdots( x, y, a )  bli_dzsaxpys( x, y, a )
+#define bli_czsdots( x, y, a )  bli_czsaxpys( x, y, a )
+#define bli_zzsdots( x, y, a )  bli_zzsaxpys( x, y, a )
 
 
 
-#define bli_sdots( x, y, a ) \
-{ \
-	bli_sssdots( x, y, a ); \
-}
-#define bli_ddots( x, y, a ) \
-{ \
-	bli_ddddots( x, y, a ); \
-}
-#define bli_cdots( x, y, a ) \
-{ \
-	bli_cccdots( x, y, a ); \
-}
-#define bli_zdots( x, y, a ) \
-{ \
-	bli_zzzdots( x, y, a ); \
-}
+#define bli_ssddots( x, y, a )  bli_ssdaxpys( x, y, a )
+#define bli_dsddots( x, y, a )  bli_dsdaxpys( x, y, a )
+#define bli_csddots( x, y, a )  bli_csdaxpys( x, y, a )
+#define bli_zsddots( x, y, a )  bli_zsdaxpys( x, y, a )
+
+#define bli_sdddots( x, y, a )  bli_sddaxpys( x, y, a )
+#define bli_ddddots( x, y, a )  bli_dddaxpys( x, y, a )
+#define bli_cdddots( x, y, a )  bli_cddaxpys( x, y, a )
+#define bli_zdddots( x, y, a )  bli_zddaxpys( x, y, a )
+
+#define bli_scddots( x, y, a )  bli_scdaxpys( x, y, a )
+#define bli_dcddots( x, y, a )  bli_dcdaxpys( x, y, a )
+#define bli_ccddots( x, y, a )  bli_ccdaxpys( x, y, a )
+#define bli_zcddots( x, y, a )  bli_zcdaxpys( x, y, a )
+
+#define bli_szddots( x, y, a )  bli_szdaxpys( x, y, a )
+#define bli_dzddots( x, y, a )  bli_dzdaxpys( x, y, a )
+#define bli_czddots( x, y, a )  bli_czdaxpys( x, y, a )
+#define bli_zzddots( x, y, a )  bli_zzdaxpys( x, y, a )
+
+
+
+#define bli_sscdots( x, y, a )  bli_sscaxpys( x, y, a )
+#define bli_dscdots( x, y, a )  bli_dscaxpys( x, y, a )
+#define bli_cscdots( x, y, a )  bli_cscaxpys( x, y, a )
+#define bli_zscdots( x, y, a )  bli_zscaxpys( x, y, a )
+
+#define bli_sdcdots( x, y, a )  bli_sdcaxpys( x, y, a )
+#define bli_ddcdots( x, y, a )  bli_ddcaxpys( x, y, a )
+#define bli_cdcdots( x, y, a )  bli_cdcaxpys( x, y, a )
+#define bli_zdcdots( x, y, a )  bli_zdcaxpys( x, y, a )
+
+#define bli_sccdots( x, y, a )  bli_sccaxpys( x, y, a )
+#define bli_dccdots( x, y, a )  bli_dccaxpys( x, y, a )
+#define bli_cccdots( x, y, a )  bli_cccaxpys( x, y, a )
+#define bli_zccdots( x, y, a )  bli_zccaxpys( x, y, a )
+
+#define bli_szcdots( x, y, a )  bli_szcaxpys( x, y, a )
+#define bli_dzcdots( x, y, a )  bli_dzcaxpys( x, y, a )
+#define bli_czcdots( x, y, a )  bli_czcaxpys( x, y, a )
+#define bli_zzcdots( x, y, a )  bli_zzcaxpys( x, y, a )
+
+
+
+#define bli_sszdots( x, y, a )  bli_sszaxpys( x, y, a )
+#define bli_dszdots( x, y, a )  bli_dszaxpys( x, y, a )
+#define bli_cszdots( x, y, a )  bli_cszaxpys( x, y, a )
+#define bli_zszdots( x, y, a )  bli_zszaxpys( x, y, a )
+
+#define bli_sdzdots( x, y, a )  bli_sdzaxpys( x, y, a )
+#define bli_ddzdots( x, y, a )  bli_ddzaxpys( x, y, a )
+#define bli_cdzdots( x, y, a )  bli_cdzaxpys( x, y, a )
+#define bli_zdzdots( x, y, a )  bli_zdzaxpys( x, y, a )
+
+#define bli_sczdots( x, y, a )  bli_sczaxpys( x, y, a )
+#define bli_dczdots( x, y, a )  bli_dczaxpys( x, y, a )
+#define bli_cczdots( x, y, a )  bli_cczaxpys( x, y, a )
+#define bli_zczdots( x, y, a )  bli_zczaxpys( x, y, a )
+
+#define bli_szzdots( x, y, a )  bli_szzaxpys( x, y, a )
+#define bli_dzzdots( x, y, a )  bli_dzzaxpys( x, y, a )
+#define bli_czzdots( x, y, a )  bli_czzaxpys( x, y, a )
+#define bli_zzzdots( x, y, a )  bli_zzzaxpys( x, y, a )
+
+
+
+#define bli_sdots( x, y, a )  bli_sssdots( x, y, a )
+#define bli_ddots( x, y, a )  bli_ddddots( x, y, a )
+#define bli_cdots( x, y, a )  bli_cccdots( x, y, a )
+#define bli_zdots( x, y, a )  bli_zzzdots( x, y, a )
 
 
 #endif
+

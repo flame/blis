@@ -43,355 +43,394 @@
 // - The third char encodes the type of y.
 // - x is used in conjugated form.
 
-// -- (axy) = (ss?) ------------------------------------------------------------
+
+// -- (axy) = (?ss) ------------------------------------------------------------
 
 #define bli_sssscal2js( a, x, y ) \
 { \
-	(y)       = ( float  )( ( float  ) (a)      * ( float  ) (x)      ); \
+	(y)          = bli_ssimulnc_r( (a), (x) ); \
 }
-#define bli_ssdscal2js( a, x, y ) \
+#define bli_dssscal2js( a, x, y ) \
 { \
-	(y)       = ( double )( ( float  ) (a)      * ( float  ) (x)      ); \
+	(y)          = bli_dsimulnc_r( (a), (x) ); \
 }
-#define bli_sscscal2js( a, x, y ) \
+#define bli_cssscal2js( a, x, y ) \
 { \
-	(y).real  = ( float  )( ( float  ) (a)      * ( float  ) (x)      ); \
+	(y)          = bli_csimulnc_r( (a), (x) ); \
 }
-#define bli_sszscal2js( a, x, y ) \
+#define bli_zssscal2js( a, x, y ) \
 { \
-	(y).real  = ( double )( ( float  ) (a)      * ( float  ) (x)      ); \
+	(y)          = bli_zsimulnc_r( (a), (x) ); \
 }
 
-// -- (axy) = (sd?) ------------------------------------------------------------
+// -- (axy) = (?ds) ------------------------------------------------------------
 
 #define bli_sdsscal2js( a, x, y ) \
 { \
-	(y)       = ( float  )( ( double ) (a)      * ( double ) (x)      ); \
+	(y)          = bli_sdimulnc_r( (a), (x) ); \
 }
-#define bli_sddscal2js( a, x, y ) \
+#define bli_ddsscal2js( a, x, y ) \
 { \
-	(y)       = ( double )( ( double ) (a)      * ( double ) (x)      ); \
+	(y)          = bli_ddimulnc_r( (a), (x) ); \
 }
-#define bli_sdcscal2js( a, x, y ) \
+#define bli_cdsscal2js( a, x, y ) \
 { \
-	(y).real  = ( float  )( ( double ) (a)      * ( double ) (x)      ); \
+	(y)          = bli_cdimulnc_r( (a), (x) ); \
 }
-#define bli_sdzscal2js( a, x, y ) \
+#define bli_zdsscal2js( a, x, y ) \
 { \
-	(y).real  = ( double )( ( double ) (a)      * ( double ) (x)      ); \
+	(y)          = bli_zdimulnc_r( (a), (x) ); \
 }
 
-// -- (axy) = (sc?) ------------------------------------------------------------
+// -- (axy) = (?cs) ------------------------------------------------------------
 
 #define bli_scsscal2js( a, x, y ) \
 { \
-	(y)       = ( float  )( ( float  ) (a)      * ( float  ) (x).real ); \
+	(y)          = bli_scimulnc_r( (a), (x) ); \
 }
-#define bli_scdscal2js( a, x, y ) \
+#define bli_dcsscal2js( a, x, y ) \
 { \
-	(y)       = ( double )( ( float  ) (a)      * ( float  ) (x).real ); \
+	(y)          = bli_dcimulnc_r( (a), (x) ); \
 }
-#define bli_sccscal2js( a, x, y ) \
+#define bli_ccsscal2js( a, x, y ) \
 { \
-	(y).real  = ( float  )( ( float  ) (a)      * ( float  ) (x).real ); \
-	(y).imag  = ( float  )( ( float  ) (a)      * ( float  )-(x).imag ); \
+	(y)          = bli_ccimulnc_r( (a), (x) ); \
 }
-#define bli_sczscal2js( a, x, y ) \
+#define bli_zcsscal2js( a, x, y ) \
 { \
-	(y).real  = ( double )( ( float  ) (a)      * ( float  ) (x).real ); \
-	(y).imag  = ( double )( ( float  ) (a)      * ( float  )-(x).imag ); \
+	(y)          = bli_zcimulnc_r( (a), (x) ); \
 }
 
-// -- (axy) = (sz?) ------------------------------------------------------------
+// -- (axy) = (?zs) ------------------------------------------------------------
 
 #define bli_szsscal2js( a, x, y ) \
 { \
-	(y)       = ( float  )( ( double ) (a)      * ( double ) (x).real ); \
+	(y)          = bli_szimulnc_r( (a), (x) ); \
 }
-#define bli_szdscal2js( a, x, y ) \
+#define bli_dzsscal2js( a, x, y ) \
 { \
-	(y)       = ( double )( ( double ) (a)      * ( double ) (x).real ); \
+	(y)          = bli_dzimulnc_r( (a), (x) ); \
 }
-#define bli_szcscal2js( a, x, y ) \
+#define bli_czsscal2js( a, x, y ) \
 { \
-	(y).real  = ( float  )( ( double ) (a)      * ( double ) (x).real ); \
-	(y).imag  = ( float  )( ( double ) (a)      * ( double )-(x).imag ); \
+	(y)          = bli_czimulnc_r( (a), (x) ); \
 }
-#define bli_szzscal2js( a, x, y ) \
+#define bli_zzsscal2js( a, x, y ) \
 { \
-	(y).real  = ( double )( ( double ) (a)      * ( double ) (x).real ); \
-	(y).imag  = ( double )( ( double ) (a)      * ( double )-(x).imag ); \
+	(y)          = bli_zzimulnc_r( (a), (x) ); \
 }
 
-// -- (axy) = (ds?) ------------------------------------------------------------
 
-#define bli_dssscal2js( a, x, y ) \
+// -- (axy) = (?sd) ------------------------------------------------------------
+
+#define bli_ssdscal2js( a, x, y ) \
 { \
-	(y)       = ( float  )( ( double ) (a)      * ( double ) (x)      ); \
+	(y)          = bli_ssimulnc_r( (a), (x) ); \
 }
 #define bli_dsdscal2js( a, x, y ) \
 { \
-	(y)       = ( double )( ( double ) (a)      * ( double ) (x)      ); \
-}
-#define bli_dscscal2js( a, x, y ) \
-{ \
-	(y).real  = ( float  )( ( double ) (a)      * ( double ) (x)      ); \
-}
-#define bli_dszscal2js( a, x, y ) \
-{ \
-	(y).real  = ( double )( ( double ) (a)      * ( double ) (x)      ); \
-}
-
-// -- (axy) = (dd?) ------------------------------------------------------------
-
-#define bli_ddsscal2js( a, x, y ) \
-{ \
-	(y)       = ( float  )( ( double ) (a)      * ( double ) (x)      ); \
-}
-#define bli_dddscal2js( a, x, y ) \
-{ \
-	(y)       = ( double )( ( double ) (a)      * ( double ) (x)      ); \
-}
-#define bli_ddcscal2js( a, x, y ) \
-{ \
-	(y).real  = ( float  )( ( double ) (a)      * ( double ) (x)      ); \
-}
-#define bli_ddzscal2js( a, x, y ) \
-{ \
-	(y).real  = ( double )( ( double ) (a)      * ( double ) (x)      ); \
-}
-
-// -- (axy) = (dc?) ------------------------------------------------------------
-
-#define bli_dcsscal2js( a, x, y ) \
-{ \
-	(y)       = ( float  )( ( double ) (a)      * ( double ) (x).real ); \
-}
-#define bli_dcdscal2js( a, x, y ) \
-{ \
-	(y)       = ( double )( ( double ) (a)      * ( double ) (x).real ); \
-}
-#define bli_dccscal2js( a, x, y ) \
-{ \
-	(y).real  = ( float  )( ( double ) (a)      * ( double ) (x).real ); \
-	(y).imag  = ( float  )( ( double ) (a)      * ( double )-(x).imag ); \
-}
-#define bli_dczscal2js( a, x, y ) \
-{ \
-	(y).real  = ( double )( ( double ) (a)      * ( double ) (x).real ); \
-	(y).imag  = ( double )( ( double ) (a)      * ( double )-(x).imag ); \
-}
-
-// -- (axy) = (dz?) ------------------------------------------------------------
-
-#define bli_dzsscal2js( a, x, y ) \
-{ \
-	(y)       = ( float  )( ( double ) (a)      * ( double ) (x).real ); \
-}
-#define bli_dzdscal2js( a, x, y ) \
-{ \
-	(y)       = ( double )( ( double ) (a)      * ( double ) (x).real ); \
-}
-#define bli_dzcscal2js( a, x, y ) \
-{ \
-	(y).real  = ( float  )( ( double ) (a)      * ( double ) (x).real ); \
-	(y).imag  = ( float  )( ( double ) (a)      * ( double )-(x).imag ); \
-}
-#define bli_dzzscal2js( a, x, y ) \
-{ \
-	(y).real  = ( double )( ( double ) (a)      * ( double ) (x).real ); \
-	(y).imag  = ( double )( ( double ) (a)      * ( double )-(x).imag ); \
-}
-
-// -- (axy) = (cs?) ------------------------------------------------------------
-
-#define bli_cssscal2js( a, x, y ) \
-{ \
-	(y)       = ( float  )( ( float  ) (a).real * ( float  ) (x)      ); \
+	(y)          = bli_dsimulnc_r( (a), (x) ); \
 }
 #define bli_csdscal2js( a, x, y ) \
 { \
-	(y)       = ( double )( ( float  ) (a).real * ( float  ) (x)      ); \
-}
-#define bli_cscscal2js( a, x, y ) \
-{ \
-	(y).real  = ( float  )( ( float  ) (a).real * ( float  ) (x)      ); \
-	(y).imag  = ( float  )( ( float  ) (a).imag * ( float  ) (x)      ); \
-}
-#define bli_cszscal2js( a, x, y ) \
-{ \
-	(y).real  = ( double )( ( float  ) (a).real * ( float  ) (x)      ); \
-	(y).imag  = ( double )( ( float  ) (a).imag * ( float  ) (x)      ); \
-}
-
-// -- (axy) = (cd?) ------------------------------------------------------------
-
-#define bli_cdsscal2js( a, x, y ) \
-{ \
-	(y)       = ( float  )( ( double ) (a).real * ( double ) (x)      ); \
-}
-#define bli_cddscal2js( a, x, y ) \
-{ \
-	(y)       = ( double )( ( double ) (a).real * ( double ) (x)      ); \
-}
-#define bli_cdcscal2js( a, x, y ) \
-{ \
-	(y).real  = ( float  )( ( double ) (a).real * ( double ) (x)      ); \
-	(y).imag  = ( float  )( ( double ) (a).imag * ( double ) (x)      ); \
-}
-#define bli_cdzscal2js( a, x, y ) \
-{ \
-	(y).real  = ( double )( ( double ) (a).real * ( double ) (x)      ); \
-	(y).imag  = ( double )( ( double ) (a).imag * ( double ) (x)      ); \
-}
-
-// -- (axy) = (cc?) ------------------------------------------------------------
-
-#define bli_ccsscal2js( a, x, y ) \
-{ \
-	(y)       = ( float  )( ( float  ) (a).real * ( float  ) (x).real + ( float  ) (a).imag * ( float  ) (x).imag ); \
-}
-#define bli_ccdscal2js( a, x, y ) \
-{ \
-	(y)       = ( double )( ( float  ) (a).real * ( float  ) (x).real + ( float  ) (a).imag * ( float  ) (x).imag ); \
-}
-#define bli_cccscal2js( a, x, y ) \
-{ \
-	(y).real  = ( float  )( ( float  ) (a).real * ( float  ) (x).real + ( float  ) (a).imag * ( float  ) (x).imag ); \
-	(y).imag  = ( float  )( ( float  ) (a).imag * ( float  ) (x).real - ( float  ) (a).real * ( float  ) (x).imag ); \
-}
-#define bli_cczscal2js( a, x, y ) \
-{ \
-	(y).real  = ( double )( ( float  ) (a).real * ( float  ) (x).real + ( float  ) (a).imag * ( float  ) (x).imag ); \
-	(y).imag  = ( double )( ( float  ) (a).imag * ( float  ) (x).real - ( float  ) (a).real * ( float  ) (x).imag ); \
-}
-
-// -- (axy) = (cz?) ------------------------------------------------------------
-
-#define bli_czsscal2js( a, x, y ) \
-{ \
-	(y)       = ( float  )( ( double ) (a).real * ( double ) (x).real + ( double ) (a).imag * ( double ) (x).imag ); \
-}
-#define bli_czdscal2js( a, x, y ) \
-{ \
-	(y)       = ( double )( ( double ) (a).real * ( double ) (x).real + ( double ) (a).imag * ( double ) (x).imag ); \
-}
-#define bli_czcscal2js( a, x, y ) \
-{ \
-	(y).real  = ( float  )( ( double ) (a).real * ( double ) (x).real + ( double ) (a).imag * ( double ) (x).imag ); \
-	(y).imag  = ( float  )( ( double ) (a).imag * ( double ) (x).real - ( double ) (a).real * ( double ) (x).imag ); \
-}
-#define bli_czzscal2js( a, x, y ) \
-{ \
-	(y).real  = ( double )( ( double ) (a).real * ( double ) (x).real + ( double ) (a).imag * ( double ) (x).imag ); \
-	(y).imag  = ( double )( ( double ) (a).imag * ( double ) (x).real - ( double ) (a).real * ( double ) (x).imag ); \
-}
-
-// -- (axy) = (zs?) ------------------------------------------------------------
-
-#define bli_zssscal2js( a, x, y ) \
-{ \
-	(y)       = ( float  )( ( float  ) (a).real * ( float  ) (x)      ); \
+	(y)          = bli_csimulnc_r( (a), (x) ); \
 }
 #define bli_zsdscal2js( a, x, y ) \
 { \
-	(y)       = ( double )( ( float  ) (a).real * ( float  ) (x)      ); \
-}
-#define bli_zscscal2js( a, x, y ) \
-{ \
-	(y).real  = ( float  )( ( float  ) (a).real * ( float  ) (x)      ); \
-	(y).imag  = ( float  )( ( float  ) (a).imag * ( float  ) (x)      ); \
-}
-#define bli_zszscal2js( a, x, y ) \
-{ \
-	(y).real  = ( double )( ( float  ) (a).real * ( float  ) (x)      ); \
-	(y).imag  = ( double )( ( float  ) (a).imag * ( float  ) (x)      ); \
+	(y)          = bli_zsimulnc_r( (a), (x) ); \
 }
 
-// -- (axy) = (zd?) ------------------------------------------------------------
+// -- (axy) = (?dd) ------------------------------------------------------------
 
-#define bli_zdsscal2js( a, x, y ) \
+#define bli_sddscal2js( a, x, y ) \
 { \
-	(y)       = ( float  )( ( double ) (a).real * ( double ) (x)      ); \
+	(y)          = bli_sdimulnc_r( (a), (x) ); \
+}
+#define bli_dddscal2js( a, x, y ) \
+{ \
+	(y)          = bli_ddimulnc_r( (a), (x) ); \
+}
+#define bli_cddscal2js( a, x, y ) \
+{ \
+	(y)          = bli_cdimulnc_r( (a), (x) ); \
 }
 #define bli_zddscal2js( a, x, y ) \
 { \
-	(y)       = ( double )( ( double ) (a).real * ( double ) (x)      ); \
-}
-#define bli_zdcscal2js( a, x, y ) \
-{ \
-	(y).real  = ( float  )( ( double ) (a).real * ( double ) (x)      ); \
-	(y).imag  = ( float  )( ( double ) (a).imag * ( double ) (x)      ); \
-}
-#define bli_zdzscal2js( a, x, y ) \
-{ \
-	(y).real  = ( double )( ( double ) (a).real * ( double ) (x)      ); \
-	(y).imag  = ( double )( ( double ) (a).imag * ( double ) (x)      ); \
+	(y)          = bli_zdimulnc_r( (a), (x) ); \
 }
 
-// -- (axy) = (zc?) ------------------------------------------------------------
+// -- (axy) = (?cd) ------------------------------------------------------------
 
-#define bli_zcsscal2js( a, x, y ) \
+#define bli_scdscal2js( a, x, y ) \
 { \
-	(y)       = ( float  )( ( float  ) (a).real * ( float  ) (x).real + ( float  ) (a).imag * ( float  ) (x).imag ); \
+	(y)          = bli_scimulnc_r( (a), (x) ); \
+}
+#define bli_dcdscal2js( a, x, y ) \
+{ \
+	(y)          = bli_dcimulnc_r( (a), (x) ); \
+}
+#define bli_ccdscal2js( a, x, y ) \
+{ \
+	(y)          = bli_ccimulnc_r( (a), (x) ); \
 }
 #define bli_zcdscal2js( a, x, y ) \
 { \
-	(y)       = ( double )( ( float  ) (a).real * ( float  ) (x).real + ( float  ) (a).imag * ( float  ) (x).imag ); \
-}
-#define bli_zccscal2js( a, x, y ) \
-{ \
-	(y).real  = ( float  )( ( float  ) (a).real * ( float  ) (x).real + ( float  ) (a).imag * ( float  ) (x).imag ); \
-	(y).imag  = ( float  )( ( float  ) (a).imag * ( float  ) (x).real - ( float  ) (a).real * ( float  ) (x).imag ); \
-}
-#define bli_zczscal2js( a, x, y ) \
-{ \
-	(y).real  = ( double )( ( float  ) (a).real * ( float  ) (x).real + ( float  ) (a).imag * ( float  ) (x).imag ); \
-	(y).imag  = ( double )( ( float  ) (a).imag * ( float  ) (x).real - ( float  ) (a).real * ( float  ) (x).imag ); \
+	(y)          = bli_zcimulnc_r( (a), (x) ); \
 }
 
-// -- (axy) = (zz?) ------------------------------------------------------------
+// -- (axy) = (?zd) ------------------------------------------------------------
 
-#define bli_zzsscal2js( a, x, y ) \
+#define bli_szdscal2js( a, x, y ) \
 { \
-	(y)       = ( float  )( ( double ) (a).real * ( double ) (x).real + ( double ) (a).imag * ( double ) (x).imag ); \
+	(y)          = bli_szimulnc_r( (a), (x) ); \
+}
+#define bli_dzdscal2js( a, x, y ) \
+{ \
+	(y)          = bli_dzimulnc_r( (a), (x) ); \
+}
+#define bli_czdscal2js( a, x, y ) \
+{ \
+	(y)          = bli_czimulnc_r( (a), (x) ); \
 }
 #define bli_zzdscal2js( a, x, y ) \
 { \
-	(y)       = ( double )( ( double ) (a).real * ( double ) (x).real + ( double ) (a).imag * ( double ) (x).imag ); \
+	(y)          = bli_zzimulnc_r( (a), (x) ); \
+}
+
+
+#ifndef BLIS_ENABLE_C99_COMPLEX
+
+
+// -- (axy) = (?sc) ------------------------------------------------------------
+
+#define bli_sscscal2js( a, x, y ) \
+{ \
+	bli_creal(y) = bli_ssimulnc_r( (a), (x) ); \
+}
+#define bli_dscscal2js( a, x, y ) \
+{ \
+	bli_creal(y) = bli_dsimulnc_r( (a), (x) ); \
+}
+#define bli_cscscal2js( a, x, y ) \
+{ \
+	bli_creal(y) = bli_csimulnc_r( (a), (x) ); \
+	bli_cimag(y) = bli_csimulnc_i( (a), (x) ); \
+}
+#define bli_zscscal2js( a, x, y ) \
+{ \
+	bli_creal(y) = bli_zsimulnc_r( (a), (x) ); \
+	bli_cimag(y) = bli_zsimulnc_i( (a), (x) ); \
+}
+
+// -- (axy) = (?dc) ------------------------------------------------------------
+
+#define bli_sdcscal2js( a, x, y ) \
+{ \
+	bli_creal(y) = bli_sdimulnc_r( (a), (x) ); \
+}
+#define bli_ddcscal2js( a, x, y ) \
+{ \
+	bli_creal(y) = bli_ddimulnc_r( (a), (x) ); \
+}
+#define bli_cdcscal2js( a, x, y ) \
+{ \
+	bli_creal(y) = bli_cdimulnc_r( (a), (x) ); \
+	bli_cimag(y) = bli_cdimulnc_i( (a), (x) ); \
+}
+#define bli_zdcscal2js( a, x, y ) \
+{ \
+	bli_creal(y) = bli_zdimulnc_r( (a), (x) ); \
+	bli_cimag(y) = bli_zdimulnc_i( (a), (x) ); \
+}
+
+// -- (axy) = (?cc) ------------------------------------------------------------
+
+#define bli_sccscal2js( a, x, y ) \
+{ \
+	bli_creal(y) = bli_scimulnc_r( (a), (x) ); \
+	bli_cimag(y) = bli_scimulnc_i( (a), (x) ); \
+}
+#define bli_dccscal2js( a, x, y ) \
+{ \
+	bli_creal(y) = bli_dcimulnc_r( (a), (x) ); \
+	bli_cimag(y) = bli_dcimulnc_i( (a), (x) ); \
+}
+#define bli_cccscal2js( a, x, y ) \
+{ \
+	bli_creal(y) = bli_ccimulnc_r( (a), (x) ); \
+	bli_cimag(y) = bli_ccimulnc_i( (a), (x) ); \
+}
+#define bli_zccscal2js( a, x, y ) \
+{ \
+	bli_creal(y) = bli_zcimulnc_r( (a), (x) ); \
+	bli_cimag(y) = bli_zcimulnc_i( (a), (x) ); \
+}
+
+// -- (axy) = (?zc) ------------------------------------------------------------
+
+#define bli_szcscal2js( a, x, y ) \
+{ \
+	bli_creal(y) = bli_szimulnc_r( (a), (x) ); \
+	bli_cimag(y) = bli_szimulnc_i( (a), (x) ); \
+}
+#define bli_dzcscal2js( a, x, y ) \
+{ \
+	bli_creal(y) = bli_dzimulnc_r( (a), (x) ); \
+	bli_cimag(y) = bli_dzimulnc_i( (a), (x) ); \
+}
+#define bli_czcscal2js( a, x, y ) \
+{ \
+	bli_creal(y) = bli_czimulnc_r( (a), (x) ); \
+	bli_cimag(y) = bli_czimulnc_i( (a), (x) ); \
 }
 #define bli_zzcscal2js( a, x, y ) \
 { \
-	(y).real  = ( float  )( ( double ) (a).real * ( double ) (x).real + ( double ) (a).imag * ( double ) (x).imag ); \
-	(y).imag  = ( float  )( ( double ) (a).imag * ( double ) (x).real - ( double ) (a).real * ( double ) (x).imag ); \
+	bli_creal(y) = bli_zzimulnc_r( (a), (x) ); \
+	bli_cimag(y) = bli_zzimulnc_i( (a), (x) ); \
+}
+
+
+// -- (axy) = (?sz) ------------------------------------------------------------
+
+#define bli_sszscal2js( a, x, y ) \
+{ \
+	bli_zreal(y) = bli_ssimulnc_r( (a), (x) ); \
+}
+#define bli_dszscal2js( a, x, y ) \
+{ \
+	bli_zreal(y) = bli_dsimulnc_r( (a), (x) ); \
+}
+#define bli_cszscal2js( a, x, y ) \
+{ \
+	bli_zreal(y) = bli_csimulnc_r( (a), (x) ); \
+	bli_zimag(y) = bli_csimulnc_i( (a), (x) ); \
+}
+#define bli_zszscal2js( a, x, y ) \
+{ \
+	bli_zreal(y) = bli_zsimulnc_r( (a), (x) ); \
+	bli_zimag(y) = bli_zsimulnc_i( (a), (x) ); \
+}
+
+// -- (axy) = (?dz) ------------------------------------------------------------
+
+#define bli_sdzscal2js( a, x, y ) \
+{ \
+	bli_zreal(y) = bli_sdimulnc_r( (a), (x) ); \
+}
+#define bli_ddzscal2js( a, x, y ) \
+{ \
+	bli_zreal(y) = bli_ddimulnc_r( (a), (x) ); \
+}
+#define bli_cdzscal2js( a, x, y ) \
+{ \
+	bli_zreal(y) = bli_cdimulnc_r( (a), (x) ); \
+	bli_zimag(y) = bli_cdimulnc_i( (a), (x) ); \
+}
+#define bli_zdzscal2js( a, x, y ) \
+{ \
+	bli_zreal(y) = bli_zdimulnc_r( (a), (x) ); \
+	bli_zimag(y) = bli_zdimulnc_i( (a), (x) ); \
+}
+
+// -- (axy) = (?cz) ------------------------------------------------------------
+
+#define bli_sczscal2js( a, x, y ) \
+{ \
+	bli_zreal(y) = bli_scimulnc_r( (a), (x) ); \
+	bli_zimag(y) = bli_scimulnc_i( (a), (x) ); \
+}
+#define bli_dczscal2js( a, x, y ) \
+{ \
+	bli_zreal(y) = bli_dcimulnc_r( (a), (x) ); \
+	bli_zimag(y) = bli_dcimulnc_i( (a), (x) ); \
+}
+#define bli_cczscal2js( a, x, y ) \
+{ \
+	bli_zreal(y) = bli_ccimulnc_r( (a), (x) ); \
+	bli_zimag(y) = bli_ccimulnc_i( (a), (x) ); \
+}
+#define bli_zczscal2js( a, x, y ) \
+{ \
+	bli_zreal(y) = bli_zcimulnc_r( (a), (x) ); \
+	bli_zimag(y) = bli_zcimulnc_i( (a), (x) ); \
+}
+
+// -- (axy) = (?zz) ------------------------------------------------------------
+
+#define bli_szzscal2js( a, x, y ) \
+{ \
+	bli_zreal(y) = bli_szimulnc_r( (a), (x) ); \
+	bli_zimag(y) = bli_szimulnc_i( (a), (x) ); \
+}
+#define bli_dzzscal2js( a, x, y ) \
+{ \
+	bli_zreal(y) = bli_dzimulnc_r( (a), (x) ); \
+	bli_zimag(y) = bli_dzimulnc_i( (a), (x) ); \
+}
+#define bli_czzscal2js( a, x, y ) \
+{ \
+	bli_zreal(y) = bli_czimulnc_r( (a), (x) ); \
+	bli_zimag(y) = bli_czimulnc_i( (a), (x) ); \
 }
 #define bli_zzzscal2js( a, x, y ) \
 { \
-	(y).real  = ( double )( ( double ) (a).real * ( double ) (x).real + ( double ) (a).imag * ( double ) (x).imag ); \
-	(y).imag  = ( double )( ( double ) (a).imag * ( double ) (x).real - ( double ) (a).real * ( double ) (x).imag ); \
+	bli_zreal(y) = bli_zzimulnc_r( (a), (x) ); \
+	bli_zimag(y) = bli_zzimulnc_i( (a), (x) ); \
 }
 
 
+#else // ifdef BLIS_ENABLE_C99_COMPLEX
 
 
+#define bli_sscscal2js( a, x, y )  { (y) = (a) * (x); }
+#define bli_dscscal2js( a, x, y )  { (y) = (a) * (x); }
+#define bli_cscscal2js( a, x, y )  { (y) = (a) * (x); }
+#define bli_zscscal2js( a, x, y )  { (y) = (a) * (x); }
+
+#define bli_sdcscal2js( a, x, y )  { (y) = (a) * (x); }
+#define bli_ddcscal2js( a, x, y )  { (y) = (a) * (x); }
+#define bli_cdcscal2js( a, x, y )  { (y) = (a) * (x); }
+#define bli_zdcscal2js( a, x, y )  { (y) = (a) * (x); }
+
+#define bli_sccscal2js( a, x, y )  { (y) = (a) * conjf(x); }
+#define bli_dccscal2js( a, x, y )  { (y) = (a) * conjf(x); }
+#define bli_cccscal2js( a, x, y )  { (y) = (a) * conjf(x); }
+#define bli_zccscal2js( a, x, y )  { (y) = (a) * conjf(x); }
+
+#define bli_szcscal2js( a, x, y )  { (y) = (a) * conj(x); }
+#define bli_dzcscal2js( a, x, y )  { (y) = (a) * conj(x); }
+#define bli_czcscal2js( a, x, y )  { (y) = (a) * conj(x); }
+#define bli_zzcscal2js( a, x, y )  { (y) = (a) * conj(x); }
 
 
-#define bli_sscal2js( a, x, y ) \
-{ \
-	bli_sssscal2js( a, x, y ); \
-}
-#define bli_dscal2js( a, x, y ) \
-{ \
-	bli_dddscal2js( a, x, y ); \
-}
-#define bli_cscal2js( a, x, y ) \
-{ \
-	bli_cccscal2js( a, x, y ); \
-}
-#define bli_zscal2js( a, x, y ) \
-{ \
-	bli_zzzscal2js( a, x, y ); \
-}
+#define bli_sszscal2js( a, x, y )  { (y) = (a) * (x); }
+#define bli_dszscal2js( a, x, y )  { (y) = (a) * (x); }
+#define bli_cszscal2js( a, x, y )  { (y) = (a) * (x); }
+#define bli_zszscal2js( a, x, y )  { (y) = (a) * (x); }
+
+#define bli_sdzscal2js( a, x, y )  { (y) = (a) * (x); }
+#define bli_ddzscal2js( a, x, y )  { (y) = (a) * (x); }
+#define bli_cdzscal2js( a, x, y )  { (y) = (a) * (x); }
+#define bli_zdzscal2js( a, x, y )  { (y) = (a) * (x); }
+
+#define bli_sczscal2js( a, x, y )  { (y) = (a) * conjf(x); }
+#define bli_dczscal2js( a, x, y )  { (y) = (a) * conjf(x); }
+#define bli_cczscal2js( a, x, y )  { (y) = (a) * conjf(x); }
+#define bli_zczscal2js( a, x, y )  { (y) = (a) * conjf(x); }
+
+#define bli_szzscal2js( a, x, y )  { (y) = (a) * conj(x); }
+#define bli_dzzscal2js( a, x, y )  { (y) = (a) * conj(x); }
+#define bli_czzscal2js( a, x, y )  { (y) = (a) * conj(x); }
+#define bli_zzzscal2js( a, x, y )  { (y) = (a) * conj(x); }
+
+
+#endif // BLIS_ENABLE_C99_COMPLEX
+
+
+#define bli_sscal2js( a, x, y )  bli_sssscal2js( a, x, y )
+#define bli_dscal2js( a, x, y )  bli_dddscal2js( a, x, y )
+#define bli_cscal2js( a, x, y )  bli_cccscal2js( a, x, y )
+#define bli_zscal2js( a, x, y )  bli_zzzscal2js( a, x, y )
 
 
 #endif

@@ -500,20 +500,6 @@
 #define bli_iformatspec() "%6d"
 
 
-// project dt to real if imaginary component is zero
-
-#define bli_proj_dt_to_real_if_imag_eq0( buf, dt ) \
-{ \
-	if ( bli_is_scomplex( dt ) ) \
-	{ \
-		if ( bli_cimageq0( buf ) ) dt = BLIS_FLOAT; \
-	} \
-	else if ( bli_is_dcomplex( dt ) ) \
-	{ \
-		if ( bli_zimageq0( buf ) ) dt = BLIS_DOUBLE; \
-	} \
-}
-
 // set scalar datatype and buffer
 
 #define bli_set_scalar_dt_buffer( obj_scalar, dt_aux, dt_scalar, buf_scalar ) \
@@ -528,12 +514,6 @@
 		dt_scalar  = bli_obj_datatype( *(obj_scalar) ); \
 		buf_scalar = bli_obj_buffer_at_off( *(obj_scalar) ); \
 	} \
-\
-	/* Projecting the scalar datatype to the real domain when the imaginary
-	   part of is zero doesn't work when only basic datatype support is
-	   enabled, because it can result in trying to use mixed datatype
-	   functionality.
-	bli_proj_dt_to_real_if_imag_eq0( buf_scalar, dt_scalar ); */ \
 }
 
 // set constant datatype and buffer
@@ -544,12 +524,6 @@
 		dt_scalar  = dt_aux; \
 		buf_scalar = bli_obj_scalar_buffer( dt_scalar, *(obj_scalar) ); \
 	} \
-\
-	/* Projecting the scalar datatype to the real domain when the imaginary
-	   part of is zero doesn't work when only basic datatype support is
-	   enabled, because it can result in trying to use mixed datatype
-	   functionality.
-	bli_proj_dt_to_real_if_imag_eq0( buf_scalar, dt_scalar ); */ \
 }
 
 

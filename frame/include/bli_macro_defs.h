@@ -41,8 +41,8 @@
 #ifdef __cplusplus
   // Language is C++; define restrict as nothing.
   #define restrict
-#elif __STDC_VERSION__ == 199901L
-  // Language is C99; do nothing since restrict is recognized.
+#elif __STDC_VERSION__ >= 199901L
+  // Language is C99 (or later); do nothing since restrict is recognized.
 #else
   // Language is pre-C99; define restrict as nothing.
   #define restrict
@@ -72,6 +72,10 @@
 
 #define PASTEMAC3(ch1,ch2,ch3,op) bli_ ## ch1 ## ch2 ## ch3 ## op
 
+#define PASTEBLACHK(op)           bla_ ## op ## _check
+
+#define MKSTR(s1)                 #s1
+
 
 // -- Include other groups of macros
 
@@ -83,6 +87,7 @@
 #include "bli_pool_macro_defs.h"
 #include "bli_obj_macro_defs.h"
 #include "bli_param_macro_defs.h"
+#include "bli_complex_macro_defs.h"
 #include "bli_scalar_macro_defs.h"
 #include "bli_error_macro_defs.h"
 #include "bli_blas_macro_defs.h"

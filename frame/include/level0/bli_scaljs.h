@@ -40,109 +40,121 @@
 // Notes:
 // - The first char encodes the type of a.
 // - The second char encodes the type of x.
-// - a is used in conjugated form.
+
 
 #define bli_ssscaljs( a, x ) \
 { \
-	(x) *= ( float  ) (a); \
+	(x)          = bli_ssimulcn_r( (a), (x) ); \
 }
 #define bli_dsscaljs( a, x ) \
 { \
-	(x) *= ( float  ) (a); \
+	(x)          = bli_dsimulcn_r( (a), (x) ); \
 }
 #define bli_csscaljs( a, x ) \
 { \
-	(x) *= ( float  ) (a).real; \
+	(x)          = bli_csimulcn_r( (a), (x) ); \
 }
 #define bli_zsscaljs( a, x ) \
 { \
-	(x) *= ( float  ) (a).real; \
+	(x)          = bli_zsimulcn_r( (a), (x) ); \
 }
+
 
 #define bli_sdscaljs( a, x ) \
 { \
-	(x) *= ( double ) (a); \
+	(x)          = bli_sdimulcn_r( (a), (x) ); \
 }
 #define bli_ddscaljs( a, x ) \
 { \
-	(x) *= ( double ) (a); \
+	(x)          = bli_ddimulcn_r( (a), (x) ); \
 }
 #define bli_cdscaljs( a, x ) \
 { \
-	(x) *= ( double ) (a).real; \
+	(x)          = bli_cdimulcn_r( (a), (x) ); \
 }
 #define bli_zdscaljs( a, x ) \
 { \
-	(x) *= ( double ) (a).real; \
+	(x)          = bli_zdimulcn_r( (a), (x) ); \
 }
+
+
+#ifndef BLIS_ENABLE_C99_COMPLEX
+
 
 #define bli_scscaljs( a, x ) \
 { \
-	(x).real *= ( float  ) (a); \
-	(x).imag *= ( float  ) (a); \
+	bli_creal(x) = bli_scimulcn_r( (a), (x) ); \
+	bli_cimag(x) = bli_scimulcn_i( (a), (x) ); \
 }
 #define bli_dcscaljs( a, x ) \
 { \
-	(x).real *= ( float  ) (a); \
-	(x).imag *= ( float  ) (a); \
+	bli_creal(x) = bli_dcimulcn_r( (a), (x) ); \
+	bli_cimag(x) = bli_dcimulcn_i( (a), (x) ); \
 }
 #define bli_ccscaljs( a, x ) \
 { \
-	float tempr = ( float  ) (a).real * (x).real + ( float  ) (a).imag * (x).imag; \
-	float tempi = ( float  ) (a).real * (x).imag - ( float  ) (a).imag * (x).real; \
-	(x).real = tempr; \
-	(x).imag = tempi; \
+	float  tempr = bli_ccimulcn_r( (a), (x) ); \
+	float  tempi = bli_ccimulcn_i( (a), (x) ); \
+	bli_creal(x) = tempr; \
+	bli_cimag(x) = tempi; \
 }
 #define bli_zcscaljs( a, x ) \
 { \
-	float tempr = ( float  ) (a).real * (x).real + ( float  ) (a).imag * (x).imag; \
-	float tempi = ( float  ) (a).real * (x).imag - ( float  ) (a).imag * (x).real; \
-	(x).real = tempr; \
-	(x).imag = tempi; \
+	float  tempr = bli_zcimulcn_r( (a), (x) ); \
+	float  tempi = bli_zcimulcn_i( (a), (x) ); \
+	bli_creal(x) = tempr; \
+	bli_cimag(x) = tempi; \
 }
+
 
 #define bli_szscaljs( a, x ) \
 { \
-	(x).real *= ( double ) (a); \
-	(x).imag *= ( double ) (a); \
+	bli_zreal(x) = bli_szimulcn_r( (a), (x) ); \
+	bli_zimag(x) = bli_szimulcn_i( (a), (x) ); \
 }
 #define bli_dzscaljs( a, x ) \
 { \
-	(x).real *= ( double ) (a); \
-	(x).imag *= ( double ) (a); \
+	bli_zreal(x) = bli_dzimulcn_r( (a), (x) ); \
+	bli_zimag(x) = bli_dzimulcn_i( (a), (x) ); \
 }
 #define bli_czscaljs( a, x ) \
 { \
-	double tempr = ( double ) (a).real * (x).real + ( double ) (a).imag * (x).imag; \
-	double tempi = ( double ) (a).real * (x).imag - ( double ) (a).imag * (x).real; \
-	(x).real = tempr; \
-	(x).imag = tempi; \
+	double tempr = bli_czimulcn_r( (a), (x) ); \
+	double tempi = bli_czimulcn_i( (a), (x) ); \
+	bli_zreal(x) = tempr; \
+	bli_zimag(x) = tempi; \
 }
 #define bli_zzscaljs( a, x ) \
 { \
-	double tempr = ( double ) (a).real * (x).real + ( double ) (a).imag * (x).imag; \
-	double tempi = ( double ) (a).real * (x).imag - ( double ) (a).imag * (x).real; \
-	(x).real = tempr; \
-	(x).imag = tempi; \
+	double tempr = bli_zzimulcn_r( (a), (x) ); \
+	double tempi = bli_zzimulcn_i( (a), (x) ); \
+	bli_zreal(x) = tempr; \
+	bli_zimag(x) = tempi; \
 }
 
 
-#define bli_sscaljs( a, x ) \
-{ \
-	bli_ssscaljs( a, x ); \
-}
-#define bli_dscaljs( a, x ) \
-{ \
-	bli_ddscaljs( a, x ); \
-}
-#define bli_cscaljs( a, x ) \
-{ \
-	bli_ccscaljs( a, x ); \
-}
-#define bli_zscaljs( a, x ) \
-{ \
-	bli_zzscaljs( a, x ); \
-}
+#else // ifdef BLIS_ENABLE_C99_COMPLEX
+
+
+#define bli_scscaljs( a, x )  { (x) *= (a); }
+#define bli_dcscaljs( a, x )  { (x) *= (a); }
+#define bli_ccscaljs( a, x )  { (x) *= conjf(a); }
+#define bli_zcscaljs( a, x )  { (x) *= conj(a); }
+
+#define bli_szscaljs( a, x )  { (x) *= (a); }
+#define bli_dzscaljs( a, x )  { (x) *= (a); }
+#define bli_czscaljs( a, x )  { (x) *= conjf(a); }
+#define bli_zzscaljs( a, x )  { (x) *= conj(a); }
+
+
+#endif // BLIS_ENABLE_C99_COMPLEX
+
+
+
+#define bli_sscaljs( a, x )  bli_ssscaljs( a, x )
+#define bli_dscaljs( a, x )  bli_ddscaljs( a, x )
+#define bli_cscaljs( a, x )  bli_ccscaljs( a, x )
+#define bli_zscaljs( a, x )  bli_zzscaljs( a, x )
 
 
 #endif

@@ -13,7 +13,7 @@ typedef float real;
 typedef double doublereal;
 typedef scomplex singlecomplex;
 typedef dcomplex doublecomplex;
-typedef long int logical;
+typedef f77_int logical;
 typedef short int shortlogical;
 typedef char logical1;
 typedef char integer1;

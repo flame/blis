@@ -37,6 +37,7 @@
 
 // conjs
 
+
 #define bli_sconjs( x ) \
 { \
 	; \
@@ -45,13 +46,30 @@
 { \
 	; \
 }
+
+
+#ifndef BLIS_ENABLE_C99_COMPLEX
+
+
 #define bli_cconjs( x ) \
 { \
-	(x).imag = -(x).imag; \
+	bli_cimag(x) = -bli_cimag(x); \
 }
 #define bli_zconjs( x ) \
 { \
-	(x).imag = -(x).imag; \
+	bli_zimag(x) = -bli_zimag(x); \
 }
 
+
+#else // ifdef BLIS_ENABLE_C99_COMPLEX
+
+
+#define bli_cconjs( x )  { (x) = conjf(x); }
+#define bli_zconjs( x )  { (x) = conj(x);  }
+
+
+#endif // BLIS_ENABLE_C99_COMPLEX
+
+
 #endif
+

@@ -41,99 +41,107 @@
 // - The first char encodes the type of a.
 // - The second char encodes the type of x.
 
+
 #define bli_sssubs( a, y ) \
 { \
-	(y)      -= ( float  )(a); \
+	(y) -= bli_sreal(a); \
 }
-#define bli_sdsubs( a, y ) \
-{ \
-	(y)      -= ( double )(a); \
-}
-#define bli_scsubs( a, y ) \
-{ \
-	(y).real -= ( float  )(a); \
-	/*(y).imag -= 0.0F;*/ \
-}
-#define bli_szsubs( a, y ) \
-{ \
-	(y).real -= ( double )(a); \
-	/*(y).imag -= 0.0F;*/ \
-}
-
 #define bli_dssubs( a, y ) \
 { \
-	(y)      -= ( float  )(a); \
+	(y) -= bli_dreal(a); \
+}
+#define bli_cssubs( a, y ) \
+{ \
+	(y) -= bli_creal(a); \
+}
+#define bli_zssubs( a, y ) \
+{ \
+	(y) -= bli_zreal(a); \
+}
+
+
+#define bli_sdsubs( a, y ) \
+{ \
+	(y) -= bli_sreal(a); \
 }
 #define bli_ddsubs( a, y ) \
 { \
-	(y)      -= ( double )(a); \
-}
-#define bli_dcsubs( a, y ) \
-{ \
-	(y).real -= ( float  )(a); \
-	/*(y).imag -= 0.0F;*/ \
-}
-#define bli_dzsubs( a, y ) \
-{ \
-	(y).real -= ( double )(a); \
-	/*(y).imag -= 0.0F;*/ \
-}
-
-#define bli_cssubs( a, y ) \
-{ \
-	(y)      -= ( float  )(a).real; \
+	(y) -= bli_dreal(a); \
 }
 #define bli_cdsubs( a, y ) \
 { \
-	(y)      -= ( double )(a).real; \
-}
-#define bli_ccsubs( a, y ) \
-{ \
-	(y).real -= ( float  )(a).real; \
-	(y).imag -= ( float  )(a).imag; \
-}
-#define bli_czsubs( a, y ) \
-{ \
-	(y).real -= ( double )(a).real; \
-	(y).imag -= ( double )(a).imag; \
-}
-
-#define bli_zssubs( a, y ) \
-{ \
-	(y)      -= ( float  )(a).real; \
+	(y) -= bli_creal(a); \
 }
 #define bli_zdsubs( a, y ) \
 { \
-	(y)      -= ( double )(a).real; \
+	(y) -= bli_zreal(a); \
+}
+
+
+#ifndef BLIS_ENABLE_C99_COMPLEX
+
+
+#define bli_scsubs( a, y ) \
+{ \
+	bli_creal(y) -= bli_sreal(a); \
+}
+#define bli_dcsubs( a, y ) \
+{ \
+	bli_creal(y) -= bli_dreal(a); \
+}
+#define bli_ccsubs( a, y ) \
+{ \
+	bli_creal(y) -= bli_creal(a); \
+	bli_cimag(y) -= bli_cimag(a); \
 }
 #define bli_zcsubs( a, y ) \
 { \
-	(y).real -= ( float  )(a).real; \
-	(y).imag -= ( float  )(a).imag; \
+	bli_creal(y) -= bli_zreal(a); \
+	bli_cimag(y) -= bli_zimag(a); \
+}
+
+
+#define bli_szsubs( a, y ) \
+{ \
+	bli_zreal(y) -= bli_sreal(a); \
+}
+#define bli_dzsubs( a, y ) \
+{ \
+	bli_zreal(y) -= bli_dreal(a); \
+}
+#define bli_czsubs( a, y ) \
+{ \
+	bli_zreal(y) -= bli_creal(a); \
+	bli_zimag(y) -= bli_cimag(a); \
 }
 #define bli_zzsubs( a, y ) \
 { \
-	(y).real -= ( double )(a).real; \
-	(y).imag -= ( double )(a).imag; \
+	bli_zreal(y) -= bli_zreal(a); \
+	bli_zimag(y) -= bli_zimag(a); \
 }
 
 
-#define bli_ssubs( a, y ) \
-{ \
-	bli_sssubs( a, y ); \
-}
-#define bli_dsubs( a, y ) \
-{ \
-	bli_ddsubs( a, y ); \
-}
-#define bli_csubs( a, y ) \
-{ \
-	bli_ccsubs( a, y ); \
-}
-#define bli_zsubs( a, y ) \
-{ \
-	bli_zzsubs( a, y ); \
-}
+#else // ifdef BLIS_ENABLE_C99_COMPLEX
+
+
+#define bli_scsubs( a, y )  { (y) -= (a); }
+#define bli_dcsubs( a, y )  { (y) -= (a); }
+#define bli_ccsubs( a, y )  { (y) -= (a); }
+#define bli_zcsubs( a, y )  { (y) -= (a); }
+
+#define bli_szsubs( a, y )  { (y) -= (a); }
+#define bli_dzsubs( a, y )  { (y) -= (a); }
+#define bli_czsubs( a, y )  { (y) -= (a); }
+#define bli_zzsubs( a, y )  { (y) -= (a); }
+
+
+#endif // BLIS_ENABLE_C99_COMPLEX
+
+
+#define bli_ssubs( a, y )  bli_sssubs( a, y )
+#define bli_dsubs( a, y )  bli_ddsubs( a, y )
+#define bli_csubs( a, y )  bli_ccsubs( a, y )
+#define bli_zsubs( a, y )  bli_zzsubs( a, y )
 
 
 #endif

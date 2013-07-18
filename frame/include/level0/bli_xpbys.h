@@ -42,418 +42,413 @@
 // - The second char encodes the type of b.
 // - The third char encodes the type of y.
 
-// -- (xby) = (ss?) ------------------------------------------------------------
+
+// -- (xby) = (?ss) ------------------------------------------------------------
 
 #define bli_sssxpbys( x, b, y ) \
 { \
-	(y)          = ( float  )( ( float  ) (x)      + ( float  ) (b)      * ( float  ) (y)      ); \
+	(y)          = ( float  ) bli_sreal(x) + ( float  ) bli_ssimulnn_r( (b), (y) ); \
 }
-#define bli_ssdxpbys( x, b, y ) \
+#define bli_dssxpbys( x, b, y ) \
 { \
-	(y)          = ( float  )( ( double ) (x)      + ( double ) (b)      * ( double ) (y)      ); \
+	(y)          = ( float  ) bli_dreal(x) + ( float  ) bli_ssimulnn_r( (b), (y) ); \
 }
-#define bli_sscxpbys( x, b, y ) \
+#define bli_cssxpbys( x, b, y ) \
 { \
-	(y).real     = ( float  )( ( float  ) (x)      + ( float  ) (b)      * ( float  ) (y).real ); \
+	(y)          = ( float  ) bli_creal(x) + ( float  ) bli_ssimulnn_r( (b), (y) ); \
 }
-#define bli_sszxpbys( x, b, y ) \
+#define bli_zssxpbys( x, b, y ) \
 { \
-	(y).real     = ( float  )( ( double ) (x)      + ( double ) (b)      * ( double ) (y).real ); \
+	(y)          = ( float  ) bli_zreal(x) + ( float  ) bli_ssimulnn_r( (b), (y) ); \
 }
 
-// -- (xby) = (sd?) ------------------------------------------------------------
+// -- (xby) = (?ds) ------------------------------------------------------------
 
 #define bli_sdsxpbys( x, b, y ) \
 { \
-	(y)          = ( float  )( ( double ) (x)      + ( double ) (b)      * ( double ) (y)      ); \
+	(y)          = ( float  ) bli_sreal(x) + ( float  ) bli_dsimulnn_r( (b), (y) ); \
 }
-#define bli_sddxpbys( x, b, y ) \
+#define bli_ddsxpbys( x, b, y ) \
 { \
-	(y)          = ( float  )( ( double ) (x)      + ( double ) (b)      * ( double ) (y)      ); \
+	(y)          = ( float  ) bli_dreal(x) + ( float  ) bli_dsimulnn_r( (b), (y) ); \
 }
-#define bli_sdcxpbys( x, b, y ) \
+#define bli_cdsxpbys( x, b, y ) \
 { \
-	(y).real     = ( float  )( ( double ) (x)      + ( double ) (b)      * ( double ) (y).real ); \
+	(y)          = ( float  ) bli_creal(x) + ( float  ) bli_dsimulnn_r( (b), (y) ); \
 }
-#define bli_sdzxpbys( x, b, y ) \
+#define bli_zdsxpbys( x, b, y ) \
 { \
-	(y).real     = ( float  )( ( double ) (x)      + ( double ) (b)      * ( double ) (y).real ); \
+	(y)          = ( float  ) bli_zreal(x) + ( float  ) bli_dsimulnn_r( (b), (y) ); \
 }
 
-// -- (xby) = (sc?) ------------------------------------------------------------
+// -- (xby) = (?cs) ------------------------------------------------------------
 
 #define bli_scsxpbys( x, b, y ) \
 { \
-	(y)          = ( float  )( ( float  ) (x)      + ( float  ) (b).real * ( float  ) (y)      ); \
+	(y)          = ( float  ) bli_sreal(x) + ( float  ) bli_csimulnn_r( (b), (y) ); \
 }
-#define bli_scdxpbys( x, b, y ) \
+#define bli_dcsxpbys( x, b, y ) \
 { \
-	(y)          = ( float  )( ( double ) (x)      + ( double ) (b).real * ( double ) (y)      ); \
+	(y)          = ( float  ) bli_dreal(x) + ( float  ) bli_csimulnn_r( (b), (y) ); \
 }
-#define bli_sccxpbys( x, b, y ) \
+#define bli_ccsxpbys( x, b, y ) \
 { \
-	float  tempr = ( float  )( ( float  ) (x)      + ( float  ) (b).real * ( float  ) (y).real - \
-	                                                 ( float  ) (b).imag * ( float  ) (y).imag ); \
-	float  tempi = ( float  )( ( float  ) (x)      + ( float  ) (b).imag * ( float  ) (y).real + \
-	                                                 ( float  ) (b).real * ( float  ) (y).imag ); \
-	(y).real  = tempr; \
-	(y).imag  = tempi; \
+	(y)          = ( float  ) bli_creal(x) + ( float  ) bli_csimulnn_r( (b), (y) ); \
 }
-#define bli_sczxpbys( x, b, y ) \
+#define bli_zcsxpbys( x, b, y ) \
 { \
-	float  tempr = ( float  )( ( double ) (x)      + ( double ) (b).real * ( double ) (y).real - \
-	                                                 ( double ) (b).imag * ( double ) (y).imag ); \
-	float  tempi = ( float  )( ( double ) (x)      + ( double ) (b).imag * ( double ) (y).real + \
-	                                                 ( double ) (b).real * ( double ) (y).imag ); \
-	(y).real  = tempr; \
-	(y).imag  = tempi; \
+	(y)          = ( float  ) bli_zreal(x) + ( float  ) bli_csimulnn_r( (b), (y) ); \
 }
 
-// -- (xby) = (sz?) ------------------------------------------------------------
+// -- (xby) = (?zs) ------------------------------------------------------------
 
 #define bli_szsxpbys( x, b, y ) \
 { \
-	(y)          = ( float  )( ( double ) (x)      + ( double ) (b).real * ( double ) (y)      ); \
+	(y)          = ( float  ) bli_sreal(x) + ( float  ) bli_zsimulnn_r( (b), (y) ); \
 }
-#define bli_szdxpbys( x, b, y ) \
+#define bli_dzsxpbys( x, b, y ) \
 { \
-	(y)          = ( float  )( ( double ) (x)      + ( double ) (b).real * ( double ) (y)      ); \
+	(y)          = ( float  ) bli_dreal(x) + ( float  ) bli_zsimulnn_r( (b), (y) ); \
 }
-#define bli_szcxpbys( x, b, y ) \
+#define bli_czsxpbys( x, b, y ) \
 { \
-	float  tempr = ( float  )( ( double ) (x)      + ( double ) (b).real * ( double ) (y).real - \
-	                                                 ( double ) (b).imag * ( double ) (y).imag ); \
-	float  tempi = ( float  )( ( double ) (x)      + ( double ) (b).imag * ( double ) (y).real + \
-	                                                 ( double ) (b).real * ( double ) (y).imag ); \
-	(y).real  = tempr; \
-	(y).imag  = tempi; \
+	(y)          = ( float  ) bli_creal(x) + ( float  ) bli_zsimulnn_r( (b), (y) ); \
 }
-#define bli_szzxpbys( x, b, y ) \
+#define bli_zzsxpbys( x, b, y ) \
 { \
-	float  tempr = ( float  )( ( double ) (x)      + ( double ) (b).real * ( double ) (y).real - \
-	                                                 ( double ) (b).imag * ( double ) (y).imag ); \
-	float  tempi = ( float  )( ( double ) (x)      + ( double ) (b).imag * ( double ) (y).real + \
-	                                                 ( double ) (b).real * ( double ) (y).imag ); \
-	(y).real  = tempr; \
-	(y).imag  = tempi; \
+	(y)          = ( float  ) bli_zreal(x) + ( float  ) bli_zsimulnn_r( (b), (y) ); \
 }
 
+// -- (xby) = (?sd) ------------------------------------------------------------
 
-// -- (xby) = (ds?) ------------------------------------------------------------
-
-#define bli_dssxpbys( x, b, y ) \
+#define bli_ssdxpbys( x, b, y ) \
 { \
-	(y)          = ( double )( ( float  ) (x)      + ( float  ) (b)      * ( float  ) (y)      ); \
+	(y)          = ( double ) bli_sreal(x) + ( double ) bli_sdimulnn_r( (b), (y) ); \
 }
 #define bli_dsdxpbys( x, b, y ) \
 { \
-	(y)          = ( double )( ( double ) (x)      + ( double ) (b)      * ( double ) (y)      ); \
-}
-#define bli_dscxpbys( x, b, y ) \
-{ \
-	(y).real     = ( double )( ( float  ) (x)      + ( float  ) (b)      * ( float  ) (y).real ); \
-}
-#define bli_dszxpbys( x, b, y ) \
-{ \
-	(y).real     = ( double )( ( double ) (x)      + ( double ) (b)      * ( double ) (y).real ); \
-}
-
-// -- (xby) = (dd?) ------------------------------------------------------------
-
-#define bli_ddsxpbys( x, b, y ) \
-{ \
-	(y)          = ( double )( ( double ) (x)      + ( double ) (b)      * ( double ) (y)      ); \
-}
-#define bli_dddxpbys( x, b, y ) \
-{ \
-	(y)          = ( double )( ( double ) (x)      + ( double ) (b)      * ( double ) (y)      ); \
-}
-#define bli_ddcxpbys( x, b, y ) \
-{ \
-	(y).real     = ( double )( ( double ) (x)      + ( double ) (b)      * ( double ) (y).real ); \
-}
-#define bli_ddzxpbys( x, b, y ) \
-{ \
-	(y).real     = ( double )( ( double ) (x)      + ( double ) (b)      * ( double ) (y).real ); \
-}
-
-// -- (xby) = (dc?) ------------------------------------------------------------
-
-#define bli_dcsxpbys( x, b, y ) \
-{ \
-	(y)          = ( double )( ( float  ) (x)      + ( float  ) (b).real * ( float  ) (y)      ); \
-}
-#define bli_dcdxpbys( x, b, y ) \
-{ \
-	(y)          = ( double )( ( double ) (x)      + ( double ) (b).real * ( double ) (y)      ); \
-}
-#define bli_dccxpbys( x, b, y ) \
-{ \
-	double tempr = ( double )( ( float  ) (x)      + ( float  ) (b).real * ( float  ) (y).real - \
-	                                                 ( float  ) (b).imag * ( float  ) (y).imag ); \
-	double tempi = ( double )( ( float  ) (x)      + ( float  ) (b).imag * ( float  ) (y).real + \
-	                                                 ( float  ) (b).real * ( float  ) (y).imag ); \
-	(y).real  = tempr; \
-	(y).imag  = tempi; \
-}
-#define bli_dczxpbys( x, b, y ) \
-{ \
-	double tempr = ( double )( ( double ) (x)      + ( double ) (b).real * ( double ) (y).real - \
-	                                                 ( double ) (b).imag * ( double ) (y).imag ); \
-	double tempi = ( double )( ( double ) (x)      + ( double ) (b).imag * ( double ) (y).real + \
-	                                                 ( double ) (b).real * ( double ) (y).imag ); \
-	(y).real  = tempr; \
-	(y).imag  = tempi; \
-}
-
-// -- (xby) = (dz?) ------------------------------------------------------------
-
-#define bli_dzsxpbys( x, b, y ) \
-{ \
-	(y)          = ( double )( ( double ) (x)      + ( double ) (b).real * ( double ) (y)      ); \
-}
-#define bli_dzdxpbys( x, b, y ) \
-{ \
-	(y)          = ( double )( ( double ) (x)      + ( double ) (b).real * ( double ) (y)      ); \
-}
-#define bli_dzcxpbys( x, b, y ) \
-{ \
-	double tempr = ( double )( ( double ) (x)      + ( double ) (b).real * ( double ) (y).real - \
-	                                                 ( double ) (b).imag * ( double ) (y).imag ); \
-	double tempi = ( double )( ( double ) (x)      + ( double ) (b).imag * ( double ) (y).real + \
-	                                                 ( double ) (b).real * ( double ) (y).imag ); \
-	(y).real  = tempr; \
-	(y).imag  = tempi; \
-}
-#define bli_dzzxpbys( x, b, y ) \
-{ \
-	double tempr = ( double )( ( double ) (x)      + ( double ) (b).real * ( double ) (y).real - \
-	                                                 ( double ) (b).imag * ( double ) (y).imag ); \
-	double tempi = ( double )( ( double ) (x)      + ( double ) (b).imag * ( double ) (y).real + \
-	                                                 ( double ) (b).real * ( double ) (y).imag ); \
-	(y).real  = tempr; \
-	(y).imag  = tempi; \
-}
-
-// -- (xby) = (cs?) ------------------------------------------------------------
-
-#define bli_cssxpbys( x, b, y ) \
-{ \
-	(y)          = ( float  )( ( float  ) (x).real + ( float  ) (b)      * ( float  ) (y)      ); \
+	(y)          = ( double ) bli_dreal(x) + ( double ) bli_sdimulnn_r( (b), (y) ); \
 }
 #define bli_csdxpbys( x, b, y ) \
 { \
-	(y)          = ( float  )( ( double ) (x).real + ( double ) (b)      * ( double ) (y)      ); \
-}
-#define bli_cscxpbys( x, b, y ) \
-{ \
-	(y).real     = ( float  )( ( float  ) (x).real + ( float  ) (b)      * ( float  ) (y).real ); \
-	(y).imag     = ( float  )( ( float  ) (x).imag + ( float  ) (b)      * ( float  ) (y).imag ); \
-}
-#define bli_cszxpbys( x, b, y ) \
-{ \
-	(y).real     = ( float  )( ( double ) (x).real + ( double ) (b)      * ( double ) (y).real ); \
-	(y).imag     = ( float  )( ( double ) (x).imag + ( double ) (b)      * ( double ) (y).imag ); \
-}
-
-// -- (xby) = (cd?) ------------------------------------------------------------
-
-#define bli_cdsxpbys( x, b, y ) \
-{ \
-	(y)          = ( float  )( ( double ) (x).real + ( double ) (b)      * ( double ) (y)      ); \
-}
-#define bli_cddxpbys( x, b, y ) \
-{ \
-	(y)          = ( float  )( ( double ) (x).real + ( double ) (b)      * ( double ) (y)      ); \
-}
-#define bli_cdcxpbys( x, b, y ) \
-{ \
-	(y).real     = ( float  )( ( double ) (x).real + ( double ) (b)      * ( double ) (y).real ); \
-	(y).imag     = ( float  )( ( double ) (x).imag + ( double ) (b)      * ( double ) (y).imag ); \
-}
-#define bli_cdzxpbys( x, b, y ) \
-{ \
-	(y).real     = ( float  )( ( double ) (x).real + ( double ) (b)      * ( double ) (y).real ); \
-	(y).imag     = ( float  )( ( double ) (x).imag + ( double ) (b)      * ( double ) (y).imag ); \
-}
-
-// -- (xby) = (cc?) ------------------------------------------------------------
-
-#define bli_ccsxpbys( x, b, y ) \
-{ \
-	(y)          = ( float  )( ( float  ) (x).real + ( float  ) (b).real * ( float  ) (y)      ); \
-}
-#define bli_ccdxpbys( x, b, y ) \
-{ \
-	(y)          = ( float  )( ( double ) (x).real + ( double ) (b).real * ( double ) (y)      ); \
-}
-#define bli_cccxpbys( x, b, y ) \
-{ \
-	float  tempr = ( float  )( ( float  ) (x).real + ( float  ) (b).real * ( float  ) (y).real - \
-	                                                 ( float  ) (b).imag * ( float  ) (y).imag ); \
-	float  tempi = ( float  )( ( float  ) (x).imag + ( float  ) (b).imag * ( float  ) (y).real + \
-	                                                 ( float  ) (b).real * ( float  ) (y).imag ); \
-	(y).real  = tempr; \
-	(y).imag  = tempi; \
-}
-#define bli_cczxpbys( x, b, y ) \
-{ \
-	float  tempr = ( float  )( ( double ) (x).real + ( double ) (b).real * ( double ) (y).real - \
-	                                                 ( double ) (b).imag * ( double ) (y).imag ); \
-	float  tempi = ( float  )( ( double ) (x).imag + ( double ) (b).imag * ( double ) (y).real + \
-	                                                 ( double ) (b).real * ( double ) (y).imag ); \
-	(y).real  = tempr; \
-	(y).imag  = tempi; \
-}
-
-// -- (xby) = (cz?) ------------------------------------------------------------
-
-#define bli_czsxpbys( x, b, y ) \
-{ \
-	(y)          = ( float  )( ( double ) (x).real + ( double ) (b).real * ( double ) (y)      ); \
-}
-#define bli_czdxpbys( x, b, y ) \
-{ \
-	(y)          = ( float  )( ( double ) (x).real + ( double ) (b).real * ( double ) (y)      ); \
-}
-#define bli_czcxpbys( x, b, y ) \
-{ \
-	float  tempr = ( float  )( ( double ) (x).real + ( double ) (b).real * ( double ) (y).real - \
-	                                                 ( double ) (b).imag * ( double ) (y).imag ); \
-	float  tempi = ( float  )( ( double ) (x).imag + ( double ) (b).imag * ( double ) (y).real + \
-	                                                 ( double ) (b).real * ( double ) (y).imag ); \
-	(y).real  = tempr; \
-	(y).imag  = tempi; \
-}
-#define bli_czzxpbys( x, b, y ) \
-{ \
-	float  tempr = ( float  )( ( double ) (x).real + ( double ) (b).real * ( double ) (y).real - \
-	                                                 ( double ) (b).imag * ( double ) (y).imag ); \
-	float  tempi = ( float  )( ( double ) (x).imag + ( double ) (b).imag * ( double ) (y).real + \
-	                                                 ( double ) (b).real * ( double ) (y).imag ); \
-	(y).real  = tempr; \
-	(y).imag  = tempi; \
-}
-
-// -- (xby) = (zs?) ------------------------------------------------------------
-
-#define bli_zssxpbys( x, b, y ) \
-{ \
-	(y)          = ( double )( ( double ) (x).real + ( double ) (b)      * ( double ) (y)      ); \
+	(y)          = ( double ) bli_creal(x) + ( double ) bli_sdimulnn_r( (b), (y) ); \
 }
 #define bli_zsdxpbys( x, b, y ) \
 { \
-	(y)          = ( double )( ( double ) (x).real + ( double ) (b)      * ( double ) (y)      ); \
-}
-#define bli_zscxpbys( x, b, y ) \
-{ \
-	(y).real     = ( double )( ( double ) (x).real + ( double ) (b)      * ( double ) (y).real ); \
-	(y).imag     = ( double )( ( double ) (x).imag + ( double ) (b)      * ( double ) (y).imag ); \
-}
-#define bli_zszxpbys( x, b, y ) \
-{ \
-	(y).real     = ( double )( ( double ) (x).real + ( double ) (b)      * ( double ) (y).real ); \
-	(y).imag     = ( double )( ( double ) (x).imag + ( double ) (b)      * ( double ) (y).imag ); \
+	(y)          = ( double ) bli_zreal(x) + ( double ) bli_sdimulnn_r( (b), (y) ); \
 }
 
-// -- (xby) = (zd?) ------------------------------------------------------------
+// -- (xby) = (?dd) ------------------------------------------------------------
 
-#define bli_zdsxpbys( x, b, y ) \
+#define bli_sddxpbys( x, b, y ) \
 { \
-	(y)          = ( double )( ( double ) (x).real + ( double ) (b)      * ( double ) (y)      ); \
+	(y)          = ( double ) bli_sreal(x) + ( double ) bli_ddimulnn_r( (b), (y) ); \
+}
+#define bli_dddxpbys( x, b, y ) \
+{ \
+	(y)          = ( double ) bli_dreal(x) + ( double ) bli_ddimulnn_r( (b), (y) ); \
+}
+#define bli_cddxpbys( x, b, y ) \
+{ \
+	(y)          = ( double ) bli_creal(x) + ( double ) bli_ddimulnn_r( (b), (y) ); \
 }
 #define bli_zddxpbys( x, b, y ) \
 { \
-	(y)          = ( double )( ( double ) (x).real + ( double ) (b)      * ( double ) (y)      ); \
-}
-#define bli_zdcxpbys( x, b, y ) \
-{ \
-	(y).real     = ( double )( ( double ) (x).real + ( double ) (b)      * ( double ) (y).real ); \
-	(y).imag     = ( double )( ( double ) (x).imag + ( double ) (b)      * ( double ) (y).imag ); \
-}
-#define bli_zdzxpbys( x, b, y ) \
-{ \
-	(y).real     = ( double )( ( double ) (x).real + ( double ) (b)      * ( double ) (y).real ); \
-	(y).imag     = ( double )( ( double ) (x).imag + ( double ) (b)      * ( double ) (y).imag ); \
+	(y)          = ( double ) bli_zreal(x) + ( double ) bli_ddimulnn_r( (b), (y) ); \
 }
 
-// -- (xby) = (zc?) ------------------------------------------------------------
+// -- (xby) = (?cd) ------------------------------------------------------------
 
-#define bli_zcsxpbys( x, b, y ) \
+#define bli_scdxpbys( x, b, y ) \
 { \
-	(y)          = ( double )( ( double ) (x).real + ( double ) (b).real * ( double ) (y)      ); \
+	(y)          = ( double ) bli_sreal(x) + ( double ) bli_cdimulnn_r( (b), (y) ); \
+}
+#define bli_dcdxpbys( x, b, y ) \
+{ \
+	(y)          = ( double ) bli_dreal(x) + ( double ) bli_cdimulnn_r( (b), (y) ); \
+}
+#define bli_ccdxpbys( x, b, y ) \
+{ \
+	(y)          = ( double ) bli_creal(x) + ( double ) bli_cdimulnn_r( (b), (y) ); \
 }
 #define bli_zcdxpbys( x, b, y ) \
 { \
-	(y)          = ( double )( ( double ) (x).real + ( double ) (b).real * ( double ) (y)      ); \
-}
-#define bli_zccxpbys( x, b, y ) \
-{ \
-	double tempr = ( double )( ( double ) (x).real + ( double ) (b).real * ( double ) (y).real - \
-	                                                 ( double ) (b).imag * ( double ) (y).imag ); \
-	double tempi = ( double )( ( double ) (x).imag + ( double ) (b).imag * ( double ) (y).real + \
-	                                                 ( double ) (b).real * ( double ) (y).imag ); \
-	(y).real  = tempr; \
-	(y).imag  = tempi; \
-}
-#define bli_zczxpbys( x, b, y ) \
-{ \
-	double tempr = ( double )( ( double ) (x).real + ( double ) (b).real * ( double ) (y).real - \
-	                                                 ( double ) (b).imag * ( double ) (y).imag ); \
-	double tempi = ( double )( ( double ) (x).imag + ( double ) (b).imag * ( double ) (y).real + \
-	                                                 ( double ) (b).real * ( double ) (y).imag ); \
-	(y).real  = tempr; \
-	(y).imag  = tempi; \
+	(y)          = ( double ) bli_zreal(x) + ( double ) bli_cdimulnn_r( (b), (y) ); \
 }
 
-// -- (xby) = (zz?) ------------------------------------------------------------
+// -- (xby) = (?zd) ------------------------------------------------------------
 
-#define bli_zzsxpbys( x, b, y ) \
+#define bli_szdxpbys( x, b, y ) \
 { \
-	(y)          = ( double )( ( double ) (x).real + ( double ) (b).real * ( double ) (y)      ); \
+	(y)          = ( double ) bli_sreal(x) + ( double ) bli_zdimulnn_r( (b), (y) ); \
+}
+#define bli_dzdxpbys( x, b, y ) \
+{ \
+	(y)          = ( double ) bli_dreal(x) + ( double ) bli_zdimulnn_r( (b), (y) ); \
+}
+#define bli_czdxpbys( x, b, y ) \
+{ \
+	(y)          = ( double ) bli_creal(x) + ( double ) bli_zdimulnn_r( (b), (y) ); \
 }
 #define bli_zzdxpbys( x, b, y ) \
 { \
-	(y)          = ( double )( ( double ) (x).real + ( double ) (b).real * ( double ) (y)      ); \
+	(y)          = ( double ) bli_zreal(x) + ( double ) bli_zdimulnn_r( (b), (y) ); \
+}
+
+// -- (xby) = (?sc) ------------------------------------------------------------
+
+#define bli_sscxpbys( x, b, y ) \
+{ \
+	float  tempr = ( float  ) bli_sreal(x) + ( float  ) bli_scimulnn_r( (b), (y) ); \
+	float  tempi =                           ( float  ) bli_scimulnn_i( (b), (y) ); \
+	bli_creal(y) = tempr; \
+	bli_cimag(y) = tempi; \
+}
+#define bli_dscxpbys( x, b, y ) \
+{ \
+	float  tempr = ( float  ) bli_dreal(x) + ( float  ) bli_scimulnn_r( (b), (y) ); \
+	float  tempi =                           ( float  ) bli_scimulnn_i( (b), (y) ); \
+	bli_creal(y) = tempr; \
+	bli_cimag(y) = tempi; \
+}
+#define bli_cscxpbys( x, b, y ) \
+{ \
+	float  tempr = ( float  ) bli_creal(x) + ( float  ) bli_scimulnn_r( (b), (y) ); \
+	float  tempi = ( float  ) bli_cimag(x) + ( float  ) bli_scimulnn_i( (b), (y) ); \
+	bli_creal(y) = tempr; \
+	bli_cimag(y) = tempi; \
+}
+#define bli_zscxpbys( x, b, y ) \
+{ \
+	float  tempr = ( float  ) bli_zreal(x) + ( float  ) bli_scimulnn_r( (b), (y) ); \
+	float  tempi = ( float  ) bli_zimag(x) + ( float  ) bli_scimulnn_i( (b), (y) ); \
+	bli_creal(y) = tempr; \
+	bli_cimag(y) = tempi; \
+}
+
+// -- (xby) = (?dc) ------------------------------------------------------------
+
+#define bli_sdcxpbys( x, b, y ) \
+{ \
+	float  tempr = ( float  ) bli_sreal(x) + ( float  ) bli_dcimulnn_r( (b), (y) ); \
+	float  tempi =                           ( float  ) bli_dcimulnn_i( (b), (y) ); \
+	bli_creal(y) = tempr; \
+	bli_cimag(y) = tempi; \
+}
+#define bli_ddcxpbys( x, b, y ) \
+{ \
+	float  tempr = ( float  ) bli_dreal(x) + ( float  ) bli_dcimulnn_r( (b), (y) ); \
+	float  tempi =                           ( float  ) bli_dcimulnn_i( (b), (y) ); \
+	bli_creal(y) = tempr; \
+	bli_cimag(y) = tempi; \
+}
+#define bli_cdcxpbys( x, b, y ) \
+{ \
+	float  tempr = ( float  ) bli_creal(x) + ( float  ) bli_dcimulnn_r( (b), (y) ); \
+	float  tempi = ( float  ) bli_cimag(x) + ( float  ) bli_dcimulnn_i( (b), (y) ); \
+	bli_creal(y) = tempr; \
+	bli_cimag(y) = tempi; \
+}
+#define bli_zdcxpbys( x, b, y ) \
+{ \
+	float  tempr = ( float  ) bli_zreal(x) + ( float  ) bli_dcimulnn_r( (b), (y) ); \
+	float  tempi = ( float  ) bli_zimag(x) + ( float  ) bli_dcimulnn_i( (b), (y) ); \
+	bli_creal(y) = tempr; \
+	bli_cimag(y) = tempi; \
+}
+
+// -- (xby) = (?cc) ------------------------------------------------------------
+
+#define bli_sccxpbys( x, b, y ) \
+{ \
+	float  tempr = ( float  ) bli_sreal(x) + ( float  ) bli_ccimulnn_r( (b), (y) ); \
+	float  tempi =                           ( float  ) bli_ccimulnn_i( (b), (y) ); \
+	bli_creal(y) = tempr; \
+	bli_cimag(y) = tempi; \
+}
+#define bli_dccxpbys( x, b, y ) \
+{ \
+	float  tempr = ( float  ) bli_dreal(x) + ( float  ) bli_ccimulnn_r( (b), (y) ); \
+	float  tempi =                           ( float  ) bli_ccimulnn_i( (b), (y) ); \
+	bli_creal(y) = tempr; \
+	bli_cimag(y) = tempi; \
+}
+#define bli_cccxpbys( x, b, y ) \
+{ \
+	float  tempr = ( float  ) bli_creal(x) + ( float  ) bli_ccimulnn_r( (b), (y) ); \
+	float  tempi = ( float  ) bli_cimag(x) + ( float  ) bli_ccimulnn_i( (b), (y) ); \
+	bli_creal(y) = tempr; \
+	bli_cimag(y) = tempi; \
+}
+#define bli_zccxpbys( x, b, y ) \
+{ \
+	float  tempr = ( float  ) bli_zreal(x) + ( float  ) bli_ccimulnn_r( (b), (y) ); \
+	float  tempi = ( float  ) bli_zimag(x) + ( float  ) bli_ccimulnn_i( (b), (y) ); \
+	bli_creal(y) = tempr; \
+	bli_cimag(y) = tempi; \
+}
+
+// -- (xby) = (?zc) ------------------------------------------------------------
+
+#define bli_szcxpbys( x, b, y ) \
+{ \
+	float  tempr = ( float  ) bli_sreal(x) + ( float  ) bli_zcimulnn_r( (b), (y) ); \
+	float  tempi =                           ( float  ) bli_zcimulnn_i( (b), (y) ); \
+	bli_creal(y) = tempr; \
+	bli_cimag(y) = tempi; \
+}
+#define bli_dzcxpbys( x, b, y ) \
+{ \
+	float  tempr = ( float  ) bli_dreal(x) + ( float  ) bli_zcimulnn_r( (b), (y) ); \
+	float  tempi =                           ( float  ) bli_zcimulnn_i( (b), (y) ); \
+	bli_creal(y) = tempr; \
+	bli_cimag(y) = tempi; \
+}
+#define bli_czcxpbys( x, b, y ) \
+{ \
+	float  tempr = ( float  ) bli_creal(x) + ( float  ) bli_zcimulnn_r( (b), (y) ); \
+	float  tempi = ( float  ) bli_cimag(x) + ( float  ) bli_zcimulnn_i( (b), (y) ); \
+	bli_creal(y) = tempr; \
+	bli_cimag(y) = tempi; \
 }
 #define bli_zzcxpbys( x, b, y ) \
 { \
-	double tempr = ( double )( ( double ) (x).real + ( double ) (b).real * ( double ) (y).real - \
-	                                                 ( double ) (b).imag * ( double ) (y).imag ); \
-	double tempi = ( double )( ( double ) (x).imag + ( double ) (b).imag * ( double ) (y).real + \
-	                                                 ( double ) (b).real * ( double ) (y).imag ); \
-	(y).real  = tempr; \
-	(y).imag  = tempi; \
+	float  tempr = ( float  ) bli_zreal(x) + ( float  ) bli_zcimulnn_r( (b), (y) ); \
+	float  tempi = ( float  ) bli_zimag(x) + ( float  ) bli_zcimulnn_i( (b), (y) ); \
+	bli_creal(y) = tempr; \
+	bli_cimag(y) = tempi; \
+}
+
+// -- (xby) = (?sz) ------------------------------------------------------------
+
+#define bli_sszxpbys( x, b, y ) \
+{ \
+	double tempr = ( double ) bli_sreal(x) + ( double ) bli_szimulnn_r( (b), (y) ); \
+	double tempi =                           ( double ) bli_szimulnn_i( (b), (y) ); \
+	bli_zreal(y) = tempr; \
+	bli_zimag(y) = tempi; \
+}
+#define bli_dszxpbys( x, b, y ) \
+{ \
+	double tempr = ( double ) bli_dreal(x) + ( double ) bli_szimulnn_r( (b), (y) ); \
+	double tempi =                           ( double ) bli_szimulnn_i( (b), (y) ); \
+	bli_zreal(y) = tempr; \
+	bli_zimag(y) = tempi; \
+}
+#define bli_cszxpbys( x, b, y ) \
+{ \
+	double tempr = ( double ) bli_creal(x) + ( double ) bli_szimulnn_r( (b), (y) ); \
+	double tempi = ( double ) bli_cimag(x) + ( double ) bli_szimulnn_i( (b), (y) ); \
+	bli_zreal(y) = tempr; \
+	bli_zimag(y) = tempi; \
+}
+#define bli_zszxpbys( x, b, y ) \
+{ \
+	double tempr = ( double ) bli_zreal(x) + ( double ) bli_szimulnn_r( (b), (y) ); \
+	double tempi = ( double ) bli_zimag(x) + ( double ) bli_szimulnn_i( (b), (y) ); \
+	bli_zreal(y) = tempr; \
+	bli_zimag(y) = tempi; \
+}
+
+// -- (xby) = (?dz) ------------------------------------------------------------
+
+#define bli_sdzxpbys( x, b, y ) \
+{ \
+	double tempr = ( double ) bli_sreal(x) + ( double ) bli_dzimulnn_r( (b), (y) ); \
+	double tempi =                           ( double ) bli_dzimulnn_i( (b), (y) ); \
+	bli_zreal(y) = tempr; \
+	bli_zimag(y) = tempi; \
+}
+#define bli_ddzxpbys( x, b, y ) \
+{ \
+	double tempr = ( double ) bli_dreal(x) + ( double ) bli_dzimulnn_r( (b), (y) ); \
+	double tempi =                           ( double ) bli_dzimulnn_i( (b), (y) ); \
+	bli_zreal(y) = tempr; \
+	bli_zimag(y) = tempi; \
+}
+#define bli_cdzxpbys( x, b, y ) \
+{ \
+	double tempr = ( double ) bli_creal(x) + ( double ) bli_dzimulnn_r( (b), (y) ); \
+	double tempi = ( double ) bli_cimag(x) + ( double ) bli_dzimulnn_i( (b), (y) ); \
+	bli_zreal(y) = tempr; \
+	bli_zimag(y) = tempi; \
+}
+#define bli_zdzxpbys( x, b, y ) \
+{ \
+	double tempr = ( double ) bli_zreal(x) + ( double ) bli_dzimulnn_r( (b), (y) ); \
+	double tempi = ( double ) bli_zimag(x) + ( double ) bli_dzimulnn_i( (b), (y) ); \
+	bli_zreal(y) = tempr; \
+	bli_zimag(y) = tempi; \
+}
+
+// -- (xby) = (?cz) ------------------------------------------------------------
+
+#define bli_sczxpbys( x, b, y ) \
+{ \
+	double tempr = ( double ) bli_sreal(x) + ( double ) bli_czimulnn_r( (b), (y) ); \
+	double tempi =                           ( double ) bli_czimulnn_i( (b), (y) ); \
+	bli_zreal(y) = tempr; \
+	bli_zimag(y) = tempi; \
+}
+#define bli_dczxpbys( x, b, y ) \
+{ \
+	double tempr = ( double ) bli_dreal(x) + ( double ) bli_czimulnn_r( (b), (y) ); \
+	double tempi =                           ( double ) bli_czimulnn_i( (b), (y) ); \
+	bli_zreal(y) = tempr; \
+	bli_zimag(y) = tempi; \
+}
+#define bli_cczxpbys( x, b, y ) \
+{ \
+	double tempr = ( double ) bli_creal(x) + ( double ) bli_czimulnn_r( (b), (y) ); \
+	double tempi = ( double ) bli_cimag(x) + ( double ) bli_czimulnn_i( (b), (y) ); \
+	bli_zreal(y) = tempr; \
+	bli_zimag(y) = tempi; \
+}
+#define bli_zczxpbys( x, b, y ) \
+{ \
+	double tempr = ( double ) bli_zreal(x) + ( double ) bli_czimulnn_r( (b), (y) ); \
+	double tempi = ( double ) bli_zimag(x) + ( double ) bli_czimulnn_i( (b), (y) ); \
+	bli_zreal(y) = tempr; \
+	bli_zimag(y) = tempi; \
+}
+
+// -- (xby) = (?zz) ------------------------------------------------------------
+
+#define bli_szzxpbys( x, b, y ) \
+{ \
+	double tempr = ( double ) bli_sreal(x) + ( double ) bli_zzimulnn_r( (b), (y) ); \
+	double tempi =                           ( double ) bli_zzimulnn_i( (b), (y) ); \
+	bli_zreal(y) = tempr; \
+	bli_zimag(y) = tempi; \
+}
+#define bli_dzzxpbys( x, b, y ) \
+{ \
+	double tempr = ( double ) bli_dreal(x) + ( double ) bli_zzimulnn_r( (b), (y) ); \
+	double tempi =                           ( double ) bli_zzimulnn_i( (b), (y) ); \
+	bli_zreal(y) = tempr; \
+	bli_zimag(y) = tempi; \
+}
+#define bli_czzxpbys( x, b, y ) \
+{ \
+	double tempr = ( double ) bli_creal(x) + ( double ) bli_zzimulnn_r( (b), (y) ); \
+	double tempi = ( double ) bli_cimag(x) + ( double ) bli_zzimulnn_i( (b), (y) ); \
+	bli_zreal(y) = tempr; \
+	bli_zimag(y) = tempi; \
 }
 #define bli_zzzxpbys( x, b, y ) \
 { \
-	double tempr = ( double )( ( double ) (x).real + ( double ) (b).real * ( double ) (y).real - \
-	                                                 ( double ) (b).imag * ( double ) (y).imag ); \
-	double tempi = ( double )( ( double ) (x).imag + ( double ) (b).imag * ( double ) (y).real + \
-	                                                 ( double ) (b).real * ( double ) (y).imag ); \
-	(y).real  = tempr; \
-	(y).imag  = tempi; \
+	double tempr = ( double ) bli_zreal(x) + ( double ) bli_zzimulnn_r( (b), (y) ); \
+	double tempi = ( double ) bli_zimag(x) + ( double ) bli_zzimulnn_i( (b), (y) ); \
+	bli_zreal(y) = tempr; \
+	bli_zimag(y) = tempi; \
 }
 
 
 
-
-#define bli_sxpbys( x, b, y ) \
-{ \
-	bli_sssxpbys( x, b, y ); \
-}
-#define bli_dxpbys( x, b, y ) \
-{ \
-	bli_dddxpbys( x, b, y ); \
-}
-#define bli_cxpbys( x, b, y ) \
-{ \
-	bli_cccxpbys( x, b, y ); \
-}
-#define bli_zxpbys( x, b, y ) \
-{ \
-	bli_zzzxpbys( x, b, y ); \
-}
+#define bli_sxpbys( x, b, y )  bli_sssxpbys( x, b, y )
+#define bli_dxpbys( x, b, y )  bli_dddxpbys( x, b, y )
+#define bli_cxpbys( x, b, y )  bli_cccxpbys( x, b, y )
+#define bli_zxpbys( x, b, y )  bli_zzzxpbys( x, b, y )
 
 
 #endif

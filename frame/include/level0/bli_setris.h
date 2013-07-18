@@ -41,11 +41,20 @@
 // - The first char encodes the type of x.
 // - The second char encodes the type of y.
 
+
 #define bli_sssetris( xr, xi, y ) \
 { \
 	(y)      = ( float  ) (xr); \
 }
 #define bli_dssetris( xr, xi, y ) \
+{ \
+	(y)      = ( float  ) (xr); \
+}
+#define bli_cssetris( xr, xi, y ) \
+{ \
+	(y)      = ( float  ) (xr); \
+}
+#define bli_zssetris( xr, xi, y ) \
 { \
 	(y)      = ( float  ) (xr); \
 }
@@ -59,6 +68,17 @@
 { \
 	(y)      = ( double ) (xr); \
 }
+#define bli_cdsetris( xr, xi, y ) \
+{ \
+	(y)      = ( double ) (xr); \
+}
+#define bli_zdsetris( xr, xi, y ) \
+{ \
+	(y)      = ( double ) (xr); \
+}
+
+
+#ifndef BLIS_ENABLE_C99_COMPLEX
 
 
 #define bli_scsetris( xr, xi, y ) \
@@ -67,6 +87,16 @@
 	(y).imag = ( float  ) (xi); \
 }
 #define bli_dcsetris( xr, xi, y ) \
+{ \
+	(y).real = ( float  ) (xr); \
+	(y).imag = ( float  ) (xi); \
+}
+#define bli_ccsetris( xr, xi, y ) \
+{ \
+	(y).real = ( float  ) (xr); \
+	(y).imag = ( float  ) (xi); \
+}
+#define bli_zcsetris( xr, xi, y ) \
 { \
 	(y).real = ( float  ) (xr); \
 	(y).imag = ( float  ) (xi); \
@@ -83,24 +113,64 @@
 	(y).real = ( double ) (xr); \
 	(y).imag = ( double ) (xi); \
 }
+#define bli_czsetris( xr, xi, y ) \
+{ \
+	(y).real = ( double ) (xr); \
+	(y).imag = ( double ) (xi); \
+}
+#define bli_zzsetris( xr, xi, y ) \
+{ \
+	(y).real = ( double ) (xr); \
+	(y).imag = ( double ) (xi); \
+}
 
 
-#define bli_ssetris( xr, xi, y ) \
+#else // ifdef BLIS_ENABLE_C99_COMPLEX
+
+
+#define bli_scsetris( xr, xi, y ) \
 { \
-	bli_sssetris( xr, xi, y ); \
+	(y)      = ( float  ) (xr) + ( float  ) (xi) * (I); \
 }
-#define bli_dsetris( xr, xi, y ) \
+#define bli_dcsetris( xr, xi, y ) \
 { \
-	bli_ddsetris( xr, xi, y ); \
+	(y)      = ( float  ) (xr) + ( float  ) (xi) * (I); \
 }
-#define bli_csetris( xr, xi, y ) \
+#define bli_ccsetris( xr, xi, y ) \
 { \
-	bli_scsetris( xr, xi, y ); \
+	(y)      = ( float  ) (xr) + ( float  ) (xi) * (I); \
 }
-#define bli_zsetris( xr, xi, y ) \
+#define bli_zcsetris( xr, xi, y ) \
 { \
-	bli_dzsetris( xr, xi, y ); \
+	(y)      = ( float  ) (xr) + ( float  ) (xi) * (I); \
 }
+
+
+#define bli_szsetris( xr, xi, y ) \
+{ \
+	(y)      = ( double ) (xr) + ( double ) (xi) * (I); \
+}
+#define bli_dzsetris( xr, xi, y ) \
+{ \
+	(y)      = ( double ) (xr) + ( double ) (xi) * (I); \
+}
+#define bli_czsetris( xr, xi, y ) \
+{ \
+	(y)      = ( double ) (xr) + ( double ) (xi) * (I); \
+}
+#define bli_zzsetris( xr, xi, y ) \
+{ \
+	(y)      = ( double ) (xr) + ( double ) (xi) * (I); \
+}
+
+
+#endif // BLIS_ENABLE_C99_COMPLEX
+
+
+#define bli_ssetris( xr, xi, y )  bli_sssetris( xr, xi, y )
+#define bli_dsetris( xr, xi, y )  bli_ddsetris( xr, xi, y )
+#define bli_csetris( xr, xi, y )  bli_scsetris( xr, xi, y )
+#define bli_zsetris( xr, xi, y )  bli_dzsetris( xr, xi, y )
 
 
 #endif

@@ -44,108 +44,89 @@
 
 #define bli_ssabsq2s( x, a ) \
 { \
-	(a) = ( float  )( (x)      * (x) ); \
+	bli_sssetris(          (x) *          (x), 0.0F, (a) ); \
 }
 #define bli_dsabsq2s( x, a ) \
 { \
-	(a) = ( float  )( (x)      * (x) ); \
+	bli_dssetris(          (x) *          (x), 0.0F, (a) ); \
 }
 #define bli_csabsq2s( x, a ) \
 { \
-	(a) = ( float  )( (x).real * (x).real + \
-	                  (x).imag * (x).imag ); \
+	bli_cssetris( bli_creal(x) * bli_creal(x) + \
+	              bli_cimag(x) * bli_cimag(x), 0.0F, (a) ); \
 }
 #define bli_zsabsq2s( x, a ) \
 { \
-	(a) = ( float  )( (x).real * (x).real + \
-	                  (x).imag * (x).imag ); \
+	bli_zssetris( bli_zreal(x) * bli_zreal(x) + \
+	              bli_zimag(x) * bli_zimag(x), 0.0F, (a) ); \
 }
 
 
 #define bli_sdabsq2s( x, a ) \
 { \
-	(a) = ( double )( (x)      * (x) ); \
+	bli_sdsetris(          (x) *          (x), 0.0, (a) ); \
 }
 #define bli_ddabsq2s( x, a ) \
 { \
-	(a) = ( double )( (x)      * (x) ); \
+	bli_ddsetris(          (x) *          (x), 0.0, (a) ); \
 }
 #define bli_cdabsq2s( x, a ) \
 { \
-	(a) = ( double )( (x).real * (x).real + \
-	                  (x).imag * (x).imag ); \
+	bli_cdsetris( bli_creal(x) * bli_creal(x) + \
+	              bli_cimag(x) * bli_cimag(x), 0.0, (a) ); \
 }
 #define bli_zdabsq2s( x, a ) \
 { \
-	(a) = ( double )( (x).real * (x).real + \
-	                  (x).imag * (x).imag ); \
+	bli_zdsetris( bli_zreal(x) * bli_zreal(x) + \
+	              bli_zimag(x) * bli_zimag(x), 0.0, (a) ); \
 }
+
 
 
 #define bli_scabsq2s( x, a ) \
 { \
-	(a).real = ( float  )( (x)      * (x) ); \
-	(a).imag = 0.0F; \
+	bli_scsetris(          (x) *          (x), 0.0F, (a) ); \
 }
 #define bli_dcabsq2s( x, a ) \
 { \
-	(a).real = ( float  )( (x)      * (x) ); \
-	(a).imag = 0.0; \
+	bli_dcsetris(          (x) *          (x), 0.0F, (a) ); \
 }
 #define bli_ccabsq2s( x, a ) \
 { \
-	(a).real = ( float  )( (x).real * (x).real + \
-	                       (x).imag * (x).imag ); \
-	(a).imag = 0.0F; \
+	bli_ccsetris( bli_creal(x) * bli_creal(x) + \
+	              bli_cimag(x) * bli_cimag(x), 0.0F, (a) ); \
 }
 #define bli_zcabsq2s( x, a ) \
 { \
-	(a).real = ( float  )( (x).real * (x).real + \
-	                       (x).imag * (x).imag ); \
-	(a).imag = 0.0; \
+	bli_zcsetris( bli_zreal(x) * bli_zreal(x) + \
+	              bli_zimag(x) * bli_zimag(x), 0.0F, (a) ); \
 }
 
 
 #define bli_szabsq2s( x, a ) \
 { \
-	(a).real = ( double )( (x)      * (x) ); \
-	(a).imag = 0.0F; \
+	bli_szsetris(          (x) *          (x), 0.0, (a) ); \
 }
 #define bli_dzabsq2s( x, a ) \
 { \
-	(a).real = ( double )( (x)      * (x) ); \
-	(a).imag = 0.0; \
+	bli_dzsetris(          (x) *          (x), 0.0, (a) ); \
 }
 #define bli_czabsq2s( x, a ) \
 { \
-	(a).real = ( double )( (x).real * (x).real + \
-	                       (x).imag * (x).imag ); \
-	(a).imag = 0.0F; \
+	bli_czsetris( bli_creal(x) * bli_creal(x) + \
+	              bli_cimag(x) * bli_cimag(x), 0.0, (a) ); \
 }
 #define bli_zzabsq2s( x, a ) \
 { \
-	(a).real = ( double )( (x).real * (x).real + \
-	                       (x).imag * (x).imag ); \
-	(a).imag = 0.0; \
+	bli_zzsetris( bli_zreal(x) * bli_zreal(x) + \
+	              bli_zimag(x) * bli_zimag(x), 0.0, (a) ); \
 }
 
 
-#define bli_sabsq2s( x, a ) \
-{ \
-	bli_ssabsq2s( x, a ); \
-}
-#define bli_dabsq2s( x, a ) \
-{ \
-	bli_ddabsq2s( x, a ); \
-}
-#define bli_cabsq2s( x, a ) \
-{ \
-	bli_ccabsq2s( x, a ); \
-}
-#define bli_zabsq2s( x, a ) \
-{ \
-	bli_zzabsq2s( x, a ); \
-}
+#define bli_sabsq2s( x, a )  bli_ssabsq2s( x, a )
+#define bli_dabsq2s( x, a )  bli_ddabsq2s( x, a )
+#define bli_cabsq2s( x, a )  bli_ccabsq2s( x, a )
+#define bli_zabsq2s( x, a )  bli_zzabsq2s( x, a )
 
 
 #endif

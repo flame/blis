@@ -43,360 +43,99 @@
 // - The third char encodes the type of rho.
 // - x is used in conjugated form.
 
-// -- (xyr) = (ss?) ------------------------------------------------------------
 
-#define bli_sssdotjs( x, y, a ) \
-{ \
-	(a)      += ( float  ) (x) * ( float  ) (y); \
-}
-#define bli_ssddotjs( x, y, a ) \
-{ \
-	(a)      += ( double ) (x) * ( double ) (y); \
-}
-#define bli_sscdotjs( x, y, a ) \
-{ \
-	(a).real += ( float  ) (x) * ( float  ) (y); \
-	/* (a).imag += ( float  ) 0.0; */ \
-}
-#define bli_sszdotjs( x, y, a ) \
-{ \
-	(a).real += ( double ) (x) * ( double ) (y); \
-	/* (a).imag += ( double ) 0.0; */ \
-}
+#define bli_sssdotjs( x, y, a )  bli_sssaxpyjs( y, x, a )
+#define bli_dssdotjs( x, y, a )  bli_sdsaxpyjs( y, x, a )
+#define bli_cssdotjs( x, y, a )  bli_scsaxpyjs( y, x, a )
+#define bli_zssdotjs( x, y, a )  bli_szsaxpyjs( y, x, a )
 
-// -- (xyr) = (sd?) ------------------------------------------------------------
+#define bli_sdsdotjs( x, y, a )  bli_dssaxpyjs( y, x, a )
+#define bli_ddsdotjs( x, y, a )  bli_ddsaxpyjs( y, x, a )
+#define bli_cdsdotjs( x, y, a )  bli_dcsaxpyjs( y, x, a )
+#define bli_zdsdotjs( x, y, a )  bli_dzsaxpyjs( y, x, a )
 
-#define bli_sdsdotjs( x, y, a ) \
-{ \
-	(a)      += ( float  ) (x) * ( float  ) (y); \
-}
-#define bli_sdddotjs( x, y, a ) \
-{ \
-	(a)      += ( double ) (x) * ( double ) (y); \
-}
-#define bli_sdcdotjs( x, y, a ) \
-{ \
-	(a).real += ( float  ) (x) * ( float  ) (y); \
-	/* (a).imag += ( float  ) 0.0; */ \
-}
-#define bli_sdzdotjs( x, y, a ) \
-{ \
-	(a).real += ( double ) (x) * ( double ) (y); \
-	/* (a).imag += ( double ) 0.0; */ \
-}
+#define bli_scsdotjs( x, y, a )  bli_cssaxpyjs( y, x, a )
+#define bli_dcsdotjs( x, y, a )  bli_cdsaxpyjs( y, x, a )
+#define bli_ccsdotjs( x, y, a )  bli_ccsaxpyjs( y, x, a )
+#define bli_zcsdotjs( x, y, a )  bli_czsaxpyjs( y, x, a )
 
-// -- (xyr) = (sc?) ------------------------------------------------------------
+#define bli_szsdotjs( x, y, a )  bli_zssaxpyjs( y, x, a )
+#define bli_dzsdotjs( x, y, a )  bli_zdsaxpyjs( y, x, a )
+#define bli_czsdotjs( x, y, a )  bli_zcsaxpyjs( y, x, a )
+#define bli_zzsdotjs( x, y, a )  bli_zzsaxpyjs( y, x, a )
 
-#define bli_scsdotjs( x, y, a ) \
-{ \
-	(a)      += ( float  ) (x) * ( float  ) (y).real; \
-}
-#define bli_scddotjs( x, y, a ) \
-{ \
-	(a)      += ( double ) (x) * ( double ) (y).real; \
-}
-#define bli_sccdotjs( x, y, a ) \
-{ \
-	(a).real += ( float  ) (x) * ( float  ) (y).real; \
-	/* (a).imag += ( float  ) 0.0; */ \
-}
-#define bli_sczdotjs( x, y, a ) \
-{ \
-	(a).real += ( double ) (x) * ( double ) (y).real; \
-	/* (a).imag += ( double ) 0.0; */ \
-}
 
-// -- (xyr) = (sz?) ------------------------------------------------------------
+#define bli_ssddotjs( x, y, a )  bli_ssdaxpyjs( y, x, a )
+#define bli_dsddotjs( x, y, a )  bli_sddaxpyjs( y, x, a )
+#define bli_csddotjs( x, y, a )  bli_scdaxpyjs( y, x, a )
+#define bli_zsddotjs( x, y, a )  bli_szdaxpyjs( y, x, a )
 
-#define bli_szsdotjs( x, y, a ) \
-{ \
-	(a)      += ( float  ) (x) * ( float  ) (y).real; \
-}
-#define bli_szddotjs( x, y, a ) \
-{ \
-	(a)      += ( double ) (x) * ( double ) (y).real; \
-}
-#define bli_szcdotjs( x, y, a ) \
-{ \
-	(a).real += ( float  ) (x) * ( float  ) (y).real; \
-	/* (a).imag += ( float  ) 0.0; */ \
-}
-#define bli_szzdotjs( x, y, a ) \
-{ \
-	(a).real += ( double ) (x) * ( double ) (y).real; \
-	/* (a).imag += ( double ) 0.0; */ \
-}
+#define bli_sdddotjs( x, y, a )  bli_dsdaxpyjs( y, x, a )
+#define bli_ddddotjs( x, y, a )  bli_dddaxpyjs( y, x, a )
+#define bli_cdddotjs( x, y, a )  bli_dcdaxpyjs( y, x, a )
+#define bli_zdddotjs( x, y, a )  bli_dzdaxpyjs( y, x, a )
 
-// -- (xyr) = (ds?) ------------------------------------------------------------
+#define bli_scddotjs( x, y, a )  bli_csdaxpyjs( y, x, a )
+#define bli_dcddotjs( x, y, a )  bli_cddaxpyjs( y, x, a )
+#define bli_ccddotjs( x, y, a )  bli_ccdaxpyjs( y, x, a )
+#define bli_zcddotjs( x, y, a )  bli_czdaxpyjs( y, x, a )
 
-#define bli_dssdotjs( x, y, a ) \
-{ \
-	(a)      += ( float  ) (x) * ( float  ) (y); \
-}
-#define bli_dsddotjs( x, y, a ) \
-{ \
-	(a)      += ( double ) (x) * ( double ) (y); \
-}
-#define bli_dscdotjs( x, y, a ) \
-{ \
-	(a).real += ( float  ) (x) * ( float  ) (y); \
-	/* (a).imag += ( float  ) 0.0; */ \
-}
-#define bli_dszdotjs( x, y, a ) \
-{ \
-	(a).real += ( double ) (x) * ( double ) (y); \
-	/* (a).imag += ( double ) 0.0; */ \
-}
+#define bli_szddotjs( x, y, a )  bli_zsdaxpyjs( y, x, a )
+#define bli_dzddotjs( x, y, a )  bli_zddaxpyjs( y, x, a )
+#define bli_czddotjs( x, y, a )  bli_zcdaxpyjs( y, x, a )
+#define bli_zzddotjs( x, y, a )  bli_zzdaxpyjs( y, x, a )
 
-// -- (xyr) = (dd?) ------------------------------------------------------------
 
-#define bli_ddsdotjs( x, y, a ) \
-{ \
-	(a)      += ( float  ) (x) * ( float  ) (y); \
-}
-#define bli_ddddotjs( x, y, a ) \
-{ \
-	(a)      += ( double ) (x) * ( double ) (y); \
-}
-#define bli_ddcdotjs( x, y, a ) \
-{ \
-	(a).real += ( float  ) (x) * ( float  ) (y); \
-	/* (a).imag += ( float  ) 0.0; */ \
-}
-#define bli_ddzdotjs( x, y, a ) \
-{ \
-	(a).real += ( double ) (x) * ( double ) (y); \
-	/* (a).imag += ( double ) 0.0; */ \
-}
+#define bli_sscdotjs( x, y, a )  bli_sscaxpyjs( y, x, a )
+#define bli_dscdotjs( x, y, a )  bli_sdcaxpyjs( y, x, a )
+#define bli_cscdotjs( x, y, a )  bli_sccaxpyjs( y, x, a )
+#define bli_zscdotjs( x, y, a )  bli_szcaxpyjs( y, x, a )
 
-// -- (xyr) = (dc?) ------------------------------------------------------------
+#define bli_sdcdotjs( x, y, a )  bli_dscaxpyjs( y, x, a )
+#define bli_ddcdotjs( x, y, a )  bli_ddcaxpyjs( y, x, a )
+#define bli_cdcdotjs( x, y, a )  bli_dccaxpyjs( y, x, a )
+#define bli_zdcdotjs( x, y, a )  bli_dzcaxpyjs( y, x, a )
 
-#define bli_dcsdotjs( x, y, a ) \
-{ \
-	(a)      += ( float  ) (x) * ( float  ) (y).real; \
-}
-#define bli_dcddotjs( x, y, a ) \
-{ \
-	(a)      += ( double ) (x) * ( double ) (y).real; \
-}
-#define bli_dccdotjs( x, y, a ) \
-{ \
-	(a).real += ( float  ) (x) * ( float  ) (y).real; \
-	/* (a).imag += ( float  ) 0.0; */ \
-}
-#define bli_dczdotjs( x, y, a ) \
-{ \
-	(a).real += ( double ) (x) * ( double ) (y).real; \
-	/* (a).imag += ( double ) 0.0; */ \
-}
+#define bli_sccdotjs( x, y, a )  bli_cscaxpyjs( y, x, a )
+#define bli_dccdotjs( x, y, a )  bli_cdcaxpyjs( y, x, a )
+#define bli_cccdotjs( x, y, a )  bli_cccaxpyjs( y, x, a )
+#define bli_zccdotjs( x, y, a )  bli_czcaxpyjs( y, x, a )
 
-// -- (xyr) = (dz?) ------------------------------------------------------------
+#define bli_szcdotjs( x, y, a )  bli_zscaxpyjs( y, x, a )
+#define bli_dzcdotjs( x, y, a )  bli_zdcaxpyjs( y, x, a )
+#define bli_czcdotjs( x, y, a )  bli_zccaxpyjs( y, x, a )
+#define bli_zzcdotjs( x, y, a )  bli_zzcaxpyjs( y, x, a )
 
-#define bli_dzsdotjs( x, y, a ) \
-{ \
-	(a)      += ( float  ) (x) * ( float  ) (y).real; \
-}
-#define bli_dzddotjs( x, y, a ) \
-{ \
-	(a)      += ( double ) (x) * ( double ) (y).real; \
-}
-#define bli_dzcdotjs( x, y, a ) \
-{ \
-	(a).real += ( float  ) (x) * ( float  ) (y).real; \
-	/* (a).imag += ( float  ) 0.0; */ \
-}
-#define bli_dzzdotjs( x, y, a ) \
-{ \
-	(a).real += ( double ) (x) * ( double ) (y).real; \
-	/* (a).imag += ( double ) 0.0; */ \
-}
 
-// -- (xyr) = (cs?) ------------------------------------------------------------
+#define bli_sszdotjs( x, y, a )  bli_sszaxpyjs( y, x, a )
+#define bli_dszdotjs( x, y, a )  bli_sdzaxpyjs( y, x, a )
+#define bli_cszdotjs( x, y, a )  bli_sczaxpyjs( y, x, a )
+#define bli_zszdotjs( x, y, a )  bli_szzaxpyjs( y, x, a )
 
-#define bli_cssdotjs( x, y, a ) \
-{ \
-	(a)      += ( float  ) (x).real * ( float  ) (y); \
-}
-#define bli_csddotjs( x, y, a ) \
-{ \
-	(a)      += ( double ) (x).real * ( double ) (y); \
-}
-#define bli_cscdotjs( x, y, a ) \
-{ \
-	(a).real += ( float  ) (x).real * ( float  ) (y); \
-	(a).imag += ( float  )-(x).imag * ( float  ) (y); \
-}
-#define bli_cszdotjs( x, y, a ) \
-{ \
-	(a).real += ( double ) (x).real * ( double ) (y); \
-	(a).imag += ( double )-(x).imag * ( double ) (y); \
-}
+#define bli_sdzdotjs( x, y, a )  bli_dszaxpyjs( y, x, a )
+#define bli_ddzdotjs( x, y, a )  bli_ddzaxpyjs( y, x, a )
+#define bli_cdzdotjs( x, y, a )  bli_dczaxpyjs( y, x, a )
+#define bli_zdzdotjs( x, y, a )  bli_dzzaxpyjs( y, x, a )
 
-// -- (xyr) = (cd?) ------------------------------------------------------------
+#define bli_sczdotjs( x, y, a )  bli_cszaxpyjs( y, x, a )
+#define bli_dczdotjs( x, y, a )  bli_cdzaxpyjs( y, x, a )
+#define bli_cczdotjs( x, y, a )  bli_cczaxpyjs( y, x, a )
+#define bli_zczdotjs( x, y, a )  bli_czzaxpyjs( y, x, a )
 
-#define bli_cdsdotjs( x, y, a ) \
-{ \
-	(a)      += ( float  ) (x).real * ( float  ) (y); \
-}
-#define bli_cdddotjs( x, y, a ) \
-{ \
-	(a)      += ( double ) (x).real * ( double ) (y); \
-}
-#define bli_cdcdotjs( x, y, a ) \
-{ \
-	(a).real += ( float  ) (x).real * ( float  ) (y); \
-	(a).imag += ( float  )-(x).imag * ( float  ) (y); \
-}
-#define bli_cdzdotjs( x, y, a ) \
-{ \
-	(a).real += ( double ) (x).real * ( double ) (y); \
-	(a).imag += ( double )-(x).imag * ( double ) (y); \
-}
-
-// -- (xyr) = (cc?) ------------------------------------------------------------
-
-#define bli_ccsdotjs( x, y, a ) \
-{ \
-	(a)      += ( float  ) (x).real * ( float  ) (y).real - ( float  ) (x).imag * ( float  ) (y).imag; \
-}
-#define bli_ccddotjs( x, y, a ) \
-{ \
-	(a)      += ( double ) (x).real * ( double ) (y).real - ( double ) (x).imag * ( double ) (y).imag; \
-}
-#define bli_cccdotjs( x, y, a ) \
-{ \
-	(a).real += ( float  ) (x).real * ( float  ) (y).real + ( float  ) (x).imag * ( float  ) (y).imag; \
-	(a).imag += ( float  ) (x).real * ( float  ) (y).imag - ( float  ) (x).imag * ( float  ) (y).real; \
-}
-#define bli_cczdotjs( x, y, a ) \
-{ \
-	(a).real += ( double ) (x).real * ( double ) (y).real + ( double ) (x).imag * ( double ) (y).imag; \
-	(a).imag += ( double ) (x).real * ( double ) (y).imag - ( double ) (x).imag * ( double ) (y).real; \
-}
-
-// -- (xyr) = (cz?) ------------------------------------------------------------
-
-#define bli_czsdotjs( x, y, a ) \
-{ \
-	(a)      += ( float  ) (x).real * ( float  ) (y).real - ( float  ) (x).imag * ( float  ) (y).imag; \
-}
-#define bli_czddotjs( x, y, a ) \
-{ \
-	(a)      += ( double ) (x).real * ( double ) (y).real - ( double ) (x).imag * ( double ) (y).imag; \
-}
-#define bli_czcdotjs( x, y, a ) \
-{ \
-	(a).real += ( float  ) (x).real * ( float  ) (y).real + ( float  ) (x).imag * ( float  ) (y).imag; \
-	(a).imag += ( float  ) (x).real * ( float  ) (y).imag - ( float  ) (x).imag * ( float  ) (y).real; \
-}
-#define bli_czzdotjs( x, y, a ) \
-{ \
-	(a).real += ( double ) (x).real * ( double ) (y).real + ( double ) (x).imag * ( double ) (y).imag; \
-	(a).imag += ( double ) (x).real * ( double ) (y).imag - ( double ) (x).imag * ( double ) (y).real; \
-}
-
-// -- (xyr) = (zs?) ------------------------------------------------------------
-
-#define bli_zssdotjs( x, y, a ) \
-{ \
-	(a)      += ( float  ) (x).real * ( float  ) (y); \
-}
-#define bli_zsddotjs( x, y, a ) \
-{ \
-	(a)      += ( double ) (x).real * ( double ) (y); \
-}
-#define bli_zscdotjs( x, y, a ) \
-{ \
-	(a).real += ( float  ) (x).real * ( float  ) (y); \
-	(a).imag += ( float  ) (x).imag * ( float  ) (y); \
-}
-#define bli_zszdotjs( x, y, a ) \
-{ \
-	(a).real += ( double ) (x).real * ( double ) (y); \
-	(a).imag += ( double ) (x).imag * ( double ) (y); \
-}
-
-// -- (xyr) = (zd?) ------------------------------------------------------------
-
-#define bli_zdsdotjs( x, y, a ) \
-{ \
-	(a)      += ( float  ) (x).real * ( float  ) (y); \
-}
-#define bli_zdddotjs( x, y, a ) \
-{ \
-	(a)      += ( double ) (x).real * ( double ) (y); \
-}
-#define bli_zdcdotjs( x, y, a ) \
-{ \
-	(a).real += ( float  ) (x).real * ( float  ) (y); \
-	(a).imag += ( float  ) (x).imag * ( float  ) (y); \
-}
-#define bli_zdzdotjs( x, y, a ) \
-{ \
-	(a).real += ( double ) (x).real * ( double ) (y); \
-	(a).imag += ( double ) (x).imag * ( double ) (y); \
-}
-
-// -- (xyr) = (zc?) ------------------------------------------------------------
-
-#define bli_zcsdotjs( x, y, a ) \
-{ \
-	(a)      += ( float  ) (x).real * ( float  ) (y).real - ( float  ) (x).imag * ( float  ) (y).imag; \
-}
-#define bli_zcddotjs( x, y, a ) \
-{ \
-	(a)      += ( double ) (x).real * ( double ) (y).real - ( double ) (x).imag * ( double ) (y).imag; \
-}
-#define bli_zccdotjs( x, y, a ) \
-{ \
-	(a).real += ( float  ) (x).real * ( float  ) (y).real + ( float  ) (x).imag * ( float  ) (y).imag; \
-	(a).imag += ( float  ) (x).real * ( float  ) (y).imag - ( float  ) (x).imag * ( float  ) (y).real; \
-}
-#define bli_zczdotjs( x, y, a ) \
-{ \
-	(a).real += ( double ) (x).real * ( double ) (y).real + ( double ) (x).imag * ( double ) (y).imag; \
-	(a).imag += ( double ) (x).real * ( double ) (y).imag - ( double ) (x).imag * ( double ) (y).real; \
-}
-
-// -- (xyr) = (zz?) ------------------------------------------------------------
-
-#define bli_zzsdotjs( x, y, a ) \
-{ \
-	(a)      += ( float  ) (x).real * ( float  ) (y).real - ( float  ) (x).imag * ( float  ) (y).imag; \
-}
-#define bli_zzddotjs( x, y, a ) \
-{ \
-	(a)      += ( double ) (x).real * ( double ) (y).real - ( double ) (x).imag * ( double ) (y).imag; \
-}
-#define bli_zzcdotjs( x, y, a ) \
-{ \
-	(a).real += ( float  ) (x).real * ( float  ) (y).real + ( float  ) (x).imag * ( float  ) (y).imag; \
-	(a).imag += ( float  ) (x).real * ( float  ) (y).imag - ( float  ) (x).imag * ( float  ) (y).real; \
-}
-#define bli_zzzdotjs( x, y, a ) \
-{ \
-	(a).real += ( double ) (x).real * ( double ) (y).real + ( double ) (x).imag * ( double ) (y).imag; \
-	(a).imag += ( double ) (x).real * ( double ) (y).imag - ( double ) (x).imag * ( double ) (y).real; \
-}
+#define bli_szzdotjs( x, y, a )  bli_zszaxpyjs( y, x, a )
+#define bli_dzzdotjs( x, y, a )  bli_zdzaxpyjs( y, x, a )
+#define bli_czzdotjs( x, y, a )  bli_zczaxpyjs( y, x, a )
+#define bli_zzzdotjs( x, y, a )  bli_zzzaxpyjs( y, x, a )
 
 
 
-#define bli_sdotjs( x, y, a ) \
-{ \
-	bli_sssdotjs( x, y, a ); \
-}
-#define bli_ddotjs( x, y, a ) \
-{ \
-	bli_ddddotjs( x, y, a ); \
-}
-#define bli_cdotjs( x, y, a ) \
-{ \
-	bli_cccdotjs( x, y, a ); \
-}
-#define bli_zdotjs( x, y, a ) \
-{ \
-	bli_zzzdotjs( x, y, a ); \
-}
+
+
+#define bli_sdotjs( x, y, a )  bli_sssdotjs( x, y, a )
+#define bli_ddotjs( x, y, a )  bli_ddddotjs( x, y, a )
+#define bli_cdotjs( x, y, a )  bli_cccdotjs( x, y, a )
+#define bli_zdotjs( x, y, a )  bli_zzzdotjs( x, y, a )
 
 
 #endif
+

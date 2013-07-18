@@ -41,96 +41,110 @@
 // - The first char encodes the type of *ap.
 // - The second char encodes the type of b.
 
+
 #define bli_sscast( ap, b ) \
 { \
-	(b) = ( float  ) *(( float*    )(ap)); \
+	(b) = ( float  )             *(( float*    )(ap)); \
 }
 #define bli_dscast( ap, b ) \
 { \
-	(b) = ( float  ) *(( double*   )(ap)); \
+	(b) = ( float  )             *(( double*   )(ap)); \
 }
 #define bli_cscast( ap, b ) \
 { \
-	(b) = ( float  )  (( scomplex* )(ap))->real; \
+	(b) = ( float  )  bli_creal( *(( scomplex* )(ap)) ); \
 }
 #define bli_zscast( ap, b ) \
 { \
-	(b) = ( float  )  (( dcomplex* )(ap))->real; \
+	(b) = ( float  )  bli_zreal( *(( dcomplex* )(ap)) ); \
 }
+
 
 #define bli_sdcast( ap, b ) \
 { \
-	(b) = ( double ) *(( float*    )(ap)); \
+	(b) = ( double )             *(( float*    )(ap)); \
 }
 #define bli_ddcast( ap, b ) \
 { \
-	(b) = ( double ) *(( double*   )(ap)); \
+	(b) = ( double )             *(( double*   )(ap)); \
 }
 #define bli_cdcast( ap, b ) \
 { \
-	(b) = ( double )  (( scomplex* )(ap))->real; \
+	(b) = ( double )  bli_creal( *(( scomplex* )(ap)) ); \
 }
 #define bli_zdcast( ap, b ) \
 { \
-	(b) = ( double )  (( dcomplex* )(ap))->real; \
+	(b) = ( double )  bli_zreal( *(( dcomplex* )(ap)) ); \
 }
+
+
+#ifndef BLIS_ENABLE_C99_COMPLEX
+
 
 #define bli_sccast( ap, b ) \
 { \
-	(b).real = ( float  ) *(( float*    )(ap)); \
-	(b).imag = 0.0F; \
+	bli_scsetris( bli_sreal( *(( float*    )(ap)) ), \
+	                                            0.0, (b) ); \
 }
 #define bli_dccast( ap, b ) \
 { \
-	(b).real = ( float  ) *(( double*   )(ap)); \
-	(b).imag = 0.0F; \
+	bli_dcsetris( bli_dreal( *(( double*   )(ap)) ), \
+	                                            0.0, (b) ); \
 }
 #define bli_cccast( ap, b ) \
 { \
-	(b).real = ( float  )  (( scomplex* )(ap))->real; \
-	(b).imag = ( float  )  (( scomplex* )(ap))->imag; \
+	bli_ccsetris( bli_creal( *(( scomplex* )(ap)) ), \
+	              bli_cimag( *(( scomplex* )(ap)) ), (b) ); \
 }
 #define bli_zccast( ap, b ) \
 { \
-	(b).real = ( float  )  (( dcomplex* )(ap))->real; \
-	(b).imag = ( float  )  (( dcomplex* )(ap))->imag; \
+	bli_zcsetris( bli_zreal( *(( dcomplex* )(ap)) ), \
+	              bli_zimag( *(( dcomplex* )(ap)) ), (b) ); \
 }
+
 
 #define bli_szcast( ap, b ) \
 { \
-	(b).real = ( double ) *(( float*    )(ap)); \
-	(b).imag = 0.0; \
+	bli_szsetris( bli_sreal( *(( float*    )(ap)) ), \
+	                                            0.0, (b) ); \
 }
 #define bli_dzcast( ap, b ) \
 { \
-	(b).real = ( double ) *(( double*   )(ap)); \
-	(b).imag = 0.0; \
+	bli_dzsetris( bli_dreal( *(( double*   )(ap)) ), \
+	                                            0.0, (b) ); \
 }
 #define bli_czcast( ap, b ) \
 { \
-	(b).real = ( double )  (( scomplex* )(ap))->real; \
-	(b).imag = ( double )  (( scomplex* )(ap))->imag; \
+	bli_czsetris( bli_creal( *(( scomplex* )(ap)) ), \
+	              bli_cimag( *(( scomplex* )(ap)) ), (b) ); \
 }
 #define bli_zzcast( ap, b ) \
 { \
-	(b).real = ( double )  (( dcomplex* )(ap))->real; \
-	(b).imag = ( double )  (( dcomplex* )(ap))->imag; \
+	bli_zzsetris( bli_zreal( *(( dcomplex* )(ap)) ), \
+	              bli_zimag( *(( dcomplex* )(ap)) ), (b) ); \
 }
 
-#define bli_scast( ap, b ) \
-\
-	bli_sscast( ap, b );
 
-#define bli_dcast( ap, b ) \
-\
-	bli_ddcast( ap, b );
+#else // ifdef BLIS_ENABLE_C99_COMPLEX
 
-#define bli_ccast( ap, b ) \
-\
-	bli_cccast( ap, b );
 
-#define bli_zcast( ap, b ) \
-\
-	bli_zzcast( ap, b );
+#define bli_sccast( ap, b )  { (b) = ( scomplex ) *(( float*    )(ap)); }
+#define bli_dccast( ap, b )  { (b) = ( scomplex ) *(( double*   )(ap)); }
+#define bli_cccast( ap, b )  { (b) = ( scomplex ) *(( scomplex* )(ap)); }
+#define bli_zccast( ap, b )  { (b) = ( scomplex ) *(( dcomplex* )(ap)); }
+
+#define bli_szcast( ap, b )  { (b) = ( dcomplex ) *(( float*    )(ap)); }
+#define bli_dzcast( ap, b )  { (b) = ( dcomplex ) *(( double*   )(ap)); }
+#define bli_czcast( ap, b )  { (b) = ( dcomplex ) *(( scomplex* )(ap)); }
+#define bli_zzcast( ap, b )  { (b) = ( dcomplex ) *(( dcomplex* )(ap)); }
+
+
+#endif // BLIS_ENABLE_C99_COMPLEX
+
+
+#define bli_scast( ap, b )  bli_sscast( ap, b )
+#define bli_dcast( ap, b )  bli_ddcast( ap, b )
+#define bli_ccast( ap, b )  bli_cccast( ap, b )
+#define bli_zcast( ap, b )  bli_zzcast( ap, b )
 
 #endif

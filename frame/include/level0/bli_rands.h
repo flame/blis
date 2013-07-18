@@ -35,6 +35,8 @@
 #ifndef BLIS_RANDS_H
 #define BLIS_RANDS_H
 
+// rands
+
 
 #define bli_srands( a ) \
 { \
@@ -50,13 +52,23 @@
 }
 #define bli_crands( a ) \
 { \
-	bli_srands( (a).real ); \
-	bli_srands( (a).imag ); \
+	float  ar, ai; \
+\
+	bli_srands( ar ); \
+	bli_srands( ai ); \
+\
+	bli_csetris( ar, ai, (a) ); \
 }
 #define bli_zrands( a ) \
 { \
-	bli_drands( (a).real ); \
-	bli_drands( (a).imag ); \
+	double ar, ai; \
+\
+	bli_drands( ar ); \
+	bli_drands( ai ); \
+\
+	bli_zsetris( ar, ai, (a) ); \
 }
 
+
 #endif
+

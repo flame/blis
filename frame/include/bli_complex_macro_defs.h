@@ -32,37 +32,39 @@
 
 */
 
-#ifndef BLIS_FPRINTS_H
-#define BLIS_FPRINTS_H
+#ifndef BLIS_COMPLEX_MACRO_DEFS_H
+#define BLIS_COMPLEX_MACRO_DEFS_H
 
-// prints
 
-#define bli_sfprints( file, spec, x ) \
-{ \
-	fprintf( file, spec, (x) ); \
-}
-#define bli_dfprints( file, spec, x ) \
-{ \
-	fprintf( file, spec, (x) ); \
-}
-#define bli_cfprints( file, spec, x ) \
-{ \
-	fprintf( file, spec, bli_creal(x) ); \
-	fprintf( file, " + " ); \
-	fprintf( file, spec, bli_cimag(x) ); \
-	fprintf( file, " " ); \
-}
-#define bli_zfprints( file, spec, x ) \
-{ \
-	fprintf( file, spec, bli_zreal(x) ); \
-	fprintf( file, " + " ); \
-	fprintf( file, spec, bli_zimag(x) ); \
-	fprintf( file, " " ); \
-}
-#define bli_ifprints( file, spec, x ) \
-{ \
-	fprintf( file, spec, (x) ); \
-}
+// -- Real and imaginary accessor macros --
+
+
+#define bli_sreal( x )  ( x )
+#define bli_simag( x )  ( 0.0F )
+#define bli_dreal( x )  ( x )
+#define bli_dimag( x )  ( 0.0 )
+
+
+#ifdef BLIS_ENABLE_C99_COMPLEX
+
+
+#define bli_creal( x )  ( crealf(x) )
+#define bli_cimag( x )  ( cimagf(x) )
+#define bli_zreal( x )  ( creal(x) )
+#define bli_zimag( x )  ( cimag(x) )
+
+
+#else // ifndef BLIS_ENABLE_C99_COMPLEX
+
+
+#define bli_creal( x )  ( (x).real )
+#define bli_cimag( x )  ( (x).imag )
+#define bli_zreal( x )  ( (x).real )
+#define bli_zimag( x )  ( (x).imag )
+
+
+#endif // BLIS_ENABLE_C99_COMPLEX
 
 
 #endif
+

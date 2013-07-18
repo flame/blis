@@ -36,126 +36,84 @@
 #define BLIS_EQ_H
 
 
-// eq1
-
-#define bli_seq1( a ) \
-\
-	( (a) == 1.0F )
-
-#define bli_deq1( a ) \
-\
-	( (a) == 1.0 )
-
-#define bli_ceq1( a ) \
-\
-	( (a).real == 1.0F && (a).imag == 0.0F )
-
-#define bli_zeq1( a ) \
-\
-	( (a).real == 1.0 && (a).imag == 0.0 )
-
-// eq0
-
-#define bli_seq0( a ) \
-\
-	( (a) == 0.0F )
-
-#define bli_deq0( a ) \
-\
-	( (a) == 0.0 )
-
-#define bli_ceq0( a ) \
-\
-	( (a).real == 0.0F && (a).imag == 0.0F )
-
-#define bli_zeq0( a ) \
-\
-	( (a).real == 0.0 && (a).imag == 0.0 )
-
-// eqm1
-
-#define bli_seqm1( a ) \
-\
-	( (a) == -1.0F )
-
-#define bli_deqm1( a ) \
-\
-	( (a) == -1.0 )
-
-#define bli_ceqm1( a ) \
-\
-	( (a).real == -1.0F && (a).imag == 0.0F )
-
-#define bli_zeqm1( a ) \
-\
-	( (a).real == -1.0 && (a).imag == 0.0 )
-
-
 // eq (passed by value)
 
-#define bli_seq( a, b ) \
-\
-	( (a) == (b) )
+#define bli_seq( a, b )  ( (a) == (b) )
+#define bli_deq( a, b )  ( (a) == (b) )
 
-#define bli_deq( a, b ) \
-\
-	( (a) == (b) )
+#ifndef BLIS_ENABLE_C99_COMPLEX
 
-#define bli_ceq( a, b ) \
-\
-	( ( (a).real == (b).real ) && \
-	  ( (a).imag == (b).imag ) )
+#define bli_ceq( a, b )  ( ( bli_creal(a) == bli_creal(b) ) && ( bli_cimag(a) == bli_cimag(b) ) )
+#define bli_zeq( a, b )  ( ( bli_zreal(a) == bli_zreal(b) ) && ( bli_zimag(a) == bli_zimag(b) ) )
 
-#define bli_zeq( a, b ) \
-\
-	( ( (a).real == (b).real ) && \
-	  ( (a).imag == (b).imag ) )
+#else // ifdef BLIS_ENABLE_C99_COMPLEX
 
-#define bli_ieq( a, b ) \
-\
-	( (a) == (b) )
+#define bli_ceq( a, b )  ( (a) == (b) )
+#define bli_zeq( a, b )  ( (a) == (b) )
+
+#endif // BLIS_ENABLE_C99_COMPLEX
+
+#define bli_ieq( a, b )  ( (a) == (b) )
+
+
+
+// eqri (passed by value)
+
+#define bli_seqtori( a, br, bi )  ( (a) == (br) )
+#define bli_deqtori( a, br, bi )  ( (a) == (br) )
+
+#ifndef BLIS_ENABLE_C99_COMPLEX
+
+#define bli_ceqtori( a, br, bi )  ( ( bli_creal(a) == (br) ) && ( bli_cimag(a) == (bi) ) )
+#define bli_zeqtori( a, br, bi )  ( ( bli_zreal(a) == (br) ) && ( bli_zimag(a) == (bi) ) )
+
+#else // ifdef BLIS_ENABLE_C99_COMPLEX
+
+#define bli_ceqtori( a, br, bi )  ( (a) == (br) + (bi) * (I) )
+#define bli_zeqtori( a, br, bi )  ( (a) == (br) + (bi) * (I) )
+
+#endif // BLIS_ENABLE_C99_COMPLEX
+
+
 
 // eqa (passed by address)
 
-#define bli_seqa( a, b ) \
-\
-	( *(( float* )(a)) == *(( float* )(b)) )
+#define bli_seqa( a, b )  bli_seq( *(( float*    )(a)), *(( float*    )(b)) )
+#define bli_deqa( a, b )  bli_deq( *(( double*   )(a)), *(( double*   )(b)) )
+#define bli_ceqa( a, b )  bli_ceq( *(( scomplex* )(a)), *(( scomplex* )(b)) )
+#define bli_zeqa( a, b )  bli_zeq( *(( dcomplex* )(a)), *(( dcomplex* )(b)) )
+#define bli_ieqa( a, b )  bli_ieq( *(( gint_t*   )(a)), *(( gint_t*   )(b)) )
 
-#define bli_deqa( a, b ) \
-\
-	( *(( double* )(a)) == *(( double* )(b)) )
 
-#define bli_ceqa( a, b ) \
-\
-	( ( (( scomplex* )(a))->real == (( scomplex* )(b))->real ) && \
-	  ( (( scomplex* )(a))->imag == (( scomplex* )(b))->imag ) )
 
-#define bli_zeqa( a, b ) \
-\
-	( ( (( dcomplex* )(a))->real == (( dcomplex* )(b))->real ) && \
-	  ( (( dcomplex* )(a))->imag == (( dcomplex* )(b))->imag ) )
+// eq1
 
-#define bli_ieqa( a, b ) \
-\
-	( *(( gint_t* )(a)) == *(( gint_t* )(b)) )
+#define bli_seq1( a )  bli_seqtori( (a), 1.0F, 0.0F )
+#define bli_deq1( a )  bli_deqtori( (a), 1.0,  0.0  )
+#define bli_ceq1( a )  bli_ceqtori( (a), 1.0F, 0.0F )
+#define bli_zeq1( a )  bli_zeqtori( (a), 1.0,  0.0  )
+#define bli_ieq1( a )  bli_ieq    ( (a), 1          )
 
-// imageq0
 
-#define bli_simageq0( a ) \
-\
-	( TRUE )
 
-#define bli_dimageq0( a ) \
-\
-	( TRUE )
+// eq0
 
-#define bli_cimageq0( a ) \
-\
-	( (( scomplex* )(a))->imag == ( float  ) 0.0 )
+#define bli_seq0( a )  bli_seqtori( (a), 0.0F, 0.0F )
+#define bli_deq0( a )  bli_deqtori( (a), 0.0,  0.0  )
+#define bli_ceq0( a )  bli_ceqtori( (a), 0.0F, 0.0F )
+#define bli_zeq0( a )  bli_zeqtori( (a), 0.0,  0.0  )
+#define bli_ieq0( a )  bli_ieq    ( (a), 0          )
 
-#define bli_zimageq0( a ) \
-\
-	( (( dcomplex* )(a))->imag == ( double ) 0.0 )
+
+
+// eqm1
+
+#define bli_seqm1( a )  bli_seqtori( (a), -1.0F, 0.0F )
+#define bli_deqm1( a )  bli_deqtori( (a), -1.0,  0.0  )
+#define bli_ceqm1( a )  bli_ceqtori( (a), -1.0F, 0.0F )
+#define bli_zeqm1( a )  bli_zeqtori( (a), -1.0,  0.0  )
+#define bli_ieqm1( a )  bli_ieq    ( (a), -1          )
+
 
 
 #endif

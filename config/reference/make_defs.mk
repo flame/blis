@@ -82,9 +82,9 @@ CPPROCFLAGS    := -D_POSIX_C_SOURCE=200112L
 CMISCFLAGS     := -std=c99 # -fopenmp -pg
 CDBGFLAGS      := -g
 CWARNFLAGS     := -Wall
-COPTFLAGS      := -O2 -malign-double -funroll-loops
+COPTFLAGS      := -O2
 CKOPTFLAGS     := $(COPTFLAGS)
-CVECFLAGS      := -msse3 -march=native # -mfpmath=sse
+CVECFLAGS      := #-msse3 -march=native # -mfpmath=sse
 
 # Aggregate all of the flags into multiple groups: one for standard
 # compilation, and one for each of the supported "special" compilation

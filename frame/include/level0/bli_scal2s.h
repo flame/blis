@@ -42,355 +42,394 @@
 // - The second char encodes the type of x.
 // - The third char encodes the type of y.
 
-// -- (axy) = (ss?) ------------------------------------------------------------
+
+// -- (axy) = (?ss) ------------------------------------------------------------
 
 #define bli_sssscal2s( a, x, y ) \
 { \
-	(y)       = ( float  )( ( float  ) (a)      * ( float  ) (x)      ); \
+	(y)          = bli_ssimulnn_r( (a), (x) ); \
 }
-#define bli_ssdscal2s( a, x, y ) \
+#define bli_dssscal2s( a, x, y ) \
 { \
-	(y)       = ( double )( ( float  ) (a)      * ( float  ) (x)      ); \
+	(y)          = bli_dsimulnn_r( (a), (x) ); \
 }
-#define bli_sscscal2s( a, x, y ) \
+#define bli_cssscal2s( a, x, y ) \
 { \
-	(y).real  = ( float  )( ( float  ) (a)      * ( float  ) (x)      ); \
+	(y)          = bli_csimulnn_r( (a), (x) ); \
 }
-#define bli_sszscal2s( a, x, y ) \
+#define bli_zssscal2s( a, x, y ) \
 { \
-	(y).real  = ( double )( ( float  ) (a)      * ( float  ) (x)      ); \
+	(y)          = bli_zsimulnn_r( (a), (x) ); \
 }
 
-// -- (axy) = (sd?) ------------------------------------------------------------
+// -- (axy) = (?ds) ------------------------------------------------------------
 
 #define bli_sdsscal2s( a, x, y ) \
 { \
-	(y)       = ( float  )( ( double ) (a)      * ( double ) (x)      ); \
+	(y)          = bli_sdimulnn_r( (a), (x) ); \
 }
-#define bli_sddscal2s( a, x, y ) \
+#define bli_ddsscal2s( a, x, y ) \
 { \
-	(y)       = ( double )( ( double ) (a)      * ( double ) (x)      ); \
+	(y)          = bli_ddimulnn_r( (a), (x) ); \
 }
-#define bli_sdcscal2s( a, x, y ) \
+#define bli_cdsscal2s( a, x, y ) \
 { \
-	(y).real  = ( float  )( ( double ) (a)      * ( double ) (x)      ); \
+	(y)          = bli_cdimulnn_r( (a), (x) ); \
 }
-#define bli_sdzscal2s( a, x, y ) \
+#define bli_zdsscal2s( a, x, y ) \
 { \
-	(y).real  = ( double )( ( double ) (a)      * ( double ) (x)      ); \
+	(y)          = bli_zdimulnn_r( (a), (x) ); \
 }
 
-// -- (axy) = (sc?) ------------------------------------------------------------
+// -- (axy) = (?cs) ------------------------------------------------------------
 
 #define bli_scsscal2s( a, x, y ) \
 { \
-	(y)       = ( float  )( ( float  ) (a)      * ( float  ) (x).real ); \
+	(y)          = bli_scimulnn_r( (a), (x) ); \
 }
-#define bli_scdscal2s( a, x, y ) \
+#define bli_dcsscal2s( a, x, y ) \
 { \
-	(y)       = ( double )( ( float  ) (a)      * ( float  ) (x).real ); \
+	(y)          = bli_dcimulnn_r( (a), (x) ); \
 }
-#define bli_sccscal2s( a, x, y ) \
+#define bli_ccsscal2s( a, x, y ) \
 { \
-	(y).real  = ( float  )( ( float  ) (a)      * ( float  ) (x).real ); \
-	(y).imag  = ( float  )( ( float  ) (a)      * ( float  ) (x).imag ); \
+	(y)          = bli_ccimulnn_r( (a), (x) ); \
 }
-#define bli_sczscal2s( a, x, y ) \
+#define bli_zcsscal2s( a, x, y ) \
 { \
-	(y).real  = ( double )( ( float  ) (a)      * ( float  ) (x).real ); \
-	(y).imag  = ( double )( ( float  ) (a)      * ( float  ) (x).imag ); \
+	(y)          = bli_zcimulnn_r( (a), (x) ); \
 }
 
-// -- (axy) = (sz?) ------------------------------------------------------------
+// -- (axy) = (?zs) ------------------------------------------------------------
 
 #define bli_szsscal2s( a, x, y ) \
 { \
-	(y)       = ( float  )( ( double ) (a)      * ( double ) (x).real ); \
+	(y)          = bli_szimulnn_r( (a), (x) ); \
 }
-#define bli_szdscal2s( a, x, y ) \
+#define bli_dzsscal2s( a, x, y ) \
 { \
-	(y)       = ( double )( ( double ) (a)      * ( double ) (x).real ); \
+	(y)          = bli_dzimulnn_r( (a), (x) ); \
 }
-#define bli_szcscal2s( a, x, y ) \
+#define bli_czsscal2s( a, x, y ) \
 { \
-	(y).real  = ( float  )( ( double ) (a)      * ( double ) (x).real ); \
-	(y).imag  = ( float  )( ( double ) (a)      * ( double ) (x).imag ); \
+	(y)          = bli_czimulnn_r( (a), (x) ); \
 }
-#define bli_szzscal2s( a, x, y ) \
+#define bli_zzsscal2s( a, x, y ) \
 { \
-	(y).real  = ( double )( ( double ) (a)      * ( double ) (x).real ); \
-	(y).imag  = ( double )( ( double ) (a)      * ( double ) (x).imag ); \
+	(y)          = bli_zzimulnn_r( (a), (x) ); \
 }
 
-// -- (axy) = (ds?) ------------------------------------------------------------
 
-#define bli_dssscal2s( a, x, y ) \
+// -- (axy) = (?sd) ------------------------------------------------------------
+
+#define bli_ssdscal2s( a, x, y ) \
 { \
-	(y)       = ( float  )( ( double ) (a)      * ( double ) (x)      ); \
+	(y)          = bli_ssimulnn_r( (a), (x) ); \
 }
 #define bli_dsdscal2s( a, x, y ) \
 { \
-	(y)       = ( double )( ( double ) (a)      * ( double ) (x)      ); \
-}
-#define bli_dscscal2s( a, x, y ) \
-{ \
-	(y).real  = ( float  )( ( double ) (a)      * ( double ) (x)      ); \
-}
-#define bli_dszscal2s( a, x, y ) \
-{ \
-	(y).real  = ( double )( ( double ) (a)      * ( double ) (x)      ); \
-}
-
-// -- (axy) = (dd?) ------------------------------------------------------------
-
-#define bli_ddsscal2s( a, x, y ) \
-{ \
-	(y)       = ( float  )( ( double ) (a)      * ( double ) (x)      ); \
-}
-#define bli_dddscal2s( a, x, y ) \
-{ \
-	(y)       = ( double )( ( double ) (a)      * ( double ) (x)      ); \
-}
-#define bli_ddcscal2s( a, x, y ) \
-{ \
-	(y).real  = ( float  )( ( double ) (a)      * ( double ) (x)      ); \
-}
-#define bli_ddzscal2s( a, x, y ) \
-{ \
-	(y).real  = ( double )( ( double ) (a)      * ( double ) (x)      ); \
-}
-
-// -- (axy) = (dc?) ------------------------------------------------------------
-
-#define bli_dcsscal2s( a, x, y ) \
-{ \
-	(y)       = ( float  )( ( double ) (a)      * ( double ) (x).real ); \
-}
-#define bli_dcdscal2s( a, x, y ) \
-{ \
-	(y)       = ( double )( ( double ) (a)      * ( double ) (x).real ); \
-}
-#define bli_dccscal2s( a, x, y ) \
-{ \
-	(y).real  = ( float  )( ( double ) (a)      * ( double ) (x).real ); \
-	(y).imag  = ( float  )( ( double ) (a)      * ( double ) (x).imag ); \
-}
-#define bli_dczscal2s( a, x, y ) \
-{ \
-	(y).real  = ( double )( ( double ) (a)      * ( double ) (x).real ); \
-	(y).imag  = ( double )( ( double ) (a)      * ( double ) (x).imag ); \
-}
-
-// -- (axy) = (dz?) ------------------------------------------------------------
-
-#define bli_dzsscal2s( a, x, y ) \
-{ \
-	(y)       = ( float  )( ( double ) (a)      * ( double ) (x).real ); \
-}
-#define bli_dzdscal2s( a, x, y ) \
-{ \
-	(y)       = ( double )( ( double ) (a)      * ( double ) (x).real ); \
-}
-#define bli_dzcscal2s( a, x, y ) \
-{ \
-	(y).real  = ( float  )( ( double ) (a)      * ( double ) (x).real ); \
-	(y).imag  = ( float  )( ( double ) (a)      * ( double ) (x).imag ); \
-}
-#define bli_dzzscal2s( a, x, y ) \
-{ \
-	(y).real  = ( double )( ( double ) (a)      * ( double ) (x).real ); \
-	(y).imag  = ( double )( ( double ) (a)      * ( double ) (x).imag ); \
-}
-
-// -- (axy) = (cs?) ------------------------------------------------------------
-
-#define bli_cssscal2s( a, x, y ) \
-{ \
-	(y)       = ( float  )( ( float  ) (a).real * ( float  ) (x)      ); \
+	(y)          = bli_dsimulnn_r( (a), (x) ); \
 }
 #define bli_csdscal2s( a, x, y ) \
 { \
-	(y)       = ( double )( ( float  ) (a).real * ( float  ) (x)      ); \
-}
-#define bli_cscscal2s( a, x, y ) \
-{ \
-	(y).real  = ( float  )( ( float  ) (a).real * ( float  ) (x)      ); \
-	(y).imag  = ( float  )( ( float  ) (a).imag * ( float  ) (x)      ); \
-}
-#define bli_cszscal2s( a, x, y ) \
-{ \
-	(y).real  = ( double )( ( float  ) (a).real * ( float  ) (x)      ); \
-	(y).imag  = ( double )( ( float  ) (a).imag * ( float  ) (x)      ); \
-}
-
-// -- (axy) = (cd?) ------------------------------------------------------------
-
-#define bli_cdsscal2s( a, x, y ) \
-{ \
-	(y)       = ( float  )( ( double ) (a).real * ( double ) (x)      ); \
-}
-#define bli_cddscal2s( a, x, y ) \
-{ \
-	(y)       = ( double )( ( double ) (a).real * ( double ) (x)      ); \
-}
-#define bli_cdcscal2s( a, x, y ) \
-{ \
-	(y).real  = ( float  )( ( double ) (a).real * ( double ) (x)      ); \
-	(y).imag  = ( float  )( ( double ) (a).imag * ( double ) (x)      ); \
-}
-#define bli_cdzscal2s( a, x, y ) \
-{ \
-	(y).real  = ( double )( ( double ) (a).real * ( double ) (x)      ); \
-	(y).imag  = ( double )( ( double ) (a).imag * ( double ) (x)      ); \
-}
-
-// -- (axy) = (cc?) ------------------------------------------------------------
-
-#define bli_ccsscal2s( a, x, y ) \
-{ \
-	(y)       = ( float  )( ( float  ) (a).real * ( float  ) (x).real - ( float  ) (a).imag * ( float  ) (x).imag ); \
-}
-#define bli_ccdscal2s( a, x, y ) \
-{ \
-	(y)       = ( double )( ( float  ) (a).real * ( float  ) (x).real - ( float  ) (a).imag * ( float  ) (x).imag ); \
-}
-#define bli_cccscal2s( a, x, y ) \
-{ \
-	(y).real  = ( float  )( ( float  ) (a).real * ( float  ) (x).real - ( float  ) (a).imag * ( float  ) (x).imag ); \
-	(y).imag  = ( float  )( ( float  ) (a).imag * ( float  ) (x).real + ( float  ) (a).real * ( float  ) (x).imag ); \
-}
-#define bli_cczscal2s( a, x, y ) \
-{ \
-	(y).real  = ( double )( ( float  ) (a).real * ( float  ) (x).real - ( float  ) (a).imag * ( float  ) (x).imag ); \
-	(y).imag  = ( double )( ( float  ) (a).imag * ( float  ) (x).real + ( float  ) (a).real * ( float  ) (x).imag ); \
-}
-
-// -- (axy) = (cz?) ------------------------------------------------------------
-
-#define bli_czsscal2s( a, x, y ) \
-{ \
-	(y)       = ( float  )( ( double ) (a).real * ( double ) (x).real - ( double ) (a).imag * ( double ) (x).imag ); \
-}
-#define bli_czdscal2s( a, x, y ) \
-{ \
-	(y)       = ( double )( ( double ) (a).real * ( double ) (x).real - ( double ) (a).imag * ( double ) (x).imag ); \
-}
-#define bli_czcscal2s( a, x, y ) \
-{ \
-	(y).real  = ( float  )( ( double ) (a).real * ( double ) (x).real - ( double ) (a).imag * ( double ) (x).imag ); \
-	(y).imag  = ( float  )( ( double ) (a).imag * ( double ) (x).real + ( double ) (a).real * ( double ) (x).imag ); \
-}
-#define bli_czzscal2s( a, x, y ) \
-{ \
-	(y).real  = ( double )( ( double ) (a).real * ( double ) (x).real - ( double ) (a).imag * ( double ) (x).imag ); \
-	(y).imag  = ( double )( ( double ) (a).imag * ( double ) (x).real + ( double ) (a).real * ( double ) (x).imag ); \
-}
-
-// -- (axy) = (zs?) ------------------------------------------------------------
-
-#define bli_zssscal2s( a, x, y ) \
-{ \
-	(y)       = ( float  )( ( float  ) (a).real * ( float  ) (x)      ); \
+	(y)          = bli_csimulnn_r( (a), (x) ); \
 }
 #define bli_zsdscal2s( a, x, y ) \
 { \
-	(y)       = ( double )( ( float  ) (a).real * ( float  ) (x)      ); \
-}
-#define bli_zscscal2s( a, x, y ) \
-{ \
-	(y).real  = ( float  )( ( float  ) (a).real * ( float  ) (x)      ); \
-	(y).imag  = ( float  )( ( float  ) (a).imag * ( float  ) (x)      ); \
-}
-#define bli_zszscal2s( a, x, y ) \
-{ \
-	(y).real  = ( double )( ( float  ) (a).real * ( float  ) (x)      ); \
-	(y).imag  = ( double )( ( float  ) (a).imag * ( float  ) (x)      ); \
+	(y)          = bli_zsimulnn_r( (a), (x) ); \
 }
 
-// -- (axy) = (zd?) ------------------------------------------------------------
+// -- (axy) = (?dd) ------------------------------------------------------------
 
-#define bli_zdsscal2s( a, x, y ) \
+#define bli_sddscal2s( a, x, y ) \
 { \
-	(y)       = ( float  )( ( double ) (a).real * ( double ) (x)      ); \
+	(y)          = bli_sdimulnn_r( (a), (x) ); \
+}
+#define bli_dddscal2s( a, x, y ) \
+{ \
+	(y)          = bli_ddimulnn_r( (a), (x) ); \
+}
+#define bli_cddscal2s( a, x, y ) \
+{ \
+	(y)          = bli_cdimulnn_r( (a), (x) ); \
 }
 #define bli_zddscal2s( a, x, y ) \
 { \
-	(y)       = ( double )( ( double ) (a).real * ( double ) (x)      ); \
-}
-#define bli_zdcscal2s( a, x, y ) \
-{ \
-	(y).real  = ( float  )( ( double ) (a).real * ( double ) (x)      ); \
-	(y).imag  = ( float  )( ( double ) (a).imag * ( double ) (x)      ); \
-}
-#define bli_zdzscal2s( a, x, y ) \
-{ \
-	(y).real  = ( double )( ( double ) (a).real * ( double ) (x)      ); \
-	(y).imag  = ( double )( ( double ) (a).imag * ( double ) (x)      ); \
+	(y)          = bli_zdimulnn_r( (a), (x) ); \
 }
 
-// -- (axy) = (zc?) ------------------------------------------------------------
+// -- (axy) = (?cd) ------------------------------------------------------------
 
-#define bli_zcsscal2s( a, x, y ) \
+#define bli_scdscal2s( a, x, y ) \
 { \
-	(y)       = ( float  )( ( float  ) (a).real * ( float  ) (x).real - ( float  ) (a).imag * ( float  ) (x).imag ); \
+	(y)          = bli_scimulnn_r( (a), (x) ); \
+}
+#define bli_dcdscal2s( a, x, y ) \
+{ \
+	(y)          = bli_dcimulnn_r( (a), (x) ); \
+}
+#define bli_ccdscal2s( a, x, y ) \
+{ \
+	(y)          = bli_ccimulnn_r( (a), (x) ); \
 }
 #define bli_zcdscal2s( a, x, y ) \
 { \
-	(y)       = ( double )( ( float  ) (a).real * ( float  ) (x).real - ( float  ) (a).imag * ( float  ) (x).imag ); \
-}
-#define bli_zccscal2s( a, x, y ) \
-{ \
-	(y).real  = ( float  )( ( float  ) (a).real * ( float  ) (x).real - ( float  ) (a).imag * ( float  ) (x).imag ); \
-	(y).imag  = ( float  )( ( float  ) (a).imag * ( float  ) (x).real + ( float  ) (a).real * ( float  ) (x).imag ); \
-}
-#define bli_zczscal2s( a, x, y ) \
-{ \
-	(y).real  = ( double )( ( float  ) (a).real * ( float  ) (x).real - ( float  ) (a).imag * ( float  ) (x).imag ); \
-	(y).imag  = ( double )( ( float  ) (a).imag * ( float  ) (x).real + ( float  ) (a).real * ( float  ) (x).imag ); \
+	(y)          = bli_zcimulnn_r( (a), (x) ); \
 }
 
-// -- (axy) = (zz?) ------------------------------------------------------------
+// -- (axy) = (?zd) ------------------------------------------------------------
 
-#define bli_zzsscal2s( a, x, y ) \
+#define bli_szdscal2s( a, x, y ) \
 { \
-	(y)       = ( float  )( ( double ) (a).real * ( double ) (x).real - ( double ) (a).imag * ( double ) (x).imag ); \
+	(y)          = bli_szimulnn_r( (a), (x) ); \
+}
+#define bli_dzdscal2s( a, x, y ) \
+{ \
+	(y)          = bli_dzimulnn_r( (a), (x) ); \
+}
+#define bli_czdscal2s( a, x, y ) \
+{ \
+	(y)          = bli_czimulnn_r( (a), (x) ); \
 }
 #define bli_zzdscal2s( a, x, y ) \
 { \
-	(y)       = ( double )( ( double ) (a).real * ( double ) (x).real - ( double ) (a).imag * ( double ) (x).imag ); \
+	(y)          = bli_zzimulnn_r( (a), (x) ); \
+}
+
+
+#ifndef BLIS_ENABLE_C99_COMPLEX
+
+
+// -- (axy) = (?sc) ------------------------------------------------------------
+
+#define bli_sscscal2s( a, x, y ) \
+{ \
+	bli_creal(y) = bli_ssimulnn_r( (a), (x) ); \
+}
+#define bli_dscscal2s( a, x, y ) \
+{ \
+	bli_creal(y) = bli_dsimulnn_r( (a), (x) ); \
+}
+#define bli_cscscal2s( a, x, y ) \
+{ \
+	bli_creal(y) = bli_csimulnn_r( (a), (x) ); \
+	bli_cimag(y) = bli_csimulnn_i( (a), (x) ); \
+}
+#define bli_zscscal2s( a, x, y ) \
+{ \
+	bli_creal(y) = bli_zsimulnn_r( (a), (x) ); \
+	bli_cimag(y) = bli_zsimulnn_i( (a), (x) ); \
+}
+
+// -- (axy) = (?dc) ------------------------------------------------------------
+
+#define bli_sdcscal2s( a, x, y ) \
+{ \
+	bli_creal(y) = bli_sdimulnn_r( (a), (x) ); \
+}
+#define bli_ddcscal2s( a, x, y ) \
+{ \
+	bli_creal(y) = bli_ddimulnn_r( (a), (x) ); \
+}
+#define bli_cdcscal2s( a, x, y ) \
+{ \
+	bli_creal(y) = bli_cdimulnn_r( (a), (x) ); \
+	bli_cimag(y) = bli_cdimulnn_i( (a), (x) ); \
+}
+#define bli_zdcscal2s( a, x, y ) \
+{ \
+	bli_creal(y) = bli_zdimulnn_r( (a), (x) ); \
+	bli_cimag(y) = bli_zdimulnn_i( (a), (x) ); \
+}
+
+// -- (axy) = (?cc) ------------------------------------------------------------
+
+#define bli_sccscal2s( a, x, y ) \
+{ \
+	bli_creal(y) = bli_scimulnn_r( (a), (x) ); \
+	bli_cimag(y) = bli_scimulnn_i( (a), (x) ); \
+}
+#define bli_dccscal2s( a, x, y ) \
+{ \
+	bli_creal(y) = bli_dcimulnn_r( (a), (x) ); \
+	bli_cimag(y) = bli_dcimulnn_i( (a), (x) ); \
+}
+#define bli_cccscal2s( a, x, y ) \
+{ \
+	bli_creal(y) = bli_ccimulnn_r( (a), (x) ); \
+	bli_cimag(y) = bli_ccimulnn_i( (a), (x) ); \
+}
+#define bli_zccscal2s( a, x, y ) \
+{ \
+	bli_creal(y) = bli_zcimulnn_r( (a), (x) ); \
+	bli_cimag(y) = bli_zcimulnn_i( (a), (x) ); \
+}
+
+// -- (axy) = (?zc) ------------------------------------------------------------
+
+#define bli_szcscal2s( a, x, y ) \
+{ \
+	bli_creal(y) = bli_szimulnn_r( (a), (x) ); \
+	bli_cimag(y) = bli_szimulnn_i( (a), (x) ); \
+}
+#define bli_dzcscal2s( a, x, y ) \
+{ \
+	bli_creal(y) = bli_dzimulnn_r( (a), (x) ); \
+	bli_cimag(y) = bli_dzimulnn_i( (a), (x) ); \
+}
+#define bli_czcscal2s( a, x, y ) \
+{ \
+	bli_creal(y) = bli_czimulnn_r( (a), (x) ); \
+	bli_cimag(y) = bli_czimulnn_i( (a), (x) ); \
 }
 #define bli_zzcscal2s( a, x, y ) \
 { \
-	(y).real  = ( float  )( ( double ) (a).real * ( double ) (x).real - ( double ) (a).imag * ( double ) (x).imag ); \
-	(y).imag  = ( float  )( ( double ) (a).imag * ( double ) (x).real + ( double ) (a).real * ( double ) (x).imag ); \
+	bli_creal(y) = bli_zzimulnn_r( (a), (x) ); \
+	bli_cimag(y) = bli_zzimulnn_i( (a), (x) ); \
+}
+
+
+// -- (axy) = (?sz) ------------------------------------------------------------
+
+#define bli_sszscal2s( a, x, y ) \
+{ \
+	bli_zreal(y) = bli_ssimulnn_r( (a), (x) ); \
+}
+#define bli_dszscal2s( a, x, y ) \
+{ \
+	bli_zreal(y) = bli_dsimulnn_r( (a), (x) ); \
+}
+#define bli_cszscal2s( a, x, y ) \
+{ \
+	bli_zreal(y) = bli_csimulnn_r( (a), (x) ); \
+	bli_zimag(y) = bli_csimulnn_i( (a), (x) ); \
+}
+#define bli_zszscal2s( a, x, y ) \
+{ \
+	bli_zreal(y) = bli_zsimulnn_r( (a), (x) ); \
+	bli_zimag(y) = bli_zsimulnn_i( (a), (x) ); \
+}
+
+// -- (axy) = (?dz) ------------------------------------------------------------
+
+#define bli_sdzscal2s( a, x, y ) \
+{ \
+	bli_zreal(y) = bli_sdimulnn_r( (a), (x) ); \
+}
+#define bli_ddzscal2s( a, x, y ) \
+{ \
+	bli_zreal(y) = bli_ddimulnn_r( (a), (x) ); \
+}
+#define bli_cdzscal2s( a, x, y ) \
+{ \
+	bli_zreal(y) = bli_cdimulnn_r( (a), (x) ); \
+	bli_zimag(y) = bli_cdimulnn_i( (a), (x) ); \
+}
+#define bli_zdzscal2s( a, x, y ) \
+{ \
+	bli_zreal(y) = bli_zdimulnn_r( (a), (x) ); \
+	bli_zimag(y) = bli_zdimulnn_i( (a), (x) ); \
+}
+
+// -- (axy) = (?cz) ------------------------------------------------------------
+
+#define bli_sczscal2s( a, x, y ) \
+{ \
+	bli_zreal(y) = bli_scimulnn_r( (a), (x) ); \
+	bli_zimag(y) = bli_scimulnn_i( (a), (x) ); \
+}
+#define bli_dczscal2s( a, x, y ) \
+{ \
+	bli_zreal(y) = bli_dcimulnn_r( (a), (x) ); \
+	bli_zimag(y) = bli_dcimulnn_i( (a), (x) ); \
+}
+#define bli_cczscal2s( a, x, y ) \
+{ \
+	bli_zreal(y) = bli_ccimulnn_r( (a), (x) ); \
+	bli_zimag(y) = bli_ccimulnn_i( (a), (x) ); \
+}
+#define bli_zczscal2s( a, x, y ) \
+{ \
+	bli_zreal(y) = bli_zcimulnn_r( (a), (x) ); \
+	bli_zimag(y) = bli_zcimulnn_i( (a), (x) ); \
+}
+
+// -- (axy) = (?zz) ------------------------------------------------------------
+
+#define bli_szzscal2s( a, x, y ) \
+{ \
+	bli_zreal(y) = bli_szimulnn_r( (a), (x) ); \
+	bli_zimag(y) = bli_szimulnn_i( (a), (x) ); \
+}
+#define bli_dzzscal2s( a, x, y ) \
+{ \
+	bli_zreal(y) = bli_dzimulnn_r( (a), (x) ); \
+	bli_zimag(y) = bli_dzimulnn_i( (a), (x) ); \
+}
+#define bli_czzscal2s( a, x, y ) \
+{ \
+	bli_zreal(y) = bli_czimulnn_r( (a), (x) ); \
+	bli_zimag(y) = bli_czimulnn_i( (a), (x) ); \
 }
 #define bli_zzzscal2s( a, x, y ) \
 { \
-	(y).real  = ( double )( ( double ) (a).real * ( double ) (x).real - ( double ) (a).imag * ( double ) (x).imag ); \
-	(y).imag  = ( double )( ( double ) (a).imag * ( double ) (x).real + ( double ) (a).real * ( double ) (x).imag ); \
+	bli_zreal(y) = bli_zzimulnn_r( (a), (x) ); \
+	bli_zimag(y) = bli_zzimulnn_i( (a), (x) ); \
 }
 
 
+#else // ifdef BLIS_ENABLE_C99_COMPLEX
 
 
+#define bli_sscscal2s( a, x, y )  { (y) = (a) * (x); }
+#define bli_dscscal2s( a, x, y )  { (y) = (a) * (x); }
+#define bli_cscscal2s( a, x, y )  { (y) = (a) * (x); }
+#define bli_zscscal2s( a, x, y )  { (y) = (a) * (x); }
+
+#define bli_sdcscal2s( a, x, y )  { (y) = (a) * (x); }
+#define bli_ddcscal2s( a, x, y )  { (y) = (a) * (x); }
+#define bli_cdcscal2s( a, x, y )  { (y) = (a) * (x); }
+#define bli_zdcscal2s( a, x, y )  { (y) = (a) * (x); }
+
+#define bli_sccscal2s( a, x, y )  { (y) = (a) * (x); }
+#define bli_dccscal2s( a, x, y )  { (y) = (a) * (x); }
+#define bli_cccscal2s( a, x, y )  { (y) = (a) * (x); }
+#define bli_zccscal2s( a, x, y )  { (y) = (a) * (x); }
+
+#define bli_szcscal2s( a, x, y )  { (y) = (a) * (x); }
+#define bli_dzcscal2s( a, x, y )  { (y) = (a) * (x); }
+#define bli_czcscal2s( a, x, y )  { (y) = (a) * (x); }
+#define bli_zzcscal2s( a, x, y )  { (y) = (a) * (x); }
 
 
-#define bli_sscal2s( a, x, y ) \
-{ \
-	bli_sssscal2s( a, x, y ); \
-}
-#define bli_dscal2s( a, x, y ) \
-{ \
-	bli_dddscal2s( a, x, y ); \
-}
-#define bli_cscal2s( a, x, y ) \
-{ \
-	bli_cccscal2s( a, x, y ); \
-}
-#define bli_zscal2s( a, x, y ) \
-{ \
-	bli_zzzscal2s( a, x, y ); \
-}
+#define bli_sszscal2s( a, x, y )  { (y) = (a) * (x); }
+#define bli_dszscal2s( a, x, y )  { (y) = (a) * (x); }
+#define bli_cszscal2s( a, x, y )  { (y) = (a) * (x); }
+#define bli_zszscal2s( a, x, y )  { (y) = (a) * (x); }
+
+#define bli_sdzscal2s( a, x, y )  { (y) = (a) * (x); }
+#define bli_ddzscal2s( a, x, y )  { (y) = (a) * (x); }
+#define bli_cdzscal2s( a, x, y )  { (y) = (a) * (x); }
+#define bli_zdzscal2s( a, x, y )  { (y) = (a) * (x); }
+
+#define bli_sczscal2s( a, x, y )  { (y) = (a) * (x); }
+#define bli_dczscal2s( a, x, y )  { (y) = (a) * (x); }
+#define bli_cczscal2s( a, x, y )  { (y) = (a) * (x); }
+#define bli_zczscal2s( a, x, y )  { (y) = (a) * (x); }
+
+#define bli_szzscal2s( a, x, y )  { (y) = (a) * (x); }
+#define bli_dzzscal2s( a, x, y )  { (y) = (a) * (x); }
+#define bli_czzscal2s( a, x, y )  { (y) = (a) * (x); }
+#define bli_zzzscal2s( a, x, y )  { (y) = (a) * (x); }
+
+
+#endif // BLIS_ENABLE_C99_COMPLEX
+
+
+#define bli_sscal2s( a, x, y )  bli_sssscal2s( a, x, y )
+#define bli_dscal2s( a, x, y )  bli_dddscal2s( a, x, y )
+#define bli_cscal2s( a, x, y )  bli_cccscal2s( a, x, y )
+#define bli_zscal2s( a, x, y )  bli_zzzscal2s( a, x, y )
 
 
 #endif

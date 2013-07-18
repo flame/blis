@@ -149,6 +149,25 @@
 
 // set to constant
 
+// set1s
+
+#define bli_sset1s( a ) \
+{ \
+	(a) = 1.0F; \
+}
+#define bli_dset1s( a ) \
+{ \
+	(a) = 1.0; \
+}
+#define bli_cset1s( a ) \
+{ \
+	bli_csetris( 1.0F, 0.0F, (a) ); \
+}
+#define bli_zset1s( a ) \
+{ \
+	bli_zsetris( 1.0, 0.0, (a) ); \
+}
+
 // set0s
 
 #define bli_sset0s( a ) \
@@ -161,13 +180,11 @@
 }
 #define bli_cset0s( a ) \
 { \
-	(a).real = 0.0F; \
-	(a).imag = 0.0F; \
+	bli_csetris( 0.0F, 0.0F, (a) ); \
 }
 #define bli_zset0s( a ) \
 { \
-	(a).real = 0.0; \
-	(a).imag = 0.0; \
+	bli_zsetris( 0.0, 0.0, (a) ); \
 }
 
 // setimag0
@@ -182,11 +199,12 @@
 }
 #define bli_csetimag0( a ) \
 { \
-	(a).imag = 0.0F; \
+	bli_csetis( 0.0F, (a) ); \
 }
 #define bli_zsetimag0( a ) \
 { \
-	(a).imag = 0.0; \
+	bli_zsetis( 0.0, (a) ); \
 }
 
 #endif
+

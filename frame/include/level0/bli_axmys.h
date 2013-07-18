@@ -42,355 +42,394 @@
 // - The second char encodes the type of x.
 // - The third char encodes the type of y.
 
-// -- (axy) = (ss?) ------------------------------------------------------------
+
+// -- (axy) = (?ss) ------------------------------------------------------------
 
 #define bli_sssaxmys( a, x, y ) \
 { \
-	(y)      -= ( float  )( ( float  ) (a)      * ( float  ) (x)      ); \
+	(y)          -= bli_ssimulnn_r( (a), (x) ); \
 }
-#define bli_ssdaxmys( a, x, y ) \
+#define bli_dssaxmys( a, x, y ) \
 { \
-	(y)      -= ( double )( ( float  ) (a)      * ( float  ) (x)      ); \
+	(y)          -= bli_dsimulnn_r( (a), (x) ); \
 }
-#define bli_sscaxmys( a, x, y ) \
+#define bli_cssaxmys( a, x, y ) \
 { \
-	(y).real -= ( float  )( ( float  ) (a)      * ( float  ) (x)      ); \
+	(y)          -= bli_csimulnn_r( (a), (x) ); \
 }
-#define bli_sszaxmys( a, x, y ) \
+#define bli_zssaxmys( a, x, y ) \
 { \
-	(y).real -= ( double )( ( float  ) (a)      * ( float  ) (x)      ); \
+	(y)          -= bli_zsimulnn_r( (a), (x) ); \
 }
 
-// -- (axy) = (sd?) ------------------------------------------------------------
+// -- (axy) = (?ds) ------------------------------------------------------------
 
 #define bli_sdsaxmys( a, x, y ) \
 { \
-	(y)      -= ( float  )( ( double ) (a)      * ( double ) (x)      ); \
+	(y)          -= bli_sdimulnn_r( (a), (x) ); \
 }
-#define bli_sddaxmys( a, x, y ) \
+#define bli_ddsaxmys( a, x, y ) \
 { \
-	(y)      -= ( double )( ( double ) (a)      * ( double ) (x)      ); \
+	(y)          -= bli_ddimulnn_r( (a), (x) ); \
 }
-#define bli_sdcaxmys( a, x, y ) \
+#define bli_cdsaxmys( a, x, y ) \
 { \
-	(y).real -= ( float  )( ( double ) (a)      * ( double ) (x)      ); \
+	(y)          -= bli_cdimulnn_r( (a), (x) ); \
 }
-#define bli_sdzaxmys( a, x, y ) \
+#define bli_zdsaxmys( a, x, y ) \
 { \
-	(y).real -= ( double )( ( double ) (a)      * ( double ) (x)      ); \
+	(y)          -= bli_zdimulnn_r( (a), (x) ); \
 }
 
-// -- (axy) = (sc?) ------------------------------------------------------------
+// -- (axy) = (?cs) ------------------------------------------------------------
 
 #define bli_scsaxmys( a, x, y ) \
 { \
-	(y)      -= ( float  )( ( float  ) (a)      * ( float  ) (x).real ); \
+	(y)          -= bli_scimulnn_r( (a), (x) ); \
 }
-#define bli_scdaxmys( a, x, y ) \
+#define bli_dcsaxmys( a, x, y ) \
 { \
-	(y)      -= ( double )( ( float  ) (a)      * ( float  ) (x).real ); \
+	(y)          -= bli_dcimulnn_r( (a), (x) ); \
 }
-#define bli_sccaxmys( a, x, y ) \
+#define bli_ccsaxmys( a, x, y ) \
 { \
-	(y).real -= ( float  )( ( float  ) (a)      * ( float  ) (x).real ); \
-	(y).imag -= ( float  )( ( float  ) (a)      * ( float  ) (x).imag ); \
+	(y)          -= bli_ccimulnn_r( (a), (x) ); \
 }
-#define bli_sczaxmys( a, x, y ) \
+#define bli_zcsaxmys( a, x, y ) \
 { \
-	(y).real -= ( double )( ( float  ) (a)      * ( float  ) (x).real ); \
-	(y).imag -= ( double )( ( float  ) (a)      * ( float  ) (x).imag ); \
+	(y)          -= bli_zcimulnn_r( (a), (x) ); \
 }
 
-// -- (axy) = (sz?) ------------------------------------------------------------
+// -- (axy) = (?zs) ------------------------------------------------------------
 
 #define bli_szsaxmys( a, x, y ) \
 { \
-	(y)      -= ( float  )( ( double ) (a)      * ( double ) (x).real ); \
+	(y)          -= bli_szimulnn_r( (a), (x) ); \
 }
-#define bli_szdaxmys( a, x, y ) \
+#define bli_dzsaxmys( a, x, y ) \
 { \
-	(y)      -= ( double )( ( double ) (a)      * ( double ) (x).real ); \
+	(y)          -= bli_dzimulnn_r( (a), (x) ); \
 }
-#define bli_szcaxmys( a, x, y ) \
+#define bli_czsaxmys( a, x, y ) \
 { \
-	(y).real -= ( float  )( ( double ) (a)      * ( double ) (x).real ); \
-	(y).imag -= ( float  )( ( double ) (a)      * ( double ) (x).imag ); \
+	(y)          -= bli_czimulnn_r( (a), (x) ); \
 }
-#define bli_szzaxmys( a, x, y ) \
+#define bli_zzsaxmys( a, x, y ) \
 { \
-	(y).real -= ( double )( ( double ) (a)      * ( double ) (x).real ); \
-	(y).imag -= ( double )( ( double ) (a)      * ( double ) (x).imag ); \
+	(y)          -= bli_zzimulnn_r( (a), (x) ); \
 }
 
-// -- (axy) = (ds?) ------------------------------------------------------------
 
-#define bli_dssaxmys( a, x, y ) \
+// -- (axy) = (?sd) ------------------------------------------------------------
+
+#define bli_ssdaxmys( a, x, y ) \
 { \
-	(y)      -= ( float  )( ( double ) (a)      * ( double ) (x)      ); \
+	(y)          -= bli_ssimulnn_r( (a), (x) ); \
 }
 #define bli_dsdaxmys( a, x, y ) \
 { \
-	(y)      -= ( double )( ( double ) (a)      * ( double ) (x)      ); \
-}
-#define bli_dscaxmys( a, x, y ) \
-{ \
-	(y).real -= ( float  )( ( double ) (a)      * ( double ) (x)      ); \
-}
-#define bli_dszaxmys( a, x, y ) \
-{ \
-	(y).real -= ( double )( ( double ) (a)      * ( double ) (x)      ); \
-}
-
-// -- (axy) = (dd?) ------------------------------------------------------------
-
-#define bli_ddsaxmys( a, x, y ) \
-{ \
-	(y)      -= ( float  )( ( double ) (a)      * ( double ) (x)      ); \
-}
-#define bli_dddaxmys( a, x, y ) \
-{ \
-	(y)      -= ( double )( ( double ) (a)      * ( double ) (x)      ); \
-}
-#define bli_ddcaxmys( a, x, y ) \
-{ \
-	(y).real -= ( float  )( ( double ) (a)      * ( double ) (x)      ); \
-}
-#define bli_ddzaxmys( a, x, y ) \
-{ \
-	(y).real -= ( double )( ( double ) (a)      * ( double ) (x)      ); \
-}
-
-// -- (axy) = (dc?) ------------------------------------------------------------
-
-#define bli_dcsaxmys( a, x, y ) \
-{ \
-	(y)      -= ( float  )( ( double ) (a)      * ( double ) (x).real ); \
-}
-#define bli_dcdaxmys( a, x, y ) \
-{ \
-	(y)      -= ( double )( ( double ) (a)      * ( double ) (x).real ); \
-}
-#define bli_dccaxmys( a, x, y ) \
-{ \
-	(y).real -= ( float  )( ( double ) (a)      * ( double ) (x).real ); \
-	(y).imag -= ( float  )( ( double ) (a)      * ( double ) (x).imag ); \
-}
-#define bli_dczaxmys( a, x, y ) \
-{ \
-	(y).real -= ( double )( ( double ) (a)      * ( double ) (x).real ); \
-	(y).imag -= ( double )( ( double ) (a)      * ( double ) (x).imag ); \
-}
-
-// -- (axy) = (dz?) ------------------------------------------------------------
-
-#define bli_dzsaxmys( a, x, y ) \
-{ \
-	(y)      -= ( float  )( ( double ) (a)      * ( double ) (x).real ); \
-}
-#define bli_dzdaxmys( a, x, y ) \
-{ \
-	(y)      -= ( double )( ( double ) (a)      * ( double ) (x).real ); \
-}
-#define bli_dzcaxmys( a, x, y ) \
-{ \
-	(y).real -= ( float  )( ( double ) (a)      * ( double ) (x).real ); \
-	(y).imag -= ( float  )( ( double ) (a)      * ( double ) (x).imag ); \
-}
-#define bli_dzzaxmys( a, x, y ) \
-{ \
-	(y).real -= ( double )( ( double ) (a)      * ( double ) (x).real ); \
-	(y).imag -= ( double )( ( double ) (a)      * ( double ) (x).imag ); \
-}
-
-// -- (axy) = (cs?) ------------------------------------------------------------
-
-#define bli_cssaxmys( a, x, y ) \
-{ \
-	(y)      -= ( float  )( ( float  ) (a).real * ( float  ) (x)      ); \
+	(y)          -= bli_dsimulnn_r( (a), (x) ); \
 }
 #define bli_csdaxmys( a, x, y ) \
 { \
-	(y)      -= ( double )( ( float  ) (a).real * ( float  ) (x)      ); \
-}
-#define bli_cscaxmys( a, x, y ) \
-{ \
-	(y).real -= ( float  )( ( float  ) (a).real * ( float  ) (x)      ); \
-	(y).imag -= ( float  )( ( float  ) (a).imag * ( float  ) (x)      ); \
-}
-#define bli_cszaxmys( a, x, y ) \
-{ \
-	(y).real -= ( double )( ( float  ) (a).real * ( float  ) (x)      ); \
-	(y).imag -= ( double )( ( float  ) (a).imag * ( float  ) (x)      ); \
-}
-
-// -- (axy) = (cd?) ------------------------------------------------------------
-
-#define bli_cdsaxmys( a, x, y ) \
-{ \
-	(y)      -= ( float  )( ( double ) (a).real * ( double ) (x)      ); \
-}
-#define bli_cddaxmys( a, x, y ) \
-{ \
-	(y)      -= ( double )( ( double ) (a).real * ( double ) (x)      ); \
-}
-#define bli_cdcaxmys( a, x, y ) \
-{ \
-	(y).real -= ( float  )( ( double ) (a).real * ( double ) (x)      ); \
-	(y).imag -= ( float  )( ( double ) (a).imag * ( double ) (x)      ); \
-}
-#define bli_cdzaxmys( a, x, y ) \
-{ \
-	(y).real -= ( double )( ( double ) (a).real * ( double ) (x)      ); \
-	(y).imag -= ( double )( ( double ) (a).imag * ( double ) (x)      ); \
-}
-
-// -- (axy) = (cc?) ------------------------------------------------------------
-
-#define bli_ccsaxmys( a, x, y ) \
-{ \
-	(y)      -= ( float  )( ( float  ) (a).real * ( float  ) (x).real - ( float  ) (a).imag * ( float  ) (x).imag ); \
-}
-#define bli_ccdaxmys( a, x, y ) \
-{ \
-	(y)      -= ( double )( ( float  ) (a).real * ( float  ) (x).real - ( float  ) (a).imag * ( float  ) (x).imag ); \
-}
-#define bli_cccaxmys( a, x, y ) \
-{ \
-	(y).real -= ( float  )( ( float  ) (a).real * ( float  ) (x).real - ( float  ) (a).imag * ( float  ) (x).imag ); \
-	(y).imag -= ( float  )( ( float  ) (a).imag * ( float  ) (x).real + ( float  ) (a).real * ( float  ) (x).imag ); \
-}
-#define bli_cczaxmys( a, x, y ) \
-{ \
-	(y).real -= ( double )( ( float  ) (a).real * ( float  ) (x).real - ( float  ) (a).imag * ( float  ) (x).imag ); \
-	(y).imag -= ( double )( ( float  ) (a).imag * ( float  ) (x).real + ( float  ) (a).real * ( float  ) (x).imag ); \
-}
-
-// -- (axy) = (cz?) ------------------------------------------------------------
-
-#define bli_czsaxmys( a, x, y ) \
-{ \
-	(y)      -= ( float  )( ( double ) (a).real * ( double ) (x).real - ( double ) (a).imag * ( double ) (x).imag ); \
-}
-#define bli_czdaxmys( a, x, y ) \
-{ \
-	(y)      -= ( double )( ( double ) (a).real * ( double ) (x).real - ( double ) (a).imag * ( double ) (x).imag ); \
-}
-#define bli_czcaxmys( a, x, y ) \
-{ \
-	(y).real -= ( float  )( ( double ) (a).real * ( double ) (x).real - ( double ) (a).imag * ( double ) (x).imag ); \
-	(y).imag -= ( float  )( ( double ) (a).imag * ( double ) (x).real + ( double ) (a).real * ( double ) (x).imag ); \
-}
-#define bli_czzaxmys( a, x, y ) \
-{ \
-	(y).real -= ( double )( ( double ) (a).real * ( double ) (x).real - ( double ) (a).imag * ( double ) (x).imag ); \
-	(y).imag -= ( double )( ( double ) (a).imag * ( double ) (x).real + ( double ) (a).real * ( double ) (x).imag ); \
-}
-
-// -- (axy) = (zs?) ------------------------------------------------------------
-
-#define bli_zssaxmys( a, x, y ) \
-{ \
-	(y)      -= ( float  )( ( float  ) (a).real * ( float  ) (x)      ); \
+	(y)          -= bli_csimulnn_r( (a), (x) ); \
 }
 #define bli_zsdaxmys( a, x, y ) \
 { \
-	(y)      -= ( double )( ( float  ) (a).real * ( float  ) (x)      ); \
-}
-#define bli_zscaxmys( a, x, y ) \
-{ \
-	(y).real -= ( float  )( ( float  ) (a).real * ( float  ) (x)      ); \
-	(y).imag -= ( float  )( ( float  ) (a).imag * ( float  ) (x)      ); \
-}
-#define bli_zszaxmys( a, x, y ) \
-{ \
-	(y).real -= ( double )( ( float  ) (a).real * ( float  ) (x)      ); \
-	(y).imag -= ( double )( ( float  ) (a).imag * ( float  ) (x)      ); \
+	(y)          -= bli_zsimulnn_r( (a), (x) ); \
 }
 
-// -- (axy) = (zd?) ------------------------------------------------------------
+// -- (axy) = (?dd) ------------------------------------------------------------
 
-#define bli_zdsaxmys( a, x, y ) \
+#define bli_sddaxmys( a, x, y ) \
 { \
-	(y)      -= ( float  )( ( double ) (a).real * ( double ) (x)      ); \
+	(y)          -= bli_sdimulnn_r( (a), (x) ); \
+}
+#define bli_dddaxmys( a, x, y ) \
+{ \
+	(y)          -= bli_ddimulnn_r( (a), (x) ); \
+}
+#define bli_cddaxmys( a, x, y ) \
+{ \
+	(y)          -= bli_cdimulnn_r( (a), (x) ); \
 }
 #define bli_zddaxmys( a, x, y ) \
 { \
-	(y)      -= ( double )( ( double ) (a).real * ( double ) (x)      ); \
-}
-#define bli_zdcaxmys( a, x, y ) \
-{ \
-	(y).real -= ( float  )( ( double ) (a).real * ( double ) (x)      ); \
-	(y).imag -= ( float  )( ( double ) (a).imag * ( double ) (x)      ); \
-}
-#define bli_zdzaxmys( a, x, y ) \
-{ \
-	(y).real -= ( double )( ( double ) (a).real * ( double ) (x)      ); \
-	(y).imag -= ( double )( ( double ) (a).imag * ( double ) (x)      ); \
+	(y)          -= bli_zdimulnn_r( (a), (x) ); \
 }
 
-// -- (axy) = (zc?) ------------------------------------------------------------
+// -- (axy) = (?cd) ------------------------------------------------------------
 
-#define bli_zcsaxmys( a, x, y ) \
+#define bli_scdaxmys( a, x, y ) \
 { \
-	(y)      -= ( float  )( ( float  ) (a).real * ( float  ) (x).real - ( float  ) (a).imag * ( float  ) (x).imag ); \
+	(y)          -= bli_scimulnn_r( (a), (x) ); \
+}
+#define bli_dcdaxmys( a, x, y ) \
+{ \
+	(y)          -= bli_dcimulnn_r( (a), (x) ); \
+}
+#define bli_ccdaxmys( a, x, y ) \
+{ \
+	(y)          -= bli_ccimulnn_r( (a), (x) ); \
 }
 #define bli_zcdaxmys( a, x, y ) \
 { \
-	(y)      -= ( double )( ( float  ) (a).real * ( float  ) (x).real - ( float  ) (a).imag * ( float  ) (x).imag ); \
-}
-#define bli_zccaxmys( a, x, y ) \
-{ \
-	(y).real -= ( float  )( ( float  ) (a).real * ( float  ) (x).real - ( float  ) (a).imag * ( float  ) (x).imag ); \
-	(y).imag -= ( float  )( ( float  ) (a).imag * ( float  ) (x).real + ( float  ) (a).real * ( float  ) (x).imag ); \
-}
-#define bli_zczaxmys( a, x, y ) \
-{ \
-	(y).real -= ( double )( ( float  ) (a).real * ( float  ) (x).real - ( float  ) (a).imag * ( float  ) (x).imag ); \
-	(y).imag -= ( double )( ( float  ) (a).imag * ( float  ) (x).real + ( float  ) (a).real * ( float  ) (x).imag ); \
+	(y)          -= bli_zcimulnn_r( (a), (x) ); \
 }
 
-// -- (axy) = (zz?) ------------------------------------------------------------
+// -- (axy) = (?zd) ------------------------------------------------------------
 
-#define bli_zzsaxmys( a, x, y ) \
+#define bli_szdaxmys( a, x, y ) \
 { \
-	(y)      -= ( float  )( ( double ) (a).real * ( double ) (x).real - ( double ) (a).imag * ( double ) (x).imag ); \
+	(y)          -= bli_szimulnn_r( (a), (x) ); \
+}
+#define bli_dzdaxmys( a, x, y ) \
+{ \
+	(y)          -= bli_dzimulnn_r( (a), (x) ); \
+}
+#define bli_czdaxmys( a, x, y ) \
+{ \
+	(y)          -= bli_czimulnn_r( (a), (x) ); \
 }
 #define bli_zzdaxmys( a, x, y ) \
 { \
-	(y)      -= ( double )( ( double ) (a).real * ( double ) (x).real - ( double ) (a).imag * ( double ) (x).imag ); \
+	(y)          -= bli_zzimulnn_r( (a), (x) ); \
+}
+
+
+#ifndef BLIS_ENABLE_C99_COMPLEX
+
+
+// -- (axy) = (?sc) ------------------------------------------------------------
+
+#define bli_sscaxmys( a, x, y ) \
+{ \
+	bli_creal(y) -= bli_ssimulnn_r( (a), (x) ); \
+}
+#define bli_dscaxmys( a, x, y ) \
+{ \
+	bli_creal(y) -= bli_dsimulnn_r( (a), (x) ); \
+}
+#define bli_cscaxmys( a, x, y ) \
+{ \
+	bli_creal(y) -= bli_csimulnn_r( (a), (x) ); \
+	bli_cimag(y) -= bli_csimulnn_i( (a), (x) ); \
+}
+#define bli_zscaxmys( a, x, y ) \
+{ \
+	bli_creal(y) -= bli_zsimulnn_r( (a), (x) ); \
+	bli_cimag(y) -= bli_zsimulnn_i( (a), (x) ); \
+}
+
+// -- (axy) = (?dc) ------------------------------------------------------------
+
+#define bli_sdcaxmys( a, x, y ) \
+{ \
+	bli_creal(y) -= bli_sdimulnn_r( (a), (x) ); \
+}
+#define bli_ddcaxmys( a, x, y ) \
+{ \
+	bli_creal(y) -= bli_ddimulnn_r( (a), (x) ); \
+}
+#define bli_cdcaxmys( a, x, y ) \
+{ \
+	bli_creal(y) -= bli_cdimulnn_r( (a), (x) ); \
+	bli_cimag(y) -= bli_cdimulnn_i( (a), (x) ); \
+}
+#define bli_zdcaxmys( a, x, y ) \
+{ \
+	bli_creal(y) -= bli_zdimulnn_r( (a), (x) ); \
+	bli_cimag(y) -= bli_zdimulnn_i( (a), (x) ); \
+}
+
+// -- (axy) = (?cc) ------------------------------------------------------------
+
+#define bli_sccaxmys( a, x, y ) \
+{ \
+	bli_creal(y) -= bli_scimulnn_r( (a), (x) ); \
+	bli_cimag(y) -= bli_scimulnn_i( (a), (x) ); \
+}
+#define bli_dccaxmys( a, x, y ) \
+{ \
+	bli_creal(y) -= bli_dcimulnn_r( (a), (x) ); \
+	bli_cimag(y) -= bli_dcimulnn_i( (a), (x) ); \
+}
+#define bli_cccaxmys( a, x, y ) \
+{ \
+	bli_creal(y) -= bli_ccimulnn_r( (a), (x) ); \
+	bli_cimag(y) -= bli_ccimulnn_i( (a), (x) ); \
+}
+#define bli_zccaxmys( a, x, y ) \
+{ \
+	bli_creal(y) -= bli_zcimulnn_r( (a), (x) ); \
+	bli_cimag(y) -= bli_zcimulnn_i( (a), (x) ); \
+}
+
+// -- (axy) = (?zc) ------------------------------------------------------------
+
+#define bli_szcaxmys( a, x, y ) \
+{ \
+	bli_creal(y) -= bli_szimulnn_r( (a), (x) ); \
+	bli_cimag(y) -= bli_szimulnn_i( (a), (x) ); \
+}
+#define bli_dzcaxmys( a, x, y ) \
+{ \
+	bli_creal(y) -= bli_dzimulnn_r( (a), (x) ); \
+	bli_cimag(y) -= bli_dzimulnn_i( (a), (x) ); \
+}
+#define bli_czcaxmys( a, x, y ) \
+{ \
+	bli_creal(y) -= bli_czimulnn_r( (a), (x) ); \
+	bli_cimag(y) -= bli_czimulnn_i( (a), (x) ); \
 }
 #define bli_zzcaxmys( a, x, y ) \
 { \
-	(y).real -= ( float  )( ( double ) (a).real * ( double ) (x).real - ( double ) (a).imag * ( double ) (x).imag ); \
-	(y).imag -= ( float  )( ( double ) (a).imag * ( double ) (x).real + ( double ) (a).real * ( double ) (x).imag ); \
+	bli_creal(y) -= bli_zzimulnn_r( (a), (x) ); \
+	bli_cimag(y) -= bli_zzimulnn_i( (a), (x) ); \
+}
+
+
+// -- (axy) = (?sz) ------------------------------------------------------------
+
+#define bli_sszaxmys( a, x, y ) \
+{ \
+	bli_zreal(y) -= bli_ssimulnn_r( (a), (x) ); \
+}
+#define bli_dszaxmys( a, x, y ) \
+{ \
+	bli_zreal(y) -= bli_dsimulnn_r( (a), (x) ); \
+}
+#define bli_cszaxmys( a, x, y ) \
+{ \
+	bli_zreal(y) -= bli_csimulnn_r( (a), (x) ); \
+	bli_zimag(y) -= bli_csimulnn_i( (a), (x) ); \
+}
+#define bli_zszaxmys( a, x, y ) \
+{ \
+	bli_zreal(y) -= bli_zsimulnn_r( (a), (x) ); \
+	bli_zimag(y) -= bli_zsimulnn_i( (a), (x) ); \
+}
+
+// -- (axy) = (?dz) ------------------------------------------------------------
+
+#define bli_sdzaxmys( a, x, y ) \
+{ \
+	bli_zreal(y) -= bli_sdimulnn_r( (a), (x) ); \
+}
+#define bli_ddzaxmys( a, x, y ) \
+{ \
+	bli_zreal(y) -= bli_ddimulnn_r( (a), (x) ); \
+}
+#define bli_cdzaxmys( a, x, y ) \
+{ \
+	bli_zreal(y) -= bli_cdimulnn_r( (a), (x) ); \
+	bli_zimag(y) -= bli_cdimulnn_i( (a), (x) ); \
+}
+#define bli_zdzaxmys( a, x, y ) \
+{ \
+	bli_zreal(y) -= bli_zdimulnn_r( (a), (x) ); \
+	bli_zimag(y) -= bli_zdimulnn_i( (a), (x) ); \
+}
+
+// -- (axy) = (?cz) ------------------------------------------------------------
+
+#define bli_sczaxmys( a, x, y ) \
+{ \
+	bli_zreal(y) -= bli_scimulnn_r( (a), (x) ); \
+	bli_zimag(y) -= bli_scimulnn_i( (a), (x) ); \
+}
+#define bli_dczaxmys( a, x, y ) \
+{ \
+	bli_zreal(y) -= bli_dcimulnn_r( (a), (x) ); \
+	bli_zimag(y) -= bli_dcimulnn_i( (a), (x) ); \
+}
+#define bli_cczaxmys( a, x, y ) \
+{ \
+	bli_zreal(y) -= bli_ccimulnn_r( (a), (x) ); \
+	bli_zimag(y) -= bli_ccimulnn_i( (a), (x) ); \
+}
+#define bli_zczaxmys( a, x, y ) \
+{ \
+	bli_zreal(y) -= bli_zcimulnn_r( (a), (x) ); \
+	bli_zimag(y) -= bli_zcimulnn_i( (a), (x) ); \
+}
+
+// -- (axy) = (?zz) ------------------------------------------------------------
+
+#define bli_szzaxmys( a, x, y ) \
+{ \
+	bli_zreal(y) -= bli_szimulnn_r( (a), (x) ); \
+	bli_zimag(y) -= bli_szimulnn_i( (a), (x) ); \
+}
+#define bli_dzzaxmys( a, x, y ) \
+{ \
+	bli_zreal(y) -= bli_dzimulnn_r( (a), (x) ); \
+	bli_zimag(y) -= bli_dzimulnn_i( (a), (x) ); \
+}
+#define bli_czzaxmys( a, x, y ) \
+{ \
+	bli_zreal(y) -= bli_czimulnn_r( (a), (x) ); \
+	bli_zimag(y) -= bli_czimulnn_i( (a), (x) ); \
 }
 #define bli_zzzaxmys( a, x, y ) \
 { \
-	(y).real -= ( double )( ( double ) (a).real * ( double ) (x).real - ( double ) (a).imag * ( double ) (x).imag ); \
-	(y).imag -= ( double )( ( double ) (a).imag * ( double ) (x).real + ( double ) (a).real * ( double ) (x).imag ); \
+	bli_zreal(y) -= bli_zzimulnn_r( (a), (x) ); \
+	bli_zimag(y) -= bli_zzimulnn_i( (a), (x) ); \
 }
 
 
+#else // ifdef BLIS_ENABLE_C99_COMPLEX
 
 
+#define bli_sscaxmys( a, x, y )  { (y) -= (a) * (x); }
+#define bli_dscaxmys( a, x, y )  { (y) -= (a) * (x); }
+#define bli_cscaxmys( a, x, y )  { (y) -= (a) * (x); }
+#define bli_zscaxmys( a, x, y )  { (y) -= (a) * (x); }
+
+#define bli_sdcaxmys( a, x, y )  { (y) -= (a) * (x); }
+#define bli_ddcaxmys( a, x, y )  { (y) -= (a) * (x); }
+#define bli_cdcaxmys( a, x, y )  { (y) -= (a) * (x); }
+#define bli_zdcaxmys( a, x, y )  { (y) -= (a) * (x); }
+
+#define bli_sccaxmys( a, x, y )  { (y) -= (a) * (x); }
+#define bli_dccaxmys( a, x, y )  { (y) -= (a) * (x); }
+#define bli_cccaxmys( a, x, y )  { (y) -= (a) * (x); }
+#define bli_zccaxmys( a, x, y )  { (y) -= (a) * (x); }
+
+#define bli_szcaxmys( a, x, y )  { (y) -= (a) * (x); }
+#define bli_dzcaxmys( a, x, y )  { (y) -= (a) * (x); }
+#define bli_czcaxmys( a, x, y )  { (y) -= (a) * (x); }
+#define bli_zzcaxmys( a, x, y )  { (y) -= (a) * (x); }
 
 
-#define bli_saxmys( a, x, y ) \
-{ \
-	bli_sssaxmys( a, x, y ); \
-}
-#define bli_daxmys( a, x, y ) \
-{ \
-	bli_dddaxmys( a, x, y ); \
-}
-#define bli_caxmys( a, x, y ) \
-{ \
-	bli_cccaxmys( a, x, y ); \
-}
-#define bli_zaxmys( a, x, y ) \
-{ \
-	bli_zzzaxmys( a, x, y ); \
-}
+#define bli_sszaxmys( a, x, y )  { (y) -= (a) * (x); }
+#define bli_dszaxmys( a, x, y )  { (y) -= (a) * (x); }
+#define bli_cszaxmys( a, x, y )  { (y) -= (a) * (x); }
+#define bli_zszaxmys( a, x, y )  { (y) -= (a) * (x); }
+
+#define bli_sdzaxmys( a, x, y )  { (y) -= (a) * (x); }
+#define bli_ddzaxmys( a, x, y )  { (y) -= (a) * (x); }
+#define bli_cdzaxmys( a, x, y )  { (y) -= (a) * (x); }
+#define bli_zdzaxmys( a, x, y )  { (y) -= (a) * (x); }
+
+#define bli_sczaxmys( a, x, y )  { (y) -= (a) * (x); }
+#define bli_dczaxmys( a, x, y )  { (y) -= (a) * (x); }
+#define bli_cczaxmys( a, x, y )  { (y) -= (a) * (x); }
+#define bli_zczaxmys( a, x, y )  { (y) -= (a) * (x); }
+
+#define bli_szzaxmys( a, x, y )  { (y) -= (a) * (x); }
+#define bli_dzzaxmys( a, x, y )  { (y) -= (a) * (x); }
+#define bli_czzaxmys( a, x, y )  { (y) -= (a) * (x); }
+#define bli_zzzaxmys( a, x, y )  { (y) -= (a) * (x); }
+
+
+#endif // BLIS_ENABLE_C99_COMPLEX
+
+
+#define bli_saxmys( a, x, y )  bli_sssaxmys( a, x, y )
+#define bli_daxmys( a, x, y )  bli_dddaxmys( a, x, y )
+#define bli_caxmys( a, x, y )  bli_cccaxmys( a, x, y )
+#define bli_zaxmys( a, x, y )  bli_zzzaxmys( a, x, y )
 
 
 #endif

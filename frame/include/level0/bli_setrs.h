@@ -32,120 +32,89 @@
 
 */
 
-#ifndef BLIS_NEG2S_H
-#define BLIS_NEG2S_H
+#ifndef BLIS_SETRS_H
+#define BLIS_SETRS_H
 
-// neg2s
+// setrs
 
 // Notes:
 // - The first char encodes the type of x.
 // - The second char encodes the type of y.
 
 
-#define bli_ssneg2s( x, y ) \
+#define bli_sssetrs( xr, y ) \
 { \
-	(y) = -bli_sreal(x); \
+	(y)      = ( float  ) (xr); \
 }
-#define bli_dsneg2s( x, y ) \
+#define bli_dssetrs( xr, y ) \
 { \
-	(y) = -bli_dreal(x); \
-}
-#define bli_csneg2s( x, y ) \
-{ \
-	(y) = -bli_creal(x); \
-}
-#define bli_zsneg2s( x, y ) \
-{ \
-	(y) = -bli_zreal(x); \
+	(y)      = ( float  ) (xr); \
 }
 
 
-#define bli_sdneg2s( x, y ) \
+#define bli_sdsetrs( xr, y ) \
 { \
-	(y) = -bli_sreal(x); \
+	(y)      = ( double ) (xr); \
 }
-#define bli_ddneg2s( x, y ) \
+#define bli_ddsetrs( xr, y ) \
 { \
-	(y) = -bli_dreal(x); \
-}
-#define bli_cdneg2s( x, y ) \
-{ \
-	(y) = -bli_creal(x); \
-}
-#define bli_zdneg2s( x, y ) \
-{ \
-	(y) = -bli_zreal(x); \
+	(y)      = ( double ) (xr); \
 }
 
 
 #ifndef BLIS_ENABLE_C99_COMPLEX
 
 
-#define bli_scneg2s( x, y ) \
+#define bli_scsetrs( xr, y ) \
 { \
-	bli_creal(y) = -bli_sreal(x); \
-	bli_cimag(y) = 0.0F; \
+	bli_creal(y) = ( float  ) (xr); \
 }
-#define bli_dcneg2s( x, y ) \
+#define bli_dcsetrs( xr, y ) \
 { \
-	bli_creal(y) = -bli_dreal(x); \
-	bli_cimag(y) = 0.0F; \
-}
-#define bli_ccneg2s( x, y ) \
-{ \
-	bli_creal(y) = -bli_creal(x); \
-	bli_cimag(y) = -bli_cimag(x); \
-}
-#define bli_zcneg2s( x, y ) \
-{ \
-	bli_creal(y) = -bli_zreal(x); \
-	bli_cimag(y) = -bli_zimag(x); \
+	bli_creal(y) = ( float  ) (xr); \
 }
 
 
-#define bli_szneg2s( x, y ) \
+#define bli_szsetrs( xr, y ) \
 { \
-	bli_zreal(y) = -bli_sreal(x); \
-	bli_zimag(y) = 0.0; \
+	bli_zreal(y) = ( double ) (xr); \
 }
-#define bli_dzneg2s( x, y ) \
+#define bli_dzsetrs( xr, y ) \
 { \
-	bli_zreal(y) = -bli_dreal(x); \
-	bli_zimag(y) = 0.0; \
-}
-#define bli_czneg2s( x, y ) \
-{ \
-	bli_zreal(y) = -bli_creal(x); \
-	bli_zimag(y) = -bli_cimag(x); \
-}
-#define bli_zzneg2s( x, y ) \
-{ \
-	bli_zreal(y) = -bli_zreal(x); \
-	bli_zimag(y) = -bli_zimag(x); \
+	bli_zreal(y) = ( double ) (xr); \
 }
 
 
 #else // ifdef BLIS_ENABLE_C99_COMPLEX
 
 
-#define bli_scneg2s( x, y )  { (y) = -(x); }
-#define bli_dcneg2s( x, y )  { (y) = -(x); }
-#define bli_ccneg2s( x, y )  { (y) = -(x); }
-#define bli_zcneg2s( x, y )  { (y) = -(x); }
+#define bli_scsetrs( xr, y ) \
+{ \
+	(y)      = ( float  ) (xr) + bli_cimag(y) * (I); \
+}
+#define bli_dcsetrs( xr, y ) \
+{ \
+	(y)      = ( float  ) (xr) + bli_cimag(y) * (I); \
+}
 
-#define bli_szneg2s( x, y )  { (y) = -(x); }
-#define bli_dzneg2s( x, y )  { (y) = -(x); }
-#define bli_czneg2s( x, y )  { (y) = -(x); }
-#define bli_zzneg2s( x, y )  { (y) = -(x); }
+
+#define bli_szsetrs( xr, y ) \
+{ \
+	(y)      = ( double ) (xr) + bli_zimag(y) * (I); \
+}
+#define bli_dzsetrs( xr, y ) \
+{ \
+	(y)      = ( double ) (xr) + bli_zimag(y) * (I); \
+}
 
 
 #endif // BLIS_ENABLE_C99_COMPLEX
 
 
-#define bli_sneg2s( x, y )  bli_ssneg2s( x, y )
-#define bli_dneg2s( x, y )  bli_ddneg2s( x, y )
-#define bli_cneg2s( x, y )  bli_ccneg2s( x, y )
-#define bli_zneg2s( x, y )  bli_zzneg2s( x, y )
+#define bli_ssetrs( xr, y )  bli_sssetrs( xr, y )
+#define bli_dsetrs( xr, y )  bli_ddsetrs( xr, y )
+#define bli_csetrs( xr, y )  bli_scsetrs( xr, y )
+#define bli_zsetrs( xr, y )  bli_dzsetrs( xr, y )
 
 
 #endif

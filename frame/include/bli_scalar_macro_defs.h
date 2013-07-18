@@ -36,6 +36,34 @@
 #define BLIS_SCALAR_MACRO_DEFS_H
 
 
+// -- Assignment macros --
+
+// NOTE: This macro is defined first since most other scalar macros use it
+// to abstract away the method used to assign complex values (ie: whether
+// fields of a struct are set directly or whether native C99 assignment is
+// used).
+
+#include "bli_setris.h"  // sets both real and imaginary components
+#include "bli_setrs.h"   // sets real component only 
+#include "bli_setis.h"   // sets imaginary component only 
+
+
+// -- Accessor macros --
+
+// NOTE: This macro also needs to be defined early on since it determines
+// how real and imaginary components are accessed (ie: whether the fields
+// of a struct are read directly or whether native C99 functions are used.)
+
+#include "bli_getris.h"
+
+
+// -- Inline multiplication macros --
+
+#include "bli_imulnn.h"
+#include "bli_imulnc.h"
+#include "bli_imulcn.h" // defined in terms of "nc", so it must come second.
+
+
 // -- Scalar query macros --
 
 #include "bli_eq.h"
@@ -70,13 +98,10 @@
 #include "bli_dots.h"
 #include "bli_dotjs.h"
 
-#include "bli_getris.h"
-
 #include "bli_inverts.h"
 
 #include "bli_invscals.h"
 #include "bli_invscaljs.h"
-#include "bli_invscalcjs.h"
 
 #include "bli_neg2s.h"
 
@@ -86,8 +111,6 @@
 
 #include "bli_scal2s.h"
 #include "bli_scal2js.h"
-
-#include "bli_setris.h"
 
 #include "bli_sqrt2s.h"
 

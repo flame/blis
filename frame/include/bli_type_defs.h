@@ -43,12 +43,11 @@
 #ifdef __cplusplus
   // For C++, include stdint.h.
   #include <stdint.h>
-#elif __STDC_VERSION__ == 199901L
-  // For C99, include stdint.h.
+#elif __STDC_VERSION__ >= 199901L
+  // For C99 (or later), include stdint.h.
   #include <stdint.h>
 #else
-  // Since stdint.h is not available, we have to manually typedef the
-  // types we will use.
+  // When stdint.h is not available, manually typedef the types we will use.
   typedef   signed long int  int64_t;
   typedef unsigned long int  uint64_t;
 #endif
@@ -64,7 +63,7 @@ typedef      gint_t bool_t;
 
 // -- Special-purpose integers --
 
-// This cpp guards provide a temporary hack to allow libflame
+// This cpp guard provides a temporary hack to allow libflame
 // interoperability with BLIS.
 #ifndef _DEFINED_DIM_T
 #define _DEFINED_DIM_T
@@ -78,27 +77,43 @@ typedef     guint_t info_t;  // object information bit field
 
 // -- Complex types --
 
-// This cpp guards provide a temporary hack to allow libflame
-// interoperability with BLIS.
-#ifndef _DEFINED_SCOMPLEX
-#define _DEFINED_SCOMPLEX
-typedef struct
-{
-	float  real;
-	float  imag;
-} scomplex;
-#endif
+#ifdef BLIS_ENABLE_C99_COMPLEX
 
-// This cpp guards provide a temporary hack to allow libflame
-// interoperability with BLIS.
-#ifndef _DEFINED_DCOMPLEX
-#define _DEFINED_DCOMPLEX
-typedef struct
-{
-	double real;
-	double imag;
-} dcomplex;
-#endif
+	#if __STDC_VERSION__ >= 199901L
+		#include <complex.h>
+
+		// Typedef official complex types to BLIS complex type names.
+		typedef  float complex scomplex;
+		typedef double complex dcomplex;
+	#else
+		#error "Configuration requested C99 complex types, but C99 does not appear to be supported."
+	#endif
+
+#else // ifndef BLIS_ENABLE_C99_COMPLEX
+
+	// This cpp guard provides a temporary hack to allow libflame
+	// interoperability with BLIS.
+	#ifndef _DEFINED_SCOMPLEX
+	#define _DEFINED_SCOMPLEX
+	typedef struct
+	{
+		float  real;
+		float  imag;
+	} scomplex;
+	#endif
+
+	// This cpp guard provides a temporary hack to allow libflame
+	// interoperability with BLIS.
+	#ifndef _DEFINED_DCOMPLEX
+	#define _DEFINED_DCOMPLEX
+	typedef struct
+	{
+		double real;
+		double imag;
+	} dcomplex;
+	#endif
+
+#endif // BLIS_ENABLE_C99_COMPLEX
 
 // -- Atom type --
 
@@ -109,8 +124,9 @@ typedef dcomplex atom_t;
 
 // -- Fortran-77 types --
 
-// Note: These types are used only by BLAS compatibility layer.
-#ifdef BLIS_ENABLE_BLAS2BLIS
+// Note: These types are typically only used by BLAS compatibility layer, but
+// we must define them even when the compatibility layer isn't being built
+// because they also occur in bli_slamch() and bli_dlamch().
 #ifdef BLIS_ENABLE_BLAS2BLIS_INT64
 typedef int64_t   f77_int;
 #else
@@ -121,7 +137,6 @@ typedef float     f77_float;
 typedef double    f77_double;
 typedef scomplex  f77_scomplex;
 typedef dcomplex  f77_dcomplex;
-#endif
 
 
 //

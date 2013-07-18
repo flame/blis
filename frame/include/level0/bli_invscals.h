@@ -41,6 +41,7 @@
 // - The first char encodes the type of a.
 // - The second char encodes the type of x.
 
+
 #define bli_ssinvscals( a, x ) \
 { \
 	(x) /= ( float  ) (a); \
@@ -51,12 +52,13 @@
 }
 #define bli_csinvscals( a, x ) \
 { \
-	(x) /= ( float  ) (a).real; \
+	(x) /= ( float  ) bli_creal(a); \
 }
 #define bli_zsinvscals( a, x ) \
 { \
-	(x) /= ( float  ) (a).real; \
+	(x) /= ( float  ) bli_zreal(a); \
 }
+
 
 #define bli_sdinvscals( a, x ) \
 { \
@@ -68,84 +70,95 @@
 }
 #define bli_cdinvscals( a, x ) \
 { \
-	(x) /= ( double ) (a).real; \
+	(x) /= ( double ) bli_creal(a); \
 }
 #define bli_zdinvscals( a, x ) \
 { \
-	(x) /= ( double ) (a).real; \
+	(x) /= ( double ) bli_zreal(a); \
 }
+
+
+#ifndef BLIS_ENABLE_C99_COMPLEX
+
 
 #define bli_scinvscals( a, x ) \
 { \
-	(x).real /= ( float  ) (a); \
-	(x).imag /= ( float  ) (a); \
+	bli_creal(x) /= ( float  ) (a); \
+	bli_cimag(x) /= ( float  ) (a); \
 }
 #define bli_dcinvscals( a, x ) \
 { \
-	(x).real /= ( float  ) (a); \
-	(x).imag /= ( float  ) (a); \
+	bli_creal(x) /= ( float  ) (a); \
+	bli_cimag(x) /= ( float  ) (a); \
 }
 #define bli_ccinvscals( a, x ) \
 { \
-	float  temp =              ( float  ) (a).real * (a).real + ( float  ) (a).imag * (a).imag; \
-	float  xr   = ( float  ) ( ( float  ) (a).real * (x).real + ( float  ) (a).imag * (x).imag ) / temp; \
-	float  xi   = ( float  ) ( ( float  ) (a).real * (x).imag - ( float  ) (a).imag * (x).real ) / temp; \
-	(x).real    = xr; \
-	(x).imag    = xi; \
+	float  temp  = ( float  ) bli_ccimulnc_r( (a), (a) ); \
+	float  xr    = ( float  ) bli_ccimulnc_r( (a), (x) ) / temp; \
+	float  xi    = ( float  ) bli_ccimulnc_i( (x), (a) ) / temp; \
+	bli_creal(x) = xr; \
+	bli_cimag(x) = xi; \
 }
 #define bli_zcinvscals( a, x ) \
 { \
-	float  temp =              ( float  ) (a).real * (a).real + ( float  ) (a).imag * (a).imag; \
-	float  xr   = ( float  ) ( ( float  ) (a).real * (x).real + ( float  ) (a).imag * (x).imag ) / temp; \
-	float  xi   = ( float  ) ( ( float  ) (a).real * (x).imag - ( float  ) (a).imag * (x).real ) / temp; \
-	(x).real    = xr; \
-	(x).imag    = xi; \
+	float  temp  = ( float  ) bli_zzimulnc_r( (a), (a) ); \
+	float  xr    = ( float  ) bli_zcimulnc_r( (a), (x) ) / temp; \
+	float  xi    = ( float  ) bli_czimulnc_i( (x), (a) ) / temp; \
+	bli_creal(x) = xr; \
+	bli_cimag(x) = xi; \
 }
+
 
 #define bli_szinvscals( a, x ) \
 { \
-	(x).real /= ( double ) (a); \
-	(x).imag /= ( double ) (a); \
+	bli_zreal(x) /= ( double ) (a); \
+	bli_zimag(x) /= ( double ) (a); \
 }
 #define bli_dzinvscals( a, x ) \
 { \
-	(x).real /= ( double ) (a); \
-	(x).imag /= ( double ) (a); \
+	bli_zreal(x) /= ( double ) (a); \
+	bli_zimag(x) /= ( double ) (a); \
 }
 #define bli_czinvscals( a, x ) \
 { \
-	double temp =              ( double ) (a).real * (a).real + ( double ) (a).imag * (a).imag; \
-	double xr   = ( double ) ( ( double ) (a).real * (x).real + ( double ) (a).imag * (x).imag ) / temp; \
-	double xi   = ( double ) ( ( double ) (a).real * (x).imag - ( double ) (a).imag * (x).real ) / temp; \
-	(x).real    = xr; \
-	(x).imag    = xi; \
+	double temp  = ( double ) bli_ccimulnc_r( (a), (a) ); \
+	double xr    = ( double ) bli_czimulnc_r( (a), (x) ) / temp; \
+	double xi    = ( double ) bli_zcimulnc_i( (x), (a) ) / temp; \
+	bli_zreal(x) = xr; \
+	bli_zimag(x) = xi; \
 }
 #define bli_zzinvscals( a, x ) \
 { \
-	double temp =              ( double ) (a).real * (a).real + ( double ) (a).imag * (a).imag; \
-	double xr   = ( double ) ( ( double ) (a).real * (x).real + ( double ) (a).imag * (x).imag ) / temp; \
-	double xi   = ( double ) ( ( double ) (a).real * (x).imag - ( double ) (a).imag * (x).real ) / temp; \
-	(x).real    = xr; \
-	(x).imag    = xi; \
+	double temp  = ( double ) bli_zzimulnc_r( (a), (a) ); \
+	double xr    = ( double ) bli_zzimulnc_r( (a), (x) ) / temp; \
+	double xi    = ( double ) bli_zzimulnc_i( (x), (a) ) / temp; \
+	bli_zreal(x) = xr; \
+	bli_zimag(x) = xi; \
 }
 
 
-#define bli_sinvscals( a, x ) \
-{ \
-	bli_ssinvscals( a, x ); \
-}
-#define bli_dinvscals( a, x ) \
-{ \
-	bli_ddinvscals( a, x ); \
-}
-#define bli_cinvscals( a, x ) \
-{ \
-	bli_ccinvscals( a, x ); \
-}
-#define bli_zinvscals( a, x ) \
-{ \
-	bli_zzinvscals( a, x ); \
-}
+#else // ifdef BLIS_ENABLE_C99_COMPLEX
+
+
+#define bli_scinvscals( a, x )  { (x) /= (a); }
+#define bli_dcinvscals( a, x )  { (x) /= (a); }
+#define bli_ccinvscals( a, x )  { (x) /= (a); }
+#define bli_zcinvscals( a, x )  { (x) /= (a); }
+
+#define bli_szinvscals( a, x )  { (x) /= (a); }
+#define bli_dzinvscals( a, x )  { (x) /= (a); }
+#define bli_czinvscals( a, x )  { (x) /= (a); }
+#define bli_zzinvscals( a, x )  { (x) /= (a); }
+
+
+#endif // BLIS_ENABLE_C99_COMPLEX
+
+
+
+#define bli_sinvscals( a, x )  bli_ssinvscals( a, x )
+#define bli_dinvscals( a, x )  bli_ddinvscals( a, x )
+#define bli_cinvscals( a, x )  bli_ccinvscals( a, x )
+#define bli_zinvscals( a, x )  bli_zzinvscals( a, x )
 
 
 #endif

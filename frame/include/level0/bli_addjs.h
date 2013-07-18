@@ -39,101 +39,109 @@
 
 // Notes:
 // - The first char encodes the type of a.
-// - The second char encodes the type of x.
+// - The second char encodes the type of y.
+
 
 #define bli_ssaddjs( a, y ) \
 { \
-	(y)      += ( float  )(a); \
+	(y) += bli_sreal(a); \
 }
-#define bli_sdaddjs( a, y ) \
-{ \
-	(y)      += ( double )(a); \
-}
-#define bli_scaddjs( a, y ) \
-{ \
-	(y).real += ( float  )(a); \
-	/*(y).imag += 0.0F;*/ \
-}
-#define bli_szaddjs( a, y ) \
-{ \
-	(y).real += ( double )(a); \
-	/*(y).imag += 0.0F;*/ \
-}
-
 #define bli_dsaddjs( a, y ) \
 { \
-	(y)      += ( float  )(a); \
+	(y) += bli_dreal(a); \
+}
+#define bli_csaddjs( a, y ) \
+{ \
+	(y) += bli_creal(a); \
+}
+#define bli_zsaddjs( a, y ) \
+{ \
+	(y) += bli_zreal(a); \
+}
+
+
+#define bli_sdaddjs( a, y ) \
+{ \
+	(y) += bli_sreal(a); \
 }
 #define bli_ddaddjs( a, y ) \
 { \
-	(y)      += ( double )(a); \
-}
-#define bli_dcaddjs( a, y ) \
-{ \
-	(y).real += ( float  )(a); \
-	/*(y).imag += 0.0F;*/ \
-}
-#define bli_dzaddjs( a, y ) \
-{ \
-	(y).real += ( double )(a); \
-	/*(y).imag += 0.0F;*/ \
-}
-
-#define bli_csaddjs( a, y ) \
-{ \
-	(y)      += ( float  )(a).real; \
+	(y) += bli_dreal(a); \
 }
 #define bli_cdaddjs( a, y ) \
 { \
-	(y)      += ( double )(a).real; \
-}
-#define bli_ccaddjs( a, y ) \
-{ \
-	(y).real += ( float  )(a).real; \
-	(y).imag -= ( float  )(a).imag; \
-}
-#define bli_czaddjs( a, y ) \
-{ \
-	(y).real += ( double )(a).real; \
-	(y).imag -= ( double )(a).imag; \
-}
-
-#define bli_zsaddjs( a, y ) \
-{ \
-	(y)      += ( float  )(a).real; \
+	(y) += bli_creal(a); \
 }
 #define bli_zdaddjs( a, y ) \
 { \
-	(y)      += ( double )(a).real; \
+	(y) += bli_zreal(a); \
+}
+
+
+#ifndef BLIS_ENABLE_C99_COMPLEX
+
+
+#define bli_scaddjs( a, y ) \
+{ \
+	bli_creal(y) += bli_sreal(a); \
+}
+#define bli_dcaddjs( a, y ) \
+{ \
+	bli_creal(y) += bli_dreal(a); \
+}
+#define bli_ccaddjs( a, y ) \
+{ \
+	bli_creal(y) += bli_creal(a); \
+	bli_cimag(y) += -bli_cimag(a); \
 }
 #define bli_zcaddjs( a, y ) \
 { \
-	(y).real += ( float  )(a).real; \
-	(y).imag -= ( float  )(a).imag; \
+	bli_creal(y) += bli_zreal(a); \
+	bli_cimag(y) += -bli_zimag(a); \
+}
+
+
+#define bli_szaddjs( a, y ) \
+{ \
+	bli_zreal(y) += bli_sreal(a); \
+}
+#define bli_dzaddjs( a, y ) \
+{ \
+	bli_zreal(y) += bli_dreal(a); \
+}
+#define bli_czaddjs( a, y ) \
+{ \
+	bli_zreal(y) += bli_creal(a); \
+	bli_zimag(y) += -bli_cimag(a); \
 }
 #define bli_zzaddjs( a, y ) \
 { \
-	(y).real += ( double )(a).real; \
-	(y).imag -= ( double )(a).imag; \
+	bli_zreal(y) += bli_zreal(a); \
+	bli_zimag(y) += -bli_zimag(a); \
 }
 
 
-#define bli_saddjs( a, y ) \
-{ \
-	bli_ssaddjs( a, y ); \
-}
-#define bli_daddjs( a, y ) \
-{ \
-	bli_ddaddjs( a, y ); \
-}
-#define bli_caddjs( a, y ) \
-{ \
-	bli_ccaddjs( a, y ); \
-}
-#define bli_zaddjs( a, y ) \
-{ \
-	bli_zzaddjs( a, y ); \
-}
+#else // ifdef BLIS_ENABLE_C99_COMPLEX
+
+
+#define bli_scaddjs( a, y )  { (y) +=      (a); }
+#define bli_dcaddjs( a, y )  { (y) +=      (a); }
+#define bli_ccaddjs( a, y )  { (y) += conjf(a); }
+#define bli_zcaddjs( a, y )  { (y) +=  conj(a); }
+
+#define bli_szaddjs( a, y )  { (y) +=      (a); }
+#define bli_dzaddjs( a, y )  { (y) +=      (a); }
+#define bli_czaddjs( a, y )  { (y) += conjf(a); }
+#define bli_zzaddjs( a, y )  { (y) +=  conj(a); }
+
+
+#endif // BLIS_ENABLE_C99_COMPLEX
+
+
+#define bli_saddjs( a, y )  bli_ssaddjs( a, y )
+#define bli_daddjs( a, y )  bli_ddaddjs( a, y )
+#define bli_caddjs( a, y )  bli_ccaddjs( a, y )
+#define bli_zaddjs( a, y )  bli_zzaddjs( a, y )
 
 
 #endif
