@@ -36,7 +36,7 @@
 #include "blis.h"
 
 //           uploa  trans, diag,  m     a        lda   x        incx
-void dtrsv_( char*, char*, char*, int*, double*, int*, double*, int* );
+//void dtrsv_( char*, char*, char*, int*, double*, int*, double*, int* );
 
 //#define PRINT
 
@@ -128,14 +128,14 @@ int main( int argc, char** argv )
 
 #else
 
-			char    uploa  = 'L';
-			char    transa = 'N';
-			char    diaga  = 'N';
-			int     mm     = bli_obj_length( a );
-			int     lda    = bli_obj_col_stride( a );
-			int     incx   = bli_obj_vector_inc( x );
-			double* ap     = bli_obj_buffer( a );
-			double* xp     = bli_obj_buffer( x );
+			f77_char uploa  = 'L';
+			f77_char transa = 'N';
+			f77_char diaga  = 'N';
+			f77_int  mm     = bli_obj_length( a );
+			f77_int  lda    = bli_obj_col_stride( a );
+			f77_int  incx   = bli_obj_vector_inc( x );
+			double*  ap     = bli_obj_buffer( a );
+			double*  xp     = bli_obj_buffer( x );
 
 			dtrsv_( &uploa,
 			        &transa,

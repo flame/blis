@@ -36,30 +36,27 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-#include "bli_f2c.h"
-
 /* ctbsv.f -- translated by f2c (version 19991025).
    You must link the resulting object file with the libraries:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(c,tbsv)(character *uplo, character *trans, character *diag, integer *n, 
-	integer *k, singlecomplex *a, integer *lda, singlecomplex *x, integer *incx) 
+/* Subroutine */ int PASTEF77(c,tbsv)(character *uplo, character *trans, character *diag, integer *n, integer *k, singlecomplex *a, integer *lda, singlecomplex *x, integer *incx) 
 {
     /* System generated locals */
     integer a_dim1, a_offset, i__1, i__2, i__3, i__4, i__5;
     singlecomplex q__1, q__2, q__3;
 
     /* Builtin functions */
-    void c_div(singlecomplex *, singlecomplex *, singlecomplex *), r_cnjg(singlecomplex *, singlecomplex *);
+    void bla_c_div(singlecomplex *, singlecomplex *, singlecomplex *), bla_r_cnjg(singlecomplex *, singlecomplex *);
 
     /* Local variables */
     integer info;
     singlecomplex temp;
     integer i__, j, l;
-    extern logical lsame_(character *, character *, ftnlen, ftnlen);
+    extern logical PASTEF770(lsame)(character *, character *, ftnlen, ftnlen);
     integer kplus1, ix, jx, kx = 0;
-    extern /* Subroutine */ int xerbla_(character *, integer *, ftnlen);
+    extern /* Subroutine */ int PASTEF770(xerbla)(character *, integer *, ftnlen);
     logical noconj, nounit;
 
 /*     .. Scalar Arguments .. */
@@ -216,14 +213,14 @@
 
     /* Function Body */
     info = 0;
-    if (! lsame_(uplo, "U", (ftnlen)1, (ftnlen)1) && ! lsame_(uplo, "L", (
+    if (! PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(uplo, "L", (
 	    ftnlen)1, (ftnlen)1)) {
 	info = 1;
-    } else if (! lsame_(trans, "N", (ftnlen)1, (ftnlen)1) && ! lsame_(trans, 
-	    "T", (ftnlen)1, (ftnlen)1) && ! lsame_(trans, "C", (ftnlen)1, (
+    } else if (! PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, 
+	    "T", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, "C", (ftnlen)1, (
 	    ftnlen)1)) {
 	info = 2;
-    } else if (! lsame_(diag, "U", (ftnlen)1, (ftnlen)1) && ! lsame_(diag, 
+    } else if (! PASTEF770(lsame)(diag, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(diag, 
 	    "N", (ftnlen)1, (ftnlen)1)) {
 	info = 3;
     } else if (*n < 0) {
@@ -236,7 +233,7 @@
 	info = 9;
     }
     if (info != 0) {
-	xerbla_("CTBSV ", &info, (ftnlen)6);
+	PASTEF770(xerbla)("CTBSV ", &info, (ftnlen)6);
 	return 0;
     }
 
@@ -246,8 +243,8 @@
 	return 0;
     }
 
-    noconj = lsame_(trans, "T", (ftnlen)1, (ftnlen)1);
-    nounit = lsame_(diag, "N", (ftnlen)1, (ftnlen)1);
+    noconj = PASTEF770(lsame)(trans, "T", (ftnlen)1, (ftnlen)1);
+    nounit = PASTEF770(lsame)(diag, "N", (ftnlen)1, (ftnlen)1);
 
 /*     Set up the start point in X if the increment is not unity. This */
 /*     will be  ( N - 1 )*INCX  too small for descending loops. */
@@ -261,11 +258,11 @@
 /*     Start the operations. In this version the elements of A are */
 /*     accessed by sequentially with one pass through A. */
 
-    if (lsame_(trans, "N", (ftnlen)1, (ftnlen)1)) {
+    if (PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  x := inv( A )*x. */
 
-	if (lsame_(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+	if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 	    kplus1 = *k + 1;
 	    if (*incx == 1) {
 		for (j = *n; j >= 1; --j) {
@@ -274,7 +271,7 @@
 			l = kplus1 - j;
 			if (nounit) {
 			    i__1 = j;
-			    c_div(&q__1, &x[j], &a[kplus1 + j * a_dim1]);
+			    bla_c_div(&q__1, &x[j], &a[kplus1 + j * a_dim1]);
 			    x[i__1].real = q__1.real, x[i__1].imag = q__1.imag;
 			}
 			i__1 = j;
@@ -308,7 +305,7 @@
 			l = kplus1 - j;
 			if (nounit) {
 			    i__1 = jx;
-			    c_div(&q__1, &x[jx], &a[kplus1 + j * a_dim1]);
+			    bla_c_div(&q__1, &x[jx], &a[kplus1 + j * a_dim1]);
 			    x[i__1].real = q__1.real, x[i__1].imag = q__1.imag;
 			}
 			i__1 = jx;
@@ -343,7 +340,7 @@
 			l = 1 - j;
 			if (nounit) {
 			    i__2 = j;
-			    c_div(&q__1, &x[j], &a[j * a_dim1 + 1]);
+			    bla_c_div(&q__1, &x[j], &a[j * a_dim1 + 1]);
 			    x[i__2].real = q__1.real, x[i__2].imag = q__1.imag;
 			}
 			i__2 = j;
@@ -377,7 +374,7 @@
 			l = 1 - j;
 			if (nounit) {
 			    i__2 = jx;
-			    c_div(&q__1, &x[jx], &a[j * a_dim1 + 1]);
+			    bla_c_div(&q__1, &x[jx], &a[j * a_dim1 + 1]);
 			    x[i__2].real = q__1.real, x[i__2].imag = q__1.imag;
 			}
 			i__2 = jx;
@@ -408,7 +405,7 @@
 
 /*        Form  x := inv( A' )*x  or  x := inv( conjg( A') )*x. */
 
-	if (lsame_(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+	if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 	    kplus1 = *k + 1;
 	    if (*incx == 1) {
 		i__1 = *n;
@@ -432,7 +429,7 @@
 /* L90: */
 			}
 			if (nounit) {
-			    c_div(&q__1, &temp, &a[kplus1 + j * a_dim1]);
+			    bla_c_div(&q__1, &temp, &a[kplus1 + j * a_dim1]);
 			    temp.real = q__1.real, temp.imag = q__1.imag;
 			}
 		    } else {
@@ -440,7 +437,7 @@
 			i__4 = 1, i__2 = j - *k;
 			i__3 = j - 1;
 			for (i__ = f2c_max(i__4,i__2); i__ <= i__3; ++i__) {
-			    r_cnjg(&q__3, &a[l + i__ + j * a_dim1]);
+			    bla_r_cnjg(&q__3, &a[l + i__ + j * a_dim1]);
 			    i__4 = i__;
 			    q__2.real = q__3.real * x[i__4].real - q__3.imag * x[i__4].imag, 
 				    q__2.imag = q__3.real * x[i__4].imag + q__3.imag * x[
@@ -451,8 +448,8 @@
 /* L100: */
 			}
 			if (nounit) {
-			    r_cnjg(&q__2, &a[kplus1 + j * a_dim1]);
-			    c_div(&q__1, &temp, &q__2);
+			    bla_r_cnjg(&q__2, &a[kplus1 + j * a_dim1]);
+			    bla_c_div(&q__1, &temp, &q__2);
 			    temp.real = q__1.real, temp.imag = q__1.imag;
 			}
 		    }
@@ -485,7 +482,7 @@
 /* L120: */
 			}
 			if (nounit) {
-			    c_div(&q__1, &temp, &a[kplus1 + j * a_dim1]);
+			    bla_c_div(&q__1, &temp, &a[kplus1 + j * a_dim1]);
 			    temp.real = q__1.real, temp.imag = q__1.imag;
 			}
 		    } else {
@@ -493,7 +490,7 @@
 			i__2 = 1, i__3 = j - *k;
 			i__4 = j - 1;
 			for (i__ = f2c_max(i__2,i__3); i__ <= i__4; ++i__) {
-			    r_cnjg(&q__3, &a[l + i__ + j * a_dim1]);
+			    bla_r_cnjg(&q__3, &a[l + i__ + j * a_dim1]);
 			    i__2 = ix;
 			    q__2.real = q__3.real * x[i__2].real - q__3.imag * x[i__2].imag, 
 				    q__2.imag = q__3.real * x[i__2].imag + q__3.imag * x[
@@ -505,8 +502,8 @@
 /* L130: */
 			}
 			if (nounit) {
-			    r_cnjg(&q__2, &a[kplus1 + j * a_dim1]);
-			    c_div(&q__1, &temp, &q__2);
+			    bla_r_cnjg(&q__2, &a[kplus1 + j * a_dim1]);
+			    bla_c_div(&q__1, &temp, &q__2);
 			    temp.real = q__1.real, temp.imag = q__1.imag;
 			}
 		    }
@@ -541,7 +538,7 @@
 /* L150: */
 			}
 			if (nounit) {
-			    c_div(&q__1, &temp, &a[j * a_dim1 + 1]);
+			    bla_c_div(&q__1, &temp, &a[j * a_dim1 + 1]);
 			    temp.real = q__1.real, temp.imag = q__1.imag;
 			}
 		    } else {
@@ -549,7 +546,7 @@
 			i__2 = *n, i__1 = j + *k;
 			i__4 = j + 1;
 			for (i__ = f2c_min(i__2,i__1); i__ >= i__4; --i__) {
-			    r_cnjg(&q__3, &a[l + i__ + j * a_dim1]);
+			    bla_r_cnjg(&q__3, &a[l + i__ + j * a_dim1]);
 			    i__2 = i__;
 			    q__2.real = q__3.real * x[i__2].real - q__3.imag * x[i__2].imag, 
 				    q__2.imag = q__3.real * x[i__2].imag + q__3.imag * x[
@@ -560,8 +557,8 @@
 /* L160: */
 			}
 			if (nounit) {
-			    r_cnjg(&q__2, &a[j * a_dim1 + 1]);
-			    c_div(&q__1, &temp, &q__2);
+			    bla_r_cnjg(&q__2, &a[j * a_dim1 + 1]);
+			    bla_c_div(&q__1, &temp, &q__2);
 			    temp.real = q__1.real, temp.imag = q__1.imag;
 			}
 		    }
@@ -594,7 +591,7 @@
 /* L180: */
 			}
 			if (nounit) {
-			    c_div(&q__1, &temp, &a[j * a_dim1 + 1]);
+			    bla_c_div(&q__1, &temp, &a[j * a_dim1 + 1]);
 			    temp.real = q__1.real, temp.imag = q__1.imag;
 			}
 		    } else {
@@ -602,7 +599,7 @@
 			i__1 = *n, i__4 = j + *k;
 			i__2 = j + 1;
 			for (i__ = f2c_min(i__1,i__4); i__ >= i__2; --i__) {
-			    r_cnjg(&q__3, &a[l + i__ + j * a_dim1]);
+			    bla_r_cnjg(&q__3, &a[l + i__ + j * a_dim1]);
 			    i__1 = ix;
 			    q__2.real = q__3.real * x[i__1].real - q__3.imag * x[i__1].imag, 
 				    q__2.imag = q__3.real * x[i__1].imag + q__3.imag * x[
@@ -614,8 +611,8 @@
 /* L190: */
 			}
 			if (nounit) {
-			    r_cnjg(&q__2, &a[j * a_dim1 + 1]);
-			    c_div(&q__1, &temp, &q__2);
+			    bla_r_cnjg(&q__2, &a[j * a_dim1 + 1]);
+			    bla_c_div(&q__1, &temp, &q__2);
 			    temp.real = q__1.real, temp.imag = q__1.imag;
 			}
 		    }
@@ -642,8 +639,7 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(d,tbsv)(character *uplo, character *trans, character *diag, integer *n, 
-	integer *k, doublereal *a, integer *lda, doublereal *x, integer *incx)
+/* Subroutine */ int PASTEF77(d,tbsv)(character *uplo, character *trans, character *diag, integer *n, integer *k, doublereal *a, integer *lda, doublereal *x, integer *incx)
 {
     /* System generated locals */
     integer a_dim1, a_offset, i__1, i__2, i__3, i__4;
@@ -652,9 +648,9 @@
     integer info;
     doublereal temp;
     integer i__, j, l;
-    extern logical lsame_(character *, character *, ftnlen, ftnlen);
+    extern logical PASTEF770(lsame)(character *, character *, ftnlen, ftnlen);
     integer kplus1, ix, jx, kx = 0;
-    extern /* Subroutine */ int xerbla_(character *, integer *, ftnlen);
+    extern /* Subroutine */ int PASTEF770(xerbla)(character *, integer *, ftnlen);
     logical nounit;
 
 /*     .. Scalar Arguments .. */
@@ -811,14 +807,14 @@
 
     /* Function Body */
     info = 0;
-    if (! lsame_(uplo, "U", (ftnlen)1, (ftnlen)1) && ! lsame_(uplo, "L", (
+    if (! PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(uplo, "L", (
 	    ftnlen)1, (ftnlen)1)) {
 	info = 1;
-    } else if (! lsame_(trans, "N", (ftnlen)1, (ftnlen)1) && ! lsame_(trans, 
-	    "T", (ftnlen)1, (ftnlen)1) && ! lsame_(trans, "C", (ftnlen)1, (
+    } else if (! PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, 
+	    "T", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, "C", (ftnlen)1, (
 	    ftnlen)1)) {
 	info = 2;
-    } else if (! lsame_(diag, "U", (ftnlen)1, (ftnlen)1) && ! lsame_(diag, 
+    } else if (! PASTEF770(lsame)(diag, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(diag, 
 	    "N", (ftnlen)1, (ftnlen)1)) {
 	info = 3;
     } else if (*n < 0) {
@@ -831,7 +827,7 @@
 	info = 9;
     }
     if (info != 0) {
-	xerbla_("DTBSV ", &info, (ftnlen)6);
+	PASTEF770(xerbla)("DTBSV ", &info, (ftnlen)6);
 	return 0;
     }
 
@@ -841,7 +837,7 @@
 	return 0;
     }
 
-    nounit = lsame_(diag, "N", (ftnlen)1, (ftnlen)1);
+    nounit = PASTEF770(lsame)(diag, "N", (ftnlen)1, (ftnlen)1);
 
 /*     Set up the start point in X if the increment is not unity. This */
 /*     will be  ( N - 1 )*INCX  too small for descending loops. */
@@ -855,11 +851,11 @@
 /*     Start the operations. In this version the elements of A are */
 /*     accessed by sequentially with one pass through A. */
 
-    if (lsame_(trans, "N", (ftnlen)1, (ftnlen)1)) {
+    if (PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  x := inv( A )*x. */
 
-	if (lsame_(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+	if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 	    kplus1 = *k + 1;
 	    if (*incx == 1) {
 		for (j = *n; j >= 1; --j) {
@@ -954,7 +950,7 @@
 
 /*        Form  x := inv( A')*x. */
 
-	if (lsame_(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+	if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 	    kplus1 = *k + 1;
 	    if (*incx == 1) {
 		i__1 = *n;
@@ -1058,8 +1054,7 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(s,tbsv)(character *uplo, character *trans, character *diag, integer *n, 
-	integer *k, real *a, integer *lda, real *x, integer *incx)
+/* Subroutine */ int PASTEF77(s,tbsv)(character *uplo, character *trans, character *diag, integer *n, integer *k, real *a, integer *lda, real *x, integer *incx)
 {
     /* System generated locals */
     integer a_dim1, a_offset, i__1, i__2, i__3, i__4;
@@ -1068,9 +1063,9 @@
     integer info;
     real temp;
     integer i__, j, l;
-    extern logical lsame_(character *, character *, ftnlen, ftnlen);
+    extern logical PASTEF770(lsame)(character *, character *, ftnlen, ftnlen);
     integer kplus1, ix, jx, kx = 0;
-    extern /* Subroutine */ int xerbla_(character *, integer *, ftnlen);
+    extern /* Subroutine */ int PASTEF770(xerbla)(character *, integer *, ftnlen);
     logical nounit;
 
 /*     .. Scalar Arguments .. */
@@ -1227,14 +1222,14 @@
 
     /* Function Body */
     info = 0;
-    if (! lsame_(uplo, "U", (ftnlen)1, (ftnlen)1) && ! lsame_(uplo, "L", (
+    if (! PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(uplo, "L", (
 	    ftnlen)1, (ftnlen)1)) {
 	info = 1;
-    } else if (! lsame_(trans, "N", (ftnlen)1, (ftnlen)1) && ! lsame_(trans, 
-	    "T", (ftnlen)1, (ftnlen)1) && ! lsame_(trans, "C", (ftnlen)1, (
+    } else if (! PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, 
+	    "T", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, "C", (ftnlen)1, (
 	    ftnlen)1)) {
 	info = 2;
-    } else if (! lsame_(diag, "U", (ftnlen)1, (ftnlen)1) && ! lsame_(diag, 
+    } else if (! PASTEF770(lsame)(diag, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(diag, 
 	    "N", (ftnlen)1, (ftnlen)1)) {
 	info = 3;
     } else if (*n < 0) {
@@ -1247,7 +1242,7 @@
 	info = 9;
     }
     if (info != 0) {
-	xerbla_("STBSV ", &info, (ftnlen)6);
+	PASTEF770(xerbla)("STBSV ", &info, (ftnlen)6);
 	return 0;
     }
 
@@ -1257,7 +1252,7 @@
 	return 0;
     }
 
-    nounit = lsame_(diag, "N", (ftnlen)1, (ftnlen)1);
+    nounit = PASTEF770(lsame)(diag, "N", (ftnlen)1, (ftnlen)1);
 
 /*     Set up the start point in X if the increment is not unity. This */
 /*     will be  ( N - 1 )*INCX  too small for descending loops. */
@@ -1271,11 +1266,11 @@
 /*     Start the operations. In this version the elements of A are */
 /*     accessed by sequentially with one pass through A. */
 
-    if (lsame_(trans, "N", (ftnlen)1, (ftnlen)1)) {
+    if (PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  x := inv( A )*x. */
 
-	if (lsame_(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+	if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 	    kplus1 = *k + 1;
 	    if (*incx == 1) {
 		for (j = *n; j >= 1; --j) {
@@ -1370,7 +1365,7 @@
 
 /*        Form  x := inv( A')*x. */
 
-	if (lsame_(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+	if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 	    kplus1 = *k + 1;
 	    if (*incx == 1) {
 		i__1 = *n;
@@ -1474,25 +1469,23 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(z,tbsv)(character *uplo, character *trans, character *diag, integer *n, 
-	integer *k, doublecomplex *a, integer *lda, doublecomplex *x, integer 
-	*incx)
+/* Subroutine */ int PASTEF77(z,tbsv)(character *uplo, character *trans, character *diag, integer *n, integer *k, doublecomplex *a, integer *lda, doublecomplex *x, integer *incx)
 {
     /* System generated locals */
     integer a_dim1, a_offset, i__1, i__2, i__3, i__4, i__5;
     doublecomplex z__1, z__2, z__3;
 
     /* Builtin functions */
-    void z_div(doublecomplex *, doublecomplex *, doublecomplex *), d_cnjg(
+    void bla_z_div(doublecomplex *, doublecomplex *, doublecomplex *), bla_d_cnjg(
 	    doublecomplex *, doublecomplex *);
 
     /* Local variables */
     integer info;
     doublecomplex temp;
     integer i__, j, l;
-    extern logical lsame_(character *, character *, ftnlen, ftnlen);
+    extern logical PASTEF770(lsame)(character *, character *, ftnlen, ftnlen);
     integer kplus1, ix, jx, kx = 0;
-    extern /* Subroutine */ int xerbla_(character *, integer *, ftnlen);
+    extern /* Subroutine */ int PASTEF770(xerbla)(character *, integer *, ftnlen);
     logical noconj, nounit;
 
 /*     .. Scalar Arguments .. */
@@ -1649,14 +1642,14 @@
 
     /* Function Body */
     info = 0;
-    if (! lsame_(uplo, "U", (ftnlen)1, (ftnlen)1) && ! lsame_(uplo, "L", (
+    if (! PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(uplo, "L", (
 	    ftnlen)1, (ftnlen)1)) {
 	info = 1;
-    } else if (! lsame_(trans, "N", (ftnlen)1, (ftnlen)1) && ! lsame_(trans, 
-	    "T", (ftnlen)1, (ftnlen)1) && ! lsame_(trans, "C", (ftnlen)1, (
+    } else if (! PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, 
+	    "T", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, "C", (ftnlen)1, (
 	    ftnlen)1)) {
 	info = 2;
-    } else if (! lsame_(diag, "U", (ftnlen)1, (ftnlen)1) && ! lsame_(diag, 
+    } else if (! PASTEF770(lsame)(diag, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(diag, 
 	    "N", (ftnlen)1, (ftnlen)1)) {
 	info = 3;
     } else if (*n < 0) {
@@ -1669,7 +1662,7 @@
 	info = 9;
     }
     if (info != 0) {
-	xerbla_("ZTBSV ", &info, (ftnlen)6);
+	PASTEF770(xerbla)("ZTBSV ", &info, (ftnlen)6);
 	return 0;
     }
 
@@ -1679,8 +1672,8 @@
 	return 0;
     }
 
-    noconj = lsame_(trans, "T", (ftnlen)1, (ftnlen)1);
-    nounit = lsame_(diag, "N", (ftnlen)1, (ftnlen)1);
+    noconj = PASTEF770(lsame)(trans, "T", (ftnlen)1, (ftnlen)1);
+    nounit = PASTEF770(lsame)(diag, "N", (ftnlen)1, (ftnlen)1);
 
 /*     Set up the start point in X if the increment is not unity. This */
 /*     will be  ( N - 1 )*INCX  too small for descending loops. */
@@ -1694,11 +1687,11 @@
 /*     Start the operations. In this version the elements of A are */
 /*     accessed by sequentially with one pass through A. */
 
-    if (lsame_(trans, "N", (ftnlen)1, (ftnlen)1)) {
+    if (PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  x := inv( A )*x. */
 
-	if (lsame_(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+	if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 	    kplus1 = *k + 1;
 	    if (*incx == 1) {
 		for (j = *n; j >= 1; --j) {
@@ -1707,7 +1700,7 @@
 			l = kplus1 - j;
 			if (nounit) {
 			    i__1 = j;
-			    z_div(&z__1, &x[j], &a[kplus1 + j * a_dim1]);
+			    bla_z_div(&z__1, &x[j], &a[kplus1 + j * a_dim1]);
 			    x[i__1].real = z__1.real, x[i__1].imag = z__1.imag;
 			}
 			i__1 = j;
@@ -1741,7 +1734,7 @@
 			l = kplus1 - j;
 			if (nounit) {
 			    i__1 = jx;
-			    z_div(&z__1, &x[jx], &a[kplus1 + j * a_dim1]);
+			    bla_z_div(&z__1, &x[jx], &a[kplus1 + j * a_dim1]);
 			    x[i__1].real = z__1.real, x[i__1].imag = z__1.imag;
 			}
 			i__1 = jx;
@@ -1776,7 +1769,7 @@
 			l = 1 - j;
 			if (nounit) {
 			    i__2 = j;
-			    z_div(&z__1, &x[j], &a[j * a_dim1 + 1]);
+			    bla_z_div(&z__1, &x[j], &a[j * a_dim1 + 1]);
 			    x[i__2].real = z__1.real, x[i__2].imag = z__1.imag;
 			}
 			i__2 = j;
@@ -1810,7 +1803,7 @@
 			l = 1 - j;
 			if (nounit) {
 			    i__2 = jx;
-			    z_div(&z__1, &x[jx], &a[j * a_dim1 + 1]);
+			    bla_z_div(&z__1, &x[jx], &a[j * a_dim1 + 1]);
 			    x[i__2].real = z__1.real, x[i__2].imag = z__1.imag;
 			}
 			i__2 = jx;
@@ -1841,7 +1834,7 @@
 
 /*        Form  x := inv( A' )*x  or  x := inv( conjg( A') )*x. */
 
-	if (lsame_(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+	if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 	    kplus1 = *k + 1;
 	    if (*incx == 1) {
 		i__1 = *n;
@@ -1865,7 +1858,7 @@
 /* L90: */
 			}
 			if (nounit) {
-			    z_div(&z__1, &temp, &a[kplus1 + j * a_dim1]);
+			    bla_z_div(&z__1, &temp, &a[kplus1 + j * a_dim1]);
 			    temp.real = z__1.real, temp.imag = z__1.imag;
 			}
 		    } else {
@@ -1873,7 +1866,7 @@
 			i__4 = 1, i__2 = j - *k;
 			i__3 = j - 1;
 			for (i__ = f2c_max(i__4,i__2); i__ <= i__3; ++i__) {
-			    d_cnjg(&z__3, &a[l + i__ + j * a_dim1]);
+			    bla_d_cnjg(&z__3, &a[l + i__ + j * a_dim1]);
 			    i__4 = i__;
 			    z__2.real = z__3.real * x[i__4].real - z__3.imag * x[i__4].imag, 
 				    z__2.imag = z__3.real * x[i__4].imag + z__3.imag * x[
@@ -1884,8 +1877,8 @@
 /* L100: */
 			}
 			if (nounit) {
-			    d_cnjg(&z__2, &a[kplus1 + j * a_dim1]);
-			    z_div(&z__1, &temp, &z__2);
+			    bla_d_cnjg(&z__2, &a[kplus1 + j * a_dim1]);
+			    bla_z_div(&z__1, &temp, &z__2);
 			    temp.real = z__1.real, temp.imag = z__1.imag;
 			}
 		    }
@@ -1918,7 +1911,7 @@
 /* L120: */
 			}
 			if (nounit) {
-			    z_div(&z__1, &temp, &a[kplus1 + j * a_dim1]);
+			    bla_z_div(&z__1, &temp, &a[kplus1 + j * a_dim1]);
 			    temp.real = z__1.real, temp.imag = z__1.imag;
 			}
 		    } else {
@@ -1926,7 +1919,7 @@
 			i__2 = 1, i__3 = j - *k;
 			i__4 = j - 1;
 			for (i__ = f2c_max(i__2,i__3); i__ <= i__4; ++i__) {
-			    d_cnjg(&z__3, &a[l + i__ + j * a_dim1]);
+			    bla_d_cnjg(&z__3, &a[l + i__ + j * a_dim1]);
 			    i__2 = ix;
 			    z__2.real = z__3.real * x[i__2].real - z__3.imag * x[i__2].imag, 
 				    z__2.imag = z__3.real * x[i__2].imag + z__3.imag * x[
@@ -1938,8 +1931,8 @@
 /* L130: */
 			}
 			if (nounit) {
-			    d_cnjg(&z__2, &a[kplus1 + j * a_dim1]);
-			    z_div(&z__1, &temp, &z__2);
+			    bla_d_cnjg(&z__2, &a[kplus1 + j * a_dim1]);
+			    bla_z_div(&z__1, &temp, &z__2);
 			    temp.real = z__1.real, temp.imag = z__1.imag;
 			}
 		    }
@@ -1974,7 +1967,7 @@
 /* L150: */
 			}
 			if (nounit) {
-			    z_div(&z__1, &temp, &a[j * a_dim1 + 1]);
+			    bla_z_div(&z__1, &temp, &a[j * a_dim1 + 1]);
 			    temp.real = z__1.real, temp.imag = z__1.imag;
 			}
 		    } else {
@@ -1982,7 +1975,7 @@
 			i__2 = *n, i__1 = j + *k;
 			i__4 = j + 1;
 			for (i__ = f2c_min(i__2,i__1); i__ >= i__4; --i__) {
-			    d_cnjg(&z__3, &a[l + i__ + j * a_dim1]);
+			    bla_d_cnjg(&z__3, &a[l + i__ + j * a_dim1]);
 			    i__2 = i__;
 			    z__2.real = z__3.real * x[i__2].real - z__3.imag * x[i__2].imag, 
 				    z__2.imag = z__3.real * x[i__2].imag + z__3.imag * x[
@@ -1993,8 +1986,8 @@
 /* L160: */
 			}
 			if (nounit) {
-			    d_cnjg(&z__2, &a[j * a_dim1 + 1]);
-			    z_div(&z__1, &temp, &z__2);
+			    bla_d_cnjg(&z__2, &a[j * a_dim1 + 1]);
+			    bla_z_div(&z__1, &temp, &z__2);
 			    temp.real = z__1.real, temp.imag = z__1.imag;
 			}
 		    }
@@ -2027,7 +2020,7 @@
 /* L180: */
 			}
 			if (nounit) {
-			    z_div(&z__1, &temp, &a[j * a_dim1 + 1]);
+			    bla_z_div(&z__1, &temp, &a[j * a_dim1 + 1]);
 			    temp.real = z__1.real, temp.imag = z__1.imag;
 			}
 		    } else {
@@ -2035,7 +2028,7 @@
 			i__1 = *n, i__4 = j + *k;
 			i__2 = j + 1;
 			for (i__ = f2c_min(i__1,i__4); i__ >= i__2; --i__) {
-			    d_cnjg(&z__3, &a[l + i__ + j * a_dim1]);
+			    bla_d_cnjg(&z__3, &a[l + i__ + j * a_dim1]);
 			    i__1 = ix;
 			    z__2.real = z__3.real * x[i__1].real - z__3.imag * x[i__1].imag, 
 				    z__2.imag = z__3.real * x[i__1].imag + z__3.imag * x[
@@ -2047,8 +2040,8 @@
 /* L190: */
 			}
 			if (nounit) {
-			    d_cnjg(&z__2, &a[j * a_dim1 + 1]);
-			    z_div(&z__1, &temp, &z__2);
+			    bla_d_cnjg(&z__2, &a[j * a_dim1 + 1]);
+			    bla_z_div(&z__1, &temp, &z__2);
 			    temp.real = z__1.real, temp.imag = z__1.imag;
 			}
 		    }

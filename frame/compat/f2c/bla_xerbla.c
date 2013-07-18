@@ -36,9 +36,6 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-#include "bli_f2c.h"
-#include "stdio.h"
-
 /* xerbla.f -- translated by f2c (version 19991025).
    You must link the resulting object file with the libraries:
 	-lf2c -lm   (in that order)
@@ -46,7 +43,7 @@
 
 /* Table of constant values */
 
-/* Subroutine */ int xerbla_(character *srname, integer *info, ftnlen srname_len)
+/* Subroutine */ int PASTEF770(xerbla)(character *srname, integer *info, ftnlen srname_len)
 {
 /*  -- LAPACK auxiliary routine (preliminary version) -- */
 /*     Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd., */
@@ -75,14 +72,20 @@
 /*  INFO    (input) INTEGER */
 /*          The position of the invalid parameter in the parameter list */
 /*          of the calling routine. */
+    int i;
+
+    for ( i = 0; i < srname_len; ++i )
+        srname[i] = toupper( srname[i] );
 
     printf("** On entry to %6s, parameter number %2i had an illegal value\n",
         srname, (int)*info);
 
+    bli_abort();
+
 /*     End of XERBLA */
 
     return 0;
-} /* xerbla_ */
+} /* xerbla */
 
 #endif
 

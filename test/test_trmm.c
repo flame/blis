@@ -36,7 +36,7 @@
 #include "blis.h"
 
 //           side   uplo   trans  diag   m     n     alpha    a        lda   b        ldb
-void dtrmm_( char*, char*, char*, char*, int*, int*, double*, double*, int*, double*, int* );
+//void dtrmm_( char*, char*, char*, char*, int*, int*, double*, double*, int*, double*, int* );
 
 //#define PRINT
 
@@ -94,8 +94,8 @@ int main( int argc, char** argv )
 	p_end   = 16;
 	p_inc   = 1;
 
-	m_input = 16;
-	n_input = 16;
+	m_input = 8;
+	n_input = 4;
 #endif
 
 	dt_a = BLIS_DOUBLE;
@@ -128,8 +128,8 @@ int main( int argc, char** argv )
 		bli_obj_create( dt_c, m, n, 0, 0, &c_save );
 
 		bli_obj_set_struc( BLIS_TRIANGULAR, a );
-		bli_obj_set_uplo( BLIS_UPPER, a );
-		//bli_obj_set_uplo( BLIS_LOWER, a );
+		//bli_obj_set_uplo( BLIS_UPPER, a );
+		bli_obj_set_uplo( BLIS_LOWER, a );
 
 		bli_randm( &a );
 		bli_randm( &c );
@@ -254,8 +254,8 @@ int main( int argc, char** argv )
 
 
 #ifdef PRINT
-			bli_printm( "a", &a, "%4.1f", "" );
-			bli_printm( "c", &c, "%4.1f", "" );
+			bli_printm( "a", &a, "%11.8f", "" );
+			bli_printm( "c", &c, "%14.11f", "" );
 #endif
 
 #ifdef BLIS
@@ -269,17 +269,17 @@ int main( int argc, char** argv )
 
 #else
 
-			char    side   = 'L';
-			char    uplo   = 'U';
-			char    transa = 'N';
-			char    diag   = 'N';
-			int     mm     = bli_obj_length( c );
-			int     nn     = bli_obj_width( c );
-			int     lda    = bli_obj_col_stride( a );
-			int     ldc    = bli_obj_col_stride( c );
-			double* alphap = bli_obj_buffer( alpha );
-			double* ap     = bli_obj_buffer( a );
-			double* cp     = bli_obj_buffer( c );
+			f77_char side   = 'L';
+			f77_char uplo   = 'L';
+			f77_char transa = 'N';
+			f77_char diag   = 'N';
+			f77_int  mm     = bli_obj_length( c );
+			f77_int  nn     = bli_obj_width( c );
+			f77_int  lda    = bli_obj_col_stride( a );
+			f77_int  ldc    = bli_obj_col_stride( c );
+			double*  alphap = bli_obj_buffer( alpha );
+			double*  ap     = bli_obj_buffer( a );
+			double*  cp     = bli_obj_buffer( c );
 
 			dtrmm_( &side,
 			        &uplo,
@@ -293,7 +293,7 @@ int main( int argc, char** argv )
 #endif
 
 #ifdef PRINT
-			bli_printm( "c after", &c, "%4.1f", "" );
+			bli_printm( "c after", &c, "%14.11f", "" );
 			exit(1);
 #endif
 

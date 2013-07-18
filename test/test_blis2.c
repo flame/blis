@@ -39,13 +39,13 @@ double FLA_Clock( void );
 
 extern gemm_t* gemm_cntl;
 //           trans  m     n     alpha    a        lda   x        incx  beta     y       incy
-void dgemv_( char*, int*, int*, double*, double*, int*, double*, int*, double*, double*, int* );
-void dger_( int*, int*, double*, double*, int*, double*, int*, double*, int* );
-void dsymv_( char*, int*, double*, double*, int*, double*, int*, double*, double*, int* );
-void dsyr_( char*, int*, double*, double*, int*, double*, int* );
-void dsyr2_( char*, int*, double*, double*, int*, double*, int*, double*, int* );
-void dtrmv_( char*, char*, char*, int*, double*, int*, double*, int* );
-void dtrsv_( char*, char*, char*, int*, double*, int*, double*, int* );
+//void dgemv_( char*, int*, int*, double*, double*, int*, double*, int*, double*, double*, int* );
+//void dger_( int*, int*, double*, double*, int*, double*, int*, double*, int* );
+//void dsymv_( char*, int*, double*, double*, int*, double*, int*, double*, double*, int* );
+//void dsyr_( char*, int*, double*, double*, int*, double*, int* );
+//void dsyr2_( char*, int*, double*, double*, int*, double*, int*, double*, int* );
+//void dtrmv_( char*, char*, char*, int*, double*, int*, double*, int* );
+//void dtrsv_( char*, char*, char*, int*, double*, int*, double*, int* );
 
 //           trans  trans m     n     k     alpha    a        lda   b        ldb   beta     c        ldc
 void dgemm_( char*, char*, int*, int*, int*, double*, double*, int*, double*, int*, double*, double*, int* );

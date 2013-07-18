@@ -36,18 +36,10 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-#include "bli_f2c.h"
-
-void c_div(singlecomplex *cp, singlecomplex *ap, singlecomplex *bp)
+void bla_c_div(singlecomplex *cp, singlecomplex *ap, singlecomplex *bp)
 {
-	singlecomplex a = *ap;
-	singlecomplex b = *bp;
-	real          temp;
-
-	temp = b.real * b.real + b.imag * b.imag;
-
-	cp->real = ( a.real * b.real + a.imag * b.imag ) / temp;
-	cp->imag = ( a.imag * b.real - a.real * b.imag ) / temp;
+	bli_ccopys( *ap, *cp );
+	bli_cinvscals( *bp, *cp );
 }
 
 #endif

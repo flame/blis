@@ -36,31 +36,27 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-#include "bli_f2c.h"
-
 /* cgbmv.f -- translated by f2c (version 19991025).
    You must link the resulting object file with the libraries:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(c,gbmv)(character *trans, integer *m, integer *n, integer *kl, 
-	integer *ku, singlecomplex *alpha, singlecomplex *a, integer *lda, singlecomplex *x, 
-	integer *incx, singlecomplex *beta, singlecomplex *y, integer *incy)
+/* Subroutine */ int PASTEF77(c,gbmv)(character *trans, integer *m, integer *n, integer *kl, integer *ku, singlecomplex *alpha, singlecomplex *a, integer *lda, singlecomplex *x, integer *incx, singlecomplex *beta, singlecomplex *y, integer *incy)
 {
     /* System generated locals */
     integer a_dim1, a_offset, i__1, i__2, i__3, i__4, i__5, i__6;
     singlecomplex q__1, q__2, q__3;
 
     /* Builtin functions */
-    void r_cnjg(singlecomplex *, singlecomplex *);
+    void bla_r_cnjg(singlecomplex *, singlecomplex *);
 
     /* Local variables */
     integer info;
     singlecomplex temp;
     integer lenx, leny, i__, j, k;
-    extern logical lsame_(character *, character *, ftnlen, ftnlen);
+    extern logical PASTEF770(lsame)(character *, character *, ftnlen, ftnlen);
     integer ix, iy, jx, jy, kx, ky;
-    extern /* Subroutine */ int xerbla_(character *, integer *, ftnlen);
+    extern /* Subroutine */ int PASTEF770(xerbla)(character *, integer *, ftnlen);
     logical noconj;
     integer kup1;
 
@@ -207,8 +203,8 @@
 
     /* Function Body */
     info = 0;
-    if (! lsame_(trans, "N", (ftnlen)1, (ftnlen)1) && ! lsame_(trans, "T", (
-	    ftnlen)1, (ftnlen)1) && ! lsame_(trans, "C", (ftnlen)1, (ftnlen)1)
+    if (! PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, "T", (
+	    ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, "C", (ftnlen)1, (ftnlen)1)
 	    ) {
 	info = 1;
     } else if (*m < 0) {
@@ -227,7 +223,7 @@
 	info = 13;
     }
     if (info != 0) {
-	xerbla_("CGBMV ", &info, (ftnlen)6);
+	PASTEF770(xerbla)("CGBMV ", &info, (ftnlen)6);
 	return 0;
     }
 
@@ -238,12 +234,12 @@
 	return 0;
     }
 
-    noconj = lsame_(trans, "T", (ftnlen)1, (ftnlen)1);
+    noconj = PASTEF770(lsame)(trans, "T", (ftnlen)1, (ftnlen)1);
 
 /*     Set  LENX  and  LENY, the lengths of the vectors x and y, and set */
 /*     up the start points in  X  and  Y. */
 
-    if (lsame_(trans, "N", (ftnlen)1, (ftnlen)1)) {
+    if (PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1)) {
 	lenx = *n;
 	leny = *m;
     } else {
@@ -316,7 +312,7 @@
 	return 0;
     }
     kup1 = *ku + 1;
-    if (lsame_(trans, "N", (ftnlen)1, (ftnlen)1)) {
+    if (PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  y := alpha*A*x + y. */
 
@@ -424,7 +420,7 @@
 		    i__5 = *m, i__6 = j + *kl;
 		    i__4 = f2c_min(i__5,i__6);
 		    for (i__ = f2c_max(i__2,i__3); i__ <= i__4; ++i__) {
-			r_cnjg(&q__3, &a[k + i__ + j * a_dim1]);
+			bla_r_cnjg(&q__3, &a[k + i__ + j * a_dim1]);
 			i__2 = i__;
 			q__2.real = q__3.real * x[i__2].real - q__3.imag * x[i__2].imag, 
 				q__2.imag = q__3.real * x[i__2].imag + q__3.imag * x[i__2]
@@ -473,7 +469,7 @@
 		    i__5 = *m, i__6 = j + *kl;
 		    i__2 = f2c_min(i__5,i__6);
 		    for (i__ = f2c_max(i__3,i__4); i__ <= i__2; ++i__) {
-			r_cnjg(&q__3, &a[k + i__ + j * a_dim1]);
+			bla_r_cnjg(&q__3, &a[k + i__ + j * a_dim1]);
 			i__3 = ix;
 			q__2.real = q__3.real * x[i__3].real - q__3.imag * x[i__3].imag, 
 				q__2.imag = q__3.real * x[i__3].imag + q__3.imag * x[i__3]
@@ -510,10 +506,7 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(d,gbmv)(character *trans, integer *m, integer *n, integer *kl, 
-	integer *ku, doublereal *alpha, doublereal *a, integer *lda, 
-	doublereal *x, integer *incx, doublereal *beta, doublereal *y, 
-	integer *incy)
+/* Subroutine */ int PASTEF77(d,gbmv)(character *trans, integer *m, integer *n, integer *kl, integer *ku, doublereal *alpha, doublereal *a, integer *lda, doublereal *x, integer *incx, doublereal *beta, doublereal *y, integer *incy)
 {
     /* System generated locals */
     integer a_dim1, a_offset, i__1, i__2, i__3, i__4, i__5, i__6;
@@ -522,9 +515,9 @@
     integer info;
     doublereal temp;
     integer lenx, leny, i__, j, k;
-    extern logical lsame_(character *, character *, ftnlen, ftnlen);
+    extern logical PASTEF770(lsame)(character *, character *, ftnlen, ftnlen);
     integer ix, iy, jx, jy, kx, ky;
-    extern /* Subroutine */ int xerbla_(character *, integer *, ftnlen);
+    extern /* Subroutine */ int PASTEF770(xerbla)(character *, integer *, ftnlen);
     integer kup1;
 
 /*     .. Scalar Arguments .. */
@@ -666,8 +659,8 @@
 
     /* Function Body */
     info = 0;
-    if (! lsame_(trans, "N", (ftnlen)1, (ftnlen)1) && ! lsame_(trans, "T", (
-	    ftnlen)1, (ftnlen)1) && ! lsame_(trans, "C", (ftnlen)1, (ftnlen)1)
+    if (! PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, "T", (
+	    ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, "C", (ftnlen)1, (ftnlen)1)
 	    ) {
 	info = 1;
     } else if (*m < 0) {
@@ -686,7 +679,7 @@
 	info = 13;
     }
     if (info != 0) {
-	xerbla_("DGBMV ", &info, (ftnlen)6);
+	PASTEF770(xerbla)("DGBMV ", &info, (ftnlen)6);
 	return 0;
     }
 
@@ -699,7 +692,7 @@
 /*     Set  LENX  and  LENY, the lengths of the vectors x and y, and set */
 /*     up the start points in  X  and  Y. */
 
-    if (lsame_(trans, "N", (ftnlen)1, (ftnlen)1)) {
+    if (PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1)) {
 	lenx = *n;
 	leny = *m;
     } else {
@@ -760,7 +753,7 @@
 	return 0;
     }
     kup1 = *ku + 1;
-    if (lsame_(trans, "N", (ftnlen)1, (ftnlen)1)) {
+    if (PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  y := alpha*A*x + y. */
 
@@ -869,9 +862,7 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(s,gbmv)(character *trans, integer *m, integer *n, integer *kl, 
-	integer *ku, real *alpha, real *a, integer *lda, real *x, integer *
-	incx, real *beta, real *y, integer *incy)
+/* Subroutine */ int PASTEF77(s,gbmv)(character *trans, integer *m, integer *n, integer *kl, integer *ku, real *alpha, real *a, integer *lda, real *x, integer * incx, real *beta, real *y, integer *incy)
 {
     /* System generated locals */
     integer a_dim1, a_offset, i__1, i__2, i__3, i__4, i__5, i__6;
@@ -880,9 +871,9 @@
     integer info;
     real temp;
     integer lenx, leny, i__, j, k;
-    extern logical lsame_(character *, character *, ftnlen, ftnlen);
+    extern logical PASTEF770(lsame)(character *, character *, ftnlen, ftnlen);
     integer ix, iy, jx, jy, kx, ky;
-    extern /* Subroutine */ int xerbla_(character *, integer *, ftnlen);
+    extern /* Subroutine */ int PASTEF770(xerbla)(character *, integer *, ftnlen);
     integer kup1;
 
 /*     .. Scalar Arguments .. */
@@ -1024,8 +1015,8 @@
 
     /* Function Body */
     info = 0;
-    if (! lsame_(trans, "N", (ftnlen)1, (ftnlen)1) && ! lsame_(trans, "T", (
-	    ftnlen)1, (ftnlen)1) && ! lsame_(trans, "C", (ftnlen)1, (ftnlen)1)
+    if (! PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, "T", (
+	    ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, "C", (ftnlen)1, (ftnlen)1)
 	    ) {
 	info = 1;
     } else if (*m < 0) {
@@ -1044,7 +1035,7 @@
 	info = 13;
     }
     if (info != 0) {
-	xerbla_("SGBMV ", &info, (ftnlen)6);
+	PASTEF770(xerbla)("SGBMV ", &info, (ftnlen)6);
 	return 0;
     }
 
@@ -1057,7 +1048,7 @@
 /*     Set  LENX  and  LENY, the lengths of the vectors x and y, and set */
 /*     up the start points in  X  and  Y. */
 
-    if (lsame_(trans, "N", (ftnlen)1, (ftnlen)1)) {
+    if (PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1)) {
 	lenx = *n;
 	leny = *m;
     } else {
@@ -1118,7 +1109,7 @@
 	return 0;
     }
     kup1 = *ku + 1;
-    if (lsame_(trans, "N", (ftnlen)1, (ftnlen)1)) {
+    if (PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  y := alpha*A*x + y. */
 
@@ -1227,25 +1218,22 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(z,gbmv)(character *trans, integer *m, integer *n, integer *kl, 
-	integer *ku, doublecomplex *alpha, doublecomplex *a, integer *lda, 
-	doublecomplex *x, integer *incx, doublecomplex *beta, doublecomplex *
-	y, integer *incy)
+/* Subroutine */ int PASTEF77(z,gbmv)(character *trans, integer *m, integer *n, integer *kl, integer *ku, doublecomplex *alpha, doublecomplex *a, integer *lda, doublecomplex *x, integer *incx, doublecomplex *beta, doublecomplex * y, integer *incy)
 {
     /* System generated locals */
     integer a_dim1, a_offset, i__1, i__2, i__3, i__4, i__5, i__6;
     doublecomplex z__1, z__2, z__3;
 
     /* Builtin functions */
-    void d_cnjg(doublecomplex *, doublecomplex *);
+    void bla_d_cnjg(doublecomplex *, doublecomplex *);
 
     /* Local variables */
     integer info;
     doublecomplex temp;
     integer lenx, leny, i__, j, k;
-    extern logical lsame_(character *, character *, ftnlen, ftnlen);
+    extern logical PASTEF770(lsame)(character *, character *, ftnlen, ftnlen);
     integer ix, iy, jx, jy, kx, ky;
-    extern /* Subroutine */ int xerbla_(character *, integer *, ftnlen);
+    extern /* Subroutine */ int PASTEF770(xerbla)(character *, integer *, ftnlen);
     logical noconj;
     integer kup1;
 
@@ -1392,8 +1380,8 @@
 
     /* Function Body */
     info = 0;
-    if (! lsame_(trans, "N", (ftnlen)1, (ftnlen)1) && ! lsame_(trans, "T", (
-	    ftnlen)1, (ftnlen)1) && ! lsame_(trans, "C", (ftnlen)1, (ftnlen)1)
+    if (! PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, "T", (
+	    ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, "C", (ftnlen)1, (ftnlen)1)
 	    ) {
 	info = 1;
     } else if (*m < 0) {
@@ -1412,7 +1400,7 @@
 	info = 13;
     }
     if (info != 0) {
-	xerbla_("ZGBMV ", &info, (ftnlen)6);
+	PASTEF770(xerbla)("ZGBMV ", &info, (ftnlen)6);
 	return 0;
     }
 
@@ -1423,12 +1411,12 @@
 	return 0;
     }
 
-    noconj = lsame_(trans, "T", (ftnlen)1, (ftnlen)1);
+    noconj = PASTEF770(lsame)(trans, "T", (ftnlen)1, (ftnlen)1);
 
 /*     Set  LENX  and  LENY, the lengths of the vectors x and y, and set */
 /*     up the start points in  X  and  Y. */
 
-    if (lsame_(trans, "N", (ftnlen)1, (ftnlen)1)) {
+    if (PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1)) {
 	lenx = *n;
 	leny = *m;
     } else {
@@ -1501,7 +1489,7 @@
 	return 0;
     }
     kup1 = *ku + 1;
-    if (lsame_(trans, "N", (ftnlen)1, (ftnlen)1)) {
+    if (PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  y := alpha*A*x + y. */
 
@@ -1609,7 +1597,7 @@
 		    i__5 = *m, i__6 = j + *kl;
 		    i__4 = f2c_min(i__5,i__6);
 		    for (i__ = f2c_max(i__2,i__3); i__ <= i__4; ++i__) {
-			d_cnjg(&z__3, &a[k + i__ + j * a_dim1]);
+			bla_d_cnjg(&z__3, &a[k + i__ + j * a_dim1]);
 			i__2 = i__;
 			z__2.real = z__3.real * x[i__2].real - z__3.imag * x[i__2].imag, 
 				z__2.imag = z__3.real * x[i__2].imag + z__3.imag * x[i__2]
@@ -1658,7 +1646,7 @@
 		    i__5 = *m, i__6 = j + *kl;
 		    i__2 = f2c_min(i__5,i__6);
 		    for (i__ = f2c_max(i__3,i__4); i__ <= i__2; ++i__) {
-			d_cnjg(&z__3, &a[k + i__ + j * a_dim1]);
+			bla_d_cnjg(&z__3, &a[k + i__ + j * a_dim1]);
 			i__3 = ix;
 			z__2.real = z__3.real * x[i__3].real - z__3.imag * x[i__3].imag, 
 				z__2.imag = z__3.real * x[i__3].imag + z__3.imag * x[i__3]

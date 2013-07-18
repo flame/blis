@@ -36,16 +36,12 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-#include "bli_f2c.h"
-
 /* dspmv.f -- translated by f2c (version 19991025).
    You must link the resulting object file with the libraries:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(d,spmv)(character *uplo, integer *n, doublereal *alpha, 
-	doublereal *ap, doublereal *x, integer *incx, doublereal *beta, 
-	doublereal *y, integer *incy)
+/* Subroutine */ int PASTEF77(d,spmv)(character *uplo, integer *n, doublereal *alpha, doublereal *ap, doublereal *x, integer *incx, doublereal *beta, doublereal *y, integer *incy)
 {
     /* System generated locals */
     integer i__1, i__2;
@@ -54,9 +50,9 @@
     integer info;
     doublereal temp1, temp2;
     integer i__, j, k;
-    extern logical lsame_(character *, character *, ftnlen, ftnlen);
+    extern logical PASTEF770(lsame)(character *, character *, ftnlen, ftnlen);
     integer kk, ix, iy, jx, jy, kx, ky;
-    extern /* Subroutine */ int xerbla_(character *, integer *, ftnlen);
+    extern /* Subroutine */ int PASTEF770(xerbla)(character *, integer *, ftnlen);
 
 /*     .. Scalar Arguments .. */
 /*     .. Array Arguments .. */
@@ -164,7 +160,7 @@
 
     /* Function Body */
     info = 0;
-    if (! lsame_(uplo, "U", (ftnlen)1, (ftnlen)1) && ! lsame_(uplo, "L", (
+    if (! PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(uplo, "L", (
 	    ftnlen)1, (ftnlen)1)) {
 	info = 1;
     } else if (*n < 0) {
@@ -175,7 +171,7 @@
 	info = 9;
     }
     if (info != 0) {
-	xerbla_("DSPMV ", &info, (ftnlen)6);
+	PASTEF770(xerbla)("DSPMV ", &info, (ftnlen)6);
 	return 0;
     }
 
@@ -241,7 +237,7 @@
 	return 0;
     }
     kk = 1;
-    if (lsame_(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+    if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  y  when AP contains the upper triangle. */
 
@@ -346,8 +342,7 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(s,spmv)(character *uplo, integer *n, real *alpha, real *ap, 
-	real *x, integer *incx, real *beta, real *y, integer *incy)
+/* Subroutine */ int PASTEF77(s,spmv)(character *uplo, integer *n, real *alpha, real *ap, real *x, integer *incx, real *beta, real *y, integer *incy)
 {
     /* System generated locals */
     integer i__1, i__2;
@@ -356,9 +351,9 @@
     integer info;
     real temp1, temp2;
     integer i__, j, k;
-    extern logical lsame_(character *, character *, ftnlen, ftnlen);
+    extern logical PASTEF770(lsame)(character *, character *, ftnlen, ftnlen);
     integer kk, ix, iy, jx, jy, kx, ky;
-    extern /* Subroutine */ int xerbla_(character *, integer *, ftnlen);
+    extern /* Subroutine */ int PASTEF770(xerbla)(character *, integer *, ftnlen);
 
 /*     .. Scalar Arguments .. */
 /*     .. Array Arguments .. */
@@ -466,7 +461,7 @@
 
     /* Function Body */
     info = 0;
-    if (! lsame_(uplo, "U", (ftnlen)1, (ftnlen)1) && ! lsame_(uplo, "L", (
+    if (! PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(uplo, "L", (
 	    ftnlen)1, (ftnlen)1)) {
 	info = 1;
     } else if (*n < 0) {
@@ -477,7 +472,7 @@
 	info = 9;
     }
     if (info != 0) {
-	xerbla_("SSPMV ", &info, (ftnlen)6);
+	PASTEF770(xerbla)("SSPMV ", &info, (ftnlen)6);
 	return 0;
     }
 
@@ -543,7 +538,7 @@
 	return 0;
     }
     kk = 1;
-    if (lsame_(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+    if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  y  when AP contains the upper triangle. */
 

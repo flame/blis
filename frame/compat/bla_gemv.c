@@ -61,6 +61,16 @@ void PASTEF77(ch,blasname)( \
 	inc_t   incy0; \
 	inc_t   rs_a, cs_a; \
 \
+	/* Perform BLAS parameter checking. */ \
+	PASTEBLACHK(blasname)( MKSTR(ch), \
+	                       MKSTR(blasname), \
+	                       transa, \
+	                       m, \
+	                       n, \
+	                       lda, \
+	                       incx, \
+	                       incy ); \
+\
 	/* Map BLAS chars to their corresponding BLIS enumerated type value. */ \
 	bli_param_map_netlib_to_blis_trans( *transa, &blis_transa ); \
 \

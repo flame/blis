@@ -36,7 +36,7 @@
 #include "blis.h"
 
 //           uploa  transa m     k     alpha    a        lda   beta     c        ldc
-void dsyrk_( char*, char*, int*, int*, double*, double*, int*, double*, double*, int* );
+//void dsyrk_( char*, char*, int*, int*, double*, double*, int*, double*, double*, int* );
 
 //#define PRINT
 
@@ -241,16 +241,16 @@ int main( int argc, char** argv )
 
 #else
 
-			char    uploa  = 'L';
-			char    transa = 'N';
-			int     mm     = bli_obj_length( c );
-			int     kk     = bli_obj_width_after_trans( a );
-			int     lda    = bli_obj_col_stride( a );
-			int     ldc    = bli_obj_col_stride( c );
-			double* alphap = bli_obj_buffer( alpha );
-			double* ap     = bli_obj_buffer( a );
-			double* betap  = bli_obj_buffer( beta );
-			double* cp     = bli_obj_buffer( c );
+			f77_char uploa  = 'L';
+			f77_char transa = 'N';
+			f77_int  mm     = bli_obj_length( c );
+			f77_int  kk     = bli_obj_width_after_trans( a );
+			f77_int  lda    = bli_obj_col_stride( a );
+			f77_int  ldc    = bli_obj_col_stride( c );
+			double*  alphap = bli_obj_buffer( alpha );
+			double*  ap     = bli_obj_buffer( a );
+			double*  betap  = bli_obj_buffer( beta );
+			double*  cp     = bli_obj_buffer( c );
 
 			dsyrk_( &uploa,
 			        &transa,

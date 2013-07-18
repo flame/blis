@@ -36,15 +36,12 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-#include "bli_f2c.h"
-
 /* dspr.f -- translated by f2c (version 19991025).
    You must link the resulting object file with the libraries:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(d,spr)(character *uplo, integer *n, doublereal *alpha, 
-	doublereal *x, integer *incx, doublereal *ap)
+/* Subroutine */ int PASTEF77(d,spr)(character *uplo, integer *n, doublereal *alpha, doublereal *x, integer *incx, doublereal *ap)
 {
     /* System generated locals */
     integer i__1, i__2;
@@ -53,9 +50,9 @@
     integer info;
     doublereal temp;
     integer i__, j, k;
-    extern logical lsame_(character *, character *, ftnlen, ftnlen);
+    extern logical PASTEF770(lsame)(character *, character *, ftnlen, ftnlen);
     integer kk, ix, jx, kx = 0;
-    extern /* Subroutine */ int xerbla_(character *, integer *, ftnlen);
+    extern /* Subroutine */ int PASTEF770(xerbla)(character *, integer *, ftnlen);
 
 /*     .. Scalar Arguments .. */
 /*     .. Array Arguments .. */
@@ -149,7 +146,7 @@
 
     /* Function Body */
     info = 0;
-    if (! lsame_(uplo, "U", (ftnlen)1, (ftnlen)1) && ! lsame_(uplo, "L", (
+    if (! PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(uplo, "L", (
 	    ftnlen)1, (ftnlen)1)) {
 	info = 1;
     } else if (*n < 0) {
@@ -158,7 +155,7 @@
 	info = 5;
     }
     if (info != 0) {
-	xerbla_("DSPR  ", &info, (ftnlen)6);
+	PASTEF770(xerbla)("DSPR  ", &info, (ftnlen)6);
 	return 0;
     }
 
@@ -180,7 +177,7 @@
 /*     are accessed sequentially with one pass through AP. */
 
     kk = 1;
-    if (lsame_(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+    if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  A  when upper triangle is stored in AP. */
 
@@ -271,8 +268,7 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(s,spr)(character *uplo, integer *n, real *alpha, real *x, 
-	integer *incx, real *ap)
+/* Subroutine */ int PASTEF77(s,spr)(character *uplo, integer *n, real *alpha, real *x, integer *incx, real *ap)
 {
     /* System generated locals */
     integer i__1, i__2;
@@ -281,9 +277,9 @@
     integer info;
     real temp;
     integer i__, j, k;
-    extern logical lsame_(character *, character *, ftnlen, ftnlen);
+    extern logical PASTEF770(lsame)(character *, character *, ftnlen, ftnlen);
     integer kk, ix, jx, kx = 0;
-    extern /* Subroutine */ int xerbla_(character *, integer *, ftnlen);
+    extern /* Subroutine */ int PASTEF770(xerbla)(character *, integer *, ftnlen);
 
 /*     .. Scalar Arguments .. */
 /*     .. Array Arguments .. */
@@ -377,7 +373,7 @@
 
     /* Function Body */
     info = 0;
-    if (! lsame_(uplo, "U", (ftnlen)1, (ftnlen)1) && ! lsame_(uplo, "L", (
+    if (! PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(uplo, "L", (
 	    ftnlen)1, (ftnlen)1)) {
 	info = 1;
     } else if (*n < 0) {
@@ -386,7 +382,7 @@
 	info = 5;
     }
     if (info != 0) {
-	xerbla_("SSPR  ", &info, (ftnlen)6);
+	PASTEF770(xerbla)("SSPR  ", &info, (ftnlen)6);
 	return 0;
     }
 
@@ -408,7 +404,7 @@
 /*     are accessed sequentially with one pass through AP. */
 
     kk = 1;
-    if (lsame_(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+    if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  A  when upper triangle is stored in AP. */
 

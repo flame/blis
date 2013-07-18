@@ -36,7 +36,7 @@
 #include "blis.h"
 
 //           uploa  m     alpha    a        lda   x        incx  beta     y        incy
-void dsymv_( char*, int*, double*, double*, int*, double*, int*, double*, double*, int* );
+//void dsymv_( char*, int*, double*, double*, int*, double*, int*, double*, double*, int* );
 
 //#define PRINT
 
@@ -148,16 +148,16 @@ int main( int argc, char** argv )
 
 #else
 
-			char    uploa  = 'L';
-			int     mm     = bli_obj_length( a );
-			int     lda    = bli_obj_col_stride( a );
-			int     incx   = bli_obj_vector_inc( x );
-			int     incy   = bli_obj_vector_inc( y );
-			double* alphap = bli_obj_buffer( alpha );
-			double* ap     = bli_obj_buffer( a );
-			double* xp     = bli_obj_buffer( x );
-			double* betap  = bli_obj_buffer( beta );
-			double* yp     = bli_obj_buffer( y );
+			f77_char uploa  = 'L';
+			f77_int  mm     = bli_obj_length( a );
+			f77_int  lda    = bli_obj_col_stride( a );
+			f77_int  incx   = bli_obj_vector_inc( x );
+			f77_int  incy   = bli_obj_vector_inc( y );
+			double*  alphap = bli_obj_buffer( alpha );
+			double*  ap     = bli_obj_buffer( a );
+			double*  xp     = bli_obj_buffer( x );
+			double*  betap  = bli_obj_buffer( beta );
+			double*  yp     = bli_obj_buffer( y );
 
 			dsymv_( &uploa,
 			        &mm,

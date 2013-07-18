@@ -36,16 +36,12 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-#include "bli_f2c.h"
-
 /* dsbmv.f -- translated by f2c (version 19991025).
    You must link the resulting object file with the libraries:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(d,sbmv)(character *uplo, integer *n, integer *k, doublereal *
-	alpha, doublereal *a, integer *lda, doublereal *x, integer *incx, 
-	doublereal *beta, doublereal *y, integer *incy)
+/* Subroutine */ int PASTEF77(d,sbmv)(character *uplo, integer *n, integer *k, doublereal *alpha, doublereal *a, integer *lda, doublereal *x, integer *incx, doublereal *beta, doublereal *y, integer *incy)
 {
     /* System generated locals */
     integer a_dim1, a_offset, i__1, i__2, i__3, i__4;
@@ -54,9 +50,9 @@
     integer info;
     doublereal temp1, temp2;
     integer i__, j, l;
-    extern logical lsame_(character *, character *, ftnlen, ftnlen);
+    extern logical PASTEF770(lsame)(character *, character *, ftnlen, ftnlen);
     integer kplus1, ix, iy, jx, jy, kx, ky;
-    extern /* Subroutine */ int xerbla_(character *, integer *, ftnlen);
+    extern /* Subroutine */ int PASTEF770(xerbla)(character *, integer *, ftnlen);
 
 /*     .. Scalar Arguments .. */
 /*     .. Array Arguments .. */
@@ -201,7 +197,7 @@
 
     /* Function Body */
     info = 0;
-    if (! lsame_(uplo, "U", (ftnlen)1, (ftnlen)1) && ! lsame_(uplo, "L", (
+    if (! PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(uplo, "L", (
 	    ftnlen)1, (ftnlen)1)) {
 	info = 1;
     } else if (*n < 0) {
@@ -216,7 +212,7 @@
 	info = 11;
     }
     if (info != 0) {
-	xerbla_("DSBMV ", &info, (ftnlen)6);
+	PASTEF770(xerbla)("DSBMV ", &info, (ftnlen)6);
 	return 0;
     }
 
@@ -281,7 +277,7 @@
     if (*alpha == 0.) {
 	return 0;
     }
-    if (lsame_(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+    if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  y  when upper triangle of A is stored. */
 
@@ -396,9 +392,7 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(s,sbmv)(character *uplo, integer *n, integer *k, real *alpha, 
-	real *a, integer *lda, real *x, integer *incx, real *beta, real *y, 
-	integer *incy)
+/* Subroutine */ int PASTEF77(s,sbmv)(character *uplo, integer *n, integer *k, real *alpha, real *a, integer *lda, real *x, integer *incx, real *beta, real *y, integer *incy)
 {
     /* System generated locals */
     integer a_dim1, a_offset, i__1, i__2, i__3, i__4;
@@ -407,9 +401,9 @@
     integer info;
     real temp1, temp2;
     integer i__, j, l;
-    extern logical lsame_(character *, character *, ftnlen, ftnlen);
+    extern logical PASTEF770(lsame)(character *, character *, ftnlen, ftnlen);
     integer kplus1, ix, iy, jx, jy, kx, ky;
-    extern /* Subroutine */ int xerbla_(character *, integer *, ftnlen);
+    extern /* Subroutine */ int PASTEF770(xerbla)(character *, integer *, ftnlen);
 
 /*     .. Scalar Arguments .. */
 /*     .. Array Arguments .. */
@@ -554,7 +548,7 @@
 
     /* Function Body */
     info = 0;
-    if (! lsame_(uplo, "U", (ftnlen)1, (ftnlen)1) && ! lsame_(uplo, "L", (
+    if (! PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(uplo, "L", (
 	    ftnlen)1, (ftnlen)1)) {
 	info = 1;
     } else if (*n < 0) {
@@ -569,7 +563,7 @@
 	info = 11;
     }
     if (info != 0) {
-	xerbla_("SSBMV ", &info, (ftnlen)6);
+	PASTEF770(xerbla)("SSBMV ", &info, (ftnlen)6);
 	return 0;
     }
 
@@ -634,7 +628,7 @@
     if (*alpha == 0.f) {
 	return 0;
     }
-    if (lsame_(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+    if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  y  when upper triangle of A is stored. */
 

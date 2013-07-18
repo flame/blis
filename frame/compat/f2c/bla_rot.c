@@ -36,15 +36,12 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-#include "bli_f2c.h"
-
 /* srot.f -- translated by f2c (version 19991025).
    You must link the resulting object file with the libraries:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(s,rot)(integer *n, real *sx, integer *incx, real *sy, 
-	integer *incy, real *c__, real *s)
+/* Subroutine */ int PASTEF77(s,rot)(integer *n, real *sx, integer *incx, real *sy, integer *incy, real *c__, real *s)
 {
     /* System generated locals */
     integer i__1;
@@ -112,8 +109,7 @@ L20:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(d,rot)(integer *n, doublereal *dx, integer *incx, 
-	doublereal *dy, integer *incy, doublereal *c__, doublereal *s)
+/* Subroutine */ int PASTEF77(d,rot)(integer *n, doublereal *dx, integer *incx, doublereal *dy, integer *incy, doublereal *c__, doublereal *s)
 {
     /* System generated locals */
     integer i__1;
@@ -181,8 +177,7 @@ L20:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(cs,rot)(integer *n, singlecomplex *cx, integer *incx, singlecomplex *
-	cy, integer *incy, real *c__, real *s)
+/* Subroutine */ int PASTEF77(cs,rot)(integer *n, singlecomplex *cx, integer *incx, singlecomplex *cy, integer *incy, real *c__, real *s)
 {
     /* System generated locals */
     integer i__1, i__2, i__3, i__4;
@@ -275,8 +270,7 @@ L20:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(zd,rot)(integer *n, doublecomplex *zx, integer *incx, 
-	doublecomplex *zy, integer *incy, doublereal *c__, doublereal *s)
+/* Subroutine */ int PASTEF77(zd,rot)(integer *n, doublecomplex *zx, integer *incx, doublecomplex *zy, integer *incy, doublereal *c__, doublereal *s)
 {
     /* System generated locals */
     integer i__1, i__2, i__3, i__4;

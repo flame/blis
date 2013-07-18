@@ -36,7 +36,7 @@
 #include "blis.h"
 
 //           transa transb m     n     k     alpha    a        lda   b        ldb   beta     c        ldc
-void dgemm_( char*, char*, int*, int*, int*, double*, double*, int*, double*, int*, double*, double*, int* );
+//void dgemm_( char*, char*, int*, int*, int*, double*, double*, int*, double*, int*, double*, double*, int* );
 
 //#define PRINT
 
@@ -83,12 +83,12 @@ int main( int argc, char** argv )
 	n_repeats = 3;
 
 #ifndef PRINT
-	p_begin = 40;
+	p_begin = 100;
 	p_end   = 2000;
-	p_inc   = 40;
+	p_inc   = 100;
 
 	m_input = -1;
-	n_input = -1;
+	n_input = 384;
 	k_input = -1;
 	//k_input = 200;
 #else
@@ -96,9 +96,9 @@ int main( int argc, char** argv )
 	p_end   = 16;
 	p_inc   = 1;
 
-	m_input = 10;
-	k_input = 10;
-	n_input = 10;
+	m_input = 8;
+	k_input = 16;
+	n_input = 16;
 #endif
 
 	dt_a = BLIS_DOUBLE;
@@ -249,19 +249,19 @@ int main( int argc, char** argv )
 
 #else
 
-			char    transa = 'N';
-			char    transb = 'N';
-			int     mm     = bli_obj_length( c );
-			int     kk     = bli_obj_width_after_trans( a );
-			int     nn     = bli_obj_width( c );
-			int     lda    = bli_obj_col_stride( a );
-			int     ldb    = bli_obj_col_stride( b );
-			int     ldc    = bli_obj_col_stride( c );
-			double* alphap = bli_obj_buffer( alpha );
-			double* ap     = bli_obj_buffer( a );
-			double* bp     = bli_obj_buffer( b );
-			double* betap  = bli_obj_buffer( beta );
-			double* cp     = bli_obj_buffer( c );
+			f77_char transa = 'N';
+			f77_char transb = 'N';
+			f77_int  mm     = bli_obj_length( c );
+			f77_int  kk     = bli_obj_width_after_trans( a );
+			f77_int  nn     = bli_obj_width( c );
+			f77_int  lda    = bli_obj_col_stride( a );
+			f77_int  ldb    = bli_obj_col_stride( b );
+			f77_int  ldc    = bli_obj_col_stride( c );
+			double*  alphap = bli_obj_buffer( alpha );
+			double*  ap     = bli_obj_buffer( a );
+			double*  bp     = bli_obj_buffer( b );
+			double*  betap  = bli_obj_buffer( beta );
+			double*  cp     = bli_obj_buffer( c );
 
 			dgemm_( &transa,
 			        &transb,

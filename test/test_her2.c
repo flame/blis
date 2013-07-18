@@ -36,7 +36,7 @@
 #include "blis.h"
 
 //           uplo   m     alpha    x        incx  y        incy  a        lda
-void dsyr2_( char*, int*, double*, double*, int*, double*, int*, double*, int* );
+//void dsyr2_( char*, int*, double*, double*, int*, double*, int*, double*, int* );
  
 //#define PRINT
 
@@ -145,15 +145,15 @@ int main( int argc, char** argv )
 
 #else
 
-			char    uplo   = 'L';
-			int     mm     = bli_obj_length( a );
-			int     incx   = bli_obj_vector_inc( x );
-			int     incy   = bli_obj_vector_inc( y );
-			int     lda    = bli_obj_col_stride( a );
-			double* alphap = bli_obj_buffer( alpha );
-			double* xp     = bli_obj_buffer( x );
-			double* yp     = bli_obj_buffer( y );
-			double* ap     = bli_obj_buffer( a );
+			f77_char uplo   = 'L';
+			f77_int  mm     = bli_obj_length( a );
+			f77_int  incx   = bli_obj_vector_inc( x );
+			f77_int  incy   = bli_obj_vector_inc( y );
+			f77_int  lda    = bli_obj_col_stride( a );
+			double*  alphap = bli_obj_buffer( alpha );
+			double*  xp     = bli_obj_buffer( x );
+			double*  yp     = bli_obj_buffer( y );
+			double*  ap     = bli_obj_buffer( a );
 
 			dsyr2_( &uplo,
 			        &mm,

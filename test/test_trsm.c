@@ -36,7 +36,7 @@
 #include "blis.h"
 
 //           side   uplo   trans  diag   m     n     alpha    a        lda   b        ldb
-void dtrsm_( char*, char*, char*, char*, int*, int*, double*, double*, int*, double*, int* );
+//void dtrsm_( char*, char*, char*, char*, int*, int*, double*, double*, int*, double*, int* );
 
 //#define PRINT
 
@@ -95,8 +95,8 @@ int main( int argc, char** argv )
 	p_end   = 16;
 	p_inc   = 1;
 
-	m_input = 16;
-	n_input = 16;
+	m_input = 7 ;
+	n_input = 7 ;
 #endif
 
 	dt_a = BLIS_DOUBLE;
@@ -265,17 +265,17 @@ int main( int argc, char** argv )
 
 #else
 
-			char    side   = 'R';
-			char    uplo   = 'L';
-			char    transa = 'N';
-			char    diag   = 'N';
-			int     mm     = bli_obj_length( c );
-			int     nn     = bli_obj_width( c );
-			int     lda    = bli_obj_col_stride( a );
-			int     ldc    = bli_obj_col_stride( c );
-			double* alphap = bli_obj_buffer( alpha );
-			double* ap     = bli_obj_buffer( a );
-			double* cp     = bli_obj_buffer( c );
+			f77_char side   = 'R';
+			f77_char uplo   = 'L';
+			f77_char transa = 'N';
+			f77_char diag   = 'N';
+			f77_int  mm     = bli_obj_length( c );
+			f77_int  nn     = bli_obj_width( c );
+			f77_int  lda    = bli_obj_col_stride( a );
+			f77_int  ldc    = bli_obj_col_stride( c );
+			double*  alphap = bli_obj_buffer( alpha );
+			double*  ap     = bli_obj_buffer( a );
+			double*  cp     = bli_obj_buffer( c );
 
 			dtrsm_( &side,
 			        &uplo,

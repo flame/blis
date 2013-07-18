@@ -7,8 +7,6 @@
 extern "C" {
 #endif
 #include "blis.h"
-#include "bli_f2c.h"
-#include "stdio.h"
 
 double bli_pow_ri( real* a, integer* n );
 

@@ -7,7 +7,6 @@
 extern "C" {
 #endif
 #include "blis.h"
-#include "bli_f2c.h"
 
 logical bli_lsame(character *ca, character *cb, ftnlen ca_len, ftnlen cb_len)
 {

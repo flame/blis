@@ -36,30 +36,27 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-#include "bli_f2c.h"
-
 /* ctpmv.f -- translated by f2c (version 19991025).
    You must link the resulting object file with the libraries:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(c,tpmv)(character *uplo, character *trans, character *diag, integer *n, 
-	singlecomplex *ap, singlecomplex *x, integer *incx)
+/* Subroutine */ int PASTEF77(c,tpmv)(character *uplo, character *trans, character *diag, integer *n, singlecomplex *ap, singlecomplex *x, integer *incx)
 {
     /* System generated locals */
     integer i__1, i__2, i__3, i__4, i__5;
     singlecomplex q__1, q__2, q__3;
 
     /* Builtin functions */
-    void r_cnjg(singlecomplex *, singlecomplex *);
+    void bla_r_cnjg(singlecomplex *, singlecomplex *);
 
     /* Local variables */
     integer info;
     singlecomplex temp;
     integer i__, j, k;
-    extern logical lsame_(character *, character *, ftnlen, ftnlen);
+    extern logical PASTEF770(lsame)(character *, character *, ftnlen, ftnlen);
     integer kk, ix, jx, kx = 0;
-    extern /* Subroutine */ int xerbla_(character *, integer *, ftnlen);
+    extern /* Subroutine */ int PASTEF770(xerbla)(character *, integer *, ftnlen);
     logical noconj, nounit;
 
 /*     .. Scalar Arguments .. */
@@ -170,14 +167,14 @@
 
     /* Function Body */
     info = 0;
-    if (! lsame_(uplo, "U", (ftnlen)1, (ftnlen)1) && ! lsame_(uplo, "L", (
+    if (! PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(uplo, "L", (
 	    ftnlen)1, (ftnlen)1)) {
 	info = 1;
-    } else if (! lsame_(trans, "N", (ftnlen)1, (ftnlen)1) && ! lsame_(trans, 
-	    "T", (ftnlen)1, (ftnlen)1) && ! lsame_(trans, "C", (ftnlen)1, (
+    } else if (! PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, 
+	    "T", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, "C", (ftnlen)1, (
 	    ftnlen)1)) {
 	info = 2;
-    } else if (! lsame_(diag, "U", (ftnlen)1, (ftnlen)1) && ! lsame_(diag, 
+    } else if (! PASTEF770(lsame)(diag, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(diag, 
 	    "N", (ftnlen)1, (ftnlen)1)) {
 	info = 3;
     } else if (*n < 0) {
@@ -186,7 +183,7 @@
 	info = 7;
     }
     if (info != 0) {
-	xerbla_("CTPMV ", &info, (ftnlen)6);
+	PASTEF770(xerbla)("CTPMV ", &info, (ftnlen)6);
 	return 0;
     }
 
@@ -196,8 +193,8 @@
 	return 0;
     }
 
-    noconj = lsame_(trans, "T", (ftnlen)1, (ftnlen)1);
-    nounit = lsame_(diag, "N", (ftnlen)1, (ftnlen)1);
+    noconj = PASTEF770(lsame)(trans, "T", (ftnlen)1, (ftnlen)1);
+    nounit = PASTEF770(lsame)(diag, "N", (ftnlen)1, (ftnlen)1);
 
 /*     Set up the start point in X if the increment is not unity. This */
 /*     will be  ( N - 1 )*INCX  too small for descending loops. */
@@ -211,11 +208,11 @@
 /*     Start the operations. In this version the elements of AP are */
 /*     accessed sequentially with one pass through AP. */
 
-    if (lsame_(trans, "N", (ftnlen)1, (ftnlen)1)) {
+    if (PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  x:= A*x. */
 
-	if (lsame_(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+	if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 	    kk = 1;
 	    if (*incx == 1) {
 		i__1 = *n;
@@ -369,7 +366,7 @@
 
 /*        Form  x := A'*x  or  x := conjg( A' )*x. */
 
-	if (lsame_(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+	if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 	    kk = *n * (*n + 1) / 2;
 	    if (*incx == 1) {
 		for (j = *n; j >= 1; --j) {
@@ -398,14 +395,14 @@
 			}
 		    } else {
 			if (nounit) {
-			    r_cnjg(&q__2, &ap[kk]);
+			    bla_r_cnjg(&q__2, &ap[kk]);
 			    q__1.real = temp.real * q__2.real - temp.imag * q__2.imag, 
 				    q__1.imag = temp.real * q__2.imag + temp.imag * 
 				    q__2.real;
 			    temp.real = q__1.real, temp.imag = q__1.imag;
 			}
 			for (i__ = j - 1; i__ >= 1; --i__) {
-			    r_cnjg(&q__3, &ap[k]);
+			    bla_r_cnjg(&q__3, &ap[k]);
 			    i__1 = i__;
 			    q__2.real = q__3.real * x[i__1].real - q__3.imag * x[i__1].imag, 
 				    q__2.imag = q__3.real * x[i__1].imag + q__3.imag * x[
@@ -451,7 +448,7 @@
 			}
 		    } else {
 			if (nounit) {
-			    r_cnjg(&q__2, &ap[kk]);
+			    bla_r_cnjg(&q__2, &ap[kk]);
 			    q__1.real = temp.real * q__2.real - temp.imag * q__2.imag, 
 				    q__1.imag = temp.real * q__2.imag + temp.imag * 
 				    q__2.real;
@@ -460,7 +457,7 @@
 			i__1 = kk - j + 1;
 			for (k = kk - 1; k >= i__1; --k) {
 			    ix -= *incx;
-			    r_cnjg(&q__3, &ap[k]);
+			    bla_r_cnjg(&q__3, &ap[k]);
 			    i__2 = ix;
 			    q__2.real = q__3.real * x[i__2].real - q__3.imag * x[i__2].imag, 
 				    q__2.imag = q__3.real * x[i__2].imag + q__3.imag * x[
@@ -509,7 +506,7 @@
 			}
 		    } else {
 			if (nounit) {
-			    r_cnjg(&q__2, &ap[kk]);
+			    bla_r_cnjg(&q__2, &ap[kk]);
 			    q__1.real = temp.real * q__2.real - temp.imag * q__2.imag, 
 				    q__1.imag = temp.real * q__2.imag + temp.imag * 
 				    q__2.real;
@@ -517,7 +514,7 @@
 			}
 			i__2 = *n;
 			for (i__ = j + 1; i__ <= i__2; ++i__) {
-			    r_cnjg(&q__3, &ap[k]);
+			    bla_r_cnjg(&q__3, &ap[k]);
 			    i__3 = i__;
 			    q__2.real = q__3.real * x[i__3].real - q__3.imag * x[i__3].imag, 
 				    q__2.imag = q__3.real * x[i__3].imag + q__3.imag * x[
@@ -564,7 +561,7 @@
 			}
 		    } else {
 			if (nounit) {
-			    r_cnjg(&q__2, &ap[kk]);
+			    bla_r_cnjg(&q__2, &ap[kk]);
 			    q__1.real = temp.real * q__2.real - temp.imag * q__2.imag, 
 				    q__1.imag = temp.real * q__2.imag + temp.imag * 
 				    q__2.real;
@@ -573,7 +570,7 @@
 			i__2 = kk + *n - j;
 			for (k = kk + 1; k <= i__2; ++k) {
 			    ix += *incx;
-			    r_cnjg(&q__3, &ap[k]);
+			    bla_r_cnjg(&q__3, &ap[k]);
 			    i__3 = ix;
 			    q__2.real = q__3.real * x[i__3].real - q__3.imag * x[i__3].imag, 
 				    q__2.imag = q__3.real * x[i__3].imag + q__3.imag * x[
@@ -605,8 +602,7 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(d,tpmv)(character *uplo, character *trans, character *diag, integer *n, 
-	doublereal *ap, doublereal *x, integer *incx)
+/* Subroutine */ int PASTEF77(d,tpmv)(character *uplo, character *trans, character *diag, integer *n, doublereal *ap, doublereal *x, integer *incx)
 {
     /* System generated locals */
     integer i__1, i__2;
@@ -615,9 +611,9 @@
     integer info;
     doublereal temp;
     integer i__, j, k;
-    extern logical lsame_(character *, character *, ftnlen, ftnlen);
+    extern logical PASTEF770(lsame)(character *, character *, ftnlen, ftnlen);
     integer kk, ix, jx, kx = 0;
-    extern /* Subroutine */ int xerbla_(character *, integer *, ftnlen);
+    extern /* Subroutine */ int PASTEF770(xerbla)(character *, integer *, ftnlen);
     logical nounit;
 
 /*     .. Scalar Arguments .. */
@@ -727,14 +723,14 @@
 
     /* Function Body */
     info = 0;
-    if (! lsame_(uplo, "U", (ftnlen)1, (ftnlen)1) && ! lsame_(uplo, "L", (
+    if (! PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(uplo, "L", (
 	    ftnlen)1, (ftnlen)1)) {
 	info = 1;
-    } else if (! lsame_(trans, "N", (ftnlen)1, (ftnlen)1) && ! lsame_(trans, 
-	    "T", (ftnlen)1, (ftnlen)1) && ! lsame_(trans, "C", (ftnlen)1, (
+    } else if (! PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, 
+	    "T", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, "C", (ftnlen)1, (
 	    ftnlen)1)) {
 	info = 2;
-    } else if (! lsame_(diag, "U", (ftnlen)1, (ftnlen)1) && ! lsame_(diag, 
+    } else if (! PASTEF770(lsame)(diag, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(diag, 
 	    "N", (ftnlen)1, (ftnlen)1)) {
 	info = 3;
     } else if (*n < 0) {
@@ -743,7 +739,7 @@
 	info = 7;
     }
     if (info != 0) {
-	xerbla_("DTPMV ", &info, (ftnlen)6);
+	PASTEF770(xerbla)("DTPMV ", &info, (ftnlen)6);
 	return 0;
     }
 
@@ -753,7 +749,7 @@
 	return 0;
     }
 
-    nounit = lsame_(diag, "N", (ftnlen)1, (ftnlen)1);
+    nounit = PASTEF770(lsame)(diag, "N", (ftnlen)1, (ftnlen)1);
 
 /*     Set up the start point in X if the increment is not unity. This */
 /*     will be  ( N - 1 )*INCX  too small for descending loops. */
@@ -767,11 +763,11 @@
 /*     Start the operations. In this version the elements of AP are */
 /*     accessed sequentially with one pass through AP. */
 
-    if (lsame_(trans, "N", (ftnlen)1, (ftnlen)1)) {
+    if (PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  x:= A*x. */
 
-	if (lsame_(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+	if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 	    kk = 1;
 	    if (*incx == 1) {
 		i__1 = *n;
@@ -861,7 +857,7 @@
 
 /*        Form  x := A'*x. */
 
-	if (lsame_(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+	if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 	    kk = *n * (*n + 1) / 2;
 	    if (*incx == 1) {
 		for (j = *n; j >= 1; --j) {
@@ -954,8 +950,7 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(s,tpmv)(character *uplo, character *trans, character *diag, integer *n, 
-	real *ap, real *x, integer *incx)
+/* Subroutine */ int PASTEF77(s,tpmv)(character *uplo, character *trans, character *diag, integer *n, real *ap, real *x, integer *incx)
 {
     /* System generated locals */
     integer i__1, i__2;
@@ -964,9 +959,9 @@
     integer info;
     real temp;
     integer i__, j, k;
-    extern logical lsame_(character *, character *, ftnlen, ftnlen);
+    extern logical PASTEF770(lsame)(character *, character *, ftnlen, ftnlen);
     integer kk, ix, jx, kx = 0;
-    extern /* Subroutine */ int xerbla_(character *, integer *, ftnlen);
+    extern /* Subroutine */ int PASTEF770(xerbla)(character *, integer *, ftnlen);
     logical nounit;
 
 /*     .. Scalar Arguments .. */
@@ -1076,14 +1071,14 @@
 
     /* Function Body */
     info = 0;
-    if (! lsame_(uplo, "U", (ftnlen)1, (ftnlen)1) && ! lsame_(uplo, "L", (
+    if (! PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(uplo, "L", (
 	    ftnlen)1, (ftnlen)1)) {
 	info = 1;
-    } else if (! lsame_(trans, "N", (ftnlen)1, (ftnlen)1) && ! lsame_(trans, 
-	    "T", (ftnlen)1, (ftnlen)1) && ! lsame_(trans, "C", (ftnlen)1, (
+    } else if (! PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, 
+	    "T", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, "C", (ftnlen)1, (
 	    ftnlen)1)) {
 	info = 2;
-    } else if (! lsame_(diag, "U", (ftnlen)1, (ftnlen)1) && ! lsame_(diag, 
+    } else if (! PASTEF770(lsame)(diag, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(diag, 
 	    "N", (ftnlen)1, (ftnlen)1)) {
 	info = 3;
     } else if (*n < 0) {
@@ -1092,7 +1087,7 @@
 	info = 7;
     }
     if (info != 0) {
-	xerbla_("STPMV ", &info, (ftnlen)6);
+	PASTEF770(xerbla)("STPMV ", &info, (ftnlen)6);
 	return 0;
     }
 
@@ -1102,7 +1097,7 @@
 	return 0;
     }
 
-    nounit = lsame_(diag, "N", (ftnlen)1, (ftnlen)1);
+    nounit = PASTEF770(lsame)(diag, "N", (ftnlen)1, (ftnlen)1);
 
 /*     Set up the start point in X if the increment is not unity. This */
 /*     will be  ( N - 1 )*INCX  too small for descending loops. */
@@ -1116,11 +1111,11 @@
 /*     Start the operations. In this version the elements of AP are */
 /*     accessed sequentially with one pass through AP. */
 
-    if (lsame_(trans, "N", (ftnlen)1, (ftnlen)1)) {
+    if (PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  x:= A*x. */
 
-	if (lsame_(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+	if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 	    kk = 1;
 	    if (*incx == 1) {
 		i__1 = *n;
@@ -1210,7 +1205,7 @@
 
 /*        Form  x := A'*x. */
 
-	if (lsame_(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+	if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 	    kk = *n * (*n + 1) / 2;
 	    if (*incx == 1) {
 		for (j = *n; j >= 1; --j) {
@@ -1303,23 +1298,22 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(z,tpmv)(character *uplo, character *trans, character *diag, integer *n, 
-	doublecomplex *ap, doublecomplex *x, integer *incx)
+/* Subroutine */ int PASTEF77(z,tpmv)(character *uplo, character *trans, character *diag, integer *n, doublecomplex *ap, doublecomplex *x, integer *incx)
 {
     /* System generated locals */
     integer i__1, i__2, i__3, i__4, i__5;
     doublecomplex z__1, z__2, z__3;
 
     /* Builtin functions */
-    void d_cnjg(doublecomplex *, doublecomplex *);
+    void bla_d_cnjg(doublecomplex *, doublecomplex *);
 
     /* Local variables */
     integer info;
     doublecomplex temp;
     integer i__, j, k;
-    extern logical lsame_(character *, character *, ftnlen, ftnlen);
+    extern logical PASTEF770(lsame)(character *, character *, ftnlen, ftnlen);
     integer kk, ix, jx, kx = 0;
-    extern /* Subroutine */ int xerbla_(character *, integer *, ftnlen);
+    extern /* Subroutine */ int PASTEF770(xerbla)(character *, integer *, ftnlen);
     logical noconj, nounit;
 
 /*     .. Scalar Arguments .. */
@@ -1430,14 +1424,14 @@
 
     /* Function Body */
     info = 0;
-    if (! lsame_(uplo, "U", (ftnlen)1, (ftnlen)1) && ! lsame_(uplo, "L", (
+    if (! PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(uplo, "L", (
 	    ftnlen)1, (ftnlen)1)) {
 	info = 1;
-    } else if (! lsame_(trans, "N", (ftnlen)1, (ftnlen)1) && ! lsame_(trans, 
-	    "T", (ftnlen)1, (ftnlen)1) && ! lsame_(trans, "C", (ftnlen)1, (
+    } else if (! PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, 
+	    "T", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, "C", (ftnlen)1, (
 	    ftnlen)1)) {
 	info = 2;
-    } else if (! lsame_(diag, "U", (ftnlen)1, (ftnlen)1) && ! lsame_(diag, 
+    } else if (! PASTEF770(lsame)(diag, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(diag, 
 	    "N", (ftnlen)1, (ftnlen)1)) {
 	info = 3;
     } else if (*n < 0) {
@@ -1446,7 +1440,7 @@
 	info = 7;
     }
     if (info != 0) {
-	xerbla_("ZTPMV ", &info, (ftnlen)6);
+	PASTEF770(xerbla)("ZTPMV ", &info, (ftnlen)6);
 	return 0;
     }
 
@@ -1456,8 +1450,8 @@
 	return 0;
     }
 
-    noconj = lsame_(trans, "T", (ftnlen)1, (ftnlen)1);
-    nounit = lsame_(diag, "N", (ftnlen)1, (ftnlen)1);
+    noconj = PASTEF770(lsame)(trans, "T", (ftnlen)1, (ftnlen)1);
+    nounit = PASTEF770(lsame)(diag, "N", (ftnlen)1, (ftnlen)1);
 
 /*     Set up the start point in X if the increment is not unity. This */
 /*     will be  ( N - 1 )*INCX  too small for descending loops. */
@@ -1471,11 +1465,11 @@
 /*     Start the operations. In this version the elements of AP are */
 /*     accessed sequentially with one pass through AP. */
 
-    if (lsame_(trans, "N", (ftnlen)1, (ftnlen)1)) {
+    if (PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  x:= A*x. */
 
-	if (lsame_(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+	if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 	    kk = 1;
 	    if (*incx == 1) {
 		i__1 = *n;
@@ -1629,7 +1623,7 @@
 
 /*        Form  x := A'*x  or  x := conjg( A' )*x. */
 
-	if (lsame_(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+	if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 	    kk = *n * (*n + 1) / 2;
 	    if (*incx == 1) {
 		for (j = *n; j >= 1; --j) {
@@ -1658,14 +1652,14 @@
 			}
 		    } else {
 			if (nounit) {
-			    d_cnjg(&z__2, &ap[kk]);
+			    bla_d_cnjg(&z__2, &ap[kk]);
 			    z__1.real = temp.real * z__2.real - temp.imag * z__2.imag, 
 				    z__1.imag = temp.real * z__2.imag + temp.imag * 
 				    z__2.real;
 			    temp.real = z__1.real, temp.imag = z__1.imag;
 			}
 			for (i__ = j - 1; i__ >= 1; --i__) {
-			    d_cnjg(&z__3, &ap[k]);
+			    bla_d_cnjg(&z__3, &ap[k]);
 			    i__1 = i__;
 			    z__2.real = z__3.real * x[i__1].real - z__3.imag * x[i__1].imag, 
 				    z__2.imag = z__3.real * x[i__1].imag + z__3.imag * x[
@@ -1711,7 +1705,7 @@
 			}
 		    } else {
 			if (nounit) {
-			    d_cnjg(&z__2, &ap[kk]);
+			    bla_d_cnjg(&z__2, &ap[kk]);
 			    z__1.real = temp.real * z__2.real - temp.imag * z__2.imag, 
 				    z__1.imag = temp.real * z__2.imag + temp.imag * 
 				    z__2.real;
@@ -1720,7 +1714,7 @@
 			i__1 = kk - j + 1;
 			for (k = kk - 1; k >= i__1; --k) {
 			    ix -= *incx;
-			    d_cnjg(&z__3, &ap[k]);
+			    bla_d_cnjg(&z__3, &ap[k]);
 			    i__2 = ix;
 			    z__2.real = z__3.real * x[i__2].real - z__3.imag * x[i__2].imag, 
 				    z__2.imag = z__3.real * x[i__2].imag + z__3.imag * x[
@@ -1769,7 +1763,7 @@
 			}
 		    } else {
 			if (nounit) {
-			    d_cnjg(&z__2, &ap[kk]);
+			    bla_d_cnjg(&z__2, &ap[kk]);
 			    z__1.real = temp.real * z__2.real - temp.imag * z__2.imag, 
 				    z__1.imag = temp.real * z__2.imag + temp.imag * 
 				    z__2.real;
@@ -1777,7 +1771,7 @@
 			}
 			i__2 = *n;
 			for (i__ = j + 1; i__ <= i__2; ++i__) {
-			    d_cnjg(&z__3, &ap[k]);
+			    bla_d_cnjg(&z__3, &ap[k]);
 			    i__3 = i__;
 			    z__2.real = z__3.real * x[i__3].real - z__3.imag * x[i__3].imag, 
 				    z__2.imag = z__3.real * x[i__3].imag + z__3.imag * x[
@@ -1824,7 +1818,7 @@
 			}
 		    } else {
 			if (nounit) {
-			    d_cnjg(&z__2, &ap[kk]);
+			    bla_d_cnjg(&z__2, &ap[kk]);
 			    z__1.real = temp.real * z__2.real - temp.imag * z__2.imag, 
 				    z__1.imag = temp.real * z__2.imag + temp.imag * 
 				    z__2.real;
@@ -1833,7 +1827,7 @@
 			i__2 = kk + *n - j;
 			for (k = kk + 1; k <= i__2; ++k) {
 			    ix += *incx;
-			    d_cnjg(&z__3, &ap[k]);
+			    bla_d_cnjg(&z__3, &ap[k]);
 			    i__3 = ix;
 			    z__2.real = z__3.real * x[i__3].real - z__3.imag * x[i__3].imag, 
 				    z__2.imag = z__3.real * x[i__3].imag + z__3.imag * x[

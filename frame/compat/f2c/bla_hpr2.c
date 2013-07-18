@@ -36,15 +36,12 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-#include "bli_f2c.h"
-
 /* chpr2.f -- translated by f2c (version 19991025).
    You must link the resulting object file with the libraries:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(c,hpr2)(character *uplo, integer *n, singlecomplex *alpha, singlecomplex *
-	x, integer *incx, singlecomplex *y, integer *incy, singlecomplex *ap)
+/* Subroutine */ int PASTEF77(c,hpr2)(character *uplo, integer *n, singlecomplex *alpha, singlecomplex *x, integer *incx, singlecomplex *y, integer *incy, singlecomplex *ap)
 {
     /* System generated locals */
     integer i__1, i__2, i__3, i__4, i__5, i__6;
@@ -52,15 +49,15 @@
     singlecomplex q__1, q__2, q__3, q__4;
 
     /* Builtin functions */
-    void r_cnjg(singlecomplex *, singlecomplex *);
+    void bla_r_cnjg(singlecomplex *, singlecomplex *);
 
     /* Local variables */
     integer info;
     singlecomplex temp1, temp2;
     integer i__, j, k;
-    extern logical lsame_(character *, character *, ftnlen, ftnlen);
+    extern logical PASTEF770(lsame)(character *, character *, ftnlen, ftnlen);
     integer kk, ix, iy, jx = 0, jy = 0, kx = 0, ky = 0;
-    extern /* Subroutine */ int xerbla_(character *, integer *, ftnlen);
+    extern /* Subroutine */ int PASTEF770(xerbla)(character *, integer *, ftnlen);
 
 /*     .. Scalar Arguments .. */
 /*     .. Array Arguments .. */
@@ -170,7 +167,7 @@
 
     /* Function Body */
     info = 0;
-    if (! lsame_(uplo, "U", (ftnlen)1, (ftnlen)1) && ! lsame_(uplo, "L", (
+    if (! PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(uplo, "L", (
 	    ftnlen)1, (ftnlen)1)) {
 	info = 1;
     } else if (*n < 0) {
@@ -181,7 +178,7 @@
 	info = 7;
     }
     if (info != 0) {
-	xerbla_("CHPR2 ", &info, (ftnlen)6);
+	PASTEF770(xerbla)("CHPR2 ", &info, (ftnlen)6);
 	return 0;
     }
 
@@ -213,7 +210,7 @@
 /*     are accessed sequentially with one pass through AP. */
 
     kk = 1;
-    if (lsame_(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+    if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  A  when upper triangle is stored in AP. */
 
@@ -224,7 +221,7 @@
 		i__3 = j;
 		if (x[i__2].real != 0.f || x[i__2].imag != 0.f || (y[i__3].real != 0.f 
 			|| y[i__3].imag != 0.f)) {
-		    r_cnjg(&q__2, &y[j]);
+		    bla_r_cnjg(&q__2, &y[j]);
 		    q__1.real = alpha->real * q__2.real - alpha->imag * q__2.imag, q__1.imag = 
 			    alpha->real * q__2.imag + alpha->imag * q__2.real;
 		    temp1.real = q__1.real, temp1.imag = q__1.imag;
@@ -232,7 +229,7 @@
 		    q__2.real = alpha->real * x[i__2].real - alpha->imag * x[i__2].imag, 
 			    q__2.imag = alpha->real * x[i__2].imag + alpha->imag * x[i__2]
 			    .real;
-		    r_cnjg(&q__1, &q__2);
+		    bla_r_cnjg(&q__1, &q__2);
 		    temp2.real = q__1.real, temp2.imag = q__1.imag;
 		    k = kk;
 		    i__2 = j - 1;
@@ -283,7 +280,7 @@
 		i__3 = jy;
 		if (x[i__2].real != 0.f || x[i__2].imag != 0.f || (y[i__3].real != 0.f 
 			|| y[i__3].imag != 0.f)) {
-		    r_cnjg(&q__2, &y[jy]);
+		    bla_r_cnjg(&q__2, &y[jy]);
 		    q__1.real = alpha->real * q__2.real - alpha->imag * q__2.imag, q__1.imag = 
 			    alpha->real * q__2.imag + alpha->imag * q__2.real;
 		    temp1.real = q__1.real, temp1.imag = q__1.imag;
@@ -291,7 +288,7 @@
 		    q__2.real = alpha->real * x[i__2].real - alpha->imag * x[i__2].imag, 
 			    q__2.imag = alpha->real * x[i__2].imag + alpha->imag * x[i__2]
 			    .real;
-		    r_cnjg(&q__1, &q__2);
+		    bla_r_cnjg(&q__1, &q__2);
 		    temp2.real = q__1.real, temp2.imag = q__1.imag;
 		    ix = kx;
 		    iy = ky;
@@ -351,7 +348,7 @@
 		i__3 = j;
 		if (x[i__2].real != 0.f || x[i__2].imag != 0.f || (y[i__3].real != 0.f 
 			|| y[i__3].imag != 0.f)) {
-		    r_cnjg(&q__2, &y[j]);
+		    bla_r_cnjg(&q__2, &y[j]);
 		    q__1.real = alpha->real * q__2.real - alpha->imag * q__2.imag, q__1.imag = 
 			    alpha->real * q__2.imag + alpha->imag * q__2.real;
 		    temp1.real = q__1.real, temp1.imag = q__1.imag;
@@ -359,7 +356,7 @@
 		    q__2.real = alpha->real * x[i__2].real - alpha->imag * x[i__2].imag, 
 			    q__2.imag = alpha->real * x[i__2].imag + alpha->imag * x[i__2]
 			    .real;
-		    r_cnjg(&q__1, &q__2);
+		    bla_r_cnjg(&q__1, &q__2);
 		    temp2.real = q__1.real, temp2.imag = q__1.imag;
 		    i__2 = kk;
 		    i__3 = kk;
@@ -410,7 +407,7 @@
 		i__3 = jy;
 		if (x[i__2].real != 0.f || x[i__2].imag != 0.f || (y[i__3].real != 0.f 
 			|| y[i__3].imag != 0.f)) {
-		    r_cnjg(&q__2, &y[jy]);
+		    bla_r_cnjg(&q__2, &y[jy]);
 		    q__1.real = alpha->real * q__2.real - alpha->imag * q__2.imag, q__1.imag = 
 			    alpha->real * q__2.imag + alpha->imag * q__2.real;
 		    temp1.real = q__1.real, temp1.imag = q__1.imag;
@@ -418,7 +415,7 @@
 		    q__2.real = alpha->real * x[i__2].real - alpha->imag * x[i__2].imag, 
 			    q__2.imag = alpha->real * x[i__2].imag + alpha->imag * x[i__2]
 			    .real;
-		    r_cnjg(&q__1, &q__2);
+		    bla_r_cnjg(&q__1, &q__2);
 		    temp2.real = q__1.real, temp2.imag = q__1.imag;
 		    i__2 = kk;
 		    i__3 = kk;
@@ -480,9 +477,7 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(z,hpr2)(character *uplo, integer *n, doublecomplex *alpha, 
-	doublecomplex *x, integer *incx, doublecomplex *y, integer *incy, 
-	doublecomplex *ap)
+/* Subroutine */ int PASTEF77(z,hpr2)(character *uplo, integer *n, doublecomplex *alpha, doublecomplex *x, integer *incx, doublecomplex *y, integer *incy, doublecomplex *ap)
 {
     /* System generated locals */
     integer i__1, i__2, i__3, i__4, i__5, i__6;
@@ -490,15 +485,15 @@
     doublecomplex z__1, z__2, z__3, z__4;
 
     /* Builtin functions */
-    void d_cnjg(doublecomplex *, doublecomplex *);
+    void bla_d_cnjg(doublecomplex *, doublecomplex *);
 
     /* Local variables */
     integer info;
     doublecomplex temp1, temp2;
     integer i__, j, k;
-    extern logical lsame_(character *, character *, ftnlen, ftnlen);
+    extern logical PASTEF770(lsame)(character *, character *, ftnlen, ftnlen);
     integer kk, ix, iy, jx = 0, jy = 0, kx = 0, ky = 0;
-    extern /* Subroutine */ int xerbla_(character *, integer *, ftnlen);
+    extern /* Subroutine */ int PASTEF770(xerbla)(character *, integer *, ftnlen);
 
 /*     .. Scalar Arguments .. */
 /*     .. Array Arguments .. */
@@ -608,7 +603,7 @@
 
     /* Function Body */
     info = 0;
-    if (! lsame_(uplo, "U", (ftnlen)1, (ftnlen)1) && ! lsame_(uplo, "L", (
+    if (! PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(uplo, "L", (
 	    ftnlen)1, (ftnlen)1)) {
 	info = 1;
     } else if (*n < 0) {
@@ -619,7 +614,7 @@
 	info = 7;
     }
     if (info != 0) {
-	xerbla_("ZHPR2 ", &info, (ftnlen)6);
+	PASTEF770(xerbla)("ZHPR2 ", &info, (ftnlen)6);
 	return 0;
     }
 
@@ -651,7 +646,7 @@
 /*     are accessed sequentially with one pass through AP. */
 
     kk = 1;
-    if (lsame_(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+    if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  A  when upper triangle is stored in AP. */
 
@@ -662,7 +657,7 @@
 		i__3 = j;
 		if (x[i__2].real != 0. || x[i__2].imag != 0. || (y[i__3].real != 0. || 
 			y[i__3].imag != 0.)) {
-		    d_cnjg(&z__2, &y[j]);
+		    bla_d_cnjg(&z__2, &y[j]);
 		    z__1.real = alpha->real * z__2.real - alpha->imag * z__2.imag, z__1.imag = 
 			    alpha->real * z__2.imag + alpha->imag * z__2.real;
 		    temp1.real = z__1.real, temp1.imag = z__1.imag;
@@ -670,7 +665,7 @@
 		    z__2.real = alpha->real * x[i__2].real - alpha->imag * x[i__2].imag, 
 			    z__2.imag = alpha->real * x[i__2].imag + alpha->imag * x[i__2]
 			    .real;
-		    d_cnjg(&z__1, &z__2);
+		    bla_d_cnjg(&z__1, &z__2);
 		    temp2.real = z__1.real, temp2.imag = z__1.imag;
 		    k = kk;
 		    i__2 = j - 1;
@@ -721,7 +716,7 @@
 		i__3 = jy;
 		if (x[i__2].real != 0. || x[i__2].imag != 0. || (y[i__3].real != 0. || 
 			y[i__3].imag != 0.)) {
-		    d_cnjg(&z__2, &y[jy]);
+		    bla_d_cnjg(&z__2, &y[jy]);
 		    z__1.real = alpha->real * z__2.real - alpha->imag * z__2.imag, z__1.imag = 
 			    alpha->real * z__2.imag + alpha->imag * z__2.real;
 		    temp1.real = z__1.real, temp1.imag = z__1.imag;
@@ -729,7 +724,7 @@
 		    z__2.real = alpha->real * x[i__2].real - alpha->imag * x[i__2].imag, 
 			    z__2.imag = alpha->real * x[i__2].imag + alpha->imag * x[i__2]
 			    .real;
-		    d_cnjg(&z__1, &z__2);
+		    bla_d_cnjg(&z__1, &z__2);
 		    temp2.real = z__1.real, temp2.imag = z__1.imag;
 		    ix = kx;
 		    iy = ky;
@@ -789,7 +784,7 @@
 		i__3 = j;
 		if (x[i__2].real != 0. || x[i__2].imag != 0. || (y[i__3].real != 0. || 
 			y[i__3].imag != 0.)) {
-		    d_cnjg(&z__2, &y[j]);
+		    bla_d_cnjg(&z__2, &y[j]);
 		    z__1.real = alpha->real * z__2.real - alpha->imag * z__2.imag, z__1.imag = 
 			    alpha->real * z__2.imag + alpha->imag * z__2.real;
 		    temp1.real = z__1.real, temp1.imag = z__1.imag;
@@ -797,7 +792,7 @@
 		    z__2.real = alpha->real * x[i__2].real - alpha->imag * x[i__2].imag, 
 			    z__2.imag = alpha->real * x[i__2].imag + alpha->imag * x[i__2]
 			    .real;
-		    d_cnjg(&z__1, &z__2);
+		    bla_d_cnjg(&z__1, &z__2);
 		    temp2.real = z__1.real, temp2.imag = z__1.imag;
 		    i__2 = kk;
 		    i__3 = kk;
@@ -848,7 +843,7 @@
 		i__3 = jy;
 		if (x[i__2].real != 0. || x[i__2].imag != 0. || (y[i__3].real != 0. || 
 			y[i__3].imag != 0.)) {
-		    d_cnjg(&z__2, &y[jy]);
+		    bla_d_cnjg(&z__2, &y[jy]);
 		    z__1.real = alpha->real * z__2.real - alpha->imag * z__2.imag, z__1.imag = 
 			    alpha->real * z__2.imag + alpha->imag * z__2.real;
 		    temp1.real = z__1.real, temp1.imag = z__1.imag;
@@ -856,7 +851,7 @@
 		    z__2.real = alpha->real * x[i__2].real - alpha->imag * x[i__2].imag, 
 			    z__2.imag = alpha->real * x[i__2].imag + alpha->imag * x[i__2]
 			    .real;
-		    d_cnjg(&z__1, &z__2);
+		    bla_d_cnjg(&z__1, &z__2);
 		    temp2.real = z__1.real, temp2.imag = z__1.imag;
 		    i__2 = kk;
 		    i__3 = kk;

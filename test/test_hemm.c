@@ -36,7 +36,7 @@
 #include "blis.h"
 
 //           side   uploa  m     n     alpha    a        lda   b        ldb   beta     c        ldc
-void dsymm_( char*, char*, int*, int*, double*, double*, int*, double*, int*, double*, double*, int* );
+//void dsymm_( char*, char*, int*, int*, double*, double*, int*, double*, int*, double*, double*, int* );
 
 //#define PRINT
 
@@ -257,18 +257,18 @@ int main( int argc, char** argv )
 
 #else
 
-			char    side   = 'R';
-			char    uplo   = 'U';
-			int     mm     = bli_obj_length( c );
-			int     nn     = bli_obj_width( c );
-			int     lda    = bli_obj_col_stride( a );
-			int     ldb    = bli_obj_col_stride( b );
-			int     ldc    = bli_obj_col_stride( c );
-			double* alphap = bli_obj_buffer( alpha );
-			double* ap     = bli_obj_buffer( a );
-			double* bp     = bli_obj_buffer( b );
-			double* betap  = bli_obj_buffer( beta );
-			double* cp     = bli_obj_buffer( c );
+			f77_char side   = 'R';
+			f77_char uplo   = 'U';
+			f77_int  mm     = bli_obj_length( c );
+			f77_int  nn     = bli_obj_width( c );
+			f77_int  lda    = bli_obj_col_stride( a );
+			f77_int  ldb    = bli_obj_col_stride( b );
+			f77_int  ldc    = bli_obj_col_stride( c );
+			double*  alphap = bli_obj_buffer( alpha );
+			double*  ap     = bli_obj_buffer( a );
+			double*  bp     = bli_obj_buffer( b );
+			double*  betap  = bli_obj_buffer( beta );
+			double*  cp     = bli_obj_buffer( c );
 
 			dsymm_( &side,
 			        &uplo,

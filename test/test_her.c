@@ -36,8 +36,8 @@
 #include "blis.h"
 
 //          uplo   m     alpha    x        incx  a        lda
-void dsyr_( char*, int*, double*, double*, int*, double*, int* );
-void zher_( char*, int*, double*, dcomplex*, int*, dcomplex*, int* );
+//void dsyr_( char*, int*, double*, double*, int*, double*, int* );
+//void zher_( char*, int*, double*, dcomplex*, int*, dcomplex*, int* );
 
 //#define PRINT
 
@@ -137,13 +137,13 @@ int main( int argc, char** argv )
 
 #else
 
-			char    uplo   = 'L';
-			int     mm     = bli_obj_length( a );
-			int     incx   = bli_obj_vector_inc( x );
-			int     lda    = bli_obj_col_stride( a );
-			double* alphap = bli_obj_buffer( alpha );
-			double* xp     = bli_obj_buffer( x );
-			double* ap     = bli_obj_buffer( a );
+			f77_char uplo   = 'L';
+			f77_int  mm     = bli_obj_length( a );
+			f77_int  incx   = bli_obj_vector_inc( x );
+			f77_int  lda    = bli_obj_col_stride( a );
+			double*  alphap = bli_obj_buffer( alpha );
+			double*  xp     = bli_obj_buffer( x );
+			double*  ap     = bli_obj_buffer( a );
 /*
 			dcomplex* xp   = bli_obj_buffer( x );
 			dcomplex* ap   = bli_obj_buffer( a );

@@ -36,18 +36,10 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-#include "bli_f2c.h"
-
-void z_div(doublecomplex *cp, doublecomplex *ap, doublecomplex *bp)
+void bla_z_div(doublecomplex *cp, doublecomplex *ap, doublecomplex *bp)
 {
-	doublecomplex a = *ap;
-	doublecomplex b = *bp;
-	double        temp;
-
-	temp = b.real * b.real + b.imag * b.imag;
-
-	cp->real = ( a.real * b.real + a.imag * b.imag ) / temp;
-	cp->imag = ( a.imag * b.real - a.real * b.imag ) / temp;
+	bli_zcopys( *ap, *cp );
+	bli_zinvscals( *bp, *cp );
 }
 
 #endif

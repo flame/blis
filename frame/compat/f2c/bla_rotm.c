@@ -36,15 +36,12 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-#include "bli_f2c.h"
-
 /* srotm.f -- translated by f2c (version 19991025).
    You must link the resulting object file with the libraries:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(s,rotm)(integer *n, real *sx, integer *incx, real *sy, 
-	integer *incy, real *sparam)
+/* Subroutine */ int PASTEF77(s,rotm)(integer *n, real *sx, integer *incx, real *sy, integer *incy, real *sparam)
 {
     /* Initialized data */
 
@@ -210,8 +207,7 @@ L140:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(d,rotm)(integer *n, doublereal *dx, integer *incx, 
-	doublereal *dy, integer *incy, doublereal *dparam)
+/* Subroutine */ int PASTEF77(d,rotm)(integer *n, doublereal *dx, integer *incx, doublereal *dy, integer *incy, doublereal *dparam)
 {
     /* Initialized data */
 

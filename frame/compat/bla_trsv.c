@@ -59,6 +59,16 @@ void PASTEF77(ch,blasname)( \
 	inc_t   rs_a, cs_a; \
 	ftype   one; \
 \
+	/* Perform BLAS parameter checking. */ \
+	PASTEBLACHK(blasname)( MKSTR(ch), \
+	                       MKSTR(blasname), \
+	                       uploa, \
+	                       transa, \
+	                       diaga, \
+	                       m, \
+	                       lda, \
+	                       incx ); \
+\
 	/* Initialize a local scalar since we don't assume that the global
 	   scalar constants have been initialized yet. */ \
 	PASTEMAC(ch,setris)( 1.0, 0.0, one ); \

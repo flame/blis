@@ -36,15 +36,12 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-#include "bli_f2c.h"
-
 /* srotmg.f -- translated by f2c (version 19991025).
    You must link the resulting object file with the libraries:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(s,rotmg)(real *sd1, real *sd2, real *sx1, real *sy1, real 
-	*sparam)
+/* Subroutine */ int PASTEF77(s,rotmg)(real *sd1, real *sd2, real *sx1, real *sy1, real *sparam)
 {
     /* Initialized data */
 
@@ -293,8 +290,7 @@ L260:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(d,rotmg)(doublereal *dd1, doublereal *dd2, doublereal *
-	dx1, doublereal *dy1, doublereal *dparam)
+/* Subroutine */ int PASTEF77(d,rotmg)(doublereal *dd1, doublereal *dd2, doublereal *dx1, doublereal *dy1, doublereal *dparam)
 {
     /* Initialized data */
 

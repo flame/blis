@@ -57,6 +57,15 @@ void PASTEF772(chxy,blasname,chc)( \
 	inc_t   incy0; \
 	inc_t   rs_a, cs_a; \
 \
+	/* Perform BLAS parameter checking. */ \
+	PASTEBLACHK(blasname)( MKSTR(ch), \
+	                       MKSTR(blasname), \
+	                       m, \
+	                       n, \
+	                       incx, \
+	                       incy, \
+	                       lda ); \
+\
 	/* Convert negative values of m and n to zero. */ \
 	bli_convert_blas_dim1( *m, m0 ); \
 	bli_convert_blas_dim1( *n, n0 ); \

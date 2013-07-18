@@ -36,7 +36,7 @@
 #include "blis.h"
 
 //           transa m     n     alpha    a        lda   x        incx  beta     y        incy
-void dgemv_( char*, int*, int*, double*, double*, int*, double*, int*, double*, double*, int* );
+//void dgemv_( char*, int*, int*, double*, double*, int*, double*, int*, double*, double*, int* );
 
 //#define PRINT
 
@@ -158,17 +158,17 @@ int main( int argc, char** argv )
 
 #else
 
-			char    transa = 'N';
-			int     mm     = bli_obj_length( a_tl );
-			int     nn     = bli_obj_width( a_tl );
-			int     lda    = bli_obj_col_stride( a_tl );
-			int     incx   = bli_obj_vector_inc( x_t );
-			int     incy   = bli_obj_vector_inc( y_t );
-			double* alphap = bli_obj_buffer( alpha );
-			double* ap     = bli_obj_buffer( a_tl );
-			double* xp     = bli_obj_buffer( x_t );
-			double* betap  = bli_obj_buffer( beta );
-			double* yp     = bli_obj_buffer( y_t );
+			f77_char transa = 'N';
+			f77_int  mm     = bli_obj_length( a_tl );
+			f77_int  nn     = bli_obj_width( a_tl );
+			f77_int  lda    = bli_obj_col_stride( a_tl );
+			f77_int  incx   = bli_obj_vector_inc( x_t );
+			f77_int  incy   = bli_obj_vector_inc( y_t );
+			double*  alphap = bli_obj_buffer( alpha );
+			double*  ap     = bli_obj_buffer( a_tl );
+			double*  xp     = bli_obj_buffer( x_t );
+			double*  betap  = bli_obj_buffer( beta );
+			double*  yp     = bli_obj_buffer( y_t );
 
 			dgemv_( &transa,
 			        &mm,

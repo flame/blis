@@ -36,8 +36,6 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-#include "bli_f2c.h"
-
 /* srotg.f -- translated by f2c (version 19991025).
    You must link the resulting object file with the libraries:
 	-lf2c -lm   (in that order)
@@ -107,8 +105,7 @@ L20:
 
 static doublereal dc_b4 = 1.;
 
-/* Subroutine */ int PASTEF77(d,rotg)(doublereal *da, doublereal *db, doublereal *c__, 
-	doublereal *s)
+/* Subroutine */ int PASTEF77(d,rotg)(doublereal *da, doublereal *db, doublereal *c__, doublereal *s)
 {
     /* System generated locals */
     doublereal d__1, d__2;
@@ -172,7 +169,7 @@ L20:
 
     /* Builtin functions */
     double c_abs(singlecomplex *), sqrt(doublereal);
-    void r_cnjg(singlecomplex *, singlecomplex *);
+    void bla_r_cnjg(singlecomplex *, singlecomplex *);
 
     /* Local variables */
     real norm;
@@ -199,7 +196,7 @@ L10:
     q__1.real = ca->real / r__1, q__1.imag = ca->imag / r__1;
     alpha.real = q__1.real, alpha.imag = q__1.imag;
     *c__ = c_abs(ca) / norm;
-    r_cnjg(&q__3, cb);
+    bla_r_cnjg(&q__3, cb);
     q__2.real = alpha.real * q__3.real - alpha.imag * q__3.imag, q__2.imag = alpha.real * q__3.imag + 
 	    alpha.imag * q__3.real;
     q__1.real = q__2.real / norm, q__1.imag = q__2.imag / norm;
@@ -215,8 +212,7 @@ L20:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(z,rotg)(doublecomplex *ca, doublecomplex *cb, doublereal *
-	c__, doublecomplex *s)
+/* Subroutine */ int PASTEF77(z,rotg)(doublecomplex *ca, doublecomplex *cb, doublereal *c__, doublecomplex *s)
 {
     /* System generated locals */
     doublereal d__1, d__2;
@@ -224,9 +220,9 @@ L20:
 
     /* Builtin functions */
     double z_abs(doublecomplex *);
-    void z_div(doublecomplex *, doublecomplex *, doublecomplex *);
+    void bla_z_div(doublecomplex *, doublecomplex *, doublecomplex *);
     double sqrt(doublereal);
-    void d_cnjg(doublecomplex *, doublecomplex *);
+    void bla_d_cnjg(doublecomplex *, doublecomplex *);
 
     /* Local variables */
     doublereal norm;
@@ -243,11 +239,11 @@ L20:
 L10:
     scale = z_abs(ca) + z_abs(cb);
     z__2.real = scale, z__2.imag = 0.;
-    z_div(&z__1, ca, &z__2);
+    bla_z_div(&z__1, ca, &z__2);
 /* Computing 2nd power */
     d__1 = z_abs(&z__1);
     z__4.real = scale, z__4.imag = 0.;
-    z_div(&z__3, cb, &z__4);
+    bla_z_div(&z__3, cb, &z__4);
 /* Computing 2nd power */
     d__2 = z_abs(&z__3);
     norm = scale * sqrt(d__1 * d__1 + d__2 * d__2);
@@ -255,7 +251,7 @@ L10:
     z__1.real = ca->real / d__1, z__1.imag = ca->imag / d__1;
     alpha.real = z__1.real, alpha.imag = z__1.imag;
     *c__ = z_abs(ca) / norm;
-    d_cnjg(&z__3, cb);
+    bla_d_cnjg(&z__3, cb);
     z__2.real = alpha.real * z__3.real - alpha.imag * z__3.imag, z__2.imag = alpha.real * z__3.imag + 
 	    alpha.imag * z__3.real;
     z__1.real = z__2.real / norm, z__1.imag = z__2.imag / norm;
