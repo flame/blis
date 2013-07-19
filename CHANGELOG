@@ -1,4 +1,242 @@
-commit 5b641c3bab31eac6a1795b9f6e3f86c59651ca50 (HEAD, tag: 0.0.8, origin/master, origin/HEAD, master)
+commit 0680916fdd532f7a4716b11a2515243b2c08d00f (HEAD, tag: 0.0.9, origin/master, origin/HEAD, master)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jul 18 18:04:34 2013 -0500
+
+    Added BLAS error checking to compatibility layer.
+    
+    Details:
+    - Added frame/compat/check directory, which now houses companion _check()
+      routines for each of the BLAS wrappers in frame/compat. These _check()
+      routines are called from the compatibility wrappers and mimic the
+      error-checking present in the netlib BLAS.
+    - Edited bla_xerbla.c so that xerbla() translates the operation string to
+      uppercase before printing.
+    - Redefined util routines in frame/compat/f2c/util in terms of level0
+      macros.
+    - Added prototypes for util routines, f2c routines, lsame(), and xerbla().
+    - Commented out prototypes in test/test_*.c since Fortran integers are now
+      int64_t by default (and the prototypes that were present in the files
+      used int).
+    - Removed redundant #include "bli_f2c.h" in bli_?lamch.c and bli_lsame.c,
+      since blis.h was already being included.
+    - Other minor changes to code in frame/compat/f2c.
+
+commit 4e80ad28c97273db3366428ec44020da7944964d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jul 18 17:53:31 2013 -0500
+
+    Added support for C99 complex types/arithmetic.
+    
+    Details:
+    - Added support for C99 complex types to bli_type_defs.h and overloaded
+      complex arithmetic to the scalar-level macros in include/level0. This
+      includes a somewhat substantial reorganization and re-layering of much
+      of the existing machinery present in the level0 macros.
+    - Added new #define for BLIS_ENABLE_C99_COMPLEX to bli_config.h files,
+      commented-out by default, which optionally enables the use of built-in
+      C99 complex types and arithmetic.
+    - Minor changes to clarksville and reference configs' make_defs.mk files.
+    - Removed macro definitions from bli_param_macro_defs.h which was not being
+      used (bli_proj_dt_to_real_if_imag_eq0).
+
+commit 6072d7c848e837ba20d607f7b727438ada31bdcf
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jul 17 12:27:45 2013 -0500
+
+    Fixed bugs in trsm, trmm macro-kernels.
+    
+    Details:
+    - Fixed a bug in trsm_rl_ker_var2() caused by incorrect edge case handling.
+    - Fixed a bug in trsm_rl_ker_var2() and trsm_ru_ker_var2() whereby k was
+      incorrectly being adjusted upward by MR, instead of NR. The rl and ru
+      trmm macro-kernels were updated in a similar fashion.
+    - Fixed a bug in trsm_ru_ker_var2() that was due to a missing negation on
+      diagoffb when recomputing k to skip a zero region below where the
+      diagonal intersects the right side of the block. The corresponding
+      trmm macro-kernel was also updated.
+    - Fixed a bug in trsm_ru_ker_var2() where the the adjustment of k (by NR)
+      needed to be placed AFTER the block that recomputes k to skip the zero
+      region (if present). The other three trsm macro-kernels, as well as the
+      trmm macro-kernels, were updated in the same manner, for consistency.
+    - Fixed a bug in trmm_lu_ker_var2() in which the wrong dimension (n) was
+      being updated to skip a zero region to the left of where the diagonal
+      of A intersects the top edge of the block.
+    - Comment updates to all trsm and trmm macro-kernels.
+    - Comment updates to bli_packm_init.c.
+
+commit 47410a48f9b91e94ce4c67633686ffd1f2ad0275
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jul 10 14:53:59 2013 -0500
+
+    Added f2c'ed Givens rotation wrappers.
+    
+    Details:
+    - Retired (for now) existing ?rot*() BLAS compatibility wrappers to 'attic'
+      along with other wrappers for which no BLIS implementation exists.
+    - Added f2c-generated codes for applicable datatype flavors of rot, rotg,
+      rotm, and rotmg operations.
+
+commit e5f90f3a8dbe671104bcb9d8b4e3409de01805da
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jul 10 13:40:12 2013 -0500
+
+    Removed copynz defs from bli_kernel.h files.
+    
+    Details:
+    - Removed COPYNZ_KERNEL definition from the bli_kernel.h files in each
+      configuration. (Meant to include this in previous commit.)
+
+commit aec12d90f596e8c04b1ad178258a1cd38108f59d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jul 10 13:33:30 2013 -0500
+
+    Removed copynzv, copynzm and related codes.
+    
+    Details:
+    - Removed copynzv and copynzm operation directories. These operations
+      implemented a variation of copyv/m that, in the case of real source
+      and complex destination operands, leaves the imaginary component
+      untouched (rather than setting it to zero). I realize now that the
+      special case(s) (e.g. gemm with real A and B but complex C) that I
+      thought required this operation actually can be handled more simply.
+    - Removed level0 scalar macros implementing copynzs, copynzjs.
+
+commit b0a0a0f274a761788531b5d281cc3b411b7124ed
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jul 9 17:15:38 2013 -0500
+
+    Added handling of restrict, stdint.h for non-C99.
+    
+    Details:
+    - Removed the #include <stdint.h> from blis.h and inserted a cpp macro block
+      in bli_type_defs.h that #includes <stdint.h> for C++ and C99, and otherwise
+      manually typedefs the types we need (which, for now, are unconditionally
+      int64_t and uint64_t).
+    - Moved basic typedefs to top of bli_type_defs.h, and comment changes.
+    - Added cpp macro block to bli_macro_defs.h that #defines restrict as
+      nothing for C++ and non-C99.
+
+commit 4b7e7970f1af4a1ab121e07657e2b78b9fcd7671
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jul 8 15:20:34 2013 -0500
+
+    Migrated integer usage to stdint.h types.
+    
+    Details:
+    - Changed the way bli_type_defs.h defines integer types so that dim_t,
+      inc_t, doff_t, etc. are all defined in terms of gint_t (general signed
+      integer) or guint_t (general unsigned integer).
+    - Renamed Fortran types fchar and fint to f77_char and f77_int.
+    - Define f77_int as int64_t if a new configuration variable,
+      BLIS_ENABLE_BLIS2BLAS_INT64, is defined, and int32_t otherwise.
+      These types are defined in stdint.h, which is now included in blis.h.
+    - Renamed "complex" type in f2c files to "singlecomplex" and typedef'ed
+      in terms of scomplex.
+    - Renamed "char" type in f2c files to "character" and typedef'ed in terms
+      of char.
+    - Updated bla_amax() wrappers so that the return type is defined directly
+      as f77_int, rather than letting the prototype-generating macro decide
+      the type. This was the only use of GENTFUNC2I/GENTPROT2I-related macros,
+      so I removed them. Also, changed the body of the wrapper so that a
+      gint_t is passed into abmaxv, which is THEN typecast to an f77_int
+      before returning the value.
+    - Updated f2c code that accessed .r and .i fields of complex and
+      doublecomplex types so that they use .real and .imag instead (now that
+      we are using scomplex and dcomplex).
+
+commit 372501398564fdba3d5a3db86c30bc1039b185ff
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jul 8 11:24:18 2013 -0500
+
+    Added experimental bli_gemm_ker_var5().
+    
+    Details:
+    - Added support for an experimental gemm macro-kernel incrementally
+      packs one micro-panel of B at a time. This is useful for certain
+      special cases of gemm where m is small.
+    - Minor changes to default values of clarksville configuration.
+    - Defined BLIS_PACKED_BLOCKS as part of pack_t type, even though we
+      do not yet have any use (or implementation support) for block storage.
+    - Comment update to bli_packm_init.c.
+
+commit 9915d667a79f23e3a2a2516247c560e9063a1646
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Jul 7 13:28:39 2013 -0500
+
+    Defined "total" blocksize query functions.
+    
+    Details:
+    - Defined bli_blksz_total_for_type() and bli_blksz_total_for_obj() to query
+      the default blocksize plus blocksize extension (using the type or the type
+      of an object).
+    - Comment update in bli_packm_cxk.c.
+
+commit 46d3d09d49aded1d9f1b468c83fce75e07d631dc
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jun 27 13:19:56 2013 -0500
+
+    Consolidated lower/upper her[2]k blocked variants.
+    
+    Details:
+    - Consolidated lower and upper blocked variants for herk and her2k, and
+      renamed the resulting variants, according to the same changes recently
+      made to trmm and trsm.
+    - Implemented support for four new subpartitions types:
+        BLIS_SUBPART1T
+        BLIS_SUBPART1B
+        BLIS_SUBPART1L
+        BLIS_SUBPART1R
+      which correspond to "merged" partitions that include the middle "1"
+      partition as well as either the neighboring "0" or "2" partition. This is
+      used to clean up code in herk/her2k var2 that attempts to partition away
+      the strictly zero region above or below the diagonal of a matrix operand
+      that is being marched through diagonally.
+    - Added safeguards to herk macro-kernels that skip any leading or trailing
+      zero region in the panel of C that is passed in. This is now needed given
+      that herk/her2k var1 no longer partitions off this zero region before
+      calling the macro-kernel (via bli_her[2]k_int()).
+    - Updated comments and other whitespace changes to trmm/trsm macro-kernels.
+
+commit 02002ef6f3d2746665982793db36714bd69bccc9
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jun 24 17:08:14 2013 -0500
+
+    Added row-storage optimizations for trmm, trsm.
+    
+    Details:
+    - Implemented algorithmic optimizations for trmm and trsm whereby the right
+      side case is now handled explicitly, rather than induced indirectly by
+      transposing and swapping strides on operands. This allows us to walk through
+      the output matrix with favorable access patterns no matter how it is stored,
+      for all parameter combinations.
+    - Renamed trmm and trsm blocked variants so that there is no longer a
+      lower/upper distinction. Instead, we simply label the variants by which
+      dimension is partitioned and whether the variant marches forwards or
+      backwards through the corresponding partitioned operands.
+    - Added support for row-stored packing of lower and upper triangular matrices
+      (as provided by bli_packm_blk_var3.c).
+    - Fixed a performance bug in bli_determine_blocksize_b() whereby the cache
+      blocksize  extensions (if non-zero) were not being used to appropriately size
+      the first iteration (ie: the bottom/right edge case).
+    - Updated comments in bli_kernel.h to indicate that both MC and NC must be
+      whole multiples of MR AND NR. This is needed for the case of trsm_r where,
+      in order to reuse existing left-side gemmtrsm fused micro-kernels, the
+      packing of A (left-hand operand) and B (right-hand operand) is done with
+      NR and MR, respectively (instead of MR and NR).
+
+commit d1e81ddc848ee47bc188735883d14582bdd0cabc
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jun 13 11:14:21 2013 -0500
+
+    Minor generalizing tweaks to trmm blk var1, var2.
+
+commit 0efb7974f104206ba3985276f2180a9b14fe9f9b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jun 12 16:40:04 2013 -0500
+
+    CHANGELOG update.
+
+commit 5b641c3bab31eac6a1795b9f6e3f86c59651ca50 (tag: 0.0.8)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Wed Jun 12 16:02:12 2013 -0500
 
