@@ -75,21 +75,29 @@
 \
 	( dt == BLIS_CONSTANT )
 
+#define bli_is_int( dt ) \
+\
+	( dt == BLIS_INT )
+
 #define bli_is_real( dt ) \
 \
-    ( ( dt & BLIS_DOMAIN_BIT ) == BLIS_BITVAL_REAL )
+    ( bli_is_float( dt ) || \
+	  bli_is_double( dt ) )
 
 #define bli_is_complex( dt ) \
 \
-    ( ( dt & BLIS_DOMAIN_BIT ) == BLIS_BITVAL_COMPLEX )
+    ( bli_is_scomplex( dt ) || \
+	  bli_is_dcomplex( dt ) )
 
 #define bli_is_single_prec( dt ) \
 \
-    ( ( dt & BLIS_PRECISION_BIT ) == BLIS_BITVAL_SINGLE_PREC )
+    ( bli_is_float( dt ) || \
+	  bli_is_scomplex( dt ) )
 
 #define bli_is_double_prec( dt ) \
 \
-    ( ( dt & BLIS_PRECISION_BIT ) == BLIS_BITVAL_DOUBLE_PREC )
+    ( bli_is_double( dt ) || \
+	  bli_is_dcomplex( dt ) )
 
 #define bli_datatype_proj_to_real( dt ) \
 \
