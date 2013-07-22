@@ -47,7 +47,7 @@ void bli_ger( obj_t*  alpha,
 	ger_t*  ger_cntl;
 	num_t   dt_targ_x;
 	num_t   dt_targ_y;
-	num_t   dt_targ_a;
+	//num_t   dt_targ_a;
 	bool_t  x_is_contig;
 	bool_t  y_is_contig;
 	bool_t  a_is_contig;
@@ -62,7 +62,7 @@ void bli_ger( obj_t*  alpha,
 	// Query the target datatypes of each object.
 	dt_targ_x = bli_obj_target_datatype( *x );
 	dt_targ_y = bli_obj_target_datatype( *y );
-	dt_targ_a = bli_obj_target_datatype( *a );
+	//dt_targ_a = bli_obj_target_datatype( *a );
 
 	// Determine whether each operand is stored contiguously.
 	x_is_contig = ( bli_obj_vector_inc( *x ) == 1 );

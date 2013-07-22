@@ -176,7 +176,6 @@ void PASTEMAC3(cha,chx,chy,varname)( \
 	ctype_ax  alpha_chi1; \
 	ctype_a   alpha11_temp; \
 	dim_t     i; \
-	dim_t     n_behind; \
 	dim_t     n_ahead; \
 	inc_t     rs_at, cs_at; \
 	conj_t    conj0, conj1; \
@@ -222,7 +221,6 @@ void PASTEMAC3(cha,chx,chy,varname)( \
 \
 	for ( i = 0; i < m; ++i ) \
 	{ \
-		n_behind = i; \
 		n_ahead  = m - i - 1; \
 		alpha11  = a_cast + (i  )*rs_at + (i  )*cs_at; \
 		a21      = a_cast + (i+1)*rs_at + (i  )*cs_at; \

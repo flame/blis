@@ -350,11 +350,11 @@ void bli_mem_init_pool( char*   pool_mem,
 
 	// If the pool starting address is not already aligned, advance it
 	// accordingly.
-	if ( bli_is_unaligned_to( pool_mem, align_size ) )
+	if ( bli_is_unaligned_to( ( uintptr_t )pool_mem, ( uintptr_t )align_size ) )
 	{
 		// Notice that this works even if the alignment is not a power of two.
-		pool_mem += ( align_size - 
-		              ( ( siz_t )pool_mem % align_size ) );
+		pool_mem += (   ( uintptr_t )align_size - 
+		              ( ( uintptr_t )pool_mem % align_size ) );
 	}
 
 	// Step through the memory pool, beginning with the aligned address
@@ -370,10 +370,10 @@ void bli_mem_init_pool( char*   pool_mem,
 
 		// Advance pool a bit further if needed in order to get to the
 		// beginning of an alignment boundary.
-		if ( bli_is_unaligned_to( pool_mem, align_size ) )
+		if ( bli_is_unaligned_to( ( uintptr_t )pool_mem, ( uintptr_t )align_size ) )
 		{
-			pool_mem += ( align_size -
-			              ( ( siz_t )pool_mem % align_size ) );
+			pool_mem += (   ( uintptr_t )align_size -
+			              ( ( uintptr_t )pool_mem % align_size ) );
 		}
 	}
 

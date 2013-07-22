@@ -230,7 +230,7 @@ void bli_param_map_blis_to_char_trans( trans_t blis_trans, char* trans )
 	}
 }
 
-void bli_param_map_blis_to_char_conj( trans_t blis_conj, char* conj )
+void bli_param_map_blis_to_char_conj( conj_t blis_conj, char* conj )
 {
 	if      ( blis_conj == BLIS_NO_CONJUGATE ) *conj = 'n';
 	else if ( blis_conj == BLIS_CONJUGATE    ) *conj = 'c';

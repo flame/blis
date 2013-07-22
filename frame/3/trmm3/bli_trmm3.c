@@ -53,8 +53,8 @@ void bli_trmm3( side_t  side,
 	obj_t   b_local;
 	obj_t   c_local;
 	num_t   dt_targ_a;
-	num_t   dt_targ_b;
-	num_t   dt_targ_c;
+	//num_t   dt_targ_b;
+	//num_t   dt_targ_c;
 	num_t   dt_alpha;
 	num_t   dt_beta;
 
@@ -85,8 +85,8 @@ void bli_trmm3( side_t  side,
 	// For now, assume the storage datatypes are the desired target
 	// datatypes.
 	dt_targ_a = bli_obj_datatype( *a );
-	dt_targ_b = bli_obj_datatype( *b );
-	dt_targ_c = bli_obj_datatype( *c );
+	//dt_targ_b = bli_obj_datatype( *b );
+	//dt_targ_c = bli_obj_datatype( *c );
 
 	// We assume trmm is implemented with a block-panel kernel, thus, we will
 	// only directly support the BLIS_LEFT case. We handle the BLIS_RIGHT case

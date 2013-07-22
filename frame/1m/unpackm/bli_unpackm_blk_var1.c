@@ -128,13 +128,13 @@ void PASTEMAC(ch,varname )( \
 	ctype* c_begin; \
 	ctype* p_begin; \
 	dim_t  panel_dim; \
-	dim_t  panel_len; \
+	/*dim_t  panel_len;*/ \
 	dim_t  iter_dim; \
 	doff_t diagoffc_i; \
 	dim_t  panel_dim_i; \
 	dim_t  ic, ip; \
 	inc_t  diagoffc_inc, vs_c; \
-	inc_t  incc, ldc; \
+	/*inc_t  incc, ldc;*/ \
 	dim_t* m_panel; \
 	dim_t* n_panel; \
 \
@@ -155,10 +155,10 @@ void PASTEMAC(ch,varname )( \
 	{ \
 		/* Prepare to unpack from column panels. */ \
 		iter_dim     = n; \
-		panel_len    = m; \
+		/*panel_len    = m;*/ \
 		panel_dim    = rs_p; \
-		incc         = cs_c; \
-		ldc          = rs_c; \
+		/*incc         = cs_c;*/ \
+		/*ldc          = rs_c;*/ \
 		vs_c         = cs_c; \
 		diagoffc_inc = -( doff_t)panel_dim; \
 		m_panel      = &m; \
@@ -168,10 +168,10 @@ void PASTEMAC(ch,varname )( \
 	{ \
 		/* Prepare to unpack from row panels. */ \
 		iter_dim     = m; \
-		panel_len    = n; \
+		/*panel_len    = n;*/ \
 		panel_dim    = cs_p; \
-		incc         = rs_c; \
-		ldc          = cs_c; \
+		/*incc         = rs_c;*/ \
+		/*ldc          = cs_c;*/ \
 		vs_c         = rs_c; \
 		diagoffc_inc = ( doff_t )panel_dim; \
 		m_panel      = &panel_dim_i; \

@@ -107,6 +107,10 @@
 \
 	( dt &  BLIS_BITVAL_COMPLEX )
 
+#define bli_domain_of_dt( dt ) \
+\
+	( dt & BLIS_DOMAIN_BIT )
+
 
 // side
 
