@@ -45,36 +45,82 @@
 
 // Verify that cache blocksizes are whole multiples of register blocksizes.
 // Specifically, verify that:
-//   - MC is a whole multiple of MR.
-//   - NC is a whole multiple of NR.
-//   - KC is a whole multiple of KR.
+//   - MC is a whole multiple of MR *AND* NR.
+//   - NC is a whole multiple of NR *AND* MR.
+//   - KC is a whole multiple of KR *AND* both MR, NR.
 // These constraints are enforced because it makes it easier to handle diagonals
 // in the macro-kernel implementations. 
+
+//
+// MC must be a whole multiple of MR and NR.
+//
 #if ( \
       ( BLIS_DEFAULT_MC_S % BLIS_DEFAULT_MR_S != 0 ) || \
       ( BLIS_DEFAULT_MC_D % BLIS_DEFAULT_MR_D != 0 ) || \
       ( BLIS_DEFAULT_MC_C % BLIS_DEFAULT_MR_C != 0 ) || \
       ( BLIS_DEFAULT_MC_Z % BLIS_DEFAULT_MR_Z != 0 )    \
     )
-  #error MC must be multiple of MR for all datatypes.
+  #error "MC must be multiple of MR for all datatypes."
 #endif
 
+#if ( \
+      ( BLIS_DEFAULT_MC_S % BLIS_DEFAULT_NR_S != 0 ) || \
+      ( BLIS_DEFAULT_MC_D % BLIS_DEFAULT_NR_D != 0 ) || \
+      ( BLIS_DEFAULT_MC_C % BLIS_DEFAULT_NR_C != 0 ) || \
+      ( BLIS_DEFAULT_MC_Z % BLIS_DEFAULT_NR_Z != 0 )    \
+    )
+  #error "MC must be multiple of NR for all datatypes."
+#endif
+
+//
+// NC must be a whole multiple of NR and MR.
+//
 #if ( \
       ( BLIS_DEFAULT_NC_S % BLIS_DEFAULT_NR_S != 0 ) || \
       ( BLIS_DEFAULT_NC_D % BLIS_DEFAULT_NR_D != 0 ) || \
       ( BLIS_DEFAULT_NC_C % BLIS_DEFAULT_NR_C != 0 ) || \
       ( BLIS_DEFAULT_NC_Z % BLIS_DEFAULT_NR_Z != 0 )    \
     )
-  #error NC must be multiple of NR for all datatypes.
+  #error "NC must be multiple of NR for all datatypes."
 #endif
 
+#if ( \
+      ( BLIS_DEFAULT_NC_S % BLIS_DEFAULT_MR_S != 0 ) || \
+      ( BLIS_DEFAULT_NC_D % BLIS_DEFAULT_MR_D != 0 ) || \
+      ( BLIS_DEFAULT_NC_C % BLIS_DEFAULT_MR_C != 0 ) || \
+      ( BLIS_DEFAULT_NC_Z % BLIS_DEFAULT_MR_Z != 0 )    \
+    )
+  #error "NC must be multiple of MR for all datatypes."
+#endif
+
+//
+// KC must be a whole multiple of KR, MR, and NR.
+//
 #if ( \
       ( BLIS_DEFAULT_KC_S % BLIS_DEFAULT_KR_S != 0 ) || \
       ( BLIS_DEFAULT_KC_D % BLIS_DEFAULT_KR_D != 0 ) || \
       ( BLIS_DEFAULT_KC_C % BLIS_DEFAULT_KR_C != 0 ) || \
       ( BLIS_DEFAULT_KC_Z % BLIS_DEFAULT_KR_Z != 0 )    \
     )
-  #error KC must be multiple of KR for all datatypes.
+  #error "KC must be multiple of KR for all datatypes."
+#endif
+
+#if ( \
+      ( BLIS_DEFAULT_KC_S % BLIS_DEFAULT_MR_S != 0 ) || \
+      ( BLIS_DEFAULT_KC_D % BLIS_DEFAULT_MR_D != 0 ) || \
+      ( BLIS_DEFAULT_KC_C % BLIS_DEFAULT_MR_C != 0 ) || \
+      ( BLIS_DEFAULT_KC_Z % BLIS_DEFAULT_MR_Z != 0 )    \
+    )
+  #error "KC must be multiple of MR for all datatypes."
+#endif
+
+#if ( \
+      ( BLIS_DEFAULT_KC_S % BLIS_DEFAULT_NR_S != 0 ) || \
+      ( BLIS_DEFAULT_KC_D % BLIS_DEFAULT_NR_D != 0 ) || \
+      ( BLIS_DEFAULT_KC_C % BLIS_DEFAULT_NR_C != 0 ) || \
+      ( BLIS_DEFAULT_KC_Z % BLIS_DEFAULT_NR_Z != 0 )    \
+    )
+  #error "KC must be multiple of NR for all datatypes."
 #endif
 
 /*
