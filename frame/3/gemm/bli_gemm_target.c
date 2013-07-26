@@ -184,9 +184,9 @@ void bli_gemm_get_target_domain( obj_t*  a,
     c  c c      c  c c     ab
 */
 {
-	dom_t d_a = bli_obj_domain( *a );
-	dom_t d_b = bli_obj_domain( *b );
-	dom_t d_c = bli_obj_domain( *c );
+	num_t d_a = bli_obj_datatype( *a );
+	num_t d_b = bli_obj_datatype( *b );
+	num_t d_c = bli_obj_datatype( *c );
 
 	if ( bli_is_real( d_c ) )
 	{
@@ -203,8 +203,8 @@ void bli_gemm_get_target_domain( obj_t*  a,
 	}
 	else // if ( bli_is_complex( d_c ) )
 	{
-		*td_a = d_a;
-		*td_b = d_b;
+		*td_a = bli_domain_of_dt( d_a );
+		*td_b = bli_domain_of_dt( d_b );
 
 		if ( bli_is_real( d_a ) &&
 		     bli_is_real( d_b ) )
@@ -249,9 +249,9 @@ void bli_gemm_get_target_prec( obj_t*  a,
     d  d d      d  d d      ab
 */
 {
-	prec_t p_a = bli_obj_precision( *a );
-	prec_t p_b = bli_obj_precision( *b );
-	prec_t p_c = bli_obj_precision( *c );
+	num_t p_a = bli_obj_datatype( *a );
+	num_t p_b = bli_obj_datatype( *b );
+	num_t p_c = bli_obj_datatype( *c );
 
 	if ( bli_is_single_prec( p_c ) )
 	{

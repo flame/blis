@@ -47,7 +47,7 @@ void bli_her2( obj_t*  alpha,
 	her2_t* her2_cntl;
 	num_t   dt_targ_x;
 	num_t   dt_targ_y;
-	num_t   dt_targ_c;
+	//num_t   dt_targ_c;
 	bool_t  x_is_contig;
 	bool_t  y_is_contig;
 	bool_t  c_is_contig;
@@ -63,7 +63,7 @@ void bli_her2( obj_t*  alpha,
 	// Query the target datatypes of each object.
 	dt_targ_x = bli_obj_target_datatype( *x );
 	dt_targ_y = bli_obj_target_datatype( *y );
-	dt_targ_c = bli_obj_target_datatype( *c );
+	//dt_targ_c = bli_obj_target_datatype( *c );
 
 	// Determine whether each operand is stored contiguously.
 	x_is_contig = ( bli_obj_vector_inc( *x ) == 1 );

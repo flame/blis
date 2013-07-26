@@ -145,7 +145,6 @@ typedef dcomplex  f77_dcomplex;
 
 #define BLIS_DOMAIN_BIT                    0x01
 #define BLIS_PRECISION_BIT                 0x02
-#define BLIS_SPECIAL_BIT                   0x04
 #define BLIS_DATATYPE_BITS                 0x07
 #define BLIS_TRANS_BIT                     0x08
 #define BLIS_CONJ_BIT                      0x10

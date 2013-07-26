@@ -79,7 +79,7 @@ void PASTEMAC(ch,varname)( \
                            void*   a, inc_t rs_a, inc_t cs_a \
                           ) \
 { \
-	ctype*  a_cast     = a; \
+	ctype*  a_cast  = a; \
 	ctype*  alpha11; \
 	doff_t  diagoffa; \
 	dim_t   i; \

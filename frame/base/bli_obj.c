@@ -493,41 +493,41 @@ void bli_obj_print( char* label, obj_t* obj )
 	fprintf( file, "%s\n", label );
 	fprintf( file, "\n" );
 
-	fprintf( file, " m x n           %lu x %lu\n", bli_obj_length( *obj ),
-	                                               bli_obj_width( *obj ) );
+	fprintf( file, " m x n           %lu x %lu\n", ( long unsigned int )bli_obj_length( *obj ),
+	                                               ( long unsigned int )bli_obj_width( *obj ) );
 	fprintf( file, "\n" );
 
-	fprintf( file, " offm, offn      %lu, %lu\n", bli_obj_row_offset( *obj ),
-	                                              bli_obj_col_offset( *obj ) );
-	fprintf( file, " diagoff         %ld\n", bli_obj_diag_offset( *obj ) );
+	fprintf( file, " offm, offn      %lu, %lu\n", ( long unsigned int )bli_obj_row_offset( *obj ),
+	                                              ( long unsigned int )bli_obj_col_offset( *obj ) );
+	fprintf( file, " diagoff         %ld\n", ( long int )bli_obj_diag_offset( *obj ) );
 	fprintf( file, "\n" );
 
 	fprintf( file, " buf             %p\n",  bli_obj_buffer( *obj ) );
-	fprintf( file, " elem size       %lu\n", bli_obj_elem_size( *obj ) );
-	fprintf( file, " rs, cs          %lu, %lu\n", bli_obj_row_stride( *obj ),
-	                                              bli_obj_col_stride( *obj ) );
+	fprintf( file, " elem size       %lu\n", ( long unsigned int )bli_obj_elem_size( *obj ) );
+	fprintf( file, " rs, cs          %lu, %lu\n", ( long unsigned int )bli_obj_row_stride( *obj ),
+	                                              ( long unsigned int )bli_obj_col_stride( *obj ) );
 	fprintf( file, " pack_mem          \n" );
 	fprintf( file, " - buf           %p\n",  bli_mem_buffer( pack_mem ) );
 	fprintf( file, " - buf_type      %u\n",  bli_mem_buf_type( pack_mem ) );
-	fprintf( file, " - size          %lu\n", bli_mem_size( pack_mem ) );
-	fprintf( file, " m_padded        %lu\n", bli_obj_padded_length( *obj ) );
-	fprintf( file, " n_padded        %lu\n", bli_obj_padded_width( *obj ) );
-	fprintf( file, " ps              %lu\n", bli_obj_panel_stride( *obj ) );
+	fprintf( file, " - size          %lu\n", ( long unsigned int )bli_mem_size( pack_mem ) );
+	fprintf( file, " m_padded        %lu\n", ( long unsigned int )bli_obj_padded_length( *obj ) );
+	fprintf( file, " n_padded        %lu\n", ( long unsigned int )bli_obj_padded_width( *obj ) );
+	fprintf( file, " ps              %lu\n", ( long unsigned int )bli_obj_panel_stride( *obj ) );
 	fprintf( file, "\n" );
 
-	fprintf( file, " info            %lX\n", (*obj).info );
+	fprintf( file, " info            %lX\n", ( long unsigned int )(*obj).info );
 	fprintf( file, " - is complex    %u\n",  bli_obj_is_complex( *obj ) );
 	fprintf( file, " - is d. prec    %u\n",  bli_obj_is_double_precision( *obj ) );
 	fprintf( file, " - has trans     %u\n",  bli_obj_has_trans( *obj ) );
 	fprintf( file, " - has conj      %u\n",  bli_obj_has_conj( *obj ) );
-	fprintf( file, " - struc type    %lu\n", bli_obj_struc( *obj ) );
-	fprintf( file, " - uplo type     %lu\n", bli_obj_uplo( *obj ) );
+	fprintf( file, " - struc type    %lu\n", ( long unsigned int )bli_obj_struc( *obj ) );
+	fprintf( file, " - uplo type     %lu\n", ( long unsigned int )bli_obj_uplo( *obj ) );
 	fprintf( file, "   - is upper    %u\n",  bli_obj_is_upper( *obj ) );
 	fprintf( file, "   - is lower    %u\n",  bli_obj_is_lower( *obj ) );
 	fprintf( file, "   - is dense    %u\n",  bli_obj_is_dense( *obj ) );
-	fprintf( file, " - datatype      %lu\n", bli_obj_datatype( *obj ) );
-	fprintf( file, " - target dt     %lu\n", bli_obj_target_datatype( *obj ) );
-	fprintf( file, " - exec dt       %lu\n", bli_obj_execution_datatype( *obj ) );
+	fprintf( file, " - datatype      %lu\n", ( long unsigned int )bli_obj_datatype( *obj ) );
+	fprintf( file, " - target dt     %lu\n", ( long unsigned int )bli_obj_target_datatype( *obj ) );
+	fprintf( file, " - exec dt       %lu\n", ( long unsigned int )bli_obj_execution_datatype( *obj ) );
 	fprintf( file, "\n" );
 }
 

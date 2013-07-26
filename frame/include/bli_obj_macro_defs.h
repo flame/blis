@@ -40,6 +40,30 @@
 
 // Info query
 
+#define bli_obj_is_float( obj ) \
+\
+	( ( (obj).info & BLIS_DATATYPE_BITS ) == BLIS_BITVAL_FLOAT_TYPE )
+
+#define bli_obj_is_double( obj ) \
+\
+	( ( (obj).info & BLIS_DATATYPE_BITS ) == BLIS_BITVAL_DOUBLE_TYPE )
+
+#define bli_obj_is_scomplex( obj ) \
+\
+	( ( (obj).info & BLIS_DATATYPE_BITS ) == BLIS_BITVAL_SCOMPLEX_TYPE )
+
+#define bli_obj_is_dcomplex( obj ) \
+\
+	( ( (obj).info & BLIS_DATATYPE_BITS ) == BLIS_BITVAL_DCOMPLEX_TYPE )
+
+#define bli_obj_is_int( obj ) \
+\
+	( ( (obj).info & BLIS_DATATYPE_BITS ) == BLIS_BITVAL_INT_TYPE )
+
+#define bli_obj_is_const( obj ) \
+\
+	( ( (obj).info & BLIS_DATATYPE_BITS ) == BLIS_BITVAL_CONST_TYPE )
+
 #define bli_obj_domain( obj ) \
 \
 	(   (obj).info & BLIS_DOMAIN_BIT )
@@ -79,30 +103,6 @@
 #define bli_obj_execution_datatype( obj ) \
 \
 	( ( (obj).info & BLIS_EXECUTION_DT_BITS ) >> BLIS_EXECUTION_DT_SHIFT )
-
-#define bli_obj_is_float( obj ) \
-\
-	( ( (obj).info & BLIS_DATATYPE_BITS ) == BLIS_BITVAL_FLOAT_TYPE )
-
-#define bli_obj_is_double( obj ) \
-\
-	( ( (obj).info & BLIS_DATATYPE_BITS ) == BLIS_BITVAL_DOUBLE_TYPE )
-
-#define bli_obj_is_scomplex( obj ) \
-\
-	( ( (obj).info & BLIS_DATATYPE_BITS ) == BLIS_BITVAL_SCOMPLEX_TYPE )
-
-#define bli_obj_is_dcomplex( obj ) \
-\
-	( ( (obj).info & BLIS_DATATYPE_BITS ) == BLIS_BITVAL_DCOMPLEX_TYPE )
-
-#define bli_obj_is_int( obj ) \
-\
-	( ( (obj).info & BLIS_DATATYPE_BITS ) == BLIS_BITVAL_INT_TYPE )
-
-#define bli_obj_is_const( obj ) \
-\
-	( ( (obj).info & BLIS_DATATYPE_BITS ) == BLIS_BITVAL_CONST_TYPE )
 
 #define bli_obj_conjtrans_status( obj ) \
 \

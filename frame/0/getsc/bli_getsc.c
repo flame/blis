@@ -70,7 +70,7 @@ void bli_getsc( obj_t*  chi,
 
 	// Index into the type combination array to extract the correct
 	// function pointer.
-	f = ftypes[dt_chi];
+	f = ftypes[dt_use];
 
 	// Invoke the function.
 	f( buf_chi,

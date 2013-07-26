@@ -194,9 +194,9 @@ void PASTEMAC(ch,opname)( \
 	bli_obj_create_scalar_with_attached_buffer( dt, alpha, &alphao ); \
 	bli_obj_create_scalar_with_attached_buffer( dt, beta,  &betao  ); \
 \
-	bli_obj_create_with_attached_buffer( dt, m,   n, a, rs_a, cs_a, &ao ); \
-	bli_obj_create_with_attached_buffer( dt, m_x, 1, x, rs_x, cs_x, &xo ); \
-	bli_obj_create_with_attached_buffer( dt, m_y, 1, y, rs_y, cs_y, &yo ); \
+	bli_obj_create_with_attached_buffer( dt, m_a, n_a, a, rs_a, cs_a, &ao ); \
+	bli_obj_create_with_attached_buffer( dt, m_x, 1,   x, rs_x, cs_x, &xo ); \
+	bli_obj_create_with_attached_buffer( dt, m_y, 1,   y, rs_y, cs_y, &yo ); \
 \
 	bli_obj_set_conjtrans( transa, ao ); \
 	bli_obj_set_conj( conjx, xo ); \
