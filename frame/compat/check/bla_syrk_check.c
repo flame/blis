@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-#ifdef BLIS_ENABLE_BLIS2BLAS
+#ifdef BLIS_ENABLE_BLAS2BLIS
 
 void bla_syrk_check( char*     dt_str,
                      char*     op_str,
@@ -55,8 +55,8 @@ void bla_syrk_check( char*     dt_str,
 	lower = PASTEF770(lsame)( uploc,  "L", (ftnlen)1, (ftnlen)1 );
 	upper = PASTEF770(lsame)( uploc,  "U", (ftnlen)1, (ftnlen)1 );
 
-	if ( nota ) { nrowa = *m }
-	else        { nrowa = *k }
+	if ( nota ) { nrowa = *m; }
+	else        { nrowa = *k; }
 
 	if      ( !lower && !upper )
 		info = 1;

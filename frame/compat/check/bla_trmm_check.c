@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-#ifdef BLIS_ENABLE_BLIS2BLAS
+#ifdef BLIS_ENABLE_BLAS2BLIS
 
 void bla_trmm_check( char*     dt_str,
                      char*     op_str,
@@ -64,8 +64,8 @@ void bla_trmm_check( char*     dt_str,
 	unita = PASTEF770(lsame)( diaga,  "U", (ftnlen)1, (ftnlen)1 );
 	nonua = PASTEF770(lsame)( diaga,  "N", (ftnlen)1, (ftnlen)1 );
 
-	if ( left ) { nrowa = *m }
-	else        { nrowa = *n }
+	if ( left ) { nrowa = *m; }
+	else        { nrowa = *n; }
 
 	if      ( !left && !right )
 		info = 1;

@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-#ifdef BLIS_ENABLE_BLIS2BLAS
+#ifdef BLIS_ENABLE_BLAS2BLIS
 
 void bla_trmv_check( char*     dt_str,
                      char*     op_str,
@@ -47,6 +47,8 @@ void bla_trmv_check( char*     dt_str,
 {
 	f77_int info = 0;
 	f77_int lower, upper;
+	f77_int nota, ta, conja;
+	f77_int unita, nonua;
 
 	lower = PASTEF770(lsame)( uploa,  "L", (ftnlen)1, (ftnlen)1 );
 	upper = PASTEF770(lsame)( uploa,  "U", (ftnlen)1, (ftnlen)1 );

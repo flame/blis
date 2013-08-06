@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-#ifdef BLIS_ENABLE_BLIS2BLAS
+#ifdef BLIS_ENABLE_BLAS2BLIS
 
 void bla_gemv_check( char*     dt_str,
                      char*     op_str,

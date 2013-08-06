@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-#ifdef BLIS_ENABLE_BLIS2BLAS
+#ifdef BLIS_ENABLE_BLAS2BLIS
 
 void bla_gemm_check( char*     dt_str,
                      char*     op_str,
@@ -52,7 +52,6 @@ void bla_gemm_check( char*     dt_str,
 	f77_int conja, conjb;
 	f77_int ta,    tb;
 	f77_int nrowa, nrowb;
-	f77_int ncola;
 
 	nota  = PASTEF770(lsame)( transa, "N", (ftnlen)1, (ftnlen)1 );
 	notb  = PASTEF770(lsame)( transb, "N", (ftnlen)1, (ftnlen)1 );
@@ -61,10 +60,10 @@ void bla_gemm_check( char*     dt_str,
 	ta    = PASTEF770(lsame)( transa, "T", (ftnlen)1, (ftnlen)1 );
 	tb    = PASTEF770(lsame)( transb, "T", (ftnlen)1, (ftnlen)1 );
 
-	if ( nota ) { nrowa = *m; ncola = *k; }
-	else        { nrowa = *k; ncola = *m; }
-	if ( notb ) { nrowb = *k;             }
-	else        { nrowb = *n;             }
+	if ( nota ) { nrowa = *m; }
+	else        { nrowa = *k; }
+	if ( notb ) { nrowb = *k; }
+	else        { nrowb = *n; }
 
 	if      ( !nota && !conja && !ta )
 		info = 1;
