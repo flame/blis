@@ -142,9 +142,6 @@ void PASTEMAC(ch,opname)( \
 	dim_t       m_y; \
 	inc_t       rs_x, cs_x; \
 	inc_t       rs_y, cs_y; \
-	err_t       init_result; \
-\
-	bli_init_safe( &init_result ); \
 \
 	bli_set_dims_with_trans( BLIS_NO_TRANSPOSE, m, n, m_x, m_y ); \
 \
@@ -164,8 +161,6 @@ void PASTEMAC(ch,opname)( \
 	                   &xo, \
 	                   &yo, \
 	                   &ao ); \
-\
-	bli_finalize_safe( init_result ); \
 }
 
 INSERT_GENTFUNC_BASIC( ger, ger )

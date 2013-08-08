@@ -182,9 +182,6 @@ void PASTEMAC(ch,opname)( \
 	obj_t       alphao, ao, bo; \
 \
 	dim_t       mn_a; \
-	err_t       init_result; \
-\
-	bli_init_safe( &init_result ); \
 \
 	bli_set_dim_with_side( side, m, n, mn_a ); \
 \
@@ -203,8 +200,6 @@ void PASTEMAC(ch,opname)( \
 	                   &alphao, \
 	                   &ao, \
 	                   &bo ); \
-\
-	bli_finalize_safe( init_result ); \
 }
 
 INSERT_GENTFUNC_BASIC( trsm, trsm )

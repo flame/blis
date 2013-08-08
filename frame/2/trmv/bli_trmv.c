@@ -147,9 +147,6 @@ void PASTEMAC(ch,opname)( \
 	obj_t       alphao, ao, xo; \
 \
 	inc_t       rs_x, cs_x; \
-	err_t       init_result; \
-\
-	bli_init_safe( &init_result ); \
 \
 	rs_x = incx; cs_x = m * incx; \
 \
@@ -167,8 +164,6 @@ void PASTEMAC(ch,opname)( \
 	PASTEMAC0(opname)( &alphao, \
 	                   &ao, \
 	                   &xo ); \
-\
-	bli_finalize_safe( init_result ); \
 }
 
 INSERT_GENTFUNC_BASIC( trmv, trmv )

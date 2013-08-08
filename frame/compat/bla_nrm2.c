@@ -50,6 +50,10 @@ ftype_r PASTEF772(chr,chx,blasname)( \
 	ftype_x* x0; \
 	inc_t    incx0; \
 	ftype_r  absum; \
+	err_t    init_result; \
+\
+	/* Initialize BLIS (if it is not already initialized). */ \
+	bli_init_safe( &init_result ); \
 \
 	/* Convert negative values of n to zero. */ \
 	bli_convert_blas_dim1( *n, n0 ); \
@@ -62,6 +66,9 @@ ftype_r PASTEF772(chr,chx,blasname)( \
 	PASTEMAC(chx,fnormv)( n0, \
 	                      x0, incx0, \
 	                      &absum ); \
+\
+	/* Finalize BLIS (if it was initialized above). */ \
+	bli_finalize_safe( init_result ); \
 \
 	return absum; \
 }

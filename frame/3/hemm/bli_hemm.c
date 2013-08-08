@@ -151,9 +151,6 @@ void PASTEMAC(ch,opname)( \
 \
 	dim_t       mn_a; \
 	dim_t       m_b, n_b; \
-	err_t       init_result; \
-\
-	bli_init_safe( &init_result ); \
 \
 	bli_set_dim_with_side(   side,   m, n, mn_a ); \
 	bli_set_dims_with_trans( transb, m, n, m_b, n_b ); \
@@ -177,8 +174,6 @@ void PASTEMAC(ch,opname)( \
 	                   &bo, \
 	                   &betao, \
 	                   &co ); \
-\
-	bli_finalize_safe( init_result ); \
 }
 
 INSERT_GENTFUNC_BASIC( hemm, hemm )

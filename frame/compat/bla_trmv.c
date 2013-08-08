@@ -58,6 +58,10 @@ void PASTEF77(ch,blasname)( \
 	inc_t   incx0; \
 	inc_t   rs_a, cs_a; \
 	ftype   one; \
+	err_t   init_result; \
+\
+	/* Initialize BLIS (if it is not already initialized). */ \
+	bli_init_safe( &init_result ); \
 \
 	/* Perform BLAS parameter checking. */ \
 	PASTEBLACHK(blasname)( MKSTR(ch), \
@@ -97,6 +101,9 @@ void PASTEF77(ch,blasname)( \
 	                       &one, \
 	                       a,  rs_a, cs_a, \
 	                       x0, incx0 ); \
+\
+	/* Finalize BLIS (if it was initialized above). */ \
+	bli_finalize_safe( init_result ); \
 }
 
 #ifdef BLIS_ENABLE_BLAS2BLIS

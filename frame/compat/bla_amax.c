@@ -51,6 +51,10 @@ f77_int PASTEF772(i,chx,blasname)( \
 	inc_t    incx0; \
 	gint_t   bli_index; \
 	f77_int  f77_index; \
+	err_t    init_result; \
+\
+	/* Initialize BLIS (if it is not already initialized). */ \
+	bli_init_safe( &init_result ); \
 \
 	/* Convert negative values of n to zero. */ \
 	bli_convert_blas_dim1( *n, n0 ); \
@@ -67,6 +71,9 @@ f77_int PASTEF772(i,chx,blasname)( \
 	/* Convert zero-based BLIS (C) index to one-based BLAS (Fortran)
 	   index. */ \
 	f77_index = bli_index + 1; \
+\
+	/* Finalize BLIS (if it was initialized above). */ \
+	bli_finalize_safe( init_result ); \
 \
 	return f77_index; \
 }

@@ -141,9 +141,6 @@ void PASTEMAC(ch,opname)( \
 	obj_t       alphao, ao, betao, co; \
 \
 	dim_t       m_a, n_a; \
-	err_t       init_result; \
-\
-	bli_init_safe( &init_result ); \
 \
 	bli_set_dims_with_trans( transa, m, k, m_a, n_a ); \
 \
@@ -162,8 +159,6 @@ void PASTEMAC(ch,opname)( \
 	                   &ao, \
 	                   &betao, \
 	                   &co ); \
-\
-	bli_finalize_safe( init_result ); \
 }
 
 INSERT_GENTFUNC_BASIC( syrk, syrk )
