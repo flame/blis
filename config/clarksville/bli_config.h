@@ -55,7 +55,7 @@
 // -- MULTITHREADING -----------------------------------------------------------
 
 // The maximum number of BLIS threads that will run concurrently.
-#define BLIS_MAX_NUM_THREADS             24
+#define BLIS_MAX_NUM_THREADS             1
 
 
 
@@ -67,7 +67,7 @@
 // contiguous memory pools.
 #define BLIS_NUM_MC_X_KC_BLOCKS          BLIS_MAX_NUM_THREADS
 #define BLIS_NUM_KC_X_NC_BLOCKS          1
-#define BLIS_NUM_MC_X_NC_BLOCKS          1
+#define BLIS_NUM_MC_X_NC_BLOCKS          0
 
 // The maximum preload byte offset is used to pad the end of the contiguous
 // memory pools so that the micro-kernel, when computing with the end of the
@@ -94,7 +94,7 @@
 
 // Alignment size used when sizing leading dimensions of dynamically
 // allocated memory.
-#define BLIS_HEAP_STRIDE_ALIGN_SIZE      16
+#define BLIS_HEAP_STRIDE_ALIGN_SIZE      BLIS_CACHE_LINE_SIZE
 
 // Alignment size used when allocating entire blocks of contiguous memory
 // from the contiguous memory allocator.

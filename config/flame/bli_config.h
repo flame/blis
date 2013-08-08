@@ -94,7 +94,7 @@
 
 // Alignment size used when sizing leading dimensions of dynamically
 // allocated memory.
-#define BLIS_HEAP_STRIDE_ALIGN_SIZE      16
+#define BLIS_HEAP_STRIDE_ALIGN_SIZE      BLIS_CACHE_LINE_SIZE
 
 // Alignment size used when allocating entire blocks of contiguous memory
 // from the contiguous memory allocator.

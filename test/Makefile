@@ -126,16 +126,16 @@ BLIS_LIB       := $(BLIS_LIB_PATH)/libblis.a
 
 # BLAS library path(s). This is where the BLAS libraries reside.
 BLAS_LIB_PATH  := $(HOME)/flame/lib
+MKL_LIB_PATH   := $(HOME)/intel/mkl/lib/intel64/
 
 # OpenBLAS, ATLAS, and MKL libraries.
-#BLAS_LIB       := $(LIB_PATH)/libblas.a
-#BLAS_LIB       := $(LIB_PATH)/libgoto.a
-#BLAS_LIB       := $(LIB_PATH)/libgoto2.a
 OPENBLAS_LIB   := $(BLAS_LIB_PATH)/libopenblas.a
 ATLAS_LIB      := $(BLAS_LIB_PATH)/libf77blas.a \
                   $(BLAS_LIB_PATH)/libatlas.a
-MKL_LIB        := -L$(HOME)/intel/mkl/lib/intel64/ \
-                  -lmkl_sequential -lmkl_core -lmkl_intel_lp64
+MKL_LIB        := -L$(MKL_LIB_PATH) \
+                  -lmkl_sequential \
+                  -lmkl_core \
+                  -lmkl_intel_lp64
 
 
 

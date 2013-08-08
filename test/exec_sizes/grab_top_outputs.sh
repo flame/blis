@@ -42,13 +42,15 @@ exec_ablas="ablas1 ablas2 ablas3 ablas4 ablas5 ablas6"
 exec_mblas="mblas1 mblas2 mblas3 mblas4 mblas5 mblas6"
 
 execs="${exec_blis} ${exec_oblas} ${exec_ablas} ${exec_mblas}"
-#execs="${exec_blis}"
 
+# Send column labels to the output file.
 top -n 1 -b | grep COMMAND >> ${output_file}
 
 for e in ${execs}; do
 
 	exec_name="${exec_prefix}_${e}.x"
+
+	echo "Capturing ${exec_name}..."
 
 	./${exec_name} &
 
@@ -56,5 +58,6 @@ for e in ${execs}; do
 
 	top -n 1 -b | grep "${exec_prefix}" >> ${output_file}
 
-	pkill "${exec_prefix}"
+	pkill "${exec_name}" > /dev/null
 done
+

@@ -83,14 +83,13 @@ int main( int argc, char** argv )
 	n_repeats = 3;
 
 #ifndef PRINT
-	p_begin = 100;
-	p_end   = 2000;
-	p_inc   = 100;
+	p_begin = 16;
+	p_end   = 800;
+	p_inc   = 8;
 
 	m_input = -1;
-	n_input = 384;
-	k_input = -1;
-	//k_input = 200;
+	n_input = -1;
+	k_input = 256;
 #else
 	p_begin = 16;
 	p_end   = 16;
