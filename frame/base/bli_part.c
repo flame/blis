@@ -99,7 +99,7 @@ void bli_acquire_mpart_t2b( subpart_t  requested_part,
 		m_part   = i;
 		n_part   = n;
 	}
-	if      ( requested_part == BLIS_SUBPART1T )
+	else if ( requested_part == BLIS_SUBPART1T )
 	{
 		// A1T (offm,offn) unchanged.
 		// A1T is (i+b) x n.
@@ -287,7 +287,7 @@ void bli_acquire_mpart_l2r( subpart_t  requested_part,
 		m_part   = m;
 		n_part   = j;
 	}
-	if      ( requested_part == BLIS_SUBPART1L )
+	else if ( requested_part == BLIS_SUBPART1L )
 	{
 		// A1L (offm,offn) unchanged.
 		// A1L is m x (j+b).

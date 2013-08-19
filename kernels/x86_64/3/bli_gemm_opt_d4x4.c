@@ -371,9 +371,9 @@ void bli_dgemm_opt_d4x4(
 		"                                \n\t"
 		"                                \n\t" // now avoid loading C if beta == 0
 		"                                \n\t"
-		//"xorpd     %%xmm0,  %%xmm0       \n\t" // set xmm0 to zero.
-		//"ucomisd   %%xmm0,  %%xmm7       \n\t" // check if beta == 0.
-		//"je      .BETAZERO               \n\t" // if ZF = 1, jump to beta == 0 case
+		"xorpd     %%xmm0,  %%xmm0       \n\t" // set xmm0 to zero.
+		"ucomisd   %%xmm0,  %%xmm7       \n\t" // check if beta == 0.
+		"je      .BETAZERO               \n\t" // if ZF = 1, jump to beta == 0 case
 		"                                \n\t"
 		"                                \n\t"
 		"                                \n\t" // check if aligned/column-stored
