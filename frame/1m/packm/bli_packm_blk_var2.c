@@ -260,6 +260,9 @@ void PASTEMAC(ch,varname )( \
 		{ \
 			diagoffc_i_abs = bli_abs( diagoffc_i ); \
 \
+			/* Sanity check. Diagonals should not intersect the short end of
+			   a micro-panel, but we can probably still support those cases if
+			   it happens. */ \
 			if ( ( bli_is_col_stored( rs_p, cs_p ) && diagoffc_i < 0 ) || \
 			     ( bli_is_row_stored( rs_p, cs_p ) && diagoffc_i > 0 ) ) \
 				bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \

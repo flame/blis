@@ -54,7 +54,7 @@
 //     (b) NR (for triangular operations such as trmm and trsm).
 // 
 
-#define BLIS_DEFAULT_MC_S              256
+#define BLIS_DEFAULT_MC_S              768
 #define BLIS_DEFAULT_KC_S              256
 #define BLIS_DEFAULT_NC_S              8192
 
@@ -82,8 +82,8 @@
 #define BLIS_EXTEND_KC_S               0 //(BLIS_DEFAULT_KC_S/4)
 #define BLIS_EXTEND_NC_S               0 //(BLIS_DEFAULT_NC_S/4)
 
-#define BLIS_EXTEND_MC_D               (BLIS_DEFAULT_MC_D/2)
-#define BLIS_EXTEND_KC_D               (BLIS_DEFAULT_KC_D/2)
+#define BLIS_EXTEND_MC_D               0 //(BLIS_DEFAULT_MC_D/2)
+#define BLIS_EXTEND_KC_D               0 //(BLIS_DEFAULT_KC_D/2)
 #define BLIS_EXTEND_NC_D               0 //(BLIS_DEFAULT_NC_D/4)
 
 #define BLIS_EXTEND_MC_C               0 //(BLIS_DEFAULT_MC_C/4)
@@ -100,7 +100,7 @@
 // in the m and n dimensions should all be equal to the size expected by
 // the reference micro-kernel(s).
 
-#define BLIS_DEFAULT_MR_S              4
+#define BLIS_DEFAULT_MR_S              8
 #define BLIS_DEFAULT_NR_S              4
 
 #define BLIS_DEFAULT_MR_D              4
