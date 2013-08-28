@@ -351,9 +351,13 @@ void libblis_test_read_params_file( char* input_filename, test_params_t* params 
 		                           params->reaction_to_failure );
 	}
 
-	// Read whether to output to matlab files.
+	// Read whether to output in matlab format.
 	libblis_test_read_next_line( buffer, input_stream );
-	sscanf( buffer, "%u ", &(params->output_matlab_files) );
+	sscanf( buffer, "%u ", &(params->output_matlab_format) );
+
+	// Read whether to output to files in addition to stdout.
+	libblis_test_read_next_line( buffer, input_stream );
+	sscanf( buffer, "%u ", &(params->output_files) );
 
 	// Close the file.
 	fclose( input_stream );
@@ -598,7 +602,8 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "problem size increment       %u\n", params->p_inc );
 	libblis_test_fprintf_c( os, "error-checking level         %u\n", params->error_checking_level );
 	libblis_test_fprintf_c( os, "reaction to failure          %c\n", params->reaction_to_failure );
-	libblis_test_fprintf_c( os, "output matlab files?         %u\n", params->output_matlab_files );
+	libblis_test_fprintf_c( os, "output in matlab format?     %u\n", params->output_matlab_format );
+	libblis_test_fprintf_c( os, "output to stdout AND files?  %u\n", params->output_files );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf( os, "\n" );
 }
@@ -878,9 +883,9 @@ void libblis_test_op_driver( test_params_t* params,
 	FILE*         output_stream = NULL;
 
 
-	// If output to matlab files was requested, attempt to open a file stream.
-	if ( params->output_matlab_files )
-		libblis_test_fopen_mfile( op_str, impl, &output_stream );
+	// If output to files was requested, attempt to open a file stream.
+	if ( params->output_files )
+		libblis_test_fopen_ofile( op_str, impl, &output_stream );
 
 	// Set the error-checking level according to what was specified in the
 	// input file.
@@ -1135,22 +1140,41 @@ void libblis_test_op_driver( test_params_t* params,
 						                                              p_cur ) );
 					}
 
-					// Output the results of the test.
-					libblis_test_fprintf( stdout,
-					                      "%s%s                 %s  %6.3lf  %9.2le    %s\n",
-					                      funcname_str, blank_str,
-					                      dims_str, perf, resid,
-					                      pass_str );
+					// Output the results of the test. Use matlab format if requested.
+					if ( params->output_matlab_format )
+					{
+						libblis_test_fprintf( stdout,
+						                      "%s%s( %3lu, 1:%lu ) = [ %s  %6.3lf  %9.2le ]; %c %s\n",
+						                      funcname_str, blank_str, pi, op->n_dims + 2,
+						                      dims_str, perf, resid,
+						                      OUTPUT_COMMENT_CHAR,
+						                      pass_str );
 
-					// Also output to a matlab file if requested (and successfully
-					// opened).
-					if ( output_stream )
-					libblis_test_fprintf( output_stream,
-					                      "%s%s( %3lu, 1:%lu ) = [ %s  %6.3lf  %9.2le ]; %c %s\n",
-					                      funcname_str, blank_str, pi, op->n_dims + 2,
-					                      dims_str, perf, resid,
-					                      OUTPUT_COMMENT_CHAR,
-					                      pass_str );
+						// Also output to a file if requested (and successfully opened).
+						if ( output_stream )
+						libblis_test_fprintf( output_stream,
+						                      "%s%s( %3lu, 1:%lu ) = [ %s  %6.3lf  %9.2le ]; %c %s\n",
+						                      funcname_str, blank_str, pi, op->n_dims + 2,
+						                      dims_str, perf, resid,
+						                      OUTPUT_COMMENT_CHAR,
+						                      pass_str );
+					}
+					else
+					{
+						libblis_test_fprintf( stdout,
+						                      "%s%s                 %s  %6.3lf  %9.2le    %s\n",
+						                      funcname_str, blank_str,
+						                      dims_str, perf, resid,
+						                      pass_str );
+
+						// Also output to a file if requested (and successfully opened).
+						if ( output_stream )
+						libblis_test_fprintf( output_stream,
+						                      "%s%s                 %s  %6.3lf  %9.2le    %s\n",
+						                      funcname_str, blank_str,
+						                      dims_str, perf, resid,
+						                      pass_str );
+					}
 
 					// If we need to check whether to do something on failure,
 					// do so now.
@@ -1192,7 +1216,7 @@ void libblis_test_op_driver( test_params_t* params,
 
 	// If the file was opened (successfully), close the output stream.
 	if ( output_stream )
-		libblis_test_fclose_mfile( output_stream );
+		libblis_test_fclose_ofile( output_stream );
 
 
 	// Mark this operation as done.
@@ -1376,7 +1400,7 @@ void libblis_test_abort( void )
 
 
 
-void libblis_test_fopen_mfile( char* op_str, mt_impl_t impl, FILE** output_stream )
+void libblis_test_fopen_ofile( char* op_str, mt_impl_t impl, FILE** output_stream )
 {
 	char filename_str[ MAX_FILENAME_LENGTH ];
 
@@ -1398,7 +1422,7 @@ void libblis_test_fopen_mfile( char* op_str, mt_impl_t impl, FILE** output_strea
 
 
 
-void libblis_test_fclose_mfile( FILE* output_stream )
+void libblis_test_fclose_ofile( FILE* output_stream )
 {
 	fclose( output_stream );
 }

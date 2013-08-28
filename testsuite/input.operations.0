@@ -156,52 +156,52 @@
 
 # --- Level-3 ------------------------------------------------------------------
 
-1         gemm                                          (0 = disable all; 1 = specify)
+0         gemm                                          (0 = disable all; 1 = specify)
 1           test sequential front-end                   (0 = disable; 1 = enable)
 -1 -2 -3    dimensions: m n k                           (-1 = bind to problem size)
-??          parameters: transa transb                   (? = test all values)
+nn          parameters: transa transb                   (? = test all values)
 
-1         hemm                                          (0 = disable all; 1 = specify)
+0         hemm                                          (0 = disable all; 1 = specify)
 1           test sequential front-end                   (0 = disable; 1 = enable)
 -1 -2       dimensions: m n                             (-1 = bind to problem size)
 ????        parameters: side uploa conja transb         (? = test all values)
 
-1         herk                                          (0 = disable all; 1 = specify)
+0         herk                                          (0 = disable all; 1 = specify)
 1           test sequential front-end                   (0 = disable; 1 = enable)
 -1 -2       dimensions: m k                             (-1 = bind to problem size)
-??          parameters: uploc transa                    (? = test all values)
+ln          parameters: uploc transa                    (? = test all values)
 
-1         her2k                                         (0 = disable all; 1 = specify)
+0         her2k                                         (0 = disable all; 1 = specify)
 1           test sequential front-end                   (0 = disable; 1 = enable)
 -1 -2       dimensions: m k                             (-1 = bind to problem size)
 ???         parameters: uploc transa transb             (? = test all values)
 
-1         symm                                          (0 = disable all; 1 = specify)
+0         symm                                          (0 = disable all; 1 = specify)
 1           test sequential front-end                   (0 = disable; 1 = enable)
 -1 -2       dimensions: m n                             (-1 = bind to problem size)
 ????        parameters: side uploa conja transb         (? = test all values)
 
-1         syrk                                          (0 = disable all; 1 = specify)
+0         syrk                                          (0 = disable all; 1 = specify)
 1           test sequential front-end                   (0 = disable; 1 = enable)
 -1 -2       dimensions: m k                             (-1 = bind to problem size)
 ??          parameters: uploc transa                    (? = test all values)
 
-1         syr2k                                         (0 = disable all; 1 = specify)
+0         syr2k                                         (0 = disable all; 1 = specify)
 1           test sequential front-end                   (0 = disable; 1 = enable)
 -1 -2       dimensions: m k                             (-1 = bind to problem size)
 ???         parameters: uploc transa transb             (? = test all values)
 
-1         trmm                                          (0 = disable all; 1 = specify)
+0         trmm                                          (0 = disable all; 1 = specify)
 1           test sequential front-end                   (0 = disable; 1 = enable)
 -1 -1       dimensions: m n                             (-1 = bind to problem size)
 ????        parameters: side uploa transa diaga         (? = test all values)
 
-1         trmm3                                         (0 = disable all; 1 = specify)
+0         trmm3                                         (0 = disable all; 1 = specify)
 1           test sequential front-end                   (0 = disable; 1 = enable)
 -1 -1       dimensions: m n                             (-1 = bind to problem size)
 ?????       parameters: side uploa transa diaga transb  (? = test all values)
 
-1         trsm                                          (0 = disable all; 1 = specify)
+0         trsm                                          (0 = disable all; 1 = specify)
 1           test sequential front-end                   (0 = disable; 1 = enable)
 -1 -1      dimensions: m n                             (-1 = bind to problem size)
 ????        parameters: side uploa transa diaga         (? = test all values)

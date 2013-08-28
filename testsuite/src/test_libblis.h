@@ -157,7 +157,8 @@ typedef struct
 	dim_t         p_max;
 	dim_t         p_inc;
 	char          reaction_to_failure;
-	unsigned int  output_matlab_files;
+	unsigned int  output_matlab_format;
+	unsigned int  output_files;
 	unsigned int  error_checking_level;
 } test_params_t;
 
@@ -337,8 +338,8 @@ void libblis_test_abort( void );
 
 // --- File I/O wrappers ---
 
-void libblis_test_fopen_mfile( char* op_str, mt_impl_t impl, FILE** output_stream );
-void libblis_test_fclose_mfile( FILE* output_stream );
+void libblis_test_fopen_ofile( char* op_str, mt_impl_t impl, FILE** output_stream );
+void libblis_test_fclose_ofile( FILE* output_stream );
 void libblis_test_fopen_check_stream( char* filename_str, FILE* stream );
 
 void libblis_test_read_next_line( char* buffer, FILE* input_stream );

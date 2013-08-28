@@ -1,12 +1,13 @@
 1       # Number of repeats per experiment (where best result is reported)
-c #rg    # Matrix storage scheme(s) to test ('c' = col-major; 'r' = row-major; 'g' = general stride)
-c #rji   # Vector storage scheme(s) to test ('c' = colvec/unit; 'r' = rowvec/unit; 'j' = colvec/non-unit; 'i' = rowvec/non-unit)
-1       # Test all combinations of storage schemes?
+c #rg     # Matrix storage scheme(s) to test ('c' = col-major; 'r' = row-major; 'g' = general stride)
+c #rji    # Vector storage scheme(s) to test ('c' = colvec/unit; 'r' = rowvec/unit; 'j' = colvec/non-unit; 'i' = rowvec/non-unit)
+0       # Test all combinations of storage schemes?
 32      # General stride spacing (for cases when testing general stride)
 d #sdcz    # Datatype(s) to test
 100     # Problem size: first to test
-500      # Problem size: maximum to test
+1000    # Problem size: maximum to test
 100     # Problem size: increment between experiments
 1       # Error-checking level (0 = disable error checking; 1 = full error checking)
 i       # Reaction to test failure ('i' = ignore; 's' = sleep() and continue; 'a' = abort)
-0       # Output results to stdout AND matlab files (0 = output only to stdout)
+0       # Output results in matlab/octave format (0 = output without formatting)
+0       # Output results to stdout AND files (0 = output only to stdout)
