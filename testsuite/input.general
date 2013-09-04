@@ -5,7 +5,7 @@ c #rji    # Vector storage scheme(s) to test ('c' = colvec/unit; 'r' = rowvec/un
 32      # General stride spacing (for cases when testing general stride)
 d #sdcz    # Datatype(s) to test
 100     # Problem size: first to test
-1000    # Problem size: maximum to test
+500     # Problem size: maximum to test
 100     # Problem size: increment between experiments
 1       # Error-checking level (0 = disable error checking; 1 = full error checking)
 i       # Reaction to test failure ('i' = ignore; 's' = sleep() and continue; 'a' = abort)

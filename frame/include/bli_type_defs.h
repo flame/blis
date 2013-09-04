@@ -59,13 +59,19 @@
 
 // -- General-purpose integers --
 
-#if 0
-typedef     int64_t  gint_t; // general signed integer
-typedef    uint64_t guint_t; // general unsigned integer
-#else
-typedef     int32_t  gint_t; // general signed integer
-typedef    uint32_t guint_t; // general unsigned integer
-#endif
+// NOTE: Here we define our general-purpose integers in terms of the C types,
+// rather than stdint types, because some systems will need larger integers
+// than others, and "long int" seems to be interpreted to the correct size
+// on most of our systems.
+//#if 0
+//typedef     int64_t  gint_t; // general signed integer
+//typedef    uint64_t guint_t; // general unsigned integer
+//#else
+//typedef     int32_t  gint_t; // general signed integer
+//typedef    uint32_t guint_t; // general unsigned integer
+//#endif
+typedef    signed long int  gint_t; // general signed integer
+typedef  unsigned long int guint_t; // general unsigned integer
 
 // -- Boolean type --
 
