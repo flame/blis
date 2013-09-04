@@ -729,8 +729,9 @@ dim_t libblis_test_get_dim_from_prob_size( int   dim_spec,
 {
 	dim_t dim;
 
-	if ( dim_spec < 0 ) dim = p_size / bli_abs(dim_spec);
-	else                dim = dim_spec;
+	if ( dim_spec < 0 ) dim = ( unsigned long )p_size /
+	                          ( unsigned long )bli_abs(dim_spec);
+	else                dim = ( unsigned long )dim_spec;
 
 	return dim;
 }
