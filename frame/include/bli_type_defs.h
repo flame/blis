@@ -48,14 +48,24 @@
   #include <stdint.h>
 #else
   // When stdint.h is not available, manually typedef the types we will use.
-  typedef   signed long int  int64_t;
+  #if 0
+  typedef   signed long int   int64_t;
   typedef unsigned long int  uint64_t;
+  #else
+  typedef   signed long int   int32_t;
+  typedef unsigned long int  uint32_t;
+  #endif
 #endif
 
 // -- General-purpose integers --
 
-typedef     int64_t gint_t;  // general signed integer
+#if 0
+typedef     int64_t  gint_t; // general signed integer
 typedef    uint64_t guint_t; // general unsigned integer
+#else
+typedef     int32_t  gint_t; // general signed integer
+typedef    uint32_t guint_t; // general unsigned integer
+#endif
 
 // -- Boolean type --
 

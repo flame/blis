@@ -133,7 +133,7 @@
 
 // Enable 64-bit integers in the BLAS compatibility layer? If disabled,
 // these integers will be defined as 32-bit.
-#define BLIS_ENABLE_BLAS2BLIS_INT64
+//#define BLIS_ENABLE_BLAS2BLIS_INT64
 
 // Fortran-77 name-mangling macros.
 #define PASTEF770(name)                        name ## _

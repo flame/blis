@@ -462,6 +462,14 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "version string               %s\n", bli_version() );
 	libblis_test_fprintf_c( os, "\n" );
+	libblis_test_fprintf_c( os, "type sizes\n" );
+	libblis_test_fprintf_c( os, "  gint_t                     %d\n", sizeof(gint_t) );
+	libblis_test_fprintf_c( os, "  guint_t                    %d\n", sizeof(guint_t) );
+	libblis_test_fprintf_c( os, "  float                      %d\n", sizeof(float) );
+	libblis_test_fprintf_c( os, "  double                     %d\n", sizeof(double) );
+	libblis_test_fprintf_c( os, "  scomplex                   %d\n", sizeof(scomplex) );
+	libblis_test_fprintf_c( os, "  dcomplex                   %d\n", sizeof(dcomplex) );
+	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "--- BLIS config header ---\n" );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "stack memory allocation        \n" );
