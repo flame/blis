@@ -46,7 +46,7 @@ void bli_her2k( obj_t*  alpha,
                 obj_t*  beta,
                 obj_t*  c )
 {
-	her2k_t* cntl;
+	//her2k_t* cntl;
 	obj_t    alpha_local;
 	obj_t    alpha_conj_local;
 	obj_t    beta_local;
@@ -133,10 +133,10 @@ void bli_her2k( obj_t*  alpha,
 
 	if ( pack_c ) bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 
+/*
 	// Choose the control tree.
 	cntl = her2k_cntl;
 
-/*
 	// Invoke the internal back-end.
 	bli_her2k_int( &alpha_local,
 	               &a_local,

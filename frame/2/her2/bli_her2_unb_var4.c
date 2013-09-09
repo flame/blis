@@ -156,6 +156,10 @@ void PASTEMAC3(chx,chy,chc,varname)( \
 	conj_t    conjh_conjx; \
 	conj_t    conjh_conjy; \
 \
+	/* Eliminate unused variable warnings. */ \
+	( void )conjh_conjx; \
+	( void )conjh_conjy; \
+\
 	if ( bli_zero_dim1( m ) ) return; \
 \
 	if ( PASTEMAC(chxy,eq0)( *alpha_cast ) ) return; \

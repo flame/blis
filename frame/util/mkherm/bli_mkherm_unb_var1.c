@@ -84,6 +84,9 @@ void PASTEMAC(ch,varname)( \
 	doff_t  diagoffa; \
 	dim_t   i; \
 \
+	/* Eliminate unused variable warnings. */ \
+	( void )alpha11; \
+\
 	/* If the dimension is zero, return early. */ \
 	if ( bli_zero_dim1( m ) ) return; \
 \
