@@ -36,21 +36,9 @@
 
 static double gtod_ref_time_sec = 0.0;
 
-double bli_clock()
+double bli_clock( void )
 {
-	double         the_time, norm_sec;
-	struct timeval tv;
-
-	gettimeofday( &tv, NULL );
-
-	if ( gtod_ref_time_sec == 0.0 )
-		gtod_ref_time_sec = ( double ) tv.tv_sec;
-
-	norm_sec = ( double ) tv.tv_sec - gtod_ref_time_sec;
-
-	the_time = norm_sec + tv.tv_usec * 1.0e-6;
-
-	return the_time;
+	return bli_clock_helper();
 }
 
 double bli_clock_min_diff( double time_min, double time_start )
@@ -76,4 +64,61 @@ double bli_clock_min_diff( double time_min, double time_start )
 
 	return time_min;
 }
+
+
+// --- Begin Linux build definitions -------------------------------------------
+#ifndef BLIS_ENABLE_WINDOWS_BUILD
+
+double bli_clock_helper()
+{
+	double         the_time, norm_sec;
+	struct timeval tv;
+
+	gettimeofday( &tv, NULL );
+
+	if ( gtod_ref_time_sec == 0.0 )
+		gtod_ref_time_sec = ( double ) tv.tv_sec;
+
+	norm_sec = ( double ) tv.tv_sec - gtod_ref_time_sec;
+
+	the_time = norm_sec + tv.tv_usec * 1.0e-6;
+
+	return the_time;
+}
+
+// --- End Linux build definitions ---------------------------------------------
+#else
+// --- Begin Windows build definitions -----------------------------------------
+
+#define WIN32_LEAN_AND_MEAN
+#define VC_EXTRALEAN
+#include <windows.h>
+
+double bli_clock_helper()
+{
+	LARGE_INTEGER clock_freq = {0};
+	LARGE_INTEGER clock_val;
+	BOOL          r_val;
+
+	r_val = QueryPerformanceFrequency( &clock_freq );
+
+	if ( r_val == 0 )
+	{
+		bli_print_msg( "QueryPerformanceFrequency() failed", __FILE__, __LINE__ );
+		bli_abort();
+	}
+
+	r_val = QueryPerformanceCounter( &clock_val );
+
+	if ( r_val == 0 )
+	{
+		bli_print_msg( "QueryPerformanceCounter() failed", __FILE__, __LINE__ );
+		bli_abort();
+	}
+
+	return ( ( double) clock_val.QuadPart / ( double) clock_freq.QuadPart );
+}
+
+#endif
+// --- End Windows build definitions -------------------------------------------
 

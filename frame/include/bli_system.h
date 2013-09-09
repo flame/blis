@@ -32,7 +32,32 @@
 
 */
 
-double bli_clock( void );
-double bli_clock_min_diff( double time_min, double time_start );
-double bli_clock_helper( void );
+#ifndef BLIS_SYSTEM_H
+#define BLIS_SYSTEM_H
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+#ifdef BLIS_ENABLE_WINDOWS_BUILD
+
+  // Include Windows header file.
+  #include <windows.h>
+
+  // Undefine attribute specifiers in Windows.
+  #define __attribute__(x)
+
+  // Undefine restrict.
+  #define restrict
+
+#endif
+
+// gettimeofday() needs this.
+#ifdef BLIS_ENABLE_WINDOWS_BUILD
+  #include <time.h>
+#else
+  #include <sys/time.h>
+  #include <time.h>
+#endif
+
+#endif
