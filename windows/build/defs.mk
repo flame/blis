@@ -160,7 +160,7 @@ NMAKE_HELP = .\build\nmake-help.cmd
 # --- Compiler-related definitions ---------------------------------------------
 #
 
-!include $(VERSION_FILE)
+#!include $(VERSION_FILE)
 
 # --- C compiler definitions ---
 
