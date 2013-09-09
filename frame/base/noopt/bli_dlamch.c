@@ -66,7 +66,7 @@ doublereal bli_dlamch(character *cmach, ftnlen cmach_len)
     static logical lrnd;
     static doublereal rmin, rmax, t, rmach;
     extern logical bli_lsame(character *, character *, ftnlen, ftnlen);
-    static doublereal small, sfmin;
+    static doublereal smnum, sfmin;
     extern /* Subroutine */ int bli_dlamc2(integer *, integer *, logical *, 
 	    doublereal *, integer *, doublereal *, integer *, doublereal *);
     static integer it;
@@ -147,13 +147,13 @@ doublereal bli_dlamch(character *cmach, ftnlen cmach_len)
 	emin = (doublereal) imin;
 	emax = (doublereal) imax;
 	sfmin = rmin;
-	small = 1. / rmax;
-	if (small >= sfmin) {
+	smnum = 1. / rmax;
+	if (smnum >= sfmin) {
 
 /*           Use SMALL plus a bit, to avoid the possibility of rounding */
 /*           causing overflow when computing  1/sfmin. */
 
-	    sfmin = small * (eps + 1.);
+	    sfmin = smnum * (eps + 1.);
 	}
     }
 
@@ -432,7 +432,7 @@ explicitly.\002,/)";
     static integer i__, lbeta;
     static doublereal rbase;
     static integer lemin, lemax, gnmin;
-    static doublereal small;
+    static doublereal smnum;
     static integer gpmin;
     static doublereal third, lrmin, lrmax, sixth;
     extern /* Subroutine */ int bli_dlamc1(integer *, integer *, logical *, 
@@ -595,13 +595,13 @@ L10:
 /*        is detected when we cannot recover the previous A. */
 
 	rbase = one / lbeta;
-	small = one;
+	smnum = one;
 	for (i__ = 1; i__ <= 3; ++i__) {
-	    d__1 = small * rbase;
-	    small = bli_dlamc3(&d__1, &zero);
+	    d__1 = smnum * rbase;
+	    smnum = bli_dlamc3(&d__1, &zero);
 /* L20: */
 	}
-	a = bli_dlamc3(&one, &small);
+	a = bli_dlamc3(&one, &smnum);
 	bli_dlamc4(&ngpmin, &one, &lbeta);
 	d__1 = -one;
 	bli_dlamc4(&ngnmin, &d__1, &lbeta);
