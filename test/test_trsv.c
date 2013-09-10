@@ -161,8 +161,9 @@ int main( int argc, char** argv )
 #else
 		printf( "data_trsv_%s", BLAS );
 #endif
-		printf( "( %2ld, 1:3 ) = [ %4lu  %10.3e  %6.3f ];\n",
-		        (p - p_begin + 1)/p_inc + 1, m, dtime_save, gflops );
+		printf( "( %2lu, 1:3 ) = [ %4lu  %10.3e  %6.3f ];\n",
+		        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
+		        ( unsigned long )m, dtime_save, gflops );
 
 		bli_obj_free( &alpha );
 

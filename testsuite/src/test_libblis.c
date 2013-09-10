@@ -325,15 +325,15 @@ void libblis_test_read_params_file( char* input_filename, test_params_t* params 
 
 	// Read the initial problem size to test.
 	libblis_test_read_next_line( buffer, input_stream );
-	sscanf( buffer, "%lu ", &(params->p_first) );
+	sscanf( buffer, "%u ", &(params->p_first) );
 
 	// Read the maximum problem size to test.
 	libblis_test_read_next_line( buffer, input_stream );
-	sscanf( buffer, "%lu ", &(params->p_max) );
+	sscanf( buffer, "%u ", &(params->p_max) );
 
 	// Read the problem size increment to test.
 	libblis_test_read_next_line( buffer, input_stream );
-	sscanf( buffer, "%lu ", &(params->p_inc) );
+	sscanf( buffer, "%u ", &(params->p_inc) );
 
 	// Read the requested error-checking level.
 	libblis_test_read_next_line( buffer, input_stream );
@@ -455,6 +455,12 @@ void libblis_test_read_op_info( test_ops_t*  ops,
 void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 {
 	int i;
+	char intsize_str[8];
+
+	if ( BLIS_INT_TYPE_SIZE == 32 || BLIS_INT_TYPE_SIZE == 64 )
+		sprintf( intsize_str, "%d", BLIS_INT_TYPE_SIZE );
+	else
+		sprintf( intsize_str, "%d", sizeof(gint_t) * 8 );
 
 	// Output some system parameters.
 	libblis_test_fprintf_c( os, "\n" );
@@ -462,15 +468,9 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "version string               %s\n", bli_version() );
 	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "type sizes\n" );
-	libblis_test_fprintf_c( os, "  gint_t                     %d\n", sizeof(gint_t) );
-	libblis_test_fprintf_c( os, "  guint_t                    %d\n", sizeof(guint_t) );
-	libblis_test_fprintf_c( os, "  float                      %d\n", sizeof(float) );
-	libblis_test_fprintf_c( os, "  double                     %d\n", sizeof(double) );
-	libblis_test_fprintf_c( os, "  scomplex                   %d\n", sizeof(scomplex) );
-	libblis_test_fprintf_c( os, "  dcomplex                   %d\n", sizeof(dcomplex) );
-	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "--- BLIS config header ---\n" );
+	libblis_test_fprintf_c( os, "\n" );
+	libblis_test_fprintf_c( os, "integer type size (bits)     %s\n", intsize_str );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "stack memory allocation        \n" );
 	libblis_test_fprintf_c( os, "  address alignment          %u\n", BLIS_STACK_BUF_ALIGN_SIZE );
@@ -488,6 +488,12 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "  panel stride alignment     %u\n", BLIS_CONTIG_STRIDE_ALIGN_SIZE );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "--- BLIS kernel header ---\n" );
+	libblis_test_fprintf_c( os, "\n" );
+	libblis_test_fprintf_c( os, "floating-point types         s     d     c     z \n" );
+	libblis_test_fprintf_c( os, "  sizes (bytes)          %5u %5u %5u %5u\n", sizeof(float),
+	                                                                          sizeof(double),
+	                                                                          sizeof(scomplex),
+	                                                                          sizeof(dcomplex) );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "level-3 cache blocksizes     s     d     c     z \n" );
 	libblis_test_fprintf_c( os, "  m dimension            %5u %5u %5u %5u\n",
@@ -713,9 +719,9 @@ operand_t libblis_test_get_operand_type_for_char( char o_type )
 
 
 
-dim_t libblis_test_get_n_dims_from_dimset( dimset_t dimset )
+unsigned int libblis_test_get_n_dims_from_dimset( dimset_t dimset )
 {
-	dim_t n_dims;
+	unsigned int n_dims;
 
 	if      ( dimset == BLIS_TEST_DIMS_MNK ) n_dims = 3;
 	else if ( dimset == BLIS_TEST_DIMS_MN  ) n_dims = 2;
@@ -732,14 +738,13 @@ dim_t libblis_test_get_n_dims_from_dimset( dimset_t dimset )
 
 
 
-dim_t libblis_test_get_dim_from_prob_size( int   dim_spec,
-                                           dim_t p_size )
+dim_t libblis_test_get_dim_from_prob_size( int          dim_spec,
+                                           unsigned int p_size )
 {
 	dim_t dim;
 
-	if ( dim_spec < 0 ) dim = ( unsigned long )p_size /
-	                          ( unsigned long )bli_abs(dim_spec);
-	else                dim = ( unsigned long )dim_spec;
+	if ( dim_spec < 0 ) dim = p_size / bli_abs(dim_spec);
+	else                dim = dim_spec;
 
 	return dim;
 }
@@ -851,16 +856,16 @@ void libblis_test_op_driver( test_params_t* params,
                                              num_t,          // datatype (current datatype)
                                              char*,          // pc_str (current param string)
                                              char*,          // sc_str (current storage string)
-                                             dim_t,          // p_cur (current problem size)
+                                             unsigned int,   // p_cur (current problem size)
                                              double*,        // perf
                                              double* ) )     // residual
 {
 	unsigned int  n_mstorage          = params->n_mstorage;
 	unsigned int  n_vstorage          = params->n_vstorage;
 	unsigned int  n_datatypes         = params->n_datatypes;
-	dim_t         p_first             = params->p_first;
-	dim_t         p_max               = params->p_max;
-	dim_t         p_inc               = params->p_inc;
+	unsigned int  p_first             = params->p_first;
+	unsigned int  p_max               = params->p_max;
+	unsigned int  p_inc               = params->p_inc;
 	unsigned int  reaction_to_failure = params->reaction_to_failure;
 
 	num_t         datatype;
@@ -878,7 +883,7 @@ void libblis_test_op_driver( test_params_t* params,
 	unsigned int  n_store_combos;
 	char**        sc_str;
 
-	dim_t         p_cur, pi;
+	unsigned int  p_cur, pi;
 	unsigned int  dt, pci, sci, i, j, o;
 
 	double        perf, resid;
@@ -1144,7 +1149,8 @@ void libblis_test_op_driver( test_params_t* params,
 					strcpy( dims_str, "" );
 					for ( i = 0; i < op->n_dims; ++i )
 					{
-						sprintf( &dims_str[strlen(dims_str)], " %5lu",
+						sprintf( &dims_str[strlen(dims_str)], " %5u",
+						         ( unsigned int )
 						         libblis_test_get_dim_from_prob_size( op->dim_spec[i],
 						                                              p_cur ) );
 					}
@@ -1153,7 +1159,7 @@ void libblis_test_op_driver( test_params_t* params,
 					if ( params->output_matlab_format )
 					{
 						libblis_test_fprintf( stdout,
-						                      "%s%s( %3lu, 1:%lu ) = [ %s  %6.3lf  %9.2le ]; %c %s\n",
+						                      "%s%s( %3u, 1:%u ) = [ %s  %6.3lf  %9.2le ]; %c %s\n",
 						                      funcname_str, blank_str, pi, op->n_dims + 2,
 						                      dims_str, perf, resid,
 						                      OUTPUT_COMMENT_CHAR,
@@ -1162,7 +1168,7 @@ void libblis_test_op_driver( test_params_t* params,
 						// Also output to a file if requested (and successfully opened).
 						if ( output_stream )
 						libblis_test_fprintf( output_stream,
-						                      "%s%s( %3lu, 1:%lu ) = [ %s  %6.3lf  %9.2le ]; %c %s\n",
+						                      "%s%s( %3u, 1:%u ) = [ %s  %6.3lf  %9.2le ]; %c %s\n",
 						                      funcname_str, blank_str, pi, op->n_dims + 2,
 						                      dims_str, perf, resid,
 						                      OUTPUT_COMMENT_CHAR,

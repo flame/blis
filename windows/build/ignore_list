@@ -1,1 +1,7 @@
-../../build/gen-make-frags/ignore_list
+attic
+broken
+old
+other
+temp
+tmp
+test

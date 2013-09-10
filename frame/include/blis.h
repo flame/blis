@@ -55,13 +55,7 @@ extern "C" {
 
 // -- System headers --
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-
-// gettimeofday() needs this.
-#include <sys/time.h>
-#include <time.h>
+#include "bli_system.h"
 
 
 // -- BLIS definitions --

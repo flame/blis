@@ -41,8 +41,8 @@
 
 #define bli_convert_blas_dim1( n_blas, n_blis )\
 { \
-	if ( n_blas < 0 ) n_blis = 0; \
-	else              n_blis = n_blas; \
+	if ( n_blas < 0 ) n_blis = ( dim_t )0; \
+	else              n_blis = ( dim_t )n_blas; \
 }
 
 // Macro to reposition vector pointers and flip signs of increments
@@ -54,12 +54,12 @@
 	if ( incx_blas < 0 ) \
 	{ \
 		x_blis    = (x_blas) + (n-1) * (incx_blas); \
-		incx_blis = -(incx_blas); \
+		incx_blis = ( inc_t )(-incx_blas); \
 	} \
 	else \
 	{ \
 		x_blis    = (x_blas); \
-		incx_blis = (incx_blas); \
+		incx_blis = ( inc_t )(incx_blas); \
 	} \
 }
 

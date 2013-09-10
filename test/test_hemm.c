@@ -299,8 +299,10 @@ int main( int argc, char** argv )
 #else
 		printf( "data_hemm_%s", BLAS );
 #endif
-		printf( "( %2ld, 1:4 ) = [ %4lu %4lu  %10.3e  %6.3f ];\n",
-		        (p - p_begin + 1)/p_inc + 1, m, n, dtime_save, gflops );
+		printf( "( %2lu, 1:4 ) = [ %4lu %4lu  %10.3e  %6.3f ];\n",
+		        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
+		        ( unsigned long )m,
+		        ( unsigned long )n, dtime_save, gflops );
 
 #if 0
 		bli_blksz_obj_free( mr );

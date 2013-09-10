@@ -290,8 +290,11 @@ int main( int argc, char** argv )
 #else
 		printf( "data_gemm_%s", BLAS );
 #endif
-		printf( "( %2ld, 1:5 ) = [ %4lu %4lu %4lu  %10.3e  %6.3f ];\n",
-		        (p - p_begin + 1)/p_inc + 1, m, k, n, dtime_save, gflops );
+		printf( "( %2lu, 1:5 ) = [ %4lu %4lu %4lu  %10.3e  %6.3f ];\n",
+		        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
+		        ( unsigned long )m,
+		        ( unsigned long )k,
+		        ( unsigned long )n, dtime_save, gflops );
 
 #if 0
 		bli_obj_release_pack( &a_pack );

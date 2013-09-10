@@ -55,7 +55,7 @@ void libblis_test_randm_experiment( test_params_t* params,
                                     num_t          datatype,
                                     char*          pc_str,
                                     char*          sc_str,
-                                    dim_t          p_cur,
+                                    unsigned int   p_cur,
                                     double*        perf,
                                     double*        resid );
 
@@ -105,7 +105,7 @@ void libblis_test_randm_experiment( test_params_t* params,
                                     num_t          dt,
                                     char*          pc_str,
                                     char*          sc_str,
-                                    dim_t          p_cur,
+                                    unsigned int   p_cur,
                                     double*        perf,
                                     double*        resid )
 {

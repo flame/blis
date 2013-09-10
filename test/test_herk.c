@@ -49,7 +49,7 @@ int main( int argc, char** argv )
 	dim_t p;
 	dim_t p_begin, p_end, p_inc;
 	int   m_input, k_input;
-	num_t dt_a, dt_b, dt_c;
+	num_t dt_a, dt_c;
 	num_t dt_alpha, dt_beta;
 	int   r, n_repeats;
 
@@ -98,7 +98,6 @@ int main( int argc, char** argv )
 #endif
 
 	dt_a = BLIS_DOUBLE;
-	dt_b = BLIS_DOUBLE;
 	dt_c = BLIS_DOUBLE;
 	dt_alpha = BLIS_DOUBLE;
 	dt_beta = BLIS_DOUBLE;
@@ -278,8 +277,10 @@ int main( int argc, char** argv )
 #else
 		printf( "data_herk_%s", BLAS );
 #endif
-		printf( "( %2ld, 1:4 ) = [ %4lu %4lu  %10.3e  %6.3f ];\n",
-		        (p - p_begin + 1)/p_inc + 1, m, k, dtime_save, gflops );
+		printf( "( %2lu, 1:4 ) = [ %4lu %4lu  %10.3e  %6.3f ];\n",
+		        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
+		        ( unsigned long )m,
+		        ( unsigned long )k, dtime_save, gflops );
 
 #if 0
 		bli_blksz_obj_free( mr );

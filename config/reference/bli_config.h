@@ -40,6 +40,18 @@
 
 
 
+// -- INTEGER PROPERTIES -------------------------------------------------------
+
+// The bit size of the integer type used to track values such as dimensions,
+// strides, diagonal offsets. A value of 32 results in BLIS using 32-bit signed
+// integers while 64 results in 64-bit integers. Any other value results in use
+// of the C99 type "long int". Note that this ONLY affects integers used
+// internally within BLIS as well as those exposed in the native BLAS-like BLIS
+// interface.
+#define BLIS_INT_TYPE_SIZE               32
+
+
+
 // -- FLOATING-POINT PROPERTIES ------------------------------------------------
 
 #define BLIS_NUM_FP_TYPES                4
@@ -55,7 +67,7 @@
 // -- MULTITHREADING -----------------------------------------------------------
 
 // The maximum number of BLIS threads that will run concurrently.
-#define BLIS_MAX_NUM_THREADS             24
+#define BLIS_MAX_NUM_THREADS             1
 
 
 
@@ -131,9 +143,13 @@
 // Enable the BLAS compatibility layer?
 #define BLIS_ENABLE_BLAS2BLIS
 
-// Enable 64-bit integers in the BLAS compatibility layer? If disabled,
-// these integers will be defined as 32-bit.
-//#define BLIS_ENABLE_BLAS2BLIS_INT64
+// The bit size of the integer type used to track values such as dimensions and
+// leading dimensions (ie: column strides) within the BLAS compatibility layer.
+// A value of 32 results in the compatibility layer using 32-bit signed integers
+// while 64 results in 64-bit integers. Any other value results in use of the
+// C99 type "long int". Note that this ONLY affects integers used within the
+// BLAS compatibility layer.
+#define BLIS_BLAS2BLIS_INT_TYPE_SIZE     32
 
 // Fortran-77 name-mangling macros.
 #define PASTEF770(name)                        name ## _

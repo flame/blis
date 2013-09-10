@@ -153,9 +153,9 @@ typedef struct
 	unsigned int  n_datatypes;
 	char          datatype_char[ MAX_NUM_DATATYPES + 1 ];
 	num_t         datatype[ MAX_NUM_DATATYPES + 1 ];
-	dim_t         p_first;
-	dim_t         p_max;
-	dim_t         p_inc;
+	unsigned int  p_first;
+	unsigned int  p_max;
+	unsigned int  p_inc;
 	char          reaction_to_failure;
 	unsigned int  output_matlab_format;
 	unsigned int  output_files;
@@ -169,7 +169,7 @@ typedef struct
 	struct test_ops_s*   ops;
 
 	int           front_seq;
-	dim_t         n_dims;
+	unsigned int  n_dims;
 	dimset_t      dimset;
 	int           dim_spec[ MAX_NUM_DIMENSIONS ];
 	unsigned int  n_params;
@@ -271,8 +271,8 @@ char*   libblis_test_get_string_for_result( double residual, num_t dt,
                                             thresh_t* thresh );
 param_t libblis_test_get_param_type_for_char( char p_type );
 operand_t libblis_test_get_operand_type_for_char( char o_type );
-dim_t   libblis_test_get_n_dims_from_dimset( dimset_t dimset );
-dim_t   libblis_test_get_dim_from_prob_size( int dim_spec, dim_t p_size );
+unsigned int libblis_test_get_n_dims_from_dimset( dimset_t dimset );
+dim_t   libblis_test_get_dim_from_prob_size( int dim_spec, unsigned int p_size );
 
 // --- Parameter/storage string generation ---
 
@@ -300,7 +300,7 @@ void libblis_test_op_driver( test_params_t* params,
                                              num_t,          // datatype (current datatype)
                                              char*,          // pc_str (current param string)
                                              char*,          // sc_str (current storage string)
-                                             dim_t,          // p_cur (current problem size)
+                                             unsigned int,   // p_cur (current problem size)
                                              double*,        // perf
                                              double* ) );    // residual
 

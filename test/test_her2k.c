@@ -116,7 +116,7 @@ int main( int argc, char** argv )
 		bli_obj_create( dt_beta,  1, 1, 0, 0, &beta );
 
 		bli_obj_create( dt_a, m, k, 0, 0, &a );
-		bli_obj_create( dt_a, m, k, 0, 0, &b );
+		bli_obj_create( dt_b, m, k, 0, 0, &b );
 		bli_obj_create( dt_c, m, m, 0, 0, &c );
 		bli_obj_create( dt_c, m, m, 0, 0, &c_save );
 
@@ -286,8 +286,10 @@ int main( int argc, char** argv )
 #else
 		printf( "data_her2k_%s", BLAS );
 #endif
-		printf( "( %2ld, 1:4 ) = [ %4lu %4lu  %10.3e  %6.3f ];\n",
-		        (p - p_begin + 1)/p_inc + 1, m, k, dtime_save, gflops );
+		printf( "( %2lu, 1:4 ) = [ %4lu %4lu  %10.3e  %6.3f ];\n",
+		        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
+		        ( unsigned long )m,
+		        ( unsigned long )k, dtime_save, gflops );
 
 #if 0
 		bli_blksz_obj_free( mr );
