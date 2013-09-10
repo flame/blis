@@ -127,15 +127,31 @@ BLIS_LIB       := $(BLIS_LIB_PATH)/libblis.a
 # BLAS library path(s). This is where the BLAS libraries reside.
 BLAS_LIB_PATH  := $(HOME)/flame/lib
 MKL_LIB_PATH   := $(HOME)/intel/mkl/lib/intel64/
+ESSL_LIB_PATH  := $(HOME)/path/to/essl/changeme
 
-# OpenBLAS, ATLAS, and MKL libraries.
+# OpenBLAS
 OPENBLAS_LIB   := $(BLAS_LIB_PATH)/libopenblas.a
+
+# ATLAS
 ATLAS_LIB      := $(BLAS_LIB_PATH)/libf77blas.a \
                   $(BLAS_LIB_PATH)/libatlas.a
+
+# MKL
 MKL_LIB        := -L$(MKL_LIB_PATH) \
                   -lmkl_sequential \
                   -lmkl_core \
                   -lmkl_intel_lp64
+
+# ESSL
+# Note: ESSL is named differently for SMP and/or BG
+ESSL_TYPE      :=       # This is the 32b library on POWER
+#ESSL_TYPE      := 6464  # This is the 64b library on POWER
+#ESSL_TYPE      := bg    # This is the 32b single-threaded library on Blue Gene
+#ESSL_TYPE      := smpbg # This is the 32b multi-threaded library on Blue Gene
+ESSL_LIB       := $(ESSL_LIB_PATH)/libessl$(ESSL_TYPE).a
+
+# Accelerate
+MAC_LIB        := -framework Accelerate
 
 
 
@@ -168,6 +184,10 @@ LDFLAGS        := -L/usr/lib/gcc/i486-linux-gnu/4.4.3 -L/usr/lib/gcc/i486-linux-
 # --- Targets/rules ------------------------------------------------------------
 #
 
+# Complete list of possible targets when defining 'all':
+#
+#   blis openblas atlas mkl mac essl
+#
 all: blis openblas atlas mkl
 
 blis: test_gemv_blis.x \
@@ -230,6 +250,37 @@ mkl:  test_gemv_mkl.x \
       test_trmm_mkl.x \
       test_trsm_mkl.x
 
+essl: test_gemv_essl.x \
+      test_ger_essl.x \
+      test_hemv_essl.x \
+      test_her_essl.x \
+      test_her2_essl.x \
+      test_trmv_essl.x \
+      test_trsv_essl.x \
+      \
+      test_gemm_essl.x \
+      test_hemm_essl.x \
+      test_herk_essl.x \
+      test_her2k_essl.x \
+      test_trmm_essl.x \
+      test_trsm_essl.x
+
+mac:  test_gemv_mac.x \
+      test_ger_mac.x \
+      test_hemv_mac.x \
+      test_her_mac.x \
+      test_her2_mac.x \
+      test_trmv_mac.x \
+      test_trsv_mac.x \
+      \
+      test_gemm_mac.x \
+      test_hemm_mac.x \
+      test_herk_mac.x \
+      test_her2k_mac.x \
+      test_trmm_mac.x \
+      test_trsm_mac.x
+
+
 
 # --Object file rules --
 
@@ -244,6 +295,12 @@ test_%_atlas.o: test_%.c
 
 test_%_mkl.o: test_%.c
 	$(CC) $(CFLAGS) -DBLAS=\"mkl\" -c $< -o $@
+
+test_%_essl.o: test_%.c
+	$(CC) $(CFLAGS) -DBLAS=\"essl\" -c $< -o $@
+
+test_%_mac.o: test_%.c
+	$(CC) $(CFLAGS) -DBLAS=\"mac\" -c $< -o $@
 
 test_%_blis.o: test_%.c
 	$(CC) $(CFLAGS) -DBLIS -c $< -o $@
@@ -264,6 +321,12 @@ test_%_atlas.x: test_%_atlas.o $(BLIS_LIB)
 
 test_%_mkl.x: test_%_mkl.o $(BLIS_LIB)
 	$(LINKER) $<             $(MKL_LIB)      $(BLIS_LIB) $(LDFLAGS) -o $@
+
+test_%_essl.x: test_%_essl.o $(BLIS_LIB)
+	$(LINKER) $<             $(ESSL_LIB)     $(BLIS_LIB) $(LDFLAGS) -o $@
+
+test_%_mac.x: test_%_mac.o $(BLIS_LIB)
+	$(LINKER) $<             $(MAC_LIB)      $(BLIS_LIB) $(LDFLAGS) -o $@
 
 test_%_blis.x: test_%_blis.o $(BLIS_LIB)
 	$(LINKER) $<                             $(BLIS_LIB) $(LDFLAGS) -o $@
