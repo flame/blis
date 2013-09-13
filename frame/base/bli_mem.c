@@ -34,87 +34,6 @@
 
 #include "blis.h"
 
-// Determine which of PACKDIM_MR/DEFAULT_MR and PACKDIM_NR/DEFAULT_NR is
-// greater so that the pair of values can be used to scale MAXIMUM_MC and
-// MAXIMUM_NC below. This is needed because the amount of space allocated
-// for a block of A and a panel of B needs to be such that MR and NR are
-// swapped (ie: A is packed with NR and B is packed with MR). This
-// transformation/optimization is needed for right-side trsm when inducing
-// an algorithm that (a) has favorable access patterns for column-stored
-// C and (b) allows the macro-kernel to reuse the existing left-side
-// fused gemmtrsm micro-kernels.
-// NOTE: We cross-multiply so that the comparison can stay in integer
-// arithmetic.
-#if ( BLIS_PACKDIM_MR_D * BLIS_DEFAULT_NR_D ) >= \
-    ( BLIS_PACKDIM_NR_D * BLIS_DEFAULT_MR_D )
-  #define BLIS_PACKDIM_MAXR_D BLIS_PACKDIM_MR_D
-  #define BLIS_DEFAULT_MAXR_D BLIS_DEFAULT_MR_D
-#else
-  #define BLIS_PACKDIM_MAXR_D BLIS_PACKDIM_NR_D
-  #define BLIS_DEFAULT_MAXR_D BLIS_DEFAULT_NR_D
-#endif
-
-// Define the size of pool blocks.
-// NOTE: for cases where the register blocksize extensions are non-zero,
-// we scale the maximum cache blocksize value so that enough space will
-// be allocated to accommodate the leading dimension for the packed
-// micro-panels of A and B.
-#define BLIS_POOL_MC_D     ( ( BLIS_MAXIMUM_MC_D * BLIS_PACKDIM_MAXR_D ) \
-                                                 / BLIS_DEFAULT_MAXR_D )
-#define BLIS_POOL_NC_D     ( ( BLIS_MAXIMUM_NC_D * BLIS_PACKDIM_MAXR_D ) \
-                                                 / BLIS_DEFAULT_MAXR_D )
-#define BLIS_POOL_KC_D     ( ( BLIS_MAXIMUM_KC_D * BLIS_PACKDIM_KR_D   ) \
-                                                 / BLIS_DEFAULT_KR_D   )
-
-// Define each pool's block size.
-// NOTE: Here we assume the "worst" case of the register blocking
-// being unit and every row of A and column of B needing maximum
-// padding to conform to the system alignment.
-#define BLIS_MK_BLOCK_SIZE ( BLIS_POOL_MC_D * \
-                             ( BLIS_POOL_KC_D + \
-                               ( BLIS_CONTIG_STRIDE_ALIGN_SIZE / \
-                                 sizeof( double ) \
-                               ) \
-                             ) * \
-                             sizeof( double ) \
-                           )
-#define BLIS_KN_BLOCK_SIZE ( ( BLIS_POOL_KC_D + \
-                               ( BLIS_CONTIG_STRIDE_ALIGN_SIZE / \
-                                 sizeof( double ) \
-                               ) \
-                             ) * \
-                             BLIS_POOL_NC_D * \
-                             sizeof( double ) \
-                           )
-#define BLIS_MN_BLOCK_SIZE ( BLIS_POOL_MC_D * \
-                             BLIS_POOL_NC_D * \
-                             sizeof( double ) \
-                           )
-
-// Define each pool's total size.
-#define BLIS_MK_POOL_SIZE  ( \
-                             BLIS_NUM_MC_X_KC_BLOCKS * \
-                             ( BLIS_MK_BLOCK_SIZE + \
-                               BLIS_CONTIG_ADDR_ALIGN_SIZE \
-                             ) + \
-                             BLIS_MAX_PRELOAD_BYTE_OFFSET \
-                           )
-
-#define BLIS_KN_POOL_SIZE  ( \
-                             BLIS_NUM_KC_X_NC_BLOCKS * \
-                             ( BLIS_KN_BLOCK_SIZE + \
-                               BLIS_CONTIG_ADDR_ALIGN_SIZE \
-                             ) + \
-                             BLIS_MAX_PRELOAD_BYTE_OFFSET \
-                           )
-
-#define BLIS_MN_POOL_SIZE  ( \
-                             BLIS_NUM_MC_X_NC_BLOCKS * \
-                             ( BLIS_MN_BLOCK_SIZE + \
-                               BLIS_CONTIG_ADDR_ALIGN_SIZE \
-                             ) + \
-                             BLIS_MAX_PRELOAD_BYTE_OFFSET \
-                           )
 
 // Declare one memory pool structure for each block size/shape we want to
 // be able to allocate.
@@ -123,6 +42,18 @@ static pool_t pools[3];
 
 
 // Physically contiguous memory for each pool.
+//
+// Generally speaking, the pool sizes are computed in a sub-header of blis.h
+// as follows:
+//
+//   BLIS_MK_POOL_SIZE = ( BLIS_DEFAULT_MC_? + BLIS_EXTEND_MC_? ) *
+//                       ( BLIS_DEFAULT_KC_? + BLIS_EXTEND_KC_? ) * BLIS_SIZEOF_?
+//
+// where "?" is the datatype that results in the largest pool size. The
+// constants BLIS_KN_POOL_SIZE and BLIS_MN_POOL_SIZE are computed in a 
+// similar manner. All constants are computed with appropriate "padding"
+// to ensure enough space given the alignments required by bli_config.h.
+//
 
 static void*  pool_mk_blk_ptrs[ BLIS_NUM_MC_X_KC_BLOCKS ];
 static char   pool_mk_mem[ BLIS_MK_POOL_SIZE ];

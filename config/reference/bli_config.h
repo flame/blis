@@ -54,6 +54,8 @@
 
 // -- FLOATING-POINT PROPERTIES ------------------------------------------------
 
+// Define the number of floating-point types supported, and the size of the
+// largest type.
 #define BLIS_NUM_FP_TYPES                4
 #define BLIS_MAX_TYPE_SIZE               sizeof(dcomplex)
 

@@ -46,9 +46,12 @@ extern "C" {
 
 // -- BLIS configuration definition --
 
-// NOTE: We include bli_config.h here because there might be something
+// NOTE: We include bli_config.h first because there might be something
 // defined there that is needed within one of the system headers. A good
 // example: posix_memalign() needs _GNU_SOURCE on GNU systems (I think).
+// 
+// PLEASE DON'T CHANGE THE ORDER IN WHICH HEADERS ARE INCLUDED UNLESS YOU
+// KNOW WHAT YOU ARE DOING.
 
 #include "bli_config.h"
 
@@ -69,6 +72,11 @@ extern "C" {
 
 #include "bli_kernel.h"
 #include "bli_kernel_macro_defs.h"
+
+
+// -- BLIS memory pool definitions --
+
+#include "bli_mem_pool_macro_defs.h"
 
 
 // -- Base operation prototypes --

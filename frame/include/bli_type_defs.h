@@ -89,6 +89,16 @@ typedef  gint_t  doff_t;  // diagonal offset type
 typedef guint_t  siz_t;   // byte size type
 typedef guint_t  info_t;  // object information bit field
 
+// -- Real types --
+
+// There are some places where we need to use sizeof() inside of a C
+// preprocessor #if conditional, and so here we define the various sizes
+// for those purposes.
+#define BLIS_SIZEOF_S      4  // sizeof(float)
+#define BLIS_SIZEOF_D      8  // sizeof(double)
+#define BLIS_SIZEOF_C      8  // sizeof(scomplex)
+#define BLIS_SIZEOF_Z      16 // sizeof(dcomplex)
+
 // -- Complex types --
 
 #ifdef BLIS_ENABLE_C99_COMPLEX
