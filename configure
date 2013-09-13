@@ -53,8 +53,9 @@ print_usage()
 	echo " "
 	echo "   confname    The name of the sub-directory inside of the 'config'"
 	echo "               directory containing the desired BLIS configuration."
-	echo "               If confname is not specified, then it defaults to"
-	echo "               'reference'."
+	echo "               Note that confname MUST be specified; if it is not,"
+	echo "               configure will complain. To build a reference"
+	echo "               implementation, use the 'reference' configuration"
 	echo " "
 	echo " Options:"
 	echo " "
@@ -67,6 +68,9 @@ print_usage()
 	echo "   -q          quiet"
 	echo "                 Suppress informational output. By default, configure"
 	echo "                 is verbose. (NOTE: -q is not yet implemented)"
+	echo " "
+	echo "   -h          help"
+	echo "                 Output this information."
 	echo " "
 
 	# Exit with non-zero exit status
@@ -110,8 +114,8 @@ main()
 	# The name of the (top-level) configuration directory.
 	config_dir='config'
 
-	# The name of the default configuration sub-directory.
-	config_name_def='reference'
+	# The name of the reference configuration sub-directory.
+	config_name_ref='reference'
 
 	# The name of the chosen configuration sub-directory.
 	config_name=''
@@ -133,7 +137,7 @@ main()
 
 
 	# Query which version of BLIS this is.
-	version=$(cat "${version_file}")
+	version=$(cat ${version_file})
 
 
 	# Process our command line options.
@@ -157,8 +161,33 @@ main()
 	# line option processing).
 	if [ $# = "0" ]; then
 
-		config_name=${config_name_def}
-		echo "${script_name}: no configuration sub-directory given; defaulting to '${config_name}'."
+		configs_avail=$(ls ${config_dir})
+
+		echo "${script_name}: "
+		echo "${script_name}: *** No configuration given! ***"
+		echo "${script_name}: "
+		echo "${script_name}: Default configuration behavior is not implemented (for your"
+		echo "${script_name}: own safety). Please re-run '${script_name}' and specify one of"
+		echo "${script_name}: the existing configurations in the '${config_dir}' directory:"
+		echo "${script_name}: "
+		for conf in ${configs_avail}; do
+			echo "${script_name}:   ${conf}"
+		done
+		echo "${script_name}: "
+		echo "${script_name}: or, alternatively, first create a new configuration (placing"
+		echo "${script_name}: it in the '${config_dir}' directory) and then run '${script_name}' with"
+		echo "${script_name}: that configuration. To build a reference implementation of"
+		echo "${script_name}: BLIS, use the '${config_name_ref}' configuration:"
+		echo "${script_name}: "
+		echo "${script_name}:   ./${script_name} ${config_name_ref}"
+		echo "${script_name}: "
+		echo "${script_name}: For a full description of how to run ${script_name}, please refer"
+		echo "${script_name}: to the output of:"
+		echo "${script_name}: "
+		echo "${script_name}:   ./${script_name} -h"
+		echo "${script_name}: "
+
+		exit 1
 
 	elif [ $# = "1" ]; then
 
