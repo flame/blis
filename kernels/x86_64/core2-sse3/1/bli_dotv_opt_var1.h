@@ -26,26 +26,36 @@
    SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
    LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
    DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+   THEORY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
+void bli_dotv_opt_var1( obj_t* x,
+                        obj_t* y,
+                        obj_t* rho );
 
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
+
+#undef  GENTPROT3
+#define GENTPROT3( ctype_x, ctype_y, ctype_r, chx, chy, chr, varname ) \
 \
-void PASTEMAC(ch,varname)( \
-                           dim_t           k, \
-                           ctype* restrict alpha, \
-                           ctype* restrict a, \
-                           ctype* restrict b, \
-                           ctype* restrict beta, \
-                           ctype* restrict c, inc_t rs_c, inc_t cs_c, \
-                           ctype* restrict a_next, \
-                           ctype* restrict b_next  \
-                         );
+void PASTEMAC3(chx,chy,chr,varname)( \
+                                     conj_t conjx, \
+                                     conj_t conjy, \
+                                     dim_t  n, \
+                                     void*  x, inc_t incx, \
+                                     void*  y, inc_t incy, \
+                                     void*  rho \
+                                   );
 
-INSERT_GENTPROT_BASIC( gemm_ref_4x2 )
+INSERT_GENTPROT3_BASIC( dotv_opt_var1 )
+
+#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
+INSERT_GENTPROT3_MIX_D( dotv_opt_var1 )
+#endif
+
+#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
+INSERT_GENTPROT3_MIX_P( dotv_opt_var1 )
+#endif
 
