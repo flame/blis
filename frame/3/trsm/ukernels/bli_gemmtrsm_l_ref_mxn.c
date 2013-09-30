@@ -41,12 +41,12 @@
 void PASTEMAC(ch,varname)( \
                            dim_t           k, \
                            ctype* restrict alpha, \
-                           ctype* restrict aL, \
-                           ctype* restrict a, \
-                           ctype* restrict bdT, \
-                           ctype* restrict bd, \
-                           ctype* restrict b, \
-                           ctype* restrict c, inc_t rs_c, inc_t cs_c, \
+                           ctype* restrict a10, \
+                           ctype* restrict a11, \
+                           ctype* restrict bd01, \
+                           ctype* restrict bd11, \
+                           ctype* restrict b11, \
+                           ctype* restrict c11, inc_t rs_c, inc_t cs_c, \
                            ctype* restrict a_next, \
                            ctype* restrict b_next  \
                          ) \
@@ -56,23 +56,23 @@ void PASTEMAC(ch,varname)( \
 \
 	ctype* restrict minus_one = PASTEMAC(ch,m1); \
 \
-	/* b = alpha * b - aL * bdT; */ \
+	/* b11 = alpha * b11 - a10 * bd01; */ \
 	PASTEMAC(ch,gemmukr)( k, \
 	                      minus_one, \
-	                      aL, \
-	                      bdT, \
+	                      a10, \
+	                      bd01, \
 	                      alpha, \
-	                      b, rs_b, cs_b, \
+	                      b11, rs_b, cs_b, \
 	                      a_next, \
 	                      b_next ); \
 \
-	/* b = inv(a) * b;
-	   bd = b; (if gemm ukernel needs duplicated B)
-	   c = b;                       */ \
-	PASTEMAC(ch,trsmukr)( a, \
-	                      b, \
-	                      bd, \
-	                      c, rs_c, cs_c ); \
+	/* b11  = inv(a11) * b11;
+	   bd11 = b11; (skipped if duplication is disabled)
+	   c11  = b11; */ \
+	PASTEMAC(ch,trsmukr)( a11, \
+	                      b11, \
+	                      bd11, \
+	                      c11, rs_c, cs_c ); \
 }
 
 INSERT_GENTFUNC_BASIC2( gemmtrsm_l_ref_mxn, GEMM_UKERNEL, TRSM_L_UKERNEL )

@@ -248,5 +248,21 @@
 #define bli_cnifac   BLIS_DEFAULT_NI_FAC
 #define bli_znifac   BLIS_DEFAULT_NI_FAC
 
+// Default Level-1f fusing factors
+
+#define bli_sdotxf_fusefac       BLIS_DOTXF_FUSE_FAC_S
+#define bli_ddotxf_fusefac       BLIS_DOTXF_FUSE_FAC_D
+#define bli_cdotxf_fusefac       BLIS_DOTXF_FUSE_FAC_C
+#define bli_zdotxf_fusefac       BLIS_DOTXF_FUSE_FAC_Z
+
+#define bli_saxpyf_fusefac       BLIS_AXPYF_FUSE_FAC_S
+#define bli_daxpyf_fusefac       BLIS_AXPYF_FUSE_FAC_D
+#define bli_caxpyf_fusefac       BLIS_AXPYF_FUSE_FAC_C
+#define bli_zaxpyf_fusefac       BLIS_AXPYF_FUSE_FAC_Z
+
+#define bli_sdotxaxpyf_fusefac   BLIS_DOTXAXPYF_FUSE_FAC_S
+#define bli_ddotxaxpyf_fusefac   BLIS_DOTXAXPYF_FUSE_FAC_D
+#define bli_cdotxaxpyf_fusefac   BLIS_DOTXAXPYF_FUSE_FAC_C
+#define bli_zdotxaxpyf_fusefac   BLIS_DOTXAXPYF_FUSE_FAC_Z
 
 #endif 

@@ -370,6 +370,18 @@
 \
 	( rs < cs )
 
+#define bli_has_nonunit_inc1( inc1 ) \
+\
+	( inc1 != 1 )
+
+#define bli_has_nonunit_inc2( inc1, inc2 ) \
+\
+	( inc1 != 1 || inc2 != 1 )
+
+#define bli_has_nonunit_inc3( inc1, inc2, inc3 ) \
+\
+	( inc1 != 1 || inc2 != 1 || inc3 != 1 )
+
 
 // diag offset-related
 

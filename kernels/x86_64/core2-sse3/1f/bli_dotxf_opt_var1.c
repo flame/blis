@@ -34,127 +34,46 @@
 
 #include "blis.h"
 
-/*
-#define FUNCPTR_T dotxf_fp
-
-typedef void (*FUNCPTR_T)(
-                           conj_t conjx,
-                           conj_t conjy,
-                           dim_t  n,
-                           void*  alpha,
-                           void*  x, inc_t incx,
-                           void*  y, inc_t incy,
-                           void*  beta,
-                           void*  rho
-                         );
-
-// If some mixed datatype functions will not be compiled, we initialize
-// the corresponding elements of the function array to NULL.
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-static FUNCPTR_T GENARRAY3_ALL(ftypes,dotxf_opt_var1);
-#else
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-static FUNCPTR_T GENARRAY3_EXT(ftypes,dotxf_opt_var1);
-#else
-static FUNCPTR_T GENARRAY3_MIN(ftypes,dotxf_opt_var1);
-#endif
-#endif
-
-
-void bli_dotxf_opt_var1( obj_t*  alpha,
-                         obj_t*  x,
-                         obj_t*  y,
-                         obj_t*  beta,
-                         obj_t*  rho )
-{
-	num_t     dt_x      = bli_obj_datatype( *x );
-	num_t     dt_y      = bli_obj_datatype( *y );
-	num_t     dt_rho    = bli_obj_datatype( *rho );
-
-	conj_t    conjx     = bli_obj_conj_status( *x );
-	conj_t    conjy     = bli_obj_conj_status( *y );
-	dim_t     n         = bli_obj_vector_dim( *x );
-
-	inc_t     inc_x     = bli_obj_vector_inc( *x );
-	void*     buf_x     = bli_obj_buffer_at_off( *x );
-
-	inc_t     inc_y     = bli_obj_vector_inc( *y );
-	void*     buf_y     = bli_obj_buffer_at_off( *y );
-
-	void*     buf_rho   = bli_obj_buffer_at_off( *rho );
-
-	num_t     dt_alpha;
-	void*     buf_alpha;
-
-	num_t     dt_beta;
-	void*     buf_beta;
-
-	FUNCPTR_T f;
-
-	// The datatype of alpha MUST be the type union of x and y. This is to
-	// prevent any unnecessary loss of information during computation.
-	dt_alpha  = bli_datatype_union( dt_x, dt_y );
-	buf_alpha = bli_obj_scalar_buffer( dt_alpha, *alpha );
-
-	// The datatype of beta MUST be the same as the datatype of rho.
-	dt_beta   = dt_rho;
-	buf_beta  = bli_obj_scalar_buffer( dt_beta, *beta );
-
-	// Index into the type combination array to extract the correct
-	// function pointer.
-	f = ftypes[dt_x][dt_y][dt_rho];
-
-	// Invoke the function.
-	f( conjx,
-	   conjy,
-	   n,
-	   buf_alpha, 
-	   buf_x, inc_x, 
-	   buf_y, inc_y,
-	   buf_beta, 
-	   buf_rho );
-}
-*/
 
 #undef  GENTFUNC3U12
-#define GENTFUNC3U12( ctype_x, ctype_y, ctype_r, ctype_xy, chx, chy, chr, chxy, opname, varname ) \
+#define GENTFUNC3U12( ctype_a, ctype_x, ctype_y, ctype_ax, cha, chx, chy, chax, opname, varname ) \
 \
 void PASTEMAC3(chx,chy,chr,varname)( \
+                                     conj_t conjat, \
                                      conj_t conjx, \
-                                     conj_t conjy, \
-                                     dim_t  b_m, \
-                                     dim_t  n, \
+                                     dim_t  m, \
+                                     dim_t  b_n, \
                                      void*  alpha, \
-                                     void*  x, inc_t incx, inc_t ldx, \
-                                     void*  y, inc_t incy, \
+                                     void*  a, inc_t inca, inc_t lda, \
+                                     void*  x, inc_t incx, \
                                      void*  beta, \
-                                     void*  r, inc_t incr \
+                                     void*  y, inc_t incy \
                                    ) \
 { \
 	ctype_xy* alpha_cast = alpha; \
-	ctype_x*  x_cast     = x; \
-	ctype_y*  y_cast     = y; \
+	ctype_x*  a_cast     = a; \
+	ctype_y*  x_cast     = x; \
 	ctype_r*  beta_cast  = beta; \
-	ctype_r*  r_cast     = r; \
-	ctype_x*  x1; \
-	ctype_y*  y1; \
-	ctype_r*  rho1; \
+	ctype_r*  y_cast     = y; \
+	ctype_x*  a1; \
+	ctype_y*  x1; \
+	ctype_r*  psi1; \
 	dim_t     i; \
 \
-	for ( i = 0; i < b_m; ++i ) \
+	for ( i = 0; i < b_n; ++i ) \
 	{ \
-		x1   = x_cast + (0  )*incx + (i  )*ldx; \
-		y1   = y_cast + (0  )*incy; \
-		rho1 = r_cast + (i  )*incr; \
+		a1   = a_cast + (0  )*inca + (i  )*lda; \
+		x1   = x_cast + (0  )*incx; \
+		psi1 = y_cast + (i  )*incy; \
 \
-		PASTEMAC3(chx,chy,chr,dotxv)( conjx, \
-		                              conjy, \
-		                              n, \
+		PASTEMAC3(cha,chx,chy,dotxv)( conjat, \
+		                              conjx, \
+		                              m, \
 		                              alpha_cast, \
+		                              a1,   inca, \
 		                              x1,   incx, \
-		                              y1,   incy, \
 		                              beta_cast, \
-		                              rho1 ); \
+		                              psi1 ); \
 	} \
 }
 
@@ -184,30 +103,30 @@ typedef union
 
 
 void bli_ddddotxf_opt_var1(
+                            conj_t conjat,
                             conj_t conjx,
-                            conj_t conjy,
-                            dim_t  b_m,
-                            dim_t  n,
+                            dim_t  m,
+                            dim_t  b_n,
                             void*  alpha,
-                            void*  x, inc_t incx, inc_t ldx,
-                            void*  y, inc_t incy,
+                            void*  a, inc_t inca, inc_t lda,
+                            void*  x, inc_t incx,
                             void*  beta,
-                            void*  r, inc_t incr
+                            void*  y, inc_t incy
                           ) 
 { 
 	double*  restrict alpha_cast = alpha; 
 	double*  restrict beta_cast = beta; 
+	double*  restrict a_cast = a; 
 	double*  restrict x_cast = x; 
 	double*  restrict y_cast = y; 
-	double*  restrict r_cast = r; 
 	dim_t             i; 
 
 	const dim_t       n_elem_per_reg = 2;
 	const dim_t       n_iter_unroll  = 4;
 
-	dim_t             n_pre;
-	dim_t             n_run;
-	dim_t             n_left;
+	dim_t             m_pre;
+	dim_t             m_run;
+	dim_t             m_left;
 
 	double*  restrict x0;
 	double*  restrict x1;
@@ -223,76 +142,76 @@ void bli_ddddotxf_opt_var1(
 	bool_t            use_ref = FALSE;
 
 
-	if ( bli_zero_dim1( b_m ) ) return;
+	if ( bli_zero_dim1( b_n ) ) return;
 
 	// If the vector lengths are zero, scale r by beta and return.
-	if ( bli_zero_dim1( n ) ) 
+	if ( bli_zero_dim1( m ) ) 
 	{ 
 		PASTEMAC2(d,d,scalv)( BLIS_NO_CONJUGATE,
-		                      b_m,
+		                      b_n,
 		                      beta_cast,
-		                      r_cast, incr );
+		                      y_cast, incy );
 		return; 
 	} 
 
-    n_pre = 0;
+    m_pre = 0;
 
     // If there is anything that would interfere with our use of aligned
     // vector loads/stores, call the reference implementation.
-	if ( b_m < PASTEMAC(d,dotxf_fuse_fac) )
+	if ( b_n < PASTEMAC(d,dotxf_fuse_fac) )
 	{
 		use_ref = TRUE;
 	}
-    else if ( incx != 1 || incy != 1 || incr != 1 )
+    else if ( inca != 1 || incx != 1 || incy != 1 )
     {
         use_ref = TRUE;
     }
-	else if ( bli_is_unaligned_to( x, 16 ) ||
-	          bli_is_unaligned_to( y, 16 ) ||
-	          bli_is_unaligned_to( r, 16 ) )
+	else if ( bli_is_unaligned_to( a, 16 ) ||
+	          bli_is_unaligned_to( x, 16 ) ||
+	          bli_is_unaligned_to( y, 16 ) )
 	{
 		use_ref = TRUE;
 
-		if ( bli_is_unaligned_to( x, 16 ) &&
-		     bli_is_unaligned_to( y, 16 ) &&
-		     bli_is_aligned_to( r, 16 ) ) // Note: r is not affected by x and y being unaligned. 
+		if ( bli_is_unaligned_to( a, 16 ) &&
+		     bli_is_unaligned_to( x, 16 ) &&
+		     bli_is_aligned_to( y, 16 ) ) // Note: r is not affected by x and y being unaligned. 
 		{
 			use_ref = FALSE;
-			n_pre   = 1;
+			m_pre   = 1;
 		}
 	}
 
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE )
 	{
-		PASTEMAC3(d,d,d,dotxf_unb_var1)( conjx,
-		                                 conjy,
-		                                 b_m,
-		                                 n,
+		PASTEMAC3(d,d,d,dotxf_unb_var1)( conjat,
+		                                 conjx,
+		                                 m,
+		                                 b_n,
 		                                 alpha_cast,
-		                                 x_cast, incx, ldx,
-		                                 y_cast, incy,
+		                                 a_cast, inca, lda,
+		                                 x_cast, incx,
 		                                 beta_cast,
-		                                 r_cast, incr );
+		                                 y_cast, incy );
 		return;
 	}
 
 
-	n_run       = ( n - n_pre ) / ( n_elem_per_reg * n_iter_unroll );
-	n_left      = ( n - n_pre ) % ( n_elem_per_reg * n_iter_unroll );
+	m_run       = ( m - m_pre ) / ( n_elem_per_reg * n_iter_unroll );
+	m_left      = ( m - m_pre ) % ( n_elem_per_reg * n_iter_unroll );
 
-	x0 = x_cast;
-	x1 = x_cast +   ldx;
-	x2 = x_cast + 2*ldx;
-	x3 = x_cast + 3*ldx;
-	y0 = y_cast;
+	x0 = a_cast;
+	x1 = a_cast +   lda;
+	x2 = a_cast + 2*lda;
+	x3 = a_cast + 3*lda;
+	y0 = x_cast;
 
 	PASTEMAC(d,set0s)( rho0 ); 
 	PASTEMAC(d,set0s)( rho1 ); 
 	PASTEMAC(d,set0s)( rho2 ); 
 	PASTEMAC(d,set0s)( rho3 ); 
 
-	if ( n_pre == 1 )
+	if ( m_pre == 1 )
 	{
 		x0c = *x0;
 		x1c = *x1;
@@ -305,11 +224,11 @@ void bli_ddddotxf_opt_var1(
 		rho2 += x2c * y0c;
 		rho3 += x3c * y0c;
 
-		x0 += incx;
-		x1 += incx;
-		x2 += incx;
-		x3 += incx;
-		y0 += incy;
+		x0 += inca;
+		x1 += inca;
+		x2 += inca;
+		x3 += inca;
+		y0 += incx;
 	}
 
 	rho0v.v = _mm_setzero_pd();
@@ -317,7 +236,7 @@ void bli_ddddotxf_opt_var1(
 	rho2v.v = _mm_setzero_pd();
 	rho3v.v = _mm_setzero_pd();
 
-	for ( i = 0; i < n_run; ++i )
+	for ( i = 0; i < m_run; ++i )
 	{
 		x0v.v = _mm_load_pd( ( double* )(x0 + 0*n_elem_per_reg) );
 		x1v.v = _mm_load_pd( ( double* )(x1 + 0*n_elem_per_reg) );
@@ -376,9 +295,9 @@ void bli_ddddotxf_opt_var1(
 	rho2 += rho2v.d[0] + rho2v.d[1];
 	rho3 += rho3v.d[0] + rho3v.d[1];
 
-	if ( n_left > 0 )
+	if ( m_left > 0 )
 	{
-		for ( i = 0; i < n_left; ++i )
+		for ( i = 0; i < m_left; ++i )
 		{
 			x0c = *x0;
 			x1c = *x1;
@@ -391,23 +310,23 @@ void bli_ddddotxf_opt_var1(
 			rho2 += x2c * y0c;
 			rho3 += x3c * y0c;
 
-			x0 += incx;
-			x1 += incx;
-			x2 += incx;
-			x3 += incx;
-			y0 += incy;
+			x0 += inca;
+			x1 += inca;
+			x2 += inca;
+			x3 += inca;
+			y0 += incx;
 		}
 	}
 /*
-	PASTEMAC2(d,d,scals)( *beta_cast, *(r_cast  ) ); \
-	PASTEMAC2(d,d,scals)( *beta_cast, *(r_cast+1) ); \
-	PASTEMAC2(d,d,scals)( *beta_cast, *(r_cast+2) ); \
-	PASTEMAC2(d,d,scals)( *beta_cast, *(r_cast+3) ); \
+	PASTEMAC2(d,d,scals)( *beta_cast, *(y_cast  ) ); \
+	PASTEMAC2(d,d,scals)( *beta_cast, *(y_cast+1) ); \
+	PASTEMAC2(d,d,scals)( *beta_cast, *(y_cast+2) ); \
+	PASTEMAC2(d,d,scals)( *beta_cast, *(y_cast+3) ); \
 
-	PASTEMAC3(d,d,d,axpys)( *alpha_cast, rho1, *(r_cast  ) ); \
-	PASTEMAC3(d,d,d,axpys)( *alpha_cast, rho2, *(r_cast+1) ); \
-	PASTEMAC3(d,d,d,axpys)( *alpha_cast, rho3, *(r_cast+2) ); \
-	PASTEMAC3(d,d,d,axpys)( *alpha_cast, rho4, *(r_cast+3) ); \
+	PASTEMAC3(d,d,d,axpys)( *alpha_cast, rho1, *(y_cast  ) ); \
+	PASTEMAC3(d,d,d,axpys)( *alpha_cast, rho2, *(y_cast+1) ); \
+	PASTEMAC3(d,d,d,axpys)( *alpha_cast, rho3, *(y_cast+2) ); \
+	PASTEMAC3(d,d,d,axpys)( *alpha_cast, rho4, *(y_cast+3) ); \
 */
 
 	rho1v.d[0] = rho0;
@@ -418,8 +337,8 @@ void bli_ddddotxf_opt_var1(
 	betav.v  = _mm_loaddup_pd( ( double* ) beta_cast );
 	alphav.v = _mm_loaddup_pd( ( double* ) alpha_cast );
 
-	rho0v.v = _mm_load_pd( ( double* )(r_cast + 0*n_elem_per_reg) );
-	rho2v.v = _mm_load_pd( ( double* )(r_cast + 1*n_elem_per_reg) );
+	rho0v.v = _mm_load_pd( ( double* )(y_cast + 0*n_elem_per_reg) );
+	rho2v.v = _mm_load_pd( ( double* )(y_cast + 1*n_elem_per_reg) );
 
 	rho0v.v *= betav.v;
 	rho2v.v *= betav.v;
@@ -427,7 +346,7 @@ void bli_ddddotxf_opt_var1(
 	rho0v.v += alphav.v * rho1v.v;
 	rho2v.v += alphav.v * rho3v.v;
 
-	_mm_store_pd( ( double* )(r_cast + 0*n_elem_per_reg), rho0v.v );
-	_mm_store_pd( ( double* )(r_cast + 1*n_elem_per_reg), rho2v.v );
+	_mm_store_pd( ( double* )(y_cast + 0*n_elem_per_reg), rho0v.v );
+	_mm_store_pd( ( double* )(y_cast + 1*n_elem_per_reg), rho2v.v );
 
 }

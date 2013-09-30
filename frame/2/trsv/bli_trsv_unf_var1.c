@@ -161,8 +161,8 @@ void PASTEMAC2(cha,chx,varname)( \
 \
 	conja = bli_extract_conj( trans ); \
 \
-	/* Query the fusing factor from the dotxf implementation. */ \
-	b_fuse = PASTEMAC(chax,dotxf_fuse_fac); \
+	/* Query the fusing factor for the dotxf implementation. */ \
+	b_fuse = PASTEMAC(chax,dotxf_fusefac); \
 \
 	/* x = alpha * x; */ \
 	PASTEMAC2(chax,chx,scalv)( BLIS_NO_CONJUGATE, \
@@ -186,8 +186,8 @@ void PASTEMAC2(cha,chx,varname)( \
 			/* x1 = x1 - A12 * x2; */ \
 			PASTEMAC3(cha,chx,chx,kername)( conja, \
 			                                BLIS_NO_CONJUGATE, \
-			                                f, \
 			                                n_behind, \
+			                                f, \
 			                                minus_one, \
 			                                A12, cs_at, rs_at, \
 			                                x2,  incx, \
@@ -242,8 +242,8 @@ void PASTEMAC2(cha,chx,varname)( \
 			/* x1 = x1 - A10 * x0; */ \
 			PASTEMAC3(cha,chx,chx,kername)( conja, \
 			                                BLIS_NO_CONJUGATE, \
-			                                f, \
 			                                n_behind, \
+			                                f, \
 			                                minus_one, \
 			                                A10, cs_at, rs_at, \
 			                                x0,  incx, \

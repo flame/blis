@@ -159,8 +159,8 @@ void PASTEMAC2(cha,chx,varname)( \
 \
 	conja = bli_extract_conj( trans ); \
 \
-	/* Query the fusing factor from the axpyf implementation. */ \
-	b_fuse = PASTEMAC(chax,axpyf_fuse_fac); \
+	/* Query the fusing factor for the axpyf implementation. */ \
+	b_fuse = PASTEMAC(chax,axpyf_fusefac); \
 \
 	/* We reduce all of the possible cases down to just lower/upper. */ \
 	if      ( bli_is_upper( uplo_trans ) ) \
@@ -176,14 +176,14 @@ void PASTEMAC2(cha,chx,varname)( \
 			x0       = x_cast + (0  )*incx; \
 \
 			/* x0 = x0 + alpha * A01 * x1; */ \
-			PASTEMAC3(cha,chx,chx,axpyf)( conja, \
-			                              BLIS_NO_CONJUGATE, \
-			                              n_behind, \
-			                              f, \
-			                              alpha_cast, \
-			                              A01, rs_at, cs_at, \
-			                              x1,  incx, \
-			                              x0,  incx ); \
+			PASTEMAC3(cha,chx,chx,kername)( conja, \
+			                                BLIS_NO_CONJUGATE, \
+			                                n_behind, \
+			                                f, \
+			                                alpha_cast, \
+			                                A01, rs_at, cs_at, \
+			                                x1,  incx, \
+			                                x0,  incx ); \
 \
 			/* x1 = alpha * A11 * x1; */ \
 			for ( k = 0; k < f; ++k ) \

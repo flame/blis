@@ -160,8 +160,8 @@ void PASTEMAC2(cha,chx,varname)( \
 \
 	conja = bli_extract_conj( trans ); \
 \
-	/* Query the fusing factor from the axpyf implementation. */ \
-	b_fuse = PASTEMAC(chax,axpyf_fuse_fac); \
+	/* Query the fusing factor for the axpyf implementation. */ \
+	b_fuse = PASTEMAC(chax,axpyf_fusefac); \
 \
 	/* x = alpha * x; */ \
 	PASTEMAC2(chax,chx,scalv)( BLIS_NO_CONJUGATE, \

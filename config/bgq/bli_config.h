@@ -97,6 +97,10 @@
 #define BLIS_CACHE_LINE_SIZE             64
 #define BLIS_PAGE_SIZE                   4096
 
+// Alignment size needed by the instruction set for aligned SIMD/vector
+// instructions.
+#define BLIS_SIMD_ALIGN_SIZE             32
+
 // Alignment size used to align local stack buffers within macro-kernel
 // functions.
 #define BLIS_STACK_BUF_ALIGN_SIZE        32

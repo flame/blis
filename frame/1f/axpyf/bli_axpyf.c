@@ -45,7 +45,7 @@ void PASTEMAC(ch,opname)( \
                           conj_t conja, \
                           conj_t conjx, \
                           dim_t  m, \
-                          dim_t  n, \
+                          dim_t  b_n, \
                           ctype* alpha, \
                           ctype* a, inc_t inca, inc_t lda, \
                           ctype* x, inc_t incx, \
@@ -55,7 +55,7 @@ void PASTEMAC(ch,opname)( \
 	PASTEMAC3(ch,ch,ch,varname)( conja, \
 	                             conjx, \
 	                             m, \
-	                             n, \
+	                             b_n, \
 	                             alpha, \
 	                             a, inca, lda, \
 	                             x, incx, \
@@ -75,7 +75,7 @@ void PASTEMAC3(cha,chx,chy,opname)( \
                                     conj_t    conja, \
                                     conj_t    conjx, \
                                     dim_t     m, \
-                                    dim_t     n, \
+                                    dim_t     b_n, \
                                     ctype_ax* alpha, \
                                     ctype_a*  a, inc_t inca, inc_t lda, \
                                     ctype_x*  x, inc_t incx, \
@@ -85,7 +85,7 @@ void PASTEMAC3(cha,chx,chy,opname)( \
 	PASTEMAC3(cha,chx,chy,varname)( conja, \
 	                                conjx, \
 	                                m, \
-	                                n, \
+	                                b_n, \
 	                                alpha, \
 	                                a, inca, lda, \
 	                                x, incx, \

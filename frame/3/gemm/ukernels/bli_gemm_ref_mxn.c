@@ -59,38 +59,39 @@ void PASTEMAC(ch,varname)( \
 	const inc_t     rs_ab = 1; \
 	const inc_t     cs_ab = PASTEMAC(ch,mr); \
 \
-	dim_t           k0, j0, i0; \
+	dim_t           l, j, i; \
 \
 	ctype           ab[ PASTEMAC(ch,mr) * \
 	                    PASTEMAC(ch,nr) ]; \
-	ctype* restrict ab00; \
-	ctype           a0; \
-	ctype           b0; \
+	ctype* restrict abij; \
+	ctype           ai; \
+	ctype           bj; \
 \
 \
 	/* Initialize the accumulator elements in ab to zero. */ \
-	for ( i0 = 0; i0 < m * n; ++i0 ) \
+	for ( i = 0; i < m * n; ++i ) \
 	{ \
-		PASTEMAC(ch,set0s)( *(ab + i0) ); \
+		PASTEMAC(ch,set0s)( *(ab + i) ); \
 	} \
 \
 	/* Perform a series of k rank-1 updates into ab. */ \
-	for ( k0 = 0; k0 < k; ++k0 ) \
+	for ( l = 0; l < k; ++l ) \
 	{ \
-		ab00 = ab; \
+		abij = ab; \
 \
-		for ( j0 = 0; j0 < n; ++j0 ) \
+		/* In an optimized implementation, these two loops over MR and NR
+		   are typically fully unrolled. */ \
+		for ( j = 0; j < n; ++j ) \
 		{ \
-			b0 = *(b + j0); \
+			bj = *(b + j); \
 \
-			for ( i0 = 0; i0 < m; ++i0 ) \
+			for ( i = 0; i < m; ++i ) \
 			{ \
-				a0 = *(a + i0); \
+				ai = *(a + i); \
 \
-				PASTEMAC(ch,dots)( a0, \
-				                   b0, \
-				                   *ab00 ); \
-				ab00 += rs_ab; \
+				PASTEMAC(ch,dots)( ai, bj, *abij ); \
+\
+				abij += rs_ab; \
 			} \
 		} \
 \
@@ -99,9 +100,9 @@ void PASTEMAC(ch,varname)( \
 	} \
 \
 	/* Scale the result in ab by alpha. */ \
-	for ( i0 = 0; i0 < m * n; ++i0 ) \
+	for ( i = 0; i < m * n; ++i ) \
 	{ \
-		PASTEMAC(ch,scals)( *alpha, *(ab + i0) ); \
+		PASTEMAC(ch,scals)( *alpha, *(ab + i) ); \
 	} \
 \
 	/* If beta is zero, overwrite c with the scaled result in ab. Otherwise,

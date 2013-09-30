@@ -42,12 +42,12 @@
 void PASTEMAC(ch,varname)( \
                            dim_t           k, \
                            ctype* restrict alpha, \
-                           ctype* restrict aR, \
-                           ctype* restrict a, \
-                           ctype* restrict bdB, \
-                           ctype* restrict bd, \
-                           ctype* restrict b, \
-                           ctype* restrict c, inc_t rs_c, inc_t cs_c, \
+                           ctype* restrict a12, \
+                           ctype* restrict a11, \
+                           ctype* restrict bd21, \
+                           ctype* restrict bd11, \
+                           ctype* restrict b11, \
+                           ctype* restrict c11, inc_t rs_c, inc_t cs_c, \
                            ctype* restrict a_next, \
                            ctype* restrict b_next  \
                          );

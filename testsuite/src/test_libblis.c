@@ -533,7 +533,7 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	                        BLIS_EXTEND_NC_C,
 	                        BLIS_EXTEND_NC_Z );
 	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "level-3 register blocksizes                     \n" );
+	libblis_test_fprintf_c( os, "level-3 register blocksizes  s     d     c     z \n" );
 	libblis_test_fprintf_c( os, "  m dimension            %5u %5u %5u %5u\n",
 	                        BLIS_DEFAULT_MR_S,
 	                        BLIS_DEFAULT_MR_D,
@@ -566,7 +566,7 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	                        BLIS_DEFAULT_NI_Z );
 */
 	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "level-3 packing duplication                     \n" );
+	libblis_test_fprintf_c( os, "level-3 packing duplication  s     d     c     z \n" );
 	libblis_test_fprintf_c( os, "  dupl. factors for B    %5u %5u %5u %5u\n",
 	                        BLIS_DEFAULT_NUM_DUPL_S,
 	                        BLIS_DEFAULT_NUM_DUPL_D,
@@ -578,7 +578,7 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	                        BLIS_NUM_ELEM_PER_REG_C,
 	                        BLIS_NUM_ELEM_PER_REG_Z );
 	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "level-2 cache blocksizes                        \n" );
+	libblis_test_fprintf_c( os, "level-2 cache blocksizes     s     d     c     z \n" );
 	libblis_test_fprintf_c( os, "  m dimension            %5u %5u %5u %5u\n",
 	                        BLIS_DEFAULT_L2_MC_S,
 	                        BLIS_DEFAULT_L2_MC_D,
@@ -590,11 +590,27 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	                        BLIS_DEFAULT_L2_NC_C,
 	                        BLIS_DEFAULT_L2_NC_Z );
 	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "level-1f fusing factors  %5u %5u %5u %5u\n",
-	                        BLIS_DEFAULT_FUSING_FACTOR_S,
-	                        BLIS_DEFAULT_FUSING_FACTOR_D,
-	                        BLIS_DEFAULT_FUSING_FACTOR_C,
-	                        BLIS_DEFAULT_FUSING_FACTOR_Z );
+	libblis_test_fprintf_c( os, "level-1f fusing factors      s     d     c     z \n" );
+	libblis_test_fprintf_c( os, "  default                %5u %5u %5u %5u\n",
+	                        BLIS_DEFAULT_FUSE_FAC_S,
+	                        BLIS_DEFAULT_FUSE_FAC_D,
+	                        BLIS_DEFAULT_FUSE_FAC_C,
+	                        BLIS_DEFAULT_FUSE_FAC_Z );
+	libblis_test_fprintf_c( os, "  axpyf                  %5u %5u %5u %5u\n",
+	                        BLIS_AXPYF_FUSE_FAC_S,
+	                        BLIS_AXPYF_FUSE_FAC_D,
+	                        BLIS_AXPYF_FUSE_FAC_C,
+	                        BLIS_AXPYF_FUSE_FAC_Z );
+	libblis_test_fprintf_c( os, "  dotxf                  %5u %5u %5u %5u\n",
+	                        BLIS_DOTXF_FUSE_FAC_S,
+	                        BLIS_DOTXF_FUSE_FAC_D,
+	                        BLIS_DOTXF_FUSE_FAC_C,
+	                        BLIS_DOTXF_FUSE_FAC_Z );
+	libblis_test_fprintf_c( os, "  dotxaxpyf              %5u %5u %5u %5u\n",
+	                        BLIS_DOTXAXPYF_FUSE_FAC_S,
+	                        BLIS_DOTXAXPYF_FUSE_FAC_D,
+	                        BLIS_DOTXAXPYF_FUSE_FAC_C,
+	                        BLIS_DOTXAXPYF_FUSE_FAC_Z );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf( os, "\n" );
 

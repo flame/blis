@@ -54,7 +54,7 @@ void PASTEMAC(ch,varname)( \
 	const inc_t     rs_b  = PASTEMAC(ch,packnr); \
 	const inc_t     cs_b  = 1; \
 \
-	dim_t           iter, i, j, k; \
+	dim_t           iter, i, j, l; \
 	dim_t           n_behind; \
 \
 	ctype* restrict alpha11; \
@@ -87,18 +87,20 @@ void PASTEMAC(ch,varname)( \
 \
 			/* chi11 = chi11 - a12t * x21; */ \
 			PASTEMAC(ch,set0s)( rho11 ); \
-			for ( k = 0; k < n_behind; ++k ) \
+			for ( l = 0; l < n_behind; ++l ) \
 			{ \
-				alpha12 = a12t + (k  )*cs_a; \
-				chi21   = x21  + (k  )*rs_b; \
+				alpha12 = a12t + (l  )*cs_a; \
+				chi21   = x21  + (l  )*rs_b; \
 \
 				PASTEMAC(ch,axpys)( *alpha12, *chi21, rho11 ); \
 			} \
 			PASTEMAC(ch,subs)( rho11, *chi11 ); \
 \
 			/* chi11 = chi11 / alpha11; */ \
-			/* NOTE: 1.0/alpha11 is stored instead of alpha11, so we
-			   need to multiply rather than divide. */ \
+			/* NOTE: The INVERSE of alpha11 (1.0/alpha11) is stored instead
+			   of alpha11, so we can multiply rather than divide. We store 
+			   the inverse of alpha11 intentionally to avoid expensive
+			   division instructions within the micro-kernel. */ \
 			PASTEMAC(ch,scals)( *alpha11, *chi11 ); \
 \
 			/* Output final result to matrix C. */ \

@@ -36,7 +36,7 @@
 
 
 #undef  GENTFUNC3U12
-#define GENTFUNC3U12( ctype_a, ctype_b, ctype_c, ctype_ab, cha, chb, chc, chab, opname, varname ) \
+#define GENTFUNC3U12( ctype_a, ctype_b, ctype_c, ctype_ab, cha, chb, chc, chab, varname, dotxvker, axpyvker ) \
 \
 void PASTEMAC3(cha,chb,chc,varname)( \
                                      conj_t conjat, \
@@ -107,13 +107,13 @@ void PASTEMAC3(cha,chb,chc,varname)( \
 
 // Define the basic set of functions unconditionally, and then also some
 // mixed datatype functions if requested.
-INSERT_GENTFUNC3U12_BASIC( dotxaxpyf, dotxaxpyf_unb_var1 )
+INSERT_GENTFUNC3U12_BASIC2( dotxaxpyf_unb_var1, DOTXV_KERNEL, AXPYV_KERNEL )
 
 #ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTFUNC3U12_MIX_D( dotxaxpyf, dotxaxpyf_unb_var1 )
+INSERT_GENTFUNC3U12_MIX_D2( dotxaxpyf_unb_var1, DOTXV_KERNEL, AXPYV_KERNEL )
 #endif
 
 #ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTFUNC3U12_MIX_P( dotxaxpyf, dotxaxpyf_unb_var1 )
+INSERT_GENTFUNC3U12_MIX_P2( dotxaxpyf_unb_var1, DOTXV_KERNEL, AXPYV_KERNEL )
 #endif
 

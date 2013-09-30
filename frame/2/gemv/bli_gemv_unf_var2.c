@@ -177,8 +177,8 @@ void PASTEMAC3(cha,chx,chy,varname)( \
 		                          y_cast, incy ); \
 	} \
 \
-	/* Query the fusing factor from the axpyf implementation. */ \
-	b_fuse = PASTEMAC(chax,axpyf_fuse_fac); \
+	/* Query the fusing factor for the axpyf implementation. */ \
+	b_fuse = PASTEMAC(chax,axpyf_fusefac); \
 \
 	for ( i = 0; i < n_iter; i += f ) \
 	{ \

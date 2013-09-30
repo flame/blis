@@ -32,26 +32,20 @@
 
 */
 
-void bli_dotxf_unb_var1( obj_t* alpha,
-                         obj_t* x,
-                         obj_t* y,
-                         obj_t* beta,
-                         obj_t* rho );
-
 
 #undef  GENTPROT3U12
-#define GENTPROT3U12( ctype_x, ctype_y, ctype_r, ctype_xy, chx, chy, chr, chxy, varname ) \
+#define GENTPROT3U12( ctype_a, ctype_x, ctype_y, ctype_ax, cha, chx, chy, chax, varname ) \
 \
-void PASTEMAC3(chx,chy,chr,varname)( \
+void PASTEMAC3(cha,chx,chy,varname)( \
+                                     conj_t conjat, \
                                      conj_t conjx, \
-                                     conj_t conjy, \
                                      dim_t  m, \
-                                     dim_t  n, \
+                                     dim_t  b_n, \
                                      void*  alpha, \
-                                     void*  x, inc_t incx, inc_t ldx, \
-                                     void*  y, inc_t incy, \
+                                     void*  a, inc_t inca, inc_t lda, \
+                                     void*  x, inc_t incx, \
                                      void*  beta, \
-                                     void*  r, inc_t incr \
+                                     void*  y, inc_t incy \
                                    );
 
 INSERT_GENTPROT3U12_BASIC( dotxf_unb_var1 )

@@ -36,24 +36,6 @@
 
 
 //
-// Define fusing factors (if they are not already defined by the user
-// in bli_kernel.h).
-//
-#ifndef bli_sdotxaxpyf_fuse_fac
-#define bli_sdotxaxpyf_fuse_fac BLIS_DEFAULT_FUSING_FACTOR_S
-#endif
-#ifndef bli_ddotxaxpyf_fuse_fac
-#define bli_ddotxaxpyf_fuse_fac BLIS_DEFAULT_FUSING_FACTOR_D
-#endif
-#ifndef bli_cdotxaxpyf_fuse_fac
-#define bli_cdotxaxpyf_fuse_fac BLIS_DEFAULT_FUSING_FACTOR_C
-#endif
-#ifndef bli_zdotxaxpyf_fuse_fac
-#define bli_zdotxaxpyf_fuse_fac BLIS_DEFAULT_FUSING_FACTOR_Z
-#endif
-
-
-//
 // Prototype BLAS-like interfaces with homogeneous-typed operands.
 //
 #undef  GENTPROT

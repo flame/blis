@@ -34,139 +34,58 @@
 
 #include "blis.h"
 
-/*
-#define FUNCPTR_T dotxf_fp
-
-typedef void (*FUNCPTR_T)(
-                           conj_t conjx,
-                           conj_t conjy,
-                           dim_t  n,
-                           void*  alpha,
-                           void*  x, inc_t incx,
-                           void*  y, inc_t incy,
-                           void*  beta,
-                           void*  rho
-                         );
-
-// If some mixed datatype functions will not be compiled, we initialize
-// the corresponding elements of the function array to NULL.
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-static FUNCPTR_T GENARRAY3_ALL(ftypes,dotxf_unb_var1);
-#else
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-static FUNCPTR_T GENARRAY3_EXT(ftypes,dotxf_unb_var1);
-#else
-static FUNCPTR_T GENARRAY3_MIN(ftypes,dotxf_unb_var1);
-#endif
-#endif
-
-
-void bli_dotxf_unb_var1( obj_t*  alpha,
-                         obj_t*  x,
-                         obj_t*  y,
-                         obj_t*  beta,
-                         obj_t*  rho )
-{
-	num_t     dt_x      = bli_obj_datatype( *x );
-	num_t     dt_y      = bli_obj_datatype( *y );
-	num_t     dt_rho    = bli_obj_datatype( *rho );
-
-	conj_t    conjx     = bli_obj_conj_status( *x );
-	conj_t    conjy     = bli_obj_conj_status( *y );
-	dim_t     n         = bli_obj_vector_dim( *x );
-
-	inc_t     inc_x     = bli_obj_vector_inc( *x );
-	void*     buf_x     = bli_obj_buffer_at_off( *x );
-
-	inc_t     inc_y     = bli_obj_vector_inc( *y );
-	void*     buf_y     = bli_obj_buffer_at_off( *y );
-
-	void*     buf_rho   = bli_obj_buffer_at_off( *rho );
-
-	num_t     dt_alpha;
-	void*     buf_alpha;
-
-	num_t     dt_beta;
-	void*     buf_beta;
-
-	FUNCPTR_T f;
-
-	// The datatype of alpha MUST be the type union of x and y. This is to
-	// prevent any unnecessary loss of information during computation.
-	dt_alpha  = bli_datatype_union( dt_x, dt_y );
-	buf_alpha = bli_obj_scalar_buffer( dt_alpha, *alpha );
-
-	// The datatype of beta MUST be the same as the datatype of rho.
-	dt_beta   = dt_rho;
-	buf_beta  = bli_obj_scalar_buffer( dt_beta, *beta );
-
-	// Index into the type combination array to extract the correct
-	// function pointer.
-	f = ftypes[dt_x][dt_y][dt_rho];
-
-	// Invoke the function.
-	f( conjx,
-	   conjy,
-	   n,
-	   buf_alpha, 
-	   buf_x, inc_x, 
-	   buf_y, inc_y,
-	   buf_beta, 
-	   buf_rho );
-}
-*/
 
 #undef  GENTFUNC3U12
-#define GENTFUNC3U12( ctype_x, ctype_y, ctype_r, ctype_xy, chx, chy, chr, chxy, opname, varname ) \
+#define GENTFUNC3U12( ctype_a, ctype_x, ctype_y, ctype_ax, cha, chx, chy, chax, varname, kername ) \
 \
-void PASTEMAC3(chx,chy,chr,varname)( \
+void PASTEMAC3(cha,chx,chy,varname)( \
+                                     conj_t conjat, \
                                      conj_t conjx, \
-                                     conj_t conjy, \
-                                     dim_t  b_m, \
-                                     dim_t  n, \
+                                     dim_t  m, \
+                                     dim_t  b_n, \
                                      void*  alpha, \
-                                     void*  x, inc_t incx, inc_t ldx, \
-                                     void*  y, inc_t incy, \
+                                     void*  a, inc_t inca, inc_t lda, \
+                                     void*  x, inc_t incx, \
                                      void*  beta, \
-                                     void*  r, inc_t incr \
+                                     void*  y, inc_t incy \
                                    ) \
 { \
-	ctype_xy* alpha_cast = alpha; \
+	ctype_ax* alpha_cast = alpha; \
+	ctype_a*  a_cast     = a; \
 	ctype_x*  x_cast     = x; \
+	ctype_y*  beta_cast  = beta; \
 	ctype_y*  y_cast     = y; \
-	ctype_r*  beta_cast  = beta; \
-	ctype_r*  r_cast     = r; \
+	ctype_a*  a1; \
 	ctype_x*  x1; \
-	ctype_y*  y1; \
-	ctype_r*  rho1; \
+	ctype_y*  psi1; \
 	dim_t     i; \
 \
-	for ( i = 0; i < b_m; ++i ) \
+	for ( i = 0; i < b_n; ++i ) \
 	{ \
-		x1   = x_cast + (0  )*incx + (i  )*ldx; \
-		y1   = y_cast + (0  )*incy; \
-		rho1 = r_cast + (i  )*incr; \
+		a1   = a_cast + (0  )*inca + (i  )*lda; \
+		x1   = x_cast + (0  )*incx; \
+		psi1 = y_cast + (i  )*incy; \
 \
-		PASTEMAC3(chx,chy,chr,dotxv)( conjx, \
-		                              conjy, \
-		                              n, \
-		                              alpha_cast, \
-		                              x1,   incx, \
-		                              y1,   incy, \
-		                              beta_cast, \
-		                              rho1 ); \
+		PASTEMAC3(cha,chx,chy,kername)( conjat, \
+		                                conjx, \
+		                                m, \
+		                                alpha_cast, \
+		                                a1,   inca, \
+		                                x1,   incx, \
+		                                beta_cast, \
+		                                psi1 ); \
 	} \
 }
 
 // Define the basic set of functions unconditionally, and then also some
 // mixed datatype functions if requested.
-INSERT_GENTFUNC3U12_BASIC( dotxf, dotxf_unb_var1 )
+INSERT_GENTFUNC3U12_BASIC( dotxf_unb_var1, DOTXV_KERNEL )
 
 #ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTFUNC3U12_MIX_D( dotxf, dotxf_unb_var1 )
+INSERT_GENTFUNC3U12_MIX_D( dotxf_unb_var1, DOTXV_KERNEL )
 #endif
 
 #ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTFUNC3U12_MIX_P( dotxf, dotxf_unb_var1 )
+INSERT_GENTFUNC3U12_MIX_P( dotxf_unb_var1, DOTXV_KERNEL )
 #endif
 

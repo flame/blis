@@ -40,7 +40,7 @@ void PASTEMAC3(chx,chy,chz,varname)( \
                                      conj_t conjxt, \
                                      conj_t conjx, \
                                      conj_t conjy, \
-                                     dim_t  n, \
+                                     dim_t  m, \
                                      void*  alpha, \
                                      void*  x, inc_t incx, \
                                      void*  y, inc_t incy, \

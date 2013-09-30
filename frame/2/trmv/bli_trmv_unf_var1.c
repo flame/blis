@@ -160,8 +160,8 @@ void PASTEMAC2(cha,chx,varname)( \
 \
 	conja = bli_extract_conj( trans ); \
 \
-	/* Query the fusing factor from the dotxf implementation. */ \
-	b_fuse = PASTEMAC(chax,dotxf_fuse_fac); \
+	/* Query the fusing factor for the dotxf implementation. */ \
+	b_fuse = PASTEMAC(chax,dotxf_fusefac); \
 \
 	/* We reduce all of the possible cases down to just lower/upper. */ \
 	if      ( bli_is_upper( uplo_trans ) ) \
@@ -208,15 +208,15 @@ void PASTEMAC2(cha,chx,varname)( \
 			} \
 \
 			/* x1 = x1 + alpha * A12 * x2; */ \
-			PASTEMAC3(cha,chx,chx,dotxf)( conja, \
-			                              BLIS_NO_CONJUGATE, \
-			                              f, \
-			                              n_ahead, \
-			                              alpha_cast, \
-			                              A12, cs_at, rs_at, \
-			                              x2,  incx, \
-			                              one, \
-			                              x1,  incx ); \
+			PASTEMAC3(cha,chx,chx,kername)( conja, \
+			                                BLIS_NO_CONJUGATE, \
+			                                n_ahead, \
+			                                f, \
+			                                alpha_cast, \
+			                                A12, cs_at, rs_at, \
+			                                x2,  incx, \
+			                                one, \
+			                                x1,  incx ); \
 		} \
 	} \
 	else /* if ( bli_is_lower( uplo_trans ) ) */ \
@@ -265,8 +265,8 @@ void PASTEMAC2(cha,chx,varname)( \
 			/* x1 = x1 + alpha * A10 * x0; */ \
 			PASTEMAC3(cha,chx,chx,kername)( conja, \
 			                                BLIS_NO_CONJUGATE, \
-			                                f, \
 			                                n_ahead, \
+			                                f, \
 			                                alpha_cast, \
 			                                A10, cs_at, rs_at, \
 			                                x0,  incx, \

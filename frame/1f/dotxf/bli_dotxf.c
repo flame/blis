@@ -42,26 +42,26 @@
 #define GENTFUNC( ctype, ch, opname, varname ) \
 \
 void PASTEMAC(ch,opname)( \
+                          conj_t conjat, \
                           conj_t conjx, \
-                          conj_t conjy, \
                           dim_t  m, \
-                          dim_t  n, \
+                          dim_t  b_n, \
                           ctype* alpha, \
-                          ctype* x, inc_t incx, inc_t ldx, \
-                          ctype* y, inc_t incy, \
+                          ctype* a, inc_t inca, inc_t lda, \
+                          ctype* x, inc_t incx, \
                           ctype* beta, \
-                          ctype* r, inc_t incr \
+                          ctype* y, inc_t incy \
                         ) \
 { \
-	PASTEMAC3(ch,ch,ch,varname)( conjx, \
-	                             conjy, \
+	PASTEMAC3(ch,ch,ch,varname)( conjat, \
+	                             conjx, \
 	                             m, \
-	                             n, \
+	                             b_n, \
 	                             alpha, \
-	                             x, incx, ldx, \
-	                             y, incy, \
+	                             a, inca, lda, \
+	                             x, incx, \
 	                             beta, \
-	                             r, incr ); \
+	                             y, incy ); \
 }
 
 INSERT_GENTFUNC_BASIC( dotxf, DOTXF_KERNEL )
@@ -71,29 +71,29 @@ INSERT_GENTFUNC_BASIC( dotxf, DOTXF_KERNEL )
 // Define BLAS-like interfaces with heterogeneous-typed operands.
 //
 #undef  GENTFUNC3U12
-#define GENTFUNC3U12( ctype_x, ctype_y, ctype_r, ctype_xy, chx, chy, chr, chxy, opname, varname ) \
+#define GENTFUNC3U12( ctype_a, ctype_x, ctype_y, ctype_ax, cha, chx, chy, chax, opname, varname ) \
 \
-void PASTEMAC3(chx,chy,chr,opname)( \
+void PASTEMAC3(cha,chx,chy,opname)( \
+                                    conj_t    conjat, \
                                     conj_t    conjx, \
-                                    conj_t    conjy, \
                                     dim_t     m, \
-                                    dim_t     n, \
-                                    ctype_xy* alpha, \
-                                    ctype_x*  x, inc_t incx, inc_t ldx, \
-                                    ctype_y*  y, inc_t incy, \
-                                    ctype_r*  beta, \
-                                    ctype_r*  r, inc_t incr \
+                                    dim_t     b_n, \
+                                    ctype_ax* alpha, \
+                                    ctype_a*  a, inc_t inca, inc_t lda, \
+                                    ctype_x*  x, inc_t incx, \
+                                    ctype_y*  beta, \
+                                    ctype_y*  y, inc_t incy \
                                   ) \
 { \
-	PASTEMAC3(chx,chy,chr,varname)( conjx, \
-	                                conjy, \
+	PASTEMAC3(cha,chx,chy,varname)( conjat, \
+	                                conjx, \
 	                                m, \
-	                                n, \
+	                                b_n, \
 	                                alpha, \
-	                                x, incx, ldx, \
-	                                y, incy, \
+	                                a, inca, lda, \
+	                                x, incx, \
 	                                beta, \
-	                                r, incr ); \
+	                                y, incy ); \
 }
 
 // Define the basic set of functions unconditionally, and then also some

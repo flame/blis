@@ -36,39 +36,21 @@
 
 
 //
-// Define fusing factors (if they are not already defined by the user
-// in bli_kernel.h).
-//
-#ifndef bli_sdotxf_fuse_fac
-#define bli_sdotxf_fuse_fac BLIS_DEFAULT_FUSING_FACTOR_S
-#endif
-#ifndef bli_ddotxf_fuse_fac
-#define bli_ddotxf_fuse_fac BLIS_DEFAULT_FUSING_FACTOR_D
-#endif
-#ifndef bli_cdotxf_fuse_fac
-#define bli_cdotxf_fuse_fac BLIS_DEFAULT_FUSING_FACTOR_C
-#endif
-#ifndef bli_zdotxf_fuse_fac
-#define bli_zdotxf_fuse_fac BLIS_DEFAULT_FUSING_FACTOR_Z
-#endif
-
-
-//
 // Prototype BLAS-like interfaces with homogeneous-typed operands.
 //
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
 void PASTEMAC(ch,opname)( \
+                          conj_t conjat, \
                           conj_t conjx, \
-                          conj_t conjy, \
                           dim_t  m, \
-                          dim_t  n, \
+                          dim_t  b_n, \
                           ctype* alpha, \
-                          ctype* x, inc_t incx, inc_t ldx, \
-                          ctype* y, inc_t incy, \
+                          ctype* a, inc_t inca, inc_t lda, \
+                          ctype* x, inc_t incx, \
                           ctype* beta, \
-                          ctype* r, inc_t incr \
+                          ctype* y, inc_t incy \
                         );
 
 INSERT_GENTPROT_BASIC( dotxf )
@@ -78,18 +60,18 @@ INSERT_GENTPROT_BASIC( dotxf )
 // Prototype BLAS-like interfaces with heterogeneous-typed operands.
 //
 #undef  GENTPROT3U12
-#define GENTPROT3U12( ctype_x, ctype_y, ctype_r, ctype_xy, chx, chy, chr, chxy, opname ) \
+#define GENTPROT3U12( ctype_a, ctype_x, ctype_y, ctype_ax, cha, chx, chy, chax, opname ) \
 \
-void PASTEMAC3(chx,chy,chr,opname)( \
+void PASTEMAC3(cha,chx,chy,opname)( \
+                                    conj_t    conjat, \
                                     conj_t    conjx, \
-                                    conj_t    conjy, \
                                     dim_t     m, \
-                                    dim_t     n, \
-                                    ctype_xy* alpha, \
-                                    ctype_x*  x, inc_t incx, inc_t ldx, \
-                                    ctype_y*  y, inc_t incy, \
-                                    ctype_r*  beta, \
-                                    ctype_r*  r, inc_t incr \
+                                    dim_t     b_n, \
+                                    ctype_ax* alpha, \
+                                    ctype_a*  a, inc_t inca, inc_t lda, \
+                                    ctype_x*  x, inc_t incx, \
+                                    ctype_y*  beta, \
+                                    ctype_y*  y, inc_t incy \
                                   );
 
 

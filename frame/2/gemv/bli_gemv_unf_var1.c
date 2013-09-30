@@ -159,8 +159,8 @@ void PASTEMAC3(cha,chx,chy,varname)( \
 \
 	conja = bli_extract_conj( transa ); \
 \
-	/* Query the fusing factor from the dotxf implementation. */ \
-	b_fuse = PASTEMAC(chax,dotxf_fuse_fac); \
+	/* Query the fusing factor for the dotxf implementation. */ \
+	b_fuse = PASTEMAC(chax,dotxf_fusefac); \
 \
 	for ( i = 0; i < n_iter; i += f ) \
 	{ \
@@ -173,8 +173,8 @@ void PASTEMAC3(cha,chx,chy,varname)( \
 		/* y1 = beta * y1 + alpha * A1 * x; */ \
 		PASTEMAC3(cha,chx,chy,kername)( conja, \
 		                                conjx, \
-		                                f, \
 		                                n_elem, \
+		                                f, \
 		                                alpha_cast, \
 		                                A1,   cs_at, rs_at, \
 		                                x1,   incx, \

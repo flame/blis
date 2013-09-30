@@ -32,12 +32,6 @@
 
 */
 
-/*
-void bli_axpy2v_unb_var1( obj_t* alpha,
-                         obj_t* x,
-                         obj_t* y );
-*/
-
 
 #undef  GENTPROT3
 #define GENTPROT3( ctype_x, ctype_y, ctype_z, chx, chy, chz, varname ) \
