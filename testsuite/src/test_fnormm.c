@@ -83,6 +83,10 @@ void libblis_test_fnormm( test_params_t* params, test_op_t* op )
 	// Return early if this test has already been done.
 	if ( op->test_done == TRUE ) return;
 
+	// Return early if operation is disabled.
+	if ( op->op_switch == DISABLE_ALL ||
+	     op->ops->l1m_over == DISABLE_ALL ) return;
+
 	// Call dependencies first.
 	if ( TRUE ) libblis_test_fnormm_deps( params, op );
 

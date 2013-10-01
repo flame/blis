@@ -168,6 +168,7 @@ typedef struct
 	// parent test_ops_t struct
 	struct test_ops_s*   ops;
 
+	int           op_switch;
 	int           front_seq;
 	unsigned int  n_dims;
 	dimset_t      dimset;
@@ -181,6 +182,13 @@ typedef struct
 
 typedef struct test_ops_s
 {
+	// section overrides
+	int       util_over;
+	int       l1v_over;
+	int       l1m_over;
+	int       l2_over;
+	int       l3_over;
+
 	// util
 	test_op_t randv;
 	test_op_t randm;
@@ -254,14 +262,19 @@ void libblis_test_level3_ops( test_params_t* params, test_ops_t* ops );
 void libblis_test_read_params_file( char* input_filename, test_params_t* params );
 void libblis_test_read_ops_file( char* input_filename, test_ops_t* ops );
 
+void libblis_test_read_section_override( test_ops_t*  ops,
+                                         FILE*        input_stream,
+                                         int*         override );
 void libblis_test_read_op_info( test_ops_t*  ops,
                                 FILE*        input_stream,
                                 dimset_t     dimset,
                                 unsigned int n_params,
                                 test_op_t*   op );
 
+
 // --- Struct output ---
 
+void libblis_test_output_section_overrides( FILE* os, test_ops_t* ops );
 void libblis_test_output_params_struct( FILE* os, test_params_t* params );
 void libblis_test_output_op_struct( FILE* os, test_op_t* op, char* op_str );
 

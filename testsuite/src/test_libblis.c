@@ -112,7 +112,6 @@ void libblis_test_level1v_ops( test_params_t* params, test_ops_t* ops )
 	libblis_test_scal2v( params, &(ops->scal2v) );
 	libblis_test_setv( params, &(ops->setv) );
 	libblis_test_subv( params, &(ops->subv) );
-
 }
 
 
@@ -179,6 +178,13 @@ void libblis_test_read_ops_file( char* input_filename, test_ops_t* ops )
 
 	//                                            dimensions          n_param   operation
 
+	// Section overrides
+	libblis_test_read_section_override( ops, input_stream, &(ops->util_over) );
+	libblis_test_read_section_override( ops, input_stream, &(ops->l1v_over) );
+	libblis_test_read_section_override( ops, input_stream, &(ops->l1m_over) );
+	libblis_test_read_section_override( ops, input_stream, &(ops->l2_over) );
+	libblis_test_read_section_override( ops, input_stream, &(ops->l3_over) );
+
 	// Utility operations
 	libblis_test_read_op_info( ops, input_stream, BLIS_TEST_DIMS_M,   0, &(ops->randv) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_TEST_DIMS_MN,  0, &(ops->randm) );
@@ -229,6 +235,8 @@ void libblis_test_read_ops_file( char* input_filename, test_ops_t* ops )
 	libblis_test_read_op_info( ops, input_stream, BLIS_TEST_DIMS_MN,  5, &(ops->trmm3) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_TEST_DIMS_MN,  4, &(ops->trsm) );
 
+	// Output the section overrides.
+	libblis_test_output_section_overrides( stdout, ops );
 
 	// Close the file.
 	fclose( input_stream );
@@ -367,6 +375,17 @@ void libblis_test_read_params_file( char* input_filename, test_params_t* params 
 }
 
 
+void libblis_test_read_section_override( test_ops_t*  ops,
+                                         FILE*        input_stream,
+                                         int*         override )
+{
+	char  buffer[ INPUT_BUFFER_SIZE ];
+
+	// Read the line for the section override switch.
+	libblis_test_read_next_line( buffer, input_stream );
+	sscanf( buffer, "%d ", override );
+}
+
 
 void libblis_test_read_op_info( test_ops_t*  ops,
                                 FILE*        input_stream,
@@ -374,14 +393,13 @@ void libblis_test_read_op_info( test_ops_t*  ops,
                                 unsigned int n_params,
                                 test_op_t*   op )
 {
-	char         buffer[ INPUT_BUFFER_SIZE ];
-	char         temp[ INPUT_BUFFER_SIZE ];
-	int          op_switch;
-	int          i, p;
+	char  buffer[ INPUT_BUFFER_SIZE ];
+	char  temp[ INPUT_BUFFER_SIZE ];
+	int   i, p;
 
 	// Read the line for the overall operation switch.
 	libblis_test_read_next_line( buffer, input_stream );
-	sscanf( buffer, "%d ", &op_switch );
+	sscanf( buffer, "%d ", &(op->op_switch) );
 
 	// Read the line for the sequential front-end.
 	libblis_test_read_next_line( buffer, input_stream );
@@ -444,19 +462,37 @@ void libblis_test_read_op_info( test_ops_t*  ops,
 	op->ops = ops;
 
 	// Disable operation if requested.
-	if ( op_switch == DISABLE_ALL )
+	if ( op->op_switch == DISABLE_ALL )
 	{
 		op->front_seq = DISABLE;
 	}
 }
 
 
+void libblis_test_output_section_overrides( FILE* os, test_ops_t* ops )
+{
+	libblis_test_fprintf_c( os, "\n" );
+	libblis_test_fprintf_c( os, "--- Section overrides ---\n" );
+	libblis_test_fprintf_c( os, "\n" );
+	libblis_test_fprintf_c( os, "Utility operations           %d\n", ops->util_over );
+	libblis_test_fprintf_c( os, "Level-1v operations          %d\n", ops->l1v_over );
+	libblis_test_fprintf_c( os, "Level-1m operations          %d\n", ops->l1m_over );
+	libblis_test_fprintf_c( os, "Level-2 operations           %d\n", ops->l2_over );
+	libblis_test_fprintf_c( os, "Level-3 operations           %d\n", ops->l3_over );
+	libblis_test_fprintf_c( os, "\n" );
+	libblis_test_fprintf( os, "\n" );
+}
+
+
 
 void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 {
-	int i;
+	int  i;
 	char intsize_str[8];
 
+	// If BLIS_INT_TYPE_SIZE is 32 or 64, the size is forced. Otherwise, the
+	// size is chosen automatically. We query the result of that automatic
+	// choice via sizeof(gint_t).
 	if ( BLIS_INT_TYPE_SIZE == 32 || BLIS_INT_TYPE_SIZE == 64 )
 		sprintf( intsize_str, "%d", BLIS_INT_TYPE_SIZE );
 	else

@@ -1,3 +1,12 @@
+# --- Section overrides --------------------------------------------------------
+
+1         Utility              (0 = disable section; 1 = enable specified tests)
+1         Level-1v             (0 = disable section; 1 = enable specified tests)
+1         Level-1m             (0 = disable section; 1 = enable specified tests)
+1         Level-2              (0 = disable section; 1 = enable specified tests)
+1         Level-3              (0 = disable section; 1 = enable specified tests)
+
+
 # --- Utility ------------------------------------------------------------------
 
 1         randv                                         (0 = disable all; 1 = specify)
