@@ -180,6 +180,11 @@ void libblis_test_gemmtrsm_ukr_experiment( test_params_t* params,
 	m = bli_blksz_for_type( datatype, gemm_mr );
 	n = bli_blksz_for_type( datatype, gemm_nr );
 
+	// Store the register blocksizes so that the driver can retrieve the
+	// values later when printing results.
+	op->dim_aux[0] = m;
+	op->dim_aux[1] = n;
+
 	// Map parameter characters to BLIS constants.
 	bli_param_map_char_to_blis_uplo( pc_str[0], &uploa );
 

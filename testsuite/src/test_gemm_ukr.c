@@ -158,6 +158,11 @@ void libblis_test_gemm_ukr_experiment( test_params_t* params,
 	m = bli_blksz_for_type( datatype, gemm_mr );
 	n = bli_blksz_for_type( datatype, gemm_nr );
 
+	// Store the register blocksizes so that the driver can retrieve the
+	// values later when printing results.
+	op->dim_aux[0] = m;
+	op->dim_aux[1] = n;
+
 	// Create test scalars.
 	bli_obj_init_scalar( datatype, &kappa );
 	bli_obj_init_scalar( datatype, &alpha );

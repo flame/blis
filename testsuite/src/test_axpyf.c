@@ -145,6 +145,10 @@ void libblis_test_axpyf_experiment( test_params_t* params,
 	// Query the operation's fusing factor for the current datatype.
 	b_n = bli_axpyf_fusefac( datatype );
 
+	// Store the fusing factor so that the driver can retrieve the value
+	// later when printing results.
+	op->dim_aux[0] = b_n;
+
 	// Map parameter characters to BLIS constants.
 	bli_param_map_char_to_blis_conj( pc_str[0], &conja );
 	bli_param_map_char_to_blis_conj( pc_str[1], &conjx );

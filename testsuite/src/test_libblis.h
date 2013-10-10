@@ -65,7 +65,7 @@
 #define INPUT_BUFFER_SIZE            256
 #define MAX_FILENAME_LENGTH          256
 #define MAX_BINARY_NAME_LENGTH       256
-#define MAX_FUNC_STRING_LENGTH       27
+#define MAX_FUNC_STRING_LENGTH       26
 #define FLOPS_PER_UNIT_PERF          1e9
 
 #define MAX_NUM_MSTORAGE             4
@@ -131,8 +131,9 @@ typedef enum
 	BLIS_TEST_DIMS_MN         = 1,
 	BLIS_TEST_DIMS_MK         = 2,
 	BLIS_TEST_DIMS_M          = 3,
-	BLIS_TEST_DIMS_K          = 4,
-	BLIS_TEST_NO_DIMS         = 5,
+	BLIS_TEST_DIMS_MF         = 4,
+	BLIS_TEST_DIMS_K          = 5,
+	BLIS_TEST_NO_DIMS         = 6,
 } dimset_t;
 
 
@@ -176,6 +177,7 @@ typedef struct
 	unsigned int  n_dims;
 	dimset_t      dimset;
 	int           dim_spec[ MAX_NUM_DIMENSIONS ];
+	int           dim_aux[ MAX_NUM_DIMENSIONS ];
 	unsigned int  n_params;
 	char          params[ MAX_NUM_PARAMETERS ];
 	bool_t        test_done;
@@ -304,6 +306,7 @@ char*   libblis_test_get_string_for_result( double residual, num_t dt,
 param_t libblis_test_get_param_type_for_char( char p_type );
 operand_t libblis_test_get_operand_type_for_char( char o_type );
 unsigned int libblis_test_get_n_dims_from_dimset( dimset_t dimset );
+unsigned int libblis_test_get_n_dims_from_string( char* dims_str );
 dim_t   libblis_test_get_dim_from_prob_size( int dim_spec, unsigned int p_size );
 
 // --- Parameter/storage string generation ---
@@ -345,6 +348,10 @@ void libblis_test_build_function_string( char*        prefix_str,
                                          char*        pc_str,
                                          char*        sc_str,
                                          char*        func_str );
+
+void libblis_test_build_dims_string( test_op_t* op,
+                                     dim_t      p_cur,
+                                     char*      dims_str );
 
 void libblis_test_build_filename_string( char*        prefix_str,
                                          char*        op_str,
