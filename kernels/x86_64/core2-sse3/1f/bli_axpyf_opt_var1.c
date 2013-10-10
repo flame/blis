@@ -208,7 +208,7 @@ void bli_dddaxpyf_opt_var1(
 
 	// If there is anything that would interfere with our use of aligned
 	// vector loads/stores, call the reference implementation.
-	if ( b_n < PASTEMAC(d,axpyf_fuse_fac) )
+	if ( b_n < PASTEMAC(d,axpyf_fusefac) )
 	{
 		use_ref = TRUE;
 	}

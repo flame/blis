@@ -201,7 +201,7 @@ void bli_dddaxpyf_opt_var1(
 
 	if ( bli_zero_dim2( m, b_n ) ) return;
 
-	if ( b_n < PASTEMAC(d,axpyf_fuse_fac) )
+	if ( b_n < PASTEMAC(d,axpyf_fusefac) )
 	{
 		PASTEMAC3(d,d,d,axpyf_unb_var1)( conja,
 		                                 conjx,

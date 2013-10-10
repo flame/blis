@@ -174,15 +174,15 @@ void bli_dddaxpyf_opt_var1(
     if ( bli_zero_dim2( m, b_n ) ) return;
 
 	bool_t            use_ref = FALSE;
-//    printf("%d\t%d\t%d\t%d\t%d\t%d\t%d\n", b_n, PASTEMAC(d, axpyf_fuse_fac), inca, incx, incy, bli_is_unaligned_to(a, 32), bli_is_unaligned_to( y, 32));
+//    printf("%d\t%d\t%d\t%d\t%d\t%d\t%d\n", b_n, PASTEMAC(d, axpyf_fusefac), inca, incx, incy, bli_is_unaligned_to(a, 32), bli_is_unaligned_to( y, 32));
 	// If there is anything that would interfere with our use of aligned
 	// vector loads/stores, call the reference implementation.
-	if ( b_n < PASTEMAC(d,axpyf_fuse_fac) || inca != 1 || incx != 1 || incy != 1 || bli_is_unaligned_to( a, 32 ) || bli_is_unaligned_to( y, 32 ) )
+	if ( b_n < PASTEMAC(d,axpyf_fusefac) || inca != 1 || incx != 1 || incy != 1 || bli_is_unaligned_to( a, 32 ) || bli_is_unaligned_to( y, 32 ) )
 		use_ref = TRUE;
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE )
 	{   
-//        printf("%d\t%d\t%d\t%d\t%d\t%d\n", PASTEMAC(d, axpyf_fuse_fac), inca, incx, incy, bli_is_unaligned_to(a, 32), bli_is_unaligned_to( y, 32));
+//        printf("%d\t%d\t%d\t%d\t%d\t%d\n", PASTEMAC(d, axpyf_fusefac), inca, incx, incy, bli_is_unaligned_to(a, 32), bli_is_unaligned_to( y, 32));
 //        printf("DEFAULTING TO REFERENCE IMPLEMENTATION\n");
 		PASTEMAC3(d,d,d,axpyf_unb_var1)( conja, conjx, m, b_n, alpha_cast, a_cast, inca, lda, x_cast, incx, y_cast, incy );
 		return;

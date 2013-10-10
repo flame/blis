@@ -158,7 +158,7 @@ void bli_ddddotxf_opt_var1(
 
     // If there is anything that would interfere with our use of aligned
     // vector loads/stores, call the reference implementation.
-	if ( b_n < PASTEMAC(d,dotxf_fuse_fac) )
+	if ( b_n < PASTEMAC(d,dotxf_fusefac) )
 	{
 		use_ref = TRUE;
 	}

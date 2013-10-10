@@ -54,21 +54,21 @@
 //     (b) NR (for triangular operations such as trmm and trsm).
 // 
 
-#define BLIS_DEFAULT_MC_S              256
-#define BLIS_DEFAULT_KC_S              256
-#define BLIS_DEFAULT_NC_S              8192
+#define BLIS_DEFAULT_MC_S              64
+#define BLIS_DEFAULT_KC_S              128
+#define BLIS_DEFAULT_NC_S              4096
 
-#define BLIS_DEFAULT_MC_D              128
-#define BLIS_DEFAULT_KC_D              256
+#define BLIS_DEFAULT_MC_D              64
+#define BLIS_DEFAULT_KC_D              128
 #define BLIS_DEFAULT_NC_D              4096
 
-#define BLIS_DEFAULT_MC_C              128
-#define BLIS_DEFAULT_KC_C              256
+#define BLIS_DEFAULT_MC_C              64
+#define BLIS_DEFAULT_KC_C              128
 #define BLIS_DEFAULT_NC_C              4096
 
 #define BLIS_DEFAULT_MC_Z              64
-#define BLIS_DEFAULT_KC_Z              256
-#define BLIS_DEFAULT_NC_Z              2048
+#define BLIS_DEFAULT_KC_Z              128
+#define BLIS_DEFAULT_NC_Z              4096
 
 // -- Cache blocksize extensions (for optimizing edge cases) --
 
@@ -100,16 +100,16 @@
 // in the m and n dimensions should all be equal to the size expected by
 // the reference micro-kernel(s).
 
-#define BLIS_DEFAULT_MR_S              8
+#define BLIS_DEFAULT_MR_S              4
 #define BLIS_DEFAULT_NR_S              4
 
-#define BLIS_DEFAULT_MR_D              8
+#define BLIS_DEFAULT_MR_D              4
 #define BLIS_DEFAULT_NR_D              4
 
-#define BLIS_DEFAULT_MR_C              8
+#define BLIS_DEFAULT_MR_C              4
 #define BLIS_DEFAULT_NR_C              4
 
-#define BLIS_DEFAULT_MR_Z              8
+#define BLIS_DEFAULT_MR_Z              4
 #define BLIS_DEFAULT_NR_Z              4
 
 // NOTE: If the micro-kernel, which is typically unrolled to a factor
@@ -220,10 +220,25 @@
 // of level-1f operations. They are here only for use when these operations
 // are optimized.
 
-#define BLIS_DEFAULT_FUSING_FACTOR_S   8
-#define BLIS_DEFAULT_FUSING_FACTOR_D   4
-#define BLIS_DEFAULT_FUSING_FACTOR_C   4
-#define BLIS_DEFAULT_FUSING_FACTOR_Z   2
+#define BLIS_DEFAULT_FUSE_FAC_S        8
+#define BLIS_DEFAULT_FUSE_FAC_D        4
+#define BLIS_DEFAULT_FUSE_FAC_C        4
+#define BLIS_DEFAULT_FUSE_FAC_Z        2
+
+#define BLIS_AXPYF_FUSE_FAC_S          BLIS_DEFAULT_FUSE_FAC_S
+#define BLIS_AXPYF_FUSE_FAC_D          BLIS_DEFAULT_FUSE_FAC_D
+#define BLIS_AXPYF_FUSE_FAC_C          BLIS_DEFAULT_FUSE_FAC_C
+#define BLIS_AXPYF_FUSE_FAC_Z          BLIS_DEFAULT_FUSE_FAC_Z
+
+#define BLIS_DOTXF_FUSE_FAC_S          BLIS_DEFAULT_FUSE_FAC_S
+#define BLIS_DOTXF_FUSE_FAC_D          BLIS_DEFAULT_FUSE_FAC_D
+#define BLIS_DOTXF_FUSE_FAC_C          BLIS_DEFAULT_FUSE_FAC_C
+#define BLIS_DOTXF_FUSE_FAC_Z          BLIS_DEFAULT_FUSE_FAC_Z
+
+#define BLIS_DOTXAXPYF_FUSE_FAC_S      BLIS_DEFAULT_FUSE_FAC_S
+#define BLIS_DOTXAXPYF_FUSE_FAC_D      BLIS_DEFAULT_FUSE_FAC_D
+#define BLIS_DOTXAXPYF_FUSE_FAC_C      BLIS_DEFAULT_FUSE_FAC_C
+#define BLIS_DOTXAXPYF_FUSE_FAC_Z      BLIS_DEFAULT_FUSE_FAC_Z
 
 
 

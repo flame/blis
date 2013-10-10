@@ -26,37 +26,30 @@
    SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
    LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
    DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-   THEORY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
 
-// Define fusing factors.
-#define bli_sdotxaxpyf_fuse_fac   ( BLIS_DEFAULT_FUSING_FACTOR_S     )
-#define bli_ddotxaxpyf_fuse_fac   ( BLIS_DEFAULT_FUSING_FACTOR_D     )
-#define bli_cdotxaxpyf_fuse_fac   ( BLIS_DEFAULT_FUSING_FACTOR_C / 2 )
-#define bli_zdotxaxpyf_fuse_fac   ( BLIS_DEFAULT_FUSING_FACTOR_Z / 2 )
-
-
 #undef  GENTPROT3U12
 #define GENTPROT3U12( ctype_a, ctype_b, ctype_c, ctype_ab, cha, chb, chc, chab, varname ) \
 \
 void PASTEMAC3(cha,chb,chc,varname)( \
-                                     conj_t conjat, \
-                                     conj_t conja, \
-                                     conj_t conjw, \
-                                     conj_t conjx, \
-                                     dim_t  m, \
-                                     dim_t  n, \
-                                     void*  alpha, \
-                                     void*  a, inc_t inca, inc_t lda, \
-                                     void*  w, inc_t incw, \
-                                     void*  x, inc_t incx, \
-                                     void*  beta, \
-                                     void*  y, inc_t incy, \
-                                     void*  z, inc_t incz \
+                                     conj_t             conjat, \
+                                     conj_t             conja, \
+                                     conj_t             conjw, \
+                                     conj_t             conjx, \
+                                     dim_t              m, \
+                                     dim_t              b_n, \
+                                     ctype_ab* restrict alpha, \
+                                     ctype_a*  restrict a, inc_t inca, inc_t lda, \
+                                     ctype_b*  restrict w, inc_t incw, \
+                                     ctype_b*  restrict x, inc_t incx, \
+                                     ctype_c*  restrict beta, \
+                                     ctype_c*  restrict y, inc_t incy, \
+                                     ctype_c*  restrict z, inc_t incz \
                                    );
 
 INSERT_GENTPROT3U12_BASIC( dotxaxpyf_opt_var1 )

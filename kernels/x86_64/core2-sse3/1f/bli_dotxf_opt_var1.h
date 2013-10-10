@@ -26,7 +26,7 @@
    SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
    LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
    DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-   THEORY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
@@ -34,27 +34,21 @@
 
 
 //
-// Define fusing factors for dotxf operation.
+// Prototype dotxf kernel interfaces.
 //
-#define bli_sdotxf_fuse_fac   BLIS_DEFAULT_FUSING_FACTOR_S
-#define bli_ddotxf_fuse_fac   BLIS_DEFAULT_FUSING_FACTOR_D
-#define bli_cdotxf_fuse_fac   BLIS_DEFAULT_FUSING_FACTOR_C
-#define bli_zdotxf_fuse_fac   BLIS_DEFAULT_FUSING_FACTOR_Z
-
-
 #undef  GENTPROT3U12
 #define GENTPROT3U12( ctype_a, ctype_x, ctype_y, ctype_ax, cha, chx, chy, chax, varname ) \
 \
-void PASTEMAC3(chx,chy,chr,varname)( \
-                                     conj_t conjat, \
-                                     conj_t conjx, \
-                                     dim_t  m, \
-                                     dim_t  b_n, \
-                                     void*  alpha, \
-                                     void*  a, inc_t inca, inc_t lda, \
-                                     void*  x, inc_t incx, \
-                                     void*  beta, \
-                                     void*  y, inc_t incy \
+void PASTEMAC3(cha,chx,chy,varname)( \
+                                     conj_t             conjat, \
+                                     conj_t             conjx, \
+                                     dim_t              m, \
+                                     dim_t              b_n, \
+                                     ctype_ax* restrict alpha, \
+                                     ctype_a*  restrict a, inc_t inca, inc_t lda, \
+                                     ctype_x*  restrict x, inc_t incx, \
+                                     ctype_y*  restrict beta, \
+                                     ctype_y*  restrict y, inc_t incy \
                                    );
 
 INSERT_GENTPROT3U12_BASIC( dotxf_opt_var1 )

@@ -231,7 +231,7 @@ void bli_ddddotxf_opt_var1(
 		return; 
 	} 
 
-	if ( b_m < PASTEMAC(d,dotxf_fuse_fac) )
+	if ( b_m < PASTEMAC(d,dotxf_fusefac) )
 	{
 		PASTEMAC3(d,d,d,dotxf_unb_var1)( conjx,
 		                                 conjy,

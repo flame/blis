@@ -26,39 +26,28 @@
    SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
    LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
    DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-   THEORY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-/*
-void bli_axpyf_opt_var1( obj_t* alpha,
-                         obj_t* x,
-                         obj_t* y );
-*/
 
 //
-// Define fusing factors.
+// Prototype axpyf kernel interfaces.
 //
-#define bli_saxpyf_fuse_fac   BLIS_DEFAULT_FUSING_FACTOR_S
-#define bli_daxpyf_fuse_fac   BLIS_DEFAULT_FUSING_FACTOR_D
-#define bli_caxpyf_fuse_fac   BLIS_DEFAULT_FUSING_FACTOR_C
-#define bli_zaxpyf_fuse_fac   BLIS_DEFAULT_FUSING_FACTOR_Z
-
-
 #undef  GENTPROT3U12
 #define GENTPROT3U12( ctype_a, ctype_x, ctype_y, ctype_ax, cha, chx, chy, chax, varname ) \
 \
 void PASTEMAC3(cha,chx,chy,varname)( \
-                                     conj_t conja, \
-                                     conj_t conjx, \
-                                     dim_t  m, \
-                                     dim_t  n, \
-                                     void*  alpha, \
-                                     void*  a, inc_t inca, inc_t lda, \
-                                     void*  x, inc_t incx, \
-                                     void*  y, inc_t incy \
+                                     conj_t             conja, \
+                                     conj_t             conjx, \
+                                     dim_t              m, \
+                                     dim_t              b_n, \
+                                     ctype_ax* restrict alpha, \
+                                     ctype_a*  restrict a, inc_t inca, inc_t lda, \
+                                     ctype_x*  restrict x, inc_t incx, \
+                                     ctype_y*  restrict y, inc_t incy \
                                    );
 
 INSERT_GENTPROT3U12_BASIC( axpyf_opt_var1 )
