@@ -42,7 +42,7 @@
 
 int main( int argc, char** argv )
 {
-	obj_t a, ah, c;
+	obj_t a, c;
 	obj_t c_save;
 	obj_t alpha, beta;
 	dim_t m, k;
@@ -52,25 +52,7 @@ int main( int argc, char** argv )
 	num_t dt_a, dt_c;
 	num_t dt_alpha, dt_beta;
 	int   r, n_repeats;
-
-#if 0
-	blksz_t* mr;
-	blksz_t* nr;
-	blksz_t* kr;
-	blksz_t* mc;
-	blksz_t* nc;
-	blksz_t* kc;
-	blksz_t* ni;
-
-	scalm_t* scalm_cntl;
-	packm_t* packm_cntl_a;
-	packm_t* packm_cntl_b;
-
-	herk_t*  herk_cntl_bp_ke;
-	herk_t*  herk_cntl_op_bp;
-	herk_t*  herk_cntl_mm_op;
-	herk_t*  herk_cntl_vl_mm;
-#endif
+	uplo_t uplo;
 
 	double dtime;
 	double dtime_save;
@@ -102,6 +84,8 @@ int main( int argc, char** argv )
 	dt_alpha = BLIS_DOUBLE;
 	dt_beta = BLIS_DOUBLE;
 
+	uplo = BLIS_LOWER;
+
 	for ( p = p_begin; p <= p_end; p += p_inc )
 	{
 
@@ -122,95 +106,11 @@ int main( int argc, char** argv )
 		bli_randm( &c );
 
 		bli_obj_set_struc( BLIS_HERMITIAN, c );
-		bli_obj_set_uplo( BLIS_LOWER, c );
+		bli_obj_set_uplo( uplo, c );
 
-		bli_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, a, ah );
 
 		bli_setsc(  (2.0/1.0), 0.0, &alpha );
 		bli_setsc( -(1.0/1.0), 0.0, &beta );
-
-#if 0
-		mr = bli_blksz_obj_create( 2, 4, 2, 2 );
-		kr = bli_blksz_obj_create( 1, 1, 1, 1 );
-		nr = bli_blksz_obj_create( 1, 4, 1, 1 );
-		mc = bli_blksz_obj_create( 128, 368, 128, 128 );
-		kc = bli_blksz_obj_create( 256, 256, 256, 256 );
-		nc = bli_blksz_obj_create( 512, 512, 512, 512 );
-		ni = bli_blksz_obj_create(  16,  16,  16,  16 );
-
-		scalm_cntl =
-		bli_scalm_cntl_obj_create( BLIS_UNBLOCKED,
-		                           BLIS_VARIANT1 );
-
-		packm_cntl_a =
-		bli_packm_cntl_obj_create( BLIS_BLOCKED,
-		                           BLIS_VARIANT2,
-		                           mr,
-		                           kr,
-		                           FALSE, // scale?
-		                           FALSE, // densify?
-		                           FALSE, // invert diagonal?
-		                           FALSE, // reverse iteration if upper?
-		                           FALSE, // reverse iteration if lower?
-		                           BLIS_PACKED_ROW_PANELS,
-		                           BLIS_BUFFER_FOR_A_BLOCK );
-
-		packm_cntl_b =
-		bli_packm_cntl_obj_create( BLIS_BLOCKED,
-		                           BLIS_VARIANT2,
-		                           kr,
-		                           nr,
-		                           FALSE, // scale?
-		                           FALSE, // densify?
-		                           FALSE, // invert diagonal?
-		                           FALSE, // reverse iteration if upper?
-		                           FALSE, // reverse iteration if lower?
-		                           BLIS_PACKED_COL_PANELS,
-		                           BLIS_BUFFER_FOR_B_PANEL );
-
-		herk_cntl_bp_ke =
-		bli_herk_cntl_obj_create( BLIS_UNB_OPT,
-		                          BLIS_VARIANT2,
-		                          NULL, NULL, NULL, NULL,
-		                          NULL, NULL, NULL, NULL );
-
-		herk_cntl_op_bp =
-		bli_herk_cntl_obj_create( BLIS_BLOCKED,
-		                          //BLIS_VARIANT4,
-		                          BLIS_VARIANT1,
-		                          mc,
-		                          ni,
-		                          NULL,
-		                          packm_cntl_a,
-		                          packm_cntl_b,
-		                          NULL,
-		                          herk_cntl_bp_ke,
-		                          NULL );
-
-		herk_cntl_mm_op =
-		bli_herk_cntl_obj_create( BLIS_BLOCKED,
-		                          BLIS_VARIANT3,
-		                          kc,
-		                          NULL,
-		                          NULL, //scalm_cntl,
-		                          NULL,
-		                          NULL,
-		                          NULL,
-		                          herk_cntl_op_bp,
-		                          NULL );
-
-		herk_cntl_vl_mm =
-		bli_herk_cntl_obj_create( BLIS_BLOCKED,
-		                          BLIS_VARIANT2,
-		                          nc,
-		                          NULL,
-		                          NULL,
-		                          NULL,
-		                          NULL,
-		                          NULL,
-		                          herk_cntl_mm_op,
-		                          NULL );
-#endif
 
 
 		bli_copym( &c, &c_save );
@@ -282,23 +182,6 @@ int main( int argc, char** argv )
 		        ( unsigned long )m,
 		        ( unsigned long )k, dtime_save, gflops );
 
-#if 0
-		bli_blksz_obj_free( mr );
-		bli_blksz_obj_free( nr );
-		bli_blksz_obj_free( kr );
-		bli_blksz_obj_free( mc );
-		bli_blksz_obj_free( nc );
-		bli_blksz_obj_free( kc );
-		bli_blksz_obj_free( ni );
-
-		bli_cntl_obj_free( scalm_cntl );
-		bli_cntl_obj_free( packm_cntl_a );
-		bli_cntl_obj_free( packm_cntl_b );
-		bli_cntl_obj_free( herk_cntl_bp_ke );
-		bli_cntl_obj_free( herk_cntl_op_bp );
-		bli_cntl_obj_free( herk_cntl_mm_op );
-		bli_cntl_obj_free( herk_cntl_vl_mm );
-#endif
 
 		bli_obj_free( &alpha );
 		bli_obj_free( &beta );

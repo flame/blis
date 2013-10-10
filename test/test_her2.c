@@ -52,6 +52,7 @@ int main( int argc, char** argv )
 	num_t dt_a, dt_x, dt_y;
 	num_t dt_alpha;
 	int   r, n_repeats;
+	uplo_t uplo;
 
 	double dtime;
 	double dtime_save;
@@ -87,6 +88,7 @@ int main( int argc, char** argv )
 	dt_a = BLIS_DCOMPLEX;
 #endif
 
+	uplo = BLIS_LOWER;
 
 	for ( p = p_begin; p <= p_end; p += p_inc )
 	{
@@ -108,8 +110,7 @@ int main( int argc, char** argv )
 
 		bli_obj_set_struc( BLIS_HERMITIAN, a );
 		//bli_obj_set_struc( BLIS_SYMMETRIC, a );
-		bli_obj_set_uplo( BLIS_LOWER, a );
-		//bli_obj_set_uplo( BLIS_UPPER, a );
+		bli_obj_set_uplo( uplo, a );
 
 
 		bli_setsc(  (2.0/1.0), 0.0, &alpha );

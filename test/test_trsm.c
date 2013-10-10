@@ -53,26 +53,7 @@ int main( int argc, char** argv )
 	num_t dt_alpha, dt_beta;
 	int   r, n_repeats;
 	side_t side;
-
-#if 0
-	blksz_t* mr;
-	blksz_t* nr;
-	blksz_t* kr;
-	blksz_t* mc;
-	blksz_t* nc;
-	blksz_t* kc;
-	blksz_t* ni;
-
-	scalm_t* scalm_cntl;
-	packm_t* packm_cntl_a;
-	packm_t* packm_cntl_b;
-
-	gemm_t*  gemm_cntl_bp_ke;
-	trsm_t*  trsm_cntl_bp_ke;
-	trsm_t*  trsm_cntl_op_bp;
-	trsm_t*  trsm_cntl_mm_op;
-	trsm_t*  trsm_cntl_vl_mm;
-#endif
+	uplo_t uplo;
 
 	double dtime;
 	double dtime_save;
@@ -84,12 +65,11 @@ int main( int argc, char** argv )
 
 #ifndef PRINT
 	p_begin = 40;
-	p_end   = 1000;
+	p_end   = 2000;
 	p_inc   = 40;
 
 	m_input = -1;
-	//n_input = -1;
-	n_input = 600;
+	n_input = -1;
 #else
 	p_begin = 16;
 	p_end   = 16;
@@ -105,8 +85,10 @@ int main( int argc, char** argv )
 	dt_alpha = BLIS_DOUBLE;
 	dt_beta = BLIS_DOUBLE;
 
-	//side = BLIS_LEFT;
-	side = BLIS_RIGHT;
+	side = BLIS_LEFT;
+	//side = BLIS_RIGHT;
+
+	uplo = BLIS_LOWER;
 
 	for ( p = p_begin; p <= p_end; p += p_inc )
 	{
@@ -129,109 +111,15 @@ int main( int argc, char** argv )
 		bli_obj_create( dt_c, m, n, 0, 0, &c_save );
 
 		bli_obj_set_struc( BLIS_TRIANGULAR, a );
-		//bli_obj_set_uplo( BLIS_UPPER, a );
-		bli_obj_set_uplo( BLIS_LOWER, a );
+		bli_obj_set_uplo( uplo, a );
 
 		bli_randm( &a );
 		bli_randm( &c );
 		bli_randm( &b );
 
+
 		bli_setsc(  (2.0/1.0), 0.0, &alpha );
 		bli_setsc( -(1.0/1.0), 0.0, &beta );
-
-#if 0
-		mr = bli_blksz_obj_create( 2, 4, 2, 2 );
-		kr = bli_blksz_obj_create( 1, 1, 1, 1 );
-		nr = bli_blksz_obj_create( 1, 4, 1, 1 );
-		mc = bli_blksz_obj_create( 128, 368, 128, 128 );
-		kc = bli_blksz_obj_create( 256, 256, 256, 256 );
-		nc = bli_blksz_obj_create( 512, 512, 512, 512 );
-		ni = bli_blksz_obj_create(  16,  16,  16,  16 );
-
-		scalm_cntl =
-		bli_scalm_cntl_obj_create( BLIS_UNBLOCKED,
-		                           BLIS_VARIANT1 );
-
-		packm_cntl_a =
-		bli_packm_cntl_obj_create( BLIS_BLOCKED,
-		                           BLIS_VARIANT3,
-		                           mr, // IMPORTANT: "k" dim multiple must be mr to
-		                           mr, // support using ukernel for right/bottom-right
-		                                  // edge cases (see macro-kernel for comments).
-		                           FALSE, // scale?
-		                           TRUE,  // densify?
-		                           TRUE,  // invert diagonal?
-		                           TRUE,  // reverse iteration if upper?
-		                           FALSE, // reverse iteration if lower?
-		                           BLIS_PACKED_ROW_PANELS,
-		                           BLIS_BUFFER_FOR_A_BLOCK );
-
-		packm_cntl_b =
-		bli_packm_cntl_obj_create( BLIS_BLOCKED,
-		                           BLIS_VARIANT2,
-		                           mr, // IMPORTANT: m dim multiple here must be mr
-		                           nr, // since "k" dim multiple is set to mr above.
-		                           TRUE,  // scale?
-		                           FALSE, // densify?
-		                           FALSE, // invert diagonal?
-		                           FALSE, // reverse iteration if upper?
-		                           FALSE, // reverse iteration if lower?
-		                           BLIS_PACKED_COL_PANELS,
-		                           BLIS_BUFFER_FOR_B_PANEL );
-
-		gemm_cntl_bp_ke =
-		bli_gemm_cntl_obj_create( BLIS_UNB_OPT,
-		                          BLIS_VARIANT2,
-		                          NULL, NULL, NULL, NULL,
-		                          NULL, NULL, NULL, NULL );
-
-		trsm_cntl_bp_ke =
-		bli_trsm_cntl_obj_create( BLIS_UNB_OPT,
-		                          BLIS_VARIANT2,
-		                          //BLIS_VARIANT3,
-		                          NULL, NULL, NULL, NULL, NULL,
-		                          NULL, NULL, NULL, NULL );
-
-		trsm_cntl_op_bp =
-		bli_trsm_cntl_obj_create( BLIS_BLOCKED,
-		                          //BLIS_VARIANT4,
-		                          BLIS_VARIANT1,
-		                          mc,
-		                          ni,
-		                          NULL,
-		                          packm_cntl_a,
-		                          packm_cntl_b,
-		                          NULL,
-		                          trsm_cntl_bp_ke,
-		                          gemm_cntl_bp_ke,
-		                          NULL );
-
-		trsm_cntl_mm_op =
-		bli_trsm_cntl_obj_create( BLIS_BLOCKED,
-		                          BLIS_VARIANT3,
-		                          kc,
-		                          NULL,
-		                          NULL, //scalm_cntl,
-		                          NULL,
-		                          NULL,
-		                          NULL,
-		                          trsm_cntl_op_bp,
-		                          NULL,
-		                          NULL );
-
-		trsm_cntl_vl_mm =
-		bli_trsm_cntl_obj_create( BLIS_BLOCKED,
-		                          BLIS_VARIANT2,
-		                          nc,
-		                          NULL,
-		                          NULL,
-		                          NULL,
-		                          NULL,
-		                          NULL,
-		                          trsm_cntl_mm_op,
-		                          NULL,
-		                          NULL );
-#endif
 
 
 		bli_copym( &c, &c_save );
@@ -255,17 +143,13 @@ int main( int argc, char** argv )
 #ifdef BLIS
 			//bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
 
-			//bli_obj_set_diag( BLIS_UNIT_DIAG, a );
-			//bli_obj_set_conjtrans( BLIS_TRANSPOSE, a );
-
 			bli_trsm( side,
 			          &alpha,
 			          &a,
 			          &c );
-
 #else
 
-			f77_char side   = 'R';
+			f77_char side   = 'L';
 			f77_char uplo   = 'L';
 			f77_char transa = 'N';
 			f77_char diag   = 'N';
@@ -312,23 +196,6 @@ int main( int argc, char** argv )
 		        ( unsigned long )m,
 		        ( unsigned long )n, dtime_save, gflops );
 
-#if 0
-		bli_blksz_obj_free( mr );
-		bli_blksz_obj_free( nr );
-		bli_blksz_obj_free( kr );
-		bli_blksz_obj_free( mc );
-		bli_blksz_obj_free( nc );
-		bli_blksz_obj_free( kc );
-		bli_blksz_obj_free( ni );
-
-		bli_cntl_obj_free( scalm_cntl );
-		bli_cntl_obj_free( packm_cntl_a );
-		bli_cntl_obj_free( packm_cntl_b );
-		bli_cntl_obj_free( trsm_cntl_bp_ke );
-		bli_cntl_obj_free( trsm_cntl_op_bp );
-		bli_cntl_obj_free( trsm_cntl_mm_op );
-		bli_cntl_obj_free( trsm_cntl_vl_mm );
-#endif
 
 		bli_obj_free( &alpha );
 		bli_obj_free( &beta );

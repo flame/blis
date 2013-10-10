@@ -43,11 +43,9 @@
 int main( int argc, char** argv )
 {
 	obj_t a, x, y;
-	obj_t a_tl, x_t, y_t;
 	obj_t y_save;
 	obj_t alpha, beta;
 	dim_t m, n;
-	dim_t m_tl, n_tl;
 	dim_t p;
 	dim_t p_begin, p_end, p_inc;
 	int   m_input, n_input;
@@ -110,25 +108,6 @@ int main( int argc, char** argv )
 		bli_setsc(  (2.0/1.0), 0.0, &alpha );
 		bli_setsc( -(1.0/1.0), 0.0, &beta );
 
-#if 0
-		m_tl = 200;
-		n_tl = 200;
-
-		m_tl = bli_min( m_tl, bli_obj_length( a ) );
-		n_tl = bli_min( n_tl, bli_obj_width( a ) );
-
-		bli_acquire_mpart_tl2br( BLIS_SUBPART11, 0, m_tl, &a, &a_tl );
-		bli_acquire_mpart_t2b( BLIS_SUBPART1, 0, n_tl, &x, &x_t );
-		bli_acquire_mpart_t2b( BLIS_SUBPART1, 0, m_tl, &y, &y_t );
-#else
-		m_tl = m;
-		n_tl = n;
-
-		a_tl = a;
-		x_t  = x;
-		y_t  = y;
-#endif
-
 
 		bli_copym( &y, &y_save );
 	
@@ -148,27 +127,25 @@ int main( int argc, char** argv )
 #endif
 
 #ifdef BLIS
-			//bli_obj_set_onlytrans( BLIS_TRANSPOSE, a_tl );
 
 			bli_gemv( &alpha,
-			          &a_tl,
-			          &x_t,
+			          &a,
+			          &x,
 			          &beta,
-			          &y_t );
-
+			          &y );
 #else
 
 			f77_char transa = 'N';
-			f77_int  mm     = bli_obj_length( a_tl );
-			f77_int  nn     = bli_obj_width( a_tl );
-			f77_int  lda    = bli_obj_col_stride( a_tl );
-			f77_int  incx   = bli_obj_vector_inc( x_t );
-			f77_int  incy   = bli_obj_vector_inc( y_t );
+			f77_int  mm     = bli_obj_length( a );
+			f77_int  nn     = bli_obj_width( a );
+			f77_int  lda    = bli_obj_col_stride( a );
+			f77_int  incx   = bli_obj_vector_inc( x );
+			f77_int  incy   = bli_obj_vector_inc( y );
 			double*  alphap = bli_obj_buffer( alpha );
-			double*  ap     = bli_obj_buffer( a_tl );
-			double*  xp     = bli_obj_buffer( x_t );
+			double*  ap     = bli_obj_buffer( a );
+			double*  xp     = bli_obj_buffer( x );
 			double*  betap  = bli_obj_buffer( beta );
-			double*  yp     = bli_obj_buffer( y_t );
+			double*  yp     = bli_obj_buffer( y );
 
 			dgemv_( &transa,
 			        &mm,
@@ -189,8 +166,7 @@ int main( int argc, char** argv )
 			dtime_save = bli_clock_min_diff( dtime_save, dtime );
 		}
 
-		//gflops = ( 2.0 * m * n ) / ( dtime_save * 1.0e9 );
-		gflops = ( 2.0 * m_tl * n_tl ) / ( dtime_save * 1.0e9 );
+		gflops = ( 2.0 * m * n ) / ( dtime_save * 1.0e9 );
 
 #ifdef BLIS
 		printf( "data_gemv_blis" );

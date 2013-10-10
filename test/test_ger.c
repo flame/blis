@@ -129,7 +129,6 @@ int main( int argc, char** argv )
 			         &x,
 			         &y,
 			         &a );
-
 #else
 
 			f77_int  mm     = bli_obj_length( a );
