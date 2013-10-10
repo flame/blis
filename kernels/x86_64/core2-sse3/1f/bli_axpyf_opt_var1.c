@@ -34,125 +34,29 @@
 
 #include "blis.h"
 
-/*
-#define FUNCPTR_T axpyf_fp
 
-typedef void (*FUNCPTR_T)(
-                           conj_t conjx,
-                           dim_t  n,
-                           void*  alpha,
-                           void*  x, inc_t incx,
-                           void*  y, inc_t incy
-                         );
-
-// If some mixed datatype functions will not be compiled, we initialize
-// the corresponding elements of the function array to NULL.
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-static FUNCPTR_T GENARRAY3_ALL(ftypes,axpyf_opt_var1);
-#else
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-static FUNCPTR_T GENARRAY3_EXT(ftypes,axpyf_opt_var1);
-#else
-static FUNCPTR_T GENARRAY3_MIN(ftypes,axpyf_opt_var1);
-#endif
-#endif
-
-
-void bli_axpyf_opt_var1( obj_t*  alpha,
-                         obj_t*  x,
-                         obj_t*  y )
+void bli_sssaxpyf_opt_var1(
+                            conj_t             conja,
+                            conj_t             conjx,
+                            dim_t              m,
+                            dim_t              b_n,
+                            float*    restrict alpha,
+                            float*    restrict a, inc_t inca, inc_t lda,
+                            float*    restrict x, inc_t incx,
+                            float*    restrict y, inc_t incy
+                          )
 {
-	num_t     dt_x      = bli_obj_datatype( *x );
-	num_t     dt_y      = bli_obj_datatype( *y );
-
-	conj_t    conjx     = bli_obj_conj_status( *x );
-	dim_t     n         = bli_obj_vector_dim( *x );
-
-	inc_t     inc_x     = bli_obj_vector_inc( *x );
-	void*     buf_x     = bli_obj_buffer_at_off( *x );
-
-	inc_t     inc_y     = bli_obj_vector_inc( *y );
-	void*     buf_y     = bli_obj_buffer_at_off( *y );
-
-	num_t     dt_alpha;
-	void*     buf_alpha;
-
-	FUNCPTR_T f;
-
-	// If alpha is a scalar constant, use dt_x to extract the address of the
-	// corresponding constant value; otherwise, use the datatype encoded
-	// within the alpha object and extract the buffer at the alpha offset.
-	bli_set_scalar_dt_buffer( alpha, dt_x, dt_alpha, buf_alpha );
-
-	// Index into the type combination array to extract the correct
-	// function pointer.
-	f = ftypes[dt_alpha][dt_x][dt_y];
-
-	// Invoke the function.
-	f( conjx,
-	   n,
-	   buf_alpha,
-	   buf_x, inc_x,
-	   buf_y, inc_y );
-}
-*/
-
-#undef  GENTFUNC3U12
-#define GENTFUNC3U12( ctype_a, ctype_x, ctype_y, ctype_ax, cha, chx, chy, chax, opname, varname ) \
-\
-void PASTEMAC3(cha,chx,chy,varname)( \
-                                     conj_t conja, \
-                                     conj_t conjx, \
-                                     dim_t  m, \
-                                     dim_t  b_n, \
-                                     void*  alpha, \
-                                     void*  a, inc_t inca, inc_t lda, \
-                                     void*  x, inc_t incx, \
-                                     void*  y, inc_t incy \
-                                   ) \
-{ \
-	ctype_ax* alpha_cast = alpha; \
-	ctype_a*  a_cast     = a; \
-	ctype_x*  x_cast     = x; \
-	ctype_y*  y_cast     = y; \
-	ctype_a*  a1; \
-	ctype_x*  chi1; \
-	ctype_y*  y1; \
-	ctype_ax  alpha_chi1; \
-	dim_t     i; \
-\
-	for ( i = 0; i < b_n; ++i ) \
-	{ \
-		a1   = a_cast + (0  )*inca + (i  )*lda; \
-		chi1 = x_cast + (i  )*incx; \
-		y1   = y_cast + (0  )*incy; \
-\
-		PASTEMAC2(chx,chax,copycjs)( conjx, *chi1, alpha_chi1 ); \
-		PASTEMAC2(chax,chax,scals)( *alpha_cast, alpha_chi1 ); \
-\
-		PASTEMAC3(chax,cha,chy,axpyv)( conja, \
-		                               m, \
-		                               &alpha_chi1, \
-		                               a1, inca, \
-		                               y1, incy ); \
-	} \
+    /* Just call the reference implementation. */
+    bli_sssaxpyf_unb_var1( conja,
+                           conjx,
+                           m,
+                           b_n,
+                           alpha,
+                           a, inca, lda,
+                           x, incx,
+                           y, incy );
 }
 
-// Define the basic set of functions unconditionally, and then also some
-// mixed datatype functions if requested.
-//INSERT_GENTFUNC3U12_BASIC( axpyf, axpyf_opt_var1 )
-GENTFUNC3U12( float,    float,    float,    float,    s, s, s, s, axpyf, axpyf_opt_var1 )
-//GENTFUNC3U12( double,   double,   double,   double,   d, d, d, d, axpyf, axpyf_opt_var1 )
-GENTFUNC3U12( scomplex, scomplex, scomplex, scomplex, c, c, c, c, axpyf, axpyf_opt_var1 )
-GENTFUNC3U12( dcomplex, dcomplex, dcomplex, dcomplex, z, z, z, z, axpyf, axpyf_opt_var1 )
-
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTFUNC3U12_MIX_D( axpyf, axpyf_opt_var1 )
-#endif
-
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTFUNC3U12_MIX_P( axpyf, axpyf_opt_var1 )
-#endif
 
 
 #include "pmmintrin.h"
@@ -162,16 +66,15 @@ typedef union
     double  d[2];
 } v2df_t;
 
-
 void bli_dddaxpyf_opt_var1(
-                            conj_t conja,
-                            conj_t conjx,
-                            dim_t  m,
-                            dim_t  b_n,
-                            void*  alpha,
-                            void*  a, inc_t inca, inc_t lda,
-                            void*  x, inc_t incx,
-                            void*  y, inc_t incy
+                            conj_t             conja,
+                            conj_t             conjx,
+                            dim_t              m,
+                            dim_t              b_n,
+                            double*   restrict alpha,
+                            double*   restrict a, inc_t inca, inc_t lda,
+                            double*   restrict x, inc_t incx,
+                            double*   restrict y, inc_t incy
                           )
 {
 	double*  restrict alpha_cast = alpha;
@@ -353,3 +256,50 @@ void bli_dddaxpyf_opt_var1(
 	}
 }
 
+
+
+void bli_cccaxpyf_opt_var1(
+                            conj_t             conja,
+                            conj_t             conjx,
+                            dim_t              m,
+                            dim_t              b_n,
+                            scomplex* restrict alpha,
+                            scomplex* restrict a, inc_t inca, inc_t lda,
+                            scomplex* restrict x, inc_t incx,
+                            scomplex* restrict y, inc_t incy
+                          )
+{
+    /* Just call the reference implementation. */
+    bli_cccaxpyf_unb_var1( conja,
+                           conjx,
+                           m,
+                           b_n,
+                           alpha,
+                           a, inca, lda,
+                           x, incx,
+                           y, incy );
+}
+
+
+
+void bli_zzzaxpyf_opt_var1(
+                            conj_t             conja,
+                            conj_t             conjx,
+                            dim_t              m,
+                            dim_t              b_n,
+                            dcomplex* restrict alpha,
+                            dcomplex* restrict a, inc_t inca, inc_t lda,
+                            dcomplex* restrict x, inc_t incx,
+                            dcomplex* restrict y, inc_t incy
+                          )
+{
+    /* Just call the reference implementation. */
+    bli_zzzaxpyf_unb_var1( conja,
+                           conjx,
+                           m,
+                           b_n,
+                           alpha,
+                           a, inca, lda,
+                           x, incx,
+                           y, incy );
+}

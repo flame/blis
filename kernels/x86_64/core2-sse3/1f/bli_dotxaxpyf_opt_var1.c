@@ -35,72 +35,37 @@
 #include "blis.h"
 
 
-#undef  GENTFUNC3U12
-#define GENTFUNC3U12( ctype_a, ctype_b, ctype_c, ctype_ab, cha, chb, chc, chab, opname, varname ) \
-\
-void PASTEMAC3(cha,chb,chc,varname)( \
-                                     conj_t conjat, \
-                                     conj_t conja, \
-                                     conj_t conjw, \
-                                     conj_t conjx, \
-                                     dim_t  m, \
-                                     dim_t  b_n, \
-                                     void*  alpha, \
-                                     void*  a, inc_t inca, inc_t lda, \
-                                     void*  w, inc_t incw, \
-                                     void*  x, inc_t incx, \
-                                     void*  beta, \
-                                     void*  y, inc_t incy, \
-                                     void*  z, inc_t incz \
-                                   ) \
-{ \
-	ctype_ab* alpha_cast = alpha; \
-	ctype_a*  a_cast     = a; \
-	ctype_b*  w_cast     = w; \
-	ctype_b*  x_cast     = x; \
-	ctype_c*  beta_cast  = beta; \
-	ctype_c*  y_cast     = y; \
-	ctype_c*  z_cast     = z; \
-\
-	/* A is m x n.                   */ \
-	/* y = beta * y + alpha * A^T w; */ \
-	/* z =        z + alpha * A   x; */ \
-	PASTEMAC3(cha,chb,chc,dotxf)( conjat, \
-	                              conjw, \
-	                              b_n, \
-	                              m, \
-	                              alpha_cast, \
-	                              a_cast, inca, lda, \
-	                              w_cast, incw, \
-	                              beta_cast, \
-	                              y_cast, incy ); \
-\
-	PASTEMAC3(cha,chb,chc,axpyf)( conja, \
-	                              conjx, \
-	                              m, \
-	                              b_n, \
-	                              alpha_cast, \
-	                              a_cast, inca, lda, \
-	                              x_cast, incx, \
-	                              z_cast, incz ); \
+
+void bli_sssdotxaxpyf_opt_var1( conj_t             conjat,
+                                conj_t             conja,
+                                conj_t             conjw,
+                                conj_t             conjx,
+                                dim_t              m,
+                                dim_t              b_n,
+                                float*    restrict alpha,
+                                float*    restrict a, inc_t inca, inc_t lda,
+                                float*    restrict w, inc_t incw,
+                                float*    restrict x, inc_t incx,
+                                float*    restrict beta,
+                                float*    restrict y, inc_t incy,
+                                float*    restrict z, inc_t incz )
+{
+    /* Just call the reference implementation. */
+    bli_sssdotxaxpyf_unb_var1( conjat,
+                               conja,
+                               conjw,
+                               conjx,
+                               m,
+                               b_n,
+                               alpha,
+                               a, inca, lda,
+                               w, incw,
+                               x, incx,
+                               beta,
+                               y, incy,
+                               z, incz );
 }
 
-
-// Define the basic set of functions unconditionally, and then also some
-// mixed datatype functions if requested.
-//INSERT_GENTFUNC3U12_BASIC( dotxaxpyf, dotxaxpyf_opt_var1 )
-GENTFUNC3U12( float,    float,    float,    float,    s, s, s, s, dotxaxpyf, dotxaxpyf_opt_var1 )
-//GENTFUNC3U12( double,   double,   double,   double,   d, d, d, d, dotxaxpyf, dotxaxpyf_opt_var1 )
-GENTFUNC3U12( scomplex, scomplex, scomplex, scomplex, c, c, c, c, dotxaxpyf, dotxaxpyf_opt_var1 )
-GENTFUNC3U12( dcomplex, dcomplex, dcomplex, dcomplex, z, z, z, z, dotxaxpyf, dotxaxpyf_opt_var1 )
-
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTFUNC3U12_MIX_D( dotxaxpyf, dotxaxpyf_opt_var1 )
-#endif
-
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTFUNC3U12_MIX_P( dotxaxpyf, dotxaxpyf_opt_var1 )
-#endif
 
 
 #include "pmmintrin.h"
@@ -111,21 +76,19 @@ typedef union
 } v2df_t;
 
 
-void bli_ddddotxaxpyf_opt_var1(
-                                conj_t conjat,
-                                conj_t conja,
-                                conj_t conjw,
-                                conj_t conjx,
-                                dim_t  m,
-                                dim_t  b_n,
-                                void*  alpha,
-                                void*  a, inc_t inca, inc_t lda,
-                                void*  w, inc_t incw,
-                                void*  x, inc_t incx,
-                                void*  beta,
-                                void*  y, inc_t incy,
-                                void*  z, inc_t incz
-                              ) 
+void bli_ddddotxaxpyf_opt_var1( conj_t             conjat,
+                                conj_t             conja,
+                                conj_t             conjw,
+                                conj_t             conjx,
+                                dim_t              m,
+                                dim_t              b_n,
+                                double*   restrict alpha,
+                                double*   restrict a, inc_t inca, inc_t lda,
+                                double*   restrict w, inc_t incw,
+                                double*   restrict x, inc_t incx,
+                                double*   restrict beta,
+                                double*   restrict y, inc_t incy,
+                                double*   restrict z, inc_t incz )
 { 
 	double*  restrict alpha_cast = alpha; 
 	double*  restrict beta_cast  = beta; 
@@ -413,4 +376,68 @@ void bli_ddddotxaxpyf_opt_var1(
 
 	_mm_store_pd( ( double* )(y_cast + 0*n_elem_per_reg ), psi0v.v );
 	_mm_store_pd( ( double* )(y_cast + 1*n_elem_per_reg ), psi1v.v );
+}
+
+
+
+void bli_cccdotxaxpyf_opt_var1( conj_t             conjat,
+                                conj_t             conja,
+                                conj_t             conjw,
+                                conj_t             conjx,
+                                dim_t              m,
+                                dim_t              b_n,
+                                scomplex* restrict alpha,
+                                scomplex* restrict a, inc_t inca, inc_t lda,
+                                scomplex* restrict w, inc_t incw,
+                                scomplex* restrict x, inc_t incx,
+                                scomplex* restrict beta,
+                                scomplex* restrict y, inc_t incy,
+                                scomplex* restrict z, inc_t incz )
+{
+    /* Just call the reference implementation. */
+    bli_cccdotxaxpyf_unb_var1( conjat,
+                               conja,
+                               conjw,
+                               conjx,
+                               m,
+                               b_n,
+                               alpha,
+                               a, inca, lda,
+                               w, incw,
+                               x, incx,
+                               beta,
+                               y, incy,
+                               z, incz );
+}
+
+
+
+void bli_zzzdotxaxpyf_opt_var1( conj_t             conjat,
+                                conj_t             conja,
+                                conj_t             conjw,
+                                conj_t             conjx,
+                                dim_t              m,
+                                dim_t              b_n,
+                                dcomplex* restrict alpha,
+                                dcomplex* restrict a, inc_t inca, inc_t lda,
+                                dcomplex* restrict w, inc_t incw,
+                                dcomplex* restrict x, inc_t incx,
+                                dcomplex* restrict beta,
+                                dcomplex* restrict y, inc_t incy,
+                                dcomplex* restrict z, inc_t incz )
+{
+    /* Just call the reference implementation. */
+    bli_zzzdotxaxpyf_unb_var1( conjat,
+                               conja,
+                               conjw,
+                               conjx,
+                               m,
+                               b_n,
+                               alpha,
+                               a, inca, lda,
+                               w, incw,
+                               x, incx,
+                               beta,
+                               y, incy,
+                               z, incz );
 }

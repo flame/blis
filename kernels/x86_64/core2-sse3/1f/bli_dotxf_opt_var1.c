@@ -35,63 +35,30 @@
 #include "blis.h"
 
 
-#undef  GENTFUNC3U12
-#define GENTFUNC3U12( ctype_a, ctype_x, ctype_y, ctype_ax, cha, chx, chy, chax, opname, varname ) \
-\
-void PASTEMAC3(chx,chy,chr,varname)( \
-                                     conj_t conjat, \
-                                     conj_t conjx, \
-                                     dim_t  m, \
-                                     dim_t  b_n, \
-                                     void*  alpha, \
-                                     void*  a, inc_t inca, inc_t lda, \
-                                     void*  x, inc_t incx, \
-                                     void*  beta, \
-                                     void*  y, inc_t incy \
-                                   ) \
-{ \
-	ctype_xy* alpha_cast = alpha; \
-	ctype_x*  a_cast     = a; \
-	ctype_y*  x_cast     = x; \
-	ctype_r*  beta_cast  = beta; \
-	ctype_r*  y_cast     = y; \
-	ctype_x*  a1; \
-	ctype_y*  x1; \
-	ctype_r*  psi1; \
-	dim_t     i; \
-\
-	for ( i = 0; i < b_n; ++i ) \
-	{ \
-		a1   = a_cast + (0  )*inca + (i  )*lda; \
-		x1   = x_cast + (0  )*incx; \
-		psi1 = y_cast + (i  )*incy; \
-\
-		PASTEMAC3(cha,chx,chy,dotxv)( conjat, \
-		                              conjx, \
-		                              m, \
-		                              alpha_cast, \
-		                              a1,   inca, \
-		                              x1,   incx, \
-		                              beta_cast, \
-		                              psi1 ); \
-	} \
+void bli_sssdotxf_opt_var1(
+                            conj_t             conjat,
+                            conj_t             conjx,
+                            dim_t              m,
+                            dim_t              b_n,
+                            float*    restrict alpha,
+                            float*    restrict a, inc_t inca, inc_t lda,
+                            float*    restrict x, inc_t incx,
+                            float*    restrict beta,
+                            float*    restrict y, inc_t incy
+                          )
+{
+    /* Just call the reference implementation. */
+    bli_sssdotxf_unb_var1( conjat,
+                           conjx,
+                           m,
+                           b_n,
+                           alpha,
+                           a, inca, lda,
+                           x, incx,
+                           beta,
+                           y, incy );
 }
 
-// Define the basic set of functions unconditionally, and then also some
-// mixed datatype functions if requested.
-//INSERT_GENTFUNC3U12_BASIC( dotxf, dotxf_opt_var1 )
-GENTFUNC3U12( float,    float,    float,    float,    s, s, s, s, dotxf, dotxf_opt_var1 )
-//GENTFUNC3U12( double,   double,   double,   double,   d, d, d, d, dotxf, dotxf_opt_var1 )
-GENTFUNC3U12( scomplex, scomplex, scomplex, scomplex, c, c, c, c, dotxf, dotxf_opt_var1 )
-GENTFUNC3U12( dcomplex, dcomplex, dcomplex, dcomplex, z, z, z, z, dotxf, dotxf_opt_var1 )
-
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTFUNC3U12_MIX_D( dotxf, dotxf_opt_var1 )
-#endif
-
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTFUNC3U12_MIX_P( dotxf, dotxf_opt_var1 )
-#endif
 
 
 #include "pmmintrin.h"
@@ -103,16 +70,16 @@ typedef union
 
 
 void bli_ddddotxf_opt_var1(
-                            conj_t conjat,
-                            conj_t conjx,
-                            dim_t  m,
-                            dim_t  b_n,
-                            void*  alpha,
-                            void*  a, inc_t inca, inc_t lda,
-                            void*  x, inc_t incx,
-                            void*  beta,
-                            void*  y, inc_t incy
-                          ) 
+                            conj_t             conjat,
+                            conj_t             conjx,
+                            dim_t              m,
+                            dim_t              b_n,
+                            double*   restrict alpha,
+                            double*   restrict a, inc_t inca, inc_t lda,
+                            double*   restrict x, inc_t incx,
+                            double*   restrict beta,
+                            double*   restrict y, inc_t incy
+                          )
 { 
 	double*  restrict alpha_cast = alpha; 
 	double*  restrict beta_cast = beta; 
@@ -350,3 +317,58 @@ void bli_ddddotxf_opt_var1(
 	_mm_store_pd( ( double* )(y_cast + 1*n_elem_per_reg), rho2v.v );
 
 }
+
+
+
+void bli_cccdotxf_opt_var1(
+                            conj_t             conjat,
+                            conj_t             conjx,
+                            dim_t              m,
+                            dim_t              b_n,
+                            scomplex* restrict alpha,
+                            scomplex* restrict a, inc_t inca, inc_t lda,
+                            scomplex* restrict x, inc_t incx,
+                            scomplex* restrict beta,
+                            scomplex* restrict y, inc_t incy
+                          )
+{
+    /* Just call the reference implementation. */
+    bli_cccdotxf_unb_var1( conjat,
+                           conjx,
+                           m,
+                           b_n,
+                           alpha,
+                           a, inca, lda,
+                           x, incx,
+                           beta,
+                           y, incy );
+}
+
+
+
+void bli_zzzdotxf_opt_var1(
+                            conj_t             conjat,
+                            conj_t             conjx,
+                            dim_t              m,
+                            dim_t              b_n,
+                            dcomplex* restrict alpha,
+                            dcomplex* restrict a, inc_t inca, inc_t lda,
+                            dcomplex* restrict x, inc_t incx,
+                            dcomplex* restrict beta,
+                            dcomplex* restrict y, inc_t incy
+                          )
+{
+    /* Just call the reference implementation. */
+    bli_zzzdotxf_unb_var1( conjat,
+                           conjx,
+                           m,
+                           b_n,
+                           alpha,
+                           a, inca, lda,
+                           x, incx,
+                           beta,
+                           y, incy );
+}
+
+
+
