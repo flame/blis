@@ -52,17 +52,17 @@
 // (3) KC must be a multiple of
 //     (a) MR and
 //     (b) NR (for triangular operations such as trmm and trsm).
-// 
+//
 
-#define BLIS_DEFAULT_MC_S              64 
+#define BLIS_DEFAULT_MC_S              64
 #define BLIS_DEFAULT_KC_S              128
 #define BLIS_DEFAULT_NC_S              4096
 
-#define BLIS_DEFAULT_MC_D              64 
+#define BLIS_DEFAULT_MC_D              64
 #define BLIS_DEFAULT_KC_D              128
 #define BLIS_DEFAULT_NC_D              4096
 
-#define BLIS_DEFAULT_MC_C              64 
+#define BLIS_DEFAULT_MC_C              64
 #define BLIS_DEFAULT_KC_C              128
 #define BLIS_DEFAULT_NC_C              4096
 
@@ -100,16 +100,16 @@
 // in the m and n dimensions should all be equal to the size expected by
 // the reference micro-kernel(s).
 
-#define BLIS_DEFAULT_MR_S              8
+#define BLIS_DEFAULT_MR_S              4
 #define BLIS_DEFAULT_NR_S              4
 
-#define BLIS_DEFAULT_MR_D              8
+#define BLIS_DEFAULT_MR_D              4
 #define BLIS_DEFAULT_NR_D              4
 
-#define BLIS_DEFAULT_MR_C              8
+#define BLIS_DEFAULT_MR_C              4
 #define BLIS_DEFAULT_NR_C              4
 
-#define BLIS_DEFAULT_MR_Z              8
+#define BLIS_DEFAULT_MR_Z              4
 #define BLIS_DEFAULT_NR_Z              4
 
 // NOTE: If the micro-kernel, which is typically unrolled to a factor

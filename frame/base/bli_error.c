@@ -186,5 +186,8 @@ void bli_error_msgs_init( void )
 	         "Attempted to allocate contiguous memory block that is too big for implementation." );
 	sprintf( bli_error_string_for_code(BLIS_EXHAUSTED_CONTIG_MEMORY_POOL),
 	         "Attempted to allocate more memory from contiguous pool than is available." );
+
+	sprintf( bli_error_string_for_code(BLIS_EXPECTED_OBJECT_ALIAS),
+	         "Expected object to be alias." );
 }
 

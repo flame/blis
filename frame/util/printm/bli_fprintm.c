@@ -131,6 +131,7 @@ void PASTEMAC(ch,opname)( \
 	} \
 \
 	fprintf( file, "%s\n", s2 ); \
+	fflush( file ); \
 }
 
 INSERT_GENTFUNC_BASIC_I( fprintm, fprintm )

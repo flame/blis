@@ -34,6 +34,82 @@
 
 #include "blis.h"
 
+#define FUNCPTR_T axpyf_fp
+
+typedef void (*FUNCPTR_T)(
+                           conj_t conja,
+                           conj_t conjx,
+                           dim_t  m,
+                           dim_t  b_n,
+                           void*  alpha,
+                           void*  a, inc_t inca, inc_t lda,
+                           void*  x, inc_t incx,
+                           void*  y, inc_t incy
+                         );
+
+// If some mixed datatype functions will not be compiled, we initialize
+// the corresponding elements of the function array to NULL.
+#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
+static FUNCPTR_T GENARRAY3_ALL(ftypes,axpyf_unb_var1);
+#else
+#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
+static FUNCPTR_T GENARRAY3_EXT(ftypes,axpyf_unb_var1);
+#else
+static FUNCPTR_T GENARRAY3_MIN(ftypes,axpyf_unb_var1);
+#endif
+#endif
+
+
+void bli_axpyf_unb_var1( obj_t*  alpha,
+                         obj_t*  a,
+                         obj_t*  x,
+                         obj_t*  y )
+{
+	num_t     dt_a      = bli_obj_datatype( *a );
+	num_t     dt_x      = bli_obj_datatype( *x );
+	num_t     dt_y      = bli_obj_datatype( *y );
+
+	conj_t    conja     = bli_obj_conj_status( *a );
+	conj_t    conjx     = bli_obj_conj_status( *x );
+
+	dim_t     m         = bli_obj_vector_dim( *y );
+	dim_t     b_n       = bli_obj_vector_dim( *x );
+
+	void*     buf_a     = bli_obj_buffer_at_off( *a );
+	inc_t     rs_a      = bli_obj_row_stride( *a );
+	inc_t     cs_a      = bli_obj_col_stride( *a );
+
+	inc_t     inc_x     = bli_obj_vector_inc( *x );
+	void*     buf_x     = bli_obj_buffer_at_off( *x );
+
+	inc_t     inc_y     = bli_obj_vector_inc( *y );
+	void*     buf_y     = bli_obj_buffer_at_off( *y );
+
+	num_t     dt_alpha;
+	void*     buf_alpha;
+
+	FUNCPTR_T f;
+
+	// The datatype of alpha MUST be the type union of a and x. This is to
+	// prevent any unnecessary loss of information during computation.
+	dt_alpha  = bli_datatype_union( dt_a, dt_x );
+	buf_alpha = bli_obj_scalar_buffer( dt_alpha, *alpha );
+
+	// Index into the type combination array to extract the correct
+	// function pointer.
+	f = ftypes[dt_a][dt_x][dt_y];
+
+	// Invoke the function.
+	f( conja,
+	   conjx,
+	   m,
+	   b_n,
+	   buf_alpha,
+	   buf_a, rs_a, cs_a,
+	   buf_x, inc_x,
+	   buf_y, inc_y );
+}
+
 
 #undef  GENTFUNC3U12
 #define GENTFUNC3U12( ctype_a, ctype_x, ctype_y, ctype_ax, cha, chx, chy, chax, varname, kername ) \

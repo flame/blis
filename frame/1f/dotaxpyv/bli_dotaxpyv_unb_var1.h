@@ -32,6 +32,13 @@
 
 */
 
+void bli_dotaxpyv_unb_var1( obj_t*  alpha,
+                            obj_t*  xt,
+                            obj_t*  x,
+                            obj_t*  y,
+                            obj_t*  rho,
+                            obj_t*  z );
+
 
 #undef  GENTPROT3U12
 #define GENTPROT3U12( ctype_x, ctype_y, ctype_z, ctype_xy, chx, chy, chz, chxy, varname ) \

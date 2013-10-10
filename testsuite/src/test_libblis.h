@@ -65,7 +65,7 @@
 #define INPUT_BUFFER_SIZE            256
 #define MAX_FILENAME_LENGTH          256
 #define MAX_BINARY_NAME_LENGTH       256
-#define MAX_FUNC_STRING_LENGTH       24
+#define MAX_FUNC_STRING_LENGTH       27
 #define FLOPS_PER_UNIT_PERF          1e9
 
 #define MAX_NUM_MSTORAGE             4
@@ -131,6 +131,8 @@ typedef enum
 	BLIS_TEST_DIMS_MN         = 1,
 	BLIS_TEST_DIMS_MK         = 2,
 	BLIS_TEST_DIMS_M          = 3,
+	BLIS_TEST_DIMS_K          = 4,
+	BLIS_TEST_NO_DIMS         = 5,
 } dimset_t;
 
 
@@ -138,6 +140,7 @@ typedef enum
 {
 	BLIS_TEST_SEQ_FRONT_END   = 0,
 	BLIS_TEST_MT_FRONT_END    = 1,
+	BLIS_TEST_SEQ_UKERNEL     = 2,
 } mt_impl_t;
 
 
@@ -186,7 +189,9 @@ typedef struct test_ops_s
 	int       util_over;
 	int       l1v_over;
 	int       l1m_over;
+	int       l1f_over;
 	int       l2_over;
+	int       l3ukr_over;
 	int       l3_over;
 
 	// util
@@ -215,6 +220,13 @@ typedef struct test_ops_s
 	test_op_t setm;
 	test_op_t subm;
 
+	// level-1f
+	test_op_t axpy2v;
+	test_op_t dotaxpyv;
+	test_op_t axpyf;
+	test_op_t dotxf;
+	test_op_t dotxaxpyf;
+
 	// level-2
 	test_op_t gemv;
 	test_op_t ger;
@@ -226,6 +238,11 @@ typedef struct test_ops_s
 	test_op_t syr2;
 	test_op_t trmv;
 	test_op_t trsv;
+
+	// level-3 micro-kernels
+	test_op_t gemm_ukr;
+	test_op_t trsm_ukr;
+	test_op_t gemmtrsm_ukr;
 
 	// level-3
 	test_op_t gemm;
@@ -256,7 +273,9 @@ typedef struct
 void libblis_test_utility_ops( test_params_t* params, test_ops_t* ops );
 void libblis_test_level1m_ops( test_params_t* params, test_ops_t* ops );
 void libblis_test_level1v_ops( test_params_t* params, test_ops_t* ops );
+void libblis_test_level1f_ops( test_params_t* params, test_ops_t* ops );
 void libblis_test_level2_ops( test_params_t* params, test_ops_t* ops );
+void libblis_test_level3_ukrs( test_params_t* params, test_ops_t* ops );
 void libblis_test_level3_ops( test_params_t* params, test_ops_t* ops );
 
 void libblis_test_read_params_file( char* input_filename, test_params_t* params );
@@ -338,6 +357,7 @@ void fill_string_with_n_spaces( char* str, unsigned int n_spaces );
 // --- Create object ---
 
 void libblis_test_mobj_create( test_params_t* params, num_t dt, trans_t trans, char storage, dim_t m, dim_t n, obj_t* a );
+void libblis_test_pobj_create( blksz_t* m, blksz_t* n, invdiag_t inv_diag, pack_t pack_schema, packbuf_t pack_buf, obj_t* a, obj_t* p );
 void libblis_test_vobj_create( test_params_t* params, num_t dt, char storage, dim_t m, obj_t* x );
 
 // --- Global string initialization ---
@@ -403,6 +423,13 @@ void libblis_test_check_empty_problem( obj_t* c, double* perf, double* resid );
 #include "test_setm.h"
 #include "test_subm.h"
 
+// Level-1f kernels
+#include "test_axpy2v.h"
+#include "test_dotaxpyv.h"
+#include "test_axpyf.h"
+#include "test_dotxf.h"
+#include "test_dotxaxpyf.h"
+
 // Level-2
 #include "test_gemv.h"
 #include "test_ger.h"
@@ -414,6 +441,11 @@ void libblis_test_check_empty_problem( obj_t* c, double* perf, double* resid );
 #include "test_syr2.h"
 #include "test_trmv.h"
 #include "test_trsv.h"
+
+// Level-3 micro-kernels
+#include "test_gemm_ukr.h"
+#include "test_trsm_ukr.h"
+#include "test_gemmtrsm_ukr.h"
 
 // Level-3
 #include "test_gemm.h"

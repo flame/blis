@@ -34,19 +34,62 @@
 
 #include "blis.h"
 
+#define FUNCPTR_T dupl_fp
+
+typedef void (*FUNCPTR_T)(
+                           dim_t   k,
+                           void*   b,
+                           void*   bd
+                         );
+
+static FUNCPTR_T GENARRAY(ftypes,dupl_unb_var1);
+
+
+void bli_dupl_unb_var1( obj_t* b,
+                        obj_t* bd )
+{
+	num_t     dt_b      = bli_obj_datatype( *b );
+
+	dim_t     k;
+
+	void*     buf_b     = bli_obj_buffer_at_off( *b );
+
+	void*     buf_bd    = bli_obj_buffer_at_off( *bd );
+
+	FUNCPTR_T f;
+
+	// The k dimension is the one that is "perpendicular" to the
+	// storage dimension. 
+	if ( bli_obj_is_row_stored( *b ) ) k = bli_obj_length( *b );
+	else                               k = bli_obj_width( *b );
+
+	// Index into the type combination array to extract the correct
+	// function pointer.
+	f = ftypes[dt_b];
+
+	// Invoke the function.
+	f( k,
+	   buf_b,
+	   buf_bd );
+}
+
 
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, varname, kername ) \
 \
 void PASTEMAC(ch,varname)( \
-                           dim_t   n, \
-                           ctype*  b, \
-                           ctype*  bd \
+                           dim_t  n, \
+                           void*  b, \
+                           void*  bd \
                          ) \
 { \
-	const dim_t NDUP   = PASTEMAC(ch,ndup); \
-	const dim_t NR     = PASTEMAC(ch,nr); \
-	const dim_t PACKNR = PASTEMAC(ch,packnr); \
+	ctype*      b_cast  = b; \
+	ctype*      bd_cast = bd; \
+\
+	const dim_t NDUP    = PASTEMAC(ch,ndup); \
+	const dim_t NR      = PASTEMAC(ch,nr); \
+	const dim_t PACKNR  = PASTEMAC(ch,packnr); \
+\
 	dim_t       i, j, el, d; \
 \
 	for ( el = 0; el < n; ++el ) \
@@ -56,7 +99,7 @@ void PASTEMAC(ch,varname)( \
 \
 		for ( d = 0; d < NDUP; ++d ) \
 		{ \
-			*(bd + el*NDUP + d) = *(b + i*PACKNR + j); \
+			*(bd_cast + el*NDUP + d) = *(b_cast + i*PACKNR + j); \
 		} \
 	} \
 }

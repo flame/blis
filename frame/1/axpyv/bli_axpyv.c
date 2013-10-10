@@ -34,17 +34,6 @@
 
 #include "blis.h"
 
-/*
-void bli_axpyv( obj_t* alpha,
-                obj_t* x,
-                obj_t* y )
-{
-	if ( bli_error_checking_is_enabled() )
-		bli_axpyv_check( alpha, x, y );
-
-	bli_axpyv_unb_var1( alpha, x, y );
-}
-*/
 
 //
 // Define object-based interface.

@@ -32,7 +32,19 @@
 
 */
 
+#include "bli_dotaxpyv_check.h"
 #include "bli_dotaxpyv_unb_var1.h"
+
+
+//
+// Prototype object-based interface.
+//
+void bli_dotaxpyv( obj_t* alpha,
+                   obj_t* xt,
+                   obj_t* x,
+                   obj_t* y,
+                   obj_t* rho,
+                   obj_t* z );
 
 
 //

@@ -95,3 +95,6 @@ err_t bli_check_packv_schema_on_unpack( obj_t* a );
 err_t bli_check_valid_packbuf( packbuf_t buf_type );
 err_t bli_check_requested_block_size_for_pool( siz_t req_size, pool_t* pool );
 err_t bli_check_if_exhausted_pool( pool_t* pool );
+
+err_t bli_check_object_alias_of( obj_t* a, obj_t* b );
+

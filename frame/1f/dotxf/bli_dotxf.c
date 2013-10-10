@@ -34,6 +34,43 @@
 
 #include "blis.h"
 
+//
+// Define object-based interface.
+//
+#undef  GENFRONT
+#define GENFRONT( opname, varname ) \
+\
+void PASTEMAC0(opname)( \
+                        obj_t* alpha, \
+                        obj_t* a, \
+                        obj_t* x, \
+                        obj_t* beta, \
+                        obj_t* y  \
+                      ) \
+{ \
+	obj_t a_local; \
+\
+	if ( bli_error_checking_is_enabled() ) \
+	    PASTEMAC(opname,_check)( alpha, a, x, beta, y ); \
+\
+	bli_obj_alias_to( *a, a_local ); \
+\
+	/* If the transposition bit is set, apply it now. */ \
+	if ( bli_obj_has_trans( a_local ) ) \
+	{ \
+	    bli_obj_induce_trans( a_local ); \
+	    bli_obj_toggle_trans( a_local ); \
+	} \
+\
+	PASTEMAC0(varname)( alpha, \
+	                    &a_local, \
+	                    x, \
+	                    beta, \
+	                    y ); \
+}
+
+GENFRONT( dotxf, DOTXF_KERNEL )
+
 
 //
 // Define BLAS-like interfaces with homogeneous-typed operands.

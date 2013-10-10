@@ -32,7 +32,18 @@
 
 */
 
+#include "bli_axpyf_check.h"
+#include "bli_axpyf_fusefac.h"
 #include "bli_axpyf_unb_var1.h"
+
+
+//
+// Prototype object-based interface.
+//
+void bli_axpyf( obj_t* alpha,
+                obj_t* a,
+                obj_t* x,
+                obj_t* y );
 
 
 //

@@ -675,7 +675,10 @@ typedef enum
 	BLIS_REQUESTED_CONTIG_BLOCK_TOO_BIG        = (-111),
 	BLIS_EXHAUSTED_CONTIG_MEMORY_POOL          = (-112),
 
-	BLIS_ERROR_CODE_MAX                        = (-120)
+	// Object-related errors
+	BLIS_EXPECTED_OBJECT_ALIAS                 = (-120),
+
+	BLIS_ERROR_CODE_MAX                        = (-130)
 } err_t;
 
 #endif

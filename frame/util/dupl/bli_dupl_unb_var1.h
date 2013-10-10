@@ -33,13 +33,23 @@
 */
 
 
+//
+// Prototype object-based interface.
+//
+void bli_dupl_unb_var1( obj_t* b,
+                        obj_t* bd );
+
+
+//
+// Prototype BLAS-like interfaces.
+//
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, varname ) \
 \
 void PASTEMAC(ch,varname)( \
-                           dim_t   n, \
-                           ctype*  b, \
-                           ctype*  bd \
+                           dim_t  n, \
+                           void*  b, \
+                           void*  bd \
                          );
 
 INSERT_GENTPROT_BASIC( dupl_unb_var1 )

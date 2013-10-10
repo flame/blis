@@ -722,3 +722,16 @@ err_t bli_check_if_exhausted_pool( pool_t* pool )
 	return e_val;
 }
 
+
+// -- Memory allocator checks --------------------------------------------------
+
+err_t bli_check_object_alias_of( obj_t* a, obj_t* b )
+{
+	err_t e_val = BLIS_SUCCESS;
+
+	if ( !bli_obj_is_alias_of( *a, *b ) )
+		e_val = BLIS_EXPECTED_OBJECT_ALIAS;
+
+	return e_val;
+}
+

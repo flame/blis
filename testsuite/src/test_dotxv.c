@@ -259,7 +259,7 @@ void libblis_test_dotxv_check( obj_t*  alpha,
 	//
 	// Under these conditions, we assume that the implementation for
 	//
-	//   rho := beta * rho_orig + alpha * conjx(x)^T conjy(y)
+	//   rho := beta * rho_orig + alpha * conjx(x^T) conjy(y)
 	//
 	// is functioning correctly if
 	//

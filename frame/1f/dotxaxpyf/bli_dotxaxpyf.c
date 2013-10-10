@@ -36,6 +36,39 @@
 
 
 //
+// Define object-based interface.
+//
+#undef  GENFRONT
+#define GENFRONT( opname, varname ) \
+\
+void PASTEMAC0(opname)( \
+                        obj_t* alpha, \
+                        obj_t* at, \
+                        obj_t* a, \
+                        obj_t* w, \
+                        obj_t* x, \
+                        obj_t* beta, \
+                        obj_t* y, \
+                        obj_t* z  \
+                      ) \
+{ \
+	if ( bli_error_checking_is_enabled() ) \
+	    PASTEMAC(opname,_check)( alpha, at, a, w, x, beta, y, z ); \
+\
+	PASTEMAC0(varname)( alpha, \
+	                    at, \
+	                    a, \
+	                    w, \
+	                    x, \
+	                    beta, \
+	                    y, \
+	                    z ); \
+}
+
+GENFRONT( dotxaxpyf, DOTXAXPYF_KERNEL )
+
+
+//
 // Define BLAS-like interfaces with homogeneous-typed operands.
 //
 #undef  GENTFUNC

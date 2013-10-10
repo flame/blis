@@ -77,8 +77,14 @@ int main( int argc, char** argv )
 	// Test the level-1m operations.
 	libblis_test_level1m_ops( &params, &ops );
 
+	// Test the level-1f operations.
+	libblis_test_level1f_ops( &params, &ops );
+
 	// Test the level-2 operations.
 	libblis_test_level2_ops( &params, &ops );
+
+	// Test the level-3 micro-kernels.
+	libblis_test_level3_ukrs( &params, &ops );
 
 	// Test the level-3 operations.
 	libblis_test_level3_ops( &params, &ops );
@@ -126,7 +132,17 @@ void libblis_test_level1m_ops( test_params_t* params, test_ops_t* ops )
 	libblis_test_scal2m( params, &(ops->scal2m) );
 	libblis_test_setm( params, &(ops->setm) );
 	libblis_test_subm( params, &(ops->subm) );
+}
 
+
+
+void libblis_test_level1f_ops( test_params_t* params, test_ops_t* ops )
+{
+	libblis_test_axpy2v( params, &(ops->axpy2v) );
+	libblis_test_dotaxpyv( params, &(ops->dotaxpyv) );
+	libblis_test_axpyf( params, &(ops->axpyf) );
+	libblis_test_dotxf( params, &(ops->dotxf) );
+	libblis_test_dotxaxpyf( params, &(ops->dotxaxpyf) );
 }
 
 
@@ -143,7 +159,15 @@ void libblis_test_level2_ops( test_params_t* params, test_ops_t* ops )
 	libblis_test_syr2( params, &(ops->syr2) );
 	libblis_test_trmv( params, &(ops->trmv) );
 	libblis_test_trsv( params, &(ops->trsv) );
+}
 
+
+
+void libblis_test_level3_ukrs( test_params_t* params, test_ops_t* ops )
+{
+	libblis_test_gemm_ukr( params, &(ops->gemm_ukr) );
+	libblis_test_trsm_ukr( params, &(ops->trsm_ukr) );
+	libblis_test_gemmtrsm_ukr( params, &(ops->gemmtrsm_ukr) );
 }
 
 
@@ -160,7 +184,6 @@ void libblis_test_level3_ops( test_params_t* params, test_ops_t* ops )
 	libblis_test_trmm( params, &(ops->trmm) );
 	libblis_test_trmm3( params, &(ops->trmm3) );
 	libblis_test_trsm( params, &(ops->trsm) );
-
 }
 
 
@@ -182,7 +205,9 @@ void libblis_test_read_ops_file( char* input_filename, test_ops_t* ops )
 	libblis_test_read_section_override( ops, input_stream, &(ops->util_over) );
 	libblis_test_read_section_override( ops, input_stream, &(ops->l1v_over) );
 	libblis_test_read_section_override( ops, input_stream, &(ops->l1m_over) );
+	libblis_test_read_section_override( ops, input_stream, &(ops->l1f_over) );
 	libblis_test_read_section_override( ops, input_stream, &(ops->l2_over) );
+	libblis_test_read_section_override( ops, input_stream, &(ops->l3ukr_over) );
 	libblis_test_read_section_override( ops, input_stream, &(ops->l3_over) );
 
 	// Utility operations
@@ -211,6 +236,13 @@ void libblis_test_read_ops_file( char* input_filename, test_ops_t* ops )
 	libblis_test_read_op_info( ops, input_stream, BLIS_TEST_DIMS_MN,  0, &(ops->setm) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_TEST_DIMS_MN,  1, &(ops->subm) );
 
+	// Level-1f
+	libblis_test_read_op_info( ops, input_stream, BLIS_TEST_DIMS_M,   2, &(ops->axpy2v) );
+	libblis_test_read_op_info( ops, input_stream, BLIS_TEST_DIMS_M,   3, &(ops->dotaxpyv) );
+	libblis_test_read_op_info( ops, input_stream, BLIS_TEST_DIMS_M,   2, &(ops->axpyf) );
+	libblis_test_read_op_info( ops, input_stream, BLIS_TEST_DIMS_M,   2, &(ops->dotxf) );
+	libblis_test_read_op_info( ops, input_stream, BLIS_TEST_DIMS_M,   4, &(ops->dotxaxpyf) );
+
 	// Level-2
 	libblis_test_read_op_info( ops, input_stream, BLIS_TEST_DIMS_MN,  2, &(ops->gemv) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_TEST_DIMS_MN,  2, &(ops->ger) );
@@ -222,6 +254,11 @@ void libblis_test_read_ops_file( char* input_filename, test_ops_t* ops )
 	libblis_test_read_op_info( ops, input_stream, BLIS_TEST_DIMS_M,   3, &(ops->syr2) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_TEST_DIMS_M,   3, &(ops->trmv) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_TEST_DIMS_M,   3, &(ops->trsv) );
+
+	// Level-3 micro-kernels
+	libblis_test_read_op_info( ops, input_stream, BLIS_TEST_DIMS_K,   0, &(ops->gemm_ukr) );
+	libblis_test_read_op_info( ops, input_stream, BLIS_TEST_NO_DIMS,  1, &(ops->trsm_ukr) );
+	libblis_test_read_op_info( ops, input_stream, BLIS_TEST_DIMS_K,   1, &(ops->gemmtrsm_ukr) );
 
 	// Level-3
 	libblis_test_read_op_info( ops, input_stream, BLIS_TEST_DIMS_MNK, 2, &(ops->gemm) );
@@ -401,7 +438,7 @@ void libblis_test_read_op_info( test_ops_t*  ops,
 	libblis_test_read_next_line( buffer, input_stream );
 	sscanf( buffer, "%d ", &(op->op_switch) );
 
-	// Read the line for the sequential front-end.
+	// Read the line for the sequential front-end/micro-kernel interface.
 	libblis_test_read_next_line( buffer, input_stream );
 	sscanf( buffer, "%d ", &(op->front_seq) );
 
@@ -414,19 +451,31 @@ void libblis_test_read_op_info( test_ops_t*  ops,
 		                           op->n_dims );
 	}
 
-	// Read the dimension specifications.
-	libblis_test_read_next_line( buffer, input_stream );
-	for ( i = 0, p = 0; i < op->n_dims; ++i )
+	//printf( "n_dims = %u\n", op->n_dims );
+
+	// If there is at least one dimension for the current operation, read the
+	// dimension specifications, which encode the actual dimensions or the
+	// dimension ratios for each dimension.
+	if ( op->n_dims > 0 )
 	{
-		// Advance until we hit non-whitespace (ie: the next number).
-		for ( ; isspace( buffer[p] ); ++p ) ; 
+		libblis_test_read_next_line( buffer, input_stream );
 
-		sscanf( &buffer[p], "%d", &(op->dim_spec[i]) );
+		for ( i = 0, p = 0; i < op->n_dims; ++i )
+		{
+			//printf( "buffer[p]:       %s\n", &buffer[p] );
 
-		//printf( "dim[%d] = %d\n", i, op->dim_spec[i] );
+			// Advance until we hit non-whitespace (ie: the next number).
+			for ( ; isspace( buffer[p] ); ++p ) ; 
 
-		// Advance until we hit whitespace (ie: the space before the next number).
-		for ( ; !isspace( buffer[p] ); ++p ) ; 
+			//printf( "buffer[p] after: %s\n", &buffer[p] );
+
+			sscanf( &buffer[p], "%d", &(op->dim_spec[i]) );
+
+			//printf( "dim[%d] = %d\n", i, op->dim_spec[i] );
+
+			// Advance until we hit whitespace (ie: the space before the next number).
+			for ( ; !isspace( buffer[p] ); ++p ) ; 
+		}
 	}
 
 	// If there is at least one parameter for the current operation, read the
@@ -444,7 +493,7 @@ void libblis_test_read_op_info( test_ops_t*  ops,
 		}
 		if ( op->n_params != n_params )
 		{
-			libblis_test_printf_error( "Number of parameters specified by caller does not match length of parameter string in input file.\n" );
+			libblis_test_printf_error( "Number of parameters specified by caller does not match length of parameter string in input file. strlen( temp ) = %u; n_params = %u\n", op->n_params, n_params );
 		}
 
 		strcpy( op->params, temp );
@@ -477,7 +526,9 @@ void libblis_test_output_section_overrides( FILE* os, test_ops_t* ops )
 	libblis_test_fprintf_c( os, "Utility operations           %d\n", ops->util_over );
 	libblis_test_fprintf_c( os, "Level-1v operations          %d\n", ops->l1v_over );
 	libblis_test_fprintf_c( os, "Level-1m operations          %d\n", ops->l1m_over );
+	libblis_test_fprintf_c( os, "Level-1f operations          %d\n", ops->l1f_over );
 	libblis_test_fprintf_c( os, "Level-2 operations           %d\n", ops->l2_over );
+	libblis_test_fprintf_c( os, "Level-3 micro-kernels        %d\n", ops->l3ukr_over );
 	libblis_test_fprintf_c( os, "Level-3 operations           %d\n", ops->l3_over );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf( os, "\n" );
@@ -706,6 +757,15 @@ void libblis_test_output_op_struct( FILE* os, test_op_t* op, char* op_str )
 		libblis_test_fprintf_c( os, "%s m                      %d\n", op_str,
 		                                op->dim_spec[0] );
 	}
+	else if ( dimset == BLIS_TEST_DIMS_K )
+	{
+		libblis_test_fprintf_c( os, "%s k                      %d\n", op_str,
+		                                op->dim_spec[0] );
+	}
+	else if ( dimset == BLIS_TEST_NO_DIMS )
+	{
+		// Do nothing.
+	}
 	else
 	{
 		libblis_test_printf_error( "Invalid dimension combination.\n" );
@@ -783,6 +843,8 @@ unsigned int libblis_test_get_n_dims_from_dimset( dimset_t dimset )
 	else if ( dimset == BLIS_TEST_DIMS_MN  ) n_dims = 2;
 	else if ( dimset == BLIS_TEST_DIMS_MK  ) n_dims = 2;
 	else if ( dimset == BLIS_TEST_DIMS_M   ) n_dims = 1;
+	else if ( dimset == BLIS_TEST_DIMS_K   ) n_dims = 1;
+	else if ( dimset == BLIS_TEST_NO_DIMS  ) n_dims = 0;
 	else
 	{
 		n_dims = 0;
@@ -922,6 +984,7 @@ void libblis_test_op_driver( test_params_t* params,
 	unsigned int  p_first             = params->p_first;
 	unsigned int  p_max               = params->p_max;
 	unsigned int  p_inc               = params->p_inc;
+	unsigned int  mix_all_storage     = params->mix_all_storage;
 	unsigned int  reaction_to_failure = params->reaction_to_failure;
 
 	num_t         datatype;
@@ -1013,8 +1076,13 @@ void libblis_test_op_driver( test_params_t* params,
 	// Figure out how many operands we have.
 	n_operands = strlen( o_types );
 
+	// If we are testing a micro-kernel, unconditionally disable the
+	// "mix all storage" option.
+	if ( impl == BLIS_TEST_SEQ_UKERNEL )
+		mix_all_storage = DISABLE;
+
 	// Determine the total number of storage schemes.
-	if ( params->mix_all_storage )
+	if ( mix_all_storage )
 	{
 		// Fill storage specification string with wildcard chars.
 		for ( i = 0; i < n_operands; ++i )
@@ -1050,14 +1118,13 @@ void libblis_test_op_driver( test_params_t* params,
 
 		// Fill the storage combination strings in sc_str with the storage
 		// combinations called for by the storage string p_spec_str.
-		//libblis_test_fill_storage_strings( sc_str, n_store_combos, n_operands );
 		libblis_test_fill_param_strings( s_spec_str,
 	                                     chars_for_storage,
 	                                     n_operands,
 	                                     n_store_combos,
 	                                     sc_str );
 	}
-	else // if ( !params->mix_all_storage )
+	else // if ( !mix_all_storage )
 	{
 		// Only run combinations where all operands of either type (matrices
 		// or vectors) are stored in one storage scheme or another (no mixing
@@ -1197,7 +1264,10 @@ void libblis_test_op_driver( test_params_t* params,
 					                                    sc_str[sci],
 					                                    funcname_str );
 
-
+//printf( "fucname_str: %s\n", funcname_str );
+//printf( "n_spaces %u  strlen( funcname_str ) %u\n", n_spaces, strlen( funcname_str ) );
+//printf( "max_str_len %u\n", MAX_FUNC_STRING_LENGTH );
+//fflush( stdout );
 					n_spaces = MAX_FUNC_STRING_LENGTH - strlen( funcname_str );
 					fill_string_with_n_spaces( blank_str, n_spaces );
 
@@ -1233,7 +1303,7 @@ void libblis_test_op_driver( test_params_t* params,
 					else
 					{
 						libblis_test_fprintf( stdout,
-						                      "%s%s                 %s  %6.3lf  %9.2le    %s\n",
+						                      "%s%s              %s  %6.3lf  %9.2le    %s\n",
 						                      funcname_str, blank_str,
 						                      dims_str, perf, resid,
 						                      pass_str );
@@ -1241,7 +1311,7 @@ void libblis_test_op_driver( test_params_t* params,
 						// Also output to a file if requested (and successfully opened).
 						if ( output_stream )
 						libblis_test_fprintf( output_stream,
-						                      "%s%s                 %s  %6.3lf  %9.2le    %s\n",
+						                      "%s%s              %s  %6.3lf  %9.2le    %s\n",
 						                      funcname_str, blank_str,
 						                      dims_str, perf, resid,
 						                      pass_str );
@@ -1356,7 +1426,8 @@ void libblis_test_build_col_labels_string( test_op_t* op, char* l_str )
 		sprintf( &l_str[strlen(l_str)], " %5s", "n" );
 
 	if ( op->dimset == BLIS_TEST_DIMS_MNK ||
-	     op->dimset == BLIS_TEST_DIMS_MK  )
+	     op->dimset == BLIS_TEST_DIMS_MK  ||
+	     op->dimset == BLIS_TEST_DIMS_K   )
 		sprintf( &l_str[strlen(l_str)], " %5s", "k" );
 
 	sprintf( &l_str[strlen(l_str)], "%s", "   gflops  resid       result" );
@@ -1406,6 +1477,25 @@ void libblis_test_mobj_create( test_params_t* params, num_t dt, trans_t trans, c
 	{
 		libblis_test_printf_error( "Invalid storage character: %c\n", storage );
 	}
+}
+
+
+
+void libblis_test_pobj_create( blksz_t* m, blksz_t* n, invdiag_t inv_diag, pack_t pack_schema, packbuf_t pack_buf, obj_t* a, obj_t* p )
+{
+	// Start with making p and alias to a.
+	bli_obj_alias_to( *a, *p );
+
+	// Then initialize p appropriately for packing.
+	bli_packm_init_pack( FALSE,
+	                     inv_diag,
+	                     pack_schema,
+	                     BLIS_PACK_FWD_IF_UPPER,
+	                     BLIS_PACK_FWD_IF_LOWER,
+	                     pack_buf,
+	                     m, n,
+	                     a,
+	                     p );
 }
 
 

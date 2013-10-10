@@ -34,17 +34,6 @@
 
 #include "blis.h"
 
-/*
-void bli_dotv( obj_t* x,
-               obj_t* y,
-               obj_t* rho )
-{
-	if ( bli_error_checking_is_enabled() )
-		bli_dotv_check( x, y, rho );
-
-	bli_dotv_unb_var1( x, y, rho );
-}
-*/
 
 //
 // Define object-based interface.

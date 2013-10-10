@@ -229,11 +229,11 @@ void libblis_test_dotv_check( obj_t*  x,
 	//
 	// Pre-conditions:
 	// - x is randomized.
-	// - y is equal to conjx(conjy(x)).
+	// - y is equal to conj(conjx(conjy(x))).
 	//
 	// Under these conditions, we assume that the implementation for
 	//
-	//   rho := conjx(x)^T conjy(y)
+	//   rho := conjx(x^T) conjy(y)
 	//
 	// is functioning correctly if
 	//

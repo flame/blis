@@ -171,7 +171,7 @@ void libblis_test_trsm_experiment( test_params_t* params,
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
 	                          sc_str[1], m,       n,       &b_save );
 
-	// Set alpha and beta.
+	// Set alpha.
 	if ( bli_obj_is_real( b ) )
 	{
 		bli_setsc(  2.0,  0.0, &alpha );

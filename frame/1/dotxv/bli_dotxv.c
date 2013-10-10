@@ -34,19 +34,6 @@
 
 #include "blis.h"
 
-/*
-void bli_dotxv( obj_t* alpha,
-                obj_t* x,
-                obj_t* y,
-                obj_t* beta,
-                obj_t* rho )
-{
-	if ( bli_error_checking_is_enabled() )
-		bli_dotxv_check( alpha, x, y, beta, rho );
-
-	bli_dotxv_unb_var1( alpha, x, y, beta, rho );
-}
-*/
 
 //
 // Define object-based interface.

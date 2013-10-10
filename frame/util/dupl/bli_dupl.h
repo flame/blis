@@ -36,6 +36,13 @@
 
 
 //
+// Prototype object-based interface.
+//
+void bli_dupl( obj_t* b,
+               obj_t* bd );
+ 
+
+//
 // Prototype BLAS-like interfaces.
 //
 #undef  GENTPROT

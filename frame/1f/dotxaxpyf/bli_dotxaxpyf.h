@@ -32,7 +32,22 @@
 
 */
 
+#include "bli_dotxaxpyf_check.h"
+#include "bli_dotxaxpyf_fusefac.h"
 #include "bli_dotxaxpyf_unb_var1.h"
+
+
+//
+// Prototype object-based interface.
+//
+void bli_dotxaxpyf( obj_t* alpha, 
+                    obj_t* at,
+                    obj_t* a,
+                    obj_t* w,
+                    obj_t* x,
+                    obj_t* beta,
+                    obj_t* y,
+                    obj_t* z );
 
 
 //

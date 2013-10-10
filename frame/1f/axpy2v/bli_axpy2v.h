@@ -32,7 +32,18 @@
 
 */
 
+#include "bli_axpy2v_check.h"
 #include "bli_axpy2v_unb_var1.h"
+
+
+//
+// Prototype object-based interface.
+//
+void bli_axpy2v( obj_t* alpha1,
+                 obj_t* alpha2,
+                 obj_t* x,
+                 obj_t* y,
+                 obj_t* z );
 
 
 //

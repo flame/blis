@@ -1,10 +1,12 @@
 # --- Section overrides --------------------------------------------------------
 
-1         Utility              (0 = disable section; 1 = enable specified tests)
-1         Level-1v             (0 = disable section; 1 = enable specified tests)
-1         Level-1m             (0 = disable section; 1 = enable specified tests)
-1         Level-2              (0 = disable section; 1 = enable specified tests)
-1         Level-3              (0 = disable section; 1 = enable specified tests)
+1         Utility                 (0 = disable section; 1 = enable specified tests)
+1         Level-1v                (0 = disable section; 1 = enable specified tests)
+1         Level-1m                (0 = disable section; 1 = enable specified tests)
+1         Level-1f                (0 = disable section; 1 = enable specified tests)
+1         Level-2                 (0 = disable section; 1 = enable specified tests)
+1         Level-3 micro-kernels   (0 = disable section; 1 = enable specified tests)
+1         Level-3                 (0 = disable section; 1 = enable specified tests)
 
 
 # --- Utility ------------------------------------------------------------------
@@ -110,6 +112,34 @@
 ?           parameters: transa                          (? = test all values)
 
 
+# --- Level-1f -----------------------------------------------------------------
+
+1         axpy2v                                        (0 = disable all; 1 = specify)
+1           test sequential front-end                   (0 = disable; 1 = enable)
+-1          dimensions: m                               (-1 = bind to problem size)
+??          parameters: conjx conjy                     (? = test all values)
+
+1         dotaxpyv                                      (0 = disable all; 1 = specify)
+1           test sequential front-end                   (0 = disable; 1 = enable)
+-1          dimensions: m                               (-1 = bind to problem size)
+???         parameters: conjxt conjx conjy              (? = test all values)
+
+1         axpyf                                         (0 = disable all; 1 = specify)
+1           test sequential front-end                   (0 = disable; 1 = enable)
+-1          dimensions: m                               (-1 = bind to problem size)
+??          parameters: conja conjx                     (? = test all values)
+
+1         dotxf                                         (0 = disable all; 1 = specify)
+1           test sequential front-end                   (0 = disable; 1 = enable)
+-1          dimensions: m                               (-1 = bind to problem size)
+??          parameters: conjat conjx                    (? = test all values)
+
+1         dotxaxpyf                                     (0 = disable all; 1 = specify)
+1           test sequential front-end                   (0 = disable; 1 = enable)
+-1          dimensions: m                               (-1 = bind to problem size)
+????        parameters: conjat conja conjw conjx        (? = test all values)
+
+
 # --- Level-2 ------------------------------------------------------------------
 
 1         gemv                                          (0 = disable all; 1 = specify)
@@ -161,6 +191,22 @@
 1           test sequential front-end                   (0 = disable; 1 = enable)
 -1          dimensions: m                               (-1 = bind to problem size)
 ???         parameters: uploa transa diaga              (? = test all values)
+
+
+# --- Level-3 micro-kernels ----------------------------------------------------
+
+1         gemm                                          (0 = disable all; 1 = specify)
+1           test sequential micro-kernel                (0 = disable; 1 = enable)
+-1          dimensions: k                               (-1 = bind to problem size)
+
+1         trsm                                          (0 = disable all; 1 = specify)
+1           test sequential micro-kernel                (0 = disable; 1 = enable)
+?           parameters: uploa                           (? = test all values)
+
+1         gemmtrsm                                      (0 = disable all; 1 = specify)
+1           test sequential micro-kernel                (0 = disable; 1 = enable)
+-1          dimensions: k                               (-1 = bind to problem size)
+?           parameters: uploa                           (? = test all values)
 
 
 # --- Level-3 ------------------------------------------------------------------

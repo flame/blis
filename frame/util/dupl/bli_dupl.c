@@ -35,6 +35,24 @@
 #include "blis.h"
 
 //
+// Define object-based interface.
+//
+#undef  GENFRONT
+#define GENFRONT( opname, varname ) \
+\
+void PASTEMAC0(opname)( \
+                        obj_t* b, \
+                        obj_t* bd \
+                      ) \
+{ \
+    PASTEMAC0(varname)( b, \
+                        bd ); \
+}
+
+GENFRONT( dupl, DUPL_KERNEL )
+
+
+//
 // Define BLAS-like interfaces.
 //
 #undef  GENTFUNC

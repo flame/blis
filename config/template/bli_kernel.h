@@ -52,9 +52,9 @@
 // (3) KC must be a multiple of
 //     (a) MR and
 //     (b) NR (for triangular operations such as trmm and trsm).
-// 
+//
 
-#define BLIS_DEFAULT_MC_S              64 
+#define BLIS_DEFAULT_MC_S              64
 #define BLIS_DEFAULT_KC_S              128
 #define BLIS_DEFAULT_NC_S              4096
 
