@@ -256,7 +256,7 @@ void PASTEMAC(ch,varname)( \
 \
 			/* Compute the addresses of the next panels of A and B. */ \
 			a2 = a1 + rstep_a; \
-			if ( i == m_iter - 1 && m_left == 0 ) \
+			if ( i == m_iter - 1 ) \
 			{ \
 				a2 = a_cast; \
 			} \
