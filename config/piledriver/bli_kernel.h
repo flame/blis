@@ -58,8 +58,8 @@
 #define BLIS_DEFAULT_KC_S              256
 #define BLIS_DEFAULT_NC_S              8192
 
-#define BLIS_DEFAULT_MC_D              1088
-#define BLIS_DEFAULT_KC_D              128
+#define BLIS_DEFAULT_MC_D              1080
+#define BLIS_DEFAULT_KC_D              120
 #define BLIS_DEFAULT_NC_D              8400
 
 #define BLIS_DEFAULT_MC_C              128

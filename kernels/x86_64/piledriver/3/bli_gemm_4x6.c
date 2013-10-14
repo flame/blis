@@ -41,8 +41,7 @@
                     float*    b,
                     float*    beta,
                     float*    c, inc_t rs_c, inc_t cs_c,
-                    float* a_next, float* b_next,
-                    dim_t thread_id
+                    float* a_next, float* b_next
                   )
 {
 	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
@@ -55,8 +54,7 @@
                     double*   b,
                     double*   beta,
                     double*   c, inc_t rs_c, inc_t cs_c,
-                    double* a_next, double* b_next,
-                    dim_t thread_id
+                    double* a_next, double* b_next
                   )
 {
     dim_t   k_iter;
@@ -673,8 +671,7 @@
                     scomplex* b,
                     scomplex* beta,
                     scomplex* c, inc_t rs_c, inc_t cs_c,
-                    scomplex* a_next, scomplex* b_next,
-                    dim_t thread_id
+                    scomplex* a_next, scomplex* b_next
                   )
 {
 	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
@@ -687,8 +684,7 @@
                     dcomplex* b,
                     dcomplex* beta,
                     dcomplex* c, inc_t rs_c, inc_t cs_c,
-                    dcomplex* a_next, dcomplex* b_next,
-                    dim_t thread_id
+                    dcomplex* a_next, dcomplex* b_next
                   )
 {
 	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );

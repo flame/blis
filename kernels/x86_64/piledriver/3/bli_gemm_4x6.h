@@ -43,8 +43,7 @@ void PASTEMAC(ch,varname)( \
                            ctype*  b, \
                            ctype*  beta, \
                            ctype*  c, inc_t rs_c, inc_t cs_c, \
-                           ctype*  a_next, ctype* b_next, \
-                           dim_t   thread_id \
+                           ctype*  a_next, ctype* b_next \
                          );
 
 INSERT_GENTPROT_BASIC( gemm_4x6 )

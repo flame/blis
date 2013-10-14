@@ -3,7 +3,7 @@
 1         Utility                 (0 = disable section; 1 = enable specified tests)
 1         Level-1v                (0 = disable section; 1 = enable specified tests)
 1         Level-1m                (0 = disable section; 1 = enable specified tests)
-1         Level-1f                (0 = disable section; 1 = enable specified tests)
+1         Level-1f kernels        (0 = disable section; 1 = enable specified tests)
 1         Level-2                 (0 = disable section; 1 = enable specified tests)
 1         Level-3 micro-kernels   (0 = disable section; 1 = enable specified tests)
 1         Level-3                 (0 = disable section; 1 = enable specified tests)
@@ -112,7 +112,7 @@
 ?           parameters: transa                          (? = test all values)
 
 
-# --- Level-1f -----------------------------------------------------------------
+# --- Level-1f kernels ---------------------------------------------------------
 
 1         axpy2v                                        (0 = disable all; 1 = specify)
 1           test sequential front-end                   (0 = disable; 1 = enable)
