@@ -76,6 +76,15 @@ void PASTEF77(ch,blasname)( \
 	bli_param_map_netlib_to_blis_uplo( *uploc, &blis_uploc ); \
 	bli_param_map_netlib_to_blis_trans( *transa, &blis_transa ); \
 \
+	/* The real domain ssyrk and dsyrk in netlib BLAS treat a trans value
+	   of 'C' (conjugate-transpose) as 'T' (transpose only). So, we have
+	   to go out of our way a little to support this behavior. */ \
+	if ( bli_is_real( PASTEMAC(ch,type) ) && \
+	     bli_is_conjtrans( blis_transa ) ) \
+	{ \
+		blis_transa = BLIS_TRANSPOSE; \
+	} \
+\
 	/* Convert negative values of m and k to zero. */ \
 	bli_convert_blas_dim1( *m, m0 ); \
 	bli_convert_blas_dim1( *k, k0 ); \

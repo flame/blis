@@ -43,7 +43,7 @@
 \
 void PASTEF77(ch,blasname)( \
                             f77_char* uploc, \
-                            f77_char* transa, \
+                            f77_char* trans, \
                             f77_int*  m, \
                             f77_int*  k, \
                             ftype*    alpha, \
@@ -54,7 +54,7 @@ void PASTEF77(ch,blasname)( \
                           ) \
 { \
 	uplo_t  blis_uploc; \
-	trans_t blis_transa; \
+	trans_t blis_trans; \
 	dim_t   m0, k0; \
 	inc_t   rs_a, cs_a; \
 	inc_t   rs_b, cs_b; \
@@ -68,7 +68,7 @@ void PASTEF77(ch,blasname)( \
 	PASTEBLACHK(blasname)( MKSTR(ch), \
 	                       MKSTR(blasname), \
 	                       uploc, \
-	                       transa, \
+	                       trans, \
 	                       m, \
 	                       k, \
 	                       lda, \
@@ -77,7 +77,16 @@ void PASTEF77(ch,blasname)( \
 \
 	/* Map BLAS chars to their corresponding BLIS enumerated type value. */ \
 	bli_param_map_netlib_to_blis_uplo( *uploc, &blis_uploc ); \
-	bli_param_map_netlib_to_blis_trans( *transa, &blis_transa ); \
+	bli_param_map_netlib_to_blis_trans( *trans, &blis_trans ); \
+\
+	/* The real domain ssyr2k and dsyr2k in netlib BLAS treat a trans value
+	   of 'C' (conjugate-transpose) as 'T' (transpose only). So, we have
+	   to go out of our way a little to support this behavior. */ \
+	if ( bli_is_real( PASTEMAC(ch,type) ) && \
+	     bli_is_conjtrans( blis_trans ) ) \
+	{ \
+		blis_trans = BLIS_TRANSPOSE; \
+	} \
 \
 	/* Convert negative values of m and k to zero. */ \
 	bli_convert_blas_dim1( *m, m0 ); \
@@ -93,8 +102,8 @@ void PASTEF77(ch,blasname)( \
 \
 	/* Call BLIS interface. */ \
 	PASTEMAC(ch,blisname)( blis_uploc, \
-	                       blis_transa, \
-	                       blis_transa, \
+	                       blis_trans, \
+	                       blis_trans, \
 	                       m0, \
 	                       k0, \
 	                       alpha, \

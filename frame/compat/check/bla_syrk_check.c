@@ -46,12 +46,13 @@ void bla_syrk_check( char*     dt_str,
                      f77_int*  ldc )
 {
 	f77_int info = 0;
-	f77_int nota, ta;
+	f77_int nota, ta, cta;
 	f77_int lower, upper;
 	f77_int nrowa;
 
 	nota  = PASTEF770(lsame)( transa, "N", (ftnlen)1, (ftnlen)1 );
 	ta    = PASTEF770(lsame)( transa, "T", (ftnlen)1, (ftnlen)1 );
+	cta   = PASTEF770(lsame)( transa, "C", (ftnlen)1, (ftnlen)1 );
 	lower = PASTEF770(lsame)( uploc,  "L", (ftnlen)1, (ftnlen)1 );
 	upper = PASTEF770(lsame)( uploc,  "U", (ftnlen)1, (ftnlen)1 );
 
@@ -60,7 +61,7 @@ void bla_syrk_check( char*     dt_str,
 
 	if      ( !lower && !upper )
 		info = 1;
-	else if ( !nota && !ta )
+	else if ( !nota && !ta && !cta )
 		info = 2;
 	else if ( *m < 0 )
 		info = 3;
