@@ -93,19 +93,21 @@
 }
 #define bli_ccinvscals( a, x ) \
 { \
-	float  temp  = ( float  ) bli_ccimulnc_r( (a), (a) ); \
-	float  xr    = ( float  ) bli_ccimulnc_r( (a), (x) ) / temp; \
-	float  xi    = ( float  ) bli_ccimulnc_i( (x), (a) ) / temp; \
-	bli_creal(x) = xr; \
-	bli_cimag(x) = xi; \
+	float  s     = ( float  )bli_fmax( bli_creal(a), bli_cimag(a) ); \
+	float  ar_s  = ( float  )bli_creal(a) / s; \
+	float  ai_s  = ( float  )bli_cimag(a) / s; \
+	float  temp  = ( ar_s * ( float  )bli_creal(a) + ai_s * ( float  )bli_cimag(a) ); \
+	bli_creal(x) = ( bli_creal(x) * ar_s + bli_cimag(x) * ai_s ) / temp; \
+	bli_cimag(x) = ( bli_cimag(x) * ar_s - bli_creal(x) * ai_s ) / temp; \
 }
 #define bli_zcinvscals( a, x ) \
 { \
-	float  temp  = ( float  ) bli_zzimulnc_r( (a), (a) ); \
-	float  xr    = ( float  ) bli_zcimulnc_r( (a), (x) ) / temp; \
-	float  xi    = ( float  ) bli_czimulnc_i( (x), (a) ) / temp; \
-	bli_creal(x) = xr; \
-	bli_cimag(x) = xi; \
+	double s     = ( double )bli_fmax( bli_zreal(a), bli_zimag(a) ); \
+	double ar_s  = ( double )bli_zreal(a) / s; \
+	double ai_s  = ( double )bli_zimag(a) / s; \
+	double temp  = ( ar_s * ( double )bli_zreal(a) + ai_s * ( double )bli_zimag(a) ); \
+	bli_creal(x) = ( bli_creal(x) * ar_s + bli_cimag(x) * ai_s ) / temp; \
+	bli_cimag(x) = ( bli_cimag(x) * ar_s - bli_creal(x) * ai_s ) / temp; \
 }
 
 
@@ -121,19 +123,21 @@
 }
 #define bli_czinvscals( a, x ) \
 { \
-	double temp  = ( double ) bli_ccimulnc_r( (a), (a) ); \
-	double xr    = ( double ) bli_czimulnc_r( (a), (x) ) / temp; \
-	double xi    = ( double ) bli_zcimulnc_i( (x), (a) ) / temp; \
-	bli_zreal(x) = xr; \
-	bli_zimag(x) = xi; \
+	double s     = ( double )bli_fmax( bli_creal(a), bli_cimag(a) ); \
+	double ar_s  = ( double )bli_creal(a) / s; \
+	double ai_s  = ( double )bli_cimag(a) / s; \
+	double temp  = ( ar_s * ( double )bli_creal(a) + ai_s * ( double )bli_cimag(a) ); \
+	bli_zreal(x) = ( bli_zreal(x) * ar_s + bli_zimag(x) * ai_s ) / temp; \
+	bli_zimag(x) = ( bli_zimag(x) * ar_s - bli_zreal(x) * ai_s ) / temp; \
 }
 #define bli_zzinvscals( a, x ) \
 { \
-	double temp  = ( double ) bli_zzimulnc_r( (a), (a) ); \
-	double xr    = ( double ) bli_zzimulnc_r( (a), (x) ) / temp; \
-	double xi    = ( double ) bli_zzimulnc_i( (x), (a) ) / temp; \
-	bli_zreal(x) = xr; \
-	bli_zimag(x) = xi; \
+	double s     = ( double )bli_fmax( bli_zreal(a), bli_zimag(a) ); \
+	double ar_s  = ( double )bli_zreal(a) / s; \
+	double ai_s  = ( double )bli_zimag(a) / s; \
+	double temp  = ( ar_s * ( double )bli_zreal(a) + ai_s * ( double )bli_zimag(a) ); \
+	bli_zreal(x) = ( bli_zreal(x) * ar_s + bli_zimag(x) * ai_s ) / temp; \
+	bli_zimag(x) = ( bli_zimag(x) * ar_s - bli_zreal(x) * ai_s ) / temp; \
 }
 
 

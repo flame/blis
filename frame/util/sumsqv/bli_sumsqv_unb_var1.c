@@ -113,7 +113,7 @@ void PASTEMAC(chx,varname)( \
 	dim_t     i; \
 \
 	/* NOTE: This function attempts to mimic the algorithm for computing
-	   the Frobenius norm in netlib LAPACK's ?lassf(). */ \
+	   the Frobenius norm in netlib LAPACK's ?lassq(). */ \
 \
 	/* If x is zero length, return with scale and sumsq unchanged. */ \
 	if ( bli_zero_dim1( n ) ) return; \

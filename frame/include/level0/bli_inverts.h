@@ -57,18 +57,22 @@
 
 #define bli_cinverts( x ) \
 { \
-	float  temp  = ( bli_creal(x) * bli_creal(x) + \
-	                 bli_cimag(x) * bli_cimag(x) ); \
-	bli_creal(x) =   bli_creal(x) /  temp; \
-	bli_cimag(x) =   bli_cimag(x) / -temp; \
+	float  s     = bli_fmax( bli_creal(x), bli_cimag(x) ); \
+	float  xr_s  = bli_creal(x) / s; \
+	float  xi_s  = bli_cimag(x) / s; \
+	float  temp  = ( xr_s * bli_creal(x) + xi_s * bli_cimag(x) ); \
+	bli_creal(x) =   xr_s / temp; \
+	bli_cimag(x) =  -xi_s / temp; \
 }
 
 #define bli_zinverts( x ) \
 { \
-	double temp  = ( bli_zreal(x) * bli_zreal(x) + \
-	                 bli_zimag(x) * bli_zimag(x) ); \
-	bli_zreal(x) =   bli_zreal(x) /  temp; \
-	bli_zimag(x) =   bli_zimag(x) / -temp; \
+	double s     = bli_fmax( bli_zreal(x), bli_zimag(x) ); \
+	double xr_s  = bli_zreal(x) / s; \
+	double xi_s  = bli_zimag(x) / s; \
+	double temp  = ( xr_s * bli_zreal(x) + xi_s * bli_zimag(x) ); \
+	bli_zreal(x) =   xr_s / temp; \
+	bli_zimag(x) =  -xi_s / temp; \
 }
 
 

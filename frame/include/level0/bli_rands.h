@@ -48,7 +48,7 @@
 { \
 	(a) = ( double ) (   ( double ) rand() / \
 	                   ( ( double ) RAND_MAX / 2.0 ) \
-	                 ) - 1.0F; \
+	                 ) - 1.0; \
 }
 #define bli_crands( a ) \
 { \
