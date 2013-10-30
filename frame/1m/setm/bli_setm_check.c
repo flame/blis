@@ -32,60 +32,37 @@
 
 */
 
-#include "bli_setm_check.h"
+#include "blis.h"
 
-#include "bli_setm_unb_var1.h"
+void bli_setm_basic_check( obj_t*   beta,
+                           obj_t*   x )
+{
+	err_t e_val;
 
+	// Check object datatypes.
 
-//
-// Prototype object-based interface.
-//
-void bli_setm( obj_t* beta,
-               obj_t* x );
+	e_val = bli_check_noninteger_object( beta );
+	bli_check_error_code( e_val );
 
+	e_val = bli_check_floating_object( x );
+	bli_check_error_code( e_val );
 
-//
-// Prototype BLAS-like interfaces with homogeneous-typed operands.
-//
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname)( \
-                          doff_t  diagoffx, \
-                          diag_t  diagx, \
-                          uplo_t  uplox, \
-                          dim_t   m, \
-                          dim_t   n, \
-                          ctype*  beta, \
-                          ctype*  x, inc_t rs_x, inc_t cs_x \
-                        );
+	// Check object dimensions.
 
-INSERT_GENTPROT_BASIC( setm )
+	e_val = bli_check_scalar_object( beta );
+	bli_check_error_code( e_val );
 
+	// Check object properties.
 
-//
-// Prototype BLAS-like interfaces with heterogeneous-typed operands.
-//
-#undef  GENTPROT2
-#define GENTPROT2( ctype_b, ctype_x, chb, chx, opname ) \
-\
-void PASTEMAC2(chb,chx,opname)( \
-                                doff_t   diagoff, \
-                                diag_t   diagx, \
-                                uplo_t   uplox, \
-                                dim_t    m, \
-                                dim_t    n, \
-                                ctype_b* beta, \
-                                ctype_x* x, inc_t rs_x, inc_t cs_x \
-                              );
+	e_val = bli_check_nonunit_diag( x );
+	bli_check_error_code( e_val );
+}
 
-INSERT_GENTPROT2_BASIC( setm )
+void bli_setm_check( obj_t*   beta,
+                     obj_t*   x )
+{
+	// Check basic properties of the operation.
 
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTPROT2_MIX_D( setm )
-#endif
-
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTPROT2_MIX_P( setm )
-#endif
+	bli_setm_basic_check( beta, x );
+}
 

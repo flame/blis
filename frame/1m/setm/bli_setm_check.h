@@ -32,60 +32,8 @@
 
 */
 
-#include "bli_setm_check.h"
+void bli_setm_basic_check( obj_t*   beta,
+                           obj_t*   x );
 
-#include "bli_setm_unb_var1.h"
-
-
-//
-// Prototype object-based interface.
-//
-void bli_setm( obj_t* beta,
-               obj_t* x );
-
-
-//
-// Prototype BLAS-like interfaces with homogeneous-typed operands.
-//
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname)( \
-                          doff_t  diagoffx, \
-                          diag_t  diagx, \
-                          uplo_t  uplox, \
-                          dim_t   m, \
-                          dim_t   n, \
-                          ctype*  beta, \
-                          ctype*  x, inc_t rs_x, inc_t cs_x \
-                        );
-
-INSERT_GENTPROT_BASIC( setm )
-
-
-//
-// Prototype BLAS-like interfaces with heterogeneous-typed operands.
-//
-#undef  GENTPROT2
-#define GENTPROT2( ctype_b, ctype_x, chb, chx, opname ) \
-\
-void PASTEMAC2(chb,chx,opname)( \
-                                doff_t   diagoff, \
-                                diag_t   diagx, \
-                                uplo_t   uplox, \
-                                dim_t    m, \
-                                dim_t    n, \
-                                ctype_b* beta, \
-                                ctype_x* x, inc_t rs_x, inc_t cs_x \
-                              );
-
-INSERT_GENTPROT2_BASIC( setm )
-
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTPROT2_MIX_D( setm )
-#endif
-
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTPROT2_MIX_P( setm )
-#endif
-
+void bli_setm_check( obj_t*   beta,
+                     obj_t*   x );

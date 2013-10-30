@@ -49,7 +49,7 @@ ftype_r PASTEF772(chr,chx,blasname)( \
 	dim_t    n0; \
 	ftype_x* x0; \
 	inc_t    incx0; \
-	ftype_r  absum; \
+	ftype_r  norm; \
 	err_t    init_result; \
 \
 	/* Initialize BLIS (if it is not already initialized). */ \
@@ -65,12 +65,12 @@ ftype_r PASTEF772(chr,chx,blasname)( \
 	/* Call BLIS interface. */ \
 	PASTEMAC(chx,fnormv)( n0, \
 	                      x0, incx0, \
-	                      &absum ); \
+	                      &norm ); \
 \
 	/* Finalize BLIS (if it was initialized above). */ \
 	bli_finalize_safe( init_result ); \
 \
-	return absum; \
+	return norm; \
 }
 
 #ifdef BLIS_ENABLE_BLAS2BLIS

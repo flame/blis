@@ -78,12 +78,14 @@ void bli_obj_create_without_buffer( num_t  dt,
 	bli_obj_set_defaults( *obj );
 
 	// Set the object root to itself, since obj is not presumed to be a view
-	// into a larger matrix. This is the ONLY time this field is ever set;
-	// henceforth, subpartitions and aliases to this object will get copies
-	// of this field, and thus always have access to its "greatest-grand"
-	// parent (ie: the original parent, or "root", object). (There is an
-	// exception to this: there are a few places where root status is
-	// reset explicitly via bli_obj_set_as_root().)
+	// into a larger matrix. This is typically the only time this field is
+	// ever set; henceforth, subpartitions and aliases to this object will
+	// get copies of this field, and thus always have access to its
+	// "greatest-grand" parent (ie: the original parent, or "root", object).
+	// However, there ARE a few places where it is convenient to reset the
+	// root field explicitly via bli_obj_set_as_root(). (We do not list
+	// those places here. Just grep for bli_obj_set_as_root within the
+	// top-level 'frame' directory to see them.
 	bli_obj_set_as_root( *obj );
 
 	// Set individual fields.
