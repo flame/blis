@@ -48,12 +48,24 @@
 
 // -- Utility macros --
 
+#include "bla_r_sign.h"
+#include "bla_d_sign.h"
+
 #include "bla_r_cnjg.h"
 #include "bla_d_cnjg.h"
+
 #include "bla_r_imag.h"
 #include "bla_d_imag.h"
+
 #include "bla_c_div.h"
 #include "bla_z_div.h"
+
+#include "bla_f__cabs.h" // needed by c_abs, z_abs
+#include "bla_r_abs.h"
+#include "bla_d_abs.h"
+#include "bla_c_abs.h"
+#include "bla_z_abs.h"
+
 #include "bla_lsame.h"
 #include "bla_xerbla.h"
 

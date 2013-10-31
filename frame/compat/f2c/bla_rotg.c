@@ -51,7 +51,7 @@ static real sc_b4 = 1.f;
     real r__1, r__2;
 
     /* Builtin functions */
-    double sqrt(doublereal), r_sign(real *, real *);
+    double sqrt(doublereal), bla_r_sign(real *, real *);
 
     /* Local variables */
     real r__, scale, z__, roe;
@@ -80,7 +80,7 @@ L10:
 /* Computing 2nd power */
     r__2 = *sb / scale;
     r__ = scale * sqrt(r__1 * r__1 + r__2 * r__2);
-    r__ = r_sign(&sc_b4, &roe) * r__;
+    r__ = bla_r_sign(&sc_b4, &roe) * r__;
     *c__ = *sa / r__;
     *s = *sb / r__;
     z__ = 1.f;
@@ -111,7 +111,7 @@ static doublereal dc_b4 = 1.;
     doublereal d__1, d__2;
 
     /* Builtin functions */
-    double sqrt(doublereal), d_sign(doublereal *, doublereal *);
+    double sqrt(doublereal), bla_d_sign(doublereal *, doublereal *);
 
     /* Local variables */
     doublereal r__, scale, z__, roe;
@@ -140,7 +140,7 @@ L10:
 /* Computing 2nd power */
     d__2 = *db / scale;
     r__ = scale * sqrt(d__1 * d__1 + d__2 * d__2);
-    r__ = d_sign(&dc_b4, &roe) * r__;
+    r__ = bla_d_sign(&dc_b4, &roe) * r__;
     *c__ = *da / r__;
     *s = *db / r__;
     z__ = 1.;
@@ -168,7 +168,7 @@ L20:
     singlecomplex q__1, q__2, q__3;
 
     /* Builtin functions */
-    double c_abs(singlecomplex *), sqrt(doublereal);
+    double bla_c_abs(singlecomplex *), sqrt(doublereal);
     void bla_r_cnjg(singlecomplex *, singlecomplex *);
 
     /* Local variables */
@@ -176,7 +176,7 @@ L20:
     singlecomplex alpha;
     real scale;
 
-    if (c_abs(ca) != 0.f) {
+    if (bla_c_abs(ca) != 0.f) {
 	goto L10;
     }
     *c__ = 0.f;
@@ -184,18 +184,18 @@ L20:
     ca->real = cb->real, ca->imag = cb->imag;
     goto L20;
 L10:
-    scale = c_abs(ca) + c_abs(cb);
+    scale = bla_c_abs(ca) + bla_c_abs(cb);
     q__1.real = ca->real / scale, q__1.imag = ca->imag / scale;
 /* Computing 2nd power */
-    r__1 = c_abs(&q__1);
+    r__1 = bla_c_abs(&q__1);
     q__2.real = cb->real / scale, q__2.imag = cb->imag / scale;
 /* Computing 2nd power */
-    r__2 = c_abs(&q__2);
+    r__2 = bla_c_abs(&q__2);
     norm = scale * sqrt(r__1 * r__1 + r__2 * r__2);
-    r__1 = c_abs(ca);
+    r__1 = bla_c_abs(ca);
     q__1.real = ca->real / r__1, q__1.imag = ca->imag / r__1;
     alpha.real = q__1.real, alpha.imag = q__1.imag;
-    *c__ = c_abs(ca) / norm;
+    *c__ = bla_c_abs(ca) / norm;
     bla_r_cnjg(&q__3, cb);
     q__2.real = alpha.real * q__3.real - alpha.imag * q__3.imag, q__2.imag = alpha.real * q__3.imag + 
 	    alpha.imag * q__3.real;
@@ -219,7 +219,7 @@ L20:
     doublecomplex z__1, z__2, z__3, z__4;
 
     /* Builtin functions */
-    double z_abs(doublecomplex *);
+    double bla_z_abs(doublecomplex *);
     void bla_z_div(doublecomplex *, doublecomplex *, doublecomplex *);
     double sqrt(doublereal);
     void bla_d_cnjg(doublecomplex *, doublecomplex *);
@@ -229,7 +229,7 @@ L20:
     doublecomplex alpha;
     doublereal scale;
 
-    if (z_abs(ca) != 0.) {
+    if (bla_z_abs(ca) != 0.) {
 	goto L10;
     }
     *c__ = 0.;
@@ -237,20 +237,20 @@ L20:
     ca->real = cb->real, ca->imag = cb->imag;
     goto L20;
 L10:
-    scale = z_abs(ca) + z_abs(cb);
+    scale = bla_z_abs(ca) + bla_z_abs(cb);
     z__2.real = scale, z__2.imag = 0.;
     bla_z_div(&z__1, ca, &z__2);
 /* Computing 2nd power */
-    d__1 = z_abs(&z__1);
+    d__1 = bla_z_abs(&z__1);
     z__4.real = scale, z__4.imag = 0.;
     bla_z_div(&z__3, cb, &z__4);
 /* Computing 2nd power */
-    d__2 = z_abs(&z__3);
+    d__2 = bla_z_abs(&z__3);
     norm = scale * sqrt(d__1 * d__1 + d__2 * d__2);
-    d__1 = z_abs(ca);
+    d__1 = bla_z_abs(ca);
     z__1.real = ca->real / d__1, z__1.imag = ca->imag / d__1;
     alpha.real = z__1.real, alpha.imag = z__1.imag;
-    *c__ = z_abs(ca) / norm;
+    *c__ = bla_z_abs(ca) / norm;
     bla_d_cnjg(&z__3, cb);
     z__2.real = alpha.real * z__3.real - alpha.imag * z__3.imag, z__2.imag = alpha.real * z__3.imag + 
 	    alpha.imag * z__3.real;
