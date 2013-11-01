@@ -35,6 +35,7 @@
 #include "bli_dotxaxpyf_check.h"
 #include "bli_dotxaxpyf_fusefac.h"
 #include "bli_dotxaxpyf_unb_var1.h"
+#include "bli_dotxaxpyf_unb_var2.h"
 
 
 //
