@@ -149,13 +149,13 @@
 
 #define bli_min( a, b )  ( (a) < (b) ? (a) : (b) )
 #define bli_max( a, b )  ( (a) > (b) ? (a) : (b) )
-#define bli_abs( a )     ( (a) < 0 ? -(a) : (a) )
+#define bli_abs( a )     ( (a) <= 0 ? -(a) : (a) )
 
 // fmin, fmax, fabs
 
 #define bli_fmin( a, b ) bli_min( a, b )
 #define bli_fmax( a, b ) bli_max( a, b )
-#define bli_fabs( a )    ( (a) < 0.0 ? -(a) : (a) )
+#define bli_fabs( a )    ( (a) <= 0.0 ? -(a) : (a) )
 
 // fminabs, fmaxabs
 #define bli_fminabs( a, b ) \
