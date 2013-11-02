@@ -55,15 +55,19 @@
 }
 #define bli_cssqrt2s( x, a ) \
 { \
-	float  mag   = sqrtf( bli_creal(x) * bli_creal(x) + \
-	                      bli_cimag(x) * bli_cimag(x) ); \
+	float  s     = bli_fmaxabs( bli_creal(x), bli_cimag(x) ); \
+	float  mag   = sqrtf( s ) * \
+	               sqrtf( ( bli_creal(x) / s ) * bli_creal(x) + \
+	                      ( bli_cimag(x) / s ) * bli_cimag(x) ); \
 \
-	(a)          = sqrtf( ( mag + bli_creal(x) ) / 2.0F ); \
+	(a)          = sqrtf( ( mag + bli_creal(x) ) / 2.0 ); \
 }
 #define bli_zssqrt2s( x, a ) \
 { \
-	double mag   = sqrt( bli_zreal(x) * bli_zreal(x) + \
-	                     bli_zimag(x) * bli_zimag(x) ); \
+	double s     = bli_fmaxabs( bli_zreal(x), bli_zimag(x) ); \
+	double mag   = sqrt( s ) * \
+	               sqrt( ( bli_zreal(x) / s ) * bli_zreal(x) + \
+	                     ( bli_zimag(x) / s ) * bli_zimag(x) ); \
 \
 	(a)          = sqrt( ( mag + bli_zreal(x) ) / 2.0 ); \
 }
@@ -79,15 +83,19 @@
 }
 #define bli_cdsqrt2s( x, a ) \
 { \
-	float  mag   = sqrtf( bli_creal(x) * bli_creal(x) + \
-	                      bli_cimag(x) * bli_cimag(x) ); \
+	double s     = bli_fmaxabs( bli_creal(x), bli_cimag(x) ); \
+	double mag   = sqrt( s ) * \
+	               sqrt( ( bli_creal(x) / s ) * bli_creal(x) + \
+	                     ( bli_cimag(x) / s ) * bli_cimag(x) ); \
 \
-	(a)          = sqrtf( ( mag + bli_creal(x) ) / 2.0F ); \
+	(a)          = sqrt( ( mag + bli_creal(x) ) / 2.0 ); \
 }
 #define bli_zdsqrt2s( x, a ) \
 { \
-	double mag   = sqrt( bli_zreal(x) * bli_zreal(x) + \
-	                     bli_zimag(x) * bli_zimag(x) ); \
+	double s     = bli_fmaxabs( bli_zreal(x), bli_zimag(x) ); \
+	double mag   = sqrt( s ) * \
+	               sqrt( ( bli_zreal(x) / s ) * bli_zreal(x) + \
+	                     ( bli_zimag(x) / s ) * bli_zimag(x) ); \
 \
 	(a)          = sqrt( ( mag + bli_zreal(x) ) / 2.0 ); \
 }
@@ -105,16 +113,20 @@
 }
 #define bli_ccsqrt2s( x, a ) \
 { \
-	float  mag   = sqrtf( bli_creal(x) * bli_creal(x) + \
-	                      bli_cimag(x) * bli_cimag(x) ); \
+	float  s     = bli_fmaxabs( bli_creal(x), bli_cimag(x) ); \
+	float  mag   = sqrtf( s ) * \
+	               sqrtf( ( bli_creal(x) / s ) * bli_creal(x) + \
+	                      ( bli_cimag(x) / s ) * bli_cimag(x) ); \
 \
-	bli_creal(a) = sqrtf( ( mag + bli_creal(x) ) / 2.0F ); \
-	bli_cimag(a) = sqrtf( ( mag - bli_cimag(x) ) / 2.0F ); \
+	bli_creal(a) = sqrtf( ( mag + bli_creal(x) ) / 2.0 ); \
+	bli_cimag(a) = sqrtf( ( mag - bli_cimag(x) ) / 2.0 ); \
 }
 #define bli_zcsqrt2s( x, a ) \
 { \
-	double mag   = sqrt( bli_zreal(x) * bli_zreal(x) + \
-	                     bli_zimag(x) * bli_zimag(x) ); \
+	double s     = bli_fmaxabs( bli_zreal(x), bli_zimag(x) ); \
+	double mag   = sqrt( s ) * \
+	               sqrt( ( bli_zreal(x) / s ) * bli_zreal(x) + \
+	                     ( bli_zimag(x) / s ) * bli_zimag(x) ); \
 \
 	bli_creal(a) = sqrt( ( mag + bli_zreal(x) ) / 2.0 ); \
 	bli_cimag(a) = sqrt( ( mag - bli_zimag(x) ) / 2.0 ); \
@@ -129,20 +141,24 @@
 #define bli_dzsqrt2s( x, a ) \
 { \
 	bli_zreal(a) = sqrt( (x) ); \
-	bli_zimag(a) = 0.0F; \
+	bli_zimag(a) = 0.0; \
 }
 #define bli_czsqrt2s( x, a ) \
 { \
-	float  mag   = sqrtf( bli_creal(x) * bli_creal(x) + \
-	                      bli_cimag(x) * bli_cimag(x) ); \
+	double s     = bli_fmaxabs( bli_creal(x), bli_cimag(x) ); \
+	double mag   = sqrt( s ) * \
+	               sqrt( ( bli_creal(x) / s ) * bli_creal(x) + \
+	                     ( bli_cimag(x) / s ) * bli_cimag(x) ); \
 \
-	bli_zreal(a) = sqrtf( ( mag + bli_creal(x) ) / 2.0F ); \
-	bli_zimag(a) = sqrtf( ( mag - bli_cimag(x) ) / 2.0F ); \
+	bli_zreal(a) = sqrt( ( mag + bli_creal(x) ) / 2.0 ); \
+	bli_zimag(a) = sqrt( ( mag - bli_cimag(x) ) / 2.0 ); \
 }
 #define bli_zzsqrt2s( x, a ) \
 { \
-	double mag   = sqrt( bli_zreal(x) * bli_zreal(x) + \
-	                     bli_zimag(x) * bli_zimag(x) ); \
+	double s     = bli_fmaxabs( bli_zreal(x), bli_zimag(x) ); \
+	double mag   = sqrt( s ) * \
+	               sqrt( ( bli_zreal(x) / s ) * bli_zreal(x) + \
+	                     ( bli_zimag(x) / s ) * bli_zimag(x) ); \
 \
 	bli_zreal(a) = sqrt( ( mag + bli_zreal(x) ) / 2.0 ); \
 	bli_zimag(a) = sqrt( ( mag - bli_zimag(x) ) / 2.0 ); \

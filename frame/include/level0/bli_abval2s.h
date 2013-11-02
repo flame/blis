@@ -84,46 +84,70 @@
 
 #define bli_csabval2s( x, a ) \
 { \
-	bli_csabsq2s( x, a ); \
-	bli_sssqrt2s( a, a ); \
+	float  s   = bli_fmaxabs( bli_creal(x), bli_cimag(x) ); \
+	float  mag = sqrtf( s ) * \
+	             sqrtf( ( bli_creal(x) / s ) * bli_creal(x) + \
+	                    ( bli_cimag(x) / s ) * bli_cimag(x) ); \
+	bli_sssetris( mag, 0.0, a ); \
 }
 #define bli_zsabval2s( x, a ) \
 { \
-	bli_zsabsq2s( x, a ); \
-	bli_sssqrt2s( a, a ); \
+	double s   = bli_fmaxabs( bli_zreal(x), bli_zimag(x) ); \
+	double mag = sqrt( s ) * \
+	             sqrt( ( bli_zreal(x) / s ) * bli_zreal(x) + \
+	                   ( bli_zimag(x) / s ) * bli_zimag(x) ); \
+	bli_dssetris( mag, 0.0, a ); \
 }
 
 #define bli_cdabval2s( x, a ) \
 { \
-	bli_cdabsq2s( x, a ); \
-	bli_ddsqrt2s( a, a ); \
+	double s   = bli_fmaxabs( bli_creal(x), bli_cimag(x) ); \
+	double mag = sqrt( s ) * \
+	             sqrt( ( bli_creal(x) / s ) * bli_creal(x) + \
+	                   ( bli_cimag(x) / s ) * bli_cimag(x) ); \
+	bli_ddsetris( mag, 0.0, a ); \
 }
 #define bli_zdabval2s( x, a ) \
 { \
-	bli_zdabsq2s( x, a ); \
-	bli_ddsqrt2s( a, a ); \
+	double s   = bli_fmaxabs( bli_zreal(x), bli_zimag(x) ); \
+	double mag = sqrt( s ) * \
+	             sqrt( ( bli_zreal(x) / s ) * bli_zreal(x) + \
+	                   ( bli_zimag(x) / s ) * bli_zimag(x) ); \
+	bli_ddsetris( mag, 0.0, a ); \
 }
 
 #define bli_ccabval2s( x, a ) \
 { \
-	bli_ccabsq2s( x, a ); \
-	bli_ccsqrt2s( a, a ); \
+	float  s   = bli_fmaxabs( bli_creal(x), bli_cimag(x) ); \
+	float  mag = sqrtf( s ) * \
+	             sqrtf( ( bli_creal(x) / s ) * bli_creal(x) + \
+	                    ( bli_cimag(x) / s ) * bli_cimag(x) ); \
+	bli_scsetris( mag, 0.0, a ); \
 }
 #define bli_zcabval2s( x, a ) \
 { \
-	bli_zcabsq2s( x, a ); \
-	bli_ccsqrt2s( a, a ); \
+	double s   = bli_fmaxabs( bli_zreal(x), bli_zimag(x) ); \
+	double mag = sqrt( s ) * \
+	             sqrt( ( bli_zreal(x) / s ) * bli_zreal(x) + \
+	                   ( bli_zimag(x) / s ) * bli_zimag(x) ); \
+	bli_dcsetris( mag, 0.0, a ); \
 }
 
 #define bli_czabval2s( x, a ) \
 { \
-	bli_czabsq2s( x, a ); \
-	bli_zzsqrt2s( a, a ); \
+	double s   = bli_fmaxabs( bli_creal(x), bli_cimag(x) ); \
+	double mag = sqrt( s ) * \
+	             sqrt( ( bli_creal(x) / s ) * bli_creal(x) + \
+	                   ( bli_cimag(x) / s ) * bli_cimag(x) ); \
+	bli_dzsetris( mag, 0.0, a ); \
 }
 #define bli_zzabval2s( x, a ) \
 { \
-	bli_zzabsq2s( x, a ); \
-	bli_zzsqrt2s( a, a ); \
+	double s   = bli_fmaxabs( bli_zreal(x), bli_zimag(x) ); \
+	double mag = sqrt( s ) * \
+	             sqrt( ( bli_zreal(x) / s ) * bli_zreal(x) + \
+	                   ( bli_zimag(x) / s ) * bli_zimag(x) ); \
+	bli_dzsetris( mag, 0.0, a ); \
 }
 
 
