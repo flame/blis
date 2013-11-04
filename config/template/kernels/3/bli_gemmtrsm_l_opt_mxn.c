@@ -128,7 +128,7 @@ void bli_dgemmtrsm_l_opt_mxn(
             below B01. If duplication is enabled, then each element occurs
             d times, effectively increasing the dimension to MR x d*NR. If
             duplication is disabled, then bd11 is simply the address of the
-            current MR x NR block witin the packed (row-stored) micro-panel
+            current MR x NR block within the packed (row-stored) micro-panel
             of B.
   - b11:    The address of the current MR x NR block within the packed
             micro-panel of B. It exists in duplicated form as bd11. If

@@ -40,7 +40,7 @@ void bli_strsm_l_opt_mxn(
                           float*    restrict a,
                           float*    restrict b,
                           float*    restrict bd,
-                          float*    restrict c, inc_t rs_c, inc_t cs_c 
+                          float*    restrict c, inc_t rs_c, inc_t cs_c
                         )
 {
 	/* Just call the reference implementation. */
@@ -56,7 +56,7 @@ void bli_dtrsm_l_opt_mxn(
                           double*   restrict a,
                           double*   restrict b,
                           double*   restrict bd,
-                          double*   restrict c, inc_t rs_c, inc_t cs_c 
+                          double*   restrict c, inc_t rs_c, inc_t cs_c
                         )
 {
 /*
@@ -71,9 +71,10 @@ void bli_dtrsm_l_opt_mxn(
 
   This micro-kernel performs a triangular solve with NR right-hand sides:
 
-    C := inv(A) * B
+    C11 := inv(A11) * B11
 
-  where A is MR x MR and lower triangular, B is MR x NR, and C is MR x NR.
+  where A11 is MR x MR and lower triangular, B11 is MR x NR, and C11 is
+  MR x NR.
 
   NOTE: Here, this trsm micro-kernel supports element "duplication", a
   feature that is enabled or disabled in bli_kernel.h. Duplication factors
@@ -82,21 +83,21 @@ void bli_dtrsm_l_opt_mxn(
 
   Parameters:
 
-  - a:      The address of A, which is the MR x MR lower triangular block
+  - a11:    The address of A11, which is the MR x MR lower triangular block
             within the packed (column-stored) micro-panel of A. By the time
-            this trsm micro-kernel is called, the diagonal of A has already
+            this trsm micro-kernel is called, the diagonal of A11 has already
             been inverted and the strictly upper triangle contains zeros.
-  - b:      The address of B, which is the MR x NR subpartition of the
+  - b11:    The address of B11, which is the MR x NR subpartition of the
             current packed (row-stored) micro-panel of B.
-  - bd:     The address of the duplicated copy of B. If duplication is
-            disabled, then bd == b.
-  - c:      The address of C, which is the MR x NR block of the output
+  - bd11:   The address of the duplicated copy of B11. If duplication is
+            disabled, then bd11 == b11.
+  - c11:    The address of C11, which is the MR x NR block of the output
             matrix (ie: the matrix provided by the user to the highest-level
-            trsm API call). C corresponds to the elements that exist in
-            packed form in B, and is stored according to rs_c and cs_c.
-  - rs_c:   The row stride of C (ie: the distance to the next row of C11,
+            trsm API call). C11 corresponds to the elements that exist in
+            packed form in B11, and is stored according to rs_c and cs_c.
+  - rs_c:   The row stride of C11 (ie: the distance to the next row of C11,
             in units of matrix elements).
-  - cs_c:   The column stride of C (ie: the distance to the next column of
+  - cs_c:   The column stride of C11 (ie: the distance to the next column of
             C11, in units of matrix elements).
 
   Please see the comments in bli_gemmtrsm_l_opt_mxn.c for a diagram of the
@@ -106,14 +107,15 @@ void bli_dtrsm_l_opt_mxn(
   - While all three loops are exposed in this template micro-kernel, all
     three loops typically disappear in an optimized code because they are
     fully unrolled.
-  - Note that the diagonal of the triangular matrix A contains the INVERSE
+  - Note that the diagonal of the triangular matrix A11 contains the INVERSE
     of those elements. This is done during packing so that we can avoid
     expensive division instructions within this micro-kernel.
   - This micro-kernel assumes duplication is NOT enabled. If it IS enabled,
     then the result must be written to three places: the sub-block within the
-    duplicated copy of B, the sub-block of the original packed micro-panel of
-    B, and the sub-block of the output matrix C. When duplication is not
-    used, the micro-kernel should update only the latter two locations.
+    duplicated copy of the current micro-panel of B, the sub-block within the
+    current packed micro-panel of B, and the sub-block of the output matrix C.
+    When duplication is not used, the micro-kernel should update only the
+    latter two locations.
 
   For more info, please refer to the BLIS website and/or contact the
   blis-devel mailing list.
@@ -173,7 +175,7 @@ void bli_dtrsm_l_opt_mxn(
 
 			/* chi11 = chi11 / alpha11; */
 			/* NOTE: The INVERSE of alpha11 (1.0/alpha11) is stored instead
-			   of alpha11, so we can multiply rather than divide. We store 
+			   of alpha11, so we can multiply rather than divide. We store
 			   the inverse of alpha11 intentionally to avoid expensive
 			   division instructions within the micro-kernel. */
 			bli_dscals( *alpha11, *chi11 );
@@ -190,7 +192,7 @@ void bli_ctrsm_l_opt_mxn(
                           scomplex* restrict a,
                           scomplex* restrict b,
                           scomplex* restrict bd,
-                          scomplex* restrict c, inc_t rs_c, inc_t cs_c 
+                          scomplex* restrict c, inc_t rs_c, inc_t cs_c
                         )
 {
 	/* Just call the reference implementation. */
@@ -206,7 +208,7 @@ void bli_ztrsm_l_opt_mxn(
                           dcomplex* restrict a,
                           dcomplex* restrict b,
                           dcomplex* restrict bd,
-                          dcomplex* restrict c, inc_t rs_c, inc_t cs_c 
+                          dcomplex* restrict c, inc_t rs_c, inc_t cs_c
                         )
 {
 	/* Just call the reference implementation. */

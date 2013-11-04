@@ -121,9 +121,9 @@ void bli_dgemmtrsm_u_opt_mxn(
             above the current MR x NR block B11. bd21 is row-stored. If
             duplication is enabled, then each element occurs d times,
             effectively increasing the dimension to k x d*NR. If duplication
-            is disabled, then bd21 is simply the address of the top part of
-            the current packed (row-stored) micro-panel of B (labeled b21
-            in the diagram below).
+            is disabled, then bd21 is simply an address within the current
+            packed (row-stored) micro-panel of B (labeled b21 in the diagram
+            below).
   - bd11:   The address of B11, which is the MR x NR subpartition situated
             above B21. If duplication is enabled, then each element occurs
             d times, effectively increasing the dimension to MR x d*NR. If

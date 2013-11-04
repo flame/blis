@@ -120,7 +120,7 @@ void bli_dgemm_opt_mxn(
         |       |  +=  |2 6 A E               |   |8 9 A B|             
         |_______|      |3_7_B_F_______________|   |C D E F|             
                                                   |   .   |             
-            NR                    k               |   .   |             
+            NR                    k               |   .   | k           
                                                   |   .   |             
                                                   |       |             
                                                   |       |             
@@ -133,7 +133,7 @@ void bli_dgemm_opt_mxn(
     datatype corresponding to the '?' character.
   - bli_?packmr and bli_?packnr are usually equal to bli_?mr and bli_?nr,
     respectively. (They are only not equal if the register blocksize
-    extensions are non-zero. See bli_config.h for more details.)
+    extensions are non-zero. See bli_kernel.h for more details.)
   - You may assume that the addresses a and b are aligned according to
     the alignment value BLIS_CONTIG_STRIDE_ALIGN_SIZE, as defined in
     bli_config.h.

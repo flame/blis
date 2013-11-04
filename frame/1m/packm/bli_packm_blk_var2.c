@@ -136,7 +136,7 @@ void PASTEMAC(ch,varname )( \
 	dim_t           iter_dim; \
 	dim_t           num_iter; \
 	dim_t           it, ic, ip; \
-	dim_t           j; \
+	dim_t           i, j; \
 	dim_t           ic0, ip0; \
 	dim_t           ic_inc, ip_inc; \
 	dim_t           panel_dim; \
@@ -360,6 +360,21 @@ void PASTEMAC(ch,varname )( \
 			                            beta_cast, \
 			                            c11, rs_c,   cs_c, \
 			                            p11, rs_p11, cs_p11 ); \
+\
+			/* If source matrix C is Hermitian, we have to zero out the
+			   imaginary components of the diagonal of P11 in case the
+			   corresponding elements in C11 were not already zero. */ \
+			if ( bli_is_hermitian( strucc ) ) \
+			{ \
+				/* NOTE: We can directly increment p11 since we are done
+				   using p11 for the remainder of the function. */ \
+				for ( i = 0; i < p11_m; ++i ) \
+				{ \
+					PASTEMAC(ch,setimag0)( *p11 ); \
+\
+					p11 += rs_p11 + cs_p11; \
+				} \
+			} \
 		} \
 		else \
 		{ \
