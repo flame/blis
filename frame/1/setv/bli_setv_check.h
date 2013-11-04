@@ -32,53 +32,8 @@
 
 */
 
-#include "bli_setv_check.h"
+void bli_setv_basic_check( obj_t*   beta,
+                           obj_t*   x );
 
-#include "bli_setv_unb_var1.h"
-#include "bli_setv_unb_var2.h"
-
-
-//
-// Prototype object-based interface.
-//
-void bli_setv( obj_t* beta,
-               obj_t* x );
-
-
-//
-// Prototype BLAS-like interfaces with homogeneous-typed operands.
-//
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname)( \
-                          dim_t  n, \
-                          ctype* beta, \
-                          ctype* x, inc_t incx \
-                        );
-
-INSERT_GENTPROT_BASIC( setv )
-
-
-//
-// Prototype BLAS-like interfaces with heterogeneous-typed operands.
-//
-#undef  GENTPROT2
-#define GENTPROT2( ctype_b, ctype_x, chb, chx, opname ) \
-\
-void PASTEMAC2(chb,chx,opname)( \
-                                dim_t    n, \
-                                ctype_b* beta, \
-                                ctype_x* x, inc_t incx \
-                              );
-
-INSERT_GENTPROT2_BASIC( setv )
-
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTPROT2_MIX_D( setv )
-#endif
-
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTPROT2_MIX_P( setv )
-#endif
-
+void bli_setv_check( obj_t*   beta,
+                     obj_t*   x );

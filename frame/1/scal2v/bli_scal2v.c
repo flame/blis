@@ -34,17 +34,6 @@
 
 #include "blis.h"
 
-/*
-void bli_scal2v( obj_t* beta,
-                 obj_t* x,
-                 obj_t* y )
-{
-	if ( bli_error_checking_is_enabled() )
-		bli_scal2v_check( beta, x, y );
-
-	bli_scal2v_unb_var1( beta, x, y );
-}
-*/
 
 //
 // Define object-based interface.
@@ -58,10 +47,23 @@ void PASTEMAC0(opname)( \
                         obj_t* y  \
                       ) \
 { \
+	num_t dt_x; \
+	obj_t beta_local; \
+\
     if ( bli_error_checking_is_enabled() ) \
         PASTEMAC(opname,_check)( beta, x, y ); \
 \
-    PASTEMAC0(varname)( beta, \
+	/* Use the datatype of x as the target type for beta (since we do
+	   not assume mixed domain/type support is enabled). */ \
+	dt_x = bli_obj_datatype( *x ); \
+\
+	/* Create an object to hold a copy-cast of beta. */ \
+	bli_obj_init_scalar_copy_of( dt_x, \
+	                             BLIS_NO_CONJUGATE, \
+	                             beta, \
+	                             &beta_local ); \
+\
+    PASTEMAC0(varname)( &beta_local, \
                         x, \
                         y ); \
 }

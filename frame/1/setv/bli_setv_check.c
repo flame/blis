@@ -32,53 +32,32 @@
 
 */
 
-#include "bli_setv_check.h"
+#include "blis.h"
 
-#include "bli_setv_unb_var1.h"
-#include "bli_setv_unb_var2.h"
+void bli_setv_basic_check( obj_t*   beta,
+                           obj_t*   x )
+{
+	err_t e_val;
 
+	// Check object datatypes.
 
-//
-// Prototype object-based interface.
-//
-void bli_setv( obj_t* beta,
-               obj_t* x );
+	e_val = bli_check_noninteger_object( beta );
+	bli_check_error_code( e_val );
 
+	e_val = bli_check_floating_object( x );
+	bli_check_error_code( e_val );
 
-//
-// Prototype BLAS-like interfaces with homogeneous-typed operands.
-//
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname)( \
-                          dim_t  n, \
-                          ctype* beta, \
-                          ctype* x, inc_t incx \
-                        );
+	// Check object dimensions.
 
-INSERT_GENTPROT_BASIC( setv )
+	e_val = bli_check_scalar_object( beta );
+	bli_check_error_code( e_val );
+}
 
+void bli_setv_check( obj_t*   beta,
+	                 obj_t*   x )
+{
+	// Check basic properties of the operation.
 
-//
-// Prototype BLAS-like interfaces with heterogeneous-typed operands.
-//
-#undef  GENTPROT2
-#define GENTPROT2( ctype_b, ctype_x, chb, chx, opname ) \
-\
-void PASTEMAC2(chb,chx,opname)( \
-                                dim_t    n, \
-                                ctype_b* beta, \
-                                ctype_x* x, inc_t incx \
-                              );
-
-INSERT_GENTPROT2_BASIC( setv )
-
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTPROT2_MIX_D( setv )
-#endif
-
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTPROT2_MIX_P( setv )
-#endif
+	bli_setv_basic_check( beta, x );
+}
 
