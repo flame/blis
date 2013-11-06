@@ -66,6 +66,9 @@ void bli_ger_basic_check( obj_t*  alpha,
 	e_val = bli_check_vector_object( y );
 	bli_check_error_code( e_val );
 
+	e_val = bli_check_matrix_object( a );
+	bli_check_error_code( e_val );
+
 	e_val = bli_check_vector_dim_equals( x, bli_obj_length_after_trans( *a ) );
 	bli_check_error_code( e_val );
 

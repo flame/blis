@@ -79,6 +79,21 @@ void bli_her2k_basic_check( obj_t*   alpha,
 	e_val = bli_check_scalar_object( beta );
 	bli_check_error_code( e_val );
 
+	e_val = bli_check_matrix_object( a );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_matrix_object( ah );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_matrix_object( b );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_matrix_object( bh );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_matrix_object( c );
+	bli_check_error_code( e_val );
+
 	e_val = bli_check_level3_dims( a, bh, c );
 	bli_check_error_code( e_val );
 

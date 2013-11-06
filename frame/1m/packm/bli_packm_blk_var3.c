@@ -192,7 +192,7 @@ void PASTEMAC(ch,varname )( \
 	/* If the strides of P indicate row storage, then we are packing to
 	   column panels; otherwise, if the strides indicate column storage,
 	   we are packing to row panels. */ \
-	if ( bli_is_row_stored( rs_p, cs_p ) ) \
+	if ( bli_is_row_stored_f( rs_p, cs_p ) ) \
 	{ \
 		/* Prepare to pack to row-stored column panels. */ \
 		iter_dim      = n; \
@@ -209,7 +209,7 @@ void PASTEMAC(ch,varname )( \
 		m_panel_use   = &panel_len_i; \
 		n_panel_use   = &panel_dim_i; \
 	} \
-	else /* if ( bli_is_col_stored( rs_p, cs_p ) ) */ \
+	else /* if ( bli_is_col_stored_f( rs_p, cs_p ) ) */ \
 	{ \
 		/* Prepare to pack to column-stored row panels. */ \
 		iter_dim      = m; \
@@ -274,32 +274,32 @@ void PASTEMAC(ch,varname )( \
 			/* Sanity check. Diagonals should not intersect the short end of
 			   a micro-panel, but we can probably still support those cases if
 			   it happens. */ \
-			if ( ( bli_is_col_stored( rs_p, cs_p ) && diagoffc_i < 0 ) || \
-			     ( bli_is_row_stored( rs_p, cs_p ) && diagoffc_i > 0 ) ) \
+			if ( ( bli_is_col_stored_f( rs_p, cs_p ) && diagoffc_i < 0 ) || \
+			     ( bli_is_row_stored_f( rs_p, cs_p ) && diagoffc_i > 0 ) ) \
 				bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \
 \
-			if      ( bli_is_row_stored( rs_p, cs_p ) && bli_is_upper( uploc ) )  \
+			if      ( bli_is_row_stored_f( rs_p, cs_p ) && bli_is_upper( uploc ) )  \
 			{ \
 				panel_off_i     = 0; \
 				panel_len_i     = bli_min( panel_len,     -diagoffc_i + panel_dim_i ); \
 				panel_len_max_i = bli_min( panel_len_max, -diagoffc_i + panel_dim ); \
 				diagoffp        = diagoffc_i; \
 			} \
-			else if ( bli_is_row_stored( rs_p, cs_p ) && bli_is_lower( uploc ) ) \
+			else if ( bli_is_row_stored_f( rs_p, cs_p ) && bli_is_lower( uploc ) ) \
 			{ \
 				panel_off_i     = bli_abs( bli_min( diagoffc_i, 0 ) ); \
 				panel_len_i     = panel_len     - panel_off_i; \
 				panel_len_max_i = panel_len_max - panel_off_i; \
 				diagoffp        = diagoffc_i + panel_off_i; \
 			} \
-			else if ( bli_is_col_stored( rs_p, cs_p ) && bli_is_upper( uploc ) )  \
+			else if ( bli_is_col_stored_f( rs_p, cs_p ) && bli_is_upper( uploc ) )  \
 			{ \
 				panel_off_i     = bli_max( diagoffc_i, 0 ); \
 				panel_len_i     = panel_len     - panel_off_i; \
 				panel_len_max_i = panel_len_max - panel_off_i; \
 				diagoffp        = diagoffc_i - panel_off_i; \
 			} \
-			else /* if ( bli_is_col_stored( rs_p, cs_p ) && bli_is_lower( uploc ) ) */ \
+			else /* if ( bli_is_col_stored_f( rs_p, cs_p ) && bli_is_lower( uploc ) ) */ \
 			{ \
 				panel_off_i     = 0; \
 				panel_len_i     = bli_min( panel_len,     diagoffc_i + panel_dim_i ); \

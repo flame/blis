@@ -88,8 +88,8 @@ void bli_obj_create_const_copy_of( obj_t* a, obj_t* b );
 
 void bli_adjust_strides( dim_t  m,
                          dim_t  n,
-                         dim_t* rs,
-                         dim_t* cs );
+                         inc_t* rs,
+                         inc_t* cs );
 
 siz_t bli_datatype_size( num_t dt );
 

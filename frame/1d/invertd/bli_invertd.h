@@ -32,6 +32,7 @@
 
 */
 
+#include "bli_invertd_check.h"
 #include "bli_invertd_unb_var1.h"
 
 

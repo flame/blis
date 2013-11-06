@@ -390,9 +390,13 @@ err_t bli_check_scalar_object( obj_t* a )
 {
 	err_t e_val = BLIS_SUCCESS;
 
+	if ( bli_obj_length( *a ) < 0 ||
+		 bli_obj_width( *a )  < 0 )
+		return BLIS_NEGATIVE_DIMENSION;
+
 	if ( bli_obj_length( *a ) != 1 ||
 	     bli_obj_width( *a )  != 1 )
-		e_val = BLIS_EXPECTED_SCALAR_OBJECT;
+		return BLIS_EXPECTED_SCALAR_OBJECT;
 
 	return e_val;
 }
@@ -401,8 +405,23 @@ err_t bli_check_vector_object( obj_t* a )
 {
 	err_t e_val = BLIS_SUCCESS;
 
+	if ( bli_obj_length( *a ) < 0 ||
+		 bli_obj_width( *a )  < 0 )
+		return BLIS_NEGATIVE_DIMENSION;
+
 	if ( !bli_obj_is_vector( *a ) )
-		e_val = BLIS_EXPECTED_VECTOR_OBJECT;
+		return BLIS_EXPECTED_VECTOR_OBJECT;
+
+	return e_val;
+}
+
+err_t bli_check_matrix_object( obj_t* a )
+{
+	err_t e_val = BLIS_SUCCESS;
+
+	if ( bli_obj_length( *a ) < 0 ||
+		 bli_obj_width( *a )  < 0 )
+		e_val = BLIS_NEGATIVE_DIMENSION;
 
 	return e_val;
 }
@@ -474,7 +493,7 @@ err_t bli_check_object_diag_offset_equals( obj_t* a, doff_t offset )
 
 // -- Stride-related checks ----------------------------------------------------
 
-err_t bli_check_matrix_strides( dim_t m, dim_t n, dim_t rs, dim_t cs )
+err_t bli_check_matrix_strides( dim_t m, dim_t n, inc_t rs, inc_t cs )
 {
 	err_t e_val = BLIS_SUCCESS;
 
@@ -482,6 +501,15 @@ err_t bli_check_matrix_strides( dim_t m, dim_t n, dim_t rs, dim_t cs )
 	// them unless you absolutely know what you are doing! Particularly, do
 	// not try to merge the general and row-/column-major sections. It might
 	// be possible, but it would be a lot less readable.
+
+	// Prohibit negative dimensions.
+	if ( m < 0 || n < 0 )
+		return BLIS_NEGATIVE_DIMENSION;
+
+	// Overwrite rs and cs with the absolute value of each. We can do this
+	// since the checks below are not dependent on the sign of the strides.
+	rs = bli_abs( rs );
+	cs = bli_abs( cs );
 
 	// The default case (whereby we interpret rs == cs == 0 as a request for
 	// column-major order) is handled prior to calling this function, so the

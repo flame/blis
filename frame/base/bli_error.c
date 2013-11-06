@@ -147,6 +147,8 @@ void bli_error_msgs_init( void )
 	         "Unexpected vector dimension." );
 	sprintf( bli_error_string_for_code(BLIS_UNEXPECTED_DIAG_OFFSET),
 	         "Unexpected object diagonal offset." );
+	sprintf( bli_error_string_for_code(BLIS_NEGATIVE_DIMENSION),
+	         "Encountered negative dimension." );
 
 	sprintf( bli_error_string_for_code(BLIS_INVALID_ROW_STRIDE),
 	         "Encountered invalid row stride relative to n dimension." );

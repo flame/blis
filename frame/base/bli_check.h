@@ -67,6 +67,7 @@ err_t bli_check_conformal_dims( obj_t* a, obj_t* b );
 err_t bli_check_level3_dims( obj_t* a, obj_t* b, obj_t* c );
 err_t bli_check_scalar_object( obj_t* a );
 err_t bli_check_vector_object( obj_t* a );
+err_t bli_check_matrix_object( obj_t* a );
 err_t bli_check_equal_vector_lengths( obj_t* x, obj_t* y );
 err_t bli_check_square_object( obj_t* a );
 err_t bli_check_object_length_equals( obj_t* a, dim_t m );
@@ -74,7 +75,7 @@ err_t bli_check_object_width_equals( obj_t* a, dim_t n );
 err_t bli_check_vector_dim_equals( obj_t* a, dim_t n );
 err_t bli_check_object_diag_offset_equals( obj_t* a, doff_t offset );
 
-err_t bli_check_matrix_strides( dim_t m, dim_t n, dim_t rs, dim_t cs );
+err_t bli_check_matrix_strides( dim_t m, dim_t n, inc_t rs, inc_t cs );
 
 err_t bli_check_general_object( obj_t* a );
 err_t bli_check_hermitian_object( obj_t* a );

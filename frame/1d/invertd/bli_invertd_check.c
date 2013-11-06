@@ -34,8 +34,7 @@
 
 #include "blis.h"
 
-void bli_absumm_check( obj_t*  x,
-                       obj_t*  absum )
+void bli_invertd_check( obj_t*  x )
 {
 	err_t e_val;
 
@@ -44,15 +43,9 @@ void bli_absumm_check( obj_t*  x,
 	e_val = bli_check_floating_object( x );
 	bli_check_error_code( e_val );
 
-	e_val = bli_check_nonconstant_object( absum );
-	bli_check_error_code( e_val );
-
 	// Check object dimensions.
 
 	e_val = bli_check_matrix_object( x );
-	bli_check_error_code( e_val );
-
-	e_val = bli_check_scalar_object( absum );
 	bli_check_error_code( e_val );
 }
 

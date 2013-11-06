@@ -191,7 +191,7 @@ void PASTEMAC(ch,varname )( \
 	/* If the strides of p indicate row storage, then we are packing to
 	   column panels; otherwise, if the strides indicate column storage,
 	   we are packing to row panels. */ \
-	if ( bli_is_row_stored( rs_p, cs_p ) ) \
+	if ( bli_is_row_stored_f( rs_p, cs_p ) ) \
 	{ \
 		/* Prepare to pack to row-stored column panels. */ \
 		iter_dim     = n; \
@@ -209,7 +209,7 @@ void PASTEMAC(ch,varname )( \
 		rs_p11       = rs_p; \
 		cs_p11       = 1; \
 	} \
-	else /* if ( bli_is_col_stored( rs_p, cs_p ) ) */ \
+	else /* if ( bli_is_col_stored_f( rs_p, cs_p ) ) */ \
 	{ \
 		/* Prepare to pack to column-stored row panels. */ \
 		iter_dim     = m; \
@@ -263,12 +263,12 @@ void PASTEMAC(ch,varname )( \
 			/* Sanity check. Diagonals should not intersect the short end of
 			   a micro-panel, but we can probably still support those cases if
 			   it happens. */ \
-			if ( ( bli_is_col_stored( rs_p, cs_p ) && diagoffc_i < 0 ) || \
-			     ( bli_is_row_stored( rs_p, cs_p ) && diagoffc_i > 0 ) ) \
+			if ( ( bli_is_col_stored_f( rs_p, cs_p ) && diagoffc_i < 0 ) || \
+			     ( bli_is_row_stored_f( rs_p, cs_p ) && diagoffc_i > 0 ) ) \
 				bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \
 \
-			if      ( ( bli_is_row_stored( rs_p, cs_p ) && bli_is_upper( uploc ) ) || \
-			          ( bli_is_col_stored( rs_p, cs_p ) && bli_is_lower( uploc ) ) ) \
+			if      ( ( bli_is_row_stored_f( rs_p, cs_p ) && bli_is_upper( uploc ) ) || \
+			          ( bli_is_col_stored_f( rs_p, cs_p ) && bli_is_lower( uploc ) ) ) \
 			{ \
 				p10_dim    = panel_dim_i; \
 				p10_len    = diagoffc_i_abs; \
@@ -299,8 +299,8 @@ void PASTEMAC(ch,varname )( \
 				if ( bli_is_hermitian( strucc ) ) \
 					bli_toggle_conj( conjc12 ); \
 			} \
-			else /* if ( ( bli_is_row_stored( rs_p, cs_p ) && bli_is_lower( uploc ) ) || \
-			             ( bli_is_col_stored( rs_p, cs_p ) && bli_is_upper( uploc ) ) ) */ \
+			else /* if ( ( bli_is_row_stored_f( rs_p, cs_p ) && bli_is_lower( uploc ) ) || \
+			             ( bli_is_col_stored_f( rs_p, cs_p ) && bli_is_upper( uploc ) ) ) */ \
 			{ \
 				p10_dim    = panel_dim_i; \
 				p10_len    = diagoffc_i_abs + panel_dim_i; \

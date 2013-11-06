@@ -41,7 +41,24 @@
 void bli_setd( obj_t* beta,
                obj_t* x )
 {
-	bli_setd_unb_var1( beta, x );
+	num_t dt_x;
+	obj_t beta_local;
+
+	if ( bli_error_checking_is_enabled() )
+		bli_scald_check( beta, x );
+
+	// Use the datatype of x as the target type for beta (since we do
+	// not assume mixed domain/type support is enabled).
+	dt_x = bli_obj_datatype( *x );
+
+	// Create an object to hold a copy-cast of alpha.
+    bli_obj_init_scalar_copy_of( dt_x,
+                                 BLIS_NO_CONJUGATE,
+                                 beta,
+                                 &beta_local );
+
+	bli_setd_unb_var1( &beta_local,
+	                   x );
 }
 
 

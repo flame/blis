@@ -76,6 +76,12 @@ void bli_dotxaxpyf_check( obj_t*  alpha,
 	e_val = bli_check_scalar_object( alpha );
 	bli_check_error_code( e_val );
 
+	e_val = bli_check_matrix_object( at );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_matrix_object( a );
+	bli_check_error_code( e_val );
+
 	e_val = bli_check_vector_object( w );
 	bli_check_error_code( e_val );
 

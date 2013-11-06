@@ -52,6 +52,9 @@ void bli_fnormm_check( obj_t*  x,
 
 	// Check object dimensions.
 
+	e_val = bli_check_matrix_object( x );
+	bli_check_error_code( e_val );
+
 	e_val = bli_check_scalar_object( norm );
 	bli_check_error_code( e_val );
 }

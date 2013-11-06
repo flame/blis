@@ -45,16 +45,27 @@
 	else              n_blis = ( dim_t )n_blas; \
 }
 
-// Macro to reposition vector pointers and flip signs of increments
-// if input increments are negative.
+// Macro to flip signs of increments if input increments are negative.
 
 #define bli_convert_blas_incv( n, x_blas, incx_blas, \
                                   x_blis, incx_blis ) \
 { \
 	if ( incx_blas < 0 ) \
 	{ \
-		x_blis    = (x_blas) + (n-1) * (incx_blas); \
-		incx_blis = ( inc_t )(-incx_blas); \
+		/* The semantics of negative stride in BLAS are that the vector
+		operand be traversed in reverse order. (Another way to think of
+		this is that negative strides effectively reverse the order of
+		the vector, but without any explicit data movements.) This is
+		also how BLIS interprets negative strides. The differences is
+		that with BLAS, the caller *always* passes in the 0th (i.e.,
+		top-most or left-most) element of the vector, even when the
+		stride is negative. By contrast, in BLIS, negative strides are
+		used *relative* to the vector address as it is given. Thus, in
+		BLIS, if this backwards traversal is desired, the caller *must*
+		pass in the address to the (n-1)th (i.e., the bottom-most or
+		right-most) element along with a negative stride. */ \
+		x_blis    = (x_blas) + (n-1)*(-incx_blas); \
+		incx_blis = ( inc_t )(incx_blas); \
 	} \
 	else \
 	{ \
@@ -62,8 +73,6 @@
 		incx_blis = ( inc_t )(incx_blas); \
 	} \
 }
-
-
 
 
 

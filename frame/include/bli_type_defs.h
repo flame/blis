@@ -82,9 +82,9 @@ typedef  gint_t  bool_t;
 // interoperability with BLIS.
 #ifndef _DEFINED_DIM_T
 #define _DEFINED_DIM_T
-typedef guint_t  dim_t;   // dimension type
+typedef  gint_t  dim_t;   // dimension type
 #endif
-typedef guint_t  inc_t;   // increment/stride type
+typedef  gint_t  inc_t;   // increment/stride type
 typedef  gint_t  doff_t;  // diagonal offset type
 typedef guint_t  siz_t;   // byte size type
 typedef guint_t  info_t;  // object information bit field
@@ -644,6 +644,7 @@ typedef enum
 	BLIS_UNEXPECTED_OBJECT_WIDTH               = ( -46),
 	BLIS_UNEXPECTED_VECTOR_DIM                 = ( -47),
 	BLIS_UNEXPECTED_DIAG_OFFSET                = ( -48),
+	BLIS_NEGATIVE_DIMENSION                    = ( -49),
 
 	// Stride-specific errors
 	BLIS_INVALID_ROW_STRIDE                    = ( -50),

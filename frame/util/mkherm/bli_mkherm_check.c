@@ -48,6 +48,9 @@ void bli_mkherm_check( obj_t*  a )
 
 	// Check object dimensions.
 
+	e_val = bli_check_matrix_object( a );
+	bli_check_error_code( e_val );
+
 	e_val = bli_check_square_object( a );
 	bli_check_error_code( e_val );
 

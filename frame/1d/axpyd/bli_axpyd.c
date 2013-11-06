@@ -42,10 +42,25 @@ void bli_axpyd( obj_t* alpha,
                 obj_t* x,
                 obj_t* y )
 {
+	num_t dt_x;
+	obj_t alpha_local;
+
 	if ( bli_error_checking_is_enabled() )
 		bli_axpyd_check( alpha, x, y );
 
-	bli_axpyd_unb_var1( alpha, x, y );
+	// Use the datatype of x as the target type for alpha (since we do
+	// not assume mixed domain/type support is enabled).
+	dt_x = bli_obj_datatype( *x );
+
+	// Create an object to hold a copy-cast of alpha.
+    bli_obj_init_scalar_copy_of( dt_x,
+                                 BLIS_NO_CONJUGATE,
+                                 alpha,
+                                 &alpha_local );
+
+	bli_axpyd_unb_var1( &alpha_local,
+	                    x,
+	                    y );
 }
 
 

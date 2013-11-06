@@ -32,27 +32,5 @@
 
 */
 
-#include "blis.h"
-
-void bli_absumm_check( obj_t*  x,
-                       obj_t*  absum )
-{
-	err_t e_val;
-
-	// Check object datatypes.
-
-	e_val = bli_check_floating_object( x );
-	bli_check_error_code( e_val );
-
-	e_val = bli_check_nonconstant_object( absum );
-	bli_check_error_code( e_val );
-
-	// Check object dimensions.
-
-	e_val = bli_check_matrix_object( x );
-	bli_check_error_code( e_val );
-
-	e_val = bli_check_scalar_object( absum );
-	bli_check_error_code( e_val );
-}
-
+void bli_scald_check( obj_t*  beta,
+                      obj_t*  x );

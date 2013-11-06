@@ -547,25 +547,34 @@ bli_obj_width_stored( obj )
 \
 	((obj).cs)
 
+#define bli_obj_row_stride_mag( obj ) \
+\
+	( bli_abs( bli_obj_row_stride( obj ) ) )
+
+#define bli_obj_col_stride_mag( obj ) \
+\
+	( bli_abs( bli_obj_col_stride( obj ) ) )
+
 #define bli_obj_is_row_stored( obj ) \
 \
-	( (obj).cs == 1 )
+	( bli_obj_col_stride_mag( obj ) == 1 )
 
 #define bli_obj_is_col_stored( obj ) \
 \
-	( (obj).rs == 1 )
+	( bli_obj_row_stride_mag( obj ) == 1 )
 
 #define bli_obj_is_gen_stored( obj ) \
 \
-	( (obj).rs != 1 && (obj).cs != 1 )
+	( bli_obj_row_stride_mag( obj ) != 1 && \
+	  bli_obj_col_stride_mag( obj ) != 1 )
 
 #define bli_obj_is_row_tilted( obj ) \
 \
-	( (obj).cs < (obj).rs )
+	( bli_obj_col_stride_mag( obj ) < bli_obj_row_stride_mag( obj ) )
 
 #define bli_obj_is_col_tilted( obj ) \
 \
-	( (obj).rs < (obj).cs )
+	( bli_obj_row_stride_mag( obj ) < bli_obj_col_stride_mag( obj ) )
 
 
 // Stride/increment modification
@@ -883,9 +892,9 @@ bli_obj_width_stored( obj )
 #define bli_obj_buffer_at_off( obj ) \
 \
 	( void* )( \
-	           ( ( char* )( (obj).buffer ) ) + (obj).elem_size * \
-	                                                ( (obj).offn * (obj).cs + \
-                                                      (obj).offm * (obj).rs ) \
+	           ( ( char* )( (obj).buffer ) ) + ( dim_t )(obj).elem_size * \
+	                                                    ( (obj).offn * (obj).cs + \
+	                                                      (obj).offm * (obj).rs ) \
 	         )
 
 #define bli_obj_scalar_buffer( dt, obj ) \

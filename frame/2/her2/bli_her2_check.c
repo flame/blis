@@ -67,6 +67,9 @@ void bli_her2_basic_check( conj_t   conjh,
 	e_val = bli_check_vector_object( y );
 	bli_check_error_code( e_val );
 
+	e_val = bli_check_matrix_object( c );
+	bli_check_error_code( e_val );
+
 	e_val = bli_check_square_object( c );
 	bli_check_error_code( e_val );
 

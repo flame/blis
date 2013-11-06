@@ -42,15 +42,15 @@
 
 #define bli_is_aligned_to( p, size ) \
 \
-	( ( siz_t )(p) % (size) == 0 )
+	( ( siz_t )(p) % ( siz_t )(size) == 0 )
 
 #define bli_is_unaligned_to( p, size ) \
 \
-	( ( siz_t )(p) % (size) != 0 )
+	( ( siz_t )(p) % ( siz_t )(size) != 0 )
 
 #define bli_offset_from_alignment( p, size ) \
 \
-	( ( siz_t )(p) % (size) )
+	( ( siz_t )(p) % ( siz_t )(size) )
 
 
 // datatype
@@ -352,23 +352,32 @@
 
 #define bli_is_row_stored( rs, cs ) \
 \
-	( cs == 1 )
+	( bli_abs( cs ) == 1 )
 
 #define bli_is_col_stored( rs, cs ) \
+\
+	( bli_abs( rs ) == 1 )
+
+#define bli_is_row_stored_f( rs, cs ) \
+\
+	( cs == 1 )
+
+#define bli_is_col_stored_f( rs, cs ) \
 \
 	( rs == 1 )
 
 #define bli_is_gen_stored( rs, cs ) \
 \
-	( rs != 1 && cs != 1 )
+	( bli_abs( rs ) != 1 && \
+	  bli_abs( cs ) != 1 )
 
 #define bli_is_row_tilted( rs, cs ) \
 \
-	( cs < rs )
+	( bli_abs( cs ) < bli_abs( rs ) )
 
 #define bli_is_col_tilted( rs, cs ) \
 \
-	( rs < cs )
+	( bli_abs( rs ) < bli_abs( cs ) )
 
 #define bli_has_nonunit_inc1( inc1 ) \
 \
@@ -376,11 +385,14 @@
 
 #define bli_has_nonunit_inc2( inc1, inc2 ) \
 \
-	( inc1 != 1 || inc2 != 1 )
+	( inc1 != 1 || \
+	  inc2 != 1 )
 
 #define bli_has_nonunit_inc3( inc1, inc2, inc3 ) \
 \
-	( inc1 != 1 || inc2 != 1 || inc3 != 1 )
+	( inc1 != 1 || \
+	  inc2 != 1 || \
+	  inc3 != 1 )
 
 
 // diag offset-related

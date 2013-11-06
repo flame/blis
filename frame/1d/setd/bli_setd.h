@@ -32,6 +32,7 @@
 
 */
 
+#include "bli_setd_check.h"
 #include "bli_setd_unb_var1.h"
 
 

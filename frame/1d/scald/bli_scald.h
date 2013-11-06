@@ -32,6 +32,7 @@
 
 */
 
+#include "bli_scald_check.h"
 #include "bli_scald_unb_var1.h"
 
 

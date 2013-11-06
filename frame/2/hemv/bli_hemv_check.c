@@ -67,13 +67,16 @@ void bli_hemv_basic_check( obj_t*  alpha,
 	e_val = bli_check_scalar_object( beta );
 	bli_check_error_code( e_val );
 
+	e_val = bli_check_matrix_object( a );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_square_object( a );
+	bli_check_error_code( e_val );
+
 	e_val = bli_check_vector_object( x );
 	bli_check_error_code( e_val );
 
 	e_val = bli_check_vector_object( y );
-	bli_check_error_code( e_val );
-
-	e_val = bli_check_square_object( a );
 	bli_check_error_code( e_val );
 
 	e_val = bli_check_object_length_equals( a, bli_obj_vector_dim( *x ) );
