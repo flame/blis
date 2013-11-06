@@ -55,7 +55,7 @@ void PASTEF772(chxy,chr,blasname)( \
 	inc_t     incx0; \
 	inc_t     incy0; \
 \
-	/* Convert negative values of n to zero. */ \
+	/* Convert/typecast negative values of n to zero. */ \
 	bli_convert_blas_dim1( *n, n0 ); \
 \
 	/* If the input increments are negative, adjust the pointers so we can

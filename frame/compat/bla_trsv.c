@@ -82,7 +82,7 @@ void PASTEF77(ch,blasname)( \
 	bli_param_map_netlib_to_blis_trans( *transa, &blis_transa ); \
 	bli_param_map_netlib_to_blis_diag( *diaga, &blis_diaga ); \
 \
-	/* Convert negative values of m to zero. */ \
+	/* Convert/typecast negative values of m to zero. */ \
 	bli_convert_blas_dim1( *m, m0 ); \
 \
 	/* If the input increments are negative, adjust the pointers so we can

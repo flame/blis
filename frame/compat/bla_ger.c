@@ -70,7 +70,7 @@ void PASTEF772(chxy,blasname,chc)( \
 	                       incy, \
 	                       lda ); \
 \
-	/* Convert negative values of m and n to zero. */ \
+	/* Convert/typecast negative values of m and n to zero. */ \
 	bli_convert_blas_dim1( *m, m0 ); \
 	bli_convert_blas_dim1( *n, n0 ); \
 \

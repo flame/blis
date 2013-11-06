@@ -58,7 +58,7 @@ ftype PASTEF772(chxy,blasname,chc)( \
 	/* Initialize BLIS (if it is not already initialized). */ \
 	bli_init_safe( &init_result ); \
 \
-	/* Convert negative values of n to zero. */ \
+	/* Convert/typecast negative values of n to zero. */ \
 	bli_convert_blas_dim1( *n, n0 ); \
 \
 	/* If the input increments are negative, adjust the pointers so we can

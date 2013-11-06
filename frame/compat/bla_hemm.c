@@ -79,7 +79,7 @@ void PASTEF77(ch,blasname)( \
 	bli_param_map_netlib_to_blis_side( *side,  &blis_side ); \
 	bli_param_map_netlib_to_blis_uplo( *uploa, &blis_uploa ); \
 \
-	/* Convert negative values of m and n to zero. */ \
+	/* Convert/typecast negative values of m and n to zero. */ \
 	bli_convert_blas_dim1( *m, m0 ); \
 	bli_convert_blas_dim1( *n, n0 ); \
 \

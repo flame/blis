@@ -62,7 +62,7 @@ void PASTEF77(ch,blasname)( \
 	/* Map BLAS chars to their corresponding BLIS enumerated type value. */ \
 	bli_param_map_netlib_to_blis_uplo( *uploa, &blis_uploa ); \
 \
-	/* Convert negative values of m to zero. */ \
+	/* Convert/typecast negative values of m to zero. */ \
 	bli_convert_blas_dim1( *m, m0 ); \
 \
 	/* If the input increments are negative, adjust the pointers so we can

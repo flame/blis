@@ -85,7 +85,7 @@ void PASTEF77(ch,blasname)( \
 		blis_transa = BLIS_TRANSPOSE; \
 	} \
 \
-	/* Convert negative values of m and k to zero. */ \
+	/* Convert/typecast negative values of m and k to zero. */ \
 	bli_convert_blas_dim1( *m, m0 ); \
 	bli_convert_blas_dim1( *k, k0 ); \
 \

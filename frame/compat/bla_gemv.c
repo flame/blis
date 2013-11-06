@@ -78,7 +78,7 @@ void PASTEF77(ch,blasname)( \
 	/* Map BLAS chars to their corresponding BLIS enumerated type value. */ \
 	bli_param_map_netlib_to_blis_trans( *transa, &blis_transa ); \
 \
-	/* Convert negative values of m and n to zero. */ \
+	/* Convert/typecast negative values of m and n to zero. */ \
 	bli_convert_blas_dim1( *m, m0 ); \
 	bli_convert_blas_dim1( *n, n0 ); \
 \
