@@ -88,53 +88,43 @@ void bli_dgemmtrsm_u_opt_mxn(
   This function contains a template implementation for a double-precision
   real micro-kernel that fuses a gemm with a trsm_u subproblem. 
 
-  This micro-kernel implements the following sequence of operations:
+  This micro-kernel performs the following compound operation: 
 
     B11 := alpha * B11 - A12 * B21    (gemm)
     B11 := inv(A11) * B11             (trsm)
+    C11 := B11
 
-  where B11 is MR x NR, A12 is MR x k, B21 is k x NR, A11 is MR x MR and
-  upper triangular, and alpha is a scalar. Here, inv() denotes matrix
+  where A11 is MR x MR and upper triangular, A12 is MR x k, B21 is k x NR,
+  B11 is MR x NR, and alpha is a scalar. Here, inv() denotes matrix
   inverse.
-
-  NOTE: Here, this gemmtrsm micro-kernel supports element "duplication", a
-  feature that is enabled or disabled in bli_kernel.h. Duplication factors
-  are also defined in the aforementioned header. Duplication is NOT
-  commonly used and most developers may assume it is disabled.
 
   Parameters:
 
   - k:      The number of columns of A12 and rows of B21.
   - alpha:  The address of a scalar to be applied to B11.
-  - a12:    The address of A12, which is the MR x k subpartition of the
-            packed (column-stored) micro-panel of A that is situated to the
-            right of the MR x MR upper triangular block.
-  - a11:    The address of A11, which is the MR x MR upper triangular block
-            within the packed micro-panel of A that is situated to the
-            left of A12. By the time this gemmtrsm kernel is called, the
-            diagonal of A11 has already been inverted and the strictly lower
-            triangle contains zeros.
-  - bd21:   The address of B21, which is the k x NR subpartition situated
-            above the current MR x NR block B11. bd21 is row-stored. If
-            duplication is enabled, then each element occurs d times,
-            effectively increasing the dimension to k x d*NR. If duplication
-            is disabled, then bd21 is simply an address within the current
-            packed (row-stored) micro-panel of B (labeled b21 in the diagram
-            below).
-  - bd11:   The address of B11, which is the MR x NR subpartition situated
-            above B21. If duplication is enabled, then each element occurs
-            d times, effectively increasing the dimension to MR x d*NR. If
-            duplication is disabled, then bd11 is simply the address of the
-            current MR x NR block witin the packed (row-stored) micro-panel
-            of B.
-  - b11:    The address of the current MR x NR block within the packed
-            micro-panel of B. It exists in duplicated form as bd11. If
-            duplication is disabled, then b11 and bd11 refer to the same
-            MR x NR block within the packed (row-stored) micro-panel of B.
-  - c11:    The address of C11, which is the MR x NR block of the output
-            matrix (ie: the matrix provided by the user to the highest-level
-            trsm API call). C11 corresponds to the elements that exist in
-            packed form in B11, and is stored according to rs_c and cs_c.
+  - a12:    The address of A12, which is the MR x k submatrix of the packed
+            micro-panel of A that is situated to the right of the MR x MR
+            triangular submatrix A11. A12 is stored by columns with leading
+            dimension PACKMR, where typically PACKMR = MR.
+  - a11:    The address of A11, which is the MR x MR upper triangular
+            submatrix within the packed micro-panel of matrix A that is
+            situated to the left of A12. A11 is stored by columns with
+            leading dimension PACKMR, where typically PACKMR = MR. Note
+            that A11 contains elements in both triangles, though elements
+            in the unstored triangle are not guaranteed to be zero and
+            thus should not be referenced. 
+  - b21:    The address of B21, which is the k x NR submatrix of the packed
+            micro-panel of B that is situated above the MR x NR submatrix
+            B11. B01 is stored by rows with leading dimension PACKNR, where
+            typically PACKNR = NR. 
+  - b11:    The address B11, which is the MR x NR submatrix of the packed
+            micro-panel of B, situated below B01. B11 is stored by rows
+            with leading dimension PACKNR, where typically PACKNR = NR.
+  - c11:    The address of C11, which is the MR x NR submatrix of matrix
+            C, stored according to rs_c and cs_c. C11 is the submatrix
+            within C that corresponds to the elements which were packed
+            into B11. Thus, C is the original input matrix B to the overall
+            trsm operation.
   - rs_c:   The row stride of C11 (ie: the distance to the next row of C11,
             in units of matrix elements).
   - cs_c:   The column stride of C11 (ie: the distance to the next column of
@@ -144,56 +134,77 @@ void bli_dgemmtrsm_u_opt_mxn(
   - b_next: The address of the packed micro-panel of B that will be used the
             next time the gemmtrsm micro-kernel will be called.
 
-  The diagram below shows the packed micro-panel operands and how elements
-  of each would be stored when MR == NR == 4. (The hex digits indicate the
-  order of the elements in memory.) We also show a B duplication buffer (bd)
-  that contains a copy of the packed micro-panel of B with a duplication
-  factor of 2. If duplication is disabled (as is commonly the case), then
-  bd01 == b01 and bd11 == b11.
+  Diagram for gemmtrsm_u
 
-       a11:     a12:                         NR                 2*NR        
-       ________ ___________________        _______         _______________  
-      |`.      |0 4 8              |  b11:|0 1 2 3|  bd11:|0 0 1 1 2 2 3 3| 
-  MR  |  `.    |1 5 9 . . .        |      |4 5 6 7|       |4 4 5 5 6 6 7 7| 
-      |    `.  |2 6 A              |   MR |8 9 A B|       |8 8 9 9 A A B B| 
-      |______`.|3_7_B______________|      |___.___|       |_______._______| 
-                                      b21:|   .   |  bd21:|       .       | 
-          MR             k                |   .   |       |       .       | 
-                                          |       |       |               | 
-    NOTE: If duplication is disabled      |       |       |               | 
-    then bd21 and bd11 simply refer     k |       |       |               | 
-    to b21 and b11, respectively.         |       |       |               | 
-    ALSO: Storage digits are shown        |       |       |               | 
-    starting with a12 to avoid            |_______|       |_______________| 
-    obscuring triangular structure of                                       
-    a11.                                                                    
-                                                                            
-  Thus, with duplication enabled, the operation takes the form of:
+  The diagram below shows the packed micro-panel operands for trsm_l and
+  how elements of each would be stored when MR = NR = 4. (The hex digits
+  indicate the layout and order (but NOT the numeric contents) in memory.
+  Here, matrix A11 (referenced by a11) is upper triangular. Matrix A11
+  does contain elements corresponding to the strictly lower triangle,
+  however, they are not guaranteed to contain zeros and thus these elements
+  should not be referenced. 
 
-    b11  = alpha * b11 - a12 * bd21;
-    b11  = inv(a11) * b11;
-    bd11 = b11;  (skipped if duplication is disabled)
-    c11  = b11;
-                                                                        
-  And if duplication is disabled, the operation reduces to:
+       a11:     a12:                          NR     
+       ________ ___________________         _______  
+      |`.      |0 4 8              |   b11:|0 1 2 3| 
+  MR  |  `.    |1 5 9 . . .        |       |4 5 6 7| 
+      |    `.  |2 6 A              |    MR |8 9 A B| 
+      |______`.|3_7_B______________|       |___.___| 
+                                       b21:|   .   | 
+          MR             k                 |   .   | 
+                                           |       | 
+                                           |       | 
+    NOTE: Storage digits are shown       k |       | 
+    starting with a12 to avoid             |       | 
+    obscuring triangular structure         |       | 
+    of a11.                                |_______| 
+                                                     
 
-    b11 = alpha * b11 - a12 * b21;  (Note: Here, b21 == bd21.)
-    b11 = inv(a11) * b11;
-    c11 = b11;
+  Implementation Notes for gemmtrsm
 
-  A note on optimization:
-  - This implementation simply calls the gemm micro-kernel and then the
-    trsm micro-kernel. Let's assume that the gemm micro-kernel has already
-    been optimized. You have two options with regards to optimizing the
-    fused gemmtrsm kernel.
-    (1) Optimize only the trsm kernel and continue to call the gemm and
-        trsm micro-kernels in sequence, as is done in this template
-        implementation.
+  - Register blocksizes. See Implementation Notes for gemm. 
+  - Leading dimensions of a and b: PACKMR and PACKNR. See Implementation
+    Notes for gemm. 
+  - Edge cases in MR, NR dimensions. See Implementation Notes for gemm. 
+  - Alignment of a and b. Unlike with gemm, the addresses a10/a12 and a11
+    are not guaranteed to be aligned according to the alignment value
+    BLIS_CONTIG_STRIDE_ALIGN_SIZE, as defined in the bli_config.h header
+    file. This is because these micro-panels may vary in size due to the
+    triangular nature of matrix A. Instead, these addresses are aligned
+    to PACKMR x sizeof(type), where type is the datatype in question. To
+    support a somewhat obscure, higher-level optimization, we similarly
+    do not guarantee that b01/b21 and b11 are aligned to
+    BLIS_CONTIG_STRIDE_ALIGN_SIZE; instead, they are only aligned to
+    PACKNR x sizeof(type). 
+  - Unrolling loops. Most optimized implementations should unroll all
+    three loops within the trsm subproblem of gemmtrsm. See Implementation
+    Notes for gemm for remarks on unrolling the gemm subproblem. 
+  - Prefetching via a_next and b_next. The addresses a_next and b_next
+    for gemmtrsm refer to the portions of the packed micro-panels of A
+    and B that will be referenced by the next invocation. Specifically,
+    in gemmtrsm_l, a_next and b_next refer to the addresses of the next
+    invocation's a10 and b01, respectively, while in gemmtrsm_u, a_next
+    and b_next refer to the addresses of the next invocation's a11 and
+    b11 (since those submatrices precede a12 and b21). 
+  - Zero alpha. The micro-kernel can safely assume that alpha is non-zero;
+    "alpha equals zero" handling is performed at a much higher level,
+    which means that, in such a scenario, the micro-kernel will never get
+    called. 
+  - Diagonal elements of A11. See Implementation Notes for trsm. 
+  - Zero elements of A11. See Implementation Notes for trsm. 
+  - Output. See Implementation Notes for trsm. 
+  - Optimization. Let's assume that the gemm micro-kernel has already been
+    optimized. You have two options with regard to optimizing the fused
+    gemmtrsm micro-kernels: 
+    (1) Optimize only the trsm micro-kernels. This will result in the gemm
+        and trsm_l micro-kernels being called in sequence. (Likewise for
+        gemm and trsm_u.) 
     (2) Fuse the implementation of the gemm micro-kernel with that of the
-        trsm micro-kernel by inlining both into this gemmtrsm function.
-    The latter option is more labor-intensive, but also more likely to
-    yield higher performance because it allows you to eliminate redundant
-    memory operations on the packed MR x NR block B11.
+        trsm micro-kernels by inlining both into the gemmtrsm_l and
+        gemmtrsm_u micro-kernel definitions. This option is more labor-
+        intensive, but also more likely to yield higher performance because
+        it avoids redundant memory operations on the packed MR x NR
+        submatrix B11. 
 
   For more info, please refer to the BLIS website and/or contact the
   blis-devel mailing list.

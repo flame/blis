@@ -93,12 +93,14 @@ void bli_dgemm_opt_mxn(
   - k:      The number of columns of A and rows of B.
   - alpha:  The address of a scalar to the A*B product.
   - a:      The address of a micro-panel of matrix A of dimension MR x k,
-            stored by columns.
+            stored by columns with leading dimension PACKMR, where
+            typically PACKMR = MR. 
   - b:      The address of a micro-panel of matrix B of dimension k x NR,
-            stored by rows.
+            stored by rows with leading dimension PACKNR, where typically
+            PACKNR = NR.
   - beta:   The address of a scalar to the input value of matrix C.
-  - c:      The address of a block of matrix C of dimension MR x NR,
-            stored according to rs_c and cs_c.
+  - c:      The address of a submatrix C of dimension MR x NR, stored
+            according to rs_c and cs_c.
   - rs_c:   The row stride of matrix C (ie: the distance to the next row,
             in units of matrix elements).
   - cs_c:   The column stride of matrix C (ie: the distance to the next
@@ -108,10 +110,13 @@ void bli_dgemm_opt_mxn(
   - b_next: The address of the micro-panel of B that will be used the next
             time the gemm micro-kernel will be called.
 
+  Diagram for gemm
+
   The diagram below shows the packed micro-panel operands and how elements
-  of each would be stored when MR == NR == 4. (The hex digits indicate the
-  order of the elements in memory.) Note that the storage of C is not shown
-  since it is determined by the row and column strides of C.
+  of each would be stored when MR = NR = 4. The hex digits indicate the
+  layout and order (but NOT the numeric contents) of the elements in
+  memory. Note that the storage of C is not shown since it is determined
+  by the row and column strides of C. 
 
          c:             a:                         b:                   
          _______        ______________________     _______              
@@ -127,37 +132,60 @@ void bli_dgemm_opt_mxn(
                                                   |_______|             
                                                                         
                                                       NR                
-  Here are a few things to consider:
+  Implementation Notes for gemm
 
-  - bli_?mr and bli_?nr give the MR and NR register blocksizes for the
-    datatype corresponding to the '?' character.
-  - bli_?packmr and bli_?packnr are usually equal to bli_?mr and bli_?nr,
-    respectively. (They are only not equal if the register blocksize
-    extensions are non-zero. See bli_kernel.h for more details.)
-  - You may assume that the addresses a and b are aligned according to
-    the alignment value BLIS_CONTIG_STRIDE_ALIGN_SIZE, as defined in
-    bli_config.h.
-  - Here, we use a local array, ab, as temporary accumulator elements as
-    we compute the a*b product. In an optimized micro-kernel, ab is held
-    in registers rather than memory.
-  - In column-major storage (or column storage), the "leading dimension"
-    of a matrix is equivalent to its column stride, and the row stride is
-    unit. In row-major storage (row storage), the "leading dimension" is
-    equivalent to the row stride and the column stride is unit.
-  - While all three loops are exposed in this template micro-kernel, the
-    loops over MR and NR typically disappear in an optimized code because
-    they are fully unrolled, leaving only the loop over k.
-  - Some optimized micro-kernels will need the loop over k to be unrolled
-    a few times (4x seems to be a common unrolling factor).
-  - a_next and b_next can be used to perform prefetching, if prefetching
-    is supported by the architecture. They may be safely ignored by the
-    micro-kernel implementation, though.
-  - If beta == 0.0 (or 0.0 + 0.0i for complex), then the micro-kernel
-    should NOT use it explicitly, as C may contain uninitialized memory
-    (including NaNs). This case should be detected and handled separately,
-    preferably by simply overwriting C with the alpha*A*B product. An
-    example of how to perform this "beta is zero" handling is included in
-    this template implementation.
+  - Register blocksizes. The C preprocessor macros bli_?mr and bli_?nr
+    evaluate to the MR and NR register blocksizes for the datatype
+    corresponding to the '?' character. These values are abbreviations
+    of the macro constants BLIS_DEFAULT_MR_? and BLIS_DEFAULT_NR_?,
+    which are defined in the bli_kernel.h header file of the BLIS
+    configuration. 
+  - Leading dimensions of a and b: PACKMR and PACKNR. The packed
+    micro-panels a and b are simply stored in column-major and row-major
+    order, respectively. Usually, the width of either micro-panel (ie:
+    the number of rows of a, or MR, and the number of columns of b, or
+    NR) is equal to that micro-panel's so-called "leading dimension."
+    Sometimes, it may be beneficial to specify a leading dimension that
+    is larger than the panel width. This may be desirable because it
+    allows each column of a or row of b to maintain a certain alignment
+    in memory that would not otherwise be maintained by MR and/or NR. In
+    this case, you should index through a and b using the values PACKMR
+    and PACKNR, respectively, as defined by bli_?packmr and bli_?packnr.
+    These values are defined as BLIS_DEFAULT_MR_? + BLIS_EXTEND_MR_? and
+    BLIS_DEFAULT_NR_? + BLIS_EXTEND_NR_?, respectively, where
+    BLIS_EXTEND_MR_? and BLIS_EXTEND_NR_? encode the register blocksize
+    extensions, as defined in the bli_kernel.h header file of the BLIS
+    configuration. 
+  - Edge cases in MR, NR dimensions. Sometimes the micro-kernel will be
+    called with micro-panels of A and B that correspond to edge cases,
+    where only partial results are needed. Zero-padding is handled
+    automatically by the packing function to facilitate reuse of the same
+    micro-kernel. Similarly, the logic for computing to temporary storage
+    and then saving only the elements that correspond to elements of C
+    that exist (at the edges) is handled automatically within the
+    macro-kernel. 
+  - Alignment of a and b. The addresses a and b are aligned according to
+    the alignment value BLIS_CONTIG_STRIDE_ALIGN_SIZE, as defined in the
+    bli_config.h header file of the BLIS configuration. 
+  - Unrolling loops. As a general rule of thumb, the loop over k is
+    sometimes moderately unrolled; for example, in our experience, an
+    unrolling factor of u = 4 is fairly common. If unrolling is applied
+    in the k dimension, edge cases must be handled to support values of k
+    that are not multiples of u. It is nearly universally true that there
+    should be no loops in the MR or NR directions; in other words,
+    iteration over these dimensions should always be fully unrolled
+    (within the loop over k). 
+  - Prefetching via a_next and b_next. The addresses a_next and b_next may
+    be used by the micro-kernel to perform prefetching, if prefetching is
+    supported by the architecture. However, these addresses are may also
+    be safely ignored if prefetching is not feasible/possible/desired. 
+  - Zero beta. If beta = 0.0 (or 0.0 + 0.0i for complex datatypes), then
+    the micro-kernel should NOT use it explicitly, as C may contain
+    uninitialized memory (including NaNs). This case should be detected
+    and handled separately, preferably by simply overwriting C with the
+    alpha * A * B product. An example of how to perform this "beta equals
+    zero" handling is included in the gemm micro-kernel associated with
+    the template configuration. 
 
   For more info, please refer to the BLIS website and/or contact the
   blis-devel mailing list.

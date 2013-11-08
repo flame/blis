@@ -37,23 +37,23 @@
 
 
 void bli_strsm_l_opt_mxn(
-                          float*    restrict a,
-                          float*    restrict b,
-                          float*    restrict c, inc_t rs_c, inc_t cs_c
+                          float*    restrict a11,
+                          float*    restrict b11,
+                          float*    restrict c11, inc_t rs_c, inc_t cs_c
                         )
 {
 	/* Just call the reference implementation. */
-	bli_strsm_l_ref_mxn( a,
-	                     b,
-	                     c, rs_c, cs_c );
+	bli_strsm_l_ref_mxn( a11,
+	                     b11,
+	                     c11, rs_c, cs_c );
 }
 
 
 
 void bli_dtrsm_l_opt_mxn(
-                          double*   restrict a,
-                          double*   restrict b,
-                          double*   restrict c, inc_t rs_c, inc_t cs_c
+                          double*   restrict a11,
+                          double*   restrict b11,
+                          double*   restrict c11, inc_t rs_c, inc_t cs_c
                         )
 {
 /*
@@ -66,40 +66,65 @@ void bli_dtrsm_l_opt_mxn(
   the templates for the other three floating-point types would be nearly
   identical.)
 
-  This micro-kernel performs a triangular solve with NR right-hand sides:
+  This micro-kernel performs the following operation:
 
     C11 := inv(A11) * B11
 
   where A11 is MR x MR and lower triangular, B11 is MR x NR, and C11 is
-  MR x NR.
+  MR x NR. 
 
   Parameters:
 
-  - a11:    The address of A11, which is the MR x MR lower triangular block
-            within the packed (column-stored) micro-panel of A. By the time
-            this trsm micro-kernel is called, the diagonal of A11 has already
-            been inverted and the strictly upper triangle contains zeros.
-  - b11:    The address of B11, which is the MR x NR subpartition of the
-            current packed (row-stored) micro-panel of B.
-  - c11:    The address of C11, which is the MR x NR block of the output
-            matrix (ie: the matrix provided by the user to the highest-level
-            trsm API call). C11 corresponds to the elements that exist in
-            packed form in B11, and is stored according to rs_c and cs_c.
+  - a11:    The address of A11, which is the MR x MR lower triangular
+            submatrix within the packed micro-panel of matrix A. A11 is
+            stored by columns with leading dimension PACKMR, where
+            typically PACKMR = MR. Note that A11 contains elements in both
+            triangles, though elements in the unstored triangle are not
+            guaranteed to be zero and thus should not be referenced. 
+  - b11:    The address of B11, which is an MR x NR submatrix of the
+            packed micro-panel of B. B11 is stored by rows with leading
+            dimension PACKNR, where typically PACKNR = NR.
+  - c11:    The address of C11, which is an MR x NR submatrix of matrix C,
+            stored according to rs_c and cs_c. C11 is the submatrix within
+            C that corresponds to the elements which were packed into B11.
+            Thus, C is the original input matrix B to the overall trsm
+            operation. 
   - rs_c:   The row stride of C11 (ie: the distance to the next row of C11,
             in units of matrix elements).
   - cs_c:   The column stride of C11 (ie: the distance to the next column of
             C11, in units of matrix elements).
 
-  Please see the comments in bli_gemmtrsm_l_opt_mxn.c for a diagram of the
-  trsm operation and where it fits in with the preceding gemm subproblem.
+  Diagrams for trsm
 
-  Here are a few things to consider:
-  - While all three loops are exposed in this template micro-kernel, all
-    three loops typically disappear in an optimized code because they are
-    fully unrolled.
-  - Note that the diagonal of the triangular matrix A11 contains the INVERSE
-    of those elements. This is done during packing so that we can avoid
-    expensive division instructions within this micro-kernel.
+  Please see the diagram for gemmtrsm_l to see depiction of the trsm_l and
+  where it fits in with its preceding gemm subproblem. 
+
+  Implementation Notes for trsm
+
+  - Register blocksizes. See Implementation Notes for gemm. 
+  - Leading dimensions of a and b: PACKMR and PACKNR. See Implementation
+    Notes for gemm. 
+  - Edge cases in MR, NR dimensions. See Implementation Notes for gemm. 
+  - Alignment of a and b. See Implementation Notes for gemmtrsm. 
+  - Unrolling loops. Most optimized implementations should unroll all
+    three loops within the trsm micro-kernel. 
+  - Diagonal elements of A11. At the time this micro-kernel is called,
+    the diagonal entries of triangular matrix A11 contain the inverse of
+    the original elements. This inversion is done during packing so that
+    we can avoid expensive division instructions within the micro-kernel
+    itself. If the diag parameter to the higher level trsm operation was
+    equal to BLIS_UNIT_DIAG, the diagonal elements will be explicitly
+    unit. 
+  - Zero elements of A11. Since A11 is lower triangular (for trsm_l), the
+    strictly upper triangle implicitly contains zeros. Similarly, the
+    strictly lower triangle of A11 implicitly contains zeros when A11 is
+    upper triangular (for trsm_u). However, the packing function may or
+    may not actually write zeros to this region. Thus, while the
+    implementation may reference these elements, it should not use them
+    in any computation. 
+  - Output. This micro-kernel must write its result to two places: the
+    submatrix B11 of the current packed micro-panel of B and the submatrix
+    C11 of the output matrix C. 
 
   For more info, please refer to the BLIS website and/or contact the
   blis-devel mailing list.
@@ -133,18 +158,18 @@ void bli_dtrsm_l_opt_mxn(
 	{
 		i        = iter;
 		n_behind = i;
-		alpha11  = a + (i  )*rs_a + (i  )*cs_a;
-		a10t     = a + (i  )*rs_a + (0  )*cs_a;
-		X0       = b + (0  )*rs_b + (0  )*cs_b;
-		x1       = b + (i  )*rs_b + (0  )*cs_b;
+		alpha11  = a11 + (i  )*rs_a + (i  )*cs_a;
+		a10t     = a11 + (i  )*rs_a + (0  )*cs_a;
+		X0       = b11 + (0  )*rs_b + (0  )*cs_b;
+		x1       = b11 + (i  )*rs_b + (0  )*cs_b;
 
 		/* x1 = x1 - a10t * X0; */
 		/* x1 = x1 / alpha11; */
 		for ( j = 0; j < n; ++j )
 		{
-			x01     = X0 + (0  )*rs_b + (j  )*cs_b;
-			chi11   = x1 + (0  )*rs_b + (j  )*cs_b;
-			gamma11 = c  + (i  )*rs_c + (j  )*cs_c;
+			x01     = X0  + (0  )*rs_b + (j  )*cs_b;
+			chi11   = x1  + (0  )*rs_b + (j  )*cs_b;
+			gamma11 = c11 + (i  )*rs_c + (j  )*cs_c;
 
 			/* chi11 = chi11 - a10t * x01; */
 			bli_dset0s( rho11 );
@@ -173,28 +198,28 @@ void bli_dtrsm_l_opt_mxn(
 
 
 void bli_ctrsm_l_opt_mxn(
-                          scomplex* restrict a,
-                          scomplex* restrict b,
-                          scomplex* restrict c, inc_t rs_c, inc_t cs_c
+                          scomplex* restrict a11,
+                          scomplex* restrict b11,
+                          scomplex* restrict c11, inc_t rs_c, inc_t cs_c
                         )
 {
 	/* Just call the reference implementation. */
-	bli_ctrsm_l_ref_mxn( a,
-	                     b,
-	                     c, rs_c, cs_c );
+	bli_ctrsm_l_ref_mxn( a11,
+	                     b11,
+	                     c11, rs_c, cs_c );
 }
 
 
 
 void bli_ztrsm_l_opt_mxn(
-                          dcomplex* restrict a,
-                          dcomplex* restrict b,
-                          dcomplex* restrict c, inc_t rs_c, inc_t cs_c
+                          dcomplex* restrict a11,
+                          dcomplex* restrict b11,
+                          dcomplex* restrict c11, inc_t rs_c, inc_t cs_c
                         )
 {
 	/* Just call the reference implementation. */
-	bli_ztrsm_l_ref_mxn( a,
-	                     b,
-	                     c, rs_c, cs_c );
+	bli_ztrsm_l_ref_mxn( a11,
+	                     b11,
+	                     c11, rs_c, cs_c );
 }
 
