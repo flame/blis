@@ -40,8 +40,7 @@ void libblis_test_gemmtrsm_ukr( test_params_t* params, test_op_t* op );
 void bli_gemmtrsm_ukr( obj_t*  alpha,
                        obj_t*  a1x,
                        obj_t*  a11,
-                       obj_t*  bdx1,
-                       obj_t*  bd11,
+                       obj_t*  bx1,
                        obj_t*  b11,
                        obj_t*  c11 );
 
@@ -53,8 +52,7 @@ void PASTEMAC(ch,varname)( \
                            void*   alpha, \
                            void*   a1x, \
                            void*   a11, \
-                           void*   bdx1, \
-                           void*   bd11, \
+                           void*   bx1, \
                            void*   b11, \
                            void*   c11, inc_t rs_c, inc_t cs_c, \
                            void*   a_next, \

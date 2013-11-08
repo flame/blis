@@ -119,13 +119,6 @@ void PASTEMAC(ch,varname)( \
                            void*   c, inc_t rs_c, inc_t cs_c \
                          ) \
 { \
-	/* Temporary buffer for duplicating elements of B. */ \
-	ctype           bd[ PASTEMAC(ch,maxkc) * \
-	                    PASTEMAC(ch,packnr) * \
-	                    PASTEMAC(ch,ndup) ] \
-	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	ctype* restrict bp; \
-\
 	/* Temporary C buffer for edge cases. */ \
 	ctype           ct[ PASTEMAC(ch,mr) * \
 	                    PASTEMAC(ch,nr) ] \
@@ -138,8 +131,6 @@ void PASTEMAC(ch,varname)( \
 	const dim_t     NR         = PASTEMAC(ch,nr); \
 	const dim_t     PACKMR     = PASTEMAC(ch,packmr); \
 	const dim_t     PACKNR     = PASTEMAC(ch,packnr); \
-	const dim_t     NDUP       = PASTEMAC(ch,ndup); \
-	const bool_t    DUPB       = NDUP != 1; \
 \
 	ctype* restrict zero       = PASTEMAC(ch,0); \
 	ctype* restrict minus_one  = PASTEMAC(ch,m1); \
@@ -151,11 +142,10 @@ void PASTEMAC(ch,varname)( \
 	ctype* restrict b1; \
 	ctype* restrict c1; \
 	ctype* restrict c11; \
-	ctype* restrict b11; \
 	ctype* restrict a10; \
 	ctype* restrict a11; \
-	ctype* restrict bp01; \
-	ctype* restrict bp11; \
+	ctype* restrict b01; \
+	ctype* restrict b11; \
 	ctype* restrict a2; \
 	ctype* restrict b2; \
 \
@@ -164,7 +154,6 @@ void PASTEMAC(ch,varname)( \
 	dim_t           n_iter, n_left; \
 	dim_t           m_cur; \
 	dim_t           n_cur; \
-	dim_t           k_nr; \
 	dim_t           k_a1011; \
 	dim_t           k_a10; \
 	dim_t           off_a10; \
@@ -238,10 +227,6 @@ void PASTEMAC(ch,varname)( \
 	if ( n_left ) ++n_iter; \
 	if ( m_left ) ++m_iter; \
 \
-	/* Compute the number of elements in B to duplicate per iteration. */ \
-	k_a1011 = bli_min( k, diagoffa + m ); \
-	k_nr    = k_a1011 * NR; \
-\
 	/* Determine some increments used to step through A, B, and C. */ \
 	rstep_a = k * PACKMR; \
 \
@@ -253,12 +238,6 @@ void PASTEMAC(ch,varname)( \
 	b1 = b_cast; \
 	c1 = c_cast; \
 \
-	/* If the micro-kernel needs elements of B duplicated, set bp to
-	   point to the duplication buffer. If no duplication is called for,
-	   bp will be set to the current column panel of B for each iteration
-	   of the outer loop below. */ \
-	if ( DUPB ) bp = bd; \
-\
 	/* Loop over the n dimension (NR columns at a time). */ \
 	for ( j = 0; j < n_iter; ++j ) \
 	{ \
@@ -266,11 +245,6 @@ void PASTEMAC(ch,varname)( \
 		c11 = c1 + (0  )*rstep_c; \
 \
 		n_cur = ( bli_is_not_edge_f( j, n_iter, n_left ) ? NR : n_left ); \
-\
-		/* If duplication is needed, copy the current iteration's NR
-		   columns of B to a local buffer with each value duplicated. */ \
-		if ( DUPB ) PASTEMAC(ch,dupl)( k_nr, b1, bp ); \
-		else        bp = b1; \
 \
 		/* Initialize our next panel of B to be the current panel of B. */ \
 		b2 = b1; \
@@ -298,16 +272,13 @@ void PASTEMAC(ch,varname)( \
 \
 				/* Compute the addresses of the panel A10 and the triangular
 				   block A11. */ \
-				a10  = a1; \
-				a11  = a1 + k_a10 * PACKMR; \
+				a10 = a1; \
+				a11 = a1 + k_a10 * PACKMR; \
 \
-				/* Now compute the corresponding addresses in Bd. */ \
-				bp01 = bp + off_a10 * NR * NDUP; \
-				bp11 = bp + off_a11 * NR * NDUP; \
-\
-				/* Index into b1 to locate the MR x NR block of b1 that will
-				   be updated by the trsm subproblem. */ \
-				b11  = b1 + off_a11 * PACKNR; \
+				/* Compute the addresses of the panel B01 and the block
+				   B11. */ \
+				b01 = b1 + off_a10 * PACKNR; \
+				b11 = b1 + off_a11 * PACKNR; \
 \
 				/* Compute the addresses of the next panels of A and B. */ \
 				a2 = a1 + k_a1011 * PACKMR; \
@@ -327,8 +298,7 @@ void PASTEMAC(ch,varname)( \
 					                          alpha_cast, \
 					                          a10, \
 					                          a11, \
-					                          bp01, \
-					                          bp11, \
+					                          b01, \
 					                          b11, \
 					                          c11, rs_c, cs_c, \
 					                          a2, b2 ); \
@@ -340,8 +310,7 @@ void PASTEMAC(ch,varname)( \
 					                          alpha_cast, \
 					                          a10, \
 					                          a11, \
-					                          bp01, \
-					                          bp11, \
+					                          b01, \
 					                          b11, \
 					                          ct, rs_ct, cs_ct, \
 					                          a2, b2 ); \
@@ -373,7 +342,7 @@ void PASTEMAC(ch,varname)( \
 					PASTEMAC(ch,gemmukr)( k, \
 					                      minus_one, \
 					                      a1, \
-					                      bp, \
+					                      b1, \
 					                      alpha_cast, \
 					                      c11, rs_c, cs_c, \
 					                      a2, b2 ); \
@@ -384,7 +353,7 @@ void PASTEMAC(ch,varname)( \
 					PASTEMAC(ch,gemmukr)( k, \
 					                      minus_one, \
 					                      a1, \
-					                      bp, \
+					                      b1, \
 					                      zero, \
 					                      ct, rs_ct, cs_ct, \
 					                      a2, b2 ); \

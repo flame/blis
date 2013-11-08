@@ -143,12 +143,11 @@ void PASTEMAC(ch,varname)( \
                            void*   c, inc_t rs_c, inc_t cs_c \
                          ) \
 { \
-	/* Temporary buffer for duplicating elements of B. */ \
-	ctype           bd[ PASTEMAC(ch,maxkc) * \
+	/* Temporary buffer for incremental packing of B. */ \
+	ctype           bp[ PASTEMAC(ch,maxkc) * \
 	                    PASTEMAC(ch,packnr) * \
 	                    PASTEMAC(ch,nifac) ] \
 	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	ctype* restrict bp; \
 \
 	/* Temporary C buffer for edge cases. */ \
 	ctype           ct[ PASTEMAC(ch,mr) * \
@@ -226,12 +225,9 @@ void PASTEMAC(ch,varname)( \
 	b1 = b_cast; \
 	c1 = c_cast; \
 \
-	/* The current packed micro-panel of B will always be stored in bd. */ \
-	bp = bd; \
-\
-	/* Since we pack micro-panels of B incrementall, one at a time, the
+	/* Since we pack micro-panels of B incrementaly, one at a time, the
 	   address of the next micro-panel of B remains constant. */ \
-	b2 = bd; \
+	b2 = bp; \
 \
 	/* Loop over the n dimension (NR columns at a time). */ \
 	for ( j = 0; j < n_iter; ++j ) \

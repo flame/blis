@@ -308,7 +308,6 @@ void PASTEMAC(ch,varname)( \
 					                          b11, \
 					                          a10, \
 					                          a11, \
-					                          a11, \
 					                          c11, cs_c, rs_c, \
 					                          b2, a2 ); \
 				} \
@@ -320,7 +319,6 @@ void PASTEMAC(ch,varname)( \
 					                          b01, \
 					                          b11, \
 					                          a10, \
-					                          a11, \
 					                          a11, \
 					                          ct, cs_ct, rs_ct, \
 					                          b2, a2 ); \
@@ -390,18 +388,6 @@ void PASTEMAC(ch,varname)( \
 		b1 += k_b0111 * PACKNR; \
 		c1 += cstep_c; \
 	} \
-\
-/*
-PASTEMAC(ch,fprintm)( stdout, "trsm_ru_ker_var2: a1 (diag)", MR, k_a1011, a1, 1, MR, "%5.2f", "" ); \
-PASTEMAC(ch,fprintm)( stdout, "trsm_ru_ker_var2: a11 (diag)", MR, MR, a11, 1, MR, "%5.2f", "" ); \
-PASTEMAC(ch,fprintm)( stdout, "trsm_ru_ker_var2: b1 (diag)", k_a1011, NR, bp_i, NR, 1, "%5.2f", "" );  \
-PASTEMAC(ch,fprintm)( stdout, "trsm_ru_ker_var2: bp11 (diag)", MR, NR, bp11, NR, 1, "%5.2f", "" );  \
-*/ \
-\
-/*
-PASTEMAC(ch,fprintm)( stdout, "trsm_ru_ker_var2: a1 (ndiag)", MR, k, a1, 1, MR, "%5.2f", "" ); \
-PASTEMAC(ch,fprintm)( stdout, "trsm_ru_ker_var2: b1 (ndiag)", k, NR, bp, NR, 1, "%5.2f", "" ); \
-*/ \
 }
 
 INSERT_GENTFUNC_BASIC2( trsm_ru_ker_var2, GEMMTRSM_L_UKERNEL, GEMM_UKERNEL )

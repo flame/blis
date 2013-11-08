@@ -43,8 +43,7 @@ void PASTEMAC(ch,varname)( \
                            ctype* restrict alpha, \
                            ctype* restrict aL, \
                            ctype* restrict a, \
-                           ctype* restrict bdT, \
-                           ctype* restrict bd, \
+                           ctype* restrict bT, \
                            ctype* restrict b, \
                            ctype* restrict c, inc_t rs_c, inc_t cs_c, \
                            ctype* restrict a_next, \
@@ -59,7 +58,7 @@ void PASTEMAC(ch,varname)( \
 	PASTEMAC(ch,gemmukr)( k, \
 	                      minus_one, \
 	                      aL, \
-	                      bdT, \
+	                      bT, \
 	                      alpha, \
 	                      b, rs_b, cs_b, \
 	                      a_next, \
@@ -67,7 +66,6 @@ void PASTEMAC(ch,varname)( \
 \
 	PASTEMAC(ch,trsmukr)( a, \
 	                      b, \
-	                      bd, \
 	                      c, rs_c, cs_c ); \
 }
 

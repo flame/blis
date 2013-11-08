@@ -39,7 +39,6 @@ void libblis_test_trsm_ukr( test_params_t* params, test_op_t* op );
 //
 void bli_trsm_ukr( obj_t*  a,
                    obj_t*  b,
-                   obj_t*  bd,
                    obj_t*  c );
 
 #undef  GENTPROT
@@ -48,7 +47,6 @@ void bli_trsm_ukr( obj_t*  a,
 void PASTEMAC(ch,varname)( \
                            void*   a, \
                            void*   b, \
-                           void*   bd, \
                            void*   c, inc_t rs_c, inc_t cs_c \
                          );
 

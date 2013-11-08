@@ -130,13 +130,6 @@ void PASTEMAC(ch,varname)( \
                            void*   c, inc_t rs_c, inc_t cs_c \
                          ) \
 { \
-	/* Temporary buffer for duplicating elements of B. */ \
-	ctype           bd[ PASTEMAC(ch,maxkc) * \
-	                    PASTEMAC(ch,packnr) * \
-	                    PASTEMAC(ch,ndup) ] \
-	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	ctype* restrict bp; \
-\
 	/* Temporary C buffer for edge cases. */ \
 	ctype           ct[ PASTEMAC(ch,mr) * \
 	                    PASTEMAC(ch,nr) ] \
@@ -149,8 +142,6 @@ void PASTEMAC(ch,varname)( \
 	const dim_t     NR         = PASTEMAC(ch,nr); \
 	const dim_t     PACKMR     = PASTEMAC(ch,packmr); \
 	const dim_t     PACKNR     = PASTEMAC(ch,packnr); \
-	const dim_t     NDUP       = PASTEMAC(ch,ndup); \
-	const bool_t    DUPB       = NDUP != 1; \
 \
 	ctype* restrict one        = PASTEMAC(ch,1); \
 	ctype* restrict zero       = PASTEMAC(ch,0); \
@@ -172,7 +163,6 @@ void PASTEMAC(ch,varname)( \
 	dim_t           n_iter, n_left; \
 	dim_t           m_cur; \
 	dim_t           n_cur; \
-	dim_t           k_nr; \
 	dim_t           k_b0111; \
 	dim_t           off_b0111; \
 	dim_t           i, j; \
@@ -254,12 +244,6 @@ void PASTEMAC(ch,varname)( \
 	b1 = b_cast; \
 	c1 = c_cast; \
 \
-	/* If the micro-kernel needs elements of B duplicated, set bp to
-	   point to the duplication buffer. If no duplication is called for,
-	   bp will be set to the current column panel of B for each iteration
-	   of the outer loop below. */ \
-	if ( DUPB ) bp = bd; \
-\
 	/* Loop over the n dimension (NR columns at a time). */ \
 	for ( j = 0; j < n_iter; ++j ) \
 	{ \
@@ -273,12 +257,6 @@ void PASTEMAC(ch,varname)( \
 		   so we can index into the corresponding location in A. */ \
 		off_b0111 = 0; \
 		k_b0111   = bli_min( k, -diagoffb_j + NR ); \
-		k_nr      = k_b0111 * NR; \
-\
-		/* If duplication is needed, copy the current iteration's NR
-		   columns of B to a local buffer with each value duplicated. */ \
-		if ( DUPB ) PASTEMAC(ch,dupl)( k_nr, b1, bp ); \
-		else        bp = b1; \
 \
 		/* Initialize our next panel of B to be the current panel of B. */ \
         b2 = b1; \
@@ -313,7 +291,7 @@ void PASTEMAC(ch,varname)( \
 					PASTEMAC(ch,ukrname)( k_b0111, \
 					                      alpha_cast, \
 					                      a1_i, \
-					                      bp, \
+					                      b1, \
 					                      beta_cast, \
 					                      c11, rs_c, cs_c, \
 					                      a2, b2 ); \
@@ -329,7 +307,7 @@ void PASTEMAC(ch,varname)( \
 					PASTEMAC(ch,ukrname)( k_b0111, \
 					                      alpha_cast, \
 					                      a1_i, \
-					                      bp, \
+					                      b1, \
 					                      beta_cast, \
 					                      ct, rs_ct, cs_ct, \
 					                      a2, b2 ); \
@@ -368,7 +346,7 @@ void PASTEMAC(ch,varname)( \
 					PASTEMAC(ch,ukrname)( k, \
 					                      alpha_cast, \
 					                      a1, \
-					                      bp, \
+					                      b1, \
 					                      one, \
 					                      c11, rs_c, cs_c, \
 					                      a2, b2 ); \
@@ -379,7 +357,7 @@ void PASTEMAC(ch,varname)( \
 					PASTEMAC(ch,ukrname)( k, \
 					                      alpha_cast, \
 					                      a1, \
-					                      bp, \
+					                      b1, \
 					                      zero, \
 					                      ct, rs_ct, cs_ct, \
 					                      a2, b2 ); \
@@ -400,7 +378,7 @@ void PASTEMAC(ch,varname)( \
 	} \
 \
 /*PASTEMAC(ch,fprintm)( stdout, "trmm_ru_ker_var2: a1", MR, k_b0111, a1, 1, MR, "%4.1f", "" );*/ \
-/*PASTEMAC(ch,fprintm)( stdout, "trmm_ru_ker_var2: b1", k_b0111, NR, bp_i, NR, 1, "%4.1f", "" );*/ \
+/*PASTEMAC(ch,fprintm)( stdout, "trmm_ru_ker_var2: b1", k_b0111, NR, b1_i, NR, 1, "%4.1f", "" );*/ \
 }
 
 INSERT_GENTFUNC_BASIC( trmm_ru_ker_var2, GEMM_UKERNEL )

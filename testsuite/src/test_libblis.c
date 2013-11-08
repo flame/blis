@@ -653,18 +653,6 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	                        BLIS_DEFAULT_NI_Z );
 */
 	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "level-3 packing duplication  s     d     c     z \n" );
-	libblis_test_fprintf_c( os, "  dupl. factors for B    %5u %5u %5u %5u\n",
-	                        BLIS_DEFAULT_NUM_DUPL_S,
-	                        BLIS_DEFAULT_NUM_DUPL_D,
-	                        BLIS_DEFAULT_NUM_DUPL_C,
-	                        BLIS_DEFAULT_NUM_DUPL_Z );
-	libblis_test_fprintf_c( os, "  elements per register  %5u %5u %5u %5u\n",
-	                        BLIS_NUM_ELEM_PER_REG_S,
-	                        BLIS_NUM_ELEM_PER_REG_D,
-	                        BLIS_NUM_ELEM_PER_REG_C,
-	                        BLIS_NUM_ELEM_PER_REG_Z );
-	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "level-2 cache blocksizes     s     d     c     z \n" );
 	libblis_test_fprintf_c( os, "  m dimension            %5u %5u %5u %5u\n",
 	                        BLIS_DEFAULT_L2_MC_S,

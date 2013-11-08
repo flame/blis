@@ -314,7 +314,6 @@ void PASTEMAC(ch,varname)( \
 					                          b11, \
 					                          a12, \
 					                          a11, \
-					                          a11, \
 					                          c11, cs_c, rs_c, \
 					                          b2, a2 ); \
 				} \
@@ -326,7 +325,6 @@ void PASTEMAC(ch,varname)( \
 					                          b21, \
 					                          b11, \
 					                          a12, \
-					                          a11, \
 					                          a11, \
 					                          ct, cs_ct, rs_ct, \
 					                          b2, a2 ); \

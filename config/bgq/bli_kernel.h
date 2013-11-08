@@ -152,34 +152,6 @@
 #define BLIS_EXTEND_KR_C               0
 #define BLIS_EXTEND_KR_Z               0
 
-// -- Number of elements per vector register --
-
-// NOTE: These constants are typically only used to determine the amount
-// of duplication needed when configuring level-3 macro-kernels that
-// copy and duplicate elements of B to a temporary duplication buffer
-// (so that element-wise vector multiplication and addition instructions
-// can be used).
-
-#define BLIS_NUM_ELEM_PER_REG_S        4
-#define BLIS_NUM_ELEM_PER_REG_D        2
-#define BLIS_NUM_ELEM_PER_REG_C        2
-#define BLIS_NUM_ELEM_PER_REG_Z        1
-
-// -- Default switch for duplication of B --
-
-// NOTE: Setting these values to 1 disables duplication. Any value
-// d > 1 results in a d-1 duplicates created within special macro-kernel
-// buffer of dimension k x NR*d.
-
-//#define BLIS_DEFAULT_NUM_DUPL_S        BLIS_NUM_ELEM_PER_REG_S
-//#define BLIS_DEFAULT_NUM_DUPL_D        BLIS_NUM_ELEM_PER_REG_D
-//#define BLIS_DEFAULT_NUM_DUPL_C        BLIS_NUM_ELEM_PER_REG_C
-//#define BLIS_DEFAULT_NUM_DUPL_Z        BLIS_NUM_ELEM_PER_REG_Z
-#define BLIS_DEFAULT_NUM_DUPL_S        1
-#define BLIS_DEFAULT_NUM_DUPL_D        1
-#define BLIS_DEFAULT_NUM_DUPL_C        1
-#define BLIS_DEFAULT_NUM_DUPL_Z        1
-
 // -- Default incremental packing blocksizes (n dimension) --
 
 // NOTE: These incremental packing blocksizes (for the n dimension) are only
@@ -264,10 +236,6 @@
 
 
 // -- LEVEL-3 KERNEL DEFINITIONS -----------------------------------------------
-
-// -- dupl --
-
-#define DUPL_KERNEL          dupl_unb_var1
 
 // -- gemm --
 

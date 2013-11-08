@@ -234,13 +234,6 @@
 #define bli_zpackkr  BLIS_PACKDIM_KR_Z
 #define bli_zpacknr  BLIS_PACKDIM_NR_Z
 
-// Duplication factors
-
-#define bli_sndup    BLIS_DEFAULT_NUM_DUPL_S
-#define bli_dndup    BLIS_DEFAULT_NUM_DUPL_D
-#define bli_cndup    BLIS_DEFAULT_NUM_DUPL_C
-#define bli_zndup    BLIS_DEFAULT_NUM_DUPL_Z
-
 // Incremental packing factors
 
 #define bli_snifac   BLIS_DEFAULT_NI_FAC

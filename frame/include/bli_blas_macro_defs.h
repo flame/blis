@@ -53,17 +53,17 @@
 	if ( incx_blas < 0 ) \
 	{ \
 		/* The semantics of negative stride in BLAS are that the vector
-		operand be traversed in reverse order. (Another way to think of
-		this is that negative strides effectively reverse the order of
-		the vector, but without any explicit data movements.) This is
-		also how BLIS interprets negative strides. The differences is
-		that with BLAS, the caller *always* passes in the 0th (i.e.,
-		top-most or left-most) element of the vector, even when the
-		stride is negative. By contrast, in BLIS, negative strides are
-		used *relative* to the vector address as it is given. Thus, in
-		BLIS, if this backwards traversal is desired, the caller *must*
-		pass in the address to the (n-1)th (i.e., the bottom-most or
-		right-most) element along with a negative stride. */ \
+		   operand be traversed in reverse order. (Another way to think
+		   of this is that negative strides effectively reverse the order
+		   of the vector, but without any explicit data movements.) This
+		   is also how BLIS interprets negative strides. The differences
+		   is that with BLAS, the caller *always* passes in the 0th (i.e.,
+		   top-most or left-most) element of the vector, even when the
+		   stride is negative. By contrast, in BLIS, negative strides are
+		   used *relative* to the vector address as it is given. Thus, in
+		   BLIS, if this backwards traversal is desired, the caller *must*
+		   pass in the address to the (n-1)th (i.e., the bottom-most or
+		   right-most) element along with a negative stride. */ \
 		x_blis    = (x_blas) + (n-1)*(-incx_blas); \
 		incx_blis = ( inc_t )(incx_blas); \
 	} \

@@ -64,8 +64,7 @@ void libblis_test_gemmtrsm_ukr_impl( mt_impl_t impl,
                                      obj_t*    alpha,
                                      obj_t*    a1x,
                                      obj_t*    a11,
-                                     obj_t*    bdx1,
-                                     obj_t*    bd11,
+                                     obj_t*    bx1,
                                      obj_t*    b11,
                                      obj_t*    c11 );
 
@@ -82,13 +81,10 @@ void libblis_test_gemmtrsm_ukr_check( side_t  side,
 void bli_gemmtrsm_ukr_make_subparts( dim_t  k,
                                      obj_t* a,
                                      obj_t* b,
-                                     obj_t* bd,
                                      obj_t* a1x,
                                      obj_t* a11,
                                      obj_t* bx1,
-                                     obj_t* b11,
-                                     obj_t* bdx1,
-                                     obj_t* bd11 );
+                                     obj_t* b11 );
 
 
 void libblis_test_gemmtrsm_ukr_deps( test_params_t* params, test_op_t* op )
@@ -166,10 +162,10 @@ void libblis_test_gemmtrsm_ukr_experiment( test_params_t* params,
 
 	obj_t        kappa;
 	obj_t        alpha;
-	obj_t        a_big, a, b, bd;
+	obj_t        a_big, a, b;
 	obj_t        b11, c11;
 	obj_t        ap, bp;
-	obj_t        a1xp, a11p, bdx1, bd11, bx1p, b11p;
+	obj_t        a1xp, a11p, bx1p, b11p;
 	obj_t        c11_save;
 
 
@@ -201,8 +197,6 @@ void libblis_test_gemmtrsm_ukr_experiment( test_params_t* params,
 	                          sc_str[0], m,   n,   &c11 );
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
 	                          sc_str[0], m,   n,   &c11_save );
-	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
-	                          sc_b,      k+m, 4*n, &bd );
 
 	// Set alpha.
 	if ( bli_obj_is_real( b ) )
@@ -264,8 +258,8 @@ void libblis_test_gemmtrsm_ukr_experiment( test_params_t* params,
 
 
 	// Create subpartitions from the a and b panels.
-	bli_gemmtrsm_ukr_make_subparts( k, &ap, &bp, &bd,
-	                                &a1xp, &a11p, &bx1p, &b11p, &bdx1, &bd11 );
+	bli_gemmtrsm_ukr_make_subparts( k, &ap, &bp,
+	                                &a1xp, &a11p, &bx1p, &b11p );
 
 
 	// Repeat the experiment n_repeats times and record results. 
@@ -279,7 +273,7 @@ void libblis_test_gemmtrsm_ukr_experiment( test_params_t* params,
 		time = bli_clock();
 
 		libblis_test_gemmtrsm_ukr_impl( impl, side, &alpha,
-		                                &a1xp, &a11p, &bdx1, &bd11, &b11p, &c11 );
+		                                &a1xp, &a11p, &bx1p, &b11p, &c11 );
 
 		time_min = bli_clock_min_diff( time_min, time );
 	}
@@ -304,7 +298,6 @@ void libblis_test_gemmtrsm_ukr_experiment( test_params_t* params,
 	bli_obj_free( &b );
 	bli_obj_free( &c11 );
 	bli_obj_free( &c11_save );
-	bli_obj_free( &bd );
 }
 
 
@@ -314,15 +307,14 @@ void libblis_test_gemmtrsm_ukr_impl( mt_impl_t impl,
                                      obj_t*    alpha,
                                      obj_t*    a1x,
                                      obj_t*    a11,
-                                     obj_t*    bdx1,
-                                     obj_t*    bd11,
+                                     obj_t*    bx1,
                                      obj_t*    b11,
                                      obj_t*    c11 )
 {
 	switch ( impl )
 	{
 		case BLIS_TEST_SEQ_UKERNEL:
-		bli_gemmtrsm_ukr( alpha, a1x, a11, bdx1, bd11, b11, c11 );
+		bli_gemmtrsm_ukr( alpha, a1x, a11, bx1, b11, c11 );
 		break;
 
 		default:
@@ -431,20 +423,16 @@ void libblis_test_gemmtrsm_ukr_check( side_t  side,
 void bli_gemmtrsm_ukr_make_subparts( dim_t  k,
                                      obj_t* a,
                                      obj_t* b,
-                                     obj_t* bd,
                                      obj_t* a1x,
                                      obj_t* a11,
                                      obj_t* bx1,
-                                     obj_t* b11,
-                                     obj_t* bdx1,
-                                     obj_t* bd11 )
+                                     obj_t* b11 )
 {
 	dim_t mr = bli_obj_length( *a );
 	dim_t nr = bli_obj_width( *b );
 
 	dim_t off_a1x, off_a11;
 	dim_t off_bx1, off_b11;
-	dim_t off_bdx1, off_bd11;
 
 	if ( bli_obj_is_lower( *a ) )
 	{
@@ -452,8 +440,6 @@ void bli_gemmtrsm_ukr_make_subparts( dim_t  k,
 		off_a11 = k;
 		off_bx1 = 0;
 		off_b11 = k;
-		off_bdx1 = 0;
-		off_bd11 = k;
 	}
 	else
 	{
@@ -461,8 +447,6 @@ void bli_gemmtrsm_ukr_make_subparts( dim_t  k,
 		off_a11 = 0;
 		off_bx1 = mr;
 		off_b11 = 0;
-		off_bdx1 = mr;
-		off_bd11 = 0;
 	}
 
 	bli_obj_init_subpart_from( *a, *a1x );
@@ -488,28 +472,6 @@ void bli_gemmtrsm_ukr_make_subparts( dim_t  k,
 	// Set the diagonal offset of a11 to 0 (which overwrites the diagonal
 	// offset value it inherited from a).
 	bli_obj_set_diag_offset( 0, *a11 );
-
-	// If duplication is disabled, alias bdxx objects to bxx.
-	if ( TRUE )
-	{
-		bli_obj_alias_to( *bx1, *bdx1 );
-		bli_obj_alias_to( *b11, *bd11 );
-	}
-	else // if duplication is enabled
-	{
-		bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
-
-		bli_obj_init_subpart_from( *b, *bdx1 );
-		bli_obj_set_dims( k, nr, *bdx1 );
-		bli_obj_inc_offs( off_bdx1, 0, *bdx1 );
-
-		bli_obj_init_subpart_from( *b, *bd11 );
-		bli_obj_set_dims( mr, nr, *bd11 );
-		bli_obj_inc_offs( off_bd11, 0, *bd11 );
-
-		// Now update the buffer fields of bdx1, bd11, and then call
-		// bli_dupl().
-	}
 }
 
 
@@ -527,8 +489,7 @@ typedef void (*FUNCPTR_T)(
                            void*   alpha,
                            void*   a1x,
                            void*   a11,
-                           void*   bdx1,
-                           void*   bd11,
+                           void*   bx1,
                            void*   b11,
                            void*   c11, inc_t rs_c, inc_t cs_c,
                            void*   a_next,
@@ -542,8 +503,7 @@ static FUNCPTR_T GENARRAY(ftypes_u,gemmtrsm_u_ukr);
 void bli_gemmtrsm_ukr( obj_t*  alpha,
                        obj_t*  a1x,
                        obj_t*  a11,
-                       obj_t*  bdx1,
-                       obj_t*  bd11,
+                       obj_t*  bx1,
                        obj_t*  b11,
                        obj_t*  c11 )
 {
@@ -555,9 +515,7 @@ void bli_gemmtrsm_ukr( obj_t*  alpha,
 
     void*     buf_a11   = bli_obj_buffer_at_off( *a11 );
 
-    void*     buf_bdx1  = bli_obj_buffer_at_off( *bdx1 );
-
-    void*     buf_bd11  = bli_obj_buffer_at_off( *bd11 );
+    void*     buf_bx1  = bli_obj_buffer_at_off( *bx1 );
 
     void*     buf_b11   = bli_obj_buffer_at_off( *b11 );
 
@@ -579,12 +537,11 @@ void bli_gemmtrsm_ukr( obj_t*  alpha,
 	   buf_alpha,
 	   buf_a1x,
 	   buf_a11,
-	   buf_bdx1,
-	   buf_bd11,
+	   buf_bx1,
        buf_b11,
        buf_c11, rs_c, cs_c,
 	   buf_a1x,
-	   buf_bdx1 );
+	   buf_bx1 );
 }
 
 
@@ -596,8 +553,7 @@ void PASTEMAC(ch,varname)( \
                            void*   alpha, \
                            void*   a1x, \
                            void*   a11, \
-                           void*   bdx1, \
-                           void*   bd11, \
+                           void*   bx1, \
                            void*   b11, \
                            void*   c11, inc_t rs_c, inc_t cs_c, \
                            void*   a_next, \
@@ -608,8 +564,7 @@ void PASTEMAC(ch,varname)( \
                           alpha, \
                           a1x, \
                           a11, \
-                          bdx1, \
-                          bd11, \
+                          bx1, \
                           b11, \
                           c11, rs_c, cs_c, \
 	                      a_next, \

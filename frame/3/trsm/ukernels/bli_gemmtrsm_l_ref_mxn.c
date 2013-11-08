@@ -43,8 +43,7 @@ void PASTEMAC(ch,varname)( \
                            ctype* restrict alpha, \
                            ctype* restrict a10, \
                            ctype* restrict a11, \
-                           ctype* restrict bd01, \
-                           ctype* restrict bd11, \
+                           ctype* restrict b01, \
                            ctype* restrict b11, \
                            ctype* restrict c11, inc_t rs_c, inc_t cs_c, \
                            ctype* restrict a_next, \
@@ -56,22 +55,20 @@ void PASTEMAC(ch,varname)( \
 \
 	ctype* restrict minus_one = PASTEMAC(ch,m1); \
 \
-	/* b11 = alpha * b11 - a10 * bd01; */ \
+	/* b11 = alpha * b11 - a10 * b01; */ \
 	PASTEMAC(ch,gemmukr)( k, \
 	                      minus_one, \
 	                      a10, \
-	                      bd01, \
+	                      b01, \
 	                      alpha, \
 	                      b11, rs_b, cs_b, \
 	                      a_next, \
 	                      b_next ); \
 \
-	/* b11  = inv(a11) * b11;
-	   bd11 = b11; (skipped if duplication is disabled)
-	   c11  = b11; */ \
+	/* b11 = inv(a11) * b11;
+	   c11 = b11; */ \
 	PASTEMAC(ch,trsmukr)( a11, \
 	                      b11, \
-	                      bd11, \
 	                      c11, rs_c, cs_c ); \
 }
 

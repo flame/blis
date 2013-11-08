@@ -39,8 +39,7 @@ void bli_sgemmtrsm_l_opt_d4x4(
                                float* restrict    alpha,
                                float* restrict    a10,
                                float* restrict    a11,
-                               float* restrict    bd01,
-                               float* restrict    bd11,
+                               float* restrict    b01,
                                float* restrict    b11,
                                float* restrict    c11, inc_t rs_c, inc_t cs_c,
                                float* restrict    a_next,
@@ -55,8 +54,7 @@ void bli_dgemmtrsm_l_opt_d4x4(
                                double* restrict   alpha,
                                double* restrict   a10,
                                double* restrict   a11,
-                               double* restrict   bd01,
-                               double* restrict   bd11,
+                               double* restrict   b01,
                                double* restrict   b11,
                                double* restrict   c11, inc_t rs_c, inc_t cs_c,
                                double* restrict   a_next,
@@ -73,8 +71,8 @@ void bli_dgemmtrsm_l_opt_d4x4(
 	(
 		"                                \n\t"
 		"movq          %2, %%rax         \n\t" // load address of a10.
-		"movq          %4, %%rbx         \n\t" // load address of bd01.
-		//"movq         %11, %%r9          \n\t" // load address of b_next.
+		"movq          %4, %%rbx         \n\t" // load address of b01.
+		//"movq         %10, %%r9          \n\t" // load address of b_next.
 		"                                \n\t"
 		"subq    $-8 * 16, %%rax         \n\t" // increment pointers to allow byte
 		"subq    $-8 * 16, %%rbx         \n\t" // offsets in the unrolled iterations.
@@ -83,7 +81,7 @@ void bli_dgemmtrsm_l_opt_d4x4(
 		"movaps  -7 * 16(%%rax), %%xmm1  \n\t" // of a and b.
 		"movaps  -8 * 16(%%rbx), %%xmm2  \n\t"
 		"                                \n\t"
-		//"movq          %7, %%rcx         \n\t" // load address of c11
+		//"movq          %6, %%rcx         \n\t" // load address of c11
 		//"movq          %9, %%rdi         \n\t" // load cs_c
 		//"leaq        (,%%rdi,8), %%rdi   \n\t" // cs_c *= sizeof(double)
 		//"leaq   (%%rcx,%%rdi,2), %%rdx   \n\t" // load address of c + 2*cs_c;
@@ -320,7 +318,7 @@ void bli_dgemmtrsm_l_opt_d4x4(
 		"                                \n\t"
 		"                                \n\t"
 		"                                \n\t"
-		"movq      %6, %%rbx             \n\t" // load address of b11.
+		"movq      %5, %%rbx             \n\t" // load address of b11.
 		"                                \n\t"
 		"                                \n\t" // xmm8:   xmm9:   xmm10:  xmm11:
 		"                                \n\t" // ( ab01  ( ab00  ( ab03  ( ab02
@@ -354,7 +352,7 @@ void bli_dgemmtrsm_l_opt_d4x4(
 		"                                \n\t" // xmm2: ( ab20 ab21 ) xmm6: ( ab22 ab23 )
 		"                                \n\t" // xmm3: ( ab30 ab31 ) xmm7: ( ab32 ab33 )
 		"                                \n\t"
-		"movq    %10, %%rax              \n\t" // load address of alpha
+		"movq    %9, %%rax               \n\t" // load address of alpha
 		"movddup (%%rax), %%xmm15        \n\t" // load alpha and duplicate
 		"                                \n\t"
 		"movaps  0 * 16(%%rbx), %%xmm8   \n\t" 
@@ -394,10 +392,10 @@ void bli_dgemmtrsm_l_opt_d4x4(
 		"                                \n\t"
 		"                                \n\t"
 		"movq     %3, %%rax                \n\t" // load address of a11
-		"movq     %7, %%rcx                \n\t" // load address of c11
+		"movq     %6, %%rcx                \n\t" // load address of c11
 		"                                  \n\t"
-		"movq     %8, %%rsi                \n\t" // load rs_c
-		"movq     %9, %%rdi                \n\t" // load cs_c
+		"movq     %7, %%rsi                \n\t" // load rs_c
+		"movq     %8, %%rdi                \n\t" // load cs_c
 		"salq     $3, %%rsi                \n\t" // rs_c *= sizeof( double )
 		"salq     $3, %%rdi                \n\t" // cs_c *= sizeof( double )
 		"                                  \n\t"
@@ -514,18 +512,17 @@ void bli_dgemmtrsm_l_opt_d4x4(
 
 		: // output operands (none)
 		: // input operands
-		  "m" (k_iter),
-		  "m" (k_left),
-		  "m" (a10),
-		  "m" (a11),
-		  "m" (bd01),
-		  "m" (bd11),
-		  "m" (b11),
-		  "m" (c11),
-		  "m" (rs_c),
-		  "m" (cs_c),
-		  "m" (alpha),
-		  "m" (b_next)
+		  "m" (k_iter), // 0
+		  "m" (k_left), // 1
+		  "m" (a10),    // 2
+		  "m" (a11),    // 3
+		  "m" (b01),    // 4
+		  "m" (b11),    // 5
+		  "m" (c11),    // 6
+		  "m" (rs_c),   // 7
+		  "m" (cs_c),   // 8
+		  "m" (alpha),  // 9
+		  "m" (b_next)  // 10
 		: // register clobber list
 		  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", //"r8", "r9", "r10",
 		  "xmm0", "xmm1", "xmm2", "xmm3",
@@ -542,8 +539,7 @@ void bli_cgemmtrsm_l_opt_d4x4(
                                scomplex* restrict alpha,
                                scomplex* restrict a10,
                                scomplex* restrict a11,
-                               scomplex* restrict bd01,
-                               scomplex* restrict bd11,
+                               scomplex* restrict b01,
                                scomplex* restrict b11,
                                scomplex* restrict c11, inc_t rs_c, inc_t cs_c,
                                scomplex* restrict a_next,
@@ -558,8 +554,7 @@ void bli_zgemmtrsm_l_opt_d4x4(
                                dcomplex* restrict alpha,
                                dcomplex* restrict a10,
                                dcomplex* restrict a11,
-                               dcomplex* restrict bd01,
-                               dcomplex* restrict bd11,
+                               dcomplex* restrict b01,
                                dcomplex* restrict b11,
                                dcomplex* restrict c11, inc_t rs_c, inc_t cs_c,
                                dcomplex* restrict a_next,

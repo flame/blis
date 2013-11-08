@@ -140,12 +140,6 @@ void bli_trsm( side_t  side,
 	                             alpha,
 	                             &alpha_local );
 
-	//
-	// NOTE: we need to disable the use of the right-hand side control tree
-	// if duplication is enabled since the trsm_r macrokernels do not support
-	// duplication.
-	//
-
 	// Choose the control tree.
 	if ( bli_is_left( side ) ) cntl = trsm_l_cntl;
 	else                       cntl = trsm_r_cntl;

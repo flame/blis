@@ -189,11 +189,6 @@ extern "C" {
 #include "bli_trsv.h"
 
 
-// -- Helper operands for ukernels --
-
-#include "bli_dupl.h"
-
-
 // -- Level-3 operations --
 
 #include "bli_gemm.h"

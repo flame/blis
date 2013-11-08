@@ -153,13 +153,6 @@ void PASTEMAC(ch,varname)( \
 	guint_t         t_id      = omp_get_thread_num(); \
 	guint_t         n_threads = omp_get_num_threads(); \
 \
-	/* Temporary buffer for duplicating elements of B. */ \
-	ctype           bd[ PASTEMAC(ch,maxkc) * \
-	                    PASTEMAC(ch,nr) * \
-	                    PASTEMAC(ch,ndup) ] \
-	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	ctype* restrict bp; \
-\
 	/* Temporary C buffer for edge cases. */ \
 	ctype           ct[ PASTEMAC(ch,mr) * \
 	                    PASTEMAC(ch,nr) ] \
@@ -170,8 +163,6 @@ void PASTEMAC(ch,varname)( \
 	/* Alias some constants to shorter names. */ \
 	const dim_t     MR         = PASTEMAC(ch,mr); \
 	const dim_t     NR         = PASTEMAC(ch,nr); \
-	const dim_t     NDUP       = PASTEMAC(ch,ndup); \
-	const bool_t    DUPB       = NDUP != 1; \
 \
 	ctype* restrict zero       = PASTEMAC(ch,0); \
 	ctype* restrict a_cast     = a; \
@@ -186,7 +177,6 @@ void PASTEMAC(ch,varname)( \
 	ctype* restrict a2; \
 	ctype* restrict b2; \
 \
-	dim_t           k_nr; \
 	dim_t           m_iter, m_left; \
 	dim_t           n_iter, n_left; \
 	dim_t           i, j; \
@@ -218,9 +208,6 @@ void PASTEMAC(ch,varname)( \
 	m_iter = m / MR; \
 	m_left = m % MR; \
 \
-	/* Compute the number of elements in B to duplicate per iteration. */ \
-	k_nr = k * NR; \
-\
 	/* Determine some increments used to step through A, B, and C. */ \
 	rstep_a = ps_a; \
 \
@@ -232,12 +219,6 @@ void PASTEMAC(ch,varname)( \
 	b1 = b_cast; \
 	c1 = c_cast; \
 \
-	/* If the micro-kernel needs elements of B duplicated, set bp to
-	   point to the duplication buffer. If no duplication is called for,
-	   bp will be set to the current column panel of B for each iteration
-	   of the outer loop below. */ \
-	if ( DUPB ) bp = bd; \
-\
 	/* Loop over the n dimension (NR columns at a time). */ \
 	for ( j = t_id; j < n_iter; j += n_threads ) \
 	{ \
@@ -246,11 +227,6 @@ void PASTEMAC(ch,varname)( \
 \
 		a1  = a_cast; \
 		c11 = c1; \
-\
-		/* If duplication is needed, copy the current iteration's NR
-		   columns of B to a local buffer with each value duplicated. */ \
-		if ( DUPB ) PASTEMAC(ch,dupl)( k_nr, b1, bp ); \
-		else        bp = b1; \
 \
 		/* Initialize our next panel of B to be the current panel of B. */ \
 		b2 = b1; \
@@ -272,7 +248,7 @@ void PASTEMAC(ch,varname)( \
 			PASTEMAC(ch,ukrname)( k, \
 			                      alpha_cast, \
 			                      a1, \
-			                      bp, \
+			                      b1, \
 			                      beta_cast, \
 			                      c11, rs_c, cs_c, \
 			                      a2, b2 ); \
@@ -295,7 +271,7 @@ void PASTEMAC(ch,varname)( \
 			PASTEMAC(ch,ukrname)( k, \
 			                      alpha_cast, \
 			                      a1, \
-			                      bp, \
+			                      b1, \
 			                      zero, \
 			                      ct, rs_ct, cs_ct, \
 			                      a2, b2 ); \
@@ -319,11 +295,6 @@ void PASTEMAC(ch,varname)( \
 		a1  = a_cast; \
 		c11 = c1; \
 \
-		/* If duplication is needed, copy the n_left (+ padding) columns
-		   of B to a local buffer with each value duplicated. */ \
-		if ( DUPB ) PASTEMAC(ch,dupl)( k_nr, b1, bp ); \
-		else        bp = b1; \
-\
 		/* Initialize our next panel of B to be the current panel of B. */ \
 		b2 = b1; \
 \
@@ -342,7 +313,7 @@ void PASTEMAC(ch,varname)( \
 			PASTEMAC(ch,ukrname)( k, \
 			                      alpha_cast, \
 			                      a1, \
-			                      bp, \
+			                      b1, \
 			                      zero, \
 			                      ct, rs_ct, cs_ct, \
 			                      a2, b2 ); \
@@ -368,7 +339,7 @@ void PASTEMAC(ch,varname)( \
 			PASTEMAC(ch,ukrname)( k, \
 			                      alpha_cast, \
 			                      a1, \
-			                      bp, \
+			                      b1, \
 			                      zero, \
 			                      ct, rs_ct, cs_ct, \
 			                      a2, b2 ); \
@@ -384,7 +355,7 @@ void PASTEMAC(ch,varname)( \
 	} /* end omp parallel */ \
 \
 /*PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: b1", k, NR, b1, NR, 1, "%4.1f", "" ); \
-PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: bd", k, NR*NDUP, bp, NR*NDUP, 1, "%4.1f", "" );*/ \
+PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: b1", k, NR, bp, NR, 1, "%4.1f", "" );*/ \
 /*PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: a1", MR, k, a1, 1, MR, "%4.1f", "" );*/ \
 }
 

@@ -41,8 +41,7 @@ void PASTEMAC(ch,varname)( \
                            ctype* restrict alpha, \
                            ctype* restrict aL, \
                            ctype* restrict a, \
-                           ctype* restrict bdT, \
-                           ctype* restrict bd, \
+                           ctype* restrict bT, \
                            ctype* restrict b, \
                            ctype* restrict c, inc_t rs_c, inc_t cs_c, \
                            ctype* restrict a_next, \

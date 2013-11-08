@@ -41,8 +41,7 @@ void bli_sgemmtrsm_l_opt_mxn(
                               float*    restrict alpha,
                               float*    restrict a10,
                               float*    restrict a11,
-                              float*    restrict bd01,
-                              float*    restrict bd11,
+                              float*    restrict b01,
                               float*    restrict b11,
                               float*    restrict c11, inc_t rs_c, inc_t cs_c,
                               float*    restrict a_next,
@@ -58,7 +57,7 @@ void bli_sgemmtrsm_l_opt_mxn(
 	bli_sgemm_opt_mxn( k,
 	                   minus_one,
 	                   a10,
-	                   bd01,
+	                   b01,
 	                   alpha,
 	                   b11, rs_b, cs_b,
 	                   a_next,
@@ -66,7 +65,6 @@ void bli_sgemmtrsm_l_opt_mxn(
 
 	bli_strsm_l_opt_mxn( a11,
 	                     b11,
-	                     bd11,
 	                     c11, rs_c, cs_c );
 }
 
@@ -77,8 +75,7 @@ void bli_dgemmtrsm_l_opt_mxn(
                               double*   restrict alpha,
                               double*   restrict a10,
                               double*   restrict a11,
-                              double*   restrict bd01,
-                              double*   restrict bd11,
+                              double*   restrict b01,
                               double*   restrict b11,
                               double*   restrict c11, inc_t rs_c, inc_t cs_c,
                               double*   restrict a_next,
@@ -171,19 +168,6 @@ void bli_dgemmtrsm_l_opt_mxn(
                                                                            
                 k             MR                                           
 
-  Thus, with duplication enabled, the operation takes the form of:
-
-    b11  = alpha * b11 - a10 * bd01;
-    b11  = inv(a11) * b11;
-    bd11 = b11;  (skipped if duplication is disabled)
-    c11  = b11;
-                                                                        
-  And if duplication is disabled, the operation reduces to:
-
-    b11 = alpha * b11 - a10 * b01;  (Note: Here, b01 == bd01.)
-    b11 = inv(a11) * b11;
-    c11 = b11;
-
   A note on optimization:
   - This implementation simply calls the gemm micro-kernel and then the
     trsm micro-kernel. Let's assume that the gemm micro-kernel has already
@@ -208,24 +192,20 @@ void bli_dgemmtrsm_l_opt_mxn(
 
 	double*   restrict minus_one = bli_dm1;
 
-	/* Reminder: if duplication is disabled, then bd01 == b01, bd11 == b11. */
-
-	/* b11 = alpha * b11 - a10 * bd01; */
+	/* b11 = alpha * b11 - a10 * b01; */
 	bli_dgemm_opt_mxn( k,
 	                   minus_one,
 	                   a10,
-	                   bd01,
+	                   b01,
 	                   alpha,
 	                   b11, rs_b, cs_b,
 	                   a_next,
 	                   b_next );
 
-	/* b11  = inv(a11) * b11;
-	   bd11 = b11; (skipped if duplication is disabled)
-	   c11  = b11; */
+	/* b11 = inv(a11) * b11;
+	   c11 = b11; */
 	bli_dtrsm_l_opt_mxn( a11,
 	                     b11,
-	                     bd11,
 	                     c11, rs_c, cs_c );
 }
 
@@ -236,8 +216,7 @@ void bli_cgemmtrsm_l_opt_mxn(
                               scomplex* restrict alpha,
                               scomplex* restrict a10,
                               scomplex* restrict a11,
-                              scomplex* restrict bd01,
-                              scomplex* restrict bd11,
+                              scomplex* restrict b01,
                               scomplex* restrict b11,
                               scomplex* restrict c11, inc_t rs_c, inc_t cs_c,
                               scomplex* restrict a_next,
@@ -253,7 +232,7 @@ void bli_cgemmtrsm_l_opt_mxn(
 	bli_cgemm_opt_mxn( k,
 	                   minus_one,
 	                   a10,
-	                   bd01,
+	                   b01,
 	                   alpha,
 	                   b11, rs_b, cs_b,
 	                   a_next,
@@ -261,7 +240,6 @@ void bli_cgemmtrsm_l_opt_mxn(
 
 	bli_ctrsm_l_opt_mxn( a11,
 	                     b11,
-	                     bd11,
 	                     c11, rs_c, cs_c );
 }
 
@@ -272,8 +250,7 @@ void bli_zgemmtrsm_l_opt_mxn(
                               dcomplex* restrict alpha,
                               dcomplex* restrict a10,
                               dcomplex* restrict a11,
-                              dcomplex* restrict bd01,
-                              dcomplex* restrict bd11,
+                              dcomplex* restrict b11,
                               dcomplex* restrict b11,
                               dcomplex* restrict c11, inc_t rs_c, inc_t cs_c,
                               dcomplex* restrict a_next,
@@ -289,7 +266,7 @@ void bli_zgemmtrsm_l_opt_mxn(
 	bli_zgemm_opt_mxn( k,
 	                   minus_one,
 	                   a10,
-	                   bd01,
+	                   b01,
 	                   alpha,
 	                   b11, rs_b, cs_b,
 	                   a_next,
@@ -297,7 +274,6 @@ void bli_zgemmtrsm_l_opt_mxn(
 
 	bli_ztrsm_l_opt_mxn( a11,
 	                     b11,
-	                     bd11,
 	                     c11, rs_c, cs_c );
 }
 

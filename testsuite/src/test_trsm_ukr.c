@@ -63,7 +63,6 @@ void libblis_test_trsm_ukr_impl( mt_impl_t impl,
                                  side_t    side,
                                  obj_t*    a,
                                  obj_t*    b,
-                                 obj_t*    bd,
                                  obj_t*    c );
 
 void libblis_test_trsm_ukr_check( side_t  side,
@@ -148,7 +147,7 @@ void libblis_test_trsm_ukr_experiment( test_params_t* params,
 	uplo_t       uploa;
 
 	obj_t        kappa;
-	obj_t        a, b, bd, c;
+	obj_t        a, b, c;
 	obj_t        ap, bp;
 	obj_t        c_save;
 
@@ -177,8 +176,6 @@ void libblis_test_trsm_ukr_experiment( test_params_t* params,
 	                          sc_str[0], m, n, &c );
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
 	                          sc_str[0], m, n, &c_save );
-	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
-	                          sc_b,      m, 4*n, &bd );
 
 	// Set the structure, uplo, and diagonal offset properties of A.
 	bli_obj_set_struc( BLIS_TRIANGULAR, a );
@@ -229,14 +226,11 @@ void libblis_test_trsm_ukr_experiment( test_params_t* params,
 		// Re-pack the contents of b to bp.
 		bli_packm_blk_var2( &BLIS_ONE, &b, &bp );
 
-		// Re-duplicate the contents of bp to bd.
-		bli_dupl( &bp, &bd );
-
 		bli_copym( &c_save, &c );
 
 		time = bli_clock();
 
-		libblis_test_trsm_ukr_impl( impl, side, &ap, &bp, &bd, &c );
+		libblis_test_trsm_ukr_impl( impl, side, &ap, &bp, &c );
 
 		time_min = bli_clock_min_diff( time_min, time );
 	}
@@ -268,13 +262,12 @@ void libblis_test_trsm_ukr_impl( mt_impl_t impl,
                                  side_t    side,
                                  obj_t*    a,
                                  obj_t*    b,
-                                 obj_t*    bd,
                                  obj_t*    c )
 {
 	switch ( impl )
 	{
 		case BLIS_TEST_SEQ_UKERNEL:
-		bli_trsm_ukr( a, b, bd, c );
+		bli_trsm_ukr( a, b, c );
 		break;
 
 		default:
@@ -386,7 +379,6 @@ void libblis_test_trsm_ukr_check( side_t  side,
 typedef void (*FUNCPTR_T)(
                            void*   a,
                            void*   b,
-                           void*   bd,
                            void*   c, inc_t rs_c, inc_t cs_c
                          );
 
@@ -396,7 +388,6 @@ static FUNCPTR_T GENARRAY(ftypes_u,trsm_u_ukr);
 
 void bli_trsm_ukr( obj_t*  a,
                    obj_t*  b,
-                   obj_t*  bd,
                    obj_t*  c )
 {
     num_t     dt        = bli_obj_datatype( *c );
@@ -404,8 +395,6 @@ void bli_trsm_ukr( obj_t*  a,
     void*     buf_a     = bli_obj_buffer_at_off( *a );
 
     void*     buf_b     = bli_obj_buffer_at_off( *b );
-
-    void*     buf_bd    = bli_obj_buffer_at_off( *bd );
 
     void*     buf_c     = bli_obj_buffer_at_off( *c );
     inc_t     rs_c      = bli_obj_row_stride( *c );
@@ -421,7 +410,6 @@ void bli_trsm_ukr( obj_t*  a,
     // Invoke the function.
     f( buf_a,
        buf_b,
-       buf_bd,
        buf_c, rs_c, cs_c );
 }
 
@@ -432,13 +420,11 @@ void bli_trsm_ukr( obj_t*  a,
 void PASTEMAC(ch,varname)( \
                            void*   a, \
                            void*   b, \
-                           void*   bd, \
                            void*   c, inc_t rs_c, inc_t cs_c \
                          ) \
 { \
     PASTEMAC(ch,ukrname)( a, \
                           b, \
-                          bd, \
                           c, rs_c, cs_c ); \
 }
 
