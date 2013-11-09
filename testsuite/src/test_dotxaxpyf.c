@@ -260,7 +260,7 @@ void libblis_test_dotxaxpyf_impl( mt_impl_t impl,
 	switch ( impl )
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
-		bli_dotxaxpyf( alpha, at, a, w, x, beta, y, z );
+		bli_dotxaxpyf_ker( alpha, at, a, w, x, beta, y, z );
 		break;
 
 		default:
@@ -371,4 +371,129 @@ void libblis_test_dotxaxpyf_check( obj_t*  alpha,
 	bli_obj_free( &v );
 	bli_obj_free( &q );
 }
+
+
+
+
+//
+// Define object-wrapper to DOTXAXPYF_KERNEL kernels.
+//
+#define FUNCPTR_T dotxaxpyf_ker_fp
+
+typedef void (*FUNCPTR_T)(
+                           conj_t  conjat,
+                           conj_t  conja,
+                           conj_t  conjw,
+                           conj_t  conjx,
+                           dim_t   m,
+                           dim_t   b_n,
+                           void*   alpha,
+                           void*   a, inc_t inca, inc_t lda,
+                           void*   w, inc_t incw,
+                           void*   x, inc_t incx,
+                           void*   beta,
+                           void*   y, inc_t incy,
+                           void*   z, inc_t incz
+                         );
+
+static FUNCPTR_T GENARRAY(ftypes,dotxaxpyf_ker);
+
+void bli_dotxaxpyf_ker( obj_t*  alpha,
+                        obj_t*  at,
+                        obj_t*  a,
+                        obj_t*  w,
+                        obj_t*  x,
+                        obj_t*  beta,
+                        obj_t*  y,
+                        obj_t*  z )
+{
+	num_t     dt        = bli_obj_datatype( *z );
+
+	conj_t    conjat    = bli_obj_conj_status( *at );
+	conj_t    conja     = bli_obj_conj_status( *a );
+	conj_t    conjw     = bli_obj_conj_status( *w );
+	conj_t    conjx     = bli_obj_conj_status( *x );
+
+	dim_t     m         = bli_obj_vector_dim( *z );
+	dim_t     b_n       = bli_obj_vector_dim( *y );
+
+	void*     buf_a     = bli_obj_buffer_at_off( *a );
+	inc_t     rs_a      = bli_obj_row_stride( *a );
+	inc_t     cs_a      = bli_obj_col_stride( *a );
+
+	inc_t     inc_w     = bli_obj_vector_inc( *w );
+	void*     buf_w     = bli_obj_buffer_at_off( *w );
+
+	inc_t     inc_x     = bli_obj_vector_inc( *x );
+	void*     buf_x     = bli_obj_buffer_at_off( *x );
+
+	inc_t     inc_y     = bli_obj_vector_inc( *y );
+	void*     buf_y     = bli_obj_buffer_at_off( *y );
+
+	inc_t     inc_z     = bli_obj_vector_inc( *z );
+	void*     buf_z     = bli_obj_buffer_at_off( *z );
+
+	void*     buf_alpha = bli_obj_scalar_buffer( dt, *alpha );;
+
+	void*     buf_beta  = bli_obj_scalar_buffer( dt, *beta );;
+
+	FUNCPTR_T f;
+
+	// Index into the type combination array to extract the correct
+	// function pointer.
+	f = ftypes[dt];
+
+	// Invoke the function.
+	f( conjat,
+	   conja,
+	   conjw,
+	   conjx,
+	   m,
+	   b_n,
+	   buf_alpha,
+	   buf_a, rs_a, cs_a,
+	   buf_w, inc_w,
+	   buf_x, inc_x,
+	   buf_beta,
+	   buf_y, inc_y,
+	   buf_z, inc_z );
+}
+
+
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, varname, kername ) \
+\
+void PASTEMAC(ch,varname)( \
+                           conj_t  conjat, \
+                           conj_t  conja, \
+                           conj_t  conjw, \
+                           conj_t  conjx, \
+                           dim_t   m, \
+                           dim_t   b_n, \
+                           void*   alpha, \
+                           void*   a, inc_t inca, inc_t lda, \
+                           void*   w, inc_t incw, \
+                           void*   x, inc_t incx, \
+                           void*   beta, \
+                           void*   y, inc_t incy, \
+                           void*   z, inc_t incz \
+                         ) \
+{ \
+	PASTEMAC3(ch,ch,ch,kername)( conjat, \
+	                             conja, \
+	                             conjw, \
+	                             conjx, \
+	                             m, \
+	                             b_n, \
+	                             alpha, \
+	                             a, inca, lda, \
+	                             w, incw, \
+	                             x, incx, \
+	                             beta, \
+	                             y, incy, \
+	                             z, incz ); \
+}
+
+INSERT_GENTFUNC_BASIC( dotxaxpyf_ker, DOTXAXPYF_KERNEL )
+
 

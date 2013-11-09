@@ -34,7 +34,7 @@
 
 
 //
-// Prototype dotxf kernel interfaces.
+// Prototype kernel interfaces.
 //
 #undef  GENTPROT3U12
 #define GENTPROT3U12( ctype_a, ctype_x, ctype_y, ctype_ax, cha, chx, chy, chax, varname ) \

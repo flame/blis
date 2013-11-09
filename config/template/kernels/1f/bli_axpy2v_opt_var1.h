@@ -32,6 +32,10 @@
 
 */
 
+
+//
+// Prototype kernel interfaces.
+//
 #undef  GENTPROT3U12
 #define GENTPROT3U12( ctype_x, ctype_y, ctype_z, ctype_xy, chx, chy, chz, chxy, varname ) \
 \

@@ -71,7 +71,7 @@ void bli_dtrsm_l_opt_mxn(
     C11 := inv(A11) * B11
 
   where A11 is MR x MR and lower triangular, B11 is MR x NR, and C11 is
-  MR x NR. 
+  MR x NR.
 
   Parameters:
 
@@ -80,7 +80,7 @@ void bli_dtrsm_l_opt_mxn(
             stored by columns with leading dimension PACKMR, where
             typically PACKMR = MR. Note that A11 contains elements in both
             triangles, though elements in the unstored triangle are not
-            guaranteed to be zero and thus should not be referenced. 
+            guaranteed to be zero and thus should not be referenced.
   - b11:    The address of B11, which is an MR x NR submatrix of the
             packed micro-panel of B. B11 is stored by rows with leading
             dimension PACKNR, where typically PACKNR = NR.
@@ -88,7 +88,7 @@ void bli_dtrsm_l_opt_mxn(
             stored according to rs_c and cs_c. C11 is the submatrix within
             C that corresponds to the elements which were packed into B11.
             Thus, C is the original input matrix B to the overall trsm
-            operation. 
+            operation.
   - rs_c:   The row stride of C11 (ie: the distance to the next row of C11,
             in units of matrix elements).
   - cs_c:   The column stride of C11 (ie: the distance to the next column of
@@ -97,34 +97,34 @@ void bli_dtrsm_l_opt_mxn(
   Diagrams for trsm
 
   Please see the diagram for gemmtrsm_l to see depiction of the trsm_l and
-  where it fits in with its preceding gemm subproblem. 
+  where it fits in with its preceding gemm subproblem.
 
   Implementation Notes for trsm
 
-  - Register blocksizes. See Implementation Notes for gemm. 
-  - Leading dimensions of a and b: PACKMR and PACKNR. See Implementation
-    Notes for gemm. 
-  - Edge cases in MR, NR dimensions. See Implementation Notes for gemm. 
-  - Alignment of a and b. See Implementation Notes for gemmtrsm. 
+  - Register blocksizes. See Implementation Notes for gemm.
+  - Leading dimensions of a11 and b11: PACKMR and PACKNR. See
+    Implementation Notes for gemm.
+  - Edge cases in MR, NR dimensions. See Implementation Notes for gemm.
+  - Alignment of a11 and b11. See Implementation Notes for gemmtrsm.
   - Unrolling loops. Most optimized implementations should unroll all
-    three loops within the trsm micro-kernel. 
+    three loops within the trsm micro-kernel.
   - Diagonal elements of A11. At the time this micro-kernel is called,
     the diagonal entries of triangular matrix A11 contain the inverse of
     the original elements. This inversion is done during packing so that
     we can avoid expensive division instructions within the micro-kernel
     itself. If the diag parameter to the higher level trsm operation was
     equal to BLIS_UNIT_DIAG, the diagonal elements will be explicitly
-    unit. 
+    unit.
   - Zero elements of A11. Since A11 is lower triangular (for trsm_l), the
     strictly upper triangle implicitly contains zeros. Similarly, the
     strictly lower triangle of A11 implicitly contains zeros when A11 is
     upper triangular (for trsm_u). However, the packing function may or
     may not actually write zeros to this region. Thus, while the
     implementation may reference these elements, it should not use them
-    in any computation. 
+    in any computation.
   - Output. This micro-kernel must write its result to two places: the
     submatrix B11 of the current packed micro-panel of B and the submatrix
-    C11 of the output matrix C. 
+    C11 of the output matrix C.
 
   For more info, please refer to the BLIS website and/or contact the
   blis-devel mailing list.

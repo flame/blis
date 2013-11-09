@@ -34,6 +34,8 @@
 
 #include "blis.h"
 
+
+/*
 //
 // Define object-based interface.
 //
@@ -55,7 +57,6 @@ void PASTEMAC0(opname)( \
 \
 	bli_obj_alias_to( *a, a_local ); \
 \
-	/* If the transposition bit is set, apply it now. */ \
 	if ( bli_obj_has_trans( a_local ) ) \
 	{ \
 	    bli_obj_induce_trans( a_local ); \
@@ -70,6 +71,7 @@ void PASTEMAC0(opname)( \
 }
 
 GENFRONT( dotxf, DOTXF_KERNEL )
+*/
 
 
 //

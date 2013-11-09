@@ -34,3 +34,28 @@
 
 void libblis_test_axpyf( test_params_t* params, test_op_t* op );
 
+
+//
+// Prototype wrapper interfaces to kernel.
+//
+void bli_axpyf_ker( obj_t*  alpha,
+                    obj_t*  a,
+                    obj_t*  x,
+                    obj_t*  y );
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname)( \
+                          conj_t  conja, \
+                          conj_t  conjx, \
+                          dim_t   m, \
+                          dim_t   b_n, \
+                          void*   alpha, \
+                          void*   a, inc_t inca, inc_t lda, \
+                          void*   x, inc_t incx, \
+                          void*   y, inc_t incy \
+                        );
+
+INSERT_GENTPROT_BASIC( axpyf_ker )
+

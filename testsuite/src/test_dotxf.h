@@ -34,3 +34,30 @@
 
 void libblis_test_dotxf( test_params_t* params, test_op_t* op );
 
+
+//
+// Prototype wrapper interfaces to kernel.
+//
+void bli_dotxf_ker( obj_t* alpha,
+                    obj_t* a,
+                    obj_t* x,
+                    obj_t* beta,
+                    obj_t* y );
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname)( \
+                          conj_t  conjat, \
+                          conj_t  conjx, \
+                          dim_t   m, \
+                          dim_t   b_n, \
+                          void*   alpha, \
+                          void*   a, inc_t inca, inc_t lda, \
+                          void*   x, inc_t incx, \
+                          void*   beta, \
+                          void*   y, inc_t incy \
+                        );
+
+INSERT_GENTPROT_BASIC( dotxf_ker )
+

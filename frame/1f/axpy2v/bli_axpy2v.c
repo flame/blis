@@ -35,6 +35,7 @@
 #include "blis.h"
 
 
+/*
 //
 // Define object-based interface.
 //
@@ -60,6 +61,7 @@ void PASTEMAC0(opname)( \
 }
 
 GENFRONT( axpy2v, AXPY2V_KERNEL )
+*/
 
 
 //

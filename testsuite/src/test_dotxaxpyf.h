@@ -34,3 +34,37 @@
 
 void libblis_test_dotxaxpyf( test_params_t* params, test_op_t* op );
 
+
+//
+// Prototype wrapper interfaces to kernel.
+//
+void bli_dotxaxpyf_ker( obj_t* alpha, 
+                        obj_t* at,
+                        obj_t* a,
+                        obj_t* w,
+                        obj_t* x,
+                        obj_t* beta,
+                        obj_t* y,
+                        obj_t* z );
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname)( \
+                          conj_t  conjat, \
+                          conj_t  conja, \
+                          conj_t  conjw, \
+                          conj_t  conjx, \
+                          dim_t   m, \
+                          dim_t   n, \
+                          void*   alpha, \
+                          void*   a, inc_t inca, inc_t lda, \
+                          void*   w, inc_t incw, \
+                          void*   x, inc_t incx, \
+                          void*   beta, \
+                          void*   y, inc_t incy, \
+                          void*   z, inc_t incz \
+                        );
+
+INSERT_GENTPROT_BASIC( dotxaxpyf_ker )
+

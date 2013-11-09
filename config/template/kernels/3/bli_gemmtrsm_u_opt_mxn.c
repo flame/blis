@@ -79,16 +79,16 @@ void bli_dgemmtrsm_u_opt_mxn(
                               double*   restrict b11,
                               double*   restrict c11, inc_t rs_c, inc_t cs_c,
                               double*   restrict a_next,
-                              double*   restrict b_next 
+                              double*   restrict b_next
                             )
 {
 /*
   Template gemmtrsm_u micro-kernel implementation
 
   This function contains a template implementation for a double-precision
-  real micro-kernel that fuses a gemm with a trsm_u subproblem. 
+  real micro-kernel that fuses a gemm with a trsm_u subproblem.
 
-  This micro-kernel performs the following compound operation: 
+  This micro-kernel performs the following compound operation:
 
     B11 := alpha * B11 - A12 * B21    (gemm)
     B11 := inv(A11) * B11             (trsm)
@@ -112,11 +112,11 @@ void bli_dgemmtrsm_u_opt_mxn(
             leading dimension PACKMR, where typically PACKMR = MR. Note
             that A11 contains elements in both triangles, though elements
             in the unstored triangle are not guaranteed to be zero and
-            thus should not be referenced. 
+            thus should not be referenced.
   - b21:    The address of B21, which is the k x NR submatrix of the packed
             micro-panel of B that is situated above the MR x NR submatrix
             B11. B01 is stored by rows with leading dimension PACKNR, where
-            typically PACKNR = NR. 
+            typically PACKNR = NR.
   - b11:    The address B11, which is the MR x NR submatrix of the packed
             micro-panel of B, situated below B01. B11 is stored by rows
             with leading dimension PACKNR, where typically PACKNR = NR.
@@ -142,31 +142,31 @@ void bli_dgemmtrsm_u_opt_mxn(
   Here, matrix A11 (referenced by a11) is upper triangular. Matrix A11
   does contain elements corresponding to the strictly lower triangle,
   however, they are not guaranteed to contain zeros and thus these elements
-  should not be referenced. 
+  should not be referenced.
 
-       a11:     a12:                          NR     
-       ________ ___________________         _______  
-      |`.      |0 4 8              |   b11:|0 1 2 3| 
-  MR  |  `.    |1 5 9 . . .        |       |4 5 6 7| 
-      |    `.  |2 6 A              |    MR |8 9 A B| 
-      |______`.|3_7_B______________|       |___.___| 
-                                       b21:|   .   | 
-          MR             k                 |   .   | 
-                                           |       | 
-                                           |       | 
-    NOTE: Storage digits are shown       k |       | 
-    starting with a12 to avoid             |       | 
-    obscuring triangular structure         |       | 
-    of a11.                                |_______| 
-                                                     
+       a11:     a12:                          NR    
+       ________ ___________________         _______ 
+      |`.      |0 4 8              |   b11:|0 1 2 3|
+  MR  |  `.    |1 5 9 . . .        |       |4 5 6 7|
+      |    `.  |2 6 A              |    MR |8 9 A B|
+      |______`.|3_7_B______________|       |___.___|
+                                       b21:|   .   |
+          MR             k                 |   .   |
+                                           |       |
+                                           |       |
+    NOTE: Storage digits are shown       k |       |
+    starting with a12 to avoid             |       |
+    obscuring triangular structure         |       |
+    of a11.                                |_______|
+                                                    
 
   Implementation Notes for gemmtrsm
 
-  - Register blocksizes. See Implementation Notes for gemm. 
-  - Leading dimensions of a and b: PACKMR and PACKNR. See Implementation
-    Notes for gemm. 
-  - Edge cases in MR, NR dimensions. See Implementation Notes for gemm. 
-  - Alignment of a and b. Unlike with gemm, the addresses a10/a12 and a11
+  - Register blocksizes. See Implementation Notes for gemm.
+  - Leading dimensions of a1 and b1: PACKMR and PACKNR. See Implementation
+    Notes for gemm.
+  - Edge cases in MR, NR dimensions. See Implementation Notes for gemm.
+  - Alignment of a1 and b1. Unlike with gemm, the addresses a10/a12 and a11
     are not guaranteed to be aligned according to the alignment value
     BLIS_CONTIG_STRIDE_ALIGN_SIZE, as defined in the bli_config.h header
     file. This is because these micro-panels may vary in size due to the
@@ -175,36 +175,36 @@ void bli_dgemmtrsm_u_opt_mxn(
     support a somewhat obscure, higher-level optimization, we similarly
     do not guarantee that b01/b21 and b11 are aligned to
     BLIS_CONTIG_STRIDE_ALIGN_SIZE; instead, they are only aligned to
-    PACKNR x sizeof(type). 
+    PACKNR x sizeof(type).
   - Unrolling loops. Most optimized implementations should unroll all
     three loops within the trsm subproblem of gemmtrsm. See Implementation
-    Notes for gemm for remarks on unrolling the gemm subproblem. 
+    Notes for gemm for remarks on unrolling the gemm subproblem.
   - Prefetching via a_next and b_next. The addresses a_next and b_next
     for gemmtrsm refer to the portions of the packed micro-panels of A
     and B that will be referenced by the next invocation. Specifically,
     in gemmtrsm_l, a_next and b_next refer to the addresses of the next
     invocation's a10 and b01, respectively, while in gemmtrsm_u, a_next
     and b_next refer to the addresses of the next invocation's a11 and
-    b11 (since those submatrices precede a12 and b21). 
+    b11 (since those submatrices precede a12 and b21).
   - Zero alpha. The micro-kernel can safely assume that alpha is non-zero;
     "alpha equals zero" handling is performed at a much higher level,
     which means that, in such a scenario, the micro-kernel will never get
-    called. 
-  - Diagonal elements of A11. See Implementation Notes for trsm. 
-  - Zero elements of A11. See Implementation Notes for trsm. 
-  - Output. See Implementation Notes for trsm. 
+    called.
+  - Diagonal elements of A11. See Implementation Notes for trsm.
+  - Zero elements of A11. See Implementation Notes for trsm.
+  - Output. See Implementation Notes for trsm.
   - Optimization. Let's assume that the gemm micro-kernel has already been
     optimized. You have two options with regard to optimizing the fused
-    gemmtrsm micro-kernels: 
+    gemmtrsm micro-kernels:
     (1) Optimize only the trsm micro-kernels. This will result in the gemm
         and trsm_l micro-kernels being called in sequence. (Likewise for
-        gemm and trsm_u.) 
+        gemm and trsm_u.)
     (2) Fuse the implementation of the gemm micro-kernel with that of the
         trsm micro-kernels by inlining both into the gemmtrsm_l and
         gemmtrsm_u micro-kernel definitions. This option is more labor-
         intensive, but also more likely to yield higher performance because
         it avoids redundant memory operations on the packed MR x NR
-        submatrix B11. 
+        submatrix B11.
 
   For more info, please refer to the BLIS website and/or contact the
   blis-devel mailing list.
