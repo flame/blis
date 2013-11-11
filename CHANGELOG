@@ -1,4 +1,719 @@
-commit 0680916fdd532f7a4716b11a2515243b2c08d00f (HEAD, tag: 0.0.9, origin/master, origin/HEAD, master)
+commit 089048d5895a30221b6b1976c9be93ad6443420d (HEAD, tag: 0.1.0, origin/master, master)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Nov 9 17:18:00 2013 -0600
+
+    Added object wrappers to 1f test suite modules.
+    
+    Details:
+    - Added missing object wrappers to level-1f test suite modules. This was
+      only apparent if you were configuring with something other than the
+      reference configuration.
+    - Commented out object-wrappers in level-1f front-ends. These were not
+      working as intended the reference configuration was selected, because
+      most kernel sets, such as those in the template set, do not have object
+      wrappers.
+    - Whitespace changes to template micro-kernels.
+    - Comment changes to template level-1f kernel headers.
+
+commit 9ef3752079de10124bed906b5d28479d04aa8187
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Nov 8 17:20:47 2013 -0600
+
+    Updated template kernels wrt KernelsHowTo wiki.
+    
+    Details:
+    - Merged latest state of KernelsHowTo wiki into template micro-kernels
+      located in config/template/kernels/3.
+
+commit 376bbb59c8944e29c5c1ff6637920d8451370afa
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Nov 8 11:17:34 2013 -0600
+
+    Removed support for duplication.
+    
+    Details:
+    - Removed support for duplication from the gemmtrsm/trsm micro-kernels
+      and all framework code.
+    - Updated test suite modules according to above changes.
+
+commit 68a5910974b62b4df853fae2a68cb04df9d5a19c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Nov 7 11:36:11 2013 -0600
+
+    Added comments to testsuite/input.operations.
+    
+    Details:
+    - Added extensive comments to the top of testsuite/input.operations,
+      which describe how to edit the file.
+    - Removed input.operations.0 and input.operations.1.
+    - Changed input.general to test all datatypes ("sdcz") by default.
+
+commit a98f78b715fb256a519870071bb5266130d70b21
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Nov 6 15:32:47 2013 -0600
+
+    Changed dim_t and inc_t to be signed integers.
+    
+    Details:
+    - Redefined dim_t and inc_t in terms of gint_t (instead of guint_t).
+      This will facilitate interoperability with Fortran in the future.
+      (Fortran does not support unsigned integers.)
+    - Redefined many instances of stride-related macros so that they return
+      or use the absolute value of the strides, rather than the raw strides
+      which may now be signed. Added new macros bli_is_row_stored_f() and
+      bli_is_col_stored_f(), which assume positive (forward-oriented) strides,
+      and changed the packm_blk_var[23] variants to use these macros instead
+      of the existing bli_is_row_stored(), bli_is_col_stored().
+    - Added/adjusted typecasting to to various functions/macros, including
+      bli_obj_alloc_buffer(), bli_obj_buffer_at_off(), and various pointer-
+      related macros in bli_param_macro_defs.h.
+    - Redefined bli_convert_blas_incv() macro so that the BLAS compatibility
+      layer properly handles situations where vector increments are negative.
+      Thanks to Vladimir Sukharev for pointing out this issue.
+    - Changed type of increment parameters in bli_adjust_strides() from dim_t
+      to inc_t. Likewise in bli_check_matrix_strides().
+    - Defined bli_check_matrix_object(), which checks for negative strides.
+    - Redefined bli_check_scalar_object() and bli_check_vector_object() so
+      that they also check for negative stride.
+    - Added instances of bli_check_matrix_object() to various operations'
+      _check routines.
+
+commit 1f8afc3e08a4312cfe810be86aedeacbc57275c5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Nov 6 10:09:10 2013 -0600
+
+    Minor comment update to BLAS compat files.
+
+commit 1abbf768afafc158d44e4d5c4a135cfd9e277f13
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Nov 4 15:50:00 2013 -0600
+
+    Fixed bugs in scalv and setv.
+    
+    Details:
+    - Fixed bugs similar to those addressed in cca1e1f51dc6, whereby
+      a segmentation fault may occur if beta is not the same type as
+      the vector operand for scalv and setv.
+    - Changed axpyv and scal2v front-ends in a similar fashion.
+
+commit f5953259a1842ee48e5833c22ac86e68a337bfe1
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Nov 4 14:43:55 2013 -0600
+
+    Fixed a bug related to Hermitian matrix diagonals.
+    
+    Details:
+    - Fixed a bug whereby BLIS assumed that the imaginary components of the
+      diagonal elements of Hermitian matrices were already zero. This property
+      is now enforced when the matrix is packed (bli_packm_blk_var2). Thanks
+      to Vladimir Sukharev for reporting this bug.
+    - Minor comment updates to template kernels.
+
+commit d70f2b089dac8b9e4c19295dfa6014c36afee2ec
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Nov 2 17:19:40 2013 -0500
+
+    Added scaling to abval2s, sqrt2s macros.
+    
+    Details:
+    - Re-defined abval2s and sqrt2s macros to use scaling to avoid underflow
+      and overflow from squaring the real and imaginary components. (This is
+      the same technique used to fix recent bugs in invscals/invscaljs and
+      inverts.)
+
+commit c5b1ed9409ae2f71d04041eef5da9a0080b5784a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Nov 1 10:28:04 2013 -0500
+
+    Added new dotxaxpyf variant 2.
+    
+    Details:
+    - Added a new variant for dotxaxpyf that is based on dotxf and axpyf
+      kernels. By default, this variant is not used by any other operation.
+
+commit 97f89fbcf202d72fc440b614708e352ea31633e2
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Nov 1 10:16:39 2013 -0500
+
+    Fixed bug in complex invscals.
+    
+    Details:
+    - Fixed complex inversion in invscals and invscaljs whereby the
+      imaginary component was being computed incorrectly.
+    - Use bli_fmaxabs() instead of bli_fabs() when choosing the scalar
+      in inverts, invscals, and invscaljs.
+    - Changed bli_abs() and bli_fabs() macro definitions to use "<="
+      operator instead of "<".
+
+commit eda42a21d17a2742eab69ab801ed530b82488c8a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Oct 31 18:00:44 2013 -0500
+
+    Defined missing symbols in bla_rotg.c
+    
+    Details:
+    - Defined local equivalents of libf2c's r_sign(), d_sign(), c_abs(), and
+      z_abs(), which are needed by bla_rotg.c. Also defined r_abs() and
+      d_abs() for completeness. Thanks to Vladimir Sukharev for reporting
+      these bugs.
+
+commit cca1e1f51dc67a2c3725d5c1837256831aaf70f8
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Oct 30 14:39:01 2013 -0500
+
+    Fixed bugs in scalm and setm.
+    
+    Details:
+    - Fixed bugs in scalm and setm that resulted in segmentation faults when
+      beta is not the same type as the matrix operand. Thanks to Vladimir
+      Sukharev for reporting this bug.
+    - Changed axpym and scal2m front-ends in fashion similar to that of scalm
+      and setm; namely, the alpha scalar is copy-cast the type of the first
+      matrix operand.
+    - Changed the template and reference configurations' bli_config.h files
+      so that the number of memory allocator blocks of A and B are set based
+      on BLIS_MAX_NUM_THREADS.
+    - Comment updates to bli_obj.c and variable rename in bla_nrm2.c.
+
+commit 2807013a4761c2b84b3944de64d23483ad7ef2fb
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Oct 24 14:32:20 2013 -0500
+
+    Fixed over/under-flow in complex inversion.
+    
+    Details:
+    - Fixed the complex bli_?inverts() macros, which were inverting elements
+      in an "unsafe" manner, such that very large and very small values were
+      unnecessarily over/under-flowing. Thanks for Vladimir Sukharev for
+      reporting this bug.
+    - Comment update to bli_sumsqv_unb_var1.c.
+    - Removed redundant bli_min() macro in bli_scalar_macro_defs.h.
+    - Changed 1.0F to 1.0 for bli_drands() macro.
+
+commit 45a80c625f84edb2ade6ac25efe2b9c589d7e0df
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Oct 23 12:15:25 2013 -0500
+
+    Fixed parameter checking issue in BLAS syr[2]k.
+    
+    Details:
+    - Fixed a minor parameter checking bug in the BLAS compatibility layer
+      for [sd]syrk and [sd]syr2k. Specifically, if 'C' is passed in for the
+      trans parameter of either operation, it is (a) allowed, and (b) treated
+      as 'T' (whereas previously it was disallowed). Thanks for Vladimir
+      Sukharev for finding and reporting this bug.
+
+commit a091a219bda55e56817acd4930c2aa4472e53ba5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Oct 14 10:11:29 2013 -0500
+
+    Minor fixes to piledriver configuration, ukernel.
+    
+    Details:
+    - Applied a patch from Tyler that fixes minor staleness in the piledriver
+      configuration and gemm micro-kernel.
+    - Very minor changes to test suite input files.
+
+commit dacdde27aee4fb90b14880136d7f20c6b234e2c6
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Oct 11 11:37:19 2013 -0500
+
+    Added Fran's Sandy Bridge kernels/configuration.
+    
+    Details:
+    - Added a kernel directory for kernels developed by Francisco Igual for
+      the Sandy Bridge architecture, including a dgemm ukernel coded with
+      AVX intrinsics.
+    - Added a configuration for Sandy Bridge using values supplied by Fran.
+
+commit 03106d650e4030d4c9831683448376f92fc52d41
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Oct 11 10:40:38 2013 -0500
+
+    Fixed minor perf bug in gemm_ker_var2.
+    
+    Details:
+    - Fixed a minor performance bug in bli_gemm_ker_var2.c (and the experimental
+      bli_gemm_ker_var5.c) whereby the addresses for a_next and b_next are not
+      computed correctly (ie: do not wraparound) at the edge cases. Thanks to
+      Tze Meng for helping me identify this bug.
+
+commit b053337387dbdef9035be03538222670a21707ca
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Oct 10 18:26:55 2013 -0500
+
+    Added fusing factors, MR/NR to test suite output.
+    
+    Details:
+    - Updated the test suite driver (and modules where appropriate) so that
+      the level-1f fusing factors are output along with the variable dimension.
+      While this is not strictly necessary, since the fusing factors are output
+      in the initial parameter summary, it allows extra reassurance to the user
+      since the fusing factors appear alongside the variable dimension, which
+      together give a complete picture of the problem size. Similar changes were
+      made for outputting the register blocksizes when reporting results for the
+      micro-kernel test modules.
+
+commit be4833bd91c5a58d0bfc52daaadf7ba543a77acf
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Oct 10 14:20:06 2013 -0500
+
+    Added test suite modules for level-1f, 3 kernels.
+    
+    Details:
+    - Added test modules in test suite for level-1f kernels and level-3
+      micro-kernels. (Duplication in the micro-kernels, for now, is NOT
+      supported by these test modules.)
+    - Added section override switches to test suite's input.operations file.
+    - Added obj_t APIs for level-1f front-ends and their unblocked variants to
+      facilitate the level-1f test modules. Also added front-end for dupl
+      operation.
+    - Added obj_t-based check routines for level-1f operations, which are
+      called from the new front-ends mentioned above.
+    - Added query routines for axpyf, dotxf, and dotxaxpyf that return fusing
+      factors as a function of datatype, which is needed by their respective
+      test modules.
+    - Whitespace changes to bli_kernel.h of all existing configurations.
+
+commit 680188d46bb15b9a1a2867638104939dc77ca2a1
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Oct 10 13:23:37 2013 -0500
+
+    Cleaned up old test drivers.
+    
+    Details:
+    - Minor updates to old test drivers in preparation for our participation
+      in ACM TOMS's replicated results initiative.
+
+commit 3690bdd4f95769c935c410414112102cc3e108b1
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Oct 10 11:45:33 2013 -0500
+
+    More updates to level-1f kernels for core2-sse3.
+    
+    Details:
+    - Changed types in function signatures to match new prototypes. Meant to
+      include this in previous commit.
+
+commit 661d5120cd7071f9b0c5cefc95f99f1361370ade
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Oct 10 11:27:27 2013 -0500
+
+    Fixed outdated fusing factor macros in 1f kernels.
+    
+    Details:
+    - Updated level-1f kernels for x86_64 and bgq to use renamed fusing factor
+      macros. Meant to include this in 5e54f46c. Thanks to Fran for pointing
+      this out.
+
+commit 73aa1e9f31d1b2a319c7e711ced6db3f9835c832
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Oct 1 17:01:18 2013 -0500
+
+    Added section overrides to test suite.
+    
+    Details:
+    - Added new lines of input to the test suite's input.operations file, which
+      allows the user to disable entire sections (levels) of tests. Before this
+      change, the user had to manually disable each operation tests's "master
+      switch". (This is why input.operations.0 existed: to allow a more
+      convenient starting point for someone who only wanted to test one or a
+      few operations.)
+
+commit 5e54f46ccb76beab892d530b693e07c6bf6db7cf
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Sep 30 12:58:18 2013 -0500
+
+    Added template implementations and other tweaks.
+    
+    Details:
+    - Added a 'template' configuration, which contains stub implementations of the
+      level 1, 1f, and 3 kernels with one datatype implemented in C for each, with
+      lots of in-file comments and documentation.
+    - Modified some variable/parameter names for some 1/1f operations. (e.g.
+      renaming vector length parameter from m to n.)
+    - Moved level-1f fusing factors from axpyf, dotxf, and dotxaxpyf header files
+      to bli_kernel.h.
+    - Modifed test suite to print out fusing factors for axpyf, dotxf, and
+      dotxaxpyf, as well as the default fusing factor (which are all equal
+      in the reference and template implementations).
+    - Cleaned up some sloppiness in the level-1f unb_var1.c files whereby these
+      reference variants were implemented in terms of front-end routines rather
+      that directly in terms of the kernels. (For example, axpy2v was implemented
+      as two calls to axpyv rather than two calls to AXPYV_KERNEL.)
+    - Changed the interface to dotxf so that it matches that of axpyf, in that
+      A is assumed to be m x b_n in both cases, and for dotxf A is actually used
+      as A^T.
+    - Minor variable naming and comment changes to reference micro-kernels in
+      frame/3/gemm/ukernels and frame/3/trsm/ukernels.
+
+commit 97aaf220a847363b4da35935eca17790c0ef71f6
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Sep 17 10:51:36 2013 -0500
+
+    Added new kernels, configurations.
+    
+    Details:
+    - Added various micro-kernels for the following architectures:
+        Intel MIC
+        IBM BG/Q
+        IBM Power7
+        AMD Piledriver
+        Loogson 3A
+      and reorganized kernels directory. Thanks to Tyler Smith, Mike Kistler,
+      and Xianyi Zhang for contributing these kernels.
+    - Added configurations corresponding to above architectures, and renamed
+      "clarksville" configuration to "dunnington".
+
+commit fe979c5a114c877506a5697cdab1fc8cf2bcd303
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Sep 13 14:31:53 2013 -0500
+
+    Removed default configuration behavior.
+    
+    Details:
+    - Changed the configure script so that it no longer defaults to the
+      reference configuration. This change is being made so that the
+      developer has a firm awareness of which configuration is being used
+      to configure BLIS. Thanks to Mike Kistler and Bryan Marker for this
+      suggested change.
+
+commit da77e9614f54f92f703f01e3b9bd67a83280150c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Sep 13 12:00:37 2013 -0500
+
+    Minor improvements to static memory allocator.
+    
+    Details:
+    - Expanded on cpp macro definitions from bli_mem.c and relocated them to
+      a new header file, frame/include/bli_mem_pool_macro_defs.h. The expanded
+      functionality includes computing the pool size for each datatype (using
+      that datatype's cache blocksizes) and using the maximum to size the
+      actual pool array. This addresses the somewhat common pitfall whereby a
+      developer updates cache blocksizes in bli_kernel.h for only one datatype
+      (say, single-precision real), while the memory pools are sized using the
+      double-precision real values. Then, when the developer attempts to link
+      to and run a level-3 BLIS routine (e.g. dgemm), the library aborts with
+      a message saying the static memory pool was exhausted. Clearly, this
+      message is misleading when the pool was not sized properly to begin with.
+    - Removed previously disabled code in bli_kernel_macro_defs.h that was
+      meant to check for size consistency among the various cache blocksizes.
+      (Obviously the memory pool size-based solution mentioned above is better.)
+    - Added BLIS_SIZEOF_? cpp macros to bli_type_defs.h. This seemed like a
+      reasonable place to put these constants, rather than further crowd up
+      bli_config.h.
+    - Updated testsuite driver to output memory pool sizes for A, B, and C.
+    - Minor comment updates to bli_config.h.
+    - Removed 'flame' configuration. It was beginning to get out-of-date, and
+      I hadn't used it in months. We can always re-create it later.
+
+commit 631f347b7a99cb02757c534fd3ec5f723a2fdb0e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Sep 10 17:17:28 2013 -0500
+
+    Added ESSL and Accelerate targets to test drivers.
+    
+    Details:
+    - Added ESSL and Accelerate (OS X) targets to standalone test drivers'
+      Makefile in "test" directory. Thanks to Jeff Hammond for suggesting
+      / providing this patch.
+
+commit 7ae4d7a41d13ef5f1ceee217c000a5cf77a11128
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Sep 10 16:35:12 2013 -0500
+
+    Various changes to treatment of integers.
+    
+    Details:
+    - Added a new cpp macro in bli_config.h, BLIS_INT_TYPE_SIZE, which can be
+      assigned values of 32, 64, or some other value. The former two result in
+      defining gint_t/guint_t in terms of 32- or 64-bit integers, while the latter
+      causes integers to be defined in terms of a default type (e.g. long int).
+    - Updated bli_config.h in reference and clarksville configurations according
+      to above changes.
+    - Updated test drivers in test and testsuite to avoid type warnings associated
+      with format specifiers not matching the types of their arguments to printf()
+      and scanf().
+    - Inserted missing #include "bli_system.h" into blis.h (which was slated for
+      inclusion in d141f9eeb6d1).
+    - Added explicit typecasting of dim_t and inc_t to macros in
+      bli_blas_macro_defs.h (which are used in BLAS compatibility layer).
+    - Slight changes to CREDITS and INSTALL files.
+    - Slight tweaks to Windows build system, mostly in the form of switching to
+      Windows-style CRLF newlines for certain files.
+
+commit 068437736b41d51a1f5ec47839f059bf58a20413
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Sep 9 14:07:58 2013 -0500
+
+    Fixed set-but-not-used compiler (gcc) warnings.
+    
+    Details:
+    - Used void-casts of certain variables to appease gcc (and perhaps other
+      compilers) when such variables are only used in the complex instances of
+      the functions. Special thanks to Karl Rupp for suggesting a portable fix
+      for these warnings.
+
+commit 6dc85f63dcd5282340c9e00d585e97d70a21edc3
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Sep 9 13:48:52 2013 -0500
+
+    Small fix to Windows defs.mk makefile fragment.
+    
+    Details:
+    - Commented out a !include statement that was attempting to include a
+      version file that does not yet exist. For now, the version string is
+      hard-coded into defs.mk.
+
+commit d141f9eeb6d1de7044b7429adf52d11c6fca620c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Sep 9 13:09:16 2013 -0500
+
+    Added Windows build system.
+    
+    Details:
+    - Added a 'windows' directory, which contains a Windows build system
+      similar to that of libflame's. Thanks to Martin for getting this up
+      and running.
+    - Spun off system header #includes into bli_system.h, which is included
+      in blis.h
+    - Added a Windows section to bli_clock.c (similar to libflame's).
+
+commit 9b320e7406fb69e8b61a0085abe2ed89a96bdb68
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Sep 9 11:04:46 2013 -0500
+
+    Edited bli_?lamch.c to avoid Windows keyword.
+    
+    Details:
+    - Renamed "small" variable to "smnum" to avoid collision with Windows type
+      by the same name. This change is needed in advance of the upcoming Windows
+      build system.
+
+commit 9013ad6ff2e9ace35e0cf44c32795c2f3d5be628
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Sep 4 13:36:07 2013 -0500
+
+    Switched integer typedefs (again) to C types.
+    
+    Details:
+    - Redefined gint_t and guint_t in terms of the standard C types long int
+      and unsigned long int, respectively.
+    - Changed testsuite default max problem size to 500.
+    - Changed testsuite input.operations to use square problems for level-3
+      operation tests.
+
+commit 981a60cfa07abac2e93697dfe12b0f076ab00a38
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Sep 4 12:09:11 2013 -0500
+
+    Falling back to 32-bit integers for dim_t, etc.
+    
+    Details:
+    - In light of recent segfaulting issues when compiling on 32-bit systems,
+      I've changed the default typedef for gint_t and guint_t from int64_t and
+      uint64_t to int32_t and uint32_t, respectively.
+    - Disabled 64-bit integers in the blas2blis layer for the reference
+      configuration.
+    - Added type sizes of gint_t, guint_t, and the four floating-point datatypes
+      to introductory output of the testsuite.
+
+commit b776ddcd4338b34f172ef78da0ac1d771a771ab4
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Sep 3 21:58:07 2013 -0500
+
+    Applied temp fix to typecasting bug in testsuite.
+    
+    Details:
+    - Applied a temporary fix to the typecasting bug in the testsuite driver.
+      The fix involves casting both numerator and denominator to unsigned long.
+      This fix is more voodoo than science, as I can't be sure why it even
+      works.
+
+commit 9ee6e125373869c4213c017ce772c38ecefba103
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Sep 3 21:53:27 2013 -0500
+
+    Changed dimension spec for gemm in testsuite.
+    
+    Details:
+    - Encounted a bizarre typecasting bug whereby the test suite was not
+      computing the proper dimension from the problem size and dimension
+      specification when the latter was set to -3. Will investigate.
+      Thanks to Fran for finding this "bug".
+
+commit e8be081e68c385ab44d0fea8dade21d40c200b79
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Aug 28 15:52:34 2013 -0500
+
+    Generalized matlab and file output in testsuite.
+    
+    Details:
+    - Added a new option in input.general that allows outputting in
+      matlab/octave format so that one can output in matlab format
+      independently from outputting to files.
+    - Adjusted input.operations according to above.
+    - Added input.operations.0 and input.operations.1 with all options
+      disabled and enabled, respectively.
+
+commit d352c746e5683037d41b5061dfb5ce08e1d0843b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Aug 27 13:41:46 2013 -0500
+
+    Added single/real gemm micro-kernel for x86_64.
+    
+    Details:
+    - Added a single-precision real gemm micro-kernel in
+      kernels/x86_64/3/bli_gemm_opt_d4x4.c.
+    - Adjusted the single-precision real register blocksizes in
+      config/clarksville/bli_kernel.h to be 8x4.
+    - Added a missing comment to bli_packm_blk_var2.c that was present in
+      bli_packm_blk_var3.c
+
+commit dedda523dc5dc779ecc34e6a03dc74cb8eb220de
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Aug 19 12:07:41 2013 -0500
+
+    Fixed bug in bli_acquire_mpart_t2b(), _l2r().
+    
+    Details:
+    - Fixed a bug in bli_acquire_mpart_t2b() and bli_acquire_mpart_l2r()
+      that cause incorrect partitioning when SUBPART0 was requested. This
+      bug was introduced in 46d3d09d49ad. Thanks to Bryan for isolating
+      this bug.
+    - Removed dupl kernels from kernels/x86_64/3 directory.
+    - Uncommented beta == 0 optimizaition code in
+      kernels/x86_64/3/bli_gemm_opt_d4x4.c.
+
+commit 12dbd2f33455e9384fe2070cbdd660fd4a7fceb5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Aug 8 14:39:35 2013 -0500
+
+    Moved init_safe(), finalize_safe() to BLAS compat.
+    
+    Details:
+    - Moved the bli_init_safe() and bli_finalize_safe() function calls from the
+      BLAS-like BLIS layer to the BLAS compatibility layer. Having these auto-
+      initializers in the BLIS layer wasn't buying us anything because the user
+      could still call the library with uninitialized global scalar constants,
+      for example. Thus, we will just have to live with the constraint that
+      bli_init() MUST be called before calling ANY routine with a bli_ prefix.
+    - Added the missing _init_safe() and finalize_safe() calls to the level-1
+      BLAS compatibility wrappers.
+
+commit 8abfe55f2ae5d89df18e1b26a5a28d94b0936683
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Aug 8 13:30:19 2013 -0500
+
+    Miscellaneous updates.
+    
+    Details:
+    - Changed the BLIS_HEAP_STRIDE_ALIGN_SIZE in the configurations from 16 to
+      BLIS_CACHE_LINE_SIZE (typically 64).
+    - Changed the use of nr in sizing of bd buffer to packnr in level-3 macro-
+      kernels.
+    - Reformulated gemm_ker_var2 to look more like the other level-3 macro-
+      kernels, in that the interior and edge-case handling is expressed once
+      inside the loops in the n and m dimensions, rather than the edge-case
+      handling being "unrolled" and expressed as distinct code regions. The
+      previous macro-kernel now lives in retired form in the subdirectory
+      other/bli_gemm_ker_var2.c.old.
+    - Updated experimental gemm_ker_var5 according to above change.
+    - Fixed bug in bli_her2k.c whereby incorrect transformations were being
+      applied to optimize the macro-kernel accesses pattern on C when C is
+      row-stored.
+    - Various updates inside of test/exec_sizes.
+
+commit 1aa05736ff49e7cc5f121acf615460fe9a87852c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Aug 7 12:27:04 2013 -0500
+
+    Fixed bug in interface of bla_ger_check().
+    
+    Details:
+    - Fixed the misplaced lda parameter in the function signature of
+      bla_ger_check(). Thanks to Tyler for finding this bug.
+
+commit 685aad25353fb200de4ca97a8bc0feeebde51d0f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Aug 6 12:25:51 2013 -0500
+
+    Fixed cpp guard typos in frame/compat/check files.
+    
+    Details:
+    - Fixed instances of BLIS_ENABLE_BLIS2BLAS that should have been
+      BLIS_ENABLE_BLAS2BLIS. Thanks to Tyler for catching this.
+    - Fixed various syntax errors in the code that had yet to be compiled
+      due to the aforementioned bug.
+
+commit f4ec28e723d28d998f1038f82da6986e44320ef6
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Aug 1 11:24:23 2013 -0500
+
+    Added basic OpenMP-based gemm and packm files.
+    
+    Details:
+    - Integrated Tyler's parallelized packm_blk_var2 and gemm_ker_var2
+      into the following auxiliary files
+    
+        frame/1m/packm/other/bli_packm_blk_var2.c
+        frame/3/gemm/other/bli_gemm_ker_var2.c
+    
+      The routine in the first file uses a basic OpenMP parallel region to
+      parallelize the packing of blocks of A and panels of B, while the
+      second uses a similar parallel region to parallelize along the n
+      dimension of the gemm macro-kernel.
+
+commit f8980edf9c318453bb1962ac4939c06bf11e6d5e
+Merge: 67a8b94 6e7e452
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jul 26 11:14:27 2013 -0500
+
+    Merge branch 'master' of https://code.google.com/p/blis
+
+commit 67a8b9498d13b038deb316ac163e62c5b17da2ec
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jul 26 11:12:37 2013 -0500
+
+    Added missing cpp kernel blocksize constraints.
+    
+    Details:
+    - Added missing C preprocessor guards in bli_kernel_macro_defs.h that enforce
+      constraints on the register blocksizes relative to the cache blocksizes.
+      Thanks to Tyler for helping me stumble across this issue.
+
+commit 6e7e452343014e8f86640874dc1dbadca4a642a1
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jul 22 14:50:57 2013 -0500
+
+    Fixed minor warnings and misc issues.
+    
+    Details:
+    - Fixed various warnings output by gcc 4.6.3-1, including removing some
+      set-but-not-used variables and addressing some instances of typecasting
+      of pointer types to integer types of different sizes.
+
+commit 03f6c3599743bc837a7d40eb5b415b1bf4f2a4e9
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jul 22 12:54:32 2013 -0500
+
+    Tightened some macros that detect datatypes.
+    
+    Details:
+    - Modified the definitions of some macros, such as bli_is_real(), so that
+      the "special" bit is taken into account so that BLIS_INT is differentiated
+      from BLIS_FLOAT.
+    - Whitespace changes to bli_obj_macro_defs.h.
+    - Removed BLIS_SPECIAL_BIT definition from bli_type_defs.h, since it wasn't
+      being used.
+
+commit b33e2f4443b9043b554963320280ff7783773652
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jul 19 17:15:03 2013 -0500
+
+    CHANGELOG update (for 0.0.9).
+
+commit 0680916fdd532f7a4716b11a2515243b2c08d00f (tag: 0.0.9)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Thu Jul 18 18:04:34 2013 -0500
 
