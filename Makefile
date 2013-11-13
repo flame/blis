@@ -45,7 +45,7 @@
 # --- Makefile PHONY target definitions ----------------------------------------
 #
 
-.PHONY: all lib install clean \
+.PHONY: all libs install clean \
         check check-config check-fragments check-make-defs \
         install-libs install-headers \
         install-lib-symlinks install-header-symlinks \
@@ -345,8 +345,6 @@ MK_ALL_BLIS_OBJS          := $(MK_ALL_BLIS_OPT_OBJS) \
 all: libs
 
 libs: check $(MK_LIBS)
-
-test: check
 
 install: libs install-libs install-headers \
          install-lib-symlinks install-header-symlinks

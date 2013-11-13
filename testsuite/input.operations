@@ -14,7 +14,7 @@
 #    the individual switches for each operation (in that level) determine
 #    whether or not the tests are executed.
 #
-#  ENABLING/DISABLING INDIVIDUAL OPERATIONS
+#  ENABLING/DISABLING INDIVIDUAL OPERATION TESTS
 #    Given that an operation's section override switch is set to 1
 #    (enabled, whether or not that operation will get tested is determined
 #    by its local switch. For example, if the level-1v section override is
@@ -25,7 +25,7 @@
 #    multithreaded implementation. For now, BLIS only contains sequential
 #    codes, so these should be left set to 1.
 #
-#  CHANGING PROBLEM SIZE TESTED
+#  CHANGING PROBLEM SIZE/SHAPES TESTED
 #    The problem sizes tested by an operation are determined by the
 #    dimension specifiers on the line marked "dimensions: <spec_labels>".
 #    If, for example, <spec_labels> contains two dimension labels (e.g.

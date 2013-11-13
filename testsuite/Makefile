@@ -44,7 +44,8 @@
 # --- Makefile PHONY target definitions ----------------------------------------
 #
 
-.PHONY: clean
+.PHONY: all bin clean \
+        check check-config check-make-defs
 
 
 
@@ -181,8 +182,26 @@ LDFLAGS        := -L/usr/lib/gcc/i486-linux-gnu/4.4.3 -L/usr/lib/gcc/i486-linux-
 # --- Targets/rules ------------------------------------------------------------
 #
 
-all: $(TEST_BIN)
+# --- Primary targets ---
 
+all: check bin
+
+bin: check $(TEST_BIN)
+
+
+# --- Environment check rules ---
+
+check: check-config check-make-defs
+
+check-config:
+ifeq ($(CONFIG_MK_PRESENT),no)
+	$(error Cannot proceed: config.mk not detected! Run configure first)
+endif
+
+check-make-defs: check-config
+ifeq ($(MAKE_DEFS_MK_PRESENT),no)
+	$(error Cannot proceed: make_defs.mk not detected! Invalid configuration)
+endif
 
 
 # --Object file rules --
