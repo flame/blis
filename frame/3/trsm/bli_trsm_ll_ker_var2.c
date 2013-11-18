@@ -138,16 +138,8 @@ void PASTEMAC(ch,varname)( \
 	ctype* restrict b_cast     = b; \
 	ctype* restrict c_cast     = c; \
 	ctype* restrict alpha_cast = alpha; \
-	ctype* restrict a1; \
 	ctype* restrict b1; \
 	ctype* restrict c1; \
-	ctype* restrict c11; \
-	ctype* restrict a10; \
-	ctype* restrict a11; \
-	ctype* restrict b01; \
-	ctype* restrict b11; \
-	ctype* restrict a2; \
-	ctype* restrict b2; \
 \
 	doff_t          diagoffa_i; \
 	dim_t           m_iter, m_left; \
@@ -241,6 +233,10 @@ void PASTEMAC(ch,varname)( \
 	/* Loop over the n dimension (NR columns at a time). */ \
 	for ( j = 0; j < n_iter; ++j ) \
 	{ \
+		ctype* restrict a1; \
+		ctype* restrict c11; \
+		ctype* restrict b2; \
+\
 		a1  = a_cast; \
 		c11 = c1 + (0  )*rstep_c; \
 \
@@ -264,6 +260,12 @@ void PASTEMAC(ch,varname)( \
 			   and so we do nothing. */ \
 			if ( bli_intersects_diag_n( diagoffa_i, MR, k ) ) \
 			{ \
+				ctype* restrict a10; \
+				ctype* restrict a11; \
+				ctype* restrict b01; \
+				ctype* restrict b11; \
+				ctype* restrict a2; \
+\
 				/* Compute various offsets into and lengths of parts of A. */ \
 				off_a10 = 0; \
 				k_a1011 = bli_min( k, diagoffa_i + MR ); \
@@ -325,6 +327,8 @@ void PASTEMAC(ch,varname)( \
 			} \
 			else if ( bli_is_strictly_below_diag_n( diagoffa_i, MR, k ) ) \
 			{ \
+				ctype* restrict a2; \
+\
 				/* Compute the addresses of the next panels of A and B. */ \
 				a2 = a1 + rstep_a; \
 				if ( i == m_iter - 1 ) \

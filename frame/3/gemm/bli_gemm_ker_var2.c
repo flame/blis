@@ -160,12 +160,8 @@ void PASTEMAC(ch,varname)( \
 	ctype* restrict c_cast     = c; \
 	ctype* restrict alpha_cast = alpha; \
 	ctype* restrict beta_cast  = beta; \
-	ctype* restrict a1; \
 	ctype* restrict b1; \
 	ctype* restrict c1; \
-	ctype* restrict c11; \
-	ctype* restrict a2; \
-	ctype* restrict b2; \
 \
 	dim_t           m_iter, m_left; \
 	dim_t           n_iter, n_left; \
@@ -220,6 +216,10 @@ void PASTEMAC(ch,varname)( \
 	/* Loop over the n dimension (NR columns at a time). */ \
 	for ( j = 0; j < n_iter; ++j ) \
 	{ \
+		ctype* restrict a1; \
+		ctype* restrict c11; \
+		ctype* restrict b2; \
+\
 		a1  = a_cast; \
 		c11 = c1; \
 \
@@ -231,6 +231,8 @@ void PASTEMAC(ch,varname)( \
 		/* Loop over the m dimension (MR rows at a time). */ \
 		for ( i = 0; i < m_iter; ++i ) \
 		{ \
+			ctype* restrict a2; \
+\
 			m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left ); \
 \
 			/* Compute the addresses of the next panels of A and B. */ \

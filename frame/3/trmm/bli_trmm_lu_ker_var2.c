@@ -149,13 +149,8 @@ void PASTEMAC(ch,varname)( \
 	ctype* restrict c_cast     = c; \
 	ctype* restrict alpha_cast = alpha; \
 	ctype* restrict beta_cast  = beta; \
-	ctype* restrict a1; \
 	ctype* restrict b1; \
 	ctype* restrict c1; \
-	ctype* restrict c11; \
-	ctype* restrict b1_i; \
-	ctype* restrict a2; \
-	ctype* restrict b2; \
 \
 	doff_t          diagoffa_i; \
 	dim_t           m_iter, m_left; \
@@ -245,6 +240,10 @@ void PASTEMAC(ch,varname)( \
 	/* Loop over the n dimension (NR columns at a time). */ \
 	for ( j = 0; j < n_iter; ++j ) \
 	{ \
+		ctype* restrict a1; \
+		ctype* restrict c11; \
+		ctype* restrict b2; \
+\
 		a1  = a_cast; \
 		c11 = c1; \
 \
@@ -266,6 +265,9 @@ void PASTEMAC(ch,varname)( \
 			   and trmm3. */ \
 			if ( bli_intersects_diag_n( diagoffa_i, MR, k ) ) \
 			{ \
+				ctype* restrict b1_i; \
+				ctype* restrict a2; \
+\
 				/* Determine the offset to and length of the panel that was
 				   packed so we can index into the corresponding location in
 				   b1. */ \
@@ -322,6 +324,8 @@ void PASTEMAC(ch,varname)( \
 			} \
 			else if ( bli_is_strictly_above_diag_n( diagoffa_i, MR, k ) ) \
 			{ \
+				ctype* restrict a2; \
+\
 				/* Compute the addresses of the next panels of A and B. */ \
 				a2 = a1 + rstep_a; \
 				if ( i == m_iter - 1 ) \
