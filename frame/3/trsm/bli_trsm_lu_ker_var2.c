@@ -135,8 +135,8 @@ void PASTEMAC(ch,varname)( \
 	ctype* restrict zero       = PASTEMAC(ch,0); \
 	ctype* restrict minus_one  = PASTEMAC(ch,m1); \
 	ctype* restrict a_cast     = a; \
-	ctype* restrict b_cast     = b; \
-	ctype* restrict c_cast     = c; \
+	ctype*          b_cast     = b; \
+	ctype*          c_cast     = c; \
 	ctype* restrict alpha_cast = alpha; \
 	ctype* restrict b1; \
 	ctype* restrict c1; \

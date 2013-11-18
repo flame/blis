@@ -223,7 +223,7 @@ void bli_dgemm_8x8_mt(
                         restrict double*   beta,
                         restrict double*   c, inc_t rs_c, inc_t cs_c,
                         restrict double* a_next, restrict double* b_next,
-                        int tid
+                        dim_t tid
                       )
 {
     
