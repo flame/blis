@@ -507,7 +507,7 @@ void bli_dgemmtrsm_u_opt_d4x4(
 		  "m" (c11),    // 6
 		  "m" (rs_c),   // 7
 		  "m" (cs_c),   // 8
-		  "m" (alpha)   // 9
+		  "m" (alpha),  // 9
 		  "m" (b_next)  // 10
 		: // register clobber list
 		  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
