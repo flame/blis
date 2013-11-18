@@ -45,13 +45,16 @@
 # --- Makefile PHONY target definitions ----------------------------------------
 #
 
-.PHONY: all libs install clean \
+.PHONY: all libs install uninstall clean \
         check check-config check-fragments check-make-defs \
         install-libs install-headers \
-        install-lib-symlinks install-header-symlinks \
+        install-lib-symlinks \
         showconfig \
         cleanmost distclean cleanmk cleanleaves \
-        changelog
+        changelog \
+        uninstall-libs uninstall-headers \
+        uninstall-lib-symlinks \
+        uninstall-old
 
 
 
@@ -164,8 +167,9 @@ VERS_CONF              := $(VERSION)-$(CONFIG_NAME)
 
 # Note: These names will be modified later to include the configuration and
 # version strings.
-BLIS_LIB_NAME      := libblis.a
-#BLIS_DLL_NAME      := libblis.so
+BLIS_LIB_BASE_NAME := libblis
+BLIS_LIB_NAME      := $(BLIS_LIB_BASE_NAME).a
+#BLIS_DLL_NAME      := $(BLIS_LIB_BASE_NAME).so
 
 # --- BLIS framework source variable names ---
 
@@ -212,9 +216,13 @@ MK_LIBS_INST                      += $(MK_BLIS_LIB_INST)
 MK_LIBS_INST_W_VERS_CONF          += $(MK_BLIS_LIB_INST_W_VERS_CONF)
 endif
 
+# Strip leading, internal, and trailing whitespace.
+MK_LIBS_INST                      := $(strip $(MK_LIBS_INST))
+MK_LIBS_INST_W_VERS_CONF          := $(strip $(MK_LIBS_INST_W_VERS_CONF))
+
 # Set the include directory names
-MK_INCL_DIR_INST                  := $(INSTALL_PREFIX)/include
-MK_INCL_DIR_INST_W_VERS_CONF      := $(INSTALL_PREFIX)/include-$(VERS_CONF)
+MK_INCL_DIR_INST                  := $(INSTALL_PREFIX)/include/blis
+#MK_INCL_DIR_INST_W_VERS_CONF      := $(INSTALL_PREFIX)/include/blis-$(VERS_CONF)
 
 
 
@@ -337,6 +345,19 @@ MK_ALL_BLIS_OBJS          := $(MK_ALL_BLIS_OPT_OBJS) \
 
 
 #
+# --- Uninstall definitions ----------------------------------------------------
+#
+
+# This shell command grabs all files named "libblis-*.a" in the installation
+# directory and then filters out the name of the library archive for the
+# current version/configuration. We consider this remaining set of libraries
+# to be "old" and eligible for removal upon running of the uninstall-old
+# target.
+UNINSTALL_LIBS   := $(shell $(FIND) $(INSTALL_PREFIX)/lib/ -name "$(BLIS_LIB_BASE_NAME)-*.a" | $(GREP) -v "$(BLIS_LIB_BASE_NAME)-$(VERS_CONF).a" | $(GREP) -v $(BLIS_LIB_NAME))
+
+
+
+#
 # --- Targets/rules ------------------------------------------------------------
 #
 
@@ -347,7 +368,7 @@ all: libs
 libs: check $(MK_LIBS)
 
 install: libs install-libs install-headers \
-         install-lib-symlinks install-header-symlinks
+         install-lib-symlinks
 
 clean: cleanmost
 
@@ -420,15 +441,15 @@ endif
 
 install-libs: check $(MK_LIBS_INST_W_VERS_CONF)
 
-install-headers: check $(MK_INCL_DIR_INST_W_VERS_CONF)
+install-headers: check $(MK_INCL_DIR_INST)
 
-$(MK_INCL_DIR_INST_W_VERS_CONF): $(MK_HEADER_FILES) $(CONFIG_MK_PATH)
+$(MK_INCL_DIR_INST): $(MK_HEADER_FILES) $(CONFIG_MK_PATH)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	$(INSTALL) -m 0755 -d $(@)
 	$(INSTALL) -m 0644 $(MK_HEADER_FILES) $(@)
 else
 	@$(INSTALL) -m 0755 -d $(@)
-	@echo "Installing C header files into $(@)"
+	@echo "Installing C header files into $(@)/"
 	@$(INSTALL) -m 0644 $(MK_HEADER_FILES) $(@)
 endif
 
@@ -446,18 +467,6 @@ endif
 # --- Install-symlinks rules ---
 
 install-lib-symlinks: check $(MK_LIBS_INST)
-
-install-header-symlinks: check $(MK_INCL_DIR_INST)
-
-$(MK_INCL_DIR_INST): $(MK_INCL_DIR_INST_W_VERS_CONF)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	$(SYMLINK) $(<F) $(@F)
-	$(MV) $(@F) $(INSTALL_PREFIX)
-else
-	@echo "Installing symlink $(@F) into $(INSTALL_PREFIX)/"
-	@$(SYMLINK) $(<F) $(@F)
-	@$(MV) $(@F) $(INSTALL_PREFIX)
-endif
 
 $(INSTALL_PREFIX)/lib/%.a: $(INSTALL_PREFIX)/lib/%-$(VERS_CONF).a
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
@@ -520,5 +529,44 @@ endif
 changelog: check
 	@echo "Updating '$(CHANGELOG)' via '$(GIT_LOG)'."
 	@$(GIT_LOG) > $(CHANGELOG) 
+
+
+# --- Uninstall rules ---
+
+uninstall: uninstall-libs uninstall-lib-symlinks uninstall-headers
+
+uninstall-old: $(UNINSTALL_LIBS)
+
+uninstall-libs: check
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	- $(RM_F) $(MK_LIBS_INST_W_VERS_CONF)
+else
+	@echo "Removing $(MK_LIBS_INST_W_VERS_CONF)."
+	@- $(RM_F) $(MK_LIBS_INST_W_VERS_CONF)
+endif
+
+uninstall-lib-symlinks: check
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	- $(RM_F) $(MK_LIBS_INST)
+else
+	@echo "Removing $(MK_LIBS_INST)."
+	@- $(RM_F) $(MK_LIBS_INST)
+endif
+
+uninstall-headers: check
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	- $(RM_RF) $(MK_INCL_DIR_INST)
+else
+	@echo "Removing $(MK_INCL_DIR_INST)/."
+	@- $(RM_RF) $(MK_INCL_DIR_INST)
+endif
+
+$(UNINSTALL_LIBS): check
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	- $(RM_F) $@
+else
+	@echo "Removing $(@F) from $(@D)/."
+	@- $(RM_F) $@
+endif
 
 

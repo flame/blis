@@ -60,6 +60,7 @@ RM_F       := rm -f
 RM_RF      := rm -rf
 SYMLINK    := ln -sf
 FIND       := find
+GREP       := grep
 XARGS      := xargs
 RANLIB     := ranlib
 INSTALL    := install -c
