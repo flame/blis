@@ -119,7 +119,7 @@ endif
 
 # BLIS library and header path. This is simply wherever it was installed.
 BLIS_LIB_PATH  := $(INSTALL_PREFIX)/lib
-BLIS_INC_PATH  := $(INSTALL_PREFIX)/include
+BLIS_INC_PATH  := $(INSTALL_PREFIX)/include/blis
 
 # BLIS library.
 BLIS_LIB       := $(BLIS_LIB_PATH)/libblis.a
