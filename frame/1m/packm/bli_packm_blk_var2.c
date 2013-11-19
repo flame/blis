@@ -261,8 +261,9 @@ void PASTEMAC(ch,varname )( \
 			diagoffc_i_abs = bli_abs( diagoffc_i ); \
 \
 			/* Sanity check. Diagonals should not intersect the short end of
-			   a micro-panel, but we can probably still support those cases if
-			   it happens. */ \
+			   a micro-panel. If they do, then somehow the constraints on
+			   cache blocksizes being a whole multiple of the register
+			   blocksizes was somehow violated. */ \
 			if ( ( bli_is_col_stored_f( rs_p, cs_p ) && diagoffc_i < 0 ) || \
 			     ( bli_is_row_stored_f( rs_p, cs_p ) && diagoffc_i > 0 ) ) \
 				bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \
@@ -351,15 +352,15 @@ void PASTEMAC(ch,varname )( \
 			                        p12,         ldp ); \
 \
 			/* Pack the stored triangule of C11 to P11. */ \
-			PASTEMAC3(ch,ch,ch,scal2m)( 0, \
-			                            BLIS_NONUNIT_DIAG, \
-			                            uploc, \
-			                            conjc, \
-			                            p11_m, \
-			                            p11_n, \
-			                            beta_cast, \
-			                            c11, rs_c,   cs_c, \
-			                            p11, rs_p11, cs_p11 ); \
+			PASTEMAC3(ch,ch,ch,scal2m_unb_var1)( 0, \
+			                                     BLIS_NONUNIT_DIAG, \
+			                                     uploc, \
+			                                     conjc, \
+			                                     p11_m, \
+			                                     p11_n, \
+			                                     beta_cast, \
+			                                     c11, rs_c,   cs_c, \
+			                                     p11, rs_p11, cs_p11 ); \
 \
 			/* If source matrix C is Hermitian, we have to zero out the
 			   imaginary components of the diagonal of P11 in case the
@@ -437,13 +438,13 @@ void PASTEMAC(ch,varname )( \
 			dim_t  n_edge = n_panel_max; \
 			ctype* p_edge = p_begin + (i  )*rs_p; \
 \
-			PASTEMAC2(ch,ch,setm)( 0, \
-			                       BLIS_NONUNIT_DIAG, \
-			                       BLIS_DENSE, \
-			                       m_edge, \
-			                       n_edge, \
-			                       zero, \
-			                       p_edge, rs_p, cs_p ); \
+			PASTEMAC2(ch,ch,setm_unb_var1)( 0, \
+			                                BLIS_NONUNIT_DIAG, \
+			                                BLIS_DENSE, \
+			                                m_edge, \
+			                                n_edge, \
+			                                zero, \
+			                                p_edge, rs_p, cs_p ); \
 		} \
 \
 		if ( *n_panel != n_panel_max ) \
@@ -453,13 +454,13 @@ void PASTEMAC(ch,varname )( \
 			dim_t  n_edge = n_panel_max - j; \
 			ctype* p_edge = p_begin + (j  )*cs_p; \
 \
-			PASTEMAC2(ch,ch,setm)( 0, \
-			                       BLIS_NONUNIT_DIAG, \
-			                       BLIS_DENSE, \
-			                       m_edge, \
-			                       n_edge, \
-			                       zero, \
-			                       p_edge, rs_p, cs_p ); \
+			PASTEMAC2(ch,ch,setm_unb_var1)( 0, \
+			                                BLIS_NONUNIT_DIAG, \
+			                                BLIS_DENSE, \
+			                                m_edge, \
+			                                n_edge, \
+			                                zero, \
+			                                p_edge, rs_p, cs_p ); \
 		} \
 \
 /*

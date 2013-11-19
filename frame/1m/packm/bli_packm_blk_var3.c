@@ -272,8 +272,9 @@ void PASTEMAC(ch,varname )( \
 		          bli_is_triangular( strucc ) ) \
 		{ \
 			/* Sanity check. Diagonals should not intersect the short end of
-			   a micro-panel, but we can probably still support those cases if
-			   it happens. */ \
+			   a micro-panel. If they do, then somehow the constraints on
+			   cache blocksizes being a whole multiple of the register
+			   blocksizes was somehow violated. */ \
 			if ( ( bli_is_col_stored_f( rs_p, cs_p ) && diagoffc_i < 0 ) || \
 			     ( bli_is_row_stored_f( rs_p, cs_p ) && diagoffc_i > 0 ) ) \
 				bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \
