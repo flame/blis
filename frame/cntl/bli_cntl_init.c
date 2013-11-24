@@ -61,7 +61,6 @@ void bli_cntl_init( void )
 	bli_herk_cntl_init();
 	bli_her2k_cntl_init();
 	bli_trmm_cntl_init();
-	bli_trmm3_cntl_init();
 	bli_trsm_cntl_init();
 }
 
@@ -92,7 +91,6 @@ void bli_cntl_finalize( void )
 	bli_herk_cntl_finalize();
 	bli_her2k_cntl_finalize();
 	bli_trmm_cntl_finalize();
-	bli_trmm3_cntl_finalize();
 	bli_trsm_cntl_finalize();
 }
 

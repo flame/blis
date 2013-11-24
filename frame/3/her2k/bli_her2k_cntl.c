@@ -104,7 +104,6 @@ void bli_her2k_cntl_init()
 	                           BLIS_VARIANT2,
 	                           her2k_mr,
 	                           her2k_kr,
-	                           FALSE, // do NOT scale by alpha
 	                           FALSE, // already dense; densify not necessary
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
@@ -118,7 +117,6 @@ void bli_her2k_cntl_init()
 	                           BLIS_VARIANT2,
 	                           her2k_kr,
 	                           her2k_nr,
-	                           FALSE, // do NOT scale by alpha
 	                           FALSE, // already dense; densify not necessary
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
@@ -133,7 +131,6 @@ void bli_her2k_cntl_init()
 	                           BLIS_VARIANT1,
 	                           her2k_mr,
 	                           her2k_nr,
-	                           FALSE, // do NOT scale by beta
 	                           FALSE, // already dense; densify not necessary
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?

@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-extern packm_t*   packm_cntl_noscale;
+extern packm_t*   packm_cntl;
 extern packv_t*   packv_cntl;
 extern unpackm_t* unpackm_cntl;
 
@@ -93,21 +93,21 @@ void bli_her_cntl_init()
 	bli_her_cntl_obj_create( BLIS_BLOCKED,
 	                         BLIS_VARIANT1,
 	                         her_mc,
-	                         packv_cntl,           // pack x1 (if needed)
-	                         NULL,                 // do NOT pack C11
+	                         packv_cntl,       // pack x1 (if needed)
+	                         NULL,             // do NOT pack C11
 	                         ger_cntl_rp_bs_row,
 	                         her_cntl_bs_ke_lrow_ucol,
-	                         NULL );               // no unpacking needed
+	                         NULL );           // no unpacking needed
 	her_cntl_ge_lcol_urow
 	=
 	bli_her_cntl_obj_create( BLIS_BLOCKED,
 	                         BLIS_VARIANT2,
 	                         her_mc,
-	                         packv_cntl,           // pack x1 (if needed)
-	                         NULL,                 // do NOT pack C11
+	                         packv_cntl,       // pack x1 (if needed)
+	                         NULL,             // do NOT pack C11
 	                         ger_cntl_cp_bs_col,
 	                         her_cntl_bs_ke_lcol_urow,
-	                         NULL );               // no unpacking needed
+	                         NULL );           // no unpacking needed
 }
 
 void bli_her_cntl_finalize()

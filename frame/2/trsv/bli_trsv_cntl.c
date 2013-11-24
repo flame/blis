@@ -35,7 +35,7 @@
 #include "blis.h"
 
 extern scalv_t*   scalv_cntl;
-extern packm_t*   packm_cntl_noscale;
+extern packm_t*   packm_cntl;
 extern packv_t*   packv_cntl;
 extern unpackv_t* unpackv_cntl;
 
@@ -89,27 +89,27 @@ void bli_trsv_cntl_init()
 	trsv_cntl_ge_nrow_tcol
     =
 	bli_trsv_cntl_obj_create( BLIS_BLOCKED,
-                              BLIS_VARIANT1,           // use var1 to maximize x1 usage
+                              BLIS_VARIANT1,        // use var1 to maximize x1 usage
                               trsv_mc,
-                              scalv_cntl,              // scale x up-front
-                              packm_cntl_noscale,      // pack A11 (if needed)
-                              packv_cntl,              // pack x1 (if needed)
-                              gemv_cntl_rp_bs_dot,     // gemv_rp needed by var1
-                              NULL,                    // gemv_cp not needed by var1
+                              scalv_cntl,           // scale x up-front
+                              packm_cntl,           // pack A11 (if needed)
+                              packv_cntl,           // pack x1 (if needed)
+                              gemv_cntl_rp_bs_dot,  // gemv_rp needed by var1
+                              NULL,                 // gemv_cp not needed by var1
                               trsv_cntl_bs_ke_nrow_tcol,
-                              unpackv_cntl );          // unpack x1 (if needed)
+                              unpackv_cntl );       // unpack x1 (if needed)
 	trsv_cntl_ge_ncol_trow
     =
 	bli_trsv_cntl_obj_create( BLIS_BLOCKED,
-                              BLIS_VARIANT1,           // use var1 to maximize x1 usage
+                              BLIS_VARIANT1,        // use var1 to maximize x1 usage
                               trsv_mc,
-                              scalv_cntl,              // scale x up-front
-                              packm_cntl_noscale,      // pack A11 (if needed)
-                              packv_cntl,              // pack x1 (if needed)
-                              gemv_cntl_rp_bs_axpy,    // gemv_rp needed by var1
-                              NULL,                    // gemv_cp not needed by var1
+                              scalv_cntl,           // scale x up-front
+                              packm_cntl,           // pack A11 (if needed)
+                              packv_cntl,           // pack x1 (if needed)
+                              gemv_cntl_rp_bs_axpy, // gemv_rp needed by var1
+                              NULL,                 // gemv_cp not needed by var1
                               trsv_cntl_bs_ke_ncol_trow,
-                              unpackv_cntl );          // unpack x1 (if needed)
+                              unpackv_cntl );       // unpack x1 (if needed)
 }
 
 void bli_trsv_cntl_finalize()

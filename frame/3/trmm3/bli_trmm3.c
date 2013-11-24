@@ -34,7 +34,8 @@
 
 #include "blis.h"
 
-extern trmm_t* trmm3_cntl;
+extern trmm_t* trmm_l_cntl;
+extern trmm_t* trmm_r_cntl;
 
 //
 // Define object-based interface.
@@ -133,7 +134,8 @@ void bli_trmm3( side_t  side,
 	                             &beta_local );
 
 	// Choose the control tree.
-	cntl = trmm3_cntl;
+	if ( bli_is_left( side ) ) cntl = trmm_l_cntl;
+	else                       cntl = trmm_r_cntl;
 
 	// Invoke the internal back-end.
 	bli_trmm_int( &alpha_local,

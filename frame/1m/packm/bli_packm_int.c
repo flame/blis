@@ -110,8 +110,9 @@ void bli_packm_int( obj_t*   beta,
 	// to be non-unit even when no scaling is prescribed. If the control tree
 	// indicates no scaling, then make sure that BLIS_ONE is passed into the
 	// packm implementation.
-	if ( cntl_does_scale( cntl ) ) beta_use = beta;
-	else                           beta_use = &BLIS_ONE;
+	//if ( cntl_does_scale( cntl ) ) beta_use = beta;
+	//else                           beta_use = &BLIS_ONE;
+	beta_use = &BLIS_ONE;
 
 	// Extract the variant number and implementation type.
 	n = cntl_var_num( cntl );

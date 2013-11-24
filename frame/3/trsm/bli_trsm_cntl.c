@@ -116,7 +116,6 @@ void bli_trsm_cntl_init()
 	                           // support right and bottom-right edge cases
 	                           trsm_mr,
 	                           trsm_mr,
-	                           FALSE, // do NOT scale by alpha
 	                           TRUE,  // densify
 	                           TRUE,  // invert diagonal
 	                           TRUE,  // reverse iteration if upper?
@@ -132,7 +131,6 @@ void bli_trsm_cntl_init()
 	                           // B_pack is updated (ie: serves as C) in trsm
 	                           trsm_mr,
 	                           trsm_nr,
-	                           FALSE, // do NOT scale by alpha
 	                           FALSE, // already dense; densify not necessary
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
@@ -147,7 +145,6 @@ void bli_trsm_cntl_init()
 	                           BLIS_VARIANT2,
 	                           trsm_nr,
 	                           trsm_mr,
-	                           FALSE, // do NOT scale by alpha
 	                           FALSE, // already dense; densify not necessary
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
@@ -161,7 +158,6 @@ void bli_trsm_cntl_init()
 	                           BLIS_VARIANT3, // pack panels of B compactly
 	                           trsm_mr,
 	                           trsm_mr,
-	                           FALSE, // do NOT scale by alpha
 	                           TRUE,  // densify
 	                           TRUE,  // invert diagonal
 	                           FALSE, // reverse iteration if upper?
@@ -176,7 +172,6 @@ void bli_trsm_cntl_init()
 	                           BLIS_VARIANT1,
 	                           trsm_mr,
 	                           trsm_nr,
-	                           FALSE, // do NOT scale by beta
 	                           FALSE, // already dense; densify not necessary
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?

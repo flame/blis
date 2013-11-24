@@ -185,8 +185,10 @@ void bli_packm_init_pack( bool_t    densify,
 	void*   buf;
 
 
-	// We begin by copying the basic fields of c.
-	bli_obj_alias_to( *c, *p );
+	// We begin by copying the basic fields of c. We do NOT copy the
+	// pack_mem entry from c because the entry in p may be cached from
+	// a previous iteration, and thus we don't want to overwrite it.
+	bli_obj_alias_for_packing( *c, *p );
 
 	// Update the dimension fields to explicitly reflect a transposition,
 	// if needed.

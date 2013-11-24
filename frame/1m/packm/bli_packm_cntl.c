@@ -34,18 +34,13 @@
 
 #include "blis.h"
 
-packm_t* packm_cntl_row_noscale;
-packm_t* packm_cntl_row_scale;
-packm_t* packm_cntl_col_noscale;
-packm_t* packm_cntl_col_scale;
+packm_t* packm_cntl_row;
+packm_t* packm_cntl_col;
 
-packm_t* packm_cntl_rpn_noscale;
-packm_t* packm_cntl_rpn_scale;
-packm_t* packm_cntl_cpn_noscale;
-packm_t* packm_cntl_cpn_scale;
+packm_t* packm_cntl_rpn;
+packm_t* packm_cntl_cpn;
 
-packm_t* packm_cntl_noscale;
-packm_t* packm_cntl_scale;
+packm_t* packm_cntl;
 
 blksz_t* packm_mult_ldim;
 blksz_t* packm_mult_nvec;
@@ -87,27 +82,13 @@ void bli_packm_cntl_init()
 	// with structure, though they can also be used on matrices that
 	// are already dense and/or have no structure.
 
-	// Create control trees to pack by rows (with and without scaling).
-	packm_cntl_row_noscale
+	// Create control trees to pack by rows.
+	packm_cntl_row
 	=
 	bli_packm_cntl_obj_create( BLIS_UNBLOCKED,
 	                           BLIS_VARIANT1,    // When packing to rows:
 	                           packm_mult_nvec,  // - nvec multiple is used for m dimension
 	                           packm_mult_ldim,  // - ldim multiple is used for n dimension
-	                           FALSE,            // do NOT scale
-	                           FALSE,            // do NOT densify structure
-	                           FALSE,            // do NOT invert diagonal
-	                           FALSE,            // do NOT iterate backwards if upper
-	                           FALSE,            // do NOT iterate backwards if lower
-	                           BLIS_PACKED_ROWS,
-	                           BLIS_BUFFER_FOR_GEN_USE );
-	packm_cntl_row_scale
-	=
-	bli_packm_cntl_obj_create( BLIS_UNBLOCKED,
-	                           BLIS_VARIANT1,    // When packing to rows:
-	                           packm_mult_nvec,  // - nvec multiple is used for m dimension
-	                           packm_mult_ldim,  // - ldim multiple is used for n dimension
-	                           TRUE,             // do scale
 	                           FALSE,            // do NOT densify structure
 	                           FALSE,            // do NOT invert diagonal
 	                           FALSE,            // do NOT iterate backwards if upper
@@ -116,27 +97,13 @@ void bli_packm_cntl_init()
 	                           BLIS_BUFFER_FOR_GEN_USE );
 
 
-	// Create control trees to pack by columns (with and without scaling).
-	packm_cntl_col_noscale
+	// Create control trees to pack by columns.
+	packm_cntl_col
 	=
 	bli_packm_cntl_obj_create( BLIS_UNBLOCKED,
 	                           BLIS_VARIANT1,    // When packing to columns:
 	                           packm_mult_ldim,  // - ldim multiple is used for m dimension
 	                           packm_mult_nvec,  // - nvec multiple is used for n dimension
-	                           FALSE,            // do NOT scale
-	                           FALSE,            // do NOT densify structure
-	                           FALSE,            // do NOT invert diagonal
-	                           FALSE,            // do NOT iterate backwards if upper
-	                           FALSE,            // do NOT iterate backwards if lower
-	                           BLIS_PACKED_COLUMNS,
-	                           BLIS_BUFFER_FOR_GEN_USE );
-	packm_cntl_col_scale
-	=
-	bli_packm_cntl_obj_create( BLIS_UNBLOCKED,
-	                           BLIS_VARIANT1,    // When packing to columns:
-	                           packm_mult_ldim,  // - ldim multiple is used for m dimension
-	                           packm_mult_nvec,  // - nvec multiple is used for n dimension
-	                           TRUE,             // do scale
 	                           FALSE,            // do NOT densify structure
 	                           FALSE,            // do NOT invert diagonal
 	                           FALSE,            // do NOT iterate backwards if upper
@@ -147,16 +114,13 @@ void bli_packm_cntl_init()
 
 	// Set defaults when we don't care whether the packing is by rows or
 	// by columns.
-	packm_cntl_noscale = packm_cntl_col_noscale;
-	packm_cntl_scale   = packm_cntl_col_scale;
+	packm_cntl = packm_cntl_col;
 }
 
 void bli_packm_cntl_finalize()
 {
-	bli_cntl_obj_free( packm_cntl_row_noscale );
-	bli_cntl_obj_free( packm_cntl_row_scale );
-	bli_cntl_obj_free( packm_cntl_col_noscale );
-	bli_cntl_obj_free( packm_cntl_col_scale );
+	bli_cntl_obj_free( packm_cntl_row );
+	bli_cntl_obj_free( packm_cntl_col );
 
 	bli_blksz_obj_free( packm_mult_ldim );
 	bli_blksz_obj_free( packm_mult_nvec );
@@ -166,7 +130,6 @@ packm_t* bli_packm_cntl_obj_create( impl_t     impl_type,
                                     varnum_t   var_num,
                                     blksz_t*   mr,
                                     blksz_t*   nr,
-                                    bool_t     does_scale,
                                     bool_t     does_densify,
                                     bool_t     does_invert_diag,
                                     bool_t     rev_iter_if_upper,
@@ -182,7 +145,6 @@ packm_t* bli_packm_cntl_obj_create( impl_t     impl_type,
 	cntl->var_num           = var_num;
 	cntl->mr                = mr;
 	cntl->nr                = nr;
-	cntl->does_scale        = does_scale;
 	cntl->does_densify      = does_densify;
 	cntl->does_invert_diag  = does_invert_diag;
 	cntl->rev_iter_if_upper = rev_iter_if_upper;
@@ -198,7 +160,6 @@ void bli_packm_cntl_obj_init( packm_t*   cntl,
                               varnum_t   var_num,
                               blksz_t*   mr,
                               blksz_t*   nr,
-                              bool_t     does_scale,
                               bool_t     does_densify,
                               bool_t     does_invert_diag,
                               bool_t     rev_iter_if_upper,
@@ -210,7 +171,6 @@ void bli_packm_cntl_obj_init( packm_t*   cntl,
 	cntl->var_num           = var_num;
 	cntl->mr                = mr;
 	cntl->nr                = nr;
-	cntl->does_scale        = does_scale;
 	cntl->does_densify      = does_densify;
 	cntl->does_invert_diag  = does_invert_diag;
 	cntl->rev_iter_if_upper = rev_iter_if_upper;

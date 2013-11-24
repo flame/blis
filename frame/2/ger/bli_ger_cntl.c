@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-extern packm_t*   packm_cntl_noscale;
+extern packm_t*   packm_cntl;
 extern packv_t*   packv_cntl;
 extern unpackm_t* unpackm_cntl;
 
@@ -104,21 +104,21 @@ void bli_ger_cntl_init()
 	bli_ger_cntl_obj_create( BLIS_BLOCKED,
 	                         BLIS_VARIANT2,
 	                         ger_nc,
-	                         NULL,               // x is not partitioned in var2
-	                         packv_cntl,         // pack y1 (if needed)
-	                         packm_cntl_noscale, // pack A1 (if needed)
+	                         NULL,           // x is not partitioned in var2
+	                         packv_cntl,     // pack y1 (if needed)
+	                         packm_cntl,     // pack A1 (if needed)
 	                         ger_cntl_bs_ke_row,
-	                         unpackm_cntl );     // unpack A1 (if packed)
+	                         unpackm_cntl ); // unpack A1 (if packed)
 	ger_cntl_rp_bs_col
 	=
 	bli_ger_cntl_obj_create( BLIS_BLOCKED,
 	                         BLIS_VARIANT2,
 	                         ger_nc,
-	                         NULL,               // x is not partitioned in var2
-	                         packv_cntl,         // pack y1 (if needed)
-	                         packm_cntl_noscale, // pack A1 (if needed)
+	                         NULL,           // x is not partitioned in var2
+	                         packv_cntl,     // pack y1 (if needed)
+	                         packm_cntl,     // pack A1 (if needed)
 	                         ger_cntl_bs_ke_col,
-	                         unpackm_cntl );     // unpack A1 (if packed)
+	                         unpackm_cntl ); // unpack A1 (if packed)
 
 
 	// Create control trees for problems with relatively small n dimension
@@ -128,21 +128,21 @@ void bli_ger_cntl_init()
 	bli_ger_cntl_obj_create( BLIS_BLOCKED,
 	                         BLIS_VARIANT1,
 	                         ger_mc,
-	                         packv_cntl,         // pack x1 (if needed)
-	                         NULL,               // y is not partitioned in var1
-	                         packm_cntl_noscale, // pack A1 (if needed)
+	                         packv_cntl,     // pack x1 (if needed)
+	                         NULL,           // y is not partitioned in var1
+	                         packm_cntl,     // pack A1 (if needed)
 	                         ger_cntl_bs_ke_row,
-	                         unpackm_cntl );     // unpack A1 (if packed)
+	                         unpackm_cntl ); // unpack A1 (if packed)
 	ger_cntl_cp_bs_col
 	=
 	bli_ger_cntl_obj_create( BLIS_BLOCKED,
 	                         BLIS_VARIANT1,
 	                         ger_mc,
-	                         packv_cntl,         // pack x1 (if needed)
-	                         NULL,               // y is not partitioned in var1
-	                         packm_cntl_noscale, // pack A1 (if needed)
+	                         packv_cntl,     // pack x1 (if needed)
+	                         NULL,           // y is not partitioned in var1
+	                         packm_cntl,     // pack A1 (if needed)
 	                         ger_cntl_bs_ke_col,
-	                         unpackm_cntl );     // unpack A1 (if packed)
+	                         unpackm_cntl ); // unpack A1 (if packed)
 
 
 	// Create control trees for generally large problems. Here, we choose a
@@ -152,21 +152,21 @@ void bli_ger_cntl_init()
 	bli_ger_cntl_obj_create( BLIS_BLOCKED,
 	                         BLIS_VARIANT2,
 	                         ger_nc,
-	                         NULL,               // x is not partitioned in var2
-	                         packv_cntl,         // pack y1 (if needed)
-	                         NULL,               // do not pack A1
+	                         NULL,           // x is not partitioned in var2
+	                         packv_cntl,     // pack y1 (if needed)
+	                         NULL,           // do not pack A1
 	                         ger_cntl_cp_bs_row,
-	                         NULL );             // do not unpack A1
+	                         NULL );         // do not unpack A1
 	ger_cntl_ge_col   
 	=
 	bli_ger_cntl_obj_create( BLIS_BLOCKED,
 	                         BLIS_VARIANT2,
 	                         ger_nc,
-	                         NULL,               // x is not partitioned in var2
-	                         packv_cntl,         // pack y1 (if needed)
-	                         NULL,               // do not pack A1
+	                         NULL,           // x is not partitioned in var2
+	                         packv_cntl,     // pack y1 (if needed)
+	                         NULL,           // do not pack A1
 	                         ger_cntl_cp_bs_col,
-	                         NULL );             // do not unpack A1
+	                         NULL );         // do not unpack A1
 }
 
 void bli_ger_cntl_finalize()

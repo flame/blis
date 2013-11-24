@@ -480,15 +480,12 @@ typedef struct obj_s
 	inc_t         ps;       // panel stride (distance to next panel)
 	inc_t         pd;       // panel dimension (the "width" of a panel:
 	                        // usually MR or NR)
-
-	//mem_t         cast_mem; // cached memory region for casting
-
 } obj_t;
 
 
 // Define these macros here since they must be updated if contents of
 // obj_t changes.
-#define bli_obj_init_as_copy_of( a, b ) \
+#define bli_obj_init_basic_shallow_copy_of( a, b ) \
 { \
 	(b).root      = (a).root; \
 \
@@ -505,11 +502,27 @@ typedef struct obj_s
 	(b).rs        = (a).rs; \
 	(b).cs        = (a).cs; \
 \
+	(b).scalar    = (a).scalar; \
+\
 	/* We must NOT copy pack_mem field since this macro forms the basis of
 	   bli_obj_alias_to(), which is used in packm_init(). There, we want to
 	   copy the basic fields of the obj_t but PRESERVE the pack_mem field
-	   (and the corresponding dimensions and stride) of the destination
-	   object since it holds the cached mem_t object and buffer. */ \
+	   of the destination object since it holds the "cached" mem_t object
+	   and buffer. The other fields, such as padded dimensions, are always
+	   set by bli_packm_init(), so we don't need to copy them either. */ \
+}
+
+#define bli_obj_init_full_shallow_copy_of( a, b ) \
+{ \
+	/* This macro implements a full alias (shallow copy) that copies all
+	   fields of the obj_t struct. */ \
+	bli_obj_init_basic_shallow_copy_of( a, b ); \
+\
+	(b).pack_mem  = (a).pack_mem; \
+	(b).m_padded  = (a).m_padded; \
+	(b).n_padded  = (a).n_padded; \
+	(b).ps        = (a).ps; \
+	(b).pd        = (a).pd; \
 }
 
 #define bli_obj_init_subpart_from( a, b ) \
@@ -518,8 +531,8 @@ typedef struct obj_s
 \
 	(b).offm      = (a).offm; \
 	(b).offn      = (a).offn; \
-\
-\
+	/* Avoid copying m since it will be overwritten. */ \
+	/* Avoid copying n since it will be overwritten. */ \
 	(b).diag_off  = (a).diag_off; \
 \
 	(b).info      = (a).info; \
@@ -529,17 +542,18 @@ typedef struct obj_s
 	(b).rs        = (a).rs; \
 	(b).cs        = (a).cs; \
 \
+	(b).scalar    = (a).scalar; \
+\
 	/* We want to copy the pack_mem field here because this macro is used
 	   when creating subpartitions, including those of packed objects. In
 	   those situations, we want the subpartition to inherit the pack_mem
-	   field, and the corresponding packed dimensions, of its parent. */ \
+	   field of its parent, as well as other related fields such as the
+	   padded dimensions. */ \
 	(b).pack_mem  = (a).pack_mem; \
 	(b).m_padded  = (a).m_padded; \
 	(b).n_padded  = (a).n_padded; \
 	(b).pd        = (a).pd; \
 	(b).ps        = (a).ps; \
-\
-	/*(b).cast_mem  = (a).cast_mem;*/ \
 }
 
 

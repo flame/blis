@@ -35,7 +35,7 @@
 #include "blis.h"
 
 extern scalv_t*   scalv_cntl;
-extern packm_t*   packm_cntl_noscale;
+extern packm_t*   packm_cntl;
 extern packv_t*   packv_cntl;
 extern unpackv_t* unpackv_cntl;
 
@@ -95,7 +95,7 @@ void bli_hemv_cntl_init()
 	                          BLIS_VARIANT2,
 	                          hemv_mc,
 	                          scalv_cntl,           // scale y up-front
-	                          packm_cntl_noscale,   // pack A11 (if needed)
+	                          packm_cntl,           // pack A11 (if needed)
 	                          packv_cntl,           // pack x1 (if needed)
 	                          packv_cntl,           // pack y1 (if needed)
 	                          gemv_cntl_rp_bs_dot,  // gemv_n_rp needed by var2
@@ -110,7 +110,7 @@ void bli_hemv_cntl_init()
 	                          BLIS_VARIANT2,
 	                          hemv_mc,
 	                          scalv_cntl,           // scale y up-front
-	                          packm_cntl_noscale,   // pack A11 (if needed)
+	                          packm_cntl,           // pack A11 (if needed)
 	                          packv_cntl,           // pack x1 (if needed)
 	                          packv_cntl,           // pack y1 (if needed)
 	                          gemv_cntl_rp_bs_axpy, // gemv_n_rp needed by var2

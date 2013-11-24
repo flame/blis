@@ -799,11 +799,19 @@ bli_obj_width_stored( obj )
 
 // -- Miscellaneous object macros --
 
-// Make an alias (shallow copy)
+// Make a special alias (shallow copy) that does not overwrite pack_mem
+// entry.
+
+#define bli_obj_alias_for_packing( a, b ) \
+{ \
+	bli_obj_init_basic_shallow_copy_of( a, b ); \
+}
+
+// Make a full alias (shallow copy), including pack_mem and friends
 
 #define bli_obj_alias_to( a, b ) \
 { \
-	bli_obj_init_as_copy_of( a, b ); \
+	bli_obj_init_full_shallow_copy_of( a, b ); \
 }
 
 // Check if two objects are aliases of one another
@@ -844,10 +852,8 @@ bli_obj_width_stored( obj )
 #define bli_obj_init_pack( obj_p ) \
 { \
 	mem_t* pack_mem = bli_obj_pack_mem( *obj_p ); \
-	/*mem_t* cast_mem = bli_obj_cast_mem( *obj_p );*/ \
 \
 	bli_mem_set_buffer( NULL, pack_mem ); \
-	/*bli_mem_set_buffer( NULL, cast_mem );*/ \
 }
 
 
@@ -868,12 +874,6 @@ bli_obj_width_stored( obj )
 	mem_t* pack_mem = bli_obj_pack_mem( *(obj_p) ); \
 	if ( bli_mem_is_alloc( pack_mem ) ) \
 		bli_mem_release( pack_mem ); \
-\
-/*
-	mem_t* cast_mem = bli_obj_cast_mem( *(obj_p) ); \
-	if ( bli_mem_is_alloc( cast_mem ) ) \
-		bli_mem_release( cast_mem ); \
-*/ \
 }
 
 

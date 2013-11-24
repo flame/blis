@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-extern packm_t*   packm_cntl_noscale;
+extern packm_t*   packm_cntl;
 extern packv_t*   packv_cntl;
 extern unpackm_t* unpackm_cntl;
 
@@ -93,25 +93,25 @@ void bli_her2_cntl_init()
 	bli_her2_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT1,
 	                          her2_mc,
-	                          packv_cntl,          // pack x1 (if needed)
-	                          packv_cntl,          // pack y1 (if needed)
-	                          packm_cntl_noscale,  // pack C11 (if needed)
+	                          packv_cntl,     // pack x1 (if needed)
+	                          packv_cntl,     // pack y1 (if needed)
+	                          packm_cntl,     // pack C11 (if needed)
 	                          ger_cntl_rp_bs_row,
 	                          ger_cntl_rp_bs_row,
 	                          her2_cntl_bs_ke_lrow_ucol,
-	                          unpackm_cntl );      // unpack C11 (if packed)
+	                          unpackm_cntl ); // unpack C11 (if packed)
 	her2_cntl_ge_lcol_urow
 	=
 	bli_her2_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT4,
 	                          her2_mc,
-	                          packv_cntl,          // pack x1 (if needed)
-	                          packv_cntl,          // pack y1 (if needed)
-	                          packm_cntl_noscale,  // pack C11 (if needed)
+	                          packv_cntl,     // pack x1 (if needed)
+	                          packv_cntl,     // pack y1 (if needed)
+	                          packm_cntl,     // pack C11 (if needed)
 	                          ger_cntl_cp_bs_col,
 	                          ger_cntl_cp_bs_col,
 	                          her2_cntl_bs_ke_lcol_urow,
-	                          unpackm_cntl );      // unpack C11 (if packed)
+	                          unpackm_cntl ); // unpack C11 (if packed)
 }
 
 void bli_her2_cntl_finalize()

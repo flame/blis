@@ -116,7 +116,6 @@ void bli_trmm_cntl_init()
 	                           // multiple is set to mr.
 	                           trmm_mr,
 	                           trmm_mr,
-	                           FALSE, // do NOT scale by alpha
 	                           TRUE,  // densify
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
@@ -132,7 +131,6 @@ void bli_trmm_cntl_init()
 	                           // since "k" dim multiple is set to mr above.
 	                           trmm_mr,
 	                           trmm_nr,
-	                           FALSE, // do NOT scale by alpha
 	                           FALSE, // already dense
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
@@ -149,7 +147,6 @@ void bli_trmm_cntl_init()
 	                           // multiple is set to nr.
 	                           trmm_mr,
 	                           trmm_nr,
-	                           FALSE, // do NOT scale by alpha
 	                           FALSE, // already dense
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
@@ -165,7 +162,6 @@ void bli_trmm_cntl_init()
 	                           // since "k" dim multiple is set to nr above.
 	                           trmm_nr,
 	                           trmm_nr,
-	                           FALSE, // do NOT scale by alpha
 	                           TRUE,  // densify
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
@@ -180,7 +176,6 @@ void bli_trmm_cntl_init()
 	                           BLIS_VARIANT1,
 	                           trmm_mr,
 	                           trmm_nr,
-	                           FALSE, // do NOT scale by beta
 	                           FALSE, // already dense; densify not necessary
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?

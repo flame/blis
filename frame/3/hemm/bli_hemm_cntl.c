@@ -103,7 +103,6 @@ void bli_hemm_cntl_init()
 	                           BLIS_VARIANT2,
 	                           hemm_mr,
 	                           hemm_kr,
-	                           FALSE, // do NOT scale by alpha
 	                           TRUE,  // densify
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
@@ -117,9 +116,7 @@ void bli_hemm_cntl_init()
 	                           BLIS_VARIANT2,
 	                           hemm_kr,
 	                           hemm_nr,
-	                           FALSE, // do NOT scale by alpha
-	                           //FALSE, // already dense; densify not necessary
-	                           TRUE,  // densify (if needed)
+	                           TRUE,  // densify
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
 	                           FALSE, // reverse iteration if lower?
@@ -133,7 +130,6 @@ void bli_hemm_cntl_init()
 	                           BLIS_VARIANT1,
 	                           hemm_mr,
 	                           hemm_nr,
-	                           FALSE, // do NOT scale by beta
 	                           FALSE, // already dense; densify not necessary
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
