@@ -45,7 +45,15 @@ void bli_sgemm_8x8(
                         float* a_next, float* b_next
                       )
 {
-	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
+	/* Just call the reference implementation. */
+	bli_sgemm_ref_mxn( k,
+	                   alpha,
+	                   a,
+	                   b,
+	                   beta,
+	                   c, rs_c, cs_c,
+	                   a_next,
+	                   b_next );
 }
 
 
@@ -244,7 +252,15 @@ void bli_cgemm_8x8(
                         scomplex* a_next, scomplex* b_next
                       )
 {
-	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
+	/* Just call the reference implementation. */
+	bli_cgemm_ref_mxn( k,
+	                   alpha,
+	                   a,
+	                   b,
+	                   beta,
+	                   c, rs_c, cs_c,
+	                   a_next,
+	                   b_next );
 }
 
 void bli_zgemm_8x8(
@@ -257,7 +273,15 @@ void bli_zgemm_8x8(
                         dcomplex* a_next, dcomplex* b_next
                       )
 {
-	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
+	/* Just call the reference implementation. */
+	bli_zgemm_ref_mxn( k,
+	                   alpha,
+	                   a,
+	                   b,
+	                   beta,
+	                   c, rs_c, cs_c,
+	                   a_next,
+	                   b_next );
 }
 
 
@@ -272,7 +296,15 @@ void bli_sgemm_8x8_mt(
                         int t_id
                       )
 {
-	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
+	/* Just call the reference implementation. */
+	bli_sgemm_ref_mxn( k,
+	                   alpha,
+	                   a,
+	                   b,
+	                   beta,
+	                   c, rs_c, cs_c,
+	                   a_next,
+	                   b_next );
 }
 
 void bli_cgemm_8x8_mt(
@@ -286,7 +318,15 @@ void bli_cgemm_8x8_mt(
                         int t_id
                       )
 {
-	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
+	/* Just call the reference implementation. */
+	bli_cgemm_ref_mxn( k,
+	                   alpha,
+	                   a,
+	                   b,
+	                   beta,
+	                   c, rs_c, cs_c,
+	                   a_next,
+	                   b_next );
 }
 
 void bli_zgemm_8x8_mt(
@@ -300,5 +340,13 @@ void bli_zgemm_8x8_mt(
                         int t_id
                       )
 {
-	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
+	/* Just call the reference implementation. */
+	bli_zgemm_ref_mxn( k,
+	                   alpha,
+	                   a,
+	                   b,
+	                   beta,
+	                   c, rs_c, cs_c,
+	                   a_next,
+	                   b_next );
 }

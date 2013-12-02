@@ -40,7 +40,10 @@ void bli_strsm_l_opt_d4x4(
                            float* restrict    c11, inc_t rs_c, inc_t cs_c
                          )
 {
-	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
+	/* Just call the reference implementation. */
+	bli_strsm_l_ref_mxn( a11,
+	                     b11,
+	                     c11, rs_c, cs_c );
 }
 
 void bli_dtrsm_l_opt_d4x4(
@@ -208,7 +211,10 @@ void bli_ctrsm_l_opt_d4x4(
                            scomplex* restrict c11, inc_t rs_c, inc_t cs_c
                          )
 {
-	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
+	/* Just call the reference implementation. */
+	bli_ctrsm_l_ref_mxn( a11,
+	                     b11,
+	                     c11, rs_c, cs_c );
 }
 
 void bli_ztrsm_l_opt_d4x4(
@@ -217,6 +223,9 @@ void bli_ztrsm_l_opt_d4x4(
                            dcomplex* restrict c11, inc_t rs_c, inc_t cs_c
                          )
 {
-	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
+	/* Just call the reference implementation. */
+	bli_ztrsm_l_ref_mxn( a11,
+	                     b11,
+	                     c11, rs_c, cs_c );
 }
 

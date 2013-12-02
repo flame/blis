@@ -46,7 +46,16 @@ void bli_sgemmtrsm_u_opt_d4x4(
                                float* restrict    b_next
                              )
 {
-	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
+	/* Just call the reference implementation. */
+	bli_sgemmtrsm_l_ref_mxn( k,
+	                         alpha,
+	                         a10,
+	                         a11,
+	                         b01,
+	                         b11,
+	                         c11, rs_c, cs_c,
+	                         a_next,
+	                         b_next );
 }
 
 void bli_dgemmtrsm_u_opt_d4x4(
@@ -532,7 +541,16 @@ void bli_cgemmtrsm_u_opt_d4x4(
                                scomplex* restrict b_next
                              )
 {
-	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
+	/* Just call the reference implementation. */
+	bli_cgemmtrsm_l_ref_mxn( k,
+	                         alpha,
+	                         a10,
+	                         a11,
+	                         b01,
+	                         b11,
+	                         c11, rs_c, cs_c,
+	                         a_next,
+	                         b_next );
 }
 
 void bli_zgemmtrsm_u_opt_d4x4(
@@ -547,6 +565,15 @@ void bli_zgemmtrsm_u_opt_d4x4(
                                dcomplex* restrict b_next
                              )
 {
-	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
+	/* Just call the reference implementation. */
+	bli_zgemmtrsm_l_ref_mxn( k,
+	                         alpha,
+	                         a10,
+	                         a11,
+	                         b01,
+	                         b11,
+	                         c11, rs_c, cs_c,
+	                         a_next,
+	                         b_next );
 }
 
