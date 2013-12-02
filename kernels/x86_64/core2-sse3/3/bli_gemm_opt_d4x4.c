@@ -1343,7 +1343,15 @@ void bli_cgemm_opt_d4x4(
                          scomplex* restrict b_next
                        )
 {
-	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
+	/* Just call the reference implementation. */
+	bli_cgemm_ref_mxn( k,
+	                   alpha,
+	                   a,
+	                   b,
+	                   beta,
+	                   c, rs_c, cs_c,
+	                   a_next,
+	                   b_next );
 }
 
 void bli_zgemm_opt_d4x4(
@@ -1357,6 +1365,14 @@ void bli_zgemm_opt_d4x4(
                          dcomplex* restrict b_next
                        )
 {
-	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
+	/* Just call the reference implementation. */
+	bli_zgemm_ref_mxn( k,
+	                   alpha,
+	                   a,
+	                   b,
+	                   beta,
+	                   c, rs_c, cs_c,
+	                   a_next,
+	                   b_next );
 }
 

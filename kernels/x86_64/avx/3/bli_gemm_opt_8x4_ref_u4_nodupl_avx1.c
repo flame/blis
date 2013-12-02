@@ -48,7 +48,15 @@ void bli_sgemm_opt_8x4_ref_u4_nodupl_avx1(
                         float* restrict    b_next
                       )
 {
-	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
+	/* Just call the reference implementation. */
+	bli_sgemm_ref_mxn( k,
+	                   alpha,
+	                   a,
+	                   b,
+	                   beta,
+	                   c, rs_c, cs_c,
+	                   a_next,
+	                   b_next );
 }
 
 
@@ -637,7 +645,15 @@ void bli_cgemm_opt_8x4_ref_u4_nodupl_avx1(
                         scomplex* restrict b_next
                       )
 {
-	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
+	/* Just call the reference implementation. */
+	bli_cgemm_ref_mxn( k,
+	                   alpha,
+	                   a,
+	                   b,
+	                   beta,
+	                   c, rs_c, cs_c,
+	                   a_next,
+	                   b_next );
 }
 
 
@@ -653,6 +669,14 @@ void bli_zgemm_opt_8x4_ref_u4_nodupl_avx1(
                         dcomplex* restrict b_next
                       )
 {
-	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
+	/* Just call the reference implementation. */
+	bli_zgemm_ref_mxn( k,
+	                   alpha,
+	                   a,
+	                   b,
+	                   beta,
+	                   c, rs_c, cs_c,
+	                   a_next,
+	                   b_next );
 }
 
