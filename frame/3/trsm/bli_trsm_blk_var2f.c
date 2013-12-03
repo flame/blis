@@ -34,10 +34,8 @@
 
 #include "blis.h"
 
-void bli_trsm_blk_var2f( obj_t*  alpha,
-                         obj_t*  a,
+void bli_trsm_blk_var2f( obj_t*  a,
                          obj_t*  b,
-                         obj_t*  beta,
                          obj_t*  c,
                          trsm_t* cntl )
 {
@@ -58,7 +56,7 @@ void bli_trsm_blk_var2f( obj_t*  alpha,
 	n_trans = bli_obj_width_after_trans( *b );
 
 	// Scale C by beta (if instructed).
-	bli_scalm_int( beta,
+	bli_scalm_int( &BLIS_ONE,
 	               c,
 	               cntl_sub_scalm( cntl ) );
 
@@ -66,9 +64,8 @@ void bli_trsm_blk_var2f( obj_t*  alpha,
 	bli_packm_init( a, &a_pack,
 	                cntl_sub_packm_a( cntl ) );
 
-	// Pack A and scale by alpha (if instructed).
-	bli_packm_int( alpha,
-	               a, &a_pack,
+	// Pack A (if instructed).
+	bli_packm_int( a, &a_pack,
 	               cntl_sub_packm_a( cntl ) );
 
 	// Partition along the n dimension.
@@ -90,21 +87,19 @@ void bli_trsm_blk_var2f( obj_t*  alpha,
 		bli_packm_init( &c1, &c1_pack,
 		                cntl_sub_packm_c( cntl ) );
 
-		// Pack B1 and scale by alpha (if instructed).
-		bli_packm_int( alpha,
-		               &b1, &b1_pack,
+		// Pack B1 (if instructed).
+		bli_packm_int( &b1, &b1_pack,
 		               cntl_sub_packm_b( cntl ) );
 
-		// Pack C1 and scale by beta (if instructed).
-		bli_packm_int( beta,
-		               &c1, &c1_pack,
+		// Pack C1 (if instructed).
+		bli_packm_int( &c1, &c1_pack,
 		               cntl_sub_packm_c( cntl ) );
 
 		// Perform trsm subproblem.
-		bli_trsm_int( alpha,
+		bli_trsm_int( &BLIS_ONE,
 		              &a_pack,
 		              &b1_pack,
-		              beta,
+		              &BLIS_ONE,
 		              &c1_pack,
 		              cntl_sub_trsm( cntl ) );
 

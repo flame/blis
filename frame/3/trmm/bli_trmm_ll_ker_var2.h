@@ -36,10 +36,8 @@
 //
 // Prototype object-based interface.
 //
-void bli_trmm_ll_ker_var2( obj_t*  alpha,
-                           obj_t*  a,
+void bli_trmm_ll_ker_var2( obj_t*  a,
                            obj_t*  b,
-                           obj_t*  beta,
                            obj_t*  c,
                            trmm_t* cntl );
 

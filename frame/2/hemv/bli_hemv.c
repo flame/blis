@@ -78,7 +78,7 @@ void bli_hemv( obj_t*  alpha,
 	// the type union of the target datatypes of a and x to prevent any
 	// unnecessary loss of information during the computation.
 	dt_alpha = bli_datatype_union( dt_targ_a, dt_targ_x );
-	bli_obj_init_scalar_copy_of( dt_alpha,
+	bli_obj_scalar_init_detached_copy_of( dt_alpha,
 	                             BLIS_NO_CONJUGATE,
 	                             alpha,
 	                             &alpha_local );
@@ -89,7 +89,7 @@ void bli_hemv( obj_t*  alpha,
 	// the complex part of beta*y will not be stored. If y is complex and
 	// beta is real then beta is harmlessly promoted to complex.
 	dt_beta = dt_targ_y;
-	bli_obj_init_scalar_copy_of( dt_beta,
+	bli_obj_scalar_init_detached_copy_of( dt_beta,
 	                             BLIS_NO_CONJUGATE,
 	                             beta,
 	                             &beta_local );
@@ -180,8 +180,8 @@ void PASTEMAC(ch,opname)( \
 	rs_x = incx; cs_x = m * incx; \
 	rs_y = incy; cs_y = m * incy; \
 \
-	bli_obj_create_scalar_with_attached_buffer( dt, alpha, &alphao ); \
-	bli_obj_create_scalar_with_attached_buffer( dt, beta,  &betao  ); \
+	bli_obj_create_1x1_with_attached_buffer( dt, alpha, &alphao ); \
+	bli_obj_create_1x1_with_attached_buffer( dt, beta,  &betao  ); \
 \
 	bli_obj_create_with_attached_buffer( dt, m, m, a, rs_a, cs_a, &ao ); \
 	bli_obj_create_with_attached_buffer( dt, m, 1, x, rs_x, cs_x, &xo ); \

@@ -154,9 +154,9 @@ void libblis_test_syrk_experiment( test_params_t* params,
 	bli_param_map_char_to_blis_trans( pc_str[1], &transa );
 
 	// Create test scalars.
-	bli_obj_init_scalar( datatype, &kappa );
-	bli_obj_init_scalar( datatype, &alpha );
-	bli_obj_init_scalar( datatype, &beta );
+	bli_obj_scalar_init_detached( datatype, &kappa );
+	bli_obj_scalar_init_detached( datatype, &alpha );
+	bli_obj_scalar_init_detached( datatype, &beta );
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_mobj_create( params, datatype, transa,
@@ -300,8 +300,8 @@ void libblis_test_syrk_check( obj_t*  alpha,
 
 	bli_obj_alias_with_trans( BLIS_TRANSPOSE, *a, at );
 
-	bli_obj_init_scalar( dt,      &kappa );
-	bli_obj_init_scalar( dt_real, &norm );
+	bli_obj_scalar_init_detached( dt,      &kappa );
+	bli_obj_scalar_init_detached( dt_real, &norm );
 
 	bli_obj_create( dt, m, 1, 0, 0, &t );
 	bli_obj_create( dt, m, 1, 0, 0, &v );

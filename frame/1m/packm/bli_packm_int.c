@@ -36,8 +36,7 @@
 
 #define FUNCPTR_T packm_fp
 
-typedef void (*FUNCPTR_T)( obj_t*   beta,
-                           obj_t*   a,
+typedef void (*FUNCPTR_T)( obj_t*   a,
                            obj_t*   p );
 
 static FUNCPTR_T vars[6][3] =
@@ -51,20 +50,17 @@ static FUNCPTR_T vars[6][3] =
 	{ NULL,               NULL,                  NULL,              },
 };
 
-void bli_packm_int( obj_t*   beta,
-                    obj_t*   a,
+void bli_packm_int( obj_t*   a,
                     obj_t*   p,
                     packm_t* cntl )
 {
-	obj_t*    beta_use;
-
 	varnum_t  n;
 	impl_t    i;
 	FUNCPTR_T f;
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
-		bli_packm_check( beta, a, p, cntl );
+		bli_packm_int_check( a, p, cntl );
 
 	// Sanity check; A should never have a zero dimension. If we must support
 	// it, then we should fold it into the next alias-and-early-exit block.
@@ -106,13 +102,35 @@ void bli_packm_int( obj_t*   beta,
 		return;
 	}
 
-	// Notice that a beta parameter is always passed in. This value is allowed
-	// to be non-unit even when no scaling is prescribed. If the control tree
-	// indicates no scaling, then make sure that BLIS_ONE is passed into the
-	// packm implementation.
-	//if ( cntl_does_scale( cntl ) ) beta_use = beta;
-	//else                           beta_use = &BLIS_ONE;
-	beta_use = &BLIS_ONE;
+/*
+	// The value for kappa we use will depend on whether the scalar
+	// attached to A has a nonzero imaginary component. If it does,
+	// then we will apply the scalar during packing to facilitate
+	// implementing complex domain micro-kernels in terms of their
+	// real domain counterparts. (In the aforementioned situation,
+	// applying a real scalar is easy, but applying a complex one is
+	// harder, so we avoid the need altogether with the code below.)
+	if ( bli_obj_scalar_has_nonzero_imag( a ) )
+	{
+		bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
+
+		// Detach the scalar.
+		bli_obj_scalar_detach( a, &kappa );
+
+		// Reset the attached scalar (to 1.0).
+		bli_obj_scalar_reset( a );
+
+		kappa_p = &kappa;
+	}
+	else
+	{
+		// If the internal scalar of A has only a real component, then
+		// we will apply it later (in the micro-kernel), and so we will
+		// use BLIS_ONE to indicate no scaling during packing.
+		kappa_p = &BLIS_ONE;
+	}
+*/
+
 
 	// Extract the variant number and implementation type.
 	n = cntl_var_num( cntl );
@@ -121,9 +139,8 @@ void bli_packm_int( obj_t*   beta,
 	// Index into the variant array to extract the correct function pointer.
 	f = vars[n][i];
 
-	// Invoke the variant with beta_use.
-	f( beta_use,
-	   a,
+	// Invoke the variant with kappa_use.
+	f( a,
 	   p );
 }
 

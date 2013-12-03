@@ -51,10 +51,8 @@ typedef void (*FUNCPTR_T)(
 static FUNCPTR_T GENARRAY(ftypes,trmm_rl_ker_var2);
 
 
-void bli_trmm_rl_ker_var2( obj_t*  alpha,
-                           obj_t*  a,
+void bli_trmm_rl_ker_var2( obj_t*  a,
                            obj_t*  b,
-                           obj_t*  beta,
                            obj_t*  c,
                            trmm_t* cntl )
 {
@@ -80,23 +78,24 @@ void bli_trmm_rl_ker_var2( obj_t*  alpha,
 	inc_t     rs_c      = bli_obj_row_stride( *c );
 	inc_t     cs_c      = bli_obj_col_stride( *c );
 
-	num_t     dt_alpha;
-	void*     buf_alpha;
+	obj_t     scalar_a;
+	obj_t     scalar_b;
 
-	num_t     dt_beta;
+	void*     buf_alpha;
 	void*     buf_beta;
 
 	FUNCPTR_T f;
 
-	// If alpha is a scalar constant, use dt_exec to extract the address of the
-	// corresponding constant value; otherwise, use the datatype encoded
-	// within the alpha object and extract the buffer at the beta offset.
-	bli_set_scalar_dt_buffer( alpha, dt_exec, dt_alpha, buf_alpha );
 
-	// If beta is a scalar constant, use dt_exec to extract the address of the
-	// corresponding constant value; otherwise, use the datatype encoded
-	// within the beta object and extract the buffer at the beta offset.
-	bli_set_scalar_dt_buffer( beta, dt_exec, dt_beta, buf_beta );
+	// Detach and multiply the scalars attached to A and B.
+	bli_obj_scalar_detach( a, &scalar_a );
+	bli_obj_scalar_detach( b, &scalar_b );
+	bli_mulsc( &scalar_a, &scalar_b );
+
+	// Grab the addresses of the internal scalar buffers for the scalar
+	// merged above and the scalar attached to C.
+	buf_alpha = bli_obj_internal_scalar_buffer( scalar_b );
+	buf_beta  = bli_obj_internal_scalar_buffer( *c );
 
 	// Index into the type combination array to extract the correct
 	// function pointer.

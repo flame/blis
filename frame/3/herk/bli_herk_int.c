@@ -36,10 +36,8 @@
 
 #define FUNCPTR_T herk_fp
 
-typedef void (*FUNCPTR_T)( obj_t*  alpha,
-                           obj_t*  a,
+typedef void (*FUNCPTR_T)( obj_t*  a,
                            obj_t*  ah,
-                           obj_t*  beta,
                            obj_t*  c,
                            herk_t* cntl );
 
@@ -70,6 +68,8 @@ void bli_herk_int( obj_t*  alpha,
                    obj_t*  c,
                    herk_t* cntl )
 {
+	obj_t     a_local;
+	obj_t     ah_local;
 	obj_t     c_local;
 	varnum_t  n;
 	impl_t    i;
@@ -91,6 +91,10 @@ void bli_herk_int( obj_t*  alpha,
 		return;
 	}
 
+	// Alias A and A' in case we need to update attached scalars.
+	bli_obj_alias_to( *a, a_local );
+	bli_obj_alias_to( *ah, ah_local );
+
 	// Alias C in case we need to induce a transposition.
 	bli_obj_alias_to( *c, c_local );
 
@@ -105,6 +109,20 @@ void bli_herk_int( obj_t*  alpha,
 		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, c_local );
 	}
 
+	// If alpha is non-unit, typecast and apply it to the scalar
+	// attached to A'.
+	if ( !bli_obj_equals( alpha, &BLIS_ONE ) )
+	{
+		bli_obj_scalar_apply_scalar( alpha, &ah_local );
+	}
+
+	// If beta is non-unit, typecast and apply it to the scalar
+	// attached to C.
+	if ( !bli_obj_equals( beta, &BLIS_ONE ) )
+	{
+		bli_obj_scalar_apply_scalar( beta, &c_local );
+	}
+
 	// Set a bool based on the uplo field of C's root object.
 	if ( bli_obj_root_is_lower( c_local ) ) uplo = 0;
 	else                                    uplo = 1;
@@ -117,10 +135,8 @@ void bli_herk_int( obj_t*  alpha,
 	f = vars[uplo][n][i];
 
 	// Invoke the variant.
-	f( alpha,
-	   a,
-	   ah,
-	   beta,
+	f( &a_local,
+	   &ah_local,
 	   &c_local,
 	   cntl );
 }

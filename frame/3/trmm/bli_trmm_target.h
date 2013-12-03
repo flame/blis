@@ -34,8 +34,7 @@
 
 void bli_trmm_set_targ_exec_datatypes( obj_t*  a,
                                        obj_t*  b,
-                                       obj_t*  c,
-                                       num_t*  dt_alpha );
+                                       obj_t*  c );
 
 /*
 void bli_trmm_get_target_datatypes( obj_t*  a,

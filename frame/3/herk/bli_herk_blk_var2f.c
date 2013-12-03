@@ -34,10 +34,8 @@
 
 #include "blis.h"
 
-void bli_herk_blk_var2f( obj_t*  alpha,
-                         obj_t*  a,
+void bli_herk_blk_var2f( obj_t*  a,
                          obj_t*  ah,
-                         obj_t*  beta,
                          obj_t*  c,
                          herk_t* cntl )
 {
@@ -65,7 +63,7 @@ void bli_herk_blk_var2f( obj_t*  alpha,
 	n_trans = bli_obj_width_after_trans( *c );
 
 	// Scale C by beta (if instructed).
-	bli_scalm_int( beta,
+	bli_scalm_int( &BLIS_ONE,
 	               c,
 	               cntl_sub_scalm( cntl ) );
 
@@ -73,9 +71,8 @@ void bli_herk_blk_var2f( obj_t*  alpha,
 	bli_packm_init( a, &a_pack,
 	                cntl_sub_packm_a( cntl ) );
 
-	// Pack A and scale by alpha (if instructed).
-	bli_packm_int( alpha,
-	               a, &a_pack,
+	// Pack A (if instructed).
+	bli_packm_int( a, &a_pack,
 	               cntl_sub_packm_a( cntl ) );
 
 	// Partition along the n dimension.
@@ -104,21 +101,19 @@ void bli_herk_blk_var2f( obj_t*  alpha,
 		bli_packm_init( &c1S, &c1S_pack,
 		                cntl_sub_packm_c( cntl ) );
 
-		// Pack A1' and scale by alpha (if instructed).
-		bli_packm_int( alpha,
-		               &ah1, &ah1_pack,
+		// Pack A1' (if instructed).
+		bli_packm_int( &ah1, &ah1_pack,
 		               cntl_sub_packm_b( cntl ) );
 
-		// Pack C1 and scale by beta (if instructed).
-		bli_packm_int( beta,
-		               &c1S, &c1S_pack,
+		// Pack C1 (if instructed).
+		bli_packm_int( &c1S, &c1S_pack,
 		               cntl_sub_packm_c( cntl ) );
 
 		// Perform herk subproblem.
-		bli_herk_int( alpha,
+		bli_herk_int( &BLIS_ONE,
 		              &aS_pack,
 		              &ah1_pack,
-		              beta,
+		              &BLIS_ONE,
 		              &c1S_pack,
 		              cntl_sub_herk( cntl ) );
 

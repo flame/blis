@@ -134,7 +134,7 @@ void libblis_test_setv_experiment( test_params_t* params,
 
 
 	// Create test scalars.
-	bli_obj_init_scalar( datatype, &beta );
+	bli_obj_scalar_init_detached( datatype, &beta );
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_vobj_create( params, datatype, sc_str[0], m, &x );
@@ -196,7 +196,7 @@ void libblis_test_setv_check( obj_t*  beta,
 	dim_t m_x      = bli_obj_vector_dim( *x );
 	inc_t inc_x    = bli_obj_vector_inc( *x );
 	void* buf_x    = bli_obj_buffer_at_off( *x );
-	void* buf_beta = bli_obj_scalar_buffer( dt_x, *beta );
+	void* buf_beta = bli_obj_buffer_for_1x1( dt_x, *beta );
 	dim_t i;
 
 	*resid = 0.0;

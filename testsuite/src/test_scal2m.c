@@ -144,7 +144,7 @@ void libblis_test_scal2m_experiment( test_params_t* params,
 	bli_param_map_char_to_blis_trans( pc_str[0], &transx );
 
 	// Create test scalars.
-	bli_obj_init_scalar( datatype, &alpha );
+	bli_obj_scalar_init_detached( datatype, &alpha );
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_mobj_create( params, datatype, transx,
@@ -252,7 +252,7 @@ void libblis_test_scal2m_check( obj_t*  alpha,
 	// is negligible.
 	//
 
-	bli_obj_init_scalar( dt_real, &norm );
+	bli_obj_scalar_init_detached( dt_real, &norm );
 
     bli_obj_create( dt, m, n, 0, 0, &x_temp );
 

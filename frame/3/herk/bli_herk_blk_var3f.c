@@ -34,17 +34,14 @@
 
 #include "blis.h"
 
-void bli_herk_blk_var3f( obj_t*  alpha,
-                         obj_t*  a,
+void bli_herk_blk_var3f( obj_t*  a,
                          obj_t*  ah,
-                         obj_t*  beta,
                          obj_t*  c,
                          herk_t* cntl )
 {
 	obj_t  a1, a1_pack;
 	obj_t  ah1, ah1_pack;
 	obj_t  c_pack;
-	obj_t* beta_use;
 
 	dim_t  i;
 	dim_t  b_alg;
@@ -59,7 +56,7 @@ void bli_herk_blk_var3f( obj_t*  alpha,
 	k_trans = bli_obj_width_after_trans( *a );
 
 	// Scale C by beta (if instructed).
-	bli_scalm_int( beta,
+	bli_scalm_int( &BLIS_ONE,
 	               c,
 	               cntl_sub_scalm( cntl ) );
 
@@ -67,9 +64,8 @@ void bli_herk_blk_var3f( obj_t*  alpha,
 	bli_packm_init( c, &c_pack,
 	                cntl_sub_packm_c( cntl ) );
 
-	// Pack C and scale by beta (if instructed).
-	bli_packm_int( beta,
-	               c, &c_pack,
+	// Pack C (if instructed).
+	bli_packm_int( c, &c_pack,
 	               cntl_sub_packm_c( cntl ) );
 
 	// Partition along the k dimension.
@@ -91,28 +87,29 @@ void bli_herk_blk_var3f( obj_t*  alpha,
 		bli_packm_init( &ah1, &ah1_pack,
 		                cntl_sub_packm_b( cntl ) );
 
-		// Pack A1 and scale by alpha (if instructed).
-		bli_packm_int( alpha,
-		               &a1, &a1_pack,
+		// Pack A1 (if instructed).
+		bli_packm_int( &a1, &a1_pack,
 		               cntl_sub_packm_a( cntl ) );
 
-		// Pack B1 and scale by alpha (if instructed).
-		bli_packm_int( alpha,
-		               &ah1, &ah1_pack,
+		// Pack B1 (if instructed).
+		bli_packm_int( &ah1, &ah1_pack,
 		               cntl_sub_packm_b( cntl ) );
 
-		// Since this variant executes multiple rank-k updates, we must use
-		// beta only for the first iteration and BLIS_ONE for all others.
-		if ( i == 0 ) beta_use = beta;
-		else          beta_use = &BLIS_ONE;
-
 		// Perform herk subproblem.
-		bli_herk_int( alpha,
+		bli_herk_int( &BLIS_ONE,
 		              &a1_pack,
 		              &ah1_pack,
-		              beta_use,
+		              &BLIS_ONE,
 		              &c_pack,
 		              cntl_sub_herk( cntl ) );
+
+		// This variant executes multiple rank-k updates. Therefore, if the
+		// internal beta scalar on matrix C is non-zero, we must use it
+		// only for the first iteration (and then BLIS_ONE for all others).
+		// And since c_pack is a local obj_t, we can simply overwrite the
+		// internal beta scalar with BLIS_ONE once it has been used in the
+		// first iteration.
+		if ( i == 0 ) bli_obj_scalar_reset( &c_pack );
 	}
 
 	// Unpack C (if C was packed).

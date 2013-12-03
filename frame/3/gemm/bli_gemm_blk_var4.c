@@ -34,10 +34,8 @@
 
 #include "blis.h"
 
-void bli_gemm_blk_var4( obj_t*  alpha,
-                        obj_t*  a,
+void bli_gemm_blk_var4( obj_t*  a,
                         obj_t*  b,
-                        obj_t*  beta,
                         obj_t*  c,
                         gemm_t* cntl )
 {
@@ -58,7 +56,7 @@ void bli_gemm_blk_var4( obj_t*  alpha,
 	m_trans = bli_obj_length_after_trans( *a );
 
 	// Scale C by beta (if instructed).
-	bli_scalm_int( beta,
+	bli_scalm_int( &BLIS_ONE,
 	               c,
 	               cntl_sub_scalm( cntl ) );
 
@@ -92,11 +90,11 @@ void bli_gemm_blk_var4( obj_t*  alpha,
 		bli_packm_init( &a1, &a1_pack, cntl_sub_packm_a( cntl ) );
 		bli_packm_init( &c1, &c1_pack, cntl_sub_packm_c( cntl ) );
 
-		// Pack A1 and scale by alpha (if instructed).
-		bli_packm_int( alpha, &a1, &a1_pack, cntl_sub_packm_a( cntl ) );
+		// Pack A1 (if instructed).
+		bli_packm_int( &a1, &a1_pack, cntl_sub_packm_a( cntl ) );
 
-		// Pack C1 and scale by beta (if instructed).
-		bli_packm_int( beta,  &c1, &c1_pack, cntl_sub_packm_c( cntl ) );
+		// Pack C1 (if instructed).
+		bli_packm_int( &c1, &c1_pack, cntl_sub_packm_c( cntl ) );
 
 		// Partition along the n dimension.
 		for ( j = 0; j < n_trans; j += bn_inc )
@@ -113,14 +111,14 @@ void bli_gemm_blk_var4( obj_t*  alpha,
 			bli_acquire_mpart_l2r( BLIS_SUBPART1,
 			                       j, bn_inc, &c1_pack, &c1_pack_inc );
 
-			// Pack B1 and scale by alpha (if instructed).
-			bli_packm_int( alpha, &b_inc, &b_pack_inc, cntl_sub_packm_b( cntl ) );
+			// Pack B1 (if instructed).
+			bli_packm_int( &b_inc, &b_pack_inc, cntl_sub_packm_b( cntl ) );
 
 			// Perform gemm subproblem.
-			bli_gemm_int( alpha,
+			bli_gemm_int( &BLIS_ONE,
 			              &a1_pack,
 			              &b_pack_inc,
-			              beta,
+			              &BLIS_ONE,
 			              &c1_pack_inc,
 			              cntl_sub_gemm( cntl ) );
 		}
@@ -152,29 +150,24 @@ void bli_gemm_blk_var4( obj_t*  alpha,
 		bli_packm_init( &c1, &c1_pack,
 		                cntl_sub_packm_c( cntl ) );
 
-		// Pack A1 and scale by alpha (if instructed).
-		bli_packm_int( alpha,
-		               &a1,
-		               &a1_pack,
+		// Pack A1 (if instructed).
+		bli_packm_int( &a1, &a1_pack,
 		               cntl_sub_packm_a( cntl ) );
 
-		// Pack C1 and scale by beta (if instructed).
-		bli_packm_int( beta,
-		               &c1,
-		               &c1_pack,
+		// Pack C1 (if instructed).
+		bli_packm_int( &c1, &c1_pack,
 		               cntl_sub_packm_c( cntl ) );
 
 		// Perform gemm subproblem.
-		bli_gemm_int( alpha,
+		bli_gemm_int( &BLIS_ONE,
 		              &a1_pack,
 		              &b_pack,
-		              beta,
+		              &BLIS_ONE,
 		              &c1_pack,
 		              cntl_sub_gemm( cntl ) );
 
 		// Unpack C1 (if C1 was packed).
-		bli_unpackm_int( &c1_pack,
-		                 &c1,
+		bli_unpackm_int( &c1_pack, &c1,
 		                 cntl_sub_unpackm_c( cntl ) );
 	}
 

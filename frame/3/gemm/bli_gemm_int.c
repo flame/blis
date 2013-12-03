@@ -36,10 +36,8 @@
 
 #define FUNCPTR_T gemm_fp
 
-typedef void (*FUNCPTR_T)( obj_t*  alpha,
-                           obj_t*  a,
+typedef void (*FUNCPTR_T)( obj_t*  a,
                            obj_t*  b,
-                           obj_t*  beta,
                            obj_t*  c,
                            gemm_t* cntl );
 
@@ -61,6 +59,8 @@ void bli_gemm_int( obj_t*  alpha,
                    obj_t*  c,
                    gemm_t* cntl )
 {
+	obj_t     a_local;
+	obj_t     b_local;
 	obj_t     c_local;
 	varnum_t  n;
 	impl_t    i;
@@ -81,6 +81,10 @@ void bli_gemm_int( obj_t*  alpha,
 		return;
 	}
 
+	// Alias A and B in case we need to update attached scalars.
+	bli_obj_alias_to( *a, a_local );
+	bli_obj_alias_to( *b, b_local );
+
 	// Alias C in case we need to induce a transposition.
 	bli_obj_alias_to( *c, c_local );
 
@@ -95,6 +99,20 @@ void bli_gemm_int( obj_t*  alpha,
 		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, c_local );
 	}
 
+	// If alpha is non-unit, typecast and apply it to the scalar attached
+	// to B.
+	if ( !bli_obj_equals( alpha, &BLIS_ONE ) )
+	{
+		bli_obj_scalar_apply_scalar( alpha, &b_local );
+	}
+
+	// If beta is non-unit, typecast and apply it to the scalar attached
+	// to C.
+	if ( !bli_obj_equals( beta, &BLIS_ONE ) )
+	{
+		bli_obj_scalar_apply_scalar( beta, &c_local );
+	}
+
 	// Extract the variant number and implementation type.
 	n = cntl_var_num( cntl );
 	i = cntl_impl_type( cntl );
@@ -103,10 +121,8 @@ void bli_gemm_int( obj_t*  alpha,
 	f = vars[n][i];
 
 	// Invoke the variant.
-	f( alpha,
-	   a,
-	   b,
-	   beta,
+	f( &a_local,
+	   &b_local,
 	   &c_local,
 	   cntl );
 }

@@ -37,8 +37,6 @@
 void bli_herk_set_targ_exec_datatypes( obj_t*  a,
                                        obj_t*  ah,
                                        obj_t*  c,
-                                       num_t*  dt_alpha,
-                                       num_t*  dt_beta,
                                        bool_t* pack_c )
 {
 	num_t   dt_targ_a;
@@ -68,10 +66,6 @@ void bli_herk_set_targ_exec_datatypes( obj_t*  a,
 	bli_obj_set_execution_datatype( dt_exec, *a );
 	bli_obj_set_execution_datatype( dt_exec, *ah );
 	bli_obj_set_execution_datatype( dt_exec, *c );
-
-	*dt_alpha = bli_obj_target_datatype( *a );
-
-	*dt_beta = bli_obj_datatype( *c );
 
 	// For now disable packing of C.
 	*pack_c = FALSE;

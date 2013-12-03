@@ -46,7 +46,7 @@ typedef void (*FUNCPTR_T)(
                            dim_t   n,
                            dim_t   m_max,
                            dim_t   n_max,
-                           void*   beta,
+                           void*   kappa,
                            void*   c, inc_t rs_c, inc_t cs_c,
                            void*   p, inc_t rs_p, inc_t cs_p,
                                       dim_t pd_p, inc_t ps_p
@@ -55,8 +55,7 @@ typedef void (*FUNCPTR_T)(
 static FUNCPTR_T GENARRAY(ftypes,packm_blk_var2);
 
 
-void bli_packm_blk_var2( obj_t*   beta,
-                         obj_t*   c,
+void bli_packm_blk_var2( obj_t*   c,
                          obj_t*   p )
 {
 	num_t     dt_cp     = bli_obj_datatype( *c );
@@ -82,9 +81,15 @@ void bli_packm_blk_var2( obj_t*   beta,
 	dim_t     pd_p      = bli_obj_panel_dim( *p );
 	inc_t     ps_p      = bli_obj_panel_stride( *p );
 
-	void*     buf_beta  = bli_obj_scalar_buffer( dt_cp, *beta );
+	void*     buf_kappa;
 
 	FUNCPTR_T f;
+
+	// This variant assumes that the micro-kernel will always apply the
+	// alpha scalar of the higher-level operation. Thus, we use BLIS_ONE
+	// for kappa so that the underlying packm implementation does not
+	// scale during packing.
+	buf_kappa = bli_obj_buffer_for_const( dt_cp, BLIS_ONE );
 
 	// Index into the type combination array to extract the correct
 	// function pointer.
@@ -100,7 +105,7 @@ void bli_packm_blk_var2( obj_t*   beta,
 	   n_p,
 	   m_max_p,
 	   n_max_p,
-	   buf_beta,
+	   buf_kappa,
 	   buf_c, rs_c, cs_c,
 	   buf_p, rs_p, cs_p,
 	          pd_p, ps_p );
@@ -120,16 +125,16 @@ void PASTEMAC(ch,varname )( \
                             dim_t   n, \
                             dim_t   m_max, \
                             dim_t   n_max, \
-                            void*   beta, \
+                            void*   kappa, \
                             void*   c, inc_t rs_c, inc_t cs_c, \
                             void*   p, inc_t rs_p, inc_t cs_p, \
                                        dim_t pd_p, inc_t ps_p  \
                           ) \
 { \
-	ctype* restrict beta_cast = beta; \
-	ctype* restrict c_cast    = c; \
-	ctype* restrict p_cast    = p; \
-	ctype* restrict zero      = PASTEMAC(ch,0); \
+	ctype* restrict kappa_cast = kappa; \
+	ctype* restrict c_cast     = c; \
+	ctype* restrict p_cast     = p; \
+	ctype* restrict zero       = PASTEMAC(ch,0); \
 	ctype* restrict c_begin; \
 	ctype* restrict p_begin; \
 \
@@ -338,7 +343,7 @@ void PASTEMAC(ch,varname )( \
 			PASTEMAC(ch,packm_cxk)( conjc10, \
 			                        p10_dim, \
 			                        p10_len, \
-			                        beta_cast, \
+			                        kappa_cast, \
 			                        c10, incc10, ldc10, \
 			                        p10,         ldp ); \
 \
@@ -347,7 +352,7 @@ void PASTEMAC(ch,varname )( \
 			PASTEMAC(ch,packm_cxk)( conjc12, \
 			                        p12_dim, \
 			                        p12_len, \
-			                        beta_cast, \
+			                        kappa_cast, \
 			                        c12, incc12, ldc12, \
 			                        p12,         ldp ); \
 \
@@ -358,7 +363,7 @@ void PASTEMAC(ch,varname )( \
 			                                     conjc, \
 			                                     p11_m, \
 			                                     p11_n, \
-			                                     beta_cast, \
+			                                     kappa_cast, \
 			                                     c11, rs_c,   cs_c, \
 			                                     p11, rs_p11, cs_p11 ); \
 \
@@ -412,7 +417,7 @@ void PASTEMAC(ch,varname )( \
 			PASTEMAC(ch,packm_cxk)( conjc10, \
 			                        panel_dim_i, \
 			                        panel_len, \
-			                        beta_cast, \
+			                        kappa_cast, \
 			                        c10,     incc10, ldc10, \
 			                        p_begin,         ldp ); \
 \

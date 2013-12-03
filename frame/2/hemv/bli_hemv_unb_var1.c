@@ -101,11 +101,11 @@ void bli_hemv_unb_var1( conj_t  conjh,
 	// The datatype of alpha MUST be the type union of a and x. This is to
 	// prevent any unnecessary loss of information during computation.
 	dt_alpha  = bli_datatype_union( dt_a, dt_x );
-	buf_alpha = bli_obj_scalar_buffer( dt_alpha, *alpha );
+	buf_alpha = bli_obj_buffer_for_1x1( dt_alpha, *alpha );
 
 	// The datatype of beta MUST be the same as the datatype of y.
 	dt_beta   = dt_y;
-	buf_beta  = bli_obj_scalar_buffer( dt_beta, *beta );
+	buf_beta  = bli_obj_buffer_for_1x1( dt_beta, *beta );
 
 	// Index into the type combination array to extract the correct
 	// function pointer.

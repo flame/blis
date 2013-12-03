@@ -51,10 +51,8 @@ typedef void (*FUNCPTR_T)(
 static FUNCPTR_T GENARRAY(ftypes,gemm_ker_var2);
 
 
-void bli_gemm_ker_var2( obj_t*  alpha,
-                        obj_t*  a,
+void bli_gemm_ker_var2( obj_t*  a,
                         obj_t*  b,
-                        obj_t*  beta,
                         obj_t*  c,
                         gemm_t* cntl )
 {
@@ -78,10 +76,10 @@ void bli_gemm_ker_var2( obj_t*  alpha,
 	inc_t     rs_c      = bli_obj_row_stride( *c );
 	inc_t     cs_c      = bli_obj_col_stride( *c );
 
-	num_t     dt_alpha;
-	void*     buf_alpha;
+	obj_t     scalar_a;
+	obj_t     scalar_b;
 
-	num_t     dt_beta;
+	void*     buf_alpha;
 	void*     buf_beta;
 
 	FUNCPTR_T f;
@@ -104,15 +102,13 @@ void bli_gemm_ker_var2( obj_t*  alpha,
 	}
 */
 
-	// If alpha is a scalar constant, use dt_exec to extract the address of the
-	// corresponding constant value; otherwise, use the datatype encoded
-	// within the alpha object and extract the buffer at the alpha offset.
-	bli_set_scalar_dt_buffer( alpha, dt_exec, dt_alpha, buf_alpha );
+	bli_obj_scalar_detach( a, &scalar_a );
+	bli_obj_scalar_detach( b, &scalar_b );
+	bli_mulsc( &scalar_a, &scalar_b );
 
-	// If beta is a scalar constant, use dt_exec to extract the address of the
-	// corresponding constant value; otherwise, use the datatype encoded
-	// within the beta object and extract the buffer at the beta offset.
-	bli_set_scalar_dt_buffer( beta, dt_exec, dt_beta, buf_beta );
+	buf_alpha = bli_obj_internal_scalar_buffer( scalar_b );
+
+	buf_beta  = bli_obj_internal_scalar_buffer( *c );
 
 	// Index into the type combination array to extract the correct
 	// function pointer.

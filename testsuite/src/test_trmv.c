@@ -150,8 +150,8 @@ void libblis_test_trmv_experiment( test_params_t* params,
 	bli_param_map_char_to_blis_diag( pc_str[2], &diaga );
 
 	// Create test scalars.
-	bli_obj_init_scalar( datatype, &alpha );
-	bli_obj_init_scalar( datatype, &kappa );
+	bli_obj_scalar_init_detached( datatype, &alpha );
+	bli_obj_scalar_init_detached( datatype, &kappa );
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
@@ -276,7 +276,7 @@ void libblis_test_trmv_check( obj_t*  alpha,
 	//   y = alpha * conja(A_dense) * x_orig
 	//
 
-	bli_obj_init_scalar( dt_real, &norm );
+	bli_obj_scalar_init_detached( dt_real, &norm );
 
 	bli_obj_create( dt, m, 1, 0, 0, &y );
 	bli_obj_create( dt, m, m, 0, 0, &a_local );

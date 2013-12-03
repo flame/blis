@@ -151,7 +151,7 @@ void libblis_test_syr2_experiment( test_params_t* params,
 	bli_param_map_char_to_blis_conj( pc_str[2], &conjy );
 
 	// Create test scalars.
-	bli_obj_init_scalar( datatype, &alpha );
+	bli_obj_scalar_init_detached( datatype, &alpha );
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_vobj_create( params, datatype,
@@ -292,9 +292,9 @@ void libblis_test_syr2_check( obj_t*  alpha,
 	bli_obj_set_uplo( BLIS_DENSE, *a );
 	bli_obj_set_uplo( BLIS_DENSE, *a_orig );
 
-	bli_obj_init_scalar( dt,      &tau );
-	bli_obj_init_scalar( dt,      &rho );
-	bli_obj_init_scalar( dt_real, &norm );
+	bli_obj_scalar_init_detached( dt,      &tau );
+	bli_obj_scalar_init_detached( dt,      &rho );
+	bli_obj_scalar_init_detached( dt_real, &norm );
 
 	bli_obj_create( dt, m_a, 1, 0, 0, &t );
 	bli_obj_create( dt, m_a, 1, 0, 0, &v );

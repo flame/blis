@@ -34,8 +34,8 @@
 
 #include "blis.h"
 
-bool_t bli_obj_scalar_equals( obj_t* a,
-                              obj_t* b )
+bool_t bli_obj_equals( obj_t* a,
+                       obj_t* b )
 {
 	bool_t r_val = FALSE;
 	num_t  dt_a;
@@ -43,6 +43,11 @@ bool_t bli_obj_scalar_equals( obj_t* a,
 	num_t  dt;
 	void*  buf_a;
 	void*  buf_b;
+
+	// The function is not yet implemented for vectors and matrices.
+	if ( !bli_obj_is_1x1( *a ) ||
+	     !bli_obj_is_1x1( *b ) )
+		bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 /*
 bli_printm( "a:", a, "%9.2e", "" );
 bli_printm( "b:", b, "%9.2e", "" );
@@ -58,8 +63,8 @@ bli_printm( "b:", b, "%9.2e", "" );
 	if ( dt_b == BLIS_CONSTANT ) dt = dt_a;
 	else                         dt = dt_b;
 
-	buf_a = bli_obj_scalar_buffer( dt, *a );
-	buf_b = bli_obj_scalar_buffer( dt, *b );
+	buf_a = bli_obj_buffer_for_1x1( dt, *a );
+	buf_b = bli_obj_buffer_for_1x1( dt, *b );
 /*
 printf( "dt:   %u\n", dt );
 printf( "dt_a: %u\n", dt_a );
@@ -79,10 +84,10 @@ printf( "bufb: %p\n", buf_b );
 		scomplex* bp_c = bli_obj_buffer_for_const( BLIS_SCOMPLEX, *b );
 		dcomplex* bp_z = bli_obj_buffer_for_const( BLIS_DCOMPLEX, *b );
 
-		r_val = r_val || ( *ap_s == *bp_s );
-		r_val = r_val || ( *ap_d == *bp_d );
-		r_val = r_val || (  ap_c->real == bp_c->real && ap_c->imag == bp_c->imag );
-		r_val = r_val || (  ap_z->real == bp_z->real && ap_z->imag == bp_z->imag );
+		r_val = r_val || bli_seqa( ap_s, bp_s );
+		r_val = r_val || bli_deqa( ap_d, bp_d );
+		r_val = r_val || bli_ceqa( ap_c, bp_c );
+		r_val = r_val || bli_zeqa( ap_z, bp_z );
 	}
 	else if ( dt == BLIS_FLOAT )    r_val = bli_seqa( buf_a, buf_b );
 	else if ( dt == BLIS_DOUBLE )   r_val = bli_deqa( buf_a, buf_b );

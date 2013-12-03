@@ -153,8 +153,8 @@ void libblis_test_dotaxpyv_experiment( test_params_t* params,
 	bli_param_map_char_to_blis_conj( pc_str[2], &conjy );
 
 	// Create test scalars.
-	bli_obj_init_scalar( datatype, &alpha );
-	bli_obj_init_scalar( datatype, &rho );
+	bli_obj_scalar_init_detached( datatype, &alpha );
+	bli_obj_scalar_init_detached( datatype, &rho );
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_vobj_create( params, datatype, sc_str[0], m, &x );
@@ -301,8 +301,8 @@ void libblis_test_dotaxpyv_check( obj_t*  alpha,
 	// computed by dotv and axpyv, respectively.
 	//
 
-	bli_obj_init_scalar( dt,      &rho_temp );
-	bli_obj_init_scalar( dt_real, &norm_z );
+	bli_obj_scalar_init_detached( dt,      &rho_temp );
+	bli_obj_scalar_init_detached( dt_real, &norm_z );
 
 	bli_obj_create( dt, m, 1, 0, 0, &z_temp );
 	bli_copyv( z_orig, &z_temp );
@@ -371,7 +371,7 @@ void bli_dotaxpyv_ker( obj_t*  alpha,
 
 	void*     buf_rho   = bli_obj_buffer_at_off( *rho );
 
-	void*     buf_alpha = bli_obj_scalar_buffer( dt, *alpha );
+	void*     buf_alpha = bli_obj_buffer_for_1x1( dt, *alpha );
 
 	FUNCPTR_T f;
 

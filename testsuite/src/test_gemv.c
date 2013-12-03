@@ -152,9 +152,9 @@ void libblis_test_gemv_experiment( test_params_t* params,
 	bli_param_map_char_to_blis_conj( pc_str[1], &conjx );
 
 	// Create test scalars.
-	bli_obj_init_scalar( datatype, &kappa );
-	bli_obj_init_scalar( datatype, &alpha );
-	bli_obj_init_scalar( datatype, &beta );
+	bli_obj_scalar_init_detached( datatype, &kappa );
+	bli_obj_scalar_init_detached( datatype, &alpha );
+	bli_obj_scalar_init_detached( datatype, &beta );
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_mobj_create( params, datatype, transa,
@@ -290,8 +290,8 @@ void libblis_test_gemv_check( obj_t*  kappa,
 	//   z = beta * y_orig + alpha * conja(kappa) * x
 	//
 
-	bli_obj_init_scalar_copy_of( dt, conja, kappa, &kappac );
-	bli_obj_init_scalar( dt_real, &norm );
+	bli_obj_scalar_init_detached_copy_of( dt, conja, kappa, &kappac );
+	bli_obj_scalar_init_detached( dt_real, &norm );
 
 	bli_obj_create( dt, n_x, 1, 0, 0, &x_temp );
 	bli_obj_create( dt, m_y, 1, 0, 0, &y_temp );

@@ -140,7 +140,7 @@ void libblis_test_dotv_experiment( test_params_t* params,
 	bli_param_map_char_to_blis_conj( pc_str[1], &conjy );
 
 	// Create test scalars.
-	bli_obj_init_scalar( datatype, &rho );
+	bli_obj_scalar_init_detached( datatype, &rho );
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_vobj_create( params, datatype, sc_str[0], m, &x );
@@ -246,10 +246,10 @@ void libblis_test_dotv_check( obj_t*  x,
 	// are negligible.
 	//
 
-	bli_obj_init_scalar( dt_real, &rho_r );
-	bli_obj_init_scalar( dt_real, &rho_i );
-	bli_obj_init_scalar( dt_real, &norm_x );
-	bli_obj_init_scalar( dt_real, &norm_xy );
+	bli_obj_scalar_init_detached( dt_real, &rho_r );
+	bli_obj_scalar_init_detached( dt_real, &rho_i );
+	bli_obj_scalar_init_detached( dt_real, &norm_x );
+	bli_obj_scalar_init_detached( dt_real, &norm_xy );
 
 	bli_fnormv( x, &norm_x );
 

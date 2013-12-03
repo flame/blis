@@ -64,7 +64,7 @@ void bli_scalv_int( obj_t*   beta,
 	if ( bli_obj_has_zero_dim( *x ) ) return;
 
 	// Return early if the beta scalar equals one.
-	if ( bli_obj_scalar_equals( beta, &BLIS_ONE ) ) return;
+	if ( bli_obj_equals( beta, &BLIS_ONE ) ) return;
 
 	// Extract the variant number and implementation type.
 	n = cntl_var_num( cntl );

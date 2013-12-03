@@ -165,7 +165,7 @@ void libblis_test_trsm_ukr_experiment( test_params_t* params,
 	bli_param_map_char_to_blis_uplo( pc_str[0], &uploa );
 
 	// Create test scalars.
-	bli_obj_init_scalar( datatype, &kappa );
+	bli_obj_scalar_init_detached( datatype, &kappa );
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
@@ -217,14 +217,14 @@ void libblis_test_trsm_ukr_experiment( test_params_t* params,
 	                          &b, &bp );
 
 	// Pack the contents of a to ap.
-	bli_packm_blk_var3( &BLIS_ONE, &a, &ap );
+	bli_packm_blk_var3( &a, &ap );
 
 
 	// Repeat the experiment n_repeats times and record results. 
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		// Re-pack the contents of b to bp.
-		bli_packm_blk_var2( &BLIS_ONE, &b, &bp );
+		bli_packm_blk_var2( &b, &bp );
 
 		bli_copym( &c_save, &c );
 
@@ -320,8 +320,8 @@ void libblis_test_trsm_ukr_check( side_t  side,
 	//     = B * tinv(ransa(A)) * t
 	//     = B * w
 
-	bli_obj_init_scalar( dt,      &kappa );
-	bli_obj_init_scalar( dt_real, &norm );
+	bli_obj_scalar_init_detached( dt,      &kappa );
+	bli_obj_scalar_init_detached( dt_real, &norm );
 
 	if ( bli_is_left( side ) )
 	{

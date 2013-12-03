@@ -34,10 +34,8 @@
 
 #include "blis.h"
 
-void bli_trsm_blk_var1f( obj_t*  alpha,
-                         obj_t*  a,
+void bli_trsm_blk_var1f( obj_t*  a,
                          obj_t*  b,
-                         obj_t*  beta,
                          obj_t*  c,
                          trsm_t* cntl )
 {
@@ -67,9 +65,8 @@ void bli_trsm_blk_var1f( obj_t*  alpha,
 	bli_packm_init( b, &b_pack,
 	                cntl_sub_packm_b( cntl ) );
 
-	// Pack B1 and scale by alpha (if instructed).
-	bli_packm_int( alpha,
-	               b, &b_pack,
+	// Pack B1 (if instructed).
+	bli_packm_int( b, &b_pack,
 	               cntl_sub_packm_b( cntl ) );
 
 	// Partition along the remaining portion of the m dimension.
@@ -89,16 +86,15 @@ void bli_trsm_blk_var1f( obj_t*  alpha,
 		bli_packm_init( &a1, &a1_pack,
 		                cntl_sub_packm_a( cntl ) );
 
-		// Pack A1 and scale by alpha (if instructed).
-		bli_packm_int( alpha,
-		               &a1, &a1_pack,
+		// Pack A1 (if instructed).
+		bli_packm_int( &a1, &a1_pack,
 		               cntl_sub_packm_a( cntl ) );
 
 		// Perform trsm subproblem.
-		bli_trsm_int( alpha,
+		bli_trsm_int( &BLIS_ONE,
 		              &a1_pack,
 		              &b_pack,
-		              beta,
+		              &BLIS_ONE,
 		              &c1,
 		              cntl_sub_trsm( cntl ) );
 	}

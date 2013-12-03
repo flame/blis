@@ -84,6 +84,7 @@ extern "C" {
 #include "bli_init.h"
 #include "bli_malloc.h"
 #include "bli_obj.h"
+#include "bli_obj_scalar.h"
 #include "bli_mem.h"
 #include "bli_part.h"
 #include "bli_query.h"

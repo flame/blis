@@ -68,7 +68,7 @@ void bli_her( obj_t*  alpha,
 
 	// Create object to hold a copy-cast of alpha.
 	dt_alpha = dt_targ_x;
-	bli_obj_init_scalar_copy_of( dt_alpha,
+	bli_obj_scalar_init_detached_copy_of( dt_alpha,
 	                             BLIS_NO_CONJUGATE,
 	                             alpha,
 	                             &alpha_local );
@@ -151,7 +151,7 @@ void PASTEMAC(ch,opname)( \
 \
 	rs_x = incx; cs_x = m * incx; \
 \
-	bli_obj_create_scalar_with_attached_buffer( dt_r, alpha, &alphao ); \
+	bli_obj_create_1x1_with_attached_buffer( dt_r, alpha, &alphao ); \
 \
 	bli_obj_create_with_attached_buffer( dt, m, 1, x, rs_x, cs_x, &xo ); \
 	bli_obj_create_with_attached_buffer( dt, m, m, c, rs_c, cs_c, &co ); \

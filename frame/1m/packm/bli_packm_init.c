@@ -56,7 +56,7 @@ void bli_packm_init( obj_t*   a,
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
-		bli_packm_check( &BLIS_ONE, a, p, cntl );
+		bli_packm_init_check( a, p, cntl );
 
 	// First check if we are to skip this operation because the control tree
 	// is NULL, and if so, simply alias the object to its packed counterpart.

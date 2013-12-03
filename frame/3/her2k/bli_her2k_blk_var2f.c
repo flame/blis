@@ -34,13 +34,10 @@
 
 #include "blis.h"
 
-void bli_her2k_blk_var2f( obj_t*   alpha,
-                          obj_t*   a,
+void bli_her2k_blk_var2f( obj_t*   a,
                           obj_t*   bh,
-                          obj_t*   alpha_conj,
                           obj_t*   b,
                           obj_t*   ah,
-                          obj_t*   beta,
                           obj_t*   c,
                           her2k_t* cntl )
 {
@@ -72,7 +69,7 @@ void bli_her2k_blk_var2f( obj_t*   alpha,
 	n_trans = bli_obj_width_after_trans( *c );
 
 	// Scale C by beta (if instructed).
-	bli_scalm_int( beta,
+	bli_scalm_int( &BLIS_ONE,
 	               c,
 	               cntl_sub_scalm( cntl ) );
 
@@ -82,14 +79,12 @@ void bli_her2k_blk_var2f( obj_t*   alpha,
 	bli_packm_init( b, &b_pack,
 	                cntl_sub_packm_a( cntl ) );
 
-	// Pack A and scale by alpha (if instructed).
-	bli_packm_int( alpha,
-	               a, &a_pack,
+	// Pack A (if instructed).
+	bli_packm_int( a, &a_pack,
 	               cntl_sub_packm_a( cntl ) );
 
-	// Pack B and scale by alpha_conj (if instructed).
-	bli_packm_int( alpha_conj,
-	               b, &b_pack,
+	// Pack B (if instructed).
+	bli_packm_int( b, &b_pack,
 	               cntl_sub_packm_a( cntl ) );
 
 	// Partition along the n dimension.
@@ -124,29 +119,26 @@ void bli_her2k_blk_var2f( obj_t*   alpha,
 		bli_packm_init( &c1S, &c1S_pack,
 		                cntl_sub_packm_c( cntl ) );
 
-		// Pack B1' and scale by alpha (if instructed).
-		bli_packm_int( alpha,
-		               &bh1, &bh1_pack,
+		// Pack B1' (if instructed).
+		bli_packm_int( &bh1, &bh1_pack,
 		               cntl_sub_packm_b( cntl ) );
 
-		// Pack A1' and scale by alpha_conj (if instructed).
-		bli_packm_int( alpha_conj,
-		               &ah1, &ah1_pack,
+		// Pack A1' (if instructed).
+		bli_packm_int( &ah1, &ah1_pack,
 		               cntl_sub_packm_b( cntl ) );
 
-		// Pack C1 and scale by beta (if instructed).
-		bli_packm_int( beta,
-		               &c1S, &c1S_pack,
+		// Pack C1 (if instructed).
+		bli_packm_int( &c1S, &c1S_pack,
 		               cntl_sub_packm_c( cntl ) );
 
 		// Perform her2k subproblem.
-		bli_her2k_int( alpha,
+		bli_her2k_int( &BLIS_ONE,
 		               &aS_pack,
 		               &bh1_pack,
-		               alpha_conj,
+		               &BLIS_ONE,
 		               &bS_pack,
 		               &ah1_pack,
-		               beta,
+		               &BLIS_ONE,
 		               &c1S_pack,
 		               cntl_sub_her2k( cntl ) );
 

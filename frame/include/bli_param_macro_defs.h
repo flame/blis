@@ -543,7 +543,7 @@
 	if ( bli_obj_is_const( *(obj_scalar) ) ) \
 	{ \
 		dt_scalar  = dt_aux; \
-		buf_scalar = bli_obj_scalar_buffer( dt_scalar, *(obj_scalar) ); \
+		buf_scalar = bli_obj_buffer_for_1x1( dt_scalar, *(obj_scalar) ); \
 	} \
 	else \
 	{ \
@@ -558,7 +558,7 @@
 { \
 	{ \
 		dt_scalar  = dt_aux; \
-		buf_scalar = bli_obj_scalar_buffer( dt_scalar, *(obj_scalar) ); \
+		buf_scalar = bli_obj_buffer_for_1x1( dt_scalar, *(obj_scalar) ); \
 	} \
 }
 

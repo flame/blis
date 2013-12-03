@@ -149,8 +149,8 @@ void libblis_test_axpy2v_experiment( test_params_t* params,
 	bli_param_map_char_to_blis_conj( pc_str[1], &conjy );
 
 	// Create test scalars.
-	bli_obj_init_scalar( datatype, &alpha1 );
-	bli_obj_init_scalar( datatype, &alpha2 );
+	bli_obj_scalar_init_detached( datatype, &alpha1 );
+	bli_obj_scalar_init_detached( datatype, &alpha2 );
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_vobj_create( params, datatype, sc_str[0], m, &x );
@@ -269,7 +269,7 @@ void libblis_test_axpy2v_check( obj_t*  alpha1,
 	// is negligible, where v contains z as computed by two calls to axpyv.
 	//
 
-	bli_obj_init_scalar( dt_real, &norm );
+	bli_obj_scalar_init_detached( dt_real, &norm );
 
 	bli_obj_create( dt, m, 1, 0, 0, &x_temp );
 	bli_obj_create( dt, m, 1, 0, 0, &y_temp );
@@ -335,9 +335,9 @@ void bli_axpy2v_ker( obj_t*  alpha1,
 	inc_t     inc_z     = bli_obj_vector_inc( *z );
 	void*     buf_z     = bli_obj_buffer_at_off( *z );
 
-	void*     buf_alpha1 = bli_obj_scalar_buffer( dt, *alpha1 );
+	void*     buf_alpha1 = bli_obj_buffer_for_1x1( dt, *alpha1 );
 
-	void*     buf_alpha2 = bli_obj_scalar_buffer( dt, *alpha2 );
+	void*     buf_alpha2 = bli_obj_buffer_for_1x1( dt, *alpha2 );
 
 	FUNCPTR_T f;
 

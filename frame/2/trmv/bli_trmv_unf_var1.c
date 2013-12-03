@@ -88,7 +88,7 @@ void bli_trmv_unf_var1( obj_t*  alpha,
 	// The datatype of alpha MUST be the type union of a and x. This is to
 	// prevent any unnecessary loss of information during computation.
 	dt_alpha  = bli_datatype_union( dt_a, dt_x );
-	buf_alpha = bli_obj_scalar_buffer( dt_alpha, *alpha );
+	buf_alpha = bli_obj_buffer_for_1x1( dt_alpha, *alpha );
 
 	// Index into the type combination array to extract the correct
 	// function pointer.

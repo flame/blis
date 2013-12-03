@@ -159,8 +159,8 @@ void libblis_test_trsm_experiment( test_params_t* params,
 	bli_param_map_char_to_blis_diag( pc_str[3], &diaga );
 
 	// Create test scalars.
-	bli_obj_init_scalar( datatype, &kappa );
-	bli_obj_init_scalar( datatype, &alpha );
+	bli_obj_scalar_init_detached( datatype, &kappa );
+	bli_obj_scalar_init_detached( datatype, &alpha );
 
 	// Create test operands (vectors and/or matrices).
 	bli_set_dim_with_side( side, m, n, mn_side );
@@ -300,8 +300,8 @@ void libblis_test_trsm_check( side_t  side,
 	//     = alpha * B * tinv(ransa(A)) * t
 	//     = alpha * B * w
 
-	bli_obj_init_scalar( dt,      &kappa );
-	bli_obj_init_scalar( dt_real, &norm );
+	bli_obj_scalar_init_detached( dt,      &kappa );
+	bli_obj_scalar_init_detached( dt_real, &norm );
 
 	if ( bli_is_left( side ) )
 	{

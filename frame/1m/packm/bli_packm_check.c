@@ -34,33 +34,49 @@
 
 #include "blis.h"
 
-void bli_packm_check( obj_t*   beta,
-                      obj_t*   c,
-                      obj_t*   p,
-                      packm_t* cntl )
+
+void bli_packm_init_check( obj_t*   a,
+                           obj_t*   p,
+                           packm_t* cntl )
 {
 	err_t e_val;
 
 	// Check object datatypes.
 
-	e_val = bli_check_noninteger_object( beta );
+	e_val = bli_check_floating_object( a );
 	bli_check_error_code( e_val );
 
-	e_val = bli_check_floating_object( c );
+	// Check control tree pointer.
+
+	// NOTE: We can't check the control tree because we interpret a NULL
+	// value (in bli_packm_int()) as a request to skip the operation.
+	//e_val = bli_check_valid_cntl( ( void* )cntl );
+	//bli_check_error_code( e_val );
+}
+
+void bli_packm_int_check( obj_t*   a,
+                          obj_t*   p,
+                          packm_t* cntl )
+{
+	err_t e_val;
+
+	// Check object datatypes.
+
+	e_val = bli_check_floating_object( a );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_floating_object( p );
 	bli_check_error_code( e_val );
 
 	// Check object dimensions.
 
-	e_val = bli_check_scalar_object( beta );
+	e_val = bli_check_conformal_dims( a, p );
 	bli_check_error_code( e_val );
 
-	// We don't check for conformal dimensions between c and p because
-	// p has not yet been initialized.
+	// Check control tree pointer.
 
-	// Check control tree pointer
-
-	// NOTE: We can't check the control tree until we stop interpreting a
-	// NULL value (in bli_packm_int()) as a request to skip the operation.
+	// NOTE: We can't check the control tree because we interpret a NULL
+	// value (in bli_packm_int()) as a request to skip the operation.
 	//e_val = bli_check_valid_cntl( ( void* )cntl );
 	//bli_check_error_code( e_val );
 }

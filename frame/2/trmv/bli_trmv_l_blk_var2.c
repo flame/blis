@@ -80,8 +80,7 @@ void bli_trmv_l_blk_var2( obj_t*  alpha,
 		                cntl_sub_packv_x1( cntl ) );
 
 		// Copy/pack A11, x1 (if needed).
-		bli_packm_int( &BLIS_ONE,
-		               &a11,
+		bli_packm_int( &a11,
 		               &a11_pack,
 		               cntl_sub_packm_a11( cntl ) );
 		bli_packv_int( &x1,

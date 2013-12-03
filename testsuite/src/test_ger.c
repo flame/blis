@@ -148,7 +148,7 @@ void libblis_test_ger_experiment( test_params_t* params,
 	bli_param_map_char_to_blis_conj( pc_str[1], &conjy );
 
 	// Create test scalars.
-	bli_obj_init_scalar( datatype, &alpha );
+	bli_obj_scalar_init_detached( datatype, &alpha );
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_vobj_create( params, datatype,
@@ -273,9 +273,9 @@ void libblis_test_ger_check( obj_t*  alpha,
 	//     =   A_orig * t + w
 	//
 
-	bli_obj_init_scalar( dt,      &tau );
-	bli_obj_init_scalar( dt,      &rho );
-	bli_obj_init_scalar( dt_real, &norm );
+	bli_obj_scalar_init_detached( dt,      &tau );
+	bli_obj_scalar_init_detached( dt,      &rho );
+	bli_obj_scalar_init_detached( dt_real, &norm );
 
 	bli_obj_create( dt, n_a, 1, 0, 0, &t );
 	bli_obj_create( dt, m_a, 1, 0, 0, &v );

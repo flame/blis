@@ -63,22 +63,12 @@ void bli_obj_attach_buffer( void*  p,
                             inc_t  cs,
                             obj_t* obj );
 
-void bli_obj_attach_internal_buffer( obj_t* obj );
+void bli_obj_create_1x1( num_t  dt,
+                         obj_t* obj );
 
-void bli_obj_init_scalar( num_t  dt,
-                          obj_t* b );
-
-void bli_obj_init_scalar_copy_of( num_t  dt,
-                                  conj_t conj,
-                                  obj_t* a,
-                                  obj_t* b );
-
-void bli_obj_create_scalar( num_t  dt,
-                            obj_t* obj );
-
-void bli_obj_create_scalar_with_attached_buffer( num_t  dt,
-                                                 void*  p,
-                                                 obj_t* obj );
+void bli_obj_create_1x1_with_attached_buffer( num_t  dt,
+                                              void*  p,
+                                              obj_t* obj );
 
 void bli_obj_free( obj_t* obj );
 

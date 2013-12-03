@@ -39,8 +39,6 @@ void bli_her2k_set_targ_exec_datatypes( obj_t*  a,
                                         obj_t*  b,
                                         obj_t*  ah,
                                         obj_t*  c,
-                                        num_t*  dt_alpha,
-                                        num_t*  dt_beta,
                                         bool_t* pack_c )
 {
 	num_t   dt_targ_a;
@@ -80,18 +78,6 @@ void bli_her2k_set_targ_exec_datatypes( obj_t*  a,
 	bli_obj_set_execution_datatype( dt_exec, *b );
 	bli_obj_set_execution_datatype( dt_exec, *ah );
 	bli_obj_set_execution_datatype( dt_exec, *c );
-
-	// Notice that we use the target datatype of matrix a. By inspecting
-	// the table above, this clearly works for cases (0) through (4), (6),
-	// and (7). It also works for case (5) since it is transformed into
-	// case (6) by the above code.
-	*dt_alpha = bli_obj_target_datatype( *a );
-
-	// Notice that we use the target datatype of matrix a. By inspecting
-	// the table above, this clearly works for cases (0) through (4), (6),
-	// and (7). It also works for case (5) since it is transformed into
-	// case (6) by the above code.
-	*dt_beta = bli_obj_datatype( *c );
 
 	// For now disable packing of C.
 	*pack_c = FALSE;

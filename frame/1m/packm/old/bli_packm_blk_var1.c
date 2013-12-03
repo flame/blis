@@ -83,7 +83,7 @@ void bli_packm_blk_var1( obj_t*   beta,
 	inc_t     cs_p      = bli_obj_col_stride( *p );
 	inc_t     ps_p      = bli_obj_panel_stride( *p );
 
-	void*     buf_beta  = bli_obj_scalar_buffer( dt_cp, *beta );
+	void*     buf_beta  = bli_obj_buffer_for_1x1( dt_cp, *beta );
 
 	FUNCPTR_T f;
 

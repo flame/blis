@@ -32,8 +32,7 @@
 
 */
 
-void bli_scalm_unb_var1( obj_t*  beta,
-                         obj_t*  x );
+void bli_scalm_unb_var1( obj_t*  x );
 
 
 #undef  GENTPROT2

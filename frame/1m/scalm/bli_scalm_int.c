@@ -36,8 +36,7 @@
 
 #define FUNCPTR_T scalm_fp
 
-typedef void (*FUNCPTR_T)( obj_t* beta,
-                           obj_t* x );
+typedef void (*FUNCPTR_T)( obj_t* x );
 
 static FUNCPTR_T vars[1][3] =
 {
@@ -49,6 +48,7 @@ void bli_scalm_int( obj_t*   beta,
                     obj_t*   x,
                     scalm_t* cntl )
 {
+	obj_t     x_local;
 	varnum_t  n;
 	impl_t    i;
 	FUNCPTR_T f;
@@ -63,8 +63,18 @@ void bli_scalm_int( obj_t*   beta,
 	// Return early if one of the matrix operands has a zero dimension.
 	if ( bli_obj_has_zero_dim( *x ) ) return;
 
-	// Return early if the beta scalar equals one.
-	if ( bli_obj_scalar_equals( beta, &BLIS_ONE ) ) return;
+	// Return early if both beta and the scalar attached to x are unit.
+	if ( bli_obj_equals( beta, &BLIS_ONE ) &&
+	     bli_obj_scalar_equals( x, &BLIS_ONE ) ) return;
+
+	// Alias x to x_local so we can apply beta if it is non-unit.
+	bli_obj_alias_to( *x, x_local );
+
+	// If beta is non-unit, apply it to the scalar attached to x.
+	if ( !bli_obj_equals( beta, &BLIS_ONE ) )
+	{
+		bli_obj_scalar_apply_scalar( beta, &x_local );
+	}
 
 	// Extract the variant number and implementation type.
 	n = cntl_var_num( cntl );
@@ -74,7 +84,6 @@ void bli_scalm_int( obj_t*   beta,
 	f = vars[n][i];
 
 	// Invoke the variant.
-	f( beta,
-	   x );
+	f( &x_local );
 }
 

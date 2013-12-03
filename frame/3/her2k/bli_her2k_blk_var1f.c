@@ -34,13 +34,10 @@
 
 #include "blis.h"
 
-void bli_her2k_blk_var1f( obj_t*   alpha,
-                          obj_t*   a,
+void bli_her2k_blk_var1f( obj_t*   a,
                           obj_t*   bh,
-                          obj_t*   alpha_conj,
                           obj_t*   b,
                           obj_t*   ah,
-                          obj_t*   beta,
                           obj_t*   c,
                           her2k_t* cntl )
 {
@@ -65,7 +62,7 @@ void bli_her2k_blk_var1f( obj_t*   alpha,
 	m_trans = bli_obj_length_after_trans( *c );
 
 	// Scale C by beta (if instructed).
-	bli_scalm_int( beta,
+	bli_scalm_int( &BLIS_ONE,
 	               c,
 	               cntl_sub_scalm( cntl ) );
 
@@ -77,9 +74,8 @@ void bli_her2k_blk_var1f( obj_t*   alpha,
 	bli_packm_init( bh, &bh_pack,
 	                cntl_sub_packm_b( cntl ) );
 
-	// Pack B' and scale by alpha (if instructed).
-	bli_packm_int( alpha,
-	               bh, &bh_pack,
+	// Pack B' (if instructed).
+	bli_packm_int( bh, &bh_pack,
 	               cntl_sub_packm_b( cntl ) );
 
 	// Partition along the m dimension.
@@ -101,21 +97,19 @@ void bli_her2k_blk_var1f( obj_t*   alpha,
 		bli_packm_init( &c1, &c1_pack,
 		                cntl_sub_packm_c( cntl ) );
 
-		// Pack A1 and scale by alpha (if instructed).
-		bli_packm_int( alpha,
-		               &a1, &a1_pack,
+		// Pack A1 (if instructed).
+		bli_packm_int( &a1, &a1_pack,
 		               cntl_sub_packm_a( cntl ) );
 
-		// Pack C1 and scale by beta (if instructed).
-		bli_packm_int( beta,
-		               &c1, &c1_pack,
+		// Pack C1 (if instructed).
+		bli_packm_int( &c1, &c1_pack,
 		               cntl_sub_packm_c( cntl ) );
 
 		// Perform herk subproblem.
-		bli_herk_int( alpha,
+		bli_herk_int( &BLIS_ONE,
 		              &a1_pack,
 		              &bh_pack,
-		              beta,
+		              &BLIS_ONE,
 		              &c1_pack,
 		              cntl_sub_herk( cntl ) );
 
@@ -129,6 +123,11 @@ void bli_her2k_blk_var1f( obj_t*   alpha,
 	bli_obj_release_pack( &a1_pack );
 	bli_obj_release_pack( &bh_pack );
 
+	// This variant executes two rank-k updates. Therefore, if the
+	// internal beta scalar on matrix C is non-zero, we must use it only
+	// for the first rank-k update (and then BLIS_ONE for the other).
+	bli_obj_scalar_reset( c );
+
 	//
 	// Perform second rank-k update: C = C + conj(alpha) * B * A'.
 	//
@@ -137,9 +136,8 @@ void bli_her2k_blk_var1f( obj_t*   alpha,
 	bli_packm_init( ah, &ah_pack,
 	                cntl_sub_packm_b( cntl ) );
 
-	// Pack A' and scale by alpha_conj (if instructed).
-	bli_packm_int( alpha_conj,
-	               ah, &ah_pack,
+	// Pack A' (if instructed).
+	bli_packm_int( ah, &ah_pack,
 	               cntl_sub_packm_b( cntl ) );
 
 	// Partition along the m dimension.
@@ -161,18 +159,16 @@ void bli_her2k_blk_var1f( obj_t*   alpha,
 		bli_packm_init( &c1, &c1_pack,
 		                cntl_sub_packm_c( cntl ) );
 
-		// Pack B1 and scale by alpha_conj (if instructed).
-		bli_packm_int( alpha_conj,
-		               &b1, &b1_pack,
+		// Pack B1 (if instructed).
+		bli_packm_int( &b1, &b1_pack,
 		               cntl_sub_packm_a( cntl ) );
 
-		// Pack C1 and scale by beta (if instructed).
-		bli_packm_int( beta,
-		               &c1, &c1_pack,
+		// Pack C1 (if instructed).
+		bli_packm_int( &c1, &c1_pack,
 		               cntl_sub_packm_c( cntl ) );
 
 		// Perform herk subproblem.
-		bli_herk_int( alpha_conj,
+		bli_herk_int( &BLIS_ONE,
 		              &b1_pack,
 		              &ah_pack,
 		              &BLIS_ONE,

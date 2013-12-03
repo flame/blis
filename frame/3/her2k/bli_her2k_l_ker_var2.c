@@ -34,16 +34,15 @@
 
 #include "blis.h"
 
-void bli_her2k_l_ker_var2( obj_t*   alpha,
-                           obj_t*   a,
+void bli_her2k_l_ker_var2( obj_t*   a,
                            obj_t*   bh,
-                           obj_t*   alpha_conj,
                            obj_t*   b,
                            obj_t*   ah,
-                           obj_t*   beta,
                            obj_t*   c,
                            her2k_t* cntl )
 {
+	obj_t c_local;
+
 	// Implement her2k kernel in terms of two calls to the corresponding
 	// herk kernel.
 
@@ -51,18 +50,18 @@ void bli_her2k_l_ker_var2( obj_t*   alpha,
 	// only want to apply beta once. (And beta might be unit anyway if this
 	// is not the first iteration of variant 3.)
 
-	bli_herk_l_ker_var2( alpha,
-	                     a,
+	bli_obj_alias_to( *c, c_local );
+
+	bli_herk_l_ker_var2( a,
 	                     bh,
-	                     beta,
-	                     c,
+	                     &c_local,
 	                     NULL );
 
-	bli_herk_l_ker_var2( alpha_conj,
-	                     b,
+	bli_obj_scalar_reset( &c_local );
+
+	bli_herk_l_ker_var2( b,
 	                     ah,
-	                     &BLIS_ONE,
-	                     c,
+	                     &c_local,
 	                     NULL );
 }
 

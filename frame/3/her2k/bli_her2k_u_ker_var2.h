@@ -35,13 +35,10 @@
 //
 // Prototype object-based interface.
 //
-void bli_her2k_u_ker_var2( obj_t*   alpha,
-                           obj_t*   a,
+void bli_her2k_u_ker_var2( obj_t*   a,
                            obj_t*   bh,
-                           obj_t*   alpha_conj,
                            obj_t*   b,
                            obj_t*   ah,
-                           obj_t*   beta,
                            obj_t*   c,
                            her2k_t* cntl );
 

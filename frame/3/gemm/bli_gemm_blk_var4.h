@@ -32,10 +32,8 @@
 
 */
 
-void bli_gemm_blk_var4( obj_t*  alpha,
-                        obj_t*  a,
+void bli_gemm_blk_var4( obj_t*  a,
                         obj_t*  b,
-                        obj_t*  beta,
                         obj_t*  c,
                         gemm_t* cntl );
 

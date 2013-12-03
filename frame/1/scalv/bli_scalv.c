@@ -57,7 +57,7 @@ void PASTEMAC0(opname)( \
 	dt_x = bli_obj_datatype( *x ); \
 \
 	/* Create an object to hold a copy-cast of beta. */ \
-	bli_obj_init_scalar_copy_of( dt_x, \
+	bli_obj_scalar_init_detached_copy_of( dt_x, \
 	                             BLIS_NO_CONJUGATE, \
 	                             beta, \
 	                             &beta_local ); \

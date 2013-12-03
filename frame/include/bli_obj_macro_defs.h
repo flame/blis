@@ -485,7 +485,7 @@ bli_obj_width_stored( obj )
 
 #define bli_obj_vector_inc( x ) \
 \
-	( bli_obj_is_scalar( x ) ? 1 : \
+	( bli_obj_is_1x1( x ) ? 1 : \
 	( bli_obj_length( x ) == 1 ? bli_obj_col_stride( x ) \
 	                           : bli_obj_row_stride( x ) ) \
 	)
@@ -508,7 +508,7 @@ bli_obj_width_stored( obj )
 	( bli_obj_length( obj ) == 0 || \
 	  bli_obj_width( obj )  == 0 )
 
-#define bli_obj_is_scalar( x ) \
+#define bli_obj_is_1x1( x ) \
 \
 	( bli_obj_length( x ) == 1 && \
 	  bli_obj_width( x )  == 1 )
@@ -695,6 +695,17 @@ bli_obj_width_stored( obj )
 \
 	&((obj).scalar)
 
+// Bufferless scalar field modification
+
+#define bli_obj_set_internal_scalar( val, obj ) \
+{ \
+	(obj).scalar = val; \
+}
+
+#define bli_obj_copy_internal_scalar( a, b ) \
+{ \
+	(b).scalar = (a).scalar; \
+}
 
 // Element size query
 
@@ -897,7 +908,7 @@ bli_obj_width_stored( obj )
 	                                                      (obj).offm * (obj).rs ) \
 	         )
 
-#define bli_obj_scalar_buffer( dt, obj ) \
+#define bli_obj_buffer_for_1x1( dt, obj ) \
 \
 	( void* )( bli_obj_is_const( obj ) ? ( bli_obj_buffer_for_const( dt, obj ) ) \
 	                                   : ( bli_obj_buffer_at_off( obj ) ) \

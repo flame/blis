@@ -36,13 +36,10 @@
 
 #define FUNCPTR_T her2k_fp
 
-typedef void (*FUNCPTR_T)( obj_t*   alpha,
-                           obj_t*   a,
+typedef void (*FUNCPTR_T)( obj_t*   a,
                            obj_t*   bh,
-                           obj_t*   alpha_conj,
                            obj_t*   b,
                            obj_t*   ah,
-                           obj_t*   beta,
                            obj_t*   c,
                            her2k_t* cntl );
 
@@ -66,16 +63,20 @@ static FUNCPTR_T vars[2][4][3] =
 	}
 };
 
-void bli_her2k_int( obj_t*   alpha,
+void bli_her2k_int( obj_t*   alpha_abh,
                     obj_t*   a,
                     obj_t*   bh,
-                    obj_t*   alpha_conj,
+                    obj_t*   alpha_bah,
                     obj_t*   b,
                     obj_t*   ah,
                     obj_t*   beta,
                     obj_t*   c,
                     her2k_t* cntl )
 {
+	obj_t     a_local;
+	obj_t     bh_local;
+	obj_t     b_local;
+	obj_t     ah_local;
 	obj_t     c_local;
 	varnum_t  n;
 	impl_t    i;
@@ -84,7 +85,7 @@ void bli_her2k_int( obj_t*   alpha,
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
-		bli_her2k_int_check( alpha, a, bh, alpha_conj, b, ah, beta, c, cntl );
+		bli_her2k_int_check( alpha_abh, a, bh, alpha_bah, b, ah, beta, c, cntl );
 
 	// If C has a zero dimension, return early.
 	if ( bli_obj_has_zero_dim( *c ) ) return;
@@ -98,6 +99,12 @@ void bli_her2k_int( obj_t*   alpha,
 		bli_scalm( beta, c );
 		return;
 	}
+
+	// Alias A, B', B, and A' in case we need to update attached scalars.
+	bli_obj_alias_to( *a, a_local );
+	bli_obj_alias_to( *bh, bh_local );
+	bli_obj_alias_to( *b, b_local );
+	bli_obj_alias_to( *ah, ah_local );
 
 	// Alias C in case we need to induce a transposition.
 	bli_obj_alias_to( *c, c_local );
@@ -113,6 +120,27 @@ void bli_her2k_int( obj_t*   alpha,
 		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, c_local );
 	}
 
+	// If alpha_abh is non-unit, typecast and apply it to the scalar
+	// attached to B'.
+	if ( !bli_obj_equals( alpha_abh, &BLIS_ONE ) )
+	{
+		bli_obj_scalar_apply_scalar( alpha_abh, &bh_local );
+	}
+
+	// If alpha_bah is non-unit, typecast and apply it to the scalar
+	// attached to A'.
+	if ( !bli_obj_equals( alpha_bah, &BLIS_ONE ) )
+	{
+		bli_obj_scalar_apply_scalar( alpha_bah, &ah_local );
+	}
+
+	// If beta is non-unit, typecast and apply it to the scalar
+	// attached to C.
+	if ( !bli_obj_equals( beta, &BLIS_ONE ) )
+	{
+		bli_obj_scalar_apply_scalar( beta, &c_local );
+	}
+
 	// Set a bool based on the uplo field of c.
 	if ( bli_obj_root_is_lower( c_local ) ) uplo = 0;
 	else                                    uplo = 1;
@@ -125,13 +153,10 @@ void bli_her2k_int( obj_t*   alpha,
 	f = vars[uplo][n][i];
 
 	// Invoke the variant.
-	f( alpha,
-	   a,
-	   bh,
-	   alpha_conj,
-	   b,
-	   ah,
-	   beta,
+	f( &a_local,
+	   &bh_local,
+	   &b_local,
+	   &ah_local,
 	   &c_local,
 	   cntl );
 }

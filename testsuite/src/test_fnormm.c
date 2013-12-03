@@ -138,8 +138,8 @@ void libblis_test_fnormm_experiment( test_params_t* params,
 
 
 	// Create test scalars.
-	bli_obj_init_scalar( datatype, &beta );
-	bli_obj_init_scalar( dt_real,  &norm );
+	bli_obj_scalar_init_detached( datatype, &beta );
+	bli_obj_scalar_init_detached( dt_real,  &norm );
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
@@ -225,9 +225,9 @@ void libblis_test_fnormm_check( obj_t*  beta,
 	// where m and n are the dimensions of x.
 	//
 
-	bli_obj_init_scalar( dt_real, &temp_r );
-	bli_obj_init_scalar( dt_real, &m_r );
-	bli_obj_init_scalar( dt_real, &n_r );
+	bli_obj_scalar_init_detached( dt_real, &temp_r );
+	bli_obj_scalar_init_detached( dt_real, &m_r );
+	bli_obj_scalar_init_detached( dt_real, &n_r );
 
 	bli_setsc( ( double )m, 0.0, &m_r );
 	bli_setsc( ( double )n, 0.0, &n_r );

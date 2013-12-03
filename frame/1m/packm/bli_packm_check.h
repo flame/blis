@@ -32,7 +32,10 @@
 
 */
 
-void bli_packm_check( obj_t*   beta,
-                      obj_t*   c,
-                      obj_t*   p,
-                      packm_t* cntl );
+void bli_packm_init_check( obj_t*   a,
+                           obj_t*   p,
+                           packm_t* cntl );
+
+void bli_packm_int_check( obj_t*   a,
+                          obj_t*   p,
+                          packm_t* cntl );

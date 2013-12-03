@@ -96,7 +96,7 @@ void bli_her2_unb_var4( conj_t   conjh,
 
 	// The datatype of alpha MUST be the type union of the datatypes of x and y.
 	dt_alpha  = bli_datatype_union( dt_x, dt_y );
-	buf_alpha = bli_obj_scalar_buffer( dt_alpha, *alpha );
+	buf_alpha = bli_obj_buffer_for_1x1( dt_alpha, *alpha );
 
 	// Index into the type combination array to extract the correct
 	// function pointer.

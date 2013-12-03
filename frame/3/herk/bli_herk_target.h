@@ -35,8 +35,6 @@
 void bli_herk_set_targ_exec_datatypes( obj_t*  a,
                                        obj_t*  ah,
                                        obj_t*  c,
-                                       num_t*  dt_alpha,
-                                       num_t*  dt_beta,
                                        bool_t* pack_c );
 
 /*

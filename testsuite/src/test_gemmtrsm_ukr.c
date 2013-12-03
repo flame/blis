@@ -185,8 +185,8 @@ void libblis_test_gemmtrsm_ukr_experiment( test_params_t* params,
 	bli_param_map_char_to_blis_uplo( pc_str[0], &uploa );
 
 	// Create test scalars.
-	bli_obj_init_scalar( datatype, &kappa );
-	bli_obj_init_scalar( datatype, &alpha );
+	bli_obj_scalar_init_detached( datatype, &kappa );
+	bli_obj_scalar_init_detached( datatype, &alpha );
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
@@ -251,10 +251,10 @@ void libblis_test_gemmtrsm_ukr_experiment( test_params_t* params,
 	                          &b, &bp );
 
 	// Pack the contents of a to ap.
-	bli_packm_blk_var3( &BLIS_ONE, &a, &ap );
+	bli_packm_blk_var3( &a, &ap );
 
 	// Pack the contents of b to bp.
-	bli_packm_blk_var2( &BLIS_ONE, &b, &bp );
+	bli_packm_blk_var2( &b, &bp );
 
 
 	// Create subpartitions from the a and b panels.
@@ -268,7 +268,7 @@ void libblis_test_gemmtrsm_ukr_experiment( test_params_t* params,
 		bli_copym( &c11_save, &c11 );
 
 		// Re-pack the contents of b to bp.
-		bli_packm_blk_var2( &BLIS_ONE, &b, &bp );
+		bli_packm_blk_var2( &b, &bp );
 
 		time = bli_clock();
 
@@ -369,8 +369,8 @@ void libblis_test_gemmtrsm_ukr_check( side_t  side,
 	//     = inv(A11) * ( alpha * B11_orig * t - A1x * w )
 	//
 
-	bli_obj_init_scalar( dt,      &kappa );
-	bli_obj_init_scalar( dt_real, &norm );
+	bli_obj_scalar_init_detached( dt,      &kappa );
+	bli_obj_scalar_init_detached( dt_real, &norm );
 
 	if ( bli_is_left( side ) )
 	{
@@ -523,7 +523,7 @@ void bli_gemmtrsm_ukr( obj_t*  alpha,
     inc_t     rs_c      = bli_obj_row_stride( *c11 );
     inc_t     cs_c      = bli_obj_col_stride( *c11 );
 
-	void*     buf_alpha = bli_obj_scalar_buffer( dt, *alpha );
+	void*     buf_alpha = bli_obj_buffer_for_1x1( dt, *alpha );
 
     FUNCPTR_T f;
 

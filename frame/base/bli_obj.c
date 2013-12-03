@@ -66,7 +66,7 @@ void bli_obj_create_without_buffer( num_t  dt,
 {
 	siz_t  elem_size;
 	mem_t* pack_mem;
-	//mem_t* cast_mem;
+	void*  s;
 
 	if ( bli_error_checking_is_enabled() )
 		bli_obj_create_without_buffer_check( dt, m, n, obj );
@@ -99,9 +99,15 @@ void bli_obj_create_without_buffer( num_t  dt,
 	bli_obj_set_diag_offset( 0, *obj );
 
 	pack_mem = bli_obj_pack_mem( *obj );
-	//cast_mem = bli_obj_cast_mem( *obj );
 	bli_mem_set_buffer( NULL, pack_mem );
-	//bli_mem_set_buffer( NULL, cast_mem );
+
+	// Set the internal scalar to 1.0.
+	s = bli_obj_internal_scalar_buffer( *obj );
+
+	if      ( bli_is_float( dt )    ) bli_sset1s( *(( float*    )s) )
+	else if ( bli_is_double( dt )   ) bli_dset1s( *(( double*   )s) )
+	else if ( bli_is_scomplex( dt ) ) bli_cset1s( *(( scomplex* )s) )
+	else if ( bli_is_dcomplex( dt ) ) bli_zset1s( *(( dcomplex* )s) )
 }
 
 void bli_obj_alloc_buffer( inc_t  rs,
@@ -210,56 +216,17 @@ void bli_obj_attach_buffer( void*  p,
 	bli_obj_set_incs( rs, cs, *obj );
 }
 
-void bli_obj_attach_internal_buffer( obj_t* obj )
-{
-	void* p;
-
-	// Query the address of the object's internal scalar buffer.
-	p = bli_obj_internal_scalar_buffer( *obj );
-
-	// Update the object.
-	bli_obj_set_buffer( p, *obj );
-	bli_obj_set_incs( 1, 1, *obj );
-}
-
-void bli_obj_init_scalar( num_t  dt,
-                          obj_t* b )
-{
-	// Initialize b without a buffer and then attach its internal buffer.
-	bli_obj_create_without_buffer( dt, 1, 1, b );
-	bli_obj_attach_internal_buffer( b );
-}
-
-void bli_obj_init_scalar_copy_of( num_t  dt,
-                                  conj_t conj,
-                                  obj_t* a,
-                                  obj_t* b )
-{
-	obj_t a_local;
-
-	// Make a local copy of scalar a so we can apply the conj parameter.
-	bli_obj_alias_to( *a, a_local );
-	bli_obj_apply_conj( conj, a_local );
-
-	// Initialize b without a buffer and then attach its internal buffer.
-	bli_obj_create_without_buffer( dt, 1, 1, b );
-	bli_obj_attach_internal_buffer( b );
-
-	// Copy the scalar value in a to object b, conjugating if needed.
-	bli_copysc( &a_local, b );
-}
-
-void bli_obj_create_scalar( num_t  dt,
-                            obj_t* obj )
+void bli_obj_create_1x1( num_t  dt,
+                         obj_t* obj )
 {
 	bli_obj_create_without_buffer( dt, 1, 1, obj );
 
 	bli_obj_alloc_buffer( 1, 1, obj );
 }
 
-void bli_obj_create_scalar_with_attached_buffer( num_t  dt,
-                                                 void*  p,
-                                                 obj_t* obj )
+void bli_obj_create_1x1_with_attached_buffer( num_t  dt,
+                                              void*  p,
+                                              obj_t* obj )
 {
 	bli_obj_create_without_buffer( dt, 1, 1, obj );
 
@@ -274,8 +241,9 @@ void bli_obj_free( obj_t* obj )
 	// Don't dereference obj if it is NULL.
 	if ( obj != NULL )
 	{
-		// Idiot safety: Don't try to free the buffer field if it currently
-		// refers to the internal scalar buffer.
+		// Idiot safety: Don't try to free the buffer field if the object
+		// is a detached scalar (ie: if the buffer pointer refers to the
+		// address of the internal scalar buffer).
 		if ( bli_obj_buffer( *obj ) != bli_obj_internal_scalar_buffer( *obj ) )
 			bli_free( bli_obj_buffer( *obj ) );
 	}
@@ -387,7 +355,7 @@ void bli_adjust_strides( dim_t  m,
 	// Interpret rs = cs = 0 as request for column storage.
 	if ( *rs == 0 && *cs == 0 )
 	{
-		// First we handle the scalar case explicitly.
+		// First we handle the 1x1 scalar case explicitly.
 		if ( m == 1 && n == 1 )
 		{
 			*rs = 1;
@@ -412,7 +380,7 @@ void bli_adjust_strides( dim_t  m,
 		// single vector (but could also be a request for a 1xn matrix in
 		// column-major order or an mx1 matrix in row-major order). In BLIS,
 		// we have decided to "reserve" the case where rs = cs = 1 for
-		// scalars only.
+		// 1x1 scalars only.
 		if ( m > 1 && n == 1 )
 		{
 			// Set the column stride to indicate that this is a column vector
@@ -431,7 +399,7 @@ void bli_adjust_strides( dim_t  m,
 			*rs = n;
 		}
 
-		// Nothing needs to be done for the scalar case where m == n == 1.
+		// Nothing needs to be done for the 1x1 scalar case where m == n == 1.
 	}
 }
 

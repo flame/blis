@@ -165,9 +165,9 @@ void libblis_test_trmm3_experiment( test_params_t* params,
 	bli_param_map_char_to_blis_trans( pc_str[4], &transb );
 
 	// Create test scalars.
-	bli_obj_init_scalar( datatype, &kappa );
-	bli_obj_init_scalar( datatype, &alpha );
-	bli_obj_init_scalar( datatype, &beta );
+	bli_obj_scalar_init_detached( datatype, &kappa );
+	bli_obj_scalar_init_detached( datatype, &alpha );
+	bli_obj_scalar_init_detached( datatype, &beta );
 
 	// Create test operands (vectors and/or matrices).
 	bli_set_dim_with_side( side, m, n, mn_side );
@@ -318,8 +318,8 @@ void libblis_test_trmm3_check( side_t  side,
 	//     = beta * C_orig * t + alpha * transb(B) * w
 	//     = beta * C_orig * t + z
 
-	bli_obj_init_scalar( dt,      &kappa );
-	bli_obj_init_scalar( dt_real, &norm );
+	bli_obj_scalar_init_detached( dt,      &kappa );
+	bli_obj_scalar_init_detached( dt_real, &norm );
 
 	if ( bli_is_left( side ) )
 	{

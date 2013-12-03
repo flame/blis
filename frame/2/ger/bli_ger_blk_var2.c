@@ -75,8 +75,7 @@ void bli_ger_blk_var2( obj_t* alpha,
 		                cntl_sub_packv_y( cntl ) );
 
 		// Copy/pack A1, y1 (if needed).
-		bli_packm_int( &BLIS_ONE,
-		               &a1,
+		bli_packm_int( &a1,
 		               &a1_pack,
 		               cntl_sub_packm_a( cntl ) );
 		bli_packv_int( &y1,

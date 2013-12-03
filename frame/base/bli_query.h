@@ -32,6 +32,6 @@
 
 */
 
-bool_t bli_obj_scalar_equals( obj_t* a,
-                              obj_t* b );
+bool_t bli_obj_equals( obj_t* a,
+                       obj_t* b );
 

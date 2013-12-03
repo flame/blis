@@ -50,10 +50,8 @@ typedef void (*FUNCPTR_T)(
 static FUNCPTR_T GENARRAY(ftypes,trsm_lu_ker_var2);
 
 
-void bli_trsm_lu_ker_var2( obj_t*  alpha,
-                           obj_t*  a,
+void bli_trsm_lu_ker_var2( obj_t*  a,
                            obj_t*  b,
-                           obj_t*  beta,
                            obj_t*  c,
                            trsm_t* cntl )
 {
@@ -79,15 +77,14 @@ void bli_trsm_lu_ker_var2( obj_t*  alpha,
 	inc_t     rs_c      = bli_obj_row_stride( *c );
 	inc_t     cs_c      = bli_obj_col_stride( *c );
 
-	num_t     dt_alpha;
 	void*     buf_alpha;
 
 	FUNCPTR_T f;
 
-	// If alpha is a scalar constant, use dt_exec to extract the address of the
-	// corresponding constant value; otherwise, use the datatype encoded
-	// within the alpha object and extract the buffer at the alpha offset.
-	bli_set_scalar_dt_buffer( alpha, dt_exec, dt_alpha, buf_alpha );
+
+	// Grab the address of the internal scalar buffer for the scalar
+	// attached to B.
+	buf_alpha = bli_obj_internal_scalar_buffer( *b );
 
 	// Index into the type combination array to extract the correct
 	// function pointer.

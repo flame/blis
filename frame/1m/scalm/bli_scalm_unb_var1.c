@@ -59,12 +59,10 @@ static FUNCPTR_T GENARRAY2_MIN(ftypes,scalm_unb_var1);
 #endif
 
 
-void bli_scalm_unb_var1( obj_t*  beta,
-                         obj_t*  x )
+void bli_scalm_unb_var1( obj_t*  x )
 {
 	num_t     dt_x      = bli_obj_datatype( *x );
 
-	conj_t    conjbeta  = bli_obj_conj_status( *beta );
 	doff_t    diagoffx  = bli_obj_diag_offset( *x );
 	uplo_t    uplox     = bli_obj_uplo( *x );
 
@@ -76,21 +74,25 @@ void bli_scalm_unb_var1( obj_t*  beta,
 	inc_t     cs_x      = bli_obj_col_stride( *x );
 
 	void*     buf_beta;
-	num_t     dt_beta;
 
 	FUNCPTR_T f;
 
-	// If beta is a scalar constant, use dt_x to extract the address of the
-	// corresponding constant value; otherwise, use the datatype encoded
-	// within the beta object and extract the buffer at the beta offset.
-	bli_set_scalar_dt_buffer( beta, dt_x, dt_beta, buf_beta );
+
+	// Grab the address of the internal scalar buffer for the scalar
+	// attached to x.
+	buf_beta  = bli_obj_internal_scalar_buffer( *x );
 
 	// Index into the type combination array to extract the correct
 	// function pointer.
-	f = ftypes[dt_beta][dt_x];
+	// NOTE: We use dt_x for both beta and x because beta was obtained
+	// from the attached scalar of x, which is guaranteed to be of the
+	// same datatype as x.
+	f = ftypes[dt_x][dt_x];
 
 	// Invoke the function.
-	f( conjbeta,
+	// NOTE: We unconditionally pass in BLIS_NO_CONJUGATE for beta
+	// because it would have already been conjugated by the front-end.
+	f( BLIS_NO_CONJUGATE,
 	   diagoffx,
 	   uplox,
 	   m,

@@ -75,7 +75,7 @@ void bli_ger( obj_t*  alpha,
 	// the type union of the target datatypes of x and y to prevent any
 	// unnecessary loss of information during the computation.
 	dt_alpha = bli_datatype_union( dt_targ_x, dt_targ_y );
-	bli_obj_init_scalar_copy_of( dt_alpha,
+	bli_obj_scalar_init_detached_copy_of( dt_alpha,
 	                             BLIS_NO_CONJUGATE,
 	                             alpha,
 	                             &alpha_local );
@@ -148,7 +148,7 @@ void PASTEMAC(ch,opname)( \
 	rs_x = incx; cs_x = m_x * incx; \
 	rs_y = incy; cs_y = m_y * incy; \
 \
-	bli_obj_create_scalar_with_attached_buffer( dt, alpha, &alphao ); \
+	bli_obj_create_1x1_with_attached_buffer( dt, alpha, &alphao ); \
 \
 	bli_obj_create_with_attached_buffer( dt, m_x, 1, x, rs_x, cs_x, &xo ); \
 	bli_obj_create_with_attached_buffer( dt, m_y, 1, y, rs_y, cs_y, &yo ); \

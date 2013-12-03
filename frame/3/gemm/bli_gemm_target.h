@@ -35,8 +35,6 @@
 void bli_gemm_set_targ_exec_datatypes( obj_t*  a,
                                        obj_t*  b,
                                        obj_t*  c,
-                                       num_t*  dt_alpha,
-                                       num_t*  dt_beta,
                                        bool_t* pack_c );
 
 void bli_gemm_get_target_datatypes( obj_t*  a,

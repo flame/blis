@@ -146,10 +146,10 @@ void libblis_test_dotxv_experiment( test_params_t* params,
 	bli_param_map_char_to_blis_conj( pc_str[1], &conjy );
 
 	// Create test scalars.
-	bli_obj_init_scalar( datatype, &alpha );
-	bli_obj_init_scalar( datatype, &beta );
-	bli_obj_init_scalar( datatype, &rho );
-	bli_obj_init_scalar( datatype, &rho_save );
+	bli_obj_scalar_init_detached( datatype, &alpha );
+	bli_obj_scalar_init_detached( datatype, &beta );
+	bli_obj_scalar_init_detached( datatype, &rho );
+	bli_obj_scalar_init_detached( datatype, &rho_save );
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_vobj_create( params, datatype, sc_str[0], m, &x );
@@ -272,11 +272,11 @@ void libblis_test_dotxv_check( obj_t*  alpha,
 	// are negligible.
 	//
 
-	bli_obj_init_scalar( dt_real, &rho_r );
-	bli_obj_init_scalar( dt_real, &rho_i );
-	bli_obj_init_scalar( dt_real, &norm_x_r );
-	bli_obj_init_scalar( dt_real, &norm_xy_r );
-	bli_obj_init_scalar( dt_real, &temp_r );
+	bli_obj_scalar_init_detached( dt_real, &rho_r );
+	bli_obj_scalar_init_detached( dt_real, &rho_i );
+	bli_obj_scalar_init_detached( dt_real, &norm_x_r );
+	bli_obj_scalar_init_detached( dt_real, &norm_xy_r );
+	bli_obj_scalar_init_detached( dt_real, &temp_r );
 
 	bli_copysc( alpha, &temp_r );
 	bli_sqrtsc( &temp_r, &temp_r );

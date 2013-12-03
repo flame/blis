@@ -137,8 +137,8 @@ void libblis_test_addm_experiment( test_params_t* params,
 	bli_param_map_char_to_blis_trans( pc_str[0], &transx );
 
 	// Create test scalars.
-	bli_obj_init_scalar( datatype, &alpha );
-	bli_obj_init_scalar( datatype, &beta );
+	bli_obj_scalar_init_detached( datatype, &alpha );
+	bli_obj_scalar_init_detached( datatype, &beta );
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_mobj_create( params, datatype, transx,
@@ -239,13 +239,13 @@ void libblis_test_addm_check( obj_t*  alpha,
 	// is negligible.
 	//
 
-	bli_obj_init_scalar( dt,      &aplusb );
-	bli_obj_init_scalar( dt_real, &temp_r );
-	bli_obj_init_scalar( dt_real, &norm_r );
-	bli_obj_init_scalar( dt_real, &m_r );
-	bli_obj_init_scalar( dt_real, &n_r );
+	bli_obj_scalar_init_detached( dt,      &aplusb );
+	bli_obj_scalar_init_detached( dt_real, &temp_r );
+	bli_obj_scalar_init_detached( dt_real, &norm_r );
+	bli_obj_scalar_init_detached( dt_real, &m_r );
+	bli_obj_scalar_init_detached( dt_real, &n_r );
 
-	bli_obj_init_scalar_copy_of( dt, conjx, alpha, &alpha_conj );
+	bli_obj_scalar_init_detached_copy_of( dt, conjx, alpha, &alpha_conj );
 
 	bli_fnormm( y, &norm_r );
 

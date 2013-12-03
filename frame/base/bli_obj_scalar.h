@@ -32,8 +32,28 @@
 
 */
 
-void bli_gemm_blk_var1( obj_t*  a,
-                        obj_t*  b,
-                        obj_t*  c,
-                        gemm_t* cntl );
+void bli_obj_scalar_init_detached( num_t  dt,
+                                   obj_t* beta );
+
+void bli_obj_scalar_init_detached_copy_of( num_t  dt,
+                                           conj_t conj,
+                                           obj_t* alpha,
+                                           obj_t* beta );
+
+void bli_obj_scalar_detach( obj_t* a,
+                            obj_t* alpha );
+
+void bli_obj_scalar_attach( conj_t conj,
+                            obj_t* alpha,
+                            obj_t* a );
+
+void bli_obj_scalar_apply_scalar( obj_t* alpha,
+                                  obj_t* a );
+
+void bli_obj_scalar_reset( obj_t* a );
+
+bool_t bli_obj_scalar_has_nonzero_imag( obj_t* a );
+
+bool_t bli_obj_scalar_equals( obj_t* a,
+                              obj_t* beta );
 

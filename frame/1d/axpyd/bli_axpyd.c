@@ -53,7 +53,7 @@ void bli_axpyd( obj_t* alpha,
 	dt_x = bli_obj_datatype( *x );
 
 	// Create an object to hold a copy-cast of alpha.
-	bli_obj_init_scalar_copy_of( dt_x,
+	bli_obj_scalar_init_detached_copy_of( dt_x,
 	                             BLIS_NO_CONJUGATE,
 	                             alpha,
 	                             &alpha_local );

@@ -216,7 +216,7 @@ void libblis_test_copym_check( obj_t*  x,
 	// is negligible.
 	//
 
-	bli_obj_init_scalar( dt_real, &norm_y_r );
+	bli_obj_scalar_init_detached( dt_real, &norm_y_r );
 
 	bli_subm( x, y );
 

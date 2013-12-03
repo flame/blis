@@ -156,8 +156,8 @@ void libblis_test_dotxf_experiment( test_params_t* params,
 	bli_param_map_char_to_blis_conj( pc_str[1], &conjx );
 
 	// Create test scalars.
-	bli_obj_init_scalar( datatype, &alpha );
-	bli_obj_init_scalar( datatype, &beta );
+	bli_obj_scalar_init_detached( datatype, &alpha );
+	bli_obj_scalar_init_detached( datatype, &beta );
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
@@ -280,7 +280,7 @@ void libblis_test_dotxf_check( obj_t*  alpha,
 	// dotxv.
 	//
 
-	bli_obj_init_scalar( dt_real, &norm );
+	bli_obj_scalar_init_detached( dt_real, &norm );
 
 	bli_obj_create( dt, b_n, 1, 0, 0, &v );
 
@@ -347,9 +347,9 @@ void bli_dotxf_ker( obj_t*  alpha,
 	inc_t     inc_y     = bli_obj_vector_inc( *y );
 	void*     buf_y     = bli_obj_buffer_at_off( *y );
 
-	void*     buf_alpha = bli_obj_scalar_buffer( dt, *alpha );
+	void*     buf_alpha = bli_obj_buffer_for_1x1( dt, *alpha );
 
-	void*     buf_beta  = bli_obj_scalar_buffer( dt, *beta );
+	void*     buf_beta  = bli_obj_buffer_for_1x1( dt, *beta );
 
 	FUNCPTR_T f;
 

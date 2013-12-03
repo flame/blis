@@ -56,7 +56,7 @@ void bli_getsc( obj_t*  chi,
 	// If chi is a constant object, default to using the dcomplex
 	// value within since we don't know if the caller needs just the
 	// real or the real and imaginary parts.
-	void*     buf_chi  = bli_obj_scalar_buffer( dt_def, *chi );
+	void*     buf_chi  = bli_obj_buffer_for_1x1( dt_def, *chi );
 
 	FUNCPTR_T f;
 

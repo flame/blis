@@ -32,10 +32,8 @@
 
 */
 
-void bli_trsm_blk_var1b( obj_t*  alpha,
-                         obj_t*  a,
+void bli_trsm_blk_var1b( obj_t*  a,
                          obj_t*  b,
-                         obj_t*  beta,
                          obj_t*  c,
                          trsm_t* cntl );
 

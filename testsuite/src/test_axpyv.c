@@ -144,7 +144,7 @@ void libblis_test_axpyv_experiment( test_params_t* params,
 	bli_param_map_char_to_blis_conj( pc_str[0], &conjx );
 
 	// Create test scalars.
-	bli_obj_init_scalar( datatype, &alpha );
+	bli_obj_scalar_init_detached( datatype, &alpha );
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_vobj_create( params, datatype, sc_str[0], m, &x );
@@ -250,7 +250,7 @@ void libblis_test_axpyv_check( obj_t*  alpha,
 	// is negligible.
 	//
 
-	bli_obj_init_scalar( dt_real, &norm );
+	bli_obj_scalar_init_detached( dt_real, &norm );
 
 	bli_obj_create( dt, m, 1, 0, 0, &x_temp );
 	bli_obj_create( dt, m, 1, 0, 0, &y_temp );

@@ -47,7 +47,7 @@ typedef void (*FUNCPTR_T)(
                            dim_t   n,
                            dim_t   m_max,
                            dim_t   n_max,
-                           void*   beta,
+                           void*   kappa,
                            void*   c, inc_t rs_c, inc_t cs_c,
                            void*   p, inc_t rs_p, inc_t cs_p
                          );
@@ -55,8 +55,7 @@ typedef void (*FUNCPTR_T)(
 static FUNCPTR_T GENARRAY(ftypes,packm_unb_var1);
 
 
-void bli_packm_unb_var1( obj_t*   beta,
-                         obj_t*   c,
+void bli_packm_unb_var1( obj_t*   c,
                          obj_t*   p )
 {
 	num_t     dt_cp     = bli_obj_datatype( *c );
@@ -81,13 +80,19 @@ void bli_packm_unb_var1( obj_t*   beta,
 	inc_t     rs_p      = bli_obj_row_stride( *p );
 	inc_t     cs_p      = bli_obj_col_stride( *p );
 
-	void*     buf_beta  = bli_obj_scalar_buffer( dt_cp, *beta );
+	void*     buf_kappa;
 
 	FUNCPTR_T f;
 
 	// Set densify based on the uplo property of p.
 	if ( bli_obj_is_dense( *p ) ) densify = TRUE;
 	else                          densify = FALSE;
+
+	// This variant assumes that the computational kernel will always apply
+	// the alpha scalar of the higher-level operation. Thus, we use BLIS_ONE
+	// for kappa so that the underlying packm implementation does not scale
+	// during packing.
+	buf_kappa = bli_obj_buffer_for_const( dt_cp, BLIS_ONE );
 
 	// Index into the type combination array to extract the correct
 	// function pointer.
@@ -104,7 +109,7 @@ void bli_packm_unb_var1( obj_t*   beta,
 	   n_p,
 	   m_max_p,
 	   n_max_p,
-	   buf_beta,
+	   buf_kappa,
 	   buf_c, rs_c, cs_c,
 	   buf_p, rs_p, cs_p );
 }
@@ -124,20 +129,20 @@ void PASTEMAC(ch,varname)( \
                            dim_t   n, \
                            dim_t   m_max, \
                            dim_t   n_max, \
-                           void*   beta, \
+                           void*   kappa, \
                            void*   c, inc_t rs_c, inc_t cs_c, \
                            void*   p, inc_t rs_p, inc_t cs_p \
                          ) \
 { \
-	ctype* restrict beta_cast = beta; \
-	ctype* restrict c_cast    = c; \
-	ctype* restrict p_cast    = p; \
-	ctype* restrict zero      = PASTEMAC(ch,0); \
+	ctype* restrict kappa_cast = kappa; \
+	ctype* restrict c_cast     = c; \
+	ctype* restrict p_cast     = p; \
+	ctype* restrict zero       = PASTEMAC(ch,0); \
 \
 	/* We begin by packing the region indicated by the parameters. If
 	   matrix c is dense (either because the structure is general or
 	   because the structure has already been "densified"), this ends
-	   up being the only action we take. Note that if beta is unit,
+	   up being the only action we take. Note that if kappa is unit,
 	   the data is simply copied (rather than scaled by one). */ \
 	PASTEMAC3(ch,ch,ch,scal2m)( diagoffc, \
 	                            diagc, \
@@ -145,7 +150,7 @@ void PASTEMAC(ch,varname)( \
 	                            transc, \
 	                            m, \
 	                            n, \
-	                            beta_cast, \
+	                            kappa_cast, \
 	                            c_cast, rs_c, cs_c, \
 	                            p_cast, rs_p, cs_p ); \
 \
@@ -184,7 +189,7 @@ void PASTEMAC(ch,varname)( \
 			                            transc, \
 			                            m, \
 			                            n, \
-			                            beta_cast, \
+			                            kappa_cast, \
 			                            c_cast, rs_c, cs_c, \
 			                            p_cast, rs_p, cs_p ); \
 		} \

@@ -140,7 +140,7 @@ void libblis_test_scalm_experiment( test_params_t* params,
 	bli_param_map_char_to_blis_conj( pc_str[0], &conjbeta );
 
 	// Create test scalars.
-	bli_obj_init_scalar( datatype, &beta );
+	bli_obj_scalar_init_detached( datatype, &beta );
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
@@ -247,8 +247,8 @@ void libblis_test_scalm_check( obj_t*  beta,
 	bli_obj_create( dt, m, n, 0, 0, &y2 );
 	bli_copym( y_orig, &y2 );
 
-	bli_obj_init_scalar( dt,      &nbeta );
-	bli_obj_init_scalar( dt_real, &norm_y_r );
+	bli_obj_scalar_init_detached( dt,      &nbeta );
+	bli_obj_scalar_init_detached( dt_real, &norm_y_r );
 
 	bli_copysc( beta, &nbeta );
 	bli_mulsc( &BLIS_MINUS_ONE, &nbeta );

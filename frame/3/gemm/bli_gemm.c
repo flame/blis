@@ -48,21 +48,16 @@ void bli_gemm( obj_t*  alpha,
                obj_t*  c )
 {
 	gemm_t* cntl;
-	obj_t   alpha_local;
-	obj_t   beta_local;
 	obj_t   a_local;
 	obj_t   b_local;
 	obj_t   c_local;
-	num_t   dt_alpha;
-	num_t   dt_beta;
-	bool_t  pack_c;
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
 		bli_gemm_check( alpha, a, b, beta, c );
 
 	// If alpha is zero, scale by beta and return.
-	if ( bli_obj_scalar_equals( alpha, &BLIS_ZERO ) )
+	if ( bli_obj_equals( alpha, &BLIS_ZERO ) )
 	{
 		bli_scalm( beta, c );
 		return;
@@ -86,29 +81,6 @@ void bli_gemm( obj_t*  alpha,
 		bli_obj_induce_trans( c_local );
 	}
 
-	// Set the target and execution datatypes of the objects, and apply
-	// any transformations necessary to handle mixed domain computation.
-	bli_gemm_set_targ_exec_datatypes( &a_local,
-	                                  &b_local,
-	                                  &c_local,
-	                                  &dt_alpha,
-	                                  &dt_beta,
-	                                  &pack_c );
-
-	// Create an object to hold a copy-cast of alpha.
-	bli_obj_init_scalar_copy_of( dt_alpha,
-	                             BLIS_NO_CONJUGATE,
-	                             alpha,
-	                             &alpha_local );
-
-	// Create an object to hold a copy-cast of beta.
-	bli_obj_init_scalar_copy_of( dt_beta,
-	                             BLIS_NO_CONJUGATE,
-	                             beta,
-	                             &beta_local );
-
-	if ( pack_c ) bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
-
 	// Choose the control tree.
 	cntl = gemm_cntl;
 
@@ -122,10 +94,10 @@ void bli_gemm( obj_t*  alpha,
 #endif
 
 	// Invoke the internal back-end.
-	bli_gemm_int( &alpha_local,
+	bli_gemm_int( alpha,
 	              &a_local,
 	              &b_local,
-	              &beta_local,
+	              beta,
 	              &c_local,
 	              cntl );
 }
@@ -159,8 +131,8 @@ void PASTEMAC(ch,opname)( \
 	bli_set_dims_with_trans( transa, m, k, m_a, n_a ); \
 	bli_set_dims_with_trans( transb, k, n, m_b, n_b ); \
 \
-	bli_obj_create_scalar_with_attached_buffer( dt, alpha, &alphao ); \
-	bli_obj_create_scalar_with_attached_buffer( dt, beta,  &betao  ); \
+	bli_obj_create_1x1_with_attached_buffer( dt, alpha, &alphao ); \
+	bli_obj_create_1x1_with_attached_buffer( dt, beta,  &betao  ); \
 \
 	bli_obj_create_with_attached_buffer( dt, m_a, n_a, a, rs_a, cs_a, &ao ); \
 	bli_obj_create_with_attached_buffer( dt, m_b, n_b, b, rs_b, cs_b, &bo ); \
