@@ -80,8 +80,7 @@ void bli_hemv_blk_var4( conj_t  conjh,
 	for ( ij = 0; ij < mn; ij += b_alg )
 	{
 		// Determine the current algorithmic blocksize.
-		b_alg = bli_determine_blocksize_f( ij, mn,
-		                                   a,
+		b_alg = bli_determine_blocksize_f( ij, mn, a,
 		                                   cntl_blocksize( cntl ) );
 
 		// Acquire partitions for A11, A10, A21, x1, y1, y0, and y2.
@@ -109,14 +108,11 @@ void bli_hemv_blk_var4( conj_t  conjh,
 		                cntl_sub_packv_y1( cntl ) );
 
 		// Copy/pack A11, x1, y1 (if needed).
-		bli_packm_int( &a11,
-		               &a11_pack,
+		bli_packm_int( &a11, &a11_pack,
 		               cntl_sub_packm_a11( cntl ) );
-		bli_packv_int( &x1,
-		               &x1_pack,
+		bli_packv_int( &x1, &x1_pack,
 		               cntl_sub_packv_x1( cntl ) );
-		bli_packv_int( &y1,
-		               &y1_pack,
+		bli_packv_int( &y1, &y1_pack,
 		               cntl_sub_packv_y1( cntl ) );
 
 		// y0 = y0 + alpha * A10' * x1;
@@ -149,8 +145,7 @@ void bli_hemv_blk_var4( conj_t  conjh,
 		              cntl_sub_gemv_n_cp( cntl ) );
 
 		// Copy/unpack y1 (if y1 was packed).
-		bli_unpackv_int( &y1_pack,
-		                 &y1,
+		bli_unpackv_int( &y1_pack, &y1,
 		                 cntl_sub_unpackv_y1( cntl ) );
 	}
 

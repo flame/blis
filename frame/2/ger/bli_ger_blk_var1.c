@@ -58,8 +58,7 @@ void bli_ger_blk_var1( obj_t* alpha,
 	for ( i = 0; i < m_trans; i += b_alg )
 	{
 		// Determine the current algorithmic blocksize.
-		b_alg = bli_determine_blocksize_f( i, m_trans,
-		                                   a,
+		b_alg = bli_determine_blocksize_f( i, m_trans, a,
 		                                   cntl_blocksize( cntl ) );
 
 		// Acquire partitions for A1 and x1.
@@ -75,11 +74,9 @@ void bli_ger_blk_var1( obj_t* alpha,
 		                cntl_sub_packv_x( cntl ) );
 
 		// Copy/pack A1, x1 (if needed).
-		bli_packm_int( &a1,
-		               &a1_pack,
+		bli_packm_int( &a1, &a1_pack,
 		               cntl_sub_packm_a( cntl ) );
-		bli_packv_int( &x1,
-		               &x1_pack,
+		bli_packv_int( &x1, &x1_pack,
 		               cntl_sub_packv_x( cntl ) );
 
 		// A1 = A1 + alpha * x1 * y;
@@ -92,8 +89,7 @@ void bli_ger_blk_var1( obj_t* alpha,
 		             cntl_sub_ger( cntl ) );
 
 		// Copy/unpack A1 (if A1 was packed).
-		bli_unpackm_int( &a1_pack,
-		                 &a1,
+		bli_unpackm_int( &a1_pack, &a1,
 		                 cntl_sub_unpackm_a( cntl ) );
 	}
 

@@ -59,8 +59,7 @@ void bli_trmv_l_blk_var2( obj_t*  alpha,
 	for ( ij = 0; ij < mn; ij += b_alg )
 	{
 		// Determine the current algorithmic blocksize.
-		b_alg = bli_determine_blocksize_b( ij, mn,
-		                                   a,
+		b_alg = bli_determine_blocksize_b( ij, mn, a,
 		                                   cntl_blocksize( cntl ) );
 
 		// Acquire partitions for A11, A21, x1, and x2.
@@ -80,11 +79,9 @@ void bli_trmv_l_blk_var2( obj_t*  alpha,
 		                cntl_sub_packv_x1( cntl ) );
 
 		// Copy/pack A11, x1 (if needed).
-		bli_packm_int( &a11,
-		               &a11_pack,
+		bli_packm_int( &a11, &a11_pack,
 		               cntl_sub_packm_a11( cntl ) );
-		bli_packv_int( &x1,
-		               &x1_pack,
+		bli_packv_int( &x1, &x1_pack,
 		               cntl_sub_packv_x1( cntl ) );
 
 		// x2 = x2 + alpha * A21 * x1;
@@ -104,8 +101,7 @@ void bli_trmv_l_blk_var2( obj_t*  alpha,
 		              cntl_sub_trmv( cntl ) );
 
 		// Copy/unpack x1 (if x1 was packed).
-		bli_unpackv_int( &x1_pack,
-		                 &x1,
+		bli_unpackv_int( &x1_pack, &x1,
 		                 cntl_sub_unpackv_x1( cntl ) );
 	}
 
