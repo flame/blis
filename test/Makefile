@@ -174,9 +174,8 @@ TEST_OBJS      := $(patsubst $(TEST_SRC_PATH)/%.c, \
 CFLAGS         += -I$(BLIS_INC_PATH) -I$(TEST_SRC_PATH)
 
 LINKER         := $(CC)
-LDFLAGS        := -L/usr/lib/gcc/x86_64-redhat-linux/4.1.2 -L/usr/lib/gcc/x86_64-redhat-linux/4.1.2/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -lgfortranbegin -lgfortran -lm
-LDFLAGS        += -lpthread
-#LDFLAGS        := -L/usr/lib/gcc/i486-linux-gnu/4.4.3 -L/usr/lib/gcc/i486-linux-gnu/4.4.3/../../../../lib -L/lib/../lib -L/usr/lib/../lib -L/usr/lib/gcc/i486-linux-gnu/4.4.3/../../.. -L/usr/lib/i486-linux-gnu -lgfortranbegin -lgfortran -lm
+LDFLAGS        := -L/home/00146/field/gnu/gcc-4.8.2/lib64
+LDFLAGS        += -lgfortran -lm -lpthread
 
 
 

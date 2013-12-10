@@ -126,7 +126,7 @@ void bli_ddddotaxpyv_opt_var1(
 	double*  restrict zeta1;
 	double            alpha1c, chi1c, psi1c, rho1c;
 	dim_t             i;
-	inc_t             stepx, stepy, stepz;
+	//inc_t             stepx, stepy, stepz;
 
 	v2df_t            alphav, rhov;
 	v2df_t            x1v, y1v, z1v;
@@ -182,9 +182,9 @@ void bli_ddddotaxpyv_opt_var1(
 	n_run       = ( n - n_pre ) / ( 2 * 1 );
 	n_left      = ( n - n_pre ) % ( 2 * 1 );
 
-	stepx       = 2 * incx;
-	stepy       = 2 * incy;
-	stepz       = 2 * incz;
+	//stepx       = 2 * incx;
+	//stepy       = 2 * incy;
+	//stepz       = 2 * incz;
 
 	PASTEMAC(d,set0s)( rho1c );
 

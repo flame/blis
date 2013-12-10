@@ -111,12 +111,10 @@ void bli_ddddotxaxpyf_opt_var1( conj_t             conjat,
 	double*  restrict a2;
 	double*  restrict a3;
 	double*  restrict w1;
-	double*  restrict x1;
 	double*  restrict z1;
 	double            rho0, rho1, rho2, rho3;
 	double            chi0, chi1, chi2, chi3;
 	double            a0c, a1c, a2c, a3c, w1c, z1c;
-	double            zeta1;
 
 	v2df_t            rho0v, rho1v, rho2v, rho3v;
 	v2df_t            chi0v, chi1v, chi2v, chi3v;
@@ -198,7 +196,6 @@ void bli_ddddotxaxpyf_opt_var1( conj_t             conjat,
 	a2 = a_cast + 2*lda;
 	a3 = a_cast + 3*lda;
 	w1 = w_cast;
-	x1 = x_cast;
 	z1 = z_cast;
 
 	chi0 = *(x_cast + 0*incx);
@@ -215,7 +212,6 @@ void bli_ddddotxaxpyf_opt_var1( conj_t             conjat,
 	PASTEMAC(d,set0s)( rho1 ); 
 	PASTEMAC(d,set0s)( rho2 ); 
 	PASTEMAC(d,set0s)( rho3 ); 
-	PASTEMAC(d,set0s)( zeta1 ); 
 
 	if ( m_pre == 1 )
 	{

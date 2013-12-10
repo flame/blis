@@ -47,11 +47,11 @@ void bli_sgemmtrsm_u_opt_d4x4(
                              )
 {
 	/* Just call the reference implementation. */
-	bli_sgemmtrsm_l_ref_mxn( k,
+	bli_sgemmtrsm_u_ref_mxn( k,
 	                         alpha,
-	                         a10,
+	                         a12,
 	                         a11,
-	                         b01,
+	                         b21,
 	                         b11,
 	                         c11, rs_c, cs_c,
 	                         a_next,
@@ -542,11 +542,11 @@ void bli_cgemmtrsm_u_opt_d4x4(
                              )
 {
 	/* Just call the reference implementation. */
-	bli_cgemmtrsm_l_ref_mxn( k,
+	bli_cgemmtrsm_u_ref_mxn( k,
 	                         alpha,
-	                         a10,
+	                         a12,
 	                         a11,
-	                         b01,
+	                         b21,
 	                         b11,
 	                         c11, rs_c, cs_c,
 	                         a_next,
@@ -566,11 +566,11 @@ void bli_zgemmtrsm_u_opt_d4x4(
                              )
 {
 	/* Just call the reference implementation. */
-	bli_zgemmtrsm_l_ref_mxn( k,
+	bli_zgemmtrsm_u_ref_mxn( k,
 	                         alpha,
-	                         a10,
+	                         a12,
 	                         a11,
-	                         b01,
+	                         b21,
 	                         b11,
 	                         c11, rs_c, cs_c,
 	                         a_next,

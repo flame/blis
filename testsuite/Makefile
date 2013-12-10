@@ -172,9 +172,7 @@ TEST_BIN       := test_libblis.x
 CFLAGS         += -I$(BLIS_INC_PATH) -I$(TEST_SRC_PATH)
 
 LINKER         := $(CC)
-#LDFLAGS        := -L/usr/lib/gcc/x86_64-redhat-linux/4.1.2 -L/usr/lib/gcc/x86_64-redhat-linux/4.1.2/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -lgfortranbegin -lgfortran -lm
-#LDFLAGS        += -lpthread
-LDFLAGS        := -L/usr/lib/gcc/i486-linux-gnu/4.4.3 -L/usr/lib/gcc/i486-linux-gnu/4.4.3/../../../../lib -L/lib/../lib -L/usr/lib/../lib -L/usr/lib/gcc/i486-linux-gnu/4.4.3/../../.. -L/usr/lib/i486-linux-gnu -lgfortranbegin -lgfortran -lm
+LDFLAGS        := -lm
 
 
 

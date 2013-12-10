@@ -545,9 +545,9 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	// size is chosen automatically. We query the result of that automatic
 	// choice via sizeof(gint_t).
 	if ( BLIS_INT_TYPE_SIZE == 32 || BLIS_INT_TYPE_SIZE == 64 )
-		sprintf( intsize_str, "%d", BLIS_INT_TYPE_SIZE );
+		sprintf( intsize_str, "%d", ( int )BLIS_INT_TYPE_SIZE );
 	else
-		sprintf( intsize_str, "%d", sizeof(gint_t) * 8 );
+		sprintf( intsize_str, "%d", ( int )sizeof(gint_t) * 8 );
 
 	// Output some system parameters.
 	libblis_test_fprintf_c( os, "\n" );
