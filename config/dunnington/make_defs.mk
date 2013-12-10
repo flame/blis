@@ -83,9 +83,9 @@ CPPROCFLAGS    := -D_POSIX_C_SOURCE=200112L
 CMISCFLAGS     := -std=c99 # -fopenmp -pg
 CDBGFLAGS      := #-g
 CWARNFLAGS     := -Wall
-COPTFLAGS      := -O2 #-fomit-frame-pointer
-CKOPTFLAGS     := -O2 -fomit-frame-pointer
-CVECFLAGS      := -msse3 -march=nocona -mfpmath=sse
+COPTFLAGS      := -O2 -mfpmath=sse #-fomit-frame-pointer
+CKOPTFLAGS     := -O2 -mfpmath=sse -fomit-frame-pointer
+CVECFLAGS      := -msse3 -march=native
 
 # Aggregate all of the flags into multiple groups: one for standard
 # compilation, and one for each of the supported "special" compilation
