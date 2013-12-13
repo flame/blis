@@ -43,343 +43,99 @@
 // - The third char encodes the type of y.
 
 
-// -- (axy) = (?ss) ------------------------------------------------------------
+// -- (axy) = (??s) ------------------------------------------------------------
 
-#define bli_sssaxpys( a, x, y ) \
-{ \
-	(y)          += bli_ssimulnn_r( (a), (x) ); \
-}
-#define bli_dssaxpys( a, x, y ) \
-{ \
-	(y)          += bli_dsimulnn_r( (a), (x) ); \
-}
-#define bli_cssaxpys( a, x, y ) \
-{ \
-	(y)          += bli_csimulnn_r( (a), (x) ); \
-}
-#define bli_zssaxpys( a, x, y ) \
-{ \
-	(y)          += bli_zsimulnn_r( (a), (x) ); \
-}
+#define bli_sssaxpys( a, x, y )  bli_saxpyris( bli_sreal(a), bli_simag(a), bli_sreal(x), bli_simag(x), bli_sreal(y), bli_simag(y) )
+#define bli_dssaxpys( a, x, y )  bli_saxpyris( bli_dreal(a), bli_dimag(a), bli_sreal(x), bli_simag(x), bli_sreal(y), bli_simag(y) )
+#define bli_cssaxpys( a, x, y )  bli_saxpyris( bli_creal(a), bli_cimag(a), bli_sreal(x), bli_simag(x), bli_sreal(y), bli_simag(y) )
+#define bli_zssaxpys( a, x, y )  bli_saxpyris( bli_zreal(a), bli_zimag(a), bli_sreal(x), bli_simag(x), bli_sreal(y), bli_simag(y) )
 
-// -- (axy) = (?ds) ------------------------------------------------------------
+#define bli_sdsaxpys( a, x, y )  bli_saxpyris( bli_sreal(a), bli_simag(a), bli_dreal(x), bli_dimag(x), bli_sreal(y), bli_simag(y) )
+#define bli_ddsaxpys( a, x, y )  bli_saxpyris( bli_dreal(a), bli_dimag(a), bli_dreal(x), bli_dimag(x), bli_sreal(y), bli_simag(y) )
+#define bli_cdsaxpys( a, x, y )  bli_saxpyris( bli_creal(a), bli_cimag(a), bli_dreal(x), bli_dimag(x), bli_sreal(y), bli_simag(y) )
+#define bli_zdsaxpys( a, x, y )  bli_saxpyris( bli_zreal(a), bli_zimag(a), bli_dreal(x), bli_dimag(x), bli_sreal(y), bli_simag(y) )
 
-#define bli_sdsaxpys( a, x, y ) \
-{ \
-	(y)          += bli_sdimulnn_r( (a), (x) ); \
-}
-#define bli_ddsaxpys( a, x, y ) \
-{ \
-	(y)          += bli_ddimulnn_r( (a), (x) ); \
-}
-#define bli_cdsaxpys( a, x, y ) \
-{ \
-	(y)          += bli_cdimulnn_r( (a), (x) ); \
-}
-#define bli_zdsaxpys( a, x, y ) \
-{ \
-	(y)          += bli_zdimulnn_r( (a), (x) ); \
-}
+#define bli_scsaxpys( a, x, y )  bli_saxpyris( bli_sreal(a), bli_simag(a), bli_creal(x), bli_cimag(x), bli_sreal(y), bli_simag(y) )
+#define bli_dcsaxpys( a, x, y )  bli_saxpyris( bli_dreal(a), bli_dimag(a), bli_creal(x), bli_cimag(x), bli_sreal(y), bli_simag(y) )
+#define bli_ccsaxpys( a, x, y )  bli_saxpyris( bli_creal(a), bli_cimag(a), bli_creal(x), bli_cimag(x), bli_sreal(y), bli_simag(y) )
+#define bli_zcsaxpys( a, x, y )  bli_saxpyris( bli_zreal(a), bli_zimag(a), bli_creal(x), bli_cimag(x), bli_sreal(y), bli_simag(y) )
 
-// -- (axy) = (?cs) ------------------------------------------------------------
+#define bli_szsaxpys( a, x, y )  bli_saxpyris( bli_sreal(a), bli_simag(a), bli_zreal(x), bli_zimag(x), bli_sreal(y), bli_simag(y) )
+#define bli_dzsaxpys( a, x, y )  bli_saxpyris( bli_dreal(a), bli_dimag(a), bli_zreal(x), bli_zimag(x), bli_sreal(y), bli_simag(y) )
+#define bli_czsaxpys( a, x, y )  bli_saxpyris( bli_creal(a), bli_cimag(a), bli_zreal(x), bli_zimag(x), bli_sreal(y), bli_simag(y) )
+#define bli_zzsaxpys( a, x, y )  bli_saxpyris( bli_zreal(a), bli_zimag(a), bli_zreal(x), bli_zimag(x), bli_sreal(y), bli_simag(y) )
 
-#define bli_scsaxpys( a, x, y ) \
-{ \
-	(y)          += bli_scimulnn_r( (a), (x) ); \
-}
-#define bli_dcsaxpys( a, x, y ) \
-{ \
-	(y)          += bli_dcimulnn_r( (a), (x) ); \
-}
-#define bli_ccsaxpys( a, x, y ) \
-{ \
-	(y)          += bli_ccimulnn_r( (a), (x) ); \
-}
-#define bli_zcsaxpys( a, x, y ) \
-{ \
-	(y)          += bli_zcimulnn_r( (a), (x) ); \
-}
+// -- (axy) = (??d) ------------------------------------------------------------
 
-// -- (axy) = (?zs) ------------------------------------------------------------
+#define bli_ssdaxpys( a, x, y )  bli_daxpyris( bli_sreal(a), bli_simag(a), bli_sreal(x), bli_simag(x), bli_dreal(y), bli_dimag(y) )
+#define bli_dsdaxpys( a, x, y )  bli_daxpyris( bli_dreal(a), bli_dimag(a), bli_sreal(x), bli_simag(x), bli_dreal(y), bli_dimag(y) )
+#define bli_csdaxpys( a, x, y )  bli_daxpyris( bli_creal(a), bli_cimag(a), bli_sreal(x), bli_simag(x), bli_dreal(y), bli_dimag(y) )
+#define bli_zsdaxpys( a, x, y )  bli_daxpyris( bli_zreal(a), bli_zimag(a), bli_sreal(x), bli_simag(x), bli_dreal(y), bli_dimag(y) )
 
-#define bli_szsaxpys( a, x, y ) \
-{ \
-	(y)          += bli_szimulnn_r( (a), (x) ); \
-}
-#define bli_dzsaxpys( a, x, y ) \
-{ \
-	(y)          += bli_dzimulnn_r( (a), (x) ); \
-}
-#define bli_czsaxpys( a, x, y ) \
-{ \
-	(y)          += bli_czimulnn_r( (a), (x) ); \
-}
-#define bli_zzsaxpys( a, x, y ) \
-{ \
-	(y)          += bli_zzimulnn_r( (a), (x) ); \
-}
+#define bli_sddaxpys( a, x, y )  bli_daxpyris( bli_sreal(a), bli_simag(a), bli_dreal(x), bli_dimag(x), bli_dreal(y), bli_dimag(y) )
+#define bli_dddaxpys( a, x, y )  bli_daxpyris( bli_dreal(a), bli_dimag(a), bli_dreal(x), bli_dimag(x), bli_dreal(y), bli_dimag(y) )
+#define bli_cddaxpys( a, x, y )  bli_daxpyris( bli_creal(a), bli_cimag(a), bli_dreal(x), bli_dimag(x), bli_dreal(y), bli_dimag(y) )
+#define bli_zddaxpys( a, x, y )  bli_daxpyris( bli_zreal(a), bli_zimag(a), bli_dreal(x), bli_dimag(x), bli_dreal(y), bli_dimag(y) )
 
+#define bli_scdaxpys( a, x, y )  bli_daxpyris( bli_sreal(a), bli_simag(a), bli_creal(x), bli_cimag(x), bli_dreal(y), bli_dimag(y) )
+#define bli_dcdaxpys( a, x, y )  bli_daxpyris( bli_dreal(a), bli_dimag(a), bli_creal(x), bli_cimag(x), bli_dreal(y), bli_dimag(y) )
+#define bli_ccdaxpys( a, x, y )  bli_daxpyris( bli_creal(a), bli_cimag(a), bli_creal(x), bli_cimag(x), bli_dreal(y), bli_dimag(y) )
+#define bli_zcdaxpys( a, x, y )  bli_daxpyris( bli_zreal(a), bli_zimag(a), bli_creal(x), bli_cimag(x), bli_dreal(y), bli_dimag(y) )
 
-// -- (axy) = (?sd) ------------------------------------------------------------
-
-#define bli_ssdaxpys( a, x, y ) \
-{ \
-	(y)          += bli_ssimulnn_r( (a), (x) ); \
-}
-#define bli_dsdaxpys( a, x, y ) \
-{ \
-	(y)          += bli_dsimulnn_r( (a), (x) ); \
-}
-#define bli_csdaxpys( a, x, y ) \
-{ \
-	(y)          += bli_csimulnn_r( (a), (x) ); \
-}
-#define bli_zsdaxpys( a, x, y ) \
-{ \
-	(y)          += bli_zsimulnn_r( (a), (x) ); \
-}
-
-// -- (axy) = (?dd) ------------------------------------------------------------
-
-#define bli_sddaxpys( a, x, y ) \
-{ \
-	(y)          += bli_sdimulnn_r( (a), (x) ); \
-}
-#define bli_dddaxpys( a, x, y ) \
-{ \
-	(y)          += bli_ddimulnn_r( (a), (x) ); \
-}
-#define bli_cddaxpys( a, x, y ) \
-{ \
-	(y)          += bli_cdimulnn_r( (a), (x) ); \
-}
-#define bli_zddaxpys( a, x, y ) \
-{ \
-	(y)          += bli_zdimulnn_r( (a), (x) ); \
-}
-
-// -- (axy) = (?cd) ------------------------------------------------------------
-
-#define bli_scdaxpys( a, x, y ) \
-{ \
-	(y)          += bli_scimulnn_r( (a), (x) ); \
-}
-#define bli_dcdaxpys( a, x, y ) \
-{ \
-	(y)          += bli_dcimulnn_r( (a), (x) ); \
-}
-#define bli_ccdaxpys( a, x, y ) \
-{ \
-	(y)          += bli_ccimulnn_r( (a), (x) ); \
-}
-#define bli_zcdaxpys( a, x, y ) \
-{ \
-	(y)          += bli_zcimulnn_r( (a), (x) ); \
-}
-
-// -- (axy) = (?zd) ------------------------------------------------------------
-
-#define bli_szdaxpys( a, x, y ) \
-{ \
-	(y)          += bli_szimulnn_r( (a), (x) ); \
-}
-#define bli_dzdaxpys( a, x, y ) \
-{ \
-	(y)          += bli_dzimulnn_r( (a), (x) ); \
-}
-#define bli_czdaxpys( a, x, y ) \
-{ \
-	(y)          += bli_czimulnn_r( (a), (x) ); \
-}
-#define bli_zzdaxpys( a, x, y ) \
-{ \
-	(y)          += bli_zzimulnn_r( (a), (x) ); \
-}
-
+#define bli_szdaxpys( a, x, y )  bli_daxpyris( bli_sreal(a), bli_simag(a), bli_zreal(x), bli_zimag(x), bli_dreal(y), bli_dimag(y) )
+#define bli_dzdaxpys( a, x, y )  bli_daxpyris( bli_dreal(a), bli_dimag(a), bli_zreal(x), bli_zimag(x), bli_dreal(y), bli_dimag(y) )
+#define bli_czdaxpys( a, x, y )  bli_daxpyris( bli_creal(a), bli_cimag(a), bli_zreal(x), bli_zimag(x), bli_dreal(y), bli_dimag(y) )
+#define bli_zzdaxpys( a, x, y )  bli_daxpyris( bli_zreal(a), bli_zimag(a), bli_zreal(x), bli_zimag(x), bli_dreal(y), bli_dimag(y) )
 
 #ifndef BLIS_ENABLE_C99_COMPLEX
 
+// -- (axy) = (??c) ------------------------------------------------------------
 
-// -- (axy) = (?sc) ------------------------------------------------------------
+#define bli_sscaxpys( a, x, y )  bli_saxpyris( bli_sreal(a), bli_simag(a), bli_sreal(x), bli_simag(x), bli_creal(y), bli_cimag(y) )
+#define bli_dscaxpys( a, x, y )  bli_saxpyris( bli_dreal(a), bli_dimag(a), bli_sreal(x), bli_simag(x), bli_creal(y), bli_cimag(y) )
+#define bli_cscaxpys( a, x, y )  bli_caxpyris( bli_creal(a), bli_cimag(a), bli_sreal(x), bli_simag(x), bli_creal(y), bli_cimag(y) )
+#define bli_zscaxpys( a, x, y )  bli_caxpyris( bli_zreal(a), bli_zimag(a), bli_sreal(x), bli_simag(x), bli_creal(y), bli_cimag(y) )
 
-#define bli_sscaxpys( a, x, y ) \
-{ \
-	bli_creal(y) += bli_ssimulnn_r( (a), (x) ); \
-}
-#define bli_dscaxpys( a, x, y ) \
-{ \
-	bli_creal(y) += bli_dsimulnn_r( (a), (x) ); \
-}
-#define bli_cscaxpys( a, x, y ) \
-{ \
-	bli_creal(y) += bli_csimulnn_r( (a), (x) ); \
-	bli_cimag(y) += bli_csimulnn_i( (a), (x) ); \
-}
-#define bli_zscaxpys( a, x, y ) \
-{ \
-	bli_creal(y) += bli_zsimulnn_r( (a), (x) ); \
-	bli_cimag(y) += bli_zsimulnn_i( (a), (x) ); \
-}
+#define bli_sdcaxpys( a, x, y )  bli_saxpyris( bli_sreal(a), bli_simag(a), bli_dreal(x), bli_dimag(x), bli_creal(y), bli_cimag(y) )
+#define bli_ddcaxpys( a, x, y )  bli_saxpyris( bli_dreal(a), bli_dimag(a), bli_dreal(x), bli_dimag(x), bli_creal(y), bli_cimag(y) )
+#define bli_cdcaxpys( a, x, y )  bli_caxpyris( bli_creal(a), bli_cimag(a), bli_dreal(x), bli_dimag(x), bli_creal(y), bli_cimag(y) )
+#define bli_zdcaxpys( a, x, y )  bli_caxpyris( bli_zreal(a), bli_zimag(a), bli_dreal(x), bli_dimag(x), bli_creal(y), bli_cimag(y) )
 
-// -- (axy) = (?dc) ------------------------------------------------------------
+#define bli_sccaxpys( a, x, y )  bli_scaxpyris( bli_sreal(a), bli_simag(a), bli_creal(x), bli_cimag(x), bli_creal(y), bli_cimag(y) )
+#define bli_dccaxpys( a, x, y )  bli_scaxpyris( bli_dreal(a), bli_dimag(a), bli_creal(x), bli_cimag(x), bli_creal(y), bli_cimag(y) )
+#define bli_cccaxpys( a, x, y )   bli_caxpyris( bli_creal(a), bli_cimag(a), bli_creal(x), bli_cimag(x), bli_creal(y), bli_cimag(y) )
+#define bli_zccaxpys( a, x, y )   bli_caxpyris( bli_zreal(a), bli_zimag(a), bli_creal(x), bli_cimag(x), bli_creal(y), bli_cimag(y) )
 
-#define bli_sdcaxpys( a, x, y ) \
-{ \
-	bli_creal(y) += bli_sdimulnn_r( (a), (x) ); \
-}
-#define bli_ddcaxpys( a, x, y ) \
-{ \
-	bli_creal(y) += bli_ddimulnn_r( (a), (x) ); \
-}
-#define bli_cdcaxpys( a, x, y ) \
-{ \
-	bli_creal(y) += bli_cdimulnn_r( (a), (x) ); \
-	bli_cimag(y) += bli_cdimulnn_i( (a), (x) ); \
-}
-#define bli_zdcaxpys( a, x, y ) \
-{ \
-	bli_creal(y) += bli_zdimulnn_r( (a), (x) ); \
-	bli_cimag(y) += bli_zdimulnn_i( (a), (x) ); \
-}
+#define bli_szcaxpys( a, x, y )  bli_scaxpyris( bli_sreal(a), bli_simag(a), bli_zreal(x), bli_zimag(x), bli_creal(y), bli_cimag(y) )
+#define bli_dzcaxpys( a, x, y )  bli_scaxpyris( bli_dreal(a), bli_dimag(a), bli_zreal(x), bli_zimag(x), bli_creal(y), bli_cimag(y) )
+#define bli_czcaxpys( a, x, y )   bli_caxpyris( bli_creal(a), bli_cimag(a), bli_zreal(x), bli_zimag(x), bli_creal(y), bli_cimag(y) )
+#define bli_zzcaxpys( a, x, y )   bli_caxpyris( bli_zreal(a), bli_zimag(a), bli_zreal(x), bli_zimag(x), bli_creal(y), bli_cimag(y) )
 
-// -- (axy) = (?cc) ------------------------------------------------------------
+// -- (axy) = (??z) ------------------------------------------------------------
 
-#define bli_sccaxpys( a, x, y ) \
-{ \
-	bli_creal(y) += bli_scimulnn_r( (a), (x) ); \
-	bli_cimag(y) += bli_scimulnn_i( (a), (x) ); \
-}
-#define bli_dccaxpys( a, x, y ) \
-{ \
-	bli_creal(y) += bli_dcimulnn_r( (a), (x) ); \
-	bli_cimag(y) += bli_dcimulnn_i( (a), (x) ); \
-}
-#define bli_cccaxpys( a, x, y ) \
-{ \
-	bli_creal(y) += bli_ccimulnn_r( (a), (x) ); \
-	bli_cimag(y) += bli_ccimulnn_i( (a), (x) ); \
-}
-#define bli_zccaxpys( a, x, y ) \
-{ \
-	bli_creal(y) += bli_zcimulnn_r( (a), (x) ); \
-	bli_cimag(y) += bli_zcimulnn_i( (a), (x) ); \
-}
+#define bli_sszaxpys( a, x, y )  bli_daxpyris( bli_sreal(a), bli_simag(a), bli_sreal(x), bli_simag(x), bli_zreal(y), bli_zimag(y) )
+#define bli_dszaxpys( a, x, y )  bli_daxpyris( bli_dreal(a), bli_dimag(a), bli_sreal(x), bli_simag(x), bli_zreal(y), bli_zimag(y) )
+#define bli_cszaxpys( a, x, y )  bli_zaxpyris( bli_creal(a), bli_cimag(a), bli_sreal(x), bli_simag(x), bli_zreal(y), bli_zimag(y) )
+#define bli_zszaxpys( a, x, y )  bli_zaxpyris( bli_zreal(a), bli_zimag(a), bli_sreal(x), bli_simag(x), bli_zreal(y), bli_zimag(y) )
 
-// -- (axy) = (?zc) ------------------------------------------------------------
+#define bli_sdzaxpys( a, x, y )  bli_daxpyris( bli_sreal(a), bli_simag(a), bli_dreal(x), bli_dimag(x), bli_zreal(y), bli_zimag(y) )
+#define bli_ddzaxpys( a, x, y )  bli_daxpyris( bli_dreal(a), bli_dimag(a), bli_dreal(x), bli_dimag(x), bli_zreal(y), bli_zimag(y) )
+#define bli_cdzaxpys( a, x, y )  bli_zaxpyris( bli_creal(a), bli_cimag(a), bli_dreal(x), bli_dimag(x), bli_zreal(y), bli_zimag(y) )
+#define bli_zdzaxpys( a, x, y )  bli_zaxpyris( bli_zreal(a), bli_zimag(a), bli_dreal(x), bli_dimag(x), bli_zreal(y), bli_zimag(y) )
 
-#define bli_szcaxpys( a, x, y ) \
-{ \
-	bli_creal(y) += bli_szimulnn_r( (a), (x) ); \
-	bli_cimag(y) += bli_szimulnn_i( (a), (x) ); \
-}
-#define bli_dzcaxpys( a, x, y ) \
-{ \
-	bli_creal(y) += bli_dzimulnn_r( (a), (x) ); \
-	bli_cimag(y) += bli_dzimulnn_i( (a), (x) ); \
-}
-#define bli_czcaxpys( a, x, y ) \
-{ \
-	bli_creal(y) += bli_czimulnn_r( (a), (x) ); \
-	bli_cimag(y) += bli_czimulnn_i( (a), (x) ); \
-}
-#define bli_zzcaxpys( a, x, y ) \
-{ \
-	bli_creal(y) += bli_zzimulnn_r( (a), (x) ); \
-	bli_cimag(y) += bli_zzimulnn_i( (a), (x) ); \
-}
+#define bli_sczaxpys( a, x, y )  bli_dzaxpyris( bli_sreal(a), bli_simag(a), bli_creal(x), bli_cimag(x), bli_zreal(y), bli_zimag(y) )
+#define bli_dczaxpys( a, x, y )  bli_dzaxpyris( bli_dreal(a), bli_dimag(a), bli_creal(x), bli_cimag(x), bli_zreal(y), bli_zimag(y) )
+#define bli_cczaxpys( a, x, y )   bli_zaxpyris( bli_creal(a), bli_cimag(a), bli_creal(x), bli_cimag(x), bli_zreal(y), bli_zimag(y) )
+#define bli_zczaxpys( a, x, y )   bli_zaxpyris( bli_zreal(a), bli_zimag(a), bli_creal(x), bli_cimag(x), bli_zreal(y), bli_zimag(y) )
 
-
-// -- (axy) = (?sz) ------------------------------------------------------------
-
-#define bli_sszaxpys( a, x, y ) \
-{ \
-	bli_zreal(y) += bli_ssimulnn_r( (a), (x) ); \
-}
-#define bli_dszaxpys( a, x, y ) \
-{ \
-	bli_zreal(y) += bli_dsimulnn_r( (a), (x) ); \
-}
-#define bli_cszaxpys( a, x, y ) \
-{ \
-	bli_zreal(y) += bli_csimulnn_r( (a), (x) ); \
-	bli_zimag(y) += bli_csimulnn_i( (a), (x) ); \
-}
-#define bli_zszaxpys( a, x, y ) \
-{ \
-	bli_zreal(y) += bli_zsimulnn_r( (a), (x) ); \
-	bli_zimag(y) += bli_zsimulnn_i( (a), (x) ); \
-}
-
-// -- (axy) = (?dz) ------------------------------------------------------------
-
-#define bli_sdzaxpys( a, x, y ) \
-{ \
-	bli_zreal(y) += bli_sdimulnn_r( (a), (x) ); \
-}
-#define bli_ddzaxpys( a, x, y ) \
-{ \
-	bli_zreal(y) += bli_ddimulnn_r( (a), (x) ); \
-}
-#define bli_cdzaxpys( a, x, y ) \
-{ \
-	bli_zreal(y) += bli_cdimulnn_r( (a), (x) ); \
-	bli_zimag(y) += bli_cdimulnn_i( (a), (x) ); \
-}
-#define bli_zdzaxpys( a, x, y ) \
-{ \
-	bli_zreal(y) += bli_zdimulnn_r( (a), (x) ); \
-	bli_zimag(y) += bli_zdimulnn_i( (a), (x) ); \
-}
-
-// -- (axy) = (?cz) ------------------------------------------------------------
-
-#define bli_sczaxpys( a, x, y ) \
-{ \
-	bli_zreal(y) += bli_scimulnn_r( (a), (x) ); \
-	bli_zimag(y) += bli_scimulnn_i( (a), (x) ); \
-}
-#define bli_dczaxpys( a, x, y ) \
-{ \
-	bli_zreal(y) += bli_dcimulnn_r( (a), (x) ); \
-	bli_zimag(y) += bli_dcimulnn_i( (a), (x) ); \
-}
-#define bli_cczaxpys( a, x, y ) \
-{ \
-	bli_zreal(y) += bli_ccimulnn_r( (a), (x) ); \
-	bli_zimag(y) += bli_ccimulnn_i( (a), (x) ); \
-}
-#define bli_zczaxpys( a, x, y ) \
-{ \
-	bli_zreal(y) += bli_zcimulnn_r( (a), (x) ); \
-	bli_zimag(y) += bli_zcimulnn_i( (a), (x) ); \
-}
-
-// -- (axy) = (?zz) ------------------------------------------------------------
-
-#define bli_szzaxpys( a, x, y ) \
-{ \
-	bli_zreal(y) += bli_szimulnn_r( (a), (x) ); \
-	bli_zimag(y) += bli_szimulnn_i( (a), (x) ); \
-}
-#define bli_dzzaxpys( a, x, y ) \
-{ \
-	bli_zreal(y) += bli_dzimulnn_r( (a), (x) ); \
-	bli_zimag(y) += bli_dzimulnn_i( (a), (x) ); \
-}
-#define bli_czzaxpys( a, x, y ) \
-{ \
-	bli_zreal(y) += bli_czimulnn_r( (a), (x) ); \
-	bli_zimag(y) += bli_czimulnn_i( (a), (x) ); \
-}
-#define bli_zzzaxpys( a, x, y ) \
-{ \
-	bli_zreal(y) += bli_zzimulnn_r( (a), (x) ); \
-	bli_zimag(y) += bli_zzimulnn_i( (a), (x) ); \
-}
-
+#define bli_szzaxpys( a, x, y )  bli_dzaxpyris( bli_sreal(a), bli_simag(a), bli_zreal(x), bli_zimag(x), bli_zreal(y), bli_zimag(y) )
+#define bli_dzzaxpys( a, x, y )  bli_dzaxpyris( bli_dreal(a), bli_dimag(a), bli_zreal(x), bli_zimag(x), bli_zreal(y), bli_zimag(y) )
+#define bli_czzaxpys( a, x, y )   bli_zaxpyris( bli_creal(a), bli_cimag(a), bli_zreal(x), bli_zimag(x), bli_zreal(y), bli_zimag(y) )
+#define bli_zzzaxpys( a, x, y )   bli_zaxpyris( bli_zreal(a), bli_zimag(a), bli_zreal(x), bli_zimag(x), bli_zreal(y), bli_zimag(y) )
 
 #else // ifdef BLIS_ENABLE_C99_COMPLEX
 
+// -- (axy) = (??c) ------------------------------------------------------------
 
 #define bli_sscaxpys( a, x, y )  { (y) += (a) * (x); }
 #define bli_dscaxpys( a, x, y )  { (y) += (a) * (x); }
@@ -401,6 +157,7 @@
 #define bli_czcaxpys( a, x, y )  { (y) += (a) * (x); }
 #define bli_zzcaxpys( a, x, y )  { (y) += (a) * (x); }
 
+// -- (axy) = (??z) ------------------------------------------------------------
 
 #define bli_sszaxpys( a, x, y )  { (y) += (a) * (x); }
 #define bli_dszaxpys( a, x, y )  { (y) += (a) * (x); }
@@ -422,7 +179,6 @@
 #define bli_czzaxpys( a, x, y )  { (y) += (a) * (x); }
 #define bli_zzzaxpys( a, x, y )  { (y) += (a) * (x); }
 
-
 #endif // BLIS_ENABLE_C99_COMPLEX
 
 
@@ -433,3 +189,4 @@
 
 
 #endif
+

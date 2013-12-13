@@ -80,7 +80,7 @@ void PASTEMAC(chx,opname)( \
 { \
 	ctype_x* chi_cast = chi; \
 \
-	PASTEMAC2(chxr,chx,setris)( beta_r, beta_i, *chi_cast ); \
+	PASTEMAC2(chxr,chx,sets)( beta_r, beta_i, *chi_cast ); \
 }
 
 GENTFUNC( double, float,    d, s, setsc )

@@ -241,7 +241,7 @@ void PASTEMAC3(chx,chy,chc,varname)( \
 		/* For her2, explicitly set the imaginary component of gamma11 to
            zero. */ \
 		if ( bli_is_conj( conjh ) ) \
-			PASTEMAC(chc,setimag0)( *gamma11 ); \
+			PASTEMAC(chc,seti0s)( *gamma11 ); \
 	} \
 }
 

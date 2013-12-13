@@ -273,7 +273,7 @@ void PASTEMAC3(cha,chx,chy,varname)( \
 			   zero. */ \
 			PASTEMAC2(cha,cha,copycjs)( conja, *alpha11, alpha11_temp ); \
 			if ( bli_is_conj( conjh ) ) \
-				PASTEMAC(cha,setimag0)( alpha11_temp ); \
+				PASTEMAC(cha,seti0s)( alpha11_temp ); \
 \
 			/* psi11 = psi11 + alpha * alpha11 * chi11; */ \
 			PASTEMAC3(chax,cha,chy,axpys)( alpha_chi11, alpha11_temp, *psi11 ); \

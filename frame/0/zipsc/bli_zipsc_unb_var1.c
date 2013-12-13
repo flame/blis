@@ -93,9 +93,9 @@ void PASTEMAC(chx,varname)( \
 	/* Inline casting and dereferencing of beta_i, instead of first assigning
 	   to beta_i_cast, so that the compiler can't complain that the beta_i_cast
 	   variable is unused for the real-only cases. */ \
-	PASTEMAC2(chxr,chx,setris)( *beta_r_cast, \
-	                            *( (ctype_xr*) beta_i ), \
-	                            *chi_cast ); \
+	PASTEMAC2(chxr,chx,sets)( *beta_r_cast, \
+	                          *( (ctype_xr*) beta_i ), \
+	                          *chi_cast ); \
 }
 
 INSERT_GENTFUNCR_BASIC( zipsc, zipsc_unb_var1 )

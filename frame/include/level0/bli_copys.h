@@ -41,92 +41,29 @@
 // - The first char encodes the type of x.
 // - The second char encodes the type of y.
 
+#define bli_sscopys( x, y )  bli_scopyris( bli_sreal(x), bli_simag(x), bli_sreal(y), bli_simag(y) )
+#define bli_dscopys( x, y )  bli_scopyris( bli_dreal(x), bli_dimag(x), bli_sreal(y), bli_simag(y) )
+#define bli_cscopys( x, y )  bli_scopyris( bli_creal(x), bli_cimag(x), bli_sreal(y), bli_simag(y) )
+#define bli_zscopys( x, y )  bli_scopyris( bli_zreal(x), bli_zimag(x), bli_sreal(y), bli_simag(y) )
 
-#define bli_sscopys( x, y ) \
-{ \
-	(y) = ( float  ) bli_sreal(x); \
-}
-#define bli_dscopys( x, y ) \
-{ \
-	(y) = ( float  ) bli_dreal(x); \
-}
-#define bli_cscopys( x, y ) \
-{ \
-	(y) = ( float  ) bli_creal(x); \
-}
-#define bli_zscopys( x, y ) \
-{ \
-	(y) = ( float  ) bli_zreal(x); \
-}
-
-
-#define bli_sdcopys( x, y ) \
-{ \
-	(y) = ( double ) bli_sreal(x); \
-}
-#define bli_ddcopys( x, y ) \
-{ \
-	(y) = ( double ) bli_dreal(x); \
-}
-#define bli_cdcopys( x, y ) \
-{ \
-	(y) = ( double ) bli_creal(x); \
-}
-#define bli_zdcopys( x, y ) \
-{ \
-	(y) = ( double ) bli_zreal(x); \
-}
-
+#define bli_sdcopys( x, y )  bli_dcopyris( bli_sreal(x), bli_simag(x), bli_dreal(y), bli_dimag(y) )
+#define bli_ddcopys( x, y )  bli_dcopyris( bli_dreal(x), bli_dimag(x), bli_dreal(y), bli_dimag(y) )
+#define bli_cdcopys( x, y )  bli_dcopyris( bli_creal(x), bli_cimag(x), bli_dreal(y), bli_dimag(y) )
+#define bli_zdcopys( x, y )  bli_dcopyris( bli_zreal(x), bli_zimag(x), bli_dreal(y), bli_dimag(y) )
 
 #ifndef BLIS_ENABLE_C99_COMPLEX
 
+#define bli_sccopys( x, y )  bli_ccopyris( bli_sreal(x), bli_simag(x), bli_creal(y), bli_cimag(y) )
+#define bli_dccopys( x, y )  bli_ccopyris( bli_dreal(x), bli_dimag(x), bli_creal(y), bli_cimag(y) )
+#define bli_cccopys( x, y )  bli_ccopyris( bli_creal(x), bli_cimag(x), bli_creal(y), bli_cimag(y) )
+#define bli_zccopys( x, y )  bli_ccopyris( bli_zreal(x), bli_zimag(x), bli_creal(y), bli_cimag(y) )
 
-#define bli_sccopys( x, y ) \
-{ \
-	bli_creal(y) = ( float  ) bli_sreal(x); \
-	bli_cimag(y) = ( float  ) bli_simag(x); \
-}
-#define bli_dccopys( x, y ) \
-{ \
-	bli_creal(y) = ( float  ) bli_dreal(x); \
-	bli_cimag(y) = ( float  ) bli_dimag(x); \
-}
-#define bli_cccopys( x, y ) \
-{ \
-	bli_creal(y) = ( float  ) bli_creal(x); \
-	bli_cimag(y) = ( float  ) bli_cimag(x); \
-}
-#define bli_zccopys( x, y ) \
-{ \
-	bli_creal(y) = ( float  ) bli_zreal(x); \
-	bli_cimag(y) = ( float  ) bli_zimag(x); \
-}
-
-
-#define bli_szcopys( x, y ) \
-{ \
-	bli_zreal(y) = ( double ) bli_sreal(x); \
-	bli_zimag(y) = ( double ) bli_simag(x); \
-}
-#define bli_dzcopys( x, y ) \
-{ \
-	bli_zreal(y) = ( double ) bli_dreal(x); \
-	bli_zimag(y) = ( double ) bli_dimag(x); \
-}
-#define bli_czcopys( x, y ) \
-{ \
-	bli_zreal(y) = ( double ) bli_creal(x); \
-	bli_zimag(y) = ( double ) bli_cimag(x); \
-}
-#define bli_zzcopys( x, y ) \
-{ \
-	bli_zreal(y) = ( double ) bli_zreal(x); \
-	bli_zimag(y) = ( double ) bli_zimag(x); \
-}
-
+#define bli_szcopys( x, y )  bli_zcopyris( bli_sreal(x), bli_simag(x), bli_zreal(y), bli_zimag(y) )
+#define bli_dzcopys( x, y )  bli_zcopyris( bli_dreal(x), bli_dimag(x), bli_zreal(y), bli_zimag(y) )
+#define bli_czcopys( x, y )  bli_zcopyris( bli_creal(x), bli_cimag(x), bli_zreal(y), bli_zimag(y) )
+#define bli_zzcopys( x, y )  bli_zcopyris( bli_zreal(x), bli_zimag(x), bli_zreal(y), bli_zimag(y) )
 
 #else // ifdef BLIS_ENABLE_C99_COMPLEX
-
 
 #define bli_sccopys( x, y )  { (y) = (x); }
 #define bli_dccopys( x, y )  { (y) = (x); }
@@ -138,14 +75,10 @@
 #define bli_czcopys( x, y )  { (y) = (x); }
 #define bli_zzcopys( x, y )  { (y) = (x); }
 
-
 #endif // BLIS_ENABLE_C99_COMPLEX
 
 
-#define bli_iicopys( x, y ) \
-{ \
-	(y) = ( gint_t ) (x); \
-}
+#define bli_iicopys( x, y )  { (y) = ( gint_t ) (x); }
 
 
 #define bli_scopys( x, y )  bli_sscopys( x, y )
@@ -156,3 +89,4 @@
 
 
 #endif
+

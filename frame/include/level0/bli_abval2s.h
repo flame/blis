@@ -41,132 +41,49 @@
 // - The first char encodes the type of x.
 // - The second char encodes the type of a.
 
+#define bli_ssabval2s( x, a )  bli_sabval2ris( bli_sreal(x), bli_simag(x), bli_sreal(a), bli_simag(a) )
+#define bli_dsabval2s( x, a )  bli_sabval2ris( bli_dreal(x), bli_dimag(x), bli_sreal(a), bli_simag(a) )
+#define bli_csabval2s( x, a )  bli_sabval2ris( bli_creal(x), bli_cimag(x), bli_sreal(a), bli_simag(a) )
+#define bli_zsabval2s( x, a )  bli_sabval2ris( bli_zreal(x), bli_zimag(x), bli_sreal(a), bli_simag(a) )
 
-#define bli_ssabval2s( x, a ) \
-{ \
-	bli_sssetris( fabsf(x), 0.0, (a) ); \
-}
-#define bli_dsabval2s( x, a ) \
-{ \
-	bli_dssetris( fabs(x),  0.0, (a) ); \
-}
-
-#define bli_sdabval2s( x, a ) \
-{ \
-	bli_sdsetris( fabsf(x), 0.0, (a) ); \
-}
-#define bli_ddabval2s( x, a ) \
-{ \
-	bli_ddsetris( fabs(x),  0.0, (a) ); \
-}
-
-#define bli_scabval2s( x, a ) \
-{ \
-	bli_scsetris( fabsf(x), 0.0, (a) ); \
-}
-#define bli_dcabval2s( x, a ) \
-{ \
-	bli_dcsetris( fabs(x),  0.0, (a) ); \
-}
-
-#define bli_szabval2s( x, a ) \
-{ \
-	bli_szsetris( fabsf(x), 0.0, (a) ); \
-}
-#define bli_dzabval2s( x, a ) \
-{ \
-	bli_dzsetris( fabs(x),  0.0, (a) ); \
-}
-
+#define bli_sdabval2s( x, a )  bli_dabval2ris( bli_sreal(x), bli_simag(x), bli_dreal(a), bli_dimag(a) )
+#define bli_ddabval2s( x, a )  bli_dabval2ris( bli_dreal(x), bli_dimag(x), bli_dreal(a), bli_dimag(a) )
+#define bli_cdabval2s( x, a )  bli_dabval2ris( bli_creal(x), bli_cimag(x), bli_dreal(a), bli_dimag(a) )
+#define bli_zdabval2s( x, a )  bli_dabval2ris( bli_zreal(x), bli_zimag(x), bli_dreal(a), bli_dimag(a) )
 
 #ifndef BLIS_ENABLE_C99_COMPLEX
 
+#define bli_scabval2s( x, a )  bli_cabval2ris( bli_sreal(x), bli_simag(x), bli_creal(a), bli_cimag(a) )
+#define bli_dcabval2s( x, a )  bli_cabval2ris( bli_dreal(x), bli_dimag(x), bli_creal(a), bli_cimag(a) )
+#define bli_ccabval2s( x, a )  bli_cabval2ris( bli_creal(x), bli_cimag(x), bli_creal(a), bli_cimag(a) )
+#define bli_zcabval2s( x, a )  bli_cabval2ris( bli_zreal(x), bli_zimag(x), bli_creal(a), bli_cimag(a) )
 
-#define bli_csabval2s( x, a ) \
-{ \
-	float  s   = bli_fmaxabs( bli_creal(x), bli_cimag(x) ); \
-	float  mag = sqrtf( s ) * \
-	             sqrtf( ( bli_creal(x) / s ) * bli_creal(x) + \
-	                    ( bli_cimag(x) / s ) * bli_cimag(x) ); \
-	bli_sssetris( mag, 0.0, a ); \
-}
-#define bli_zsabval2s( x, a ) \
-{ \
-	double s   = bli_fmaxabs( bli_zreal(x), bli_zimag(x) ); \
-	double mag = sqrt( s ) * \
-	             sqrt( ( bli_zreal(x) / s ) * bli_zreal(x) + \
-	                   ( bli_zimag(x) / s ) * bli_zimag(x) ); \
-	bli_dssetris( mag, 0.0, a ); \
-}
-
-#define bli_cdabval2s( x, a ) \
-{ \
-	double s   = bli_fmaxabs( bli_creal(x), bli_cimag(x) ); \
-	double mag = sqrt( s ) * \
-	             sqrt( ( bli_creal(x) / s ) * bli_creal(x) + \
-	                   ( bli_cimag(x) / s ) * bli_cimag(x) ); \
-	bli_ddsetris( mag, 0.0, a ); \
-}
-#define bli_zdabval2s( x, a ) \
-{ \
-	double s   = bli_fmaxabs( bli_zreal(x), bli_zimag(x) ); \
-	double mag = sqrt( s ) * \
-	             sqrt( ( bli_zreal(x) / s ) * bli_zreal(x) + \
-	                   ( bli_zimag(x) / s ) * bli_zimag(x) ); \
-	bli_ddsetris( mag, 0.0, a ); \
-}
-
-#define bli_ccabval2s( x, a ) \
-{ \
-	float  s   = bli_fmaxabs( bli_creal(x), bli_cimag(x) ); \
-	float  mag = sqrtf( s ) * \
-	             sqrtf( ( bli_creal(x) / s ) * bli_creal(x) + \
-	                    ( bli_cimag(x) / s ) * bli_cimag(x) ); \
-	bli_scsetris( mag, 0.0, a ); \
-}
-#define bli_zcabval2s( x, a ) \
-{ \
-	double s   = bli_fmaxabs( bli_zreal(x), bli_zimag(x) ); \
-	double mag = sqrt( s ) * \
-	             sqrt( ( bli_zreal(x) / s ) * bli_zreal(x) + \
-	                   ( bli_zimag(x) / s ) * bli_zimag(x) ); \
-	bli_dcsetris( mag, 0.0, a ); \
-}
-
-#define bli_czabval2s( x, a ) \
-{ \
-	double s   = bli_fmaxabs( bli_creal(x), bli_cimag(x) ); \
-	double mag = sqrt( s ) * \
-	             sqrt( ( bli_creal(x) / s ) * bli_creal(x) + \
-	                   ( bli_cimag(x) / s ) * bli_cimag(x) ); \
-	bli_dzsetris( mag, 0.0, a ); \
-}
-#define bli_zzabval2s( x, a ) \
-{ \
-	double s   = bli_fmaxabs( bli_zreal(x), bli_zimag(x) ); \
-	double mag = sqrt( s ) * \
-	             sqrt( ( bli_zreal(x) / s ) * bli_zreal(x) + \
-	                   ( bli_zimag(x) / s ) * bli_zimag(x) ); \
-	bli_dzsetris( mag, 0.0, a ); \
-}
-
+#define bli_szabval2s( x, a )  bli_zabval2ris( bli_sreal(x), bli_simag(x), bli_zreal(a), bli_zimag(a) )
+#define bli_dzabval2s( x, a )  bli_zabval2ris( bli_dreal(x), bli_dimag(x), bli_zreal(a), bli_zimag(a) )
+#define bli_czabval2s( x, a )  bli_zabval2ris( bli_creal(x), bli_cimag(x), bli_zreal(a), bli_zimag(a) )
+#define bli_zzabval2s( x, a )  bli_zabval2ris( bli_zreal(x), bli_zimag(x), bli_zreal(a), bli_zimag(a) )
 
 #else // ifdef BLIS_ENABLE_C99_COMPLEX
 
+#define bli_ssabval2s( x, a )  bli_sssets( fabsf(x), 0.0, (a) )
+#define bli_dsabval2s( x, a )  bli_dssets( fabs (x), 0.0, (a) )
+#define bli_csabval2s( x, a )  bli_cssets( cabsf(x), 0.0, (a) )
+#define bli_zsabval2s( x, a )  bli_zssets( cabs (x), 0.0, (a) )
 
-#define bli_csabval2s( x, a )  { (a) = cabsf(x); }
-#define bli_zsabval2s( x, a )  { (a) = cabs(x);  }
+#define bli_sdabval2s( x, a )  bli_sdsets( fabsf(x), 0.0, (a) )
+#define bli_ddabval2s( x, a )  bli_ddsets( fabs (x), 0.0, (a) )
+#define bli_cdabval2s( x, a )  bli_cdsets( cabsf(x), 0.0, (a) )
+#define bli_zdabval2s( x, a )  bli_zdsets( cabs (x), 0.0, (a) )
 
-#define bli_cdabval2s( x, a )  { (a) = cabsf(x); }
-#define bli_zdabval2s( x, a )  { (a) = cabs(x);  }
+#define bli_scabval2s( x, a )  bli_scsets( fabsf(x), 0.0, (a) )
+#define bli_dcabval2s( x, a )  bli_dcsets( fabs (x), 0.0, (a) )
+#define bli_ccabval2s( x, a )  bli_ccsets( cabsf(x), 0.0, (a) )
+#define bli_zcabval2s( x, a )  bli_zcsets( cabs (x), 0.0, (a) )
 
-#define bli_ccabval2s( x, a )  { (a) = cabsf(x); }
-#define bli_zcabval2s( x, a )  { (a) = cabs(x);  }
-
-#define bli_czabval2s( x, a )  { (a) = cabsf(x); }
-#define bli_zzabval2s( x, a )  { (a) = cabs(x);  }
-
-
+#define bli_szabval2s( x, a )  bli_szsets( fabsf(x), 0.0, (a) )
+#define bli_dzabval2s( x, a )  bli_dzsets( fabs (x), 0.0, (a) )
+#define bli_czabval2s( x, a )  bli_czsets( cabsf(x), 0.0, (a) )
+#define bli_zzabval2s( x, a )  bli_zzsets( cabs (x), 0.0, (a) )
 
 #endif // BLIS_ENABLE_C99_COMPLEX
 

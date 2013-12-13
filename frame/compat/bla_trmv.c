@@ -57,8 +57,8 @@ void PASTEF77(ch,blasname)( \
 	ftype*  x0; \
 	inc_t   incx0; \
 	inc_t   rs_a, cs_a; \
-	ftype   one; \
 	err_t   init_result; \
+	ftype*  one_p; \
 \
 	/* Initialize BLIS (if it is not already initialized). */ \
 	bli_init_safe( &init_result ); \
@@ -72,10 +72,6 @@ void PASTEF77(ch,blasname)( \
 	                       m, \
 	                       lda, \
 	                       incx ); \
-\
-	/* Initialize a local scalar since we don't assume that the global
-	   scalar constants have been initialized yet. */ \
-	PASTEMAC(ch,setris)( 1.0, 0.0, one ); \
 \
 	/* Map BLAS chars to their corresponding BLIS enumerated type value. */ \
 	bli_param_map_netlib_to_blis_uplo( *uploa, &blis_uploa ); \
@@ -93,12 +89,15 @@ void PASTEF77(ch,blasname)( \
 	rs_a = 1; \
 	cs_a = *lda; \
 \
+	/* Acquire a pointer to the global scalar constant BLIS_ONE. */ \
+	one_p = PASTEMAC(ch,1); \
+\
 	/* Call BLIS interface. */ \
 	PASTEMAC(ch,blisname)( blis_uploa, \
 	                       blis_transa, \
 	                       blis_diaga, \
 	                       m0, \
-	                       &one, \
+	                       one_p, \
 	                       a,  rs_a, cs_a, \
 	                       x0, incx0 ); \
 \

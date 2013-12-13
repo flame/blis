@@ -41,88 +41,27 @@
 // - The first char encodes the type of x.
 // - The second char encodes the type of y.
 
+#define bli_sssetis( xi, y )  { ; }
+#define bli_dssetis( xi, y )  { ; }
 
-#define bli_sssetis( xi, y ) \
-{ \
-	; \
-}
-#define bli_dssetis( xi, y ) \
-{ \
-	; \
-}
-#define bli_cssetis( xi, y ) \
-{ \
-	; \
-}
-#define bli_zssetis( xi, y ) \
-{ \
-	; \
-}
-
-
-#define bli_sdsetis( xi, y ) \
-{ \
-	; \
-}
-#define bli_ddsetis( xi, y ) \
-{ \
-	; \
-}
-#define bli_cdsetis( xi, y ) \
-{ \
-	; \
-}
-#define bli_zdsetis( xi, y ) \
-{ \
-	; \
-}
-
+#define bli_sdsetis( xi, y )  { ; }
+#define bli_ddsetis( xi, y )  { ; }
 
 #ifndef BLIS_ENABLE_C99_COMPLEX
 
+#define bli_scsetis( xi, y )  { bli_cimag(y) = (xi); }
+#define bli_dcsetis( xi, y )  { bli_cimag(y) = (xi); }
 
-#define bli_scsetis( xi, y ) \
-{ \
-	bli_cimag(y) = ( float  ) (xi); \
-}
-#define bli_dcsetis( xi, y ) \
-{ \
-	bli_cimag(y) = ( float  ) (xi); \
-}
-
-
-#define bli_szsetis( xi, y ) \
-{ \
-	bli_zimag(y) = ( double ) (xi); \
-}
-#define bli_dzsetis( xi, y ) \
-{ \
-	bli_zimag(y) = ( double ) (xi); \
-}
-
+#define bli_szsetis( xi, y )  { bli_zimag(y) = (xi); }
+#define bli_dzsetis( xi, y )  { bli_zimag(y) = (xi); }
 
 #else // ifdef BLIS_ENABLE_C99_COMPLEX
 
+#define bli_scsetis( xi, y )  { (y) = bli_creal(y) + (xi) * (I); }
+#define bli_dcsetis( xi, y )  { (y) = bli_creal(y) + (xi) * (I); }
 
-#define bli_scsetis( xi, y ) \
-{ \
-	(y)      = bli_creal(y) + ( float  ) (xi) * (I); \
-}
-#define bli_dcsetis( xi, y ) \
-{ \
-	(y)      = bli_creal(y) + ( float  ) (xi) * (I); \
-}
-
-
-#define bli_szsetis( xi, y ) \
-{ \
-	(y)      = bli_zreal(y) + ( double ) (xi) * (I); \
-}
-#define bli_dzsetis( xi, y ) \
-{ \
-	(y)      = bli_zreal(y) + ( double ) (xi) * (I); \
-}
-
+#define bli_szsetis( xi, y )  { (y) = bli_zreal(y) + (xi) * (I); }
+#define bli_dzsetis( xi, y )  { (y) = bli_zreal(y) + (xi) * (I); }
 
 #endif // BLIS_ENABLE_C99_COMPLEX
 
@@ -134,3 +73,4 @@
 
 
 #endif
+

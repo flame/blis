@@ -127,7 +127,7 @@ void PASTEMAC(chx,varname)( \
 	for ( i = 0; i < n; ++i ) \
 	{ \
 		/* Get the real and imaginary components of chi1. */ \
-		PASTEMAC2(chx,chxr,getris)( *chi1, chi1_r, chi1_i ); \
+		PASTEMAC2(chx,chxr,gets)( *chi1, chi1_r, chi1_i ); \
 \
 		/* Accumulate real component into sumsq, adjusting scale if
 		   needed. */ \

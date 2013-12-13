@@ -233,7 +233,7 @@ void PASTEMAC3(cha,chx,chy,varname)( \
 		   zero. */ \
 		PASTEMAC2(cha,cha,copycjs)( conja, *alpha11, alpha11_temp ); \
 		if ( bli_is_conj( conjh ) ) \
-			PASTEMAC(cha,setimag0)( alpha11_temp ); \
+			PASTEMAC(cha,seti0s)( alpha11_temp ); \
 \
 		/* Apply conjx to chi1 and and scale by alpha. */ \
 		PASTEMAC2(chx,chx,copycjs)( conjx, *chi1, conjx_chi1 ); \

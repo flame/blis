@@ -376,7 +376,7 @@ void PASTEMAC(ch,varname )( \
 				   using p11 for the remainder of the function. */ \
 				for ( i = 0; i < p11_m; ++i ) \
 				{ \
-					PASTEMAC(ch,setimag0)( *p11 ); \
+					PASTEMAC(ch,seti0s)( *p11 ); \
 \
 					p11 += rs_p11 + cs_p11; \
 				} \

@@ -38,135 +38,51 @@
 // scalcjs
 
 // Notes:
-// - The first char encodes the type of a.
-// - The second char encodes the type of x.
+// - The first char encodes the type of x.
+// - The second char encodes the type of y.
 
+#define bli_ssscalcjs( conj, x, y )  bli_sscalcjris( conj, bli_sreal(x), bli_simag(x), bli_sreal(y), bli_simag(y) )
+#define bli_dsscalcjs( conj, x, y )  bli_sscalcjris( conj, bli_dreal(x), bli_dimag(x), bli_sreal(y), bli_simag(y) )
+#define bli_csscalcjs( conj, x, y )  bli_sscalcjris( conj, bli_creal(x), bli_cimag(x), bli_sreal(y), bli_simag(y) )
+#define bli_zsscalcjs( conj, x, y )  bli_sscalcjris( conj, bli_zreal(x), bli_zimag(x), bli_sreal(y), bli_simag(y) )
 
-#define bli_ssscalcjs( conj, a, x ) \
-{ \
-	(x)          = bli_ssimulnn_r( (a), (x) ); \
-}
-#define bli_dsscalcjs( conj, a, x ) \
-{ \
-	(x)          = bli_dsimulnn_r( (a), (x) ); \
-}
-#define bli_csscalcjs( conj, a, x ) \
-{ \
-	(x)          = bli_csimulnn_r( (a), (x) ); \
-}
-#define bli_zsscalcjs( conj, a, x ) \
-{ \
-	(x)          = bli_zsimulnn_r( (a), (x) ); \
-}
-
-
-#define bli_sdscalcjs( conj, a, x ) \
-{ \
-	(x)          = bli_sdimulnn_r( (a), (x) ); \
-}
-#define bli_ddscalcjs( conj, a, x ) \
-{ \
-	(x)          = bli_ddimulnn_r( (a), (x) ); \
-}
-#define bli_cdscalcjs( conj, a, x ) \
-{ \
-	(x)          = bli_cdimulnn_r( (a), (x) ); \
-}
-#define bli_zdscalcjs( conj, a, x ) \
-{ \
-	(x)          = bli_zdimulnn_r( (a), (x) ); \
-}
-
+#define bli_sdscalcjs( conj, x, y )  bli_dscalcjris( conj, bli_sreal(x), bli_simag(x), bli_dreal(y), bli_dimag(y) )
+#define bli_ddscalcjs( conj, x, y )  bli_dscalcjris( conj, bli_dreal(x), bli_dimag(x), bli_dreal(y), bli_dimag(y) )
+#define bli_cdscalcjs( conj, x, y )  bli_dscalcjris( conj, bli_creal(x), bli_cimag(x), bli_dreal(y), bli_dimag(y) )
+#define bli_zdscalcjs( conj, x, y )  bli_dscalcjris( conj, bli_zreal(x), bli_zimag(x), bli_dreal(y), bli_dimag(y) )
 
 #ifndef BLIS_ENABLE_C99_COMPLEX
 
+#define bli_scscalcjs( conj, x, y )  bli_scscalcjris( conj, bli_sreal(x), bli_simag(x), bli_creal(y), bli_cimag(y) )
+#define bli_dcscalcjs( conj, x, y )  bli_scscalcjris( conj, bli_dreal(x), bli_dimag(x), bli_creal(y), bli_cimag(y) )
+#define bli_ccscalcjs( conj, x, y )   bli_cscalcjris( conj, bli_creal(x), bli_cimag(x), bli_creal(y), bli_cimag(y) )
+#define bli_zcscalcjs( conj, x, y )   bli_cscalcjris( conj, bli_zreal(x), bli_zimag(x), bli_creal(y), bli_cimag(y) )
 
-#define bli_scscalcjs( conj, a, x ) \
-{ \
-	bli_creal(x) = bli_scimulnn_r( (a), (x) ); \
-	bli_cimag(x) = bli_scimulnn_i( (a), (x) ); \
-}
-#define bli_dcscalcjs( conj, a, x ) \
-{ \
-	bli_creal(x) = bli_dcimulnn_r( (a), (x) ); \
-	bli_cimag(x) = bli_dcimulnn_i( (a), (x) ); \
-}
-#define bli_ccscalcjs( conj, a, x ) \
-{ \
-	float  tempr, tempi; \
-	if ( bli_is_conj( conj ) ) { tempr = bli_ccimulcn_r( (a), (x) );   \
-	                             tempi = bli_ccimulcn_i( (a), (x) ); } \
-	else                       { tempr = bli_ccimulnn_r( (a), (x) );   \
-	                             tempi = bli_ccimulnn_i( (a), (x) ); } \
-	bli_creal(x) = tempr; \
-	bli_cimag(x) = tempi; \
-}
-#define bli_zcscalcjs( conj, a, x ) \
-{ \
-	float  tempr, tempi; \
-	if ( bli_is_conj( conj ) ) { tempr = bli_zcimulcn_r( (a), (x) );   \
-	                             tempi = bli_zcimulcn_i( (a), (x) ); } \
-	else                       { tempr = bli_zcimulnn_r( (a), (x) );   \
-	                             tempi = bli_zcimulnn_i( (a), (x) ); } \
-	bli_creal(x) = tempr; \
-	bli_cimag(x) = tempi; \
-}
-
-
-#define bli_szscalcjs( conj, a, x ) \
-{ \
-	bli_zreal(x) = bli_szimulnn_r( (a), (x) ); \
-	bli_zimag(x) = bli_szimulnn_i( (a), (x) ); \
-}
-#define bli_dzscalcjs( conj, a, x ) \
-{ \
-	bli_zreal(x) = bli_dzimulnn_r( (a), (x) ); \
-	bli_zimag(x) = bli_dzimulnn_i( (a), (x) ); \
-}
-#define bli_czscalcjs( conj, a, x ) \
-{ \
-	double tempr, tempi; \
-	if ( bli_is_conj( conj ) ) { tempr = bli_czimulcn_r( (a), (x) );   \
-	                             tempi = bli_czimulcn_i( (a), (x) ); } \
-	else                       { tempr = bli_czimulnn_r( (a), (x) );   \
-	                             tempi = bli_czimulnn_i( (a), (x) ); } \
-	bli_zreal(x) = tempr; \
-	bli_zimag(x) = tempi; \
-}
-#define bli_zzscalcjs( conj, a, x ) \
-{ \
-	double tempr, tempi; \
-	if ( bli_is_conj( conj ) ) { tempr = bli_zzimulcn_r( (a), (x) );   \
-	                             tempi = bli_zzimulcn_i( (a), (x) ); } \
-	else                       { tempr = bli_zzimulnn_r( (a), (x) );   \
-	                             tempi = bli_zzimulnn_i( (a), (x) ); } \
-	bli_zreal(x) = tempr; \
-	bli_zimag(x) = tempi; \
-}
-
+#define bli_szscalcjs( conj, x, y )  bli_dzscalcjris( conj, bli_sreal(x), bli_simag(x), bli_zreal(y), bli_zimag(y) )
+#define bli_dzscalcjs( conj, x, y )  bli_dzscalcjris( conj, bli_dreal(x), bli_dimag(x), bli_zreal(y), bli_zimag(y) )
+#define bli_czscalcjs( conj, x, y )   bli_zscalcjris( conj, bli_creal(x), bli_cimag(x), bli_zreal(y), bli_zimag(y) )
+#define bli_zzscalcjs( conj, x, y )   bli_zscalcjris( conj, bli_zreal(x), bli_zimag(x), bli_zreal(y), bli_zimag(y) )
 
 #else // ifdef BLIS_ENABLE_C99_COMPLEX
 
+#define bli_scscalcjs( conj, x, y )  { (y) *= (x); }
+#define bli_dcscalcjs( conj, x, y )  { (y) *= (x); }
+#define bli_ccscalcjs( conj, x, y )  { (y) *= ( bli_is_conj( conj ) ? conjf(x) : (x) ); }
+#define bli_zcscalcjs( conj, x, y )  { (y) *= ( bli_is_conj( conj ) ? conj (x) : (x) ); }
 
-#define bli_scscalcjs( conj, a, x )  { (x) *= (a); }
-#define bli_dcscalcjs( conj, a, x )  { (x) *= (a); }
-#define bli_ccscalcjs( conj, a, x )  { (x) *= ( bli_is_conj( conj ) ? conjf(a) : (a) ); }
-#define bli_zcscalcjs( conj, a, x )  { (x) *= ( bli_is_conj( conj ) ? conj(a)  : (a) ); }
-
-#define bli_szscalcjs( conj, a, x )  { (x) *= (a); }
-#define bli_dzscalcjs( conj, a, x )  { (x) *= (a); }
-#define bli_czscalcjs( conj, a, x )  { (x) *= ( bli_is_conj( conj ) ? conjf(a) : (a) ); }
-#define bli_zzscalcjs( conj, a, x )  { (x) *= ( bli_is_conj( conj ) ? conj(a)  : (a) ); }
-
+#define bli_szscalcjs( conj, x, y )  { (y) *= (x); }
+#define bli_dzscalcjs( conj, x, y )  { (y) *= (x); }
+#define bli_czscalcjs( conj, x, y )  { (y) *= ( bli_is_conj( conj ) ? conjf(x) : (x) ); }
+#define bli_zzscalcjs( conj, x, y )  { (y) *= ( bli_is_conj( conj ) ? conj (x) : (x) ); }
 
 #endif // BLIS_ENABLE_C99_COMPLEX
 
 
-
-#define bli_sscalcjs( conj, a, x )  bli_ssscalcjs( conj, a, x )
-#define bli_dscalcjs( conj, a, x )  bli_ddscalcjs( conj, a, x )
-#define bli_cscalcjs( conj, a, x )  bli_ccscalcjs( conj, a, x )
-#define bli_zscalcjs( conj, a, x )  bli_zzscalcjs( conj, a, x )
+#define bli_sscalcjs( conj, x, y )  bli_ssscalcjs( conj, x, y )
+#define bli_dscalcjs( conj, x, y )  bli_ddscalcjs( conj, x, y )
+#define bli_cscalcjs( conj, x, y )  bli_ccscalcjs( conj, x, y )
+#define bli_zscalcjs( conj, x, y )  bli_zzscalcjs( conj, x, y )
 
 
 #endif
+

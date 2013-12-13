@@ -88,9 +88,9 @@ void PASTEMAC(chb,varname)( \
 	ctype_br* chi_r_cast = chi_r; \
 	ctype_br* chi_i_cast = chi_i; \
 \
-	PASTEMAC2(chb,chbr,getris)( *beta_cast, \
-	                            *chi_r_cast, \
-	                            *chi_i_cast ); \
+	PASTEMAC2(chb,chbr,gets)( *beta_cast, \
+	                          *chi_r_cast, \
+	                          *chi_i_cast ); \
 }
 
 INSERT_GENTFUNCR_BASIC( unzipsc, unzipsc_unb_var1 )

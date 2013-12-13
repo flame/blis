@@ -106,7 +106,7 @@ void PASTEMAC(chx,varname)( \
 	for ( i = 0; i < n; ++i ) \
 	{ \
 		/* Get the real and imaginary components of chi1. */ \
-		PASTEMAC2(chx,chxr,getris)( *chi1, chi1_r, chi1_i ); \
+		PASTEMAC2(chx,chxr,gets)( *chi1, chi1_r, chi1_i ); \
 \
 		/* Replace chi1_r and chi1_i with their absolute values. */ \
 		chi1_r = bli_fabs( chi1_r ); \

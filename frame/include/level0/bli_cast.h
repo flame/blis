@@ -83,45 +83,45 @@
 
 #define bli_sccast( ap, b ) \
 { \
-	bli_scsetris( bli_sreal( *(( float*    )(ap)) ), \
-	                                            0.0, (b) ); \
+	bli_scsets( bli_sreal( *(( float*    )(ap)) ), \
+	                                          0.0, (b) ); \
 }
 #define bli_dccast( ap, b ) \
 { \
-	bli_dcsetris( bli_dreal( *(( double*   )(ap)) ), \
-	                                            0.0, (b) ); \
+	bli_dcsets( bli_dreal( *(( double*   )(ap)) ), \
+	                                          0.0, (b) ); \
 }
 #define bli_cccast( ap, b ) \
 { \
-	bli_ccsetris( bli_creal( *(( scomplex* )(ap)) ), \
-	              bli_cimag( *(( scomplex* )(ap)) ), (b) ); \
+	bli_ccsets( bli_creal( *(( scomplex* )(ap)) ), \
+	            bli_cimag( *(( scomplex* )(ap)) ), (b) ); \
 }
 #define bli_zccast( ap, b ) \
 { \
-	bli_zcsetris( bli_zreal( *(( dcomplex* )(ap)) ), \
-	              bli_zimag( *(( dcomplex* )(ap)) ), (b) ); \
+	bli_zcsets( bli_zreal( *(( dcomplex* )(ap)) ), \
+	            bli_zimag( *(( dcomplex* )(ap)) ), (b) ); \
 }
 
 
 #define bli_szcast( ap, b ) \
 { \
-	bli_szsetris( bli_sreal( *(( float*    )(ap)) ), \
-	                                            0.0, (b) ); \
+	bli_szsets( bli_sreal( *(( float*    )(ap)) ), \
+	                                          0.0, (b) ); \
 }
 #define bli_dzcast( ap, b ) \
 { \
-	bli_dzsetris( bli_dreal( *(( double*   )(ap)) ), \
-	                                            0.0, (b) ); \
+	bli_dzsets( bli_dreal( *(( double*   )(ap)) ), \
+	                                          0.0, (b) ); \
 }
 #define bli_czcast( ap, b ) \
 { \
-	bli_czsetris( bli_creal( *(( scomplex* )(ap)) ), \
-	              bli_cimag( *(( scomplex* )(ap)) ), (b) ); \
+	bli_czsets( bli_creal( *(( scomplex* )(ap)) ), \
+	            bli_cimag( *(( scomplex* )(ap)) ), (b) ); \
 }
 #define bli_zzcast( ap, b ) \
 { \
-	bli_zzsetris( bli_zreal( *(( dcomplex* )(ap)) ), \
-	              bli_zimag( *(( dcomplex* )(ap)) ), (b) ); \
+	bli_zzsets( bli_zreal( *(( dcomplex* )(ap)) ), \
+	            bli_zimag( *(( dcomplex* )(ap)) ), (b) ); \
 }
 
 

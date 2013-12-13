@@ -36,36 +36,32 @@
 #define BLIS_SCALAR_MACRO_DEFS_H
 
 
-// -- Assignment macros --
 
-// NOTE: This macro is defined first since most other scalar macros use it
-// to abstract away the method used to assign complex values (ie: whether
-// fields of a struct are set directly or whether native C99 assignment is
-// used).
+// -- Assignment/Accessor macros --
 
-#include "bli_setris.h"  // sets both real and imaginary components
+// NOTE: This macro is defined first since some of the other scalar macros
+// use it to abstract away the method used to assign complex values (ie:
+// whether fields of a struct are set directly or whether native C99
+// assignment is used).
+
+#include "bli_sets.h"    // sets both real and imaginary components
+
+// NOTE: These macros are not used by other scalar macros, but they are
+// related to those defined in bli_sets.h, and so we #include them here.
+
 #include "bli_setrs.h"   // sets real component only 
 #include "bli_setis.h"   // sets imaginary component only 
-
-
-// -- Accessor macros --
 
 // NOTE: This macro also needs to be defined early on since it determines
 // how real and imaginary components are accessed (ie: whether the fields
 // of a struct are read directly or whether native C99 functions are used.)
 
-#include "bli_getris.h"
-
-
-// -- Inline multiplication macros --
-
-#include "bli_imulnn.h"
-#include "bli_imulnc.h"
-#include "bli_imulcn.h" // defined in terms of "nc", so it must come second.
+#include "bli_gets.h"
 
 
 // -- Scalar query macros --
 
+#include "bli_eqri.h"
 #include "bli_eq.h"
 
 
@@ -76,49 +72,75 @@
 
 // -- Scalar computation macros --
 
+#include "bli_absq2ris.h"
 #include "bli_absq2s.h"
+
+#include "bli_abval2ris.h"
 #include "bli_abval2s.h"
 
+#include "bli_addris.h"
 #include "bli_adds.h"
+#include "bli_addjris.h"
 #include "bli_addjs.h"
 
+#include "bli_axpyris.h"
 #include "bli_axpys.h"
+#include "bli_axpyjris.h"
 #include "bli_axpyjs.h"
 
+#include "bli_axmyris.h"
 #include "bli_axmys.h"
 
 #include "bli_cast.h"
 
+#include "bli_conjris.h"
 #include "bli_conjs.h"
 
+#include "bli_copyris.h"
 #include "bli_copys.h"
+#include "bli_copyjris.h"
 #include "bli_copyjs.h"
+#include "bli_copycjris.h"
 #include "bli_copycjs.h"
 
 #include "bli_dots.h"
 #include "bli_dotjs.h"
 
+#include "bli_invertris.h"
 #include "bli_inverts.h"
 
+#include "bli_invscalris.h"
 #include "bli_invscals.h"
+#include "bli_invscaljris.h"
 #include "bli_invscaljs.h"
 
+#include "bli_neg2ris.h"
 #include "bli_neg2s.h"
 
+#include "bli_scalris.h"
 #include "bli_scals.h"
+#include "bli_scaljris.h"
 #include "bli_scaljs.h"
+#include "bli_scalcjris.h"
 #include "bli_scalcjs.h"
 
+#include "bli_scal2ris.h"
 #include "bli_scal2s.h"
+#include "bli_scal2jris.h"
 #include "bli_scal2js.h"
 
+#include "bli_sqrt2ris.h"
 #include "bli_sqrt2s.h"
 
+#include "bli_subris.h"
 #include "bli_subs.h"
+#include "bli_subjris.h"
 #include "bli_subjs.h"
 
+#include "bli_swapris.h"
 #include "bli_swaps.h"
 
+#include "bli_xpbyris.h"
 #include "bli_xpbys.h"
 
 

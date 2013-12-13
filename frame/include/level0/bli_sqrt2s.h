@@ -41,132 +41,29 @@
 // - The first char encodes the type of x.
 // - The second char encodes the type of a.
 
-
 #ifndef BLIS_ENABLE_C99_COMPLEX
 
+#define bli_sssqrt2s( x, a )  bli_ssqrt2ris( bli_sreal(x), bli_simag(x), bli_sreal(a), bli_simag(a) )
+#define bli_dssqrt2s( x, a )  bli_ssqrt2ris( bli_dreal(x), bli_dimag(x), bli_sreal(a), bli_simag(a) )
+#define bli_cssqrt2s( x, a )  bli_ssqrt2ris( bli_creal(x), bli_cimag(x), bli_sreal(a), bli_simag(a) )
+#define bli_zssqrt2s( x, a )  bli_ssqrt2ris( bli_zreal(x), bli_zimag(x), bli_sreal(a), bli_simag(a) )
 
-#define bli_sssqrt2s( x, a ) \
-{ \
-	(a) = sqrtf( (x) ); \
-}
-#define bli_dssqrt2s( x, a ) \
-{ \
-	(a) = sqrt( (x) ); \
-}
-#define bli_cssqrt2s( x, a ) \
-{ \
-	float  s     = bli_fmaxabs( bli_creal(x), bli_cimag(x) ); \
-	float  mag   = sqrtf( s ) * \
-	               sqrtf( ( bli_creal(x) / s ) * bli_creal(x) + \
-	                      ( bli_cimag(x) / s ) * bli_cimag(x) ); \
-\
-	(a)          = sqrtf( ( mag + bli_creal(x) ) / 2.0 ); \
-}
-#define bli_zssqrt2s( x, a ) \
-{ \
-	double s     = bli_fmaxabs( bli_zreal(x), bli_zimag(x) ); \
-	double mag   = sqrt( s ) * \
-	               sqrt( ( bli_zreal(x) / s ) * bli_zreal(x) + \
-	                     ( bli_zimag(x) / s ) * bli_zimag(x) ); \
-\
-	(a)          = sqrt( ( mag + bli_zreal(x) ) / 2.0 ); \
-}
+#define bli_sdsqrt2s( x, a )  bli_dsqrt2ris( bli_sreal(x), bli_simag(x), bli_dreal(a), bli_dimag(a) )
+#define bli_ddsqrt2s( x, a )  bli_dsqrt2ris( bli_dreal(x), bli_dimag(x), bli_dreal(a), bli_dimag(a) )
+#define bli_cdsqrt2s( x, a )  bli_dsqrt2ris( bli_creal(x), bli_cimag(x), bli_dreal(a), bli_dimag(a) )
+#define bli_zdsqrt2s( x, a )  bli_dsqrt2ris( bli_zreal(x), bli_zimag(x), bli_dreal(a), bli_dimag(a) )
 
+#define bli_scsqrt2s( x, a )  bli_scsqrt2ris( bli_sreal(x), bli_simag(x), bli_creal(a), bli_cimag(a) )
+#define bli_dcsqrt2s( x, a )  bli_scsqrt2ris( bli_dreal(x), bli_dimag(x), bli_creal(a), bli_cimag(a) )
+#define bli_ccsqrt2s( x, a )   bli_csqrt2ris( bli_creal(x), bli_cimag(x), bli_creal(a), bli_cimag(a) )
+#define bli_zcsqrt2s( x, a )   bli_csqrt2ris( bli_zreal(x), bli_zimag(x), bli_creal(a), bli_cimag(a) )
 
-#define bli_sdsqrt2s( x, a ) \
-{ \
-	(a) = sqrtf( (x) ); \
-}
-#define bli_ddsqrt2s( x, a ) \
-{ \
-	(a) = sqrt( (x) ); \
-}
-#define bli_cdsqrt2s( x, a ) \
-{ \
-	double s     = bli_fmaxabs( bli_creal(x), bli_cimag(x) ); \
-	double mag   = sqrt( s ) * \
-	               sqrt( ( bli_creal(x) / s ) * bli_creal(x) + \
-	                     ( bli_cimag(x) / s ) * bli_cimag(x) ); \
-\
-	(a)          = sqrt( ( mag + bli_creal(x) ) / 2.0 ); \
-}
-#define bli_zdsqrt2s( x, a ) \
-{ \
-	double s     = bli_fmaxabs( bli_zreal(x), bli_zimag(x) ); \
-	double mag   = sqrt( s ) * \
-	               sqrt( ( bli_zreal(x) / s ) * bli_zreal(x) + \
-	                     ( bli_zimag(x) / s ) * bli_zimag(x) ); \
-\
-	(a)          = sqrt( ( mag + bli_zreal(x) ) / 2.0 ); \
-}
-
-
-#define bli_scsqrt2s( x, a ) \
-{ \
-	bli_creal(a) = sqrtf( (x) ); \
-	bli_cimag(a) = 0.0F; \
-}
-#define bli_dcsqrt2s( x, a ) \
-{ \
-	bli_creal(a) = sqrt( (x) ); \
-	bli_cimag(a) = 0.0F; \
-}
-#define bli_ccsqrt2s( x, a ) \
-{ \
-	float  s     = bli_fmaxabs( bli_creal(x), bli_cimag(x) ); \
-	float  mag   = sqrtf( s ) * \
-	               sqrtf( ( bli_creal(x) / s ) * bli_creal(x) + \
-	                      ( bli_cimag(x) / s ) * bli_cimag(x) ); \
-\
-	bli_creal(a) = sqrtf( ( mag + bli_creal(x) ) / 2.0 ); \
-	bli_cimag(a) = sqrtf( ( mag - bli_cimag(x) ) / 2.0 ); \
-}
-#define bli_zcsqrt2s( x, a ) \
-{ \
-	double s     = bli_fmaxabs( bli_zreal(x), bli_zimag(x) ); \
-	double mag   = sqrt( s ) * \
-	               sqrt( ( bli_zreal(x) / s ) * bli_zreal(x) + \
-	                     ( bli_zimag(x) / s ) * bli_zimag(x) ); \
-\
-	bli_creal(a) = sqrt( ( mag + bli_zreal(x) ) / 2.0 ); \
-	bli_cimag(a) = sqrt( ( mag - bli_zimag(x) ) / 2.0 ); \
-}
-
-
-#define bli_szsqrt2s( x, a ) \
-{ \
-	bli_zreal(a) = sqrtf( (x) ); \
-	bli_zimag(a) = 0.0F; \
-}
-#define bli_dzsqrt2s( x, a ) \
-{ \
-	bli_zreal(a) = sqrt( (x) ); \
-	bli_zimag(a) = 0.0; \
-}
-#define bli_czsqrt2s( x, a ) \
-{ \
-	double s     = bli_fmaxabs( bli_creal(x), bli_cimag(x) ); \
-	double mag   = sqrt( s ) * \
-	               sqrt( ( bli_creal(x) / s ) * bli_creal(x) + \
-	                     ( bli_cimag(x) / s ) * bli_cimag(x) ); \
-\
-	bli_zreal(a) = sqrt( ( mag + bli_creal(x) ) / 2.0 ); \
-	bli_zimag(a) = sqrt( ( mag - bli_cimag(x) ) / 2.0 ); \
-}
-#define bli_zzsqrt2s( x, a ) \
-{ \
-	double s     = bli_fmaxabs( bli_zreal(x), bli_zimag(x) ); \
-	double mag   = sqrt( s ) * \
-	               sqrt( ( bli_zreal(x) / s ) * bli_zreal(x) + \
-	                     ( bli_zimag(x) / s ) * bli_zimag(x) ); \
-\
-	bli_zreal(a) = sqrt( ( mag + bli_zreal(x) ) / 2.0 ); \
-	bli_zimag(a) = sqrt( ( mag - bli_zimag(x) ) / 2.0 ); \
-}
-
+#define bli_szsqrt2s( x, a )  bli_dzsqrt2ris( bli_sreal(x), bli_simag(x), bli_zreal(a), bli_zimag(a) )
+#define bli_dzsqrt2s( x, a )  bli_dzsqrt2ris( bli_dreal(x), bli_dimag(x), bli_zreal(a), bli_zimag(a) )
+#define bli_czsqrt2s( x, a )   bli_zsqrt2ris( bli_creal(x), bli_cimag(x), bli_zreal(a), bli_zimag(a) )
+#define bli_zzsqrt2s( x, a )   bli_zsqrt2ris( bli_zreal(x), bli_zimag(x), bli_zreal(a), bli_zimag(a) )
 
 #else // ifdef BLIS_ENABLE_C99_COMPLEX
-
 
 #define bli_sssqrt2s( x, a )  { (a) = ( float    )            sqrtf( (x) )  ; }
 #define bli_dssqrt2s( x, a )  { (a) = ( float    )            sqrt ( (x) )  ; }
@@ -187,7 +84,6 @@
 #define bli_dzsqrt2s( x, a )  { (a) = ( dcomplex )            sqrt ( (x) )  ; }
 #define bli_czsqrt2s( x, a )  { (a) = ( dcomplex )           csqrtf( (x) )  ; }
 #define bli_zzsqrt2s( x, a )  { (a) = ( dcomplex )           csqrt ( (x) )  ; }
-
 
 #endif // BLIS_ENABLE_C99_COMPLEX
 

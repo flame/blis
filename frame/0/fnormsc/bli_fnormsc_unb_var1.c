@@ -84,9 +84,9 @@ void PASTEMAC(chx,varname)( \
 	ctype_xr  chi_r; \
 	ctype_xr  chi_i; \
 \
-	PASTEMAC2(chx,chxr,getris)( *chi_cast, \
-	                            chi_r, \
-	                            chi_i ); \
+	PASTEMAC2(chx,chxr,gets)( *chi_cast, \
+	                          chi_r, \
+	                          chi_i ); \
 \
 	if ( bli_is_real( PASTEMAC(chx,type) ) ) \
 	{ \

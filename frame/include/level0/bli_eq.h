@@ -57,7 +57,7 @@
 
 
 
-// eqri (passed by value)
+// eqtori (passed by value)
 
 #define bli_seqtori( a, br, bi )  ( (a) == (br) )
 #define bli_deqtori( a, br, bi )  ( (a) == (br) )

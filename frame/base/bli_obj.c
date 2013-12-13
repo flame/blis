@@ -104,10 +104,10 @@ void bli_obj_create_without_buffer( num_t  dt,
 	// Set the internal scalar to 1.0.
 	s = bli_obj_internal_scalar_buffer( *obj );
 
-	if      ( bli_is_float( dt )    ) bli_sset1s( *(( float*    )s) )
-	else if ( bli_is_double( dt )   ) bli_dset1s( *(( double*   )s) )
-	else if ( bli_is_scomplex( dt ) ) bli_cset1s( *(( scomplex* )s) )
-	else if ( bli_is_dcomplex( dt ) ) bli_zset1s( *(( dcomplex* )s) )
+	if      ( bli_is_float( dt )    ) { bli_sset1s( *(( float*    )s) ); }
+	else if ( bli_is_double( dt )   ) { bli_dset1s( *(( double*   )s) ); }
+	else if ( bli_is_scomplex( dt ) ) { bli_cset1s( *(( scomplex* )s) ); }
+	else if ( bli_is_dcomplex( dt ) ) { bli_zset1s( *(( dcomplex* )s) ); }
 }
 
 void bli_obj_alloc_buffer( inc_t  rs,

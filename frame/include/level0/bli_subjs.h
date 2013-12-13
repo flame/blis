@@ -39,101 +39,41 @@
 
 // Notes:
 // - The first char encodes the type of a.
-// - The second char encodes the type of x.
+// - The second char encodes the type of y.
 
+#define bli_sssubjs( a, y )  bli_ssubjris( bli_sreal(a), bli_simag(a), bli_sreal(y), bli_simag(y) )
+#define bli_dssubjs( a, y )  bli_ssubjris( bli_dreal(a), bli_dimag(a), bli_sreal(y), bli_simag(y) )
+#define bli_cssubjs( a, y )  bli_ssubjris( bli_creal(a), bli_cimag(a), bli_sreal(y), bli_simag(y) )
+#define bli_zssubjs( a, y )  bli_ssubjris( bli_zreal(a), bli_zimag(a), bli_sreal(y), bli_simag(y) )
 
-#define bli_sssubjs( a, y ) \
-{ \
-	(y) -= bli_sreal(a); \
-}
-#define bli_dssubjs( a, y ) \
-{ \
-	(y) -= bli_dreal(a); \
-}
-#define bli_cssubjs( a, y ) \
-{ \
-	(y) -= bli_creal(a); \
-}
-#define bli_zssubjs( a, y ) \
-{ \
-	(y) -= bli_zreal(a); \
-}
-
-
-#define bli_sdsubjs( a, y ) \
-{ \
-	(y) -= bli_sreal(a); \
-}
-#define bli_ddsubjs( a, y ) \
-{ \
-	(y) -= bli_dreal(a); \
-}
-#define bli_cdsubjs( a, y ) \
-{ \
-	(y) -= bli_creal(a); \
-}
-#define bli_zdsubjs( a, y ) \
-{ \
-	(y) -= bli_zreal(a); \
-}
-
+#define bli_sdsubjs( a, y )  bli_dsubjris( bli_sreal(a), bli_simag(a), bli_dreal(y), bli_dimag(y) )
+#define bli_ddsubjs( a, y )  bli_dsubjris( bli_dreal(a), bli_dimag(a), bli_dreal(y), bli_dimag(y) )
+#define bli_cdsubjs( a, y )  bli_dsubjris( bli_creal(a), bli_cimag(a), bli_dreal(y), bli_dimag(y) )
+#define bli_zdsubjs( a, y )  bli_dsubjris( bli_zreal(a), bli_zimag(a), bli_dreal(y), bli_dimag(y) )
 
 #ifndef BLIS_ENABLE_C99_COMPLEX
 
+#define bli_scsubjs( a, y )  bli_csubjris( bli_sreal(a), bli_simag(a), bli_creal(y), bli_cimag(y) )
+#define bli_dcsubjs( a, y )  bli_csubjris( bli_dreal(a), bli_dimag(a), bli_creal(y), bli_cimag(y) )
+#define bli_ccsubjs( a, y )  bli_csubjris( bli_creal(a), bli_cimag(a), bli_creal(y), bli_cimag(y) )
+#define bli_zcsubjs( a, y )  bli_csubjris( bli_zreal(a), bli_zimag(a), bli_creal(y), bli_cimag(y) )
 
-#define bli_scsubjs( a, y ) \
-{ \
-	bli_creal(y) -= bli_sreal(a); \
-}
-#define bli_dcsubjs( a, y ) \
-{ \
-	bli_creal(y) -= bli_dreal(a); \
-}
-#define bli_ccsubjs( a, y ) \
-{ \
-	bli_creal(y) -= bli_creal(a); \
-	bli_cimag(y) -= -bli_cimag(a); \
-}
-#define bli_zcsubjs( a, y ) \
-{ \
-	bli_creal(y) -= bli_zreal(a); \
-	bli_cimag(y) -= -bli_zimag(a); \
-}
-
-
-#define bli_szsubjs( a, y ) \
-{ \
-	bli_zreal(y) -= bli_sreal(a); \
-}
-#define bli_dzsubjs( a, y ) \
-{ \
-	bli_zreal(y) -= bli_dreal(a); \
-}
-#define bli_czsubjs( a, y ) \
-{ \
-	bli_zreal(y) -= bli_creal(a); \
-	bli_zimag(y) -= -bli_cimag(a); \
-}
-#define bli_zzsubjs( a, y ) \
-{ \
-	bli_zreal(y) -= bli_zreal(a); \
-	bli_zimag(y) -= -bli_zimag(a); \
-}
-
+#define bli_szsubjs( a, y )  bli_zsubjris( bli_sreal(a), bli_simag(a), bli_zreal(y), bli_zimag(y) )
+#define bli_dzsubjs( a, y )  bli_zsubjris( bli_dreal(a), bli_dimag(a), bli_zreal(y), bli_zimag(y) )
+#define bli_czsubjs( a, y )  bli_zsubjris( bli_creal(a), bli_cimag(a), bli_zreal(y), bli_zimag(y) )
+#define bli_zzsubjs( a, y )  bli_zsubjris( bli_zreal(a), bli_zimag(a), bli_zreal(y), bli_zimag(y) )
 
 #else // ifdef BLIS_ENABLE_C99_COMPLEX
-
 
 #define bli_scsubjs( a, y )  { (y) -=      (a); }
 #define bli_dcsubjs( a, y )  { (y) -=      (a); }
 #define bli_ccsubjs( a, y )  { (y) -= conjf(a); }
-#define bli_zcsubjs( a, y )  { (y) -=  conj(a); }
+#define bli_zcsubjs( a, y )  { (y) -= conj (a); }
 
 #define bli_szsubjs( a, y )  { (y) -=      (a); }
 #define bli_dzsubjs( a, y )  { (y) -=      (a); }
 #define bli_czsubjs( a, y )  { (y) -= conjf(a); }
-#define bli_zzsubjs( a, y )  { (y) -=  conj(a); }
-
+#define bli_zzsubjs( a, y )  { (y) -= conj (a); }
 
 #endif // BLIS_ENABLE_C99_COMPLEX
 
@@ -145,3 +85,4 @@
 
 
 #endif
+

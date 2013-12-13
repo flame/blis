@@ -57,7 +57,7 @@
 	bli_srands( ar ); \
 	bli_srands( ai ); \
 \
-	bli_csetris( ar, ai, (a) ); \
+	bli_csets( ar, ai, (a) ); \
 }
 #define bli_zrands( a ) \
 { \
@@ -66,7 +66,7 @@
 	bli_drands( ar ); \
 	bli_drands( ai ); \
 \
-	bli_zsetris( ar, ai, (a) ); \
+	bli_zsets( ar, ai, (a) ); \
 }
 
 

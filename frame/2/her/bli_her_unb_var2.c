@@ -148,7 +148,7 @@ void PASTEMAC2(chx,chc,varname)( \
 	PASTEMAC2(chx,chx,copys)( *alpha_cast, alpha_local ); \
 	if ( bli_is_conj( conjh ) ) \
 	{ \
-		PASTEMAC(chx,setimag0)( alpha_local ); \
+		PASTEMAC(chx,seti0s)( alpha_local ); \
 	} \
 \
 	/* The algorithm will be expressed in terms of the lower triangular case;
@@ -207,7 +207,7 @@ void PASTEMAC2(chx,chc,varname)( \
 		/* For her, explicitly set the imaginary component of gamma11 to
 		   zero. */ \
 		if ( bli_is_conj( conjh ) ) \
-			PASTEMAC(chc,setimag0)( *gamma11 ); \
+			PASTEMAC(chc,seti0s)( *gamma11 ); \
 	} \
 }
 

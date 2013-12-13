@@ -84,9 +84,9 @@ void PASTEMAC(chx,varname)( \
 	ctype_xr  chi_r; \
 	ctype_xr  chi_i; \
 \
-	PASTEMAC2(chx,chxr,getris)( *chi_cast, \
-	                            chi_r, \
-	                            chi_i ); \
+	PASTEMAC2(chx,chxr,gets)( *chi_cast, \
+	                          chi_r, \
+	                          chi_i ); \
 \
 	/* absq = chi_r * chi_r + chi_i * chi_i; */ \
 	PASTEMAC2(chxr,chxr,scals)( chi_r, chi_r ); \

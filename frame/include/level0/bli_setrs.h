@@ -41,72 +41,27 @@
 // - The first char encodes the type of x.
 // - The second char encodes the type of y.
 
+#define bli_sssetrs( xr, y )  { (y) = (xr); }
+#define bli_dssetrs( xr, y )  { (y) = (xr); }
 
-#define bli_sssetrs( xr, y ) \
-{ \
-	(y)      = ( float  ) (xr); \
-}
-#define bli_dssetrs( xr, y ) \
-{ \
-	(y)      = ( float  ) (xr); \
-}
-
-
-#define bli_sdsetrs( xr, y ) \
-{ \
-	(y)      = ( double ) (xr); \
-}
-#define bli_ddsetrs( xr, y ) \
-{ \
-	(y)      = ( double ) (xr); \
-}
-
+#define bli_sdsetrs( xr, y )  { (y) = (xr); }
+#define bli_ddsetrs( xr, y )  { (y) = (xr); }
 
 #ifndef BLIS_ENABLE_C99_COMPLEX
 
+#define bli_scsetrs( xr, y )  { bli_creal(y) = (xr); }
+#define bli_dcsetrs( xr, y )  { bli_creal(y) = (xr); }
 
-#define bli_scsetrs( xr, y ) \
-{ \
-	bli_creal(y) = ( float  ) (xr); \
-}
-#define bli_dcsetrs( xr, y ) \
-{ \
-	bli_creal(y) = ( float  ) (xr); \
-}
-
-
-#define bli_szsetrs( xr, y ) \
-{ \
-	bli_zreal(y) = ( double ) (xr); \
-}
-#define bli_dzsetrs( xr, y ) \
-{ \
-	bli_zreal(y) = ( double ) (xr); \
-}
-
+#define bli_szsetrs( xr, y )  { bli_zreal(y) = (xr); }
+#define bli_dzsetrs( xr, y )  { bli_zreal(y) = (xr); }
 
 #else // ifdef BLIS_ENABLE_C99_COMPLEX
 
+#define bli_scsetrs( xr, y )  { (y) = (xr) + bli_cimag(y) * (I); }
+#define bli_dcsetrs( xr, y )  { (y) = (xr) + bli_cimag(y) * (I); }
 
-#define bli_scsetrs( xr, y ) \
-{ \
-	(y)      = ( float  ) (xr) + bli_cimag(y) * (I); \
-}
-#define bli_dcsetrs( xr, y ) \
-{ \
-	(y)      = ( float  ) (xr) + bli_cimag(y) * (I); \
-}
-
-
-#define bli_szsetrs( xr, y ) \
-{ \
-	(y)      = ( double ) (xr) + bli_zimag(y) * (I); \
-}
-#define bli_dzsetrs( xr, y ) \
-{ \
-	(y)      = ( double ) (xr) + bli_zimag(y) * (I); \
-}
-
+#define bli_szsetrs( xr, y )  { (y) = (xr) + bli_zimag(y) * (I); }
+#define bli_dzsetrs( xr, y )  { (y) = (xr) + bli_zimag(y) * (I); }
 
 #endif // BLIS_ENABLE_C99_COMPLEX
 
@@ -118,3 +73,4 @@
 
 
 #endif
+

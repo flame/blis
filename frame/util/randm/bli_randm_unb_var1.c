@@ -131,7 +131,7 @@ void PASTEMAC(ch,varname)( \
 	{ \
 		max_m_n = bli_max( m, n ); \
 \
-		PASTEMAC2(d,ch,setris)( max_m_n, 0.0, omega ); \
+		PASTEMAC2(d,ch,sets)( max_m_n, 0.0, omega ); \
 		PASTEMAC2(ch,ch,copys)( *one, beta ); \
 		PASTEMAC2(ch,ch,invscals)( omega, beta ); \
 \

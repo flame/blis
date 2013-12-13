@@ -112,7 +112,7 @@ void PASTEMAC(ch,varname)( \
 	{ \
 		alpha11 = a_cast + (i  )*rs_a + (i  )*cs_a; \
 \
-		PASTEMAC(ch,setimag0)( *alpha11 ); \
+		PASTEMAC(ch,seti0s)( *alpha11 ); \
 	} \
 }
 

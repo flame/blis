@@ -32,108 +32,41 @@
 
 */
 
-#ifndef BLIS_GETRIS_H
-#define BLIS_GETRIS_H
+#ifndef BLIS_GETS_H
+#define BLIS_GETS_H
 
-// getris
+// gets
 
 // Notes:
 // - The first char encodes the type of x.
 // - The second char encodes the type of y.
 
 
-#define bli_ssgetris( x, yr, yi ) \
-{ \
-	(yr) = bli_sreal(x); \
-	(yi) = bli_simag(x); \
-}
-#define bli_dsgetris( x, yr, yi ) \
-{ \
-	(yr) = bli_dreal(x); \
-	(yi) = bli_dimag(x); \
-}
-#define bli_csgetris( x, yr, yi ) \
-{ \
-	(yr) = bli_creal(x); \
-	(yi) = bli_cimag(x); \
-}
-#define bli_zsgetris( x, yr, yi ) \
-{ \
-	(yr) = bli_zreal(x); \
-	(yi) = bli_zimag(x); \
-}
+#define bli_ssgets( x, yr, yi )  { (yr) = bli_sreal(x); (yi) = bli_simag(x); }
+#define bli_dsgets( x, yr, yi )  { (yr) = bli_dreal(x); (yi) = bli_dimag(x); }
+#define bli_csgets( x, yr, yi )  { (yr) = bli_creal(x); (yi) = bli_cimag(x); }
+#define bli_zsgets( x, yr, yi )  { (yr) = bli_zreal(x); (yi) = bli_zimag(x); }
+
+#define bli_sdgets( x, yr, yi )  { (yr) = bli_sreal(x); (yi) = bli_simag(x); }
+#define bli_ddgets( x, yr, yi )  { (yr) = bli_dreal(x); (yi) = bli_dimag(x); }
+#define bli_cdgets( x, yr, yi )  { (yr) = bli_creal(x); (yi) = bli_cimag(x); }
+#define bli_zdgets( x, yr, yi )  { (yr) = bli_zreal(x); (yi) = bli_zimag(x); }
+
+#define bli_scgets( x, yr, yi )  { (yr) = bli_sreal(x); (yi) = bli_simag(x); }
+#define bli_dcgets( x, yr, yi )  { (yr) = bli_dreal(x); (yi) = bli_dimag(x); }
+#define bli_ccgets( x, yr, yi )  { (yr) = bli_creal(x); (yi) = bli_cimag(x); }
+#define bli_zcgets( x, yr, yi )  { (yr) = bli_zreal(x); (yi) = bli_zimag(x); }
+
+#define bli_szgets( x, yr, yi )  { (yr) = bli_sreal(x); (yi) = bli_simag(x); }
+#define bli_dzgets( x, yr, yi )  { (yr) = bli_dreal(x); (yi) = bli_dimag(x); }
+#define bli_czgets( x, yr, yi )  { (yr) = bli_creal(x); (yi) = bli_cimag(x); }
+#define bli_zzgets( x, yr, yi )  { (yr) = bli_zreal(x); (yi) = bli_zimag(x); }
 
 
-#define bli_sdgetris( x, yr, yi ) \
-{ \
-	(yr) = bli_sreal(x); \
-	(yi) = bli_simag(x); \
-}
-#define bli_ddgetris( x, yr, yi ) \
-{ \
-	(yr) = bli_dreal(x); \
-	(yi) = bli_dimag(x); \
-}
-#define bli_cdgetris( x, yr, yi ) \
-{ \
-	(yr) = bli_creal(x); \
-	(yi) = bli_cimag(x); \
-}
-#define bli_zdgetris( x, yr, yi ) \
-{ \
-	(yr) = bli_zreal(x); \
-	(yi) = bli_zimag(x); \
-}
-
-
-#define bli_scgetris( x, yr, yi ) \
-{ \
-	(yr) = bli_sreal(x); \
-	(yi) = bli_simag(x); \
-}
-#define bli_dcgetris( x, yr, yi ) \
-{ \
-	(yr) = bli_dreal(x); \
-	(yi) = bli_dimag(x); \
-}
-#define bli_ccgetris( x, yr, yi ) \
-{ \
-	(yr) = bli_creal(x); \
-	(yi) = bli_cimag(x); \
-}
-#define bli_zcgetris( x, yr, yi ) \
-{ \
-	(yr) = bli_zreal(x); \
-	(yi) = bli_zimag(x); \
-}
-
-
-#define bli_szgetris( x, yr, yi ) \
-{ \
-	(yr) = bli_sreal(x); \
-	(yi) = bli_simag(x); \
-}
-#define bli_dzgetris( x, yr, yi ) \
-{ \
-	(yr) = bli_dreal(x); \
-	(yi) = bli_dimag(x); \
-}
-#define bli_czgetris( x, yr, yi ) \
-{ \
-	(yr) = bli_creal(x); \
-	(yi) = bli_cimag(x); \
-}
-#define bli_zzgetris( x, yr, yi ) \
-{ \
-	(yr) = bli_zreal(x); \
-	(yi) = bli_zimag(x); \
-}
-
-
-#define bli_sgetris( x, yr, yi )  bli_ssgetris( x, yr, yi )
-#define bli_dgetris( x, yr, yi )  bli_ddgetris( x, yr, yi )
-#define bli_cgetris( x, yr, yi )  bli_csgetris( x, yr, yi )
-#define bli_zgetris( x, yr, yi )  bli_zdgetris( x, yr, yi )
+#define bli_sgets( x, yr, yi )  bli_ssgets( x, yr, yi )
+#define bli_dgets( x, yr, yi )  bli_ddgets( x, yr, yi )
+#define bli_cgets( x, yr, yi )  bli_csgets( x, yr, yi )
+#define bli_zgets( x, yr, yi )  bli_zdgets( x, yr, yi )
 
 
 #endif

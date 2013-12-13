@@ -40,50 +40,21 @@
 // Notes:
 // - The first char encodes the type of x.
 
-
-#define bli_sinverts( x ) \
-{ \
-	(x) = 1.0F / (x); \
-}
-
-#define bli_dinverts( x ) \
-{ \
-	(x) = 1.0  / (x); \
-}
-
+#define bli_sinverts( x )  bli_sinvertris( bli_sreal(x), bli_simag(x) )
+#define bli_dinverts( x )  bli_dinvertris( bli_dreal(x), bli_dimag(x) )
 
 #ifndef BLIS_ENABLE_C99_COMPLEX
 
-
-#define bli_cinverts( x ) \
-{ \
-	float  s     = bli_fmaxabs( bli_creal(x), bli_cimag(x) ); \
-	float  xr_s  = bli_creal(x) / s; \
-	float  xi_s  = bli_cimag(x) / s; \
-	float  temp  = ( xr_s * bli_creal(x) + xi_s * bli_cimag(x) ); \
-	bli_creal(x) =   xr_s / temp; \
-	bli_cimag(x) =  -xi_s / temp; \
-}
-
-#define bli_zinverts( x ) \
-{ \
-	double s     = bli_fmaxabs( bli_zreal(x), bli_zimag(x) ); \
-	double xr_s  = bli_zreal(x) / s; \
-	double xi_s  = bli_zimag(x) / s; \
-	double temp  = ( xr_s * bli_zreal(x) + xi_s * bli_zimag(x) ); \
-	bli_zreal(x) =   xr_s / temp; \
-	bli_zimag(x) =  -xi_s / temp; \
-}
-
+#define bli_cinverts( x )  bli_cinvertris( bli_creal(x), bli_cimag(x) )
+#define bli_zinverts( x )  bli_zinvertris( bli_zreal(x), bli_zimag(x) )
 
 #else // ifdef BLIS_ENABLE_C99_COMPLEX
-
 
 #define bli_cinverts( x )  { (x) = 1.0F / (x); }
 #define bli_zinverts( x )  { (x) = 1.0  / (x); }
 
+#endif // BLIS_ENABLE_C99_COMPLEX
+
 
 #endif
 
-
-#endif
