@@ -391,37 +391,40 @@ void bli_trsm_ukr( obj_t*  a,
                    obj_t*  b,
                    obj_t*  c )
 {
-    num_t     dt        = bli_obj_datatype( *c );
+	num_t     dt        = bli_obj_datatype( *c );
 
-    void*     buf_a     = bli_obj_buffer_at_off( *a );
+	void*     buf_a     = bli_obj_buffer_at_off( *a );
 
-    void*     buf_b     = bli_obj_buffer_at_off( *b );
+	void*     buf_b     = bli_obj_buffer_at_off( *b );
 
-    void*     buf_c     = bli_obj_buffer_at_off( *c );
-    inc_t     rs_c      = bli_obj_row_stride( *c );
-    inc_t     cs_c      = bli_obj_col_stride( *c );
+	void*     buf_c     = bli_obj_buffer_at_off( *c );
+	inc_t     rs_c      = bli_obj_row_stride( *c );
+	inc_t     cs_c      = bli_obj_col_stride( *c );
 
-    FUNCPTR_T f;
+	inc_t     ps_a      = bli_obj_panel_stride( *a );
+	inc_t     ps_b      = bli_obj_panel_stride( *b );
+
+	FUNCPTR_T f;
 
 	auxinfo_t data;
 
 
 	// Fill the auxinfo_t struct in case the micro-kernel uses it.
-    bli_auxinfo_set_next_a( buf_a, data );
+	bli_auxinfo_set_next_a( buf_a, data );
 	bli_auxinfo_set_next_b( buf_b, data );
 
-	// STILL NEED TO FILL IN PANEL STRIDE FIELDS!
+	bli_auxinfo_set_ps_a( ps_a, data );
+	bli_auxinfo_set_ps_b( ps_b, data );
 
+	// Index into the type combination array to extract the correct
+	// function pointer.
+	if ( bli_obj_is_lower( *a ) ) f = ftypes_l[dt];
+	else                          f = ftypes_u[dt];
 
-    // Index into the type combination array to extract the correct
-    // function pointer.
-    if ( bli_obj_is_lower( *a ) ) f = ftypes_l[dt];
-    else                          f = ftypes_u[dt];
-
-    // Invoke the function.
-    f( buf_a,
-       buf_b,
-       buf_c, rs_c, cs_c,
+	// Invoke the function.
+	f( buf_a,
+	   buf_b,
+	   buf_c, rs_c, cs_c,
 	   &data );
 }
 
@@ -436,9 +439,9 @@ void PASTEMAC(ch,varname)( \
                            auxinfo_t* data  \
                          ) \
 { \
-    PASTEMAC(ch,ukrname)( a, \
-                          b, \
-                          c, rs_c, cs_c, \
+	PASTEMAC(ch,ukrname)( a, \
+	                      b, \
+	                      c, rs_c, cs_c, \
 	                      data ); \
 }
 

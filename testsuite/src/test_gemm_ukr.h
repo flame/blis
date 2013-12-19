@@ -48,12 +48,13 @@ void bli_gemm_ukr( obj_t*  alpha,
 #define GENTPROT( ctype, ch, varname ) \
 \
 void PASTEMAC(ch,varname)( \
-                           dim_t   k, \
-                           void*   alpha, \
-                           void*   a, \
-                           void*   b, \
-                           void*   beta, \
-                           void*   c, inc_t rs_c, inc_t cs_c \
+                           dim_t      k, \
+                           void*      alpha, \
+                           void*      a, \
+                           void*      b, \
+                           void*      beta, \
+                           void*      c, inc_t rs_c, inc_t cs_c, \
+                           auxinfo_t* data  \
                          );
 
 INSERT_GENTPROT_BASIC( gemm_ukr )

@@ -274,11 +274,11 @@ void PASTEMAC(ch,varname)( \
 \
 			/* Compute the addresses of the next panels of A and B. */ \
 			a2 = a1 + rstep_a; \
-			if ( i == m_iter - 1 ) \
+			if ( bli_is_last_iter( i, m_iter ) ) \
 			{ \
 				a2 = a_cast; \
 				b2 = b1 + cstep_b; \
-				if ( j == n_iter - 1 ) \
+				if ( bli_is_last_iter( j, n_iter ) ) \
 					b2 = b_cast; \
 			} \
 \

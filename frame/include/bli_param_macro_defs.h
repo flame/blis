@@ -485,6 +485,10 @@
 \
 	( i1 != 0 || left == 0 )
 
+#define bli_is_last_iter( i1, iter ) \
+\
+	( i1 == iter - 1 )
+
 
 // packbuf_t-related
 

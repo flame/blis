@@ -508,48 +508,53 @@ void bli_gemmtrsm_ukr( obj_t*  alpha,
 {
 	dim_t     k         = bli_obj_width( *a1x );
 
-    num_t     dt        = bli_obj_datatype( *c11 );
+	num_t     dt        = bli_obj_datatype( *c11 );
 
-    void*     buf_a1x   = bli_obj_buffer_at_off( *a1x );
+	void*     buf_a1x   = bli_obj_buffer_at_off( *a1x );
 
-    void*     buf_a11   = bli_obj_buffer_at_off( *a11 );
+	void*     buf_a11   = bli_obj_buffer_at_off( *a11 );
 
-    void*     buf_bx1   = bli_obj_buffer_at_off( *bx1 );
+	void*     buf_bx1   = bli_obj_buffer_at_off( *bx1 );
 
-    void*     buf_b11   = bli_obj_buffer_at_off( *b11 );
+	void*     buf_b11   = bli_obj_buffer_at_off( *b11 );
 
-    void*     buf_c11   = bli_obj_buffer_at_off( *c11 );
-    inc_t     rs_c      = bli_obj_row_stride( *c11 );
-    inc_t     cs_c      = bli_obj_col_stride( *c11 );
+	void*     buf_c11   = bli_obj_buffer_at_off( *c11 );
+	inc_t     rs_c      = bli_obj_row_stride( *c11 );
+	inc_t     cs_c      = bli_obj_col_stride( *c11 );
 
 	void*     buf_alpha = bli_obj_buffer_for_1x1( dt, *alpha );
 
-    FUNCPTR_T f;
+	inc_t     ps_a      = bli_obj_panel_stride( *a1x );
+	inc_t     ps_b      = bli_obj_panel_stride( *bx1 );
+
+	FUNCPTR_T f;
 
 	auxinfo_t data;
 
 
 	// Fill the auxinfo_t struct in case the micro-kernel uses it.
-    if ( bli_obj_is_lower( *a11 ) ) { bli_auxinfo_set_next_a( buf_a1x, data ); }
-    else                            { bli_auxinfo_set_next_a( buf_a11, data ); }
+	if ( bli_obj_is_lower( *a11 ) )
+	{ bli_auxinfo_set_next_a( buf_a1x, data ); }
+	else
+	{ bli_auxinfo_set_next_a( buf_a11, data ); }
 	bli_auxinfo_set_next_b( buf_bx1, data );
 
-	// STILL NEED TO FILL IN PANEL STRIDE FIELDS!
+	bli_auxinfo_set_ps_a( ps_a, data );
+	bli_auxinfo_set_ps_b( ps_b, data );
 
+	// Index into the type combination array to extract the correct
+	// function pointer.
+	if ( bli_obj_is_lower( *a11 ) ) f = ftypes_l[dt];
+	else                            f = ftypes_u[dt];
 
-    // Index into the type combination array to extract the correct
-    // function pointer.
-    if ( bli_obj_is_lower( *a11 ) ) f = ftypes_l[dt];
-    else                            f = ftypes_u[dt];
-
-    // Invoke the function.
-    f( k,
+	// Invoke the function.
+	f( k,
 	   buf_alpha,
 	   buf_a1x,
 	   buf_a11,
 	   buf_bx1,
-       buf_b11,
-       buf_c11, rs_c, cs_c,
+	   buf_b11,
+	   buf_c11, rs_c, cs_c,
 	   &data );
 }
 
@@ -568,13 +573,13 @@ void PASTEMAC(ch,varname)( \
                            auxinfo_t* data  \
                          ) \
 { \
-    PASTEMAC(ch,ukrname)( k, \
-                          alpha, \
-                          a1x, \
-                          a11, \
-                          bx1, \
-                          b11, \
-                          c11, rs_c, cs_c, \
+	PASTEMAC(ch,ukrname)( k, \
+	                      alpha, \
+	                      a1x, \
+	                      a11, \
+	                      bx1, \
+	                      b11, \
+	                      c11, rs_c, cs_c, \
 	                      data ); \
 }
 

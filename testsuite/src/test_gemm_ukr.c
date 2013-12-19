@@ -363,12 +363,13 @@ void libblis_test_gemm_ukr_check( obj_t*  alpha,
 #define FUNCPTR_T gemm_ukr_fp
 
 typedef void (*FUNCPTR_T)(
-                           dim_t   k,
-                           void*   alpha,
-                           void*   a,
-                           void*   b,
-                           void*   beta,
-                           void*   c, inc_t rs_c, inc_t cs_c
+                           dim_t      k,
+                           void*      alpha,
+                           void*      a,
+                           void*      b,
+                           void*      beta,
+                           void*      c, inc_t rs_c, inc_t cs_c,
+                           auxinfo_t* data
                          );
 
 static FUNCPTR_T GENARRAY(ftypes,gemm_ukr);
@@ -396,7 +397,19 @@ void bli_gemm_ukr( obj_t*  alpha,
 
 	void*     buf_beta  = bli_obj_buffer_for_1x1( dt, *beta );
 
+	inc_t     ps_a      = bli_obj_panel_stride( *a );
+	inc_t     ps_b      = bli_obj_panel_stride( *b );
+
 	FUNCPTR_T f;
+
+	auxinfo_t data;
+
+
+	// Fill the auxinfo_t struct in case the micro-kernel uses it.
+	bli_auxinfo_set_next_a( buf_a, data );
+	bli_auxinfo_set_next_b( buf_b, data );
+	bli_auxinfo_set_ps_a( ps_a, data );
+	bli_auxinfo_set_ps_b( ps_b, data );
 
 	// Index into the type combination array to extract the correct
 	// function pointer.
@@ -408,7 +421,8 @@ void bli_gemm_ukr( obj_t*  alpha,
 	   buf_a,
 	   buf_b,
 	   buf_beta,
-	   buf_c, rs_c, cs_c );
+	   buf_c, rs_c, cs_c,
+	   &data );
 }
 
 
@@ -416,12 +430,13 @@ void bli_gemm_ukr( obj_t*  alpha,
 #define GENTFUNC( ctype, ch, varname, ukrname ) \
 \
 void PASTEMAC(ch,varname)( \
-                           dim_t   k, \
-                           void*   alpha, \
-                           void*   a, \
-                           void*   b, \
-                           void*   beta, \
-                           void*   c, inc_t rs_c, inc_t cs_c \
+                           dim_t      k, \
+                           void*      alpha, \
+                           void*      a, \
+                           void*      b, \
+                           void*      beta, \
+                           void*      c, inc_t rs_c, inc_t cs_c, \
+                           auxinfo_t* data  \
                          ) \
 { \
 	PASTEMAC(ch,ukrname)( k, \
@@ -430,7 +445,7 @@ void PASTEMAC(ch,varname)( \
 	                      b, \
 	                      beta, \
 	                      c, rs_c, cs_c, \
-	                      NULL ); \
+	                      data ); \
 }
 
 INSERT_GENTFUNC_BASIC( gemm_ukr, GEMM_UKERNEL )
