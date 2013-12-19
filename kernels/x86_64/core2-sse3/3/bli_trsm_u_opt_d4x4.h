@@ -39,7 +39,8 @@
 void PASTEMAC(ch,varname)( \
                            ctype* restrict a11, \
                            ctype* restrict b11, \
-                           ctype* restrict c11, inc_t rs_c, inc_t cs_c  \
+                           ctype* restrict c11, inc_t rs_c, inc_t cs_c, \
+                           auxinfo_t*      data  \
                          );
 
 INSERT_GENTPROT_BASIC( trsm_u_opt_d4x4 )

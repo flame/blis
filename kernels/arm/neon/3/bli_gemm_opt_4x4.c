@@ -35,16 +35,18 @@
 #include "blis.h"
 
 void bli_sgemm_opt_4x4(
-                        dim_t             k,
-                        float* restrict   alpha,
-                        float* restrict   a,
-                        float* restrict   b,
-                        float* restrict   beta,
-                        float* restrict   c, inc_t rs_c, inc_t cs_c,
-                    	float* restrict   a_next, 
-                        float* restrict   b_next
+                        dim_t              k,
+                        float*    restrict alpha,
+                        float*    restrict a,
+                        float*    restrict b,
+                        float*    restrict beta,
+                        float*    restrict c, inc_t rs_c, inc_t cs_c,
+                        auxinfo_t*         data
                       )
 {
+	void* a_next = bli_auxinfo_next_a( data );
+	void* b_next = bli_auxinfo_next_b( data );
+
 	float32x4_t alphav;
 	alphav = vmovq_n_f32( *alpha );
 
@@ -262,16 +264,18 @@ void bli_sgemm_opt_4x4(
 }
 
 void bli_dgemm_opt_4x4(
-                        dim_t             k,
-                        double* restrict  alpha,
-                        double* restrict  a,
-                        double* restrict  b,
-                        double* restrict  beta,
-                        double* restrict  c, inc_t rs_c, inc_t cs_c,
-                    	double* restrict  a_next, 
-                        double* restrict  b_next
+                        dim_t              k,
+                        double*   restrict alpha,
+                        double*   restrict a,
+                        double*   restrict b,
+                        double*   restrict beta,
+                        double*   restrict c, inc_t rs_c, inc_t cs_c,
+                        auxinfo_t*         data
                       )
 {
+	//void* a_next = bli_auxinfo_next_a( data );
+	//void* b_next = bli_auxinfo_next_b( data );
+
 	//dim_t   k_iter;
 	dim_t   k_left;
 
@@ -515,8 +519,7 @@ void bli_cgemm_opt_4x4(
                         scomplex* restrict b,
                         scomplex* restrict beta,
                         scomplex* restrict c, inc_t rs_c, inc_t cs_c,
-                    	scomplex* restrict a_next, 
-                        scomplex* restrict b_next
+                        auxinfo_t*         data
                       )
 {
 	/* Just call the reference implementation. */
@@ -526,8 +529,7 @@ void bli_cgemm_opt_4x4(
 	                   b,
 	                   beta,
 	                   c, rs_c, cs_c,
-	                   a_next,
-	                   b_next );
+	                   data );
 }
 
 void bli_zgemm_opt_4x4(
@@ -537,8 +539,7 @@ void bli_zgemm_opt_4x4(
                         dcomplex* restrict b,
                         dcomplex* restrict beta,
                         dcomplex* restrict c, inc_t rs_c, inc_t cs_c,
-                    	dcomplex* restrict a_next, 
-                        dcomplex* restrict b_next
+                        auxinfo_t*         data
                       )
 {
 	/* Just call the reference implementation. */
@@ -548,7 +549,6 @@ void bli_zgemm_opt_4x4(
 	                   b,
 	                   beta,
 	                   c, rs_c, cs_c,
-	                   a_next,
-	                   b_next );
+	                   data );
 }
 

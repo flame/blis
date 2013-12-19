@@ -167,6 +167,26 @@ typedef double    f77_double;
 typedef scomplex  f77_scomplex;
 typedef dcomplex  f77_dcomplex;
 
+// -- Auxiliary kernel info type --
+
+// Note: This struct is used by macro-kernels to package together extra
+// parameter values that may be of use to the micro-kernel without
+// cluttering up the micro-kernel interface itself.
+
+typedef struct
+{
+	// Pointers to the micro-panels of A and B which will be used by the
+	// next call to the micro-kernel.
+	void*  a_next;
+	void*  b_next;
+
+	// The panel strides of A and B.
+	inc_t  ps_a;
+	inc_t  ps_b;
+
+} auxinfo_t;
+
+
 
 //
 // -- BLIS info bit field masks ------------------------------------------------

@@ -46,8 +46,7 @@ void PASTEMAC(ch,varname)( \
                            ctype* restrict b, \
                            ctype* restrict beta, \
                            ctype* restrict c, inc_t rs_c, inc_t cs_c, \
-                           ctype* restrict a_next, \
-                           ctype* restrict b_next  \
+                           auxinfo_t*      data  \
                          );
 
 INSERT_GENTPROT_BASIC( gemm_ref_mxn )

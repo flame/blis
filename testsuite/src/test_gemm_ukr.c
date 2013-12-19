@@ -430,7 +430,7 @@ void PASTEMAC(ch,varname)( \
 	                      b, \
 	                      beta, \
 	                      c, rs_c, cs_c, \
-	                      a, b ); \
+	                      NULL ); \
 }
 
 INSERT_GENTFUNC_BASIC( gemm_ukr, GEMM_UKERNEL )

@@ -44,8 +44,7 @@ void PASTEMAC(ch,varname)( \
                            ctype* restrict b01, \
                            ctype* restrict b11, \
                            ctype* restrict c11, inc_t rs_c, inc_t cs_c, \
-                           ctype* restrict a_next, \
-                           ctype* restrict b_next  \
+                           auxinfo_t*      data  \
                          );
 
 INSERT_GENTPROT_BASIC( gemmtrsm_l_opt_d4x4 )

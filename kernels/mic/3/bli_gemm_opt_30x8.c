@@ -36,15 +36,15 @@
 #include <assert.h>
 
 void bli_sgemm_opt_30x8(
-                    dim_t     k,	    float*    alpha,
-                    float*    a,
-                    float*    b,
-                    float*    beta,
-                    float*    c, inc_t rs_c, inc_t cs_c,
-                    float* a_next,
-                    float* b_next,
-                    dim_t thread_id
-                  )
+                         dim_t      k,
+                         float*     alpha,
+                         float*     a,
+                         float*     b,
+                         float*     beta,
+                         float*     c, inc_t rs_c, inc_t cs_c,
+                         auxinfo_t* data,
+                         dim_t      thread_id
+                       )
 {
 }
 
@@ -324,15 +324,15 @@ int offsets[16] __attribute__((aligned(0x1000))) = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 //#define MONITORS
 //#define LOOPMON
 void bli_dgemm_opt_30x8(
-                    dim_t     k,	    double*   alpha,
-                    double*   a,
-                    double*   b,
-                    double*   beta,
-                    double*   c, inc_t rs_c, inc_t cs_c,
-                    double* a_next,
-                    double* b_next,
-                    dim_t thread_id
-                  )
+                         dim_t      k,
+                         double*    alpha,
+                         double*    a,
+                         double*    b,
+                         double*    beta,
+                         double*    c, inc_t rs_c, inc_t cs_c,
+                         auxinfo_t* data,
+                         dim_t      thread_id
+                       )
 {
 
     int * offsetPtr = &offsets[0];
@@ -627,30 +627,29 @@ void bli_dgemm_opt_30x8(
 }
 
 
-
 void bli_cgemm_opt_30x8(
-                    dim_t     k,	    scomplex* alpha,  
-                    scomplex* a,
-                    scomplex* b,
-                    scomplex* beta,
-                    scomplex* c, inc_t rs_c, inc_t cs_c,
-                    scomplex* a_next,
-                    scomplex* b_next,
-                    dim_t thread_id
-                  )
+                         dim_t      k,
+                         scomplex*  alpha,
+                         scomplex*  a,
+                         scomplex*  b,
+                         scomplex*  beta,
+                         scomplex*  c, inc_t rs_c, inc_t cs_c,
+                         auxinfo_t* data,
+                         dim_t      thread_id
+                       )
 {
 }
 
 
 void bli_zgemm_opt_30x8(
-                    dim_t     k,	    dcomplex* alpha,  
-                    dcomplex* a,
-                    dcomplex* b,
-                    dcomplex* beta,
-                    dcomplex* c, inc_t rs_c, inc_t cs_c,
-                    dcomplex* a_next,
-                    dcomplex* b_next,
-                    dim_t thread_id
-                  )
+                         dim_t      k,
+                         dcomplex*  alpha,
+                         dcomplex*  a,
+                         dcomplex*  b,
+                         dcomplex*  beta,
+                         dcomplex*  c, inc_t rs_c, inc_t cs_c,
+                         auxinfo_t* data,
+                         dim_t      thread_id
+                       )
 {
 }

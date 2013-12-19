@@ -169,6 +169,7 @@ void PASTEMAC(ch,varname)( \
 	inc_t           rstep_a; \
 	inc_t           cstep_b; \
 	inc_t           rstep_c, cstep_c; \
+	auxinfo_t       aux; \
 \
 	/*
 	   Assumptions/assertions:
@@ -208,6 +209,10 @@ void PASTEMAC(ch,varname)( \
 	rstep_c = rs_c * MR; \
 	cstep_c = cs_c * NR; \
 \
+	/* Save the panel strides of A and B to the auxinfo_t object. */ \
+	bli_auxinfo_set_ps_a( ps_a, aux ); \
+	bli_auxinfo_set_ps_b( ps_b, aux ); \
+\
 	b1 = b_cast; \
 	c1 = c_cast; \
 \
@@ -243,6 +248,11 @@ void PASTEMAC(ch,varname)( \
 					b2 = b_cast; \
 			} \
 \
+			/* Save addresses of next panels of A and B to the auxinfo_t
+			   object. */ \
+			bli_auxinfo_set_next_a( a2, aux ); \
+			bli_auxinfo_set_next_b( b2, aux ); \
+\
 			/* Handle interior and edge cases separately. */ \
 			if ( m_cur == MR && n_cur == NR ) \
 			{ \
@@ -253,7 +263,7 @@ void PASTEMAC(ch,varname)( \
 				                      b1, \
 				                      beta_cast, \
 				                      c11, rs_c, cs_c, \
-				                      a2, b2 ); \
+				                      &aux ); \
 			} \
 			else \
 			{ \
@@ -264,7 +274,7 @@ void PASTEMAC(ch,varname)( \
 				                      b1, \
 				                      zero, \
 				                      ct, rs_ct, cs_ct, \
-				                      a2, b2 ); \
+				                      &aux ); \
 \
 				/* Scale the bottom edge of C and add the result from above. */ \
 				PASTEMAC(ch,xpbys_mxn)( m_cur, n_cur, \

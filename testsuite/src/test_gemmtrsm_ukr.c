@@ -485,15 +485,14 @@ void bli_gemmtrsm_ukr_make_subparts( dim_t  k,
 #define FUNCPTR_T gemmtrsm_ukr_fp
 
 typedef void (*FUNCPTR_T)(
-                           dim_t   k,
-                           void*   alpha,
-                           void*   a1x,
-                           void*   a11,
-                           void*   bx1,
-                           void*   b11,
-                           void*   c11, inc_t rs_c, inc_t cs_c,
-                           void*   a_next,
-                           void*   b_next
+                           dim_t      k,
+                           void*      alpha,
+                           void*      a1x,
+                           void*      a11,
+                           void*      bx1,
+                           void*      b11,
+                           void*      c11, inc_t rs_c, inc_t cs_c,
+                           auxinfo_t* data
                          );
 
 static FUNCPTR_T GENARRAY(ftypes_l,gemmtrsm_l_ukr);
@@ -515,7 +514,7 @@ void bli_gemmtrsm_ukr( obj_t*  alpha,
 
     void*     buf_a11   = bli_obj_buffer_at_off( *a11 );
 
-    void*     buf_bx1  = bli_obj_buffer_at_off( *bx1 );
+    void*     buf_bx1   = bli_obj_buffer_at_off( *bx1 );
 
     void*     buf_b11   = bli_obj_buffer_at_off( *b11 );
 
@@ -526,6 +525,17 @@ void bli_gemmtrsm_ukr( obj_t*  alpha,
 	void*     buf_alpha = bli_obj_buffer_for_1x1( dt, *alpha );
 
     FUNCPTR_T f;
+
+	auxinfo_t data;
+
+
+	// Fill the auxinfo_t struct in case the micro-kernel uses it.
+    if ( bli_obj_is_lower( *a11 ) ) { bli_auxinfo_set_next_a( buf_a1x, data ); }
+    else                            { bli_auxinfo_set_next_a( buf_a11, data ); }
+	bli_auxinfo_set_next_b( buf_bx1, data );
+
+	// STILL NEED TO FILL IN PANEL STRIDE FIELDS!
+
 
     // Index into the type combination array to extract the correct
     // function pointer.
@@ -540,8 +550,7 @@ void bli_gemmtrsm_ukr( obj_t*  alpha,
 	   buf_bx1,
        buf_b11,
        buf_c11, rs_c, cs_c,
-	   buf_a1x,
-	   buf_bx1 );
+	   &data );
 }
 
 
@@ -549,15 +558,14 @@ void bli_gemmtrsm_ukr( obj_t*  alpha,
 #define GENTFUNC( ctype, ch, varname, ukrname ) \
 \
 void PASTEMAC(ch,varname)( \
-                           dim_t   k, \
-                           void*   alpha, \
-                           void*   a1x, \
-                           void*   a11, \
-                           void*   bx1, \
-                           void*   b11, \
-                           void*   c11, inc_t rs_c, inc_t cs_c, \
-                           void*   a_next, \
-                           void*   b_next  \
+                           dim_t      k, \
+                           void*      alpha, \
+                           void*      a1x, \
+                           void*      a11, \
+                           void*      bx1, \
+                           void*      b11, \
+                           void*      c11, inc_t rs_c, inc_t cs_c, \
+                           auxinfo_t* data  \
                          ) \
 { \
     PASTEMAC(ch,ukrname)( k, \
@@ -567,8 +575,7 @@ void PASTEMAC(ch,varname)( \
                           bx1, \
                           b11, \
                           c11, rs_c, cs_c, \
-	                      a_next, \
-	                      b_next ); \
+	                      data ); \
 }
 
 INSERT_GENTFUNC_BASIC( gemmtrsm_l_ukr, GEMMTRSM_L_UKERNEL )

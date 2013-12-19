@@ -29,15 +29,14 @@
  *   b is k x nr in packed row-maj format (leading dim is nr)
  */
 void bli_dgemm_check(
-                         dim_t     k,
-                         double* restrict  alpha,
-                         double* restrict  a,
-                         double* restrict  b,
-                         double* restrict  beta,
-                         double* restrict  c, inc_t rs_c, inc_t cs_c,
-                         double* restrict  a_next,
-                         double* restrict  b_next
-                       )
+                      dim_t              k,
+                      double*   restrict alpha,
+                      double*   restrict a,
+                      double*   restrict b,
+                      double*   restrict beta,
+                      double*   restrict c, inc_t rs_c, inc_t cs_c,
+                      auxinfo_t*         data
+                    )
 {
     int i, j, kk;
     double c00;
@@ -100,9 +99,9 @@ int main(int argc, char *argv[])
 
     /* First check the results */
 
-    bli_dgemm_opt_8x4(k, &alpha, A, B, &beta, C, rs_c, cs_c, 0, 0);
+    bli_dgemm_opt_8x4(k, &alpha, A, B, &beta, C, rs_c, cs_c, NULL);
 
-    bli_dgemm_check(k, &alpha, A, B, &beta, C2, rs_c, cs_c, 0, 0);
+    bli_dgemm_check(k, &alpha, A, B, &beta, C2, rs_c, cs_c, NULL);
 
     for (i=0, errors=0; i<MR*NR-1; i++) {
         if (fabs(C[i] - C2[i]) > EPSILON) { 
@@ -121,7 +120,7 @@ int main(int argc, char *argv[])
     gettimeofday(&tv_start, NULL);
 
     for (i=0; i<iters; i++) {
-        bli_dgemm_opt_8x4(k, &alpha, A, B, &beta, C, rs_c, cs_c, 0, 0);
+        bli_dgemm_opt_8x4(k, &alpha, A, B, &beta, C, rs_c, cs_c, NULL);
     }
 
     gettimeofday(&tv_end, NULL);

@@ -46,8 +46,7 @@ void PASTEMAC(ch,varname)( \
                            ctype* restrict bT, \
                            ctype* restrict b, \
                            ctype* restrict c, inc_t rs_c, inc_t cs_c, \
-                           ctype* restrict a_next, \
-                           ctype* restrict b_next  \
+                           auxinfo_t*      data  \
                          ) \
 { \
 	ctype*      minus_one = PASTEMAC(ch,m1); \
@@ -61,12 +60,12 @@ void PASTEMAC(ch,varname)( \
 	                      bT, \
 	                      alpha, \
 	                      b, rs_b, cs_b, \
-	                      a_next, \
-	                      b_next ); \
+	                      data ); \
 \
 	PASTEMAC(ch,trsmukr)( a, \
 	                      b, \
-	                      c, rs_c, cs_c ); \
+	                      c, rs_c, cs_c, \
+	                      data ); \
 }
 
 INSERT_GENTFUNC_BASIC2( gemmtrsm_l_ref_4x4, GEMM_UKERNEL, TRSM_L_UKERNEL )

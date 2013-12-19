@@ -41,15 +41,14 @@ void bli_sgemm_opt_d4x4(
                          float* restrict    b,
                          float* restrict    beta,
                          float* restrict    c, inc_t rs_c, inc_t cs_c,
-                         float* restrict    a_next,
-                         float* restrict    b_next
+                         auxinfo_t*         data
                        )
 {
-	dim_t   k_iter;
-	dim_t   k_left;
+	void*   a_next = bli_auxinfo_next_a( data );
+	void*   b_next = bli_auxinfo_next_b( data );
 
-	k_iter  = k / 4;
-	k_left  = k % 4;
+	dim_t   k_iter = k / 4;
+	dim_t   k_left = k % 4;
 
 	__asm__ volatile
 	(
@@ -723,15 +722,14 @@ void bli_dgemm_opt_d4x4(
                          double* restrict   b,
                          double* restrict   beta,
                          double* restrict   c, inc_t rs_c, inc_t cs_c,
-                         double* restrict   a_next,
-                         double* restrict   b_next
+                         auxinfo_t*         data
                        )
 {
-	dim_t   k_iter;
-	dim_t   k_left;
+	void*   a_next = bli_auxinfo_next_a( data );
+	void*   b_next = bli_auxinfo_next_b( data );
 
-	k_iter  = k / 4;
-	k_left  = k % 4;
+	dim_t   k_iter = k / 4;
+	dim_t   k_left = k % 4;
 
 	__asm__ volatile
 	(
@@ -1339,8 +1337,7 @@ void bli_cgemm_opt_d4x4(
                          scomplex* restrict b,
                          scomplex* restrict beta,
                          scomplex* restrict c, inc_t rs_c, inc_t cs_c,
-                         scomplex* restrict a_next,
-                         scomplex* restrict b_next
+                         auxinfo_t*         data
                        )
 {
 	/* Just call the reference implementation. */
@@ -1350,8 +1347,7 @@ void bli_cgemm_opt_d4x4(
 	                   b,
 	                   beta,
 	                   c, rs_c, cs_c,
-	                   a_next,
-	                   b_next );
+	                   data );
 }
 
 void bli_zgemm_opt_d4x4(
@@ -1361,8 +1357,7 @@ void bli_zgemm_opt_d4x4(
                          dcomplex* restrict b,
                          dcomplex* restrict beta,
                          dcomplex* restrict c, inc_t rs_c, inc_t cs_c,
-                         dcomplex* restrict a_next,
-                         dcomplex* restrict b_next
+                         auxinfo_t*         data
                        )
 {
 	/* Just call the reference implementation. */
@@ -1372,7 +1367,6 @@ void bli_zgemm_opt_d4x4(
 	                   b,
 	                   beta,
 	                   c, rs_c, cs_c,
-	                   a_next,
-	                   b_next );
+	                   data );
 }
 

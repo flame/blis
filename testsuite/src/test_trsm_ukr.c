@@ -377,9 +377,10 @@ void libblis_test_trsm_ukr_check( side_t  side,
 #define FUNCPTR_T trsm_ukr_fp
 
 typedef void (*FUNCPTR_T)(
-                           void*   a,
-                           void*   b,
-                           void*   c, inc_t rs_c, inc_t cs_c
+                           void*      a,
+                           void*      b,
+                           void*      c, inc_t rs_c, inc_t cs_c,
+                           auxinfo_t* data
                          );
 
 static FUNCPTR_T GENARRAY(ftypes_l,trsm_l_ukr);
@@ -402,6 +403,16 @@ void bli_trsm_ukr( obj_t*  a,
 
     FUNCPTR_T f;
 
+	auxinfo_t data;
+
+
+	// Fill the auxinfo_t struct in case the micro-kernel uses it.
+    bli_auxinfo_set_next_a( buf_a, data );
+	bli_auxinfo_set_next_b( buf_b, data );
+
+	// STILL NEED TO FILL IN PANEL STRIDE FIELDS!
+
+
     // Index into the type combination array to extract the correct
     // function pointer.
     if ( bli_obj_is_lower( *a ) ) f = ftypes_l[dt];
@@ -410,7 +421,8 @@ void bli_trsm_ukr( obj_t*  a,
     // Invoke the function.
     f( buf_a,
        buf_b,
-       buf_c, rs_c, cs_c );
+       buf_c, rs_c, cs_c,
+	   &data );
 }
 
 
@@ -418,14 +430,16 @@ void bli_trsm_ukr( obj_t*  a,
 #define GENTFUNC( ctype, ch, varname, ukrname ) \
 \
 void PASTEMAC(ch,varname)( \
-                           void*   a, \
-                           void*   b, \
-                           void*   c, inc_t rs_c, inc_t cs_c \
+                           void*      a, \
+                           void*      b, \
+                           void*      c, inc_t rs_c, inc_t cs_c, \
+                           auxinfo_t* data  \
                          ) \
 { \
     PASTEMAC(ch,ukrname)( a, \
                           b, \
-                          c, rs_c, cs_c ); \
+                          c, rs_c, cs_c, \
+	                      data ); \
 }
 
 INSERT_GENTFUNC_BASIC( trsm_l_ukr, TRSM_L_UKERNEL )

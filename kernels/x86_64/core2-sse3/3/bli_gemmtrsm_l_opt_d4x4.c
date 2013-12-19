@@ -42,8 +42,7 @@ void bli_sgemmtrsm_l_opt_d4x4(
                                float* restrict    b01,
                                float* restrict    b11,
                                float* restrict    c11, inc_t rs_c, inc_t cs_c,
-                               float* restrict    a_next,
-                               float* restrict    b_next
+                               auxinfo_t*         data
                              )
 {
 	/* Just call the reference implementation. */
@@ -54,8 +53,7 @@ void bli_sgemmtrsm_l_opt_d4x4(
 	                         b01,
 	                         b11,
 	                         c11, rs_c, cs_c,
-	                         a_next,
-	                         b_next );
+	                         data );
 }
 
 void bli_dgemmtrsm_l_opt_d4x4(
@@ -66,15 +64,13 @@ void bli_dgemmtrsm_l_opt_d4x4(
                                double* restrict   b01,
                                double* restrict   b11,
                                double* restrict   c11, inc_t rs_c, inc_t cs_c,
-                               double* restrict   a_next,
-                               double* restrict   b_next
+                               auxinfo_t*         data
                              )
 {
-	dim_t   k_iter;
-	dim_t   k_left;
+	void*   b_next  = bli_auxinfo_next_b( data );
 
-	k_iter  = k / 4;
-	k_left  = k % 4;
+	dim_t   k_iter  = k / 4;
+	dim_t   k_left  = k % 4;
 
 	__asm__ volatile
 	(
@@ -551,8 +547,7 @@ void bli_cgemmtrsm_l_opt_d4x4(
                                scomplex* restrict b01,
                                scomplex* restrict b11,
                                scomplex* restrict c11, inc_t rs_c, inc_t cs_c,
-                               scomplex* restrict a_next,
-                               scomplex* restrict b_next
+                               auxinfo_t*         data
                              )
 {
 	/* Just call the reference implementation. */
@@ -563,8 +558,7 @@ void bli_cgemmtrsm_l_opt_d4x4(
 	                         b01,
 	                         b11,
 	                         c11, rs_c, cs_c,
-	                         a_next,
-	                         b_next );
+	                         data );
 }
 
 void bli_zgemmtrsm_l_opt_d4x4(
@@ -575,8 +569,7 @@ void bli_zgemmtrsm_l_opt_d4x4(
                                dcomplex* restrict b01,
                                dcomplex* restrict b11,
                                dcomplex* restrict c11, inc_t rs_c, inc_t cs_c,
-                               dcomplex* restrict a_next,
-                               dcomplex* restrict b_next
+                               auxinfo_t*         data
                              )
 {
 	/* Just call the reference implementation. */
@@ -587,7 +580,6 @@ void bli_zgemmtrsm_l_opt_d4x4(
 	                         b01,
 	                         b11,
 	                         c11, rs_c, cs_c,
-	                         a_next,
-	                         b_next );
+	                         data );
 }
 

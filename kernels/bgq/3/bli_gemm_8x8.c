@@ -36,14 +36,14 @@
 #undef restrict
 
 void bli_sgemm_8x8(
-                        dim_t     k,
-                        float*    alpha,
-                        float*    a,
-                        float*    b,
-                        float*    beta,
-                        float*    c, inc_t rs_c, inc_t cs_c,
-                        float* a_next, float* b_next
-                      )
+                    dim_t      k,
+                    float*     alpha,
+                    float*     a,
+                    float*     b,
+                    float*     beta,
+                    float*     c, inc_t rs_c, inc_t cs_c,
+                    auxinfo_t* data
+                  )
 {
 	/* Just call the reference implementation. */
 	bli_sgemm_ref_mxn( k,
@@ -52,8 +52,7 @@ void bli_sgemm_8x8(
 	                   b,
 	                   beta,
 	                   c, rs_c, cs_c,
-	                   a_next,
-	                   b_next );
+	                   data );
 }
 
 
@@ -76,14 +75,14 @@ void bli_sgemm_8x8(
 */
 
 void bli_dgemm_8x8(
-                        dim_t     k,
-                        restrict double*   alpha,
-                        restrict double*   a,
-                        restrict double*   b,
-                        restrict double*   beta,
-                        restrict double*   c, inc_t rs_c, inc_t cs_c,
-                        restrict double* a_next, restrict double* b_next
-                      )
+                    dim_t      k,
+                    double*    alpha,
+                    double*    a,
+                    double*    b,
+                    double*    beta,
+                    double*    c, inc_t rs_c, inc_t cs_c,
+                    auxinfo_t* data
+                  )
 
 {
     //Registers for storing C.
@@ -224,33 +223,34 @@ void bli_dgemm_8x8(
 }
 
 void bli_dgemm_8x8_mt(
-                        dim_t     k,
-                        restrict double*   alpha,
-                        restrict double*   a,
-                        restrict double*   b,
-                        restrict double*   beta,
-                        restrict double*   c, inc_t rs_c, inc_t cs_c,
-                        restrict double* a_next, restrict double* b_next,
-                        dim_t tid
-                      )
+                       dim_t      k,
+                       double*    alpha,
+                       double*    a,
+                       double*    b,
+                       double*    beta,
+                       double*    c, inc_t rs_c, inc_t cs_c,
+                       auxinfo_t* data,
+                       dim_t      tid
+                     )
 {
-    
-    bli_dgemm_8x8( k, alpha, 
-        a,
-        b, beta, 
-        c, 
-        rs_c, cs_c, NULL, NULL );
+	bli_dgemm_8x8( k,
+	               alpha, 
+	               a,
+	               b, beta, 
+	               c, 
+	               rs_c, cs_c,
+	               data );
 }
 
 void bli_cgemm_8x8(
-                        dim_t     k,
-                        scomplex* alpha,
-                        scomplex* a,
-                        scomplex* b,
-                        scomplex* beta,
-                        scomplex* c, inc_t rs_c, inc_t cs_c,
-                        scomplex* a_next, scomplex* b_next
-                      )
+                    dim_t      k,
+                    scomplex*  alpha,
+                    scomplex*  a,
+                    scomplex*  b,
+                    scomplex*  beta,
+                    scomplex*  c, inc_t rs_c, inc_t cs_c,
+                    auxinfo_t* data
+                  )
 {
 	/* Just call the reference implementation. */
 	bli_cgemm_ref_mxn( k,
@@ -259,19 +259,18 @@ void bli_cgemm_8x8(
 	                   b,
 	                   beta,
 	                   c, rs_c, cs_c,
-	                   a_next,
-	                   b_next );
+	                   data );
 }
 
 void bli_zgemm_8x8(
-                        dim_t     k,
-                        dcomplex* alpha,
-                        dcomplex* a,
-                        dcomplex* b,
-                        dcomplex* beta,
-                        dcomplex* c, inc_t rs_c, inc_t cs_c,
-                        dcomplex* a_next, dcomplex* b_next
-                      )
+                    dim_t      k,
+                    dcomplex*  alpha,
+                    dcomplex*  a,
+                    dcomplex*  b,
+                    dcomplex*  beta,
+                    dcomplex*  c, inc_t rs_c, inc_t cs_c,
+                    auxinfo_t* data
+                  )
 {
 	/* Just call the reference implementation. */
 	bli_zgemm_ref_mxn( k,
@@ -280,21 +279,20 @@ void bli_zgemm_8x8(
 	                   b,
 	                   beta,
 	                   c, rs_c, cs_c,
-	                   a_next,
-	                   b_next );
+	                   data );
 }
 
 
 void bli_sgemm_8x8_mt(
-                        dim_t     k,
-                        float*    alpha,
-                        float*    a,
-                        float*    b,
-                        float*    beta,
-                        float*    c, inc_t rs_c, inc_t cs_c,
-                        float* a_next, float* b_next,
-                        int t_id
-                      )
+                       dim_t      k,
+                       float*     alpha,
+                       float*     a,
+                       float*     b,
+                       float*     beta,
+                       float*     c, inc_t rs_c, inc_t cs_c,
+                       auxinfo_t* data,
+                       dim_t      t_id
+                     )
 {
 	/* Just call the reference implementation. */
 	bli_sgemm_ref_mxn( k,
@@ -303,20 +301,19 @@ void bli_sgemm_8x8_mt(
 	                   b,
 	                   beta,
 	                   c, rs_c, cs_c,
-	                   a_next,
-	                   b_next );
+	                   data );
 }
 
 void bli_cgemm_8x8_mt(
-                        dim_t     k,
-                        scomplex* alpha,
-                        scomplex* a,
-                        scomplex* b,
-                        scomplex* beta,
-                        scomplex* c, inc_t rs_c, inc_t cs_c,
-                        scomplex* a_next, scomplex* b_next,
-                        int t_id
-                      )
+                       dim_t      k,
+                       scomplex*  alpha,
+                       scomplex*  a,
+                       scomplex*  b,
+                       scomplex*  beta,
+                       scomplex*  c, inc_t rs_c, inc_t cs_c,
+                       auxinfo_t* data,
+                       dim_t      t_id
+                     )
 {
 	/* Just call the reference implementation. */
 	bli_cgemm_ref_mxn( k,
@@ -325,20 +322,19 @@ void bli_cgemm_8x8_mt(
 	                   b,
 	                   beta,
 	                   c, rs_c, cs_c,
-	                   a_next,
-	                   b_next );
+	                   data );
 }
 
 void bli_zgemm_8x8_mt(
-                        dim_t     k,
-                        dcomplex* alpha,
-                        dcomplex* a,
-                        dcomplex* b,
-                        dcomplex* beta,
-                        dcomplex* c, inc_t rs_c, inc_t cs_c,
-                        dcomplex* a_next, dcomplex* b_next,
-                        int t_id
-                      )
+                       dim_t      k,
+                       dcomplex*  alpha,
+                       dcomplex*  a,
+                       dcomplex*  b,
+                       dcomplex*  beta,
+                       dcomplex*  c, inc_t rs_c, inc_t cs_c,
+                       auxinfo_t* data,
+                       dim_t      t_id
+                     )
 {
 	/* Just call the reference implementation. */
 	bli_zgemm_ref_mxn( k,
@@ -347,6 +343,5 @@ void bli_zgemm_8x8_mt(
 	                   b,
 	                   beta,
 	                   c, rs_c, cs_c,
-	                   a_next,
-	                   b_next );
+	                   data );
 }

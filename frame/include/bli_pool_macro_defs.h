@@ -63,32 +63,32 @@
 
 #define bli_pool_set_block_ptrs( block_ptrs0, pool_p ) \
 { \
-    pool_p->block_ptrs = block_ptrs0; \
+    (pool_p)->block_ptrs = block_ptrs0; \
 }
 
 #define bli_pool_set_num_blocks( num_blocks0, pool_p ) \
 { \
-    pool_p->num_blocks = num_blocks0; \
+    (pool_p)->num_blocks = num_blocks0; \
 }
 
 #define bli_pool_set_block_size( block_size0, pool_p ) \
 { \
-    pool_p->block_size = block_size0; \
+    (pool_p)->block_size = block_size0; \
 }
 
 #define bli_pool_set_top_index( top_index0, pool_p ) \
 { \
-    pool_p->top_index = top_index0; \
+    (pool_p)->top_index = top_index0; \
 }
 
 #define bli_pool_dec_top_index( pool_p ) \
 { \
-    (pool_p->top_index)--; \
+    ((pool_p)->top_index)--; \
 }
 
 #define bli_pool_inc_top_index( pool_p ) \
 { \
-    (pool_p->top_index)++; \
+    ((pool_p)->top_index)++; \
 }
 
 #define bli_pool_init( num_blocks, block_size, block_ptrs, pool_p ) \

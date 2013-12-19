@@ -32,66 +32,27 @@
 
 */
 
-#ifndef BLIS_MACRO_DEFS_H
-#define BLIS_MACRO_DEFS_H
+#ifndef BLIS_AUXINFO_MACRO_DEFS_H
+#define BLIS_AUXINFO_MACRO_DEFS_H
 
 
-// -- Undefine restrict for C++ and C89/90 --
+// auxinfo_t field query
 
-#ifdef __cplusplus
-  // Language is C++; define restrict as nothing.
-  #define restrict
-#elif __STDC_VERSION__ >= 199901L
-  // Language is C99 (or later); do nothing since restrict is recognized.
-#else
-  // Language is pre-C99; define restrict as nothing.
-  #define restrict
-#endif
+#define bli_auxinfo_next_a( auxinfo )  ( (auxinfo)->a_next )
+#define bli_auxinfo_next_b( auxinfo )  ( (auxinfo)->b_next )
+
+#define bli_auxinfo_ps_a( auxinfo )    ( (auxinfo)->ps_a )
+#define bli_auxinfo_ps_b( auxinfo )    ( (auxinfo)->ps_b )
 
 
-// -- Boolean values --
+// auxinfo_t field modification
 
-#ifndef TRUE
-  #define TRUE  1
-#endif
+#define bli_auxinfo_set_next_a( a_p, auxinfo ) { (auxinfo).a_next = a_p; }
+#define bli_auxinfo_set_next_b( b_p, auxinfo ) { (auxinfo).b_next = b_p; }
 
-#ifndef FALSE
-  #define FALSE 0
-#endif
+#define bli_auxinfo_set_ps_a( a_p, auxinfo )   { (auxinfo).ps_a = a_p; }
+#define bli_auxinfo_set_ps_b( b_p, auxinfo )   { (auxinfo).ps_b = b_p; }
 
 
-// -- Concatenation macros --
+#endif 
 
-#define BLIS_FUNC_PREFIX_STR      "bli"
-
-#define PASTEMAC0(op)             bli_ ## op
-
-#define PASTEMAC(ch,op)           bli_ ## ch  ## op
-
-#define PASTEMAC2(ch1,ch2,op)     bli_ ## ch1 ## ch2 ## op
-
-#define PASTEMAC3(ch1,ch2,ch3,op) bli_ ## ch1 ## ch2 ## ch3 ## op
-
-#define PASTEBLACHK(op)           bla_ ## op ## _check
-
-#define MKSTR(s1)                 #s1
-
-
-// -- Include other groups of macros
-
-#include "bli_genarray_macro_defs.h"
-#include "bli_gentfunc_macro_defs.h"
-#include "bli_gentprot_macro_defs.h"
-
-#include "bli_mem_macro_defs.h"
-#include "bli_pool_macro_defs.h"
-#include "bli_obj_macro_defs.h"
-#include "bli_param_macro_defs.h"
-#include "bli_complex_macro_defs.h"
-#include "bli_scalar_macro_defs.h"
-#include "bli_error_macro_defs.h"
-#include "bli_blas_macro_defs.h"
-#include "bli_auxinfo_macro_defs.h"
-
-
-#endif

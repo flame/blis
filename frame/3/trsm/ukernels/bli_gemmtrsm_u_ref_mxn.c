@@ -46,8 +46,7 @@ void PASTEMAC(ch,varname)( \
                            ctype* restrict b21, \
                            ctype* restrict b11, \
                            ctype* restrict c11, inc_t rs_c, inc_t cs_c, \
-                           ctype* restrict a_next, \
-                           ctype* restrict b_next  \
+                           auxinfo_t*      data  \
                          ) \
 { \
 	const inc_t     rs_b      = PASTEMAC(ch,packnr); \
@@ -62,14 +61,14 @@ void PASTEMAC(ch,varname)( \
 	                      b21, \
 	                      alpha, \
 	                      b11, rs_b, cs_b, \
-	                      a_next, \
-	                      b_next ); \
+	                      data ); \
 \
 	/* b11 = inv(a11) * b11;
 	   c11 = b11; */ \
 	PASTEMAC(ch,trsmukr)( a11, \
 	                      b11, \
-	                      c11, rs_c, cs_c ); \
+	                      c11, rs_c, cs_c, \
+	                      data ); \
 }
 
 INSERT_GENTFUNC_BASIC2( gemmtrsm_u_ref_mxn, GEMM_UKERNEL, TRSM_U_UKERNEL )

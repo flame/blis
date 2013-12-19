@@ -36,14 +36,14 @@
 
 
 
- void bli_sgemm_4x6(
-                    dim_t     k,
-                    float*    alpha,
-                    float*    a,
-                    float*    b,
-                    float*    beta,
-                    float*    c, inc_t rs_c, inc_t cs_c,
-                    float* a_next, float* b_next
+void bli_sgemm_4x6(
+                    dim_t              k,
+                    float*    restrict alpha,
+                    float*    restrict a,
+                    float*    restrict b,
+                    float*    restrict beta,
+                    float*    restrict c, inc_t rs_c, inc_t cs_c,
+                    auxinfo_t*         data
                   )
 {
 	/* Just call the reference implementation. */
@@ -53,24 +53,21 @@
 	                   b,
 	                   beta,
 	                   c, rs_c, cs_c,
-	                   a_next,
-	                   b_next );
+	                   data );
 }
 
- void bli_dgemm_4x6(
-                    dim_t     k,
-                    double*   alpha,
-                    double*   a,
-                    double*   b,
-                    double*   beta,
-                    double*   c, inc_t rs_c, inc_t cs_c,
-                    double* a_next, double* b_next
+void bli_dgemm_4x6(
+                    dim_t              k,
+                    double*   restrict alpha,
+                    double*   restrict a,
+                    double*   restrict b,
+                    double*   restrict beta,
+                    double*   restrict c, inc_t rs_c, inc_t cs_c,
+                    auxinfo_t*         data
                   )
 {
-    dim_t   k_iter;
-	dim_t   k_left;
-	k_iter  = k / 16;
-	k_left  = k % 16;
+	dim_t k_iter  = k / 16;
+	dim_t k_left  = k % 16;
 
 	__asm__ 
 	(	
@@ -674,14 +671,14 @@
 	);
 }
 
- void bli_cgemm_4x6(
-                    dim_t     k,
-                    scomplex* alpha,
-                    scomplex* a,
-                    scomplex* b,
-                    scomplex* beta,
-                    scomplex* c, inc_t rs_c, inc_t cs_c,
-                    scomplex* a_next, scomplex* b_next
+void bli_cgemm_4x6(
+                    dim_t              k,
+                    scomplex* restrict alpha,
+                    scomplex* restrict a,
+                    scomplex* restrict b,
+                    scomplex* restrict beta,
+                    scomplex* restrict c, inc_t rs_c, inc_t cs_c,
+                    auxinfo_t*         data
                   )
 {
 	/* Just call the reference implementation. */
@@ -691,18 +688,17 @@
 	                   b,
 	                   beta,
 	                   c, rs_c, cs_c,
-	                   a_next,
-	                   b_next );
+	                   data );
 }
 
- void bli_zgemm_4x6(
-                    dim_t     k,
-                    dcomplex* alpha,
-                    dcomplex* a,
-                    dcomplex* b,
-                    dcomplex* beta,
-                    dcomplex* c, inc_t rs_c, inc_t cs_c,
-                    dcomplex* a_next, dcomplex* b_next
+void bli_zgemm_4x6(
+                    dim_t              k,
+                    dcomplex* restrict alpha,
+                    dcomplex* restrict a,
+                    dcomplex* restrict b,
+                    dcomplex* restrict beta,
+                    dcomplex* restrict c, inc_t rs_c, inc_t cs_c,
+                    auxinfo_t*         data
                   )
 {
 	/* Just call the reference implementation. */
@@ -712,7 +708,6 @@
 	                   b,
 	                   beta,
 	                   c, rs_c, cs_c,
-	                   a_next,
-	                   b_next );
+	                   data );
 }
 

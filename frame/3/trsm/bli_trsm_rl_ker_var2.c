@@ -152,6 +152,7 @@ void PASTEMAC(ch,varname)( \
 	dim_t           rstep_a; \
 	dim_t           cstep_b; \
 	dim_t           rstep_c, cstep_c; \
+	auxinfo_t       aux; \
 \
 	/*
 	   Assumptions/assertions:
@@ -238,6 +239,12 @@ void PASTEMAC(ch,varname)( \
 	rstep_c = rs_c * MR; \
 	cstep_c = cs_c * NR; \
 \
+	/* Save the panel strides of A and B to the auxinfo_t object.
+	   NOTE: We swap the values for A and B since the triangular
+	   "A" matrix is actually contained within B. */ \
+	bli_auxinfo_set_ps_a( ps_b, aux ); \
+	bli_auxinfo_set_ps_b( ps_a, aux ); \
+\
 	b1 = b_cast; \
 	c1 = c_cast; \
 \
@@ -303,6 +310,12 @@ void PASTEMAC(ch,varname)( \
 						b2 = b_cast; \
 				} \
 \
+				/* Save addresses of next panels of A and B to the auxinfo_t
+				   object. NOTE: We swap the values for A and B since the
+				   triangular "A" matrix is actually contained within B. */ \
+				bli_auxinfo_set_next_a( b2, aux ); \
+				bli_auxinfo_set_next_b( a2, aux ); \
+\
 				/* Handle interior and edge cases separately. */ \
 				if ( m_cur == MR && n_cur == NR ) \
 				{ \
@@ -314,7 +327,7 @@ void PASTEMAC(ch,varname)( \
 					                          a12, \
 					                          a11, \
 					                          c11, cs_c, rs_c, \
-					                          b2, a2 ); \
+					                          &aux ); \
 				} \
 				else \
 				{ \
@@ -326,7 +339,7 @@ void PASTEMAC(ch,varname)( \
 					                          a12, \
 					                          a11, \
 					                          ct, cs_ct, rs_ct, \
-					                          b2, a2 ); \
+					                          &aux ); \
 \
 					/* Copy the result to the bottom edge of C. */ \
 					PASTEMAC(ch,copys_mxn)( m_cur, n_cur, \
@@ -357,6 +370,12 @@ void PASTEMAC(ch,varname)( \
 						b2 = b_cast; \
 				} \
 \
+				/* Save addresses of next panels of A and B to the auxinfo_t
+				   object. NOTE: We swap the values for A and B since the
+				   triangular "A" matrix is actually contained within B. */ \
+				bli_auxinfo_set_next_a( b2, aux ); \
+				bli_auxinfo_set_next_b( a2, aux ); \
+\
 				/* Handle interior and edge cases separately. */ \
 				if ( m_cur == MR && n_cur == NR ) \
 				{ \
@@ -367,7 +386,7 @@ void PASTEMAC(ch,varname)( \
 					                      a1, \
 					                      alpha_cast, \
 					                      c11, cs_c, rs_c, \
-					                      b2, a2 ); \
+					                      &aux ); \
 				} \
 				else \
 				{ \
@@ -378,7 +397,7 @@ void PASTEMAC(ch,varname)( \
 					                      a1, \
 					                      zero, \
 					                      ct, cs_ct, rs_ct, \
-					                      b2, a2 ); \
+					                      &aux ); \
 \
 					/* Add the result to the edge of C. */ \
 					PASTEMAC(ch,xpbys_mxn)( m_cur, n_cur, \
