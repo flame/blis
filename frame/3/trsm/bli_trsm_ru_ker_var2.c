@@ -234,10 +234,9 @@ void PASTEMAC(ch,varname)( \
 	rstep_c = rs_c * MR; \
 	cstep_c = cs_c * NR; \
 \
-	/* Save the panel strides of A and B to the auxinfo_t object.
+	/* Save the panel stride of A to the auxinfo_t object.
 	   NOTE: We swap the values for A and B since the triangular
 	   "A" matrix is actually contained within B. */ \
-	bli_auxinfo_set_ps_a( ps_b, aux ); \
 	bli_auxinfo_set_ps_b( ps_a, aux ); \
 \
 	b1 = b_cast; \
@@ -272,6 +271,11 @@ void PASTEMAC(ch,varname)( \
 \
 		/* Initialize our next panel of B to be the current panel of B. */ \
 		b2 = b1; \
+\
+		/* Save the panel stride of B to the auxinfo_t object.
+		   NOTE: We swap the values for A and B since the triangular
+		   "A" matrix is actually contained within B. */ \
+		bli_auxinfo_set_ps_a( k_b0111 * PACKNR, aux ); \
 \
 		/* If the current panel of B intersects the diagonal, use a
 		   special micro-kernel that performs a fused gemm and trsm.

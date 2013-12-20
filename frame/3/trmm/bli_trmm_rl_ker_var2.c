@@ -235,9 +235,8 @@ void PASTEMAC(ch,varname)( \
 	rstep_c = rs_c * MR; \
 	cstep_c = cs_c * NR; \
 \
-	/* Save the panel strides of A and B to the auxinfo_t object. */ \
+	/* Save the panel stride of A to the auxinfo_t object. */ \
 	bli_auxinfo_set_ps_a( ps_a, aux ); \
-	bli_auxinfo_set_ps_b( ps_b, aux ); \
 \
 	b1 = b_cast; \
 	c1 = c_cast; \
@@ -262,7 +261,11 @@ void PASTEMAC(ch,varname)( \
 		k_b1121   = k - off_b1121; \
 \
 		/* Initialize our next panel of B to be the current panel of B. */ \
-        b2 = b1; \
+		b2 = b1; \
+\
+		/* Save the panel stride of the current panel of B to the
+		   auxinfo_t object. */ \
+		bli_auxinfo_set_ps_b( k_b1121 * PACKNR, aux ); \
 \
 		/* If the current panel of B intersects the diagonal, scale C
 		   by beta. If it is strictly below the diagonal, scale by one.

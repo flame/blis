@@ -226,8 +226,7 @@ void PASTEMAC(ch,varname)( \
 	rstep_c = rs_c * MR; \
 	cstep_c = cs_c * NR; \
 \
-	/* Save the panel strides of A and B to the auxinfo_t object. */ \
-	bli_auxinfo_set_ps_a( ps_a, aux ); \
+	/* Save the panel stride of B to the auxinfo_t object. */ \
 	bli_auxinfo_set_ps_b( ps_b, aux ); \
 \
 	b1 = b_cast; \
@@ -287,6 +286,10 @@ void PASTEMAC(ch,varname)( \
 				bli_auxinfo_set_next_a( a2, aux ); \
 				bli_auxinfo_set_next_b( b2, aux ); \
 \
+				/* Save the panel stride of the current panel of A to the
+				   auxinfo_t object. */ \
+				bli_auxinfo_set_ps_a( k_a1011 * PACKMR, aux ); \
+\
 				/* Handle interior and edge cases separately. */ \
 				if ( m_cur == MR && n_cur == NR ) \
 				{ \
@@ -341,6 +344,10 @@ void PASTEMAC(ch,varname)( \
 				   object. */ \
 				bli_auxinfo_set_next_a( a2, aux ); \
 				bli_auxinfo_set_next_b( b2, aux ); \
+\
+				/* Save the panel stride of the current panel of A to the
+				   auxinfo_t object. */ \
+				bli_auxinfo_set_ps_a( rstep_a, aux ); \
 \
 				/* Handle interior and edge cases separately. */ \
 				if ( m_cur == MR && n_cur == NR ) \
