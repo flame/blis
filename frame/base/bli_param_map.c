@@ -104,7 +104,16 @@ void bli_param_map_netlib_to_blis_side( char side, side_t* blis_side )
 	else if ( side == 'r' || side == 'R' ) *blis_side = BLIS_RIGHT;
 	else
 	{
-		bli_check_error_code( BLIS_INVALID_SIDE );
+		// Instead of reporting an error to the framework, default to
+		// an arbitrary value. This is needed because this function is
+		// called by the BLAS compatibility layer AFTER it has already
+		// checked errors and called xerbla(). If the application wants
+		// to override the BLAS compatibility layer's xerbla--which
+		// responds to errors with abort()--we need to also NOT call
+		// abort() here, since either way it has already been dealt
+		// with.
+		//bli_check_error_code( BLIS_INVALID_SIDE );
+		*blis_side = BLIS_LEFT;
 	}
 }
 
@@ -114,7 +123,9 @@ void bli_param_map_netlib_to_blis_uplo( char uplo, uplo_t* blis_uplo )
 	else if ( uplo == 'u' || uplo == 'U' ) *blis_uplo = BLIS_UPPER;
 	else
 	{
-		bli_check_error_code( BLIS_INVALID_UPLO );
+		// See comment for bli_param_map_netlib_to_blis_side() above.
+		//bli_check_error_code( BLIS_INVALID_UPLO );
+		*blis_uplo = BLIS_LOWER;
 	}
 }
 
@@ -125,7 +136,9 @@ void bli_param_map_netlib_to_blis_trans( char trans, trans_t* blis_trans )
 	else if ( trans == 'c' || trans == 'C' ) *blis_trans = BLIS_CONJ_TRANSPOSE;
 	else
 	{
-		bli_check_error_code( BLIS_INVALID_TRANS );
+		// See comment for bli_param_map_netlib_to_blis_side() above.
+		//bli_check_error_code( BLIS_INVALID_TRANS );
+		*blis_trans = BLIS_NO_TRANSPOSE;
 	}
 }
 
@@ -135,7 +148,9 @@ void bli_param_map_netlib_to_blis_diag( char diag, diag_t* blis_diag )
 	else if ( diag == 'u' || diag == 'U' ) *blis_diag = BLIS_UNIT_DIAG;
 	else
 	{
-		bli_check_error_code( BLIS_INVALID_DIAG );
+		// See comment for bli_param_map_netlib_to_blis_side() above.
+		//bli_check_error_code( BLIS_INVALID_DIAG );
+		*blis_diag = BLIS_NONUNIT_DIAG;
 	}
 }
 
