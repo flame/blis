@@ -42,7 +42,8 @@
 void PASTEMAC(ch,varname)( \
                            ctype* restrict a, \
                            ctype* restrict b, \
-                           ctype* restrict c, inc_t rs_c, inc_t cs_c  \
+                           ctype* restrict c, inc_t rs_c, inc_t cs_c, \
+                           auxinfo_t*      data  \
                          );
 
 INSERT_GENTPROT_BASIC( trsm_u_opt_mxn )

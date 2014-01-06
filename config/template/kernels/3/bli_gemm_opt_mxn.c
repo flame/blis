@@ -43,8 +43,7 @@ void bli_sgemm_opt_mxn(
                         float*    restrict b1,
                         float*    restrict beta,
                         float*    restrict c11, inc_t rs_c, inc_t cs_c,
-                        float*    restrict a_next,
-                        float*    restrict b_next
+                        auxinfo_t*         data
                       )
 {
 	/* Just call the reference implementation. */
@@ -54,8 +53,7 @@ void bli_sgemm_opt_mxn(
 	                   b1,
 	                   beta,
 	                   c11, rs_c, cs_c,
-	                   a_next,
-	                   b_next );
+	                   data );
 }
 
 
@@ -67,8 +65,7 @@ void bli_dgemm_opt_mxn(
                         double*   restrict b1,
                         double*   restrict beta,
                         double*   restrict c11, inc_t rs_c, inc_t cs_c,
-                        double*   restrict a_next,
-                        double*   restrict b_next
+                        auxinfo_t*         data
                       )
 {
 /*
@@ -105,10 +102,10 @@ void bli_dgemm_opt_mxn(
             in units of matrix elements).
   - cs_c:   The column stride of matrix C11 (ie: the distance to the next
             column, in units of matrix elements).
-  - a_next: The address of the micro-panel of A that will be used the next
-            time the gemm micro-kernel will be called.
-  - b_next: The address of the micro-panel of B that will be used the next
-            time the gemm micro-kernel will be called.
+  - data:   The address of an auxinfo_t object that contains auxiliary
+            information that may be useful when optimizing the gemm
+            micro-kernel implementation. (See BLIS KernelsHowTo wiki for
+            more info.)
 
   Diagram for gemm
 
@@ -175,10 +172,6 @@ void bli_dgemm_opt_mxn(
     should be no loops in the MR or NR directions; in other words,
     iteration over these dimensions should always be fully unrolled
     (within the loop over k).
-  - Prefetching via a_next and b_next. The addresses a_next and b_next may
-    be used by the micro-kernel to perform prefetching, if prefetching is
-    supported by the architecture. However, these addresses are may also
-    be safely ignored if prefetching is not feasible/possible/desired.
   - Zero beta. If beta = 0.0 (or 0.0 + 0.0i for complex datatypes), then
     the micro-kernel should NOT use it explicitly, as C11 may contain
     uninitialized memory (including NaNs). This case should be detected
@@ -278,8 +271,7 @@ void bli_cgemm_opt_mxn(
                         scomplex* restrict b1,
                         scomplex* restrict beta,
                         scomplex* restrict c11, inc_t rs_c, inc_t cs_c,
-                        scomplex* restrict a_next,
-                        scomplex* restrict b_next
+                        auxinfo_t*         data
                       )
 {
 	/* Just call the reference implementation. */
@@ -289,8 +281,7 @@ void bli_cgemm_opt_mxn(
 	                   b1,
 	                   beta,
 	                   c11, rs_c, cs_c,
-	                   a_next,
-	                   b_next );
+	                   data );
 }
 
 
@@ -302,8 +293,7 @@ void bli_zgemm_opt_mxn(
                         dcomplex* restrict b1,
                         dcomplex* restrict beta,
                         dcomplex* restrict c11, inc_t rs_c, inc_t cs_c,
-                        dcomplex* restrict a_next,
-                        dcomplex* restrict b_next
+                        auxinfo_t*         data
                       )
 {
 	/* Just call the reference implementation. */
@@ -313,7 +303,6 @@ void bli_zgemm_opt_mxn(
 	                   b1,
 	                   beta,
 	                   c11, rs_c, cs_c,
-	                   a_next,
-	                   b_next );
+	                   data );
 }
 

@@ -39,13 +39,15 @@
 void bli_strsm_l_opt_mxn(
                           float*    restrict a11,
                           float*    restrict b11,
-                          float*    restrict c11, inc_t rs_c, inc_t cs_c
+                          float*    restrict c11, inc_t rs_c, inc_t cs_c,
+                          auxinfo_t*         data
                         )
 {
 	/* Just call the reference implementation. */
 	bli_strsm_l_ref_mxn( a11,
 	                     b11,
-	                     c11, rs_c, cs_c );
+	                     c11, rs_c, cs_c,
+	                     data );
 }
 
 
@@ -53,7 +55,8 @@ void bli_strsm_l_opt_mxn(
 void bli_dtrsm_l_opt_mxn(
                           double*   restrict a11,
                           double*   restrict b11,
-                          double*   restrict c11, inc_t rs_c, inc_t cs_c
+                          double*   restrict c11, inc_t rs_c, inc_t cs_c,
+                          auxinfo_t*         data
                         )
 {
 /*
@@ -93,6 +96,10 @@ void bli_dtrsm_l_opt_mxn(
             in units of matrix elements).
   - cs_c:   The column stride of C11 (ie: the distance to the next column of
             C11, in units of matrix elements).
+  - data:   The address of an auxinfo_t object that contains auxiliary
+            information that may be useful when optimizing the trsm
+            micro-kernel implementation. (See BLIS KernelsHowTo wiki for
+            more info.)
 
   Diagrams for trsm
 
@@ -108,6 +115,10 @@ void bli_dtrsm_l_opt_mxn(
   - Alignment of a11 and b11. See Implementation Notes for gemmtrsm.
   - Unrolling loops. Most optimized implementations should unroll all
     three loops within the trsm micro-kernel.
+  - Prefetching next micro-panels of A and B. We advise against using
+    the bli_auxinfo_next_a() and bli_auxinfo_next_b() macros from within
+    the trsm_l and trsm_u micro-kernels, since the values returned usually
+    only make sense in the context of the overall gemmtrsm subproblem. 
   - Diagonal elements of A11. At the time this micro-kernel is called,
     the diagonal entries of triangular matrix A11 contain the inverse of
     the original elements. This inversion is done during packing so that
@@ -200,13 +211,15 @@ void bli_dtrsm_l_opt_mxn(
 void bli_ctrsm_l_opt_mxn(
                           scomplex* restrict a11,
                           scomplex* restrict b11,
-                          scomplex* restrict c11, inc_t rs_c, inc_t cs_c
+                          scomplex* restrict c11, inc_t rs_c, inc_t cs_c,
+                          auxinfo_t*         data
                         )
 {
 	/* Just call the reference implementation. */
 	bli_ctrsm_l_ref_mxn( a11,
 	                     b11,
-	                     c11, rs_c, cs_c );
+	                     c11, rs_c, cs_c,
+	                     data );
 }
 
 
@@ -214,12 +227,14 @@ void bli_ctrsm_l_opt_mxn(
 void bli_ztrsm_l_opt_mxn(
                           dcomplex* restrict a11,
                           dcomplex* restrict b11,
-                          dcomplex* restrict c11, inc_t rs_c, inc_t cs_c
+                          dcomplex* restrict c11, inc_t rs_c, inc_t cs_c,
+                          auxinfo_t*         data
                         )
 {
 	/* Just call the reference implementation. */
 	bli_ztrsm_l_ref_mxn( a11,
 	                     b11,
-	                     c11, rs_c, cs_c );
+	                     c11, rs_c, cs_c,
+	                     data );
 }
 

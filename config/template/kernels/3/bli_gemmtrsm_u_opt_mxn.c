@@ -44,8 +44,7 @@ void bli_sgemmtrsm_u_opt_mxn(
                               float*    restrict b21,
                               float*    restrict b11,
                               float*    restrict c11, inc_t rs_c, inc_t cs_c,
-                              float*    restrict a_next,
-                              float*    restrict b_next 
+                              auxinfo_t*         data
                             )
 {
 	const inc_t        rs_b      = bli_spacknr;
@@ -60,12 +59,12 @@ void bli_sgemmtrsm_u_opt_mxn(
 	                   b21,
 	                   alpha,
 	                   b11, rs_b, cs_b,
-	                   a_next,
-	                   b_next );
+	                   data );
 
 	bli_strsm_u_opt_mxn( a11,
 	                     b11,
-	                     c11, rs_c, cs_c );
+	                     c11, rs_c, cs_c,
+	                     data );
 }
 
 
@@ -78,8 +77,7 @@ void bli_dgemmtrsm_u_opt_mxn(
                               double*   restrict b21,
                               double*   restrict b11,
                               double*   restrict c11, inc_t rs_c, inc_t cs_c,
-                              double*   restrict a_next,
-                              double*   restrict b_next
+                              auxinfo_t*         data
                             )
 {
 /*
@@ -129,10 +127,10 @@ void bli_dgemmtrsm_u_opt_mxn(
             in units of matrix elements).
   - cs_c:   The column stride of C11 (ie: the distance to the next column of
             C11, in units of matrix elements).
-  - a_next: The address of the packed micro-panel of A that will be used the
-            next time the gemmtrsm micro-kernel will be called.
-  - b_next: The address of the packed micro-panel of B that will be used the
-            next time the gemmtrsm micro-kernel will be called.
+  - data:   The address of an auxinfo_t object that contains auxiliary
+            information that may be useful when optimizing the gemmtrsm
+            micro-kernel implementation. (See BLIS KernelsHowTo wiki for
+            more info.)
 
   Diagram for gemmtrsm_u
 
@@ -179,13 +177,13 @@ void bli_dgemmtrsm_u_opt_mxn(
   - Unrolling loops. Most optimized implementations should unroll all
     three loops within the trsm subproblem of gemmtrsm. See Implementation
     Notes for gemm for remarks on unrolling the gemm subproblem.
-  - Prefetching via a_next and b_next. The addresses a_next and b_next
-    for gemmtrsm refer to the portions of the packed micro-panels of A
-    and B that will be referenced by the next invocation. Specifically,
-    in gemmtrsm_l, a_next and b_next refer to the addresses of the next
-    invocation's a10 and b01, respectively, while in gemmtrsm_u, a_next
-    and b_next refer to the addresses of the next invocation's a11 and
-    b11 (since those submatrices precede a12 and b21).
+  - Prefetching next micro-panels of A and B. When invoked from within a
+    gemmtrsm_l micro-kernel, the addresses accessible via
+    bli_auxinfo_next_a() and bli_auxinfo_next_b() refer to the next
+    invocation's a10 and b01, respectively, while in gemmtrsm_u, the
+    _next_a() and _next_b() macros return the addresses of the next
+    invocation's a11 and b11 (since those submatrices precede a12 and b21).
+    (See BLIS KernelsHowTo wiki for more info.)
   - Zero alpha. The micro-kernel can safely assume that alpha is non-zero;
     "alpha equals zero" handling is performed at a much higher level,
     which means that, in such a scenario, the micro-kernel will never get
@@ -222,14 +220,14 @@ void bli_dgemmtrsm_u_opt_mxn(
 	                   b21,
 	                   alpha,
 	                   b11, rs_b, cs_b,
-	                   a_next,
-	                   b_next );
+	                   data );
 
 	/* b11 = inv(a11) * b11;
 	   c11 = b11; */
 	bli_dtrsm_u_opt_mxn( a11,
 	                     b11,
-	                     c11, rs_c, cs_c );
+	                     c11, rs_c, cs_c,
+	                     data );
 }
 
 
@@ -242,8 +240,7 @@ void bli_cgemmtrsm_u_opt_mxn(
                               scomplex* restrict b21,
                               scomplex* restrict b11,
                               scomplex* restrict c11, inc_t rs_c, inc_t cs_c,
-                              scomplex* restrict a_next,
-                              scomplex* restrict b_next 
+                              auxinfo_t*         data
                             )
 {
 	const inc_t        rs_b      = bli_cpacknr;
@@ -258,12 +255,12 @@ void bli_cgemmtrsm_u_opt_mxn(
 	                   b21,
 	                   alpha,
 	                   b11, rs_b, cs_b,
-	                   a_next,
-	                   b_next );
+	                   data );
 
 	bli_ctrsm_u_opt_mxn( a11,
 	                     b11,
-	                     c11, rs_c, cs_c );
+	                     c11, rs_c, cs_c,
+	                     data );
 }
 
 
@@ -276,8 +273,7 @@ void bli_zgemmtrsm_u_opt_mxn(
                               dcomplex* restrict b21,
                               dcomplex* restrict b11,
                               dcomplex* restrict c11, inc_t rs_c, inc_t cs_c,
-                              dcomplex* restrict a_next,
-                              dcomplex* restrict b_next 
+                              auxinfo_t*         data
                             )
 {
 	const inc_t        rs_b      = bli_zpacknr;
@@ -292,11 +288,11 @@ void bli_zgemmtrsm_u_opt_mxn(
 	                   b21,
 	                   alpha,
 	                   b11, rs_b, cs_b,
-	                   a_next,
-	                   b_next );
+	                   data );
 
 	bli_ztrsm_u_opt_mxn( a11,
 	                     b11,
-	                     c11, rs_c, cs_c );
+	                     c11, rs_c, cs_c,
+	                     data );
 }
 
