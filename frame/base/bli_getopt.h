@@ -32,33 +32,9 @@
 
 */
 
-#ifndef BLIS_SYSTEM_H
-#define BLIS_SYSTEM_H
+extern char *bli_optarg;
+extern int   bli_optind;
+extern int   bli_opterr;
+extern int   bli_optopt;
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <string.h>
-
-#ifdef BLIS_ENABLE_WINDOWS_BUILD
-
-  // Include Windows header file.
-  #include <windows.h>
-
-  // Undefine attribute specifiers in Windows.
-  #define __attribute__(x)
-
-  // Undefine restrict.
-  #define restrict
-
-#endif
-
-// gettimeofday() needs this.
-#ifdef BLIS_ENABLE_WINDOWS_BUILD
-  #include <time.h>
-#else
-  #include <sys/time.h>
-  #include <time.h>
-#endif
-
-#endif
+int bli_getopt( int argc, char** const argv, const char* optstring );

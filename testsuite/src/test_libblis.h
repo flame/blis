@@ -63,7 +63,7 @@
 #define BLIS_FILEDATA_PREFIX_STR     "blis"
 
 #define INPUT_BUFFER_SIZE            256
-#define MAX_FILENAME_LENGTH          256
+#define MAX_FILENAME_LENGTH          1000
 #define MAX_BINARY_NAME_LENGTH       256
 #define MAX_FUNC_STRING_LENGTH       26
 #define FLOPS_PER_UNIT_PERF          1e9

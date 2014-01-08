@@ -39,6 +39,9 @@
 // Global variables.
 char libblis_test_binary_name[ MAX_BINARY_NAME_LENGTH + 1 ];
 
+char libblis_test_parameters_filename[ MAX_FILENAME_LENGTH + 1 ];
+char libblis_test_operations_filename[ MAX_FILENAME_LENGTH + 1 ];
+
 char libblis_test_pass_string[ MAX_PASS_STRING_LENGTH + 1 ];
 char libblis_test_warn_string[ MAX_PASS_STRING_LENGTH + 1 ];
 char libblis_test_fail_string[ MAX_PASS_STRING_LENGTH + 1 ];
@@ -63,10 +66,10 @@ int main( int argc, char** argv )
 	libblis_test_parse_command_line( argc, argv );
 
 	// Read the global parameters file.
-	libblis_test_read_params_file( PARAMETERS_FILENAME, &params );
+	libblis_test_read_params_file( libblis_test_parameters_filename, &params );
 
 	// Read the operations parameter file.
-	libblis_test_read_ops_file( OPERATIONS_FILENAME, &ops );
+	libblis_test_read_ops_file( libblis_test_operations_filename, &ops );
 	
 	// Test the utility operations.
 	libblis_test_utility_ops( &params, &ops );
@@ -292,14 +295,8 @@ void libblis_test_read_params_file( char* input_filename, test_params_t* params 
 	// Attempt to open input file corresponding to input_filename as
 	// read-only/binary.
 	input_stream = fopen( input_filename, "rb" );
+	libblis_test_fopen_check_stream( input_filename, input_stream );
 
-	// Check for success.
-	if ( input_stream == NULL )
-	{
-		libblis_test_printf_error( "Failed to open input file %s. Check existence and permissions.\n",
-		                           input_filename );
-	}
-	
 	// Read the number of repeats.
 	libblis_test_read_next_line( buffer, input_stream );
 	sscanf( buffer, "%u ", &(params->n_repeats) );
@@ -1677,7 +1674,7 @@ void libblis_test_fopen_check_stream( char* filename_str,
 	// Check for success.
 	if ( stream == NULL )
 	{
-		libblis_test_printf_error( "Failed to open output file %s. Check existence (if file is being read), permissions (if file is being overwritten), and/or storage limit.\n",
+		libblis_test_printf_error( "Failed to open file %s. Check existence (if file is being read), permissions (if file is being overwritten), and/or storage limit.\n",
 		                           filename_str );
 	}
 }
@@ -1904,14 +1901,65 @@ void libblis_test_parse_message( FILE* output_stream, char* message, va_list arg
 
 void libblis_test_parse_command_line( int argc, char** argv )
 {
-	if ( argc > 1 )
-	{
-		fprintf( stderr, "Too many command line arguments.\n" );
-		exit(1);
-	}
-	
+	bool_t gave_option_g = FALSE;
+	bool_t gave_option_o = FALSE;
+	char   opt;
+
 	// Copy the binary name to a global string so we can use it later.
 	strncpy( libblis_test_binary_name, argv[0], MAX_BINARY_NAME_LENGTH );
+	
+
+	while( (opt = bli_getopt( argc, argv, "g:o:" )) != -1 )
+	{
+		switch( opt )
+		{
+			case 'g':
+			libblis_test_printf_infoc( "detected -g option; using \"%s\" for parameters filename.\n", bli_optarg );
+			strncpy( libblis_test_parameters_filename,
+			         bli_optarg, MAX_FILENAME_LENGTH );
+			gave_option_g = TRUE;
+			break;
+
+			case 'o':
+			libblis_test_printf_infoc( "detected -o option; using \"%s\" for operations filename.\n", bli_optarg );
+			strncpy( libblis_test_operations_filename,
+			         bli_optarg, MAX_FILENAME_LENGTH );
+			gave_option_o = TRUE;
+			break;
+
+			case '?':
+			libblis_test_printf_error( "unexpected option '%c' given or missing option argument\n", bli_optopt );
+			break;
+
+			default:
+			libblis_test_printf_error( "unexpected option chararcter returned from getopt: %c\n", opt );
+		}
+	}
+
+	if ( gave_option_g == FALSE )
+	{
+		libblis_test_printf_infoc( "no -g option given; defaulting to \"%s\" for parameters filename.\n", PARAMETERS_FILENAME );
+
+		// Copy default parameters filename into its global string.
+		strncpy( libblis_test_parameters_filename,
+		         PARAMETERS_FILENAME, MAX_FILENAME_LENGTH );
+	}
+
+	if ( gave_option_o == FALSE )
+	{
+		libblis_test_printf_infoc( "no -o option given; defaulting to \"%s\" for operations filename.\n", OPERATIONS_FILENAME );
+
+		// Copy default operations filename into its global string.
+		strncpy( libblis_test_operations_filename,
+		         OPERATIONS_FILENAME, MAX_FILENAME_LENGTH );
+	}
+
+	// If there are still arguments remaining after getopt() processing is
+	// complete, print an error.
+	if ( bli_optind < argc )
+	{
+		libblis_test_printf_error( "Encountered unexpected non-option argument: %s\n", argv[ bli_optind ] );
+	}
 }
 
 

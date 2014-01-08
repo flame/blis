@@ -96,6 +96,7 @@ extern "C" {
 #include "bli_f2c.h"
 #include "bli_machval.h"
 #include "bli_version.h"
+#include "bli_getopt.h"
 
 // Control tree definitions.
 #include "bli_cntl.h"
