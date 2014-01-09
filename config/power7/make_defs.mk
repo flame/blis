@@ -101,7 +101,7 @@ ARFLAGS        := cru
 
 # --- Determine the linker and related flags ---
 LINKER         := $(CC)
-LDFLAGS        := 
+LDFLAGS        := -lm
 
 
 

@@ -39,6 +39,9 @@ CONFIG_MK_INCLUDED := yes
 # The name of the configuration sub-directory.
 CONFIG_NAME    := @config_name@
 
+# The directory path to the top level of the source distribution.
+DIST_PATH      := @dist_path@
+
 # The install prefix tell us where to install the libraries and header file
 # directory. Notice that we support the use of DESTDIR so that advanced users
 # may install to a temporary location.
