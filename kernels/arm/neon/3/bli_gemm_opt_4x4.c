@@ -276,12 +276,6 @@ void bli_dgemm_opt_4x4(
 	//void* a_next = bli_auxinfo_next_a( data );
 	//void* b_next = bli_auxinfo_next_b( data );
 
-	//dim_t   k_iter;
-	dim_t   k_left;
-
-	//k_iter  = k / 2;
-	k_left  = k % 2;
-	
 	register double a0;
 	register double a1;
 	register double a2;
@@ -312,6 +306,9 @@ void bli_dgemm_opt_4x4(
         double* restrict Bp = b + 4; 
 
 	dim_t  i; 
+	dim_t  k_left;
+
+	k_left  = k % 4;
 
 	c00 = (c + 0*rs_c + 0*cs_c); 
 	c10 = (c + 1*rs_c + 0*cs_c); 
@@ -356,7 +353,7 @@ void bli_dgemm_opt_4x4(
 	b1 = *(bp + 1);
 	b2 = *(bp + 2);
 
-	double *Aplast = (Ap + 4*k); 
+	double *Aplast = (Ap + 4*(k-k_left)); 
 
 	//for ( i = 0; i < k_iter; ++i ) // Unroll by factor 4.
 	for ( ; Ap != Aplast ; ) // Unroll by factor 4.
@@ -434,17 +431,18 @@ void bli_dgemm_opt_4x4(
 
 	} 
 
+
 	for ( i = 0; i < k_left; ++i ) 
 	{ 
-		a0 = *(a + 0); 
-		a1 = *(a + 1);
-		a2 = *(a + 2);
-		a3 = *(a + 3);
+		a0 = *(ap + 0); 
+		a1 = *(ap + 1);
+		a2 = *(ap + 2);
+		a3 = *(ap + 3);
 
-		b0 = *(b + 0);
-		b1 = *(b + 1);
-		b2 = *(b + 2);
-		b3 = *(b + 3);
+		b0 = *(bp + 0);
+		b1 = *(bp + 1);
+		b2 = *(bp + 2);
+		b3 = *(bp + 3);
 
 		ab00 += a0 * b0;
 		ab10 += a1 * b0;
@@ -466,8 +464,8 @@ void bli_dgemm_opt_4x4(
 		ab23 += a2 * b3;
 		ab33 += a3 * b3;
 
-		a += 4; 
-		b += 2; 
+		ap += 4; 
+		bp += 4; 
 	} 
 
 	*c00 = *c00 * *beta;
@@ -509,7 +507,6 @@ void bli_dgemm_opt_4x4(
 	*c13 += ab13 * *alpha;
 	*c23 += ab23 * *alpha;
 	*c33 += ab33 * *alpha;
-
 }
 
 void bli_cgemm_opt_4x4(
