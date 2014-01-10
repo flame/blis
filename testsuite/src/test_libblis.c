@@ -1903,15 +1903,21 @@ void libblis_test_parse_command_line( int argc, char** argv )
 {
 	bool_t gave_option_g = FALSE;
 	bool_t gave_option_o = FALSE;
-	char   opt;
+	int    opt;
+	char   opt_ch;
 
 	// Copy the binary name to a global string so we can use it later.
 	strncpy( libblis_test_binary_name, argv[0], MAX_BINARY_NAME_LENGTH );
-	
 
+	// Process all option arguments until we get a -1, which means we're done.
 	while( (opt = bli_getopt( argc, argv, "g:o:" )) != -1 )
 	{
-		switch( opt )
+		// Explicitly typecast opt, which is an int, to a char. (Failing to
+		// typecast resulted in at least one user-reported problem whereby
+		// opt was being filled with garbage.)
+		opt_ch = ( char )opt;
+
+		switch( opt_ch )
 		{
 			case 'g':
 			libblis_test_printf_infoc( "detected -g option; using \"%s\" for parameters filename.\n", bli_optarg );
@@ -1932,7 +1938,7 @@ void libblis_test_parse_command_line( int argc, char** argv )
 			break;
 
 			default:
-			libblis_test_printf_error( "unexpected option chararcter returned from getopt: %c\n", opt );
+			libblis_test_printf_error( "unexpected option chararcter returned from getopt: %c\n", opt_ch );
 		}
 	}
 
