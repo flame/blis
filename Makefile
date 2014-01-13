@@ -382,7 +382,7 @@ TESTSUITE_BIN           := $(TESTSUITE_NAME).x
 # current version/configuration. We consider this remaining set of libraries
 # to be "old" and eligible for removal upon running of the uninstall-old
 # target.
-UNINSTALL_LIBS   := $(shell $(FIND) $(INSTALL_PREFIX)/lib/ -name "$(BLIS_LIB_BASE_NAME)-*.a" | $(GREP) -v "$(BLIS_LIB_BASE_NAME)-$(VERS_CONF).a" | $(GREP) -v $(BLIS_LIB_NAME))
+UNINSTALL_LIBS   := $(shell $(FIND) $(INSTALL_PREFIX)/lib/ -name "$(BLIS_LIB_BASE_NAME)-*.a" 2> /dev/null | $(GREP) -v "$(BLIS_LIB_BASE_NAME)-$(VERS_CONF).a" | $(GREP) -v $(BLIS_LIB_NAME))
 
 
 
