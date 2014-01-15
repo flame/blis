@@ -240,12 +240,10 @@ typedef struct
 #define BLIS_BITVAL_INVERT_DIAG            0x200
 #define BLIS_BITVAL_NOT_PACKED             0x0
 #define BLIS_BITVAL_PACKED_UNSPEC          0x10000
-#define BLIS_BITVAL_PACKED_VECTOR          0x20000
-#define BLIS_BITVAL_PACKED_ROWS            0x30000
-#define BLIS_BITVAL_PACKED_COLUMNS         0x40000
-#define BLIS_BITVAL_PACKED_ROW_PANELS      0x50000
-#define BLIS_BITVAL_PACKED_COL_PANELS      0x60000
-#define BLIS_BITVAL_PACKED_BLOCKS          0x70000
+#define BLIS_BITVAL_PACKED_ROWS            0x20000
+#define BLIS_BITVAL_PACKED_COLUMNS         0x30000
+#define BLIS_BITVAL_PACKED_ROW_PANELS      0x40000
+#define BLIS_BITVAL_PACKED_COL_PANELS      0x50000
 #define BLIS_BITVAL_PACK_FWD_IF_UPPER      0x0
 #define BLIS_BITVAL_PACK_REV_IF_UPPER      0x80000
 #define BLIS_BITVAL_PACK_FWD_IF_LOWER      0x0
@@ -350,12 +348,11 @@ typedef enum
 {
 	BLIS_NOT_PACKED        = BLIS_BITVAL_NOT_PACKED,
 	BLIS_PACKED_UNSPEC     = BLIS_BITVAL_PACKED_UNSPEC,
-	BLIS_PACKED_VECTOR     = BLIS_BITVAL_PACKED_VECTOR,
+	BLIS_PACKED_VECTOR     = BLIS_BITVAL_PACKED_UNSPEC,
 	BLIS_PACKED_ROWS       = BLIS_BITVAL_PACKED_ROWS,
 	BLIS_PACKED_COLUMNS    = BLIS_BITVAL_PACKED_COLUMNS,
 	BLIS_PACKED_ROW_PANELS = BLIS_BITVAL_PACKED_ROW_PANELS,
 	BLIS_PACKED_COL_PANELS = BLIS_BITVAL_PACKED_COL_PANELS,
-	BLIS_PACKED_BLOCKS     = BLIS_BITVAL_PACKED_BLOCKS
 } pack_t;
 
 
@@ -449,12 +446,12 @@ typedef struct blksz_s
            - 15: unused
   18 ~ 16  Packed type/status
            - 0 == not packed
-           - 1 == packed (unspecified; row or column)
-           - 2 == packed vector
-           - 3 == packed by rows
-           - 4 == packed by columns
-           - 5 == packed by row panels
-           - 6 == packed by column panels
+           - 1 == packed (unspecified; row, column, or vector)
+           - 2 == packed by rows
+           - 3 == packed by columns
+           - 4 == packed by row panels
+           - 5 == packed by column panels
+           - 6 == unused
            - 7 == unused
        19  Packed panel order if upper-stored
            - 0 == forward order if upper

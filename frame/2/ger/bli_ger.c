@@ -48,9 +48,9 @@ void bli_ger( obj_t*  alpha,
 	num_t   dt_targ_x;
 	num_t   dt_targ_y;
 	//num_t   dt_targ_a;
-	bool_t  x_is_contig;
-	bool_t  y_is_contig;
-	bool_t  a_is_contig;
+	bool_t  x_has_unit_inc;
+	bool_t  y_has_unit_inc;
+	bool_t  a_has_unit_inc;
 	obj_t   alpha_local;
 	num_t   dt_alpha;
 
@@ -64,11 +64,11 @@ void bli_ger( obj_t*  alpha,
 	dt_targ_y = bli_obj_target_datatype( *y );
 	//dt_targ_a = bli_obj_target_datatype( *a );
 
-	// Determine whether each operand is stored contiguously.
-	x_is_contig = ( bli_obj_vector_inc( *x ) == 1 );
-	y_is_contig = ( bli_obj_vector_inc( *y ) == 1 );
-	a_is_contig = ( bli_obj_is_row_stored( *a ) ||
-	                bli_obj_is_col_stored( *a ) );
+	// Determine whether each operand with unit stride.
+	x_has_unit_inc = ( bli_obj_vector_inc( *x ) == 1 );
+	y_has_unit_inc = ( bli_obj_vector_inc( *y ) == 1 );
+	a_has_unit_inc = ( bli_obj_is_row_stored( *a ) ||
+	                   bli_obj_is_col_stored( *a ) );
 
 
 	// Create an object to hold a copy-cast of alpha. Notice that we use
@@ -80,11 +80,12 @@ void bli_ger( obj_t*  alpha,
 	                             alpha,
 	                             &alpha_local );
 
-	// If all operands are contiguous, we choose a control tree for calling
+
+	// If all operands have unit stride, we choose a control tree for calling
 	// the unblocked implementation directly without any blocking.
-	if ( x_is_contig &&
-	     y_is_contig &&
-	     a_is_contig )
+	if ( x_has_unit_inc &&
+	     y_has_unit_inc &&
+	     a_has_unit_inc )
 	{
 		// Use different control trees depending on storage of the matrix
 		// operand.
@@ -95,9 +96,9 @@ void bli_ger( obj_t*  alpha,
 	{
 		// Mark objects with unit stride as already being packed. This prevents
 		// unnecessary packing from happening within the blocked algorithm.
-		if ( x_is_contig ) bli_obj_set_pack_schema( BLIS_PACKED_VECTOR, *x );
-		if ( y_is_contig ) bli_obj_set_pack_schema( BLIS_PACKED_VECTOR, *y );
-		if ( a_is_contig ) bli_obj_set_pack_schema( BLIS_PACKED_UNSPEC, *a );
+		if ( x_has_unit_inc ) bli_obj_set_pack_schema( BLIS_PACKED_VECTOR, *x );
+		if ( y_has_unit_inc ) bli_obj_set_pack_schema( BLIS_PACKED_VECTOR, *y );
+		if ( a_has_unit_inc ) bli_obj_set_pack_schema( BLIS_PACKED_UNSPEC, *a );
 
 		// Here, we make a similar choice as above, except that (1) we look
 		// at storage tilt, and (2) we choose a tree that performs blocking.

@@ -46,8 +46,8 @@ void bli_syr( obj_t*  alpha,
 	her_t*  her_cntl;
 	num_t   dt_targ_x;
 	num_t   dt_targ_c;
-	bool_t  x_is_contig;
-	bool_t  c_is_contig;
+	bool_t  x_has_unit_inc;
+	bool_t  c_has_unit_inc;
 	obj_t   alpha_local;
 	num_t   dt_alpha;
 
@@ -60,10 +60,10 @@ void bli_syr( obj_t*  alpha,
 	dt_targ_x = bli_obj_target_datatype( *x );
 	dt_targ_c = bli_obj_target_datatype( *c );
 
-	// Determine whether each operand is stored contiguously.
-	x_is_contig = ( bli_obj_vector_inc( *x ) == 1 );
-	c_is_contig = ( bli_obj_is_row_stored( *c ) ||
-	                bli_obj_is_col_stored( *c ) );
+	// Determine whether each operand with unit stride.
+	x_has_unit_inc = ( bli_obj_vector_inc( *x ) == 1 );
+	c_has_unit_inc = ( bli_obj_is_row_stored( *c ) ||
+	                   bli_obj_is_col_stored( *c ) );
 
 
 	// Create an object to hold a copy-cast of alpha. Notice that we use
@@ -76,10 +76,10 @@ void bli_syr( obj_t*  alpha,
 	                             &alpha_local );
 
 
-	// If all operands are contiguous, we choose a control tree for calling
+	// If all operands have unit stride, we choose a control tree for calling
 	// the unblocked implementation directly without any blocking.
-	if ( x_is_contig &&
-	     c_is_contig )
+	if ( x_has_unit_inc &&
+	     c_has_unit_inc )
 	{
 		// We use two control trees to handle the four cases corresponding to
 		// combinations of upper/lower triangular storage and row/column-storage.
@@ -100,8 +100,8 @@ void bli_syr( obj_t*  alpha,
 	{
 		// Mark objects with unit stride as already being packed. This prevents
 		// unnecessary packing from happening within the blocked algorithm.
-		if ( x_is_contig ) bli_obj_set_pack_schema( BLIS_PACKED_VECTOR, *x );
-		if ( c_is_contig ) bli_obj_set_pack_schema( BLIS_PACKED_UNSPEC, *c );
+		if ( x_has_unit_inc ) bli_obj_set_pack_schema( BLIS_PACKED_VECTOR, *x );
+		if ( c_has_unit_inc ) bli_obj_set_pack_schema( BLIS_PACKED_UNSPEC, *c );
 
 		// Here, we make a similar choice as above, except that (1) we look
 		// at storage tilt, and (2) we choose a tree that performs blocking.
