@@ -71,7 +71,7 @@ INSERT_GENTPROT_BASIC( trmm3 )
 
 
 //
-// Prototype BLAS-like interfaces with homogeneous-typed operands.
+// Prototype BLAS-like interfaces with heterogeneous-typed operands.
 //
 #undef  GENTPROT3U12
 #define GENTPROT3U12( ctype_a, ctype_b, ctype_c, ctype_ab, cha, chb, chc, chab, opname ) \

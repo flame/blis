@@ -185,7 +185,7 @@ INSERT_GENTFUNC_BASIC( trmm, trmm )
 
 
 //
-// Define BLAS-like interfaces with homogeneous-typed operands.
+// Define BLAS-like interfaces with heterogeneous-typed operands.
 //
 #undef  GENTFUNC2
 #define GENTFUNC2( ctype_a, ctype_b, cha, chb, opname, varname ) \
