@@ -101,11 +101,6 @@ void bli_trmm_cntl_init()
 	                                BLIS_DEFAULT_KR_C, BLIS_EXTEND_KR_C,
 	                                BLIS_DEFAULT_KR_Z, BLIS_EXTEND_KR_Z );
 
-	trmm_ni = bli_blksz_obj_create( BLIS_DEFAULT_NI_S, 0,
-	                                BLIS_DEFAULT_NI_D, 0,
-	                                BLIS_DEFAULT_NI_C, 0,
-	                                BLIS_DEFAULT_NI_Z, 0 );
-
 
 	// Create control tree objects for packm operations (left side).
 	trmm_l_packa_cntl
@@ -195,7 +190,7 @@ void bli_trmm_cntl_init()
 	=
 	bli_trmm_cntl_obj_create( BLIS_UNB_OPT,
 	                          BLIS_VARIANT2,
-	                          NULL, NULL, NULL, NULL, NULL,
+	                          NULL, NULL, NULL, NULL,
 	                          NULL, NULL, NULL, NULL );
 
 	// Create control tree object for outer panel (to block-panel)
@@ -205,7 +200,6 @@ void bli_trmm_cntl_init()
 	bli_trmm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT1,
 	                          trmm_mc,
-	                          trmm_ni,
 	                          NULL,
 	                          trmm_l_packa_cntl,
 	                          trmm_l_packb_cntl,
@@ -221,7 +215,6 @@ void bli_trmm_cntl_init()
 	bli_trmm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT3,
 	                          trmm_kc,
-	                          NULL,
 	                          NULL,
 	                          NULL, 
 	                          NULL,
@@ -241,7 +234,6 @@ void bli_trmm_cntl_init()
 	                          NULL,
 	                          NULL,
 	                          NULL,
-	                          NULL,
 	                          trmm_l_cntl_mm_op,
 	                          NULL,
 	                          NULL );
@@ -253,7 +245,6 @@ void bli_trmm_cntl_init()
 	bli_trmm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT1,
 	                          trmm_mc,
-	                          trmm_ni,
 	                          NULL,
 	                          trmm_r_packa_cntl,
 	                          trmm_r_packb_cntl,
@@ -270,7 +261,6 @@ void bli_trmm_cntl_init()
 	                          BLIS_VARIANT3,
 	                          trmm_kc,
 	                          NULL,
-	                          NULL,
 	                          NULL, 
 	                          NULL,
 	                          NULL,
@@ -285,7 +275,6 @@ void bli_trmm_cntl_init()
 	bli_trmm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT2,
 	                          trmm_nc,
-	                          NULL,
 	                          NULL,
 	                          NULL,
 	                          NULL,
@@ -307,7 +296,6 @@ void bli_trmm_cntl_finalize()
 	bli_blksz_obj_free( trmm_mr );
 	bli_blksz_obj_free( trmm_nr );
 	bli_blksz_obj_free( trmm_kr );
-	bli_blksz_obj_free( trmm_ni );
 
 	bli_cntl_obj_free( trmm_l_packa_cntl );
 	bli_cntl_obj_free( trmm_l_packb_cntl );
@@ -328,7 +316,6 @@ void bli_trmm_cntl_finalize()
 trmm_t* bli_trmm_cntl_obj_create( impl_t     impl_type,
                                   varnum_t   var_num,
                                   blksz_t*   b,
-                                  blksz_t*   b_aux,
                                   scalm_t*   sub_scalm,
                                   packm_t*   sub_packm_a,
                                   packm_t*   sub_packm_b,
@@ -344,7 +331,6 @@ trmm_t* bli_trmm_cntl_obj_create( impl_t     impl_type,
 	cntl->impl_type     = impl_type;
 	cntl->var_num       = var_num;
 	cntl->b             = b;
-	cntl->b_aux         = b_aux;
 	cntl->sub_scalm     = sub_scalm;
 	cntl->sub_packm_a   = sub_packm_a;
 	cntl->sub_packm_b   = sub_packm_b;

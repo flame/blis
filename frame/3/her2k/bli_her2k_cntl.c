@@ -55,7 +55,6 @@ blksz_t*          her2k_kc;
 blksz_t*          her2k_mr;
 blksz_t*          her2k_nr;
 blksz_t*          her2k_kr;
-blksz_t*          her2k_ni;
 
 
 void bli_her2k_cntl_init()
@@ -90,11 +89,6 @@ void bli_her2k_cntl_init()
 	                                 BLIS_DEFAULT_KR_D, BLIS_EXTEND_KR_D,
 	                                 BLIS_DEFAULT_KR_C, BLIS_EXTEND_KR_C,
 	                                 BLIS_DEFAULT_KR_Z, BLIS_EXTEND_KR_Z );
-
-	her2k_ni = bli_blksz_obj_create( BLIS_DEFAULT_NI_S, 0,
-	                                 BLIS_DEFAULT_NI_D, 0,
-	                                 BLIS_DEFAULT_NI_C, 0,
-	                                 BLIS_DEFAULT_NI_Z, 0 );
 
 
 	// Create control tree objects for packm operations.
@@ -149,7 +143,7 @@ void bli_her2k_cntl_init()
 	=
 	bli_her2k_cntl_obj_create( BLIS_UNB_OPT,
 	                           BLIS_VARIANT2,
-	                           NULL, NULL, NULL, NULL, NULL,
+	                           NULL, NULL, NULL, NULL,
 	                           NULL, NULL, NULL, NULL );
 
 	// Create control tree object for outer panel (to block-panel)
@@ -157,10 +151,8 @@ void bli_her2k_cntl_init()
 	her2k_cntl_op_bp
 	=
 	bli_her2k_cntl_obj_create( BLIS_BLOCKED,
-	                           //BLIS_VARIANT4,  // var1 with incremental pack in iter 0
 	                           BLIS_VARIANT1,
 	                           her2k_mc,
-	                           her2k_ni,
 	                           NULL,
 	                           her2k_packa_cntl,
 	                           her2k_packb_cntl,
@@ -177,7 +169,6 @@ void bli_her2k_cntl_init()
 	                           BLIS_VARIANT3,
 	                           her2k_kc,
 	                           NULL,
-	                           NULL,
 	                           NULL, 
 	                           NULL,
 	                           NULL,
@@ -192,7 +183,6 @@ void bli_her2k_cntl_init()
 	bli_her2k_cntl_obj_create( BLIS_BLOCKED,
 	                           BLIS_VARIANT2,
 	                           her2k_nc,
-	                           NULL,
 	                           NULL,
 	                           NULL, 
 	                           NULL,
@@ -213,7 +203,6 @@ void bli_her2k_cntl_finalize()
 	bli_blksz_obj_free( her2k_mr );
 	bli_blksz_obj_free( her2k_nr );
 	bli_blksz_obj_free( her2k_kr );
-	bli_blksz_obj_free( her2k_ni );
 
 	bli_cntl_obj_free( her2k_packa_cntl );
 	bli_cntl_obj_free( her2k_packb_cntl );
@@ -229,7 +218,6 @@ void bli_her2k_cntl_finalize()
 her2k_t* bli_her2k_cntl_obj_create( impl_t     impl_type,
                                     varnum_t   var_num,
                                     blksz_t*   b,
-                                    blksz_t*   b_aux,
                                     scalm_t*   sub_scalm,
                                     packm_t*   sub_packm_a,
                                     packm_t*   sub_packm_b,
@@ -245,7 +233,6 @@ her2k_t* bli_her2k_cntl_obj_create( impl_t     impl_type,
 	cntl->impl_type     = impl_type;
 	cntl->var_num       = var_num;
 	cntl->b             = b;
-	cntl->b_aux         = b_aux;
 	cntl->sub_scalm     = sub_scalm;
 	cntl->sub_packm_a   = sub_packm_a;
 	cntl->sub_packm_b   = sub_packm_b;

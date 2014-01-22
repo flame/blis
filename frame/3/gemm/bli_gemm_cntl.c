@@ -37,18 +37,19 @@
 extern scalm_t*   scalm_cntl;
 
 gemm_t*           gemm_cntl;
-gemm_t*           gemm_cntl_packa;
 
 gemm_t*           gemm_cntl_bp_ke;
 gemm_t*           gemm_cntl_op_bp;
 gemm_t*           gemm_cntl_mm_op;
 gemm_t*           gemm_cntl_vl_mm;
+#if 0
+gemm_t*           gemm_cntl_packa;
 
 gemm_t*           gemm_cntl_bp_ke5;
 gemm_t*           gemm_cntl_pm_bp;
 gemm_t*           gemm_cntl_mm_pm;
 gemm_t*           gemm_cntl_vl_mm5;
-
+#endif
 packm_t*          gemm_packa_cntl;
 packm_t*          gemm_packb_cntl;
 packm_t*          gemm_packc_cntl;
@@ -60,7 +61,6 @@ blksz_t*          gemm_kc;
 blksz_t*          gemm_mr;
 blksz_t*          gemm_nr;
 blksz_t*          gemm_kr;
-blksz_t*          gemm_ni;
 
 
 void bli_gemm_cntl_init()
@@ -95,11 +95,6 @@ void bli_gemm_cntl_init()
 	                                BLIS_DEFAULT_KR_D, BLIS_EXTEND_KR_D,
 	                                BLIS_DEFAULT_KR_C, BLIS_EXTEND_KR_C,
 	                                BLIS_DEFAULT_KR_Z, BLIS_EXTEND_KR_Z );
-
-	gemm_ni = bli_blksz_obj_create( BLIS_DEFAULT_NI_S, 0,
-	                                BLIS_DEFAULT_NI_D, 0,
-	                                BLIS_DEFAULT_NI_C, 0,
-	                                BLIS_DEFAULT_NI_Z, 0 );
 
 
 	// Create control tree objects for packm operations.
@@ -159,7 +154,7 @@ void bli_gemm_cntl_init()
 	=
 	bli_gemm_cntl_obj_create( BLIS_UNB_OPT,
 	                          BLIS_VARIANT2,
-	                          NULL, NULL, NULL, NULL,
+	                          NULL, NULL, NULL,
 	                          NULL, NULL, NULL, NULL );
 
 	// Create control tree object for outer panel (to block-panel)
@@ -169,7 +164,6 @@ void bli_gemm_cntl_init()
 	bli_gemm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT1,
 	                          gemm_mc,
-	                          gemm_ni,
 	                          NULL,
 	                          gemm_packa_cntl,
 	                          gemm_packb_cntl,
@@ -188,7 +182,6 @@ void bli_gemm_cntl_init()
 	                          NULL,
 	                          NULL,
 	                          NULL,
-	                          NULL,
 	                          gemm_cntl_op_bp,
 	                          NULL );
 
@@ -203,14 +196,13 @@ void bli_gemm_cntl_init()
 	                          NULL,
 	                          NULL,
 	                          NULL,
-	                          NULL,
 	                          gemm_cntl_mm_op,
 	                          NULL );
 
 	// Alias the "master" gemm control tree to a shorter name.
 	gemm_cntl = gemm_cntl_vl_mm;
 
-
+#if 0
 	//
 	// Create a control tree for packing A, and streaming B and C.
 	//
@@ -226,7 +218,6 @@ void bli_gemm_cntl_init()
 	bli_gemm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT3,
 	                          gemm_kc,
-	                          NULL,
 	                          NULL,
 	                          gemm_packa_cntl,
 	                          NULL,
@@ -245,7 +236,6 @@ void bli_gemm_cntl_init()
 	                          NULL,
 	                          NULL,
 	                          NULL,
-	                          NULL,
 	                          gemm_cntl_pm_bp,
 	                          NULL );
 
@@ -258,11 +248,11 @@ void bli_gemm_cntl_init()
 	                          NULL,
 	                          NULL,
 	                          NULL,
-	                          NULL,
 	                          gemm_cntl_mm_pm,
 	                          NULL );
 
 	gemm_cntl_packa = gemm_cntl_vl_mm5;
+#endif
 }
 
 void bli_gemm_cntl_finalize()
@@ -273,7 +263,6 @@ void bli_gemm_cntl_finalize()
 	bli_blksz_obj_free( gemm_mr );
 	bli_blksz_obj_free( gemm_nr );
 	bli_blksz_obj_free( gemm_kr );
-	bli_blksz_obj_free( gemm_ni );
 
 	bli_cntl_obj_free( gemm_packa_cntl );
 	bli_cntl_obj_free( gemm_packb_cntl );
@@ -285,16 +274,17 @@ void bli_gemm_cntl_finalize()
 	bli_cntl_obj_free( gemm_cntl_mm_op );
 	bli_cntl_obj_free( gemm_cntl_vl_mm );
 
+#if 0
 	bli_cntl_obj_free( gemm_cntl_bp_ke5 );
 	bli_cntl_obj_free( gemm_cntl_pm_bp );
 	bli_cntl_obj_free( gemm_cntl_mm_pm );
 	bli_cntl_obj_free( gemm_cntl_vl_mm5 );
+#endif
 }
 
 gemm_t* bli_gemm_cntl_obj_create( impl_t     impl_type,
                                   varnum_t   var_num,
                                   blksz_t*   b,
-                                  blksz_t*   b_aux,
                                   scalm_t*   sub_scalm,
                                   packm_t*   sub_packm_a,
                                   packm_t*   sub_packm_b,
@@ -309,7 +299,6 @@ gemm_t* bli_gemm_cntl_obj_create( impl_t     impl_type,
 	cntl->impl_type     = impl_type;
 	cntl->var_num       = var_num;
 	cntl->b             = b;
-	cntl->b_aux         = b_aux;
 	cntl->sub_scalm     = sub_scalm;
 	cntl->sub_packm_a   = sub_packm_a;
 	cntl->sub_packm_b   = sub_packm_b;

@@ -54,7 +54,6 @@ blksz_t*          hemm_kc;
 blksz_t*          hemm_mr;
 blksz_t*          hemm_nr;
 blksz_t*          hemm_kr;
-blksz_t*          hemm_ni;
 
 
 void bli_hemm_cntl_init()
@@ -89,11 +88,6 @@ void bli_hemm_cntl_init()
 	                                BLIS_DEFAULT_KR_D, BLIS_EXTEND_KR_D,
 	                                BLIS_DEFAULT_KR_C, BLIS_EXTEND_KR_C,
 	                                BLIS_DEFAULT_KR_Z, BLIS_EXTEND_KR_Z );
-
-	hemm_ni = bli_blksz_obj_create( BLIS_DEFAULT_NI_S, 0,
-	                                BLIS_DEFAULT_NI_D, 0,
-	                                BLIS_DEFAULT_NI_C, 0,
-	                                BLIS_DEFAULT_NI_Z, 0 );
 
 
 	// Create control tree objects for packm operations.
@@ -149,7 +143,7 @@ void bli_hemm_cntl_init()
 	=
 	bli_gemm_cntl_obj_create( BLIS_UNB_OPT,
 	                          BLIS_VARIANT2,
-	                          NULL, NULL, NULL, NULL,
+	                          NULL, NULL, NULL,
 	                          NULL, NULL, NULL, NULL );
 
 	// Create control tree object for outer panel (to block-panel)
@@ -157,10 +151,8 @@ void bli_hemm_cntl_init()
 	hemm_cntl_op_bp
 	=
 	bli_gemm_cntl_obj_create( BLIS_BLOCKED,
-	                          //BLIS_VARIANT4,  // var1 with incremental pack in iter 0
 	                          BLIS_VARIANT1,
 	                          hemm_mc,
-	                          hemm_ni,
 	                          NULL,
 	                          hemm_packa_cntl,
 	                          hemm_packb_cntl,
@@ -176,7 +168,6 @@ void bli_hemm_cntl_init()
 	                          BLIS_VARIANT3,
 	                          hemm_kc,
 	                          NULL,
-	                          NULL,
 	                          NULL, 
 	                          NULL,
 	                          NULL,
@@ -190,7 +181,6 @@ void bli_hemm_cntl_init()
 	bli_gemm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT2,
 	                          hemm_nc,
-	                          NULL,
 	                          NULL,
 	                          NULL,
 	                          NULL,
@@ -210,7 +200,6 @@ void bli_hemm_cntl_finalize()
 	bli_blksz_obj_free( hemm_mr );
 	bli_blksz_obj_free( hemm_nr );
 	bli_blksz_obj_free( hemm_kr );
-	bli_blksz_obj_free( hemm_ni );
 
 	bli_cntl_obj_free( hemm_packa_cntl );
 	bli_cntl_obj_free( hemm_packb_cntl );

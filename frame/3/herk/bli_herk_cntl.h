@@ -37,7 +37,6 @@ struct herk_s
 	impl_t             impl_type;
 	varnum_t           var_num;
 	blksz_t*           b;
-	blksz_t*           b_aux;
 	struct scalm_s*    sub_scalm;
 	struct packm_s*    sub_packm_a;
 	struct packm_s*    sub_packm_b;
@@ -54,7 +53,6 @@ void    bli_herk_cntl_finalize( void );
 herk_t* bli_herk_cntl_obj_create( impl_t       impl_type,
                                   varnum_t     var_num,
                                   blksz_t*     b,
-                                  blksz_t*     b_aux,
                                   scalm_t*     sub_scalm,
                                   packm_t*     sub_pack_a,
                                   packm_t*     sub_pack_b,

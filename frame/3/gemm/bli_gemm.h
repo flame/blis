@@ -40,7 +40,6 @@
 #include "bli_gemm_blk_var1.h"
 #include "bli_gemm_blk_var2.h"
 #include "bli_gemm_blk_var3.h"
-#include "bli_gemm_blk_var4.h"
 
 #include "bli_gemm_ker_var2.h"
 #include "bli_gemm_ker_var5.h"
