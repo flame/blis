@@ -86,23 +86,6 @@ void bli_herk_l_ker_var2( obj_t*  a,
 
 	FUNCPTR_T f;
 
-/*
-	// Handle the special case where c and a are complex and b is real.
-	// Note that this is the ONLY case allowed by the inner kernel whereby
-	// the datatypes of a and b differ. In this situation, the execution
-	// datatype is real, so we need to inflate (by a factor of two):
-	//  - the m dimension,
-	//  - the column stride of c,
-	//  - the column stride (ie: the panel length) of a, and
-	//  - the panel stride of a.
-	if ( bli_obj_is_complex( *a ) && bli_obj_is_real( *b ) )
-	{
-		m    *= 2;
-		cs_c *= 2;
-		cs_a *= 2;
-		ps_a *= 2;
-	}
-*/
 
 	// Detach and multiply the scalars attached to A and B.
 	bli_obj_scalar_detach( a, &scalar_a );
