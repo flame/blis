@@ -37,6 +37,7 @@ struct trmm_s
 	impl_t             impl_type;
 	varnum_t           var_num;
 	blksz_t*           b;
+	func_t*            gemm_ukrs;
 	struct scalm_s*    sub_scalm;
 	struct packm_s*    sub_packm_a;
 	struct packm_s*    sub_packm_b;
@@ -54,6 +55,7 @@ void    bli_trmm_cntl_finalize( void );
 trmm_t* bli_trmm_cntl_obj_create( impl_t       impl_type,
                                   varnum_t     var_num,
                                   blksz_t*     b,
+                                  func_t*      gemm_ukrs,
                                   scalm_t*     sub_scalm,
                                   packm_t*     sub_pack_a,
                                   packm_t*     sub_pack_b,

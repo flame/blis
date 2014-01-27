@@ -44,7 +44,9 @@ typedef void (*FUNCPTR_T)(
                            void*   alpha,
                            void*   a, inc_t rs_a, inc_t cs_a, inc_t ps_a,
                            void*   b, inc_t rs_b, inc_t cs_b, inc_t ps_b,
-                           void*   c, inc_t rs_c, inc_t cs_c
+                           void*   c, inc_t rs_c, inc_t cs_c,
+                           void*   gemmtrsm_ukr,
+                           void*   gemm_ukr
                          );
 
 static FUNCPTR_T GENARRAY(ftypes,trsm_rl_ker_var2);
@@ -81,6 +83,11 @@ void bli_trsm_rl_ker_var2( obj_t*  a,
 
 	FUNCPTR_T f;
 
+	func_t*   gemmtrsm_ukrs;
+	func_t*   gemm_ukrs;
+	void*     gemmtrsm_ukr;
+	void*     gemm_ukr;
+
 
 	// Grab the address of the internal scalar buffer for the scalar
 	// attached to B.
@@ -90,6 +97,14 @@ void bli_trsm_rl_ker_var2( obj_t*  a,
 	// function pointer.
 	f = ftypes[dt_exec];
 
+	// Extract from the control tree node the func_t objects containing
+	// the gemmtrsm and gemm micro-kernel function addresses, and then
+	// query the function addresses corresponding to the current datatype.
+	gemmtrsm_ukrs = cntl_gemmtrsm_u_ukrs( cntl );
+	gemm_ukrs     = cntl_gemm_ukrs( cntl );
+	gemmtrsm_ukr  = bli_func_obj_query( dt_exec, gemmtrsm_ukrs );
+	gemm_ukr      = bli_func_obj_query( dt_exec, gemm_ukrs );
+
 	// Invoke the function.
 	f( diagoffb,
 	   m,
@@ -98,12 +113,14 @@ void bli_trsm_rl_ker_var2( obj_t*  a,
 	   buf_alpha,
 	   buf_a, rs_a, cs_a, ps_a,
 	   buf_b, rs_b, cs_b, ps_b,
-	   buf_c, rs_c, cs_c );
+	   buf_c, rs_c, cs_c,
+	   gemmtrsm_ukr,
+	   gemm_ukr );
 }
 
 
 #undef  GENTFUNC
-#define GENTFUNC( ctype, ch, varname, gemmtrsmukr, gemmukr ) \
+#define GENTFUNC( ctype, ch, varname, gemmtrsmtype, gemmtype ) \
 \
 void PASTEMAC(ch,varname)( \
                            doff_t  diagoffb, \
@@ -113,9 +130,15 @@ void PASTEMAC(ch,varname)( \
                            void*   alpha, \
                            void*   a, inc_t rs_a, inc_t cs_a, inc_t ps_a, \
                            void*   b, inc_t rs_b, inc_t cs_b, inc_t ps_b, \
-                           void*   c, inc_t rs_c, inc_t cs_c \
+                           void*   c, inc_t rs_c, inc_t cs_c, \
+                           void*   gemmtrsm_ukr, \
+                           void*   gemm_ukr  \
                          ) \
 { \
+	/* Cast the micro-kernels' addresses to their function pointer types. */ \
+	PASTECH(ch,gemmtrsmtype) gemmtrsm_ukr_cast = gemmtrsm_ukr; \
+	PASTECH(ch,gemmtype)     gemm_ukr_cast     = gemm_ukr; \
+\
 	/* Temporary C buffer for edge cases. */ \
 	ctype           ct[ PASTEMAC(ch,nr) * \
 	                    PASTEMAC(ch,mr) ] \
@@ -324,7 +347,7 @@ void PASTEMAC(ch,varname)( \
 				if ( m_cur == MR && n_cur == NR ) \
 				{ \
 					/* Invoke the fused gemm/trsm micro-kernel. */ \
-					PASTEMAC(ch,gemmtrsmukr)( k_b21, \
+					gemmtrsm_ukr_cast( k_b21, \
 					                          alpha_cast, \
 					                          b21, \
 					                          b11, \
@@ -336,7 +359,7 @@ void PASTEMAC(ch,varname)( \
 				else \
 				{ \
 					/* Invoke the fused gemm/trsm micro-kernel. */ \
-					PASTEMAC(ch,gemmtrsmukr)( k_b21, \
+					gemmtrsm_ukr_cast( k_b21, \
 					                          alpha_cast, \
 					                          b21, \
 					                          b11, \
@@ -384,7 +407,7 @@ void PASTEMAC(ch,varname)( \
 				if ( m_cur == MR && n_cur == NR ) \
 				{ \
 					/* Invoke the gemm micro-kernel. */ \
-					PASTEMAC(ch,gemmukr)( k, \
+					gemm_ukr_cast( k, \
 					                      minus_one, \
 					                      b1, \
 					                      a1, \
@@ -395,7 +418,7 @@ void PASTEMAC(ch,varname)( \
 				else \
 				{ \
 					/* Invoke the gemm micro-kernel. */ \
-					PASTEMAC(ch,gemmukr)( k, \
+					gemm_ukr_cast( k, \
 					                      minus_one, \
 					                      b1, \
 					                      a1, \
@@ -420,5 +443,5 @@ void PASTEMAC(ch,varname)( \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC2( trsm_rl_ker_var2, GEMMTRSM_U_UKERNEL, GEMM_UKERNEL )
+INSERT_GENTFUNC_BASIC2( trsm_rl_ker_var2, gemmtrsm_ukr_t, gemm_ukr_t )
 

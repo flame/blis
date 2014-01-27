@@ -36,31 +36,26 @@
 
 extern scalm_t*   scalm_cntl;
 
-gemm_t*           gemm_cntl;
-
-gemm_t*           gemm_cntl_bp_ke;
-gemm_t*           gemm_cntl_op_bp;
-gemm_t*           gemm_cntl_mm_op;
-gemm_t*           gemm_cntl_vl_mm;
-#if 0
-gemm_t*           gemm_cntl_packa;
-
-gemm_t*           gemm_cntl_bp_ke5;
-gemm_t*           gemm_cntl_pm_bp;
-gemm_t*           gemm_cntl_mm_pm;
-gemm_t*           gemm_cntl_vl_mm5;
-#endif
-packm_t*          gemm_packa_cntl;
-packm_t*          gemm_packb_cntl;
-packm_t*          gemm_packc_cntl;
-unpackm_t*        gemm_unpackc_cntl;
-
 blksz_t*          gemm_mc;
 blksz_t*          gemm_nc;
 blksz_t*          gemm_kc;
 blksz_t*          gemm_mr;
 blksz_t*          gemm_nr;
 blksz_t*          gemm_kr;
+
+func_t*           gemm_ukrs;
+
+packm_t*          gemm_packa_cntl;
+packm_t*          gemm_packb_cntl;
+packm_t*          gemm_packc_cntl;
+unpackm_t*        gemm_unpackc_cntl;
+
+gemm_t*           gemm_cntl_bp_ke;
+gemm_t*           gemm_cntl_op_bp;
+gemm_t*           gemm_cntl_mm_op;
+gemm_t*           gemm_cntl_vl_mm;
+
+gemm_t*           gemm_cntl;
 
 
 void bli_gemm_cntl_init()
@@ -95,6 +90,11 @@ void bli_gemm_cntl_init()
 	                                BLIS_DEFAULT_KR_D, BLIS_EXTEND_KR_D,
 	                                BLIS_DEFAULT_KR_C, BLIS_EXTEND_KR_C,
 	                                BLIS_DEFAULT_KR_Z, BLIS_EXTEND_KR_Z );
+
+	gemm_ukrs = bli_func_obj_create( BLIS_SGEMM_UKERNEL,
+	                                 BLIS_DGEMM_UKERNEL,
+	                                 BLIS_CGEMM_UKERNEL,
+	                                 BLIS_ZGEMM_UKERNEL );
 
 
 	// Create control tree objects for packm operations.
@@ -154,8 +154,10 @@ void bli_gemm_cntl_init()
 	=
 	bli_gemm_cntl_obj_create( BLIS_UNB_OPT,
 	                          BLIS_VARIANT2,
+	                          NULL,
+	                          gemm_ukrs,
 	                          NULL, NULL, NULL,
-	                          NULL, NULL, NULL, NULL );
+	                          NULL, NULL, NULL );
 
 	// Create control tree object for outer panel (to block-panel)
 	// problem.
@@ -164,6 +166,7 @@ void bli_gemm_cntl_init()
 	bli_gemm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT1,
 	                          gemm_mc,
+	                          NULL,
 	                          NULL,
 	                          gemm_packa_cntl,
 	                          gemm_packb_cntl,
@@ -182,6 +185,7 @@ void bli_gemm_cntl_init()
 	                          NULL,
 	                          NULL,
 	                          NULL,
+	                          NULL,
 	                          gemm_cntl_op_bp,
 	                          NULL );
 
@@ -196,63 +200,14 @@ void bli_gemm_cntl_init()
 	                          NULL,
 	                          NULL,
 	                          NULL,
+	                          NULL,
 	                          gemm_cntl_mm_op,
 	                          NULL );
 
 	// Alias the "master" gemm control tree to a shorter name.
 	gemm_cntl = gemm_cntl_vl_mm;
 
-#if 0
-	//
-	// Create a control tree for packing A, and streaming B and C.
-	//
-
-	gemm_cntl_bp_ke5
-	=
-	bli_gemm_cntl_obj_create( BLIS_UNB_OPT,
-	                          BLIS_VARIANT5,
-	                          NULL, NULL, NULL, NULL,
-	                          NULL, NULL, NULL, NULL );
-	gemm_cntl_pm_bp
-	=
-	bli_gemm_cntl_obj_create( BLIS_BLOCKED,
-	                          BLIS_VARIANT3,
-	                          gemm_kc,
-	                          NULL,
-	                          gemm_packa_cntl,
-	                          NULL,
-	                          //gemm_packc_cntl,
-	                          NULL,
-	                          gemm_cntl_bp_ke5,
-	                          //gemm_unpackc_cntl );
-	                          NULL );
-
-	gemm_cntl_mm_pm
-	=
-	bli_gemm_cntl_obj_create( BLIS_BLOCKED,
-	                          BLIS_VARIANT1,
-	                          gemm_mc,
-	                          NULL,
-	                          NULL,
-	                          NULL,
-	                          NULL,
-	                          gemm_cntl_pm_bp,
-	                          NULL );
-
-	gemm_cntl_vl_mm5
-	=
-	bli_gemm_cntl_obj_create( BLIS_BLOCKED,
-	                          BLIS_VARIANT2,
-	                          gemm_nc,
-	                          NULL,
-	                          NULL,
-	                          NULL,
-	                          NULL,
-	                          gemm_cntl_mm_pm,
-	                          NULL );
-
-	gemm_cntl_packa = gemm_cntl_vl_mm5;
-#endif
+	//bli_gemm_cntl_init_exp();
 }
 
 void bli_gemm_cntl_finalize()
@@ -264,6 +219,8 @@ void bli_gemm_cntl_finalize()
 	bli_blksz_obj_free( gemm_nr );
 	bli_blksz_obj_free( gemm_kr );
 
+	bli_func_obj_free( gemm_ukrs );
+
 	bli_cntl_obj_free( gemm_packa_cntl );
 	bli_cntl_obj_free( gemm_packb_cntl );
 	bli_cntl_obj_free( gemm_packc_cntl );
@@ -274,17 +231,13 @@ void bli_gemm_cntl_finalize()
 	bli_cntl_obj_free( gemm_cntl_mm_op );
 	bli_cntl_obj_free( gemm_cntl_vl_mm );
 
-#if 0
-	bli_cntl_obj_free( gemm_cntl_bp_ke5 );
-	bli_cntl_obj_free( gemm_cntl_pm_bp );
-	bli_cntl_obj_free( gemm_cntl_mm_pm );
-	bli_cntl_obj_free( gemm_cntl_vl_mm5 );
-#endif
+	//bli_gemm_cntl_finalize_exp();
 }
 
 gemm_t* bli_gemm_cntl_obj_create( impl_t     impl_type,
                                   varnum_t   var_num,
                                   blksz_t*   b,
+                                  func_t*    gemm_ukrs_,
                                   scalm_t*   sub_scalm,
                                   packm_t*   sub_packm_a,
                                   packm_t*   sub_packm_b,
@@ -294,11 +247,12 @@ gemm_t* bli_gemm_cntl_obj_create( impl_t     impl_type,
 {
 	gemm_t* cntl;
 
-	cntl = ( gemm_t* ) bli_malloc( sizeof(gemm_t) );	
+	cntl = ( gemm_t* ) bli_malloc( sizeof(gemm_t) );
 
 	cntl->impl_type     = impl_type;
 	cntl->var_num       = var_num;
 	cntl->b             = b;
+	cntl->gemm_ukrs     = gemm_ukrs_; // avoid name conflict with global symbol
 	cntl->sub_scalm     = sub_scalm;
 	cntl->sub_packm_a   = sub_packm_a;
 	cntl->sub_packm_b   = sub_packm_b;

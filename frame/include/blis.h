@@ -71,6 +71,7 @@ extern "C" {
 // -- BLIS kernel definitions --
 
 #include "bli_kernel.h"
+#include "bli_kernel_type_defs.h"
 #include "bli_kernel_macro_defs.h"
 
 
@@ -89,6 +90,7 @@ extern "C" {
 #include "bli_part.h"
 #include "bli_query.h"
 #include "bli_blocksize.h"
+#include "bli_func.h"
 #include "bli_param_map.h"
 #include "bli_clock.h"
 #include "bli_check.h"

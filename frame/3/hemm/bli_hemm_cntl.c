@@ -35,18 +35,7 @@
 #include "blis.h"
 
 extern scalm_t*   scalm_cntl;
-
-gemm_t*           hemm_cntl;
-
-gemm_t*           hemm_cntl_bp_ke;
-gemm_t*           hemm_cntl_op_bp;
-gemm_t*           hemm_cntl_mm_op;
-gemm_t*           hemm_cntl_vl_mm;
-
-packm_t*          hemm_packa_cntl;
-packm_t*          hemm_packb_cntl;
-packm_t*          hemm_packc_cntl;
-unpackm_t*        hemm_unpackc_cntl;
+extern func_t*    gemm_ukrs;
 
 blksz_t*          hemm_mc;
 blksz_t*          hemm_nc;
@@ -54,6 +43,18 @@ blksz_t*          hemm_kc;
 blksz_t*          hemm_mr;
 blksz_t*          hemm_nr;
 blksz_t*          hemm_kr;
+
+packm_t*          hemm_packa_cntl;
+packm_t*          hemm_packb_cntl;
+packm_t*          hemm_packc_cntl;
+unpackm_t*        hemm_unpackc_cntl;
+
+gemm_t*           hemm_cntl_bp_ke;
+gemm_t*           hemm_cntl_op_bp;
+gemm_t*           hemm_cntl_mm_op;
+gemm_t*           hemm_cntl_vl_mm;
+
+gemm_t*           hemm_cntl;
 
 
 void bli_hemm_cntl_init()
@@ -143,8 +144,10 @@ void bli_hemm_cntl_init()
 	=
 	bli_gemm_cntl_obj_create( BLIS_UNB_OPT,
 	                          BLIS_VARIANT2,
+	                          NULL,
+	                          gemm_ukrs,
 	                          NULL, NULL, NULL,
-	                          NULL, NULL, NULL, NULL );
+	                          NULL, NULL, NULL );
 
 	// Create control tree object for outer panel (to block-panel)
 	// problem.
@@ -153,6 +156,7 @@ void bli_hemm_cntl_init()
 	bli_gemm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT1,
 	                          hemm_mc,
+	                          NULL,
 	                          NULL,
 	                          hemm_packa_cntl,
 	                          hemm_packb_cntl,
@@ -168,6 +172,7 @@ void bli_hemm_cntl_init()
 	                          BLIS_VARIANT3,
 	                          hemm_kc,
 	                          NULL,
+	                          NULL,
 	                          NULL, 
 	                          NULL,
 	                          NULL,
@@ -181,6 +186,7 @@ void bli_hemm_cntl_init()
 	bli_gemm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT2,
 	                          hemm_nc,
+	                          NULL,
 	                          NULL,
 	                          NULL,
 	                          NULL,

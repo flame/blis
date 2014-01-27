@@ -36,18 +36,7 @@
 
 extern scalm_t*   scalm_cntl;
 extern herk_t*    herk_cntl_bp_ke;
-
-her2k_t*          her2k_cntl;
-
-her2k_t*          her2k_cntl_bp_ke;
-her2k_t*          her2k_cntl_op_bp;
-her2k_t*          her2k_cntl_mm_op;
-her2k_t*          her2k_cntl_vl_mm;
-
-packm_t*          her2k_packa_cntl;
-packm_t*          her2k_packb_cntl;
-packm_t*          her2k_packc_cntl;
-unpackm_t*        her2k_unpackc_cntl;
+extern func_t*    gemm_ukrs;
 
 blksz_t*          her2k_mc;
 blksz_t*          her2k_nc;
@@ -55,6 +44,18 @@ blksz_t*          her2k_kc;
 blksz_t*          her2k_mr;
 blksz_t*          her2k_nr;
 blksz_t*          her2k_kr;
+
+packm_t*          her2k_packa_cntl;
+packm_t*          her2k_packb_cntl;
+packm_t*          her2k_packc_cntl;
+unpackm_t*        her2k_unpackc_cntl;
+
+her2k_t*          her2k_cntl_bp_ke;
+her2k_t*          her2k_cntl_op_bp;
+her2k_t*          her2k_cntl_mm_op;
+her2k_t*          her2k_cntl_vl_mm;
+
+her2k_t*          her2k_cntl;
 
 
 void bli_her2k_cntl_init()
@@ -143,8 +144,10 @@ void bli_her2k_cntl_init()
 	=
 	bli_her2k_cntl_obj_create( BLIS_UNB_OPT,
 	                           BLIS_VARIANT2,
+	                           NULL,
+	                           gemm_ukrs,
 	                           NULL, NULL, NULL, NULL,
-	                           NULL, NULL, NULL, NULL );
+	                           NULL, NULL, NULL );
 
 	// Create control tree object for outer panel (to block-panel)
 	// problem.
@@ -153,6 +156,7 @@ void bli_her2k_cntl_init()
 	bli_her2k_cntl_obj_create( BLIS_BLOCKED,
 	                           BLIS_VARIANT1,
 	                           her2k_mc,
+	                           NULL,
 	                           NULL,
 	                           her2k_packa_cntl,
 	                           her2k_packb_cntl,
@@ -169,6 +173,7 @@ void bli_her2k_cntl_init()
 	                           BLIS_VARIANT3,
 	                           her2k_kc,
 	                           NULL,
+	                           NULL,
 	                           NULL, 
 	                           NULL,
 	                           NULL,
@@ -183,6 +188,7 @@ void bli_her2k_cntl_init()
 	bli_her2k_cntl_obj_create( BLIS_BLOCKED,
 	                           BLIS_VARIANT2,
 	                           her2k_nc,
+	                           NULL,
 	                           NULL,
 	                           NULL, 
 	                           NULL,
@@ -218,6 +224,7 @@ void bli_her2k_cntl_finalize()
 her2k_t* bli_her2k_cntl_obj_create( impl_t     impl_type,
                                     varnum_t   var_num,
                                     blksz_t*   b,
+                                    func_t*    gemm_ukrs_,
                                     scalm_t*   sub_scalm,
                                     packm_t*   sub_packm_a,
                                     packm_t*   sub_packm_b,
@@ -228,11 +235,12 @@ her2k_t* bli_her2k_cntl_obj_create( impl_t     impl_type,
 {
 	her2k_t* cntl;
 
-	cntl = ( her2k_t* ) bli_malloc( sizeof(her2k_t) );	
+	cntl = ( her2k_t* ) bli_malloc( sizeof(her2k_t) );
 
 	cntl->impl_type     = impl_type;
 	cntl->var_num       = var_num;
 	cntl->b             = b;
+	cntl->gemm_ukrs     = gemm_ukrs_; // avoid name conflict with global symbol
 	cntl->sub_scalm     = sub_scalm;
 	cntl->sub_packm_a   = sub_packm_a;
 	cntl->sub_packm_b   = sub_packm_b;

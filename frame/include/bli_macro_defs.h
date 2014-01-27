@@ -62,19 +62,31 @@
 
 // -- Concatenation macros --
 
-#define BLIS_FUNC_PREFIX_STR      "bli"
+#define BLIS_FUNC_PREFIX_STR       "bli"
 
-#define PASTEMAC0(op)             bli_ ## op
+// We add an extra layer the definitions of these string-pasting macros
+// because sometimes it is needed if, for example, one of the PASTE
+// macros is invoked with an "op" argument that is itself a macro.
 
-#define PASTEMAC(ch,op)           bli_ ## ch  ## op
+#define PASTEMAC0_(op)             bli_ ## op
+#define PASTEMAC0(op)              PASTEMAC0_(op)
 
-#define PASTEMAC2(ch1,ch2,op)     bli_ ## ch1 ## ch2 ## op
+#define PASTEMAC_(ch,op)           bli_ ## ch  ## op
+#define PASTEMAC(ch,op)            PASTEMAC_(ch,op)
 
-#define PASTEMAC3(ch1,ch2,ch3,op) bli_ ## ch1 ## ch2 ## ch3 ## op
+#define PASTEMAC2_(ch1,ch2,op)     bli_ ## ch1 ## ch2 ## op
+#define PASTEMAC2(ch1,ch2,op)      PASTEMAC2_(ch1,ch2,op)
 
-#define PASTEBLACHK(op)           bla_ ## op ## _check
+#define PASTEMAC3_(ch1,ch2,ch3,op) bli_ ## ch1 ## ch2 ## ch3 ## op
+#define PASTEMAC3(ch1,ch2,ch3,op)  PASTEMAC3_(ch1,ch2,ch3,op)
 
-#define MKSTR(s1)                 #s1
+#define PASTEBLACHK_(op)           bla_ ## op ## _check
+#define PASTEBLACHK(op)            PASTEBLACHK_(op)
+
+#define PASTECH_(ch,op)            ch ## op
+#define PASTECH(ch,op)             PASTECH_(ch,op)
+
+#define MKSTR(s1)                  #s1
 
 
 // -- Include other groups of macros

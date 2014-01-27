@@ -45,7 +45,8 @@ typedef void (*FUNCPTR_T)(
                            void*   a, inc_t rs_a, inc_t cs_a, inc_t ps_a,
                            void*   b, inc_t rs_b, inc_t cs_b, inc_t ps_b,
                            void*   beta,
-                           void*   c, inc_t rs_c, inc_t cs_c
+                           void*   c, inc_t rs_c, inc_t cs_c,
+                           void*   gemm_ukr
                          );
 
 static FUNCPTR_T GENARRAY(ftypes,herk_u_ker_var2);
@@ -86,6 +87,9 @@ void bli_herk_u_ker_var2( obj_t*  a,
 
 	FUNCPTR_T f;
 
+	func_t*   gemm_ukrs;
+	void*     gemm_ukr;
+
 
 	// Detach and multiply the scalars attached to A and B.
 	bli_obj_scalar_detach( a, &scalar_a );
@@ -101,6 +105,12 @@ void bli_herk_u_ker_var2( obj_t*  a,
 	// function pointer.
 	f = ftypes[dt_exec];
 
+	// Extract from the control tree node the func_t object containing
+	// the gemm micro-kernel function addresses, and then query the
+	// function address corresponding to the current datatype.
+	gemm_ukrs = cntl_gemm_ukrs( cntl );
+	gemm_ukr  = bli_func_obj_query( dt_exec, gemm_ukrs );
+
 	// Invoke the function.
 	f( diagoffc,
 	   m,
@@ -110,12 +120,13 @@ void bli_herk_u_ker_var2( obj_t*  a,
 	   buf_a, rs_a, cs_a, ps_a,
 	   buf_b, rs_b, cs_b, ps_b,
 	   buf_beta,
-	   buf_c, rs_c, cs_c );
+	   buf_c, rs_c, cs_c,
+	   gemm_ukr );
 }
 
 
 #undef  GENTFUNC
-#define GENTFUNC( ctype, ch, varname, ukrname ) \
+#define GENTFUNC( ctype, ch, varname, ukrtype ) \
 \
 void PASTEMAC(ch,varname)( \
                            doff_t  diagoffc, \
@@ -126,9 +137,13 @@ void PASTEMAC(ch,varname)( \
                            void*   a, inc_t rs_a, inc_t cs_a, inc_t ps_a, \
                            void*   b, inc_t rs_b, inc_t cs_b, inc_t ps_b, \
                            void*   beta, \
-                           void*   c, inc_t rs_c, inc_t cs_c \
+                           void*   c, inc_t rs_c, inc_t cs_c, \
+                           void*   gemm_ukr  \
                          ) \
 { \
+	/* Cast the micro-kernel address to its function pointer type. */ \
+	PASTECH(ch,ukrtype) gemm_ukr_cast = gemm_ukr; \
+\
 	/* Temporary C buffer for edge cases. */ \
 	ctype           ct[ PASTEMAC(ch,mr) * \
 	                    PASTEMAC(ch,nr) ] \
@@ -280,13 +295,13 @@ void PASTEMAC(ch,varname)( \
 			if ( bli_intersects_diag_n( diagoffc_ij, m_cur, n_cur ) ) \
 			{ \
 				/* Invoke the gemm micro-kernel. */ \
-				PASTEMAC(ch,ukrname)( k, \
-				                      alpha_cast, \
-				                      a1, \
-				                      b1, \
-				                      zero, \
-				                      ct, rs_ct, cs_ct, \
-				                      &aux ); \
+				gemm_ukr_cast( k, \
+				               alpha_cast, \
+				               a1, \
+				               b1, \
+				               zero, \
+				               ct, rs_ct, cs_ct, \
+				               &aux ); \
 \
 				/* Scale C and add the result to only the stored part. */ \
 				PASTEMAC(ch,xpbys_mxn_u)( diagoffc_ij, \
@@ -301,24 +316,24 @@ void PASTEMAC(ch,varname)( \
 				if ( m_cur == MR && n_cur == NR ) \
 				{ \
 					/* Invoke the gemm micro-kernel. */ \
-					PASTEMAC(ch,ukrname)( k, \
-					                      alpha_cast, \
-					                      a1, \
-					                      b1, \
-					                      beta_cast, \
-					                      c11, rs_c, cs_c, \
-					                      &aux ); \
+					gemm_ukr_cast( k, \
+					               alpha_cast, \
+					               a1, \
+					               b1, \
+					               beta_cast, \
+					               c11, rs_c, cs_c, \
+					               &aux ); \
 				} \
 				else \
 				{ \
 					/* Invoke the gemm micro-kernel. */ \
-					PASTEMAC(ch,ukrname)( k, \
-					                      alpha_cast, \
-					                      a1, \
-					                      b1, \
-					                      zero, \
-					                      ct, rs_ct, cs_ct, \
-					                      &aux ); \
+					gemm_ukr_cast( k, \
+					               alpha_cast, \
+					               a1, \
+					               b1, \
+					               zero, \
+					               ct, rs_ct, cs_ct, \
+					               &aux ); \
 \
 					/* Scale the edge of C and add the result. */ \
 					PASTEMAC(ch,xpbys_mxn)( m_cur, n_cur, \
@@ -337,5 +352,5 @@ void PASTEMAC(ch,varname)( \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC( herk_u_ker_var2, GEMM_UKERNEL )
+INSERT_GENTFUNC_BASIC( herk_u_ker_var2, gemm_ukr_t )
 

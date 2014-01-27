@@ -41,7 +41,8 @@ void bli_her2k_u_ker_var2( obj_t*   a,
                            obj_t*   c,
                            her2k_t* cntl )
 {
-	obj_t c_local;
+	herk_t herk_cntl;
+	obj_t  c_local;
 
 	// Implement her2k kernel in terms of two calls to the corresponding
 	// herk kernel.
@@ -50,18 +51,20 @@ void bli_her2k_u_ker_var2( obj_t*   a,
 	// only want to apply beta once. (And beta might be unit anyway if this
 	// is not the first iteration of variant 3.)
 
+	cntl_gemm_ukrs( (&herk_cntl) ) = cntl_gemm_ukrs( cntl );
+
 	bli_obj_alias_to( *c, c_local );
 
 	bli_herk_u_ker_var2( a,
 	                     bh,
 	                     &c_local,
-	                     NULL );
+	                     &herk_cntl );
 
 	bli_obj_scalar_reset( &c_local );
 
 	bli_herk_u_ker_var2( b,
 	                     ah,
 	                     &c_local,
-	                     NULL );
+	                     &herk_cntl );
 }
 

@@ -36,9 +36,26 @@
 
 extern scalm_t*   scalm_cntl;
 extern gemm_t*    gemm_cntl_bp_ke;
+extern func_t*    gemm_ukrs;
 
-trsm_t*           trsm_l_cntl;
-trsm_t*           trsm_r_cntl;
+blksz_t*          trsm_mc;
+blksz_t*          trsm_nc;
+blksz_t*          trsm_kc;
+blksz_t*          trsm_mr;
+blksz_t*          trsm_nr;
+blksz_t*          trsm_kr;
+
+func_t*           gemmtrsm_l_ukrs;
+func_t*           gemmtrsm_u_ukrs;
+
+packm_t*          trsm_l_packa_cntl;
+packm_t*          trsm_l_packb_cntl;
+
+packm_t*          trsm_r_packa_cntl;
+packm_t*          trsm_r_packb_cntl;
+
+packm_t*          trsm_packc_cntl;
+unpackm_t*        trsm_unpackc_cntl;
 
 trsm_t*           trsm_cntl_bp_ke;
 
@@ -50,21 +67,8 @@ trsm_t*           trsm_r_cntl_op_bp;
 trsm_t*           trsm_r_cntl_mm_op;
 trsm_t*           trsm_r_cntl_vl_mm;
 
-packm_t*          trsm_l_packa_cntl;
-packm_t*          trsm_l_packb_cntl;
-
-packm_t*          trsm_r_packa_cntl;
-packm_t*          trsm_r_packb_cntl;
-
-packm_t*          trsm_packc_cntl;
-unpackm_t*        trsm_unpackc_cntl;
-
-blksz_t*          trsm_mc;
-blksz_t*          trsm_nc;
-blksz_t*          trsm_kc;
-blksz_t*          trsm_mr;
-blksz_t*          trsm_nr;
-blksz_t*          trsm_kr;
+trsm_t*           trsm_l_cntl;
+trsm_t*           trsm_r_cntl;
 
 
 void bli_trsm_cntl_init()
@@ -99,6 +103,16 @@ void bli_trsm_cntl_init()
 	                                BLIS_DEFAULT_KR_D, BLIS_EXTEND_KR_D,
 	                                BLIS_DEFAULT_KR_C, BLIS_EXTEND_KR_C,
 	                                BLIS_DEFAULT_KR_Z, BLIS_EXTEND_KR_Z );
+
+	gemmtrsm_l_ukrs = bli_func_obj_create( BLIS_SGEMMTRSM_L_UKERNEL,
+	                                       BLIS_DGEMMTRSM_L_UKERNEL,
+	                                       BLIS_CGEMMTRSM_L_UKERNEL,
+	                                       BLIS_ZGEMMTRSM_L_UKERNEL );
+
+	gemmtrsm_u_ukrs = bli_func_obj_create( BLIS_SGEMMTRSM_U_UKERNEL,
+	                                       BLIS_DGEMMTRSM_U_UKERNEL,
+	                                       BLIS_CGEMMTRSM_U_UKERNEL,
+	                                       BLIS_ZGEMMTRSM_U_UKERNEL );
 
 
 	// Create control tree objects for packm operations (left side).
@@ -185,8 +199,12 @@ void bli_trsm_cntl_init()
 	=
 	bli_trsm_cntl_obj_create( BLIS_UNB_OPT,
 	                          BLIS_VARIANT2,
+	                          NULL,
+	                          gemm_ukrs,
+	                          gemmtrsm_l_ukrs,
+	                          gemmtrsm_u_ukrs,
 	                          NULL, NULL, NULL, NULL,
-	                          NULL, NULL, NULL, NULL );
+	                          NULL, NULL, NULL );
 
 	// Create control tree object for outer panel (to block-panel)
 	// problem (left side).
@@ -195,6 +213,7 @@ void bli_trsm_cntl_init()
 	bli_trsm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT1,
 	                          trsm_mc,
+	                          NULL, NULL, NULL,
 	                          NULL,
 	                          trsm_l_packa_cntl,
 	                          trsm_l_packb_cntl,
@@ -210,6 +229,7 @@ void bli_trsm_cntl_init()
 	bli_trsm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT3,
 	                          trsm_kc,
+	                          NULL, NULL, NULL,
 	                          NULL,
 	                          NULL, 
 	                          NULL,
@@ -225,6 +245,7 @@ void bli_trsm_cntl_init()
 	bli_trsm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT2,
 	                          trsm_nc,
+	                          NULL, NULL, NULL,
 	                          NULL,
 	                          NULL,
 	                          NULL,
@@ -240,6 +261,7 @@ void bli_trsm_cntl_init()
 	bli_trsm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT1,
 	                          trsm_mc,
+	                          NULL, NULL, NULL,
 	                          NULL,
 	                          trsm_r_packa_cntl,
 	                          trsm_r_packb_cntl,
@@ -255,6 +277,7 @@ void bli_trsm_cntl_init()
 	bli_trsm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT3,
 	                          trsm_kc,
+	                          NULL, NULL, NULL,
 	                          NULL,
 	                          NULL, 
 	                          NULL,
@@ -270,6 +293,7 @@ void bli_trsm_cntl_init()
 	bli_trsm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT2,
 	                          trsm_nc,
+	                          NULL, NULL, NULL,
 	                          NULL,
 	                          NULL,
 	                          NULL,
@@ -292,6 +316,9 @@ void bli_trsm_cntl_finalize()
 	bli_blksz_obj_free( trsm_nr );
 	bli_blksz_obj_free( trsm_kr );
 
+	bli_func_obj_free( gemmtrsm_l_ukrs );
+	bli_func_obj_free( gemmtrsm_u_ukrs );
+
 	bli_cntl_obj_free( trsm_l_packa_cntl );
 	bli_cntl_obj_free( trsm_l_packb_cntl );
 	bli_cntl_obj_free( trsm_r_packa_cntl );
@@ -311,6 +338,9 @@ void bli_trsm_cntl_finalize()
 trsm_t* bli_trsm_cntl_obj_create( impl_t     impl_type,
                                   varnum_t   var_num,
                                   blksz_t*   b,
+                                  func_t*    gemm_ukrs_,
+                                  func_t*    gemmtrsm_l_ukrs_,
+                                  func_t*    gemmtrsm_u_ukrs_,
                                   scalm_t*   sub_scalm,
                                   packm_t*   sub_packm_a,
                                   packm_t*   sub_packm_b,
@@ -321,18 +351,21 @@ trsm_t* bli_trsm_cntl_obj_create( impl_t     impl_type,
 {
 	trsm_t* cntl;
 
-	cntl = ( trsm_t* ) bli_malloc( sizeof(trsm_t) );	
+	cntl = ( trsm_t* ) bli_malloc( sizeof(trsm_t) );
 
-	cntl->impl_type     = impl_type;
-	cntl->var_num       = var_num;
-	cntl->b             = b;
-	cntl->sub_scalm     = sub_scalm;
-	cntl->sub_packm_a   = sub_packm_a;
-	cntl->sub_packm_b   = sub_packm_b;
-	cntl->sub_packm_c   = sub_packm_c;
-	cntl->sub_trsm      = sub_trsm;
-	cntl->sub_gemm      = sub_gemm;
-	cntl->sub_unpackm_c = sub_unpackm_c;
+	cntl->impl_type       = impl_type;
+	cntl->var_num         = var_num;
+	cntl->b               = b;
+	cntl->gemm_ukrs       = gemm_ukrs_;
+	cntl->gemmtrsm_l_ukrs = gemmtrsm_l_ukrs_;
+	cntl->gemmtrsm_u_ukrs = gemmtrsm_u_ukrs_;
+	cntl->sub_scalm       = sub_scalm;
+	cntl->sub_packm_a     = sub_packm_a;
+	cntl->sub_packm_b     = sub_packm_b;
+	cntl->sub_packm_c     = sub_packm_c;
+	cntl->sub_trsm        = sub_trsm;
+	cntl->sub_gemm        = sub_gemm;
+	cntl->sub_unpackm_c   = sub_unpackm_c;
 
 	return cntl;
 }

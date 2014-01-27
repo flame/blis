@@ -414,6 +414,15 @@ typedef struct blksz_s
 	dim_t e[BLIS_NUM_FP_TYPES];
 } blksz_t;
 
+// -- Function pointer object type --
+
+typedef struct func_s
+{
+	// Primary blocksize values.
+	void* f[BLIS_NUM_FP_TYPES];
+} func_t;
+
+
 
 //
 // -- BLIS object type definitions ---------------------------------------------

@@ -36,9 +36,23 @@
 
 extern scalm_t*   scalm_cntl;
 extern gemm_t*    gemm_cntl_bp_ke;
+extern func_t*    gemm_ukrs;
 
-trmm_t*           trmm_l_cntl;
-trmm_t*           trmm_r_cntl;
+blksz_t*          trmm_mc;
+blksz_t*          trmm_nc;
+blksz_t*          trmm_kc;
+blksz_t*          trmm_mr;
+blksz_t*          trmm_nr;
+blksz_t*          trmm_kr;
+
+packm_t*          trmm_l_packa_cntl;
+packm_t*          trmm_l_packb_cntl;
+
+packm_t*          trmm_r_packa_cntl;
+packm_t*          trmm_r_packb_cntl;
+
+packm_t*          trmm_packc_cntl;
+unpackm_t*        trmm_unpackc_cntl;
 
 trmm_t*           trmm_cntl_bp_ke;
 
@@ -50,22 +64,8 @@ trmm_t*           trmm_r_cntl_op_bp;
 trmm_t*           trmm_r_cntl_mm_op;
 trmm_t*           trmm_r_cntl_vl_mm;
 
-packm_t*          trmm_l_packa_cntl;
-packm_t*          trmm_l_packb_cntl;
-
-packm_t*          trmm_r_packa_cntl;
-packm_t*          trmm_r_packb_cntl;
-
-packm_t*          trmm_packc_cntl;
-unpackm_t*        trmm_unpackc_cntl;
-
-blksz_t*          trmm_mc;
-blksz_t*          trmm_nc;
-blksz_t*          trmm_kc;
-blksz_t*          trmm_mr;
-blksz_t*          trmm_nr;
-blksz_t*          trmm_kr;
-blksz_t*          trmm_ni;
+trmm_t*           trmm_l_cntl;
+trmm_t*           trmm_r_cntl;
 
 
 void bli_trmm_cntl_init()
@@ -190,8 +190,10 @@ void bli_trmm_cntl_init()
 	=
 	bli_trmm_cntl_obj_create( BLIS_UNB_OPT,
 	                          BLIS_VARIANT2,
+	                          NULL,
+	                          gemm_ukrs,
 	                          NULL, NULL, NULL, NULL,
-	                          NULL, NULL, NULL, NULL );
+	                          NULL, NULL, NULL );
 
 	// Create control tree object for outer panel (to block-panel)
 	// problem (left side).
@@ -200,6 +202,7 @@ void bli_trmm_cntl_init()
 	bli_trmm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT1,
 	                          trmm_mc,
+	                          NULL,
 	                          NULL,
 	                          trmm_l_packa_cntl,
 	                          trmm_l_packb_cntl,
@@ -215,6 +218,7 @@ void bli_trmm_cntl_init()
 	bli_trmm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT3,
 	                          trmm_kc,
+	                          NULL,
 	                          NULL,
 	                          NULL, 
 	                          NULL,
@@ -234,6 +238,7 @@ void bli_trmm_cntl_init()
 	                          NULL,
 	                          NULL,
 	                          NULL,
+	                          NULL,
 	                          trmm_l_cntl_mm_op,
 	                          NULL,
 	                          NULL );
@@ -245,6 +250,7 @@ void bli_trmm_cntl_init()
 	bli_trmm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT1,
 	                          trmm_mc,
+	                          NULL,
 	                          NULL,
 	                          trmm_r_packa_cntl,
 	                          trmm_r_packb_cntl,
@@ -261,6 +267,7 @@ void bli_trmm_cntl_init()
 	                          BLIS_VARIANT3,
 	                          trmm_kc,
 	                          NULL,
+	                          NULL,
 	                          NULL, 
 	                          NULL,
 	                          NULL,
@@ -275,6 +282,7 @@ void bli_trmm_cntl_init()
 	bli_trmm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT2,
 	                          trmm_nc,
+	                          NULL,
 	                          NULL,
 	                          NULL,
 	                          NULL,
@@ -316,6 +324,7 @@ void bli_trmm_cntl_finalize()
 trmm_t* bli_trmm_cntl_obj_create( impl_t     impl_type,
                                   varnum_t   var_num,
                                   blksz_t*   b,
+                                  func_t*    gemm_ukrs_,
                                   scalm_t*   sub_scalm,
                                   packm_t*   sub_packm_a,
                                   packm_t*   sub_packm_b,
@@ -326,11 +335,12 @@ trmm_t* bli_trmm_cntl_obj_create( impl_t     impl_type,
 {
 	trmm_t* cntl;
 
-	cntl = ( trmm_t* ) bli_malloc( sizeof(trmm_t) );	
+	cntl = ( trmm_t* ) bli_malloc( sizeof(trmm_t) );
 
 	cntl->impl_type     = impl_type;
 	cntl->var_num       = var_num;
 	cntl->b             = b;
+	cntl->gemm_ukrs     = gemm_ukrs_;
 	cntl->sub_scalm     = sub_scalm;
 	cntl->sub_packm_a   = sub_packm_a;
 	cntl->sub_packm_b   = sub_packm_b;

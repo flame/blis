@@ -36,6 +36,113 @@
 #define BLIS_KERNEL_MACRO_DEFS_H
 
 
+// -- Construct base kernel names ----------------------------------------------
+
+// If any datatype-specific base name for a given micro-kernel does not
+// exist, default to using the datatype-agnostic base name.
+
+// gemm micro-kernel base names
+#ifndef SGEMM_UKERNEL
+#define SGEMM_UKERNEL GEMM_UKERNEL
+#endif
+#ifndef DGEMM_UKERNEL
+#define DGEMM_UKERNEL GEMM_UKERNEL
+#endif
+#ifndef CGEMM_UKERNEL
+#define CGEMM_UKERNEL GEMM_UKERNEL
+#endif
+#ifndef ZGEMM_UKERNEL
+#define ZGEMM_UKERNEL GEMM_UKERNEL
+#endif
+
+// trsm_l micro-kernel base names
+#ifndef STRSM_L_UKERNEL
+#define STRSM_L_UKERNEL TRSM_L_UKERNEL
+#endif
+#ifndef DTRSM_L_UKERNEL
+#define DTRSM_L_UKERNEL TRSM_L_UKERNEL
+#endif
+#ifndef CTRSM_L_UKERNEL
+#define CTRSM_L_UKERNEL TRSM_L_UKERNEL
+#endif
+#ifndef ZTRSM_L_UKERNEL
+#define ZTRSM_L_UKERNEL TRSM_L_UKERNEL
+#endif
+
+// trsm_u micro-kernel base names
+#ifndef STRSM_U_UKERNEL
+#define STRSM_U_UKERNEL TRSM_U_UKERNEL
+#endif
+#ifndef DTRSM_U_UKERNEL
+#define DTRSM_U_UKERNEL TRSM_U_UKERNEL
+#endif
+#ifndef CTRSM_U_UKERNEL
+#define CTRSM_U_UKERNEL TRSM_U_UKERNEL
+#endif
+#ifndef ZTRSM_U_UKERNEL
+#define ZTRSM_U_UKERNEL TRSM_U_UKERNEL
+#endif
+
+// gemmtrsm_l micro-kernel base names
+#ifndef SGEMMTRSM_L_UKERNEL
+#define SGEMMTRSM_L_UKERNEL GEMMTRSM_L_UKERNEL
+#endif
+#ifndef DGEMMTRSM_L_UKERNEL
+#define DGEMMTRSM_L_UKERNEL GEMMTRSM_L_UKERNEL
+#endif
+#ifndef CGEMMTRSM_L_UKERNEL
+#define CGEMMTRSM_L_UKERNEL GEMMTRSM_L_UKERNEL
+#endif
+#ifndef ZGEMMTRSM_L_UKERNEL
+#define ZGEMMTRSM_L_UKERNEL GEMMTRSM_L_UKERNEL
+#endif
+
+// gemmtrsm_u micro-kernel base names
+#ifndef SGEMMTRSM_U_UKERNEL
+#define SGEMMTRSM_U_UKERNEL GEMMTRSM_U_UKERNEL
+#endif
+#ifndef DGEMMTRSM_U_UKERNEL
+#define DGEMMTRSM_U_UKERNEL GEMMTRSM_U_UKERNEL
+#endif
+#ifndef CGEMMTRSM_U_UKERNEL
+#define CGEMMTRSM_U_UKERNEL GEMMTRSM_U_UKERNEL
+#endif
+#ifndef ZGEMMTRSM_U_UKERNEL
+#define ZGEMMTRSM_U_UKERNEL GEMMTRSM_U_UKERNEL
+#endif
+
+
+// -- Construct kernel function names ------------------------------------------
+
+// For each datatype-specific micro-kernel base name, construct the full
+// function name of the corresponding micro-kernel.
+
+#define BLIS_SGEMM_UKERNEL       PASTEMAC(s,SGEMM_UKERNEL)
+#define BLIS_DGEMM_UKERNEL       PASTEMAC(d,DGEMM_UKERNEL)
+#define BLIS_CGEMM_UKERNEL       PASTEMAC(c,CGEMM_UKERNEL)
+#define BLIS_ZGEMM_UKERNEL       PASTEMAC(z,ZGEMM_UKERNEL)
+
+#define BLIS_STRSM_L_UKERNEL     PASTEMAC(s,STRSM_L_UKERNEL)
+#define BLIS_DTRSM_L_UKERNEL     PASTEMAC(d,DTRSM_L_UKERNEL)
+#define BLIS_CTRSM_L_UKERNEL     PASTEMAC(c,CTRSM_L_UKERNEL)
+#define BLIS_ZTRSM_L_UKERNEL     PASTEMAC(z,ZTRSM_L_UKERNEL)
+
+#define BLIS_STRSM_U_UKERNEL     PASTEMAC(s,STRSM_U_UKERNEL)
+#define BLIS_DTRSM_U_UKERNEL     PASTEMAC(d,DTRSM_U_UKERNEL)
+#define BLIS_CTRSM_U_UKERNEL     PASTEMAC(c,CTRSM_U_UKERNEL)
+#define BLIS_ZTRSM_U_UKERNEL     PASTEMAC(z,ZTRSM_U_UKERNEL)
+
+#define BLIS_SGEMMTRSM_L_UKERNEL PASTEMAC(s,SGEMMTRSM_L_UKERNEL)
+#define BLIS_DGEMMTRSM_L_UKERNEL PASTEMAC(d,DGEMMTRSM_L_UKERNEL)
+#define BLIS_CGEMMTRSM_L_UKERNEL PASTEMAC(c,CGEMMTRSM_L_UKERNEL)
+#define BLIS_ZGEMMTRSM_L_UKERNEL PASTEMAC(z,ZGEMMTRSM_L_UKERNEL)
+
+#define BLIS_SGEMMTRSM_U_UKERNEL PASTEMAC(s,SGEMMTRSM_U_UKERNEL)
+#define BLIS_DGEMMTRSM_U_UKERNEL PASTEMAC(d,DGEMMTRSM_U_UKERNEL)
+#define BLIS_CGEMMTRSM_U_UKERNEL PASTEMAC(c,CGEMMTRSM_U_UKERNEL)
+#define BLIS_ZGEMMTRSM_U_UKERNEL PASTEMAC(z,ZGEMMTRSM_U_UKERNEL)
+
+
 // -- Kernel macro checks ------------------------------------------------------
 
 // Verify that cache blocksizes are whole multiples of register blocksizes.
@@ -233,13 +340,6 @@
 #define bli_zpackmr  BLIS_PACKDIM_MR_Z
 #define bli_zpackkr  BLIS_PACKDIM_KR_Z
 #define bli_zpacknr  BLIS_PACKDIM_NR_Z
-
-// Incremental packing factors
-
-#define bli_snifac   BLIS_DEFAULT_NI_FAC
-#define bli_dnifac   BLIS_DEFAULT_NI_FAC
-#define bli_cnifac   BLIS_DEFAULT_NI_FAC
-#define bli_znifac   BLIS_DEFAULT_NI_FAC
 
 // Default Level-1f fusing factors
 

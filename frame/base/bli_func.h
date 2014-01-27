@@ -33,33 +33,20 @@
 */
 
 
-//
-// Prototype object-based interface.
-//
-void bli_trsm_lu_ker_var2( obj_t*  a,
-                           obj_t*  b,
-                           obj_t*  c,
-                           trsm_t* cntl );
+func_t* bli_func_obj_create( void* f_s,
+                             void* f_d,
+                             void* f_c,
+                             void* f_z );
+
+void bli_func_obj_init( func_t* f,
+                        void*  f_s,
+                        void*  f_d,
+                        void*  f_c,
+                        void*  f_z );
+
+void bli_func_obj_free( func_t* f );
 
 
-//
-// Prototype BLAS-like interfaces.
-//
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTEMAC(ch,varname)( \
-                           doff_t  diagoffa, \
-                           dim_t   m, \
-                           dim_t   n, \
-                           dim_t   k, \
-                           void*   alpha, \
-                           void*   a, inc_t rs_a, inc_t cs_a, inc_t ps_a, \
-                           void*   b, inc_t rs_b, inc_t cs_b, inc_t ps_b, \
-                           void*   c, inc_t rs_c, inc_t cs_c, \
-                           void*   gemmtrsm_ukr, \
-                           void*   gemm_ukr  \
-                         );
-
-INSERT_GENTPROT_BASIC( trsm_lu_ker_var2 )
+void* bli_func_obj_query( num_t   dt,
+                          func_t* f );
 

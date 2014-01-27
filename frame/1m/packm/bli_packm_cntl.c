@@ -34,6 +34,9 @@
 
 #include "blis.h"
 
+blksz_t* packm_mult_ldim;
+blksz_t* packm_mult_nvec;
+
 packm_t* packm_cntl_row;
 packm_t* packm_cntl_col;
 
@@ -41,9 +44,6 @@ packm_t* packm_cntl_rpn;
 packm_t* packm_cntl_cpn;
 
 packm_t* packm_cntl;
-
-blksz_t* packm_mult_ldim;
-blksz_t* packm_mult_nvec;
 
 void bli_packm_cntl_init()
 {
