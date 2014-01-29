@@ -32,63 +32,11 @@
 
 */
 
-#include "bli_syrk_check.h"
-#include "bli_syrk_front.h"
-
-
-//
-// Prototype object-based interface.
-//
-void bli_syrk( obj_t*  alpha,
-               obj_t*  a,
-               obj_t*  beta,
-               obj_t*  c );
-
-
-//
-// Prototype BLAS-like interfaces with homogeneous-typed operands.
-//
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname)( \
-                          uplo_t  uploc, \
-                          trans_t transa, \
-                          dim_t   m, \
-                          dim_t   k, \
-                          ctype*  alpha, \
-                          ctype*  a, inc_t rs_a, inc_t cs_a, \
-                          ctype*  beta, \
-                          ctype*  c, inc_t rs_c, inc_t cs_c  \
-                        );
-
-INSERT_GENTPROT_BASIC( syrk )
-
-
-//
-// Prototype BLAS-like interfaces with heterogeneous-typed operands.
-//
-#undef  GENTPROT2
-#define GENTPROT2( ctype_a, ctype_c, cha, chc, opname ) \
-\
-void PASTEMAC2(cha,chc,opname)( \
-                                uplo_t    uploc, \
-                                trans_t   transa, \
-                                dim_t     m, \
-                                dim_t     k, \
-                                ctype_a*  alpha, \
-                                ctype_a*  a, inc_t rs_a, inc_t cs_a, \
-                                ctype_c*  beta, \
-                                ctype_c*  c, inc_t rs_c, inc_t cs_c  \
-                              );
-
-INSERT_GENTPROT2_BASIC( syrk )
-
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTPROT2_MIX_D( syrk )
-#endif
-
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTPROT2_MIX_P( syrk )
-#endif
+void bli_symm_front( side_t  side,
+                     obj_t*  alpha,
+                     obj_t*  a,
+                     obj_t*  b,
+                     obj_t*  beta,
+                     obj_t*  c,
+                     gemm_t* cntl );
 

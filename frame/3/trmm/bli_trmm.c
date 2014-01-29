@@ -45,97 +45,10 @@ void bli_trmm( side_t  side,
                obj_t*  a,
                obj_t*  b )
 {
-	trmm_t* cntl;
-	obj_t   a_local;
-	obj_t   b_local;
-	obj_t   c_local;
-
-	// Check parameters.
-	if ( bli_error_checking_is_enabled() )
-		bli_trmm_check( side, alpha, a, b );
-
-	// If alpha is zero, scale by beta and return.
-	if ( bli_obj_equals( alpha, &BLIS_ZERO ) )
-	{
-		bli_scalm( alpha, b );
-		return;
-	}
-
-	// Alias A and B so we can tweak the objects if necessary.
-	bli_obj_alias_to( *a, a_local );
-	bli_obj_alias_to( *b, b_local );
-	bli_obj_alias_to( *b, c_local );
-
-	// We do not explicitly implement the cases where A is transposed.
-	// However, we can still handle them. Specifically, if A is marked as
-	// needing a transposition, we simply induce a transposition. This
-	// allows us to only explicitly implement the no-transpose cases. Once
-	// the transposition is induced, the correct algorithm will be called,
-	// since, for example, an algorithm over a transposed lower triangular
-	// matrix A moves in the same direction (forwards) as a non-transposed
-	// upper triangular matrix. And with the transposition induced, the
-	// matrix now appears to be upper triangular, so the upper triangular
-	// algorithm will grab the correct partitions, as if it were upper
-	// triangular (with no transpose) all along.
-	if ( bli_obj_has_trans( a_local ) )
-	{
-		bli_obj_induce_trans( a_local );
-		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, a_local );
-	}
-
-#if 0
-	if ( bli_is_right( side ) )
-	{
-		bli_obj_induce_trans( a_local );
-		bli_obj_induce_trans( b_local );
-		bli_obj_induce_trans( c_local );
-
-		bli_toggle_side( side );
-	}
-#endif
-
-#if 1
-	// If A is being multiplied from the right, swap A and B so that
-	// the matrix will actually be on the right.
-	if ( bli_is_right( side ) )
-	{
-		bli_obj_swap( a_local, b_local );
-	}
-
-	// An optimization: If C is row-stored, transpose the entire operation
-	// so as to allow the macro-kernel more favorable access patterns
-	// through C. (The effect of the transposition of A and B is negligible
-	// because those operands are always packed to contiguous memory.)
-	if ( bli_obj_is_row_stored( c_local ) )
-	{
-		bli_obj_swap( a_local, b_local );
-
-		bli_obj_induce_trans( a_local );
-		bli_obj_induce_trans( b_local );
-		bli_obj_induce_trans( c_local );
-
-		bli_toggle_side( side );
-	}
-#endif
-
-	// Set each alias as the root object.
-	// NOTE: We MUST wait until we are done potentially swapping the objects
-	// before setting the root fields!
-	bli_obj_set_as_root( a_local );
-	bli_obj_set_as_root( b_local );
-	bli_obj_set_as_root( c_local );
-
-	// Choose the control tree.
-	if ( bli_is_left( side ) ) cntl = trmm_l_cntl;
-	else                       cntl = trmm_r_cntl;
-
 	// Invoke the internal back-end.
-	bli_trmm_int( alpha,
-	              &a_local,
-	              &b_local,
-	              &BLIS_ZERO,
-	              &c_local,
-	              cntl );
+	bli_trmm_front( side, alpha, a, b,
+	                trmm_l_cntl,
+	                trmm_r_cntl );
 }
 
 //

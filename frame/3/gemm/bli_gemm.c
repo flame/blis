@@ -35,8 +35,6 @@
 #include "blis.h"
 
 extern gemm_t*  gemm_cntl;
-extern gemm_t*  gemm_cntl_packa;
-extern blksz_t* gemm_mc;
 
 //
 // Define object-based interface.
@@ -47,59 +45,8 @@ void bli_gemm( obj_t*  alpha,
                obj_t*  beta,
                obj_t*  c )
 {
-	gemm_t* cntl;
-	obj_t   a_local;
-	obj_t   b_local;
-	obj_t   c_local;
-
-	// Check parameters.
-	if ( bli_error_checking_is_enabled() )
-		bli_gemm_check( alpha, a, b, beta, c );
-
-	// If alpha is zero, scale by beta and return.
-	if ( bli_obj_equals( alpha, &BLIS_ZERO ) )
-	{
-		bli_scalm( beta, c );
-		return;
-	}
-
-	// Alias A, B, and C in case we need to apply transformations.
-	bli_obj_alias_to( *a, a_local );
-	bli_obj_alias_to( *b, b_local );
-	bli_obj_alias_to( *c, c_local );
-
-	// An optimization: If C is row-stored, transpose the entire operation
-	// so as to allow the macro-kernel more favorable access patterns
-	// through C. (The effect of the transposition of A and B is negligible
-	// because those operands are always packed to contiguous memory.)
-	if ( bli_obj_is_row_stored( *c ) )
-	{
-		bli_obj_swap( a_local, b_local );
-
-		bli_obj_induce_trans( a_local );
-		bli_obj_induce_trans( b_local );
-		bli_obj_induce_trans( c_local );
-	}
-
-	// Choose the control tree.
-	cntl = gemm_cntl;
-
-#if 0
-	if ( bli_obj_length_after_trans( c_local ) <=
-	     bli_blksz_total_for_obj( &c_local, gemm_mc ) )
-	{
-		cntl = gemm_cntl_packa;
-
-	}
-#endif
-
-	// Invoke the internal back-end.
-	bli_gemm_int( alpha,
-	              &a_local,
-	              &b_local,
-	              beta,
-	              &c_local,
-	              cntl );
+	bli_gemm_front( alpha, a, b, beta, c,
+	                gemm_cntl );
 }
 
 //
@@ -141,11 +88,11 @@ void PASTEMAC(ch,opname)( \
 	bli_obj_set_conjtrans( transa, ao ); \
 	bli_obj_set_conjtrans( transb, bo ); \
 \
-	PASTEMAC0(opname)( &alphao, \
-	                   &ao, \
-	                   &bo, \
-	                   &betao, \
-	                   &co ); \
+	PASTEMAC0(varname)( &alphao, \
+	                    &ao, \
+	                    &bo, \
+	                    &betao, \
+	                    &co ); \
 }
 
 INSERT_GENTFUNC_BASIC( gemm, gemm )

@@ -32,63 +32,59 @@
 
 */
 
-#include "bli_syrk_check.h"
-#include "bli_syrk_front.h"
+#include "blis.h"
 
+void bli_symm_front( side_t  side,
+                     obj_t*  alpha,
+                     obj_t*  a,
+                     obj_t*  b,
+                     obj_t*  beta,
+                     obj_t*  c,
+                     gemm_t* cntl )
+{
+	obj_t   a_local;
+	obj_t   b_local;
+	obj_t   c_local;
 
-//
-// Prototype object-based interface.
-//
-void bli_syrk( obj_t*  alpha,
-               obj_t*  a,
-               obj_t*  beta,
-               obj_t*  c );
+	// Check parameters.
+	if ( bli_error_checking_is_enabled() )
+		bli_symm_check( side, alpha, a, b, beta, c );
 
+	// If alpha is zero, scale by beta and return.
+	if ( bli_obj_equals( alpha, &BLIS_ZERO ) )
+	{
+		bli_scalm( beta, c );
+		return;
+	}
 
-//
-// Prototype BLAS-like interfaces with homogeneous-typed operands.
-//
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname)( \
-                          uplo_t  uploc, \
-                          trans_t transa, \
-                          dim_t   m, \
-                          dim_t   k, \
-                          ctype*  alpha, \
-                          ctype*  a, inc_t rs_a, inc_t cs_a, \
-                          ctype*  beta, \
-                          ctype*  c, inc_t rs_c, inc_t cs_c  \
-                        );
+	// Alias A, B, and C in case we need to apply transformations.
+	bli_obj_alias_to( *a, a_local );
+	bli_obj_alias_to( *b, b_local );
+	bli_obj_alias_to( *c, c_local );
 
-INSERT_GENTPROT_BASIC( syrk )
+	// An optimization: If C is row-stored, transpose the entire operation
+	// so as to allow the macro-kernel more favorable access patterns
+	// through C.
+	if ( bli_obj_is_row_stored( *c ) )
+	{
+		bli_toggle_side( side );
+		bli_obj_induce_trans( b_local );
+		bli_obj_induce_trans( c_local );
+	}
 
+	// Swap A and B if multiplying A from the right so that "B" contains
+	// the symmetric matrix.
+	if ( bli_is_right( side ) )
+	{
+		bli_obj_swap( a_local, b_local );
+	}
 
-//
-// Prototype BLAS-like interfaces with heterogeneous-typed operands.
-//
-#undef  GENTPROT2
-#define GENTPROT2( ctype_a, ctype_c, cha, chc, opname ) \
-\
-void PASTEMAC2(cha,chc,opname)( \
-                                uplo_t    uploc, \
-                                trans_t   transa, \
-                                dim_t     m, \
-                                dim_t     k, \
-                                ctype_a*  alpha, \
-                                ctype_a*  a, inc_t rs_a, inc_t cs_a, \
-                                ctype_c*  beta, \
-                                ctype_c*  c, inc_t rs_c, inc_t cs_c  \
-                              );
-
-INSERT_GENTPROT2_BASIC( syrk )
-
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTPROT2_MIX_D( syrk )
-#endif
-
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTPROT2_MIX_P( syrk )
-#endif
+	// Invoke the internal back-end.
+	bli_gemm_int( alpha,
+	              &a_local,
+	              &b_local,
+	              beta,
+	              &c_local,
+	              cntl );
+}
 

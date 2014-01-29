@@ -44,54 +44,8 @@ void bli_herk( obj_t*  alpha,
                obj_t*  beta,
                obj_t*  c )
 {
-	herk_t* cntl;
-	obj_t   a_local;
-	obj_t   ah_local;
-	obj_t   c_local;
-
-	// Check parameters.
-	if ( bli_error_checking_is_enabled() )
-		bli_herk_check( alpha, a, beta, c );
-
-	// If alpha is zero, scale by beta and return.
-	if ( bli_obj_equals( alpha, &BLIS_ZERO ) )
-	{
-		bli_scalm( beta, c );
-		return;
-	}
-
-	// Alias A and C in case we need to apply transformations.
-	bli_obj_alias_to( *a, a_local );
-	bli_obj_alias_to( *c, c_local );
-	bli_obj_set_as_root( c_local );
-
-	// For herk, the right-hand "B" operand is simply A'.
-	bli_obj_alias_to( *a, ah_local );
-	bli_obj_induce_trans( ah_local );
-	bli_obj_toggle_conj( ah_local );
-
-	// An optimization: If C is row-stored, transpose the entire operation
-	// so as to allow the macro-kernel more favorable access patterns
-	// through C. (The effect of the transposition of A and A' is negligible
-	// because those operands are always packed to contiguous memory.)
-	if ( bli_obj_is_row_stored( c_local ) )
-	{
-		bli_obj_toggle_conj( a_local );
-		bli_obj_toggle_conj( ah_local );
-
-		bli_obj_induce_trans( c_local );
-	}
-
-	// Choose the control tree.
-	cntl = herk_cntl;
-
-	// Invoke the internal back-end.
-	bli_herk_int( alpha,
-	              &a_local,
-	              &ah_local,
-	              beta,
-	              &c_local,
-	              cntl );
+	bli_herk_front( alpha, a, beta, c,
+	                herk_cntl );
 }
 
 //

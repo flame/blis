@@ -34,6 +34,7 @@
 
 #include "bli_herk_cntl.h"
 #include "bli_herk_check.h"
+#include "bli_herk_front.h"
 #include "bli_herk_int.h"
 #include "bli_herk_target.h"
 

@@ -33,6 +33,7 @@
 */
 
 #include "bli_syr2k_check.h"
+#include "bli_syr2k_front.h"
 
 
 //
@@ -40,7 +41,7 @@
 //
 void bli_syr2k( obj_t*  alpha,
                 obj_t*  a,
-                obj_t*  bh,
+                obj_t*  b,
                 obj_t*  beta,
                 obj_t*  c );
 

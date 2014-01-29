@@ -46,77 +46,8 @@ void bli_syr2k( obj_t*  alpha,
                 obj_t*  beta,
                 obj_t*  c )
 {
-	//her2k_t* cntl;
-	obj_t    c_local;
-	obj_t    a_local;
-	obj_t    bt_local;
-	obj_t    b_local;
-	obj_t    at_local;
-
-	// Check parameters.
-	if ( bli_error_checking_is_enabled() )
-		bli_syr2k_check( alpha, a, b, beta, c );
-
-	// If alpha is zero, scale by beta and return.
-	if ( bli_obj_equals( alpha, &BLIS_ZERO ) )
-	{
-		bli_scalm( beta, c );
-		return;
-	}
-
-	// Alias A, B, and C in case we need to apply transformations.
-	bli_obj_alias_to( *a, a_local );
-	bli_obj_alias_to( *b, b_local );
-	bli_obj_alias_to( *c, c_local );
-	bli_obj_set_as_root( c_local );
-
-	// For syr2k, the first and second right-hand "B" operands are simply B'
-	// and A'.
-	bli_obj_alias_to( *b, bt_local );
-	bli_obj_induce_trans( bt_local );
-	bli_obj_alias_to( *a, at_local );
-	bli_obj_induce_trans( at_local );
-
-	// An optimization: If C is row-stored, transpose the entire operation
-	// so as to allow the macro-kernel more favorable access patterns
-	// through C. (The effect of the transposition of A and A' is negligible
-	// because those operands are always packed to contiguous memory.)
-	if ( bli_obj_is_row_stored( c_local ) )
-	{
-		bli_obj_induce_trans( c_local );
-	}
-
-#if 0
-	// Choose the control tree. We can just use her2k since the algorithm
-	// is nearly identical to that of syr2k.
-	cntl = her2k_cntl;
-
-	// Invoke the internal back-end.
-	bli_her2k_int( alpha,
-	               &a_local,
-	               &bt_local,
-	               alpha,
-	               &b_local,
-	               &at_local,
-	               beta,
-	               &c_local,
-	               cntl );
-#else
-	// Invoke herk twice, using beta only the first time.
-	bli_herk_int( alpha,
-	              &a_local,
-	              &bt_local,
-	              beta,
-	              &c_local,
-	              herk_cntl );
-
-	bli_herk_int( alpha,
-	              &b_local,
-	              &at_local,
-	              &BLIS_ONE,
-	              &c_local,
-	              herk_cntl );
-#endif
+	bli_syr2k_front( alpha, a, b, beta, c,
+	                 herk_cntl );
 }
 
 //

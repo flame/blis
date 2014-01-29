@@ -33,6 +33,7 @@
 */
 
 #include "bli_trmm3_check.h"
+#include "bli_trmm3_front.h"
 
 
 //

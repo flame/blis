@@ -44,51 +44,8 @@ void bli_syrk( obj_t*  alpha,
                obj_t*  beta,
                obj_t*  c )
 {
-	herk_t* cntl;
-	obj_t   a_local;
-	obj_t   at_local;
-	obj_t   c_local;
-
-	// Check parameters.
-	if ( bli_error_checking_is_enabled() )
-		bli_syrk_check( alpha, a, beta, c );
-
-	// If alpha is zero, scale by beta and return.
-	if ( bli_obj_equals( alpha, &BLIS_ZERO ) )
-	{
-		bli_scalm( beta, c );
-		return;
-	}
-
-	// Alias A and C in case we need to apply transformations.
-	bli_obj_alias_to( *a, a_local );
-	bli_obj_alias_to( *c, c_local );
-	bli_obj_set_as_root( c_local );
-
-	// For herk, the right-hand "B" operand is simply A^T.
-	bli_obj_alias_to( *a, at_local );
-	bli_obj_induce_trans( at_local );
-
-	// An optimization: If C is row-stored, transpose the entire operation
-	// so as to allow the macro-kernel more favorable access patterns
-	// through C. (The effect of the transposition of A and A^T is negligible
-	// because those operands are always packed to contiguous memory.)
-	if ( bli_obj_is_row_stored( c_local ) )
-	{
-		bli_obj_induce_trans( c_local );
-	}
-
-	// Choose the control tree. We can just use herk since the algorithm
-	// is nearly identical to that of syrk.
-	cntl = herk_cntl;
-
-	// Invoke the internal back-end.
-	bli_herk_int( alpha,
-	              &a_local,
-	              &at_local,
-	              beta,
-	              &c_local,
-	              cntl );
+	bli_syrk_front( alpha, a, beta, c,
+	                herk_cntl );
 }
 
 //

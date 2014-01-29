@@ -46,55 +46,8 @@ void bli_hemm( side_t  side,
                obj_t*  beta,
                obj_t*  c )
 {
-	gemm_t* cntl;
-	obj_t   a_local;
-	obj_t   b_local;
-	obj_t   c_local;
-
-	// Check parameters.
-	if ( bli_error_checking_is_enabled() )
-		bli_hemm_check( side, alpha, a, b, beta, c );
-
-	// If alpha is zero, scale by beta and return.
-	if ( bli_obj_equals( alpha, &BLIS_ZERO ) )
-	{
-		bli_scalm( beta, c );
-		return;
-	}
-
-	// Alias A, B, and C in case we need to apply transformations.
-	bli_obj_alias_to( *a, a_local );
-	bli_obj_alias_to( *b, b_local );
-	bli_obj_alias_to( *c, c_local );
-
-	// An optimization: If C is row-stored, transpose the entire operation
-	// so as to allow the macro-kernel more favorable access patterns
-	// through C.
-	if ( bli_obj_is_row_stored( *c ) )
-	{
-		bli_toggle_side( side );
-		bli_obj_toggle_conj( a_local );
-		bli_obj_induce_trans( b_local );
-		bli_obj_induce_trans( c_local );
-	}
-
-	// Swap A and B if multiplying A from the right so that "B" contains
-	// the Hermitian matrix.
-	if ( bli_is_right( side ) )
-	{
-		bli_obj_swap( a_local, b_local );
-	}
-
-	// Choose the control tree.
-	cntl = gemm_cntl;
-
-	// Invoke the internal back-end.
-	bli_gemm_int( alpha,
-	              &a_local,
-	              &b_local,
-	              beta,
-	              &c_local,
-	              cntl );
+	bli_hemm_front( side, alpha, a, b, beta, c,
+	                gemm_cntl );
 }
 
 //

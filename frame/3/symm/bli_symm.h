@@ -33,6 +33,7 @@
 */
 
 #include "bli_symm_check.h"
+#include "bli_symm_front.h"
 
 
 //
