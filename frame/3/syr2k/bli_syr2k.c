@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-extern her2k_t* her2k_cntl;
+//extern her2k_t* her2k_cntl;
 extern herk_t*  herk_cntl;
 
 //
@@ -46,7 +46,7 @@ void bli_syr2k( obj_t*  alpha,
                 obj_t*  beta,
                 obj_t*  c )
 {
-	her2k_t* cntl;
+	//her2k_t* cntl;
 	obj_t    c_local;
 	obj_t    a_local;
 	obj_t    bt_local;
@@ -86,11 +86,11 @@ void bli_syr2k( obj_t*  alpha,
 		bli_obj_induce_trans( c_local );
 	}
 
+#if 0
 	// Choose the control tree. We can just use her2k since the algorithm
 	// is nearly identical to that of syr2k.
 	cntl = her2k_cntl;
 
-#if 1
 	// Invoke the internal back-end.
 	bli_her2k_int( alpha,
 	               &a_local,

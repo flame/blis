@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-extern her2k_t* her2k_cntl;
+//extern her2k_t* her2k_cntl;
 extern herk_t*  herk_cntl;
 
 //

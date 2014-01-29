@@ -47,8 +47,6 @@ func_t*           gemm_ukrs;
 
 packm_t*          gemm_packa_cntl;
 packm_t*          gemm_packb_cntl;
-packm_t*          gemm_packc_cntl;
-unpackm_t*        gemm_unpackc_cntl;
 
 gemm_t*           gemm_cntl_bp_ke;
 gemm_t*           gemm_cntl_op_bp;
@@ -104,7 +102,7 @@ void bli_gemm_cntl_init()
 	                           BLIS_VARIANT2,
 	                           gemm_mr,
 	                           gemm_kr,
-	                           FALSE, // already dense; densify not necessary
+	                           TRUE,  // densify; used by hemm/symm
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
 	                           FALSE, // reverse iteration if lower?
@@ -117,32 +115,12 @@ void bli_gemm_cntl_init()
 	                           BLIS_VARIANT2,
 	                           gemm_kr,
 	                           gemm_nr,
-	                           FALSE, // already dense; densify not necessary
+	                           TRUE,  // densify; used by hemm/symm
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
 	                           FALSE, // reverse iteration if lower?
 	                           BLIS_PACKED_COL_PANELS,
 	                           BLIS_BUFFER_FOR_B_PANEL );
-
-	// Create control tree objects for packm/unpackm operations on C.
-	gemm_packc_cntl
-	=
-	bli_packm_cntl_obj_create( BLIS_UNBLOCKED,
-	                           BLIS_VARIANT1,
-	                           gemm_mr,
-	                           gemm_nr,
-	                           FALSE, // already dense; densify not necessary
-	                           FALSE, // do NOT invert diagonal
-	                           FALSE, // reverse iteration if upper?
-	                           FALSE, // reverse iteration if lower?
-	                           BLIS_PACKED_COLUMNS,
-	                           BLIS_BUFFER_FOR_C_PANEL );
-
-	gemm_unpackc_cntl
-	=
-	bli_unpackm_cntl_obj_create( BLIS_UNBLOCKED,
-	                             BLIS_VARIANT1,
-	                             NULL ); // no blocksize needed
 
 
 	//
@@ -223,8 +201,6 @@ void bli_gemm_cntl_finalize()
 
 	bli_cntl_obj_free( gemm_packa_cntl );
 	bli_cntl_obj_free( gemm_packb_cntl );
-	bli_cntl_obj_free( gemm_packc_cntl );
-	bli_cntl_obj_free( gemm_unpackc_cntl );
 
 	bli_cntl_obj_free( gemm_cntl_bp_ke );
 	bli_cntl_obj_free( gemm_cntl_op_bp );

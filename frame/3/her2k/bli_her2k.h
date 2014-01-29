@@ -32,8 +32,9 @@
 
 */
 
-#include "bli_her2k_cntl.h"
+//#include "bli_her2k_cntl.h"
 #include "bli_her2k_check.h"
+/*
 #include "bli_her2k_int.h"
 #include "bli_her2k_target.h"
 
@@ -45,6 +46,7 @@
 
 #include "bli_her2k_l_ker_var2.h"
 #include "bli_her2k_u_ker_var2.h"
+*/
 
 
 //

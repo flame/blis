@@ -32,7 +32,6 @@
 
 */
 
-#include "bli_hemm_cntl.h"
 #include "bli_hemm_check.h"
 
 

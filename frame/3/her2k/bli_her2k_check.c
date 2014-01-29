@@ -151,6 +151,7 @@ void bli_her2k_check( obj_t*   alpha,
 	bli_check_error_code( e_val );
 }
 
+#if 0
 void bli_her2k_int_check( obj_t*   alpha,
                           obj_t*   a,
                           obj_t*   bh,
@@ -172,4 +173,4 @@ void bli_her2k_int_check( obj_t*   alpha,
 	e_val = bli_check_valid_cntl( ( void* )cntl );
 	bli_check_error_code( e_val );
 }
-
+#endif

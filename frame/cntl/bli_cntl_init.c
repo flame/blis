@@ -57,9 +57,7 @@ void bli_cntl_init( void )
 
 	// Level-3
 	bli_gemm_cntl_init();
-	bli_hemm_cntl_init();
 	bli_herk_cntl_init();
-	bli_her2k_cntl_init();
 	bli_trmm_cntl_init();
 	bli_trsm_cntl_init();
 }
@@ -87,9 +85,7 @@ void bli_cntl_finalize( void )
 
 	// Level-3
 	bli_gemm_cntl_finalize();
-	bli_hemm_cntl_finalize();
 	bli_herk_cntl_finalize();
-	bli_her2k_cntl_finalize();
 	bli_trmm_cntl_finalize();
 	bli_trsm_cntl_finalize();
 }

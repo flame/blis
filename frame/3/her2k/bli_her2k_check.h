@@ -47,6 +47,7 @@ void bli_her2k_check( obj_t*   alpha,
                       obj_t*   beta,
                       obj_t*   c );
 
+#if 0
 void bli_her2k_int_check( obj_t*   alpha,
                           obj_t*   a,
                           obj_t*   bh,
@@ -56,4 +57,4 @@ void bli_her2k_int_check( obj_t*   alpha,
                           obj_t*   beta,
                           obj_t*   c,
                           her2k_t* cntl );
-
+#endif

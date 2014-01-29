@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-extern gemm_t* hemm_cntl;
+extern gemm_t* gemm_cntl;
 
 //
 // Define object-based interface.
@@ -86,7 +86,7 @@ void bli_hemm( side_t  side,
 	}
 
 	// Choose the control tree.
-	cntl = hemm_cntl;
+	cntl = gemm_cntl;
 
 	// Invoke the internal back-end.
 	bli_gemm_int( alpha,
