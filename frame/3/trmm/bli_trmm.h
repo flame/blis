@@ -38,7 +38,7 @@
 #include "bli_trmm_int.h"
 #include "bli_trmm_target.h"
 
-#include "bli_trmm_blk_var1.h"
+#include "bli_trmm_blk_var1f.h"
 
 #include "bli_trmm_blk_var2f.h"
 #include "bli_trmm_blk_var2b.h"

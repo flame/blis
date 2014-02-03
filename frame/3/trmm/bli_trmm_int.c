@@ -48,7 +48,7 @@ static FUNCPTR_T vars[2][2][4][3] =
 		// lower
 		{
 		    // unblocked            optimized unblocked    blocked
-		    { NULL,                 NULL,                  bli_trmm_blk_var1   },
+		    { NULL,                 NULL,                  bli_trmm_blk_var1f  },
 		    { NULL,                 bli_trmm_ll_ker_var2,  bli_trmm_blk_var2b  },
 		    { NULL,                 NULL,                  bli_trmm_blk_var3b  },
 		    { NULL,                 NULL,                  NULL                },
@@ -56,7 +56,7 @@ static FUNCPTR_T vars[2][2][4][3] =
 		// upper
 		{
 		    // unblocked            optimized unblocked    blocked
-		    { NULL,                 NULL,                  bli_trmm_blk_var1   },
+		    { NULL,                 NULL,                  bli_trmm_blk_var1f  },
 		    { NULL,                 bli_trmm_lu_ker_var2,  bli_trmm_blk_var2f  },
 		    { NULL,                 NULL,                  bli_trmm_blk_var3f  },
 		    { NULL,                 NULL,                  NULL                },
@@ -67,7 +67,7 @@ static FUNCPTR_T vars[2][2][4][3] =
 		// lower
 		{
 		    // unblocked            optimized unblocked    blocked
-		    { NULL,                 NULL,                  bli_trmm_blk_var1   },
+		    { NULL,                 NULL,                  bli_trmm_blk_var1f  },
 		    { NULL,                 bli_trmm_rl_ker_var2,  bli_trmm_blk_var2f  },
 		    { NULL,                 NULL,                  bli_trmm_blk_var3f  },
 		    { NULL,                 NULL,                  NULL                },
@@ -75,7 +75,7 @@ static FUNCPTR_T vars[2][2][4][3] =
 		// upper
 		{
 		    // unblocked            optimized unblocked    blocked
-		    { NULL,                 NULL,                  bli_trmm_blk_var1   },
+		    { NULL,                 NULL,                  bli_trmm_blk_var1f  },
 		    { NULL,                 bli_trmm_ru_ker_var2,  bli_trmm_blk_var2b  },
 		    { NULL,                 NULL,                  bli_trmm_blk_var3b  },
 		    { NULL,                 NULL,                  NULL                },

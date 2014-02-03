@@ -38,9 +38,9 @@
 #include "bli_gemm_int.h"
 #include "bli_gemm_target.h"
 
-#include "bli_gemm_blk_var1.h"
-#include "bli_gemm_blk_var2.h"
-#include "bli_gemm_blk_var3.h"
+#include "bli_gemm_blk_var1f.h"
+#include "bli_gemm_blk_var2f.h"
+#include "bli_gemm_blk_var3f.h"
 
 #include "bli_gemm_ker_var2.h"
 #include "bli_gemm_ker_var5.h"

@@ -34,77 +34,85 @@
 
 #include "blis.h"
 
-void bli_gemm_blk_var2( obj_t*  a,
-                        obj_t*  b,
-                        obj_t*  c,
-                        gemm_t* cntl )
+void bli_trmm_blk_var1f( obj_t*  a,
+                         obj_t*  b,
+                         obj_t*  c,
+                         trmm_t* cntl )
 {
-	obj_t a_pack;
-	obj_t b1, b1_pack;
+	obj_t a1, a1_pack;
+	obj_t b_pack;
 	obj_t c1, c1_pack;
 
 	dim_t i;
 	dim_t b_alg;
-	dim_t n_trans;
+	dim_t m_trans;
+	dim_t offA;
 
 	// Initialize all pack objects that are passed into packm_init().
-	bli_obj_init_pack( &a_pack );
-	bli_obj_init_pack( &b1_pack );
+	bli_obj_init_pack( &a1_pack );
+	bli_obj_init_pack( &b_pack );
 	bli_obj_init_pack( &c1_pack );
 
-	// Query dimension in partitioning direction.
-	n_trans = bli_obj_width_after_trans( *b );
+	// Set the default length of and offset to the non-zero part of A.
+	m_trans = bli_obj_length_after_trans( *a );
+	offA    = 0;
+
+	// If A is lower triangular, we have to adjust where the non-zero part of
+	// A begins. If A is upper triangular, we have to adjust the length of
+	// the non-zero part. If A is general/dense, then we keep the defaults.
+	if      ( bli_obj_is_lower( *a ) )
+		offA    = bli_abs( bli_obj_diag_offset_after_trans( *a ) );
+	else if ( bli_obj_is_upper( *a ) )
+		m_trans = bli_abs( bli_obj_diag_offset_after_trans( *a ) ) +
+		          bli_obj_width_after_trans( *a );
 
 	// Scale C by beta (if instructed).
 	bli_scalm_int( &BLIS_ONE,
 	               c,
 	               cntl_sub_scalm( cntl ) );
 
-	// Initialize object for packing A.
-	bli_packm_init( a, &a_pack,
-	                cntl_sub_packm_a( cntl ) );
+	// Initialize object for packing B.
+	bli_packm_init( b, &b_pack,
+	                cntl_sub_packm_b( cntl ) );
 
-	// Pack A (if instructed).
-	bli_packm_int( a, &a_pack,
-	               cntl_sub_packm_a( cntl ) );
+	// Pack B (if instructed).
+	bli_packm_int( b, &b_pack,
+	               cntl_sub_packm_b( cntl ) );
 
-	// Partition along the n dimension.
-	for ( i = 0; i < n_trans; i += b_alg )
+	// Partition along the m dimension.
+	for ( i = offA; i < m_trans; i += b_alg )
 	{
 		// Determine the current algorithmic blocksize.
-		// NOTE: Use of b (for execution datatype) is intentional!
-		// This causes the right blocksize to be used if c and a are
-		// complex and b is real.
-		b_alg = bli_determine_blocksize_f( i, n_trans, b,
+		b_alg = bli_determine_blocksize_f( i, m_trans, a,
 		                                   cntl_blocksize( cntl ) );
 
-		// Acquire partitions for B1 and C1.
-		bli_acquire_mpart_l2r( BLIS_SUBPART1,
-		                       i, b_alg, b, &b1 );
-		bli_acquire_mpart_l2r( BLIS_SUBPART1,
+		// Acquire partitions for A1 and C1.
+		bli_acquire_mpart_t2b( BLIS_SUBPART1,
+		                       i, b_alg, a, &a1 );
+		bli_acquire_mpart_t2b( BLIS_SUBPART1,
 		                       i, b_alg, c, &c1 );
 
-		// Initialize objects for packing A1 and B1.
-		bli_packm_init( &b1, &b1_pack,
-		                cntl_sub_packm_b( cntl ) );
+		// Initialize objects for packing A1 and C1.
+		bli_packm_init( &a1, &a1_pack,
+		                cntl_sub_packm_a( cntl ) );
 		bli_packm_init( &c1, &c1_pack,
 		                cntl_sub_packm_c( cntl ) );
 
-		// Pack B1 (if instructed).
-		bli_packm_int( &b1, &b1_pack,
-		               cntl_sub_packm_b( cntl ) );
+		// Pack A1 (if instructed).
+		bli_packm_int( &a1, &a1_pack,
+		               cntl_sub_packm_a( cntl ) );
 
 		// Pack C1 (if instructed).
 		bli_packm_int( &c1, &c1_pack,
 		               cntl_sub_packm_c( cntl ) );
 
-		// Perform gemm subproblem.
-		bli_gemm_int( &BLIS_ONE,
-		              &a_pack,
-		              &b1_pack,
+		// Perform trmm subproblem.
+		bli_trmm_int( &BLIS_ONE,
+		              &a1_pack,
+		              &b_pack,
 		              &BLIS_ONE,
 		              &c1_pack,
-		              cntl_sub_gemm( cntl ) );
+		              cntl_sub_trmm( cntl ) );
 
 		// Unpack C1 (if C1 was packed).
 		bli_unpackm_int( &c1_pack, &c1,
@@ -113,8 +121,8 @@ void bli_gemm_blk_var2( obj_t*  a,
 
 	// If any packing buffers were acquired within packm, release them back
 	// to the memory manager.
-	bli_obj_release_pack( &a_pack );
-	bli_obj_release_pack( &b1_pack );
+	bli_obj_release_pack( &a1_pack );
+	bli_obj_release_pack( &b_pack );
 	bli_obj_release_pack( &c1_pack );
 }
 

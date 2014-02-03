@@ -44,9 +44,9 @@ typedef void (*FUNCPTR_T)( obj_t*  a,
 static FUNCPTR_T vars[6][3] =
 {
     // unblocked          optimized unblocked   blocked
-    { NULL,               NULL,                 bli_gemm_blk_var1  },
-    { NULL,               bli_gemm_ker_var2,    bli_gemm_blk_var2  },
-    { NULL,               NULL,                 bli_gemm_blk_var3  },
+    { NULL,               NULL,                 bli_gemm_blk_var1f },
+    { NULL,               bli_gemm_ker_var2,    bli_gemm_blk_var2f },
+    { NULL,               NULL,                 bli_gemm_blk_var3f },
     { NULL,               NULL,                 NULL               },
     { NULL,               bli_gemm_ker_var5,    NULL               },
     { NULL,               NULL,                 NULL               }

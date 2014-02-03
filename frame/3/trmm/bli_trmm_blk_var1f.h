@@ -32,8 +32,8 @@
 
 */
 
-void bli_trmm_blk_var1( obj_t*  a,
-                        obj_t*  b,
-                        obj_t*  c,
-                        trmm_t* cntl );
+void bli_trmm_blk_var1f( obj_t*  a,
+                         obj_t*  b,
+                         obj_t*  c,
+                         trmm_t* cntl );
 
