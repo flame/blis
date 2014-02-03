@@ -47,8 +47,6 @@ extern func_t*    gemm_ukrs;
 
 extern packm_t*   gemm_packa_cntl;
 extern packm_t*   gemm_packb_cntl;
-extern packm_t*   gemm_packc_cntl;
-extern unpackm_t* gemm_unpackc_cntl;
 
 gemm_t*           gemm_cntl5;
 
@@ -82,10 +80,8 @@ void bli_gemm_cntl_init_exp()
 	                          NULL,
 	                          gemm_packa_cntl,
 	                          NULL,
-	                          //gemm_packc_cntl,
 	                          NULL,
 	                          gemm_cntl_bp_ke5,
-	                          //gemm_unpackc_cntl );
 	                          NULL );
 
 	gemm_cntl_mm_pm

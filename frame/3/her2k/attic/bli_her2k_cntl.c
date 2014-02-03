@@ -35,20 +35,20 @@
 #include "blis.h"
 
 extern scalm_t*   scalm_cntl;
-extern herk_t*    herk_cntl_bp_ke;
+
+extern blksz_t*   gemm_mc;
+extern blksz_t*   gemm_nc;
+extern blksz_t*   gemm_kc;
+extern blksz_t*   gemm_mr;
+extern blksz_t*   gemm_nr;
+extern blksz_t*   gemm_kr;
+
 extern func_t*    gemm_ukrs;
 
-blksz_t*          her2k_mc;
-blksz_t*          her2k_nc;
-blksz_t*          her2k_kc;
-blksz_t*          her2k_mr;
-blksz_t*          her2k_nr;
-blksz_t*          her2k_kr;
+extern herk_t*    herk_cntl_bp_ke;
 
 packm_t*          her2k_packa_cntl;
 packm_t*          her2k_packb_cntl;
-packm_t*          her2k_packc_cntl;
-unpackm_t*        her2k_unpackc_cntl;
 
 her2k_t*          her2k_cntl_bp_ke;
 her2k_t*          her2k_cntl_op_bp;
@@ -60,37 +60,6 @@ her2k_t*          her2k_cntl;
 
 void bli_her2k_cntl_init()
 {
-	// Create blocksize objects for each dimension.
-	her2k_mc = bli_blksz_obj_create( BLIS_DEFAULT_MC_S, BLIS_EXTEND_MC_S,
-	                                 BLIS_DEFAULT_MC_D, BLIS_EXTEND_MC_D,
-	                                 BLIS_DEFAULT_MC_C, BLIS_EXTEND_MC_C,
-	                                 BLIS_DEFAULT_MC_Z, BLIS_EXTEND_MC_Z );
-
-	her2k_nc = bli_blksz_obj_create( BLIS_DEFAULT_NC_S, BLIS_EXTEND_NC_S,
-	                                 BLIS_DEFAULT_NC_D, BLIS_EXTEND_NC_D,
-	                                 BLIS_DEFAULT_NC_C, BLIS_EXTEND_NC_C,
-	                                 BLIS_DEFAULT_NC_Z, BLIS_EXTEND_NC_Z );
-
-	her2k_kc = bli_blksz_obj_create( BLIS_DEFAULT_KC_S, BLIS_EXTEND_KC_S,
-	                                 BLIS_DEFAULT_KC_D, BLIS_EXTEND_KC_D,
-	                                 BLIS_DEFAULT_KC_C, BLIS_EXTEND_KC_C,
-	                                 BLIS_DEFAULT_KC_Z, BLIS_EXTEND_KC_Z );
-
-	her2k_mr = bli_blksz_obj_create( BLIS_DEFAULT_MR_S, BLIS_EXTEND_MR_S,
-	                                 BLIS_DEFAULT_MR_D, BLIS_EXTEND_MR_D,
-	                                 BLIS_DEFAULT_MR_C, BLIS_EXTEND_MR_C,
-	                                 BLIS_DEFAULT_MR_Z, BLIS_EXTEND_MR_Z );
-
-	her2k_nr = bli_blksz_obj_create( BLIS_DEFAULT_NR_S, BLIS_EXTEND_NR_S,
-	                                 BLIS_DEFAULT_NR_D, BLIS_EXTEND_NR_D,
-	                                 BLIS_DEFAULT_NR_C, BLIS_EXTEND_NR_C,
-	                                 BLIS_DEFAULT_NR_Z, BLIS_EXTEND_NR_Z );
-
-	her2k_kr = bli_blksz_obj_create( BLIS_DEFAULT_KR_S, BLIS_EXTEND_KR_S,
-	                                 BLIS_DEFAULT_KR_D, BLIS_EXTEND_KR_D,
-	                                 BLIS_DEFAULT_KR_C, BLIS_EXTEND_KR_C,
-	                                 BLIS_DEFAULT_KR_Z, BLIS_EXTEND_KR_Z );
-
 
 	// Create control tree objects for packm operations.
 	her2k_packa_cntl
@@ -119,25 +88,6 @@ void bli_her2k_cntl_init()
 	                           BLIS_PACKED_COL_PANELS,
 	                           BLIS_BUFFER_FOR_B_PANEL );
 
-	// Create control tree objects for packm/unpackm operations on C.
-	her2k_packc_cntl
-	=
-	bli_packm_cntl_obj_create( BLIS_UNBLOCKED,
-	                           BLIS_VARIANT1,
-	                           her2k_mr,
-	                           her2k_nr,
-	                           FALSE, // already dense; densify not necessary
-	                           FALSE, // do NOT invert diagonal
-	                           FALSE, // reverse iteration if upper?
-	                           FALSE, // reverse iteration if lower?
-	                           BLIS_PACKED_COLUMNS,
-	                           BLIS_BUFFER_FOR_GEN_USE );
-
-	her2k_unpackc_cntl
-	=
-	bli_unpackm_cntl_obj_create( BLIS_UNBLOCKED,
-	                             BLIS_VARIANT1,
-	                             NULL ); // no blocksize needed
 
 	// Create control tree object for lowest-level block-panel kernel.
 	her2k_cntl_bp_ke
@@ -203,17 +153,8 @@ void bli_her2k_cntl_init()
 
 void bli_her2k_cntl_finalize()
 {
-	bli_blksz_obj_free( her2k_mc );
-	bli_blksz_obj_free( her2k_nc );
-	bli_blksz_obj_free( her2k_kc );
-	bli_blksz_obj_free( her2k_mr );
-	bli_blksz_obj_free( her2k_nr );
-	bli_blksz_obj_free( her2k_kr );
-
 	bli_cntl_obj_free( her2k_packa_cntl );
 	bli_cntl_obj_free( her2k_packb_cntl );
-	bli_cntl_obj_free( her2k_packc_cntl );
-	bli_cntl_obj_free( her2k_unpackc_cntl );
 
 	bli_cntl_obj_free( her2k_cntl_bp_ke );
 	bli_cntl_obj_free( her2k_cntl_op_bp );
