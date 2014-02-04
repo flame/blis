@@ -81,6 +81,15 @@ void bli_gemm_int( obj_t*  alpha,
 		return;
 	}
 
+	// If A or B is marked as being filled with zeros, scale C by beta and
+	// return early.
+	if ( bli_obj_is_zeros( *a ) ||
+	     bli_obj_is_zeros( *b ) )
+	{
+		bli_scalm( beta, c );
+		return;
+	}
+
 	// Alias A and B in case we need to update attached scalars.
 	bli_obj_alias_to( *a, a_local );
 	bli_obj_alias_to( *b, b_local );

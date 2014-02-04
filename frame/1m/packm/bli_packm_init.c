@@ -95,6 +95,14 @@ void bli_packm_init( obj_t*   a,
 		return;
 	}
 
+	// If the object is marked as being filled with zeros, then we can skip
+	// the packm operation entirely and alias.
+	if ( bli_obj_is_zeros( *a ) )
+	{
+		bli_obj_alias_to( *a, *p );
+		return;
+	}
+
 	// Now, if we are not skipping the pack operation, then the only question
 	// left is whether we are to typecast matrix a before packing.
 	if ( bli_obj_datatype( *a ) != bli_obj_target_datatype( *a ) )

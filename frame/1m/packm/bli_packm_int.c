@@ -102,34 +102,12 @@ void bli_packm_int( obj_t*   a,
 		return;
 	}
 
-/*
-	// The value for kappa we use will depend on whether the scalar
-	// attached to A has a nonzero imaginary component. If it does,
-	// then we will apply the scalar during packing to facilitate
-	// implementing complex domain micro-kernels in terms of their
-	// real domain counterparts. (In the aforementioned situation,
-	// applying a real scalar is easy, but applying a complex one is
-	// harder, so we avoid the need altogether with the code below.)
-	if ( bli_obj_scalar_has_nonzero_imag( a ) )
+	// If the object is marked as being filled with zeros, then we can skip
+	// the packm operation entirely.
+	if ( bli_obj_is_zeros( *a ) )
 	{
-		bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
-
-		// Detach the scalar.
-		bli_obj_scalar_detach( a, &kappa );
-
-		// Reset the attached scalar (to 1.0).
-		bli_obj_scalar_reset( a );
-
-		kappa_p = &kappa;
+		return;
 	}
-	else
-	{
-		// If the internal scalar of A has only a real component, then
-		// we will apply it later (in the micro-kernel), and so we will
-		// use BLIS_ONE to indicate no scaling during packing.
-		kappa_p = &BLIS_ONE;
-	}
-*/
 
 
 	// Extract the variant number and implementation type.
