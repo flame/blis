@@ -146,18 +146,6 @@
 #define BLIS_EXTEND_KR_C               0
 #define BLIS_EXTEND_KR_Z               0
 
-// -- Default incremental packing blocksizes (n dimension) --
-
-// NOTE: These incremental packing blocksizes (for the n dimension) are only
-// used by certain blocked variants. But when the *are* used, they MUST be
-// be an integer multiple of NR!
-
-#define BLIS_DEFAULT_NI_FAC            1
-#define BLIS_DEFAULT_NI_S              (BLIS_DEFAULT_NI_FAC * BLIS_DEFAULT_NR_S)
-#define BLIS_DEFAULT_NI_D              (BLIS_DEFAULT_NI_FAC * BLIS_DEFAULT_NR_D)
-#define BLIS_DEFAULT_NI_C              (BLIS_DEFAULT_NI_FAC * BLIS_DEFAULT_NR_C)
-#define BLIS_DEFAULT_NI_Z              (BLIS_DEFAULT_NI_FAC * BLIS_DEFAULT_NR_Z)
-
 
 
 // -- LEVEL-2 KERNEL CONSTANTS -------------------------------------------------
