@@ -54,7 +54,7 @@ void PASTEMAC(ch,varname)( \
 \
 	ctype* restrict minus_one = PASTEMAC(ch,m1); \
 \
-	/* b11 = alpha * b11 - a12 * bd21; */ \
+	/* b11 = alpha * b11 - a12 * b21; */ \
 	PASTEMAC(ch,gemmukr)( k, \
 	                      minus_one, \
 	                      a12, \
