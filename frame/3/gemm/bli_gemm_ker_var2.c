@@ -172,11 +172,13 @@ void PASTEMAC(ch,varname)( \
 	/*
 	   Assumptions/assertions:
 	     rs_a == 1
-	     cs_a == GEMM_MR
-	     ps_a == stride to next row panel of A
-	     rs_b == GEMM_NR
+	     cs_a == PACKMR
+	     pd_a == MR
+	     ps_a == stride to next micro-panel of A
+	     rs_b == PACKNR
 	     cs_b == 1
-	     ps_b == stride to next column panel of B
+	     pd_b == NR
+	     ps_b == stride to next micro-panel of B
 	     rs_c == (no assumptions)
 	     cs_c == (no assumptions)
 	*/ \

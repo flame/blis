@@ -179,14 +179,24 @@ void PASTEMAC(ch,varname)( \
 \
 	/*
 	   Assumptions/assertions:
-         rs_a == 1
-	     cs_a == GEMM_NR
-	     ps_a == stride to next row panel of A
-         rs_b == GEMM_MR
+	     rs_a == 1
+	     cs_a == PACKNR
+	     pd_a == NR
+	     ps_a == stride to next micro-panel of A
+	     rs_b == PACKMR
 	     cs_b == 1
-	     ps_b == stride to next column panel of B
-         rs_c == (no assumptions)
+	     pd_b == MR
+	     ps_b == stride to next micro-panel of B
+	     rs_c == (no assumptions)
 	     cs_c == (no assumptions)
+
+	  Note that MR/NR and PACKMR/PACKNR have been swapped to reflect the
+	  swapping of values in the control tree (ie: those values used when
+	  packing). This swapping is needed since we cast right-hand trsm in
+	  terms of transposed left-hand trsm. So, if we're going to be
+	  transposing the operation, then A needs to be packed with NR and B
+	  needs to be packed with MR (remember: B is the triangular matrix in
+	  the right-hand side parameter case).
 	*/ \
 \
 	/* If any dimension is zero, return immediately. */ \
