@@ -42,8 +42,8 @@ typedef void (*FUNCPTR_T)(
                            dim_t   n,
                            dim_t   k,
                            void*   alpha,
-                           void*   a, inc_t rs_a, inc_t cs_a, inc_t ps_a,
-                           void*   b, inc_t rs_b, inc_t cs_b, inc_t ps_b,
+                           void*   a, inc_t cs_a, inc_t pd_a, inc_t ps_a,
+                           void*   b, inc_t rs_b, inc_t pd_b, inc_t ps_b,
                            void*   beta,
                            void*   c, inc_t rs_c, inc_t cs_c,
                            void*   gemm_ukr
@@ -66,13 +66,13 @@ void bli_trmm_rl_ker_var2( obj_t*  a,
 	dim_t     k         = bli_obj_width( *a );
 
 	void*     buf_a     = bli_obj_buffer_at_off( *a );
-	inc_t     rs_a      = bli_obj_row_stride( *a );
 	inc_t     cs_a      = bli_obj_col_stride( *a );
+	inc_t     pd_a      = bli_obj_panel_dim( *a );
 	inc_t     ps_a      = bli_obj_panel_stride( *a );
 
 	void*     buf_b     = bli_obj_buffer_at_off( *b );
 	inc_t     rs_b      = bli_obj_row_stride( *b );
-	inc_t     cs_b      = bli_obj_col_stride( *b );
+	inc_t     pd_b      = bli_obj_panel_dim( *b );
 	inc_t     ps_b      = bli_obj_panel_stride( *b );
 
 	void*     buf_c     = bli_obj_buffer_at_off( *c );
@@ -117,8 +117,8 @@ void bli_trmm_rl_ker_var2( obj_t*  a,
 	   n,
 	   k,
 	   buf_alpha,
-	   buf_a, rs_a, cs_a, ps_a,
-	   buf_b, rs_b, cs_b, ps_b,
+	   buf_a, cs_a, pd_a, ps_a,
+	   buf_b, rs_b, pd_b, ps_b,
 	   buf_beta,
 	   buf_c, rs_c, cs_c,
 	   gemm_ukr );
@@ -134,8 +134,8 @@ void PASTEMAC(ch,varname)( \
                            dim_t   n, \
                            dim_t   k, \
                            void*   alpha, \
-                           void*   a, inc_t rs_a, inc_t cs_a, inc_t ps_a, \
-                           void*   b, inc_t rs_b, inc_t cs_b, inc_t ps_b, \
+                           void*   a, inc_t cs_a, inc_t pd_a, inc_t ps_a, \
+                           void*   b, inc_t rs_b, inc_t pd_b, inc_t ps_b, \
                            void*   beta, \
                            void*   c, inc_t rs_c, inc_t cs_c, \
                            void*   gemm_ukr  \
@@ -145,17 +145,17 @@ void PASTEMAC(ch,varname)( \
 	PASTECH(ch,ukrtype) gemm_ukr_cast = gemm_ukr; \
 \
 	/* Temporary C buffer for edge cases. */ \
-	ctype           ct[ PASTEMAC(ch,mr) * \
-	                    PASTEMAC(ch,nr) ] \
+	ctype           ct[ PASTEMAC(ch,maxmr) * \
+	                    PASTEMAC(ch,maxnr) ] \
 	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
 	const inc_t     rs_ct      = 1; \
-	const inc_t     cs_ct      = PASTEMAC(ch,mr); \
+	const inc_t     cs_ct      = PASTEMAC(ch,maxmr); \
 \
-	/* Alias some constants to shorter names. */ \
-	const dim_t     MR         = PASTEMAC(ch,mr); \
-	const dim_t     NR         = PASTEMAC(ch,nr); \
-	const dim_t     PACKMR     = PASTEMAC(ch,packmr); \
-	const dim_t     PACKNR     = PASTEMAC(ch,packnr); \
+	/* Alias some constants to simpler names. */ \
+	const dim_t     MR         = pd_a; \
+	const dim_t     NR         = pd_b; \
+	const dim_t     PACKMR     = cs_a; \
+	const dim_t     PACKNR     = rs_b; \
 \
 	ctype* restrict one        = PASTEMAC(ch,1); \
 	ctype* restrict zero       = PASTEMAC(ch,0); \

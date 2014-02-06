@@ -54,8 +54,8 @@ void PASTEMAC(ch,varname)( \
                            dim_t   n, \
                            dim_t   k, \
                            void*   alpha, \
-                           void*   a, inc_t rs_a, inc_t cs_a, inc_t ps_a, \
-                           void*   b, inc_t rs_b, inc_t cs_b, inc_t ps_b, \
+                           void*   a, inc_t cs_a, inc_t pd_a, inc_t ps_a, \
+                           void*   b, inc_t rs_b, inc_t pd_b, inc_t ps_b, \
                            void*   c, inc_t rs_c, inc_t cs_c, \
                            void*   gemmtrsm_ukr, \
                            void*   gemm_ukr  \

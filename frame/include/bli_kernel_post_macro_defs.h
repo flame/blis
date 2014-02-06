@@ -32,34 +32,45 @@
 
 */
 
+#ifndef BLIS_KERNEL_POST_MACRO_DEFS_H
+#define BLIS_KERNEL_POST_MACRO_DEFS_H
+
+// -- Maximum register blocksize search ----------------------------------------
 
 //
-// Prototype object-based interface.
+// Find the largest register blocksize MR.
 //
-void bli_trsm_rl_ker_var2( obj_t*  a,
-                           obj_t*  b,
-                           obj_t*  c,
-                           trsm_t* cntl );
+
+#define BLIS_MAX_DEFAULT_MR_S BLIS_DEFAULT_MR_S
+#define BLIS_MAX_DEFAULT_MR_D BLIS_DEFAULT_MR_D
+#define BLIS_MAX_DEFAULT_MR_C BLIS_DEFAULT_MR_C
+#define BLIS_MAX_DEFAULT_MR_Z BLIS_DEFAULT_MR_Z
+
+#define BLIS_MAX_DEFAULT_NR_S BLIS_DEFAULT_NR_S
+#define BLIS_MAX_DEFAULT_NR_D BLIS_DEFAULT_NR_D
+#define BLIS_MAX_DEFAULT_NR_C BLIS_DEFAULT_NR_C
+#define BLIS_MAX_DEFAULT_NR_Z BLIS_DEFAULT_NR_Z
 
 
-//
-// Prototype BLAS-like interfaces.
-//
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTEMAC(ch,varname)( \
-                           doff_t  diagoffa, \
-                           dim_t   m, \
-                           dim_t   n, \
-                           dim_t   k, \
-                           void*   alpha, \
-                           void*   a, inc_t cs_a, inc_t pd_a, inc_t ps_a, \
-                           void*   b, inc_t rs_b, inc_t pd_b, inc_t ps_b, \
-                           void*   c, inc_t rs_c, inc_t cs_c, \
-                           void*   gemmtrsm_ukr, \
-                           void*   gemm_ukr  \
-                         );
+// -- Abbreiviated macros ------------------------------------------------------
 
-INSERT_GENTPROT_BASIC( trsm_rl_ker_var2 )
+// Here, we shorten the maximum blocksizes found above so that they can be
+// derived via the PASTEMAC macro.
+
+// Maximum MR blocksizes
+
+#define bli_smaxmr   BLIS_MAX_DEFAULT_MR_S
+#define bli_dmaxmr   BLIS_MAX_DEFAULT_MR_D
+#define bli_cmaxmr   BLIS_MAX_DEFAULT_MR_C
+#define bli_zmaxmr   BLIS_MAX_DEFAULT_MR_Z
+
+// Maximum NR blocksizes
+
+#define bli_smaxnr   BLIS_MAX_DEFAULT_NR_S
+#define bli_dmaxnr   BLIS_MAX_DEFAULT_NR_D
+#define bli_cmaxnr   BLIS_MAX_DEFAULT_NR_C
+#define bli_zmaxnr   BLIS_MAX_DEFAULT_NR_Z
+
+
+#endif 
 

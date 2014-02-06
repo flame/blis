@@ -73,6 +73,7 @@ extern "C" {
 #include "bli_kernel.h"
 #include "bli_kernel_type_defs.h"
 #include "bli_kernel_macro_defs.h"
+#include "bli_kernel_post_macro_defs.h"
 
 
 // -- BLIS memory pool definitions --
