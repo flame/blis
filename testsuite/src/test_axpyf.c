@@ -51,7 +51,7 @@ void libblis_test_axpyf_deps( test_params_t* params,
 
 void libblis_test_axpyf_experiment( test_params_t* params,
                                     test_op_t*     op,
-                                    mt_impl_t      impl,
+                                    iface_t        iface,
                                     num_t          datatype,
                                     char*          pc_str,
                                     char*          sc_str,
@@ -59,7 +59,7 @@ void libblis_test_axpyf_experiment( test_params_t* params,
                                     double*        perf,
                                     double*        resid );
 
-void libblis_test_axpyf_impl( mt_impl_t impl,
+void libblis_test_axpyf_impl( iface_t   iface,
                               obj_t*    alpha,
                               obj_t*    a,
                               obj_t*    x,
@@ -117,7 +117,7 @@ void libblis_test_axpyf( test_params_t* params, test_op_t* op )
 
 void libblis_test_axpyf_experiment( test_params_t* params,
                                     test_op_t*     op,
-                                    mt_impl_t      impl,
+                                    iface_t        iface,
                                     num_t          datatype,
                                     char*          pc_str,
                                     char*          sc_str,
@@ -190,7 +190,7 @@ void libblis_test_axpyf_experiment( test_params_t* params,
 
 		time = bli_clock();
 
-		libblis_test_axpyf_impl( impl, &alpha, &a, &x, &y );
+		libblis_test_axpyf_impl( iface, &alpha, &a, &x, &y );
 
 		time_min = bli_clock_min_diff( time_min, time );
 	}
@@ -214,20 +214,20 @@ void libblis_test_axpyf_experiment( test_params_t* params,
 
 
 
-void libblis_test_axpyf_impl( mt_impl_t impl,
+void libblis_test_axpyf_impl( iface_t   iface,
                               obj_t*    alpha,
                               obj_t*    a,
                               obj_t*    x,
                               obj_t*    y )
 {
-	switch ( impl )
+	switch ( iface )
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
 		bli_axpyf_ker( alpha, a, x, y );
 		break;
 
 		default:
-		libblis_test_printf_error( "Invalid implementation type.\n" );
+		libblis_test_printf_error( "Invalid interface type.\n" );
 	}
 }
 

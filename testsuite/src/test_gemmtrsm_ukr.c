@@ -51,7 +51,7 @@ void libblis_test_gemmtrsm_ukr_deps( test_params_t* params,
 
 void libblis_test_gemmtrsm_ukr_experiment( test_params_t* params,
                                            test_op_t*     op,
-                                           mt_impl_t      impl,
+                                           iface_t        iface,
                                            num_t          datatype,
                                            char*          pc_str,
                                            char*          sc_str,
@@ -59,7 +59,7 @@ void libblis_test_gemmtrsm_ukr_experiment( test_params_t* params,
                                            double*        perf,
                                            double*        resid );
 
-void libblis_test_gemmtrsm_ukr_impl( mt_impl_t impl,
+void libblis_test_gemmtrsm_ukr_impl( iface_t   iface,
                                      side_t    side,
                                      obj_t*    alpha,
                                      obj_t*    a1x,
@@ -138,7 +138,7 @@ extern blksz_t* gemm_kr;
 
 void libblis_test_gemmtrsm_ukr_experiment( test_params_t* params,
                                            test_op_t*     op,
-                                           mt_impl_t      impl,
+                                           iface_t        iface,
                                            num_t          datatype,
                                            char*          pc_str,
                                            char*          sc_str,
@@ -272,7 +272,7 @@ void libblis_test_gemmtrsm_ukr_experiment( test_params_t* params,
 
 		time = bli_clock();
 
-		libblis_test_gemmtrsm_ukr_impl( impl, side, &alpha,
+		libblis_test_gemmtrsm_ukr_impl( iface, side, &alpha,
 		                                &a1xp, &a11p, &bx1p, &b11p, &c11 );
 
 		time_min = bli_clock_min_diff( time_min, time );
@@ -302,7 +302,7 @@ void libblis_test_gemmtrsm_ukr_experiment( test_params_t* params,
 
 
 
-void libblis_test_gemmtrsm_ukr_impl( mt_impl_t impl,
+void libblis_test_gemmtrsm_ukr_impl( iface_t   iface,
                                      side_t    side,
                                      obj_t*    alpha,
                                      obj_t*    a1x,
@@ -311,14 +311,14 @@ void libblis_test_gemmtrsm_ukr_impl( mt_impl_t impl,
                                      obj_t*    b11,
                                      obj_t*    c11 )
 {
-	switch ( impl )
+	switch ( iface )
 	{
 		case BLIS_TEST_SEQ_UKERNEL:
 		bli_gemmtrsm_ukr( alpha, a1x, a11, bx1, b11, c11 );
 		break;
 
 		default:
-		libblis_test_printf_error( "Invalid implementation type.\n" );
+		libblis_test_printf_error( "Invalid interface type.\n" );
 	}
 }
 

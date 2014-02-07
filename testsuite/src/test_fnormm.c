@@ -51,7 +51,7 @@ void libblis_test_fnormm_deps( test_params_t* params,
 
 void libblis_test_fnormm_experiment( test_params_t* params,
                                      test_op_t*     op,
-                                     mt_impl_t      impl,
+                                     iface_t        iface,
                                      num_t          datatype,
                                      char*          pc_str,
                                      char*          sc_str,
@@ -59,7 +59,7 @@ void libblis_test_fnormm_experiment( test_params_t* params,
                                      double*        perf,
                                      double*        resid );
 
-void libblis_test_fnormm_impl( mt_impl_t impl,
+void libblis_test_fnormm_impl( iface_t   iface,
                                obj_t*    x,
                                obj_t*    norm );
 
@@ -108,7 +108,7 @@ void libblis_test_fnormm( test_params_t* params, test_op_t* op )
 
 void libblis_test_fnormm_experiment( test_params_t* params,
                                      test_op_t*     op,
-                                     mt_impl_t      impl,
+                                     iface_t        iface,
                                      num_t          datatype,
                                      char*          pc_str,
                                      char*          sc_str,
@@ -156,7 +156,7 @@ void libblis_test_fnormm_experiment( test_params_t* params,
 	{
 		time = bli_clock();
 
-		libblis_test_fnormm_impl( impl, &x, &norm );
+		libblis_test_fnormm_impl( iface, &x, &norm );
 
 		time_min = bli_clock_min_diff( time_min, time );
 	}
@@ -177,18 +177,18 @@ void libblis_test_fnormm_experiment( test_params_t* params,
 
 
 
-void libblis_test_fnormm_impl( mt_impl_t impl,
+void libblis_test_fnormm_impl( iface_t   iface,
                                obj_t*    x,
                                obj_t*    norm )
 {
-	switch ( impl )
+	switch ( iface )
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
 		bli_fnormm( x, norm );
 		break;
 
 		default:
-		libblis_test_printf_error( "Invalid implementation type.\n" );
+		libblis_test_printf_error( "Invalid interface type.\n" );
 	}
 }
 

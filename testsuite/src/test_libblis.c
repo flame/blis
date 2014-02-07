@@ -979,14 +979,14 @@ void carryover( unsigned int* c,
 
 void libblis_test_op_driver( test_params_t* params,
                              test_op_t*     op,
-                             mt_impl_t      impl,
+                             iface_t        iface,
                              char*          op_str,
                              char*          p_types,
                              char*          o_types,
                              thresh_t*      thresh,
                              void (*f_exp)  (test_params_t*, // params struct
                                              test_op_t*,     // op struct
-                                             mt_impl_t,      // impl
+                                             iface_t,        // iface
                                              num_t,          // datatype (current datatype)
                                              char*,          // pc_str (current param string)
                                              char*,          // sc_str (current storage string)
@@ -1035,7 +1035,7 @@ void libblis_test_op_driver( test_params_t* params,
 
 	// If output to files was requested, attempt to open a file stream.
 	if ( params->output_files )
-		libblis_test_fopen_ofile( op_str, impl, &output_stream );
+		libblis_test_fopen_ofile( op_str, iface, &output_stream );
 
 	// Set the error-checking level according to what was specified in the
 	// input file.
@@ -1095,7 +1095,7 @@ void libblis_test_op_driver( test_params_t* params,
 
 	// If we are testing a micro-kernel, unconditionally disable the
 	// "mix all storage" option.
-	if ( impl == BLIS_TEST_SEQ_UKERNEL )
+	if ( iface == BLIS_TEST_SEQ_UKERNEL )
 		mix_all_storage = DISABLE;
 
 	// Determine the total number of storage schemes.
@@ -1253,7 +1253,7 @@ void libblis_test_op_driver( test_params_t* params,
 				{
 					f_exp( params,
 					       op,
-					       impl,
+					       iface,
 					       datatype,
 					       pc_str[pci],
 					       sc_str[sci],
@@ -1639,11 +1639,11 @@ void libblis_test_abort( void )
 
 
 
-void libblis_test_fopen_ofile( char* op_str, mt_impl_t impl, FILE** output_stream )
+void libblis_test_fopen_ofile( char* op_str, iface_t iface, FILE** output_stream )
 {
 	char filename_str[ MAX_FILENAME_LENGTH ];
 
-	if ( impl == BLIS_TEST_MT_FRONT_END )
+	if ( iface == BLIS_TEST_MT_FRONT_END )
 		bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 
 	// Construct a filename string for the current operation.

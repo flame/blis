@@ -51,7 +51,7 @@ void libblis_test_setm_deps( test_params_t* params,
 
 void libblis_test_setm_experiment( test_params_t* params,
                                    test_op_t*     op,
-                                   mt_impl_t      impl,
+                                   iface_t        iface,
                                    num_t          datatype,
                                    char*          pc_str,
                                    char*          sc_str,
@@ -59,7 +59,7 @@ void libblis_test_setm_experiment( test_params_t* params,
                                    double*        perf,
                                    double*        resid );
 
-void libblis_test_setm_impl( mt_impl_t impl,
+void libblis_test_setm_impl( iface_t   iface,
                              obj_t*    beta,
                              obj_t*    x );
 
@@ -107,7 +107,7 @@ void libblis_test_setm( test_params_t* params, test_op_t* op )
 
 void libblis_test_setm_experiment( test_params_t* params,
                                    test_op_t*     op,
-                                   mt_impl_t      impl,
+                                   iface_t        iface,
                                    num_t          datatype,
                                    char*          pc_str,
                                    char*          sc_str,
@@ -152,7 +152,7 @@ void libblis_test_setm_experiment( test_params_t* params,
 	{
 		time = bli_clock();
 
-		libblis_test_setm_impl( impl, &beta, &x );
+		libblis_test_setm_impl( iface, &beta, &x );
 
 		time_min = bli_clock_min_diff( time_min, time );
 	}
@@ -173,18 +173,18 @@ void libblis_test_setm_experiment( test_params_t* params,
 
 
 
-void libblis_test_setm_impl( mt_impl_t impl,
+void libblis_test_setm_impl( iface_t   iface,
                              obj_t*    beta,
                              obj_t*    x )
 {
-	switch ( impl )
+	switch ( iface )
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
 		bli_setm( beta, x );
 		break;
 
 		default:
-		libblis_test_printf_error( "Invalid implementation type.\n" );
+		libblis_test_printf_error( "Invalid interface type.\n" );
 	}
 }
 

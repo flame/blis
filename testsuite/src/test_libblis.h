@@ -139,10 +139,10 @@ typedef enum
 
 typedef enum
 {
-	BLIS_TEST_SEQ_FRONT_END   = 0,
-	BLIS_TEST_MT_FRONT_END    = 1,
-	BLIS_TEST_SEQ_UKERNEL     = 2,
-} mt_impl_t;
+	BLIS_TEST_SEQ_UKERNEL     = 0,
+	BLIS_TEST_SEQ_FRONT_END   = 1,
+	BLIS_TEST_MT_FRONT_END    = 2,
+} iface_t;
 
 
 
@@ -324,14 +324,14 @@ void carryover( unsigned int* c,
 
 void libblis_test_op_driver( test_params_t* params,
                              test_op_t*     op,
-                             mt_impl_t      impl,
+                             iface_t        iface,
                              char*          op_str,
                              char*          p_types,
                              char*          o_types,
                              thresh_t*      thresh,
                              void (*f_exp)  (test_params_t*, // params struct
                                              test_op_t*,     // op struct
-                                             mt_impl_t,      // impl
+                                             iface_t,        // iface
                                              num_t,          // datatype (current datatype)
                                              char*,          // pc_str (current param string)
                                              char*,          // sc_str (current storage string)
@@ -378,7 +378,7 @@ void libblis_test_abort( void );
 
 // --- File I/O wrappers ---
 
-void libblis_test_fopen_ofile( char* op_str, mt_impl_t impl, FILE** output_stream );
+void libblis_test_fopen_ofile( char* op_str, iface_t iface, FILE** output_stream );
 void libblis_test_fclose_ofile( FILE* output_stream );
 void libblis_test_fopen_check_stream( char* filename_str, FILE* stream );
 
