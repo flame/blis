@@ -36,7 +36,7 @@
 
 
 #undef  GENTFUNC
-#define GENTFUNC( ctype, ch, varname, kername ) \
+#define GENTFUNC( ctype, ch, varname ) \
 \
 void PASTEMAC(ch,varname)( \
                            dim_t           k, \
@@ -122,5 +122,5 @@ void PASTEMAC(ch,varname)( \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC( gemm_ref_mxn, gemm_ref_mxn )
+INSERT_GENTFUNC_BASIC0( gemm_ref_mxn )
 

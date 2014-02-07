@@ -127,7 +127,18 @@ GENTFUNCSCAL( double,   dcomplex, d, z, blasname, blisname )
 // -- Macros for functions with one operand ------------------------------------
 
 
-// -- Basic one-operand macro --
+// -- Basic one-operand macro (with no auxiliary arguments) --
+
+
+#define INSERT_GENTFUNC_BASIC0( tfuncname ) \
+\
+GENTFUNC( float,    s, tfuncname ) \
+GENTFUNC( double,   d, tfuncname ) \
+GENTFUNC( scomplex, c, tfuncname ) \
+GENTFUNC( dcomplex, z, tfuncname )
+
+
+// -- Basic one-operand macro (with one auxiliary argument) --
 
 
 #define INSERT_GENTFUNC_BASIC( tfuncname, varname ) \
@@ -136,6 +147,17 @@ GENTFUNC( float,    s, tfuncname, varname ) \
 GENTFUNC( double,   d, tfuncname, varname ) \
 GENTFUNC( scomplex, c, tfuncname, varname ) \
 GENTFUNC( dcomplex, z, tfuncname, varname )
+
+
+// -- Basic one-operand macro (with two auxiliary arguments) --
+
+
+#define INSERT_GENTFUNC_BASIC2( tfuncname, varname1, varname2 ) \
+\
+GENTFUNC( float,    s, tfuncname, varname1, varname2 ) \
+GENTFUNC( double,   d, tfuncname, varname1, varname2 ) \
+GENTFUNC( scomplex, c, tfuncname, varname1, varname2 ) \
+GENTFUNC( dcomplex, z, tfuncname, varname1, varname2 )
 
 
 // -- Basic one-operand macro with integer instance --
@@ -181,17 +203,6 @@ GENTFUNCRI( float,    float,  gint_t, s, s, i, tfuncname, varname ) \
 GENTFUNCRI( double,   double, gint_t, d, d, i, tfuncname, varname ) \
 GENTFUNCRI( scomplex, float,  gint_t, c, s, i, tfuncname, varname ) \
 GENTFUNCRI( dcomplex, double, gint_t, z, d, i, tfuncname, varname )
-
-
-// -- Basic one-operand macro (with two auxiliary arguments) --
-
-
-#define INSERT_GENTFUNC_BASIC2( tfuncname, varname1, varname2 ) \
-\
-GENTFUNC( float,    s, tfuncname, varname1, varname2 ) \
-GENTFUNC( double,   d, tfuncname, varname1, varname2 ) \
-GENTFUNC( scomplex, c, tfuncname, varname1, varname2 ) \
-GENTFUNC( dcomplex, z, tfuncname, varname1, varname2 )
 
 
 

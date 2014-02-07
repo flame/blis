@@ -36,7 +36,7 @@
 
 
 #undef  GENTFUNC
-#define GENTFUNC( ctype, ch, varname, kername ) \
+#define GENTFUNC( ctype, ch, varname ) \
 \
 void PASTEMAC(ch,varname)( \
                            ctype* restrict a, \
@@ -101,5 +101,5 @@ void PASTEMAC(ch,varname)( \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC( trsm_u_ref_mxn, trsm_u_ref_mxn )
+INSERT_GENTFUNC_BASIC0( trsm_u_ref_mxn )
 
