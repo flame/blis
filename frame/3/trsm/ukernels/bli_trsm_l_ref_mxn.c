@@ -57,54 +57,46 @@ void PASTEMAC(ch,varname)( \
 	dim_t           iter, i, j, l; \
 	dim_t           n_behind; \
 \
-	ctype* restrict alpha11; \
-	ctype* restrict a10t; \
-	ctype* restrict alpha10; \
-	ctype* restrict X0; \
-	ctype* restrict x1; \
-	ctype* restrict x01; \
-	ctype* restrict chi01; \
-	ctype* restrict chi11; \
-	ctype* restrict gamma11; \
 	ctype           rho11; \
 \
 	for ( iter = 0; iter < m; ++iter ) \
 	{ \
 		i        = iter; \
 		n_behind = i; \
-		alpha11  = a + (i  )*rs_a + (i  )*cs_a; \
-		a10t     = a + (i  )*rs_a + (0  )*cs_a; \
-		X0       = b + (0  )*rs_b + (0  )*cs_b; \
-		x1       = b + (i  )*rs_b + (0  )*cs_b; \
 \
-		/* x1 = x1 - a10t * X0; */ \
-		/* x1 = x1 / alpha11; */ \
+		ctype* restrict alpha11  = a + (i  )*rs_a + (i  )*cs_a; \
+		ctype* restrict a10t     = a + (i  )*rs_a + (0  )*cs_a; \
+		ctype* restrict B0       = b + (0  )*rs_b + (0  )*cs_b; \
+		ctype* restrict b1       = b + (i  )*rs_b + (0  )*cs_b; \
+\
+		/* b1 = b1 - a10t * B0; */ \
+		/* b1 = b1 / alpha11; */ \
 		for ( j = 0; j < n; ++j ) \
 		{ \
-			x01     = X0 + (0  )*rs_b + (j  )*cs_b; \
-			chi11   = x1 + (0  )*rs_b + (j  )*cs_b; \
-			gamma11 = c  + (i  )*rs_c + (j  )*cs_c; \
+			ctype* restrict b01     = B0 + (0  )*rs_b + (j  )*cs_b; \
+			ctype* restrict beta11  = b1 + (0  )*rs_b + (j  )*cs_b; \
+			ctype* restrict gamma11 = c  + (i  )*rs_c + (j  )*cs_c; \
 \
-			/* chi11 = chi11 - a10t * x01; */ \
+			/* beta11 = beta11 - a10t * b01; */ \
 			PASTEMAC(ch,set0s)( rho11 ); \
 			for ( l = 0; l < n_behind; ++l ) \
 			{ \
-				alpha10 = a10t + (l  )*cs_a; \
-				chi01   = x01  + (l  )*rs_b; \
+				ctype* restrict alpha10 = a10t + (l  )*cs_a; \
+				ctype* restrict beta01  = b01  + (l  )*rs_b; \
 \
-				PASTEMAC(ch,axpys)( *alpha10, *chi01, rho11 ); \
+				PASTEMAC(ch,axpys)( *alpha10, *beta01, rho11 ); \
 			} \
-			PASTEMAC(ch,subs)( rho11, *chi11 ); \
+			PASTEMAC(ch,subs)( rho11, *beta11 ); \
 \
-			/* chi11 = chi11 / alpha11; */ \
+			/* beta11 = beta11 / alpha11; */ \
 			/* NOTE: The INVERSE of alpha11 (1.0/alpha11) is stored instead
 			   of alpha11, so we can multiply rather than divide. We store 
 			   the inverse of alpha11 intentionally to avoid expensive
 			   division instructions within the micro-kernel. */ \
-			PASTEMAC(ch,scals)( *alpha11, *chi11 ); \
+			PASTEMAC(ch,scals)( *alpha11, *beta11 ); \
 \
 			/* Output final result to matrix C. */ \
-			PASTEMAC(ch,copys)( *chi11, *gamma11 ); \
+			PASTEMAC(ch,copys)( *beta11, *gamma11 ); \
 		} \
 	} \
 }

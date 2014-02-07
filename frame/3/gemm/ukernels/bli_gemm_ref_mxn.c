@@ -62,7 +62,6 @@ void PASTEMAC(ch,varname)( \
 \
 	ctype           ab[ PASTEMAC(ch,mr) * \
 	                    PASTEMAC(ch,nr) ]; \
-	ctype* restrict abij; \
 	ctype           ai; \
 	ctype           bj; \
 \
@@ -76,7 +75,7 @@ void PASTEMAC(ch,varname)( \
 	/* Perform a series of k rank-1 updates into ab. */ \
 	for ( l = 0; l < k; ++l ) \
 	{ \
-		abij = ab; \
+		ctype* restrict abij = ab; \
 \
 		/* In an optimized implementation, these two loops over MR and NR
 		   are typically fully unrolled. */ \

@@ -282,7 +282,7 @@ endif
 
 # --Object file rules --
 
-$(TEST_OBJ_PATH)/%.o: $(TEST_SRC_PATH)/%.c
+$(TEST_OBJ_PATH)/%.o: $(TEST_SRC_PATH)/%.c $(BLIS_LIB)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	$(CC) $(CFLAGS) -c $< -o $@
 else
