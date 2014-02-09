@@ -32,21 +32,22 @@
 
 */
 
-#include "bli_packm_cntl.h"
-#include "bli_packm_check.h"
-#include "bli_packm_init.h"
-#include "bli_packm_int.h"
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, varname ) \
+\
+void PASTEMAC(ch,varname)( \
+                           struc_t strucc, \
+                           doff_t  diagoffc, \
+                           uplo_t  uploc, \
+                           conj_t  conjc, \
+                           dim_t   m_panel, \
+                           dim_t   n_panel, \
+                           dim_t   m_panel_max, \
+                           dim_t   n_panel_max, \
+                           void*   kappa, \
+                           void*   c, inc_t rs_c, inc_t cs_c, \
+                           void*   p, inc_t rs_p, inc_t cs_p  \
+                         );
 
-#include "bli_packm_part.h"
-
-#include "bli_packm_unb_var1.h"
-
-#include "bli_packm_blk_var2.h"
-
-#include "bli_packm_blk_var3.h"
-
-#include "bli_packm_cxk.h"
-#include "bli_packm_gen_cxk.h"
-#include "bli_packm_herm_cxk.h"
-#include "bli_packm_tri_cxk.h"
+INSERT_GENTPROT_BASIC( packm_herm_cxk )
 

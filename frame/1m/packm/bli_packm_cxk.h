@@ -52,7 +52,7 @@ void PASTEMAC(ch,varname)( \
                            dim_t   n, \
                            void*   beta, \
                            void*   a, inc_t inca, inc_t lda, \
-                           void*   p,             inc_t ldp \
+                           void*   p,             inc_t ldp  \
                          );
 
 INSERT_GENTPROT_BASIC( packm_cxk )
