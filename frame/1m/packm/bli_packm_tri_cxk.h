@@ -36,19 +36,19 @@
 #define GENTPROT( ctype, ch, varname ) \
 \
 void PASTEMAC(ch,varname)( \
-                           struc_t strucc, \
-                           doff_t  diagoffc, \
-                           diag_t  diagc, \
-                           uplo_t  uploc, \
-                           conj_t  conjc, \
-                           bool_t  invdiag, \
-                           dim_t   m_panel, \
-                           dim_t   n_panel, \
-                           dim_t   m_panel_max, \
-                           dim_t   n_panel_max, \
-                           ctype*  kappa, \
-                           ctype*  c, inc_t rs_c, inc_t cs_c, \
-                           ctype*  p, inc_t rs_p, inc_t cs_p  \
+                           struc_t         strucc, \
+                           doff_t          diagoffp, \
+                           diag_t          diagc, \
+                           uplo_t          uploc, \
+                           conj_t          conjc, \
+                           bool_t          invdiag, \
+                           dim_t           m_panel, \
+                           dim_t           n_panel, \
+                           dim_t           m_panel_max, \
+                           dim_t           n_panel_max, \
+                           ctype* restrict kappa, \
+                           ctype* restrict c, inc_t rs_c, inc_t cs_c, \
+                           ctype* restrict p, inc_t rs_p, inc_t cs_p  \
                          );
 
 INSERT_GENTPROT_BASIC( packm_tri_cxk )

@@ -190,6 +190,12 @@
 \
 	( struc == BLIS_TRIANGULAR )
 
+#define bli_is_herm_or_symm( struc ) \
+\
+	( bli_is_hermitian( struc ) || \
+	  bli_is_symmetric( struc ) )
+
+
 
 // conj
 

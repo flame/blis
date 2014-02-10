@@ -217,7 +217,7 @@ void libblis_test_trsm_ukr_experiment( test_params_t* params,
 	                          &b, &bp );
 
 	// Pack the contents of a to ap.
-	bli_packm_blk_var3( &a, &ap );
+	bli_packm_blk_var1( &a, &ap );
 
 
 	// Repeat the experiment n_repeats times and record results. 

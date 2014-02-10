@@ -251,10 +251,10 @@ void libblis_test_gemmtrsm_ukr_experiment( test_params_t* params,
 	                          &b, &bp );
 
 	// Pack the contents of a to ap.
-	bli_packm_blk_var3( &a, &ap );
+	bli_packm_blk_var1( &a, &ap );
 
 	// Pack the contents of b to bp.
-	bli_packm_blk_var2( &b, &bp );
+	bli_packm_blk_var1( &b, &bp );
 
 
 	// Create subpartitions from the a and b panels.

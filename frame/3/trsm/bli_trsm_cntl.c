@@ -88,7 +88,7 @@ void bli_trsm_cntl_init()
 	trsm_l_packa_cntl
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT3, // pack panels of A compactly
+	                           BLIS_VARIANT1, // pack panels of A compactly
 	                           // IMPORTANT: n dim multiple must be mr to
 	                           // support right and bottom-right edge cases
 	                           gemm_mr,
@@ -103,7 +103,7 @@ void bli_trsm_cntl_init()
 	trsm_l_packb_cntl
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT2,
+	                           BLIS_VARIANT1,
 	                           // IMPORTANT: m dim multiple must be mr since
 	                           // B_pack is updated (ie: serves as C) in trsm
 	                           gemm_mr,
@@ -119,7 +119,7 @@ void bli_trsm_cntl_init()
 	trsm_r_packa_cntl
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT2,
+	                           BLIS_VARIANT1,
 	                           gemm_nr,
 	                           gemm_mr,
 	                           FALSE, // already dense; densify not necessary
@@ -132,7 +132,7 @@ void bli_trsm_cntl_init()
 	trsm_r_packb_cntl
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT3, // pack panels of B compactly
+	                           BLIS_VARIANT1, // pack panels of B compactly
 	                           gemm_mr,
 	                           gemm_mr,
 	                           TRUE,  // densify

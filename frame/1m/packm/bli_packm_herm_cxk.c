@@ -38,23 +38,20 @@
 #define GENTFUNC( ctype, ch, varname ) \
 \
 void PASTEMAC(ch,varname)( \
-                           struc_t strucc, \
-                           doff_t  diagoffc, \
-                           uplo_t  uploc, \
-                           conj_t  conjc, \
-                           dim_t   m_panel, \
-                           dim_t   n_panel, \
-                           dim_t   m_panel_max, \
-                           dim_t   n_panel_max, \
-                           void*   kappa, \
-                           void*   c, inc_t rs_c, inc_t cs_c, \
-                           void*   p, inc_t rs_p, inc_t cs_p  \
+                           struc_t         strucc, \
+                           doff_t          diagoffc, \
+                           uplo_t          uploc, \
+                           conj_t          conjc, \
+                           dim_t           m_panel, \
+                           dim_t           n_panel, \
+                           dim_t           m_panel_max, \
+                           dim_t           n_panel_max, \
+                           ctype* restrict kappa, \
+                           ctype* restrict c, inc_t rs_c, inc_t cs_c, \
+                           ctype* restrict p, inc_t rs_p, inc_t cs_p  \
                          ) \
 { \
-	ctype* restrict c_begin    = c; \
-	ctype* restrict p_begin    = p; \
-	ctype* restrict kappa_cast = kappa; \
-	ctype* restrict zero       = PASTEMAC(ch,0); \
+	ctype* restrict zero = PASTEMAC(ch,0); \
 \
 	dim_t           i, j; \
 	dim_t           panel_len; \
@@ -110,122 +107,151 @@ void PASTEMAC(ch,varname)( \
 		cs_p11    = cs_p; \
 	} \
 \
-	diagoffc_abs = bli_abs( diagoffc ); \
-\
-	/* Sanity check. Diagonals should not intersect the short end of
-	   a micro-panel. If they do, then somehow the constraints on
-	   cache blocksizes being a whole multiple of the register
-	   blocksizes was somehow violated. */ \
-	if ( ( bli_is_col_stored_f( rs_p, cs_p ) && diagoffc < 0 ) || \
-	     ( bli_is_row_stored_f( rs_p, cs_p ) && diagoffc > 0 ) ) \
-		bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \
-\
-	if      ( ( bli_is_row_stored_f( rs_p, cs_p ) && bli_is_upper( uploc ) ) || \
-	          ( bli_is_col_stored_f( rs_p, cs_p ) && bli_is_lower( uploc ) ) ) \
+	if ( !bli_intersects_diag_n( diagoffc, m_panel, n_panel ) ) \
 	{ \
-		p10_dim    = panel_dim; \
-		p10_len    = diagoffc_abs; \
-		p10        = p_begin; \
-		c10        = c_begin; \
-		incc10     = incc; \
-		ldc10      = ldc; \
-		conjc10    = conjc; \
-\
-		p12_dim    = panel_dim; \
-		p12_len    = panel_len - p10_len; \
-		j          = p10_len; \
-		diagoffc12 = diagoffc_abs - j; \
-		p12        = p_begin + (j  )*ldp; \
-		c12        = c_begin + (j  )*ldc; \
-		c12        = c12 + diagoffc12 * ( doff_t )cs_c + \
-		                  -diagoffc12 * ( doff_t )rs_c;  \
-		incc12     = ldc; \
-		ldc12      = incc; \
-		conjc12    = conjc; \
-\
-		p11_m      = panel_dim; \
-		p11_n      = panel_dim; \
-		j          = diagoffc_abs; \
-		p11        = p_begin + (j  )*ldp; \
-		c11        = c_begin + (j  )*ldc; \
-\
-		if ( bli_is_hermitian( strucc ) ) \
-			bli_toggle_conj( conjc12 ); \
-	} \
-	else /* if ( ( bli_is_row_stored_f( rs_p, cs_p ) && bli_is_lower( uploc ) ) || \
-	             ( bli_is_col_stored_f( rs_p, cs_p ) && bli_is_upper( uploc ) ) ) */ \
-	{ \
-		p10_dim    = panel_dim; \
-		p10_len    = diagoffc_abs + panel_dim; \
-		diagoffc10 = diagoffc; \
-		p10        = p_begin; \
-		c10        = c_begin; \
-		c10        = c10 + diagoffc10 * ( doff_t )cs_c + \
-		                  -diagoffc10 * ( doff_t )rs_c;  \
-		incc10     = ldc; \
-		ldc10      = incc; \
-		conjc10    = conjc; \
-\
-		p12_dim    = panel_dim; \
-		p12_len    = panel_len - p10_len; \
-		j          = p10_len; \
-		p12        = p_begin + (j  )*ldp; \
-		c12        = c_begin + (j  )*ldc; \
-		incc12     = incc; \
-		ldc12      = ldc; \
-		conjc12    = conjc; \
-\
-		p11_m      = panel_dim; \
-		p11_n      = panel_dim; \
-		j          = diagoffc_abs; \
-		p11        = p_begin + (j  )*ldp; \
-		c11        = c_begin + (j  )*ldc; \
-\
-		if ( bli_is_hermitian( strucc ) ) \
-			bli_toggle_conj( conjc10 ); \
-	} \
-\
-	/* Pack to P10. For upper storage, this includes the unstored
-	   triangle of C11. */ \
-	PASTEMAC(ch,packm_cxk)( conjc10, \
-	                        p10_dim, \
-	                        p10_len, \
-	                        kappa_cast, \
-	                        c10, incc10, ldc10, \
-	                        p10,         ldp ); \
-\
-	/* Pack to P12. For lower storage, this includes the unstored
-	   triangle of C11. */ \
-	PASTEMAC(ch,packm_cxk)( conjc12, \
-	                        p12_dim, \
-	                        p12_len, \
-	                        kappa_cast, \
-	                        c12, incc12, ldc12, \
-	                        p12,         ldp ); \
-\
-	/* Pack the stored triangule of C11 to P11. */ \
-	PASTEMAC3(ch,ch,ch,scal2m_unb_var1)( 0, \
-	                                     BLIS_NONUNIT_DIAG, \
-	                                     uploc, \
-	                                     conjc, \
-	                                     p11_m, \
-	                                     p11_n, \
-	                                     kappa_cast, \
-	                                     c11, rs_c,   cs_c, \
-	                                     p11, rs_p11, cs_p11 ); \
-\
-	/* If source matrix C is Hermitian, we have to zero out the
-	   imaginary components of the diagonal of P11 in case the
-	   corresponding elements in C11 were not already zero. */ \
-	if ( bli_is_hermitian( strucc ) ) \
-	{ \
-		/* NOTE: We can directly increment p11 since we are done
-		   using p11 for the remainder of the function. */ \
-		for ( i = 0; i < p11_m; ++i ) \
+		/* If the current panel is unstored, we need to make a few
+		   adjustments so we refer to the data where it is actually
+		   stored, also taking conjugation into account. (Note this
+		   implicitly assumes we are operating on a dense panel
+		   within a larger symmetric or Hermitian matrix, since a
+		   general matrix would not contain any unstored region.) */ \
+		if ( bli_is_unstored_subpart_n( diagoffc, uploc, m_panel, n_panel ) ) \
 		{ \
-			PASTEMAC(ch,seti0s)( *p11 ); \
+			c = c + diagoffc * ( doff_t )cs_c + \
+			       -diagoffc * ( doff_t )rs_c;  \
+			bli_swap_incs( incc, ldc ); \
 \
-			p11 += rs_p11 + cs_p11; \
+			if ( bli_is_hermitian( strucc ) ) \
+				bli_toggle_conj( conjc ); \
+		} \
+\
+		/* Pack the full panel. */ \
+		PASTEMAC(ch,packm_cxk)( conjc, \
+		                        panel_dim, \
+		                        panel_len, \
+		                        kappa, \
+		                        c, incc, ldc, \
+		                        p,       ldp ); \
+	} \
+	else /* if ( bli_intersects_diag_n( diagoffc, m_panel, n_panel ) ) */ \
+	{ \
+		/* Sanity check. Diagonals should not intersect the short end of
+		   a micro-panel. If they do, then somehow the constraints on
+		   cache blocksizes being a whole multiple of the register
+		   blocksizes was somehow violated. */ \
+		if ( ( bli_is_col_stored_f( rs_p, cs_p ) && diagoffc < 0 ) || \
+		     ( bli_is_row_stored_f( rs_p, cs_p ) && diagoffc > 0 ) ) \
+			bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \
+\
+		diagoffc_abs = bli_abs( diagoffc ); \
+\
+		if      ( ( bli_is_row_stored_f( rs_p, cs_p ) && bli_is_upper( uploc ) ) || \
+		          ( bli_is_col_stored_f( rs_p, cs_p ) && bli_is_lower( uploc ) ) ) \
+		{ \
+			p10_dim    = panel_dim; \
+			p10_len    = diagoffc_abs; \
+			p10        = p; \
+			c10        = c; \
+			incc10     = incc; \
+			ldc10      = ldc; \
+			conjc10    = conjc; \
+\
+			p12_dim    = panel_dim; \
+			p12_len    = panel_len - p10_len; \
+			j          = p10_len; \
+			diagoffc12 = diagoffc_abs - j; \
+			p12        = p + (j  )*ldp; \
+			c12        = c + (j  )*ldc; \
+			c12        = c12 + diagoffc12 * ( doff_t )cs_c + \
+			                  -diagoffc12 * ( doff_t )rs_c;  \
+			incc12     = ldc; \
+			ldc12      = incc; \
+			conjc12    = conjc; \
+\
+			p11_m      = panel_dim; \
+			p11_n      = panel_dim; \
+			j          = diagoffc_abs; \
+			p11        = p + (j  )*ldp; \
+			c11        = c + (j  )*ldc; \
+\
+			if ( bli_is_hermitian( strucc ) ) \
+				bli_toggle_conj( conjc12 ); \
+		} \
+		else /* if ( ( bli_is_row_stored_f( rs_p, cs_p ) && bli_is_lower( uploc ) ) || \
+		             ( bli_is_col_stored_f( rs_p, cs_p ) && bli_is_upper( uploc ) ) ) */ \
+		{ \
+			p10_dim    = panel_dim; \
+			p10_len    = diagoffc_abs + panel_dim; \
+			diagoffc10 = diagoffc; \
+			p10        = p; \
+			c10        = c; \
+			c10        = c10 + diagoffc10 * ( doff_t )cs_c + \
+			                  -diagoffc10 * ( doff_t )rs_c;  \
+			incc10     = ldc; \
+			ldc10      = incc; \
+			conjc10    = conjc; \
+\
+			p12_dim    = panel_dim; \
+			p12_len    = panel_len - p10_len; \
+			j          = p10_len; \
+			p12        = p + (j  )*ldp; \
+			c12        = c + (j  )*ldc; \
+			incc12     = incc; \
+			ldc12      = ldc; \
+			conjc12    = conjc; \
+\
+			p11_m      = panel_dim; \
+			p11_n      = panel_dim; \
+			j          = diagoffc_abs; \
+			p11        = p + (j  )*ldp; \
+			c11        = c + (j  )*ldc; \
+\
+			if ( bli_is_hermitian( strucc ) ) \
+				bli_toggle_conj( conjc10 ); \
+		} \
+\
+		/* Pack to P10. For upper storage, this includes the unstored
+		   triangle of C11. */ \
+		PASTEMAC(ch,packm_cxk)( conjc10, \
+		                        p10_dim, \
+		                        p10_len, \
+		                        kappa, \
+		                        c10, incc10, ldc10, \
+		                        p10,         ldp ); \
+\
+		/* Pack to P12. For lower storage, this includes the unstored
+		   triangle of C11. */ \
+		PASTEMAC(ch,packm_cxk)( conjc12, \
+		                        p12_dim, \
+		                        p12_len, \
+		                        kappa, \
+		                        c12, incc12, ldc12, \
+		                        p12,         ldp ); \
+\
+		/* Pack the stored triangule of C11 to P11. */ \
+		PASTEMAC3(ch,ch,ch,scal2m_unb_var1)( 0, \
+		                                     BLIS_NONUNIT_DIAG, \
+		                                     uploc, \
+		                                     conjc, \
+		                                     p11_m, \
+		                                     p11_n, \
+		                                     kappa, \
+		                                     c11, rs_c,   cs_c, \
+		                                     p11, rs_p11, cs_p11 ); \
+\
+		/* If source matrix C is Hermitian, we have to zero out the
+		   imaginary components of the diagonal of P11 in case the
+		   corresponding elements in C11 were not already zero. */ \
+		if ( bli_is_hermitian( strucc ) ) \
+		{ \
+			/* NOTE: We can directly increment p11 since we are done
+			   using p11 for the remainder of the function. */ \
+			for ( i = 0; i < p11_m; ++i ) \
+			{ \
+				PASTEMAC(ch,seti0s)( *p11 ); \
+\
+				p11 += rs_p11 + cs_p11; \
+			} \
 		} \
 	} \
 \
@@ -241,7 +267,7 @@ void PASTEMAC(ch,varname)( \
 		dim_t  i      = m_panel; \
 		dim_t  m_edge = m_panel_max - i; \
 		dim_t  n_edge = n_panel_max; \
-		ctype* p_edge = p_begin + (i  )*rs_p; \
+		ctype* p_edge = p + (i  )*rs_p; \
 \
 		PASTEMAC2(ch,ch,setm_unb_var1)( 0, \
 		                                BLIS_NONUNIT_DIAG, \
@@ -257,7 +283,7 @@ void PASTEMAC(ch,varname)( \
 		dim_t  j      = n_panel; \
 		dim_t  m_edge = m_panel_max; \
 		dim_t  n_edge = n_panel_max - j; \
-		ctype* p_edge = p_begin + (j  )*cs_p; \
+		ctype* p_edge = p + (j  )*cs_p; \
 \
 		PASTEMAC2(ch,ch,setm_unb_var1)( 0, \
 		                                BLIS_NONUNIT_DIAG, \

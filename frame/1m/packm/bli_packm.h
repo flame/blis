@@ -41,9 +41,7 @@
 
 #include "bli_packm_unb_var1.h"
 
-#include "bli_packm_blk_var2.h"
-
-#include "bli_packm_blk_var3.h"
+#include "bli_packm_blk_var1.h"
 
 #include "bli_packm_cxk.h"
 #include "bli_packm_gen_cxk.h"

@@ -32,7 +32,7 @@
 
 */
 
-void bli_packm_blk_var3( obj_t*   c,
+void bli_packm_blk_var1( obj_t*   c,
                          obj_t*   p );
 
 
@@ -58,5 +58,5 @@ void PASTEMAC(ch,varname)( \
                                       dim_t pd_p, inc_t ps_p \
                          );
 
-INSERT_GENTPROT_BASIC( packm_blk_var3 )
+INSERT_GENTPROT_BASIC( packm_blk_var1 )
 

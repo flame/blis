@@ -99,7 +99,7 @@ void bli_gemm_cntl_init()
 	gemm_packa_cntl
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT2,
+	                           BLIS_VARIANT1,
 	                           gemm_mr,
 	                           gemm_kr,
 	                           TRUE,  // densify; used by hemm/symm
@@ -112,7 +112,7 @@ void bli_gemm_cntl_init()
 	gemm_packb_cntl
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT2,
+	                           BLIS_VARIANT1,
 	                           gemm_kr,
 	                           gemm_nr,
 	                           TRUE,  // densify; used by hemm/symm

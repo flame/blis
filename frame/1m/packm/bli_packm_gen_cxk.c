@@ -38,23 +38,20 @@
 #define GENTFUNC( ctype, ch, varname ) \
 \
 void PASTEMAC(ch,varname)( \
-                           struc_t strucc, \
-                           doff_t  diagoffc, \
-                           uplo_t  uploc, \
-                           conj_t  conjc, \
-                           dim_t   m_panel, \
-                           dim_t   n_panel, \
-                           dim_t   m_panel_max, \
-                           dim_t   n_panel_max, \
-                           void*   kappa, \
-                           void*   c, inc_t rs_c, inc_t cs_c, \
-                           void*   p, inc_t rs_p, inc_t cs_p  \
+                           struc_t         strucc, \
+                           doff_t          diagoffc, \
+                           uplo_t          uploc, \
+                           conj_t          conjc, \
+                           dim_t           m_panel, \
+                           dim_t           n_panel, \
+                           dim_t           m_panel_max, \
+                           dim_t           n_panel_max, \
+                           ctype* restrict kappa, \
+                           ctype* restrict c, inc_t rs_c, inc_t cs_c, \
+                           ctype* restrict p, inc_t rs_p, inc_t cs_p  \
                          ) \
 { \
-	ctype* restrict c_begin    = c; \
-	ctype* restrict p_begin    = p; \
-	ctype* restrict kappa_cast = kappa; \
-	ctype* restrict zero       = PASTEMAC(ch,0); \
+	ctype* restrict zero = PASTEMAC(ch,0); \
 \
 	dim_t           panel_dim; \
 	dim_t           panel_len; \
@@ -84,29 +81,14 @@ void PASTEMAC(ch,varname)( \
 		ldp       = cs_p; \
 	} \
 \
-	/* If the current panel is unstored, we need to make a few
-	   adjustments so we refer to the data where it is actually
-	   stored, also taking conjugation into account. (Note this
-	   implicitly assumes we are operating on a dense panel
-	   within a larger symmetric or Hermitian matrix, since a
-	   general matrix would not contain any unstored region.) */ \
-	if ( bli_is_unstored_subpart_n( diagoffc, uploc, m_panel, n_panel ) ) \
-	{ \
-		c_begin = c_begin + diagoffc * ( doff_t )cs_c + \
-		                   -diagoffc * ( doff_t )rs_c;  \
-		bli_swap_incs( incc, ldc ); \
-\
-		if ( bli_is_hermitian( strucc ) ) \
-			bli_toggle_conj( conjc ); \
-	} \
 \
 	/* Pack the panel. */ \
 	PASTEMAC(ch,packm_cxk)( conjc, \
 	                        panel_dim, \
 	                        panel_len, \
-	                        kappa_cast, \
-	                        c_begin, incc, ldc, \
-	                        p_begin,       ldp ); \
+	                        kappa, \
+	                        c, incc, ldc, \
+	                        p,       ldp ); \
 \
 \
 	/* The packed memory region was acquired/allocated with "aligned"
@@ -121,7 +103,7 @@ void PASTEMAC(ch,varname)( \
 		dim_t  i      = m_panel; \
 		dim_t  m_edge = m_panel_max - i; \
 		dim_t  n_edge = n_panel_max; \
-		ctype* p_edge = p_begin + (i  )*rs_p; \
+		ctype* p_edge = p + (i  )*rs_p; \
 \
 		PASTEMAC2(ch,ch,setm_unb_var1)( 0, \
 		                                BLIS_NONUNIT_DIAG, \
@@ -137,7 +119,7 @@ void PASTEMAC(ch,varname)( \
 		dim_t  j      = n_panel; \
 		dim_t  m_edge = m_panel_max; \
 		dim_t  n_edge = n_panel_max - j; \
-		ctype* p_edge = p_begin + (j  )*cs_p; \
+		ctype* p_edge = p + (j  )*cs_p; \
 \
 		PASTEMAC2(ch,ch,setm_unb_var1)( 0, \
 		                                BLIS_NONUNIT_DIAG, \

@@ -38,25 +38,22 @@
 #define GENTFUNC( ctype, ch, varname ) \
 \
 void PASTEMAC(ch,varname)( \
-                           struc_t strucc, \
-                           doff_t  diagoffp, \
-                           diag_t  diagc, \
-                           uplo_t  uploc, \
-                           conj_t  conjc, \
-                           bool_t  invdiag, \
-                           dim_t   m_panel, \
-                           dim_t   n_panel, \
-                           dim_t   m_panel_max, \
-                           dim_t   n_panel_max, \
-                           ctype*  kappa, \
-                           ctype*  c, inc_t rs_c, inc_t cs_c, \
-                           ctype*  p, inc_t rs_p, inc_t cs_p  \
+                           struc_t         strucc, \
+                           doff_t          diagoffp, \
+                           diag_t          diagc, \
+                           uplo_t          uploc, \
+                           conj_t          conjc, \
+                           bool_t          invdiag, \
+                           dim_t           m_panel, \
+                           dim_t           n_panel, \
+                           dim_t           m_panel_max, \
+                           dim_t           n_panel_max, \
+                           ctype* restrict kappa, \
+                           ctype* restrict c, inc_t rs_c, inc_t cs_c, \
+                           ctype* restrict p, inc_t rs_p, inc_t cs_p  \
                          ) \
 { \
-	ctype* restrict c_begin    = c; \
-	ctype* restrict p_begin    = p; \
-	ctype* restrict kappa_cast = kappa; \
-	ctype* restrict zero       = PASTEMAC(ch,0); \
+	ctype* restrict zero = PASTEMAC(ch,0); \
 \
 	dim_t           panel_dim; \
 	dim_t           panel_len; \
@@ -90,9 +87,9 @@ void PASTEMAC(ch,varname)( \
 	PASTEMAC(ch,packm_cxk)( conjc, \
 	                        panel_dim, \
 	                        panel_len, \
-	                        kappa_cast, \
-	                        c_begin, incc, ldc, \
-	                        p_begin,       ldp ); \
+	                        kappa, \
+	                        c, incc, ldc, \
+	                        p,       ldp ); \
 \
 	/* If the diagonal of C is implicitly unit, set the diagonal of
 	   the packed panel to unit. */ \
@@ -101,8 +98,8 @@ void PASTEMAC(ch,varname)( \
 		PASTEMAC2(ch,ch,setd_unb_var1)( diagoffp, \
 		                                m_panel, \
 		                                n_panel, \
-		                                kappa_cast, \
-		                                p_begin, rs_p, cs_p ); \
+		                                kappa, \
+		                                p, rs_p, cs_p ); \
 	} \
 \
 	/* If requested, invert the diagonal of the packed panel. */ \
@@ -111,7 +108,7 @@ void PASTEMAC(ch,varname)( \
 		PASTEMAC(ch,invertd_unb_var1)( diagoffp, \
 		                               m_panel, \
 		                               n_panel, \
-		                               p_begin, rs_p, cs_p ); \
+		                               p, rs_p, cs_p ); \
 	} \
 \
 	/* Set the region opposite the diagonal of P to zero. To do this,
@@ -131,7 +128,7 @@ void PASTEMAC(ch,varname)( \
 		                                m_panel, \
 		                                n_panel, \
 		                                zero, \
-		                                p_begin, rs_p, cs_p ); \
+		                                p, rs_p, cs_p ); \
 	} \
 \
 	/* The packed memory region was acquired/allocated with "aligned"
@@ -146,7 +143,7 @@ void PASTEMAC(ch,varname)( \
 		dim_t  i      = m_panel; \
 		dim_t  m_edge = m_panel_max - i; \
 		dim_t  n_edge = n_panel_max; \
-		ctype* p_edge = p_begin + (i  )*rs_p; \
+		ctype* p_edge = p + (i  )*rs_p; \
 \
 		PASTEMAC2(ch,ch,setm_unb_var1)( 0, \
 		                                BLIS_NONUNIT_DIAG, \
@@ -162,7 +159,7 @@ void PASTEMAC(ch,varname)( \
 		dim_t  j      = n_panel; \
 		dim_t  m_edge = m_panel_max; \
 		dim_t  n_edge = n_panel_max - j; \
-		ctype* p_edge = p_begin + (j  )*cs_p; \
+		ctype* p_edge = p + (j  )*cs_p; \
 \
 		PASTEMAC2(ch,ch,setm_unb_var1)( 0, \
 		                                BLIS_NONUNIT_DIAG, \
@@ -184,7 +181,7 @@ void PASTEMAC(ch,varname)( \
 		dim_t  m_br   = m_panel_max - i; \
 		dim_t  n_br   = n_panel_max - j; \
 		ctype* one    = PASTEMAC(ch,1); \
-		ctype* p_edge = p_begin + (i  )*rs_p + (j  )*cs_p; \
+		ctype* p_edge = p + (i  )*rs_p + (j  )*cs_p; \
 \
 		PASTEMAC2(ch,ch,setd_unb_var1)( 0, \
 		                                m_br, \
@@ -199,10 +196,10 @@ void PASTEMAC(ch,varname)( \
 /*
 	if ( rs_p == 1 ) \
 	PASTEMAC(ch,fprintm)( stdout, "packm_var3: ap copied", m_panel_max, n_panel_max, \
-	                      p_begin, rs_p, cs_p, "%4.1f", "" ); \
+	                      p, rs_p, cs_p, "%4.1f", "" ); \
 	if ( cs_p == 1 ) \
 	PASTEMAC(ch,fprintm)( stdout, "packm_var3: bp copied", m_panel_max, n_panel_max, \
-	                      p_begin, rs_p, cs_p, "%4.1f", "" ); \
+	                      p, rs_p, cs_p, "%4.1f", "" ); \
 */ \
 }
 
