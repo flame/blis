@@ -268,7 +268,7 @@ void libblis_test_gemmtrsm_ukr_experiment( test_params_t* params,
 		bli_copym( &c11_save, &c11 );
 
 		// Re-pack the contents of b to bp.
-		bli_packm_blk_var2( &b, &bp );
+		bli_packm_blk_var1( &b, &bp );
 
 		time = bli_clock();
 

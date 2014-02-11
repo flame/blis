@@ -224,7 +224,7 @@ void libblis_test_trsm_ukr_experiment( test_params_t* params,
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		// Re-pack the contents of b to bp.
-		bli_packm_blk_var2( &b, &bp );
+		bli_packm_blk_var1( &b, &bp );
 
 		bli_copym( &c_save, &c );
 
