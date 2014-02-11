@@ -42,11 +42,9 @@ void PASTEMAC(ch,varname)( \
                            dim_t   n, \
                            void*   beta, \
                            void*   a, inc_t inca, inc_t lda, \
-                           void*   p \
+                           void*   p,             inc_t ldp  \
                          ) \
 { \
-	const inc_t     ldp       = 8; \
-\
 	ctype* restrict beta_cast = beta; \
 	ctype* restrict alpha1    = a; \
 	ctype* restrict pi1       = p; \

@@ -41,7 +41,7 @@ typedef void (*FUNCPTR_T)(
                            dim_t   n,
                            void*   beta,
                            void*   a, inc_t inca, inc_t lda,
-                           void*   p
+                           void*   p,             inc_t ldp
                          );
 
 #undef  FUNCPTR_ARRAY_LENGTH
@@ -190,8 +190,8 @@ void PASTEMAC(ch,opname)( \
 		return; \
 	} \
 \
-	/* The panel dimension is always equal to the leading dimension of p. */ \
-	panel_dim = ldp; \
+	/* The panel dimension is always equal to the m dimension of p. */ \
+	panel_dim = m; \
 \
 	/* Acquire the datatype for the current function. */ \
 	dt = PASTEMAC(ch,type); \
@@ -204,19 +204,14 @@ void PASTEMAC(ch,opname)( \
 	else                                    f = NULL; \
 \
 	/* If there exists a kernel implementation for the panel dimension
-	   provided, and the "width" of the panel is equal to the leading
-	   dimension, we invoke the implementation. Otherwise, we use scal2m.
-	   By using scal2m to handle (a) edge cases (where m < panel_dim) and
-	   (b) cases where the panel dimension is less than the panel packing
-	   dimension (e.g. MR < PACKMR), we allow the kernel implementations
-	   to remain very simple. */ \
-	if ( f != NULL && m == panel_dim ) \
+	   provided, we invoke the implementation. Otherwise, we use scal2m. */ \
+	if ( f != NULL ) \
 	{ \
 		f( conja, \
 		   n, \
 		   beta, \
 		   a, inca, lda, \
-		   p ); \
+		   p,       ldp ); \
 	} \
 	else \
 	{ \
