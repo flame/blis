@@ -155,6 +155,7 @@ void PASTEMAC(ch,varname)( \
 	const dim_t     MR         = pd_a; \
 	const dim_t     NR         = pd_b; \
 	const dim_t     PACKMR     = cs_a; \
+	const dim_t     PACKNR     = rs_b; \
 \
 	ctype* restrict one        = PASTEMAC(ch,1); \
 	ctype* restrict zero       = PASTEMAC(ch,0); \
@@ -244,7 +245,7 @@ void PASTEMAC(ch,varname)( \
 	if ( m_left ) ++m_iter; \
 \
 	/* Determine some increments used to step through A, B, and C. */ \
-	rstep_a = k * PACKMR; \
+	rstep_a = ps_a; \
 \
 	cstep_b = ps_b; \
 \
@@ -291,10 +292,10 @@ void PASTEMAC(ch,varname)( \
 				/* Determine the offset to and length of the panel that was
 				   packed so we can index into the corresponding location in
 				   b1. */ \
-				off_a1112 = bli_max( diagoffa_i, 0 ); \
+				off_a1112 = diagoffa_i; \
 				k_a1112   = k - off_a1112; \
 \
-				b1_i = b1 + off_a1112 * NR; \
+				b1_i = b1 + off_a1112 * PACKNR; \
 \
 				/* Compute the addresses of the next panels of A and B. */ \
 				a2 = a1 + k_a1112 * PACKMR; \
