@@ -206,11 +206,11 @@ typedef struct
 #define BLIS_INVERT_DIAG_BIT               0x200
 #define BLIS_TARGET_DT_BITS                0x1C00
 #define BLIS_EXECUTION_DT_BITS             0xE000
-#define BLIS_PACK_BITS                     0x70000
-#define BLIS_PACK_REV_IF_UPPER_BIT         0x80000
-#define BLIS_PACK_REV_IF_LOWER_BIT         0x100000
-#define BLIS_PACK_BUFFER_BITS              0x600000
-#define BLIS_STRUC_BITS                    0x1800000
+#define BLIS_PACK_BITS                     0xF0000
+#define BLIS_PACK_REV_IF_UPPER_BIT         0x100000
+#define BLIS_PACK_REV_IF_LOWER_BIT         0x200000
+#define BLIS_PACK_BUFFER_BITS              0xC00000
+#define BLIS_STRUC_BITS                    0x3000000
 
 
 //
@@ -245,21 +245,21 @@ typedef struct
 #define BLIS_BITVAL_PACKED_ROW_PANELS      0x40000
 #define BLIS_BITVAL_PACKED_COL_PANELS      0x50000
 #define BLIS_BITVAL_PACK_FWD_IF_UPPER      0x0
-#define BLIS_BITVAL_PACK_REV_IF_UPPER      0x80000
+#define BLIS_BITVAL_PACK_REV_IF_UPPER      0x100000
 #define BLIS_BITVAL_PACK_FWD_IF_LOWER      0x0
-#define BLIS_BITVAL_PACK_REV_IF_LOWER      0x100000
+#define BLIS_BITVAL_PACK_REV_IF_LOWER      0x200000
 #define BLIS_BITVAL_BUFFER_FOR_A_BLOCK     0x0
-#define BLIS_BITVAL_BUFFER_FOR_B_PANEL     0x200000
-#define BLIS_BITVAL_BUFFER_FOR_C_PANEL     0x400000
-#define BLIS_BITVAL_BUFFER_FOR_GEN_USE     0x600000
+#define BLIS_BITVAL_BUFFER_FOR_B_PANEL     0x400000
+#define BLIS_BITVAL_BUFFER_FOR_C_PANEL     0x800000
+#define BLIS_BITVAL_BUFFER_FOR_GEN_USE     0xC00000
 #define BLIS_BITVAL_GENERAL                0x0
-#define BLIS_BITVAL_HERMITIAN              0x800000
-#define BLIS_BITVAL_SYMMETRIC              0x1000000
-#define BLIS_BITVAL_TRIANGULAR             0x1800000
+#define BLIS_BITVAL_HERMITIAN              0x1000000
+#define BLIS_BITVAL_SYMMETRIC              0x2000000
+#define BLIS_BITVAL_TRIANGULAR             0x3000000
 
 #define BLIS_TARGET_DT_SHIFT               10
 #define BLIS_EXECUTION_DT_SHIFT            13
-#define BLIS_PACK_BUFFER_SHIFT             21
+#define BLIS_PACK_BUFFER_SHIFT             22
 
 
 //
@@ -453,7 +453,7 @@ typedef struct func_s
            - 13 domain    (0 == real, 1 == complex)
            - 14: precision (0 == single, 1 == double)
            - 15: unused
-  18 ~ 16  Packed type/status
+  19 ~ 16  Packed type/status
            - 0 == not packed
            - 1 == packed (unspecified; row, column, or vector)
            - 2 == packed by rows
@@ -462,20 +462,24 @@ typedef struct func_s
            - 5 == packed by column panels
            - 6 == unused
            - 7 == unused
-       19  Packed panel order if upper-stored
+           - 8 == unused
+           - 9 == unused
+       20  Packed panel order if upper-stored
            - 0 == forward order if upper
            - 1 == reverse order if upper
-       20  Packed panel order if lower-stored
+       21  Packed panel order if lower-stored
            - 0 == forward order if lower
            - 1 == reverse order if lower
-  22 ~ 21  Packed buffer type
+  23 ~ 22  Packed buffer type
            - 0 == block of A
            - 1 == panel of B
            - 2 == panel of C
            - 3 == general use
-  24 ~ 23  Structure type
-           - (00 == general, 01 == Hermitian)
-           - (10 == symmetric, 11 == triangular)
+  25 ~ 24  Structure type
+           - 0 == general
+           - 1 == Hermitian
+           - 2 == symmetric
+           - 3 == triangular
 */
 
 typedef struct obj_s
