@@ -267,7 +267,7 @@ void PASTEMAC(ch,varname)( \
 	/* Determine some increments used to step through A, B, and C. */ \
 	rstep_a = ps_a; \
 \
-	cstep_b = k * PACKNR; \
+	cstep_b = ps_b; \
 \
 	rstep_c = rs_c * MR; \
 	cstep_c = cs_c * NR; \

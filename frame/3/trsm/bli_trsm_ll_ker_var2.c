@@ -243,7 +243,7 @@ void PASTEMAC(ch,varname)( \
 	if ( m_left ) ++m_iter; \
 \
 	/* Determine some increments used to step through A, B, and C. */ \
-	rstep_a = k * PACKMR; \
+	rstep_a = ps_a; \
 \
 	cstep_b = ps_b; \
 \
@@ -294,7 +294,7 @@ void PASTEMAC(ch,varname)( \
 \
 				/* Compute various offsets into and lengths of parts of A. */ \
 				off_a10 = 0; \
-				k_a1011 = bli_min( k, diagoffa_i + MR ); \
+				k_a1011 = diagoffa_i + MR; \
 				k_a10   = k_a1011 - MR; \
 				off_a11 = k_a10; \
 \
