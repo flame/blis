@@ -78,7 +78,7 @@ GIT_LOG    := $(GIT) log --decorate
 # --- Determine the C compiler and related flags ---
 CC             := icc
 CPPROCFLAGS    :=
-CMISCFLAGS     := -mmic -fasm-blocks -std=c99 -openmp
+CMISCFLAGS     := -mmic -fasm-blocks -std=c99 
 CDBGFLAGS      :=
 CWARNFLAGS     := -Wall
 COPTFLAGS      := -O3
@@ -98,7 +98,7 @@ ARFLAGS        := cru
 
 # --- Determine the linker and related flags ---
 LINKER         := $(CC)
-LDFLAGS        := -lm
+LDFLAGS        := -mmic -lm
 
 
 
