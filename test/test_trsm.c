@@ -64,8 +64,8 @@ int main( int argc, char** argv )
 	n_repeats = 3;
 
 #ifndef PRINT
-	p_begin = 40;
-	p_end   = 2000;
+	p_begin = 1000;
+	p_end   = 1000;
 	p_inc   = 40;
 
 	m_input = -1;
@@ -75,20 +75,26 @@ int main( int argc, char** argv )
 	p_end   = 16;
 	p_inc   = 1;
 
-	m_input = 7 ;
-	n_input = 7 ;
+	m_input = 8 ;
+	n_input = 4 ;
 #endif
 
+#if 0
 	dt_a = BLIS_DOUBLE;
 	dt_b = BLIS_DOUBLE;
 	dt_c = BLIS_DOUBLE;
 	dt_alpha = BLIS_DOUBLE;
 	dt_beta = BLIS_DOUBLE;
+#else
+	dt_a = dt_b = dt_c = dt_alpha = dt_beta = BLIS_FLOAT; 
+	//dt_a = dt_b = dt_c = dt_alpha = dt_beta = BLIS_SCOMPLEX; 
+#endif
 
 	side = BLIS_LEFT;
 	//side = BLIS_RIGHT;
 
 	uplo = BLIS_LOWER;
+	//uplo = BLIS_UPPER;
 
 	for ( p = p_begin; p <= p_end; p += p_inc )
 	{
@@ -112,11 +118,27 @@ int main( int argc, char** argv )
 
 		bli_obj_set_struc( BLIS_TRIANGULAR, a );
 		bli_obj_set_uplo( uplo, a );
+		//bli_obj_set_diag( BLIS_UNIT_DIAG, a );
 
 		bli_randm( &a );
 		bli_randm( &c );
 		bli_randm( &b );
 
+/*
+		{ 
+			obj_t a2;
+
+			bli_obj_alias_to( a, a2 );
+			bli_obj_toggle_uplo( a2 );
+			bli_obj_inc_diag_off( 1, a2 );
+			bli_setm( &BLIS_ZERO, &a2 );
+			bli_obj_inc_diag_off( -2, a2 );
+			bli_obj_toggle_uplo( a2 );
+			bli_obj_set_diag( BLIS_NONUNIT_DIAG, a2 );
+			bli_scalm( &BLIS_TWO, &a2 );
+			//bli_scalm( &BLIS_TWO, &a );
+		} 
+*/
 
 		bli_setsc(  (2.0/1.0), 0.0, &alpha );
 		bli_setsc( -(1.0/1.0), 0.0, &beta );
@@ -134,6 +156,17 @@ int main( int argc, char** argv )
 
 
 #ifdef PRINT
+/*
+			obj_t ar, ai;
+			bli_obj_alias_to( a, ar );
+			bli_obj_alias_to( a, ai );
+			bli_obj_set_datatype( BLIS_DOUBLE, ar ); ar.rs *= 2; ar.cs *= 2;
+			bli_obj_set_datatype( BLIS_DOUBLE, ai ); ai.rs *= 2; ai.cs *= 2; ai.buffer = ( double* )ai.buffer + 1;
+
+			bli_printm( "ar", &ar, "%4.1f", "" );
+			bli_printm( "ai", &ai, "%4.1f", "" );
+*/
+
 			bli_invertd( &a );
 			bli_printm( "a", &a, "%4.1f", "" );
 			bli_invertd( &a );
@@ -144,11 +177,15 @@ int main( int argc, char** argv )
 			//bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
 
 			bli_trsm( side,
+			//bli_trsm4m( side,
+			//bli_trsm3m( side,
 			          &alpha,
 			          &a,
 			          &c );
 #else
 
+		if ( bli_is_real( dt_a ) )
+		{
 			f77_char side   = 'L';
 			f77_char uplo   = 'L';
 			f77_char transa = 'N';
@@ -157,11 +194,11 @@ int main( int argc, char** argv )
 			f77_int  nn     = bli_obj_width( c );
 			f77_int  lda    = bli_obj_col_stride( a );
 			f77_int  ldc    = bli_obj_col_stride( c );
-			double*  alphap = bli_obj_buffer( alpha );
-			double*  ap     = bli_obj_buffer( a );
-			double*  cp     = bli_obj_buffer( c );
+			float *  alphap = bli_obj_buffer( alpha );
+			float *  ap     = bli_obj_buffer( a );
+			float *  cp     = bli_obj_buffer( c );
 
-			dtrsm_( &side,
+			strsm_( &side,
 			        &uplo,
 			        &transa,
 			        &diag,
@@ -170,6 +207,33 @@ int main( int argc, char** argv )
 			        alphap,
 			        ap, &lda,
 			        cp, &ldc );
+		}
+		else // if ( bli_is_complex( dt_a ) )
+		{
+			f77_char  side   = 'L';
+			f77_char  uplo   = 'L';
+			f77_char  transa = 'N';
+			f77_char  diag   = 'N';
+			f77_int   mm     = bli_obj_length( c );
+			f77_int   nn     = bli_obj_width( c );
+			f77_int   lda    = bli_obj_col_stride( a );
+			f77_int   ldc    = bli_obj_col_stride( c );
+			scomplex* alphap = bli_obj_buffer( alpha );
+			scomplex* ap     = bli_obj_buffer( a );
+			scomplex* cp     = bli_obj_buffer( c );
+
+			ctrsm_( &side,
+			//ztrsm_( &side,
+			        &uplo,
+			        &transa,
+			        &diag,
+			        &mm,
+			        &nn,
+			        alphap,
+			        ap, &lda,
+			        cp, &ldc );
+		}
+		
 #endif
 
 #ifdef PRINT
@@ -185,6 +249,8 @@ int main( int argc, char** argv )
 			gflops = ( 1.0 * m * m * n ) / ( dtime_save * 1.0e9 );
 		else
 			gflops = ( 1.0 * m * n * n ) / ( dtime_save * 1.0e9 );
+
+		if ( bli_is_complex( dt_a ) ) gflops *= 4.0;
 
 #ifdef BLIS
 		printf( "data_trsm_blis" );

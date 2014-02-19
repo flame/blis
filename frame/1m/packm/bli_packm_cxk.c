@@ -39,7 +39,7 @@
 typedef void (*FUNCPTR_T)(
                            conj_t  conja,
                            dim_t   n,
-                           void*   beta,
+                           void*   kappa,
                            void*   a, inc_t inca, inc_t lda,
                            void*   p,             inc_t ldp
                          );
@@ -169,7 +169,7 @@ void PASTEMAC(ch,opname)( \
                           conj_t  conja, \
                           dim_t   m, \
                           dim_t   n, \
-                          void*   beta, \
+                          void*   kappa, \
                           void*   a, inc_t inca, inc_t lda, \
                           void*   p,             inc_t ldp  \
                         ) \
@@ -184,7 +184,7 @@ void PASTEMAC(ch,opname)( \
 	{ \
 		PASTEMAC3(ch,ch,ch,scal2vker)( conja, \
 		                               n, \
-		                               beta, \
+		                               kappa, \
 		                               a, lda, \
 		                               p, ldp ); \
 		return; \
@@ -209,7 +209,7 @@ void PASTEMAC(ch,opname)( \
 	{ \
 		f( conja, \
 		   n, \
-		   beta, \
+		   kappa, \
 		   a, inca, lda, \
 		   p,       ldp ); \
 	} \
@@ -222,7 +222,7 @@ void PASTEMAC(ch,opname)( \
 		                            conja, \
 		                            m, \
 		                            n, \
-		                            beta, \
+		                            kappa, \
 		                            a, inca, lda, \
 		                            p, 1,    ldp ); \
 	} \

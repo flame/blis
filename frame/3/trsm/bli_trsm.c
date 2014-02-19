@@ -45,6 +45,14 @@ void bli_trsm( side_t  side,
                obj_t*  a,
                obj_t*  b )
 {
+#ifdef BLIS_ENABLE_COMPLEX_VIA_4M
+	if ( bli_obj_is_complex( *b ) )
+	{
+		bli_trsm4m( side, alpha, a, b );
+		return;
+	}
+#endif
+
 	bli_trsm_front( side, alpha, a, b,
 	                trsm_l_cntl,
 	                trsm_r_cntl );

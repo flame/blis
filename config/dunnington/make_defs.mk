@@ -83,7 +83,7 @@ CPPROCFLAGS    := -D_POSIX_C_SOURCE=200112L
 CMISCFLAGS     := -std=c99 # -fopenmp -pg
 CDBGFLAGS      := #-g
 CWARNFLAGS     := -Wall
-COPTFLAGS      := -O2 -mfpmath=sse #-fomit-frame-pointer
+COPTFLAGS      := -O2 -mfpmath=sse -fomit-frame-pointer
 CKOPTFLAGS     := -O2 -mfpmath=sse -fomit-frame-pointer
 CVECFLAGS      := -msse3 -march=native
 

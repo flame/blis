@@ -73,7 +73,7 @@ void bli_trmm_cntl_init()
 	trmm_l_packa_cntl
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT1, // pack panels of A compactly
+	                           BLIS_VARIANT1,
 	                           // IMPORTANT: for consistency with trsm, "k" dim
 	                           // multiple is set to mr.
 	                           gemm_mr,
@@ -119,7 +119,7 @@ void bli_trmm_cntl_init()
 	trmm_r_packb_cntl
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT1, // pack panels of B compactly
+	                           BLIS_VARIANT1,
 	                           // IMPORTANT: m dim multiple here must be nr
 	                           // since "k" dim multiple is set to nr above.
 	                           gemm_nr,

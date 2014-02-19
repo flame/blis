@@ -194,6 +194,33 @@ GENTFUNCR( scomplex, float,  c, s, tfuncname, varname ) \
 GENTFUNCR( dcomplex, double, z, d, tfuncname, varname )
 
 
+// -- Basic one-operand macro with complex domain only and real projection (with no auxiliary arguments) --
+
+
+#define INSERT_GENTFUNCCO_BASIC0( tfuncname ) \
+\
+GENTFUNCCO( scomplex, float,  c, s, tfuncname ) \
+GENTFUNCCO( dcomplex, double, z, d, tfuncname )
+
+
+// -- Basic one-operand macro with complex domain only and real projection --
+
+
+#define INSERT_GENTFUNCCO_BASIC( tfuncname, varname ) \
+\
+GENTFUNCCO( scomplex, float,  c, s, tfuncname, varname ) \
+GENTFUNCCO( dcomplex, double, z, d, tfuncname, varname )
+
+
+// -- Basic one-operand macro with complex domain only and real projection (with two auxiliary arguments) --
+
+
+#define INSERT_GENTFUNCCO_BASIC2( tfuncname, varname1, varname2 ) \
+\
+GENTFUNCCO( scomplex, float,  c, s, tfuncname, varname1, varname2 ) \
+GENTFUNCCO( dcomplex, double, z, d, tfuncname, varname1, varname2 )
+
+
 // -- Basic one-operand with real and integer projections --
 
 

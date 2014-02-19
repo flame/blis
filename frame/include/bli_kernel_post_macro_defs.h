@@ -43,13 +43,41 @@
 
 #define BLIS_MAX_DEFAULT_MR_S BLIS_DEFAULT_MR_S
 #define BLIS_MAX_DEFAULT_MR_D BLIS_DEFAULT_MR_D
+
+// c: Choose between the regular and 4m/3m blocksize.
 #define BLIS_MAX_DEFAULT_MR_C BLIS_DEFAULT_MR_C
+#if     BLIS_DEFAULT_4M_MR_C > BLIS_MAX_DEFAULT_MR_C
+#undef  BLIS_MAX_DEFAULT_MR_C
+#define BLIS_MAX_DEFAULT_MR_C BLIS_DEFAULT_4M_MR_C
+#endif
+
+// z: Choose between the regular and 4m/3m blocksize.
 #define BLIS_MAX_DEFAULT_MR_Z BLIS_DEFAULT_MR_Z
+#if     BLIS_DEFAULT_4M_MR_Z > BLIS_MAX_DEFAULT_MR_Z
+#undef  BLIS_MAX_DEFAULT_MR_Z
+#define BLIS_MAX_DEFAULT_MR_Z BLIS_DEFAULT_4M_MR_Z
+#endif
+
+//
+// Find the largest register blocksize NR.
+//
 
 #define BLIS_MAX_DEFAULT_NR_S BLIS_DEFAULT_NR_S
 #define BLIS_MAX_DEFAULT_NR_D BLIS_DEFAULT_NR_D
+
+// c: Choose between the regular and 4m/3m blocksize.
 #define BLIS_MAX_DEFAULT_NR_C BLIS_DEFAULT_NR_C
+#if     BLIS_DEFAULT_4M_NR_C > BLIS_MAX_DEFAULT_NR_C
+#undef  BLIS_MAX_DEFAULT_NR_C
+#define BLIS_MAX_DEFAULT_NR_C BLIS_DEFAULT_4M_NR_C
+#endif
+
+// z: Choose between the regular and 4m/3m blocksize.
 #define BLIS_MAX_DEFAULT_NR_Z BLIS_DEFAULT_NR_Z
+#if     BLIS_DEFAULT_4M_NR_Z > BLIS_MAX_DEFAULT_NR_Z
+#undef  BLIS_MAX_DEFAULT_NR_Z
+#define BLIS_MAX_DEFAULT_NR_Z BLIS_DEFAULT_4M_NR_Z
+#endif
 
 
 // -- Abbreiviated macros ------------------------------------------------------

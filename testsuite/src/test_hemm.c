@@ -256,6 +256,8 @@ void libblis_test_hemm_impl( iface_t   iface,
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
 		bli_hemm( side, alpha, a, b, beta, c );
+		//bli_hemm4m( side, alpha, a, b, beta, c );
+		//bli_hemm3m( side, alpha, a, b, beta, c );
 		break;
 
 		default:

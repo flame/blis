@@ -57,6 +57,9 @@
 #include "bli_trsm_l_ref_mxn.h"
 #include "bli_trsm_u_ref_mxn.h"
 
+#include "bli_trsm4m.h"
+#include "bli_trsm3m.h"
+
 
 //
 // Prototype object-based interface.

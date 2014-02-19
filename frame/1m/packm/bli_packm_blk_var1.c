@@ -124,24 +124,24 @@ void bli_packm_blk_var1( obj_t*   c,
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, varname ) \
 \
-void PASTEMAC(ch,varname )( \
-                            struc_t strucc, \
-                            doff_t  diagoffc, \
-                            diag_t  diagc, \
-                            uplo_t  uploc, \
-                            trans_t transc, \
-                            bool_t  invdiag, \
-                            bool_t  revifup, \
-                            bool_t  reviflo, \
-                            dim_t   m, \
-                            dim_t   n, \
-                            dim_t   m_max, \
-                            dim_t   n_max, \
-                            void*   kappa, \
-                            void*   c, inc_t rs_c, inc_t cs_c, \
-                            void*   p, inc_t rs_p, inc_t cs_p, \
-                                       dim_t pd_p, inc_t ps_p  \
-                          ) \
+void PASTEMAC(ch,varname)( \
+                           struc_t strucc, \
+                           doff_t  diagoffc, \
+                           diag_t  diagc, \
+                           uplo_t  uploc, \
+                           trans_t transc, \
+                           bool_t  invdiag, \
+                           bool_t  revifup, \
+                           bool_t  reviflo, \
+                           dim_t   m, \
+                           dim_t   n, \
+                           dim_t   m_max, \
+                           dim_t   n_max, \
+                           void*   kappa, \
+                           void*   c, inc_t rs_c, inc_t cs_c, \
+                           void*   p, inc_t rs_p, inc_t cs_p, \
+                                      dim_t pd_p, inc_t ps_p  \
+                         ) \
 { \
 	ctype* restrict kappa_cast = kappa; \
 	ctype* restrict c_cast     = c; \
@@ -353,8 +353,7 @@ void PASTEMAC(ch,varname )( \
 			                             c_begin, rs_c, cs_c, \
 			                             p_begin, rs_p, cs_p ); \
 \
-			/* NOTE: p_inc should be set to ps_p to properly support
-			   BLIS_CONTIG_STRIDE_ALIGN_SIZE. */ \
+			/* NOTE: This value is equivalent to ps_p. */ \
 			p_inc = ldp * panel_len_max_i; \
 		} \
 		else \
@@ -378,8 +377,7 @@ void PASTEMAC(ch,varname )( \
 			                            c_begin, rs_c, cs_c, \
 			                            p_begin, rs_p, cs_p ); \
 \
-			/* NOTE: p_inc should be set to ps_p to properly support
-			   BLIS_CONTIG_STRIDE_ALIGN_SIZE. */ \
+			/* NOTE: This value is equivalent to ps_p. */ \
 			p_inc = ldp * panel_len_max_i; \
 		} \
 \

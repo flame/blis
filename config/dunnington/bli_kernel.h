@@ -55,20 +55,40 @@
 //
 
 #define BLIS_DEFAULT_MC_S              768
-#define BLIS_DEFAULT_KC_S              256
-#define BLIS_DEFAULT_NC_S              8192
+#define BLIS_DEFAULT_KC_S              384
+#define BLIS_DEFAULT_NC_S              4096
 
 #define BLIS_DEFAULT_MC_D              384
 #define BLIS_DEFAULT_KC_D              384
 #define BLIS_DEFAULT_NC_D              4096
 
-#define BLIS_DEFAULT_MC_C              128
-#define BLIS_DEFAULT_KC_C              256
+#define BLIS_DEFAULT_MC_C              384
+#define BLIS_DEFAULT_KC_C              384
 #define BLIS_DEFAULT_NC_C              4096
 
-#define BLIS_DEFAULT_MC_Z              64
-#define BLIS_DEFAULT_KC_Z              256
-#define BLIS_DEFAULT_NC_Z              2048
+#define BLIS_DEFAULT_MC_Z              192
+#define BLIS_DEFAULT_KC_Z              384
+#define BLIS_DEFAULT_NC_Z              4096
+
+// NOTE: If 4m blocksizes are not defined here, they will be determined
+// from the corresponding real domain blocksizes.
+#define BLIS_DEFAULT_4M_MC_C           384
+#define BLIS_DEFAULT_4M_KC_C           512
+#define BLIS_DEFAULT_4M_NC_C           4096
+
+#define BLIS_DEFAULT_4M_MC_Z           192
+#define BLIS_DEFAULT_4M_KC_Z           256
+#define BLIS_DEFAULT_4M_NC_Z           4096
+
+// NOTE: If 3m blocksizes are not defined here, they will be determined
+// from the corresponding real domain blocksizes.
+#define BLIS_DEFAULT_3M_MC_C           384
+#define BLIS_DEFAULT_3M_KC_C           512
+#define BLIS_DEFAULT_3M_NC_C           4096
+
+#define BLIS_DEFAULT_3M_MC_Z           192
+#define BLIS_DEFAULT_3M_KC_Z           256
+#define BLIS_DEFAULT_3M_NC_Z           4096
 
 // -- Cache blocksize extensions (for optimizing edge cases) --
 
@@ -107,10 +127,10 @@
 #define BLIS_DEFAULT_NR_D              4
 
 #define BLIS_DEFAULT_MR_C              4
-#define BLIS_DEFAULT_NR_C              4
+#define BLIS_DEFAULT_NR_C              2
 
-#define BLIS_DEFAULT_MR_Z              4
-#define BLIS_DEFAULT_NR_Z              4
+#define BLIS_DEFAULT_MR_Z              2
+#define BLIS_DEFAULT_NR_Z              2
 
 // NOTE: If the micro-kernel, which is typically unrolled to a factor
 // of f, handles leftover edge cases (ie: when k % f > 0) then these
@@ -238,10 +258,10 @@
 
 // -- trsm-related --
 
-#define GEMMTRSM_L_UKERNEL   gemmtrsm_l_opt_d4x4
-#define GEMMTRSM_U_UKERNEL   gemmtrsm_u_opt_d4x4
 //#define GEMMTRSM_L_UKERNEL   gemmtrsm_l_ref_mxn
 //#define GEMMTRSM_U_UKERNEL   gemmtrsm_u_ref_mxn
+#define GEMMTRSM_L_UKERNEL   gemmtrsm_l_opt_d4x4
+#define GEMMTRSM_U_UKERNEL   gemmtrsm_u_opt_d4x4
 
 //#define TRSM_L_UKERNEL       trsm_l_ref_4x4
 //#define TRSM_U_UKERNEL       trsm_u_ref_4x4

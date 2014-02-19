@@ -617,6 +617,40 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	                        BLIS_EXTEND_NC_C,
 	                        BLIS_EXTEND_NC_Z );
 	libblis_test_fprintf_c( os, "\n" );
+	libblis_test_fprintf_c( os, "4m/3m cache blocksizes      4c    4z    3c    3z \n" );
+	libblis_test_fprintf_c( os, "  m dimension            %5u %5u %5u %5u\n",
+	                        BLIS_DEFAULT_4M_MC_C,
+	                        BLIS_DEFAULT_4M_MC_Z,
+	                        BLIS_DEFAULT_3M_MC_C,
+	                        BLIS_DEFAULT_3M_MC_Z );
+	libblis_test_fprintf_c( os, "  k dimension            %5u %5u %5u %5u\n",
+	                        BLIS_DEFAULT_4M_KC_C,
+	                        BLIS_DEFAULT_4M_KC_Z,
+	                        BLIS_DEFAULT_3M_KC_C,
+	                        BLIS_DEFAULT_3M_KC_Z );
+	libblis_test_fprintf_c( os, "  n dimension            %5u %5u %5u %5u\n",
+	                        BLIS_DEFAULT_4M_NC_C,
+	                        BLIS_DEFAULT_4M_NC_Z,
+	                        BLIS_DEFAULT_3M_NC_C,
+	                        BLIS_DEFAULT_3M_NC_Z );
+	libblis_test_fprintf_c( os, "\n" );
+	libblis_test_fprintf_c( os, "4m/3m cache blksz exts      4c    4z    3c    3z \n" );
+	libblis_test_fprintf_c( os, "  m dimension            %5u %5u %5u %5u\n",
+	                        BLIS_EXTEND_4M_MC_C,
+	                        BLIS_EXTEND_4M_MC_Z,
+	                        BLIS_EXTEND_3M_MC_C,
+	                        BLIS_EXTEND_3M_MC_Z );
+	libblis_test_fprintf_c( os, "  k dimension            %5u %5u %5u %5u\n",
+	                        BLIS_EXTEND_4M_KC_C,
+	                        BLIS_EXTEND_4M_KC_Z,
+	                        BLIS_EXTEND_3M_KC_C,
+	                        BLIS_EXTEND_3M_KC_Z );
+	libblis_test_fprintf_c( os, "  n dimension            %5u %5u %5u %5u\n",
+	                        BLIS_EXTEND_4M_NC_C,
+	                        BLIS_EXTEND_4M_NC_Z,
+	                        BLIS_EXTEND_3M_NC_C,
+	                        BLIS_EXTEND_3M_NC_Z );
+	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "level-3 register blocksizes  s     d     c     z \n" );
 	libblis_test_fprintf_c( os, "  m dimension            %5u %5u %5u %5u\n",
 	                        BLIS_DEFAULT_MR_S,

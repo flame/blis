@@ -303,7 +303,9 @@ void bli_packm_init_pack( bool_t    densify,
 		// Compute the size of the packed buffer.
 		size_p = cs_p * n_p_pad * elem_size_p;
 	}
-	else if ( pack_schema == BLIS_PACKED_ROW_PANELS )
+	else if ( pack_schema == BLIS_PACKED_ROW_PANELS    ||
+	          pack_schema == BLIS_PACKED_ROW_PANELS_4M ||
+	          pack_schema == BLIS_PACKED_ROW_PANELS_3M )
 	{
 		dim_t m_panel;
 		dim_t ps_p;
@@ -331,11 +333,14 @@ void bli_packm_init_pack( bool_t    densify,
 		// dimension of the matrix is not a whole multiple of MR.
 		ps_p = cs_p * n_p_pad;
 
+		if ( pack_schema == BLIS_PACKED_ROW_PANELS_3M )
+			ps_p = ( ps_p * 3 ) / 2;
+
 		// Align the panel dimension according to the contiguous memory
 		// stride alignment size so that the second, third, etc panels begin
 		// at aligned addresses.
-		ps_p = bli_align_dim_to_size( ps_p, elem_size_p,
-		                              BLIS_CONTIG_STRIDE_ALIGN_SIZE );
+		//ps_p = bli_align_dim_to_size( ps_p, elem_size_p,
+		//                              BLIS_CONTIG_STRIDE_ALIGN_SIZE );
 
 		// Store the strides and panel dimension in p.
 		bli_obj_set_incs( rs_p, cs_p, *p );
@@ -345,7 +350,9 @@ void bli_packm_init_pack( bool_t    densify,
 		// Compute the size of the packed buffer.
 		size_p = ps_p * (m_p_pad / m_panel) * elem_size_p;
 	}
-	else if ( pack_schema == BLIS_PACKED_COL_PANELS )
+	else if ( pack_schema == BLIS_PACKED_COL_PANELS    ||
+	          pack_schema == BLIS_PACKED_COL_PANELS_4M ||
+	          pack_schema == BLIS_PACKED_COL_PANELS_3M )
 	{
 		dim_t n_panel;
 		dim_t ps_p;
@@ -373,11 +380,14 @@ void bli_packm_init_pack( bool_t    densify,
 		// dimension of the matrix is not a whole multiple of NR.
 		ps_p = m_p_pad * rs_p;
 
+		if ( pack_schema == BLIS_PACKED_COL_PANELS_3M )
+			ps_p = ( ps_p * 3 ) / 2;
+
 		// Align the panel dimension according to the contiguous memory
 		// stride alignment size so that the second, third, etc panels begin
 		// at aligned addresses.
-		ps_p = bli_align_dim_to_size( ps_p, elem_size_p,
-		                              BLIS_CONTIG_STRIDE_ALIGN_SIZE );
+		//ps_p = bli_align_dim_to_size( ps_p, elem_size_p,
+		//                              BLIS_CONTIG_STRIDE_ALIGN_SIZE );
 
 		// Store the strides and panel dimension in p.
 		bli_obj_set_incs( rs_p, cs_p, *p );

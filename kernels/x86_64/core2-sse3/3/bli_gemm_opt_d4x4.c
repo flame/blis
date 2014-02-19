@@ -44,7 +44,7 @@ void bli_sgemm_opt_d4x4(
                          auxinfo_t*         data
                        )
 {
-	void*   a_next = bli_auxinfo_next_a( data );
+	//void*   a_next = bli_auxinfo_next_a( data );
 	void*   b_next = bli_auxinfo_next_b( data );
 
 	dim_t   k_iter = k / 4;
@@ -738,6 +738,7 @@ void bli_dgemm_opt_d4x4(
 		"movq          %2, %%rax         \n\t" // load address of a.
 		"movq          %3, %%rbx         \n\t" // load address of b.
 		"movq          %9, %%r9          \n\t" // load address of b_next.
+		"movq         %10, %%r11         \n\t" // load address of a_next.
 		"                                \n\t"
 		"subq    $-8 * 16, %%rax         \n\t" // increment pointers to allow byte
 		"subq    $-8 * 16, %%rbx         \n\t" // offsets in the unrolled iterations.
@@ -758,16 +759,16 @@ void bli_dgemm_opt_d4x4(
 		"xorpd     %%xmm5,  %%xmm5       \n\t"
 		"xorpd     %%xmm6,  %%xmm6       \n\t"
 		"                                \n\t"
-		"prefetcht0   3 * 8(%%rcx)       \n\t" // prefetch c + 0*cs_c
+		"prefetcht2   3 * 8(%%rcx)       \n\t" // prefetch c + 0*cs_c
 		"xorpd     %%xmm8,  %%xmm8       \n\t"
 		"movaps    %%xmm8,  %%xmm9       \n\t"
-		"prefetcht0   3 * 8(%%rcx,%%rdi) \n\t" // prefetch c + 1*cs_c
+		"prefetcht2   3 * 8(%%rcx,%%rdi) \n\t" // prefetch c + 1*cs_c
 		"movaps    %%xmm8, %%xmm10       \n\t"
 		"movaps    %%xmm8, %%xmm11       \n\t"
-		"prefetcht0   3 * 8(%%r10)       \n\t" // prefetch c + 2*cs_c
+		"prefetcht2   3 * 8(%%r10)       \n\t" // prefetch c + 2*cs_c
 		"movaps    %%xmm8, %%xmm12       \n\t"
 		"movaps    %%xmm8, %%xmm13       \n\t"
-		"prefetcht0   3 * 8(%%r10,%%rdi) \n\t" // prefetch c + 3*cs_c
+		"prefetcht2   3 * 8(%%r10,%%rdi) \n\t" // prefetch c + 3*cs_c
 		"movaps    %%xmm8, %%xmm14       \n\t"
 		"movaps    %%xmm8, %%xmm15       \n\t"
 		"                                \n\t"
@@ -782,6 +783,9 @@ void bli_dgemm_opt_d4x4(
 		".DLOOPKITER:                    \n\t" // MAIN LOOP
 		"                                \n\t"
 		"prefetcht0  (4*35+1) * 8(%%rax) \n\t"
+		//"prefetcht0  (8*97+4) * 8(%%rax) \n\t"
+		"                                \n\t"
+		//"prefetcht0  67*4 * 8(%%r11)       \n\t" // prefetch a_next[0]
 		"                                \n\t"
 		"addpd   %%xmm3, %%xmm11         \n\t" // iteration 0
 		"movaps  -7 * 16(%%rbx), %%xmm3  \n\t"
@@ -814,6 +818,7 @@ void bli_dgemm_opt_d4x4(
 		"movaps  -5 * 16(%%rax), %%xmm1  \n\t"
 		"                                \n\t"
 		"                                \n\t"
+		"                                \n\t"
 		"addpd   %%xmm3, %%xmm11         \n\t" // iteration 1
 		"movaps  -5 * 16(%%rbx), %%xmm3  \n\t"
 		"addpd   %%xmm4, %%xmm15         \n\t"
@@ -844,7 +849,14 @@ void bli_dgemm_opt_d4x4(
 		"mulpd   %%xmm1, %%xmm6          \n\t"
 		"movaps  -3 * 16(%%rax), %%xmm1  \n\t"
 		"                                \n\t"
+		"                                \n\t"
 		"prefetcht0  (4*37+1) * 8(%%rax) \n\t"
+		//"prefetcht0  (8*97+12)* 8(%%rax) \n\t"
+		"                                \n\t"
+		//"prefetcht0  69*4 * 8(%%r11)       \n\t" // prefetch a_next[8]
+		//"subq  $-4 * 4 * 8, %%r11        \n\t" // a_next += 4*4 (unroll x mr)
+		"                                \n\t"
+		"                                \n\t"
 		"                                \n\t"
 		"addpd   %%xmm3, %%xmm11         \n\t" // iteration 2
 		"movaps  -3 * 16(%%rbx), %%xmm3  \n\t"
@@ -868,6 +880,7 @@ void bli_dgemm_opt_d4x4(
 		"mulpd   %%xmm0, %%xmm3          \n\t"
 		"mulpd   %%xmm1, %%xmm4          \n\t"
 		"                                \n\t"
+		"                                \n\t"
 		"addpd   %%xmm7, %%xmm8          \n\t"
 		"addpd   %%xmm6, %%xmm12         \n\t"
 		"movaps  %%xmm5, %%xmm6          \n\t"
@@ -875,6 +888,7 @@ void bli_dgemm_opt_d4x4(
 		"movaps  -2 * 16(%%rax), %%xmm0  \n\t"
 		"mulpd   %%xmm1, %%xmm6          \n\t"
 		"movaps  -1 * 16(%%rax), %%xmm1  \n\t"
+		"                                \n\t"
 		"                                \n\t"
 		"                                \n\t"
 		"addpd   %%xmm3, %%xmm11         \n\t" // iteration 3
@@ -916,9 +930,12 @@ void bli_dgemm_opt_d4x4(
 		"prefetcht2        0 * 8(%%r9)   \n\t" // prefetch b_next[0]
 		"prefetcht2        8 * 8(%%r9)   \n\t" // prefetch b_next[8]
 		"                                \n\t"
-		"                                \n\t"
 		"decq   %%rsi                    \n\t" // i -= 1;
 		"jne    .DLOOPKITER              \n\t" // iterate again if i != 0.
+		"                                \n\t"
+		"                                \n\t"
+		"                                \n\t"
+		//"prefetcht2       -8 * 8(%%r9)   \n\t" // prefetch b_next[-8]
 		"                                \n\t"
 		"                                \n\t"
 		"                                \n\t"
@@ -1310,18 +1327,19 @@ void bli_dgemm_opt_d4x4(
 
 		: // output operands (none)
 		: // input operands
-		  "m" (k_iter),
-		  "m" (k_left),
-		  "m" (a),
-		  "m" (b),
-		  "m" (alpha),
-		  "m" (beta),
-		  "m" (c),
-		  "m" (rs_c),
-		  "m" (cs_c),
-		  "m" (b_next)
+		  "m" (k_iter), // 0
+		  "m" (k_left), // 1
+		  "m" (a),      // 2
+		  "m" (b),      // 3
+		  "m" (alpha),  // 4
+		  "m" (beta),   // 5
+		  "m" (c),      // 6
+		  "m" (rs_c),   // 7
+		  "m" (cs_c),   // 8
+		  "m" (b_next), // 9
+		  "m" (a_next)  // 10
 		: // register clobber list
-		  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "r8", "r9", "r10",
+		  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "r8", "r9", "r10", "r11",
 		  "xmm0", "xmm1", "xmm2", "xmm3",
 		  "xmm4", "xmm5", "xmm6", "xmm7",
 		  "xmm8", "xmm9", "xmm10", "xmm11",
@@ -1349,6 +1367,8 @@ void bli_cgemm_opt_d4x4(
 	                   c, rs_c, cs_c,
 	                   data );
 }
+
+
 
 void bli_zgemm_opt_d4x4(
                          dim_t              k,

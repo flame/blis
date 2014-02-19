@@ -50,6 +50,12 @@
 #define bli_auxinfo_set_next_a( a_p, auxinfo ) { (auxinfo).a_next = a_p; }
 #define bli_auxinfo_set_next_b( b_p, auxinfo ) { (auxinfo).b_next = b_p; }
 
+#define bli_auxinfo_set_next_ab( a_p, b_p, auxinfo ) \
+{ \
+	bli_auxinfo_set_next_a( a_p, auxinfo ); \
+	bli_auxinfo_set_next_b( b_p, auxinfo ); \
+}
+
 #define bli_auxinfo_set_ps_a( a_p, auxinfo )   { (auxinfo).ps_a = a_p; }
 #define bli_auxinfo_set_ps_b( b_p, auxinfo )   { (auxinfo).ps_b = b_p; }
 

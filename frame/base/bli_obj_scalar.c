@@ -134,7 +134,7 @@ void bli_obj_scalar_reset( obj_t* a )
 	else if ( bli_is_dcomplex( dt ) ) *(( dcomplex* )scalar_a) = *(( dcomplex* )one);
 
 	// Alternate implementation:
-	//bli_obj_scalar_attach( &BLIS_ONE, a );
+	//bli_obj_scalar_attach( BLIS_NO_CONJUGATE, &BLIS_ONE, a );
 }
 
 bool_t bli_obj_scalar_has_nonzero_imag( obj_t* a )

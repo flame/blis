@@ -89,6 +89,8 @@ void bli_gemm_cntl_init()
 	                                BLIS_DEFAULT_KR_C, BLIS_EXTEND_KR_C,
 	                                BLIS_DEFAULT_KR_Z, BLIS_EXTEND_KR_Z );
 
+	// Create function pointer object for each datatype-specific gemm
+	// micro-kernel.
 	gemm_ukrs = bli_func_obj_create( BLIS_SGEMM_UKERNEL,
 	                                 BLIS_DGEMM_UKERNEL,
 	                                 BLIS_CGEMM_UKERNEL,

@@ -45,22 +45,22 @@
 #define bli_dimag( x )  ( 0.0 )
 
 
-#ifdef BLIS_ENABLE_C99_COMPLEX
-
-
-#define bli_creal( x )  ( crealf(x) )
-#define bli_cimag( x )  ( cimagf(x) )
-#define bli_zreal( x )  ( creal(x) )
-#define bli_zimag( x )  ( cimag(x) )
-
-
-#else // ifndef BLIS_ENABLE_C99_COMPLEX
+#ifndef BLIS_ENABLE_C99_COMPLEX
 
 
 #define bli_creal( x )  ( (x).real )
 #define bli_cimag( x )  ( (x).imag )
 #define bli_zreal( x )  ( (x).real )
 #define bli_zimag( x )  ( (x).imag )
+
+
+#else // ifdef BLIS_ENABLE_C99_COMPLEX
+
+
+#define bli_creal( x )  ( crealf(x) )
+#define bli_cimag( x )  ( cimagf(x) )
+#define bli_zreal( x )  ( creal(x) )
+#define bli_zimag( x )  ( cimag(x) )
 
 
 #endif // BLIS_ENABLE_C99_COMPLEX

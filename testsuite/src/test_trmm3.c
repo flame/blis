@@ -257,6 +257,8 @@ void libblis_test_trmm3_impl( iface_t   iface,
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
 		bli_trmm3( side, alpha, a, b, beta, c );
+		//bli_trmm34m( side, alpha, a, b, beta, c );
+		//bli_trmm33m( side, alpha, a, b, beta, c );
 		break;
 
 		default:

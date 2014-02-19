@@ -57,8 +57,6 @@ void PASTEMAC(ch,varname)( \
 	dim_t           iter, i, j, l; \
 	dim_t           n_behind; \
 \
-	ctype           rho11; \
-\
 	for ( iter = 0; iter < m; ++iter ) \
 	{ \
 		i        = m - iter - 1; \
@@ -76,6 +74,8 @@ void PASTEMAC(ch,varname)( \
 			ctype* restrict beta11  = b1 + (0  )*rs_b + (j  )*cs_b; \
 			ctype* restrict b21     = B2 + (0  )*rs_b + (j  )*cs_b; \
 			ctype* restrict gamma11 = c  + (i  )*rs_c + (j  )*cs_c; \
+			ctype           beta11c = *beta11; \
+			ctype           rho11; \
 \
 			/* beta11 = beta11 - a12t * b21; */ \
 			PASTEMAC(ch,set0s)( rho11 ); \
@@ -86,17 +86,20 @@ void PASTEMAC(ch,varname)( \
 \
 				PASTEMAC(ch,axpys)( *alpha12, *beta21, rho11 ); \
 			} \
-			PASTEMAC(ch,subs)( rho11, *beta11 ); \
+			PASTEMAC(ch,subs)( rho11, beta11c ); \
 \
 			/* beta11 = beta11 / alpha11; */ \
 			/* NOTE: The INVERSE of alpha11 (1.0/alpha11) is stored instead
 			   of alpha11, so we can multiply rather than divide. We store 
 			   the inverse of alpha11 intentionally to avoid expensive
 			   division instructions within the micro-kernel. */ \
-			PASTEMAC(ch,scals)( *alpha11, *beta11 ); \
+			PASTEMAC(ch,scals)( *alpha11, beta11c ); \
 \
-			/* Output final result to matrix C. */ \
-			PASTEMAC(ch,copys)( *beta11, *gamma11 ); \
+			/* Output final result to matrix c. */ \
+			PASTEMAC(ch,copys)( beta11c, *gamma11 ); \
+\
+			/* Store the local value back to b11. */ \
+			PASTEMAC(ch,copys)( beta11c, *beta11 ); \
 		} \
 	} \
 }

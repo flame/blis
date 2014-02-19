@@ -73,6 +73,8 @@ extern "C" {
 #include "bli_kernel.h"
 #include "bli_kernel_type_defs.h"
 #include "bli_kernel_macro_defs.h"
+#include "bli_kernel_4m_macro_defs.h"
+#include "bli_kernel_3m_macro_defs.h"
 #include "bli_kernel_post_macro_defs.h"
 
 

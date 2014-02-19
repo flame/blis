@@ -44,8 +44,8 @@ static FUNCPTR_T vars[6][3] =
 	// unblocked          optimized unblocked    blocked
 	{ bli_packm_unb_var1, NULL,                  bli_packm_blk_var1 },
 	{ NULL,               NULL,                  NULL,              },
-	{ NULL,               NULL,                  NULL,              },
-	{ NULL,               NULL,                  NULL,              },
+	{ NULL,               NULL,                  bli_packm_blk_var3 },
+	{ NULL,               NULL,                  bli_packm_blk_var4 },
 	{ NULL,               NULL,                  NULL,              },
 	{ NULL,               NULL,                  NULL,              },
 };
