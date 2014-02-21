@@ -317,18 +317,24 @@ CFLAGS_KERNELS := $(CFLAGS_KERNELS) $(VERS_DEF)
 # Convert source file paths to object file paths by replacing the base source
 # directories with the base object directories, and also replacing the source
 # file suffix (eg: '.c') with '.o'.
-MK_BLIS_CONFIG_OBJS         := $(patsubst $(FRAME_PATH)/%.c, $(BASE_OBJ_FRAME_PATH)/%.o, \
+MK_BLIS_FRAME_OBJS         := $(patsubst $(FRAME_PATH)/%.c, $(BASE_OBJ_FRAME_PATH)/%.o, \
                                           $(filter %.c, $(MK_FRAME_SRC)))
-MK_BLIS_CONFIG_NOOPT_OBJS   := $(patsubst $(FRAME_PATH)/%.c, $(BASE_OBJ_FRAME_PATH)/%.o, \
+MK_BLIS_FRAME_NOOPT_OBJS   := $(patsubst $(FRAME_PATH)/%.c, $(BASE_OBJ_FRAME_PATH)/%.o, \
                                           $(filter %.c, $(MK_FRAME_NOOPT_SRC)))
-MK_BLIS_CONFIG_KERNELS_OBJS := $(patsubst $(FRAME_PATH)/%.c, $(BASE_OBJ_FRAME_PATH)/%.o, \
+MK_BLIS_FRAME_KERNELS_OBJS := $(patsubst $(FRAME_PATH)/%.c, $(BASE_OBJ_FRAME_PATH)/%.o, \
                                           $(filter %.c, $(MK_FRAME_KERNELS_SRC)))
 
-MK_BLIS_FRAME_OBJS          := $(patsubst $(CONFIG_PATH)/%.c, $(BASE_OBJ_CONFIG_PATH)/%.o, \
+MK_BLIS_CONFIG_OBJS          := $(patsubst $(CONFIG_PATH)/%.S, $(BASE_OBJ_CONFIG_PATH)/%.o, \
+                                          $(filter %.S, $(MK_CONFIG_SRC)))
+MK_BLIS_CONFIG_OBJS          += $(patsubst $(CONFIG_PATH)/%.c, $(BASE_OBJ_CONFIG_PATH)/%.o, \
                                           $(filter %.c, $(MK_CONFIG_SRC)))
-MK_BLIS_FRAME_NOOPT_OBJS    := $(patsubst $(CONFIG_PATH)/%.c, $(BASE_OBJ_CONFIG_PATH)/%.o, \
+MK_BLIS_CONFIG_NOOPT_OBJS    := $(patsubst $(CONFIG_PATH)/%.S, $(BASE_OBJ_CONFIG_PATH)/%.o, \
+                                          $(filter %.S, $(MK_CONFIG_NOOPT_SRC)))
+MK_BLIS_CONFIG_NOOPT_OBJS    += $(patsubst $(CONFIG_PATH)/%.c, $(BASE_OBJ_CONFIG_PATH)/%.o, \
                                           $(filter %.c, $(MK_CONFIG_NOOPT_SRC)))
-MK_BLIS_FRAME_KERNELS_OBJS  := $(patsubst $(CONFIG_PATH)/%.c, $(BASE_OBJ_CONFIG_PATH)/%.o, \
+MK_BLIS_CONFIG_KERNELS_OBJS  := $(patsubst $(CONFIG_PATH)/%.S, $(BASE_OBJ_CONFIG_PATH)/%.o, \
+                                          $(filter %.S, $(MK_CONFIG_KERNELS_SRC)))
+MK_BLIS_CONFIG_KERNELS_OBJS  += $(patsubst $(CONFIG_PATH)/%.c, $(BASE_OBJ_CONFIG_PATH)/%.o, \
                                           $(filter %.c, $(MK_CONFIG_KERNELS_SRC)))
 
 # Combine all of the object files into some readily-accessible variables.
@@ -427,7 +433,7 @@ else
 	@$(CC) $(call get_cflags_for_obj,$@) -c $< -o $@
 endif
 
-$(BASE_OBJ_CONFIG_PATH)/%.o: $(CONFIG_PATH)/%.c $(MK_HEADER_FILES) $(MAKE_DEFS_MK_PATH)
+$(BASE_OBJ_CONFIG_PATH)/%.o: $(CONFIG_PATH)/%.[cS] $(MK_HEADER_FILES) $(MAKE_DEFS_MK_PATH)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	$(CC) $(call get_cflags_for_obj,$@) -c $< -o $@
 else
