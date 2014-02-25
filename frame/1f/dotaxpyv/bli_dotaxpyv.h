@@ -33,7 +33,8 @@
 */
 
 #include "bli_dotaxpyv_check.h"
-#include "bli_dotaxpyv_unb_var1.h"
+#include "bli_dotaxpyv_kernel.h"
+#include "bli_dotaxpyv_ref.h"
 
 
 //

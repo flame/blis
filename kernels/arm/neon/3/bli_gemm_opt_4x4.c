@@ -520,7 +520,7 @@ void bli_cgemm_opt_4x4(
                       )
 {
 	/* Just call the reference implementation. */
-	bli_cgemm_ref_mxn( k,
+	BLIS_CGEMM_UKERNEL_REF( k,
 	                   alpha,
 	                   a,
 	                   b,
@@ -540,7 +540,7 @@ void bli_zgemm_opt_4x4(
                       )
 {
 	/* Just call the reference implementation. */
-	bli_zgemm_ref_mxn( k,
+	BLIS_ZGEMM_UKERNEL_REF( k,
 	                   alpha,
 	                   a,
 	                   b,

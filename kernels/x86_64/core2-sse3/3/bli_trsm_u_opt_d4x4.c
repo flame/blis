@@ -34,26 +34,26 @@
 
 #include "blis.h"
 
-void bli_strsm_u_opt_d4x4(
-                           float* restrict    a11,
-                           float* restrict    b11,
-                           float* restrict    c11, inc_t rs_c, inc_t cs_c,
-                           auxinfo_t*         data
-                         )
+void bli_strsm_u_opt_8x4(
+                          float* restrict    a11,
+                          float* restrict    b11,
+                          float* restrict    c11, inc_t rs_c, inc_t cs_c,
+                          auxinfo_t*         data
+                        )
 {
 	/* Just call the reference implementation. */
-	bli_strsm_u_ref_mxn( a11,
+	BLIS_STRSM_U_UKERNEL_REF( a11,
 	                     b11,
 	                     c11, rs_c, cs_c,
 	                     data );
 }
 
-void bli_dtrsm_u_opt_d4x4(
-                           double* restrict   a11,
-                           double* restrict   b11,
-                           double* restrict   c11, inc_t rs_c, inc_t cs_c,
-                           auxinfo_t*         data
-                         )
+void bli_dtrsm_u_opt_4x4(
+                          double* restrict   a11,
+                          double* restrict   b11,
+                          double* restrict   c11, inc_t rs_c, inc_t cs_c,
+                          auxinfo_t*         data
+                        )
 {
 	__asm__ volatile
 	(
@@ -211,29 +211,29 @@ void bli_dtrsm_u_opt_d4x4(
 
 }
 
-void bli_ctrsm_u_opt_d4x4(
-                           scomplex* restrict a11,
-                           scomplex* restrict b11,
-                           scomplex* restrict c11, inc_t rs_c, inc_t cs_c,
-                           auxinfo_t*         data
-                         )
+void bli_ctrsm_u_opt_4x2(
+                          scomplex* restrict a11,
+                          scomplex* restrict b11,
+                          scomplex* restrict c11, inc_t rs_c, inc_t cs_c,
+                          auxinfo_t*         data
+                        )
 {
 	/* Just call the reference implementation. */
-	bli_ctrsm_u_ref_mxn( a11,
+	BLIS_CTRSM_U_UKERNEL_REF( a11,
 	                     b11,
 	                     c11, rs_c, cs_c,
 	                     data );
 }
 
-void bli_ztrsm_u_opt_d4x4(
-                           dcomplex* restrict a11,
-                           dcomplex* restrict b11,
-                           dcomplex* restrict c11, inc_t rs_c, inc_t cs_c,
-                           auxinfo_t*         data
-                         )
+void bli_ztrsm_u_opt_2x2(
+                          dcomplex* restrict a11,
+                          dcomplex* restrict b11,
+                          dcomplex* restrict c11, inc_t rs_c, inc_t cs_c,
+                          auxinfo_t*         data
+                        )
 {
 	/* Just call the reference implementation. */
-	bli_ztrsm_u_ref_mxn( a11,
+	BLIS_ZTRSM_U_UKERNEL_REF( a11,
 	                     b11,
 	                     c11, rs_c, cs_c,
 	                     data );

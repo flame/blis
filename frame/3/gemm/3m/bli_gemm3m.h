@@ -34,7 +34,7 @@
 
 #include "bli_gemm3m_cntl.h"
 
-#include "bli_gemm3m_ref_mxn.h"
+#include "bli_gemm3m_ukr_ref.h"
 
 
 //

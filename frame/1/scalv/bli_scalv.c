@@ -66,7 +66,7 @@ void PASTEMAC0(opname)( \
 	                    x ); \
 }
 
-GENFRONT( scalv, SCALV_KERNEL )
+GENFRONT( scalv, scalv_kernel )
 
 
 //

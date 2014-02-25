@@ -34,15 +34,15 @@
 
 #include "blis.h"
 
-void bli_sgemm_opt_d4x4(
-                         dim_t              k,
-                         float* restrict    alpha,
-                         float* restrict    a,
-                         float* restrict    b,
-                         float* restrict    beta,
-                         float* restrict    c, inc_t rs_c, inc_t cs_c,
-                         auxinfo_t*         data
-                       )
+void bli_sgemm_opt_8x4(
+                        dim_t              k,
+                        float* restrict    alpha,
+                        float* restrict    a,
+                        float* restrict    b,
+                        float* restrict    beta,
+                        float* restrict    c, inc_t rs_c, inc_t cs_c,
+                        auxinfo_t*         data
+                      )
 {
 	//void*   a_next = bli_auxinfo_next_a( data );
 	void*   b_next = bli_auxinfo_next_b( data );
@@ -715,15 +715,15 @@ void bli_sgemm_opt_d4x4(
 	);
 }
 
-void bli_dgemm_opt_d4x4(
-                         dim_t              k,
-                         double* restrict   alpha,
-                         double* restrict   a,
-                         double* restrict   b,
-                         double* restrict   beta,
-                         double* restrict   c, inc_t rs_c, inc_t cs_c,
-                         auxinfo_t*         data
-                       )
+void bli_dgemm_opt_4x4(
+                        dim_t              k,
+                        double* restrict   alpha,
+                        double* restrict   a,
+                        double* restrict   b,
+                        double* restrict   beta,
+                        double* restrict   c, inc_t rs_c, inc_t cs_c,
+                        auxinfo_t*         data
+                      )
 {
 	void*   a_next = bli_auxinfo_next_a( data );
 	void*   b_next = bli_auxinfo_next_b( data );
@@ -1348,18 +1348,18 @@ void bli_dgemm_opt_d4x4(
 	);
 }
 
-void bli_cgemm_opt_d4x4(
-                         dim_t              k,
-                         scomplex* restrict alpha,
-                         scomplex* restrict a,
-                         scomplex* restrict b,
-                         scomplex* restrict beta,
-                         scomplex* restrict c, inc_t rs_c, inc_t cs_c,
-                         auxinfo_t*         data
-                       )
+void bli_cgemm_opt_4x2(
+                        dim_t              k,
+                        scomplex* restrict alpha,
+                        scomplex* restrict a,
+                        scomplex* restrict b,
+                        scomplex* restrict beta,
+                        scomplex* restrict c, inc_t rs_c, inc_t cs_c,
+                        auxinfo_t*         data
+                      )
 {
 	/* Just call the reference implementation. */
-	bli_cgemm_ref_mxn( k,
+	BLIS_CGEMM_UKERNEL_REF( k,
 	                   alpha,
 	                   a,
 	                   b,
@@ -1370,18 +1370,18 @@ void bli_cgemm_opt_d4x4(
 
 
 
-void bli_zgemm_opt_d4x4(
-                         dim_t              k,
-                         dcomplex* restrict alpha,
-                         dcomplex* restrict a,
-                         dcomplex* restrict b,
-                         dcomplex* restrict beta,
-                         dcomplex* restrict c, inc_t rs_c, inc_t cs_c,
-                         auxinfo_t*         data
-                       )
+void bli_zgemm_opt_2x2(
+                        dim_t              k,
+                        dcomplex* restrict alpha,
+                        dcomplex* restrict a,
+                        dcomplex* restrict b,
+                        dcomplex* restrict beta,
+                        dcomplex* restrict c, inc_t rs_c, inc_t cs_c,
+                        auxinfo_t*         data
+                      )
 {
 	/* Just call the reference implementation. */
-	bli_zgemm_ref_mxn( k,
+	BLIS_ZGEMM_UKERNEL_REF( k,
 	                   alpha,
 	                   a,
 	                   b,

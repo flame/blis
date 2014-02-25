@@ -698,10 +698,10 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "level-1f fusing factors      s     d     c     z \n" );
 	libblis_test_fprintf_c( os, "  default                %5u %5u %5u %5u\n",
-	                        BLIS_DEFAULT_FUSE_FAC_S,
-	                        BLIS_DEFAULT_FUSE_FAC_D,
-	                        BLIS_DEFAULT_FUSE_FAC_C,
-	                        BLIS_DEFAULT_FUSE_FAC_Z );
+	                        BLIS_L1F_FUSE_FAC_S,
+	                        BLIS_L1F_FUSE_FAC_D,
+	                        BLIS_L1F_FUSE_FAC_C,
+	                        BLIS_L1F_FUSE_FAC_Z );
 	libblis_test_fprintf_c( os, "  axpyf                  %5u %5u %5u %5u\n",
 	                        BLIS_AXPYF_FUSE_FAC_S,
 	                        BLIS_AXPYF_FUSE_FAC_D,

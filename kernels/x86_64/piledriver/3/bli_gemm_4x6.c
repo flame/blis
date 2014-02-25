@@ -47,7 +47,7 @@ void bli_sgemm_4x6(
                   )
 {
 	/* Just call the reference implementation. */
-	bli_sgemm_ref_mxn( k,
+	BLIS_SGEMM_UKERNEL_REF( k,
 	                   alpha,
 	                   a,
 	                   b,
@@ -682,7 +682,7 @@ void bli_cgemm_4x6(
                   )
 {
 	/* Just call the reference implementation. */
-	bli_cgemm_ref_mxn( k,
+	BLIS_CGEMM_UKERNEL_REF( k,
 	                   alpha,
 	                   a,
 	                   b,
@@ -702,7 +702,7 @@ void bli_zgemm_4x6(
                   )
 {
 	/* Just call the reference implementation. */
-	bli_zgemm_ref_mxn( k,
+	BLIS_ZGEMM_UKERNEL_REF( k,
 	                   alpha,
 	                   a,
 	                   b,

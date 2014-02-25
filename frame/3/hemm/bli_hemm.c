@@ -46,13 +46,16 @@ void bli_hemm( side_t  side,
                obj_t*  beta,
                obj_t*  c )
 {
-#ifdef BLIS_ENABLE_COMPLEX_VIA_4M
-	if ( bli_obj_is_complex( *c ) )
-	{
-		bli_hemm4m( side, alpha, a, b, beta, c );
-		return;
-	}
+	if (
+#ifdef BLIS_ENABLE_SCOMPLEX_VIA_4M
+	     bli_obj_is_scomplex( *c ) ||
 #endif
+#ifdef BLIS_ENABLE_DCOMPLEX_VIA_4M
+	     bli_obj_is_dcomplex( *c ) ||
+#endif
+	     FALSE
+	   )
+		return bli_hemm4m( side, alpha, a, b, beta, c );
 
 	bli_hemm_front( side, alpha, a, b, beta, c,
 	                gemm_cntl );

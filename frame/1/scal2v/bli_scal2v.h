@@ -33,7 +33,8 @@
 */
 
 #include "bli_scal2v_check.h"
-#include "bli_scal2v_unb_var1.h"
+#include "bli_scal2v_kernel.h"
+#include "bli_scal2v_ref.h"
 
 
 //

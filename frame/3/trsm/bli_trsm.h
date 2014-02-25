@@ -51,11 +51,11 @@
 #include "bli_trsm_rl_ker_var2.h"
 #include "bli_trsm_ru_ker_var2.h"
 
-#include "bli_gemmtrsm_l_ref_mxn.h"
-#include "bli_gemmtrsm_u_ref_mxn.h"
+#include "bli_gemmtrsm_l_ukr_ref.h"
+#include "bli_gemmtrsm_u_ukr_ref.h"
 
-#include "bli_trsm_l_ref_mxn.h"
-#include "bli_trsm_u_ref_mxn.h"
+#include "bli_trsm_l_ukr_ref.h"
+#include "bli_trsm_u_ukr_ref.h"
 
 #include "bli_trsm4m.h"
 #include "bli_trsm3m.h"

@@ -35,6 +35,7 @@
 #include "blis.h"
 
 
+/*
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, varname ) \
 \
@@ -49,6 +50,7 @@ void PASTEMAC(ch,varname)( \
                          );
 
 INSERT_GENTPROT_BASIC( gemm_8x8 )
+*/
 
 
 #undef  GENTPROT

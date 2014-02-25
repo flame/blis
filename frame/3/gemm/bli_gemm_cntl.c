@@ -84,10 +84,10 @@ void bli_gemm_cntl_init()
 	                                BLIS_DEFAULT_NR_C, BLIS_EXTEND_NR_C,
 	                                BLIS_DEFAULT_NR_Z, BLIS_EXTEND_NR_Z );
 
-	gemm_kr = bli_blksz_obj_create( BLIS_DEFAULT_KR_S, BLIS_EXTEND_KR_S,
-	                                BLIS_DEFAULT_KR_D, BLIS_EXTEND_KR_D,
-	                                BLIS_DEFAULT_KR_C, BLIS_EXTEND_KR_C,
-	                                BLIS_DEFAULT_KR_Z, BLIS_EXTEND_KR_Z );
+	gemm_kr = bli_blksz_obj_create( BLIS_DEFAULT_KR_S, 0,
+	                                BLIS_DEFAULT_KR_D, 0,
+	                                BLIS_DEFAULT_KR_C, 0,
+	                                BLIS_DEFAULT_KR_Z, 0 );
 
 	// Create function pointer object for each datatype-specific gemm
 	// micro-kernel.

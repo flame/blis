@@ -67,7 +67,7 @@ void PASTEMAC0(opname)( \
                         x ); \
 }
 
-GENFRONT( setv, SETV_KERNEL )
+GENFRONT( setv, setv_kernel )
 
 
 //

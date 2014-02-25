@@ -328,10 +328,12 @@ MK_BLIS_CONFIG_OBJS          := $(patsubst $(CONFIG_PATH)/%.S, $(BASE_OBJ_CONFIG
                                           $(filter %.S, $(MK_CONFIG_SRC)))
 MK_BLIS_CONFIG_OBJS          += $(patsubst $(CONFIG_PATH)/%.c, $(BASE_OBJ_CONFIG_PATH)/%.o, \
                                           $(filter %.c, $(MK_CONFIG_SRC)))
+
 MK_BLIS_CONFIG_NOOPT_OBJS    := $(patsubst $(CONFIG_PATH)/%.S, $(BASE_OBJ_CONFIG_PATH)/%.o, \
                                           $(filter %.S, $(MK_CONFIG_NOOPT_SRC)))
 MK_BLIS_CONFIG_NOOPT_OBJS    += $(patsubst $(CONFIG_PATH)/%.c, $(BASE_OBJ_CONFIG_PATH)/%.o, \
                                           $(filter %.c, $(MK_CONFIG_NOOPT_SRC)))
+
 MK_BLIS_CONFIG_KERNELS_OBJS  := $(patsubst $(CONFIG_PATH)/%.S, $(BASE_OBJ_CONFIG_PATH)/%.o, \
                                           $(filter %.S, $(MK_CONFIG_KERNELS_SRC)))
 MK_BLIS_CONFIG_KERNELS_OBJS  += $(patsubst $(CONFIG_PATH)/%.c, $(BASE_OBJ_CONFIG_PATH)/%.o, \

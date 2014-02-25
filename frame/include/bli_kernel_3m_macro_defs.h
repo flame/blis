@@ -38,52 +38,211 @@
 
 // -- Define datatype-agnostic base 3m kernel names ----------------------------
 
-// If any datatype-agnostic base name for a given micro-kernel does not
-// exist, default to the reference kernel base name.
+//
+// Level-3 3m
+//
 
-#ifndef GEMM3M_UKERNEL
-#define GEMM3M_UKERNEL        gemm3m_ref_mxn
+// gemm3m micro-kernels
+
+#ifndef BLIS_CGEMM3M_UKERNEL
+#define BLIS_CGEMM3M_UKERNEL BLIS_CGEMM3M_UKERNEL_REF
 #endif
 
-#ifndef GEMMTRSM3M_L_UKERNEL
-#define GEMMTRSM3M_L_UKERNEL  gemmtrsm3m_l_ref_mxn
+#ifndef BLIS_ZGEMM3M_UKERNEL
+#define BLIS_ZGEMM3M_UKERNEL BLIS_ZGEMM3M_UKERNEL_REF
 #endif
 
-#ifndef GEMMTRSM3M_U_UKERNEL
-#define GEMMTRSM3M_U_UKERNEL  gemmtrsm3m_u_ref_mxn
+// gemmtrsm3m_l micro-kernels
+
+#ifndef BLIS_CGEMMTRSM3M_L_UKERNEL
+#define BLIS_CGEMMTRSM3M_L_UKERNEL BLIS_CGEMMTRSM3M_L_UKERNEL_REF
 #endif
 
-#ifndef TRSM3M_L_UKERNEL
-#define TRSM3M_L_UKERNEL      trsm3m_l_ref_mxn
+#ifndef BLIS_ZGEMMTRSM3M_L_UKERNEL
+#define BLIS_ZGEMMTRSM3M_L_UKERNEL BLIS_ZGEMMTRSM3M_L_UKERNEL_REF
 #endif
 
-#ifndef TRSM3M_U_UKERNEL
-#define TRSM3M_U_UKERNEL      trsm3m_u_ref_mxn
+// gemmtrsm3m_u micro-kernels
+
+#ifndef BLIS_CGEMMTRSM3M_U_UKERNEL
+#define BLIS_CGEMMTRSM3M_U_UKERNEL BLIS_CGEMMTRSM3M_U_UKERNEL_REF
+#endif
+
+#ifndef BLIS_ZGEMMTRSM3M_U_UKERNEL
+#define BLIS_ZGEMMTRSM3M_U_UKERNEL BLIS_ZGEMMTRSM3M_U_UKERNEL_REF
+#endif
+
+// trsm3m_l micro-kernels
+
+#ifndef BLIS_CTRSM3M_L_UKERNEL
+#define BLIS_CTRSM3M_L_UKERNEL BLIS_CTRSM3M_L_UKERNEL_REF
+#endif
+
+#ifndef BLIS_ZTRSM3M_L_UKERNEL
+#define BLIS_ZTRSM3M_L_UKERNEL BLIS_ZTRSM3M_L_UKERNEL_REF
+#endif
+
+// trsm3m_u micro-kernels
+
+#ifndef BLIS_CTRSM3M_U_UKERNEL
+#define BLIS_CTRSM3M_U_UKERNEL BLIS_CTRSM3M_U_UKERNEL_REF
+#endif
+
+#ifndef BLIS_ZTRSM3M_U_UKERNEL
+#define BLIS_ZTRSM3M_U_UKERNEL BLIS_ZTRSM3M_U_UKERNEL_REF
+#endif
+
+//
+// Level-1m
+//
+
+// packm_2xk_ri3 kernels
+
+#ifndef BLIS_SPACKM_2XK_RI3_KERNEL
+#define BLIS_SPACKM_2XK_RI3_KERNEL BLIS_SPACKM_2XK_RI3_KERNEL_REF
+#endif
+
+#ifndef BLIS_DPACKM_2XK_RI3_KERNEL
+#define BLIS_DPACKM_2XK_RI3_KERNEL BLIS_DPACKM_2XK_RI3_KERNEL_REF
+#endif
+
+#ifndef BLIS_CPACKM_2XK_RI3_KERNEL
+#define BLIS_CPACKM_2XK_RI3_KERNEL BLIS_CPACKM_2XK_RI3_KERNEL_REF
+#endif
+
+#ifndef BLIS_ZPACKM_2XK_RI3_KERNEL
+#define BLIS_ZPACKM_2XK_RI3_KERNEL BLIS_ZPACKM_2XK_RI3_KERNEL_REF
+#endif
+
+// packm_4xk_ri3 kernels
+
+#ifndef BLIS_SPACKM_4XK_RI3_KERNEL
+#define BLIS_SPACKM_4XK_RI3_KERNEL BLIS_SPACKM_4XK_RI3_KERNEL_REF
+#endif
+
+#ifndef BLIS_DPACKM_4XK_RI3_KERNEL
+#define BLIS_DPACKM_4XK_RI3_KERNEL BLIS_DPACKM_4XK_RI3_KERNEL_REF
+#endif
+
+#ifndef BLIS_CPACKM_4XK_RI3_KERNEL
+#define BLIS_CPACKM_4XK_RI3_KERNEL BLIS_CPACKM_4XK_RI3_KERNEL_REF
+#endif
+
+#ifndef BLIS_ZPACKM_4XK_RI3_KERNEL
+#define BLIS_ZPACKM_4XK_RI3_KERNEL BLIS_ZPACKM_4XK_RI3_KERNEL_REF
+#endif
+
+// packm_6xk_ri3 kernels
+
+#ifndef BLIS_SPACKM_6XK_RI3_KERNEL
+#define BLIS_SPACKM_6XK_RI3_KERNEL BLIS_SPACKM_6XK_RI3_KERNEL_REF
+#endif
+
+#ifndef BLIS_DPACKM_6XK_RI3_KERNEL
+#define BLIS_DPACKM_6XK_RI3_KERNEL BLIS_DPACKM_6XK_RI3_KERNEL_REF
+#endif
+
+#ifndef BLIS_CPACKM_6XK_RI3_KERNEL
+#define BLIS_CPACKM_6XK_RI3_KERNEL BLIS_CPACKM_6XK_RI3_KERNEL_REF
+#endif
+
+#ifndef BLIS_ZPACKM_6XK_RI3_KERNEL
+#define BLIS_ZPACKM_6XK_RI3_KERNEL BLIS_ZPACKM_6XK_RI3_KERNEL_REF
+#endif
+
+// packm_8xk_ri3 kernels
+
+#ifndef BLIS_SPACKM_8XK_RI3_KERNEL
+#define BLIS_SPACKM_8XK_RI3_KERNEL BLIS_SPACKM_8XK_RI3_KERNEL_REF
+#endif
+
+#ifndef BLIS_DPACKM_8XK_RI3_KERNEL
+#define BLIS_DPACKM_8XK_RI3_KERNEL BLIS_DPACKM_8XK_RI3_KERNEL_REF
+#endif
+
+#ifndef BLIS_CPACKM_8XK_RI3_KERNEL
+#define BLIS_CPACKM_8XK_RI3_KERNEL BLIS_CPACKM_8XK_RI3_KERNEL_REF
+#endif
+
+#ifndef BLIS_ZPACKM_8XK_RI3_KERNEL
+#define BLIS_ZPACKM_8XK_RI3_KERNEL BLIS_ZPACKM_8XK_RI3_KERNEL_REF
+#endif
+
+// packm_10xk_ri3 kernels
+
+#ifndef BLIS_SPACKM_10XK_RI3_KERNEL
+#define BLIS_SPACKM_10XK_RI3_KERNEL BLIS_SPACKM_10XK_RI3_KERNEL_REF
+#endif
+
+#ifndef BLIS_DPACKM_10XK_RI3_KERNEL
+#define BLIS_DPACKM_10XK_RI3_KERNEL BLIS_DPACKM_10XK_RI3_KERNEL_REF
+#endif
+
+#ifndef BLIS_CPACKM_10XK_RI3_KERNEL
+#define BLIS_CPACKM_10XK_RI3_KERNEL BLIS_CPACKM_10XK_RI3_KERNEL_REF
+#endif
+
+#ifndef BLIS_ZPACKM_10XK_RI3_KERNEL
+#define BLIS_ZPACKM_10XK_RI3_KERNEL BLIS_ZPACKM_10XK_RI3_KERNEL_REF
+#endif
+
+// packm_12xk_ri3 kernels
+
+#ifndef BLIS_SPACKM_12XK_RI3_KERNEL
+#define BLIS_SPACKM_12XK_RI3_KERNEL BLIS_SPACKM_12XK_RI3_KERNEL_REF
+#endif
+
+#ifndef BLIS_DPACKM_12XK_RI3_KERNEL
+#define BLIS_DPACKM_12XK_RI3_KERNEL BLIS_DPACKM_12XK_RI3_KERNEL_REF
+#endif
+
+#ifndef BLIS_CPACKM_12XK_RI3_KERNEL
+#define BLIS_CPACKM_12XK_RI3_KERNEL BLIS_CPACKM_12XK_RI3_KERNEL_REF
+#endif
+
+#ifndef BLIS_ZPACKM_12XK_RI3_KERNEL
+#define BLIS_ZPACKM_12XK_RI3_KERNEL BLIS_ZPACKM_12XK_RI3_KERNEL_REF
+#endif
+
+// packm_14xk_ri3 kernels
+
+#ifndef BLIS_SPACKM_14XK_RI3_KERNEL
+#define BLIS_SPACKM_14XK_RI3_KERNEL BLIS_SPACKM_14XK_RI3_KERNEL_REF
+#endif
+
+#ifndef BLIS_DPACKM_14XK_RI3_KERNEL
+#define BLIS_DPACKM_14XK_RI3_KERNEL BLIS_DPACKM_14XK_RI3_KERNEL_REF
+#endif
+
+#ifndef BLIS_CPACKM_14XK_RI3_KERNEL
+#define BLIS_CPACKM_14XK_RI3_KERNEL BLIS_CPACKM_14XK_RI3_KERNEL_REF
+#endif
+
+#ifndef BLIS_ZPACKM_14XK_RI3_KERNEL
+#define BLIS_ZPACKM_14XK_RI3_KERNEL BLIS_ZPACKM_14XK_RI3_KERNEL_REF
+#endif
+
+// packm_16xk_ri3 kernels
+
+#ifndef BLIS_SPACKM_16XK_RI3_KERNEL
+#define BLIS_SPACKM_16XK_RI3_KERNEL BLIS_SPACKM_16XK_RI3_KERNEL_REF
+#endif
+
+#ifndef BLIS_DPACKM_16XK_RI3_KERNEL
+#define BLIS_DPACKM_16XK_RI3_KERNEL BLIS_DPACKM_16XK_RI3_KERNEL_REF
+#endif
+
+#ifndef BLIS_CPACKM_16XK_RI3_KERNEL
+#define BLIS_CPACKM_16XK_RI3_KERNEL BLIS_CPACKM_16XK_RI3_KERNEL_REF
+#endif
+
+#ifndef BLIS_ZPACKM_16XK_RI3_KERNEL
+#define BLIS_ZPACKM_16XK_RI3_KERNEL BLIS_ZPACKM_16XK_RI3_KERNEL_REF
 #endif
 
 
-// -- Construct 3m kernel function names ---------------------------------------
 
-// For each datatype-specific micro-kernel base name, construct the full
-// function name of the corresponding micro-kernel.
-
-#define BLIS_CGEMM3M_UKERNEL       PASTEMAC(c,GEMM3M_UKERNEL)
-#define BLIS_ZGEMM3M_UKERNEL       PASTEMAC(z,GEMM3M_UKERNEL)
-
-#define BLIS_CGEMMTRSM3M_L_UKERNEL PASTEMAC(c,GEMMTRSM3M_L_UKERNEL)
-#define BLIS_ZGEMMTRSM3M_L_UKERNEL PASTEMAC(z,GEMMTRSM3M_L_UKERNEL)
-
-#define BLIS_CGEMMTRSM3M_U_UKERNEL PASTEMAC(c,GEMMTRSM3M_U_UKERNEL)
-#define BLIS_ZGEMMTRSM3M_U_UKERNEL PASTEMAC(z,GEMMTRSM3M_U_UKERNEL)
-
-#define BLIS_CTRSM3M_L_UKERNEL     PASTEMAC(c,TRSM3M_L_UKERNEL)
-#define BLIS_ZTRSM3M_L_UKERNEL     PASTEMAC(z,TRSM3M_L_UKERNEL)
-
-#define BLIS_CTRSM3M_U_UKERNEL     PASTEMAC(c,TRSM3M_U_UKERNEL)
-#define BLIS_ZTRSM3M_U_UKERNEL     PASTEMAC(z,TRSM3M_U_UKERNEL)
-
-
-// -- Define 3m-specific blocksize macros --------------------------------------
+// -- Define default 3m-specific blocksize macros ------------------------------
 
 // Define complex 3m register blocksizes in terms of blocksizes used for
 // real kernels.
@@ -99,11 +258,11 @@
 
 // 3m register blocksize extensions
 #define BLIS_EXTEND_3M_MR_C      BLIS_EXTEND_MR_S
-#define BLIS_EXTEND_3M_KR_C      BLIS_EXTEND_KR_S
+#define BLIS_EXTEND_3M_KR_C      0
 #define BLIS_EXTEND_3M_NR_C      BLIS_EXTEND_NR_S
 
 #define BLIS_EXTEND_3M_MR_Z      BLIS_EXTEND_MR_D
-#define BLIS_EXTEND_3M_KR_Z      BLIS_EXTEND_KR_D
+#define BLIS_EXTEND_3M_KR_Z      0
 #define BLIS_EXTEND_3M_NR_Z      BLIS_EXTEND_NR_D
 
 // Define complex 3m cache blocksizes in terms of blocksizes used for
@@ -152,7 +311,8 @@
 #endif
 
 
-// -- Kernel macro checks ------------------------------------------------------
+
+// -- Kernel blocksize checks --------------------------------------------------
 
 // Verify that cache blocksizes are whole multiples of register blocksizes.
 // Specifically, verify that:
@@ -221,7 +381,12 @@
 #endif
 
 
-// -- Compute maximum cache blocksizes -----------------------------------------
+
+// -- Compute extended blocksizes ----------------------------------------------
+
+//
+// Compute maximum cache blocksizes.
+//
 
 #define BLIS_MAXIMUM_3M_MC_C  ( BLIS_DEFAULT_3M_MC_C + BLIS_EXTEND_3M_MC_C )
 #define BLIS_MAXIMUM_3M_KC_C  ( BLIS_DEFAULT_3M_KC_C + BLIS_EXTEND_3M_KC_C )
@@ -231,7 +396,9 @@
 #define BLIS_MAXIMUM_3M_KC_Z  ( BLIS_DEFAULT_3M_KC_Z + BLIS_EXTEND_3M_KC_Z )
 #define BLIS_MAXIMUM_3M_NC_Z  ( BLIS_DEFAULT_3M_NC_Z + BLIS_EXTEND_3M_NC_Z )
 
-// -- Compute leading dim blocksizes used for packing --------------------------
+//
+// Compute leading dimension blocksizes used when packing micro-panels.
+//
 
 #define BLIS_PACKDIM_3M_MR_C  ( BLIS_DEFAULT_3M_MR_C + BLIS_EXTEND_3M_MR_C )
 #define BLIS_PACKDIM_3M_KR_C  ( BLIS_DEFAULT_3M_KR_C + BLIS_EXTEND_3M_KR_C )

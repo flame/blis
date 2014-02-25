@@ -41,15 +41,22 @@
 #define L2_PREFETCH_DIST  16 // Must be greater than 10, because of the way the loop is constructed.
 
 void bli_sgemm_opt_30x8(
-                    dim_t     k,
-                    float*    alpha,
-                    float*    a,
-                    float*    b,
-                    float*    beta,
-                    float*    c, inc_t rs_c, inc_t cs_c,
-                    auxinfo_t* data
+                    dim_t           k,
+                    float* restrict alpha,
+                    float* restrict a,
+                    float* restrict b,
+                    float* restrict beta,
+                    float* restrict c, inc_t rs_c, inc_t cs_c,
+                    auxinfo_t*      data
                   )
 {
+	BLIS_SGEMM_UKERNEL_REF( k,
+	                       alpha,
+	                       a,
+	                       b,
+	                       beta,
+	                       c, rs_c, cs_c,
+	                       data );
 }
 
 //Alternate code path uused if C is not row-major
@@ -267,12 +274,13 @@ int offsets[16] __attribute__((aligned(0x1000))) = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 //#define MONITORS
 //#define LOOPMON
 void bli_dgemm_opt_30x8(
-                    dim_t     k,        double*   alpha,
-                    double*   a,
-                    double*   b,
-                    double*   beta,
-                    double*   c, inc_t rs_c, inc_t cs_c,
-                    auxinfo_t* data
+                    dim_t            k,
+                    double* restrict alpha,
+                    double* restrict a,
+                    double* restrict b,
+                    double* restrict beta,
+                    double* restrict c, inc_t rs_c, inc_t cs_c,
+                    auxinfo_t*       data
                   )
 {
     double * a_next = bli_auxinfo_next_a( data );
@@ -586,24 +594,40 @@ void bli_dgemm_opt_30x8(
 
 
 void bli_cgemm_opt_30x8(
-                    dim_t     k,        scomplex* alpha,  
-                    scomplex* a,
-                    scomplex* b,
-                    scomplex* beta,
-                    scomplex* c, inc_t rs_c, inc_t cs_c,
-                    auxinfo_t* data
+                    dim_t              k,
+                    scomplex* restrict alpha,
+                    scomplex* restrict a,
+                    scomplex* restrict b,
+                    scomplex* restrict beta,
+                    scomplex* restrict c, inc_t rs_c, inc_t cs_c,
+                    auxinfo_t*         data
                   )
 {
+	BLIS_CGEMM_UKERNEL_REF( k,
+	                       alpha,
+	                       a,
+	                       b,
+	                       beta,
+	                       c, rs_c, cs_c,
+	                       data );
 }
 
 
 void bli_zgemm_opt_30x8(
-                    dim_t     k,        dcomplex* alpha,  
-                    dcomplex* a,
-                    dcomplex* b,
-                    dcomplex* beta,
-                    dcomplex* c, inc_t rs_c, inc_t cs_c,
-                    auxinfo_t* data
+                    dim_t              k,
+                    dcomplex* restrict alpha,
+                    dcomplex* restrict a,
+                    dcomplex* restrict b,
+                    dcomplex* restrict beta,
+                    dcomplex* restrict c, inc_t rs_c, inc_t cs_c,
+                    auxinfo_t*         data
                   )
 {
+	BLIS_ZGEMM_UKERNEL_REF( k,
+	                       alpha,
+	                       a,
+	                       b,
+	                       beta,
+	                       c, rs_c, cs_c,
+	                       data );
 }

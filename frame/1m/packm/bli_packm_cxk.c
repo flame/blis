@@ -47,118 +47,105 @@ typedef void (*FUNCPTR_T)(
 #undef  FUNCPTR_ARRAY_LENGTH
 #define FUNCPTR_ARRAY_LENGTH 18
 
-#undef  GENARRAY
-#define GENARRAY( kername2,  kername4,  kername6,  kername8,   \
-                  kername10, kername12, kername14, kername16 ) \
-\
-static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] = \
-{ \
-	/* panel width = 0 */ \
-	{ \
-		NULL, NULL, NULL, NULL, \
-	}, \
-	/* panel width = 1 */ \
-	{ \
-		NULL, NULL, NULL, NULL, \
-	}, \
-	/* panel width = 2 */ \
-	{ \
-		PASTEMAC(s,kername2), \
-		PASTEMAC(c,kername2), \
-		PASTEMAC(d,kername2), \
-		PASTEMAC(z,kername2), \
-	}, \
-	/* panel width = 3 */ \
-	{ \
-		NULL, NULL, NULL, NULL, \
-	}, \
-	/* panel width = 4 */ \
-	{ \
-		PASTEMAC(s,kername4), \
-		PASTEMAC(c,kername4), \
-		PASTEMAC(d,kername4), \
-		PASTEMAC(z,kername4), \
-	}, \
-	/* panel width = 5 */ \
-	{ \
-		NULL, NULL, NULL, NULL, \
-	}, \
-	/* panel width = 6 */ \
-	{ \
-		PASTEMAC(s,kername6), \
-		PASTEMAC(c,kername6), \
-		PASTEMAC(d,kername6), \
-		PASTEMAC(z,kername6), \
-	}, \
-	/* panel width = 7 */ \
-	{ \
-		NULL, NULL, NULL, NULL, \
-	}, \
-	/* panel width = 8 */ \
-	{ \
-		PASTEMAC(s,kername8), \
-		PASTEMAC(c,kername8), \
-		PASTEMAC(d,kername8), \
-		PASTEMAC(z,kername8), \
-	}, \
-	/* panel width = 9 */ \
-	{ \
-		NULL, NULL, NULL, NULL, \
-	}, \
-	/* panel width = 10 */ \
-	{ \
-		PASTEMAC(s,kername10), \
-		PASTEMAC(c,kername10), \
-		PASTEMAC(d,kername10), \
-		PASTEMAC(z,kername10), \
-	}, \
-	/* panel width = 11 */ \
-	{ \
-		NULL, NULL, NULL, NULL, \
-	}, \
-	/* panel width = 12 */ \
-	{ \
-		PASTEMAC(s,kername12), \
-		PASTEMAC(c,kername12), \
-		PASTEMAC(d,kername12), \
-		PASTEMAC(z,kername12), \
-	}, \
-	/* panel width = 13 */ \
-	{ \
-		NULL, NULL, NULL, NULL, \
-	}, \
-	/* panel width = 14 */ \
-	{ \
-		PASTEMAC(s,kername14), \
-		PASTEMAC(c,kername14), \
-		PASTEMAC(d,kername14), \
-		PASTEMAC(z,kername14), \
-	}, \
-	/* panel width = 15 */ \
-	{ \
-		NULL, NULL, NULL, NULL, \
-	}, \
-	/* panel width = 16 */ \
-	{ \
-		PASTEMAC(s,kername16), \
-		PASTEMAC(c,kername16), \
-		PASTEMAC(d,kername16), \
-		PASTEMAC(z,kername16), \
-	}, \
-	/* panel width = 17 */ \
-	{ \
-		NULL, NULL, NULL, NULL, \
-	} \
+static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] =
+{
+	/* panel width = 0 */
+	{
+		NULL, NULL, NULL, NULL,
+	},
+	/* panel width = 1 */
+	{
+		NULL, NULL, NULL, NULL,
+	},
+	/* panel width = 2 */
+	{
+		BLIS_SPACKM_2XK_KERNEL,
+		BLIS_CPACKM_2XK_KERNEL,
+		BLIS_DPACKM_2XK_KERNEL,
+		BLIS_ZPACKM_2XK_KERNEL,
+	},
+	/* panel width = 3 */
+	{
+		NULL, NULL, NULL, NULL,
+	},
+	/* panel width = 4 */
+	{
+		BLIS_SPACKM_4XK_KERNEL,
+		BLIS_CPACKM_4XK_KERNEL,
+		BLIS_DPACKM_4XK_KERNEL,
+		BLIS_ZPACKM_4XK_KERNEL,
+	},
+	/* panel width = 5 */
+	{
+		NULL, NULL, NULL, NULL,
+	},
+	/* panel width = 6 */
+	{
+		BLIS_SPACKM_6XK_KERNEL,
+		BLIS_CPACKM_6XK_KERNEL,
+		BLIS_DPACKM_6XK_KERNEL,
+		BLIS_ZPACKM_6XK_KERNEL,
+	},
+	/* panel width = 7 */
+	{
+		NULL, NULL, NULL, NULL,
+	},
+	/* panel width = 8 */
+	{
+		BLIS_SPACKM_8XK_KERNEL,
+		BLIS_CPACKM_8XK_KERNEL,
+		BLIS_DPACKM_8XK_KERNEL,
+		BLIS_ZPACKM_8XK_KERNEL,
+	},
+	/* panel width = 9 */
+	{
+		NULL, NULL, NULL, NULL,
+	},
+	/* panel width = 10 */
+	{
+		BLIS_SPACKM_10XK_KERNEL,
+		BLIS_CPACKM_10XK_KERNEL,
+		BLIS_DPACKM_10XK_KERNEL,
+		BLIS_ZPACKM_10XK_KERNEL,
+	},
+	/* panel width = 11 */
+	{
+		NULL, NULL, NULL, NULL,
+	},
+	/* panel width = 12 */
+	{
+		BLIS_SPACKM_12XK_KERNEL,
+		BLIS_CPACKM_12XK_KERNEL,
+		BLIS_DPACKM_12XK_KERNEL,
+		BLIS_ZPACKM_12XK_KERNEL,
+	},
+	/* panel width = 13 */
+	{
+		NULL, NULL, NULL, NULL,
+	},
+	/* panel width = 14 */
+	{
+		BLIS_SPACKM_14XK_KERNEL,
+		BLIS_CPACKM_14XK_KERNEL,
+		BLIS_DPACKM_14XK_KERNEL,
+		BLIS_ZPACKM_14XK_KERNEL,
+	},
+	/* panel width = 15 */
+	{
+		NULL, NULL, NULL, NULL,
+	},
+	/* panel width = 16 */
+	{
+		BLIS_SPACKM_16XK_KERNEL,
+		BLIS_CPACKM_16XK_KERNEL,
+		BLIS_DPACKM_16XK_KERNEL,
+		BLIS_ZPACKM_16XK_KERNEL,
+	},
+	/* panel width = 17 */
+	{
+		NULL, NULL, NULL, NULL,
+	},
 };
-
-GENARRAY( PACKM_2XK_KERNEL,
-          PACKM_4XK_KERNEL,
-          PACKM_6XK_KERNEL,
-          PACKM_8XK_KERNEL,
-          PACKM_10XK_KERNEL,
-          PACKM_12XK_KERNEL,
-          PACKM_14XK_KERNEL,
-          PACKM_16XK_KERNEL ) 
 
 
 

@@ -37,25 +37,25 @@
 
 
 void bli_strsm_u_opt_mxn(
-                          float*    restrict a,
-                          float*    restrict b,
-                          float*    restrict c, inc_t rs_c, inc_t cs_c,
+                          float*    restrict a11,
+                          float*    restrict b11,
+                          float*    restrict c11, inc_t rs_c, inc_t cs_c,
                           auxinfo_t*         data
                         )
 {
 	/* Just call the reference implementation. */
-	bli_strsm_u_ref_mxn( a,
-	                     b,
-	                     c, rs_c, cs_c,
+	BLIS_STRSM_U_UKERNEL_REF( a11,
+	                     b11,
+	                     c11, rs_c, cs_c,
 	                     data );
 }
 
 
 
 void bli_dtrsm_u_opt_mxn(
-                          double*   restrict a,
-                          double*   restrict b,
-                          double*   restrict c, inc_t rs_c, inc_t cs_c,
+                          double*   restrict a11,
+                          double*   restrict b11,
+                          double*   restrict c11, inc_t rs_c, inc_t cs_c,
                           auxinfo_t*         data
                         )
 {
@@ -168,18 +168,18 @@ void bli_dtrsm_u_opt_mxn(
 	{
 		i        = m - iter - 1;
 		n_behind = iter;
-		alpha11  = a + (i  )*rs_a + (i  )*cs_a;
-		a12t     = a + (i  )*rs_a + (i+1)*cs_a;
-		x1       = b + (i  )*rs_b + (0  )*cs_b;
-		X2       = b + (i+1)*rs_b + (0  )*cs_b;
+		alpha11  = a11 + (i  )*rs_a + (i  )*cs_a;
+		a12t     = a11 + (i  )*rs_a + (i+1)*cs_a;
+		x1       = b11 + (i  )*rs_b + (0  )*cs_b;
+		X2       = b11 + (i+1)*rs_b + (0  )*cs_b;
 
 		/* x1 = x1 - a12t * X2; */
 		/* x1 = x1 / alpha11; */
 		for ( j = 0; j < n; ++j )
 		{
-			chi11   = x1 + (0  )*rs_b + (j  )*cs_b;
-			x21     = X2 + (0  )*rs_b + (j  )*cs_b;
-			gamma11 = c  + (i  )*rs_c + (j  )*cs_c;
+			chi11   = x1  + (0  )*rs_b + (j  )*cs_b;
+			x21     = X2  + (0  )*rs_b + (j  )*cs_b;
+			gamma11 = c11 + (i  )*rs_c + (j  )*cs_c;
 
 			/* chi11 = chi11 - a12t * x21; */
 			bli_dset0s( rho11 );
@@ -208,32 +208,32 @@ void bli_dtrsm_u_opt_mxn(
 
 
 void bli_ctrsm_u_opt_mxn(
-                          scomplex* restrict a,
-                          scomplex* restrict b,
-                          scomplex* restrict c, inc_t rs_c, inc_t cs_c,
+                          scomplex* restrict a11,
+                          scomplex* restrict b11,
+                          scomplex* restrict c11, inc_t rs_c, inc_t cs_c,
                           auxinfo_t*         data
                         )
 {
 	/* Just call the reference implementation. */
-	bli_ctrsm_u_ref_mxn( a,
-	                     b,
-	                     c, rs_c, cs_c,
+	BLIS_CTRSM_U_UKERNEL_REF( a11,
+	                     b11,
+	                     c11, rs_c, cs_c,
 	                     data );
 }
 
 
 
 void bli_ztrsm_u_opt_mxn(
-                          dcomplex* restrict a,
-                          dcomplex* restrict b,
-                          dcomplex* restrict c, inc_t rs_c, inc_t cs_c,
+                          dcomplex* restrict a11,
+                          dcomplex* restrict b11,
+                          dcomplex* restrict c11, inc_t rs_c, inc_t cs_c,
                           auxinfo_t*         data
                         )
 {
 	/* Just call the reference implementation. */
-	bli_ztrsm_u_ref_mxn( a,
-	                     b,
-	                     c, rs_c, cs_c,
+	BLIS_ZTRSM_U_UKERNEL_REF( a11,
+	                     b11,
+	                     c11, rs_c, cs_c,
 	                     data );
 }
 

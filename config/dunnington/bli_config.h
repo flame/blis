@@ -64,14 +64,6 @@
 // scomplex and dcomplex being defined in terms of simple structs.
 //#define BLIS_ENABLE_C99_COMPLEX
 
-// Enable use of the 4m method to implement complex domain level-3
-// operations. By enabling this option, special code is activiated that
-// induces complex level-3 operations using ONLY the real domain 
-// micro-kernels. This allows kernel authors to focus on optimizing
-// the real micro-kernels, which can then be leveraged to provide their
-// complex counterparts "for free".
-#define BLIS_ENABLE_COMPLEX_VIA_4M
-
 
 
 // -- MULTITHREADING -----------------------------------------------------------

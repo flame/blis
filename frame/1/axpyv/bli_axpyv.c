@@ -68,7 +68,7 @@ void PASTEMAC0(opname)( \
 	                    y ); \
 }
 
-GENFRONT( axpyv, AXPYV_KERNEL )
+GENFRONT( axpyv, axpyv_kernel )
 
 
 //

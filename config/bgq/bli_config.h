@@ -36,6 +36,9 @@
 #define BLIS_CONFIG_H
 
 
+#undef restrict
+
+
 // -- OPERATING SYSTEM ---------------------------------------------------------
 
 

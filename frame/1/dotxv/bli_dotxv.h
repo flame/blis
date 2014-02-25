@@ -33,7 +33,8 @@
 */
 
 #include "bli_dotxv_check.h"
-#include "bli_dotxv_unb_var1.h"
+#include "bli_dotxv_kernel.h"
+#include "bli_dotxv_ref.h"
 
 
 //

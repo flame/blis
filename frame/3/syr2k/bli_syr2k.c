@@ -46,13 +46,16 @@ void bli_syr2k( obj_t*  alpha,
                 obj_t*  beta,
                 obj_t*  c )
 {
-#ifdef BLIS_ENABLE_COMPLEX_VIA_4M
-	if ( bli_obj_is_complex( *c ) )
-	{
-		bli_syr2k4m( alpha, a, b, beta, c );
-		return;
-	}
+	if (
+#ifdef BLIS_ENABLE_SCOMPLEX_VIA_4M
+	     bli_obj_is_scomplex( *c ) ||
 #endif
+#ifdef BLIS_ENABLE_DCOMPLEX_VIA_4M
+	     bli_obj_is_dcomplex( *c ) ||
+#endif
+	     FALSE
+	   )
+		return bli_syr2k4m( alpha, a, b, beta, c );
 
 	bli_syr2k_front( alpha, a, b, beta, c,
 	                 herk_cntl );

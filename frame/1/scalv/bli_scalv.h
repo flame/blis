@@ -36,7 +36,8 @@
 #include "bli_scalv_check.h"
 #include "bli_scalv_int.h"
 
-#include "bli_scalv_unb_var1.h"
+#include "bli_scalv_kernel.h"
+#include "bli_scalv_ref.h"
 
 
 //

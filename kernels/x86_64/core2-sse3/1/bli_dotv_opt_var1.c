@@ -34,151 +34,6 @@
 
 #include "blis.h"
 
-#define FUNCPTR_T dotv_fp
-
-typedef void (*FUNCPTR_T)(
-                           conj_t conjx,
-                           conj_t conjy,
-                           dim_t  n,
-                           void*  x, inc_t incx,
-                           void*  y, inc_t incy,
-                           void*  rho
-                         );
-
-// If some mixed datatype functions will not be compiled, we initialize
-// the corresponding elements of the function array to NULL.
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-static FUNCPTR_T GENARRAY3_ALL(ftypes,dotv_opt_var1);
-#else
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-static FUNCPTR_T GENARRAY3_EXT(ftypes,dotv_opt_var1);
-#else
-static FUNCPTR_T GENARRAY3_MIN(ftypes,dotv_opt_var1);
-#endif
-#endif
-
-
-void bli_dotv_opt_var1( obj_t*  x,
-                        obj_t*  y,
-                        obj_t*  rho )
-{
-	num_t     dt_x      = bli_obj_datatype( *x );
-	num_t     dt_y      = bli_obj_datatype( *y );
-	num_t     dt_rho    = bli_obj_datatype( *rho );
-
-	conj_t    conjx     = bli_obj_conj_status( *x );
-	conj_t    conjy     = bli_obj_conj_status( *y );
-	dim_t     n         = bli_obj_vector_dim( *x );
-
-	inc_t     inc_x     = bli_obj_vector_inc( *x );
-	void*     buf_x     = bli_obj_buffer_at_off( *x );
-
-	inc_t     inc_y     = bli_obj_vector_inc( *y );
-	void*     buf_y     = bli_obj_buffer_at_off( *y );
-
-	void*     buf_rho   = bli_obj_buffer_at_off( *rho );
-
-	FUNCPTR_T f;
-
-	// Index into the type combination array to extract the correct
-	// function pointer.
-	f = ftypes[dt_x][dt_y][dt_rho];
-
-	// Invoke the function.
-	f( conjx,
-	   conjy,
-	   n,
-	   buf_x, inc_x, 
-	   buf_y, inc_y,
-	   buf_rho );
-}
-
-
-#undef  GENTFUNC3
-#define GENTFUNC3( ctype_x, ctype_y, ctype_r, chx, chy, chr, opname, varname ) \
-\
-void PASTEMAC3(chx,chy,chr,varname)( \
-                                     conj_t conjx, \
-                                     conj_t conjy, \
-                                     dim_t  n, \
-                                     void*  x, inc_t incx, \
-                                     void*  y, inc_t incy, \
-                                     void*  rho \
-                                   ) \
-{ \
-	ctype_x* x_cast   = x; \
-	ctype_y* y_cast   = y; \
-	ctype_r* rho_cast = rho; \
-	ctype_x* chi1; \
-	ctype_y* psi1; \
-	ctype_r  dotxy; \
-	dim_t    i; \
-	conj_t   conjx_use; \
-\
-	if ( bli_zero_dim1( n ) ) \
-	{ \
-		PASTEMAC(chr,set0s)( *rho_cast ); \
-		return; \
-	} \
-\
-	PASTEMAC(chr,set0s)( dotxy ); \
-\
-	chi1 = x_cast; \
-	psi1 = y_cast; \
-\
-	conjx_use = conjx; \
-\
-	/* If y must be conjugated, we do so indirectly by first toggling the
-	   effective conjugation of x and then conjugating the resulting dot
-	   product. */ \
-	if ( bli_is_conj( conjy ) ) \
-		bli_toggle_conj( conjx_use ); \
-\
-	if ( bli_is_conj( conjx_use ) ) \
-	{ \
-		for ( i = 0; i < n; ++i ) \
-		{ \
-			PASTEMAC3(chx,chy,chr,dotjs)( *chi1, *psi1, dotxy ); \
-\
-			chi1 += incx; \
-			psi1 += incy; \
-		} \
-	} \
-	else \
-	{ \
-		for ( i = 0; i < n; ++i ) \
-		{ \
-			PASTEMAC3(chx,chy,chr,dots)( *chi1, *psi1, dotxy ); \
-\
-			chi1 += incx; \
-			psi1 += incy; \
-		} \
-	} \
-\
-	if ( bli_is_conj( conjy ) ) \
-		PASTEMAC(chr,conjs)( dotxy ); \
-\
-	PASTEMAC2(chr,chr,copys)( dotxy, *rho_cast ); \
-}
-
-// Define the basic set of functions unconditionally, and then also some
-// mixed datatype functions if requested.
-//INSERT_GENTFUNC3_BASIC( dotv, dotv_opt_var1 )
-GENTFUNC3( float,    float,    float,    s, s, s, dotv, dotv_opt_var1 )
-//GENTFUNC3( double,   double,   double,   d, d, d, dotv, dotv_opt_var1 )
-GENTFUNC3( scomplex, scomplex, scomplex, c, c, c, dotv, dotv_opt_var1 )
-GENTFUNC3( dcomplex, dcomplex, dcomplex, z, z, z, dotv, dotv_opt_var1 )
-
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTFUNC3_MIX_D( dotv, dotv_opt_var1 )
-#endif
-
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTFUNC3_MIX_P( dotv, dotv_opt_var1 )
-#endif
-
-
-
 
 #include "pmmintrin.h"
 typedef union
@@ -188,14 +43,14 @@ typedef union
 } v2df_t;
 
 
-void bli_ddddotv_opt_var1( 
-                           conj_t conjx, 
-                           conj_t conjy, 
-                           dim_t  n, 
-                           void*  x, inc_t incx, 
-                           void*  y, inc_t incy, 
-                           void*  rho 
-                         ) 
+void bli_ddotv_opt_var1( 
+                         conj_t           conjx, 
+                         conj_t           conjy, 
+                         dim_t            n, 
+                         double* restrict x, inc_t incx,
+                         double* restrict y, inc_t incy,
+                         double* restrict rho
+                       ) 
 { 
 	double*  restrict x_cast   = x; 
 	double*  restrict y_cast   = y; 
@@ -247,12 +102,12 @@ void bli_ddddotv_opt_var1(
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE )
 	{
-		bli_ddddotv_unb_var1( conjx,
-		                      conjy,
-		                      n,
-		                      x, incx,
-		                      y, incy,
-		                      rho );
+		BLIS_DDOTV_KERNEL_REF( conjx,
+		                       conjy,
+		                       n,
+		                       x, incx,
+		                       y, incy,
+		                       rho );
 		return;
 	}
 

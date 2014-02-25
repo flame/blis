@@ -34,16 +34,6 @@
 
 #include "blis.h"
 
-/*
-void bli_copyv( obj_t* x,
-                obj_t* y )
-{
-	if ( bli_error_checking_is_enabled() )
-		bli_copyv_check( x, y );
-
-	bli_copyv_unb_var1( x, y );
-}
-*/
 
 //
 // Define object-based interface.
@@ -63,7 +53,7 @@ void PASTEMAC0(opname)( \
                         y ); \
 }
 
-GENFRONT( copyv, COPYV_KERNEL )
+GENFRONT( copyv, copyv_kernel )
 
 
 //

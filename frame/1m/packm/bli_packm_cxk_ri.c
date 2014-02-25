@@ -47,118 +47,106 @@ typedef void (*FUNCPTR_T)(
 #undef  FUNCPTR_ARRAY_LENGTH
 #define FUNCPTR_ARRAY_LENGTH 18
 
-#undef  GENARRAY
-#define GENARRAY( kername2,  kername4,  kername6,  kername8,   \
-                  kername10, kername12, kername14, kername16 ) \
-\
-static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] = \
-{ \
-	/* panel width = 0 */ \
-	{ \
-		NULL, NULL, NULL, NULL, \
-	}, \
-	/* panel width = 1 */ \
-	{ \
-		NULL, NULL, NULL, NULL, \
-	}, \
-	/* panel width = 2 */ \
-	{ \
-		NULL, \
-		PASTEMAC2(c,kername2,_ri), \
-		NULL, \
-		PASTEMAC2(z,kername2,_ri), \
-	}, \
-	/* panel width = 3 */ \
-	{ \
-		NULL, NULL, NULL, NULL, \
-	}, \
-	/* panel width = 4 */ \
-	{ \
-		NULL, \
-		PASTEMAC2(c,kername4,_ri), \
-		NULL, \
-		PASTEMAC2(z,kername4,_ri), \
-	}, \
-	/* panel width = 5 */ \
-	{ \
-		NULL, NULL, NULL, NULL, \
-	}, \
-	/* panel width = 6 */ \
-	{ \
-		NULL, \
-		PASTEMAC2(c,kername6,_ri), \
-		NULL, \
-		PASTEMAC2(z,kername6,_ri), \
-	}, \
-	/* panel width = 7 */ \
-	{ \
-		NULL, NULL, NULL, NULL, \
-	}, \
-	/* panel width = 8 */ \
-	{ \
-		NULL, \
-		PASTEMAC2(c,kername8,_ri), \
-		NULL, \
-		PASTEMAC2(z,kername8,_ri), \
-	}, \
-	/* panel width = 9 */ \
-	{ \
-		NULL, NULL, NULL, NULL, \
-	}, \
-	/* panel width = 10 */ \
-	{ \
-		NULL, \
-		PASTEMAC2(c,kername10,_ri), \
-		NULL, \
-		PASTEMAC2(z,kername10,_ri), \
-	}, \
-	/* panel width = 11 */ \
-	{ \
-		NULL, NULL, NULL, NULL, \
-	}, \
-	/* panel width = 12 */ \
-	{ \
-		NULL, \
-		PASTEMAC2(c,kername12,_ri), \
-		NULL, \
-		PASTEMAC2(z,kername12,_ri), \
-	}, \
-	/* panel width = 13 */ \
-	{ \
-		NULL, NULL, NULL, NULL, \
-	}, \
-	/* panel width = 14 */ \
-	{ \
-		NULL, \
-		PASTEMAC2(c,kername14,_ri), \
-		NULL, \
-		PASTEMAC2(z,kername14,_ri), \
-	}, \
-	/* panel width = 15 */ \
-	{ \
-		NULL, NULL, NULL, NULL, \
-	}, \
-	/* panel width = 16 */ \
-	{ \
-		NULL, \
-		PASTEMAC2(c,kername16,_ri), \
-		NULL, \
-		PASTEMAC2(z,kername16,_ri), \
-	}, \
-	/* panel width = 17 */ \
-	{ \
-		NULL, NULL, NULL, NULL, \
-	}, \
+static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] =
+{
+	/* panel width = 0 */
+	{
+		NULL, NULL, NULL, NULL,
+	},
+	/* panel width = 1 */
+	{
+		NULL, NULL, NULL, NULL,
+	},
+	/* panel width = 2 */
+	{
+		NULL,
+		BLIS_CPACKM_2XK_RI_KERNEL,
+		NULL,
+		BLIS_ZPACKM_2XK_RI_KERNEL,
+	},
+	/* panel width = 3 */
+	{
+		NULL, NULL, NULL, NULL,
+	},
+	/* panel width = 4 */
+	{
+		NULL,
+		BLIS_CPACKM_4XK_RI_KERNEL,
+		NULL,
+		BLIS_ZPACKM_4XK_RI_KERNEL,
+	},
+	/* panel width = 5 */
+	{
+		NULL, NULL, NULL, NULL,
+	},
+	/* panel width = 6 */
+	{
+		NULL,
+		BLIS_CPACKM_6XK_RI_KERNEL,
+		NULL,
+		BLIS_ZPACKM_6XK_RI_KERNEL,
+	},
+	/* panel width = 7 */
+	{
+		NULL, NULL, NULL, NULL,
+	},
+	/* panel width = 8 */
+	{
+		NULL,
+		BLIS_CPACKM_8XK_RI_KERNEL,
+		NULL,
+		BLIS_ZPACKM_8XK_RI_KERNEL,
+	},
+	/* panel width = 9 */
+	{
+		NULL, NULL, NULL, NULL,
+	},
+	/* panel width = 10 */
+	{
+		NULL,
+		BLIS_CPACKM_10XK_RI_KERNEL,
+		NULL,
+		BLIS_ZPACKM_10XK_RI_KERNEL,
+	},
+	/* panel width = 11 */
+	{
+		NULL, NULL, NULL, NULL,
+	},
+	/* panel width = 12 */
+	{
+		NULL,
+		BLIS_CPACKM_12XK_RI_KERNEL,
+		NULL,
+		BLIS_ZPACKM_12XK_RI_KERNEL,
+	},
+	/* panel width = 13 */
+	{
+		NULL, NULL, NULL, NULL,
+	},
+	/* panel width = 14 */
+	{
+		NULL,
+		BLIS_CPACKM_14XK_RI_KERNEL,
+		NULL,
+		BLIS_ZPACKM_14XK_RI_KERNEL,
+	},
+	/* panel width = 15 */
+	{
+		NULL, NULL, NULL, NULL,
+	},
+	/* panel width = 16 */
+	{
+		NULL,
+		BLIS_CPACKM_16XK_RI_KERNEL,
+		NULL,
+		BLIS_ZPACKM_16XK_RI_KERNEL,
+	},
+	/* panel width = 17 */
+	{
+		NULL, NULL, NULL, NULL,
+	},
 };
 
-GENARRAY( PACKM_2XK_KERNEL,
-          PACKM_4XK_KERNEL,
-          PACKM_6XK_KERNEL,
-          PACKM_8XK_KERNEL,
-          PACKM_10XK_KERNEL,
-          PACKM_12XK_KERNEL,
-          PACKM_14XK_KERNEL,
-          PACKM_16XK_KERNEL )
 
 
 
