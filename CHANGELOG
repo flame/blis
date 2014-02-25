@@ -1,4 +1,918 @@
-commit 089048d5895a30221b6b1976c9be93ad6443420d (HEAD, tag: 0.1.0, origin/master, master)
+commit fde5f1fdece19881f50b142e8611b772a647e6d2 (HEAD, tag: 0.1.1, origin/master, origin/HEAD, master)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Feb 25 13:34:56 2014 -0600
+
+    Added extensive support for configuration defaults.
+    
+    Details:
+    - Standard names for reference kernels (levels-1v, -1f and 3) are now
+      macro constants. Examples:
+        BLIS_SAXPYV_KERNEL_REF
+        BLIS_DDOTXF_KERNEL_REF
+        BLIS_ZGEMM_UKERNEL_REF
+    - Developers no longer have to name all datatype instances of a kernel
+      with a common base name; [sdcz] datatype flavors of each kernel or
+      micro-kernel (level-1v, -1f, or 3) may now be named independently.
+      This means you can now, if you wish, encode the datatype-specific
+      register blocksizes in the name of the micro-kernel functions.
+    - Any datatype instances of any kernel (1v, 1f, or 3) that is left
+      undefined in bli_kernel.h will default to the corresponding reference
+      implementation. For example, if BLIS_DGEMM_UKERNEL is left undefined,
+      it will be defined to be BLIS_DGEMM_UKERNEL_REF.
+    - Developers no longer need to name level-1v/-1f kernels with multiple
+      datatype chars to match the number of types the kernel WOULD take in
+      a mixed type environment, as in bli_dddaxpyv_opt(). Now, one char is
+      sufficient, as in bli_daxpyv_opt().
+    - There is no longer a need to define an obj_t wrapper to go along with
+      your level-1v/-1f kernels. The framework now prvides a _kernel()
+      function which serves as the obj_t wrapper for whatever kernels are
+      specified (or defaulted to) via bli_kernel.h
+    - Developers no longer need to prototype their kernels, and thus no
+      longer need to include any prototyping headers from within
+      bli_kernel.h. The framework now generates kernel prototypes, with the
+      proper type signature, based on the kernel names defined (or defaulted
+      to) via bli_kernel.h.
+    - If the complex datatype x (of [cz]) implementation of the gemm micro-
+      kernel is left undefined by bli_kernel.h, but its same-precision real
+      domain equivalent IS defined, BLIS will use a 4m-based implementation
+      for the datatype x implementations of all level-3 operations, using
+      only the real gemm micro-kernel.
+
+commit 15b51e990f1d21333b5f7af97c211756247336e5
+Merge: 6363a9f fc04b5e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Feb 21 09:04:32 2014 -0600
+
+    Merge branch 'master' of github.com:fgvanzee/blis
+
+commit fc04b5eb69868c341ce03f5ef1f02de4b8c121b0
+Merge: b29e1c2 d1813c9
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Feb 21 09:04:13 2014 -0600
+
+    Merge pull request #3 from figual/master
+    
+    New ARM armv7a kernels and Assembly file consideration in Makefile
+
+commit d1813c9dee34410833db5061e6588ec1a6c9ecd4
+Author: Francisco Igual <figual@pandaboard.(none)>
+Date:   Fri Feb 21 15:14:31 2014 +0100
+
+    Added new armv7a micro-kernels and configuration files from Werner Saar.
+
+commit 0cd098c03a000ed9426a7e9135190696da8cadbc
+Author: Francisco Igual <figual@pandaboard.(none)>
+Date:   Fri Feb 21 15:12:30 2014 +0100
+
+     o Modified Makefile to consider .S assembly microkernels.
+
+commit 6363a9f658257fe3d814a3dce5308f807adb54a2
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Feb 19 17:00:52 2014 -0600
+
+    Added level-3 support for complex via 4m-/3m.
+    
+    Details:
+    - Added the ability to induce complex domain level-3 operations via new
+      virtual complex micro-kernels which are implemented via only real
+      domain micro-kernels. Two new implementations are provided: 4m and 3m.
+      4m implements complex matrix multiplication in terms of four real
+      matrix multiplications, where as 3m uses only three and thus is
+      capable of even higher (than peak) performance. However, the 3m method
+      has somewhat weaker numerical properties, making it less desirable
+      in general.
+    - Further refined packing routines, which were recently revamped, and
+      added packing functionality for 4m and 3m.
+    - Some modifications to trmm and trsm macro-kernels to facilitate indexing
+      into micro-panels which were packed for 4m/3m virtual kernels.
+    - Added 4m and 3m interfaces for each level-3 operation.
+    - Various other minor changes to facilitate 4m/3m methods.
+
+commit b29e1c2b278c177e104c84ba462820ee8296df6c
+Merge: ee60377 bd3c7ec
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Feb 14 14:11:54 2014 -0600
+
+    Merge pull request #2 from tlrmchlsmth/master
+    
+    Fixes and improvements to xeon phi implementation.
+
+commit bd3c7ecfb54a9b9851c7d364f41c21e4cff52f6f
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Fri Feb 14 14:05:57 2014 -0600
+
+    Removing changes to input.general and input.operations
+
+commit ce066863683cb4e910270cf8ab8e138b01ff3358
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Fri Feb 14 13:40:24 2014 -0600
+
+    Fixed more Xeon Phi bugs, especially with scattered update
+
+commit 31134b5c7076423aee1b4f494e925f27171d97e6
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Fri Feb 14 11:19:44 2014 -0600
+
+    Some fixes, changes, and improvements to the microkernel to the Xeon Phi
+
+commit ee60377e467862b9d8a7205c45dce5cf66c78c46
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Feb 13 14:03:31 2014 -0600
+
+    Shifted some fields in info_t.
+    
+    Details:
+    - Shifted the pack order, pack buffer type, and structure type fields
+      to make room for an extra bit in the pack type/status field.
+
+commit bd3ab1ad4cf42f8bc30ab262acf8eccb49bb1a08
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Feb 13 09:29:55 2014 -0600
+
+    Minor fixes to trsm consistent with prev on trmm.
+    
+    Details:
+    - Removed use of bli_min() and bli_max() that were only being used to
+      try to support situations where the diagonal would intersect the
+      short end of some micro-panels, which is situation that is disallowed
+      at a higher level by various constraints on the register and cache
+      blocksize. This only affected trsm_ll and trsm_lu.
+    - Use panel stride as passed into the macro-kernel rather than compute
+      it via k and PACKMR/PACKNR. This affects all macro-kernels of trsm.
+
+commit 6260b0b5f8bd248f3f66e5a1c6854bdbd9d02ad0
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Feb 13 09:19:56 2014 -0600
+
+    Fixed obscure bug in trmm_ll, trmm_lu.
+    
+    Details:
+    - Fixed an obscure bug in left-hand trmm that would only manifest when
+      non-zero register blocksize extensions (PACKMR > MR or PACKNR > NR)
+      are used.
+    - Removed use of bli_min() and bli_max() that were only being used to
+      try to support situations where the diagonal would intersect the
+      short end of some micro-panels, which is situation that is disallowed
+      at a higher level by various constraints on the register and cache
+      blocksize. This only affected trmm_ll and trmm_lu.
+    - Use panel stride as passed into the macro-kernel rather than compute
+      it via k and PACKMR/PACKNR. This affects all macro-kernels of trmm.
+
+commit 16915c1c1e55c660bf82141cdadf7c0860d5b464
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Feb 11 10:54:19 2014 -0600
+
+    Fixed an obscure bug in packm_cxk().
+    
+    Details:
+    - Fixed a bug in packm_cxk() whereby the packm ukernel was being chosen
+      from ldp, which is always equal to PACKMR or PACKNR. The problem with
+      this is that the pack ukernels were implicitly assuming that the
+      panel dimension of the panel being packed was equal to ldp, which
+      is not the case when the register blocksizes extensions are non-zero
+      (ie: when PACKMR > MR or PACKNR > NR, whichever is applicable). This
+      problem has been fixed by passing ldp into the pack ukernels, which
+      now walk through the packed micro-panel region by incrementing by this
+      value, rather than incrementing by the inherent panel dimension value
+      assumed by each packm ukernel (e.g. 4 in the case of packm_ref_4xk).
+    - Also fixed a very minor edge case inefficiency whereby pack ukernels
+      smaller than the default were not being used in edge cases, and instead
+      those situations were being handled by scal2m. This is related to the
+      issue above, because the pack ukernel itself was being chosen based on
+      ldp instead of the panel dimension.
+
+commit b7da57b282c5a5e2208946e60309d2352f55351d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Feb 11 10:28:23 2014 -0600
+
+    Updated calls to packm_blk_var2() in testsuite.
+    
+    Details:
+    - In ukernel testsuite modules, replaced calls to packm_blk_var2() with
+      _var1(). Meant to include this in previous commit.
+
+commit c255a293e25b2223c88e8800267cd06ad2a90041
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Feb 10 14:31:24 2014 -0600
+
+    Consolidated packm_blk_var2 and var3.
+    
+    Details:
+    - Consolidated the functionality previously supported by packm_blk_var2()
+      and packm_blk_var3() into a new variant, packm_blk_var1().
+    - Updates to packm_gen_cxk(), packm_herm_cxk.c(), and packm_tri_cxk()
+      to accommodate above changes.
+    - Removed packm_blk_var3() and retired packm_blk_var2() to
+      frame/1m/packm/old.
+    - Updated all level-3 _cntl_init() functions so that the new, more
+      versatile packm_blk_var1 is used for all level-3 matrix packing.
+
+commit 32d8f264ae7b28155f5d7b21dcc5ecb78da2e0ab
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Feb 9 10:07:37 2014 -0600
+
+    Refactored packm variants.
+    
+    Details:
+    - Revised packm_blk_var2() and _var3() by encapsulating the general,
+      hermitian/symmetric, and triangular panel-packing subproblems into
+      separate functions: packm_gen_cxk(), packm_herm_cxk(), and
+      packm_tri_cxk(), respectively. Also, homogenized the packm code as
+      well as the new specialized packm_*_cxk() code to further improve
+      readability.
+
+commit 6c8067028707947fcdf4f856a272e15bb9ed91e3
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Feb 7 11:27:15 2014 -0600
+
+    Renamed enumerated type in testsuite and modules.
+    
+    Details:
+    - Renamed the test suite's "mt_impl_t" enumerated type to "iface_t", and
+      renamed all corresponding "impl" variables to "iface".
+
+commit 6c12598b1bc567f0b08f58aebdc753a1c1390378
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Feb 6 18:26:35 2014 -0600
+
+    Employ simpler INSERT_ macro for ref ukernels.
+    
+    Details:
+    - Defined a new macro, INSERT_GENTFUNC_BASIC0, which takes only one
+      argument--the base name of the function--and employed this macro
+      in the reference micro-kernel files instead of the _BASIC macro,
+      which takes one auxiliary argument. That argument was not being
+      used and probably just acted to unnecessarily obfuscate.
+
+commit 32cae66326b68706d0e695cfd60c9ca5bc32c534
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Feb 6 18:06:42 2014 -0600
+
+    Fixed some instances of sloppy 'restrict' usage.
+    
+    Details:
+    - Fixed some technical incorrectness with some usage of the 'restrict'
+      keyword in the reference trsm micro-kernels.
+    - Tweak to testsuite/Makefile that causes rebuild if libblis was
+      touched.
+
+commit 7aceef7683e2a2aff3c7ec2a73508036af2e19e2
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Feb 6 17:31:19 2014 -0600
+
+    Updated comments in macro-kernels.
+    
+    Details:
+    - Updated (and fixed some errors in) the "Assumptions/assertions" comment
+      section of macro-kernels.
+    - Changed register blocksizes of reference configuration to MR = 8 and
+      NR = 4. It's always good for MR != NR in the reference configuration
+      since it may help uncover bugs related to non-square micro-kernels.
+
+commit 8fd292aa78950bcdf556605718f09d13f9575abc
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Feb 6 14:32:21 2014 -0600
+
+    Pass panel dimensions into macro-kernels.
+    
+    Details:
+    - Modified the interfaces to the datatype-specific macro-kernels so that:
+      - pd_a and pd_b are passed in (which contain the panel dimensions of
+        packed panels of a and b).
+      - rs_a and cs_b are no longer passed in (they were guaranteed to be 1).
+    - Modified implementations of datatype-specific macro-kernels so pd_a,
+      pd_b, cs_a, and rs_b are used instead of cpp macros for MR, NR, PACKMR,
+      and PACKNR, respectively.
+    - Declare temporary c matrices (ct) as being maxmr-by-maxnr, which for now
+      is equivalent to being mr-by-nr. maxmr and maxnr are declared in a new
+      header file bli_kernel_post_macro_defs.h.
+
+commit 3404e6657eabb017cd1580a2f1dd8e6fb13df923
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Feb 5 11:19:10 2014 -0600
+
+    Deprecated incremental blocksize macro const defs.
+    
+    Details:
+    - Removed macro constant definitions related to incremental blocksizes
+      from all configurations' bli_kernel.h files. This change is minor and
+      is mostly a cleanup related to a previous commit.
+
+commit 1e9afd39a63e0a58167d4439c1a0a880a4a35657
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Feb 4 20:15:19 2014 -0600
+
+    Comment updates (removed vestiges of "bd").
+
+commit 5cf58f7c2d5bc0d2d94d9576f7158d8f133b7aac
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Feb 4 09:15:19 2014 -0600
+
+    Added early returns for "object is zeros" case.
+    
+    Details:
+    - Added some logic to packm_init(), pack_int() and gemm_int() so that
+      (a) objects marked as BLIS_ZEROS are not packed, and (b) those
+      objects are not computed with. This functionality is not currently
+      needed by any existing implementations, but may be used in the
+      future.
+
+commit 6bbd4be769a9b344a55abe5ddaca1a99fd29f7b4
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Feb 3 13:15:25 2014 -0600
+
+    Added 'f' on some gemm and trmm blocked variants.
+    
+    Details:
+    - Added 'f' to some block variant files/functions to be consistent with
+      other file/functions' naming convention. Here, the f indicates
+      partitioning in the "forward" direction.
+
+commit eb13cb2c6b182df5e2a9b88c76f50e2cee25b9e0
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Feb 3 11:07:01 2014 -0600
+
+    Removed redundant non-gemm blksz_t creation.
+    
+    Details:
+    - Removed code that creates duplicate blksz_t objects for herk, trmm,
+      and trsm. Instead, the gemm blksz_t objects are accessed via extern
+      and used directly. This reduces the amount of code associated with
+      each of the three _cntl_init() and _cntl_finalize() function.
+
+commit 0a023a7d9e58e53b8c204a5f49aa8ca9afeba938
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jan 29 14:02:08 2014 -0600
+
+    Introduced new level-3 front-end layer.
+    
+    Details:
+    - Added new _front() functions for each level-3 operation. This is done
+      so that the choosing of the control tree (and *only* the choosing of
+      the control tree) happens in what was previously the "front end"
+      (e.g. bli_gemm()). That control tree is then passed into the _front()
+      function, which then performs up-front tasks such as parameter
+      checking.
+
+commit 251c5d112196d37b183e554bc9d406104aed65fb
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jan 28 19:40:29 2014 -0600
+
+    Removed redundant hemm, her2k control trees.
+    
+    Details:
+    - Removed code that generated a control tree specifically for hemm and
+      symm. Instead, the gemm control tree is now configured so that it
+      works for gemm, hemm, or symm.
+    - Retired most her2k code, as it was not being used. (Currently, her2k is
+      implemented as two invocations of herk.) I couldn't think of many
+      situations where her2k variants were needed.
+    - Removed some older her2k code.
+
+commit 5a36e5bf2f59d1e85d6dbce32a07d604c5e82d11
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jan 27 11:13:00 2014 -0600
+
+    Embed func_t microkernel objects in control trees.
+    
+    Details:
+    - Modified all control tree node definitions to include a new field of
+      type func_t*, which is similar to a blksz_t except that it contains
+      one function pointer (each typed simply as void*) for each datatype.
+      We use the func_t* to embed pointers to the micro-kernels to use for
+      the leaf-level nodes of each control tree. This change is a natural
+      extension of control trees and will allow more flexibility in the
+      future.
+    - Modified all macro-kernel wrappers to obtain the micro-kernel pointers
+      from the incomming (previously ignored) control tree node and then pass
+      the queried pointer into the datatype-specific macro-kernel code, which
+      then casts the pointer to the appropriate type (new typedefs residing
+      in bli_kernel_type_defs.h) and then uses the pointer to call the micro-
+      kernel. Thus, the micro-kernel function is no longer "hard-coded" (that
+      is, determined when the datatype-specific macro-kernel functions are
+      instantiated by the C preprocessor).
+    - Added macros to bli_kernel_macro_defs.h that build datatype-specific
+      base names if they do not exist already, and then uses those to build
+      datatype-specific micro-kernel function names. This will allow
+      developers extra flexibility if they wanted to, for example, name each
+      of their datatype-specific micro-kernels differently (e.g. double
+      real might be named bli_dgemm_opt_4x4() while double complex might be
+      named bli_zgemm_opt_2x2()).
+    - Inserted appropriate code into _cntl_init() functions that allocates
+      and initializes a func_t object for the corresponding micro-kernels.
+      The gemm ukernel func_t object is created once, in bli_gemm_cntl_init(),
+      and then reused via extern wherever possible.
+
+commit 6cbd6f1c7f1915180aa28939833afde48665c5ae
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jan 24 10:38:29 2014 -0600
+
+    Removed commented mixed domain macro-kernel code.
+    
+    Details:
+    - Removed commented-out code from macro-kernels that was supposed to
+      facilitate implementing mixed domain (complex times real) matrix
+      multiplication. This functionality is still (probably possible),
+      but I'm getting tired of looking at the code every time I edit
+      a macro-kernel. Plus, there are probably ways of doing it at a
+      higher level, via control trees.
+
+commit 29778be1119f1a884330d7f8dc424a2df4101d58
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jan 22 16:03:11 2014 -0600
+
+    Removed b_aux field from cntl nodes.
+    
+    Details:
+    - Removed b_aux field from all control tree node definitions. This field
+      was being used in certain optimizations (incremental blocking) that were
+      not actually being employed within BLIS, and are probably not employed
+      by others.
+    - Updated all _cntl_obj_create() function definitions and invocations
+      according to above change.
+    - Retired bli_gemm_blk_var4.c, which was one such function that employed
+      incremental blocking, but which was never called by BLIS itself.
+
+commit 06ac727a42ec9e832c7832745036702014638f99
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jan 15 16:44:52 2014 -0600
+
+    Updated some comments in level-3 front ends.
+
+commit d628bf1da1560f1f5126a1ddfed8714f0a4b8da3
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jan 15 11:40:12 2014 -0600
+
+    Consolidated pack_t enums; retired VECTOR value.
+    
+    Details:
+    - Changed the pack_t enumerations so that BLIS_PACKED_VECTOR no longer has
+      its own value, and instead simply aliases to BLIS_PACKED_UNSPEC. This
+      makes room in the three pack_t bits of the info field of obj_t so that
+      two values are now unused, and may be used for other future purposes.
+    - Updated sloppy terminology usage in comments in level-2 front-ends.
+      (Replaced "is contiguous" with more accurate "has unit stride".)
+
+commit ddc8c1c379b4787be5954802906593d7ea144452
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jan 13 14:55:43 2014 -0600
+
+    Suppress warning in Makefile (UNINSTALL_LIBS).
+    
+    Details:
+    - Redirect errors to /dev/null when using 'find' to locate libraries that
+      would be uninstalled upon executing "make uninstall-old". Before, if the
+      Makefile was read before $(INSTALL_PREFIX)/lib existed, a "No such file
+      or directory" message was emitted. This message was harmless, but is now
+      suppressed in this situation.
+
+commit f8f67d7251bffc05020e20527c100c8115fd5e55
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jan 10 09:06:11 2014 -0600
+
+    Typecast bli_getopt() return value in testsuite.
+    
+    Details:
+    - In the test suite driver, inserted an explicit typecast of the return
+      value of bli_getopt() prior parsing. The lack of typecast caused a
+      problem on at least one system whereby a return value of -1 was
+      interpreted as garbage character. Thanks to Francisco Igual for finding
+      and submitting this fix.
+
+commit e7f154fe2ed3e10e2323cefe5d25c2c23ac902c4
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jan 10 08:48:07 2014 -0600
+
+    Applied edge case fix to arm/neon microkernel.
+    
+    Details:
+    - Applied an edge case bugfix, courtesy of Francisco Igual, to the current
+      double precision real gemm microkernel in kernels/arm/neon/3.
+
+commit 89c76a8a51d070d263c13bfa5ace65769509f2b4
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jan 9 12:08:37 2014 -0600
+
+    Allow building outside source distribution.
+    
+    Details:
+    - Modified build system (mostly configure and top-level Makefile) so that
+      a user can build a BLIS library outside of the top-level directory of
+      the source distribution.
+    - Added "test" target to Makefile so that the user can run "make test",
+      which will compile, link, and run the testsuite binary. This works even
+      if the build directory is externally located, thanks to the test suite
+      binary's new -g and -o command-line options. Also, when creating the
+      test suite via the top-level Makefile, the linking is against the
+      local archive, in lib/<configname>, rather than at <install_prefix>/lib.
+    - Modified testsuite/Makefile so that it links against the library built
+      locally, in ../lib/<configname>.
+    - Added "-lm" to LDFLAGS of most configurations' make_defs.mk.
+    - Various other cleanups to build system.
+
+commit 12fa82ec12cc340ab28552997d9d50f7c98691f8
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jan 8 16:09:26 2014 -0600
+
+    Implemented bli_getopt().
+    
+    Details:
+    - Added bli_getopt.c and .h files to frame/base. These files implement
+      a custom version of getopt(), which may be used to parse command line
+      options passed into a program via argc/argv. I am implementing this
+      function myself, as opposed to using the version available via unistd.h,
+      for portability reasons, as the only requirements are string.h (which
+      is available via the standard C library).
+    - Modified test suite to allow the user to specify the file name (and/or
+      path) to the parameters and operations input files: -g may be used to
+      specify the general input file and -o to specify the operations input
+      file). If -g or -o or both are not given, default filenames are assumed
+      (as well as their existence in the current directory).
+
+commit cafb58e86ea5cfb21b9eedc57ca8ebbf24252098
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jan 6 13:28:36 2014 -0600
+
+    Updated template micro-kernels to use auxinfo_t.
+    
+    Details:
+    - Updated template micro-kernel implementations (located in
+      config/template/kernels), to adhere to the new auxinfo_t interface.
+      Meant to include this change in a0331fb1.
+    - Changed template configuration to use 64-bit integers (for both BLIS
+      and the BLAS compatibility layer).
+
+commit 9ab126b499c3805045020cb89a8a5848e28d3bf5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jan 6 12:13:26 2014 -0600
+
+    Removed error checks in netlib->BLIS param mapping
+    
+    Details:
+    - Disabled error checking in netlib-to-BLIS parameter mapping functions.
+      If the char value input to these functions was not one of the defined
+      values, bli_check_error_code() with the appropriate error code value
+      would be called, resulting in an abort(). This was unnecessary and
+      redundant since these routines are currently only used within the
+      BLAS compatibility layer, and they are only called AFTER parameter
+      checking has already been performed on the original BLAS char values.
+      If the application tried to override xerbla() to prevent an abort()
+      from being called, this error checking would still get in the way.
+      Thus, instead of reporting the error situation to the framework (ie:
+      calling abort()), an arbitrary BLIS parameter value is now chosen and
+      the function returns normally. Thanks to Jeff Hammond for finding and
+      reporting this issue.
+
+commit 2cb13600f9f9601c60e7f96f4ca159d169ade9cb
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jan 3 12:29:13 2014 -0600
+
+    Updated year in copyright headers to 2014.
+
+commit 290fa54e0083c9c837188b8321b13b1b282e7b0c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Dec 20 14:10:26 2013 -0600
+
+    Store variable panel strides in trmm/trsm auxinfo.
+    
+    Details:
+    - Changed the value being stored into the auxinfo_t structure in trmm
+      and trsm macro-kernels. Whereas before we stored whatever value was
+      provided to the macro-kernel implementation via ps_a/ps_b, now we
+      store the stride that will advance to the next variable-length
+      micro-panel of the triangular matrix A (left) or B (right).
+    - Whitespace changes to the files affected above.
+
+commit e3a6c7e77667fd749248df3f75f880266c3136ec
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Dec 19 16:29:31 2013 -0600
+
+    Macroized conditionals for a2/b2 in macro-kernels.
+    
+    Details:
+    - Replaced conditional expressions in macro-kernels related to computing
+      the addresses a2 and b2 (a_next and b_next) with a preprocessor macro
+      invocation, bli_is_last_iter(), that tests the same condition.
+    - Updated gemm_ukr module to use auxinfo_t argument.
+    - Whitespace changes in test suite ukr modules.
+
+commit a0331fb10a50393e31d16339053b75b944132da1
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Dec 19 14:50:11 2013 -0600
+
+    Introduced auxinfo_t argument to micro-kernels.
+    
+    Details:
+    - Removed a_next and b_next arguments to micro-kernels and replaced them
+      with a pointer to a new datatype, auxinfo_t, which is simply a struct
+      that holds a_next and b_next. The struct may hold other auxiliary
+      information that may be useful to a micro-kernel, such as micro-panel
+      stride. Micro-kernels may access struct fields via accessor macros
+      defined in bli_auxinfo_macro_defs.h.
+    - Updated all instances of micro-kernel definitions, micro-kernel calls,
+      as well as macro-kernels (for declaring and initializing the structs)
+      according to above change.
+
+commit 392428dea4001fe4384efe29f6cde32f8abeeb35
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Dec 12 19:01:47 2013 -0600
+
+    Added "ri" scalar macros.
+    
+    Details:
+    - Added set of basic scalar macros that take arguments' real and
+      imaginary components separately, named like the previous set except
+      with the "ris" (instead of "s") suffix.
+    - Redefined the previous set of scalar macros (those that take arguments
+      "whole") in terms of the new "ri" set.
+    - Renamed setris and getris macros to sets and gets.
+    - Renamed setimag0 macros to seti0s.
+    - Use bli_?1 macro instead of a local constant in bla_trmv.c, bla_trsv.c.
+
+commit f60c8adc2f61eaba06b892f4e73000159de93056
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Dec 10 14:39:56 2013 -0600
+
+    Minor updates to dunnington configuration.
+    
+    Details:
+    - Added commented alternatives to dunnington configuration's bli_kernel.h.
+    - Minor reformatting of optimization flag variables in make_defs.mk.
+
+commit 4ef20150492db254b5baf2368add62e19b0ac11b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Dec 9 18:53:03 2013 -0600
+
+    Tweaks to dunnington configuration (x86_64/core2).
+    
+    Details:
+    - Updated BLIS_DEFAULT_KC_D from 256 to 384.
+    - Enabled cache blocksize extension of up to 25% for MC and KC (for
+      double-precision real).
+
+commit 5ad2ce7bf5ba3ea955e6d517bfd270e02820263b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Dec 9 18:30:49 2013 -0600
+
+    Minor x86_64 (core2) kernel fixes.
+    
+    Details:
+    - Fixed copy-and-paste bug whereby [scz]gemmtrsm_u_opt_d4x4 kernels
+      for x86_64/core2 were calling the wrong reference code (l instead
+      of u).
+    - Fixed some unused variables in x86_64/core2 dotaxpyv and dotxaxpyf
+      kernels.
+    - Minor typecasting fix in testsuite/src/test_libblis.c.
+    - Makefile updates.
+
+commit d289f5d3a9c0e1a68a17c1c32b736e282a289c4c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Dec 5 10:56:13 2013 -0600
+
+    Whitespace changes to level-2 blocked variants.
+    
+    Details:
+    - Joined some lines in level-2 blocked variants to match formatting used
+      in level-3 blocked variants.
+    - Streamlined implementation of bli_obj_equals() in bli_query.c.
+
+commit b444489f100d218bc8ef29b01ff8489c358559f9
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Dec 3 16:08:30 2013 -0600
+
+    Added new "attached" scalar representation.
+    
+    Details:
+    - Added infrastructure to support a new scalar representation, whereby
+      every object contains an internal scalar that defaults to 1.0. This
+      facilitates passing scalars around without having to house them in
+      separate objects. These "attached" scalars are stored in the internal
+      atom_t field of the obj_t struct, and are always stored to be the same
+      datatype as the object to which they are attached. Level-3 variants no
+      longer take scalar arguments, however, level-3 internal back-ends stll
+      do; this is so that the calling function can perform subproblems such
+      as C := C - alpha * A * B on-the-fly without needing to change either
+      of the scalars attached to A or B.
+    - Removed scalar argument from packm_int().
+    - Observe and apply attached scalars in scalm_int(), and removed scalar
+      from interface of scalm_unb_var1().
+    - Renamed the following functions (and corresponding invocations):
+    
+       bli_obj_init_scalar_copy_of()
+                               -> bli_obj_scalar_init_detached_copy_of()
+       bli_obj_init_scalar()   -> bli_obj_scalar_init_detached()
+       bli_obj_create_scalar_with_attached_buffer()
+                               -> bli_obj_create_1x1_with_attached_buffer()
+       bli_obj_scalar_equals() -> bli_obj_equals()
+    
+    - Defined new functions:
+    
+       bli_obj_scalar_detach()
+       bli_obj_scalar_attach()
+       bli_obj_scalar_apply_scalar()
+       bli_obj_scalar_reset()
+       bli_obj_scalar_has_nonzero_imag()
+       bli_obj_scalar_equals()
+    
+    - Placed all bli_obj_scalar_* functions in a new file, bli_obj_scalar.c.
+    - Renamed the following macros:
+    
+       bli_obj_scalar_buffer() -> bli_obj_buffer_for_1x1()
+       bli_obj_is_scalar()     -> bli_obj_is_1x1()
+    
+    - Defined new macros to set and copy internal scalars between objects:
+    
+       bli_obj_set_internal_scalar()
+       bli_obj_copy_internal_scalar()
+    
+    - In level-3 internal back-ends, added conditional blocks where alpha and
+      beta are checked for non-unit-ness. Those values for alpha and beta are
+      applied to the scalars attached to aliases of A/B/C, as appropriate,
+      before being passed into the variant specified by the control tree.
+    - In level-3 blocked variants, pass BLIS_ONE into subproblems instead of
+      alpha and/or beta.
+    - In level-3 macro-kernels, changed how scalars are obtained. Now, scalars
+      attached to A and B are multiplied together to obtain alpha, while beta
+      is obtained directly from C.
+    - In level-3 front-ends, removed old function calls meant to provide
+      future support for mixed domain/precision. These can be added back later
+      once that functionality is given proper treatment. Also, removed the
+      creating of copy-casts of alpha and beta since typecasting of scalars
+      is now implicitly handled in the internal back-ends when alpha and
+      beta are applied to the attached scalars.
+
+commit 992de486d6f23e69a623abd15ae77d7881d13871
+Merge: 9552e6e fd4ac63
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Dec 2 13:58:46 2013 -0600
+
+    Unimplemented kernels now call reference.
+    
+    Details:
+    - Updated arm, bgq, loongson3a, and x86_64 kernels so that unimplemented
+      datatypes call the corresponding reference kernel. Previously, these
+      kernel functions called abort() with a "not yet implemented" error
+      message.
+
+commit fd4ac636d9a55cec1476a444bd4e70def219dc8f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Dec 2 13:50:36 2013 -0600
+
+    Unimplemented kernels now call reference.
+    
+    Details:
+    - Updated micro-kernels for arm, bgq, loongson3a, and x86_64 so that
+      unimplemented kernel functions simply call the corresponding reference
+      implementation. (Previously, these unimplemented functions would
+      abort() with a "not yet implemented" message.)
+
+commit 9552e6ee824d4345d5e908e869e071d19829819a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Nov 24 11:40:31 2013 -0600
+
+    Removed optional scaling from packm control tree.
+    
+    Details:
+    - Removed does_scale field from packm control tree node and
+      bli_packm_cntl_obj_create() interface. Adjusted all invocations of
+      _cntl_obj_create() accordingly.
+    - Redefined/renamted macros that are used in aliasing so that now,
+      bli_obj_alias_to() does a full alias (shallow copy) while
+      bli_obj_alias_for_packing() does a partial alias that preserves the
+      pack_mem-related fields of the aliasing (destination) object.
+    - Removed bli_trmm3_cntl.c, .h after realizing that the trmm control tree
+      will work just fine for bli_trmm3().
+    - Removed some commented vestiges of the typecasting functionality needed
+      to support heterogeneous datatypes.
+
+commit e65c476284db9ef64b23191a21c2584b1083342f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Nov 19 10:05:35 2013 -0600
+
+    Minor updates to packm_blk_var2.c and _blk_var3.c.
+    
+    Details:
+    - Comment updates to packm_blk_var2.c and packm_blk_var3.c.
+    - In packm_blk_var2(), call setm_unb_var1(), scal2m_unb_var1() directly
+      instead of setm(), scal2m().
+
+commit 9e1d0d4bca48eda54301d8976f203e2544c9df3a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Nov 18 18:11:07 2013 -0600
+
+    Added trsm_l, trsm_u ukernels for x86_64/core2.
+    
+    Details:
+    - Added standalone trsm_l/trsm_u micro-kernels for x86_64 (core2).
+      These kernels are based on the gemmtrsm_l/gemmtrsm_u micro-kernels
+      that already existed in kernels/x86_64/core2-sse3/3.
+
+commit 85e7e02ea3a9190b6fcff5d46b00d41c79cb1242
+Merge: 67761e2 7072005
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Nov 18 12:02:00 2013 -0600
+
+    Merge branch 'master'. Forgot to git-pull.
+
+commit 67761e224c92500eecf9c1540cc72bdd2fb27679
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Nov 18 11:57:40 2013 -0600
+
+    Attempting to fix errors in bgq build.
+    
+    Details:
+    - Removed restrict declaration from b_cast and c_cast from
+      bli_trsm_lu_ker_var2.c and bli_trsm_rl_ker_var2.c. Curiously, they
+      are causing problems for xlc only in those two files and no other
+      macro-kernels.
+    - Fixed (hopefully) kernel function parameter type declarations in
+      kernels/bgq/1f/bli_axpyf_opt_var1.c and kernels/bgq/3/bli_gemm_8x8.c.
+
+commit 707200541d344f98cf34c9801954dbb36fbe0447
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Nov 18 11:17:31 2013 -0600
+
+    Syntax error fix in x86_64/core2 gemmtrsm_u ukr.
+
+commit bbe2b84a49e7785d4d0c514cda34adfbe66478b0
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Nov 18 11:11:06 2013 -0600
+
+    Updated Makefile in test, testsuite.
+    
+    Details:
+    - Updated Makefiles in test and testsuite directories to use the new
+      BLIS header installation directory scheme, which is to compile with
+      -I<PREFIX>/include/blis instead of -I<PREFIX>/include.
+
+commit 9bd7fcfd436625ca2108128086671319362f4d92
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Nov 18 10:58:09 2013 -0600
+
+    Outer-to-inner 'restrict' fix in macro-kernels.
+    
+    Details:
+    - Fixed sloppy placement of 'restrict' pointer declarations in level-3
+      macro-kernels. Previously, all restricted pointers were being declared
+      at the outer-most function scope level. While this violates the C99
+      standard, very few of the compilers used with BLIS so far have seemed
+      to care. The lone exception has been IBM's xlc. Thanks to Tyler Smith
+      for identifying this bug (and suggesting the fix).
+
+commit 50549a6a31dd26cf63a013e0ede16b2c7ce835b6
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Nov 17 18:31:27 2013 -0600
+
+    Changed header install directory to include/blis.
+    
+    Details:
+    - Changed top-level Makefile so that headers are installed to
+      $(INSTALL_PREFIX)/include/blis/. (Header directories are no longer
+      named by version/configuration and then symlinked.)
+    - Added uninstall targets, including uninstall-old to clean out old
+      library archives.
+    - Added GREP makefile definitions to all configurations' make_defs.mk.
+
+commit d70733abddfb9a95661897e1e4f3c1f3cfa7cbaa
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Nov 16 17:34:25 2013 -0600
+
+    Added ARM kernels, configurations.
+    
+    Details:
+    - Added kernels for ARM, and configurations for Cortex-A9 and Cortex-A15.
+      Thanks to Francisco Igual for contributing these kernels and
+      configurations.
+
+commit d37c2cff62089c86983c2f79762f4b5329037373
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Nov 13 10:47:11 2013 -0600
+
+    Minor comment and Makefile changes.
+    
+    Details:
+    - Added missing 'check-config' and 'check-make-defs' targets to
+      testsuite/Makefile.
+    - Removed unused 'test' target from top-level Makefile.
+    - Comment changes to testsuite input files.
+
+commit 19885f893a17b91ee79bead0620d0f913392d4c5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Nov 11 12:09:21 2013 -0600
+
+    Updated some kernel comment headers.
+    
+    Details:
+    - Updated bgq and piledriver comment headers to use BLIS copyright header
+      instead of libflame.
+
+commit 1a4d698f42981d74fe5f29b980031e1ee7dc42d5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Nov 11 10:15:40 2013 -0600
+
+    CHANGELOG update (for 0.1.0).
+
+commit 089048d5895a30221b6b1976c9be93ad6443420d (tag: 0.1.0)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Sat Nov 9 17:18:00 2013 -0600
 
