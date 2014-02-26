@@ -210,19 +210,12 @@
 //
 // Compute memory pool block sizes for single real.
 //
+
 #define BLIS_MK_BLOCK_SIZE_S ( BLIS_POOL_MC_S * \
-                               ( BLIS_POOL_KC_S + \
-                                 ( BLIS_CONTIG_STRIDE_ALIGN_SIZE / \
-                                   BLIS_SIZEOF_S \
-                                 ) \
-                               ) * \
+                               BLIS_POOL_KC_S * \
                                BLIS_SIZEOF_S \
                              )
-#define BLIS_KN_BLOCK_SIZE_S ( ( BLIS_POOL_KC_S + \
-                                 ( BLIS_CONTIG_STRIDE_ALIGN_SIZE / \
-                                   BLIS_SIZEOF_S \
-                                 ) \
-                               ) * \
+#define BLIS_KN_BLOCK_SIZE_S ( BLIS_POOL_KC_S * \
                                BLIS_POOL_NC_S * \
                                BLIS_SIZEOF_S \
                              )
@@ -234,19 +227,12 @@
 //
 // Compute memory pool block sizes for double real.
 //
+
 #define BLIS_MK_BLOCK_SIZE_D ( BLIS_POOL_MC_D * \
-                               ( BLIS_POOL_KC_D + \
-                                 ( BLIS_CONTIG_STRIDE_ALIGN_SIZE / \
-                                   BLIS_SIZEOF_D \
-                                 ) \
-                               ) * \
+                               BLIS_POOL_KC_D * \
                                BLIS_SIZEOF_D \
                              )
-#define BLIS_KN_BLOCK_SIZE_D ( ( BLIS_POOL_KC_D + \
-                                 ( BLIS_CONTIG_STRIDE_ALIGN_SIZE / \
-                                   BLIS_SIZEOF_D \
-                                 ) \
-                               ) * \
+#define BLIS_KN_BLOCK_SIZE_D ( BLIS_POOL_KC_D * \
                                BLIS_POOL_NC_D * \
                                BLIS_SIZEOF_D \
                              )
@@ -258,19 +244,12 @@
 //
 // Compute memory pool block sizes for single complex.
 //
+
 #define BLIS_MK_BLOCK_SIZE_C ( BLIS_POOL_MC_C * \
-                               ( BLIS_POOL_KC_C + \
-                                 ( BLIS_CONTIG_STRIDE_ALIGN_SIZE / \
-                                   BLIS_SIZEOF_C \
-                                 ) \
-                               ) * \
+                               BLIS_POOL_KC_C * \
                                BLIS_SIZEOF_C \
                              )
-#define BLIS_KN_BLOCK_SIZE_C ( ( BLIS_POOL_KC_C + \
-                                 ( BLIS_CONTIG_STRIDE_ALIGN_SIZE / \
-                                   BLIS_SIZEOF_C \
-                                 ) \
-                               ) * \
+#define BLIS_KN_BLOCK_SIZE_C ( BLIS_POOL_KC_C * \
                                BLIS_POOL_NC_C * \
                                BLIS_SIZEOF_C \
                              )
@@ -282,19 +261,12 @@
 //
 // Compute memory pool block sizes for double complex.
 //
+
 #define BLIS_MK_BLOCK_SIZE_Z ( BLIS_POOL_MC_Z * \
-                               ( BLIS_POOL_KC_Z + \
-                                 ( BLIS_CONTIG_STRIDE_ALIGN_SIZE / \
-                                   BLIS_SIZEOF_Z \
-                                 ) \
-                               ) * \
+                               BLIS_POOL_KC_Z * \
                                BLIS_SIZEOF_Z \
                              )
-#define BLIS_KN_BLOCK_SIZE_Z ( ( BLIS_POOL_KC_Z + \
-                                 ( BLIS_CONTIG_STRIDE_ALIGN_SIZE / \
-                                   BLIS_SIZEOF_Z \
-                                 ) \
-                               ) * \
+#define BLIS_KN_BLOCK_SIZE_Z ( BLIS_POOL_KC_Z * \
                                BLIS_POOL_NC_Z * \
                                BLIS_SIZEOF_Z \
                              )
@@ -306,9 +278,6 @@
 //
 // Compute memory pool block sizes for single complex (4m).
 //
-
-// NOTE: We don't align by BLIS_CONTIG_STRIDE_ALIGN_SIZE here because that
-// of alignment is not supported by 4m.
 
 #define BLIS_MK_BLOCK_SIZE_4M_C ( BLIS_POOL_4M_MC_C * \
                                   BLIS_POOL_4M_KC_C * \
@@ -327,9 +296,6 @@
 // Compute memory pool block sizes for double complex (4m).
 //
 
-// NOTE: We don't align by BLIS_CONTIG_STRIDE_ALIGN_SIZE here because that
-// of alignment is not supported by 4m.
-
 #define BLIS_MK_BLOCK_SIZE_4M_Z ( BLIS_POOL_4M_MC_Z * \
                                   BLIS_POOL_4M_KC_Z * \
                                   BLIS_SIZEOF_Z \
@@ -347,8 +313,7 @@
 // Compute memory pool block sizes for single complex (3m).
 //
 
-// NOTE: We don't align by BLIS_CONTIG_STRIDE_ALIGN_SIZE here because that
-// of alignment is not supported by 3m.
+// NOTE: We scale by 3/2 because 3m requires 50% more space than 4m.
 
 #define BLIS_MK_BLOCK_SIZE_3M_C ( BLIS_POOL_3M_MC_C * \
                                   BLIS_POOL_3M_KC_C * \
@@ -373,8 +338,7 @@
 // Compute memory pool block sizes for double complex (3m).
 //
 
-// NOTE: We don't align by BLIS_CONTIG_STRIDE_ALIGN_SIZE here because that
-// of alignment is not supported by 3m.
+// NOTE: We scale by 3/2 because 3m requires 50% more space than 4m.
 
 #define BLIS_MK_BLOCK_SIZE_3M_Z ( BLIS_POOL_3M_MC_Z * \
                                   BLIS_POOL_3M_KC_Z * \

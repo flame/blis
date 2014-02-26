@@ -336,12 +336,6 @@ void bli_packm_init_pack( bool_t    densify,
 		if ( pack_schema == BLIS_PACKED_ROW_PANELS_3M )
 			ps_p = ( ps_p * 3 ) / 2;
 
-		// Align the panel dimension according to the contiguous memory
-		// stride alignment size so that the second, third, etc panels begin
-		// at aligned addresses.
-		//ps_p = bli_align_dim_to_size( ps_p, elem_size_p,
-		//                              BLIS_CONTIG_STRIDE_ALIGN_SIZE );
-
 		// Store the strides and panel dimension in p.
 		bli_obj_set_incs( rs_p, cs_p, *p );
 		bli_obj_set_panel_dim( m_panel, *p );
@@ -382,12 +376,6 @@ void bli_packm_init_pack( bool_t    densify,
 
 		if ( pack_schema == BLIS_PACKED_COL_PANELS_3M )
 			ps_p = ( ps_p * 3 ) / 2;
-
-		// Align the panel dimension according to the contiguous memory
-		// stride alignment size so that the second, third, etc panels begin
-		// at aligned addresses.
-		//ps_p = bli_align_dim_to_size( ps_p, elem_size_p,
-		//                              BLIS_CONTIG_STRIDE_ALIGN_SIZE );
 
 		// Store the strides and panel dimension in p.
 		bli_obj_set_incs( rs_p, cs_p, *p );

@@ -118,10 +118,6 @@
 // from the contiguous memory allocator.
 #define BLIS_CONTIG_ADDR_ALIGN_SIZE      BLIS_PAGE_SIZE
 
-// Alignment size used when sizing strides (eg: of packed micro-panels)
-// within a block of contiguous memory.
-#define BLIS_CONTIG_STRIDE_ALIGN_SIZE    BLIS_SIMD_ALIGN_SIZE
-
 
 
 // -- MIXED DATATYPE SUPPORT ---------------------------------------------------

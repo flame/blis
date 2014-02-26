@@ -568,7 +568,6 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "  # of kc x nc blocks        %u\n", BLIS_NUM_KC_X_NC_BLOCKS );
 	libblis_test_fprintf_c( os, "  # of mc x nc blocks        %u\n", BLIS_NUM_MC_X_NC_BLOCKS );
 	libblis_test_fprintf_c( os, "  block address alignment    %u\n", BLIS_CONTIG_ADDR_ALIGN_SIZE );
-	libblis_test_fprintf_c( os, "  panel stride alignment     %u\n", BLIS_CONTIG_STRIDE_ALIGN_SIZE );
 	libblis_test_fprintf_c( os, "  max preload byte offset    %u\n", BLIS_MAX_PRELOAD_BYTE_OFFSET );
 	libblis_test_fprintf_c( os, "  actual pool sizes (bytes)    \n" );
 	libblis_test_fprintf_c( os, "    for mc x kc blocks of A  %u\n", BLIS_MK_POOL_SIZE );
