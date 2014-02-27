@@ -76,7 +76,7 @@ void bli_fprintm( FILE* file, char* s1, obj_t* x, char* format, char* s2 )
 		fprintf( file, " double:    %9.2e\n",         bli_dreal( *dp ) );
 		fprintf( file, " scomplex:  %9.2e + %9.2e\n", bli_creal( *cp ), bli_cimag( *cp ) );
 		fprintf( file, " dcomplex:  %9.2e + %9.2e\n", bli_zreal( *zp ), bli_zimag( *zp ) );
-		fprintf( file, " int:       %d\n",            *ip );
+		fprintf( file, " int:       %ld\n",           *ip );
 		fprintf( file, "\n" );
 		return;
 	}
