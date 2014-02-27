@@ -878,6 +878,19 @@ bli_obj_width_stored( obj )
 	  bli_obj_pack_status( obj ) == BLIS_PACKED_COL_PANELS )
 
 
+// Check if an object is packed for 4m/3m
+
+#define bli_obj_is_panel_packed_4m( obj ) \
+\
+	( bli_obj_pack_status( obj ) == BLIS_PACKED_ROW_PANELS_4M || \
+	  bli_obj_pack_status( obj ) == BLIS_PACKED_COL_PANELS_4M )
+
+#define bli_obj_is_panel_packed_3m( obj ) \
+\
+	( bli_obj_pack_status( obj ) == BLIS_PACKED_ROW_PANELS_3M || \
+	  bli_obj_pack_status( obj ) == BLIS_PACKED_COL_PANELS_3M )
+
+
 // Release object's pack (and cast) memory entries back to memory manager
 
 #define bli_obj_release_pack( obj_p ) \

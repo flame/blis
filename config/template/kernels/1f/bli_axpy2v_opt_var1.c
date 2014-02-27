@@ -36,88 +36,88 @@
 
 
 
-void bli_sssaxpy2v_opt_var1(
-                             conj_t             conjx,
-                             conj_t             conjy,
-                             dim_t              n,
-                             float*    restrict alpha1,
-                             float*    restrict alpha2,
-                             float*    restrict x, inc_t incx,
-                             float*    restrict y, inc_t incy,
-                             float*    restrict z, inc_t incz
-                           )
+void bli_saxpy2v_opt_var1(
+                           conj_t             conjx,
+                           conj_t             conjy,
+                           dim_t              n,
+                           float*    restrict alpha1,
+                           float*    restrict alpha2,
+                           float*    restrict x, inc_t incx,
+                           float*    restrict y, inc_t incy,
+                           float*    restrict z, inc_t incz
+                         )
 {
 	/* Just call the reference implementation. */
-	bli_sssaxpy2v_unb_var1( conjx,
-	                        conjy,
-	                        n,
-	                        alpha1,
-	                        alpha2,
-	                        x, incx,
-	                        y, incy,
-	                        z, incz );
+	BLIS_SAXPY2V_KERNEL_REF( conjx,
+	                         conjy,
+	                         n,
+	                         alpha1,
+	                         alpha2,
+	                         x, incx,
+	                         y, incy,
+	                         z, incz );
 }
 
 
 
-void bli_dddaxpy2v_opt_var1(
-                             conj_t             conjx,
-                             conj_t             conjy,
-                             dim_t              n,
-                             double*   restrict alpha1,
-                             double*   restrict alpha2,
-                             double*   restrict x, inc_t incx,
-                             double*   restrict y, inc_t incy,
-                             double*   restrict z, inc_t incz
-                           )
+void bli_daxpy2v_opt_var1(
+                           conj_t             conjx,
+                           conj_t             conjy,
+                           dim_t              n,
+                           double*   restrict alpha1,
+                           double*   restrict alpha2,
+                           double*   restrict x, inc_t incx,
+                           double*   restrict y, inc_t incy,
+                           double*   restrict z, inc_t incz
+                         )
 {
 	/* Just call the reference implementation. */
-	bli_dddaxpy2v_unb_var1( conjx,
-	                        conjy,
-	                        n,
-	                        alpha1,
-	                        alpha2,
-	                        x, incx,
-	                        y, incy,
-	                        z, incz );
+	BLIS_DAXPY2V_KERNEL_REF( conjx,
+	                         conjy,
+	                         n,
+	                         alpha1,
+	                         alpha2,
+	                         x, incx,
+	                         y, incy,
+	                         z, incz );
 }
 
 
 
-void bli_cccaxpy2v_opt_var1(
-                             conj_t             conjx,
-                             conj_t             conjy,
-                             dim_t              n,
-                             scomplex* restrict alpha1,
-                             scomplex* restrict alpha2,
-                             scomplex* restrict x, inc_t incx,
-                             scomplex* restrict y, inc_t incy,
-                             scomplex* restrict z, inc_t incz
-                           )
+void bli_caxpy2v_opt_var1(
+                           conj_t             conjx,
+                           conj_t             conjy,
+                           dim_t              n,
+                           scomplex* restrict alpha1,
+                           scomplex* restrict alpha2,
+                           scomplex* restrict x, inc_t incx,
+                           scomplex* restrict y, inc_t incy,
+                           scomplex* restrict z, inc_t incz
+                         )
 {
 	/* Just call the reference implementation. */
-	bli_cccaxpy2v_unb_var1( conjx,
-	                        conjy,
-	                        n,
-	                        alpha1,
-	                        alpha2,
-	                        x, incx,
-	                        y, incy,
-	                        z, incz );
+	BLIS_CAXPY2V_KERNEL_REF( conjx,
+	                         conjy,
+	                         n,
+	                         alpha1,
+	                         alpha2,
+	                         x, incx,
+	                         y, incy,
+	                         z, incz );
 }
 
 
 
-void bli_zzzaxpy2v_opt_var1(
-                             conj_t             conjx,
-                             conj_t             conjy,
-                             dim_t              n,
-                             dcomplex* restrict alpha1,
-                             dcomplex* restrict alpha2,
-                             dcomplex* restrict x, inc_t incx,
-                             dcomplex* restrict y, inc_t incy,
-                             dcomplex* restrict z, inc_t incz
-                           )
+void bli_zaxpy2v_opt_var1(
+                           conj_t             conjx,
+                           conj_t             conjy,
+                           dim_t              n,
+                           dcomplex* restrict alpha1,
+                           dcomplex* restrict alpha2,
+                           dcomplex* restrict x, inc_t incx,
+                           dcomplex* restrict y, inc_t incy,
+                           dcomplex* restrict z, inc_t incz
+                         )
 {
 /*
   Template axpy2v kernel implementation
@@ -229,14 +229,14 @@ void bli_zzzaxpy2v_opt_var1(
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE )
 	{
-		bli_zzzaxpy2v_unb_var1( conjx,
-		                        conjy,
-		                        n,
-		                        alpha1,
-		                        alpha2,
-		                        x, incx,
-		                        y, incy,
-		                        z, incz );
+		BLIS_ZAXPY2V_KERNEL_REF( conjx,
+		                         conjy,
+		                         n,
+		                         alpha1,
+		                         alpha2,
+		                         x, incx,
+		                         y, incy,
+		                         z, incz );
         return;
 	}
 
@@ -395,42 +395,4 @@ void bli_zzzaxpy2v_opt_var1(
 		}
 	}
 }
-
-
-
-//
-// Define BLAS-like interfaces with heterogeneous-typed operands.
-//
-#undef  GENTFUNC3U12
-#define GENTFUNC3U12( ctype_x, ctype_y, ctype_z, ctype_xy, chx, chy, chz, chxy, varname, kername ) \
-\
-void PASTEMAC3(chx,chy,chz,varname)( \
-                                     conj_t             conjx, \
-                                     conj_t             conjy, \
-                                     dim_t              n, \
-                                     ctype_xy* restrict alpha1, \
-                                     ctype_xy* restrict alpha2, \
-                                     ctype_x*  restrict x, inc_t incx, \
-                                     ctype_y*  restrict y, inc_t incy, \
-                                     ctype_z*  restrict z, inc_t incz \
-                                   ) \
-{ \
-	/* Just call the reference implementation. */ \
-	PASTEMAC3(chx,chy,chz,kername)( conjx, \
-	                                conjy, \
-	                                n, \
-	                                alpha1, \
-	                                alpha2, \
-	                                x, incx, \
-	                                y, incy, \
-	                                z, incz ); \
-}
-
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTFUNC3U12_MIX_D( axpy2v_opt_var1, axpy2v_unb_var1 )
-#endif
-
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTFUNC3U12_MIX_P( axpy2v_opt_var1, axpy2v_unb_var1 )
-#endif
 

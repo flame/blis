@@ -59,7 +59,7 @@ void PASTEMAC0(opname)( \
                         rho ); \
 }
 
-GENFRONT( dotxv, DOTXV_KERNEL )
+GENFRONT( dotxv, dotxv_kernel )
 
 
 //

@@ -55,7 +55,7 @@ void PASTEMAC0(opname)( \
                         rho ); \
 }
 
-GENFRONT( dotv, DOTV_KERNEL )
+GENFRONT( dotv, dotv_kernel )
 
 
 //

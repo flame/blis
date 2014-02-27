@@ -33,7 +33,8 @@
 */
 
 #include "bli_axpyv_check.h"
-#include "bli_axpyv_unb_var1.h"
+#include "bli_axpyv_kernel.h"
+#include "bli_axpyv_ref.h"
 
 
 //

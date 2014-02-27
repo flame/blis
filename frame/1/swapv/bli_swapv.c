@@ -53,7 +53,7 @@ void PASTEMAC0(opname)( \
                         y ); \
 }
 
-GENFRONT( swapv, SWAPV_KERNEL )
+GENFRONT( swapv, swapv_kernel )
 
 
 //

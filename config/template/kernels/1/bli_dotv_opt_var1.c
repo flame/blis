@@ -36,66 +36,66 @@
 
 
 
-void bli_sssdotv_opt_var1( conj_t             conjx,
-                           conj_t             conjy,
-                           dim_t              n,
-                           float*    restrict x, inc_t incx,
-                           float*    restrict y, inc_t incy,
-                           float*    restrict rho )
+void bli_sdotv_opt_var1( conj_t             conjx,
+                         conj_t             conjy,
+                         dim_t              n,
+                         float*    restrict x, inc_t incx,
+                         float*    restrict y, inc_t incy,
+                         float*    restrict rho )
 {
 	/* Just call the reference implementation. */
-	bli_sssdotv_unb_var1( conjx,
-	                      conjy,
-	                      n,
-	                      x, incx,
-	                      y, incy,
-	                      rho );
+	BLIS_SDOTV_KERNEL_REF( conjx,
+	                       conjy,
+	                       n,
+	                       x, incx,
+	                       y, incy,
+	                       rho );
 }
 
 
 
-void bli_ddddotv_opt_var1( conj_t             conjx,
-                           conj_t             conjy,
-                           dim_t              n,
-                           double*   restrict x, inc_t incx,
-                           double*   restrict y, inc_t incy,
-                           double*   restrict rho )
+void bli_ddotv_opt_var1( conj_t             conjx,
+                         conj_t             conjy,
+                         dim_t              n,
+                         double*   restrict x, inc_t incx,
+                         double*   restrict y, inc_t incy,
+                         double*   restrict rho )
 {
 	/* Just call the reference implementation. */
-	bli_ddddotv_unb_var1( conjx,
-	                      conjy,
-	                      n,
-	                      x, incx,
-	                      y, incy,
-	                      rho );
+	BLIS_DDOTV_KERNEL_REF( conjx,
+	                       conjy,
+	                       n,
+	                       x, incx,
+	                       y, incy,
+	                       rho );
 }
 
 
 
-void bli_cccdotv_opt_var1( conj_t             conjx,
-                           conj_t             conjy,
-                           dim_t              n,
-                           scomplex* restrict x, inc_t incx,
-                           scomplex* restrict y, inc_t incy,
-                           scomplex* restrict rho )
+void bli_cdotv_opt_var1( conj_t             conjx,
+                         conj_t             conjy,
+                         dim_t              n,
+                         scomplex* restrict x, inc_t incx,
+                         scomplex* restrict y, inc_t incy,
+                         scomplex* restrict rho )
 {
 	/* Just call the reference implementation. */
-	bli_cccdotv_unb_var1( conjx,
-	                      conjy,
-	                      n,
-	                      x, incx,
-	                      y, incy,
-	                      rho );
+	BLIS_CDOTV_KERNEL_REF( conjx,
+	                       conjy,
+	                       n,
+	                       x, incx,
+	                       y, incy,
+	                       rho );
 }
 
 
 
-void bli_zzzdotv_opt_var1( conj_t             conjx,
-                           conj_t             conjy,
-                           dim_t              n,
-                           dcomplex* restrict x, inc_t incx,
-                           dcomplex* restrict y, inc_t incy,
-                           dcomplex* restrict rho )
+void bli_zdotv_opt_var1( conj_t             conjx,
+                         conj_t             conjy,
+                         dim_t              n,
+                         dcomplex* restrict x, inc_t incx,
+                         dcomplex* restrict y, inc_t incy,
+                         dcomplex* restrict rho )
 {
 /*
   Template dotv kernel implementation
@@ -210,12 +210,12 @@ void bli_zzzdotv_opt_var1( conj_t             conjx,
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE )
 	{
-		bli_zzzdotv_unb_var1( conjx,
-		                      conjy,
-		                      n,
-		                      x, incx,
-		                      y, incy,
-		                      rho );
+		BLIS_ZDOTV_KERNEL_REF( conjx,
+		                       conjy,
+		                       n,
+		                       x, incx,
+		                       y, incy,
+		                       rho );
         return;
 	}
 
@@ -310,36 +310,3 @@ void bli_zzzdotv_opt_var1( conj_t             conjx,
 	bli_zzcopys( dotxy, *rho );
 }
 
-
-
-//
-// Define BLAS-like interfaces with heterogeneous-typed operands.
-//
-#undef  GENTFUNC3
-#define GENTFUNC3( ctype_x, ctype_y, ctype_r, chx, chy, chr, opname, varname ) \
-\
-void PASTEMAC3(chx,chy,chr,opname)( \
-                                    conj_t            conjx, \
-                                    conj_t            conjy, \
-                                    dim_t             n, \
-                                    ctype_x* restrict x, inc_t incx, \
-                                    ctype_y* restrict y, inc_t incy, \
-                                    ctype_r* restrict rho \
-                                  ) \
-{ \
-	/* Just call the reference implementation. */ \
-    PASTEMAC3(chx,chy,chr,varname)( conjx, \
-                                    conjy, \
-                                    n, \
-                                    x, incx, \
-                                    y, incy, \
-                                    rho ); \
-}
-
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTFUNC3_MIX_D( dotv_opt_var1, dotv_unb_var1 )
-#endif
-
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTFUNC3_MIX_P( dotv_opt_var1, dotv_unb_var1 )
-#endif

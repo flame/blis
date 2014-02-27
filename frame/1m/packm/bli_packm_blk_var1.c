@@ -361,8 +361,7 @@ void PASTEMAC(ch,varname )( \
 			                             c_begin, rs_c, cs_c, \
 			                             p_begin, rs_p, cs_p ); \
 \
-			/* NOTE: p_inc should be set to ps_p to properly support
-			   BLIS_CONTIG_STRIDE_ALIGN_SIZE. */ \
+			/* NOTE: This value is equivalent to ps_p. */ \
 			p_inc = ldp * panel_len_max_i; \
 		} \
 		else \
@@ -386,8 +385,7 @@ void PASTEMAC(ch,varname )( \
 			                            c_begin, rs_c, cs_c, \
 			                            p_begin, rs_p, cs_p ); \
 \
-			/* NOTE: p_inc should be set to ps_p to properly support
-			   BLIS_CONTIG_STRIDE_ALIGN_SIZE. */ \
+			/* NOTE: This value is equivalent to ps_p. */ \
 			p_inc = ldp * panel_len_max_i; \
 		} \
 	} \

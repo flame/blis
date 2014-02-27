@@ -34,7 +34,8 @@
 
 #include "bli_dotxf_check.h"
 #include "bli_dotxf_fusefac.h"
-#include "bli_dotxf_unb_var1.h"
+#include "bli_dotxf_kernel.h"
+#include "bli_dotxf_ref.h"
 
 
 //

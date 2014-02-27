@@ -35,6 +35,9 @@
 #include "bli_syrk_check.h"
 #include "bli_syrk_front.h"
 
+#include "bli_syrk4m.h"
+#include "bli_syrk3m.h"
+
 
 //
 // Prototype object-based interface.

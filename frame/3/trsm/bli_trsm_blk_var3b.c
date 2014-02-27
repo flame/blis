@@ -107,10 +107,11 @@ void bli_trsm_blk_var3b( obj_t*  a,
 		              cntl_sub_trsm( cntl ) );
 
 		// This variant executes multiple rank-k updates. Therefore, if the
-		// internal alpha scalar on matrix A/B is non-zero, we must use it
-		// only for the first iteration (and then BLIS_ONE for all others).
+		// internal alpha scalars on A/B and C are non-zero, we must ensure
+		// that they are only used in the first iteration.
 		if ( i == 0 ) { bli_obj_scalar_reset( a );
-		                bli_obj_scalar_reset( b ); }
+		                bli_obj_scalar_reset( b );
+		                bli_obj_scalar_reset( &c_pack ); }
 	}
 
 	// Unpack C (if C was packed).

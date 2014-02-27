@@ -47,6 +47,17 @@ void bli_trmm3( side_t  side,
                 obj_t*  beta,
                 obj_t*  c )
 {
+	if (
+#ifdef BLIS_ENABLE_SCOMPLEX_VIA_4M
+	     bli_obj_is_scomplex( *c ) ||
+#endif
+#ifdef BLIS_ENABLE_DCOMPLEX_VIA_4M
+	     bli_obj_is_dcomplex( *c ) ||
+#endif
+	     FALSE
+	   )
+		return bli_trmm34m( side, alpha, a, b, beta, c );
+
 	bli_trmm3_front( side, alpha, a, b, beta, c,
 	                 trmm_l_cntl,
 	                 trmm_r_cntl );

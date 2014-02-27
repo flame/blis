@@ -33,7 +33,6 @@
 */
 
 #include "blis.h"
-#undef restrict
 
 void bli_sgemm_8x8(
                     dim_t      k,
@@ -46,7 +45,7 @@ void bli_sgemm_8x8(
                   )
 {
 	/* Just call the reference implementation. */
-	bli_sgemm_ref_mxn( k,
+	BLIS_SGEMM_UKERNEL_REF( k,
 	                   alpha,
 	                   a,
 	                   b,
@@ -253,7 +252,7 @@ void bli_cgemm_8x8(
                   )
 {
 	/* Just call the reference implementation. */
-	bli_cgemm_ref_mxn( k,
+	BLIS_CGEMM_UKERNEL_REF( k,
 	                   alpha,
 	                   a,
 	                   b,
@@ -273,7 +272,7 @@ void bli_zgemm_8x8(
                   )
 {
 	/* Just call the reference implementation. */
-	bli_zgemm_ref_mxn( k,
+	BLIS_ZGEMM_UKERNEL_REF( k,
 	                   alpha,
 	                   a,
 	                   b,
@@ -295,7 +294,7 @@ void bli_sgemm_8x8_mt(
                      )
 {
 	/* Just call the reference implementation. */
-	bli_sgemm_ref_mxn( k,
+	BLIS_SGEMM_UKERNEL_REF( k,
 	                   alpha,
 	                   a,
 	                   b,
@@ -316,7 +315,7 @@ void bli_cgemm_8x8_mt(
                      )
 {
 	/* Just call the reference implementation. */
-	bli_cgemm_ref_mxn( k,
+	BLIS_CGEMM_UKERNEL_REF( k,
 	                   alpha,
 	                   a,
 	                   b,
@@ -337,7 +336,7 @@ void bli_zgemm_8x8_mt(
                      )
 {
 	/* Just call the reference implementation. */
-	bli_zgemm_ref_mxn( k,
+	BLIS_ZGEMM_UKERNEL_REF( k,
 	                   alpha,
 	                   a,
 	                   b,

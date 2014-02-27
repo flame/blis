@@ -33,7 +33,8 @@
 */
 
 #include "bli_swapv_check.h"
-#include "bli_swapv_unb_var1.h"
+#include "bli_swapv_kernel.h"
+#include "bli_swapv_ref.h"
 
 
 //

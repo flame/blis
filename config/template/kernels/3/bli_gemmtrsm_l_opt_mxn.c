@@ -166,16 +166,8 @@ void bli_dgemmtrsm_l_opt_mxn(
   - Leading dimensions of a1 and b1: PACKMR and PACKNR. See Implementation
     Notes for gemm.
   - Edge cases in MR, NR dimensions. See Implementation Notes for gemm.
-  - Alignment of a1 and b1. Unlike with gemm, the addresses a10/a12 and a11
-    are not guaranteed to be aligned according to the alignment value
-    BLIS_CONTIG_STRIDE_ALIGN_SIZE, as defined in the bli_config.h header
-    file. This is because these micro-panels may vary in size due to the
-    triangular nature of matrix A. Instead, these addresses are aligned
-    to PACKMR x sizeof(type), where type is the datatype in question. To
-    support a somewhat obscure, higher-level optimization, we similarly
-    do not guarantee that b01/b21 and b11 are aligned to
-    BLIS_CONTIG_STRIDE_ALIGN_SIZE; instead, they are only aligned to
-    PACKNR x sizeof(type).
+  - Alignment of a1 and b1. The addresses a1 and b1 are aligned according
+    to PACKMR*sizeof(type) and PACKNR*sizeof(type), respectively.
   - Unrolling loops. Most optimized implementations should unroll all
     three loops within the trsm subproblem of gemmtrsm. See Implementation
     Notes for gemm for remarks on unrolling the gemm subproblem.

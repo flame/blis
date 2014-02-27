@@ -36,87 +36,87 @@
 
 
 
-void bli_sssdotaxpyv_opt_var1( conj_t             conjxt,
-                               conj_t             conjx,
-                               conj_t             conjy,
-                               dim_t              n,
-                               float*    restrict alpha,
-                               float*    restrict x, inc_t incx,
-                               float*    restrict y, inc_t incy,
-                               float*    restrict rho,
-                               float*    restrict z, inc_t incz )
+void bli_sdotaxpyv_opt_var1( conj_t             conjxt,
+                             conj_t             conjx,
+                             conj_t             conjy,
+                             dim_t              n,
+                             float*    restrict alpha,
+                             float*    restrict x, inc_t incx,
+                             float*    restrict y, inc_t incy,
+                             float*    restrict rho,
+                             float*    restrict z, inc_t incz )
 {
 	/* Just call the reference implementation. */
-	bli_sssdotaxpyv_unb_var1( conjxt,
-	                          conjx,
-	                          conjy,
-	                          n,
-	                          alpha,
-	                          x, incx,
-	                          y, incy,
-	                          rho,
-	                          z, incz );
+	BLIS_SDOTAXPYV_KERNEL_REF( conjxt,
+	                           conjx,
+	                           conjy,
+	                           n,
+	                           alpha,
+	                           x, incx,
+	                           y, incy,
+	                           rho,
+	                           z, incz );
 }
 
 
 
-void bli_ddddotaxpyv_opt_var1( conj_t             conjxt,
-                               conj_t             conjx,
-                               conj_t             conjy,
-                               dim_t              n,
-                               double*   restrict alpha,
-                               double*   restrict x, inc_t incx,
-                               double*   restrict y, inc_t incy,
-                               double*   restrict rho,
-                               double*   restrict z, inc_t incz )
+void bli_ddotaxpyv_opt_var1( conj_t             conjxt,
+                             conj_t             conjx,
+                             conj_t             conjy,
+                             dim_t              n,
+                             double*   restrict alpha,
+                             double*   restrict x, inc_t incx,
+                             double*   restrict y, inc_t incy,
+                             double*   restrict rho,
+                             double*   restrict z, inc_t incz )
 {
 	/* Just call the reference implementation. */
-	bli_ddddotaxpyv_unb_var1( conjxt,
-	                          conjx,
-	                          conjy,
-	                          n,
-	                          alpha,
-	                          x, incx,
-	                          y, incy,
-	                          rho,
-	                          z, incz );
+	BLIS_DDOTAXPYV_KERNEL_REF( conjxt,
+	                           conjx,
+	                           conjy,
+	                           n,
+	                           alpha,
+	                           x, incx,
+	                           y, incy,
+	                           rho,
+	                           z, incz );
 }
 
 
 
-void bli_cccdotaxpyv_opt_var1( conj_t             conjxt,
-                               conj_t             conjx,
-                               conj_t             conjy,
-                               dim_t              n,
-                               scomplex* restrict alpha,
-                               scomplex* restrict x, inc_t incx,
-                               scomplex* restrict y, inc_t incy,
-                               scomplex* restrict rho,
-                               scomplex* restrict z, inc_t incz )
+void bli_cdotaxpyv_opt_var1( conj_t             conjxt,
+                             conj_t             conjx,
+                             conj_t             conjy,
+                             dim_t              n,
+                             scomplex* restrict alpha,
+                             scomplex* restrict x, inc_t incx,
+                             scomplex* restrict y, inc_t incy,
+                             scomplex* restrict rho,
+                             scomplex* restrict z, inc_t incz )
 {
 	/* Just call the reference implementation. */
-	bli_cccdotaxpyv_unb_var1( conjxt,
-	                          conjx,
-	                          conjy,
-	                          n,
-	                          alpha,
-	                          x, incx,
-	                          y, incy,
-	                          rho,
-	                          z, incz );
+	BLIS_CDOTAXPYV_KERNEL_REF( conjxt,
+	                           conjx,
+	                           conjy,
+	                           n,
+	                           alpha,
+	                           x, incx,
+	                           y, incy,
+	                           rho,
+	                           z, incz );
 }
 
 
 
-void bli_zzzdotaxpyv_opt_var1( conj_t             conjxt,
-                               conj_t             conjx,
-                               conj_t             conjy,
-                               dim_t              n,
-                               dcomplex* restrict alpha,
-                               dcomplex* restrict x, inc_t incx,
-                               dcomplex* restrict y, inc_t incy,
-                               dcomplex* restrict rho,
-                               dcomplex* restrict z, inc_t incz )
+void bli_zdotaxpyv_opt_var1( conj_t             conjxt,
+                             conj_t             conjx,
+                             conj_t             conjy,
+                             dim_t              n,
+                             dcomplex* restrict alpha,
+                             dcomplex* restrict x, inc_t incx,
+                             dcomplex* restrict y, inc_t incy,
+                             dcomplex* restrict rho,
+                             dcomplex* restrict z, inc_t incz )
 {
 /*
   Template dotaxpyv kernel implementation
@@ -240,15 +240,15 @@ void bli_zzzdotaxpyv_opt_var1( conj_t             conjxt,
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE )
 	{
-		bli_zzzdotaxpyv_unb_var1( conjxt,
-		                          conjx,
-		                          conjy,
-		                          n,
-		                          alpha,
-		                          x, incx,
-		                          y, incy,
-		                          rho,
-		                          z, incz );
+		BLIS_ZDOTAXPYV_KERNEL_REF( conjxt,
+		                           conjx,
+		                           conjy,
+		                           n,
+		                           alpha,
+		                           x, incx,
+		                           y, incy,
+		                           rho,
+		                           z, incz );
         return;
 	}
 
@@ -428,43 +428,4 @@ void bli_zzzdotaxpyv_opt_var1( conj_t             conjxt,
 
 	bli_zzcopys( dotxy, *rho );
 }
-
-
-//
-// Define BLAS-like interfaces with heterogeneous-typed operands.
-//
-#undef  GENTFUNC3U12
-#define GENTFUNC3U12( ctype_x, ctype_y, ctype_z, ctype_xy, chx, chy, chz, chxy, varname, kername ) \
-\
-void PASTEMAC3(chx,chy,chz,varname)( \
-                                     conj_t             conjxt, \
-                                     conj_t             conjx, \
-                                     conj_t             conjy, \
-                                     dim_t              n, \
-                                     ctype_x*  restrict alpha, \
-                                     ctype_x*  restrict x, inc_t incx, \
-                                     ctype_y*  restrict y, inc_t incy, \
-                                     ctype_xy* restrict rho, \
-                                     ctype_z*  restrict z, inc_t incz \
-                                   ) \
-{ \
-	/* Just call the reference implementation. */ \
-	PASTEMAC3(chx,chy,chz,kername)( conjxt, \
-	                                conjx, \
-	                                conjy, \
-	                                n, \
-	                                alpha, \
-	                                x, incx, \
-	                                y, incy, \
-	                                rho, \
-	                                z, incz ); \
-}
-
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTFUNC3U12_MIX_D( dotaxpyv_opt_var1, dotaxpyv_unb_var1 )
-#endif
-
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTFUNC3U12_MIX_P( dotaxpyv_opt_var1, dotaxpyv_unb_var1 )
-#endif
 

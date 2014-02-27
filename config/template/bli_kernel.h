@@ -38,9 +38,8 @@
 
 // -- LEVEL-3 MICRO-KERNEL CONSTANTS -------------------------------------------
 
-// -- Default cache blocksizes --
+// -- Cache blocksizes --
 
-//
 // Constraints:
 //
 // (1) MC must be a multiple of:
@@ -52,53 +51,24 @@
 // (3) KC must be a multiple of
 //     (a) MR and
 //     (b) NR (for triangular operations such as trmm and trsm).
-//
 
-#define BLIS_DEFAULT_MC_S              64
-#define BLIS_DEFAULT_KC_S              128
-#define BLIS_DEFAULT_NC_S              4096
+#define BLIS_DEFAULT_MC_S              128
+#define BLIS_DEFAULT_KC_S              256
+#define BLIS_DEFAULT_NC_S              2048
 
-#define BLIS_DEFAULT_MC_D              64
-#define BLIS_DEFAULT_KC_D              128
-#define BLIS_DEFAULT_NC_D              4096
+#define BLIS_DEFAULT_MC_D              128
+#define BLIS_DEFAULT_KC_D              256
+#define BLIS_DEFAULT_NC_D              2048
 
-#define BLIS_DEFAULT_MC_C              64
-#define BLIS_DEFAULT_KC_C              128
-#define BLIS_DEFAULT_NC_C              4096
+#define BLIS_DEFAULT_MC_C              128
+#define BLIS_DEFAULT_KC_C              256
+#define BLIS_DEFAULT_NC_C              2048
 
-#define BLIS_DEFAULT_MC_Z              64
-#define BLIS_DEFAULT_KC_Z              128
-#define BLIS_DEFAULT_NC_Z              4096
+#define BLIS_DEFAULT_MC_Z              128
+#define BLIS_DEFAULT_KC_Z              256
+#define BLIS_DEFAULT_NC_Z              2048
 
-// -- Cache blocksize extensions (for optimizing edge cases) --
-
-// NOTE: These cache blocksize "extensions" have the same constraints as
-// the corresponding default blocksizes above. When these values are
-// non-zero, blocksizes used at edge cases are extended (enlarged) if
-// such an extension would encompass the remaining portion of the
-// matrix dimension.
-
-#define BLIS_EXTEND_MC_S               0 //(BLIS_DEFAULT_MC_S/4)
-#define BLIS_EXTEND_KC_S               0 //(BLIS_DEFAULT_KC_S/4)
-#define BLIS_EXTEND_NC_S               0 //(BLIS_DEFAULT_NC_S/4)
-
-#define BLIS_EXTEND_MC_D               0 //(BLIS_DEFAULT_MC_D/4)
-#define BLIS_EXTEND_KC_D               0 //(BLIS_DEFAULT_KC_D/4)
-#define BLIS_EXTEND_NC_D               0 //(BLIS_DEFAULT_NC_D/4)
-
-#define BLIS_EXTEND_MC_C               0 //(BLIS_DEFAULT_MC_C/4)
-#define BLIS_EXTEND_KC_C               0 //(BLIS_DEFAULT_KC_C/4)
-#define BLIS_EXTEND_NC_C               0 //(BLIS_DEFAULT_NC_C/4)
-
-#define BLIS_EXTEND_MC_Z               0 //(BLIS_DEFAULT_MC_Z/4)
-#define BLIS_EXTEND_KC_Z               0 //(BLIS_DEFAULT_KC_Z/4)
-#define BLIS_EXTEND_NC_Z               0 //(BLIS_DEFAULT_NC_Z/4)
-
-// -- Default register blocksizes for micro-kernel --
-
-// NOTE: When using the reference configuration, these register blocksizes
-// in the m and n dimensions should all be equal to the size expected by
-// the reference micro-kernel(s).
+// -- Register blocksizes --
 
 #define BLIS_DEFAULT_MR_S              8
 #define BLIS_DEFAULT_NR_S              4
@@ -116,10 +86,34 @@
 // of f, handles leftover edge cases (ie: when k % f > 0) then these
 // register blocksizes in the k dimension can be defined to 1.
 
-#define BLIS_DEFAULT_KR_S              1
-#define BLIS_DEFAULT_KR_D              1
-#define BLIS_DEFAULT_KR_C              1
-#define BLIS_DEFAULT_KR_Z              1
+//#define BLIS_DEFAULT_KR_S              1
+//#define BLIS_DEFAULT_KR_D              1
+//#define BLIS_DEFAULT_KR_C              1
+//#define BLIS_DEFAULT_KR_Z              1
+
+// -- Cache blocksize extensions (for optimizing edge cases) --
+
+// NOTE: These cache blocksize "extensions" have the same constraints as
+// the corresponding default blocksizes above. When these values are
+// non-zero, blocksizes used at edge cases are extended (enlarged) if
+// such an extension would encompass the remaining portion of the
+// matrix dimension.
+
+//#define BLIS_EXTEND_MC_S               0
+//#define BLIS_EXTEND_KC_S               0
+//#define BLIS_EXTEND_NC_S               0
+
+//#define BLIS_EXTEND_MC_D               0
+//#define BLIS_EXTEND_KC_D               0
+//#define BLIS_EXTEND_NC_D               0
+
+//#define BLIS_EXTEND_MC_C               0
+//#define BLIS_EXTEND_KC_C               0
+//#define BLIS_EXTEND_NC_C               0
+
+//#define BLIS_EXTEND_MC_Z               0
+//#define BLIS_EXTEND_KC_Z               0
+//#define BLIS_EXTEND_NC_Z               0
 
 // -- Register blocksize extensions (for packed micro-panels) --
 
@@ -127,24 +121,52 @@
 // leading dimensions used within the packed micro-panels are equal to
 // or greater than their corresponding register blocksizes above.
 
-#define BLIS_EXTEND_MR_S               0
-#define BLIS_EXTEND_NR_S               0
+//#define BLIS_EXTEND_MR_S               0
+//#define BLIS_EXTEND_NR_S               0
 
-#define BLIS_EXTEND_MR_D               0
-#define BLIS_EXTEND_NR_D               0
+//#define BLIS_EXTEND_MR_D               0
+//#define BLIS_EXTEND_NR_D               0
 
-#define BLIS_EXTEND_MR_C               0
-#define BLIS_EXTEND_NR_C               0
+//#define BLIS_EXTEND_MR_C               0
+//#define BLIS_EXTEND_NR_C               0
 
-#define BLIS_EXTEND_MR_Z               0
-#define BLIS_EXTEND_NR_Z               0
+//#define BLIS_EXTEND_MR_Z               0
+//#define BLIS_EXTEND_NR_Z               0
 
-// Register blocksize extensions in the k dimension are not used.
 
-#define BLIS_EXTEND_KR_S               0
-#define BLIS_EXTEND_KR_D               0
-#define BLIS_EXTEND_KR_C               0
-#define BLIS_EXTEND_KR_Z               0
+
+
+// -- LEVEL-3 MICRO-KERNELS ---------------------------------------------------
+
+// -- gemm --
+
+#define BLIS_SGEMM_UKERNEL         bli_sgemm_opt_mxn
+#define BLIS_DGEMM_UKERNEL         bli_dgemm_opt_mxn
+#define BLIS_CGEMM_UKERNEL         bli_cgemm_opt_mxn
+#define BLIS_ZGEMM_UKERNEL         bli_zgemm_opt_mxn
+
+// -- trsm-related --
+
+#define BLIS_SGEMMTRSM_L_UKERNEL   bli_sgemmtrsm_l_opt_mxn
+#define BLIS_DGEMMTRSM_L_UKERNEL   bli_dgemmtrsm_l_opt_mxn
+#define BLIS_CGEMMTRSM_L_UKERNEL   bli_cgemmtrsm_l_opt_mxn
+#define BLIS_ZGEMMTRSM_L_UKERNEL   bli_zgemmtrsm_l_opt_mxn
+
+#define BLIS_SGEMMTRSM_U_UKERNEL   bli_sgemmtrsm_u_opt_mxn
+#define BLIS_DGEMMTRSM_U_UKERNEL   bli_dgemmtrsm_u_opt_mxn
+#define BLIS_CGEMMTRSM_U_UKERNEL   bli_cgemmtrsm_u_opt_mxn
+#define BLIS_ZGEMMTRSM_U_UKERNEL   bli_zgemmtrsm_u_opt_mxn
+
+#define BLIS_STRSM_L_UKERNEL       bli_strsm_l_opt_mxn
+#define BLIS_DTRSM_L_UKERNEL       bli_dtrsm_l_opt_mxn
+#define BLIS_CTRSM_L_UKERNEL       bli_ctrsm_l_opt_mxn
+#define BLIS_ZTRSM_L_UKERNEL       bli_ztrsm_l_opt_mxn
+
+#define BLIS_STRSM_U_UKERNEL       bli_strsm_u_opt_mxn
+#define BLIS_DTRSM_U_UKERNEL       bli_dtrsm_u_opt_mxn
+#define BLIS_CTRSM_U_UKERNEL       bli_ctrsm_u_opt_mxn
+#define BLIS_ZTRSM_U_UKERNEL       bli_ztrsm_u_opt_mxn
+
 
 
 
@@ -158,17 +180,18 @@
 // be packed here, but this tends to be much too expensive in practice to
 // actually employ.)
 
-#define BLIS_DEFAULT_L2_MC_S           1000
-#define BLIS_DEFAULT_L2_NC_S           1000
+//#define BLIS_DEFAULT_L2_MC_S           1000
+//#define BLIS_DEFAULT_L2_NC_S           1000
 
-#define BLIS_DEFAULT_L2_MC_D           1000
-#define BLIS_DEFAULT_L2_NC_D           1000
+//#define BLIS_DEFAULT_L2_MC_D           1000
+//#define BLIS_DEFAULT_L2_NC_D           1000
 
-#define BLIS_DEFAULT_L2_MC_C           1000
-#define BLIS_DEFAULT_L2_NC_C           1000
+//#define BLIS_DEFAULT_L2_MC_C           1000
+//#define BLIS_DEFAULT_L2_NC_C           1000
 
-#define BLIS_DEFAULT_L2_MC_Z           1000
-#define BLIS_DEFAULT_L2_NC_Z           1000
+//#define BLIS_DEFAULT_L2_MC_Z           1000
+//#define BLIS_DEFAULT_L2_NC_Z           1000
+
 
 
 
@@ -176,66 +199,67 @@
 
 // -- Default fusing factors for level-1f operations --
 
-// NOTE: Default fusing factors are not used by the reference implementations
-// of level-1f operations. They are here only for use when these operations
-// are optimized.
+//#define BLIS_L1F_FUSE_FAC_S            8
+//#define BLIS_L1F_FUSE_FAC_D            4
+//#define BLIS_L1F_FUSE_FAC_C            4
+//#define BLIS_L1F_FUSE_FAC_Z            2
 
-#define BLIS_DEFAULT_FUSE_FAC_S        8
-#define BLIS_DEFAULT_FUSE_FAC_D        4
-#define BLIS_DEFAULT_FUSE_FAC_C        4
-#define BLIS_DEFAULT_FUSE_FAC_Z        2
+//#define BLIS_AXPYF_FUSE_FAC_S          BLIS_L1F_FUSE_FAC_S
+//#define BLIS_AXPYF_FUSE_FAC_D          BLIS_L1F_FUSE_FAC_D
+//#define BLIS_AXPYF_FUSE_FAC_C          BLIS_L1F_FUSE_FAC_C
+//#define BLIS_AXPYF_FUSE_FAC_Z          BLIS_L1F_FUSE_FAC_Z
 
-#define BLIS_AXPYF_FUSE_FAC_S          BLIS_DEFAULT_FUSE_FAC_S
-#define BLIS_AXPYF_FUSE_FAC_D          BLIS_DEFAULT_FUSE_FAC_D
-#define BLIS_AXPYF_FUSE_FAC_C          BLIS_DEFAULT_FUSE_FAC_C
-#define BLIS_AXPYF_FUSE_FAC_Z          BLIS_DEFAULT_FUSE_FAC_Z
+//#define BLIS_DOTXF_FUSE_FAC_S          BLIS_L1F_FUSE_FAC_S
+//#define BLIS_DOTXF_FUSE_FAC_D          BLIS_L1F_FUSE_FAC_D
+//#define BLIS_DOTXF_FUSE_FAC_C          BLIS_L1F_FUSE_FAC_C
+//#define BLIS_DOTXF_FUSE_FAC_Z          BLIS_L1F_FUSE_FAC_Z
 
-#define BLIS_DOTXF_FUSE_FAC_S          BLIS_DEFAULT_FUSE_FAC_S
-#define BLIS_DOTXF_FUSE_FAC_D          BLIS_DEFAULT_FUSE_FAC_D
-#define BLIS_DOTXF_FUSE_FAC_C          BLIS_DEFAULT_FUSE_FAC_C
-#define BLIS_DOTXF_FUSE_FAC_Z          BLIS_DEFAULT_FUSE_FAC_Z
-
-#define BLIS_DOTXAXPYF_FUSE_FAC_S      BLIS_DEFAULT_FUSE_FAC_S
-#define BLIS_DOTXAXPYF_FUSE_FAC_D      BLIS_DEFAULT_FUSE_FAC_D
-#define BLIS_DOTXAXPYF_FUSE_FAC_C      BLIS_DEFAULT_FUSE_FAC_C
-#define BLIS_DOTXAXPYF_FUSE_FAC_Z      BLIS_DEFAULT_FUSE_FAC_Z
+//#define BLIS_DOTXAXPYF_FUSE_FAC_S      BLIS_L1F_FUSE_FAC_S
+//#define BLIS_DOTXAXPYF_FUSE_FAC_D      BLIS_L1F_FUSE_FAC_D
+//#define BLIS_DOTXAXPYF_FUSE_FAC_C      BLIS_L1F_FUSE_FAC_C
+//#define BLIS_DOTXAXPYF_FUSE_FAC_Z      BLIS_L1F_FUSE_FAC_Z
 
 
 
-// -- LEVEL-1V KERNEL CONSTANTS ------------------------------------------------
 
-// -- Default register blocksizes for vectors --
+// -- LEVEL-1F KERNEL DEFINITIONS ----------------------------------------------
 
-// NOTE: Register blocksizes for vectors are used when packing
-// non-contiguous vectors. Similar to that of KR, they can
-// typically be set to 1.
+// -- axpy2v --
 
-#define BLIS_DEFAULT_VR_S              1
-#define BLIS_DEFAULT_VR_D              1
-#define BLIS_DEFAULT_VR_C              1
-#define BLIS_DEFAULT_VR_Z              1
+#define BLIS_SAXPY2V_KERNEL        bli_saxpy2v_opt_var1
+#define BLIS_DAXPY2V_KERNEL        bli_daxpy2v_opt_var1
+#define BLIS_CAXPY2V_KERNEL        bli_caxpy2v_opt_var1
+#define BLIS_ZAXPY2V_KERNEL        bli_zaxpy2v_opt_var1
+
+// -- dotaxpyv --
+
+#define BLIS_SDOTAXPYV_KERNEL      bli_sdotaxpyv_opt_var1
+#define BLIS_DDOTAXPYV_KERNEL      bli_ddotaxpyv_opt_var1
+#define BLIS_CDOTAXPYV_KERNEL      bli_cdotaxpyv_opt_var1
+#define BLIS_ZDOTAXPYV_KERNEL      bli_zdotaxpyv_opt_var1
+
+// -- axpyf --
+
+#define BLIS_SAXPYF_KERNEL         bli_saxpyf_opt_var1
+#define BLIS_DAXPYF_KERNEL         bli_daxpyf_opt_var1
+#define BLIS_CAXPYF_KERNEL         bli_caxpyf_opt_var1
+#define BLIS_ZAXPYF_KERNEL         bli_zaxpyf_opt_var1
+
+// -- dotxf --
+
+#define BLIS_SDOTXF_KERNEL         bli_sdotxf_opt_var1
+#define BLIS_DDOTXF_KERNEL         bli_ddotxf_opt_var1
+#define BLIS_CDOTXF_KERNEL         bli_cdotxf_opt_var1
+#define BLIS_ZDOTXF_KERNEL         bli_zdotxf_opt_var1
 
 
+// -- dotxaxpyf --
 
-// -- LEVEL-3 KERNEL DEFINITIONS -----------------------------------------------
+#define BLIS_SDOTXAXPYF_KERNEL     bli_sdotxaxpyf_opt_var1
+#define BLIS_DDOTXAXPYF_KERNEL     bli_ddotxaxpyf_opt_var1
+#define BLIS_CDOTXAXPYF_KERNEL     bli_cdotxaxpyf_opt_var1
+#define BLIS_ZDOTXAXPYF_KERNEL     bli_zdotxaxpyf_opt_var1
 
-#include "bli_gemm_opt_mxn.h"
-#include "bli_trsm_l_opt_mxn.h"
-#include "bli_trsm_u_opt_mxn.h"
-#include "bli_gemmtrsm_l_opt_mxn.h"
-#include "bli_gemmtrsm_u_opt_mxn.h"
-
-// -- gemm --
-
-#define GEMM_UKERNEL         gemm_opt_mxn
-
-// -- trsm-related --
-
-#define GEMMTRSM_L_UKERNEL   gemmtrsm_l_opt_mxn
-#define GEMMTRSM_U_UKERNEL   gemmtrsm_u_opt_mxn
-
-#define TRSM_L_UKERNEL       trsm_l_opt_mxn
-#define TRSM_U_UKERNEL       trsm_u_opt_mxn
 
 
 
@@ -243,55 +267,30 @@
 
 // -- packm --
 
-#define PACKM_2XK_KERNEL     packm_ref_2xk
-#define PACKM_4XK_KERNEL     packm_ref_4xk
-#define PACKM_6XK_KERNEL     packm_ref_6xk
-#define PACKM_8XK_KERNEL     packm_ref_8xk
-#define PACKM_10XK_KERNEL    packm_ref_10xk
-#define PACKM_12XK_KERNEL    packm_ref_12xk
-#define PACKM_14XK_KERNEL    packm_ref_14xk
-#define PACKM_16XK_KERNEL    packm_ref_16xk
+//#define BLIS_SPACKM_2XK_KERNEL     bli_spackm_ref_2xk
+//#define BLIS_DPACKM_2XK_KERNEL     bli_dpackm_ref_2xk
+//#define BLIS_CPACKM_2XK_KERNEL     bli_cpackm_ref_2xk
+//#define BLIS_ZPACKM_2XK_KERNEL     bli_zpackm_ref_2xk
 
-// -- unpackm --
+//#define BLIS_SPACKM_4XK_KERNEL     bli_spackm_ref_4xk
+//#define BLIS_DPACKM_4XK_KERNEL     bli_dpackm_ref_4xk
+//#define BLIS_CPACKM_4XK_KERNEL     bli_cpackm_ref_4xk
+//#define BLIS_ZPACKM_4XK_KERNEL     bli_zpackm_ref_4xk
 
-#define UNPACKM_2XK_KERNEL   unpackm_ref_2xk
-#define UNPACKM_4XK_KERNEL   unpackm_ref_4xk
-#define UNPACKM_6XK_KERNEL   unpackm_ref_6xk
-#define UNPACKM_8XK_KERNEL   unpackm_ref_8xk
-#define UNPACKM_10XK_KERNEL  unpackm_ref_10xk
-#define UNPACKM_12XK_KERNEL  unpackm_ref_12xk
-#define UNPACKM_14XK_KERNEL  unpackm_ref_14xk
-#define UNPACKM_16XK_KERNEL  unpackm_ref_16xk
+//#define BLIS_SPACKM_6XK_KERNEL     bli_spackm_ref_6xk
+//#define BLIS_DPACKM_6XK_KERNEL     bli_dpackm_ref_6xk
+//#define BLIS_CPACKM_6XK_KERNEL     bli_cpackm_ref_6xk
+//#define BLIS_ZPACKM_6XK_KERNEL     bli_zpackm_ref_6xk
 
+//#define BLIS_SPACKM_8XK_KERNEL     bli_spackm_ref_8xk
+//#define BLIS_DPACKM_8XK_KERNEL     bli_dpackm_ref_8xk
+//#define BLIS_CPACKM_8XK_KERNEL     bli_cpackm_ref_8xk
+//#define BLIS_ZPACKM_8XK_KERNEL     bli_zpackm_ref_8xk
 
+// ...
 
-// -- LEVEL-1F KERNEL DEFINITIONS ----------------------------------------------
+// (Commented definitions for 10, 12, 14, and 16 not shown).
 
-#include "bli_axpy2v_opt_var1.h"
-#include "bli_dotaxpyv_opt_var1.h"
-#include "bli_axpyf_opt_var1.h"
-#include "bli_dotxf_opt_var1.h"
-#include "bli_dotxaxpyf_opt_var1.h"
-
-// -- axpy2v --
-
-#define AXPY2V_KERNEL        axpy2v_opt_var1
-
-// -- dotaxpyv --
-
-#define DOTAXPYV_KERNEL      dotaxpyv_opt_var1
-
-// -- axpyf --
-
-#define AXPYF_KERNEL         axpyf_opt_var1
-
-// -- dotxf --
-
-#define DOTXF_KERNEL         dotxf_opt_var1
-
-// -- dotxaxpyf --
-
-#define DOTXAXPYF_KERNEL     dotxaxpyf_opt_var1
 
 
 
@@ -299,47 +298,81 @@
 
 // -- addv --
 
-#define ADDV_KERNEL          addv_unb_var1
+//#define BLIS_SADDV_KERNEL          bli_saddv_unb_var1
+//#define BLIS_DADDV_KERNEL          bli_daddv_unb_var1
+//#define BLIS_CADDV_KERNEL          bli_caddv_unb_var1
+//#define BLIS_ZADDV_KERNEL          bli_zaddv_unb_var1
 
 // -- axpyv --
 
-#define AXPYV_KERNEL         axpyv_unb_var1
+#define BLIS_SAXPYV_KERNEL         bli_saxpyv_opt_var1
+#define BLIS_DAXPYV_KERNEL         bli_daxpyv_opt_var1
+#define BLIS_CAXPYV_KERNEL         bli_caxpyv_opt_var1
+#define BLIS_ZAXPYV_KERNEL         bli_zaxpyv_opt_var1
 
 // -- copyv --
 
-#define COPYV_KERNEL         copyv_unb_var1
+//#define BLIS_SCOPYV_KERNEL         bli_scopyv_unb_var1
+//#define BLIS_DCOPYV_KERNEL         bli_dcopyv_unb_var1
+//#define BLIS_CCOPYV_KERNEL         bli_ccopyv_unb_var1
+//#define BLIS_ZCOPYV_KERNEL         bli_zcopyv_unb_var1
 
 // -- dotv --
 
-#define DOTV_KERNEL          dotv_unb_var1
+#define BLIS_SDOTV_KERNEL          bli_sdotv_opt_var1
+#define BLIS_DDOTV_KERNEL          bli_ddotv_opt_var1
+#define BLIS_CDOTV_KERNEL          bli_cdotv_opt_var1
+#define BLIS_ZDOTV_KERNEL          bli_zdotv_opt_var1
 
 // -- dotxv --
 
-#define DOTXV_KERNEL         dotxv_unb_var1
+//#define BLIS_SDOTXV_KERNEL         bli_sdotxv_unb_var1
+//#define BLIS_DDOTXV_KERNEL         bli_ddotxv_unb_var1
+//#define BLIS_CDOTXV_KERNEL         bli_cdotxv_unb_var1
+//#define BLIS_ZDOTXV_KERNEL         bli_zdotxv_unb_var1
 
 // -- invertv --
 
-#define INVERTV_KERNEL       invertv_unb_var1
+//#define BLIS_SINVERTV_KERNEL       bli_sinvertv_unb_var1
+//#define BLIS_DINVERTV_KERNEL       bli_dinvertv_unb_var1
+//#define BLIS_CINVERTV_KERNEL       bli_cinvertv_unb_var1
+//#define BLIS_ZINVERTV_KERNEL       bli_zinvertv_unb_var1
 
 // -- scal2v --
 
-#define SCAL2V_KERNEL        scal2v_unb_var1
+//#define BLIS_SSCAL2V_KERNEL        bli_sscal2v_unb_var1
+//#define BLIS_DSCAL2V_KERNEL        bli_dscal2v_unb_var1
+//#define BLIS_CSCAL2V_KERNEL        bli_cscal2v_unb_var1
+//#define BLIS_ZSCAL2V_KERNEL        bli_zscal2v_unb_var1
 
 // -- scalv --
 
-#define SCALV_KERNEL         scalv_unb_var1
+//#define BLIS_SSCALV_KERNEL         bli_sscalv_unb_var1
+//#define BLIS_DSCALV_KERNEL         bli_dscalv_unb_var1
+//#define BLIS_CSCALV_KERNEL         bli_cscalv_unb_var1
+//#define BLIS_ZSCALV_KERNEL         bli_zscalv_unb_var1
 
 // -- setv --
 
-#define SETV_KERNEL          setv_unb_var1
+//#define BLIS_SSETV_KERNEL          bli_ssetv_unb_var1
+//#define BLIS_DSETV_KERNEL          bli_dsetv_unb_var1
+//#define BLIS_CSETV_KERNEL          bli_csetv_unb_var1
+//#define BLIS_ZSETV_KERNEL          bli_zsetv_unb_var1
 
 // -- subv --
 
-#define SUBV_KERNEL          subv_unb_var1
+//#define BLIS_SSUBV_KERNEL          bli_ssubv_unb_var1
+//#define BLIS_DSUBV_KERNEL          bli_dsubv_unb_var1
+//#define BLIS_CSUBV_KERNEL          bli_csubv_unb_var1
+//#define BLIS_ZSUBV_KERNEL          bli_zsubv_unb_var1
 
 // -- swapv --
 
-#define SWAPV_KERNEL         swapv_unb_var1
+//#define BLIS_SSWAPV_KERNEL         bli_sswapv_unb_var1
+//#define BLIS_DSWAPV_KERNEL         bli_dswapv_unb_var1
+//#define BLIS_CSWAPV_KERNEL         bli_cswapv_unb_var1
+//#define BLIS_ZSWAPV_KERNEL         bli_zswapv_unb_var1
+
 
 
 

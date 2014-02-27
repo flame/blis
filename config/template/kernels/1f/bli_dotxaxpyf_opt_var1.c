@@ -36,115 +36,115 @@
 
 
 
-void bli_sssdotxaxpyf_opt_var1( conj_t             conjat,
-                                conj_t             conja,
-                                conj_t             conjw,
-                                conj_t             conjx,
-                                dim_t              m,
-                                dim_t              b_n,
-                                float*    restrict alpha,
-                                float*    restrict a, inc_t inca, inc_t lda,
-                                float*    restrict w, inc_t incw,
-                                float*    restrict x, inc_t incx,
-                                float*    restrict beta,
-                                float*    restrict y, inc_t incy,
-                                float*    restrict z, inc_t incz )
+void bli_sdotxaxpyf_opt_var1( conj_t             conjat,
+                              conj_t             conja,
+                              conj_t             conjw,
+                              conj_t             conjx,
+                              dim_t              m,
+                              dim_t              b_n,
+                              float*    restrict alpha,
+                              float*    restrict a, inc_t inca, inc_t lda,
+                              float*    restrict w, inc_t incw,
+                              float*    restrict x, inc_t incx,
+                              float*    restrict beta,
+                              float*    restrict y, inc_t incy,
+                              float*    restrict z, inc_t incz )
 {
 	/* Just call the reference implementation. */
-	bli_sssdotxaxpyf_unb_var1( conjat,
-	                           conja,
-	                           conjw,
-	                           conjx,
-	                           m,
-	                           b_n,
-	                           alpha,
-	                           a, inca, lda,
-	                           w, incw,
-	                           x, incx,
-	                           beta,
-	                           y, incy,
-	                           z, incz );
+	BLIS_SDOTXAXPYF_KERNEL_REF( conjat,
+	                            conja,
+	                            conjw,
+	                            conjx,
+	                            m,
+	                            b_n,
+	                            alpha,
+	                            a, inca, lda,
+	                            w, incw,
+	                            x, incx,
+	                            beta,
+	                            y, incy,
+	                            z, incz );
 }
 
 
 
-void bli_ddddotxaxpyf_opt_var1( conj_t             conjat,
-                                conj_t             conja,
-                                conj_t             conjw,
-                                conj_t             conjx,
-                                dim_t              m,
-                                dim_t              b_n,
-                                double*   restrict alpha,
-                                double*   restrict a, inc_t inca, inc_t lda,
-                                double*   restrict w, inc_t incw,
-                                double*   restrict x, inc_t incx,
-                                double*   restrict beta,
-                                double*   restrict y, inc_t incy,
-                                double*   restrict z, inc_t incz )
+void bli_ddotxaxpyf_opt_var1( conj_t             conjat,
+                              conj_t             conja,
+                              conj_t             conjw,
+                              conj_t             conjx,
+                              dim_t              m,
+                              dim_t              b_n,
+                              double*   restrict alpha,
+                              double*   restrict a, inc_t inca, inc_t lda,
+                              double*   restrict w, inc_t incw,
+                              double*   restrict x, inc_t incx,
+                              double*   restrict beta,
+                              double*   restrict y, inc_t incy,
+                              double*   restrict z, inc_t incz )
 {
 	/* Just call the reference implementation. */
-	bli_ddddotxaxpyf_unb_var1( conjat,
-	                           conja,
-	                           conjw,
-	                           conjx,
-	                           m,
-	                           b_n,
-	                           alpha,
-	                           a, inca, lda,
-	                           w, incw,
-	                           x, incx,
-	                           beta,
-	                           y, incy,
-	                           z, incz );
+	BLIS_DDOTXAXPYF_KERNEL_REF( conjat,
+	                            conja,
+	                            conjw,
+	                            conjx,
+	                            m,
+	                            b_n,
+	                            alpha,
+	                            a, inca, lda,
+	                            w, incw,
+	                            x, incx,
+	                            beta,
+	                            y, incy,
+	                            z, incz );
 }
 
 
 
-void bli_cccdotxaxpyf_opt_var1( conj_t             conjat,
-                                conj_t             conja,
-                                conj_t             conjw,
-                                conj_t             conjx,
-                                dim_t              m,
-                                dim_t              b_n,
-                                scomplex* restrict alpha,
-                                scomplex* restrict a, inc_t inca, inc_t lda,
-                                scomplex* restrict w, inc_t incw,
-                                scomplex* restrict x, inc_t incx,
-                                scomplex* restrict beta,
-                                scomplex* restrict y, inc_t incy,
-                                scomplex* restrict z, inc_t incz )
+void bli_cdotxaxpyf_opt_var1( conj_t             conjat,
+                              conj_t             conja,
+                              conj_t             conjw,
+                              conj_t             conjx,
+                              dim_t              m,
+                              dim_t              b_n,
+                              scomplex* restrict alpha,
+                              scomplex* restrict a, inc_t inca, inc_t lda,
+                              scomplex* restrict w, inc_t incw,
+                              scomplex* restrict x, inc_t incx,
+                              scomplex* restrict beta,
+                              scomplex* restrict y, inc_t incy,
+                              scomplex* restrict z, inc_t incz )
 {
 	/* Just call the reference implementation. */
-	bli_cccdotxaxpyf_unb_var1( conjat,
-	                           conja,
-	                           conjw,
-	                           conjx,
-	                           m,
-	                           b_n,
-	                           alpha,
-	                           a, inca, lda,
-	                           w, incw,
-	                           x, incx,
-	                           beta,
-	                           y, incy,
-	                           z, incz );
+	BLIS_CDOTXAXPYF_KERNEL_REF( conjat,
+	                            conja,
+	                            conjw,
+	                            conjx,
+	                            m,
+	                            b_n,
+	                            alpha,
+	                            a, inca, lda,
+	                            w, incw,
+	                            x, incx,
+	                            beta,
+	                            y, incy,
+	                            z, incz );
 }
 
 
 
-void bli_zzzdotxaxpyf_opt_var1( conj_t             conjat,
-                                conj_t             conja,
-                                conj_t             conjw,
-                                conj_t             conjx,
-                                dim_t              m,
-                                dim_t              b_n,
-                                dcomplex* restrict alpha,
-                                dcomplex* restrict a, inc_t inca, inc_t lda,
-                                dcomplex* restrict w, inc_t incw,
-                                dcomplex* restrict x, inc_t incx,
-                                dcomplex* restrict beta,
-                                dcomplex* restrict y, inc_t incy,
-                                dcomplex* restrict z, inc_t incz )
+void bli_zdotxaxpyf_opt_var1( conj_t             conjat,
+                              conj_t             conja,
+                              conj_t             conjw,
+                              conj_t             conjx,
+                              dim_t              m,
+                              dim_t              b_n,
+                              dcomplex* restrict alpha,
+                              dcomplex* restrict a, inc_t inca, inc_t lda,
+                              dcomplex* restrict w, inc_t incw,
+                              dcomplex* restrict x, inc_t incx,
+                              dcomplex* restrict beta,
+                              dcomplex* restrict y, inc_t incy,
+                              dcomplex* restrict z, inc_t incz )
 
 {
 /*
@@ -289,19 +289,19 @@ void bli_zzzdotxaxpyf_opt_var1( conj_t             conjat,
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE )
 	{
-		bli_zzzdotxaxpyf_unb_var1( conjat,
-		                           conja,
-		                           conjw,
-		                           conjx,
-		                           m,
-		                           b_n,
-		                           alpha,
-		                           a, inca, lda,
-		                           w, incw,
-		                           x, incx,
-		                           beta,
-		                           y, incy,
-		                           z, incz );
+		BLIS_ZDOTXAXPYF_KERNEL_REF( conjat,
+		                            conja,
+		                            conjw,
+		                            conjx,
+		                            m,
+		                            b_n,
+		                            alpha,
+		                            a, inca, lda,
+		                            w, incw,
+		                            x, incx,
+		                            beta,
+		                            y, incy,
+		                            z, incz );
         return;
 	}
 
@@ -559,52 +559,4 @@ void bli_zzzdotxaxpyf_opt_var1( conj_t             conjat,
 		bli_zzzaxpys( *alpha, At_w[ j ], *yp[ j ] );
 	}
 }
-
-
-
-//
-// Define BLAS-like interfaces with heterogeneous-typed operands.
-//
-#undef  GENTFUNC3U12
-#define GENTFUNC3U12( ctype_a, ctype_b, ctype_c, ctype_ab, cha, chb, chc, chab, varname, kername ) \
-\
-void PASTEMAC3(cha,chb,chc,varname)( \
-                                     conj_t             conjat, \
-                                     conj_t             conja, \
-                                     conj_t             conjw, \
-                                     conj_t             conjx, \
-                                     dim_t              m, \
-                                     dim_t              b_n, \
-                                     ctype_ab* restrict alpha, \
-                                     ctype_a*  restrict a, inc_t inca, inc_t lda, \
-                                     ctype_b*  restrict w, inc_t incw, \
-                                     ctype_b*  restrict x, inc_t incx, \
-                                     ctype_c*  restrict beta, \
-                                     ctype_c*  restrict y, inc_t incy, \
-                                     ctype_c*  restrict z, inc_t incz \
-                                   ) \
-{ \
-	/* Just call the reference implementation. */ \
-	PASTEMAC3(cha,chx,chy,kername)( conjat, \
-	                                conja, \
-	                                conjw, \
-	                                conjx, \
-	                                m, \
-	                                b_n, \
-	                                alpha, \
-	                                a, inca, lda, \
-	                                w, incw, \
-	                                x, incx, \
-	                                beta, \
-	                                y, incy, \
-	                                z, incz ); \
-}
-
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTFUNC3U12_MIX_D( dotxaxpyf_opt_var1, dotxaxpyf_unb_var1 )
-#endif
-
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTFUNC3U12_MIX_P( dotxaxpyf_opt_var1, dotxaxpyf_unb_var1 )
-#endif
 

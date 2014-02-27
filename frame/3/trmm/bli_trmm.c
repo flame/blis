@@ -45,7 +45,17 @@ void bli_trmm( side_t  side,
                obj_t*  a,
                obj_t*  b )
 {
-	// Invoke the internal back-end.
+	if (
+#ifdef BLIS_ENABLE_SCOMPLEX_VIA_4M
+	     bli_obj_is_scomplex( *b ) ||
+#endif
+#ifdef BLIS_ENABLE_DCOMPLEX_VIA_4M
+	     bli_obj_is_dcomplex( *b ) ||
+#endif
+	     FALSE
+	   )
+		return bli_trmm4m( side, alpha, a, b );
+
 	bli_trmm_front( side, alpha, a, b,
 	                trmm_l_cntl,
 	                trmm_r_cntl );

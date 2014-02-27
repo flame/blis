@@ -568,7 +568,6 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "  # of kc x nc blocks        %u\n", BLIS_NUM_KC_X_NC_BLOCKS );
 	libblis_test_fprintf_c( os, "  # of mc x nc blocks        %u\n", BLIS_NUM_MC_X_NC_BLOCKS );
 	libblis_test_fprintf_c( os, "  block address alignment    %u\n", BLIS_CONTIG_ADDR_ALIGN_SIZE );
-	libblis_test_fprintf_c( os, "  panel stride alignment     %u\n", BLIS_CONTIG_STRIDE_ALIGN_SIZE );
 	libblis_test_fprintf_c( os, "  max preload byte offset    %u\n", BLIS_MAX_PRELOAD_BYTE_OFFSET );
 	libblis_test_fprintf_c( os, "  actual pool sizes (bytes)    \n" );
 	libblis_test_fprintf_c( os, "    for mc x kc blocks of A  %u\n", BLIS_MK_POOL_SIZE );
@@ -617,6 +616,40 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	                        BLIS_EXTEND_NC_C,
 	                        BLIS_EXTEND_NC_Z );
 	libblis_test_fprintf_c( os, "\n" );
+	libblis_test_fprintf_c( os, "4m/3m cache blocksizes      4c    4z    3c    3z \n" );
+	libblis_test_fprintf_c( os, "  m dimension            %5u %5u %5u %5u\n",
+	                        BLIS_DEFAULT_4M_MC_C,
+	                        BLIS_DEFAULT_4M_MC_Z,
+	                        BLIS_DEFAULT_3M_MC_C,
+	                        BLIS_DEFAULT_3M_MC_Z );
+	libblis_test_fprintf_c( os, "  k dimension            %5u %5u %5u %5u\n",
+	                        BLIS_DEFAULT_4M_KC_C,
+	                        BLIS_DEFAULT_4M_KC_Z,
+	                        BLIS_DEFAULT_3M_KC_C,
+	                        BLIS_DEFAULT_3M_KC_Z );
+	libblis_test_fprintf_c( os, "  n dimension            %5u %5u %5u %5u\n",
+	                        BLIS_DEFAULT_4M_NC_C,
+	                        BLIS_DEFAULT_4M_NC_Z,
+	                        BLIS_DEFAULT_3M_NC_C,
+	                        BLIS_DEFAULT_3M_NC_Z );
+	libblis_test_fprintf_c( os, "\n" );
+	libblis_test_fprintf_c( os, "4m/3m cache blksz exts      4c    4z    3c    3z \n" );
+	libblis_test_fprintf_c( os, "  m dimension            %5u %5u %5u %5u\n",
+	                        BLIS_EXTEND_4M_MC_C,
+	                        BLIS_EXTEND_4M_MC_Z,
+	                        BLIS_EXTEND_3M_MC_C,
+	                        BLIS_EXTEND_3M_MC_Z );
+	libblis_test_fprintf_c( os, "  k dimension            %5u %5u %5u %5u\n",
+	                        BLIS_EXTEND_4M_KC_C,
+	                        BLIS_EXTEND_4M_KC_Z,
+	                        BLIS_EXTEND_3M_KC_C,
+	                        BLIS_EXTEND_3M_KC_Z );
+	libblis_test_fprintf_c( os, "  n dimension            %5u %5u %5u %5u\n",
+	                        BLIS_EXTEND_4M_NC_C,
+	                        BLIS_EXTEND_4M_NC_Z,
+	                        BLIS_EXTEND_3M_NC_C,
+	                        BLIS_EXTEND_3M_NC_Z );
+	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "level-3 register blocksizes  s     d     c     z \n" );
 	libblis_test_fprintf_c( os, "  m dimension            %5u %5u %5u %5u\n",
 	                        BLIS_DEFAULT_MR_S,
@@ -664,10 +697,10 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "level-1f fusing factors      s     d     c     z \n" );
 	libblis_test_fprintf_c( os, "  default                %5u %5u %5u %5u\n",
-	                        BLIS_DEFAULT_FUSE_FAC_S,
-	                        BLIS_DEFAULT_FUSE_FAC_D,
-	                        BLIS_DEFAULT_FUSE_FAC_C,
-	                        BLIS_DEFAULT_FUSE_FAC_Z );
+	                        BLIS_L1F_FUSE_FAC_S,
+	                        BLIS_L1F_FUSE_FAC_D,
+	                        BLIS_L1F_FUSE_FAC_C,
+	                        BLIS_L1F_FUSE_FAC_Z );
 	libblis_test_fprintf_c( os, "  axpyf                  %5u %5u %5u %5u\n",
 	                        BLIS_AXPYF_FUSE_FAC_S,
 	                        BLIS_AXPYF_FUSE_FAC_D,

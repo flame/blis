@@ -35,7 +35,6 @@
 #include "blis.h"
 
 
-/*
 //
 // Define object-based interface.
 //
@@ -60,8 +59,7 @@ void PASTEMAC0(opname)( \
 	                    z ); \
 }
 
-GENFRONT( axpy2v, AXPY2V_KERNEL )
-*/
+GENFRONT( axpy2v, axpy2v_kernel )
 
 
 //
@@ -123,7 +121,6 @@ void PASTEMAC3(chx,chy,chz,opname)( \
 
 // Define the basic set of functions unconditionally, and then also some
 // mixed datatype functions if requested.
-//INSERT_GENTFUNC3U12_BASIC( axpy2v, axpy2v_unb_var1 )
 INSERT_GENTFUNC3U12_BASIC( axpy2v, AXPY2V_KERNEL )
 
 #ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT

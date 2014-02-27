@@ -73,7 +73,7 @@ void bli_sgemm_opt_8x4(
         }
     }
 #else
-    bli_sgemm_ref_mxn(k, alpha, a, b, beta, c, rs_c, cs_c, data);
+    BLIS_SGEMM_UKERNEL_REF(k, alpha, a, b, beta, c, rs_c, cs_c, data);
 #endif
 }
 
@@ -445,7 +445,7 @@ void bli_dgemm_opt_8x4(
             }
         }
 #else
-        bli_dgemm_ref_mxn(k, alpha, a, b, beta, c, rs_c, cs_c, data);
+		BLIS_DGEMM_UKERNEL_REF(k, alpha, a, b, beta, c, rs_c, cs_c, data);
 #endif
     }
 }
@@ -495,7 +495,7 @@ void bli_cgemm_opt_8x4(
         }
     }
 #else
-    bli_cgemm_ref_mxn(k, alpha, a, b, beta, c, rs_c, cs_c, data);
+    BLIS_CGEMM_UKERNEL_REF(k, alpha, a, b, beta, c, rs_c, cs_c, data);
 #endif
 }
 
@@ -544,7 +544,7 @@ void bli_zgemm_opt_8x4(
         }
     }
 #else
-    bli_zgemm_ref_mxn(k, alpha, a, b, beta, c, rs_c, cs_c, data);
+    BLIS_ZGEMM_UKERNEL_REF(k, alpha, a, b, beta, c, rs_c, cs_c, data);
 #endif
 }
 

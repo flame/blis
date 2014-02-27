@@ -244,6 +244,10 @@ typedef struct
 #define BLIS_BITVAL_PACKED_COLUMNS         0x30000
 #define BLIS_BITVAL_PACKED_ROW_PANELS      0x40000
 #define BLIS_BITVAL_PACKED_COL_PANELS      0x50000
+#define BLIS_BITVAL_PACKED_ROW_PANELS_4M   0x60000
+#define BLIS_BITVAL_PACKED_COL_PANELS_4M   0x70000
+#define BLIS_BITVAL_PACKED_ROW_PANELS_3M   0x80000
+#define BLIS_BITVAL_PACKED_COL_PANELS_3M   0x90000
 #define BLIS_BITVAL_PACK_FWD_IF_UPPER      0x0
 #define BLIS_BITVAL_PACK_REV_IF_UPPER      0x100000
 #define BLIS_BITVAL_PACK_FWD_IF_LOWER      0x0
@@ -346,13 +350,17 @@ typedef enum
 
 typedef enum
 {
-	BLIS_NOT_PACKED        = BLIS_BITVAL_NOT_PACKED,
-	BLIS_PACKED_UNSPEC     = BLIS_BITVAL_PACKED_UNSPEC,
-	BLIS_PACKED_VECTOR     = BLIS_BITVAL_PACKED_UNSPEC,
-	BLIS_PACKED_ROWS       = BLIS_BITVAL_PACKED_ROWS,
-	BLIS_PACKED_COLUMNS    = BLIS_BITVAL_PACKED_COLUMNS,
-	BLIS_PACKED_ROW_PANELS = BLIS_BITVAL_PACKED_ROW_PANELS,
-	BLIS_PACKED_COL_PANELS = BLIS_BITVAL_PACKED_COL_PANELS,
+	BLIS_NOT_PACKED           = BLIS_BITVAL_NOT_PACKED,
+	BLIS_PACKED_UNSPEC        = BLIS_BITVAL_PACKED_UNSPEC,
+	BLIS_PACKED_VECTOR        = BLIS_BITVAL_PACKED_UNSPEC,
+	BLIS_PACKED_ROWS          = BLIS_BITVAL_PACKED_ROWS,
+	BLIS_PACKED_COLUMNS       = BLIS_BITVAL_PACKED_COLUMNS,
+	BLIS_PACKED_ROW_PANELS    = BLIS_BITVAL_PACKED_ROW_PANELS,
+	BLIS_PACKED_COL_PANELS    = BLIS_BITVAL_PACKED_COL_PANELS,
+	BLIS_PACKED_ROW_PANELS_4M = BLIS_BITVAL_PACKED_ROW_PANELS_4M,
+	BLIS_PACKED_COL_PANELS_4M = BLIS_BITVAL_PACKED_COL_PANELS_4M,
+	BLIS_PACKED_ROW_PANELS_3M = BLIS_BITVAL_PACKED_ROW_PANELS_3M,
+	BLIS_PACKED_COL_PANELS_3M = BLIS_BITVAL_PACKED_COL_PANELS_3M,
 } pack_t;
 
 
@@ -460,10 +468,10 @@ typedef struct func_s
            - 3 == packed by columns
            - 4 == packed by row panels
            - 5 == packed by column panels
-           - 6 == unused
-           - 7 == unused
-           - 8 == unused
-           - 9 == unused
+           - 6 == packed by row panels (4m)
+           - 7 == packed by column panels (4m)
+           - 8 == packed by row panels (3m)
+           - 9 == packed by column panels (3m)
        20  Packed panel order if upper-stored
            - 0 == forward order if upper
            - 1 == reverse order if upper

@@ -83,6 +83,9 @@
 #include "bli_addjris.h"
 #include "bli_addjs.h"
 
+#include "bli_add3ris.h"
+#include "bli_add3s.h"
+
 #include "bli_axpyris.h"
 #include "bli_axpys.h"
 #include "bli_axpyjris.h"
@@ -102,6 +105,9 @@
 #include "bli_copyjs.h"
 #include "bli_copycjris.h"
 #include "bli_copycjs.h"
+
+#include "bli_copyri3s.h"
+#include "bli_copyjri3s.h"
 
 #include "bli_dots.h"
 #include "bli_dotjs.h"
@@ -128,6 +134,16 @@
 #include "bli_scal2s.h"
 #include "bli_scal2jris.h"
 #include "bli_scal2js.h"
+
+#include "bli_scal2ri3s.h"
+#include "bli_scal2jri3s.h"
+
+#include "bli_set0ris.h"
+#include "bli_set0s.h"
+
+#include "bli_set1s.h"
+
+#include "bli_seti0s.h"
 
 #include "bli_sqrt2ris.h"
 #include "bli_sqrt2s.h"
@@ -163,6 +179,8 @@
 #include "bli_set0s_mxn.h"
 #include "bli_xpbys_mxn.h"
 #include "bli_xpbys_mxn_uplo.h"
+
+#include "bli_scalris_mxn_uplo.h"
 
 
 // -- Miscellaneous macros --

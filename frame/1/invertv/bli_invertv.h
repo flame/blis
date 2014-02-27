@@ -33,7 +33,8 @@
 */
 
 #include "bli_invertv_check.h"
-#include "bli_invertv_unb_var1.h"
+#include "bli_invertv_kernel.h"
+#include "bli_invertv_ref.h"
 
 
 //

@@ -42,7 +42,7 @@ typedef void (*FUNCPTR_T)( obj_t* beta,
 static FUNCPTR_T vars[1][3] =
 {
 	// unblocked          optimized unblocked    blocked
-	{ bli_scalv_unb_var1, NULL,                  NULL }
+	{ bli_scalv_kernel,   bli_scalv_kernel,      NULL }
 };
 
 void bli_scalv_int( obj_t*   beta,

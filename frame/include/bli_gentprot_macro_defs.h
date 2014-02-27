@@ -171,6 +171,15 @@ GENTPROTR( scomplex, float,  c, s, funcname ) \
 GENTPROTR( dcomplex, double, z, d, funcname )
 
 
+// -- Basic one-operand macro with complex domain only and real projection --
+
+
+#define INSERT_GENTPROTCO_BASIC( funcname ) \
+\
+GENTPROTCO( scomplex, float,  c, s, funcname ) \
+GENTPROTCO( dcomplex, double, z, d, funcname )
+
+
 // -- Basic one-operand with real and integer projections --
 
 

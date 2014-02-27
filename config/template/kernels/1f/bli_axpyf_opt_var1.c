@@ -36,87 +36,87 @@
 
 
 
-void bli_sssaxpyf_opt_var1(
-                            conj_t             conja,
-                            conj_t             conjx,
-                            dim_t              m,
-                            dim_t              b_n,
-                            float*    restrict alpha,
-                            float*    restrict a, inc_t inca, inc_t lda,
-                            float*    restrict x, inc_t incx,
-                            float*    restrict y, inc_t incy
-                          )
+void bli_saxpyf_opt_var1(
+                          conj_t             conja,
+                          conj_t             conjx,
+                          dim_t              m,
+                          dim_t              b_n,
+                          float*    restrict alpha,
+                          float*    restrict a, inc_t inca, inc_t lda,
+                          float*    restrict x, inc_t incx,
+                          float*    restrict y, inc_t incy
+                        )
 {
 	/* Just call the reference implementation. */
-	bli_sssaxpyf_unb_var1( conja,
-	                       conjx,
-	                       m,
-	                       b_n,
-	                       alpha,
-	                       a, inca, lda,
-	                       x, incx,
-	                       y, incy );
+	BLIS_SAXPYF_KERNEL_REF( conja,
+	                        conjx,
+	                        m,
+	                        b_n,
+	                        alpha,
+	                        a, inca, lda,
+	                        x, incx,
+	                        y, incy );
 }
 
 
 
-void bli_dddaxpyf_opt_var1(
-                            conj_t             conja,
-                            conj_t             conjx,
-                            dim_t              m,
-                            dim_t              b_n,
-                            double*   restrict alpha,
-                            double*   restrict a, inc_t inca, inc_t lda,
-                            double*   restrict x, inc_t incx,
-                            double*   restrict y, inc_t incy
-                          )
+void bli_daxpyf_opt_var1(
+                          conj_t             conja,
+                          conj_t             conjx,
+                          dim_t              m,
+                          dim_t              b_n,
+                          double*   restrict alpha,
+                          double*   restrict a, inc_t inca, inc_t lda,
+                          double*   restrict x, inc_t incx,
+                          double*   restrict y, inc_t incy
+                        )
 {
 	/* Just call the reference implementation. */
-	bli_dddaxpyf_unb_var1( conja,
-	                       conjx,
-	                       m,
-	                       b_n,
-	                       alpha,
-	                       a, inca, lda,
-	                       x, incx,
-	                       y, incy );
+	BLIS_DAXPYF_KERNEL_REF( conja,
+	                        conjx,
+	                        m,
+	                        b_n,
+	                        alpha,
+	                        a, inca, lda,
+	                        x, incx,
+	                        y, incy );
 }
 
 
 
-void bli_cccaxpyf_opt_var1(
-                            conj_t             conja,
-                            conj_t             conjx,
-                            dim_t              m,
-                            dim_t              b_n,
-                            scomplex* restrict alpha,
-                            scomplex* restrict a, inc_t inca, inc_t lda,
-                            scomplex* restrict x, inc_t incx,
-                            scomplex* restrict y, inc_t incy
-                          )
+void bli_caxpyf_opt_var1(
+                          conj_t             conja,
+                          conj_t             conjx,
+                          dim_t              m,
+                          dim_t              b_n,
+                          scomplex* restrict alpha,
+                          scomplex* restrict a, inc_t inca, inc_t lda,
+                          scomplex* restrict x, inc_t incx,
+                          scomplex* restrict y, inc_t incy
+                        )
 {
 	/* Just call the reference implementation. */
-	bli_cccaxpyf_unb_var1( conja,
-	                       conjx,
-	                       m,
-	                       b_n,
-	                       alpha,
-	                       a, inca, lda,
-	                       x, incx,
-	                       y, incy );
+	BLIS_CAXPYF_KERNEL_REF( conja,
+	                        conjx,
+	                        m,
+	                        b_n,
+	                        alpha,
+	                        a, inca, lda,
+	                        x, incx,
+	                        y, incy );
 }
 
 
-void bli_zzzaxpyf_opt_var1(
-                            conj_t             conja,
-                            conj_t             conjx,
-                            dim_t              m,
-                            dim_t              b_n,
-                            dcomplex* restrict alpha,
-                            dcomplex* restrict a, inc_t inca, inc_t lda,
-                            dcomplex* restrict x, inc_t incx,
-                            dcomplex* restrict y, inc_t incy
-                          )
+void bli_zaxpyf_opt_var1(
+                          conj_t             conja,
+                          conj_t             conjx,
+                          dim_t              m,
+                          dim_t              b_n,
+                          dcomplex* restrict alpha,
+                          dcomplex* restrict a, inc_t inca, inc_t lda,
+                          dcomplex* restrict x, inc_t incx,
+                          dcomplex* restrict y, inc_t incy
+                        )
 {
 /*
   Template axpyf kernel implementation
@@ -243,14 +243,14 @@ void bli_zzzaxpyf_opt_var1(
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE )
 	{
-		bli_zzzaxpyf_unb_var1( conja,
-		                       conjx,
-		                       m,
-		                       b_n,
-		                       alpha,
-		                       a, inca, lda,
-		                       x, incx,
-		                       y, incy );
+		BLIS_ZAXPYF_KERNEL_REF( conja,
+		                        conjx,
+		                        m,
+		                        b_n,
+		                        alpha,
+		                        a, inca, lda,
+		                        x, incx,
+		                        y, incy );
         return;
 	}
 
@@ -375,42 +375,4 @@ void bli_zzzaxpyf_opt_var1(
 	}
 
 }
-
-
-
-//
-// Define BLAS-like interfaces with heterogeneous-typed operands.
-//
-#undef  GENTFUNC3U12
-#define GENTFUNC3U12( ctype_a, ctype_x, ctype_y, ctype_ax, cha, chx, chy, chax, varname, kername ) \
-\
-void PASTEMAC3(cha,chx,chy,varname)( \
-                                     conj_t             conja, \
-                                     conj_t             conjx, \
-                                     dim_t              m, \
-                                     dim_t              b_n, \
-                                     ctype_ax* restrict alpha, \
-                                     ctype_a*  restrict a, inc_t inca, inc_t lda, \
-                                     ctype_x*  restrict x, inc_t incx, \
-                                     ctype_y*  restrict y, inc_t incy \
-                                   ) \
-{ \
-	/* Just call the reference implementation. */ \
-	PASTEMAC3(cha,chx,chy,kername)( conja, \
-	                                conjx, \
-	                                m, \
-	                                b_n, \
-	                                alpha, \
-	                                a, inca, lda, \
-	                                x, incx, \
-	                                y, incy ); \
-}
-
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTFUNC3U12_MIX_D( axpyf_opt_var1, axpyf_unb_var1 )
-#endif
-
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTFUNC3U12_MIX_P( axpyf_opt_var1, axpyf_unb_var1 )
-#endif
 

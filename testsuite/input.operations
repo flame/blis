@@ -290,37 +290,37 @@
 
 1        # gemm
 1        #   test sequential front-end
--1 -1 -2 #   dimensions: m n k
+-1 -1 -1 #   dimensions: m n k
 ??       #   parameters: transa transb
 
 1        # hemm
 1        #   test sequential front-end
--1 -2    #   dimensions: m n
+-1 -1    #   dimensions: m n
 ????     #   parameters: side uploa conja transb
 
 1        # herk
 1        #   test sequential front-end
--1 -2    #   dimensions: m k
+-1 -1    #   dimensions: m k
 ??       #   parameters: uploc transa
 
 1        # her2k
 1        #   test sequential front-end
--1 -2    #   dimensions: m k
+-1 -1    #   dimensions: m k
 ???      #   parameters: uploc transa transb
 
 1        # symm
 1        #   test sequential front-end
--1 -2    #   dimensions: m n
+-1 -1    #   dimensions: m n
 ????     #   parameters: side uploa conja transb
 
 1        # syrk
 1        #   test sequential front-end
--1 -2    #   dimensions: m k
+-1 -1    #   dimensions: m k
 ??       #   parameters: uploc transa
 
 1        # syr2k
 1        #   test sequential front-end
--1 -2    #   dimensions: m k
+-1 -1    #   dimensions: m k
 ???      #   parameters: uploc transa transb
 
 1        # trmm

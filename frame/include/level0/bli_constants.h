@@ -148,28 +148,5 @@
 	( ( gint_t*   ) bli_obj_buffer_for_const( BLIS_INT,      BLIS_MINUS_TWO ) )
 
 
-// set to constant
-
-// set1s
-
-#define bli_sset1s( a )  bli_ssets( 1.0F, 0.0F, (a) )
-#define bli_dset1s( a )  bli_dsets( 1.0 , 0.0 , (a) )
-#define bli_cset1s( a )  bli_csets( 1.0F, 0.0F, (a) )
-#define bli_zset1s( a )  bli_zsets( 1.0 , 0.0 , (a) )
-
-// set0s
-
-#define bli_sset0s( a )  bli_ssets( 0.0F, 0.0F, (a) )
-#define bli_dset0s( a )  bli_dsets( 0.0 , 0.0 , (a) )
-#define bli_cset0s( a )  bli_csets( 0.0F, 0.0F, (a) )
-#define bli_zset0s( a )  bli_zsets( 0.0 , 0.0 , (a) )
-
-// seti0s
-
-#define bli_sseti0s( a )  bli_ssetis( 0.0F, (a) )
-#define bli_dseti0s( a )  bli_dsetis( 0.0 , (a) )
-#define bli_cseti0s( a )  bli_csetis( 0.0F, (a) )
-#define bli_zseti0s( a )  bli_zsetis( 0.0 , (a) )
-
 #endif
 

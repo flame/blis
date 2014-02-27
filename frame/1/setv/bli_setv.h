@@ -34,8 +34,8 @@
 
 #include "bli_setv_check.h"
 
-#include "bli_setv_unb_var1.h"
-#include "bli_setv_unb_var2.h"
+#include "bli_setv_kernel.h"
+#include "bli_setv_ref.h"
 
 
 //
