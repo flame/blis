@@ -66,7 +66,8 @@ void bli_herk_blk_var1f( obj_t*  a,
 
 	// Pack A' (if instructed).
 	bli_packm_int( ah, &ah_pack,
-	               cntl_sub_packm_b( cntl ) );
+	               cntl_sub_packm_b( cntl ),
+                   &BLIS_SINGLE_THREADED );
 
 	// Partition along the m dimension.
 	for ( i = 0; i < m_trans; i += b_alg )
@@ -89,11 +90,13 @@ void bli_herk_blk_var1f( obj_t*  a,
 
 		// Pack A1 (if instructed).
 		bli_packm_int( &a1, &a1_pack,
-		               cntl_sub_packm_a( cntl ) );
+		               cntl_sub_packm_a( cntl ),
+                       &BLIS_SINGLE_THREADED );
 
 		// Pack C1 (if instructed).
 		bli_packm_int( &c1, &c1_pack,
-		               cntl_sub_packm_c( cntl ) );
+		               cntl_sub_packm_c( cntl ),
+                       &BLIS_SINGLE_THREADED );
 
 		// Perform herk subproblem.
 		bli_herk_int( &BLIS_ONE,

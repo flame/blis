@@ -55,6 +55,17 @@ gemm_t*           gemm_cntl_vl_mm;
 
 gemm_t*           gemm_cntl;
 
+dim_t             gemm_caucuses_at_level[5] = {1, 1, 2, 1, 1};
+
+thrinfo_t* bli_gemm_cntl_get_thrinfos()
+{
+    return bli_create_thread_info( gemm_caucuses_at_level, 5 );
+}
+
+void bli_gemm_cntl_free_thrinfos(thrinfo_t* tofree)
+{
+    //MEMORYLEAK
+}
 
 void bli_gemm_cntl_init()
 {

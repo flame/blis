@@ -39,7 +39,8 @@
 typedef void (*FUNCPTR_T)( obj_t*  a,
                            obj_t*  b,
                            obj_t*  c,
-                           gemm_t* cntl );
+                           gemm_t* cntl,
+                           thrinfo_t* thread );
 
 static FUNCPTR_T vars[6][3] =
 {
@@ -57,7 +58,8 @@ void bli_gemm_int( obj_t*  alpha,
                    obj_t*  b,
                    obj_t*  beta,
                    obj_t*  c,
-                   gemm_t* cntl )
+                   gemm_t* cntl,
+                   thrinfo_t* thread )
 {
 	obj_t     a_local;
 	obj_t     b_local;
@@ -133,6 +135,7 @@ void bli_gemm_int( obj_t*  alpha,
 	f( &a_local,
 	   &b_local,
 	   &c_local,
-	   cntl );
+	   cntl,
+       thread );
 }
 

@@ -251,10 +251,10 @@ void libblis_test_gemmtrsm_ukr_experiment( test_params_t* params,
 	                          &b, &bp );
 
 	// Pack the contents of a to ap.
-	bli_packm_blk_var1( &a, &ap );
+	bli_packm_blk_var1( &a, &ap, &BLIS_SINGLE_THREADED );
 
 	// Pack the contents of b to bp.
-	bli_packm_blk_var1( &b, &bp );
+	bli_packm_blk_var1( &b, &bp, &BLIS_SINGLE_THREADED );
 
 
 	// Create subpartitions from the a and b panels.
@@ -268,7 +268,7 @@ void libblis_test_gemmtrsm_ukr_experiment( test_params_t* params,
 		bli_copym( &c11_save, &c11 );
 
 		// Re-pack the contents of b to bp.
-		bli_packm_blk_var1( &b, &bp );
+		bli_packm_blk_var1( &b, &bp, &BLIS_SINGLE_THREADED );
 
 		time = bli_clock();
 

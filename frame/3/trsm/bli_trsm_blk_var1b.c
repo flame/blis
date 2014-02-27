@@ -68,7 +68,8 @@ void bli_trsm_blk_var1b( obj_t*  a,
 
 	// Pack B1 (if instructed).
 	bli_packm_int( b, &b_pack,
-	               cntl_sub_packm_b( cntl ) );
+	               cntl_sub_packm_b( cntl ),
+                   &BLIS_SINGLE_THREADED );
 
 	// Partition along the remaining portion of the m dimension.
 	for ( i = offA; i < m_trans; i += b_alg )
@@ -91,7 +92,8 @@ void bli_trsm_blk_var1b( obj_t*  a,
 
 		// Pack A1 (if instructed).
 		bli_packm_int( &a1, &a1_pack,
-		               cntl_sub_packm_a( cntl ) );
+		               cntl_sub_packm_a( cntl ),
+                       &BLIS_SINGLE_THREADED );
 
 		// Perform trsm subproblem.
 		bli_trsm_int( &BLIS_ONE,

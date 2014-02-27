@@ -221,8 +221,8 @@ void libblis_test_gemm_ukr_experiment( test_params_t* params,
 	                          &b, &bp );
 
 	// Pack the contents of a and b to ap and bp, respectively.
-	bli_packm_blk_var1( &a, &ap );
-	bli_packm_blk_var1( &b, &bp );
+	bli_packm_blk_var1( &a, &ap, &BLIS_SINGLE_THREADED );
+	bli_packm_blk_var1( &b, &bp, &BLIS_SINGLE_THREADED );
 	                          
 
 	// Repeat the experiment n_repeats times and record results. 

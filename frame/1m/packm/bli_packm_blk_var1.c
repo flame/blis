@@ -52,14 +52,16 @@ typedef void (*FUNCPTR_T)(
                            void*   kappa,
                            void*   c, inc_t rs_c, inc_t cs_c,
                            void*   p, inc_t rs_p, inc_t cs_p,
-                                      dim_t pd_p, inc_t ps_p
+                                      dim_t pd_p, inc_t ps_p,
+                           thrinfo_t* thread
                          );
 
 static FUNCPTR_T GENARRAY(ftypes,packm_blk_var1);
 
 
 void bli_packm_blk_var1( obj_t*   c,
-                         obj_t*   p )
+                         obj_t*   p,
+                         thrinfo_t* t )
 {
 	num_t     dt_cp     = bli_obj_datatype( *c );
 
@@ -117,7 +119,8 @@ void bli_packm_blk_var1( obj_t*   c,
 	   buf_kappa,
 	   buf_c, rs_c, cs_c,
 	   buf_p, rs_p, cs_p,
-	          pd_p, ps_p );
+	          pd_p, ps_p, 
+       t );
 }
 
 
@@ -140,7 +143,8 @@ void PASTEMAC(ch,varname )( \
                             void*   kappa, \
                             void*   c, inc_t rs_c, inc_t cs_c, \
                             void*   p, inc_t rs_p, inc_t cs_p, \
-                                       dim_t pd_p, inc_t ps_p  \
+                                       dim_t pd_p, inc_t ps_p, \
+                            thrinfo_t* thread \
                           ) \
 { \
 	ctype* restrict kappa_cast = kappa; \
@@ -183,6 +187,9 @@ void PASTEMAC(ch,varname )( \
 	   to pack it. */ \
 	if ( bli_is_zeros( uploc ) && \
 	     bli_is_triangular( strucc ) ) return; \
+\
+    dim_t t_id = thread_id( thread ); \
+    dim_t num_threads = thread_num_threads( thread ); \
 \
 	/* Extract the conjugation bit from the transposition argument. */ \
 	conjc = bli_extract_conj( transc ); \
@@ -260,8 +267,8 @@ void PASTEMAC(ch,varname )( \
 \
 	p_begin = p_cast; \
 \
-	for ( ic  = ic0,    ip  = ip0,    it  = 0; it < num_iter; \
-	      ic += ic_inc, ip += ip_inc, it += 1 ) \
+	for ( ic  = ic0 + t_id * ic_inc,  ip  = ip0 + t_id * ip_inc,  it  = t_id; it < num_iter; \
+	      ic += num_threads * ic_inc, ip += num_threads * ip_inc, it += num_threads ) \
 	{ \
 		panel_dim_i = bli_min( panel_dim_max, iter_dim - ic ); \
 \

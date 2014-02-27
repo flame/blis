@@ -127,7 +127,7 @@ void bli_mem_acquire_m( siz_t     req_size,
 
 
 		// BEGIN CRITICAL SECTION
-
+        _Pragma( "omp critical (mem)" ){
 
 		// Query the index of the contiguous memory block that resides at the
 		// "top" of the pool.
@@ -145,6 +145,7 @@ void bli_mem_acquire_m( siz_t     req_size,
 
 
 		// END CRITICAL SECTION
+        }
 
 		// Query the size of the blocks in the pool so we can store it in the
 		// mem_t object.
@@ -198,6 +199,7 @@ void bli_mem_release( mem_t* mem )
 
 
 		// BEGIN CRITICAL SECTION
+        _Pragma( "omp critical (mem)" ){
 
 
 		// Increment the top of the memory pool.
@@ -211,6 +213,7 @@ void bli_mem_release( mem_t* mem )
 
 
 		// END CRITICAL SECTION
+        }
 	}
 
 

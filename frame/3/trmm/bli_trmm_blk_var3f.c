@@ -66,7 +66,8 @@ void bli_trmm_blk_var3f( obj_t*  a,
 
 	// Pack C (if instructed).
 	bli_packm_int( c, &c_pack,
-	               cntl_sub_packm_c( cntl ) );
+	               cntl_sub_packm_c( cntl ),
+                   &BLIS_SINGLE_THREADED );
 
 	// Partition along the k dimension.
 	for ( i = 0; i < k_trans; i += b_alg )
@@ -89,11 +90,13 @@ void bli_trmm_blk_var3f( obj_t*  a,
 
 		// Pack A1 (if instructed).
 		bli_packm_int( &a1, &a1_pack,
-		               cntl_sub_packm_a( cntl ) );
+		               cntl_sub_packm_a( cntl ),
+                       &BLIS_SINGLE_THREADED );
 
 		// Pack B1 (if instructed).
 		bli_packm_int( &b1, &b1_pack,
-		               cntl_sub_packm_b( cntl ) );
+		               cntl_sub_packm_b( cntl ),
+                       &BLIS_SINGLE_THREADED );
 
 		// Perform trmm subproblem.
 		bli_trmm_int( &BLIS_ONE,

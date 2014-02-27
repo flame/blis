@@ -109,7 +109,8 @@ void bli_hemv_blk_var2( conj_t  conjh,
 
 		// Copy/pack A11, x1, y1 (if needed).
 		bli_packm_int( &a11, &a11_pack,
-		               cntl_sub_packm_a11( cntl ) );
+		               cntl_sub_packm_a11( cntl ),
+                       &BLIS_SINGLE_THREADED );
 		bli_packv_int( &x1, &x1_pack,
 		               cntl_sub_packv_x1( cntl ) );
 		bli_packv_int( &y1, &y1_pack,

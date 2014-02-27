@@ -65,6 +65,12 @@ extern "C" {
 
 #include "bli_type_defs.h"
 #include "bli_macro_defs.h"
+
+// -- Threading definitions --
+#include <omp.h>
+#include "bli_threading.h"
+
+// -- Constant definitions --
 #include "bli_extern_defs.h"
 
 

@@ -43,4 +43,6 @@ extern obj_t BLIS_MINUS_ONE_HALF;
 extern obj_t BLIS_MINUS_ONE;
 extern obj_t BLIS_MINUS_TWO;
 
+extern thrinfo_t BLIS_SINGLE_THREADED;
+
 #endif

@@ -76,14 +76,14 @@ GIT_LOG    := $(GIT) log --decorate
 #
 
 # --- Determine the C compiler and related flags ---
-CC             := gcc
+CC             := gcc-4.8
 # Enable IEEE Standard 1003.1-2004 (POSIX.1d). 
 # NOTE: This is needed to enable posix_memalign().
 CPPROCFLAGS    := -D_POSIX_C_SOURCE=200112L
-CMISCFLAGS     := -std=c99 # -fopenmp -pg
+CMISCFLAGS     := -std=c99 -fopenmp # -pg
 CDBGFLAGS      := -g
 CWARNFLAGS     := -Wall
-COPTFLAGS      := -O2
+COPTFLAGS      := -O0 -g
 CKOPTFLAGS     := $(COPTFLAGS)
 CVECFLAGS      := #-msse3 -march=native # -mfpmath=sse
 
@@ -100,7 +100,7 @@ ARFLAGS        := cru
 
 # --- Determine the linker and related flags ---
 LINKER         := $(CC)
-LDFLAGS        := -lm
+LDFLAGS        := -fopenmp -lm
 
 
 

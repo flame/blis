@@ -39,7 +39,8 @@
 void bli_gemm_ker_var2( obj_t*  a,
                         obj_t*  b,
                         obj_t*  c,
-                        gemm_t* cntl );
+                        gemm_t* cntl,
+                        thrinfo_t* thread );
 
 
 //
