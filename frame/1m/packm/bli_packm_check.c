@@ -66,8 +66,6 @@ void bli_packm_int_check( obj_t*   a,
 	bli_check_error_code( e_val );
 
 	e_val = bli_check_floating_object( p );
-    if(e_val == BLIS_EXPECTED_FLOATING_POINT_DATATYPE)
-        printf("HI\n");
 	bli_check_error_code( e_val );
 
 	// Check object dimensions.

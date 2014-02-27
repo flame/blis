@@ -100,9 +100,8 @@ void bli_gemm_blk_var1f( obj_t*  a,
 		                       i, b_alg, a, &a1 );
 		bli_acquire_mpart_t2b( BLIS_SUBPART1,
 		                       i, b_alg, c, &c1 );
-        if( !thread_am_caucus_chief( thread ) ) 
-        printf("DOGS\n");
-		// Initialize objects for packing A1 and C1.
+		
+        // Initialize objects for packing A1 and C1.
         if( thread_am_caucus_chief( thread ) ) {
             bli_packm_init( &a1, a1_pack,
                             cntl_sub_packm_a( cntl ) );
