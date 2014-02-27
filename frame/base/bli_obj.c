@@ -268,13 +268,14 @@ void bli_obj_create_const( double value, obj_t* obj )
 	temp_z = bli_obj_buffer_for_const( BLIS_DCOMPLEX, *obj );
 	temp_i = bli_obj_buffer_for_const( BLIS_INT,      *obj );
 
-	*temp_s      = ( float  ) value;
-	*temp_d      =            value;
-	temp_c->real = ( float  ) value;
-	temp_c->imag = ( float  ) 0.0;
-	temp_z->real =            value;
-	temp_z->imag =            0.0;
-	*temp_i      = ( gint_t ) value;
+	// Use the bli_??sets() macros to set the temp variables in order to
+	// properly support BLIS_ENABLE_C99_COMPLEX.
+	bli_dssets( value, 0.0, *temp_s );
+	bli_ddsets( value, 0.0, *temp_d );
+	bli_dcsets( value, 0.0, *temp_c );
+	bli_dzsets( value, 0.0, *temp_z );
+
+	*temp_i = ( gint_t ) value;
 }
 
 void bli_obj_create_const_copy_of( obj_t* a, obj_t* b )
@@ -284,6 +285,7 @@ void bli_obj_create_const_copy_of( obj_t* a, obj_t* b )
 	double*   temp_d;
 	scomplex* temp_c;
 	dcomplex* temp_z;
+	void*     buf_a;
 	dcomplex  value;
 
 	if ( bli_error_checking_is_enabled() )
@@ -297,41 +299,37 @@ void bli_obj_create_const_copy_of( obj_t* a, obj_t* b )
 	temp_z = bli_obj_buffer_for_const( BLIS_DCOMPLEX, *b );
 	temp_i = bli_obj_buffer_for_const( BLIS_INT,      *b );
 
-	value.real = 0.0;
-	value.imag = 0.0;
+	buf_a = bli_obj_buffer_at_off( *a );
+
+	bli_zzsets( 0.0, 0.0, value ); 
 
 	if ( bli_obj_is_float( *a ) )
 	{
-		value.real = *(( float*    )( bli_obj_buffer_at_off( *a ) ));
-		value.imag = 0.0;
+		bli_szcopys( *(( float*    )buf_a), value );
 	}
 	else if ( bli_obj_is_double( *a ) )
 	{
-		value.real = *(( double*   )( bli_obj_buffer_at_off( *a ) ));
-		value.imag = 0.0;
+		bli_dzcopys( *(( double*   )buf_a), value );
 	}
 	else if ( bli_obj_is_scomplex( *a ) )
 	{
-		value.real =  (( scomplex* )( bli_obj_buffer_at_off( *a ) ))->real;
-		value.imag =  (( scomplex* )( bli_obj_buffer_at_off( *a ) ))->imag;
+		bli_czcopys( *(( scomplex* )buf_a), value );
 	}
 	else if ( bli_obj_is_dcomplex( *a ) )
 	{
-		value.real =  (( dcomplex* )( bli_obj_buffer_at_off( *a ) ))->real;
-		value.imag =  (( dcomplex* )( bli_obj_buffer_at_off( *a ) ))->imag;
+		bli_zzcopys( *(( dcomplex* )buf_a), value );
 	}
 	else
 	{
 		bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 	}
 
-	*temp_s      = ( float  ) value.real;
-	*temp_d      =            value.real;
-	temp_c->real = ( float  ) value.real;
-	temp_c->imag = ( float  ) value.imag;
-	temp_z->real =            value.real;
-	temp_z->imag =            value.imag;
-	*temp_i      = ( gint_t ) value.real;
+	bli_zscopys( value, *temp_s );
+	bli_zdcopys( value, *temp_d );
+	bli_zccopys( value, *temp_c );
+	bli_zzcopys( value, *temp_z );
+
+	*temp_i = ( gint_t ) bli_zreal( value );
 }
 
 void bli_adjust_strides( dim_t  m,

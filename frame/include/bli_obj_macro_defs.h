@@ -232,9 +232,9 @@
 	(obj).info = ( (obj).info & ~BLIS_TRANS_BIT ) | (trans); \
 }
 
-#define bli_obj_set_conj( conj, obj ) \
+#define bli_obj_set_conj( conjval, obj ) \
 { \
-	(obj).info = ( (obj).info & ~BLIS_CONJ_BIT ) | (conj); \
+	(obj).info = ( (obj).info & ~BLIS_CONJ_BIT ) | (conjval); \
 }
 
 #define bli_obj_set_uplo( uplo, obj ) \
@@ -329,9 +329,9 @@
 	(obj).info = ( (obj).info ^ (trans) ); \
 }
 
-#define bli_obj_apply_conj( conj, obj )\
+#define bli_obj_apply_conj( conjval, obj )\
 { \
-	(obj).info = ( (obj).info ^ (conj) ); \
+	(obj).info = ( (obj).info ^ (conjval) ); \
 }
 
 
@@ -842,10 +842,10 @@ bli_obj_width_stored( obj )
 
 // Create an alias with a conj value applied.
 
-#define bli_obj_alias_with_conj( conj, a, b ) \
+#define bli_obj_alias_with_conj( conja, a, b ) \
 { \
 	bli_obj_alias_to( a, b ); \
-	bli_obj_apply_conj( conj, b ); \
+	bli_obj_apply_conj( conja, b ); \
 }
 
 
