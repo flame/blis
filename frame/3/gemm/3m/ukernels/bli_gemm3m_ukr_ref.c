@@ -90,11 +90,11 @@ void PASTEMAC(ch,varname)( \
 	ctype_r* restrict one_r     = PASTEMAC(chr,1); \
 	ctype_r* restrict zero_r    = PASTEMAC(chr,0); \
 \
-	ctype_r* restrict alpha_r   = &PASTEMAC(ch,real)( *alpha ); \
-	ctype_r* restrict alpha_i   = &PASTEMAC(ch,imag)( *alpha ); \
+	ctype_r           alpha_r   = PASTEMAC(ch,real)( *alpha ); \
+	ctype_r           alpha_i   = PASTEMAC(ch,imag)( *alpha ); \
 \
-	ctype_r* restrict beta_r    = &PASTEMAC(ch,real)( *beta ); \
-	ctype_r* restrict beta_i    = &PASTEMAC(ch,imag)( *beta ); \
+	ctype_r           beta_r    = PASTEMAC(ch,real)( *beta ); \
+	ctype_r           beta_i    = PASTEMAC(ch,imag)( *beta ); \
 \
 	void*             a_next    = bli_auxinfo_next_a( data ); \
 	void*             b_next    = bli_auxinfo_next_b( data ); \
@@ -106,27 +106,27 @@ void PASTEMAC(ch,varname)( \
 	   allow an alpha with non-zero imaginary component to be passed
 	   in, because it can't be applied properly using the 3m method.
 	   If alpha is not real, then something is very wrong. */ \
-	if ( !PASTEMAC(chr,eq0)( *alpha_i ) ) \
+	if ( !PASTEMAC(chr,eq0)( alpha_i ) ) \
 		bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \
 \
 \
 	/* Copy the contents of c to a temporary buffer ct. */ \
-	if ( !PASTEMAC(chr,eq0)( *beta_i ) ) \
+	if ( !PASTEMAC(chr,eq0)( beta_i ) ) \
 	{ \
 		/* We can handle a non-zero imaginary component on beta, but to do
 		   so we have to manually scale c and then use beta == 1 for the
 		   micro-kernel calls. */ \
 		for ( i = 0; i < m; ++i ) \
 		for ( j = 0; j < n; ++j ) \
-		PASTEMAC(ch,scal2ris)( *beta_r, \
-		                       *beta_i, \
+		PASTEMAC(ch,scal2ris)( beta_r, \
+		                       beta_i, \
 		                       *(c_r  + i*rs_c2 + j*cs_c2), \
 		                       *(c_i  + i*rs_c2 + j*cs_c2), \
 		                       *(ct_r + i*rs_ct + j*cs_ct), \
 		                       *(ct_i + i*rs_ct + j*cs_ct) ); \
 \
 		/* Use beta.r == 1.0. */ \
-		beta_r = one_r; \
+		beta_r = *one_r; \
 	} \
 	else \
 	{ \
@@ -147,7 +147,7 @@ void PASTEMAC(ch,varname)( \
 \
 	/* ab.r = a.r * b.r; */ \
 	PASTEMAC(chr,gemmukr)( k, \
-	                       alpha_r, \
+	                       &alpha_r, \
 	                       a_r, \
 	                       b_r, \
 	                       zero_r, \
@@ -158,7 +158,7 @@ void PASTEMAC(ch,varname)( \
 \
 	/* ab.i = a.i * b.i; */ \
 	PASTEMAC(chr,gemmukr)( k, \
-	                       alpha_r, \
+	                       &alpha_r, \
 	                       a_i, \
 	                       b_i, \
 	                       zero_r, \
@@ -169,10 +169,10 @@ void PASTEMAC(ch,varname)( \
 \
 	/* ct.i = a.ri * b.ri; */ \
 	PASTEMAC(chr,gemmukr)( k, \
-	                       alpha_r, \
+	                       &alpha_r, \
 	                       a_ri, \
 	                       b_ri, \
-	                       beta_r, \
+	                       &beta_r, \
 	                       ct_i, rs_ct, cs_ct, \
 	                       data ); \
 \
@@ -189,7 +189,7 @@ void PASTEMAC(ch,varname)( \
 		ctype_r gammat_r    = *(ct_r + i*rs_ct + j*cs_ct); \
 		ctype_r gammat_i    = *(ct_i + i*rs_ct + j*cs_ct); \
 \
-		PASTEMAC(chr,scals)( *beta_r, gammat_r ); \
+		PASTEMAC(chr,scals)( beta_r, gammat_r ); \
 \
 		PASTEMAC(chr,adds)( alphabeta_r, gammat_r ); \
 		PASTEMAC(chr,subs)( alphabeta_i, gammat_r ); \

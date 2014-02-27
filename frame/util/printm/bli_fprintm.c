@@ -69,14 +69,14 @@ void bli_fprintm( FILE* file, char* s1, obj_t* x, char* format, char* s2 )
 		double*   dp = bli_obj_buffer_for_const( BLIS_DOUBLE,   *x );
 		scomplex* cp = bli_obj_buffer_for_const( BLIS_SCOMPLEX, *x );
 		dcomplex* zp = bli_obj_buffer_for_const( BLIS_DCOMPLEX, *x );
-		int*      ip = bli_obj_buffer_for_const( BLIS_INT,      *x );
+		gint_t*   ip = bli_obj_buffer_for_const( BLIS_INT,      *x );
 
 		fprintf( file, "%s\n", s1 );
-		fprintf( file, " float:     %9.2e\n", *sp );
-		fprintf( file, " double:    %9.2e\n", *dp );
-		fprintf( file, " scomplex:  %9.2e + %9.2e\n", cp->real, cp->imag );
-		fprintf( file, " dcomplex:  %9.2e + %9.2e\n", zp->real, zp->imag );
-		fprintf( file, " int:       %d\n", *ip );
+		fprintf( file, " float:     %9.2e\n",         bli_sreal( *sp ) );
+		fprintf( file, " double:    %9.2e\n",         bli_dreal( *dp ) );
+		fprintf( file, " scomplex:  %9.2e + %9.2e\n", bli_creal( *cp ), bli_cimag( *cp ) );
+		fprintf( file, " dcomplex:  %9.2e + %9.2e\n", bli_zreal( *zp ), bli_zimag( *zp ) );
+		fprintf( file, " int:       %d\n",            *ip );
 		fprintf( file, "\n" );
 		return;
 	}

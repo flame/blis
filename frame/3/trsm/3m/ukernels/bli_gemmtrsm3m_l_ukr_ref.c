@@ -85,8 +85,8 @@ void PASTEMAC(ch,varname)( \
 	ctype_r* restrict zero_r      = PASTEMAC(chr,0); \
 	ctype_r* restrict minus_one_r = PASTEMAC(chr,m1); \
 \
-	ctype_r* restrict alpha_r     = &PASTEMAC(ch,real)( *alpha ); \
-	ctype_r* restrict alpha_i     = &PASTEMAC(ch,imag)( *alpha ); \
+	ctype_r           alpha_r     = PASTEMAC(ch,real)( *alpha ); \
+	ctype_r           alpha_i     = PASTEMAC(ch,imag)( *alpha ); \
 \
 	void*             a_next      = bli_auxinfo_next_a( data ); \
 	void*             b_next      = bli_auxinfo_next_b( data ); \
@@ -95,20 +95,20 @@ void PASTEMAC(ch,varname)( \
 \
 \
 	/* Copy the contents of c to a temporary buffer ct. */ \
-	if ( !PASTEMAC(chr,eq0)( *alpha_i ) ) \
+	if ( !PASTEMAC(chr,eq0)( alpha_i ) ) \
 	{ \
 		/* We can handle a non-zero imaginary component on alpha, but to do
 		   so we have to manually scale b and then use alpha == 1 for the
 		   micro-kernel calls. */ \
 		for ( i = 0; i < m; ++i ) \
 		for ( j = 0; j < n; ++j ) \
-		PASTEMAC(ch,scalris)( *alpha_r, \
-		                      *alpha_i, \
+		PASTEMAC(ch,scalris)( alpha_r, \
+		                      alpha_i, \
 		                      *(b11_r + i*rs_b + j*cs_b), \
 		                      *(b11_i + i*rs_b + j*cs_b) ); \
 \
 		/* Use alpha.r == 1.0. */ \
-		alpha_r = one_r; \
+		alpha_r = *one_r; \
 	} \
 \
 \
@@ -144,7 +144,7 @@ void PASTEMAC(ch,varname)( \
 	                       minus_one_r, \
 	                       a10_ri, \
 	                       b01_ri, \
-	                       alpha_r, \
+	                       &alpha_r, \
 	                       b11_i, rs_b, cs_b, \
 	                       data ); \
 \
@@ -161,7 +161,7 @@ void PASTEMAC(ch,varname)( \
 		ctype_r beta11_r    = *(b11_r + i*rs_b  + j*cs_b); \
 		ctype_r beta11_i    = *(b11_i + i*rs_b  + j*cs_b); \
 \
-		PASTEMAC(chr,scals)( *alpha_r, beta11_r ); \
+		PASTEMAC(chr,scals)( alpha_r, beta11_r ); \
 \
 		PASTEMAC(chr,subs)( alphabeta_r, beta11_r ); \
 		PASTEMAC(chr,adds)( alphabeta_i, beta11_r ); \

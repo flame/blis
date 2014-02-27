@@ -499,10 +499,10 @@ void PASTEMAC(ch,varname)( \
 			ctype_r* c11_i   = ( ctype_r* )c11 + 1; \
 			ctype_r* p11_r   = ( ctype_r* )p11; \
 			ctype_r* p11_i   = ( ctype_r* )p11 + psp; \
-			ctype_r* kappa_r = &PASTEMAC(ch,real)( *kappa ); \
-			ctype_r* kappa_i = &PASTEMAC(ch,imag)( *kappa ); \
 			ctype_r* alpha_r = one_r; \
 			ctype_r* alpha_i = ( bli_is_conj( conjc ) ? minus_one_r : one_r ); \
+			ctype_r  kappa_r = PASTEMAC(ch,real)( *kappa ); \
+			ctype_r  kappa_i = PASTEMAC(ch,imag)( *kappa ); \
 \
 			/* Copy the real part of the stored triangle of c11 to p11_r. */ \
 			PASTEMAC(chr,scal2m)( 0, \
@@ -547,8 +547,8 @@ void PASTEMAC(ch,varname)( \
 				PASTEMAC(ch,scalris_mxn_u)( 0, \
 				                            p11_m, \
 				                            p11_n, \
-				                            kappa_r, \
-				                            kappa_i, \
+				                            &kappa_r, \
+				                            &kappa_i, \
 				                            p11_r,  \
 				                            p11_i, rs_p11, cs_p11 ); \
 			} \
@@ -557,8 +557,8 @@ void PASTEMAC(ch,varname)( \
 				PASTEMAC(ch,scalris_mxn_l)( 0, \
 				                            p11_m, \
 				                            p11_n, \
-				                            kappa_r, \
-				                            kappa_i, \
+				                            &kappa_r, \
+				                            &kappa_i, \
 				                            p11_r,  \
 				                            p11_i, rs_p11, cs_p11 ); \
 			} \
@@ -835,10 +835,10 @@ void PASTEMAC(ch,varname)( \
 			ctype_r* c11_i   = ( ctype_r* )c11 + 1; \
 			ctype_r* p11_r   = ( ctype_r* )p11; \
 			ctype_r* p11_i   = ( ctype_r* )p11 + psp; \
-			ctype_r* kappa_r = &PASTEMAC(ch,real)( *kappa ); \
-			ctype_r* kappa_i = &PASTEMAC(ch,imag)( *kappa ); \
 			ctype_r* alpha_r = one_r; \
 			ctype_r* alpha_i = ( bli_is_conj( conjc ) ? minus_one_r : one_r ); \
+			ctype_r  kappa_r = PASTEMAC(ch,real)( *kappa ); \
+			ctype_r  kappa_i = PASTEMAC(ch,imag)( *kappa ); \
 \
 			/* Copy the real part of the stored triangle of c11 to p11_r. */ \
 			PASTEMAC(chr,scal2m)( 0, \
@@ -883,8 +883,8 @@ void PASTEMAC(ch,varname)( \
 				PASTEMAC(ch,scalris_mxn_u)( 0, \
 				                            p11_m, \
 				                            p11_n, \
-				                            kappa_r, \
-				                            kappa_i, \
+				                            &kappa_r, \
+				                            &kappa_i, \
 				                            p11_r,  \
 				                            p11_i, rs_p11, cs_p11 ); \
 			} \
@@ -893,8 +893,8 @@ void PASTEMAC(ch,varname)( \
 				PASTEMAC(ch,scalris_mxn_l)( 0, \
 				                            p11_m, \
 				                            p11_n, \
-				                            kappa_r, \
-				                            kappa_i, \
+				                            &kappa_r, \
+				                            &kappa_i, \
 				                            p11_r,  \
 				                            p11_i, rs_p11, cs_p11 ); \
 			} \

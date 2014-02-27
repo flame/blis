@@ -184,7 +184,7 @@
 
 /*     Quick return if possible. */
 
-    if (*n == 0 || (alpha->real == 0.f && alpha->imag == 0.f)) {
+    if (*n == 0 || (bli_creal(*alpha) == 0.f && bli_cimag(*alpha) == 0.f)) {
 	return 0;
     }
 
@@ -219,56 +219,44 @@
 	    for (j = 1; j <= i__1; ++j) {
 		i__2 = j;
 		i__3 = j;
-		if (x[i__2].real != 0.f || x[i__2].imag != 0.f || (y[i__3].real != 0.f 
-			|| y[i__3].imag != 0.f)) {
+		if (bli_creal(x[i__2]) != 0.f || bli_cimag(x[i__2]) != 0.f || (bli_creal(y[i__3]) != 0.f 
+			|| bli_cimag(y[i__3]) != 0.f)) {
 		    bla_r_cnjg(&q__2, &y[j]);
-		    q__1.real = alpha->real * q__2.real - alpha->imag * q__2.imag, q__1.imag = 
-			    alpha->real * q__2.imag + alpha->imag * q__2.real;
-		    temp1.real = q__1.real, temp1.imag = q__1.imag;
+		    bli_csets( (bli_creal(*alpha) * bli_creal(q__2) - bli_cimag(*alpha) * bli_cimag(q__2)), (bli_creal(*alpha) * bli_cimag(q__2) + bli_cimag(*alpha) * bli_creal(q__2)), q__1 );
+		    bli_csets( (bli_creal(q__1)), (bli_cimag(q__1)), temp1 );
 		    i__2 = j;
-		    q__2.real = alpha->real * x[i__2].real - alpha->imag * x[i__2].imag, 
-			    q__2.imag = alpha->real * x[i__2].imag + alpha->imag * x[i__2]
-			    .real;
+		    bli_csets( (bli_creal(*alpha) * bli_creal(x[i__2]) - bli_cimag(*alpha) * bli_cimag(x[i__2])), (bli_creal(*alpha) * bli_cimag(x[i__2]) + bli_cimag(*alpha) * bli_creal(x[i__2])), q__2 );
 		    bla_r_cnjg(&q__1, &q__2);
-		    temp2.real = q__1.real, temp2.imag = q__1.imag;
+		    bli_csets( (bli_creal(q__1)), (bli_cimag(q__1)), temp2 );
 		    k = kk;
 		    i__2 = j - 1;
 		    for (i__ = 1; i__ <= i__2; ++i__) {
 			i__3 = k;
 			i__4 = k;
 			i__5 = i__;
-			q__3.real = x[i__5].real * temp1.real - x[i__5].imag * temp1.imag, 
-				q__3.imag = x[i__5].real * temp1.imag + x[i__5].imag * 
-				temp1.real;
-			q__2.real = ap[i__4].real + q__3.real, q__2.imag = ap[i__4].imag + 
-				q__3.imag;
+			bli_csets( (bli_creal(x[i__5]) * bli_creal(temp1) - bli_cimag(x[i__5]) * bli_cimag(temp1)), (bli_creal(x[i__5]) * bli_cimag(temp1) + bli_cimag(x[i__5]) * bli_creal(temp1)), q__3 );
+			bli_csets( (bli_creal(ap[i__4]) + bli_creal(q__3)), (bli_cimag(ap[i__4]) + bli_cimag(q__3)), q__2 );
 			i__6 = i__;
-			q__4.real = y[i__6].real * temp2.real - y[i__6].imag * temp2.imag, 
-				q__4.imag = y[i__6].real * temp2.imag + y[i__6].imag * 
-				temp2.real;
-			q__1.real = q__2.real + q__4.real, q__1.imag = q__2.imag + q__4.imag;
-			ap[i__3].real = q__1.real, ap[i__3].imag = q__1.imag;
+			bli_csets( (bli_creal(y[i__6]) * bli_creal(temp2) - bli_cimag(y[i__6]) * bli_cimag(temp2)), (bli_creal(y[i__6]) * bli_cimag(temp2) + bli_cimag(y[i__6]) * bli_creal(temp2)), q__4 );
+			bli_csets( (bli_creal(q__2) + bli_creal(q__4)), (bli_cimag(q__2) + bli_cimag(q__4)), q__1 );
+			bli_csets( (bli_creal(q__1)), (bli_cimag(q__1)), ap[i__3] );
 			++k;
 /* L10: */
 		    }
 		    i__2 = kk + j - 1;
 		    i__3 = kk + j - 1;
 		    i__4 = j;
-		    q__2.real = x[i__4].real * temp1.real - x[i__4].imag * temp1.imag, 
-			    q__2.imag = x[i__4].real * temp1.imag + x[i__4].imag * 
-			    temp1.real;
+		    bli_csets( (bli_creal(x[i__4]) * bli_creal(temp1) - bli_cimag(x[i__4]) * bli_cimag(temp1)), (bli_creal(x[i__4]) * bli_cimag(temp1) + bli_cimag(x[i__4]) * bli_creal(temp1)), q__2 );
 		    i__5 = j;
-		    q__3.real = y[i__5].real * temp2.real - y[i__5].imag * temp2.imag, 
-			    q__3.imag = y[i__5].real * temp2.imag + y[i__5].imag * 
-			    temp2.real;
-		    q__1.real = q__2.real + q__3.real, q__1.imag = q__2.imag + q__3.imag;
-		    r__1 = ap[i__3].real + q__1.real;
-		    ap[i__2].real = r__1, ap[i__2].imag = 0.f;
+		    bli_csets( (bli_creal(y[i__5]) * bli_creal(temp2) - bli_cimag(y[i__5]) * bli_cimag(temp2)), (bli_creal(y[i__5]) * bli_cimag(temp2) + bli_cimag(y[i__5]) * bli_creal(temp2)), q__3 );
+		    bli_csets( (bli_creal(q__2) + bli_creal(q__3)), (bli_cimag(q__2) + bli_cimag(q__3)), q__1 );
+		    r__1 = bli_creal(ap[i__3]) + bli_creal(q__1);
+		    bli_csets( (r__1), (0.f), ap[i__2] );
 		} else {
 		    i__2 = kk + j - 1;
 		    i__3 = kk + j - 1;
-		    r__1 = ap[i__3].real;
-		    ap[i__2].real = r__1, ap[i__2].imag = 0.f;
+		    r__1 = bli_creal(ap[i__3]);
+		    bli_csets( (r__1), (0.f), ap[i__2] );
 		}
 		kk += j;
 /* L20: */
@@ -278,18 +266,15 @@
 	    for (j = 1; j <= i__1; ++j) {
 		i__2 = jx;
 		i__3 = jy;
-		if (x[i__2].real != 0.f || x[i__2].imag != 0.f || (y[i__3].real != 0.f 
-			|| y[i__3].imag != 0.f)) {
+		if (bli_creal(x[i__2]) != 0.f || bli_cimag(x[i__2]) != 0.f || (bli_creal(y[i__3]) != 0.f 
+			|| bli_cimag(y[i__3]) != 0.f)) {
 		    bla_r_cnjg(&q__2, &y[jy]);
-		    q__1.real = alpha->real * q__2.real - alpha->imag * q__2.imag, q__1.imag = 
-			    alpha->real * q__2.imag + alpha->imag * q__2.real;
-		    temp1.real = q__1.real, temp1.imag = q__1.imag;
+		    bli_csets( (bli_creal(*alpha) * bli_creal(q__2) - bli_cimag(*alpha) * bli_cimag(q__2)), (bli_creal(*alpha) * bli_cimag(q__2) + bli_cimag(*alpha) * bli_creal(q__2)), q__1 );
+		    bli_csets( (bli_creal(q__1)), (bli_cimag(q__1)), temp1 );
 		    i__2 = jx;
-		    q__2.real = alpha->real * x[i__2].real - alpha->imag * x[i__2].imag, 
-			    q__2.imag = alpha->real * x[i__2].imag + alpha->imag * x[i__2]
-			    .real;
+		    bli_csets( (bli_creal(*alpha) * bli_creal(x[i__2]) - bli_cimag(*alpha) * bli_cimag(x[i__2])), (bli_creal(*alpha) * bli_cimag(x[i__2]) + bli_cimag(*alpha) * bli_creal(x[i__2])), q__2 );
 		    bla_r_cnjg(&q__1, &q__2);
-		    temp2.real = q__1.real, temp2.imag = q__1.imag;
+		    bli_csets( (bli_creal(q__1)), (bli_cimag(q__1)), temp2 );
 		    ix = kx;
 		    iy = ky;
 		    i__2 = kk + j - 2;
@@ -297,17 +282,12 @@
 			i__3 = k;
 			i__4 = k;
 			i__5 = ix;
-			q__3.real = x[i__5].real * temp1.real - x[i__5].imag * temp1.imag, 
-				q__3.imag = x[i__5].real * temp1.imag + x[i__5].imag * 
-				temp1.real;
-			q__2.real = ap[i__4].real + q__3.real, q__2.imag = ap[i__4].imag + 
-				q__3.imag;
+			bli_csets( (bli_creal(x[i__5]) * bli_creal(temp1) - bli_cimag(x[i__5]) * bli_cimag(temp1)), (bli_creal(x[i__5]) * bli_cimag(temp1) + bli_cimag(x[i__5]) * bli_creal(temp1)), q__3 );
+			bli_csets( (bli_creal(ap[i__4]) + bli_creal(q__3)), (bli_cimag(ap[i__4]) + bli_cimag(q__3)), q__2 );
 			i__6 = iy;
-			q__4.real = y[i__6].real * temp2.real - y[i__6].imag * temp2.imag, 
-				q__4.imag = y[i__6].real * temp2.imag + y[i__6].imag * 
-				temp2.real;
-			q__1.real = q__2.real + q__4.real, q__1.imag = q__2.imag + q__4.imag;
-			ap[i__3].real = q__1.real, ap[i__3].imag = q__1.imag;
+			bli_csets( (bli_creal(y[i__6]) * bli_creal(temp2) - bli_cimag(y[i__6]) * bli_cimag(temp2)), (bli_creal(y[i__6]) * bli_cimag(temp2) + bli_cimag(y[i__6]) * bli_creal(temp2)), q__4 );
+			bli_csets( (bli_creal(q__2) + bli_creal(q__4)), (bli_cimag(q__2) + bli_cimag(q__4)), q__1 );
+			bli_csets( (bli_creal(q__1)), (bli_cimag(q__1)), ap[i__3] );
 			ix += *incx;
 			iy += *incy;
 /* L30: */
@@ -315,21 +295,17 @@
 		    i__2 = kk + j - 1;
 		    i__3 = kk + j - 1;
 		    i__4 = jx;
-		    q__2.real = x[i__4].real * temp1.real - x[i__4].imag * temp1.imag, 
-			    q__2.imag = x[i__4].real * temp1.imag + x[i__4].imag * 
-			    temp1.real;
+		    bli_csets( (bli_creal(x[i__4]) * bli_creal(temp1) - bli_cimag(x[i__4]) * bli_cimag(temp1)), (bli_creal(x[i__4]) * bli_cimag(temp1) + bli_cimag(x[i__4]) * bli_creal(temp1)), q__2 );
 		    i__5 = jy;
-		    q__3.real = y[i__5].real * temp2.real - y[i__5].imag * temp2.imag, 
-			    q__3.imag = y[i__5].real * temp2.imag + y[i__5].imag * 
-			    temp2.real;
-		    q__1.real = q__2.real + q__3.real, q__1.imag = q__2.imag + q__3.imag;
-		    r__1 = ap[i__3].real + q__1.real;
-		    ap[i__2].real = r__1, ap[i__2].imag = 0.f;
+		    bli_csets( (bli_creal(y[i__5]) * bli_creal(temp2) - bli_cimag(y[i__5]) * bli_cimag(temp2)), (bli_creal(y[i__5]) * bli_cimag(temp2) + bli_cimag(y[i__5]) * bli_creal(temp2)), q__3 );
+		    bli_csets( (bli_creal(q__2) + bli_creal(q__3)), (bli_cimag(q__2) + bli_cimag(q__3)), q__1 );
+		    r__1 = bli_creal(ap[i__3]) + bli_creal(q__1);
+		    bli_csets( (r__1), (0.f), ap[i__2] );
 		} else {
 		    i__2 = kk + j - 1;
 		    i__3 = kk + j - 1;
-		    r__1 = ap[i__3].real;
-		    ap[i__2].real = r__1, ap[i__2].imag = 0.f;
+		    r__1 = bli_creal(ap[i__3]);
+		    bli_csets( (r__1), (0.f), ap[i__2] );
 		}
 		jx += *incx;
 		jy += *incy;
@@ -346,56 +322,44 @@
 	    for (j = 1; j <= i__1; ++j) {
 		i__2 = j;
 		i__3 = j;
-		if (x[i__2].real != 0.f || x[i__2].imag != 0.f || (y[i__3].real != 0.f 
-			|| y[i__3].imag != 0.f)) {
+		if (bli_creal(x[i__2]) != 0.f || bli_cimag(x[i__2]) != 0.f || (bli_creal(y[i__3]) != 0.f 
+			|| bli_cimag(y[i__3]) != 0.f)) {
 		    bla_r_cnjg(&q__2, &y[j]);
-		    q__1.real = alpha->real * q__2.real - alpha->imag * q__2.imag, q__1.imag = 
-			    alpha->real * q__2.imag + alpha->imag * q__2.real;
-		    temp1.real = q__1.real, temp1.imag = q__1.imag;
+		    bli_csets( (bli_creal(*alpha) * bli_creal(q__2) - bli_cimag(*alpha) * bli_cimag(q__2)), (bli_creal(*alpha) * bli_cimag(q__2) + bli_cimag(*alpha) * bli_creal(q__2)), q__1 );
+		    bli_csets( (bli_creal(q__1)), (bli_cimag(q__1)), temp1 );
 		    i__2 = j;
-		    q__2.real = alpha->real * x[i__2].real - alpha->imag * x[i__2].imag, 
-			    q__2.imag = alpha->real * x[i__2].imag + alpha->imag * x[i__2]
-			    .real;
+		    bli_csets( (bli_creal(*alpha) * bli_creal(x[i__2]) - bli_cimag(*alpha) * bli_cimag(x[i__2])), (bli_creal(*alpha) * bli_cimag(x[i__2]) + bli_cimag(*alpha) * bli_creal(x[i__2])), q__2 );
 		    bla_r_cnjg(&q__1, &q__2);
-		    temp2.real = q__1.real, temp2.imag = q__1.imag;
+		    bli_csets( (bli_creal(q__1)), (bli_cimag(q__1)), temp2 );
 		    i__2 = kk;
 		    i__3 = kk;
 		    i__4 = j;
-		    q__2.real = x[i__4].real * temp1.real - x[i__4].imag * temp1.imag, 
-			    q__2.imag = x[i__4].real * temp1.imag + x[i__4].imag * 
-			    temp1.real;
+		    bli_csets( (bli_creal(x[i__4]) * bli_creal(temp1) - bli_cimag(x[i__4]) * bli_cimag(temp1)), (bli_creal(x[i__4]) * bli_cimag(temp1) + bli_cimag(x[i__4]) * bli_creal(temp1)), q__2 );
 		    i__5 = j;
-		    q__3.real = y[i__5].real * temp2.real - y[i__5].imag * temp2.imag, 
-			    q__3.imag = y[i__5].real * temp2.imag + y[i__5].imag * 
-			    temp2.real;
-		    q__1.real = q__2.real + q__3.real, q__1.imag = q__2.imag + q__3.imag;
-		    r__1 = ap[i__3].real + q__1.real;
-		    ap[i__2].real = r__1, ap[i__2].imag = 0.f;
+		    bli_csets( (bli_creal(y[i__5]) * bli_creal(temp2) - bli_cimag(y[i__5]) * bli_cimag(temp2)), (bli_creal(y[i__5]) * bli_cimag(temp2) + bli_cimag(y[i__5]) * bli_creal(temp2)), q__3 );
+		    bli_csets( (bli_creal(q__2) + bli_creal(q__3)), (bli_cimag(q__2) + bli_cimag(q__3)), q__1 );
+		    r__1 = bli_creal(ap[i__3]) + bli_creal(q__1);
+		    bli_csets( (r__1), (0.f), ap[i__2] );
 		    k = kk + 1;
 		    i__2 = *n;
 		    for (i__ = j + 1; i__ <= i__2; ++i__) {
 			i__3 = k;
 			i__4 = k;
 			i__5 = i__;
-			q__3.real = x[i__5].real * temp1.real - x[i__5].imag * temp1.imag, 
-				q__3.imag = x[i__5].real * temp1.imag + x[i__5].imag * 
-				temp1.real;
-			q__2.real = ap[i__4].real + q__3.real, q__2.imag = ap[i__4].imag + 
-				q__3.imag;
+			bli_csets( (bli_creal(x[i__5]) * bli_creal(temp1) - bli_cimag(x[i__5]) * bli_cimag(temp1)), (bli_creal(x[i__5]) * bli_cimag(temp1) + bli_cimag(x[i__5]) * bli_creal(temp1)), q__3 );
+			bli_csets( (bli_creal(ap[i__4]) + bli_creal(q__3)), (bli_cimag(ap[i__4]) + bli_cimag(q__3)), q__2 );
 			i__6 = i__;
-			q__4.real = y[i__6].real * temp2.real - y[i__6].imag * temp2.imag, 
-				q__4.imag = y[i__6].real * temp2.imag + y[i__6].imag * 
-				temp2.real;
-			q__1.real = q__2.real + q__4.real, q__1.imag = q__2.imag + q__4.imag;
-			ap[i__3].real = q__1.real, ap[i__3].imag = q__1.imag;
+			bli_csets( (bli_creal(y[i__6]) * bli_creal(temp2) - bli_cimag(y[i__6]) * bli_cimag(temp2)), (bli_creal(y[i__6]) * bli_cimag(temp2) + bli_cimag(y[i__6]) * bli_creal(temp2)), q__4 );
+			bli_csets( (bli_creal(q__2) + bli_creal(q__4)), (bli_cimag(q__2) + bli_cimag(q__4)), q__1 );
+			bli_csets( (bli_creal(q__1)), (bli_cimag(q__1)), ap[i__3] );
 			++k;
 /* L50: */
 		    }
 		} else {
 		    i__2 = kk;
 		    i__3 = kk;
-		    r__1 = ap[i__3].real;
-		    ap[i__2].real = r__1, ap[i__2].imag = 0.f;
+		    r__1 = bli_creal(ap[i__3]);
+		    bli_csets( (r__1), (0.f), ap[i__2] );
 		}
 		kk = kk + *n - j + 1;
 /* L60: */
@@ -405,31 +369,24 @@
 	    for (j = 1; j <= i__1; ++j) {
 		i__2 = jx;
 		i__3 = jy;
-		if (x[i__2].real != 0.f || x[i__2].imag != 0.f || (y[i__3].real != 0.f 
-			|| y[i__3].imag != 0.f)) {
+		if (bli_creal(x[i__2]) != 0.f || bli_cimag(x[i__2]) != 0.f || (bli_creal(y[i__3]) != 0.f 
+			|| bli_cimag(y[i__3]) != 0.f)) {
 		    bla_r_cnjg(&q__2, &y[jy]);
-		    q__1.real = alpha->real * q__2.real - alpha->imag * q__2.imag, q__1.imag = 
-			    alpha->real * q__2.imag + alpha->imag * q__2.real;
-		    temp1.real = q__1.real, temp1.imag = q__1.imag;
+		    bli_csets( (bli_creal(*alpha) * bli_creal(q__2) - bli_cimag(*alpha) * bli_cimag(q__2)), (bli_creal(*alpha) * bli_cimag(q__2) + bli_cimag(*alpha) * bli_creal(q__2)), q__1 );
+		    bli_csets( (bli_creal(q__1)), (bli_cimag(q__1)), temp1 );
 		    i__2 = jx;
-		    q__2.real = alpha->real * x[i__2].real - alpha->imag * x[i__2].imag, 
-			    q__2.imag = alpha->real * x[i__2].imag + alpha->imag * x[i__2]
-			    .real;
+		    bli_csets( (bli_creal(*alpha) * bli_creal(x[i__2]) - bli_cimag(*alpha) * bli_cimag(x[i__2])), (bli_creal(*alpha) * bli_cimag(x[i__2]) + bli_cimag(*alpha) * bli_creal(x[i__2])), q__2 );
 		    bla_r_cnjg(&q__1, &q__2);
-		    temp2.real = q__1.real, temp2.imag = q__1.imag;
+		    bli_csets( (bli_creal(q__1)), (bli_cimag(q__1)), temp2 );
 		    i__2 = kk;
 		    i__3 = kk;
 		    i__4 = jx;
-		    q__2.real = x[i__4].real * temp1.real - x[i__4].imag * temp1.imag, 
-			    q__2.imag = x[i__4].real * temp1.imag + x[i__4].imag * 
-			    temp1.real;
+		    bli_csets( (bli_creal(x[i__4]) * bli_creal(temp1) - bli_cimag(x[i__4]) * bli_cimag(temp1)), (bli_creal(x[i__4]) * bli_cimag(temp1) + bli_cimag(x[i__4]) * bli_creal(temp1)), q__2 );
 		    i__5 = jy;
-		    q__3.real = y[i__5].real * temp2.real - y[i__5].imag * temp2.imag, 
-			    q__3.imag = y[i__5].real * temp2.imag + y[i__5].imag * 
-			    temp2.real;
-		    q__1.real = q__2.real + q__3.real, q__1.imag = q__2.imag + q__3.imag;
-		    r__1 = ap[i__3].real + q__1.real;
-		    ap[i__2].real = r__1, ap[i__2].imag = 0.f;
+		    bli_csets( (bli_creal(y[i__5]) * bli_creal(temp2) - bli_cimag(y[i__5]) * bli_cimag(temp2)), (bli_creal(y[i__5]) * bli_cimag(temp2) + bli_cimag(y[i__5]) * bli_creal(temp2)), q__3 );
+		    bli_csets( (bli_creal(q__2) + bli_creal(q__3)), (bli_cimag(q__2) + bli_cimag(q__3)), q__1 );
+		    r__1 = bli_creal(ap[i__3]) + bli_creal(q__1);
+		    bli_csets( (r__1), (0.f), ap[i__2] );
 		    ix = jx;
 		    iy = jy;
 		    i__2 = kk + *n - j;
@@ -439,24 +396,19 @@
 			i__3 = k;
 			i__4 = k;
 			i__5 = ix;
-			q__3.real = x[i__5].real * temp1.real - x[i__5].imag * temp1.imag, 
-				q__3.imag = x[i__5].real * temp1.imag + x[i__5].imag * 
-				temp1.real;
-			q__2.real = ap[i__4].real + q__3.real, q__2.imag = ap[i__4].imag + 
-				q__3.imag;
+			bli_csets( (bli_creal(x[i__5]) * bli_creal(temp1) - bli_cimag(x[i__5]) * bli_cimag(temp1)), (bli_creal(x[i__5]) * bli_cimag(temp1) + bli_cimag(x[i__5]) * bli_creal(temp1)), q__3 );
+			bli_csets( (bli_creal(ap[i__4]) + bli_creal(q__3)), (bli_cimag(ap[i__4]) + bli_cimag(q__3)), q__2 );
 			i__6 = iy;
-			q__4.real = y[i__6].real * temp2.real - y[i__6].imag * temp2.imag, 
-				q__4.imag = y[i__6].real * temp2.imag + y[i__6].imag * 
-				temp2.real;
-			q__1.real = q__2.real + q__4.real, q__1.imag = q__2.imag + q__4.imag;
-			ap[i__3].real = q__1.real, ap[i__3].imag = q__1.imag;
+			bli_csets( (bli_creal(y[i__6]) * bli_creal(temp2) - bli_cimag(y[i__6]) * bli_cimag(temp2)), (bli_creal(y[i__6]) * bli_cimag(temp2) + bli_cimag(y[i__6]) * bli_creal(temp2)), q__4 );
+			bli_csets( (bli_creal(q__2) + bli_creal(q__4)), (bli_cimag(q__2) + bli_cimag(q__4)), q__1 );
+			bli_csets( (bli_creal(q__1)), (bli_cimag(q__1)), ap[i__3] );
 /* L70: */
 		    }
 		} else {
 		    i__2 = kk;
 		    i__3 = kk;
-		    r__1 = ap[i__3].real;
-		    ap[i__2].real = r__1, ap[i__2].imag = 0.f;
+		    r__1 = bli_creal(ap[i__3]);
+		    bli_csets( (r__1), (0.f), ap[i__2] );
 		}
 		jx += *incx;
 		jy += *incy;
@@ -620,7 +572,7 @@
 
 /*     Quick return if possible. */
 
-    if (*n == 0 || (alpha->real == 0. && alpha->imag == 0.)) {
+    if (*n == 0 || (bli_zreal(*alpha) == 0. && bli_zimag(*alpha) == 0.)) {
 	return 0;
     }
 
@@ -655,56 +607,44 @@
 	    for (j = 1; j <= i__1; ++j) {
 		i__2 = j;
 		i__3 = j;
-		if (x[i__2].real != 0. || x[i__2].imag != 0. || (y[i__3].real != 0. || 
-			y[i__3].imag != 0.)) {
+		if (bli_zreal(x[i__2]) != 0. || bli_zimag(x[i__2]) != 0. || (bli_zreal(y[i__3]) != 0. || 
+			bli_zimag(y[i__3]) != 0.)) {
 		    bla_d_cnjg(&z__2, &y[j]);
-		    z__1.real = alpha->real * z__2.real - alpha->imag * z__2.imag, z__1.imag = 
-			    alpha->real * z__2.imag + alpha->imag * z__2.real;
-		    temp1.real = z__1.real, temp1.imag = z__1.imag;
+		    bli_zsets( (bli_zreal(*alpha) * bli_zreal(z__2) - bli_zimag(*alpha) * bli_zimag(z__2)), (bli_zreal(*alpha) * bli_zimag(z__2) + bli_zimag(*alpha) * bli_zreal(z__2)), z__1 );
+		    bli_zsets( (bli_zreal(z__1)), (bli_zimag(z__1)), temp1 );
 		    i__2 = j;
-		    z__2.real = alpha->real * x[i__2].real - alpha->imag * x[i__2].imag, 
-			    z__2.imag = alpha->real * x[i__2].imag + alpha->imag * x[i__2]
-			    .real;
+		    bli_zsets( (bli_zreal(*alpha) * bli_zreal(x[i__2]) - bli_zimag(*alpha) * bli_zimag(x[i__2])), (bli_zreal(*alpha) * bli_zimag(x[i__2]) + bli_zimag(*alpha) * bli_zreal(x[i__2])), z__2 );
 		    bla_d_cnjg(&z__1, &z__2);
-		    temp2.real = z__1.real, temp2.imag = z__1.imag;
+		    bli_zsets( (bli_zreal(z__1)), (bli_zimag(z__1)), temp2 );
 		    k = kk;
 		    i__2 = j - 1;
 		    for (i__ = 1; i__ <= i__2; ++i__) {
 			i__3 = k;
 			i__4 = k;
 			i__5 = i__;
-			z__3.real = x[i__5].real * temp1.real - x[i__5].imag * temp1.imag, 
-				z__3.imag = x[i__5].real * temp1.imag + x[i__5].imag * 
-				temp1.real;
-			z__2.real = ap[i__4].real + z__3.real, z__2.imag = ap[i__4].imag + 
-				z__3.imag;
+			bli_zsets( (bli_zreal(x[i__5]) * bli_zreal(temp1) - bli_zimag(x[i__5]) * bli_zimag(temp1)), (bli_zreal(x[i__5]) * bli_zimag(temp1) + bli_zimag(x[i__5]) * bli_zreal(temp1)), z__3 );
+			bli_zsets( (bli_zreal(ap[i__4]) + bli_zreal(z__3)), (bli_zimag(ap[i__4]) + bli_zimag(z__3)), z__2 );
 			i__6 = i__;
-			z__4.real = y[i__6].real * temp2.real - y[i__6].imag * temp2.imag, 
-				z__4.imag = y[i__6].real * temp2.imag + y[i__6].imag * 
-				temp2.real;
-			z__1.real = z__2.real + z__4.real, z__1.imag = z__2.imag + z__4.imag;
-			ap[i__3].real = z__1.real, ap[i__3].imag = z__1.imag;
+			bli_zsets( (bli_zreal(y[i__6]) * bli_zreal(temp2) - bli_zimag(y[i__6]) * bli_zimag(temp2)), (bli_zreal(y[i__6]) * bli_zimag(temp2) + bli_zimag(y[i__6]) * bli_zreal(temp2)), z__4 );
+			bli_zsets( (bli_zreal(z__2) + bli_zreal(z__4)), (bli_zimag(z__2) + bli_zimag(z__4)), z__1 );
+			bli_zsets( (bli_zreal(z__1)), (bli_zimag(z__1)), ap[i__3] );
 			++k;
 /* L10: */
 		    }
 		    i__2 = kk + j - 1;
 		    i__3 = kk + j - 1;
 		    i__4 = j;
-		    z__2.real = x[i__4].real * temp1.real - x[i__4].imag * temp1.imag, 
-			    z__2.imag = x[i__4].real * temp1.imag + x[i__4].imag * 
-			    temp1.real;
+		    bli_zsets( (bli_zreal(x[i__4]) * bli_zreal(temp1) - bli_zimag(x[i__4]) * bli_zimag(temp1)), (bli_zreal(x[i__4]) * bli_zimag(temp1) + bli_zimag(x[i__4]) * bli_zreal(temp1)), z__2 );
 		    i__5 = j;
-		    z__3.real = y[i__5].real * temp2.real - y[i__5].imag * temp2.imag, 
-			    z__3.imag = y[i__5].real * temp2.imag + y[i__5].imag * 
-			    temp2.real;
-		    z__1.real = z__2.real + z__3.real, z__1.imag = z__2.imag + z__3.imag;
-		    d__1 = ap[i__3].real + z__1.real;
-		    ap[i__2].real = d__1, ap[i__2].imag = 0.;
+		    bli_zsets( (bli_zreal(y[i__5]) * bli_zreal(temp2) - bli_zimag(y[i__5]) * bli_zimag(temp2)), (bli_zreal(y[i__5]) * bli_zimag(temp2) + bli_zimag(y[i__5]) * bli_zreal(temp2)), z__3 );
+		    bli_zsets( (bli_zreal(z__2) + bli_zreal(z__3)), (bli_zimag(z__2) + bli_zimag(z__3)), z__1 );
+		    d__1 = bli_zreal(ap[i__3]) + bli_zreal(z__1);
+		    bli_zsets( (d__1), (0.), ap[i__2] );
 		} else {
 		    i__2 = kk + j - 1;
 		    i__3 = kk + j - 1;
-		    d__1 = ap[i__3].real;
-		    ap[i__2].real = d__1, ap[i__2].imag = 0.;
+		    d__1 = bli_zreal(ap[i__3]);
+		    bli_zsets( (d__1), (0.), ap[i__2] );
 		}
 		kk += j;
 /* L20: */
@@ -714,18 +654,15 @@
 	    for (j = 1; j <= i__1; ++j) {
 		i__2 = jx;
 		i__3 = jy;
-		if (x[i__2].real != 0. || x[i__2].imag != 0. || (y[i__3].real != 0. || 
-			y[i__3].imag != 0.)) {
+		if (bli_zreal(x[i__2]) != 0. || bli_zimag(x[i__2]) != 0. || (bli_zreal(y[i__3]) != 0. || 
+			bli_zimag(y[i__3]) != 0.)) {
 		    bla_d_cnjg(&z__2, &y[jy]);
-		    z__1.real = alpha->real * z__2.real - alpha->imag * z__2.imag, z__1.imag = 
-			    alpha->real * z__2.imag + alpha->imag * z__2.real;
-		    temp1.real = z__1.real, temp1.imag = z__1.imag;
+		    bli_zsets( (bli_zreal(*alpha) * bli_zreal(z__2) - bli_zimag(*alpha) * bli_zimag(z__2)), (bli_zreal(*alpha) * bli_zimag(z__2) + bli_zimag(*alpha) * bli_zreal(z__2)), z__1 );
+		    bli_zsets( (bli_zreal(z__1)), (bli_zimag(z__1)), temp1 );
 		    i__2 = jx;
-		    z__2.real = alpha->real * x[i__2].real - alpha->imag * x[i__2].imag, 
-			    z__2.imag = alpha->real * x[i__2].imag + alpha->imag * x[i__2]
-			    .real;
+		    bli_zsets( (bli_zreal(*alpha) * bli_zreal(x[i__2]) - bli_zimag(*alpha) * bli_zimag(x[i__2])), (bli_zreal(*alpha) * bli_zimag(x[i__2]) + bli_zimag(*alpha) * bli_zreal(x[i__2])), z__2 );
 		    bla_d_cnjg(&z__1, &z__2);
-		    temp2.real = z__1.real, temp2.imag = z__1.imag;
+		    bli_zsets( (bli_zreal(z__1)), (bli_zimag(z__1)), temp2 );
 		    ix = kx;
 		    iy = ky;
 		    i__2 = kk + j - 2;
@@ -733,17 +670,12 @@
 			i__3 = k;
 			i__4 = k;
 			i__5 = ix;
-			z__3.real = x[i__5].real * temp1.real - x[i__5].imag * temp1.imag, 
-				z__3.imag = x[i__5].real * temp1.imag + x[i__5].imag * 
-				temp1.real;
-			z__2.real = ap[i__4].real + z__3.real, z__2.imag = ap[i__4].imag + 
-				z__3.imag;
+			bli_zsets( (bli_zreal(x[i__5]) * bli_zreal(temp1) - bli_zimag(x[i__5]) * bli_zimag(temp1)), (bli_zreal(x[i__5]) * bli_zimag(temp1) + bli_zimag(x[i__5]) * bli_zreal(temp1)), z__3 );
+			bli_zsets( (bli_zreal(ap[i__4]) + bli_zreal(z__3)), (bli_zimag(ap[i__4]) + bli_zimag(z__3)), z__2 );
 			i__6 = iy;
-			z__4.real = y[i__6].real * temp2.real - y[i__6].imag * temp2.imag, 
-				z__4.imag = y[i__6].real * temp2.imag + y[i__6].imag * 
-				temp2.real;
-			z__1.real = z__2.real + z__4.real, z__1.imag = z__2.imag + z__4.imag;
-			ap[i__3].real = z__1.real, ap[i__3].imag = z__1.imag;
+			bli_zsets( (bli_zreal(y[i__6]) * bli_zreal(temp2) - bli_zimag(y[i__6]) * bli_zimag(temp2)), (bli_zreal(y[i__6]) * bli_zimag(temp2) + bli_zimag(y[i__6]) * bli_zreal(temp2)), z__4 );
+			bli_zsets( (bli_zreal(z__2) + bli_zreal(z__4)), (bli_zimag(z__2) + bli_zimag(z__4)), z__1 );
+			bli_zsets( (bli_zreal(z__1)), (bli_zimag(z__1)), ap[i__3] );
 			ix += *incx;
 			iy += *incy;
 /* L30: */
@@ -751,21 +683,17 @@
 		    i__2 = kk + j - 1;
 		    i__3 = kk + j - 1;
 		    i__4 = jx;
-		    z__2.real = x[i__4].real * temp1.real - x[i__4].imag * temp1.imag, 
-			    z__2.imag = x[i__4].real * temp1.imag + x[i__4].imag * 
-			    temp1.real;
+		    bli_zsets( (bli_zreal(x[i__4]) * bli_zreal(temp1) - bli_zimag(x[i__4]) * bli_zimag(temp1)), (bli_zreal(x[i__4]) * bli_zimag(temp1) + bli_zimag(x[i__4]) * bli_zreal(temp1)), z__2 );
 		    i__5 = jy;
-		    z__3.real = y[i__5].real * temp2.real - y[i__5].imag * temp2.imag, 
-			    z__3.imag = y[i__5].real * temp2.imag + y[i__5].imag * 
-			    temp2.real;
-		    z__1.real = z__2.real + z__3.real, z__1.imag = z__2.imag + z__3.imag;
-		    d__1 = ap[i__3].real + z__1.real;
-		    ap[i__2].real = d__1, ap[i__2].imag = 0.;
+		    bli_zsets( (bli_zreal(y[i__5]) * bli_zreal(temp2) - bli_zimag(y[i__5]) * bli_zimag(temp2)), (bli_zreal(y[i__5]) * bli_zimag(temp2) + bli_zimag(y[i__5]) * bli_zreal(temp2)), z__3 );
+		    bli_zsets( (bli_zreal(z__2) + bli_zreal(z__3)), (bli_zimag(z__2) + bli_zimag(z__3)), z__1 );
+		    d__1 = bli_zreal(ap[i__3]) + bli_zreal(z__1);
+		    bli_zsets( (d__1), (0.), ap[i__2] );
 		} else {
 		    i__2 = kk + j - 1;
 		    i__3 = kk + j - 1;
-		    d__1 = ap[i__3].real;
-		    ap[i__2].real = d__1, ap[i__2].imag = 0.;
+		    d__1 = bli_zreal(ap[i__3]);
+		    bli_zsets( (d__1), (0.), ap[i__2] );
 		}
 		jx += *incx;
 		jy += *incy;
@@ -782,56 +710,44 @@
 	    for (j = 1; j <= i__1; ++j) {
 		i__2 = j;
 		i__3 = j;
-		if (x[i__2].real != 0. || x[i__2].imag != 0. || (y[i__3].real != 0. || 
-			y[i__3].imag != 0.)) {
+		if (bli_zreal(x[i__2]) != 0. || bli_zimag(x[i__2]) != 0. || (bli_zreal(y[i__3]) != 0. || 
+			bli_zimag(y[i__3]) != 0.)) {
 		    bla_d_cnjg(&z__2, &y[j]);
-		    z__1.real = alpha->real * z__2.real - alpha->imag * z__2.imag, z__1.imag = 
-			    alpha->real * z__2.imag + alpha->imag * z__2.real;
-		    temp1.real = z__1.real, temp1.imag = z__1.imag;
+		    bli_zsets( (bli_zreal(*alpha) * bli_zreal(z__2) - bli_zimag(*alpha) * bli_zimag(z__2)), (bli_zreal(*alpha) * bli_zimag(z__2) + bli_zimag(*alpha) * bli_zreal(z__2)), z__1 );
+		    bli_zsets( (bli_zreal(z__1)), (bli_zimag(z__1)), temp1 );
 		    i__2 = j;
-		    z__2.real = alpha->real * x[i__2].real - alpha->imag * x[i__2].imag, 
-			    z__2.imag = alpha->real * x[i__2].imag + alpha->imag * x[i__2]
-			    .real;
+		    bli_zsets( (bli_zreal(*alpha) * bli_zreal(x[i__2]) - bli_zimag(*alpha) * bli_zimag(x[i__2])), (bli_zreal(*alpha) * bli_zimag(x[i__2]) + bli_zimag(*alpha) * bli_zreal(x[i__2])), z__2 );
 		    bla_d_cnjg(&z__1, &z__2);
-		    temp2.real = z__1.real, temp2.imag = z__1.imag;
+		    bli_zsets( (bli_zreal(z__1)), (bli_zimag(z__1)), temp2 );
 		    i__2 = kk;
 		    i__3 = kk;
 		    i__4 = j;
-		    z__2.real = x[i__4].real * temp1.real - x[i__4].imag * temp1.imag, 
-			    z__2.imag = x[i__4].real * temp1.imag + x[i__4].imag * 
-			    temp1.real;
+		    bli_zsets( (bli_zreal(x[i__4]) * bli_zreal(temp1) - bli_zimag(x[i__4]) * bli_zimag(temp1)), (bli_zreal(x[i__4]) * bli_zimag(temp1) + bli_zimag(x[i__4]) * bli_zreal(temp1)), z__2 );
 		    i__5 = j;
-		    z__3.real = y[i__5].real * temp2.real - y[i__5].imag * temp2.imag, 
-			    z__3.imag = y[i__5].real * temp2.imag + y[i__5].imag * 
-			    temp2.real;
-		    z__1.real = z__2.real + z__3.real, z__1.imag = z__2.imag + z__3.imag;
-		    d__1 = ap[i__3].real + z__1.real;
-		    ap[i__2].real = d__1, ap[i__2].imag = 0.;
+		    bli_zsets( (bli_zreal(y[i__5]) * bli_zreal(temp2) - bli_zimag(y[i__5]) * bli_zimag(temp2)), (bli_zreal(y[i__5]) * bli_zimag(temp2) + bli_zimag(y[i__5]) * bli_zreal(temp2)), z__3 );
+		    bli_zsets( (bli_zreal(z__2) + bli_zreal(z__3)), (bli_zimag(z__2) + bli_zimag(z__3)), z__1 );
+		    d__1 = bli_zreal(ap[i__3]) + bli_zreal(z__1);
+		    bli_zsets( (d__1), (0.), ap[i__2] );
 		    k = kk + 1;
 		    i__2 = *n;
 		    for (i__ = j + 1; i__ <= i__2; ++i__) {
 			i__3 = k;
 			i__4 = k;
 			i__5 = i__;
-			z__3.real = x[i__5].real * temp1.real - x[i__5].imag * temp1.imag, 
-				z__3.imag = x[i__5].real * temp1.imag + x[i__5].imag * 
-				temp1.real;
-			z__2.real = ap[i__4].real + z__3.real, z__2.imag = ap[i__4].imag + 
-				z__3.imag;
+			bli_zsets( (bli_zreal(x[i__5]) * bli_zreal(temp1) - bli_zimag(x[i__5]) * bli_zimag(temp1)), (bli_zreal(x[i__5]) * bli_zimag(temp1) + bli_zimag(x[i__5]) * bli_zreal(temp1)), z__3 );
+			bli_zsets( (bli_zreal(ap[i__4]) + bli_zreal(z__3)), (bli_zimag(ap[i__4]) + bli_zimag(z__3)), z__2 );
 			i__6 = i__;
-			z__4.real = y[i__6].real * temp2.real - y[i__6].imag * temp2.imag, 
-				z__4.imag = y[i__6].real * temp2.imag + y[i__6].imag * 
-				temp2.real;
-			z__1.real = z__2.real + z__4.real, z__1.imag = z__2.imag + z__4.imag;
-			ap[i__3].real = z__1.real, ap[i__3].imag = z__1.imag;
+			bli_zsets( (bli_zreal(y[i__6]) * bli_zreal(temp2) - bli_zimag(y[i__6]) * bli_zimag(temp2)), (bli_zreal(y[i__6]) * bli_zimag(temp2) + bli_zimag(y[i__6]) * bli_zreal(temp2)), z__4 );
+			bli_zsets( (bli_zreal(z__2) + bli_zreal(z__4)), (bli_zimag(z__2) + bli_zimag(z__4)), z__1 );
+			bli_zsets( (bli_zreal(z__1)), (bli_zimag(z__1)), ap[i__3] );
 			++k;
 /* L50: */
 		    }
 		} else {
 		    i__2 = kk;
 		    i__3 = kk;
-		    d__1 = ap[i__3].real;
-		    ap[i__2].real = d__1, ap[i__2].imag = 0.;
+		    d__1 = bli_zreal(ap[i__3]);
+		    bli_zsets( (d__1), (0.), ap[i__2] );
 		}
 		kk = kk + *n - j + 1;
 /* L60: */
@@ -841,31 +757,24 @@
 	    for (j = 1; j <= i__1; ++j) {
 		i__2 = jx;
 		i__3 = jy;
-		if (x[i__2].real != 0. || x[i__2].imag != 0. || (y[i__3].real != 0. || 
-			y[i__3].imag != 0.)) {
+		if (bli_zreal(x[i__2]) != 0. || bli_zimag(x[i__2]) != 0. || (bli_zreal(y[i__3]) != 0. || 
+			bli_zimag(y[i__3]) != 0.)) {
 		    bla_d_cnjg(&z__2, &y[jy]);
-		    z__1.real = alpha->real * z__2.real - alpha->imag * z__2.imag, z__1.imag = 
-			    alpha->real * z__2.imag + alpha->imag * z__2.real;
-		    temp1.real = z__1.real, temp1.imag = z__1.imag;
+		    bli_zsets( (bli_zreal(*alpha) * bli_zreal(z__2) - bli_zimag(*alpha) * bli_zimag(z__2)), (bli_zreal(*alpha) * bli_zimag(z__2) + bli_zimag(*alpha) * bli_zreal(z__2)), z__1 );
+		    bli_zsets( (bli_zreal(z__1)), (bli_zimag(z__1)), temp1 );
 		    i__2 = jx;
-		    z__2.real = alpha->real * x[i__2].real - alpha->imag * x[i__2].imag, 
-			    z__2.imag = alpha->real * x[i__2].imag + alpha->imag * x[i__2]
-			    .real;
+		    bli_zsets( (bli_zreal(*alpha) * bli_zreal(x[i__2]) - bli_zimag(*alpha) * bli_zimag(x[i__2])), (bli_zreal(*alpha) * bli_zimag(x[i__2]) + bli_zimag(*alpha) * bli_zreal(x[i__2])), z__2 );
 		    bla_d_cnjg(&z__1, &z__2);
-		    temp2.real = z__1.real, temp2.imag = z__1.imag;
+		    bli_zsets( (bli_zreal(z__1)), (bli_zimag(z__1)), temp2 );
 		    i__2 = kk;
 		    i__3 = kk;
 		    i__4 = jx;
-		    z__2.real = x[i__4].real * temp1.real - x[i__4].imag * temp1.imag, 
-			    z__2.imag = x[i__4].real * temp1.imag + x[i__4].imag * 
-			    temp1.real;
+		    bli_zsets( (bli_zreal(x[i__4]) * bli_zreal(temp1) - bli_zimag(x[i__4]) * bli_zimag(temp1)), (bli_zreal(x[i__4]) * bli_zimag(temp1) + bli_zimag(x[i__4]) * bli_zreal(temp1)), z__2 );
 		    i__5 = jy;
-		    z__3.real = y[i__5].real * temp2.real - y[i__5].imag * temp2.imag, 
-			    z__3.imag = y[i__5].real * temp2.imag + y[i__5].imag * 
-			    temp2.real;
-		    z__1.real = z__2.real + z__3.real, z__1.imag = z__2.imag + z__3.imag;
-		    d__1 = ap[i__3].real + z__1.real;
-		    ap[i__2].real = d__1, ap[i__2].imag = 0.;
+		    bli_zsets( (bli_zreal(y[i__5]) * bli_zreal(temp2) - bli_zimag(y[i__5]) * bli_zimag(temp2)), (bli_zreal(y[i__5]) * bli_zimag(temp2) + bli_zimag(y[i__5]) * bli_zreal(temp2)), z__3 );
+		    bli_zsets( (bli_zreal(z__2) + bli_zreal(z__3)), (bli_zimag(z__2) + bli_zimag(z__3)), z__1 );
+		    d__1 = bli_zreal(ap[i__3]) + bli_zreal(z__1);
+		    bli_zsets( (d__1), (0.), ap[i__2] );
 		    ix = jx;
 		    iy = jy;
 		    i__2 = kk + *n - j;
@@ -875,24 +784,19 @@
 			i__3 = k;
 			i__4 = k;
 			i__5 = ix;
-			z__3.real = x[i__5].real * temp1.real - x[i__5].imag * temp1.imag, 
-				z__3.imag = x[i__5].real * temp1.imag + x[i__5].imag * 
-				temp1.real;
-			z__2.real = ap[i__4].real + z__3.real, z__2.imag = ap[i__4].imag + 
-				z__3.imag;
+			bli_zsets( (bli_zreal(x[i__5]) * bli_zreal(temp1) - bli_zimag(x[i__5]) * bli_zimag(temp1)), (bli_zreal(x[i__5]) * bli_zimag(temp1) + bli_zimag(x[i__5]) * bli_zreal(temp1)), z__3 );
+			bli_zsets( (bli_zreal(ap[i__4]) + bli_zreal(z__3)), (bli_zimag(ap[i__4]) + bli_zimag(z__3)), z__2 );
 			i__6 = iy;
-			z__4.real = y[i__6].real * temp2.real - y[i__6].imag * temp2.imag, 
-				z__4.imag = y[i__6].real * temp2.imag + y[i__6].imag * 
-				temp2.real;
-			z__1.real = z__2.real + z__4.real, z__1.imag = z__2.imag + z__4.imag;
-			ap[i__3].real = z__1.real, ap[i__3].imag = z__1.imag;
+			bli_zsets( (bli_zreal(y[i__6]) * bli_zreal(temp2) - bli_zimag(y[i__6]) * bli_zimag(temp2)), (bli_zreal(y[i__6]) * bli_zimag(temp2) + bli_zimag(y[i__6]) * bli_zreal(temp2)), z__4 );
+			bli_zsets( (bli_zreal(z__2) + bli_zreal(z__4)), (bli_zimag(z__2) + bli_zimag(z__4)), z__1 );
+			bli_zsets( (bli_zreal(z__1)), (bli_zimag(z__1)), ap[i__3] );
 /* L70: */
 		    }
 		} else {
 		    i__2 = kk;
 		    i__3 = kk;
-		    d__1 = ap[i__3].real;
-		    ap[i__2].real = d__1, ap[i__2].imag = 0.;
+		    d__1 = bli_zreal(ap[i__3]);
+		    bli_zsets( (d__1), (0.), ap[i__2] );
 		}
 		jx += *incx;
 		jy += *incy;

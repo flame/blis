@@ -41,6 +41,8 @@
 // - The first char encodes the type of x.
 // - The second char encodes the type of a.
 
+#ifndef BLIS_ENABLE_C99_COMPLEX
+
 #define bli_ssabval2s( x, a )  bli_sabval2ris( bli_sreal(x), bli_simag(x), bli_sreal(a), bli_simag(a) )
 #define bli_dsabval2s( x, a )  bli_sabval2ris( bli_dreal(x), bli_dimag(x), bli_sreal(a), bli_simag(a) )
 #define bli_csabval2s( x, a )  bli_sabval2ris( bli_creal(x), bli_cimag(x), bli_sreal(a), bli_simag(a) )
@@ -50,8 +52,6 @@
 #define bli_ddabval2s( x, a )  bli_dabval2ris( bli_dreal(x), bli_dimag(x), bli_dreal(a), bli_dimag(a) )
 #define bli_cdabval2s( x, a )  bli_dabval2ris( bli_creal(x), bli_cimag(x), bli_dreal(a), bli_dimag(a) )
 #define bli_zdabval2s( x, a )  bli_dabval2ris( bli_zreal(x), bli_zimag(x), bli_dreal(a), bli_dimag(a) )
-
-#ifndef BLIS_ENABLE_C99_COMPLEX
 
 #define bli_scabval2s( x, a )  bli_cabval2ris( bli_sreal(x), bli_simag(x), bli_creal(a), bli_cimag(a) )
 #define bli_dcabval2s( x, a )  bli_cabval2ris( bli_dreal(x), bli_dimag(x), bli_creal(a), bli_cimag(a) )

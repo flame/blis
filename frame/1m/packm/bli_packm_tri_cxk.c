@@ -302,18 +302,18 @@ void PASTEMAC(ch,varname)( \
 		   the diagonal of the packed panel to kappa. */ \
 		if ( bli_is_unit_diag( diagc ) ) \
 		{ \
-			ctype_r* kappa_r = &PASTEMAC(ch,real)( *kappa ); \
-			ctype_r* kappa_i = &PASTEMAC(ch,imag)( *kappa ); \
+			ctype_r kappa_r = PASTEMAC(ch,real)( *kappa ); \
+			ctype_r kappa_i = PASTEMAC(ch,imag)( *kappa ); \
 \
 			PASTEMAC(chr,setd)( 0, \
 			                    m_panel, \
 			                    n_panel, \
-			                    kappa_r, \
+			                    &kappa_r, \
 			                    p11_r, rs_p11, cs_p11 ); \
 			PASTEMAC(chr,setd)( 0, \
 			                    m_panel, \
 			                    n_panel, \
-			                    kappa_i, \
+			                    &kappa_i, \
 			                    p11_i, rs_p11, cs_p11 ); \
 		} \
 \
@@ -539,23 +539,23 @@ void PASTEMAC(ch,varname)( \
 		   the diagonal of the packed panel to kappa. */ \
 		if ( bli_is_unit_diag( diagc ) ) \
 		{ \
-			ctype_r* kappa_r = &PASTEMAC(ch,real)( *kappa ); \
-			ctype_r* kappa_i = &PASTEMAC(ch,imag)( *kappa ); \
+			ctype_r kappa_r = PASTEMAC(ch,real)( *kappa ); \
+			ctype_r kappa_i = PASTEMAC(ch,imag)( *kappa ); \
 \
 			PASTEMAC(chr,setd)( 0, \
 			                    m_panel, \
 			                    n_panel, \
-			                    kappa_r, \
+			                    &kappa_r, \
 			                    p11_r, rs_p11, cs_p11 ); \
 			PASTEMAC(chr,setd)( 0, \
 			                    m_panel, \
 			                    n_panel, \
-			                    kappa_i, \
+			                    &kappa_i, \
 			                    p11_i, rs_p11, cs_p11 ); \
 			PASTEMAC(chr,setd)( 0, \
 			                    m_panel, \
 			                    n_panel, \
-			                    kappa_i, \
+			                    &kappa_r, \
 			                    p11_ri, rs_p11, cs_p11 ); \
 		} \
 \
