@@ -275,8 +275,8 @@ void bli_dgemm_opt_30x8(
                     auxinfo_t* data
                   )
 {
-    double * a_next = bli_auxinfo_next_a( aux );
-    double * b_next = bli_auxinfo_next_b( aux );
+    double * a_next = bli_auxinfo_next_a( data );
+    double * b_next = bli_auxinfo_next_b( data );
 
     int * offsetPtr = &offsets[0];
 
@@ -364,7 +364,7 @@ void bli_dgemm_opt_30x8(
         LOOPMAIN:
             ONE_ITER_MAIN_LOOP(rcx, rsi)
         jne LOOPMAIN
-
+        
         //Penultimate 22 iterations.
         //Break these off from the main loop to avoid prefetching extra shit.
         mov r14, a_next
@@ -398,20 +398,24 @@ void bli_dgemm_opt_30x8(
 
 
         POSTACCUM:
-      //  jmp END
+
 #ifdef MONITORS
         rdtsc
         mov mid2l, eax
         mov mid2h, edx
 #endif
+
+        mov r9, c               //load address of c for update
+        mov r12, alpha          //load address of alpha
+
+        // Check if C is row stride. If not, jump to the slow scattered update
         mov r14, cs_c
         dec r14
         jne SCATTEREDUPDATE
 
         mov r14, beta
         vbroadcastsd zmm31, 0[r14] 
-        mov r9, c               //load address of c for update
-        mov r12, alpha          //load address of alpha
+
 
         vmulpd zmm0, zmm0, 0[r12]{1to8}
         vmulpd zmm1, zmm1, 0[r12]{1to8}
@@ -526,7 +530,7 @@ void bli_dgemm_opt_30x8(
         vpbroadcastd zmm30, cs_c 
         mov r13, beta
         vpmulld zmm30, zmm31, zmm30 
-       
+
         mov ebx, 255 
         UPDATE_C_ROW_SCATTERED(zmm0, 0, r9) 
         UPDATE_C_ROW_SCATTERED(zmm1, 1, r9) 
