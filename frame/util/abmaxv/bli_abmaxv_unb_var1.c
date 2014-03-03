@@ -117,7 +117,9 @@ void PASTEMAC(chx,varname)( \
 		PASTEMAC2(chxr,chxr,adds)( chi1_r, abs_chi1 ); \
 		PASTEMAC2(chxr,chxr,adds)( chi1_i, abs_chi1 ); \
 \
-		if ( abs_chi1_save < abs_chi1 ) \
+		/* NOTE: We use the "less than or equal to" operator to mimic the
+		   behavior of netlib's i?amax() routines. */ \
+		if ( abs_chi1_save <= abs_chi1 ) \
 		{ \
 			/* If the absolute value of the current element exceeds
 			   that of the previous largest, save it and its index. */ \

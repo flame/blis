@@ -198,6 +198,7 @@
 #define bli_fabs( a )    ( (a) <= 0.0 ? -(a) : (a) )
 
 // fminabs, fmaxabs
+
 #define bli_fminabs( a, b ) \
 \
 	bli_fmin( bli_fabs( a ), \
@@ -207,6 +208,11 @@
 \
 	bli_fmax( bli_fabs( a ), \
 	          bli_fabs( b ) )
+
+// isnan, isinf
+
+#define bli_isinf( a )  isinf( a )
+#define bli_isnan( a )  isnan( a )
 
 // swap_types
 
