@@ -46,7 +46,7 @@ typedef void (*FUNCPTR_T)(
                            void*   beta,
                            void*   c, inc_t rs_c, inc_t cs_c,
                            void*   gemm_ukr,
-                           thrinfo_t* thread
+                           gemm_thrinfo_t* thread
                          );
 
 static FUNCPTR_T GENARRAY(ftypes,gemm_ker_var2);
@@ -137,7 +137,7 @@ void PASTEMAC(ch,varname)( \
                            void*   beta, \
                            void*   c, inc_t rs_c, inc_t cs_c, \
                            void*   gemm_ukr,  \
-                           thrinfo_t* thread \
+                           gemm_thrinfo_t* thread \
                          ) \
 { \
 	/* Cast the micro-kernel address to its function pointer type. */ \
@@ -217,11 +217,11 @@ void PASTEMAC(ch,varname)( \
 	bli_auxinfo_set_ps_a( ps_a, aux ); \
 	bli_auxinfo_set_ps_b( ps_b, aux ); \
 \
-    thrinfo_t* caucus = thread_sub_caucus( thread ); \
-    dim_t l2_num_threads = thread_num_caucuses( thread ); \
-    dim_t l2_thread_id   = thread_caucus_id( thread ); \
-    dim_t l1_num_threads = thread_num_caucuses( caucus ); \
-    dim_t l1_thread_id   = thread_caucus_id( caucus ); \
+    gemm_thrinfo_t* caucus = gemm_thread_sub_gemm( thread ); \
+    dim_t l2_num_threads = thread_n_way( thread ); \
+    dim_t l2_thread_id   = thread_work_id( thread ); \
+    dim_t l1_num_threads = thread_n_way( caucus ); \
+    dim_t l1_thread_id   = thread_work_id( caucus ); \
 \
 	/* Loop over the n dimension (NR columns at a time). */ \
 	for ( j = l2_thread_id; j < n_iter; j += l2_num_threads ) \

@@ -98,7 +98,7 @@ void bli_packm_blk_var3( obj_t*   c,
 	// in the real domain.
 	if ( bli_is_real( dt_cp ) )
 	{
-		bli_packm_blk_var1( c, p, &BLIS_SINGLE_THREADED );
+		bli_packm_blk_var1( c, p, &BLIS_PACKM_SINGLE_THREADED );
 		return;
 	}
 

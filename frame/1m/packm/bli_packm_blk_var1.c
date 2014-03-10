@@ -274,7 +274,7 @@ void PASTEMAC(ch,varname )( \
 \
 		diagoffc_i  = diagoffc + (ip  )*diagoffc_inc; \
 		c_begin     = c_cast   + (ic  )*vs_c; \
-		p_begin     = p_cast   + (ip  )*ps_p; \
+		p_begin     = p_cast   + (ip  )*p_inc; \
 \
 		if ( bli_is_triangular( strucc ) &&  \
 		     bli_is_unstored_subpart_n( diagoffc_i, uploc, *m_panel_full, *n_panel_full ) ) \
