@@ -53,7 +53,7 @@ void PASTEMAC0(opname)( \
                         y ); \
 }
 
-GENFRONT( addv, ADDV_KERNEL )
+GENFRONT( addv, addv_kernel )
 
 
 //

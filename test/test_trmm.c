@@ -75,20 +75,25 @@ int main( int argc, char** argv )
 	p_end   = 16;
 	p_inc   = 1;
 
-	m_input = 8;
-	n_input = 4;
+	m_input = 4;
+	n_input = 6;
 #endif
 
+#if 1
 	dt_a = BLIS_DOUBLE;
 	dt_b = BLIS_DOUBLE;
 	dt_c = BLIS_DOUBLE;
 	dt_alpha = BLIS_DOUBLE;
 	dt_beta = BLIS_DOUBLE;
+#else
+	dt_a = dt_b = dt_c = dt_alpha = dt_beta = BLIS_DCOMPLEX;
+#endif
 
 	side = BLIS_LEFT;
 	//side = BLIS_RIGHT;
 
 	uplo = BLIS_LOWER;
+	//uplo = BLIS_UPPER;
 
 	for ( p = p_begin; p <= p_end; p += p_inc )
 	{
@@ -117,6 +122,18 @@ int main( int argc, char** argv )
 		bli_randm( &c );
 		bli_randm( &b );
 
+/*
+		bli_obj_toggle_uplo( a );
+		bli_obj_inc_diag_off( -1, a );
+		bli_setm( &BLIS_ZERO, &a );
+		bli_obj_inc_diag_off( 1, a );
+		bli_obj_toggle_uplo( a );
+		bli_obj_set_diag( BLIS_NONUNIT_DIAG, a );
+		bli_scalm( &BLIS_TWO, &a );
+		//bli_scalm( &BLIS_TWO, &a );
+*/
+
+
 
 		bli_setsc(  (2.0/1.0), 0.0, &alpha );
 		bli_setsc( -(1.0/1.0), 0.0, &beta );
@@ -134,14 +151,25 @@ int main( int argc, char** argv )
 
 
 #ifdef PRINT
-			bli_printm( "a", &a, "%11.8f", "" );
-			bli_printm( "c", &c, "%14.11f", "" );
+
+/*
+			obj_t ar, ai;
+			bli_obj_alias_to( a, ar );
+			bli_obj_alias_to( a, ai );
+			bli_obj_set_datatype( BLIS_DOUBLE, ar ); ar.rs *= 2; ar.cs *= 2;
+			bli_obj_set_datatype( BLIS_DOUBLE, ai ); ai.rs *= 2; ai.cs *= 2; ai.buffer = ( double* )ai.buffer + 1;
+			bli_printm( "ar", &ar, "%4.1f", "" );
+			bli_printm( "ai", &ai, "%4.1f", "" );
+*/
+			bli_printm( "a", &a, "%4.1f", "" );
+			bli_printm( "c", &c, "%4.1f", "" );
 #endif
 
 #ifdef BLIS
-			//bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
+			bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
 
 			bli_trmm( side,
+			//bli_trmm4m( side,
 			          &alpha,
 			          &a,
 			          &c );
@@ -172,7 +200,7 @@ int main( int argc, char** argv )
 #endif
 
 #ifdef PRINT
-			bli_printm( "c after", &c, "%14.11f", "" );
+			bli_printm( "c after", &c, "%4.1f", "" );
 			exit(1);
 #endif
 
@@ -185,6 +213,8 @@ int main( int argc, char** argv )
 			gflops = ( 1.0 * m * m * n ) / ( dtime_save * 1.0e9 );
 		else
 			gflops = ( 1.0 * m * n * n ) / ( dtime_save * 1.0e9 );
+
+		if ( bli_is_complex( dt_a ) ) gflops *= 4.0;
 
 #ifdef BLIS
 		printf( "data_trmm_blis" );

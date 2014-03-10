@@ -53,7 +53,7 @@ void PASTEMAC0(opname)( \
                         y ); \
 }
 
-GENFRONT( subv, SUBV_KERNEL )
+GENFRONT( subv, subv_kernel )
 
 
 //

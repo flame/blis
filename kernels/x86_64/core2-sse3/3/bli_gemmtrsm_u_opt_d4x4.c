@@ -34,19 +34,19 @@
 
 #include "blis.h"
 
-void bli_sgemmtrsm_u_opt_d4x4(
-                               dim_t              k,
-                               float* restrict    alpha,
-                               float* restrict    a12,
-                               float* restrict    a11,
-                               float* restrict    b21,
-                               float* restrict    b11,
-                               float* restrict    c11, inc_t rs_c, inc_t cs_c,
-                               auxinfo_t*         data
-                             )
+void bli_sgemmtrsm_u_opt_8x4(
+                              dim_t              k,
+                              float* restrict    alpha,
+                              float* restrict    a12,
+                              float* restrict    a11,
+                              float* restrict    b21,
+                              float* restrict    b11,
+                              float* restrict    c11, inc_t rs_c, inc_t cs_c,
+                              auxinfo_t*         data
+                            )
 {
 	/* Just call the reference implementation. */
-	bli_sgemmtrsm_u_ref_mxn( k,
+	BLIS_SGEMMTRSM_U_UKERNEL_REF( k,
 	                         alpha,
 	                         a12,
 	                         a11,
@@ -56,16 +56,16 @@ void bli_sgemmtrsm_u_opt_d4x4(
 	                         data );
 }
 
-void bli_dgemmtrsm_u_opt_d4x4(
-                               dim_t              k,
-                               double* restrict   alpha,
-                               double* restrict   a12,
-                               double* restrict   a11,
-                               double* restrict   b21,
-                               double* restrict   b11,
-                               double* restrict   c11, inc_t rs_c, inc_t cs_c,
-                               auxinfo_t*         data
-                             )
+void bli_dgemmtrsm_u_opt_4x4(
+                              dim_t              k,
+                              double* restrict   alpha,
+                              double* restrict   a12,
+                              double* restrict   a11,
+                              double* restrict   b21,
+                              double* restrict   b11,
+                              double* restrict   c11, inc_t rs_c, inc_t cs_c,
+                              auxinfo_t*         data
+                            )
 {
 	void*   b_next  = bli_auxinfo_next_b( data );
 
@@ -526,19 +526,19 @@ void bli_dgemmtrsm_u_opt_d4x4(
 
 }
 
-void bli_cgemmtrsm_u_opt_d4x4(
-                               dim_t              k,
-                               scomplex* restrict alpha,
-                               scomplex* restrict a12,
-                               scomplex* restrict a11,
-                               scomplex* restrict b21,
-                               scomplex* restrict b11,
-                               scomplex* restrict c11, inc_t rs_c, inc_t cs_c,
-                               auxinfo_t*         data
-                             )
+void bli_cgemmtrsm_u_opt_4x2(
+                              dim_t              k,
+                              scomplex* restrict alpha,
+                              scomplex* restrict a12,
+                              scomplex* restrict a11,
+                              scomplex* restrict b21,
+                              scomplex* restrict b11,
+                              scomplex* restrict c11, inc_t rs_c, inc_t cs_c,
+                              auxinfo_t*         data
+                            )
 {
 	/* Just call the reference implementation. */
-	bli_cgemmtrsm_u_ref_mxn( k,
+	BLIS_CGEMMTRSM_U_UKERNEL_REF( k,
 	                         alpha,
 	                         a12,
 	                         a11,
@@ -548,19 +548,19 @@ void bli_cgemmtrsm_u_opt_d4x4(
 	                         data );
 }
 
-void bli_zgemmtrsm_u_opt_d4x4(
-                               dim_t              k,
-                               dcomplex* restrict alpha,
-                               dcomplex* restrict a12,
-                               dcomplex* restrict a11,
-                               dcomplex* restrict b21,
-                               dcomplex* restrict b11,
-                               dcomplex* restrict c11, inc_t rs_c, inc_t cs_c,
-                               auxinfo_t*         data
-                             )
+void bli_zgemmtrsm_u_opt_2x2(
+                              dim_t              k,
+                              dcomplex* restrict alpha,
+                              dcomplex* restrict a12,
+                              dcomplex* restrict a11,
+                              dcomplex* restrict b21,
+                              dcomplex* restrict b11,
+                              dcomplex* restrict c11, inc_t rs_c, inc_t cs_c,
+                              auxinfo_t*         data
+                            )
 {
 	/* Just call the reference implementation. */
-	bli_zgemmtrsm_u_ref_mxn( k,
+	BLIS_ZGEMMTRSM_U_UKERNEL_REF( k,
 	                         alpha,
 	                         a12,
 	                         a11,

@@ -35,30 +35,6 @@
 #include "blis.h"
 
 
-void bli_sssaxpyf_opt_var1(
-                            conj_t             conja,
-                            conj_t             conjx,
-                            dim_t              m,
-                            dim_t              b_n,
-                            float*    restrict alpha,
-                            float*    restrict a, inc_t inca, inc_t lda,
-                            float*    restrict x, inc_t incx,
-                            float*    restrict y, inc_t incy
-                          )
-{
-    /* Just call the reference implementation. */
-    bli_sssaxpyf_unb_var1( conja,
-                           conjx,
-                           m,
-                           b_n,
-                           alpha,
-                           a, inca, lda,
-                           x, incx,
-                           y, incy );
-}
-
-
-
 #include "pmmintrin.h"
 typedef union
 {
@@ -66,16 +42,16 @@ typedef union
     double  d[2];
 } v2df_t;
 
-void bli_dddaxpyf_opt_var1(
-                            conj_t             conja,
-                            conj_t             conjx,
-                            dim_t              m,
-                            dim_t              b_n,
-                            double*   restrict alpha,
-                            double*   restrict a, inc_t inca, inc_t lda,
-                            double*   restrict x, inc_t incx,
-                            double*   restrict y, inc_t incy
-                          )
+void bli_daxpyf_opt_var1(
+                          conj_t             conja,
+                          conj_t             conjx,
+                          dim_t              m,
+                          dim_t              b_n,
+                          double*   restrict alpha,
+                          double*   restrict a, inc_t inca, inc_t lda,
+                          double*   restrict x, inc_t incx,
+                          double*   restrict y, inc_t incy
+                        )
 {
 	double*  restrict alpha_cast = alpha;
 	double*  restrict a_cast = a;
@@ -135,14 +111,14 @@ void bli_dddaxpyf_opt_var1(
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE )
 	{
-		PASTEMAC3(d,d,d,axpyf_unb_var1)( conja,
-		                                 conjx,
-		                                 m,
-		                                 b_n,
-		                                 alpha_cast,
-		                                 a_cast, inca, lda,
-		                                 x_cast, incx,
-		                                 y_cast, incy );
+		BLIS_DAXPYF_KERNEL_REF( conja,
+		                        conjx,
+		                        m,
+		                        b_n,
+		                        alpha_cast,
+		                        a_cast, inca, lda,
+		                        x_cast, incx,
+		                        y_cast, incy );
 		return;
 	}
 
@@ -256,50 +232,3 @@ void bli_dddaxpyf_opt_var1(
 	}
 }
 
-
-
-void bli_cccaxpyf_opt_var1(
-                            conj_t             conja,
-                            conj_t             conjx,
-                            dim_t              m,
-                            dim_t              b_n,
-                            scomplex* restrict alpha,
-                            scomplex* restrict a, inc_t inca, inc_t lda,
-                            scomplex* restrict x, inc_t incx,
-                            scomplex* restrict y, inc_t incy
-                          )
-{
-    /* Just call the reference implementation. */
-    bli_cccaxpyf_unb_var1( conja,
-                           conjx,
-                           m,
-                           b_n,
-                           alpha,
-                           a, inca, lda,
-                           x, incx,
-                           y, incy );
-}
-
-
-
-void bli_zzzaxpyf_opt_var1(
-                            conj_t             conja,
-                            conj_t             conjx,
-                            dim_t              m,
-                            dim_t              b_n,
-                            dcomplex* restrict alpha,
-                            dcomplex* restrict a, inc_t inca, inc_t lda,
-                            dcomplex* restrict x, inc_t incx,
-                            dcomplex* restrict y, inc_t incy
-                          )
-{
-    /* Just call the reference implementation. */
-    bli_zzzaxpyf_unb_var1( conja,
-                           conjx,
-                           m,
-                           b_n,
-                           alpha,
-                           a, inca, lda,
-                           x, incx,
-                           y, incy );
-}

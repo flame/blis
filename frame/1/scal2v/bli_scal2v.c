@@ -68,7 +68,7 @@ void PASTEMAC0(opname)( \
                         y ); \
 }
 
-GENFRONT( scal2v, SCAL2V_KERNEL )
+GENFRONT( scal2v, scal2v_kernel )
 
 
 //

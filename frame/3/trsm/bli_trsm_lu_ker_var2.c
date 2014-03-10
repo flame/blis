@@ -41,9 +41,10 @@ typedef void (*FUNCPTR_T)(
                            dim_t   m,
                            dim_t   n,
                            dim_t   k,
-                           void*   alpha,
+                           void*   alpha1,
                            void*   a, inc_t cs_a, inc_t pd_a, inc_t ps_a,
                            void*   b, inc_t rs_b, inc_t pd_b, inc_t ps_b,
+                           void*   alpha2,
                            void*   c, inc_t rs_c, inc_t cs_c,
                            void*   gemmtrsm_ukr,
                            void*   gemm_ukr
@@ -79,7 +80,8 @@ void bli_trsm_lu_ker_var2( obj_t*  a,
 	inc_t     rs_c      = bli_obj_row_stride( *c );
 	inc_t     cs_c      = bli_obj_col_stride( *c );
 
-	void*     buf_alpha;
+	void*     buf_alpha1;
+	void*     buf_alpha2;
 
 	FUNCPTR_T f;
 
@@ -90,12 +92,33 @@ void bli_trsm_lu_ker_var2( obj_t*  a,
 
 
 	// Grab the address of the internal scalar buffer for the scalar
-	// attached to B.
-	buf_alpha = bli_obj_internal_scalar_buffer( *b );
+	// attached to B. This will be the alpha scalar used in the gemmtrsm
+	// subproblems (ie: the scalar that would be applied to the packed
+	// copy of B prior to it being updated by the trsm subproblem). This
+	// scalar may be unit, if for example it was applied during packing.
+	buf_alpha1 = bli_obj_internal_scalar_buffer( *b );
+
+	// Grab the address of the internal scalar buffer for the scalar
+	// attached to C. This will be the "beta" scalar used in the gemm-only
+	// subproblems that correspond to micro-panels that do not intersect
+	// the diagonal. We need this separate scalar because it's possible
+	// that the alpha attached to B was reset, if it was applied during
+	// packing.
+	buf_alpha2 = bli_obj_internal_scalar_buffer( *c );
 
 	// Index into the type combination array to extract the correct
 	// function pointer.
 	f = ftypes[dt_exec];
+
+	// Adjust cs_a and rs_b if A and B were packed for 4m or 3m. This
+	// is needed because cs_a and rs_b are used to index into the
+	// micro-panels of A and B, respectively, and since the pointer
+	// types in the macro-kernel (scomplex or dcomplex) will result
+	// in pointer arithmetic that moves twice as far as it should,
+	// given the datatypes actually stored (float or double), we must
+	// halve the strides to compensate.
+	if ( bli_obj_is_panel_packed_4m( *a ) ||
+	     bli_obj_is_panel_packed_3m( *a ) ) { cs_a /= 2; rs_b /= 2; }
 
 	// Extract from the control tree node the func_t objects containing
 	// the gemmtrsm and gemm micro-kernel function addresses, and then
@@ -110,9 +133,10 @@ void bli_trsm_lu_ker_var2( obj_t*  a,
 	   m,
 	   n,
 	   k,
-	   buf_alpha,
+	   buf_alpha1,
 	   buf_a, cs_a, pd_a, ps_a,
 	   buf_b, rs_b, pd_b, ps_b,
+	   buf_alpha2,
 	   buf_c, rs_c, cs_c,
 	   gemmtrsm_ukr,
 	   gemm_ukr );
@@ -127,9 +151,10 @@ void PASTEMAC(ch,varname)( \
                            dim_t   m, \
                            dim_t   n, \
                            dim_t   k, \
-                           void*   alpha, \
+                           void*   alpha1, \
                            void*   a, inc_t cs_a, inc_t pd_a, inc_t ps_a, \
                            void*   b, inc_t rs_b, inc_t pd_b, inc_t ps_b, \
+                           void*   alpha2, \
                            void*   c, inc_t rs_c, inc_t cs_c, \
                            void*   gemmtrsm_ukr, \
                            void*   gemm_ukr  \
@@ -152,16 +177,18 @@ void PASTEMAC(ch,varname)( \
 	const dim_t     PACKMR     = cs_a; \
 	const dim_t     PACKNR     = rs_b; \
 \
-	ctype* restrict zero       = PASTEMAC(ch,0); \
-	ctype* restrict minus_one  = PASTEMAC(ch,m1); \
-	ctype* restrict a_cast     = a; \
-	ctype*          b_cast     = b; \
-	ctype*          c_cast     = c; \
-	ctype* restrict alpha_cast = alpha; \
+	ctype* restrict zero        = PASTEMAC(ch,0); \
+	ctype* restrict minus_one   = PASTEMAC(ch,m1); \
+	ctype* restrict a_cast      = a; \
+	ctype* restrict b_cast      = b; \
+	ctype* restrict c_cast      = c; \
+	ctype* restrict alpha1_cast = alpha1; \
+	ctype* restrict alpha2_cast = alpha2; \
 	ctype* restrict b1; \
 	ctype* restrict c1; \
 \
 	doff_t          diagoffa_i; \
+	dim_t           k_full; \
 	dim_t           m_iter, m_left; \
 	dim_t           n_iter, n_left; \
 	dim_t           m_cur; \
@@ -172,9 +199,10 @@ void PASTEMAC(ch,varname)( \
 	dim_t           off_a11; \
 	dim_t           off_a12; \
 	dim_t           i, j, ib; \
-	dim_t           rstep_a; \
-	dim_t           cstep_b; \
-	dim_t           rstep_c, cstep_c; \
+	inc_t           rstep_a; \
+	inc_t           cstep_b; \
+	inc_t           rstep_c, cstep_c; \
+	inc_t           ss_a; \
 	auxinfo_t       aux; \
 \
 	/*
@@ -197,6 +225,15 @@ void PASTEMAC(ch,varname)( \
 	/* Safeguard: If matrix A is below the diagonal, it is implicitly zero.
 	   So we do nothing. */ \
 	if ( bli_is_strictly_below_diag_n( diagoffa, m, k ) ) return; \
+\
+	/* Compute the storage stride for the triangular matrix A, which is
+	   usually PACKMR. However, in the case of 3m, the storage stride
+	   captures the (PACKMR * 3/2) factor embedded in the panel stride.
+	   Notice that we must first inflate k up to a multiple of MR, since
+	   the panel stride was originally computed using this inflated k
+	   dimension. */ \
+	k_full = ( k % MR != 0 ? k + MR - ( k % MR ) : k ); \
+	ss_a   = ps_a / k_full; \
 \
 	/* If there is a zero region to the left of where the diagonal of A
 	   intersects the top edge of the block, adjust the pointer to B and
@@ -320,7 +357,7 @@ void PASTEMAC(ch,varname)( \
 				b21 = b1 + off_a12 * PACKNR; \
 \
 				/* Compute the addresses of the next panels of A and B. */ \
-				a2 = a1 + k_a1112 * PACKMR; \
+				a2 = a1 + k_a1112 * ss_a; \
 				if ( bli_is_last_iter( ib, m_iter ) ) \
 				{ \
 					a2 = a_cast; \
@@ -336,14 +373,14 @@ void PASTEMAC(ch,varname)( \
 \
 				/* Save the panel stride of the current panel of A to the
 				   auxinfo_t object. */ \
-				bli_auxinfo_set_ps_a( k_a1112 * PACKMR, aux ); \
+				bli_auxinfo_set_ps_a( k_a1112 * ss_a, aux ); \
 \
 				/* Handle interior and edge cases separately. */ \
 				if ( m_cur == MR && n_cur == NR ) \
 				{ \
 					/* Invoke the fused gemm/trsm micro-kernel. */ \
 					gemmtrsm_ukr_cast( k_a12, \
-					                   alpha_cast, \
+					                   alpha1_cast, \
 					                   a12, \
 					                   a11, \
 					                   b21, \
@@ -355,7 +392,7 @@ void PASTEMAC(ch,varname)( \
 				{ \
 					/* Invoke the fused gemm/trsm micro-kernel. */ \
 					gemmtrsm_ukr_cast( k_a12, \
-					                   alpha_cast, \
+					                   alpha1_cast, \
 					                   a12, \
 					                   a11, \
 					                   b21, \
@@ -369,7 +406,7 @@ void PASTEMAC(ch,varname)( \
 					                        c11, rs_c,  cs_c ); \
 				} \
 \
-				a1 += k_a1112 * PACKMR; \
+				a1 += k_a1112 * ss_a; \
 			} \
 			else if ( bli_is_strictly_above_diag_n( diagoffa_i, MR, k ) ) \
 			{ \
@@ -402,7 +439,7 @@ void PASTEMAC(ch,varname)( \
 					               minus_one, \
 					               a1, \
 					               b1, \
-					               alpha_cast, \
+					               alpha2_cast, \
 					               c11, rs_c, cs_c, \
 					               &aux ); \
 				} \
@@ -420,7 +457,7 @@ void PASTEMAC(ch,varname)( \
 					/* Add the result to the edge of C. */ \
 					PASTEMAC(ch,xpbys_mxn)( m_cur, n_cur, \
 					                        ct,  rs_ct, cs_ct, \
-					                        alpha_cast, \
+					                        alpha2_cast, \
 					                        c11, rs_c,  cs_c ); \
 				} \
 \

@@ -33,7 +33,8 @@
 */
 
 #include "bli_copyv_check.h"
-#include "bli_copyv_unb_var1.h"
+#include "bli_copyv_kernel.h"
+#include "bli_copyv_ref.h"
 
 
 //

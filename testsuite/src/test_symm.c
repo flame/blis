@@ -256,6 +256,8 @@ void libblis_test_symm_impl( iface_t   iface,
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
 		bli_symm( side, alpha, a, b, beta, c );
+		//bli_symm4m( side, alpha, a, b, beta, c );
+		//bli_symm3m( side, alpha, a, b, beta, c );
 		break;
 
 		default:

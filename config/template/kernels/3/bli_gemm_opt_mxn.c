@@ -47,7 +47,7 @@ void bli_sgemm_opt_mxn(
                       )
 {
 	/* Just call the reference implementation. */
-	bli_sgemm_ref_mxn( k,
+	BLIS_SGEMM_UKERNEL_REF( k,
 	                   alpha,
 	                   a1,
 	                   b1,
@@ -162,8 +162,7 @@ void bli_dgemm_opt_mxn(
     that exist (at the edges) is handled automatically within the
     macro-kernel.
   - Alignment of a1 and b1. The addresses a1 and b1 are aligned according
-    to the alignment value BLIS_CONTIG_STRIDE_ALIGN_SIZE, as defined in the
-    bli_config.h header file of the BLIS configuration.
+    to PACKMR*sizeof(type) and PACKNR*sizeof(type), respectively.
   - Unrolling loops. As a general rule of thumb, the loop over k is
     sometimes moderately unrolled; for example, in our experience, an
     unrolling factor of u = 4 is fairly common. If unrolling is applied
@@ -275,7 +274,7 @@ void bli_cgemm_opt_mxn(
                       )
 {
 	/* Just call the reference implementation. */
-	bli_cgemm_ref_mxn( k,
+	BLIS_CGEMM_UKERNEL_REF( k,
 	                   alpha,
 	                   a1,
 	                   b1,
@@ -297,7 +296,7 @@ void bli_zgemm_opt_mxn(
                       )
 {
 	/* Just call the reference implementation. */
-	bli_zgemm_ref_mxn( k,
+	BLIS_ZGEMM_UKERNEL_REF( k,
 	                   alpha,
 	                   a1,
 	                   b1,

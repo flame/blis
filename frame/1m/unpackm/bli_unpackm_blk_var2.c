@@ -44,7 +44,8 @@ typedef void (*FUNCPTR_T)(
                            trans_t transc,
                            dim_t   m,
                            dim_t   n,
-                           void*   p, inc_t rs_p, inc_t cs_p, inc_t ps_p,
+                           void*   p, inc_t rs_p, inc_t cs_p,
+                                      inc_t pd_p, inc_t ps_p,
                            void*   c, inc_t rs_c, inc_t cs_c
                          );
 
@@ -82,6 +83,7 @@ void bli_unpackm_blk_var2( obj_t*     p,
 	void*     buf_p     = bli_obj_buffer_at_off( *p );
 	inc_t     rs_p      = bli_obj_row_stride( *p );
 	inc_t     cs_p      = bli_obj_col_stride( *p );
+	inc_t     pd_p      = bli_obj_panel_dim( *p );
 	inc_t     ps_p      = bli_obj_panel_stride( *p );
 
 	void*     buf_c     = bli_obj_buffer_at_off( *c );
@@ -102,7 +104,8 @@ void bli_unpackm_blk_var2( obj_t*     p,
 	   transc,
 	   m_c,
 	   n_c,
-	   buf_p, rs_p, cs_p, ps_p,
+	   buf_p, rs_p, cs_p,
+	          pd_p, ps_p,
 	   buf_c, rs_c, cs_c );
 }
 
@@ -118,25 +121,33 @@ void PASTEMAC(ch,varname )( \
                             trans_t transc, \
                             dim_t   m, \
                             dim_t   n, \
-                            void*   p, inc_t rs_p, inc_t cs_p, inc_t ps_p, \
+                            void*   p, inc_t rs_p, inc_t cs_p, \
+                                       inc_t pd_p, inc_t ps_p, \
                             void*   c, inc_t rs_c, inc_t cs_c  \
                           ) \
 { \
-	ctype* one       = PASTEMAC(ch,1); \
-	ctype* c_cast    = c; \
-	ctype* p_cast    = p; \
-	ctype* c_begin; \
-	ctype* p_begin; \
-	dim_t  panel_dim; \
-	dim_t  panel_len; \
-	dim_t  iter_dim; \
-	doff_t diagoffc_i; \
-	dim_t  panel_dim_i; \
-	dim_t  ic, ip; \
-	inc_t  diagoffc_inc, vs_c; \
-	inc_t  incc, ldc; \
-	dim_t* m_panel; \
-	dim_t* n_panel; \
+	ctype* restrict one       = PASTEMAC(ch,1); \
+	ctype* restrict c_cast    = c; \
+	ctype* restrict p_cast    = p; \
+	ctype* restrict c_begin; \
+	ctype* restrict p_begin; \
+\
+	dim_t           iter_dim; \
+	dim_t           num_iter; \
+	dim_t           it, ic, ip; \
+    dim_t           ic0, ip0; \
+	doff_t          ic_inc, ip_inc; \
+    doff_t          diagoffc_i; \
+    doff_t          diagoffc_inc; \
+	dim_t           panel_len; \
+	dim_t           panel_dim_i; \
+	dim_t           panel_dim_max; \
+	inc_t           vs_c; \
+	inc_t           incc, ldc; \
+	inc_t           ldp; \
+	dim_t*          m_panel; \
+	dim_t*          n_panel; \
+\
 \
 	/* If c needs a transposition, induce it so that we can more simply
 	   express the remaining parameters and code. */ \
@@ -154,39 +165,51 @@ void PASTEMAC(ch,varname )( \
 	if ( bli_is_row_stored_f( rs_p, cs_p ) ) \
 	{ \
 		/* Prepare to unpack from column panels. */ \
-		iter_dim     = n; \
-		panel_len    = m; \
-		panel_dim    = rs_p; \
-		incc         = cs_c; \
-		ldc          = rs_c; \
-		vs_c         = cs_c; \
-		diagoffc_inc = -( doff_t)panel_dim; \
-		m_panel      = &m; \
-		n_panel      = &panel_dim_i; \
+		iter_dim      = n; \
+		panel_len     = m; \
+		panel_dim_max = pd_p; \
+		incc          = cs_c; \
+		ldc           = rs_c; \
+		vs_c          = cs_c; \
+		diagoffc_inc  = -( doff_t)panel_dim_max; \
+		ldp           = rs_p; \
+		m_panel       = &m; \
+		n_panel       = &panel_dim_i; \
 	} \
 	else /* if ( bli_is_col_stored_f( rs_p, cs_p ) ) */ \
 	{ \
 		/* Prepare to unpack from row panels. */ \
-		iter_dim     = m; \
-		panel_len    = n; \
-		panel_dim    = cs_p; \
-		incc         = rs_c; \
-		ldc          = cs_c; \
-		vs_c         = rs_c; \
-		diagoffc_inc = ( doff_t )panel_dim; \
-		m_panel      = &panel_dim_i; \
-		n_panel      = &n; \
+		iter_dim      = m; \
+		panel_len     = n; \
+		panel_dim_max = pd_p; \
+		incc          = rs_c; \
+		ldc           = cs_c; \
+		vs_c          = rs_c; \
+		diagoffc_inc  = ( doff_t )panel_dim_max; \
+		ldp           = cs_p; \
+		m_panel       = &panel_dim_i; \
+		n_panel       = &n; \
 	} \
 \
-\
-	for ( ic  = 0,         ip  = 0, diagoffc_i  = diagoffc;  ic < iter_dim; \
-	      ic += panel_dim, ip += 1, diagoffc_i += diagoffc_inc ) \
+	/* Compute the total number of iterations we'll need. */ \
+	num_iter = iter_dim / panel_dim_max + ( iter_dim % panel_dim_max ? 1 : 0 ); \
 \
 	{ \
-		panel_dim_i = bli_min( panel_dim, iter_dim - ic ); \
+		ic0    = 0; \
+		ic_inc = panel_dim_max; \
+		ip0    = 0; \
+		ip_inc = 1; \
+	} \
 \
-		p_begin = p_cast + ip * ps_p; \
-		c_begin = c_cast + ic * vs_c; \
+	for ( ic  = ic0,    ip  = ip0,    it  = 0; it < num_iter; \
+	      ic += ic_inc, ip += ip_inc, it += 1 ) \
+	{ \
+		panel_dim_i = bli_min( panel_dim_max, iter_dim - ic ); \
+\
+		diagoffc_i  = diagoffc + (ip  )*diagoffc_inc; \
+\
+		p_begin     = p_cast + ip * ps_p; \
+		c_begin     = c_cast + ic * vs_c; \
 \
 		/* If the current panel of C intersects the diagonal AND is upper or
 		   lower stored, then we must call scal2m. Otherwise, we can use a
@@ -212,7 +235,7 @@ void PASTEMAC(ch,varname )( \
 			                          panel_dim_i, \
 			                          panel_len, \
 			                          one, \
-			                          p_begin,       panel_dim, \
+			                          p_begin,       ldp, \
 			                          c_begin, incc, ldc ); \
 		} \
 \

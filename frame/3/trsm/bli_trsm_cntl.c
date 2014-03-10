@@ -73,6 +73,8 @@ trsm_t*           trsm_r_cntl;
 void bli_trsm_cntl_init()
 {
 
+	// Create function pointer objects for each datatype-specific
+	// gemmtrsm_l and gemmtrsm_u micro-kernel.
 	gemmtrsm_l_ukrs = bli_func_obj_create( BLIS_SGEMMTRSM_L_UKERNEL,
 	                                       BLIS_DGEMMTRSM_L_UKERNEL,
 	                                       BLIS_CGEMMTRSM_L_UKERNEL,
@@ -88,7 +90,7 @@ void bli_trsm_cntl_init()
 	trsm_l_packa_cntl
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT1, // pack panels of A compactly
+	                           BLIS_VARIANT1,
 	                           // IMPORTANT: n dim multiple must be mr to
 	                           // support right and bottom-right edge cases
 	                           gemm_mr,

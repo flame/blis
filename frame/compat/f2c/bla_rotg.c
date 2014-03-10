@@ -180,29 +180,28 @@ L20:
 	goto L10;
     }
     *c__ = 0.f;
-    s->real = 1.f, s->imag = 0.f;
-    ca->real = cb->real, ca->imag = cb->imag;
+    bli_csets( 1.f, 0.f, *s );
+    bli_csets( bli_creal(*cb), bli_cimag(*cb), *ca );
     goto L20;
 L10:
     scale = bla_c_abs(ca) + bla_c_abs(cb);
-    q__1.real = ca->real / scale, q__1.imag = ca->imag / scale;
+    bli_csets( (bli_creal(*ca) / scale), (bli_cimag(*ca) / scale), q__1 );
 /* Computing 2nd power */
     r__1 = bla_c_abs(&q__1);
-    q__2.real = cb->real / scale, q__2.imag = cb->imag / scale;
+    bli_csets( (bli_creal(*cb) / scale), (bli_cimag(*cb) / scale), q__2 );
 /* Computing 2nd power */
     r__2 = bla_c_abs(&q__2);
     norm = scale * sqrt(r__1 * r__1 + r__2 * r__2);
     r__1 = bla_c_abs(ca);
-    q__1.real = ca->real / r__1, q__1.imag = ca->imag / r__1;
-    alpha.real = q__1.real, alpha.imag = q__1.imag;
+    bli_csets( (bli_creal(*ca) / r__1), (bli_cimag(*ca) / r__1), q__1 );
+    bli_csets( (bli_creal(q__1)), (bli_cimag(q__1)), alpha );
     *c__ = bla_c_abs(ca) / norm;
     bla_r_cnjg(&q__3, cb);
-    q__2.real = alpha.real * q__3.real - alpha.imag * q__3.imag, q__2.imag = alpha.real * q__3.imag + 
-	    alpha.imag * q__3.real;
-    q__1.real = q__2.real / norm, q__1.imag = q__2.imag / norm;
-    s->real = q__1.real, s->imag = q__1.imag;
-    q__1.real = norm * alpha.real, q__1.imag = norm * alpha.imag;
-    ca->real = q__1.real, ca->imag = q__1.imag;
+    bli_csets( (bli_creal(alpha) * bli_creal(q__3) - bli_cimag(alpha) * bli_cimag(q__3)), (bli_creal(alpha) * bli_cimag(q__3) + bli_cimag(alpha) * bli_creal(q__3)), q__2 );
+    bli_csets( (bli_creal(q__2) / norm), (bli_cimag(q__2) / norm), q__1 );
+    bli_csets( bli_creal(q__1), bli_cimag(q__1), *s );
+    bli_csets( (norm * bli_creal(alpha)), (norm * bli_cimag(alpha)), q__1 );
+    bli_csets( bli_creal(q__1), bli_cimag(q__1), *ca );
 L20:
     return 0;
 } /* crotg_ */
@@ -233,31 +232,30 @@ L20:
 	goto L10;
     }
     *c__ = 0.;
-    s->real = 1., s->imag = 0.;
-    ca->real = cb->real, ca->imag = cb->imag;
+    bli_zsets( 1., 0., *s );
+    bli_zsets( bli_zreal(*cb), bli_zimag(*cb), *ca );
     goto L20;
 L10:
     scale = bla_z_abs(ca) + bla_z_abs(cb);
-    z__2.real = scale, z__2.imag = 0.;
+    bli_zsets( (scale), (0.), z__2 );
     bla_z_div(&z__1, ca, &z__2);
 /* Computing 2nd power */
     d__1 = bla_z_abs(&z__1);
-    z__4.real = scale, z__4.imag = 0.;
+    bli_zsets( (scale), (0.), z__4 );
     bla_z_div(&z__3, cb, &z__4);
 /* Computing 2nd power */
     d__2 = bla_z_abs(&z__3);
     norm = scale * sqrt(d__1 * d__1 + d__2 * d__2);
     d__1 = bla_z_abs(ca);
-    z__1.real = ca->real / d__1, z__1.imag = ca->imag / d__1;
-    alpha.real = z__1.real, alpha.imag = z__1.imag;
+    bli_zsets( (bli_zreal(*ca) / d__1), (bli_zimag(*ca) / d__1), z__1 );
+    bli_zsets( (bli_zreal(z__1)), (bli_zimag(z__1)), alpha );
     *c__ = bla_z_abs(ca) / norm;
     bla_d_cnjg(&z__3, cb);
-    z__2.real = alpha.real * z__3.real - alpha.imag * z__3.imag, z__2.imag = alpha.real * z__3.imag + 
-	    alpha.imag * z__3.real;
-    z__1.real = z__2.real / norm, z__1.imag = z__2.imag / norm;
-    s->real = z__1.real, s->imag = z__1.imag;
-    z__1.real = norm * alpha.real, z__1.imag = norm * alpha.imag;
-    ca->real = z__1.real, ca->imag = z__1.imag;
+    bli_zsets( (bli_zreal(alpha) * bli_zreal(z__3) - bli_zimag(alpha) * bli_zimag(z__3)), (bli_zreal(alpha) * bli_zimag(z__3) + bli_zimag(alpha) * bli_zreal(z__3)), z__2 );
+    bli_zsets( (bli_zreal(z__2) / norm), (bli_zimag(z__2) / norm), z__1 );
+    bli_zsets( bli_zreal(z__1), bli_zimag(z__1), *s );
+    bli_zsets( (norm * bli_zreal(alpha)), (norm * bli_zimag(alpha)), z__1 );
+    bli_zsets( bli_zreal(z__1), bli_zimag(z__1), *ca );
 L20:
     return 0;
 } /* zrotg_ */

@@ -221,7 +221,7 @@ void libblis_test_axpy2v_impl( iface_t   iface,
 	switch ( iface )
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
-		bli_axpy2v_ker( alpha1, alpha2, x, y, z );
+		bli_axpy2v_kernel( alpha1, alpha2, x, y, z );
 		break;
 
 		default:
@@ -292,94 +292,4 @@ void libblis_test_axpy2v_check( obj_t*  alpha1,
 	bli_obj_free( &y_temp );
 	bli_obj_free( &z_temp );
 }
-
-
-
-
-//
-// Define object-wrapper to AXPY2V_KERNEL kernels.
-//
-#define FUNCPTR_T axpy2v_ker_fp
-
-typedef void (*FUNCPTR_T)(
-                           conj_t conjx,
-                           conj_t conjy,
-                           dim_t  n,
-                           void*  alpha1,
-                           void*  alpha2,
-                           void*  x, inc_t incx,
-                           void*  y, inc_t incy,
-                           void*  z, inc_t incz
-                         );
-
-static FUNCPTR_T GENARRAY(ftypes,axpy2v_ker);
-
-void bli_axpy2v_ker( obj_t*  alpha1,
-                     obj_t*  alpha2,
-                     obj_t*  x,
-                     obj_t*  y,
-                     obj_t*  z )
-{
-	num_t     dt        = bli_obj_datatype( *z );
-
-	conj_t    conjx     = bli_obj_conj_status( *x );
-	conj_t    conjy     = bli_obj_conj_status( *y );
-	dim_t     n         = bli_obj_vector_dim( *x );
-
-	inc_t     inc_x     = bli_obj_vector_inc( *x );
-	void*     buf_x     = bli_obj_buffer_at_off( *x );
-
-	inc_t     inc_y     = bli_obj_vector_inc( *y );
-	void*     buf_y     = bli_obj_buffer_at_off( *y );
-
-	inc_t     inc_z     = bli_obj_vector_inc( *z );
-	void*     buf_z     = bli_obj_buffer_at_off( *z );
-
-	void*     buf_alpha1 = bli_obj_buffer_for_1x1( dt, *alpha1 );
-
-	void*     buf_alpha2 = bli_obj_buffer_for_1x1( dt, *alpha2 );
-
-	FUNCPTR_T f;
-
-	// Index into the type combination array to extract the correct
-	// function pointer.
-	f = ftypes[dt];
-
-	// Invoke the function.
-	f( conjx,
-	   conjy,
-	   n,
-	   buf_alpha1,
-	   buf_alpha2,
-	   buf_x, inc_x,
-	   buf_y, inc_y,
-	   buf_z, inc_z );
-}
-
-
-#undef  GENTFUNC
-#define GENTFUNC( ctype, ch, varname, kername ) \
-\
-void PASTEMAC(ch,varname)( \
-                           conj_t  conjx, \
-                           conj_t  conjy, \
-                           dim_t   n, \
-                           void*   alpha1, \
-                           void*   alpha2, \
-                           void*   x, inc_t incx, \
-                           void*   y, inc_t incy, \
-                           void*   z, inc_t incz \
-                         ) \
-{ \
-    PASTEMAC3(ch,ch,ch,kername)( conjx, \
-                                 conjy, \
-                                 n, \
-                                 alpha1, \
-                                 alpha2, \
-                                 x, incx, \
-                                 y, incy, \
-                                 z, incz ); \
-}
-
-INSERT_GENTFUNC_BASIC( axpy2v_ker, AXPY2V_KERNEL )
 

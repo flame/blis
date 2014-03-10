@@ -229,7 +229,7 @@ void libblis_test_dotxf_impl( iface_t   iface,
 	switch ( iface )
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
-		bli_dotxf_ker( alpha, a, x, beta, y );
+		bli_dotxf_kernel( alpha, a, x, beta, y );
 		break;
 
 		default:
@@ -300,101 +300,4 @@ void libblis_test_dotxf_check( obj_t*  alpha,
 
 	bli_obj_free( &v );
 }
-
-
-
-
-//
-// Define object-wrapper to DOTXF_KERNEL kernels.
-//
-#define FUNCPTR_T dotxf_ker_fp
-
-typedef void (*FUNCPTR_T)(
-                           conj_t  conjat,
-                           conj_t  conjx,
-                           dim_t   m,
-                           dim_t   b_n,
-                           void*   alpha,
-                           void*   a, inc_t inca, inc_t lda,
-                           void*   x, inc_t incx,
-                           void*   beta,
-                           void*   y, inc_t incy
-                         );
-
-static FUNCPTR_T GENARRAY(ftypes,dotxf_ker);
-
-void bli_dotxf_ker( obj_t*  alpha,
-                    obj_t*  a,
-                    obj_t*  x,
-                    obj_t*  beta,
-                    obj_t*  y )
-{
-	num_t     dt        = bli_obj_datatype( *y );
-
-	conj_t    conjat    = bli_obj_conj_status( *a );
-	conj_t    conjx     = bli_obj_conj_status( *x );
-
-	dim_t     m         = bli_obj_vector_dim( *x );
-	dim_t     b_n       = bli_obj_vector_dim( *y );
-
-	void*     buf_a     = bli_obj_buffer_at_off( *a );
-	inc_t     rs_a      = bli_obj_row_stride( *a );
-	inc_t     cs_a      = bli_obj_col_stride( *a );
-
-	inc_t     inc_x     = bli_obj_vector_inc( *x );
-	void*     buf_x     = bli_obj_buffer_at_off( *x );
-
-	inc_t     inc_y     = bli_obj_vector_inc( *y );
-	void*     buf_y     = bli_obj_buffer_at_off( *y );
-
-	void*     buf_alpha = bli_obj_buffer_for_1x1( dt, *alpha );
-
-	void*     buf_beta  = bli_obj_buffer_for_1x1( dt, *beta );
-
-	FUNCPTR_T f;
-
-	// Index into the type combination array to extract the correct
-	// function pointer.
-	f = ftypes[dt];
-
-	// Invoke the function.
-	f( conjat,
-	   conjx,
-	   m,
-	   b_n,
-	   buf_alpha,
-	   buf_a, rs_a, cs_a,
-	   buf_x, inc_x,
-	   buf_beta,
-	   buf_y, inc_y );
-}
-
-
-#undef  GENTFUNC
-#define GENTFUNC( ctype, ch, varname, kername ) \
-\
-void PASTEMAC(ch,varname)( \
-                           conj_t  conjat, \
-                           conj_t  conjx, \
-                           dim_t   m, \
-                           dim_t   b_n, \
-                           void*   alpha, \
-                           void*   a, inc_t inca, inc_t lda, \
-                           void*   x, inc_t incx, \
-                           void*   beta, \
-                           void*   y, inc_t incy \
-                         ) \
-{ \
-	PASTEMAC3(ch,ch,ch,kername)( conjat, \
-	                             conjx, \
-	                             m, \
-	                             b_n, \
-	                             alpha, \
-	                             a, inca, lda, \
-	                             x, incx, \
-	                             beta, \
-	                             y, incy ); \
-}
-
-INSERT_GENTFUNC_BASIC( dotxf_ker, DOTXF_KERNEL )
 

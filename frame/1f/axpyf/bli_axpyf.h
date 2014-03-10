@@ -34,7 +34,8 @@
 
 #include "bli_axpyf_check.h"
 #include "bli_axpyf_fusefac.h"
-#include "bli_axpyf_unb_var1.h"
+#include "bli_axpyf_kernel.h"
+#include "bli_axpyf_ref.h"
 
 
 //

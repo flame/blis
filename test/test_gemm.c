@@ -68,22 +68,27 @@ int main( int argc, char** argv )
 
 	m_input = -1;
 	n_input = -1;
+	//k_input = 256;
 	k_input = -1;
 #else
 	p_begin = 16;
 	p_end   = 16;
 	p_inc   = 1;
 
-	m_input = 8;
-	k_input = 16;
-	n_input = 16;
+	m_input = 5;
+	k_input = 6;
+	n_input = 4;
 #endif
 
+#if 1
 	dt_a = BLIS_DOUBLE;
 	dt_b = BLIS_DOUBLE;
 	dt_c = BLIS_DOUBLE;
 	dt_alpha = BLIS_DOUBLE;
 	dt_beta = BLIS_DOUBLE;
+#else
+	dt_a = dt_b = dt_c = dt_alpha = dt_beta = BLIS_DCOMPLEX;
+#endif
 
 	for ( p = p_begin; p <= p_end; p += p_inc )
 	{
@@ -109,8 +114,8 @@ int main( int argc, char** argv )
 		bli_randm( &c );
 
 
-		bli_setsc(  (2.0/1.0), 0.0, &alpha );
-		bli_setsc( -(1.0/1.0), 0.0, &beta );
+		bli_setsc(  (0.9/1.0), 0.2, &alpha );
+		bli_setsc( -(1.1/1.0), 0.3, &beta );
 
 
 		bli_copym( &c, &c_save );
@@ -135,13 +140,15 @@ int main( int argc, char** argv )
 			//bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
 
 			bli_gemm( &alpha,
+			//bli_gemm4m( &alpha,
 			          &a,
 			          &b,
 			          &beta,
 			          &c );
 
 #else
-
+		if ( bli_is_real( dt_a ) )
+		{
 			f77_char transa = 'N';
 			f77_char transb = 'N';
 			f77_int  mm     = bli_obj_length( c );
@@ -166,6 +173,35 @@ int main( int argc, char** argv )
 			        bp, &ldb,
 			        betap,
 			        cp, &ldc );
+		}
+		else
+		{
+			f77_char transa = 'N';
+			f77_char transb = 'N';
+			f77_int  mm     = bli_obj_length( c );
+			f77_int  kk     = bli_obj_width_after_trans( a );
+			f77_int  nn     = bli_obj_width( c );
+			f77_int  lda    = bli_obj_col_stride( a );
+			f77_int  ldb    = bli_obj_col_stride( b );
+			f77_int  ldc    = bli_obj_col_stride( c );
+			dcomplex*  alphap = bli_obj_buffer( alpha );
+			dcomplex*  ap     = bli_obj_buffer( a );
+			dcomplex*  bp     = bli_obj_buffer( b );
+			dcomplex*  betap  = bli_obj_buffer( beta );
+			dcomplex*  cp     = bli_obj_buffer( c );
+
+			zgemm_( &transa,
+			//zgemm3m_( &transa,
+			        &transb,
+			        &mm,
+			        &nn,
+			        &kk,
+			        alphap,
+			        ap, &lda,
+			        bp, &ldb,
+			        betap,
+			        cp, &ldc );
+		}
 #endif
 
 #ifdef PRINT
@@ -178,6 +214,8 @@ int main( int argc, char** argv )
 		}
 
 		gflops = ( 2.0 * m * k * n ) / ( dtime_save * 1.0e9 );
+
+		if ( bli_is_complex( dt_a ) ) gflops *= 4.0;
 
 #ifdef BLIS
 		printf( "data_gemm_blis" );

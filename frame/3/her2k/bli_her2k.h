@@ -49,6 +49,9 @@
 #include "bli_her2k_u_ker_var2.h"
 */
 
+#include "bli_her2k4m.h"
+#include "bli_her2k3m.h"
+
 
 //
 // Prototype object-based interface.

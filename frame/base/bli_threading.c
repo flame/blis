@@ -176,7 +176,7 @@ thrinfo_t* bli_create_thread_info( dim_t* caucuses_at_level, dim_t n_levels )
     //Create communicators
     thread_comm_tree_t* comm_leaves = (thread_comm_tree_t*)bli_malloc( sizeof(thread_comm_tree_t) * n_threads);
     create_comms( caucuses_at_level, n_levels, 0, NULL, comm_leaves, 0 );
-    thrinfo_t* info_paths = (thrinfo_t*)bli_malloc( sizeof(thrinfo_t*) * n_threads );
+    thrinfo_t* info_paths = (thrinfo_t*)bli_malloc( sizeof(thrinfo_t) * n_threads );
 
     //Now create paths upwards
     for( dim_t i = 0; i < n_threads; i++ )

@@ -44,7 +44,7 @@ void bli_strsm_l_opt_mxn(
                         )
 {
 	/* Just call the reference implementation. */
-	bli_strsm_l_ref_mxn( a11,
+	BLIS_STRSM_L_UKERNEL_REF( a11,
 	                     b11,
 	                     c11, rs_c, cs_c,
 	                     data );
@@ -216,7 +216,7 @@ void bli_ctrsm_l_opt_mxn(
                         )
 {
 	/* Just call the reference implementation. */
-	bli_ctrsm_l_ref_mxn( a11,
+	BLIS_CTRSM_L_UKERNEL_REF( a11,
 	                     b11,
 	                     c11, rs_c, cs_c,
 	                     data );
@@ -232,7 +232,7 @@ void bli_ztrsm_l_opt_mxn(
                         )
 {
 	/* Just call the reference implementation. */
-	bli_ztrsm_l_ref_mxn( a11,
+	BLIS_ZTRSM_L_UKERNEL_REF( a11,
 	                     b11,
 	                     c11, rs_c, cs_c,
 	                     data );

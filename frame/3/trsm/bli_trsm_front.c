@@ -129,7 +129,7 @@ void bli_trsm_front( side_t  side,
 	bli_trsm_int( alpha,
 	              &a_local,
 	              &b_local,
-	              &BLIS_ZERO,
+	              alpha,
 	              &c_local,
 	              cntl );
 }

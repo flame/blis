@@ -33,7 +33,8 @@
 */
 
 #include "bli_dotv_check.h"
-#include "bli_dotv_unb_var1.h"
+#include "bli_dotv_kernel.h"
+#include "bli_dotv_ref.h"
 
 
 //

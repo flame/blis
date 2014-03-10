@@ -38,9 +38,9 @@
 
 double bla_r_sign(real *a, real *b)
 {
-	double x = (*a >= 0 ? *a : - *a);
+	double x = (*a >= 0.0 ? *a : - *a);
 
-	return(*b >= 0 ? x : -x);
+	return(*b >= 0.0 ? x : -x);
 }
 
 #endif

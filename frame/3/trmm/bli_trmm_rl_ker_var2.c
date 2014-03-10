@@ -105,6 +105,16 @@ void bli_trmm_rl_ker_var2( obj_t*  a,
 	// function pointer.
 	f = ftypes[dt_exec];
 
+	// Adjust cs_a and rs_b if A and B were packed for 4m or 3m. This
+	// is needed because cs_a and rs_b are used to index into the
+	// micro-panels of A and B, respectively, and since the pointer
+	// types in the macro-kernel (scomplex or dcomplex) will result
+	// in pointer arithmetic that moves twice as far as it should,
+	// given the datatypes actually stored (float or double), we must
+	// halve the strides to compensate.
+	if ( bli_obj_is_panel_packed_4m( *a ) ||
+	     bli_obj_is_panel_packed_3m( *a ) ) { cs_a /= 2; rs_b /= 2; }
+
 	// Extract from the control tree node the func_t object containing
 	// the gemm micro-kernel function addresses, and then query the
 	// function address corresponding to the current datatype.
@@ -155,7 +165,6 @@ void PASTEMAC(ch,varname)( \
 	const dim_t     MR         = pd_a; \
 	const dim_t     NR         = pd_b; \
 	const dim_t     PACKMR     = cs_a; \
-	const dim_t     PACKNR     = rs_b; \
 \
 	ctype* restrict one        = PASTEMAC(ch,1); \
 	ctype* restrict zero       = PASTEMAC(ch,0); \
@@ -168,6 +177,7 @@ void PASTEMAC(ch,varname)( \
 	ctype* restrict c1; \
 \
 	doff_t          diagoffb_j; \
+	dim_t           k_full; \
 	dim_t           m_iter, m_left; \
 	dim_t           n_iter, n_left; \
 	dim_t           m_cur; \
@@ -178,6 +188,7 @@ void PASTEMAC(ch,varname)( \
 	inc_t           rstep_a; \
 	inc_t           cstep_b; \
 	inc_t           rstep_c, cstep_c; \
+	inc_t           ss_b; \
 	auxinfo_t       aux; \
 \
 	/*
@@ -200,6 +211,15 @@ void PASTEMAC(ch,varname)( \
 	/* Safeguard: If the current panel of B is entirely above the diagonal,
 	   it is implicitly zero. So we do nothing. */ \
 	if ( bli_is_strictly_above_diag_n( diagoffb, k, n ) ) return; \
+\
+	/* Compute the storage stride for the triangular matrix B, which is
+	   usually PACKNR. However, in the case of 3m, the storage stride
+	   captures the (PACKNR * 3/2) factor embedded in the panel stride.
+	   Notice that we must first inflate k up to a multiple of NR, since
+	   the panel stride was originally computed using this inflated k
+	   dimension. */ \
+	k_full = ( k % NR != 0 ? k + NR - ( k % NR ) : k ); \
+	ss_b   = ps_b / k_full; \
 \
 	/* If there is a zero region above where the diagonal of B intersects
 	   the left edge of the panel, adjust the pointer to A and treat this
@@ -282,7 +302,7 @@ void PASTEMAC(ch,varname)( \
 \
 		/* Save the panel stride of the current panel of B to the
 		   auxinfo_t object. */ \
-		bli_auxinfo_set_ps_b( k_b1121 * PACKNR, aux ); \
+		bli_auxinfo_set_ps_b( k_b1121 * ss_b, aux ); \
 \
 		/* If the current panel of B intersects the diagonal, scale C
 		   by beta. If it is strictly below the diagonal, scale by one.
@@ -305,7 +325,7 @@ void PASTEMAC(ch,varname)( \
 				if ( bli_is_last_iter( i, m_iter ) ) \
 				{ \
 					a2 = a_cast; \
-					b2 = b1 + k_b1121 * PACKNR; \
+					b2 = b1 + k_b1121 * ss_b; \
 					if ( bli_is_last_iter( j, n_iter ) ) \
 						b2 = b_cast; \
 				} \
@@ -411,7 +431,7 @@ void PASTEMAC(ch,varname)( \
 			} \
 		} \
 \
-		b1 += k_b1121 * PACKNR; \
+		b1 += k_b1121 * ss_b; \
 		c1 += cstep_c; \
 	} \
 \

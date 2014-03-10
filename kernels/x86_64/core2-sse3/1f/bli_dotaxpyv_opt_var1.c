@@ -35,62 +35,6 @@
 #include "blis.h"
 
 
-#undef  GENTFUNC3U12
-#define GENTFUNC3U12( ctype_x, ctype_y, ctype_z, ctype_xy, chx, chy, chz, chxy, opname, varname ) \
-\
-void PASTEMAC3(chx,chy,chz,varname)( \
-                                     conj_t conjxt, \
-                                     conj_t conjx, \
-                                     conj_t conjy, \
-                                     dim_t  n, \
-                                     void*  alpha, \
-                                     void*  x, inc_t incx, \
-                                     void*  y, inc_t incy, \
-                                     void*  rho, \
-                                     void*  z, inc_t incz \
-                                   ) \
-{ \
-	ctype_xy* one        = PASTEMAC(chxy,1); \
-	ctype_xy* zero       = PASTEMAC(chxy,0); \
-	ctype_xy* alpha_cast = alpha; \
-	ctype_x*  x_cast     = x; \
-	ctype_y*  y_cast     = y; \
-	ctype_xy* rho_cast   = rho; \
-	ctype_z*  z_cast     = z; \
-\
-	PASTEMAC3(chx,chy,chxy,dotxv)( conjxt, \
-	                               conjy, \
-	                               n, \
-	                               one, \
-	                               x_cast, incx, \
-	                               y_cast, incy, \
-	                               zero, \
-	                               rho_cast ); \
-	PASTEMAC3(chxy,chx,chz,axpyv)( conjx, \
-	                               n, \
-	                               alpha_cast, \
-	                               x_cast, incx, \
-	                               z_cast, incz ); \
-}
-
-// Define the basic set of functions unconditionally, and then also some
-// mixed datatype functions if requested.
-//INSERT_GENTFUNC3U12_BASIC( dotaxpyv, dotaxpyv_opt_var1 )
-GENTFUNC3U12( float,    float,    float,    float,    s, s, s, s, dotaxpyv, dotaxpyv_opt_var1 )
-//GENTFUNC3U12( double,   double,   double,   double,   d, d, d, d, dotaxpyv, dotaxpyv_opt_var1 )
-GENTFUNC3U12( scomplex, scomplex, scomplex, scomplex, c, c, c, c, dotaxpyv, dotaxpyv_opt_var1 )
-GENTFUNC3U12( dcomplex, dcomplex, dcomplex, dcomplex, z, z, z, z, dotaxpyv, dotaxpyv_opt_var1 )
-
-
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTFUNC3U12_MIX_D( dotaxpyv, dotaxpyv_opt_var1 )
-#endif
-
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTFUNC3U12_MIX_P( dotaxpyv, dotaxpyv_opt_var1 )
-#endif
-
-
 #include "pmmintrin.h"
 typedef union
 {
@@ -99,17 +43,17 @@ typedef union
 } v2df_t;
 
 
-void bli_ddddotaxpyv_opt_var1(
-                               conj_t conjxt,
-                               conj_t conjx,
-                               conj_t conjy,
-                               dim_t  n,
-                               void*  alpha,
-                               void*  x, inc_t incx,
-                               void*  y, inc_t incy,
-                               void*  rho,
-                               void*  z, inc_t incz
-                             )
+void bli_ddotaxpyv_opt_var1(
+                             conj_t           conjxt,
+                             conj_t           conjx,
+                             conj_t           conjy,
+                             dim_t            n,
+                             double* restrict alpha,
+                             double* restrict x, inc_t incx,
+                             double* restrict y, inc_t incy,
+                             double* restrict rho,
+                             double* restrict z, inc_t incz
+                           )
 {
 	double*  restrict alpha_cast = alpha;
 	double*  restrict x_cast     = x;
@@ -166,15 +110,15 @@ void bli_ddddotaxpyv_opt_var1(
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE )
 	{
-		bli_ddddotaxpyv_unb_var1( conjxt,
-		                          conjx,
-		                          conjy,
-		                          n,
-		                          alpha,
-		                          x, incx,
-		                          y, incy,
-		                          rho,
-		                          z, incz );
+		BLIS_DDOTAXPYV_KERNEL_REF( conjxt,
+		                           conjx,
+		                           conjy,
+		                           n,
+		                           alpha,
+		                           x, incx,
+		                           y, incy,
+		                           rho,
+		                           z, incz );
 		return;
 	}
 

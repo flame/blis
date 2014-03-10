@@ -35,6 +35,9 @@
 #include "bli_symm_check.h"
 #include "bli_symm_front.h"
 
+#include "bli_symm4m.h"
+#include "bli_symm3m.h"
+
 
 //
 // Prototype object-based interface.

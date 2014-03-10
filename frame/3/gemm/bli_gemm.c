@@ -45,6 +45,17 @@ void bli_gemm( obj_t*  alpha,
                obj_t*  beta,
                obj_t*  c )
 {
+	if (
+#ifdef BLIS_ENABLE_SCOMPLEX_VIA_4M
+	     bli_obj_is_scomplex( *c ) ||
+#endif
+#ifdef BLIS_ENABLE_DCOMPLEX_VIA_4M
+	     bli_obj_is_dcomplex( *c ) ||
+#endif
+	     FALSE
+	   )
+		return bli_gemm4m( alpha, a, b, beta, c );
+
 	bli_gemm_front( alpha, a, b, beta, c,
 	                gemm_cntl );
 }
@@ -88,11 +99,11 @@ void PASTEMAC(ch,opname)( \
 	bli_obj_set_conjtrans( transa, ao ); \
 	bli_obj_set_conjtrans( transb, bo ); \
 \
-	PASTEMAC0(varname)( &alphao, \
-	                    &ao, \
-	                    &bo, \
-	                    &betao, \
-	                    &co ); \
+	PASTEMAC0(opname)( &alphao, \
+	                   &ao, \
+	                   &bo, \
+	                   &betao, \
+	                   &co ); \
 }
 
 INSERT_GENTFUNC_BASIC( gemm, gemm )

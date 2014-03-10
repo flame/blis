@@ -58,7 +58,8 @@ void PASTEMAC(ch,varname)( \
                            void*   b, inc_t rs_b, inc_t pd_b, inc_t ps_b, \
                            void*   beta, \
                            void*   c, inc_t rs_c, inc_t cs_c, \
-                           void*   gemm_ukr  \
+                           void*   gemm_ukr, \
+                           thrinfo_t* thread  \
                          );
 
 INSERT_GENTPROT_BASIC( gemm_ker_var2 )

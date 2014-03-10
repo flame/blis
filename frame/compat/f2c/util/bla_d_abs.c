@@ -38,7 +38,7 @@
 
 double bla_d_abs(doublereal *x)
 {
-	if(*x >= 0)
+	if(*x >= 0.0)
 		return(*x);
 
 	return(- *x);

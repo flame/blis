@@ -48,7 +48,7 @@ void bli_sgemm_opt_8x4_ref_u4_nodupl_avx1(
                       )
 {
 	/* Just call the reference implementation. */
-	bli_sgemm_ref_mxn( k,
+	BLIS_SGEMM_UKERNEL_REF( k,
 	                   alpha,
 	                   a,
 	                   b,
@@ -642,7 +642,7 @@ void bli_cgemm_opt_8x4_ref_u4_nodupl_avx1(
                       )
 {
 	/* Just call the reference implementation. */
-	bli_cgemm_ref_mxn( k,
+	BLIS_CGEMM_UKERNEL_REF( k,
 	                   alpha,
 	                   a,
 	                   b,
@@ -664,7 +664,7 @@ void bli_zgemm_opt_8x4_ref_u4_nodupl_avx1(
                       )
 {
 	/* Just call the reference implementation. */
-	bli_zgemm_ref_mxn( k,
+	BLIS_ZGEMM_UKERNEL_REF( k,
 	                   alpha,
 	                   a,
 	                   b,

@@ -34,31 +34,3 @@
 
 void libblis_test_dotaxpyv( test_params_t* params, test_op_t* op );
 
-
-//
-// Prototype wrapper interfaces to kernel.
-//
-void bli_dotaxpyv_ker( obj_t*  alpha,
-                       obj_t*  xt,
-                       obj_t*  x,
-                       obj_t*  y,
-                       obj_t*  rho,
-                       obj_t*  z );
-
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname)( \
-                          conj_t  conjxt, \
-                          conj_t  conjx, \
-                          conj_t  conjy, \
-                          dim_t   m, \
-                          void*   alpha, \
-                          void*   x, inc_t incx, \
-                          void*   y, inc_t incy, \
-                          void*   rho, \
-                          void*   z, inc_t incz \
-                        );
-
-INSERT_GENTPROT_BASIC( dotaxpyv_ker )
-

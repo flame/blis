@@ -46,6 +46,17 @@ void bli_her2k( obj_t*  alpha,
                 obj_t*  beta,
                 obj_t*  c )
 {
+	if (
+#ifdef BLIS_ENABLE_SCOMPLEX_VIA_4M
+	     bli_obj_is_scomplex( *c ) ||
+#endif
+#ifdef BLIS_ENABLE_DCOMPLEX_VIA_4M
+	     bli_obj_is_dcomplex( *c ) ||
+#endif
+	     FALSE
+	   )
+		return bli_her2k4m( alpha, a, b, beta, c );
+
 	bli_her2k_front( alpha, a, b, beta, c,
 	                 herk_cntl );
 }

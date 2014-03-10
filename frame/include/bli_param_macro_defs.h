@@ -199,25 +199,25 @@
 
 // conj
 
-#define bli_is_noconj( conj ) \
+#define bli_is_noconj( conjval ) \
 \
-    ( conj == BLIS_NO_CONJUGATE )
+    ( conjval == BLIS_NO_CONJUGATE )
 
-#define bli_is_conj( conj ) \
+#define bli_is_conj( conjval ) \
 \
-    ( conj == BLIS_CONJUGATE )
+    ( conjval == BLIS_CONJUGATE )
 
-#define bli_conj_toggled( conj ) \
+#define bli_conj_toggled( conjval ) \
 \
-	( conj ^ BLIS_CONJ_BIT )
+	( conjval ^ BLIS_CONJ_BIT )
 
-#define bli_apply_conj( conjapp, conj )\
+#define bli_apply_conj( conjapp, conjval )\
 \
-	( conj ^ (conjapp) )
+	( conjval ^ (conjapp) )
 
-#define bli_toggle_conj( conj ) \
+#define bli_toggle_conj( conjval ) \
 { \
-	conj = bli_conj_toggled( conj ); \
+	conjval = bli_conj_toggled( conjval ); \
 }
 
 

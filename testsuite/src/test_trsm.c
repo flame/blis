@@ -178,7 +178,6 @@ void libblis_test_trsm_experiment( test_params_t* params,
 	}
 	else
 	{
-		//bli_setsc(  1.0,  0.5, &alpha );
 		bli_setsc(  2.0,  0.0, &alpha );
 	}
 
@@ -189,8 +188,6 @@ void libblis_test_trsm_experiment( test_params_t* params,
 	// Randomize A, make it densely triangular.
 	bli_randm( &a );
 	bli_mktrim( &a );
-	//bli_setsc( 0.5, 0.0, &kappa );
-	//bli_scalm( &kappa, &a );
 
 	// Randomize B and save B.
 	bli_randm( &b );
@@ -244,6 +241,8 @@ void libblis_test_trsm_impl( iface_t   iface,
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
 		bli_trsm( side, alpha, a, b );
+		//bli_trsm4m( side, alpha, a, b );
+		//bli_trsm3m( side, alpha, a, b );
 		break;
 
 		default:

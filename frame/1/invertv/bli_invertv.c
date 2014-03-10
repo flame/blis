@@ -34,15 +34,6 @@
 
 #include "blis.h"
 
-/*
-void bli_invertv( obj_t* x )
-{
-	if ( bli_error_checking_is_enabled() )
-		bli_invertv_check( x );
-
-	bli_invertv_unb_var1( x );
-}
-*/
 
 //
 // Define object-based interface.
@@ -60,7 +51,7 @@ void PASTEMAC0(opname)( \
     PASTEMAC0(varname)( x ); \
 }
 
-GENFRONT( invertv, INVERTV_KERNEL )
+GENFRONT( invertv, invertv_kernel )
 
 
 //

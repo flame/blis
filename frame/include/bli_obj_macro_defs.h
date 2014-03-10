@@ -232,9 +232,9 @@
 	(obj).info = ( (obj).info & ~BLIS_TRANS_BIT ) | (trans); \
 }
 
-#define bli_obj_set_conj( conj, obj ) \
+#define bli_obj_set_conj( conjval, obj ) \
 { \
-	(obj).info = ( (obj).info & ~BLIS_CONJ_BIT ) | (conj); \
+	(obj).info = ( (obj).info & ~BLIS_CONJ_BIT ) | (conjval); \
 }
 
 #define bli_obj_set_uplo( uplo, obj ) \
@@ -329,9 +329,9 @@
 	(obj).info = ( (obj).info ^ (trans) ); \
 }
 
-#define bli_obj_apply_conj( conj, obj )\
+#define bli_obj_apply_conj( conjval, obj )\
 { \
-	(obj).info = ( (obj).info ^ (conj) ); \
+	(obj).info = ( (obj).info ^ (conjval) ); \
 }
 
 
@@ -842,10 +842,10 @@ bli_obj_width_stored( obj )
 
 // Create an alias with a conj value applied.
 
-#define bli_obj_alias_with_conj( conj, a, b ) \
+#define bli_obj_alias_with_conj( conja, a, b ) \
 { \
 	bli_obj_alias_to( a, b ); \
-	bli_obj_apply_conj( conj, b ); \
+	bli_obj_apply_conj( conja, b ); \
 }
 
 
@@ -876,6 +876,19 @@ bli_obj_width_stored( obj )
 \
 	( bli_obj_pack_status( obj ) == BLIS_PACKED_ROW_PANELS || \
 	  bli_obj_pack_status( obj ) == BLIS_PACKED_COL_PANELS )
+
+
+// Check if an object is packed for 4m/3m
+
+#define bli_obj_is_panel_packed_4m( obj ) \
+\
+	( bli_obj_pack_status( obj ) == BLIS_PACKED_ROW_PANELS_4M || \
+	  bli_obj_pack_status( obj ) == BLIS_PACKED_COL_PANELS_4M )
+
+#define bli_obj_is_panel_packed_3m( obj ) \
+\
+	( bli_obj_pack_status( obj ) == BLIS_PACKED_ROW_PANELS_3M || \
+	  bli_obj_pack_status( obj ) == BLIS_PACKED_COL_PANELS_3M )
 
 
 // Release object's pack (and cast) memory entries back to memory manager

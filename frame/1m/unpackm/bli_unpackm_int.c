@@ -43,7 +43,7 @@ typedef void (*FUNCPTR_T)( obj_t*     p,
 static FUNCPTR_T vars[2][3] =
 {
 	// unblocked            optimized unblocked    blocked
-	{ bli_unpackm_unb_var1, NULL,                  bli_unpackm_blk_var1, },
+	{ bli_unpackm_unb_var1, NULL,                  NULL,                 },
 	{ NULL,                 NULL,                  bli_unpackm_blk_var2, },
 };
 

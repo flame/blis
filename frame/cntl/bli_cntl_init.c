@@ -60,6 +60,18 @@ void bli_cntl_init( void )
 	bli_herk_cntl_init();
 	bli_trmm_cntl_init();
 	bli_trsm_cntl_init();
+
+	// Level-3 via 4m
+	bli_gemm4m_cntl_init();
+	bli_herk4m_cntl_init();
+	bli_trmm4m_cntl_init();
+	bli_trsm4m_cntl_init();
+
+	// Level-3 via 3m
+	bli_gemm3m_cntl_init();
+	bli_herk3m_cntl_init();
+	bli_trmm3m_cntl_init();
+	bli_trsm3m_cntl_init();
 }
 
 void bli_cntl_finalize( void )
@@ -88,5 +100,17 @@ void bli_cntl_finalize( void )
 	bli_herk_cntl_finalize();
 	bli_trmm_cntl_finalize();
 	bli_trsm_cntl_finalize();
+
+	// Level-3 via 4m
+	bli_gemm4m_cntl_finalize();
+	bli_herk4m_cntl_finalize();
+	bli_trmm4m_cntl_finalize();
+	bli_trsm4m_cntl_finalize();
+
+	// Level-3 via 3m
+	bli_gemm3m_cntl_finalize();
+	bli_herk3m_cntl_finalize();
+	bli_trmm3m_cntl_finalize();
+	bli_trsm3m_cntl_finalize();
 }
 

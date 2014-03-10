@@ -188,9 +188,6 @@ void PASTEMAC(ch,varname )( \
 	if ( bli_is_zeros( uploc ) && \
 	     bli_is_triangular( strucc ) ) return; \
 \
-    dim_t t_id = thread_id( thread ); \
-    dim_t num_threads = thread_num_threads( thread ); \
-\
 	/* Extract the conjugation bit from the transposition argument. */ \
 	conjc = bli_extract_conj( transc ); \
 \
@@ -266,6 +263,9 @@ void PASTEMAC(ch,varname )( \
 	} \
 \
 	p_begin = p_cast; \
+    dim_t t_id = thread_id( thread ); \
+    dim_t num_threads = thread_num_threads( thread ); \
+\
 \
 	for ( ic  = ic0 + t_id * ic_inc,  ip  = ip0 + t_id * ip_inc,  it  = t_id; it < num_iter; \
 	      ic += num_threads * ic_inc, ip += num_threads * ip_inc, it += num_threads ) \
@@ -274,6 +274,7 @@ void PASTEMAC(ch,varname )( \
 \
 		diagoffc_i  = diagoffc + (ip  )*diagoffc_inc; \
 		c_begin     = c_cast   + (ic  )*vs_c; \
+		p_begin     = p_cast   + (ip  )*ps_p; \
 \
 		if ( bli_is_triangular( strucc ) &&  \
 		     bli_is_unstored_subpart_n( diagoffc_i, uploc, *m_panel_full, *n_panel_full ) ) \
@@ -360,8 +361,7 @@ void PASTEMAC(ch,varname )( \
 			                             c_begin, rs_c, cs_c, \
 			                             p_begin, rs_p, cs_p ); \
 \
-			/* NOTE: p_inc should be set to ps_p to properly support
-			   BLIS_CONTIG_STRIDE_ALIGN_SIZE. */ \
+			/* NOTE: This value is equivalent to ps_p. */ \
 			p_inc = ldp * panel_len_max_i; \
 		} \
 		else \
@@ -385,13 +385,9 @@ void PASTEMAC(ch,varname )( \
 			                            c_begin, rs_c, cs_c, \
 			                            p_begin, rs_p, cs_p ); \
 \
-			/* NOTE: p_inc should be set to ps_p to properly support
-			   BLIS_CONTIG_STRIDE_ALIGN_SIZE. */ \
+			/* NOTE: This value is equivalent to ps_p. */ \
 			p_inc = ldp * panel_len_max_i; \
 		} \
-\
-\
-	 	p_begin += p_inc; \
 	} \
 \
 \

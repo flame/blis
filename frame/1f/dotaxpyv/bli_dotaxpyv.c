@@ -35,7 +35,6 @@
 #include "blis.h"
 
 
-/*
 //
 // Define object-based interface.
 //
@@ -62,8 +61,7 @@ void PASTEMAC0(opname)( \
                         z ); \
 }
 
-GENFRONT( dotaxpyv, DOTAXPYV_KERNEL )
-*/
+GENFRONT( dotaxpyv, dotaxpyv_kernel )
 
 
 //
