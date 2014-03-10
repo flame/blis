@@ -86,6 +86,6 @@ void bli_symm_front( side_t  side,
 	              beta,
 	              &c_local,
 	              cntl,
-                  &BLIS_SINGLE_THREADED );
+                  &BLIS_GEMM_SINGLE_THREADED );
 }
 

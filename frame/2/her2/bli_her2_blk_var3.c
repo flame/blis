@@ -105,7 +105,7 @@ void bli_her2_blk_var3( conj_t  conjh,
 		// Copy/pack C11, x1, y1 (if needed).
 		bli_packm_int( &c11, &c11_pack,
 		               cntl_sub_packm_c11( cntl ),
-                       &BLIS_SINGLE_THREADED );
+                       &BLIS_PACKM_SINGLE_THREADED );
 		bli_packv_int( &x1, &x1_pack,
 		               cntl_sub_packv_x1( cntl ) );
 		bli_packv_int( &y1, &y1_pack,

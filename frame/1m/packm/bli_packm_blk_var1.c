@@ -53,7 +53,7 @@ typedef void (*FUNCPTR_T)(
                            void*   c, inc_t rs_c, inc_t cs_c,
                            void*   p, inc_t rs_p, inc_t cs_p,
                                       dim_t pd_p, inc_t ps_p,
-                           thrinfo_t* thread
+                           packm_thrinfo_t* thread
                          );
 
 static FUNCPTR_T GENARRAY(ftypes,packm_blk_var1);
@@ -61,7 +61,7 @@ static FUNCPTR_T GENARRAY(ftypes,packm_blk_var1);
 
 void bli_packm_blk_var1( obj_t*   c,
                          obj_t*   p,
-                         thrinfo_t* t )
+                         packm_thrinfo_t* t )
 {
 	num_t     dt_cp     = bli_obj_datatype( *c );
 
@@ -144,7 +144,7 @@ void PASTEMAC(ch,varname )( \
                             void*   c, inc_t rs_c, inc_t cs_c, \
                             void*   p, inc_t rs_p, inc_t cs_p, \
                                        dim_t pd_p, inc_t ps_p, \
-                            thrinfo_t* thread \
+                            packm_thrinfo_t* thread \
                           ) \
 { \
 	ctype* restrict kappa_cast = kappa; \

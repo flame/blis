@@ -46,7 +46,9 @@ obj_t BLIS_MINUS_ONE_HALF;
 obj_t BLIS_MINUS_ONE;
 obj_t BLIS_MINUS_TWO;
 
-thrinfo_t BLIS_SINGLE_THREADED;
+packm_thrinfo_t BLIS_PACKM_SINGLE_THREADED;
+gemm_thrinfo_t BLIS_GEMM_SINGLE_THREADED;
+
 thread_comm_t BLIS_SINGLE_COMM;
 
 void bli_init( void )
@@ -61,7 +63,7 @@ void bli_init( void )
 
 	bli_mem_init();
 
-    bli_setup_single_threaded_info( &BLIS_SINGLE_THREADED, &BLIS_SINGLE_COMM );
+    //bli_setup_single_threaded_info( &BLIS_PACKM_SINGLE_THREADED, &BLIS_SINGLE_COMM );
 }
 
 void bli_finalize( void )

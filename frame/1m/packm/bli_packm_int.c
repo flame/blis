@@ -38,7 +38,7 @@
 
 typedef void (*FUNCPTR_T)( obj_t*   a,
                            obj_t*   p,
-                           thrinfo_t* t );
+                           packm_thrinfo_t* t );
 
 static FUNCPTR_T vars[6][3] =
 {
@@ -54,7 +54,7 @@ static FUNCPTR_T vars[6][3] =
 void bli_packm_int( obj_t*   a,
                     obj_t*   p,
                     packm_t* cntl,
-                    thrinfo_t* thread )
+                    packm_thrinfo_t* thread )
 {
 	varnum_t  n;
 	impl_t    i;

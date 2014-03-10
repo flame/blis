@@ -86,7 +86,7 @@ void bli_trsv_u_blk_var1( obj_t*  alpha,
 		// Copy/pack A11, x1 (if needed).
 		bli_packm_int( &a11, &a11_pack,
 		               cntl_sub_packm_a11( cntl ),
-                       &BLIS_SINGLE_THREADED );
+                       &BLIS_PACKM_SINGLE_THREADED );
 		bli_packv_int( &x1, &x1_pack,
 		               cntl_sub_packv_x1( cntl ) );
 

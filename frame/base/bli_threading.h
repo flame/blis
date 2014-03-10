@@ -34,6 +34,7 @@
 #ifndef BLIS_THREADING_H
 #define BLIS_THREADING_H
 
+
 typedef omp_lock_t lock_t;
 
 struct thread_comm_s
@@ -47,14 +48,6 @@ struct thread_comm_s
 };
 typedef struct thread_comm_s thread_comm_t;
 
-struct thread_comm_tree_s
-{
-    struct thread_comm_tree_s* parent;
-    thread_comm_t* comm;
-};
-typedef struct thread_comm_tree_s thread_comm_tree_t;
-
-
 void    bli_setup_communicator( thread_comm_t* communicator, dim_t n_threads );
 thread_comm_t*    bli_create_communicator( dim_t n_threads );
 
@@ -66,42 +59,43 @@ void    bli_unset_lock( lock_t* lock );
 void    bli_init_lock( lock_t* lock );
 void    bli_destroy_lock( lock_t* lock );
 
-/*
- * Each thrinfo_t is a linked list.
- * It represents a path through a thread communicator hierarchy.
- * There is a 1:1 correspondence between leaf nodes and thrinfo_t 
- *
- * When we hit a loop, we advance the linked list towards the bottom of the hierarchy
- */
 struct thrinfo_s
 {
     thread_comm_t*      ocomm;       //The thread communicator for the other threads sharing the same work at this level
     dim_t               ocomm_id;    //Our thread id within that thread comm
+    thread_comm_t*      icomm;       //The thread communicator for the other threads sharing the same work at this level
+    dim_t               icomm_id;    //Our thread id within that thread comm
 
-    struct thrinfo_s*   caucus;      //my thread info for the caucus I am a part of 
-    dim_t               n_caucuses; //Number of distinct caucuses used to parallelize the loop
-    dim_t               caucus_id;  //Which caucus we are part of
+    dim_t               n_way;       //Number of distinct  used to parallelize the loop
+    dim_t               work_id;     //What we're working on
 };
 typedef struct thrinfo_s thrinfo_t;
 
-#define thread_comm( thread )           thread->ocomm
-#define thread_caucus_comm( thread )     (thread->caucus->ocomm)
+#define thread_ocomm( thread )          thread->ocomm
+#define thread_icomm( thread )          (thread->icomm)
 
 #define thread_id( thread )             thread->ocomm_id
 #define thread_num_threads( thread )    thread->ocomm->n_threads
-#define thread_sub_caucus( thread )      thread->caucus
-#define thread_caucus_id( thread )       thread->caucus_id
-#define thread_num_caucuses( thread )    thread->n_caucuses
-#define thread_am_chief( thread )        (thread->ocomm_id == 0)
-#define thread_am_caucus_chief( thread ) (thread->caucus->ocomm_id == 0) 
 
-#define thread_broadcast( thread, ptr )             bli_broadcast_structure( thread->ocomm, thread->ocomm_id, ptr )
-#define thread_caucus_broadcast( thread, ptr )      bli_broadcast_structure( thread->caucus->ocomm, thread->caucus->ocomm_id, ptr )
-#define thread_barrier( thread )                    bli_barrier( thread->ocomm, thread->ocomm_id )
-#define thread_caucus_barrier( thread )             bli_barrier( thread->caucus->ocomm, thread->caucus->ocomm_id )
+#define thread_work_id( thread )        thread->work_id
+#define thread_n_way( thread )          thread->n_way
+#define thread_am_ochief( thread )      (thread->ocomm_id == 0)
+#define thread_am_ichief( thread )      (thread->icomm_id == 0)
 
-thrinfo_t* bli_create_thread_info( dim_t* n_threads_each_level, dim_t n_levels );
-void bli_get_range( thrinfo_t* thread, dim_t size, dim_t block_factor, dim_t* start, dim_t* end );
-void bli_setup_single_threaded_info( thrinfo_t* thr, thread_comm_t* comm );
+#define thread_obroadcast( thread, ptr )       bli_broadcast_structure( thread->ocomm, thread->ocomm_id, ptr )
+#define thread_ibroadcast( thread, ptr )       bli_broadcast_structure( thread->icomm, thread->icomm_id, ptr )
+#define thread_obarrier( thread )              bli_barrier( thread->ocomm, thread->ocomm_id )
+#define thread_ibarrier( thread )              bli_barrier( thread->icomm, thread->icomm_id )
+
+void bli_get_range( void* thread, dim_t size, dim_t block_factor, dim_t* start, dim_t* end );
+thrinfo_t* bli_create_thread_info( thread_comm_t* ocomm, dim_t ocomm_id, thread_comm_t* icomm, dim_t icomm_id,
+                             dim_t n_way, dim_t work_id );
+void bli_setup_thread_info( thrinfo_t* thread, thread_comm_t* ocomm, dim_t ocomm_id, thread_comm_t* icomm, dim_t icomm_id,
+                             dim_t n_way, dim_t work_id );
+//void bli_setup_single_threaded_info( thrinfo_t* thr, thread_comm_t* comm );
+//thrinfo_t* bli_create_thread_info( dim_t* n_threads_each_level, dim_t n_levels );
+
+#include "bli_packm_threading.h"
+#include "bli_gemm_threading.h"
 
 #endif

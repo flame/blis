@@ -38,5 +38,5 @@ void bli_gemm_int( obj_t*  alpha,
                    obj_t*  beta,
                    obj_t*  c,
                    gemm_t* cntl,
-                   thrinfo_t* thread );
+                   gemm_thrinfo_t* thread );
 

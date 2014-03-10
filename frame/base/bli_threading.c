@@ -39,6 +39,7 @@ void bli_cleanup_communicator( thread_comm_t* communicator )
     if( communicator == NULL ) return;
     bli_destroy_lock( &communicator->barrier_lock );
 }
+
 void bli_setup_communicator( thread_comm_t* communicator, dim_t n_threads)
 {
     if( communicator == NULL ) return;
@@ -111,7 +112,7 @@ void bli_barrier( thread_comm_t* communicator, dim_t t_id )
         while( *listener == my_sense ) {}
     }
 }
-
+/*
 //Recursively create thread communicators
 void create_comms( dim_t* caucuses_at_level, dim_t n_levels, dim_t cur_level, 
                         thread_comm_tree_t* parent, thread_comm_tree_t* leaves, dim_t global_id )
@@ -142,35 +143,29 @@ void create_comms( dim_t* caucuses_at_level, dim_t n_levels, dim_t cur_level,
     for( dim_t i = 0; i < caucuses; i++)
         create_comms( caucuses_at_level, n_levels, cur_level+1, info, leaves, global_id * caucuses + i);
 }
-
-void bli_setup_thrinfo_t(thrinfo_t* thr, thread_comm_t* comm, dim_t comm_id, 
-                         thrinfo_t* caucus, dim_t n_caucuses, dim_t caucus_id )
+*/
+thrinfo_t* bli_create_thread_info( thread_comm_t* ocomm, dim_t ocomm_id, thread_comm_t* icomm, dim_t icomm_id,
+                             dim_t n_way, dim_t work_id )
 {
-        thr->ocomm = comm;
-        thr->ocomm_id = comm_id;
-        thr->caucus = caucus; 
-        thr->n_caucuses = n_caucuses;
-        thr->caucus_id = caucus_id;
-}
 
-thrinfo_t* bli_create_thrinfo_t( thread_comm_t* comm, dim_t comm_id, thrinfo_t* caucus, dim_t n_caucuses, dim_t caucus_id )
-{
         thrinfo_t* thr = (thrinfo_t*) bli_malloc( sizeof(thrinfo_t) );
-        thr->ocomm = comm;
-        thr->ocomm_id = comm_id;
-        thr->caucus = caucus; 
-        thr->n_caucuses = n_caucuses;
-        thr->caucus_id = caucus_id;
+        bli_setup_thread_info( thr, ocomm, ocomm_id, icomm, icomm_id, n_way, work_id );
         return thr;
 }
 
-void bli_setup_single_threaded_info( thrinfo_t* thr, thread_comm_t* comm )
+void bli_setup_thread_info( thrinfo_t* thr, thread_comm_t* ocomm, dim_t ocomm_id, thread_comm_t* icomm, dim_t icomm_id,
+                             dim_t n_way, dim_t work_id )
 {
-    bli_setup_communicator( comm, 1 );
-    bli_setup_thrinfo_t( thr, comm, 0, NULL, 1, 0 );
-    thr->caucus = thr;
+        thr->ocomm = ocomm;
+        thr->ocomm_id = ocomm_id;
+        thr->icomm = icomm;
+        thr->icomm_id = icomm_id;
+
+        thr->n_way = n_way;
+        thr->work_id = work_id;
 }
 
+/*
 thrinfo_t* bli_create_thread_info( dim_t* caucuses_at_level, dim_t n_levels )
 {
     //Calculate total number of threads
@@ -209,20 +204,21 @@ thrinfo_t* bli_create_thread_info( dim_t* caucuses_at_level, dim_t n_levels )
             bli_setup_thrinfo_t(cur, comm_node->comm, ocomm_id, 
                                 prev, caucuses_at_level[n_levels - j - 1], caucus_id );
 
-            cur = prev;
+            prev = cur;
             comm_node = comm_node->parent;
         }
     }
     return info_paths;
 }
-
-void bli_get_range( thrinfo_t* thread, dim_t size, dim_t block_factor, dim_t* start, dim_t* end )
+*/
+void bli_get_range( void* thr, dim_t size, dim_t block_factor, dim_t* start, dim_t* end )
 {
-    dim_t n_caucuses = thread->n_caucuses;
-    dim_t caucus_id = thread->caucus_id;
-    dim_t n_pt = size / n_caucuses;
-    n_pt = (n_pt * n_caucuses < size) ? n_pt + 1 : n_pt;
+    thrinfo_t* thread = (thrinfo_t*) thr;
+    dim_t n_way = thread->n_way;
+    dim_t work_id = thread->work_id;
+    dim_t n_pt = size / n_way;
+    n_pt = (n_pt * n_way < size) ? n_pt + 1 : n_pt;
     n_pt = (n_pt % block_factor == 0) ? n_pt : n_pt + block_factor - (n_pt % block_factor); 
-    *start = caucus_id * n_pt;
+    *start = work_id * n_pt;
     *end   = bli_min( *start + n_pt, size );
 }

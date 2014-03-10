@@ -47,7 +47,6 @@
 
 #include "bli_gemm_ref_mxn.h"
 
-
 //
 // Prototype object-based interface.
 //

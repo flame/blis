@@ -74,7 +74,7 @@ void bli_gemm_front( obj_t*  alpha,
 		bli_obj_induce_trans( c_local );
 	}
 
-    thrinfo_t* infos = bli_gemm_cntl_get_thrinfos();
+    gemm_thrinfo_t* infos = bli_gemm_cntl_get_thrinfos();
     dim_t n_threads = thread_num_threads( (&infos[0]) );
 
 	// Invoke the internal back-end.

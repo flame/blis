@@ -55,7 +55,7 @@ void bli_gemm_ker_var5( obj_t*  a,
                         obj_t*  b,
                         obj_t*  c,
                         gemm_t* cntl,
-                        thrinfo_t* thread )
+                        gemm_thrinfo_t* thread )
 {
 	num_t     dt_exec   = bli_obj_execution_datatype( *c );
 
