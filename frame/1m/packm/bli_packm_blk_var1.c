@@ -265,7 +265,7 @@ void PASTEMAC(ch,varname )( \
 	p_begin = p_cast; \
     dim_t t_id = thread_id( thread ); \
     dim_t num_threads = thread_num_threads( thread ); \
-\
+    p_inc = ps_p; \
 \
 	for ( ic  = ic0 + t_id * ic_inc,  ip  = ip0 + t_id * ip_inc,  it  = t_id; it < num_iter; \
 	      ic += num_threads * ic_inc, ip += num_threads * ip_inc, it += num_threads ) \

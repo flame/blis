@@ -55,7 +55,7 @@ gemm_t*           gemm_cntl_vl_mm;
 
 gemm_t*           gemm_cntl;
 
-dim_t             gemm_caucuses_at_level[5] = {2, 1, 1, 1, 1};
+dim_t             gemm_caucuses_at_level[5] = {1, 1, 2, 1, 1};
 
 gemm_thrinfo_t* bli_gemm_cntl_get_thrinfos()
 {

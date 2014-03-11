@@ -86,7 +86,6 @@ gemm_thrinfo_t* bli_create_gemm_thrinfo_node( thread_comm_t* ocomm, dim_t ocomm_
 
 gemm_thrinfo_t* bli_create_gemm_thrinfo_paths( dim_t* threads_at_level, dim_t n_levels )
 {
-
     assert(n_levels == 5);
 
     dim_t jc_way = threads_at_level[0];
@@ -96,31 +95,33 @@ gemm_thrinfo_t* bli_create_gemm_thrinfo_paths( dim_t* threads_at_level, dim_t n_
     dim_t ir_way = threads_at_level[4];
     
     dim_t global_num_threads = jc_way * kc_way * ic_way * jr_way * ir_way;
+    assert( global_num_threads != 0 );
+
     dim_t jc_nt  = kc_way * ic_way * jr_way * ir_way;
     dim_t kc_nt  = ic_way * jr_way * ir_way;
     dim_t ic_nt  = jr_way * ir_way;
     dim_t jr_nt  = ir_way;
     dim_t ir_nt  = 1;
+
     
     gemm_thrinfo_t* paths = (gemm_thrinfo_t*) malloc( global_num_threads * sizeof( gemm_thrinfo_t ) );
 
     thread_comm_t*  global_comm = bli_create_communicator( global_num_threads );
-    for( int a = 0; a < jc_nt; a++ )
+    for( int a = 0; a < jc_way; a++ )
     {   
         thread_comm_t*  jc_comm = bli_create_communicator( jc_nt );
-        for( int b = 0; b < kc_nt; b++ )
+        for( int b = 0; b < kc_way; b++ )
         {   
             thread_comm_t* kc_comm = bli_create_communicator( kc_nt );
-            for( int c = 0; c < ic_nt; c++ )
+            for( int c = 0; c < ic_way; c++ )
             {   
                 thread_comm_t* ic_comm = bli_create_communicator( ic_nt );
-                for( int d = 0; d < jr_nt; d++ )
+                for( int d = 0; d < jr_way; d++ )
                 {   
                     thread_comm_t* jr_comm = bli_create_communicator( jr_nt );
-                    for( int e = 0; e < jc_nt; e++) 
+                    for( int e = 0; e < ir_way; e++) 
                     {   
                         thread_comm_t* ir_comm = bli_create_communicator( ir_nt );
-
                         dim_t ir_comm_id = 0;
                         dim_t jr_comm_id = e*ir_nt + ir_comm_id;
                         dim_t ic_comm_id = d*jr_nt + jr_comm_id;

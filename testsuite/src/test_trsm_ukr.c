@@ -217,14 +217,14 @@ void libblis_test_trsm_ukr_experiment( test_params_t* params,
 	                          &b, &bp );
 
 	// Pack the contents of a to ap.
-	bli_packm_blk_var1( &a, &ap, &BLIS_SINGLE_THREADED );
+	bli_packm_blk_var1( &a, &ap, &BLIS_PACKM_SINGLE_THREADED );
 
 
 	// Repeat the experiment n_repeats times and record results. 
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		// Re-pack the contents of b to bp.
-		bli_packm_blk_var1( &b, &bp, &BLIS_SINGLE_THREADED );
+		bli_packm_blk_var1( &b, &bp, &BLIS_PACKM_SINGLE_THREADED );
 
 		bli_copym( &c_save, &c );
 

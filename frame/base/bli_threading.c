@@ -214,6 +214,7 @@ thrinfo_t* bli_create_thread_info( dim_t* caucuses_at_level, dim_t n_levels )
 void bli_get_range( void* thr, dim_t size, dim_t block_factor, dim_t* start, dim_t* end )
 {
     thrinfo_t* thread = (thrinfo_t*) thr;
+
     dim_t n_way = thread->n_way;
     dim_t work_id = thread->work_id;
     dim_t n_pt = size / n_way;
