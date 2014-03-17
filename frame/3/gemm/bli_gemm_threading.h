@@ -53,7 +53,7 @@ typedef struct gemm_thrinfo_s gemm_thrinfo_t;
 #define gemm_thread_sub_opackm( thread )  thread->opackm
 #define gemm_thread_sub_ipackm( thread )  thread->ipackm
 
-gemm_thrinfo_t* bli_create_gemm_thrinfo_paths( dim_t* threads_at_level, dim_t n_levels );
+gemm_thrinfo_t* bli_create_gemm_thrinfo_paths( );
 
 void bli_setup_gemm_thrinfo_node( gemm_thrinfo_t* thread,
                                   thread_comm_t* ocomm, dim_t ocomm_id,

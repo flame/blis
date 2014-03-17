@@ -80,13 +80,24 @@ void bli_hemm_front( side_t  side,
 		bli_obj_swap( a_local, b_local );
 	}
 
-	// Invoke the internal back-end.
-	bli_gemm_int( alpha,
-	              &a_local,
-	              &b_local,
-	              beta,
-	              &c_local,
-	              cntl,
-                  &BLIS_GEMM_SINGLE_THREADED );
+    gemm_thrinfo_t* infos = bli_gemm_cntl_get_thrinfos();
+    dim_t n_threads = thread_num_threads( (&infos[0]) );
+
+    // Invoke the internal back-end.
+    _Pragma( "omp parallel num_threads(n_threads)" )
+    {   
+        dim_t omp_id = omp_get_thread_num();
+
+        // Invoke the internal back-end.
+        bli_gemm_int( alpha,
+                      &a_local,
+                      &b_local,
+                      beta,
+                      &c_local,
+                      cntl,
+                      &infos[omp_id] );
+    }
+
+    bli_gemm_cntl_free_thrinfos( infos );
 }
 

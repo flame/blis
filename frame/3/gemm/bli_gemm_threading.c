@@ -84,15 +84,24 @@ gemm_thrinfo_t* bli_create_gemm_thrinfo_node( thread_comm_t* ocomm, dim_t ocomm_
     return thread;
 }
 
-gemm_thrinfo_t* bli_create_gemm_thrinfo_paths( dim_t* threads_at_level, dim_t n_levels )
+dim_t read_env( char* env )
 {
-    assert(n_levels == 5);
+    dim_t number = 1;
+    char* str = getenv( env );
+    if( str != NULL )
+    {
+        number = strtol( str, NULL, 10 );
+    }
+    return number;
+}
 
-    dim_t jc_way = threads_at_level[0];
-    dim_t kc_way = threads_at_level[1];
-    dim_t ic_way = threads_at_level[2];
-    dim_t jr_way = threads_at_level[3];
-    dim_t ir_way = threads_at_level[4];
+gemm_thrinfo_t* bli_create_gemm_thrinfo_paths( )
+{
+    dim_t jc_way = read_env( "BLIS_JC_NT" );
+    dim_t kc_way = read_env( "BLIS_KC_NT" );
+    dim_t ic_way = read_env( "BLIS_IC_NT" );
+    dim_t jr_way = read_env( "BLIS_JR_NT" );
+    dim_t ir_way = read_env( "BLIS_IR_NT" );
     
     dim_t global_num_threads = jc_way * kc_way * ic_way * jr_way * ir_way;
     assert( global_num_threads != 0 );

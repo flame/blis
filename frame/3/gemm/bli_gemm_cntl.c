@@ -55,11 +55,9 @@ gemm_t*           gemm_cntl_vl_mm;
 
 gemm_t*           gemm_cntl;
 
-dim_t             gemm_caucuses_at_level[5] = {1, 1, 2, 1, 1};
-
 gemm_thrinfo_t* bli_gemm_cntl_get_thrinfos()
 {
-    return bli_create_gemm_thrinfo_paths( gemm_caucuses_at_level, 5 );
+    return bli_create_gemm_thrinfo_paths( );
 }
 
 void bli_gemm_cntl_free_thrinfos(thrinfo_t* tofree)

@@ -90,5 +90,7 @@ void bli_gemm_front( obj_t*  alpha,
                       cntl,
                       &infos[omp_id] );
     }
+
+    bli_gemm_cntl_free_thrinfos( infos );
 }
 
