@@ -101,6 +101,7 @@ void bli_herk_blk_var3f( obj_t*  a,
             bli_packm_init( &ah1, ah1_pack,
                             cntl_sub_packm_b( cntl ) );
         }
+        thread_ibarrier( thread );
 
 		// Pack A1 (if instructed).
 		bli_packm_int( &a1, a1_pack,

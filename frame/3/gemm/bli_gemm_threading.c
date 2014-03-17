@@ -172,8 +172,8 @@ gemm_thrinfo_t* bli_create_gemm_thrinfo_paths( )
 
                         gemm_thrinfo_t* jc_info = &paths[global_comm_id];
                         bli_setup_gemm_thrinfo_node( jc_info, global_comm, global_comm_id,
-                                                     jr_comm, jr_comm_id,
-                                                     jr_way,  a,
+                                                     jc_comm, jc_comm_id,
+                                                     jc_way,  a,
                                                      NULL, NULL, kc_info);
                     }
                 }

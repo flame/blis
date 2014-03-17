@@ -81,9 +81,9 @@ void bli_herk_blk_var2f( obj_t*  a,
     c1S_pack = thread_ibroadcast( thread, &c1S_pack_s );
 
 	// Pack A (if instructed).
-	bli_packm_int( a, &a_pack,
+	bli_packm_int( a, a_pack,
 	               cntl_sub_packm_a( cntl ),
-                   hemm_thread_sub_opackm( thread ) );
+                   herk_thread_sub_opackm( thread ) );
 
 	// Query dimension in partitioning direction.
 	n_trans = bli_obj_width_after_trans( *c );

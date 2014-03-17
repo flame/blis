@@ -84,17 +84,6 @@ herk_thrinfo_t* bli_create_herk_thrinfo_node( thread_comm_t* ocomm, dim_t ocomm_
     return thread;
 }
 
-dim_t read_env( char* env )
-{
-    dim_t number = 1;
-    char* str = getenv( env );
-    if( str != NULL )
-    {
-        number = strtol( str, NULL, 10 );
-    }
-    return number;
-}
-
 void bli_herk_thrinfo_free_paths( herk_thrinfo_t* threads )
 {
 }
@@ -172,8 +161,8 @@ herk_thrinfo_t* bli_create_herk_thrinfo_paths( )
 
                         herk_thrinfo_t* jc_info = &paths[global_comm_id];
                         bli_setup_herk_thrinfo_node( jc_info, global_comm, global_comm_id,
-                                                     jr_comm, jr_comm_id,
-                                                     jr_way,  a,
+                                                     jc_comm, jc_comm_id,
+                                                     jc_way,  a,
                                                      NULL, NULL, kc_info);
                     }
                 }

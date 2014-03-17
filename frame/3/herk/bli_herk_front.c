@@ -77,7 +77,7 @@ void bli_herk_front( obj_t*  alpha,
 		bli_obj_induce_trans( c_local );
 	}
 
-    herk_thrinfo_t* infos = bli_herk_cntl_get_thrinfos();
+    herk_thrinfo_t* infos = bli_create_herk_thrinfo_paths();
     dim_t n_threads = thread_num_threads( (&infos[0]) );
 
 	// Invoke the internal back-end.
