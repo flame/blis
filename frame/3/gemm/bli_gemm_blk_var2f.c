@@ -66,7 +66,7 @@ void bli_gemm_blk_var2f( obj_t*  a,
     }
     a_pack = thread_obroadcast( thread, &a_pack_s );
 
-	// Initialize all pack objects that are passed into packm_init().
+	// Initialize pack objects for B and C that are passed into packm_init().
     if( thread_am_ichief( thread ) ) {
         bli_obj_init_pack( &b1_pack_s );
         bli_obj_init_pack( &c1_pack_s );
@@ -129,7 +129,7 @@ void bli_gemm_blk_var2f( obj_t*  a,
 		              &BLIS_ONE,
 		              c1_pack,
 		              cntl_sub_gemm( cntl ),
-                      gemm_thread_sub_gemm( thread) );
+                      gemm_thread_sub_gemm( thread ) );
 
         // Unpack C1 (if C1 was packed).
         // Currently must be done by 1 thread

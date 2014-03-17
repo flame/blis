@@ -33,7 +33,7 @@
 */
 
 
-struct gemm_thrinfo_s //implements thrinfo_t
+struct herk_thrinfo_s //implements thrinfo_t
 {
     thread_comm_t*      ocomm;       //The thread communicator for the other threads sharing the same work at this level
     dim_t               ocomm_id;    //Our thread id within that thread comm
@@ -45,30 +45,30 @@ struct gemm_thrinfo_s //implements thrinfo_t
 
     packm_thrinfo_t*    opackm;
     packm_thrinfo_t*    ipackm;
-    struct gemm_thrinfo_s*    sub_gemm;
+    struct herk_thrinfo_s*    sub_herk;
 };
-typedef struct gemm_thrinfo_s gemm_thrinfo_t;
+typedef struct herk_thrinfo_s herk_thrinfo_t;
 
-#define gemm_thread_sub_gemm( thread )  thread->sub_gemm
-#define gemm_thread_sub_opackm( thread )  thread->opackm
-#define gemm_thread_sub_ipackm( thread )  thread->ipackm
+#define herk_thread_sub_herk( thread )  thread->sub_herk
+#define herk_thread_sub_opackm( thread )  thread->opackm
+#define herk_thread_sub_ipackm( thread )  thread->ipackm
 
-gemm_thrinfo_t* bli_create_gemm_thrinfo_paths( );
-void bli_gemm_thrinfo_free_paths( gemm_thrinfo_t* );
+herk_thrinfo_t* bli_herk_create_thrinfo_paths( );
+void bli_herk_thrinfo_free_paths();
 
-void bli_setup_gemm_thrinfo_node( gemm_thrinfo_t* thread,
+void bli_setup_herk_thrinfo_node( herk_thrinfo_t* thread,
                                   thread_comm_t* ocomm, dim_t ocomm_id,
                                   thread_comm_t* icomm, dim_t icomm_id,
                                   dim_t n_way, dim_t work_id, 
                                   packm_thrinfo_t* opackm,
                                   packm_thrinfo_t* ipackm,
-                                  gemm_thrinfo_t* sub_gemm );
+                                  herk_thrinfo_t* sub_herk );
 
-gemm_thrinfo_t* bli_create_gemm_thrinfo_node( thread_comm_t* ocomm, dim_t ocomm_id,
+herk_thrinfo_t* bli_create_herk_thrinfo_node( thread_comm_t* ocomm, dim_t ocomm_id,
                                               thread_comm_t* icomm, dim_t icomm_id,
                                               dim_t n_way, dim_t work_id, 
                                               packm_thrinfo_t* opackm,
                                               packm_thrinfo_t* ipackm,
-                                              gemm_thrinfo_t* sub_gemm );
+                                              herk_thrinfo_t* sub_herk );
 
-void bli_setup_gemm_single_threaded_info( gemm_thrinfo_t* thread );
+void bli_setup_herk_single_threaded_info( herk_thrinfo_t* thread );

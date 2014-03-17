@@ -48,6 +48,7 @@ obj_t BLIS_MINUS_TWO;
 
 packm_thrinfo_t BLIS_PACKM_SINGLE_THREADED;
 gemm_thrinfo_t BLIS_GEMM_SINGLE_THREADED;
+herk_thrinfo_t BLIS_HERK_SINGLE_THREADED;
 thread_comm_t BLIS_SINGLE_COMM;
 
 void bli_init( void )
@@ -65,6 +66,7 @@ void bli_init( void )
     bli_setup_communicator( &BLIS_SINGLE_COMM, 1 );
     bli_setup_packm_single_threaded_info( &BLIS_PACKM_SINGLE_THREADED );
     bli_setup_gemm_single_threaded_info( &BLIS_GEMM_SINGLE_THREADED );
+    bli_setup_herk_single_threaded_info( &BLIS_HERK_SINGLE_THREADED );
 }
 
 void bli_finalize( void )

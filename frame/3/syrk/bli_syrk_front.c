@@ -79,6 +79,7 @@ void bli_syrk_front( obj_t*  alpha,
 	              &at_local,
 	              beta,
 	              &c_local,
-	              cntl );
+	              cntl,
+                  &BLIS_HERK_SINGLE_THREADED );
 }
 

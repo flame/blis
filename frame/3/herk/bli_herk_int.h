@@ -37,5 +37,6 @@ void bli_herk_int( obj_t*  alpha,
                    obj_t*  ah,
                    obj_t*  beta,
                    obj_t*  c,
-                   herk_t* cntl );
+                   herk_t* cntl,
+                   herk_thrinfo_t* thread );
 

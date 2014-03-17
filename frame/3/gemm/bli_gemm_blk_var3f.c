@@ -80,17 +80,15 @@ void bli_gemm_blk_var3f( obj_t*  a,
 
 	// Query dimension in partitioning direction.
 	k_trans = bli_obj_width_after_trans( *a );
-    dim_t start, end;
-    bli_get_range( thread, k_trans, 1, &start, &end );
 
 	// Partition along the k dimension.
-	for ( i = start; i < end; i += b_alg )
+	for ( i = 0; i < k_trans; i += b_alg )
 	{
 		// Determine the current algorithmic blocksize.
 		// NOTE: Use of b (for execution datatype) is intentional!
 		// This causes the right blocksize to be used if c and a are
 		// complex and b is real.
-		b_alg = bli_determine_blocksize_f( i, end, b,
+		b_alg = bli_determine_blocksize_f( i, k_trans, b,
 		                                   cntl_blocksize( cntl ) );
 
 		// Acquire partitions for A1 and B1.
@@ -140,18 +138,20 @@ void bli_gemm_blk_var3f( obj_t*  a,
 
 	}
 
+    thread_obarrier( thread );
+
 	// Unpack C (if C was packed).
-	bli_unpackm_int( c_pack, c,
-	                 cntl_sub_unpackm_c( cntl ) );
+    if( thread_am_ochief( thread ) ){
+        bli_unpackm_int( c_pack, c,
+                         cntl_sub_unpackm_c( cntl ) );
+	    bli_obj_release_pack( c_pack );
+    }
 
 	// If any packing buffers were acquired within packm, release them back
 	// to the memory manager.
-    thread_obarrier( thread );
     if( thread_am_ichief( thread ) ){
         bli_obj_release_pack( a1_pack );
         bli_obj_release_pack( b1_pack );
     }
-    if( thread_am_ochief( thread ) )
-	    bli_obj_release_pack( c_pack );
 }
 

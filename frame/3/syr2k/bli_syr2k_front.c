@@ -98,14 +98,16 @@ void bli_syr2k_front( obj_t*  alpha,
 	              &bt_local,
 	              beta,
 	              &c_local,
-	              cntl );
+	              cntl,
+                  &BLIS_HERK_SINGLE_THREADED );
 
 	bli_herk_int( alpha,
 	              &b_local,
 	              &at_local,
 	              &BLIS_ONE,
 	              &c_local,
-	              cntl );
+	              cntl,
+                  &BLIS_HERK_SINGLE_THREADED );
 #endif
 }
 

@@ -97,6 +97,6 @@ void bli_symm_front( side_t  side,
                       &infos[omp_id] );
      }
 
-     bli_gemm_cntl_free_thrinfos( infos );
+     bli_gemm_thrinfo_free_paths( infos );
 }
 

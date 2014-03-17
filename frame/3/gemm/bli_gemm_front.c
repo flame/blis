@@ -91,6 +91,6 @@ void bli_gemm_front( obj_t*  alpha,
                       &infos[omp_id] );
     }
 
-    bli_gemm_cntl_free_thrinfos( infos );
+    bli_gemm_thrinfo_free_paths( infos );
 }
 

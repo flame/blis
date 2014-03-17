@@ -60,11 +60,6 @@ gemm_thrinfo_t* bli_gemm_cntl_get_thrinfos()
     return bli_create_gemm_thrinfo_paths( );
 }
 
-void bli_gemm_cntl_free_thrinfos(thrinfo_t* tofree)
-{
-    //MEMORYLEAK
-}
-
 void bli_gemm_cntl_init()
 {
 	// Create blocksize objects for each dimension.

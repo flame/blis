@@ -97,5 +97,6 @@ void bli_setup_thread_info( thrinfo_t* thread, thread_comm_t* ocomm, dim_t ocomm
 
 #include "bli_packm_threading.h"
 #include "bli_gemm_threading.h"
+#include "bli_herk_threading.h"
 
 #endif

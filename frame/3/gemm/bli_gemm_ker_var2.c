@@ -218,13 +218,13 @@ void PASTEMAC(ch,varname)( \
 	bli_auxinfo_set_ps_b( ps_b, aux ); \
 \
     gemm_thrinfo_t* caucus = gemm_thread_sub_gemm( thread ); \
-    dim_t l2_num_threads = thread_n_way( thread ); \
-    dim_t l2_thread_id   = thread_work_id( thread ); \
-    dim_t l1_num_threads = thread_n_way( caucus ); \
-    dim_t l1_thread_id   = thread_work_id( caucus ); \
+    dim_t jr_num_threads = thread_n_way( thread ); \
+    dim_t jr_thread_id   = thread_work_id( thread ); \
+    dim_t ir_num_threads = thread_n_way( caucus ); \
+    dim_t ir_thread_id   = thread_work_id( caucus ); \
 \
 	/* Loop over the n dimension (NR columns at a time). */ \
-	for ( j = l2_thread_id; j < n_iter; j += l2_num_threads ) \
+	for ( j = jr_thread_id; j < n_iter; j += jr_num_threads ) \
 	{ \
 		ctype* restrict a1; \
 		ctype* restrict c11; \
@@ -239,7 +239,7 @@ void PASTEMAC(ch,varname)( \
 		b2 = b1; \
 \
 		/* Loop over the m dimension (MR rows at a time). */ \
-		for ( i = l1_thread_id; i < m_iter; i += l1_num_threads ) \
+		for ( i = ir_thread_id; i < m_iter; i += ir_num_threads ) \
 		{ \
 			ctype* restrict a2; \
 \

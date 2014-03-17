@@ -39,7 +39,8 @@
 typedef void (*FUNCPTR_T)( obj_t*  a,
                            obj_t*  ah,
                            obj_t*  c,
-                           herk_t* cntl );
+                           herk_t* cntl,
+                           herk_thrinfo_t* thread );
 
 static FUNCPTR_T vars[2][4][3] =
 {
@@ -66,7 +67,8 @@ void bli_herk_int( obj_t*  alpha,
                    obj_t*  ah,
                    obj_t*  beta,
                    obj_t*  c,
-                   herk_t* cntl )
+                   herk_t* cntl,
+                   herk_thrinfo_t* thread )
 {
 	obj_t     a_local;
 	obj_t     ah_local;
@@ -138,6 +140,7 @@ void bli_herk_int( obj_t*  alpha,
 	f( &a_local,
 	   &ah_local,
 	   &c_local,
-	   cntl );
+	   cntl,
+       thread );
 }
 
