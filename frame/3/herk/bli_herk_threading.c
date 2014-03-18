@@ -84,11 +84,11 @@ herk_thrinfo_t* bli_create_herk_thrinfo_node( thread_comm_t* ocomm, dim_t ocomm_
     return thread;
 }
 
-void bli_herk_thrinfo_free_paths( herk_thrinfo_t* threads )
+void bli_herk_thrinfo_free_paths( herk_thrinfo_t** threads )
 {
 }
 
-herk_thrinfo_t* bli_create_herk_thrinfo_paths( )
+herk_thrinfo_t** bli_create_herk_thrinfo_paths( )
 {
     dim_t jc_way = read_env( "BLIS_JC_NT" );
     dim_t kc_way = read_env( "BLIS_KC_NT" );
@@ -106,7 +106,7 @@ herk_thrinfo_t* bli_create_herk_thrinfo_paths( )
     dim_t ir_nt  = 1;
 
     
-    herk_thrinfo_t* paths = (herk_thrinfo_t*) malloc( global_num_threads * sizeof( herk_thrinfo_t ) );
+    herk_thrinfo_t** paths = (herk_thrinfo_t**) malloc( global_num_threads * sizeof( herk_thrinfo_t* ) );
 
     thread_comm_t*  global_comm = bli_create_communicator( global_num_threads );
     for( int a = 0; a < jc_way; a++ )
@@ -159,11 +159,12 @@ herk_thrinfo_t* bli_create_herk_thrinfo_paths( )
                                                                                 kc_way,  b,
                                                                                 NULL, NULL, ic_info);
 
-                        herk_thrinfo_t* jc_info = &paths[global_comm_id];
-                        bli_setup_herk_thrinfo_node( jc_info, global_comm, global_comm_id,
-                                                     jc_comm, jc_comm_id,
-                                                     jc_way,  a,
-                                                     NULL, NULL, kc_info);
+                        herk_thrinfo_t* jc_info = bli_create_herk_thrinfo_node( global_comm, global_comm_id,
+                                                                                jc_comm, jc_comm_id,
+                                                                                jc_way,  a,  
+                                                                                NULL, NULL, kc_info);
+
+                        paths[global_comm_id] = jc_info;
                     }
                 }
             }

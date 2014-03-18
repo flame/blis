@@ -74,22 +74,19 @@ void bli_gemm_front( obj_t*  alpha,
 		bli_obj_induce_trans( c_local );
 	}
 
-    gemm_thrinfo_t* infos = bli_gemm_cntl_get_thrinfos();
-    dim_t n_threads = thread_num_threads( (&infos[0]) );
+    gemm_thrinfo_t** infos = bli_create_gemm_thrinfo_paths();
+    dim_t n_threads = thread_num_threads( infos[0] );
 
 	// Invoke the internal back-end.
-    _Pragma( "omp parallel num_threads(n_threads)" )
-    {
-        dim_t omp_id = omp_get_thread_num();
-
-        bli_gemm_int( alpha,
-                      &a_local,
-                      &b_local,
-                      beta,
-                      &c_local,
-                      cntl,
-                      &infos[omp_id] );
-    }
+    bli_level3_thread_decorator( n_threads,   
+                                 (level3_int_t*) bli_gemm_int, 
+                                 alpha, 
+                                 &a_local,  
+                                 &b_local,  
+                                 beta, 
+                                 &c_local,  
+                                 (void*) cntl, 
+                                 (void**) infos );
 
     bli_gemm_thrinfo_free_paths( infos );
 }

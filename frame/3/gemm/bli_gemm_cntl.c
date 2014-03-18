@@ -55,11 +55,6 @@ gemm_t*           gemm_cntl_vl_mm;
 
 gemm_t*           gemm_cntl;
 
-gemm_thrinfo_t* bli_gemm_cntl_get_thrinfos()
-{
-    return bli_create_gemm_thrinfo_paths( );
-}
-
 void bli_gemm_cntl_init()
 {
 	// Create blocksize objects for each dimension.

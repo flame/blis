@@ -95,11 +95,11 @@ dim_t read_env( char* env )
     return number;
 }
 
-void bli_gemm_thrinfo_free_paths( gemm_thrinfo_t* threads )
+void bli_gemm_thrinfo_free_paths( gemm_thrinfo_t** threads )
 {
 }
 
-gemm_thrinfo_t* bli_create_gemm_thrinfo_paths( )
+gemm_thrinfo_t** bli_create_gemm_thrinfo_paths( )
 {
     dim_t jc_way = read_env( "BLIS_JC_NT" );
     dim_t kc_way = read_env( "BLIS_KC_NT" );
@@ -117,7 +117,7 @@ gemm_thrinfo_t* bli_create_gemm_thrinfo_paths( )
     dim_t ir_nt  = 1;
 
     
-    gemm_thrinfo_t* paths = (gemm_thrinfo_t*) malloc( global_num_threads * sizeof( gemm_thrinfo_t ) );
+    gemm_thrinfo_t** paths = (gemm_thrinfo_t**) malloc( global_num_threads * sizeof( gemm_thrinfo_t* ) );
 
     thread_comm_t*  global_comm = bli_create_communicator( global_num_threads );
     for( int a = 0; a < jc_way; a++ )
@@ -170,11 +170,11 @@ gemm_thrinfo_t* bli_create_gemm_thrinfo_paths( )
                                                                                 kc_way,  b,
                                                                                 NULL, NULL, ic_info);
 
-                        gemm_thrinfo_t* jc_info = &paths[global_comm_id];
-                        bli_setup_gemm_thrinfo_node( jc_info, global_comm, global_comm_id,
-                                                     jc_comm, jc_comm_id,
-                                                     jc_way,  a,
-                                                     NULL, NULL, kc_info);
+                        gemm_thrinfo_t* jc_info = bli_create_gemm_thrinfo_node( global_comm, global_comm_id,
+                                                                                jc_comm, jc_comm_id,
+                                                                                jc_way,  a,
+                                                                                NULL, NULL, kc_info);
+                        paths[global_comm_id] = jc_info;
                     }
                 }
             }

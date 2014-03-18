@@ -95,10 +95,14 @@ void bli_barrier( thread_comm_t* communicator, dim_t t_id )
     bool_t my_sense = communicator->barrier_sense;
     dim_t my_threads_arrived;
 
+    _Pragma("omp atomic capture")
+        my_threads_arrived = communicator->barrier_threads_arrived++;
+/*
     bli_set_lock(&communicator->barrier_lock);
     my_threads_arrived = communicator->barrier_threads_arrived + 1;
     communicator->barrier_threads_arrived = my_threads_arrived;
     bli_unset_lock(&communicator->barrier_lock);
+*/
 
     if( my_threads_arrived == communicator->n_threads ) {
 
@@ -222,4 +226,32 @@ void bli_get_range( void* thr, dim_t size, dim_t block_factor, dim_t* start, dim
     n_pt = (n_pt % block_factor == 0) ? n_pt : n_pt + block_factor - (n_pt % block_factor); 
     *start = work_id * n_pt;
     *end   = bli_min( *start + n_pt, size );
+}
+
+void bli_get_range_tri_weighted( void* thr, dim_t size, dim_t block_factor, bool_t forward, dim_t* start, dim_t* end)
+{
+}
+
+void bli_level3_thread_decorator( dim_t n_threads, 
+                                  level3_int_t* func, 
+                                  obj_t* alpha, 
+                                  obj_t* a, 
+                                  obj_t* b, 
+                                  obj_t* beta, 
+                                  obj_t* c, 
+                                  void* cntl, 
+                                  void** thread )
+{
+    _Pragma( "omp parallel num_threads(n_threads)" )
+    {
+        dim_t omp_id = omp_get_thread_num();
+
+        (*func) ( alpha,
+                  a,
+                  b,
+                  beta,
+                  c,
+                  cntl,
+                  thread[omp_id] );
+    }
 }

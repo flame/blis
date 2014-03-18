@@ -93,21 +93,31 @@ void bli_syr2k_front( obj_t*  alpha,
 	               cntl );
 #else
 	// Invoke herk twice, using beta only the first time.
-	bli_herk_int( alpha,
-	              &a_local,
-	              &bt_local,
-	              beta,
-	              &c_local,
-	              cntl,
-                  &BLIS_HERK_SINGLE_THREADED );
+    herk_thrinfo_t** infos = bli_create_herk_thrinfo_paths();
+    dim_t n_threads = thread_num_threads( infos[0] );
 
-	bli_herk_int( alpha,
-	              &b_local,
-	              &at_local,
-	              &BLIS_ONE,
-	              &c_local,
-	              cntl,
-                  &BLIS_HERK_SINGLE_THREADED );
+    // Invoke the internal back-end.
+    bli_level3_thread_decorator( n_threads,   
+                                 (level3_int_t*) bli_herk_int, 
+                                 alpha, 
+                                 &a_local,  
+                                 &bt_local,  
+                                 beta, 
+                                 &c_local,  
+                                 (void*) cntl, 
+                                 (void**) infos );
+
+    bli_level3_thread_decorator( n_threads,   
+                                 (level3_int_t*) bli_herk_int, 
+                                 alpha, 
+                                 &b_local,  
+                                 &at_local,  
+                                 &BLIS_ONE, 
+                                 &c_local,  
+                                 (void*) cntl, 
+                                 (void**) infos );
+
+    bli_herk_thrinfo_free_paths( infos );
 #endif
 }
 

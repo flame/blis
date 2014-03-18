@@ -65,4 +65,3 @@ gemm_t* bli_gemm_cntl_obj_create( impl_t       impl_type,
                                   gemm_t*      sub_gemm,
                                   unpackm_t*   sub_unpack_c );
 
-gemm_thrinfo_t* bli_gemm_cntl_get_thrinfos();

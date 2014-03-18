@@ -53,8 +53,8 @@ typedef struct herk_thrinfo_s herk_thrinfo_t;
 #define herk_thread_sub_opackm( thread )  thread->opackm
 #define herk_thread_sub_ipackm( thread )  thread->ipackm
 
-herk_thrinfo_t* bli_herk_create_thrinfo_paths( );
-void bli_herk_thrinfo_free_paths();
+herk_thrinfo_t** bli_create_herk_thrinfo_paths( );
+void bli_herk_thrinfo_free_paths( herk_thrinfo_t** paths );
 
 void bli_setup_herk_thrinfo_node( herk_thrinfo_t* thread,
                                   thread_comm_t* ocomm, dim_t ocomm_id,
