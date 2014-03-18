@@ -101,7 +101,7 @@ void bli_setup_thread_info( thrinfo_t* thread, thread_comm_t* ocomm, dim_t ocomm
 
 typedef void (*level3_int_t) ( obj_t* alpha, obj_t* a, obj_t* b, obj_t* beta, obj_t* c, void* cntl, void* thread );
 void bli_level3_thread_decorator( dim_t num_threads, 
-                                  level3_int_t* func, 
+                                  level3_int_t func, 
                                   obj_t* alpha, 
                                   obj_t* a,  
                                   obj_t* b,  

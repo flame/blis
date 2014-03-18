@@ -233,7 +233,7 @@ void bli_get_range_tri_weighted( void* thr, dim_t size, dim_t block_factor, bool
 }
 
 void bli_level3_thread_decorator( dim_t n_threads, 
-                                  level3_int_t* func, 
+                                  level3_int_t func, 
                                   obj_t* alpha, 
                                   obj_t* a, 
                                   obj_t* b, 
@@ -242,16 +242,18 @@ void bli_level3_thread_decorator( dim_t n_threads,
                                   void* cntl, 
                                   void** thread )
 {
-    _Pragma( "omp parallel num_threads(n_threads)" )
+    //_Pragma( "omp parallel num_threads(n_threads)" )
     {
-        dim_t omp_id = omp_get_thread_num();
+    //    dim_t omp_id = omp_get_thread_num();
 
-        (*func) ( alpha,
+        func( alpha,
+//        bli_gemm_int ( alpha,
                   a,
                   b,
                   beta,
                   c,
-                  cntl,
-                  thread[omp_id] );
+                  (gemm_t*)cntl,
+//                  thread[omp_id] );
+                  (gemm_thrinfo_t*)thread[0] );
     }
 }
