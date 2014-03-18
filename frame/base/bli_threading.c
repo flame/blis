@@ -96,7 +96,8 @@ void bli_barrier( thread_comm_t* communicator, dim_t t_id )
     dim_t my_threads_arrived;
 
     _Pragma("omp atomic capture")
-        my_threads_arrived = communicator->barrier_threads_arrived++;
+        my_threads_arrived = ++(communicator->barrier_threads_arrived);
+
 /*
     bli_set_lock(&communicator->barrier_lock);
     my_threads_arrived = communicator->barrier_threads_arrived + 1;
@@ -242,18 +243,16 @@ void bli_level3_thread_decorator( dim_t n_threads,
                                   void* cntl, 
                                   void** thread )
 {
-    //_Pragma( "omp parallel num_threads(n_threads)" )
+    _Pragma( "omp parallel num_threads(n_threads)" )
     {
-    //    dim_t omp_id = omp_get_thread_num();
+        dim_t omp_id = omp_get_thread_num();
 
         func( alpha,
-//        bli_gemm_int ( alpha,
                   a,
                   b,
                   beta,
                   c,
-                  (gemm_t*)cntl,
-//                  thread[omp_id] );
-                  (gemm_thrinfo_t*)thread[0] );
+                  cntl,
+                  thread[omp_id] );
     }
 }
