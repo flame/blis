@@ -100,7 +100,7 @@ void bli_packm_blk_var4( obj_t*   c,
 	// in the real domain.
 	if ( bli_is_real( dt_cp ) )
 	{
-		bli_packm_blk_var1( c, p, &BLIS_PACKM_SINGLE_THREADED );
+		bli_packm_blk_var1( c, p, t );
 		return;
 	}
 
@@ -111,23 +111,26 @@ void bli_packm_blk_var4( obj_t*   c,
 	// real domain counterparts. (In the aforementioned situation,
 	// applying a real scalar is easy, but applying a complex one is
 	// harder, so we avoid the need altogether with the code below.)
-	if ( bli_obj_scalar_has_nonzero_imag( p ) )
-	{
-		// Detach the scalar.
-		bli_obj_scalar_detach( p, &kappa );
+    if( thread_am_ochief( t ) ) {
+        if ( bli_obj_scalar_has_nonzero_imag( p ) )
+        {
+            // Detach the scalar.
+            bli_obj_scalar_detach( p, &kappa );
 
-		// Reset the attached scalar (to 1.0).
-		bli_obj_scalar_reset( p );
+            // Reset the attached scalar (to 1.0).
+            bli_obj_scalar_reset( p );
 
-		kappa_p = &kappa;
-	}
-	else
-	{
-		// If the internal scalar of A has only a real component, then
-		// we will apply it later (in the micro-kernel), and so we will
-		// use BLIS_ONE to indicate no scaling during packing.
-		kappa_p = &BLIS_ONE;
-	}
+            kappa_p = &kappa;
+        }
+        else
+        {
+            // If the internal scalar of A has only a real component, then
+            // we will apply it later (in the micro-kernel), and so we will
+            // use BLIS_ONE to indicate no scaling during packing.
+            kappa_p = &BLIS_ONE;
+        }
+    }
+    kappa_p = thread_obroadcast( t, kappa_p );
 
 
 	// Acquire the buffer to the kappa chosen above.
