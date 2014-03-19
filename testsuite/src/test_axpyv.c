@@ -75,7 +75,7 @@ void libblis_test_axpyv_check( obj_t*  alpha,
 void libblis_test_axpyv_deps( test_params_t* params, test_op_t* op )
 {
 	libblis_test_randv( params, &(op->ops->randv) );
-	libblis_test_fnormv( params, &(op->ops->fnormv) );
+	libblis_test_normfv( params, &(op->ops->normfv) );
 	libblis_test_addv( params, &(op->ops->addv) );
 	libblis_test_subv( params, &(op->ops->subv) );
 	libblis_test_copyv( params, &(op->ops->copyv) );
@@ -245,7 +245,7 @@ void libblis_test_axpyv_check( obj_t*  alpha,
 	//
 	// is functioning correctly if
 	//
-	//   fnorm( y - ( y_orig + alpha * conjx(x) ) )
+	//   normf( y - ( y_orig + alpha * conjx(x) ) )
 	//
 	// is negligible.
 	//
@@ -262,7 +262,7 @@ void libblis_test_axpyv_check( obj_t*  alpha,
 	bli_addv( &x_temp, &y_temp );
 
 	bli_subv( &y_temp, y );
-	bli_fnormv( y, &norm );
+	bli_normfv( y, &norm );
 	bli_getsc( &norm, resid, &junk );
 
 	bli_obj_free( &x_temp );

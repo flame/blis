@@ -187,9 +187,9 @@ void libblis_test_randv_impl( iface_t   iface,
 void libblis_test_randv_check( obj_t*  x,
                                double* resid )
 {
-	dim_t m_x   = bli_obj_vector_dim( *x );
-	inc_t inc_x = bli_obj_vector_inc( *x );
-	void* buf_x = bli_obj_buffer_at_off( *x );
+	num_t  dt_real = bli_obj_datatype_proj_to_real( *x );
+	dim_t  m_x     = bli_obj_vector_dim( *x );
+	obj_t  sum;
 
 	*resid = 0.0;
 
@@ -200,49 +200,23 @@ void libblis_test_randv_check( obj_t*  x,
 	// absolute values of the elements of x.
 	//
 
-	if      ( bli_obj_is_float( *x ) )
+	bli_obj_scalar_init_detached( dt_real, &sum );
+
+	bli_norm1v( x, &sum );
+
+	if ( bli_is_float( dt_real ) )
 	{
-		float  sum_x;
+		float*  sum_x = bli_obj_buffer_at_off( sum );
 
-		bli_sabsumv( m_x,
-		             buf_x, inc_x,
-		             &sum_x );
-
-		if      ( sum_x == *bli_s0   ) *resid = 1.0;
-		else if ( sum_x >= 1.0 * m_x ) *resid = 2.0;
+		if      ( *sum_x == *bli_d0   ) *resid = 1.0;
+		else if ( *sum_x >= 2.0 * m_x ) *resid = 2.0;
 	}
-	else if ( bli_obj_is_double( *x ) )
+	else // if ( bli_is_double( dt_real ) )
 	{
-		double sum_x;
+		double* sum_x = bli_obj_buffer_at_off( sum );
 
-		bli_dabsumv( m_x,
-		             buf_x, inc_x,
-		             &sum_x );
-
-		if      ( sum_x == *bli_d0   ) *resid = 1.0;
-		else if ( sum_x >= 1.0 * m_x ) *resid = 2.0;
-	}
-	else if ( bli_obj_is_scomplex( *x ) )
-	{
-		float  sum_x;
-
-		bli_cabsumv( m_x,
-		             buf_x, inc_x,
-		             &sum_x );
-
-		if      ( sum_x == *bli_s0   ) *resid = 1.0;
-		else if ( sum_x >= 2.0 * m_x ) *resid = 2.0;
-	}
-	else // if ( bli_obj_is_dcomplex( *x ) )
-	{
-		double sum_x;
-
-		bli_zabsumv( m_x,
-		             buf_x, inc_x,
-		             &sum_x );
-
-		if      ( sum_x == *bli_d0   ) *resid = 1.0;
-		else if ( sum_x >= 2.0 * m_x ) *resid = 2.0;
+		if      ( *sum_x == *bli_d0   ) *resid = 1.0;
+		else if ( *sum_x >= 2.0 * m_x ) *resid = 2.0;
 	}
 }
 

@@ -206,7 +206,7 @@ typedef struct test_ops_s
 	test_op_t copyv;
 	test_op_t dotv;
 	test_op_t dotxv;
-	test_op_t fnormv;
+	test_op_t normfv;
 	test_op_t scalv;
 	test_op_t scal2v;
 	test_op_t setv;
@@ -216,7 +216,7 @@ typedef struct test_ops_s
 	test_op_t addm;
 	test_op_t axpym;
 	test_op_t copym;
-	test_op_t fnormm;
+	test_op_t normfm;
 	test_op_t scalm;
 	test_op_t scal2m;
 	test_op_t setm;
@@ -414,7 +414,7 @@ void libblis_test_check_empty_problem( obj_t* c, double* perf, double* resid );
 #include "test_copyv.h"
 #include "test_dotv.h"
 #include "test_dotxv.h"
-#include "test_fnormv.h"
+#include "test_normfv.h"
 #include "test_scalv.h"
 #include "test_scal2v.h"
 #include "test_setv.h"
@@ -424,7 +424,7 @@ void libblis_test_check_empty_problem( obj_t* c, double* perf, double* resid );
 #include "test_addm.h"
 #include "test_axpym.h"
 #include "test_copym.h"
-#include "test_fnormm.h"
+#include "test_normfm.h"
 #include "test_scalm.h"
 #include "test_scal2m.h"
 #include "test_setm.h"

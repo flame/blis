@@ -74,7 +74,7 @@ void libblis_test_dotv_check( obj_t*  x,
 void libblis_test_dotv_deps( test_params_t* params, test_op_t* op )
 {
 	libblis_test_randv( params, &(op->ops->randv) );
-	libblis_test_fnormv( params, &(op->ops->fnormv) );
+	libblis_test_normfv( params, &(op->ops->normfv) );
 	libblis_test_copyv( params, &(op->ops->copyv) );
 }
 
@@ -237,7 +237,7 @@ void libblis_test_dotv_check( obj_t*  x,
 	//
 	// is functioning correctly if
 	//
-	//   sqrtsc( rho.real ) - fnorm( x )
+	//   sqrtsc( rho.real ) - normf( x )
 	//
 	// and
 	//
@@ -251,7 +251,7 @@ void libblis_test_dotv_check( obj_t*  x,
 	bli_obj_scalar_init_detached( dt_real, &norm_x );
 	bli_obj_scalar_init_detached( dt_real, &norm_xy );
 
-	bli_fnormv( x, &norm_x );
+	bli_normfv( x, &norm_x );
 
 	bli_unzipsc( rho, &rho_r, &rho_i );
 

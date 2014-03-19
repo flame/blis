@@ -77,7 +77,7 @@ void libblis_test_ger_check( obj_t*  alpha,
 void libblis_test_ger_deps( test_params_t* params, test_op_t* op )
 {
 	libblis_test_randv( params, &(op->ops->randv) );
-	libblis_test_fnormv( params, &(op->ops->fnormv) );
+	libblis_test_normfv( params, &(op->ops->normfv) );
 	libblis_test_subv( params, &(op->ops->subv) );
 	libblis_test_scal2v( params, &(op->ops->scal2v) );
 	libblis_test_dotv( params, &(op->ops->dotv) );
@@ -262,7 +262,7 @@ void libblis_test_ger_check( obj_t*  alpha,
 	//
 	// is functioning correctly if
 	//
-	//   fnorm( v - w )
+	//   normf( v - w )
 	//
 	// is negligible, where
 	//
@@ -292,7 +292,7 @@ void libblis_test_ger_check( obj_t*  alpha,
 	bli_gemv( &BLIS_ONE, a_orig, &t, &BLIS_ONE, &w );
 
 	bli_subv( &w, &v );
-	bli_fnormv( &v, &norm );
+	bli_normfv( &v, &norm );
 	bli_getsc( &norm, resid, &junk );
 
 	bli_obj_free( &t );

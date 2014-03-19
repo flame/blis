@@ -73,7 +73,7 @@ void libblis_test_scalv_check( obj_t*  beta,
 void libblis_test_scalv_deps( test_params_t* params, test_op_t* op )
 {
 	libblis_test_randv( params, &(op->ops->randv) );
-	libblis_test_fnormv( params, &(op->ops->fnormv) );
+	libblis_test_normfv( params, &(op->ops->normfv) );
 	libblis_test_addv( params, &(op->ops->addv) );
 	libblis_test_copyv( params, &(op->ops->copyv) );
 }
@@ -235,7 +235,7 @@ void libblis_test_scalv_check( obj_t*  beta,
 	//
 	// is functioning correctly if
 	//
-	//   fnorm( y + -conjbeta(beta) * y_orig )
+	//   normf( y + -conjbeta(beta) * y_orig )
 	//
 	// is negligible.
 	//
@@ -252,7 +252,7 @@ void libblis_test_scalv_check( obj_t*  beta,
 	bli_scalv( &nbeta, &y2 );
     bli_addv( &y2, y );
 
-    bli_fnormv( y, &norm_y_r );
+    bli_normfv( y, &norm_y_r );
 
     bli_getsc( &norm_y_r, resid, &junk );
 

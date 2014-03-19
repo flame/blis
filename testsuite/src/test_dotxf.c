@@ -80,7 +80,7 @@ void libblis_test_dotxf_deps( test_params_t* params, test_op_t* op )
 {
 	libblis_test_randv( params, &(op->ops->randv) );
 	libblis_test_randm( params, &(op->ops->randm) );
-	libblis_test_fnormv( params, &(op->ops->fnormv) );
+	libblis_test_normfv( params, &(op->ops->normfv) );
 	libblis_test_subv( params, &(op->ops->subv) );
 	libblis_test_copyv( params, &(op->ops->copyv) );
 	libblis_test_dotxv( params, &(op->ops->dotxv) );
@@ -274,7 +274,7 @@ void libblis_test_dotxf_check( obj_t*  alpha,
 	//
 	// is functioning correctly if
 	//
-	//   fnorm( y - v )
+	//   normf( y - v )
 	//
 	// is negligible, where v contains y as computed by repeated calls to
 	// dotxv.
@@ -295,7 +295,7 @@ void libblis_test_dotxf_check( obj_t*  alpha,
 	}
 
 	bli_subv( y, &v );
-	bli_fnormv( &v, &norm );
+	bli_normfv( &v, &norm );
 	bli_getsc( &norm, resid, &junk );
 
 	bli_obj_free( &v );

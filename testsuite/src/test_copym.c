@@ -73,7 +73,7 @@ void libblis_test_copym_deps( test_params_t* params, test_op_t* op )
 {
 	libblis_test_randm( params, &(op->ops->randm) );
 	libblis_test_subm( params, &(op->ops->subm) );
-	libblis_test_fnormm( params, &(op->ops->fnormm) );
+	libblis_test_normfm( params, &(op->ops->normfm) );
 }
 
 
@@ -211,7 +211,7 @@ void libblis_test_copym_check( obj_t*  x,
 	//
 	// is functioning correctly if
 	//
-	//   fnormm( y - conjx(x) )
+	//   normfm( y - conjx(x) )
 	//
 	// is negligible.
 	//
@@ -220,7 +220,7 @@ void libblis_test_copym_check( obj_t*  x,
 
 	bli_subm( x, y );
 
-	bli_fnormm( y, &norm_y_r );
+	bli_normfm( y, &norm_y_r );
 
 	bli_getsc( &norm_y_r, resid, &junk );
 }

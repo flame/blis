@@ -187,17 +187,10 @@ void libblis_test_randm_impl( iface_t   iface,
 void libblis_test_randm_check( obj_t*  x,
                                double* resid )
 {
-	doff_t diagoffx = bli_obj_diag_offset( *x );
-	uplo_t uplox    = bli_obj_uplo( *x );
-
-	dim_t  m_x      = bli_obj_length( *x );
-	dim_t  n_x      = bli_obj_width( *x );
-
-	inc_t  rs_x     = bli_obj_row_stride( *x );
-	inc_t  cs_x     = bli_obj_col_stride( *x );
-	void*  buf_x    = bli_obj_buffer_at_off( *x );
-
-	*resid = 0.0;
+	num_t  dt_real = bli_obj_datatype_proj_to_real( *x );
+	dim_t  m_x     = bli_obj_length( *x );
+	dim_t  n_x     = bli_obj_width( *x );
+	obj_t  sum;
 
 	//
 	// The two most likely ways that randm would fail is if all elements
@@ -206,61 +199,103 @@ void libblis_test_randm_check( obj_t*  x,
 	// absolute values of the elements of x.
 	//
 
-	if      ( bli_obj_is_float( *x ) )
+	*resid = 0.0;
+
+	bli_obj_scalar_init_detached( dt_real, &sum );
+
+	bli_absumm( x, &sum );
+	
+	if ( bli_is_float( dt_real ) )
 	{
-		float  sum_x;
+		float*  sum_x = bli_obj_buffer_at_off( sum );
 
-		bli_sabsumm( diagoffx,
-		             uplox,
-		             m_x,
-		             n_x,
-		             buf_x, rs_x, cs_x,
-		             &sum_x );
-
-		if      ( sum_x == *bli_s0         ) *resid = 1.0;
-		else if ( sum_x >= 1.0 * m_x * n_x ) *resid = 2.0;
+		if      ( *sum_x == *bli_d0         ) *resid = 1.0;
+		else if ( *sum_x >= 2.0 * m_x * n_x ) *resid = 2.0;
 	}
-	else if ( bli_obj_is_double( *x ) )
+	else // if ( bli_is_double( dt_real ) )
 	{
-		double sum_x;
+		double* sum_x = bli_obj_buffer_at_off( sum );
 
-		bli_dabsumm( diagoffx,
-		             uplox,
-		             m_x,
-		             n_x,
-		             buf_x, rs_x, cs_x,
-		             &sum_x );
-
-		if      ( sum_x == *bli_d0         ) *resid = 1.0;
-		else if ( sum_x >= 1.0 * m_x * n_x ) *resid = 2.0;
-	}
-	else if ( bli_obj_is_scomplex( *x ) )
-	{
-		float  sum_x;
-
-		bli_cabsumm( diagoffx,
-		             uplox,
-		             m_x,
-		             n_x,
-		             buf_x, rs_x, cs_x,
-		             &sum_x );
-
-		if      ( sum_x == *bli_s0         ) *resid = 1.0;
-		else if ( sum_x >= 2.0 * m_x * n_x ) *resid = 2.0;
-	}
-	else // if ( bli_obj_is_dcomplex( *x ) )
-	{
-		double sum_x;
-
-		bli_zabsumm( diagoffx,
-		             uplox,
-		             m_x,
-		             n_x,
-		             buf_x, rs_x, cs_x,
-		             &sum_x );
-
-		if      ( sum_x == *bli_d0         ) *resid = 1.0;
-		else if ( sum_x >= 2.0 * m_x * n_x ) *resid = 2.0;
+		if      ( *sum_x == *bli_d0         ) *resid = 1.0;
+		else if ( *sum_x >= 2.0 * m_x * n_x ) *resid = 2.0;
 	}
 }
+
+
+
+
+#define FUNCPTR_T absumm_fp
+
+typedef void (*FUNCPTR_T)(
+                           dim_t  m,
+                           dim_t  n,
+                           void*  x, inc_t rs_x, inc_t cs_x,
+                           void*  sum_x
+                         );
+
+static FUNCPTR_T GENARRAY(ftypes,absumm);
+
+
+void bli_absumm( obj_t*  x,
+                 obj_t*  sum_x )
+{
+	num_t     dt        = bli_obj_datatype( *x );
+
+	dim_t     m         = bli_obj_length( *x );
+	dim_t     n         = bli_obj_width( *x );
+
+	void*     buf_x     = bli_obj_buffer_at_off( *x );
+	inc_t     rs_x      = bli_obj_row_stride( *x );
+	inc_t     cs_x      = bli_obj_col_stride( *x );
+
+	void*     buf_sum_x = bli_obj_buffer_at_off( *sum_x );
+
+	FUNCPTR_T f;
+
+
+	// Index into the type combination array to extract the correct
+	// function pointer.
+	f = ftypes[dt];
+
+	// Invoke the function.
+	f( m,
+	   n,
+	   buf_x, rs_x, cs_x,
+	   buf_sum_x );
+}
+
+
+#undef  GENTFUNCR
+#define GENTFUNCR( ctype, ctype_r, ch, chr, varname, kername ) \
+\
+void PASTEMAC(ch,varname)( \
+                           dim_t  m, \
+                           dim_t  n, \
+                           void*  x, inc_t rs_x, inc_t cs_x, \
+                           void*  sum_x  \
+                         ) \
+{ \
+	ctype*   x_cast     = x; \
+	ctype_r* sum_x_cast = sum_x; \
+	ctype_r  abs_chi1; \
+	ctype_r  sum; \
+	dim_t    i, j; \
+\
+	PASTEMAC(chr,set0s)( sum ); \
+\
+	for ( j = 0; j < n; j++ ) \
+	{ \
+		for ( i = 0; i < m; i++ ) \
+		{ \
+			ctype* chi1 = x_cast + (i  )*rs_x + (j  )*cs_x; \
+\
+			PASTEMAC2(ch,chr,abval2s)( *chi1, abs_chi1 ); \
+			PASTEMAC2(chr,chr,adds)( abs_chi1, sum ); \
+		} \
+	} \
+\
+	PASTEMAC2(chr,chr,copys)( sum, *sum_x_cast ); \
+}
+
+INSERT_GENTFUNCR_BASIC( absumm, absumm )
 

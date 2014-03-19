@@ -74,7 +74,7 @@ void libblis_test_subm_check( obj_t*  alpha,
 void libblis_test_subm_deps( test_params_t* params, test_op_t* op )
 {
 	libblis_test_setm( params, &(op->ops->setm) );
-	libblis_test_fnormm( params, &(op->ops->fnormm) );
+	libblis_test_normfm( params, &(op->ops->normfm) );
 }
 
 
@@ -234,7 +234,7 @@ void libblis_test_subm_check( obj_t*  alpha,
 	//
 	// is functioning correctly if
 	//
-	//   fnormv(y) - sqrt( absqsc( beta - conjx(alpha) ) * m * n )
+	//   normfv(y) - sqrt( absqsc( beta - conjx(alpha) ) * m * n )
 	//
 	// is negligible.
 	//
@@ -247,7 +247,7 @@ void libblis_test_subm_check( obj_t*  alpha,
 
 	bli_obj_scalar_init_detached_copy_of( dt, conjx, alpha, &alpha_conj );
 
-	bli_fnormm( y, &norm_r );
+	bli_normfm( y, &norm_r );
 
 	bli_copysc( beta, &aminusb );
 	bli_subsc( &alpha_conj, &aminusb );

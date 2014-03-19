@@ -73,7 +73,7 @@ void libblis_test_copyv_deps( test_params_t* params, test_op_t* op )
 {
 	libblis_test_randv( params, &(op->ops->randv) );
 	libblis_test_subv( params, &(op->ops->subv) );
-	libblis_test_fnormv( params, &(op->ops->fnormv) );
+	libblis_test_normfv( params, &(op->ops->normfv) );
 }
 
 
@@ -208,7 +208,7 @@ void libblis_test_copyv_check( obj_t*  x,
 	//
 	// is functioning correctly if
 	//
-	//   fnormv( y - conjx(x) )
+	//   normfv( y - conjx(x) )
 	//
 	// is negligible.
 	//
@@ -217,7 +217,7 @@ void libblis_test_copyv_check( obj_t*  x,
 
 	bli_subv( x, y );
 
-	bli_fnormv( y, &norm_y_r );
+	bli_normfv( y, &norm_y_r );
 
 	bli_getsc( &norm_y_r, resid, &junk );
 }
