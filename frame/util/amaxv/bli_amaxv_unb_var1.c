@@ -71,7 +71,7 @@ void bli_amaxv_unb_var1( obj_t*  x,
 
 
 #undef  GENTFUNCRI
-#define GENTFUNCRI( ctype_x, ctype_xr, ctype_i, chx, chxr, chi, opname, varname ) \
+#define GENTFUNCRI( ctype_x, ctype_xr, ctype_i, chx, chxr, chi, varname ) \
 \
 void PASTEMAC(chx,varname)( \
                             dim_t  n, \
@@ -139,5 +139,5 @@ void PASTEMAC(chx,varname)( \
 	PASTEMAC2(chi,chi,copys)( i_max, *abmax_i_cast ); \
 }
 
-INSERT_GENTFUNCRI_BASIC( amaxv, amaxv_unb_var1 )
+INSERT_GENTFUNCRI_BASIC0( amaxv_unb_var1 )
 

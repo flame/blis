@@ -39,13 +39,13 @@ void bli_zipsc_unb_var1( obj_t* beta_r,
 
 
 #undef  GENTPROTR
-#define GENTPROTR( ctype_x, ctype_xr, chx, chxr, opname ) \
+#define GENTPROTR( ctype_x, ctype_xr, chx, chxr, varname ) \
 \
-void PASTEMAC(chx,opname)( \
-                           void*  beta_r, \
-                           void*  beta_i, \
-                           void*  chi \
-                         );
+void PASTEMAC(chx,varname)( \
+                            void*  beta_r, \
+                            void*  beta_i, \
+                            void*  chi \
+                          );
 
 INSERT_GENTPROTR_BASIC( zipsc_unb_var1 )
 

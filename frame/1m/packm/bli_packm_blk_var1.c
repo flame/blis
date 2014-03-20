@@ -122,7 +122,7 @@ void bli_packm_blk_var1( obj_t*   c,
 
 
 #undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, varname ) \
+#define GENTFUNC( ctype, ch, varname ) \
 \
 void PASTEMAC(ch,varname)( \
                            struc_t strucc, \
@@ -397,5 +397,5 @@ void PASTEMAC(ch,varname)( \
 \
 }
 
-INSERT_GENTFUNC_BASIC( packm, packm_blk_var1 )
+INSERT_GENTFUNC_BASIC0( packm_blk_var1 )
 

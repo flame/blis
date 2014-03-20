@@ -68,7 +68,7 @@ void bli_invertv_ref( obj_t* x )
 
 
 #undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, varname ) \
+#define GENTFUNC( ctype, ch, varname ) \
 \
 void PASTEMAC(ch,varname) \
      ( \
@@ -92,5 +92,5 @@ void PASTEMAC(ch,varname) \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC( invertv, invertv_ref )
+INSERT_GENTFUNC_BASIC0( invertv_ref )
 

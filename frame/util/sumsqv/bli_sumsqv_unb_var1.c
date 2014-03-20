@@ -90,7 +90,7 @@ void bli_sumsqv_unb_var1( obj_t*  x,
 
 
 #undef  GENTFUNCR
-#define GENTFUNCR( ctype_x, ctype_xr, chx, chxr, opname, varname ) \
+#define GENTFUNCR( ctype_x, ctype_xr, chx, chxr, varname ) \
 \
 void PASTEMAC(chx,varname)( \
                             dim_t  n, \
@@ -181,5 +181,5 @@ void PASTEMAC(chx,varname)( \
 	PASTEMAC2(chxr,chxr,copys)( sumsq_r, *sumsq_cast ); \
 }
 
-INSERT_GENTFUNCR_BASIC( sumsqv, sumsqv_unb_var1 )
+INSERT_GENTFUNCR_BASIC0( sumsqv_unb_var1 )
 

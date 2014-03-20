@@ -150,16 +150,16 @@ static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] =
 
 
 #undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, scal2vker ) \
+#define GENTFUNC( ctype, ch, varname, scal2vker ) \
 \
-void PASTEMAC(ch,opname)( \
-                          conj_t  conja, \
-                          dim_t   m, \
-                          dim_t   n, \
-                          void*   kappa, \
-                          void*   a, inc_t inca, inc_t lda, \
-                          void*   p,             inc_t ldp  \
-                        ) \
+void PASTEMAC(ch,varname)( \
+                           conj_t  conja, \
+                           dim_t   m, \
+                           dim_t   n, \
+                           void*   kappa, \
+                           void*   a, inc_t inca, inc_t lda, \
+                           void*   p,             inc_t ldp  \
+                         ) \
 { \
 	dim_t     panel_dim; \
 	num_t     dt; \

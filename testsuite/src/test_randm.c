@@ -266,7 +266,7 @@ void bli_absumm( obj_t*  x,
 
 
 #undef  GENTFUNCR
-#define GENTFUNCR( ctype, ctype_r, ch, chr, varname, kername ) \
+#define GENTFUNCR( ctype, ctype_r, ch, chr, varname ) \
 \
 void PASTEMAC(ch,varname)( \
                            dim_t  m, \
@@ -297,5 +297,5 @@ void PASTEMAC(ch,varname)( \
 	PASTEMAC2(chr,chr,copys)( sum, *sum_x_cast ); \
 }
 
-INSERT_GENTFUNCR_BASIC( absumm, absumm )
+INSERT_GENTFUNCR_BASIC0( absumm )
 

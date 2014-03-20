@@ -66,7 +66,7 @@ void bli_randv_unb_var1( obj_t* x )
 
 
 #undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, varname ) \
+#define GENTFUNC( ctype, ch, varname ) \
 \
 void PASTEMAC(ch,varname)( \
                            dim_t  n, \
@@ -88,5 +88,5 @@ void PASTEMAC(ch,varname)( \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC( randv, randv_unb_var1 )
+INSERT_GENTFUNC_BASIC0( randv_unb_var1 )
 

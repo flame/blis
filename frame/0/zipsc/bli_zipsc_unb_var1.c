@@ -79,7 +79,7 @@ void bli_zipsc_unb_var1( obj_t*  beta_r,
 
 
 #undef  GENTFUNCR
-#define GENTFUNCR( ctype_x, ctype_xr, chx, chxr, opname, varname ) \
+#define GENTFUNCR( ctype_x, ctype_xr, chx, chxr, varname ) \
 \
 void PASTEMAC(chx,varname)( \
                             void*  beta_r, \
@@ -98,5 +98,5 @@ void PASTEMAC(chx,varname)( \
 	                          *chi_cast ); \
 }
 
-INSERT_GENTFUNCR_BASIC( zipsc, zipsc_unb_var1 )
+INSERT_GENTFUNCR_BASIC0( zipsc_unb_var1 )
 

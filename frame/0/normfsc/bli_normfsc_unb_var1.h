@@ -38,12 +38,12 @@ void bli_normfsc_unb_var1( obj_t* chi,
 
 
 #undef  GENTPROTR
-#define GENTPROTR( ctype_x, ctype_xr, chx, chxr, opname ) \
+#define GENTPROTR( ctype_x, ctype_xr, chx, chxr, varname ) \
 \
-void PASTEMAC(chx,opname)( \
-                           void*  chi, \
-                           void*  norm \
-                         );
+void PASTEMAC(chx,varname)( \
+                            void*  chi, \
+                            void*  norm \
+                          );
 
 INSERT_GENTPROTR_BASIC( normfsc_unb_var1 )
 

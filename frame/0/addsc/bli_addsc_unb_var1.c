@@ -85,7 +85,7 @@ void bli_addsc_unb_var1( obj_t*  chi,
 
 
 #undef  GENTFUNC2
-#define GENTFUNC2( ctype_x, ctype_y, chx, chy, opname, varname ) \
+#define GENTFUNC2( ctype_x, ctype_y, chx, chy, varname ) \
 \
 void PASTEMAC2(chx,chy,varname)( \
                                  conj_t conjchi, \
@@ -105,13 +105,13 @@ void PASTEMAC2(chx,chy,varname)( \
 
 // Define the basic set of functions unconditionally, and then also some
 // mixed datatype functions if requested.
-INSERT_GENTFUNC2_BASIC( addsc, addsc_unb_var1 )
+INSERT_GENTFUNC2_BASIC0( addsc_unb_var1 )
 
 #ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTFUNC2_MIX_D( addsc, addsc_unb_var1 )
+INSERT_GENTFUNC2_MIX_D0( addsc_unb_var1 )
 #endif
 
 #ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTFUNC2_MIX_P( addsc, addsc_unb_var1 )
+INSERT_GENTFUNC2_MIX_P0( addsc_unb_var1 )
 #endif
 

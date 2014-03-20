@@ -39,13 +39,13 @@ void bli_unzipsc_unb_var1( obj_t* beta,
 
 
 #undef  GENTPROTR
-#define GENTPROTR( ctype_b, ctype_br, chb, chbr, opname ) \
+#define GENTPROTR( ctype_b, ctype_br, chb, chbr, varname ) \
 \
-void PASTEMAC(chb,opname)( \
-                           void*  beta, \
-                           void*  chi_r, \
-                           void*  chi_i  \
-                         );
+void PASTEMAC(chb,varname)( \
+                            void*  beta, \
+                            void*  chi_r, \
+                            void*  chi_i  \
+                          );
 
 INSERT_GENTPROTR_BASIC( unzipsc_unb_var1 )
 

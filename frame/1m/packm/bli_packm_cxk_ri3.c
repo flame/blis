@@ -150,16 +150,16 @@ static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] =
 
 
 #undef  GENTFUNCCO
-#define GENTFUNCCO( ctype, ctype_r, ch, chr, opname, scal2vker ) \
+#define GENTFUNCCO( ctype, ctype_r, ch, chr, varname ) \
 \
-void PASTEMAC(ch,opname)( \
-                          conj_t  conja, \
-                          dim_t   m, \
-                          dim_t   n, \
-                          void*   kappa, \
-                          void*   a, inc_t inca, inc_t lda, \
-                          void*   p, inc_t psp,  inc_t ldp  \
-                        ) \
+void PASTEMAC(ch,varname)( \
+                           conj_t  conja, \
+                           dim_t   m, \
+                           dim_t   n, \
+                           void*   kappa, \
+                           void*   a, inc_t inca, inc_t lda, \
+                           void*   p, inc_t psp,  inc_t ldp  \
+                         ) \
 { \
 	dim_t     panel_dim; \
 	dim_t     i, j; \
@@ -253,5 +253,5 @@ void PASTEMAC(ch,opname)( \
 	} \
 }
 
-INSERT_GENTFUNCCO_BASIC( packm_cxk_ri3, SCAL2V_KERNEL )
+INSERT_GENTFUNCCO_BASIC0( packm_cxk_ri3 )
 

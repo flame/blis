@@ -72,7 +72,7 @@ void bli_normfsc_unb_var1( obj_t* chi,
 
 
 #undef  GENTFUNCR
-#define GENTFUNCR( ctype_x, ctype_xr, chx, chxr, opname, varname ) \
+#define GENTFUNCR( ctype_x, ctype_xr, chx, chxr, varname ) \
 \
 void PASTEMAC(chx,varname)( \
                             void*  chi, \
@@ -85,5 +85,5 @@ void PASTEMAC(chx,varname)( \
 	PASTEMAC2(chx,chxr,abval2s)( *chi_cast, *norm_cast ); \
 }
 
-INSERT_GENTFUNCR_BASIC( normfsc, normfsc_unb_var1 )
+INSERT_GENTFUNCR_BASIC0( normfsc_unb_var1 )
 

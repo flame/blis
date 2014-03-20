@@ -38,13 +38,13 @@ void bli_divsc_unb_var1( obj_t*  chi,
 
 
 #undef  GENTPROT2
-#define GENTPROT2( ctype_x, ctype_y, chx, chy, opname ) \
+#define GENTPROT2( ctype_x, ctype_y, chx, chy, varname ) \
 \
-void PASTEMAC2(chx,chy,opname)( \
-                                conj_t conjchi, \
-                                void*  chi, \
-                                void*  psi \
-                              );
+void PASTEMAC2(chx,chy,varname)( \
+                                 conj_t conjchi, \
+                                 void*  chi, \
+                                 void*  psi \
+                               );
 
 INSERT_GENTPROT2_BASIC( divsc_unb_var1 )
 

@@ -71,7 +71,7 @@ void bli_normiv_unb_var1( obj_t*  x,
 
 
 #undef  GENTFUNCR
-#define GENTFUNCR( ctype_x, ctype_xr, chx, chxr, opname, varname ) \
+#define GENTFUNCR( ctype_x, ctype_xr, chx, chxr, varname ) \
 \
 void PASTEMAC(chx,varname)( \
                             dim_t  n, \
@@ -111,5 +111,5 @@ void PASTEMAC(chx,varname)( \
 	PASTEMAC2(chxr,chxr,copys)( abs_chi1_max, *norm_cast ); \
 }
 
-INSERT_GENTFUNCR_BASIC( normiv, normiv_unb_var1 )
+INSERT_GENTFUNCR_BASIC0( normiv_unb_var1 )
 
