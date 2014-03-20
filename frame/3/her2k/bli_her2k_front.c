@@ -116,7 +116,7 @@ void bli_her2k_front( obj_t*  alpha,
 
     // Invoke the internal back-end.
     bli_level3_thread_decorator( n_threads,   
-                                 (level3_int_t*) bli_herk_int, 
+                                 (level3_int_t) bli_herk_int, 
                                  alpha, 
                                  &a_local,  
                                  &bh_local,  
@@ -126,7 +126,7 @@ void bli_her2k_front( obj_t*  alpha,
                                  (void**) infos );
 
     bli_level3_thread_decorator( n_threads,   
-                                 (level3_int_t*) bli_herk_int, 
+                                 (level3_int_t) bli_herk_int, 
                                  &alpha_conj, 
                                  &b_local,  
                                  &ah_local,  

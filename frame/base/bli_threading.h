@@ -87,7 +87,8 @@ typedef struct thrinfo_s thrinfo_t;
 #define thread_obarrier( thread )              bli_barrier( thread->ocomm, thread->ocomm_id )
 #define thread_ibarrier( thread )              bli_barrier( thread->icomm, thread->icomm_id )
 
-void bli_get_range( void* thread, dim_t size, dim_t block_factor, dim_t* start, dim_t* end );
+void bli_get_range( void* thread, dim_t all_start, dim_t all_end, dim_t block_factor, dim_t* start, dim_t* end );
+
 thrinfo_t* bli_create_thread_info( thread_comm_t* ocomm, dim_t ocomm_id, thread_comm_t* icomm, dim_t icomm_id,
                              dim_t n_way, dim_t work_id );
 void bli_setup_thread_info( thrinfo_t* thread, thread_comm_t* ocomm, dim_t ocomm_id, thread_comm_t* icomm, dim_t icomm_id,
@@ -98,6 +99,7 @@ void bli_setup_thread_info( thrinfo_t* thread, thread_comm_t* ocomm, dim_t ocomm
 #include "bli_packm_threading.h"
 #include "bli_gemm_threading.h"
 #include "bli_herk_threading.h"
+#include "bli_trmm_threading.h"
 
 typedef void (*level3_int_t) ( obj_t* alpha, obj_t* a, obj_t* b, obj_t* beta, obj_t* c, void* cntl, void* thread );
 void bli_level3_thread_decorator( dim_t num_threads, 

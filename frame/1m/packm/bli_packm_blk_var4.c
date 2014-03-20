@@ -303,18 +303,14 @@ void PASTEMAC(ch,varname)( \
 	} \
 \
 	p_begin = p_cast; \
-    dim_t t_id = thread_id( thread ); \
-    dim_t num_threads = thread_num_threads( thread ); \
-    p_inc = ps_p; \
 \
-    for ( ic  = ic0 + t_id * ic_inc,  ip  = ip0 + t_id * ip_inc,  it  = t_id; it < num_iter; \
-          ic += num_threads * ic_inc, ip += num_threads * ip_inc, it += num_threads ) \
+    for ( ic  = ic0,  ip  = ip0,  it = 0; it < num_iter; \
+          ic += ic_inc, ip += ip_inc, it += 1 ) \
 	{ \
 		panel_dim_i = bli_min( panel_dim_max, iter_dim - ic ); \
 \
 		diagoffc_i  = diagoffc + (ip  )*diagoffc_inc; \
 		c_begin     = c_cast   + (ic  )*vs_c; \
-        p_begin     = p_cast   + (ip  )*p_inc; \
 \
 		if ( bli_is_triangular( strucc ) &&  \
 		     bli_is_unstored_subpart_n( diagoffc_i, uploc, *m_panel_full, *n_panel_full ) ) \
@@ -363,6 +359,8 @@ void PASTEMAC(ch,varname)( \
 			c_use = c_begin + (panel_off_i  )*ldc; \
 			p_use = p_begin; \
 \
+            if( packm_thread_my_iter( it, thread ) ) \
+            { \
 			PASTEMAC(ch,packm_tri_cxk_ri)( strucc, \
 			                               diagoffp_i, \
 			                               diagc, \
@@ -376,6 +374,7 @@ void PASTEMAC(ch,varname)( \
 			                               kappa_cast, \
 			                               c_use, rs_c, cs_c, \
 			                               p_use, rs_p, cs_p ); \
+            } \
 \
 			p_inc = ldp * panel_len_max_i; \
 \
@@ -406,6 +405,8 @@ void PASTEMAC(ch,varname)( \
 			panel_len_i     = panel_len_full; \
 			panel_len_max_i = panel_len_max; \
 \
+            if( packm_thread_my_iter( it, thread ) ) \
+            { \
 			PASTEMAC(ch,packm_herm_cxk_ri)( strucc, \
 			                                diagoffc_i, \
 			                                uploc, \
@@ -417,6 +418,7 @@ void PASTEMAC(ch,varname)( \
 			                                kappa_cast, \
 			                                c_begin, rs_c, cs_c, \
 			                                p_begin, rs_p, cs_p ); \
+            } \
 \
 			/* NOTE: This value is equivalent to ps_p. */ \
 			p_inc = ldp * panel_len_max_i; \
@@ -430,6 +432,8 @@ void PASTEMAC(ch,varname)( \
 			panel_len_i     = panel_len_full; \
 			panel_len_max_i = panel_len_max; \
 \
+            if( packm_thread_my_iter( it, thread ) ) \
+            { \
 			PASTEMAC(ch,packm_gen_cxk_ri)( BLIS_GENERAL, \
 			                               0, \
 			                               BLIS_DENSE, \
@@ -441,6 +445,7 @@ void PASTEMAC(ch,varname)( \
 			                               kappa_cast, \
 			                               c_begin, rs_c, cs_c, \
 			                               p_begin, rs_p, cs_p ); \
+            } \
 \
 			/* NOTE: This value is equivalent to ps_p. */ \
 			p_inc = ldp * panel_len_max_i; \
@@ -463,6 +468,8 @@ void PASTEMAC(ch,varname)( \
 */ \
 \
 		} \
+\
+        p_begin += p_inc; \
 	} \
 }
 

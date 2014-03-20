@@ -46,7 +46,8 @@ typedef void (*FUNCPTR_T)(
                            void*   b, inc_t rs_b, inc_t pd_b, inc_t ps_b,
                            void*   beta,
                            void*   c, inc_t rs_c, inc_t cs_c,
-                           void*   gemm_ukr
+                           void*   gemm_ukr,
+                           trmm_thrinfo_t* thread
                          );
 
 static FUNCPTR_T GENARRAY(ftypes,trmm_ru_ker_var2);
@@ -55,7 +56,8 @@ static FUNCPTR_T GENARRAY(ftypes,trmm_ru_ker_var2);
 void bli_trmm_ru_ker_var2( obj_t*  a,
                            obj_t*  b,
                            obj_t*  c,
-                           trmm_t* cntl )
+                           trmm_t* cntl,
+                           trmm_thrinfo_t* thread )
 {
 	num_t     dt_exec   = bli_obj_execution_datatype( *c );
 
@@ -131,7 +133,8 @@ void bli_trmm_ru_ker_var2( obj_t*  a,
 	   buf_b, rs_b, pd_b, ps_b,
 	   buf_beta,
 	   buf_c, rs_c, cs_c,
-	   gemm_ukr );
+	   gemm_ukr,
+       thread );
 }
 
 
@@ -148,7 +151,8 @@ void PASTEMAC(ch,varname)( \
                            void*   b, inc_t rs_b, inc_t pd_b, inc_t ps_b, \
                            void*   beta, \
                            void*   c, inc_t rs_c, inc_t cs_c, \
-                           void*   gemm_ukr  \
+                           void*   gemm_ukr, \
+                           trmm_thrinfo_t* jr_thread \
                          ) \
 { \
 	/* Cast the micro-kernel address to its function pointer type. */ \
@@ -279,6 +283,7 @@ void PASTEMAC(ch,varname)( \
 	b1 = b_cast; \
 	c1 = c_cast; \
 \
+    trmm_thrinfo_t* ir_thread = trmm_thread_sub_trmm( jr_thread ); \
 	/* Loop over the n dimension (NR columns at a time). */ \
 	for ( j = 0; j < n_iter; ++j ) \
 	{ \
@@ -297,6 +302,8 @@ void PASTEMAC(ch,varname)( \
 		off_b0111 = 0; \
 		k_b0111   = bli_min( k, -diagoffb_j + NR ); \
 \
+        if( trmm_r_jr_my_iter( j, jr_thread ) ) { \
+\
 		/* Initialize our next panel of B to be the current panel of B. */ \
 		b2 = b1; \
 \
@@ -313,6 +320,7 @@ void PASTEMAC(ch,varname)( \
 			/* Loop over the m dimension (MR rows at a time). */ \
 			for ( i = 0; i < m_iter; ++i ) \
 			{ \
+                if( trmm_r_ir_my_iter( i, ir_thread ) ) { \
 				ctype* restrict a1_i; \
 				ctype* restrict a2; \
 \
@@ -368,7 +376,7 @@ void PASTEMAC(ch,varname)( \
 					                        ct,  rs_ct, cs_ct, \
 					                        c11, rs_c,  cs_c ); \
 				} \
-\
+                } \
 				a1  += rstep_a; \
 				c11 += rstep_c; \
 			} \
@@ -378,6 +386,7 @@ void PASTEMAC(ch,varname)( \
 			/* Loop over the m dimension (MR rows at a time). */ \
 			for ( i = 0; i < m_iter; ++i ) \
 			{ \
+                if( trmm_r_ir_my_iter( i, ir_thread ) ) { \
 				ctype* restrict a2; \
 \
 				m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left ); \
@@ -425,12 +434,12 @@ void PASTEMAC(ch,varname)( \
 					                       ct,  rs_ct, cs_ct, \
 					                       c11, rs_c,  cs_c ); \
 				} \
-\
+                } \
 				a1  += rstep_a; \
 				c11 += rstep_c; \
 			} \
 		} \
-\
+        } \
 		b1 += k_b0111 * ss_b; \
 		c1 += cstep_c; \
 	} \

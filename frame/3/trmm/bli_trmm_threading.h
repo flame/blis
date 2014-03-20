@@ -32,7 +32,8 @@
 
 */
 
-struct packm_thrinfo_s //implements thrinfo_t
+
+struct trmm_thrinfo_s //implements thrinfo_t
 {
     thread_comm_t*      ocomm;       //The thread communicator for the other threads sharing the same work at this level
     dim_t               ocomm_id;    //Our thread id within that thread comm
@@ -41,13 +42,38 @@ struct packm_thrinfo_s //implements thrinfo_t
 
     dim_t               n_way;       //Number of distinct caucuses used to parallelize the loop
     dim_t               work_id;     //What we're working on
+
+    packm_thrinfo_t*    opackm;
+    packm_thrinfo_t*    ipackm;
+    struct trmm_thrinfo_s*    sub_trmm;
 };
-typedef struct packm_thrinfo_s packm_thrinfo_t;
+typedef struct trmm_thrinfo_s trmm_thrinfo_t;
 
-#define packm_thread_my_iter( index, thread ) ( index % thread->n_way == thread->work_id % thread->n_way )
+#define trmm_thread_sub_trmm( thread )  thread->sub_trmm
+#define trmm_thread_sub_opackm( thread )  thread->opackm
+#define trmm_thread_sub_ipackm( thread )  thread->ipackm
 
-packm_thrinfo_t* bli_create_packm_thread_info( thread_comm_t* ocomm, dim_t ocomm_id, thread_comm_t* icomm, dim_t icomm_id,
-                             dim_t n_way, dim_t work_id );
-void bli_setup_packm_thread_info( packm_thrinfo_t* thread, thread_comm_t* ocomm, dim_t ocomm_id, thread_comm_t* icomm, dim_t icomm_id,
-                             dim_t n_way, dim_t work_id );
-void bli_setup_packm_single_threaded_info( packm_thrinfo_t* thread );
+#define trmm_r_ir_my_iter( index, thread ) ( index % thread->n_way == thread->work_id % thread->n_way )
+#define trmm_r_jr_my_iter( index, thread ) ( index % thread->n_way == thread->work_id % thread->n_way )
+#define trmm_l_ir_my_iter( index, thread ) ( index % thread->n_way == thread->work_id % thread->n_way )
+#define trmm_l_jr_my_iter( index, thread ) ( index % thread->n_way == thread->work_id % thread->n_way )
+
+trmm_thrinfo_t** bli_create_trmm_thrinfo_paths( );
+void bli_trmm_thrinfo_free_paths( trmm_thrinfo_t** );
+
+void bli_setup_trmm_thrinfo_node( trmm_thrinfo_t* thread,
+                                  thread_comm_t* ocomm, dim_t ocomm_id,
+                                  thread_comm_t* icomm, dim_t icomm_id,
+                                  dim_t n_way, dim_t work_id, 
+                                  packm_thrinfo_t* opackm,
+                                  packm_thrinfo_t* ipackm,
+                                  trmm_thrinfo_t* sub_trmm );
+
+trmm_thrinfo_t* bli_create_trmm_thrinfo_node( thread_comm_t* ocomm, dim_t ocomm_id,
+                                              thread_comm_t* icomm, dim_t icomm_id,
+                                              dim_t n_way, dim_t work_id, 
+                                              packm_thrinfo_t* opackm,
+                                              packm_thrinfo_t* ipackm,
+                                              trmm_thrinfo_t* sub_trmm );
+
+void bli_setup_trmm_single_threaded_info( trmm_thrinfo_t* thread );

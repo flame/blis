@@ -216,17 +216,18 @@ thrinfo_t* bli_create_thread_info( dim_t* caucuses_at_level, dim_t n_levels )
     return info_paths;
 }
 */
-void bli_get_range( void* thr, dim_t size, dim_t block_factor, dim_t* start, dim_t* end )
+void bli_get_range( void* thr, dim_t all_start, dim_t all_end, dim_t block_factor, dim_t* start, dim_t* end )
 {
     thrinfo_t* thread = (thrinfo_t*) thr;
-
     dim_t n_way = thread->n_way;
     dim_t work_id = thread->work_id;
+
+    dim_t size = all_end - all_start;
     dim_t n_pt = size / n_way;
     n_pt = (n_pt * n_way < size) ? n_pt + 1 : n_pt;
     n_pt = (n_pt % block_factor == 0) ? n_pt : n_pt + block_factor - (n_pt % block_factor); 
-    *start = work_id * n_pt;
-    *end   = bli_min( *start + n_pt, size );
+    *start = work_id * n_pt + all_start;
+    *end   = bli_min( *start + n_pt, size + all_start );
 }
 
 void bli_get_range_tri_weighted( void* thr, dim_t size, dim_t block_factor, bool_t forward, dim_t* start, dim_t* end)
