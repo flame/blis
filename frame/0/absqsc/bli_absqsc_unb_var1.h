@@ -38,12 +38,12 @@ void bli_absqsc_unb_var1( obj_t* chi,
 
 
 #undef  GENTPROTR
-#define GENTPROTR( ctype_x, ctype_xr, chx, chxr, opname ) \
+#define GENTPROTR( ctype_x, ctype_xr, chx, chxr, varname ) \
 \
-void PASTEMAC(chx,opname)( \
-                           void*  chi, \
-                           void*  absq \
-                         );
+void PASTEMAC(chx,varname)( \
+                            void*  chi, \
+                            void*  absq \
+                          );
 
 INSERT_GENTPROTR_BASIC( absqsc_unb_var1 )
 

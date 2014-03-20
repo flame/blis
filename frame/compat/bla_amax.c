@@ -64,9 +64,9 @@ f77_int PASTEF772(i,chx,blasname)( \
 	bli_convert_blas_incv( n0, x, *incx, x0, incx0 ); \
 \
 	/* Call BLIS interface. */ \
-	PASTEMAC(chx,abmaxv)( n0, \
-	                      x0, incx0, \
-	                      &bli_index ); \
+	PASTEMAC(chx,blisname)( n0, \
+	                        x0, incx0, \
+	                        &bli_index ); \
 \
 	/* Convert zero-based BLIS (C) index to one-based BLAS (Fortran)
 	   index. */ \
@@ -79,6 +79,6 @@ f77_int PASTEF772(i,chx,blasname)( \
 }
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
-INSERT_GENTFUNC_BLAS( amax, abmaxv )
+INSERT_GENTFUNC_BLAS( amax, amaxv )
 #endif
 

@@ -116,7 +116,7 @@ void libblis_test_level1v_ops( test_params_t* params, test_ops_t* ops )
 	libblis_test_copyv( params, &(ops->copyv) );
 	libblis_test_dotv( params, &(ops->dotv) );
 	libblis_test_dotxv( params, &(ops->dotxv) );
-	libblis_test_fnormv( params, &(ops->fnormv) );
+	libblis_test_normfv( params, &(ops->normfv) );
 	libblis_test_scalv( params, &(ops->scalv) );
 	libblis_test_scal2v( params, &(ops->scal2v) );
 	libblis_test_setv( params, &(ops->setv) );
@@ -130,7 +130,7 @@ void libblis_test_level1m_ops( test_params_t* params, test_ops_t* ops )
 	libblis_test_addm( params, &(ops->addm) );
 	libblis_test_axpym( params, &(ops->axpym) );
 	libblis_test_copym( params, &(ops->copym) );
-	libblis_test_fnormm( params, &(ops->fnormm) );
+	libblis_test_normfm( params, &(ops->normfm) );
 	libblis_test_scalm( params, &(ops->scalm) );
 	libblis_test_scal2m( params, &(ops->scal2m) );
 	libblis_test_setm( params, &(ops->setm) );
@@ -223,7 +223,7 @@ void libblis_test_read_ops_file( char* input_filename, test_ops_t* ops )
 	libblis_test_read_op_info( ops, input_stream, BLIS_TEST_DIMS_M,   1, &(ops->copyv) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_TEST_DIMS_M,   2, &(ops->dotv) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_TEST_DIMS_M,   2, &(ops->dotxv) );
-	libblis_test_read_op_info( ops, input_stream, BLIS_TEST_DIMS_M,   0, &(ops->fnormv) );
+	libblis_test_read_op_info( ops, input_stream, BLIS_TEST_DIMS_M,   0, &(ops->normfv) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_TEST_DIMS_M,   1, &(ops->scalv) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_TEST_DIMS_M,   1, &(ops->scal2v) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_TEST_DIMS_M,   0, &(ops->setv) );
@@ -233,7 +233,7 @@ void libblis_test_read_ops_file( char* input_filename, test_ops_t* ops )
 	libblis_test_read_op_info( ops, input_stream, BLIS_TEST_DIMS_MN,  1, &(ops->addm) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_TEST_DIMS_MN,  1, &(ops->axpym) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_TEST_DIMS_MN,  1, &(ops->copym) );
-	libblis_test_read_op_info( ops, input_stream, BLIS_TEST_DIMS_MN,  0, &(ops->fnormm) );
+	libblis_test_read_op_info( ops, input_stream, BLIS_TEST_DIMS_MN,  0, &(ops->normfm) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_TEST_DIMS_MN,  1, &(ops->scalm) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_TEST_DIMS_MN,  1, &(ops->scal2m) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_TEST_DIMS_MN,  0, &(ops->setm) );

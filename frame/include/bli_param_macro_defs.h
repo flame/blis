@@ -659,6 +659,86 @@
 	} \
 }
 
+// Set dimensions, increments, effective uplo/diagoff, etc for ONE matrix
+// argument (without column-wise stride optimization).
+
+#define bli_set_dims_incs_uplo_1m_noswap( \
+          diagoffa, diaga, \
+          uploa,    m,          n,      rs_a, cs_a, \
+          uplo_eff, n_elem_max, n_iter, inca, lda, \
+          ij0, n_shift \
+        ) \
+{ \
+	/* If matrix A is entirely "unstored", that is, if either:
+	   - A is lower-stored and entirely above the diagonal, or
+	   - A is upper-stored and entirely below the diagonal
+	   then we mark the storage as implicitly zero. */ \
+	if ( bli_is_unstored_subpart( diagoffa, BLIS_NO_TRANSPOSE, uploa, m, n ) ) \
+	{ \
+		uplo_eff = BLIS_ZEROS; \
+	} \
+	else \
+	{ \
+		doff_t diagoffa_use = diagoffa; \
+		doff_t diagoff_eff; \
+		dim_t  n_iter_max; \
+\
+		if ( bli_is_unit_diag( diaga ) ) \
+			bli_shift_diag_offset_to_shrink_uplo( uploa, diagoffa_use ); \
+\
+		/* If matrix A is entirely "stored", that is, if either:
+		   - A is upper-stored and entirely above the diagonal, or
+		   - A is lower-stored and entirely below the diagonal
+		   then we mark the storage as dense. */ \
+		if ( bli_is_stored_subpart( diagoffa_use, BLIS_NO_TRANSPOSE, uploa, m, n ) ) \
+			uploa = BLIS_DENSE; \
+\
+		n_iter_max  = n; \
+		n_elem_max  = m; \
+		inca        = rs_a; \
+		lda         = cs_a; \
+		uplo_eff    = uploa; \
+		diagoff_eff = diagoffa_use; \
+\
+		if ( bli_is_dense( uplo_eff ) ) \
+		{ \
+			n_iter = n_iter_max; \
+		} \
+		else if ( bli_is_upper( uplo_eff ) ) \
+		{ \
+			if ( diagoff_eff < 0 ) \
+			{ \
+				ij0        = 0; \
+				n_shift    = -diagoff_eff; \
+				n_elem_max = bli_min( n_elem_max, n_shift + bli_min( m, n ) ); \
+				n_iter     = n_iter_max; \
+			} \
+			else \
+			{ \
+				ij0        = diagoff_eff; \
+				n_shift    = 0; \
+				n_iter     = n_iter_max - diagoff_eff; \
+			} \
+		} \
+		else /* if ( bli_is_lower( uplo_eff ) ) */ \
+		{ \
+			if ( diagoff_eff < 0 ) \
+			{ \
+				ij0        = -diagoff_eff; \
+				n_shift    = 0; \
+				n_elem_max = n_elem_max + diagoff_eff; \
+				n_iter     = bli_min( n_elem_max, bli_min( m, n ) ); \
+			} \
+			else \
+			{ \
+				ij0        = 0; \
+				n_shift    = diagoff_eff; \
+				n_iter     = bli_min( n_iter_max, n_shift + bli_min( m, n ) ); \
+			} \
+		} \
+	} \
+}
+
 // Set dimensions, increments, effective uplo/diagoff, etc for TWO matrix
 // arguments.
 

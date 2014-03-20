@@ -91,7 +91,7 @@ void bli_copysc_unb_var1( obj_t*  chi,
 
 
 #undef  GENTFUNC2
-#define GENTFUNC2( ctype_x, ctype_y, chx, chy, opname, varname ) \
+#define GENTFUNC2( ctype_x, ctype_y, chx, chy, varname ) \
 \
 void PASTEMAC2(chx,chy,varname)( \
                                  conj_t conjchi, \
@@ -114,13 +114,13 @@ void PASTEMAC2(chx,chy,varname)( \
 
 // Enable all datatype combinations even when only basic datatype support
 // is requested.
-INSERT_GENTFUNC2_BASIC( copysc, copysc_unb_var1 )
+INSERT_GENTFUNC2_BASIC0( copysc_unb_var1 )
 
 //#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTFUNC2_MIX_D( copysc, copysc_unb_var1 )
+INSERT_GENTFUNC2_MIX_D0( copysc_unb_var1 )
 //#endif
 
 //#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTFUNC2_MIX_P( copysc, copysc_unb_var1 )
+INSERT_GENTFUNC2_MIX_P0( copysc_unb_var1 )
 //#endif
 

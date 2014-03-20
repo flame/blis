@@ -90,7 +90,7 @@ void bli_sumsqv_unb_var1( obj_t*  x,
 
 
 #undef  GENTFUNCR
-#define GENTFUNCR( ctype_x, ctype_xr, chx, chxr, opname, varname ) \
+#define GENTFUNCR( ctype_x, ctype_xr, chx, chxr, varname ) \
 \
 void PASTEMAC(chx,varname)( \
                             dim_t  n, \
@@ -99,18 +99,20 @@ void PASTEMAC(chx,varname)( \
                             void*  sumsq  \
                           ) \
 { \
-	ctype_x*  x_cast     = x; \
-	ctype_xr* scale_cast = scale; \
-	ctype_xr* sumsq_cast = sumsq; \
-	ctype_xr* zero       = PASTEMAC(chxr,0); \
-	ctype_xr* one        = PASTEMAC(chxr,1); \
-	ctype_x*  chi1; \
-	ctype_xr  chi1_r; \
-	ctype_xr  chi1_i; \
-	ctype_xr  scale_r; \
-	ctype_xr  sumsq_r; \
-	ctype_xr  abs_chi1_r; \
-	dim_t     i; \
+	ctype_x*       x_cast     = x; \
+	ctype_xr*      scale_cast = scale; \
+	ctype_xr*      sumsq_cast = sumsq; \
+\
+	const ctype_xr zero_r     = *PASTEMAC(chxr,0); \
+	const ctype_xr one_r      = *PASTEMAC(chxr,1); \
+\
+	ctype_x*       chi1; \
+	ctype_xr       chi1_r; \
+	ctype_xr       chi1_i; \
+	ctype_xr       scale_r; \
+	ctype_xr       sumsq_r; \
+	ctype_xr       abs_chi1_r; \
+	dim_t          i; \
 \
 	/* NOTE: This function attempts to mimic the algorithm for computing
 	   the Frobenius norm in netlib LAPACK's ?lassq(). */ \
@@ -129,15 +131,15 @@ void PASTEMAC(chx,varname)( \
 		/* Get the real and imaginary components of chi1. */ \
 		PASTEMAC2(chx,chxr,gets)( *chi1, chi1_r, chi1_i ); \
 \
+		abs_chi1_r = bli_fabs( chi1_r ); \
+\
 		/* Accumulate real component into sumsq, adjusting scale if
 		   needed. */ \
-		if ( chi1_r != *zero ) \
+		if ( abs_chi1_r > zero_r || bli_isnan( abs_chi1_r) ) \
 		{ \
-			abs_chi1_r = bli_fabs( chi1_r ); \
-\
 			if ( scale_r < abs_chi1_r ) \
 			{ \
-				sumsq_r = *one + \
+				sumsq_r = one_r + \
 				          sumsq_r * ( scale_r / abs_chi1_r ) * \
 				                    ( scale_r / abs_chi1_r );  \
 \
@@ -150,15 +152,15 @@ void PASTEMAC(chx,varname)( \
 			} \
 		} \
 \
+		abs_chi1_r = bli_fabs( chi1_i ); \
+\
 		/* Accumulate imaginary component into sumsq, adjusting scale if
 		   needed. */ \
-		if ( chi1_i != *zero ) \
+		if ( abs_chi1_r > zero_r || bli_isnan( abs_chi1_r) ) \
 		{ \
-			abs_chi1_r = bli_fabs( chi1_i ); \
-\
 			if ( scale_r < abs_chi1_r ) \
 			{ \
-				sumsq_r = *one + \
+				sumsq_r = one_r + \
 				          sumsq_r * ( scale_r / abs_chi1_r ) * \
 				                    ( scale_r / abs_chi1_r );  \
 \
@@ -179,5 +181,5 @@ void PASTEMAC(chx,varname)( \
 	PASTEMAC2(chxr,chxr,copys)( sumsq_r, *sumsq_cast ); \
 }
 
-INSERT_GENTFUNCR_BASIC( sumsqv, sumsqv_unb_var1 )
+INSERT_GENTFUNCR_BASIC0( sumsqv_unb_var1 )
 

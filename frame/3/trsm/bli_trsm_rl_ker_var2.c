@@ -333,7 +333,8 @@ void PASTEMAC(ch,varname)( \
 \
 		n_cur = ( bli_is_not_edge_b( jb, n_iter, n_left ) ? NR : n_left ); \
 \
-		/* Compute various offsets into and lengths of parts of B. */ \
+		/* Determine the offset to and length of the panel that was packed
+		   so we can index into the corresponding location in A. */ \
 		off_b11   = bli_max( -diagoffb_j, 0 ); \
 		k_b1121   = k - off_b11; \
 		k_b11     = NR; \

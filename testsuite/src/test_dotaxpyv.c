@@ -81,7 +81,7 @@ void libblis_test_dotaxpyv_check( obj_t*  alpha,
 void libblis_test_dotaxpyv_deps( test_params_t* params, test_op_t* op )
 {
 	libblis_test_randv( params, &(op->ops->randv) );
-	libblis_test_fnormv( params, &(op->ops->fnormv) );
+	libblis_test_normfv( params, &(op->ops->normfv) );
 	libblis_test_subv( params, &(op->ops->subv) );
 	libblis_test_copyv( params, &(op->ops->copyv) );
 	libblis_test_dotv( params, &(op->ops->dotv) );
@@ -295,7 +295,7 @@ void libblis_test_dotaxpyv_check( obj_t*  alpha,
 	//
 	// and
 	//
-	//   fnorm( z - z_temp )
+	//   normf( z - z_temp )
 	//
 	// are negligible, where rho_temp and z_temp contain rho and z as
 	// computed by dotv and axpyv, respectively.
@@ -316,7 +316,7 @@ void libblis_test_dotaxpyv_check( obj_t*  alpha,
 	bli_getsc( &rho_temp, &resid1, &junk );
 
 	bli_subv( &z_temp, z );
-	bli_fnormv( z, &norm_z );
+	bli_normfv( z, &norm_z );
 	bli_getsc( &norm_z, &resid2, &junk );
 
 	*resid = bli_fmaxabs( resid1, resid2 );

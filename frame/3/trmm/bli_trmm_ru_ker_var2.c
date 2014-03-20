@@ -228,14 +228,14 @@ void PASTEMAC(ch,varname)( \
 	/* If there is a zero region to the left of where the diagonal of B
 	   intersects the top edge of the panel, adjust the pointer to C and
 	   treat this case as if the diagonal offset were zero. This skips over
-	   the region (in increments of NR) that was not packed. (Note we skip
-	   in increments of NR since that is how the region would have been
-	   skipped by packm.) */ \
+	   the region that was not packed. (Note we assume the diagonal offset
+	   is a multiple of MR; this assumption will hold as long as the cache
+	   blocksizes are each a multiple of MR and NR.) */ \
 	if ( diagoffb > 0 ) \
 	{ \
-		j        = ( diagoffb / NR ) * NR; \
+		j        = diagoffb; \
 		n        = n - j; \
-		diagoffb = diagoffb % NR; \
+		diagoffb = 0; \
 		c_cast   = c_cast + (j  )*cs_c; \
 	} \
 \

@@ -83,7 +83,7 @@ void libblis_test_hemm_deps( test_params_t* params, test_op_t* op )
 	libblis_test_randv( params, &(op->ops->randv) );
 	libblis_test_randm( params, &(op->ops->randm) );
 	libblis_test_setv( params, &(op->ops->setv) );
-	libblis_test_fnormv( params, &(op->ops->fnormv) );
+	libblis_test_normfv( params, &(op->ops->normfv) );
 	libblis_test_subv( params, &(op->ops->subv) );
 	libblis_test_scalv( params, &(op->ops->scalv) );
 	libblis_test_copym( params, &(op->ops->copym) );
@@ -303,7 +303,7 @@ void libblis_test_hemm_check( side_t  side,
 	//
 	// is functioning correctly if
 	//
-	//   fnorm( v - z )
+	//   normf( v - z )
 	//
 	// is negligible, where
 	//
@@ -357,7 +357,7 @@ void libblis_test_hemm_check( side_t  side,
 	bli_gemv( beta, c_orig, &t, &BLIS_ONE, &z );
 	
 	bli_subv( &z, &v );
-	bli_fnormv( &v, &norm );
+	bli_normfv( &v, &norm );
 	bli_getsc( &norm, resid, &junk );
 
 	bli_obj_free( &t );

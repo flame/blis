@@ -73,7 +73,7 @@ void libblis_test_scalm_check( obj_t*  beta,
 void libblis_test_scalm_deps( test_params_t* params, test_op_t* op )
 {
 	libblis_test_randm( params, &(op->ops->randm) );
-	libblis_test_fnormm( params, &(op->ops->fnormm) );
+	libblis_test_normfm( params, &(op->ops->normfm) );
 	libblis_test_copym( params, &(op->ops->copym) );
 }
 
@@ -239,7 +239,7 @@ void libblis_test_scalm_check( obj_t*  beta,
 	//
 	// is functioning correctly if
 	//
-	//   fnorm( y + -conjbeta(beta) * y_orig )
+	//   normf( y + -conjbeta(beta) * y_orig )
 	//
 	// is negligible.
 	//
@@ -256,7 +256,7 @@ void libblis_test_scalm_check( obj_t*  beta,
 	bli_scalm( &nbeta, &y2 );
 	bli_addm( &y2, y );
 	
-	bli_fnormm( y, &norm_y_r );
+	bli_normfm( y, &norm_y_r );
 
 	bli_getsc( &norm_y_r, resid, &junk );
 

@@ -34,3 +34,18 @@
 
 void libblis_test_randm( test_params_t* params, test_op_t* op );
 
+
+void bli_absumm( obj_t*  x,
+                 obj_t*  sum_x );
+
+#undef  GENTPROTR
+#define GENTPROTR( ctype, ctype_r, ch, chr, varname ) \
+\
+void PASTEMAC(ch,varname)( \
+                           dim_t  m, \
+                           dim_t  n, \
+                           void*  x, inc_t rs_x, inc_t cs_x, \
+                           void*  sum_x  \
+                         );
+
+INSERT_GENTPROTR_BASIC( absumm )

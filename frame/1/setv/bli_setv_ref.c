@@ -88,7 +88,7 @@ void bli_setv_ref( obj_t*  beta,
 */
 
 #undef  GENTFUNC2
-#define GENTFUNC2( ctype_b, ctype_x, chb, chx, opname, varname ) \
+#define GENTFUNC2( ctype_b, ctype_x, chb, chx, varname ) \
 \
 void PASTEMAC2(chb,chx,varname) \
      ( \
@@ -125,12 +125,12 @@ void PASTEMAC2(chb,chx,varname) \
 
 // Define the basic set of functions unconditionally, and then also some
 // mixed datatype functions if requested.
-INSERT_GENTFUNC2_BASIC( setv, setv_ref )
+INSERT_GENTFUNC2_BASIC0( setv_ref )
 
 #ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTFUNC2_MIX_D( setv, setv_ref )
+INSERT_GENTFUNC2_MIX_D0( setv_ref )
 #endif
 
 #ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTFUNC2_MIX_P( setv, setv_ref )
+INSERT_GENTFUNC2_MIX_P0( setv_ref )
 #endif

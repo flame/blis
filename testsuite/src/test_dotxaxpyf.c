@@ -87,7 +87,7 @@ void libblis_test_dotxaxpyf_deps( test_params_t* params, test_op_t* op )
 {
 	libblis_test_randv( params, &(op->ops->randv) );
 	libblis_test_randm( params, &(op->ops->randm) );
-	libblis_test_fnormv( params, &(op->ops->fnormv) );
+	libblis_test_normfv( params, &(op->ops->normfv) );
 	libblis_test_subv( params, &(op->ops->subv) );
 	libblis_test_copyv( params, &(op->ops->copyv) );
 	libblis_test_axpyv( params, &(op->ops->axpyv) );
@@ -316,11 +316,11 @@ void libblis_test_dotxaxpyf_check( obj_t*  alpha,
 	//
 	// is functioning correctly if
 	//
-	//   fnorm( y - v )
+	//   normf( y - v )
 	//
 	// and
 	//
-	//   fnorm( z - q )
+	//   normf( z - q )
 	//
 	// are negligible, where v and q contain y and z as computed by repeated
 	// calls to dotxv and axpyv, respectively.
@@ -358,11 +358,11 @@ void libblis_test_dotxaxpyf_check( obj_t*  alpha,
 
 
 	bli_subv( y, &v );
-	bli_fnormv( &v, &norm );
+	bli_normfv( &v, &norm );
 	bli_getsc( &norm, &resid1, &junk );
 
 	bli_subv( z, &q );
-	bli_fnormv( &q, &norm );
+	bli_normfv( &q, &norm );
 	bli_getsc( &norm, &resid2, &junk );
 
 

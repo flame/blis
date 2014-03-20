@@ -75,7 +75,7 @@ void libblis_test_scal2v_check( obj_t*  alpha,
 void libblis_test_scal2v_deps( test_params_t* params, test_op_t* op )
 {
 	libblis_test_randv( params, &(op->ops->randv) );
-	libblis_test_fnormv( params, &(op->ops->fnormv) );
+	libblis_test_normfv( params, &(op->ops->normfv) );
 	libblis_test_subv( params, &(op->ops->subv) );
 	libblis_test_copyv( params, &(op->ops->copyv) );
 	libblis_test_scalv( params, &(op->ops->scalv) );
@@ -244,7 +244,7 @@ void libblis_test_scal2v_check( obj_t*  alpha,
 	//
 	// is functioning correctly if
 	//
-	//   fnorm( y - alpha * conjx(x) )
+	//   normf( y - alpha * conjx(x) )
 	//
 	// is negligible.
 	//
@@ -258,7 +258,7 @@ void libblis_test_scal2v_check( obj_t*  alpha,
 	bli_scalv( alpha, &x_temp );
 
 	bli_subv( &x_temp, y );
-	bli_fnormv( y, &norm );
+	bli_normfv( y, &norm );
 	bli_getsc( &norm, resid, &junk );
 
 	bli_obj_free( &x_temp );

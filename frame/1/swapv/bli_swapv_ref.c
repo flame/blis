@@ -85,7 +85,7 @@ void bli_swapv_ref( obj_t*  x,
 
 
 #undef  GENTFUNC2
-#define GENTFUNC2( ctype_x, ctype_y, chx, chy, opname, varname ) \
+#define GENTFUNC2( ctype_x, ctype_y, chx, chy, varname ) \
 \
 void PASTEMAC2(chx,chy,varname) \
      ( \
@@ -116,13 +116,13 @@ void PASTEMAC2(chx,chy,varname) \
 
 // Define the basic set of functions unconditionally, and then also some
 // mixed datatype functions if requested.
-INSERT_GENTFUNC2_BASIC( swapv, swapv_ref )
+INSERT_GENTFUNC2_BASIC0( swapv_ref )
 
 #ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTFUNC2_MIX_D( swapv, swapv_ref )
+INSERT_GENTFUNC2_MIX_D0( swapv_ref )
 #endif
 
 #ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTFUNC2_MIX_P( swapv, swapv_ref )
+INSERT_GENTFUNC2_MIX_P0( swapv_ref )
 #endif
 

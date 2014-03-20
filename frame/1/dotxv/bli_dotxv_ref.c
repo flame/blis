@@ -118,7 +118,7 @@ void bli_dotxv_ref( obj_t*  alpha,
 
 
 #undef  GENTFUNC3U12
-#define GENTFUNC3U12( ctype_x, ctype_y, ctype_r, ctype_xy, chx, chy, chr, chxy, opname, varname ) \
+#define GENTFUNC3U12( ctype_x, ctype_y, ctype_r, ctype_xy, chx, chy, chr, chxy, varname ) \
 \
 void PASTEMAC3(chx,chy,chr,varname) \
      ( \
@@ -197,13 +197,13 @@ void PASTEMAC3(chx,chy,chr,varname) \
 
 // Define the basic set of functions unconditionally, and then also some
 // mixed datatype functions if requested.
-INSERT_GENTFUNC3U12_BASIC( dotxv, dotxv_ref )
+INSERT_GENTFUNC3U12_BASIC0( dotxv_ref )
 
 #ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTFUNC3U12_MIX_D( dotxv, dotxv_ref )
+INSERT_GENTFUNC3U12_MIX_D0( dotxv_ref )
 #endif
 
 #ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTFUNC3U12_MIX_P( dotxv, dotxv_ref )
+INSERT_GENTFUNC3U12_MIX_P0( dotxv_ref )
 #endif
 

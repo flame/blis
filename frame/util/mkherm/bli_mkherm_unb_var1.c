@@ -71,7 +71,7 @@ void bli_mkherm_unb_var1( obj_t* a )
 
 
 #undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, varname ) \
+#define GENTFUNC( ctype, ch, varname ) \
 \
 void PASTEMAC(ch,varname)( \
                            uplo_t  uploa, \
@@ -117,5 +117,5 @@ void PASTEMAC(ch,varname)( \
 }
 
 
-INSERT_GENTFUNC_BASIC( mkherm, mkherm_unb_var1 )
+INSERT_GENTFUNC_BASIC0( mkherm_unb_var1 )
 

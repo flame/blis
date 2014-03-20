@@ -80,7 +80,7 @@ void libblis_test_gemv_check( obj_t*  kappa,
 void libblis_test_gemv_deps( test_params_t* params, test_op_t* op )
 {
 	libblis_test_randv( params, &(op->ops->randv) );
-	libblis_test_fnormv( params, &(op->ops->fnormv) );
+	libblis_test_normfv( params, &(op->ops->normfv) );
 	libblis_test_subv( params, &(op->ops->subv) );
 	libblis_test_copyv( params, &(op->ops->copyv) );
 	libblis_test_scalv( params, &(op->ops->scalv) );
@@ -283,7 +283,7 @@ void libblis_test_gemv_check( obj_t*  kappa,
 	//
 	// is functioning correctly if
 	//
-	//   fnorm( y - z )
+	//   normf( y - z )
 	//
 	// is negligible, where
 	//
@@ -311,7 +311,7 @@ void libblis_test_gemv_check( obj_t*  kappa,
 	bli_axpyv( alpha, &xT_temp, &yT_temp );
 
 	bli_subv( &yT_temp, &yT );
-	bli_fnormv( &yT, &norm );
+	bli_normfv( &yT, &norm );
 	bli_getsc( &norm, resid, &junk );
 
 	bli_obj_free( &x_temp );

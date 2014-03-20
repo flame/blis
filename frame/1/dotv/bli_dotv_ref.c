@@ -96,7 +96,7 @@ void bli_dotv_ref( obj_t*  x,
 */
 
 #undef  GENTFUNC3
-#define GENTFUNC3( ctype_x, ctype_y, ctype_r, chx, chy, chr, opname, varname ) \
+#define GENTFUNC3( ctype_x, ctype_y, ctype_r, chx, chy, chr, varname ) \
 \
 void PASTEMAC3(chx,chy,chr,varname) \
      ( \
@@ -165,13 +165,13 @@ void PASTEMAC3(chx,chy,chr,varname) \
 
 // Define the basic set of functions unconditionally, and then also some
 // mixed datatype functions if requested.
-INSERT_GENTFUNC3_BASIC( dotv, dotv_ref )
+INSERT_GENTFUNC3_BASIC0( dotv_ref )
 
 #ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTFUNC3_MIX_D( dotv, dotv_ref )
+INSERT_GENTFUNC3_MIX_D0( dotv_ref )
 #endif
 
 #ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTFUNC3_MIX_P( dotv, dotv_ref )
+INSERT_GENTFUNC3_MIX_P0( dotv_ref )
 #endif
 
