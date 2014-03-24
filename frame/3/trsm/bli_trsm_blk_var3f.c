@@ -37,37 +37,50 @@
 void bli_trsm_blk_var3f( obj_t*  a,
                          obj_t*  b,
                          obj_t*  c,
-                         trsm_t* cntl )
+                         trsm_t* cntl,
+                         trsm_thrinfo_t* thread )
 {
-	obj_t  a1, a1_pack;
-	obj_t  b1, b1_pack;
-	obj_t  c_pack;
+    obj_t  c_pack_s;
+    obj_t  a1_pack_s, b1_pack_s;
+
+    obj_t  a1, b1;
+    obj_t* a1_pack = NULL;
+    obj_t* b1_pack = NULL;
+    obj_t* c_pack = NULL;
 
 	dim_t  i;
 	dim_t  b_alg;
 	dim_t  k_trans;
 
-	// Initialize all pack objects that are passed into packm_init().
-	bli_obj_init_pack( &a1_pack );
-	bli_obj_init_pack( &b1_pack );
-	bli_obj_init_pack( &c_pack );
+	// Initialize pack objects for C that are passed into packm_init().
+    if( thread_am_ochief( thread ) ) {
+	    bli_obj_init_pack( &c_pack_s );
+
+        // Initialize object for packing C.
+        bli_packm_init( c, &c_pack_s,
+                        cntl_sub_packm_c( cntl ) );
+
+        // Scale C by beta (if instructed).
+        bli_scalm_int( &BLIS_ONE,
+                       c,
+                       cntl_sub_scalm( cntl ) );
+    }
+    c_pack = thread_obroadcast( thread, &c_pack_s );
+
+    if( thread_am_ichief( thread ) ) {
+        bli_obj_init_pack( &a1_pack_s );
+        bli_obj_init_pack( &b1_pack_s );
+    }
+    a1_pack = thread_ibroadcast( thread, &a1_pack_s );
+    b1_pack = thread_ibroadcast( thread, &b1_pack_s );
+
+	// Pack C (if instructed).
+	bli_packm_int( c, c_pack,
+	               cntl_sub_packm_c( cntl ),
+                   trsm_thread_sub_opackm( thread ) );
 
 	// Query dimension in partitioning direction.
 	k_trans = bli_obj_width_after_trans( *a );
-
-	// Scale C by beta (if instructed).
-	bli_scalm_int( &BLIS_ONE,
-	               c,
-	               cntl_sub_scalm( cntl ) );
-
-	// Initialize object for packing C.
-	bli_packm_init( c, &c_pack,
-	                cntl_sub_packm_c( cntl ) );
-
-	// Pack C (if instructed).
-	bli_packm_int( c, &c_pack,
-	               cntl_sub_packm_c( cntl ),
-                   &BLIS_PACKM_SINGLE_THREADED );
 
 	// Partition along the k dimension.
 	for ( i = 0; i < k_trans; i += b_alg )
@@ -83,45 +96,60 @@ void bli_trsm_blk_var3f( obj_t*  a,
 		                       i, b_alg, b, &b1 );
 
 		// Initialize objects for packing A1 and B1.
-		bli_packm_init( &a1, &a1_pack,
-		                cntl_sub_packm_a( cntl ) );
-		bli_packm_init( &b1, &b1_pack,
-		                cntl_sub_packm_b( cntl ) );
+        if( thread_am_ichief( thread ) ) {
+            bli_packm_init( &a1, a1_pack,
+                            cntl_sub_packm_a( cntl ) );
+            bli_packm_init( &b1, b1_pack,
+                            cntl_sub_packm_b( cntl ) );
+        }
+        thread_ibarrier( thread );
 
 		// Pack A1 (if instructed).
-		bli_packm_int( &a1, &a1_pack,
+		bli_packm_int( &a1, a1_pack,
 		               cntl_sub_packm_a( cntl ),
-                       &BLIS_PACKM_SINGLE_THREADED );
+                       trsm_thread_sub_ipackm( thread ) );
 
 		// Pack B1 (if instructed).
-		bli_packm_int( &b1, &b1_pack,
+		bli_packm_int( &b1, b1_pack,
 		               cntl_sub_packm_b( cntl ),
-                       &BLIS_PACKM_SINGLE_THREADED );
+                       trsm_thread_sub_ipackm( thread ) );
+
+        // Packing must be done before computation
+        thread_ibarrier( thread );
 
 		// Perform trsm subproblem.
 		bli_trsm_int( &BLIS_ONE,
-		              &a1_pack,
-		              &b1_pack,
+		              a1_pack,
+		              b1_pack,
 		              &BLIS_ONE,
-		              &c_pack,
-		              cntl_sub_trsm( cntl ) );
+		              c_pack,
+		              cntl_sub_trsm( cntl ),
+                      trsm_thread_sub_trsm( thread ) );
 
 		// This variant executes multiple rank-k updates. Therefore, if the
 		// internal alpha scalars on A/B and C are non-zero, we must ensure
 		// that they are only used in the first iteration.
-		if ( i == 0 ) { bli_obj_scalar_reset( a );
-		                bli_obj_scalar_reset( b );
-		                bli_obj_scalar_reset( &c_pack ); }
+		if ( i == 0 && thread_am_ichief( thread ) ) { 
+            bli_obj_scalar_reset( a );
+            bli_obj_scalar_reset( b );
+            bli_obj_scalar_reset( c_pack ); 
+        }
 	}
 
+    thread_obarrier( thread );
+
 	// Unpack C (if C was packed).
-	bli_unpackm_int( &c_pack, c,
-	                 cntl_sub_unpackm_c( cntl ) );
+    if( thread_am_ochief( thread ) ) {
+        bli_unpackm_int( c_pack, c,
+                         cntl_sub_unpackm_c( cntl ) );
+	    bli_obj_release_pack( c_pack );
+    }
 
 	// If any packing buffers were acquired within packm, release them back
 	// to the memory manager.
-	bli_obj_release_pack( &a1_pack );
-	bli_obj_release_pack( &b1_pack );
-	bli_obj_release_pack( &c_pack );
+    if( thread_am_ichief( thread ) ) {
+        bli_obj_release_pack( a1_pack );
+        bli_obj_release_pack( b1_pack );
+    }
 }
 

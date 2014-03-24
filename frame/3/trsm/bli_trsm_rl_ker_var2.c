@@ -47,7 +47,8 @@ typedef void (*FUNCPTR_T)(
                            void*   alpha2,
                            void*   c, inc_t rs_c, inc_t cs_c,
                            void*   gemmtrsm_ukr,
-                           void*   gemm_ukr
+                           void*   gemm_ukr,
+                           trsm_thrinfo_t* thread
                          );
 
 static FUNCPTR_T GENARRAY(ftypes,trsm_rl_ker_var2);
@@ -56,7 +57,8 @@ static FUNCPTR_T GENARRAY(ftypes,trsm_rl_ker_var2);
 void bli_trsm_rl_ker_var2( obj_t*  a,
                            obj_t*  b,
                            obj_t*  c,
-                           trsm_t* cntl )
+                           trsm_t* cntl,
+                           trsm_thrinfo_t* thread )
 {
 	num_t     dt_exec   = bli_obj_execution_datatype( *c );
 
@@ -139,7 +141,8 @@ void bli_trsm_rl_ker_var2( obj_t*  a,
 	   buf_alpha2,
 	   buf_c, rs_c, cs_c,
 	   gemmtrsm_ukr,
-	   gemm_ukr );
+	   gemm_ukr,
+       thread );
 }
 
 
@@ -157,7 +160,8 @@ void PASTEMAC(ch,varname)( \
                            void*   alpha2, \
                            void*   c, inc_t rs_c, inc_t cs_c, \
                            void*   gemmtrsm_ukr, \
-                           void*   gemm_ukr  \
+                           void*   gemm_ukr, \
+                           trsm_thrinfo_t* thread \
                          ) \
 { \
 	/* Cast the micro-kernels' addresses to their function pointer types. */ \

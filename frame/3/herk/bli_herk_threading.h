@@ -53,6 +53,11 @@ typedef struct herk_thrinfo_s herk_thrinfo_t;
 #define herk_thread_sub_opackm( thread )  thread->opackm
 #define herk_thread_sub_ipackm( thread )  thread->ipackm
 
+// For use in herk micro-kernel
+#define herk_get_next_a_micropanel( thread, a1, step ) ( a1 + step * thread->n_way )
+#define herk_get_next_b_micropanel( thread, b1, step ) ( b1 + step * thread->n_way )
+
+
 herk_thrinfo_t** bli_create_herk_thrinfo_paths( );
 void bli_herk_thrinfo_free_paths( herk_thrinfo_t** paths );
 

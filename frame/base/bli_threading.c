@@ -230,8 +230,51 @@ void bli_get_range( void* thr, dim_t all_start, dim_t all_end, dim_t block_facto
     *end   = bli_min( *start + n_pt, size + all_start );
 }
 
-void bli_get_range_tri_weighted( void* thr, dim_t size, dim_t block_factor, bool_t forward, dim_t* start, dim_t* end)
+void bli_get_range_weighted( void* thr, dim_t all_start, dim_t all_end, dim_t block_factor, bool_t forward, dim_t* start, dim_t* end)
 {
+    thrinfo_t* thread = (thrinfo_t*) thr;
+    dim_t n_way = thread->n_way;
+    dim_t work_id = thread->work_id;
+    dim_t size = all_end - all_start;
+
+    *start = all_start;
+    *end   = all_end;
+
+    if( forward ) {
+        dim_t curr_caucus = n_way - 1;
+        dim_t len = 0;
+        dim_t num = size*size / n_way; // 2xArea per thread?
+        while(1){
+            dim_t width = sqrt( len*len + num ) - len; // The width of the current caucus
+            width = (width % block_factor == 0) ? width : width + block_factor - (width % block_factor);
+            if( curr_caucus == work_id ) {
+                if( *end > width )
+                    *start = *end - width;
+                return;
+            }
+            else{
+                *end -= width;
+                len += width;
+                curr_caucus--;
+            }
+        }
+    }
+    else{
+        dim_t len = *end - *start;
+        dim_t num = len * len / n_way;
+        while(1){
+            dim_t width = sqrt(*start * *start + num) - *start;
+            width = (width % block_factor == 0) ? width : width + block_factor - (width % block_factor);
+            if(!work_id) {
+                *end = bli_min( *start + width, *end );
+                return;
+            }
+            else{
+                *start = *start + width;
+            }
+            work_id--;
+        }
+    }
 }
 
 void bli_level3_thread_decorator( dim_t n_threads, 
@@ -256,4 +299,15 @@ void bli_level3_thread_decorator( dim_t n_threads,
                   cntl,
                   thread[omp_id] );
     }
+}
+
+dim_t bli_read_nway_from_env( char* env )
+{
+    dim_t number = 1;
+    char* str = getenv( env );
+    if( str != NULL )
+    {   
+        number = strtol( str, NULL, 10 );
+    }   
+    return number;
 }

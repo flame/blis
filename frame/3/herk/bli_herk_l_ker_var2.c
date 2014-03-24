@@ -286,11 +286,11 @@ void PASTEMAC(ch,varname)( \
 			m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left ); \
 \
 			/* Compute the addresses of the next panels of A and B. */ \
-			a2 = a1 + rstep_a; \
+            a2 = herk_get_next_a_micropanel( caucus, a1, rstep_a ); \
 			if ( bli_is_last_iter( i, m_iter ) ) \
 			{ \
 				a2 = a_cast; \
-				b2 = b1 + cstep_b; \
+                b2 = herk_get_next_b_micropanel( thread, b1, cstep_b ); \
 				if ( bli_is_last_iter( j, n_iter ) ) \
 					b2 = b_cast; \
 			} \

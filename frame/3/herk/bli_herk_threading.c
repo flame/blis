@@ -90,11 +90,11 @@ void bli_herk_thrinfo_free_paths( herk_thrinfo_t** threads )
 
 herk_thrinfo_t** bli_create_herk_thrinfo_paths( )
 {
-    dim_t jc_way = read_env( "BLIS_JC_NT" );
-    dim_t kc_way = read_env( "BLIS_KC_NT" );
-    dim_t ic_way = read_env( "BLIS_IC_NT" );
-    dim_t jr_way = read_env( "BLIS_JR_NT" );
-    dim_t ir_way = read_env( "BLIS_IR_NT" );
+    dim_t jc_way = bli_read_nway_from_env( "BLIS_JC_NT" );
+    dim_t kc_way = bli_read_nway_from_env( "BLIS_KC_NT" );
+    dim_t ic_way = bli_read_nway_from_env( "BLIS_IC_NT" );
+    dim_t jr_way = bli_read_nway_from_env( "BLIS_JR_NT" );
+    dim_t ir_way = bli_read_nway_from_env( "BLIS_IR_NT" );
     
     dim_t global_num_threads = jc_way * kc_way * ic_way * jr_way * ir_way;
     assert( global_num_threads != 0 );

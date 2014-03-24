@@ -37,4 +37,5 @@ void bli_trsm_int( obj_t*  alpha,
                    obj_t*  b,
                    obj_t*  beta,
                    obj_t*  c,
-                   trsm_t* cntl );
+                   trsm_t* cntl,
+                   trsm_thrinfo_t* thread );

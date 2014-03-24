@@ -320,11 +320,11 @@ void PASTEMAC(ch,varname)( \
 				    b1_i = b1 + off_a1011 * PACKNR; \
 \
                     /* Compute the addresses of the next panels of A and B. */ \
-                    a2 = a1 + k_a1011 * ss_a; \
+                    a2 = a1; \
                     if ( bli_is_last_iter( i, m_iter ) ) \
                     { \
                         a2 = a_cast; \
-                        b2 = b1 + cstep_b; \
+                        b2 = b1; \
                         if ( bli_is_last_iter( j, n_iter ) ) \
                             b2 = b_cast; \
                     } \
@@ -381,11 +381,11 @@ void PASTEMAC(ch,varname)( \
                 if( trmm_l_ir_my_iter( i, ir_thread ) ) \
                 { \
                     /* Compute the addresses of the next panels of A and B. */ \
-                    a2 = a1 + rstep_a; \
+                    a2 = a1; \
                     if ( bli_is_last_iter( i, m_iter ) ) \
                     { \
                         a2 = a_cast; \
-                        b2 = b1 + cstep_b; \
+                        b2 = b1; \
                         if ( bli_is_last_iter( j, n_iter ) ) \
                             b2 = b_cast; \
                     } \

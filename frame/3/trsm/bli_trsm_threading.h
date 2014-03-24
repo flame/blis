@@ -33,7 +33,7 @@
 */
 
 
-struct gemm_thrinfo_s //implements thrinfo_t
+struct trsm_thrinfo_s //implements thrinfo_t
 {
     thread_comm_t*      ocomm;       //The thread communicator for the other threads sharing the same work at this level
     dim_t               ocomm_id;    //Our thread id within that thread comm
@@ -45,34 +45,35 @@ struct gemm_thrinfo_s //implements thrinfo_t
 
     packm_thrinfo_t*    opackm;
     packm_thrinfo_t*    ipackm;
-    struct gemm_thrinfo_s*    sub_gemm;
+    struct trsm_thrinfo_s*    sub_trsm;
 };
-typedef struct gemm_thrinfo_s gemm_thrinfo_t;
+typedef struct trsm_thrinfo_s trsm_thrinfo_t;
 
-#define gemm_thread_sub_gemm( thread )  thread->sub_gemm
-#define gemm_thread_sub_opackm( thread )  thread->opackm
-#define gemm_thread_sub_ipackm( thread )  thread->ipackm
+#define trsm_thread_sub_trsm( thread )  thread->sub_trsm
+#define trsm_thread_sub_opackm( thread )  thread->opackm
+#define trsm_thread_sub_ipackm( thread )  thread->ipackm
 
-// For use in gemm micro-kernel
-#define gemm_get_next_a_micropanel( thread, a1, step ) ( a1 + step * thread->n_way )
-#define gemm_get_next_b_micropanel( thread, b1, step ) ( b1 + step * thread->n_way )
+#define trsm_r_ir_my_iter( index, thread ) ( index % thread->n_way == thread->work_id % thread->n_way )
+#define trsm_r_jr_my_iter( index, thread ) ( index % thread->n_way == thread->work_id % thread->n_way )
+#define trsm_l_ir_my_iter( index, thread ) ( index % thread->n_way == thread->work_id % thread->n_way )
+#define trsm_l_jr_my_iter( index, thread ) ( index % thread->n_way == thread->work_id % thread->n_way )
 
-gemm_thrinfo_t** bli_create_gemm_thrinfo_paths( );
-void bli_gemm_thrinfo_free_paths( gemm_thrinfo_t** );
+trsm_thrinfo_t** bli_create_trsm_thrinfo_paths( );
+void bli_trsm_thrinfo_free_paths( trsm_thrinfo_t** );
 
-void bli_setup_gemm_thrinfo_node( gemm_thrinfo_t* thread,
+void bli_setup_trsm_thrinfo_node( trsm_thrinfo_t* thread,
                                   thread_comm_t* ocomm, dim_t ocomm_id,
                                   thread_comm_t* icomm, dim_t icomm_id,
                                   dim_t n_way, dim_t work_id, 
                                   packm_thrinfo_t* opackm,
                                   packm_thrinfo_t* ipackm,
-                                  gemm_thrinfo_t* sub_gemm );
+                                  trsm_thrinfo_t* sub_trsm );
 
-gemm_thrinfo_t* bli_create_gemm_thrinfo_node( thread_comm_t* ocomm, dim_t ocomm_id,
+trsm_thrinfo_t* bli_create_trsm_thrinfo_node( thread_comm_t* ocomm, dim_t ocomm_id,
                                               thread_comm_t* icomm, dim_t icomm_id,
                                               dim_t n_way, dim_t work_id, 
                                               packm_thrinfo_t* opackm,
                                               packm_thrinfo_t* ipackm,
-                                              gemm_thrinfo_t* sub_gemm );
+                                              trsm_thrinfo_t* sub_trsm );
 
-void bli_setup_gemm_single_threaded_info( gemm_thrinfo_t* thread );
+void bli_setup_trsm_single_threaded_info( trsm_thrinfo_t* thread );

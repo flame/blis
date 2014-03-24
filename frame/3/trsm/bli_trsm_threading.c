@@ -35,13 +35,13 @@
 #include "blis.h"
 #include "assert.h"
 
-void bli_setup_gemm_thrinfo_node( gemm_thrinfo_t* thread,
+void bli_setup_trsm_thrinfo_node( trsm_thrinfo_t* thread,
                                              thread_comm_t* ocomm, dim_t ocomm_id,
                                              thread_comm_t* icomm, dim_t icomm_id,
                                              dim_t n_way, dim_t work_id, 
                                              packm_thrinfo_t* opackm,
                                              packm_thrinfo_t* ipackm,
-                                             gemm_thrinfo_t* sub_gemm )
+                                             trsm_thrinfo_t* sub_trsm )
 {
     thread->ocomm = ocomm;
     thread->ocomm_id = ocomm_id;
@@ -51,10 +51,10 @@ void bli_setup_gemm_thrinfo_node( gemm_thrinfo_t* thread,
     thread->work_id = work_id;
     thread->opackm = opackm;
     thread->ipackm = ipackm;
-    thread->sub_gemm = sub_gemm;
+    thread->sub_trsm = sub_trsm;
 }
 
-void bli_setup_gemm_single_threaded_info( gemm_thrinfo_t* thread )
+void bli_setup_trsm_single_threaded_info( trsm_thrinfo_t* thread )
 {
     thread->ocomm = &BLIS_SINGLE_COMM;
     thread->ocomm_id = 0;
@@ -64,31 +64,31 @@ void bli_setup_gemm_single_threaded_info( gemm_thrinfo_t* thread )
     thread->work_id = 0;
     thread->opackm = &BLIS_PACKM_SINGLE_THREADED;
     thread->ipackm = &BLIS_PACKM_SINGLE_THREADED;
-    thread->sub_gemm = thread;
+    thread->sub_trsm = thread;
 }
 
-gemm_thrinfo_t* bli_create_gemm_thrinfo_node( thread_comm_t* ocomm, dim_t ocomm_id,
+trsm_thrinfo_t* bli_create_trsm_thrinfo_node( thread_comm_t* ocomm, dim_t ocomm_id,
                                               thread_comm_t* icomm, dim_t icomm_id,
                                               dim_t n_way, dim_t work_id, 
                                               packm_thrinfo_t* opackm,
                                               packm_thrinfo_t* ipackm,
-                                              gemm_thrinfo_t* sub_gemm )
+                                              trsm_thrinfo_t* sub_trsm )
 {
-    gemm_thrinfo_t* thread = ( gemm_thrinfo_t* ) bli_malloc( sizeof( gemm_thrinfo_t ) );
-    bli_setup_gemm_thrinfo_node( thread, ocomm, ocomm_id,
+    trsm_thrinfo_t* thread = ( trsm_thrinfo_t* ) bli_malloc( sizeof( trsm_thrinfo_t ) );
+    bli_setup_trsm_thrinfo_node( thread, ocomm, ocomm_id,
                               icomm, icomm_id,
                               n_way, work_id, 
                               opackm,
                               ipackm,
-                              sub_gemm );
+                              sub_trsm );
     return thread;
 }
 
-void bli_gemm_thrinfo_free_paths( gemm_thrinfo_t** threads )
+void bli_trsm_thrinfo_free_paths( trsm_thrinfo_t** threads )
 {
 }
 
-gemm_thrinfo_t** bli_create_gemm_thrinfo_paths( )
+trsm_thrinfo_t** bli_create_trsm_thrinfo_paths( )
 {
     dim_t jc_way = bli_read_nway_from_env( "BLIS_JC_NT" );
     dim_t kc_way = bli_read_nway_from_env( "BLIS_KC_NT" );
@@ -106,7 +106,7 @@ gemm_thrinfo_t** bli_create_gemm_thrinfo_paths( )
     dim_t ir_nt  = 1;
 
     
-    gemm_thrinfo_t** paths = (gemm_thrinfo_t**) malloc( global_num_threads * sizeof( gemm_thrinfo_t* ) );
+    trsm_thrinfo_t** paths = (trsm_thrinfo_t**) malloc( global_num_threads * sizeof( trsm_thrinfo_t* ) );
 
     thread_comm_t*  global_comm = bli_create_communicator( global_num_threads );
     for( int a = 0; a < jc_way; a++ )
@@ -131,12 +131,12 @@ gemm_thrinfo_t** bli_create_gemm_thrinfo_paths( )
                         dim_t jc_comm_id = b*kc_nt + kc_comm_id;
                         dim_t global_comm_id = a*jc_nt + jc_comm_id;
                         
-                        gemm_thrinfo_t* ir_info = bli_create_gemm_thrinfo_node( jr_comm, jr_comm_id,
+                        trsm_thrinfo_t* ir_info = bli_create_trsm_thrinfo_node( jr_comm, jr_comm_id,
                                                                                 ir_comm, ir_comm_id,
                                                                                 ir_way,  e,
                                                                                 NULL, NULL, NULL);
 
-                        gemm_thrinfo_t* jr_info = bli_create_gemm_thrinfo_node( ic_comm, ic_comm_id,
+                        trsm_thrinfo_t* jr_info = bli_create_trsm_thrinfo_node( ic_comm, ic_comm_id,
                                                                                 jr_comm, jr_comm_id,
                                                                                 jr_way,  d,
                                                                                 NULL, NULL, ir_info);
@@ -149,17 +149,17 @@ gemm_thrinfo_t** bli_create_gemm_thrinfo_paths( )
                                                                             jr_comm, jr_comm_id,
                                                                             ic_nt, ic_comm_id );
 
-                        gemm_thrinfo_t* ic_info = bli_create_gemm_thrinfo_node( kc_comm, kc_comm_id,
+                        trsm_thrinfo_t* ic_info = bli_create_trsm_thrinfo_node( kc_comm, kc_comm_id,
                                                                                 ic_comm, ic_comm_id,
                                                                                 ic_way,  c,
                                                                                 packb, packa, jr_info);
 
-                        gemm_thrinfo_t* kc_info = bli_create_gemm_thrinfo_node( jc_comm, jc_comm_id,
+                        trsm_thrinfo_t* kc_info = bli_create_trsm_thrinfo_node( jc_comm, jc_comm_id,
                                                                                 kc_comm, kc_comm_id,
                                                                                 kc_way,  b,
                                                                                 NULL, NULL, ic_info);
 
-                        gemm_thrinfo_t* jc_info = bli_create_gemm_thrinfo_node( global_comm, global_comm_id,
+                        trsm_thrinfo_t* jc_info = bli_create_trsm_thrinfo_node( global_comm, global_comm_id,
                                                                                 jc_comm, jc_comm_id,
                                                                                 jc_way,  a,
                                                                                 NULL, NULL, kc_info);

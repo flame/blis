@@ -115,14 +115,6 @@ void bli_gemm_blk_var3f( obj_t*  a,
 		bli_packm_int( &b1, b1_pack,
 		               cntl_sub_packm_b( cntl ),
                        gemm_thread_sub_ipackm( thread ) );
-
-		// This variant executes multiple rank-k updates. Therefore, if the
-		// internal beta scalar on matrix C is non-zero, we must use it
-		// only for the first iteration (and then BLIS_ONE for all others).
-		// And since c_pack is a local obj_t, we can simply overwrite the
-		// internal beta scalar with BLIS_ONE once it has been used in the
-		// first iteration.
-		if ( i != 0 && thread_am_ichief( thread ) ) bli_obj_scalar_reset( c_pack );
         
         // Packing must be done before computation.
         thread_ibarrier( thread );
@@ -135,6 +127,14 @@ void bli_gemm_blk_var3f( obj_t*  a,
 		              c_pack,
 		              cntl_sub_gemm( cntl ),
                       gemm_thread_sub_gemm( thread) );
+
+		// This variant executes multiple rank-k updates. Therefore, if the
+		// internal beta scalar on matrix C is non-zero, we must use it
+		// only for the first iteration (and then BLIS_ONE for all others).
+		// And since c_pack is a local obj_t, we can simply overwrite the
+		// internal beta scalar with BLIS_ONE once it has been used in the
+		// first iteration.
+		if ( i == 0 && thread_am_ichief( thread ) ) bli_obj_scalar_reset( c_pack );
 
 	}
 
