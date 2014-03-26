@@ -54,8 +54,8 @@
 //     (b) NR (for triangular operations such as trmm and trsm).
 //
 
-#define BLIS_DEFAULT_MC_S              256
-#define BLIS_DEFAULT_KC_S              256
+#define BLIS_DEFAULT_MC_S              1024
+#define BLIS_DEFAULT_KC_S              2048
 #define BLIS_DEFAULT_NC_S              8192
 
 // 16 MPI RANKS CASE:
@@ -64,17 +64,17 @@
 //
 
 // 1 MPI RANK CASE:
-#define BLIS_DEFAULT_MC_D              1008
-#define BLIS_DEFAULT_KC_D              2016
-#define BLIS_DEFAULT_NC_D              20480
+#define BLIS_DEFAULT_MC_D              1024
+#define BLIS_DEFAULT_KC_D              2048
+#define BLIS_DEFAULT_NC_D              10240
 
-#define BLIS_DEFAULT_MC_C              128
-#define BLIS_DEFAULT_KC_C              256
-#define BLIS_DEFAULT_NC_C              4096
+#define BLIS_DEFAULT_MC_C              1024
+#define BLIS_DEFAULT_KC_C              2048
+#define BLIS_DEFAULT_NC_C              8192
 
-#define BLIS_DEFAULT_MC_Z              64
-#define BLIS_DEFAULT_KC_Z              256
-#define BLIS_DEFAULT_NC_Z              2048
+#define BLIS_DEFAULT_MC_Z              768
+#define BLIS_DEFAULT_KC_Z              1536
+#define BLIS_DEFAULT_NC_Z              10240
 
 // -- Register blocksizes --
 
@@ -182,7 +182,7 @@
 #include "bli_gemm_8x8.h"
 
 #define BLIS_DGEMM_UKERNEL         bli_dgemm_8x8
-#define BLIS_DGEMM_UKERNEL_MT      bli_dgemm_8x8_mt
+#define BLIS_ZGEMM_UKERNEL         bli_zgemm_8x8
 
 // -- trsm-related --
 
@@ -206,7 +206,7 @@
 
 // -- axpyf --
 
-#define BLIS_DAXPYF_KERNEL         bli_daxpyf_opt_var1
+//#define BLIS_DAXPYF_KERNEL         bli_daxpyf_opt_var1
 
 // -- dotxf --
 
@@ -221,13 +221,13 @@
 
 // -- axpyv --
 
-#define BLIS_DAXPYV_KERNEL         bli_daxpyv_opt_var1
+//#define BLIS_DAXPYV_KERNEL         bli_daxpyv_opt_var1
 
 // -- copyv --
 
 // -- dotv --
 
-#define BLIS_DDOTV_KERNEL          bli_ddotv_opt_var1
+//#define BLIS_DDOTV_KERNEL          bli_ddotv_opt_var1
 
 // -- dotxv --
 

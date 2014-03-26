@@ -42,7 +42,7 @@ void bli_ddotv_opt_var1(
                          double* restrict y_in, inc_t incy, 
                          double* restrict rho_in 
                        ) 
-{ 
+{{
 	double*  restrict x   = x_in; 
 	double*  restrict y   = y_in; 
     double*  rho = rho_in;
@@ -94,5 +94,5 @@ void bli_ddotv_opt_var1(
     }
 	
     *rho = rhos;
-}
+}}
 

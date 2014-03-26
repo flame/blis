@@ -111,16 +111,16 @@
 // Alignment size used when allocating memory dynamically from the operating
 // system (eg: posix_memalign()). To disable heap alignment and just use
 // malloc() instead, set this to 1.
-#define BLIS_HEAP_ADDR_ALIGN_SIZE        32
+#define BLIS_HEAP_ADDR_ALIGN_SIZE        64
 
 // Alignment size used when sizing leading dimensions of dynamically
 // allocated memory.
-#define BLIS_HEAP_STRIDE_ALIGN_SIZE      32
+#define BLIS_HEAP_STRIDE_ALIGN_SIZE      64
 
 // Alignment size used when allocating entire blocks of contiguous memory
 // from the contiguous memory allocator.
 #define BLIS_CONTIG_ADDR_ALIGN_SIZE      BLIS_PAGE_SIZE
-
+#define BLIS_CONTIG_STRIDE_ALIGN_SIZE 32
 
 
 // -- MIXED DATATYPE SUPPORT ---------------------------------------------------
@@ -154,12 +154,13 @@
 // while 64 results in 64-bit integers. Any other value results in use of the
 // C99 type "long int". Note that this ONLY affects integers used within the
 // BLAS compatibility layer.
-#define BLIS_BLAS2BLIS_INT_TYPE_SIZE     64
+#define BLIS_BLAS2BLIS_INT_TYPE_SIZE     32
 
 // Fortran-77 name-mangling macros.
-#define PASTEF770(name)                        name ## _
-#define PASTEF77(ch1,name)       ch1        ## name ## _
-#define PASTEF772(ch1,ch2,name)  ch1 ## ch2 ## name ## _
+// Underscore is left out to work on BGQ systems
+#define PASTEF770(name)                        name //## _
+#define PASTEF77(ch1,name)       ch1        ## name //## _
+#define PASTEF772(ch1,ch2,name)  ch1 ## ch2 ## name //## _
 
 
 

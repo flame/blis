@@ -42,6 +42,7 @@ void bli_daxpyv_opt_var1(
                           double* restrict y_in, inc_t incy
                         )
 {
+    {
 	double*  restrict alpha = alpha_in;
 	double*  restrict x = x_in;
 	double*  restrict y = y_in;
@@ -65,7 +66,7 @@ void bli_daxpyv_opt_var1(
     dim_t n_left      = n % 4;
 
     vector4double xv, yv, zv;
-    vector4double alphav = vec_lds( 0 * sizeof(double), alpha );
+    vector4double alphav = vec_lds( 0 * sizeof(double), &alpha[0] );
 
     #pragma omp parallel for
 	for ( dim_t i = 0; i < n_run; i++ )
@@ -79,4 +80,5 @@ void bli_daxpyv_opt_var1(
     {
         y[4*n_run + i] += *alpha * x[4*n_run + i];
     }
+}
 }
