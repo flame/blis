@@ -114,9 +114,6 @@ void bli_trsm_blk_var3f( obj_t*  a,
 		               cntl_sub_packm_b( cntl ),
                        trsm_thread_sub_ipackm( thread ) );
 
-        // Packing must be done before computation
-        thread_ibarrier( thread );
-
 		// Perform trsm subproblem.
 		bli_trsm_int( &BLIS_ONE,
 		              a1_pack,

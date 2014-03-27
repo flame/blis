@@ -128,9 +128,6 @@ void bli_trmm_blk_var1f( obj_t*  a,
 		               cntl_sub_packm_c( cntl ),
                        trmm_thread_sub_ipackm( thread ) );
         
-        // Packing must be finished before computation
-        thread_ibarrier( thread );
-
 		// Perform trmm subproblem.
 		bli_trmm_int( &BLIS_ONE,
 		              a1_pack,

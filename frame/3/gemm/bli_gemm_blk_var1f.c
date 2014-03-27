@@ -119,9 +119,6 @@ void bli_gemm_blk_var1f( obj_t*  a,
 		bli_packm_int( &c1, c1_pack,
 		               cntl_sub_packm_c( cntl ),
                        gemm_thread_sub_ipackm( thread ) );
-        
-        // Packing must be done before computation.
-        thread_ibarrier( thread );
 
 		// Perform gemm subproblem.
 		bli_gemm_int( &BLIS_ONE,

@@ -123,5 +123,8 @@ void bli_packm_int( obj_t*   a,
 	f( a,
 	   p,
        thread );
+
+    // Barrier so that packing is done before computation
+    thread_obarrier( thread );
 }
 

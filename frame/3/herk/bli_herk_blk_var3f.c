@@ -120,9 +120,6 @@ void bli_herk_blk_var3f( obj_t*  a,
 		// internal beta scalar with BLIS_ONE once it has been used in the
 		// first iteration.
 		if ( i != 0 && thread_am_ichief( thread ) ) bli_obj_scalar_reset( c_pack );
-
-        // Packing must be done before computation
-        thread_ibarrier( thread );
         
 		// Perform herk subproblem.
 		bli_herk_int( &BLIS_ONE,

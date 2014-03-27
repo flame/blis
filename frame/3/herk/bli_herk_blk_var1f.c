@@ -116,9 +116,6 @@ void bli_herk_blk_var1f( obj_t*  a,
 		               cntl_sub_packm_c( cntl ),
                        herk_thread_sub_ipackm( thread ) );
 
-        // Packing must be done before computation
-        thread_ibarrier( thread );
-
 		// Perform herk subproblem.
 		bli_herk_int( &BLIS_ONE,
 		              a1_pack,
