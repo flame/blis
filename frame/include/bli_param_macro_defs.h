@@ -581,6 +581,11 @@
                                    uplo_eff, n_elem_max, n_iter, inca, lda, \
                                    ij0, n_shift ) \
 { \
+	/* This is to prevent the compiler from warning about uninitialized
+	   variables. */ \
+	ij0     = 0; \
+	n_shift = 0; \
+\
 	/* If matrix A is entirely "unstored", that is, if either:
 	   - A is lower-stored and entirely above the diagonal, or
 	   - A is upper-stored and entirely below the diagonal
@@ -669,6 +674,11 @@
           ij0, n_shift \
         ) \
 { \
+	/* This is to prevent the compiler from warning about uninitialized
+	   variables. */ \
+	ij0     = 0; \
+	n_shift = 0; \
+\
 	/* If matrix A is entirely "unstored", that is, if either:
 	   - A is lower-stored and entirely above the diagonal, or
 	   - A is upper-stored and entirely below the diagonal
@@ -749,6 +759,11 @@
           ij0, n_shift \
         ) \
 { \
+	/* This is to prevent the compiler from warning about uninitialized
+	   variables. */ \
+	ij0     = 0; \
+	n_shift = 0; \
+\
 	/* If matrix A is entirely "unstored", that is, if either:
 	   - A is lower-stored and entirely above the diagonal, or
 	   - A is upper-stored and entirely below the diagonal
