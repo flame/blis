@@ -61,7 +61,7 @@ void bli_daxpyv_opt_var1(
     dim_t n_left      = n % 4;
 
     vector4double xv, yv, zv;
-    vector4double alphav = vec_lds( 0 * sizeof(double), alpha );
+    vector4double alphav = vec_lds( 0 * sizeof(double), (double*)alpha );
 
     #pragma omp parallel for
 	for ( dim_t i = 0; i < n_run; i++ )
