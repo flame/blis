@@ -112,7 +112,7 @@ void bli_herk_blk_var3f( obj_t*  a,
 		bli_packm_int( &ah1, ah1_pack,
 		               cntl_sub_packm_b( cntl ),
                        herk_thread_sub_ipackm( thread ) );
-        
+
 		// Perform herk subproblem.
 		bli_herk_int( &BLIS_ONE,
 		              a1_pack,
@@ -128,6 +128,7 @@ void bli_herk_blk_var3f( obj_t*  a,
         // And since c_pack is a local obj_t, we can simply overwrite the
         // internal beta scalar with BLIS_ONE once it has been used in the
         // first iteration.
+        if ( i == 0 ) thread_ibarrier( thread );
         if ( i == 0 && thread_am_ichief( thread ) ) bli_obj_scalar_reset( c_pack );
 
 	}
