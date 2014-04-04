@@ -40,9 +40,11 @@ void bli_free_barrier_tree( barrier_t* barrier )
     if( barrier == NULL )
         return;
     barrier->count--;
-    bli_free_barrier_tree( barrier->dad );
-    if( barrier->count == 1 )
+    if( barrier->count == 0 )
+    {
+        bli_free_barrier_tree( barrier->dad );
         bli_free( barrier );
+    }
     return;
 }
 barrier_t* bli_create_tree_barrier(int num_threads, int arity, barrier_t** leaves, int leaf_index)
