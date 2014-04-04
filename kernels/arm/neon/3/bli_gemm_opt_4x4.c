@@ -33,6 +33,7 @@
 */
 
 #include "blis.h"
+#include "arm_neon.h"
 
 void bli_sgemm_opt_4x4(
                         dim_t              k,

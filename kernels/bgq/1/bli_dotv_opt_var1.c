@@ -38,16 +38,13 @@ void bli_ddotv_opt_var1(
                          conj_t           conjx, 
                          conj_t           conjy, 
                          dim_t            n, 
-                         double* restrict x_in, inc_t incx, 
-                         double* restrict y_in, inc_t incy, 
-                         double* restrict rho_in 
+                         double* restrict x, inc_t incx, 
+                         double* restrict y, inc_t incy, 
+                         double* restrict rho 
                        ) 
-{{
-	double*  restrict x   = x_in; 
-	double*  restrict y   = y_in; 
-    double*  rho = rho_in;
+{ 
+	bool_t use_ref = FALSE;
 
-	bool_t            use_ref = FALSE;
 	// If the vector lengths are zero, set rho to zero and return.
 	if ( bli_zero_dim1( n ) ) {
 		PASTEMAC(d,set0s)( rho ); 

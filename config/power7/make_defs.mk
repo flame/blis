@@ -76,7 +76,7 @@ GIT_LOG    := $(GIT) log --decorate
 #
 
 # --- Determine the C compiler and related flags ---
-CC             := /opt/at6.0/bin/powerpc64-linux-gcc
+CC             := gcc
 # Enable IEEE Standard 1003.1-2004 (POSIX.1d). 
 # NOTE: This is needed to enable posix_memalign().
 CPPROCFLAGS    := -D_POSIX_C_SOURCE=200112L
@@ -96,7 +96,7 @@ CFLAGS_KERNELS := $(CDBGFLAGS) $(CKOPTFLAGS) $(CVECFLAGS) $(CWARNFLAGS) $(CMISCF
 CFLAGS_NOOPT   := $(CDBGFLAGS)                            $(CWARNFLAGS) $(CMISCFLAGS) $(CPPROCFLAGS)
 
 # --- Determine the archiver and related flags ---
-AR             := /opt/at6.0/bin/powerpc64-linux-ar
+AR             := ar
 ARFLAGS        := cru
 
 # --- Determine the linker and related flags ---

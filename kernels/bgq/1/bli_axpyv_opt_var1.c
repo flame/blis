@@ -37,16 +37,11 @@
 void bli_daxpyv_opt_var1( 
                           conj_t           conjx,
                           dim_t            n,
-                          double* restrict alpha_in,
-                          double* restrict x_in, inc_t incx,
-                          double* restrict y_in, inc_t incy
+                          double* restrict alpha,
+                          double* restrict x, inc_t incx,
+                          double* restrict y, inc_t incy
                         )
 {
-    {
-	double*  restrict alpha = alpha_in;
-	double*  restrict x = x_in;
-	double*  restrict y = y_in;
-
 	if ( bli_zero_dim1( n ) ) return;
 
 	// If there is anything that would interfere with our use of aligned
@@ -65,7 +60,7 @@ void bli_daxpyv_opt_var1(
     dim_t n_left      = n % 4;
 
     vector4double xv, yv, zv;
-    vector4double alphav = vec_lds( 0 * sizeof(double), &alpha[0] );
+    vector4double alphav = vec_lds( 0 * sizeof(double), (double*)alpha );
 
     #pragma omp parallel for
 	for ( dim_t i = 0; i < n_run; i++ )

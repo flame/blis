@@ -1,5 +1,5 @@
 
-CC	= /opt/at6.0/bin/powerpc64-linux-gcc
+CC	= gcc
 TARGET_ARCH = -m64 -mvsx
 
 TGTS	= exp
