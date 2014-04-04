@@ -83,7 +83,7 @@ void bli_gemm_blk_var1f( obj_t*  a,
 	// Query dimension in partitioning direction.
 	m_trans = bli_obj_length_after_trans( *a );
     dim_t start, end;
-    bli_get_range( thread, 0, m_trans, BLIS_DEFAULT_MC_D, &start, &end );
+    bli_get_range( thread, 0, m_trans, BLIS_DEFAULT_MR_D, &start, &end );
 
 	// Partition along the m dimension.
 	for ( i = start; i < end; i += b_alg )

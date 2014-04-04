@@ -94,7 +94,7 @@ void bli_trmm_blk_var1f( obj_t*  a,
 		          bli_obj_width_after_trans( *a );
 
     dim_t start, end;
-    bli_get_range( thread, offA, m_trans, BLIS_DEFAULT_MC_D, &start, &end ); 
+    bli_get_range( thread, offA, m_trans, BLIS_DEFAULT_MR_D, &start, &end ); 
 	// Partition along the m dimension.
 	for ( i = start; i < end; i += b_alg )
 	{
