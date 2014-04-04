@@ -142,11 +142,9 @@ void bli_herk_blk_var2f( obj_t*  a,
                       herk_thread_sub_herk( thread ) );
 
 		// Unpack C1 (if C1 was packed).
-        if( thread_am_ichief( thread ) ) {
-            bli_unpackm_int( c1S_pack, &c1S,
-                             cntl_sub_unpackm_c( cntl ) );
-        }
-        thread_ibarrier( thread );
+        bli_unpackm_int( c1S_pack, &c1S,
+                         cntl_sub_unpackm_c( cntl ),
+                         herk_thread_sub_ipackm( thread ) );
 	}
 
 	// If any packing buffers were acquired within packm, release them back

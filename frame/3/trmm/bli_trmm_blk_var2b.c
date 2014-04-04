@@ -83,7 +83,7 @@ void bli_trmm_blk_var2b( obj_t*  a,
 	n_trans = bli_obj_width_after_trans( *b );
     dim_t start, end;
     //bli_get_range( thread, 0, n_trans, 8, &start, &end );
-    bli_get_range_weighted( thread, 0, n_trans, BLIS_DEFAULT_NC_D, 0, &start, &end );
+    bli_get_range_weighted( thread, 0, n_trans, BLIS_DEFAULT_NC_D, bli_obj_is_upper( *c ), &start, &end );
 
 	// Partition along the n dimension.
 	for ( i = start; i < end; i += b_alg )
@@ -127,14 +127,9 @@ void bli_trmm_blk_var2b( obj_t*  a,
                       trmm_thread_sub_trmm( thread ) );
 
         // Unpack C1 (if C1 was packed).
-        // Currently must be done by 1 thread
-        if( thread_am_ichief( thread ) ) {
-            bli_unpackm_int( c1_pack, &c1,
-                             cntl_sub_unpackm_c( cntl ) );
-        }
-        //Barrier to make sure unpacking is done before next iteration's packing of C
-        //Somehow, we'd like to make this a noop if packing isn't done.
-        thread_ibarrier( thread );
+        bli_unpackm_int( c1_pack, &c1,
+                         cntl_sub_unpackm_c( cntl ),
+                         trmm_thread_sub_ipackm( thread ) );
 	}
 
 	// If any packing buffers were acquired within packm, release them back

@@ -137,14 +137,15 @@ void bli_trsm_blk_var3b( obj_t*  a,
     thread_obarrier( thread );
 
 	// Unpack C (if C was packed).
-    if( thread_am_ochief( thread ) ) {
-        bli_unpackm_int( c_pack, c,
-                         cntl_sub_unpackm_c( cntl ) );
-	    bli_obj_release_pack( c_pack );
-    }
+    bli_unpackm_int( c_pack, c,
+                     cntl_sub_unpackm_c( cntl ),
+                     trsm_thread_sub_opackm( thread ) );
 
 	// If any packing buffers were acquired within packm, release them back
 	// to the memory manager.
+    if( thread_am_ochief( thread ) ) {
+	    bli_obj_release_pack( c_pack );
+    }
     if( thread_am_ichief( thread ) ) {
         bli_obj_release_pack( a1_pack );
         bli_obj_release_pack( b1_pack );

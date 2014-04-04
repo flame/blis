@@ -35,7 +35,7 @@
 #include "blis.h"
 
 #ifdef BLIS_TREE_BARRIER
-barrier_t* bli_free_barrier_tree( barrier_t* barrier )
+void bli_free_barrier_tree( barrier_t* barrier )
 {
     if( barrier == NULL )
         return;

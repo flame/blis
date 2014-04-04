@@ -49,7 +49,8 @@ static FUNCPTR_T vars[2][3] =
 
 void bli_unpackm_int( obj_t*     p,
                       obj_t*     a,
-                      unpackm_t* cntl )
+                      unpackm_t* cntl,
+                      packm_thrinfo_t* thread )
 {
 	// The unpackm operation consists of an optional post-process: castm.
 	// (This post-process is analogous to the castm pre-process in packm.)
@@ -122,9 +123,12 @@ void bli_unpackm_int( obj_t*     p,
 	f = vars[n][i];
 
 	// Invoke the variant.
-	f( p,
-	   &c,
-	   cntl );
+    if( thread_am_ochief( thread ) ) {
+        f( p,
+           &c,
+           cntl );
+    }
+    thread_obarrier( thread );
 
 	// Now, if necessary, we cast the contents of c to matrix a. If casting
 	// was not necessary, then we are done because the call to the unpackm

@@ -137,7 +137,8 @@ void bli_her2_blk_var4( conj_t  conjh,
 
 		// Copy/unpack C11 (if C11 was packed).
 		bli_unpackm_int( &c11_pack, &c11,
-		                 cntl_sub_unpackm_c11( cntl ) );
+		                 cntl_sub_unpackm_c11( cntl ),
+                         &BLIS_PACKM_SINGLE_THREADED );
 	}
 
 	// If any packing buffers were acquired within packm, release them back

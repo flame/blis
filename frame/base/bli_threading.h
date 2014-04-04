@@ -34,9 +34,6 @@
 #ifndef BLIS_THREADING_H
 #define BLIS_THREADING_H
 
-#define BLIS_TREE_BARRIER
-#define BLIS_TREE_BARRIER_ARITY 4
-
 #ifdef BLIS_TREE_BARRIER
     struct barrier_s
     {   
