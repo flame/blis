@@ -58,11 +58,6 @@
 #define BLIS_DEFAULT_KC_S              2048
 #define BLIS_DEFAULT_NC_S              8192
 
-// 16 MPI RANKS CASE:
-//#define BLIS_DEFAULT_MC_D              256//1024
-//#define BLIS_DEFAULT_KC_D              512//2048
-//
-
 // 1 MPI RANK CASE:
 #define BLIS_DEFAULT_MC_D              1024
 #define BLIS_DEFAULT_KC_D              2048
@@ -87,7 +82,7 @@
 #define BLIS_DEFAULT_MR_C              8
 #define BLIS_DEFAULT_NR_C              4
 
-#define BLIS_DEFAULT_MR_Z              8
+#define BLIS_DEFAULT_MR_Z              4
 #define BLIS_DEFAULT_NR_Z              4
 
 // NOTE: If the micro-kernel, which is typically unrolled to a factor
@@ -153,7 +148,7 @@
 // -- Default fusing factors for level-1f operations --
 
 #define BLIS_L1F_FUSE_FAC_S        8
-#define BLIS_L1F_FUSE_FAC_D        4
+#define BLIS_L1F_FUSE_FAC_D        8
 #define BLIS_L1F_FUSE_FAC_C        4
 #define BLIS_L1F_FUSE_FAC_Z        2
 
@@ -206,7 +201,7 @@
 
 // -- axpyf --
 
-//#define BLIS_DAXPYF_KERNEL         bli_daxpyf_opt_var1
+#define BLIS_DAXPYF_KERNEL         bli_daxpyf_opt_var1
 
 // -- dotxf --
 
@@ -221,13 +216,13 @@
 
 // -- axpyv --
 
-//#define BLIS_DAXPYV_KERNEL         bli_daxpyv_opt_var1
+#define BLIS_DAXPYV_KERNEL         bli_daxpyv_opt_var1
 
 // -- copyv --
 
 // -- dotv --
 
-//#define BLIS_DDOTV_KERNEL          bli_ddotv_opt_var1
+#define BLIS_DDOTV_KERNEL          bli_ddotv_opt_var1
 
 // -- dotxv --
 
