@@ -59,7 +59,7 @@ typedef struct herk_thrinfo_s herk_thrinfo_t;
 
 
 herk_thrinfo_t** bli_create_herk_thrinfo_paths( );
-void bli_herk_thrinfo_free_paths( herk_thrinfo_t** paths );
+void bli_herk_thrinfo_free_paths( herk_thrinfo_t** paths, dim_t n_threads );
 
 void bli_setup_herk_thrinfo_node( herk_thrinfo_t* thread,
                                   thread_comm_t* ocomm, dim_t ocomm_id,

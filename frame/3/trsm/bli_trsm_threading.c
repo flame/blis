@@ -93,9 +93,9 @@ void bli_trsm_thrinfo_free( trsm_thrinfo_t* thread)
         bli_free_communicator( thread->ocomm );
 
     // Free Sub Thrinfos
-    bli_packm_thrinfo_free( opackm );
-    bli_packm_thrinfo_free( ipackm );
-    bli_trsm_thrinfo_free( sub_trsm );
+    bli_packm_thrinfo_free( thread->opackm );
+    bli_packm_thrinfo_free( thread->ipackm );
+    bli_trsm_thrinfo_free( thread->sub_trsm );
     bli_free( thread );
 
     return;
@@ -109,11 +109,18 @@ void bli_trsm_thrinfo_free_paths( trsm_thrinfo_t** threads, dim_t num )
 
 trsm_thrinfo_t** bli_create_trsm_thrinfo_paths( )
 {
+    /*
     dim_t jc_way = bli_read_nway_from_env( "BLIS_JC_NT" );
     dim_t kc_way = bli_read_nway_from_env( "BLIS_KC_NT" );
     dim_t ic_way = bli_read_nway_from_env( "BLIS_IC_NT" );
     dim_t jr_way = bli_read_nway_from_env( "BLIS_JR_NT" );
     dim_t ir_way = bli_read_nway_from_env( "BLIS_IR_NT" );
+    */
+    dim_t jc_way = 1; 
+    dim_t kc_way = 1;
+    dim_t ic_way = 1;
+    dim_t jr_way = 1;
+    dim_t ir_way = 1;
     
     dim_t global_num_threads = jc_way * kc_way * ic_way * jr_way * ir_way;
     assert( global_num_threads != 0 );

@@ -59,7 +59,7 @@ typedef struct trsm_thrinfo_s trsm_thrinfo_t;
 #define trsm_l_jr_my_iter( index, thread ) ( index % thread->n_way == thread->work_id % thread->n_way )
 
 trsm_thrinfo_t** bli_create_trsm_thrinfo_paths( );
-void bli_trsm_thrinfo_free_paths( trsm_thrinfo_t** );
+void bli_trsm_thrinfo_free_paths( trsm_thrinfo_t** info, dim_t n_threads );
 
 void bli_setup_trsm_thrinfo_node( trsm_thrinfo_t* thread,
                                   thread_comm_t* ocomm, dim_t ocomm_id,

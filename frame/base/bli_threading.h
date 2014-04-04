@@ -34,32 +34,44 @@
 #ifndef BLIS_THREADING_H
 #define BLIS_THREADING_H
 
+#define BLIS_TREE_BARRIER
+#define BLIS_TREE_BARRIER_ARITY 4
 
-typedef omp_lock_t lock_t;
+#ifdef BLIS_TREE_BARRIER
+    struct barrier_s
+    {   
+        int arity;
+        int count;
+        struct barrier_s* dad;
+        int signal;
+    };  
+    typedef struct barrier_s barrier_t;
 
-struct thread_comm_s
-{
-    void*   sent_object;
-    dim_t   n_threads;
+    struct thread_comm_s
+    {   
+        void*   sent_object;
+        dim_t   n_threads;
+        barrier_t** barriers;
+    }; 
+#else
+    struct thread_comm_s
+    {
+        void*   sent_object;
+        dim_t   n_threads;
 
-    bool_t  barrier_sense;
-    lock_t  barrier_lock;
-    dim_t   barrier_threads_arrived;
-};
+        bool_t  barrier_sense;
+        dim_t   barrier_threads_arrived;
+    };
+#endif
 typedef struct thread_comm_s thread_comm_t;
 
+// Thread Communicator Interface Definitions
 void    bli_setup_communicator( thread_comm_t* communicator, dim_t n_threads );
 void    bli_cleanup_communicator( thread_comm_t* communicator );
 thread_comm_t*    bli_create_communicator( dim_t n_threads );
 void    bli_free_communicator( thread_comm_t* communicator );
-
 void*   bli_broadcast_structure( thread_comm_t* communicator, dim_t inside_id, void* to_send );
-
 void    bli_barrier( thread_comm_t* communicator, dim_t thread_id );
-void    bli_set_lock( lock_t* lock );
-void    bli_unset_lock( lock_t* lock );
-void    bli_init_lock( lock_t* lock );
-void    bli_destroy_lock( lock_t* lock );
 
 struct thrinfo_s
 {
@@ -73,14 +85,15 @@ struct thrinfo_s
 };
 typedef struct thrinfo_s thrinfo_t;
 
-#define thread_ocomm( thread )          thread->ocomm
+// Thread Info Interface Definitions
+#define thread_ocomm( thread )          (thread->ocomm)
 #define thread_icomm( thread )          (thread->icomm)
 
-#define thread_id( thread )             thread->ocomm_id
-#define thread_num_threads( thread )    thread->ocomm->n_threads
+#define thread_id( thread )             (thread->ocomm_id)
+#define thread_num_threads( thread )    (thread->ocomm->n_threads)
 
-#define thread_work_id( thread )        thread->work_id
-#define thread_n_way( thread )          thread->n_way
+#define thread_work_id( thread )        (thread->work_id)
+#define thread_n_way( thread )          (thread->n_way)
 #define thread_am_ochief( thread )      (thread->ocomm_id == 0)
 #define thread_am_ichief( thread )      (thread->icomm_id == 0)
 
@@ -91,15 +104,21 @@ typedef struct thrinfo_s thrinfo_t;
 
 void bli_get_range( void* thread, dim_t all_start, dim_t all_end, dim_t block_factor, dim_t* start, dim_t* end );
 void bli_get_range_weighted( void* thr, dim_t all_start, dim_t all_end, dim_t block_factor, bool_t forward, dim_t* start, dim_t* end);
-
-thrinfo_t* bli_create_thread_info( thread_comm_t* ocomm, dim_t ocomm_id, thread_comm_t* icomm, dim_t icomm_id,
-                             dim_t n_way, dim_t work_id );
-void bli_setup_thread_info( thrinfo_t* thread, thread_comm_t* ocomm, dim_t ocomm_id, thread_comm_t* icomm, dim_t icomm_id,
-                             dim_t n_way, dim_t work_id );
+thrinfo_t* bli_create_thread_info( thread_comm_t* ocomm, dim_t ocomm_id, 
+                                   thread_comm_t* icomm, dim_t icomm_id,
+                                   dim_t n_way, dim_t work_id );
+void bli_setup_thread_info( thrinfo_t* thread, thread_comm_t* ocomm, dim_t ocomm_id, 
+                            thread_comm_t* icomm, dim_t icomm_id,
+                            dim_t n_way, dim_t work_id );
 dim_t bli_read_nway_from_env( char* env );
+
 //void bli_setup_single_threaded_info( thrinfo_t* thr, thread_comm_t* comm );
 //thrinfo_t* bli_create_thread_info( dim_t* n_threads_each_level, dim_t n_levels );
 
+
+//TODO: These nneed to be included after the thread info and thread comm definitions
+// But this doesn't seem like the best place to put these includes.
+// Note that the bli_packm_threading.h must be included before the others!
 #include "bli_packm_threading.h"
 #include "bli_gemm_threading.h"
 #include "bli_herk_threading.h"

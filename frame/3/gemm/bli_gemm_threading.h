@@ -58,7 +58,7 @@ typedef struct gemm_thrinfo_s gemm_thrinfo_t;
 #define gemm_get_next_b_micropanel( thread, b1, step ) ( b1 + step * thread->n_way )
 
 gemm_thrinfo_t** bli_create_gemm_thrinfo_paths( );
-void bli_gemm_thrinfo_free_paths( gemm_thrinfo_t** );
+void bli_gemm_thrinfo_free_paths( gemm_thrinfo_t**, dim_t n_threads );
 
 void bli_setup_gemm_thrinfo_node( gemm_thrinfo_t* thread,
                                   thread_comm_t* ocomm, dim_t ocomm_id,

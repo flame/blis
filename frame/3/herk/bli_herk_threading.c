@@ -93,9 +93,9 @@ void bli_herk_thrinfo_free( herk_thrinfo_t* thread)
         bli_free_communicator( thread->ocomm );
 
     // Free Sub Thrinfos
-    bli_packm_thrinfo_free( opackm );
-    bli_packm_thrinfo_free( ipackm );
-    bli_herk_thrinfo_free( sub_herk );
+    bli_packm_thrinfo_free( thread->opackm );
+    bli_packm_thrinfo_free( thread->ipackm );
+    bli_herk_thrinfo_free( thread->sub_herk );
     bli_free( thread );
         
     return; 

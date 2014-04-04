@@ -91,13 +91,11 @@ void bli_gemm_thrinfo_free( gemm_thrinfo_t* thread)
     // Free Communicators
     if( thread_am_ochief( thread ) )
         bli_free_communicator( thread->ocomm );
-//    if( thread_am_ichief( thread ) )
-//        bli_cleanup_communicator( thread->icomm );
 
     // Free Sub Thrinfos
-    bli_packm_thrinfo_free( opackm );
-    bli_packm_thrinfo_free( ipackm );
-    bli_gemm_thrinfo_free( sub_gemm );
+    bli_packm_thrinfo_free( thread->opackm );
+    bli_packm_thrinfo_free( thread->ipackm );
+    bli_gemm_thrinfo_free( thread->sub_gemm );
     bli_free( thread );
     
     return; 
