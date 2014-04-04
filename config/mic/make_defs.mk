@@ -98,7 +98,7 @@ ARFLAGS        := cru
 
 # --- Determine the linker and related flags ---
 LINKER         := $(CC)
-LDFLAGS        := -mmic -lm
+LDFLAGS        := -mmic -lm -openmp
 
 
 
