@@ -49,7 +49,9 @@ struct thread_comm_s
 typedef struct thread_comm_s thread_comm_t;
 
 void    bli_setup_communicator( thread_comm_t* communicator, dim_t n_threads );
+void    bli_cleanup_communicator( thread_comm_t* communicator );
 thread_comm_t*    bli_create_communicator( dim_t n_threads );
+void    bli_free_communicator( thread_comm_t* communicator );
 
 void*   bli_broadcast_structure( thread_comm_t* communicator, dim_t inside_id, void* to_send );
 

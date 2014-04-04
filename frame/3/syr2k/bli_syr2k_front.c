@@ -117,7 +117,7 @@ void bli_syr2k_front( obj_t*  alpha,
                                  (void*) cntl, 
                                  (void**) infos );
 
-    bli_herk_thrinfo_free_paths( infos );
+    bli_herk_thrinfo_free_paths( infos, n_threads );
 #endif
 }
 

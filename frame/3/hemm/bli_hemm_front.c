@@ -94,6 +94,6 @@ void bli_hemm_front( side_t  side,
                                  (void*) cntl, 
                                  (void**) infos );
 
-    bli_gemm_thrinfo_free_paths( infos );
+    bli_gemm_thrinfo_free_paths( infos, n_threads );
 }
 

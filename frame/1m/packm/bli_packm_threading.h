@@ -46,6 +46,7 @@ typedef struct packm_thrinfo_s packm_thrinfo_t;
 
 #define packm_thread_my_iter( index, thread ) ( index % thread->n_way == thread->work_id % thread->n_way )
 
+void bli_packm_thrinfo_free( packm_thrinfo_t* thread );
 packm_thrinfo_t* bli_create_packm_thread_info( thread_comm_t* ocomm, dim_t ocomm_id, thread_comm_t* icomm, dim_t icomm_id,
                              dim_t n_way, dim_t work_id );
 void bli_setup_packm_thread_info( packm_thrinfo_t* thread, thread_comm_t* ocomm, dim_t ocomm_id, thread_comm_t* icomm, dim_t icomm_id,

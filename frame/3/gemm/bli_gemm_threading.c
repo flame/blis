@@ -84,8 +84,29 @@ gemm_thrinfo_t* bli_create_gemm_thrinfo_node( thread_comm_t* ocomm, dim_t ocomm_
     return thread;
 }
 
-void bli_gemm_thrinfo_free_paths( gemm_thrinfo_t** threads )
+void bli_gemm_thrinfo_free( gemm_thrinfo_t* thread)
 {
+    if( thread == NULL ) return;
+
+    // Free Communicators
+    if( thread_am_ochief( thread ) )
+        bli_free_communicator( thread->ocomm );
+//    if( thread_am_ichief( thread ) )
+//        bli_cleanup_communicator( thread->icomm );
+
+    // Free Sub Thrinfos
+    bli_packm_thrinfo_free( opackm );
+    bli_packm_thrinfo_free( ipackm );
+    bli_gemm_thrinfo_free( sub_gemm );
+    bli_free( thread );
+    
+    return; 
+}
+void bli_gemm_thrinfo_free_paths( gemm_thrinfo_t** threads, dim_t num )
+{
+    for( int i = 0; i < num; i++)
+        bli_gemm_thrinfo_free( threads[i] );
+    bli_free( threads );
 }
 
 gemm_thrinfo_t** bli_create_gemm_thrinfo_paths( )

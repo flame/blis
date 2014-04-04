@@ -39,6 +39,12 @@ void bli_cleanup_communicator( thread_comm_t* communicator )
     if( communicator == NULL ) return;
     bli_destroy_lock( &communicator->barrier_lock );
 }
+void bli_free_communicator( thread_comm_t* communicator )
+{
+    if( communicator == NULL ) return;
+    bli_cleanup_communicator( communicator );
+    bli_free( communicator );
+}
 
 void bli_setup_communicator( thread_comm_t* communicator, dim_t n_threads)
 {

@@ -84,8 +84,27 @@ herk_thrinfo_t* bli_create_herk_thrinfo_node( thread_comm_t* ocomm, dim_t ocomm_
     return thread;
 }
 
-void bli_herk_thrinfo_free_paths( herk_thrinfo_t** threads )
+void bli_herk_thrinfo_free( herk_thrinfo_t* thread)
 {
+    if( thread == NULL ) return;
+
+    // Free Communicators
+    if( thread_am_ochief( thread ) ) 
+        bli_free_communicator( thread->ocomm );
+
+    // Free Sub Thrinfos
+    bli_packm_thrinfo_free( opackm );
+    bli_packm_thrinfo_free( ipackm );
+    bli_herk_thrinfo_free( sub_herk );
+    bli_free( thread );
+        
+    return; 
+}
+void bli_herk_thrinfo_free_paths( herk_thrinfo_t** threads, dim_t num )
+{
+    for( int i = 0; i < num; i++)
+        bli_herk_thrinfo_free( threads[i] );
+    bli_free( threads );
 }
 
 herk_thrinfo_t** bli_create_herk_thrinfo_paths( )

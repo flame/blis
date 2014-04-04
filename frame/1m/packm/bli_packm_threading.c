@@ -34,13 +34,20 @@
 
 #include "blis.h"
 
+void bli_packm_thrinfo_free( packm_thrinfo_t* thread )
+{
+    //Assume that the ocomm and the icomm are freed by something else and don't need to be freed.
+    bli_free(thread);
+}
+
 packm_thrinfo_t* bli_create_packm_thread_info( thread_comm_t* ocomm, dim_t ocomm_id, thread_comm_t* icomm, dim_t icomm_id,
                                                dim_t n_way, dim_t work_id )
 {
     return (packm_thrinfo_t*) bli_create_thread_info( ocomm, ocomm_id, icomm, icomm_id, n_way, work_id );
 }
 
-void bli_setup_packm_thread_info( packm_thrinfo_t* thread, thread_comm_t* ocomm, dim_t ocomm_id, thread_comm_t* icomm, dim_t icomm_id,
+void bli_setup_packm_thread_info( packm_thrinfo_t* thread, thread_comm_t* ocomm, dim_t ocomm_id,
+                                  thread_comm_t* icomm, dim_t icomm_id,
                                   dim_t n_way, dim_t work_id )
 {
     bli_setup_thread_info( (thrinfo_t*) thread, ocomm, ocomm_id, icomm, icomm_id, n_way, work_id );

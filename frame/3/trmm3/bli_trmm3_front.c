@@ -141,6 +141,6 @@ void bli_trmm3_front( side_t  side,
                                  (void*) cntl, 
                                  (void**) infos );
 
-    bli_trmm_thrinfo_free_paths( infos );
+    bli_trmm_thrinfo_free_paths( infos, n_threads );
 }
 
