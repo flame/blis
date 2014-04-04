@@ -91,7 +91,7 @@ void bli_herk_blk_var2f( obj_t*  a,
 
     // Needs to be replaced with a weighted range because triangle
     //bli_get_range( thread, 0, n_trans, 8, &start, &end ); 
-    bli_get_range_weighted( thread, 0, n_trans, 8, bli_obj_is_lower( *c ), &start, &end ); 
+    bli_get_range_weighted( thread, 0, n_trans, BLIS_DEFAULT_NC_D, bli_obj_is_lower( *c ), &start, &end ); 
 
 	// Partition along the n dimension.
 	for ( i = start; i < end; i += b_alg )
