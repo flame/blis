@@ -75,4 +75,3 @@ void bli_daxpyv_opt_var1(
         y[4*n_run + i] += *alpha * x[4*n_run + i];
     }
 }
-}

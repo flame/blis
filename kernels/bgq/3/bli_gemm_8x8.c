@@ -226,7 +226,7 @@ void bli_zgemm_8x8(
     double * a = (double*) a_z;
     double * b = (double*) b_z;
     double * c = (double*) c_z;
-    
+
     //Registers for storing C.
     //2 2x4 subblocks of C, c0, and c1
     //Each sub-block has 4 columns, 0, 1, 2, 3
@@ -253,7 +253,6 @@ void bli_zgemm_8x8(
     vector4double b0, b1, b2, b3;
     vector4double a0, a1;
 
-    double _Complex tmp = 0.0;
     for( dim_t i = 0; i < k; i++ )
     {
         
@@ -334,13 +333,13 @@ void bli_zgemm_8x8(
                                                 \
     /* Scale by alpha */                        \
     REG1 = vec_xmadd( alphav, AB, zed );        \
-    REG2 = vec_xxcpnmadd( AB, alphav, zed );    \
+    REG2 = vec_xxcpnmadd( AB, alphav, zed );     \
     AB = vec_sub(REG1, REG2 ); \
                                                 \
                                                 \
     /* Scale by beta */                         \
     REG1 = vec_xmadd( betav, C, zed );          \
-    REG2 = vec_xxcpnmadd( C, betav, zed );    \
+    REG2 = vec_xxcpnmadd( C, betav, zed );       \
     C = vec_sub(REG1, REG2 ); \
                                                 \
     /* Add AB to C */                           \
