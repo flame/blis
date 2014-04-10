@@ -44,31 +44,16 @@ extern gemv_t*    gemv_cntl_rp_bs_axpy;
 extern gemv_t*    gemv_cntl_cp_bs_dot;
 extern gemv_t*    gemv_cntl_cp_bs_axpy;
 
-static blksz_t*   hemv_mc;
+extern blksz_t*   gemv_mc;
 
 hemv_t*           hemv_cntl_bs_ke_lrow_ucol;
 hemv_t*           hemv_cntl_bs_ke_lcol_urow;
 hemv_t*           hemv_cntl_ge_lrow_ucol;
 hemv_t*           hemv_cntl_ge_lcol_urow;
 
-// Cache blocksizes.
-
-#define BLIS_HEMV_MC_S BLIS_DEFAULT_L2_MC_S
-#define BLIS_HEMV_MC_D BLIS_DEFAULT_L2_MC_D
-#define BLIS_HEMV_MC_C BLIS_DEFAULT_L2_MC_C
-#define BLIS_HEMV_MC_Z BLIS_DEFAULT_L2_MC_Z
-
-
 
 void bli_hemv_cntl_init()
 {
-	// Create blocksize objects.
-	hemv_mc = bli_blksz_obj_create( BLIS_HEMV_MC_S, 0,
-	                                BLIS_HEMV_MC_D, 0,
-	                                BLIS_HEMV_MC_C, 0,
-	                                BLIS_HEMV_MC_Z, 0 );
-
-
 	// Create control trees for the lowest-level kernels. These trees induce
 	// operations on (presumably) relatively small block-subvector problems.
 	hemv_cntl_bs_ke_lrow_ucol
@@ -93,7 +78,7 @@ void bli_hemv_cntl_init()
 	=
 	bli_hemv_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT2,
-	                          hemv_mc,
+	                          gemv_mc,
 	                          scalv_cntl,           // scale y up-front
 	                          packm_cntl,           // pack A11 (if needed)
 	                          packv_cntl,           // pack x1 (if needed)
@@ -108,7 +93,7 @@ void bli_hemv_cntl_init()
 	=
 	bli_hemv_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT2,
-	                          hemv_mc,
+	                          gemv_mc,
 	                          scalv_cntl,           // scale y up-front
 	                          packm_cntl,           // pack A11 (if needed)
 	                          packv_cntl,           // pack x1 (if needed)

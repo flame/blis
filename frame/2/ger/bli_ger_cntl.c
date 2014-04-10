@@ -38,8 +38,8 @@ extern packm_t*   packm_cntl;
 extern packv_t*   packv_cntl;
 extern unpackm_t* unpackm_cntl;
 
-static blksz_t*   ger_mc;
-static blksz_t*   ger_nc;
+extern blksz_t*   gemv_mc;
+extern blksz_t*   gemv_nc;
 
 ger_t*            ger_cntl_bs_ke_row;
 ger_t*            ger_cntl_bs_ke_col;
@@ -53,34 +53,9 @@ ger_t*            ger_cntl_cp_bs_col;
 ger_t*            ger_cntl_ge_row;
 ger_t*            ger_cntl_ge_col;
 
-// Cache blocksizes.
-
-#define BLIS_GER_MC_S BLIS_DEFAULT_L2_MC_S
-#define BLIS_GER_MC_D BLIS_DEFAULT_L2_MC_D
-#define BLIS_GER_MC_C BLIS_DEFAULT_L2_MC_C
-#define BLIS_GER_MC_Z BLIS_DEFAULT_L2_MC_Z
-
-#define BLIS_GER_NC_S BLIS_DEFAULT_L2_NC_S
-#define BLIS_GER_NC_D BLIS_DEFAULT_L2_NC_D
-#define BLIS_GER_NC_C BLIS_DEFAULT_L2_NC_C
-#define BLIS_GER_NC_Z BLIS_DEFAULT_L2_NC_Z
-
-
 
 void bli_ger_cntl_init()
 {
-	// Create blocksize objects.
-	ger_mc = bli_blksz_obj_create( BLIS_GER_MC_S, 0,
-	                               BLIS_GER_MC_D, 0,
-	                               BLIS_GER_MC_C, 0,
-	                               BLIS_GER_MC_Z, 0 );
-
-	ger_nc = bli_blksz_obj_create( BLIS_GER_NC_S, 0,
-	                               BLIS_GER_NC_D, 0,
-	                               BLIS_GER_NC_C, 0,
-	                               BLIS_GER_NC_Z, 0 );
-
-
 	// Create control trees for the lowest-level kernels. These trees induce
 	// operations on (persumably) relatively small block-subvector problems.
 	ger_cntl_bs_ke_row
@@ -103,7 +78,7 @@ void bli_ger_cntl_init()
 	=
 	bli_ger_cntl_obj_create( BLIS_BLOCKED,
 	                         BLIS_VARIANT2,
-	                         ger_nc,
+	                         gemv_nc,
 	                         NULL,           // x is not partitioned in var2
 	                         packv_cntl,     // pack y1 (if needed)
 	                         packm_cntl,     // pack A1 (if needed)
@@ -113,7 +88,7 @@ void bli_ger_cntl_init()
 	=
 	bli_ger_cntl_obj_create( BLIS_BLOCKED,
 	                         BLIS_VARIANT2,
-	                         ger_nc,
+	                         gemv_nc,
 	                         NULL,           // x is not partitioned in var2
 	                         packv_cntl,     // pack y1 (if needed)
 	                         packm_cntl,     // pack A1 (if needed)
@@ -127,7 +102,7 @@ void bli_ger_cntl_init()
 	=
 	bli_ger_cntl_obj_create( BLIS_BLOCKED,
 	                         BLIS_VARIANT1,
-	                         ger_mc,
+	                         gemv_mc,
 	                         packv_cntl,     // pack x1 (if needed)
 	                         NULL,           // y is not partitioned in var1
 	                         packm_cntl,     // pack A1 (if needed)
@@ -137,7 +112,7 @@ void bli_ger_cntl_init()
 	=
 	bli_ger_cntl_obj_create( BLIS_BLOCKED,
 	                         BLIS_VARIANT1,
-	                         ger_mc,
+	                         gemv_mc,
 	                         packv_cntl,     // pack x1 (if needed)
 	                         NULL,           // y is not partitioned in var1
 	                         packm_cntl,     // pack A1 (if needed)
@@ -151,7 +126,7 @@ void bli_ger_cntl_init()
 	=
 	bli_ger_cntl_obj_create( BLIS_BLOCKED,
 	                         BLIS_VARIANT2,
-	                         ger_nc,
+	                         gemv_nc,
 	                         NULL,           // x is not partitioned in var2
 	                         packv_cntl,     // pack y1 (if needed)
 	                         NULL,           // do not pack A1
@@ -161,7 +136,7 @@ void bli_ger_cntl_init()
 	=
 	bli_ger_cntl_obj_create( BLIS_BLOCKED,
 	                         BLIS_VARIANT2,
-	                         ger_nc,
+	                         gemv_nc,
 	                         NULL,           // x is not partitioned in var2
 	                         packv_cntl,     // pack y1 (if needed)
 	                         NULL,           // do not pack A1
@@ -171,9 +146,6 @@ void bli_ger_cntl_init()
 
 void bli_ger_cntl_finalize()
 {
-	bli_cntl_obj_free( ger_mc );
-	bli_cntl_obj_free( ger_nc );
-
 	bli_cntl_obj_free( ger_cntl_bs_ke_row );
 	bli_cntl_obj_free( ger_cntl_bs_ke_col );
 
