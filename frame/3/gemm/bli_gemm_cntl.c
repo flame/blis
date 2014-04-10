@@ -97,6 +97,12 @@ void bli_gemm_cntl_init()
 	                      BLIS_DEFAULT_KR_Z, 0 );
 
 
+	// Attach the register blksz_t objects as sub-blocksizes to the cache
+	// blksz_t objects.
+	bli_blksz_obj_attach_to( gemm_mr, gemm_mc );
+	bli_blksz_obj_attach_to( gemm_nr, gemm_nc );
+	bli_blksz_obj_attach_to( gemm_kr, gemm_kc );
+
 
 	// Create function pointer object for each datatype-specific gemm
 	// micro-kernel.

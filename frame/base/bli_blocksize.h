@@ -44,6 +44,9 @@ void bli_blksz_obj_init( blksz_t* b,
                          dim_t    b_c, dim_t be_c,
                          dim_t    b_z, dim_t be_z );
 
+void bli_blksz_obj_attach_to( blksz_t* br,
+                              blksz_t* bc );
+
 void bli_blksz_obj_free( blksz_t* b );
 
 dim_t bli_blksz_for_type( num_t    dt,
@@ -64,6 +67,8 @@ dim_t bli_blksz_ext_for_obj( obj_t*   obj,
 dim_t bli_blksz_total_for_obj( obj_t*   obj,
                                blksz_t* b );
 
+blksz_t* bli_blksz_sub( blksz_t* b );
+
 dim_t bli_determine_blocksize_f( dim_t    i,
                                  dim_t    dim,
                                  obj_t*   obj,
@@ -73,3 +78,5 @@ dim_t bli_determine_blocksize_b( dim_t    i,
                                  obj_t*   obj,
                                  blksz_t* b );
 
+dim_t bli_determine_reg_blocksize( obj_t*   obj,
+                                   blksz_t* b );
