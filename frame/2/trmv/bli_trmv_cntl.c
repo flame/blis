@@ -43,31 +43,16 @@ extern gemv_t*    gemv_cntl_rp_bs_axpy;
 extern gemv_t*    gemv_cntl_cp_bs_dot;
 extern gemv_t*    gemv_cntl_cp_bs_axpy;
 
-static blksz_t*   trmv_mc;
+extern blksz_t*   gemv_mc;
 
 trmv_t*           trmv_cntl_bs_ke_nrow_tcol;
 trmv_t*           trmv_cntl_bs_ke_ncol_trow;
 trmv_t*           trmv_cntl_ge_nrow_tcol;
 trmv_t*           trmv_cntl_ge_ncol_trow;
 
-// Cache blocksizes.
-
-#define BLIS_TRMV_MC_S BLIS_DEFAULT_L2_MC_S
-#define BLIS_TRMV_MC_D BLIS_DEFAULT_L2_MC_D
-#define BLIS_TRMV_MC_C BLIS_DEFAULT_L2_MC_C
-#define BLIS_TRMV_MC_Z BLIS_DEFAULT_L2_MC_Z
-
-
 
 void bli_trmv_cntl_init()
 {
-	// Create blocksize objects.
-	trmv_mc = bli_blksz_obj_create( BLIS_TRMV_MC_S, 0,
-	                                BLIS_TRMV_MC_D, 0,
-	                                BLIS_TRMV_MC_C, 0,
-	                                BLIS_TRMV_MC_Z, 0 );
-
-
 	// Create control trees for the lowest-level kernels. These trees induce
 	// operations on (presumably) relatively small block-subvector problems.
 	trmv_cntl_bs_ke_nrow_tcol
@@ -93,7 +78,7 @@ void bli_trmv_cntl_init()
 	=
 	bli_trmv_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT1,         // use var1 to maximize x1 usage
-	                          trmv_mc,
+	                          gemv_mc,
 	                          packm_cntl,            // pack A11 (if needed)
 	                          packv_cntl,            // pack x1 (if needed)
 	                          gemv_cntl_rp_bs_dot,   // gemv_rp needed by var1
@@ -104,7 +89,7 @@ void bli_trmv_cntl_init()
 	=
 	bli_trmv_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT1,        // use var1 to maximize x1 usage
-	                          trmv_mc,
+	                          gemv_mc,
 	                          packm_cntl,           // pack A11 (if needed)
 	                          packv_cntl,           // pack x1 (if needed)
 	                          gemv_cntl_rp_bs_axpy, // gemv_rp needed by var1

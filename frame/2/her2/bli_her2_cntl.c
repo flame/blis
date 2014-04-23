@@ -41,7 +41,7 @@ extern unpackm_t* unpackm_cntl;
 extern ger_t*     ger_cntl_rp_bs_row;
 extern ger_t*     ger_cntl_cp_bs_col;
 
-static blksz_t*   her2_mc;
+extern blksz_t*   gemv_mc;
 
 her2_t*           her2_cntl_bs_ke_lrow_ucol;
 her2_t*           her2_cntl_bs_ke_lcol_urow;
@@ -49,24 +49,9 @@ her2_t*           her2_cntl_bs_ke_lcol_urow;
 her2_t*           her2_cntl_ge_lrow_ucol;
 her2_t*           her2_cntl_ge_lcol_urow;
 
-// Cache blocksizes.
-
-#define BLIS_HER2_MC_S BLIS_DEFAULT_L2_MC_S
-#define BLIS_HER2_MC_D BLIS_DEFAULT_L2_MC_D
-#define BLIS_HER2_MC_C BLIS_DEFAULT_L2_MC_C
-#define BLIS_HER2_MC_Z BLIS_DEFAULT_L2_MC_Z
-
-
 
 void bli_her2_cntl_init()
 {
-	// Create blocksize objects.
-	her2_mc = bli_blksz_obj_create( BLIS_HER2_MC_S, 0,
-                                    BLIS_HER2_MC_D, 0,
-                                    BLIS_HER2_MC_C, 0,
-                                    BLIS_HER2_MC_Z, 0 );
-
-
 	// Create control trees for the lowest-level kernels. These trees induce
     // operations on (persumably) relatively small block-subvector problems.
 	her2_cntl_bs_ke_lrow_ucol
@@ -92,7 +77,7 @@ void bli_her2_cntl_init()
 	=
 	bli_her2_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT1,
-	                          her2_mc,
+	                          gemv_mc,
 	                          packv_cntl,     // pack x1 (if needed)
 	                          packv_cntl,     // pack y1 (if needed)
 	                          packm_cntl,     // pack C11 (if needed)
@@ -104,7 +89,7 @@ void bli_her2_cntl_init()
 	=
 	bli_her2_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT4,
-	                          her2_mc,
+	                          gemv_mc,
 	                          packv_cntl,     // pack x1 (if needed)
 	                          packv_cntl,     // pack y1 (if needed)
 	                          packm_cntl,     // pack C11 (if needed)

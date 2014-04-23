@@ -61,40 +61,47 @@ void bli_gemm3m_cntl_init()
 	// Create blocksize objects for each dimension.
 	gemm3m_mc
 	=
-	bli_blksz_obj_create( 0, 0,  0, 0,
+	bli_blksz_obj_create( 0,                    0,
+	                      0,                    0,
 	                      BLIS_DEFAULT_3M_MC_C, BLIS_EXTEND_3M_MC_C,
 	                      BLIS_DEFAULT_3M_MC_Z, BLIS_EXTEND_3M_MC_Z );
-
 	gemm3m_nc
 	=
-	bli_blksz_obj_create( 0, 0,  0, 0,
+	bli_blksz_obj_create( 0,                    0,
+	                      0,                    0,
 	                      BLIS_DEFAULT_3M_NC_C, BLIS_EXTEND_3M_NC_C,
 	                      BLIS_DEFAULT_3M_NC_Z, BLIS_EXTEND_3M_NC_Z );
-
 	gemm3m_kc
 	=
-	bli_blksz_obj_create( 0, 0,  0, 0,
+	bli_blksz_obj_create( 0,                    0,
+	                      0,                    0,
 	                      BLIS_DEFAULT_3M_KC_C, BLIS_EXTEND_3M_KC_C,
 	                      BLIS_DEFAULT_3M_KC_Z, BLIS_EXTEND_3M_KC_Z );
-
 	gemm3m_mr
 	=
-	bli_blksz_obj_create( 0, 0,  0, 0,
+	bli_blksz_obj_create( 0,                    0,
+	                      0,                    0,
 	                      BLIS_DEFAULT_3M_MR_C, BLIS_EXTEND_3M_MR_C,
 	                      BLIS_DEFAULT_3M_MR_Z, BLIS_EXTEND_3M_MR_Z );
-
 	gemm3m_nr
 	=
-	bli_blksz_obj_create( 0, 0,  0, 0,
+	bli_blksz_obj_create( 0,                    0,
+	                      0,                    0,
 	                      BLIS_DEFAULT_3M_NR_C, BLIS_EXTEND_3M_NR_C,
 	                      BLIS_DEFAULT_3M_NR_Z, BLIS_EXTEND_3M_NR_Z );
-
 	gemm3m_kr
 	=
-	bli_blksz_obj_create( 0, 0,  0, 0,
+	bli_blksz_obj_create( 0,                    0,
+	                      0,                    0,
 	                      BLIS_DEFAULT_3M_KR_C, BLIS_EXTEND_3M_KR_C,
 	                      BLIS_DEFAULT_3M_KR_Z, BLIS_EXTEND_3M_KR_Z );
 
+
+	// Attach the register blksz_t objects as sub-blocksizes to the cache
+	// blksz_t objects.
+	bli_blksz_obj_attach_to( gemm3m_mr, gemm3m_mc );
+	bli_blksz_obj_attach_to( gemm3m_nr, gemm3m_nc );
+	bli_blksz_obj_attach_to( gemm3m_kr, gemm3m_kc );
 
 
 	// Create function pointer object for each datatype-specific gemm

@@ -39,8 +39,8 @@ extern packm_t*   packm_cntl;
 extern packv_t*   packv_cntl;
 extern unpackv_t* unpackv_cntl;
 
-static blksz_t*   gemv_mc;
-static blksz_t*   gemv_nc;
+blksz_t*          gemv_mc;
+blksz_t*          gemv_nc;
 
 gemv_t*           gemv_cntl_bs_ke_dot;
 gemv_t*           gemv_cntl_bs_ke_axpy;
@@ -54,32 +54,22 @@ gemv_t*           gemv_cntl_cp_bs_axpy;
 gemv_t*           gemv_cntl_ge_dot;
 gemv_t*           gemv_cntl_ge_axpy;
 
-// Cache blocksizes.
-
-#define BLIS_GEMV_MC_S BLIS_DEFAULT_L2_MC_S
-#define BLIS_GEMV_MC_D BLIS_DEFAULT_L2_MC_D
-#define BLIS_GEMV_MC_C BLIS_DEFAULT_L2_MC_C
-#define BLIS_GEMV_MC_Z BLIS_DEFAULT_L2_MC_Z
-
-#define BLIS_GEMV_NC_S BLIS_DEFAULT_L2_NC_S
-#define BLIS_GEMV_NC_D BLIS_DEFAULT_L2_NC_D
-#define BLIS_GEMV_NC_C BLIS_DEFAULT_L2_NC_C
-#define BLIS_GEMV_NC_Z BLIS_DEFAULT_L2_NC_Z
-
-
 
 void bli_gemv_cntl_init()
 {
 	// Create blocksize objects for each dimension.
-	gemv_mc = bli_blksz_obj_create( BLIS_GEMV_MC_S, 0,
-	                                BLIS_GEMV_MC_D, 0,
-	                                BLIS_GEMV_MC_C, 0,
-	                                BLIS_GEMV_MC_Z, 0 );
-
-	gemv_nc = bli_blksz_obj_create( BLIS_GEMV_NC_S, 0,
-	                                BLIS_GEMV_NC_D, 0,
-	                                BLIS_GEMV_NC_C, 0,
-	                                BLIS_GEMV_NC_Z, 0 );
+	gemv_mc
+	=
+	bli_blksz_obj_create( BLIS_DEFAULT_L2_MC_S, 0,
+	                      BLIS_DEFAULT_L2_MC_D, 0,
+	                      BLIS_DEFAULT_L2_MC_C, 0,
+	                      BLIS_DEFAULT_L2_MC_Z, 0 );
+	gemv_nc
+	=
+	bli_blksz_obj_create( BLIS_DEFAULT_L2_NC_S, 0,
+	                      BLIS_DEFAULT_L2_NC_D, 0,
+	                      BLIS_DEFAULT_L2_NC_C, 0,
+	                      BLIS_DEFAULT_L2_NC_Z, 0 );
 
 
 	// Create control trees for the lowest-level kernels. These trees induce

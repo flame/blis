@@ -416,10 +416,14 @@ typedef struct mem_s
 typedef struct blksz_s
 {
 	// Primary blocksize values.
-	dim_t v[BLIS_NUM_FP_TYPES];
+	dim_t           v[BLIS_NUM_FP_TYPES];
 
 	// Blocksize Extensions.
-	dim_t e[BLIS_NUM_FP_TYPES];
+	dim_t           e[BLIS_NUM_FP_TYPES];
+
+	// Sub-blocksize pointer.
+	struct blksz_s* sub;
+
 } blksz_t;
 
 // -- Function pointer object type --

@@ -68,6 +68,16 @@ void bli_blksz_obj_init( blksz_t* b,
 	b->e[BLIS_BITVAL_DOUBLE_TYPE]   = be_d;
 	b->e[BLIS_BITVAL_SCOMPLEX_TYPE] = be_c;
 	b->e[BLIS_BITVAL_DCOMPLEX_TYPE] = be_z;
+
+	// By default, set the sub-blocksize field to NULL.
+	b->sub = NULL;
+}
+
+
+void bli_blksz_obj_attach_to( blksz_t* br,
+                              blksz_t* bc )
+{
+	bc->sub = br;
 }
 
 
@@ -119,6 +129,12 @@ dim_t bli_blksz_total_for_obj( obj_t*   obj,
 }
 
 
+blksz_t* bli_blksz_sub( blksz_t* b )
+{
+	return b->sub;
+}
+
+
 dim_t bli_determine_blocksize_f( dim_t    i,
                                  dim_t    dim,
                                  obj_t*   obj,
@@ -133,7 +149,7 @@ dim_t bli_determine_blocksize_f( dim_t    i,
 	// to bottom-right).
 
 	// Extract the execution datatype and use it to query the corresponding
-	// blocksize and blocksize extension values rom the blksz_t object.
+	// blocksize and blocksize extension values from the blksz_t object.
 	dt    = bli_obj_execution_datatype( *obj );
 	b_alg = bli_blksz_for_type( dt, b );
 	b_ext = bli_blksz_ext_for_type( dt, b );
@@ -173,7 +189,7 @@ dim_t bli_determine_blocksize_b( dim_t    i,
 	// to top-left).
 
 	// Extract the execution datatype and use it to query the corresponding
-	// blocksize and blocksize extension values rom the blksz_t object.
+	// blocksize and blocksize extension values from the blksz_t object.
 	dt    = bli_obj_execution_datatype( *obj );
 	b_alg = bli_blksz_for_type( dt, b );
 	b_ext = bli_blksz_ext_for_type( dt, b );
@@ -213,5 +229,22 @@ dim_t bli_determine_blocksize_b( dim_t    i,
 	}
 
 	return b_now;
+}
+
+
+dim_t bli_determine_reg_blocksize( obj_t*   obj,
+                                   blksz_t* b )
+{
+	num_t    dt;
+	blksz_t* b_sub_obj;
+	dim_t    b_sub;
+
+	// Extract the execution datatype and sub-blocksize and use them to
+	// query the the register blocksize from the blksz_t object.
+	dt        = bli_obj_execution_datatype( *obj );
+	b_sub_obj = bli_blksz_sub( b );
+	b_sub     = bli_blksz_for_type( dt, b_sub_obj );
+
+	return b_sub;
 }
 
