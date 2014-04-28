@@ -727,15 +727,18 @@ typedef enum
 	// Packing-specific errors
 	BLIS_PACK_SCHEMA_NOT_SUPPORTED_FOR_UNPACK  = (-100),
 
+	// Buffer-specific errors 
+	BLIS_EXPECTED_NONNULL_OBJECT_BUFFER        = (-110),
+
 	// Memory allocator errors
-	BLIS_INVALID_PACKBUF                       = (-110),
-	BLIS_REQUESTED_CONTIG_BLOCK_TOO_BIG        = (-111),
-	BLIS_EXHAUSTED_CONTIG_MEMORY_POOL          = (-112),
+	BLIS_INVALID_PACKBUF                       = (-120),
+	BLIS_REQUESTED_CONTIG_BLOCK_TOO_BIG        = (-121),
+	BLIS_EXHAUSTED_CONTIG_MEMORY_POOL          = (-122),
 
 	// Object-related errors
-	BLIS_EXPECTED_OBJECT_ALIAS                 = (-120),
+	BLIS_EXPECTED_OBJECT_ALIAS                 = (-130),
 
-	BLIS_ERROR_CODE_MAX                        = (-130)
+	BLIS_ERROR_CODE_MAX                        = (-140)
 } err_t;
 
 #endif

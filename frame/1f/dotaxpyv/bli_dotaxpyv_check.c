@@ -99,5 +99,25 @@ void bli_dotaxpyv_check( obj_t*  alpha,
 
 	e_val = bli_check_object_alias_of( xt, x );
 	bli_check_error_code( e_val );
+
+	// Check object buffers (for non-NULLness).
+
+	e_val = bli_check_object_buffer( alpha );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( xt );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( x );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( y );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( rho );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( z );
+	bli_check_error_code( e_val );
 }
 

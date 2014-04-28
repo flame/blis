@@ -70,14 +70,14 @@ void bli_her2_int( conj_t   conjh,
 	obj_t     y_local;
 	obj_t     c_local;
 
-	// Check parameters.
-	if ( bli_error_checking_is_enabled() )
-		bli_her2_int_check( conjh, alpha, x, y, c, cntl );
-
 	// If C, x, or y has a zero dimension, return early.
 	if ( bli_obj_has_zero_dim( *c ) ) return;
 	if ( bli_obj_has_zero_dim( *x ) ) return;
 	if ( bli_obj_has_zero_dim( *y ) ) return;
+
+	// Check parameters.
+	if ( bli_error_checking_is_enabled() )
+		bli_her2_int_check( conjh, alpha, x, y, c, cntl );
 
 	// Alias the operands in case we need to apply conjugations.
 	bli_obj_alias_to( *x, x_local );

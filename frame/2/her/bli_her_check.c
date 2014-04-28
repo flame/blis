@@ -120,6 +120,17 @@ void bli_her_int_check( conj_t  conjh,
 		bli_check_error_code( e_val );
 	}
 
+	// Check object buffers (for non-NULLness).
+
+	e_val = bli_check_object_buffer( alpha );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( x );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( c );
+	bli_check_error_code( e_val );
+
 	// Check control tree pointer.
 
 	e_val = bli_check_valid_cntl( ( void* )cntl );

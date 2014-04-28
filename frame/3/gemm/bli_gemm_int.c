@@ -66,10 +66,6 @@ void bli_gemm_int( obj_t*  alpha,
 	impl_t    i;
 	FUNCPTR_T f;
 
-	// Check parameters.
-	if ( bli_error_checking_is_enabled() )
-		bli_gemm_int_check( alpha, a, b, beta, c, cntl );
-
 	// If C has a zero dimension, return early.
 	if ( bli_obj_has_zero_dim( *c ) ) return;
 
@@ -80,6 +76,10 @@ void bli_gemm_int( obj_t*  alpha,
 		bli_scalm( beta, c );
 		return;
 	}
+
+	// Check parameters.
+	if ( bli_error_checking_is_enabled() )
+		bli_gemm_int_check( alpha, a, b, beta, c, cntl );
 
 	// If A or B is marked as being filled with zeros, scale C by beta and
 	// return early.

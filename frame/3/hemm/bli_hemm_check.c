@@ -111,6 +111,23 @@ void bli_hemm_check( side_t  side,
 {
 	err_t e_val;
 
+	// Check object pointers.
+
+	e_val = bli_check_null_pointer( alpha );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_null_pointer( a );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_null_pointer( b );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_null_pointer( beta );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_null_pointer( c );
+	bli_check_error_code( e_val );
+
 	// Check basic properties of the operation.
 
 	bli_hemm_basic_check( side, alpha, a, b, beta, c );

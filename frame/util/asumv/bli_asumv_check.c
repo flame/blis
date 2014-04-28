@@ -54,5 +54,13 @@ void bli_asumv_check( obj_t*  x,
 
 	e_val = bli_check_scalar_object( asum );
 	bli_check_error_code( e_val );
+
+	// Check object buffers (for non-NULLness).
+
+	e_val = bli_check_object_buffer( x );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( asum );
+	bli_check_error_code( e_val );
 }
 

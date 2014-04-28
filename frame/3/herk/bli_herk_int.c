@@ -76,10 +76,6 @@ void bli_herk_int( obj_t*  alpha,
 	bool_t    uplo;
 	FUNCPTR_T f;
 
-	// Check parameters.
-	if ( bli_error_checking_is_enabled() )
-		bli_herk_int_check( alpha, a, ah, beta, c, cntl );
-
 	// If C has a zero dimension, return early.
 	if ( bli_obj_has_zero_dim( *c ) ) return;
 
@@ -90,6 +86,10 @@ void bli_herk_int( obj_t*  alpha,
 		bli_scalm( beta, c );
 		return;
 	}
+
+	// Check parameters.
+	if ( bli_error_checking_is_enabled() )
+		bli_herk_int_check( alpha, a, ah, beta, c, cntl );
 
 	// Alias A and A' in case we need to update attached scalars.
 	bli_obj_alias_to( *a, a_local );

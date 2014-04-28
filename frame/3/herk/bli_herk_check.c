@@ -131,6 +131,23 @@ void bli_herk_int_check( obj_t*  alpha,
 {
 	err_t e_val;
 
+	// Check object buffers (for non-NULLness).
+
+	e_val = bli_check_object_buffer( alpha );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( a );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( ah );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( beta );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( c );
+	bli_check_error_code( e_val );
+
 	// Check basic properties of the operation.
 
 	bli_herk_basic_check( alpha, a, ah, beta, c );

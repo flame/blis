@@ -114,6 +114,23 @@ void bli_gemv_int_check( obj_t*  alpha,
 
 	bli_gemv_basic_check( alpha, a, x, beta, y );
 
+	// Check object buffers (for non-NULLness).
+
+	e_val = bli_check_object_buffer( alpha );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( a );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( x );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( beta );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( y );
+	bli_check_error_code( e_val );
+
 	// Check control tree pointer.
 
 	e_val = bli_check_valid_cntl( ( void* )cntl );

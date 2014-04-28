@@ -74,5 +74,19 @@ void bli_axpyf_check( obj_t*  alpha,
 
 	e_val = bli_check_vector_dim_equals( y, bli_obj_length_after_trans( *a ) );
 	bli_check_error_code( e_val );
+
+	// Check object buffers (for non-NULLness).
+
+	e_val = bli_check_object_buffer( alpha );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( a );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( x );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( y );
+	bli_check_error_code( e_val );
 }
 

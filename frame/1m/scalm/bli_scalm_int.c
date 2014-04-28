@@ -53,15 +53,15 @@ void bli_scalm_int( obj_t*   beta,
 	impl_t    i;
 	FUNCPTR_T f;
 
+	// Return early if one of the matrix operands has a zero dimension.
+	if ( bli_obj_has_zero_dim( *x ) ) return;
+
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
 		bli_scalm_int_check( beta, x, cntl );
 
 	// First check if we are to skip this operation.
 	if ( cntl_is_noop( cntl ) ) return;
-
-	// Return early if one of the matrix operands has a zero dimension.
-	if ( bli_obj_has_zero_dim( *x ) ) return;
 
 	// Return early if both beta and the scalar attached to x are unit.
 	if ( bli_obj_equals( beta, &BLIS_ONE ) &&
