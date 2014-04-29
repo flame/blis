@@ -59,6 +59,9 @@ void bli_fprintv( FILE* file, char* s1, obj_t* x, char* format, char* s2 )
 
 	FUNCPTR_T f;
 
+	if ( bli_error_checking_is_enabled() )
+		bli_fprintv_check( file, s1, x, format, s2 );
+
 	// Index into the type combination array to extract the correct
 	// function pointer.
 	f = ftypes[dt_x];

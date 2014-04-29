@@ -32,26 +32,4 @@
 
 */
 
-#include "bli_randv_check.h"
-#include "bli_randv_unb_var1.h"
-
-
-//
-// Prototype object-based interface.
-//
-void bli_randv( obj_t* x );
-
-
-//
-// Prototype BLAS-like interfaces.
-//
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname)( \
-                           dim_t  n, \
-                           ctype* x, inc_t incx \
-                        );
-
-INSERT_GENTPROT_BASIC( randv )
-
+void bli_randm_check( obj_t* x );

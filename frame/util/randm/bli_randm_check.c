@@ -32,26 +32,23 @@
 
 */
 
-#include "bli_randv_check.h"
-#include "bli_randv_unb_var1.h"
+#include "blis.h"
 
+void bli_randm_check( obj_t* x )
+{
+	err_t e_val;
 
-//
-// Prototype object-based interface.
-//
-void bli_randv( obj_t* x );
+	// Check object datatypes.
 
+	e_val = bli_check_noninteger_object( x );
+	bli_check_error_code( e_val );
 
-//
-// Prototype BLAS-like interfaces.
-//
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname)( \
-                           dim_t  n, \
-                           ctype* x, inc_t incx \
-                        );
+	e_val = bli_check_nonconstant_object( x );
+	bli_check_error_code( e_val );
 
-INSERT_GENTPROT_BASIC( randv )
+	// Check object buffers (for non-NULLness).
+
+	e_val = bli_check_object_buffer( x );
+	bli_check_error_code( e_val );
+}
 
