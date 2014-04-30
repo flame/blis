@@ -82,8 +82,9 @@ void bli_trmm_blk_var2f( obj_t*  a,
 	// Query dimension in partitioning direction.
 	n_trans = bli_obj_width_after_trans( *b );
     dim_t start, end;
-    //bli_get_range( thread, 0, n_trans, 8, &start, &end );
-    bli_get_range_weighted( thread, 0, n_trans, BLIS_DEFAULT_NR_D, bli_obj_is_lower( *c ), &start, &end );
+    bli_get_range_weighted( thread, 0, n_trans, 
+                            bli_determine_reg_blocksize( b, cntl_blocksize( cntl ) ),
+                            bli_obj_is_lower( *c ), &start, &end );
 
 	// Partition along the n dimension.
 	for ( i = start; i < end; i += b_alg )

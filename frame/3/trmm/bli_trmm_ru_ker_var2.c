@@ -190,7 +190,7 @@ void PASTEMAC(ch,varname)( \
 	dim_t           off_b0111; \
 	dim_t           i, j; \
 	inc_t           rstep_a; \
-	inc_t           cstep_b; \
+	/*inc_t           cstep_b; */\
 	inc_t           rstep_c, cstep_c; \
 	inc_t           ss_b; \
 	auxinfo_t       aux; \
@@ -272,7 +272,7 @@ void PASTEMAC(ch,varname)( \
 	/* Determine some increments used to step through A, B, and C. */ \
 	rstep_a = ps_a; \
 \
-	cstep_b = ps_b; \
+	/*cstep_b = ps_b; */\
 \
 	rstep_c = rs_c * MR; \
 	cstep_c = cs_c * NR; \
