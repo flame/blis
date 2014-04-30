@@ -34,8 +34,8 @@
 
 #include "blis.h"
 
-void bli_setm_basic_check( obj_t*   beta,
-                           obj_t*   x )
+void bli_setm_check( obj_t*   beta,
+                     obj_t*   x )
 {
 	err_t e_val;
 
@@ -59,13 +59,13 @@ void bli_setm_basic_check( obj_t*   beta,
 
 	e_val = bli_check_nonunit_diag( x );
 	bli_check_error_code( e_val );
-}
 
-void bli_setm_check( obj_t*   beta,
-                     obj_t*   x )
-{
-	// Check basic properties of the operation.
+	// Check object buffers (for non-NULLness).
 
-	bli_setm_basic_check( beta, x );
+	e_val = bli_check_object_buffer( beta );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( x );
+	bli_check_error_code( e_val );
 }
 

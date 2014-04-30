@@ -70,12 +70,13 @@ void bli_trsv_int( obj_t*  alpha,
 	FUNCPTR_T f;
 	obj_t     a_local;
 
+	// If A or x has a zero dimension, return early.
+	if ( bli_obj_has_zero_dim( *a ) ) return;
+	if ( bli_obj_has_zero_dim( *x ) ) return;
+
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
 		bli_trsv_int_check( alpha, a, x, cntl );
-
-	// If x has a zero dimension, return early.
-	if ( bli_obj_has_zero_dim( *x ) ) return;
 
 	// Alias A in case we need to induce a transformation (ie: transposition).
 	bli_obj_alias_to( *a, a_local );

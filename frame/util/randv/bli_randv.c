@@ -34,12 +34,22 @@
 
 #include "blis.h"
 
+
+//
+// Define object-based interface.
+//
 void bli_randv( obj_t* x )
 {
+	if ( bli_error_checking_is_enabled() )
+		bli_randv_check( x );
+
 	bli_randv_unb_var1( x );
 }
 
 
+//
+// Define BLAS-like interfaces.
+//
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, varname ) \
 \

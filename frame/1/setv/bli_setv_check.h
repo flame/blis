@@ -32,8 +32,5 @@
 
 */
 
-void bli_setv_basic_check( obj_t*   beta,
-                           obj_t*   x );
-
 void bli_setv_check( obj_t*   beta,
                      obj_t*   x );

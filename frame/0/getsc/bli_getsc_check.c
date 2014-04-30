@@ -49,5 +49,10 @@ void bli_getsc_check( obj_t*  chi,
 
 	e_val = bli_check_scalar_object( chi );
 	bli_check_error_code( e_val );
+
+	// Check object buffers (for non-NULLness).
+
+	e_val = bli_check_object_buffer( chi );
+	bli_check_error_code( e_val );
 }
 

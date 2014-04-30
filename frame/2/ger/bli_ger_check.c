@@ -94,16 +94,30 @@ void bli_ger_check( obj_t*  alpha,
 }
 
 void bli_ger_int_check( obj_t*  alpha,
-                    obj_t*  x,
-                    obj_t*  y,
-                    obj_t*  a,
-                    ger_t*  cntl )
+                        obj_t*  x,
+                        obj_t*  y,
+                        obj_t*  a,
+                        ger_t*  cntl )
 {
 	err_t e_val;
 
 	// Check object datatypes.
 
 	bli_ger_basic_check( alpha, x, y, a );
+
+	// Check object buffers (for non-NULLness).
+
+	e_val = bli_check_object_buffer( alpha );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( x );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( y );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( a );
+	bli_check_error_code( e_val );
 
 	// Check control tree pointer
 

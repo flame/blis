@@ -73,9 +73,19 @@ void bli_scalm_int_check( obj_t*   beta,
                           obj_t*   x,
                           scalm_t* cntl )
 {
+	err_t e_val;
+
 	// Check basic properties of the operation.
 
 	bli_scalm_basic_check( beta, x );
+
+	// Check object buffers (for non-NULLness).
+
+	e_val = bli_check_object_buffer( beta );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( x );
+	bli_check_error_code( e_val );
 
 	// Check control tree pointer
 

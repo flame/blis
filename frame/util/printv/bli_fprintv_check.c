@@ -34,69 +34,28 @@
 
 #include "blis.h"
 
-void bli_axpy2v_check( obj_t*  alpha1,
-                       obj_t*  alpha2,
-                       obj_t*  x,
-                       obj_t*  y,
-                       obj_t*  z )
+void bli_fprintv_check( FILE*  file,
+                        char*  s1,
+                        obj_t* x,
+                        char*  format,
+                        char*  s2 )
 {
 	err_t e_val;
 
-	// Check object datatypes.
+	// Check argument pointers.
 
-	e_val = bli_check_noninteger_object( alpha1 );
+	e_val = bli_check_null_pointer( file );
 	bli_check_error_code( e_val );
 
-	e_val = bli_check_noninteger_object( alpha2 );
+	e_val = bli_check_null_pointer( s1 );
 	bli_check_error_code( e_val );
 
-	e_val = bli_check_floating_object( x );
-	bli_check_error_code( e_val );
-
-	e_val = bli_check_floating_object( y );
-	bli_check_error_code( e_val );
-
-	e_val = bli_check_floating_object( z );
-	bli_check_error_code( e_val );
-
-	// Check object dimensions.
-
-	e_val = bli_check_scalar_object( alpha1 );
-	bli_check_error_code( e_val );
-
-	e_val = bli_check_scalar_object( alpha2 );
-	bli_check_error_code( e_val );
-
-	e_val = bli_check_vector_object( x );
-	bli_check_error_code( e_val );
-
-	e_val = bli_check_vector_object( y );
-	bli_check_error_code( e_val );
-
-	e_val = bli_check_vector_object( z );
-	bli_check_error_code( e_val );
-
-	e_val = bli_check_equal_vector_lengths( x, y );
-	bli_check_error_code( e_val );
-
-	e_val = bli_check_equal_vector_lengths( x, z );
+	e_val = bli_check_null_pointer( s2 );
 	bli_check_error_code( e_val );
 
 	// Check object buffers (for non-NULLness).
 
-	e_val = bli_check_object_buffer( alpha1 );
-	bli_check_error_code( e_val );
-
-	e_val = bli_check_object_buffer( alpha2 );
-	bli_check_error_code( e_val );
-
 	e_val = bli_check_object_buffer( x );
-	bli_check_error_code( e_val );
-
-	e_val = bli_check_object_buffer( y );
-	bli_check_error_code( e_val );
-
-	e_val = bli_check_object_buffer( z );
 	bli_check_error_code( e_val );
 }
 

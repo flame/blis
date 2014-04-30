@@ -57,5 +57,13 @@ void bli_addm_check( obj_t*  x,
 
 	e_val = bli_check_conformal_dims( x, y );
 	bli_check_error_code( e_val );
+
+	// Check object buffers (for non-NULLness).
+
+	e_val = bli_check_object_buffer( x );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( y );
+	bli_check_error_code( e_val );
 }
 

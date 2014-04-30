@@ -70,5 +70,16 @@ void bli_zipsc_check( obj_t* beta_r,
 
 	e_val = bli_check_scalar_object( chi );
 	bli_check_error_code( e_val );
+
+	// Check object buffers (for non-NULLness).
+
+	e_val = bli_check_object_buffer( beta_r );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( beta_i );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( chi );
+	bli_check_error_code( e_val );
 }
 

@@ -120,6 +120,23 @@ void bli_trmm_int_check( obj_t*  alpha,
 {
 	err_t e_val;
 
+	// Check object buffers (for non-NULLness).
+
+	e_val = bli_check_object_buffer( alpha );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( a );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( b );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( beta );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( c );
+	bli_check_error_code( e_val );
+
 	// Check basic properties of the operation.
 
 	bli_trmm_basic_check( BLIS_LEFT, alpha, a, b, beta, c );

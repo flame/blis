@@ -77,7 +77,6 @@ err_t bli_check_null_pointer( void* ptr )
 	return e_val;
 }
 
-
 // -- Parameter-related checks -------------------------------------------------
 
 err_t bli_check_valid_side( side_t side )
@@ -676,7 +675,6 @@ err_t bli_check_valid_3x3_subpart( subpart_t part )
 	return e_val;
 }
 
-
 // -- Control tree-related checks ----------------------------------------------
 
 err_t bli_check_valid_cntl( void* cntl )
@@ -714,6 +712,17 @@ err_t bli_check_packv_schema_on_unpack( obj_t* a )
 	return e_val;
 }
 
+// -- Buffer-related checks ----------------------------------------------------
+
+err_t bli_check_object_buffer( obj_t* a )
+{
+	err_t e_val = BLIS_SUCCESS;
+
+	if ( bli_obj_buffer( *a ) == NULL )
+		e_val = BLIS_EXPECTED_NONNULL_OBJECT_BUFFER;
+
+	return e_val;
+}
 
 // -- Memory allocator checks --------------------------------------------------
 
@@ -749,7 +758,6 @@ err_t bli_check_if_exhausted_pool( pool_t* pool )
 
 	return e_val;
 }
-
 
 // -- Memory allocator checks --------------------------------------------------
 

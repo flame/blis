@@ -62,6 +62,9 @@ void bli_fprintm( FILE* file, char* s1, obj_t* x, char* format, char* s2 )
 
 	FUNCPTR_T f;
 
+	if ( bli_error_checking_is_enabled() )
+		bli_fprintm_check( file, s1, x, format, s2 );
+
 	// Handle constants up front.
 	if ( dt_x == BLIS_CONSTANT )
 	{

@@ -33,6 +33,7 @@
 */
 
 #include "bli_fprintv.h"
+#include "bli_fprintv_check.h"
 
 void bli_printv( char*  s1,
                  obj_t* x,

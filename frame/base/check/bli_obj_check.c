@@ -89,8 +89,14 @@ void bli_obj_attach_buffer_check( void*  p,
 {
 	err_t e_val;
 
-	e_val = bli_check_null_pointer( p );
-	bli_check_error_code( e_val );
+	// NOTE: We allow the caller to attach NULL to an object because
+	// the buffer contains NULL after _create_wihout_buffer() anyway.
+	// Thus, we're not opening a window for undefined behavior because
+	// that window is already open. Instead of checking for NULL here,
+	// we check the object buffers for all objects in all of the
+	// computational operations' _check()/_int_check() functions.
+	//e_val = bli_check_null_pointer( p );
+	//bli_check_error_code( e_val );
 
 	e_val = bli_check_matrix_strides( bli_obj_length( *obj ),
 	                                  bli_obj_width( *obj ),
@@ -142,6 +148,9 @@ void bli_obj_create_const_copy_of_check( obj_t* a, obj_t* b )
 	bli_check_error_code( e_val );
 
 	e_val = bli_check_scalar_object( a );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( a );
 	bli_check_error_code( e_val );
 }
 

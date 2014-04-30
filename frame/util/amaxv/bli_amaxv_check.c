@@ -57,5 +57,13 @@ void bli_amaxv_check( obj_t*  x,
 
 	e_val = bli_check_scalar_object( abmax_i );
 	bli_check_error_code( e_val );
+
+	// Check object buffers (for non-NULLness).
+
+	e_val = bli_check_object_buffer( x );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( abmax_i );
+	bli_check_error_code( e_val );
 }
 
