@@ -110,7 +110,8 @@ void bli_gemm_thrinfo_free_paths( gemm_thrinfo_t** threads, dim_t num )
 gemm_thrinfo_t** bli_create_gemm_thrinfo_paths( )
 {
     dim_t jc_way = bli_read_nway_from_env( "BLIS_JC_NT" );
-    dim_t kc_way = bli_read_nway_from_env( "BLIS_KC_NT" );
+//    dim_t kc_way = bli_read_nway_from_env( "BLIS_KC_NT" );
+    dim_t kc_way = 1;
     dim_t ic_way = bli_read_nway_from_env( "BLIS_IC_NT" );
     dim_t jr_way = bli_read_nway_from_env( "BLIS_JR_NT" );
     dim_t ir_way = bli_read_nway_from_env( "BLIS_IR_NT" );
