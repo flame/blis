@@ -105,6 +105,7 @@ void bli_setup_communicator( thread_comm_t* communicator, dim_t n_threads)
 
 void tree_barrier( barrier_t* barack )
 {
+#ifdef BLIS_ENABLE_OPENMP
     int my_signal = barack->signal;
     int my_count;
 
@@ -122,6 +123,9 @@ void tree_barrier( barrier_t* barack )
         volatile int* listener = &barack->signal;
         while( *listener == my_signal ) {}
     }
+#else
+    return
+#endif
 }
 
 void bli_barrier( thread_comm_t* comm, dim_t t_id )
@@ -130,6 +134,7 @@ void bli_barrier( thread_comm_t* comm, dim_t t_id )
 }
 
 #else
+
 void bli_cleanup_communicator( thread_comm_t* communicator )
 {
     if( communicator == NULL ) return;
@@ -145,6 +150,7 @@ void bli_setup_communicator( thread_comm_t* communicator, dim_t n_threads)
 //barrier routine taken from art of multicore programming or something
 void bli_barrier( thread_comm_t* communicator, dim_t t_id )
 {
+#ifdef BLIS_ENABLE_OPENMP
     if(communicator == NULL || communicator->n_threads == 1)
         return;
     bool_t my_sense = communicator->barrier_sense;
@@ -161,6 +167,9 @@ void bli_barrier( thread_comm_t* communicator, dim_t t_id )
         volatile bool_t* listener = &communicator->barrier_sense;
         while( *listener == my_sense ) {}
     }
+#else
+    return;
+#endif
 }
 #endif
 
@@ -226,6 +235,45 @@ void bli_get_range( void* thr, dim_t all_start, dim_t all_end, dim_t block_facto
     *end   = bli_min( *start + n_pt, size + all_start );
 }
 
+void bli_get_range_weighted( void* thr, dim_t all_start, dim_t all_end, dim_t block_factor, bool_t forward, dim_t* out_start, dim_t* out_end)
+{
+    //bli_get_range( thr, all_start, all_end, block_factor, out_start, out_end );
+    //return;
+
+    thrinfo_t* thread = (thrinfo_t*) thr;
+    dim_t n_way = thread->n_way;
+    dim_t work_id = thread->work_id;
+
+    dim_t size = all_end - all_start;
+    dim_t start = all_start;
+    dim_t end   = all_end;
+
+    if( !forward ) {
+        work_id = n_way - work_id - 1;
+    }
+
+    dim_t curr_caucus = n_way - 1;
+    dim_t len = 0;
+    dim_t num = size*size / n_way; // 2xArea per thread?
+    while(1){
+        dim_t width = sqrt( len*len + num ) - len; // The width of the current caucus
+        width = (width % block_factor == 0) ? width : width + block_factor - (width % block_factor);
+        if( curr_caucus == work_id ) {
+            if( end > width )
+                start = bli_max(end - width, start);
+            break;
+        }
+        else{
+            end -= width;
+            len += width;
+            curr_caucus--;
+        }
+    }
+
+    *out_start = start;
+    *out_end = end;
+}
+/*
 void bli_get_range_weighted( void* thr, dim_t all_start, dim_t all_end, dim_t block_factor, bool_t forward, dim_t* start, dim_t* end)
 {
     thrinfo_t* thread = (thrinfo_t*) thr;
@@ -257,11 +305,12 @@ void bli_get_range_weighted( void* thr, dim_t all_start, dim_t all_end, dim_t bl
     }
     else{
         dim_t len = *end - *start;
-        dim_t num = len * len / n_way;
+        dim_t num = size*size / n_way;
         while(1){
             dim_t width = sqrt(*start * *start + num) - *start;
             width = (width % block_factor == 0) ? width : width + block_factor - (width % block_factor);
-            if(!work_id) {
+
+            if( work_id == 0 ) {
                 *end = bli_min( *start + width, *end );
                 return;
             }
@@ -272,6 +321,7 @@ void bli_get_range_weighted( void* thr, dim_t all_start, dim_t all_end, dim_t bl
         }
     }
 }
+*/
 
 void bli_level3_thread_decorator( dim_t n_threads, 
                                   level3_int_t func, 
@@ -283,6 +333,7 @@ void bli_level3_thread_decorator( dim_t n_threads,
                                   void* cntl, 
                                   void** thread )
 {
+#ifdef BLIS_ENABLE_OPENMP
     _Pragma( "omp parallel num_threads(n_threads)" )
     {
         dim_t omp_id = omp_get_thread_num();
@@ -295,6 +346,15 @@ void bli_level3_thread_decorator( dim_t n_threads,
                   cntl,
                   thread[omp_id] );
     }
+#else
+        func( alpha,
+                  a,
+                  b,
+                  beta,
+                  c,
+                  cntl,
+                  thread[0] );
+#endif
 }
 
 dim_t bli_read_nway_from_env( char* env )

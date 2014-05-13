@@ -86,7 +86,7 @@ gemm_thrinfo_t* bli_create_gemm_thrinfo_node( thread_comm_t* ocomm, dim_t ocomm_
 
 void bli_gemm_thrinfo_free( gemm_thrinfo_t* thread)
 {
-    if( thread == NULL ) return;
+    if( thread == NULL || thread == &BLIS_GEMM_SINGLE_THREADED ) return;
 
     // Free Communicators
     if( thread_am_ochief( thread ) )
@@ -109,12 +109,22 @@ void bli_gemm_thrinfo_free_paths( gemm_thrinfo_t** threads, dim_t num )
 
 gemm_thrinfo_t** bli_create_gemm_thrinfo_paths( )
 {
+
+#ifdef BLIS_ENABLE_MULTITHREADING 
     dim_t jc_way = bli_read_nway_from_env( "BLIS_JC_NT" );
 //    dim_t kc_way = bli_read_nway_from_env( "BLIS_KC_NT" );
     dim_t kc_way = 1;
     dim_t ic_way = bli_read_nway_from_env( "BLIS_IC_NT" );
     dim_t jr_way = bli_read_nway_from_env( "BLIS_JR_NT" );
     dim_t ir_way = bli_read_nway_from_env( "BLIS_IR_NT" );
+#else
+    dim_t jc_way = 1;
+    dim_t kc_way = 1;
+    dim_t ic_way = 1; 
+    dim_t jr_way = 1;
+    dim_t ir_way = 1;
+#endif
+
     
     dim_t global_num_threads = jc_way * kc_way * ic_way * jr_way * ir_way;
     assert( global_num_threads != 0 );

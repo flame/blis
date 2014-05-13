@@ -127,7 +127,10 @@ void bli_mem_acquire_m( siz_t     req_size,
 
 
 		// BEGIN CRITICAL SECTION
-        _Pragma( "omp critical (mem)" ){
+#ifdef BLIS_ENABLE_OPENMP        
+        _Pragma( "omp critical (mem)" )
+#endif
+        {
 
 		// Query the index of the contiguous memory block that resides at the
 		// "top" of the pool.
@@ -199,8 +202,10 @@ void bli_mem_release( mem_t* mem )
 
 
 		// BEGIN CRITICAL SECTION
-        _Pragma( "omp critical (mem)" ){
-
+#ifdef BLIS_ENABLE_OPENMP        
+        _Pragma( "omp critical (mem)" )
+#endif
+        {
 
 		// Increment the top of the memory pool.
 		bli_pool_inc_top_index( pool );
