@@ -108,15 +108,23 @@ void bli_trmm_thrinfo_free_paths( trmm_thrinfo_t** threads, dim_t num )
     bli_free( threads );
 }
 
-trmm_thrinfo_t** bli_create_trmm_thrinfo_paths( )
+trmm_thrinfo_t** bli_create_trmm_thrinfo_paths( bool_t jc_dependency )
 {
 #ifdef BLIS_ENABLE_MULTITHREADING 
-    dim_t jc_way = bli_read_nway_from_env( "BLIS_JC_NT" );
 //    dim_t kc_way = bli_read_nway_from_env( "BLIS_KC_NT" );
     dim_t kc_way = 1;
     dim_t ic_way = bli_read_nway_from_env( "BLIS_IC_NT" );
-    dim_t jr_way = bli_read_nway_from_env( "BLIS_JR_NT" );
     dim_t ir_way = bli_read_nway_from_env( "BLIS_IR_NT" );
+
+    if( !jc_dependency ){
+        dim_t jc_way = bli_read_nway_from_env( "BLIS_JC_NT" );
+        dim_t jr_way = bli_read_nway_from_env( "BLIS_JR_NT" );
+    }
+    else
+    {
+        dim_t jc_way = 1;
+        dim_t jr_way = bli_read_nway_from_env( "BLIS_JC_NT" ) * bli_read_nway_from_env( "BLIS_JR_NT" );
+    }
 #else
     dim_t jc_way = 1;
     dim_t kc_way = 1;

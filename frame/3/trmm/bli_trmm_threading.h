@@ -58,7 +58,7 @@ typedef struct trmm_thrinfo_s trmm_thrinfo_t;
 #define trmm_l_ir_my_iter( index, thread ) ( index % thread->n_way == thread->work_id % thread->n_way )
 #define trmm_l_jr_my_iter( index, thread ) ( index % thread->n_way == thread->work_id % thread->n_way )
 
-trmm_thrinfo_t** bli_create_trmm_thrinfo_paths( );
+trmm_thrinfo_t** bli_create_trmm_thrinfo_paths( bool_t jc_dependency );
 void bli_trmm_thrinfo_free_paths( trmm_thrinfo_t** info, dim_t n_threads );
 
 void bli_setup_trmm_thrinfo_node( trmm_thrinfo_t* thread,

@@ -127,7 +127,7 @@ void bli_trmm3_front( side_t  side,
 	if ( bli_is_left( side ) ) cntl = l_cntl;
 	else                       cntl = r_cntl;
 
-    trmm_thrinfo_t** infos = bli_create_trmm_thrinfo_paths();
+    trmm_thrinfo_t** infos = bli_create_trmm_thrinfo_paths( FALSE );
     dim_t n_threads = thread_num_threads( infos[0] );
 
     // Invoke the internal back-end.
