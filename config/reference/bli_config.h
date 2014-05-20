@@ -69,7 +69,7 @@
 // -- MULTITHREADING -----------------------------------------------------------
 
 // The maximum number of BLIS threads that will run concurrently.
-#define BLIS_MAX_NUM_THREADS             2
+#define BLIS_MAX_NUM_THREADS             1
 
 
 
