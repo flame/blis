@@ -39,7 +39,8 @@
 void bli_herk_u_ker_var2( obj_t*  a,
                           obj_t*  b,
                           obj_t*  c,
-                          herk_t* cntl );
+                          herk_t* cntl,
+                          herk_thrinfo_t* thread );
 
 
 //
@@ -58,7 +59,8 @@ void PASTEMAC(ch,varname)( \
                            void*   b, inc_t rs_b, inc_t pd_b, inc_t ps_b, \
                            void*   beta, \
                            void*   c, inc_t rs_c, inc_t cs_c, \
-                           void*   gemm_ukr  \
+                           void*   gemm_ukr, \
+                           herk_thrinfo_t* thread  \
                          );
 
 INSERT_GENTPROT_BASIC( herk_u_ker_var2 )

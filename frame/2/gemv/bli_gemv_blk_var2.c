@@ -81,7 +81,8 @@ void bli_gemv_blk_var2( obj_t*  alpha,
 
 		// Copy/pack A1, x1 (if needed).
 		bli_packm_int( &a1, &a1_pack,
-		               cntl_sub_packm_a( cntl ) );
+		               cntl_sub_packm_a( cntl ),
+                       &BLIS_PACKM_SINGLE_THREADED );
 		bli_packv_int( &x1, &x1_pack,
 		               cntl_sub_packv_x( cntl ) );
 

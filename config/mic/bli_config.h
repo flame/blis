@@ -36,6 +36,9 @@
 #define BLIS_CONFIG_H
 
 
+#define BLIS_TREE_BARRIER
+#define BLIS_TREE_BARRIER_ARITY 4
+
 // -- OPERATING SYSTEM ---------------------------------------------------------
 
 

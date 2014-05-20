@@ -56,7 +56,8 @@ static FUNCPTR_T GENARRAY(ftypes,packm_unb_var1);
 
 
 void bli_packm_unb_var1( obj_t*   c,
-                         obj_t*   p )
+                         obj_t*   p,
+                         packm_thrinfo_t* thread )
 {
 	num_t     dt_cp     = bli_obj_datatype( *c );
 
@@ -98,20 +99,22 @@ void bli_packm_unb_var1( obj_t*   c,
 	// function pointer.
 	f = ftypes[dt_cp];
 
-	// Invoke the function.
-	f( strucc,
-	   diagoffc,
-	   diagc,
-	   uploc,
-	   transc,
-	   densify,
-	   m_p,
-	   n_p,
-	   m_max_p,
-	   n_max_p,
-	   buf_kappa,
-	   buf_c, rs_c, cs_c,
-	   buf_p, rs_p, cs_p );
+    if( thread_am_ochief( thread ) ) {
+        // Invoke the function.
+        f( strucc,
+           diagoffc,
+           diagc,
+           uploc,
+           transc,
+           densify,
+           m_p,
+           n_p,
+           m_max_p,
+           n_max_p,
+           buf_kappa,
+           buf_c, rs_c, cs_c,
+           buf_p, rs_p, cs_p );
+    }
 }
 
 

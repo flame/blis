@@ -50,7 +50,6 @@
 #include "bli_gemm4m.h"
 #include "bli_gemm3m.h"
 
-
 //
 // Prototype object-based interface.
 //

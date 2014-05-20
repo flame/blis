@@ -45,7 +45,8 @@ typedef void (*FUNCPTR_T)(
                            void*   b, inc_t rs_b, inc_t pd_b, inc_t ps_b,
                            void*   beta,
                            void*   c, inc_t rs_c, inc_t cs_c,
-                           void*   gemm_ukr
+                           void*   gemm_ukr,
+                           gemm_thrinfo_t* thread
                          );
 
 static FUNCPTR_T GENARRAY(ftypes,gemm_ker_var2);
@@ -54,7 +55,8 @@ static FUNCPTR_T GENARRAY(ftypes,gemm_ker_var2);
 void bli_gemm_ker_var2( obj_t*  a,
                         obj_t*  b,
                         obj_t*  c,
-                        gemm_t* cntl )
+                        gemm_t* cntl,
+                        gemm_thrinfo_t* thread )
 {
 	num_t     dt_exec   = bli_obj_execution_datatype( *c );
 
@@ -117,7 +119,8 @@ void bli_gemm_ker_var2( obj_t*  a,
 	   buf_b, rs_b, pd_b, ps_b,
 	   buf_beta,
 	   buf_c, rs_c, cs_c,
-	   gemm_ukr );
+	   gemm_ukr,
+       thread );
 }
 
 
@@ -133,7 +136,8 @@ void PASTEMAC(ch,varname)( \
                            void*   b, inc_t rs_b, inc_t pd_b, inc_t ps_b, \
                            void*   beta, \
                            void*   c, inc_t rs_c, inc_t cs_c, \
-                           void*   gemm_ukr  \
+                           void*   gemm_ukr,  \
+                           gemm_thrinfo_t* thread \
                          ) \
 { \
 	/* Cast the micro-kernel address to its function pointer type. */ \
@@ -213,18 +217,21 @@ void PASTEMAC(ch,varname)( \
 	bli_auxinfo_set_ps_a( ps_a, aux ); \
 	bli_auxinfo_set_ps_b( ps_b, aux ); \
 \
-	b1 = b_cast; \
-	c1 = c_cast; \
+    gemm_thrinfo_t* caucus = gemm_thread_sub_gemm( thread ); \
+    dim_t jr_num_threads = thread_n_way( thread ); \
+    dim_t jr_thread_id   = thread_work_id( thread ); \
+    dim_t ir_num_threads = thread_n_way( caucus ); \
+    dim_t ir_thread_id   = thread_work_id( caucus ); \
 \
 	/* Loop over the n dimension (NR columns at a time). */ \
-	for ( j = 0; j < n_iter; ++j ) \
+	for ( j = jr_thread_id; j < n_iter; j += jr_num_threads ) \
 	{ \
 		ctype* restrict a1; \
 		ctype* restrict c11; \
 		ctype* restrict b2; \
-\
-		a1  = a_cast; \
-		c11 = c1; \
+        \
+        b1 = b_cast + j * cstep_b; \
+        c1 = c_cast + j * cstep_c; \
 \
 		n_cur = ( bli_is_not_edge_f( j, n_iter, n_left ) ? NR : n_left ); \
 \
@@ -232,18 +239,21 @@ void PASTEMAC(ch,varname)( \
 		b2 = b1; \
 \
 		/* Loop over the m dimension (MR rows at a time). */ \
-		for ( i = 0; i < m_iter; ++i ) \
+		for ( i = ir_thread_id; i < m_iter; i += ir_num_threads ) \
 		{ \
 			ctype* restrict a2; \
+\
+            a1 = a_cast + i * rstep_a; \
+            c11 = c1 + i * rstep_c; \
 \
 			m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left ); \
 \
 			/* Compute the addresses of the next panels of A and B. */ \
-			a2 = a1 + rstep_a; \
+            a2 = gemm_get_next_a_micropanel( caucus, a1, rstep_a ); \
 			if ( bli_is_last_iter( i, m_iter ) ) \
 			{ \
 				a2 = a_cast; \
-				b2 = b1 + cstep_b; \
+                b2 = gemm_get_next_b_micropanel( thread, b1, cstep_b ); \
 				if ( bli_is_last_iter( j, n_iter ) ) \
 					b2 = b_cast; \
 			} \
@@ -282,13 +292,7 @@ void PASTEMAC(ch,varname)( \
 				                        beta_cast, \
 				                        c11, rs_c,  cs_c ); \
 			} \
-\
-			a1  += rstep_a; \
-			c11 += rstep_c; \
 		} \
-\
-		b1 += cstep_b; \
-		c1 += cstep_c; \
 	} \
 \
 /*PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: b1", k, NR, b1, NR, 1, "%4.1f", "" ); \

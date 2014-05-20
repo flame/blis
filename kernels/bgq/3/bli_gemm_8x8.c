@@ -33,28 +33,9 @@
 */
 
 #include "blis.h"
-
-void bli_sgemm_8x8(
-                    dim_t      k,
-                    float*     alpha,
-                    float*     a,
-                    float*     b,
-                    float*     beta,
-                    float*     c, inc_t rs_c, inc_t cs_c,
-                    auxinfo_t* data
-                  )
-{
-	/* Just call the reference implementation. */
-	BLIS_SGEMM_UKERNEL_REF( k,
-	                   alpha,
-	                   a,
-	                   b,
-	                   beta,
-	                   c, rs_c, cs_c,
-	                   data );
-}
-
-
+#undef restrict
+#include <complex.h>
+#include <assert.h>
 
 
 /*
@@ -62,7 +43,7 @@ void bli_sgemm_8x8(
  * Instruction mix was divined by a statement in an email from John Gunnels when asked about the peak performance with a single thread:
  * "Achievable peak can either be:
  * 1) 12.8 GF 8 FMAs cycle * 1.6 GHz
- * 2) 8.53 GF Takes into account the instruction mix in DGEMM and the fact that you can only do an FMA or a load/store in a single cycle with just one thread
+ * 2) 8.53 GF Takes intoo account the instruction mix in DGEMM and the fact that you can only do an FMA or a load/store in a single cycle with just one thread
  * 3) 7.58 GF (2) + the fact that we can only issue 8 instructions in 9 cycles with one thread"
  *
  * Which I have taken to mean: 8.53 GFLOPS implies on average 5.33 flops/cycle. 
@@ -74,14 +55,14 @@ void bli_sgemm_8x8(
 */
 
 void bli_dgemm_8x8(
-                    dim_t      k,
-                    double*    alpha,
-                    double*    a,
-                    double*    b,
-                    double*    beta,
-                    double*    c, inc_t rs_c, inc_t cs_c,
-                    auxinfo_t* data
-                  )
+                        dim_t     k,
+                        restrict double*   alpha,
+                        restrict double*   a,
+                        restrict double*   b,
+                        restrict double*   beta,
+                        restrict double*   c, inc_t rs_c, inc_t cs_c,
+                        auxinfo_t* data
+                      )
 
 {
     //Registers for storing C.
@@ -221,126 +202,169 @@ void bli_dgemm_8x8(
     UPDATE( AB, c, 4 );
 }
 
-void bli_dgemm_8x8_mt(
-                       dim_t      k,
-                       double*    alpha,
-                       double*    a,
-                       double*    b,
-                       double*    beta,
-                       double*    c, inc_t rs_c, inc_t cs_c,
-                       auxinfo_t* data,
-                       dim_t      tid
-                     )
+void printvec(vector4double v)
 {
-	bli_dgemm_8x8( k,
-	               alpha, 
-	               a,
-	               b, beta, 
-	               c, 
-	               rs_c, cs_c,
-	               data );
-}
-
-void bli_cgemm_8x8(
-                    dim_t      k,
-                    scomplex*  alpha,
-                    scomplex*  a,
-                    scomplex*  b,
-                    scomplex*  beta,
-                    scomplex*  c, inc_t rs_c, inc_t cs_c,
-                    auxinfo_t* data
-                  )
-{
-	/* Just call the reference implementation. */
-	BLIS_CGEMM_UKERNEL_REF( k,
-	                   alpha,
-	                   a,
-	                   b,
-	                   beta,
-	                   c, rs_c, cs_c,
-	                   data );
+    double a = vec_extract(v, 0);
+    double b = vec_extract(v, 1);
+    double c = vec_extract(v, 2);
+    double d = vec_extract(v, 3);
+    printf("%4.3f\t%4.3f\t%4.3f\t%4.3f\n", a, b, c, d);
 }
 
 void bli_zgemm_8x8(
-                    dim_t      k,
-                    dcomplex*  alpha,
-                    dcomplex*  a,
-                    dcomplex*  b,
-                    dcomplex*  beta,
-                    dcomplex*  c, inc_t rs_c, inc_t cs_c,
-                    auxinfo_t* data
-                  )
+                        dim_t     k,
+                        dcomplex* alpha_z,
+                        dcomplex* a_z,
+                        dcomplex* b_z,
+                        dcomplex* beta_z,
+                        dcomplex* c_z, inc_t rs_c, inc_t cs_c,
+                        auxinfo_t* data
+                      )
 {
-	/* Just call the reference implementation. */
-	BLIS_ZGEMM_UKERNEL_REF( k,
-	                   alpha,
-	                   a,
-	                   b,
-	                   beta,
-	                   c, rs_c, cs_c,
-	                   data );
+    double * alpha = (double*) alpha_z;
+    double * beta =  (double*) beta_z;
+    double * a = (double*) a_z;
+    double * b = (double*) b_z;
+    double * c = (double*) c_z;
+
+    //Registers for storing C.
+    //2 2x4 subblocks of C, c0, and c1
+    //Each sub-block has 4 columns, 0, 1, 2, 3
+    //Each column has 2 partial sum, a and b, and contains 2 complex numbers.
+    vector4double c00a = vec_splats( 0.0 );
+    vector4double c00b = vec_splats( 0.0 );
+    vector4double c01a = vec_splats( 0.0 );
+    vector4double c01b = vec_splats( 0.0 );
+    vector4double c02a = vec_splats( 0.0 );
+    vector4double c02b = vec_splats( 0.0 );
+    vector4double c03a = vec_splats( 0.0 );
+    vector4double c03b = vec_splats( 0.0 );
+
+    vector4double c10a = vec_splats( 0.0 );
+    vector4double c10b = vec_splats( 0.0 );
+    vector4double c11a = vec_splats( 0.0 );
+    vector4double c11b = vec_splats( 0.0 );
+    vector4double c12a = vec_splats( 0.0 );
+    vector4double c12b = vec_splats( 0.0 );
+    vector4double c13a = vec_splats( 0.0 );
+    vector4double c13b = vec_splats( 0.0 );
+
+
+    vector4double b0, b1, b2, b3;
+    vector4double a0, a1;
+
+    for( dim_t i = 0; i < k; i++ )
+    {
+        
+        b0 = vec_ld2a( 0 * sizeof(double), &b[8*i] );
+        b1 = vec_ld2a( 2 * sizeof(double), &b[8*i] );
+        b2 = vec_ld2a( 4 * sizeof(double), &b[8*i] );
+        b3 = vec_ld2a( 6 * sizeof(double), &b[8*i] );
+
+        a0 = vec_lda ( 0 * sizeof(double), &a[8*i] );
+        a1 = vec_lda ( 4 * sizeof(double), &a[8*i] );
+        
+        c00a    = vec_xmadd ( b0, a0, c00a );
+        c00b    = vec_xxcpnmadd( a0, b0, c00b );
+        c01a    = vec_xmadd ( b1, a0, c01a );
+        c01b    = vec_xxcpnmadd( a0, b1, c01b );
+
+        c02a    = vec_xmadd ( b2, a0, c02a );
+        c02b    = vec_xxcpnmadd( a0, b2, c02b );
+        c03a    = vec_xmadd ( b3, a0, c03a );
+        c03b    = vec_xxcpnmadd( a0, b3, c03b );
+
+
+        c10a    = vec_xmadd ( b0, a1, c10a );
+        c10b    = vec_xxcpnmadd( a1, b0, c10b );
+        c11a    = vec_xmadd ( b1, a1, c11a );
+        c11b    = vec_xxcpnmadd( a1, b1, c11b );
+
+        c12a    = vec_xmadd ( b2, a1, c12a );
+        c12b    = vec_xxcpnmadd( a1, b2, c12b );
+        c13a    = vec_xmadd ( b3, a1, c13a );
+        c13b    = vec_xxcpnmadd( a1, b3, c13b );
+
+    }
+
+    // Create patterns for permuting the "b" parts of each vector
+    vector4double pattern = vec_gpci( 01032 );
+    vector4double zed = vec_splats( 0.0 );
+
+    vector4double AB;
+    vector4double C = vec_splats( 0.0 );
+    vector4double C1 = vec_splats( 0.0 );
+    vector4double C2 = vec_splats( 0.0 );
+
+    double alphar = *alpha;
+    double alphai = *(alpha+1);
+    double betar = *beta;
+    double betai = *(beta+1);
+    vector4double alphav = vec_splats( 0.0 ); 
+    vector4double betav = vec_splats( 0.0 );
+    alphav = vec_insert( alphar, alphav, 0);
+    alphav = vec_insert( alphai, alphav, 1);
+    alphav = vec_insert( alphar, alphav, 2);
+    alphav = vec_insert( alphai, alphav, 3);
+    betav = vec_insert( betar, betav, 0);
+    betav = vec_insert( betai, betav, 1);
+    betav = vec_insert( betar, betav, 2);
+    betav = vec_insert( betai, betav, 3);
+    double ct;
+  
+
+    //Macro to update 2 elements of C in a column.
+    //REG1 is the register holding the first partial sum of those 2 elements
+    //REG2 is the register holding the second partial sum of those 2 elements
+    //ADDR is the address to write them to
+    //OFFSET is the number of rows from ADDR to write to
+#define ZUPDATE( REG1, REG2, ADDR, OFFSET )     \
+{                                               \
+    ct = *(ADDR + (OFFSET + 0) * rs_c);         \
+    C = vec_insert( ct, C, 0 );                 \
+    ct = *(ADDR + (OFFSET + 0) * rs_c + 1);     \
+    C = vec_insert( ct, C, 1 );                 \
+    ct = *(ADDR + (OFFSET + 2) * rs_c);         \
+    C = vec_insert( ct, C, 2 );                 \
+    ct = *(ADDR + (OFFSET + 2) * rs_c + 1);     \
+    C = vec_insert( ct, C, 3 );                 \
+                                                \
+    AB = vec_sub(REG1, REG2 ); \
+                                                \
+    /* Scale by alpha */                        \
+    REG1 = vec_xmadd( alphav, AB, zed );        \
+    REG2 = vec_xxcpnmadd( AB, alphav, zed );     \
+    AB = vec_sub(REG1, REG2 ); \
+                                                \
+                                                \
+    /* Scale by beta */                         \
+    REG1 = vec_xmadd( betav, C, zed );          \
+    REG2 = vec_xxcpnmadd( C, betav, zed );       \
+    C = vec_sub(REG1, REG2 ); \
+                                                \
+    /* Add AB to C */                           \
+    C    = vec_add( AB, C );                    \
+                                                \
+    ct = vec_extract( C, 0 );                  \
+    *(ADDR + (OFFSET + 0) * rs_c) = ct;         \
+    ct = vec_extract( C, 1 );                  \
+    *(ADDR + (OFFSET + 0) * rs_c + 1) = ct;     \
+    ct = vec_extract( C, 2 );                  \
+    *(ADDR + (OFFSET + 2) * rs_c) = ct;         \
+    ct = vec_extract( C, 3 );                  \
+    *(ADDR + (OFFSET + 2) * rs_c + 1) = ct;     \
 }
 
 
-void bli_sgemm_8x8_mt(
-                       dim_t      k,
-                       float*     alpha,
-                       float*     a,
-                       float*     b,
-                       float*     beta,
-                       float*     c, inc_t rs_c, inc_t cs_c,
-                       auxinfo_t* data,
-                       dim_t      t_id
-                     )
-{
-	/* Just call the reference implementation. */
-	BLIS_SGEMM_UKERNEL_REF( k,
-	                   alpha,
-	                   a,
-	                   b,
-	                   beta,
-	                   c, rs_c, cs_c,
-	                   data );
-}
-
-void bli_cgemm_8x8_mt(
-                       dim_t      k,
-                       scomplex*  alpha,
-                       scomplex*  a,
-                       scomplex*  b,
-                       scomplex*  beta,
-                       scomplex*  c, inc_t rs_c, inc_t cs_c,
-                       auxinfo_t* data,
-                       dim_t      t_id
-                     )
-{
-	/* Just call the reference implementation. */
-	BLIS_CGEMM_UKERNEL_REF( k,
-	                   alpha,
-	                   a,
-	                   b,
-	                   beta,
-	                   c, rs_c, cs_c,
-	                   data );
-}
-
-void bli_zgemm_8x8_mt(
-                       dim_t      k,
-                       dcomplex*  alpha,
-                       dcomplex*  a,
-                       dcomplex*  b,
-                       dcomplex*  beta,
-                       dcomplex*  c, inc_t rs_c, inc_t cs_c,
-                       auxinfo_t* data,
-                       dim_t      t_id
-                     )
-{
-	/* Just call the reference implementation. */
-	BLIS_ZGEMM_UKERNEL_REF( k,
-	                   alpha,
-	                   a,
-	                   b,
-	                   beta,
-	                   c, rs_c, cs_c,
-	                   data );
+    ZUPDATE( c00a, c00b, c, 0 );
+    ZUPDATE( c10a, c10b, c, 4 );
+    c += 2*cs_c;
+    ZUPDATE( c01a, c01b, c, 0 );
+    ZUPDATE( c11a, c11b, c, 4 );
+    c += 2*cs_c;
+    ZUPDATE( c02a, c02b, c, 0 );
+    ZUPDATE( c12a, c12b, c, 4 );
+    c += 2*cs_c;
+    ZUPDATE( c03a, c03b, c, 0 );
+    ZUPDATE( c13a, c13b, c, 4 );
 }

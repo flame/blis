@@ -39,7 +39,8 @@
 typedef void (*FUNCPTR_T)( obj_t*  a,
                            obj_t*  b,
                            obj_t*  c,
-                           gemm_t* cntl );
+                           gemm_t* cntl,
+                           gemm_thrinfo_t* thread );
 
 static FUNCPTR_T vars[6][3] =
 {
@@ -57,7 +58,8 @@ void bli_gemm_int( obj_t*  alpha,
                    obj_t*  b,
                    obj_t*  beta,
                    obj_t*  c,
-                   gemm_t* cntl )
+                   gemm_t* cntl,
+                   gemm_thrinfo_t* thread )
 {
 	obj_t     a_local;
 	obj_t     b_local;
@@ -73,7 +75,9 @@ void bli_gemm_int( obj_t*  alpha,
 	if ( bli_obj_has_zero_dim( *a ) ||
 	     bli_obj_has_zero_dim( *b ) )
 	{
-		bli_scalm( beta, c );
+        if( thread_am_ochief( thread ) )
+		    bli_scalm( beta, c );
+        thread_obarrier( thread );
 		return;
 	}
 
@@ -86,7 +90,9 @@ void bli_gemm_int( obj_t*  alpha,
 	if ( bli_obj_is_zeros( *a ) ||
 	     bli_obj_is_zeros( *b ) )
 	{
-		bli_scalm( beta, c );
+        if( thread_am_ochief( thread ) )
+		    bli_scalm( beta, c );
+        thread_obarrier( thread );
 		return;
 	}
 
@@ -104,22 +110,24 @@ void bli_gemm_int( obj_t*  alpha,
 	// packed, this is our last chance to handle the transposition.
 	if ( cntl_is_leaf( cntl ) && bli_obj_has_trans( *c ) )
 	{
-		bli_obj_induce_trans( c_local );
-		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, c_local );
+        //if( thread_am_ochief( thread ) ) {
+            bli_obj_induce_trans( c_local );
+            bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, c_local );
+       // }
 	}
 
 	// If alpha is non-unit, typecast and apply it to the scalar attached
 	// to B.
 	if ( !bli_obj_equals( alpha, &BLIS_ONE ) )
 	{
-		bli_obj_scalar_apply_scalar( alpha, &b_local );
+        bli_obj_scalar_apply_scalar( alpha, &b_local );
 	}
 
 	// If beta is non-unit, typecast and apply it to the scalar attached
 	// to C.
 	if ( !bli_obj_equals( beta, &BLIS_ONE ) )
 	{
-		bli_obj_scalar_apply_scalar( beta, &c_local );
+        bli_obj_scalar_apply_scalar( beta, &c_local );
 	}
 
 	// Extract the variant number and implementation type.
@@ -133,6 +141,7 @@ void bli_gemm_int( obj_t*  alpha,
 	f( &a_local,
 	   &b_local,
 	   &c_local,
-	   cntl );
+	   cntl,
+       thread );
 }
 

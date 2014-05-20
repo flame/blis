@@ -55,7 +55,6 @@ gemm_t*           gemm_cntl_vl_mm;
 
 gemm_t*           gemm_cntl;
 
-
 void bli_gemm_cntl_init()
 {
 	// Create blocksize objects for each dimension.

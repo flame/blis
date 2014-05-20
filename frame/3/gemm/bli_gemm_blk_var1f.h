@@ -35,5 +35,6 @@
 void bli_gemm_blk_var1f( obj_t*  a,
                          obj_t*  b,
                          obj_t*  c,
-                         gemm_t* cntl );
+                         gemm_t* cntl,
+                         gemm_thrinfo_t* thread );
 

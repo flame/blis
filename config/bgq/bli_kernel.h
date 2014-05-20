@@ -54,27 +54,22 @@
 //     (b) NR (for triangular operations such as trmm and trsm).
 //
 
-#define BLIS_DEFAULT_MC_S              256
-#define BLIS_DEFAULT_KC_S              256
+#define BLIS_DEFAULT_MC_S              1024
+#define BLIS_DEFAULT_KC_S              2048
 #define BLIS_DEFAULT_NC_S              8192
 
-// 16 MPI RANKS CASE:
-//#define BLIS_DEFAULT_MC_D              256//1024
-//#define BLIS_DEFAULT_KC_D              512//2048
-//
-
 // 1 MPI RANK CASE:
-#define BLIS_DEFAULT_MC_D              1008
-#define BLIS_DEFAULT_KC_D              2016
-#define BLIS_DEFAULT_NC_D              20480
+#define BLIS_DEFAULT_MC_D              1024
+#define BLIS_DEFAULT_KC_D              2048
+#define BLIS_DEFAULT_NC_D              10240
 
-#define BLIS_DEFAULT_MC_C              128
-#define BLIS_DEFAULT_KC_C              256
-#define BLIS_DEFAULT_NC_C              4096
+#define BLIS_DEFAULT_MC_C              1024
+#define BLIS_DEFAULT_KC_C              2048
+#define BLIS_DEFAULT_NC_C              8192
 
-#define BLIS_DEFAULT_MC_Z              64
-#define BLIS_DEFAULT_KC_Z              256
-#define BLIS_DEFAULT_NC_Z              2048
+#define BLIS_DEFAULT_MC_Z              768
+#define BLIS_DEFAULT_KC_Z              1536
+#define BLIS_DEFAULT_NC_Z              10240
 
 // -- Register blocksizes --
 
@@ -87,7 +82,7 @@
 #define BLIS_DEFAULT_MR_C              8
 #define BLIS_DEFAULT_NR_C              4
 
-#define BLIS_DEFAULT_MR_Z              8
+#define BLIS_DEFAULT_MR_Z              4
 #define BLIS_DEFAULT_NR_Z              4
 
 // NOTE: If the micro-kernel, which is typically unrolled to a factor
@@ -153,7 +148,7 @@
 // -- Default fusing factors for level-1f operations --
 
 #define BLIS_L1F_FUSE_FAC_S        8
-#define BLIS_L1F_FUSE_FAC_D        4
+#define BLIS_L1F_FUSE_FAC_D        8
 #define BLIS_L1F_FUSE_FAC_C        4
 #define BLIS_L1F_FUSE_FAC_Z        2
 
@@ -182,7 +177,7 @@
 #include "bli_gemm_8x8.h"
 
 #define BLIS_DGEMM_UKERNEL         bli_dgemm_8x8
-#define BLIS_DGEMM_UKERNEL_MT      bli_dgemm_8x8_mt
+#define BLIS_ZGEMM_UKERNEL         bli_zgemm_8x8
 
 // -- trsm-related --
 

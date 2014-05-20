@@ -63,8 +63,7 @@ void PASTEMAC(ch,varname)( \
                            ctype*     b, \
                            ctype*     beta, \
                            ctype*     c, inc_t rs_c, inc_t cs_c, \
-                           auxinfo_t* data, \
-                           dim_t      tid  \
+                           auxinfo_t* data \
                          );
 
 INSERT_GENTPROT_BASIC( gemm_8x8_mt )

@@ -52,7 +52,6 @@ void bli_daxpyv_opt_var1(
 	}
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE ) {
-        printf("Defaulting to reference!");
 		BLIS_DAXPYV_KERNEL_REF( conjx, n, alpha, x, incx, y, incy );
 		return;
 	}

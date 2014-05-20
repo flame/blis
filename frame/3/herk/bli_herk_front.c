@@ -77,12 +77,20 @@ void bli_herk_front( obj_t*  alpha,
 		bli_obj_induce_trans( c_local );
 	}
 
-	// Invoke the internal back-end.
-	bli_herk_int( alpha,
-	              &a_local,
-	              &ah_local,
-	              beta,
-	              &c_local,
-	              cntl );
+    herk_thrinfo_t** infos = bli_create_herk_thrinfo_paths();
+    dim_t n_threads = thread_num_threads( infos[0] );
+
+    // Invoke the internal back-end.
+    bli_level3_thread_decorator( n_threads,   
+                                 (level3_int_t) bli_herk_int, 
+                                 alpha, 
+                                 &a_local,  
+                                 &ah_local,  
+                                 beta, 
+                                 &c_local,  
+                                 (void*) cntl, 
+                                 (void**) infos );
+
+    bli_herk_thrinfo_free_paths( infos, n_threads );
 }
 

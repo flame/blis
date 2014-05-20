@@ -39,7 +39,8 @@
 void bli_gemm_ker_var2( obj_t*  a,
                         obj_t*  b,
                         obj_t*  c,
-                        gemm_t* cntl );
+                        gemm_t* cntl,
+                        gemm_thrinfo_t* thread );
 
 
 //
@@ -57,7 +58,8 @@ void PASTEMAC(ch,varname)( \
                            void*   b, inc_t rs_b, inc_t pd_b, inc_t ps_b, \
                            void*   beta, \
                            void*   c, inc_t rs_c, inc_t cs_c, \
-                           void*   gemm_ukr  \
+                           void*   gemm_ukr, \
+                           gemm_thrinfo_t* thread  \
                          );
 
 INSERT_GENTPROT_BASIC( gemm_ker_var2 )

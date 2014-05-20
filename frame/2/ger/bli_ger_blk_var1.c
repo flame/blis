@@ -75,7 +75,8 @@ void bli_ger_blk_var1( obj_t* alpha,
 
 		// Copy/pack A1, x1 (if needed).
 		bli_packm_int( &a1, &a1_pack,
-		               cntl_sub_packm_a( cntl ) );
+		               cntl_sub_packm_a( cntl ),
+                       &BLIS_PACKM_SINGLE_THREADED );
 		bli_packv_int( &x1, &x1_pack,
 		               cntl_sub_packv_x( cntl ) );
 
@@ -90,7 +91,8 @@ void bli_ger_blk_var1( obj_t* alpha,
 
 		// Copy/unpack A1 (if A1 was packed).
 		bli_unpackm_int( &a1_pack, &a1,
-		                 cntl_sub_unpackm_a( cntl ) );
+		                 cntl_sub_unpackm_a( cntl ),
+                         &BLIS_PACKM_SINGLE_THREADED );
 	}
 
 	// If any packing buffers were acquired within packm, release them back

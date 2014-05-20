@@ -52,14 +52,16 @@ typedef void (*FUNCPTR_T)(
                            void*   kappa,
                            void*   c, inc_t rs_c, inc_t cs_c,
                            void*   p, inc_t rs_p, inc_t cs_p,
-                                      dim_t pd_p, inc_t ps_p
+                                      dim_t pd_p, inc_t ps_p,
+                           packm_thrinfo_t* thread
                          );
 
 static FUNCPTR_T GENARRAY(ftypes,packm_blk_var1);
 
 
 void bli_packm_blk_var1( obj_t*   c,
-                         obj_t*   p )
+                         obj_t*   p,
+                         packm_thrinfo_t* t )
 {
 	num_t     dt_cp     = bli_obj_datatype( *c );
 
@@ -117,31 +119,33 @@ void bli_packm_blk_var1( obj_t*   c,
 	   buf_kappa,
 	   buf_c, rs_c, cs_c,
 	   buf_p, rs_p, cs_p,
-	          pd_p, ps_p );
+	          pd_p, ps_p, 
+       t );
 }
 
 
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, varname ) \
 \
-void PASTEMAC(ch,varname)( \
-                           struc_t strucc, \
-                           doff_t  diagoffc, \
-                           diag_t  diagc, \
-                           uplo_t  uploc, \
-                           trans_t transc, \
-                           bool_t  invdiag, \
-                           bool_t  revifup, \
-                           bool_t  reviflo, \
-                           dim_t   m, \
-                           dim_t   n, \
-                           dim_t   m_max, \
-                           dim_t   n_max, \
-                           void*   kappa, \
-                           void*   c, inc_t rs_c, inc_t cs_c, \
-                           void*   p, inc_t rs_p, inc_t cs_p, \
-                                      dim_t pd_p, inc_t ps_p  \
-                         ) \
+void PASTEMAC(ch,varname )( \
+                            struc_t strucc, \
+                            doff_t  diagoffc, \
+                            diag_t  diagc, \
+                            uplo_t  uploc, \
+                            trans_t transc, \
+                            bool_t  invdiag, \
+                            bool_t  revifup, \
+                            bool_t  reviflo, \
+                            dim_t   m, \
+                            dim_t   n, \
+                            dim_t   m_max, \
+                            dim_t   n_max, \
+                            void*   kappa, \
+                            void*   c, inc_t rs_c, inc_t cs_c, \
+                            void*   p, inc_t rs_p, inc_t cs_p, \
+                                       dim_t pd_p, inc_t ps_p, \
+                            packm_thrinfo_t* thread \
+                          ) \
 { \
 	ctype* restrict kappa_cast = kappa; \
 	ctype* restrict c_cast     = c; \
@@ -260,7 +264,7 @@ void PASTEMAC(ch,varname)( \
 \
 	p_begin = p_cast; \
 \
-	for ( ic  = ic0,    ip  = ip0,    it  = 0; it < num_iter; \
+	for ( ic  = ic0,  ip  = ip0,  it = 0; it < num_iter; \
 	      ic += ic_inc, ip += ip_inc, it += 1 ) \
 	{ \
 		panel_dim_i = bli_min( panel_dim_max, iter_dim - ic ); \
@@ -315,6 +319,8 @@ void PASTEMAC(ch,varname)( \
 			c_use = c_begin + (panel_off_i  )*ldc; \
 			p_use = p_begin; \
 \
+        if( packm_thread_my_iter( it, thread ) ) \
+        { \
 			PASTEMAC(ch,packm_tri_cxk)( strucc, \
 			                            diagoffp_i, \
 			                            diagc, \
@@ -328,6 +334,7 @@ void PASTEMAC(ch,varname)( \
 			                            kappa_cast, \
 			                            c_use, rs_c, cs_c, \
 			                            p_use, rs_p, cs_p ); \
+        }\
 \
 \
 			p_inc = ldp * panel_len_max_i; \
@@ -341,6 +348,8 @@ void PASTEMAC(ch,varname)( \
 			panel_len_i     = panel_len_full; \
 			panel_len_max_i = panel_len_max; \
 \
+        if( packm_thread_my_iter( it, thread ) ) \
+        { \
 			PASTEMAC(ch,packm_herm_cxk)( strucc, \
 			                             diagoffc_i, \
 			                             uploc, \
@@ -352,6 +361,7 @@ void PASTEMAC(ch,varname)( \
 			                             kappa_cast, \
 			                             c_begin, rs_c, cs_c, \
 			                             p_begin, rs_p, cs_p ); \
+        } \
 \
 			/* NOTE: This value is equivalent to ps_p. */ \
 			p_inc = ldp * panel_len_max_i; \
@@ -365,6 +375,8 @@ void PASTEMAC(ch,varname)( \
 			panel_len_i     = panel_len_full; \
 			panel_len_max_i = panel_len_max; \
 \
+        if( packm_thread_my_iter( it, thread ) ) \
+        { \
 			PASTEMAC(ch,packm_gen_cxk)( BLIS_GENERAL, \
 			                            0, \
 			                            BLIS_DENSE, \
@@ -376,13 +388,13 @@ void PASTEMAC(ch,varname)( \
 			                            kappa_cast, \
 			                            c_begin, rs_c, cs_c, \
 			                            p_begin, rs_p, cs_p ); \
-\
+		} \
 			/* NOTE: This value is equivalent to ps_p. */ \
 			p_inc = ldp * panel_len_max_i; \
-		} \
+        } \
 \
 \
-	 	p_begin += p_inc; \
+        p_begin += p_inc; \
 	} \
 \
 \

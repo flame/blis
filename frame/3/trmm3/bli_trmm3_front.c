@@ -127,12 +127,20 @@ void bli_trmm3_front( side_t  side,
 	if ( bli_is_left( side ) ) cntl = l_cntl;
 	else                       cntl = r_cntl;
 
-	// Invoke the internal back-end.
-	bli_trmm_int( alpha,
-	              &a_local,
-	              &b_local,
-	              beta,
-	              &c_local,
-	              cntl );
+    trmm_thrinfo_t** infos = bli_create_trmm_thrinfo_paths( FALSE );
+    dim_t n_threads = thread_num_threads( infos[0] );
+
+    // Invoke the internal back-end.
+    bli_level3_thread_decorator( n_threads,   
+                                 (level3_int_t) bli_trmm_int, 
+                                 alpha, 
+                                 &a_local,  
+                                 &b_local,  
+                                 beta, 
+                                 &c_local,  
+                                 (void*) cntl, 
+                                 (void**) infos );
+
+    bli_trmm_thrinfo_free_paths( infos, n_threads );
 }
 

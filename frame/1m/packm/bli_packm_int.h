@@ -34,5 +34,6 @@
 
 void bli_packm_int( obj_t*   a,
                     obj_t*   p,
-                    packm_t* cntl );
+                    packm_t* cntl,
+                    packm_thrinfo_t* thread );
 
