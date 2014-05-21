@@ -68,6 +68,7 @@ void bli_sgemm_opt_8x4(
 		"movq          %6, %%rcx         \n\t" // load address of c
 		"movq          %8, %%rdi         \n\t" // load cs_c
 		"leaq        (,%%rdi,4), %%rdi   \n\t" // cs_c *= sizeof(float)
+		"movq       %%rdi, %%r12         \n\t" // make a copy of cs_c (in bytes)
 		"leaq   (%%rcx,%%rdi,2), %%r10   \n\t" // load address of c + 2*cs_c;
 		"                                \n\t"
 		"prefetcht2   0 * 4(%%r9)        \n\t" // prefetch b_next
@@ -364,15 +365,20 @@ void bli_sgemm_opt_8x4(
 		"                                \n\t"
 		"                                \n\t"
 		"                                \n\t" // determine if
-		"                                \n\t" //   c % 16 == 0, AND
-		"                                \n\t" //   rs_c == 1
-		"                                \n\t" // ie: aligned and column-stored
+		"                                \n\t" //   c      % 16 == 0, AND
+		"                                \n\t" //   8*cs_c % 16 == 0, AND
+		"                                \n\t" //   rs_c        == 1
+		"                                \n\t" // ie: aligned, ldim aligned, and
+		"                                \n\t" // column-stored
 		"                                \n\t"
 		"cmpq       $1, %%r8             \n\t" // set ZF if rs_c == 1.
 		"sete           %%bl             \n\t" // bl = ( ZF == 1 ? 1 : 0 );
 		"testq     $15, %%rcx            \n\t" // set ZF if c & 16 is zero.
 		"setz           %%bh             \n\t" // bh = ( ZF == 1 ? 1 : 0 );
-		"                                \n\t" // and(bl,bh) will reveal result
+		"testq     $15, %%r12            \n\t" // set ZF if (4*cs_c) & 16 is zero.
+		"setz           %%al             \n\t" // al = ( ZF == 1 ? 1 : 0 );
+		"                                \n\t" // and(bl,bh) followed by
+		"                                \n\t" // and(bh,al) will reveal result
 		"                                \n\t"
 		"                                \n\t" // now avoid loading C if beta == 0
 		"                                \n\t"
@@ -383,6 +389,7 @@ void bli_sgemm_opt_8x4(
 		"                                \n\t"
 		"                                \n\t" // check if aligned/column-stored
 		"andb     %%bl, %%bh             \n\t" // set ZF if bl & bh == 1.
+		"andb     %%bh, %%al             \n\t" // set ZF if bh & al == 1.
 		"jne     .SCOLSTORED             \n\t" // jump to column storage case
 		"                                \n\t"
 		"                                \n\t"
@@ -632,6 +639,7 @@ void bli_sgemm_opt_8x4(
 		".SBETAZERO:                     \n\t"
 		"                                \n\t" // check if aligned/column-stored
 		"andb     %%bl, %%bh             \n\t" // set ZF if bl & bh == 1.
+		"andb     %%bh, %%al             \n\t" // set ZF if bh & al == 1.
 		"jne     .SCOLSTORBZ             \n\t" // jump to column storage case
 		"                                \n\t"
 		"                                \n\t"
@@ -706,7 +714,7 @@ void bli_sgemm_opt_8x4(
 		  "m" (cs_c),
 		  "m" (b_next)
 		: // register clobber list
-		  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "r8", "r9", "r10", "r11",
+		  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "r8", "r9", "r10", "r11", "r12",
 		  "xmm0", "xmm1", "xmm2", "xmm3",
 		  "xmm4", "xmm5", "xmm6", "xmm7",
 		  "xmm8", "xmm9", "xmm10", "xmm11",
@@ -750,6 +758,7 @@ void bli_dgemm_opt_4x4(
 		"movq          %6, %%rcx         \n\t" // load address of c
 		"movq          %8, %%rdi         \n\t" // load cs_c
 		"leaq        (,%%rdi,8), %%rdi   \n\t" // cs_c *= sizeof(double)
+		"movq       %%rdi, %%r12         \n\t" // make a copy of cs_c (in bytes)
 		"leaq   (%%rcx,%%rdi,2), %%r10   \n\t" // load address of c + 2*cs_c;
 		"                                \n\t"
 		"prefetcht2   0 * 8(%%r9)        \n\t" // prefetch b_next
@@ -1043,15 +1052,20 @@ void bli_dgemm_opt_4x4(
 		"                                \n\t"
 		"                                \n\t"
 		"                                \n\t" // determine if
-		"                                \n\t" //   c % 16 == 0, AND
-		"                                \n\t" //   rs_c == 1
-		"                                \n\t" // ie: aligned and column-stored
+		"                                \n\t" //   c      % 16 == 0, AND
+		"                                \n\t" //   8*cs_c % 16 == 0, AND
+		"                                \n\t" //   rs_c        == 1
+		"                                \n\t" // ie: aligned, ldim aligned, and
+		"                                \n\t" // column-stored
 		"                                \n\t"
 		"cmpq       $1, %%r8             \n\t" // set ZF if rs_c == 1.
 		"sete           %%bl             \n\t" // bl = ( ZF == 1 ? 1 : 0 );
 		"testq     $15, %%rcx            \n\t" // set ZF if c & 16 is zero.
 		"setz           %%bh             \n\t" // bh = ( ZF == 1 ? 1 : 0 );
-		"                                \n\t" // and(bl,bh) will reveal result
+		"testq     $15, %%r12            \n\t" // set ZF if (8*cs_c) & 16 is zero.
+		"setz           %%al             \n\t" // al = ( ZF == 1 ? 1 : 0 );
+		"                                \n\t" // and(bl,bh) followed by
+		"                                \n\t" // and(bh,al) will reveal result
 		"                                \n\t"
 		"                                \n\t" // now avoid loading C if beta == 0
 		"                                \n\t"
@@ -1062,6 +1076,7 @@ void bli_dgemm_opt_4x4(
 		"                                \n\t"
 		"                                \n\t" // check if aligned/column-stored
 		"andb     %%bl, %%bh             \n\t" // set ZF if bl & bh == 1.
+		"andb     %%bh, %%al             \n\t" // set ZF if bh & al == 1.
 		"jne     .DCOLSTORED             \n\t" // jump to column storage case
 		"                                \n\t"
 		"                                \n\t"
@@ -1220,6 +1235,7 @@ void bli_dgemm_opt_4x4(
 		".DBETAZERO:                     \n\t"
 		"                                \n\t" // check if aligned/column-stored
 		"andb     %%bl, %%bh             \n\t" // set ZF if bl & bh == 1.
+		"andb     %%bh, %%al             \n\t" // set ZF if bh & al == 1.
 		"jne     .DCOLSTORBZ             \n\t" // jump to column storage case
 		"                                \n\t"
 		"                                \n\t"
@@ -1339,7 +1355,7 @@ void bli_dgemm_opt_4x4(
 		  "m" (b_next), // 9
 		  "m" (a_next)  // 10
 		: // register clobber list
-		  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "r8", "r9", "r10", "r11",
+		  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "r8", "r9", "r10", "r11", "r12",
 		  "xmm0", "xmm1", "xmm2", "xmm3",
 		  "xmm4", "xmm5", "xmm6", "xmm7",
 		  "xmm8", "xmm9", "xmm10", "xmm11",
