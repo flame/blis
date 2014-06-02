@@ -97,7 +97,7 @@
 // It is sometimes useful to define the various memory alignments in terms
 // of some other characteristics of the system, such as the cache line size
 // and the page size.
-#define BLIS_CACHE_LINE_SIZE             64
+#define BLIS_CACHE_LINE_SIZE             256
 #define BLIS_PAGE_SIZE                   4096
 
 // Alignment size needed by the instruction set for aligned SIMD/vector

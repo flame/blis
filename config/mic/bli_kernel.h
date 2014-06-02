@@ -54,35 +54,42 @@
 //     (b) NR (for triangular operations such as trmm and trsm).
 //
 
-#define BLIS_DEFAULT_MC_S              256
-#define BLIS_DEFAULT_KC_S              256
-#define BLIS_DEFAULT_NC_S              8192
+#define BLIS_DEFAULT_MC_S              240
+#define BLIS_DEFAULT_KC_S              240
+#define BLIS_DEFAULT_NC_S              9600
 
 #define BLIS_DEFAULT_MC_D              120
 #define BLIS_DEFAULT_KC_D              240
 #define BLIS_DEFAULT_NC_D              14400
 
-#define BLIS_DEFAULT_MC_C              128
-#define BLIS_DEFAULT_KC_C              256
-#define BLIS_DEFAULT_NC_C              4096
+#define BLIS_DEFAULT_4M_MC_C           BLIS_DEFAULT_MC_S
+#define BLIS_DEFAULT_4M_KC_C           BLIS_DEFAULT_KC_S
 
-#define BLIS_DEFAULT_MC_Z              64
-#define BLIS_DEFAULT_KC_Z              256
-#define BLIS_DEFAULT_NC_Z              2048
+#define BLIS_DEFAULT_3M_MC_C           BLIS_DEFAULT_MC_S
+#define BLIS_DEFAULT_3M_KC_C           BLIS_DEFAULT_KC_S
 
+/*
+#define BLIS_DEFAULT_MC_C              120
+#define BLIS_DEFAULT_KC_C              240
+#define BLIS_DEFAULT_NC_C              9600
+
+#define BLIS_DEFAULT_MC_Z              120
+#define BLIS_DEFAULT_KC_Z              240
+#define BLIS_DEFAULT_NC_Z              9600
+*/
 // -- Register blocksizes --
 
-#define BLIS_DEFAULT_MR_S              8
-#define BLIS_DEFAULT_NR_S              4
+#define BLIS_DEFAULT_MR_S              30
+#define BLIS_DEFAULT_NR_S              16
 
 #define BLIS_DEFAULT_MR_D              30
 #define BLIS_DEFAULT_NR_D              8
 
-#define BLIS_DEFAULT_MR_C              8
-#define BLIS_DEFAULT_NR_C              4
+//#define BLIS_DEFAULT_MR_C              8
+//#define BLIS_DEFAULT_NR_C              4
 
-#define BLIS_DEFAULT_MR_Z              8
-#define BLIS_DEFAULT_NR_Z              4
+//#define BLIS_DEFAULT_MR_Z              8
+//#define BLIS_DEFAULT_NR_Z              4
 
 // NOTE: If the micro-kernel, which is typically unrolled to a factor
 // of f, handles leftover edge cases (ie: when k % f > 0) then these
@@ -123,8 +130,8 @@
 // leading dimensions used within the packed micro-panels are equal to
 // or greater than their corresponding register blocksizes above.
 
-//#define BLIS_EXTEND_MR_S               0
-//#define BLIS_EXTEND_NR_S               0
+#define BLIS_EXTEND_MR_S               2
+#define BLIS_EXTEND_NR_S               0
 
 #define BLIS_EXTEND_MR_D               2
 #define BLIS_EXTEND_NR_D               0
@@ -153,10 +160,9 @@
 // -- gemm --
 
 #define BLIS_DGEMM_UKERNEL         bli_dgemm_opt_30x8
+#define BLIS_SGEMM_UKERNEL         bli_sgemm_opt_30x16
 
 // -- trsm-related --
-
-
 
 
 // -- LEVEL-1M KERNEL DEFINITIONS ----------------------------------------------
