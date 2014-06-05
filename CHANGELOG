@@ -1,4 +1,632 @@
-commit fde5f1fdece19881f50b142e8611b772a647e6d2 (HEAD, tag: 0.1.1, origin/master, origin/HEAD, master)
+commit 00f232f8ed1f7c41619b12ebf779ebe2c3b2d3cd (HEAD, tag: 0.1.2, origin/master, master)
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Mon Jun 2 13:40:57 2014 -0500
+
+    Added single-precision micro-kernel for Knights Corner aka MIC aka Xeon Phi
+
+commit 3fc60e491426f6248c0feae88d971e4d1f88fb95
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed May 21 11:34:42 2014 -0500
+
+    Fixed ldim alignment bug in core2 gemm ukernel.
+    
+    Details:
+    - Fixed a bug in the dunnington/core2 gemm micro-kernels that resulted in
+      a segmentation fault if a column-stored matrix's starting address was
+      aligned, but its leading dimension was such that its second column was
+      unaligned. Basically, the micro-kernel was assuming that aligned load
+      instructions were safe when they actually were not. An extra condition
+      that checks the alignment of cs_c (ie: the leading dimension in the
+      column storage case) has now been added. Thanks to Michael Lehn for
+      reporting this bug.
+
+commit 77a2d8dac8b242d7a202c9aabda3927ab68cf987
+Merge: 8c5d607 21fb089
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue May 20 09:53:19 2014 -0500
+
+    Merge pull request #8 from tlrmchlsmth/master
+    
+    Added multithreading to most level-3 operations.
+
+commit 21fb089387ee7c87f6dc53b0f60f68b48d3ff3e8
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Mon May 19 20:38:55 2014 -0700
+
+    Reverting changes dunnington and reference configs
+    
+    Now they are unchanged from the main branch of BLIS
+
+commit 8a0ef0e0db5880730425926f8ba56b457a2ba764
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Fri May 16 13:44:14 2014 -0500
+
+    Fixed rounding error in bli_get_range_weighted
+
+commit 0b4b1680334528b1b60bc696537600f763198e92
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Fri May 16 12:23:37 2014 -0500
+
+    Fixed bug with disabling JC loop threading for right sided trmm
+
+commit 5c048a90d8dfa1dbde4e45fbc10ffcbdfe59d960
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Wed May 14 16:20:06 2014 -0500
+
+    Disabled parallelism for right-sided TRMM JC loop
+    
+    The loop has dependent iterations.
+
+commit 13a4c717ed0e273359dbaf5554cc4fa70b087d71
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Wed May 14 14:59:04 2014 -0500
+
+    Fixed bug with bli_get_range_weighted
+
+commit 45957cc7745e9bb1698408d72f53ef192e960820
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Tue May 13 17:14:46 2014 -0500
+
+    Allowed threading to be turned off
+    
+    No longer requires OpenMP to compile
+    Define the following in bli_config.h in order to enable multithreading:
+    BLIS_ENABLE_MULTITHREADING
+    BLIS_ENABLE_OPENMP
+    
+    Also fixes a bug with bli_get_range_weighted
+
+commit bd1dc98ce599d74513a553fe3b37a2ebca1c3812
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Mon May 12 17:26:19 2014 -0500
+
+    Disabled multithreading of the kc loop
+
+commit 456df0372170bd7ca2c7e2d85365a69f1f04de88
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Wed Apr 30 12:28:00 2014 -0500
+
+    Replaced register blocksize hack with querying the register blocksize for determining parallelism granularity
+
+commit f4fdfe8fc573553eb36795b79cdf681270dab71b
+Merge: 31bb065 8c5d607
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Wed Apr 30 11:46:35 2014 -0500
+
+    Merge http://github.com/flame/blis
+
+commit 8c5d6071e24ba10a53669390a47287e86ff354ce
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Apr 29 12:26:12 2014 -0500
+
+    Added _check() routines for fprint[mv], rand[mv].
+    
+    Details:
+    - Added _check() routines for fprintm, fprintv, randm, and randv.
+    - Added invocations to the above routines from their respective
+      front-ends.
+
+commit 262cdabcc885bcf6636f4d8bb7d320f95e81d820
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Apr 28 16:48:25 2014 -0500
+
+    Changed treatment of NULL object buffers.
+    
+    Details:
+    - Relaxed the constraint in bli_obj_attach_buffer_check(), which required
+      the buffer address being attached to be non-NULL. This is acceptable
+      because the user was already able to create and use objects with NULL
+      buffers (via bli_obj_create_without_buffer(), which initializes the
+      buffer to NULL).
+    - Inserted calls to newly defined function, bli_check_object_buffer(),
+      into nearly all operations' _check() or _int_check() functions. This
+      allows BLIS to abort peacefully if a computational routine is called
+      with an object containing a NULL buffer. By contrast, under such
+      conditions, BLAS would typically fail with a segmentation fault.
+    - Within operation front-ends, moved the calls to _check()/_int_check()
+      so that zero dimensions are checked first (and if found, execution
+      returns with trivial or no computation). This resolves issue #7. Thanks
+      to Jack Poulson for reporting this bug.
+
+commit 31bb065ba40ae0c5a614e743b8025abca012b99e
+Merge: 20e2443 7c61959
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Wed Apr 23 12:30:19 2014 -0500
+
+    Merge http://github.com/flame/blis
+
+commit 7c61959955c8ba78160d0ed4d1979022029d963b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Apr 10 17:18:36 2014 -0500
+
+    Can now query register blocksizes from blk algs.
+    
+    Details:
+    - Added a new field to blksz_t objects that allows one to attach a
+      sub-object. Doing this allows us to associate a register blocksize with
+      any given cache blocksize. That way, the register blocksize can be
+      queried wherever the cache blocksize would normally be accessible
+      (e.g. a blocked algorithm).
+    - Modified bli_gemm_cntl.c (and 4m/3m variants) so that the register
+      blocksizes are attached to the cache blocksizes after they are created.
+
+commit 58671597d3d450817b2eda576c05ed6dadd8af6d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Apr 10 15:35:30 2014 -0500
+
+    Minor cleanups to level-2 _cntl.c files.
+    
+    Details:
+    - Changed level-2 _cntl.c files so that the blocksizes for gemv are
+      imported and used, rather than blocksizes being declared locally.
+    - Whitespace changes to gemv_cntl.c and gemm_cntl.c files (as well as
+      4m/3m variants).
+    - Removed test/old/test_blis2.c.
+
+commit 20e24430a772bc0fbaf24dec2f8c544096fd3f4e
+Author: Tyler Michael Smith <tmsmith@vestalac1.ftd.alcf.anl.gov>
+Date:   Tue Apr 8 17:50:44 2014 +0000
+
+    Some fixes for the bgq kernels
+
+commit bde697f75ec1e7f2decebee0c9bd620b4c134cd5
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Fri Apr 4 16:43:44 2014 -0500
+
+    Add -openmp to ldflags as well
+
+commit c332be8cd471eeace7b4fa4ae7443088b6a68ec3
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Fri Apr 4 16:37:50 2014 -0500
+
+    Added -openmp flag to Xeon Phi build for convenience
+
+commit e7ca9e4b4a24d585c9aec8293fc7bb79e4171ad0
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Fri Apr 4 16:31:15 2014 -0500
+
+    Used BLIS_DEFAULT_*_MR for rounding partitioning instead of BLIS_DEFAULT_*_MC
+
+commit 7b9b228c6fa4cfb70b1ebb855b009a036e85fac3
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Fri Apr 4 16:29:10 2014 -0500
+
+    Fix for tree barrier freeing bug
+
+commit 5ec93bd9a76096312d51c326ccde1e9bd0a436ab
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Fri Apr 4 15:09:10 2014 -0500
+
+    Bunch of minor fixes
+    
+    Removed barrier after unpackm in all level3 blocked variants
+    Now there is an implicit barrier inside unpackm that only occurs if C is packed (which is usually not the case)
+    
+    Moved the enabling of the tree barriers into bli_config.h
+    Fed the default MR and NR for double precision into bli_get_range instead of the number 8
+
+commit 575fb9b0b08f3bdb56ccde056da619d1585617c1
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Fri Apr 4 12:13:29 2014 -0500
+
+    Changed default blocking factor to default double precision MR and NR
+
+commit ab9c7880335c281432d5809fe0dec46753d22569
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Fri Apr 4 11:38:11 2014 -0500
+
+    Added faster tree barriers necessary for performance for Xeon Phi
+    
+    Fixed up some stuff in the thread info free functions
+    Disabled threading for TRSM so that it actually works when threading environment variables are set
+
+commit ec58a7923cccac08632670caadf3cf6ff5dce766
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Fri Apr 4 10:22:48 2014 -0500
+
+    Freeing thread info paths.
+    
+    Also made herk IC and JC loops do weighted partitioning
+
+commit 2b6848b2397d6d84ca4e5f792fc51ad05e351a36
+Merge: 4e3eb39 21a0efb
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Fri Apr 4 09:54:54 2014 -0500
+
+    Merge http://github.com/flame/blis
+    
+    Conflicts:
+    	kernels/bgq/1/bli_axpyv_opt_var1.c
+    	kernels/bgq/1/bli_dotv_opt_var1.c
+
+commit 4e3eb39aca4df0b9fdc003d468f368a2f2ba597d
+Author: Tyler Michael Smith <tmsmith@vestalac1.ftd.alcf.anl.gov>
+Date:   Fri Apr 4 14:50:03 2014 +0000
+
+    Some fixes to the bgq config
+    MR and NR for double complex were wrong
+    Default fusing factor for double precision was wrong as well
+
+commit 21a0efb33d7435139e9c43c1a4787a6bff533e26
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Apr 3 16:38:44 2014 -0500
+
+    Fixed follow-up to issue #6.
+
+commit c318157a9bee8ea6e59be16f99f65d9271fe0d27
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Apr 3 16:24:34 2014 -0500
+
+    Fixed issue #6 (incorrect 'restrict' usage).
+    
+    Details:
+    - Fixed improper usage of restrict keyword in axpyv and dotv bgq kernels.
+      (However, there may be other instances of similar misuse elsewhere in
+      BLIS.) Thanks to Jeff Hammond for reporting this issue.
+
+commit b5150a1bf3bd89598e2b3aeac110eb5b44ac6c12
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Apr 3 12:25:45 2014 -0500
+
+    Added #include "arm_neon.h" to ARM gemm ukernel.
+    
+    Details:
+    - Inserted #include "arm_neon.h" into gemm ukernel source file for
+      arm/neon. Thanks to Jean-Michel Hautbois for suggesting this fix.
+
+commit 2041c264517b6c590fd4f7e8253e6911b622d1c3
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Thu Apr 3 10:30:03 2014 -0500
+
+    Added barriers needed prior to doing scalar reset for rank-k updates.
+
+commit 47a90e69dfde3f4f8fdf90654248a6b499fbadbc
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Apr 1 14:34:31 2014 -0500
+
+    Attempted to fix uninitialized variable warnings.
+    
+    Details:
+    - Added initialization statements to various macros used in level 1m and
+      1m-like operations. I wasn't able to reproduce the reported behavior,
+      so hopefully this takes care of it. Thanks to Jeff Hammond for the
+      report.
+
+commit d27b4f690c14b1f836f8c7a3c0e91e09d852f02e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Apr 1 12:57:24 2014 -0500
+
+    Use generic paths for toolchain in POWER7.
+    
+    Details:
+    - Fixed issue #4. Thanks to Jeff Hammond for contributing changes.
+
+commit 1584ae1c83c3a8c1af76acb46404747507650f19
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Fri Mar 28 15:15:48 2014 -0500
+
+    Fixed race condition involving scalar reset
+
+commit 459dde4acc09e49380da58fb7b246db488884ad9
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Thu Mar 27 17:06:45 2014 -0500
+
+    Made barrier after packing implicit.
+    
+    This also fixed a bug where barriers in the blocked variants were inserted after the inner packing routines,
+    but not the outer packing routines.
+    This allowed, for instance, the block of B to not be finished being packed before computation to occur.
+
+commit 9f78ec6e7e95fcad89a167b27cad7e2d74b6d122
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Thu Mar 27 14:18:46 2014 -0500
+
+    Some fixes for the internal functions,
+    was innappropriately only having thread chief do some things.
+
+commit a6fd48345424e097f71652be013aa897e098b41e
+Author: Tyler Michael Smith <tmsmith@vestalac1.ftd.alcf.anl.gov>
+Date:   Wed Mar 26 17:19:46 2014 +0000
+
+    Added test drivers for level 3 BLAS that run tests in parallel using MPI
+
+commit 73b3db594864be0f9be9a0eb29bf961fa9c95f29
+Author: Tyler Michael Smith <tmsmith@vestalac1.ftd.alcf.anl.gov>
+Date:   Wed Mar 26 15:39:05 2014 +0000
+
+    Some fixes for the bgq configuration
+
+commit f0824a04fc75e231c3a3d7757fa4e7294173282f
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Mon Mar 24 15:21:42 2014 -0500
+
+    Initial commit to enable threading in TRSM,
+    
+    Also enabled weighted partitioning for herk, trmm
+    Fixed bug where multiple threads would try to modify the same state in the internal level 3 functions
+    Correctly computed a_next and b_next for gemm, herk macrokernels
+    a_next and b_next point to the current micropanels in trmm
+
+commit 23d9eab354fbc88165889832955e126772bf8488
+Merge: 5d5dc2e fd3e32a
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Thu Mar 20 16:54:35 2014 -0500
+
+    Merge https://github.com/flame/blis
+
+commit 5d5dc2eedef2f7c90d61371a1b457be5c06cf583
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Thu Mar 20 16:43:36 2014 -0500
+
+    Parallelized trmm and trmm3
+    
+    Also fixed bugs in packm
+
+commit fd3e32a5f419fa412f46afe4dd1c3a26e15f3eb4
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Mar 20 13:59:48 2014 -0500
+
+    Refined INSERT_GENTFUNC macro usage.
+    
+    Details:
+    - Defined new INSERT_GENTFUNC macros so that the macro always takes
+      exactly the number of arguments needed for the particular operation or
+      variant being defined. Many operations were using INSERT_GENTFUNC
+      macros that expected one auxiliary argument even though none were
+      needed. Those instances have now been updated. Most of these instances
+      were in the level-0 and -1v operations, as well as some operations
+      defined in frame/util.
+
+commit 9b0e715f29338a1a1d6445907d2445c35f011121
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Mar 19 15:47:54 2014 -0500
+
+    Minor simplifications to trmm, trsm macro-kernels.
+    
+    Details:
+    - Simplified some code that would have allowed the diagonal of a trmm
+      or trsm triangular matrix to intersect the short end of a micro-panel.
+      This is disallowed via higher-level constraints on cache blocksizes, so
+      this code was never needed and only served to obfuscate.
+    - Updated some comments in trmm, trsm macro-kernels.
+
+commit a3902750b9ab4923433f7e353f3669c3c419f8e4
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Mar 19 12:35:17 2014 -0500
+
+    Reorganized norm operations.
+    
+    Details:
+    - Completely reoganized norm operations:
+      - Renames:
+        - fnormsc, fnormv, fnormm -> normfsc, normfv, normfm (2-norm)
+        - absumv -> norm1v (vector 1-norm)
+      - New operations:
+        - norm1m (matrix 1-norm)
+        - normiv, normim (infinity-norm)
+        - amaxv (BLAS-like absolute maximum value index)
+        - asumv (BLAS-like absolute sum)
+    - Deprecated absumm, as it did not correspond to any actual norm.
+      (However, an inlined version now exists in the testsuite module for
+      randm.)
+
+commit c0140cb752f27e99742f85d23be2181c00a1335e
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Wed Mar 19 11:21:16 2014 -0500
+
+    Fixed packm variants 3 and 4 where every thread was trying to manipulate the same state
+    
+    Now just performed by the master thread.
+
+commit fb42983bd9943711baa7d1c6496de1215bb816ef
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Tue Mar 18 16:37:28 2014 -0500
+
+    Fixed a barrier bug and a thread decorator bug
+
+commit aa2405f8b23d0f8d2ec04790882f2176ef2e8fd8
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Tue Mar 18 15:23:09 2014 -0500
+
+    Fixing function pointer issues with thread decorator
+
+commit ec8b88f93533942d3711191873310e7ff281bda6
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Tue Mar 18 14:35:37 2014 -0500
+
+    Enabled threading for packm blocked variants 3 and 4
+
+commit 0ac534cdf657bbf04601abfe719ba2887aab5da7
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Tue Mar 18 13:26:27 2014 -0500
+
+    Added decorator for calling parallelized intermal functions
+    
+    Will allow for easy support for different threading models
+
+commit 5296f58975f7d351f88909cc80b6d0cffd73def7
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Mon Mar 17 17:15:35 2014 -0500
+
+    Fixing some bugs with herk parallelization
+
+commit c51d0110831eb89361b4720bf7ed75edbd26ebce
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Mon Mar 17 15:00:47 2014 -0500
+
+    Initial multithreading support for HERK
+
+commit c720b141568d1f289146bf34ded08001f2c0dfbb
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Mon Mar 17 11:39:32 2014 -0500
+
+    Switched to using environment variables to control threading.
+    
+    The environment variables all follow the format BLIS_X_NT,
+    where X is the index of the loop as described in our paper
+    Anatomy of High Performance Many-Threaded Matrix Multiplication.
+    These indices are IR, JR, IC, KC, and JC.
+    
+    Also enabled parallelism for hemm and symm, but these are currently untested.
+
+commit 92233cf64274b27b2217c5cfffe75443ff6137a4
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Tue Mar 11 14:16:08 2014 -0500
+
+    Some fixes to gemm thread info tree creation,
+    Changed microkernel tests to use the new BLIS_PACKM_SINGLE_THREADED
+    instead of BLIS_SINGLE_THREADED
+
+commit 020f80c30289d8bcaa688bf600b01fae9b23b54f
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Tue Mar 11 12:08:17 2014 -0500
+
+    Added files specific to threading for gemm and packm operations
+
+commit 8d8f4352a41926bc923e47be836365b6b726aff2
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Mon Mar 10 15:47:28 2014 -0500
+
+    Added single threaded thread info data structures specifically for gemm and packm
+
+commit 0e8677761175189583ca7d855e24b2bbdd2dada8
+Merge: 2e727a0 b3bff63
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Mon Mar 10 15:16:21 2014 -0500
+
+    Merge branch 'master' of https://github.com/tlrmchlsmth/blis
+
+commit 2e727a025a8f796d2b6bd14f489d0ee72e7d1fc7
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Mon Mar 10 15:14:33 2014 -0500
+
+    Modifying the thread info data structures
+    
+    This change makes each operation have its own thread info type,
+    allowing more fine control of threading in operations that have different types of suboperations
+
+commit a770590cf21a459f04bf941c58ee2afd272cc441
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Mar 3 14:31:44 2014 -0600
+
+    Minor fixes to sumsqv, abmaxv.
+    
+    Details:
+    - Minor update to bli_sumsqv_unb_var1() to bring it up-to-date with
+      LAPACK 3.5.0's zlassq.f, which, starting with 3.4.2, returns NaN when
+      the vector (or matrix) contains a NaN.
+    - Minor change to bli_abmaxv_unb_var1() to more closely mimic the
+      behavior of netlib BLAS's izamax(). There, a "less than or equal to"
+      operator is used in the search instead of "less than", which would
+      change the element index returned if there were multiple maximum values.
+    - Added macro function definitions for bli_isinf() and bli_isnan(), which
+      are currently implemented in terms of isinf() and isnan() from math.h.
+
+commit b3bff631eadf98b15cb422fb4a8e2f855c23e8a7
+Merge: 2c158fb e8757b0
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Thu Feb 27 16:53:24 2014 -0600
+
+    Merge https://github.com/flame/blis
+
+commit 2c158fb885c27f7b599dc1e85b57edd684f19223
+Merge: e4738c4 c2b2ab6
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Thu Feb 27 16:46:23 2014 -0600
+
+    Merge https://github.com/flame/blis
+    
+    Conflicts:
+    	frame/1m/packm/bli_packm_blk_var1.c
+
+commit e8757b03a74f9891632242e9a90efb32150826f5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Feb 27 16:40:07 2014 -0600
+
+    Use "%ld" as int format specifier in fprintm.
+    
+    Details:
+    - Changed "%d" to "%ld" when printing integers via bli_fprintm().
+    - Meant to include this in previous commit.
+
+commit c663ce3b5170fee7dfb5b528b650d70c8e932cac
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Feb 27 16:32:57 2014 -0600
+
+    Fixed various bugs when C99 complex is enabled.
+    
+    Details:
+    - Fixed various bugs in packm_*_cxk(), the 4m/3m micro-kernels, and
+      elsewhere in the framework that were not yet set up to work properly
+      when BLIS_ENABLE_C99_COMPLEX is defined in bli_config.h
+    - Extensive changes to f2c-derived files in frame/compat/f2c to allow
+      C99 complex storage. Most of these changes center around accessing
+      real and imaginary components via bli_?real()/bli_?imag() accessor
+      macros, and setting of values via bli_?sets() assignment macros.
+      (Thanks to Vladimir Sukarev for pointing out that _ENABLE_C99_COMPLEX
+      was broken.)
+
+commit e4738c48e00b89391d9baa1fd0aa62d1ea2f95e6
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Thu Feb 27 16:29:46 2014 -0600
+
+    Added support for parallelism in gemm micro-kernel
+
+commit bfe214b633765ed40b57b330fbb84c332663aa40
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Thu Feb 27 15:53:10 2014 -0600
+
+    Fixed bug with parallel packing, and bug with allocating an array of thread infos
+    
+    In packm variant 1, the variable p_begin was incremented each iteration, causing a dependency.
+    This dependeny was removed, allowing each iteration to be executed in parallel.
+    
+    Somewhere in bli_threading.c, I was allocating an array of pointers instead of an array of structs.
+
+commit 6193d9ceea552e67170dba45abde04c64271c705
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Thu Feb 27 14:09:19 2014 -0600
+
+    Fixed bug in thread trees
+
+commit ac5a2de1d17ffd460b00fee9757898525a09abae
+Merge: 01b125e bd3c7ec
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Thu Feb 27 11:59:33 2014 -0600
+
+    Merge branch 'master' of https://github.com/tlrmchlsmth/blis
+
+commit 01b125e815f19410e8e0611d088b84570e499e93
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Thu Feb 27 11:55:45 2014 -0600
+
+    First pass at adding parallelism to BLIS.
+    
+    Added a multithreading infrastructure that should be independent of multithreading implementation in the future.
+    Currently, gemm blocked variants 1f and 2f, and packm variant blocked variant 1 is parallelized.
+
+commit c2b2ab62707e4174892aff3ce65f36f54878fae5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Feb 26 12:46:45 2014 -0600
+
+    Deprecated panel stride alignment in bli_config.h.
+    
+    Details:
+    - Removed BLIS_CONTIG_STRIDE_ALIGN_SIZE from bli_config.h of all
+      configurations. It was already going unused in packm_init() since the
+      recent 4m/3m commit. This setting was rarely, if ever, useful, and its
+      existence only posed a potential risk for 4m/3m-based implementations.
+    - Removed BLIS_CONTIG_STRIDE_ALIGN_SIZE usage from mem_pool_macro_defs.h.
+    - Updated comments regarding CONTIG_STRIDE_ALIGN_SIZE in template
+      micro-kernels.
+
+commit f18aee83a5ac1b14808686fc3c5a3c846a1d99b9
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Feb 25 17:58:42 2014 -0600
+
+    CHANGELOG update (for 0.1.1).
+
+commit fde5f1fdece19881f50b142e8611b772a647e6d2 (tag: 0.1.1)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Tue Feb 25 13:34:56 2014 -0600
 
