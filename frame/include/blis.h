@@ -67,7 +67,9 @@ extern "C" {
 #include "bli_macro_defs.h"
 
 // -- Threading definitions --
+#ifdef BLIS_ENABLE_OPENMP
 #include <omp.h>
+#endif
 #include "bli_threading.h"
 
 // -- Constant definitions --
