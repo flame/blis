@@ -43,6 +43,9 @@ void* bli_malloc( siz_t size )
 
 #if BLIS_HEAP_ADDR_ALIGN_SIZE == 1
 	p = malloc( ( size_t )size );
+#elif defined(_WIN32)
+	p = _aligned_malloc( ( size_t )size,
+	                     ( size_t )BLIS_HEAP_ADDR_ALIGN_SIZE );
 #else
 	r_val = posix_memalign( &p,
 	                        ( size_t )BLIS_HEAP_ADDR_ALIGN_SIZE,
@@ -58,6 +61,10 @@ void* bli_malloc( siz_t size )
 
 void bli_free( void* p )
 {
+#if BLIS_HEAP_ADDR_ALIGN_SIZE == 1 || !defined(_WIN32)
 	free( p );
+#else
+	_aligned_free( p );
+#endif
 }
 
