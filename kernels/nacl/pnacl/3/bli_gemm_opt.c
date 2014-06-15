@@ -64,15 +64,15 @@ inline v4sf v4sf_zero() {
 
 #if PPAPI_RELEASE >= 36
 void bli_sgemm_opt_8x4(
-	dim_t           k,
-	float *restrict alpha,
-	float *restrict a,
-	float *restrict b,
-	float *restrict beta,
-	float *restrict c,
-	inc_t           rs_c,
-	inc_t           cs_c,
-	auxinfo_t*      data)
+	dim_t      k,
+	float      alpha[restrict static 1],
+	float      a[restrict static 8*k],
+	float      b[restrict static k*4],
+	float      beta[restrict static 1],
+	float      c[restrict static 8*4],
+	inc_t      rs_c,
+	inc_t      cs_c,
+	auxinfo_t* data)
 {
 	// Vectors for accummulating column 0, 1, 2, 3 (initialize to 0.0)
 	v4sf abv0t = v4sf_zero(), abv1t = v4sf_zero(), abv2t = v4sf_zero(), abv3t = v4sf_zero();
@@ -204,15 +204,15 @@ void bli_sgemm_opt_8x4(
 }
 #else
 void bli_sgemm_opt_4x4(
-	dim_t           k,
-	float *restrict alpha,
-	float *restrict a,
-	float *restrict b,
-	float *restrict beta,
-	float *restrict c,
-	inc_t           rs_c,
-	inc_t           cs_c,
-	auxinfo_t*      data)
+	dim_t      k,
+	float      alpha[restrict static 1],
+	float      a[restrict static 4*k],
+	float      b[restrict static k*4],
+	float      beta[restrict static 1],
+	float      c[restrict static 4*4],
+	inc_t      rs_c,
+	inc_t      cs_c,
+	auxinfo_t* data)
 {
 	/* Just call the reference implementation. */
 	BLIS_SGEMM_UKERNEL_REF(
@@ -229,15 +229,15 @@ void bli_sgemm_opt_4x4(
 #endif
 
 void bli_dgemm_opt_4x4(
-	dim_t            k,
-	double *restrict alpha,
-	double *restrict a,
-	double *restrict b,
-	double *restrict beta,
-	double *restrict c,
-	inc_t            rs_c,
-	inc_t            cs_c,
-	auxinfo_t*       data)
+	dim_t      k,
+	double     alpha[restrict static 1],
+	double     a[restrict static 4*k],
+	double     b[restrict static k*4],
+	double     beta[restrict static 1],
+	double     c[restrict static 4*4],
+	inc_t      rs_c,
+	inc_t      cs_c,
+	auxinfo_t* data)
 {
 	/* Just call the reference implementation. */
 	BLIS_DGEMM_UKERNEL_REF(
@@ -255,15 +255,15 @@ void bli_dgemm_opt_4x4(
 
 #if PPAPI_RELEASE >= 36
 void bli_cgemm_opt_4x4(
-	dim_t              k,
-	scomplex *restrict alpha,
-	scomplex *restrict a,
-	scomplex *restrict b,
-	scomplex *restrict beta,
-	scomplex *restrict c,
-	inc_t              rs_c,
-	inc_t              cs_c,
-	auxinfo_t*         data)
+	dim_t      k,
+	scomplex   alpha[restrict static 1],
+	scomplex   a[restrict static 4*k],
+	scomplex   b[restrict static k*4],
+	scomplex   beta[restrict static 1],
+	scomplex   c[restrict static 4*4],
+	inc_t      rs_c,
+	inc_t      cs_c,
+	auxinfo_t* data)
 {
 	// Vectors for accummulating column 0, 1, 2, 3 (initialize to 0.0)
 	v4sf abv0r = v4sf_zero(), abv1r = v4sf_zero(), abv2r = v4sf_zero(), abv3r = v4sf_zero();
@@ -278,7 +278,6 @@ void bli_cgemm_opt_4x4(
 		const v4sf bv0i = v4sf_splat(b[0].imag);
 		abv0r += avr * bv0r - avi * bv0i;
 		abv0i += avr * bv0i + avi * bv0r;
-
 
 		const v4sf bv1r = v4sf_splat(b[1].real);
 		const v4sf bv1i = v4sf_splat(b[1].imag);
@@ -379,6 +378,7 @@ void bli_cgemm_opt_4x4(
 
 		const v4sf betavr = v4sf_splat(beta->real);
 		const v4sf betavi = v4sf_splat(beta->imag);
+
 		temp = abv0r + cv0r * betavr - cv0i * betavi;
 		cv0i = abv0i + cv0r * betavi + cv0i * betavr;
 		cv0r = temp;
@@ -438,15 +438,15 @@ void bli_cgemm_opt_4x4(
 }
 #else
 void bli_cgemm_opt_4x4(
-	dim_t              k,
-	scomplex *restrict alpha,
-	scomplex *restrict a,
-	scomplex *restrict b,
-	scomplex *restrict beta,
-	scomplex *restrict c,
-	inc_t              rs_c,
-	inc_t              cs_c,
-	auxinfo_t*         data)
+	dim_t      k,
+	scomplex   alpha[restrict static 1],
+	scomplex   a[restrict static 4*k],
+	scomplex   b[restrict static k*4],
+	scomplex   beta[restrict static 1],
+	scomplex   c[restrict static 4*4],
+	inc_t      rs_c,
+	inc_t      cs_c,
+	auxinfo_t* data)
 {
 	/* Just call the reference implementation. */
 	BLIS_CGEMM_UKERNEL_REF(
@@ -463,15 +463,15 @@ void bli_cgemm_opt_4x4(
 #endif
 
 void bli_zgemm_opt_4x4(
-	dim_t              k,
-	dcomplex *restrict alpha,
-	dcomplex *restrict a,
-	dcomplex *restrict b,
-	dcomplex *restrict beta,
-	dcomplex *restrict c,
-	inc_t              rs_c,
-	inc_t              cs_c,
-	auxinfo_t*         data)
+	dim_t      k,
+	dcomplex   alpha[restrict static 1],
+	dcomplex   a[restrict static 4*k],
+	dcomplex   b[restrict static k*4],
+	dcomplex   beta[restrict static 1],
+	dcomplex   c[restrict static 4*4],
+	inc_t      rs_c,
+	inc_t      cs_c,
+	auxinfo_t* data)
 {
 	/* Just call the reference implementation. */
 	BLIS_ZGEMM_UKERNEL_REF(
