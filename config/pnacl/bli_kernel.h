@@ -74,13 +74,19 @@
 #define BLIS_DEFAULT_KC_D              120
 #define BLIS_DEFAULT_NC_D              8400
 
+#if PPAPI_RELEASE >= 36
 #define BLIS_DEFAULT_MC_C              128
 #define BLIS_DEFAULT_KC_C              256
 #define BLIS_DEFAULT_NC_C              4096
+#else
+#define BLIS_DEFAULT_MC_C              120
+#define BLIS_DEFAULT_KC_C              264
+#define BLIS_DEFAULT_NC_C              4092
+#endif
 
-#define BLIS_DEFAULT_MC_Z              64
-#define BLIS_DEFAULT_KC_Z              256
-#define BLIS_DEFAULT_NC_Z              2048
+#define BLIS_DEFAULT_MC_Z              60
+#define BLIS_DEFAULT_KC_Z              264
+#define BLIS_DEFAULT_NC_Z              2040
 
 // -- Register blocksizes --
 
@@ -92,15 +98,19 @@
 #define BLIS_DEFAULT_NR_S              3 
 #endif
 
-/* So far, PNaCl does not support double-precision SIMD */
 #define BLIS_DEFAULT_MR_D              4
 #define BLIS_DEFAULT_NR_D              3
 
+#if PPAPI_RELEASE >= 36
 #define BLIS_DEFAULT_MR_C              4
 #define BLIS_DEFAULT_NR_C              4
+#else
+#define BLIS_DEFAULT_MR_C              2
+#define BLIS_DEFAULT_NR_C              3
+#endif
 
-#define BLIS_DEFAULT_MR_Z              4
-#define BLIS_DEFAULT_NR_Z              4
+#define BLIS_DEFAULT_MR_Z              2
+#define BLIS_DEFAULT_NR_Z              3
 
 // NOTE: If the micro-kernel, which is typically unrolled to a factor
 // of f, handles leftover edge cases (ie: when k % f > 0) then these
@@ -171,6 +181,7 @@
 
 #if PPAPI_RELEASE >= 36
 #define BLIS_SGEMM_UKERNEL         bli_sgemm_opt_8x4
+#define BLIS_CGEMM_UKERNEL         bli_cgemm_opt_4x4
 #endif
 
 // -- trsm-related --
