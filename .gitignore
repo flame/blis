@@ -19,6 +19,8 @@
 *.a
 # test executables
 *.x
+*.pexe
+*.nexe
 
 # -- build system files --
 
