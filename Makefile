@@ -469,7 +469,7 @@ endif
 blis-lib: check-env $(MK_LIBS)
 
 $(MK_ALL_BLIS_LIB): $(MK_ALL_BLIS_OBJS)
-ifeq ($(FLA_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	$(AR) $(ARFLAGS) $@ $?
 	$(RANLIB) $@
 else
