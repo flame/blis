@@ -95,7 +95,7 @@ CFLAGS_KERNELS := $(CDBGFLAGS) $(CKOPTFLAGS) $(CVECFLAGS) $(CWARNFLAGS) $(CMISCF
 CFLAGS_NOOPT   := $(CDBGFLAGS)                            $(CWARNFLAGS) $(CMISCFLAGS) $(CPPROCFLAGS)
 
 # --- Determine the archiver and related flags ---
-AR             := ar
+AR             := pnacl-ar
 ARFLAGS        := cru
 
 # --- Determine the linker and related flags ---
