@@ -80,7 +80,7 @@ CC             := pnacl-clang
 # Enable IEEE Standard 1003.1-2004 (POSIX.1d). 
 # NOTE: This is needed to enable posix_memalign().
 CPPROCFLAGS    := -D_POSIX_C_SOURCE=200112L
-CMISCFLAGS     := -std=c99 -I$(NACL_SDK_ROOT)/include
+CMISCFLAGS     := -std=gnu11 -I$(NACL_SDK_ROOT)/include
 CDBGFLAGS      := -g
 CWARNFLAGS     := -Wall
 COPTFLAGS      := -O3
