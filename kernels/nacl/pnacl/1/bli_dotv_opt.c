@@ -185,7 +185,7 @@ void bli_sdotv_opt(
 #endif
 }
 
-void bli_ddotv_opt_var1(
+void bli_ddotv_opt(
 	conj_t conjx,
 	conj_t conjy,
 	dim_t  n,
@@ -232,7 +232,7 @@ void bli_ddotv_opt_var1(
 	*rho = sum;
 }
 
-void bli_cdotv_opt_var1(
+void bli_cdotv_opt(
 	conj_t   conjx,
 	conj_t   conjy,
 	dim_t    n,
@@ -510,7 +510,7 @@ void bli_cdotv_opt_var1(
 
 
 
-void bli_zdotv_opt_var1(
+void bli_zdotv_opt(
 	conj_t   conjx,
 	conj_t   conjy,
 	dim_t    n,
@@ -615,3 +615,4 @@ void bli_zdotv_opt_var1(
 	rho->real = sumr;
 	rho->imag = bli_is_conj(conjy) ? -sumi : sumi;
 }
+

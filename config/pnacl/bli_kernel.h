@@ -180,8 +180,8 @@
 // -- gemm --
 
 #if PPAPI_RELEASE >= 36
-#define BLIS_SGEMM_UKERNEL         bli_sgemm_opt_8x4
-#define BLIS_CGEMM_UKERNEL         bli_cgemm_opt_4x4
+#define BLIS_SGEMM_UKERNEL         bli_sgemm_opt
+#define BLIS_CGEMM_UKERNEL         bli_cgemm_opt
 #endif
 
 // -- trsm-related --
@@ -222,9 +222,10 @@
 // -- copyv --
 
 // -- dotv --
-#if PPAPI_RELEASE >= 36
 #define BLIS_SDOTV_KERNEL          bli_sdotv_opt
-#endif
+#define BLIS_DDOTV_KERNEL          bli_ddotv_opt
+#define BLIS_CDOTV_KERNEL          bli_cdotv_opt
+#define BLIS_ZDOTV_KERNEL          bli_zdotv_opt
 
 // -- dotxv --
 
