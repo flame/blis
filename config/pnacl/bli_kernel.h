@@ -222,6 +222,9 @@
 // -- copyv --
 
 // -- dotv --
+#if PPAPI_RELEASE >= 36
+#define BLIS_SDOTV_KERNEL          bli_sdotv_opt
+#endif
 
 // -- dotxv --
 
