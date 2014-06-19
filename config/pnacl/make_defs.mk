@@ -96,7 +96,7 @@ CFLAGS_NOOPT   := $(CDBGFLAGS)                            $(CWARNFLAGS) $(CMISCF
 
 # --- Determine the archiver and related flags ---
 AR             := pnacl-ar
-ARFLAGS        := cru
+ARFLAGS        := rcs
 
 # --- Determine the linker and related flags ---
 LINKER         := $(CC)
