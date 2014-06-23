@@ -218,6 +218,10 @@
 // -- addv --
 
 // -- axpyv --
+#if PPAPI_RELEASE >= 36
+#define BLIS_SAXPYV_KERNEL         bli_saxpyv_opt
+#define BLIS_CAXPYV_KERNEL         bli_caxpyv_opt
+#endif
 
 // -- copyv --
 
