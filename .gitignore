@@ -25,7 +25,6 @@
 # -- build system files --
 
 config.mk
-version
 
 # -- makefile fragments --
 
