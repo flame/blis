@@ -1,4 +1,137 @@
-commit 00f232f8ed1f7c41619b12ebf779ebe2c3b2d3cd (HEAD, tag: 0.1.2, origin/master, master)
+commit 036cc634918463b1caa0fd89c9a211f2f5639af7 (HEAD, tag: 0.1.3, master)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jun 23 13:48:17 2014 -0500
+
+    Version file update (0.1.3)
+
+commit 09d9a3bf6763932d9f571085b2cfd1b8631eccba
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jun 23 13:43:26 2014 -0500
+
+    Reverting version file to test new version script.
+    
+    Details:
+    - Changed version file contents to 0.1.2 so that I can test out a new
+      version file bumping script.
+
+commit ebb33965981dcb2b0bdee5fc7fdf6c959420f311
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jun 23 11:22:50 2014 -0500
+
+    Added 'version' file.
+
+commit 2cb9a5501a3cbeb6692cf68e896087ba73b6af69
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jun 23 10:42:29 2014 -0500
+
+    Removed 'version' from .gitignore file.
+
+commit b40dcefc5ee31f67aa3990e2e9d2ef8ed1386a25 (origin/master)
+Merge: 7101a8e b693b0c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jun 23 10:39:05 2014 -0500
+
+    Merge pull request #11 from Maratyszcza/stable
+    
+    [sc]axpy kernels for PNaCl
+
+commit b693b0cddcfb41450e3c09a3ab97acb44c1ccdec
+Author: Marat Dukhan <maratek@gmail.com>
+Date:   Sun Jun 22 13:44:25 2014 -0700
+
+    [SC]AXPY kernels for PNaCl
+
+commit 7101a8eec0327d6c3a7eb36eb4b0fd45c1c6d162
+Merge: ad48dca 020a831
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jun 19 21:46:50 2014 -0500
+
+    Merge pull request #10 from Maratyszcza/stable
+    
+    Portable Native Client port
+
+commit 020a831bc5f61744cb8354886aa679b99b1285f6
+Author: Marat Dukhan <maratek@gmail.com>
+Date:   Thu Jun 19 00:58:26 2014 -0700
+
+    Code clean-up in PNaCl port
+
+commit 491be4f91ed725522f5cc7184053857c6c376ada
+Author: Marat Dukhan <maratek@gmail.com>
+Date:   Thu Jun 19 00:45:44 2014 -0700
+
+    Optimized dot product kernels for PNaCl
+
+commit 4b8e71aab80182873a2e138eb07902b8d8fd5480
+Author: Marat Dukhan <maratek@gmail.com>
+Date:   Thu Jun 19 00:43:25 2014 -0700
+
+    Use AR rcs flags for PNaCl target to avoid warning
+
+commit 031deb2a5c718d569bde842590a791b812f4cf1d
+Author: Marat Dukhan <maratek@gmail.com>
+Date:   Wed Jun 18 03:11:34 2014 -0700
+
+    PNaCl configuration: use pnacl-ar instead or ar (fixes build issue on Mac)
+
+commit 68a02976e3c3638f0a9821342e269a1743e3ace3
+Author: Marat Dukhan <maratek@gmail.com>
+Date:   Wed Jun 18 03:10:25 2014 -0700
+
+    Compile pnacl configuration in GNU11 mode to avoid warning about non-standard features
+
+commit 6f8462eb0ec278b89731e73ef583386a3371d095
+Author: Marat Dukhan <maratek@gmail.com>
+Date:   Wed Jun 18 03:08:46 2014 -0700
+
+    Fix inconsistent VERBOSE macro in Makefile
+
+commit b2ffb4de8b6872cb23537ad282e557d11dcd9c8b
+Author: Marat Dukhan <maratek@gmail.com>
+Date:   Sun Jun 15 18:41:30 2014 -0400
+
+    Reformatted PNaCl GEMM kernels
+
+commit 6de2d472d98baa215264a776f3d5291780a6a085
+Author: Marat Dukhan <maratek@gmail.com>
+Date:   Sun Jun 15 08:44:31 2014 -0400
+
+    CGEMM and ZGEMM kernels for PNaCl
+
+commit f064711a5e6fb3852c17c7520909b09dc27665f2
+Author: Marat Dukhan <maratek@gmail.com>
+Date:   Sun Jun 15 06:27:37 2014 -0400
+
+    SGEMM and DGEMM kernels for PNaCl
+
+commit ad48dca22913a363899f0bef45553898718eebb1
+Merge: ee2b679 7118f87
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Jun 14 15:10:13 2014 -0500
+
+    Merge pull request #9 from tkelman/memalign_windows
+    
+    Use _aligned_malloc instead of posix_memalign on Windows
+
+commit 7118f87e18b4941423472afc00215c1d1f2a1fcd
+Author: Tony Kelman <tony@kelman.net>
+Date:   Sat Jun 14 06:53:20 2014 -0700
+
+    Use _aligned_malloc instead of posix_memalign on Windows
+
+commit ee2b679281ca45fb40b2198e293bc3bc3d446632
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Fri Jun 6 12:41:55 2014 -0500
+
+    Only include omp.h if BLIS_ENABLE_OPENMP is set
+
+commit 19c05dfaac43c627f86e897c8c00f1f9440754aa
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jun 5 10:54:16 2014 -0500
+
+    CHANGELOG update (for 0.1.2).
+
+commit 00f232f8ed1f7c41619b12ebf779ebe2c3b2d3cd (tag: 0.1.2)
 Author: Tyler Smith <tms@cs.utexas.edu>
 Date:   Mon Jun 2 13:40:57 2014 -0500
 
