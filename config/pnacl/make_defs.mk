@@ -81,6 +81,7 @@ CC             := pnacl-clang
 # NOTE: This is needed to enable posix_memalign().
 CPPROCFLAGS    := -D_POSIX_C_SOURCE=200112L
 CMISCFLAGS     := -std=gnu11 -I$(NACL_SDK_ROOT)/include
+CPICFLAGS      := 
 CDBGFLAGS      := -g
 CWARNFLAGS     := -Wall
 COPTFLAGS      := -O3
@@ -90,9 +91,9 @@ CVECFLAGS      :=
 # Aggregate all of the flags into multiple groups: one for standard
 # compilation, and one for each of the supported "special" compilation
 # modes.
-CFLAGS         := $(CDBGFLAGS) $(COPTFLAGS)  $(CVECFLAGS) $(CWARNFLAGS) $(CMISCFLAGS) $(CPPROCFLAGS)
-CFLAGS_KERNELS := $(CDBGFLAGS) $(CKOPTFLAGS) $(CVECFLAGS) $(CWARNFLAGS) $(CMISCFLAGS) $(CPPROCFLAGS)
-CFLAGS_NOOPT   := $(CDBGFLAGS)                            $(CWARNFLAGS) $(CMISCFLAGS) $(CPPROCFLAGS)
+CFLAGS         := $(CDBGFLAGS) $(COPTFLAGS)  $(CVECFLAGS) $(CWARNFLAGS) $(CPICFLAGS) $(CMISCFLAGS) $(CPPROCFLAGS)
+CFLAGS_KERNELS := $(CDBGFLAGS) $(CKOPTFLAGS) $(CVECFLAGS) $(CWARNFLAGS) $(CPICFLAGS) $(CMISCFLAGS) $(CPPROCFLAGS)
+CFLAGS_NOOPT   := $(CDBGFLAGS)                            $(CWARNFLAGS) $(CPICFLAGS) $(CMISCFLAGS) $(CPPROCFLAGS)
 
 # --- Determine the archiver and related flags ---
 AR             := pnacl-ar
@@ -100,6 +101,7 @@ ARFLAGS        := rcs
 
 # --- Determine the linker and related flags ---
 LINKER         := $(CC)
+SOFLAGS        := 
 LDFLAGS        := -lm
 
 # --- Determine the finalizer and related flags ---

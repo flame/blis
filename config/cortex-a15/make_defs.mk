@@ -81,6 +81,7 @@ CC             := gcc
 # NOTE: This is needed to enable posix_memalign().
 CPPROCFLAGS    := -D_POSIX_C_SOURCE=200112L
 CMISCFLAGS     := -std=c99 -mfloat-abi=hard -mfpu=neon 
+CPICFLAGS      := -fPIC
 CDBGFLAGS      := -g
 CWARNFLAGS     := -Wall
 COPTFLAGS      := -march=armv7-a -mfpu=neon -O2
@@ -90,9 +91,9 @@ CVECFLAGS      := #-msse3 -march=native # -mfpmath=sse
 # Aggregate all of the flags into multiple groups: one for standard
 # compilation, and one for each of the supported "special" compilation
 # modes.
-CFLAGS         := $(CDBGFLAGS) $(COPTFLAGS)  $(CVECFLAGS) $(CWARNFLAGS) $(CMISCFLAGS) $(CPPROCFLAGS)
-CFLAGS_KERNELS := $(CDBGFLAGS) $(CKOPTFLAGS) $(CVECFLAGS) $(CWARNFLAGS) $(CMISCFLAGS) $(CPPROCFLAGS)
-CFLAGS_NOOPT   := $(CDBGFLAGS)                            $(CWARNFLAGS) $(CMISCFLAGS) $(CPPROCFLAGS)
+CFLAGS         := $(CDBGFLAGS) $(COPTFLAGS)  $(CVECFLAGS) $(CWARNFLAGS) $(CPICFLAGS) $(CMISCFLAGS) $(CPPROCFLAGS)
+CFLAGS_KERNELS := $(CDBGFLAGS) $(CKOPTFLAGS) $(CVECFLAGS) $(CWARNFLAGS) $(CPICFLAGS) $(CMISCFLAGS) $(CPPROCFLAGS)
+CFLAGS_NOOPT   := $(CDBGFLAGS)                            $(CWARNFLAGS) $(CPICFLAGS) $(CMISCFLAGS) $(CPPROCFLAGS)
 
 # --- Determine the archiver and related flags ---
 AR             := ar
@@ -100,6 +101,7 @@ ARFLAGS        := cru
 
 # --- Determine the linker and related flags ---
 LINKER         := $(CC)
+SOFLAGS        := -shared
 LDFLAGS        := -lm
 
 

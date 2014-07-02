@@ -82,6 +82,7 @@ CC             := /bgsys/drivers/ppcfloor/comm/gcc.legacy/bin/mpixlc_r
 CPPROCFLAGS    := -D_POSIX_C_SOURCE=200112L \
                   -I/bgsys/drivers/ppcfloor -I/bgsys/drivers/ppcfloor/spi/include/kernel/cnk
 CMISCFLAGS     := -qthreaded -qsmp=omp -qasm=gcc -qkeyword=asm # -qreport -qsource -qlistopt -qlist
+CPICFLAGS      := 
 CDBGFLAGS      :=
 CWARNFLAGS     := -w
 COPTFLAGS      := -O3
@@ -91,9 +92,9 @@ CVECFLAGS      := -qarch=qp -qtune=qp -qsimd=auto -qhot=level=1 -qprefetch -qunr
 # Aggregate all of the flags into multiple groups: one for standard
 # compilation, and one for each of the supported "special" compilation
 # modes.
-CFLAGS         := $(CDBGFLAGS) $(COPTFLAGS)  $(CVECFLAGS) $(CWARNFLAGS) $(CMISCFLAGS) $(CPPROCFLAGS)
-CFLAGS_KERNELS := $(CDBGFLAGS) $(CKOPTFLAGS) $(CVECFLAGS) $(CWARNFLAGS) $(CMISCFLAGS) $(CPPROCFLAGS)
-CFLAGS_NOOPT   := $(CDBGFLAGS)                            $(CWARNFLAGS) $(CMISCFLAGS) $(CPPROCFLAGS)
+CFLAGS         := $(CDBGFLAGS) $(COPTFLAGS)  $(CVECFLAGS) $(CWARNFLAGS) $(CPICFLAGS) $(CMISCFLAGS) $(CPPROCFLAGS)
+CFLAGS_KERNELS := $(CDBGFLAGS) $(CKOPTFLAGS) $(CVECFLAGS) $(CWARNFLAGS) $(CPICFLAGS) $(CMISCFLAGS) $(CPPROCFLAGS)
+CFLAGS_NOOPT   := $(CDBGFLAGS)                            $(CWARNFLAGS) $(CPICFLAGS) $(CMISCFLAGS) $(CPPROCFLAGS)
 
 # --- Determine the archiver and related flags ---
 AR             := ar
