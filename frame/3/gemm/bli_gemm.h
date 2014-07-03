@@ -38,6 +38,8 @@
 #include "bli_gemm_int.h"
 #include "bli_gemm_target.h"
 
+#include "bli_gemm_ukernel.h"
+
 #include "bli_gemm_blk_var1f.h"
 #include "bli_gemm_blk_var2f.h"
 #include "bli_gemm_blk_var3f.h"

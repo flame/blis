@@ -32,5 +32,25 @@
 
 */
 
-void libblis_test_trsm_ukr( test_params_t* params, test_op_t* op );
+void bli_trsm_ukernel( obj_t*  a,
+                       obj_t*  b,
+                       obj_t*  c );
+
+
+//
+// Prototype the void pointer kernel wrappers.
+//
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, varname ) \
+\
+void PASTEMAC(ch,varname)( \
+                           void*      a, \
+                           void*      b, \
+                           void*      c, inc_t rs_c, inc_t cs_c, \
+                           auxinfo_t* data  \
+                         );
+
+INSERT_GENTPROT_BASIC( trsm_l_ukernel_void )
+INSERT_GENTPROT_BASIC( trsm_u_ukernel_void )
 

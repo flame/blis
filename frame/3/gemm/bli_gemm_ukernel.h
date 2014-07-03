@@ -32,5 +32,29 @@
 
 */
 
-void libblis_test_trsm_ukr( test_params_t* params, test_op_t* op );
+void bli_gemm_ukernel( obj_t*  alpha,
+                       obj_t*  a,
+                       obj_t*  b,
+                       obj_t*  beta,
+                       obj_t*  c );
+
+
+//
+// Prototype the void pointer kernel wrappers.
+//
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, varname ) \
+\
+void PASTEMAC(ch,varname)( \
+                           dim_t      k, \
+                           void*      alpha, \
+                           void*      a, \
+                           void*      b, \
+                           void*      beta, \
+                           void*      c, inc_t rs_c, inc_t cs_c, \
+                           auxinfo_t* data  \
+                         );
+
+INSERT_GENTPROT_BASIC( gemm_ukernel_void )
 

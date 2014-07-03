@@ -270,7 +270,7 @@ void libblis_test_gemm_ukr_impl( iface_t   iface,
 	switch ( iface )
 	{
 		case BLIS_TEST_SEQ_UKERNEL:
-		bli_gemm_ukr( alpha, a, b, beta, c );
+		bli_gemm_ukernel( alpha, a, b, beta, c );
 		break;
 
 		default:
@@ -353,100 +353,4 @@ void libblis_test_gemm_ukr_check( obj_t*  alpha,
 	bli_obj_free( &w );
 	bli_obj_free( &z );
 }
-
-
-
-//
-// Define object-wrapper to GEMM_UKERNEL micro-kernels.
-//
-
-#define FUNCPTR_T gemm_ukr_fp
-
-typedef void (*FUNCPTR_T)(
-                           dim_t      k,
-                           void*      alpha,
-                           void*      a,
-                           void*      b,
-                           void*      beta,
-                           void*      c, inc_t rs_c, inc_t cs_c,
-                           auxinfo_t* data
-                         );
-
-static FUNCPTR_T GENARRAY(ftypes,gemm_ukr);
-
-
-void bli_gemm_ukr( obj_t*  alpha,
-                   obj_t*  a,
-                   obj_t*  b,
-                   obj_t*  beta,
-                   obj_t*  c )
-{
-	num_t     dt        = bli_obj_datatype( *c );
-
-	dim_t     k         = bli_obj_width( *a );
-
-	void*     buf_a     = bli_obj_buffer_at_off( *a );
-
-	void*     buf_b     = bli_obj_buffer_at_off( *b );
-
-	void*     buf_c     = bli_obj_buffer_at_off( *c );
-	inc_t     rs_c      = bli_obj_row_stride( *c );
-	inc_t     cs_c      = bli_obj_col_stride( *c );
-
-	void*     buf_alpha = bli_obj_buffer_for_1x1( dt, *alpha );
-
-	void*     buf_beta  = bli_obj_buffer_for_1x1( dt, *beta );
-
-	inc_t     ps_a      = bli_obj_panel_stride( *a );
-	inc_t     ps_b      = bli_obj_panel_stride( *b );
-
-	FUNCPTR_T f;
-
-	auxinfo_t data;
-
-
-	// Fill the auxinfo_t struct in case the micro-kernel uses it.
-	bli_auxinfo_set_next_a( buf_a, data );
-	bli_auxinfo_set_next_b( buf_b, data );
-	bli_auxinfo_set_ps_a( ps_a, data );
-	bli_auxinfo_set_ps_b( ps_b, data );
-
-	// Index into the type combination array to extract the correct
-	// function pointer.
-	f = ftypes[dt];
-
-	// Invoke the function.
-	f( k,
-	   buf_alpha,
-	   buf_a,
-	   buf_b,
-	   buf_beta,
-	   buf_c, rs_c, cs_c,
-	   &data );
-}
-
-
-#undef  GENTFUNC
-#define GENTFUNC( ctype, ch, varname, ukrname ) \
-\
-void PASTEMAC(ch,varname)( \
-                           dim_t      k, \
-                           void*      alpha, \
-                           void*      a, \
-                           void*      b, \
-                           void*      beta, \
-                           void*      c, inc_t rs_c, inc_t cs_c, \
-                           auxinfo_t* data  \
-                         ) \
-{ \
-	PASTEMAC(ch,ukrname)( k, \
-	                      alpha, \
-	                      a, \
-	                      b, \
-	                      beta, \
-	                      c, rs_c, cs_c, \
-	                      data ); \
-}
-
-INSERT_GENTFUNC_BASIC( gemm_ukr, GEMM_UKERNEL )
 
