@@ -62,7 +62,7 @@ SYMLINK    := ln -sf
 FIND       := find
 GREP       := grep
 XARGS      := xargs
-RANLIB     := ranlib
+RANLIB     := pnacl-ranlib
 INSTALL    := install -c
 
 # Used to refresh CHANGELOG.
@@ -76,17 +76,17 @@ GIT_LOG    := $(GIT) log --decorate
 #
 
 # --- Determine the C compiler and related flags ---
-CC             := gcc
+CC             := pnacl-clang
 # Enable IEEE Standard 1003.1-2004 (POSIX.1d). 
 # NOTE: This is needed to enable posix_memalign().
 CPPROCFLAGS    := -D_POSIX_C_SOURCE=200112L
-CMISCFLAGS     := -std=c99 # -fopenmp -pg
-CPICFLAGS      := -fPIC
-CDBGFLAGS      := #-g
+CMISCFLAGS     := -std=gnu11 -I$(NACL_SDK_ROOT)/include
+CPICFLAGS      := 
+CDBGFLAGS      := -g
 CWARNFLAGS     := -Wall
-COPTFLAGS      := -O2 -mfpmath=sse -fomit-frame-pointer
-CKOPTFLAGS     := -O2 -mfpmath=sse -fomit-frame-pointer
-CVECFLAGS      := -msse3 -march=native
+COPTFLAGS      := -O3
+CKOPTFLAGS     := $(COPTFLAGS) -ffast-math
+CVECFLAGS      :=
 
 # Aggregate all of the flags into multiple groups: one for standard
 # compilation, and one for each of the supported "special" compilation
@@ -96,15 +96,24 @@ CFLAGS_KERNELS := $(CDBGFLAGS) $(CKOPTFLAGS) $(CVECFLAGS) $(CWARNFLAGS) $(CPICFL
 CFLAGS_NOOPT   := $(CDBGFLAGS)                            $(CWARNFLAGS) $(CPICFLAGS) $(CMISCFLAGS) $(CPPROCFLAGS)
 
 # --- Determine the archiver and related flags ---
-AR             := ar
-ARFLAGS        := cru
+AR             := pnacl-ar
+ARFLAGS        := rcs
 
 # --- Determine the linker and related flags ---
 LINKER         := $(CC)
-SOFLAGS        := -shared
+SOFLAGS        := 
 LDFLAGS        := -lm
 
+# --- Determine the finalizer and related flags ---
+FINALIZER      := pnacl-finalize
+FINFLAGS        :=
 
+# --- Determine the translator and related flags ---
+TRANSLATOR     := pnacl-translate
+TRNSFLAGS      := -O3
+TRNSAMD64FLAGS := -arch x86-64
+TRNSX86FLAGS   := -arch i686
+TRNSARMFLAGS   := -arch armv7
 
 # end of ifndef MAKE_DEFS_MK_INCLUDED conditional block
 endif

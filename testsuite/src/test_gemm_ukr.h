@@ -34,28 +34,3 @@
 
 void libblis_test_gemm_ukr( test_params_t* params, test_op_t* op );
 
-
-//
-// Prototype wrapper interfaces to micro-kernel.
-//
-void bli_gemm_ukr( obj_t*  alpha,
-                   obj_t*  a,
-                   obj_t*  b,
-                   obj_t*  beta,
-                   obj_t*  c );
-
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTEMAC(ch,varname)( \
-                           dim_t      k, \
-                           void*      alpha, \
-                           void*      a, \
-                           void*      b, \
-                           void*      beta, \
-                           void*      c, inc_t rs_c, inc_t cs_c, \
-                           auxinfo_t* data  \
-                         );
-
-INSERT_GENTPROT_BASIC( gemm_ukr )
-

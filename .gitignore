@@ -19,11 +19,12 @@
 *.a
 # test executables
 *.x
+*.pexe
+*.nexe
 
 # -- build system files --
 
 config.mk
-version
 
 # -- makefile fragments --
 

@@ -174,7 +174,7 @@ VERS_CONF              := $(VERSION)-$(CONFIG_NAME)
 # Note: These names will be modified later to include the configuration and
 # version strings.
 BLIS_LIB_NAME      := $(BLIS_LIB_BASE_NAME).a
-#BLIS_DLL_NAME      := $(BLIS_LIB_BASE_NAME).so
+BLIS_DLL_NAME      := $(BLIS_LIB_BASE_NAME).so
 
 # --- BLIS framework source and object variable names ---
 
@@ -196,8 +196,9 @@ MK_CONFIG_OBJS         :=
 MK_CONFIG_NOOPT_OBJS   :=
 MK_CONFIG_KERNELS_OBJS :=
 
-# Append the base library path to the library name.
+# Append the base library path to the library names.
 MK_ALL_BLIS_LIB        := $(BASE_LIB_PATH)/$(BLIS_LIB_NAME)
+MK_ALL_BLIS_DLL        := $(BASE_LIB_PATH)/$(BLIS_DLL_NAME)
 
 # --- Define install target names for static libraries ---
 
@@ -209,6 +210,16 @@ MK_BLIS_LIB_INST_W_VERS_CONF := $(patsubst $(BASE_LIB_PATH)/%.a, \
                                            $(INSTALL_PREFIX)/lib/%-$(VERS_CONF).a, \
                                            $(MK_BLIS_LIB))
 
+# --- Define install target names for shared libraries ---
+
+MK_BLIS_DLL                  := $(MK_ALL_BLIS_DLL)
+MK_BLIS_DLL_INST             := $(patsubst $(BASE_LIB_PATH)/%.so, \
+                                           $(INSTALL_PREFIX)/lib/%.so, \
+                                           $(MK_BLIS_DLL))
+MK_BLIS_DLL_INST_W_VERS_CONF := $(patsubst $(BASE_LIB_PATH)/%.so, \
+                                           $(INSTALL_PREFIX)/lib/%-$(VERS_CONF).so, \
+                                           $(MK_BLIS_DLL))
+
 # --- Determine which libraries to build ---
 
 MK_LIBS                           :=
@@ -219,6 +230,12 @@ ifeq ($(BLIS_ENABLE_STATIC_BUILD),yes)
 MK_LIBS                           += $(MK_BLIS_LIB)
 MK_LIBS_INST                      += $(MK_BLIS_LIB_INST)
 MK_LIBS_INST_W_VERS_CONF          += $(MK_BLIS_LIB_INST_W_VERS_CONF)
+endif
+
+ifeq ($(BLIS_ENABLE_DYNAMIC_BUILD),yes)
+MK_LIBS                           += $(MK_BLIS_DLL)
+MK_LIBS_INST                      += $(MK_BLIS_DLL_INST)
+MK_LIBS_INST_W_VERS_CONF          += $(MK_BLIS_DLL_INST_W_VERS_CONF)
 endif
 
 # Strip leading, internal, and trailing whitespace.
@@ -385,12 +402,12 @@ TESTSUITE_BIN           := $(TESTSUITE_NAME).x
 # --- Uninstall definitions ----------------------------------------------------
 #
 
-# This shell command grabs all files named "libblis-*.a" in the installation
-# directory and then filters out the name of the library archive for the
-# current version/configuration. We consider this remaining set of libraries
-# to be "old" and eligible for removal upon running of the uninstall-old
-# target.
-UNINSTALL_LIBS   := $(shell $(FIND) $(INSTALL_PREFIX)/lib/ -name "$(BLIS_LIB_BASE_NAME)-*.a" 2> /dev/null | $(GREP) -v "$(BLIS_LIB_BASE_NAME)-$(VERS_CONF).a" | $(GREP) -v $(BLIS_LIB_NAME))
+# This shell command grabs all files named "libblis-*.a" or "libblis-*.so" in
+# the installation directory and then filters out the name of the library
+# archive for the current version/configuration. We consider this remaining set
+# of libraries to be "old" and eligible for removal upon running of the
+# uninstall-old target.
+UNINSTALL_LIBS   := $(shell $(FIND) $(INSTALL_PREFIX)/lib/ -name "$(BLIS_LIB_BASE_NAME)-*.[a|so]" 2> /dev/null | $(GREP) -v "$(BLIS_LIB_BASE_NAME)-$(VERS_CONF).[a|so]" | $(GREP) -v $(BLIS_LIB_NAME))
 
 
 
@@ -464,18 +481,32 @@ ifeq ($(MAKE_DEFS_MK_PRESENT),no)
 endif
 
 
-# --- Static library archiver rules ---
+# --- All-purpose library rule (static and shared) ---
 
 blis-lib: check-env $(MK_LIBS)
 
+
+# --- Static library archiver rules ---
+
 $(MK_ALL_BLIS_LIB): $(MK_ALL_BLIS_OBJS)
-ifeq ($(FLA_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	$(AR) $(ARFLAGS) $@ $?
 	$(RANLIB) $@
 else
 	@echo "Archiving $@"
 	@$(AR) $(ARFLAGS) $@ $?
 	@$(RANLIB) $@
+endif
+
+
+# --- Dynamic library linker rules ---
+
+$(MK_ALL_BLIS_DLL): $(MK_ALL_BLIS_OBJS)
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	$(LINKER) $(SOFLAGS) $(LDFLAGS) -o $@ $?
+else 
+	@echo "Dynamically linking $@"
+	@$(LINKER) $(SOFLAGS) $(LDFLAGS) -o $@ $?
 endif
 
 
@@ -540,12 +571,32 @@ else
 	@$(INSTALL) -m 0644 $< $@
 endif
 
+$(INSTALL_PREFIX)/lib/%-$(VERS_CONF).so: $(BASE_LIB_PATH)/%.so $(CONFIG_MK_FILE)
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	$(INSTALL) -m 0755 -d $(@D)
+	$(INSTALL) -m 0644 $< $@
+else
+	@echo "Installing $(@F) into $(INSTALL_PREFIX)/lib/"
+	@$(INSTALL) -m 0755 -d $(@D)
+	@$(INSTALL) -m 0644 $< $@
+endif
+
 
 # --- Install-symlinks rules ---
 
 install-lib-symlinks: check-env $(MK_LIBS_INST)
 
 $(INSTALL_PREFIX)/lib/%.a: $(INSTALL_PREFIX)/lib/%-$(VERS_CONF).a
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	$(SYMLINK) $(<F) $(@F)
+	$(MV) $(@F) $(INSTALL_PREFIX)/lib/
+else
+	@echo "Installing symlink $(@F) into $(INSTALL_PREFIX)/lib/"
+	@$(SYMLINK) $(<F) $(@F)
+	@$(MV) $(@F) $(INSTALL_PREFIX)/lib/
+endif
+
+$(INSTALL_PREFIX)/lib/%.so: $(INSTALL_PREFIX)/lib/%-$(VERS_CONF).so
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	$(SYMLINK) $(<F) $(@F)
 	$(MV) $(@F) $(INSTALL_PREFIX)/lib/
@@ -569,6 +620,7 @@ ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	- $(FIND) $(BASE_OBJ_CONFIG_PATH) -name "*.o" | $(XARGS) $(RM_F)
 	- $(FIND) $(BASE_OBJ_FRAME_PATH) -name "*.o" | $(XARGS) $(RM_F)
 	- $(FIND) $(BASE_LIB_PATH) -name "*.a" | $(XARGS) $(RM_F)
+	- $(FIND) $(BASE_LIB_PATH) -name "*.so" | $(XARGS) $(RM_F)
 else
 	@echo "Removing .o files from $(BASE_OBJ_CONFIG_PATH)."
 	@- $(FIND) $(BASE_OBJ_CONFIG_PATH) -name "*.o" | $(XARGS) $(RM_F)
@@ -576,6 +628,8 @@ else
 	@- $(FIND) $(BASE_OBJ_FRAME_PATH) -name "*.o" | $(XARGS) $(RM_F)
 	@echo "Removing .a files from $(BASE_LIB_PATH)."
 	@- $(FIND) $(BASE_LIB_PATH) -name "*.a" | $(XARGS) $(RM_F)
+	@echo "Removing .so files from $(BASE_LIB_PATH)."
+	@- $(FIND) $(BASE_LIB_PATH) -name "*.so" | $(XARGS) $(RM_F)
 endif
 
 cleantest: check-env

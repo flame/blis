@@ -314,7 +314,7 @@ void libblis_test_gemmtrsm_ukr_impl( iface_t   iface,
 	switch ( iface )
 	{
 		case BLIS_TEST_SEQ_UKERNEL:
-		bli_gemmtrsm_ukr( alpha, a1x, a11, bx1, b11, c11 );
+		bli_gemmtrsm_ukernel( alpha, a1x, a11, bx1, b11, c11 );
 		break;
 
 		default:
@@ -473,116 +473,4 @@ void bli_gemmtrsm_ukr_make_subparts( dim_t  k,
 	// offset value it inherited from a).
 	bli_obj_set_diag_offset( 0, *a11 );
 }
-
-
-
-//
-// Define object-wrapper to GEMMTRSM_L_UKERNEL, GEMMTRSM_U_UKERNEL
-// micro-kernels.
-//
-
-#undef  FUNCPTR_T
-#define FUNCPTR_T gemmtrsm_ukr_fp
-
-typedef void (*FUNCPTR_T)(
-                           dim_t      k,
-                           void*      alpha,
-                           void*      a1x,
-                           void*      a11,
-                           void*      bx1,
-                           void*      b11,
-                           void*      c11, inc_t rs_c, inc_t cs_c,
-                           auxinfo_t* data
-                         );
-
-static FUNCPTR_T GENARRAY(ftypes_l,gemmtrsm_l_ukr);
-static FUNCPTR_T GENARRAY(ftypes_u,gemmtrsm_u_ukr);
-
-
-void bli_gemmtrsm_ukr( obj_t*  alpha,
-                       obj_t*  a1x,
-                       obj_t*  a11,
-                       obj_t*  bx1,
-                       obj_t*  b11,
-                       obj_t*  c11 )
-{
-	dim_t     k         = bli_obj_width( *a1x );
-
-	num_t     dt        = bli_obj_datatype( *c11 );
-
-	void*     buf_a1x   = bli_obj_buffer_at_off( *a1x );
-
-	void*     buf_a11   = bli_obj_buffer_at_off( *a11 );
-
-	void*     buf_bx1   = bli_obj_buffer_at_off( *bx1 );
-
-	void*     buf_b11   = bli_obj_buffer_at_off( *b11 );
-
-	void*     buf_c11   = bli_obj_buffer_at_off( *c11 );
-	inc_t     rs_c      = bli_obj_row_stride( *c11 );
-	inc_t     cs_c      = bli_obj_col_stride( *c11 );
-
-	void*     buf_alpha = bli_obj_buffer_for_1x1( dt, *alpha );
-
-	inc_t     ps_a      = bli_obj_panel_stride( *a1x );
-	inc_t     ps_b      = bli_obj_panel_stride( *bx1 );
-
-	FUNCPTR_T f;
-
-	auxinfo_t data;
-
-
-	// Fill the auxinfo_t struct in case the micro-kernel uses it.
-	if ( bli_obj_is_lower( *a11 ) )
-	{ bli_auxinfo_set_next_a( buf_a1x, data ); }
-	else
-	{ bli_auxinfo_set_next_a( buf_a11, data ); }
-	bli_auxinfo_set_next_b( buf_bx1, data );
-
-	bli_auxinfo_set_ps_a( ps_a, data );
-	bli_auxinfo_set_ps_b( ps_b, data );
-
-	// Index into the type combination array to extract the correct
-	// function pointer.
-	if ( bli_obj_is_lower( *a11 ) ) f = ftypes_l[dt];
-	else                            f = ftypes_u[dt];
-
-	// Invoke the function.
-	f( k,
-	   buf_alpha,
-	   buf_a1x,
-	   buf_a11,
-	   buf_bx1,
-	   buf_b11,
-	   buf_c11, rs_c, cs_c,
-	   &data );
-}
-
-
-#undef  GENTFUNC
-#define GENTFUNC( ctype, ch, varname, ukrname ) \
-\
-void PASTEMAC(ch,varname)( \
-                           dim_t      k, \
-                           void*      alpha, \
-                           void*      a1x, \
-                           void*      a11, \
-                           void*      bx1, \
-                           void*      b11, \
-                           void*      c11, inc_t rs_c, inc_t cs_c, \
-                           auxinfo_t* data  \
-                         ) \
-{ \
-	PASTEMAC(ch,ukrname)( k, \
-	                      alpha, \
-	                      a1x, \
-	                      a11, \
-	                      bx1, \
-	                      b11, \
-	                      c11, rs_c, cs_c, \
-	                      data ); \
-}
-
-INSERT_GENTFUNC_BASIC( gemmtrsm_l_ukr, GEMMTRSM_L_UKERNEL )
-INSERT_GENTFUNC_BASIC( gemmtrsm_u_ukr, GEMMTRSM_U_UKERNEL )
 

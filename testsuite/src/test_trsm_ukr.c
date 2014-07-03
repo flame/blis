@@ -267,7 +267,7 @@ void libblis_test_trsm_ukr_impl( iface_t   iface,
 	switch ( iface )
 	{
 		case BLIS_TEST_SEQ_UKERNEL:
-		bli_trsm_ukr( a, b, c );
+		bli_trsm_ukernel( a, b, c );
 		break;
 
 		default:
@@ -366,85 +366,4 @@ void libblis_test_trsm_ukr_check( side_t  side,
 	bli_obj_free( &w );
 	bli_obj_free( &z );
 }
-
-
-
-//
-// Define object-wrapper to TRSM_L_UKERNEL, TRSM_U_UKERNEL micro-kernels.
-//
-
-#undef  FUNCPTR_T
-#define FUNCPTR_T trsm_ukr_fp
-
-typedef void (*FUNCPTR_T)(
-                           void*      a,
-                           void*      b,
-                           void*      c, inc_t rs_c, inc_t cs_c,
-                           auxinfo_t* data
-                         );
-
-static FUNCPTR_T GENARRAY(ftypes_l,trsm_l_ukr);
-static FUNCPTR_T GENARRAY(ftypes_u,trsm_u_ukr);
-
-
-void bli_trsm_ukr( obj_t*  a,
-                   obj_t*  b,
-                   obj_t*  c )
-{
-	num_t     dt        = bli_obj_datatype( *c );
-
-	void*     buf_a     = bli_obj_buffer_at_off( *a );
-
-	void*     buf_b     = bli_obj_buffer_at_off( *b );
-
-	void*     buf_c     = bli_obj_buffer_at_off( *c );
-	inc_t     rs_c      = bli_obj_row_stride( *c );
-	inc_t     cs_c      = bli_obj_col_stride( *c );
-
-	inc_t     ps_a      = bli_obj_panel_stride( *a );
-	inc_t     ps_b      = bli_obj_panel_stride( *b );
-
-	FUNCPTR_T f;
-
-	auxinfo_t data;
-
-
-	// Fill the auxinfo_t struct in case the micro-kernel uses it.
-	bli_auxinfo_set_next_a( buf_a, data );
-	bli_auxinfo_set_next_b( buf_b, data );
-
-	bli_auxinfo_set_ps_a( ps_a, data );
-	bli_auxinfo_set_ps_b( ps_b, data );
-
-	// Index into the type combination array to extract the correct
-	// function pointer.
-	if ( bli_obj_is_lower( *a ) ) f = ftypes_l[dt];
-	else                          f = ftypes_u[dt];
-
-	// Invoke the function.
-	f( buf_a,
-	   buf_b,
-	   buf_c, rs_c, cs_c,
-	   &data );
-}
-
-
-#undef  GENTFUNC
-#define GENTFUNC( ctype, ch, varname, ukrname ) \
-\
-void PASTEMAC(ch,varname)( \
-                           void*      a, \
-                           void*      b, \
-                           void*      c, inc_t rs_c, inc_t cs_c, \
-                           auxinfo_t* data  \
-                         ) \
-{ \
-	PASTEMAC(ch,ukrname)( a, \
-	                      b, \
-	                      c, rs_c, cs_c, \
-	                      data ); \
-}
-
-INSERT_GENTFUNC_BASIC( trsm_l_ukr, TRSM_L_UKERNEL )
-INSERT_GENTFUNC_BASIC( trsm_u_ukr, TRSM_U_UKERNEL )
 
