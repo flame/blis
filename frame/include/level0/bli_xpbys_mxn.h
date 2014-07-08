@@ -46,44 +46,84 @@
 { \
 	dim_t i, j; \
 \
-	for ( j = 0; j < n; ++j ) \
-	for ( i = 0; i < m; ++i ) \
-	bli_sssxpbys( *(x + i*rs_x + j*cs_x), \
-	              *(beta), \
-	              *(y + i*rs_y + j*cs_y) ); \
+	/* If beta is zero, overwrite y with x (in case y has infs or NaNs). */ \
+	if ( bli_seq0( *beta ) ) \
+	{ \
+		bli_sscopys_mxn( m, n, \
+		                 x, rs_x, cs_x, \
+		                 y, rs_y, cs_y ); \
+	} \
+	else \
+	{ \
+		for ( j = 0; j < n; ++j ) \
+		for ( i = 0; i < m; ++i ) \
+		bli_sssxpbys( *(x + i*rs_x + j*cs_x), \
+		              *(beta), \
+		              *(y + i*rs_y + j*cs_y) ); \
+	} \
 }
 
 #define bli_dddxpbys_mxn( m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ) \
 { \
 	dim_t i, j; \
 \
-	for ( j = 0; j < n; ++j ) \
-	for ( i = 0; i < m; ++i ) \
-	bli_dddxpbys( *(x + i*rs_x + j*cs_x), \
-	              *(beta), \
-	              *(y + i*rs_y + j*cs_y) ); \
+	/* If beta is zero, overwrite y with x (in case y has infs or NaNs). */ \
+	if ( bli_deq0( *beta ) ) \
+	{ \
+		bli_ddcopys_mxn( m, n, \
+		                 x, rs_x, cs_x, \
+		                 y, rs_y, cs_y ); \
+	} \
+	else \
+	{ \
+		for ( j = 0; j < n; ++j ) \
+		for ( i = 0; i < m; ++i ) \
+		bli_dddxpbys( *(x + i*rs_x + j*cs_x), \
+		              *(beta), \
+		              *(y + i*rs_y + j*cs_y) ); \
+	} \
 }
 
 #define bli_cccxpbys_mxn( m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ) \
 { \
 	dim_t i, j; \
 \
-	for ( j = 0; j < n; ++j ) \
-	for ( i = 0; i < m; ++i ) \
-	bli_cccxpbys( *(x + i*rs_x + j*cs_x), \
-	              *(beta), \
-	              *(y + i*rs_y + j*cs_y) ); \
+	/* If beta is zero, overwrite y with x (in case y has infs or NaNs). */ \
+	if ( bli_ceq0( *beta ) ) \
+	{ \
+		bli_cccopys_mxn( m, n, \
+		                 x, rs_x, cs_x, \
+		                 y, rs_y, cs_y ); \
+	} \
+	else \
+	{ \
+		for ( j = 0; j < n; ++j ) \
+		for ( i = 0; i < m; ++i ) \
+		bli_cccxpbys( *(x + i*rs_x + j*cs_x), \
+		              *(beta), \
+		              *(y + i*rs_y + j*cs_y) ); \
+	} \
 }
 
 #define bli_zzzxpbys_mxn( m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ) \
 { \
 	dim_t i, j; \
 \
-	for ( j = 0; j < n; ++j ) \
-	for ( i = 0; i < m; ++i ) \
-	bli_zzzxpbys( *(x + i*rs_x + j*cs_x), \
-	              *(beta), \
-	              *(y + i*rs_y + j*cs_y) ); \
+	/* If beta is zero, overwrite y with x (in case y has infs or NaNs). */ \
+	if ( bli_zeq0( *beta ) ) \
+	{ \
+		bli_zzcopys_mxn( m, n, \
+		                 x, rs_x, cs_x, \
+		                 y, rs_y, cs_y ); \
+	} \
+	else \
+	{ \
+		for ( j = 0; j < n; ++j ) \
+		for ( i = 0; i < m; ++i ) \
+		bli_zzzxpbys( *(x + i*rs_x + j*cs_x), \
+		              *(beta), \
+		              *(y + i*rs_y + j*cs_y) ); \
+	} \
 }
 
 
