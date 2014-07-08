@@ -79,15 +79,10 @@ int main( int argc, char** argv )
 	n_input = 4 ;
 #endif
 
-#if 0
-	dt_a = BLIS_DOUBLE;
-	dt_b = BLIS_DOUBLE;
-	dt_c = BLIS_DOUBLE;
-	dt_alpha = BLIS_DOUBLE;
-	dt_beta = BLIS_DOUBLE;
+#if 1
+	dt_a = dt_b = dt_c = dt_alpha = dt_beta = BLIS_DOUBLE;
 #else
-	dt_a = dt_b = dt_c = dt_alpha = dt_beta = BLIS_FLOAT; 
-	//dt_a = dt_b = dt_c = dt_alpha = dt_beta = BLIS_SCOMPLEX; 
+	dt_a = dt_b = dt_c = dt_alpha = dt_beta = BLIS_DCOMPLEX; 
 #endif
 
 	side = BLIS_LEFT;

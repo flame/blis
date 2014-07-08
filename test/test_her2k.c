@@ -79,11 +79,7 @@ int main( int argc, char** argv )
 	k_input = 10;
 #endif
 
-	dt_a = BLIS_DOUBLE;
-	dt_b = BLIS_DOUBLE;
-	dt_c = BLIS_DOUBLE;
-	dt_alpha = BLIS_DOUBLE;
-	dt_beta = BLIS_DOUBLE;
+	dt_a = dt_b = dt_c = dt_alpha = dt_beta = BLIS_DOUBLE;
 
 	uplo = BLIS_LOWER;
 

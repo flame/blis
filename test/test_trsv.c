@@ -77,9 +77,7 @@ int main( int argc, char** argv )
 	n_input = 15;
 #endif
 
-	dt_alpha = BLIS_DOUBLE;
-	dt_a = BLIS_DOUBLE;
-	dt_x = BLIS_DOUBLE;
+	dt_alpha = dt_a = dt_x = BLIS_DOUBLE;
 
 	uplo = BLIS_LOWER;
 

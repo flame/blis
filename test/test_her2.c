@@ -77,15 +77,9 @@ int main( int argc, char** argv )
 #endif
 
 #if 1
-	dt_alpha = BLIS_DOUBLE;
-	dt_x = BLIS_DOUBLE;
-	dt_y = BLIS_DOUBLE;
-	dt_a = BLIS_DOUBLE;
+	dt_alpha = dt_x = dt_y = dt_a = BLIS_DOUBLE;
 #else
-	dt_alpha = BLIS_DCOMPLEX;
-	dt_x = BLIS_DCOMPLEX;
-	dt_y = BLIS_DCOMPLEX;
-	dt_a = BLIS_DCOMPLEX;
+	dt_alpha = dt_x = dt_y = dt_a = BLIS_DCOMPLEX;
 #endif
 
 	uplo = BLIS_LOWER;

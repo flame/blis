@@ -17,6 +17,7 @@
 # NOTE: This will result in git also exluding the top-level lib directory
 # since its only contents are .a files.
 *.a
+*.so
 # test executables
 *.x
 *.pexe

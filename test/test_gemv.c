@@ -77,11 +77,7 @@ int main( int argc, char** argv )
 	n_input = 15;
 #endif
 
-	dt_a = BLIS_DOUBLE;
-	dt_x = BLIS_DOUBLE;
-	dt_y = BLIS_DOUBLE;
-	dt_alpha = BLIS_DOUBLE;
-	dt_beta = BLIS_DOUBLE;
+	dt_a = dt_x = dt_y = dt_alpha = dt_beta = BLIS_DOUBLE;
 
 	for ( p = p_begin; p <= p_end; p += p_inc )
 	{
