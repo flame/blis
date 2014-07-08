@@ -373,6 +373,8 @@ void PASTEMAC(ch,varname)( \
 				ctype* restrict a12; \
 				ctype* restrict a2; \
 \
+                if( trsm_my_iter( i, thread ) ){ \
+\
 				m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left ); \
 \
 				/* Compute the addresses of the A11 block and A12 panel. */ \
@@ -380,8 +382,9 @@ void PASTEMAC(ch,varname)( \
 				a12  = a1 + off_b21 * PACKMR; \
 \
 				/* Compute the addresses of the next panels of A and B. */ \
-                a2 = a1 + rstep_a; \
-				if ( bli_is_last_iter( i, m_iter ) ) \
+                a2 = a1; \
+				/*if ( bli_is_last_iter( i, m_iter ) ) */\
+                if ( i + thread_num_threads(thread) >= m_iter ) \
 				{ \
 					a2 = a_cast; \
 					b2 = b1 + k_b1121 * ss_b; \
@@ -425,7 +428,7 @@ void PASTEMAC(ch,varname)( \
 					                        ct,  rs_ct, cs_ct, \
 					                        c11, rs_c,  cs_c ); \
 				} \
-\
+                } \
 				a1  += rstep_a; \
 				c11 += rstep_c; \
 			} \
@@ -437,11 +440,14 @@ void PASTEMAC(ch,varname)( \
 			{ \
 				ctype* restrict a2; \
 \
+                if( trsm_my_iter( i, thread ) ){ \
+\
 				m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left ); \
 \
 				/* Compute the addresses of the next panels of A and B. */ \
-                a2 = a1 + rstep_a; \
-				if ( bli_is_last_iter( i, m_iter ) ) \
+                a2 = a1; \
+				/*if ( bli_is_last_iter( i, m_iter ) ) */\
+                if ( i + thread_num_threads(thread) >= m_iter ) \
 				{ \
 					a2 = a_cast; \
 					b2 = b1 + cstep_b; \
@@ -484,7 +490,7 @@ void PASTEMAC(ch,varname)( \
 					                        alpha2_cast, \
 					                        c11, rs_c,  cs_c ); \
 				} \
-\
+				} \
 				a1  += rstep_a; \
 				c11 += rstep_c; \
 			} \
