@@ -62,10 +62,10 @@ static real sc_b4 = 1.f;
 
 
     roe = *sb;
-    if (abs(*sa) > abs(*sb)) {
+    if (bli_fabs(*sa) > bli_fabs(*sb)) {
 	roe = *sa;
     }
-    scale = abs(*sa) + abs(*sb);
+    scale = bli_fabs(*sa) + bli_fabs(*sb);
     if (scale != 0.f) {
 	goto L10;
     }
@@ -84,10 +84,10 @@ L10:
     *c__ = *sa / r__;
     *s = *sb / r__;
     z__ = 1.f;
-    if (abs(*sa) > abs(*sb)) {
+    if (bli_fabs(*sa) > bli_fabs(*sb)) {
 	z__ = *s;
     }
-    if (abs(*sb) >= abs(*sa) && *c__ != 0.f) {
+    if (bli_fabs(*sb) >= bli_fabs(*sa) && *c__ != 0.f) {
 	z__ = 1.f / *c__;
     }
 L20:
@@ -122,10 +122,10 @@ static doublereal dc_b4 = 1.;
 
 
     roe = *db;
-    if (abs(*da) > abs(*db)) {
+    if (bli_fabs(*da) > bli_fabs(*db)) {
 	roe = *da;
     }
-    scale = abs(*da) + abs(*db);
+    scale = bli_fabs(*da) + bli_fabs(*db);
     if (scale != 0.) {
 	goto L10;
     }
@@ -144,10 +144,10 @@ L10:
     *c__ = *da / r__;
     *s = *db / r__;
     z__ = 1.;
-    if (abs(*da) > abs(*db)) {
+    if (bli_fabs(*da) > bli_fabs(*db)) {
 	z__ = *s;
     }
-    if (abs(*db) >= abs(*da) && *c__ != 0.) {
+    if (bli_fabs(*db) >= bli_fabs(*da) && *c__ != 0.) {
 	z__ = 1. / *c__;
     }
 L20:

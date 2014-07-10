@@ -107,7 +107,7 @@ L20:
     sq2 = sp2 * *sy1;
     sq1 = sp1 * *sx1;
 
-    if (! (abs(sq1) > abs(sq2))) {
+    if (! (bli_fabs(sq1) > bli_fabs(sq2))) {
 	goto L40;
     }
     sh21 = -(*sy1) / *sx1;
@@ -219,7 +219,7 @@ L150:
     goto L140;
 L160:
 L170:
-    if (! (abs(*sd2) <= rgamsq)) {
+    if (! (bli_fabs(*sd2) <= rgamsq)) {
 	goto L190;
     }
     if (*sd2 == zero) {
@@ -237,7 +237,7 @@ L180:
     goto L170;
 L190:
 L200:
-    if (! (abs(*sd2) >= gamsq)) {
+    if (! (bli_fabs(*sd2) >= gamsq)) {
 	goto L220;
     }
     igo = 3;
@@ -347,7 +347,7 @@ L20:
     dq2 = dp2 * *dy1;
     dq1 = dp1 * *dx1;
 
-    if (! (abs(dq1) > abs(dq2))) {
+    if (! (bli_fabs(dq1) > bli_fabs(dq2))) {
 	goto L40;
     }
     dh21 = -(*dy1) / *dx1;
@@ -459,7 +459,7 @@ L150:
     goto L140;
 L160:
 L170:
-    if (! (abs(*dd2) <= rgamsq)) {
+    if (! (bli_fabs(*dd2) <= rgamsq)) {
 	goto L190;
     }
     if (*dd2 == zero) {
@@ -477,7 +477,7 @@ L180:
     goto L170;
 L190:
 L200:
-    if (! (abs(*dd2) >= gamsq)) {
+    if (! (bli_fabs(*dd2) >= gamsq)) {
 	goto L220;
     }
     igo = 3;

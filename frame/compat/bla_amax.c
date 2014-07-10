@@ -53,6 +53,12 @@ f77_int PASTEF772(i,chx,blasname)( \
 	f77_int  f77_index; \
 	err_t    init_result; \
 \
+	/* If the vector is empty, return an index of zero. This early check
+	   is needed to emulate netlib BLAS. Without it, bli_?amaxv() will
+	   return 0, which ends up getting incremented to 1 (below) before
+	   being returned, which is not what we want. */ \
+	if ( *n < 1 || *incx <= 0 ) return 0; \
+\
 	/* Initialize BLIS (if it is not already initialized). */ \
 	bli_init_safe( &init_result ); \
 \
