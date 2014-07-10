@@ -110,7 +110,7 @@ extern "C" {
 #include "bli_error.h"
 #include "bli_f2c.h"
 #include "bli_machval.h"
-#include "bli_version.h"
+#include "bli_info.h"
 #include "bli_getopt.h"
 
 // Control tree definitions.

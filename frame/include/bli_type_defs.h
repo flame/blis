@@ -82,12 +82,12 @@ typedef  gint_t  bool_t;
 // interoperability with BLIS.
 #ifndef _DEFINED_DIM_T
 #define _DEFINED_DIM_T
-typedef  gint_t  dim_t;   // dimension type
+typedef  gint_t  dim_t;      // dimension type
 #endif
-typedef  gint_t  inc_t;   // increment/stride type
-typedef  gint_t  doff_t;  // diagonal offset type
-typedef guint_t  siz_t;   // byte size type
-typedef guint_t  info_t;  // object information bit field
+typedef  gint_t  inc_t;      // increment/stride type
+typedef  gint_t  doff_t;     // diagonal offset type
+typedef guint_t  siz_t;      // byte size type
+typedef guint_t  objbits_t;  // object information bit field
 
 // -- Real types --
 
@@ -505,7 +505,7 @@ typedef struct obj_s
 	dim_t         n;
 	doff_t        diag_off;
 
-	info_t        info;
+	objbits_t     info;
 	siz_t         elem_size;
 
 	void*         buffer;

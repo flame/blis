@@ -87,6 +87,7 @@
 #define PASTECH(ch,op)             PASTECH_(ch,op)
 
 #define MKSTR(s1)                  #s1
+#define STRINGIFY_INT( s )         MKSTR( s )
 
 
 // -- Include other groups of macros
