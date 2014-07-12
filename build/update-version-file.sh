@@ -145,7 +145,7 @@ main()
 
 		echo "${script_name}: found '${gitdir}' directory; assuming git clone."
 
-		echo "${script_name}: executing git describe --tags."
+		echo "${script_name}: executing: git describe --tags."
 
 		# Query git for the version string, which is simply the current tag,
 		# followed by a number signifying how many commits have transpired

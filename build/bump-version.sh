@@ -53,7 +53,14 @@ print_usage()
 	echo " Field G. Van Zee"
 	echo " "
 	echo " Performs a series of actions needed when incrementing (bumping) the"
-	echo " BLIS version number."
+	echo " BLIS version number:"
+	echo "   1. Overwrite the version file with the version string passed"
+	echo "      into this script (new_vers)."
+	echo "   2. Commit the updated version file."
+	echo "   3. Create a new tag (named the same as new_vers) which refers to"
+	echo "      the commit created in (2)."
+	echo "   4. Update the CHANGELOG file."
+	echo "   5. Commit the updated CHANGELOG file."
 	echo " "
 	echo " Usage:"
 	echo "   ${script_name} [options] new_vers"
@@ -148,9 +155,8 @@ main()
 
 		echo "${script_name}: found '${gitdir}' directory; assuming git clone."
 
-		#echo "${script_name}: executing: git describe --always."
 		git_commit_str=$(git describe --always)
-		echo "${script_name}: starting commit: ${git_commit_str}."
+		echo "${script_name}: initial commit: ${git_commit_str}."
 
 		echo "${script_name}: updating version file '${version_file}'."
 		if [ -z "$dry_run_flag" ]; then
@@ -162,7 +168,6 @@ main()
 			git commit -m "Version file update (${new_version_str})" ${version_file}
 		fi
 
-		#echo "${script_name}: executing: git describe --always."
 		git_commit_str=$(git describe --always)
 		echo "${script_name}: commit to be tagged: ${git_commit_str}."
 
@@ -181,7 +186,6 @@ main()
 			git commit -m "CHANGELOG update (${new_version_str})" ${changelog_file}
 		fi
 
-		#echo "${script_name}: executing: git describe --always."
 		git_commit_str=$(git describe --always)
 		echo "${script_name}: latest commit: ${git_commit_str}."
 
