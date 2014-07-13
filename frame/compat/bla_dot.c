@@ -93,9 +93,9 @@ float PASTEF77(sd,sdot)( f77_int* n,
                          float*   y, f77_int* incy
                        )
 {
-	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
-
-	return 0.0F;
+	return ( float )PASTEF77(d,sdot)( n,
+	                                  x, incx,
+	                                  y, incy );
 }
 
 // Input vectors stored in single precision, computed in double precision,
@@ -105,9 +105,39 @@ double PASTEF77(d,sdot)( f77_int* n,
                          float*   y, f77_int* incy
                        )
 {
-	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
+	dim_t   n0;
+	float*  x0;
+	float*  y0;
+	inc_t   incx0;
+	inc_t   incy0;
+	double  rho;
+	dim_t   i;
 
-	return 0.0;
+	/* Initialization of BLIS is not required. */
+
+	/* Convert/typecast negative values of n to zero. */
+	bli_convert_blas_dim1( *n, n0 );
+
+	/* If the input increments are negative, adjust the pointers so we can
+	   use positive increments instead. */
+	bli_convert_blas_incv( n0, x, *incx, x0, incx0 );
+	bli_convert_blas_incv( n0, y, *incy, y0, incy0 );
+
+	rho = 0.0;
+
+	for ( i = 0; i < n0; i++ )
+	{
+		float* chi1 = x0 + (i  )*incx0;
+		float* psi1 = y0 + (i  )*incy0;
+
+		bli_ddots( (( double )(*chi1)),
+		           (( double )(*psi1)), rho );
+	}
+
+	/* Finalization of BLIS is not required, because initialization was
+	   not required. */
+
+	return rho;
 }
 
 #endif
