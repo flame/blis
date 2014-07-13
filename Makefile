@@ -394,7 +394,17 @@ MK_TESTSUITE_OBJS       := $(patsubst $(TESTSUITE_SRC_PATH)/%.c, \
                                       $(wildcard $(TESTSUITE_SRC_PATH)/*.c))
 
 # The test suite binary executable filename.
-TESTSUITE_BIN           := $(TESTSUITE_NAME).x
+ifeq ($(CONFIG_NAME),pnacl)
+# Linked executable
+MK_TESTSUITE_BIN_UNSTABLE := $(BASE_OBJ_TESTSUITE_PATH)/test_libblis.unstable.pexe
+# Finalized executable
+MK_TESTSUITE_BIN_PNACL    := $(BASE_OBJ_TESTSUITE_PATH)/test_libblis.pexe
+# Translated executable (for x86-64)
+TESTSUITE_BIN             := test_libblis.x86-64.nexe
+else
+# Binary executable name.
+TESTSUITE_BIN             := test_libblis.x
+endif
 
 
 
@@ -524,15 +534,65 @@ else
 	@$(CC) $(CFLAGS) -c $< -o $@
 endif
 
-$(TESTSUITE_BIN): $(MK_TESTSUITE_OBJS) $(MK_BLIS_LIB)
-ifeq ($(FLA_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(CONFIG_NAME),pnacl)
+
+# Link executable (produces unstable LLVM bitcode)
+$(MK_TESTSUITE_BIN_UNSTABLE): $(MK_TESTSUITE_OBJS) $(MK_BLIS_LIB)
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	$(LINKER) $(MK_TESTSUITE_OBJS) $(MK_BLIS_LIB) $(LDFLAGS) -o $@
 else
 	@echo "Linking $@ against '$(MK_BLIS_LIB) $(LDFLAGS)'"
 	@$(LINKER) $(MK_TESTSUITE_OBJS) $(MK_BLIS_LIB) $(LDFLAGS) -o $@
 endif
 
+# Finalize PNaCl executable (i.e. convert from LLVM bitcode to PNaCl bitcode)
+$(MK_TESTSUITE_BIN_PNACL): $(MK_TESTSUITE_BIN_UNSTABLE)
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	$(FINALIZER) $(FINFLAGS) -o $@ $<
+else
+	@echo "Finalizing $@"
+	@$(FINALIZER) $(FINFLAGS) -o $@ $<
+endif
+
+# Translate PNaCl executable to x86-64 NaCl executable
+$(TESTSUITE_BIN): $(MK_TESTSUITE_BIN_PNACL)
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	$(TRANSLATOR) $(TRNSFLAGS) $(TRNSAMD64FLAGS) $< -o $@
+else
+	@echo "Translating $< -> $@"
+	@$(TRANSLATOR) $(TRNSFLAGS) $(TRNSAMD64FLAGS) $< -o $@
+endif
+
+else # Non-PNaCl case
+
+# Link executable normally
+$(TESTSUITE_BIN): $(MK_TESTSUITE_OBJS) $(MK_BLIS_LIB)
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	$(LINKER) $(MK_TESTSUITE_OBJS) $(MK_BLIS_LIB) $(LDFLAGS) -o $@
+else
+	@echo "Linking $@ against '$(MK_BLIS_LIB) $(LDFLAGS)'"
+	@$(LINKER) $(MK_TESTSUITE_OBJS) $(MK_BLIS_LIB) $(LDFLAGS) -o $@
+endif
+
+endif
+
 testsuite-run: testsuite-bin
+ifeq ($(CONFIG_NAME),pnacl)
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	$(NACL_SDK_ROOT)/tools/sel_ldr_x86_64 -a -c -q \
+	    -B $(NACL_SDK_ROOT)/tools/irt_core_x86_64.nexe -- \
+	    $(TESTSUITE_BIN) -g $(TESTSUITE_CONF_GEN_PATH) \
+	                     -o $(TESTSUITE_CONF_OPS_PATH) \
+                         > $(TESTSUITE_OUT_FILE)
+else
+	@echo "Running $(TESTSUITE_BIN) with output redirected to '$(TESTSUITE_OUT_FILE)'"
+	@$(NACL_SDK_ROOT)/tools/sel_ldr_x86_64 -a -c -q \
+	    -B $(NACL_SDK_ROOT)/tools/irt_core_x86_64.nexe -- \
+	    $(TESTSUITE_BIN) -g $(TESTSUITE_CONF_GEN_PATH) \
+	                     -o $(TESTSUITE_CONF_OPS_PATH) \
+                         > $(TESTSUITE_OUT_FILE)
+endif
+else
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	./$(TESTSUITE_BIN) -g $(TESTSUITE_CONF_GEN_PATH) \
 	                   -o $(TESTSUITE_CONF_OPS_PATH) \
@@ -543,7 +603,7 @@ else
 	                    -o $(TESTSUITE_CONF_OPS_PATH) \
                          > $(TESTSUITE_OUT_FILE)
 endif
-
+endif
 
 # --- Install rules ---
 
@@ -634,11 +694,11 @@ endif
 
 cleantest: check-env
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	- $(FIND) $(BASE_OBJ_TESTSUITE_PATH) -name "*.o" | $(XARGS) $(RM_F)
+	- $(FIND) $(BASE_OBJ_TESTSUITE_PATH) -name "*.o" -name "*.pexe" | $(XARGS) $(RM_F)
 	- $(RM_RF) $(TESTSUITE_BIN)
 else
-	@echo "Removing .o files from $(BASE_OBJ_TESTSUITE_PATH)."
-	@- $(FIND) $(BASE_OBJ_TESTSUITE_PATH) -name "*.o" | $(XARGS) $(RM_F)
+	@echo "Removing object files from $(BASE_OBJ_TESTSUITE_PATH)."
+	@- $(FIND) $(BASE_OBJ_TESTSUITE_PATH) -name "*.o" -name "*.pexe" | $(XARGS) $(RM_F)
 	@echo "Removing $(TESTSUITE_BIN) binary."
 	@- $(RM_RF) $(TESTSUITE_BIN)
 endif
