@@ -86,6 +86,24 @@ void PASTEF77(ch,blasname)( \
 	   if necessary.*/ \
 	bli_set_dims_with_trans( blis_transa, m0, n0, m_y, n_x ); \
 \
+	/* BLAS handles cases where trans(A) has no columns, and x has no elements,
+	   in a peculiar way. In these situations, BLAS returns without performing
+	   any action, even though most sane interpretations of gemv would have the
+	   the operation reduce to y := beta * y. Here, we catch those cases that
+	   BLAS would normally mishandle and emulate the BLAS exactly so as to
+	   provide "bug-for-bug" compatibility. Note that this extreme level of
+	   compatibility would not be as much of an issue if it weren't for the
+	   fact that some BLAS test suites actually test for these cases. Also, it
+	   should be emphasized that BLIS, if called natively, does NOT exhibit
+	   this quirky behavior; it will scale y by beta, as one would expect. */ \
+	if ( m_y > 0 && n_x == 0 ) \
+	{ \
+		/* Finalize BLIS (if it was initialized above). */ \
+		bli_finalize_safe( init_result ); \
+\
+		return; \
+	} \
+\
 	/* If the input increments are negative, adjust the pointers so we can
 	   use positive increments instead. */ \
 	bli_convert_blas_incv( n_x, x, *incx, x0, incx0 ); \
