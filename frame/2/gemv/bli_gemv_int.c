@@ -66,17 +66,6 @@ void bli_gemv_int( trans_t transa,
 	obj_t     a_local;
 	obj_t     x_local;
 
-	// If y has a zero dimension, return early.
-	if ( bli_obj_has_zero_dim( *y ) ) return;
-
-	// If A or x has a zero dimension, scale y by beta and return early.
-	if ( bli_obj_has_zero_dim( *a ) ||
-	     bli_obj_has_zero_dim( *x ) )
-	{
-		bli_scalm( beta, y );
-		return;
-	}
-
 	// Apply the trans and/or conj parameters to aliases of the objects.
 	bli_obj_alias_with_trans( transa, *a, a_local );
 	bli_obj_alias_with_conj( conjx, *x, x_local );
@@ -85,6 +74,16 @@ void bli_gemv_int( trans_t transa,
 	// is taken into account for dimension checking.
 	if ( bli_error_checking_is_enabled() )
 		bli_gemv_int_check( alpha, &a_local, &x_local, beta, y, cntl );
+
+	// If y has a zero dimension, return early.
+	if ( bli_obj_has_zero_dim( *y ) ) return;
+
+	// If x has a zero dimension, scale y by beta and return early.
+	if ( bli_obj_has_zero_dim( *x ) )
+	{
+		bli_scalm( beta, y );
+		return;
+	}
 
 	// Extract the variant number and implementation type.
 	n = cntl_var_num( cntl );

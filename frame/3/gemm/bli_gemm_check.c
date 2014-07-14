@@ -81,11 +81,9 @@ void bli_gemm_basic_check( obj_t*  alpha,
 
 	// Check matrix structure.
 
-	// We don't enforce general structure in matrix A so we can use gemm to
-	// implement hemm/symm. Instead, we only check this from the front-end.
-
-	//e_val = bli_check_general_object( b );
-	//bli_check_error_code( e_val );
+	// We don't enforce general structure in matrices A or B so we can use
+	// gemm to implement hemm/symm. Instead, we only check this from the
+	// front-end.
 
 	e_val = bli_check_general_object( c );
 	bli_check_error_code( e_val );

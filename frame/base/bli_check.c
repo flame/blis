@@ -718,7 +718,10 @@ err_t bli_check_object_buffer( obj_t* a )
 {
 	err_t e_val = BLIS_SUCCESS;
 
+	// We are only concerned with NULL buffers in objects where BOTH
+	// dimensions are non-zero.
 	if ( bli_obj_buffer( *a ) == NULL )
+	if ( bli_obj_length( *a ) > 0 && bli_obj_width( *a ) > 0 )
 		e_val = BLIS_EXPECTED_NONNULL_OBJECT_BUFFER;
 
 	return e_val;

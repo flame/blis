@@ -183,7 +183,7 @@ void bli_error_msgs_init( void )
 	         "Pack schema not yet supported/implemented for use with unpacking." );
 
 	sprintf( bli_error_string_for_code(BLIS_EXPECTED_NONNULL_OBJECT_BUFFER),
-	         "Encountered object containing unexpected null buffer." );
+	         "Encountered object with non-zero dimensions containing null buffer." );
 
 	sprintf( bli_error_string_for_code(BLIS_INVALID_PACKBUF),
 	         "Invalid packbuf_t value." );

@@ -100,6 +100,10 @@ void bli_trmm_int( obj_t*  alpha,
 	impl_t    i;
 	FUNCPTR_T f;
 
+	// Check parameters.
+	if ( bli_error_checking_is_enabled() )
+		bli_trmm_int_check( alpha, a, b, beta, c, cntl );
+
 	// If C has a zero dimension, return early.
 	if ( bli_obj_has_zero_dim( *c ) ) return;
 
@@ -112,10 +116,6 @@ void bli_trmm_int( obj_t*  alpha,
         thread_obarrier( thread );
 		return;
 	}
-
-	// Check parameters.
-	if ( bli_error_checking_is_enabled() )
-		bli_trmm_int_check( alpha, a, b, beta, c, cntl );
 
 	// Alias A and B in case we need to update attached scalars.
 	bli_obj_alias_to( *a, a_local );
