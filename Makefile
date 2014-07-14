@@ -402,9 +402,14 @@ MK_TESTSUITE_BIN_PNACL    := $(BASE_OBJ_TESTSUITE_PATH)/test_libblis.pexe
 # Translated executable (for x86-64)
 TESTSUITE_BIN             := test_libblis.x86-64.nexe
 else
+ifeq ($(CONFIG_NAME),emscripten)
+# JS script name.
+TESTSUITE_BIN             := test_libblis.js
+else
 # Binary executable name.
 TESTSUITE_BIN             := test_libblis.x
-endif
+endif # emscripten
+endif # pnacl
 
 
 
@@ -565,6 +570,20 @@ endif
 
 else # Non-PNaCl case
 
+ifeq ($(CONFIG_NAME),emscripten)
+# Generate JavaScript and embed testsuite resources normally
+$(TESTSUITE_BIN): $(MK_TESTSUITE_OBJS) $(MK_BLIS_LIB) $(TESTSUITE_CONF_GEN_PATH) $(TESTSUITE_CONF_OPS_PATH)
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	$(LINKER) $(MK_TESTSUITE_OBJS) $(MK_BLIS_LIB) $(LDFLAGS) -o $@ \
+		--embed-file $(TESTSUITE_CONF_GEN_PATH)@input.general \
+		--embed-file $(TESTSUITE_CONF_OPS_PATH)@input.operations
+else
+	@echo "Linking $@ against '$(MK_BLIS_LIB) $(LDFLAGS)'"
+	@$(LINKER) $(MK_TESTSUITE_OBJS) $(MK_BLIS_LIB) $(LDFLAGS) -o $@ \
+		--embed-file $(TESTSUITE_CONF_GEN_PATH)@input.general \
+		--embed-file $(TESTSUITE_CONF_OPS_PATH)@input.operations
+endif
+else
 # Link executable normally
 $(TESTSUITE_BIN): $(MK_TESTSUITE_OBJS) $(MK_BLIS_LIB)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
@@ -572,6 +591,7 @@ ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 else
 	@echo "Linking $@ against '$(MK_BLIS_LIB) $(LDFLAGS)'"
 	@$(LINKER) $(MK_TESTSUITE_OBJS) $(MK_BLIS_LIB) $(LDFLAGS) -o $@
+endif
 endif
 
 endif
@@ -593,6 +613,14 @@ else
                          > $(TESTSUITE_OUT_FILE)
 endif
 else
+ifeq ($(CONFIG_NAME),emscripten)
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	$(JSINT) $(TESTSUITE_BIN)
+else
+	@echo "Running $(TESTSUITE_BIN)"
+	@$(JSINT) $(TESTSUITE_BIN)
+endif
+else
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	./$(TESTSUITE_BIN) -g $(TESTSUITE_CONF_GEN_PATH) \
 	                   -o $(TESTSUITE_CONF_OPS_PATH) \
@@ -603,7 +631,8 @@ else
 	                    -o $(TESTSUITE_CONF_OPS_PATH) \
                          > $(TESTSUITE_OUT_FILE)
 endif
-endif
+endif # emscripten
+endif # pnacl
 
 # --- Install rules ---
 
