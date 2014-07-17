@@ -32,11 +32,11 @@
 
 */
 
-void bli_init( void );
-void bli_finalize( void );
+err_t bli_init( void );
+err_t bli_finalize( void );
 
-void bli_init_const( void );
-void bli_finalize_const( void );
+void  bli_init_const( void );
+void  bli_finalize_const( void );
 
-void bli_init_safe( err_t* init_result );
-void bli_finalize_safe( err_t init_result );
+void  bli_init_auto( err_t* init_result );
+void  bli_finalize_auto( err_t init_result );

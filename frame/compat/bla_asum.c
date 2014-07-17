@@ -53,7 +53,7 @@ ftype_r PASTEF772(chr,chx,blasname)( \
 	err_t    init_result; \
 \
 	/* Initialize BLIS (if it is not already initialized). */ \
-	bli_init_safe( &init_result ); \
+	bli_init_auto( &init_result ); \
 \
 	/* Convert/typecast negative values of n to zero. */ \
 	bli_convert_blas_dim1( *n, n0 ); \
@@ -68,7 +68,7 @@ ftype_r PASTEF772(chr,chx,blasname)( \
 	                        &asum ); \
 \
 	/* Finalize BLIS (if it was initialized above). */ \
-	bli_finalize_safe( init_result ); \
+	bli_finalize_auto( init_result ); \
 \
 	return asum; \
 }

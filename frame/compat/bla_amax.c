@@ -60,7 +60,7 @@ f77_int PASTEF772(i,chx,blasname)( \
 	if ( *n < 1 || *incx <= 0 ) return 0; \
 \
 	/* Initialize BLIS (if it is not already initialized). */ \
-	bli_init_safe( &init_result ); \
+	bli_init_auto( &init_result ); \
 \
 	/* Convert/typecast negative values of n to zero. */ \
 	bli_convert_blas_dim1( *n, n0 ); \
@@ -79,7 +79,7 @@ f77_int PASTEF772(i,chx,blasname)( \
 	f77_index = bli_index + 1; \
 \
 	/* Finalize BLIS (if it was initialized above). */ \
-	bli_finalize_safe( init_result ); \
+	bli_finalize_auto( init_result ); \
 \
 	return f77_index; \
 }

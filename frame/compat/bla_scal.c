@@ -54,7 +54,7 @@ void PASTEF772(chx,cha,blasname)( \
 	err_t    init_result; \
 \
 	/* Initialize BLIS (if it is not already initialized). */ \
-	bli_init_safe( &init_result ); \
+	bli_init_auto( &init_result ); \
 \
 	/* Convert/typecast negative values of n to zero. */ \
 	bli_convert_blas_dim1( *n, n0 ); \
@@ -78,7 +78,7 @@ void PASTEF772(chx,cha,blasname)( \
 	                             x0, incx0 ); \
 \
 	/* Finalize BLIS (if it was initialized above). */ \
-	bli_finalize_safe( init_result ); \
+	bli_finalize_auto( init_result ); \
 }
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
