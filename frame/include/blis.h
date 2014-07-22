@@ -158,6 +158,7 @@ extern "C" {
 #include "bli_invertd.h"
 #include "bli_scald.h"
 #include "bli_setd.h"
+#include "bli_setid.h"
 // two diagonal operands
 #include "bli_addd.h"
 #include "bli_axpyd.h"
