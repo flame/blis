@@ -22,6 +22,9 @@
 *.x
 *.pexe
 *.nexe
+*.js
+# link map files
+*.map
 
 # -- build system files --
 
@@ -33,4 +36,4 @@ config.mk
 
 # -- misc. --
 
-
+output.testsuite
