@@ -75,13 +75,18 @@ int main( int argc, char** argv )
 	p_end   = 16;
 	p_inc   = 1;
 
-	m_input = 15;
-	k_input = 13;
+	m_input = 3;
+	k_input = 1;
 #endif
 
+#if 0
 	dt_a = dt_c = dt_alpha = dt_beta = BLIS_DOUBLE;
+#else
+	dt_a = dt_c = dt_alpha = dt_beta = BLIS_DCOMPLEX;
+#endif
 
 	uplo = BLIS_LOWER;
+	//uplo = BLIS_UPPER;
 
 	for ( p = p_begin; p <= p_end; p += p_inc )
 	{

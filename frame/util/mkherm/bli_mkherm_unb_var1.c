@@ -70,8 +70,8 @@ void bli_mkherm_unb_var1( obj_t* a )
 }
 
 
-#undef  GENTFUNC
-#define GENTFUNC( ctype, ch, varname ) \
+#undef  GENTFUNCR
+#define GENTFUNCR( ctype, ctype_r, ch, chr, varname ) \
 \
 void PASTEMAC(ch,varname)( \
                            uplo_t  uploa, \
@@ -79,10 +79,10 @@ void PASTEMAC(ch,varname)( \
                            void*   a, inc_t rs_a, inc_t cs_a \
                           ) \
 { \
-	ctype*  a_cast  = a; \
-	ctype*  alpha11; \
-	doff_t  diagoffa; \
-	dim_t   i; \
+	ctype_r* zeror  = PASTEMAC(chr,0); \
+	ctype*   a_cast = a; \
+	ctype*   alpha11; \
+	doff_t   diagoffa; \
 \
 	/* Eliminate unused variable warnings. */ \
 	( void )alpha11; \
@@ -108,14 +108,13 @@ void PASTEMAC(ch,varname)( \
 	                        a_cast, rs_a, cs_a ); \
 \
 	/* Set the imaginary parts of the diagonal elements to zero. */ \
-	for ( i = 0; i < m; ++i ) \
-	{ \
-		alpha11 = a_cast + (i  )*rs_a + (i  )*cs_a; \
-\
-		PASTEMAC(ch,seti0s)( *alpha11 ); \
-	} \
+	PASTEMAC(ch,setid)( 0, \
+	                    m, \
+	                    m, \
+	                    zeror, \
+	                    a_cast, rs_a, cs_a ); \
 }
 
 
-INSERT_GENTFUNC_BASIC0( mkherm_unb_var1 )
+INSERT_GENTFUNCR_BASIC0( mkherm_unb_var1 )
 

@@ -138,5 +138,8 @@ void bli_her2k_front( obj_t*  alpha,
     bli_herk_thrinfo_free_paths( infos, n_threads );
 
 #endif
+
+	// Explicitly set diagonal elements' imaginary components to zero.
+	bli_setid( &BLIS_ZERO, &c_local );
 }
 

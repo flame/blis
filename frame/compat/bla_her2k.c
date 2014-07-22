@@ -83,6 +83,23 @@ void PASTEF77(ch,blasname)( \
 	bli_convert_blas_dim1( *m, m0 ); \
 	bli_convert_blas_dim1( *k, k0 ); \
 \
+	/* We emulate the BLAS early return behavior with the following
+	   conditional, which returns if one of the following is true:
+	   - matrix C is empty
+	   - the rank-2k product is empty (either because alpha is zero or k
+	     is zero) AND matrix C is not scaled. */ \
+	if ( m0 == 0 || \
+	     ( ( PASTEMAC(ch,eq0)( *alpha ) || k0 == 0 ) \
+	       && PASTEMAC(chr,eq1)( *beta ) \
+         ) \
+	   ) \
+	{ \
+		/* Finalize BLIS (if it was initialized above). */ \
+		bli_finalize_auto( init_result ); \
+\
+		return; \
+	} \
+\
 	/* Set the row and column strides of the matrix operands. */ \
 	rs_a = 1; \
 	cs_a = *lda; \

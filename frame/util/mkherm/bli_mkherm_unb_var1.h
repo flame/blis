@@ -35,8 +35,8 @@
 void bli_mkherm_unb_var1( obj_t* a );
 
 
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
+#undef  GENTPROTR
+#define GENTPROTR( ctype, ctype_r, ch, chr, varname ) \
 \
 void PASTEMAC(ch,varname)( \
                            uplo_t  uploa, \
@@ -44,5 +44,5 @@ void PASTEMAC(ch,varname)( \
                            void*   a, inc_t rs_a, inc_t cs_a \
                           );
 
-INSERT_GENTPROT_BASIC( mkherm_unb_var1 )
+INSERT_GENTPROTR_BASIC( mkherm_unb_var1 )
 
