@@ -45,7 +45,7 @@ void bli_setd( obj_t* beta,
 	obj_t beta_local;
 
 	if ( bli_error_checking_is_enabled() )
-		bli_scald_check( beta, x );
+		bli_setd_check( beta, x );
 
 	// Use the datatype of x as the target type for beta (since we do
 	// not assume mixed domain/type support is enabled).

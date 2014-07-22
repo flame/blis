@@ -40,6 +40,9 @@
 //
 void bli_invertd( obj_t* x )
 {
+	if ( bli_error_checking_is_enabled() )
+		bli_invertd_check( x );
+
 	bli_invertd_unb_var1( x );
 }
 
