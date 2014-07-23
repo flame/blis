@@ -83,15 +83,16 @@ void bli_trsm_blk_var2f( obj_t*  a,
 	// Query dimension in partitioning direction.
 	n_trans = bli_obj_width_after_trans( *b );
     dim_t start, end;
-    bli_get_range_weighted( thread, 0, n_trans, 
-                            bli_determine_reg_blocksize( b, cntl_blocksize( cntl ) ),
-                            bli_obj_is_lower( *c ), &start, &end );
+    bli_get_range( thread, 0, n_trans, 
+                   //bli_determine_reg_blocksize( b, cntl_blocksize( cntl ) ),
+                   8,
+                   &start, &end );
 
 	// Partition along the n dimension.
 	for ( i = start; i < end; i += b_alg )
 	{
 		// Determine the current algorithmic blocksize.
-		b_alg = bli_determine_blocksize_f( i, n_trans, b,
+		b_alg = bli_determine_blocksize_f( i, end, b,
 		                                   cntl_blocksize( cntl ) );
 
 		// Acquire partitions for B1 and C1.

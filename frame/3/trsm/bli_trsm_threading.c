@@ -107,23 +107,26 @@ void bli_trsm_thrinfo_free_paths( trsm_thrinfo_t** threads, dim_t num )
     bli_free( threads );
 }
 
-trsm_thrinfo_t** bli_create_trsm_thrinfo_paths( )
+trsm_thrinfo_t** bli_create_trsm_thrinfo_paths( bool_t right_sided )
 {
+    dim_t jc_way = 1; 
+    dim_t kc_way = 1;
+    dim_t ic_way = 1;
+    dim_t jr_way = 1;
+    dim_t ir_way = 1;
+
 #ifdef BLIS_ENABLE_MULTITHREADING 
     dim_t jc_in = bli_read_nway_from_env( "BLIS_JC_NT" );
     /*dim_t kc_in = bli_read_nway_from_env( "BLIS_KC_NT" );*/
     dim_t ic_in = bli_read_nway_from_env( "BLIS_IC_NT" );
     dim_t jr_in = bli_read_nway_from_env( "BLIS_JR_NT" );
     dim_t ir_in = bli_read_nway_from_env( "BLIS_IR_NT" );
-    
-    dim_t jr_way = jc_in * ic_in * jr_in * ir_in;
-#else
-    dim_t jr_way = 1;
+
+    if(!right_sided){
+        jc_way = jc_in;
+        jr_way  = jr_in * ic_in * ir_in;
+    }
 #endif
-    dim_t jc_way = 1; 
-    dim_t kc_way = 1;
-    dim_t ic_way = 1;
-    dim_t ir_way = 1;
     
     dim_t global_num_threads = jc_way * kc_way * ic_way * jr_way * ir_way;
     assert( global_num_threads != 0 );
@@ -171,12 +174,12 @@ trsm_thrinfo_t** bli_create_trsm_thrinfo_paths( )
                                                                                 NULL, NULL, ir_info);
 
                         packm_thrinfo_t* packb  = bli_create_packm_thread_info( kc_comm, kc_comm_id,
-                                                                            ic_comm, ic_comm_id,
-                                                                            kc_nt, kc_comm_id );
+                                                                                ic_comm, ic_comm_id,
+                                                                                kc_nt, kc_comm_id );
 
                         packm_thrinfo_t* packa  = bli_create_packm_thread_info( ic_comm, ic_comm_id,
-                                                                            jr_comm, jr_comm_id,
-                                                                            ic_nt, ic_comm_id );
+                                                                                jr_comm, jr_comm_id,
+                                                                                ic_nt, ic_comm_id );
 
                         trsm_thrinfo_t* ic_info = bli_create_trsm_thrinfo_node( kc_comm, kc_comm_id,
                                                                                 ic_comm, ic_comm_id,

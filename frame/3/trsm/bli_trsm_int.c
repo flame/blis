@@ -131,17 +131,14 @@ void bli_trsm_int( obj_t*  alpha,
 	// packed, this is our last chance to handle the transposition.
 	if ( cntl_is_leaf( cntl ) && bli_obj_has_trans( *c ) )
 	{
-        if( thread_am_ochief( thread ) ) {
-            bli_obj_induce_trans( c_local );
-            bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, c_local );
-        }
+        bli_obj_induce_trans( c_local );
+        bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, c_local );
 	}
 
 	// If beta is non-unit, apply it to the scalar attached to C.
 	if ( !bli_obj_equals( beta, &BLIS_ONE ) )
 	{
-        if( thread_am_ochief( thread ) ) 
-            bli_obj_scalar_apply_scalar( beta, &c_local );
+        bli_obj_scalar_apply_scalar( beta, &c_local );
 	}
 
 	// Set two bools: one based on the implied side parameter (the structure
@@ -157,8 +154,7 @@ void bli_trsm_int( obj_t*  alpha,
 		// attached to B (the non-triangular matrix).
 		if ( !bli_obj_equals( alpha, &BLIS_ONE ) )
 		{
-            if( thread_am_ochief( thread ) ) 
-                bli_obj_scalar_apply_scalar( alpha, &b_local );
+            bli_obj_scalar_apply_scalar( alpha, &b_local );
 		}
 	}
 	else // if ( bli_obj_root_is_triangular( *b ) )
@@ -172,8 +168,7 @@ void bli_trsm_int( obj_t*  alpha,
 		// attached to A (the non-triangular matrix).
 		if ( !bli_obj_equals( alpha, &BLIS_ONE ) )
 		{
-            if( thread_am_ochief( thread ) ) 
-                bli_obj_scalar_apply_scalar( alpha, &a_local );
+            bli_obj_scalar_apply_scalar( alpha, &a_local );
 		}
 	}
 
