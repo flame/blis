@@ -64,7 +64,7 @@ void bli_trsm_blk_var1b( obj_t*  a,
     if( thread_am_ichief( thread ) ) {
         bli_obj_init_pack( &a1_pack_s );
     }
-    a1_pack = thread_obroadcast( thread, &a1_pack_s );
+    a1_pack = thread_ibroadcast( thread, &a1_pack_s );
 
 	// Pack B1 (if instructed).
 	bli_packm_int( b, b_pack,
@@ -82,9 +82,11 @@ void bli_trsm_blk_var1b( obj_t*  a,
                          bli_obj_width_after_trans( *a );
 
     dim_t start, end;
-    bli_get_range_weighted( thread, offA, m_trans, 
-                            bli_determine_reg_blocksize( a, cntl_blocksize( cntl ) ),
-                            bli_obj_is_upper( *c ), &start, &end );
+    num_t datatype = bli_obj_execution_datatype( *a );
+    bli_get_range( thread, offA, m_trans, 
+                   //bli_lcm( bli_info_get_default_nr( datatype ), bli_info_get_default_mr( datatype ) ),
+                   bli_info_get_default_mc( datatype ),
+                   &start, &end );
 
 	// Partition along the remaining portion of the m dimension.
 	for ( i = start; i < end; i += b_alg )
@@ -125,8 +127,8 @@ void bli_trsm_blk_var1b( obj_t*  a,
 	// to the memory manager.
     thread_obarrier( thread );
     if( thread_am_ochief( thread ) )
-    	bli_obj_release_pack( a1_pack );
-    if( thread_am_ichief( thread ) )
     	bli_obj_release_pack( b_pack );
+    if( thread_am_ichief( thread ) )
+    	bli_obj_release_pack( a1_pack );
 }
 

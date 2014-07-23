@@ -327,3 +327,18 @@ dim_t bli_read_nway_from_env( char* env )
     }   
     return number;
 }
+
+dim_t bli_gcd( dim_t x, dim_t y )
+{
+    while( y != 0 ) {
+        dim_t t = y;
+        y = x % y;
+        x = t;
+    }
+    return x;
+}
+
+dim_t bli_lcm( dim_t x, dim_t y)
+{
+    return x * y / bli_gcd( x, y );
+}

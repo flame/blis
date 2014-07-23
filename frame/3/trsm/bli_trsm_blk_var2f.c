@@ -83,9 +83,9 @@ void bli_trsm_blk_var2f( obj_t*  a,
 	// Query dimension in partitioning direction.
 	n_trans = bli_obj_width_after_trans( *b );
     dim_t start, end;
+    num_t datatype = bli_obj_execution_datatype( *a );
     bli_get_range( thread, 0, n_trans, 
-                   //bli_determine_reg_blocksize( b, cntl_blocksize( cntl ) ),
-                   8,
+                   bli_lcm( bli_info_get_default_nr( datatype ), bli_info_get_default_mr( datatype ) ),
                    &start, &end );
 
 	// Partition along the n dimension.

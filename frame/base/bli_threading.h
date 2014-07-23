@@ -133,4 +133,8 @@ void bli_level3_thread_decorator( dim_t num_threads,
                                   void* cntl, 
                                   void** thread );
 
+
+dim_t bli_gcd( dim_t x, dim_t y );
+dim_t bli_lcm( dim_t x, dim_t y );
+
 #endif

@@ -122,7 +122,11 @@ trsm_thrinfo_t** bli_create_trsm_thrinfo_paths( bool_t right_sided )
     dim_t jr_in = bli_read_nway_from_env( "BLIS_JR_NT" );
     dim_t ir_in = bli_read_nway_from_env( "BLIS_IR_NT" );
 
-    if(!right_sided){
+    if(right_sided) {
+        ic_way = jc_in * ic_in * jr_in;
+        ir_way = ir_in;
+    }
+    else {
         jc_way = jc_in;
         jr_way  = jr_in * ic_in * ir_in;
     }
