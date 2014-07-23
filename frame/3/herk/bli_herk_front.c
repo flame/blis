@@ -48,10 +48,12 @@ void bli_herk_front( obj_t*  alpha,
 	if ( bli_error_checking_is_enabled() )
 		bli_herk_check( alpha, a, beta, c );
 
-	// If alpha is zero, scale by beta and return.
+	// If alpha is zero, scale by beta, zero the imaginary components of
+	// the diagonal elements, and return.
 	if ( bli_obj_equals( alpha, &BLIS_ZERO ) )
 	{
 		bli_scalm( beta, c );
+		bli_setid( &BLIS_ZERO, c );
 		return;
 	}
 
@@ -93,7 +95,12 @@ void bli_herk_front( obj_t*  alpha,
 
     bli_herk_thrinfo_free_paths( infos, n_threads );
 
-	// Explicitly set diagonal elements' imaginary components to zero.
+	// The Hermitian rank-k product was computed as A*A', even for the
+	// diagonal elements. Mathematically, the imaginary components of
+	// diagonal elements of a Hermitian rank-k product should always be
+	// zero. However, in practice, they sometimes accumulate meaningless
+	// non-zero values. To prevent this, we explicitly set those values
+	// to zero before returning.
 	bli_setid( &BLIS_ZERO, &c_local );
 }
 
