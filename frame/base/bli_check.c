@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas
+   Copyright (C) 2014, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -14,9 +14,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
+    - Neither the name of The University of Texas at Austin nor the names
+      of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -718,7 +718,10 @@ err_t bli_check_object_buffer( obj_t* a )
 {
 	err_t e_val = BLIS_SUCCESS;
 
+	// We are only concerned with NULL buffers in objects where BOTH
+	// dimensions are non-zero.
 	if ( bli_obj_buffer( *a ) == NULL )
+	if ( bli_obj_length( *a ) > 0 && bli_obj_width( *a ) > 0 )
 		e_val = BLIS_EXPECTED_NONNULL_OBJECT_BUFFER;
 
 	return e_val;

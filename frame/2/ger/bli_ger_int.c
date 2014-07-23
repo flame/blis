@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas
+   Copyright (C) 2014, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -14,9 +14,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
+    - Neither the name of The University of Texas at Austin nor the names
+      of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -67,19 +67,16 @@ void bli_ger_int( conj_t  conjx,
 	obj_t     y_local;
 	obj_t     a_local;
 
+	// Check parameters.
+	if ( bli_error_checking_is_enabled() )
+		bli_ger_int_check( alpha, x, y, a, cntl );
+
 	// If A has a zero dimension, return early.
 	if ( bli_obj_has_zero_dim( *a ) ) return;
 
 	// If x or y has a zero dimension, return early.
 	if ( bli_obj_has_zero_dim( *x ) ||
-	     bli_obj_has_zero_dim( *y ) )
-	{
-		return;
-	}
-
-	// Check parameters.
-	if ( bli_error_checking_is_enabled() )
-		bli_ger_int_check( alpha, x, y, a, cntl );
+	     bli_obj_has_zero_dim( *y ) ) return;
 
 	// Alias the objects, applying conjx and conjy to x and y, respectively.
 	bli_obj_alias_with_conj( conjx, *x, x_local );

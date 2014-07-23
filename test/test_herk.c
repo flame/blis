@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas
+   Copyright (C) 2014, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -14,9 +14,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
+    - Neither the name of The University of Texas at Austin nor the names
+      of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -75,16 +75,18 @@ int main( int argc, char** argv )
 	p_end   = 16;
 	p_inc   = 1;
 
-	m_input = 15;
-	k_input = 13;
+	m_input = 3;
+	k_input = 1;
 #endif
 
-	dt_a = BLIS_DOUBLE;
-	dt_c = BLIS_DOUBLE;
-	dt_alpha = BLIS_DOUBLE;
-	dt_beta = BLIS_DOUBLE;
+#if 0
+	dt_a = dt_c = dt_alpha = dt_beta = BLIS_DOUBLE;
+#else
+	dt_a = dt_c = dt_alpha = dt_beta = BLIS_DCOMPLEX;
+#endif
 
 	uplo = BLIS_LOWER;
+	//uplo = BLIS_UPPER;
 
 	for ( p = p_begin; p <= p_end; p += p_inc )
 	{

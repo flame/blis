@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas
+   Copyright (C) 2014, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -14,9 +14,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
+    - Neither the name of The University of Texas at Austin nor the names
+      of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -32,11 +32,11 @@
 
 */
 
-void bli_init( void );
-void bli_finalize( void );
+err_t bli_init( void );
+err_t bli_finalize( void );
 
-void bli_init_const( void );
-void bli_finalize_const( void );
+void  bli_init_const( void );
+void  bli_finalize_const( void );
 
-void bli_init_safe( err_t* init_result );
-void bli_finalize_safe( err_t init_result );
+void  bli_init_auto( err_t* init_result );
+void  bli_finalize_auto( err_t init_result );

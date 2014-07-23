@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas
+   Copyright (C) 2014, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -14,9 +14,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
+    - Neither the name of The University of Texas at Austin nor the names
+      of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -62,10 +62,10 @@ static real sc_b4 = 1.f;
 
 
     roe = *sb;
-    if (abs(*sa) > abs(*sb)) {
+    if (bli_fabs(*sa) > bli_fabs(*sb)) {
 	roe = *sa;
     }
-    scale = abs(*sa) + abs(*sb);
+    scale = bli_fabs(*sa) + bli_fabs(*sb);
     if (scale != 0.f) {
 	goto L10;
     }
@@ -84,10 +84,10 @@ L10:
     *c__ = *sa / r__;
     *s = *sb / r__;
     z__ = 1.f;
-    if (abs(*sa) > abs(*sb)) {
+    if (bli_fabs(*sa) > bli_fabs(*sb)) {
 	z__ = *s;
     }
-    if (abs(*sb) >= abs(*sa) && *c__ != 0.f) {
+    if (bli_fabs(*sb) >= bli_fabs(*sa) && *c__ != 0.f) {
 	z__ = 1.f / *c__;
     }
 L20:
@@ -122,10 +122,10 @@ static doublereal dc_b4 = 1.;
 
 
     roe = *db;
-    if (abs(*da) > abs(*db)) {
+    if (bli_fabs(*da) > bli_fabs(*db)) {
 	roe = *da;
     }
-    scale = abs(*da) + abs(*db);
+    scale = bli_fabs(*da) + bli_fabs(*db);
     if (scale != 0.) {
 	goto L10;
     }
@@ -144,10 +144,10 @@ L10:
     *c__ = *da / r__;
     *s = *db / r__;
     z__ = 1.;
-    if (abs(*da) > abs(*db)) {
+    if (bli_fabs(*da) > bli_fabs(*db)) {
 	z__ = *s;
     }
-    if (abs(*db) >= abs(*da) && *c__ != 0.) {
+    if (bli_fabs(*db) >= bli_fabs(*da) && *c__ != 0.) {
 	z__ = 1. / *c__;
     }
 L20:

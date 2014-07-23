@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas
+   Copyright (C) 2014, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -14,9 +14,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
+    - Neither the name of The University of Texas at Austin nor the names
+      of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -82,12 +82,12 @@ typedef  gint_t  bool_t;
 // interoperability with BLIS.
 #ifndef _DEFINED_DIM_T
 #define _DEFINED_DIM_T
-typedef  gint_t  dim_t;   // dimension type
+typedef  gint_t  dim_t;      // dimension type
 #endif
-typedef  gint_t  inc_t;   // increment/stride type
-typedef  gint_t  doff_t;  // diagonal offset type
-typedef guint_t  siz_t;   // byte size type
-typedef guint_t  info_t;  // object information bit field
+typedef  gint_t  inc_t;      // increment/stride type
+typedef  gint_t  doff_t;     // diagonal offset type
+typedef guint_t  siz_t;      // byte size type
+typedef guint_t  objbits_t;  // object information bit field
 
 // -- Real types --
 
@@ -505,7 +505,7 @@ typedef struct obj_s
 	dim_t         n;
 	doff_t        diag_off;
 
-	info_t        info;
+	objbits_t     info;
 	siz_t         elem_size;
 
 	void*         buffer;

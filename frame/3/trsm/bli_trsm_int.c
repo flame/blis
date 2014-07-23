@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas
+   Copyright (C) 2014, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -14,9 +14,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
+    - Neither the name of The University of Texas at Austin nor the names
+      of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -100,6 +100,10 @@ void bli_trsm_int( obj_t*  alpha,
 	impl_t    i;
 	FUNCPTR_T f;
 
+	// Check parameters.
+	if ( bli_error_checking_is_enabled() )
+		bli_trsm_int_check( alpha, a, b, beta, c, cntl );
+
 	// If C has a zero dimension, return early.
 	if ( bli_obj_has_zero_dim( *c ) ) return;
 
@@ -112,10 +116,6 @@ void bli_trsm_int( obj_t*  alpha,
         thread_obarrier( thread );
 		return;
 	}
-
-	// Check parameters.
-	if ( bli_error_checking_is_enabled() )
-		bli_trsm_int_check( alpha, a, b, beta, c, cntl );
 
 	// Alias A and B in case we need to update attached scalars.
 	bli_obj_alias_to( *a, a_local );

@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas
+   Copyright (C) 2014, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -14,9 +14,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
+    - Neither the name of The University of Texas at Austin nor the names
+      of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -107,7 +107,7 @@ L20:
     sq2 = sp2 * *sy1;
     sq1 = sp1 * *sx1;
 
-    if (! (abs(sq1) > abs(sq2))) {
+    if (! (bli_fabs(sq1) > bli_fabs(sq2))) {
 	goto L40;
     }
     sh21 = -(*sy1) / *sx1;
@@ -219,7 +219,7 @@ L150:
     goto L140;
 L160:
 L170:
-    if (! (abs(*sd2) <= rgamsq)) {
+    if (! (bli_fabs(*sd2) <= rgamsq)) {
 	goto L190;
     }
     if (*sd2 == zero) {
@@ -237,7 +237,7 @@ L180:
     goto L170;
 L190:
 L200:
-    if (! (abs(*sd2) >= gamsq)) {
+    if (! (bli_fabs(*sd2) >= gamsq)) {
 	goto L220;
     }
     igo = 3;
@@ -347,7 +347,7 @@ L20:
     dq2 = dp2 * *dy1;
     dq1 = dp1 * *dx1;
 
-    if (! (abs(dq1) > abs(dq2))) {
+    if (! (bli_fabs(dq1) > bli_fabs(dq2))) {
 	goto L40;
     }
     dh21 = -(*dy1) / *dx1;
@@ -459,7 +459,7 @@ L150:
     goto L140;
 L160:
 L170:
-    if (! (abs(*dd2) <= rgamsq)) {
+    if (! (bli_fabs(*dd2) <= rgamsq)) {
 	goto L190;
     }
     if (*dd2 == zero) {
@@ -477,7 +477,7 @@ L180:
     goto L170;
 L190:
 L200:
-    if (! (abs(*dd2) >= gamsq)) {
+    if (! (bli_fabs(*dd2) >= gamsq)) {
 	goto L220;
     }
     igo = 3;

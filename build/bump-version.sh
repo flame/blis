@@ -4,7 +4,7 @@
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
-#  Copyright (C) 2014, The University of Texas
+#  Copyright (C) 2014, The University of Texas at Austin
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -14,9 +14,9 @@
 #   - Redistributions in binary form must reproduce the above copyright
 #     notice, this list of conditions and the following disclaimer in the
 #     documentation and/or other materials provided with the distribution.
-#   - Neither the name of The University of Texas nor the names of its
-#     contributors may be used to endorse or promote products derived
-#     from this software without specific prior written permission.
+#   - Neither the name of The University of Texas at Austin nor the names
+#     of its contributors may be used to endorse or promote products
+#     derived from this software without specific prior written permission.
 #
 #  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 #  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -53,7 +53,14 @@ print_usage()
 	echo " Field G. Van Zee"
 	echo " "
 	echo " Performs a series of actions needed when incrementing (bumping) the"
-	echo " BLIS version number."
+	echo " BLIS version number:"
+	echo "   1. Overwrite the version file with the version string passed"
+	echo "      into this script (new_vers)."
+	echo "   2. Commit the updated version file."
+	echo "   3. Create a new tag (named the same as new_vers) which refers to"
+	echo "      the commit created in (2)."
+	echo "   4. Update the CHANGELOG file."
+	echo "   5. Commit the updated CHANGELOG file."
 	echo " "
 	echo " Usage:"
 	echo "   ${script_name} [options] new_vers"
@@ -148,9 +155,8 @@ main()
 
 		echo "${script_name}: found '${gitdir}' directory; assuming git clone."
 
-		#echo "${script_name}: executing: git describe --always."
 		git_commit_str=$(git describe --always)
-		echo "${script_name}: starting commit: ${git_commit_str}."
+		echo "${script_name}: initial commit: ${git_commit_str}."
 
 		echo "${script_name}: updating version file '${version_file}'."
 		if [ -z "$dry_run_flag" ]; then
@@ -162,7 +168,6 @@ main()
 			git commit -m "Version file update (${new_version_str})" ${version_file}
 		fi
 
-		#echo "${script_name}: executing: git describe --always."
 		git_commit_str=$(git describe --always)
 		echo "${script_name}: commit to be tagged: ${git_commit_str}."
 
@@ -181,7 +186,6 @@ main()
 			git commit -m "CHANGELOG update (${new_version_str})" ${changelog_file}
 		fi
 
-		#echo "${script_name}: executing: git describe --always."
 		git_commit_str=$(git describe --always)
 		echo "${script_name}: latest commit: ${git_commit_str}."
 
