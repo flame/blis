@@ -36,7 +36,7 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-real r_imag(singlecomplex *z);
+real bla_r_imag(singlecomplex *z);
 
 #endif
 
