@@ -48,6 +48,8 @@ void PASTEMAC(ch,varname)( \
                            trans_t transc, \
                            dim_t   m, \
                            dim_t   n, \
+                           dim_t   m_panel, \
+                           dim_t   n_panel, \
                            void*   p, inc_t rs_p, inc_t cs_p, \
                                       inc_t pd_p, inc_t ps_p, \
                            void*   c, inc_t rs_c, inc_t cs_c  \

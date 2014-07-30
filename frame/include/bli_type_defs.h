@@ -522,6 +522,8 @@ typedef struct obj_s
 	inc_t         ps;       // panel stride (distance to next panel)
 	inc_t         pd;       // panel dimension (the "width" of a panel:
 	                        // usually MR or NR)
+	dim_t         m_panel;  // m dimension of a "full" panel
+	dim_t         n_panel;  // n dimension of a "full" panel
 } obj_t;
 
 
@@ -565,6 +567,8 @@ typedef struct obj_s
 	(b).n_padded  = (a).n_padded; \
 	(b).ps        = (a).ps; \
 	(b).pd        = (a).pd; \
+	(b).m_panel   = (a).m_panel; \
+	(b).n_panel   = (a).n_panel; \
 }
 
 #define bli_obj_init_subpart_from( a, b ) \
@@ -596,6 +600,8 @@ typedef struct obj_s
 	(b).n_padded  = (a).n_padded; \
 	(b).pd        = (a).pd; \
 	(b).ps        = (a).ps; \
+	(b).m_panel   = (a).m_panel; \
+	(b).n_panel   = (a).n_panel; \
 }
 
 

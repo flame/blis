@@ -186,6 +186,7 @@ void bli_packm_init_pack( bool_t    densify,
 	dim_t   nr_pack_dim  = nr_def_dim + nr_ext_dim;
 
 	mem_t*  mem_p;
+	dim_t   m_p, n_p;
 	dim_t   m_p_pad, n_p_pad;
 	siz_t   size_p;
 	siz_t   elem_size_p;
@@ -242,8 +243,10 @@ void bli_packm_init_pack( bool_t    densify,
 	// in p) and aligning them to the dimension multiples (typically equal
 	// to register blocksizes). This does waste a little bit of space for
 	// level-2 operations, but that's okay with us.
-	m_p_pad = bli_align_dim_to_mult( bli_obj_length( *p ), mr_def_dim );
-	n_p_pad = bli_align_dim_to_mult( bli_obj_width( *p ),  nr_def_dim );
+	m_p     = bli_obj_length( *p );
+	n_p     = bli_obj_width( *p );
+	m_p_pad = bli_align_dim_to_mult( m_p, mr_def_dim );
+	n_p_pad = bli_align_dim_to_mult( n_p, nr_def_dim );
 
 	// Save the padded dimensions into the packed object. It is important
 	// to save these dimensions since they represent the actual dimensions
@@ -340,6 +343,8 @@ void bli_packm_init_pack( bool_t    densify,
 		bli_obj_set_incs( rs_p, cs_p, *p );
 		bli_obj_set_panel_dim( m_panel, *p );
 		bli_obj_set_panel_stride( ps_p, *p );
+		bli_obj_set_panel_length( m_panel, *p );
+		bli_obj_set_panel_width( n_p, *p );
 
 		// Compute the size of the packed buffer.
 		size_p = ps_p * (m_p_pad / m_panel) * elem_size_p;
@@ -381,6 +386,8 @@ void bli_packm_init_pack( bool_t    densify,
 		bli_obj_set_incs( rs_p, cs_p, *p );
 		bli_obj_set_panel_dim( n_panel, *p );
 		bli_obj_set_panel_stride( ps_p, *p );
+		bli_obj_set_panel_length( m_p, *p );
+		bli_obj_set_panel_width( n_panel, *p );
 
 		// Compute the size of the packed buffer.
 		size_p = ps_p * (n_p_pad / n_panel) * elem_size_p;

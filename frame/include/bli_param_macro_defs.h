@@ -356,6 +356,7 @@
 	( bli_does_notrans( trans ) ? ( m == 1 ? (cs) : (rs) ) \
                                 : ( m == 1 ? (rs) : (cs) ) )
 
+/*
 #define bli_is_row_stored( rs, cs ) \
 \
 	( bli_abs( cs ) == 1 )
@@ -363,14 +364,15 @@
 #define bli_is_col_stored( rs, cs ) \
 \
 	( bli_abs( rs ) == 1 )
+*/
 
-#define bli_is_row_stored_f( rs, cs ) \
+#define bli_is_row_stored_f( m, n, rs, cs ) \
 \
-	( cs == 1 )
+	( cs == 1 && ( rs > 1 || n == 1 ) )
 
-#define bli_is_col_stored_f( rs, cs ) \
+#define bli_is_col_stored_f( m, n, rs, cs ) \
 \
-	( rs == 1 )
+	( rs == 1 && ( cs > 1 || m == 1 ) )
 
 #define bli_is_gen_stored( rs, cs ) \
 \
@@ -391,14 +393,11 @@
 
 #define bli_has_nonunit_inc2( inc1, inc2 ) \
 \
-	( inc1 != 1 || \
-	  inc2 != 1 )
+	( inc1 != 1 || inc2 != 1 )
 
 #define bli_has_nonunit_inc3( inc1, inc2, inc3 ) \
 \
-	( inc1 != 1 || \
-	  inc2 != 1 || \
-	  inc3 != 1 )
+	( inc1 != 1 || inc2 != 1 || inc3 != 1 )
 
 
 // diag offset-related

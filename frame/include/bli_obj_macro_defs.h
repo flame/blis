@@ -557,11 +557,17 @@ bli_obj_width_stored( obj )
 
 #define bli_obj_is_row_stored( obj ) \
 \
-	( bli_obj_col_stride_mag( obj ) == 1 )
+	( bli_obj_col_stride_mag( obj ) == 1 && \
+	  ( bli_obj_row_stride_mag( obj ) > 1 || \
+	    bli_obj_width( obj )         == 1 ) \
+	)
 
 #define bli_obj_is_col_stored( obj ) \
 \
-	( bli_obj_row_stride_mag( obj ) == 1 )
+	( bli_obj_row_stride_mag( obj ) == 1 && \
+	  ( bli_obj_col_stride_mag( obj ) > 1 || \
+	    bli_obj_length( obj )        == 1 ) \
+	)
 
 #define bli_obj_is_gen_stored( obj ) \
 \
@@ -735,7 +741,7 @@ bli_obj_width_stored( obj )
 }
 
 
-// Packed dimensions query
+// Packed matrix info query
 
 #define bli_obj_padded_length( obj ) \
 \
@@ -745,7 +751,7 @@ bli_obj_width_stored( obj )
 \
 	( (obj).n_padded )
 
-// Packed dimensions modification
+// Packed matrix info modification
 
 #define bli_obj_set_padded_length( m0, obj ) \
 { \
@@ -764,48 +770,46 @@ bli_obj_width_stored( obj )
 }
 
 
-// Packed panel dimension query
+// Packed panel info query
+
+#define bli_obj_panel_length( obj ) \
+\
+	((obj).m_panel)
+
+#define bli_obj_panel_width( obj ) \
+\
+	((obj).n_panel)
 
 #define bli_obj_panel_dim( obj ) \
 \
 	((obj).pd)
 
-// Packed panel dimension modification
+#define bli_obj_panel_stride( obj ) \
+\
+	((obj).ps)
+
+// Packed panel info modification
+
+#define bli_obj_set_panel_length( m0, obj ) \
+{ \
+	(obj).m_panel = m0; \
+}
+
+#define bli_obj_set_panel_width( n0, obj ) \
+{ \
+	(obj).n_panel = n0; \
+}
 
 #define bli_obj_set_panel_dim( panel_dim, obj ) \
 { \
 	(obj).pd = panel_dim; \
 }
 
-
-// Packed panel stride query
-
-#define bli_obj_panel_stride( obj ) \
-\
-	((obj).ps)
-
-// Packed panel stride modification
-
 #define bli_obj_set_panel_stride( panel_stride, obj ) \
 { \
 	(obj).ps = panel_stride; \
 }
 
-
-/*
-// Cast mem entry query
-
-#define bli_obj_cast_mem( obj ) \
-\
-	( &((obj).cast_mem) )
-
-// Cast mem entry modification
-
-#define bli_obj_set_cast_mem( mem_p, obj ) \
-{ \
-	(obj).cast_mem = *mem_p; \
-}
-*/
  
 
 // -- Miscellaneous object macros --

@@ -49,6 +49,8 @@ typedef void (*FUNCPTR_T)(
                            dim_t   n,
                            dim_t   m_max,
                            dim_t   n_max,
+                           dim_t   m_panel,
+                           dim_t   n_panel,
                            void*   kappa,
                            void*   c, inc_t rs_c, inc_t cs_c,
                            void*   p, inc_t rs_p, inc_t cs_p,
@@ -78,6 +80,8 @@ void bli_packm_blk_var3( obj_t*   c,
 	dim_t     n_p       = bli_obj_width( *p );
 	dim_t     m_max_p   = bli_obj_padded_length( *p );
 	dim_t     n_max_p   = bli_obj_padded_width( *p );
+	dim_t     m_panel   = bli_obj_panel_length( *p );
+	dim_t     n_panel   = bli_obj_panel_width( *p );
 
 	void*     buf_c     = bli_obj_buffer_at_off( *c );
 	inc_t     rs_c      = bli_obj_row_stride( *c );
@@ -111,26 +115,27 @@ void bli_packm_blk_var3( obj_t*   c,
 	// real domain counterparts. (In the aforementioned situation,
 	// applying a real scalar is easy, but applying a complex one is
 	// harder, so we avoid the need altogether with the code below.)
-    if ( thread_am_ochief( t ) ) {
-        if ( bli_obj_scalar_has_nonzero_imag( p ) )
-        {
-            // Detach the scalar.
-            bli_obj_scalar_detach( p, &kappa );
+	if ( thread_am_ochief( t ) )
+	{
+		if ( bli_obj_scalar_has_nonzero_imag( p ) )
+		{
+			// Detach the scalar.
+			bli_obj_scalar_detach( p, &kappa );
 
-            // Reset the attached scalar (to 1.0).
-            bli_obj_scalar_reset( p );
+			// Reset the attached scalar (to 1.0).
+			bli_obj_scalar_reset( p );
 
-            kappa_p = &kappa;
-        }
-        else
-        {
-            // If the internal scalar of A has only a real component, then
-            // we will apply it later (in the micro-kernel), and so we will
-            // use BLIS_ONE to indicate no scaling during packing.
-            kappa_p = &BLIS_ONE;
-        }
-    }
-    kappa_p = thread_obroadcast( t, kappa_p );
+			kappa_p = &kappa;
+		}
+		else
+		{
+			// If the internal scalar of A has only a real component, then
+			// we will apply it later (in the micro-kernel), and so we will
+			// use BLIS_ONE to indicate no scaling during packing.
+			kappa_p = &BLIS_ONE;
+		}
+	}
+	kappa_p = thread_obroadcast( t, kappa_p );
 
 
 	// Acquire the buffer to the kappa chosen above.
@@ -156,11 +161,13 @@ void bli_packm_blk_var3( obj_t*   c,
 	   n_p,
 	   m_max_p,
 	   n_max_p,
+	   m_panel,
+	   n_panel,
 	   buf_kappa,
 	   buf_c, rs_c, cs_c,
 	   buf_p, rs_p, cs_p,
 	          pd_p, ps_p,
-       t );
+	   t );
 }
 
 
@@ -180,6 +187,8 @@ void PASTEMAC(ch,varname)( \
                            dim_t   n, \
                            dim_t   m_max, \
                            dim_t   n_max, \
+                           dim_t   m_panel, \
+                           dim_t   n_panel, \
                            void*   kappa, \
                            void*   c, inc_t rs_c, inc_t cs_c, \
                            void*   p, inc_t rs_p, inc_t cs_p, \
@@ -244,7 +253,7 @@ void PASTEMAC(ch,varname)( \
 	/* If the strides of P indicate row storage, then we are packing to
 	   column panels; otherwise, if the strides indicate column storage,
 	   we are packing to row panels. */ \
-	if ( bli_is_row_stored_f( rs_p, cs_p ) ) \
+	if ( bli_is_row_stored_f( m_panel, n_panel, rs_p, cs_p ) ) \
 	{ \
 		/* Prepare to pack to row-stored column panels. */ \
 		iter_dim       = n; \
@@ -253,7 +262,7 @@ void PASTEMAC(ch,varname)( \
 		panel_dim_max  = pd_p; \
 		ldc            = rs_c; \
 		vs_c           = cs_c; \
-		diagoffc_inc   = -( doff_t)panel_dim_max; \
+		diagoffc_inc   = -( doff_t )panel_dim_max; \
 		ldp            = rs_p; \
 		m_panel_full   = &m; \
 		n_panel_full   = &panel_dim_i; \
@@ -262,7 +271,7 @@ void PASTEMAC(ch,varname)( \
 		m_panel_max    = &panel_len_max_i; \
 		n_panel_max    = &panel_dim_max; \
 	} \
-	else /* if ( bli_is_col_stored_f( rs_p, cs_p ) ) */ \
+	else /* if ( bli_is_col_stored_f( m_panel, n_panel, rs_p, cs_p ) ) */ \
 	{ \
 		/* Prepare to pack to column-stored row panels. */ \
 		iter_dim       = m; \
@@ -304,8 +313,8 @@ void PASTEMAC(ch,varname)( \
 \
 	p_begin = p_cast; \
 \
-    for ( ic  = ic0,  ip  = ip0,  it = 0; it < num_iter; \
-                  ic += ic_inc, ip += ip_inc, it += 1 ) \
+	for ( ic  = ic0,  ip  = ip0,  it = 0; it < num_iter; \
+	              ic += ic_inc, ip += ip_inc, it += 1 ) \
 	{ \
 		panel_dim_i = bli_min( panel_dim_max, iter_dim - ic ); \
 \
@@ -335,20 +344,20 @@ void PASTEMAC(ch,varname)( \
 			   a micro-panel. If they do, then somehow the constraints on
 			   cache blocksizes being a whole multiple of the register
 			   blocksizes was somehow violated. */ \
-			if ( ( bli_is_col_stored_f( rs_p, cs_p ) && diagoffc_i < 0 ) || \
-			     ( bli_is_row_stored_f( rs_p, cs_p ) && diagoffc_i > 0 ) ) \
+			if ( ( bli_is_col_stored_f( m_panel, n_panel, rs_p, cs_p ) && diagoffc_i < 0 ) || \
+			     ( bli_is_row_stored_f( m_panel, n_panel, rs_p, cs_p ) && diagoffc_i > 0 ) ) \
 				bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \
 \
-			if      ( ( bli_is_row_stored_f( rs_p, cs_p ) && bli_is_upper( uploc ) ) || \
-			          ( bli_is_col_stored_f( rs_p, cs_p ) && bli_is_lower( uploc ) ) )  \
+			if      ( ( bli_is_row_stored_f( m_panel, n_panel, rs_p, cs_p ) && bli_is_upper( uploc ) ) || \
+			          ( bli_is_col_stored_f( m_panel, n_panel, rs_p, cs_p ) && bli_is_lower( uploc ) ) )  \
 			{ \
 				panel_off_i     = 0; \
 				panel_len_i     = bli_abs( diagoffc_i ) + panel_dim_i; \
 				panel_len_max_i = bli_abs( diagoffc_i ) + panel_dim_max; \
 				diagoffp_i      = diagoffc_i; \
 			} \
-			else /* if ( ( bli_is_row_stored_f( rs_p, cs_p ) && bli_is_lower( uploc ) ) || \
-			             ( bli_is_col_stored_f( rs_p, cs_p ) && bli_is_upper( uploc ) ) )  */ \
+			else /* if ( ( bli_is_row_stored_f( m_panel, n_panel, rs_p, cs_p ) && bli_is_lower( uploc ) ) || \
+			             ( bli_is_col_stored_f( m_panel, n_panel, rs_p, cs_p ) && bli_is_upper( uploc ) ) )  */ \
 			{ \
 				panel_off_i     = bli_abs( diagoffc_i ); \
 				panel_len_i     = panel_len_full - panel_off_i; \
@@ -359,8 +368,8 @@ void PASTEMAC(ch,varname)( \
 			c_use = c_begin + (panel_off_i  )*ldc; \
 			p_use = p_begin; \
 \
-        if( packm_thread_my_iter( it, thread ) ) \
-        { \
+			if( packm_thread_my_iter( it, thread ) ) \
+			{ \
 			PASTEMAC(ch,packm_tri_cxk_ri3)( strucc, \
 			                                diagoffp_i, \
 			                                diagc, \
@@ -374,7 +383,7 @@ void PASTEMAC(ch,varname)( \
 			                                kappa_cast, \
 			                                c_use, rs_c, cs_c, \
 			                                p_use, rs_p, cs_p ); \
-        } \
+			} \
 \
 \
 			p_inc = ( ldp * panel_len_max_i * 3 ) / 2; \
@@ -398,8 +407,8 @@ void PASTEMAC(ch,varname)( \
 			panel_len_i     = panel_len_full; \
 			panel_len_max_i = panel_len_max; \
 \
-        if( packm_thread_my_iter( it, thread ) ) \
-        { \
+			if( packm_thread_my_iter( it, thread ) ) \
+			{ \
 			PASTEMAC(ch,packm_herm_cxk_ri3)( strucc, \
 			                                 diagoffc_i, \
 			                                 uploc, \
@@ -411,8 +420,8 @@ void PASTEMAC(ch,varname)( \
 			                                 kappa_cast, \
 			                                 c_begin, rs_c, cs_c, \
 			                                 p_begin, rs_p, cs_p ); \
+			} \
 \
-        } \
 			/* NOTE: This value is equivalent to ps_p. */ \
 			p_inc = ( ldp * panel_len_max_i * 3 ) / 2; \
 		} \
@@ -425,8 +434,8 @@ void PASTEMAC(ch,varname)( \
 			panel_len_i     = panel_len_full; \
 			panel_len_max_i = panel_len_max; \
 \
-        if( packm_thread_my_iter( it, thread ) ) \
-        { \
+			if( packm_thread_my_iter( it, thread ) ) \
+			{ \
 			PASTEMAC(ch,packm_gen_cxk_ri3)( BLIS_GENERAL, \
 			                                0, \
 			                                BLIS_DENSE, \
@@ -438,11 +447,12 @@ void PASTEMAC(ch,varname)( \
 			                                kappa_cast, \
 			                                c_begin, rs_c, cs_c, \
 			                                p_begin, rs_p, cs_p ); \
-        } \
+			} \
 \
 			/* NOTE: This value is equivalent to ps_p. */ \
 			p_inc = ( ldp * panel_len_max_i * 3 ) / 2; \
 \
+		} \
 /*
 	if ( cs_p == 1 ) { \
 	PASTEMAC(chr,fprintm)( stdout, "packm_var3: bp_r", *m_panel_max, *n_panel_max, \
@@ -452,9 +462,8 @@ void PASTEMAC(ch,varname)( \
 	} \
 */ \
 \
-		} \
 \
-        p_begin += p_inc; \
+		p_begin += p_inc; \
 	} \
 }
 

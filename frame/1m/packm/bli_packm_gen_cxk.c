@@ -62,7 +62,7 @@ void PASTEMAC(ch,varname)( \
 	/* If the strides of p indicate row storage, then we are packing to
 	   column panels; otherwise, if the strides indicate column storage,
 	   we are packing to row panels. */ \
-	if ( bli_is_row_stored_f( rs_p, cs_p ) ) \
+	if ( bli_is_row_stored_f( m_panel, n_panel, rs_p, cs_p ) ) \
 	{ \
 		/* Prepare to pack to row-stored column panel. */ \
 		panel_dim = n_panel; \
@@ -71,7 +71,7 @@ void PASTEMAC(ch,varname)( \
 		ldc       = rs_c; \
 		ldp       = rs_p; \
 	} \
-	else /* if ( bli_is_col_stored_f( rs_p, cs_p ) ) */ \
+	else /* if ( bli_is_col_stored_f( m_panel, n_panel, rs_p, cs_p ) ) */ \
 	{ \
 		/* Prepare to pack to column-stored row panel. */ \
 		panel_dim = m_panel; \
@@ -165,7 +165,7 @@ void PASTEMAC(ch,varname)( \
 	/* If the strides of p indicate row storage, then we are packing to
 	   column panels; otherwise, if the strides indicate column storage,
 	   we are packing to row panels. */ \
-	if ( bli_is_row_stored_f( rs_p, cs_p ) ) \
+	if ( bli_is_row_stored_f( m_panel, n_panel, rs_p, cs_p ) ) \
 	{ \
 		/* Prepare to pack to row-stored column panel. */ \
 		panel_dim     = n_panel; \
@@ -175,7 +175,7 @@ void PASTEMAC(ch,varname)( \
 		ldc           = rs_c; \
 		ldp           = rs_p; \
 	} \
-	else /* if ( bli_is_col_stored_f( rs_p, cs_p ) ) */ \
+	else /* if ( bli_is_col_stored_f( m_panel, n_panel, rs_p, cs_p ) ) */ \
 	{ \
 		/* Prepare to pack to column-stored row panel. */ \
 		panel_dim     = m_panel; \
@@ -290,7 +290,7 @@ void PASTEMAC(ch,varname)( \
 	/* If the strides of p indicate row storage, then we are packing to
 	   column panels; otherwise, if the strides indicate column storage,
 	   we are packing to row panels. */ \
-	if ( bli_is_row_stored_f( rs_p, cs_p ) ) \
+	if ( bli_is_row_stored_f( m_panel, n_panel, rs_p, cs_p ) ) \
 	{ \
 		/* Prepare to pack to row-stored column panel. */ \
 		panel_dim     = n_panel; \
@@ -300,7 +300,7 @@ void PASTEMAC(ch,varname)( \
 		ldc           = rs_c; \
 		ldp           = rs_p; \
 	} \
-	else /* if ( bli_is_col_stored_f( rs_p, cs_p ) ) */ \
+	else /* if ( bli_is_col_stored_f( m_panel, n_panel, rs_p, cs_p ) ) */ \
 	{ \
 		/* Prepare to pack to column-stored row panel. */ \
 		panel_dim     = m_panel; \
