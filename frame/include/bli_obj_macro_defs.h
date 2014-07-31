@@ -193,7 +193,7 @@
 
 #define bli_obj_pack_status( obj ) \
 \
-	(   (obj).info & BLIS_PACK_BITS )
+	(   (obj).info & BLIS_PACK_SCHEMA_BITS )
 
 #define bli_obj_is_packed( obj ) \
 \
@@ -295,7 +295,7 @@
 
 #define bli_obj_set_pack_schema( pack, obj ) \
 { \
-	(obj).info = ( (obj).info & ~BLIS_PACK_BITS ) | (pack); \
+	(obj).info = ( (obj).info & ~BLIS_PACK_SCHEMA_BITS ) | (pack); \
 }
 
 #define bli_obj_set_pack_order_if_upper( packordifup, obj ) \
