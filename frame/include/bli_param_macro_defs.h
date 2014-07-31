@@ -502,7 +502,34 @@
 	( ( (buf_type) & BLIS_PACK_BUFFER_BITS ) >> BLIS_PACK_BUFFER_SHIFT )
 
 
-// return value for char
+// pack_t-related
+
+#define bli_is_packed( schema ) \
+\
+	( ( schema & BLIS_PACK_BIT  ) )
+
+#define bli_is_row_packed( schema ) \
+\
+	( ( schema & BLIS_PACK_RC_BIT  ) == ( BLIS_BITVAL_PACKED_UNSPEC ^ \
+	                                      BLIS_BITVAL_PACKED_ROWS    ) )
+
+#define bli_is_col_packed( schema ) \
+\
+	( ( schema & BLIS_PACK_RC_BIT  ) == ( BLIS_BITVAL_PACKED_UNSPEC ^ \
+	                                      BLIS_BITVAL_PACKED_COLUMNS ) )
+
+#define bli_is_panel_packed( schema ) \
+\
+	( ( schema & BLIS_PACK_PANEL_BIT ) )
+
+#define bli_is_4m_packed( schema ) \
+\
+	( ( schema & BLIS_PACK_4M_BIT ) )
+
+#define bli_is_3m_packed( schema ) \
+\
+	( ( schema & BLIS_PACK_3M_BIT ) )
+
 
 
 // return datatype for char

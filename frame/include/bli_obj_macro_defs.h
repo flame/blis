@@ -195,6 +195,32 @@
 \
 	(   (obj).info & BLIS_PACK_BITS )
 
+#define bli_obj_is_packed( obj ) \
+\
+	( ( (obj).info & BLIS_PACK_BIT  ) )
+
+#define bli_obj_is_row_packed( obj ) \
+\
+	( ( (obj).info & BLIS_PACK_RC_BIT  ) == ( BLIS_BITVAL_PACKED_UNSPEC ^ \
+	                                          BLIS_BITVAL_PACKED_ROWS    ) )
+
+#define bli_obj_is_col_packed( obj ) \
+\
+	( ( (obj).info & BLIS_PACK_RC_BIT  ) == ( BLIS_BITVAL_PACKED_UNSPEC ^ \
+	                                          BLIS_BITVAL_PACKED_COLUMNS ) )
+
+#define bli_obj_is_panel_packed( obj ) \
+\
+	( ( (obj).info & BLIS_PACK_PANEL_BIT ) )
+
+#define bli_obj_is_4m_packed( obj ) \
+\
+	( ( (obj).info & BLIS_PACK_4M_BIT ) )
+
+#define bli_obj_is_3m_packed( obj ) \
+\
+	( ( (obj).info & BLIS_PACK_3M_BIT ) )
+
 #define bli_obj_pack_buffer_type( obj ) \
 \
 	(   (obj).info & BLIS_PACK_BUFFER_BITS )
@@ -870,29 +896,6 @@ bli_obj_width_stored( obj )
 \
 	bli_mem_set_buffer( NULL, pack_mem ); \
 }
-
-
-// Check if an object is a packed object
-// NOTE: TRUE here does not mean the actual packing is complete, such as with
-// incremental packing.
-
-#define bli_obj_is_panel_packed( obj ) \
-\
-	( bli_obj_pack_status( obj ) == BLIS_PACKED_ROW_PANELS || \
-	  bli_obj_pack_status( obj ) == BLIS_PACKED_COL_PANELS )
-
-
-// Check if an object is packed for 4m/3m
-
-#define bli_obj_is_panel_packed_4m( obj ) \
-\
-	( bli_obj_pack_status( obj ) == BLIS_PACKED_ROW_PANELS_4M || \
-	  bli_obj_pack_status( obj ) == BLIS_PACKED_COL_PANELS_4M )
-
-#define bli_obj_is_panel_packed_3m( obj ) \
-\
-	( bli_obj_pack_status( obj ) == BLIS_PACKED_ROW_PANELS_3M || \
-	  bli_obj_pack_status( obj ) == BLIS_PACKED_COL_PANELS_3M )
 
 
 // Release object's pack (and cast) memory entries back to memory manager

@@ -114,8 +114,8 @@ void bli_trmm_rl_ker_var2( obj_t*  a,
 	// in pointer arithmetic that moves twice as far as it should,
 	// given the datatypes actually stored (float or double), we must
 	// halve the strides to compensate.
-	if ( bli_obj_is_panel_packed_4m( *a ) ||
-	     bli_obj_is_panel_packed_3m( *a ) ) { cs_a /= 2; rs_b /= 2; }
+	if ( bli_obj_is_4m_packed( *a ) ||
+	     bli_obj_is_3m_packed( *a ) ) { cs_a /= 2; rs_b /= 2; }
 
 	// Extract from the control tree node the func_t object containing
 	// the gemm micro-kernel function addresses, and then query the

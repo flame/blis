@@ -49,12 +49,11 @@ void PASTEMAC(ch,varname)( \
                            bool_t  invdiag, \
                            bool_t  revifup, \
                            bool_t  reviflo, \
+                           bool_t  row_stored, \
                            dim_t   m, \
                            dim_t   n, \
                            dim_t   m_max, \
                            dim_t   n_max, \
-                           dim_t   m_panel, \
-                           dim_t   n_panel, \
                            void*   kappa, \
                            void*   c, inc_t rs_c, inc_t cs_c, \
                            void*   p, inc_t rs_p, inc_t cs_p, \

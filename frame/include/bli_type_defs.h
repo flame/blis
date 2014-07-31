@@ -206,11 +206,16 @@ typedef struct
 #define BLIS_INVERT_DIAG_BIT               0x200
 #define BLIS_TARGET_DT_BITS                0x1C00
 #define BLIS_EXECUTION_DT_BITS             0xE000
-#define BLIS_PACK_BITS                     0xF0000
-#define BLIS_PACK_REV_IF_UPPER_BIT         0x100000
-#define BLIS_PACK_REV_IF_LOWER_BIT         0x200000
-#define BLIS_PACK_BUFFER_BITS              0xC00000
-#define BLIS_STRUC_BITS                    0x3000000
+#define BLIS_PACK_BITS                     0x1F0000
+#define BLIS_PACK_BIT                      0x100000
+#define BLIS_PACK_RC_BIT                   0x010000
+#define BLIS_PACK_PANEL_BIT                0x020000
+#define BLIS_PACK_4M_BIT                   0x040000
+#define BLIS_PACK_3M_BIT                   0x080000
+#define BLIS_PACK_REV_IF_UPPER_BIT         0x200000
+#define BLIS_PACK_REV_IF_LOWER_BIT         0x400000
+#define BLIS_PACK_BUFFER_BITS              0x1800000
+#define BLIS_STRUC_BITS                    0x6000000
 
 
 //
@@ -239,31 +244,31 @@ typedef struct
 #define BLIS_BITVAL_UNIT_DIAG              0x100
 #define BLIS_BITVAL_INVERT_DIAG            0x200
 #define BLIS_BITVAL_NOT_PACKED             0x0
-#define BLIS_BITVAL_PACKED_UNSPEC          0x10000
-#define BLIS_BITVAL_PACKED_ROWS            0x20000
-#define BLIS_BITVAL_PACKED_COLUMNS         0x30000
-#define BLIS_BITVAL_PACKED_ROW_PANELS      0x40000
-#define BLIS_BITVAL_PACKED_COL_PANELS      0x50000
-#define BLIS_BITVAL_PACKED_ROW_PANELS_4M   0x60000
-#define BLIS_BITVAL_PACKED_COL_PANELS_4M   0x70000
-#define BLIS_BITVAL_PACKED_ROW_PANELS_3M   0x80000
-#define BLIS_BITVAL_PACKED_COL_PANELS_3M   0x90000
+#define BLIS_BITVAL_PACKED_UNSPEC          0x100000
+#define   BLIS_BITVAL_PACKED_ROWS          0x100000
+#define   BLIS_BITVAL_PACKED_COLUMNS       0x110000
+#define   BLIS_BITVAL_PACKED_ROW_PANELS    0x120000
+#define   BLIS_BITVAL_PACKED_COL_PANELS    0x130000
+#define   BLIS_BITVAL_PACKED_ROW_PANELS_4M 0x140000
+#define   BLIS_BITVAL_PACKED_COL_PANELS_4M 0x150000
+#define   BLIS_BITVAL_PACKED_ROW_PANELS_3M 0x180000
+#define   BLIS_BITVAL_PACKED_COL_PANELS_3M 0x190000
 #define BLIS_BITVAL_PACK_FWD_IF_UPPER      0x0
-#define BLIS_BITVAL_PACK_REV_IF_UPPER      0x100000
+#define BLIS_BITVAL_PACK_REV_IF_UPPER      0x200000
 #define BLIS_BITVAL_PACK_FWD_IF_LOWER      0x0
-#define BLIS_BITVAL_PACK_REV_IF_LOWER      0x200000
+#define BLIS_BITVAL_PACK_REV_IF_LOWER      0x400000
 #define BLIS_BITVAL_BUFFER_FOR_A_BLOCK     0x0
-#define BLIS_BITVAL_BUFFER_FOR_B_PANEL     0x400000
-#define BLIS_BITVAL_BUFFER_FOR_C_PANEL     0x800000
-#define BLIS_BITVAL_BUFFER_FOR_GEN_USE     0xC00000
+#define BLIS_BITVAL_BUFFER_FOR_B_PANEL     0x800000
+#define BLIS_BITVAL_BUFFER_FOR_C_PANEL     0x1000000
+#define BLIS_BITVAL_BUFFER_FOR_GEN_USE     0x1800000
 #define BLIS_BITVAL_GENERAL                0x0
-#define BLIS_BITVAL_HERMITIAN              0x1000000
-#define BLIS_BITVAL_SYMMETRIC              0x2000000
-#define BLIS_BITVAL_TRIANGULAR             0x3000000
+#define BLIS_BITVAL_HERMITIAN              0x2000000
+#define BLIS_BITVAL_SYMMETRIC              0x4000000
+#define BLIS_BITVAL_TRIANGULAR             0x6000000
 
 #define BLIS_TARGET_DT_SHIFT               10
 #define BLIS_EXECUTION_DT_SHIFT            13
-#define BLIS_PACK_BUFFER_SHIFT             22
+#define BLIS_PACK_BUFFER_SHIFT             23
 
 
 //
@@ -465,29 +470,29 @@ typedef struct func_s
            - 13 domain    (0 == real, 1 == complex)
            - 14: precision (0 == single, 1 == double)
            - 15: unused
-  19 ~ 16  Packed type/status
-           - 0 == not packed
-           - 1 == packed (unspecified; row, column, or vector)
-           - 2 == packed by rows
-           - 3 == packed by columns
-           - 4 == packed by row panels
-           - 5 == packed by column panels
-           - 6 == packed by row panels (4m)
-           - 7 == packed by column panels (4m)
-           - 8 == packed by row panels (3m)
-           - 9 == packed by column panels (3m)
-       20  Packed panel order if upper-stored
+  20 ~ 16  Packed type/status
+           - 00000 0 == not packed
+           - 10000 1 == packed (unspecified; row, column, or vector)
+           - 10000 2 == packed by rows
+           - 10001 3 == packed by columns
+           - 10010 4 == packed by row panels
+           - 10011 5 == packed by column panels
+           - 10100 6 == packed by row panels (4m)
+           - 10101 7 == packed by column panels (4m)
+           - 11000 8 == packed by row panels (3m)
+           - 11001 9 == packed by column panels (3m)
+       21  Packed panel order if upper-stored
            - 0 == forward order if upper
            - 1 == reverse order if upper
-       21  Packed panel order if lower-stored
+       22  Packed panel order if lower-stored
            - 0 == forward order if lower
            - 1 == reverse order if lower
-  23 ~ 22  Packed buffer type
+  24 ~ 23  Packed buffer type
            - 0 == block of A
            - 1 == panel of B
            - 2 == panel of C
            - 3 == general use
-  25 ~ 24  Structure type
+  26 ~ 25  Structure type
            - 0 == general
            - 1 == Hermitian
            - 2 == symmetric
