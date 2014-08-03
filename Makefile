@@ -642,31 +642,31 @@ install-headers: check-env $(MK_INCL_DIR_INST)
 
 $(MK_INCL_DIR_INST): $(MK_HEADER_FILES) $(CONFIG_MK_FILE)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	$(INSTALL) -m 0755 -d $(@)
+	$(MKDIR) $(@)
 	$(INSTALL) -m 0644 $(MK_HEADER_FILES) $(@)
 else
-	@$(INSTALL) -m 0755 -d $(@)
+	@$(MKDIR) $(@)
 	@echo "Installing C header files into $(@)/"
 	@$(INSTALL) -m 0644 $(MK_HEADER_FILES) $(@)
 endif
 
 $(INSTALL_PREFIX)/lib/%-$(VERS_CONF).a: $(BASE_LIB_PATH)/%.a $(CONFIG_MK_FILE)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	$(INSTALL) -m 0755 -d $(@D)
+	$(MKDIR) $(@D)
 	$(INSTALL) -m 0644 $< $@
 else
 	@echo "Installing $(@F) into $(INSTALL_PREFIX)/lib/"
-	@$(INSTALL) -m 0755 -d $(@D)
+	@$(MKDIR) $(@D)
 	@$(INSTALL) -m 0644 $< $@
 endif
 
 $(INSTALL_PREFIX)/lib/%-$(VERS_CONF).so: $(BASE_LIB_PATH)/%.so $(CONFIG_MK_FILE)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	$(INSTALL) -m 0755 -d $(@D)
+	$(MKDIR) $(@D)
 	$(INSTALL) -m 0644 $< $@
 else
 	@echo "Installing $(@F) into $(INSTALL_PREFIX)/lib/"
-	@$(INSTALL) -m 0755 -d $(@D)
+	@$(MKDIR) $(@D)
 	@$(INSTALL) -m 0644 $< $@
 endif
 
