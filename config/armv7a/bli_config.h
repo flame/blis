@@ -140,7 +140,7 @@
 
 
 
-// -- BLAS-to-BLIS COMPATIBILITY LAYER -----------------------------------------
+// -- BLAS COMPATIBILITY LAYER -------------------------------------------------
 
 // Enable the BLAS compatibility layer?
 #define BLIS_ENABLE_BLAS2BLIS
@@ -157,6 +157,18 @@
 #define PASTEF770(name)                        name ## _
 #define PASTEF77(ch1,name)       ch1        ## name ## _
 #define PASTEF772(ch1,ch2,name)  ch1 ## ch2 ## name ## _
+
+
+
+// -- CBLAS COMPATIBILITY LAYER ------------------------------------------------
+
+// Enable the CBLAS compatibility layer?
+// NOTE: Enabling CBLAS will automatically enable the BLAS compatibility layer
+// regardless of whether or not it was explicitly enabled above. Furthermore,
+// the CBLAS compatibility layer will use the integer type size definition
+// specified above when defining the size of its own integers (regardless of
+// whether the BLAS layer was enabled directly or indirectly).
+//#define BLIS_ENABLE_CBLAS
 
 
 

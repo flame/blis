@@ -239,7 +239,11 @@ extern "C" {
 #include "bli_sumsqv.h"
 
 
-// -- BLAS-to-BLIS headers --
+// -- CBLAS compatibility layer --
+
+#include "bli_cblas.h"
+
+// -- BLAS compatibility layer --
 
 #include "bli_blas.h"
 
