@@ -8,7 +8,7 @@
 #  accepted values.
 #
 
-1       # Number of repeats per experiment (best result is reported)
+3       # Number of repeats per experiment (best result is reported)
 c       # Matrix storage scheme(s) to test:
         #   'c' = col-major storage; 'g' = general stride storage;
         #   'r' = row-major storage
@@ -17,12 +17,12 @@ c       # Vector storage scheme(s) to test:
         #   'r' = rowvec / unit stride; 'i' = rowvec / non-unit stride
 0       # Test all combinations of storage schemes?
 32      # General stride spacing (for cases when testing general stride)
-sdcz    # Datatype(s) to test:
+s #sdcz    # Datatype(s) to test:
         #   's' = single real; 'c' = single complex;
         #   'd' = double real; 'z' = double complex
-100     # Problem size: first to test
-300     # Problem size: maximum to test
-100     # Problem size: increment between experiments
+128     # Problem size: first to test
+2048    # Problem size: maximum to test
+128     # Problem size: increment between experiments
 1       # Error-checking level:
         #   '0' = disable error checking; '1' = full error checking
 i       # Reaction to test failure:

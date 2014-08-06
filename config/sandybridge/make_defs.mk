@@ -85,6 +85,7 @@ CPICFLAGS      := -fPIC
 CDBGFLAGS      := #-g
 CWARNFLAGS     := -Wall
 COPTFLAGS      := -O3 -march=native
+#COPTFLAGS      := -O1 -march=native
 CKOPTFLAGS     := $(COPTFLAGS)
 CVECFLAGS      := -mavx -mfpmath=sse #-msse3 -march=native # -mfpmath=sse
 

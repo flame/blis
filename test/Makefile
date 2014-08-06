@@ -126,7 +126,7 @@ BLIS_LIB       := $(BLIS_LIB_PATH)/libblis.a
 
 # BLAS library path(s). This is where the BLAS libraries reside.
 BLAS_LIB_PATH  := $(HOME)/flame/lib
-MKL_LIB_PATH   := $(HOME)/intel/mkl/lib/intel64/
+MKL_LIB_PATH   := /opt/apps/intel/13/composer_xe_2013.2.146/mkl/lib/intel64
 ESSL_LIB_PATH  := $(HOME)/path/to/essl/changeme
 
 # OpenBLAS
@@ -174,7 +174,7 @@ TEST_OBJS      := $(patsubst $(TEST_SRC_PATH)/%.c, \
 CFLAGS         += -I$(BLIS_INC_PATH) -I$(TEST_SRC_PATH)
 
 LINKER         := $(CC)
-LDFLAGS        := -L/home/00146/field/gnu/gcc-4.8.2/lib64
+LDFLAGS        := #-L/home/00146/field/gnu/gcc-4.8.2/lib64
 LDFLAGS        += -lgfortran -lm -lpthread
 
 
@@ -187,7 +187,7 @@ LDFLAGS        += -lgfortran -lm -lpthread
 #
 #   blis openblas atlas mkl mac essl
 #
-all: blis openblas atlas mkl
+all: blis openblas #mkl
 
 blis: test_gemv_blis.x \
       test_ger_blis.x \
