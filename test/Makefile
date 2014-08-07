@@ -187,7 +187,7 @@ LDFLAGS        += -lgfortran -lm -lpthread
 #
 #   blis openblas atlas mkl mac essl
 #
-all: blis openblas #mkl
+all: blis openblas #atlas mkl
 
 blis: test_gemv_blis.x \
       test_ger_blis.x \

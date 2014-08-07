@@ -48,7 +48,7 @@
 // of the C99 type "long int". Note that this ONLY affects integers used
 // internally within BLIS as well as those exposed in the native BLAS-like BLIS
 // interface.
-#define BLIS_INT_TYPE_SIZE               64
+#define BLIS_INT_TYPE_SIZE               32
 
 
 
@@ -99,7 +99,7 @@
 
 // Alignment size needed by the instruction set for aligned SIMD/vector
 // instructions.
-#define BLIS_SIMD_ALIGN_SIZE             32
+#define BLIS_SIMD_ALIGN_SIZE             16
 
 // Alignment size used to align local stack buffers within macro-kernel
 // functions.
@@ -151,7 +151,7 @@
 // while 64 results in 64-bit integers. Any other value results in use of the
 // C99 type "long int". Note that this ONLY affects integers used within the
 // BLAS compatibility layer.
-#define BLIS_BLAS2BLIS_INT_TYPE_SIZE     64
+#define BLIS_BLAS2BLIS_INT_TYPE_SIZE     32
 
 // Fortran-77 name-mangling macros.
 #define PASTEF770(name)                                   name ## _
