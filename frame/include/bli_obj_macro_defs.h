@@ -581,19 +581,20 @@ bli_obj_width_stored( obj )
 \
 	( bli_abs( bli_obj_col_stride( obj ) ) )
 
+//
+// NOTE: The following two macros differ from their non-obj counterparts
+// in that they do not identify m x 1 and 1 x n objects as column-stored
+// and row-stored, respectively, which is needed when considering packed
+// objects. But this is okay, since none of the invocations of these
+// "obj" macros are used on packed matrices.
+//
 #define bli_obj_is_row_stored( obj ) \
 \
-	( bli_obj_col_stride_mag( obj ) == 1 && \
-	  ( bli_obj_row_stride_mag( obj ) > 1 || \
-	    bli_obj_width( obj )         == 1 ) \
-	)
+	( bli_obj_col_stride_mag( obj ) == 1 )
 
 #define bli_obj_is_col_stored( obj ) \
 \
-	( bli_obj_row_stride_mag( obj ) == 1 && \
-	  ( bli_obj_col_stride_mag( obj ) > 1 || \
-	    bli_obj_length( obj )        == 1 ) \
-	)
+	( bli_obj_row_stride_mag( obj ) == 1 )
 
 #define bli_obj_is_gen_stored( obj ) \
 \
