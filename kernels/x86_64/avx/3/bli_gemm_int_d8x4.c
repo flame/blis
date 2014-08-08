@@ -16,7 +16,7 @@
       documentation and/or other materials provided with the distribution.
     - Neither the name of The University of Texas at Austin nor the names
       of its contributors may be used to endorse or promote products
-      derived derived from this software without specific prior written permission.
+      derived from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -37,7 +37,7 @@
 
 
 
-void bli_sgemm_opt_8x4_ref_u4_nodupl_avx1(
+void bli_sgemm_int_8x8(
                         dim_t              k,
                         float*    restrict alpha,
                         float*    restrict a,
@@ -59,7 +59,7 @@ void bli_sgemm_opt_8x4_ref_u4_nodupl_avx1(
 
 
 
-void bli_dgemm_opt_8x4_ref_u4_nodupl_avx1(
+void bli_dgemm_int_8x4(
                         dim_t              k,
                         double*   restrict alpha,
                         double*   restrict a,
@@ -631,7 +631,7 @@ void bli_dgemm_opt_8x4_ref_u4_nodupl_avx1(
 
 
 
-void bli_cgemm_opt_8x4_ref_u4_nodupl_avx1(
+void bli_cgemm_int_8x4(
                         dim_t              k,
                         scomplex* restrict alpha,
                         scomplex* restrict a,
@@ -653,7 +653,7 @@ void bli_cgemm_opt_8x4_ref_u4_nodupl_avx1(
 
 
 
-void bli_zgemm_opt_8x4_ref_u4_nodupl_avx1(
+void bli_zgemm_int_4x4(
                         dim_t              k,
                         dcomplex* restrict alpha,
                         dcomplex* restrict a,

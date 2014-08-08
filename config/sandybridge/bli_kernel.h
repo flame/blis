@@ -54,26 +54,29 @@
 //     (b) NR (for triangular operations such as trmm and trsm).
 //
 
-#define BLIS_DEFAULT_MC_S              64
-#define BLIS_DEFAULT_KC_S              128
+#define BLIS_DEFAULT_MC_S              192
+#define BLIS_DEFAULT_KC_S              256
 #define BLIS_DEFAULT_NC_S              4096
 
-#define BLIS_DEFAULT_MC_D              96
+#define BLIS_DEFAULT_MC_D              96 
 #define BLIS_DEFAULT_KC_D              256
 #define BLIS_DEFAULT_NC_D              4096
 
-#define BLIS_DEFAULT_MC_C              64
-#define BLIS_DEFAULT_KC_C              128
+#define BLIS_DEFAULT_MC_C              128
+#define BLIS_DEFAULT_KC_C              384
 #define BLIS_DEFAULT_NC_C              4096
 
-#define BLIS_DEFAULT_MC_Z              64
-#define BLIS_DEFAULT_KC_Z              128
+#define BLIS_DEFAULT_MC_Z              128
+#define BLIS_DEFAULT_KC_Z              192
 #define BLIS_DEFAULT_NC_Z              4096
+
+//#define BLIS_DEFAULT_4M_MC_Z           128
+//#define BLIS_DEFAULT_4M_KC_Z           128
 
 // -- Register blocksizes --
 
 #define BLIS_DEFAULT_MR_S              8
-#define BLIS_DEFAULT_NR_S              4
+#define BLIS_DEFAULT_NR_S              8
 
 #define BLIS_DEFAULT_MR_D              8
 #define BLIS_DEFAULT_NR_D              4
@@ -81,7 +84,7 @@
 #define BLIS_DEFAULT_MR_C              8
 #define BLIS_DEFAULT_NR_C              4
 
-#define BLIS_DEFAULT_MR_Z              8
+#define BLIS_DEFAULT_MR_Z              4
 #define BLIS_DEFAULT_NR_Z              4
 
 // NOTE: If the micro-kernel, which is typically unrolled to a factor
@@ -152,7 +155,10 @@
 
 // -- gemm --
 
-#define BLIS_DGEMM_UKERNEL         bli_dgemm_opt_8x4_ref_u4_nodupl_avx1
+#define BLIS_SGEMM_UKERNEL         bli_sgemm_asm_8x8
+
+//#define BLIS_DGEMM_UKERNEL         bli_dgemm_int_8x4
+#define BLIS_DGEMM_UKERNEL         bli_dgemm_asm_8x4
 
 // -- trsm-related --
 
