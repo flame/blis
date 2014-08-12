@@ -59,16 +59,5 @@ void PASTEMAC(ch,varname)( \
 
 INSERT_GENTPROTCO_BASIC( packm_ref_16xk_ri )
 
-
-#undef  GENTPROTCO
-#define GENTPROTCO( ctype, ctype_r, ch, chr, varname ) \
-\
-void PASTEMAC(ch,varname)( \
-                           conj_t  conja, \
-                           dim_t   n, \
-                           void*   beta, \
-                           void*   a, inc_t inca, inc_t lda, \
-                           void*   p, inc_t psp,  inc_t ldp  \
-                         );
-
 INSERT_GENTPROTCO_BASIC( packm_ref_16xk_ri3 )
+
