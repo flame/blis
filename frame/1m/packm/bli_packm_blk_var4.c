@@ -314,7 +314,7 @@ void PASTEMAC(ch,varname)( \
 \
 	p_begin = p_cast; \
 \
-	for ( ic  = ic0,  ip  = ip0,  it = 0; it < num_iter; \
+	for ( ic  = ic0,    ip  = ip0,    it  = 0; it < num_iter; \
 	      ic += ic_inc, ip += ip_inc, it += 1 ) \
 	{ \
 		panel_dim_i = bli_min( panel_dim_max, iter_dim - ic ); \
@@ -386,6 +386,7 @@ void PASTEMAC(ch,varname)( \
 			                               p_use, rs_p, cs_p ); \
 			} \
 \
+			/* NOTE: This value is usually LESS than ps_p. */ \
 			p_inc = ldp * panel_len_max_i; \
 \
 /*
