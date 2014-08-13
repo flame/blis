@@ -128,7 +128,7 @@ void PASTEMAC(ch,varname)( \
 		/* Use beta.r == 1.0. */ \
 		beta_r = *one_r; \
 	} \
-	else \
+	else if ( !PASTEMAC(chr,eq0)( beta_r ) ) \
 	{ \
 		/* Copy c to ct without scaling. */ \
 		for ( j = 0; j < n; ++j ) \
@@ -138,6 +138,11 @@ void PASTEMAC(ch,varname)( \
 		                      *(ct_r + i*rs_ct + j*cs_ct), \
 		                      *(ct_i + i*rs_ct + j*cs_ct) ); \
 	} \
+	else \
+	{ \
+		/* Since beta is zero, ct can remain uninitialized since it
+		   will be overwritten by the micro-kernel. */ \
+	} \
 \
 \
 	/* c.r = beta.r * c.r                          + a.r * b.r - a.i * b.i;
@@ -145,7 +150,7 @@ void PASTEMAC(ch,varname)( \
 \
 	bli_auxinfo_set_next_ab( a_i, b_i, *data ); \
 \
-	/* ab.r = a.r * b.r; */ \
+	/* ab.r = alpha.r * a.r * b.r; */ \
 	PASTEMAC(chr,gemmukr)( k, \
 	                       &alpha_r, \
 	                       a_r, \
@@ -156,7 +161,7 @@ void PASTEMAC(ch,varname)( \
 \
 	bli_auxinfo_set_next_ab( a_ri, b_ri, *data ); \
 \
-	/* ab.i = a.i * b.i; */ \
+	/* ab.i = alpha.r * a.i * b.i; */ \
 	PASTEMAC(chr,gemmukr)( k, \
 	                       &alpha_r, \
 	                       a_i, \
@@ -167,7 +172,7 @@ void PASTEMAC(ch,varname)( \
 \
 	bli_auxinfo_set_next_ab( a_next, b_next, *data ); \
 \
-	/* ct.i = a.ri * b.ri; */ \
+	/* ct.i = alpha.r * a.ri * b.ri; */ \
 	PASTEMAC(chr,gemmukr)( k, \
 	                       &alpha_r, \
 	                       a_ri, \
@@ -189,7 +194,14 @@ void PASTEMAC(ch,varname)( \
 		ctype_r gammat_r    = *(ct_r + i*rs_ct + j*cs_ct); \
 		ctype_r gammat_i    = *(ct_i + i*rs_ct + j*cs_ct); \
 \
-		PASTEMAC(chr,scals)( beta_r, gammat_r ); \
+		if ( PASTEMAC(ch,eq0)( *beta ) ) \
+		{ \
+			PASTEMAC(chr,copys)( *zero_r, gammat_r ); \
+		} \
+		else \
+		{ \
+			PASTEMAC(chr,scals)( beta_r, gammat_r ); \
+		} \
 \
 		PASTEMAC(chr,adds)( alphabeta_r, gammat_r ); \
 		PASTEMAC(chr,subs)( alphabeta_i, gammat_r ); \

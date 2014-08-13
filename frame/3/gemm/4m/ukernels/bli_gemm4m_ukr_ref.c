@@ -76,12 +76,10 @@ void PASTEMAC(ch,varname)( \
 	const inc_t       cs_c2     = 2 * cs_c; \
 \
 	ctype_r* restrict one_r     = PASTEMAC(chr,1); \
+	ctype_r* restrict zero_r    = PASTEMAC(chr,0); \
 \
 	ctype_r           alpha_r   = PASTEMAC(ch,real)( *alpha ); \
 	ctype_r           alpha_i   = PASTEMAC(ch,imag)( *alpha ); \
-\
-	ctype_r           beta_r    = PASTEMAC(ch,real)( *beta ); \
-	ctype_r           beta_i    = PASTEMAC(ch,imag)( *beta ); \
 \
 	ctype_r           m_alpha_r = -PASTEMAC(ch,real)( *alpha ); \
 \
@@ -99,36 +97,6 @@ void PASTEMAC(ch,varname)( \
 		bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \
 \
 \
-	/* Copy the contents of c to a temporary buffer ct. */ \
-	if ( !PASTEMAC(chr,eq0)( beta_i ) ) \
-	{ \
-		/* We can handle a non-zero imaginary component on beta, but to do
-		   so we have to manually scale c and then use beta == 1 for the
-		   micro-kernel calls. */ \
-		for ( j = 0; j < n; ++j ) \
-		for ( i = 0; i < m; ++i ) \
-		PASTEMAC(ch,scal2ris)( beta_r, \
-		                       beta_i, \
-		                       *(c_r  + i*rs_c2 + j*cs_c2), \
-		                       *(c_i  + i*rs_c2 + j*cs_c2), \
-		                       *(ct_r + i*rs_ct + j*cs_ct), \
-		                       *(ct_i + i*rs_ct + j*cs_ct) ); \
-\
-		/* Use beta.r == 1.0. */ \
-		beta_r = *one_r; \
-	} \
-	else \
-	{ \
-		/* Copy c to ct without scaling. */ \
-		for ( j = 0; j < n; ++j ) \
-		for ( i = 0; i < m; ++i ) \
-		PASTEMAC(ch,copyris)( *(c_r  + i*rs_c2 + j*cs_c2), \
-		                      *(c_i  + i*rs_c2 + j*cs_c2), \
-		                      *(ct_r + i*rs_ct + j*cs_ct), \
-		                      *(ct_i + i*rs_ct + j*cs_ct) ); \
-	} \
-\
-\
 	/* c.r = beta.r * c.r + alpha.r * a.r * b.r
 	                      - alpha.r * a.i * b.i;
 	   c.i = beta.r * c.i + alpha.r * a.r * b.i
@@ -136,29 +104,29 @@ void PASTEMAC(ch,varname)( \
 \
 	bli_auxinfo_set_next_ab( a_r, b_i, *data ); \
 \
-	/* c.r = beta * c.r + a.r * b.r; */ \
+	/* ct.r = alpha.r * a.r * b.r; */ \
 	PASTEMAC(chr,gemmukr)( k, \
 	                       &alpha_r, \
 	                       a_r, \
 	                       b_r, \
-	                       &beta_r, \
+	                       zero_r, \
 	                       ct_r, rs_ct, cs_ct, \
 	                       data ); \
 \
 	bli_auxinfo_set_next_ab( a_i, b_r, *data ); \
 \
-	/* c.i = beta * c.i + a.r * b.i; */ \
+	/* ct.i = alpha.r * a.r * b.i; */ \
 	PASTEMAC(chr,gemmukr)( k, \
 	                       &alpha_r, \
 	                       a_r, \
 	                       b_i, \
-	                       &beta_r, \
+	                       zero_r, \
 	                       ct_i, rs_ct, cs_ct, \
 	                       data ); \
 \
 	bli_auxinfo_set_next_ab( a_i, b_i, *data ); \
 \
-	/* c.i =  1.0 * c.i + a.i * b.r; */ \
+	/* ct.i += alpha.r * a.i * b.r; */ \
 	PASTEMAC(chr,gemmukr)( k, \
 	                       &alpha_r, \
 	                       a_i, \
@@ -169,7 +137,7 @@ void PASTEMAC(ch,varname)( \
 \
 	bli_auxinfo_set_next_ab( a_next, b_next, *data ); \
 \
-	/* c.r =  1.0 * c.r - a.i * b.i; */ \
+	/* ct.r += -alpha.r * a.i * b.i; */ \
 	PASTEMAC(chr,gemmukr)( k, \
 	                       &m_alpha_r, \
 	                       a_i, \
@@ -179,13 +147,39 @@ void PASTEMAC(ch,varname)( \
 	                       data ); \
 \
 \
-	/* Copy the final result in ct back to c. */ \
-	for ( j = 0; j < n; ++j ) \
-	for ( i = 0; i < m; ++i ) \
-	PASTEMAC(ch,copyris)( *(ct_r + i*rs_ct + j*cs_ct), \
-	                      *(ct_i + i*rs_ct + j*cs_ct), \
-	                      *(c_r  + i*rs_c2 + j*cs_c2), \
-	                      *(c_i  + i*rs_c2 + j*cs_c2) ); \
+	/* Accumulate the final result in ct back to c. */ \
+	if ( PASTEMAC(ch,eq1)( *beta ) ) \
+	{ \
+		for ( j = 0; j < n; ++j ) \
+		for ( i = 0; i < m; ++i ) \
+		PASTEMAC(ch,addris)( *(ct_r + i*rs_ct + j*cs_ct), \
+		                     *(ct_i + i*rs_ct + j*cs_ct), \
+		                     *(c_r  + i*rs_c2 + j*cs_c2), \
+		                     *(c_i  + i*rs_c2 + j*cs_c2) ); \
+	} \
+	else if ( PASTEMAC(ch,eq0)( *beta ) ) \
+	{ \
+		for ( j = 0; j < n; ++j ) \
+		for ( i = 0; i < m; ++i ) \
+		PASTEMAC(ch,copyris)( *(ct_r + i*rs_ct + j*cs_ct), \
+		                      *(ct_i + i*rs_ct + j*cs_ct), \
+		                      *(c_r  + i*rs_c2 + j*cs_c2), \
+		                      *(c_i  + i*rs_c2 + j*cs_c2) ); \
+	} \
+	else \
+	{ \
+		ctype_r beta_r = PASTEMAC(ch,real)( *beta ); \
+		ctype_r beta_i = PASTEMAC(ch,imag)( *beta ); \
+\
+		for ( j = 0; j < n; ++j ) \
+		for ( i = 0; i < m; ++i ) \
+		PASTEMAC(ch,xpbyris)( *(ct_r + i*rs_ct + j*cs_ct), \
+		                      *(ct_i + i*rs_ct + j*cs_ct), \
+		                      beta_r, \
+		                      beta_i, \
+		                      *(c_r  + i*rs_c2 + j*cs_c2), \
+		                      *(c_i  + i*rs_c2 + j*cs_c2) ); \
+	} \
 }
 
 INSERT_GENTFUNCCO_BASIC( gemm4m_ukr_ref, GEMM_UKERNEL )
