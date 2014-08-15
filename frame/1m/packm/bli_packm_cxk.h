@@ -32,6 +32,9 @@
 
 */
 
+#include "bli_packm_ref_cxk.h"
+
+
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, varname ) \
 \

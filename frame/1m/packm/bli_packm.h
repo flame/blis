@@ -53,12 +53,3 @@
 #include "bli_packm_cxk_ri.h"
 #include "bli_packm_cxk_ri3.h"
 
-#include "bli_packm_ref_2xk.h"
-#include "bli_packm_ref_4xk.h"
-#include "bli_packm_ref_6xk.h"
-#include "bli_packm_ref_8xk.h"
-#include "bli_packm_ref_10xk.h"
-#include "bli_packm_ref_12xk.h"
-#include "bli_packm_ref_14xk.h"
-#include "bli_packm_ref_16xk.h"
-

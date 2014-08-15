@@ -40,24 +40,15 @@ void PASTEMAC(ch,varname)( \
                            dim_t   n, \
                            void*   beta, \
                            void*   a, inc_t inca, inc_t lda, \
-                           void*   p,             inc_t ldp  \
-                         );
-
-INSERT_GENTPROT_BASIC( packm_ref_8xk )
-
-
-#undef  GENTPROTCO
-#define GENTPROTCO( ctype, ctype_r, ch, chr, varname ) \
-\
-void PASTEMAC(ch,varname)( \
-                           conj_t  conja, \
-                           dim_t   n, \
-                           void*   beta, \
-                           void*   a, inc_t inca, inc_t lda, \
                            void*   p, inc_t psp,  inc_t ldp  \
                          );
 
-INSERT_GENTPROTCO_BASIC( packm_ref_8xk_ri )
-
-INSERT_GENTPROTCO_BASIC( packm_ref_8xk_ri3 )
+INSERT_GENTPROT_BASIC( packm_ref_2xk_ri3 )
+INSERT_GENTPROT_BASIC( packm_ref_4xk_ri3 )
+INSERT_GENTPROT_BASIC( packm_ref_6xk_ri3 )
+INSERT_GENTPROT_BASIC( packm_ref_8xk_ri3 )
+INSERT_GENTPROT_BASIC( packm_ref_10xk_ri3 )
+INSERT_GENTPROT_BASIC( packm_ref_12xk_ri3 )
+INSERT_GENTPROT_BASIC( packm_ref_14xk_ri3 )
+INSERT_GENTPROT_BASIC( packm_ref_16xk_ri3 )
 

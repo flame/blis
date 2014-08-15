@@ -32,6 +32,9 @@
 
 */
 
+#include "bli_packm_ref_cxk_ri.h"
+
+
 #undef  GENTPROTCO
 #define GENTPROTCO( ctype, ctype_r, ch, chr, varname ) \
 \
