@@ -36,16 +36,53 @@
 #define BLIS_KERNEL_MACRO_DEFS_H
 
 
-// -- Construct kernel function names ------------------------------------------
+// -- Define row access bools --------------------------------------------------
+
+// In this section we consider each datatype-specific "prefers contiguous rows"
+// macro. If it is defined, we re-define it to be 1 (TRUE); otherwise, we
+// define it to be 0 (FALSE).
+
+// gemm micro-kernels
+
+#ifdef  BLIS_SGEMM_UKERNEL_PREFERS_CONTIG_ROWS
+#undef  BLIS_SGEMM_UKERNEL_PREFERS_CONTIG_ROWS
+#define BLIS_SGEMM_UKERNEL_PREFERS_CONTIG_ROWS 1 
+#else
+#define BLIS_SGEMM_UKERNEL_PREFERS_CONTIG_ROWS 0 
+#endif
+
+#ifdef  BLIS_DGEMM_UKERNEL_PREFERS_CONTIG_ROWS
+#undef  BLIS_DGEMM_UKERNEL_PREFERS_CONTIG_ROWS
+#define BLIS_DGEMM_UKERNEL_PREFERS_CONTIG_ROWS 1 
+#else
+#define BLIS_DGEMM_UKERNEL_PREFERS_CONTIG_ROWS 0 
+#endif
+
+#ifdef  BLIS_CGEMM_UKERNEL_PREFERS_CONTIG_ROWS
+#undef  BLIS_CGEMM_UKERNEL_PREFERS_CONTIG_ROWS
+#define BLIS_CGEMM_UKERNEL_PREFERS_CONTIG_ROWS 1 
+#else
+#define BLIS_CGEMM_UKERNEL_PREFERS_CONTIG_ROWS 0 
+#endif
+
+#ifdef  BLIS_ZGEMM_UKERNEL_PREFERS_CONTIG_ROWS
+#undef  BLIS_ZGEMM_UKERNEL_PREFERS_CONTIG_ROWS
+#define BLIS_ZGEMM_UKERNEL_PREFERS_CONTIG_ROWS 1 
+#else
+#define BLIS_ZGEMM_UKERNEL_PREFERS_CONTIG_ROWS 0 
+#endif
+
+
+// -- Define default kernel names ----------------------------------------------
 
 // In this section we consider each datatype-specific micro-kernel macro;
 // if it is undefined, we define it to be the corresponding reference kernel.
-// In the case of complex gemm micro-kernels, we also define special _VIA_4M
-// macros so that later on we can tell whether or not to employ the 4m
-// implementations. Note that in order to properly determine whether 4m is a
-// viable option, we need to be able to test the existence of the real gemm
-// micro-kernels, which means we must consider the complex gemm micro-kernel
-// cases *BEFORE* the real cases.
+// In the case of complex gemm micro-kernels, we also define special macros so
+// that later on we can tell whether or not to employ the 4m implementations.
+// Note that in order to properly determine whether/ 4m is a viable option, we
+// need to be able to test the existence of the real gemm micro-kernels, which
+// means we must consider the complex gemm micro-kernel cases *BEFORE* the
+// real cases.
 
 //
 // Level-3

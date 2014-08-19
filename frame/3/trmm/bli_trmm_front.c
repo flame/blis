@@ -80,17 +80,39 @@ void bli_trmm_front( side_t  side,
 	}
 
 #if 0
+
+	// If A is being multiplied from the right, transpose all operands
+	// so that we can perform the computation as if A were being multiplied
+	// from the left.
 	if ( bli_is_right( side ) )
 	{
+		bli_toggle_side( side );
 		bli_obj_induce_trans( a_local );
 		bli_obj_induce_trans( b_local );
 		bli_obj_induce_trans( c_local );
-
-		bli_toggle_side( side );
 	}
-#endif
 
-#if 1
+#else
+
+	// An optimization: If C is stored by rows and the micro-kernel prefers
+	// contiguous columns, or if C is stored by columns and the micro-kernel
+	// prefers contiguous rows, transpose the entire operation to allow the
+	// micro-kernel to access elements of C in its preferred manner.
+	if (
+	     ( bli_obj_is_row_stored( c_local ) &&
+	       bli_func_prefers_contig_cols( bli_obj_datatype( c_local ),
+	                                     cntl_gemm_ukrs( l_cntl ) ) ) ||
+	     ( bli_obj_is_col_stored( c_local ) &&
+	       bli_func_prefers_contig_rows( bli_obj_datatype( c_local ),
+	                                     cntl_gemm_ukrs( l_cntl ) ) )
+	   )
+	{
+		bli_toggle_side( side );
+		bli_obj_induce_trans( a_local );
+		bli_obj_induce_trans( b_local );
+		bli_obj_induce_trans( c_local );
+	}
+
 	// If A is being multiplied from the right, swap A and B so that
 	// the matrix will actually be on the right.
 	if ( bli_is_right( side ) )
@@ -98,20 +120,6 @@ void bli_trmm_front( side_t  side,
 		bli_obj_swap( a_local, b_local );
 	}
 
-	// An optimization: If C is row-stored, transpose the entire operation
-	// so as to allow the macro-kernel more favorable access patterns
-	// through C. (The effect of the transposition of A and B is negligible
-	// because those operands are always packed to contiguous memory.)
-	if ( bli_obj_is_row_stored( c_local ) )
-	{
-		bli_obj_swap( a_local, b_local );
-
-		bli_obj_induce_trans( a_local );
-		bli_obj_induce_trans( b_local );
-		bli_obj_induce_trans( c_local );
-
-		bli_toggle_side( side );
-	}
 #endif
 
 	// Set each alias as the root object.

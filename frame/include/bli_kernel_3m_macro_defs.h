@@ -36,6 +36,16 @@
 #define BLIS_KERNEL_3M_MACRO_DEFS_H
 
 
+// -- Define row access bools --------------------------------------------------
+
+// gemm3m micro-kernels
+
+#define BLIS_CGEMM3M_UKERNEL_PREFERS_CONTIG_ROWS \
+        BLIS_SGEMM_UKERNEL_PREFERS_CONTIG_ROWS
+#define BLIS_ZGEMM3M_UKERNEL_PREFERS_CONTIG_ROWS \
+        BLIS_DGEMM_UKERNEL_PREFERS_CONTIG_ROWS
+
+
 // -- Define default 3m-specific kernel names ----------------------------------
 
 //

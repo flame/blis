@@ -36,6 +36,16 @@
 #define BLIS_KERNEL_4M_MACRO_DEFS_H
 
 
+// -- Define row access bools --------------------------------------------------
+
+// gemm4m micro-kernels
+
+#define BLIS_CGEMM4M_UKERNEL_PREFERS_CONTIG_ROWS \
+        BLIS_SGEMM_UKERNEL_PREFERS_CONTIG_ROWS
+#define BLIS_ZGEMM4M_UKERNEL_PREFERS_CONTIG_ROWS \
+        BLIS_DGEMM_UKERNEL_PREFERS_CONTIG_ROWS
+
+
 // -- Define default 4m-specific kernel names ----------------------------------
 
 //

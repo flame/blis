@@ -73,15 +73,19 @@ void bli_trsm3m_cntl_init()
 
 	// Create function pointer objects for each datatype-specific
 	// gemmtrsm3m_l and gemmtrsm3m_u micro-kernel.
-	gemmtrsm3m_l_ukrs = bli_func_obj_create( NULL,
-	                                         NULL,
-	                                         BLIS_CGEMMTRSM3M_L_UKERNEL,
-	                                         BLIS_ZGEMMTRSM3M_L_UKERNEL );
+	gemmtrsm3m_l_ukrs
+	=
+	bli_func_obj_create( NULL,                       FALSE,
+	                     NULL,                       FALSE,
+	                     BLIS_CGEMMTRSM3M_L_UKERNEL, FALSE,
+	                     BLIS_ZGEMMTRSM3M_L_UKERNEL, FALSE );
 
-	gemmtrsm3m_u_ukrs = bli_func_obj_create( NULL,
-	                                         NULL,
-	                                         BLIS_CGEMMTRSM3M_U_UKERNEL,
-	                                         BLIS_ZGEMMTRSM3M_U_UKERNEL );
+	gemmtrsm3m_u_ukrs
+	=
+	bli_func_obj_create( NULL,                       FALSE,
+	                     NULL,                       FALSE,
+	                     BLIS_CGEMMTRSM3M_U_UKERNEL, FALSE,
+	                     BLIS_ZGEMMTRSM3M_U_UKERNEL, FALSE );
 
 
 	// Create control tree objects for packm operations (left side).
@@ -162,7 +166,7 @@ void bli_trsm3m_cntl_init()
 	bli_trsm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT1,
 	                          gemm3m_mc,
-	                          NULL, NULL, NULL,
+	                          gemm3m_ukrs, NULL, NULL,
 	                          NULL,
 	                          trsm3m_l_packa_cntl,
 	                          trsm3m_l_packb_cntl,
@@ -178,7 +182,7 @@ void bli_trsm3m_cntl_init()
 	bli_trsm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT3,
 	                          gemm3m_kc,
-	                          NULL, NULL, NULL,
+	                          gemm3m_ukrs, NULL, NULL,
 	                          NULL,
 	                          NULL, 
 	                          NULL,
@@ -194,7 +198,7 @@ void bli_trsm3m_cntl_init()
 	bli_trsm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT2,
 	                          gemm3m_nc,
-	                          NULL, NULL, NULL,
+	                          gemm3m_ukrs, NULL, NULL,
 	                          NULL,
 	                          NULL,
 	                          NULL,
@@ -210,7 +214,7 @@ void bli_trsm3m_cntl_init()
 	bli_trsm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT1,
 	                          gemm3m_mc,
-	                          NULL, NULL, NULL,
+	                          gemm3m_ukrs, NULL, NULL,
 	                          NULL,
 	                          trsm3m_r_packa_cntl,
 	                          trsm3m_r_packb_cntl,
@@ -226,7 +230,7 @@ void bli_trsm3m_cntl_init()
 	bli_trsm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT3,
 	                          gemm3m_kc,
-	                          NULL, NULL, NULL,
+	                          gemm3m_ukrs, NULL, NULL,
 	                          NULL,
 	                          NULL, 
 	                          NULL,
@@ -242,7 +246,7 @@ void bli_trsm3m_cntl_init()
 	bli_trsm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT2,
 	                          gemm3m_nc,
-	                          NULL, NULL, NULL,
+	                          gemm3m_ukrs, NULL, NULL,
 	                          NULL,
 	                          NULL,
 	                          NULL,

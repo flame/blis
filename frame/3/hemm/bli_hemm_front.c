@@ -62,10 +62,18 @@ void bli_hemm_front( side_t  side,
 	bli_obj_alias_to( *b, b_local );
 	bli_obj_alias_to( *c, c_local );
 
-	// An optimization: If C is row-stored, transpose the entire operation
-	// so as to allow the macro-kernel more favorable access patterns
-	// through C.
-	if ( bli_obj_is_row_stored( *c ) )
+	// An optimization: If C is stored by rows and the micro-kernel prefers
+	// contiguous columns, or if C is stored by columns and the micro-kernel
+	// prefers contiguous rows, transpose the entire operation to allow the
+	// micro-kernel to access elements of C in its preferred manner.
+	if (
+	     ( bli_obj_is_row_stored( c_local ) &&
+	       bli_func_prefers_contig_cols( bli_obj_datatype( c_local ),
+	                                     cntl_gemm_ukrs( cntl ) ) ) ||
+	     ( bli_obj_is_col_stored( c_local ) &&
+	       bli_func_prefers_contig_rows( bli_obj_datatype( c_local ),
+	                                     cntl_gemm_ukrs( cntl ) ) )
+	   )
 	{
 		bli_toggle_side( side );
 		bli_obj_toggle_conj( a_local );

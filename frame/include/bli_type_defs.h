@@ -515,8 +515,11 @@ typedef struct blksz_s
 
 typedef struct func_s
 {
-	// Primary blocksize values.
-	void* f[BLIS_NUM_FP_TYPES];
+	// Kernel function address.
+	void*  ptr[BLIS_NUM_FP_TYPES];
+
+	// Kernel row/column storage preference.
+	bool_t prefers_contig_rows[BLIS_NUM_FP_TYPES];
 } func_t;
 
 

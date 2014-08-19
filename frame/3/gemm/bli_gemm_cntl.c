@@ -105,10 +105,12 @@ void bli_gemm_cntl_init()
 
 	// Create function pointer object for each datatype-specific gemm
 	// micro-kernel.
-	gemm_ukrs = bli_func_obj_create( BLIS_SGEMM_UKERNEL,
-	                                 BLIS_DGEMM_UKERNEL,
-	                                 BLIS_CGEMM_UKERNEL,
-	                                 BLIS_ZGEMM_UKERNEL );
+	gemm_ukrs
+	=
+	bli_func_obj_create( BLIS_SGEMM_UKERNEL, BLIS_SGEMM_UKERNEL_PREFERS_CONTIG_ROWS,
+	                     BLIS_DGEMM_UKERNEL, BLIS_DGEMM_UKERNEL_PREFERS_CONTIG_ROWS,
+	                     BLIS_CGEMM_UKERNEL, BLIS_CGEMM_UKERNEL_PREFERS_CONTIG_ROWS,
+	                     BLIS_ZGEMM_UKERNEL, BLIS_ZGEMM_UKERNEL_PREFERS_CONTIG_ROWS );
 
 
 	// Create control tree objects for packm operations.
@@ -160,7 +162,7 @@ void bli_gemm_cntl_init()
 	bli_gemm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT1,
 	                          gemm_mc,
-	                          NULL,
+	                          gemm_ukrs,
 	                          NULL,
 	                          gemm_packa_cntl,
 	                          gemm_packb_cntl,
@@ -175,7 +177,7 @@ void bli_gemm_cntl_init()
 	bli_gemm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT3,
 	                          gemm_kc,
-	                          NULL,
+	                          gemm_ukrs,
 	                          NULL,
 	                          NULL,
 	                          NULL,
@@ -190,7 +192,7 @@ void bli_gemm_cntl_init()
 	bli_gemm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT2,
 	                          gemm_nc,
-	                          NULL,
+	                          gemm_ukrs,
 	                          NULL,
 	                          NULL,
 	                          NULL,

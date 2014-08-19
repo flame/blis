@@ -35,35 +35,40 @@
 #include "blis.h"
 
 
-func_t* bli_func_obj_create( void* f_s,
-                             void* f_d,
-                             void* f_c,
-                             void* f_z )
+func_t* bli_func_obj_create( void* ptr_s, bool_t pref_s,
+                             void* ptr_d, bool_t pref_d,
+                             void* ptr_c, bool_t pref_c,
+                             void* ptr_z, bool_t pref_z )
 {
 	func_t* f;
 
 	f = ( func_t* ) bli_malloc( sizeof(func_t) );	
 
 	bli_func_obj_init( f,
-	                   f_s,
-	                   f_d,
-	                   f_c,
-	                   f_z );
+	                   ptr_s, pref_s,
+	                   ptr_d, pref_d,
+	                   ptr_c, pref_c,
+	                   ptr_z, pref_z );
 
 	return f;
 }
 
 
 void bli_func_obj_init( func_t* f,
-                        void*   f_s,
-                        void*   f_d,
-                        void*   f_c,
-                        void*   f_z )
+                        void*   ptr_s, bool_t pref_s,
+                        void*   ptr_d, bool_t pref_d,
+                        void*   ptr_c, bool_t pref_c,
+                        void*   ptr_z, bool_t pref_z )
 {
-	f->f[BLIS_BITVAL_FLOAT_TYPE]    = f_s;
-	f->f[BLIS_BITVAL_DOUBLE_TYPE]   = f_d;
-	f->f[BLIS_BITVAL_SCOMPLEX_TYPE] = f_c;
-	f->f[BLIS_BITVAL_DCOMPLEX_TYPE] = f_z;
+	f->ptr[BLIS_BITVAL_FLOAT_TYPE]    = ptr_s;
+	f->ptr[BLIS_BITVAL_DOUBLE_TYPE]   = ptr_d;
+	f->ptr[BLIS_BITVAL_SCOMPLEX_TYPE] = ptr_c;
+	f->ptr[BLIS_BITVAL_DCOMPLEX_TYPE] = ptr_z;
+
+	f->prefers_contig_rows[BLIS_BITVAL_FLOAT_TYPE]    = pref_s;
+	f->prefers_contig_rows[BLIS_BITVAL_DOUBLE_TYPE]   = pref_d;
+	f->prefers_contig_rows[BLIS_BITVAL_SCOMPLEX_TYPE] = pref_c;
+	f->prefers_contig_rows[BLIS_BITVAL_DCOMPLEX_TYPE] = pref_z;
 }
 
 
@@ -76,6 +81,39 @@ void bli_func_obj_free( func_t* f )
 void* bli_func_obj_query( num_t   dt,
                           func_t* f )
 {
-	return f->f[ dt ];
+	return f->ptr[ dt ];
+}
+
+bool_t bli_func_prefers_contig_rows( num_t   dt,
+                                     func_t* f )
+{
+	return f->prefers_contig_rows[ dt ];
+}
+
+bool_t bli_func_prefers_contig_cols( num_t   dt,
+                                     func_t* f )
+{
+	return !(f->prefers_contig_rows[ dt ]);
+}
+
+bool_t bli_func_pref_is_sat_by( obj_t*  a,
+                                func_t* f )
+{
+	num_t  dt    = bli_obj_datatype( *a );
+	bool_t r_val = FALSE;
+
+	if ( ( bli_obj_is_row_stored( *a ) &&
+	       bli_func_prefers_contig_rows( dt, f ) ) ||
+	     ( bli_obj_is_col_stored( *a ) &&
+	       bli_func_prefers_contig_cols( dt, f ) ) )
+		r_val = TRUE;
+
+	return r_val;
+}
+
+bool_t bli_func_pref_is_unsat_by( obj_t*  a,
+                                  func_t* f )
+{
+	return !bli_func_pref_is_sat_by( a, f );
 }
 
