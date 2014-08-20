@@ -54,8 +54,8 @@
 //     (b) NR (for triangular operations such as trmm and trsm).
 //
 
-#define BLIS_DEFAULT_MC_S              192
-#define BLIS_DEFAULT_KC_S              256
+#define BLIS_DEFAULT_MC_S              128
+#define BLIS_DEFAULT_KC_S              384
 #define BLIS_DEFAULT_NC_S              4096
 
 #define BLIS_DEFAULT_MC_D              96 
