@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas
+   Copyright (C) 2014, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -14,9 +14,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
+    - Neither the name of The University of Texas at Austin nor the names
+      of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -535,44 +535,63 @@ void libblis_test_output_section_overrides( FILE* os, test_ops_t* ops )
 
 void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 {
-	int  i;
-	char intsize_str[8];
+	int    i;
+	//char   int_type_size_str[8];
+	gint_t int_type_size;
 
-	// If BLIS_INT_TYPE_SIZE is 32 or 64, the size is forced. Otherwise, the
-	// size is chosen automatically. We query the result of that automatic
-	// choice via sizeof(gint_t).
-	if ( BLIS_INT_TYPE_SIZE == 32 || BLIS_INT_TYPE_SIZE == 64 )
-		sprintf( intsize_str, "%d", ( int )BLIS_INT_TYPE_SIZE );
+	// If bli_info_get_int_type_size() returns 32 or 64, the size is forced.
+	// Otherwise, the size is chosen automatically. We query the result of
+	// that automatic choice via sizeof(gint_t).
+/*	
+	if ( bli_info_get_int_type_size() == 32 ||
+	     bli_info_get_int_type_size() == 64 )
+		sprintf( int_type_size_str, "%d", ( int )bli_info_get_int_type_size() );
 	else
-		sprintf( intsize_str, "%d", ( int )sizeof(gint_t) * 8 );
+		sprintf( int_type_size_str, "%d", ( int )sizeof(gint_t) * 8 );
+*/
+	if ( bli_info_get_int_type_size() == 32 ||
+	     bli_info_get_int_type_size() == 64 )
+		int_type_size = bli_info_get_int_type_size();
+	else
+		int_type_size = sizeof(gint_t) * 8;
 
 	// Output some system parameters.
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "--- BLIS library info -------------------------------------\n" );
 	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "version string               %s\n", bli_version() );
+	libblis_test_fprintf_c( os, "version string               %s\n", bli_info_get_version_str() );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "--- BLIS config header ---\n" );
 	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "integer type size (bits)     %s\n", intsize_str );
+	libblis_test_fprintf_c( os, "integer type size (bits)     %d\n", ( int )int_type_size );
+	libblis_test_fprintf_c( os, "# of floating-point types    %d\n", ( int )bli_info_get_num_fp_types() );
+	libblis_test_fprintf_c( os, "maximum type size            %d\n", ( int )bli_info_get_max_type_size() );
+	libblis_test_fprintf_c( os, "\n" );
+	libblis_test_fprintf_c( os, "maximum number of threads    %d\n", ( int )bli_info_get_max_num_threads() );
+	libblis_test_fprintf_c( os, "\n" );
+	libblis_test_fprintf_c( os, "SIMD alignment (bytes)       %d\n", ( int )bli_info_get_simd_align_size() );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "stack memory allocation        \n" );
-	libblis_test_fprintf_c( os, "  address alignment (bytes)  %u\n", BLIS_STACK_BUF_ALIGN_SIZE );
+	libblis_test_fprintf_c( os, "  address alignment (bytes)  %d\n", ( int )bli_info_get_stack_buf_align_size() );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "dynamic memory allocation      \n" );
-	libblis_test_fprintf_c( os, "  address alignment          %u\n", BLIS_HEAP_ADDR_ALIGN_SIZE );
-	libblis_test_fprintf_c( os, "  stride alignment           %u\n", BLIS_HEAP_STRIDE_ALIGN_SIZE );
+	libblis_test_fprintf_c( os, "  address alignment          %d\n", ( int )bli_info_get_heap_addr_align_size() );
+	libblis_test_fprintf_c( os, "  stride alignment           %d\n", ( int )bli_info_get_heap_stride_align_size() );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "contiguous memory allocation   \n" );
-	libblis_test_fprintf_c( os, "  # of mc x kc blocks        %u\n", BLIS_NUM_MC_X_KC_BLOCKS );
-	libblis_test_fprintf_c( os, "  # of kc x nc blocks        %u\n", BLIS_NUM_KC_X_NC_BLOCKS );
-	libblis_test_fprintf_c( os, "  # of mc x nc blocks        %u\n", BLIS_NUM_MC_X_NC_BLOCKS );
-	libblis_test_fprintf_c( os, "  block address alignment    %u\n", BLIS_CONTIG_ADDR_ALIGN_SIZE );
-	libblis_test_fprintf_c( os, "  max preload byte offset    %u\n", BLIS_MAX_PRELOAD_BYTE_OFFSET );
+	libblis_test_fprintf_c( os, "  # of mc x kc blocks        %d\n", ( int )bli_info_get_num_mc_x_kc_blocks() );
+	libblis_test_fprintf_c( os, "  # of kc x nc blocks        %d\n", ( int )bli_info_get_num_kc_x_nc_blocks() );
+	libblis_test_fprintf_c( os, "  # of mc x nc blocks        %d\n", ( int )bli_info_get_num_mc_x_nc_blocks() );
+	libblis_test_fprintf_c( os, "  block address alignment    %d\n", ( int )bli_info_get_contig_addr_align_size() );
+	libblis_test_fprintf_c( os, "  max preload byte offset    %d\n", ( int )bli_info_get_max_preload_byte_offset() );
 	libblis_test_fprintf_c( os, "  actual pool sizes (bytes)    \n" );
-	libblis_test_fprintf_c( os, "    for mc x kc blocks of A  %u\n", BLIS_MK_POOL_SIZE );
-	libblis_test_fprintf_c( os, "    for kc x nc panels of B  %u\n", BLIS_KN_POOL_SIZE );
-	libblis_test_fprintf_c( os, "    for mc x nc panels of C  %u\n", BLIS_MN_POOL_SIZE );
+	libblis_test_fprintf_c( os, "    for mc x kc blocks of A  %d\n", ( int )bli_info_get_mk_pool_size() );
+	libblis_test_fprintf_c( os, "    for kc x nc panels of B  %d\n", ( int )bli_info_get_kn_pool_size() );
+	libblis_test_fprintf_c( os, "    for mc x nc panels of C  %d\n", ( int )bli_info_get_mn_pool_size() );
+	libblis_test_fprintf_c( os, "\n" );
+	libblis_test_fprintf_c( os, "BLAS compatibility layer       \n" );
+	libblis_test_fprintf_c( os, "  enabled?                   %d\n", ( int )bli_info_get_enable_blas2blis() );
+	libblis_test_fprintf_c( os, "  integer type size (bits)   %d\n", ( int )bli_info_get_blas2blis_int_type_size() );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "--- BLIS kernel header ---\n" );
 	libblis_test_fprintf_c( os, "\n" );
@@ -582,140 +601,101 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	                                                                          sizeof(scomplex),
 	                                                                          sizeof(dcomplex) );
 	libblis_test_fprintf_c( os, "\n" );
+	libblis_test_fprintf_c( os, "complex via 4m\n" );
+	libblis_test_fprintf_c( os, "  enabled for scomplex?      %d\n", ( int )bli_info_get_enable_scomplex_via_4m() );
+	libblis_test_fprintf_c( os, "  enabled for dcomplex?      %d\n", ( int )bli_info_get_enable_dcomplex_via_4m() );
+	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "level-3 cache blocksizes     s     d     c     z \n" );
-	libblis_test_fprintf_c( os, "  m dimension            %5u %5u %5u %5u\n",
-	                        BLIS_DEFAULT_MC_S,
-	                        BLIS_DEFAULT_MC_D,
-	                        BLIS_DEFAULT_MC_C,
-	                        BLIS_DEFAULT_MC_Z );
-	libblis_test_fprintf_c( os, "  k dimension            %5u %5u %5u %5u\n",
-	                        BLIS_DEFAULT_KC_S,
-	                        BLIS_DEFAULT_KC_D,
-	                        BLIS_DEFAULT_KC_C,
-	                        BLIS_DEFAULT_KC_Z );
-	libblis_test_fprintf_c( os, "  n dimension            %5u %5u %5u %5u\n",
-	                        BLIS_DEFAULT_NC_S,
-	                        BLIS_DEFAULT_NC_D,
-	                        BLIS_DEFAULT_NC_C,
-	                        BLIS_DEFAULT_NC_Z );
+	libblis_test_fprintf_c( os, "  m dimension            %5d %5d %5d %5d\n",
+	                        ( int )bli_info_get_default_mc_s(),
+	                        ( int )bli_info_get_default_mc_d(),
+	                        ( int )bli_info_get_default_mc_c(),
+	                        ( int )bli_info_get_default_mc_z() );
+	libblis_test_fprintf_c( os, "  k dimension            %5d %5d %5d %5d\n",
+	                        ( int )bli_info_get_default_kc_s(),
+	                        ( int )bli_info_get_default_kc_d(),
+	                        ( int )bli_info_get_default_kc_c(),
+	                        ( int )bli_info_get_default_kc_z() );
+	libblis_test_fprintf_c( os, "  n dimension            %5d %5d %5d %5d\n",
+	                        ( int )bli_info_get_default_nc_s(),
+	                        ( int )bli_info_get_default_nc_d(),
+	                        ( int )bli_info_get_default_nc_c(),
+	                        ( int )bli_info_get_default_nc_z() );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "level-3 cache blksz exts     s     d     c     z \n" );
-	libblis_test_fprintf_c( os, "  m dimension            %5u %5u %5u %5u\n",
-	                        BLIS_EXTEND_MC_S,
-	                        BLIS_EXTEND_MC_D,
-	                        BLIS_EXTEND_MC_C,
-	                        BLIS_EXTEND_MC_Z );
-	libblis_test_fprintf_c( os, "  k dimension            %5u %5u %5u %5u\n",
-	                        BLIS_EXTEND_KC_S,
-	                        BLIS_EXTEND_KC_D,
-	                        BLIS_EXTEND_KC_C,
-	                        BLIS_EXTEND_KC_Z );
-	libblis_test_fprintf_c( os, "  n dimension            %5u %5u %5u %5u\n",
-	                        BLIS_EXTEND_NC_S,
-	                        BLIS_EXTEND_NC_D,
-	                        BLIS_EXTEND_NC_C,
-	                        BLIS_EXTEND_NC_Z );
-	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "4m/3m cache blocksizes      4c    4z    3c    3z \n" );
-	libblis_test_fprintf_c( os, "  m dimension            %5u %5u %5u %5u\n",
-	                        BLIS_DEFAULT_4M_MC_C,
-	                        BLIS_DEFAULT_4M_MC_Z,
-	                        BLIS_DEFAULT_3M_MC_C,
-	                        BLIS_DEFAULT_3M_MC_Z );
-	libblis_test_fprintf_c( os, "  k dimension            %5u %5u %5u %5u\n",
-	                        BLIS_DEFAULT_4M_KC_C,
-	                        BLIS_DEFAULT_4M_KC_Z,
-	                        BLIS_DEFAULT_3M_KC_C,
-	                        BLIS_DEFAULT_3M_KC_Z );
-	libblis_test_fprintf_c( os, "  n dimension            %5u %5u %5u %5u\n",
-	                        BLIS_DEFAULT_4M_NC_C,
-	                        BLIS_DEFAULT_4M_NC_Z,
-	                        BLIS_DEFAULT_3M_NC_C,
-	                        BLIS_DEFAULT_3M_NC_Z );
-	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "4m/3m cache blksz exts      4c    4z    3c    3z \n" );
-	libblis_test_fprintf_c( os, "  m dimension            %5u %5u %5u %5u\n",
-	                        BLIS_EXTEND_4M_MC_C,
-	                        BLIS_EXTEND_4M_MC_Z,
-	                        BLIS_EXTEND_3M_MC_C,
-	                        BLIS_EXTEND_3M_MC_Z );
-	libblis_test_fprintf_c( os, "  k dimension            %5u %5u %5u %5u\n",
-	                        BLIS_EXTEND_4M_KC_C,
-	                        BLIS_EXTEND_4M_KC_Z,
-	                        BLIS_EXTEND_3M_KC_C,
-	                        BLIS_EXTEND_3M_KC_Z );
-	libblis_test_fprintf_c( os, "  n dimension            %5u %5u %5u %5u\n",
-	                        BLIS_EXTEND_4M_NC_C,
-	                        BLIS_EXTEND_4M_NC_Z,
-	                        BLIS_EXTEND_3M_NC_C,
-	                        BLIS_EXTEND_3M_NC_Z );
+	libblis_test_fprintf_c( os, "  m dimension            %5d %5d %5d %5d\n",
+	                        ( int )bli_info_get_extend_mc_s(),
+	                        ( int )bli_info_get_extend_mc_d(),
+	                        ( int )bli_info_get_extend_mc_c(),
+	                        ( int )bli_info_get_extend_mc_z() );
+	libblis_test_fprintf_c( os, "  k dimension            %5d %5d %5d %5d\n",
+	                        ( int )bli_info_get_extend_kc_s(),
+	                        ( int )bli_info_get_extend_kc_d(),
+	                        ( int )bli_info_get_extend_kc_c(),
+	                        ( int )bli_info_get_extend_kc_z() );
+	libblis_test_fprintf_c( os, "  n dimension            %5d %5d %5d %5d\n",
+	                        ( int )bli_info_get_extend_nc_s(),
+	                        ( int )bli_info_get_extend_nc_d(),
+	                        ( int )bli_info_get_extend_nc_c(),
+	                        ( int )bli_info_get_extend_nc_z() );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "level-3 register blocksizes  s     d     c     z \n" );
-	libblis_test_fprintf_c( os, "  m dimension            %5u %5u %5u %5u\n",
-	                        BLIS_DEFAULT_MR_S,
-	                        BLIS_DEFAULT_MR_D,
-	                        BLIS_DEFAULT_MR_C,
-	                        BLIS_DEFAULT_MR_Z );
-	libblis_test_fprintf_c( os, "  n dimension            %5u %5u %5u %5u\n",
-	                        BLIS_DEFAULT_NR_S,
-	                        BLIS_DEFAULT_NR_D,
-	                        BLIS_DEFAULT_NR_C,
-	                        BLIS_DEFAULT_NR_Z );
+	libblis_test_fprintf_c( os, "  m dimension            %5d %5d %5d %5d\n",
+	                        ( int )bli_info_get_default_mr_s(),
+	                        ( int )bli_info_get_default_mr_d(),
+	                        ( int )bli_info_get_default_mr_c(),
+	                        ( int )bli_info_get_default_mr_z() );
+	libblis_test_fprintf_c( os, "  n dimension            %5d %5d %5d %5d\n",
+	                        ( int )bli_info_get_default_nr_s(),
+	                        ( int )bli_info_get_default_nr_d(),
+	                        ( int )bli_info_get_default_nr_c(),
+	                        ( int )bli_info_get_default_nr_z() );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "level-3 register blksz exts  s     d     c     z \n" );
-	libblis_test_fprintf_c( os, "  m dimension            %5u %5u %5u %5u\n",
-	                        BLIS_EXTEND_MR_S,
-	                        BLIS_EXTEND_MR_D,
-	                        BLIS_EXTEND_MR_C,
-	                        BLIS_EXTEND_MR_Z );
-	libblis_test_fprintf_c( os, "  n dimension            %5u %5u %5u %5u\n",
-	                        BLIS_EXTEND_NR_S,
-	                        BLIS_EXTEND_NR_D,
-	                        BLIS_EXTEND_NR_C,
-	                        BLIS_EXTEND_NR_Z );
-/*
-	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "level-3 incremental packing blocksizes          \n" );
-	libblis_test_fprintf_c( os, "  n dimension            %5u %5u %5u %5u\n",
-	                        BLIS_DEFAULT_NI_S,
-	                        BLIS_DEFAULT_NI_D,
-	                        BLIS_DEFAULT_NI_C,
-	                        BLIS_DEFAULT_NI_Z );
-*/
+	libblis_test_fprintf_c( os, "  m dimension            %5d %5d %5d %5d\n",
+	                        ( int )bli_info_get_extend_mr_s(),
+	                        ( int )bli_info_get_extend_mr_d(),
+	                        ( int )bli_info_get_extend_mr_c(),
+	                        ( int )bli_info_get_extend_mr_z() );
+	libblis_test_fprintf_c( os, "  n dimension            %5d %5d %5d %5d\n",
+	                        ( int )bli_info_get_extend_nr_s(),
+	                        ( int )bli_info_get_extend_nr_d(),
+	                        ( int )bli_info_get_extend_nr_c(),
+	                        ( int )bli_info_get_extend_nr_z() );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "level-2 cache blocksizes     s     d     c     z \n" );
-	libblis_test_fprintf_c( os, "  m dimension            %5u %5u %5u %5u\n",
-	                        BLIS_DEFAULT_L2_MC_S,
-	                        BLIS_DEFAULT_L2_MC_D,
-	                        BLIS_DEFAULT_L2_MC_C,
-	                        BLIS_DEFAULT_L2_MC_Z );
-	libblis_test_fprintf_c( os, "  n dimension            %5u %5u %5u %5u\n",
-	                        BLIS_DEFAULT_L2_NC_S,
-	                        BLIS_DEFAULT_L2_NC_D,
-	                        BLIS_DEFAULT_L2_NC_C,
-	                        BLIS_DEFAULT_L2_NC_Z );
+	libblis_test_fprintf_c( os, "  m dimension            %5d %5d %5d %5d\n",
+	                        ( int )bli_info_get_default_l2_mc_s(),
+	                        ( int )bli_info_get_default_l2_mc_d(),
+	                        ( int )bli_info_get_default_l2_mc_c(),
+	                        ( int )bli_info_get_default_l2_mc_z() );
+	libblis_test_fprintf_c( os, "  n dimension            %5d %5d %5d %5d\n",
+	                        ( int )bli_info_get_default_l2_nc_s(),
+	                        ( int )bli_info_get_default_l2_nc_d(),
+	                        ( int )bli_info_get_default_l2_nc_c(),
+	                        ( int )bli_info_get_default_l2_nc_z() );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "level-1f fusing factors      s     d     c     z \n" );
-	libblis_test_fprintf_c( os, "  default                %5u %5u %5u %5u\n",
-	                        BLIS_L1F_FUSE_FAC_S,
-	                        BLIS_L1F_FUSE_FAC_D,
-	                        BLIS_L1F_FUSE_FAC_C,
-	                        BLIS_L1F_FUSE_FAC_Z );
-	libblis_test_fprintf_c( os, "  axpyf                  %5u %5u %5u %5u\n",
-	                        BLIS_AXPYF_FUSE_FAC_S,
-	                        BLIS_AXPYF_FUSE_FAC_D,
-	                        BLIS_AXPYF_FUSE_FAC_C,
-	                        BLIS_AXPYF_FUSE_FAC_Z );
-	libblis_test_fprintf_c( os, "  dotxf                  %5u %5u %5u %5u\n",
-	                        BLIS_DOTXF_FUSE_FAC_S,
-	                        BLIS_DOTXF_FUSE_FAC_D,
-	                        BLIS_DOTXF_FUSE_FAC_C,
-	                        BLIS_DOTXF_FUSE_FAC_Z );
-	libblis_test_fprintf_c( os, "  dotxaxpyf              %5u %5u %5u %5u\n",
-	                        BLIS_DOTXAXPYF_FUSE_FAC_S,
-	                        BLIS_DOTXAXPYF_FUSE_FAC_D,
-	                        BLIS_DOTXAXPYF_FUSE_FAC_C,
-	                        BLIS_DOTXAXPYF_FUSE_FAC_Z );
+	libblis_test_fprintf_c( os, "  default                %5d %5d %5d %5d\n",
+	                        ( int )bli_info_get_default_l1f_fuse_fac_s(),
+	                        ( int )bli_info_get_default_l1f_fuse_fac_d(),
+	                        ( int )bli_info_get_default_l1f_fuse_fac_c(),
+	                        ( int )bli_info_get_default_l1f_fuse_fac_z() );
+	libblis_test_fprintf_c( os, "  axpyf                  %5d %5d %5d %5d\n",
+	                        ( int )bli_info_get_axpyf_fuse_fac_s(),
+	                        ( int )bli_info_get_axpyf_fuse_fac_d(),
+	                        ( int )bli_info_get_axpyf_fuse_fac_c(),
+	                        ( int )bli_info_get_axpyf_fuse_fac_z() );
+	libblis_test_fprintf_c( os, "  dotxf                  %5d %5d %5d %5d\n",
+	                        ( int )bli_info_get_dotxf_fuse_fac_s(),
+	                        ( int )bli_info_get_dotxf_fuse_fac_d(),
+	                        ( int )bli_info_get_dotxf_fuse_fac_c(),
+	                        ( int )bli_info_get_dotxf_fuse_fac_z() );
+	libblis_test_fprintf_c( os, "  dotxaxpyf              %5d %5d %5d %5d\n",
+	                        ( int )bli_info_get_dotxaxpyf_fuse_fac_s(),
+	                        ( int )bli_info_get_dotxaxpyf_fuse_fac_d(),
+	                        ( int )bli_info_get_dotxaxpyf_fuse_fac_c(),
+	                        ( int )bli_info_get_dotxaxpyf_fuse_fac_z() );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf( os, "\n" );
 

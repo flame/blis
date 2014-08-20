@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas
+   Copyright (C) 2014, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -14,9 +14,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
+    - Neither the name of The University of Texas at Austin nor the names
+      of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -106,10 +106,13 @@ void bli_gemm3m_cntl_init()
 
 	// Create function pointer object for each datatype-specific gemm
 	// micro-kernel.
-	gemm3m_ukrs = bli_func_obj_create( NULL,
-	                                   NULL,
-	                                   BLIS_CGEMM3M_UKERNEL,
-	                                   BLIS_ZGEMM3M_UKERNEL );
+	gemm3m_ukrs
+	=
+	bli_func_obj_create(
+	    NULL,                 FALSE,
+	    NULL,                 FALSE,
+	    BLIS_CGEMM3M_UKERNEL, BLIS_CGEMM3M_UKERNEL_PREFERS_CONTIG_ROWS,
+	    BLIS_ZGEMM3M_UKERNEL, BLIS_ZGEMM3M_UKERNEL_PREFERS_CONTIG_ROWS );
 
 
 	// Create control tree objects for packm operations.
@@ -161,7 +164,7 @@ void bli_gemm3m_cntl_init()
 	bli_gemm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT1,
 	                          gemm3m_mc,
-	                          NULL,
+	                          gemm3m_ukrs,
 	                          NULL,
 	                          gemm3m_packa_cntl,
 	                          gemm3m_packb_cntl,
@@ -176,7 +179,7 @@ void bli_gemm3m_cntl_init()
 	bli_gemm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT3,
 	                          gemm3m_kc,
-	                          NULL,
+	                          gemm3m_ukrs,
 	                          NULL,
 	                          NULL,
 	                          NULL,
@@ -191,7 +194,7 @@ void bli_gemm3m_cntl_init()
 	bli_gemm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT2,
 	                          gemm3m_nc,
-	                          NULL,
+	                          gemm3m_ukrs,
 	                          NULL,
 	                          NULL,
 	                          NULL,

@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas
+   Copyright (C) 2014, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -14,9 +14,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
+    - Neither the name of The University of Texas at Austin nor the names
+      of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -54,7 +54,7 @@ void bli_packm_acquire_mpart_t2b( subpart_t requested_part,
 
 	// Partitioning top-to-bottom through packed column panels (which are
 	// row-stored) is not yet supported.
-	if ( bli_obj_is_row_stored( *obj ) )
+	if ( bli_obj_is_row_packed( *obj ) )
 	{
 		bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 	}
@@ -130,7 +130,7 @@ void bli_packm_acquire_mpart_l2r( subpart_t requested_part,
 
 	// Partitioning left-to-right through packed row panels (which are
 	// column-stored) is not yet supported.
-	if ( bli_obj_is_col_stored( *obj ) )
+	if ( bli_obj_is_col_packed( *obj ) )
 	{
 		bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 	}

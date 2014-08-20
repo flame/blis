@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas
+   Copyright (C) 2014, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -14,9 +14,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
+    - Neither the name of The University of Texas at Austin nor the names
+      of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -44,6 +44,8 @@ typedef void (*FUNCPTR_T)(
                            trans_t transc,
                            dim_t   m,
                            dim_t   n,
+                           dim_t   m_panel,
+                           dim_t   n_panel,
                            void*   p, inc_t rs_p, inc_t cs_p,
                                       inc_t pd_p, inc_t ps_p,
                            void*   c, inc_t rs_c, inc_t cs_c
@@ -79,6 +81,8 @@ void bli_unpackm_blk_var2( obj_t*     p,
 
 	dim_t     m_c       = bli_obj_length( *c );
 	dim_t     n_c       = bli_obj_width( *c );
+	dim_t     m_panel   = bli_obj_panel_length( *c );
+	dim_t     n_panel   = bli_obj_panel_width( *c );
 
 	void*     buf_p     = bli_obj_buffer_at_off( *p );
 	inc_t     rs_p      = bli_obj_row_stride( *p );
@@ -104,6 +108,8 @@ void bli_unpackm_blk_var2( obj_t*     p,
 	   transc,
 	   m_c,
 	   n_c,
+	   m_panel,
+	   n_panel,
 	   buf_p, rs_p, cs_p,
 	          pd_p, ps_p,
 	   buf_c, rs_c, cs_c );
@@ -121,6 +127,8 @@ void PASTEMAC(ch,varname )( \
                             trans_t transc, \
                             dim_t   m, \
                             dim_t   n, \
+                            dim_t   m_panel, \
+                            dim_t   n_panel, \
                             void*   p, inc_t rs_p, inc_t cs_p, \
                                        inc_t pd_p, inc_t ps_p, \
                             void*   c, inc_t rs_c, inc_t cs_c  \
@@ -145,8 +153,8 @@ void PASTEMAC(ch,varname )( \
 	inc_t           vs_c; \
 	inc_t           incc, ldc; \
 	inc_t           ldp; \
-	dim_t*          m_panel; \
-	dim_t*          n_panel; \
+	dim_t*          m_panel_full; \
+	dim_t*          n_panel_full; \
 \
 \
 	/* If c needs a transposition, induce it so that we can more simply
@@ -162,7 +170,7 @@ void PASTEMAC(ch,varname )( \
 	/* If the strides of p indicate row storage, then we are packing to
 	   column panels; otherwise, if the strides indicate column storage,
 	   we are packing to row panels. */ \
-	if ( bli_is_row_stored_f( rs_p, cs_p ) ) \
+	if ( bli_is_row_stored_f( m_panel, n_panel, rs_p, cs_p ) ) \
 	{ \
 		/* Prepare to unpack from column panels. */ \
 		iter_dim      = n; \
@@ -173,10 +181,10 @@ void PASTEMAC(ch,varname )( \
 		vs_c          = cs_c; \
 		diagoffc_inc  = -( doff_t)panel_dim_max; \
 		ldp           = rs_p; \
-		m_panel       = &m; \
-		n_panel       = &panel_dim_i; \
+		m_panel_full  = &m; \
+		n_panel_full  = &panel_dim_i; \
 	} \
-	else /* if ( bli_is_col_stored_f( rs_p, cs_p ) ) */ \
+	else /* if ( bli_is_col_stored_f( m_panel, n_panel, rs_p, cs_p ) ) */ \
 	{ \
 		/* Prepare to unpack from row panels. */ \
 		iter_dim      = m; \
@@ -187,8 +195,8 @@ void PASTEMAC(ch,varname )( \
 		vs_c          = rs_c; \
 		diagoffc_inc  = ( doff_t )panel_dim_max; \
 		ldp           = cs_p; \
-		m_panel       = &panel_dim_i; \
-		n_panel       = &n; \
+		m_panel_full  = &panel_dim_i; \
+		n_panel_full  = &n; \
 	} \
 \
 	/* Compute the total number of iterations we'll need. */ \
@@ -215,15 +223,15 @@ void PASTEMAC(ch,varname )( \
 		   lower stored, then we must call scal2m. Otherwise, we can use a
 		   variant that is oblivious to structure and storage (and thus tends
 		   to be faster). */ \
-		if ( bli_intersects_diag_n( diagoffc_i, *m_panel, *n_panel ) && \
+		if ( bli_intersects_diag_n( diagoffc_i, *m_panel_full, *n_panel_full ) && \
 		     bli_is_upper_or_lower( uploc ) ) \
 		{ \
 			PASTEMAC3(ch,ch,ch,scal2m)( diagoffc_i, \
 			                            diagc, \
 			                            uploc, \
 			                            transc, \
-			                            *m_panel, \
-			                            *n_panel, \
+			                            *m_panel_full, \
+			                            *n_panel_full, \
 			                            one, \
 			                            p_begin, rs_p, cs_p, \
 			                            c_begin, rs_c, cs_c ); \
@@ -239,7 +247,7 @@ void PASTEMAC(ch,varname )( \
 			                          c_begin, incc, ldc ); \
 		} \
 \
-		/*PASTEMAC(ch,fprintm)( stdout, "p copied", *m_panel, *n_panel, \
+		/*PASTEMAC(ch,fprintm)( stdout, "p copied", *m_panel_full, *n_panel_full, \
 		                      p_begin, rs_p, cs_p, "%4.1f", "" );*/ \
 	} \
 \

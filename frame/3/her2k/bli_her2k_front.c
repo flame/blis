@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas
+   Copyright (C) 2014, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -14,9 +14,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
+    - Neither the name of The University of Texas at Austin nor the names
+      of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -52,10 +52,12 @@ void bli_her2k_front( obj_t*  alpha,
 	if ( bli_error_checking_is_enabled() )
 		bli_her2k_check( alpha, a, b, beta, c );
 
-	// If alpha is zero, scale by beta and return.
+	// If alpha is zero, scale by beta, zero the imaginary components of
+	// the diagonal elements, and return.
 	if ( bli_obj_equals( alpha, &BLIS_ZERO ) )
 	{
 		bli_scalm( beta, c );
+		bli_setid( &BLIS_ZERO, c );
 		return;
 	}
 
@@ -80,11 +82,18 @@ void bli_her2k_front( obj_t*  alpha,
 	                                      alpha,
 	                                      &alpha_conj );
 
-	// An optimization: If C is row-stored, transpose the entire operation
-	// so as to allow the macro-kernel more favorable access patterns
-	// through C. (The effect of the transposition of A and A' is negligible
-	// because those operands are always packed to contiguous memory.)
-	if ( bli_obj_is_row_stored( c_local ) )
+	// An optimization: If C is stored by rows and the micro-kernel prefers
+	// contiguous columns, or if C is stored by columns and the micro-kernel
+	// prefers contiguous rows, transpose the entire operation to allow the
+	// micro-kernel to access elements of C in its preferred manner.
+	if (
+	     ( bli_obj_is_row_stored( c_local ) &&
+	       bli_func_prefers_contig_cols( bli_obj_datatype( c_local ),
+	                                     cntl_gemm_ukrs( cntl ) ) ) ||
+	     ( bli_obj_is_col_stored( c_local ) &&
+	       bli_func_prefers_contig_rows( bli_obj_datatype( c_local ),
+	                                     cntl_gemm_ukrs( cntl ) ) )
+	   )
 	{
 		bli_obj_swap( a_local, bh_local );
 		bli_obj_swap( b_local, ah_local );
@@ -138,5 +147,13 @@ void bli_her2k_front( obj_t*  alpha,
     bli_herk_thrinfo_free_paths( infos, n_threads );
 
 #endif
+
+	// The Hermitian rank-2k product was computed as A*B'+B*A', even for
+	// the diagonal elements. Mathematically, the imaginary components of
+	// diagonal elements of a Hermitian rank-2k product should always be
+	// zero. However, in practice, they sometimes accumulate meaningless
+	// non-zero values. To prevent this, we explicitly set those values
+	// to zero before returning.
+	bli_setid( &BLIS_ZERO, &c_local );
 }
 

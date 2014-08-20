@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas
+   Copyright (C) 2014, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -14,9 +14,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
+    - Neither the name of The University of Texas at Austin nor the names
+      of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -75,15 +75,19 @@ void bli_trsm_cntl_init()
 
 	// Create function pointer objects for each datatype-specific
 	// gemmtrsm_l and gemmtrsm_u micro-kernel.
-	gemmtrsm_l_ukrs = bli_func_obj_create( BLIS_SGEMMTRSM_L_UKERNEL,
-	                                       BLIS_DGEMMTRSM_L_UKERNEL,
-	                                       BLIS_CGEMMTRSM_L_UKERNEL,
-	                                       BLIS_ZGEMMTRSM_L_UKERNEL );
+	gemmtrsm_l_ukrs
+	=
+	bli_func_obj_create( BLIS_SGEMMTRSM_L_UKERNEL, FALSE,
+	                     BLIS_DGEMMTRSM_L_UKERNEL, FALSE,
+	                     BLIS_CGEMMTRSM_L_UKERNEL, FALSE,
+	                     BLIS_ZGEMMTRSM_L_UKERNEL, FALSE );
 
-	gemmtrsm_u_ukrs = bli_func_obj_create( BLIS_SGEMMTRSM_U_UKERNEL,
-	                                       BLIS_DGEMMTRSM_U_UKERNEL,
-	                                       BLIS_CGEMMTRSM_U_UKERNEL,
-	                                       BLIS_ZGEMMTRSM_U_UKERNEL );
+	gemmtrsm_u_ukrs
+	=
+	bli_func_obj_create( BLIS_SGEMMTRSM_U_UKERNEL, FALSE,
+	                     BLIS_DGEMMTRSM_U_UKERNEL, FALSE,
+	                     BLIS_CGEMMTRSM_U_UKERNEL, FALSE,
+	                     BLIS_ZGEMMTRSM_U_UKERNEL, FALSE );
 
 
 	// Create control tree objects for packm operations (left side).
@@ -164,7 +168,7 @@ void bli_trsm_cntl_init()
 	bli_trsm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT1,
 	                          gemm_mc,
-	                          NULL, NULL, NULL,
+	                          gemm_ukrs, NULL, NULL,
 	                          NULL,
 	                          trsm_l_packa_cntl,
 	                          trsm_l_packb_cntl,
@@ -180,7 +184,7 @@ void bli_trsm_cntl_init()
 	bli_trsm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT3,
 	                          gemm_kc,
-	                          NULL, NULL, NULL,
+	                          gemm_ukrs, NULL, NULL,
 	                          NULL,
 	                          NULL, 
 	                          NULL,
@@ -196,7 +200,7 @@ void bli_trsm_cntl_init()
 	bli_trsm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT2,
 	                          gemm_nc,
-	                          NULL, NULL, NULL,
+	                          gemm_ukrs, NULL, NULL,
 	                          NULL,
 	                          NULL,
 	                          NULL,
@@ -212,7 +216,7 @@ void bli_trsm_cntl_init()
 	bli_trsm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT1,
 	                          gemm_mc,
-	                          NULL, NULL, NULL,
+	                          gemm_ukrs, NULL, NULL,
 	                          NULL,
 	                          trsm_r_packa_cntl,
 	                          trsm_r_packb_cntl,
@@ -228,7 +232,7 @@ void bli_trsm_cntl_init()
 	bli_trsm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT3,
 	                          gemm_kc,
-	                          NULL, NULL, NULL,
+	                          gemm_ukrs, NULL, NULL,
 	                          NULL,
 	                          NULL, 
 	                          NULL,
@@ -244,7 +248,7 @@ void bli_trsm_cntl_init()
 	bli_trsm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT2,
 	                          gemm_nc,
-	                          NULL, NULL, NULL,
+	                          gemm_ukrs, NULL, NULL,
 	                          NULL,
 	                          NULL,
 	                          NULL,

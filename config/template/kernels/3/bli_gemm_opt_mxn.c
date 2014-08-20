@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas
+   Copyright (C) 2014, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -14,9 +14,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
+    - Neither the name of The University of Texas at Austin nor the names
+      of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -153,6 +153,20 @@ void bli_dgemm_opt_mxn(
     BLIS_EXTEND_MR_? and BLIS_EXTEND_NR_? encode the register blocksize
     extensions, as defined in the bli_kernel.h header file of the BLIS
     configuration.
+  - Storage preference of c11: Sometimes, an optimized micro-kernel will
+    have a preferred storage format for C11--typically either contiguous
+    row-storage or contiguous column-storage. This preference comes from
+    how the micro-kernel is most efficiently able to load/store elements
+    of C11 from/to memory. Most micro-kernels use vector instructions to
+    load and store contigous columns (or column segments) of C11. However,
+    the developer may decide that loading contiguous rows (or row
+    segments) is desirable. If this is the case, this preference should be
+    noted in bli_kernel.h by defining the macro
+    BLIS_?GEMM_UKERNEL_PREFERS_CONTIG_ROWS. Leaving the macro undefined
+    leaves the default assumption (contiguous column preference) in
+    place. Setting this macro allows the framework to perform a minor
+    optimization at run-time that will ensure the micro-kernel preference
+    is honored, if at all possible.
   - Edge cases in MR, NR dimensions. Sometimes the micro-kernel will be
     called with micro-panels a1 and b1 that correspond to edge cases,
     where only partial results are needed. Zero-padding is handled

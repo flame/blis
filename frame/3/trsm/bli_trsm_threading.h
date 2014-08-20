@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas
+   Copyright (C) 2014, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -14,9 +14,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
+    - Neither the name of The University of Texas at Austin nor the names
+      of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -55,7 +55,7 @@ typedef struct trsm_thrinfo_s trsm_thrinfo_t;
 
 #define trsm_my_iter( index, thread ) ( index % thread->n_way == thread->work_id % thread->n_way )
 
-trsm_thrinfo_t** bli_create_trsm_thrinfo_paths( );
+trsm_thrinfo_t** bli_create_trsm_thrinfo_paths( bool_t right_sided );
 void bli_trsm_thrinfo_free_paths( trsm_thrinfo_t** info, dim_t n_threads );
 
 void bli_setup_trsm_thrinfo_node( trsm_thrinfo_t* thread,

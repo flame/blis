@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas
+   Copyright (C) 2014, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -14,9 +14,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
+    - Neither the name of The University of Texas at Austin nor the names
+      of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -36,7 +36,17 @@
 #define BLIS_KERNEL_4M_MACRO_DEFS_H
 
 
-// -- Construct 4m kernel function names ---------------------------------------
+// -- Define row access bools --------------------------------------------------
+
+// gemm4m micro-kernels
+
+#define BLIS_CGEMM4M_UKERNEL_PREFERS_CONTIG_ROWS \
+        BLIS_SGEMM_UKERNEL_PREFERS_CONTIG_ROWS
+#define BLIS_ZGEMM4M_UKERNEL_PREFERS_CONTIG_ROWS \
+        BLIS_DGEMM_UKERNEL_PREFERS_CONTIG_ROWS
+
+
+// -- Define default 4m-specific kernel names ----------------------------------
 
 //
 // Level-3 4m
@@ -98,14 +108,6 @@
 
 // packm_2xk_ri kernels
 
-#ifndef BLIS_SPACKM_2XK_RI_KERNEL
-#define BLIS_SPACKM_2XK_RI_KERNEL BLIS_SPACKM_2XK_RI_KERNEL_REF
-#endif
-
-#ifndef BLIS_DPACKM_2XK_RI_KERNEL
-#define BLIS_DPACKM_2XK_RI_KERNEL BLIS_DPACKM_2XK_RI_KERNEL_REF
-#endif
-
 #ifndef BLIS_CPACKM_2XK_RI_KERNEL
 #define BLIS_CPACKM_2XK_RI_KERNEL BLIS_CPACKM_2XK_RI_KERNEL_REF
 #endif
@@ -115,14 +117,6 @@
 #endif
 
 // packm_4xk_ri kernels
-
-#ifndef BLIS_SPACKM_4XK_RI_KERNEL
-#define BLIS_SPACKM_4XK_RI_KERNEL BLIS_SPACKM_4XK_RI_KERNEL_REF
-#endif
-
-#ifndef BLIS_DPACKM_4XK_RI_KERNEL
-#define BLIS_DPACKM_4XK_RI_KERNEL BLIS_DPACKM_4XK_RI_KERNEL_REF
-#endif
 
 #ifndef BLIS_CPACKM_4XK_RI_KERNEL
 #define BLIS_CPACKM_4XK_RI_KERNEL BLIS_CPACKM_4XK_RI_KERNEL_REF
@@ -134,14 +128,6 @@
 
 // packm_6xk_ri kernels
 
-#ifndef BLIS_SPACKM_6XK_RI_KERNEL
-#define BLIS_SPACKM_6XK_RI_KERNEL BLIS_SPACKM_6XK_RI_KERNEL_REF
-#endif
-
-#ifndef BLIS_DPACKM_6XK_RI_KERNEL
-#define BLIS_DPACKM_6XK_RI_KERNEL BLIS_DPACKM_6XK_RI_KERNEL_REF
-#endif
-
 #ifndef BLIS_CPACKM_6XK_RI_KERNEL
 #define BLIS_CPACKM_6XK_RI_KERNEL BLIS_CPACKM_6XK_RI_KERNEL_REF
 #endif
@@ -151,14 +137,6 @@
 #endif
 
 // packm_8xk_ri kernels
-
-#ifndef BLIS_SPACKM_8XK_RI_KERNEL
-#define BLIS_SPACKM_8XK_RI_KERNEL BLIS_SPACKM_8XK_RI_KERNEL_REF
-#endif
-
-#ifndef BLIS_DPACKM_8XK_RI_KERNEL
-#define BLIS_DPACKM_8XK_RI_KERNEL BLIS_DPACKM_8XK_RI_KERNEL_REF
-#endif
 
 #ifndef BLIS_CPACKM_8XK_RI_KERNEL
 #define BLIS_CPACKM_8XK_RI_KERNEL BLIS_CPACKM_8XK_RI_KERNEL_REF
@@ -170,14 +148,6 @@
 
 // packm_10xk_ri kernels
 
-#ifndef BLIS_SPACKM_10XK_RI_KERNEL
-#define BLIS_SPACKM_10XK_RI_KERNEL BLIS_SPACKM_10XK_RI_KERNEL_REF
-#endif
-
-#ifndef BLIS_DPACKM_10XK_RI_KERNEL
-#define BLIS_DPACKM_10XK_RI_KERNEL BLIS_DPACKM_10XK_RI_KERNEL_REF
-#endif
-
 #ifndef BLIS_CPACKM_10XK_RI_KERNEL
 #define BLIS_CPACKM_10XK_RI_KERNEL BLIS_CPACKM_10XK_RI_KERNEL_REF
 #endif
@@ -187,14 +157,6 @@
 #endif
 
 // packm_12xk_ri kernels
-
-#ifndef BLIS_SPACKM_12XK_RI_KERNEL
-#define BLIS_SPACKM_12XK_RI_KERNEL BLIS_SPACKM_12XK_RI_KERNEL_REF
-#endif
-
-#ifndef BLIS_DPACKM_12XK_RI_KERNEL
-#define BLIS_DPACKM_12XK_RI_KERNEL BLIS_DPACKM_12XK_RI_KERNEL_REF
-#endif
 
 #ifndef BLIS_CPACKM_12XK_RI_KERNEL
 #define BLIS_CPACKM_12XK_RI_KERNEL BLIS_CPACKM_12XK_RI_KERNEL_REF
@@ -206,14 +168,6 @@
 
 // packm_14xk_ri kernels
 
-#ifndef BLIS_SPACKM_14XK_RI_KERNEL
-#define BLIS_SPACKM_14XK_RI_KERNEL BLIS_SPACKM_14XK_RI_KERNEL_REF
-#endif
-
-#ifndef BLIS_DPACKM_14XK_RI_KERNEL
-#define BLIS_DPACKM_14XK_RI_KERNEL BLIS_DPACKM_14XK_RI_KERNEL_REF
-#endif
-
 #ifndef BLIS_CPACKM_14XK_RI_KERNEL
 #define BLIS_CPACKM_14XK_RI_KERNEL BLIS_CPACKM_14XK_RI_KERNEL_REF
 #endif
@@ -223,14 +177,6 @@
 #endif
 
 // packm_16xk_ri kernels
-
-#ifndef BLIS_SPACKM_16XK_RI_KERNEL
-#define BLIS_SPACKM_16XK_RI_KERNEL BLIS_SPACKM_16XK_RI_KERNEL_REF
-#endif
-
-#ifndef BLIS_DPACKM_16XK_RI_KERNEL
-#define BLIS_DPACKM_16XK_RI_KERNEL BLIS_DPACKM_16XK_RI_KERNEL_REF
-#endif
 
 #ifndef BLIS_CPACKM_16XK_RI_KERNEL
 #define BLIS_CPACKM_16XK_RI_KERNEL BLIS_CPACKM_16XK_RI_KERNEL_REF

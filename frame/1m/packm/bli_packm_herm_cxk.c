@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas
+   Copyright (C) 2014, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -14,9 +14,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
+    - Neither the name of The University of Texas at Austin nor the names
+      of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -84,7 +84,7 @@ void PASTEMAC(ch,varname)( \
 	/* If the strides of p indicate row storage, then we are packing to
 	   column panels; otherwise, if the strides indicate column storage,
 	   we are packing to row panels. */ \
-	if ( bli_is_row_stored_f( rs_p, cs_p ) ) \
+	if ( bli_is_row_stored_f( m_panel, n_panel, rs_p, cs_p ) ) \
 	{ \
 		/* Prepare to pack to row-stored column panel. */ \
 		panel_dim = n_panel; \
@@ -95,7 +95,7 @@ void PASTEMAC(ch,varname)( \
 		rs_p11    = rs_p; \
 		cs_p11    = 1; \
 	} \
-	else /* if ( bli_is_col_stored_f( rs_p, cs_p ) ) */ \
+	else /* if ( bli_is_col_stored_f( m_panel, n_panel, rs_p, cs_p ) ) */ \
 	{ \
 		/* Prepare to pack to column-stored row panel. */ \
 		panel_dim = m_panel; \
@@ -139,14 +139,14 @@ void PASTEMAC(ch,varname)( \
 		   a micro-panel. If they do, then somehow the constraints on
 		   cache blocksizes being a whole multiple of the register
 		   blocksizes was somehow violated. */ \
-		if ( ( bli_is_col_stored_f( rs_p, cs_p ) && diagoffc < 0 ) || \
-		     ( bli_is_row_stored_f( rs_p, cs_p ) && diagoffc > 0 ) ) \
+		if ( ( bli_is_col_stored_f( m_panel, n_panel, rs_p, cs_p ) && diagoffc < 0 ) || \
+		     ( bli_is_row_stored_f( m_panel, n_panel, rs_p, cs_p ) && diagoffc > 0 ) ) \
 			bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \
 \
 		diagoffc_abs = bli_abs( diagoffc ); \
 \
-		if      ( ( bli_is_row_stored_f( rs_p, cs_p ) && bli_is_upper( uploc ) ) || \
-		          ( bli_is_col_stored_f( rs_p, cs_p ) && bli_is_lower( uploc ) ) ) \
+		if      ( ( bli_is_row_stored_f( m_panel, n_panel, rs_p, cs_p ) && bli_is_upper( uploc ) ) || \
+		          ( bli_is_col_stored_f( m_panel, n_panel, rs_p, cs_p ) && bli_is_lower( uploc ) ) ) \
 		{ \
 			p10_dim    = panel_dim; \
 			p10_len    = diagoffc_abs; \
@@ -171,8 +171,8 @@ void PASTEMAC(ch,varname)( \
 			if ( bli_is_hermitian( strucc ) ) \
 				bli_toggle_conj( conjc12 ); \
 		} \
-		else /* if ( ( bli_is_row_stored_f( rs_p, cs_p ) && bli_is_lower( uploc ) ) || \
-		             ( bli_is_col_stored_f( rs_p, cs_p ) && bli_is_upper( uploc ) ) ) */ \
+		else /* if ( ( bli_is_row_stored_f( m_panel, n_panel, rs_p, cs_p ) && bli_is_lower( uploc ) ) || \
+		             ( bli_is_col_stored_f( m_panel, n_panel, rs_p, cs_p ) && bli_is_upper( uploc ) ) ) */ \
 		{ \
 			p10_dim    = panel_dim; \
 			p10_len    = diagoffc_abs + panel_dim; \
@@ -347,7 +347,7 @@ void PASTEMAC(ch,varname)( \
 	/* If the strides of p indicate row storage, then we are packing to
 	   column panels; otherwise, if the strides indicate column storage,
 	   we are packing to row panels. */ \
-	if ( bli_is_row_stored_f( rs_p, cs_p ) ) \
+	if ( bli_is_row_stored_f( m_panel, n_panel, rs_p, cs_p ) ) \
 	{ \
 		/* Prepare to pack to row-stored column panel. */ \
 		panel_dim     = n_panel; \
@@ -359,7 +359,7 @@ void PASTEMAC(ch,varname)( \
 		rs_p11        = rs_p; \
 		cs_p11        = 1; \
 	} \
-	else /* if ( bli_is_col_stored_f( rs_p, cs_p ) ) */ \
+	else /* if ( bli_is_col_stored_f( m_panel, n_panel, rs_p, cs_p ) ) */ \
 	{ \
 		/* Prepare to pack to column-stored row panel. */ \
 		panel_dim     = m_panel; \
@@ -409,14 +409,14 @@ void PASTEMAC(ch,varname)( \
 		   a micro-panel. If they do, then somehow the constraints on
 		   cache blocksizes being a whole multiple of the register
 		   blocksizes was somehow violated. */ \
-		if ( ( bli_is_col_stored_f( rs_p, cs_p ) && diagoffc < 0 ) || \
-		     ( bli_is_row_stored_f( rs_p, cs_p ) && diagoffc > 0 ) ) \
+		if ( ( bli_is_col_stored_f( m_panel, n_panel, rs_p, cs_p ) && diagoffc < 0 ) || \
+		     ( bli_is_row_stored_f( m_panel, n_panel, rs_p, cs_p ) && diagoffc > 0 ) ) \
 			bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \
 \
 		diagoffc_abs = bli_abs( diagoffc ); \
 \
-		if      ( ( bli_is_row_stored_f( rs_p, cs_p ) && bli_is_upper( uploc ) ) || \
-		          ( bli_is_col_stored_f( rs_p, cs_p ) && bli_is_lower( uploc ) ) ) \
+		if      ( ( bli_is_row_stored_f( m_panel, n_panel, rs_p, cs_p ) && bli_is_upper( uploc ) ) || \
+		          ( bli_is_col_stored_f( m_panel, n_panel, rs_p, cs_p ) && bli_is_lower( uploc ) ) ) \
 		{ \
 			p10_dim    = panel_dim; \
 			p10_len    = diagoffc_abs; \
@@ -441,8 +441,8 @@ void PASTEMAC(ch,varname)( \
 			if ( bli_is_hermitian( strucc ) ) \
 				bli_toggle_conj( conjc12 ); \
 		} \
-		else /* if ( ( bli_is_row_stored_f( rs_p, cs_p ) && bli_is_lower( uploc ) ) || \
-		             ( bli_is_col_stored_f( rs_p, cs_p ) && bli_is_upper( uploc ) ) ) */ \
+		else /* if ( ( bli_is_row_stored_f( m_panel, n_panel, rs_p, cs_p ) && bli_is_lower( uploc ) ) || \
+		             ( bli_is_col_stored_f( m_panel, n_panel, rs_p, cs_p ) && bli_is_upper( uploc ) ) ) */ \
 		{ \
 			p10_dim    = panel_dim; \
 			p10_len    = diagoffc_abs + panel_dim; \
@@ -683,7 +683,7 @@ void PASTEMAC(ch,varname)( \
 	/* If the strides of p indicate row storage, then we are packing to
 	   column panels; otherwise, if the strides indicate column storage,
 	   we are packing to row panels. */ \
-	if ( bli_is_row_stored_f( rs_p, cs_p ) ) \
+	if ( bli_is_row_stored_f( m_panel, n_panel, rs_p, cs_p ) ) \
 	{ \
 		/* Prepare to pack to row-stored column panel. */ \
 		panel_dim     = n_panel; \
@@ -695,7 +695,7 @@ void PASTEMAC(ch,varname)( \
 		rs_p11        = rs_p; \
 		cs_p11        = 1; \
 	} \
-	else /* if ( bli_is_col_stored_f( rs_p, cs_p ) ) */ \
+	else /* if ( bli_is_col_stored_f( m_panel, n_panel, rs_p, cs_p ) ) */ \
 	{ \
 		/* Prepare to pack to column-stored row panel. */ \
 		panel_dim     = m_panel; \
@@ -745,14 +745,14 @@ void PASTEMAC(ch,varname)( \
 		   a micro-panel. If they do, then somehow the constraints on
 		   cache blocksizes being a whole multiple of the register
 		   blocksizes was somehow violated. */ \
-		if ( ( bli_is_col_stored_f( rs_p, cs_p ) && diagoffc < 0 ) || \
-		     ( bli_is_row_stored_f( rs_p, cs_p ) && diagoffc > 0 ) ) \
+		if ( ( bli_is_col_stored_f( m_panel, n_panel, rs_p, cs_p ) && diagoffc < 0 ) || \
+		     ( bli_is_row_stored_f( m_panel, n_panel, rs_p, cs_p ) && diagoffc > 0 ) ) \
 			bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \
 \
 		diagoffc_abs = bli_abs( diagoffc ); \
 \
-		if      ( ( bli_is_row_stored_f( rs_p, cs_p ) && bli_is_upper( uploc ) ) || \
-		          ( bli_is_col_stored_f( rs_p, cs_p ) && bli_is_lower( uploc ) ) ) \
+		if      ( ( bli_is_row_stored_f( m_panel, n_panel, rs_p, cs_p ) && bli_is_upper( uploc ) ) || \
+		          ( bli_is_col_stored_f( m_panel, n_panel, rs_p, cs_p ) && bli_is_lower( uploc ) ) ) \
 		{ \
 			p10_dim    = panel_dim; \
 			p10_len    = diagoffc_abs; \
@@ -777,8 +777,8 @@ void PASTEMAC(ch,varname)( \
 			if ( bli_is_hermitian( strucc ) ) \
 				bli_toggle_conj( conjc12 ); \
 		} \
-		else /* if ( ( bli_is_row_stored_f( rs_p, cs_p ) && bli_is_lower( uploc ) ) || \
-		             ( bli_is_col_stored_f( rs_p, cs_p ) && bli_is_upper( uploc ) ) ) */ \
+		else /* if ( ( bli_is_row_stored_f( m_panel, n_panel, rs_p, cs_p ) && bli_is_lower( uploc ) ) || \
+		             ( bli_is_col_stored_f( m_panel, n_panel, rs_p, cs_p ) && bli_is_upper( uploc ) ) ) */ \
 		{ \
 			p10_dim    = panel_dim; \
 			p10_len    = diagoffc_abs + panel_dim; \

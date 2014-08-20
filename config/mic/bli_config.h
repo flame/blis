@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas
+   Copyright (C) 2014, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -14,9 +14,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
+    - Neither the name of The University of Texas at Austin nor the names
+      of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -143,7 +143,7 @@
 
 
 
-// -- BLAS-to-BLIS COMPATIBILITY LAYER -----------------------------------------
+// -- BLAS COMPATIBILITY LAYER -------------------------------------------------
 
 // Enable the BLAS compatibility layer?
 #define BLIS_ENABLE_BLAS2BLIS
@@ -160,6 +160,18 @@
 #define PASTEF770(name)                        name ## _
 #define PASTEF77(ch1,name)       ch1        ## name ## _
 #define PASTEF772(ch1,ch2,name)  ch1 ## ch2 ## name ## _
+
+
+
+// -- CBLAS COMPATIBILITY LAYER ------------------------------------------------
+
+// Enable the CBLAS compatibility layer?
+// NOTE: Enabling CBLAS will automatically enable the BLAS compatibility layer
+// regardless of whether or not it was explicitly enabled above. Furthermore,
+// the CBLAS compatibility layer will use the integer type size definition
+// specified above when defining the size of its own integers (regardless of
+// whether the BLAS layer was enabled directly or indirectly).
+//#define BLIS_ENABLE_CBLAS
 
 
 

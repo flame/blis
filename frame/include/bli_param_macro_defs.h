@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas
+   Copyright (C) 2014, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -14,9 +14,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
+    - Neither the name of The University of Texas at Austin nor the names
+      of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -356,6 +356,7 @@
 	( bli_does_notrans( trans ) ? ( m == 1 ? (cs) : (rs) ) \
                                 : ( m == 1 ? (rs) : (cs) ) )
 
+/*
 #define bli_is_row_stored( rs, cs ) \
 \
 	( bli_abs( cs ) == 1 )
@@ -363,14 +364,15 @@
 #define bli_is_col_stored( rs, cs ) \
 \
 	( bli_abs( rs ) == 1 )
+*/
 
-#define bli_is_row_stored_f( rs, cs ) \
+#define bli_is_row_stored_f( m, n, rs, cs ) \
 \
-	( cs == 1 )
+	( cs == 1 && ( rs > 1 || n == 1 ) )
 
-#define bli_is_col_stored_f( rs, cs ) \
+#define bli_is_col_stored_f( m, n, rs, cs ) \
 \
-	( rs == 1 )
+	( rs == 1 && ( cs > 1 || m == 1 ) )
 
 #define bli_is_gen_stored( rs, cs ) \
 \
@@ -391,14 +393,11 @@
 
 #define bli_has_nonunit_inc2( inc1, inc2 ) \
 \
-	( inc1 != 1 || \
-	  inc2 != 1 )
+	( inc1 != 1 || inc2 != 1 )
 
 #define bli_has_nonunit_inc3( inc1, inc2, inc3 ) \
 \
-	( inc1 != 1 || \
-	  inc2 != 1 || \
-	  inc3 != 1 )
+	( inc1 != 1 || inc2 != 1 || inc3 != 1 )
 
 
 // diag offset-related
@@ -503,7 +502,34 @@
 	( ( (buf_type) & BLIS_PACK_BUFFER_BITS ) >> BLIS_PACK_BUFFER_SHIFT )
 
 
-// return value for char
+// pack_t-related
+
+#define bli_is_packed( schema ) \
+\
+	( ( schema & BLIS_PACK_BIT  ) )
+
+#define bli_is_row_packed( schema ) \
+\
+	( ( schema & BLIS_PACK_RC_BIT  ) == ( BLIS_BITVAL_PACKED_UNSPEC ^ \
+	                                      BLIS_BITVAL_PACKED_ROWS    ) )
+
+#define bli_is_col_packed( schema ) \
+\
+	( ( schema & BLIS_PACK_RC_BIT  ) == ( BLIS_BITVAL_PACKED_UNSPEC ^ \
+	                                      BLIS_BITVAL_PACKED_COLUMNS ) )
+
+#define bli_is_panel_packed( schema ) \
+\
+	( ( schema & BLIS_PACK_PANEL_BIT ) )
+
+#define bli_is_4m_packed( schema ) \
+\
+	( ( schema & BLIS_PACK_4M_BIT ) )
+
+#define bli_is_3m_packed( schema ) \
+\
+	( ( schema & BLIS_PACK_3M_BIT ) )
+
 
 
 // return datatype for char

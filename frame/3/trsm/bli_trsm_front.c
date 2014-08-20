@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas
+   Copyright (C) 2014, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -14,9 +14,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
+    - Neither the name of The University of Texas at Austin nor the names
+      of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -80,38 +80,27 @@ void bli_trsm_front( side_t  side,
 	}
 
 #if 0
+
+	// If A is being solved against from the right, transpose all operands
+	// so that we can perform the computation as if A were being solved
+	// from the left.
 	if ( bli_is_right( side ) )
 	{
+		bli_toggle_side( side );
 		bli_obj_induce_trans( a_local );
 		bli_obj_induce_trans( b_local );
 		bli_obj_induce_trans( c_local );
-
-		bli_toggle_side( side );
 	}
-#endif
 
-#if 1
+#else
+
 	// If A is being solved against from the right, swap A and B so that
-	// the matrix will actually be on the right.
+	// the triangular matrix will actually be on the right.
 	if ( bli_is_right( side ) )
 	{
 		bli_obj_swap( a_local, b_local );
 	}
 
-	// An optimization: If C is row-stored, transpose the entire operation
-	// so as to allow the macro-kernel more favorable access patterns
-	// through C. (The effect of the transposition of A and B is negligible
-	// because those operands are always packed to contiguous memory.)
-	if ( bli_obj_is_row_stored( c_local ) )
-	{
-		bli_obj_swap( a_local, b_local );
-
-		bli_obj_induce_trans( a_local );
-		bli_obj_induce_trans( b_local );
-		bli_obj_induce_trans( c_local );
-
-		bli_toggle_side( side );
-	}
 #endif
 
 	// Set each alias as the root object.
@@ -125,9 +114,9 @@ void bli_trsm_front( side_t  side,
 	if ( bli_is_left( side ) ) cntl = l_cntl;
 	else                       cntl = r_cntl;
 
-    trsm_thrinfo_t** infos = bli_create_trsm_thrinfo_paths();
+    trsm_thrinfo_t** infos = bli_create_trsm_thrinfo_paths( bli_is_right( side ) );
     dim_t n_threads = thread_num_threads( infos[0] );
-
+    
     // Invoke the internal back-end.
     bli_level3_thread_decorator( n_threads,   
                                  (level3_int_t) bli_trsm_int, 

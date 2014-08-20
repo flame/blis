@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas
+   Copyright (C) 2014, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -14,9 +14,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
+    - Neither the name of The University of Texas at Austin nor the names
+      of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -119,8 +119,8 @@ void bli_trsm_lu_ker_var2( obj_t*  a,
 	// in pointer arithmetic that moves twice as far as it should,
 	// given the datatypes actually stored (float or double), we must
 	// halve the strides to compensate.
-	if ( bli_obj_is_panel_packed_4m( *a ) ||
-	     bli_obj_is_panel_packed_3m( *a ) ) { cs_a /= 2; rs_b /= 2; }
+	if ( bli_obj_is_4m_packed( *a ) ||
+	     bli_obj_is_3m_packed( *a ) ) { cs_a /= 2; rs_b /= 2; }
 
 	// Extract from the control tree node the func_t objects containing
 	// the gemmtrsm and gemm micro-kernel function addresses, and then

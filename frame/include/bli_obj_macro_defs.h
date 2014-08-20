@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas
+   Copyright (C) 2014, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -14,9 +14,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
+    - Neither the name of The University of Texas at Austin nor the names
+      of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -193,7 +193,33 @@
 
 #define bli_obj_pack_status( obj ) \
 \
-	(   (obj).info & BLIS_PACK_BITS )
+	(   (obj).info & BLIS_PACK_SCHEMA_BITS )
+
+#define bli_obj_is_packed( obj ) \
+\
+	( ( (obj).info & BLIS_PACK_BIT  ) )
+
+#define bli_obj_is_row_packed( obj ) \
+\
+	( ( (obj).info & BLIS_PACK_RC_BIT  ) == ( BLIS_BITVAL_PACKED_UNSPEC ^ \
+	                                          BLIS_BITVAL_PACKED_ROWS    ) )
+
+#define bli_obj_is_col_packed( obj ) \
+\
+	( ( (obj).info & BLIS_PACK_RC_BIT  ) == ( BLIS_BITVAL_PACKED_UNSPEC ^ \
+	                                          BLIS_BITVAL_PACKED_COLUMNS ) )
+
+#define bli_obj_is_panel_packed( obj ) \
+\
+	( ( (obj).info & BLIS_PACK_PANEL_BIT ) )
+
+#define bli_obj_is_4m_packed( obj ) \
+\
+	( ( (obj).info & BLIS_PACK_4M_BIT ) )
+
+#define bli_obj_is_3m_packed( obj ) \
+\
+	( ( (obj).info & BLIS_PACK_3M_BIT ) )
 
 #define bli_obj_pack_buffer_type( obj ) \
 \
@@ -269,7 +295,7 @@
 
 #define bli_obj_set_pack_schema( pack, obj ) \
 { \
-	(obj).info = ( (obj).info & ~BLIS_PACK_BITS ) | (pack); \
+	(obj).info = ( (obj).info & ~BLIS_PACK_SCHEMA_BITS ) | (pack); \
 }
 
 #define bli_obj_set_pack_order_if_upper( packordifup, obj ) \
@@ -555,6 +581,13 @@ bli_obj_width_stored( obj )
 \
 	( bli_abs( bli_obj_col_stride( obj ) ) )
 
+//
+// NOTE: The following two macros differ from their non-obj counterparts
+// in that they do not identify m x 1 and 1 x n objects as row-stored and
+// column-stored, respectively, which is needed when considering packed
+// objects. But this is okay, since none of the invocations of these
+// "obj" macros are used on packed matrices.
+//
 #define bli_obj_is_row_stored( obj ) \
 \
 	( bli_obj_col_stride_mag( obj ) == 1 )
@@ -735,7 +768,7 @@ bli_obj_width_stored( obj )
 }
 
 
-// Packed dimensions query
+// Packed matrix info query
 
 #define bli_obj_padded_length( obj ) \
 \
@@ -745,7 +778,7 @@ bli_obj_width_stored( obj )
 \
 	( (obj).n_padded )
 
-// Packed dimensions modification
+// Packed matrix info modification
 
 #define bli_obj_set_padded_length( m0, obj ) \
 { \
@@ -764,48 +797,46 @@ bli_obj_width_stored( obj )
 }
 
 
-// Packed panel dimension query
+// Packed panel info query
+
+#define bli_obj_panel_length( obj ) \
+\
+	((obj).m_panel)
+
+#define bli_obj_panel_width( obj ) \
+\
+	((obj).n_panel)
 
 #define bli_obj_panel_dim( obj ) \
 \
 	((obj).pd)
 
-// Packed panel dimension modification
+#define bli_obj_panel_stride( obj ) \
+\
+	((obj).ps)
+
+// Packed panel info modification
+
+#define bli_obj_set_panel_length( m0, obj ) \
+{ \
+	(obj).m_panel = m0; \
+}
+
+#define bli_obj_set_panel_width( n0, obj ) \
+{ \
+	(obj).n_panel = n0; \
+}
 
 #define bli_obj_set_panel_dim( panel_dim, obj ) \
 { \
 	(obj).pd = panel_dim; \
 }
 
-
-// Packed panel stride query
-
-#define bli_obj_panel_stride( obj ) \
-\
-	((obj).ps)
-
-// Packed panel stride modification
-
 #define bli_obj_set_panel_stride( panel_stride, obj ) \
 { \
 	(obj).ps = panel_stride; \
 }
 
-
-/*
-// Cast mem entry query
-
-#define bli_obj_cast_mem( obj ) \
-\
-	( &((obj).cast_mem) )
-
-// Cast mem entry modification
-
-#define bli_obj_set_cast_mem( mem_p, obj ) \
-{ \
-	(obj).cast_mem = *mem_p; \
-}
-*/
  
 
 // -- Miscellaneous object macros --
@@ -866,29 +897,6 @@ bli_obj_width_stored( obj )
 \
 	bli_mem_set_buffer( NULL, pack_mem ); \
 }
-
-
-// Check if an object is a packed object
-// NOTE: TRUE here does not mean the actual packing is complete, such as with
-// incremental packing.
-
-#define bli_obj_is_panel_packed( obj ) \
-\
-	( bli_obj_pack_status( obj ) == BLIS_PACKED_ROW_PANELS || \
-	  bli_obj_pack_status( obj ) == BLIS_PACKED_COL_PANELS )
-
-
-// Check if an object is packed for 4m/3m
-
-#define bli_obj_is_panel_packed_4m( obj ) \
-\
-	( bli_obj_pack_status( obj ) == BLIS_PACKED_ROW_PANELS_4M || \
-	  bli_obj_pack_status( obj ) == BLIS_PACKED_COL_PANELS_4M )
-
-#define bli_obj_is_panel_packed_3m( obj ) \
-\
-	( bli_obj_pack_status( obj ) == BLIS_PACKED_ROW_PANELS_3M || \
-	  bli_obj_pack_status( obj ) == BLIS_PACKED_COL_PANELS_3M )
 
 
 // Release object's pack (and cast) memory entries back to memory manager

@@ -1,4 +1,552 @@
-commit 036cc634918463b1caa0fd89c9a211f2f5639af7 (HEAD, tag: 0.1.3, master)
+commit bde56d0ecfd0ec20330fac290b91a6dca0cf94e9 (HEAD, tag: 0.1.5, master)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Aug 4 16:01:58 2014 -0500
+
+    Version file update (0.1.5)
+
+commit 4c6ceea4be35d089630986eb5b959b9e97214077 (origin/master)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Aug 4 15:49:59 2014 -0500
+
+    Added CBLAS compatibility layer.
+    
+    Details:
+    - Added a new section in bli_config.h files of all configurations for
+      enabling CBLAS support. (Currently, the default is for the CBLAS layer
+      to be disabled.)
+    - Added a directory, frame/compat/cblas, to house CBLAS source code. A
+      subdirectory 'f77_sub' holds subroutine wrappers corresponding to
+      subroutines found in CBLAS that allow calling some BLAS routines with
+      the return value passed as the last argument rather than as an actual
+      (function) return value. This was probably intended to allow CBLAS to
+      avoid the whole f2c debacle altogether. However, since BLIS does not
+      assume the presence of a Fortran compiler, we had to provide similar
+      routines in C.
+    - A script, integrate-cblas-tarball.sh, is included to streamline the
+      integration of future revisions of the CBLAS source code.
+    - The current tarball, cblas.tgz, that was used with the above script to
+      generate the present set of CBLAS source code is also included.
+    - Updated blis.h to include necessary CBLAS-related headers.
+
+commit caab62dac0fb0bd0d674118f409c81680db94d29
+Merge: 383631b db97ce9
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Aug 3 14:36:18 2014 -0500
+
+    Merge pull request #19 from kevinoid/fix-install-perms-error
+    
+    Fix permissions error installing to non-owned directory
+
+commit db97ce979b88c051922c2f946ce52d523c7a12c6
+Author: Kevin Locke <kevin@kevinlocke.name>
+Date:   Sun Aug 3 12:48:04 2014 -0600
+
+    Fix permissions error installing to non-owned directory
+    
+    When installing to a directory which is not owned by the installing
+    user, even when the user has write permission for the directory, the
+    installation can fail with an error similar to the following:
+    
+    Installing libblis-0.1.4-7-sandybridge.a into /usr/local/lib/
+    install: cannot change permissions of ‘/usr/local/lib’: Operation not permitted
+    Makefile:658: recipe for target '/usr/local/lib/libblis-0.1.4-7-sandybridge.a' failed
+    make: *** [/usr/local/lib/libblis-0.1.4-7-sandybridge.a] Error 1
+    
+    In the example case, the error occurred because the user attempted to
+    install to /usr/local and /usr/local/lib is owned by root with mode 2755
+    which the Makefile unsuccessfully attempted to change to 0755.
+    
+    Given that installing to /usr/local is likely to be quite common and the
+    ownership/permissions are the default for Debian and Debian-derived
+    Linux distributions (perhaps others as well), this commit attempts to
+    support that use case by using mkdir rather than install to create the
+    directory (which is the same approach as Automake).
+    
+    Signed-off-by: Kevin Locke <kevin@kevinlocke.name>
+
+commit 383631b514c3d42b724640f57644eea276cc418c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jul 31 14:51:48 2014 -0500
+
+    Redefined bit field macros with bitshift operator.
+    
+    Details:
+    - Redefined many of the macros that define bit fields and bit values in
+      the obj_t info field using the bitshift operator (<<). This makes it
+      easier to reorder bit fields, or expand existing bit fields, or add
+      new fields. The bitshifting should be evaluated by the compiler at
+      compile-time.
+
+commit 137143345dc93cc9a83da5ba88b25bac7502de86
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jul 31 12:12:45 2014 -0500
+
+    Reimplemented unit blocksize fix in prev commit.
+    
+    Details:
+    - Instead of inferring the storage format of the micro-panels from within
+      the packm variants, we now pass in a bool_t value that denotes whether
+      the packed matrix contains row-stored column panels or column-stored
+      row panels. This value can then be tested more easily inside the main
+      packm variant loop.
+    - Renumbered pack_t schema values in bli_type_defs.h so that there are
+      now five bits, each with different meaning:
+      - 4: packed or not packed?
+      - 3: packed for 3m?
+      - 2: packed for 4m?
+      - 1: packed to panels?
+      - 0: stored by rows or columns?
+    - Added new macros that test for status of above bits in schema bit
+      subfield, and renamed some existing macros related to 4m/3m.
+
+commit a51e32ec061941cd10119ea80115c82a40b1673f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jul 30 10:41:48 2014 -0500
+
+    Fixed unit register blocksize brokenness.
+    
+    Details:
+    - Fixed a breakdown in BLIS's ability to differentiate between row-stored
+      and column-stored micro-panels when MR or NR is unit. When either
+      register blocksize (or both) is equal to one, inspecting the strides of
+      the affected packed micro-panel is no longer sufficient to determine
+      whether the micro-panel is a row-stored column panel or a column-stored
+      row panel (because both strides are unit). At that point, dimension
+      information is necessary when invoking the bli_is_row_stored_f() and
+      bli_is_col_stored_f() macros (and their "obj" counterparts). Thanks to
+      Ilya Polkovnichenko for reporting this bug.
+    - Added panel dimensions (m and n) to obj_t, which are set in
+      packm_init() and then passed into the blocked variants to support the
+      aforementioned update.
+
+commit c2732272f0ac680a0ad19fa9db5d587398a1479a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jul 29 16:37:18 2014 -0500
+
+    Removed old/unused packm variants.
+
+commit b97fa9a5a70fe0123e5eebd999b947461d38445f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Jul 27 18:54:09 2014 -0500
+
+    Minor usage update to build/bump-version.sh.
+
+commit b18ba5f62d98629cdd519ff4c96fc67ec1a62fb9
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Jul 27 18:52:05 2014 -0500
+
+    Added missing 'bla_' prefix to r_imag(), d_imag().
+    
+    Details:
+    - Added "bla_" to f2c functions r_imag() and d_imag(). Thanks to Murtaza
+      Ali for pointing the mis-named functions.
+
+commit af7a8e6c042cade452130a6729377f1a3ef4e19e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Jul 27 18:20:13 2014 -0500
+
+    CHANGELOG update (0.1.4)
+
+commit a7537071b152ecff671f8716595d37dc09e4fd51 (tag: 0.1.4)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Jul 27 18:20:12 2014 -0500
+
+    Version file update (0.1.4)
+
+commit acff74041bf02c7b9fdfa24b507bca782a4c5fce
+Merge: cdb9413 47b243e
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Wed Jul 23 15:07:30 2014 -0500
+
+    Merge branch 'master' of https://github.com/flame/blis
+
+commit cdb9413e140f8a198666250ec88fa34b5425a9c3
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Wed Jul 23 15:05:15 2014 -0500
+
+    Enabled threading for a couple more loops in TRSM
+    
+    JC loop is now enabled for the left-sided case
+    IC loop is now enabled for the right-sided case
+
+commit 47b243ef08f4101de3d936f2373343e67eaa4dd5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jul 23 13:41:13 2014 -0500
+
+    Call setid for early return from herk/her2k.
+    
+    Details:
+    - Added setid call (to zero imaginary parts of diagonal elements) to
+      early return branches of herk_front() and her2k_front() for cases
+      where alpha is zero. Thanks to Murtaza Ali for suggesting this fix.
+    - Comment update.
+
+commit 3e7b0db5b0e24f5fd66c60bacabc019885ddbec5
+Merge: 2f8a357 ed3e33d
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Wed Jul 23 13:40:44 2014 -0500
+
+    Merge branch 'master' of https://github.com/flame/blis
+
+commit 2f8a357de5fb55163a969d888cf059f24b78125c
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Wed Jul 23 13:40:12 2014 -0500
+
+    Some TRSM threading fixes/additions
+
+commit ed3e33d548047be3283ff41268fdf716563bc542
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jul 22 14:40:43 2014 -0500
+
+    Tweaked behavior of herk, her2k for BLAS compat.
+    
+    Details:
+    - Updated herk_front() and her2k_front() to explicitly set the imaginary
+      components of the diagonal entries of C to zero after the computation
+      is complete. This is needed in case downstream applications read the
+      full diagonal entries (i.e., including imaginary part), which could, in
+      the absence of this modification, accumulate numerical error from
+      subsequent rank-k/rank-2k updates.
+    - Updated BLAS compatibility wrappers for herk and her2k to return early
+      if:
+        n == 0 || ( ( alpha == 0 || k == 0 ) && beta == 1 )
+      This also results in the imaginary components of diagonal entries NOT
+      being set to zero (see above), which is consistent with BLAS.
+    - Updated mkherm to use setid instead of an inlined loop over the
+      diagonal.
+
+commit ea59a5c93cde1467a3715abc53dda4aecf961873
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jul 22 14:36:02 2014 -0500
+
+    Added new level-1d operation: setid.
+    
+    Details:
+    - Defined a new level-1d operation, setid, which sets the imaginary
+      elements of an object's diagonal to a single scalar. This can be
+      useful, for example, when trying to make the diagonal of a Hermitian
+      matrix real-valued.
+
+commit 8965a965931318619ceaebd7c32edccf3022d0c7
+Merge: 1785efb 5b73e80
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jul 22 14:34:32 2014 -0500
+
+    Merge branch 'master' of github.com:flame/blis
+
+commit 1785efb5420bc7b9c850a068cb5d99837071e877
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jul 22 14:33:01 2014 -0500
+
+    Minor improvements to invertd and setd.
+    
+    Details:
+    - Added missing call to invertd_check() from front-end.
+    - Changed setd front-end call of scald_check() to setd_check().
+
+commit 5b73e80b71c054c1945a06aff044ef629bc1a9a0
+Merge: a41e68e 20690fe
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jul 18 12:21:20 2014 -0500
+
+    Merge pull request #16 from Maratyszcza/emscripten
+    
+    Emscripten port
+
+commit a41e68e09e73b999fab0bb430a43dccfc63aab45
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jul 17 13:25:56 2014 -0500
+
+    Reimplemented BLIS initialization/finalization.
+    
+    Details:
+    - Rewrote bli_init() and bli_finalize() with OpenMP critical sections
+      for thread-safety. Also added lots of explanatory comments.
+    - Renamed bli_init_safe() and bli_finalize_safe() with the _auto()
+      suffix, and reimplemented for simplicity. Updated all invocations
+      in BLAS compatibility layer to use _auto() suffix.
+
+commit 36358948ea75074bda32a9f8c008f835b87d21db
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jul 17 10:58:10 2014 -0500
+
+    Retired frame/3/gemm/other directory.
+    
+    Details:
+    - Removed frame/3/gemm/other directory, which contained some outdated
+      and/or experimental variants.
+
+commit c73261f17edf589e76bdbe297702a1fbbd69275f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jul 14 16:23:51 2014 -0500
+
+    More minor cleanups post-copyright update.
+
+commit 2a09d24463d358be6243b24f112fad057c2aefe0
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jul 14 16:17:09 2014 -0500
+
+    Reverted power7 symlinks destroyed by sed script.
+    
+    Details:
+    - Reverted two symlinks, in kernels/power7/3/test, back to being symlinks
+      after recursive-sed.sh mistakenly replaced them with copies of the
+      actual files to which they referred. Meant to include this in previous
+      commit.
+
+commit 7ed415824d3b2e78541b6f64e404ca5347c06d3d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jul 14 16:14:33 2014 -0500
+
+    Updated copyright headers (continued).
+    
+    Details:
+    - Inserted "at Austin" into third clause of license declarations.
+      Meant to include this change in previous commit.
+
+commit 5c2c6c85616834ff2716ece083118201d9df6dde
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jul 14 16:05:03 2014 -0500
+
+    Updated copyright headers to contain "at Austin".
+    
+    Details:
+    - Updated copyright headers to include "at Austin" in the name of the
+      University of Texas.
+    - Updated the copyright years of a few headers to 2014 (from 2011 and
+      2012).
+
+commit fcec68cda3f6e90ae055e7304e6674c1c5c8d010
+Merge: 94c0df7 4a20ed1
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jul 14 11:35:34 2014 -0500
+
+    Merge branch 'master' of github.com:flame/blis
+
+commit 94c0df797eda377931f29a41ba6a89c0ed58daca
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jul 14 11:24:36 2014 -0500
+
+    Changed order of zero dim / error checking.
+    
+    Details:
+    - Updated level-2 and level-3 internal back-ends so that the operation's
+      _check() function is called BEFORE any attempt to return early due to
+      the presence of zero dimensions. This ordering makes more sense because
+      (for example) object dimensions should match even if one of them is
+      zero. Previously, a dimension mismatch could result in an early return
+      with no error message.
+    - Updated bli_check_object_buffer() so that NULL buffers result in an
+      error only if the object is dimensionally non-empty (i.e., only if both
+      of the object's dimensions are non-zero). This allows BLIS operations
+      to be performed on dimensionally empty objects (i.e., where at least one
+      dimension is zero).
+    - Updated the error message associated with bli_check_object_buffer()
+      to mention the newly relaxed constraint mentioned above, vis-a-vis
+      non-zero dimensions.
+
+commit 20690fe3018ce17c8df61ce0bffecaa7911dc3a5
+Author: Marat Dukhan <maratek@gmail.com>
+Date:   Sun Jul 13 22:50:56 2014 -0700
+
+    Emscripten port
+
+commit 4a20ed1a3f5e9e5232df30aa0e568e6c00c56ce1
+Merge: 6a515e9 8ccdfae
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Jul 13 17:45:01 2014 -0500
+
+    Merge pull request #14 from Maratyszcza/master
+    
+    Support "make test" for PNaCl configuration
+
+commit 6a515e988f2ae1628258a6dec2c0e9cf2d04790f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Jul 13 17:38:33 2014 -0500
+
+    Implemented dsdot() and sdsdot() in compat layer.
+    
+    Details:
+    - Replaced "not yet implemented" error messages in dsdot() and sdsdot()
+      with actual implementations. (These routines are so rarely used that
+      this log message will probably lead to some people learning of their
+      existence for the first time.)
+
+commit 255668ddd1004552c6cc65035ec6486671ce99bb
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Jul 13 17:30:44 2014 -0500
+
+    Inserted gemv beta-scaling bug into compat layer.
+    
+    Details:
+    - BLAS has a peculiar bug (or feature) whereby calling gemv on a vector
+      y of non-zero length and a vector x of zero length results in no action.
+      Given that the operation is y := beta*y + A*x, many (most?) individuals
+      would expect vector y to still be scaled by beta. BLIS, when called
+      natively, handles these cases intuitively (with beta scaling).
+      Unfortunately, many BLAS test suites actually check for the way this
+      situation is handled. Therefore, we have decided to implement this "bug"
+      in the compatibility layer so as to provide "bug-for-bug" compatibility
+      with BLAS.
+
+commit 570a154581bdb353fa13a219c7cb3c81d3dceffd
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Jul 12 17:51:05 2014 -0500
+
+    Comment/formatting updates to build scripts.
+    
+    Details:
+    - Minor updates to comments and formatting in bump-version.sh and
+      update-version-file.sh scripts.
+
+commit 26cd81990631ff799791629206e068126ff9e3a1
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jul 10 13:16:07 2014 -0500
+
+    Added bli_info_*() query functions.
+    
+    Details:
+    - Added a new API family, bli_info_*(), which can be used to query
+      information about how BLIS was configured. Most of these values are
+      returned as gint_t, with the exception of the version string which
+      is char*.
+    - Changed how the testsuite driver queries information about how BLIS
+      was configured (from using macro constants directly to using the
+      new bli_info API).
+    - Removed bli_version.c and its header file.
+    - Added STRINGIFY_INT() macro to bli_macro_defs.h
+    - Renamed info_t type in bli_type_defs.h to objbits_t (not because of
+      an actual naming conflict, but because the name 'info_t' would now be
+      somewhat misleading in the presence of the new bli_info API, as the
+      two are unrelated).
+
+commit 970b43141697d8c31a033f59513bb59d7cc78ab0
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jul 10 09:30:00 2014 -0500
+
+    Minor bugfixes to BLAS compatibility layer.
+    
+    Details:
+    - Changed bla_amax.c so that i?amax() routines now correctly return 0
+      if ( n < 1 || incx <= 0 ).
+    - Changed bla_rotg.c and bla_rotmg.c to use bli_fabs() macro instead of
+      f2c's abs() macro for float and double cases.
+    - Thanks to Murtaza Ali for suggesting the two fixes above.
+    - Updated label of fnormv to normfv in testsuite/input.operations.
+
+commit 8ccdfaef4c42ad8957af8607a1a9ee29b9277d4b
+Author: Marat Dukhan <maratek@gmail.com>
+Date:   Tue Jul 8 23:14:36 2014 -0700
+
+    Replicated logic from testsuite/Makefile in top-level Makefile to support make test
+
+commit caa6507ff3724c80d60987f309b8bbc5b50a9841
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jul 8 10:25:27 2014 -0500
+
+    Minor cleanup to standalone test drivers.
+    
+    Details:
+    - Very minor code changes to standalone test drivers in 'test' directory.
+    - Added *.so files to '.gitignore'.
+
+commit 6c65e9a58fe55990ebb99ec3986443e18af35338
+Merge: cb12e45 daca500
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jul 8 10:13:49 2014 -0500
+
+    Merge branch 'master' of github.com:flame/blis
+
+commit cb12e456f94c196c093e52f02a7cbca0032fc86e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jul 8 10:07:46 2014 -0500
+
+    Fixed possible level-3 inf/NaN issue when beta=0.
+    
+    Details:
+    - Redefined xpbys_mxn and xpbys_mxn_u/_l macros to employ a copy
+      (instead of scaling by beta) when beta is zero. This will stamp out
+      any possible infs or NaNs in the output matrix, if it happens to be
+      uninitialized. Thanks to Tony Kelman for isolating this bug.
+
+commit daca500db5e2448ba0da8047b75eb0f88d9f40e3
+Merge: ab3bc91 4702350
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Thu Jul 3 12:52:52 2014 -0500
+
+    Merge branch 'master' of http://github.com/flame/blis
+
+commit 4702350278af31f662b458127777dd4d85a3192f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jul 3 11:48:23 2014 -0500
+
+    Defined _ukernel_void() wrappers to micro-kernels.
+    
+    Details:
+    - Added wrappers for micro-kernels so that users may invoke the
+      micro-kernels without knowing what the function names actually are.
+      This is useful when an application wishes to call the micro-kernel
+      from a shared library instance of BLIS, where the application may not
+      necessarily have the luxury of grabbing the micro-kernel name(s) from
+      C preprocessor macros at compile-time. Also, since the wrappers use
+      void* pointers, one's environment does not need to be aware of some
+      BLIS types such as scomplex and dcomplex. These wrappers now join the
+      level-1 and level-1f kernel wrappers, which pre-dated this commit.
+    - Removed the wrapper definitions and prototypes from the micro-kernel
+      test suite modules, and replaced calls to them with calls to the new
+      wrappers mentioned above.
+
+commit ab3bc9153b914fbaf259e15b66c91d628e7c8661
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Thu Jul 3 11:19:43 2014 -0500
+
+    Fixed a bug for TRSM when BLIS_ENABLE_MULTITHREADING is not set but the multithreading environment variables are turned on
+
+commit b8134b720b985783ee6a582a3eb5d6c51f00d051
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Wed Jul 2 16:02:39 2014 -0500
+
+    Quick and dirty multithreading for TRSM
+    
+    Should work fine for small number of threads (up to 8 or maybe even 16).
+    However, performance is yet untested.
+    This parallelizes the "JR" loop for the left sided cases
+    and the "IR" loop for the right sided cases.
+    
+    Future work is to parallelize the outer loops as well.
+
+commit e8ef69692831db07ddbe9485a5e504ac3f03e496
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jul 2 14:59:27 2014 -0500
+
+    Added shared library support to build system.
+    
+    Details:
+    - Modified top-level Makefile to support building shared (dynamic)
+      libraries.
+    - Updated most configurations' make_defs.mk files to include necessary
+      compiler/linker flags needed by top-level Makefile.
+    - Note that by default, all configurations presently do NOT build
+      shared libraries. To enable, one must change the value of
+      BLIS_ENABLE_DYNAMIC_BUILD to 'yes'.
+
+commit b80df0f2cffb015da02e70a82b8512da9891ab67
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jun 23 13:52:39 2014 -0500
+
+    Added bump-version.sh script to 'build' directory.
+    
+    Details:
+    - Added a bash script, bump-version.sh, to aid in incrementing the BLIS
+      version string.
+
+commit 9ef1f1e21d083697fc730e48d7d9169c201f3da2
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jun 23 13:48:17 2014 -0500
+
+    CHANGELOG update (0.1.3)
+
+commit 036cc634918463b1caa0fd89c9a211f2f5639af7 (tag: 0.1.3)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Mon Jun 23 13:48:17 2014 -0500
 
@@ -26,7 +574,7 @@ Date:   Mon Jun 23 10:42:29 2014 -0500
 
     Removed 'version' from .gitignore file.
 
-commit b40dcefc5ee31f67aa3990e2e9d2ef8ed1386a25 (origin/master)
+commit b40dcefc5ee31f67aa3990e2e9d2ef8ed1386a25
 Merge: 7101a8e b693b0c
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Mon Jun 23 10:39:05 2014 -0500
