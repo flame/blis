@@ -112,6 +112,7 @@ extern "C" {
 #include "bli_machval.h"
 #include "bli_info.h"
 #include "bli_getopt.h"
+#include "bli_4m.h"
 
 // Control tree definitions.
 #include "bli_cntl.h"
