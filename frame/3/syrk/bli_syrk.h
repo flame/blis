@@ -33,6 +33,7 @@
 */
 
 #include "bli_syrk_check.h"
+#include "bli_syrk_entry.h"
 #include "bli_syrk_front.h"
 
 #include "bli_syrk4m.h"

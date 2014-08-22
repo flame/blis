@@ -33,6 +33,7 @@
 */
 
 #include "bli_hemm_check.h"
+#include "bli_hemm_entry.h"
 #include "bli_hemm_front.h"
 
 #include "bli_hemm4m.h"

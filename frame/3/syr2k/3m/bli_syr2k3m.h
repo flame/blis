@@ -32,6 +32,8 @@
 
 */
 
+#include "bli_syr2k3m_entry.h"
+
 
 //
 // Prototype object-based interface.

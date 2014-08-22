@@ -34,8 +34,6 @@
 
 #include "blis.h"
 
-extern herk_t* herk_cntl;
-
 //
 // Define object-based interface.
 //
@@ -44,19 +42,10 @@ void bli_syrk( obj_t*  alpha,
                obj_t*  beta,
                obj_t*  c )
 {
-	if (
-#ifdef BLIS_ENABLE_SCOMPLEX_VIA_4M
-	     bli_obj_is_scomplex( *c ) ||
-#endif
-#ifdef BLIS_ENABLE_DCOMPLEX_VIA_4M
-	     bli_obj_is_dcomplex( *c ) ||
-#endif
-	     FALSE
-	   )
-		return bli_syrk4m( alpha, a, beta, c );
-
-	bli_syrk_front( alpha, a, beta, c,
-	                herk_cntl );
+	if ( bli_4m_is_enabled( bli_obj_datatype( *c ) ) )
+		bli_syrk4m_entry( alpha, a, beta, c );
+	else
+		bli_syrk_entry( alpha, a, beta, c );
 }
 
 //

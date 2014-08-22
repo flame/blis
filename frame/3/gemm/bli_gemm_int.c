@@ -49,7 +49,7 @@ static FUNCPTR_T vars[6][3] =
     { NULL,               bli_gemm_ker_var2,    bli_gemm_blk_var2f },
     { NULL,               NULL,                 bli_gemm_blk_var3f },
     { NULL,               NULL,                 NULL               },
-    { NULL,               bli_gemm_ker_var5,    NULL               },
+    { NULL,               NULL,                 NULL               },
     { NULL,               NULL,                 NULL               }
 };
 

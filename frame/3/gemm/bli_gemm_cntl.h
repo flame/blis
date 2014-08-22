@@ -32,8 +32,6 @@
 
 */
 
-#include "bli_gemm_cntl_exp.h"
-
 struct gemm_s
 {
 	impl_t             impl_type;

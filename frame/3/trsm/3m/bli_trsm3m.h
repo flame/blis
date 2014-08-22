@@ -33,6 +33,7 @@
 */
 
 #include "bli_trsm3m_cntl.h"
+#include "bli_trsm3m_entry.h"
 
 #include "bli_gemmtrsm3m_l_ukr_ref.h"
 #include "bli_gemmtrsm3m_u_ukr_ref.h"

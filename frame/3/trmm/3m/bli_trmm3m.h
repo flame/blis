@@ -33,6 +33,7 @@
 */
 
 #include "bli_trmm3m_cntl.h"
+#include "bli_trmm3m_entry.h"
 
 
 //

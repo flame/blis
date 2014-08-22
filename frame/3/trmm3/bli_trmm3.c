@@ -34,9 +34,6 @@
 
 #include "blis.h"
 
-extern trmm_t* trmm_l_cntl;
-extern trmm_t* trmm_r_cntl;
-
 //
 // Define object-based interface.
 //
@@ -47,20 +44,10 @@ void bli_trmm3( side_t  side,
                 obj_t*  beta,
                 obj_t*  c )
 {
-	if (
-#ifdef BLIS_ENABLE_SCOMPLEX_VIA_4M
-	     bli_obj_is_scomplex( *c ) ||
-#endif
-#ifdef BLIS_ENABLE_DCOMPLEX_VIA_4M
-	     bli_obj_is_dcomplex( *c ) ||
-#endif
-	     FALSE
-	   )
-		return bli_trmm34m( side, alpha, a, b, beta, c );
-
-	bli_trmm3_front( side, alpha, a, b, beta, c,
-	                 trmm_l_cntl,
-	                 trmm_r_cntl );
+	if ( bli_4m_is_enabled( bli_obj_datatype( *c ) ) )
+		bli_trmm34m_entry( side, alpha, a, b, beta, c );
+	else
+		bli_trmm3_entry( side, alpha, a, b, beta, c );
 }
 
 //

@@ -34,11 +34,6 @@
 
 #include "blis.h"
 
-extern trmm_t* trmm3m_l_cntl;
-extern trmm_t* trmm3m_r_cntl;
-extern trmm_t* trmm_l_cntl;
-extern trmm_t* trmm_r_cntl;
-
 //
 // Define object-based interface.
 //
@@ -49,17 +44,12 @@ void bli_trmm33m( side_t  side,
                   obj_t*  beta,
                   obj_t*  c )
 {
-	trmm_t* l_cntl;
-	trmm_t* r_cntl;
-
 	// Since 3m only applies to the complex domain, we use the regular
 	// control tree for real domain cases.
-	if ( bli_obj_is_complex( *c ) ) { l_cntl = trmm3m_l_cntl; r_cntl = trmm3m_r_cntl; }
-	else                            { l_cntl = trmm_l_cntl;   r_cntl = trmm_r_cntl; }
-
-	bli_trmm3_front( side, alpha, a, b, beta, c,
-	                 l_cntl,
-	                 r_cntl );
+	if ( bli_obj_is_complex( *c ) )
+		bli_trmm33m_entry( side, alpha, a, b, beta, c );
+	else
+		bli_trmm3_entry( side, alpha, a, b, beta, c );
 }
 
 //

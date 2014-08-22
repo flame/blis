@@ -34,9 +34,6 @@
 
 #include "blis.h"
 
-extern gemm_t*  gemm3m_cntl;
-extern gemm_t*  gemm_cntl;
-
 //
 // Define object-based interface.
 //
@@ -46,15 +43,12 @@ void bli_gemm3m( obj_t*  alpha,
                  obj_t*  beta,
                  obj_t*  c )
 {
-	gemm_t* cntl;
-
 	// Since 3m only applies to the complex domain, we use the regular
-	// control tree for real domain cases.
-	if ( bli_obj_is_complex( *c ) ) cntl = gemm3m_cntl;
-	else                            cntl = gemm_cntl;
-
-	bli_gemm_front( alpha, a, b, beta, c,
-	                cntl );
+	// implementation for real domain cases.
+	if ( bli_obj_is_complex( *c ) )
+		bli_gemm3m_entry( alpha, a, b, beta, c );
+	else
+		bli_gemm_entry( alpha, a, b, beta, c );
 }
 
 //

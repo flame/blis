@@ -33,6 +33,7 @@
 */
 
 #include "bli_herk3m_cntl.h"
+#include "bli_herk3m_entry.h"
 
 
 //
