@@ -524,11 +524,11 @@
 
 #define bli_is_4m_packed( schema ) \
 \
-	( ( schema & BLIS_PACK_4M_BIT ) )
+	( ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_4M )
 
 #define bli_is_3m_packed( schema ) \
 \
-	( ( schema & BLIS_PACK_3M_BIT ) )
+	( ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_3M )
 
 
 
