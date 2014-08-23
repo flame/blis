@@ -371,7 +371,7 @@ void PASTEMAC(ch,varname)( \
 \
 			if( packm_thread_my_iter( it, thread ) ) \
 			{ \
-			PASTEMAC(ch,packm_tri_cxk_ri)( strucc, \
+			PASTEMAC(ch,packm_tri_cxk_4m)( strucc, \
 			                               diagoffp_i, \
 			                               diagc, \
 			                               uploc, \
@@ -418,7 +418,7 @@ void PASTEMAC(ch,varname)( \
 \
 			if( packm_thread_my_iter( it, thread ) ) \
 			{ \
-			PASTEMAC(ch,packm_herm_cxk_ri)( strucc, \
+			PASTEMAC(ch,packm_herm_cxk_4m)( strucc, \
 			                                diagoffc_i, \
 			                                uploc, \
 			                                conjc, \
@@ -445,7 +445,7 @@ void PASTEMAC(ch,varname)( \
 \
 			if( packm_thread_my_iter( it, thread ) ) \
 			{ \
-			PASTEMAC(ch,packm_gen_cxk_ri)( BLIS_GENERAL, \
+			PASTEMAC(ch,packm_gen_cxk_4m)( BLIS_GENERAL, \
 			                               0, \
 			                               BLIS_DENSE, \
 			                               conjc, \

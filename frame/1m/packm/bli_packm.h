@@ -50,6 +50,6 @@
 #include "bli_packm_tri_cxk.h"
 
 #include "bli_packm_cxk.h"
-#include "bli_packm_cxk_ri.h"
-#include "bli_packm_cxk_ri3.h"
+#include "bli_packm_cxk_4m.h"
+#include "bli_packm_cxk_3m.h"
 

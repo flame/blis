@@ -32,7 +32,7 @@
 
 */
 
-#include "bli_packm_ref_cxk_ri3.h"
+#include "bli_packm_ref_cxk_4m.h"
 
 
 #undef  GENTPROTCO
@@ -44,8 +44,8 @@ void PASTEMAC(ch,varname)( \
                            dim_t   n, \
                            void*   beta, \
                            void*   a, inc_t inca, inc_t lda, \
-                           void*   p, inc_t psp,  inc_t ldp \
+                           void*   p, inc_t psp,  inc_t ldp  \
                          );
 
-INSERT_GENTPROTCO_BASIC( packm_cxk_ri3 )
+INSERT_GENTPROTCO_BASIC( packm_cxk_4m )
 

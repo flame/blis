@@ -192,7 +192,7 @@ void PASTEMAC(ch,varname)( \
 \
 \
 	/* Pack the panel. */ \
-	PASTEMAC(ch,packm_cxk_ri)( conjc, \
+	PASTEMAC(ch,packm_cxk_4m)( conjc, \
 	                           panel_dim, \
 	                           panel_len, \
 	                           kappa, \
@@ -256,7 +256,7 @@ void PASTEMAC(ch,varname)( \
 	} \
 }
 
-INSERT_GENTFUNCCO_BASIC0( packm_gen_cxk_ri )
+INSERT_GENTFUNCCO_BASIC0( packm_gen_cxk_4m )
 
 
 
@@ -317,12 +317,12 @@ void PASTEMAC(ch,varname)( \
 \
 \
 	/* Pack the panel. */ \
-	PASTEMAC(ch,packm_cxk_ri3)( conjc, \
-	                            panel_dim, \
-	                            panel_len, \
-	                            kappa, \
-	                            c, incc, ldc, \
-	                            p, psp,  ldp ); \
+	PASTEMAC(ch,packm_cxk_3m)( conjc, \
+	                           panel_dim, \
+	                           panel_len, \
+	                           kappa, \
+	                           c, incc, ldc, \
+	                           p, psp,  ldp ); \
 \
 \
 	/* The packed memory region was acquired/allocated with "aligned"
@@ -334,12 +334,12 @@ void PASTEMAC(ch,varname)( \
 	   different register blockings for the edge cases. */ \
 	if ( m_panel != m_panel_max ) \
 	{ \
-		dim_t    i         = m_panel; \
-		dim_t    m_edge    = m_panel_max - i; \
-		dim_t    n_edge    = n_panel_max; \
-		ctype_r* p_edge_r  = ( ctype_r* )p +         (i  )*rs_p; \
-		ctype_r* p_edge_i  = ( ctype_r* )p +   psp + (i  )*rs_p; \
-		ctype_r* p_edge_ri = ( ctype_r* )p + 2*psp + (i  )*rs_p; \
+		dim_t    i          = m_panel; \
+		dim_t    m_edge     = m_panel_max - i; \
+		dim_t    n_edge     = n_panel_max; \
+		ctype_r* p_edge_r   = ( ctype_r* )p +         (i  )*rs_p; \
+		ctype_r* p_edge_i   = ( ctype_r* )p +   psp + (i  )*rs_p; \
+		ctype_r* p_edge_rpi = ( ctype_r* )p + 2*psp + (i  )*rs_p; \
 \
 		PASTEMAC(chr,setm)( 0, \
 		                    BLIS_NONUNIT_DIAG, \
@@ -361,17 +361,17 @@ void PASTEMAC(ch,varname)( \
 		                    m_edge, \
 		                    n_edge, \
 		                    zero_r, \
-		                    p_edge_ri, rs_p, cs_p ); \
+		                    p_edge_rpi, rs_p, cs_p ); \
 	} \
 \
 	if ( n_panel != n_panel_max ) \
 	{ \
-		dim_t    j         = n_panel; \
-		dim_t    m_edge    = m_panel_max; \
-		dim_t    n_edge    = n_panel_max - j; \
-		ctype_r* p_edge_r  = ( ctype_r* )p +         (j  )*cs_p; \
-		ctype_r* p_edge_i  = ( ctype_r* )p +   psp + (j  )*cs_p; \
-		ctype_r* p_edge_ri = ( ctype_r* )p + 2*psp + (j  )*cs_p; \
+		dim_t    j          = n_panel; \
+		dim_t    m_edge     = m_panel_max; \
+		dim_t    n_edge     = n_panel_max - j; \
+		ctype_r* p_edge_r   = ( ctype_r* )p +         (j  )*cs_p; \
+		ctype_r* p_edge_i   = ( ctype_r* )p +   psp + (j  )*cs_p; \
+		ctype_r* p_edge_rpi = ( ctype_r* )p + 2*psp + (j  )*cs_p; \
 \
 		PASTEMAC(chr,setm)( 0, \
 		                    BLIS_NONUNIT_DIAG, \
@@ -393,9 +393,9 @@ void PASTEMAC(ch,varname)( \
 		                    m_edge, \
 		                    n_edge, \
 		                    zero_r, \
-		                    p_edge_ri, rs_p, cs_p ); \
+		                    p_edge_rpi, rs_p, cs_p ); \
 	} \
 }
 
-INSERT_GENTFUNCCO_BASIC0( packm_gen_cxk_ri3 )
+INSERT_GENTFUNCCO_BASIC0( packm_gen_cxk_3m )
 

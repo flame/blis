@@ -73,7 +73,7 @@ void PASTEMAC(ch,varname)( \
                            ctype* restrict p, inc_t rs_p, inc_t cs_p  \
                          );
 
-INSERT_GENTPROTCO_BASIC( packm_tri_cxk_ri )
+INSERT_GENTPROTCO_BASIC( packm_tri_cxk_4m )
 
-INSERT_GENTPROTCO_BASIC( packm_tri_cxk_ri3 )
+INSERT_GENTPROTCO_BASIC( packm_tri_cxk_3m )
 

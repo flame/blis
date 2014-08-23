@@ -371,19 +371,19 @@ void PASTEMAC(ch,varname)( \
 \
 			if( packm_thread_my_iter( it, thread ) ) \
 			{ \
-			PASTEMAC(ch,packm_tri_cxk_ri3)( strucc, \
-			                                diagoffp_i, \
-			                                diagc, \
-			                                uploc, \
-			                                conjc, \
-			                                invdiag, \
-			                                *m_panel_use, \
-			                                *n_panel_use, \
-			                                *m_panel_max, \
-			                                *n_panel_max, \
-			                                kappa_cast, \
-			                                c_use, rs_c, cs_c, \
-			                                p_use, rs_p, cs_p ); \
+			PASTEMAC(ch,packm_tri_cxk_3m)( strucc, \
+			                               diagoffp_i, \
+			                               diagc, \
+			                               uploc, \
+			                               conjc, \
+			                               invdiag, \
+			                               *m_panel_use, \
+			                               *n_panel_use, \
+			                               *m_panel_max, \
+			                               *n_panel_max, \
+			                               kappa_cast, \
+			                               c_use, rs_c, cs_c, \
+			                               p_use, rs_p, cs_p ); \
 			} \
 \
 \
@@ -411,17 +411,17 @@ void PASTEMAC(ch,varname)( \
 \
 			if( packm_thread_my_iter( it, thread ) ) \
 			{ \
-			PASTEMAC(ch,packm_herm_cxk_ri3)( strucc, \
-			                                 diagoffc_i, \
-			                                 uploc, \
-			                                 conjc, \
-			                                 *m_panel_use, \
-			                                 *n_panel_use, \
-			                                 *m_panel_max, \
-			                                 *n_panel_max, \
-			                                 kappa_cast, \
-			                                 c_begin, rs_c, cs_c, \
-			                                 p_begin, rs_p, cs_p ); \
+			PASTEMAC(ch,packm_herm_cxk_3m)( strucc, \
+			                                diagoffc_i, \
+			                                uploc, \
+			                                conjc, \
+			                                *m_panel_use, \
+			                                *n_panel_use, \
+			                                *m_panel_max, \
+			                                *n_panel_max, \
+			                                kappa_cast, \
+			                                c_begin, rs_c, cs_c, \
+			                                p_begin, rs_p, cs_p ); \
 			} \
 \
 			/* NOTE: This value is equivalent to (ps_p*3)/2. */ \
@@ -438,17 +438,17 @@ void PASTEMAC(ch,varname)( \
 \
 			if( packm_thread_my_iter( it, thread ) ) \
 			{ \
-			PASTEMAC(ch,packm_gen_cxk_ri3)( BLIS_GENERAL, \
-			                                0, \
-			                                BLIS_DENSE, \
-			                                conjc, \
-			                                *m_panel_use, \
-			                                *n_panel_use, \
-			                                *m_panel_max, \
-			                                *n_panel_max, \
-			                                kappa_cast, \
-			                                c_begin, rs_c, cs_c, \
-			                                p_begin, rs_p, cs_p ); \
+			PASTEMAC(ch,packm_gen_cxk_3m)( BLIS_GENERAL, \
+			                               0, \
+			                               BLIS_DENSE, \
+			                               conjc, \
+			                               *m_panel_use, \
+			                               *n_panel_use, \
+			                               *m_panel_max, \
+			                               *n_panel_max, \
+			                               kappa_cast, \
+			                               c_begin, rs_c, cs_c, \
+			                               p_begin, rs_p, cs_p ); \
 			} \
 \
 			/* NOTE: This value is equivalent to (ps_p*3)/2. */ \

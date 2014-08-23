@@ -60,9 +60,9 @@ static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] =
 	/* panel width = 2 */
 	{
 		NULL,
-		BLIS_CPACKM_2XK_RI3_KERNEL,
+		BLIS_CPACKM_2XK_4M_KERNEL,
 		NULL,
-		BLIS_ZPACKM_2XK_RI3_KERNEL,
+		BLIS_ZPACKM_2XK_4M_KERNEL,
 	},
 	/* panel width = 3 */
 	{
@@ -71,9 +71,9 @@ static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] =
 	/* panel width = 4 */
 	{
 		NULL,
-		BLIS_CPACKM_4XK_RI3_KERNEL,
+		BLIS_CPACKM_4XK_4M_KERNEL,
 		NULL,
-		BLIS_ZPACKM_4XK_RI3_KERNEL,
+		BLIS_ZPACKM_4XK_4M_KERNEL,
 	},
 	/* panel width = 5 */
 	{
@@ -82,9 +82,9 @@ static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] =
 	/* panel width = 6 */
 	{
 		NULL,
-		BLIS_CPACKM_6XK_RI3_KERNEL,
+		BLIS_CPACKM_6XK_4M_KERNEL,
 		NULL,
-		BLIS_ZPACKM_6XK_RI3_KERNEL,
+		BLIS_ZPACKM_6XK_4M_KERNEL,
 	},
 	/* panel width = 7 */
 	{
@@ -93,9 +93,9 @@ static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] =
 	/* panel width = 8 */
 	{
 		NULL,
-		BLIS_CPACKM_8XK_RI3_KERNEL,
+		BLIS_CPACKM_8XK_4M_KERNEL,
 		NULL,
-		BLIS_ZPACKM_8XK_RI3_KERNEL,
+		BLIS_ZPACKM_8XK_4M_KERNEL,
 	},
 	/* panel width = 9 */
 	{
@@ -104,9 +104,9 @@ static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] =
 	/* panel width = 10 */
 	{
 		NULL,
-		BLIS_CPACKM_10XK_RI3_KERNEL,
+		BLIS_CPACKM_10XK_4M_KERNEL,
 		NULL,
-		BLIS_ZPACKM_10XK_RI3_KERNEL,
+		BLIS_ZPACKM_10XK_4M_KERNEL,
 	},
 	/* panel width = 11 */
 	{
@@ -115,9 +115,9 @@ static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] =
 	/* panel width = 12 */
 	{
 		NULL,
-		BLIS_CPACKM_12XK_RI3_KERNEL,
+		BLIS_CPACKM_12XK_4M_KERNEL,
 		NULL,
-		BLIS_ZPACKM_12XK_RI3_KERNEL,
+		BLIS_ZPACKM_12XK_4M_KERNEL,
 	},
 	/* panel width = 13 */
 	{
@@ -126,9 +126,9 @@ static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] =
 	/* panel width = 14 */
 	{
 		NULL,
-		BLIS_CPACKM_14XK_RI3_KERNEL,
+		BLIS_CPACKM_14XK_4M_KERNEL,
 		NULL,
-		BLIS_ZPACKM_14XK_RI3_KERNEL,
+		BLIS_ZPACKM_14XK_4M_KERNEL,
 	},
 	/* panel width = 15 */
 	{
@@ -137,15 +137,16 @@ static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] =
 	/* panel width = 16 */
 	{
 		NULL,
-		BLIS_CPACKM_16XK_RI3_KERNEL,
+		BLIS_CPACKM_16XK_4M_KERNEL,
 		NULL,
-		BLIS_ZPACKM_16XK_RI3_KERNEL,
+		BLIS_ZPACKM_16XK_4M_KERNEL,
 	},
 	/* panel width = 17 */
 	{
 		NULL, NULL, NULL, NULL,
 	},
 };
+
 
 
 
@@ -196,8 +197,7 @@ void PASTEMAC(ch,varname)( \
 		ctype_r* restrict a_r     = ( ctype_r* )a; \
 		ctype_r* restrict a_i     = ( ctype_r* )a + 1; \
 		ctype_r* restrict p_r     = ( ctype_r* )p; \
-		ctype_r* restrict p_i     = ( ctype_r* )p +   psp; \
-		ctype_r* restrict p_ri    = ( ctype_r* )p + 2*psp; \
+		ctype_r* restrict p_i     = ( ctype_r* )p + psp; \
 		dim_t             inca2   = 2*inca; \
 		dim_t             lda2    = 2*lda; \
 \
@@ -212,19 +212,17 @@ void PASTEMAC(ch,varname)( \
 			{ \
 				for ( i = 0; i < m; ++i ) \
 				{ \
-					ctype_r* restrict alpha11_r = a_r  + (i  )*inca2 + (j  )*lda2; \
-					ctype_r* restrict alpha11_i = a_i  + (i  )*inca2 + (j  )*lda2; \
-					ctype_r* restrict pi11_r    = p_r  + (i  )*1     + (j  )*ldp; \
-					ctype_r* restrict pi11_i    = p_i  + (i  )*1     + (j  )*ldp; \
-					ctype_r* restrict pi11_ri   = p_ri + (i  )*1     + (j  )*ldp; \
+					ctype_r* restrict alpha11_r = a_r + (i  )*inca2 + (j  )*lda2; \
+					ctype_r* restrict alpha11_i = a_i + (i  )*inca2 + (j  )*lda2; \
+					ctype_r* restrict pi11_r    = p_r + (i  )*1     + (j  )*ldp; \
+					ctype_r* restrict pi11_i    = p_i + (i  )*1     + (j  )*ldp; \
 \
-					PASTEMAC(ch,scal2jri3s)( *kappa_r, \
-					                         *kappa_i, \
-					                         *alpha11_r, \
-					                         *alpha11_i, \
-					                         *pi11_r, \
-					                         *pi11_i, \
-					                         *pi11_ri ); \
+					PASTEMAC(ch,scal2jris)( *kappa_r, \
+					                        *kappa_i, \
+					                        *alpha11_r, \
+					                        *alpha11_i, \
+					                        *pi11_r, \
+					                        *pi11_i ); \
 				} \
 			} \
 		} \
@@ -234,24 +232,22 @@ void PASTEMAC(ch,varname)( \
 			{ \
 				for ( i = 0; i < m; ++i ) \
 				{ \
-					ctype_r* restrict alpha11_r = a_r  + (i  )*inca2 + (j  )*lda2; \
-					ctype_r* restrict alpha11_i = a_i  + (i  )*inca2 + (j  )*lda2; \
-					ctype_r* restrict pi11_r    = p_r  + (i  )*1     + (j  )*ldp; \
-					ctype_r* restrict pi11_i    = p_i  + (i  )*1     + (j  )*ldp; \
-					ctype_r* restrict pi11_ri   = p_ri + (i  )*1     + (j  )*ldp; \
+					ctype_r* restrict alpha11_r = a_r + (i  )*inca2 + (j  )*lda2; \
+					ctype_r* restrict alpha11_i = a_i + (i  )*inca2 + (j  )*lda2; \
+					ctype_r* restrict pi11_r    = p_r + (i  )*1     + (j  )*ldp; \
+					ctype_r* restrict pi11_i    = p_i + (i  )*1     + (j  )*ldp; \
 \
-					PASTEMAC(ch,scal2ri3s)( *kappa_r, \
-					                        *kappa_i, \
-					                        *alpha11_r, \
-					                        *alpha11_i, \
-					                        *pi11_r, \
-					                        *pi11_i, \
-					                        *pi11_ri ); \
+					PASTEMAC(ch,scal2ris)( *kappa_r, \
+					                       *kappa_i, \
+					                       *alpha11_r, \
+					                       *alpha11_i, \
+					                       *pi11_r, \
+					                       *pi11_i ); \
 				} \
 			} \
 		} \
 	} \
 }
 
-INSERT_GENTFUNCCO_BASIC0( packm_cxk_ri3 )
+INSERT_GENTFUNCCO_BASIC0( packm_cxk_4m )
 
