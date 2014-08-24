@@ -32,15 +32,7 @@
 
 */
 
-// Include headers for various unpackm kernels.
-#include "bli_unpackm_ref_2xk.h"
-#include "bli_unpackm_ref_4xk.h"
-#include "bli_unpackm_ref_6xk.h"
-#include "bli_unpackm_ref_8xk.h"
-#include "bli_unpackm_ref_10xk.h"
-#include "bli_unpackm_ref_12xk.h"
-#include "bli_unpackm_ref_14xk.h"
-#include "bli_unpackm_ref_16xk.h"
+#include "bli_unpackm_ref_cxk.h"
 
 
 #undef  GENTPROT
