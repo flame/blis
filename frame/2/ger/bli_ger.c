@@ -76,9 +76,9 @@ void bli_ger( obj_t*  alpha,
 	// unnecessary loss of information during the computation.
 	dt_alpha = bli_datatype_union( dt_targ_x, dt_targ_y );
 	bli_obj_scalar_init_detached_copy_of( dt_alpha,
-	                             BLIS_NO_CONJUGATE,
-	                             alpha,
-	                             &alpha_local );
+	                                      BLIS_NO_CONJUGATE,
+	                                      alpha,
+	                                      &alpha_local );
 
 
 	// If all operands have unit stride, we choose a control tree for calling

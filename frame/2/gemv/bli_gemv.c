@@ -79,9 +79,9 @@ void bli_gemv( obj_t*  alpha,
 	// unnecessary loss of information during the computation.
 	dt_alpha = bli_datatype_union( dt_targ_a, dt_targ_x );
 	bli_obj_scalar_init_detached_copy_of( dt_alpha,
-	                             BLIS_NO_CONJUGATE,
-	                             alpha,
-	                             &alpha_local );
+	                                      BLIS_NO_CONJUGATE,
+	                                      alpha,
+	                                      &alpha_local );
 
 	// Create an object to hold a copy-cast of beta. Notice that we use
 	// the datatype of y. Here's why: If y is real and beta is complex,
@@ -90,9 +90,9 @@ void bli_gemv( obj_t*  alpha,
 	// beta is real then beta is harmlessly promoted to complex.
 	dt_beta = dt_targ_y;
 	bli_obj_scalar_init_detached_copy_of( dt_beta,
-	                             BLIS_NO_CONJUGATE,
-	                             beta,
-	                             &beta_local );
+	                                      BLIS_NO_CONJUGATE,
+	                                      beta,
+	                                      &beta_local );
 
 
 	// If all operands have unit stride, we choose a control tree for calling

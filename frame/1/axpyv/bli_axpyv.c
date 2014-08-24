@@ -59,9 +59,9 @@ void PASTEMAC0(opname)( \
 \
 	/* Create an object to hold a copy-cast of alpha. */ \
 	bli_obj_scalar_init_detached_copy_of( dt_x, \
-	                             BLIS_NO_CONJUGATE, \
-	                             alpha, \
-	                             &alpha_local ); \
+	                                      BLIS_NO_CONJUGATE, \
+	                                      alpha, \
+	                                      &alpha_local ); \
 \
 	PASTEMAC0(varname)( &alpha_local, \
 	                    x, \
