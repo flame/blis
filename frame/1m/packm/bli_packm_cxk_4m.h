@@ -42,7 +42,7 @@ void PASTEMAC(ch,varname)( \
                            conj_t  conja, \
                            dim_t   m, \
                            dim_t   n, \
-                           void*   beta, \
+                           void*   kappa, \
                            void*   a, inc_t inca, inc_t lda, \
                            void*   p, inc_t psp,  inc_t ldp  \
                          );
