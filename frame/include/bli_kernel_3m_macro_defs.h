@@ -49,7 +49,7 @@
 // -- Define default 3m-specific kernel names ----------------------------------
 
 //
-// Level-3 3m
+// Level-3
 //
 
 // gemm3m micro-kernels
@@ -216,44 +216,44 @@
 
 // 3m cache blocksizes
 #ifndef BLIS_DEFAULT_3M_MC_C
-#define BLIS_DEFAULT_3M_MC_C     ((BLIS_DEFAULT_MC_S)/1)
+#define BLIS_DEFAULT_3M_MC_C     BLIS_DEFAULT_MC_S
 #endif
 #ifndef BLIS_DEFAULT_3M_KC_C
-#define BLIS_DEFAULT_3M_KC_C     ((BLIS_DEFAULT_KC_S)/2)
+#define BLIS_DEFAULT_3M_KC_C   ((BLIS_DEFAULT_KC_S)/2)
 #endif
 #ifndef BLIS_DEFAULT_3M_NC_C
-#define BLIS_DEFAULT_3M_NC_C     ((BLIS_DEFAULT_NC_S)/1)
+#define BLIS_DEFAULT_3M_NC_C     BLIS_DEFAULT_NC_S
 #endif
 
 #ifndef BLIS_DEFAULT_3M_MC_Z
-#define BLIS_DEFAULT_3M_MC_Z     ((BLIS_DEFAULT_MC_D)/1)
+#define BLIS_DEFAULT_3M_MC_Z     BLIS_DEFAULT_MC_D
 #endif
 #ifndef BLIS_DEFAULT_3M_KC_Z
-#define BLIS_DEFAULT_3M_KC_Z     ((BLIS_DEFAULT_KC_D)/2)
+#define BLIS_DEFAULT_3M_KC_Z   ((BLIS_DEFAULT_KC_D)/2)
 #endif
 #ifndef BLIS_DEFAULT_3M_NC_Z
-#define BLIS_DEFAULT_3M_NC_Z     ((BLIS_DEFAULT_NC_D)/1)
+#define BLIS_DEFAULT_3M_NC_Z     BLIS_DEFAULT_NC_D
 #endif
 
 // 3m cache blocksize extensions
 #ifndef BLIS_EXTEND_3M_MC_C
-#define BLIS_EXTEND_3M_MC_C      0
+#define BLIS_EXTEND_3M_MC_C      BLIS_EXTEND_MC_S
 #endif
 #ifndef BLIS_EXTEND_3M_KC_C
-#define BLIS_EXTEND_3M_KC_C      0
+#define BLIS_EXTEND_3M_KC_C    ((BLIS_EXTEND_KC_S)/2)
 #endif
 #ifndef BLIS_EXTEND_3M_NC_C
-#define BLIS_EXTEND_3M_NC_C      0
+#define BLIS_EXTEND_3M_NC_C      BLIS_EXTEND_NC_S
 #endif
 
 #ifndef BLIS_EXTEND_3M_MC_Z
-#define BLIS_EXTEND_3M_MC_Z      0
+#define BLIS_EXTEND_3M_MC_Z      BLIS_EXTEND_MC_D
 #endif
 #ifndef BLIS_EXTEND_3M_KC_Z
-#define BLIS_EXTEND_3M_KC_Z      0
+#define BLIS_EXTEND_3M_KC_Z    ((BLIS_EXTEND_KC_D)/2)
 #endif
 #ifndef BLIS_EXTEND_3M_NC_Z
-#define BLIS_EXTEND_3M_NC_Z      0
+#define BLIS_EXTEND_3M_NC_Z      BLIS_EXTEND_NC_D
 #endif
 
 

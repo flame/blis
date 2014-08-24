@@ -215,11 +215,11 @@
 
 #define bli_obj_is_4m_packed( obj ) \
 \
-	( ( (obj).info & BLIS_PACK_4M_BIT ) )
+	( ( (obj).info & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_4M )
 
 #define bli_obj_is_3m_packed( obj ) \
 \
-	( ( (obj).info & BLIS_PACK_3M_BIT ) )
+	( ( (obj).info & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_3M )
 
 #define bli_obj_pack_buffer_type( obj ) \
 \
