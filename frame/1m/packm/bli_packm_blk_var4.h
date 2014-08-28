@@ -46,10 +46,10 @@ void PASTEMAC(ch,varname)( \
                            diag_t  diagc, \
                            uplo_t  uploc, \
                            trans_t transc, \
+                           pack_t  schema, \
                            bool_t  invdiag, \
                            bool_t  revifup, \
                            bool_t  reviflo, \
-                           bool_t  row_stored, \
                            dim_t   m, \
                            dim_t   n, \
                            dim_t   m_max, \

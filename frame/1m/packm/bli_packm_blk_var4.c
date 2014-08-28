@@ -42,10 +42,10 @@ typedef void (*FUNCPTR_T)(
                            diag_t  diagc,
                            uplo_t  uploc,
                            trans_t transc,
+                           pack_t  schema,
                            bool_t  invdiag,
                            bool_t  revifup,
                            bool_t  reviflo,
-                           bool_t  row_stored,
                            dim_t   m,
                            dim_t   n,
                            dim_t   m_max,
@@ -71,10 +71,10 @@ void bli_packm_blk_var4( obj_t*   c,
 	diag_t    diagc      = bli_obj_diag( *c );
 	uplo_t    uploc      = bli_obj_uplo( *c );
 	trans_t   transc     = bli_obj_conjtrans_status( *c );
+	pack_t    schema     = bli_obj_pack_status( *p );
 	bool_t    invdiag    = bli_obj_has_inverted_diag( *p );
 	bool_t    revifup    = bli_obj_is_pack_rev_if_upper( *p );
 	bool_t    reviflo    = bli_obj_is_pack_rev_if_lower( *p );
-	bool_t    row_stored = bli_obj_is_col_packed( *p ); /* column panels are row-stored. */
 
 	dim_t     m_p        = bli_obj_length( *p );
 	dim_t     n_p        = bli_obj_width( *p );
@@ -152,10 +152,10 @@ void bli_packm_blk_var4( obj_t*   c,
 	   diagc,
 	   uploc,
 	   transc,
+	   schema,
 	   invdiag,
 	   revifup,
 	   reviflo,
-	   row_stored,
 	   m_p,
 	   n_p,
 	   m_max_p,
@@ -177,10 +177,10 @@ void PASTEMAC(ch,varname)( \
                            diag_t  diagc, \
                            uplo_t  uploc, \
                            trans_t transc, \
+                           pack_t  schema, \
                            bool_t  invdiag, \
                            bool_t  revifup, \
                            bool_t  reviflo, \
-                           bool_t  row_stored, \
                            dim_t   m, \
                            dim_t   n, \
                            dim_t   m_max, \
@@ -222,6 +222,7 @@ void PASTEMAC(ch,varname)( \
 	dim_t*          m_panel_max; \
 	dim_t*          n_panel_max; \
 	conj_t          conjc; \
+	bool_t          row_stored; \
 	bool_t          col_stored; \
 \
 	ctype* restrict c_use; \
@@ -247,9 +248,12 @@ void PASTEMAC(ch,varname)( \
 		bli_toggle_trans( transc ); \
 	} \
 \
-	/* Create a column storage flag corresponding to the row storage
-	   flag that was passed in. (This is only done for convenience.) */ \
-	col_stored = !row_stored; \
+	/* Create flags to incidate row or column storage. Note that the
+	   schema bit that encodes row or column is describing the form of
+	   micro-panel, not the storage in the micro-panel. Hence the
+	   mismatch in "row" and "column" semantics. */ \
+	row_stored = bli_is_col_packed( schema ); \
+	col_stored = bli_is_row_packed( schema ); \
 \
 	/* If the strides of P indicate row storage, then we are packing to
 	   column panels; otherwise, if the strides indicate column storage,
