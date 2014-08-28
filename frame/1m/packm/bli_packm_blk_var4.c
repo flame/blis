@@ -255,8 +255,8 @@ void PASTEMAC(ch,varname)( \
 	row_stored = bli_is_col_packed( schema ); \
 	col_stored = bli_is_row_packed( schema ); \
 \
-	/* If the strides of P indicate row storage, then we are packing to
-	   column panels; otherwise, if the strides indicate column storage,
+	/* If the row storage flag indicates row storage, then we are packing
+	   to column panels; otherwise, if the strides indicate column storage,
 	   we are packing to row panels. */ \
 	if ( row_stored ) \
 	{ \

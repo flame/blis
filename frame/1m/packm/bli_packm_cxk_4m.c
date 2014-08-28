@@ -198,8 +198,8 @@ void PASTEMAC(ch,varname)( \
 		ctype_r* restrict a_i     = ( ctype_r* )a + 1; \
 		ctype_r* restrict p_r     = ( ctype_r* )p; \
 		ctype_r* restrict p_i     = ( ctype_r* )p + psp; \
-		dim_t             inca2   = 2*inca; \
-		dim_t             lda2    = 2*lda; \
+		const dim_t       inca2   = 2*inca; \
+		const dim_t       lda2    = 2*lda; \
 \
 		/* Treat the panel as m x n and column-stored (unit row stride). */ \
 \
