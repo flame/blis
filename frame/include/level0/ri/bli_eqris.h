@@ -32,44 +32,44 @@
 
 */
 
-#ifndef BLIS_EQRI_H
-#define BLIS_EQRI_H
+#ifndef BLIS_EQRIS_H
+#define BLIS_EQRIS_H
 
 
-// eqri (passed by value)
+// eqris (passed by value)
 
-#define bli_seqri( ar, ai, br, bi )  ( (ar) == (br) )
-#define bli_deqri( ar, ai, br, bi )  ( (ar) == (br) )
-#define bli_ceqri( ar, ai, br, bi )  ( (ar) == (br) && (ai) == (bi) )
-#define bli_zeqri( ar, ai, br, bi )  ( (ar) == (br) && (ai) == (bi) )
-#define bli_ieqri( ar, ai, br, bi )  ( (ar) == (br) )
-
-
-// eq1ri
-
-#define bli_seq1ri( ar, ai )  bli_seqri( (ar), (ai), 1.0F, 0.0F )
-#define bli_deq1ri( ar, ai )  bli_deqri( (ar), (ai), 1.0,  0.0  )
-#define bli_ceq1ri( ar, ai )  bli_ceqri( (ar), (ai), 1.0F, 0.0F )
-#define bli_zeq1ri( ar, ai )  bli_zeqri( (ar), (ai), 1.0,  0.0  )
-#define bli_ieq1ri( ar, ai )  bli_ieqri( (ar), (ai), 1,    0    )
+#define bli_seqris( ar, ai, br, bi )  ( (ar) == (br) )
+#define bli_deqris( ar, ai, br, bi )  ( (ar) == (br) )
+#define bli_ceqris( ar, ai, br, bi )  ( (ar) == (br) && (ai) == (bi) )
+#define bli_zeqris( ar, ai, br, bi )  ( (ar) == (br) && (ai) == (bi) )
+#define bli_ieqris( ar, ai, br, bi )  ( (ar) == (br) )
 
 
-// eq0ri
+// eq1ris
 
-#define bli_seq0ri( ar, ai )  bli_seqri( (ar), (ai), 0.0F, 0.0F )
-#define bli_deq0ri( ar, ai )  bli_deqri( (ar), (ai), 0.0,  0.0  )
-#define bli_ceq0ri( ar, ai )  bli_ceqri( (ar), (ai), 0.0F, 0.0F )
-#define bli_zeq0ri( ar, ai )  bli_zeqri( (ar), (ai), 0.0,  0.0  )
-#define bli_ieq0ri( ar, ai )  bli_ieqri( (ar), (ai), 0,    0    )
+#define bli_seq1ris( ar, ai )  bli_seqris( (ar), (ai), 1.0F, 0.0F )
+#define bli_deq1ris( ar, ai )  bli_deqris( (ar), (ai), 1.0,  0.0  )
+#define bli_ceq1ris( ar, ai )  bli_ceqris( (ar), (ai), 1.0F, 0.0F )
+#define bli_zeq1ris( ar, ai )  bli_zeqris( (ar), (ai), 1.0,  0.0  )
+#define bli_ieq1ris( ar, ai )  bli_ieqris( (ar), (ai), 1,    0    )
 
 
-// eqm1ri
+// eq0ris
 
-#define bli_seqm1ri( ar, ai )  bli_seqri( (ar), (ai), -1.0F, 0.0F )
-#define bli_deqm1ri( ar, ai )  bli_deqri( (ar), (ai), -1.0,  0.0  )
-#define bli_ceqm1ri( ar, ai )  bli_ceqri( (ar), (ai), -1.0F, 0.0F )
-#define bli_zeqm1ri( ar, ai )  bli_zeqri( (ar), (ai), -1.0,  0.0  )
-#define bli_ieqm1ri( ar, ai )  bli_ieqri( (ar), (ai), -1,    0    )
+#define bli_seq0ris( ar, ai )  bli_seqris( (ar), (ai), 0.0F, 0.0F )
+#define bli_deq0ris( ar, ai )  bli_deqris( (ar), (ai), 0.0,  0.0  )
+#define bli_ceq0ris( ar, ai )  bli_ceqris( (ar), (ai), 0.0F, 0.0F )
+#define bli_zeq0ris( ar, ai )  bli_zeqris( (ar), (ai), 0.0,  0.0  )
+#define bli_ieq0ris( ar, ai )  bli_ieqris( (ar), (ai), 0,    0    )
+
+
+// eqm1ris
+
+#define bli_seqm1ris( ar, ai )  bli_seqris( (ar), (ai), -1.0F, 0.0F )
+#define bli_deqm1ris( ar, ai )  bli_deqris( (ar), (ai), -1.0,  0.0  )
+#define bli_ceqm1ris( ar, ai )  bli_ceqris( (ar), (ai), -1.0F, 0.0F )
+#define bli_zeqm1ris( ar, ai )  bli_zeqris( (ar), (ai), -1.0,  0.0  )
+#define bli_ieqm1ris( ar, ai )  bli_ieqris( (ar), (ai), -1,    0    )
 
 
 
