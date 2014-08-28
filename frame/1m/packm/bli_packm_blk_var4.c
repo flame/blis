@@ -189,7 +189,7 @@ void PASTEMAC(ch,varname)( \
                            void*   c, inc_t rs_c, inc_t cs_c, \
                            void*   p, inc_t rs_p, inc_t cs_p, \
                                       dim_t pd_p, inc_t ps_p, \
-                            packm_thrinfo_t* thread \
+                           packm_thrinfo_t* thread \
                          ) \
 { \
 	ctype* restrict kappa_cast = kappa; \
@@ -461,30 +461,30 @@ void PASTEMAC(ch,varname)( \
 			                               c_begin, rs_c, cs_c, \
 			                               p_begin, rs_p, cs_p ); \
 			} \
+/*
+			if ( row_stored ) { \
+			PASTEMAC(chr,fprintm)( stdout, "packm_var4: bp_r", *m_panel_max, *n_panel_max, \
+			                       ( ctype_r* )p_begin,         rs_p, cs_p, "%4.1f", "" ); \
+			PASTEMAC(chr,fprintm)( stdout, "packm_var4: bp_i", *m_panel_max, *n_panel_max, \
+			                       ( ctype_r* )p_begin + p_inc, rs_p, cs_p, "%4.1f", "" ); \
+			} \
+*/ \
+/*
+			if ( col_stored ) { \
+			PASTEMAC(chr,fprintm)( stdout, "packm_var4: ap_r", *m_panel_max, *n_panel_max, \
+			                       ( ctype_r* )p_begin,         rs_p, cs_p, "%4.1f", "" ); \
+			PASTEMAC(chr,fprintm)( stdout, "packm_var4: ap_i", *m_panel_max, *n_panel_max, \
+			                       ( ctype_r* )p_begin + p_inc, rs_p, cs_p, "%4.1f", "" ); \
+			} \
+*/ \
 \
 			/* NOTE: This value is equivalent to ps_p. */ \
 			p_inc = ldp * panel_len_max_i; \
-\
 		} \
-/*
-	if ( cs_p == 1 ) { \
-	PASTEMAC(chr,fprintm)( stdout, "packm_var4: bp_r", *m_panel_max, *n_panel_max, \
-	                       ( ctype_r* )p_begin,         rs_p, cs_p, "%4.1f", "" ); \
-	PASTEMAC(chr,fprintm)( stdout, "packm_var4: bp_i", *m_panel_max, *n_panel_max, \
-	                       ( ctype_r* )p_begin + p_inc, rs_p, cs_p, "%4.1f", "" ); \
-	} \
-*/ \
-/*
-	if ( rs_p == 1 ) { \
-	PASTEMAC(chr,fprintm)( stdout, "packm_var4: ap_r", *m_panel_max, *n_panel_max, \
-	                       ( ctype_r* )p_begin,         rs_p, cs_p, "%4.1f", "" ); \
-	PASTEMAC(chr,fprintm)( stdout, "packm_var4: ap_i", *m_panel_max, *n_panel_max, \
-	                       ( ctype_r* )p_begin + p_inc, rs_p, cs_p, "%4.1f", "" ); \
-	} \
-*/ \
 \
 \
 		p_begin += p_inc; \
+\
 	} \
 }
 

@@ -122,7 +122,7 @@ void bli_packm_blk_var1( obj_t*   c,
 	   buf_kappa,
 	   buf_c, rs_c, cs_c,
 	   buf_p, rs_p, cs_p,
-	          pd_p, ps_p, 
+	          pd_p, ps_p,
 	   t );
 }
 
@@ -349,6 +349,7 @@ void PASTEMAC(ch,varname)( \
 			                            p_use, rs_p, cs_p ); \
 			}\
 \
+			/* NOTE: This value is usually LESS than ps_p. */ \
 			p_inc = ldp * panel_len_max_i; \
 		} \
 		else if ( bli_is_herm_or_symm( strucc ) ) \
@@ -387,17 +388,6 @@ void PASTEMAC(ch,varname)( \
 			panel_len_i     = panel_len_full; \
 			panel_len_max_i = panel_len_max; \
 \
-/*
-printf( "packm_var1: gen case\n" ); \
-printf( "packm_var1: m_panel_use = %d\n", *m_panel_use ); \
-printf( "packm_var1: n_panel_use = %d\n", *n_panel_use ); \
-printf( "packm_var1: m_panel_max = %d\n", *m_panel_max ); \
-printf( "packm_var1: n_panel_max = %d\n", *n_panel_max ); \
-printf( "packm_var1: m_panel     = %d\n",  m_panel ); \
-printf( "packm_var1: n_panel     = %d\n",  n_panel ); \
-printf( "packm_var1: rs_c cs_c = %d %d\n", rs_c, cs_c ); \
-printf( "packm_var1: rs_p cs_p = %d %d\n", rs_p, cs_p ); \
-*/ \
 			if( packm_thread_my_iter( it, thread ) ) \
 			{ \
 			PASTEMAC(ch,packm_gen_cxk)( BLIS_GENERAL, \
@@ -428,17 +418,6 @@ printf( "packm_var1: rs_p cs_p = %d %d\n", rs_p, cs_p ); \
 \
 		p_begin += p_inc; \
 	} \
-\
-\
-/*
-		if ( rs_p == 1 ) \
-		PASTEMAC(ch,fprintm)( stdout, "packm_var1: ap copied", panel_dim_max, panel_len_max_i, \
-		                      p_begin, rs_p, cs_p, "%9.2e", "" ); \
-		if ( cs_p == 1 ) \
-		PASTEMAC(ch,fprintm)( stdout, "packm_var1: bp copied", panel_len_max_i, panel_dim_max, \
-		                      p_begin, rs_p, cs_p, "%9.2e", "" ); \
-*/ \
-\
 }
 
 INSERT_GENTFUNC_BASIC0( packm_blk_var1 )

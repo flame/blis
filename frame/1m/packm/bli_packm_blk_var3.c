@@ -460,7 +460,7 @@ void PASTEMAC(ch,varname)( \
 \
 		} \
 /*
-	if ( cs_p == 1 ) { \
+	if ( row_stored ) { \
 	PASTEMAC(chr,fprintm)( stdout, "packm_var3: bp_r", *m_panel_max, *n_panel_max, \
 	                       ( ctype_r* )p_begin,               rs_p, cs_p, "%4.1f", "" ); \
 	PASTEMAC(chr,fprintm)( stdout, "packm_var3: bp_i", *m_panel_max, *n_panel_max, \
