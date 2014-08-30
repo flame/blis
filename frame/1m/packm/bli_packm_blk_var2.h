@@ -32,44 +32,35 @@
 
 */
 
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTEMAC(ch,varname)( \
-                           struc_t         strucc, \
-                           doff_t          diagoffc, \
-                           uplo_t          uploc, \
-                           conj_t          conjc, \
-                           dim_t           m_panel, \
-                           dim_t           n_panel, \
-                           dim_t           m_panel_max, \
-                           dim_t           n_panel_max, \
-                           ctype* restrict kappa, \
-                           ctype* restrict c, inc_t rs_c, inc_t cs_c, \
-                           ctype* restrict p, inc_t rs_p, inc_t cs_p  \
-                         );
-
-INSERT_GENTPROT_BASIC( packm_gen_cxk )
-
+void bli_packm_blk_var2( obj_t*   c,
+                         obj_t*   p,
+                         packm_thrinfo_t* t );
 
 
 #undef  GENTPROTCO
 #define GENTPROTCO( ctype, ctype_r, ch, chr, varname ) \
 \
 void PASTEMAC(ch,varname)( \
-                           struc_t         strucc, \
-                           doff_t          diagoffc, \
-                           uplo_t          uploc, \
-                           conj_t          conjc, \
-                           dim_t           m_panel, \
-                           dim_t           n_panel, \
-                           dim_t           m_panel_max, \
-                           dim_t           n_panel_max, \
-                           ctype* restrict kappa, \
-                           ctype* restrict c, inc_t rs_c, inc_t cs_c, \
-                           ctype* restrict p, inc_t rs_p, inc_t cs_p  \
+                           struc_t strucc, \
+                           doff_t  diagoffc, \
+                           diag_t  diagc, \
+                           uplo_t  uploc, \
+                           trans_t transc, \
+                           pack_t  schema, \
+                           bool_t  invdiag, \
+                           bool_t  revifup, \
+                           bool_t  reviflo, \
+                           dim_t   m, \
+                           dim_t   n, \
+                           dim_t   m_max, \
+                           dim_t   n_max, \
+                           void*   kappa, \
+                           void*   c, inc_t rs_c, inc_t cs_c, \
+                           void*   p, inc_t rs_p, inc_t cs_p, \
+                                      dim_t pd_p, inc_t ps_p, \
+                           void*   packm_ker, \
+                           packm_thrinfo_t* t \
                          );
 
-INSERT_GENTPROTCO_BASIC( packm_gen_cxk_4m )
+INSERT_GENTPROTCO_BASIC( packm_blk_var2 )
 
-INSERT_GENTPROTCO_BASIC( packm_gen_cxk_3m )

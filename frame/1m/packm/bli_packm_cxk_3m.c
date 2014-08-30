@@ -41,7 +41,7 @@ typedef void (*FUNCPTR_T)(
                            dim_t   n,
                            void*   kappa,
                            void*   a, inc_t inca, inc_t lda,
-                           void*   p, inc_t psp,  inc_t ldp
+                           void*   p, inc_t is_p, inc_t ldp
                          );
 
 #undef  FUNCPTR_ARRAY_LENGTH
@@ -158,7 +158,7 @@ void PASTEMAC(ch,varname)( \
                            dim_t   n, \
                            void*   kappa, \
                            void*   a, inc_t inca, inc_t lda, \
-                           void*   p, inc_t psp,  inc_t ldp  \
+                           void*   p, inc_t is_p, inc_t ldp  \
                          ) \
 { \
 	dim_t     panel_dim; \
@@ -187,7 +187,7 @@ void PASTEMAC(ch,varname)( \
 		   n, \
 		   kappa, \
 		   a, inca, lda, \
-		   p, psp,  ldp ); \
+		   p, is_p, ldp ); \
 	} \
 	else \
 	{ \
@@ -196,8 +196,8 @@ void PASTEMAC(ch,varname)( \
 		ctype_r* restrict a_r     = ( ctype_r* )a; \
 		ctype_r* restrict a_i     = ( ctype_r* )a + 1; \
 		ctype_r* restrict p_r     = ( ctype_r* )p; \
-		ctype_r* restrict p_i     = ( ctype_r* )p +   psp; \
-		ctype_r* restrict p_rpi   = ( ctype_r* )p + 2*psp; \
+		ctype_r* restrict p_i     = ( ctype_r* )p +   is_p; \
+		ctype_r* restrict p_rpi   = ( ctype_r* )p + 2*is_p; \
 		const dim_t       inca2   = 2*inca; \
 		const dim_t       lda2    = 2*lda; \
 \

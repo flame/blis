@@ -62,7 +62,7 @@ void bli_herk3m_cntl_init()
 	herk3m_packa_cntl
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT3,
+	                           BLIS_VARIANT2,
 	                           gemm3m_mr,
 	                           gemm3m_kr,
 	                           FALSE, // already dense; densify not necessary
@@ -75,7 +75,7 @@ void bli_herk3m_cntl_init()
 	herk3m_packb_cntl
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT3,
+	                           BLIS_VARIANT2,
 	                           gemm3m_kr,
 	                           gemm3m_nr,
 	                           FALSE, // already dense; densify not necessary

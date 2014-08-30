@@ -42,7 +42,7 @@ void PASTEMAC(ch,varname)( \
                            dim_t   n, \
                            void*   kappa, \
                            void*   a, inc_t inca, inc_t lda, \
-                           void*   p, inc_t psp,  inc_t ldp  \
+                           void*   p, inc_t is_p, inc_t ldp  \
                          ) \
 { \
 	const inc_t       inca2      = 2 * inca; \
@@ -54,8 +54,8 @@ void PASTEMAC(ch,varname)( \
 	ctype_r* restrict alpha1_r   = ( ctype_r* )a; \
 	ctype_r* restrict alpha1_i   = ( ctype_r* )a + 1; \
 	ctype_r* restrict pi1_r      = ( ctype_r* )p; \
-	ctype_r* restrict pi1_i      = ( ctype_r* )p +   psp; \
-	ctype_r* restrict pi1_rpi    = ( ctype_r* )p + 2*psp; \
+	ctype_r* restrict pi1_i      = ( ctype_r* )p +   is_p; \
+	ctype_r* restrict pi1_rpi    = ( ctype_r* )p + 2*is_p; \
 \
 	if ( PASTEMAC(ch,eq1)( *kappa_cast ) ) \
 	{ \
@@ -133,7 +133,7 @@ void PASTEMAC(ch,varname)( \
                            dim_t   n, \
                            void*   kappa, \
                            void*   a, inc_t inca, inc_t lda, \
-                           void*   p, inc_t psp,  inc_t ldp  \
+                           void*   p, inc_t is_p, inc_t ldp  \
                          ) \
 { \
 	const inc_t       inca2      = 2 * inca; \
@@ -145,8 +145,8 @@ void PASTEMAC(ch,varname)( \
 	ctype_r* restrict alpha1_r   = ( ctype_r* )a; \
 	ctype_r* restrict alpha1_i   = ( ctype_r* )a + 1; \
 	ctype_r* restrict pi1_r      = ( ctype_r* )p; \
-	ctype_r* restrict pi1_i      = ( ctype_r* )p +   psp; \
-	ctype_r* restrict pi1_rpi    = ( ctype_r* )p + 2*psp; \
+	ctype_r* restrict pi1_i      = ( ctype_r* )p +   is_p; \
+	ctype_r* restrict pi1_rpi    = ( ctype_r* )p + 2*is_p; \
 \
 	if ( PASTEMAC(ch,eq1)( *kappa_cast ) ) \
 	{ \
@@ -232,7 +232,7 @@ void PASTEMAC(ch,varname)( \
                            dim_t   n, \
                            void*   kappa, \
                            void*   a, inc_t inca, inc_t lda, \
-                           void*   p, inc_t psp,  inc_t ldp  \
+                           void*   p, inc_t is_p, inc_t ldp  \
                          ) \
 { \
 	const inc_t       inca2      = 2 * inca; \
@@ -244,8 +244,8 @@ void PASTEMAC(ch,varname)( \
 	ctype_r* restrict alpha1_r   = ( ctype_r* )a; \
 	ctype_r* restrict alpha1_i   = ( ctype_r* )a + 1; \
 	ctype_r* restrict pi1_r      = ( ctype_r* )p; \
-	ctype_r* restrict pi1_i      = ( ctype_r* )p +   psp; \
-	ctype_r* restrict pi1_rpi    = ( ctype_r* )p + 2*psp; \
+	ctype_r* restrict pi1_i      = ( ctype_r* )p +   is_p; \
+	ctype_r* restrict pi1_rpi    = ( ctype_r* )p + 2*is_p; \
 \
 	if ( PASTEMAC(ch,eq1)( *kappa_cast ) ) \
 	{ \
@@ -339,7 +339,7 @@ void PASTEMAC(ch,varname)( \
                            dim_t   n, \
                            void*   kappa, \
                            void*   a, inc_t inca, inc_t lda, \
-                           void*   p, inc_t psp,  inc_t ldp  \
+                           void*   p, inc_t is_p, inc_t ldp  \
                          ) \
 { \
 	const inc_t       inca2      = 2 * inca; \
@@ -351,8 +351,8 @@ void PASTEMAC(ch,varname)( \
 	ctype_r* restrict alpha1_r   = ( ctype_r* )a; \
 	ctype_r* restrict alpha1_i   = ( ctype_r* )a + 1; \
 	ctype_r* restrict pi1_r      = ( ctype_r* )p; \
-	ctype_r* restrict pi1_i      = ( ctype_r* )p +   psp; \
-	ctype_r* restrict pi1_rpi    = ( ctype_r* )p + 2*psp; \
+	ctype_r* restrict pi1_i      = ( ctype_r* )p +   is_p; \
+	ctype_r* restrict pi1_rpi    = ( ctype_r* )p + 2*is_p; \
 \
 	if ( PASTEMAC(ch,eq1)( *kappa_cast ) ) \
 	{ \
@@ -454,7 +454,7 @@ void PASTEMAC(ch,varname)( \
                            dim_t   n, \
                            void*   kappa, \
                            void*   a, inc_t inca, inc_t lda, \
-                           void*   p, inc_t psp,  inc_t ldp  \
+                           void*   p, inc_t is_p, inc_t ldp  \
                          ) \
 { \
 	const inc_t       inca2      = 2 * inca; \
@@ -466,8 +466,8 @@ void PASTEMAC(ch,varname)( \
 	ctype_r* restrict alpha1_r   = ( ctype_r* )a; \
 	ctype_r* restrict alpha1_i   = ( ctype_r* )a + 1; \
 	ctype_r* restrict pi1_r      = ( ctype_r* )p; \
-	ctype_r* restrict pi1_i      = ( ctype_r* )p +   psp; \
-	ctype_r* restrict pi1_rpi    = ( ctype_r* )p + 2*psp; \
+	ctype_r* restrict pi1_i      = ( ctype_r* )p +   is_p; \
+	ctype_r* restrict pi1_rpi    = ( ctype_r* )p + 2*is_p; \
 \
 	if ( PASTEMAC(ch,eq1)( *kappa_cast ) ) \
 	{ \
@@ -577,7 +577,7 @@ void PASTEMAC(ch,varname)( \
                            dim_t   n, \
                            void*   kappa, \
                            void*   a, inc_t inca, inc_t lda, \
-                           void*   p, inc_t psp,  inc_t ldp  \
+                           void*   p, inc_t is_p, inc_t ldp  \
                          ) \
 { \
 	const inc_t       inca2      = 2 * inca; \
@@ -589,8 +589,8 @@ void PASTEMAC(ch,varname)( \
 	ctype_r* restrict alpha1_r   = ( ctype_r* )a; \
 	ctype_r* restrict alpha1_i   = ( ctype_r* )a + 1; \
 	ctype_r* restrict pi1_r      = ( ctype_r* )p; \
-	ctype_r* restrict pi1_i      = ( ctype_r* )p +   psp; \
-	ctype_r* restrict pi1_rpi    = ( ctype_r* )p + 2*psp; \
+	ctype_r* restrict pi1_i      = ( ctype_r* )p +   is_p; \
+	ctype_r* restrict pi1_rpi    = ( ctype_r* )p + 2*is_p; \
 \
 	if ( PASTEMAC(ch,eq1)( *kappa_cast ) ) \
 	{ \
@@ -708,7 +708,7 @@ void PASTEMAC(ch,varname)( \
                            dim_t   n, \
                            void*   kappa, \
                            void*   a, inc_t inca, inc_t lda, \
-                           void*   p, inc_t psp,  inc_t ldp  \
+                           void*   p, inc_t is_p, inc_t ldp  \
                          ) \
 { \
 	const inc_t       inca2      = 2 * inca; \
@@ -720,8 +720,8 @@ void PASTEMAC(ch,varname)( \
 	ctype_r* restrict alpha1_r   = ( ctype_r* )a; \
 	ctype_r* restrict alpha1_i   = ( ctype_r* )a + 1; \
 	ctype_r* restrict pi1_r      = ( ctype_r* )p; \
-	ctype_r* restrict pi1_i      = ( ctype_r* )p +   psp; \
-	ctype_r* restrict pi1_rpi    = ( ctype_r* )p + 2*psp; \
+	ctype_r* restrict pi1_i      = ( ctype_r* )p +   is_p; \
+	ctype_r* restrict pi1_rpi    = ( ctype_r* )p + 2*is_p; \
 \
 	if ( PASTEMAC(ch,eq1)( *kappa_cast ) ) \
 	{ \
@@ -847,7 +847,7 @@ void PASTEMAC(ch,varname)( \
                            dim_t   n, \
                            void*   kappa, \
                            void*   a, inc_t inca, inc_t lda, \
-                           void*   p, inc_t psp,  inc_t ldp  \
+                           void*   p, inc_t is_p, inc_t ldp  \
                          ) \
 { \
 	const inc_t       inca2      = 2 * inca; \
@@ -859,8 +859,8 @@ void PASTEMAC(ch,varname)( \
 	ctype_r* restrict alpha1_r   = ( ctype_r* )a; \
 	ctype_r* restrict alpha1_i   = ( ctype_r* )a + 1; \
 	ctype_r* restrict pi1_r      = ( ctype_r* )p; \
-	ctype_r* restrict pi1_i      = ( ctype_r* )p +   psp; \
-	ctype_r* restrict pi1_rpi    = ( ctype_r* )p + 2*psp; \
+	ctype_r* restrict pi1_i      = ( ctype_r* )p +   is_p; \
+	ctype_r* restrict pi1_rpi    = ( ctype_r* )p + 2*is_p; \
 \
 	if ( PASTEMAC(ch,eq1)( *kappa_cast ) ) \
 	{ \

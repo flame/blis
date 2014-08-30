@@ -93,7 +93,7 @@ void bli_trsm4m_cntl_init()
 	trsm4m_l_packa_cntl
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT4,
+	                           BLIS_VARIANT2,
 	                           // IMPORTANT: n dim multiple must be mr to
 	                           // support right and bottom-right edge cases
 	                           gemm4m_mr,
@@ -108,7 +108,7 @@ void bli_trsm4m_cntl_init()
 	trsm4m_l_packb_cntl
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT4,
+	                           BLIS_VARIANT2,
 	                           // IMPORTANT: m dim multiple must be mr since
 	                           // B_pack is updated (ie: serves as C) in trsm
 	                           gemm4m_mr,
@@ -124,7 +124,7 @@ void bli_trsm4m_cntl_init()
 	trsm4m_r_packa_cntl
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT4,
+	                           BLIS_VARIANT2,
 	                           gemm4m_nr,
 	                           gemm4m_mr,
 	                           FALSE, // already dense; densify not necessary
@@ -137,7 +137,7 @@ void bli_trsm4m_cntl_init()
 	trsm4m_r_packb_cntl
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT4,
+	                           BLIS_VARIANT2,
 	                           gemm4m_mr,
 	                           gemm4m_mr,
 	                           TRUE,  // densify

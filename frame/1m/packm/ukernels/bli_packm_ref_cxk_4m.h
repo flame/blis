@@ -40,7 +40,7 @@ void PASTEMAC(ch,varname)( \
                            dim_t   n, \
                            void*   kappa, \
                            void*   a, inc_t inca, inc_t lda, \
-                           void*   p, inc_t psp,  inc_t ldp  \
+                           void*   p, inc_t is_p, inc_t ldp  \
                          );
 
 INSERT_GENTPROT_BASIC( packm_ref_2xk_4m )

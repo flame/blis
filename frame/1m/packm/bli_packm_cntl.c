@@ -37,6 +37,10 @@
 blksz_t* packm_mult_ldim;
 blksz_t* packm_mult_nvec;
 
+func_t*  packm_struc_cxk_kers;
+func_t*  packm_struc_cxk_4m_kers;
+func_t*  packm_struc_cxk_3m_kers;
+
 packm_t* packm_cntl_row;
 packm_t* packm_cntl_col;
 
@@ -47,6 +51,30 @@ packm_t* packm_cntl;
 
 void bli_packm_cntl_init()
 {
+	// Create function pointer object for each datatype-specific packm
+	// kernel.
+	packm_struc_cxk_kers
+	=
+	bli_func_obj_create( bli_spackm_struc_cxk, FALSE,
+	                     bli_dpackm_struc_cxk, FALSE,
+	                     bli_cpackm_struc_cxk, FALSE,
+	                     bli_zpackm_struc_cxk, FALSE );
+
+	packm_struc_cxk_4m_kers
+	=
+	bli_func_obj_create( NULL,                    FALSE,
+	                     NULL,                    FALSE,
+	                     bli_cpackm_struc_cxk_4m, FALSE,
+	                     bli_zpackm_struc_cxk_4m, FALSE );
+
+	packm_struc_cxk_3m_kers
+	=
+	bli_func_obj_create( NULL,                    FALSE,
+	                     NULL,                    FALSE,
+	                     bli_cpackm_struc_cxk_3m, FALSE,
+	                     bli_zpackm_struc_cxk_3m, FALSE );
+
+
 	// Create blocksize objects for m and n register blocking. We will attach
 	// these to the packm control node so they can be used to (a) allocate a
 	// block whose m and n dimension are multiples of mr and nr, and (b) know
@@ -119,6 +147,10 @@ void bli_packm_cntl_init()
 
 void bli_packm_cntl_finalize()
 {
+	bli_func_obj_free( packm_struc_cxk_kers );
+	bli_func_obj_free( packm_struc_cxk_4m_kers );
+	bli_func_obj_free( packm_struc_cxk_3m_kers );
+
 	bli_cntl_obj_free( packm_cntl_row );
 	bli_cntl_obj_free( packm_cntl_col );
 

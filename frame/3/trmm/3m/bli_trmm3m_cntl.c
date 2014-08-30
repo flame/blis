@@ -73,7 +73,7 @@ void bli_trmm3m_cntl_init()
 	trmm3m_l_packa_cntl
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT3,
+	                           BLIS_VARIANT2,
 	                           // IMPORTANT: for consistency with trsm, "k" dim
 	                           // multiple is set to mr.
 	                           gemm3m_mr,
@@ -88,7 +88,7 @@ void bli_trmm3m_cntl_init()
 	trmm3m_l_packb_cntl
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT3,
+	                           BLIS_VARIANT2,
 	                           // IMPORTANT: m dim multiple here must be mr
 	                           // since "k" dim multiple is set to mr above.
 	                           gemm3m_mr,
@@ -104,7 +104,7 @@ void bli_trmm3m_cntl_init()
 	trmm3m_r_packa_cntl
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT3,
+	                           BLIS_VARIANT2,
 	                           // IMPORTANT: for consistency with trsm, "k" dim
 	                           // multiple is set to nr.
 	                           gemm3m_mr,
@@ -119,7 +119,7 @@ void bli_trmm3m_cntl_init()
 	trmm3m_r_packb_cntl
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT3,
+	                           BLIS_VARIANT2,
 	                           // IMPORTANT: m dim multiple here must be nr
 	                           // since "k" dim multiple is set to nr above.
 	                           gemm3m_nr,
