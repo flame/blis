@@ -358,6 +358,7 @@ void PASTEMAC(ch,varname)( \
 				                diagc, \
 				                uploc, \
 				                conjc, \
+				                schema, \
 				                invdiag, \
 				                *m_panel_use, \
 				                *n_panel_use, \
@@ -389,6 +390,7 @@ void PASTEMAC(ch,varname)( \
 				                diagc, \
 				                uploc, \
 				                conjc, \
+				                schema, \
 				                invdiag, \
 				                *m_panel_use, \
 				                *n_panel_use, \
@@ -418,6 +420,7 @@ void PASTEMAC(ch,varname)( \
 				                diagc, \
 				                BLIS_DENSE, \
 				                conjc, \
+				                schema, \
 				                invdiag, \
 				                *m_panel_use, \
 				                *n_panel_use, \

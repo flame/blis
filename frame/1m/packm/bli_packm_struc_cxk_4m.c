@@ -43,6 +43,7 @@ void PASTEMAC(ch,varname)( \
                            diag_t          diagc, \
                            uplo_t          uploc, \
                            conj_t          conjc, \
+                           pack_t          schema, \
                            bool_t          invdiag, \
                            dim_t           m_panel, \
                            dim_t           n_panel, \
@@ -60,10 +61,9 @@ void PASTEMAC(ch,varname)( \
 	inc_t  is_p, ldp; \
 \
 \
-	/* If the strides of p indicate row storage, then we are packing to
-	   column panels; otherwise, if the strides indicate column storage,
-	   we are packing to row panels. */ \
-	if ( bli_is_row_stored_f( m_panel, n_panel, rs_p, cs_p ) ) \
+	/* Determine the dimensions and relative strides of the micro-panel
+	   based on its pack schema. */ \
+	if ( bli_is_col_packed( schema ) ) \
 	{ \
 		/* Prepare to pack to row-stored column panel. */ \
 		panel_dim     = n_panel; \
@@ -73,7 +73,7 @@ void PASTEMAC(ch,varname)( \
 		ldc           = rs_c; \
 		ldp           = rs_p; \
 	} \
-	else /* if ( bli_is_col_stored_f( m_panel, n_panel, rs_p, cs_p ) ) */ \
+	else /* if ( bli_is_row_packed( schema ) ) */ \
 	{ \
 		/* Prepare to pack to column-stored row panel. */ \
 		panel_dim     = m_panel; \
@@ -110,6 +110,7 @@ void PASTEMAC(ch,varname)( \
 		                                diagoffc, \
 		                                uploc, \
 		                                conjc, \
+		                                schema, \
 		                                m_panel, \
 		                                n_panel, \
 		                                m_panel_max, \
@@ -131,6 +132,7 @@ void PASTEMAC(ch,varname)( \
 		                               diagc, \
 		                               uploc, \
 		                               conjc, \
+		                               schema, \
 		                               invdiag, \
 		                               m_panel, \
 		                               n_panel, \
@@ -253,6 +255,7 @@ void PASTEMAC(ch,varname)( \
                            doff_t          diagoffc, \
                            uplo_t          uploc, \
                            conj_t          conjc, \
+                           pack_t          schema, \
                            dim_t           m_panel, \
                            dim_t           n_panel, \
                            dim_t           m_panel_max, \
@@ -272,12 +275,12 @@ void PASTEMAC(ch,varname)( \
 	bool_t  col_stored; \
 \
 \
-	/* Create flags to incidate row or column storage. Since we don't
-	   have the schema in scope, we must use the dimensions and strides
-	   of the micro-panel to determine whether it is row- or column-
-	   stored. */ \
-	row_stored = bli_is_row_stored_f( m_panel, n_panel, rs_p, cs_p ); \
-	col_stored = bli_is_col_stored_f( m_panel, n_panel, rs_p, cs_p ); \
+	/* Create flags to incidate row or column storage. Note that the
+	   schema bit that encodes row or column is describing the form of
+	   micro-panel, not the storage in the micro-panel. Hence the
+	   mismatch in "row" and "column" semantics. */ \
+	row_stored = bli_is_col_packed( schema ); \
+	col_stored = bli_is_row_packed( schema ); \
 \
 \
 	/* Handle the case where the micro-panel does NOT intersect the
@@ -517,6 +520,7 @@ void PASTEMAC(ch,varname)( \
                            diag_t          diagc, \
                            uplo_t          uploc, \
                            conj_t          conjc, \
+                           pack_t          schema, \
                            bool_t          invdiag, \
                            dim_t           m_panel, \
                            dim_t           n_panel, \
@@ -535,12 +539,12 @@ void PASTEMAC(ch,varname)( \
 	bool_t col_stored; \
 \
 \
-	/* Create flags to incidate row or column storage. Since we don't
-	   have the schema in scope, we must use the dimensions and strides
-	   of the micro-panel to determine whether it is row- or column-
-	   stored. */ \
-	row_stored = bli_is_row_stored_f( m_panel, n_panel, rs_p, cs_p ); \
-	col_stored = bli_is_col_stored_f( m_panel, n_panel, rs_p, cs_p ); \
+	/* Create flags to incidate row or column storage. Note that the
+	   schema bit that encodes row or column is describing the form of
+	   micro-panel, not the storage in the micro-panel. Hence the
+	   mismatch in "row" and "column" semantics. */ \
+	row_stored = bli_is_col_packed( schema ); \
+	col_stored = bli_is_row_packed( schema ); \
 \
 \
 	/* Pack the panel. */ \

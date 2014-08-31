@@ -113,6 +113,7 @@ typedef void \
                       diag_t          diagc, \
                       uplo_t          uploc, \
                       conj_t          conjc, \
+                      pack_t          schema, \
                       bool_t          invdiag, \
                       dim_t           m_panel, \
                       dim_t           n_panel, \
