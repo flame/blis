@@ -284,6 +284,11 @@
 // prefer not to assume this, therefore, we always take the larger of the
 // two values.
 
+#define BLIS_DEFAULT_4M_MR_C BLIS_DEFAULT_MR_S
+#define BLIS_DEFAULT_4M_NR_C BLIS_DEFAULT_NR_S
+#define BLIS_DEFAULT_4M_MR_Z BLIS_DEFAULT_MR_D
+#define BLIS_DEFAULT_4M_NR_Z BLIS_DEFAULT_NR_D
+
 //
 // Find the largest register blocksize MR.
 //

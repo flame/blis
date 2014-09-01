@@ -59,42 +59,48 @@ gemm_t*           gemm4m_cntl;
 void bli_gemm4m_cntl_init()
 {
 	// Create blocksize objects for each dimension.
+	// NOTE: the complex blocksizes for 4m are generally equal to their
+	// corresponding real domain counterparts. However, we want to promote
+	// similar cache footprints for the micro-panels of A and B (when
+	// compared to executing in the real domain), and since the complex
+	// micro-panels are twice as "fat" (due to storing real and imaginary
+	// parts), we reduce KC by a factor of 2 to compensate.
 	gemm4m_mc
 	=
 	bli_blksz_obj_create( 0,                    0,
 	                      0,                    0,
-	                      BLIS_DEFAULT_4M_MC_C, BLIS_MAXIMUM_4M_MC_C,
-	                      BLIS_DEFAULT_4M_MC_Z, BLIS_MAXIMUM_4M_MC_Z );
+	                      BLIS_DEFAULT_MC_S, BLIS_MAXIMUM_MC_S,
+	                      BLIS_DEFAULT_MC_D, BLIS_MAXIMUM_MC_D );
 	gemm4m_nc
 	=
 	bli_blksz_obj_create( 0,                    0,
 	                      0,                    0,
-	                      BLIS_DEFAULT_4M_NC_C, BLIS_MAXIMUM_4M_NC_C,
-	                      BLIS_DEFAULT_4M_NC_Z, BLIS_MAXIMUM_4M_NC_Z );
+	                      BLIS_DEFAULT_NC_S, BLIS_MAXIMUM_NC_S,
+	                      BLIS_DEFAULT_NC_D, BLIS_MAXIMUM_NC_D );
 	gemm4m_kc
 	=
 	bli_blksz_obj_create( 0,                    0,
 	                      0,                    0,
-	                      BLIS_DEFAULT_4M_KC_C, BLIS_MAXIMUM_4M_KC_C,
-	                      BLIS_DEFAULT_4M_KC_Z, BLIS_MAXIMUM_4M_KC_Z );
+	                      BLIS_DEFAULT_KC_S/2, BLIS_MAXIMUM_KC_S/2,
+	                      BLIS_DEFAULT_KC_D/2, BLIS_MAXIMUM_KC_D/2 );
 	gemm4m_mr
 	=
 	bli_blksz_obj_create( 0,                    0,
 	                      0,                    0,
-	                      BLIS_DEFAULT_4M_MR_C, BLIS_PACKDIM_4M_MR_C,
-	                      BLIS_DEFAULT_4M_MR_Z, BLIS_PACKDIM_4M_MR_Z );
+	                      BLIS_DEFAULT_MR_S, BLIS_PACKDIM_MR_S,
+	                      BLIS_DEFAULT_MR_D, BLIS_PACKDIM_MR_D );
 	gemm4m_nr
 	=
 	bli_blksz_obj_create( 0,                    0,
 	                      0,                    0,
-	                      BLIS_DEFAULT_4M_NR_C, BLIS_PACKDIM_4M_NR_C,
-	                      BLIS_DEFAULT_4M_NR_Z, BLIS_PACKDIM_4M_NR_Z );
+	                      BLIS_DEFAULT_NR_S, BLIS_PACKDIM_NR_S,
+	                      BLIS_DEFAULT_NR_D, BLIS_PACKDIM_NR_D );
 	gemm4m_kr
 	=
 	bli_blksz_obj_create( 0,                    0,
 	                      0,                    0,
-	                      BLIS_DEFAULT_4M_KR_C, BLIS_PACKDIM_4M_KR_C,
-	                      BLIS_DEFAULT_4M_KR_Z, BLIS_PACKDIM_4M_KR_Z );
+	                      BLIS_DEFAULT_KR_S, BLIS_PACKDIM_KR_S,
+	                      BLIS_DEFAULT_KR_D, BLIS_PACKDIM_KR_D );
 
 
 	// Attach the register blksz_t objects as sub-blocksizes to the cache
