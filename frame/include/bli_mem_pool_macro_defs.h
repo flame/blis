@@ -52,8 +52,7 @@
 // factors is to increase the amount of space we reserve for the memory
 // pool blocks if one of the packed micro-panels has a "leading dimension"
 // that is larger than the register blocksize. (In this case, the leading
-// dimension of a micro-panel is the default register blocksize plus its
-// corresponding extension.)
+// dimension of a micro-panel is the packing register blocksize.)
 
 // Note that when computing the scaling factor, we have to determine which
 // of PACKDIM_MR/DEFAULT_MR and PACKDIM_NR/DEFAULT_NR is greater so that

@@ -46,8 +46,7 @@ static pool_t pools[3];
 // Generally speaking, the pool sizes are computed in a sub-header of blis.h
 // as follows:
 //
-//   BLIS_MK_POOL_SIZE = ( BLIS_DEFAULT_MC_? + BLIS_EXTEND_MC_? ) *
-//                       ( BLIS_DEFAULT_KC_? + BLIS_EXTEND_KC_? ) * BLIS_SIZEOF_?
+//   BLIS_MK_POOL_SIZE = BLIS_MAXIMUM_MC_? * BLIS_MAXIMUM_KC_? * BLIS_SIZEOF_?
 //
 // where "?" is the datatype that results in the largest pool size. The
 // constants BLIS_KN_POOL_SIZE and BLIS_MN_POOL_SIZE are computed in a 

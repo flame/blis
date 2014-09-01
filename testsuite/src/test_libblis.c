@@ -605,7 +605,7 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "  enabled for scomplex?      %d\n", ( int )bli_info_get_enable_scomplex_via_4m() );
 	libblis_test_fprintf_c( os, "  enabled for dcomplex?      %d\n", ( int )bli_info_get_enable_dcomplex_via_4m() );
 	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "level-3 cache blocksizes     s     d     c     z \n" );
+	libblis_test_fprintf_c( os, "level-3 def cache blkszes    s     d     c     z \n" );
 	libblis_test_fprintf_c( os, "  m dimension            %5d %5d %5d %5d\n",
 	                        ( int )bli_info_get_default_mc_s(),
 	                        ( int )bli_info_get_default_mc_d(),
@@ -622,22 +622,22 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	                        ( int )bli_info_get_default_nc_c(),
 	                        ( int )bli_info_get_default_nc_z() );
 	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "level-3 cache blksz exts     s     d     c     z \n" );
+	libblis_test_fprintf_c( os, "level-3 max cache blkszes    s     d     c     z \n" );
 	libblis_test_fprintf_c( os, "  m dimension            %5d %5d %5d %5d\n",
-	                        ( int )bli_info_get_extend_mc_s(),
-	                        ( int )bli_info_get_extend_mc_d(),
-	                        ( int )bli_info_get_extend_mc_c(),
-	                        ( int )bli_info_get_extend_mc_z() );
+	                        ( int )bli_info_get_maximum_mc_s(),
+	                        ( int )bli_info_get_maximum_mc_d(),
+	                        ( int )bli_info_get_maximum_mc_c(),
+	                        ( int )bli_info_get_maximum_mc_z() );
 	libblis_test_fprintf_c( os, "  k dimension            %5d %5d %5d %5d\n",
-	                        ( int )bli_info_get_extend_kc_s(),
-	                        ( int )bli_info_get_extend_kc_d(),
-	                        ( int )bli_info_get_extend_kc_c(),
-	                        ( int )bli_info_get_extend_kc_z() );
+	                        ( int )bli_info_get_maximum_kc_s(),
+	                        ( int )bli_info_get_maximum_kc_d(),
+	                        ( int )bli_info_get_maximum_kc_c(),
+	                        ( int )bli_info_get_maximum_kc_z() );
 	libblis_test_fprintf_c( os, "  n dimension            %5d %5d %5d %5d\n",
-	                        ( int )bli_info_get_extend_nc_s(),
-	                        ( int )bli_info_get_extend_nc_d(),
-	                        ( int )bli_info_get_extend_nc_c(),
-	                        ( int )bli_info_get_extend_nc_z() );
+	                        ( int )bli_info_get_maximum_nc_s(),
+	                        ( int )bli_info_get_maximum_nc_d(),
+	                        ( int )bli_info_get_maximum_nc_c(),
+	                        ( int )bli_info_get_maximum_nc_z() );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "level-3 register blocksizes  s     d     c     z \n" );
 	libblis_test_fprintf_c( os, "  m dimension            %5d %5d %5d %5d\n",
@@ -651,17 +651,17 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	                        ( int )bli_info_get_default_nr_c(),
 	                        ( int )bli_info_get_default_nr_z() );
 	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "level-3 register blksz exts  s     d     c     z \n" );
+	libblis_test_fprintf_c( os, "level-3 pack register blksz  s     d     c     z \n" );
 	libblis_test_fprintf_c( os, "  m dimension            %5d %5d %5d %5d\n",
-	                        ( int )bli_info_get_extend_mr_s(),
-	                        ( int )bli_info_get_extend_mr_d(),
-	                        ( int )bli_info_get_extend_mr_c(),
-	                        ( int )bli_info_get_extend_mr_z() );
+	                        ( int )bli_info_get_packdim_mr_s(),
+	                        ( int )bli_info_get_packdim_mr_d(),
+	                        ( int )bli_info_get_packdim_mr_c(),
+	                        ( int )bli_info_get_packdim_mr_z() );
 	libblis_test_fprintf_c( os, "  n dimension            %5d %5d %5d %5d\n",
-	                        ( int )bli_info_get_extend_nr_s(),
-	                        ( int )bli_info_get_extend_nr_d(),
-	                        ( int )bli_info_get_extend_nr_c(),
-	                        ( int )bli_info_get_extend_nr_z() );
+	                        ( int )bli_info_get_packdim_nr_s(),
+	                        ( int )bli_info_get_packdim_nr_d(),
+	                        ( int )bli_info_get_packdim_nr_c(),
+	                        ( int )bli_info_get_packdim_nr_z() );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "level-2 cache blocksizes     s     d     c     z \n" );
 	libblis_test_fprintf_c( os, "  m dimension            %5d %5d %5d %5d\n",

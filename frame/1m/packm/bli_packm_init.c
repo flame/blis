@@ -178,12 +178,9 @@ void bli_packm_init_pack( bool_t    densify,
 	dim_t   m_c          = bli_obj_length( *c );
 	dim_t   n_c          = bli_obj_width( *c );
 	dim_t   mr_def_dim   = bli_blksz_for_type( datatype, mr );
-	dim_t   mr_ext_dim   = bli_blksz_ext_for_type( datatype, mr );
+	dim_t   mr_pack_dim  = bli_blksz_max_for_type( datatype, mr );
 	dim_t   nr_def_dim   = bli_blksz_for_type( datatype, nr );
-	dim_t   nr_ext_dim   = bli_blksz_ext_for_type( datatype, nr );
-
-	dim_t   mr_pack_dim  = mr_def_dim + mr_ext_dim;
-	dim_t   nr_pack_dim  = nr_def_dim + nr_ext_dim;
+	dim_t   nr_pack_dim  = bli_blksz_max_for_type( datatype, nr );
 
 	mem_t*  mem_p;
 	dim_t   m_p, n_p;
@@ -319,8 +316,7 @@ void bli_packm_init_pack( bool_t    densify,
 
 		// The "column stride" of a row panel packed object is interpreted as
 		// the column stride WITHIN a panel. Thus, this is equal to the panel
-		// dimension plus an extension (which may be zero, meaning there is
-		// no extension).
+		// pack dimension (which may be equal to the panel dimension).
 		cs_p = mr_pack_dim;
 
 		// The "row stride" of a row panel packed object is interpreted
@@ -362,8 +358,7 @@ void bli_packm_init_pack( bool_t    densify,
 
 		// The "row stride" of a column panel packed object is interpreted as
 		// the row stride WITHIN a panel. Thus, this is equal to the panel
-		// dimension plus an extension (which may be zero, meaning there is
-		// no extension).
+		// pack dimension (which may be equal to the panel dimension).
 		rs_p = nr_pack_dim;
 
 		// The "column stride" of a column panel packed object is interpreted

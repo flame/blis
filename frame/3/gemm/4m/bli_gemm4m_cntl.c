@@ -63,38 +63,38 @@ void bli_gemm4m_cntl_init()
 	=
 	bli_blksz_obj_create( 0,                    0,
 	                      0,                    0,
-	                      BLIS_DEFAULT_4M_MC_C, BLIS_EXTEND_4M_MC_C,
-	                      BLIS_DEFAULT_4M_MC_Z, BLIS_EXTEND_4M_MC_Z );
+	                      BLIS_DEFAULT_4M_MC_C, BLIS_MAXIMUM_4M_MC_C,
+	                      BLIS_DEFAULT_4M_MC_Z, BLIS_MAXIMUM_4M_MC_Z );
 	gemm4m_nc
 	=
 	bli_blksz_obj_create( 0,                    0,
 	                      0,                    0,
-	                      BLIS_DEFAULT_4M_NC_C, BLIS_EXTEND_4M_NC_C,
-	                      BLIS_DEFAULT_4M_NC_Z, BLIS_EXTEND_4M_NC_Z );
+	                      BLIS_DEFAULT_4M_NC_C, BLIS_MAXIMUM_4M_NC_C,
+	                      BLIS_DEFAULT_4M_NC_Z, BLIS_MAXIMUM_4M_NC_Z );
 	gemm4m_kc
 	=
 	bli_blksz_obj_create( 0,                    0,
 	                      0,                    0,
-	                      BLIS_DEFAULT_4M_KC_C, BLIS_EXTEND_4M_KC_C,
-	                      BLIS_DEFAULT_4M_KC_Z, BLIS_EXTEND_4M_KC_Z );
+	                      BLIS_DEFAULT_4M_KC_C, BLIS_MAXIMUM_4M_KC_C,
+	                      BLIS_DEFAULT_4M_KC_Z, BLIS_MAXIMUM_4M_KC_Z );
 	gemm4m_mr
 	=
 	bli_blksz_obj_create( 0,                    0,
 	                      0,                    0,
-	                      BLIS_DEFAULT_4M_MR_C, BLIS_EXTEND_4M_MR_C,
-	                      BLIS_DEFAULT_4M_MR_Z, BLIS_EXTEND_4M_MR_Z );
+	                      BLIS_DEFAULT_4M_MR_C, BLIS_PACKDIM_4M_MR_C,
+	                      BLIS_DEFAULT_4M_MR_Z, BLIS_PACKDIM_4M_MR_Z );
 	gemm4m_nr
 	=
 	bli_blksz_obj_create( 0,                    0,
 	                      0,                    0,
-	                      BLIS_DEFAULT_4M_NR_C, BLIS_EXTEND_4M_NR_C,
-	                      BLIS_DEFAULT_4M_NR_Z, BLIS_EXTEND_4M_NR_Z );
+	                      BLIS_DEFAULT_4M_NR_C, BLIS_PACKDIM_4M_NR_C,
+	                      BLIS_DEFAULT_4M_NR_Z, BLIS_PACKDIM_4M_NR_Z );
 	gemm4m_kr
 	=
 	bli_blksz_obj_create( 0,                    0,
 	                      0,                    0,
-	                      BLIS_DEFAULT_4M_KR_C, BLIS_EXTEND_4M_KR_C,
-	                      BLIS_DEFAULT_4M_KR_Z, BLIS_EXTEND_4M_KR_Z );
+	                      BLIS_DEFAULT_4M_KR_C, BLIS_PACKDIM_4M_KR_C,
+	                      BLIS_DEFAULT_4M_KR_Z, BLIS_PACKDIM_4M_KR_Z );
 
 
 	// Attach the register blksz_t objects as sub-blocksizes to the cache

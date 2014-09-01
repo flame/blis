@@ -202,14 +202,14 @@
 #define BLIS_DEFAULT_3M_KR_Z     BLIS_DEFAULT_KR_D
 #define BLIS_DEFAULT_3M_NR_Z     BLIS_DEFAULT_NR_D
 
-// 3m register blocksize extensions
-#define BLIS_EXTEND_3M_MR_C      BLIS_EXTEND_MR_S
-#define BLIS_EXTEND_3M_KR_C      0
-#define BLIS_EXTEND_3M_NR_C      BLIS_EXTEND_NR_S
+// 3m packing register blocksize
+#define BLIS_PACKDIM_3M_MR_C     BLIS_PACKDIM_MR_S
+#define BLIS_PACKDIM_3M_KR_C     BLIS_PACKDIM_KR_S
+#define BLIS_PACKDIM_3M_NR_C     BLIS_PACKDIM_NR_S
 
-#define BLIS_EXTEND_3M_MR_Z      BLIS_EXTEND_MR_D
-#define BLIS_EXTEND_3M_KR_Z      0
-#define BLIS_EXTEND_3M_NR_Z      BLIS_EXTEND_NR_D
+#define BLIS_PACKDIM_3M_MR_Z     BLIS_PACKDIM_MR_D
+#define BLIS_PACKDIM_3M_KR_Z     BLIS_PACKDIM_KR_D
+#define BLIS_PACKDIM_3M_NR_Z     BLIS_PACKDIM_NR_D
 
 // Define complex 3m cache blocksizes in terms of blocksizes used for
 // real operations (if they have not yet already been defined).
@@ -235,25 +235,25 @@
 #define BLIS_DEFAULT_3M_NC_Z     BLIS_DEFAULT_NC_D
 #endif
 
-// 3m cache blocksize extensions
-#ifndef BLIS_EXTEND_3M_MC_C
-#define BLIS_EXTEND_3M_MC_C      BLIS_EXTEND_MC_S
+// 3m maximum cache blocksize
+#ifndef BLIS_MAXIMUM_3M_MC_C
+#define BLIS_MAXIMUM_3M_MC_C     BLIS_MAXIMUM_MC_S
 #endif
-#ifndef BLIS_EXTEND_3M_KC_C
-#define BLIS_EXTEND_3M_KC_C    ((BLIS_EXTEND_KC_S)/2)
+#ifndef BLIS_MAXIMUM_3M_KC_C
+#define BLIS_MAXIMUM_3M_KC_C   ((BLIS_MAXIMUM_KC_S)/2)
 #endif
-#ifndef BLIS_EXTEND_3M_NC_C
-#define BLIS_EXTEND_3M_NC_C      BLIS_EXTEND_NC_S
+#ifndef BLIS_MAXIMUM_3M_NC_C
+#define BLIS_MAXIMUM_3M_NC_C     BLIS_MAXIMUM_NC_S
 #endif
 
-#ifndef BLIS_EXTEND_3M_MC_Z
-#define BLIS_EXTEND_3M_MC_Z      BLIS_EXTEND_MC_D
+#ifndef BLIS_MAXIMUM_3M_MC_Z
+#define BLIS_MAXIMUM_3M_MC_Z     BLIS_MAXIMUM_MC_D
 #endif
-#ifndef BLIS_EXTEND_3M_KC_Z
-#define BLIS_EXTEND_3M_KC_Z    ((BLIS_EXTEND_KC_D)/2)
+#ifndef BLIS_MAXIMUM_3M_KC_Z
+#define BLIS_MAXIMUM_3M_KC_Z   ((BLIS_MAXIMUM_KC_D)/2)
 #endif
-#ifndef BLIS_EXTEND_3M_NC_Z
-#define BLIS_EXTEND_3M_NC_Z      BLIS_EXTEND_NC_D
+#ifndef BLIS_MAXIMUM_3M_NC_Z
+#define BLIS_MAXIMUM_3M_NC_Z     BLIS_MAXIMUM_NC_D
 #endif
 
 
@@ -326,33 +326,6 @@
   #error "KC (3m) must be multiple of NR for all datatypes."
 #endif
 
-
-
-// -- Compute extended blocksizes ----------------------------------------------
-
-//
-// Compute maximum cache blocksizes.
-//
-
-#define BLIS_MAXIMUM_3M_MC_C  ( BLIS_DEFAULT_3M_MC_C + BLIS_EXTEND_3M_MC_C )
-#define BLIS_MAXIMUM_3M_KC_C  ( BLIS_DEFAULT_3M_KC_C + BLIS_EXTEND_3M_KC_C )
-#define BLIS_MAXIMUM_3M_NC_C  ( BLIS_DEFAULT_3M_NC_C + BLIS_EXTEND_3M_NC_C )
-
-#define BLIS_MAXIMUM_3M_MC_Z  ( BLIS_DEFAULT_3M_MC_Z + BLIS_EXTEND_3M_MC_Z )
-#define BLIS_MAXIMUM_3M_KC_Z  ( BLIS_DEFAULT_3M_KC_Z + BLIS_EXTEND_3M_KC_Z )
-#define BLIS_MAXIMUM_3M_NC_Z  ( BLIS_DEFAULT_3M_NC_Z + BLIS_EXTEND_3M_NC_Z )
-
-//
-// Compute leading dimension blocksizes used when packing micro-panels.
-//
-
-#define BLIS_PACKDIM_3M_MR_C  ( BLIS_DEFAULT_3M_MR_C + BLIS_EXTEND_3M_MR_C )
-#define BLIS_PACKDIM_3M_KR_C  ( BLIS_DEFAULT_3M_KR_C + BLIS_EXTEND_3M_KR_C )
-#define BLIS_PACKDIM_3M_NR_C  ( BLIS_DEFAULT_3M_NR_C + BLIS_EXTEND_3M_NR_C )
-
-#define BLIS_PACKDIM_3M_MR_Z  ( BLIS_DEFAULT_3M_MR_Z + BLIS_EXTEND_3M_MR_Z )
-#define BLIS_PACKDIM_3M_KR_Z  ( BLIS_DEFAULT_3M_KR_Z + BLIS_EXTEND_3M_KR_Z )
-#define BLIS_PACKDIM_3M_NR_Z  ( BLIS_DEFAULT_3M_NR_Z + BLIS_EXTEND_3M_NR_Z )
 
 
 

@@ -174,64 +174,64 @@ gint_t bli_info_get_default_kc_z( void ) { bli_init(); return bli_blksz_for_type
 	                                                                                           : gemm_kc ) ); }
 
 
-// -- Cache blocksize extensions --
+// -- Maximum cache blocksizes --
 
-// MC blocksize extensions
+// MC maximum blocksizes
 
-gint_t bli_info_get_extend_mc( num_t dt )
+gint_t bli_info_get_maximum_mc( num_t dt )
 {
-	if      ( bli_is_float   ( dt ) ) return bli_info_get_extend_mc_s();
-	else if ( bli_is_double  ( dt ) ) return bli_info_get_extend_mc_d();
-	else if ( bli_is_scomplex( dt ) ) return bli_info_get_extend_mc_c();
-	else if ( bli_is_dcomplex( dt ) ) return bli_info_get_extend_mc_z();
+	if      ( bli_is_float   ( dt ) ) return bli_info_get_maximum_mc_s();
+	else if ( bli_is_double  ( dt ) ) return bli_info_get_maximum_mc_d();
+	else if ( bli_is_scomplex( dt ) ) return bli_info_get_maximum_mc_c();
+	else if ( bli_is_dcomplex( dt ) ) return bli_info_get_maximum_mc_z();
 	else                              return 0;
 }
-gint_t bli_info_get_extend_mc_s( void ) { bli_init(); return bli_blksz_ext_for_type( BLIS_FLOAT,    gemm_mc ); }
-gint_t bli_info_get_extend_mc_d( void ) { bli_init(); return bli_blksz_ext_for_type( BLIS_DOUBLE,   gemm_mc ); }
-gint_t bli_info_get_extend_mc_c( void ) { bli_init(); return bli_blksz_ext_for_type( BLIS_SCOMPLEX,
-                                                                          ( bli_4m_is_enabled_c() ? gemm4m_mc
-	                                                                                              : gemm_mc ) ); }
-gint_t bli_info_get_extend_mc_z( void ) { bli_init(); return bli_blksz_ext_for_type( BLIS_DCOMPLEX,
-                                                                          ( bli_4m_is_enabled_z() ? gemm4m_mc
-	                                                                                              : gemm_mc ) ); }
+gint_t bli_info_get_maximum_mc_s( void ) { bli_init(); return bli_blksz_max_for_type( BLIS_FLOAT,    gemm_mc ); }
+gint_t bli_info_get_maximum_mc_d( void ) { bli_init(); return bli_blksz_max_for_type( BLIS_DOUBLE,   gemm_mc ); }
+gint_t bli_info_get_maximum_mc_c( void ) { bli_init(); return bli_blksz_max_for_type( BLIS_SCOMPLEX,
+                                                                           ( bli_4m_is_enabled_c() ? gemm4m_mc
+	                                                                                               : gemm_mc ) ); }
+gint_t bli_info_get_maximum_mc_z( void ) { bli_init(); return bli_blksz_max_for_type( BLIS_DCOMPLEX,
+                                                                           ( bli_4m_is_enabled_z() ? gemm4m_mc
+	                                                                                               : gemm_mc ) ); }
 
-// NC blocksize extensions
+// NC maximum blocksizes
 
-gint_t bli_info_get_extend_nc( num_t dt )
+gint_t bli_info_get_maximum_nc( num_t dt )
 {
-	if      ( bli_is_float   ( dt ) ) return bli_info_get_extend_nc_s();
-	else if ( bli_is_double  ( dt ) ) return bli_info_get_extend_nc_d();
-	else if ( bli_is_scomplex( dt ) ) return bli_info_get_extend_nc_c();
-	else if ( bli_is_dcomplex( dt ) ) return bli_info_get_extend_nc_z();
+	if      ( bli_is_float   ( dt ) ) return bli_info_get_maximum_nc_s();
+	else if ( bli_is_double  ( dt ) ) return bli_info_get_maximum_nc_d();
+	else if ( bli_is_scomplex( dt ) ) return bli_info_get_maximum_nc_c();
+	else if ( bli_is_dcomplex( dt ) ) return bli_info_get_maximum_nc_z();
 	else                              return 0;
 }
-gint_t bli_info_get_extend_nc_s( void ) { bli_init(); return bli_blksz_ext_for_type( BLIS_FLOAT,    gemm_nc ); }
-gint_t bli_info_get_extend_nc_d( void ) { bli_init(); return bli_blksz_ext_for_type( BLIS_DOUBLE,   gemm_nc ); }
-gint_t bli_info_get_extend_nc_c( void ) { bli_init(); return bli_blksz_ext_for_type( BLIS_SCOMPLEX,
-                                                                          ( bli_4m_is_enabled_c() ? gemm4m_nc
-	                                                                                              : gemm_nc ) ); }
-gint_t bli_info_get_extend_nc_z( void ) { bli_init(); return bli_blksz_ext_for_type( BLIS_DCOMPLEX,
-                                                                          ( bli_4m_is_enabled_z() ? gemm4m_nc
-	                                                                                              : gemm_nc ) ); }
+gint_t bli_info_get_maximum_nc_s( void ) { bli_init(); return bli_blksz_max_for_type( BLIS_FLOAT,    gemm_nc ); }
+gint_t bli_info_get_maximum_nc_d( void ) { bli_init(); return bli_blksz_max_for_type( BLIS_DOUBLE,   gemm_nc ); }
+gint_t bli_info_get_maximum_nc_c( void ) { bli_init(); return bli_blksz_max_for_type( BLIS_SCOMPLEX,
+                                                                           ( bli_4m_is_enabled_c() ? gemm4m_nc
+	                                                                                               : gemm_nc ) ); }
+gint_t bli_info_get_maximum_nc_z( void ) { bli_init(); return bli_blksz_max_for_type( BLIS_DCOMPLEX,
+                                                                           ( bli_4m_is_enabled_z() ? gemm4m_nc
+	                                                                                               : gemm_nc ) ); }
 
-// KC blocksize extensions
+// KC maximum blocksizes
 
-gint_t bli_info_get_extend_kc( num_t dt )
+gint_t bli_info_get_maximum_kc( num_t dt )
 {
-	if      ( bli_is_float   ( dt ) ) return bli_info_get_extend_kc_s();
-	else if ( bli_is_double  ( dt ) ) return bli_info_get_extend_kc_d();
-	else if ( bli_is_scomplex( dt ) ) return bli_info_get_extend_kc_c();
-	else if ( bli_is_dcomplex( dt ) ) return bli_info_get_extend_kc_z();
+	if      ( bli_is_float   ( dt ) ) return bli_info_get_maximum_kc_s();
+	else if ( bli_is_double  ( dt ) ) return bli_info_get_maximum_kc_d();
+	else if ( bli_is_scomplex( dt ) ) return bli_info_get_maximum_kc_c();
+	else if ( bli_is_dcomplex( dt ) ) return bli_info_get_maximum_kc_z();
 	else                              return 0;
 }
-gint_t bli_info_get_extend_kc_s( void ) { bli_init(); return bli_blksz_ext_for_type( BLIS_FLOAT,    gemm_kc ); }
-gint_t bli_info_get_extend_kc_d( void ) { bli_init(); return bli_blksz_ext_for_type( BLIS_DOUBLE,   gemm_kc ); }
-gint_t bli_info_get_extend_kc_c( void ) { bli_init(); return bli_blksz_ext_for_type( BLIS_SCOMPLEX,
-                                                                          ( bli_4m_is_enabled_c() ? gemm4m_kc
-	                                                                                              : gemm_kc ) ); }
-gint_t bli_info_get_extend_kc_z( void ) { bli_init(); return bli_blksz_ext_for_type( BLIS_DCOMPLEX,
-                                                                          ( bli_4m_is_enabled_z() ? gemm4m_kc
-	                                                                                              : gemm_kc ) ); }
+gint_t bli_info_get_maximum_kc_s( void ) { bli_init(); return bli_blksz_max_for_type( BLIS_FLOAT,    gemm_kc ); }
+gint_t bli_info_get_maximum_kc_d( void ) { bli_init(); return bli_blksz_max_for_type( BLIS_DOUBLE,   gemm_kc ); }
+gint_t bli_info_get_maximum_kc_c( void ) { bli_init(); return bli_blksz_max_for_type( BLIS_SCOMPLEX,
+                                                                           ( bli_4m_is_enabled_c() ? gemm4m_kc
+	                                                                                               : gemm_kc ) ); }
+gint_t bli_info_get_maximum_kc_z( void ) { bli_init(); return bli_blksz_max_for_type( BLIS_DCOMPLEX,
+                                                                           ( bli_4m_is_enabled_z() ? gemm4m_kc
+	                                                                                               : gemm_kc ) ); }
 
 
 // -- Default register blocksizes --
@@ -294,45 +294,45 @@ gint_t bli_info_get_default_kr_z( void ) { bli_init(); return bli_blksz_for_type
 	                                                                                           : gemm_kr ) ); }
 
 
-// -- Register blocksize extensions --
+// -- Packing register blocksizes --
 
-// MR blocksize extensions
+// MR packing blocksize
 
-gint_t bli_info_get_extend_mr( num_t dt )
+gint_t bli_info_get_packdim_mr( num_t dt )
 {
-	if      ( bli_is_float   ( dt ) ) return bli_info_get_extend_mr_s();
-	else if ( bli_is_double  ( dt ) ) return bli_info_get_extend_mr_d();
-	else if ( bli_is_scomplex( dt ) ) return bli_info_get_extend_mr_c();
-	else if ( bli_is_dcomplex( dt ) ) return bli_info_get_extend_mr_z();
+	if      ( bli_is_float   ( dt ) ) return bli_info_get_packdim_mr_s();
+	else if ( bli_is_double  ( dt ) ) return bli_info_get_packdim_mr_d();
+	else if ( bli_is_scomplex( dt ) ) return bli_info_get_packdim_mr_c();
+	else if ( bli_is_dcomplex( dt ) ) return bli_info_get_packdim_mr_z();
 	else                              return 0;
 }
-gint_t bli_info_get_extend_mr_s( void ) { bli_init(); return bli_blksz_ext_for_type( BLIS_FLOAT,    gemm_mr ); }
-gint_t bli_info_get_extend_mr_d( void ) { bli_init(); return bli_blksz_ext_for_type( BLIS_DOUBLE,   gemm_mr ); }
-gint_t bli_info_get_extend_mr_c( void ) { bli_init(); return bli_blksz_ext_for_type( BLIS_SCOMPLEX,
-                                                                          ( bli_4m_is_enabled_c() ? gemm4m_mr
-	                                                                                              : gemm_mr ) ); }
-gint_t bli_info_get_extend_mr_z( void ) { bli_init(); return bli_blksz_ext_for_type( BLIS_DCOMPLEX,
-                                                                          ( bli_4m_is_enabled_z() ? gemm4m_mr
-	                                                                                              : gemm_mr ) ); }
+gint_t bli_info_get_packdim_mr_s( void ) { bli_init(); return bli_blksz_max_for_type( BLIS_FLOAT,    gemm_mr ); }
+gint_t bli_info_get_packdim_mr_d( void ) { bli_init(); return bli_blksz_max_for_type( BLIS_DOUBLE,   gemm_mr ); }
+gint_t bli_info_get_packdim_mr_c( void ) { bli_init(); return bli_blksz_max_for_type( BLIS_SCOMPLEX,
+                                                                           ( bli_4m_is_enabled_c() ? gemm4m_mr
+	                                                                                               : gemm_mr ) ); }
+gint_t bli_info_get_packdim_mr_z( void ) { bli_init(); return bli_blksz_max_for_type( BLIS_DCOMPLEX,
+                                                                           ( bli_4m_is_enabled_z() ? gemm4m_mr
+	                                                                                               : gemm_mr ) ); }
 
-// NR blocksize extensions
+// NR packing blocksize
 
-gint_t bli_info_get_extend_nr( num_t dt )
+gint_t bli_info_get_packdim_nr( num_t dt )
 {
-	if      ( bli_is_float   ( dt ) ) return bli_info_get_extend_nr_s();
-	else if ( bli_is_double  ( dt ) ) return bli_info_get_extend_nr_d();
-	else if ( bli_is_scomplex( dt ) ) return bli_info_get_extend_nr_c();
-	else if ( bli_is_dcomplex( dt ) ) return bli_info_get_extend_nr_z();
+	if      ( bli_is_float   ( dt ) ) return bli_info_get_packdim_nr_s();
+	else if ( bli_is_double  ( dt ) ) return bli_info_get_packdim_nr_d();
+	else if ( bli_is_scomplex( dt ) ) return bli_info_get_packdim_nr_c();
+	else if ( bli_is_dcomplex( dt ) ) return bli_info_get_packdim_nr_z();
 	else                              return 0;
 }
-gint_t bli_info_get_extend_nr_s( void ) { bli_init(); return bli_blksz_ext_for_type( BLIS_FLOAT,    gemm_nr ); }
-gint_t bli_info_get_extend_nr_d( void ) { bli_init(); return bli_blksz_ext_for_type( BLIS_DOUBLE,   gemm_nr ); }
-gint_t bli_info_get_extend_nr_c( void ) { bli_init(); return bli_blksz_ext_for_type( BLIS_SCOMPLEX,
-                                                                          ( bli_4m_is_enabled_c() ? gemm4m_nr
-	                                                                                              : gemm_nr ) ); }
-gint_t bli_info_get_extend_nr_z( void ) { bli_init(); return bli_blksz_ext_for_type( BLIS_DCOMPLEX,
-                                                                          ( bli_4m_is_enabled_z() ? gemm4m_nr
-	                                                                                              : gemm_nr ) ); }
+gint_t bli_info_get_packdim_nr_s( void ) { bli_init(); return bli_blksz_max_for_type( BLIS_FLOAT,    gemm_nr ); }
+gint_t bli_info_get_packdim_nr_d( void ) { bli_init(); return bli_blksz_max_for_type( BLIS_DOUBLE,   gemm_nr ); }
+gint_t bli_info_get_packdim_nr_c( void ) { bli_init(); return bli_blksz_max_for_type( BLIS_SCOMPLEX,
+                                                                           ( bli_4m_is_enabled_c() ? gemm4m_nr
+	                                                                                               : gemm_nr ) ); }
+gint_t bli_info_get_packdim_nr_z( void ) { bli_init(); return bli_blksz_max_for_type( BLIS_DCOMPLEX,
+                                                                           ( bli_4m_is_enabled_z() ? gemm4m_nr
+	                                                                                               : gemm_nr ) ); }
 
 // -- Level-2 cache blocksizes --
 

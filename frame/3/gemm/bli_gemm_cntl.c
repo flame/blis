@@ -60,40 +60,40 @@ void bli_gemm_cntl_init()
 	// Create blocksize objects for each dimension.
 	gemm_mc
 	=
-	bli_blksz_obj_create( BLIS_DEFAULT_MC_S, BLIS_EXTEND_MC_S,
-	                      BLIS_DEFAULT_MC_D, BLIS_EXTEND_MC_D,
-	                      BLIS_DEFAULT_MC_C, BLIS_EXTEND_MC_C,
-	                      BLIS_DEFAULT_MC_Z, BLIS_EXTEND_MC_Z );
+	bli_blksz_obj_create( BLIS_DEFAULT_MC_S, BLIS_MAXIMUM_MC_S,
+	                      BLIS_DEFAULT_MC_D, BLIS_MAXIMUM_MC_D,
+	                      BLIS_DEFAULT_MC_C, BLIS_MAXIMUM_MC_C,
+	                      BLIS_DEFAULT_MC_Z, BLIS_MAXIMUM_MC_Z );
 	gemm_nc
 	=
-	bli_blksz_obj_create( BLIS_DEFAULT_NC_S, BLIS_EXTEND_NC_S,
-	                      BLIS_DEFAULT_NC_D, BLIS_EXTEND_NC_D,
-	                      BLIS_DEFAULT_NC_C, BLIS_EXTEND_NC_C,
-	                      BLIS_DEFAULT_NC_Z, BLIS_EXTEND_NC_Z );
+	bli_blksz_obj_create( BLIS_DEFAULT_NC_S, BLIS_MAXIMUM_NC_S,
+	                      BLIS_DEFAULT_NC_D, BLIS_MAXIMUM_NC_D,
+	                      BLIS_DEFAULT_NC_C, BLIS_MAXIMUM_NC_C,
+	                      BLIS_DEFAULT_NC_Z, BLIS_MAXIMUM_NC_Z );
 	gemm_kc
 	=
-	bli_blksz_obj_create( BLIS_DEFAULT_KC_S, BLIS_EXTEND_KC_S,
-	                      BLIS_DEFAULT_KC_D, BLIS_EXTEND_KC_D,
-	                      BLIS_DEFAULT_KC_C, BLIS_EXTEND_KC_C,
-	                      BLIS_DEFAULT_KC_Z, BLIS_EXTEND_KC_Z );
+	bli_blksz_obj_create( BLIS_DEFAULT_KC_S, BLIS_MAXIMUM_KC_S,
+	                      BLIS_DEFAULT_KC_D, BLIS_MAXIMUM_KC_D,
+	                      BLIS_DEFAULT_KC_C, BLIS_MAXIMUM_KC_C,
+	                      BLIS_DEFAULT_KC_Z, BLIS_MAXIMUM_KC_Z );
 	gemm_mr
 	=
-	bli_blksz_obj_create( BLIS_DEFAULT_MR_S, BLIS_EXTEND_MR_S,
-	                      BLIS_DEFAULT_MR_D, BLIS_EXTEND_MR_D,
-	                      BLIS_DEFAULT_MR_C, BLIS_EXTEND_MR_C,
-	                      BLIS_DEFAULT_MR_Z, BLIS_EXTEND_MR_Z );
+	bli_blksz_obj_create( BLIS_DEFAULT_MR_S, BLIS_PACKDIM_MR_S,
+	                      BLIS_DEFAULT_MR_D, BLIS_PACKDIM_MR_D,
+	                      BLIS_DEFAULT_MR_C, BLIS_PACKDIM_MR_C,
+	                      BLIS_DEFAULT_MR_Z, BLIS_PACKDIM_MR_Z );
 	gemm_nr
 	=
-	bli_blksz_obj_create( BLIS_DEFAULT_NR_S, BLIS_EXTEND_NR_S,
-	                      BLIS_DEFAULT_NR_D, BLIS_EXTEND_NR_D,
-	                      BLIS_DEFAULT_NR_C, BLIS_EXTEND_NR_C,
-	                      BLIS_DEFAULT_NR_Z, BLIS_EXTEND_NR_Z );
+	bli_blksz_obj_create( BLIS_DEFAULT_NR_S, BLIS_PACKDIM_NR_S,
+	                      BLIS_DEFAULT_NR_D, BLIS_PACKDIM_NR_D,
+	                      BLIS_DEFAULT_NR_C, BLIS_PACKDIM_NR_C,
+	                      BLIS_DEFAULT_NR_Z, BLIS_PACKDIM_NR_Z );
 	gemm_kr
 	=
-	bli_blksz_obj_create( BLIS_DEFAULT_KR_S, 0,
-	                      BLIS_DEFAULT_KR_D, 0,
-	                      BLIS_DEFAULT_KR_C, 0,
-	                      BLIS_DEFAULT_KR_Z, 0 );
+	bli_blksz_obj_create( BLIS_DEFAULT_KR_S, BLIS_PACKDIM_KR_S,
+	                      BLIS_DEFAULT_KR_D, BLIS_PACKDIM_KR_D,
+	                      BLIS_DEFAULT_KR_C, BLIS_PACKDIM_KR_C,
+	                      BLIS_DEFAULT_KR_Z, BLIS_PACKDIM_KR_Z );
 
 
 	// Attach the register blksz_t objects as sub-blocksizes to the cache
