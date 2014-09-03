@@ -383,19 +383,12 @@ void PASTEMAC(ch,varname)( \
 			ctype* restrict p11; \
 			dim_t           p11_m; \
 			dim_t           p11_n; \
-			inc_t           rs_p11; \
-			inc_t           cs_p11; \
 \
 			p11_m = panel_dim; \
 			p11_n = panel_dim; \
 			j     = diagoffc_abs; \
 			p11   = p + (j  )*ldp; \
 			c11   = c + (j  )*ldc; \
-\
-			/* Compute the row and column strides of p11. */ \
-			if         ( row_stored )    { rs_p11 = rs_p; cs_p11 = 1;    } \
-			else /* if ( col_stored ) */ { rs_p11 = 1;    cs_p11 = cs_p; } \
-\
 \
 			PASTEMAC(ch,scal2m)( 0, \
 			                     BLIS_NONUNIT_DIAG, \
@@ -404,8 +397,8 @@ void PASTEMAC(ch,varname)( \
 			                     p11_m, \
 			                     p11_n, \
 			                     kappa, \
-			                     c11, rs_c,   cs_c, \
-			                     p11, rs_p11, cs_p11 ); \
+			                     c11, rs_c, cs_c, \
+			                     p11, rs_p, cs_p ); \
 \
 			/* If source matrix c is Hermitian, we have to zero out the
 			   imaginary components of the diagonal of p11 in case the
@@ -418,7 +411,7 @@ void PASTEMAC(ch,varname)( \
 				{ \
 					PASTEMAC(ch,seti0s)( *p11 ); \
 \
-					p11 += rs_p11 + cs_p11; \
+					p11 += rs_p + cs_p; \
 				} \
 			} \
 		} \

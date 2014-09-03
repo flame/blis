@@ -415,8 +415,6 @@ void PASTEMAC(ch,varname)( \
 \
 		/* Pack the stored triangle of c11 to p11. */ \
 		{ \
-			inc_t    cs_p11; \
-			inc_t    rs_p11; \
 			dim_t    p11_m   = panel_dim; \
 			dim_t    p11_n   = panel_dim; \
 			inc_t    rs_c11  = 2*rs_c; \
@@ -433,10 +431,6 @@ void PASTEMAC(ch,varname)( \
 			ctype_r  kappa_r = PASTEMAC(ch,real)( *kappa ); \
 			ctype_r  kappa_i = PASTEMAC(ch,imag)( *kappa ); \
 \
-			/* Compute the row and column strides of p11. */ \
-			if         ( row_stored )    { rs_p11 = rs_p; cs_p11 = 1;    } \
-			else /* if ( col_stored ) */ { rs_p11 = 1;    cs_p11 = cs_p; } \
-\
 			/* Copy the real part of the stored triangle of c11 to p11_r. */ \
 			PASTEMAC(chr,scal2m)( 0, \
 			                      BLIS_NONUNIT_DIAG, \
@@ -446,7 +440,7 @@ void PASTEMAC(ch,varname)( \
 			                      p11_n, \
 			                      alpha_r, \
 			                      c11_r, rs_c11, cs_c11, \
-			                      p11_r, rs_p11, cs_p11 ); \
+			                      p11_r, rs_p,   cs_p ); \
 \
 			/* Copy the imaginary part of the stored triangle of c11 to p11_i,
 			   scaling by -1 if conjugation on c was requested. */ \
@@ -458,7 +452,7 @@ void PASTEMAC(ch,varname)( \
 			                      p11_n, \
 			                      alpha_i, \
 			                      c11_i, rs_c11, cs_c11, \
-			                      p11_i, rs_p11, cs_p11 ); \
+			                      p11_i, rs_p,   cs_p ); \
 \
 			/* If source matrix c is Hermitian, we have to zero out the
 			   imaginary components of the diagonal of p11 in case the
@@ -467,7 +461,7 @@ void PASTEMAC(ch,varname)( \
 			{ \
 				for ( i = 0; i < p11_m; ++i ) \
 				{ \
-					ctype_r* pi11_i = p11_i + (i  )*rs_p11 + (i  )*cs_p11; \
+					ctype_r* pi11_i = p11_i + (i  )*rs_p + (i  )*cs_p; \
 \
 					PASTEMAC(chr,set0s)( *pi11_i ); \
 				} \
@@ -483,7 +477,7 @@ void PASTEMAC(ch,varname)( \
 				                            &kappa_r, \
 				                            &kappa_i, \
 				                            p11_r,  \
-				                            p11_i, rs_p11, cs_p11 ); \
+				                            p11_i, rs_p, cs_p ); \
 			} \
 			else \
 			{ \
@@ -493,7 +487,7 @@ void PASTEMAC(ch,varname)( \
 				                            &kappa_r, \
 				                            &kappa_i, \
 				                            p11_r,  \
-				                            p11_i, rs_p11, cs_p11 ); \
+				                            p11_i, rs_p, cs_p ); \
 			} \
 /*
 	PASTEMAC(chr,fprintm)( stdout, "packm_herm_cxk: ap_r copied", m_panel_max, n_panel_max, \
@@ -561,13 +555,6 @@ void PASTEMAC(ch,varname)( \
 		dim_t    j     = bli_abs( diagoffp ); \
 		ctype_r* p11_r = ( ctype_r* )p +        (j  )*ldp; \
 		ctype_r* p11_i = ( ctype_r* )p + is_p + (j  )*ldp; \
-		inc_t    cs_p11; \
-		inc_t    rs_p11; \
-\
-		/* Compute the row and column strides of p11. */ \
-		if         ( row_stored )    { rs_p11 = rs_p; cs_p11 = 1;    } \
-		else /* if ( col_stored ) */ { rs_p11 = 1;    cs_p11 = cs_p; } \
-\
 \
 		/* If the diagonal of c is implicitly unit, explicitly set the
 		   the diagonal of the packed panel to kappa. */ \
@@ -580,12 +567,12 @@ void PASTEMAC(ch,varname)( \
 			                    m_panel, \
 			                    n_panel, \
 			                    &kappa_r, \
-			                    p11_r, rs_p11, cs_p11 ); \
+			                    p11_r, rs_p, cs_p ); \
 			PASTEMAC(chr,setd)( 0, \
 			                    m_panel, \
 			                    n_panel, \
 			                    &kappa_i, \
-			                    p11_i, rs_p11, cs_p11 ); \
+			                    p11_i, rs_p, cs_p ); \
 		} \
 \
 \
@@ -626,14 +613,14 @@ void PASTEMAC(ch,varname)( \
 			                    panel_dim, \
 			                    panel_dim, \
 			                    zero_r, \
-			                    p11_r, rs_p11, cs_p11 ); \
+			                    p11_r, rs_p, cs_p ); \
 			PASTEMAC(chr,setm)( diagoffp11, \
 			                    BLIS_NONUNIT_DIAG, \
 			                    uplop11, \
 			                    panel_dim, \
 			                    panel_dim, \
 			                    zero_r, \
-			                    p11_i, rs_p11, cs_p11 ); \
+			                    p11_i, rs_p, cs_p ); \
 		} \
 	} \
 }
