@@ -38,7 +38,7 @@
 
 typedef void (*FUNCPTR_T)(
                            conj_t  conja,
-                           dim_t   n,
+                           dim_t   panel_len,
                            void*   kappa,
                            void*   a, inc_t inca, inc_t lda,
                            void*   p, inc_t is_p, inc_t ldp
@@ -49,99 +49,99 @@ typedef void (*FUNCPTR_T)(
 
 static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] =
 {
-	/* panel width = 0 */
+	/* micro-panel width = 0 */
 	{
 		NULL, NULL, NULL, NULL,
 	},
-	/* panel width = 1 */
+	/* micro-panel width = 1 */
 	{
 		NULL, NULL, NULL, NULL,
 	},
-	/* panel width = 2 */
+	/* micro-panel width = 2 */
 	{
 		NULL,
 		BLIS_CPACKM_2XK_3M_KERNEL,
 		NULL,
 		BLIS_ZPACKM_2XK_3M_KERNEL,
 	},
-	/* panel width = 3 */
+	/* micro-panel width = 3 */
 	{
 		NULL, NULL, NULL, NULL,
 	},
-	/* panel width = 4 */
+	/* micro-panel width = 4 */
 	{
 		NULL,
 		BLIS_CPACKM_4XK_3M_KERNEL,
 		NULL,
 		BLIS_ZPACKM_4XK_3M_KERNEL,
 	},
-	/* panel width = 5 */
+	/* micro-panel width = 5 */
 	{
 		NULL, NULL, NULL, NULL,
 	},
-	/* panel width = 6 */
+	/* micro-panel width = 6 */
 	{
 		NULL,
 		BLIS_CPACKM_6XK_3M_KERNEL,
 		NULL,
 		BLIS_ZPACKM_6XK_3M_KERNEL,
 	},
-	/* panel width = 7 */
+	/* micro-panel width = 7 */
 	{
 		NULL, NULL, NULL, NULL,
 	},
-	/* panel width = 8 */
+	/* micro-panel width = 8 */
 	{
 		NULL,
 		BLIS_CPACKM_8XK_3M_KERNEL,
 		NULL,
 		BLIS_ZPACKM_8XK_3M_KERNEL,
 	},
-	/* panel width = 9 */
+	/* micro-panel width = 9 */
 	{
 		NULL, NULL, NULL, NULL,
 	},
-	/* panel width = 10 */
+	/* micro-panel width = 10 */
 	{
 		NULL,
 		BLIS_CPACKM_10XK_3M_KERNEL,
 		NULL,
 		BLIS_ZPACKM_10XK_3M_KERNEL,
 	},
-	/* panel width = 11 */
+	/* micro-panel width = 11 */
 	{
 		NULL, NULL, NULL, NULL,
 	},
-	/* panel width = 12 */
+	/* micro-panel width = 12 */
 	{
 		NULL,
 		BLIS_CPACKM_12XK_3M_KERNEL,
 		NULL,
 		BLIS_ZPACKM_12XK_3M_KERNEL,
 	},
-	/* panel width = 13 */
+	/* micro-panel width = 13 */
 	{
 		NULL, NULL, NULL, NULL,
 	},
-	/* panel width = 14 */
+	/* micro-panel width = 14 */
 	{
 		NULL,
 		BLIS_CPACKM_14XK_3M_KERNEL,
 		NULL,
 		BLIS_ZPACKM_14XK_3M_KERNEL,
 	},
-	/* panel width = 15 */
+	/* micro-panel width = 15 */
 	{
 		NULL, NULL, NULL, NULL,
 	},
-	/* panel width = 16 */
+	/* micro-panel width = 16 */
 	{
 		NULL,
 		BLIS_CPACKM_16XK_3M_KERNEL,
 		NULL,
 		BLIS_ZPACKM_16XK_3M_KERNEL,
 	},
-	/* panel width = 17 */
+	/* micro-panel width = 17 */
 	{
 		NULL, NULL, NULL, NULL,
 	},
@@ -154,37 +154,32 @@ static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] =
 \
 void PASTEMAC(ch,varname)( \
                            conj_t  conja, \
-                           dim_t   m, \
-                           dim_t   n, \
+                           dim_t   panel_dim, \
+                           dim_t   panel_len, \
                            void*   kappa, \
                            void*   a, inc_t inca, inc_t lda, \
                            void*   p, inc_t is_p, inc_t ldp  \
                          ) \
 { \
-	dim_t     panel_dim; \
-	dim_t     i, j; \
 	num_t     dt; \
 	FUNCPTR_T f; \
-\
-	/* The panel dimension is always equal to the m dimension of p. */ \
-	panel_dim = m; \
 \
 	/* Acquire the datatype for the current function. */ \
 	dt = PASTEMAC(ch,type); \
 \
 	/* Index into the array to extract the correct function pointer.
-	   If the panel dimension is too big to be within the array of
+	   If the micro-panel dimension is too big to be within the array of
 	   explicitly handled kernels, then we treat that kernel the same
 	   as if it were in range but unimplemented. */ \
 	if ( panel_dim < FUNCPTR_ARRAY_LENGTH ) f = ftypes[panel_dim][dt]; \
 	else                                    f = NULL; \
 \
-	/* If there exists a kernel implementation for the panel dimension
+	/* If there exists a kernel implementation for the micro-panel dimension
 	   provided, we invoke the implementation. Otherwise, we use scal2m. */ \
 	if ( f != NULL ) \
 	{ \
 		f( conja, \
-		   n, \
+		   panel_len, \
 		   kappa, \
 		   a, inca, lda, \
 		   p, is_p, ldp ); \
@@ -200,17 +195,19 @@ void PASTEMAC(ch,varname)( \
 		ctype_r* restrict p_rpi   = ( ctype_r* )p + 2*is_p; \
 		const dim_t       inca2   = 2*inca; \
 		const dim_t       lda2    = 2*lda; \
+		dim_t             i, j; \
 \
-		/* Treat the panel as m x n and column-stored (unit row stride). */ \
+		/* Treat the micro-panel as panel_dim x panel_len and column-stored
+		   (unit row stride). */ \
 \
 		/* NOTE: The loops below are inlined versions of scal2m, but
 		   for separated real/imaginary storage. */ \
 \
 		if ( bli_is_conj( conja ) ) \
 		{ \
-			for ( j = 0; j < n; ++j ) \
+			for ( j = 0; j < panel_len; ++j ) \
 			{ \
-				for ( i = 0; i < m; ++i ) \
+				for ( i = 0; i < panel_dim; ++i ) \
 				{ \
 					ctype_r* restrict alpha11_r = a_r   + (i  )*inca2 + (j  )*lda2; \
 					ctype_r* restrict alpha11_i = a_i   + (i  )*inca2 + (j  )*lda2; \
@@ -230,9 +227,9 @@ void PASTEMAC(ch,varname)( \
 		} \
 		else /* if ( bli_is_noconj( conja ) ) */ \
 		{ \
-			for ( j = 0; j < n; ++j ) \
+			for ( j = 0; j < panel_len; ++j ) \
 			{ \
-				for ( i = 0; i < m; ++i ) \
+				for ( i = 0; i < panel_dim; ++i ) \
 				{ \
 					ctype_r* restrict alpha11_r = a_r   + (i  )*inca2 + (j  )*lda2; \
 					ctype_r* restrict alpha11_i = a_i   + (i  )*inca2 + (j  )*lda2; \

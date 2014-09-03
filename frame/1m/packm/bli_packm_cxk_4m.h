@@ -40,8 +40,8 @@
 \
 void PASTEMAC(ch,varname)( \
                            conj_t  conja, \
-                           dim_t   m, \
-                           dim_t   n, \
+                           dim_t   panel_dim, \
+                           dim_t   panel_len, \
                            void*   kappa, \
                            void*   a, inc_t inca, inc_t lda, \
                            void*   p, inc_t is_p, inc_t ldp  \

@@ -38,7 +38,7 @@
 
 typedef void (*FUNCPTR_T)(
                            conj_t  conja,
-                           dim_t   n,
+                           dim_t   panel_len,
                            void*   kappa,
                            void*   a, inc_t inca, inc_t lda,
                            void*   p,             inc_t ldp
@@ -49,99 +49,99 @@ typedef void (*FUNCPTR_T)(
 
 static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] =
 {
-	/* panel width = 0 */
+	/* micro-panel width = 0 */
 	{
 		NULL, NULL, NULL, NULL,
 	},
-	/* panel width = 1 */
+	/* micro-panel width = 1 */
 	{
 		NULL, NULL, NULL, NULL,
 	},
-	/* panel width = 2 */
+	/* micro-panel width = 2 */
 	{
 		BLIS_SPACKM_2XK_KERNEL,
 		BLIS_CPACKM_2XK_KERNEL,
 		BLIS_DPACKM_2XK_KERNEL,
 		BLIS_ZPACKM_2XK_KERNEL,
 	},
-	/* panel width = 3 */
+	/* micro-panel width = 3 */
 	{
 		NULL, NULL, NULL, NULL,
 	},
-	/* panel width = 4 */
+	/* micro-panel width = 4 */
 	{
 		BLIS_SPACKM_4XK_KERNEL,
 		BLIS_CPACKM_4XK_KERNEL,
 		BLIS_DPACKM_4XK_KERNEL,
 		BLIS_ZPACKM_4XK_KERNEL,
 	},
-	/* panel width = 5 */
+	/* micro-panel width = 5 */
 	{
 		NULL, NULL, NULL, NULL,
 	},
-	/* panel width = 6 */
+	/* micro-panel width = 6 */
 	{
 		BLIS_SPACKM_6XK_KERNEL,
 		BLIS_CPACKM_6XK_KERNEL,
 		BLIS_DPACKM_6XK_KERNEL,
 		BLIS_ZPACKM_6XK_KERNEL,
 	},
-	/* panel width = 7 */
+	/* micro-panel width = 7 */
 	{
 		NULL, NULL, NULL, NULL,
 	},
-	/* panel width = 8 */
+	/* micro-panel width = 8 */
 	{
 		BLIS_SPACKM_8XK_KERNEL,
 		BLIS_CPACKM_8XK_KERNEL,
 		BLIS_DPACKM_8XK_KERNEL,
 		BLIS_ZPACKM_8XK_KERNEL,
 	},
-	/* panel width = 9 */
+	/* micro-panel width = 9 */
 	{
 		NULL, NULL, NULL, NULL,
 	},
-	/* panel width = 10 */
+	/* micro-panel width = 10 */
 	{
 		BLIS_SPACKM_10XK_KERNEL,
 		BLIS_CPACKM_10XK_KERNEL,
 		BLIS_DPACKM_10XK_KERNEL,
 		BLIS_ZPACKM_10XK_KERNEL,
 	},
-	/* panel width = 11 */
+	/* micro-panel width = 11 */
 	{
 		NULL, NULL, NULL, NULL,
 	},
-	/* panel width = 12 */
+	/* micro-panel width = 12 */
 	{
 		BLIS_SPACKM_12XK_KERNEL,
 		BLIS_CPACKM_12XK_KERNEL,
 		BLIS_DPACKM_12XK_KERNEL,
 		BLIS_ZPACKM_12XK_KERNEL,
 	},
-	/* panel width = 13 */
+	/* micro-panel width = 13 */
 	{
 		NULL, NULL, NULL, NULL,
 	},
-	/* panel width = 14 */
+	/* micro-panel width = 14 */
 	{
 		BLIS_SPACKM_14XK_KERNEL,
 		BLIS_CPACKM_14XK_KERNEL,
 		BLIS_DPACKM_14XK_KERNEL,
 		BLIS_ZPACKM_14XK_KERNEL,
 	},
-	/* panel width = 15 */
+	/* micro-panel width = 15 */
 	{
 		NULL, NULL, NULL, NULL,
 	},
-	/* panel width = 16 */
+	/* micro-panel width = 16 */
 	{
 		BLIS_SPACKM_16XK_KERNEL,
 		BLIS_CPACKM_16XK_KERNEL,
 		BLIS_DPACKM_16XK_KERNEL,
 		BLIS_ZPACKM_16XK_KERNEL,
 	},
-	/* panel width = 17 */
+	/* micro-panel width = 17 */
 	{
 		NULL, NULL, NULL, NULL,
 	},
@@ -150,70 +150,55 @@ static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] =
 
 
 #undef  GENTFUNC
-#define GENTFUNC( ctype, ch, varname, scal2vker ) \
+#define GENTFUNC( ctype, ch, varname ) \
 \
 void PASTEMAC(ch,varname)( \
                            conj_t  conja, \
-                           dim_t   m, \
-                           dim_t   n, \
+                           dim_t   panel_dim, \
+                           dim_t   panel_len, \
                            void*   kappa, \
                            void*   a, inc_t inca, inc_t lda, \
                            void*   p,             inc_t ldp  \
                          ) \
 { \
-	dim_t     panel_dim; \
 	num_t     dt; \
 	FUNCPTR_T f; \
-\
-	/* If the panel dimension is unit, then we recognize that this allows
-	   the kernel to reduce to a copyv, so we call that kernel directly. */ \
-	if ( m == 1 ) \
-	{ \
-		PASTEMAC3(ch,ch,ch,scal2vker)( conja, \
-		                               n, \
-		                               kappa, \
-		                               a, lda, \
-		                               p, ldp ); \
-		return; \
-	} \
-\
-	/* The panel dimension is always equal to the m dimension of p. */ \
-	panel_dim = m; \
 \
 	/* Acquire the datatype for the current function. */ \
 	dt = PASTEMAC(ch,type); \
 \
 	/* Index into the array to extract the correct function pointer.
-	   If the panel dimension is too big to be within the array of
+	   If the micro-panel dimension is too big to be within the array of
 	   explicitly handled kernels, then we treat that kernel the same
 	   as if it were in range but unimplemented. */ \
 	if ( panel_dim < FUNCPTR_ARRAY_LENGTH ) f = ftypes[panel_dim][dt]; \
 	else                                    f = NULL; \
 \
-	/* If there exists a kernel implementation for the panel dimension
+	/* If there exists a kernel implementation for the micro-panel dimension
 	   provided, we invoke the implementation. Otherwise, we use scal2m. */ \
 	if ( f != NULL ) \
 	{ \
 		f( conja, \
-		   n, \
+		   panel_len, \
 		   kappa, \
 		   a, inca, lda, \
 		   p,       ldp ); \
 	} \
 	else \
 	{ \
-		/* Treat the panel as m x n and column-stored (unit row stride). */ \
+		/* Treat the micro-panel as panel_dim x panel_len and column-stored
+		   (unit row stride). */ \
 		PASTEMAC3(ch,ch,ch,scal2m)( 0, \
 		                            BLIS_NONUNIT_DIAG, \
 		                            BLIS_DENSE, \
 		                            conja, \
-		                            m, \
-		                            n, \
+		                            panel_dim, \
+		                            panel_len, \
 		                            kappa, \
 		                            a, inca, lda, \
 		                            p, 1,    ldp ); \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC( packm_cxk, SCAL2V_KERNEL )
+INSERT_GENTFUNC_BASIC0( packm_cxk )
 
