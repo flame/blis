@@ -39,7 +39,7 @@ void bli_her2k_front( obj_t*  alpha,
                       obj_t*  b,
                       obj_t*  beta,
                       obj_t*  c,
-                      herk_t* cntl )
+                      gemm_t* cntl )
 {
 	obj_t    alpha_conj;
 	obj_t    c_local;

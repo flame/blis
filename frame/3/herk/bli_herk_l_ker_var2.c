@@ -56,7 +56,7 @@ static FUNCPTR_T GENARRAY(ftypes,herk_l_ker_var2);
 void bli_herk_l_ker_var2( obj_t*  a,
                           obj_t*  b,
                           obj_t*  c,
-                          herk_t* cntl,
+                          gemm_t* cntl,
                           herk_thrinfo_t* thread )
 {
 	num_t     dt_exec   = bli_obj_execution_datatype( *c );

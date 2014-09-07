@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-extern herk_t* herk4m_cntl;
+extern gemm_t* gemm4m_cntl;
 
 void bli_syrk4m_entry( obj_t*  alpha,
                        obj_t*  a,
@@ -42,6 +42,6 @@ void bli_syrk4m_entry( obj_t*  alpha,
                        obj_t*  c )
 {
 	bli_syrk_front( alpha, a, beta, c,
-	                herk4m_cntl );
+	                gemm4m_cntl );
 }
 

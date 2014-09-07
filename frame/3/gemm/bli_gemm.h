@@ -37,7 +37,6 @@
 #include "bli_gemm_entry.h"
 #include "bli_gemm_front.h"
 #include "bli_gemm_int.h"
-#include "bli_gemm_target.h"
 
 #include "bli_gemm_ukernel.h"
 

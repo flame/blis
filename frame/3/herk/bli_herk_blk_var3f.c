@@ -37,7 +37,7 @@
 void bli_herk_blk_var3f( obj_t*  a,
                          obj_t*  ah,
                          obj_t*  c,
-                         herk_t* cntl,
+                         gemm_t* cntl,
                          herk_thrinfo_t* thread )
 {
     obj_t  c_pack_s;
@@ -119,7 +119,7 @@ void bli_herk_blk_var3f( obj_t*  a,
 		              ah1_pack,
 		              &BLIS_ONE,
 		              c_pack,
-		              cntl_sub_herk( cntl ),
+		              cntl_sub_gemm( cntl ),
                       herk_thread_sub_herk( thread ) );
 
         // This variant executes multiple rank-k updates. Therefore, if the

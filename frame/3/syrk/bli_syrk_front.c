@@ -38,7 +38,7 @@ void bli_syrk_front( obj_t*  alpha,
                      obj_t*  a,
                      obj_t*  beta,
                      obj_t*  c,
-                     herk_t* cntl )
+                     gemm_t* cntl )
 {
 	obj_t   a_local;
 	obj_t   at_local;
@@ -60,7 +60,7 @@ void bli_syrk_front( obj_t*  alpha,
 	bli_obj_alias_to( *c, c_local );
 	bli_obj_set_as_root( c_local );
 
-	// For herk, the right-hand "B" operand is simply A^T.
+	// For syrk, the right-hand "B" operand is simply A^T.
 	bli_obj_alias_to( *a, at_local );
 	bli_obj_induce_trans( at_local );
 

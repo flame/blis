@@ -39,7 +39,7 @@
 void bli_herk_u_ker_var2( obj_t*  a,
                           obj_t*  b,
                           obj_t*  c,
-                          herk_t* cntl,
+                          gemm_t* cntl,
                           herk_thrinfo_t* thread );
 
 

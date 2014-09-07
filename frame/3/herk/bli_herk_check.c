@@ -127,7 +127,7 @@ void bli_herk_int_check( obj_t*  alpha,
                          obj_t*  ah,
                          obj_t*  beta,
                          obj_t*  c,
-                         herk_t* cntl )
+                         gemm_t* cntl )
 {
 	err_t e_val;
 

@@ -35,6 +35,6 @@
 void bli_herk_blk_var2f( obj_t*  a,
                          obj_t*  ah,
                          obj_t*  c,
-                         herk_t* cntl,
+                         gemm_t* cntl,
                          herk_thrinfo_t* thread );
 
