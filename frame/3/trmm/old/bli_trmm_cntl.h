@@ -48,7 +48,7 @@ struct trmm_s
 };
 typedef struct trmm_s trmm_t;
 
-#define cntl_sub_trmm( cntl )      cntl->sub_trmm
+#define cntl_sub_gemm( cntl )      cntl->sub_trmm
 
 void    bli_trmm_cntl_init( void );
 void    bli_trmm_cntl_finalize( void );

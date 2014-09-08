@@ -34,8 +34,7 @@
 
 #include "blis.h"
 
-extern trmm_t* trmm3m_l_cntl;
-extern trmm_t* trmm3m_r_cntl;
+extern gemm_t* gemm3m_cntl;
 
 void bli_trmm33m_entry( side_t  side,
                         obj_t*  alpha,
@@ -45,7 +44,6 @@ void bli_trmm33m_entry( side_t  side,
                         obj_t*  c )
 {
 	bli_trmm3_front( side, alpha, a, b, beta, c,
-	                 trmm3m_l_cntl,
-	                 trmm3m_r_cntl );
+	                 gemm3m_cntl );
 }
 

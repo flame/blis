@@ -210,6 +210,16 @@ void PASTEMAC(ch,varname)( \
 			                   p_br, rs_p, cs_p ); \
 		} \
 	} \
+\
+\
+/*
+	if ( bli_is_col_packed( schema ) ) \
+	PASTEMAC(ch,fprintm)( stdout, "packm_struc_cxk: bp copied", m_panel_max, n_panel_max, \
+	                      p, rs_p, cs_p, "%4.1f", "" ); \
+	else if ( bli_is_row_packed( schema ) ) \
+	PASTEMAC(ch,fprintm)( stdout, "packm_struc_cxk: ap copied", m_panel_max, n_panel_max, \
+	                      p, rs_p, cs_p, "%4.1f", "" ); \
+*/ \
 }
 
 INSERT_GENTFUNC_BASIC( packm_struc_cxk, packm_cxk )
@@ -500,7 +510,6 @@ void PASTEMAC(ch,varname)( \
 		                   zero, \
 		                   p, rs_p, cs_p ); \
 	} \
-\
 \
 }
 

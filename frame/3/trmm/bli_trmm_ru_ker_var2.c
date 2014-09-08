@@ -56,7 +56,7 @@ static FUNCPTR_T GENARRAY(ftypes,trmm_ru_ker_var2);
 void bli_trmm_ru_ker_var2( obj_t*  a,
                            obj_t*  b,
                            obj_t*  c,
-                           trmm_t* cntl,
+                           gemm_t* cntl,
                            trmm_thrinfo_t* thread )
 {
 	num_t     dt_exec   = bli_obj_execution_datatype( *c );
@@ -219,10 +219,12 @@ void PASTEMAC(ch,varname)( \
 	/* Compute the storage stride for the triangular matrix B, which is
 	   usually PACKNR. However, in the case of 3m, the storage stride
 	   captures the (PACKNR * 3/2) factor embedded in the panel stride.
-	   Notice that we must first inflate k up to a multiple of NR, since
-	   the panel stride was originally computed using this inflated k
-	   dimension. */ \
-	k_full = ( k % NR != 0 ? k + NR - ( k % NR ) : k ); \
+	   Note that trmm does NOT require k to be a multiple of MR or NR
+	   (depending on whether A or B is the triangular matrix), so we can
+	   use k as-is. By contrast, trsm must use an "inflated" version of
+	   k since trsm requires that k be a multiple of MR (when A is
+	   triangular) or NR (when B is triangular). */ \
+	k_full = k; \
 	ss_b   = ps_b / k_full; \
 \
 	/* If there is a zero region to the left of where the diagonal of B
@@ -246,13 +248,6 @@ void PASTEMAC(ch,varname)( \
 	{ \
 		k = -diagoffb + n; \
 	} \
-\
-	/* For consistency with the trsm macro-kernels, we inflate k to be a
-	   multiple of NR, if necessary. This is needed because we typically
-	   use the same packm variant for trmm as for trsm, and trsm has this
-	   constraint that k must be a multiple of NR so that it can safely
-	   handle bottom-right corner edges of the triangle. */ \
-	if ( k % NR != 0 ) k += NR - ( k % NR ); \
 \
 	/* Clear the temporary C buffer in case it has any infs or NaNs. */ \
 	PASTEMAC(ch,set0s_mxn)( MR, NR, \

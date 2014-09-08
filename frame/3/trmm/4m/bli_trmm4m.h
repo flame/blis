@@ -32,7 +32,6 @@
 
 */
 
-#include "bli_trmm4m_cntl.h"
 #include "bli_trmm4m_entry.h"
 
 

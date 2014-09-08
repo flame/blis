@@ -50,21 +50,13 @@ extern gemm_t*    gemm_cntl_bp_ke;
 packm_t*          trmm_l_packa_cntl;
 packm_t*          trmm_l_packb_cntl;
 
-packm_t*          trmm_r_packa_cntl;
-packm_t*          trmm_r_packb_cntl;
-
 trmm_t*           trmm_cntl_bp_ke;
 
 trmm_t*           trmm_l_cntl_op_bp;
 trmm_t*           trmm_l_cntl_mm_op;
 trmm_t*           trmm_l_cntl_vl_mm;
 
-trmm_t*           trmm_r_cntl_op_bp;
-trmm_t*           trmm_r_cntl_mm_op;
-trmm_t*           trmm_r_cntl_vl_mm;
-
 trmm_t*           trmm_l_cntl;
-trmm_t*           trmm_r_cntl;
 
 
 void bli_trmm_cntl_init()
@@ -74,10 +66,10 @@ void bli_trmm_cntl_init()
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
 	                           BLIS_VARIANT1,
-	                           // IMPORTANT: for consistency with trsm, "k" dim
-	                           // multiple is set to mr.
+	                           // IMPORTANT: Unlike trsm, trmm does not require a
+	                           // "k" dim multiple equal to mr.
 	                           gemm_mr,
-	                           gemm_mr,
+	                           gemm_kr,
 	                           TRUE,  // densify
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
@@ -89,40 +81,9 @@ void bli_trmm_cntl_init()
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
 	                           BLIS_VARIANT1,
-	                           // IMPORTANT: m dim multiple here must be mr
-	                           // since "k" dim multiple is set to mr above.
-	                           gemm_mr,
-	                           gemm_nr,
-	                           FALSE, // already dense
-	                           FALSE, // do NOT invert diagonal
-	                           FALSE, // reverse iteration if upper?
-	                           FALSE, // reverse iteration if lower?
-	                           BLIS_PACKED_COL_PANELS,
-	                           BLIS_BUFFER_FOR_B_PANEL );
-
-	// Create control tree objects for packm operations (right side).
-	trmm_r_packa_cntl
-	=
-	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT1,
-	                           // IMPORTANT: for consistency with trsm, "k" dim
-	                           // multiple is set to nr.
-	                           gemm_mr,
-	                           gemm_nr,
-	                           FALSE, // already dense
-	                           FALSE, // do NOT invert diagonal
-	                           FALSE, // reverse iteration if upper?
-	                           FALSE, // reverse iteration if lower?
-	                           BLIS_PACKED_ROW_PANELS,
-	                           BLIS_BUFFER_FOR_A_BLOCK );
-
-	trmm_r_packb_cntl
-	=
-	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT1,
-	                           // IMPORTANT: m dim multiple here must be nr
-	                           // since "k" dim multiple is set to nr above.
-	                           gemm_nr,
+	                           // IMPORTANT: Unlike trsm, trmm does not require a
+	                           // "k" dim multiple equal to mr.
+	                           gemm_kr,
 	                           gemm_nr,
 	                           TRUE,  // densify
 	                           FALSE, // do NOT invert diagonal
@@ -130,7 +91,6 @@ void bli_trmm_cntl_init()
 	                           FALSE, // reverse iteration if lower?
 	                           BLIS_PACKED_COL_PANELS,
 	                           BLIS_BUFFER_FOR_B_PANEL );
-
 
 	// Create control tree object for lowest-level block-panel kernel.
 	trmm_cntl_bp_ke
@@ -190,74 +150,20 @@ void bli_trmm_cntl_init()
 	                          NULL,
 	                          NULL );
 
-	// Create control tree object for outer panel (to block-panel)
-	// problem (right side).
-	trmm_r_cntl_op_bp
-	=
-	bli_trmm_cntl_obj_create( BLIS_BLOCKED,
-	                          BLIS_VARIANT1,
-	                          gemm_mc,
-	                          gemm_ukrs,
-	                          NULL,
-	                          trmm_r_packa_cntl,
-	                          trmm_r_packb_cntl,
-	                          NULL,
-	                          trmm_cntl_bp_ke,
-	                          gemm_cntl_bp_ke,
-	                          NULL );
-
-	// Create control tree object for general problem via multiple
-	// rank-k (outer panel) updates (right side).
-	trmm_r_cntl_mm_op
-	=
-	bli_trmm_cntl_obj_create( BLIS_BLOCKED,
-	                          BLIS_VARIANT3,
-	                          gemm_kc,
-	                          gemm_ukrs,
-	                          NULL,
-	                          NULL, 
-	                          NULL,
-	                          NULL,
-	                          trmm_r_cntl_op_bp,
-	                          NULL,
-	                          NULL );
-
-	// Create control tree object for very large problem via multiple
-	// general problems (right side).
-	trmm_r_cntl_vl_mm
-	=
-	bli_trmm_cntl_obj_create( BLIS_BLOCKED,
-	                          BLIS_VARIANT2,
-	                          gemm_nc,
-	                          gemm_ukrs,
-	                          NULL,
-	                          NULL,
-	                          NULL,
-	                          NULL,
-	                          trmm_r_cntl_mm_op,
-	                          NULL,
-	                          NULL );
-
 	// Alias the "master" trmm control trees to shorter names.
 	trmm_l_cntl = trmm_l_cntl_vl_mm;
-	trmm_r_cntl = trmm_r_cntl_vl_mm;
 }
 
 void bli_trmm_cntl_finalize()
 {
 	bli_cntl_obj_free( trmm_l_packa_cntl );
 	bli_cntl_obj_free( trmm_l_packb_cntl );
-	bli_cntl_obj_free( trmm_r_packa_cntl );
-	bli_cntl_obj_free( trmm_r_packb_cntl );
 
 	bli_cntl_obj_free( trmm_cntl_bp_ke );
 
 	bli_cntl_obj_free( trmm_l_cntl_op_bp );
 	bli_cntl_obj_free( trmm_l_cntl_mm_op );
 	bli_cntl_obj_free( trmm_l_cntl_vl_mm );
-	bli_cntl_obj_free( trmm_r_cntl_op_bp );
-	bli_cntl_obj_free( trmm_r_cntl_mm_op );
-	bli_cntl_obj_free( trmm_r_cntl_vl_mm );
 }
 
 trmm_t* bli_trmm_cntl_obj_create( impl_t     impl_type,

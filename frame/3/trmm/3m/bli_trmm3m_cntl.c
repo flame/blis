@@ -53,18 +53,18 @@ packm_t*          trmm3m_l_packb_cntl;
 packm_t*          trmm3m_r_packa_cntl;
 packm_t*          trmm3m_r_packb_cntl;
 
-trmm_t*           trmm3m_cntl_bp_ke;
+gemm_t*           trmm3m_cntl_bp_ke;
 
-trmm_t*           trmm3m_l_cntl_op_bp;
-trmm_t*           trmm3m_l_cntl_mm_op;
-trmm_t*           trmm3m_l_cntl_vl_mm;
+gemm_t*           trmm3m_l_cntl_op_bp;
+gemm_t*           trmm3m_l_cntl_mm_op;
+gemm_t*           trmm3m_l_cntl_vl_mm;
 
-trmm_t*           trmm3m_r_cntl_op_bp;
-trmm_t*           trmm3m_r_cntl_mm_op;
-trmm_t*           trmm3m_r_cntl_vl_mm;
+gemm_t*           trmm3m_r_cntl_op_bp;
+gemm_t*           trmm3m_r_cntl_mm_op;
+gemm_t*           trmm3m_r_cntl_vl_mm;
 
-trmm_t*           trmm3m_l_cntl;
-trmm_t*           trmm3m_r_cntl;
+gemm_t*           trmm3m_l_cntl;
+gemm_t*           trmm3m_r_cntl;
 
 
 void bli_trmm3m_cntl_init()
@@ -77,7 +77,7 @@ void bli_trmm3m_cntl_init()
 	                           // IMPORTANT: for consistency with trsm, "k" dim
 	                           // multiple is set to mr.
 	                           gemm3m_mr,
-	                           gemm3m_mr,
+	                           gemm3m_kr,
 	                           TRUE,  // densify
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
@@ -91,9 +91,9 @@ void bli_trmm3m_cntl_init()
 	                           BLIS_VARIANT2,
 	                           // IMPORTANT: m dim multiple here must be mr
 	                           // since "k" dim multiple is set to mr above.
-	                           gemm3m_mr,
+	                           gemm3m_kr,
 	                           gemm3m_nr,
-	                           FALSE, // already dense
+	                           TRUE,  // already dense
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
 	                           FALSE, // reverse iteration if lower?

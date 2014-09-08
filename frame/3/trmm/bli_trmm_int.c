@@ -39,7 +39,7 @@
 typedef void (*FUNCPTR_T)( obj_t*  a,
                            obj_t*  b,
                            obj_t*  c,
-                           trmm_t* cntl,
+                           gemm_t* cntl,
                            trmm_thrinfo_t* thread );
 
 static FUNCPTR_T vars[2][2][4][3] =
@@ -89,7 +89,7 @@ void bli_trmm_int( obj_t*  alpha,
                    obj_t*  b,
                    obj_t*  beta,
                    obj_t*  c,
-                   trmm_t* cntl,
+                   gemm_t* cntl,
                    trmm_thrinfo_t* thread )
 {
 	obj_t     a_local;

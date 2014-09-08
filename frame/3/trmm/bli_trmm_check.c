@@ -116,7 +116,7 @@ void bli_trmm_int_check( obj_t*  alpha,
                          obj_t*  b,
                          obj_t*  beta,
                          obj_t*  c,
-                         trmm_t* cntl )
+                         gemm_t* cntl )
 {
 	err_t e_val;
 

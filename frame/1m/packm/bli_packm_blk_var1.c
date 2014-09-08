@@ -336,7 +336,8 @@ void PASTEMAC(ch,varname)( \
 			{ \
 				panel_off_i     = 0; \
 				panel_len_i     = bli_abs( diagoffc_i ) + panel_dim_i; \
-				panel_len_max_i = bli_abs( diagoffc_i ) + panel_dim_max; \
+				panel_len_max_i = bli_min( bli_abs( diagoffc_i ) + panel_dim_max, \
+				                           panel_len_max ); \
 				diagoffp_i      = diagoffc_i; \
 			} \
 			else /* if ( ( row_stored && bli_is_lower( uploc ) ) || \

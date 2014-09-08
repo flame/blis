@@ -37,7 +37,7 @@
 void bli_trmm_blk_var1f( obj_t*  a,
                          obj_t*  b,
                          obj_t*  c,
-                         trmm_t* cntl,
+                         gemm_t* cntl,
                          trmm_thrinfo_t* thread )
 {
     obj_t b_pack_s;
@@ -136,7 +136,7 @@ void bli_trmm_blk_var1f( obj_t*  a,
 		              b_pack,
 		              &BLIS_ONE,
 		              c1_pack,
-		              cntl_sub_trmm( cntl ),
+		              cntl_sub_gemm( cntl ),
                       trmm_thread_sub_trmm( thread ) );
 
 		// Unpack C1 (if C1 was packed).

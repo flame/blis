@@ -557,18 +557,6 @@ void PASTEMAC(ch,varname)( \
                                               inc_t is_p, inc_t ldp  \
                          ) \
 { \
-	bool_t row_stored; \
-	bool_t col_stored; \
-\
-\
-	/* Create flags to incidate row or column storage. Note that the
-	   schema bit that encodes row or column is describing the form of
-	   micro-panel, not the storage in the micro-panel. Hence the
-	   mismatch in "row" and "column" semantics. */ \
-	row_stored = bli_is_col_packed( schema ); \
-	col_stored = bli_is_row_packed( schema ); \
-\
-\
 	/* Pack the panel. */ \
 	PASTEMAC(ch,kername)( conjc, \
 	                      panel_dim, \
@@ -580,10 +568,24 @@ void PASTEMAC(ch,varname)( \
 \
 	/* Tweak the panel according to its triangular structure */ \
 	{ \
+		ctype_r* p_r     = ( ctype_r* )p +      0; \
+		ctype_r* p_i     = ( ctype_r* )p +   is_p; \
+		ctype_r* p_rpi   = ( ctype_r* )p + 2*is_p; \
+\
 		dim_t    j       = bli_abs( diagoffp ); \
-		ctype_r* p11_r   = ( ctype_r* )p +          (j  )*ldp; \
-		ctype_r* p11_i   = ( ctype_r* )p +   is_p + (j  )*ldp; \
-		ctype_r* p11_rpi = ( ctype_r* )p + 2*is_p + (j  )*ldp; \
+		ctype_r* p11_r   = p_r   + (j  )*ldp; \
+		ctype_r* p11_i   = p_i   + (j  )*ldp; \
+		ctype_r* p11_rpi = p_rpi + (j  )*ldp; \
+\
+		dim_t    p11_m   = m_panel; \
+		dim_t    p11_n   = n_panel; \
+\
+		dim_t    min_p11_m_n; \
+\
+		if      ( diagoffp < 0 ) p11_m -= j; \
+		else if ( diagoffp > 0 ) p11_n -= j; \
+\
+		min_p11_m_n = bli_min( p11_m, p11_n ); \
 \
 \
 		/* If the diagonal of c is implicitly unit, explicitly set the
@@ -594,21 +596,21 @@ void PASTEMAC(ch,varname)( \
 			ctype_r kappa_i = PASTEMAC(ch,imag)( *kappa ); \
 			dim_t   i; \
 \
-			PASTEMAC(chr,setd)( 0, \
+			PASTEMAC(chr,setd)( diagoffp, \
 			                    m_panel, \
 			                    n_panel, \
 			                    &kappa_r, \
-			                    p11_r, rs_p, cs_p ); \
-			PASTEMAC(chr,setd)( 0, \
+			                    p_r, rs_p, cs_p ); \
+			PASTEMAC(chr,setd)( diagoffp, \
 			                    m_panel, \
 			                    n_panel, \
 			                    &kappa_i, \
-			                    p11_i, rs_p, cs_p ); \
+			                    p_i, rs_p, cs_p ); \
 \
 			/* Update the diagonal of the p11 section of the rpi panel.
 			   It simply needs to contain the sum of diagonals of p11_r
 			   and p11_i. */ \
-			for ( i = 0; i < panel_dim; ++i ) \
+			for ( i = 0; i < min_p11_m_n; ++i ) \
 			{ \
 				ctype_r* pi11_r   = p11_r   + (i  )*rs_p + (i  )*cs_p; \
 				ctype_r* pi11_i   = p11_i   + (i  )*rs_p + (i  )*cs_p; \
@@ -626,7 +628,7 @@ void PASTEMAC(ch,varname)( \
 		{ \
 			dim_t i; \
 \
-			for ( i = 0; i < panel_dim; ++i ) \
+			for ( i = 0; i < min_p11_m_n; ++i ) \
 			{ \
 				ctype_r* pi11_r = p11_r + (i  )*rs_p + (i  )*cs_p; \
 				ctype_r* pi11_i = p11_i + (i  )*rs_p + (i  )*cs_p; \
@@ -644,34 +646,33 @@ void PASTEMAC(ch,varname)( \
 		   micro-kernel; however, zero-filling is needed for trmm, which
 		   uses the gemm micro-kernel.*/ \
 		{ \
-			ctype_r* restrict zero_r     = PASTEMAC(chr,0); \
-			uplo_t            uplop11    = uploc; \
-			doff_t            diagoffp11 = 0; \
+			ctype_r* restrict zero_r = PASTEMAC(chr,0); \
+			uplo_t            uplop  = uploc; \
 \
-			bli_toggle_uplo( uplop11 ); \
-			bli_shift_diag_offset_to_shrink_uplo( uplop11, diagoffp11 ); \
+			bli_toggle_uplo( uplop ); \
+			bli_shift_diag_offset_to_shrink_uplo( uplop, diagoffp ); \
 \
-			PASTEMAC(chr,setm)( diagoffp11, \
+			PASTEMAC(chr,setm)( diagoffp, \
 			                    BLIS_NONUNIT_DIAG, \
-			                    uplop11, \
-			                    panel_dim, \
-			                    panel_dim, \
+			                    uplop, \
+			                    m_panel, \
+			                    n_panel, \
 			                    zero_r, \
-			                    p11_r, rs_p, cs_p ); \
-			PASTEMAC(chr,setm)( diagoffp11, \
+			                    p_r, rs_p, cs_p ); \
+			PASTEMAC(chr,setm)( diagoffp, \
 			                    BLIS_NONUNIT_DIAG, \
-			                    uplop11, \
-			                    panel_dim, \
-			                    panel_dim, \
+			                    uplop, \
+			                    m_panel, \
+			                    n_panel, \
 			                    zero_r, \
-			                    p11_i, rs_p, cs_p ); \
-			PASTEMAC(chr,setm)( diagoffp11, \
+			                    p_i, rs_p, cs_p ); \
+			PASTEMAC(chr,setm)( diagoffp, \
 			                    BLIS_NONUNIT_DIAG, \
-			                    uplop11, \
-			                    panel_dim, \
-			                    panel_dim, \
+			                    uplop, \
+			                    m_panel, \
+			                    n_panel, \
 			                    zero_r, \
-			                    p11_rpi, rs_p, cs_p ); \
+			                    p_rpi, rs_p, cs_p ); \
 		} \
 	} \
 }
