@@ -44,7 +44,6 @@ void bli_packm_init( obj_t*   a,
 	// block of memory from the memory allocator, if such a block of memory
 	// has not already been allocated previously.
 
-	bool_t    needs_densify;
 	invdiag_t invert_diag;
 	pack_t    pack_schema;
 	packord_t pack_ord_if_up;
@@ -131,7 +130,6 @@ void bli_packm_init( obj_t*   a,
 	// Extract various fields from the control tree and pass them in
 	// explicitly into _init_pack(). This allows external code generators
 	// the option of bypassing usage of control trees altogether.
-	needs_densify  = cntl_does_densify( cntl );
 	pack_schema    = cntl_pack_schema( cntl );
 	pack_buf_type  = cntl_pack_buf_type( cntl );
 	mr             = cntl_mr( cntl );
@@ -147,8 +145,7 @@ void bli_packm_init( obj_t*   a,
 	else                                  pack_ord_if_lo = BLIS_PACK_FWD_IF_LOWER;
 
 	// Initialize object p for the final packed matrix.
-	bli_packm_init_pack( needs_densify,
-	                     invert_diag,
+	bli_packm_init_pack( invert_diag,
 	                     pack_schema,
 	                     pack_ord_if_up,
 	                     pack_ord_if_lo,
@@ -162,8 +159,7 @@ void bli_packm_init( obj_t*   a,
 }
 
 
-void bli_packm_init_pack( bool_t    densify,
-                          invdiag_t invert_diag,
+void bli_packm_init_pack( invdiag_t invert_diag,
                           pack_t    pack_schema,
                           packord_t pack_ord_if_up,
                           packord_t pack_ord_if_lo,
@@ -204,7 +200,8 @@ void bli_packm_init_pack( bool_t    densify,
 	// Then, we adjust the properties of p when c needs a transposition.
 	// We negate the diagonal offset, and if c is upper- or lower-stored,
 	// we either toggle the uplo of p.
-	// Finally, if we are going to densify c, we mark p as dense.
+	// Finally, if we mark p as dense since we assume that all matrices,
+	// regardless of structure, will be densified.
 	bli_obj_set_dims_with_trans( transc, m_c, n_c, *p );
 	bli_obj_set_conjtrans( BLIS_NO_TRANSPOSE, *p );
 	if ( bli_does_trans( transc ) )
@@ -213,7 +210,7 @@ void bli_packm_init_pack( bool_t    densify,
 		if ( bli_obj_is_upper_or_lower( *c ) )
 			bli_obj_toggle_uplo( *p );
 	}
-	if ( densify ) bli_obj_set_uplo( BLIS_DENSE, *p );
+	bli_obj_set_uplo( BLIS_DENSE, *p );
 
 	// Reset the view offsets to (0,0).
 	bli_obj_set_offs( 0, 0, *p );

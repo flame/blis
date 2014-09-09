@@ -65,7 +65,6 @@ void bli_herk4m_cntl_init()
 	                           BLIS_VARIANT2,
 	                           gemm4m_mr,
 	                           gemm4m_kr,
-	                           FALSE, // already dense; densify not necessary
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
 	                           FALSE, // reverse iteration if lower?
@@ -78,7 +77,6 @@ void bli_herk4m_cntl_init()
 	                           BLIS_VARIANT2,
 	                           gemm4m_kr,
 	                           gemm4m_nr,
-	                           FALSE, // already dense; densify not necessary
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
 	                           FALSE, // reverse iteration if lower?

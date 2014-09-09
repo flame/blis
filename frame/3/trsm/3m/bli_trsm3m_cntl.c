@@ -97,7 +97,6 @@ void bli_trsm3m_cntl_init()
 	                           // support right and bottom-right edge cases
 	                           gemm3m_mr,
 	                           gemm3m_mr,
-	                           TRUE,  // densify
 	                           TRUE,  // invert diagonal
 	                           TRUE,  // reverse iteration if upper?
 	                           FALSE, // reverse iteration if lower?
@@ -112,7 +111,6 @@ void bli_trsm3m_cntl_init()
 	                           // B_pack is updated (ie: serves as C) in trsm
 	                           gemm3m_mr,
 	                           gemm3m_nr,
-	                           FALSE, // already dense; densify not necessary
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
 	                           FALSE, // reverse iteration if lower?
@@ -126,7 +124,6 @@ void bli_trsm3m_cntl_init()
 	                           BLIS_VARIANT2,
 	                           gemm3m_nr,
 	                           gemm3m_mr,
-	                           FALSE, // already dense; densify not necessary
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
 	                           FALSE, // reverse iteration if lower?
@@ -139,7 +136,6 @@ void bli_trsm3m_cntl_init()
 	                           BLIS_VARIANT2,
 	                           gemm3m_mr,
 	                           gemm3m_mr,
-	                           TRUE,  // densify
 	                           TRUE,  // invert diagonal
 	                           FALSE, // reverse iteration if upper?
 	                           TRUE,  // reverse iteration if lower?

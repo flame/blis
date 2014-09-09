@@ -78,7 +78,6 @@ void bli_trmm3m_cntl_init()
 	                           // multiple is set to mr.
 	                           gemm3m_mr,
 	                           gemm3m_kr,
-	                           TRUE,  // densify
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
 	                           FALSE, // reverse iteration if lower?
@@ -93,7 +92,6 @@ void bli_trmm3m_cntl_init()
 	                           // since "k" dim multiple is set to mr above.
 	                           gemm3m_kr,
 	                           gemm3m_nr,
-	                           TRUE,  // already dense
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
 	                           FALSE, // reverse iteration if lower?
@@ -109,7 +107,6 @@ void bli_trmm3m_cntl_init()
 	                           // multiple is set to nr.
 	                           gemm3m_mr,
 	                           gemm3m_nr,
-	                           FALSE, // already dense
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
 	                           FALSE, // reverse iteration if lower?
@@ -124,7 +121,6 @@ void bli_trmm3m_cntl_init()
 	                           // since "k" dim multiple is set to nr above.
 	                           gemm3m_nr,
 	                           gemm3m_nr,
-	                           TRUE,  // densify
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
 	                           FALSE, // reverse iteration if lower?

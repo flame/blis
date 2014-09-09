@@ -42,7 +42,6 @@ typedef void (*FUNCPTR_T)(
                            diag_t  diagc,
                            uplo_t  uploc,
                            trans_t transc,
-                           bool_t  densify,
                            dim_t   m,
                            dim_t   n,
                            dim_t   m_max,
@@ -66,7 +65,6 @@ void bli_packm_unb_var1( obj_t*   c,
 	diag_t    diagc     = bli_obj_diag( *c );
 	uplo_t    uploc     = bli_obj_uplo( *c );
 	trans_t   transc    = bli_obj_conjtrans_status( *c );
-	bool_t    densify;
 
 	dim_t     m_p       = bli_obj_length( *p );
 	dim_t     n_p       = bli_obj_width( *p );
@@ -85,9 +83,6 @@ void bli_packm_unb_var1( obj_t*   c,
 
 	FUNCPTR_T f;
 
-	// Set densify based on the uplo property of p.
-	if ( bli_obj_is_dense( *p ) ) densify = TRUE;
-	else                          densify = FALSE;
 
 	// This variant assumes that the computational kernel will always apply
 	// the alpha scalar of the higher-level operation. Thus, we use BLIS_ONE
@@ -106,7 +101,6 @@ void bli_packm_unb_var1( obj_t*   c,
            diagc,
            uploc,
            transc,
-           densify,
            m_p,
            n_p,
            m_max_p,
@@ -127,7 +121,6 @@ void PASTEMAC(ch,varname)( \
                            diag_t  diagc, \
                            uplo_t  uploc, \
                            trans_t transc, \
-                           bool_t  densify, \
                            dim_t   m, \
                            dim_t   n, \
                            dim_t   m_max, \
@@ -159,10 +152,9 @@ void PASTEMAC(ch,varname)( \
 \
 	/* If uploc is upper or lower, then the structure of c is necessarily
 	   non-dense (ie: Hermitian, symmetric, or triangular, where part of the
-	   matrix is unstored). In these cases, when indicated by the densify
-	   parameter, we want to fill in the unstored part of the matrix. How
-	   this is done depends on the structure of c. */ \
-	if ( bli_is_upper_or_lower( uploc ) && densify == TRUE ) \
+	   matrix is unstored). In these cases, we want to fill in the unstored
+	   part of the matrix. How this is done depends on the structure of c. */ \
+	if ( bli_is_upper_or_lower( uploc ) ) \
 	{ \
 		/* The Hermitian and symmetric cases are almost identical, so we
 		   handle them in one conditional block. */ \

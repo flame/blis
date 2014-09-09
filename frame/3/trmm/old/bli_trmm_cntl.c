@@ -70,7 +70,6 @@ void bli_trmm_cntl_init()
 	                           // "k" dim multiple equal to mr.
 	                           gemm_mr,
 	                           gemm_kr,
-	                           TRUE,  // densify
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
 	                           FALSE, // reverse iteration if lower?
@@ -85,7 +84,6 @@ void bli_trmm_cntl_init()
 	                           // "k" dim multiple equal to mr.
 	                           gemm_kr,
 	                           gemm_nr,
-	                           TRUE,  // densify
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
 	                           FALSE, // reverse iteration if lower?

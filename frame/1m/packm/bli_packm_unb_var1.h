@@ -46,7 +46,6 @@ void PASTEMAC(ch,varname)( \
                            diag_t  diagc, \
                            uplo_t  uploc, \
                            trans_t transc, \
-                           bool_t  densify, \
                            dim_t   m, \
                            dim_t   n, \
                            dim_t   m_max, \

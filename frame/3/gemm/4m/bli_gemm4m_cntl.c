@@ -128,7 +128,6 @@ void bli_gemm4m_cntl_init()
 	                           BLIS_VARIANT2,
 	                           gemm4m_mr,
 	                           gemm4m_kr,
-	                           TRUE,  // densify; used by hemm/symm
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
 	                           FALSE, // reverse iteration if lower?
@@ -141,7 +140,6 @@ void bli_gemm4m_cntl_init()
 	                           BLIS_VARIANT2,
 	                           gemm4m_kr,
 	                           gemm4m_nr,
-	                           TRUE,  // densify; used by hemm/symm
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
 	                           FALSE, // reverse iteration if lower?

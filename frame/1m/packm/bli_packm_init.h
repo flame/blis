@@ -36,8 +36,7 @@ void bli_packm_init( obj_t*   a,
                      obj_t*   p,
                      packm_t* cntl );
 
-void bli_packm_init_pack( bool_t    densify,
-                          invdiag_t invert_diag,
+void bli_packm_init_pack( invdiag_t invert_diag,
                           pack_t    pack_schema,
                           packord_t pack_ord_if_up,
                           packord_t pack_ord_if_lo,
