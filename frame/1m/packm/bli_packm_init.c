@@ -169,14 +169,14 @@ void bli_packm_init_pack( invdiag_t invert_diag,
                           obj_t*    c,
                           obj_t*    p )
 {
-	num_t   datatype     = bli_obj_datatype( *c );
+	num_t   dt           = bli_obj_datatype( *c );
 	trans_t transc       = bli_obj_onlytrans_status( *c );
 	dim_t   m_c          = bli_obj_length( *c );
 	dim_t   n_c          = bli_obj_width( *c );
-	dim_t   mr_def_dim   = bli_blksz_for_type( datatype, mr );
-	dim_t   mr_pack_dim  = bli_blksz_max_for_type( datatype, mr );
-	dim_t   nr_def_dim   = bli_blksz_for_type( datatype, nr );
-	dim_t   nr_pack_dim  = bli_blksz_max_for_type( datatype, nr );
+	dim_t   mr_def_dim   = bli_blksz_for_type( dt, mr );
+	dim_t   mr_pack_dim  = bli_blksz_max_for_type( dt, mr );
+	dim_t   nr_def_dim   = bli_blksz_for_type( dt, nr );
+	dim_t   nr_pack_dim  = bli_blksz_max_for_type( dt, nr );
 
 	mem_t*  mem_p;
 	dim_t   m_p, n_p;
@@ -256,7 +256,8 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 	elem_size_p = bli_obj_elem_size( *p );
 
 	// Set the row and column strides of p based on the pack schema.
-	if      ( pack_schema == BLIS_PACKED_ROWS )
+	if      ( bli_is_row_packed( pack_schema ) &&
+	          !bli_is_panel_packed( pack_schema ) )
 	{
 		// For regular row storage, the padded width of our matrix
 		// should be used for the row stride, with the column stride set
@@ -278,7 +279,8 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 		// Compute the size of the packed buffer.
 		size_p = m_p_pad * rs_p * elem_size_p;
 	}
-	else if ( pack_schema == BLIS_PACKED_COLUMNS )
+	else if ( bli_is_col_packed( pack_schema ) &&
+	          !bli_is_panel_packed( pack_schema ) )
 	{
 		// For regular column storage, the padded length of our matrix
 		// should be used for the column stride, with the row stride set
@@ -300,15 +302,14 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 		// Compute the size of the packed buffer.
 		size_p = cs_p * n_p_pad * elem_size_p;
 	}
-	else if ( pack_schema == BLIS_PACKED_ROW_PANELS    ||
-	          pack_schema == BLIS_PACKED_ROW_PANELS_4M ||
-	          pack_schema == BLIS_PACKED_ROW_PANELS_3M )
+	else if ( bli_is_row_packed( pack_schema ) &&
+	          bli_is_panel_packed( pack_schema ) )
 	{
 		dim_t m_panel;
 		dim_t ps_p;
 
-		// The maximum panel length (for each datatype) should be equal to
-		// the register blocksize in the m dimension.
+		// The panel dimension (for each datatype) should be equal to the
+		// register blocksize in the m dimension.
 		m_panel = mr_def_dim;
 
 		// The "column stride" of a row panel packed object is interpreted as
@@ -329,7 +330,7 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 		// dimension of the matrix is not a whole multiple of MR.
 		ps_p = cs_p * n_p_pad;
 
-		if ( pack_schema == BLIS_PACKED_ROW_PANELS_3M )
+		if ( bli_is_3m_packed( pack_schema ) )
 			ps_p = ( ps_p * 3 ) / 2;
 
 		// Store the strides and panel dimension in p.
@@ -342,15 +343,14 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 		// Compute the size of the packed buffer.
 		size_p = ps_p * (m_p_pad / m_panel) * elem_size_p;
 	}
-	else if ( pack_schema == BLIS_PACKED_COL_PANELS    ||
-	          pack_schema == BLIS_PACKED_COL_PANELS_4M ||
-	          pack_schema == BLIS_PACKED_COL_PANELS_3M )
+	else if ( bli_is_col_packed( pack_schema ) &&
+	          bli_is_panel_packed( pack_schema ) )
 	{
 		dim_t n_panel;
 		dim_t ps_p;
 
-		// The maximum panel width (for each datatype) should be equal to
-		// the register blocksize in the n dimension.
+		// The panel dimension (for each datatype) should be equal to the
+		// register blocksize in the n dimension.
 		n_panel = nr_def_dim;
 
 		// The "row stride" of a column panel packed object is interpreted as
@@ -371,7 +371,7 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 		// dimension of the matrix is not a whole multiple of NR.
 		ps_p = m_p_pad * rs_p;
 
-		if ( pack_schema == BLIS_PACKED_COL_PANELS_3M )
+		if ( bli_is_3m_packed( pack_schema ) )
 			ps_p = ( ps_p * 3 ) / 2;
 
 		// Store the strides and panel dimension in p.
