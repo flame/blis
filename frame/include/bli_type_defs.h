@@ -167,25 +167,6 @@ typedef double    f77_double;
 typedef scomplex  f77_scomplex;
 typedef dcomplex  f77_dcomplex;
 
-// -- Auxiliary kernel info type --
-
-// Note: This struct is used by macro-kernels to package together extra
-// parameter values that may be of use to the micro-kernel without
-// cluttering up the micro-kernel interface itself.
-
-typedef struct
-{
-	// Pointers to the micro-panels of A and B which will be used by the
-	// next call to the micro-kernel.
-	void*  a_next;
-	void*  b_next;
-
-	// The panel strides of A and B.
-	inc_t  ps_a;
-	inc_t  ps_b;
-
-} auxinfo_t;
-
 
 
 //
@@ -521,6 +502,29 @@ typedef struct func_s
 	// Kernel row/column storage preference.
 	bool_t prefers_contig_rows[BLIS_NUM_FP_TYPES];
 } func_t;
+
+// -- Auxiliary kernel info type --
+
+// Note: This struct is used by macro-kernels to package together extra
+// parameter values that may be of use to the micro-kernel without
+// cluttering up the micro-kernel interface itself.
+
+typedef struct
+{
+	// The pack schemas of A and B.
+	pack_t schema_a;
+	pack_t schema_b;
+
+	// Pointers to the micro-panels of A and B which will be used by the
+	// next call to the micro-kernel.
+	void*  a_next;
+	void*  b_next;
+
+	// The panel strides of A and B.
+	inc_t  ps_a;
+	inc_t  ps_b;
+
+} auxinfo_t;
 
 
 

@@ -38,6 +38,8 @@
 
 typedef void (*FUNCPTR_T)(
                            doff_t  diagoffa,
+                           pack_t  schema_a,
+                           pack_t  schema_b,
                            dim_t   m,
                            dim_t   n,
                            dim_t   k,
@@ -63,6 +65,9 @@ void bli_trsm_ll_ker_var2( obj_t*  a,
 	num_t     dt_exec   = bli_obj_execution_datatype( *c );
 
 	doff_t    diagoffa  = bli_obj_diag_offset( *a );
+
+	pack_t    schema_a  = bli_obj_pack_status( *a );
+	pack_t    schema_b  = bli_obj_pack_status( *b );
 
 	dim_t     m         = bli_obj_length( *c );
 	dim_t     n         = bli_obj_width( *c );
@@ -132,6 +137,8 @@ void bli_trsm_ll_ker_var2( obj_t*  a,
 
 	// Invoke the function.
 	f( diagoffa,
+	   schema_a,
+	   schema_b,
 	   m,
 	   n,
 	   k,
@@ -151,6 +158,8 @@ void bli_trsm_ll_ker_var2( obj_t*  a,
 \
 void PASTEMAC(ch,varname)( \
                            doff_t  diagoffa, \
+                           pack_t  schema_a, \
+                           pack_t  schema_b, \
                            dim_t   m, \
                            dim_t   n, \
                            dim_t   k, \
@@ -291,6 +300,10 @@ void PASTEMAC(ch,varname)( \
 \
 	rstep_c = rs_c * MR; \
 	cstep_c = cs_c * NR; \
+\
+	/* Save the pack schemas of A and B to the auxinfo_t object. */ \
+	bli_auxinfo_set_schema_a( schema_a, aux ); \
+	bli_auxinfo_set_schema_b( schema_b, aux ); \
 \
 	/* Save the panel stride of B to the auxinfo_t object. */ \
 	bli_auxinfo_set_ps_b( ps_b, aux ); \

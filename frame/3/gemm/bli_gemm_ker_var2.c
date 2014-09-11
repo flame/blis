@@ -37,6 +37,8 @@
 #define FUNCPTR_T gemm_fp
 
 typedef void (*FUNCPTR_T)(
+                           pack_t  schema_a,
+                           pack_t  schema_b,
                            dim_t   m,
                            dim_t   n,
                            dim_t   k,
@@ -59,6 +61,9 @@ void bli_gemm_ker_var2( obj_t*  a,
                         gemm_thrinfo_t* thread )
 {
 	num_t     dt_exec   = bli_obj_execution_datatype( *c );
+
+	pack_t    schema_a  = bli_obj_pack_status( *a );
+	pack_t    schema_b  = bli_obj_pack_status( *b );
 
 	dim_t     m         = bli_obj_length( *c );
 	dim_t     n         = bli_obj_width( *c );
@@ -111,7 +116,9 @@ void bli_gemm_ker_var2( obj_t*  a,
 	gemm_ukr  = bli_func_obj_query( dt_exec, gemm_ukrs );
 
 	// Invoke the function.
-	f( m,
+	f( schema_a,
+	   schema_b,
+	   m,
 	   n,
 	   k,
 	   buf_alpha,
@@ -128,6 +135,8 @@ void bli_gemm_ker_var2( obj_t*  a,
 #define GENTFUNC( ctype, ch, varname, ukrtype ) \
 \
 void PASTEMAC(ch,varname)( \
+                           pack_t  schema_a, \
+                           pack_t  schema_b, \
                            dim_t   m, \
                            dim_t   n, \
                            dim_t   k, \
@@ -212,6 +221,10 @@ void PASTEMAC(ch,varname)( \
 \
 	rstep_c = rs_c * MR; \
 	cstep_c = cs_c * NR; \
+\
+	/* Save the pack schemas of A and B to the auxinfo_t object. */ \
+	bli_auxinfo_set_schema_a( schema_a, aux ); \
+	bli_auxinfo_set_schema_b( schema_b, aux ); \
 \
 	/* Save the panel strides of A and B to the auxinfo_t object. */ \
 	bli_auxinfo_set_ps_a( ps_a, aux ); \

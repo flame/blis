@@ -50,6 +50,8 @@ void bli_gemm_ker_var2( obj_t*  a,
 #define GENTPROT( ctype, ch, varname ) \
 \
 void PASTEMAC(ch,varname)( \
+                           pack_t  schema_a, \
+                           pack_t  schema_b, \
                            dim_t   m, \
                            dim_t   n, \
                            dim_t   k, \

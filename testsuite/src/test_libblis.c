@@ -1578,8 +1578,7 @@ void libblis_test_pobj_create( blksz_t* m, blksz_t* n, invdiag_t inv_diag, pack_
 	bli_obj_alias_to( *a, *p );
 
 	// Then initialize p appropriately for packing.
-	bli_packm_init_pack( FALSE,
-	                     inv_diag,
+	bli_packm_init_pack( inv_diag,
 	                     pack_schema,
 	                     BLIS_PACK_FWD_IF_UPPER,
 	                     BLIS_PACK_FWD_IF_LOWER,
