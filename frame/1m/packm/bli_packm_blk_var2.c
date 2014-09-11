@@ -76,7 +76,7 @@ void bli_packm_blk_var2( obj_t*   c,
 	diag_t    diagc      = bli_obj_diag( *c );
 	uplo_t    uploc      = bli_obj_uplo( *c );
 	trans_t   transc     = bli_obj_conjtrans_status( *c );
-	pack_t    schema     = bli_obj_pack_status( *p );
+	pack_t    schema     = bli_obj_pack_schema( *p );
 	bool_t    invdiag    = bli_obj_has_inverted_diag( *p );
 	bool_t    revifup    = bli_obj_is_pack_rev_if_upper( *p );
 	bool_t    reviflo    = bli_obj_is_pack_rev_if_lower( *p );

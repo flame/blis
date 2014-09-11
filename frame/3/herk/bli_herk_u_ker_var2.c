@@ -65,8 +65,8 @@ void bli_herk_u_ker_var2( obj_t*  a,
 
 	doff_t    diagoffc  = bli_obj_diag_offset( *c );
 
-	pack_t    schema_a  = bli_obj_pack_status( *a );
-	pack_t    schema_b  = bli_obj_pack_status( *b );
+	pack_t    schema_a  = bli_obj_pack_schema( *a );
+	pack_t    schema_b  = bli_obj_pack_schema( *b );
 
 	dim_t     m         = bli_obj_length( *c );
 	dim_t     n         = bli_obj_width( *c );

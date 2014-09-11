@@ -693,10 +693,10 @@ err_t bli_check_packm_schema_on_unpack( obj_t* a )
 {
 	err_t e_val = BLIS_SUCCESS;
 
-	if ( bli_obj_pack_status( *a ) != BLIS_PACKED_ROWS &&
-	     bli_obj_pack_status( *a ) != BLIS_PACKED_COLUMNS &&
-	     bli_obj_pack_status( *a ) != BLIS_PACKED_ROW_PANELS &&
-	     bli_obj_pack_status( *a ) != BLIS_PACKED_COL_PANELS )
+	if ( bli_obj_pack_schema( *a ) != BLIS_PACKED_ROWS &&
+	     bli_obj_pack_schema( *a ) != BLIS_PACKED_COLUMNS &&
+	     bli_obj_pack_schema( *a ) != BLIS_PACKED_ROW_PANELS &&
+	     bli_obj_pack_schema( *a ) != BLIS_PACKED_COL_PANELS )
 		e_val = BLIS_PACK_SCHEMA_NOT_SUPPORTED_FOR_UNPACK;
 
 	return e_val;
@@ -706,7 +706,7 @@ err_t bli_check_packv_schema_on_unpack( obj_t* a )
 {
 	err_t e_val = BLIS_SUCCESS;
 
-	if ( bli_obj_pack_status( *a ) != BLIS_PACKED_VECTOR )
+	if ( bli_obj_pack_schema( *a ) != BLIS_PACKED_VECTOR )
 		e_val = BLIS_PACK_SCHEMA_NOT_SUPPORTED_FOR_UNPACK;
 
 	return e_val;

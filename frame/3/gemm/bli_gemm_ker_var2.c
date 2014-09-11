@@ -62,8 +62,8 @@ void bli_gemm_ker_var2( obj_t*  a,
 {
 	num_t     dt_exec   = bli_obj_execution_datatype( *c );
 
-	pack_t    schema_a  = bli_obj_pack_status( *a );
-	pack_t    schema_b  = bli_obj_pack_status( *b );
+	pack_t    schema_a  = bli_obj_pack_schema( *a );
+	pack_t    schema_b  = bli_obj_pack_schema( *b );
 
 	dim_t     m         = bli_obj_length( *c );
 	dim_t     n         = bli_obj_width( *c );

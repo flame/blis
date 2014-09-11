@@ -191,7 +191,7 @@
 \
 	( ( (obj).info & BLIS_PACK_REV_IF_LOWER_BIT ) == BLIS_BITVAL_PACK_REV_IF_LOWER )
 
-#define bli_obj_pack_status( obj ) \
+#define bli_obj_pack_schema( obj ) \
 \
 	(   (obj).info & BLIS_PACK_SCHEMA_BITS )
 
