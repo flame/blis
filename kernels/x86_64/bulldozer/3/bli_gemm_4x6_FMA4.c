@@ -42,95 +42,95 @@
 #define KERNEL4x6_1(xx) \
 		".align 4                       					\n\t"\
 		"vmovddup -8 * 8(%%rax), %%xmm0   					\n\t"\
-		"vfmadd231pd  %%xmm1, %%xmm0, %%xmm4		        \n\t"\
-		"vfmadd231pd  %%xmm2, %%xmm0, %%xmm5		        \n\t"\
-		"vfmadd231pd  %%xmm3, %%xmm0, %%xmm6		        \n\t"\
+		"vfmaddpd %%xmm4,  %%xmm1, %%xmm0, %%xmm4		\n\t"\
+		"vfmaddpd %%xmm5,  %%xmm2, %%xmm0, %%xmm5		\n\t"\
+		"vfmaddpd %%xmm6,  %%xmm3, %%xmm0, %%xmm6		        \n\t"\
 		"vmovddup -7 * 8(%%rax), %%xmm0   					\n\t"\
-		"vfmadd231pd  %%xmm1, %%xmm0, %%xmm7		        \n\t"\
+		"vfmaddpd %%xmm7,  %%xmm1, %%xmm0, %%xmm7		        \n\t"\
 		"prefetcht0 128(%%rax)								\n\t"\
-		"vfmadd231pd  %%xmm2, %%xmm0, %%xmm8		        \n\t"\
-		"vfmadd231pd  %%xmm3, %%xmm0, %%xmm9                \n\t"\
+		"vfmaddpd %%xmm8,  %%xmm2, %%xmm0, %%xmm8		        \n\t"\
+		"vfmaddpd %%xmm9,  %%xmm3, %%xmm0, %%xmm9                \n\t"\
 		"vmovddup -6 * 8(%%rax), %%xmm0   					\n\t"\
-		"vfmadd231pd  %%xmm1, %%xmm0, %%xmm10               \n\t"\
-		"vfmadd231pd  %%xmm2, %%xmm0, %%xmm11               \n\t"\
-		"vfmadd231pd  %%xmm3, %%xmm0, %%xmm12               \n\t"\
+		"vfmaddpd %%xmm10,  %%xmm1, %%xmm0, %%xmm10               \n\t"\
+		"vfmaddpd %%xmm11,  %%xmm2, %%xmm0, %%xmm11               \n\t"\
+		"vfmaddpd %%xmm12,  %%xmm3, %%xmm0, %%xmm12               \n\t"\
 		"vmovddup -5 * 8(%%rax), %%xmm0   	                \n\t"\
-		"vfmadd231pd  %%xmm1, %%xmm0, %%xmm13		        \n\t"\
+		"vfmaddpd %%xmm13,  %%xmm1, %%xmm0, %%xmm13		        \n\t"\
 		"vmovaps -6 * 8(%%rbx), %%xmm1   					\n\t"\
-		"vfmadd231pd  %%xmm2, %%xmm0, %%xmm14		        \n\t"\
+		"vfmaddpd %%xmm14,  %%xmm2, %%xmm0, %%xmm14		        \n\t"\
 		"vmovaps -4 * 8(%%rbx), %%xmm2   			        \n\t"\
-		"vfmadd231pd  %%xmm3, %%xmm0, %%xmm15		        \n\t"\
+		"vfmaddpd %%xmm15,  %%xmm3, %%xmm0, %%xmm15		        \n\t"\
 		"vmovaps -2 * 8(%%rbx), %%xmm3                      \n\t"
 
 #define KERNEL4x6_2(xx) \
 		"vmovddup -4 * 8(%%rax), %%xmm0                     \n\t"\
-		"vfmadd231pd  %%xmm1, %%xmm0, %%xmm4                \n\t"\
+		"vfmaddpd %%xmm4,  %%xmm1, %%xmm0, %%xmm4                \n\t"\
 		"prefetcht0 192(%%rax)                              \n\t"\
-		"vfmadd231pd  %%xmm2, %%xmm0, %%xmm5                \n\t"\
-		"vfmadd231pd  %%xmm3, %%xmm0, %%xmm6                \n\t"\
+		"vfmaddpd %%xmm5,  %%xmm2, %%xmm0, %%xmm5                \n\t"\
+		"vfmaddpd %%xmm6,  %%xmm3, %%xmm0, %%xmm6                \n\t"\
 		"vmovddup -3 * 8(%%rax), %%xmm0                     \n\t"\
-		"vfmadd231pd  %%xmm1, %%xmm0, %%xmm7                \n\t"\
-		"vfmadd231pd  %%xmm2, %%xmm0, %%xmm8                \n\t"\
-		"vfmadd231pd  %%xmm3, %%xmm0, %%xmm9                \n\t"\
+		"vfmaddpd %%xmm7,  %%xmm1, %%xmm0, %%xmm7                \n\t"\
+		"vfmaddpd %%xmm8,  %%xmm2, %%xmm0, %%xmm8                \n\t"\
+		"vfmaddpd %%xmm9,  %%xmm3, %%xmm0, %%xmm9                \n\t"\
 		"vmovddup -2 * 8(%%rax), %%xmm0                     \n\t"\
-		"vfmadd231pd  %%xmm1, %%xmm0, %%xmm10               \n\t"\
-		"vfmadd231pd  %%xmm2, %%xmm0, %%xmm11               \n\t"\
-		"vfmadd231pd  %%xmm3, %%xmm0, %%xmm12               \n\t"\
+		"vfmaddpd %%xmm10,  %%xmm1, %%xmm0, %%xmm10               \n\t"\
+		"vfmaddpd %%xmm11,  %%xmm2, %%xmm0, %%xmm11               \n\t"\
+		"vfmaddpd %%xmm12,  %%xmm3, %%xmm0, %%xmm12               \n\t"\
 		"vmovddup -1 * 8(%%rax), %%xmm0                     \n\t"\
-		"vfmadd231pd  %%xmm1, %%xmm0, %%xmm13               \n\t"\
+		"vfmaddpd %%xmm13,  %%xmm1, %%xmm0, %%xmm13               \n\t"\
 		"vmovaps 0 * 8(%%rbx), %%xmm1                       \n\t"\
-		"vfmadd231pd  %%xmm2, %%xmm0, %%xmm14               \n\t"\
+		"vfmaddpd %%xmm14,  %%xmm2, %%xmm0, %%xmm14               \n\t"\
 		"vmovaps 2 * 8(%%rbx), %%xmm2                       \n\t"\
-		"vfmadd231pd %%xmm3, %%xmm0, %%xmm15                \n\t"\
+		"vfmaddpd %%xmm15, %%xmm3, %%xmm0, %%xmm15                \n\t"\
 		"vmovaps 4 * 8(%%rbx), %%xmm3                       \n\t"\
 
 #define KERNEL4x6_3(xx) \
 		"vmovddup  0 * 8(%%rax), %%xmm0   					\n\t"\
-		"vfmadd231pd  %%xmm1, %%xmm0, %%xmm4		        \n\t"\
-		"vfmadd231pd  %%xmm2, %%xmm0, %%xmm5		        \n\t"\
-		"vfmadd231pd  %%xmm3, %%xmm0, %%xmm6		        \n\t"\
+		"vfmaddpd %%xmm4,  %%xmm1, %%xmm0, %%xmm4		        \n\t"\
+		"vfmaddpd %%xmm5,  %%xmm2, %%xmm0, %%xmm5		        \n\t"\
+		"vfmaddpd %%xmm6,  %%xmm3, %%xmm0, %%xmm6		        \n\t"\
 		"vmovddup  1 * 8(%%rax), %%xmm0   					\n\t"\
-		"vfmadd231pd  %%xmm1, %%xmm0, %%xmm7		        \n\t"\
+		"vfmaddpd %%xmm7,  %%xmm1, %%xmm0, %%xmm7		        \n\t"\
 		"prefetcht0 224(%%rax)								\n\t"\
-		"vfmadd231pd  %%xmm2, %%xmm0, %%xmm8		        \n\t"\
-		"vfmadd231pd  %%xmm3, %%xmm0, %%xmm9                \n\t"\
+		"vfmaddpd %%xmm8,  %%xmm2, %%xmm0, %%xmm8		        \n\t"\
+		"vfmaddpd %%xmm9,  %%xmm3, %%xmm0, %%xmm9                \n\t"\
 		"vmovddup  2 * 8(%%rax), %%xmm0   					\n\t"\
-		"vfmadd231pd  %%xmm1, %%xmm0, %%xmm10               \n\t"\
-		"vfmadd231pd  %%xmm2, %%xmm0, %%xmm11               \n\t"\
-		"vfmadd231pd  %%xmm3, %%xmm0, %%xmm12               \n\t"\
+		"vfmaddpd %%xmm10,  %%xmm1, %%xmm0, %%xmm10               \n\t"\
+		"vfmaddpd %%xmm11,  %%xmm2, %%xmm0, %%xmm11               \n\t"\
+		"vfmaddpd %%xmm12,  %%xmm3, %%xmm0, %%xmm12               \n\t"\
 		"vmovddup  3 * 8(%%rax), %%xmm0   	                \n\t"\
-		"vfmadd231pd  %%xmm1, %%xmm0, %%xmm13		        \n\t"\
+		"vfmaddpd %%xmm13,  %%xmm1, %%xmm0, %%xmm13		        \n\t"\
 		"vmovaps  6 * 8(%%rbx), %%xmm1   					\n\t"\
-		"vfmadd231pd  %%xmm2, %%xmm0, %%xmm14		        \n\t"\
+		"vfmaddpd %%xmm14,  %%xmm2, %%xmm0, %%xmm14		        \n\t"\
 		"vmovaps  8 * 8(%%rbx), %%xmm2   			        \n\t"\
-		"vfmadd231pd  %%xmm3, %%xmm0, %%xmm15		        \n\t"\
+		"vfmaddpd %%xmm15,  %%xmm3, %%xmm0, %%xmm15		        \n\t"\
 		"vmovaps 10 * 8(%%rbx), %%xmm3                      \n\t"
 
 #define KERNEL4x6_4(xx) \
 		"vmovddup  4 * 8(%%rax), %%xmm0                     \n\t"\
-		"vfmadd231pd  %%xmm1, %%xmm0, %%xmm4                \n\t"\
+		"vfmaddpd %%xmm4,  %%xmm1, %%xmm0, %%xmm4                \n\t"\
 		"prefetcht0 224(%%rax)                              \n\t"\
-		"vfmadd231pd  %%xmm2, %%xmm0, %%xmm5                \n\t"\
-		"vfmadd231pd  %%xmm3, %%xmm0, %%xmm6                \n\t"\
+		"vfmaddpd %%xmm5,  %%xmm2, %%xmm0, %%xmm5                \n\t"\
+		"vfmaddpd %%xmm6,  %%xmm3, %%xmm0, %%xmm6                \n\t"\
 		"vmovddup  5 * 8(%%rax), %%xmm0                     \n\t"\
-		"vfmadd231pd  %%xmm1, %%xmm0, %%xmm7                \n\t"\
-		"vfmadd231pd  %%xmm2, %%xmm0, %%xmm8                \n\t"\
-		"vfmadd231pd  %%xmm3, %%xmm0, %%xmm9                \n\t"\
+		"vfmaddpd %%xmm7,  %%xmm1, %%xmm0, %%xmm7                \n\t"\
+		"vfmaddpd %%xmm8,  %%xmm2, %%xmm0, %%xmm8                \n\t"\
+		"vfmaddpd %%xmm9,  %%xmm3, %%xmm0, %%xmm9                \n\t"\
 		"vmovddup  6 * 8(%%rax), %%xmm0                     \n\t"\
-		"vfmadd231pd  %%xmm1, %%xmm0, %%xmm10               \n\t"\
-		"vfmadd231pd  %%xmm2, %%xmm0, %%xmm11               \n\t"\
-		"vfmadd231pd  %%xmm3, %%xmm0, %%xmm12               \n\t"\
+		"vfmaddpd %%xmm10,  %%xmm1, %%xmm0, %%xmm10               \n\t"\
+		"vfmaddpd %%xmm11,  %%xmm2, %%xmm0, %%xmm11               \n\t"\
+		"vfmaddpd %%xmm12,  %%xmm3, %%xmm0, %%xmm12               \n\t"\
 		"vmovddup  7 * 8(%%rax), %%xmm0                     \n\t"\
-		"vfmadd231pd  %%xmm1, %%xmm0, %%xmm13               \n\t"\
+		"vfmaddpd %%xmm13,  %%xmm1, %%xmm0, %%xmm13               \n\t"\
 		"vmovaps  12 * 8(%%rbx), %%xmm1                       \n\t"\
-		"vfmadd231pd  %%xmm2, %%xmm0, %%xmm14               \n\t"\
+		"vfmaddpd %%xmm14,  %%xmm2, %%xmm0, %%xmm14               \n\t"\
 		"vmovaps  14 * 8(%%rbx), %%xmm2                       \n\t"\
-		"vfmadd231pd %%xmm3, %%xmm0, %%xmm15                \n\t"\
+		"vfmaddpd %%xmm15, %%xmm3, %%xmm0, %%xmm15                \n\t"\
 		"addq       $16*8, %%rax		                    \n\t"\
 		"vmovaps  16 * 8(%%rbx), %%xmm3                       \n\t"\
 		"addq       $24*8, %%rbx		                    \n\t"
 
-void bli_dgemm_4x6(
+void bli_dgemm_4x6_FMA4(
                     dim_t              k,
                     double*   restrict alpha,
                     double*   restrict a,
@@ -215,9 +215,9 @@ void bli_dgemm_4x6(
 		"leaq     (%%rdx, %%rdi,2), %%r8 	\n\t"
 		"vmulpd   %%xmm2,  %%xmm4, %%xmm4         	\n\t"			// scale by alpha,
 		"vmulpd   %%xmm2,  %%xmm5, %%xmm5         	\n\t"			// scale by alpha,
-		"vfmadd231pd %%xmm0, %%xmm3, %%xmm4         \n\t"	// scale by beta, and add the gemm result
+		"vfmaddpd %%xmm4, %%xmm0, %%xmm3, %%xmm4         \n\t"	// scale by beta, and add the gemm result
 		"vmovlpd  (%%r8),       %%xmm0, %%xmm0   	\n\t" 			
-		"vfmadd231pd %%xmm1, %%xmm3, %%xmm5         \n\t"	// scale by beta, and add the gemm result
+		"vfmaddpd %%xmm5, %%xmm1, %%xmm3, %%xmm5         \n\t"	// scale by beta, and add the gemm result
 		"vmovhpd  (%%r8,%%rdi), %%xmm0, %%xmm0   	\n\t"
 		"vmovlpd  %%xmm4,  (%%rcx)        	\n\t" 			// and store back to memory.
 		"vmovlpd  %%xmm5,  (%%rdx)        	\n\t" 			// and store back to memory.
@@ -227,7 +227,7 @@ void bli_dgemm_4x6(
 		"addq %%rsi, %%rdx				   	\n\t" 
 		"                                	\n\t"
 		"vmulpd   %%xmm2,  %%xmm6, %%xmm6         	\n\t"			// scale by alpha,
-		"vfmadd231pd   %%xmm0, %%xmm3, %%xmm6       \n\t"	// scale by beta, and add the gemm result
+		"vfmaddpd %%xmm6,   %%xmm0, %%xmm3, %%xmm6       \n\t"	// scale by beta, and add the gemm result
 		"vmovlpd  %%xmm6,  (%%r8)        	\n\t" 			// and store back to memory.
 		"vmovhpd  %%xmm6,  (%%r8,%%rdi)  	\n\t"
 		"addq %%rsi, %%r8				   	\n\t" 
@@ -242,9 +242,9 @@ void bli_dgemm_4x6(
 		"vmulpd   %%xmm2,  %%xmm7, %%xmm7         	\n\t"			// scale by alpha,
 		"vmulpd   %%xmm2,  %%xmm8, %%xmm8         	\n\t"			// scale by alpha,
 		"vmulpd   %%xmm2,  %%xmm9, %%xmm9         	\n\t"			// scale by alpha,
-		"vfmadd231pd   %%xmm0, %%xmm3, %%xmm7       \n\t"	// scale by beta, and add the gemm result
-		"vfmadd231pd   %%xmm1, %%xmm3, %%xmm8       \n\t"	// scale by beta, and add the gemm result
-		"vfmadd231pd   %%xmm4, %%xmm3, %%xmm9       \n\t"	// scale by beta, and add the gemm result
+		"vfmaddpd %%xmm7,   %%xmm0, %%xmm3, %%xmm7       \n\t"	// scale by beta, and add the gemm result
+		"vfmaddpd %%xmm8,   %%xmm1, %%xmm3, %%xmm8       \n\t"	// scale by beta, and add the gemm result
+		"vfmaddpd %%xmm9,   %%xmm4, %%xmm3, %%xmm9       \n\t"	// scale by beta, and add the gemm result
 		"vmovlpd  %%xmm7,  (%%rcx)        	\n\t" 			// and store back to memory.
 		"vmovlpd  %%xmm8,  (%%rdx)        	\n\t" 			// and store back to memory.
 		"vmovlpd  %%xmm9,  (%%r8)        	\n\t" 			// and store back to memory.
@@ -265,9 +265,9 @@ void bli_dgemm_4x6(
 		"vmulpd   %%xmm2,  %%xmm10, %%xmm10         	\n\t"			// scale by alpha,
 		"vmulpd   %%xmm2,  %%xmm11, %%xmm11         	\n\t"			// scale by alpha,
 		"vmulpd   %%xmm2,  %%xmm12, %%xmm12         	\n\t"			// scale by alpha,
-		"vfmadd231pd   %%xmm0, %%xmm3, %%xmm10      \n\t"	// scale by beta, and add the gemm result
-		"vfmadd231pd   %%xmm1, %%xmm3, %%xmm11      \n\t"	// scale by beta, and add the gemm result
-		"vfmadd231pd   %%xmm4, %%xmm3, %%xmm12      \n\t"	// scale by beta, and add the gemm result
+		"vfmaddpd %%xmm10,   %%xmm0, %%xmm3, %%xmm10      \n\t"	// scale by beta, and add the gemm result
+		"vfmaddpd %%xmm11,   %%xmm1, %%xmm3, %%xmm11      \n\t"	// scale by beta, and add the gemm result
+		"vfmaddpd %%xmm12,   %%xmm4, %%xmm3, %%xmm12      \n\t"	// scale by beta, and add the gemm result
 		"vmovlpd  %%xmm10,  (%%rcx)        	\n\t" 			// and store back to memory.
 		"vmovlpd  %%xmm11,  (%%rdx)        	\n\t" 			// and store back to memory.
 		"vmovlpd  %%xmm12,  (%%r8)        	\n\t" 			// and store back to memory.
@@ -288,9 +288,9 @@ void bli_dgemm_4x6(
 		"vmulpd   %%xmm2,  %%xmm13, %%xmm13         	\n\t"			// scale by alpha,
 		"vmulpd   %%xmm2,  %%xmm14, %%xmm14         	\n\t"			// scale by alpha,
 		"vmulpd   %%xmm2,  %%xmm15, %%xmm15         	\n\t"			// scale by alpha,
-		"vfmadd231pd   %%xmm0, %%xmm3, %%xmm13          \n\t"	// scale by beta, and add the gemm result
-		"vfmadd231pd   %%xmm1, %%xmm3, %%xmm14          \n\t"	// scale by beta, and add the gemm result
-		"vfmadd231pd   %%xmm4, %%xmm3, %%xmm15          \n\t"	// scale by beta, and add the gemm result
+		"vfmaddpd %%xmm13,   %%xmm0, %%xmm3, %%xmm13          \n\t"	// scale by beta, and add the gemm result
+		"vfmaddpd %%xmm14,   %%xmm1, %%xmm3, %%xmm14          \n\t"	// scale by beta, and add the gemm result
+		"vfmaddpd %%xmm15,   %%xmm4, %%xmm3, %%xmm15          \n\t"	// scale by beta, and add the gemm result
 		"vmovlpd  %%xmm13,  (%%rcx)        	\n\t" 			// and store back to memory.
 		"vmovlpd  %%xmm14,  (%%rdx)        	\n\t" 			// and store back to memory.
 		"vmovlpd  %%xmm15,  (%%r8)        	\n\t" 			// and store back to memory.

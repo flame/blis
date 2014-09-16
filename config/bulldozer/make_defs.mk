@@ -86,7 +86,7 @@ CDBGFLAGS      := -g
 CWARNFLAGS     := -Wall
 COPTFLAGS      := -O0 -malign-double -funroll-all-loops
 CKOPTFLAGS     := $(COPTFLAGS)
-CVECFLAGS      := -mavx -mfma4 -march=bdver1 -mfpmath=sse
+CVECFLAGS      := -mavx -mfma -march=bdver2 -mfpmath=sse
 
 # Aggregate all of the flags into multiple groups: one for standard
 # compilation, and one for each of the supported "special" compilation
