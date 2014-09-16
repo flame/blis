@@ -70,38 +70,38 @@ void bli_gemm3m_cntl_init()
 	// blocksizes.
 	gemm3m_mc
 	=
-	bli_blksz_obj_create( 0,                    0,
-	                      0,                    0,
+	bli_blksz_obj_create( 0,                 0,
+	                      0,                 0,
 	                      BLIS_DEFAULT_MC_S, BLIS_MAXIMUM_MC_S,
 	                      BLIS_DEFAULT_MC_D, BLIS_MAXIMUM_MC_D );
 	gemm3m_nc
 	=
-	bli_blksz_obj_create( 0,                    0,
-	                      0,                    0,
+	bli_blksz_obj_create( 0,                 0,
+	                      0,                 0,
 	                      BLIS_DEFAULT_NC_S, BLIS_MAXIMUM_NC_S,
 	                      BLIS_DEFAULT_NC_D, BLIS_MAXIMUM_NC_D );
 	gemm3m_kc
 	=
-	bli_blksz_obj_create( 0,                    0,
-	                      0,                    0,
+	bli_blksz_obj_create( 0,                   0,
+	                      0,                   0,
 	                      BLIS_DEFAULT_KC_S/2, BLIS_MAXIMUM_KC_S/2,
 	                      BLIS_DEFAULT_KC_D/2, BLIS_MAXIMUM_KC_D/2 );
 	gemm3m_mr
 	=
-	bli_blksz_obj_create( 0,                    0,
-	                      0,                    0,
+	bli_blksz_obj_create( 0,                 0,
+	                      0,                 0,
 	                      BLIS_DEFAULT_MR_S, BLIS_PACKDIM_MR_S,
 	                      BLIS_DEFAULT_MR_D, BLIS_PACKDIM_MR_D );
 	gemm3m_nr
 	=
-	bli_blksz_obj_create( 0,                    0,
-	                      0,                    0,
+	bli_blksz_obj_create( 0,                 0,
+	                      0,                 0,
 	                      BLIS_DEFAULT_NR_S, BLIS_PACKDIM_NR_S,
 	                      BLIS_DEFAULT_NR_D, BLIS_PACKDIM_NR_D );
 	gemm3m_kr
 	=
-	bli_blksz_obj_create( 0,                    0,
-	                      0,                    0,
+	bli_blksz_obj_create( 0,                 0,
+	                      0,                 0,
 	                      BLIS_DEFAULT_KR_S, BLIS_PACKDIM_KR_S,
 	                      BLIS_DEFAULT_KR_D, BLIS_PACKDIM_KR_D );
 

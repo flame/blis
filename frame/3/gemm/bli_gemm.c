@@ -43,11 +43,15 @@ void bli_gemm( obj_t*  alpha,
                obj_t*  beta,
                obj_t*  c )
 {
-	if ( bli_4m_is_enabled( bli_obj_datatype( *c ) ) )
-		bli_gemm4m_entry( alpha, a, b, beta, c );
-	else
-		bli_gemm_entry( alpha, a, b, beta, c );
+	num_t dt = bli_obj_datatype( *c );
+
+	if      ( bli_3mh_is_enabled_dt( dt ) ) bli_gemm3mh_entry( alpha, a, b, beta, c );
+	else if ( bli_3m_is_enabled_dt( dt ) )  bli_gemm3m_entry( alpha, a, b, beta, c );
+	else if ( bli_4mh_is_enabled_dt( dt ) ) bli_gemm4mh_entry( alpha, a, b, beta, c );
+	else if ( bli_4m_is_enabled_dt( dt ) )  bli_gemm4m_entry( alpha, a, b, beta, c );
+	else                                    bli_gemm_entry( alpha, a, b, beta, c );
 }
+
 
 //
 // Define BLAS-like interfaces with homogeneous-typed operands.

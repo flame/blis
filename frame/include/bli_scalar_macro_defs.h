@@ -197,6 +197,25 @@
 #include "bli_scal2jri3s.h"
 
 
+// -- 4mh/3mh-specific scalar macros --
+
+#include "bli_scal2rihs_mxn_diag.h"
+#include "bli_scal2rihs_mxn_uplo.h"
+#include "bli_setrihs_mxn_diag.h"
+
+// ro
+#include "bli_scal2ros.h"
+#include "bli_scal2jros.h"
+
+// io
+#include "bli_scal2ios.h"
+#include "bli_scal2jios.h"
+
+// rpi
+#include "bli_scal2rpis.h"
+#include "bli_scal2jrpis.h"
+
+
 
 // -- Miscellaneous macros --
 

@@ -42,11 +42,13 @@ void bli_trsm( side_t  side,
                obj_t*  a,
                obj_t*  b )
 {
-	if ( bli_4m_is_enabled( bli_obj_datatype( *b ) ) )
-		bli_trsm4m_entry( side, alpha, a, b );
-	else
-		bli_trsm_entry( side, alpha, a, b );
+	num_t dt = bli_obj_datatype( *b );
+
+	if      ( bli_3m_is_enabled_dt( dt ) ) bli_trsm3m_entry( side, alpha, a, b );
+	else if ( bli_4m_is_enabled_dt( dt ) ) bli_trsm4m_entry( side, alpha, a, b );
+	else                                   bli_trsm_entry( side, alpha, a, b );
 }
+
 
 //
 // Define BLAS-like interfaces with homogeneous-typed operands.

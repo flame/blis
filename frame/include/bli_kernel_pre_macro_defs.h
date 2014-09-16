@@ -135,6 +135,24 @@
 #define BLIS_ZTRSM3M_U_UKERNEL_REF       bli_ztrsm3m_u_ukr_ref
 
 //
+// Level-3 4mh
+//
+
+// gemm4mh micro-kernels
+
+#define BLIS_CGEMM4MH_UKERNEL_REF        bli_cgemm4mh_ukr_ref
+#define BLIS_ZGEMM4MH_UKERNEL_REF        bli_zgemm4mh_ukr_ref
+
+//
+//
+// Level-3 3mh
+//
+
+// gemm3mh micro-kernels
+
+#define BLIS_CGEMM3MH_UKERNEL_REF        bli_cgemm3mh_ukr_ref
+#define BLIS_ZGEMM3MH_UKERNEL_REF        bli_zgemm3mh_ukr_ref
+
 // Level-1m
 //
 
@@ -273,6 +291,46 @@
 
 #define BLIS_CPACKM_16XK_3M_KERNEL_REF   bli_cpackm_ref_16xk_3m
 #define BLIS_ZPACKM_16XK_3M_KERNEL_REF   bli_zpackm_ref_16xk_3m
+
+// packm_2xk_rih kernels
+
+#define BLIS_CPACKM_2XK_RIH_KERNEL_REF   bli_cpackm_ref_2xk_rih
+#define BLIS_ZPACKM_2XK_RIH_KERNEL_REF   bli_zpackm_ref_2xk_rih
+
+// packm_4xk_rih kernels
+
+#define BLIS_CPACKM_4XK_RIH_KERNEL_REF   bli_cpackm_ref_4xk_rih
+#define BLIS_ZPACKM_4XK_RIH_KERNEL_REF   bli_zpackm_ref_4xk_rih
+
+// packm_6xk_rih kernels
+
+#define BLIS_CPACKM_6XK_RIH_KERNEL_REF   bli_cpackm_ref_6xk_rih
+#define BLIS_ZPACKM_6XK_RIH_KERNEL_REF   bli_zpackm_ref_6xk_rih
+
+// packm_8xk_rih kernels
+
+#define BLIS_CPACKM_8XK_RIH_KERNEL_REF   bli_cpackm_ref_8xk_rih
+#define BLIS_ZPACKM_8XK_RIH_KERNEL_REF   bli_zpackm_ref_8xk_rih
+
+// packm_10xk_rih kernels
+
+#define BLIS_CPACKM_10XK_RIH_KERNEL_REF  bli_cpackm_ref_10xk_rih
+#define BLIS_ZPACKM_10XK_RIH_KERNEL_REF  bli_zpackm_ref_10xk_rih
+
+// packm_12xk_rih kernels
+
+#define BLIS_CPACKM_12XK_RIH_KERNEL_REF  bli_cpackm_ref_12xk_rih
+#define BLIS_ZPACKM_12XK_RIH_KERNEL_REF  bli_zpackm_ref_12xk_rih
+
+// packm_14xk_rih kernels
+
+#define BLIS_CPACKM_14XK_RIH_KERNEL_REF  bli_cpackm_ref_14xk_rih
+#define BLIS_ZPACKM_14XK_RIH_KERNEL_REF  bli_zpackm_ref_14xk_rih
+
+// packm_16xk_rih kernels
+
+#define BLIS_CPACKM_16XK_RIH_KERNEL_REF  bli_cpackm_ref_16xk_rih
+#define BLIS_ZPACKM_16XK_RIH_KERNEL_REF  bli_zpackm_ref_16xk_rih
 
 // unpack_2xk kernels
 

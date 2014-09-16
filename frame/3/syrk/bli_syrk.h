@@ -38,6 +38,8 @@
 
 #include "bli_syrk4m.h"
 #include "bli_syrk3m.h"
+#include "bli_syrk4mh.h"
+#include "bli_syrk3mh.h"
 
 
 //

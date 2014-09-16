@@ -332,6 +332,10 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 
 		if ( bli_is_3m_packed( pack_schema ) )
 			ps_p = ( ps_p * 3 ) / 2;
+		else if ( bli_is_ro_packed( pack_schema ) ||
+		          bli_is_io_packed( pack_schema ) ||
+		          bli_is_rpi_packed( pack_schema ) )
+			ps_p =   ps_p / 2;
 
 		// Store the strides and panel dimension in p.
 		bli_obj_set_incs( rs_p, cs_p, *p );
@@ -373,6 +377,10 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 
 		if ( bli_is_3m_packed( pack_schema ) )
 			ps_p = ( ps_p * 3 ) / 2;
+		else if ( bli_is_ro_packed( pack_schema ) ||
+		          bli_is_io_packed( pack_schema ) ||
+		          bli_is_rpi_packed( pack_schema ) )
+			ps_p =   ps_p / 2;
 
 		// Store the strides and panel dimension in p.
 		bli_obj_set_incs( rs_p, cs_p, *p );

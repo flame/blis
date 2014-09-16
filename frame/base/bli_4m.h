@@ -32,16 +32,19 @@
 
 */
 
-bool_t bli_4m_is_enabled( num_t dt );
+char*  bli_native_get_string( void );
+char*  bli_4m_get_string( void );
+
+bool_t bli_4m_is_enabled_dt( num_t dt );
 bool_t bli_4m_is_enabled_c( void );
 bool_t bli_4m_is_enabled_z( void );
 
-void   bli_4m_enable( num_t dt );
+void   bli_4m_enable_dt( num_t dt );
 void   bli_4m_enable_c( void );
 void   bli_4m_enable_z( void );
-void   bli_4m_enable_cz( void );
+void   bli_4m_enable( void );
 
-void   bli_4m_disable( num_t dt );
+void   bli_4m_disable_dt( num_t dt );
 void   bli_4m_disable_c( void );
 void   bli_4m_disable_z( void );
-void   bli_4m_disable_cz( void );
+void   bli_4m_disable( void );

@@ -38,6 +38,8 @@
 
 #include "bli_trmm34m.h"
 #include "bli_trmm33m.h"
+#include "bli_trmm34mh.h"
+#include "bli_trmm33mh.h"
 
 
 //

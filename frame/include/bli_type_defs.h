@@ -209,6 +209,12 @@ typedef dcomplex  f77_dcomplex;
            - 100111: packed by 4m column panels
            - 101010: packed by 3m row panels
            - 101011: packed by 3m column panels
+           - 110010: packed real-only row panels
+           - 110011: packed real-only column panels
+           - 110110: packed imag-only row panels
+           - 110111: packed imag-only column panels
+           - 111010: packed real+imag row panels
+           - 111011: packed real+imag column panels
        22  Packed panel order if upper-stored
            - 0 == forward order if upper
            - 1 == reverse order if upper
@@ -309,6 +315,9 @@ typedef dcomplex  f77_dcomplex;
 #define BLIS_BITVAL_NOT_PACKED               0x0
 #define   BLIS_BITVAL_4M                   ( 0x1  << BLIS_PACK_FORMAT_SHIFT )
 #define   BLIS_BITVAL_3M                   ( 0x2  << BLIS_PACK_FORMAT_SHIFT )
+#define   BLIS_BITVAL_RO                   ( 0x5  << BLIS_PACK_FORMAT_SHIFT )
+#define   BLIS_BITVAL_IO                   ( 0x6  << BLIS_PACK_FORMAT_SHIFT )
+#define   BLIS_BITVAL_RPI                  ( 0x7  << BLIS_PACK_FORMAT_SHIFT )
 #define   BLIS_BITVAL_PACKED_UNSPEC          BLIS_PACK_BIT
 #define   BLIS_BITVAL_PACKED_ROWS          ( BLIS_PACK_BIT                                                           )
 #define   BLIS_BITVAL_PACKED_COLUMNS       ( BLIS_PACK_BIT                                        | BLIS_PACK_RC_BIT )
@@ -318,6 +327,12 @@ typedef dcomplex  f77_dcomplex;
 #define   BLIS_BITVAL_PACKED_COL_PANELS_4M ( BLIS_PACK_BIT | BLIS_BITVAL_4M | BLIS_PACK_PANEL_BIT | BLIS_PACK_RC_BIT )
 #define   BLIS_BITVAL_PACKED_ROW_PANELS_3M ( BLIS_PACK_BIT | BLIS_BITVAL_3M | BLIS_PACK_PANEL_BIT                    )
 #define   BLIS_BITVAL_PACKED_COL_PANELS_3M ( BLIS_PACK_BIT | BLIS_BITVAL_3M | BLIS_PACK_PANEL_BIT | BLIS_PACK_RC_BIT )
+#define   BLIS_BITVAL_PACKED_ROW_PANELS_RO ( BLIS_PACK_BIT | BLIS_BITVAL_RO | BLIS_PACK_PANEL_BIT                    )
+#define   BLIS_BITVAL_PACKED_COL_PANELS_RO ( BLIS_PACK_BIT | BLIS_BITVAL_RO | BLIS_PACK_PANEL_BIT | BLIS_PACK_RC_BIT )
+#define   BLIS_BITVAL_PACKED_ROW_PANELS_IO ( BLIS_PACK_BIT | BLIS_BITVAL_IO | BLIS_PACK_PANEL_BIT                    )
+#define   BLIS_BITVAL_PACKED_COL_PANELS_IO ( BLIS_PACK_BIT | BLIS_BITVAL_IO | BLIS_PACK_PANEL_BIT | BLIS_PACK_RC_BIT )
+#define   BLIS_BITVAL_PACKED_ROW_PANELS_RPI ( BLIS_PACK_BIT | BLIS_BITVAL_RPI | BLIS_PACK_PANEL_BIT                    )
+#define   BLIS_BITVAL_PACKED_COL_PANELS_RPI ( BLIS_PACK_BIT | BLIS_BITVAL_RPI | BLIS_PACK_PANEL_BIT | BLIS_PACK_RC_BIT )
 #define BLIS_BITVAL_PACK_FWD_IF_UPPER        0x0
 #define BLIS_BITVAL_PACK_REV_IF_UPPER        BLIS_PACK_REV_IF_UPPER_BIT
 #define BLIS_BITVAL_PACK_FWD_IF_LOWER        0x0
@@ -427,6 +442,12 @@ typedef enum
 	BLIS_PACKED_COL_PANELS_4M = BLIS_BITVAL_PACKED_COL_PANELS_4M,
 	BLIS_PACKED_ROW_PANELS_3M = BLIS_BITVAL_PACKED_ROW_PANELS_3M,
 	BLIS_PACKED_COL_PANELS_3M = BLIS_BITVAL_PACKED_COL_PANELS_3M,
+	BLIS_PACKED_ROW_PANELS_RO = BLIS_BITVAL_PACKED_ROW_PANELS_RO,
+	BLIS_PACKED_COL_PANELS_RO = BLIS_BITVAL_PACKED_COL_PANELS_RO,
+	BLIS_PACKED_ROW_PANELS_IO = BLIS_BITVAL_PACKED_ROW_PANELS_IO,
+	BLIS_PACKED_COL_PANELS_IO = BLIS_BITVAL_PACKED_COL_PANELS_IO,
+	BLIS_PACKED_ROW_PANELS_RPI = BLIS_BITVAL_PACKED_ROW_PANELS_RPI,
+	BLIS_PACKED_COL_PANELS_RPI = BLIS_BITVAL_PACKED_COL_PANELS_RPI,
 } pack_t;
 
 
@@ -451,6 +472,17 @@ typedef enum
 	BLIS_BUFFER_FOR_C_PANEL = BLIS_BITVAL_BUFFER_FOR_C_PANEL,
 	BLIS_BUFFER_FOR_GEN_USE = BLIS_BITVAL_BUFFER_FOR_GEN_USE,
 } packbuf_t;
+
+
+// -- micro-kernel implementation type --
+
+typedef enum
+{
+	BLIS_REFERENCE_UKERNEL = 0,
+	BLIS_VIRTUAL4M_UKERNEL,
+	BLIS_VIRTUAL3M_UKERNEL,
+	BLIS_OPTIMIZED_UKERNEL,
+} kimpl_t;
 
 
 //

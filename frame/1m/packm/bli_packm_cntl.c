@@ -40,6 +40,7 @@ blksz_t* packm_mult_nvec;
 func_t*  packm_struc_cxk_kers;
 func_t*  packm_struc_cxk_4m_kers;
 func_t*  packm_struc_cxk_3m_kers;
+func_t*  packm_struc_cxk_rih_kers;
 
 packm_t* packm_cntl_row;
 packm_t* packm_cntl_col;
@@ -73,6 +74,13 @@ void bli_packm_cntl_init()
 	                     NULL,                    FALSE,
 	                     bli_cpackm_struc_cxk_3m, FALSE,
 	                     bli_zpackm_struc_cxk_3m, FALSE );
+
+	packm_struc_cxk_rih_kers
+	=
+	bli_func_obj_create( NULL,                     FALSE,
+	                     NULL,                     FALSE,
+	                     bli_cpackm_struc_cxk_rih, FALSE,
+	                     bli_zpackm_struc_cxk_rih, FALSE );
 
 
 	// Create blocksize objects for m and n register blocking. We will attach
@@ -146,6 +154,7 @@ void bli_packm_cntl_finalize()
 	bli_func_obj_free( packm_struc_cxk_kers );
 	bli_func_obj_free( packm_struc_cxk_4m_kers );
 	bli_func_obj_free( packm_struc_cxk_3m_kers );
+	bli_func_obj_free( packm_struc_cxk_rih_kers );
 
 	bli_cntl_obj_free( packm_cntl_row );
 	bli_cntl_obj_free( packm_cntl_col );

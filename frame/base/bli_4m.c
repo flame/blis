@@ -34,23 +34,28 @@
 
 #include "blis.h"
 
+static char*  bli_native_str    = "native";
+static char*  bli_4m_str        = "4m";
+
 // Initialize the 4m enabled/disabled state based on the cpp macros
-// BLIS_ENABLE_SCOMPLEX_VIA_4M and BLIS_ENABLE_DCOMPLEX_VIA_4M, which
-// are set in bli_kernel_macro_defs.h.
-#ifdef BLIS_ENABLE_SCOMPLEX_VIA_4M
+// which are set in bli_kernel_macro_defs.h.
+#ifdef BLIS_ENABLE_VIRTUAL_SCOMPLEX
 static bool_t bli_will_use_4m_c = TRUE;
 #else
 static bool_t bli_will_use_4m_c = FALSE;
 #endif
 
-#ifdef BLIS_ENABLE_DCOMPLEX_VIA_4M
+#ifdef BLIS_ENABLE_VIRTUAL_DCOMPLEX
 static bool_t bli_will_use_4m_z = TRUE;
 #else
 static bool_t bli_will_use_4m_z = FALSE;
 #endif
 
 
-bool_t bli_4m_is_enabled( num_t dt )
+char*  bli_native_get_string( void ) { return bli_native_str; }
+char*  bli_4m_get_string( void ) { return bli_4m_str; }
+
+bool_t bli_4m_is_enabled_dt( num_t dt )
 {
 	if      ( bli_is_scomplex( dt ) ) return bli_4m_is_enabled_c();
 	else if ( bli_is_dcomplex( dt ) ) return bli_4m_is_enabled_z();
@@ -60,18 +65,18 @@ bool_t bli_4m_is_enabled_c( void ) { return bli_will_use_4m_c; }
 bool_t bli_4m_is_enabled_z( void ) { return bli_will_use_4m_z; }
 
 
-void bli_4m_enable( num_t dt )
+void bli_4m_enable_dt( num_t dt )
 {
 	if      ( bli_is_scomplex( dt ) ) bli_4m_enable_c();
 	else if ( bli_is_dcomplex( dt ) ) bli_4m_enable_z();
 }
 void bli_4m_enable_c( void )  { bli_will_use_4m_c = TRUE; }
 void bli_4m_enable_z( void )  { bli_will_use_4m_z = TRUE; }
-void bli_4m_enable_cz( void ) { bli_will_use_4m_c =
+void bli_4m_enable( void )    { bli_will_use_4m_c =
                                 bli_will_use_4m_z = TRUE; }
 
 
-void bli_4m_disable( num_t dt )
+void bli_4m_disable_dt( num_t dt )
 {
 	if      ( bli_is_scomplex( dt ) ) bli_4m_disable_c();
 	else if ( bli_is_dcomplex( dt ) ) bli_4m_disable_z();
@@ -79,5 +84,5 @@ void bli_4m_disable( num_t dt )
 
 void bli_4m_disable_c( void )  { bli_will_use_4m_c = FALSE; }
 void bli_4m_disable_z( void )  { bli_will_use_4m_z = FALSE; }
-void bli_4m_disable_cz( void ) { bli_will_use_4m_c =
+void bli_4m_disable( void )    { bli_will_use_4m_c =
                                  bli_will_use_4m_z = FALSE; }

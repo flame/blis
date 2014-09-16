@@ -51,6 +51,12 @@ char libblis_test_store_chars[ NUM_OPERAND_TYPES ][ MAX_STORE_VALS_PER_TYPE + 1 
 char libblis_test_param_chars[ NUM_PARAM_TYPES ][ MAX_PARAM_VALS_PER_TYPE + 1 ];
 
 
+//#define _3MH
+//#define _4MH
+//#define _3M
+//#define _4M
+
+
 int main( int argc, char** argv )
 {
 	test_params_t params;
@@ -58,6 +64,36 @@ int main( int argc, char** argv )
 
 	// Initialize libblis.
 	bli_init();
+
+	// Experimental. Set the complex implementations.
+/*
+#if defined _3MH
+	bli_3mh_enable();
+	bli_3m_enable();
+	bli_4mh_disable();
+	bli_4m_enable();
+#elif defined _3M
+	bli_3mh_disable();
+	bli_3m_enable();
+	bli_4mh_enable();
+	bli_4m_enable();
+#elif defined _4MH
+	bli_3mh_disable();
+	bli_3m_disable();
+	bli_4mh_enable();
+	bli_4m_enable();
+#elif defined _4M
+	bli_3mh_disable();
+	bli_3m_disable();
+	bli_4mh_disable();
+	bli_4m_enable();
+#else
+	bli_3mh_disable();
+	bli_3m_disable();
+	bli_4mh_disable();
+	bli_4m_enable();
+#endif
+*/
 
 	// Initialize some strings.
 	libblis_test_init_strings();
@@ -377,6 +413,22 @@ void libblis_test_read_params_file( char* input_filename, test_params_t* params 
 	libblis_test_read_next_line( buffer, input_stream );
 	sscanf( buffer, "%u ", &(params->p_inc) );
 
+	// Read whether to enable 3mh.
+	libblis_test_read_next_line( buffer, input_stream );
+	sscanf( buffer, "%u ", &(params->enable_3mh) );
+
+	// Read whether to enable 3m.
+	libblis_test_read_next_line( buffer, input_stream );
+	sscanf( buffer, "%u ", &(params->enable_3m) );
+
+	// Read whether to enable 4mh.
+	libblis_test_read_next_line( buffer, input_stream );
+	sscanf( buffer, "%u ", &(params->enable_4mh) );
+
+	// Read whether to enable 4m.
+	libblis_test_read_next_line( buffer, input_stream );
+	sscanf( buffer, "%u ", &(params->enable_4m) );
+
 	// Read the requested error-checking level.
 	libblis_test_read_next_line( buffer, input_stream );
 	sscanf( buffer, "%u ", &(params->error_checking_level) );
@@ -403,6 +455,16 @@ void libblis_test_read_params_file( char* input_filename, test_params_t* params 
 
 	// Close the file.
 	fclose( input_stream );
+
+	// Enable/disable the alternative complex implementations.
+	if ( params->enable_3mh ) bli_3mh_enable();
+	else                      bli_3mh_disable();
+	if ( params->enable_3m  ) bli_3m_enable();
+	else                      bli_3m_disable();
+	if ( params->enable_4mh ) bli_4mh_enable();
+	else                      bli_4mh_disable();
+	if ( params->enable_4m  ) bli_4m_enable();
+	else                      bli_4m_disable();
 
 	// Output the parameter struct.
 	libblis_test_output_params_struct( stdout, params );
@@ -595,107 +657,184 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "--- BLIS kernel header ---\n" );
 	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "floating-point types         s     d     c     z \n" );
-	libblis_test_fprintf_c( os, "  sizes (bytes)          %5u %5u %5u %5u\n", sizeof(float),
+	libblis_test_fprintf_c( os, "floating-point types           s       d       c       z \n" );
+	libblis_test_fprintf_c( os, "  sizes (bytes)          %7u %7u %7u %7u\n", sizeof(float),
 	                                                                          sizeof(double),
 	                                                                          sizeof(scomplex),
 	                                                                          sizeof(dcomplex) );
 	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "complex via 4m\n" );
-	libblis_test_fprintf_c( os, "  enabled for scomplex?      %d\n", ( int )bli_info_get_enable_scomplex_via_4m() );
-	libblis_test_fprintf_c( os, "  enabled for dcomplex?      %d\n", ( int )bli_info_get_enable_dcomplex_via_4m() );
-	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "level-3 def cache blkszes    s     d     c     z \n" );
-	libblis_test_fprintf_c( os, "  m dimension            %5d %5d %5d %5d\n",
+	libblis_test_fprintf_c( os, "level-3 def cache blkszes      s       d       c       z \n" );
+	libblis_test_fprintf_c( os, "  m dimension            %7d %7d %7d %7d\n",
 	                        ( int )bli_info_get_default_mc_s(),
 	                        ( int )bli_info_get_default_mc_d(),
 	                        ( int )bli_info_get_default_mc_c(),
 	                        ( int )bli_info_get_default_mc_z() );
-	libblis_test_fprintf_c( os, "  k dimension            %5d %5d %5d %5d\n",
+	libblis_test_fprintf_c( os, "  k dimension            %7d %7d %7d %7d\n",
 	                        ( int )bli_info_get_default_kc_s(),
 	                        ( int )bli_info_get_default_kc_d(),
 	                        ( int )bli_info_get_default_kc_c(),
 	                        ( int )bli_info_get_default_kc_z() );
-	libblis_test_fprintf_c( os, "  n dimension            %5d %5d %5d %5d\n",
+	libblis_test_fprintf_c( os, "  n dimension            %7d %7d %7d %7d\n",
 	                        ( int )bli_info_get_default_nc_s(),
 	                        ( int )bli_info_get_default_nc_d(),
 	                        ( int )bli_info_get_default_nc_c(),
 	                        ( int )bli_info_get_default_nc_z() );
 	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "level-3 max cache blkszes    s     d     c     z \n" );
-	libblis_test_fprintf_c( os, "  m dimension            %5d %5d %5d %5d\n",
+	libblis_test_fprintf_c( os, "level-3 max cache blkszes      s       d       c       z \n" );
+	libblis_test_fprintf_c( os, "  m dimension            %7d %7d %7d %7d\n",
 	                        ( int )bli_info_get_maximum_mc_s(),
 	                        ( int )bli_info_get_maximum_mc_d(),
 	                        ( int )bli_info_get_maximum_mc_c(),
 	                        ( int )bli_info_get_maximum_mc_z() );
-	libblis_test_fprintf_c( os, "  k dimension            %5d %5d %5d %5d\n",
+	libblis_test_fprintf_c( os, "  k dimension            %7d %7d %7d %7d\n",
 	                        ( int )bli_info_get_maximum_kc_s(),
 	                        ( int )bli_info_get_maximum_kc_d(),
 	                        ( int )bli_info_get_maximum_kc_c(),
 	                        ( int )bli_info_get_maximum_kc_z() );
-	libblis_test_fprintf_c( os, "  n dimension            %5d %5d %5d %5d\n",
+	libblis_test_fprintf_c( os, "  n dimension            %7d %7d %7d %7d\n",
 	                        ( int )bli_info_get_maximum_nc_s(),
 	                        ( int )bli_info_get_maximum_nc_d(),
 	                        ( int )bli_info_get_maximum_nc_c(),
 	                        ( int )bli_info_get_maximum_nc_z() );
 	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "level-3 register blocksizes  s     d     c     z \n" );
-	libblis_test_fprintf_c( os, "  m dimension            %5d %5d %5d %5d\n",
+	libblis_test_fprintf_c( os, "level-3 register blocksizes    s       d       c       z \n" );
+	libblis_test_fprintf_c( os, "  m dimension            %7d %7d %7d %7d\n",
 	                        ( int )bli_info_get_default_mr_s(),
 	                        ( int )bli_info_get_default_mr_d(),
 	                        ( int )bli_info_get_default_mr_c(),
 	                        ( int )bli_info_get_default_mr_z() );
-	libblis_test_fprintf_c( os, "  n dimension            %5d %5d %5d %5d\n",
+	libblis_test_fprintf_c( os, "  n dimension            %7d %7d %7d %7d\n",
 	                        ( int )bli_info_get_default_nr_s(),
 	                        ( int )bli_info_get_default_nr_d(),
 	                        ( int )bli_info_get_default_nr_c(),
 	                        ( int )bli_info_get_default_nr_z() );
 	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "level-3 pack register blksz  s     d     c     z \n" );
-	libblis_test_fprintf_c( os, "  m dimension            %5d %5d %5d %5d\n",
+	libblis_test_fprintf_c( os, "level-3 pack register blksz    s       d       c       z \n" );
+	libblis_test_fprintf_c( os, "  m dimension            %7d %7d %7d %7d\n",
 	                        ( int )bli_info_get_packdim_mr_s(),
 	                        ( int )bli_info_get_packdim_mr_d(),
 	                        ( int )bli_info_get_packdim_mr_c(),
 	                        ( int )bli_info_get_packdim_mr_z() );
-	libblis_test_fprintf_c( os, "  n dimension            %5d %5d %5d %5d\n",
+	libblis_test_fprintf_c( os, "  n dimension            %7d %7d %7d %7d\n",
 	                        ( int )bli_info_get_packdim_nr_s(),
 	                        ( int )bli_info_get_packdim_nr_d(),
 	                        ( int )bli_info_get_packdim_nr_c(),
 	                        ( int )bli_info_get_packdim_nr_z() );
 	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "level-2 cache blocksizes     s     d     c     z \n" );
-	libblis_test_fprintf_c( os, "  m dimension            %5d %5d %5d %5d\n",
+	libblis_test_fprintf_c( os, "level-2 cache blocksizes       s       d       c       z \n" );
+	libblis_test_fprintf_c( os, "  m dimension            %7d %7d %7d %7d\n",
 	                        ( int )bli_info_get_default_l2_mc_s(),
 	                        ( int )bli_info_get_default_l2_mc_d(),
 	                        ( int )bli_info_get_default_l2_mc_c(),
 	                        ( int )bli_info_get_default_l2_mc_z() );
-	libblis_test_fprintf_c( os, "  n dimension            %5d %5d %5d %5d\n",
+	libblis_test_fprintf_c( os, "  n dimension            %7d %7d %7d %7d\n",
 	                        ( int )bli_info_get_default_l2_nc_s(),
 	                        ( int )bli_info_get_default_l2_nc_d(),
 	                        ( int )bli_info_get_default_l2_nc_c(),
 	                        ( int )bli_info_get_default_l2_nc_z() );
 	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "level-1f fusing factors      s     d     c     z \n" );
-	libblis_test_fprintf_c( os, "  default                %5d %5d %5d %5d\n",
+	libblis_test_fprintf_c( os, "level-1f fusing factors        s       d       c       z \n" );
+	libblis_test_fprintf_c( os, "  default                %7d %7d %7d %7d\n",
 	                        ( int )bli_info_get_default_l1f_fuse_fac_s(),
 	                        ( int )bli_info_get_default_l1f_fuse_fac_d(),
 	                        ( int )bli_info_get_default_l1f_fuse_fac_c(),
 	                        ( int )bli_info_get_default_l1f_fuse_fac_z() );
-	libblis_test_fprintf_c( os, "  axpyf                  %5d %5d %5d %5d\n",
+	libblis_test_fprintf_c( os, "  axpyf                  %7d %7d %7d %7d\n",
 	                        ( int )bli_info_get_axpyf_fuse_fac_s(),
 	                        ( int )bli_info_get_axpyf_fuse_fac_d(),
 	                        ( int )bli_info_get_axpyf_fuse_fac_c(),
 	                        ( int )bli_info_get_axpyf_fuse_fac_z() );
-	libblis_test_fprintf_c( os, "  dotxf                  %5d %5d %5d %5d\n",
+	libblis_test_fprintf_c( os, "  dotxf                  %7d %7d %7d %7d\n",
 	                        ( int )bli_info_get_dotxf_fuse_fac_s(),
 	                        ( int )bli_info_get_dotxf_fuse_fac_d(),
 	                        ( int )bli_info_get_dotxf_fuse_fac_c(),
 	                        ( int )bli_info_get_dotxf_fuse_fac_z() );
-	libblis_test_fprintf_c( os, "  dotxaxpyf              %5d %5d %5d %5d\n",
+	libblis_test_fprintf_c( os, "  dotxaxpyf              %7d %7d %7d %7d\n",
 	                        ( int )bli_info_get_dotxaxpyf_fuse_fac_s(),
 	                        ( int )bli_info_get_dotxaxpyf_fuse_fac_d(),
 	                        ( int )bli_info_get_dotxaxpyf_fuse_fac_c(),
 	                        ( int )bli_info_get_dotxaxpyf_fuse_fac_z() );
+	libblis_test_fprintf_c( os, "\n" );
+	libblis_test_fprintf_c( os, "micro-kernel types             s       d       c       z\n" );
+	libblis_test_fprintf_c( os, "  gemm                   %7s %7s %7s %7s\n",
+	                        bli_info_get_gemm_ukr_type( BLIS_FLOAT ),
+	                        bli_info_get_gemm_ukr_type( BLIS_DOUBLE ),
+	                        bli_info_get_gemm_ukr_type( BLIS_SCOMPLEX ),
+	                        bli_info_get_gemm_ukr_type( BLIS_DCOMPLEX ) );
+	libblis_test_fprintf_c( os, "  gemmtrsm_l             %7s %7s %7s %7s\n",
+	                        bli_info_get_gemmtrsm_l_ukr_type( BLIS_FLOAT ),
+	                        bli_info_get_gemmtrsm_l_ukr_type( BLIS_DOUBLE ),
+	                        bli_info_get_gemmtrsm_l_ukr_type( BLIS_SCOMPLEX ),
+	                        bli_info_get_gemmtrsm_l_ukr_type( BLIS_DCOMPLEX ) );
+	libblis_test_fprintf_c( os, "  gemmtrsm_u             %7s %7s %7s %7s\n",
+	                        bli_info_get_gemmtrsm_u_ukr_type( BLIS_FLOAT ),
+	                        bli_info_get_gemmtrsm_u_ukr_type( BLIS_DOUBLE ),
+	                        bli_info_get_gemmtrsm_u_ukr_type( BLIS_SCOMPLEX ),
+	                        bli_info_get_gemmtrsm_u_ukr_type( BLIS_DCOMPLEX ) );
+	libblis_test_fprintf_c( os, "  trsm_l                 %7s %7s %7s %7s\n",
+	                        bli_info_get_trsm_l_ukr_type( BLIS_FLOAT ),
+	                        bli_info_get_trsm_l_ukr_type( BLIS_DOUBLE ),
+	                        bli_info_get_trsm_l_ukr_type( BLIS_SCOMPLEX ),
+	                        bli_info_get_trsm_l_ukr_type( BLIS_DCOMPLEX ) );
+	libblis_test_fprintf_c( os, "  trsm_u                 %7s %7s %7s %7s\n",
+	                        bli_info_get_trsm_u_ukr_type( BLIS_FLOAT ),
+	                        bli_info_get_trsm_u_ukr_type( BLIS_DOUBLE ),
+	                        bli_info_get_trsm_u_ukr_type( BLIS_SCOMPLEX ),
+	                        bli_info_get_trsm_u_ukr_type( BLIS_DCOMPLEX ) );
+	libblis_test_fprintf_c( os, "\n" );
+	libblis_test_fprintf_c( os, "--- BLIS implementation details ---\n" );
+	libblis_test_fprintf_c( os, "\n" );
+	libblis_test_fprintf_c( os, "level-3 implementations        s       d       c       z\n" );
+	libblis_test_fprintf_c( os, "  gemm                   %7s %7s %7s %7s\n",
+	                        bli_info_get_gemm_impl_string( BLIS_FLOAT ),
+	                        bli_info_get_gemm_impl_string( BLIS_DOUBLE ),
+	                        bli_info_get_gemm_impl_string( BLIS_SCOMPLEX ),
+	                        bli_info_get_gemm_impl_string( BLIS_DCOMPLEX ) );
+	libblis_test_fprintf_c( os, "  hemm                   %7s %7s %7s %7s\n",
+	                        bli_info_get_hemm_impl_string( BLIS_FLOAT ),
+	                        bli_info_get_hemm_impl_string( BLIS_DOUBLE ),
+	                        bli_info_get_hemm_impl_string( BLIS_SCOMPLEX ),
+	                        bli_info_get_hemm_impl_string( BLIS_DCOMPLEX ) );
+	libblis_test_fprintf_c( os, "  herk                   %7s %7s %7s %7s\n",
+	                        bli_info_get_herk_impl_string( BLIS_FLOAT ),
+	                        bli_info_get_herk_impl_string( BLIS_DOUBLE ),
+	                        bli_info_get_herk_impl_string( BLIS_SCOMPLEX ),
+	                        bli_info_get_herk_impl_string( BLIS_DCOMPLEX ) );
+	libblis_test_fprintf_c( os, "  her2k                  %7s %7s %7s %7s\n",
+	                        bli_info_get_her2k_impl_string( BLIS_FLOAT ),
+	                        bli_info_get_her2k_impl_string( BLIS_DOUBLE ),
+	                        bli_info_get_her2k_impl_string( BLIS_SCOMPLEX ),
+	                        bli_info_get_her2k_impl_string( BLIS_DCOMPLEX ) );
+	libblis_test_fprintf_c( os, "  symm                   %7s %7s %7s %7s\n",
+	                        bli_info_get_symm_impl_string( BLIS_FLOAT ),
+	                        bli_info_get_symm_impl_string( BLIS_DOUBLE ),
+	                        bli_info_get_symm_impl_string( BLIS_SCOMPLEX ),
+	                        bli_info_get_symm_impl_string( BLIS_DCOMPLEX ) );
+	libblis_test_fprintf_c( os, "  syrk                   %7s %7s %7s %7s\n",
+	                        bli_info_get_syrk_impl_string( BLIS_FLOAT ),
+	                        bli_info_get_syrk_impl_string( BLIS_DOUBLE ),
+	                        bli_info_get_syrk_impl_string( BLIS_SCOMPLEX ),
+	                        bli_info_get_syrk_impl_string( BLIS_DCOMPLEX ) );
+	libblis_test_fprintf_c( os, "  syr2k                  %7s %7s %7s %7s\n",
+	                        bli_info_get_syr2k_impl_string( BLIS_FLOAT ),
+	                        bli_info_get_syr2k_impl_string( BLIS_DOUBLE ),
+	                        bli_info_get_syr2k_impl_string( BLIS_SCOMPLEX ),
+	                        bli_info_get_syr2k_impl_string( BLIS_DCOMPLEX ) );
+	libblis_test_fprintf_c( os, "  trmm                   %7s %7s %7s %7s\n",
+	                        bli_info_get_trmm_impl_string( BLIS_FLOAT ),
+	                        bli_info_get_trmm_impl_string( BLIS_DOUBLE ),
+	                        bli_info_get_trmm_impl_string( BLIS_SCOMPLEX ),
+	                        bli_info_get_trmm_impl_string( BLIS_DCOMPLEX ) );
+	libblis_test_fprintf_c( os, "  trmm3                  %7s %7s %7s %7s\n",
+	                        bli_info_get_trmm3_impl_string( BLIS_FLOAT ),
+	                        bli_info_get_trmm3_impl_string( BLIS_DOUBLE ),
+	                        bli_info_get_trmm3_impl_string( BLIS_SCOMPLEX ),
+	                        bli_info_get_trmm3_impl_string( BLIS_DCOMPLEX ) );
+	libblis_test_fprintf_c( os, "  trsm                   %7s %7s %7s %7s\n",
+	                        bli_info_get_trsm_impl_string( BLIS_FLOAT ),
+	                        bli_info_get_trsm_impl_string( BLIS_DOUBLE ),
+	                        bli_info_get_trsm_impl_string( BLIS_SCOMPLEX ),
+	                        bli_info_get_trsm_impl_string( BLIS_DCOMPLEX ) );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf( os, "\n" );
 
@@ -719,6 +858,10 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "problem size: first to test  %u\n", params->p_first );
 	libblis_test_fprintf_c( os, "problem size: max to test    %u\n", params->p_max );
 	libblis_test_fprintf_c( os, "problem size increment       %u\n", params->p_inc );
+	libblis_test_fprintf_c( os, "enable 3mh?                  %u\n", params->enable_3mh );
+	libblis_test_fprintf_c( os, "enable 3m?                   %u\n", params->enable_3m );
+	libblis_test_fprintf_c( os, "enable 4mh?                  %u\n", params->enable_4mh );
+	libblis_test_fprintf_c( os, "enable 4m?                   %u\n", params->enable_4m );
 	libblis_test_fprintf_c( os, "error-checking level         %u\n", params->error_checking_level );
 	libblis_test_fprintf_c( os, "reaction to failure          %c\n", params->reaction_to_failure );
 	libblis_test_fprintf_c( os, "output in matlab format?     %u\n", params->output_matlab_format );

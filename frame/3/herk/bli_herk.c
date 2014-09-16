@@ -42,11 +42,15 @@ void bli_herk( obj_t*  alpha,
                obj_t*  beta,
                obj_t*  c )
 {
-	if ( bli_4m_is_enabled( bli_obj_datatype( *c ) ) )
-		bli_herk4m_entry( alpha, a, beta, c );
-	else
-		bli_herk_entry( alpha, a, beta, c );
+	num_t dt = bli_obj_datatype( *c );
+
+	if      ( bli_3mh_is_enabled_dt( dt ) ) bli_herk3mh_entry( alpha, a, beta, c );
+	else if ( bli_3m_is_enabled_dt( dt ) )  bli_herk3m_entry( alpha, a, beta, c );
+	else if ( bli_4mh_is_enabled_dt( dt ) ) bli_herk4mh_entry( alpha, a, beta, c );
+	else if ( bli_4m_is_enabled_dt( dt ) )  bli_herk4m_entry( alpha, a, beta, c );
+	else                                    bli_herk_entry( alpha, a, beta, c );
 }
+
 
 //
 // Define BLAS-like interfaces with homogeneous-typed operands.

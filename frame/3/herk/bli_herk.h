@@ -48,6 +48,8 @@
 
 #include "bli_herk4m.h"
 #include "bli_herk3m.h"
+#include "bli_herk4mh.h"
+#include "bli_herk3mh.h"
 
 
 //

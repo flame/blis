@@ -389,41 +389,46 @@ void PASTEMAC(ch,varname)( \
 \
 		/* Pack the stored triangle of c11 to p11. */ \
 		{ \
-			ctype* restrict c11; \
-			ctype* restrict p11; \
-			dim_t           p11_m; \
-			dim_t           p11_n; \
+			dim_t           p11_m = panel_dim; \
+			dim_t           p11_n = panel_dim; \
+			dim_t           j     = diagoffc_abs; \
+			ctype* restrict c11   = c + (j  )*ldc; \
+			ctype* restrict p11   = p + (j  )*ldp; \
 \
-			p11_m = panel_dim; \
-			p11_n = panel_dim; \
-			j     = diagoffc_abs; \
-			p11   = p + (j  )*ldp; \
-			c11   = c + (j  )*ldc; \
-\
-			PASTEMAC(ch,scal2m)( 0, \
-			                     BLIS_NONUNIT_DIAG, \
-			                     uploc, \
-			                     conjc, \
-			                     p11_m, \
-			                     p11_n, \
-			                     kappa, \
-			                     c11, rs_c, cs_c, \
-			                     p11, rs_p, cs_p ); \
+			PASTEMAC(ch,copym)( 0, \
+			                    BLIS_NONUNIT_DIAG, \
+			                    uploc, \
+			                    conjc, \
+			                    p11_m, \
+			                    p11_n, \
+			                    c11, rs_c, cs_c, \
+			                    p11, rs_p, cs_p ); \
 \
 			/* If source matrix c is Hermitian, we have to zero out the
 			   imaginary components of the diagonal of p11 in case the
 			   corresponding elements in c11 were not already zero. */ \
 			if ( bli_is_hermitian( strucc ) ) \
 			{ \
-				/* NOTE: We can directly increment p11 since we are done
-				   using p11 for the remainder of the function. */ \
+				ctype* restrict pi11 = p11; \
+\
 				for ( i = 0; i < p11_m; ++i ) \
 				{ \
-					PASTEMAC(ch,seti0s)( *p11 ); \
+					PASTEMAC(ch,seti0s)( *pi11 ); \
 \
-					p11 += rs_p + cs_p; \
+					pi11 += rs_p + cs_p; \
 				} \
 			} \
+\
+			/* Now that the diagonal has been made explicitly Hermitian
+			   (if applicable), we can now safely scale the stored
+			   triangle specified by uploc. */ \
+			PASTEMAC(ch,scalm)( BLIS_NO_CONJUGATE, \
+			                    0, \
+			                    uploc, \
+			                    p11_m, \
+			                    p11_n, \
+			                    kappa, \
+			                    p11, rs_p, cs_p ); \
 		} \
 	} \
 }

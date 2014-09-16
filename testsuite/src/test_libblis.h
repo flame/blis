@@ -160,6 +160,10 @@ typedef struct
 	unsigned int  p_first;
 	unsigned int  p_max;
 	unsigned int  p_inc;
+	unsigned int  enable_3mh;
+	unsigned int  enable_3m;
+	unsigned int  enable_4mh;
+	unsigned int  enable_4m;
 	char          reaction_to_failure;
 	unsigned int  output_matlab_format;
 	unsigned int  output_files;

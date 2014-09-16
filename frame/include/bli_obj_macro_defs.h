@@ -221,6 +221,24 @@
 \
 	( ( (obj).info & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_3M )
 
+#define bli_obj_is_ro_packed( obj ) \
+\
+	( ( (obj).info & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_RO )
+
+#define bli_obj_is_io_packed( obj ) \
+\
+	( ( (obj).info & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_IO )
+
+#define bli_obj_is_rpi_packed( obj ) \
+\
+	( ( (obj).info & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_RPI )
+
+#define bli_obj_is_rih_packed( obj ) \
+\
+	( bli_obj_is_ro_packed( obj ) || \
+	  bli_obj_is_io_packed( obj ) || \
+	  bli_obj_is_rpi_packed( obj ) )
+
 #define bli_obj_pack_buffer_type( obj ) \
 \
 	(   (obj).info & BLIS_PACK_BUFFER_BITS )

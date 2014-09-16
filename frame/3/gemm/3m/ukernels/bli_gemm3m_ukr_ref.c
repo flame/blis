@@ -47,25 +47,17 @@ void PASTEMAC(ch,varname)( \
                            auxinfo_t*      data \
                          ) \
 { \
-	ctype_r           ct_r[ PASTEMAC(chr,mr) * \
-	                        PASTEMAC(chr,nr) ] \
-	                   __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	ctype_r           ct_i[ PASTEMAC(chr,mr) * \
-	                        PASTEMAC(chr,nr) ] \
-	                   __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	const inc_t       rs_ct     = 1; \
-	const inc_t       cs_ct     = PASTEMAC(chr,mr); \
-\
-\
 	ctype_r           ab_r[ PASTEMAC(chr,mr) * \
 	                        PASTEMAC(chr,nr) ] \
 	                   __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
 	ctype_r           ab_i[ PASTEMAC(chr,mr) * \
 	                        PASTEMAC(chr,nr) ] \
 	                   __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	const inc_t       rs_ab     = 1; \
-	const inc_t       cs_ab     = PASTEMAC(chr,mr); \
-\
+	ctype_r           ab_rpi[ PASTEMAC(chr,mr) * \
+	                          PASTEMAC(chr,nr) ] \
+	                   __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
+	inc_t             rs_ab; \
+	inc_t             cs_ab; \
 \
 	const dim_t       m         = PASTEMAC(chr,mr); \
 	const dim_t       n         = PASTEMAC(chr,nr); \
@@ -75,29 +67,28 @@ void PASTEMAC(ch,varname)( \
 \
 	ctype_r* restrict a_r       = ( ctype_r* )a; \
 	ctype_r* restrict a_i       = ( ctype_r* )a +   ps_a; \
-	ctype_r* restrict a_ri      = ( ctype_r* )a + 2*ps_a; \
+	ctype_r* restrict a_rpi     = ( ctype_r* )a + 2*ps_a; \
 \
 	ctype_r* restrict b_r       = ( ctype_r* )b; \
 	ctype_r* restrict b_i       = ( ctype_r* )b +   ps_b; \
-	ctype_r* restrict b_ri      = ( ctype_r* )b + 2*ps_b; \
+	ctype_r* restrict b_rpi     = ( ctype_r* )b + 2*ps_b; \
 \
-	ctype_r* restrict c_r       = ( ctype_r* )c; \
-	ctype_r* restrict c_i       = ( ctype_r* )c + 1; \
-\
-	const inc_t       rs_c2     = 2 * rs_c; \
-	const inc_t       cs_c2     = 2 * cs_c; \
-\
-	ctype_r* restrict one_r     = PASTEMAC(chr,1); \
 	ctype_r* restrict zero_r    = PASTEMAC(chr,0); \
 \
-	ctype_r           alpha_r   = PASTEMAC(ch,real)( *alpha ); \
-	ctype_r           alpha_i   = PASTEMAC(ch,imag)( *alpha ); \
+	ctype_r* restrict alpha_r   = &PASTEMAC(ch,real)( *alpha ); \
+	ctype_r* restrict alpha_i   = &PASTEMAC(ch,imag)( *alpha ); \
 \
-	ctype_r           beta_r    = PASTEMAC(ch,real)( *beta ); \
-	ctype_r           beta_i    = PASTEMAC(ch,imag)( *beta ); \
+	const ctype_r     beta_r    = PASTEMAC(ch,real)( *beta ); \
+	const ctype_r     beta_i    = PASTEMAC(ch,imag)( *beta ); \
 \
 	void*             a_next    = bli_auxinfo_next_a( data ); \
 	void*             b_next    = bli_auxinfo_next_b( data ); \
+\
+	dim_t             n_iter; \
+	dim_t             n_elem; \
+\
+	inc_t             incc, ldc; \
+	inc_t             incab, ldab; \
 \
 	dim_t             i, j; \
 \
@@ -106,64 +97,54 @@ void PASTEMAC(ch,varname)( \
 	   allow an alpha with non-zero imaginary component to be passed
 	   in, because it can't be applied properly using the 3m method.
 	   If alpha is not real, then something is very wrong. */ \
-	if ( !PASTEMAC(chr,eq0)( alpha_i ) ) \
+	if ( !PASTEMAC(chr,eq0)( *alpha_i ) ) \
 		bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \
 \
 \
-	/* Copy the contents of c to a temporary buffer ct. */ \
-	if ( !PASTEMAC(chr,eq0)( beta_i ) ) \
+	/* An optimization: Set local strides and loop bounds based on the
+	   strides of c, so that (a) the micro-kernel accesses ct the same
+	   way it would if it were updating c directly, and (b) c is updated
+	   contiguously. */ \
+	if ( bli_is_row_stored( rs_c, cs_c ) ) \
 	{ \
-		/* We can handle a non-zero imaginary component on beta, but to do
-		   so we have to manually scale c and then use beta == 1 for the
-		   micro-kernel calls. */ \
-		for ( i = 0; i < m; ++i ) \
-		for ( j = 0; j < n; ++j ) \
-		PASTEMAC(ch,scal2ris)( beta_r, \
-		                       beta_i, \
-		                       *(c_r  + i*rs_c2 + j*cs_c2), \
-		                       *(c_i  + i*rs_c2 + j*cs_c2), \
-		                       *(ct_r + i*rs_ct + j*cs_ct), \
-		                       *(ct_i + i*rs_ct + j*cs_ct) ); \
-\
-		/* Use beta.r == 1.0. */ \
-		beta_r = *one_r; \
+		rs_ab = n; n_iter = m; incc = cs_c; \
+		cs_ab = 1; n_elem = n; ldc  = rs_c; \
 	} \
-	else if ( !PASTEMAC(chr,eq0)( beta_r ) ) \
+	else /* column-stored or general stride */ \
 	{ \
-		/* Copy c to ct without scaling. */ \
-		for ( j = 0; j < n; ++j ) \
-		for ( i = 0; i < m; ++i ) \
-		PASTEMAC(ch,copyris)( *(c_r  + i*rs_c2 + j*cs_c2), \
-		                      *(c_i  + i*rs_c2 + j*cs_c2), \
-		                      *(ct_r + i*rs_ct + j*cs_ct), \
-		                      *(ct_i + i*rs_ct + j*cs_ct) ); \
+		rs_ab = 1; n_iter = n; incc = rs_c; \
+		cs_ab = m; n_elem = m; ldc  = cs_c; \
 	} \
-	else \
-	{ \
-		/* Since beta is zero, ct can remain uninitialized since it
-		   will be overwritten by the micro-kernel. */ \
-	} \
+	incab = 1; \
+	ldab  = n_elem; \
 \
 \
-	/* c.r = beta.r * c.r                          + a.r * b.r - a.i * b.i;
-	   c.i = beta.r * c.i + (a.r + a.i)(b.r + b.i) - a.r * b.r - a.i * b.i; */ \
+	/* The following gemm micro-kernel calls implement all "phases" of the
+	   3m method:
+
+	     c    = beta * c;
+	     c_r +=                        + a_r * b_r - a_i * b_i;
+	     c_i += (a_r + a_i)(b_r + b_i) - a_r * b_r - a_i * b_i;
+
+	   NOTE: Scaling by alpha_r is not shown for space reasons. */ \
+\
 \
 	bli_auxinfo_set_next_ab( a_i, b_i, *data ); \
 \
-	/* ab.r = alpha.r * a.r * b.r; */ \
+	/* ab_r = alpha_r * a_r * b_r; */ \
 	PASTEMAC(chr,gemmukr)( k, \
-	                       &alpha_r, \
+	                       alpha_r, \
 	                       a_r, \
 	                       b_r, \
 	                       zero_r, \
 	                       ab_r, rs_ab, cs_ab, \
 	                       data ); \
 \
-	bli_auxinfo_set_next_ab( a_ri, b_ri, *data ); \
+	bli_auxinfo_set_next_ab( a_rpi, b_rpi, *data ); \
 \
-	/* ab.i = alpha.r * a.i * b.i; */ \
+	/* ab_i = alpha_r * a_i * b_i; */ \
 	PASTEMAC(chr,gemmukr)( k, \
-	                       &alpha_r, \
+	                       alpha_r, \
 	                       a_i, \
 	                       b_i, \
 	                       zero_r, \
@@ -172,47 +153,158 @@ void PASTEMAC(ch,varname)( \
 \
 	bli_auxinfo_set_next_ab( a_next, b_next, *data ); \
 \
-	/* ct.i = alpha.r * a.ri * b.ri; */ \
+	/* ct_i = alpha_r * a_ri * b_ri; */ \
 	PASTEMAC(chr,gemmukr)( k, \
-	                       &alpha_r, \
-	                       a_ri, \
-	                       b_ri, \
-	                       &beta_r, \
-	                       ct_i, rs_ct, cs_ct, \
+	                       alpha_r, \
+	                       a_rpi, \
+	                       b_rpi, \
+	                       zero_r, \
+	                       ab_rpi, rs_ab, cs_ab, \
 	                       data ); \
 \
 \
-	/* ct.r = beta.r * ct.r + ab.r;
-	   ct.r =          ct.r - ab.i;
-	   ct.i =          ct.i - ab.r;
-	   ct.i =          ct.i - ab.i; */ \
-	for ( j = 0; j < n; ++j ) \
-	for ( i = 0; i < m; ++i ) \
+	/* How we accumulate the intermediate matrix products stored in ab_r,
+	   ab_i, and ab_rpi depends on the value of beta. */ \
+	if ( !PASTEMAC(chr,eq0)( beta_i ) ) \
 	{ \
-		ctype_r alphabeta_r = *(ab_r + i*rs_ab + j*cs_ab); \
-		ctype_r alphabeta_i = *(ab_i + i*rs_ab + j*cs_ab); \
-		ctype_r gammat_r    = *(ct_r + i*rs_ct + j*cs_ct); \
-		ctype_r gammat_i    = *(ct_i + i*rs_ct + j*cs_ct); \
-\
-		if ( PASTEMAC(ch,eq0)( *beta ) ) \
+		/* c   = beta * c; 
+		   c_r = c_r          + ab_r - ab_i;
+		   c_i = c_i + ab_rpi - ab_r - ab_i; */ \
+		for ( j = 0; j < n_iter; ++j ) \
+		for ( i = 0; i < n_elem; ++i ) \
 		{ \
-			PASTEMAC(chr,copys)( *zero_r, gammat_r ); \
+			const ctype_r     alphabeta11_r   = *(ab_r   + i*incab + j*ldab); \
+			const ctype_r     alphabeta11_i   = *(ab_i   + i*incab + j*ldab); \
+			const ctype_r     alphabeta11_rpi = *(ab_rpi + i*incab + j*ldab); \
+			ctype*   restrict gamma11         =   c      + i*incc  + j*ldc  ; \
+			ctype_r* restrict gamma11_r       = &PASTEMAC(ch,real)( *gamma11 ); \
+			ctype_r* restrict gamma11_i       = &PASTEMAC(ch,imag)( *gamma11 ); \
+			ctype_r           gamma11t_r; \
+			ctype_r           gamma11t_i; \
+\
+			PASTEMAC(ch,copyris)( alphabeta11_r, \
+			                     -alphabeta11_r, \
+			                      gamma11t_r, \
+			                      gamma11t_i ); \
+\
+			PASTEMAC(ch,subris)( alphabeta11_i, \
+			                     alphabeta11_i, \
+			                     gamma11t_r, \
+			                     gamma11t_i ); \
+\
+			PASTEMAC(chr,adds)( alphabeta11_rpi, \
+			                    gamma11t_i ); \
+\
+			PASTEMAC(ch,xpbyris)( gamma11t_r, \
+			                      gamma11t_i, \
+			                      beta_r, \
+			                      beta_i, \
+			                      *gamma11_r, \
+			                      *gamma11_i ); \
 		} \
-		else \
+	} \
+	else if ( PASTEMAC(chr,eq1)( beta_r ) ) \
+	{ \
+		/* c_r = c_r          + ab_r - ab_i;
+		   c_i = c_i + ab_rpi - ab_r - ab_i; */ \
+		for ( j = 0; j < n_iter; ++j ) \
+		for ( i = 0; i < n_elem; ++i ) \
 		{ \
-			PASTEMAC(chr,scals)( beta_r, gammat_r ); \
+			const ctype_r     alphabeta11_r   = *(ab_r   + i*incab + j*ldab); \
+			const ctype_r     alphabeta11_i   = *(ab_i   + i*incab + j*ldab); \
+			const ctype_r     alphabeta11_rpi = *(ab_rpi + i*incab + j*ldab); \
+			ctype*   restrict gamma11         =   c      + i*incc  + j*ldc  ; \
+			ctype_r* restrict gamma11_r       = &PASTEMAC(ch,real)( *gamma11 ); \
+			ctype_r* restrict gamma11_i       = &PASTEMAC(ch,imag)( *gamma11 ); \
+			ctype_r           gamma11t_r; \
+			ctype_r           gamma11t_i; \
+\
+			PASTEMAC(ch,copyris)( alphabeta11_r, \
+			                     -alphabeta11_r, \
+			                      gamma11t_r, \
+			                      gamma11t_i ); \
+\
+			PASTEMAC(ch,subris)( alphabeta11_i, \
+			                     alphabeta11_i, \
+			                     gamma11t_r, \
+			                     gamma11t_i ); \
+\
+			PASTEMAC(chr,adds)( alphabeta11_rpi, \
+			                    gamma11t_i ); \
+\
+			PASTEMAC(ch,addris)( gamma11t_r, \
+			                     gamma11t_i, \
+			                     *gamma11_r, \
+			                     *gamma11_i ); \
 		} \
+	} \
+	else if ( !PASTEMAC(chr,eq0)( beta_r ) ) \
+	{ \
+		/* c_r = beta_r * c_r          + ab_r - ab_i;
+		   c_i = beta_r * c_i + ab_rpi - ab_r - ab_i; */ \
+		for ( j = 0; j < n_iter; ++j ) \
+		for ( i = 0; i < n_elem; ++i ) \
+		{ \
+			const ctype_r     alphabeta11_r   = *(ab_r   + i*incab + j*ldab); \
+			const ctype_r     alphabeta11_i   = *(ab_i   + i*incab + j*ldab); \
+			const ctype_r     alphabeta11_rpi = *(ab_rpi + i*incab + j*ldab); \
+			ctype*   restrict gamma11         =   c      + i*incc  + j*ldc  ; \
+			ctype_r* restrict gamma11_r       = &PASTEMAC(ch,real)( *gamma11 ); \
+			ctype_r* restrict gamma11_i       = &PASTEMAC(ch,imag)( *gamma11 ); \
+			ctype_r           gamma11t_r; \
+			ctype_r           gamma11t_i; \
 \
-		PASTEMAC(chr,adds)( alphabeta_r, gammat_r ); \
-		PASTEMAC(chr,subs)( alphabeta_i, gammat_r ); \
-		PASTEMAC(chr,subs)( alphabeta_r, gammat_i ); \
-		PASTEMAC(chr,subs)( alphabeta_i, gammat_i ); \
+			PASTEMAC(ch,copyris)( alphabeta11_r, \
+			                     -alphabeta11_r, \
+			                      gamma11t_r, \
+			                      gamma11t_i ); \
 \
-		/* Store the local values (from ct) back to c. */ \
-		PASTEMAC(ch,copyris)( gammat_r, \
-		                      gammat_i, \
-		                      *(c_r + i*rs_c2 + j*cs_c2), \
-		                      *(c_i + i*rs_c2 + j*cs_c2) ); \
+			PASTEMAC(ch,subris)( alphabeta11_i, \
+			                     alphabeta11_i, \
+			                     gamma11t_r, \
+			                     gamma11t_i ); \
+\
+			PASTEMAC(chr,adds)( alphabeta11_rpi, \
+			                    gamma11t_i ); \
+\
+			PASTEMAC(chr,xpbys)( gamma11t_r, beta_r, *gamma11_r ); \
+			PASTEMAC(chr,xpbys)( gamma11t_i, beta_r, *gamma11_i ); \
+		} \
+	} \
+	else /* if ( PASTEMAC(chr,eq0)( beta_r ) ) */ \
+	{ \
+		/* c_r =          ab_r - ab_i;
+		   c_i = ab_rpi - ab_r - ab_i; */ \
+		for ( j = 0; j < n_iter; ++j ) \
+		for ( i = 0; i < n_elem; ++i ) \
+		{ \
+			const ctype_r     alphabeta11_r   = *(ab_r   + i*incab + j*ldab); \
+			const ctype_r     alphabeta11_i   = *(ab_i   + i*incab + j*ldab); \
+			const ctype_r     alphabeta11_rpi = *(ab_rpi + i*incab + j*ldab); \
+			ctype*   restrict gamma11         =   c      + i*incc  + j*ldc  ; \
+			ctype_r* restrict gamma11_r       = &PASTEMAC(ch,real)( *gamma11 ); \
+			ctype_r* restrict gamma11_i       = &PASTEMAC(ch,imag)( *gamma11 ); \
+			ctype_r           gamma11t_r; \
+			ctype_r           gamma11t_i; \
+\
+			PASTEMAC(ch,copyris)( alphabeta11_r, \
+			                     -alphabeta11_r, \
+			                      gamma11t_r, \
+			                      gamma11t_i ); \
+\
+			PASTEMAC(ch,subris)( alphabeta11_i, \
+			                     alphabeta11_i, \
+			                     gamma11t_r, \
+			                     gamma11t_i ); \
+\
+			PASTEMAC(chr,adds)( alphabeta11_rpi, \
+			                    gamma11t_i ); \
+\
+			PASTEMAC(ch,copyris)( gamma11t_r, \
+			                      gamma11t_i, \
+			                      *gamma11_r, \
+			                      *gamma11_i ); \
+		} \
 	} \
 }
 

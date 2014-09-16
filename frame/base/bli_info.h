@@ -181,9 +181,32 @@ gint_t bli_info_get_dotxaxpyf_fuse_fac_c( void );
 gint_t bli_info_get_dotxaxpyf_fuse_fac_z( void );
 
 
+// -- Level-3 kernel definitions --
+
+char* bli_info_get_gemm_ukr_type( num_t dt );
+char* bli_info_get_gemmtrsm_l_ukr_type( num_t dt );
+char* bli_info_get_gemmtrsm_u_ukr_type( num_t dt );
+char* bli_info_get_trsm_l_ukr_type( num_t dt );
+char* bli_info_get_trsm_u_ukr_type( num_t dt );
+
+
 // -- bli_mem_pool_macro_defs.h ------------------------------------------------
 
 gint_t bli_info_get_mk_pool_size( void );
 gint_t bli_info_get_kn_pool_size( void );
 gint_t bli_info_get_mn_pool_size( void );
+
+
+// -- BLIS implementation query (level-3) --------------------------------------
+
+char* bli_info_get_gemm_impl_string( num_t dt );
+char* bli_info_get_hemm_impl_string( num_t dt );
+char* bli_info_get_herk_impl_string( num_t dt );
+char* bli_info_get_her2k_impl_string( num_t dt );
+char* bli_info_get_symm_impl_string( num_t dt );
+char* bli_info_get_syrk_impl_string( num_t dt );
+char* bli_info_get_syr2k_impl_string( num_t dt );
+char* bli_info_get_trmm_impl_string( num_t dt );
+char* bli_info_get_trmm3_impl_string( num_t dt );
+char* bli_info_get_trsm_impl_string( num_t dt );
 

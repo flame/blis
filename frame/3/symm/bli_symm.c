@@ -44,11 +44,15 @@ void bli_symm( side_t  side,
                obj_t*  beta,
                obj_t*  c )
 {
-	if ( bli_4m_is_enabled( bli_obj_datatype( *c ) ) )
-		bli_symm4m_entry( side, alpha, a, b, beta, c );
-	else
-		bli_symm_entry( side, alpha, a, b, beta, c );
+	num_t dt = bli_obj_datatype( *c );
+
+	if      ( bli_3mh_is_enabled_dt( dt ) ) bli_symm3mh_entry( side, alpha, a, b, beta, c );
+	else if ( bli_3m_is_enabled_dt( dt ) )  bli_symm3m_entry( side, alpha, a, b, beta, c );
+	else if ( bli_4mh_is_enabled_dt( dt ) ) bli_symm4mh_entry( side, alpha, a, b, beta, c );
+	else if ( bli_4m_is_enabled_dt( dt ) )  bli_symm4m_entry( side, alpha, a, b, beta, c );
+	else                                    bli_symm_entry( side, alpha, a, b, beta, c );
 }
+
 
 //
 // Define BLAS-like interfaces with homogeneous-typed operands.

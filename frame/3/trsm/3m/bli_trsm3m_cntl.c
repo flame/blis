@@ -48,6 +48,9 @@ extern func_t*    gemm3m_ukrs;
 func_t*           gemmtrsm3m_l_ukrs;
 func_t*           gemmtrsm3m_u_ukrs;
 
+func_t*           trsm3m_l_ukrs;
+func_t*           trsm3m_u_ukrs;
+
 packm_t*          trsm3m_l_packa_cntl;
 packm_t*          trsm3m_l_packb_cntl;
 
@@ -86,6 +89,23 @@ void bli_trsm3m_cntl_init()
 	                     NULL,                       FALSE,
 	                     BLIS_CGEMMTRSM3M_U_UKERNEL, FALSE,
 	                     BLIS_ZGEMMTRSM3M_U_UKERNEL, FALSE );
+
+
+	// Create function pointer objects for each datatype-specific
+	// trsm3m_l and trsm3m_u micro-kernel.
+	trsm3m_l_ukrs
+	=
+	bli_func_obj_create( NULL,                   FALSE,
+	                     NULL,                   FALSE,
+	                     BLIS_CTRSM3M_L_UKERNEL, FALSE,
+	                     BLIS_ZTRSM3M_L_UKERNEL, FALSE );
+
+	trsm3m_u_ukrs
+	=
+	bli_func_obj_create( NULL,                   FALSE,
+	                     NULL,                   FALSE,
+	                     BLIS_CTRSM3M_U_UKERNEL, FALSE,
+	                     BLIS_ZTRSM3M_U_UKERNEL, FALSE );
 
 
 	// Create control tree objects for packm operations (left side).
@@ -260,6 +280,8 @@ void bli_trsm3m_cntl_finalize()
 {
 	bli_func_obj_free( gemmtrsm3m_l_ukrs );
 	bli_func_obj_free( gemmtrsm3m_u_ukrs );
+	bli_func_obj_free( trsm3m_l_ukrs );
+	bli_func_obj_free( trsm3m_u_ukrs );
 
 	bli_cntl_obj_free( trsm3m_l_packa_cntl );
 	bli_cntl_obj_free( trsm3m_l_packb_cntl );

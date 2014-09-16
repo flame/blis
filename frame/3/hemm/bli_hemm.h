@@ -38,6 +38,8 @@
 
 #include "bli_hemm4m.h"
 #include "bli_hemm3m.h"
+#include "bli_hemm4mh.h"
+#include "bli_hemm3mh.h"
 
 
 //
@@ -49,6 +51,7 @@ void bli_hemm( side_t  side,
                obj_t*  b,
                obj_t*  beta,
                obj_t*  c );
+
 
 //
 // Prototype BLAS-like interfaces with homogeneous-typed operands.

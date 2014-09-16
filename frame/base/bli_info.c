@@ -421,7 +421,7 @@ gint_t bli_info_get_dotxf_fuse_fac_c( void ) { return BLIS_DOTXF_FUSE_FAC_C; }
 gint_t bli_info_get_dotxf_fuse_fac_z( void ) { return BLIS_DOTXF_FUSE_FAC_Z; }
 
 
-// dotxf
+// dotxaxpyf
 
 gint_t bli_info_get_dotxaxpyf_fuse_fac( num_t dt )
 {
@@ -437,10 +437,58 @@ gint_t bli_info_get_dotxaxpyf_fuse_fac_c( void ) { return BLIS_DOTXAXPYF_FUSE_FA
 gint_t bli_info_get_dotxaxpyf_fuse_fac_z( void ) { return BLIS_DOTXAXPYF_FUSE_FAC_Z; }
 
 
+// -- Level-3 kernel definitions --
+
+static char* ukr_type_str[4] = { "refnce",
+                                 "virt4m",
+                                 "virt3m",
+                                 "optmzd" };
+
+char* bli_info_get_gemm_ukr_type( num_t dt )
+{
+	return ukr_type_str[ bli_gemm_ukernel_impl_type( dt ) ];
+}
+
+char* bli_info_get_gemmtrsm_l_ukr_type( num_t dt )
+{
+	return ukr_type_str[ bli_gemmtrsm_l_ukernel_impl_type( dt ) ];
+}
+
+char* bli_info_get_gemmtrsm_u_ukr_type( num_t dt )
+{
+	return ukr_type_str[ bli_gemmtrsm_u_ukernel_impl_type( dt ) ];
+}
+
+char* bli_info_get_trsm_l_ukr_type( num_t dt )
+{
+	return ukr_type_str[ bli_trsm_l_ukernel_impl_type( dt ) ];
+}
+
+char* bli_info_get_trsm_u_ukr_type( num_t dt )
+{
+	return ukr_type_str[ bli_trsm_u_ukernel_impl_type( dt ) ];
+}
+
+
 
 // -- bli_mem_pool_macro_defs.h ------------------------------------------------
 
 gint_t bli_info_get_mk_pool_size( void ) { return BLIS_MK_POOL_SIZE; }
 gint_t bli_info_get_kn_pool_size( void ) { return BLIS_KN_POOL_SIZE; }
 gint_t bli_info_get_mn_pool_size( void ) { return BLIS_MN_POOL_SIZE; }
+
+
+
+// -- BLIS implementation query (level-3) --------------------------------------
+
+char* bli_info_get_gemm_impl_string( num_t dt )  { bli_init(); return bli_gemm_query_impl_string( dt ); }
+char* bli_info_get_hemm_impl_string( num_t dt )  { bli_init(); return bli_gemm_query_impl_string( dt ); }
+char* bli_info_get_herk_impl_string( num_t dt )  { bli_init(); return bli_gemm_query_impl_string( dt ); }
+char* bli_info_get_her2k_impl_string( num_t dt ) { bli_init(); return bli_gemm_query_impl_string( dt ); }
+char* bli_info_get_symm_impl_string( num_t dt )  { bli_init(); return bli_gemm_query_impl_string( dt ); }
+char* bli_info_get_syrk_impl_string( num_t dt )  { bli_init(); return bli_gemm_query_impl_string( dt ); }
+char* bli_info_get_syr2k_impl_string( num_t dt ) { bli_init(); return bli_gemm_query_impl_string( dt ); }
+char* bli_info_get_trmm_impl_string( num_t dt )  { bli_init(); return bli_trmm_query_impl_string( dt ); }
+char* bli_info_get_trmm3_impl_string( num_t dt ) { bli_init(); return bli_gemm_query_impl_string( dt ); }
+char* bli_info_get_trsm_impl_string( num_t dt )  { bli_init(); return bli_trsm_query_impl_string( dt ); }
 

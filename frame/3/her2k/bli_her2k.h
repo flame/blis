@@ -52,6 +52,8 @@
 
 #include "bli_her2k4m.h"
 #include "bli_her2k3m.h"
+#include "bli_her2k4mh.h"
+#include "bli_her2k3mh.h"
 
 
 //
