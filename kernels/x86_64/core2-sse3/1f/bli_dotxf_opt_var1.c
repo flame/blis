@@ -103,7 +103,8 @@ void bli_ddotxf_opt_var1(
 	{
 		use_ref = TRUE;
 	}
-    else if ( inca != 1 || incx != 1 || incy != 1 )
+    else if ( inca != 1 || incx != 1 || incy != 1 ||
+	          bli_is_unaligned_to( lda, 16 ) )
     {
         use_ref = TRUE;
     }
