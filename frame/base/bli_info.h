@@ -61,11 +61,6 @@ gint_t bli_info_get_blas2blis_int_type_size( void );
 
 // -- bli_kernel.h -------------------------------------------------------------
 
-// -- 4m status --
-
-gint_t bli_info_get_enable_scomplex_via_4m( void );
-gint_t bli_info_get_enable_dcomplex_via_4m( void );
-
 // -- Default cache blocksizes --
 
 gint_t bli_info_get_default_mc( num_t dt );
@@ -183,11 +178,11 @@ gint_t bli_info_get_dotxaxpyf_fuse_fac_z( void );
 
 // -- Level-3 kernel definitions --
 
-char* bli_info_get_gemm_ukr_type( num_t dt );
-char* bli_info_get_gemmtrsm_l_ukr_type( num_t dt );
-char* bli_info_get_gemmtrsm_u_ukr_type( num_t dt );
-char* bli_info_get_trsm_l_ukr_type( num_t dt );
-char* bli_info_get_trsm_u_ukr_type( num_t dt );
+char* bli_info_get_gemm_ukr_type_string( num_t dt );
+char* bli_info_get_gemmtrsm_l_ukr_type_string( num_t dt );
+char* bli_info_get_gemmtrsm_u_ukr_type_string( num_t dt );
+char* bli_info_get_trsm_l_ukr_type_string( num_t dt );
+char* bli_info_get_trsm_u_ukr_type_string( num_t dt );
 
 
 // -- bli_mem_pool_macro_defs.h ------------------------------------------------

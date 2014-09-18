@@ -105,15 +105,6 @@ extern blksz_t* gemm4m_mr;
 extern blksz_t* gemm4m_nr;
 extern blksz_t* gemm4m_kr;
 
-// -- 4m status --
-
-gint_t bli_info_get_enable_scomplex_via_4m( void ) {
-	return ( gint_t )bli_4m_is_enabled_c();
-}
-gint_t bli_info_get_enable_dcomplex_via_4m( void ) {
-	return ( gint_t )bli_4m_is_enabled_z();
-}
-
 // -- Default cache blocksizes --
 
 // MC default blocksizes
@@ -444,27 +435,27 @@ static char* ukr_type_str[4] = { "refnce",
                                  "virt3m",
                                  "optmzd" };
 
-char* bli_info_get_gemm_ukr_type( num_t dt )
+char* bli_info_get_gemm_ukr_type_string( num_t dt )
 {
 	return ukr_type_str[ bli_gemm_ukernel_impl_type( dt ) ];
 }
 
-char* bli_info_get_gemmtrsm_l_ukr_type( num_t dt )
+char* bli_info_get_gemmtrsm_l_ukr_type_string( num_t dt )
 {
 	return ukr_type_str[ bli_gemmtrsm_l_ukernel_impl_type( dt ) ];
 }
 
-char* bli_info_get_gemmtrsm_u_ukr_type( num_t dt )
+char* bli_info_get_gemmtrsm_u_ukr_type_string( num_t dt )
 {
 	return ukr_type_str[ bli_gemmtrsm_u_ukernel_impl_type( dt ) ];
 }
 
-char* bli_info_get_trsm_l_ukr_type( num_t dt )
+char* bli_info_get_trsm_l_ukr_type_string( num_t dt )
 {
 	return ukr_type_str[ bli_trsm_l_ukernel_impl_type( dt ) ];
 }
 
-char* bli_info_get_trsm_u_ukr_type( num_t dt )
+char* bli_info_get_trsm_u_ukr_type_string( num_t dt )
 {
 	return ukr_type_str[ bli_trsm_u_ukernel_impl_type( dt ) ];
 }

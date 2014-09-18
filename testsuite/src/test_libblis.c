@@ -757,30 +757,30 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "micro-kernel types             s       d       c       z\n" );
 	libblis_test_fprintf_c( os, "  gemm                   %7s %7s %7s %7s\n",
-	                        bli_info_get_gemm_ukr_type( BLIS_FLOAT ),
-	                        bli_info_get_gemm_ukr_type( BLIS_DOUBLE ),
-	                        bli_info_get_gemm_ukr_type( BLIS_SCOMPLEX ),
-	                        bli_info_get_gemm_ukr_type( BLIS_DCOMPLEX ) );
+	                        bli_info_get_gemm_ukr_type_string( BLIS_FLOAT ),
+	                        bli_info_get_gemm_ukr_type_string( BLIS_DOUBLE ),
+	                        bli_info_get_gemm_ukr_type_string( BLIS_SCOMPLEX ),
+	                        bli_info_get_gemm_ukr_type_string( BLIS_DCOMPLEX ) );
 	libblis_test_fprintf_c( os, "  gemmtrsm_l             %7s %7s %7s %7s\n",
-	                        bli_info_get_gemmtrsm_l_ukr_type( BLIS_FLOAT ),
-	                        bli_info_get_gemmtrsm_l_ukr_type( BLIS_DOUBLE ),
-	                        bli_info_get_gemmtrsm_l_ukr_type( BLIS_SCOMPLEX ),
-	                        bli_info_get_gemmtrsm_l_ukr_type( BLIS_DCOMPLEX ) );
+	                        bli_info_get_gemmtrsm_l_ukr_type_string( BLIS_FLOAT ),
+	                        bli_info_get_gemmtrsm_l_ukr_type_string( BLIS_DOUBLE ),
+	                        bli_info_get_gemmtrsm_l_ukr_type_string( BLIS_SCOMPLEX ),
+	                        bli_info_get_gemmtrsm_l_ukr_type_string( BLIS_DCOMPLEX ) );
 	libblis_test_fprintf_c( os, "  gemmtrsm_u             %7s %7s %7s %7s\n",
-	                        bli_info_get_gemmtrsm_u_ukr_type( BLIS_FLOAT ),
-	                        bli_info_get_gemmtrsm_u_ukr_type( BLIS_DOUBLE ),
-	                        bli_info_get_gemmtrsm_u_ukr_type( BLIS_SCOMPLEX ),
-	                        bli_info_get_gemmtrsm_u_ukr_type( BLIS_DCOMPLEX ) );
+	                        bli_info_get_gemmtrsm_u_ukr_type_string( BLIS_FLOAT ),
+	                        bli_info_get_gemmtrsm_u_ukr_type_string( BLIS_DOUBLE ),
+	                        bli_info_get_gemmtrsm_u_ukr_type_string( BLIS_SCOMPLEX ),
+	                        bli_info_get_gemmtrsm_u_ukr_type_string( BLIS_DCOMPLEX ) );
 	libblis_test_fprintf_c( os, "  trsm_l                 %7s %7s %7s %7s\n",
-	                        bli_info_get_trsm_l_ukr_type( BLIS_FLOAT ),
-	                        bli_info_get_trsm_l_ukr_type( BLIS_DOUBLE ),
-	                        bli_info_get_trsm_l_ukr_type( BLIS_SCOMPLEX ),
-	                        bli_info_get_trsm_l_ukr_type( BLIS_DCOMPLEX ) );
+	                        bli_info_get_trsm_l_ukr_type_string( BLIS_FLOAT ),
+	                        bli_info_get_trsm_l_ukr_type_string( BLIS_DOUBLE ),
+	                        bli_info_get_trsm_l_ukr_type_string( BLIS_SCOMPLEX ),
+	                        bli_info_get_trsm_l_ukr_type_string( BLIS_DCOMPLEX ) );
 	libblis_test_fprintf_c( os, "  trsm_u                 %7s %7s %7s %7s\n",
-	                        bli_info_get_trsm_u_ukr_type( BLIS_FLOAT ),
-	                        bli_info_get_trsm_u_ukr_type( BLIS_DOUBLE ),
-	                        bli_info_get_trsm_u_ukr_type( BLIS_SCOMPLEX ),
-	                        bli_info_get_trsm_u_ukr_type( BLIS_DCOMPLEX ) );
+	                        bli_info_get_trsm_u_ukr_type_string( BLIS_FLOAT ),
+	                        bli_info_get_trsm_u_ukr_type_string( BLIS_DOUBLE ),
+	                        bli_info_get_trsm_u_ukr_type_string( BLIS_SCOMPLEX ),
+	                        bli_info_get_trsm_u_ukr_type_string( BLIS_DCOMPLEX ) );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "--- BLIS implementation details ---\n" );
 	libblis_test_fprintf_c( os, "\n" );
