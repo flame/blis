@@ -102,7 +102,8 @@ void PASTEMAC(ch,varname)( \
 	/* An optimization: Set local strides and loop bounds based on the
 	   strides of c, so that (a) the micro-kernel accesses ct the same
 	   way it would if it were updating c directly, and (b) c is updated
-	   contiguously. */ \
+	   contiguously. For c with general stride, we access ct the same way
+	   we would as if it were column-stored. */ \
 	if ( bli_is_row_stored( rs_c, cs_c ) ) \
 	{ \
 		rs_ct = n; n_iter = m; incc = cs_c; \
