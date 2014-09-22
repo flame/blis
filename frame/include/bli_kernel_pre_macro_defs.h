@@ -212,6 +212,13 @@
 #define BLIS_CPACKM_16XK_KERNEL_REF      bli_cpackm_ref_16xk
 #define BLIS_ZPACKM_16XK_KERNEL_REF      bli_zpackm_ref_16xk
 
+// packm_30xk kernels
+
+#define BLIS_SPACKM_30XK_KERNEL_REF      bli_spackm_ref_30xk
+#define BLIS_DPACKM_30XK_KERNEL_REF      bli_dpackm_ref_30xk
+#define BLIS_CPACKM_30XK_KERNEL_REF      bli_cpackm_ref_30xk
+#define BLIS_ZPACKM_30XK_KERNEL_REF      bli_zpackm_ref_30xk
+
 // packm_2xk_4m kernels
 
 #define BLIS_CPACKM_2XK_4M_KERNEL_REF    bli_cpackm_ref_2xk_4m
@@ -251,6 +258,11 @@
 
 #define BLIS_CPACKM_16XK_4M_KERNEL_REF   bli_cpackm_ref_16xk_4m
 #define BLIS_ZPACKM_16XK_4M_KERNEL_REF   bli_zpackm_ref_16xk_4m
+
+// packm_30xk_4m kernels
+
+#define BLIS_CPACKM_30XK_4M_KERNEL_REF   bli_cpackm_ref_30xk_4m
+#define BLIS_ZPACKM_30XK_4M_KERNEL_REF   bli_zpackm_ref_30xk_4m
 
 // packm_2xk_3m kernels
 
@@ -292,6 +304,11 @@
 #define BLIS_CPACKM_16XK_3M_KERNEL_REF   bli_cpackm_ref_16xk_3m
 #define BLIS_ZPACKM_16XK_3M_KERNEL_REF   bli_zpackm_ref_16xk_3m
 
+// packm_30xk_3m kernels
+
+#define BLIS_CPACKM_30XK_3M_KERNEL_REF   bli_cpackm_ref_30xk_3m
+#define BLIS_ZPACKM_30XK_3M_KERNEL_REF   bli_zpackm_ref_30xk_3m
+
 // packm_2xk_rih kernels
 
 #define BLIS_CPACKM_2XK_RIH_KERNEL_REF   bli_cpackm_ref_2xk_rih
@@ -331,6 +348,11 @@
 
 #define BLIS_CPACKM_16XK_RIH_KERNEL_REF  bli_cpackm_ref_16xk_rih
 #define BLIS_ZPACKM_16XK_RIH_KERNEL_REF  bli_zpackm_ref_16xk_rih
+
+// packm_30xk_rih kernels
+
+#define BLIS_CPACKM_30XK_RIH_KERNEL_REF  bli_cpackm_ref_30xk_rih
+#define BLIS_ZPACKM_30XK_RIH_KERNEL_REF  bli_zpackm_ref_30xk_rih
 
 // unpack_2xk kernels
 

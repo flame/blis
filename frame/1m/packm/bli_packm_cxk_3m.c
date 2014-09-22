@@ -45,7 +45,7 @@ typedef void (*FUNCPTR_T)(
                          );
 
 #undef  FUNCPTR_ARRAY_LENGTH
-#define FUNCPTR_ARRAY_LENGTH 18
+#define FUNCPTR_ARRAY_LENGTH 32
 
 static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] =
 {
@@ -59,10 +59,8 @@ static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] =
 	},
 	/* micro-panel width = 2 */
 	{
-		NULL,
-		BLIS_CPACKM_2XK_3M_KERNEL,
-		NULL,
-		BLIS_ZPACKM_2XK_3M_KERNEL,
+		NULL, BLIS_CPACKM_2XK_3M_KERNEL,
+		NULL, BLIS_ZPACKM_2XK_3M_KERNEL,
 	},
 	/* micro-panel width = 3 */
 	{
@@ -70,10 +68,8 @@ static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] =
 	},
 	/* micro-panel width = 4 */
 	{
-		NULL,
-		BLIS_CPACKM_4XK_3M_KERNEL,
-		NULL,
-		BLIS_ZPACKM_4XK_3M_KERNEL,
+		NULL, BLIS_CPACKM_4XK_3M_KERNEL,
+		NULL, BLIS_ZPACKM_4XK_3M_KERNEL,
 	},
 	/* micro-panel width = 5 */
 	{
@@ -81,10 +77,8 @@ static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] =
 	},
 	/* micro-panel width = 6 */
 	{
-		NULL,
-		BLIS_CPACKM_6XK_3M_KERNEL,
-		NULL,
-		BLIS_ZPACKM_6XK_3M_KERNEL,
+		NULL, BLIS_CPACKM_6XK_3M_KERNEL,
+		NULL, BLIS_ZPACKM_6XK_3M_KERNEL,
 	},
 	/* micro-panel width = 7 */
 	{
@@ -92,10 +86,8 @@ static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] =
 	},
 	/* micro-panel width = 8 */
 	{
-		NULL,
-		BLIS_CPACKM_8XK_3M_KERNEL,
-		NULL,
-		BLIS_ZPACKM_8XK_3M_KERNEL,
+		NULL, BLIS_CPACKM_8XK_3M_KERNEL,
+		NULL, BLIS_ZPACKM_8XK_3M_KERNEL,
 	},
 	/* micro-panel width = 9 */
 	{
@@ -103,10 +95,8 @@ static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] =
 	},
 	/* micro-panel width = 10 */
 	{
-		NULL,
-		BLIS_CPACKM_10XK_3M_KERNEL,
-		NULL,
-		BLIS_ZPACKM_10XK_3M_KERNEL,
+		NULL, BLIS_CPACKM_10XK_3M_KERNEL,
+		NULL, BLIS_ZPACKM_10XK_3M_KERNEL,
 	},
 	/* micro-panel width = 11 */
 	{
@@ -114,10 +104,8 @@ static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] =
 	},
 	/* micro-panel width = 12 */
 	{
-		NULL,
-		BLIS_CPACKM_12XK_3M_KERNEL,
-		NULL,
-		BLIS_ZPACKM_12XK_3M_KERNEL,
+		NULL, BLIS_CPACKM_12XK_3M_KERNEL,
+		NULL, BLIS_ZPACKM_12XK_3M_KERNEL,
 	},
 	/* micro-panel width = 13 */
 	{
@@ -125,10 +113,8 @@ static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] =
 	},
 	/* micro-panel width = 14 */
 	{
-		NULL,
-		BLIS_CPACKM_14XK_3M_KERNEL,
-		NULL,
-		BLIS_ZPACKM_14XK_3M_KERNEL,
+		NULL, BLIS_CPACKM_14XK_3M_KERNEL,
+		NULL, BLIS_ZPACKM_14XK_3M_KERNEL,
 	},
 	/* micro-panel width = 15 */
 	{
@@ -136,12 +122,69 @@ static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] =
 	},
 	/* micro-panel width = 16 */
 	{
-		NULL,
-		BLIS_CPACKM_16XK_3M_KERNEL,
-		NULL,
-		BLIS_ZPACKM_16XK_3M_KERNEL,
+		NULL, BLIS_CPACKM_16XK_3M_KERNEL,
+		NULL, BLIS_ZPACKM_16XK_3M_KERNEL,
 	},
 	/* micro-panel width = 17 */
+	{
+		NULL, NULL, NULL, NULL,
+	},
+	/* micro-panel width = 18 */
+	{
+		NULL, NULL, NULL, NULL,
+	},
+	/* micro-panel width = 19 */
+	{
+		NULL, NULL, NULL, NULL,
+	},
+	/* micro-panel width = 20 */
+	{
+		NULL, NULL, NULL, NULL,
+	},
+	/* micro-panel width = 21 */
+	{
+		NULL, NULL, NULL, NULL,
+	},
+	/* micro-panel width = 22 */
+	{
+		NULL, NULL, NULL, NULL,
+	},
+	/* micro-panel width = 23 */
+	{
+		NULL, NULL, NULL, NULL,
+	},
+	/* micro-panel width = 24 */
+	{
+		NULL, NULL, NULL, NULL,
+	},
+	/* micro-panel width = 25 */
+	{
+		NULL, NULL, NULL, NULL,
+	},
+	/* micro-panel width = 26 */
+	{
+		NULL, NULL, NULL, NULL,
+	},
+	/* micro-panel width = 27 */
+	{
+		NULL, NULL, NULL, NULL,
+	},
+	/* micro-panel width = 28 */
+	{
+		NULL, NULL, NULL, NULL,
+	},
+	/* micro-panel width = 29 */
+	{
+		NULL, NULL, NULL, NULL,
+	},
+	/* micro-panel width = 30 */
+	{
+		NULL,
+		BLIS_CPACKM_30XK_3M_KERNEL,
+		NULL,
+		BLIS_ZPACKM_30XK_3M_KERNEL,
+	},
+	/* micro-panel width = 31 */
 	{
 		NULL, NULL, NULL, NULL,
 	},

@@ -51,4 +51,5 @@ INSERT_GENTPROT_BASIC( packm_ref_10xk_3m )
 INSERT_GENTPROT_BASIC( packm_ref_12xk_3m )
 INSERT_GENTPROT_BASIC( packm_ref_14xk_3m )
 INSERT_GENTPROT_BASIC( packm_ref_16xk_3m )
+INSERT_GENTPROT_BASIC( packm_ref_30xk_3m )
 
