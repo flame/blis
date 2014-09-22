@@ -469,10 +469,10 @@ endif
 
 $(BASE_OBJ_CONFIG_PATH)/%.o: $(CONFIG_PATH)/%.c $(MK_HEADER_FILES) $(MAKE_DEFS_MK_PATH)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-       $(CC) $(call get_cflags_for_obj,$@) -c $< -o $@
+	$(CC) $(call get_cflags_for_obj,$@) -c $< -o $@
 else
-       @echo "Compiling $<" $(call get_ctext_for_obj,$@)
-       @$(CC) $(call get_cflags_for_obj,$@) -c $< -o $@
+	@echo "Compiling $<" $(call get_ctext_for_obj,$@)
+	@$(CC) $(call get_cflags_for_obj,$@) -c $< -o $@
 endif
 
 $(BASE_OBJ_CONFIG_PATH)/%.o: $(CONFIG_PATH)/%.S $(MK_HEADER_FILES) $(MAKE_DEFS_MK_PATH)
