@@ -269,6 +269,26 @@
 
 // -- Maximum register blocksize search ----------------------------------------
 
+// The macro-kernels oftentimes need to statically allocate a temporary
+// MR x NR micro-tile of C. This micro-tile must be sized such that it will
+// work for both native and 4m/3m implementations, since the user can switch
+// between them at runtime. In order to facilitate the sizing of those
+// micro-tiles, we must determine the largest the register blocksizes would
+// need to be to accommodate both native and 4m/3m-based complex
+// micro-kernels. For real datatypes, the maximum is never larger than the
+// actual s and d register blocksizes. However, for complex datatypes, the
+// "native" register blocksizes may differ from the "virtual" register
+// blocksizes used by the 4m/3m implementations. Usually, it is the register
+// blocksizes used for 4m/3m-based complex micro-kernels that would be
+// larger, and thus determine the maximum for c and z datatypes. But, we
+// prefer not to assume this, therefore, we always take the larger of the
+// two values.
+
+#define BLIS_DEFAULT_4M_MR_C BLIS_DEFAULT_MR_S
+#define BLIS_DEFAULT_4M_NR_C BLIS_DEFAULT_NR_S
+#define BLIS_DEFAULT_4M_MR_Z BLIS_DEFAULT_MR_D
+#define BLIS_DEFAULT_4M_NR_Z BLIS_DEFAULT_NR_D
+
 //
 // Find the largest register blocksize MR.
 //

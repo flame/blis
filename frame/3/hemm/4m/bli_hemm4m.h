@@ -32,6 +32,8 @@
 
 */
 
+#include "bli_hemm4m_entry.h"
+
 
 //
 // Prototype object-based interface.

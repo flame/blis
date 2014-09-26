@@ -37,6 +37,11 @@
 blksz_t* packm_mult_ldim;
 blksz_t* packm_mult_nvec;
 
+func_t*  packm_struc_cxk_kers;
+func_t*  packm_struc_cxk_4m_kers;
+func_t*  packm_struc_cxk_3m_kers;
+func_t*  packm_struc_cxk_rih_kers;
+
 packm_t* packm_cntl_row;
 packm_t* packm_cntl_col;
 
@@ -47,6 +52,37 @@ packm_t* packm_cntl;
 
 void bli_packm_cntl_init()
 {
+	// Create function pointer object for each datatype-specific packm
+	// kernel.
+	packm_struc_cxk_kers
+	=
+	bli_func_obj_create( bli_spackm_struc_cxk, FALSE,
+	                     bli_dpackm_struc_cxk, FALSE,
+	                     bli_cpackm_struc_cxk, FALSE,
+	                     bli_zpackm_struc_cxk, FALSE );
+
+	packm_struc_cxk_4m_kers
+	=
+	bli_func_obj_create( NULL,                    FALSE,
+	                     NULL,                    FALSE,
+	                     bli_cpackm_struc_cxk_4m, FALSE,
+	                     bli_zpackm_struc_cxk_4m, FALSE );
+
+	packm_struc_cxk_3m_kers
+	=
+	bli_func_obj_create( NULL,                    FALSE,
+	                     NULL,                    FALSE,
+	                     bli_cpackm_struc_cxk_3m, FALSE,
+	                     bli_zpackm_struc_cxk_3m, FALSE );
+
+	packm_struc_cxk_rih_kers
+	=
+	bli_func_obj_create( NULL,                     FALSE,
+	                     NULL,                     FALSE,
+	                     bli_cpackm_struc_cxk_rih, FALSE,
+	                     bli_zpackm_struc_cxk_rih, FALSE );
+
+
 	// Create blocksize objects for m and n register blocking. We will attach
 	// these to the packm control node so they can be used to (a) allocate a
 	// block whose m and n dimension are multiples of mr and nr, and (b) know
@@ -70,17 +106,15 @@ void bli_packm_cntl_init()
 	                      BLIS_DEFAULT_NR_Z, 0 );
 
 	// Generally speaking, the BLIS_PACKED_ROWS and BLIS_PACKED_COLUMNS
-	// are used by the level-2 operations, and thus densification is not
-	// necessary. These schemas amount to simple copies to row or column
-	// storage. These simple schemas may be used by level-3 operations,
-	// but they should never be used for matrices with structure (since
-	// they do not densify).
+	// are used by the level-2 operations. These schemas amount to simple
+	// copies to row or column storage. These simple schemas may be used
+	// by level-3 operations, but they should never be used for matrices
+	// with structure (since they do not densify).
 	// The BLIS_PACKED_ROW_PANELS and BLIS_PACKED_COL_PANELS schemas are
 	// used only in level-3 operations. They pack to (typically) skinny
 	// row and column panels, where the width of the panel is determined
-	// by register blocksizes. They are configured to densify matrices
-	// with structure, though they can also be used on matrices that
-	// are already dense and/or have no structure.
+	// by register blocksizes. It is assumed that matrices with structure
+	// will be densified.
 
 	// Create control trees to pack by rows.
 	packm_cntl_row
@@ -89,7 +123,6 @@ void bli_packm_cntl_init()
 	                           BLIS_VARIANT1,    // When packing to rows:
 	                           packm_mult_nvec,  // - nvec multiple is used for m dimension
 	                           packm_mult_ldim,  // - ldim multiple is used for n dimension
-	                           FALSE,            // do NOT densify structure
 	                           FALSE,            // do NOT invert diagonal
 	                           FALSE,            // do NOT iterate backwards if upper
 	                           FALSE,            // do NOT iterate backwards if lower
@@ -104,7 +137,6 @@ void bli_packm_cntl_init()
 	                           BLIS_VARIANT1,    // When packing to columns:
 	                           packm_mult_ldim,  // - ldim multiple is used for m dimension
 	                           packm_mult_nvec,  // - nvec multiple is used for n dimension
-	                           FALSE,            // do NOT densify structure
 	                           FALSE,            // do NOT invert diagonal
 	                           FALSE,            // do NOT iterate backwards if upper
 	                           FALSE,            // do NOT iterate backwards if lower
@@ -119,6 +151,11 @@ void bli_packm_cntl_init()
 
 void bli_packm_cntl_finalize()
 {
+	bli_func_obj_free( packm_struc_cxk_kers );
+	bli_func_obj_free( packm_struc_cxk_4m_kers );
+	bli_func_obj_free( packm_struc_cxk_3m_kers );
+	bli_func_obj_free( packm_struc_cxk_rih_kers );
+
 	bli_cntl_obj_free( packm_cntl_row );
 	bli_cntl_obj_free( packm_cntl_col );
 
@@ -130,7 +167,6 @@ packm_t* bli_packm_cntl_obj_create( impl_t     impl_type,
                                     varnum_t   var_num,
                                     blksz_t*   mr,
                                     blksz_t*   nr,
-                                    bool_t     does_densify,
                                     bool_t     does_invert_diag,
                                     bool_t     rev_iter_if_upper,
                                     bool_t     rev_iter_if_lower,
@@ -145,7 +181,6 @@ packm_t* bli_packm_cntl_obj_create( impl_t     impl_type,
 	cntl->var_num           = var_num;
 	cntl->mr                = mr;
 	cntl->nr                = nr;
-	cntl->does_densify      = does_densify;
 	cntl->does_invert_diag  = does_invert_diag;
 	cntl->rev_iter_if_upper = rev_iter_if_upper;
 	cntl->rev_iter_if_lower = rev_iter_if_lower;
@@ -160,7 +195,6 @@ void bli_packm_cntl_obj_init( packm_t*   cntl,
                               varnum_t   var_num,
                               blksz_t*   mr,
                               blksz_t*   nr,
-                              bool_t     does_densify,
                               bool_t     does_invert_diag,
                               bool_t     rev_iter_if_upper,
                               bool_t     rev_iter_if_lower,
@@ -171,7 +205,6 @@ void bli_packm_cntl_obj_init( packm_t*   cntl,
 	cntl->var_num           = var_num;
 	cntl->mr                = mr;
 	cntl->nr                = nr;
-	cntl->does_densify      = does_densify;
 	cntl->does_invert_diag  = does_invert_diag;
 	cntl->rev_iter_if_upper = rev_iter_if_upper;
 	cntl->rev_iter_if_lower = rev_iter_if_lower;

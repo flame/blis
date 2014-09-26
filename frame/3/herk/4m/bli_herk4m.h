@@ -32,7 +32,7 @@
 
 */
 
-#include "bli_herk4m_cntl.h"
+#include "bli_herk4m_entry.h"
 
 
 //

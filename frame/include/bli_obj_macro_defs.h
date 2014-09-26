@@ -191,7 +191,7 @@
 \
 	( ( (obj).info & BLIS_PACK_REV_IF_LOWER_BIT ) == BLIS_BITVAL_PACK_REV_IF_LOWER )
 
-#define bli_obj_pack_status( obj ) \
+#define bli_obj_pack_schema( obj ) \
 \
 	(   (obj).info & BLIS_PACK_SCHEMA_BITS )
 
@@ -215,11 +215,29 @@
 
 #define bli_obj_is_4m_packed( obj ) \
 \
-	( ( (obj).info & BLIS_PACK_4M_BIT ) )
+	( ( (obj).info & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_4M )
 
 #define bli_obj_is_3m_packed( obj ) \
 \
-	( ( (obj).info & BLIS_PACK_3M_BIT ) )
+	( ( (obj).info & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_3M )
+
+#define bli_obj_is_ro_packed( obj ) \
+\
+	( ( (obj).info & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_RO )
+
+#define bli_obj_is_io_packed( obj ) \
+\
+	( ( (obj).info & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_IO )
+
+#define bli_obj_is_rpi_packed( obj ) \
+\
+	( ( (obj).info & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_RPI )
+
+#define bli_obj_is_rih_packed( obj ) \
+\
+	( bli_obj_is_ro_packed( obj ) || \
+	  bli_obj_is_io_packed( obj ) || \
+	  bli_obj_is_rpi_packed( obj ) )
 
 #define bli_obj_pack_buffer_type( obj ) \
 \

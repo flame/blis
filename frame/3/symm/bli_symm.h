@@ -33,10 +33,13 @@
 */
 
 #include "bli_symm_check.h"
+#include "bli_symm_entry.h"
 #include "bli_symm_front.h"
 
 #include "bli_symm4m.h"
 #include "bli_symm3m.h"
+#include "bli_symm4mh.h"
+#include "bli_symm3mh.h"
 
 
 //
@@ -48,6 +51,7 @@ void bli_symm( side_t  side,
                obj_t*  b,
                obj_t*  beta,
                obj_t*  c );
+
 
 //
 // Prototype BLAS-like interfaces with homogeneous-typed operands.

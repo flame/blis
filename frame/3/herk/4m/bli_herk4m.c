@@ -34,9 +34,6 @@
 
 #include "blis.h"
 
-extern herk_t* herk4m_cntl;
-extern herk_t* herk_cntl;
-
 //
 // Define object-based interface.
 //
@@ -45,15 +42,12 @@ void bli_herk4m( obj_t*  alpha,
                  obj_t*  beta,
                  obj_t*  c )
 {
-	herk_t* cntl;
-
 	// Since 4m only applies to the complex domain, we use the regular
-	// control tree for real domain cases.
-	if ( bli_obj_is_complex( *c ) ) cntl = herk4m_cntl;
-	else                            cntl = herk_cntl;
-
-	bli_herk_front( alpha, a, beta, c,
-	                cntl );
+	// implementation for real domain cases.
+	if ( bli_obj_is_complex( *c ) )
+		bli_herk4m_entry( alpha, a, beta, c );
+	else
+		bli_herk_entry( alpha, a, beta, c );
 }
 
 //

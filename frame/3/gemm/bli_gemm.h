@@ -33,10 +33,11 @@
 */
 
 #include "bli_gemm_cntl.h"
+#include "bli_gemm_query.h"
 #include "bli_gemm_check.h"
+#include "bli_gemm_entry.h"
 #include "bli_gemm_front.h"
 #include "bli_gemm_int.h"
-#include "bli_gemm_target.h"
 
 #include "bli_gemm_ukernel.h"
 
@@ -45,12 +46,13 @@
 #include "bli_gemm_blk_var3f.h"
 
 #include "bli_gemm_ker_var2.h"
-#include "bli_gemm_ker_var5.h"
 
 #include "bli_gemm_ukr_ref.h"
 
 #include "bli_gemm4m.h"
 #include "bli_gemm3m.h"
+#include "bli_gemm4mh.h"
+#include "bli_gemm3mh.h"
 
 //
 // Prototype object-based interface.

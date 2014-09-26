@@ -38,6 +38,8 @@
 
 typedef void (*FUNCPTR_T)(
                            doff_t  diagoffb,
+                           pack_t  schema_a,
+                           pack_t  schema_b,
                            dim_t   m,
                            dim_t   n,
                            dim_t   k,
@@ -56,12 +58,15 @@ static FUNCPTR_T GENARRAY(ftypes,trmm_ru_ker_var2);
 void bli_trmm_ru_ker_var2( obj_t*  a,
                            obj_t*  b,
                            obj_t*  c,
-                           trmm_t* cntl,
+                           gemm_t* cntl,
                            trmm_thrinfo_t* thread )
 {
 	num_t     dt_exec   = bli_obj_execution_datatype( *c );
 
 	doff_t    diagoffb  = bli_obj_diag_offset( *b );
+
+	pack_t    schema_a  = bli_obj_pack_schema( *a );
+	pack_t    schema_b  = bli_obj_pack_schema( *b );
 
 	dim_t     m         = bli_obj_length( *c );
 	dim_t     n         = bli_obj_width( *c );
@@ -115,7 +120,8 @@ void bli_trmm_ru_ker_var2( obj_t*  a,
 	// given the datatypes actually stored (float or double), we must
 	// halve the strides to compensate.
 	if ( bli_obj_is_4m_packed( *a ) ||
-	     bli_obj_is_3m_packed( *a ) ) { cs_a /= 2; rs_b /= 2; }
+	     bli_obj_is_3m_packed( *a ) ||
+	     bli_obj_is_rih_packed( *a ) ) { cs_a /= 2; rs_b /= 2; }
 
 	// Extract from the control tree node the func_t object containing
 	// the gemm micro-kernel function addresses, and then query the
@@ -125,6 +131,8 @@ void bli_trmm_ru_ker_var2( obj_t*  a,
 
 	// Invoke the function.
 	f( diagoffb,
+	   schema_a,
+	   schema_b,
 	   m,
 	   n,
 	   k,
@@ -143,6 +151,8 @@ void bli_trmm_ru_ker_var2( obj_t*  a,
 \
 void PASTEMAC(ch,varname)( \
                            doff_t  diagoffb, \
+                           pack_t  schema_a, \
+                           pack_t  schema_b, \
                            dim_t   m, \
                            dim_t   n, \
                            dim_t   k, \
@@ -219,10 +229,12 @@ void PASTEMAC(ch,varname)( \
 	/* Compute the storage stride for the triangular matrix B, which is
 	   usually PACKNR. However, in the case of 3m, the storage stride
 	   captures the (PACKNR * 3/2) factor embedded in the panel stride.
-	   Notice that we must first inflate k up to a multiple of NR, since
-	   the panel stride was originally computed using this inflated k
-	   dimension. */ \
-	k_full = ( k % NR != 0 ? k + NR - ( k % NR ) : k ); \
+	   Note that trmm does NOT require k to be a multiple of MR or NR
+	   (depending on whether A or B is the triangular matrix), so we can
+	   use k as-is. By contrast, trsm must use an "inflated" version of
+	   k since trsm requires that k be a multiple of MR (when A is
+	   triangular) or NR (when B is triangular). */ \
+	k_full = k; \
 	ss_b   = ps_b / k_full; \
 \
 	/* If there is a zero region to the left of where the diagonal of B
@@ -247,13 +259,6 @@ void PASTEMAC(ch,varname)( \
 		k = -diagoffb + n; \
 	} \
 \
-	/* For consistency with the trsm macro-kernels, we inflate k to be a
-	   multiple of NR, if necessary. This is needed because we typically
-	   use the same packm variant for trmm as for trsm, and trsm has this
-	   constraint that k must be a multiple of NR so that it can safely
-	   handle bottom-right corner edges of the triangle. */ \
-	if ( k % NR != 0 ) k += NR - ( k % NR ); \
-\
 	/* Clear the temporary C buffer in case it has any infs or NaNs. */ \
 	PASTEMAC(ch,set0s_mxn)( MR, NR, \
 	                        ct, rs_ct, cs_ct ); \
@@ -276,6 +281,10 @@ void PASTEMAC(ch,varname)( \
 \
 	rstep_c = rs_c * MR; \
 	cstep_c = cs_c * NR; \
+\
+	/* Save the pack schemas of A and B to the auxinfo_t object. */ \
+	bli_auxinfo_set_schema_a( schema_a, aux ); \
+	bli_auxinfo_set_schema_b( schema_b, aux ); \
 \
 	/* Save the panel stride of A to the auxinfo_t object. */ \
 	bli_auxinfo_set_ps_a( ps_a, aux ); \

@@ -38,6 +38,8 @@
 
 typedef void (*FUNCPTR_T)(
                            doff_t  diagoffc,
+                           pack_t  schema_a,
+                           pack_t  schema_b,
                            dim_t   m,
                            dim_t   n,
                            dim_t   k,
@@ -56,12 +58,15 @@ static FUNCPTR_T GENARRAY(ftypes,herk_l_ker_var2);
 void bli_herk_l_ker_var2( obj_t*  a,
                           obj_t*  b,
                           obj_t*  c,
-                          herk_t* cntl,
+                          gemm_t* cntl,
                           herk_thrinfo_t* thread )
 {
 	num_t     dt_exec   = bli_obj_execution_datatype( *c );
 
 	doff_t    diagoffc  = bli_obj_diag_offset( *c );
+
+	pack_t    schema_a  = bli_obj_pack_schema( *a );
+	pack_t    schema_b  = bli_obj_pack_schema( *b );
 
 	dim_t     m         = bli_obj_length( *c );
 	dim_t     n         = bli_obj_width( *c );
@@ -115,6 +120,8 @@ void bli_herk_l_ker_var2( obj_t*  a,
 
 	// Invoke the function.
 	f( diagoffc,
+	   schema_a,
+	   schema_b,
 	   m,
 	   n,
 	   k,
@@ -133,6 +140,8 @@ void bli_herk_l_ker_var2( obj_t*  a,
 \
 void PASTEMAC(ch,varname)( \
                            doff_t  diagoffc, \
+                           pack_t  schema_a, \
+                           pack_t  schema_b, \
                            dim_t   m, \
                            dim_t   n, \
                            dim_t   k, \
@@ -243,6 +252,10 @@ void PASTEMAC(ch,varname)( \
 \
 	rstep_c = rs_c * MR; \
 	cstep_c = cs_c * NR; \
+\
+	/* Save the pack schemas of A and B to the auxinfo_t object. */ \
+	bli_auxinfo_set_schema_a( schema_a, aux ); \
+	bli_auxinfo_set_schema_b( schema_b, aux ); \
 \
 	/* Save the panel strides of A and B to the auxinfo_t object. */ \
 	bli_auxinfo_set_ps_a( ps_a, aux ); \

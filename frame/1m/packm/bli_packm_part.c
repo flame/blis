@@ -201,7 +201,7 @@ dim_t bli_packm_offset_to_panel_for( dim_t offmn, obj_t* p )
 {
 	dim_t panel_off;
 
-	if      ( bli_obj_pack_status( *p ) == BLIS_PACKED_ROWS )
+	if      ( bli_obj_pack_schema( *p ) == BLIS_PACKED_ROWS )
 	{
 		// For the "packed rows" schema, a single row is effectively one
 		// row panel, and so we use the row offset as the panel offset.
@@ -209,7 +209,7 @@ dim_t bli_packm_offset_to_panel_for( dim_t offmn, obj_t* p )
 		// (ie: the row stride) to arrive at the desired offset.
 		panel_off = offmn * bli_obj_row_stride( *p );
 	}
-	else if ( bli_obj_pack_status( *p ) == BLIS_PACKED_COLUMNS )
+	else if ( bli_obj_pack_schema( *p ) == BLIS_PACKED_COLUMNS )
 	{
 		// For the "packed columns" schema, a single column is effectively one
 		// column panel, and so we use the column offset as the panel offset.
@@ -217,7 +217,7 @@ dim_t bli_packm_offset_to_panel_for( dim_t offmn, obj_t* p )
 		// (ie: the column stride) to arrive at the desired offset.
 		panel_off = offmn * bli_obj_col_stride( *p );
 	}
-	else if ( bli_obj_pack_status( *p ) == BLIS_PACKED_ROW_PANELS )
+	else if ( bli_obj_pack_schema( *p ) == BLIS_PACKED_ROW_PANELS )
 	{
 		// For the "packed row panels" schema, the column stride is equal to
 		// the panel dimension (length). So we can divide it into offmn
@@ -230,7 +230,7 @@ dim_t bli_packm_offset_to_panel_for( dim_t offmn, obj_t* p )
 		// Sanity check.
 		if ( offmn % bli_obj_col_stride( *p ) > 0 ) bli_abort();
 	}
-	else if ( bli_obj_pack_status( *p ) == BLIS_PACKED_COL_PANELS )
+	else if ( bli_obj_pack_schema( *p ) == BLIS_PACKED_COL_PANELS )
 	{
 		// For the "packed column panels" schema, the row stride is equal to
 		// the panel dimension (width). So we can divide it into offmn

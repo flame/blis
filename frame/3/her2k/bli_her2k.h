@@ -34,6 +34,7 @@
 
 //#include "bli_her2k_cntl.h"
 #include "bli_her2k_check.h"
+#include "bli_her2k_entry.h"
 #include "bli_her2k_front.h"
 /*
 #include "bli_her2k_int.h"
@@ -51,6 +52,8 @@
 
 #include "bli_her2k4m.h"
 #include "bli_her2k3m.h"
+#include "bli_her2k4mh.h"
+#include "bli_her2k3mh.h"
 
 
 //

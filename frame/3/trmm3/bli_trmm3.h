@@ -33,10 +33,13 @@
 */
 
 #include "bli_trmm3_check.h"
+#include "bli_trmm3_entry.h"
 #include "bli_trmm3_front.h"
 
 #include "bli_trmm34m.h"
 #include "bli_trmm33m.h"
+#include "bli_trmm34mh.h"
+#include "bli_trmm33mh.h"
 
 
 //

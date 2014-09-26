@@ -33,6 +33,7 @@
 */
 
 #include "bli_gemm4m_cntl.h"
+#include "bli_gemm4m_entry.h"
 
 #include "bli_gemm4m_ukr_ref.h"
 

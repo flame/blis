@@ -51,6 +51,8 @@ void bli_trsm_ll_ker_var2( obj_t*  a,
 \
 void PASTEMAC(ch,varname)( \
                            doff_t  diagoffa, \
+                           pack_t  schema_a, \
+                           pack_t  schema_b, \
                            dim_t   m, \
                            dim_t   n, \
                            dim_t   k, \

@@ -69,9 +69,9 @@ void bli_her( obj_t*  alpha,
 	// Create object to hold a copy-cast of alpha.
 	dt_alpha = dt_targ_x;
 	bli_obj_scalar_init_detached_copy_of( dt_alpha,
-	                             BLIS_NO_CONJUGATE,
-	                             alpha,
-	                             &alpha_local );
+	                                      BLIS_NO_CONJUGATE,
+	                                      alpha,
+	                                      &alpha_local );
 
 
 	// If all operands have unit stride, we choose a control tree for calling

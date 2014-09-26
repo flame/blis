@@ -32,11 +32,11 @@
 
 */
 
-#include "bli_trmm_cntl.h"
+#include "bli_trmm_query.h"
 #include "bli_trmm_check.h"
+#include "bli_trmm_entry.h"
 #include "bli_trmm_front.h"
 #include "bli_trmm_int.h"
-#include "bli_trmm_target.h"
 
 #include "bli_trmm_blk_var1f.h"
 

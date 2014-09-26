@@ -37,7 +37,7 @@
 void bli_herk_blk_var1f( obj_t*  a,
                          obj_t*  ah,
                          obj_t*  c,
-                         herk_t* cntl,
+                         gemm_t* cntl,
                          herk_thrinfo_t* thread )
 {
 	obj_t ah_pack_s;
@@ -124,7 +124,7 @@ void bli_herk_blk_var1f( obj_t*  a,
 		              ah_pack,
 		              &BLIS_ONE,
 		              c1_pack,
-		              cntl_sub_herk( cntl ),
+		              cntl_sub_gemm( cntl ),
                       herk_thread_sub_herk( thread ) );
 
 		// Unpack C1 (if C1 was packed).

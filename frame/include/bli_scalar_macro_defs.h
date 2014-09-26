@@ -59,120 +59,127 @@
 #include "bli_gets.h"
 
 
-// -- Scalar query macros --
-
-#include "bli_eqri.h"
-#include "bli_eq.h"
-
-
 // -- Scalar constant initialization macros --
 
 #include "bli_constants.h"
 
 
-// -- Scalar computation macros --
+// -- Separated scalar macros (separated real/imaginary values) --
 
 #include "bli_absq2ris.h"
-#include "bli_absq2s.h"
 
 #include "bli_abval2ris.h"
-#include "bli_abval2s.h"
 
 #include "bli_addris.h"
-#include "bli_adds.h"
 #include "bli_addjris.h"
-#include "bli_addjs.h"
 
 #include "bli_add3ris.h"
-#include "bli_add3s.h"
 
 #include "bli_axpyris.h"
-#include "bli_axpys.h"
 #include "bli_axpyjris.h"
-#include "bli_axpyjs.h"
 
 #include "bli_axmyris.h"
+
+#include "bli_conjris.h"
+
+#include "bli_copyris.h"
+#include "bli_copyjris.h"
+#include "bli_copycjris.h"
+
+#include "bli_eqris.h"
+
+#include "bli_invertris.h"
+
+#include "bli_invscalris.h"
+#include "bli_invscaljris.h"
+
+#include "bli_neg2ris.h"
+
+#include "bli_scalris.h"
+#include "bli_scaljris.h"
+#include "bli_scalcjris.h"
+
+#include "bli_scal2ris.h"
+#include "bli_scal2jris.h"
+
+#include "bli_set0ris.h"
+
+#include "bli_sqrt2ris.h"
+
+#include "bli_subris.h"
+#include "bli_subjris.h"
+
+#include "bli_swapris.h"
+
+#include "bli_xpbyris.h"
+
+// Inlined scalar macros in loops
+#include "bli_scalris_mxn_uplo.h"
+
+
+// -- Conventional scalar macros (paired real/imaginary values) --
+
+#include "bli_absq2s.h"
+
+#include "bli_abval2s.h"
+
+#include "bli_adds.h"
+#include "bli_addjs.h"
+
+#include "bli_add3s.h"
+
+#include "bli_axpys.h"
+#include "bli_axpyjs.h"
+
 #include "bli_axmys.h"
 
 #include "bli_cast.h"
 
-#include "bli_conjris.h"
 #include "bli_conjs.h"
 
-#include "bli_copyris.h"
 #include "bli_copys.h"
-#include "bli_copyjris.h"
 #include "bli_copyjs.h"
-#include "bli_copycjris.h"
 #include "bli_copycjs.h"
-
-#include "bli_copyri3s.h"
-#include "bli_copyjri3s.h"
 
 #include "bli_dots.h"
 #include "bli_dotjs.h"
 
-#include "bli_invertris.h"
+#include "bli_eq.h"
+
+#include "bli_fprints.h"
+
 #include "bli_inverts.h"
 
-#include "bli_invscalris.h"
 #include "bli_invscals.h"
-#include "bli_invscaljris.h"
 #include "bli_invscaljs.h"
 
-#include "bli_neg2ris.h"
 #include "bli_neg2s.h"
 
-#include "bli_scalris.h"
+#include "bli_rands.h"
+
 #include "bli_scals.h"
-#include "bli_scaljris.h"
 #include "bli_scaljs.h"
-#include "bli_scalcjris.h"
 #include "bli_scalcjs.h"
 
-#include "bli_scal2ris.h"
 #include "bli_scal2s.h"
-#include "bli_scal2jris.h"
 #include "bli_scal2js.h"
 
-#include "bli_scal2ri3s.h"
-#include "bli_scal2jri3s.h"
-
-#include "bli_set0ris.h"
 #include "bli_set0s.h"
 
 #include "bli_set1s.h"
 
 #include "bli_seti0s.h"
 
-#include "bli_sqrt2ris.h"
 #include "bli_sqrt2s.h"
 
-#include "bli_subris.h"
 #include "bli_subs.h"
-#include "bli_subjris.h"
 #include "bli_subjs.h"
 
-#include "bli_swapris.h"
 #include "bli_swaps.h"
 
-#include "bli_xpbyris.h"
 #include "bli_xpbys.h"
 
-
-
-// -- Scalar initialization macros --
-
-#include "bli_rands.h"
-
-
-// -- Misc. scalar macros --
-
-#include "bli_fprints.h"
-
-
-// -- Inlined scalar macros in loops --
-
+// Inlined scalar macros in loops
 #include "bli_adds_mxn.h"
 #include "bli_adds_mxn_uplo.h"
 #include "bli_copys_mxn.h"
@@ -180,7 +187,34 @@
 #include "bli_xpbys_mxn.h"
 #include "bli_xpbys_mxn_uplo.h"
 
-#include "bli_scalris_mxn_uplo.h"
+
+// -- 3m-specific scalar macros --
+
+#include "bli_copyri3s.h"
+#include "bli_copyjri3s.h"
+
+#include "bli_scal2ri3s.h"
+#include "bli_scal2jri3s.h"
+
+
+// -- 4mh/3mh-specific scalar macros --
+
+#include "bli_scal2rihs_mxn_diag.h"
+#include "bli_scal2rihs_mxn_uplo.h"
+#include "bli_setrihs_mxn_diag.h"
+
+// ro
+#include "bli_scal2ros.h"
+#include "bli_scal2jros.h"
+
+// io
+#include "bli_scal2ios.h"
+#include "bli_scal2jios.h"
+
+// rpi
+#include "bli_scal2rpis.h"
+#include "bli_scal2jrpis.h"
+
 
 
 // -- Miscellaneous macros --

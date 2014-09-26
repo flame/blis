@@ -35,8 +35,6 @@
 #include <unistd.h>
 #include "blis.h"
 
-//           transa transb m     n     k     alpha    a        lda   b        ldb   beta     c        ldc
-//void dgemm_( char*, char*, int*, int*, int*, double*, double*, int*, double*, int*, double*, double*, int* );
 
 //#define PRINT
 
@@ -49,9 +47,12 @@ int main( int argc, char** argv )
 	dim_t p;
 	dim_t p_begin, p_end, p_inc;
 	int   m_input, n_input, k_input;
-	num_t dt_a, dt_b, dt_c;
-	num_t dt_alpha, dt_beta;
+	num_t dt;
 	int   r, n_repeats;
+	trans_t  transa;
+	trans_t  transb;
+	f77_char f77_transa;
+	f77_char f77_transb;
 
 	double dtime;
 	double dtime_save;
@@ -59,16 +60,17 @@ int main( int argc, char** argv )
 
 	bli_init();
 
+	//bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
+
 	n_repeats = 3;
 
 #ifndef PRINT
-	p_begin = 40;
+	p_begin = 200;
 	p_end   = 2000;
-	p_inc   = 40;
+	p_inc   = 200;
 
 	m_input = -1;
 	n_input = -1;
-	//k_input = 256;
 	k_input = -1;
 #else
 	p_begin = 16;
@@ -81,18 +83,22 @@ int main( int argc, char** argv )
 #endif
 
 #if 1
-	dt_a = BLIS_DOUBLE;
-	dt_b = BLIS_DOUBLE;
-	dt_c = BLIS_DOUBLE;
-	dt_alpha = BLIS_DOUBLE;
-	dt_beta = BLIS_DOUBLE;
+	//dt = BLIS_FLOAT;
+	dt = BLIS_DOUBLE;
 #else
-	dt_a = dt_b = dt_c = dt_alpha = dt_beta = BLIS_DCOMPLEX;
+	//dt = BLIS_SCOMPLEX;
+	dt = BLIS_DCOMPLEX;
 #endif
+
+	transa = BLIS_NO_TRANSPOSE;
+	transb = BLIS_NO_TRANSPOSE;
+
+	bli_param_map_blis_to_netlib_trans( transa, &f77_transa );
+	bli_param_map_blis_to_netlib_trans( transb, &f77_transb );
+
 
 	for ( p = p_begin; p <= p_end; p += p_inc )
 	{
-
 		if ( m_input < 0 ) m = p * ( dim_t )abs(m_input);
 		else               m =     ( dim_t )    m_input;
 		if ( n_input < 0 ) n = p * ( dim_t )abs(n_input);
@@ -100,19 +106,20 @@ int main( int argc, char** argv )
 		if ( k_input < 0 ) k = p * ( dim_t )abs(k_input);
 		else               k =     ( dim_t )    k_input;
 
+		bli_obj_create( dt, 1, 1, 0, 0, &alpha );
+		bli_obj_create( dt, 1, 1, 0, 0, &beta );
 
-		bli_obj_create( dt_alpha, 1, 1, 0, 0, &alpha );
-		bli_obj_create( dt_beta,  1, 1, 0, 0, &beta );
-
-		bli_obj_create( dt_a, m, k, 0, 0, &a );
-		bli_obj_create( dt_b, k, n, 0, 0, &b );
-		bli_obj_create( dt_c, m, n, 0, 0, &c );
-		bli_obj_create( dt_c, m, n, 0, 0, &c_save );
+		bli_obj_create( dt, m, k, 0, 0, &a );
+		bli_obj_create( dt, k, n, 0, 0, &b );
+		bli_obj_create( dt, m, n, 0, 0, &c );
+		bli_obj_create( dt, m, n, 0, 0, &c_save );
 
 		bli_randm( &a );
 		bli_randm( &b );
 		bli_randm( &c );
 
+		bli_obj_set_conjtrans( transa, a );
+		bli_obj_set_conjtrans( transb, b );
 
 		bli_setsc(  (0.9/1.0), 0.2, &alpha );
 		bli_setsc( -(1.1/1.0), 0.3, &beta );
@@ -137,20 +144,42 @@ int main( int argc, char** argv )
 #endif
 
 #ifdef BLIS
-			//bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
 
 			bli_gemm( &alpha,
-			//bli_gemm4m( &alpha,
 			          &a,
 			          &b,
 			          &beta,
 			          &c );
 
 #else
-		if ( bli_is_real( dt_a ) )
+
+		if ( bli_is_float( dt ) )
 		{
-			f77_char transa = 'N';
-			f77_char transb = 'N';
+			f77_int  mm     = bli_obj_length( c );
+			f77_int  kk     = bli_obj_width_after_trans( a );
+			f77_int  nn     = bli_obj_width( c );
+			f77_int  lda    = bli_obj_col_stride( a );
+			f77_int  ldb    = bli_obj_col_stride( b );
+			f77_int  ldc    = bli_obj_col_stride( c );
+			float*   alphap = bli_obj_buffer( alpha );
+			float*   ap     = bli_obj_buffer( a );
+			float*   bp     = bli_obj_buffer( b );
+			float*   betap  = bli_obj_buffer( beta );
+			float*   cp     = bli_obj_buffer( c );
+
+			sgemm_( &f77_transa,
+			        &f77_transb,
+			        &mm,
+			        &nn,
+			        &kk,
+			        alphap,
+			        ap, &lda,
+			        bp, &ldb,
+			        betap,
+			        cp, &ldc );
+		}
+		else if ( bli_is_double( dt ) )
+		{
 			f77_int  mm     = bli_obj_length( c );
 			f77_int  kk     = bli_obj_width_after_trans( a );
 			f77_int  nn     = bli_obj_width( c );
@@ -163,8 +192,8 @@ int main( int argc, char** argv )
 			double*  betap  = bli_obj_buffer( beta );
 			double*  cp     = bli_obj_buffer( c );
 
-			dgemm_( &transa,
-			        &transb,
+			dgemm_( &f77_transa,
+			        &f77_transb,
 			        &mm,
 			        &nn,
 			        &kk,
@@ -174,10 +203,33 @@ int main( int argc, char** argv )
 			        betap,
 			        cp, &ldc );
 		}
-		else
+		else if ( bli_is_scomplex( dt ) )
 		{
-			f77_char transa = 'N';
-			f77_char transb = 'N';
+			f77_int  mm     = bli_obj_length( c );
+			f77_int  kk     = bli_obj_width_after_trans( a );
+			f77_int  nn     = bli_obj_width( c );
+			f77_int  lda    = bli_obj_col_stride( a );
+			f77_int  ldb    = bli_obj_col_stride( b );
+			f77_int  ldc    = bli_obj_col_stride( c );
+			scomplex*  alphap = bli_obj_buffer( alpha );
+			scomplex*  ap     = bli_obj_buffer( a );
+			scomplex*  bp     = bli_obj_buffer( b );
+			scomplex*  betap  = bli_obj_buffer( beta );
+			scomplex*  cp     = bli_obj_buffer( c );
+
+			cgemm_( &f77_transa,
+			        &f77_transb,
+			        &mm,
+			        &nn,
+			        &kk,
+			        alphap,
+			        ap, &lda,
+			        bp, &ldb,
+			        betap,
+			        cp, &ldc );
+		}
+		else if ( bli_is_dcomplex( dt ) )
+		{
 			f77_int  mm     = bli_obj_length( c );
 			f77_int  kk     = bli_obj_width_after_trans( a );
 			f77_int  nn     = bli_obj_width( c );
@@ -190,9 +242,8 @@ int main( int argc, char** argv )
 			dcomplex*  betap  = bli_obj_buffer( beta );
 			dcomplex*  cp     = bli_obj_buffer( c );
 
-			zgemm_( &transa,
-			//zgemm3m_( &transa,
-			        &transb,
+			zgemm_( &f77_transa,
+			        &f77_transb,
 			        &mm,
 			        &nn,
 			        &kk,
@@ -215,7 +266,7 @@ int main( int argc, char** argv )
 
 		gflops = ( 2.0 * m * k * n ) / ( dtime_save * 1.0e9 );
 
-		if ( bli_is_complex( dt_a ) ) gflops *= 4.0;
+		if ( bli_is_complex( dt ) ) gflops *= 4.0;
 
 #ifdef BLIS
 		printf( "data_gemm_blis" );

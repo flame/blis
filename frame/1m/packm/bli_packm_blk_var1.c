@@ -42,10 +42,10 @@ typedef void (*FUNCPTR_T)(
                            diag_t  diagc,
                            uplo_t  uploc,
                            trans_t transc,
+                           pack_t  schema,
                            bool_t  invdiag,
                            bool_t  revifup,
                            bool_t  reviflo,
-                           bool_t  row_stored,
                            dim_t   m,
                            dim_t   n,
                            dim_t   m_max,
@@ -54,10 +54,15 @@ typedef void (*FUNCPTR_T)(
                            void*   c, inc_t rs_c, inc_t cs_c,
                            void*   p, inc_t rs_p, inc_t cs_p,
                                       dim_t pd_p, inc_t ps_p,
+                           void*   packm_ker,
                            packm_thrinfo_t* thread
                          );
 
 static FUNCPTR_T GENARRAY(ftypes,packm_blk_var1);
+
+extern func_t* packm_struc_cxk_kers;
+extern func_t* packm_struc_cxk_4m_kers;
+extern func_t* packm_struc_cxk_3m_kers;
 
 
 void bli_packm_blk_var1( obj_t*   c,
@@ -71,10 +76,10 @@ void bli_packm_blk_var1( obj_t*   c,
 	diag_t    diagc      = bli_obj_diag( *c );
 	uplo_t    uploc      = bli_obj_uplo( *c );
 	trans_t   transc     = bli_obj_conjtrans_status( *c );
+	pack_t    schema     = bli_obj_pack_schema( *p );
 	bool_t    invdiag    = bli_obj_has_inverted_diag( *p );
 	bool_t    revifup    = bli_obj_is_pack_rev_if_upper( *p );
 	bool_t    reviflo    = bli_obj_is_pack_rev_if_lower( *p );
-	bool_t    row_stored = bli_obj_is_col_packed( *p ); /* column panels are row-stored. */
 
 	dim_t     m_p        = bli_obj_length( *p );
 	dim_t     n_p        = bli_obj_width( *p );
@@ -93,6 +98,9 @@ void bli_packm_blk_var1( obj_t*   c,
 
 	void*     buf_kappa;
 
+	func_t*   packm_kers;
+	void*     packm_ker;
+
 	FUNCPTR_T f;
 
 	// This variant assumes that the micro-kernel will always apply the
@@ -100,6 +108,13 @@ void bli_packm_blk_var1( obj_t*   c,
 	// for kappa so that the underlying packm implementation does not
 	// scale during packing.
 	buf_kappa = bli_obj_buffer_for_const( dt_cp, BLIS_ONE );
+
+	// Choose the correct func_t object.
+	packm_kers = packm_struc_cxk_kers;
+
+	// Query the datatype-specific function pointer from the func_t object.
+	packm_ker = bli_func_obj_query( dt_cp, packm_kers );
+
 
 	// Index into the type combination array to extract the correct
 	// function pointer.
@@ -111,10 +126,10 @@ void bli_packm_blk_var1( obj_t*   c,
 	   diagc,
 	   uploc,
 	   transc,
+	   schema,
 	   invdiag,
 	   revifup,
 	   reviflo,
-	   row_stored,
 	   m_p,
 	   n_p,
 	   m_max_p,
@@ -122,13 +137,14 @@ void bli_packm_blk_var1( obj_t*   c,
 	   buf_kappa,
 	   buf_c, rs_c, cs_c,
 	   buf_p, rs_p, cs_p,
-	          pd_p, ps_p, 
+	          pd_p, ps_p,
+	   packm_ker,
 	   t );
 }
 
 
 #undef  GENTFUNC
-#define GENTFUNC( ctype, ch, varname ) \
+#define GENTFUNC( ctype, ch, varname, kertype ) \
 \
 void PASTEMAC(ch,varname)( \
                            struc_t strucc, \
@@ -136,10 +152,10 @@ void PASTEMAC(ch,varname)( \
                            diag_t  diagc, \
                            uplo_t  uploc, \
                            trans_t transc, \
+                           pack_t  schema, \
                            bool_t  invdiag, \
                            bool_t  revifup, \
                            bool_t  reviflo, \
-                           bool_t  row_stored, \
                            dim_t   m, \
                            dim_t   n, \
                            dim_t   m_max, \
@@ -148,9 +164,12 @@ void PASTEMAC(ch,varname)( \
                            void*   c, inc_t rs_c, inc_t cs_c, \
                            void*   p, inc_t rs_p, inc_t cs_p, \
                                       dim_t pd_p, inc_t ps_p, \
+                           void*   packm_ker, \
                            packm_thrinfo_t* thread \
                          ) \
 { \
+	PASTECH(ch,kertype) packm_ker_cast = packm_ker; \
+\
 	ctype* restrict kappa_cast = kappa; \
 	ctype* restrict c_cast     = c; \
 	ctype* restrict p_cast     = p; \
@@ -181,6 +200,7 @@ void PASTEMAC(ch,varname)( \
 	dim_t*          m_panel_max; \
 	dim_t*          n_panel_max; \
 	conj_t          conjc; \
+	bool_t          row_stored; \
 	bool_t          col_stored; \
 \
 	ctype* restrict c_use; \
@@ -206,12 +226,15 @@ void PASTEMAC(ch,varname)( \
 		bli_toggle_trans( transc ); \
 	} \
 \
-	/* Create a column storage flag corresponding to the row storage
-	   flag that was passed in. (This is only done for convenience.) */ \
-	col_stored = !row_stored; \
+	/* Create flags to incidate row or column storage. Note that the
+	   schema bit that encodes row or column is describing the form of
+	   micro-panel, not the storage in the micro-panel. Hence the
+	   mismatch in "row" and "column" semantics. */ \
+	row_stored = bli_is_col_packed( schema ); \
+	col_stored = bli_is_row_packed( schema ); \
 \
-	/* If the strides of P indicate row storage, then we are packing to
-	   column panels; otherwise, if the strides indicate column storage,
+	/* If the row storage flag indicates row storage, then we are packing
+	   to column panels; otherwise, if the strides indicate column storage,
 	   we are packing to row panels. */ \
 	if ( row_stored ) \
 	{ \
@@ -297,7 +320,7 @@ void PASTEMAC(ch,varname)( \
 			/* This case executes if the panel belongs to a triangular
 			   matrix AND is diagonal-intersecting. Notice that we
 			   cannot bury the following conditional logic into
-			   packm_tri_cxk() because we need to know the value of
+			   packm_struc_cxk() because we need to know the value of
 			   panel_len_max_i so we can properly increment p_inc. */ \
 \
 			/* Sanity check. Diagonals should not intersect the short end of
@@ -313,7 +336,8 @@ void PASTEMAC(ch,varname)( \
 			{ \
 				panel_off_i     = 0; \
 				panel_len_i     = bli_abs( diagoffc_i ) + panel_dim_i; \
-				panel_len_max_i = bli_abs( diagoffc_i ) + panel_dim_max; \
+				panel_len_max_i = bli_min( bli_abs( diagoffc_i ) + panel_dim_max, \
+				                           panel_len_max ); \
 				diagoffp_i      = diagoffc_i; \
 			} \
 			else /* if ( ( row_stored && bli_is_lower( uploc ) ) || \
@@ -330,21 +354,25 @@ void PASTEMAC(ch,varname)( \
 \
 			if( packm_thread_my_iter( it, thread ) ) \
 			{ \
-			PASTEMAC(ch,packm_tri_cxk)( strucc, \
-			                            diagoffp_i, \
-			                            diagc, \
-			                            uploc, \
-			                            conjc, \
-			                            invdiag, \
-			                            *m_panel_use, \
-			                            *n_panel_use, \
-			                            *m_panel_max, \
-			                            *n_panel_max, \
-			                            kappa_cast, \
-			                            c_use, rs_c, cs_c, \
-			                            p_use, rs_p, cs_p ); \
-			}\
+				packm_ker_cast( strucc, \
+				                diagoffp_i, \
+				                diagc, \
+				                uploc, \
+				                conjc, \
+				                schema, \
+				                invdiag, \
+				                *m_panel_use, \
+				                *n_panel_use, \
+				                *m_panel_max, \
+				                *n_panel_max, \
+				                kappa_cast, \
+				                c_use, rs_c, cs_c, \
+				                p_use, rs_p, cs_p ); \
+			} \
 \
+			/* NOTE: This value is usually LESS than ps_p because triangular
+			   matrices usually have several micro-panels that are shorter
+			   than a "full" micro-panel. */ \
 			p_inc = ldp * panel_len_max_i; \
 		} \
 		else if ( bli_is_herm_or_symm( strucc ) ) \
@@ -358,17 +386,20 @@ void PASTEMAC(ch,varname)( \
 \
 			if( packm_thread_my_iter( it, thread ) ) \
 			{ \
-			PASTEMAC(ch,packm_herm_cxk)( strucc, \
-			                             diagoffc_i, \
-			                             uploc, \
-			                             conjc, \
-			                             *m_panel_use, \
-			                             *n_panel_use, \
-			                             *m_panel_max, \
-			                             *n_panel_max, \
-			                             kappa_cast, \
-			                             c_begin, rs_c, cs_c, \
-			                             p_begin, rs_p, cs_p ); \
+				packm_ker_cast( strucc, \
+				                diagoffc_i, \
+				                diagc, \
+				                uploc, \
+				                conjc, \
+				                schema, \
+				                invdiag, \
+				                *m_panel_use, \
+				                *n_panel_use, \
+				                *m_panel_max, \
+				                *n_panel_max, \
+				                kappa_cast, \
+				                c_begin, rs_c, cs_c, \
+				                p_begin, rs_p, cs_p ); \
 			} \
 \
 			/* NOTE: This value is equivalent to ps_p. */ \
@@ -383,30 +414,22 @@ void PASTEMAC(ch,varname)( \
 			panel_len_i     = panel_len_full; \
 			panel_len_max_i = panel_len_max; \
 \
-/*
-printf( "packm_var1: gen case\n" ); \
-printf( "packm_var1: m_panel_use = %d\n", *m_panel_use ); \
-printf( "packm_var1: n_panel_use = %d\n", *n_panel_use ); \
-printf( "packm_var1: m_panel_max = %d\n", *m_panel_max ); \
-printf( "packm_var1: n_panel_max = %d\n", *n_panel_max ); \
-printf( "packm_var1: m_panel     = %d\n",  m_panel ); \
-printf( "packm_var1: n_panel     = %d\n",  n_panel ); \
-printf( "packm_var1: rs_c cs_c = %d %d\n", rs_c, cs_c ); \
-printf( "packm_var1: rs_p cs_p = %d %d\n", rs_p, cs_p ); \
-*/ \
 			if( packm_thread_my_iter( it, thread ) ) \
 			{ \
-			PASTEMAC(ch,packm_gen_cxk)( BLIS_GENERAL, \
-			                            0, \
-			                            BLIS_DENSE, \
-			                            conjc, \
-			                            *m_panel_use, \
-			                            *n_panel_use, \
-			                            *m_panel_max, \
-			                            *n_panel_max, \
-			                            kappa_cast, \
-			                            c_begin, rs_c, cs_c, \
-			                            p_begin, rs_p, cs_p ); \
+				packm_ker_cast( BLIS_GENERAL, \
+				                0, \
+				                diagc, \
+				                BLIS_DENSE, \
+				                conjc, \
+				                schema, \
+				                invdiag, \
+				                *m_panel_use, \
+				                *n_panel_use, \
+				                *m_panel_max, \
+				                *n_panel_max, \
+				                kappa_cast, \
+				                c_begin, rs_c, cs_c, \
+				                p_begin, rs_p, cs_p ); \
 			} \
 /*
 			if ( row_stored ) \
@@ -424,18 +447,7 @@ printf( "packm_var1: rs_p cs_p = %d %d\n", rs_p, cs_p ); \
 \
 		p_begin += p_inc; \
 	} \
-\
-\
-/*
-		if ( rs_p == 1 ) \
-		PASTEMAC(ch,fprintm)( stdout, "packm_var1: ap copied", panel_dim_max, panel_len_max_i, \
-		                      p_begin, rs_p, cs_p, "%9.2e", "" ); \
-		if ( cs_p == 1 ) \
-		PASTEMAC(ch,fprintm)( stdout, "packm_var1: bp copied", panel_len_max_i, panel_dim_max, \
-		                      p_begin, rs_p, cs_p, "%9.2e", "" ); \
-*/ \
-\
 }
 
-INSERT_GENTFUNC_BASIC0( packm_blk_var1 )
+INSERT_GENTFUNC_BASIC( packm_blk_var1, packm_ker_t )
 

@@ -39,7 +39,7 @@
 void bli_trmm_ll_ker_var2( obj_t*  a,
                            obj_t*  b,
                            obj_t*  c,
-                           trmm_t* cntl,
+                           gemm_t* cntl,
                            trmm_thrinfo_t* thread );
 
 
@@ -51,6 +51,8 @@ void bli_trmm_ll_ker_var2( obj_t*  a,
 \
 void PASTEMAC(ch,varname)( \
                            doff_t  diagoffa, \
+                           pack_t  schema_a, \
+                           pack_t  schema_b, \
                            dim_t   m, \
                            dim_t   n, \
                            dim_t   k, \

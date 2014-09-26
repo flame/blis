@@ -33,7 +33,9 @@
 */
 
 #include "bli_trsm_cntl.h"
+#include "bli_trsm_query.h"
 #include "bli_trsm_check.h"
+#include "bli_trsm_entry.h"
 #include "bli_trsm_front.h"
 #include "bli_trsm_int.h"
 

@@ -356,7 +356,6 @@
 	( bli_does_notrans( trans ) ? ( m == 1 ? (cs) : (rs) ) \
                                 : ( m == 1 ? (rs) : (cs) ) )
 
-/*
 #define bli_is_row_stored( rs, cs ) \
 \
 	( bli_abs( cs ) == 1 )
@@ -364,7 +363,6 @@
 #define bli_is_col_stored( rs, cs ) \
 \
 	( bli_abs( rs ) == 1 )
-*/
 
 #define bli_is_row_stored_f( m, n, rs, cs ) \
 \
@@ -524,11 +522,30 @@
 
 #define bli_is_4m_packed( schema ) \
 \
-	( ( schema & BLIS_PACK_4M_BIT ) )
+	( ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_4M )
 
 #define bli_is_3m_packed( schema ) \
 \
-	( ( schema & BLIS_PACK_3M_BIT ) )
+	( ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_3M )
+
+#define bli_is_ro_packed( schema ) \
+\
+	( ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_RO )
+
+#define bli_is_io_packed( schema ) \
+\
+	( ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_IO )
+
+#define bli_is_rpi_packed( schema ) \
+\
+	( ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_RPI )
+
+#define bli_is_rih_packed( schema ) \
+\
+	( bli_is_ro_packed( schema ) || \
+	  bli_is_io_packed( schema ) || \
+	  bli_is_rpi_packed( schema ) )
+
 
 
 

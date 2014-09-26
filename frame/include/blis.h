@@ -84,6 +84,7 @@ extern "C" {
 #include "bli_kernel_macro_defs.h"
 #include "bli_kernel_4m_macro_defs.h"
 #include "bli_kernel_3m_macro_defs.h"
+#include "bli_kernel_rih_macro_defs.h"
 #include "bli_kernel_post_macro_defs.h"
 #include "bli_kernel_prototypes.h"
 
@@ -112,6 +113,10 @@ extern "C" {
 #include "bli_machval.h"
 #include "bli_info.h"
 #include "bli_getopt.h"
+#include "bli_4m.h"
+#include "bli_3m.h"
+#include "bli_4mh.h"
+#include "bli_3mh.h"
 
 // Control tree definitions.
 #include "bli_cntl.h"

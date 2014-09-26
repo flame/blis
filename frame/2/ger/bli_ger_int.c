@@ -93,9 +93,9 @@ void bli_ger_int( conj_t  conjx,
 		bli_obj_toggle_conj( y_local );
 
 		bli_obj_scalar_init_detached_copy_of( bli_obj_datatype( *alpha ),
-		                             BLIS_CONJUGATE,
-		                             alpha,
-		                             &alpha_local );
+		                                      BLIS_CONJUGATE,
+		                                      alpha,
+		                                      &alpha_local );
 	}
 	else
 	{

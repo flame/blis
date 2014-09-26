@@ -35,8 +35,6 @@
 #include <unistd.h>
 #include "blis.h"
 
-//           side   uploa  m     n     alpha    a        lda   b        ldb   beta     c        ldc
-//void dsymm_( char*, char*, int*, int*, double*, double*, int*, double*, int*, double*, double*, int* );
 
 //#define PRINT
 
@@ -49,11 +47,12 @@ int main( int argc, char** argv )
 	dim_t p;
 	dim_t p_begin, p_end, p_inc;
 	int   m_input, n_input;
-	num_t dt_a, dt_b, dt_c;
-	num_t dt_alpha, dt_beta;
+	num_t dt;
 	int   r, n_repeats;
 	side_t side;
-	uplo_t uplo;
+	uplo_t uploa;
+	f77_char f77_side;
+	f77_char f77_uploa;
 
 	double dtime;
 	double dtime_save;
@@ -61,12 +60,14 @@ int main( int argc, char** argv )
 
 	bli_init();
 
+	//bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
+
 	n_repeats = 3;
 
 #ifndef PRINT
-	p_begin = 40;
+	p_begin = 200;
 	p_end   = 2000;
-	p_inc   = 40;
+	p_inc   = 200;
 
 	m_input = -1;
 	n_input = -1;
@@ -80,43 +81,47 @@ int main( int argc, char** argv )
 #endif
 
 #if 1
-	dt_a = dt_b = dt_c = dt_alpha = dt_beta = BLIS_DOUBLE;
+	//dt = BLIS_FLOAT;
+	dt = BLIS_DOUBLE;
 #else
-	dt_a = dt_b = dt_c = dt_alpha = dt_beta = BLIS_DCOMPLEX;
+	//dt = BLIS_SCOMPLEX;
+	dt = BLIS_DCOMPLEX;
 #endif
 
 	side = BLIS_LEFT;
 	//side = BLIS_RIGHT;
 
-	uplo = BLIS_LOWER;
-	//uplo = BLIS_UPPER;
+	uploa = BLIS_LOWER;
+	//uploa = BLIS_UPPER;
+
+	bli_param_map_blis_to_netlib_side( side, &f77_side );
+	bli_param_map_blis_to_netlib_uplo( uploa, &f77_uploa );
+
 
 	for ( p = p_begin; p <= p_end; p += p_inc )
 	{
-
 		if ( m_input < 0 ) m = p * ( dim_t )abs(m_input);
 		else               m =     ( dim_t )    m_input;
 		if ( n_input < 0 ) n = p * ( dim_t )abs(n_input);
 		else               n =     ( dim_t )    n_input;
 
-
-		bli_obj_create( dt_alpha, 1, 1, 0, 0, &alpha );
-		bli_obj_create( dt_beta,  1, 1, 0, 0, &beta );
+		bli_obj_create( dt, 1, 1, 0, 0, &alpha );
+		bli_obj_create( dt, 1, 1, 0, 0, &beta );
 
 		if ( bli_is_left( side ) )
-			bli_obj_create( dt_a, m, m, 0, 0, &a );
+			bli_obj_create( dt, m, m, 0, 0, &a );
 		else
-			bli_obj_create( dt_a, n, n, 0, 0, &a );
-		bli_obj_create( dt_b, m, n, 0, 0, &b );
-		bli_obj_create( dt_c, m, n, 0, 0, &c );
-		bli_obj_create( dt_c, m, n, 0, 0, &c_save );
+			bli_obj_create( dt, n, n, 0, 0, &a );
+		bli_obj_create( dt, m, n, 0, 0, &b );
+		bli_obj_create( dt, m, n, 0, 0, &c );
+		bli_obj_create( dt, m, n, 0, 0, &c_save );
 
 		bli_randm( &a );
 		bli_randm( &b );
 		bli_randm( &c );
 
 		bli_obj_set_struc( BLIS_HERMITIAN, a );
-		bli_obj_set_uplo( uplo, a );
+		bli_obj_set_uplo( uploa, a );
 
 		// Randomize A, make it densely Hermitian, and zero the unstored
 		// triangle to ensure the implementation reads only from the stored
@@ -135,7 +140,6 @@ int main( int argc, char** argv )
 		bli_scalm( &BLIS_TWO, &a );
 */
 
-
 		bli_setsc(  (2.0/1.0), 1.0, &alpha );
 		bli_setsc( -(1.0/1.0), 0.0, &beta );
 
@@ -152,16 +156,6 @@ int main( int argc, char** argv )
 			dtime = bli_clock();
 
 #ifdef PRINT
-/*
-			obj_t ar, ai;
-			bli_obj_alias_to( a, ar );
-			bli_obj_alias_to( a, ai );
-			bli_obj_set_datatype( BLIS_DOUBLE, ar ); ar.rs *= 2; ar.cs *= 2;
-			bli_obj_set_datatype( BLIS_DOUBLE, ai ); ai.rs *= 2; ai.cs *= 2; ai.buffer = ( double* )ai.buffer + 1;
-			bli_printm( "ar", &ar, "%4.1f", "" );
-			bli_printm( "ai", &ai, "%4.1f", "" );
-*/
-
 			bli_printm( "a", &a, "%4.1f", "" );
 			bli_printm( "b", &b, "%4.1f", "" );
 			bli_printm( "c", &c, "%4.1f", "" );
@@ -169,10 +163,7 @@ int main( int argc, char** argv )
 
 #ifdef BLIS
 
-			//bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
-
 			bli_hemm( side,
-			//bli_hemm4m( side,
 			          &alpha,
 			          &a,
 			          &b,
@@ -180,8 +171,31 @@ int main( int argc, char** argv )
 			          &c );
 #else
 
-			f77_char side   = 'L';
-			f77_char uplo   = 'L';
+		if ( bli_is_float( dt ) )
+		{
+			f77_int  mm     = bli_obj_length( c );
+			f77_int  nn     = bli_obj_width( c );
+			f77_int  lda    = bli_obj_col_stride( a );
+			f77_int  ldb    = bli_obj_col_stride( b );
+			f77_int  ldc    = bli_obj_col_stride( c );
+			float*   alphap = bli_obj_buffer( alpha );
+			float*   ap     = bli_obj_buffer( a );
+			float*   bp     = bli_obj_buffer( b );
+			float*   betap  = bli_obj_buffer( beta );
+			float*   cp     = bli_obj_buffer( c );
+
+			ssymm_( &f77_side,
+			        &f77_uploa,
+			        &mm,
+			        &nn,
+			        alphap,
+			        ap, &lda,
+			        bp, &ldb,
+			        betap,
+			        cp, &ldc );
+		}
+		else if ( bli_is_double( dt ) )
+		{
 			f77_int  mm     = bli_obj_length( c );
 			f77_int  nn     = bli_obj_width( c );
 			f77_int  lda    = bli_obj_col_stride( a );
@@ -193,8 +207,8 @@ int main( int argc, char** argv )
 			double*  betap  = bli_obj_buffer( beta );
 			double*  cp     = bli_obj_buffer( c );
 
-			dsymm_( &side,
-			        &uplo,
+			dsymm_( &f77_side,
+			        &f77_uploa,
 			        &mm,
 			        &nn,
 			        alphap,
@@ -202,6 +216,53 @@ int main( int argc, char** argv )
 			        bp, &ldb,
 			        betap,
 			        cp, &ldc );
+		}
+		else if ( bli_is_scomplex( dt ) )
+		{
+			f77_int  mm     = bli_obj_length( c );
+			f77_int  nn     = bli_obj_width( c );
+			f77_int  lda    = bli_obj_col_stride( a );
+			f77_int  ldb    = bli_obj_col_stride( b );
+			f77_int  ldc    = bli_obj_col_stride( c );
+			scomplex*  alphap = bli_obj_buffer( alpha );
+			scomplex*  ap     = bli_obj_buffer( a );
+			scomplex*  bp     = bli_obj_buffer( b );
+			scomplex*  betap  = bli_obj_buffer( beta );
+			scomplex*  cp     = bli_obj_buffer( c );
+
+			chemm_( &f77_side,
+			        &f77_uploa,
+			        &mm,
+			        &nn,
+			        alphap,
+			        ap, &lda,
+			        bp, &ldb,
+			        betap,
+			        cp, &ldc );
+		}
+		else if ( bli_is_dcomplex( dt ) )
+		{
+			f77_int  mm     = bli_obj_length( c );
+			f77_int  nn     = bli_obj_width( c );
+			f77_int  lda    = bli_obj_col_stride( a );
+			f77_int  ldb    = bli_obj_col_stride( b );
+			f77_int  ldc    = bli_obj_col_stride( c );
+			dcomplex*  alphap = bli_obj_buffer( alpha );
+			dcomplex*  ap     = bli_obj_buffer( a );
+			dcomplex*  bp     = bli_obj_buffer( b );
+			dcomplex*  betap  = bli_obj_buffer( beta );
+			dcomplex*  cp     = bli_obj_buffer( c );
+
+			zhemm_( &f77_side,
+			        &f77_uploa,
+			        &mm,
+			        &nn,
+			        alphap,
+			        ap, &lda,
+			        bp, &ldb,
+			        betap,
+			        cp, &ldc );
+		}
 #endif
 
 #ifdef PRINT
@@ -217,7 +278,7 @@ int main( int argc, char** argv )
 		else
 			gflops = ( 2.0 * m * n * n ) / ( dtime_save * 1.0e9 );
 
-		if ( bli_is_complex( dt_a ) ) gflops *= 4.0;
+		if ( bli_is_complex( dt ) ) gflops *= 4.0;
 
 #ifdef BLIS
 		printf( "data_hemm_blis" );

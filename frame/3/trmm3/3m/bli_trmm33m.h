@@ -32,6 +32,8 @@
 
 */
 
+#include "bli_trmm33m_entry.h"
+
 
 //
 // Prototype object-based interface.

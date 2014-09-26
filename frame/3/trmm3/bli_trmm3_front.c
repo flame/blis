@@ -40,10 +40,8 @@ void bli_trmm3_front( side_t  side,
                       obj_t*  b,
                       obj_t*  beta,
                       obj_t*  c,
-                      trmm_t* l_cntl,
-                      trmm_t* r_cntl )
+                      gemm_t* cntl )
 {
-	trmm_t* cntl;
 	obj_t   a_local;
 	obj_t   b_local;
 	obj_t   c_local;
@@ -103,10 +101,10 @@ void bli_trmm3_front( side_t  side,
 	if (
 	     ( bli_obj_is_row_stored( c_local ) &&
 	       bli_func_prefers_contig_cols( bli_obj_datatype( c_local ),
-	                                     cntl_gemm_ukrs( l_cntl ) ) ) ||
+	                                     cntl_gemm_ukrs( cntl ) ) ) ||
 	     ( bli_obj_is_col_stored( c_local ) &&
 	       bli_func_prefers_contig_rows( bli_obj_datatype( c_local ),
-	                                     cntl_gemm_ukrs( l_cntl ) ) )
+	                                     cntl_gemm_ukrs( cntl ) ) )
 	   )
 	{
 		bli_toggle_side( side );
@@ -131,9 +129,6 @@ void bli_trmm3_front( side_t  side,
 	bli_obj_set_as_root( b_local );
 	bli_obj_set_as_root( c_local );
 
-	// Choose the control tree.
-	if ( bli_is_left( side ) ) cntl = l_cntl;
-	else                       cntl = r_cntl;
 
     trmm_thrinfo_t** infos = bli_create_trmm_thrinfo_paths( FALSE );
     dim_t n_threads = thread_num_threads( infos[0] );

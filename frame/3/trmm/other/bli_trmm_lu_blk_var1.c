@@ -112,7 +112,7 @@ void bli_trmm_lu_blk_var1( obj_t*  alpha,
 		              &b_pack,
 		              beta,
 		              &c1_pack,
-		              cntl_sub_trmm( cntl ) );
+		              cntl_sub_gemm( cntl ) );
 
 		// Unpack C1 (if C1 was packed).
 		bli_unpackm_int( &c1_pack, &c1,

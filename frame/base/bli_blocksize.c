@@ -94,7 +94,7 @@ dim_t bli_blksz_for_type( num_t    dt,
 }
 
 
-dim_t bli_blksz_ext_for_type( num_t    dt,
+dim_t bli_blksz_max_for_type( num_t    dt,
                               blksz_t* b )
 {
 	return b->e[ dt ];
@@ -115,10 +115,10 @@ dim_t bli_blksz_for_obj( obj_t*   obj,
 }
 
 
-dim_t bli_blksz_ext_for_obj( obj_t*   obj,
+dim_t bli_blksz_max_for_obj( obj_t*   obj,
                              blksz_t* b )
 {
-	return bli_blksz_ext_for_type( bli_obj_datatype( *obj ), b );
+	return bli_blksz_max_for_type( bli_obj_datatype( *obj ), b );
 }
 
 
@@ -141,7 +141,7 @@ dim_t bli_determine_blocksize_f( dim_t    i,
                                  blksz_t* b )
 {
 	num_t dt;
-	dim_t b_alg, b_ext, b_now;
+	dim_t b_alg, b_max, b_now;
 	dim_t dim_left_now;
 
 	// We assume that this function is being called from an algorithm that
@@ -149,19 +149,19 @@ dim_t bli_determine_blocksize_f( dim_t    i,
 	// to bottom-right).
 
 	// Extract the execution datatype and use it to query the corresponding
-	// blocksize and blocksize extension values from the blksz_t object.
+	// blocksize and blocksize maximum values from the blksz_t object.
 	dt    = bli_obj_execution_datatype( *obj );
 	b_alg = bli_blksz_for_type( dt, b );
-	b_ext = bli_blksz_ext_for_type( dt, b );
+	b_max = bli_blksz_max_for_type( dt, b );
 	
 	// Compute how much of the matrix dimension is left, including the
 	// chunk that will correspond to the blocksize we are computing now.
 	dim_left_now = dim - i;
 
-	// If the dimension currently remaining is less than the blocksize
-	// plus its allowed extension, use it instead of the default
-	// blocksize b_alg. Otherwise, use b_alg.
-	if ( dim_left_now <= b_alg + b_ext )
+	// If the dimension currently remaining is less than the maximum
+	// blocksize, use it instead of the default blocksize b_alg.
+	// Otherwise, use b_alg.
+	if ( dim_left_now <= b_max )
 	{
 		b_now = dim_left_now;
 	}
@@ -180,7 +180,7 @@ dim_t bli_determine_blocksize_b( dim_t    i,
                                  blksz_t* b )
 {
 	num_t dt;
-	dim_t b_alg, b_ext, b_now;
+	dim_t b_alg, b_max, b_now;
 	dim_t dim_at_edge;
 	dim_t dim_left_now;
 
@@ -189,10 +189,10 @@ dim_t bli_determine_blocksize_b( dim_t    i,
 	// to top-left).
 
 	// Extract the execution datatype and use it to query the corresponding
-	// blocksize and blocksize extension values from the blksz_t object.
+	// blocksize and blocksize maximum values from the blksz_t object.
 	dt    = bli_obj_execution_datatype( *obj );
 	b_alg = bli_blksz_for_type( dt, b );
-	b_ext = bli_blksz_ext_for_type( dt, b );
+	b_max = bli_blksz_max_for_type( dt, b );
 	
 	// Compute how much of the matrix dimension is left, including the
 	// chunk that will correspond to the blocksize we are computing now.
@@ -205,24 +205,24 @@ dim_t bli_determine_blocksize_b( dim_t    i,
 	if ( dim_at_edge == 0 )
 		return b_alg;
 
-	// If the dimension currently remaining is less than the blocksize
-	// plus its allowed extension, use it as the chosen blocksize. If this
-	// is not the case, then we know dim_left_now is greater than the
-	// extended blocksize. To determine how much of it we should use for
-	// the current blocksize, we inspect dim_at_edge; if it is smaller than
-	// (or equal to) b_ext, then we use b_alg + dim_at_edge. Otherwise,
-	// dim_at_edge is greater than b_ext, in which case we use dim_at_edge.
-	if ( dim_left_now <= b_alg + b_ext )
+	// If the dimension currently remaining is less than the maximum
+	// blocksize, use it as the chosen blocksize. If this is not the case,
+	// then we know dim_left_now is greater than the maximum blocksize.
+	// To determine how much of it we should use for the current blocksize,
+	// we inspect dim_at_edge; if it is smaller than (or equal to) b_max -
+	// b_alg, then we use b_alg + dim_at_edge. Otherwise, dim_at_edge is
+	// greater than b_max - b_alg, in which case we use dim_at_edge.
+	if ( dim_left_now <= b_max )
 	{
 		b_now = dim_left_now;
 	}
-	else // if ( dim_left_now > b_alg + b_ext )
+	else // if ( dim_left_now > b_max )
 	{
-		if ( dim_at_edge <= b_ext )
+		if ( dim_at_edge <= b_max - b_alg )
 		{
 			b_now = b_alg + dim_at_edge;
 		}
-		else // if ( dim_at_edge > b_ext )
+		else // if ( dim_at_edge > b_max - b_alg )
 		{
 			b_now = dim_at_edge;
 		}

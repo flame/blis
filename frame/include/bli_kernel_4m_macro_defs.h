@@ -49,7 +49,7 @@
 // -- Define default 4m-specific kernel names ----------------------------------
 
 //
-// Level-3 4m
+// Level-3
 //
 
 // gemm4m micro-kernels
@@ -106,256 +106,95 @@
 // Level-1m
 //
 
-// packm_2xk_ri kernels
+// packm_2xk_4m kernels
 
-#ifndef BLIS_CPACKM_2XK_RI_KERNEL
-#define BLIS_CPACKM_2XK_RI_KERNEL BLIS_CPACKM_2XK_RI_KERNEL_REF
+#ifndef BLIS_CPACKM_2XK_4M_KERNEL
+#define BLIS_CPACKM_2XK_4M_KERNEL BLIS_CPACKM_2XK_4M_KERNEL_REF
 #endif
 
-#ifndef BLIS_ZPACKM_2XK_RI_KERNEL
-#define BLIS_ZPACKM_2XK_RI_KERNEL BLIS_ZPACKM_2XK_RI_KERNEL_REF
+#ifndef BLIS_ZPACKM_2XK_4M_KERNEL
+#define BLIS_ZPACKM_2XK_4M_KERNEL BLIS_ZPACKM_2XK_4M_KERNEL_REF
 #endif
 
-// packm_4xk_ri kernels
+// packm_4xk_4m kernels
 
-#ifndef BLIS_CPACKM_4XK_RI_KERNEL
-#define BLIS_CPACKM_4XK_RI_KERNEL BLIS_CPACKM_4XK_RI_KERNEL_REF
+#ifndef BLIS_CPACKM_4XK_4M_KERNEL
+#define BLIS_CPACKM_4XK_4M_KERNEL BLIS_CPACKM_4XK_4M_KERNEL_REF
 #endif
 
-#ifndef BLIS_ZPACKM_4XK_RI_KERNEL
-#define BLIS_ZPACKM_4XK_RI_KERNEL BLIS_ZPACKM_4XK_RI_KERNEL_REF
+#ifndef BLIS_ZPACKM_4XK_4M_KERNEL
+#define BLIS_ZPACKM_4XK_4M_KERNEL BLIS_ZPACKM_4XK_4M_KERNEL_REF
 #endif
 
-// packm_6xk_ri kernels
+// packm_6xk_4m kernels
 
-#ifndef BLIS_CPACKM_6XK_RI_KERNEL
-#define BLIS_CPACKM_6XK_RI_KERNEL BLIS_CPACKM_6XK_RI_KERNEL_REF
+#ifndef BLIS_CPACKM_6XK_4M_KERNEL
+#define BLIS_CPACKM_6XK_4M_KERNEL BLIS_CPACKM_6XK_4M_KERNEL_REF
 #endif
 
-#ifndef BLIS_ZPACKM_6XK_RI_KERNEL
-#define BLIS_ZPACKM_6XK_RI_KERNEL BLIS_ZPACKM_6XK_RI_KERNEL_REF
+#ifndef BLIS_ZPACKM_6XK_4M_KERNEL
+#define BLIS_ZPACKM_6XK_4M_KERNEL BLIS_ZPACKM_6XK_4M_KERNEL_REF
 #endif
 
-// packm_8xk_ri kernels
+// packm_8xk_4m kernels
 
-#ifndef BLIS_CPACKM_8XK_RI_KERNEL
-#define BLIS_CPACKM_8XK_RI_KERNEL BLIS_CPACKM_8XK_RI_KERNEL_REF
+#ifndef BLIS_CPACKM_8XK_4M_KERNEL
+#define BLIS_CPACKM_8XK_4M_KERNEL BLIS_CPACKM_8XK_4M_KERNEL_REF
 #endif
 
-#ifndef BLIS_ZPACKM_8XK_RI_KERNEL
-#define BLIS_ZPACKM_8XK_RI_KERNEL BLIS_ZPACKM_8XK_RI_KERNEL_REF
+#ifndef BLIS_ZPACKM_8XK_4M_KERNEL
+#define BLIS_ZPACKM_8XK_4M_KERNEL BLIS_ZPACKM_8XK_4M_KERNEL_REF
 #endif
 
-// packm_10xk_ri kernels
+// packm_10xk_4m kernels
 
-#ifndef BLIS_CPACKM_10XK_RI_KERNEL
-#define BLIS_CPACKM_10XK_RI_KERNEL BLIS_CPACKM_10XK_RI_KERNEL_REF
+#ifndef BLIS_CPACKM_10XK_4M_KERNEL
+#define BLIS_CPACKM_10XK_4M_KERNEL BLIS_CPACKM_10XK_4M_KERNEL_REF
 #endif
 
-#ifndef BLIS_ZPACKM_10XK_RI_KERNEL
-#define BLIS_ZPACKM_10XK_RI_KERNEL BLIS_ZPACKM_10XK_RI_KERNEL_REF
+#ifndef BLIS_ZPACKM_10XK_4M_KERNEL
+#define BLIS_ZPACKM_10XK_4M_KERNEL BLIS_ZPACKM_10XK_4M_KERNEL_REF
 #endif
 
-// packm_12xk_ri kernels
+// packm_12xk_4m kernels
 
-#ifndef BLIS_CPACKM_12XK_RI_KERNEL
-#define BLIS_CPACKM_12XK_RI_KERNEL BLIS_CPACKM_12XK_RI_KERNEL_REF
+#ifndef BLIS_CPACKM_12XK_4M_KERNEL
+#define BLIS_CPACKM_12XK_4M_KERNEL BLIS_CPACKM_12XK_4M_KERNEL_REF
 #endif
 
-#ifndef BLIS_ZPACKM_12XK_RI_KERNEL
-#define BLIS_ZPACKM_12XK_RI_KERNEL BLIS_ZPACKM_12XK_RI_KERNEL_REF
+#ifndef BLIS_ZPACKM_12XK_4M_KERNEL
+#define BLIS_ZPACKM_12XK_4M_KERNEL BLIS_ZPACKM_12XK_4M_KERNEL_REF
 #endif
 
-// packm_14xk_ri kernels
+// packm_14xk_4m kernels
 
-#ifndef BLIS_CPACKM_14XK_RI_KERNEL
-#define BLIS_CPACKM_14XK_RI_KERNEL BLIS_CPACKM_14XK_RI_KERNEL_REF
+#ifndef BLIS_CPACKM_14XK_4M_KERNEL
+#define BLIS_CPACKM_14XK_4M_KERNEL BLIS_CPACKM_14XK_4M_KERNEL_REF
 #endif
 
-#ifndef BLIS_ZPACKM_14XK_RI_KERNEL
-#define BLIS_ZPACKM_14XK_RI_KERNEL BLIS_ZPACKM_14XK_RI_KERNEL_REF
+#ifndef BLIS_ZPACKM_14XK_4M_KERNEL
+#define BLIS_ZPACKM_14XK_4M_KERNEL BLIS_ZPACKM_14XK_4M_KERNEL_REF
 #endif
 
-// packm_16xk_ri kernels
+// packm_16xk_4m kernels
 
-#ifndef BLIS_CPACKM_16XK_RI_KERNEL
-#define BLIS_CPACKM_16XK_RI_KERNEL BLIS_CPACKM_16XK_RI_KERNEL_REF
+#ifndef BLIS_CPACKM_16XK_4M_KERNEL
+#define BLIS_CPACKM_16XK_4M_KERNEL BLIS_CPACKM_16XK_4M_KERNEL_REF
 #endif
 
-#ifndef BLIS_ZPACKM_16XK_RI_KERNEL
-#define BLIS_ZPACKM_16XK_RI_KERNEL BLIS_ZPACKM_16XK_RI_KERNEL_REF
+#ifndef BLIS_ZPACKM_16XK_4M_KERNEL
+#define BLIS_ZPACKM_16XK_4M_KERNEL BLIS_ZPACKM_16XK_4M_KERNEL_REF
 #endif
 
+// packm_30xk_4m kernels
 
-
-// -- Define default 4m-specific blocksize macros ------------------------------
-
-// Define complex 4m register blocksizes in terms of blocksizes used for
-// real kernels.
-
-// 4m register blocksizes
-#define BLIS_DEFAULT_4M_MR_C     BLIS_DEFAULT_MR_S
-#define BLIS_DEFAULT_4M_KR_C     BLIS_DEFAULT_KR_S
-#define BLIS_DEFAULT_4M_NR_C     BLIS_DEFAULT_NR_S
-
-#define BLIS_DEFAULT_4M_MR_Z     BLIS_DEFAULT_MR_D
-#define BLIS_DEFAULT_4M_KR_Z     BLIS_DEFAULT_KR_D
-#define BLIS_DEFAULT_4M_NR_Z     BLIS_DEFAULT_NR_D
-
-// 4m register blocksize extensions
-#define BLIS_EXTEND_4M_MR_C      BLIS_EXTEND_MR_S
-#define BLIS_EXTEND_4M_KR_C      0
-#define BLIS_EXTEND_4M_NR_C      BLIS_EXTEND_NR_S
-
-#define BLIS_EXTEND_4M_MR_Z      BLIS_EXTEND_MR_D
-#define BLIS_EXTEND_4M_KR_Z      0
-#define BLIS_EXTEND_4M_NR_Z      BLIS_EXTEND_NR_D
-
-// Define complex 4m cache blocksizes in terms of blocksizes used for
-// real operations (if they have not yet already been defined).
-
-// 4m cache blocksizes
-#ifndef BLIS_DEFAULT_4M_MC_C
-#define BLIS_DEFAULT_4M_MC_C     ((BLIS_DEFAULT_MC_S)/1)
-#endif
-#ifndef BLIS_DEFAULT_4M_KC_C
-#define BLIS_DEFAULT_4M_KC_C     ((BLIS_DEFAULT_KC_S)/2)
-#endif
-#ifndef BLIS_DEFAULT_4M_NC_C
-#define BLIS_DEFAULT_4M_NC_C     ((BLIS_DEFAULT_NC_S)/1)
+#ifndef BLIS_CPACKM_30XK_4M_KERNEL
+#define BLIS_CPACKM_30XK_4M_KERNEL BLIS_CPACKM_30XK_4M_KERNEL_REF
 #endif
 
-#ifndef BLIS_DEFAULT_4M_MC_Z
-#define BLIS_DEFAULT_4M_MC_Z     ((BLIS_DEFAULT_MC_D)/1)
+#ifndef BLIS_ZPACKM_30XK_4M_KERNEL
+#define BLIS_ZPACKM_30XK_4M_KERNEL BLIS_ZPACKM_30XK_4M_KERNEL_REF
 #endif
-#ifndef BLIS_DEFAULT_4M_KC_Z
-#define BLIS_DEFAULT_4M_KC_Z     ((BLIS_DEFAULT_KC_D)/2)
-#endif
-#ifndef BLIS_DEFAULT_4M_NC_Z
-#define BLIS_DEFAULT_4M_NC_Z     ((BLIS_DEFAULT_NC_D)/1)
-#endif
-
-// 4m cache blocksize extensions
-#ifndef BLIS_EXTEND_4M_MC_C
-#define BLIS_EXTEND_4M_MC_C      0
-#endif
-#ifndef BLIS_EXTEND_4M_KC_C
-#define BLIS_EXTEND_4M_KC_C      0
-#endif
-#ifndef BLIS_EXTEND_4M_NC_C
-#define BLIS_EXTEND_4M_NC_C      0
-#endif
-
-#ifndef BLIS_EXTEND_4M_MC_Z
-#define BLIS_EXTEND_4M_MC_Z      0
-#endif
-#ifndef BLIS_EXTEND_4M_KC_Z
-#define BLIS_EXTEND_4M_KC_Z      0
-#endif
-#ifndef BLIS_EXTEND_4M_NC_Z
-#define BLIS_EXTEND_4M_NC_Z      0
-#endif
-
-
-
-// -- Kernel blocksize checks --------------------------------------------------
-
-// Verify that cache blocksizes are whole multiples of register blocksizes.
-// Specifically, verify that:
-//   - MC is a whole multiple of MR *AND* NR.
-//   - NC is a whole multiple of NR *AND* MR.
-//   - KC is a whole multiple of KR *AND* both MR, NR.
-// These constraints are enforced because it makes it easier to handle diagonals
-// in the macro-kernel implementations. 
-
-//
-// MC must be a whole multiple of MR and NR.
-//
-
-#if ( \
-      ( BLIS_DEFAULT_4M_MC_C % BLIS_DEFAULT_4M_MR_C != 0 ) || \
-      ( BLIS_DEFAULT_4M_MC_Z % BLIS_DEFAULT_4M_MR_Z != 0 )    \
-    )
-  #error "MC (4m) must be multiple of MR for all datatypes."
-#endif
-
-#if ( \
-      ( BLIS_DEFAULT_4M_MC_C % BLIS_DEFAULT_4M_NR_C != 0 ) || \
-      ( BLIS_DEFAULT_4M_MC_Z % BLIS_DEFAULT_4M_NR_Z != 0 )    \
-    )
-  #error "MC (4m) must be multiple of NR for all datatypes."
-#endif
-
-//
-// NC must be a whole multiple of NR and MR.
-//
-
-#if ( \
-      ( BLIS_DEFAULT_4M_NC_C % BLIS_DEFAULT_4M_NR_C != 0 ) || \
-      ( BLIS_DEFAULT_4M_NC_Z % BLIS_DEFAULT_4M_NR_Z != 0 )    \
-    )
-  #error "NC (4m) must be multiple of NR for all datatypes."
-#endif
-
-#if ( \
-      ( BLIS_DEFAULT_4M_NC_C % BLIS_DEFAULT_4M_MR_C != 0 ) || \
-      ( BLIS_DEFAULT_4M_NC_Z % BLIS_DEFAULT_4M_MR_Z != 0 )    \
-    )
-  #error "NC (4m) must be multiple of MR for all datatypes."
-#endif
-
-//
-// KC must be a whole multiple of KR, MR, and NR.
-//
-
-#if ( \
-      ( BLIS_DEFAULT_4M_KC_C % BLIS_DEFAULT_4M_KR_C != 0 ) || \
-      ( BLIS_DEFAULT_4M_KC_Z % BLIS_DEFAULT_4M_KR_Z != 0 )    \
-    )
-  #error "KC (4m) must be multiple of KR for all datatypes."
-#endif
-
-#if ( \
-      ( BLIS_DEFAULT_4M_KC_C % BLIS_DEFAULT_4M_MR_C != 0 ) || \
-      ( BLIS_DEFAULT_4M_KC_Z % BLIS_DEFAULT_4M_MR_Z != 0 )    \
-    )
-  #error "KC (4m) must be multiple of MR for all datatypes."
-#endif
-
-#if ( \
-      ( BLIS_DEFAULT_4M_KC_C % BLIS_DEFAULT_4M_NR_C != 0 ) || \
-      ( BLIS_DEFAULT_4M_KC_Z % BLIS_DEFAULT_4M_NR_Z != 0 )    \
-    )
-  #error "KC (4m) must be multiple of NR for all datatypes."
-#endif
-
-
-
-// -- Compute extended blocksizes ----------------------------------------------
-
-//
-// Compute maximum cache blocksizes.
-//
-
-#define BLIS_MAXIMUM_4M_MC_C  ( BLIS_DEFAULT_4M_MC_C + BLIS_EXTEND_4M_MC_C )
-#define BLIS_MAXIMUM_4M_KC_C  ( BLIS_DEFAULT_4M_KC_C + BLIS_EXTEND_4M_KC_C )
-#define BLIS_MAXIMUM_4M_NC_C  ( BLIS_DEFAULT_4M_NC_C + BLIS_EXTEND_4M_NC_C )
-
-#define BLIS_MAXIMUM_4M_MC_Z  ( BLIS_DEFAULT_4M_MC_Z + BLIS_EXTEND_4M_MC_Z )
-#define BLIS_MAXIMUM_4M_KC_Z  ( BLIS_DEFAULT_4M_KC_Z + BLIS_EXTEND_4M_KC_Z )
-#define BLIS_MAXIMUM_4M_NC_Z  ( BLIS_DEFAULT_4M_NC_Z + BLIS_EXTEND_4M_NC_Z )
-
-//
-// Compute leading dimension blocksizes used when packing micro-panels.
-//
-
-#define BLIS_PACKDIM_4M_MR_C  ( BLIS_DEFAULT_4M_MR_C + BLIS_EXTEND_4M_MR_C )
-#define BLIS_PACKDIM_4M_KR_C  ( BLIS_DEFAULT_4M_KR_C + BLIS_EXTEND_4M_KR_C )
-#define BLIS_PACKDIM_4M_NR_C  ( BLIS_DEFAULT_4M_NR_C + BLIS_EXTEND_4M_NR_C )
-
-#define BLIS_PACKDIM_4M_MR_Z  ( BLIS_DEFAULT_4M_MR_Z + BLIS_EXTEND_4M_MR_Z )
-#define BLIS_PACKDIM_4M_KR_Z  ( BLIS_DEFAULT_4M_KR_Z + BLIS_EXTEND_4M_KR_Z )
-#define BLIS_PACKDIM_4M_NR_Z  ( BLIS_DEFAULT_4M_NR_Z + BLIS_EXTEND_4M_NR_Z )
 
 
 

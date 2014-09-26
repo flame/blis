@@ -37,5 +37,5 @@ void bli_trmm_int( obj_t*  alpha,
                    obj_t*  b,
                    obj_t*  beta,
                    obj_t*  c,
-                   trmm_t* cntl,
+                   gemm_t* cntl,
                    trmm_thrinfo_t* thread );

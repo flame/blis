@@ -46,14 +46,13 @@
 // the cache blocksize value of the datatype used to size the pool (e.g.
 // double) was not updated accordingly.
 
-// First we compute possibly scaling factors for each datatype. These
+// First we compute possible scaling factors for each datatype. These
 // scaling factors actually take the form of numerator and denominator
 // since we want stay in integer arithmetic. The purpose of the scaling
 // factors is to increase the amount of space we reserve for the memory
 // pool blocks if one of the packed micro-panels has a "leading dimension"
 // that is larger than the register blocksize. (In this case, the leading
-// dimension of a micro-panel is the default register blocksize plus its
-// corresponding extension.)
+// dimension of a micro-panel is the packing register blocksize.)
 
 // Note that when computing the scaling factor, we have to determine which
 // of PACKDIM_MR/DEFAULT_MR and PACKDIM_NR/DEFAULT_NR is greater so that
@@ -65,6 +64,32 @@
 // favorable access patterns for column-stored C and (b) allows the
 // macro-kernel to reuse the existing left-side fused gemmtrsm micro-kernels.
 // We cross-multiply so that the comparison can stay in integer arithmetic.
+
+
+//
+// Create "local" definitions for the 4m and 3m maximum cache blocksizes
+// so that we can more easily show the computation of the pool dimensions
+// below.
+//
+
+// 4m maximum cache blocksizes
+#define BLIS_MAXIMUM_4M_MC_C     BLIS_MAXIMUM_MC_S
+#define BLIS_MAXIMUM_4M_KC_C   ((BLIS_MAXIMUM_KC_S)/2)
+#define BLIS_MAXIMUM_4M_NC_C     BLIS_MAXIMUM_NC_S
+
+#define BLIS_MAXIMUM_4M_MC_Z     BLIS_MAXIMUM_MC_D
+#define BLIS_MAXIMUM_4M_KC_Z   ((BLIS_MAXIMUM_KC_D)/2)
+#define BLIS_MAXIMUM_4M_NC_Z     BLIS_MAXIMUM_NC_D
+
+// 3m maximum cache blocksizes
+#define BLIS_MAXIMUM_3M_MC_C     BLIS_MAXIMUM_MC_S
+#define BLIS_MAXIMUM_3M_KC_C   ((BLIS_MAXIMUM_KC_S)/2)
+#define BLIS_MAXIMUM_3M_NC_C     BLIS_MAXIMUM_NC_S
+
+#define BLIS_MAXIMUM_3M_MC_Z     BLIS_MAXIMUM_MC_D
+#define BLIS_MAXIMUM_3M_KC_Z   ((BLIS_MAXIMUM_KC_D)/2)
+#define BLIS_MAXIMUM_3M_NC_Z     BLIS_MAXIMUM_NC_D
+
 
 //
 // Compute scaling factors for single real.
@@ -200,12 +225,6 @@
 
 // Now, we compute the size of each block/panel of A, B, and C for each
 // datatype.
-
-// NOTE: In defining each BLIS_*_BLOCK_SIZE_? macro below, we assume the
-// "worst case" of the register blocking being unit, in which case every row
-// of A and column of B would need padding to allow for alignment of every
-// packed micro-panel. (This is the worst case since for MR,NR > 1, padding
-// is only needed for every few rows of A and columns of B.)
 
 //
 // Compute memory pool block sizes for single real.
@@ -362,8 +381,7 @@
 
 // -- Maximum block size search ------------------------------------------------
 
-// In this section, we find the largest of each block size and save the result
-// in a new macro for later use in bli_mem.c.
+// In this section, we find the largest of each block size.
 
 //
 // Find the largest block size for blocks of A.
@@ -469,6 +487,8 @@
 
 
 // Define each pool's total size using the block sizes determined above.
+// These values are used in bli_mem.c to size the static memory pool
+// arrays.
 
 //
 // Pool for MC x KC blocks of A.

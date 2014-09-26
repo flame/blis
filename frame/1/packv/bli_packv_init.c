@@ -64,11 +64,11 @@ void bli_packv_init( obj_t*   a,
 	// check to see if the object has already been packed to the desired
 	// schema (as encoded in the control tree). If so, we can alias and
 	// return, as above.
-	// Note that in most cases, bli_obj_pack_status() will return
+	// Note that in most cases, bli_obj_pack_schema() will return
 	// BLIS_NOT_PACKED and thus packing will be called for (but in some
 	// cases packing has already taken place). Also, not all combinations
 	// of current pack status and desired pack schema are valid.
-	if ( bli_obj_pack_status( *a ) == cntl_pack_schema( cntl ) )
+	if ( bli_obj_pack_schema( *a ) == cntl_pack_schema( cntl ) )
 	{
 		bli_obj_alias_to( *a, *p );
 		return;

@@ -34,9 +34,6 @@
 
 #include "blis.h"
 
-extern trmm_t* trmm_l_cntl;
-extern trmm_t* trmm_r_cntl;
-
 //
 // Define object-based interface.
 //
@@ -45,21 +42,13 @@ void bli_trmm( side_t  side,
                obj_t*  a,
                obj_t*  b )
 {
-	if (
-#ifdef BLIS_ENABLE_SCOMPLEX_VIA_4M
-	     bli_obj_is_scomplex( *b ) ||
-#endif
-#ifdef BLIS_ENABLE_DCOMPLEX_VIA_4M
-	     bli_obj_is_dcomplex( *b ) ||
-#endif
-	     FALSE
-	   )
-		return bli_trmm4m( side, alpha, a, b );
+	num_t dt = bli_obj_datatype( *b );
 
-	bli_trmm_front( side, alpha, a, b,
-	                trmm_l_cntl,
-	                trmm_r_cntl );
+	if      ( bli_3m_is_enabled_dt( dt ) ) bli_trmm3m_entry( side, alpha, a, b );
+	else if ( bli_4m_is_enabled_dt( dt ) ) bli_trmm4m_entry( side, alpha, a, b );
+	else                                   bli_trmm_entry( side, alpha, a, b );
 }
+
 
 //
 // Define BLAS-like interfaces with homogeneous-typed operands.

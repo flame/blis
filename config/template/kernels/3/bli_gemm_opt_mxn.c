@@ -148,10 +148,8 @@ void bli_dgemm_opt_mxn(
     in memory that would not otherwise be maintained by MR and/or NR. In
     this case, you should index through a1 and b1 using the values PACKMR
     and PACKNR, respectively, as defined by bli_?packmr and bli_?packnr.
-    These values are defined as BLIS_DEFAULT_MR_? + BLIS_EXTEND_MR_? and
-    BLIS_DEFAULT_NR_? + BLIS_EXTEND_NR_?, respectively, where
-    BLIS_EXTEND_MR_? and BLIS_EXTEND_NR_? encode the register blocksize
-    extensions, as defined in the bli_kernel.h header file of the BLIS
+    These values are defined as BLIS_PACKDIM_MR_? and BLIS_PACKDIM_NR_?,
+    respectively, in the bli_kernel.h header file of the BLIS
     configuration.
   - Storage preference of c11: Sometimes, an optimized micro-kernel will
     have a preferred storage format for C11--typically either contiguous

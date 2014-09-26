@@ -34,8 +34,6 @@
 
 #include "blis.h"
 
-extern gemm_t* gemm_cntl;
-
 //
 // Define object-based interface.
 //
@@ -46,20 +44,15 @@ void bli_symm( side_t  side,
                obj_t*  beta,
                obj_t*  c )
 {
-	if (
-#ifdef BLIS_ENABLE_SCOMPLEX_VIA_4M
-	     bli_obj_is_scomplex( *c ) ||
-#endif
-#ifdef BLIS_ENABLE_DCOMPLEX_VIA_4M
-	     bli_obj_is_dcomplex( *c ) ||
-#endif
-	     FALSE
-	   )
-		return bli_symm4m( side, alpha, a, b, beta, c );
+	num_t dt = bli_obj_datatype( *c );
 
-	bli_symm_front( side, alpha, a, b, beta, c,
-	                gemm_cntl );
+	if      ( bli_3mh_is_enabled_dt( dt ) ) bli_symm3mh_entry( side, alpha, a, b, beta, c );
+	else if ( bli_3m_is_enabled_dt( dt ) )  bli_symm3m_entry( side, alpha, a, b, beta, c );
+	else if ( bli_4mh_is_enabled_dt( dt ) ) bli_symm4mh_entry( side, alpha, a, b, beta, c );
+	else if ( bli_4m_is_enabled_dt( dt ) )  bli_symm4m_entry( side, alpha, a, b, beta, c );
+	else                                    bli_symm_entry( side, alpha, a, b, beta, c );
 }
+
 
 //
 // Define BLAS-like interfaces with homogeneous-typed operands.

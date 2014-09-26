@@ -54,9 +54,9 @@ void bli_scal2d( obj_t* beta,
 
 	// Create an object to hold a copy-cast of alpha.
 	bli_obj_scalar_init_detached_copy_of( dt_x,
-	                             BLIS_NO_CONJUGATE,
-	                             beta,
-	                             &beta_local );
+	                                      BLIS_NO_CONJUGATE,
+	                                      beta,
+	                                      &beta_local );
 
 	bli_scal2d_unb_var1( &beta_local,
 	                     x,

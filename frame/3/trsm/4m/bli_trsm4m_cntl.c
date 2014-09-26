@@ -48,6 +48,9 @@ extern func_t*    gemm4m_ukrs;
 func_t*           gemmtrsm4m_l_ukrs;
 func_t*           gemmtrsm4m_u_ukrs;
 
+func_t*           trsm4m_l_ukrs;
+func_t*           trsm4m_u_ukrs;
+
 packm_t*          trsm4m_l_packa_cntl;
 packm_t*          trsm4m_l_packb_cntl;
 
@@ -88,17 +91,32 @@ void bli_trsm4m_cntl_init()
 	                     BLIS_ZGEMMTRSM4M_U_UKERNEL, FALSE );
 
 
+	// Create function pointer objects for each datatype-specific
+	// trsm4m_l and trsm4m_u micro-kernel.
+	trsm4m_l_ukrs
+	=
+	bli_func_obj_create( NULL,                   FALSE,
+	                     NULL,                   FALSE,
+	                     BLIS_CTRSM4M_L_UKERNEL, FALSE,
+	                     BLIS_ZTRSM4M_L_UKERNEL, FALSE );
+
+	trsm4m_u_ukrs
+	=
+	bli_func_obj_create( NULL,                   FALSE,
+	                     NULL,                   FALSE,
+	                     BLIS_CTRSM4M_U_UKERNEL, FALSE,
+	                     BLIS_ZTRSM4M_U_UKERNEL, FALSE );
+
 
 	// Create control tree objects for packm operations (left side).
 	trsm4m_l_packa_cntl
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT4,
+	                           BLIS_VARIANT2,
 	                           // IMPORTANT: n dim multiple must be mr to
 	                           // support right and bottom-right edge cases
 	                           gemm4m_mr,
 	                           gemm4m_mr,
-	                           TRUE,  // densify
 	                           TRUE,  // invert diagonal
 	                           TRUE,  // reverse iteration if upper?
 	                           FALSE, // reverse iteration if lower?
@@ -108,12 +126,11 @@ void bli_trsm4m_cntl_init()
 	trsm4m_l_packb_cntl
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT4,
+	                           BLIS_VARIANT2,
 	                           // IMPORTANT: m dim multiple must be mr since
 	                           // B_pack is updated (ie: serves as C) in trsm
 	                           gemm4m_mr,
 	                           gemm4m_nr,
-	                           FALSE, // already dense; densify not necessary
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
 	                           FALSE, // reverse iteration if lower?
@@ -124,10 +141,9 @@ void bli_trsm4m_cntl_init()
 	trsm4m_r_packa_cntl
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT4,
+	                           BLIS_VARIANT2,
 	                           gemm4m_nr,
 	                           gemm4m_mr,
-	                           FALSE, // already dense; densify not necessary
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
 	                           FALSE, // reverse iteration if lower?
@@ -137,10 +153,9 @@ void bli_trsm4m_cntl_init()
 	trsm4m_r_packb_cntl
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT4,
+	                           BLIS_VARIANT2,
 	                           gemm4m_mr,
 	                           gemm4m_mr,
-	                           TRUE,  // densify
 	                           TRUE,  // invert diagonal
 	                           FALSE, // reverse iteration if upper?
 	                           TRUE,  // reverse iteration if lower?
@@ -265,6 +280,8 @@ void bli_trsm4m_cntl_finalize()
 {
 	bli_func_obj_free( gemmtrsm4m_l_ukrs );
 	bli_func_obj_free( gemmtrsm4m_u_ukrs );
+	bli_func_obj_free( trsm4m_l_ukrs );
+	bli_func_obj_free( trsm4m_u_ukrs );
 
 	bli_cntl_obj_free( trsm4m_l_packa_cntl );
 	bli_cntl_obj_free( trsm4m_l_packb_cntl );

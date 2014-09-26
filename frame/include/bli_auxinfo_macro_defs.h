@@ -38,14 +38,20 @@
 
 // auxinfo_t field query
 
-#define bli_auxinfo_next_a( auxinfo )  ( (auxinfo)->a_next )
-#define bli_auxinfo_next_b( auxinfo )  ( (auxinfo)->b_next )
+#define bli_auxinfo_schema_a( auxinfo )  ( (auxinfo)->schema_a )
+#define bli_auxinfo_schema_b( auxinfo )  ( (auxinfo)->schema_b )
 
-#define bli_auxinfo_ps_a( auxinfo )    ( (auxinfo)->ps_a )
-#define bli_auxinfo_ps_b( auxinfo )    ( (auxinfo)->ps_b )
+#define bli_auxinfo_next_a( auxinfo )    ( (auxinfo)->a_next )
+#define bli_auxinfo_next_b( auxinfo )    ( (auxinfo)->b_next )
+
+#define bli_auxinfo_ps_a( auxinfo )      ( (auxinfo)->ps_a )
+#define bli_auxinfo_ps_b( auxinfo )      ( (auxinfo)->ps_b )
 
 
 // auxinfo_t field modification
+
+#define bli_auxinfo_set_schema_a( schema, auxinfo )   { (auxinfo).schema_a = schema; }
+#define bli_auxinfo_set_schema_b( schema, auxinfo )   { (auxinfo).schema_b = schema; }
 
 #define bli_auxinfo_set_next_a( a_p, auxinfo ) { (auxinfo).a_next = a_p; }
 #define bli_auxinfo_set_next_b( b_p, auxinfo ) { (auxinfo).b_next = b_p; }
@@ -56,8 +62,8 @@
 	bli_auxinfo_set_next_b( b_p, auxinfo ); \
 }
 
-#define bli_auxinfo_set_ps_a( a_p, auxinfo )   { (auxinfo).ps_a = a_p; }
-#define bli_auxinfo_set_ps_b( b_p, auxinfo )   { (auxinfo).ps_b = b_p; }
+#define bli_auxinfo_set_ps_a( ps, auxinfo )   { (auxinfo).ps_a = ps; }
+#define bli_auxinfo_set_ps_b( ps, auxinfo )   { (auxinfo).ps_b = ps; }
 
 
 #endif 

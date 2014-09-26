@@ -115,7 +115,8 @@ void bli_ddotxaxpyf_opt_var1( conj_t             conjat,
 	{
 		use_ref = TRUE;
 	}
-    else if ( inca != 1 || incw != 1 || incx != 1 || incy != 1 || incz != 1 )
+    else if ( inca != 1 || incw != 1 || incx != 1 || incy != 1 || incz != 1 ||
+	          bli_is_unaligned_to( lda*sizeof(double), 16 ) )
     {
         use_ref = TRUE;
     }

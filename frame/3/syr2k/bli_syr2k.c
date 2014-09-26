@@ -34,9 +34,6 @@
 
 #include "blis.h"
 
-//extern her2k_t* her2k_cntl;
-extern herk_t*  herk_cntl;
-
 //
 // Define object-based interface.
 //
@@ -46,20 +43,15 @@ void bli_syr2k( obj_t*  alpha,
                 obj_t*  beta,
                 obj_t*  c )
 {
-	if (
-#ifdef BLIS_ENABLE_SCOMPLEX_VIA_4M
-	     bli_obj_is_scomplex( *c ) ||
-#endif
-#ifdef BLIS_ENABLE_DCOMPLEX_VIA_4M
-	     bli_obj_is_dcomplex( *c ) ||
-#endif
-	     FALSE
-	   )
-		return bli_syr2k4m( alpha, a, b, beta, c );
+	num_t dt = bli_obj_datatype( *c );
 
-	bli_syr2k_front( alpha, a, b, beta, c,
-	                 herk_cntl );
+	if      ( bli_3mh_is_enabled_dt( dt ) ) bli_syr2k3mh_entry( alpha, a, b, beta, c );
+	else if ( bli_3m_is_enabled_dt( dt ) )  bli_syr2k3m_entry( alpha, a, b, beta, c );
+	else if ( bli_4mh_is_enabled_dt( dt ) ) bli_syr2k4mh_entry( alpha, a, b, beta, c );
+	else if ( bli_4m_is_enabled_dt( dt ) )  bli_syr2k4m_entry( alpha, a, b, beta, c );
+	else                                    bli_syr2k_entry( alpha, a, b, beta, c );
 }
+
 
 //
 // Define BLAS-like interfaces with homogeneous-typed operands.

@@ -37,5 +37,5 @@ void bli_syr2k_front( obj_t*  alpha,
                       obj_t*  b,
                       obj_t*  beta,
                       obj_t*  c,
-                      herk_t* cntl );
+                      gemm_t* cntl );
 

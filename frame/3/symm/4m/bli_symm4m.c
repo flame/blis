@@ -34,8 +34,6 @@
 
 #include "blis.h"
 
-extern gemm_t* gemm4m_cntl;
-
 //
 // Define object-based interface.
 //
@@ -46,8 +44,12 @@ void bli_symm4m( side_t  side,
                  obj_t*  beta,
                  obj_t*  c )
 {
-	bli_symm_front( side, alpha, a, b, beta, c,
-	                gemm4m_cntl );
+	// Since 4m only applies to the complex domain, we use the regular
+	// implementation for real domain cases.
+	if ( bli_obj_is_complex( *c ) )
+		bli_symm4m_entry( side, alpha, a, b, beta, c );
+	else
+		bli_symm_entry( side, alpha, a, b, beta, c );
 }
 
 //
