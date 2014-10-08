@@ -39,6 +39,10 @@
 #define BLIS_TREE_BARRIER
 #define BLIS_TREE_BARRIER_ARITY 4
 
+#define BLIS_DGEMM_UKERNEL_PREFERS_CONTIG_ROWS
+#define BLIS_ENABLE_MULTITHREADING
+#define BLIS_ENABLE_OPENMP
+
 // -- OPERATING SYSTEM ---------------------------------------------------------
 
 
