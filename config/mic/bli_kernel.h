@@ -56,17 +56,11 @@
 
 #define BLIS_DEFAULT_MC_S              240
 #define BLIS_DEFAULT_KC_S              240
-#define BLIS_DEFAULT_NC_S              9600
+#define BLIS_DEFAULT_NC_S              14400
 
 #define BLIS_DEFAULT_MC_D              120
 #define BLIS_DEFAULT_KC_D              240
 #define BLIS_DEFAULT_NC_D              14400
-
-#define BLIS_DEFAULT_4M_MC_C           BLIS_DEFAULT_MC_S
-#define BLIS_DEFAULT_4M_KC_C           BLIS_DEFAULT_KC_S
-
-#define BLIS_DEFAULT_3M_MC_C           BLIS_DEFAULT_MC_S
-#define BLIS_DEFAULT_3M_KC_C           BLIS_DEFAULT_KC_S
 
 /*
 #define BLIS_DEFAULT_MC_C              120
@@ -77,6 +71,7 @@
 #define BLIS_DEFAULT_KC_Z              240
 #define BLIS_DEFAULT_NC_Z              9600
 */
+
 // -- Register blocksizes --
 
 #define BLIS_DEFAULT_MR_S              30
@@ -108,9 +103,9 @@
 // enlarged if such an extension would encompass the remaining portion of
 // the matrix dimension.
 
-//#define BLIS_MAXIMUM_MC_S              (BLIS_DEFAULT_MC_S + BLIS_DEFAULT_MC_S/4)
-//#define BLIS_MAXIMUM_KC_S              (BLIS_DEFAULT_KC_S + BLIS_DEFAULT_KC_S/4)
-//#define BLIS_MAXIMUM_NC_S              (BLIS_DEFAULT_NC_S + BLIS_DEFAULT_NC_S/4)
+#define BLIS_MAXIMUM_MC_S              (BLIS_DEFAULT_MC_S + BLIS_DEFAULT_MC_S/4)
+#define BLIS_MAXIMUM_KC_S              (BLIS_DEFAULT_KC_S + BLIS_DEFAULT_KC_S/4)
+#define BLIS_MAXIMUM_NC_S              (BLIS_DEFAULT_NC_S +                   0) 
 
 #define BLIS_MAXIMUM_MC_D              (BLIS_DEFAULT_MC_D + BLIS_DEFAULT_MC_D/4)
 #define BLIS_MAXIMUM_KC_D              (BLIS_DEFAULT_KC_D + BLIS_DEFAULT_KC_D/4)

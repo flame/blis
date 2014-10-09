@@ -264,6 +264,8 @@ void bli_sgemm_opt_30x16(
                     auxinfo_t*       data
                   )
 {
+    if( k == 0 ) return;
+
     float * a_next = bli_auxinfo_next_a( data );
     float * b_next = bli_auxinfo_next_b( data );
 

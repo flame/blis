@@ -264,6 +264,8 @@ void bli_dgemm_opt_30x8(
                     auxinfo_t*       data
                   )
 {
+    if( k == 0) return;
+
     double * a_next = bli_auxinfo_next_a( data );
     double * b_next = bli_auxinfo_next_b( data );
 
