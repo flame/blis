@@ -216,6 +216,11 @@ void libblis_test_trsm_ukr_experiment( test_params_t* params,
 	                          BLIS_BUFFER_FOR_B_PANEL,
 	                          &b, &bp );
 
+	// Set the uplo field of ap since the default for packed objects is
+	// BLIS_DENSE, and the _ukernel() wrapper needs this information to
+	// know which set of micro-kernels (lower or upper) to choose from.
+	bli_obj_set_uplo( uploa, ap );
+
 	// Pack the contents of a to ap.
 	bli_packm_blk_var1( &a, &ap, &BLIS_PACKM_SINGLE_THREADED );
 

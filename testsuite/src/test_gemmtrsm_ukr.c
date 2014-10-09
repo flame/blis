@@ -256,10 +256,20 @@ void libblis_test_gemmtrsm_ukr_experiment( test_params_t* params,
 	// Pack the contents of b to bp.
 	bli_packm_blk_var1( &b, &bp, &BLIS_PACKM_SINGLE_THREADED );
 
+	// Set the uplo field of ap since the default for packed objects is
+	// BLIS_DENSE, and the _make_subparts() routine needs this information
+	// to know how to initialize the subpartitions.
+	bli_obj_set_uplo( uploa, ap );
+
 
 	// Create subpartitions from the a and b panels.
 	bli_gemmtrsm_ukr_make_subparts( k, &ap, &bp,
 	                                &a1xp, &a11p, &bx1p, &b11p );
+
+	// Set the uplo field of a11p since the default for packed objects is
+	// BLIS_DENSE, and the _ukernel() wrapper needs this information to
+	// know which set of micro-kernels (lower or upper) to choose from.
+	bli_obj_set_uplo( uploa, a11p );
 
 
 	// Repeat the experiment n_repeats times and record results. 

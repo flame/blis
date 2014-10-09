@@ -175,9 +175,15 @@ void bli_obj_alloc_buffer( inc_t  rs,
 			                                BLIS_HEAP_STRIDE_ALIGN_SIZE );
 			n_elem = bli_abs( rs ) * m;
 		}
-		else
+		else // if ( cs_abs == rs_abs )
 		{
-			bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
+			// If the row and column strides are equal, it almost certainly
+			// means that m == n == 1. (If that is not the case, then
+			// something is very wrong.)
+			if ( m != 1 || m != 1 )
+				bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
+
+			n_elem = 1;
 		}
 	}
 
