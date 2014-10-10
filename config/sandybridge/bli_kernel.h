@@ -58,20 +58,17 @@
 #define BLIS_DEFAULT_KC_S              384
 #define BLIS_DEFAULT_NC_S              4096
 
-#define BLIS_DEFAULT_MC_D              96 
+#define BLIS_DEFAULT_MC_D              96
 #define BLIS_DEFAULT_KC_D              256
 #define BLIS_DEFAULT_NC_D              4096
 
-#define BLIS_DEFAULT_MC_C              128
-#define BLIS_DEFAULT_KC_C              384
+#define BLIS_DEFAULT_MC_C              96
+#define BLIS_DEFAULT_KC_C              256
 #define BLIS_DEFAULT_NC_C              4096
 
 #define BLIS_DEFAULT_MC_Z              128
 #define BLIS_DEFAULT_KC_Z              192
 #define BLIS_DEFAULT_NC_Z              4096
-
-//#define BLIS_DEFAULT_4M_MC_Z           128
-//#define BLIS_DEFAULT_4M_KC_Z           128
 
 // -- Register blocksizes --
 
@@ -159,6 +156,8 @@
 
 //#define BLIS_DGEMM_UKERNEL         bli_dgemm_int_8x4
 #define BLIS_DGEMM_UKERNEL         bli_dgemm_asm_8x4
+
+#define BLIS_ZGEMM_UKERNEL         bli_zgemm_asm_4x4
 
 // -- trsm-related --
 
