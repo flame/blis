@@ -154,8 +154,9 @@
 
 #define BLIS_SGEMM_UKERNEL         bli_sgemm_asm_8x8
 
-//#define BLIS_DGEMM_UKERNEL         bli_dgemm_int_8x4
 #define BLIS_DGEMM_UKERNEL         bli_dgemm_asm_8x4
+
+#define BLIS_CGEMM_UKERNEL         bli_cgemm_asm_8x4
 
 #define BLIS_ZGEMM_UKERNEL         bli_zgemm_asm_4x4
 
