@@ -66,7 +66,7 @@
 #define BLIS_DEFAULT_KC_C              256
 #define BLIS_DEFAULT_NC_C              4096
 
-#define BLIS_DEFAULT_MC_Z              128
+#define BLIS_DEFAULT_MC_Z              64 
 #define BLIS_DEFAULT_KC_Z              192
 #define BLIS_DEFAULT_NC_Z              4096
 

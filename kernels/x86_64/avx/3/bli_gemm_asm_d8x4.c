@@ -45,7 +45,7 @@ void bli_sgemm_asm_8x8(
                       )
 {
 	//void*   a_next = bli_auxinfo_next_a( data );
-	void*   b_next = bli_auxinfo_next_b( data );
+	//void*   b_next = bli_auxinfo_next_b( data );
 
 	dim_t   k_iter = k / 4;
 	dim_t   k_left = k % 4;
@@ -56,15 +56,16 @@ void bli_sgemm_asm_8x8(
 	"                                            \n\t"
 	"movq                %2, %%rax               \n\t" // load address of a.
 	"movq                %3, %%rbx               \n\t" // load address of b.
-	"movq                %9, %%r15               \n\t" // load address of b_next.
+	//"movq                %9, %%r15               \n\t" // load address of b_next.
+	"                                            \n\t"
+	"vmovaps    0 * 32(%%rax), %%ymm0            \n\t" // initialize loop by pre-loading
+	"vmovsldup  0 * 32(%%rbx), %%ymm2            \n\t" // elements of a and b.
+	"vpermilps   $0x4e, %%ymm2, %%ymm3           \n\t"
 	"                                            \n\t"
 	"movq                %6, %%rcx               \n\t" // load address of c
 	"movq                %8, %%rdi               \n\t" // load cs_c
 	"leaq        (,%%rdi,4), %%rdi               \n\t" // cs_c *= sizeof(float)
 	"leaq   (%%rcx,%%rdi,4), %%r10               \n\t" // load address of c + 4*cs_c;
-	"                                            \n\t"
-	"prefetcht0   0 * 32(%%r15)                  \n\t" // prefetch b_next
-	"prefetcht0   2 * 32(%%r15)                  \n\t" // prefetch b_next[2*8]
 	"                                            \n\t"
 	"leaq   (%%rdi,%%rdi,2), %%r14               \n\t" // r14 = 3*cs_c;
 	"prefetcht0   7 * 8(%%rcx)                   \n\t" // prefetch c + 0*cs_c
@@ -75,10 +76,6 @@ void bli_sgemm_asm_8x8(
 	"prefetcht0   7 * 8(%%r10,%%rdi)             \n\t" // prefetch c + 5*cs_c
 	"prefetcht0   7 * 8(%%r10,%%rdi,2)           \n\t" // prefetch c + 6*cs_c
 	"prefetcht0   7 * 8(%%r10,%%r14)             \n\t" // prefetch c + 7*cs_c
-	"                                            \n\t"
-	"vmovaps    0 * 32(%%rax), %%ymm0            \n\t" // initialize loop by pre-loading
-	"vmovsldup  0 * 32(%%rbx), %%ymm2            \n\t" // elements of a and b.
-	"vpermilps   $0x4e, %%ymm2, %%ymm3           \n\t"
 	"                                            \n\t"
 	"vxorps    %%ymm8,  %%ymm8,  %%ymm8          \n\t"
 	"vxorps    %%ymm9,  %%ymm9,  %%ymm9          \n\t"
@@ -99,11 +96,9 @@ void bli_sgemm_asm_8x8(
 	"                                            \n\t"
 	".SLOOPKITER:                                \n\t" // MAIN LOOP
 	"                                            \n\t"
-	"addq         $4 * 8 * 4, %%r15              \n\t" // b_next += 4*8 (unroll x nr)
 	"                                            \n\t"
 	"                                            \n\t" // iteration 0
 	"prefetcht0  16 * 32(%%rax)                  \n\t"
-	//"prefetcht0  10 * 32(%%rax)                  \n\t"
 	"vmulps            %%ymm0,  %%ymm2, %%ymm6   \n\t"
 	"vperm2f128 $0x03, %%ymm2,  %%ymm2, %%ymm4   \n\t"
 	"vmovshdup  0 * 32(%%rbx),  %%ymm2           \n\t"
@@ -132,7 +127,6 @@ void bli_sgemm_asm_8x8(
 	"vmulps            %%ymm0,  %%ymm5, %%ymm7   \n\t"
 	"vaddps            %%ymm10, %%ymm6, %%ymm10  \n\t"
 	"vaddps            %%ymm8,  %%ymm7, %%ymm8   \n\t"
-	"prefetcht0   0 * 32(%%r15)                  \n\t" // prefetch b_next[0*8]
 	"                                            \n\t"
 	"                                            \n\t" // iteration 1
 	"vmulps            %%ymm1,  %%ymm2, %%ymm6   \n\t"
@@ -167,7 +161,6 @@ void bli_sgemm_asm_8x8(
 	"                                            \n\t"
 	"                                            \n\t" // iteration 2
 	"prefetcht0  18 * 32(%%rax)                  \n\t"
-	//"prefetcht0  12 * 32(%%rax)                  \n\t"
 	"vmulps            %%ymm0,  %%ymm2, %%ymm6   \n\t"
 	"vperm2f128 $0x03, %%ymm2,  %%ymm2, %%ymm4   \n\t"
 	"vmovshdup  2 * 32(%%rbx),  %%ymm2           \n\t"
@@ -197,7 +190,6 @@ void bli_sgemm_asm_8x8(
 	"vmulps            %%ymm0,  %%ymm5, %%ymm7   \n\t"
 	"vaddps            %%ymm10, %%ymm6, %%ymm10  \n\t"
 	"vaddps            %%ymm8,  %%ymm7, %%ymm8   \n\t"
-	"prefetcht0   2 * 32(%%r15)                  \n\t" // prefetch b_next[2*8]
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t" // iteration 3
@@ -1026,8 +1018,8 @@ void bli_sgemm_asm_8x8(
 	  "m" (beta),   // 5
 	  "m" (c),      // 6
 	  "m" (rs_c),   // 7
-	  "m" (cs_c),   // 8
-	  "m" (b_next)/*, // 9
+	  "m" (cs_c)/*,   // 8
+	  "m" (b_next), // 9
 	  "m" (a_next)*/  // 10
 	: // register clobber list
 	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", 
@@ -1051,7 +1043,7 @@ void bli_dgemm_asm_8x4(
                       )
 {
 	//void*   a_next = bli_auxinfo_next_a( data );
-	void*   b_next = bli_auxinfo_next_b( data );
+	//void*   b_next = bli_auxinfo_next_b( data );
 
 	dim_t   k_iter = k / 4;
 	dim_t   k_left = k % 4;
@@ -1062,25 +1054,22 @@ void bli_dgemm_asm_8x4(
 	"                                            \n\t"
 	"movq                %2, %%rax               \n\t" // load address of a.
 	"movq                %3, %%rbx               \n\t" // load address of b.
-	"movq                %9, %%r15               \n\t" // load address of b_next.
+	//"movq                %9, %%r15               \n\t" // load address of b_next.
 	//"movq               %10, %%r14               \n\t" // load address of a_next.
+	"                                            \n\t"
+	"vmovapd   0 * 32(%%rax), %%ymm0             \n\t" // initialize loop by pre-loading
+	"vmovapd   0 * 32(%%rbx), %%ymm2             \n\t" // elements of a and b.
+	"vpermilpd  $0x5, %%ymm2, %%ymm3             \n\t"
 	"                                            \n\t"
 	"movq                %6, %%rcx               \n\t" // load address of c
 	"movq                %8, %%rdi               \n\t" // load cs_c
 	"leaq        (,%%rdi,8), %%rdi               \n\t" // cs_c *= sizeof(double)
 	"leaq   (%%rcx,%%rdi,2), %%r10               \n\t" // load address of c + 2*cs_c;
 	"                                            \n\t"
-	"prefetcht0   0 * 32(%%r15)                  \n\t" // prefetch b_next
-	"prefetcht0   2 * 32(%%r15)                  \n\t" // prefetch b_next[2*4]
-	"                                            \n\t"
 	"prefetcht0   3 * 8(%%rcx)                   \n\t" // prefetch c + 0*cs_c
 	"prefetcht0   3 * 8(%%rcx,%%rdi)             \n\t" // prefetch c + 1*cs_c
 	"prefetcht0   3 * 8(%%r10)                   \n\t" // prefetch c + 2*cs_c
 	"prefetcht0   3 * 8(%%r10,%%rdi)             \n\t" // prefetch c + 3*cs_c
-	"                                            \n\t"
-	"vmovapd   0 * 32(%%rax), %%ymm0             \n\t" // initialize loop by pre-loading
-	"vmovapd   0 * 32(%%rbx), %%ymm2             \n\t" // elements of a and b.
-	"vpermilpd  $0x5, %%ymm2, %%ymm3             \n\t"
 	"                                            \n\t"
 	"vxorpd    %%ymm8,  %%ymm8,  %%ymm8          \n\t"
 	"vxorpd    %%ymm9,  %%ymm9,  %%ymm9          \n\t"
@@ -1101,7 +1090,6 @@ void bli_dgemm_asm_8x4(
 	"                                            \n\t"
 	".DLOOPKITER:                                \n\t" // MAIN LOOP
 	"                                            \n\t"
-	"addq         $4 * 4 * 8, %%r15              \n\t" // b_next += 4*4 (unroll x nr)
 	"                                            \n\t"
 	"                                            \n\t" // iteration 0
 	"vmovapd   1 * 32(%%rax),  %%ymm1            \n\t"
@@ -1126,7 +1114,6 @@ void bli_dgemm_asm_8x4(
 	"vaddpd           %%ymm11, %%ymm6,  %%ymm11  \n\t"
 	"vaddpd           %%ymm9,  %%ymm7,  %%ymm9   \n\t"
 	"                                            \n\t"
-	"prefetcht0   0 * 32(%%r15)                  \n\t" // prefetch b_next[0*4]
 	"vmulpd           %%ymm1,  %%ymm4,  %%ymm6   \n\t"
 	"vmulpd           %%ymm1,  %%ymm5,  %%ymm7   \n\t"
 	"vaddpd           %%ymm10, %%ymm6,  %%ymm10  \n\t"
@@ -1186,7 +1173,6 @@ void bli_dgemm_asm_8x4(
 	"vaddpd           %%ymm11, %%ymm6,  %%ymm11  \n\t"
 	"vaddpd           %%ymm9,  %%ymm7,  %%ymm9   \n\t"
 	"                                            \n\t"
-	"prefetcht0   2 * 32(%%r15)                  \n\t" // prefetch b_next[2*4]
 	"vmulpd           %%ymm1,  %%ymm4,  %%ymm6   \n\t"
 	"vmulpd           %%ymm1,  %%ymm5,  %%ymm7   \n\t"
 	"vaddpd           %%ymm10, %%ymm6,  %%ymm10  \n\t"
@@ -1713,8 +1699,8 @@ void bli_dgemm_asm_8x4(
 	  "m" (beta),   // 5
 	  "m" (c),      // 6
 	  "m" (rs_c),   // 7
-	  "m" (cs_c),   // 8
-	  "m" (b_next)/*, // 9
+	  "m" (cs_c)/*,   // 8
+	  "m" (b_next), // 9
 	  "m" (a_next)*/  // 10
 	: // register clobber list
 	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", 
