@@ -490,8 +490,8 @@
 
 #define bli_is_last_iter( i1, niter, tid, nth ) \
 \
-	( i1 == niter - 1 - ( ( niter - tid - 1 ) % nth ) ) \
-	/*( i1 == niter - 1 ) */
+	/*( i1 == niter - 1 - ( ( niter - tid - 1 ) % nth ) )*/ \
+	( i1 == niter - 1 )
 
 
 // packbuf_t-related
