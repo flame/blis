@@ -149,7 +149,7 @@ void bli_trsm_lu_ker_var2( obj_t*  a,
 	   buf_c, rs_c, cs_c,
 	   gemmtrsm_ukr,
 	   gemm_ukr,
-       thread );
+	   thread );
 }
 
 
@@ -322,7 +322,7 @@ void PASTEMAC(ch,varname)( \
 	/* Loop over the n dimension (NR columns at a time). */ \
 	for ( j = 0; j < n_iter; ++j ) \
 	{ \
-        if( trsm_my_iter( j, thread ) ) { \
+		if( trsm_my_iter( j, thread ) ) { \
 \
 		ctype* restrict a1; \
 		ctype* restrict c11; \
@@ -377,12 +377,12 @@ void PASTEMAC(ch,varname)( \
 \
 				/* Compute the addresses of the next panels of A and B. */ \
 				a2 = a1 + k_a1112 * ss_a; \
-				if ( bli_is_last_iter( ib, m_iter ) ) \
+				if ( bli_is_last_iter( ib, m_iter, 0, 1 ) ) \
 				{ \
 					a2 = a_cast; \
 					b2 = b1; \
-					/*if ( bli_is_last_iter( j, n_iter ) ) */\
-                    if ( j + thread_num_threads(thread) >= n_iter ) \
+					/*if ( bli_is_last_iter( j, n_iter, 0, 1 ) ) */\
+					if ( j + thread_num_threads(thread) >= n_iter ) \
 						b2 = b_cast; \
 				} \
 \
@@ -434,12 +434,12 @@ void PASTEMAC(ch,varname)( \
 \
 				/* Compute the addresses of the next panels of A and B. */ \
 				a2 = a1 + rstep_a; \
-				if ( bli_is_last_iter( ib, m_iter ) ) \
+				if ( bli_is_last_iter( ib, m_iter, 0, 1 ) ) \
 				{ \
 					a2 = a_cast; \
 					b2 = b1; \
-					/*if ( bli_is_last_iter( j, n_iter ) ) */\
-                    if ( j + thread_num_threads(thread) >= n_iter ) \
+					/*if ( bli_is_last_iter( j, n_iter, 0, 1 ) ) */\
+					if ( j + thread_num_threads(thread) >= n_iter ) \
 						b2 = b_cast; \
 				} \
 \
@@ -487,7 +487,8 @@ void PASTEMAC(ch,varname)( \
 \
 			c11 -= rstep_c; \
 		} \
-        } \
+		} \
+\
 		b1 += cstep_b; \
 		c1 += cstep_c; \
 	} \

@@ -99,18 +99,18 @@ void bli_trsm_ll_ker_var2( obj_t*  a,
 
 
 	// Grab the address of the internal scalar buffer for the scalar
-    // attached to B. This will be the alpha scalar used in the gemmtrsm
-    // subproblems (ie: the scalar that would be applied to the packed
-    // copy of B prior to it being updated by the trsm subproblem). This
-    // scalar may be unit, if for example it was applied during packing.
+	// attached to B. This will be the alpha scalar used in the gemmtrsm
+	// subproblems (ie: the scalar that would be applied to the packed
+	// copy of B prior to it being updated by the trsm subproblem). This
+	// scalar may be unit, if for example it was applied during packing.
 	buf_alpha1 = bli_obj_internal_scalar_buffer( *b );
 
 	// Grab the address of the internal scalar buffer for the scalar
-    // attached to C. This will be the "beta" scalar used in the gemm-only
-    // subproblems that correspond to micro-panels that do not intersect
-    // the diagonal. We need this separate scalar because it's possible
-    // that the alpha attached to B was reset, if it was applied during
-    // packing.
+	// attached to C. This will be the "beta" scalar used in the gemm-only
+	// subproblems that correspond to micro-panels that do not intersect
+	// the diagonal. We need this separate scalar because it's possible
+	// that the alpha attached to B was reset, if it was applied during
+	// packing.
 	buf_alpha2 = bli_obj_internal_scalar_buffer( *c );
 
 	// Index into the type combination array to extract the correct
@@ -149,7 +149,7 @@ void bli_trsm_ll_ker_var2( obj_t*  a,
 	   buf_c, rs_c, cs_c,
 	   gemmtrsm_ukr,
 	   gemm_ukr,
-       thread );
+	   thread );
 }
 
 
@@ -314,7 +314,7 @@ void PASTEMAC(ch,varname)( \
 	/* Loop over the n dimension (NR columns at a time). */ \
 	for ( j = 0; j < n_iter; ++j ) \
 	{ \
-        if( trsm_my_iter( j, thread ) ) { \
+		if( trsm_my_iter( j, thread ) ) { \
 \
 		ctype* restrict a1; \
 		ctype* restrict c11; \
@@ -367,11 +367,11 @@ void PASTEMAC(ch,varname)( \
 \
 				/* Compute the addresses of the next panels of A and B. */ \
 				a2 = a1 + k_a1011 * ss_a; \
-				if ( bli_is_last_iter( i, m_iter ) ) \
+				if ( bli_is_last_iter( i, m_iter, 0, 1 ) ) \
 				{ \
 					a2 = a_cast; \
 					b2 = b1; \
-					/*if ( bli_is_last_iter( j, n_iter ) ) */\
+					/*if ( bli_is_last_iter( j, n_iter, 0, 1 ) ) */\
 					if ( j + thread_num_threads(thread) >= n_iter ) \
 						b2 = b_cast; \
 				} \
@@ -424,11 +424,11 @@ void PASTEMAC(ch,varname)( \
 \
 				/* Compute the addresses of the next panels of A and B. */ \
 				a2 = a1 + rstep_a; \
-				if ( bli_is_last_iter( i, m_iter ) ) \
+				if ( bli_is_last_iter( i, m_iter, 0, 1 ) ) \
 				{ \
 					a2 = a_cast; \
 					b2 = b1; \
-					/*if ( bli_is_last_iter( j, n_iter ) ) */\
+					/*if ( bli_is_last_iter( j, n_iter, 0, 1 ) ) */\
 					if ( j + thread_num_threads(thread) >= n_iter ) \
 						b2 = b_cast; \
 				} \
@@ -477,7 +477,8 @@ void PASTEMAC(ch,varname)( \
 \
 			c11 += rstep_c; \
 		} \
-        } \
+		} \
+\
 		b1 += cstep_b; \
 		c1 += cstep_c; \
 	} \

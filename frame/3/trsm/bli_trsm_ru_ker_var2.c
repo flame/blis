@@ -149,7 +149,7 @@ void bli_trsm_ru_ker_var2( obj_t*  a,
 	   buf_c, rs_c, cs_c,
 	   gemmtrsm_ukr,
 	   gemm_ukr,
-       thread );
+	   thread );
 }
 
 
@@ -377,11 +377,11 @@ void PASTEMAC(ch,varname)( \
 			/* Loop over the m dimension (MR rows at a time). */ \
 			for ( i = 0; i < m_iter; ++i ) \
 			{ \
+				if( trsm_my_iter( i, thread ) ){ \
+\
 				ctype* restrict a10; \
 				ctype* restrict a11; \
 				ctype* restrict a2; \
-\
-                if( trsm_my_iter( i, thread ) ){ \
 \
 				m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left ); \
 \
@@ -390,13 +390,13 @@ void PASTEMAC(ch,varname)( \
 				a11  = a1 + off_b11 * PACKMR; \
 \
 				/* Compute the addresses of the next panels of A and B. */ \
-                a2 = a1; \
-				/*if ( bli_is_last_iter( i, m_iter ) ) */\
-                if ( i + thread_num_threads(thread) >= m_iter ) \
+				a2 = a1; \
+				/*if ( bli_is_last_iter( i, m_iter, 0, 1 ) ) */\
+				if ( i + thread_num_threads(thread) >= m_iter ) \
 				{ \
 					a2 = a_cast; \
 					b2 = b1 + k_b0111 * ss_b; \
-					if ( bli_is_last_iter( j, n_iter ) ) \
+					if ( bli_is_last_iter( j, n_iter, 0, 1 ) ) \
 						b2 = b_cast; \
 				} \
 \
@@ -437,6 +437,7 @@ void PASTEMAC(ch,varname)( \
 					                        c11, rs_c,  cs_c ); \
 				} \
 				} \
+\
 				a1  += rstep_a; \
 				c11 += rstep_c; \
 			} \
@@ -446,20 +447,20 @@ void PASTEMAC(ch,varname)( \
 			/* Loop over the m dimension (MR rows at a time). */ \
 			for ( i = 0; i < m_iter; ++i ) \
 			{ \
-				ctype* restrict a2; \
+				if( trsm_my_iter( i, thread ) ){ \
 \
-                if( trsm_my_iter( i, thread ) ){ \
+				ctype* restrict a2; \
 \
 				m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left ); \
 \
 				/* Compute the addresses of the next panels of A and B. */ \
-                a2 = a1; \
-				/*if ( bli_is_last_iter( i, m_iter ) ) */\
-                if ( i + thread_num_threads(thread) >= m_iter ) \
+				a2 = a1; \
+				/*if ( bli_is_last_iter( i, m_iter, 0, 1 ) ) */\
+				if ( i + thread_num_threads(thread) >= m_iter ) \
 				{ \
 					a2 = a_cast; \
 					b2 = b1 + cstep_b; \
-					if ( bli_is_last_iter( j, n_iter ) ) \
+					if ( bli_is_last_iter( j, n_iter, 0, 1 ) ) \
 						b2 = b_cast; \
 				} \
 \
@@ -499,6 +500,7 @@ void PASTEMAC(ch,varname)( \
 					                        c11, rs_c,  cs_c ); \
 				} \
 				} \
+\
 				a1  += rstep_a; \
 				c11 += rstep_c; \
 			} \

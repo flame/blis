@@ -131,7 +131,7 @@ void bli_herk_u_ker_var2( obj_t*  a,
 	   buf_beta,
 	   buf_c, rs_c, cs_c,
 	   gemm_ukr,
-       thread );
+	   thread );
 }
 
 
@@ -225,10 +225,10 @@ void PASTEMAC(ch,varname)( \
 	/* If there is a zero region below where the diagonal of C intersects
 	   the right edge of the panel, shrink it to prevent "no-op" iterations
 	   from executing. */ \
-    if ( -diagoffc + n < m ) \
-    { \
-        m = -diagoffc + n; \
-    } \
+	if ( -diagoffc + n < m ) \
+	{ \
+		m = -diagoffc + n; \
+	} \
 \
 	/* Clear the temporary C buffer in case it has any infs or NaNs. */ \
 	PASTEMAC(ch,set0s_mxn)( MR, NR, \
@@ -264,11 +264,11 @@ void PASTEMAC(ch,varname)( \
 	b1 = b_cast; \
 	c1 = c_cast; \
 \
-    herk_thrinfo_t* caucus = herk_thread_sub_herk( thread ); \
-    dim_t jr_num_threads = thread_n_way( thread ); \
-    dim_t jr_thread_id   = thread_work_id( thread ); \
-    dim_t ir_num_threads = thread_n_way( caucus ); \
-    dim_t ir_thread_id   = thread_work_id( caucus ); \
+	herk_thrinfo_t* caucus = herk_thread_sub_herk( thread ); \
+	dim_t jr_num_threads = thread_n_way( thread ); \
+	dim_t jr_thread_id   = thread_work_id( thread ); \
+	dim_t ir_num_threads = thread_n_way( caucus ); \
+	dim_t ir_thread_id   = thread_work_id( caucus ); \
 \
 	/* Loop over the n dimension (NR columns at a time). */ \
 	for ( j = jr_thread_id; j < n_iter; j += jr_num_threads ) \
@@ -277,8 +277,8 @@ void PASTEMAC(ch,varname)( \
 		ctype* restrict c11; \
 		ctype* restrict b2; \
 \
-        b1 = b_cast + j * cstep_b; \
-        c1 = c_cast + j * cstep_c; \
+		b1 = b_cast + j * cstep_b; \
+		c1 = c_cast + j * cstep_c; \
 \
 		n_cur = ( bli_is_not_edge_f( j, n_iter, n_left ) ? NR : n_left ); \
 \
@@ -290,8 +290,8 @@ void PASTEMAC(ch,varname)( \
 		{ \
 			ctype* restrict a2; \
 \
-            a1 = a_cast + i * rstep_a; \
-            c11 = c1 + i * rstep_c; \
+			a1  = a_cast + i * rstep_a; \
+			c11 = c1     + i * rstep_c; \
 \
 			/* Compute the diagonal offset for the submatrix at (i,j). */ \
 			diagoffc_ij = diagoffc - (doff_t)j*NR + (doff_t)i*MR; \
@@ -299,12 +299,12 @@ void PASTEMAC(ch,varname)( \
 			m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left ); \
 \
 			/* Compute the addresses of the next panels of A and B. */ \
-            a2 = herk_get_next_a_micropanel( caucus, a1, rstep_a ); \
-			if ( bli_is_last_iter( i, m_iter ) ) \
+			a2 = herk_get_next_a_micropanel( caucus, a1, rstep_a ); \
+			if ( bli_is_last_iter( i, m_iter, ir_thread_id, ir_num_threads ) ) \
 			{ \
 				a2 = a_cast; \
-                b2 = herk_get_next_b_micropanel( thread, b1, cstep_b ); \
-				if ( bli_is_last_iter( j, n_iter ) ) \
+				b2 = herk_get_next_b_micropanel( thread, b1, cstep_b ); \
+				if ( bli_is_last_iter( j, n_iter, jr_thread_id, jr_num_threads ) ) \
 					b2 = b_cast; \
 			} \
 \

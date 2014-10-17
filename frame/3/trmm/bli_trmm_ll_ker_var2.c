@@ -142,7 +142,7 @@ void bli_trmm_ll_ker_var2( obj_t*  a,
 	   buf_beta,
 	   buf_c, rs_c, cs_c,
 	   gemm_ukr,
-       thread );
+	   thread );
 }
 
 
@@ -227,8 +227,8 @@ void PASTEMAC(ch,varname)( \
 	if ( bli_is_strictly_above_diag_n( diagoffa, m, k ) ) return; \
 \
 	/* Compute the storage stride for the triangular matrix A, which is
-       usually PACKMR. However, in the case of 3m, the storage stride
-       captures the (PACKMR * 3/2) factor embedded in the panel stride.
+	   usually PACKMR. However, in the case of 3m, the storage stride
+	   captures the (PACKMR * 3/2) factor embedded in the panel stride.
 	   Note that trmm does NOT require k to be a multiple of MR or NR
 	   (depending on whether A or B is the triangular matrix), so we can
 	   use k as-is. By contrast, trsm must use an "inflated" version of
@@ -284,11 +284,14 @@ void PASTEMAC(ch,varname)( \
 	b1 = b_cast; \
 	c1 = c_cast; \
 \
-    trmm_thrinfo_t* ir_thread = trmm_thread_sub_trmm( jr_thread );\
-	/* Loop over the n dimension (NR columns at a time). */ \
-	for ( j = 0; j < n_iter; ++j ) { \
+	trmm_thrinfo_t* ir_thread = trmm_thread_sub_trmm( jr_thread ); \
+	dim_t jr_num_threads      = thread_n_way( jr_thread ); \
+	dim_t jr_thread_id        = thread_work_id( jr_thread ); \
 \
-        if( trmm_l_jr_my_iter( j, jr_thread ) ) { \
+	/* Loop over the n dimension (NR columns at a time). */ \
+	for ( j = 0; j < n_iter; ++j ) \
+	{ \
+		if ( trmm_l_jr_my_iter( j, jr_thread ) ) { \
 \
 		ctype* restrict a1; \
 		ctype* restrict c11; \
@@ -324,124 +327,128 @@ void PASTEMAC(ch,varname)( \
 				off_a1011 = 0; \
 				k_a1011   = bli_min( diagoffa_i + MR, k ); \
 \
-                if( trmm_l_ir_my_iter( i, ir_thread ) ) \
-                { \
-				    b1_i = b1 + off_a1011 * PACKNR; \
+				if ( trmm_l_ir_my_iter( i, ir_thread ) ) { \
 \
-                    /* Compute the addresses of the next panels of A and B. */ \
-                    a2 = a1; \
-                    if ( bli_is_last_iter( i, m_iter ) ) \
-                    { \
-                        a2 = a_cast; \
-                        b2 = b1; \
-                        if ( bli_is_last_iter( j, n_iter ) ) \
-                            b2 = b_cast; \
-                    } \
-    \
-                    /* Save addresses of next panels of A and B to the auxinfo_t
-                       object. */ \
-                    bli_auxinfo_set_next_a( a2, aux ); \
-                    bli_auxinfo_set_next_b( b2, aux ); \
-    \
-                    /* Save the panel stride of the current panel of A to the
-                       auxinfo_t object. */ \
-                    bli_auxinfo_set_ps_a( k_a1011 * ss_a, aux ); \
-    \
-                    /* Handle interior and edge cases separately. */ \
-                    if ( m_cur == MR && n_cur == NR ) \
-                    { \
-                        /* Invoke the gemm micro-kernel. */ \
-                        gemm_ukr_cast( k_a1011, \
-                                       alpha_cast, \
-                                       a1, \
-                                       b1_i, \
-                                       beta_cast, \
-                                       c11, rs_c, cs_c, \
-                                       &aux ); \
-                    } \
-                    else \
-                    { \
-                        /* Copy edge elements of C to the temporary buffer. */ \
-                        PASTEMAC(ch,copys_mxn)( m_cur, n_cur, \
-                                                c11, rs_c,  cs_c, \
-                                                ct,  rs_ct, cs_ct ); \
-    \
-                        /* Invoke the gemm micro-kernel. */ \
-                        gemm_ukr_cast( k_a1011, \
-                                       alpha_cast, \
-                                       a1, \
-                                       b1_i, \
-                                       beta_cast, \
-                                       ct, rs_ct, cs_ct, \
-                                       &aux ); \
-    \
-                        /* Copy the result to the edge of C. */ \
-                        PASTEMAC(ch,copys_mxn)( m_cur, n_cur, \
-                                                ct,  rs_ct, cs_ct, \
-                                                c11, rs_c,  cs_c ); \
-                    } \
-                } \
+				b1_i = b1 + off_a1011 * PACKNR; \
+\
+				/* Compute the addresses of the next panels of A and B. */ \
+				a2 = a1; \
+				if ( bli_is_last_iter( i, m_iter, 0, 1 ) ) \
+				{ \
+					a2 = a_cast; \
+					b2 = b1; \
+					if ( bli_is_last_iter( j, n_iter, jr_thread_id, jr_num_threads ) ) \
+						b2 = b_cast; \
+				} \
+\
+				/* Save addresses of next panels of A and B to the auxinfo_t
+				   object. */ \
+				bli_auxinfo_set_next_a( a2, aux ); \
+				bli_auxinfo_set_next_b( b2, aux ); \
+\
+				/* Save the panel stride of the current panel of A to the
+				   auxinfo_t object. */ \
+				bli_auxinfo_set_ps_a( k_a1011 * ss_a, aux ); \
+\
+				/* Handle interior and edge cases separately. */ \
+				if ( m_cur == MR && n_cur == NR ) \
+				{ \
+					/* Invoke the gemm micro-kernel. */ \
+					gemm_ukr_cast( k_a1011, \
+					               alpha_cast, \
+					               a1, \
+					               b1_i, \
+					               beta_cast, \
+					               c11, rs_c, cs_c, \
+					               &aux ); \
+				} \
+				else \
+				{ \
+					/* Copy edge elements of C to the temporary buffer. */ \
+					PASTEMAC(ch,copys_mxn)( m_cur, n_cur, \
+					                        c11, rs_c,  cs_c, \
+					                        ct,  rs_ct, cs_ct ); \
+\
+					/* Invoke the gemm micro-kernel. */ \
+					gemm_ukr_cast( k_a1011, \
+					               alpha_cast, \
+					               a1, \
+					               b1_i, \
+					               beta_cast, \
+					               ct, rs_ct, cs_ct, \
+					               &aux ); \
+\
+					/* Copy the result to the edge of C. */ \
+					PASTEMAC(ch,copys_mxn)( m_cur, n_cur, \
+					                        ct,  rs_ct, cs_ct, \
+					                        c11, rs_c,  cs_c ); \
+				} \
+				} \
+\
 				a1 += k_a1011 * ss_a; \
 			} \
 			else if ( bli_is_strictly_below_diag_n( diagoffa_i, MR, k ) ) \
 			{ \
+				if ( trmm_l_ir_my_iter( i, ir_thread ) ) { \
+\
 				ctype* restrict a2; \
 \
-                if( trmm_l_ir_my_iter( i, ir_thread ) ) \
-                { \
-                    /* Compute the addresses of the next panels of A and B. */ \
-                    a2 = a1; \
-                    if ( bli_is_last_iter( i, m_iter ) ) \
-                    { \
-                        a2 = a_cast; \
-                        b2 = b1; \
-                        if ( bli_is_last_iter( j, n_iter ) ) \
-                            b2 = b_cast; \
-                    } \
+				/* Compute the addresses of the next panels of A and B. */ \
+				a2 = a1; \
+				if ( bli_is_last_iter( i, m_iter, 0, 1 ) ) \
+				{ \
+					a2 = a_cast; \
+					b2 = b1; \
+					if ( bli_is_last_iter( j, n_iter, jr_thread_id, jr_num_threads ) ) \
+						b2 = b_cast; \
+				} \
 \
-                    /* Save addresses of next panels of A and B to the auxinfo_t
-                       object. */ \
-                    bli_auxinfo_set_next_a( a2, aux ); \
-                    bli_auxinfo_set_next_b( b2, aux ); \
+				/* Save addresses of next panels of A and B to the auxinfo_t
+				   object. */ \
+				bli_auxinfo_set_next_a( a2, aux ); \
+				bli_auxinfo_set_next_b( b2, aux ); \
 \
-                    /* Save the panel stride of the current panel of A to the
-                       auxinfo_t object. */ \
-                    bli_auxinfo_set_ps_a( rstep_a, aux ); \
+				/* Save the panel stride of the current panel of A to the
+				   auxinfo_t object. */ \
+				bli_auxinfo_set_ps_a( rstep_a, aux ); \
 \
-                    /* Handle interior and edge cases separately. */ \
-                    if ( m_cur == MR && n_cur == NR ) \
-                    { \
-                        /* Invoke the gemm micro-kernel. */ \
-                        gemm_ukr_cast( k, \
-                                       alpha_cast, \
-                                       a1, \
-                                       b1, \
-                                       one, \
-                                       c11, rs_c, cs_c, \
-                                       &aux ); \
-                    } \
-                    else \
-                    { \
-                        /* Invoke the gemm micro-kernel. */ \
-                        gemm_ukr_cast( k, \
-                                       alpha_cast, \
-                                       a1, \
-                                       b1, \
-                                       zero, \
-                                       ct, rs_ct, cs_ct, \
-                                       &aux ); \
+				/* Handle interior and edge cases separately. */ \
+				if ( m_cur == MR && n_cur == NR ) \
+				{ \
+					/* Invoke the gemm micro-kernel. */ \
+					gemm_ukr_cast( k, \
+					               alpha_cast, \
+					               a1, \
+					               b1, \
+					               one, \
+					               c11, rs_c, cs_c, \
+					               &aux ); \
+				} \
+				else \
+				{ \
+					/* Invoke the gemm micro-kernel. */ \
+					gemm_ukr_cast( k, \
+					               alpha_cast, \
+					               a1, \
+					               b1, \
+					               zero, \
+					               ct, rs_ct, cs_ct, \
+					               &aux ); \
 \
-                        /* Add the result to the edge of C. */ \
-                        PASTEMAC(ch,adds_mxn)( m_cur, n_cur, \
-                                               ct,  rs_ct, cs_ct, \
-                                               c11, rs_c,  cs_c ); \
-                    } \
-                } \
+					/* Add the result to the edge of C. */ \
+					PASTEMAC(ch,adds_mxn)( m_cur, n_cur, \
+					                       ct,  rs_ct, cs_ct, \
+					                       c11, rs_c,  cs_c ); \
+				} \
+				} \
+\
 				a1 += rstep_a; \
 			} \
+\
 			c11 += rstep_c; \
 		} \
-        } \
+		} \
+\
 		b1 += cstep_b; \
 		c1 += cstep_c; \
 	} \

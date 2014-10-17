@@ -127,7 +127,7 @@ void bli_gemm_ker_var2( obj_t*  a,
 	   buf_beta,
 	   buf_c, rs_c, cs_c,
 	   gemm_ukr,
-       thread );
+	   thread );
 }
 
 
@@ -230,11 +230,11 @@ void PASTEMAC(ch,varname)( \
 	bli_auxinfo_set_ps_a( ps_a, aux ); \
 	bli_auxinfo_set_ps_b( ps_b, aux ); \
 \
-    gemm_thrinfo_t* caucus = gemm_thread_sub_gemm( thread ); \
-    dim_t jr_num_threads = thread_n_way( thread ); \
-    dim_t jr_thread_id   = thread_work_id( thread ); \
-    dim_t ir_num_threads = thread_n_way( caucus ); \
-    dim_t ir_thread_id   = thread_work_id( caucus ); \
+	gemm_thrinfo_t* caucus = gemm_thread_sub_gemm( thread ); \
+	dim_t jr_num_threads = thread_n_way( thread ); \
+	dim_t jr_thread_id   = thread_work_id( thread ); \
+	dim_t ir_num_threads = thread_n_way( caucus ); \
+	dim_t ir_thread_id   = thread_work_id( caucus ); \
 \
 	/* Loop over the n dimension (NR columns at a time). */ \
 	for ( j = jr_thread_id; j < n_iter; j += jr_num_threads ) \
@@ -243,8 +243,8 @@ void PASTEMAC(ch,varname)( \
 		ctype* restrict c11; \
 		ctype* restrict b2; \
         \
-        b1 = b_cast + j * cstep_b; \
-        c1 = c_cast + j * cstep_c; \
+		b1 = b_cast + j * cstep_b; \
+		c1 = c_cast + j * cstep_c; \
 \
 		n_cur = ( bli_is_not_edge_f( j, n_iter, n_left ) ? NR : n_left ); \
 \
@@ -256,18 +256,18 @@ void PASTEMAC(ch,varname)( \
 		{ \
 			ctype* restrict a2; \
 \
-            a1 = a_cast + i * rstep_a; \
-            c11 = c1 + i * rstep_c; \
+			a1  = a_cast + i * rstep_a; \
+			c11 = c1     + i * rstep_c; \
 \
 			m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left ); \
 \
 			/* Compute the addresses of the next panels of A and B. */ \
-            a2 = gemm_get_next_a_micropanel( caucus, a1, rstep_a ); \
-			if ( bli_is_last_iter( i, m_iter ) ) \
+			a2 = gemm_get_next_a_micropanel( caucus, a1, rstep_a ); \
+			if ( bli_is_last_iter( i, m_iter, ir_thread_id, ir_num_threads ) ) \
 			{ \
 				a2 = a_cast; \
-                b2 = gemm_get_next_b_micropanel( thread, b1, cstep_b ); \
-				if ( bli_is_last_iter( j, n_iter ) ) \
+				b2 = gemm_get_next_b_micropanel( thread, b1, cstep_b ); \
+				if ( bli_is_last_iter( j, n_iter, jr_thread_id, jr_num_threads ) ) \
 					b2 = b_cast; \
 			} \
 \

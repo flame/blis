@@ -142,7 +142,7 @@ void bli_trmm_ru_ker_var2( obj_t*  a,
 	   buf_beta,
 	   buf_c, rs_c, cs_c,
 	   gemm_ukr,
-       thread );
+	   thread );
 }
 
 
@@ -292,7 +292,10 @@ void PASTEMAC(ch,varname)( \
 	b1 = b_cast; \
 	c1 = c_cast; \
 \
-    trmm_thrinfo_t* ir_thread = trmm_thread_sub_trmm( jr_thread ); \
+	trmm_thrinfo_t* ir_thread = trmm_thread_sub_trmm( jr_thread ); \
+	dim_t jr_num_threads      = thread_n_way( jr_thread ); \
+	dim_t jr_thread_id        = thread_work_id( jr_thread ); \
+\
 	/* Loop over the n dimension (NR columns at a time). */ \
 	for ( j = 0; j < n_iter; ++j ) \
 	{ \
@@ -301,17 +304,18 @@ void PASTEMAC(ch,varname)( \
 		ctype* restrict b2; \
 \
 		diagoffb_j = diagoffb - ( doff_t )j*NR; \
-		a1         = a_cast; \
-		c11        = c1; \
-\
-		n_cur = ( bli_is_not_edge_f( j, n_iter, n_left ) ? NR : n_left ); \
 \
 		/* Determine the offset to and length of the panel that was packed
 		   so we can index into the corresponding location in A. */ \
 		off_b0111 = 0; \
 		k_b0111   = bli_min( k, -diagoffb_j + NR ); \
 \
-        if( trmm_r_jr_my_iter( j, jr_thread ) ) { \
+		if ( trmm_r_jr_my_iter( j, jr_thread ) ) { \
+\
+		a1  = a_cast; \
+		c11 = c1; \
+\
+		n_cur = ( bli_is_not_edge_f( j, n_iter, n_left ) ? NR : n_left ); \
 \
 		/* Initialize our next panel of B to be the current panel of B. */ \
 		b2 = b1; \
@@ -329,7 +333,8 @@ void PASTEMAC(ch,varname)( \
 			/* Loop over the m dimension (MR rows at a time). */ \
 			for ( i = 0; i < m_iter; ++i ) \
 			{ \
-                if( trmm_r_ir_my_iter( i, ir_thread ) ) { \
+				if ( trmm_r_ir_my_iter( i, ir_thread ) ) { \
+\
 				ctype* restrict a1_i; \
 				ctype* restrict a2; \
 \
@@ -339,11 +344,11 @@ void PASTEMAC(ch,varname)( \
 \
 				/* Compute the addresses of the next panels of A and B. */ \
 				a2 = a1; \
-				if ( bli_is_last_iter( i, m_iter ) ) \
+				if ( bli_is_last_iter( i, m_iter, 0, 1 ) ) \
 				{ \
 					a2 = a_cast; \
 					b2 = b1; \
-					if ( bli_is_last_iter( j, n_iter ) ) \
+					if ( bli_is_last_iter( j, n_iter, jr_thread_id, jr_num_threads ) ) \
 						b2 = b_cast; \
 				} \
 \
@@ -385,7 +390,8 @@ void PASTEMAC(ch,varname)( \
 					                        ct,  rs_ct, cs_ct, \
 					                        c11, rs_c,  cs_c ); \
 				} \
-                } \
+				} \
+\
 				a1  += rstep_a; \
 				c11 += rstep_c; \
 			} \
@@ -395,18 +401,19 @@ void PASTEMAC(ch,varname)( \
 			/* Loop over the m dimension (MR rows at a time). */ \
 			for ( i = 0; i < m_iter; ++i ) \
 			{ \
-                if( trmm_r_ir_my_iter( i, ir_thread ) ) { \
+				if ( trmm_r_ir_my_iter( i, ir_thread ) ) { \
+\
 				ctype* restrict a2; \
 \
 				m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left ); \
 \
 				/* Compute the addresses of the next panels of A and B. */ \
 				a2 = a1; \
-				if ( bli_is_last_iter( i, m_iter ) ) \
+				if ( bli_is_last_iter( i, m_iter, 0, 1 ) ) \
 				{ \
 					a2 = a_cast; \
 					b2 = b1; \
-					if ( bli_is_last_iter( j, n_iter ) ) \
+					if ( bli_is_last_iter( j, n_iter, jr_thread_id, jr_num_threads ) ) \
 						b2 = b_cast; \
 				} \
 \
@@ -443,12 +450,14 @@ void PASTEMAC(ch,varname)( \
 					                       ct,  rs_ct, cs_ct, \
 					                       c11, rs_c,  cs_c ); \
 				} \
-                } \
+				} \
+\
 				a1  += rstep_a; \
 				c11 += rstep_c; \
 			} \
 		} \
         } \
+\
 		b1 += k_b0111 * ss_b; \
 		c1 += cstep_c; \
 	} \

@@ -51,11 +51,6 @@ char libblis_test_store_chars[ NUM_OPERAND_TYPES ][ MAX_STORE_VALS_PER_TYPE + 1 
 char libblis_test_param_chars[ NUM_PARAM_TYPES ][ MAX_PARAM_VALS_PER_TYPE + 1 ];
 
 
-//#define _3MH
-//#define _4MH
-//#define _3M
-//#define _4M
-
 
 int main( int argc, char** argv )
 {
@@ -64,36 +59,6 @@ int main( int argc, char** argv )
 
 	// Initialize libblis.
 	bli_init();
-
-	// Experimental. Set the complex implementations.
-/*
-#if defined _3MH
-	bli_3mh_enable();
-	bli_3m_enable();
-	bli_4mh_disable();
-	bli_4m_enable();
-#elif defined _3M
-	bli_3mh_disable();
-	bli_3m_enable();
-	bli_4mh_enable();
-	bli_4m_enable();
-#elif defined _4MH
-	bli_3mh_disable();
-	bli_3m_disable();
-	bli_4mh_enable();
-	bli_4m_enable();
-#elif defined _4M
-	bli_3mh_disable();
-	bli_3m_disable();
-	bli_4mh_disable();
-	bli_4m_enable();
-#else
-	bli_3mh_disable();
-	bli_3m_disable();
-	bli_4mh_disable();
-	bli_4m_enable();
-#endif
-*/
 
 	// Initialize some strings.
 	libblis_test_init_strings();
@@ -1452,7 +1417,7 @@ void libblis_test_op_driver( test_params_t* params,
 					if ( params->output_matlab_format )
 					{
 						libblis_test_fprintf( stdout,
-						                      "%s%s( %3u, 1:%u ) = [%s  %6.3lf  %9.2le ]; %c %s\n",
+						                      "%s%s( %3u, 1:%u ) = [%s  %7.3lf  %8.2le ]; %c %s\n",
 						                      funcname_str, blank_str, pi, n_dims_print + 2,
 						                      dims_str, perf, resid,
 						                      OUTPUT_COMMENT_CHAR,
@@ -1461,7 +1426,7 @@ void libblis_test_op_driver( test_params_t* params,
 						// Also output to a file if requested (and successfully opened).
 						if ( output_stream )
 						libblis_test_fprintf( output_stream,
-						                      "%s%s( %3u, 1:%u ) = [%s  %6.3lf  %9.2le ]; %c %s\n",
+						                      "%s%s( %3u, 1:%u ) = [%s  %7.3lf  %8.2le ]; %c %s\n",
 						                      funcname_str, blank_str, pi, n_dims_print + 2,
 						                      dims_str, perf, resid,
 						                      OUTPUT_COMMENT_CHAR,
@@ -1470,7 +1435,7 @@ void libblis_test_op_driver( test_params_t* params,
 					else
 					{
 						libblis_test_fprintf( stdout,
-						                      "%s%s                %s  %6.3lf  %9.2le    %s\n",
+						                      "%s%s                %s  %7.3lf   %8.2le   %s\n",
 						                      funcname_str, blank_str,
 						                      dims_str, perf, resid,
 						                      pass_str );
@@ -1478,7 +1443,7 @@ void libblis_test_op_driver( test_params_t* params,
 						// Also output to a file if requested (and successfully opened).
 						if ( output_stream )
 						libblis_test_fprintf( output_stream,
-						                      "%s%s                %s  %6.3lf  %9.2le    %s\n",
+						                      "%s%s                %s  %7.3lf   %8.2le   %s\n",
 						                      funcname_str, blank_str,
 						                      dims_str, perf, resid,
 						                      pass_str );
@@ -1661,7 +1626,7 @@ void libblis_test_build_col_labels_string( test_op_t* op, char* l_str )
 	     op->dimset == BLIS_TEST_DIMS_K   )
 		sprintf( &l_str[strlen(l_str)], " %5s", "k" );
 
-	sprintf( &l_str[strlen(l_str)], "%s", "   gflops  resid       result" );
+	sprintf( &l_str[strlen(l_str)], "%s", "   gflops   resid      result" );
 }
 
 
