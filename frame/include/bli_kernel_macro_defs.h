@@ -1230,6 +1230,26 @@
 
 
 
+// -- Define micro-panel alignment ---------------------------------------------
+
+// In this section, we consider each datatype-specific micro-panel alignment
+// size macro. If it is undefined, we define it to the default value (the size
+// of the datatype).
+
+#ifndef BLIS_UPANEL_ALIGN_SIZE_S
+#define BLIS_UPANEL_ALIGN_SIZE_S     BLIS_SIZEOF_S
+#endif
+#ifndef BLIS_UPANEL_ALIGN_SIZE_D
+#define BLIS_UPANEL_ALIGN_SIZE_D     BLIS_SIZEOF_D
+#endif
+#ifndef BLIS_UPANEL_ALIGN_SIZE_C
+#define BLIS_UPANEL_ALIGN_SIZE_C     BLIS_SIZEOF_C
+#endif
+#ifndef BLIS_UPANEL_ALIGN_SIZE_Z
+#define BLIS_UPANEL_ALIGN_SIZE_Z     BLIS_SIZEOF_Z
+#endif
+
+
 // -- Kernel blocksize checks --------------------------------------------------
 
 // Verify that cache blocksizes are whole multiples of register blocksizes.
@@ -1314,7 +1334,6 @@
     )
   #error "KC must be multiple of NR for all datatypes."
 #endif
-
 
 
 // -- Abbreiviated kernel blocksize macros -------------------------------------

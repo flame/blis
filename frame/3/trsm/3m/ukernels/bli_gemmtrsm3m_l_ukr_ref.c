@@ -61,22 +61,22 @@ void PASTEMAC(ch,varname)( \
 	const dim_t       m           = PASTEMAC(chr,mr); \
 	const dim_t       n           = PASTEMAC(chr,nr); \
 \
-	const inc_t       ps_a        = ( bli_auxinfo_ps_a( data ) * 2 ) / 3; \
-	const inc_t       ps_b        = ( bli_auxinfo_ps_b( data ) * 2 ) / 3; \
+	const inc_t       is_a        = bli_auxinfo_is_a( data ); \
+	const inc_t       is_b        = bli_auxinfo_is_b( data ); \
 \
 	ctype_r* restrict a10_r       = ( ctype_r* )a10; \
-	ctype_r* restrict a10_i       = ( ctype_r* )a10 +   ps_a; \
-	ctype_r* restrict a10_ri      = ( ctype_r* )a10 + 2*ps_a; \
+	ctype_r* restrict a10_i       = ( ctype_r* )a10 +   is_a; \
+	ctype_r* restrict a10_ri      = ( ctype_r* )a10 + 2*is_a; \
 \
 	ctype_r* restrict a11_r       = ( ctype_r* )a11; \
 \
 	ctype_r* restrict b01_r       = ( ctype_r* )b01; \
-	ctype_r* restrict b01_i       = ( ctype_r* )b01 +   ps_b; \
-	ctype_r* restrict b01_ri      = ( ctype_r* )b01 + 2*ps_b; \
+	ctype_r* restrict b01_i       = ( ctype_r* )b01 +   is_b; \
+	ctype_r* restrict b01_ri      = ( ctype_r* )b01 + 2*is_b; \
 \
 	ctype_r* restrict b11_r       = ( ctype_r* )b11; \
-	ctype_r* restrict b11_i       = ( ctype_r* )b11 +   ps_b; \
-	ctype_r* restrict b11_ri      = ( ctype_r* )b11 + 2*ps_b; \
+	ctype_r* restrict b11_i       = ( ctype_r* )b11 +   is_b; \
+	ctype_r* restrict b11_ri      = ( ctype_r* )b11 + 2*is_b; \
 \
 	const inc_t       rs_b        = PASTEMAC(chr,packnr); \
 	const inc_t       cs_b        = 1; \

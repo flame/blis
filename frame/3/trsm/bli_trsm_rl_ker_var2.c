@@ -117,16 +117,6 @@ void bli_trsm_rl_ker_var2( obj_t*  a,
 	// function pointer.
 	f = ftypes[dt_exec];
 
-	// Adjust cs_a and rs_b if A and B were packed for 4m or 3m. This
-	// is needed because cs_a and rs_b are used to index into the
-	// micro-panels of A and B, respectively, and since the pointer
-	// types in the macro-kernel (scomplex or dcomplex) will result
-	// in pointer arithmetic that moves twice as far as it should,
-	// given the datatypes actually stored (float or double), we must
-	// halve the strides to compensate.
-	if ( bli_obj_is_4m_packed( *a ) ||
-	     bli_obj_is_3m_packed( *a ) ) { cs_a /= 2; rs_b /= 2; }
-
 	// Extract from the control tree node the func_t objects containing
 	// the gemmtrsm and gemm micro-kernel function addresses, and then
 	// query the function addresses corresponding to the current datatype.
@@ -215,7 +205,12 @@ void PASTEMAC(ch,varname)( \
 	inc_t           rstep_a; \
 	inc_t           cstep_b; \
 	inc_t           rstep_c, cstep_c; \
-	inc_t           ss_b; \
+	inc_t           istep_a; \
+	inc_t           istep_b; \
+	inc_t           off_scl; \
+	inc_t           ss_b_num; \
+	inc_t           ss_b_den; \
+	inc_t           ps_b_cur; \
 	auxinfo_t       aux; \
 \
 	/*
@@ -247,14 +242,37 @@ void PASTEMAC(ch,varname)( \
 	   it is implicitly zero. So we do nothing. */ \
 	if ( bli_is_strictly_above_diag_n( diagoffb, k, n ) ) return; \
 \
-	/* Compute the storage stride for the triangular matrix B, which is
-	   usually PACKNR. However, in the case of 3m, the storage stride
-	   captures the (PACKNR * 3/2) factor embedded in the panel stride.
-	   Notice that we must first inflate k up to a multiple of NR, since
-	   the panel stride was originally computed using this inflated k
-	   dimension. */ \
+	/* Compute k_full as k inflated up to a multiple of NR. This is
+	   needed because some parameter combinations of trsm reduce k
+	   to advance past zero regions in the triangular matrix, and
+	   when computing the imaginary stride of B (the non-triangular
+	   matrix), which is used by 3m and 4m implementations, we need
+	   this unreduced value of k. */ \
 	k_full = ( k % NR != 0 ? k + NR - ( k % NR ) : k ); \
-	ss_b   = ps_b / k_full; \
+\
+	/* Compute indexing scaling factor for for 4m or 3m. This is
+	   needed because one of the packing register blocksizes (PACKMR
+	   or PACKNR) is used to index into the micro-panels of the non-
+	   triangular matrix when computing with a diagonal-intersecting
+	   micro-panel of the triangular matrix. In the case of 4m or 3m,
+	   real values are stored in both sub-panels, and so the indexing
+	   needs to occur in units of real values. The value computed
+	   here is divided into the complex pointer offset to cause the
+	   pointer to be advanced by the correct value. */ \
+	if ( bli_is_4m_packed( schema_b ) || \
+	     bli_is_3m_packed( schema_b ) || \
+	     bli_is_rih_packed( schema_b ) ) off_scl = 2; \
+	else                                 off_scl = 1; \
+\
+	/* Compute the storage stride. Usually this is just PACKMR (for A
+	   or PACKNR (for B). However, in the case of 3m, we need to scale
+	   the offset by 3/2. Since it's possible we may need to scale
+	   the packing dimension by a non-integer value, we break up the
+	   scaling factor into numerator and denominator. */ \
+	if ( bli_is_3m_packed( schema_b ) ) { ss_b_num = 3*PACKNR; \
+	                                      ss_b_den = 2; } \
+	else                                { ss_b_num = 1*PACKNR; \
+	                                      ss_b_den = 1; } \
 \
 	/* If there is a zero region above where the diagonal of B intersects
 	   the left edge of the panel, adjust the pointer to A and treat this
@@ -266,7 +284,7 @@ void PASTEMAC(ch,varname)( \
 		j        = -diagoffb; \
 		k        = k - j; \
 		diagoffb = 0; \
-		a_cast   = a_cast + (j  )*cs_a; \
+		a_cast   = a_cast + ( j * PACKMR ) / off_scl; \
 	} \
 \
 	/* If there is a zero region to the right of where the diagonal
@@ -322,16 +340,19 @@ void PASTEMAC(ch,varname)( \
 	rstep_c = rs_c * MR; \
 	cstep_c = cs_c * NR; \
 \
+	istep_a = PACKMR * k_full; \
+	istep_b = PACKNR * k; \
+\
 	/* Save the pack schemas of A and B to the auxinfo_t object.
 	   NOTE: We swap the values for A and B since the triangular
 	   "A" matrix is actually contained within B. */ \
 	bli_auxinfo_set_schema_a( schema_b, aux ); \
 	bli_auxinfo_set_schema_b( schema_a, aux ); \
 \
-	/* Save the panel stride of A to the auxinfo_t object.
+	/* Save the imaginary stride of A to the auxinfo_t object.
 	   NOTE: We swap the values for A and B since the triangular
 	   "A" matrix is actually contained within B. */ \
-	bli_auxinfo_set_ps_b( ps_a, aux ); \
+	bli_auxinfo_set_is_b( istep_a, aux ); \
 \
 	b1 = b_cast; \
 	c1 = c_cast; \
@@ -352,26 +373,8 @@ void PASTEMAC(ch,varname)( \
 \
 		n_cur = ( bli_is_not_edge_b( jb, n_iter, n_left ) ? NR : n_left ); \
 \
-		/* Determine the offset to and length of the panel that was packed
-		   so we can index into the corresponding location in A. */ \
-		off_b11   = bli_max( -diagoffb_j, 0 ); \
-		k_b1121   = k - off_b11; \
-		k_b11     = NR; \
-		k_b21     = k_b1121 - NR; \
-		off_b21   = off_b11 + k_b11; \
-\
-		/* Compute the addresses of the triangular block B11 and the
-		   panel B21. */ \
-		b11       = b1; \
-		b21       = b1 + k_b11 * PACKNR; \
-\
 		/* Initialize our next panel of B to be the current panel of B. */ \
 		b2 = b1; \
-\
-		/* Save the panel stride of B to the auxinfo_t object.
-		   NOTE: We swap the values for A and B since the triangular
-		   "A" matrix is actually contained within B. */ \
-		bli_auxinfo_set_ps_a( k_b1121 * ss_b, aux ); \
 \
 		/* If the current panel of B intersects the diagonal, use a
 		   special micro-kernel that performs a fused gemm and trsm.
@@ -381,6 +384,27 @@ void PASTEMAC(ch,varname)( \
 		   and so we do nothing. */ \
 		if ( bli_intersects_diag_n( diagoffb_j, k, NR ) ) \
 		{ \
+			/* Determine the offset to and length of the panel that was packed
+			   so we can index into the corresponding location in A. */ \
+			off_b11   = bli_max( -diagoffb_j, 0 ); \
+			k_b1121   = k - off_b11; \
+			k_b11     = NR; \
+			k_b21     = k_b1121 - NR; \
+			off_b21   = off_b11 + k_b11; \
+\
+			/* Compute the addresses of the triangular block B11 and the
+			   panel B21. */ \
+			b11       = b1; \
+			b21       = b1 + ( k_b11 * PACKNR ) / off_scl; \
+\
+			/* Compute the panel stride for the current micro-panel. */ \
+			ps_b_cur = ( k_b1121 * ss_b_num ) / ss_b_den; \
+\
+			/* Save the imaginary stride of B to the auxinfo_t object.
+			   NOTE: We swap the values for A and B since the triangular
+			   "A" matrix is actually contained within B. */ \
+			bli_auxinfo_set_is_a( PACKNR * k_b1121, aux ); \
+\
 			/* Loop over the m dimension (MR rows at a time). */ \
 			for ( i = 0; i < m_iter; ++i ) \
 			{ \
@@ -393,17 +417,16 @@ void PASTEMAC(ch,varname)( \
 				m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left ); \
 \
 				/* Compute the addresses of the A11 block and A12 panel. */ \
-				a11  = a1 + off_b11 * PACKMR; \
-				a12  = a1 + off_b21 * PACKMR; \
+				a11  = a1 + ( off_b11 * PACKMR ) / off_scl; \
+				a12  = a1 + ( off_b21 * PACKMR ) / off_scl; \
 \
 				/* Compute the addresses of the next panels of A and B. */ \
 				a2 = a1; \
-\
 				/*if ( bli_is_last_iter( i, m_iter, 0, 1 ) ) */\
 				if ( i + thread_num_threads(thread) >= m_iter ) \
 				{ \
 					a2 = a_cast; \
-					b2 = b1 + k_b1121 * ss_b; \
+					b2 = b1 + ps_b_cur; \
 					if ( bli_is_last_iter( jb, n_iter, 0, 1 ) ) \
 						b2 = b_cast; \
 				} \
@@ -449,9 +472,16 @@ void PASTEMAC(ch,varname)( \
 				a1  += rstep_a; \
 				c11 += rstep_c; \
 			} \
+\
+			b1 += ps_b_cur; \
 		} \
 		else if ( bli_is_strictly_below_diag_n( diagoffb_j, k, NR ) ) \
 		{ \
+			/* Save the imaginary stride of B to the auxinfo_t object.
+			   NOTE: We swap the values for A and B since the triangular
+			   "A" matrix is actually contained within B. */ \
+			bli_auxinfo_set_is_a( istep_b, aux ); \
+\
 			/* Loop over the m dimension (MR rows at a time). */ \
 			for ( i = 0; i < m_iter; ++i ) \
 			{ \
@@ -512,9 +542,10 @@ void PASTEMAC(ch,varname)( \
 				a1  += rstep_a; \
 				c11 += rstep_c; \
 			} \
+\
+			b1 += cstep_b; \
 		} \
 \
-		b1 += k_b1121 * ss_b; \
 		c1 -= cstep_c; \
 	} \
 }

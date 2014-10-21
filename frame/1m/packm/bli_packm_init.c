@@ -34,6 +34,8 @@
 
 #include "blis.h"
 
+extern blksz_t* gemm_upanel_align;
+
 void bli_packm_init( obj_t*   a,
                      obj_t*   p,
                      packm_t* cntl )
@@ -307,6 +309,7 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 	{
 		dim_t m_panel;
 		dim_t ps_p;
+		dim_t upanel_align;
 
 		// The panel dimension (for each datatype) should be equal to the
 		// register blocksize in the m dimension.
@@ -330,12 +333,37 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 		// dimension of the matrix is not a whole multiple of MR.
 		ps_p = cs_p * n_p_pad;
 
+		// Query the micro-panel alignment.
+		upanel_align = bli_blksz_for_type( dt, gemm_upanel_align );
+
+		// Here, we adjust the panel stride, if necessary. Remember: ps_p is
+		// always interpreted as being in units of the datatype of the object
+		// which is not necessarily how the micro-panels will be stored. For
+		// 3m, we will increase ps_p by 50%, and for ro/io/rpi, we halve ps_p
+		// Why? Because the macro-kernel indexes in units of the complex
+		// datatype. So these changes "trick" it into indexing the correct
+		// amount.
 		if ( bli_is_3m_packed( pack_schema ) )
+		{
 			ps_p = ( ps_p * 3 ) / 2;
+
+			// Align the panel stride according to the micro-panel alignment.
+			ps_p = bli_align_dim_to_size( ps_p, elem_size_p, upanel_align );
+		}
 		else if ( bli_is_ro_packed( pack_schema ) ||
 		          bli_is_io_packed( pack_schema ) ||
 		          bli_is_rpi_packed( pack_schema ) )
-			ps_p =   ps_p / 2;
+		{
+			// Align the panel stride according to the micro-panel alignment.
+			ps_p = bli_align_dim_to_size( ps_p, elem_size_p, upanel_align );
+
+			ps_p = ps_p / 2;
+		}
+		else
+		{
+			// Align the panel stride according to the micro-panel alignment.
+			ps_p = bli_align_dim_to_size( ps_p, elem_size_p, upanel_align );
+		}
 
 		// Store the strides and panel dimension in p.
 		bli_obj_set_incs( rs_p, cs_p, *p );
@@ -352,6 +380,7 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 	{
 		dim_t n_panel;
 		dim_t ps_p;
+		dim_t upanel_align;
 
 		// The panel dimension (for each datatype) should be equal to the
 		// register blocksize in the n dimension.
@@ -375,12 +404,37 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 		// dimension of the matrix is not a whole multiple of NR.
 		ps_p = m_p_pad * rs_p;
 
+		// Query the micro-panel alignment.
+		upanel_align = bli_blksz_for_type( dt, gemm_upanel_align );
+
+		// Here, we adjust the panel stride, if necessary. Remember: ps_p is
+		// always interpreted as being in units of the datatype of the object
+		// which is not necessarily how the micro-panels will be stored. For
+		// 3m, we will increase ps_p by 50%, and for ro/io/rpi, we halve ps_p
+		// Why? Because the macro-kernel indexes in units of the complex
+		// datatype. So these changes "trick" it into indexing the correct
+		// amount.
 		if ( bli_is_3m_packed( pack_schema ) )
+		{
 			ps_p = ( ps_p * 3 ) / 2;
+
+			// Align the panel stride according to the micro-panel alignment.
+			ps_p = bli_align_dim_to_size( ps_p, elem_size_p, upanel_align );
+		}
 		else if ( bli_is_ro_packed( pack_schema ) ||
 		          bli_is_io_packed( pack_schema ) ||
 		          bli_is_rpi_packed( pack_schema ) )
-			ps_p =   ps_p / 2;
+		{
+			// Align the panel stride according to the micro-panel alignment.
+			ps_p = bli_align_dim_to_size( ps_p, elem_size_p, upanel_align );
+
+			ps_p = ps_p / 2;
+		}
+		else
+		{
+			// Align the panel stride according to the micro-panel alignment.
+			ps_p = bli_align_dim_to_size( ps_p, elem_size_p, upanel_align );
+		}
 
 		// Store the strides and panel dimension in p.
 		bli_obj_set_incs( rs_p, cs_p, *p );

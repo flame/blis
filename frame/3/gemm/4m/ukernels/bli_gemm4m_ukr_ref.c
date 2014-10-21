@@ -59,14 +59,14 @@ void PASTEMAC(ch,varname)( \
 	const dim_t       m         = PASTEMAC(chr,mr); \
 	const dim_t       n         = PASTEMAC(chr,nr); \
 \
-	const inc_t       ps_a      = bli_auxinfo_ps_a( data ); \
-	const inc_t       ps_b      = bli_auxinfo_ps_b( data ); \
+	const inc_t       is_a      = bli_auxinfo_is_a( data ); \
+	const inc_t       is_b      = bli_auxinfo_is_b( data ); \
 \
 	ctype_r* restrict a_r       = ( ctype_r* )a; \
-	ctype_r* restrict a_i       = ( ctype_r* )a + ps_a; \
+	ctype_r* restrict a_i       = ( ctype_r* )a + is_a; \
 \
 	ctype_r* restrict b_r       = ( ctype_r* )b; \
-	ctype_r* restrict b_i       = ( ctype_r* )b + ps_b; \
+	ctype_r* restrict b_i       = ( ctype_r* )b + is_b; \
 \
 	ctype_r* restrict one_r     = PASTEMAC(chr,1); \
 	ctype_r* restrict zero_r    = PASTEMAC(chr,0); \
@@ -89,6 +89,18 @@ void PASTEMAC(ch,varname)( \
 	inc_t             incct, ldct; \
 \
 	dim_t             i, j; \
+\
+\
+/*
+PASTEMAC(chr,fprintm)( stdout, "gemm4m_ukr: ap_r", m, k, \
+                       a_r, 1, PASTEMAC(chr,packmr), "%4.1f", "" ); \
+PASTEMAC(chr,fprintm)( stdout, "gemm4m_ukr: ap_i", m, k, \
+                       a_i, 1, PASTEMAC(chr,packmr), "%4.1f", "" ); \
+PASTEMAC(chr,fprintm)( stdout, "gemm4m_ukr: bp_r", k, n, \
+                       b_r, PASTEMAC(chr,packnr), 1, "%4.1f", "" ); \
+PASTEMAC(chr,fprintm)( stdout, "gemm4m_ukr: bp_i", k, n, \
+                       b_i, PASTEMAC(chr,packnr), 1, "%4.1f", "" ); \
+*/ \
 \
 \
 	/* SAFETY CHECK: The higher level implementation should never

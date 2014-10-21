@@ -403,7 +403,8 @@ void PASTEMAC(ch,varname)( \
 			} \
 \
 			/* NOTE: This value is equivalent to ps_p. */ \
-			p_inc = ldp * panel_len_max_i; \
+			/*p_inc = ldp * panel_len_max_i;*/ \
+			p_inc = ps_p; \
 		} \
 		else \
 		{ \
@@ -441,7 +442,8 @@ void PASTEMAC(ch,varname)( \
 */ \
 \
 			/* NOTE: This value is equivalent to ps_p. */ \
-			p_inc = ldp * panel_len_max_i; \
+			/*p_inc = ldp * panel_len_max_i;*/ \
+			p_inc = ps_p; \
 		} \
 \
 \

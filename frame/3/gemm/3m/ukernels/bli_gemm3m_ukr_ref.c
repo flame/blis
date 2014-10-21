@@ -62,16 +62,16 @@ void PASTEMAC(ch,varname)( \
 	const dim_t       m         = PASTEMAC(chr,mr); \
 	const dim_t       n         = PASTEMAC(chr,nr); \
 \
-	const inc_t       ps_a      = ( bli_auxinfo_ps_a( data ) * 2 ) / 3; \
-	const inc_t       ps_b      = ( bli_auxinfo_ps_b( data ) * 2 ) / 3; \
+	const inc_t       is_a      = bli_auxinfo_is_a( data ); \
+	const inc_t       is_b      = bli_auxinfo_is_b( data ); \
 \
 	ctype_r* restrict a_r       = ( ctype_r* )a; \
-	ctype_r* restrict a_i       = ( ctype_r* )a +   ps_a; \
-	ctype_r* restrict a_rpi     = ( ctype_r* )a + 2*ps_a; \
+	ctype_r* restrict a_i       = ( ctype_r* )a +   is_a; \
+	ctype_r* restrict a_rpi     = ( ctype_r* )a + 2*is_a; \
 \
 	ctype_r* restrict b_r       = ( ctype_r* )b; \
-	ctype_r* restrict b_i       = ( ctype_r* )b +   ps_b; \
-	ctype_r* restrict b_rpi     = ( ctype_r* )b + 2*ps_b; \
+	ctype_r* restrict b_i       = ( ctype_r* )b +   is_b; \
+	ctype_r* restrict b_rpi     = ( ctype_r* )b + 2*is_b; \
 \
 	ctype_r* restrict zero_r    = PASTEMAC(chr,0); \
 \

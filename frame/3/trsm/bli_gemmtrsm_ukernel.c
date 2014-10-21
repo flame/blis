@@ -77,9 +77,6 @@ void bli_gemmtrsm_ukernel( obj_t*  alpha,
 
 	void*     buf_alpha = bli_obj_buffer_for_1x1( dt, *alpha );
 
-	inc_t     ps_a      = bli_obj_panel_stride( *a1x );
-	inc_t     ps_b      = bli_obj_panel_stride( *bx1 );
-
 	FUNCPTR_T f;
 
 	auxinfo_t data;
@@ -91,9 +88,6 @@ void bli_gemmtrsm_ukernel( obj_t*  alpha,
 	else
 	{ bli_auxinfo_set_next_a( buf_a11, data ); }
 	bli_auxinfo_set_next_b( buf_bx1, data );
-
-	bli_auxinfo_set_ps_a( ps_a, data );
-	bli_auxinfo_set_ps_b( ps_b, data );
 
 	// Index into the type combination array to extract the correct
 	// function pointer.

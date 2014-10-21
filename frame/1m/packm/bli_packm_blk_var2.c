@@ -251,7 +251,8 @@ void PASTEMAC(ch,varname)( \
 	conj_t          conjc; \
 	bool_t          row_stored; \
 	bool_t          col_stored; \
-	dim_t           ss_p; \
+	dim_t           ss_num; \
+	dim_t           ss_den; \
 \
 	ctype* restrict c_use; \
 	ctype* restrict p_use; \
@@ -323,14 +324,14 @@ void PASTEMAC(ch,varname)( \
 		n_panel_max    = &panel_len_max_i; \
 	} \
 \
-	/* Compute the "storage stride" of p. This is usually equal to ldp,
-	   because usually ps_p = ldp * panel_len_max (e.g. where ldp is
-	   equal to rs_p = packnr, or cs_p = packmr). But for 3m, the product
-	   ldp * panel_len_max must be scaled by 3/2. packm_init() has already
-	   scaled ps_p by 3/2, if needed, so rather than scale the product by
-	   3/2 manually, we just compute the correct scaling factor and use it
-	   instead of ldp. */ \
-	ss_p = ps_p / panel_len_max; \
+	/* Compute the storage stride. Usually this is just ldp. However, in
+	   the case of 3m, we need to scale by 3/2. We break up this scaling
+	   factor into numerator and denominator since it cannot be represented
+	   by a single integer. */ \
+	if ( bli_is_3m_packed( schema ) ) { ss_num = 3*ldp; \
+	                                    ss_den = 2; } \
+	else                              { ss_num = 1*ldp; \
+	                                    ss_den = 1; } \
 \
 	/* Compute the total number of iterations we'll need. */ \
 	num_iter = iter_dim / panel_dim_max + ( iter_dim % panel_dim_max ? 1 : 0 ); \
@@ -354,6 +355,15 @@ void PASTEMAC(ch,varname)( \
 	} \
 \
 	p_begin = p_cast; \
+\
+/*
+if ( row_stored ) \
+PASTEMAC(ch,fprintm)( stdout, "packm_var2: b", m, n, \
+                      c_cast,        rs_c, cs_c, "%4.1f", "" ); \
+if ( col_stored ) \
+PASTEMAC(ch,fprintm)( stdout, "packm_var2: a", m, n, \
+                      c_cast,        rs_c, cs_c, "%4.1f", "" ); \
+*/ \
 \
 	for ( ic  = ic0,    ip  = ip0,    it  = 0; it < num_iter; \
 	      ic += ic_inc, ip += ip_inc, it += 1 ) \
@@ -432,13 +442,16 @@ void PASTEMAC(ch,varname)( \
 			/* NOTE: This value is usually LESS than ps_p because triangular
 			   matrices usually have several micro-panels that are shorter
 			   than a "full" micro-panel. */ \
-			p_inc = ss_p * panel_len_max_i; \
+			p_inc = ( panel_len_max_i * ss_num ) / ss_den; \
 		} \
 		else if ( bli_is_herm_or_symm( strucc ) ) \
 		{ \
 			/* This case executes if the panel belongs to a Hermitian or
 			   symmetric matrix, which includes stored, unstored, and
 			   diagonal-intersecting panels. */ \
+\
+			c_use = c_begin; \
+			p_use = p_begin; \
 \
 			panel_len_i     = panel_len_full; \
 			panel_len_max_i = panel_len_max; \
@@ -457,18 +470,21 @@ void PASTEMAC(ch,varname)( \
 				                *m_panel_max, \
 				                *n_panel_max, \
 				                kappa_cast, \
-				                c_begin, rs_c, cs_c, \
-				                p_begin, rs_p, cs_p ); \
+				                c_use, rs_c, cs_c, \
+				                p_use, rs_p, cs_p ); \
 			} \
 \
 			/* NOTE: This value is equivalent to ps_p. */ \
-			p_inc = ss_p * panel_len_max_i; \
+			p_inc = ps_p; \
 		} \
 		else \
 		{ \
 			/* This case executes if the panel is general, or, if the
 			   panel is part of a triangular matrix and is neither unstored
 			   (ie: zero) nor diagonal-intersecting. */ \
+\
+			c_use = c_begin; \
+			p_use = p_begin; \
 \
 			panel_len_i     = panel_len_full; \
 			panel_len_max_i = panel_len_max; \
@@ -487,30 +503,41 @@ void PASTEMAC(ch,varname)( \
 				                *m_panel_max, \
 				                *n_panel_max, \
 				                kappa_cast, \
-				                c_begin, rs_c, cs_c, \
-				                p_begin, rs_p, cs_p ); \
+				                c_use, rs_c, cs_c, \
+				                p_use, rs_p, cs_p ); \
 			} \
-/*
-			if ( row_stored ) { \
-			PASTEMAC(chr,fprintm)( stdout, "packm_var2: bp_r", *m_panel_max, *n_panel_max, \
-			                       ( ctype_r* )p_begin,         rs_p, cs_p, "%4.1f", "" ); \
-			PASTEMAC(chr,fprintm)( stdout, "packm_var2: bp_i", *m_panel_max, *n_panel_max, \
-			                       ( ctype_r* )p_begin + p_inc, rs_p, cs_p, "%4.1f", "" ); \
-			} \
-*/ \
-/*
-			if ( col_stored ) { \
-			PASTEMAC(chr,fprintm)( stdout, "packm_var2: ap_r", *m_panel_max, *n_panel_max, \
-			                       ( ctype_r* )p_begin,         rs_p, cs_p, "%4.1f", "" ); \
-			PASTEMAC(chr,fprintm)( stdout, "packm_var2: ap_i", *m_panel_max, *n_panel_max, \
-			                       ( ctype_r* )p_begin + p_inc, rs_p, cs_p, "%4.1f", "" ); \
-			} \
-*/ \
 \
 			/* NOTE: This value is equivalent to ps_p. */ \
-			p_inc = ss_p * panel_len_max_i; \
+			p_inc = ps_p; \
 		} \
 \
+/*
+		if ( row_stored ) { \
+		PASTEMAC(chr,fprintm)( stdout, "packm_var2: b_r", *m_panel_max, *n_panel_max, \
+		                       ( ctype_r* )c_use,        2*rs_c, 2*cs_c, "%4.1f", "" ); \
+		PASTEMAC(chr,fprintm)( stdout, "packm_var2: b_i", *m_panel_max, *n_panel_max, \
+		                       (( ctype_r* )c_use)+rs_c, 2*rs_c, 2*cs_c, "%4.1f", "" ); \
+		PASTEMAC(chr,fprintm)( stdout, "packm_var2: bp_r", *m_panel_max, *n_panel_max, \
+		                       ( ctype_r* )p_use,         rs_p, cs_p, "%4.1f", "" ); \
+		inc_t is_b = rs_p * *m_panel_max; \
+		PASTEMAC(chr,fprintm)( stdout, "packm_var2: bp_i", *m_panel_max, *n_panel_max, \
+		                       ( ctype_r* )p_use + is_b, rs_p, cs_p, "%4.1f", "" ); \
+		} \
+*/ \
+\
+\
+/*
+		if ( col_stored ) { \
+		PASTEMAC(chr,fprintm)( stdout, "packm_var2: a_r", *m_panel_max, *n_panel_max, \
+		                       ( ctype_r* )c_use,        2*rs_c, 2*cs_c, "%4.1f", "" ); \
+		PASTEMAC(chr,fprintm)( stdout, "packm_var2: a_i", *m_panel_max, *n_panel_max, \
+		                       (( ctype_r* )c_use)+rs_c, 2*rs_c, 2*cs_c, "%4.1f", "" ); \
+		PASTEMAC(chr,fprintm)( stdout, "packm_var2: ap_r", *m_panel_max, *n_panel_max, \
+		                       ( ctype_r* )p_use,         rs_p, cs_p, "%4.1f", "" ); \
+		PASTEMAC(chr,fprintm)( stdout, "packm_var2: ap_i", *m_panel_max, *n_panel_max, \
+		                       ( ctype_r* )p_use + p_inc, rs_p, cs_p, "%4.1f", "" ); \
+		} \
+*/ \
 \
 		p_begin += p_inc; \
 \

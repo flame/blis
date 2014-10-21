@@ -48,14 +48,14 @@ void PASTEMAC(ch,varname)( \
 	const dim_t       m     = PASTEMAC(chr,mr); \
 	const dim_t       n     = PASTEMAC(chr,nr); \
 \
-	const inc_t       ps_a  = bli_auxinfo_ps_a( data ); \
-	const inc_t       ps_b  = bli_auxinfo_ps_b( data ); \
+	const inc_t       is_a  = bli_auxinfo_is_a( data ); \
+	const inc_t       is_b  = bli_auxinfo_is_b( data ); \
 \
 	ctype_r* restrict a_r   = ( ctype_r* )ar; \
-	ctype_r* restrict a_i   = ( ctype_r* )ar + ps_a; \
+	ctype_r* restrict a_i   = ( ctype_r* )ar + is_a; \
 \
 	ctype_r* restrict b_r   = ( ctype_r* )br; \
-	ctype_r* restrict b_i   = ( ctype_r* )br + ps_b; \
+	ctype_r* restrict b_i   = ( ctype_r* )br + is_b; \
 \
 	const inc_t       rs_a  = 1; \
 	const inc_t       cs_a  = PASTEMAC(chr,packmr); \

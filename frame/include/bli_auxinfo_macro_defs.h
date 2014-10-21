@@ -44,8 +44,8 @@
 #define bli_auxinfo_next_a( auxinfo )    ( (auxinfo)->a_next )
 #define bli_auxinfo_next_b( auxinfo )    ( (auxinfo)->b_next )
 
-#define bli_auxinfo_ps_a( auxinfo )      ( (auxinfo)->ps_a )
-#define bli_auxinfo_ps_b( auxinfo )      ( (auxinfo)->ps_b )
+#define bli_auxinfo_is_a( auxinfo )      ( (auxinfo)->is_a )
+#define bli_auxinfo_is_b( auxinfo )      ( (auxinfo)->is_b )
 
 
 // auxinfo_t field modification
@@ -62,8 +62,8 @@
 	bli_auxinfo_set_next_b( b_p, auxinfo ); \
 }
 
-#define bli_auxinfo_set_ps_a( ps, auxinfo )   { (auxinfo).ps_a = ps; }
-#define bli_auxinfo_set_ps_b( ps, auxinfo )   { (auxinfo).ps_b = ps; }
+#define bli_auxinfo_set_is_a( is, auxinfo )   { (auxinfo).is_a = is; }
+#define bli_auxinfo_set_is_b( is, auxinfo )   { (auxinfo).is_b = is; }
 
 
 #endif 

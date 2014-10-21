@@ -51,19 +51,19 @@ void PASTEMAC(ch,varname)( \
 	const dim_t       m           = PASTEMAC(chr,mr); \
 	const dim_t       n           = PASTEMAC(chr,nr); \
 \
-	const inc_t       ps_a        = bli_auxinfo_ps_a( data ); \
-	const inc_t       ps_b        = bli_auxinfo_ps_b( data ); \
+	const inc_t       is_a        = bli_auxinfo_is_a( data ); \
+	const inc_t       is_b        = bli_auxinfo_is_b( data ); \
 \
 	ctype_r* restrict a11_r       = ( ctype_r* )a11; \
 \
 	ctype_r* restrict a12_r       = ( ctype_r* )a12; \
-	ctype_r* restrict a12_i       = ( ctype_r* )a12 + ps_a; \
+	ctype_r* restrict a12_i       = ( ctype_r* )a12 + is_a; \
 \
 	ctype_r* restrict b11_r       = ( ctype_r* )b11; \
-	ctype_r* restrict b11_i       = ( ctype_r* )b11 + ps_b; \
+	ctype_r* restrict b11_i       = ( ctype_r* )b11 + is_b; \
 \
 	ctype_r* restrict b21_r       = ( ctype_r* )b21; \
-	ctype_r* restrict b21_i       = ( ctype_r* )b21 + ps_b; \
+	ctype_r* restrict b21_i       = ( ctype_r* )b21 + is_b; \
 \
 	const inc_t       rs_b        = PASTEMAC(chr,packnr); \
 	const inc_t       cs_b        = 1; \
@@ -79,6 +79,17 @@ void PASTEMAC(ch,varname)( \
 \
 	dim_t             i, j; \
 \
+/*
+PASTEMAC(chr,fprintm)( stdout, "gemmtrsm4m_ukr: a1112p_r", m, k+m, \
+                       a11_r, 1,      PASTEMAC(chr,packmr), "%4.1f", "" ); \
+PASTEMAC(chr,fprintm)( stdout, "gemmtrsm4m_ukr: a1112p_i", m, k+m, \
+                       a11_r+is_a, 1, PASTEMAC(chr,packmr), "%4.1f", "" ); \
+PASTEMAC(chr,fprintm)( stdout, "gemmtrsm4m_ukr: b1121p_r", k+m, n, \
+                       b11_r,      PASTEMAC(chr,packnr), 1, "%4.1f", "" ); \
+PASTEMAC(chr,fprintm)( stdout, "gemmtrsm4m_ukr: b1121p_i", k+m, n, \
+                       b11_r+is_b, PASTEMAC(chr,packnr), 1, "%4.1f", "" ); \
+*/ \
+ \
 \
 	/* Copy the contents of c to a temporary buffer ct. */ \
 	if ( !PASTEMAC(chr,eq0)( alpha_i ) ) \

@@ -71,9 +71,6 @@ void bli_gemm_ukernel( obj_t*  alpha,
 
 	void*     buf_beta  = bli_obj_buffer_for_1x1( dt, *beta );
 
-	inc_t     ps_a      = bli_obj_panel_stride( *a );
-	inc_t     ps_b      = bli_obj_panel_stride( *b );
-
 	FUNCPTR_T f;
 
 	auxinfo_t data;
@@ -82,8 +79,6 @@ void bli_gemm_ukernel( obj_t*  alpha,
 	// Fill the auxinfo_t struct in case the micro-kernel uses it.
 	bli_auxinfo_set_next_a( buf_a, data );
 	bli_auxinfo_set_next_b( buf_b, data );
-	bli_auxinfo_set_ps_a( ps_a, data );
-	bli_auxinfo_set_ps_b( ps_b, data );
 
 	// Index into the type combination array to extract the correct
 	// function pointer.

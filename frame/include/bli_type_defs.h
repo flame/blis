@@ -552,9 +552,9 @@ typedef struct
 	void*  a_next;
 	void*  b_next;
 
-	// The panel strides of A and B.
-	inc_t  ps_a;
-	inc_t  ps_b;
+	// The imaginary strides of A and B.
+	inc_t  is_a;
+	inc_t  is_b;
 
 } auxinfo_t;
 

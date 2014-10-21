@@ -162,6 +162,8 @@ void PASTEMAC(ch,varname)( \
 	/* Alias some constants to simpler names. */ \
 	const dim_t     MR         = pd_a; \
 	const dim_t     NR         = pd_b; \
+	const dim_t     PACKMR     = cs_a; \
+	const dim_t     PACKNR     = rs_b; \
 \
 	ctype* restrict zero       = PASTEMAC(ch,0); \
 	ctype* restrict a_cast     = a; \
@@ -180,6 +182,8 @@ void PASTEMAC(ch,varname)( \
 	inc_t           rstep_a; \
 	inc_t           cstep_b; \
 	inc_t           rstep_c, cstep_c; \
+	inc_t           istep_a; \
+	inc_t           istep_b; \
 	auxinfo_t       aux; \
 \
 	/*
@@ -222,13 +226,16 @@ void PASTEMAC(ch,varname)( \
 	rstep_c = rs_c * MR; \
 	cstep_c = cs_c * NR; \
 \
+	istep_a = PACKMR * k; \
+	istep_b = PACKNR * k; \
+\
 	/* Save the pack schemas of A and B to the auxinfo_t object. */ \
 	bli_auxinfo_set_schema_a( schema_a, aux ); \
 	bli_auxinfo_set_schema_b( schema_b, aux ); \
 \
-	/* Save the panel strides of A and B to the auxinfo_t object. */ \
-	bli_auxinfo_set_ps_a( ps_a, aux ); \
-	bli_auxinfo_set_ps_b( ps_b, aux ); \
+	/* Save the imaginary stride of A and B to the auxinfo_t object. */ \
+	bli_auxinfo_set_is_a( istep_a, aux ); \
+	bli_auxinfo_set_is_b( istep_b, aux ); \
 \
 	gemm_thrinfo_t* caucus = gemm_thread_sub_gemm( thread ); \
 	dim_t jr_num_threads = thread_n_way( thread ); \
