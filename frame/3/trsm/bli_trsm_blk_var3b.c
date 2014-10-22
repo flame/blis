@@ -86,8 +86,11 @@ void bli_trsm_blk_var3b( obj_t*  a,
 	for ( i = 0; i < k_trans; i += b_alg )
 	{
 		// Determine the current algorithmic blocksize.
-		b_alg = bli_determine_blocksize_b( i, k_trans, b,
-		                                   cntl_blocksize( cntl ) );
+		// NOTE: We call a trsm-specific function to determine the kc
+		// blocksize so that we can implement the "nudging" of kc to be
+		// a multiple of mr, as needed.
+		b_alg = bli_trsm_determine_kc_b( i, k_trans, b,
+		                                 cntl_blocksize( cntl ) );
 
 		// Acquire partitions for A1 and B1.
 		bli_acquire_mpart_r2l( BLIS_SUBPART1,

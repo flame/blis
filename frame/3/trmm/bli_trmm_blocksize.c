@@ -34,113 +34,14 @@
 
 #include "blis.h"
 
-
-blksz_t* bli_blksz_obj_create( dim_t b_s, dim_t be_s,
-                               dim_t b_d, dim_t be_d,
-                               dim_t b_c, dim_t be_c,
-                               dim_t b_z, dim_t be_z )
-{
-	blksz_t* b;
-
-	b = ( blksz_t* ) bli_malloc( sizeof(blksz_t) );	
-
-	bli_blksz_obj_init( b,
-	                    b_s, be_s,
-	                    b_d, be_d,
-	                    b_c, be_c,
-	                    b_z, be_z );
-
-	return b;
-}
-
-
-void bli_blksz_obj_init( blksz_t* b,
-                         dim_t    b_s, dim_t be_s,
-                         dim_t    b_d, dim_t be_d,
-                         dim_t    b_c, dim_t be_c,
-                         dim_t    b_z, dim_t be_z )
-{
-	b->v[BLIS_BITVAL_FLOAT_TYPE]    = b_s;
-	b->v[BLIS_BITVAL_DOUBLE_TYPE]   = b_d;
-	b->v[BLIS_BITVAL_SCOMPLEX_TYPE] = b_c;
-	b->v[BLIS_BITVAL_DCOMPLEX_TYPE] = b_z;
-	b->e[BLIS_BITVAL_FLOAT_TYPE]    = be_s;
-	b->e[BLIS_BITVAL_DOUBLE_TYPE]   = be_d;
-	b->e[BLIS_BITVAL_SCOMPLEX_TYPE] = be_c;
-	b->e[BLIS_BITVAL_DCOMPLEX_TYPE] = be_z;
-
-	// By default, set the sub-blocksize field to NULL.
-	b->sub = NULL;
-}
-
-
-void bli_blksz_obj_attach_to( blksz_t* br,
-                              blksz_t* bc )
-{
-	bc->sub = br;
-}
-
-
-void bli_blksz_obj_free( blksz_t* b )
-{
-	bli_free( b );
-}
-
-
-dim_t bli_blksz_for_type( num_t    dt,
-                          blksz_t* b )
-{
-	return b->v[ dt ];
-}
-
-
-dim_t bli_blksz_max_for_type( num_t    dt,
-                              blksz_t* b )
-{
-	return b->e[ dt ];
-}
-
-
-dim_t bli_blksz_total_for_type( num_t    dt,
-                                blksz_t* b )
-{
-	return b->v[ dt ] + b->e[ dt ];
-}
-
-
-dim_t bli_blksz_for_obj( obj_t*   obj,
-                         blksz_t* b )
-{
-	return bli_blksz_for_type( bli_obj_datatype( *obj ), b );
-}
-
-
-dim_t bli_blksz_max_for_obj( obj_t*   obj,
-                             blksz_t* b )
-{
-	return bli_blksz_max_for_type( bli_obj_datatype( *obj ), b );
-}
-
-
-dim_t bli_blksz_total_for_obj( obj_t*   obj,
-                               blksz_t* b )
-{
-	return bli_blksz_total_for_type( bli_obj_datatype( *obj ), b );
-}
-
-
-blksz_t* bli_blksz_sub( blksz_t* b )
-{
-	return b->sub;
-}
-
-
-dim_t bli_determine_blocksize_f( dim_t    i,
-                                 dim_t    dim,
-                                 obj_t*   obj,
-                                 blksz_t* bsize )
+dim_t bli_trmm_determine_kc_f( dim_t    i,
+                               dim_t    dim,
+                               obj_t*   a,
+                               obj_t*   b,
+                               blksz_t* bsize )
 {
 	num_t dt;
+	dim_t mnr;
 	dim_t b_alg, b_max, b_now;
 	dim_t dim_left_now;
 
@@ -150,9 +51,17 @@ dim_t bli_determine_blocksize_f( dim_t    i,
 
 	// Extract the execution datatype and use it to query the corresponding
 	// blocksize and blocksize maximum values from the blksz_t object.
-	dt    = bli_obj_execution_datatype( *obj );
+	dt    = bli_obj_execution_datatype( *a );
 	b_alg = bli_blksz_for_type( dt, bsize );
 	b_max = bli_blksz_max_for_type( dt, bsize );
+
+	// Nudge the default and maximum blocksizes up to the nearest
+	// multiple of MR if the triangular matrix is on the left, or NR
+	// if the triangular matrix is one the right.
+	if ( bli_obj_root_is_triangular( *a ) ) mnr = bli_info_get_default_mr( dt );
+	else                                    mnr = bli_info_get_default_nr( dt );
+	b_alg = bli_align_dim_to_mult( b_alg, mnr );
+	b_max = bli_align_dim_to_mult( b_max, mnr );
 
 	// Compute how much of the matrix dimension is left, including the
 	// chunk that will correspond to the blocksize we are computing now.
@@ -174,12 +83,14 @@ dim_t bli_determine_blocksize_f( dim_t    i,
 }
 
 
-dim_t bli_determine_blocksize_b( dim_t    i,
-                                 dim_t    dim,
-                                 obj_t*   obj,
-                                 blksz_t* bsize )
+dim_t bli_trmm_determine_kc_b( dim_t    i,
+                               dim_t    dim,
+                               obj_t*   a,
+                               obj_t*   b,
+                               blksz_t* bsize )
 {
 	num_t dt;
+	dim_t mnr;
 	dim_t b_alg, b_max, b_now;
 	dim_t dim_at_edge;
 	dim_t dim_left_now;
@@ -190,9 +101,17 @@ dim_t bli_determine_blocksize_b( dim_t    i,
 
 	// Extract the execution datatype and use it to query the corresponding
 	// blocksize and blocksize maximum values from the blksz_t object.
-	dt    = bli_obj_execution_datatype( *obj );
+	dt    = bli_obj_execution_datatype( *a );
 	b_alg = bli_blksz_for_type( dt, bsize );
 	b_max = bli_blksz_max_for_type( dt, bsize );
+
+	// Nudge the default and maximum blocksizes up to the nearest
+	// multiple of MR if the triangular matrix is on the left, or NR
+	// if the triangular matrix is one the right.
+	if ( bli_obj_root_is_triangular( *a ) ) mnr = bli_info_get_default_mr( dt );
+	else                                    mnr = bli_info_get_default_nr( dt );
+	b_alg = bli_align_dim_to_mult( b_alg, mnr );
+	b_max = bli_align_dim_to_mult( b_max, mnr );
 
 	// Compute how much of the matrix dimension is left, including the
 	// chunk that will correspond to the blocksize we are computing now.
@@ -229,22 +148,5 @@ dim_t bli_determine_blocksize_b( dim_t    i,
 	}
 
 	return b_now;
-}
-
-
-dim_t bli_determine_reg_blocksize( obj_t*   obj,
-                                   blksz_t* bsize )
-{
-	num_t    dt;
-	blksz_t* b_sub_obj;
-	dim_t    b_sub;
-
-	// Extract the execution datatype and sub-blocksize and use them to
-	// query the the register blocksize from the blksz_t object.
-	dt        = bli_obj_execution_datatype( *obj );
-	b_sub_obj = bli_blksz_sub( bsize );
-	b_sub     = bli_blksz_for_type( dt, b_sub_obj );
-
-	return b_sub;
 }
 

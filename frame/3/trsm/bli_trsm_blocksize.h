@@ -32,51 +32,11 @@
 
 */
 
-
-blksz_t* bli_blksz_obj_create( dim_t b_s, dim_t be_s,
-                               dim_t b_d, dim_t be_d,
-                               dim_t b_c, dim_t be_c,
-                               dim_t b_z, dim_t be_z );
-
-void bli_blksz_obj_init( blksz_t* b,
-                         dim_t    b_s, dim_t be_s,
-                         dim_t    b_d, dim_t be_d,
-                         dim_t    b_c, dim_t be_c,
-                         dim_t    b_z, dim_t be_z );
-
-void bli_blksz_obj_attach_to( blksz_t* br,
-                              blksz_t* bc );
-
-void bli_blksz_obj_free( blksz_t* b );
-
-dim_t bli_blksz_for_type( num_t    dt,
-                          blksz_t* b );
-
-dim_t bli_blksz_max_for_type( num_t    dt,
-                              blksz_t* b );
-
-dim_t bli_blksz_total_for_type( num_t    dt,
-                                blksz_t* b );
-
-dim_t bli_blksz_for_obj( obj_t*   obj,
-                         blksz_t* b );
-
-dim_t bli_blksz_max_for_obj( obj_t*   obj,
-                             blksz_t* b );
-
-dim_t bli_blksz_total_for_obj( obj_t*   obj,
-                               blksz_t* b );
-
-blksz_t* bli_blksz_sub( blksz_t* b );
-
-dim_t bli_determine_blocksize_f( dim_t    i,
-                                 dim_t    dim,
-                                 obj_t*   obj,
-                                 blksz_t* bsize );
-dim_t bli_determine_blocksize_b( dim_t    i,
-                                 dim_t    dim,
-                                 obj_t*   obj,
-                                 blksz_t* bsize );
-
-dim_t bli_determine_reg_blocksize( obj_t*   obj,
-                                   blksz_t* bsize );
+dim_t bli_trsm_determine_kc_f( dim_t    i,
+                               dim_t    dim,
+                               obj_t*   obj,
+                               blksz_t* bsize );
+dim_t bli_trsm_determine_kc_b( dim_t    i,
+                               dim_t    dim,
+                               obj_t*   obj,
+                               blksz_t* bsize );

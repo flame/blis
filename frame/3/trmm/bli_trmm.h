@@ -32,6 +32,7 @@
 
 */
 
+#include "bli_trmm_blocksize.h"
 #include "bli_trmm_query.h"
 #include "bli_trmm_check.h"
 #include "bli_trmm_entry.h"

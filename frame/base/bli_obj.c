@@ -427,6 +427,10 @@ siz_t bli_datatype_size( num_t dt )
 
 dim_t bli_align_dim_to_mult( dim_t dim, dim_t dim_mult )
 {
+	// We return the dimension unmodified if the multiple is zero
+	// (to avoid division by zero).
+	if ( dim_mult == 0 ) return dim;
+
 	dim = ( ( dim + dim_mult - 1 ) /
 	        dim_mult ) *
 	        dim_mult;

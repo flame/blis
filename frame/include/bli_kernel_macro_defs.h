@@ -1305,7 +1305,7 @@
 #endif
 
 //
-// KC must be a whole multiple of KR, MR, and NR.
+// KC must be a whole multiple of KR.
 //
 
 #if ( \
@@ -1315,24 +1315,6 @@
       ( BLIS_DEFAULT_KC_Z % BLIS_DEFAULT_KR_Z != 0 )    \
     )
   #error "KC must be multiple of KR for all datatypes."
-#endif
-
-#if ( \
-      ( BLIS_DEFAULT_KC_S % BLIS_DEFAULT_MR_S != 0 ) || \
-      ( BLIS_DEFAULT_KC_D % BLIS_DEFAULT_MR_D != 0 ) || \
-      ( BLIS_DEFAULT_KC_C % BLIS_DEFAULT_MR_C != 0 ) || \
-      ( BLIS_DEFAULT_KC_Z % BLIS_DEFAULT_MR_Z != 0 )    \
-    )
-  #error "KC must be multiple of MR for all datatypes."
-#endif
-
-#if ( \
-      ( BLIS_DEFAULT_KC_S % BLIS_DEFAULT_NR_S != 0 ) || \
-      ( BLIS_DEFAULT_KC_D % BLIS_DEFAULT_NR_D != 0 ) || \
-      ( BLIS_DEFAULT_KC_C % BLIS_DEFAULT_NR_C != 0 ) || \
-      ( BLIS_DEFAULT_KC_Z % BLIS_DEFAULT_NR_Z != 0 )    \
-    )
-  #error "KC must be multiple of NR for all datatypes."
 #endif
 
 
