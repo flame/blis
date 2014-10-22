@@ -264,8 +264,6 @@ void bli_dgemm_opt_30x8(
                     auxinfo_t*       data
                   )
 {
-    if( k == 0) return;
-
     double * a_next = bli_auxinfo_next_a( data );
     double * b_next = bli_auxinfo_next_b( data );
 
@@ -382,6 +380,8 @@ void bli_dgemm_opt_30x8(
         //Used when <= 40 iterations
         CONSIDER_UNDER_40:
         mov rsi, k
+        test rsi, rsi
+        je POSTACCUM
         LOOP_UNDER_40:
             ONE_ITER_MAIN_LOOP(rcx, rsi)
         jne LOOP_UNDER_40
