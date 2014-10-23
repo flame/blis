@@ -34,13 +34,14 @@
 
 #include "blis.h"
 
-dim_t bli_trsm_determine_kc_f( dim_t    i,
+dim_t bli_gemm_determine_kc_f( dim_t    i,
                                dim_t    dim,
-                               obj_t*   obj,
+                               obj_t*   a,
+                               obj_t*   b,
                                blksz_t* bsize )
 {
 	num_t dt;
-	dim_t mr;
+	dim_t mnr;
 	dim_t b_alg, b_max, b_now;
 	dim_t dim_left_now;
 
@@ -50,15 +51,26 @@ dim_t bli_trsm_determine_kc_f( dim_t    i,
 
 	// Extract the execution datatype and use it to query the corresponding
 	// blocksize and blocksize maximum values from the blksz_t object.
-	dt    = bli_obj_execution_datatype( *obj );
+	dt    = bli_obj_execution_datatype( *a );
 	b_alg = bli_blksz_for_type( dt, bsize );
 	b_max = bli_blksz_max_for_type( dt, bsize );
 
 	// Nudge the default and maximum kc blocksizes up to the nearest
-	// multiple of MR.
-	mr    = bli_info_get_default_mr( dt );
-	b_alg = bli_align_dim_to_mult( b_alg, mr );
-	b_max = bli_align_dim_to_mult( b_max, mr );
+	// multiple of MR if A is Hermitian or symmetric, or NR if B is
+	// Hermitian or symmetric. If neither case applies, then we leave
+	// the blocksizes unchanged.
+	if      ( bli_obj_root_is_herm_or_symm( *a ) )
+	{
+		mnr   = bli_info_get_default_mr( dt );
+		b_alg = bli_align_dim_to_mult( b_alg, mnr );
+		b_max = bli_align_dim_to_mult( b_max, mnr );
+	}
+	else if ( bli_obj_root_is_herm_or_symm( *b ) )
+	{
+		mnr   = bli_info_get_default_nr( dt );
+		b_alg = bli_align_dim_to_mult( b_alg, mnr );
+		b_max = bli_align_dim_to_mult( b_max, mnr );
+	}
 
 	// Compute how much of the matrix dimension is left, including the
 	// chunk that will correspond to the blocksize we are computing now.
@@ -80,13 +92,14 @@ dim_t bli_trsm_determine_kc_f( dim_t    i,
 }
 
 
-dim_t bli_trsm_determine_kc_b( dim_t    i,
+dim_t bli_gemm_determine_kc_b( dim_t    i,
                                dim_t    dim,
-                               obj_t*   obj,
+                               obj_t*   a,
+                               obj_t*   b,
                                blksz_t* bsize )
 {
 	num_t dt;
-	dim_t mr;
+	dim_t mnr;
 	dim_t b_alg, b_max, b_now;
 	dim_t dim_at_edge;
 	dim_t dim_left_now;
@@ -97,15 +110,26 @@ dim_t bli_trsm_determine_kc_b( dim_t    i,
 
 	// Extract the execution datatype and use it to query the corresponding
 	// blocksize and blocksize maximum values from the blksz_t object.
-	dt    = bli_obj_execution_datatype( *obj );
+	dt    = bli_obj_execution_datatype( *a );
 	b_alg = bli_blksz_for_type( dt, bsize );
 	b_max = bli_blksz_max_for_type( dt, bsize );
 
 	// Nudge the default and maximum kc blocksizes up to the nearest
-	// multiple of MR.
-	mr    = bli_info_get_default_mr( dt );
-	b_alg = bli_align_dim_to_mult( b_alg, mr );
-	b_max = bli_align_dim_to_mult( b_max, mr );
+	// multiple of MR if A is Hermitian or symmetric, or NR if B is
+	// Hermitian or symmetric. If neither case applies, then we leave
+	// the blocksizes unchanged.
+	if      ( bli_obj_root_is_herm_or_symm( *a ) )
+	{
+		mnr   = bli_info_get_default_mr( dt );
+		b_alg = bli_align_dim_to_mult( b_alg, mnr );
+		b_max = bli_align_dim_to_mult( b_max, mnr );
+	}
+	else if ( bli_obj_root_is_herm_or_symm( *b ) )
+	{
+		mnr   = bli_info_get_default_nr( dt );
+		b_alg = bli_align_dim_to_mult( b_alg, mnr );
+		b_max = bli_align_dim_to_mult( b_max, mnr );
+	}
 
 	// Compute how much of the matrix dimension is left, including the
 	// chunk that will correspond to the blocksize we are computing now.

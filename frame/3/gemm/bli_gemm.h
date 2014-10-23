@@ -33,6 +33,7 @@
 */
 
 #include "bli_gemm_cntl.h"
+#include "bli_gemm_blocksize.h"
 #include "bli_gemm_query.h"
 #include "bli_gemm_check.h"
 #include "bli_gemm_entry.h"

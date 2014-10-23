@@ -263,6 +263,12 @@
 \
 	( ( (obj).info & BLIS_STRUC_BITS ) == BLIS_BITVAL_TRIANGULAR )
 
+#define bli_obj_is_herm_or_symm( obj ) \
+\
+	( bli_obj_is_hermitian( obj ) || \
+	  bli_obj_is_symmetric( obj ) )
+
+
 
 // Info modification
 
@@ -400,6 +406,11 @@
 #define bli_obj_root_is_triangular( obj ) \
 \
 	bli_obj_is_triangular( *bli_obj_root( obj ) ) \
+
+#define bli_obj_root_is_herm_or_symm( obj ) \
+\
+	( bli_obj_is_hermitian( *bli_obj_root( obj ) ) || \
+	  bli_obj_is_symmetric( *bli_obj_root( obj ) ) )
 
 #define bli_obj_root_is_upper( obj ) \
 \

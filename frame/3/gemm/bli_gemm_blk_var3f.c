@@ -85,11 +85,11 @@ void bli_gemm_blk_var3f( obj_t*  a,
 	for ( i = 0; i < k_trans; i += b_alg )
 	{
 		// Determine the current algorithmic blocksize.
-		// NOTE: Use of b (for execution datatype) is intentional!
-		// This causes the right blocksize to be used if c and a are
-		// complex and b is real.
-		b_alg = bli_determine_blocksize_f( i, k_trans, b,
-		                                   cntl_blocksize( cntl ) );
+		// NOTE: We call a gemm/hemm/symm-specific function to determine
+		// the kc blocksize so that we can implement the "nudging" of kc
+		// to be a multiple of mr or nr, as needed.
+		b_alg = bli_gemm_determine_kc_f( i, k_trans, a, b,
+		                                 cntl_blocksize( cntl ) );
 
 		// Acquire partitions for A1 and B1.
 		bli_acquire_mpart_l2r( BLIS_SUBPART1,

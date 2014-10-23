@@ -55,7 +55,7 @@ dim_t bli_trmm_determine_kc_f( dim_t    i,
 	b_alg = bli_blksz_for_type( dt, bsize );
 	b_max = bli_blksz_max_for_type( dt, bsize );
 
-	// Nudge the default and maximum blocksizes up to the nearest
+	// Nudge the default and maximum kc blocksizes up to the nearest
 	// multiple of MR if the triangular matrix is on the left, or NR
 	// if the triangular matrix is one the right.
 	if ( bli_obj_root_is_triangular( *a ) ) mnr = bli_info_get_default_mr( dt );
@@ -105,7 +105,7 @@ dim_t bli_trmm_determine_kc_b( dim_t    i,
 	b_alg = bli_blksz_for_type( dt, bsize );
 	b_max = bli_blksz_max_for_type( dt, bsize );
 
-	// Nudge the default and maximum blocksizes up to the nearest
+	// Nudge the default and maximum kc blocksizes up to the nearest
 	// multiple of MR if the triangular matrix is on the left, or NR
 	// if the triangular matrix is one the right.
 	if ( bli_obj_root_is_triangular( *a ) ) mnr = bli_info_get_default_mr( dt );
