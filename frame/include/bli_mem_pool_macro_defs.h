@@ -232,14 +232,14 @@
 
 #define BLIS_MK_BLOCK_SIZE_S ( BLIS_POOL_MC_S * \
                                ( BLIS_POOL_KC_S + \
-                                 ( BLIS_UPANEL_ALIGN_SIZE_S / \
+                                 ( BLIS_UPANEL_A_ALIGN_SIZE_S / \
                                    BLIS_SIZEOF_S ) \
                                ) * \
                                BLIS_SIZEOF_S \
                              )
 #define BLIS_KN_BLOCK_SIZE_S ( \
                                ( BLIS_POOL_KC_S + \
-                                 ( BLIS_UPANEL_ALIGN_SIZE_S / \
+                                 ( BLIS_UPANEL_B_ALIGN_SIZE_S / \
                                    BLIS_SIZEOF_S ) \
                                ) * \
                                BLIS_POOL_NC_S * \
@@ -256,14 +256,14 @@
 
 #define BLIS_MK_BLOCK_SIZE_D ( BLIS_POOL_MC_D * \
                                ( BLIS_POOL_KC_D + \
-                                 ( BLIS_UPANEL_ALIGN_SIZE_D / \
+                                 ( BLIS_UPANEL_A_ALIGN_SIZE_D / \
                                    BLIS_SIZEOF_D ) \
                                ) * \
                                BLIS_SIZEOF_D \
                              )
 #define BLIS_KN_BLOCK_SIZE_D ( \
                                ( BLIS_POOL_KC_D + \
-                                 ( BLIS_UPANEL_ALIGN_SIZE_D / \
+                                 ( BLIS_UPANEL_B_ALIGN_SIZE_D / \
                                    BLIS_SIZEOF_D ) \
                                ) * \
                                BLIS_POOL_NC_D * \
@@ -280,14 +280,14 @@
 
 #define BLIS_MK_BLOCK_SIZE_C ( BLIS_POOL_MC_C * \
                                ( BLIS_POOL_KC_C + \
-                                 ( BLIS_UPANEL_ALIGN_SIZE_C / \
+                                 ( BLIS_UPANEL_A_ALIGN_SIZE_C / \
                                    BLIS_SIZEOF_C ) \
                                ) * \
                                BLIS_SIZEOF_C \
                              )
 #define BLIS_KN_BLOCK_SIZE_C ( \
                                ( BLIS_POOL_KC_C + \
-                                 ( BLIS_UPANEL_ALIGN_SIZE_C / \
+                                 ( BLIS_UPANEL_B_ALIGN_SIZE_C / \
                                    BLIS_SIZEOF_C ) \
                                ) * \
                                BLIS_POOL_NC_C * \
@@ -304,14 +304,14 @@
 
 #define BLIS_MK_BLOCK_SIZE_Z ( BLIS_POOL_MC_Z * \
                                ( BLIS_POOL_KC_Z + \
-                                 ( BLIS_UPANEL_ALIGN_SIZE_Z / \
+                                 ( BLIS_UPANEL_A_ALIGN_SIZE_Z / \
                                    BLIS_SIZEOF_Z ) \
                                ) * \
                                BLIS_SIZEOF_Z \
                              )
 #define BLIS_KN_BLOCK_SIZE_Z ( \
                                ( BLIS_POOL_KC_Z + \
-                                 ( BLIS_UPANEL_ALIGN_SIZE_Z / \
+                                 ( BLIS_UPANEL_B_ALIGN_SIZE_Z / \
                                    BLIS_SIZEOF_Z ) \
                                ) * \
                                BLIS_POOL_NC_Z * \
@@ -328,14 +328,14 @@
 
 #define BLIS_MK_BLOCK_SIZE_4M_C ( BLIS_POOL_4M_MC_C * \
                                   ( BLIS_POOL_4M_KC_C + \
-                                    ( BLIS_UPANEL_ALIGN_SIZE_C / \
+                                    ( BLIS_UPANEL_A_ALIGN_SIZE_C / \
                                       BLIS_SIZEOF_C ) \
                                   ) * \
                                   BLIS_SIZEOF_C \
                                 )
 #define BLIS_KN_BLOCK_SIZE_4M_C ( \
                                   ( BLIS_POOL_4M_KC_C + \
-                                    ( BLIS_UPANEL_ALIGN_SIZE_C / \
+                                    ( BLIS_UPANEL_B_ALIGN_SIZE_C / \
                                       BLIS_SIZEOF_C ) \
                                   ) * \
                                   BLIS_POOL_4M_NC_C * \
@@ -352,14 +352,14 @@
 
 #define BLIS_MK_BLOCK_SIZE_4M_Z ( BLIS_POOL_4M_MC_Z * \
                                   ( BLIS_POOL_4M_KC_Z + \
-                                    ( BLIS_UPANEL_ALIGN_SIZE_Z / \
+                                    ( BLIS_UPANEL_A_ALIGN_SIZE_Z / \
                                       BLIS_SIZEOF_Z ) \
                                   ) * \
                                   BLIS_SIZEOF_Z \
                                 )
 #define BLIS_KN_BLOCK_SIZE_4M_Z ( \
                                   ( BLIS_POOL_4M_KC_Z + \
-                                    ( BLIS_UPANEL_ALIGN_SIZE_Z / \
+                                    ( BLIS_UPANEL_B_ALIGN_SIZE_Z / \
                                       BLIS_SIZEOF_Z ) \
                                   ) * \
                                   BLIS_POOL_4M_NC_Z * \
@@ -378,7 +378,7 @@
 
 #define BLIS_MK_BLOCK_SIZE_3M_C ( BLIS_POOL_3M_MC_C * \
                                   ( BLIS_POOL_3M_KC_C + \
-                                    ( BLIS_UPANEL_ALIGN_SIZE_C / \
+                                    ( BLIS_UPANEL_A_ALIGN_SIZE_C / \
                                       BLIS_SIZEOF_C ) \
                                   ) * \
                                   ( BLIS_SIZEOF_C * \
@@ -387,7 +387,7 @@
                                 )
 #define BLIS_KN_BLOCK_SIZE_3M_C ( \
                                   ( BLIS_POOL_3M_KC_C + \
-                                    ( BLIS_UPANEL_ALIGN_SIZE_C / \
+                                    ( BLIS_UPANEL_B_ALIGN_SIZE_C / \
                                       BLIS_SIZEOF_C ) \
                                   ) * \
                                   BLIS_POOL_3M_NC_C * \
@@ -410,7 +410,7 @@
 
 #define BLIS_MK_BLOCK_SIZE_3M_Z ( BLIS_POOL_3M_MC_Z * \
                                   ( BLIS_POOL_3M_KC_Z + \
-                                    ( BLIS_UPANEL_ALIGN_SIZE_Z / \
+                                    ( BLIS_UPANEL_A_ALIGN_SIZE_Z / \
                                       BLIS_SIZEOF_Z ) \
                                   ) * \
                                   ( BLIS_SIZEOF_Z * \
@@ -419,7 +419,7 @@
                                 )
 #define BLIS_KN_BLOCK_SIZE_3M_Z ( \
                                   ( BLIS_POOL_3M_KC_Z + \
-                                    ( BLIS_UPANEL_ALIGN_SIZE_Z / \
+                                    ( BLIS_UPANEL_B_ALIGN_SIZE_Z / \
                                       BLIS_SIZEOF_Z ) \
                                   ) * \
                                   BLIS_POOL_3M_NC_Z * \

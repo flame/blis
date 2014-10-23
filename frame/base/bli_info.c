@@ -93,17 +93,9 @@ extern blksz_t* gemm_mc;
 extern blksz_t* gemm_nc;
 extern blksz_t* gemm_kc;
 
-extern blksz_t* gemm_mr;
-extern blksz_t* gemm_nr;
-extern blksz_t* gemm_kr;
-
 extern blksz_t* gemm4m_mc;
 extern blksz_t* gemm4m_nc;
 extern blksz_t* gemm4m_kc;
-
-extern blksz_t* gemm4m_mr;
-extern blksz_t* gemm4m_nr;
-extern blksz_t* gemm4m_kr;
 
 // -- Default cache blocksizes --
 
@@ -227,6 +219,14 @@ gint_t bli_info_get_maximum_kc_z( void ) { bli_init(); return bli_blksz_max_for_
 
 // -- Default register blocksizes --
 
+extern blksz_t* gemm_mr;
+extern blksz_t* gemm_nr;
+extern blksz_t* gemm_kr;
+
+extern blksz_t* gemm4m_mr;
+extern blksz_t* gemm4m_nr;
+extern blksz_t* gemm4m_kr;
+
 // MR default blocksizes
 
 gint_t bli_info_get_default_mr( num_t dt )
@@ -324,6 +324,42 @@ gint_t bli_info_get_packdim_nr_c( void ) { bli_init(); return bli_blksz_max_for_
 gint_t bli_info_get_packdim_nr_z( void ) { bli_init(); return bli_blksz_max_for_type( BLIS_DCOMPLEX,
                                                                            ( bli_4m_is_enabled_z() ? gemm4m_nr
 	                                                                                               : gemm_nr ) ); }
+
+// -- Micro-panel alignment --
+
+extern blksz_t* gemm_upanel_a_align;
+extern blksz_t* gemm_upanel_b_align;
+
+// Micro-panel alignment of A
+
+gint_t bli_info_get_upanel_a_align_size( num_t dt )
+{
+	if      ( bli_is_float   ( dt ) ) return bli_info_get_upanel_a_align_size_s();
+	else if ( bli_is_double  ( dt ) ) return bli_info_get_upanel_a_align_size_d();
+	else if ( bli_is_scomplex( dt ) ) return bli_info_get_upanel_a_align_size_c();
+	else if ( bli_is_dcomplex( dt ) ) return bli_info_get_upanel_a_align_size_z();
+	else                              return 0;
+}
+gint_t bli_info_get_upanel_a_align_size_s( void ) { bli_init(); return bli_blksz_for_type( BLIS_FLOAT,    gemm_upanel_a_align ); }
+gint_t bli_info_get_upanel_a_align_size_d( void ) { bli_init(); return bli_blksz_for_type( BLIS_DOUBLE,   gemm_upanel_a_align ); }
+gint_t bli_info_get_upanel_a_align_size_c( void ) { bli_init(); return bli_blksz_for_type( BLIS_SCOMPLEX, gemm_upanel_a_align ); }
+gint_t bli_info_get_upanel_a_align_size_z( void ) { bli_init(); return bli_blksz_for_type( BLIS_DCOMPLEX, gemm_upanel_a_align ); }
+
+// Micro-panel alignment of B
+
+gint_t bli_info_get_upanel_b_align_size( num_t dt )
+{
+	if      ( bli_is_float   ( dt ) ) return bli_info_get_upanel_b_align_size_s();
+	else if ( bli_is_double  ( dt ) ) return bli_info_get_upanel_b_align_size_d();
+	else if ( bli_is_scomplex( dt ) ) return bli_info_get_upanel_b_align_size_c();
+	else if ( bli_is_dcomplex( dt ) ) return bli_info_get_upanel_b_align_size_z();
+	else                              return 0;
+}
+gint_t bli_info_get_upanel_b_align_size_s( void ) { bli_init(); return bli_blksz_for_type( BLIS_FLOAT,    gemm_upanel_b_align ); }
+gint_t bli_info_get_upanel_b_align_size_d( void ) { bli_init(); return bli_blksz_for_type( BLIS_DOUBLE,   gemm_upanel_b_align ); }
+gint_t bli_info_get_upanel_b_align_size_c( void ) { bli_init(); return bli_blksz_for_type( BLIS_SCOMPLEX, gemm_upanel_b_align ); }
+gint_t bli_info_get_upanel_b_align_size_z( void ) { bli_init(); return bli_blksz_for_type( BLIS_DCOMPLEX, gemm_upanel_b_align ); }
+
 
 // -- Level-2 cache blocksizes --
 

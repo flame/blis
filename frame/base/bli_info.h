@@ -135,6 +135,22 @@ gint_t bli_info_get_packdim_nr_d( void );
 gint_t bli_info_get_packdim_nr_c( void );
 gint_t bli_info_get_packdim_nr_z( void );
 
+// -- Micro-panel alignment for A --
+
+gint_t bli_info_get_upanel_a_align_size( num_t dt );
+gint_t bli_info_get_upanel_a_align_size_s( void );
+gint_t bli_info_get_upanel_a_align_size_d( void );
+gint_t bli_info_get_upanel_a_align_size_c( void );
+gint_t bli_info_get_upanel_a_align_size_z( void );
+
+// -- Micro-panel alignment for B --
+
+gint_t bli_info_get_upanel_b_align_size( num_t dt );
+gint_t bli_info_get_upanel_b_align_size_s( void );
+gint_t bli_info_get_upanel_b_align_size_d( void );
+gint_t bli_info_get_upanel_b_align_size_c( void );
+gint_t bli_info_get_upanel_b_align_size_z( void );
+
 
 // -- Level-2 cache blocksizes --
 

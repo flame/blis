@@ -1082,8 +1082,6 @@
 #define BLIS_PACKDIM_KR_Z  BLIS_DEFAULT_KR_Z
 #endif
 
-
-
 //
 // Define level-2 blocksizes.
 //
@@ -1229,24 +1227,38 @@
 #endif
 
 
-
 // -- Define micro-panel alignment ---------------------------------------------
 
-// In this section, we consider each datatype-specific micro-panel alignment
-// size macro. If it is undefined, we define it to the default value (the size
-// of the datatype).
+// In this section, we consider each datatype-specific alignment sizes for
+// micro-panels of A and B. If any definition is undefined, we define it to
+// a safe default value (the size of the datatype).
 
-#ifndef BLIS_UPANEL_ALIGN_SIZE_S
-#define BLIS_UPANEL_ALIGN_SIZE_S     BLIS_SIZEOF_S
+// Alignment for micro-panels of A
+#ifndef BLIS_UPANEL_A_ALIGN_SIZE_S
+#define BLIS_UPANEL_A_ALIGN_SIZE_S     BLIS_SIZEOF_S
 #endif
-#ifndef BLIS_UPANEL_ALIGN_SIZE_D
-#define BLIS_UPANEL_ALIGN_SIZE_D     BLIS_SIZEOF_D
+#ifndef BLIS_UPANEL_A_ALIGN_SIZE_D
+#define BLIS_UPANEL_A_ALIGN_SIZE_D     BLIS_SIZEOF_D
 #endif
-#ifndef BLIS_UPANEL_ALIGN_SIZE_C
-#define BLIS_UPANEL_ALIGN_SIZE_C     BLIS_SIZEOF_C
+#ifndef BLIS_UPANEL_A_ALIGN_SIZE_C
+#define BLIS_UPANEL_A_ALIGN_SIZE_C     BLIS_SIZEOF_C
 #endif
-#ifndef BLIS_UPANEL_ALIGN_SIZE_Z
-#define BLIS_UPANEL_ALIGN_SIZE_Z     BLIS_SIZEOF_Z
+#ifndef BLIS_UPANEL_A_ALIGN_SIZE_Z
+#define BLIS_UPANEL_A_ALIGN_SIZE_Z     BLIS_SIZEOF_Z
+#endif
+
+// Alignment for micro-panels of B
+#ifndef BLIS_UPANEL_B_ALIGN_SIZE_S
+#define BLIS_UPANEL_B_ALIGN_SIZE_S     BLIS_SIZEOF_S
+#endif
+#ifndef BLIS_UPANEL_B_ALIGN_SIZE_D
+#define BLIS_UPANEL_B_ALIGN_SIZE_D     BLIS_SIZEOF_D
+#endif
+#ifndef BLIS_UPANEL_B_ALIGN_SIZE_C
+#define BLIS_UPANEL_B_ALIGN_SIZE_C     BLIS_SIZEOF_C
+#endif
+#ifndef BLIS_UPANEL_B_ALIGN_SIZE_Z
+#define BLIS_UPANEL_B_ALIGN_SIZE_Z     BLIS_SIZEOF_Z
 #endif
 
 

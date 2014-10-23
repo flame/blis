@@ -686,12 +686,17 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	                        ( int )bli_info_get_packdim_nr_c(),
 	                        ( int )bli_info_get_packdim_nr_z() );
 	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "micro-panel alignment          s       d       c       z \n" );
-	libblis_test_fprintf_c( os, "  sizes (bytes)          %7d %7d %7d %7d\n",
-	                        ( int )BLIS_UPANEL_ALIGN_SIZE_S,
-	                        ( int )BLIS_UPANEL_ALIGN_SIZE_D,
-	                        ( int )BLIS_UPANEL_ALIGN_SIZE_C,
-	                        ( int )BLIS_UPANEL_ALIGN_SIZE_Z );
+	libblis_test_fprintf_c( os, "micro-panel alignment (bytes)  s       d       c       z \n" );
+	libblis_test_fprintf_c( os, "  A (left matrix)        %7d %7d %7d %7d\n",
+	                        ( int )bli_info_get_upanel_a_align_size_s(),
+	                        ( int )bli_info_get_upanel_a_align_size_d(),
+	                        ( int )bli_info_get_upanel_a_align_size_c(),
+	                        ( int )bli_info_get_upanel_a_align_size_z() );
+	libblis_test_fprintf_c( os, "  B (right matrix)       %7d %7d %7d %7d\n",
+	                        ( int )bli_info_get_upanel_b_align_size_s(),
+	                        ( int )bli_info_get_upanel_b_align_size_d(),
+	                        ( int )bli_info_get_upanel_b_align_size_c(),
+	                        ( int )bli_info_get_upanel_b_align_size_z() );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "level-2 cache blocksizes       s       d       c       z \n" );
 	libblis_test_fprintf_c( os, "  m dimension            %7d %7d %7d %7d\n",
