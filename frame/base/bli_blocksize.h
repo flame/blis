@@ -73,10 +73,19 @@ dim_t bli_determine_blocksize_f( dim_t    i,
                                  dim_t    dim,
                                  obj_t*   obj,
                                  blksz_t* bsize );
+dim_t bli_determine_blocksize_f_sub( dim_t  i,
+                                     dim_t  dim,
+                                     dim_t  b_alg,
+                                     dim_t  b_max );
+
 dim_t bli_determine_blocksize_b( dim_t    i,
                                  dim_t    dim,
                                  obj_t*   obj,
                                  blksz_t* bsize );
+dim_t bli_determine_blocksize_b_sub( dim_t  i,
+                                     dim_t  dim,
+                                     dim_t  b_alg,
+                                     dim_t  b_max );
 
 dim_t bli_determine_reg_blocksize( obj_t*   obj,
                                    blksz_t* bsize );

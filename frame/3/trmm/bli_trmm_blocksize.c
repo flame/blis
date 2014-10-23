@@ -42,8 +42,8 @@ dim_t bli_trmm_determine_kc_f( dim_t    i,
 {
 	num_t dt;
 	dim_t mnr;
-	dim_t b_alg, b_max, b_now;
-	dim_t dim_left_now;
+	dim_t b_alg, b_max;
+	dim_t b_use;
 
 	// We assume that this function is being called from an algorithm that
 	// is moving "forward" (ie: top to bottom, left to right, top-left
@@ -63,23 +63,9 @@ dim_t bli_trmm_determine_kc_f( dim_t    i,
 	b_alg = bli_align_dim_to_mult( b_alg, mnr );
 	b_max = bli_align_dim_to_mult( b_max, mnr );
 
-	// Compute how much of the matrix dimension is left, including the
-	// chunk that will correspond to the blocksize we are computing now.
-	dim_left_now = dim - i;
+	b_use = bli_determine_blocksize_f_sub( i, dim, b_alg, b_max );
 
-	// If the dimension currently remaining is less than the maximum
-	// blocksize, use it instead of the default blocksize b_alg.
-	// Otherwise, use b_alg.
-	if ( dim_left_now <= b_max )
-	{
-		b_now = dim_left_now;
-	}
-	else
-	{
-		b_now = b_alg;
-	}
-
-	return b_now;
+	return b_use;
 }
 
 
@@ -91,9 +77,8 @@ dim_t bli_trmm_determine_kc_b( dim_t    i,
 {
 	num_t dt;
 	dim_t mnr;
-	dim_t b_alg, b_max, b_now;
-	dim_t dim_at_edge;
-	dim_t dim_left_now;
+	dim_t b_alg, b_max;
+	dim_t b_use;
 
 	// We assume that this function is being called from an algorithm that
 	// is moving "backward" (ie: bottom to top, right to left, bottom-right
@@ -113,40 +98,8 @@ dim_t bli_trmm_determine_kc_b( dim_t    i,
 	b_alg = bli_align_dim_to_mult( b_alg, mnr );
 	b_max = bli_align_dim_to_mult( b_max, mnr );
 
-	// Compute how much of the matrix dimension is left, including the
-	// chunk that will correspond to the blocksize we are computing now.
-	dim_left_now = dim - i;
+	b_use = bli_determine_blocksize_b_sub( i, dim, b_alg, b_max );
 
-	dim_at_edge = dim_left_now % b_alg;
-
-	// If dim_left_now is a multiple of b_alg, we can safely return b_alg
-	// without going any further.
-	if ( dim_at_edge == 0 )
-		return b_alg;
-
-	// If the dimension currently remaining is less than the maximum
-	// blocksize, use it as the chosen blocksize. If this is not the case,
-	// then we know dim_left_now is greater than the maximum blocksize.
-	// To determine how much of it we should use for the current blocksize,
-	// we inspect dim_at_edge; if it is smaller than (or equal to) b_max -
-	// b_alg, then we use b_alg + dim_at_edge. Otherwise, dim_at_edge is
-	// greater than b_max - b_alg, in which case we use dim_at_edge.
-	if ( dim_left_now <= b_max )
-	{
-		b_now = dim_left_now;
-	}
-	else // if ( dim_left_now > b_max )
-	{
-		if ( dim_at_edge <= b_max - b_alg )
-		{
-			b_now = b_alg + dim_at_edge;
-		}
-		else // if ( dim_at_edge > b_max - b_alg )
-		{
-			b_now = dim_at_edge;
-		}
-	}
-
-	return b_now;
+	return b_use;
 }
 

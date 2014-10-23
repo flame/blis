@@ -141,18 +141,32 @@ dim_t bli_determine_blocksize_f( dim_t    i,
                                  blksz_t* bsize )
 {
 	num_t dt;
-	dim_t b_alg, b_max, b_now;
-	dim_t dim_left_now;
-
-	// We assume that this function is being called from an algorithm that
-	// is moving "forward" (ie: top to bottom, left to right, top-left
-	// to bottom-right).
+	dim_t b_alg, b_max;
+	dim_t b_use;
 
 	// Extract the execution datatype and use it to query the corresponding
 	// blocksize and blocksize maximum values from the blksz_t object.
 	dt    = bli_obj_execution_datatype( *obj );
 	b_alg = bli_blksz_for_type( dt, bsize );
 	b_max = bli_blksz_max_for_type( dt, bsize );
+
+	b_use = bli_determine_blocksize_f_sub( i, dim, b_alg, b_max );
+
+	return b_use;
+}
+
+
+dim_t bli_determine_blocksize_f_sub( dim_t  i,
+                                     dim_t  dim,
+                                     dim_t  b_alg,
+                                     dim_t  b_max )
+{
+	dim_t b_now;
+	dim_t dim_left_now;
+
+	// We assume that this function is being called from an algorithm that
+	// is moving "forward" (ie: top to bottom, left to right, top-left
+	// to bottom-right).
 
 	// Compute how much of the matrix dimension is left, including the
 	// chunk that will correspond to the blocksize we are computing now.
@@ -180,19 +194,33 @@ dim_t bli_determine_blocksize_b( dim_t    i,
                                  blksz_t* bsize )
 {
 	num_t dt;
-	dim_t b_alg, b_max, b_now;
-	dim_t dim_at_edge;
-	dim_t dim_left_now;
-
-	// We assume that this function is being called from an algorithm that
-	// is moving "backward" (ie: bottom to top, right to left, bottom-right
-	// to top-left).
+	dim_t b_alg, b_max;
+	dim_t b_use;
 
 	// Extract the execution datatype and use it to query the corresponding
 	// blocksize and blocksize maximum values from the blksz_t object.
 	dt    = bli_obj_execution_datatype( *obj );
 	b_alg = bli_blksz_for_type( dt, bsize );
 	b_max = bli_blksz_max_for_type( dt, bsize );
+
+	b_use = bli_determine_blocksize_b_sub( i, dim, b_alg, b_max );
+
+	return b_use;
+}
+
+
+dim_t bli_determine_blocksize_b_sub( dim_t  i,
+                                     dim_t  dim,
+                                     dim_t  b_alg,
+                                     dim_t  b_max )
+{
+	dim_t b_now;
+	dim_t dim_left_now;
+	dim_t dim_at_edge;
+
+	// We assume that this function is being called from an algorithm that
+	// is moving "backward" (ie: bottom to top, right to left, bottom-right
+	// to top-left).
 
 	// Compute how much of the matrix dimension is left, including the
 	// chunk that will correspond to the blocksize we are computing now.
