@@ -44,6 +44,7 @@ void PASTEMAC(ch,varname)( \
                          );
 
 INSERT_GENTPROT_BASIC( packm_ref_2xk )
+INSERT_GENTPROT_BASIC( packm_ref_3xk )
 INSERT_GENTPROT_BASIC( packm_ref_4xk )
 INSERT_GENTPROT_BASIC( packm_ref_6xk )
 INSERT_GENTPROT_BASIC( packm_ref_8xk )

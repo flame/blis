@@ -32,6 +32,9 @@
 
 */
 
+/* NOTE: The micro-kernels in this file were partially inspired by portions
+   of code found in OpenBLAS 0.2.8 (http://www.openblas.net/). -FGVZ */
+
 #include "blis.h"
 
 void bli_sgemm_asm_8x8(

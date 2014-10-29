@@ -116,7 +116,7 @@
 
 // Alignment size used when allocating entire blocks of contiguous memory
 // from the contiguous memory allocator.
-#define BLIS_CONTIG_ADDR_ALIGN_SIZE      BLIS_CACHE_LINE_SIZE
+#define BLIS_CONTIG_ADDR_ALIGN_SIZE      BLIS_PAGE_SIZE
 
 
 

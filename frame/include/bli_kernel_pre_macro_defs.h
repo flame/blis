@@ -163,6 +163,13 @@
 #define BLIS_CPACKM_2XK_KERNEL_REF       bli_cpackm_ref_2xk
 #define BLIS_ZPACKM_2XK_KERNEL_REF       bli_zpackm_ref_2xk
 
+// packm_3xk kernels
+
+#define BLIS_SPACKM_3XK_KERNEL_REF       bli_spackm_ref_3xk
+#define BLIS_DPACKM_3XK_KERNEL_REF       bli_dpackm_ref_3xk
+#define BLIS_CPACKM_3XK_KERNEL_REF       bli_cpackm_ref_3xk
+#define BLIS_ZPACKM_3XK_KERNEL_REF       bli_zpackm_ref_3xk
+
 // packm_4xk kernels
 
 #define BLIS_SPACKM_4XK_KERNEL_REF       bli_spackm_ref_4xk

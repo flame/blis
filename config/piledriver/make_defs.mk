@@ -82,11 +82,11 @@ CC             := gcc
 CPPROCFLAGS    := -D_POSIX_C_SOURCE=200112L
 CMISCFLAGS     := -std=c99 -fopenmp
 CPICFLAGS      := -fPIC
-CDBGFLAGS      := -g
+CDBGFLAGS      := #-g
 CWARNFLAGS     := -Wall
-COPTFLAGS      := -O0 -malign-double -funroll-all-loops
+COPTFLAGS      := -O2 -mfpmath=sse -fomit-frame-pointer
 CKOPTFLAGS     := $(COPTFLAGS)
-CVECFLAGS      := -mavx -mfma4 -march=bdver1 -mfpmath=sse
+CVECFLAGS      := -mavx -mfma -march=native
 
 # Aggregate all of the flags into multiple groups: one for standard
 # compilation, and one for each of the supported "special" compilation
@@ -102,7 +102,7 @@ ARFLAGS        := cru
 # --- Determine the linker and related flags ---
 LINKER         := $(CC)
 SOFLAGS        := -shared
-LDFLAGS        := -lm
+LDFLAGS        := -lm -fopenmp
 
 
 

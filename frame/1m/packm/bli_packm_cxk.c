@@ -66,7 +66,10 @@ static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] =
 	},
 	/* micro-panel width = 3 */
 	{
-		NULL, NULL, NULL, NULL,
+		BLIS_SPACKM_3XK_KERNEL,
+		BLIS_CPACKM_3XK_KERNEL,
+		BLIS_DPACKM_3XK_KERNEL,
+		BLIS_ZPACKM_3XK_KERNEL,
 	},
 	/* micro-panel width = 4 */
 	{
