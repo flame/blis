@@ -49,9 +49,6 @@
 // (2) NC must be a multiple of
 //     (a) NR (for zero-padding purposes)
 //     (b) MR (for zero-padding purposes when MR and NR are "swapped")
-// (3) KC must be a multiple of
-//     (a) MR and
-//     (b) NR (for triangular operations such as trmm and trsm).
 //
 
 #define BLIS_SGEMM_UKERNEL         bli_sgemm_new_16x3
