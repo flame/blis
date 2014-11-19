@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -155,6 +155,7 @@
 #define PASTEF770(name)                        name ## _
 #define PASTEF77(ch1,name)       ch1        ## name ## _
 #define PASTEF772(ch1,ch2,name)  ch1 ## ch2 ## name ## _
+#define PASTEF773(ch1,ch2,ch3,name)  ch1 ## ch2 ## ch3 ## name ## _
 
 
 
@@ -172,4 +173,3 @@
 
 
 #endif
-
