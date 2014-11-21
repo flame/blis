@@ -173,8 +173,15 @@ void bli_dgemm_opt_mxn(
     and then saving only the elements that correspond to elements of C11
     that exist (at the edges) is handled automatically within the
     macro-kernel.
-  - Alignment of a1 and b1. The addresses a1 and b1 are aligned according
-    to PACKMR*sizeof(type) and PACKNR*sizeof(type), respectively.
+  - Alignment of a1 and b1. By default, the alignment of addresses a1 and
+    b1 are aligned only to sizeof(type). If BLIS_CONTIG_ADDR_ALIGN_SIZE is
+    set to some larger multiple of sizeof(type), such as the page size,
+    then a1 and b1 will be aligned to PACKMR * sizeof(type) and PACKNR *
+    sizeof(type), respectively. Alignment of a1 and b1 is also affected
+    by BLIS_UPANEL_A_ALIGN_SIZE_? and BLIS_UPANEL_B_ALIGN_SIZE_?, which
+    align the distance (stride) between subsequent micro-panels. (By
+    default, those values are simply sizeof(type), in which case they have
+    no effect.)
   - Unrolling loops. As a general rule of thumb, the loop over k is
     sometimes moderately unrolled; for example, in our experience, an
     unrolling factor of u = 4 is fairly common. If unrolling is applied
