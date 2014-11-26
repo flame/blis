@@ -31,10 +31,13 @@
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
+
 #ifndef BLIS_THREADING_OMP_H
 #define BLIS_THREADING_OMP_H
 
 #ifdef BLIS_ENABLE_OPENMP
+
+#include <omp.h>
 
 #ifdef BLIS_TREE_BARRIER
     struct barrier_s

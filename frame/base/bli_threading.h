@@ -31,12 +31,28 @@
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
+
 #ifndef BLIS_THREADING_H
 #define BLIS_THREADING_H
 
-//thread communicators may be implementation dependent
+// Perform a sanity check to make sure the user doesn't try to enable
+// both OpenMP and pthreads.
+#if defined (BLIS_ENABLE_OPENMP) && defined (BLIS_ENABLE_PTHREADS)
+  #error "BLIS_ENABLE_OPENMP and BLIS_ENABLE_PTHREADS may not be simultaneously defined."
+#endif
+
+// Here, we define BLIS_ENABLE_MULTITHREADING if either OpenMP
+// or pthreads are enabled. This macro is useful in situations when
+// we want to detect use of either OpenMP or pthreads (as opposed
+// to neither being used).
+#if defined (BLIS_ENABLE_OPENMP) || defined (BLIS_ENABLE_PTHREADS)
+  #define BLIS_ENABLE_MULTITHREADING
+#endif
+
+// Define thread_comm_t for situations when multithreading is disabled.
 #ifndef BLIS_ENABLE_MULTITHREADING 
 
+//thread communicators may be implementation dependent
 #ifdef BLIS_TREE_BARRIER
     struct barrier_s
     {   
@@ -66,6 +82,10 @@
 typedef struct thread_comm_s thread_comm_t;
 
 #endif
+
+// Include OpenMP or pthreads definitions.
+#include "bli_threading_omp.h"
+#include "bli_threading_pthreads.h"
 
 // Thread Communicator Interface Definitions
 void    bli_setup_communicator( thread_comm_t* communicator, dim_t n_threads );

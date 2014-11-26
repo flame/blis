@@ -102,7 +102,7 @@ ARFLAGS        := cru
 # --- Determine the linker and related flags ---
 LINKER         := $(CC)
 SOFLAGS        := -shared
-LDFLAGS        := -lm
+LDFLAGS        := -lm -fopenmp -lpthread
 
 
 

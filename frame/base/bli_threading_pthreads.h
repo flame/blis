@@ -31,10 +31,14 @@
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
+
 #ifndef BLIS_THREADING_PTHREADS_H
 #define BLIS_THREADING_PTHREADS_H
 
 #ifdef BLIS_ENABLE_PTHREADS 
+
+#include <pthread.h>
+
 #ifdef __APPLE__
 typedef int pthread_barrierattr_t;
 typedef struct
