@@ -52,6 +52,7 @@ herk_thrinfo_t BLIS_HERK_SINGLE_THREADED;
 thread_comm_t BLIS_SINGLE_COMM;
 
 #ifdef BLIS_ENABLE_PTHREADS
+pthread_mutex_t initialize_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mem_manager_mutex;
 #endif
 
@@ -80,6 +81,9 @@ err_t bli_init( void )
 	// BEGIN CRITICAL SECTION
 #ifdef BLIS_ENABLE_OPENMP        
 	_Pragma( "omp critical (init)" )
+#endif
+#ifdef BLIS_ENABLE_PTHREADS
+    pthread_mutex_lock( &mem_manager_mutex );
 #endif
 	{
 
@@ -114,6 +118,9 @@ err_t bli_init( void )
 
 	// END CRITICAL SECTION
 	}
+#ifdef BLIS_ENABLE_PTHREADS
+    pthread_mutex_unlock( &mem_manager_mutex );
+#endif
 
 #ifdef BLIS_ENABLE_PTHREADS
     pthread_mutex_init( &mem_manager_mutex, NULL );
@@ -147,6 +154,9 @@ err_t bli_finalize( void )
 #ifdef BLIS_ENABLE_OPENMP        
 	_Pragma( "omp critical (init)" )
 #endif
+#ifdef BLIS_ENABLE_PTHREADS
+    pthread_mutex_lock( &mem_manager_mutex );
+#endif
 	{
 
 	// Proceed with finalization only if BLIS is presently initialized.
@@ -175,6 +185,9 @@ err_t bli_finalize( void )
 
 	// END CRITICAL SECTION
 	}
+#ifdef BLIS_ENABLE_PTHREADS
+    pthread_mutex_unlock( &mem_manager_mutex );
+#endif
 
 #ifdef BLIS_ENABLE_PTHREADS
     pthread_mutex_destroy( &mem_manager_mutex );
