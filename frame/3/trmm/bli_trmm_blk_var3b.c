@@ -124,6 +124,7 @@ void bli_trmm_blk_var3b( obj_t*  a,
 		              c_pack,
 		              cntl_sub_gemm( cntl ),
                       trmm_thread_sub_trmm( thread ) );
+        thread_ibarrier( thread );
 	}
 
     thread_obarrier( thread );

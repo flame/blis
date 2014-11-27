@@ -126,6 +126,7 @@ void bli_trmm_blk_var2f( obj_t*  a,
 		              c1_pack,
 		              cntl_sub_gemm( cntl ),
                       trmm_thread_sub_trmm( thread ) );
+        thread_ibarrier( thread );
 
         // Unpack C1 (if C1 was packed).
         bli_unpackm_int( c1_pack, &c1,

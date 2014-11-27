@@ -129,7 +129,7 @@ void bli_trsm_blk_var3f( obj_t*  a,
 		// This variant executes multiple rank-k updates. Therefore, if the
 		// internal alpha scalars on A/B and C are non-zero, we must ensure
 		// that they are only used in the first iteration.
-        if ( i == 0 ) thread_ibarrier( thread );
+        thread_ibarrier( thread );
 		if ( i == 0 && thread_am_ichief( thread ) ) { 
             bli_obj_scalar_reset( a );
             bli_obj_scalar_reset( b );

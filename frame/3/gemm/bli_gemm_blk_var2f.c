@@ -129,6 +129,8 @@ void bli_gemm_blk_var2f( obj_t*  a,
 		              c1_pack,
 		              cntl_sub_gemm( cntl ),
                       gemm_thread_sub_gemm( thread ) );
+        
+        thread_ibarrier( thread );
 
         // Unpack C1 (if C1 was packed).
         // Currently must be done by 1 thread

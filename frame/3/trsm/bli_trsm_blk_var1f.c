@@ -120,6 +120,7 @@ void bli_trsm_blk_var1f( obj_t*  a,
 		              &c1,
 		              cntl_sub_trsm( cntl ),
                       trsm_thread_sub_trsm( thread ) );
+        thread_ibarrier( thread );
 	}
 
 	// If any packing buffers were acquired within packm, release them back

@@ -167,6 +167,8 @@ trsm_thrinfo_t** bli_create_trsm_thrinfo_paths( bool_t right_sided )
                         dim_t jc_comm_id = b*kc_nt + kc_comm_id;
                         dim_t global_comm_id = a*jc_nt + jc_comm_id;
                         
+
+                        // Macrokernel loops 
                         trsm_thrinfo_t* ir_info = bli_create_trsm_thrinfo_node( jr_comm, jr_comm_id,
                                                                                 ir_comm, ir_comm_id,
                                                                                 ir_way,  e,
@@ -176,29 +178,46 @@ trsm_thrinfo_t** bli_create_trsm_thrinfo_paths( bool_t right_sided )
                                                                                 jr_comm, jr_comm_id,
                                                                                 jr_way,  d,
                                                                                 NULL, NULL, ir_info);
+                        //blk_var_1
+                        packm_thrinfo_t* pack_ic_in  = bli_create_packm_thread_info( ic_comm, ic_comm_id,
+                                                                            jr_comm, jr_comm_id,
+                                                                            ic_nt, ic_comm_id );
 
-                        packm_thrinfo_t* packb  = bli_create_packm_thread_info( kc_comm, kc_comm_id,
-                                                                                ic_comm, ic_comm_id,
-                                                                                kc_nt, kc_comm_id );
-
-                        packm_thrinfo_t* packa  = bli_create_packm_thread_info( ic_comm, ic_comm_id,
-                                                                                jr_comm, jr_comm_id,
-                                                                                ic_nt, ic_comm_id );
+                        packm_thrinfo_t* pack_ic_out  = bli_create_packm_thread_info( kc_comm, kc_comm_id,
+                                                                            ic_comm, ic_comm_id,
+                                                                            kc_nt, kc_comm_id );
 
                         trsm_thrinfo_t* ic_info = bli_create_trsm_thrinfo_node( kc_comm, kc_comm_id,
                                                                                 ic_comm, ic_comm_id,
                                                                                 ic_way,  c,
-                                                                                packb, packa, jr_info);
+                                                                                pack_ic_out, pack_ic_in, jr_info);
+                        //blk_var_3
+                        packm_thrinfo_t* pack_kc_in  = bli_create_packm_thread_info( kc_comm, kc_comm_id,
+                                                                            ic_comm, ic_comm_id,
+                                                                            kc_nt, kc_comm_id );
+
+                        packm_thrinfo_t* pack_kc_out  = bli_create_packm_thread_info( jc_comm, jc_comm_id,
+                                                                            jc_comm, jc_comm_id,
+                                                                            jc_nt, jc_comm_id );
 
                         trsm_thrinfo_t* kc_info = bli_create_trsm_thrinfo_node( jc_comm, jc_comm_id,
                                                                                 kc_comm, kc_comm_id,
                                                                                 kc_way,  b,
-                                                                                NULL, NULL, ic_info);
+                                                                                pack_kc_out, pack_kc_in, ic_info);
+                        //blk_var_2
+                        packm_thrinfo_t* pack_jc_in  = bli_create_packm_thread_info( jc_comm, jc_comm_id,
+                                                                            kc_comm, kc_comm_id,
+                                                                            jc_nt, jc_comm_id );
+
+                        packm_thrinfo_t* pack_jc_out  = bli_create_packm_thread_info( global_comm, global_comm_id,
+                                                                            jc_comm, jc_comm_id,
+                                                                            global_num_threads, global_comm_id );
 
                         trsm_thrinfo_t* jc_info = bli_create_trsm_thrinfo_node( global_comm, global_comm_id,
                                                                                 jc_comm, jc_comm_id,
                                                                                 jc_way,  a,
-                                                                                NULL, NULL, kc_info);
+                                                                                pack_jc_out, pack_jc_in, kc_info);
+
                         paths[global_comm_id] = jc_info;
                     }
                 }

@@ -127,6 +127,8 @@ void bli_herk_blk_var1f( obj_t*  a,
 		              cntl_sub_gemm( cntl ),
                       herk_thread_sub_herk( thread ) );
 
+        thread_ibarrier( thread );
+
 		// Unpack C1 (if C1 was packed).
         bli_unpackm_int( c1_pack, &c1,
                          cntl_sub_unpackm_c( cntl ),
