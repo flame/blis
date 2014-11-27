@@ -69,7 +69,13 @@ extern "C" {
 // -- Threading definitions --
 #ifdef BLIS_ENABLE_OPENMP
 #include <omp.h>
+#include "bli_threading_omp.h"
 #endif
+#ifdef BLIS_ENABLE_PTHREADS
+#include <pthread.h>
+#include "bli_threading_pthreads.h"
+#endif
+
 #include "bli_threading.h"
 
 // -- Constant definitions --

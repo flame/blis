@@ -34,6 +34,9 @@
 #ifndef BLIS_THREADING_H
 #define BLIS_THREADING_H
 
+//thread communicators may be implementation dependent
+#ifndef BLIS_ENABLE_MULTITHREADING 
+
 #ifdef BLIS_TREE_BARRIER
     struct barrier_s
     {   
@@ -61,6 +64,8 @@
     };
 #endif
 typedef struct thread_comm_s thread_comm_t;
+
+#endif
 
 // Thread Communicator Interface Definitions
 void    bli_setup_communicator( thread_comm_t* communicator, dim_t n_threads );

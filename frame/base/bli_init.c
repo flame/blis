@@ -51,6 +51,10 @@ gemm_thrinfo_t BLIS_GEMM_SINGLE_THREADED;
 herk_thrinfo_t BLIS_HERK_SINGLE_THREADED;
 thread_comm_t BLIS_SINGLE_COMM;
 
+#ifdef BLIS_ENABLE_PTHREADS
+pthread_mutex_t mem_manager_mutex;
+#endif
+
 err_t bli_init( void )
 {
 	err_t r_val = BLIS_FAILURE;
@@ -111,6 +115,9 @@ err_t bli_init( void )
 	// END CRITICAL SECTION
 	}
 
+#ifdef BLIS_ENABLE_PTHREADS
+    pthread_mutex_init( &mem_manager_mutex, NULL );
+#endif
 	return r_val;
 }
 
@@ -168,6 +175,10 @@ err_t bli_finalize( void )
 
 	// END CRITICAL SECTION
 	}
+
+#ifdef BLIS_ENABLE_PTHREADS
+    pthread_mutex_destroy( &mem_manager_mutex );
+#endif
 
 	return r_val;
 }

@@ -34,6 +34,9 @@
 
 #include "blis.h"
 
+#ifdef BLIS_ENABLE_PTHREADS
+extern pthread_mutex_t mem_manager_mutex;
+#endif
 
 // Declare one memory pool structure for each block size/shape we want to
 // be able to allocate.
@@ -129,6 +132,9 @@ void bli_mem_acquire_m( siz_t     req_size,
 #ifdef BLIS_ENABLE_OPENMP        
         _Pragma( "omp critical (mem)" )
 #endif
+#ifdef BLIS_ENABLE_PTHREADS
+        pthread_mutex_lock( &mem_manager_mutex );
+#endif
         {
 
 		// Query the index of the contiguous memory block that resides at the
@@ -148,6 +154,9 @@ void bli_mem_acquire_m( siz_t     req_size,
 
 		// END CRITICAL SECTION
         }
+#ifdef BLIS_ENABLE_PTHREADS
+        pthread_mutex_unlock( &mem_manager_mutex );
+#endif
 
 		// Query the size of the blocks in the pool so we can store it in the
 		// mem_t object.
@@ -204,6 +213,9 @@ void bli_mem_release( mem_t* mem )
 #ifdef BLIS_ENABLE_OPENMP        
         _Pragma( "omp critical (mem)" )
 #endif
+#ifdef BLIS_ENABLE_PTHREADS
+        pthread_mutex_lock( &mem_manager_mutex );
+#endif
         {
 
 		// Increment the top of the memory pool.
@@ -218,6 +230,9 @@ void bli_mem_release( mem_t* mem )
 
 		// END CRITICAL SECTION
         }
+#ifdef BLIS_ENABLE_PTHREADS
+        pthread_mutex_unlock( &mem_manager_mutex );
+#endif
 	}
 
 

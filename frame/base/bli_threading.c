@@ -34,111 +34,35 @@
 
 #include "blis.h"
 
-#ifdef BLIS_TREE_BARRIER
-void bli_free_barrier_tree( barrier_t* barrier )
+//*********** Stuff Specific to single-threaded *************
+#ifndef BLIS_ENABLE_MULTITHREADING
+void bli_barrier( thread_comm_t* communicator, dim_t t_id )
 {
-    if( barrier == NULL )
-        return;
-    barrier->count--;
-    if( barrier->count == 0 )
-    {
-        bli_free_barrier_tree( barrier->dad );
-        bli_free( barrier );
-    }
     return;
 }
-barrier_t* bli_create_tree_barrier(int num_threads, int arity, barrier_t** leaves, int leaf_index)
+
+void bli_level3_thread_decorator( dim_t n_threads, 
+                                  level3_int_t func, 
+                                  obj_t* alpha, 
+                                  obj_t* a, 
+                                  obj_t* b, 
+                                  obj_t* beta, 
+                                  obj_t* c, 
+                                  void* cntl, 
+                                  void** thread )
 {
-    barrier_t* me = (barrier_t*) malloc(sizeof(barrier_t));
-
-    me->dad = NULL;
-    me->signal = 0;
-
-    // Base Case
-    if( num_threads <= arity ) {
-       //Now must be registered as a leaf
-       for(int i = 0; i < num_threads; i++)
-       {
-           leaves[leaf_index + i] = me;
-       }
-       me->count = num_threads;
-       me->arity = num_threads;
-    }
-    else {
-        // Otherwise this node has children
-        int threads_per_kid = num_threads / arity;
-        int defecit = num_threads - threads_per_kid * arity;
-
-        for(int i = 0; i < arity; i++){
-            int threads_this_kid = threads_per_kid;
-            if(i < defecit) threads_this_kid++;
-            
-            barrier_t* kid = bli_create_tree_barrier(threads_this_kid, arity, leaves, leaf_index);
-            kid->dad = me;
-
-            leaf_index += threads_this_kid;
-        }  
-        me->count = arity;
-        me->arity = arity;
-    }  
-
-    return me;
+        func( alpha, a, b, beta, c, cntl, thread[0] );
 }
 
-void bli_cleanup_communicator( thread_comm_t* communicator )
+
+//Constructors and destructors for constructors
+thread_comm_t* bli_create_communicator( dim_t n_threads )
 {
-    if( communicator == NULL ) return;
-    for( dim_t i = 0; i < communicator->n_threads; i++)
-    {
-       bli_free_barrier_tree( communicator->barriers[i] );
-    }
-    bli_free( communicator->barriers );
-}
-void bli_setup_communicator( thread_comm_t* communicator, dim_t n_threads)
-{
-    if( communicator == NULL ) return;
-    communicator->sent_object = NULL;
-    communicator->n_threads = n_threads;
-    communicator->barriers = ( barrier_t** ) bli_malloc( sizeof( barrier_t* ) * n_threads );
-    bli_create_tree_barrier( n_threads, BLIS_TREE_BARRIER_ARITY, communicator->barriers, 0 );
+    thread_comm_t* comm = (thread_comm_t*) bli_malloc( sizeof(thread_comm_t) );
+    bli_setup_communicator( comm, n_threads );
+    return comm;
 }
 
-void tree_barrier( barrier_t* barack )
-{
-#ifdef BLIS_ENABLE_OPENMP
-    int my_signal = barack->signal;
-    int my_count;
-
-    _Pragma("omp atomic capture")
-        my_count = barack->count--;
-
-    if( my_count == 1 ) {
-        if(  barack->dad != NULL ) {
-            tree_barrier( barack->dad );
-        }
-        barack->count = barack->arity;
-        barack->signal = !barack->signal;
-    }
-    else {
-        volatile int* listener = &barack->signal;
-        while( *listener == my_signal ) {}
-    }
-#else
-    return
-#endif
-}
-
-void bli_barrier( thread_comm_t* comm, dim_t t_id )
-{
-    tree_barrier( comm->barriers[t_id] );
-}
-
-#else
-
-void bli_cleanup_communicator( thread_comm_t* communicator )
-{
-    if( communicator == NULL ) return;
-}
 void bli_setup_communicator( thread_comm_t* communicator, dim_t n_threads)
 {
     if( communicator == NULL ) return;
@@ -147,31 +71,6 @@ void bli_setup_communicator( thread_comm_t* communicator, dim_t n_threads)
     communicator->barrier_sense = 0;
     communicator->barrier_threads_arrived = 0;
 }
-//barrier routine taken from art of multicore programming or something
-void bli_barrier( thread_comm_t* communicator, dim_t t_id )
-{
-#ifdef BLIS_ENABLE_OPENMP
-    if(communicator == NULL || communicator->n_threads == 1)
-        return;
-    bool_t my_sense = communicator->barrier_sense;
-    dim_t my_threads_arrived;
-
-    _Pragma("omp atomic capture")
-        my_threads_arrived = ++(communicator->barrier_threads_arrived);
-
-    if( my_threads_arrived == communicator->n_threads ) {
-        communicator->barrier_threads_arrived = 0;
-        communicator->barrier_sense = !communicator->barrier_sense;
-    }
-    else {
-        volatile bool_t* listener = &communicator->barrier_sense;
-        while( *listener == my_sense ) {}
-    }
-#else
-    return;
-#endif
-}
-#endif
 
 void bli_free_communicator( thread_comm_t* communicator )
 {
@@ -180,26 +79,14 @@ void bli_free_communicator( thread_comm_t* communicator )
     bli_free( communicator );
 }
 
-thread_comm_t* bli_create_communicator( dim_t n_threads )
+void bli_cleanup_communicator( thread_comm_t* communicator )
 {
-    thread_comm_t* comm = (thread_comm_t*) bli_malloc( sizeof(thread_comm_t) );
-    bli_setup_communicator( comm, n_threads );
-    return comm;
+    if( communicator == NULL ) return;
 }
 
-void* bli_broadcast_structure( thread_comm_t* communicator, dim_t id, void* to_send )
-{   
-    if( communicator == NULL || communicator->n_threads == 1 ) return to_send;
+#endif
 
-    if( id == 0 ) communicator->sent_object = to_send;
-
-    bli_barrier( communicator, id );
-    void * object = communicator->sent_object;
-    bli_barrier( communicator, id );
-
-    return object;
-}
-
+//Constructors and destructors for thread infos
 thrinfo_t* bli_create_thread_info( thread_comm_t* ocomm, dim_t ocomm_id, thread_comm_t* icomm, dim_t icomm_id,
                              dim_t n_way, dim_t work_id )
 {
@@ -221,6 +108,21 @@ void bli_setup_thread_info( thrinfo_t* thr, thread_comm_t* ocomm, dim_t ocomm_id
         thr->work_id = work_id;
 }
 
+// Broadcast code
+void* bli_broadcast_structure( thread_comm_t* communicator, dim_t id, void* to_send )
+{   
+    if( communicator == NULL || communicator->n_threads == 1 ) return to_send;
+
+    if( id == 0 ) communicator->sent_object = to_send;
+
+    bli_barrier( communicator, id );
+    void * object = communicator->sent_object;
+    bli_barrier( communicator, id );
+
+    return object;
+}
+
+// Code for work assignments
 void bli_get_range( void* thr, dim_t all_start, dim_t all_end, dim_t block_factor, dim_t* start, dim_t* end )
 {
     thrinfo_t* thread = (thrinfo_t*) thr;
@@ -283,40 +185,8 @@ void bli_get_range_weighted( void* thr, dim_t all_start, dim_t all_end, dim_t bl
     }
 }
 
-void bli_level3_thread_decorator( dim_t n_threads, 
-                                  level3_int_t func, 
-                                  obj_t* alpha, 
-                                  obj_t* a, 
-                                  obj_t* b, 
-                                  obj_t* beta, 
-                                  obj_t* c, 
-                                  void* cntl, 
-                                  void** thread )
-{
-#ifdef BLIS_ENABLE_OPENMP
-    _Pragma( "omp parallel num_threads(n_threads)" )
-    {
-        dim_t omp_id = omp_get_thread_num();
 
-        func( alpha,
-                  a,
-                  b,
-                  beta,
-                  c,
-                  cntl,
-                  thread[omp_id] );
-    }
-#else
-        func( alpha,
-                  a,
-                  b,
-                  beta,
-                  c,
-                  cntl,
-                  thread[0] );
-#endif
-}
-
+// Some utilities
 dim_t bli_read_nway_from_env( char* env )
 {
     dim_t number = 1;
