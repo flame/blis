@@ -213,7 +213,17 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 		if ( bli_obj_is_upper_or_lower( *c ) )
 			bli_obj_toggle_uplo( *p );
 	}
-	bli_obj_set_uplo( BLIS_DENSE, *p );
+
+	// If we are packing micro-panels, mark p as dense. Otherwise, we are
+	// probably being called in the context of a level-2 operation, in
+	// which case we do not want to overwrite the uplo field of p (inherited
+	// from c) with BLIS_DENSE because that information may be needed by
+	// the level-2 operation's unblocked variant to decide whether to
+	// execute a "lower" or "upper" branch of code.
+	if ( bli_is_panel_packed( pack_schema ) )
+	{
+		bli_obj_set_uplo( BLIS_DENSE, *p );
+	}
 
 	// Reset the view offsets to (0,0).
 	bli_obj_set_offs( 0, 0, *p );
