@@ -118,6 +118,7 @@ extern "C" {
 #include "bli_3m.h"
 #include "bli_4mh.h"
 #include "bli_3mh.h"
+#include "bli_4mb.h"
 
 // Control tree definitions.
 #include "bli_cntl.h"

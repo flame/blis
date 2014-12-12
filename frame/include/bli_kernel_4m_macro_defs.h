@@ -45,6 +45,13 @@
 #define BLIS_ZGEMM4M_UKERNEL_PREFERS_CONTIG_ROWS \
         BLIS_DGEMM_UKERNEL_PREFERS_CONTIG_ROWS
 
+// gemm4mb micro-kernels
+
+#define BLIS_CGEMM4MB_UKERNEL_PREFERS_CONTIG_ROWS \
+        BLIS_SGEMM_UKERNEL_PREFERS_CONTIG_ROWS
+#define BLIS_ZGEMM4MB_UKERNEL_PREFERS_CONTIG_ROWS \
+        BLIS_DGEMM_UKERNEL_PREFERS_CONTIG_ROWS
+
 
 // -- Define default 4m-specific kernel names ----------------------------------
 
@@ -60,6 +67,16 @@
 
 #ifndef BLIS_ZGEMM4M_UKERNEL
 #define BLIS_ZGEMM4M_UKERNEL BLIS_ZGEMM4M_UKERNEL_REF
+#endif
+
+// gemm4mb micro-kernels
+
+#ifndef BLIS_CGEMM4MB_UKERNEL
+#define BLIS_CGEMM4MB_UKERNEL BLIS_CGEMM4MB_UKERNEL_REF
+#endif
+
+#ifndef BLIS_ZGEMM4MB_UKERNEL
+#define BLIS_ZGEMM4MB_UKERNEL BLIS_ZGEMM4MB_UKERNEL_REF
 #endif
 
 // gemmtrsm4m_l micro-kernels

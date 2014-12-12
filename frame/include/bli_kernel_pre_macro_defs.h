@@ -144,7 +144,6 @@
 #define BLIS_ZGEMM4MH_UKERNEL_REF        bli_zgemm4mh_ukr_ref
 
 //
-//
 // Level-3 3mh
 //
 
@@ -153,6 +152,16 @@
 #define BLIS_CGEMM3MH_UKERNEL_REF        bli_cgemm3mh_ukr_ref
 #define BLIS_ZGEMM3MH_UKERNEL_REF        bli_zgemm3mh_ukr_ref
 
+//
+// Level-3 4mb
+//
+
+// gemm4mb micro-kernels
+
+#define BLIS_CGEMM4MB_UKERNEL_REF        bli_cgemm4mb_ukr_ref
+#define BLIS_ZGEMM4MB_UKERNEL_REF        bli_zgemm4mb_ukr_ref
+
+//
 // Level-1m
 //
 

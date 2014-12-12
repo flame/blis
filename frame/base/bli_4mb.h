@@ -32,91 +32,18 @@
 
 */
 
-#include "blis.h"
+char*  bli_4mb_get_string( void );
 
-void bli_cntl_init( void )
-{
-	// Level-1
-	bli_scalv_cntl_init();
-	bli_packv_cntl_init();
-	bli_unpackv_cntl_init();
+bool_t bli_4mb_is_enabled_dt( num_t dt );
+bool_t bli_4mb_is_enabled_c( void );
+bool_t bli_4mb_is_enabled_z( void );
 
-	// Level-1m
-	bli_scalm_cntl_init();
-	bli_packm_cntl_init();
-	bli_unpackm_cntl_init();
+void   bli_4mb_enable_dt( num_t dt );
+void   bli_4mb_enable_c( void );
+void   bli_4mb_enable_z( void );
+void   bli_4mb_enable( void );
 
-	// Level-2
-	bli_gemv_cntl_init();
-	bli_ger_cntl_init();
-	bli_hemv_cntl_init();
-	bli_her_cntl_init();
-	bli_her2_cntl_init();
-	bli_trmv_cntl_init();
-	bli_trsv_cntl_init();
-
-	// Level-3
-	bli_gemm_cntl_init();
-	bli_trsm_cntl_init();
-
-	// Level-3 via 4m
-	bli_gemm4m_cntl_init();
-	bli_trsm4m_cntl_init();
-
-	// Level-3 via 3m
-	bli_gemm3m_cntl_init();
-	bli_trsm3m_cntl_init();
-
-	// Level-3 via 4mh
-	bli_gemm4mh_cntl_init();
-
-	// Level-3 via 3mh
-	bli_gemm3mh_cntl_init();
-
-	// Level-3 via 4mb
-	bli_gemm4mb_cntl_init();
-}
-
-void bli_cntl_finalize( void )
-{
-	// Level-1
-	bli_scalv_cntl_finalize();
-	bli_packv_cntl_finalize();
-	bli_unpackv_cntl_finalize();
-
-	// Level-1m
-	bli_scalm_cntl_finalize();
-	bli_packm_cntl_finalize();
-	bli_unpackm_cntl_finalize();
-
-	// Level-2
-	bli_gemv_cntl_finalize();
-	bli_ger_cntl_finalize();
-	bli_hemv_cntl_finalize();
-	bli_her_cntl_finalize();
-	bli_her2_cntl_finalize();
-	bli_trmv_cntl_finalize();
-	bli_trsv_cntl_finalize();
-
-	// Level-3
-	bli_gemm_cntl_finalize();
-	bli_trsm_cntl_finalize();
-
-	// Level-3 via 4m
-	bli_gemm4m_cntl_finalize();
-	bli_trsm4m_cntl_finalize();
-
-	// Level-3 via 3m
-	bli_gemm3m_cntl_finalize();
-	bli_trsm3m_cntl_finalize();
-
-	// Level-3 via 4mh
-	bli_gemm4mh_cntl_finalize();
-
-	// Level-3 via 3mh
-	bli_gemm3mh_cntl_finalize();
-
-	// Level-3 via 4mb
-	bli_gemm4mb_cntl_finalize();
-}
-
+void   bli_4mb_disable_dt( num_t dt );
+void   bli_4mb_disable_c( void );
+void   bli_4mb_disable_z( void );
+void   bli_4mb_disable( void );

@@ -48,6 +48,7 @@ void bli_gemm( obj_t*  alpha,
 	if      ( bli_3mh_is_enabled_dt( dt ) ) bli_gemm3mh_entry( alpha, a, b, beta, c );
 	else if ( bli_3m_is_enabled_dt( dt ) )  bli_gemm3m_entry( alpha, a, b, beta, c );
 	else if ( bli_4mh_is_enabled_dt( dt ) ) bli_gemm4mh_entry( alpha, a, b, beta, c );
+	else if ( bli_4mb_is_enabled_dt( dt ) ) bli_gemm4mb_entry( alpha, a, b, beta, c );
 	else if ( bli_4m_is_enabled_dt( dt ) )  bli_gemm4m_entry( alpha, a, b, beta, c );
 	else                                    bli_gemm_entry( alpha, a, b, beta, c );
 }

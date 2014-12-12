@@ -34,89 +34,42 @@
 
 #include "blis.h"
 
-void bli_cntl_init( void )
+static char*  bli_4mb_str        = "4mb";
+
+static bool_t bli_will_use_4mb_c = FALSE;
+static bool_t bli_will_use_4mb_z = FALSE;
+
+
+char*  bli_4mb_get_string( void ) { return bli_4mb_str; }
+
+bool_t bli_4mb_is_enabled_dt( num_t dt )
 {
-	// Level-1
-	bli_scalv_cntl_init();
-	bli_packv_cntl_init();
-	bli_unpackv_cntl_init();
+	if      ( bli_is_scomplex( dt ) ) return bli_4mb_is_enabled_c();
+	else if ( bli_is_dcomplex( dt ) ) return bli_4mb_is_enabled_z();
+	else                              return FALSE;
+}
+bool_t bli_4mb_is_enabled_c( void ) { return bli_will_use_4mb_c; }
+bool_t bli_4mb_is_enabled_z( void ) { return bli_will_use_4mb_z; }
 
-	// Level-1m
-	bli_scalm_cntl_init();
-	bli_packm_cntl_init();
-	bli_unpackm_cntl_init();
 
-	// Level-2
-	bli_gemv_cntl_init();
-	bli_ger_cntl_init();
-	bli_hemv_cntl_init();
-	bli_her_cntl_init();
-	bli_her2_cntl_init();
-	bli_trmv_cntl_init();
-	bli_trsv_cntl_init();
+void bli_4mb_enable_dt( num_t dt )
+{
+	if      ( bli_is_scomplex( dt ) ) bli_4mb_enable_c();
+	else if ( bli_is_dcomplex( dt ) ) bli_4mb_enable_z();
+}
+void bli_4mb_enable_c( void )  { bli_will_use_4mb_c = TRUE; }
+void bli_4mb_enable_z( void )  { bli_will_use_4mb_z = TRUE; }
+void bli_4mb_enable( void )    { bli_will_use_4mb_c =
+                                 bli_will_use_4mb_z = TRUE; }
 
-	// Level-3
-	bli_gemm_cntl_init();
-	bli_trsm_cntl_init();
 
-	// Level-3 via 4m
-	bli_gemm4m_cntl_init();
-	bli_trsm4m_cntl_init();
-
-	// Level-3 via 3m
-	bli_gemm3m_cntl_init();
-	bli_trsm3m_cntl_init();
-
-	// Level-3 via 4mh
-	bli_gemm4mh_cntl_init();
-
-	// Level-3 via 3mh
-	bli_gemm3mh_cntl_init();
-
-	// Level-3 via 4mb
-	bli_gemm4mb_cntl_init();
+void bli_4mb_disable_dt( num_t dt )
+{
+	if      ( bli_is_scomplex( dt ) ) bli_4mb_disable_c();
+	else if ( bli_is_dcomplex( dt ) ) bli_4mb_disable_z();
 }
 
-void bli_cntl_finalize( void )
-{
-	// Level-1
-	bli_scalv_cntl_finalize();
-	bli_packv_cntl_finalize();
-	bli_unpackv_cntl_finalize();
-
-	// Level-1m
-	bli_scalm_cntl_finalize();
-	bli_packm_cntl_finalize();
-	bli_unpackm_cntl_finalize();
-
-	// Level-2
-	bli_gemv_cntl_finalize();
-	bli_ger_cntl_finalize();
-	bli_hemv_cntl_finalize();
-	bli_her_cntl_finalize();
-	bli_her2_cntl_finalize();
-	bli_trmv_cntl_finalize();
-	bli_trsv_cntl_finalize();
-
-	// Level-3
-	bli_gemm_cntl_finalize();
-	bli_trsm_cntl_finalize();
-
-	// Level-3 via 4m
-	bli_gemm4m_cntl_finalize();
-	bli_trsm4m_cntl_finalize();
-
-	// Level-3 via 3m
-	bli_gemm3m_cntl_finalize();
-	bli_trsm3m_cntl_finalize();
-
-	// Level-3 via 4mh
-	bli_gemm4mh_cntl_finalize();
-
-	// Level-3 via 3mh
-	bli_gemm3mh_cntl_finalize();
-
-	// Level-3 via 4mb
-	bli_gemm4mb_cntl_finalize();
-}
-
+void bli_4mb_disable_c( void )  { bli_will_use_4mb_c = FALSE; }
+void bli_4mb_disable_z( void )  { bli_will_use_4mb_z = FALSE; }
+void bli_4mb_disable( void )    { bli_will_use_4mb_c =
+                                  bli_will_use_4mb_z = FALSE; }

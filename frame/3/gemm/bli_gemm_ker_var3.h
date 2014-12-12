@@ -32,91 +32,37 @@
 
 */
 
-#include "blis.h"
 
-void bli_cntl_init( void )
-{
-	// Level-1
-	bli_scalv_cntl_init();
-	bli_packv_cntl_init();
-	bli_unpackv_cntl_init();
+//
+// Prototype object-based interface.
+//
+void bli_gemm_ker_var3( obj_t*  a,
+                        obj_t*  b,
+                        obj_t*  c,
+                        gemm_t* cntl,
+                        gemm_thrinfo_t* thread );
 
-	// Level-1m
-	bli_scalm_cntl_init();
-	bli_packm_cntl_init();
-	bli_unpackm_cntl_init();
 
-	// Level-2
-	bli_gemv_cntl_init();
-	bli_ger_cntl_init();
-	bli_hemv_cntl_init();
-	bli_her_cntl_init();
-	bli_her2_cntl_init();
-	bli_trmv_cntl_init();
-	bli_trsv_cntl_init();
+//
+// Prototype BLAS-like interfaces.
+//
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, varname ) \
+\
+void PASTEMAC(ch,varname)( \
+                           pack_t  schema_a, \
+                           pack_t  schema_b, \
+                           dim_t   m, \
+                           dim_t   n, \
+                           dim_t   k, \
+                           void*   alpha, \
+                           void*   a, inc_t cs_a, inc_t pd_a, inc_t ps_a, \
+                           void*   b, inc_t rs_b, inc_t pd_b, inc_t ps_b, \
+                           void*   beta, \
+                           void*   c, inc_t rs_c, inc_t cs_c, \
+                           void*   gemm_ukr, \
+                           gemm_thrinfo_t* thread  \
+                         );
 
-	// Level-3
-	bli_gemm_cntl_init();
-	bli_trsm_cntl_init();
-
-	// Level-3 via 4m
-	bli_gemm4m_cntl_init();
-	bli_trsm4m_cntl_init();
-
-	// Level-3 via 3m
-	bli_gemm3m_cntl_init();
-	bli_trsm3m_cntl_init();
-
-	// Level-3 via 4mh
-	bli_gemm4mh_cntl_init();
-
-	// Level-3 via 3mh
-	bli_gemm3mh_cntl_init();
-
-	// Level-3 via 4mb
-	bli_gemm4mb_cntl_init();
-}
-
-void bli_cntl_finalize( void )
-{
-	// Level-1
-	bli_scalv_cntl_finalize();
-	bli_packv_cntl_finalize();
-	bli_unpackv_cntl_finalize();
-
-	// Level-1m
-	bli_scalm_cntl_finalize();
-	bli_packm_cntl_finalize();
-	bli_unpackm_cntl_finalize();
-
-	// Level-2
-	bli_gemv_cntl_finalize();
-	bli_ger_cntl_finalize();
-	bli_hemv_cntl_finalize();
-	bli_her_cntl_finalize();
-	bli_her2_cntl_finalize();
-	bli_trmv_cntl_finalize();
-	bli_trsv_cntl_finalize();
-
-	// Level-3
-	bli_gemm_cntl_finalize();
-	bli_trsm_cntl_finalize();
-
-	// Level-3 via 4m
-	bli_gemm4m_cntl_finalize();
-	bli_trsm4m_cntl_finalize();
-
-	// Level-3 via 3m
-	bli_gemm3m_cntl_finalize();
-	bli_trsm3m_cntl_finalize();
-
-	// Level-3 via 4mh
-	bli_gemm4mh_cntl_finalize();
-
-	// Level-3 via 3mh
-	bli_gemm3mh_cntl_finalize();
-
-	// Level-3 via 4mb
-	bli_gemm4mb_cntl_finalize();
-}
+INSERT_GENTPROT_BASIC( gemm_ker_var3 )
 

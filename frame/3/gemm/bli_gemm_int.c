@@ -47,7 +47,7 @@ static FUNCPTR_T vars[6][3] =
     // unblocked          optimized unblocked   blocked
     { NULL,               NULL,                 bli_gemm_blk_var1f },
     { NULL,               bli_gemm_ker_var2,    bli_gemm_blk_var2f },
-    { NULL,               NULL,                 bli_gemm_blk_var3f },
+    { NULL,               bli_gemm_ker_var3,    bli_gemm_blk_var3f },
     { NULL,               NULL,                 NULL               },
     { NULL,               NULL,                 NULL               },
     { NULL,               NULL,                 NULL               }
