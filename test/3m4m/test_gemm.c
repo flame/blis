@@ -82,7 +82,7 @@ int main( int argc, char** argv )
 
 #if 1
 	#if   (defined _3M1)
-		k_input = 384/2; // 384/3
+		k_input = 384/3;
 	#elif (defined _4M1)
 		k_input = 384/2;
 	#elif (defined _4MHW) || (defined _3MHW) || \
@@ -99,7 +99,7 @@ int main( int argc, char** argv )
 
 #if 1
 	#if   (defined _3M1)
-		k_input = 256/2; // 256/3
+		k_input = 256/3;
 	#elif (defined _4M1)
 		k_input = 256/2;
 	#elif (defined _4MHW) || (defined _3MHW) || \

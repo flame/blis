@@ -40,9 +40,19 @@ for th in ${threads_r}; do
 
 			for op in ${test_ops_r}; do
 
-				export BLIS_IC_NT=1
-				export BLIS_JC_NT=1
-				export OMP_NUM_THREADS=1
+				# Set the number of threads according to th.
+				if [ ${th} = "mt" ]; then
+
+					export BLIS_IC_NT=${ic_nt}
+					export BLIS_JC_NT=${jc_nt}
+					export OMP_NUM_THREADS=${nt}
+
+				else
+
+					export BLIS_IC_NT=1
+					export BLIS_JC_NT=1
+					export OMP_NUM_THREADS=1
+				fi
 
 				# Construct the name of the test executable.
 				exec_name="${exec_root}_${dt}${op}_${im}_${th}.x"

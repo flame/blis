@@ -84,8 +84,8 @@ void bli_gemm3m_cntl_init()
 	=
 	bli_blksz_obj_create( 0,                   0,
 	                      0,                   0,
-	                      BLIS_DEFAULT_KC_S/2, BLIS_MAXIMUM_KC_S/2,
-	                      BLIS_DEFAULT_KC_D/2, BLIS_MAXIMUM_KC_D/2 );
+	                      BLIS_DEFAULT_KC_S/3, BLIS_MAXIMUM_KC_S/3,
+	                      BLIS_DEFAULT_KC_D/3, BLIS_MAXIMUM_KC_D/3 );
 	gemm3m_mr
 	=
 	bli_blksz_obj_create( 0,                 0,
