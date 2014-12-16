@@ -168,6 +168,8 @@ LDFLAGS        += -lgfortran -lm -lpthread -fopenmp
 
 
 # Datatype
+DT_S     := -DDT_S
+DT_D     := -DDT_D
 DT_C     := -DDT_C
 DT_Z     := -DDT_Z
 
@@ -177,6 +179,7 @@ BLA_DEF  := -DBLAS
 
 # Complex implementation type
 D4M1     := -D_4M1
+D4M1B    := -D_4M1B
 D4MHW    := -D_4MHW
 D3M1     := -D_3M1
 D3MHW    := -D_3MHW
@@ -185,6 +188,7 @@ D3MHW    := -D_3MHW
 STR_OBL  := -DSTR=\"openblas\"
 STR_ASM  := -DSTR=\"asm\"
 STR_4M1  := -DSTR=\"4m1\"
+STR_4M1B := -DSTR=\"4m1b\"
 STR_4MHW := -DSTR=\"4mhw\"
 STR_3M1  := -DSTR=\"3m1\"
 STR_3MHW := -DSTR=\"3mhw\"
@@ -216,10 +220,15 @@ PDEF_MT  := -DP_BEGIN=200 \
 all: blis blis-mt openblas openblas-mt
 
 blis: \
+      test_sgemm_asm_blis_st.x \
+      test_dgemm_asm_blis_st.x \
+      \
       test_cgemm_asm_blis_st.x \
       test_zgemm_asm_blis_st.x \
       test_cgemm_4m1_blis_st.x \
       test_zgemm_4m1_blis_st.x \
+      test_cgemm_4m1b_blis_st.x \
+      test_zgemm_4m1b_blis_st.x \
       test_cgemm_4mhw_blis_st.x \
       test_zgemm_4mhw_blis_st.x \
       test_cgemm_3m1_blis_st.x \
@@ -228,10 +237,15 @@ blis: \
       test_zgemm_3mhw_blis_st.x
 
 blis-mt: \
+      test_sgemm_asm_blis_mt.x \
+      test_dgemm_asm_blis_mt.x \
+      \
       test_cgemm_asm_blis_mt.x \
       test_zgemm_asm_blis_mt.x \
       test_cgemm_4m1_blis_mt.x \
       test_zgemm_4m1_blis_mt.x \
+      test_cgemm_4m1b_blis_mt.x \
+      test_zgemm_4m1b_blis_mt.x \
       test_cgemm_4mhw_blis_mt.x \
       test_zgemm_4mhw_blis_mt.x \
       test_cgemm_3m1_blis_mt.x \
@@ -274,11 +288,23 @@ test_c%_openblas_mt.o: test_%.c
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLA_DEF)          $(STR_OBL)  $(STR_MT) -c $< -o $@
 
 # blis asm
+test_d%_asm_blis_st.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_D) $(BLI_DEF)          $(STR_ASM)  $(STR_ST) -c $< -o $@
+
+test_s%_asm_blis_st.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_S) $(BLI_DEF)          $(STR_ASM)  $(STR_ST) -c $< -o $@
+
 test_z%_asm_blis_st.o: test_%.c
 	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLI_DEF)          $(STR_ASM)  $(STR_ST) -c $< -o $@
 
 test_c%_asm_blis_st.o: test_%.c
 	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLI_DEF)          $(STR_ASM)  $(STR_ST) -c $< -o $@
+
+test_d%_asm_blis_mt.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_D) $(BLI_DEF)          $(STR_ASM)  $(STR_MT) -c $< -o $@
+
+test_s%_asm_blis_mt.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_S) $(BLI_DEF)          $(STR_ASM)  $(STR_MT) -c $< -o $@
 
 test_z%_asm_blis_mt.o: test_%.c
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_Z) $(BLI_DEF)          $(STR_ASM)  $(STR_MT) -c $< -o $@
@@ -298,6 +324,19 @@ test_z%_4m1_blis_mt.o: test_%.c
 
 test_c%_4m1_blis_mt.o: test_%.c
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLI_DEF) $(D4M1)  $(STR_4M1)  $(STR_MT) -c $< -o $@
+
+# blis 4m1b
+test_z%_4m1b_blis_st.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLI_DEF) $(D4M1B) $(STR_4M1B) $(STR_ST) -c $< -o $@
+
+test_c%_4m1b_blis_st.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLI_DEF) $(D4M1B) $(STR_4M1B) $(STR_ST) -c $< -o $@
+
+test_z%_4m1b_blis_mt.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_Z) $(BLI_DEF) $(D4M1B) $(STR_4M1B) $(STR_MT) -c $< -o $@
+
+test_c%_4m1b_blis_mt.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLI_DEF) $(D4M1B) $(STR_4M1B) $(STR_MT) -c $< -o $@
 
 # blis 4mhw
 test_z%_4mhw_blis_st.o: test_%.c

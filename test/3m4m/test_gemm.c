@@ -81,9 +81,12 @@ int main( int argc, char** argv )
 	dt = BLIS_SCOMPLEX; dt_ch = 'c';
 
 #if 1
-	#if   (defined _4M1) || (defined _3M1)
+	#if   (defined _3M1)
+		k_input = 384/2; // 384/3
+	#elif (defined _4M1)
 		k_input = 384/2;
-	#elif (defined _4MHW) || (defined _3MHW)
+	#elif (defined _4MHW) || (defined _3MHW) || \
+		  (defined _4M1B)
 		k_input = 384;
 	#else /* asm */
 		k_input = 256;
@@ -95,9 +98,12 @@ int main( int argc, char** argv )
 	dt = BLIS_DCOMPLEX; dt_ch = 'z';
 
 #if 1
-	#if   (defined _4M1) || (defined _3M1)
+	#if   (defined _3M1)
+		k_input = 256/2; // 256/3
+	#elif (defined _4M1)
 		k_input = 256/2;
-	#elif (defined _4MHW) || (defined _3MHW)
+	#elif (defined _4MHW) || (defined _3MHW) || \
+		  (defined _4M1B)
 		k_input = 256;
 	#else /* asm */
 		k_input = 192;
@@ -174,6 +180,8 @@ int main( int argc, char** argv )
 
 	#if   defined _4M1 
 			bli_gemm4m( &alpha,
+	#elif defined _4M1B 
+			bli_gemm4mb( &alpha,
 	#elif defined _4MHW 
 			bli_gemm4mh( &alpha,
 	#elif defined _3M1 
