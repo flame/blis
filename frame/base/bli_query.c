@@ -83,3 +83,52 @@ bool_t bli_obj_equals( obj_t* a,
 	return r_val;
 }
 
+bool_t bli_obj_imag_equals( obj_t* a,
+                            obj_t* b )
+{
+	bool_t r_val = FALSE;
+	num_t  dt_a;
+	num_t  dt_b;
+
+	dt_a = bli_obj_datatype( *a );
+	dt_b = bli_obj_datatype( *b );
+
+	// The function is not yet implemented for vectors and matrices.
+	if ( !bli_obj_is_1x1( *a ) ||
+	     !bli_obj_is_1x1( *b ) ||
+	     bli_is_constant( dt_a ) ||
+	     bli_is_complex( dt_b ) )
+		bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
+
+	// Handle the special (trivial) case where a is real, in which
+	// case all we have to do is test whether b is zero.
+	if ( bli_is_real( dt_a ) )
+	{
+		r_val = bli_obj_equals( &BLIS_ZERO, b );
+	}
+	else // if ( bli_is_complex( dt_a ) )
+	{
+		num_t dt_a_real = bli_datatype_proj_to_real( dt_a );
+
+		// Now we compare the imaginary part of a to b. Notice that since
+		// we are using bli_obj_buffer_for_1x1() to acquire the buffer for
+		// b, this works regardless of whether b is BLIS_CONSTANT.
+		if ( dt_a == BLIS_SCOMPLEX )
+		{
+			scomplex* ap_c = bli_obj_buffer_at_off( *a );
+			float*    bp_c = bli_obj_buffer_for_1x1( dt_a_real, *b );
+
+			r_val = bli_seq( bli_cimag( *ap_c ), *bp_c );
+		}
+		else if ( dt_a == BLIS_DCOMPLEX )
+		{
+			dcomplex* ap_z = bli_obj_buffer_at_off( *a );
+			double*   bp_z = bli_obj_buffer_for_1x1( dt_a_real, *b );
+
+			r_val = bli_deq( bli_zimag( *ap_z ), *bp_z );
+		}
+	}
+
+	return r_val;
+}
+
