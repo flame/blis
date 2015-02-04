@@ -114,6 +114,7 @@ extern "C" {
 #include "bli_machval.h"
 #include "bli_info.h"
 #include "bli_getopt.h"
+#include "bli_flops.h"
 #include "bli_4m.h"
 #include "bli_3m.h"
 #include "bli_4mh.h"
