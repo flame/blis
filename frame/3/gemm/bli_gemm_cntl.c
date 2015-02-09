@@ -178,7 +178,7 @@ void bli_gemm_cntl_init()
 	bli_gemm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT1,
 	                          gemm_mc,
-	                          gemm_ukrs,
+	                          NULL,
 	                          NULL,
 	                          gemm_packa_cntl,
 	                          gemm_packb_cntl,
@@ -193,7 +193,7 @@ void bli_gemm_cntl_init()
 	bli_gemm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT3,
 	                          gemm_kc,
-	                          gemm_ukrs,
+	                          NULL,
 	                          NULL,
 	                          NULL,
 	                          NULL,
@@ -208,7 +208,7 @@ void bli_gemm_cntl_init()
 	bli_gemm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT2,
 	                          gemm_nc,
-	                          gemm_ukrs,
+	                          NULL,
 	                          NULL,
 	                          NULL,
 	                          NULL,
@@ -270,5 +270,27 @@ gemm_t* bli_gemm_cntl_obj_create( impl_t     impl_type,
 	cntl->sub_unpackm_c = sub_unpackm_c;
 
 	return cntl;
+}
+
+func_t* bli_gemm_cntl_ukrs( gemm_t* cntl )
+{
+	dim_t max_depth = 10;
+	dim_t i;
+
+	for ( i = 0; ; ++i )
+	{
+		// If the gemm sub-tree is NULL, we are at the leaf.
+		if ( cntl_sub_gemm( cntl ) == NULL ) break;
+
+		// If the above branch was not taken, we can assume the gemm
+		// sub-tree is valid. Here, we step down into that sub-tree.
+		cntl = cntl_sub_gemm( cntl );
+
+		// Safeguard against infinite loops due to bad control tree
+		// configuration.
+		if ( i == max_depth ) bli_abort();
+	}
+
+	return cntl_gemm_ukrs( cntl );
 }
 

@@ -101,10 +101,10 @@ void bli_trmm3_front( side_t  side,
 	if (
 	     ( bli_obj_is_row_stored( c_local ) &&
 	       bli_func_prefers_contig_cols( bli_obj_datatype( c_local ),
-	                                     cntl_gemm_ukrs( cntl ) ) ) ||
+	                                     bli_gemm_cntl_ukrs( cntl ) ) ) ||
 	     ( bli_obj_is_col_stored( c_local ) &&
 	       bli_func_prefers_contig_rows( bli_obj_datatype( c_local ),
-	                                     cntl_gemm_ukrs( cntl ) ) )
+	                                     bli_gemm_cntl_ukrs( cntl ) ) )
 	   )
 	{
 		bli_toggle_side( side );
