@@ -56,11 +56,13 @@ void bli_obj_create_without_buffer( num_t  dt,
 
 void bli_obj_alloc_buffer( inc_t  rs,
                            inc_t  cs,
+                           inc_t  is,
                            obj_t* obj );
 
 void bli_obj_attach_buffer( void*  p,
                             inc_t  rs,
                             inc_t  cs,
+                            inc_t  is,
                             obj_t* obj );
 
 void bli_obj_create_1x1( num_t  dt,
@@ -79,7 +81,8 @@ void bli_obj_create_const_copy_of( obj_t* a, obj_t* b );
 void bli_adjust_strides( dim_t  m,
                          dim_t  n,
                          inc_t* rs,
-                         inc_t* cs );
+                         inc_t* cs,
+                         inc_t* is );
 
 siz_t bli_datatype_size( num_t dt );
 

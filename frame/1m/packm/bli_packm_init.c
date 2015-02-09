@@ -287,7 +287,7 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 		                              BLIS_HEAP_STRIDE_ALIGN_SIZE );
 
 		// Store the strides in p.
-		bli_obj_set_incs( rs_p, cs_p, *p );
+		bli_obj_set_strides( rs_p, cs_p, *p );
 
 		// Compute the size of the packed buffer.
 		size_p = m_p_pad * rs_p * elem_size_p;
@@ -310,7 +310,7 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 		                              BLIS_HEAP_STRIDE_ALIGN_SIZE );
 
 		// Store the strides in p.
-		bli_obj_set_incs( rs_p, cs_p, *p );
+		bli_obj_set_strides( rs_p, cs_p, *p );
 
 		// Compute the size of the packed buffer.
 		size_p = cs_p * n_p_pad * elem_size_p;
@@ -377,7 +377,7 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 		}
 
 		// Store the strides and panel dimension in p.
-		bli_obj_set_incs( rs_p, cs_p, *p );
+		bli_obj_set_strides( rs_p, cs_p, *p );
 		bli_obj_set_panel_dim( m_panel, *p );
 		bli_obj_set_panel_stride( ps_p, *p );
 		bli_obj_set_panel_length( m_panel, *p );
@@ -448,7 +448,7 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 		}
 
 		// Store the strides and panel dimension in p.
-		bli_obj_set_incs( rs_p, cs_p, *p );
+		bli_obj_set_strides( rs_p, cs_p, *p );
 		bli_obj_set_panel_dim( n_panel, *p );
 		bli_obj_set_panel_stride( ps_p, *p );
 		bli_obj_set_panel_length( m_p, *p );
@@ -552,7 +552,7 @@ void bli_packm_init_cast( obj_t*  a,
 	cs_c = bli_align_dim_to_size( m_a, elem_size_c,
 	                                   BLIS_HEAP_STRIDE_ALIGN_SIZE );
 	rs_c = 1;
-	bli_obj_set_incs( rs_c, cs_c, *c );
+	bli_obj_set_strides( rs_c, cs_c, *c );
 }
 */
 

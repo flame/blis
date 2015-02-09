@@ -581,6 +581,7 @@ typedef struct obj_s
 	void*         buffer;
 	inc_t         rs;
 	inc_t         cs;
+	inc_t         is;
 
 	// Bufferless scalar storage
 	atom_t        scalar;
@@ -615,6 +616,7 @@ typedef struct obj_s
 	(b).buffer    = (a).buffer; \
 	(b).rs        = (a).rs; \
 	(b).cs        = (a).cs; \
+	(b).is        = (a).is; \
 \
 	(b).scalar    = (a).scalar; \
 \
@@ -657,6 +659,7 @@ typedef struct obj_s
 	(b).buffer    = (a).buffer; \
 	(b).rs        = (a).rs; \
 	(b).cs        = (a).cs; \
+	(b).is        = (a).is; \
 \
 	(b).scalar    = (a).scalar; \
 \

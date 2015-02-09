@@ -213,6 +213,6 @@ void bli_unpackm_init_cast( obj_t*  p,
 	cs_c = bli_align_dim_to_size( m_a, elem_size_c,
 	                              BLIS_HEAP_STRIDE_ALIGN_SIZE );
     rs_c = 1;
-    bli_obj_set_incs( rs_c, cs_c, *c );
+    bli_obj_set_strides( rs_c, cs_c, *c );
 }
 */

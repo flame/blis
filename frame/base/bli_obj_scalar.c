@@ -48,7 +48,8 @@ void bli_obj_scalar_init_detached( num_t  dt,
 
 	// Update the object.
 	bli_obj_set_buffer( p, *beta );
-	bli_obj_set_incs( 1, 1, *beta );
+	bli_obj_set_strides( 1, 1, *beta );
+	bli_obj_set_imag_stride( 1, *beta );
 }
 
 void bli_obj_scalar_init_detached_copy_of( num_t  dt,

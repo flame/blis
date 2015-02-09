@@ -46,11 +46,13 @@ void bli_obj_create_without_buffer_check( num_t  dt,
 
 void bli_obj_alloc_buffer_check( inc_t  rs,
                                  inc_t  cs,
+                                 inc_t  is,
                                  obj_t* obj );
 
 void bli_obj_attach_buffer_check( void*  p,
                                   inc_t  rs,
                                   inc_t  cs,
+                                  inc_t  is,
                                   obj_t* obj );
 
 void bli_obj_create_scalar_check( num_t  dt,

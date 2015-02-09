@@ -192,7 +192,7 @@ void bli_unpackv_init_cast( obj_t*  p,
 	// though it should never be used because there is no second column to
 	// index into (and therefore it also does not need to be aligned).
 	bli_obj_set_dims( dim_a, 1, *c );
-	bli_obj_set_incs( 1, dim_a, *c );
+	bli_obj_set_strides( 1, dim_a, *c );
 
 	// Reset the view offsets to (0,0).
 	bli_obj_set_offs( 0, 0, *c );

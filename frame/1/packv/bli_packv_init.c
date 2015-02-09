@@ -195,7 +195,7 @@ void bli_packv_init_pack( pack_t   pack_schema,
 		rs_p = 1;
 		cs_p = bli_obj_padded_length( *p );
 
-		bli_obj_set_incs( rs_p, cs_p, *p );
+		bli_obj_set_strides( rs_p, cs_p, *p );
 	}
 }
 
@@ -243,7 +243,7 @@ void bli_packv_init_cast( obj_t*  a,
 
 	// Update the strides. We set the increments to reflect a column storage.
 	// Note that the column stride should never be used.
-	bli_obj_set_incs( 1, dim_a, *c );
+	bli_obj_set_strides( 1, dim_a, *c );
 }
 */
 

@@ -602,6 +602,10 @@ bli_obj_width_stored( obj )
 \
 	((obj).cs)
 
+#define bli_obj_imag_stride( obj ) \
+\
+	((obj).is)
+
 #define bli_obj_row_stride_mag( obj ) \
 \
 	( bli_abs( bli_obj_row_stride( obj ) ) )
@@ -609,6 +613,10 @@ bli_obj_width_stored( obj )
 #define bli_obj_col_stride_mag( obj ) \
 \
 	( bli_abs( bli_obj_col_stride( obj ) ) )
+
+#define bli_obj_imag_stride_mag( obj ) \
+\
+	( bli_abs( bli_obj_imag_stride( obj ) ) )
 
 //
 // NOTE: The following two macros differ from their non-obj counterparts
@@ -641,10 +649,15 @@ bli_obj_width_stored( obj )
 
 // Stride/increment modification
 
-#define bli_obj_set_incs( row_stride, col_stride, obj ) \
+#define bli_obj_set_strides( row_stride, col_stride, obj ) \
 { \
 	(obj).rs = row_stride; \
 	(obj).cs = col_stride; \
+}
+
+#define bli_obj_set_imag_stride( imag_stride, obj ) \
+{ \
+	(obj).is = imag_stride; \
 }
 
 
@@ -998,7 +1011,7 @@ bli_obj_width_stored( obj )
 		doff_t diag_off = bli_obj_diag_offset( obj ); \
 \
 		bli_obj_set_dims( n, m, obj ); \
-		bli_obj_set_incs( cs, rs, obj ); \
+		bli_obj_set_strides( cs, rs, obj ); \
 		bli_obj_set_offs( offn, offm, obj ); \
 		bli_obj_set_diag_offset( -diag_off, obj ); \
 \

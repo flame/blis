@@ -43,7 +43,7 @@ void bli_obj_create( num_t  dt,
 {
 	bli_obj_create_without_buffer( dt, m, n, obj );
 
-	bli_obj_alloc_buffer( rs, cs, obj );
+	bli_obj_alloc_buffer( rs, cs, 1, obj );
 }
 
 void bli_obj_create_with_attached_buffer( num_t  dt,
@@ -56,7 +56,7 @@ void bli_obj_create_with_attached_buffer( num_t  dt,
 {
 	bli_obj_create_without_buffer( dt, m, n, obj );
 
-	bli_obj_attach_buffer( p, rs, cs, obj );
+	bli_obj_attach_buffer( p, rs, cs, 1, obj );
 }
 
 void bli_obj_create_without_buffer( num_t  dt,
@@ -112,11 +112,12 @@ void bli_obj_create_without_buffer( num_t  dt,
 
 void bli_obj_alloc_buffer( inc_t  rs,
                            inc_t  cs,
+                           inc_t  is,
                            obj_t* obj )
 {
 	dim_t  n_elem = 0;
 	dim_t  m, n;
-	inc_t  rs_abs, cs_abs;
+	inc_t  rs_abs, cs_abs, is_abs;
 	siz_t  elem_size;
 	siz_t  buffer_size;
 	void*  p;
@@ -126,19 +127,21 @@ void bli_obj_alloc_buffer( inc_t  rs,
 
 	// Adjust the strides, if needed, before doing anything else
 	// (particularly, before doing any error checking).
-	bli_adjust_strides( m, n, &rs, &cs );
+	bli_adjust_strides( m, n, &rs, &cs, &is );
 
 	if ( bli_error_checking_is_enabled() )
-		bli_obj_alloc_buffer_check( rs, cs, obj );
+		bli_obj_alloc_buffer_check( rs, cs, is, obj );
 
 	// Query the size of one element.
 	elem_size = bli_obj_elem_size( *obj );
 
-	// Compute the magnitude of the row and column strides. We will use
-	// these in the comparisons below since those comparisions really
-	// relate only to the magnitudes of the strides, not their signs.
+	// Compute the magnitude of the row, column, and imaginary strides.
+	// We will use these in the comparisons below since those
+	// comparisions really relate only to the magnitudes of the strides,
+	// not their signs.
 	rs_abs = bli_abs( rs );
 	cs_abs = bli_abs( cs );
+	is_abs = bli_abs( is );
 
 	// Determine how much object to allocate.
 	if ( m == 0 || n == 0 )
@@ -187,6 +190,19 @@ void bli_obj_alloc_buffer( inc_t  rs,
 		}
 	}
 
+	// Handle the special case where imaginary stride is larger than
+	// normal.
+	if ( bli_obj_is_complex( *obj ) )
+	{
+		// Notice that adding is/2 works regardless of whether the
+		// imaginary stride is unit, something between unit and
+		// 2*n_elem, or something bigger than 2*n_elem.
+		if ( 1 > is_abs )
+		{
+			n_elem = is_abs / 2 + n_elem;
+		}
+	}
+
 	// Compute the size of the total buffer to be allocated, which includes
 	// padding if the leading dimension was increased for alignment purposes.
 	buffer_size = ( siz_t )n_elem * elem_size;
@@ -196,12 +212,14 @@ void bli_obj_alloc_buffer( inc_t  rs,
 
 	// Set individual fields.
 	bli_obj_set_buffer( p, *obj );
-	bli_obj_set_incs( rs, cs, *obj );
+	bli_obj_set_strides( rs, cs, *obj );
+	bli_obj_set_imag_stride( is, *obj );
 }
 
 void bli_obj_attach_buffer( void*  p,
                             inc_t  rs,
                             inc_t  cs,
+                            inc_t  is,
                             obj_t* obj )
 {
 	dim_t  m, n;
@@ -210,16 +228,17 @@ void bli_obj_attach_buffer( void*  p,
 	n = bli_obj_width( *obj );
 
 	// Adjust the strides, if necessary.
-	bli_adjust_strides( m, n, &rs, &cs );
+	bli_adjust_strides( m, n, &rs, &cs, &is );
 
 	// Notice that we wait until after strides have been adjusted to
 	// error-check.
 	if ( bli_error_checking_is_enabled() )
-		bli_obj_attach_buffer_check( p, rs, cs, obj );
+		bli_obj_attach_buffer_check( p, rs, cs, is, obj );
 
 	// Update the object.
 	bli_obj_set_buffer( p, *obj );
-	bli_obj_set_incs( rs, cs, *obj );
+	bli_obj_set_strides( rs, cs, *obj );
+	bli_obj_set_imag_stride( is, *obj );
 }
 
 void bli_obj_create_1x1( num_t  dt,
@@ -227,7 +246,7 @@ void bli_obj_create_1x1( num_t  dt,
 {
 	bli_obj_create_without_buffer( dt, 1, 1, obj );
 
-	bli_obj_alloc_buffer( 1, 1, obj );
+	bli_obj_alloc_buffer( 1, 1, 1, obj );
 }
 
 void bli_obj_create_1x1_with_attached_buffer( num_t  dt,
@@ -236,7 +255,7 @@ void bli_obj_create_1x1_with_attached_buffer( num_t  dt,
 {
 	bli_obj_create_without_buffer( dt, 1, 1, obj );
 
-	bli_obj_attach_buffer( p, 1, 1, obj );
+	bli_obj_attach_buffer( p, 1, 1, 1, obj );
 }
 
 void bli_obj_free( obj_t* obj )
@@ -341,23 +360,25 @@ void bli_obj_create_const_copy_of( obj_t* a, obj_t* b )
 void bli_adjust_strides( dim_t  m,
                          dim_t  n,
                          inc_t* rs,
-                         inc_t* cs )
+                         inc_t* cs,
+                         inc_t* is )
 {
 	// Here, we check the strides that were input from the user and modify
 	// them if needed.
 
 	// Handle the special "empty" case first. If either dimension is zero,
-	// we set both strides to zero.
+	// we set row and column strides to zero.
 	if ( m == 0 || n == 0 )
 	{
 		*rs = 0;
 		*cs = 0;
+		*is = 1;
 
 		return;
 	}
 		
 	// Interpret rs = cs = 0 as request for column storage.
-	if ( *rs == 0 && *cs == 0 )
+	if ( *rs == 0 && *cs == 0 && ( *is == 0 || *is == 1 ) )
 	{
 		// First we handle the 1x1 scalar case explicitly.
 		if ( m == 1 && n == 1 )
@@ -377,6 +398,9 @@ void bli_adjust_strides( dim_t  m,
 			*rs = 1;
 			*cs = m;
 		}
+
+		// Use default complex storage.
+		*is = 1;
 	}
 	else if ( *rs == 1 && *cs == 1 )
 	{
@@ -494,6 +518,7 @@ void bli_obj_print( char* label, obj_t* obj )
 	fprintf( file, " elem size       %lu\n", ( unsigned long int )bli_obj_elem_size( *obj ) );
 	fprintf( file, " rs, cs          %ld, %ld\n", ( signed long int )bli_obj_row_stride( *obj ),
 	                                              ( signed long int )bli_obj_col_stride( *obj ) );
+	fprintf( file, " is              %ld\n", ( signed long int )bli_obj_imag_stride( *obj ) );
 	fprintf( file, " pack_mem          \n" );
 	fprintf( file, " - buf           %p\n",  ( void* )bli_mem_buffer( pack_mem ) );
 	fprintf( file, " - buf_type      %lu\n", ( unsigned long int )bli_mem_buf_type( pack_mem ) );

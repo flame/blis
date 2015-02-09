@@ -492,7 +492,7 @@ err_t bli_check_object_diag_offset_equals( obj_t* a, doff_t offset )
 
 // -- Stride-related checks ----------------------------------------------------
 
-err_t bli_check_matrix_strides( dim_t m, dim_t n, inc_t rs, inc_t cs )
+err_t bli_check_matrix_strides( dim_t m, dim_t n, inc_t rs, inc_t cs, inc_t is )
 {
 	err_t e_val = BLIS_SUCCESS;
 
@@ -509,14 +509,15 @@ err_t bli_check_matrix_strides( dim_t m, dim_t n, inc_t rs, inc_t cs )
 	// since the checks below are not dependent on the sign of the strides.
 	rs = bli_abs( rs );
 	cs = bli_abs( cs );
+	is = bli_abs( is );
 
 	// The default case (whereby we interpret rs == cs == 0 as a request for
 	// column-major order) is handled prior to calling this function, so the
 	// only time we should see zero strides here is if the matrix is empty.
 	if ( m == 0 || n == 0 ) return e_val;
 
-	// Disallow either of the strides to be zero.
-	if ( ( rs == 0 || cs == 0 ) )
+	// Disallow row, column, or imaginary strides of zero.
+	if ( ( rs == 0 || cs == 0 || is == 0 ) )
 		return BLIS_INVALID_DIM_STRIDE_COMBINATION;
 
 	// Check stride consistency in cases of general stride.

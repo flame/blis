@@ -46,7 +46,7 @@ void bli_obj_create_check( num_t  dt,
 	e_val = bli_check_valid_datatype( dt );
 	bli_check_error_code( e_val );
 
-	e_val = bli_check_matrix_strides( m, n, rs, cs );
+	e_val = bli_check_matrix_strides( m, n, rs, cs, 1 );
 	bli_check_error_code( e_val );
 
 	e_val = bli_check_null_pointer( obj );
@@ -69,13 +69,14 @@ void bli_obj_create_without_buffer_check( num_t  dt,
 
 void bli_obj_alloc_buffer_check( inc_t  rs,
                                  inc_t  cs,
+                                 inc_t  is,
                                  obj_t* obj )
 {
 	err_t e_val;
 
 	e_val = bli_check_matrix_strides( bli_obj_length( *obj ),
 	                                  bli_obj_width( *obj ),
-	                                  rs, cs );
+	                                  rs, cs, is );
 	bli_check_error_code( e_val );
 
 	e_val = bli_check_null_pointer( obj );
@@ -85,6 +86,7 @@ void bli_obj_alloc_buffer_check( inc_t  rs,
 void bli_obj_attach_buffer_check( void*  p,
                                   inc_t  rs,
                                   inc_t  cs,
+                                  inc_t  is,
                                   obj_t* obj )
 {
 	err_t e_val;
@@ -100,7 +102,7 @@ void bli_obj_attach_buffer_check( void*  p,
 
 	e_val = bli_check_matrix_strides( bli_obj_length( *obj ),
 	                                  bli_obj_width( *obj ),
-	                                  rs, cs );
+	                                  rs, cs, is );
 	bli_check_error_code( e_val );
 
 	e_val = bli_check_null_pointer( obj );

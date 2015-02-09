@@ -75,7 +75,7 @@ err_t bli_check_object_width_equals( obj_t* a, dim_t n );
 err_t bli_check_vector_dim_equals( obj_t* a, dim_t n );
 err_t bli_check_object_diag_offset_equals( obj_t* a, doff_t offset );
 
-err_t bli_check_matrix_strides( dim_t m, dim_t n, inc_t rs, inc_t cs );
+err_t bli_check_matrix_strides( dim_t m, dim_t n, inc_t rs, inc_t cs, inc_t is );
 
 err_t bli_check_general_object( obj_t* a );
 err_t bli_check_hermitian_object( obj_t* a );
