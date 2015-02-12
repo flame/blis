@@ -68,10 +68,10 @@ void bli_gemm_front( obj_t*  alpha,
 	if (
 	     ( bli_obj_is_row_stored( c_local ) &&
 	       bli_func_prefers_contig_cols( bli_obj_datatype( c_local ),
-	                                     cntl_gemm_ukrs( cntl ) ) ) ||
+	                                     bli_gemm_cntl_ukrs( cntl ) ) ) ||
 	     ( bli_obj_is_col_stored( c_local ) &&
 	       bli_func_prefers_contig_rows( bli_obj_datatype( c_local ),
-	                                     cntl_gemm_ukrs( cntl ) ) )
+	                                     bli_gemm_cntl_ukrs( cntl ) ) )
 	   )
 	{
 		bli_obj_swap( a_local, b_local );

@@ -36,8 +36,21 @@
 
 #ifdef BLIS_ENABLE_OPENMP
 
-//'Normal' barrier for openmp
-#ifndef BLIS_TREE_BARRIER
+//Constructors and destructors for constructors
+thread_comm_t* bli_create_communicator( dim_t n_threads )
+{
+    thread_comm_t* comm = (thread_comm_t*) bli_malloc( sizeof(thread_comm_t) );
+    bli_setup_communicator( comm, n_threads );
+    return comm;
+}
+
+void bli_free_communicator( thread_comm_t* communicator )
+{
+    if( communicator == NULL ) return;
+    bli_cleanup_communicator( communicator );
+    bli_free( communicator );
+}
+
 void bli_level3_thread_decorator( dim_t n_threads, 
                                   level3_int_t func, 
                                   obj_t* alpha, 
@@ -62,6 +75,8 @@ void bli_level3_thread_decorator( dim_t n_threads,
     }
 }
 
+#ifndef BLIS_TREE_BARRIER
+//'Normal' barrier for openmp
 //barrier routine taken from art of multicore programming
 void bli_barrier( thread_comm_t* communicator, dim_t t_id )
 {
@@ -83,13 +98,6 @@ void bli_barrier( thread_comm_t* communicator, dim_t t_id )
     }
 }
 
-//Constructors and destructors for constructors
-thread_comm_t* bli_create_communicator( dim_t n_threads )
-{
-    thread_comm_t* comm = (thread_comm_t*) bli_malloc( sizeof(thread_comm_t) );
-    bli_setup_communicator( comm, n_threads );
-    return comm;
-}
 
 void bli_setup_communicator( thread_comm_t* communicator, dim_t n_threads)
 {
@@ -100,12 +108,6 @@ void bli_setup_communicator( thread_comm_t* communicator, dim_t n_threads)
     communicator->barrier_threads_arrived = 0;
 }
 
-void bli_free_communicator( thread_comm_t* communicator )
-{
-    if( communicator == NULL ) return;
-    bli_cleanup_communicator( communicator );
-    bli_free( communicator );
-}
 
 void bli_cleanup_communicator( thread_comm_t* communicator )
 {
@@ -173,6 +175,7 @@ void bli_cleanup_communicator( thread_comm_t* communicator )
     }
     bli_free( communicator->barriers );
 }
+
 
 void bli_setup_communicator( thread_comm_t* communicator, dim_t n_threads)
 {

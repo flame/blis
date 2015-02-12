@@ -62,4 +62,5 @@ gemm_t* bli_gemm_cntl_obj_create( impl_t       impl_type,
                                   packm_t*     sub_pack_c,
                                   gemm_t*      sub_gemm,
                                   unpackm_t*   sub_unpack_c );
+func_t* bli_gemm_cntl_ukrs( gemm_t* cntl );
 
