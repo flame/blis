@@ -214,6 +214,11 @@ void PASTEMAC(ch,varname)( \
 	     cs_c == (no assumptions)
 	*/ \
 \
+	/* Safety trap: Certain indexing within this macro-kernel does not
+	   work as intended if both MR and NR are odd. */ \
+	if ( ( bli_is_odd( PACKMR ) && bli_is_odd( NR ) ) || \
+	     ( bli_is_odd( PACKNR ) && bli_is_odd( MR ) ) ) bli_abort(); \
+\
 	/* If any dimension is zero, return immediately. */ \
 	if ( bli_zero_dim3( m, n, k ) ) return; \
 \
@@ -243,14 +248,12 @@ void PASTEMAC(ch,varname)( \
 	     bli_is_rih_packed( schema_a ) ) off_scl = 2; \
 	else                                 off_scl = 1; \
 \
-	/* Compute the storage stride. Usually this is just PACKMR (for A
-	   or PACKNR (for B). However, in the case of 3m, we need to scale
-	   the offset by 3/2. Since it's possible we may need to scale
-	   the packing dimension by a non-integer value, we break up the
-	   scaling factor into numerator and denominator. */ \
-	if ( bli_is_3m_packed( schema_a ) ) { ss_a_num = 3*PACKMR; \
+	/* Compute the storage stride scaling. Usually this is just 1.
+	   However, in the case of interleaved 3m, we need to scale the
+	   offset by 3/2. */ \
+	if ( bli_is_3m_packed( schema_a ) ) { ss_a_num = 3; \
 	                                      ss_a_den = 2; } \
-	else                                { ss_a_num = 1*PACKMR; \
+	else                                { ss_a_num = 1; \
 	                                      ss_a_den = 1; } \
 \
 	/* If there is a zero region to the left of where the diagonal of A
@@ -355,7 +358,9 @@ void PASTEMAC(ch,varname)( \
 \
 				/* Compute the panel stride for the current diagonal-
 				   intersecting micro-panel. */ \
-				ps_a_cur = ( k_a1112 * ss_a_num ) / ss_a_den; \
+				ps_a_cur  = k_a1112 * PACKMR; \
+				ps_a_cur += ( bli_is_odd( ps_a_cur ) ? 1 : 0 ); \
+				ps_a_cur  = ( ps_a_cur * ss_a_num ) / ss_a_den; \
 \
 				if ( trmm_l_ir_my_iter( i, ir_thread ) ) { \
 \
@@ -415,9 +420,6 @@ void PASTEMAC(ch,varname)( \
 				} \
 				} \
 \
-/*
-printf( "bli_trmm_lu_ker_var2: applying ps_a_cur = %lu\n", ps_a_cur ); \
-*/ \
 				a1 += ps_a_cur; \
 			} \
 			else if ( bli_is_strictly_above_diag_n( diagoffa_i, MR, k ) ) \
@@ -475,9 +477,6 @@ printf( "bli_trmm_lu_ker_var2: applying ps_a_cur = %lu\n", ps_a_cur ); \
 				} \
 				} \
 \
-/*
-printf( "bli_trmm_lu_ker_var2: applying rstep_a = %lu\n", rstep_a ); \
-*/ \
 				a1 += rstep_a; \
 			} \
 \

@@ -173,6 +173,7 @@ void bli_packm_init_pack( invdiag_t invert_diag,
                           obj_t*    p )
 {
 	num_t   dt           = bli_obj_datatype( *c );
+	num_t   dt_real      = bli_obj_datatype_proj_to_real( *c );
 	trans_t transc       = bli_obj_onlytrans_status( *c );
 	dim_t   m_c          = bli_obj_length( *c );
 	dim_t   n_c          = bli_obj_width( *c );
@@ -344,6 +345,13 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 		// dimension of the matrix is not a whole multiple of MR.
 		ps_p = cs_p * n_p_pad;
 
+		// As a general rule, we don't want panel strides to be odd. This
+		// is primarily motivated by our desire to support interleaved 3m
+		// micro-panels, in which case we have to scale the panel stride
+		// by 3/2. That division by 2 means the numerator (prior to being
+		// scaled by 3) must be even.
+		if ( bli_is_odd( ps_p ) ) ps_p += 1;
+
 		// Query the micro-panel alignment for A.
 		upanel_a_align = bli_blksz_for_type( dt, gemm_upanel_a_align );
 
@@ -365,9 +373,29 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 		          bli_is_io_packed( pack_schema ) ||
 		          bli_is_rpi_packed( pack_schema ) )
 		{
-			// Align the panel stride according to the micro-panel alignment.
-			ps_p = bli_align_dim_to_size( ps_p, elem_size_p, upanel_a_align );
+			// Acquire the element size of the the real projection of the
+			// current complex datatype.
+			siz_t elem_size_p_real = elem_size_p / 2;
 
+			// Acquire the micro-panel alignment for the real projection of
+			// the current complex datatype.
+			upanel_a_align = bli_blksz_for_type( dt_real, gemm_upanel_a_align );
+
+			// Align the panel stride according to the micro-panel alignment.
+			ps_p = bli_align_dim_to_size( ps_p, elem_size_p_real, upanel_a_align );
+
+			// The division by 2 below assumes that ps_p is an even number.
+			// However, it is possible that, at this point, ps_p is an odd.
+			// If it is indeed odd, we nudge it higher.
+			if ( bli_is_odd( ps_p ) ) ps_p += 1;
+
+			// Despite the fact that the packed micro-panels will contain
+			// real elements, the panel stride that we store in the obj_t
+			// (which is passed into the macro-kernel) needs to be in units
+			// of complex elements, since the macro-kernel will index through
+			// micro-panels via complex pointer arithmetic for trmm/trsm.
+			// Since the indexing "increment" will be twice as large as each
+			// actual stored element, we divide the panel_stride by 2.
 			ps_p = ps_p / 2;
 		}
 		else
@@ -415,6 +443,13 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 		// dimension of the matrix is not a whole multiple of NR.
 		ps_p = m_p_pad * rs_p;
 
+		// As a general rule, we don't want panel strides to be odd. This
+		// is primarily motivated by our desire to support interleaved 3m
+		// micro-panels, in which case we have to scale the panel stride
+		// by 3/2. That division by 2 means the numerator (prior to being
+		// scaled by 3) must be even.
+		if ( bli_is_odd( ps_p ) ) ps_p += 1;
+
 		// Query the micro-panel alignment for B.
 		upanel_b_align = bli_blksz_for_type( dt, gemm_upanel_b_align );
 
@@ -436,9 +471,29 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 		          bli_is_io_packed( pack_schema ) ||
 		          bli_is_rpi_packed( pack_schema ) )
 		{
-			// Align the panel stride according to the micro-panel alignment.
-			ps_p = bli_align_dim_to_size( ps_p, elem_size_p, upanel_b_align );
+			// Acquire the element size of the the real projection of the
+			// current complex datatype.
+			siz_t elem_size_p_real = elem_size_p / 2;
 
+			// Acquire the micro-panel alignment for the real projection of
+			// the current complex datatype.
+			upanel_b_align = bli_blksz_for_type( dt_real, gemm_upanel_b_align );
+
+			// Align the panel stride according to the micro-panel alignment.
+			ps_p = bli_align_dim_to_size( ps_p, elem_size_p_real, upanel_b_align );
+
+			// The division by 2 below assumes that ps_p is an even number.
+			// However, it is possible that, at this point, ps_p is an odd.
+			// If it is indeed odd, we nudge it higher.
+			if ( bli_is_odd( ps_p ) ) ps_p += 1;
+
+			// Despite the fact that the packed micro-panels will contain
+			// real elements, the panel stride that we store in the obj_t
+			// (which is passed into the macro-kernel) needs to be in units
+			// of complex elements, since the macro-kernel will index through
+			// micro-panels via complex pointer arithmetic for trmm/trsm.
+			// Since the indexing "increment" will be twice as large as each
+			// actual stored element, we divide the panel_stride by 2.
 			ps_p = ps_p / 2;
 		}
 		else
