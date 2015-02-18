@@ -328,9 +328,9 @@ void PASTEMAC(ch,varname)( \
 	   the case of 3m, we need to scale by 3/2. We break up this scaling
 	   factor into numerator and denominator since it cannot be represented
 	   by a single integer. */ \
-	if ( bli_is_3m_packed( schema ) ) { ss_num = 3*ldp; \
+	if ( bli_is_3m_packed( schema ) ) { ss_num = 3; \
 	                                    ss_den = 2; } \
-	else                              { ss_num = 1*ldp; \
+	else                              { ss_num = 1; \
 	                                    ss_den = 1; } \
 \
 	/* Compute the total number of iterations we'll need. */ \
@@ -442,7 +442,12 @@ PASTEMAC(ch,fprintm)( stdout, "packm_var2: a", m, n, \
 			/* NOTE: This value is usually LESS than ps_p because triangular
 			   matrices usually have several micro-panels that are shorter
 			   than a "full" micro-panel. */ \
-			p_inc = ( panel_len_max_i * ss_num ) / ss_den; \
+			p_inc = ldp * panel_len_max_i; \
+\
+			/* We nudge the panel increment up by one if it is odd. */ \
+			p_inc += ( bli_is_odd( p_inc ) ? 1 : 0 ); \
+\
+			p_inc = ( p_inc * ss_num ) / ss_den; \
 		} \
 		else if ( bli_is_herm_or_symm( strucc ) ) \
 		{ \
@@ -510,6 +515,28 @@ PASTEMAC(ch,fprintm)( stdout, "packm_var2: a", m, n, \
 			/* NOTE: This value is equivalent to ps_p. */ \
 			p_inc = ps_p; \
 		} \
+\
+/*
+		if ( bli_is_ro_packed( schema ) ) { \
+		if ( col_stored ) { \
+		PASTEMAC(chr,fprintm)( stdout, "packm_var2: a_r", *m_panel_use, *n_panel_use, \
+		                       ( ctype_r* )c_use,         2*rs_c, 2*cs_c, "%4.1f", "" ); \
+		PASTEMAC(chr,fprintm)( stdout, "packm_var2: ap_r", *m_panel_max, *n_panel_max, \
+		                       ( ctype_r* )p_use,         rs_p, cs_p, "%4.1f", "" ); \
+		} \
+		if ( row_stored && *n_panel_use == 3 ) { \
+		PASTEMAC(chr,fprintm)( stdout, "packm_var2: b_r", *m_panel_use, *n_panel_use, \
+		                       ( ctype_r* )c_use,         2*rs_c, 2*cs_c, "%4.1f", "" ); \
+		PASTEMAC(chr,fprintm)( stdout, "packm_var2: bp_r", *m_panel_max, *n_panel_max, \
+		                       ( ctype_r* )p_use,         rs_p, cs_p, "%4.1f", "" ); \
+		} \
+		} \
+*/ \
+/*
+		PASTEMAC(chr,fprintm)( stdout, "packm_var2: bp_rpi", *m_panel_max, *n_panel_max, \
+		                       ( ctype_r* )p_use,         rs_p, cs_p, "%4.1f", "" ); \
+*/ \
+\
 \
 /*
 		if ( row_stored ) { \

@@ -374,6 +374,9 @@ void PASTEMAC(ch,varname)( \
 			   matrices usually have several micro-panels that are shorter
 			   than a "full" micro-panel. */ \
 			p_inc = ldp * panel_len_max_i; \
+\
+			/* We nudge the panel increment up by one if it is odd. */ \
+			p_inc += ( bli_is_odd( p_inc ) ? 1 : 0 ); \
 		} \
 		else if ( bli_is_herm_or_symm( strucc ) ) \
 		{ \

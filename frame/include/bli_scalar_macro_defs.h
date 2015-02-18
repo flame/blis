@@ -248,6 +248,11 @@
 #define bli_isinf( a )  isinf( a )
 #define bli_isnan( a )  isnan( a )
 
+// is_odd, is_even
+
+#define bli_is_odd( a )  ( a % 2 == 1 )
+#define bli_is_even( a ) ( a % 2 == 0 )
+
 // swap_types
 
 #define bli_swap_types( type1, type2 ) \
