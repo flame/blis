@@ -362,7 +362,7 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 		// Why? Because the macro-kernel indexes in units of the complex
 		// datatype. So these changes "trick" it into indexing the correct
 		// amount.
-		if ( bli_is_3m_packed( pack_schema ) )
+		if ( bli_is_3mi_packed( pack_schema ) )
 		{
 			ps_p = ( ps_p * 3 ) / 2;
 
@@ -460,7 +460,7 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 		// Why? Because the macro-kernel indexes in units of the complex
 		// datatype. So these changes "trick" it into indexing the correct
 		// amount.
-		if ( bli_is_3m_packed( pack_schema ) )
+		if ( bli_is_3mi_packed( pack_schema ) )
 		{
 			ps_p = ( ps_p * 3 ) / 2;
 

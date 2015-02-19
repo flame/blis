@@ -125,7 +125,7 @@ void bli_gemm4mb_cntl_init()
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
 	                           FALSE, // reverse iteration if lower?
-	                           BLIS_PACKED_ROW_PANELS_4M,
+	                           BLIS_PACKED_ROW_PANELS_4MI,
 	                           BLIS_BUFFER_FOR_A_BLOCK );
 
 	gemm4mb_packb_cntl
@@ -137,7 +137,7 @@ void bli_gemm4mb_cntl_init()
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
 	                           FALSE, // reverse iteration if lower?
-	                           BLIS_PACKED_COL_PANELS_4M,
+	                           BLIS_PACKED_COL_PANELS_4MI,
 	                           BLIS_BUFFER_FOR_B_PANEL );
 
 

@@ -263,8 +263,8 @@ void PASTEMAC(ch,varname)( \
 	   needs to occur in units of real values. The value computed
 	   here is divided into the complex pointer offset to cause the
 	   pointer to be advanced by the correct value. */ \
-	if ( bli_is_4m_packed( schema_b ) || \
-	     bli_is_3m_packed( schema_b ) || \
+	if ( bli_is_4mi_packed( schema_b ) || \
+	     bli_is_3mi_packed( schema_b ) || \
 	     bli_is_rih_packed( schema_b ) ) off_scl = 2; \
 	else                                 off_scl = 1; \
 \
@@ -274,8 +274,8 @@ void PASTEMAC(ch,varname)( \
 	   packing formats are not applicable here since trsm is a two-
 	   operand operation only (unlike trmm, which is capable of three-
 	   operand). */ \
-	if ( bli_is_3m_packed( schema_b ) ) { ss_b_num = 3; ss_b_den = 2; } \
-	else                                { ss_b_num = 1; ss_b_den = 1; } \
+	if ( bli_is_3mi_packed( schema_b ) ) { ss_b_num = 3; ss_b_den = 2; } \
+	else                                 { ss_b_num = 1; ss_b_den = 1; } \
 \
 	/* If there is a zero region to the left of where the diagonal of B
 	   intersects the top edge of the panel, adjust the pointer to C and

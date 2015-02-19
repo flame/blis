@@ -243,8 +243,8 @@ void PASTEMAC(ch,varname)( \
 	   needs to occur in units of real values. The value computed
 	   here is divided into the complex pointer offset to cause the
 	   pointer to be advanced by the correct value. */ \
-	if ( bli_is_4m_packed( schema_a ) || \
-	     bli_is_3m_packed( schema_a ) || \
+	if ( bli_is_4mi_packed( schema_a ) || \
+	     bli_is_3mi_packed( schema_a ) || \
 	     bli_is_rih_packed( schema_a ) ) off_scl = 2; \
 	else                                 off_scl = 1; \
 \
@@ -254,7 +254,7 @@ void PASTEMAC(ch,varname)( \
 	   summed-only, we need to scale the computed panel sizes by 1/2
 	   to compensate for the fact that the pointer arithmetic occurs
 	   in terms of complex elements rather than real elements. */ \
-	if      ( bli_is_3m_packed( schema_a ) )  { ss_a_num = 3; ss_a_den = 2; } \
+	if      ( bli_is_3mi_packed( schema_a ) ) { ss_a_num = 3; ss_a_den = 2; } \
 	else if ( bli_is_rih_packed( schema_a ) ) { ss_a_num = 1; ss_a_den = 2; } \
 	else                                      { ss_a_num = 1; ss_a_den = 1; } \
 \
