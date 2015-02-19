@@ -270,11 +270,12 @@ void PASTEMAC(ch,varname)( \
 \
 	/* Compute the storage stride scaling. Usually this is just 1.
 	   However, in the case of interleaved 3m, we need to scale the
-	   offset by 3/2. */ \
-	if ( bli_is_3m_packed( schema_b ) ) { ss_b_num = 3; \
-	                                      ss_b_den = 2; } \
-	else                                { ss_b_num = 1; \
-	                                      ss_b_den = 1; } \
+	   offset by 3/2. Note that real-only, imag-only, and summed-only
+	   packing formats are not applicable here since trsm is a two-
+	   operand operation only (unlike trmm, which is capable of three-
+	   operand). */ \
+	if ( bli_is_3m_packed( schema_b ) ) { ss_b_num = 3; ss_b_den = 2; } \
+	else                                { ss_b_num = 1; ss_b_den = 1; } \
 \
 	/* If there is a zero region to the left of where the diagonal of B
 	   intersects the top edge of the panel, adjust the pointer to C and

@@ -324,14 +324,15 @@ void PASTEMAC(ch,varname)( \
 		n_panel_max    = &panel_len_max_i; \
 	} \
 \
-	/* Compute the storage stride. Usually this is just ldp. However, in
-	   the case of 3m, we need to scale by 3/2. We break up this scaling
-	   factor into numerator and denominator since it cannot be represented
-	   by a single integer. */ \
-	if ( bli_is_3m_packed( schema ) ) { ss_num = 3; \
-	                                    ss_den = 2; } \
-	else                              { ss_num = 1; \
-	                                    ss_den = 1; } \
+	/* Compute the storage stride scaling. Usually this is just 1. However,
+	   in the case of interleaved 3m, we need to scale by 3/2, and in the
+	   cases of real-only, imag-only, or summed-only, we need to scale by
+	   1/2. In both cases, we are compensating for the fact that pointer
+	   arithmetic occurs in terms of complex elements rather than real
+	   elements. */ \
+	if      ( bli_is_3m_packed( schema ) )  { ss_num = 3; ss_den = 2; } \
+	else if ( bli_is_rih_packed( schema ) ) { ss_num = 1; ss_den = 2; } \
+	else                                    { ss_num = 1; ss_den = 1; } \
 \
 	/* Compute the total number of iterations we'll need. */ \
 	num_iter = iter_dim / panel_dim_max + ( iter_dim % panel_dim_max ? 1 : 0 ); \

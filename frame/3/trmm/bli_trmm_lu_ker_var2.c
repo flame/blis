@@ -250,11 +250,13 @@ void PASTEMAC(ch,varname)( \
 \
 	/* Compute the storage stride scaling. Usually this is just 1.
 	   However, in the case of interleaved 3m, we need to scale the
-	   offset by 3/2. */ \
-	if ( bli_is_3m_packed( schema_a ) ) { ss_a_num = 3; \
-	                                      ss_a_den = 2; } \
-	else                                { ss_a_num = 1; \
-	                                      ss_a_den = 1; } \
+	   offset by 3/2. And if we are packing real-only, imag-only, or
+	   summed-only, we need to scale the computed panel sizes by 1/2
+	   to compensate for the fact that the pointer arithmetic occurs
+	   in terms of complex elements rather than real elements. */ \
+	if      ( bli_is_3m_packed( schema_a ) )  { ss_a_num = 3; ss_a_den = 2; } \
+	else if ( bli_is_rih_packed( schema_a ) ) { ss_a_num = 1; ss_a_den = 2; } \
+	else                                      { ss_a_num = 1; ss_a_den = 1; } \
 \
 	/* If there is a zero region to the left of where the diagonal of A
 	   intersects the top edge of the block, adjust the pointer to B and
