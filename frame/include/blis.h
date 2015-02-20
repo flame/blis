@@ -115,11 +115,12 @@ extern "C" {
 #include "bli_info.h"
 #include "bli_getopt.h"
 #include "bli_flops.h"
-#include "bli_4m.h"
-#include "bli_3m.h"
+#include "bli_xm.h"
 #include "bli_4mh.h"
-#include "bli_3mh.h"
 #include "bli_4mb.h"
+#include "bli_4m.h"
+#include "bli_3mh.h"
+#include "bli_3m.h"
 
 // Control tree definitions.
 #include "bli_cntl.h"
