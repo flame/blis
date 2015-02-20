@@ -146,11 +146,11 @@ void bli_get_range_weighted( void* thr, dim_t all_start, dim_t all_end, dim_t bl
 
     *start = 0;
     *end   = all_end - all_start;
+    double num = size*size / (double) n_way;
 
     if( forward ) {
         dim_t curr_caucus = n_way - 1;
         dim_t len = 0;
-        dim_t num = size*size / n_way; // 2xArea per thread?
         while(1){
             dim_t width = ceil(sqrt( len*len + num )) - len; // The width of the current caucus
             width = (width % block_factor == 0) ? width : width + block_factor - (width % block_factor);
@@ -167,7 +167,6 @@ void bli_get_range_weighted( void* thr, dim_t all_start, dim_t all_end, dim_t bl
         }
     }
     else{
-        dim_t num = size*size / n_way;
         while(1){
             dim_t width = ceil(sqrt(*start * *start + num)) - *start;
             width = (width % block_factor == 0) ? width : width + block_factor - (width % block_factor);
