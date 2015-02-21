@@ -91,6 +91,8 @@ void bli_gemm_thrinfo_free( gemm_thrinfo_t* thread)
     // Free Communicators
     if( thread_am_ochief( thread ) )
         bli_free_communicator( thread->ocomm );
+    if( thread->sub_gemm == NULL && thread_am_ichief( thread ) )
+        bli_free_communicator( thread->icomm );
 
     // Free Sub Thrinfos
     bli_packm_thrinfo_free( thread->opackm );
