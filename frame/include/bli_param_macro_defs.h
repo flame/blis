@@ -521,13 +521,13 @@
 \
 	( ( schema & BLIS_PACK_PANEL_BIT ) )
 
-#define bli_is_4m_packed( schema ) \
+#define bli_is_4mi_packed( schema ) \
 \
-	( ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_4M )
+	( ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_4MI )
 
-#define bli_is_3m_packed( schema ) \
+#define bli_is_3mi_packed( schema ) \
 \
-	( ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_3M )
+	( ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_3MI )
 
 #define bli_is_ro_packed( schema ) \
 \

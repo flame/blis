@@ -213,13 +213,13 @@
 \
 	( ( (obj).info & BLIS_PACK_PANEL_BIT ) )
 
-#define bli_obj_is_4m_packed( obj ) \
+#define bli_obj_is_4mi_packed( obj ) \
 \
-	( ( (obj).info & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_4M )
+	( ( (obj).info & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_4MI )
 
-#define bli_obj_is_3m_packed( obj ) \
+#define bli_obj_is_3mi_packed( obj ) \
 \
-	( ( (obj).info & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_3M )
+	( ( (obj).info & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_3MI )
 
 #define bli_obj_is_ro_packed( obj ) \
 \

@@ -152,8 +152,8 @@ void bli_packm_blk_var2( obj_t*   c,
 
 
 	// Choose the correct func_t object based on the pack_t schema.
-	if      ( bli_is_4m_packed( schema ) ) packm_kers = packm_struc_cxk_4m_kers;
-	else if ( bli_is_3m_packed( schema ) ) packm_kers = packm_struc_cxk_3m_kers;
+	if      ( bli_is_4mi_packed( schema ) ) packm_kers = packm_struc_cxk_4m_kers;
+	else if ( bli_is_3mi_packed( schema ) ) packm_kers = packm_struc_cxk_3m_kers;
 	else if ( bli_is_ro_packed( schema ) ||
 	          bli_is_io_packed( schema ) ||
 	         bli_is_rpi_packed( schema ) ) packm_kers = packm_struc_cxk_rih_kers;
@@ -330,7 +330,7 @@ void PASTEMAC(ch,varname)( \
 	   1/2. In both cases, we are compensating for the fact that pointer
 	   arithmetic occurs in terms of complex elements rather than real
 	   elements. */ \
-	if      ( bli_is_3m_packed( schema ) )  { ss_num = 3; ss_den = 2; } \
+	if      ( bli_is_3mi_packed( schema ) ) { ss_num = 3; ss_den = 2; } \
 	else if ( bli_is_rih_packed( schema ) ) { ss_num = 1; ss_den = 2; } \
 	else                                    { ss_num = 1; ss_den = 1; } \
 \

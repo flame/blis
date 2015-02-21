@@ -120,7 +120,7 @@ void bli_trsm3m_cntl_init()
 	                           TRUE,  // invert diagonal
 	                           TRUE,  // reverse iteration if upper?
 	                           FALSE, // reverse iteration if lower?
-	                           BLIS_PACKED_ROW_PANELS_3M,
+	                           BLIS_PACKED_ROW_PANELS_3MI,
 	                           BLIS_BUFFER_FOR_A_BLOCK );
 
 	trsm3m_l_packb_cntl
@@ -134,7 +134,7 @@ void bli_trsm3m_cntl_init()
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
 	                           FALSE, // reverse iteration if lower?
-	                           BLIS_PACKED_COL_PANELS_3M,
+	                           BLIS_PACKED_COL_PANELS_3MI,
 	                           BLIS_BUFFER_FOR_B_PANEL );
 
 	// Create control tree objects for packm operations (right side).
@@ -147,7 +147,7 @@ void bli_trsm3m_cntl_init()
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
 	                           FALSE, // reverse iteration if lower?
-	                           BLIS_PACKED_ROW_PANELS_3M,
+	                           BLIS_PACKED_ROW_PANELS_3MI,
 	                           BLIS_BUFFER_FOR_A_BLOCK );
 
 	trsm3m_r_packb_cntl
@@ -159,7 +159,7 @@ void bli_trsm3m_cntl_init()
 	                           TRUE,  // invert diagonal
 	                           FALSE, // reverse iteration if upper?
 	                           TRUE,  // reverse iteration if lower?
-	                           BLIS_PACKED_COL_PANELS_3M,
+	                           BLIS_PACKED_COL_PANELS_3MI,
 	                           BLIS_BUFFER_FOR_B_PANEL );
 
 
