@@ -15,8 +15,8 @@ jc_nt=2
 nt=16
 
 # Threadedness to test.
-threads="st mt"
-threads_r="st mt"
+threads="st" # mt"
+threads_r="st" # mt"
 
 # Datatypes to test.
 dts="z c"
@@ -28,7 +28,8 @@ test_ops="${l3_ops}"
 test_ops_r="${l3_ops}"
 
 # Implementations to test
-test_impls="openblas asm_blis 4m1_blis 4m1b_blis 4mhw_blis 3m1_blis 3mhw_blis"
+#test_impls="openblas asm_blis 4m1a_blis 4m1b_blis 4mhw_blis 3m1_blis 3mhw_blis"
+test_impls="asm_blis"
 test_impls_r="asm_blis"
 
 # First perform real test cases.
@@ -60,7 +61,7 @@ for th in ${threads_r}; do
 				# Construct the name of the output file.
 				out_file="${out_root}_${th}_${dt}${op}_${im}.m"
 
-				echo "Running (nt = 1) ./${exec_name} > ${out_file}"
+				echo "Running (nt = ${OMP_NUM_THREADS}) ./${exec_name} > ${out_file}"
 
 				# Run executable.
 				./${exec_name} > ${out_file}

@@ -42,10 +42,10 @@
 // Prototype object-based interface.
 //
 void bli_gemm4mb( obj_t*  alpha,
-                 obj_t*  a,
-                 obj_t*  b,
-                 obj_t*  beta,
-                 obj_t*  c );
+                  obj_t*  a,
+                  obj_t*  b,
+                  obj_t*  beta,
+                  obj_t*  c );
 
 
 //

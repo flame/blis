@@ -61,8 +61,6 @@ typedef void (*FUNCPTR_T)(
 static FUNCPTR_T GENARRAY(ftypes,packm_blk_var1);
 
 extern func_t* packm_struc_cxk_kers;
-extern func_t* packm_struc_cxk_4m_kers;
-extern func_t* packm_struc_cxk_3m_kers;
 
 
 void bli_packm_blk_var1( obj_t*   c,

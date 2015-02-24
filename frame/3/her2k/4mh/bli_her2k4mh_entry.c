@@ -40,10 +40,10 @@ extern gemm_t* gemm4mh_cntl_ir;
 extern gemm_t* gemm4mh_cntl_ii;
 
 void bli_her2k4mh_entry( obj_t*  alpha,
-                        obj_t*  a,
-                        obj_t*  b,
-                        obj_t*  beta,
-                        obj_t*  c )
+                         obj_t*  a,
+                         obj_t*  b,
+                         obj_t*  beta,
+                         obj_t*  c )
 {
 	bli_her2k_front( alpha, a, b, beta,      c, gemm4mh_cntl_rr );
 	bli_her2k_front( alpha, a, b, &BLIS_ONE, c, gemm4mh_cntl_ii );

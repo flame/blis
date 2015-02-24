@@ -59,22 +59,22 @@ void bli_cntl_init( void )
 	bli_gemm_cntl_init();
 	bli_trsm_cntl_init();
 
-	// Level-3 via 4m
-	bli_gemm4m_cntl_init();
-	bli_trsm4m_cntl_init();
-
-	// Level-3 via 3m
-	bli_gemm3m_cntl_init();
-	bli_trsm3m_cntl_init();
-
 	// Level-3 via 4mh
 	bli_gemm4mh_cntl_init();
+
+	// Level-3 via 4mb
+	bli_gemm4mb_cntl_init();
+
+	// Level-3 via 4m1
+	bli_gemm4m1_cntl_init();
+	bli_trsm4m1_cntl_init();
 
 	// Level-3 via 3mh
 	bli_gemm3mh_cntl_init();
 
-	// Level-3 via 4mb
-	bli_gemm4mb_cntl_init();
+	// Level-3 via 3m1
+	bli_gemm3m1_cntl_init();
+	bli_trsm3m1_cntl_init();
 }
 
 void bli_cntl_finalize( void )
@@ -102,21 +102,21 @@ void bli_cntl_finalize( void )
 	bli_gemm_cntl_finalize();
 	bli_trsm_cntl_finalize();
 
-	// Level-3 via 4m
-	bli_gemm4m_cntl_finalize();
-	bli_trsm4m_cntl_finalize();
-
-	// Level-3 via 3m
-	bli_gemm3m_cntl_finalize();
-	bli_trsm3m_cntl_finalize();
-
 	// Level-3 via 4mh
 	bli_gemm4mh_cntl_finalize();
+
+	// Level-3 via 4mb
+	bli_gemm4mb_cntl_finalize();
+
+	// Level-3 via 4m1
+	bli_gemm4m1_cntl_finalize();
+	bli_trsm4m1_cntl_finalize();
 
 	// Level-3 via 3mh
 	bli_gemm3mh_cntl_finalize();
 
-	// Level-3 via 4mb
-	bli_gemm4mb_cntl_finalize();
+	// Level-3 via 3m1
+	bli_gemm3m1_cntl_finalize();
+	bli_trsm3m1_cntl_finalize();
 }
 

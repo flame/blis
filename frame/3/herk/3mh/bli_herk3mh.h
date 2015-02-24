@@ -39,9 +39,9 @@
 // Prototype object-based interface.
 //
 void bli_herk3mh( obj_t*  alpha,
-                 obj_t*  a,
-                 obj_t*  beta,
-                 obj_t*  c );
+                  obj_t*  a,
+                  obj_t*  beta,
+                  obj_t*  c );
 
 
 //

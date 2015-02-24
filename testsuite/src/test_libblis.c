@@ -382,17 +382,17 @@ void libblis_test_read_params_file( char* input_filename, test_params_t* params 
 	libblis_test_read_next_line( buffer, input_stream );
 	sscanf( buffer, "%u ", &(params->enable_3mh) );
 
-	// Read whether to enable 3m.
+	// Read whether to enable 3m1.
 	libblis_test_read_next_line( buffer, input_stream );
-	sscanf( buffer, "%u ", &(params->enable_3m) );
+	sscanf( buffer, "%u ", &(params->enable_3m1) );
 
 	// Read whether to enable 4mh.
 	libblis_test_read_next_line( buffer, input_stream );
 	sscanf( buffer, "%u ", &(params->enable_4mh) );
 
-	// Read whether to enable 4m.
+	// Read whether to enable 4m1.
 	libblis_test_read_next_line( buffer, input_stream );
-	sscanf( buffer, "%u ", &(params->enable_4m) );
+	sscanf( buffer, "%u ", &(params->enable_4m1) );
 
 	// Read the requested error-checking level.
 	libblis_test_read_next_line( buffer, input_stream );
@@ -424,12 +424,12 @@ void libblis_test_read_params_file( char* input_filename, test_params_t* params 
 	// Enable/disable the alternative complex implementations.
 	if ( params->enable_3mh ) bli_3mh_enable();
 	else                      bli_3mh_disable();
-	if ( params->enable_3m  ) bli_3m_enable();
-	else                      bli_3m_disable();
+	if ( params->enable_3m1 ) bli_3m1_enable();
+	else                      bli_3m1_disable();
 	if ( params->enable_4mh ) bli_4mh_enable();
 	else                      bli_4mh_disable();
-	if ( params->enable_4m  ) bli_4m_enable();
-	else                      bli_4m_disable();
+	if ( params->enable_4m1 ) bli_4m1_enable();
+	else                      bli_4m1_disable();
 
 	// Output the parameter struct.
 	libblis_test_output_params_struct( stdout, params );
@@ -836,9 +836,9 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "problem size: max to test    %u\n", params->p_max );
 	libblis_test_fprintf_c( os, "problem size increment       %u\n", params->p_inc );
 	libblis_test_fprintf_c( os, "enable 3mh?                  %u\n", params->enable_3mh );
-	libblis_test_fprintf_c( os, "enable 3m?                   %u\n", params->enable_3m );
+	libblis_test_fprintf_c( os, "enable 3m1?                  %u\n", params->enable_3m1 );
 	libblis_test_fprintf_c( os, "enable 4mh?                  %u\n", params->enable_4mh );
-	libblis_test_fprintf_c( os, "enable 4m?                   %u\n", params->enable_4m );
+	libblis_test_fprintf_c( os, "enable 4m1?                  %u\n", params->enable_4m1 );
 	libblis_test_fprintf_c( os, "error-checking level         %u\n", params->error_checking_level );
 	libblis_test_fprintf_c( os, "reaction to failure          %c\n", params->reaction_to_failure );
 	libblis_test_fprintf_c( os, "output in matlab format?     %u\n", params->output_matlab_format );

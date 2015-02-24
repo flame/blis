@@ -160,8 +160,8 @@ INSERT_GENTPROT_BASIC( TRSM_U_UKERNEL )
 
 // gemm4m micro-kernels
 
-#define bli_cGEMM4M_UKERNEL BLIS_CGEMM4M_UKERNEL
-#define bli_zGEMM4M_UKERNEL BLIS_ZGEMM4M_UKERNEL
+#define bli_cGEMM4M1_UKERNEL BLIS_CGEMM4M1_UKERNEL
+#define bli_zGEMM4M1_UKERNEL BLIS_ZGEMM4M1_UKERNEL
 
 #undef  GENTPROTCO
 #define GENTPROTCO( ctype, ctype_r, ch, chr, kername ) \
@@ -177,12 +177,12 @@ void PASTEMAC(ch,kername) \
        auxinfo_t*      data  \
      );
 
-INSERT_GENTPROTCO_BASIC( GEMM4M_UKERNEL )
+INSERT_GENTPROTCO_BASIC( GEMM4M1_UKERNEL )
 
 // gemmtrsm4m_l micro-kernels
 
-#define bli_cGEMMTRSM4M_L_UKERNEL BLIS_CGEMMTRSM4M_L_UKERNEL
-#define bli_zGEMMTRSM4M_L_UKERNEL BLIS_ZGEMMTRSM4M_L_UKERNEL
+#define bli_cGEMMTRSM4M1_L_UKERNEL BLIS_CGEMMTRSM4M1_L_UKERNEL
+#define bli_zGEMMTRSM4M1_L_UKERNEL BLIS_ZGEMMTRSM4M1_L_UKERNEL
 
 #undef  GENTPROTCO
 #define GENTPROTCO( ctype, ctype_r, ch, chr, kername ) \
@@ -199,12 +199,12 @@ void PASTEMAC(ch,kername) \
        auxinfo_t*      data  \
      );
 
-INSERT_GENTPROTCO_BASIC( GEMMTRSM4M_L_UKERNEL )
+INSERT_GENTPROTCO_BASIC( GEMMTRSM4M1_L_UKERNEL )
 
 // gemmtrsm4m_u micro-kernels
 
-#define bli_cGEMMTRSM4M_U_UKERNEL BLIS_CGEMMTRSM4M_U_UKERNEL
-#define bli_zGEMMTRSM4M_U_UKERNEL BLIS_ZGEMMTRSM4M_U_UKERNEL
+#define bli_cGEMMTRSM4M1_U_UKERNEL BLIS_CGEMMTRSM4M1_U_UKERNEL
+#define bli_zGEMMTRSM4M1_U_UKERNEL BLIS_ZGEMMTRSM4M1_U_UKERNEL
 
 #undef  GENTPROTCO
 #define GENTPROTCO( ctype, ctype_r, ch, chr, kername ) \
@@ -221,12 +221,12 @@ void PASTEMAC(ch,kername) \
        auxinfo_t*      data  \
      );
 
-INSERT_GENTPROTCO_BASIC( GEMMTRSM4M_U_UKERNEL )
+INSERT_GENTPROTCO_BASIC( GEMMTRSM4M1_U_UKERNEL )
 
 // trsm4m_l micro-kernels
 
-#define bli_cTRSM4M_L_UKERNEL BLIS_CTRSM4M_L_UKERNEL
-#define bli_zTRSM4M_L_UKERNEL BLIS_ZTRSM4M_L_UKERNEL
+#define bli_cTRSM4M1_L_UKERNEL BLIS_CTRSM4M1_L_UKERNEL
+#define bli_zTRSM4M1_L_UKERNEL BLIS_ZTRSM4M1_L_UKERNEL
 
 #undef  GENTPROTCO
 #define GENTPROTCO( ctype, ctype_r, ch, chr, kername ) \
@@ -239,12 +239,12 @@ void PASTEMAC(ch,kername) \
        auxinfo_t*        data  \
      );
 
-INSERT_GENTPROTCO_BASIC( TRSM4M_L_UKERNEL )
+INSERT_GENTPROTCO_BASIC( TRSM4M1_L_UKERNEL )
 
 // trsm4m_u micro-kernels
 
-#define bli_cTRSM4M_U_UKERNEL BLIS_CTRSM4M_U_UKERNEL
-#define bli_zTRSM4M_U_UKERNEL BLIS_ZTRSM4M_U_UKERNEL
+#define bli_cTRSM4M1_U_UKERNEL BLIS_CTRSM4M1_U_UKERNEL
+#define bli_zTRSM4M1_U_UKERNEL BLIS_ZTRSM4M1_U_UKERNEL
 
 #undef  GENTPROTCO
 #define GENTPROTCO( ctype, ctype_r, ch, chr, kername ) \
@@ -257,7 +257,7 @@ void PASTEMAC(ch,kername) \
        auxinfo_t*        data  \
      );
 
-INSERT_GENTPROTCO_BASIC( TRSM4M_U_UKERNEL )
+INSERT_GENTPROTCO_BASIC( TRSM4M1_U_UKERNEL )
 
 
 //
@@ -266,8 +266,8 @@ INSERT_GENTPROTCO_BASIC( TRSM4M_U_UKERNEL )
 
 // gemm3m micro-kernels
 
-#define bli_cGEMM3M_UKERNEL BLIS_CGEMM3M_UKERNEL
-#define bli_zGEMM3M_UKERNEL BLIS_ZGEMM3M_UKERNEL
+#define bli_cGEMM3M1_UKERNEL BLIS_CGEMM3M1_UKERNEL
+#define bli_zGEMM3M1_UKERNEL BLIS_ZGEMM3M1_UKERNEL
 
 #undef  GENTPROTCO
 #define GENTPROTCO( ctype, ctype_r, ch, chr, kername ) \
@@ -283,12 +283,12 @@ void PASTEMAC(ch,kername) \
        auxinfo_t*      data  \
      );
 
-INSERT_GENTPROTCO_BASIC( GEMM3M_UKERNEL )
+INSERT_GENTPROTCO_BASIC( GEMM3M1_UKERNEL )
 
 // gemmtrsm3m_l micro-kernels
 
-#define bli_cGEMMTRSM3M_L_UKERNEL BLIS_CGEMMTRSM3M_L_UKERNEL
-#define bli_zGEMMTRSM3M_L_UKERNEL BLIS_ZGEMMTRSM3M_L_UKERNEL
+#define bli_cGEMMTRSM3M1_L_UKERNEL BLIS_CGEMMTRSM3M1_L_UKERNEL
+#define bli_zGEMMTRSM3M1_L_UKERNEL BLIS_ZGEMMTRSM3M1_L_UKERNEL
 
 #undef  GENTPROTCO
 #define GENTPROTCO( ctype, ctype_r, ch, chr, kername ) \
@@ -305,12 +305,12 @@ void PASTEMAC(ch,kername) \
        auxinfo_t*      data  \
      );
 
-INSERT_GENTPROTCO_BASIC( GEMMTRSM3M_L_UKERNEL )
+INSERT_GENTPROTCO_BASIC( GEMMTRSM3M1_L_UKERNEL )
 
 // gemmtrsm3m_u micro-kernels
 
-#define bli_cGEMMTRSM3M_U_UKERNEL BLIS_CGEMMTRSM3M_U_UKERNEL
-#define bli_zGEMMTRSM3M_U_UKERNEL BLIS_ZGEMMTRSM3M_U_UKERNEL
+#define bli_cGEMMTRSM3M1_U_UKERNEL BLIS_CGEMMTRSM3M1_U_UKERNEL
+#define bli_zGEMMTRSM3M1_U_UKERNEL BLIS_ZGEMMTRSM3M1_U_UKERNEL
 
 #undef  GENTPROTCO
 #define GENTPROTCO( ctype, ctype_r, ch, chr, kername ) \
@@ -327,12 +327,12 @@ void PASTEMAC(ch,kername) \
        auxinfo_t*      data  \
      );
 
-INSERT_GENTPROTCO_BASIC( GEMMTRSM3M_U_UKERNEL )
+INSERT_GENTPROTCO_BASIC( GEMMTRSM3M1_U_UKERNEL )
 
 // trsm3m_l micro-kernels
 
-#define bli_cTRSM3M_L_UKERNEL BLIS_CTRSM3M_L_UKERNEL
-#define bli_zTRSM3M_L_UKERNEL BLIS_ZTRSM3M_L_UKERNEL
+#define bli_cTRSM3M1_L_UKERNEL BLIS_CTRSM3M1_L_UKERNEL
+#define bli_zTRSM3M1_L_UKERNEL BLIS_ZTRSM3M1_L_UKERNEL
 
 #undef  GENTPROTCO
 #define GENTPROTCO( ctype, ctype_r, ch, chr, kername ) \
@@ -345,12 +345,12 @@ void PASTEMAC(ch,kername) \
        auxinfo_t*        data  \
      );
 
-INSERT_GENTPROTCO_BASIC( TRSM3M_L_UKERNEL )
+INSERT_GENTPROTCO_BASIC( TRSM3M1_L_UKERNEL )
 
 // trsm3m_u micro-kernels
 
-#define bli_cTRSM3M_U_UKERNEL BLIS_CTRSM3M_U_UKERNEL
-#define bli_zTRSM3M_U_UKERNEL BLIS_ZTRSM3M_U_UKERNEL
+#define bli_cTRSM3M1_U_UKERNEL BLIS_CTRSM3M1_U_UKERNEL
+#define bli_zTRSM3M1_U_UKERNEL BLIS_ZTRSM3M1_U_UKERNEL
 
 #undef  GENTPROTCO
 #define GENTPROTCO( ctype, ctype_r, ch, chr, kername ) \
@@ -363,7 +363,7 @@ void PASTEMAC(ch,kername) \
        auxinfo_t*        data  \
      );
 
-INSERT_GENTPROTCO_BASIC( TRSM3M_U_UKERNEL )
+INSERT_GENTPROTCO_BASIC( TRSM3M1_U_UKERNEL )
 
 
 //

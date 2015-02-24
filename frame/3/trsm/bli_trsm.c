@@ -44,8 +44,8 @@ void bli_trsm( side_t  side,
 {
 	num_t dt = bli_obj_datatype( *b );
 
-	if      ( bli_3m_is_enabled_dt( dt ) ) bli_trsm3m_entry( side, alpha, a, b );
-	else if ( bli_4m_is_enabled_dt( dt ) ) bli_trsm4m_entry( side, alpha, a, b );
+	if      ( bli_3m1_is_enabled_dt( dt ) ) bli_trsm3m1_entry( side, alpha, a, b );
+	else if ( bli_4m1_is_enabled_dt( dt ) ) bli_trsm4m1_entry( side, alpha, a, b );
 	else                                   bli_trsm_entry( side, alpha, a, b );
 }
 

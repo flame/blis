@@ -36,10 +36,10 @@
 #include "bli_symm_entry.h"
 #include "bli_symm_front.h"
 
-#include "bli_symm4m.h"
-#include "bli_symm3m.h"
 #include "bli_symm4mh.h"
+#include "bli_symm4m1.h"
 #include "bli_symm3mh.h"
+#include "bli_symm3m1.h"
 
 
 //

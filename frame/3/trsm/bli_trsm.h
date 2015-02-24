@@ -63,8 +63,8 @@
 #include "bli_trsm_l_ukr_ref.h"
 #include "bli_trsm_u_ukr_ref.h"
 
-#include "bli_trsm4m.h"
-#include "bli_trsm3m.h"
+#include "bli_trsm4m1.h"
+#include "bli_trsm3m1.h"
 
 
 //

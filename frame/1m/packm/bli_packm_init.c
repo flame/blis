@@ -358,10 +358,10 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 		// Here, we adjust the panel stride, if necessary. Remember: ps_p is
 		// always interpreted as being in units of the datatype of the object
 		// which is not necessarily how the micro-panels will be stored. For
-		// 3m, we will increase ps_p by 50%, and for ro/io/rpi, we halve ps_p
-		// Why? Because the macro-kernel indexes in units of the complex
-		// datatype. So these changes "trick" it into indexing the correct
-		// amount.
+		// interleaved 3m, we will increase ps_p by 50%, and for ro/io/rpi,
+		// we halve ps_p. Why? Because the macro-kernel indexes in units of
+		// the complex datatype. So these changes "trick" it into indexing
+		// the correct amount.
 		if ( bli_is_3mi_packed( pack_schema ) )
 		{
 			ps_p = ( ps_p * 3 ) / 2;
@@ -456,10 +456,10 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 		// Here, we adjust the panel stride, if necessary. Remember: ps_p is
 		// always interpreted as being in units of the datatype of the object
 		// which is not necessarily how the micro-panels will be stored. For
-		// 3m, we will increase ps_p by 50%, and for ro/io/rpi, we halve ps_p
-		// Why? Because the macro-kernel indexes in units of the complex
-		// datatype. So these changes "trick" it into indexing the correct
-		// amount.
+		// interleaved 3m, we will increase ps_p by 50%, and for ro/io/rpi,
+		// we halve ps_p. Why? Because the macro-kernel indexes in units of
+		// the complex datatype. So these changes "trick" it into indexing
+		// the correct amount.
 		if ( bli_is_3mi_packed( pack_schema ) )
 		{
 			ps_p = ( ps_p * 3 ) / 2;

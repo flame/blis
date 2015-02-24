@@ -34,28 +34,28 @@
 
 #include "blis.h"
 
-extern func_t* gemmtrsm3m_l_ukrs;
-extern func_t* gemmtrsm3m_u_ukrs;
-extern func_t* gemmtrsm4m_l_ukrs;
-extern func_t* gemmtrsm4m_u_ukrs;
+extern func_t* gemmtrsm3m1_l_ukrs;
+extern func_t* gemmtrsm3m1_u_ukrs;
+extern func_t* gemmtrsm4m1_l_ukrs;
+extern func_t* gemmtrsm4m1_u_ukrs;
 extern func_t* gemmtrsm_l_ukrs;
 extern func_t* gemmtrsm_u_ukrs;
 
-extern func_t* trsm3m_l_ukrs;
-extern func_t* trsm3m_u_ukrs;
-extern func_t* trsm4m_l_ukrs;
-extern func_t* trsm4m_u_ukrs;
+extern func_t* trsm3m1_l_ukrs;
+extern func_t* trsm3m1_u_ukrs;
+extern func_t* trsm4m1_l_ukrs;
+extern func_t* trsm4m1_u_ukrs;
 extern func_t* trsm_l_ukrs;
 extern func_t* trsm_u_ukrs;
 
 func_t* bli_gemmtrsm_query_ukrs( uplo_t uplo, num_t dt )
 {
-	if      ( bli_3m_is_enabled_dt( dt ) )
-		return ( bli_is_lower( uplo ) ? gemmtrsm3m_l_ukrs
-		                              : gemmtrsm3m_u_ukrs );
-	else if ( bli_4m_is_enabled_dt( dt ) )
-		return ( bli_is_lower( uplo ) ? gemmtrsm4m_l_ukrs
-		                              : gemmtrsm4m_u_ukrs );
+	if      ( bli_3m1_is_enabled_dt( dt ) )
+		return ( bli_is_lower( uplo ) ? gemmtrsm3m1_l_ukrs
+		                              : gemmtrsm3m1_u_ukrs );
+	else if ( bli_4m1_is_enabled_dt( dt ) )
+		return ( bli_is_lower( uplo ) ? gemmtrsm4m1_l_ukrs
+		                              : gemmtrsm4m1_u_ukrs );
 	else
 		return ( bli_is_lower( uplo ) ? gemmtrsm_l_ukrs
 		                              : gemmtrsm_u_ukrs );
@@ -63,12 +63,12 @@ func_t* bli_gemmtrsm_query_ukrs( uplo_t uplo, num_t dt )
 
 func_t* bli_trsm_query_ukrs( uplo_t uplo, num_t dt )
 {
-	if      ( bli_3m_is_enabled_dt( dt ) )
-		return ( bli_is_lower( uplo ) ? trsm3m_l_ukrs
-		                              : trsm3m_u_ukrs );
-	else if ( bli_4m_is_enabled_dt( dt ) )
-		return ( bli_is_lower( uplo ) ? trsm4m_l_ukrs
-		                              : trsm4m_u_ukrs );
+	if      ( bli_3m1_is_enabled_dt( dt ) )
+		return ( bli_is_lower( uplo ) ? trsm3m1_l_ukrs
+		                              : trsm3m1_u_ukrs );
+	else if ( bli_4m1_is_enabled_dt( dt ) )
+		return ( bli_is_lower( uplo ) ? trsm4m1_l_ukrs
+		                              : trsm4m1_u_ukrs );
 	else
 		return ( bli_is_lower( uplo ) ? trsm_l_ukrs
 		                              : trsm_u_ukrs );
@@ -76,9 +76,9 @@ func_t* bli_trsm_query_ukrs( uplo_t uplo, num_t dt )
 
 char* bli_trsm_query_impl_string( num_t dt )
 {
-	if      ( bli_3m_is_enabled_dt( dt ) ) return bli_3m_get_string();
-	else if ( bli_4m_is_enabled_dt( dt ) ) return bli_4m_get_string();
-	else                                   return bli_native_get_string();
+	if      ( bli_3m1_is_enabled_dt( dt ) ) return bli_3m1_get_string();
+	else if ( bli_4m1_is_enabled_dt( dt ) )  return bli_4m1_get_string();
+	else                                    return bli_native_get_string();
 }
 
 kimpl_t bli_gemmtrsm_l_ukernel_impl_type( num_t dt )
@@ -92,12 +92,12 @@ kimpl_t bli_gemmtrsm_l_ukernel_impl_type( num_t dt )
 	          p == BLIS_ZGEMMTRSM_L_UKERNEL_REF
 	        ) return BLIS_REFERENCE_UKERNEL;
 	else if (
-	          p == BLIS_CGEMMTRSM3M_L_UKERNEL_REF ||
-	          p == BLIS_ZGEMMTRSM3M_L_UKERNEL_REF
+	          p == BLIS_CGEMMTRSM3M1_L_UKERNEL_REF ||
+	          p == BLIS_ZGEMMTRSM3M1_L_UKERNEL_REF
 	        ) return BLIS_VIRTUAL3M_UKERNEL;
 	else if (
-	          p == BLIS_CGEMMTRSM4M_L_UKERNEL_REF ||
-	          p == BLIS_ZGEMMTRSM4M_L_UKERNEL_REF
+	          p == BLIS_CGEMMTRSM4M1_L_UKERNEL_REF ||
+	          p == BLIS_ZGEMMTRSM4M1_L_UKERNEL_REF
 	        ) return BLIS_VIRTUAL4M_UKERNEL;
 	else 
 	          return BLIS_OPTIMIZED_UKERNEL;
@@ -114,12 +114,12 @@ kimpl_t bli_gemmtrsm_u_ukernel_impl_type( num_t dt )
 	          p == BLIS_ZGEMMTRSM_U_UKERNEL_REF
 	        ) return BLIS_REFERENCE_UKERNEL;
 	else if (
-	          p == BLIS_CGEMMTRSM3M_U_UKERNEL_REF ||
-	          p == BLIS_ZGEMMTRSM3M_U_UKERNEL_REF
+	          p == BLIS_CGEMMTRSM3M1_U_UKERNEL_REF ||
+	          p == BLIS_ZGEMMTRSM3M1_U_UKERNEL_REF
 	        ) return BLIS_VIRTUAL3M_UKERNEL;
 	else if (
-	          p == BLIS_CGEMMTRSM4M_U_UKERNEL_REF ||
-	          p == BLIS_ZGEMMTRSM4M_U_UKERNEL_REF
+	          p == BLIS_CGEMMTRSM4M1_U_UKERNEL_REF ||
+	          p == BLIS_ZGEMMTRSM4M1_U_UKERNEL_REF
 	        ) return BLIS_VIRTUAL4M_UKERNEL;
 	else 
 	          return BLIS_OPTIMIZED_UKERNEL;
@@ -136,12 +136,12 @@ kimpl_t bli_trsm_l_ukernel_impl_type( num_t dt )
 	          p == BLIS_ZTRSM_L_UKERNEL_REF
 	        ) return BLIS_REFERENCE_UKERNEL;
 	else if (
-	          p == BLIS_CTRSM3M_L_UKERNEL_REF ||
-	          p == BLIS_ZTRSM3M_L_UKERNEL_REF
+	          p == BLIS_CTRSM3M1_L_UKERNEL_REF ||
+	          p == BLIS_ZTRSM3M1_L_UKERNEL_REF
 	        ) return BLIS_VIRTUAL3M_UKERNEL;
 	else if (
-	          p == BLIS_CTRSM4M_L_UKERNEL_REF ||
-	          p == BLIS_ZTRSM4M_L_UKERNEL_REF
+	          p == BLIS_CTRSM4M1_L_UKERNEL_REF ||
+	          p == BLIS_ZTRSM4M1_L_UKERNEL_REF
 	        ) return BLIS_VIRTUAL4M_UKERNEL;
 	else 
 	          return BLIS_OPTIMIZED_UKERNEL;
@@ -158,12 +158,12 @@ kimpl_t bli_trsm_u_ukernel_impl_type( num_t dt )
 	          p == BLIS_ZTRSM_U_UKERNEL_REF
 	        ) return BLIS_REFERENCE_UKERNEL;
 	else if (
-	          p == BLIS_CTRSM3M_U_UKERNEL_REF ||
-	          p == BLIS_ZTRSM3M_U_UKERNEL_REF
+	          p == BLIS_CTRSM3M1_U_UKERNEL_REF ||
+	          p == BLIS_ZTRSM3M1_U_UKERNEL_REF
 	        ) return BLIS_VIRTUAL3M_UKERNEL;
 	else if (
-	          p == BLIS_CTRSM4M_U_UKERNEL_REF ||
-	          p == BLIS_ZTRSM4M_U_UKERNEL_REF
+	          p == BLIS_CTRSM4M1_U_UKERNEL_REF ||
+	          p == BLIS_ZTRSM4M1_U_UKERNEL_REF
 	        ) return BLIS_VIRTUAL4M_UKERNEL;
 	else 
 	          return BLIS_OPTIMIZED_UKERNEL;

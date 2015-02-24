@@ -50,10 +50,10 @@
 #include "bli_her2k_u_ker_var2.h"
 */
 
-#include "bli_her2k4m.h"
-#include "bli_her2k3m.h"
 #include "bli_her2k4mh.h"
+#include "bli_her2k4m1.h"
 #include "bli_her2k3mh.h"
+#include "bli_her2k3m1.h"
 
 
 //

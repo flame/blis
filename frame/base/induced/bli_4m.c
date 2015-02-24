@@ -35,54 +35,54 @@
 #include "blis.h"
 
 static char*  bli_native_str    = "native";
-static char*  bli_4m_str        = "4m";
+static char*  bli_4m1_str       = "4m1";
 
 // Initialize the 4m enabled/disabled state based on the cpp macros
 // which are set in bli_kernel_macro_defs.h.
 #ifdef BLIS_ENABLE_VIRTUAL_SCOMPLEX
-static bool_t bli_will_use_4m_c = TRUE;
+static bool_t bli_will_use_4m1_c = TRUE;
 #else
-static bool_t bli_will_use_4m_c = FALSE;
+static bool_t bli_will_use_4m1_c = FALSE;
 #endif
 
 #ifdef BLIS_ENABLE_VIRTUAL_DCOMPLEX
-static bool_t bli_will_use_4m_z = TRUE;
+static bool_t bli_will_use_4m1_z = TRUE;
 #else
-static bool_t bli_will_use_4m_z = FALSE;
+static bool_t bli_will_use_4m1_z = FALSE;
 #endif
 
 
 char*  bli_native_get_string( void ) { return bli_native_str; }
-char*  bli_4m_get_string( void ) { return bli_4m_str; }
+char*  bli_4m1_get_string( void ) { return bli_4m1_str; }
 
-bool_t bli_4m_is_enabled_dt( num_t dt )
+bool_t bli_4m1_is_enabled_dt( num_t dt )
 {
-	if      ( bli_is_scomplex( dt ) ) return bli_4m_is_enabled_c();
-	else if ( bli_is_dcomplex( dt ) ) return bli_4m_is_enabled_z();
+	if      ( bli_is_scomplex( dt ) ) return bli_4m1_is_enabled_c();
+	else if ( bli_is_dcomplex( dt ) ) return bli_4m1_is_enabled_z();
 	else                              return FALSE;
 }
-bool_t bli_4m_is_enabled_c( void ) { return bli_will_use_4m_c; }
-bool_t bli_4m_is_enabled_z( void ) { return bli_will_use_4m_z; }
+bool_t bli_4m1_is_enabled_c( void ) { return bli_will_use_4m1_c; }
+bool_t bli_4m1_is_enabled_z( void ) { return bli_will_use_4m1_z; }
 
 
-void bli_4m_enable_dt( num_t dt )
+void bli_4m1_enable_dt( num_t dt )
 {
-	if      ( bli_is_scomplex( dt ) ) bli_4m_enable_c();
-	else if ( bli_is_dcomplex( dt ) ) bli_4m_enable_z();
+	if      ( bli_is_scomplex( dt ) ) bli_4m1_enable_c();
+	else if ( bli_is_dcomplex( dt ) ) bli_4m1_enable_z();
 }
-void bli_4m_enable_c( void )  { bli_will_use_4m_c = TRUE; }
-void bli_4m_enable_z( void )  { bli_will_use_4m_z = TRUE; }
-void bli_4m_enable( void )    { bli_will_use_4m_c =
-                                bli_will_use_4m_z = TRUE; }
+void bli_4m1_enable_c( void )  { bli_will_use_4m1_c = TRUE; }
+void bli_4m1_enable_z( void )  { bli_will_use_4m1_z = TRUE; }
+void bli_4m1_enable( void )    { bli_will_use_4m1_c =
+                                 bli_will_use_4m1_z = TRUE; }
 
 
-void bli_4m_disable_dt( num_t dt )
+void bli_4m1_disable_dt( num_t dt )
 {
-	if      ( bli_is_scomplex( dt ) ) bli_4m_disable_c();
-	else if ( bli_is_dcomplex( dt ) ) bli_4m_disable_z();
+	if      ( bli_is_scomplex( dt ) ) bli_4m1_disable_c();
+	else if ( bli_is_dcomplex( dt ) ) bli_4m1_disable_z();
 }
 
-void bli_4m_disable_c( void )  { bli_will_use_4m_c = FALSE; }
-void bli_4m_disable_z( void )  { bli_will_use_4m_z = FALSE; }
-void bli_4m_disable( void )    { bli_will_use_4m_c =
-                                 bli_will_use_4m_z = FALSE; }
+void bli_4m1_disable_c( void )  { bli_will_use_4m1_c = FALSE; }
+void bli_4m1_disable_z( void )  { bli_will_use_4m1_z = FALSE; }
+void bli_4m1_disable( void )    { bli_will_use_4m1_c =
+                                  bli_will_use_4m1_z = FALSE; }

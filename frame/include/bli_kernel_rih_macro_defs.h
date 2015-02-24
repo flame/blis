@@ -36,48 +36,7 @@
 #define BLIS_KERNEL_RIH_MACRO_DEFS_H
 
 
-// -- Define 4mh/3mh row access bools ------------------------------------------
-
-// gemm4mh micro-kernels
-
-#define BLIS_CGEMM4MH_UKERNEL_PREFERS_CONTIG_ROWS \
-        BLIS_SGEMM_UKERNEL_PREFERS_CONTIG_ROWS
-#define BLIS_ZGEMM4MH_UKERNEL_PREFERS_CONTIG_ROWS \
-        BLIS_DGEMM_UKERNEL_PREFERS_CONTIG_ROWS
-
-// gemm3mh micro-kernels
-
-#define BLIS_CGEMM3MH_UKERNEL_PREFERS_CONTIG_ROWS \
-        BLIS_SGEMM_UKERNEL_PREFERS_CONTIG_ROWS
-#define BLIS_ZGEMM3MH_UKERNEL_PREFERS_CONTIG_ROWS \
-        BLIS_DGEMM_UKERNEL_PREFERS_CONTIG_ROWS
-
-
-// -- Define default 4mh/3mh-specific kernel names -----------------------------
-
-//
-// Level-3
-//
-
-// gemm4mh micro-kernels
-
-#ifndef BLIS_CGEMM4MH_UKERNEL
-#define BLIS_CGEMM4MH_UKERNEL BLIS_CGEMM4MH_UKERNEL_REF
-#endif
-
-#ifndef BLIS_ZGEMM4MH_UKERNEL
-#define BLIS_ZGEMM4MH_UKERNEL BLIS_ZGEMM4MH_UKERNEL_REF
-#endif
-
-// gemm3mh micro-kernels
-
-#ifndef BLIS_CGEMM3MH_UKERNEL
-#define BLIS_CGEMM3MH_UKERNEL BLIS_CGEMM3MH_UKERNEL_REF
-#endif
-
-#ifndef BLIS_ZGEMM3MH_UKERNEL
-#define BLIS_ZGEMM3MH_UKERNEL BLIS_ZGEMM3MH_UKERNEL_REF
-#endif
+// -- Define default rih-specific kernel names ---------------------------------
 
 //
 // Level-1m

@@ -21,13 +21,13 @@ sdcz    # Datatype(s) to test:
         #   's' = single real; 'c' = single complex;
         #   'd' = double real; 'z' = double complex
 100     # Problem size: first to test
-300     # Problem size: maximum to test
+400     # Problem size: maximum to test
 100     # Problem size: increment between experiments
         # Complex level-3 implementations
 0       #   3mh  ('1' = enable; '0' = disable)
-0       #   3m   ('1' = enable; '0' = disable)
+0       #   3m1  ('1' = enable; '0' = disable)
 0       #   4mh  ('1' = enable; '0' = disable)
-1       #   4m   ('1' = enable; '0' = disable)
+1       #   4m1  ('1' = enable; '0' = disable)
 1       # Error-checking level:
         #   '0' = disable error checking; '1' = full error checking
 i       # Reaction to test failure:

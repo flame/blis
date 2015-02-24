@@ -44,18 +44,18 @@ bool_t bli_xm_is_enabled_dt( num_t dt )
 bool_t bli_xm_is_enabled_c( void )
 {
 	if      ( bli_3mh_is_enabled_c() ) return TRUE;
-	else if ( bli_3m_is_enabled_c()  ) return TRUE;
+	else if ( bli_3m1_is_enabled_c() ) return TRUE;
 	else if ( bli_4mh_is_enabled_c() ) return TRUE;
-	else if ( bli_4m_is_enabled_c()  ) return TRUE;
+	else if ( bli_4m1_is_enabled_c() ) return TRUE;
 	else                               return FALSE;
 }
 
 bool_t bli_xm_is_enabled_z( void )
 {
 	if      ( bli_3mh_is_enabled_z() ) return TRUE;
-	else if ( bli_3m_is_enabled_z()  ) return TRUE;
+	else if ( bli_3m1_is_enabled_z() ) return TRUE;
 	else if ( bli_4mh_is_enabled_z() ) return TRUE;
-	else if ( bli_4m_is_enabled_z()  ) return TRUE;
+	else if ( bli_4m1_is_enabled_z() ) return TRUE;
 	else                               return FALSE;
 }
 

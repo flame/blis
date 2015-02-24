@@ -33,9 +33,9 @@
 */
 
 void bli_trmm33mh_entry( side_t  side,
-                        obj_t*  alpha,
-                        obj_t*  a,
-                        obj_t*  b,
-                        obj_t*  beta,
-                        obj_t*  c );
+                         obj_t*  alpha,
+                         obj_t*  a,
+                         obj_t*  b,
+                         obj_t*  beta,
+                         obj_t*  c );
 

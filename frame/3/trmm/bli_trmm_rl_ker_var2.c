@@ -230,7 +230,7 @@ void PASTEMAC(ch,varname)( \
 	   needed because some parameter combinations of trmm reduce k
 	   to advance past zero regions in the triangular matrix, and
 	   when computing the imaginary stride of A (the non-triangular
-	   matrix), which is used by 3m and 4m implementations, we need
+	   matrix), which is used by 4m1/3m1 implementations, we need
 	   this unreduced value of k. */ \
 	k_full = k; \
 \
@@ -356,7 +356,7 @@ void PASTEMAC(ch,varname)( \
 \
 			if ( trmm_r_jr_my_iter( j, jr_thread ) ) { \
 \
-			/* Save the 4m/3m imaginary stride of B to the auxinfo_t
+			/* Save the 4m1/3m1 imaginary stride of B to the auxinfo_t
 			   object. */ \
 			bli_auxinfo_set_is_b( PACKNR * k_b1121, aux ); \
 \
@@ -433,7 +433,7 @@ void PASTEMAC(ch,varname)( \
 		{ \
 			if ( trmm_r_jr_my_iter( j, jr_thread ) ) { \
 \
-			/* Save the 4m/3m imaginary stride of B to the auxinfo_t
+			/* Save the 4m1/3m1 imaginary stride of B to the auxinfo_t
 			   object. */ \
 			bli_auxinfo_set_is_b( istep_b, aux ); \
 \

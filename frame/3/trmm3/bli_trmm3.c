@@ -47,9 +47,9 @@ void bli_trmm3( side_t  side,
 	num_t dt = bli_obj_datatype( *c );
 
 	if      ( bli_3mh_is_enabled_dt( dt ) ) bli_trmm33mh_entry( side, alpha, a, b, beta, c );
-	else if ( bli_3m_is_enabled_dt( dt ) )  bli_trmm33m_entry( side, alpha, a, b, beta, c );
+	else if ( bli_3m1_is_enabled_dt( dt ) )  bli_trmm33m1_entry( side, alpha, a, b, beta, c );
 	else if ( bli_4mh_is_enabled_dt( dt ) ) bli_trmm34mh_entry( side, alpha, a, b, beta, c );
-	else if ( bli_4m_is_enabled_dt( dt ) )  bli_trmm34m_entry( side, alpha, a, b, beta, c );
+	else if ( bli_4m1_is_enabled_dt( dt ) )  bli_trmm34m1_entry( side, alpha, a, b, beta, c );
 	else                                    bli_trmm3_entry( side, alpha, a, b, beta, c );
 }
 

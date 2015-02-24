@@ -77,12 +77,12 @@
 
 // In this section we consider each datatype-specific micro-kernel macro;
 // if it is undefined, we define it to be the corresponding reference kernel.
-// In the case of complex gemm micro-kernels, we also define special macros so
-// that later on we can tell whether or not to employ the 4m implementations.
-// Note that in order to properly determine whether/ 4m is a viable option, we
-// need to be able to test the existence of the real gemm micro-kernels, which
-// means we must consider the complex gemm micro-kernel cases *BEFORE* the
-// real cases.
+// In the case of complex gemm micro-kernels, we also define special macros
+// so that later on we can tell whether or not to employ the induced
+// implementations. Note that in order to properly determine whether the
+// induced method is a viable option, we need to be able to test the
+// existence of the real gemm micro-kernels, which means we must consider
+// the complex gemm micro-kernel cases *BEFORE* the real cases.
 
 //
 // Level-3

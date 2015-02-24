@@ -36,10 +36,10 @@
 #include "bli_hemm_entry.h"
 #include "bli_hemm_front.h"
 
-#include "bli_hemm4m.h"
-#include "bli_hemm3m.h"
 #include "bli_hemm4mh.h"
+#include "bli_hemm4m1.h"
 #include "bli_hemm3mh.h"
+#include "bli_hemm3m1.h"
 
 
 //

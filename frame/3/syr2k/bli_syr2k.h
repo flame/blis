@@ -36,10 +36,10 @@
 #include "bli_syr2k_entry.h"
 #include "bli_syr2k_front.h"
 
-#include "bli_syr2k4m.h"
-#include "bli_syr2k3m.h"
 #include "bli_syr2k4mh.h"
+#include "bli_syr2k4m1.h"
 #include "bli_syr2k3mh.h"
+#include "bli_syr2k3m1.h"
 
 
 //

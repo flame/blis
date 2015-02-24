@@ -37,10 +37,10 @@
 extern gemm_t* gemm4mb_cntl;
 
 void bli_gemm4mb_entry( obj_t*  alpha,
-                       obj_t*  a,
-                       obj_t*  b,
-                       obj_t*  beta,
-                       obj_t*  c )
+                        obj_t*  a,
+                        obj_t*  b,
+                        obj_t*  beta,
+                        obj_t*  c )
 {
 	bli_gemm_front( alpha, a, b, beta, c,
 	                gemm4mb_cntl );

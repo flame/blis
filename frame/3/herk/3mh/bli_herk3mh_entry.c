@@ -39,9 +39,9 @@ extern gemm_t* gemm3mh_cntl_io;
 extern gemm_t* gemm3mh_cntl_rpi;
 
 void bli_herk3mh_entry( obj_t*  alpha,
-                       obj_t*  a,
-                       obj_t*  beta,
-                       obj_t*  c )
+                        obj_t*  a,
+                        obj_t*  beta,
+                        obj_t*  c )
 {
 	bli_herk_front( alpha, a, beta,      c, gemm3mh_cntl_ro );
 	bli_herk_front( alpha, a, &BLIS_ONE, c, gemm3mh_cntl_io );

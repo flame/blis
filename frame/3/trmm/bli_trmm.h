@@ -52,8 +52,8 @@
 #include "bli_trmm_rl_ker_var2.h"
 #include "bli_trmm_ru_ker_var2.h"
 
-#include "bli_trmm4m.h"
-#include "bli_trmm3m.h"
+#include "bli_trmm4m1.h"
+#include "bli_trmm3m1.h"
 
 
 //

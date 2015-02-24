@@ -144,7 +144,9 @@ int main( int argc, char** argv )
 		bli_obj_create( dt, m, k, 0, 0, &a );
 		bli_obj_create( dt, k, n, 0, 0, &b );
 		bli_obj_create( dt, m, n, 0, 0, &c );
-		//bli_obj_create( dt, m, n, 4, 4*m, &c );
+		//bli_obj_create( dt, m, k, 2, 2*m, &a );
+		//bli_obj_create( dt, k, n, 2, 2*k, &b );
+		//bli_obj_create( dt, m, n, 2, 2*m, &c );
 		bli_obj_create( dt, m, n, 0, 0, &c_save );
 
 		bli_randm( &a );
@@ -178,16 +180,16 @@ int main( int argc, char** argv )
 
 #ifdef BLIS
 
-	#if   defined _4M1 
-			bli_gemm4m( &alpha,
+	#if   defined _4MHW 
+			bli_gemm4mh( &alpha,
 	#elif defined _4M1B 
 			bli_gemm4mb( &alpha,
-	#elif defined _4MHW 
-			bli_gemm4mh( &alpha,
-	#elif defined _3M1 
-			bli_gemm3m( &alpha,
+	#elif defined _4M1A
+			bli_gemm4m1( &alpha,
 	#elif defined _3MHW 
 			bli_gemm3mh( &alpha,
+	#elif defined _3M1 
+			bli_gemm3m1( &alpha,
 	#else              
 			bli_gemm( &alpha,
 	#endif

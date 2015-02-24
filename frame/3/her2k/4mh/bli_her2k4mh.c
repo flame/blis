@@ -38,10 +38,10 @@
 // Define object-based interface.
 //
 void bli_her2k4mh( obj_t*  alpha,
-                  obj_t*  a,
-                  obj_t*  b,
-                  obj_t*  beta,
-                  obj_t*  c )
+                   obj_t*  a,
+                   obj_t*  b,
+                   obj_t*  beta,
+                   obj_t*  c )
 {
 	// Since 4mh only applies to the complex domain, we use the regular
 	// implementation for real domain cases.

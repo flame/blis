@@ -250,7 +250,7 @@ void PASTEMAC(ch,varname)( \
 	   needed because some parameter combinations of trsm reduce k
 	   to advance past zero regions in the triangular matrix, and
 	   when computing the imaginary stride of B (the non-triangular
-	   matrix), which is used by 3m and 4m implementations, we need
+	   matrix), which is used by 4m1/3m1 implementations, we need
 	   this unreduced value of k. */ \
 	k_full = ( k % NR != 0 ? k + NR - ( k % NR ) : k ); \
 \
@@ -399,7 +399,8 @@ void PASTEMAC(ch,varname)( \
 			ps_b_cur += ( bli_is_odd( ps_b_cur ) ? 1 : 0 ); \
 			ps_b_cur  = ( ps_b_cur * ss_b_num ) / ss_b_den; \
 \
-			/* Save the imaginary stride of B to the auxinfo_t object.
+			/* Save the 4m1/3m1 imaginary stride of B to the auxinfo_t
+			   object.
 			   NOTE: We swap the values for A and B since the triangular
 			   "A" matrix is actually contained within B. */ \
 			bli_auxinfo_set_is_a( PACKNR * k_b0111, aux ); \
@@ -476,7 +477,8 @@ void PASTEMAC(ch,varname)( \
 		} \
 		else if ( bli_is_strictly_above_diag_n( diagoffb_j, k, NR ) ) \
 		{ \
-			/* Save the imaginary stride of B to the auxinfo_t object.
+			/* Save the 4m1/3m1 imaginary stride of B to the auxinfo_t
+			   object.
 			   NOTE: We swap the values for A and B since the triangular
 			   "A" matrix is actually contained within B. */ \
 			bli_auxinfo_set_is_a( istep_b, aux ); \

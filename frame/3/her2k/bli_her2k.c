@@ -46,9 +46,9 @@ void bli_her2k( obj_t*  alpha,
 	num_t dt = bli_obj_datatype( *c );
 
 	if      ( bli_3mh_is_enabled_dt( dt ) ) bli_her2k3mh_entry( alpha, a, b, beta, c );
-	else if ( bli_3m_is_enabled_dt( dt ) )  bli_her2k3m_entry( alpha, a, b, beta, c );
+	else if ( bli_3m1_is_enabled_dt( dt ) )  bli_her2k3m1_entry( alpha, a, b, beta, c );
 	else if ( bli_4mh_is_enabled_dt( dt ) ) bli_her2k4mh_entry( alpha, a, b, beta, c );
-	else if ( bli_4m_is_enabled_dt( dt ) )  bli_her2k4m_entry( alpha, a, b, beta, c );
+	else if ( bli_4m1_is_enabled_dt( dt ) )  bli_her2k4m1_entry( alpha, a, b, beta, c );
 	else                                    bli_her2k_entry( alpha, a, b, beta, c );
 }
 

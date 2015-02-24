@@ -51,11 +51,11 @@
 
 #include "bli_gemm_ukr_ref.h"
 
-#include "bli_gemm4m.h"
-#include "bli_gemm3m.h"
 #include "bli_gemm4mh.h"
-#include "bli_gemm3mh.h"
 #include "bli_gemm4mb.h"
+#include "bli_gemm4m1.h"
+#include "bli_gemm3mh.h"
+#include "bli_gemm3m1.h"
 
 //
 // Prototype object-based interface.

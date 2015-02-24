@@ -61,8 +61,8 @@ typedef void (*FUNCPTR_T)(
 //static FUNCPTR_T GENARRAY(ftypes,packm_blk_var2);
 
 extern func_t* packm_struc_cxk_kers;
-extern func_t* packm_struc_cxk_4m_kers;
-extern func_t* packm_struc_cxk_3m_kers;
+extern func_t* packm_struc_cxk_4mi_kers;
+extern func_t* packm_struc_cxk_3mi_kers;
 extern func_t* packm_struc_cxk_rih_kers;
 
 
@@ -152,8 +152,8 @@ void bli_packm_blk_var2( obj_t*   c,
 
 
 	// Choose the correct func_t object based on the pack_t schema.
-	if      ( bli_is_4mi_packed( schema ) ) packm_kers = packm_struc_cxk_4m_kers;
-	else if ( bli_is_3mi_packed( schema ) ) packm_kers = packm_struc_cxk_3m_kers;
+	if      ( bli_is_4mi_packed( schema ) ) packm_kers = packm_struc_cxk_4mi_kers;
+	else if ( bli_is_3mi_packed( schema ) ) packm_kers = packm_struc_cxk_3mi_kers;
 	else if ( bli_is_ro_packed( schema ) ||
 	          bli_is_io_packed( schema ) ||
 	         bli_is_rpi_packed( schema ) ) packm_kers = packm_struc_cxk_rih_kers;

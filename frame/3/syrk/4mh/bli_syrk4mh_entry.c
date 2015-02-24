@@ -40,9 +40,9 @@ extern gemm_t* gemm4mh_cntl_ir;
 extern gemm_t* gemm4mh_cntl_ii;
 
 void bli_syrk4mh_entry( obj_t*  alpha,
-                       obj_t*  a,
-                       obj_t*  beta,
-                       obj_t*  c )
+                        obj_t*  a,
+                        obj_t*  beta,
+                        obj_t*  c )
 {
 	bli_syrk_front( alpha, a, beta,      c, gemm4mh_cntl_rr );
 	bli_syrk_front( alpha, a, &BLIS_ONE, c, gemm4mh_cntl_ii );

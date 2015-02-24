@@ -45,12 +45,12 @@
 #include "bli_packm_blk_var2.h"
 
 #include "bli_packm_struc_cxk.h"
-#include "bli_packm_struc_cxk_4m.h"
-#include "bli_packm_struc_cxk_3m.h"
+#include "bli_packm_struc_cxk_4mi.h"
+#include "bli_packm_struc_cxk_3mi.h"
 #include "bli_packm_struc_cxk_rih.h"
 
 #include "bli_packm_cxk.h"
-#include "bli_packm_cxk_4m.h"
-#include "bli_packm_cxk_3m.h"
+#include "bli_packm_cxk_4mi.h"
+#include "bli_packm_cxk_3mi.h"
 #include "bli_packm_cxk_rih.h"
 

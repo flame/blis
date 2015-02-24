@@ -47,9 +47,9 @@ void bli_hemm( side_t  side,
 	num_t dt = bli_obj_datatype( *c );
 
 	if      ( bli_3mh_is_enabled_dt( dt ) ) bli_hemm3mh_entry( side, alpha, a, b, beta, c );
-	else if ( bli_3m_is_enabled_dt( dt ) )  bli_hemm3m_entry( side, alpha, a, b, beta, c );
+	else if ( bli_3m1_is_enabled_dt( dt ) )  bli_hemm3m1_entry( side, alpha, a, b, beta, c );
 	else if ( bli_4mh_is_enabled_dt( dt ) ) bli_hemm4mh_entry( side, alpha, a, b, beta, c );
-	else if ( bli_4m_is_enabled_dt( dt ) )  bli_hemm4m_entry( side, alpha, a, b, beta, c );
+	else if ( bli_4m1_is_enabled_dt( dt ) )  bli_hemm4m1_entry( side, alpha, a, b, beta, c );
 	else                                    bli_hemm_entry( side, alpha, a, b, beta, c );
 }
 

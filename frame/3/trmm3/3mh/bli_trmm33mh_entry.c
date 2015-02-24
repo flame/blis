@@ -39,11 +39,11 @@ extern gemm_t* gemm3mh_cntl_io;
 extern gemm_t* gemm3mh_cntl_rpi;
 
 void bli_trmm33mh_entry( side_t  side,
-                       obj_t*  alpha,
-                       obj_t*  a,
-                       obj_t*  b,
-                       obj_t*  beta,
-                       obj_t*  c )
+                         obj_t*  alpha,
+                         obj_t*  a,
+                         obj_t*  b,
+                         obj_t*  beta,
+                         obj_t*  c )
 {
 	bli_trmm3_front( side, alpha, a, b, beta,      c, gemm3mh_cntl_ro );
 	bli_trmm3_front( side, alpha, a, b, &BLIS_ONE, c, gemm3mh_cntl_io );

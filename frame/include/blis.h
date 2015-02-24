@@ -83,9 +83,18 @@ extern "C" {
 #include "bli_kernel_type_defs.h"
 #include "bli_kernel_pre_macro_defs.h"
 #include "bli_kernel_macro_defs.h"
-#include "bli_kernel_4m_macro_defs.h"
-#include "bli_kernel_3m_macro_defs.h"
+
+#include "bli_kernel_4mh_macro_defs.h"
+#include "bli_kernel_4mb_macro_defs.h"
+#include "bli_kernel_4m1_macro_defs.h"
+
+#include "bli_kernel_3mh_macro_defs.h"
+#include "bli_kernel_3m1_macro_defs.h"
+
+#include "bli_kernel_4mi_macro_defs.h"
+#include "bli_kernel_3mi_macro_defs.h"
 #include "bli_kernel_rih_macro_defs.h"
+
 #include "bli_kernel_post_macro_defs.h"
 #include "bli_kernel_prototypes.h"
 
@@ -120,7 +129,7 @@ extern "C" {
 #include "bli_4mb.h"
 #include "bli_4m.h"
 #include "bli_3mh.h"
-#include "bli_3m.h"
+#include "bli_3m1.h"
 
 // Control tree definitions.
 #include "bli_cntl.h"
