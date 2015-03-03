@@ -12,18 +12,21 @@
 #    all operations in a given "level". Enabling a level here by itself
 #    does not enable every operation in that level; it simply means that
 #    the individual switches for each operation (in that level) determine
-#    whether or not the tests are executed.
+#    whether or not the tests are executed. Use 1 to enable a section, or
+#    0 to disable.
 #
 #  ENABLING/DISABLING INDIVIDUAL OPERATION TESTS
 #    Given that an operation's section override switch is set to 1
 #    (enabled, whether or not that operation will get tested is determined
 #    by its local switch. For example, if the level-1v section override is
 #    set to 1, and there is a 1 on the line marked "addv", then the addv
-#    operation will be tested. NOTE: You may ignore the lines marked "test
-#    sequential front-end." These lines are for future use, to distinguish
-#    tests of the sequential implementation from tests of the
-#    multithreaded implementation. For now, BLIS only contains sequential
-#    codes, so these should be left set to 1.
+#    operation will be tested. Similarly, a 0 would cause addv to not be
+#    tested. NOTE: You may ignore the lines marked "test sequential
+#    front-end." These lines are for future use, to distinguish tests of
+#    the sequential implementation from tests of the multithreaded
+#    implementation. For now, BLIS does not contain separate APIs for
+#    multithreaded execution, even though multithreading is supported.
+#    So, these should be left set to 1.
 #
 #  CHANGING PROBLEM SIZE/SHAPES TESTED
 #    The problem sizes tested by an operation are determined by the
