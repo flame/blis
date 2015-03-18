@@ -33,13 +33,7 @@
 */
 
 #include "bli_trmm3_check.h"
-#include "bli_trmm3_entry.h"
 #include "bli_trmm3_front.h"
-
-#include "bli_trmm34mh.h"
-#include "bli_trmm34m1.h"
-#include "bli_trmm33mh.h"
-#include "bli_trmm33m1.h"
 
 
 //
@@ -53,9 +47,6 @@ void bli_trmm3( side_t  side,
                 obj_t*  c );
 
 
-//
-// Prototype BLAS-like interfaces with homogeneous-typed operands.
-//
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
@@ -75,36 +66,4 @@ void PASTEMAC(ch,opname)( \
                         );
 
 INSERT_GENTPROT_BASIC( trmm3 )
-
-
-//
-// Prototype BLAS-like interfaces with heterogeneous-typed operands.
-//
-#undef  GENTPROT3U12
-#define GENTPROT3U12( ctype_a, ctype_b, ctype_c, ctype_ab, cha, chb, chc, chab, opname ) \
-\
-void PASTEMAC3(cha,chb,chc,opname)( \
-                                    side_t    side, \
-                                    uplo_t    uploa, \
-                                    trans_t   transa, \
-                                    diag_t    diaga, \
-                                    trans_t   transb, \
-                                    dim_t     m, \
-                                    dim_t     n, \
-                                    ctype_ab* alpha, \
-                                    ctype_a*  a, inc_t rs_a, inc_t cs_a, \
-                                    ctype_b*  b, inc_t rs_b, inc_t cs_b, \
-                                    ctype_c*  beta, \
-                                    ctype_c*  c, inc_t rs_c, inc_t cs_c  \
-                                  );
-
-INSERT_GENTPROT3U12_BASIC( trmm3 )
-
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTPROT3U12_MIX_D( trmm3 )
-#endif
-
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTPROT3U12_MIX_P( trmm3 )
-#endif
 

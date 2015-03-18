@@ -83,7 +83,7 @@ void bli_herk_blk_var1f( obj_t*  a,
 	m_trans = bli_obj_length_after_trans( *c );
     dim_t start, end;
     bli_get_range_weighted( thread, 0, m_trans, 
-                            bli_determine_reg_blocksize( a, cntl_blocksize( cntl ) ),
+                            bli_blksz_mult_for_obj( a, cntl_blocksize( cntl ) ),
                             bli_obj_is_upper( *c ), &start, &end );
 
 	// Partition along the m dimension.

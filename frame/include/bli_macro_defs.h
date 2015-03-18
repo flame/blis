@@ -86,6 +86,9 @@
 #define PASTECH_(ch,op)            ch ## op
 #define PASTECH(ch,op)             PASTECH_(ch,op)
 
+#define PASTECH2_(ch1,ch2,op)      ch1 ## ch2 ## op
+#define PASTECH2(ch1,ch2,op)       PASTECH2_(ch1,ch2,op)
+
 #define MKSTR(s1)                  #s1
 #define STRINGIFY_INT( s )         MKSTR( s )
 

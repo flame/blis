@@ -34,9 +34,8 @@
 
 #include "blis.h"
 
-//
-// Define object-based interface.
-//
+extern gemm_t* gemm_cntl;
+
 void bli_her2k( obj_t*  alpha,
                 obj_t*  a,
                 obj_t*  b,
@@ -45,19 +44,22 @@ void bli_her2k( obj_t*  alpha,
 {
 	num_t dt = bli_obj_datatype( *c );
 
-	if      ( bli_3mh_is_enabled_dt( dt ) ) bli_her2k3mh_entry( alpha, a, b, beta, c );
-	else if ( bli_3m1_is_enabled_dt( dt ) )  bli_her2k3m1_entry( alpha, a, b, beta, c );
-	else if ( bli_4mh_is_enabled_dt( dt ) ) bli_her2k4mh_entry( alpha, a, b, beta, c );
-	else if ( bli_4m1_is_enabled_dt( dt ) )  bli_her2k4m1_entry( alpha, a, b, beta, c );
-	else                                    bli_her2k_entry( alpha, a, b, beta, c );
+	// If an induced method is available (ie: implemented and enabled),
+	// call it instead.
+	if ( bli_her2kind_has_avail( dt ) )
+	{
+		her2k_fp_t func = bli_her2kind_get_avail( dt );
+
+		return func( alpha, a, b, beta, c );
+	}
+
+	bli_her2k_front( alpha, a, b, beta, c,
+	                 gemm_cntl );
 }
 
 
-//
-// Define BLAS-like interfaces with homogeneous-typed operands.
-//
 #undef  GENTFUNCR
-#define GENTFUNCR( ctype, ctype_r, ch, chr, opname, varname ) \
+#define GENTFUNCR( ctype, ctype_r, ch, chr, opname ) \
 \
 void PASTEMAC(ch,opname)( \
                           uplo_t    uploc, \
@@ -103,38 +105,5 @@ void PASTEMAC(ch,opname)( \
 	                   &co ); \
 }
 
-INSERT_GENTFUNCR_BASIC( her2k, her2k )
-
-
-//
-// Define BLAS-like interfaces with heterogeneous-typed operands.
-//
-#undef  GENTFUNC3U12
-#define GENTFUNC3U12( ctype_a, ctype_b, ctype_c, ctype_ab, cha, chb, chc, chab, opname, varname ) \
-\
-void PASTEMAC3(cha,chb,chc,opname)( \
-                                    uplo_t    uploc, \
-                                    trans_t   transa, \
-                                    trans_t   transb, \
-                                    dim_t     m, \
-                                    dim_t     k, \
-                                    ctype_ab* alpha, \
-                                    ctype_a*  a, inc_t rs_a, inc_t cs_a, \
-                                    ctype_b*  b, inc_t rs_b, inc_t cs_b, \
-                                    ctype_c*  beta, \
-                                    ctype_c*  c, inc_t rs_c, inc_t cs_c  \
-                                  ) \
-{ \
-	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \
-}
-
-INSERT_GENTFUNC3U12_BASIC( her2k, her2k )
-
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTFUNC3U12_MIX_D( her2k, her2k )
-#endif
-
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTFUNC3U12_MIX_P( her2k, her2k )
-#endif
+INSERT_GENTFUNCR_BASIC0( her2k )
 

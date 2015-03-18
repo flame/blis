@@ -34,9 +34,7 @@
 
 #include "bli_trsm_cntl.h"
 #include "bli_trsm_blocksize.h"
-#include "bli_trsm_query.h"
 #include "bli_trsm_check.h"
-#include "bli_trsm_entry.h"
 #include "bli_trsm_front.h"
 #include "bli_trsm_int.h"
 
@@ -63,9 +61,6 @@
 #include "bli_trsm_l_ukr_ref.h"
 #include "bli_trsm_u_ukr_ref.h"
 
-#include "bli_trsm4m1.h"
-#include "bli_trsm3m1.h"
-
 
 //
 // Prototype object-based interface.
@@ -76,9 +71,6 @@ void bli_trsm( side_t  side,
                obj_t*  b );
 
 
-//
-// Prototype BLAS-like interfaces with homogeneous-typed operands.
-//
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
@@ -95,33 +87,3 @@ void PASTEMAC(ch,opname)( \
                         );
 
 INSERT_GENTPROT_BASIC( trsm )
-
-
-//
-// Prototype BLAS-like interfaces with heterogeneous-typed operands.
-//
-#undef  GENTPROT2
-#define GENTPROT2( ctype_a, ctype_b, cha, chb, opname ) \
-\
-void PASTEMAC2(cha,chb,opname)( \
-                                side_t    side, \
-                                uplo_t    uploa, \
-                                trans_t   transa, \
-                                diag_t    diaga, \
-                                dim_t     m, \
-                                dim_t     n, \
-                                ctype_a*  alpha, \
-                                ctype_a*  a, inc_t rs_a, inc_t cs_a, \
-                                ctype_b*  b, inc_t rs_b, inc_t cs_b  \
-                        );
-
-INSERT_GENTPROT2_BASIC( trsm )
-
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTPROT2_MIX_D( trsm )
-#endif
-
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTPROT2_MIX_P( trsm )
-#endif
-

@@ -334,7 +334,7 @@
 1        # trmm3
 1        #   test sequential front-end
 -1 -1    #   dimensions: m n
-?????    #   parameters: side uploa transa diaga transb
+????n    #   parameters: side uploa transa diaga transb
 
 1        # trsm
 1        #   test sequential front-end

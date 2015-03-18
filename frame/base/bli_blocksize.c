@@ -69,15 +69,27 @@ void bli_blksz_obj_init( blksz_t* b,
 	b->e[BLIS_BITVAL_SCOMPLEX_TYPE] = be_c;
 	b->e[BLIS_BITVAL_DCOMPLEX_TYPE] = be_z;
 
-	// By default, set the sub-blocksize field to NULL.
-	b->sub = NULL;
+	// By default, set the blocksize multiple, mr, and nr fields
+	// to NULL.
+	b->mult = NULL;
+	b->mr   = NULL;
+	b->nr   = NULL;
 }
 
 
-void bli_blksz_obj_attach_to( blksz_t* br,
-                              blksz_t* bc )
+void bli_blksz_obj_attach_mult_to( blksz_t* br,
+                                   blksz_t* bc )
 {
-	bc->sub = br;
+	bc->mult = br;
+}
+
+
+void bli_blksz_obj_attach_mr_nr_to( blksz_t* bmr,
+                                    blksz_t* bnr,
+                                    blksz_t* bc )
+{
+	bc->mr = bmr;
+	bc->nr = bnr;
 }
 
 
@@ -129,9 +141,49 @@ dim_t bli_blksz_total_for_obj( obj_t*   obj,
 }
 
 
-blksz_t* bli_blksz_sub( blksz_t* b )
+blksz_t* bli_blksz_mult( blksz_t* b )
 {
-	return b->sub;
+	return b->mult;
+}
+
+
+dim_t bli_blksz_mult_for_type( num_t    dt,
+                               blksz_t* b )
+{
+	return bli_blksz_for_type( dt, bli_blksz_mult( b ) );
+}
+
+
+dim_t bli_blksz_mult_for_obj( obj_t*   obj,
+                              blksz_t* b )
+{
+	return bli_blksz_mult_for_type( bli_obj_datatype( *obj ), b );
+}
+
+
+blksz_t* bli_blksz_mr( blksz_t* b )
+{
+	return b->mr;
+}
+
+
+blksz_t* bli_blksz_nr( blksz_t* b )
+{
+	return b->nr;
+}
+
+
+dim_t bli_blksz_mr_for_type( num_t    dt,
+                             blksz_t* b )
+{
+	return bli_blksz_for_type( dt, bli_blksz_mr( b ) );
+}
+
+
+dim_t bli_blksz_nr_for_type( num_t    dt,
+                             blksz_t* b )
+{
+	return bli_blksz_for_type( dt, bli_blksz_nr( b ) );
 }
 
 
@@ -259,20 +311,4 @@ dim_t bli_determine_blocksize_b_sub( dim_t  i,
 	return b_now;
 }
 
-
-dim_t bli_determine_reg_blocksize( obj_t*   obj,
-                                   blksz_t* bsize )
-{
-	num_t    dt;
-	blksz_t* b_sub_obj;
-	dim_t    b_sub;
-
-	// Extract the execution datatype and sub-blocksize and use them to
-	// query the the register blocksize from the blksz_t object.
-	dt        = bli_obj_execution_datatype( *obj );
-	b_sub_obj = bli_blksz_sub( bsize );
-	b_sub     = bli_blksz_for_type( dt, b_sub_obj );
-
-	return b_sub;
-}
 

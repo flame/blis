@@ -47,6 +47,7 @@ blksz_t*          gemm_upanel_a_align;
 blksz_t*          gemm_upanel_b_align;
 
 func_t*           gemm_ukrs;
+func_t*           gemm_ref_ukrs;
 
 packm_t*          gemm_packa_cntl;
 packm_t*          gemm_packb_cntl;
@@ -114,11 +115,21 @@ void bli_gemm_cntl_init()
 	                      BLIS_UPANEL_B_ALIGN_SIZE_Z, 0 );
 
 
-	// Attach the register blksz_t objects as sub-blocksizes to the cache
+	// Attach the register blksz_t objects as blocksize multiples to the cache
 	// blksz_t objects.
-	bli_blksz_obj_attach_to( gemm_mr, gemm_mc );
-	bli_blksz_obj_attach_to( gemm_nr, gemm_nc );
-	bli_blksz_obj_attach_to( gemm_kr, gemm_kc );
+	bli_blksz_obj_attach_mult_to( gemm_mr, gemm_mc );
+	bli_blksz_obj_attach_mult_to( gemm_nr, gemm_nc );
+	bli_blksz_obj_attach_mult_to( gemm_kr, gemm_kc );
+
+
+	// Attach the mr and nr blksz_t objects to each cache blksz_t object.
+	// The primary example of why this is needed relates to nudging kc.
+	// In hemm, symm, trmm, or trmm3, we need to know both mr and nr,
+	// since the multiple we target in nudging depends on whether the
+	// structured matrix is on the left or the right.
+	bli_blksz_obj_attach_mr_nr_to( gemm_mr, gemm_nr, gemm_mc );
+	bli_blksz_obj_attach_mr_nr_to( gemm_mr, gemm_nr, gemm_nc );
+	bli_blksz_obj_attach_mr_nr_to( gemm_mr, gemm_nr, gemm_kc );
 
 
 	// Create function pointer object for each datatype-specific gemm
@@ -129,6 +140,15 @@ void bli_gemm_cntl_init()
 	                     BLIS_DGEMM_UKERNEL, BLIS_DGEMM_UKERNEL_PREFERS_CONTIG_ROWS,
 	                     BLIS_CGEMM_UKERNEL, BLIS_CGEMM_UKERNEL_PREFERS_CONTIG_ROWS,
 	                     BLIS_ZGEMM_UKERNEL, BLIS_ZGEMM_UKERNEL_PREFERS_CONTIG_ROWS );
+
+
+	// Create function pointer object for reference micro-kernels.
+	gemm_ref_ukrs
+	=
+	bli_func_obj_create( BLIS_SGEMM_UKERNEL_REF, FALSE,
+	                     BLIS_DGEMM_UKERNEL_REF, FALSE,
+	                     BLIS_CGEMM_UKERNEL_REF, FALSE,
+	                     BLIS_ZGEMM_UKERNEL_REF, FALSE );
 
 
 	// Create control tree objects for packm operations.
@@ -233,6 +253,7 @@ void bli_gemm_cntl_finalize()
 	bli_blksz_obj_free( gemm_upanel_b_align );
 
 	bli_func_obj_free( gemm_ukrs );
+	bli_func_obj_free( gemm_ref_ukrs );
 
 	bli_cntl_obj_free( gemm_packa_cntl );
 	bli_cntl_obj_free( gemm_packb_cntl );

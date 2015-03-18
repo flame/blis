@@ -33,7 +33,6 @@
 */
 
 #include "bli_herk_check.h"
-#include "bli_herk_entry.h"
 #include "bli_herk_front.h"
 #include "bli_herk_int.h"
 
@@ -46,11 +45,6 @@
 #include "bli_herk_l_ker_var2.h"
 #include "bli_herk_u_ker_var2.h"
 
-#include "bli_herk4mh.h"
-#include "bli_herk4m1.h"
-#include "bli_herk3mh.h"
-#include "bli_herk3m1.h"
-
 
 //
 // Prototype object-based interface.
@@ -61,9 +55,6 @@ void bli_herk( obj_t*  alpha,
                obj_t*  c );
 
 
-//
-// Prototype BLAS-like interfaces with homogeneous-typed operands.
-//
 #undef  GENTPROTR
 #define GENTPROTR( ctype, ctype_r, ch, chr, opname ) \
 \
@@ -79,32 +70,3 @@ void PASTEMAC(ch,opname)( \
                         );
 
 INSERT_GENTPROTR_BASIC( herk )
-
-
-//
-// Prototype BLAS-like interfaces with heterogeneous-typed operands.
-//
-#undef  GENTPROT2R
-#define GENTPROT2R( ctype_a, ctype_c, ctype_ar, cha, chc, chAr, opname ) \
-\
-void PASTEMAC2(cha,chc,opname)( \
-                                uplo_t    uploc, \
-                                trans_t   transa, \
-                                dim_t     m, \
-                                dim_t     k, \
-                                ctype_ar* alpha, \
-                                ctype_a*  a, inc_t rs_a, inc_t cs_a, \
-                                ctype_c*  beta, \
-                                ctype_c*  c, inc_t rs_c, inc_t cs_c  \
-                              );
-
-INSERT_GENTPROT2R_BASIC( herk )
-
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTPROT2R_MIX_D( herk )
-#endif
-
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTPROT2R_MIX_P( herk )
-#endif
-

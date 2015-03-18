@@ -33,9 +33,7 @@
 */
 
 #include "bli_trmm_blocksize.h"
-#include "bli_trmm_query.h"
 #include "bli_trmm_check.h"
-#include "bli_trmm_entry.h"
 #include "bli_trmm_front.h"
 #include "bli_trmm_int.h"
 
@@ -52,9 +50,6 @@
 #include "bli_trmm_rl_ker_var2.h"
 #include "bli_trmm_ru_ker_var2.h"
 
-#include "bli_trmm4m1.h"
-#include "bli_trmm3m1.h"
-
 
 //
 // Prototype object-based interface.
@@ -65,9 +60,6 @@ void bli_trmm( side_t  side,
                obj_t*  b );
 
 
-//
-// Prototype BLAS-like interfaces with homogeneous-typed operands.
-//
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
@@ -84,33 +76,4 @@ void PASTEMAC(ch,opname)( \
                         );
 
 INSERT_GENTPROT_BASIC( trmm )
-
-
-//
-// Prototype BLAS-like interfaces with heterogeneous-typed operands.
-//
-#undef  GENTPROT2
-#define GENTPROT2( ctype_a, ctype_b, cha, chb, opname ) \
-\
-void PASTEMAC2(cha,chb,opname)( \
-                                side_t    side, \
-                                uplo_t    uploa, \
-                                trans_t   transa, \
-                                diag_t    diaga, \
-                                dim_t     m, \
-                                dim_t     n, \
-                                ctype_a*  alpha, \
-                                ctype_a*  a, inc_t rs_a, inc_t cs_a, \
-                                ctype_b*  b, inc_t rs_b, inc_t cs_b  \
-                              );
-
-INSERT_GENTPROT2_BASIC( trmm )
-
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTPROT2_MIX_D( trmm )
-#endif
-
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTPROT2_MIX_P( trmm )
-#endif
 

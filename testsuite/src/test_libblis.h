@@ -160,10 +160,7 @@ typedef struct
 	unsigned int  p_first;
 	unsigned int  p_max;
 	unsigned int  p_inc;
-	unsigned int  enable_3mh;
-	unsigned int  enable_3m1;
-	unsigned int  enable_4mh;
-	unsigned int  enable_4m1;
+	unsigned int  ind_enable[ BLIS_NUM_IND_METHODS ];
 	char          reaction_to_failure;
 	unsigned int  output_matlab_format;
 	unsigned int  output_files;
@@ -176,6 +173,7 @@ typedef struct
 	// parent test_ops_t struct
 	struct test_ops_s*   ops;
 
+	opid_t        opid;
 	int           op_switch;
 	int           front_seq;
 	unsigned int  n_dims;
@@ -292,6 +290,7 @@ void libblis_test_read_section_override( test_ops_t*  ops,
                                          int*         override );
 void libblis_test_read_op_info( test_ops_t*  ops,
                                 FILE*        input_stream,
+                                opid_t       opid,
                                 dimset_t     dimset,
                                 unsigned int n_params,
                                 test_op_t*   op );
@@ -346,6 +345,8 @@ void libblis_test_op_driver( test_params_t* params,
 // --- Generate experiment string labels ---
 
 void libblis_test_build_function_string( char*        prefix_str,
+                                         ind_t        method,
+                                         char*        ind_str,
                                          char*        op_str,
                                          char         dt_char,
                                          unsigned int n_param_combos,

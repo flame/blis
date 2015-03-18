@@ -103,6 +103,8 @@ err_t bli_init( void )
 
 		bli_mem_init();
     
+		bli_ind_init();
+    
 		bli_setup_communicator( &BLIS_SINGLE_COMM, 1 );
 		bli_setup_packm_single_threaded_info( &BLIS_PACKM_SINGLE_THREADED );
 		bli_setup_gemm_single_threaded_info( &BLIS_GEMM_SINGLE_THREADED );

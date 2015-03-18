@@ -63,77 +63,26 @@ gint_t bli_info_get_blas2blis_int_type_size( void );
 
 // -- Default cache blocksizes --
 
-gint_t bli_info_get_default_mc( num_t dt );
-gint_t bli_info_get_default_mc_s( void );
-gint_t bli_info_get_default_mc_d( void );
-gint_t bli_info_get_default_mc_c( void );
-gint_t bli_info_get_default_mc_z( void );
-
-gint_t bli_info_get_default_kc( num_t dt );
-gint_t bli_info_get_default_kc_s( void );
-gint_t bli_info_get_default_kc_d( void );
-gint_t bli_info_get_default_kc_c( void );
-gint_t bli_info_get_default_kc_z( void );
-
-gint_t bli_info_get_default_nc( num_t dt );
-gint_t bli_info_get_default_nc_s( void );
-gint_t bli_info_get_default_nc_d( void );
-gint_t bli_info_get_default_nc_c( void );
-gint_t bli_info_get_default_nc_z( void );
+gint_t bli_info_get_default_mc( opid_t oper, num_t dt );
+gint_t bli_info_get_default_kc( opid_t oper, num_t dt );
+gint_t bli_info_get_default_nc( opid_t oper, num_t dt );
 
 // -- Maximum cache blocksizes --
 
-gint_t bli_info_get_maximum_mc( num_t dt );
-gint_t bli_info_get_maximum_mc_s( void );
-gint_t bli_info_get_maximum_mc_d( void );
-gint_t bli_info_get_maximum_mc_c( void );
-gint_t bli_info_get_maximum_mc_z( void );
-
-gint_t bli_info_get_maximum_kc( num_t dt );
-gint_t bli_info_get_maximum_kc_s( void );
-gint_t bli_info_get_maximum_kc_d( void );
-gint_t bli_info_get_maximum_kc_c( void );
-gint_t bli_info_get_maximum_kc_z( void );
-
-gint_t bli_info_get_maximum_nc( num_t dt );
-gint_t bli_info_get_maximum_nc_s( void );
-gint_t bli_info_get_maximum_nc_d( void );
-gint_t bli_info_get_maximum_nc_c( void );
-gint_t bli_info_get_maximum_nc_z( void );
+gint_t bli_info_get_maximum_mc( opid_t oper, num_t dt );
+gint_t bli_info_get_maximum_kc( opid_t oper, num_t dt );
+gint_t bli_info_get_maximum_nc( opid_t oper, num_t dt );
 
 // -- Default register blocksizes --
 
-gint_t bli_info_get_default_mr( num_t dt );
-gint_t bli_info_get_default_mr_s( void );
-gint_t bli_info_get_default_mr_d( void );
-gint_t bli_info_get_default_mr_c( void );
-gint_t bli_info_get_default_mr_z( void );
-
-gint_t bli_info_get_default_kr( num_t dt );
-gint_t bli_info_get_default_kr_s( void );
-gint_t bli_info_get_default_kr_d( void );
-gint_t bli_info_get_default_kr_c( void );
-gint_t bli_info_get_default_kr_z( void );
-
-gint_t bli_info_get_default_nr( num_t dt );
-gint_t bli_info_get_default_nr_s( void );
-gint_t bli_info_get_default_nr_d( void );
-gint_t bli_info_get_default_nr_c( void );
-gint_t bli_info_get_default_nr_z( void );
+gint_t bli_info_get_default_mr( opid_t oper, num_t dt );
+gint_t bli_info_get_default_kr( opid_t oper, num_t dt );
+gint_t bli_info_get_default_nr( opid_t oper, num_t dt );
 
 // -- Packing register blocksizes --
 
-gint_t bli_info_get_packdim_mr( num_t dt );
-gint_t bli_info_get_packdim_mr_s( void );
-gint_t bli_info_get_packdim_mr_d( void );
-gint_t bli_info_get_packdim_mr_c( void );
-gint_t bli_info_get_packdim_mr_z( void );
-
-gint_t bli_info_get_packdim_nr( num_t dt );
-gint_t bli_info_get_packdim_nr_s( void );
-gint_t bli_info_get_packdim_nr_d( void );
-gint_t bli_info_get_packdim_nr_c( void );
-gint_t bli_info_get_packdim_nr_z( void );
+gint_t bli_info_get_packdim_mr( opid_t oper, num_t dt );
+gint_t bli_info_get_packdim_nr( opid_t oper, num_t dt );
 
 // -- Micro-panel alignment for A --
 
@@ -194,11 +143,11 @@ gint_t bli_info_get_dotxaxpyf_fuse_fac_z( void );
 
 // -- Level-3 kernel definitions --
 
-char* bli_info_get_gemm_ukr_type_string( num_t dt );
-char* bli_info_get_gemmtrsm_l_ukr_type_string( num_t dt );
-char* bli_info_get_gemmtrsm_u_ukr_type_string( num_t dt );
-char* bli_info_get_trsm_l_ukr_type_string( num_t dt );
-char* bli_info_get_trsm_u_ukr_type_string( num_t dt );
+char* bli_info_get_gemm_ukr_impl_string( ind_t method, num_t dt );
+char* bli_info_get_gemmtrsm_l_ukr_impl_string( ind_t method, num_t dt );
+char* bli_info_get_gemmtrsm_u_ukr_impl_string( ind_t method, num_t dt );
+char* bli_info_get_trsm_l_ukr_impl_string( ind_t method, num_t dt );
+char* bli_info_get_trsm_u_ukr_impl_string( ind_t method, num_t dt );
 
 
 // -- bli_mem_pool_macro_defs.h ------------------------------------------------

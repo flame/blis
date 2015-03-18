@@ -33,13 +33,7 @@
 */
 
 #include "bli_syrk_check.h"
-#include "bli_syrk_entry.h"
 #include "bli_syrk_front.h"
-
-#include "bli_syrk4mh.h"
-#include "bli_syrk4m1.h"
-#include "bli_syrk3mh.h"
-#include "bli_syrk3m1.h"
 
 
 //
@@ -51,9 +45,6 @@ void bli_syrk( obj_t*  alpha,
                obj_t*  c );
 
 
-//
-// Prototype BLAS-like interfaces with homogeneous-typed operands.
-//
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
@@ -69,32 +60,4 @@ void PASTEMAC(ch,opname)( \
                         );
 
 INSERT_GENTPROT_BASIC( syrk )
-
-
-//
-// Prototype BLAS-like interfaces with heterogeneous-typed operands.
-//
-#undef  GENTPROT2
-#define GENTPROT2( ctype_a, ctype_c, cha, chc, opname ) \
-\
-void PASTEMAC2(cha,chc,opname)( \
-                                uplo_t    uploc, \
-                                trans_t   transa, \
-                                dim_t     m, \
-                                dim_t     k, \
-                                ctype_a*  alpha, \
-                                ctype_a*  a, inc_t rs_a, inc_t cs_a, \
-                                ctype_c*  beta, \
-                                ctype_c*  c, inc_t rs_c, inc_t cs_c  \
-                              );
-
-INSERT_GENTPROT2_BASIC( syrk )
-
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTPROT2_MIX_D( syrk )
-#endif
-
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTPROT2_MIX_P( syrk )
-#endif
 

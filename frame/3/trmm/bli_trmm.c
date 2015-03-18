@@ -34,9 +34,8 @@
 
 #include "blis.h"
 
-//
-// Define object-based interface.
-//
+extern gemm_t* gemm_cntl;
+
 void bli_trmm( side_t  side,
                obj_t*  alpha,
                obj_t*  a,
@@ -44,17 +43,22 @@ void bli_trmm( side_t  side,
 {
 	num_t dt = bli_obj_datatype( *b );
 
-	if      ( bli_3m1_is_enabled_dt( dt ) ) bli_trmm3m1_entry( side, alpha, a, b );
-	else if ( bli_4m1_is_enabled_dt( dt ) ) bli_trmm4m1_entry( side, alpha, a, b );
-	else                                   bli_trmm_entry( side, alpha, a, b );
+	// If an induced method is available (ie: implemented and enabled),
+	// call it instead.
+	if ( bli_trmmind_has_avail( dt ) )
+	{
+		trmm_fp_t func = bli_trmmind_get_avail( dt );
+
+		return func( side, alpha, a, b );
+	}
+
+	bli_trmm_front( side, alpha, a, b,
+	                gemm_cntl );
 }
 
 
-//
-// Define BLAS-like interfaces with homogeneous-typed operands.
-//
 #undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, varname ) \
+#define GENTFUNC( ctype, ch, opname ) \
 \
 void PASTEMAC(ch,opname)( \
                           side_t  side, \
@@ -93,37 +97,5 @@ void PASTEMAC(ch,opname)( \
 	                   &bo ); \
 }
 
-INSERT_GENTFUNC_BASIC( trmm, trmm )
-
-
-//
-// Define BLAS-like interfaces with heterogeneous-typed operands.
-//
-#undef  GENTFUNC2
-#define GENTFUNC2( ctype_a, ctype_b, cha, chb, opname, varname ) \
-\
-void PASTEMAC2(cha,chb,opname)( \
-                                side_t    side, \
-                                uplo_t    uploa, \
-                                trans_t   transa, \
-                                diag_t    diaga, \
-                                dim_t     m, \
-                                dim_t     n, \
-                                ctype_a*  alpha, \
-                                ctype_a*  a, inc_t rs_a, inc_t cs_a, \
-                                ctype_b*  b, inc_t rs_b, inc_t cs_b  \
-                              ) \
-{ \
-	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \
-}
-
-INSERT_GENTFUNC2_BASIC( trmm, trmm )
-
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTFUNC2_MIX_D( trmm, trmm )
-#endif
-
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTFUNC2_MIX_P( trmm, trmm )
-#endif
+INSERT_GENTFUNC_BASIC0( trmm )
 

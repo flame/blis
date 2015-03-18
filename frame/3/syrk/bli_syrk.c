@@ -34,9 +34,8 @@
 
 #include "blis.h"
 
-//
-// Define object-based interface.
-//
+extern gemm_t* gemm_cntl;
+
 void bli_syrk( obj_t*  alpha,
                obj_t*  a,
                obj_t*  beta,
@@ -44,19 +43,22 @@ void bli_syrk( obj_t*  alpha,
 {
 	num_t dt = bli_obj_datatype( *c );
 
-	if      ( bli_3mh_is_enabled_dt( dt ) ) bli_syrk3mh_entry( alpha, a, beta, c );
-	else if ( bli_3m1_is_enabled_dt( dt ) )  bli_syrk3m1_entry( alpha, a, beta, c );
-	else if ( bli_4mh_is_enabled_dt( dt ) ) bli_syrk4mh_entry( alpha, a, beta, c );
-	else if ( bli_4m1_is_enabled_dt( dt ) )  bli_syrk4m1_entry( alpha, a, beta, c );
-	else                                    bli_syrk_entry( alpha, a, beta, c );
+	// If an induced method is available (ie: implemented and enabled),
+	// call it instead.
+	if ( bli_syrkind_has_avail( dt ) )
+	{
+		syrk_fp_t func = bli_syrkind_get_avail( dt );
+
+		return func( alpha, a, beta, c );
+	}
+
+	bli_syrk_front( alpha, a, beta, c,
+	                gemm_cntl );
 }
 
 
-//
-// Define BLAS-like interfaces with homogeneous-typed operands.
-//
 #undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, varname ) \
+#define GENTFUNC( ctype, ch, opname ) \
 \
 void PASTEMAC(ch,opname)( \
                           uplo_t  uploc, \
@@ -94,36 +96,5 @@ void PASTEMAC(ch,opname)( \
 	                   &co ); \
 }
 
-INSERT_GENTFUNC_BASIC( syrk, syrk )
-
-
-//
-// Define BLAS-like interfaces with heterogeneous-typed operands.
-//
-#undef  GENTFUNC2
-#define GENTFUNC2( ctype_a, ctype_c, cha, chc, opname, varname ) \
-\
-void PASTEMAC2(cha,chc,opname)( \
-                                uplo_t    uploc, \
-                                trans_t   transa, \
-                                dim_t     m, \
-                                dim_t     k, \
-                                ctype_a*  alpha, \
-                                ctype_a*  a, inc_t rs_a, inc_t cs_a, \
-                                ctype_c*  beta, \
-                                ctype_c*  c, inc_t rs_c, inc_t cs_c  \
-                              ) \
-{ \
-	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \
-}
-
-INSERT_GENTFUNC2_BASIC( syrk, syrk )
-
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTFUNC2_MIX_D( syrk, syrk )
-#endif
-
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTFUNC2_MIX_P( syrk, syrk )
-#endif
+INSERT_GENTFUNC_BASIC0( syrk )
 

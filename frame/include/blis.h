@@ -61,10 +61,12 @@ extern "C" {
 #include "bli_system.h"
 
 
-// -- BLIS definitions --
+// -- Common BLIS definitions --
 
 #include "bli_type_defs.h"
 #include "bli_macro_defs.h"
+
+#include "bli_level3_type_defs.h"
 
 
 // -- Threading definitions --
@@ -84,16 +86,16 @@ extern "C" {
 #include "bli_kernel_pre_macro_defs.h"
 #include "bli_kernel_macro_defs.h"
 
-#include "bli_kernel_4mh_macro_defs.h"
-#include "bli_kernel_4mb_macro_defs.h"
-#include "bli_kernel_4m1_macro_defs.h"
+#include "bli_kernel_ind_macro_defs.h"
+//#include "bli_kernel_4mh_macro_defs.h"
+//#include "bli_kernel_4mb_macro_defs.h"
+//#include "bli_kernel_4m1_macro_defs.h"
+//#include "bli_kernel_3mh_macro_defs.h"
+//#include "bli_kernel_3m1_macro_defs.h"
 
-#include "bli_kernel_3mh_macro_defs.h"
-#include "bli_kernel_3m1_macro_defs.h"
-
-#include "bli_kernel_4mi_macro_defs.h"
-#include "bli_kernel_3mi_macro_defs.h"
-#include "bli_kernel_rih_macro_defs.h"
+//#include "bli_packm_4mi_macro_defs.h"
+//#include "bli_packm_3mi_macro_defs.h"
+//#include "bli_packm_rih_macro_defs.h"
 
 #include "bli_kernel_post_macro_defs.h"
 #include "bli_kernel_prototypes.h"
@@ -121,18 +123,12 @@ extern "C" {
 #include "bli_error.h"
 #include "bli_f2c.h"
 #include "bli_machval.h"
-#include "bli_info.h"
 #include "bli_getopt.h"
+#include "bli_opid.h"
 #include "bli_flops.h"
-#include "bli_xm.h"
-#include "bli_4mh.h"
-#include "bli_4mb.h"
-#include "bli_4m.h"
-#include "bli_3mh.h"
-#include "bli_3m1.h"
-
-// Control tree definitions.
 #include "bli_cntl.h"
+#include "bli_ind.h"
+#include "bli_info.h"
 
 
 // -- Level-0 operations --

@@ -61,13 +61,13 @@ dim_t bli_gemm_determine_kc_f( dim_t    i,
 	// the blocksizes unchanged.
 	if      ( bli_obj_root_is_herm_or_symm( *a ) )
 	{
-		mnr   = bli_info_get_default_mr( dt );
+		mnr   = bli_blksz_mr_for_type( dt, bsize );
 		b_alg = bli_align_dim_to_mult( b_alg, mnr );
 		b_max = bli_align_dim_to_mult( b_max, mnr );
 	}
 	else if ( bli_obj_root_is_herm_or_symm( *b ) )
 	{
-		mnr   = bli_info_get_default_nr( dt );
+		mnr   = bli_blksz_nr_for_type( dt, bsize );
 		b_alg = bli_align_dim_to_mult( b_alg, mnr );
 		b_max = bli_align_dim_to_mult( b_max, mnr );
 	}
@@ -105,13 +105,13 @@ dim_t bli_gemm_determine_kc_b( dim_t    i,
 	// the blocksizes unchanged.
 	if      ( bli_obj_root_is_herm_or_symm( *a ) )
 	{
-		mnr   = bli_info_get_default_mr( dt );
+		mnr   = bli_blksz_mr_for_type( dt, bsize );
 		b_alg = bli_align_dim_to_mult( b_alg, mnr );
 		b_max = bli_align_dim_to_mult( b_max, mnr );
 	}
 	else if ( bli_obj_root_is_herm_or_symm( *b ) )
 	{
-		mnr   = bli_info_get_default_nr( dt );
+		mnr   = bli_blksz_nr_for_type( dt, bsize );
 		b_alg = bli_align_dim_to_mult( b_alg, mnr );
 		b_max = bli_align_dim_to_mult( b_max, mnr );
 	}

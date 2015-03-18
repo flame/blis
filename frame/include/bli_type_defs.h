@@ -474,17 +474,6 @@ typedef enum
 } packbuf_t;
 
 
-// -- micro-kernel implementation type --
-
-typedef enum
-{
-	BLIS_REFERENCE_UKERNEL = 0,
-	BLIS_VIRTUAL4M_UKERNEL,
-	BLIS_VIRTUAL3M_UKERNEL,
-	BLIS_OPTIMIZED_UKERNEL,
-} kimpl_t;
-
-
 //
 // -- BLIS misc. structure types -----------------------------------------------
 //
@@ -519,8 +508,12 @@ typedef struct blksz_s
 	// Blocksize Extensions.
 	dim_t           e[BLIS_NUM_FP_TYPES];
 
-	// Sub-blocksize pointer.
-	struct blksz_s* sub;
+	// Pointer to blocksize multiple object.
+	struct blksz_s* mult;
+
+	// Pointer to mr and nr objects (if applicable).
+	struct blksz_s* mr;
+	struct blksz_s* nr;
 
 } blksz_t;
 
@@ -725,6 +718,39 @@ typedef enum
 #define BLIS_NUM_MACH_PARAMS   11
 #define BLIS_MACH_PARAM_FIRST  BLIS_MACH_EPS
 #define BLIS_MACH_PARAM_LAST   BLIS_MACH_EPS2
+
+
+// -- Operation ID type --
+
+typedef enum
+{
+//
+// NOTE: If/when additional type values are added to this enum,
+// you must either:
+// - keep the level-3 values (starting with _GEMM) beginning at
+//   index 0; or
+// - if the value range is moved such that it does not begin at
+//   index 0, implement something like a BLIS_OPID_LEVEL3_RANGE_START
+//   value that can be subtracted from the opid_t value to map it
+//   to a zero-based range.
+// This is needed because these level-3 opid_t values are used in
+// bli_ind_query.c to index into arrays.
+//
+	BLIS_GEMM = 0,
+	BLIS_HEMM,
+	BLIS_HERK,
+	BLIS_HER2K,
+	BLIS_SYMM,
+	BLIS_SYRK,
+	BLIS_SYR2K,
+	BLIS_TRMM3,
+	BLIS_TRMM,
+	BLIS_TRSM,
+
+	BLIS_NOID,
+} opid_t;
+
+#define BLIS_NUM_LEVEL3_OPS 10
 
 
 // -- Error types --

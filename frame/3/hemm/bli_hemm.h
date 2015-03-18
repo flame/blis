@@ -33,13 +33,7 @@
 */
 
 #include "bli_hemm_check.h"
-#include "bli_hemm_entry.h"
 #include "bli_hemm_front.h"
-
-#include "bli_hemm4mh.h"
-#include "bli_hemm4m1.h"
-#include "bli_hemm3mh.h"
-#include "bli_hemm3m1.h"
 
 
 //
@@ -53,9 +47,6 @@ void bli_hemm( side_t  side,
                obj_t*  c );
 
 
-//
-// Prototype BLAS-like interfaces with homogeneous-typed operands.
-//
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
@@ -74,35 +65,4 @@ void PASTEMAC(ch,opname)( \
                         );
 
 INSERT_GENTPROT_BASIC( hemm )
-
-
-//
-// Prototype BLAS-like interfaces with heterogeneous-typed operands.
-//
-#undef  GENTPROT3U12
-#define GENTPROT3U12( ctype_a, ctype_b, ctype_c, ctype_ab, cha, chb, chc, chab, opname ) \
-\
-void PASTEMAC3(cha,chb,chc,opname)( \
-                                    side_t    side, \
-                                    uplo_t    uploa, \
-                                    conj_t    conja, \
-                                    trans_t   transb, \
-                                    dim_t     m, \
-                                    dim_t     n, \
-                                    ctype_ab* alpha, \
-                                    ctype_a*  a, inc_t rs_a, inc_t cs_a, \
-                                    ctype_b*  b, inc_t rs_b, inc_t cs_b, \
-                                    ctype_c*  beta, \
-                                    ctype_c*  c, inc_t rs_c, inc_t cs_c  \
-                                  );
-
-INSERT_GENTPROT3U12_BASIC( hemm )
-
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTPROT3U12_MIX_D( hemm )
-#endif
-
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTPROT3U12_MIX_P( hemm )
-#endif
 

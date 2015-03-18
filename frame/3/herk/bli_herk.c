@@ -34,9 +34,8 @@
 
 #include "blis.h"
 
-//
-// Define object-based interface.
-//
+extern gemm_t* gemm_cntl;
+
 void bli_herk( obj_t*  alpha,
                obj_t*  a,
                obj_t*  beta,
@@ -44,19 +43,22 @@ void bli_herk( obj_t*  alpha,
 {
 	num_t dt = bli_obj_datatype( *c );
 
-	if      ( bli_3mh_is_enabled_dt( dt ) ) bli_herk3mh_entry( alpha, a, beta, c );
-	else if ( bli_3m1_is_enabled_dt( dt ) )  bli_herk3m1_entry( alpha, a, beta, c );
-	else if ( bli_4mh_is_enabled_dt( dt ) ) bli_herk4mh_entry( alpha, a, beta, c );
-	else if ( bli_4m1_is_enabled_dt( dt ) )  bli_herk4m1_entry( alpha, a, beta, c );
-	else                                    bli_herk_entry( alpha, a, beta, c );
+	// If an induced method is available (ie: implemented and enabled),
+	// call it instead.
+	if ( bli_herkind_has_avail( dt ) )
+	{
+		herk_fp_t func = bli_herkind_get_avail( dt );
+
+		return func( alpha, a, beta, c );
+	}
+
+	bli_herk_front( alpha, a, beta, c,
+	                gemm_cntl );
 }
 
 
-//
-// Define BLAS-like interfaces with homogeneous-typed operands.
-//
 #undef  GENTFUNCR
-#define GENTFUNCR( ctype, ctype_r, ch, chr, opname, varname ) \
+#define GENTFUNCR( ctype, ctype_r, ch, chr, opname ) \
 \
 void PASTEMAC(ch,opname)( \
                           uplo_t    uploc, \
@@ -95,36 +97,5 @@ void PASTEMAC(ch,opname)( \
 	                   &co ); \
 }
 
-INSERT_GENTFUNCR_BASIC( herk, herk )
-
-
-//
-// Define BLAS-like interfaces with heterogeneous-typed operands.
-//
-#undef  GENTFUNC2R
-#define GENTFUNC2R( ctype_a, ctype_c, ctype_ar, cha, chc, chAr, opname, varname ) \
-\
-void PASTEMAC2(cha,chc,opname)( \
-                                uplo_t    uploc, \
-                                trans_t   transa, \
-                                dim_t     m, \
-                                dim_t     k, \
-                                ctype_ar* alpha, \
-                                ctype_a*  a, inc_t rs_a, inc_t cs_a, \
-                                ctype_c*  beta, \
-                                ctype_c*  c, inc_t rs_c, inc_t cs_c  \
-                              ) \
-{ \
-	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \
-}
-
-INSERT_GENTFUNC2R_BASIC( herk, herk )
-
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTFUNC2R_MIX_D( herk, herk )
-#endif
-
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTFUNC2R_MIX_P( herk, herk )
-#endif
+INSERT_GENTFUNCR_BASIC0( herk )
 
