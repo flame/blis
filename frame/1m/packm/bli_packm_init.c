@@ -558,6 +558,13 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 
 }
 
+void bli_packm_release( obj_t*   p,
+                        packm_t* cntl )
+{
+	if ( !cntl_is_noop( cntl ) )
+	    bli_obj_release_pack( p );
+}
+
 
 /*
 void bli_packm_init_cast( obj_t*  a,

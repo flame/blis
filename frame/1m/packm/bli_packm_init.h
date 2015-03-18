@@ -51,3 +51,7 @@ void bli_packm_init_cast( obj_t*  a,
                           obj_t*  p,
                           obj_t*  c );
 */
+
+void bli_packm_release( obj_t*   p,
+                        packm_t* cntl );
+

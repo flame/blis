@@ -147,11 +147,11 @@ void bli_trsm_blk_var3b( obj_t*  a,
 	// If any packing buffers were acquired within packm, release them back
 	// to the memory manager.
     if( thread_am_ochief( thread ) ) {
-	    bli_obj_release_pack( c_pack );
+	    bli_packm_release( c_pack, cntl_sub_packm_c( cntl ) );
     }
     if( thread_am_ichief( thread ) ) {
-        bli_obj_release_pack( a1_pack );
-        bli_obj_release_pack( b1_pack );
+        bli_packm_release( a1_pack, cntl_sub_packm_a( cntl ) );
+        bli_packm_release( b1_pack, cntl_sub_packm_b( cntl ) );
     }
 }
 

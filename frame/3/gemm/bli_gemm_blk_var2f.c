@@ -143,10 +143,10 @@ void bli_gemm_blk_var2f( obj_t*  a,
 	// to the memory manager.
     thread_obarrier( thread );
     if( thread_am_ochief( thread ) )
-    	bli_obj_release_pack( a_pack );
+    	bli_packm_release( a_pack, cntl_sub_packm_a( cntl ) );
     if( thread_am_ichief( thread ) ) {
-        bli_obj_release_pack( b1_pack );
-        bli_obj_release_pack( c1_pack );
+        bli_packm_release( b1_pack, cntl_sub_packm_b( cntl ) );
+        bli_packm_release( c1_pack, cntl_sub_packm_c( cntl ) );
     }
 }
 

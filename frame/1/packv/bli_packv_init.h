@@ -41,6 +41,9 @@ void bli_packv_init_pack( pack_t   pack_schema,
                           obj_t*   c,
                           obj_t*   p );
 
+void bli_packv_release( obj_t*   p,
+                        packv_t* cntl );
+
 /*
 void bli_packv_init_cast( obj_t*  a,
                           obj_t*  p,

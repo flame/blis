@@ -946,6 +946,7 @@ bli_obj_width_stored( obj )
 #define bli_obj_release_pack( obj_p ) \
 { \
 	mem_t* pack_mem = bli_obj_pack_mem( *(obj_p) ); \
+\
 	if ( bli_mem_is_alloc( pack_mem ) ) \
 		bli_mem_release( pack_mem ); \
 }

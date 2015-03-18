@@ -199,6 +199,13 @@ void bli_packv_init_pack( pack_t   pack_schema,
 	}
 }
 
+void bli_packv_release( obj_t*   p,
+                        packv_t* cntl )
+{
+	if ( !cntl_is_noop( cntl ) )
+	    bli_obj_release_pack( p );
+}
+
 
 /*
 void bli_packv_init_cast( obj_t*  a,

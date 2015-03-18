@@ -99,7 +99,7 @@ void bli_gemv_blk_var2( obj_t*  alpha,
 
 	// If any packing buffers were acquired within packm, release them back
 	// to the memory manager.
-	bli_obj_release_pack( &a1_pack );
-	bli_obj_release_pack( &x1_pack );
+	bli_packm_release( &a1_pack, cntl_sub_packm_a( cntl ) );
+	bli_packv_release( &x1_pack, cntl_sub_packv_x( cntl ) );
 }
 

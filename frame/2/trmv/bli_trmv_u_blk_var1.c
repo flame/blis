@@ -108,7 +108,7 @@ void bli_trmv_u_blk_var1( obj_t*  alpha,
 
 	// If any packing buffers were acquired within packm, release them back
 	// to the memory manager.
-	bli_obj_release_pack( &a11_pack );
-	bli_obj_release_pack( &x1_pack );
+	bli_packm_release( &a11_pack, cntl_sub_packm_a11( cntl ) );
+	bli_packv_release( &x1_pack, cntl_sub_packv_x1( cntl ) );
 }
 
