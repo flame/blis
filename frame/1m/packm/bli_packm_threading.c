@@ -36,8 +36,8 @@
 
 void bli_packm_thrinfo_free( packm_thrinfo_t* thread )
 {
-    //Assume that the ocomm and the icomm are freed by something else and don't need to be freed.
-    bli_free(thread);
+    if( thread != NULL )
+        bli_free(thread);
 }
 
 packm_thrinfo_t* bli_create_packm_thread_info( thread_comm_t* ocomm, dim_t ocomm_id, thread_comm_t* icomm, dim_t icomm_id,
