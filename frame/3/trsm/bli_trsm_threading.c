@@ -144,7 +144,7 @@ trsm_thrinfo_t** bli_create_trsm_thrinfo_paths( bool_t right_sided )
     dim_t ir_nt  = 1;
 
     
-    trsm_thrinfo_t** paths = (trsm_thrinfo_t**) malloc( global_num_threads * sizeof( trsm_thrinfo_t* ) );
+    trsm_thrinfo_t** paths = (trsm_thrinfo_t**) bli_malloc( global_num_threads * sizeof( trsm_thrinfo_t* ) );
 
     thread_comm_t*  global_comm = bli_create_communicator( global_num_threads );
     for( int a = 0; a < jc_way; a++ )

@@ -142,7 +142,7 @@ trmm_thrinfo_t** bli_create_trmm_thrinfo_paths( bool_t jc_dependency )
     dim_t ir_nt  = 1;
 
     
-    trmm_thrinfo_t** paths = (trmm_thrinfo_t**) malloc( global_num_threads * sizeof( trmm_thrinfo_t* ) );
+    trmm_thrinfo_t** paths = (trmm_thrinfo_t**) bli_malloc( global_num_threads * sizeof( trmm_thrinfo_t* ) );
 
     thread_comm_t*  global_comm = bli_create_communicator( global_num_threads );
     for( int a = 0; a < jc_way; a++ )
