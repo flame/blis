@@ -36,7 +36,7 @@
 
 void bli_packm_thrinfo_free( packm_thrinfo_t* thread )
 {
-    if( thread != NULL )
+    if( thread != NULL && thread != &BLIS_PACKM_SINGLE_THREADED)
         bli_free(thread);
 }
 
