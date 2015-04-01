@@ -128,8 +128,8 @@ void bli_gemm3m1_cntl_init()
 	gemm3m1_ukrs
 	=
 	bli_func_obj_create(
-	    NULL,                 FALSE,
-	    NULL,                 FALSE,
+	    NULL,                  FALSE,
+	    NULL,                  FALSE,
 	    BLIS_CGEMM3M1_UKERNEL, BLIS_CGEMM3M1_UKERNEL_PREFERS_CONTIG_ROWS,
 	    BLIS_ZGEMM3M1_UKERNEL, BLIS_ZGEMM3M1_UKERNEL_PREFERS_CONTIG_ROWS );
 

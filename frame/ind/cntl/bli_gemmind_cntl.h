@@ -32,6 +32,18 @@
 
 */
 
+void    bli_gemm3mh_cntl_init( void );
+void    bli_gemm3mh_cntl_finalize( void );
+
+void    bli_gemm3m3_cntl_init( void );
+void    bli_gemm3m3_cntl_finalize( void );
+
+void    bli_gemm3m2_cntl_init( void );
+void    bli_gemm3m2_cntl_finalize( void );
+
+void    bli_gemm3m1_cntl_init( void );
+void    bli_gemm3m1_cntl_finalize( void );
+
 void    bli_gemm4mh_cntl_init( void );
 void    bli_gemm4mh_cntl_finalize( void );
 
@@ -40,10 +52,4 @@ void    bli_gemm4mb_cntl_finalize( void );
 
 void    bli_gemm4m1_cntl_init( void );
 void    bli_gemm4m1_cntl_finalize( void );
-
-void    bli_gemm3mh_cntl_init( void );
-void    bli_gemm3mh_cntl_finalize( void );
-
-void    bli_gemm3m1_cntl_init( void );
-void    bli_gemm3m1_cntl_finalize( void );
 

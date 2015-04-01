@@ -51,12 +51,13 @@ void PASTEMAC(ch,varname)( \
                            dim_t           n_panel_max, \
                            ctype* restrict kappa, \
                            ctype* restrict c, inc_t rs_c, inc_t cs_c, \
-                           ctype* restrict p, inc_t rs_p, inc_t cs_p  \
+                           ctype* restrict p, inc_t rs_p, inc_t cs_p, \
+                                              inc_t is_p  \
                          ) \
 { \
 	dim_t  panel_dim; \
 	dim_t  panel_len; \
-	dim_t  panel_len_max; \
+	/*dim_t  panel_len_max;*/ \
 	inc_t  incc, ldc; \
 	inc_t  ldp; \
 \
@@ -68,7 +69,7 @@ void PASTEMAC(ch,varname)( \
 		/* Prepare to pack to row-stored column panel. */ \
 		panel_dim     = n_panel; \
 		panel_len     = m_panel; \
-		panel_len_max = m_panel_max; \
+		/*panel_len_max = m_panel_max;*/ \
 		incc          = cs_c; \
 		ldc           = rs_c; \
 		ldp           = rs_p; \
@@ -78,7 +79,7 @@ void PASTEMAC(ch,varname)( \
 		/* Prepare to pack to column-stored row panel. */ \
 		panel_dim     = m_panel; \
 		panel_len     = n_panel; \
-		panel_len_max = n_panel_max; \
+		/*panel_len_max = n_panel_max;*/ \
 		incc          = rs_c; \
 		ldc           = cs_c; \
 		ldp           = cs_p; \

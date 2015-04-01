@@ -25,6 +25,8 @@ sdcz    # Datatype(s) to test:
 100     # Problem size: increment between experiments
         # Complex level-3 implementations to test
 1       #   3mh  ('1' = enable; '0' = disable)
+1       #   3m3  ('1' = enable; '0' = disable)
+1       #   3m2  ('1' = enable; '0' = disable)
 1       #   3m1  ('1' = enable; '0' = disable)
 1       #   4mh  ('1' = enable; '0' = disable)
 1       #   4m1b ('1' = enable; '0' = disable)

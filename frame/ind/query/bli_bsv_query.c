@@ -42,6 +42,22 @@ extern blksz_t* gemm3mh_mr;
 extern blksz_t* gemm3mh_nr;
 extern blksz_t* gemm3mh_kr;
 
+// 3m3 blocksizes
+extern blksz_t* gemm3m3_mc;
+extern blksz_t* gemm3m3_nc;
+extern blksz_t* gemm3m3_kc;
+extern blksz_t* gemm3m3_mr;
+extern blksz_t* gemm3m3_nr;
+extern blksz_t* gemm3m3_kr;
+
+// 3m2 blocksizes
+extern blksz_t* gemm3m2_mc;
+extern blksz_t* gemm3m2_nc;
+extern blksz_t* gemm3m2_kc;
+extern blksz_t* gemm3m2_mr;
+extern blksz_t* gemm3m2_nr;
+extern blksz_t* gemm3m2_kr;
+
 // 3m1 blocksizes
 extern blksz_t* gemm3m1_mc;
 extern blksz_t* gemm3m1_nc;
@@ -92,6 +108,10 @@ static blksz_t** bli_bsizes[BLIS_NUM_IND_METHODS][BLIS_NUM_LEVEL3_BLKSZS] =
         /*   mc/mr        nc/nr        kc/kr   */
 /* 3mh  */ { &gemm3mh_mc, &gemm3mh_nc, &gemm3mh_kc,
              &gemm3mh_mr, &gemm3mh_nr, &gemm3mh_kr },
+/* 3m3  */ { &gemm3m3_mc, &gemm3m3_nc, &gemm3m3_kc,
+             &gemm3m3_mr, &gemm3m3_nr, &gemm3m3_kr },
+/* 3m2  */ { &gemm3m2_mc, &gemm3m2_nc, &gemm3m2_kc,
+             &gemm3m2_mr, &gemm3m2_nr, &gemm3m2_kr },
 /* 3m1  */ { &gemm3m1_mc, &gemm3m1_nc, &gemm3m1_kc,
              &gemm3m1_mr, &gemm3m1_nr, &gemm3m1_kr },
 /* 4mh  */ { &gemm4mh_mc, &gemm4mh_nc, &gemm4mh_kc,
@@ -114,7 +134,7 @@ dim_t bli_bsv_get_avail_blksz_dt( bszid_t bsv, opid_t oper, num_t dt )
 	blksz_t* b = bli_bsv_get_avail_blksz( bsv, oper, dt );
 
 	// Return the default blocksize associated with the given datatype.
-	return bli_blksz_for_type( dt, b );
+	return bli_blksz_get_def( dt, b );
 }
 
 // -----------------------------------------------------------------------------
@@ -127,7 +147,7 @@ dim_t bli_bsv_get_avail_blksz_max_dt( bszid_t bsv, opid_t oper, num_t dt )
 	blksz_t* b = bli_bsv_get_avail_blksz( bsv, oper, dt );
 
 	// Return the maximum blocksize associated with the given datatype.
-	return bli_blksz_max_for_type( dt, b );
+	return bli_blksz_get_max( dt, b );
 }
 
 // -----------------------------------------------------------------------------

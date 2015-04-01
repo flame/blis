@@ -51,14 +51,15 @@ void PASTEMAC(ch,varname)( \
                            dim_t           n_panel_max, \
                            ctype* restrict kappa, \
                            ctype* restrict c, inc_t rs_c, inc_t cs_c, \
-                           ctype* restrict p, inc_t rs_p, inc_t cs_p  \
+                           ctype* restrict p, inc_t rs_p, inc_t cs_p, \
+                                              inc_t is_p  \
                          ) \
 { \
 	dim_t  panel_dim; \
 	dim_t  panel_len; \
 	dim_t  panel_len_max; \
 	inc_t  incc, ldc; \
-	inc_t  is_p, ldp; \
+	inc_t  ldp; \
 \
 \
 	/* Determine the dimensions and relative strides of the micro-panel
@@ -83,10 +84,6 @@ void PASTEMAC(ch,varname)( \
 		ldc           = cs_c; \
 		ldp           = cs_p; \
 	} \
-\
-	/* Compute the imaginary stride (ie: the element offset to the imaginary
-	   panel). */ \
-	is_p = ldp * panel_len_max; \
 \
 \
 	/* Handle micro-panel packing based on the structure of the matrix
@@ -125,6 +122,11 @@ void PASTEMAC(ch,varname)( \
 	} \
 	else /* ( bli_is_triangular( strucc ) ) */ \
 	{ \
+		/* We need to re-compute the imaginary stride as a function of
+		   panel_len_max since triangular packed matrices have panels
+		   of varying lengths. */ \
+		is_p = ldp * panel_len_max; \
+\
 		/* Call a helper function for micro-panels of triangular
 		   matrices. */ \
 		PASTEMAC(ch,packm_tri_cxk_4mi)( strucc, \

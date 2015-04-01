@@ -121,7 +121,7 @@ void PASTEMAC(ch,varname)( \
 	} \
 }
 
-INSERT_GENTFUNCCO_BASIC0( packm_ref_2xk_3mi )
+INSERT_GENTFUNCCO_BASIC0( packm_ref_2xk_3mis )
 
 
 
@@ -220,7 +220,7 @@ void PASTEMAC(ch,varname)( \
 	} \
 }
 
-INSERT_GENTFUNCCO_BASIC0( packm_ref_4xk_3mi )
+INSERT_GENTFUNCCO_BASIC0( packm_ref_4xk_3mis )
 
 
 
@@ -327,7 +327,7 @@ void PASTEMAC(ch,varname)( \
 	} \
 }
 
-INSERT_GENTFUNCCO_BASIC0( packm_ref_6xk_3mi )
+INSERT_GENTFUNCCO_BASIC0( packm_ref_6xk_3mis )
 
 
 
@@ -442,7 +442,7 @@ void PASTEMAC(ch,varname)( \
 	} \
 }
 
-INSERT_GENTFUNCCO_BASIC0( packm_ref_8xk_3mi )
+INSERT_GENTFUNCCO_BASIC0( packm_ref_8xk_3mis )
 
 
 
@@ -565,7 +565,7 @@ void PASTEMAC(ch,varname)( \
 	} \
 }
 
-INSERT_GENTFUNCCO_BASIC0( packm_ref_10xk_3mi )
+INSERT_GENTFUNCCO_BASIC0( packm_ref_10xk_3mis )
 
 
 
@@ -696,7 +696,7 @@ void PASTEMAC(ch,varname)( \
 	} \
 }
 
-INSERT_GENTFUNCCO_BASIC0( packm_ref_12xk_3mi )
+INSERT_GENTFUNCCO_BASIC0( packm_ref_12xk_3mis )
 
 
 
@@ -835,7 +835,7 @@ void PASTEMAC(ch,varname)( \
 	} \
 }
 
-INSERT_GENTFUNCCO_BASIC0( packm_ref_14xk_3mi )
+INSERT_GENTFUNCCO_BASIC0( packm_ref_14xk_3mis )
 
 
 
@@ -982,7 +982,7 @@ void PASTEMAC(ch,varname)( \
 	} \
 }
 
-INSERT_GENTFUNCCO_BASIC0( packm_ref_16xk_3mi )
+INSERT_GENTFUNCCO_BASIC0( packm_ref_16xk_3mis )
 
 
 
@@ -1186,5 +1186,5 @@ void PASTEMAC(ch,varname)( \
 	} \
 }
 
-INSERT_GENTFUNCCO_BASIC0( packm_ref_30xk_3mi )
+INSERT_GENTFUNCCO_BASIC0( packm_ref_30xk_3mis )
 

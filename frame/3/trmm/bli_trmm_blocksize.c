@@ -52,14 +52,14 @@ dim_t bli_trmm_determine_kc_f( dim_t    i,
 	// Extract the execution datatype and use it to query the corresponding
 	// blocksize and blocksize maximum values from the blksz_t object.
 	dt    = bli_obj_execution_datatype( *a );
-	b_alg = bli_blksz_for_type( dt, bsize );
-	b_max = bli_blksz_max_for_type( dt, bsize );
+	b_alg = bli_blksz_get_def( dt, bsize );
+	b_max = bli_blksz_get_max( dt, bsize );
 
 	// Nudge the default and maximum kc blocksizes up to the nearest
 	// multiple of MR if the triangular matrix is on the left, or NR
 	// if the triangular matrix is one the right.
-	if ( bli_obj_root_is_triangular( *a ) ) mnr = bli_blksz_mr_for_type( dt, bsize );
-	else                                    mnr = bli_blksz_nr_for_type( dt, bsize );
+	if ( bli_obj_root_is_triangular( *a ) ) mnr = bli_blksz_get_mr( dt, bsize );
+	else                                    mnr = bli_blksz_get_nr( dt, bsize );
 	b_alg = bli_align_dim_to_mult( b_alg, mnr );
 	b_max = bli_align_dim_to_mult( b_max, mnr );
 
@@ -87,14 +87,14 @@ dim_t bli_trmm_determine_kc_b( dim_t    i,
 	// Extract the execution datatype and use it to query the corresponding
 	// blocksize and blocksize maximum values from the blksz_t object.
 	dt    = bli_obj_execution_datatype( *a );
-	b_alg = bli_blksz_for_type( dt, bsize );
-	b_max = bli_blksz_max_for_type( dt, bsize );
+	b_alg = bli_blksz_get_def( dt, bsize );
+	b_max = bli_blksz_get_max( dt, bsize );
 
 	// Nudge the default and maximum kc blocksizes up to the nearest
 	// multiple of MR if the triangular matrix is on the left, or NR
 	// if the triangular matrix is one the right.
-	if ( bli_obj_root_is_triangular( *a ) ) mnr = bli_blksz_mr_for_type( dt, bsize );
-	else                                    mnr = bli_blksz_nr_for_type( dt, bsize );
+	if ( bli_obj_root_is_triangular( *a ) ) mnr = bli_blksz_get_mr( dt, bsize );
+	else                                    mnr = bli_blksz_get_nr( dt, bsize );
 	b_alg = bli_align_dim_to_mult( b_alg, mnr );
 	b_max = bli_align_dim_to_mult( b_max, mnr );
 

@@ -55,7 +55,8 @@ void PASTEMAC(ch,varname)( \
                            void*      bx1, \
                            void*      b11, \
                            void*      c11, inc_t rs_c, inc_t cs_c, \
-                           auxinfo_t* data  \
+                           auxinfo_t* data, \
+                           void*      ukr  \
                          );
 
 INSERT_GENTPROT_BASIC( gemmtrsm_l_ukernel_void )

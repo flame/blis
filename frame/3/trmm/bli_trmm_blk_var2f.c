@@ -83,7 +83,7 @@ void bli_trmm_blk_var2f( obj_t*  a,
 	n_trans = bli_obj_width_after_trans( *b );
     dim_t start, end;
     bli_get_range_weighted( thread, 0, n_trans, 
-                            bli_blksz_mult_for_obj( b, cntl_blocksize( cntl ) ),
+                            bli_blksz_get_mult_for_obj( b, cntl_blocksize( cntl ) ),
                             bli_obj_is_lower( *c ), &start, &end );
 
 	// Partition along the n dimension.

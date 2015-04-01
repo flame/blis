@@ -84,7 +84,7 @@ void bli_gemm_blk_var1f( obj_t*  a,
 	m_trans = bli_obj_length_after_trans( *a );
     dim_t start, end;
     bli_get_range( thread, 0, m_trans, 
-                   bli_blksz_mult_for_obj( a, cntl_blocksize( cntl ) ),
+                   bli_blksz_get_mult_for_obj( a, cntl_blocksize( cntl ) ),
                    &start, &end );
 
 	// Partition along the m dimension.

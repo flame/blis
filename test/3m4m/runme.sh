@@ -28,7 +28,7 @@ test_ops="${l3_ops}"
 test_ops_r="${l3_ops}"
 
 # Implementations to test
-#test_impls="openblas asm_blis 4m1a_blis 4m1b_blis 4mhw_blis 3m1_blis 3mhw_blis"
+#test_impls="openblas asm_blis 4m1a_blis 4m1b_blis 4mhw_blis 3m1_blis 3m2_blis 3m3_blis 3mhw_blis"
 test_impls="asm_blis"
 test_impls_r="asm_blis"
 

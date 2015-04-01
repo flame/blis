@@ -122,7 +122,7 @@ void bli_packv_init_pack( pack_t   pack_schema,
 {
 	num_t  datatype     = bli_obj_datatype( *c );
 	dim_t  dim_c        = bli_obj_vector_dim( *c );
-	dim_t  mult_m_dim   = bli_blksz_for_type( datatype, mult_m );
+	dim_t  mult_m_dim   = bli_blksz_get_def( datatype, mult_m );
 
 	mem_t* mem_p;
 	dim_t  m_p_pad;

@@ -51,15 +51,15 @@ dim_t bli_trsm_determine_kc_f( dim_t    i,
 	// Extract the execution datatype and use it to query the corresponding
 	// blocksize and blocksize maximum values from the blksz_t object.
 	dt    = bli_obj_execution_datatype( *obj );
-	b_alg = bli_blksz_for_type( dt, bsize );
-	b_max = bli_blksz_max_for_type( dt, bsize );
+	b_alg = bli_blksz_get_def( dt, bsize );
+	b_max = bli_blksz_get_max( dt, bsize );
 
 	// Nudge the default and maximum kc blocksizes up to the nearest
 	// multiple of MR. We always use MR (rather than sometimes using NR)
 	// because even when the triangle is on the right, packing of that
 	// matrix uses MR, since only left-side trsm micro-kernels are
 	// supported.
-	mr    = bli_blksz_mr_for_type( dt, bsize );
+	mr    = bli_blksz_get_mr( dt, bsize );
 	b_alg = bli_align_dim_to_mult( b_alg, mr );
 	b_max = bli_align_dim_to_mult( b_max, mr );
 
@@ -86,15 +86,15 @@ dim_t bli_trsm_determine_kc_b( dim_t    i,
 	// Extract the execution datatype and use it to query the corresponding
 	// blocksize and blocksize maximum values from the blksz_t object.
 	dt    = bli_obj_execution_datatype( *obj );
-	b_alg = bli_blksz_for_type( dt, bsize );
-	b_max = bli_blksz_max_for_type( dt, bsize );
+	b_alg = bli_blksz_get_def( dt, bsize );
+	b_max = bli_blksz_get_max( dt, bsize );
 
 	// Nudge the default and maximum kc blocksizes up to the nearest
 	// multiple of MR. We always use MR (rather than sometimes using NR)
 	// because even when the triangle is on the right, packing of that
 	// matrix uses MR, since only left-side trsm micro-kernels are
 	// supported.
-	mr    = bli_blksz_mr_for_type( dt, bsize );
+	mr    = bli_blksz_get_mr( dt, bsize );
 	b_alg = bli_align_dim_to_mult( b_alg, mr );
 	b_max = bli_align_dim_to_mult( b_max, mr );
 

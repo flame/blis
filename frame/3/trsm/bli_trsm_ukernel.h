@@ -48,7 +48,8 @@ void PASTEMAC(ch,varname)( \
                            void*      a, \
                            void*      b, \
                            void*      c, inc_t rs_c, inc_t cs_c, \
-                           auxinfo_t* data  \
+                           auxinfo_t* data, \
+                           void*      ukr  \
                          );
 
 INSERT_GENTPROT_BASIC( trsm_l_ukernel_void )

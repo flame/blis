@@ -53,6 +53,7 @@ typedef void (*FUNCPTR_T)(
                            void*   kappa,
                            void*   c, inc_t rs_c, inc_t cs_c,
                            void*   p, inc_t rs_p, inc_t cs_p,
+                                      inc_t is_p,
                                       dim_t pd_p, inc_t ps_p,
                            void*   packm_ker,
                            packm_thrinfo_t* thread
@@ -62,7 +63,7 @@ typedef void (*FUNCPTR_T)(
 
 extern func_t* packm_struc_cxk_kers;
 extern func_t* packm_struc_cxk_4mi_kers;
-extern func_t* packm_struc_cxk_3mi_kers;
+extern func_t* packm_struc_cxk_3mis_kers;
 extern func_t* packm_struc_cxk_rih_kers;
 
 
@@ -94,6 +95,7 @@ void bli_packm_blk_var2( obj_t*   c,
 	void*     buf_p      = bli_obj_buffer_at_off( *p );
 	inc_t     rs_p       = bli_obj_row_stride( *p );
 	inc_t     cs_p       = bli_obj_col_stride( *p );
+	inc_t     is_p       = bli_obj_imag_stride( *p );
 	dim_t     pd_p       = bli_obj_panel_dim( *p );
 	inc_t     ps_p       = bli_obj_panel_stride( *p );
 
@@ -120,8 +122,8 @@ void bli_packm_blk_var2( obj_t*   c,
 	// The value for kappa we use will depend on whether the scalar
 	// attached to A has a nonzero imaginary component. If it does,
 	// then we will apply the scalar during packing to facilitate
-	// implementing complex domain micro-kernels in terms of their
-	// real domain counterparts. (In the aforementioned situation,
+	// implementing induced complex domain algorithms in terms of
+	// real domain micro-kernels. (In the aforementioned situation,
 	// applying a real scalar is easy, but applying a complex one is
 	// harder, so we avoid the need altogether with the code below.)
 	if( thread_am_ochief( t ) )
@@ -153,11 +155,12 @@ void bli_packm_blk_var2( obj_t*   c,
 
 	// Choose the correct func_t object based on the pack_t schema.
 	if      ( bli_is_4mi_packed( schema ) ) packm_kers = packm_struc_cxk_4mi_kers;
-	else if ( bli_is_3mi_packed( schema ) ) packm_kers = packm_struc_cxk_3mi_kers;
+	else if ( bli_is_3mi_packed( schema ) ||
+	          bli_is_3ms_packed( schema ) ) packm_kers = packm_struc_cxk_3mis_kers;
 	else if ( bli_is_ro_packed( schema ) ||
 	          bli_is_io_packed( schema ) ||
-	         bli_is_rpi_packed( schema ) ) packm_kers = packm_struc_cxk_rih_kers;
-	else                                   packm_kers = packm_struc_cxk_kers;
+	         bli_is_rpi_packed( schema ) )  packm_kers = packm_struc_cxk_rih_kers;
+	else                                    packm_kers = packm_struc_cxk_kers;
 
 	// Query the datatype-specific function pointer from the func_t object.
 	packm_ker = bli_func_obj_query( dt_cp, packm_kers );
@@ -186,6 +189,7 @@ void bli_packm_blk_var2( obj_t*   c,
 	   buf_kappa,
 	   buf_c, rs_c, cs_c,
 	   buf_p, rs_p, cs_p,
+	          is_p,
 	          pd_p, ps_p,
 	   packm_ker,
 	   t );
@@ -212,6 +216,7 @@ void PASTEMAC(ch,varname)( \
                            void*   kappa, \
                            void*   c, inc_t rs_c, inc_t cs_c, \
                            void*   p, inc_t rs_p, inc_t cs_p, \
+                                      inc_t is_p, \
                                       dim_t pd_p, inc_t ps_p, \
                            void*   packm_ker, \
                            packm_thrinfo_t* thread \
@@ -331,6 +336,7 @@ void PASTEMAC(ch,varname)( \
 	   arithmetic occurs in terms of complex elements rather than real
 	   elements. */ \
 	if      ( bli_is_3mi_packed( schema ) ) { ss_num = 3; ss_den = 2; } \
+	else if ( bli_is_3ms_packed( schema ) ) { ss_num = 1; ss_den = 2; } \
 	else if ( bli_is_rih_packed( schema ) ) { ss_num = 1; ss_den = 2; } \
 	else                                    { ss_num = 1; ss_den = 1; } \
 \
@@ -437,7 +443,8 @@ PASTEMAC(ch,fprintm)( stdout, "packm_var2: a", m, n, \
 				                *n_panel_max, \
 				                kappa_cast, \
 				                c_use, rs_c, cs_c, \
-				                p_use, rs_p, cs_p ); \
+				                p_use, rs_p, cs_p, \
+			                           is_p ); \
 			} \
 \
 			/* NOTE: This value is usually LESS than ps_p because triangular
@@ -477,7 +484,8 @@ PASTEMAC(ch,fprintm)( stdout, "packm_var2: a", m, n, \
 				                *n_panel_max, \
 				                kappa_cast, \
 				                c_use, rs_c, cs_c, \
-				                p_use, rs_p, cs_p ); \
+				                p_use, rs_p, cs_p, \
+			                           is_p ); \
 			} \
 \
 			/* NOTE: This value is equivalent to ps_p. */ \
@@ -510,7 +518,8 @@ PASTEMAC(ch,fprintm)( stdout, "packm_var2: a", m, n, \
 				                *n_panel_max, \
 				                kappa_cast, \
 				                c_use, rs_c, cs_c, \
-				                p_use, rs_p, cs_p ); \
+				                p_use, rs_p, cs_p, \
+			                           is_p ); \
 			} \
 \
 			/* NOTE: This value is equivalent to ps_p. */ \

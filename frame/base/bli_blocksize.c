@@ -53,21 +53,20 @@ blksz_t* bli_blksz_obj_create( dim_t b_s, dim_t be_s,
 	return b;
 }
 
-
 void bli_blksz_obj_init( blksz_t* b,
                          dim_t    b_s, dim_t be_s,
                          dim_t    b_d, dim_t be_d,
                          dim_t    b_c, dim_t be_c,
                          dim_t    b_z, dim_t be_z )
 {
-	b->v[BLIS_BITVAL_FLOAT_TYPE]    = b_s;
-	b->v[BLIS_BITVAL_DOUBLE_TYPE]   = b_d;
-	b->v[BLIS_BITVAL_SCOMPLEX_TYPE] = b_c;
-	b->v[BLIS_BITVAL_DCOMPLEX_TYPE] = b_z;
-	b->e[BLIS_BITVAL_FLOAT_TYPE]    = be_s;
-	b->e[BLIS_BITVAL_DOUBLE_TYPE]   = be_d;
-	b->e[BLIS_BITVAL_SCOMPLEX_TYPE] = be_c;
-	b->e[BLIS_BITVAL_DCOMPLEX_TYPE] = be_z;
+	b->v[BLIS_FLOAT]    = b_s;
+	b->v[BLIS_DOUBLE]   = b_d;
+	b->v[BLIS_SCOMPLEX] = b_c;
+	b->v[BLIS_DCOMPLEX] = b_z;
+	b->e[BLIS_FLOAT]    = be_s;
+	b->e[BLIS_DOUBLE]   = be_d;
+	b->e[BLIS_SCOMPLEX] = be_c;
+	b->e[BLIS_DCOMPLEX] = be_z;
 
 	// By default, set the blocksize multiple, mr, and nr fields
 	// to NULL.
@@ -76,13 +75,11 @@ void bli_blksz_obj_init( blksz_t* b,
 	b->nr   = NULL;
 }
 
-
 void bli_blksz_obj_attach_mult_to( blksz_t* br,
                                    blksz_t* bc )
 {
 	bc->mult = br;
 }
-
 
 void bli_blksz_obj_attach_mr_nr_to( blksz_t* bmr,
                                     blksz_t* bnr,
@@ -92,100 +89,131 @@ void bli_blksz_obj_attach_mr_nr_to( blksz_t* bmr,
 	bc->nr = bnr;
 }
 
-
 void bli_blksz_obj_free( blksz_t* b )
 {
 	bli_free( b );
 }
 
+// -----------------------------------------------------------------------------
 
-dim_t bli_blksz_for_type( num_t    dt,
-                          blksz_t* b )
+void bli_blksz_set_def( dim_t    val,
+                        num_t    dt,
+                        blksz_t* b )
+{
+	b->v[ dt ] = val;
+}
+
+void bli_blksz_set_max( dim_t    val,
+                        num_t    dt,
+                        blksz_t* b )
+{
+	b->e[ dt ] = val;
+}
+
+void bli_blksz_set_def_max( dim_t    def,
+                            dim_t    max,
+                            num_t    dt,
+                            blksz_t* b )
+{
+	bli_blksz_set_def( def, dt, b );
+	bli_blksz_set_max( max, dt, b );
+}
+
+// -----------------------------------------------------------------------------
+
+void bli_blksz_reduce_to_mult( blksz_t* b )
+{
+	num_t dt;
+
+	// If there is no blocksize multiple currently attached, we
+	// do nothing.
+	if ( bli_blksz_mult( b ) == NULL ) return;
+
+	for ( dt = BLIS_DT_LO; dt <= BLIS_DT_HI; ++dt )
+	{
+		dim_t b_def  = bli_blksz_get_def( dt, b );
+		dim_t b_max  = bli_blksz_get_max( dt, b );
+		dim_t b_mult = bli_blksz_get_mult( dt, b );
+
+		// If the blocksize multiple is zero, we skip this datatype.
+		if ( b_mult == 0 ) continue;
+
+		// Round default and maximum blocksize values down to nearest
+		// multiple of b_mult.
+		b_def = ( b_def / b_mult ) * b_mult;
+		b_max = ( b_max / b_mult ) * b_mult;
+
+		// Make sure the blocksizes are at least b_mult.
+		if ( b_def == 0 ) b_def = b_mult;
+		if ( b_max == 0 ) b_max = b_mult;
+
+		// Store the new blocksizes back to the object.
+		bli_blksz_set_def_max( b_def, b_max, dt, b );
+	}
+}
+
+// -----------------------------------------------------------------------------
+
+dim_t bli_blksz_get_def( num_t dt, blksz_t* b )
 {
 	return b->v[ dt ];
 }
 
-
-dim_t bli_blksz_max_for_type( num_t    dt,
-                              blksz_t* b )
+dim_t bli_blksz_get_max( num_t dt, blksz_t* b )
 {
 	return b->e[ dt ];
 }
 
-
-dim_t bli_blksz_total_for_type( num_t    dt,
-                                blksz_t* b )
+dim_t bli_blksz_get_def_for_obj( obj_t* obj, blksz_t* b )
 {
-	return b->v[ dt ] + b->e[ dt ];
+	return bli_blksz_get_def( bli_obj_datatype( *obj ), b );
 }
 
-
-dim_t bli_blksz_for_obj( obj_t*   obj,
-                         blksz_t* b )
+dim_t bli_blksz_get_max_for_obj( obj_t* obj, blksz_t* b )
 {
-	return bli_blksz_for_type( bli_obj_datatype( *obj ), b );
+	return bli_blksz_get_max( bli_obj_datatype( *obj ), b );
 }
 
-
-dim_t bli_blksz_max_for_obj( obj_t*   obj,
-                             blksz_t* b )
-{
-	return bli_blksz_max_for_type( bli_obj_datatype( *obj ), b );
-}
-
-
-dim_t bli_blksz_total_for_obj( obj_t*   obj,
-                               blksz_t* b )
-{
-	return bli_blksz_total_for_type( bli_obj_datatype( *obj ), b );
-}
-
+// -----------------------------------------------------------------------------
 
 blksz_t* bli_blksz_mult( blksz_t* b )
 {
 	return b->mult;
 }
 
-
-dim_t bli_blksz_mult_for_type( num_t    dt,
-                               blksz_t* b )
+dim_t bli_blksz_get_mult( num_t dt, blksz_t* b )
 {
-	return bli_blksz_for_type( dt, bli_blksz_mult( b ) );
+	return bli_blksz_get_def( dt, bli_blksz_mult( b ) );
 }
 
-
-dim_t bli_blksz_mult_for_obj( obj_t*   obj,
-                              blksz_t* b )
+dim_t bli_blksz_get_mult_for_obj( obj_t* obj, blksz_t* b )
 {
-	return bli_blksz_mult_for_type( bli_obj_datatype( *obj ), b );
+	return bli_blksz_get_mult( bli_obj_datatype( *obj ), b );
 }
 
+// -----------------------------------------------------------------------------
 
 blksz_t* bli_blksz_mr( blksz_t* b )
 {
 	return b->mr;
 }
 
-
 blksz_t* bli_blksz_nr( blksz_t* b )
 {
 	return b->nr;
 }
 
-
-dim_t bli_blksz_mr_for_type( num_t    dt,
-                             blksz_t* b )
+dim_t bli_blksz_get_mr( num_t dt, blksz_t* b )
 {
-	return bli_blksz_for_type( dt, bli_blksz_mr( b ) );
+	return bli_blksz_get_def( dt, bli_blksz_mr( b ) );
 }
 
-
-dim_t bli_blksz_nr_for_type( num_t    dt,
-                             blksz_t* b )
+dim_t bli_blksz_get_nr( num_t dt, blksz_t* b )
 {
-	return bli_blksz_for_type( dt, bli_blksz_nr( b ) );
+	return bli_blksz_get_def( dt, bli_blksz_nr( b ) );
 }
 
+// -----------------------------------------------------------------------------
 
 dim_t bli_determine_blocksize_f( dim_t    i,
                                  dim_t    dim,
@@ -199,14 +227,13 @@ dim_t bli_determine_blocksize_f( dim_t    i,
 	// Extract the execution datatype and use it to query the corresponding
 	// blocksize and blocksize maximum values from the blksz_t object.
 	dt    = bli_obj_execution_datatype( *obj );
-	b_alg = bli_blksz_for_type( dt, bsize );
-	b_max = bli_blksz_max_for_type( dt, bsize );
+	b_alg = bli_blksz_get_def( dt, bsize );
+	b_max = bli_blksz_get_max( dt, bsize );
 
 	b_use = bli_determine_blocksize_f_sub( i, dim, b_alg, b_max );
 
 	return b_use;
 }
-
 
 dim_t bli_determine_blocksize_f_sub( dim_t  i,
                                      dim_t  dim,
@@ -239,7 +266,6 @@ dim_t bli_determine_blocksize_f_sub( dim_t  i,
 	return b_now;
 }
 
-
 dim_t bli_determine_blocksize_b( dim_t    i,
                                  dim_t    dim,
                                  obj_t*   obj,
@@ -252,14 +278,13 @@ dim_t bli_determine_blocksize_b( dim_t    i,
 	// Extract the execution datatype and use it to query the corresponding
 	// blocksize and blocksize maximum values from the blksz_t object.
 	dt    = bli_obj_execution_datatype( *obj );
-	b_alg = bli_blksz_for_type( dt, bsize );
-	b_max = bli_blksz_max_for_type( dt, bsize );
+	b_alg = bli_blksz_get_def( dt, bsize );
+	b_max = bli_blksz_get_max( dt, bsize );
 
 	b_use = bli_determine_blocksize_b_sub( i, dim, b_alg, b_max );
 
 	return b_use;
 }
-
 
 dim_t bli_determine_blocksize_b_sub( dim_t  i,
                                      dim_t  dim,
@@ -310,5 +335,4 @@ dim_t bli_determine_blocksize_b_sub( dim_t  i,
 
 	return b_now;
 }
-
 

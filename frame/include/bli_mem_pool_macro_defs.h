@@ -95,10 +95,10 @@
 //
 
 // NOTE: We define these values here just to more concisely capture the
-// increaseing of the kc dimension blocksizes by the maximum register
+// increasing of the kc dimension blocksizes by the maximum register
 // blocksize, which we do to make room for the nudging up of kc at
 // runtime to be a multiple of MR or NR for triangular operations trmm,
-// trmm3, and trsm. Also, we divide the 4m/3m values by 2 since they are
+// trmm3, and trsm. Also, we divide the induced values by 2 since they are
 // defined in terms of real elements, but used (later, when computing
 // pool block sizes) in terms of complex elements.
 
@@ -118,13 +118,13 @@
 #define BLIS_MAXIMUM_ASM_KC_Z   ((BLIS_MAXIMUM_KC_Z + BLIS_MAX_MNR_Z)/2)
 #define BLIS_MAXIMUM_ASM_NC_Z    (BLIS_MAXIMUM_NC_Z)
 
-#define BLIS_MAXIMUM_43M_MC_C    (BLIS_MAXIMUM_MC_S)
-#define BLIS_MAXIMUM_43M_KC_C   ((BLIS_MAXIMUM_KC_S + BLIS_MAX_MNR_S)/2)
-#define BLIS_MAXIMUM_43M_NC_C    (BLIS_MAXIMUM_NC_S)
+#define BLIS_MAXIMUM_IND_MC_C    (BLIS_MAXIMUM_MC_S)
+#define BLIS_MAXIMUM_IND_KC_C   ((BLIS_MAXIMUM_KC_S + BLIS_MAX_MNR_S)/2)
+#define BLIS_MAXIMUM_IND_NC_C    (BLIS_MAXIMUM_NC_S)
 
-#define BLIS_MAXIMUM_43M_MC_Z    (BLIS_MAXIMUM_MC_D)
-#define BLIS_MAXIMUM_43M_KC_Z   ((BLIS_MAXIMUM_KC_D + BLIS_MAX_MNR_D)/2)
-#define BLIS_MAXIMUM_43M_NC_Z    (BLIS_MAXIMUM_NC_D)
+#define BLIS_MAXIMUM_IND_MC_Z    (BLIS_MAXIMUM_MC_D)
+#define BLIS_MAXIMUM_IND_KC_Z   ((BLIS_MAXIMUM_KC_D + BLIS_MAX_MNR_D)/2)
+#define BLIS_MAXIMUM_IND_NC_Z    (BLIS_MAXIMUM_NC_D)
 
 
 //
@@ -199,7 +199,7 @@
                                                       / BLIS_DEFAULT_KR_D   )
 
 //
-// Compute pool dimensions for single complex
+// Compute pool dimensions for single complex (native)
 //
 #define BLIS_POOL_ASM_MC_C  ( ( BLIS_MAXIMUM_ASM_MC_C * BLIS_PACKDIM_MAXR_C ) \
                                                       / BLIS_DEFAULT_MAXR_C )
@@ -209,7 +209,7 @@
                                                       / BLIS_DEFAULT_KR_C   )
 
 //
-// Compute pool dimensions for double complex
+// Compute pool dimensions for double complex (native)
 //
 #define BLIS_POOL_ASM_MC_Z  ( ( BLIS_MAXIMUM_ASM_MC_Z * BLIS_PACKDIM_MAXR_Z ) \
                                                       / BLIS_DEFAULT_MAXR_Z )
@@ -219,23 +219,23 @@
                                                       / BLIS_DEFAULT_KR_Z   )
 
 //
-// Compute pool dimensions for single complex (4m/3m)
+// Compute pool dimensions for single complex (induced)
 //
-#define BLIS_POOL_43M_MC_C  ( ( BLIS_MAXIMUM_43M_MC_C * BLIS_PACKDIM_MAXR_S ) \
+#define BLIS_POOL_IND_MC_C  ( ( BLIS_MAXIMUM_IND_MC_C * BLIS_PACKDIM_MAXR_S ) \
                                                       / BLIS_DEFAULT_MAXR_S )
-#define BLIS_POOL_43M_NC_C  ( ( BLIS_MAXIMUM_43M_NC_C * BLIS_PACKDIM_MAXR_S ) \
+#define BLIS_POOL_IND_NC_C  ( ( BLIS_MAXIMUM_IND_NC_C * BLIS_PACKDIM_MAXR_S ) \
                                                       / BLIS_DEFAULT_MAXR_S )
-#define BLIS_POOL_43M_KC_C  ( ( BLIS_MAXIMUM_43M_KC_C * BLIS_PACKDIM_KR_S   ) \
+#define BLIS_POOL_IND_KC_C  ( ( BLIS_MAXIMUM_IND_KC_C * BLIS_PACKDIM_KR_S   ) \
                                                       / BLIS_DEFAULT_KR_S   )
 
 //
-// Compute pool dimensions for double complex (4m/3m)
+// Compute pool dimensions for double complex (induced)
 //
-#define BLIS_POOL_43M_MC_Z  ( ( BLIS_MAXIMUM_43M_MC_Z * BLIS_PACKDIM_MAXR_D ) \
+#define BLIS_POOL_IND_MC_Z  ( ( BLIS_MAXIMUM_IND_MC_Z * BLIS_PACKDIM_MAXR_D ) \
                                                       / BLIS_DEFAULT_MAXR_D )
-#define BLIS_POOL_43M_NC_Z  ( ( BLIS_MAXIMUM_43M_NC_Z * BLIS_PACKDIM_MAXR_D ) \
+#define BLIS_POOL_IND_NC_Z  ( ( BLIS_MAXIMUM_IND_NC_Z * BLIS_PACKDIM_MAXR_D ) \
                                                       / BLIS_DEFAULT_MAXR_D )
-#define BLIS_POOL_43M_KC_Z  ( ( BLIS_MAXIMUM_43M_KC_Z * BLIS_PACKDIM_KR_D   ) \
+#define BLIS_POOL_IND_KC_Z  ( ( BLIS_MAXIMUM_IND_KC_Z * BLIS_PACKDIM_KR_D   ) \
                                                       / BLIS_DEFAULT_KR_D   )
 
 
@@ -345,13 +345,14 @@
                                  )
 
 //
-// Compute memory pool block sizes for single complex (4m/3m).
+// Compute memory pool block sizes for single complex (induced).
 //
 
-// NOTE: We scale by 3/2 because 3m requires 50% more space than 4m.
+// NOTE: We scale by 3/2 because 3m1 requires 50% more space than other
+// algorithms.
 
-#define BLIS_MK_BLOCK_SIZE_43M_C ( BLIS_POOL_43M_MC_C * \
-                                   ( BLIS_POOL_43M_KC_C + \
+#define BLIS_MK_BLOCK_SIZE_IND_C ( BLIS_POOL_IND_MC_C * \
+                                   ( BLIS_POOL_IND_KC_C + \
                                      ( BLIS_UPANEL_A_ALIGN_SIZE_C / \
                                        BLIS_SIZEOF_C ) \
                                    ) * \
@@ -359,31 +360,32 @@
                                      3 \
                                    ) / 2 \
                                  )
-#define BLIS_KN_BLOCK_SIZE_43M_C ( \
-                                   ( BLIS_POOL_43M_KC_C + \
+#define BLIS_KN_BLOCK_SIZE_IND_C ( \
+                                   ( BLIS_POOL_IND_KC_C + \
                                      ( BLIS_UPANEL_B_ALIGN_SIZE_C / \
                                        BLIS_SIZEOF_C ) \
                                    ) * \
-                                   BLIS_POOL_43M_NC_C * \
+                                   BLIS_POOL_IND_NC_C * \
                                    ( BLIS_SIZEOF_C * \
                                      3 \
                                    ) / 2 \
                                  )
-#define BLIS_MN_BLOCK_SIZE_43M_C ( BLIS_POOL_43M_MC_C * \
-                                   BLIS_POOL_43M_NC_C * \
+#define BLIS_MN_BLOCK_SIZE_IND_C ( BLIS_POOL_IND_MC_C * \
+                                   BLIS_POOL_IND_NC_C * \
                                    ( BLIS_SIZEOF_C * \
                                      3 \
                                    ) / 2 \
                                  )
 
 //
-// Compute memory pool block sizes for double complex (4m/3m).
+// Compute memory pool block sizes for double complex (induced).
 //
 
-// NOTE: We scale by 3/2 because 3m requires 50% more space than 4m.
+// NOTE: We scale by 3/2 because 3m1 requires 50% more space than other
+// algorithms.
 
-#define BLIS_MK_BLOCK_SIZE_43M_Z ( BLIS_POOL_43M_MC_Z * \
-                                   ( BLIS_POOL_43M_KC_Z + \
+#define BLIS_MK_BLOCK_SIZE_IND_Z ( BLIS_POOL_IND_MC_Z * \
+                                   ( BLIS_POOL_IND_KC_Z + \
                                      ( BLIS_UPANEL_A_ALIGN_SIZE_Z / \
                                        BLIS_SIZEOF_Z ) \
                                    ) * \
@@ -391,18 +393,18 @@
                                      3 \
                                    ) / 2 \
                                  )
-#define BLIS_KN_BLOCK_SIZE_43M_Z ( \
-                                   ( BLIS_POOL_43M_KC_Z + \
+#define BLIS_KN_BLOCK_SIZE_IND_Z ( \
+                                   ( BLIS_POOL_IND_KC_Z + \
                                      ( BLIS_UPANEL_B_ALIGN_SIZE_Z / \
                                        BLIS_SIZEOF_Z ) \
                                    ) * \
-                                   BLIS_POOL_43M_NC_Z * \
+                                   BLIS_POOL_IND_NC_Z * \
                                    ( BLIS_SIZEOF_Z * \
                                      3 \
                                    ) / 2 \
                                  )
-#define BLIS_MN_BLOCK_SIZE_43M_Z ( BLIS_POOL_43M_MC_Z * \
-                                   BLIS_POOL_43M_NC_Z * \
+#define BLIS_MN_BLOCK_SIZE_IND_Z ( BLIS_POOL_IND_MC_Z * \
+                                   BLIS_POOL_IND_NC_Z * \
                                    ( BLIS_SIZEOF_Z * \
                                      3 \
                                    ) / 2 \
@@ -429,13 +431,13 @@
 #undef  BLIS_MK_BLOCK_SIZE
 #define BLIS_MK_BLOCK_SIZE BLIS_MK_BLOCK_SIZE_ASM_Z
 #endif
-#if     BLIS_MK_BLOCK_SIZE_43M_C > BLIS_MK_BLOCK_SIZE
+#if     BLIS_MK_BLOCK_SIZE_IND_C > BLIS_MK_BLOCK_SIZE
 #undef  BLIS_MK_BLOCK_SIZE
-#define BLIS_MK_BLOCK_SIZE BLIS_MK_BLOCK_SIZE_43M_C
+#define BLIS_MK_BLOCK_SIZE BLIS_MK_BLOCK_SIZE_IND_C
 #endif
-#if     BLIS_MK_BLOCK_SIZE_43M_Z > BLIS_MK_BLOCK_SIZE
+#if     BLIS_MK_BLOCK_SIZE_IND_Z > BLIS_MK_BLOCK_SIZE
 #undef  BLIS_MK_BLOCK_SIZE
-#define BLIS_MK_BLOCK_SIZE BLIS_MK_BLOCK_SIZE_43M_Z
+#define BLIS_MK_BLOCK_SIZE BLIS_MK_BLOCK_SIZE_IND_Z
 #endif
 
 //
@@ -454,13 +456,13 @@
 #undef  BLIS_KN_BLOCK_SIZE
 #define BLIS_KN_BLOCK_SIZE BLIS_KN_BLOCK_SIZE_ASM_Z
 #endif
-#if     BLIS_KN_BLOCK_SIZE_43M_C > BLIS_KN_BLOCK_SIZE
+#if     BLIS_KN_BLOCK_SIZE_IND_C > BLIS_KN_BLOCK_SIZE
 #undef  BLIS_KN_BLOCK_SIZE
-#define BLIS_KN_BLOCK_SIZE BLIS_KN_BLOCK_SIZE_43M_C
+#define BLIS_KN_BLOCK_SIZE BLIS_KN_BLOCK_SIZE_IND_C
 #endif
-#if     BLIS_KN_BLOCK_SIZE_43M_Z > BLIS_KN_BLOCK_SIZE
+#if     BLIS_KN_BLOCK_SIZE_IND_Z > BLIS_KN_BLOCK_SIZE
 #undef  BLIS_KN_BLOCK_SIZE
-#define BLIS_KN_BLOCK_SIZE BLIS_KN_BLOCK_SIZE_43M_Z
+#define BLIS_KN_BLOCK_SIZE BLIS_KN_BLOCK_SIZE_IND_Z
 #endif
 
 //
@@ -479,13 +481,13 @@
 #undef  BLIS_MN_BLOCK_SIZE
 #define BLIS_MN_BLOCK_SIZE BLIS_MN_BLOCK_SIZE_ASM_Z
 #endif
-#if     BLIS_MN_BLOCK_SIZE_43M_C > BLIS_MN_BLOCK_SIZE
+#if     BLIS_MN_BLOCK_SIZE_IND_C > BLIS_MN_BLOCK_SIZE
 #undef  BLIS_MN_BLOCK_SIZE
-#define BLIS_MN_BLOCK_SIZE BLIS_MN_BLOCK_SIZE_43M_C
+#define BLIS_MN_BLOCK_SIZE BLIS_MN_BLOCK_SIZE_IND_C
 #endif
-#if     BLIS_MN_BLOCK_SIZE_43M_Z > BLIS_MN_BLOCK_SIZE
+#if     BLIS_MN_BLOCK_SIZE_IND_Z > BLIS_MN_BLOCK_SIZE
 #undef  BLIS_MN_BLOCK_SIZE
-#define BLIS_MN_BLOCK_SIZE BLIS_MN_BLOCK_SIZE_43M_Z
+#define BLIS_MN_BLOCK_SIZE BLIS_MN_BLOCK_SIZE_IND_Z
 #endif
 
 

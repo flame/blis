@@ -168,30 +168,35 @@ LDFLAGS        += -lgfortran -lm -lpthread -fopenmp
 
 
 # Datatype
-DT_S     := -DDT_S
-DT_D     := -DDT_D
-DT_C     := -DDT_C
-DT_Z     := -DDT_Z
+DT_S     := -DDT=BLIS_FLOAT
+DT_D     := -DDT=BLIS_DOUBLE
+DT_C     := -DDT=BLIS_SCOMPLEX
+DT_Z     := -DDT=BLIS_DCOMPLEX
 
 # Which library?
 BLI_DEF  := -DBLIS
 BLA_DEF  := -DBLAS
 
 # Complex implementation type
-D4MHW    := -D_4MHW
-D4M1B    := -D_4M1B
-D4M1A    := -D_4M1A
-D3MHW    := -D_3MHW
-D3M1     := -D_3M1
+D3MHW    := -DIND=BLIS_3MH
+D3M3     := -DIND=BLIS_3M3
+D3M2     := -DIND=BLIS_3M2
+D3M1     := -DIND=BLIS_3M1
+D4MHW    := -DIND=BLIS_4MH
+D4M1B    := -DIND=BLIS_4M1B
+D4M1A    := -DIND=BLIS_4M1A
+DNAT     := -DIND=BLIS_NAT
 
 # Implementation string
-STR_OBL  := -DSTR=\"openblas\"
-STR_ASM  := -DSTR=\"asm\"
+STR_3MHW := -DSTR=\"3mhw\"
+STR_3M3  := -DSTR=\"3m3\"
+STR_3M2  := -DSTR=\"3m2\"
+STR_3M1  := -DSTR=\"3m1\"
 STR_4MHW := -DSTR=\"4mhw\"
 STR_4M1B := -DSTR=\"4m1b\"
 STR_4M1A := -DSTR=\"4m1a\"
-STR_3MHW := -DSTR=\"3mhw\"
-STR_3M1  := -DSTR=\"3m1\"
+STR_NAT  := -DSTR=\"asm\"
+STR_OBL  := -DSTR=\"openblas\"
 
 # Single or multithreaded string
 STR_ST   := -DTHR_STR=\"st\"
@@ -223,35 +228,43 @@ blis: \
       test_sgemm_asm_blis_st.x \
       test_dgemm_asm_blis_st.x \
       \
-      test_cgemm_asm_blis_st.x \
-      test_zgemm_asm_blis_st.x \
-      test_cgemm_4m1a_blis_st.x \
-      test_zgemm_4m1a_blis_st.x \
-      test_cgemm_4m1b_blis_st.x \
-      test_zgemm_4m1b_blis_st.x \
-      test_cgemm_4mhw_blis_st.x \
-      test_zgemm_4mhw_blis_st.x \
+      test_cgemm_3mhw_blis_st.x \
+      test_zgemm_3mhw_blis_st.x \
+      test_cgemm_3m3_blis_st.x \
+      test_zgemm_3m3_blis_st.x \
+      test_cgemm_3m2_blis_st.x \
+      test_zgemm_3m2_blis_st.x \
       test_cgemm_3m1_blis_st.x \
       test_zgemm_3m1_blis_st.x \
-      test_cgemm_3mhw_blis_st.x \
-      test_zgemm_3mhw_blis_st.x
+      test_cgemm_4mhw_blis_st.x \
+      test_zgemm_4mhw_blis_st.x \
+      test_cgemm_4m1b_blis_st.x \
+      test_zgemm_4m1b_blis_st.x \
+      test_cgemm_4m1a_blis_st.x \
+      test_zgemm_4m1a_blis_st.x \
+      test_cgemm_asm_blis_st.x \
+      test_zgemm_asm_blis_st.x
 
 blis-mt: \
       test_sgemm_asm_blis_mt.x \
       test_dgemm_asm_blis_mt.x \
       \
-      test_cgemm_asm_blis_mt.x \
-      test_zgemm_asm_blis_mt.x \
-      test_cgemm_4m1a_blis_mt.x \
-      test_zgemm_4m1a_blis_mt.x \
-      test_cgemm_4m1b_blis_mt.x \
-      test_zgemm_4m1b_blis_mt.x \
-      test_cgemm_4mhw_blis_mt.x \
-      test_zgemm_4mhw_blis_mt.x \
+      test_cgemm_3mhw_blis_mt.x \
+      test_zgemm_3mhw_blis_mt.x \
+      test_cgemm_3m3_blis_mt.x \
+      test_zgemm_3m3_blis_mt.x \
+      test_cgemm_3m2_blis_mt.x \
+      test_zgemm_3m2_blis_mt.x \
       test_cgemm_3m1_blis_mt.x \
       test_zgemm_3m1_blis_mt.x \
-      test_cgemm_3mhw_blis_mt.x \
-      test_zgemm_3mhw_blis_mt.x
+      test_cgemm_4mhw_blis_mt.x \
+      test_zgemm_4mhw_blis_mt.x \
+      test_cgemm_4m1b_blis_mt.x \
+      test_zgemm_4m1b_blis_mt.x \
+      test_cgemm_4m1a_blis_mt.x \
+      test_zgemm_4m1a_blis_mt.x \
+      test_cgemm_asm_blis_mt.x \
+      test_zgemm_asm_blis_mt.x
 
 openblas: \
       test_cgemm_openblas_st.x \
@@ -274,43 +287,57 @@ openblas-mt: \
 $(TEST_OBJ_PATH)/%.o: $(TEST_SRC_PATH)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# openblas
-test_z%_openblas_st.o: test_%.c
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLA_DEF)          $(STR_OBL)  $(STR_ST) -c $< -o $@
+# blis 3mhw
+test_z%_3mhw_blis_st.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLI_DEF) $(D3MHW) $(STR_3MHW) $(STR_ST) -c $< -o $@
 
-test_c%_openblas_st.o: test_%.c
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLA_DEF)          $(STR_OBL)  $(STR_ST) -c $< -o $@
+test_c%_3mhw_blis_st.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLI_DEF) $(D3MHW) $(STR_3MHW) $(STR_ST) -c $< -o $@
 
-test_z%_openblas_mt.o: test_%.c
-	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_Z) $(BLA_DEF)          $(STR_OBL)  $(STR_MT) -c $< -o $@
+test_z%_3mhw_blis_mt.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_Z) $(BLI_DEF) $(D3MHW) $(STR_3MHW) $(STR_MT) -c $< -o $@
 
-test_c%_openblas_mt.o: test_%.c
-	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLA_DEF)          $(STR_OBL)  $(STR_MT) -c $< -o $@
+test_c%_3mhw_blis_mt.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLI_DEF) $(D3MHW) $(STR_3MHW) $(STR_MT) -c $< -o $@
 
-# blis asm
-test_d%_asm_blis_st.o: test_%.c
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_D) $(BLI_DEF)          $(STR_ASM)  $(STR_ST) -c $< -o $@
+# blis 3m3
+test_z%_3m3_blis_st.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLI_DEF) $(D3M3)  $(STR_3M3)  $(STR_ST) -c $< -o $@
 
-test_s%_asm_blis_st.o: test_%.c
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_S) $(BLI_DEF)          $(STR_ASM)  $(STR_ST) -c $< -o $@
+test_c%_3m3_blis_st.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLI_DEF) $(D3M3)  $(STR_3M3)  $(STR_ST) -c $< -o $@
 
-test_z%_asm_blis_st.o: test_%.c
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLI_DEF)          $(STR_ASM)  $(STR_ST) -c $< -o $@
+test_z%_3m3_blis_mt.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_Z) $(BLI_DEF) $(D3M3)  $(STR_3M3)  $(STR_MT) -c $< -o $@
 
-test_c%_asm_blis_st.o: test_%.c
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLI_DEF)          $(STR_ASM)  $(STR_ST) -c $< -o $@
+test_c%_3m3_blis_mt.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLI_DEF) $(D3M3)  $(STR_3M3)  $(STR_MT) -c $< -o $@
 
-test_d%_asm_blis_mt.o: test_%.c
-	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_D) $(BLI_DEF)          $(STR_ASM)  $(STR_MT) -c $< -o $@
+# blis 3m2
+test_z%_3m2_blis_st.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLI_DEF) $(D3M2)  $(STR_3M2)  $(STR_ST) -c $< -o $@
 
-test_s%_asm_blis_mt.o: test_%.c
-	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_S) $(BLI_DEF)          $(STR_ASM)  $(STR_MT) -c $< -o $@
+test_c%_3m2_blis_st.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLI_DEF) $(D3M2)  $(STR_3M2)  $(STR_ST) -c $< -o $@
 
-test_z%_asm_blis_mt.o: test_%.c
-	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_Z) $(BLI_DEF)          $(STR_ASM)  $(STR_MT) -c $< -o $@
+test_z%_3m2_blis_mt.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_Z) $(BLI_DEF) $(D3M2)  $(STR_3M2)  $(STR_MT) -c $< -o $@
 
-test_c%_asm_blis_mt.o: test_%.c
-	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLI_DEF)          $(STR_ASM)  $(STR_MT) -c $< -o $@
+test_c%_3m2_blis_mt.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLI_DEF) $(D3M2)  $(STR_3M2)  $(STR_MT) -c $< -o $@
+
+# blis 3m1
+test_z%_3m1_blis_st.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLI_DEF) $(D3M1)  $(STR_3M1)  $(STR_ST) -c $< -o $@
+
+test_c%_3m1_blis_st.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLI_DEF) $(D3M1)  $(STR_3M1)  $(STR_ST) -c $< -o $@
+
+test_z%_3m1_blis_mt.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_Z) $(BLI_DEF) $(D3M1)  $(STR_3M1)  $(STR_MT) -c $< -o $@
+
+test_c%_3m1_blis_mt.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLI_DEF) $(D3M1)  $(STR_3M1)  $(STR_MT) -c $< -o $@
 
 # blis 4mhw
 test_z%_4mhw_blis_st.o: test_%.c
@@ -351,31 +378,43 @@ test_z%_4m1a_blis_mt.o: test_%.c
 test_c%_4m1a_blis_mt.o: test_%.c
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLI_DEF) $(D4M1A) $(STR_4M1A) $(STR_MT) -c $< -o $@
 
-# blis 3mhw
-test_z%_3mhw_blis_st.o: test_%.c
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLI_DEF) $(D3MHW) $(STR_3MHW) $(STR_ST) -c $< -o $@
+# blis asm
+test_d%_asm_blis_st.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_D) $(BLI_DEF) $(DNAT)  $(STR_NAT)  $(STR_ST) -c $< -o $@
 
-test_c%_3mhw_blis_st.o: test_%.c
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLI_DEF) $(D3MHW) $(STR_3MHW) $(STR_ST) -c $< -o $@
+test_s%_asm_blis_st.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_S) $(BLI_DEF) $(DNAT)  $(STR_NAT)  $(STR_ST) -c $< -o $@
 
-test_z%_3mhw_blis_mt.o: test_%.c
-	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_Z) $(BLI_DEF) $(D3MHW) $(STR_3MHW) $(STR_MT) -c $< -o $@
+test_z%_asm_blis_st.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLI_DEF) $(DNAT)  $(STR_NAT)  $(STR_ST) -c $< -o $@
 
-test_c%_3mhw_blis_mt.o: test_%.c
-	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLI_DEF) $(D3MHW) $(STR_3MHW) $(STR_MT) -c $< -o $@
+test_c%_asm_blis_st.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLI_DEF) $(DNAT)  $(STR_NAT)  $(STR_ST) -c $< -o $@
 
-# blis 3m1
-test_z%_3m1_blis_st.o: test_%.c
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLI_DEF) $(D3M1)  $(STR_3M1)  $(STR_ST) -c $< -o $@
+test_d%_asm_blis_mt.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_D) $(BLI_DEF) $(DNAT)  $(STR_NAT)  $(STR_MT) -c $< -o $@
 
-test_c%_3m1_blis_st.o: test_%.c
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLI_DEF) $(D3M1)  $(STR_3M1)  $(STR_ST) -c $< -o $@
+test_s%_asm_blis_mt.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_S) $(BLI_DEF) $(DNAT)  $(STR_NAT)  $(STR_MT) -c $< -o $@
 
-test_z%_3m1_blis_mt.o: test_%.c
-	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_Z) $(BLI_DEF) $(D3M1)  $(STR_3M1)  $(STR_MT) -c $< -o $@
+test_z%_asm_blis_mt.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_Z) $(BLI_DEF) $(DNAT)  $(STR_NAT)  $(STR_MT) -c $< -o $@
 
-test_c%_3m1_blis_mt.o: test_%.c
-	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLI_DEF) $(D3M1)  $(STR_3M1)  $(STR_MT) -c $< -o $@
+test_c%_asm_blis_mt.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLI_DEF) $(DNAT)  $(STR_NAT)  $(STR_MT) -c $< -o $@
+
+# openblas
+test_z%_openblas_st.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLA_DEF) $(DNAT)  $(STR_OBL)  $(STR_ST) -c $< -o $@
+
+test_c%_openblas_st.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLA_DEF) $(DNAT)  $(STR_OBL)  $(STR_ST) -c $< -o $@
+
+test_z%_openblas_mt.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_Z) $(BLA_DEF) $(DNAT)  $(STR_OBL)  $(STR_MT) -c $< -o $@
+
+test_c%_openblas_mt.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLA_DEF) $(DNAT)  $(STR_OBL)  $(STR_MT) -c $< -o $@
 
 
 # -- Executable file rules --

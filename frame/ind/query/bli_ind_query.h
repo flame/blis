@@ -39,6 +39,8 @@
 typedef enum
 {
 	BLIS_3MH = 0,
+	BLIS_3M3,
+	BLIS_3M2,
 	BLIS_3M1,
 	BLIS_4MH,
 	BLIS_4M1B,
@@ -46,33 +48,9 @@ typedef enum
 	BLIS_NAT,
 } ind_t;
 
-#define BLIS_NUM_IND_METHODS 6
+#define BLIS_NUM_IND_METHODS (BLIS_NAT+1)
 
 // -----------------------------------------------------------------------------
-
-/*
-bool_t bli_gemmind_has_avail( num_t dt );
-bool_t bli_hemmind_has_avail( num_t dt );
-bool_t bli_herkind_has_avail( num_t dt );
-bool_t bli_her2kind_has_avail( num_t dt );
-bool_t bli_symmind_has_avail( num_t dt );
-bool_t bli_syrkind_has_avail( num_t dt );
-bool_t bli_syr2kind_has_avail( num_t dt );
-bool_t bli_trmm3ind_has_avail( num_t dt );
-bool_t bli_trmmind_has_avail( num_t dt );
-bool_t bli_trsmind_has_avail( num_t dt );
-
-void*  bli_gemmind_get_avail( num_t dt );
-void*  bli_hemmind_get_avail( num_t dt );
-void*  bli_herkind_get_avail( num_t dt );
-void*  bli_her2kind_get_avail( num_t dt );
-void*  bli_symmind_get_avail( num_t dt );
-void*  bli_syrkind_get_avail( num_t dt );
-void*  bli_syr2kind_get_avail( num_t dt );
-void*  bli_trmm3ind_get_avail( num_t dt );
-void*  bli_trmmind_get_avail( num_t dt );
-void*  bli_trsmind_get_avail( num_t dt );
-*/
 
 #undef  GENPROT
 #define GENPROT( opname ) \

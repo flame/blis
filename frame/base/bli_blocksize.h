@@ -53,39 +53,37 @@ void bli_blksz_obj_attach_mr_nr_to( blksz_t* bmr,
 
 void bli_blksz_obj_free( blksz_t* b );
 
-dim_t bli_blksz_for_type( num_t    dt,
-                          blksz_t* b );
+void bli_blksz_set_def( dim_t    val,
+                        num_t    dt,
+                        blksz_t* b );
 
-dim_t bli_blksz_max_for_type( num_t    dt,
-                              blksz_t* b );
+void bli_blksz_set_max( dim_t    val,
+                        num_t    dt,
+                        blksz_t* b );
 
-dim_t bli_blksz_total_for_type( num_t    dt,
-                                blksz_t* b );
+void bli_blksz_set_def_max( dim_t    def,
+                            dim_t    max,
+                            num_t    dt,
+                            blksz_t* b );
 
-dim_t bli_blksz_for_obj( obj_t*   obj,
-                         blksz_t* b );
+void bli_blksz_reduce_to_mult( blksz_t* b );
 
-dim_t bli_blksz_max_for_obj( obj_t*   obj,
-                             blksz_t* b );
+dim_t bli_blksz_get_def( num_t dt, blksz_t* b );
+dim_t bli_blksz_get_max( num_t dt, blksz_t* b );
 
-dim_t bli_blksz_total_for_obj( obj_t*   obj,
-                               blksz_t* b );
+dim_t bli_blksz_get_def_for_obj( obj_t* obj, blksz_t* b );
+dim_t bli_blksz_get_max_for_obj( obj_t* obj, blksz_t* b );
 
 blksz_t* bli_blksz_mult( blksz_t* b );
-
-dim_t bli_blksz_mult_for_type( num_t    dt,
-                               blksz_t* b );
-
-dim_t bli_blksz_mult_for_obj( obj_t*   obj,
-                              blksz_t* b );
+dim_t bli_blksz_get_mult( num_t dt, blksz_t* b );
+dim_t bli_blksz_get_mult_for_obj( obj_t* obj, blksz_t* b );
 
 blksz_t* bli_blksz_mr( blksz_t* b );
 blksz_t* bli_blksz_nr( blksz_t* b );
 
-dim_t bli_blksz_mr_for_type( num_t    dt,
-                             blksz_t* b );
-dim_t bli_blksz_nr_for_type( num_t    dt,
-                             blksz_t* b );
+dim_t bli_blksz_get_mr( num_t dt, blksz_t* b );
+dim_t bli_blksz_get_nr( num_t dt, blksz_t* b );
+
 // -----------------------------------------------------------------------------
 
 dim_t bli_determine_blocksize_f( dim_t    i,

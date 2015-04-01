@@ -43,18 +43,20 @@ typedef void (*FUNCPTR_T)(
                            dim_t   n,
                            dim_t   k,
                            void*   alpha,
-                           void*   a, inc_t cs_a, inc_t pd_a, inc_t ps_a,
-                           void*   b, inc_t rs_b, inc_t pd_b, inc_t ps_b,
+                           void*   a, inc_t cs_a, inc_t is_a,
+                                      dim_t pd_a, inc_t ps_a,
+                           void*   b, inc_t rs_b, inc_t is_b,
+                                      dim_t pd_b, inc_t ps_b,
                            void*   beta,
                            void*   c, inc_t rs_c, inc_t cs_c,
                            void*   gemm_ukr,
                            gemm_thrinfo_t* thread
                          );
 
-static FUNCPTR_T GENARRAY(ftypes,gemm_ker_var3);
+static FUNCPTR_T GENARRAY(ftypes,gemm_ker_var4);
 
 
-void bli_gemm_ker_var3( obj_t*  a,
+void bli_gemm_ker_var4( obj_t*  a,
                         obj_t*  b,
                         obj_t*  c,
                         gemm_t* cntl,
@@ -71,12 +73,14 @@ void bli_gemm_ker_var3( obj_t*  a,
 
 	void*     buf_a     = bli_obj_buffer_at_off( *a );
 	inc_t     cs_a      = bli_obj_col_stride( *a );
-	inc_t     pd_a      = bli_obj_panel_dim( *a );
+	inc_t     is_a      = bli_obj_imag_stride( *a );
+	dim_t     pd_a      = bli_obj_panel_dim( *a );
 	inc_t     ps_a      = bli_obj_panel_stride( *a );
 
 	void*     buf_b     = bli_obj_buffer_at_off( *b );
 	inc_t     rs_b      = bli_obj_row_stride( *b );
-	inc_t     pd_b      = bli_obj_panel_dim( *b );
+	inc_t     is_b      = bli_obj_imag_stride( *b );
+	dim_t     pd_b      = bli_obj_panel_dim( *b );
 	inc_t     ps_b      = bli_obj_panel_stride( *b );
 
 	void*     buf_c     = bli_obj_buffer_at_off( *c );
@@ -122,8 +126,10 @@ void bli_gemm_ker_var3( obj_t*  a,
 	   n,
 	   k,
 	   buf_alpha,
-	   buf_a, cs_a, pd_a, ps_a,
-	   buf_b, rs_b, pd_b, ps_b,
+	   buf_a, cs_a, is_a,
+	          pd_a, ps_a,
+	   buf_b, rs_b, is_b,
+	          pd_b, ps_b,
 	   buf_beta,
 	   buf_c, rs_c, cs_c,
 	   gemm_ukr,
@@ -141,8 +147,10 @@ void PASTEMAC(ch,varname)( \
                            dim_t   n, \
                            dim_t   k, \
                            void*   alpha, \
-                           void*   a, inc_t cs_a, inc_t pd_a, inc_t ps_a, \
-                           void*   b, inc_t rs_b, inc_t pd_b, inc_t ps_b, \
+                           void*   a, inc_t cs_a, inc_t is_a, \
+                                      dim_t pd_a, inc_t ps_a, \
+                           void*   b, inc_t rs_b, inc_t is_b, \
+                                      dim_t pd_b, inc_t ps_b, \
                            void*   beta, \
                            void*   c, inc_t rs_c, inc_t cs_c, \
                            void*   gemm_ukr,  \
@@ -162,8 +170,8 @@ void PASTEMAC(ch,varname)( \
 	/* Alias some constants to simpler names. */ \
 	const dim_t     MR         = pd_a; \
 	const dim_t     NR         = pd_b; \
-	const dim_t     PACKMR     = cs_a; \
-	const dim_t     PACKNR     = rs_b; \
+	/*const dim_t     PACKMR     = cs_a;*/ \
+	/*const dim_t     PACKNR     = rs_b;*/ \
 \
 	ctype* restrict zero       = PASTEMAC(ch,0); \
 	ctype* restrict one        = PASTEMAC(ch,1); \
@@ -184,8 +192,6 @@ void PASTEMAC(ch,varname)( \
 	inc_t           rstep_a; \
 	inc_t           cstep_b; \
 	inc_t           rstep_c, cstep_c; \
-	inc_t           istep_a; \
-	inc_t           istep_b; \
 	auxinfo_t       aux; \
 \
 	/*
@@ -228,16 +234,13 @@ void PASTEMAC(ch,varname)( \
 	rstep_c = rs_c * MR; \
 	cstep_c = cs_c * NR; \
 \
-	istep_a = PACKMR * k; \
-	istep_b = PACKNR * k; \
-\
 	/* Save the pack schemas of A and B to the auxinfo_t object. */ \
 	bli_auxinfo_set_schema_a( schema_a, aux ); \
 	bli_auxinfo_set_schema_b( schema_b, aux ); \
 \
 	/* Save the imaginary stride of A and B to the auxinfo_t object. */ \
-	bli_auxinfo_set_is_a( istep_a, aux ); \
-	bli_auxinfo_set_is_b( istep_b, aux ); \
+	bli_auxinfo_set_is_a( is_a, aux ); \
+	bli_auxinfo_set_is_b( is_b, aux ); \
 \
 	gemm_thrinfo_t* caucus = gemm_thread_sub_gemm( thread ); \
 	dim_t jr_num_threads = thread_n_way( thread ); \
@@ -260,20 +263,29 @@ void PASTEMAC(ch,varname)( \
 		/* Initialize our next panel of B to be the current panel of B. */ \
 		b2 = b1; \
 \
-		/* In the 4mb method, we execute the ir loop twice: once for b_r
-		   and once for b_i. */ \
-		for ( ii = 0; ii < 2; ++ii ) \
+		/* In the 3m2 method, we execute the ir loop thrice: once for
+		   a_r[ir] * b_r, once for a_i[ir] * b_i, and once for
+		   a_{r+i}[ir] * b_{r+i}. */ \
+		for ( ii = 0; ii < 3; ++ii ) \
 		{ \
 		ctype* restrict beta_use; \
 \
 		if ( ii == 0 ) \
 		{ \
+			bli_auxinfo_set_schema_a( BLIS_PACKED_ROW_PANELS_RO, aux ); \
 			bli_auxinfo_set_schema_b( BLIS_PACKED_COL_PANELS_RO, aux ); \
 			beta_use = beta_cast; \
 		} \
+		else if ( ii == 1 ) \
+		{ \
+			bli_auxinfo_set_schema_a( BLIS_PACKED_ROW_PANELS_IO, aux ); \
+			bli_auxinfo_set_schema_b( BLIS_PACKED_COL_PANELS_IO, aux ); \
+			beta_use = one; \
+		} \
 		else \
 		{ \
-			bli_auxinfo_set_schema_b( BLIS_PACKED_COL_PANELS_IO, aux ); \
+			bli_auxinfo_set_schema_a( BLIS_PACKED_ROW_PANELS_RPI, aux ); \
+			bli_auxinfo_set_schema_b( BLIS_PACKED_COL_PANELS_RPI, aux ); \
 			beta_use = one; \
 		} \
 \
@@ -335,9 +347,9 @@ void PASTEMAC(ch,varname)( \
 		} \
 	} \
 \
-/*PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var3: b1", k, NR, b1, NR, 1, "%4.1f", "" ); \
-PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var3: a1", MR, k, a1, 1, MR, "%4.1f", "" );*/ \
+/*PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var4: b1", k, NR, b1, NR, 1, "%4.1f", "" ); \
+PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var4: a1", MR, k, a1, 1, MR, "%4.1f", "" );*/ \
 }
 
-INSERT_GENTFUNC_BASIC( gemm_ker_var3, gemm_ukr_t )
+INSERT_GENTFUNC_BASIC( gemm_ker_var4, gemm_ukr_t )
 

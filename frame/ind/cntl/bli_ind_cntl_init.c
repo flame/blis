@@ -39,6 +39,12 @@ void bli_ind_cntl_init( void )
 	// Level-3 via 3mh
 	bli_gemm3mh_cntl_init();
 
+	// Level-3 via 3m3
+	bli_gemm3m3_cntl_init();
+
+	// Level-3 via 3m2
+	bli_gemm3m2_cntl_init();
+
 	// Level-3 via 3m1
 	bli_gemm3m1_cntl_init();
 	bli_trsm3m1_cntl_init();
@@ -58,6 +64,12 @@ void bli_ind_cntl_finalize( void )
 {
 	// Level-3 via 3mh
 	bli_gemm3mh_cntl_finalize();
+
+	// Level-3 via 3m3
+	bli_gemm3m3_cntl_finalize();
+
+	// Level-3 via 3m2
+	bli_gemm3m2_cntl_finalize();
 
 	// Level-3 via 3m1
 	bli_gemm3m1_cntl_finalize();

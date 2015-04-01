@@ -45,7 +45,11 @@
 #include "bli_gemm_blk_var3f.h"
 
 #include "bli_gemm_ker_var2.h"
-#include "bli_gemm_ker_var3.h"
+
+// Headers for induced algorithms:
+#include "bli_gemm_blk_var4f.h" // 3m3
+#include "bli_gemm_ker_var3.h"  // 4m1b
+#include "bli_gemm_ker_var4.h"  // 3m2
 
 #include "bli_gemm_ukr_ref.h"
 

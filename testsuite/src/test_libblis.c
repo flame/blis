@@ -382,6 +382,14 @@ void libblis_test_read_params_file( char* input_filename, test_params_t* params 
 	libblis_test_read_next_line( buffer, input_stream );
 	sscanf( buffer, "%u ", &(params->ind_enable[ BLIS_3MH ]) );
 
+	// Read whether to enable 3m3.
+	libblis_test_read_next_line( buffer, input_stream );
+	sscanf( buffer, "%u ", &(params->ind_enable[ BLIS_3M3 ]) );
+
+	// Read whether to enable 3m2.
+	libblis_test_read_next_line( buffer, input_stream );
+	sscanf( buffer, "%u ", &(params->ind_enable[ BLIS_3M2 ]) );
+
 	// Read whether to enable 3m1.
 	libblis_test_read_next_line( buffer, input_stream );
 	sscanf( buffer, "%u ", &(params->ind_enable[ BLIS_3M1 ]) );
@@ -924,6 +932,8 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "problem size increment       %u\n", params->p_inc );
 	libblis_test_fprintf_c( os, "test induced complex           \n" );
 	libblis_test_fprintf_c( os, "  3mh?                       %u\n", params->ind_enable[ BLIS_3MH ] );
+	libblis_test_fprintf_c( os, "  3m3?                       %u\n", params->ind_enable[ BLIS_3M3 ] );
+	libblis_test_fprintf_c( os, "  3m2?                       %u\n", params->ind_enable[ BLIS_3M2 ] );
 	libblis_test_fprintf_c( os, "  3m1?                       %u\n", params->ind_enable[ BLIS_3M1 ] );
 	libblis_test_fprintf_c( os, "  4mh?                       %u\n", params->ind_enable[ BLIS_4MH ] );
 	libblis_test_fprintf_c( os, "  4m1b (4mb)?                %u\n", params->ind_enable[ BLIS_4M1B ] );

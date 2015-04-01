@@ -42,30 +42,35 @@ void zgemm3m_( f77_char*, f77_char*, f77_int*, f77_int*, f77_int*, dcomplex*, dc
 
 int main( int argc, char** argv )
 {
-	obj_t a, b, c;
-	obj_t c_save;
-	obj_t alpha, beta;
-	dim_t m, n, k;
-	dim_t p;
-	dim_t p_begin, p_end, p_inc;
-	int   m_input, n_input, k_input;
-	num_t dt;
-	char  dt_ch;
-	int   r, n_repeats;
+	obj_t    a, b, c;
+	obj_t    c_save;
+	obj_t    alpha, beta;
+	dim_t    m, n, k;
+	dim_t    p;
+	dim_t    p_begin, p_end, p_inc;
+	int      m_input, n_input, k_input;
+	num_t    dt, dt_real;
+	char     dt_ch;
+	int      r, n_repeats;
 	trans_t  transa;
 	trans_t  transb;
 	f77_char f77_transa;
 	f77_char f77_transb;
 
-	double dtime;
-	double dtime_save;
-	double gflops;
+	double   dtime;
+	double   dtime_save;
+	double   gflops;
+
+	extern blksz_t* gemm_kc;
 
 	bli_init();
 
 	//bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
 
 	n_repeats = 3;
+
+	dt      = DT;
+	dt_real = bli_datatype_proj_to_real( DT );
 
 	p_begin = P_BEGIN;
 	p_end   = P_END;
@@ -75,52 +80,24 @@ int main( int argc, char** argv )
 	n_input = -1;
 	k_input = 1;
 
+	// Extract the kc blocksize for the requested datatype and its
+	// real analogue.
+	dim_t kc      = bli_blksz_get_def( dt,      gemm_kc );
+	dim_t kc_real = bli_blksz_get_def( dt_real, gemm_kc );
 
-#if   defined DT_C
+	// Assign the k dimension depending on which implementation is
+	// being tested. Note that the BLIS_NAT case handles the real
+	// domain cases as well as native complex.
+	if      ( IND == BLIS_NAT  ) k_input = kc;
+	else if ( IND == BLIS_3M1  ) k_input = kc_real / 3;
+	else if ( IND == BLIS_4M1A ) k_input = kc_real / 2;
+	else                         k_input = kc_real;
 
-	dt = BLIS_SCOMPLEX; dt_ch = 'c';
-
-#if 1
-	#if   (defined _3M1)
-		k_input = 384/3;
-	#elif (defined _4M1)
-		k_input = 384/2;
-	#elif (defined _4MHW) || (defined _3MHW) || \
-		  (defined _4M1B)
-		k_input = 384;
-	#else /* asm */
-		k_input = 256;
-	#endif
-#endif
-
-#elif defined DT_Z
-
-	dt = BLIS_DCOMPLEX; dt_ch = 'z';
-
-#if 1
-	#if   (defined _3M1)
-		k_input = 256/3;
-	#elif (defined _4M1)
-		k_input = 256/2;
-	#elif (defined _4MHW) || (defined _3MHW) || \
-		  (defined _4M1B)
-		k_input = 256;
-	#else /* asm */
-		k_input = 192;
-	#endif
-#endif
-
-#elif defined DT_S
-
-	dt = BLIS_FLOAT; dt_ch = 's';
-	k_input = 384;
-
-#elif defined DT_D
-
-	dt = BLIS_DOUBLE; dt_ch = 'd';
-	k_input = 256;
-
-#endif
+	// Choose the char corresponding to the requested datatype.
+	if      ( bli_is_float( dt ) )    dt_ch = 's';
+	else if ( bli_is_double( dt ) )   dt_ch = 'd';
+	else if ( bli_is_scomplex( dt ) ) dt_ch = 'c';
+	else                              dt_ch = 'z';
 
 	transa = BLIS_NO_TRANSPOSE;
 	transb = BLIS_NO_TRANSPOSE;
@@ -162,6 +139,11 @@ int main( int argc, char** argv )
 
 		bli_copym( &c, &c_save );
 	
+#ifdef BLIS
+		bli_ind_disable_all_dt( dt );
+		bli_ind_enable_dt( IND, dt );
+#endif
+
 		dtime_save = 1.0e9;
 
 		for ( r = 0; r < n_repeats; ++r )
@@ -180,19 +162,7 @@ int main( int argc, char** argv )
 
 #ifdef BLIS
 
-	#if   defined _4MHW 
-			bli_gemm4mh( &alpha,
-	#elif defined _4M1B 
-			bli_gemm4mb( &alpha,
-	#elif defined _4M1A
-			bli_gemm4m1( &alpha,
-	#elif defined _3MHW 
-			bli_gemm3mh( &alpha,
-	#elif defined _3M1 
-			bli_gemm3m1( &alpha,
-	#else              
 			bli_gemm( &alpha,
-	#endif
 			          &a,
 			          &b,
 			          &beta,

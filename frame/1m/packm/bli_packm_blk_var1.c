@@ -53,6 +53,7 @@ typedef void (*FUNCPTR_T)(
                            void*   kappa,
                            void*   c, inc_t rs_c, inc_t cs_c,
                            void*   p, inc_t rs_p, inc_t cs_p,
+                                      inc_t is_p,
                                       dim_t pd_p, inc_t ps_p,
                            void*   packm_ker,
                            packm_thrinfo_t* thread
@@ -91,6 +92,7 @@ void bli_packm_blk_var1( obj_t*   c,
 	void*     buf_p      = bli_obj_buffer_at_off( *p );
 	inc_t     rs_p       = bli_obj_row_stride( *p );
 	inc_t     cs_p       = bli_obj_col_stride( *p );
+	inc_t     is_p       = bli_obj_imag_stride( *p );
 	dim_t     pd_p       = bli_obj_panel_dim( *p );
 	inc_t     ps_p       = bli_obj_panel_stride( *p );
 
@@ -135,6 +137,7 @@ void bli_packm_blk_var1( obj_t*   c,
 	   buf_kappa,
 	   buf_c, rs_c, cs_c,
 	   buf_p, rs_p, cs_p,
+	          is_p,
 	          pd_p, ps_p,
 	   packm_ker,
 	   t );
@@ -161,6 +164,7 @@ void PASTEMAC(ch,varname)( \
                            void*   kappa, \
                            void*   c, inc_t rs_c, inc_t cs_c, \
                            void*   p, inc_t rs_p, inc_t cs_p, \
+                                      inc_t is_p, \
                                       dim_t pd_p, inc_t ps_p, \
                            void*   packm_ker, \
                            packm_thrinfo_t* thread \
@@ -365,7 +369,8 @@ void PASTEMAC(ch,varname)( \
 				                *n_panel_max, \
 				                kappa_cast, \
 				                c_use, rs_c, cs_c, \
-				                p_use, rs_p, cs_p ); \
+				                p_use, rs_p, cs_p, \
+				                       is_p ); \
 			} \
 \
 			/* NOTE: This value is usually LESS than ps_p because triangular
@@ -400,7 +405,8 @@ void PASTEMAC(ch,varname)( \
 				                *n_panel_max, \
 				                kappa_cast, \
 				                c_begin, rs_c, cs_c, \
-				                p_begin, rs_p, cs_p ); \
+				                p_begin, rs_p, cs_p, \
+				                         is_p ); \
 			} \
 \
 			/* NOTE: This value is equivalent to ps_p. */ \
@@ -431,7 +437,8 @@ void PASTEMAC(ch,varname)( \
 				                *n_panel_max, \
 				                kappa_cast, \
 				                c_begin, rs_c, cs_c, \
-				                p_begin, rs_p, cs_p ); \
+				                p_begin, rs_p, cs_p, \
+				                         is_p ); \
 			} \
 /*
 			if ( row_stored ) \

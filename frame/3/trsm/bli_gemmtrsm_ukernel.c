@@ -45,12 +45,15 @@ typedef void (*FUNCPTR_T)(
                            void*      bx1,
                            void*      b11,
                            void*      c11, inc_t rs_c, inc_t cs_c,
-                           auxinfo_t* data
+                           auxinfo_t* data,
+                           void*      ukr
                          );
 
 static FUNCPTR_T GENARRAY(ftypes_l,gemmtrsm_l_ukernel_void);
 static FUNCPTR_T GENARRAY(ftypes_u,gemmtrsm_u_ukernel_void);
 
+extern func_t* gemmtrsm_l_ukrs;
+extern func_t* gemmtrsm_u_ukrs;
 
 void bli_gemmtrsm_ukernel( obj_t*  alpha,
                            obj_t*  a1x,
@@ -77,9 +80,11 @@ void bli_gemmtrsm_ukernel( obj_t*  alpha,
 
 	void*     buf_alpha = bli_obj_buffer_for_1x1( dt, *alpha );
 
+	auxinfo_t data;
+
 	FUNCPTR_T f;
 
-	auxinfo_t data;
+	void*     gemmtrsm_ukr;
 
 
 	// Fill the auxinfo_t struct in case the micro-kernel uses it.
@@ -88,6 +93,12 @@ void bli_gemmtrsm_ukernel( obj_t*  alpha,
 	else
 	{ bli_auxinfo_set_next_a( buf_a11, data ); }
 	bli_auxinfo_set_next_b( buf_bx1, data );
+
+	// Query the function address from the micro-kernel func_t object.
+	if ( bli_obj_is_lower( *a11 ) )
+		gemmtrsm_ukr = bli_func_obj_query( dt, gemmtrsm_l_ukrs );
+	else
+		gemmtrsm_ukr = bli_func_obj_query( dt, gemmtrsm_u_ukrs );
 
 	// Index into the type combination array to extract the correct
 	// function pointer.
@@ -102,12 +113,13 @@ void bli_gemmtrsm_ukernel( obj_t*  alpha,
 	   buf_bx1,
 	   buf_b11,
 	   buf_c11, rs_c, cs_c,
-	   &data );
+	   &data,
+	   gemmtrsm_ukr );
 }
 
 
 #undef  GENTFUNC
-#define GENTFUNC( ctype, ch, varname, ukrname ) \
+#define GENTFUNC( ctype, ch, varname, ukrtype ) \
 \
 void PASTEMAC(ch,varname)( \
                            dim_t      k, \
@@ -117,19 +129,23 @@ void PASTEMAC(ch,varname)( \
                            void*      bx1, \
                            void*      b11, \
                            void*      c11, inc_t rs_c, inc_t cs_c, \
-                           auxinfo_t* data  \
+                           auxinfo_t* data, \
+                           void*      ukr  \
                          ) \
 { \
-	PASTEMAC(ch,ukrname)( k, \
-	                      alpha, \
-	                      a1x, \
-	                      a11, \
-	                      bx1, \
-	                      b11, \
-	                      c11, rs_c, cs_c, \
-	                      data ); \
+	/* Cast the micro-kernel address to its function pointer type. */ \
+	PASTECH(ch,ukrtype) ukr_cast = ukr; \
+\
+	ukr_cast( k, \
+	          alpha, \
+	          a1x, \
+	          a11, \
+	          bx1, \
+	          b11, \
+	          c11, rs_c, cs_c, \
+	          data ); \
 }
 
-INSERT_GENTFUNC_BASIC( gemmtrsm_l_ukernel_void, GEMMTRSM_L_UKERNEL )
-INSERT_GENTFUNC_BASIC( gemmtrsm_u_ukernel_void, GEMMTRSM_U_UKERNEL )
+INSERT_GENTFUNC_BASIC( gemmtrsm_l_ukernel_void, gemmtrsm_ukr_t )
+INSERT_GENTFUNC_BASIC( gemmtrsm_u_ukernel_void, gemmtrsm_ukr_t )
 

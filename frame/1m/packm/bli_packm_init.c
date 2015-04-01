@@ -45,7 +45,7 @@ void bli_packm_init( obj_t*   a,
 	// has not already been allocated previously.
 
 	invdiag_t invert_diag;
-	pack_t    pack_schema;
+	pack_t    schema;
 	packord_t pack_ord_if_up;
 	packord_t pack_ord_if_lo;
 	packbuf_t pack_buf_type;
@@ -130,7 +130,7 @@ void bli_packm_init( obj_t*   a,
 	// Extract various fields from the control tree and pass them in
 	// explicitly into _init_pack(). This allows external code generators
 	// the option of bypassing usage of control trees altogether.
-	pack_schema    = cntl_pack_schema( cntl );
+	schema         = cntl_pack_schema( cntl );
 	pack_buf_type  = cntl_pack_buf_type( cntl );
 	mr             = cntl_mr( cntl );
 	nr             = cntl_nr( cntl );
@@ -146,7 +146,7 @@ void bli_packm_init( obj_t*   a,
 
 	// Initialize object p for the final packed matrix.
 	bli_packm_init_pack( invert_diag,
-	                     pack_schema,
+	                     schema,
 	                     pack_ord_if_up,
 	                     pack_ord_if_lo,
 	                     pack_buf_type,
@@ -163,7 +163,7 @@ extern blksz_t* gemm_upanel_a_align;
 extern blksz_t* gemm_upanel_b_align;
 
 void bli_packm_init_pack( invdiag_t invert_diag,
-                          pack_t    pack_schema,
+                          pack_t    schema,
                           packord_t pack_ord_if_up,
                           packord_t pack_ord_if_lo,
                           packbuf_t pack_buf_type,
@@ -177,10 +177,10 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 	trans_t transc       = bli_obj_onlytrans_status( *c );
 	dim_t   m_c          = bli_obj_length( *c );
 	dim_t   n_c          = bli_obj_width( *c );
-	dim_t   mr_def_dim   = bli_blksz_for_type( dt, mr );
-	dim_t   mr_pack_dim  = bli_blksz_max_for_type( dt, mr );
-	dim_t   nr_def_dim   = bli_blksz_for_type( dt, nr );
-	dim_t   nr_pack_dim  = bli_blksz_max_for_type( dt, nr );
+	dim_t   mr_def_dim   = bli_blksz_get_def( dt, mr );
+	dim_t   mr_pack_dim  = bli_blksz_get_max( dt, mr );
+	dim_t   nr_def_dim   = bli_blksz_get_def( dt, nr );
+	dim_t   nr_pack_dim  = bli_blksz_get_max( dt, nr );
 
 	mem_t*  mem_p;
 	dim_t   m_p, n_p;
@@ -188,6 +188,7 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 	siz_t   size_p;
 	siz_t   elem_size_p;
 	inc_t   rs_p, cs_p;
+	inc_t   is_p;
 	void*   buf;
 
 
@@ -221,7 +222,7 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 	// from c) with BLIS_DENSE because that information may be needed by
 	// the level-2 operation's unblocked variant to decide whether to
 	// execute a "lower" or "upper" branch of code.
-	if ( bli_is_panel_packed( pack_schema ) )
+	if ( bli_is_panel_packed( schema ) )
 	{
 		bli_obj_set_uplo( BLIS_DENSE, *p );
 	}
@@ -234,7 +235,7 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 
 	// Set the pack status of p to the pack schema prescribed in the control
 	// tree node.
-	bli_obj_set_pack_schema( pack_schema, *p );
+	bli_obj_set_pack_schema( schema, *p );
 
 	// Set the packing order bits.
 	bli_obj_set_pack_order_if_upper( pack_ord_if_up, *p );
@@ -270,8 +271,8 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 	elem_size_p = bli_obj_elem_size( *p );
 
 	// Set the row and column strides of p based on the pack schema.
-	if      ( bli_is_row_packed( pack_schema ) &&
-	          !bli_is_panel_packed( pack_schema ) )
+	if      ( bli_is_row_packed( schema ) &&
+	          !bli_is_panel_packed( schema ) )
 	{
 		// For regular row storage, the padded width of our matrix
 		// should be used for the row stride, with the column stride set
@@ -293,8 +294,8 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 		// Compute the size of the packed buffer.
 		size_p = m_p_pad * rs_p * elem_size_p;
 	}
-	else if ( bli_is_col_packed( pack_schema ) &&
-	          !bli_is_panel_packed( pack_schema ) )
+	else if ( bli_is_col_packed( schema ) &&
+	          !bli_is_panel_packed( schema ) )
 	{
 		// For regular column storage, the padded length of our matrix
 		// should be used for the column stride, with the row stride set
@@ -316,11 +317,11 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 		// Compute the size of the packed buffer.
 		size_p = cs_p * n_p_pad * elem_size_p;
 	}
-	else if ( bli_is_row_packed( pack_schema ) &&
-	          bli_is_panel_packed( pack_schema ) )
+	else if ( bli_is_row_packed( schema ) &&
+	          bli_is_panel_packed( schema ) )
 	{
 		dim_t m_panel;
-		dim_t ps_p;
+		dim_t ps_p, ps_p_orig;
 		dim_t upanel_a_align;
 
 		// The panel dimension (for each datatype) should be equal to the
@@ -352,8 +353,11 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 		// scaled by 3) must be even.
 		if ( bli_is_odd( ps_p ) ) ps_p += 1;
 
+		// Preserve this early panel stride value for use later, if needed.
+		ps_p_orig = ps_p;
+
 		// Query the micro-panel alignment for A.
-		upanel_a_align = bli_blksz_for_type( dt, gemm_upanel_a_align );
+		upanel_a_align = bli_blksz_get_def( dt, gemm_upanel_a_align );
 
 		// Here, we adjust the panel stride, if necessary. Remember: ps_p is
 		// always interpreted as being in units of the datatype of the object
@@ -362,16 +366,17 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 		// we halve ps_p. Why? Because the macro-kernel indexes in units of
 		// the complex datatype. So these changes "trick" it into indexing
 		// the correct amount.
-		if ( bli_is_3mi_packed( pack_schema ) )
+		if ( bli_is_3mi_packed( schema ) )
 		{
 			ps_p = ( ps_p * 3 ) / 2;
 
 			// Align the panel stride according to the micro-panel alignment.
 			ps_p = bli_align_dim_to_size( ps_p, elem_size_p, upanel_a_align );
 		}
-		else if ( bli_is_ro_packed( pack_schema ) ||
-		          bli_is_io_packed( pack_schema ) ||
-		          bli_is_rpi_packed( pack_schema ) )
+		else if ( bli_is_3ms_packed( schema ) ||
+		          bli_is_ro_packed( schema )  ||
+		          bli_is_io_packed( schema )  ||
+		          bli_is_rpi_packed( schema ) )
 		{
 			// Acquire the element size of the the real projection of the
 			// current complex datatype.
@@ -379,7 +384,7 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 
 			// Acquire the micro-panel alignment for the real projection of
 			// the current complex datatype.
-			upanel_a_align = bli_blksz_for_type( dt_real, gemm_upanel_a_align );
+			upanel_a_align = bli_blksz_get_def( dt_real, gemm_upanel_a_align );
 
 			// Align the panel stride according to the micro-panel alignment.
 			ps_p = bli_align_dim_to_size( ps_p, elem_size_p_real, upanel_a_align );
@@ -404,21 +409,34 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 			ps_p = bli_align_dim_to_size( ps_p, elem_size_p, upanel_a_align );
 		}
 
+		// Set the imaginary stride (in units of fundamental elements) for
+		// 3m and 4m (separated or interleaved). We use ps_p_orig since
+		// that variable tracks the number of real part elements contained
+		// within each micro-panel of the source matrix. Therefore, this
+		// is the number of real elements that must be traversed before
+		// reaching the imaginary part (3mi/4mi) of the packed micro-panel,
+		// or the real part of the next micro-panel (3ms).
+		if      ( bli_is_3mi_packed( schema ) ) is_p = ps_p_orig;
+		else if ( bli_is_4mi_packed( schema ) ) is_p = ps_p_orig;
+		else if ( bli_is_3ms_packed( schema ) ) is_p = ps_p_orig * ( m_p_pad / m_panel );
+		else                                    is_p = 1;
+
 		// Store the strides and panel dimension in p.
 		bli_obj_set_strides( rs_p, cs_p, *p );
+		bli_obj_set_imag_stride( is_p, *p );
 		bli_obj_set_panel_dim( m_panel, *p );
 		bli_obj_set_panel_stride( ps_p, *p );
 		bli_obj_set_panel_length( m_panel, *p );
 		bli_obj_set_panel_width( n_p, *p );
 
 		// Compute the size of the packed buffer.
-		size_p = ps_p * (m_p_pad / m_panel) * elem_size_p;
+		size_p = ps_p * ( m_p_pad / m_panel ) * elem_size_p;
 	}
-	else if ( bli_is_col_packed( pack_schema ) &&
-	          bli_is_panel_packed( pack_schema ) )
+	else if ( bli_is_col_packed( schema ) &&
+	          bli_is_panel_packed( schema ) )
 	{
 		dim_t n_panel;
-		dim_t ps_p;
+		dim_t ps_p, ps_p_orig;
 		dim_t upanel_b_align;
 
 		// The panel dimension (for each datatype) should be equal to the
@@ -450,8 +468,11 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 		// scaled by 3) must be even.
 		if ( bli_is_odd( ps_p ) ) ps_p += 1;
 
+		// Preserve this early panel stride value for use later, if needed.
+		ps_p_orig = ps_p;
+
 		// Query the micro-panel alignment for B.
-		upanel_b_align = bli_blksz_for_type( dt, gemm_upanel_b_align );
+		upanel_b_align = bli_blksz_get_def( dt, gemm_upanel_b_align );
 
 		// Here, we adjust the panel stride, if necessary. Remember: ps_p is
 		// always interpreted as being in units of the datatype of the object
@@ -460,16 +481,17 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 		// we halve ps_p. Why? Because the macro-kernel indexes in units of
 		// the complex datatype. So these changes "trick" it into indexing
 		// the correct amount.
-		if ( bli_is_3mi_packed( pack_schema ) )
+		if ( bli_is_3mi_packed( schema ) )
 		{
 			ps_p = ( ps_p * 3 ) / 2;
 
 			// Align the panel stride according to the micro-panel alignment.
 			ps_p = bli_align_dim_to_size( ps_p, elem_size_p, upanel_b_align );
 		}
-		else if ( bli_is_ro_packed( pack_schema ) ||
-		          bli_is_io_packed( pack_schema ) ||
-		          bli_is_rpi_packed( pack_schema ) )
+		else if ( bli_is_3ms_packed( schema ) ||
+		          bli_is_ro_packed( schema ) ||
+		          bli_is_io_packed( schema ) ||
+		          bli_is_rpi_packed( schema ) )
 		{
 			// Acquire the element size of the the real projection of the
 			// current complex datatype.
@@ -477,7 +499,7 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 
 			// Acquire the micro-panel alignment for the real projection of
 			// the current complex datatype.
-			upanel_b_align = bli_blksz_for_type( dt_real, gemm_upanel_b_align );
+			upanel_b_align = bli_blksz_get_def( dt_real, gemm_upanel_b_align );
 
 			// Align the panel stride according to the micro-panel alignment.
 			ps_p = bli_align_dim_to_size( ps_p, elem_size_p_real, upanel_b_align );
@@ -502,15 +524,28 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 			ps_p = bli_align_dim_to_size( ps_p, elem_size_p, upanel_b_align );
 		}
 
+		// Set the imaginary stride (in units of fundamental elements) for
+		// 3m and 4m (separated or interleaved). We use ps_p_orig since
+		// that variable tracks the number of real part elements contained
+		// within each micro-panel of the source matrix. Therefore, this
+		// is the number of real elements that must be traversed before
+		// reaching the imaginary part (3mi/4mi) of the packed micro-panel,
+		// or the real part of the next micro-panel (3ms).
+		if      ( bli_is_3mi_packed( schema ) ) is_p = ps_p_orig;
+		else if ( bli_is_4mi_packed( schema ) ) is_p = ps_p_orig;
+		else if ( bli_is_3ms_packed( schema ) ) is_p = ps_p_orig * ( n_p_pad / n_panel );
+		else                                    is_p = 1;
+
 		// Store the strides and panel dimension in p.
 		bli_obj_set_strides( rs_p, cs_p, *p );
+		bli_obj_set_imag_stride( is_p, *p );
 		bli_obj_set_panel_dim( n_panel, *p );
 		bli_obj_set_panel_stride( ps_p, *p );
 		bli_obj_set_panel_length( m_p, *p );
 		bli_obj_set_panel_width( n_panel, *p );
 
 		// Compute the size of the packed buffer.
-		size_p = ps_p * (n_p_pad / n_panel) * elem_size_p;
+		size_p = ps_p * ( n_p_pad / n_panel ) * elem_size_p;
 	}
 	else
 	{

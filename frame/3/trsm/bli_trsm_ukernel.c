@@ -41,12 +41,15 @@ typedef void (*FUNCPTR_T)(
                            void*      a,
                            void*      b,
                            void*      c, inc_t rs_c, inc_t cs_c,
-                           auxinfo_t* data
+                           auxinfo_t* data,
+                           void*      ukr
                          );
 
 static FUNCPTR_T GENARRAY(ftypes_l,trsm_l_ukernel_void);
 static FUNCPTR_T GENARRAY(ftypes_u,trsm_u_ukernel_void);
 
+extern func_t* trsm_l_ukrs;
+extern func_t* trsm_u_ukrs;
 
 void bli_trsm_ukernel( obj_t*  a,
                        obj_t*  b,
@@ -62,14 +65,23 @@ void bli_trsm_ukernel( obj_t*  a,
 	inc_t     rs_c      = bli_obj_row_stride( *c );
 	inc_t     cs_c      = bli_obj_col_stride( *c );
 
+	auxinfo_t data;
+
 	FUNCPTR_T f;
 
-	auxinfo_t data;
+	void*     trsm_ukr;
 
 
 	// Fill the auxinfo_t struct in case the micro-kernel uses it.
 	bli_auxinfo_set_next_a( buf_a, data );
 	bli_auxinfo_set_next_b( buf_b, data );
+
+	bli_auxinfo_set_is_a( 1, data );
+	bli_auxinfo_set_is_b( 1, data );
+
+	// Query the function address from the micro-kernel func_t object.
+	if ( bli_obj_is_lower( *a ) ) trsm_ukr = bli_func_obj_query( dt, trsm_l_ukrs );
+	else                          trsm_ukr = bli_func_obj_query( dt, trsm_u_ukrs );
 
 	// Index into the type combination array to extract the correct
 	// function pointer.
@@ -80,26 +92,31 @@ void bli_trsm_ukernel( obj_t*  a,
 	f( buf_a,
 	   buf_b,
 	   buf_c, rs_c, cs_c,
-	   &data );
+	   &data,
+	   trsm_ukr );
 }
 
 
 #undef  GENTFUNC
-#define GENTFUNC( ctype, ch, varname, ukrname ) \
+#define GENTFUNC( ctype, ch, varname, ukrtype ) \
 \
 void PASTEMAC(ch,varname)( \
                            void*      a, \
                            void*      b, \
                            void*      c, inc_t rs_c, inc_t cs_c, \
-                           auxinfo_t* data  \
+                           auxinfo_t* data, \
+                           void*      ukr  \
                          ) \
 { \
-	PASTEMAC(ch,ukrname)( a, \
-	                      b, \
-	                      c, rs_c, cs_c, \
-	                      data ); \
+	/* Cast the micro-kernel address to its function pointer type. */ \
+	PASTECH(ch,ukrtype) ukr_cast = ukr; \
+\
+	ukr_cast( a, \
+	          b, \
+	          c, rs_c, cs_c, \
+	          data ); \
 }
 
-INSERT_GENTFUNC_BASIC( trsm_l_ukernel_void, TRSM_L_UKERNEL )
-INSERT_GENTFUNC_BASIC( trsm_u_ukernel_void, TRSM_U_UKERNEL )
+INSERT_GENTFUNC_BASIC( trsm_l_ukernel_void, trsm_ukr_t )
+INSERT_GENTFUNC_BASIC( trsm_u_ukernel_void, trsm_ukr_t )
 

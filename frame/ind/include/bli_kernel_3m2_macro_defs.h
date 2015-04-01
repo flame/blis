@@ -32,20 +32,36 @@
 
 */
 
-#include "bli_packm_ref_cxk_3mi.h"
+#ifndef BLIS_KERNEL_3M2_MACRO_DEFS_H
+#define BLIS_KERNEL_3M2_MACRO_DEFS_H
 
 
-#undef  GENTPROTCO
-#define GENTPROTCO( ctype, ctype_r, ch, chr, varname ) \
-\
-void PASTEMAC(ch,varname)( \
-                           conj_t  conja, \
-                           dim_t   panel_dim, \
-                           dim_t   panel_len, \
-                           void*   kappa, \
-                           void*   a, inc_t inca, inc_t lda, \
-                           void*   p, inc_t is_p, inc_t ldp \
-                         );
+// -- Define row access bools --------------------------------------------------
 
-INSERT_GENTPROTCO_BASIC( packm_cxk_3mi )
+// gemm3m2 micro-kernels
 
+#define BLIS_CGEMM3M2_UKERNEL_PREFERS_CONTIG_ROWS \
+        BLIS_SGEMM_UKERNEL_PREFERS_CONTIG_ROWS
+#define BLIS_ZGEMM3M2_UKERNEL_PREFERS_CONTIG_ROWS \
+        BLIS_DGEMM_UKERNEL_PREFERS_CONTIG_ROWS
+
+
+// -- Define default 3m-specific kernel names ----------------------------------
+
+//
+// Level-3
+//
+
+// gemm3m2 micro-kernels
+
+#ifndef BLIS_CGEMM3M2_UKERNEL
+#define BLIS_CGEMM3M2_UKERNEL BLIS_CGEMM3M2_UKERNEL_REF
+#endif
+
+#ifndef BLIS_ZGEMM3M2_UKERNEL
+#define BLIS_ZGEMM3M2_UKERNEL BLIS_ZGEMM3M2_UKERNEL_REF
+#endif
+
+
+
+#endif 

@@ -104,6 +104,14 @@ void bli_gemm4mb_cntl_init()
 	bli_blksz_obj_attach_mult_to( gemm4mb_kr, gemm4mb_kc );
 
 
+	// The cache blocksizes that were scaled above need to be rounded down
+	// to their respective nearest register blocksize multiples. Note that
+	// this can only happen after the appropriate register blocksize is
+	// actually attached as a multiple.
+	bli_blksz_reduce_to_mult( gemm4mb_mc );
+	bli_blksz_reduce_to_mult( gemm4mb_nc );
+
+
 	// Attach the mr and nr blksz_t objects to each cache blksz_t object.
 	// The primary example of why this is needed relates to nudging kc.
 	// In hemm, symm, trmm, or trmm3, we need to know both mr and nr,

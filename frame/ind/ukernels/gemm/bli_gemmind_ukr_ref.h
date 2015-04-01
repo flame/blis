@@ -46,9 +46,11 @@ void PASTEMAC(ch,varname)( \
                            auxinfo_t*      data  \
                          );
 
+INSERT_GENTPROTCO_BASIC( gemm3mh_ukr_ref )
+INSERT_GENTPROTCO_BASIC( gemm3m3_ukr_ref )
+INSERT_GENTPROTCO_BASIC( gemm3m2_ukr_ref )
+INSERT_GENTPROTCO_BASIC( gemm3m1_ukr_ref )
 INSERT_GENTPROTCO_BASIC( gemm4mh_ukr_ref )
 INSERT_GENTPROTCO_BASIC( gemm4mb_ukr_ref )
 INSERT_GENTPROTCO_BASIC( gemm4m1_ukr_ref )
-INSERT_GENTPROTCO_BASIC( gemm3mh_ukr_ref )
-INSERT_GENTPROTCO_BASIC( gemm3m1_ukr_ref )
 

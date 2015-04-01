@@ -490,8 +490,8 @@
 
 #define bli_is_last_iter( i1, niter, tid, nth ) \
 \
-	/*( i1 == niter - 1 - ( ( niter - tid - 1 ) % nth ) )*/ \
-	( i1 == niter - 1 )
+	( i1 == niter - 1 - ( ( niter - tid - 1 ) % nth ) ) \
+	/*( i1 == niter - 1 )*/
 
 
 // packbuf_t-related
@@ -528,6 +528,10 @@
 #define bli_is_3mi_packed( schema ) \
 \
 	( ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_3MI )
+
+#define bli_is_3ms_packed( schema ) \
+\
+	( ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_3MS )
 
 #define bli_is_ro_packed( schema ) \
 \

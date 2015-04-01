@@ -33,15 +33,17 @@
 */
 
 
-// Virtual kernel headers
+// Virtual micro-kernel headers
 #include "bli_kernel_3mh_macro_defs.h"
+#include "bli_kernel_3m3_macro_defs.h"
+#include "bli_kernel_3m2_macro_defs.h"
 #include "bli_kernel_3m1_macro_defs.h"
 #include "bli_kernel_4mh_macro_defs.h"
 #include "bli_kernel_4mb_macro_defs.h"
 #include "bli_kernel_4m1_macro_defs.h"
 
 // Storage format headers
-#include "bli_packm_3mi_macro_defs.h"
+#include "bli_packm_3mis_macro_defs.h"
 #include "bli_packm_4mi_macro_defs.h"
 #include "bli_packm_rih_macro_defs.h"
 

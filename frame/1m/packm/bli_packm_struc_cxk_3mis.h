@@ -49,10 +49,11 @@ void PASTEMAC(ch,varname)( \
                            dim_t           n_panel_max, \
                            ctype* restrict kappa, \
                            ctype* restrict c, inc_t rs_c, inc_t cs_c, \
-                           ctype* restrict p, inc_t rs_p, inc_t cs_p  \
+                           ctype* restrict p, inc_t rs_p, inc_t cs_p, \
+                                              inc_t is_p  \
                          );
 
-INSERT_GENTPROTCO_BASIC( packm_struc_cxk_3mi )
+INSERT_GENTPROTCO_BASIC( packm_struc_cxk_3mis )
 
 
 
@@ -78,7 +79,7 @@ void PASTEMAC(ch,varname)( \
                                               inc_t is_p, inc_t ldp  \
                          );
 
-INSERT_GENTPROTCO_BASIC( packm_herm_cxk_3mi )
+INSERT_GENTPROTCO_BASIC( packm_herm_cxk_3mis )
 
 
 
@@ -106,5 +107,5 @@ void PASTEMAC(ch,varname)( \
                                               inc_t is_p, inc_t ldp  \
                          );
 
-INSERT_GENTPROTCO_BASIC( packm_tri_cxk_3mi )
+INSERT_GENTPROTCO_BASIC( packm_tri_cxk_3mis )
 

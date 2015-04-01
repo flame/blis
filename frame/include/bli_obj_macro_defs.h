@@ -221,6 +221,10 @@
 \
 	( ( (obj).info & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_3MI )
 
+#define bli_obj_is_3ms_packed( obj ) \
+\
+	( ( (obj).info & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_3MS )
+
 #define bli_obj_is_ro_packed( obj ) \
 \
 	( ( (obj).info & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_RO )

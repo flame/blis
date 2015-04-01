@@ -32,24 +32,39 @@
 
 */
 
+
+//
+// Prototype object-based interface.
+//
+void bli_gemm_ker_var4( obj_t*  a,
+                        obj_t*  b,
+                        obj_t*  c,
+                        gemm_t* cntl,
+                        gemm_thrinfo_t* thread );
+
+
+//
+// Prototype BLAS-like interfaces.
+//
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, varname ) \
 \
 void PASTEMAC(ch,varname)( \
-                           conj_t  conja, \
+                           pack_t  schema_a, \
+                           pack_t  schema_b, \
+                           dim_t   m, \
                            dim_t   n, \
-                           void*   kappa, \
-                           void*   a, inc_t inca, inc_t lda, \
-                           void*   p, inc_t is_p, inc_t ldp  \
+                           dim_t   k, \
+                           void*   alpha, \
+                           void*   a, inc_t cs_a, inc_t is_a, \
+                                      dim_t pd_a, inc_t ps_a, \
+                           void*   b, inc_t rs_b, inc_t is_b, \
+                                      dim_t pd_b, inc_t ps_b, \
+                           void*   beta, \
+                           void*   c, inc_t rs_c, inc_t cs_c, \
+                           void*   gemm_ukr, \
+                           gemm_thrinfo_t* thread  \
                          );
 
-INSERT_GENTPROT_BASIC( packm_ref_2xk_3mi )
-INSERT_GENTPROT_BASIC( packm_ref_4xk_3mi )
-INSERT_GENTPROT_BASIC( packm_ref_6xk_3mi )
-INSERT_GENTPROT_BASIC( packm_ref_8xk_3mi )
-INSERT_GENTPROT_BASIC( packm_ref_10xk_3mi )
-INSERT_GENTPROT_BASIC( packm_ref_12xk_3mi )
-INSERT_GENTPROT_BASIC( packm_ref_14xk_3mi )
-INSERT_GENTPROT_BASIC( packm_ref_16xk_3mi )
-INSERT_GENTPROT_BASIC( packm_ref_30xk_3mi )
+INSERT_GENTPROT_BASIC( gemm_ker_var4 )
 

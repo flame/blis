@@ -155,8 +155,8 @@ void libblis_test_gemm_ukr_experiment( test_params_t* params,
 	k = libblis_test_get_dim_from_prob_size( op->dim_spec[0], p_cur );
 
 	// Fix m and n to MR and NR, respectively.
-	m = bli_blksz_for_type( datatype, gemm_mr );
-	n = bli_blksz_for_type( datatype, gemm_nr );
+	m = bli_blksz_get_def( datatype, gemm_mr );
+	n = bli_blksz_get_def( datatype, gemm_nr );
 
 	// Store the register blocksizes so that the driver can retrieve the
 	// values later when printing results.

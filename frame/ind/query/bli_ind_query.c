@@ -40,6 +40,10 @@ static void* bli_ind_oper_fp[BLIS_NUM_IND_METHODS][BLIS_NUM_LEVEL3_OPS] =
         /*   gemm   hemm   herk   her2k  symm   syrk,  syr2k  trmm3  trmm   trsm  */
 /* 3mh  */ { bli_gemm3mh,  bli_hemm3mh,  bli_herk3mh,  bli_her2k3mh, bli_symm3mh,
              bli_syrk3mh,  bli_syr2k3mh, bli_trmm33mh, NULL,         NULL         },
+/* 3m3  */ { bli_gemm3m3,  NULL,         NULL,         NULL,         NULL,         
+             NULL,         NULL,         NULL,         NULL,         NULL         },
+/* 3m2  */ { bli_gemm3m2,  NULL,         NULL,         NULL,         NULL,         
+             NULL,         NULL,         NULL,         NULL,         NULL         },
 /* 3m1  */ { bli_gemm3m1,  bli_hemm3m1,  bli_herk3m1,  bli_her2k3m1, bli_symm3m1,
              bli_syrk3m1,  bli_syr2k3m1, bli_trmm33m1, bli_trmm3m1,  bli_trsm3m1  },
 /* 4mh  */ { bli_gemm4mh,  bli_hemm4mh,  bli_herk4mh,  bli_her2k4mh, bli_symm4mh,
@@ -52,15 +56,6 @@ static void* bli_ind_oper_fp[BLIS_NUM_IND_METHODS][BLIS_NUM_LEVEL3_OPS] =
              bli_syrk,     bli_syr2k,    bli_trmm3,    bli_trmm,     bli_trsm     },
 };
 
-
-// FGVZ NOTE:
-// - still need to cpp-enable default method
-// - this will be annoying due to ordering of datatype dimensions in
-//   bli_ind_oper_st (ie: dt is innermost).
-// - alternative: insert call in bli_init() to bli_ind_enable()
-//   - by default, BLIS_4M1 is passed in. but you could make the precise
-//     default method user-configurable.
-
 //
 // NOTE: "2" is used instead of BLIS_NUM_FP_TYPES/2.
 //
@@ -69,6 +64,10 @@ static bool_t bli_ind_oper_st[BLIS_NUM_IND_METHODS][BLIS_NUM_LEVEL3_OPS][2] =
         /*   gemm   hemm   herk   her2k  symm   syrk,  syr2k  trmm3  trmm   trsm  */
         /*    c     z    */
 /* 3mh  */ { {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE},
+             {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}  },
+/* 3m3  */ { {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE},
+             {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}  },
+/* 3m2  */ { {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE},
              {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}  },
 /* 3m1  */ { {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE},
              {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}  },
@@ -82,10 +81,11 @@ static bool_t bli_ind_oper_st[BLIS_NUM_IND_METHODS][BLIS_NUM_LEVEL3_OPS][2] =
              {TRUE,TRUE},   {TRUE,TRUE},   {TRUE,TRUE},   {TRUE,TRUE},   {TRUE,TRUE}    },
 };
 
-
 static char* bli_ind_impl_str[BLIS_NUM_IND_METHODS] =
 {
 /* 3mh  */ "3mh",
+/* 3m2  */ "3m3",
+/* 3m2  */ "3m2",
 /* 3m1  */ "3m1",
 /* 4mh  */ "4mh",
 /* 4m1b */ "4m1b",
@@ -214,14 +214,11 @@ char* bli_ind_oper_get_avail_impl_string( opid_t oper, num_t dt )
 
 void bli_ind_init( void )
 {
-	const ind_t method_c = BLIS_4M1A;
-	const ind_t method_z = BLIS_4M1A;
-
 #ifdef BLIS_ENABLE_INDUCED_SCOMPLEX
-	bli_ind_enable_dt( method_c, BLIS_SCOMPLEX );
+	bli_ind_enable_dt( BLIS_4M1A, BLIS_SCOMPLEX );
 #endif
 #ifdef BLIS_ENABLE_INDUCED_DCOMPLEX
-	bli_ind_enable_dt( method_z, BLIS_DCOMPLEX );
+	bli_ind_enable_dt( BLIS_4M1A, BLIS_DCOMPLEX );
 #endif
 }
 

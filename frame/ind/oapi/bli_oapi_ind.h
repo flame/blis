@@ -34,7 +34,7 @@
 
 
 //
-// Generate object-based interfaces for induced methods that work for
+// Generate object-based prototypes for induced methods that work for
 // trmm and trsm (ie: two-operand operations).
 //
 #undef  GENPROT
@@ -51,12 +51,12 @@ void PASTEMAC(trmm3,imeth)( side_t side, obj_t* alpha, obj_t* a, obj_t* b, obj_t
 void PASTEMAC(trmm,imeth) ( side_t side, obj_t* alpha, obj_t* a, obj_t* b                        ); \
 void PASTEMAC(trsm,imeth) ( side_t side, obj_t* alpha, obj_t* a, obj_t* b                        );
 
-GENPROT( 4m1 )
 GENPROT( 3m1 )
+GENPROT( 4m1 )
 
 
 //
-// Generate object-based interfaces for induced methods that do NOT work
+// Generate object-based prototypes for induced methods that do NOT work
 // for trmm and trsm (ie: two-operand operations).
 //
 #undef  GENPROT_NO2OP
@@ -71,7 +71,9 @@ void PASTEMAC(syrk,imeth) (              obj_t* alpha, obj_t* a,           obj_t
 void PASTEMAC(syr2k,imeth)(              obj_t* alpha, obj_t* a, obj_t* b, obj_t* beta, obj_t* c ); \
 void PASTEMAC(trmm3,imeth)( side_t side, obj_t* alpha, obj_t* a, obj_t* b, obj_t* beta, obj_t* c );
 
+GENPROT_NO2OP( 3mh )
+GENPROT_NO2OP( 3m3 )
+GENPROT_NO2OP( 3m2 )
 GENPROT_NO2OP( 4mh )
 GENPROT_NO2OP( 4mb )
-GENPROT_NO2OP( 3mh )
 

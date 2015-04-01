@@ -59,8 +59,8 @@ static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] =
 	},
 	/* micro-panel width = 2 */
 	{
-		NULL, BLIS_CPACKM_2XK_3MI_KERNEL,
-		NULL, BLIS_ZPACKM_2XK_3MI_KERNEL,
+		NULL, BLIS_CPACKM_2XK_3MIS_KERNEL,
+		NULL, BLIS_ZPACKM_2XK_3MIS_KERNEL,
 	},
 	/* micro-panel width = 3 */
 	{
@@ -68,8 +68,8 @@ static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] =
 	},
 	/* micro-panel width = 4 */
 	{
-		NULL, BLIS_CPACKM_4XK_3MI_KERNEL,
-		NULL, BLIS_ZPACKM_4XK_3MI_KERNEL,
+		NULL, BLIS_CPACKM_4XK_3MIS_KERNEL,
+		NULL, BLIS_ZPACKM_4XK_3MIS_KERNEL,
 	},
 	/* micro-panel width = 5 */
 	{
@@ -77,8 +77,8 @@ static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] =
 	},
 	/* micro-panel width = 6 */
 	{
-		NULL, BLIS_CPACKM_6XK_3MI_KERNEL,
-		NULL, BLIS_ZPACKM_6XK_3MI_KERNEL,
+		NULL, BLIS_CPACKM_6XK_3MIS_KERNEL,
+		NULL, BLIS_ZPACKM_6XK_3MIS_KERNEL,
 	},
 	/* micro-panel width = 7 */
 	{
@@ -86,8 +86,8 @@ static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] =
 	},
 	/* micro-panel width = 8 */
 	{
-		NULL, BLIS_CPACKM_8XK_3MI_KERNEL,
-		NULL, BLIS_ZPACKM_8XK_3MI_KERNEL,
+		NULL, BLIS_CPACKM_8XK_3MIS_KERNEL,
+		NULL, BLIS_ZPACKM_8XK_3MIS_KERNEL,
 	},
 	/* micro-panel width = 9 */
 	{
@@ -95,8 +95,8 @@ static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] =
 	},
 	/* micro-panel width = 10 */
 	{
-		NULL, BLIS_CPACKM_10XK_3MI_KERNEL,
-		NULL, BLIS_ZPACKM_10XK_3MI_KERNEL,
+		NULL, BLIS_CPACKM_10XK_3MIS_KERNEL,
+		NULL, BLIS_ZPACKM_10XK_3MIS_KERNEL,
 	},
 	/* micro-panel width = 11 */
 	{
@@ -104,8 +104,8 @@ static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] =
 	},
 	/* micro-panel width = 12 */
 	{
-		NULL, BLIS_CPACKM_12XK_3MI_KERNEL,
-		NULL, BLIS_ZPACKM_12XK_3MI_KERNEL,
+		NULL, BLIS_CPACKM_12XK_3MIS_KERNEL,
+		NULL, BLIS_ZPACKM_12XK_3MIS_KERNEL,
 	},
 	/* micro-panel width = 13 */
 	{
@@ -113,8 +113,8 @@ static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] =
 	},
 	/* micro-panel width = 14 */
 	{
-		NULL, BLIS_CPACKM_14XK_3MI_KERNEL,
-		NULL, BLIS_ZPACKM_14XK_3MI_KERNEL,
+		NULL, BLIS_CPACKM_14XK_3MIS_KERNEL,
+		NULL, BLIS_ZPACKM_14XK_3MIS_KERNEL,
 	},
 	/* micro-panel width = 15 */
 	{
@@ -122,8 +122,8 @@ static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] =
 	},
 	/* micro-panel width = 16 */
 	{
-		NULL, BLIS_CPACKM_16XK_3MI_KERNEL,
-		NULL, BLIS_ZPACKM_16XK_3MI_KERNEL,
+		NULL, BLIS_CPACKM_16XK_3MIS_KERNEL,
+		NULL, BLIS_ZPACKM_16XK_3MIS_KERNEL,
 	},
 	/* micro-panel width = 17 */
 	{
@@ -180,9 +180,9 @@ static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] =
 	/* micro-panel width = 30 */
 	{
 		NULL,
-		BLIS_CPACKM_30XK_3MI_KERNEL,
+		BLIS_CPACKM_30XK_3MIS_KERNEL,
 		NULL,
-		BLIS_ZPACKM_30XK_3MI_KERNEL,
+		BLIS_ZPACKM_30XK_3MIS_KERNEL,
 	},
 	/* micro-panel width = 31 */
 	{
@@ -293,5 +293,5 @@ void PASTEMAC(ch,varname)( \
 	} \
 }
 
-INSERT_GENTFUNCCO_BASIC0( packm_cxk_3mi )
+INSERT_GENTFUNCCO_BASIC0( packm_cxk_3mis )
 

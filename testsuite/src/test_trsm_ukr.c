@@ -153,8 +153,8 @@ void libblis_test_trsm_ukr_experiment( test_params_t* params,
 
 
 	// Fix m and n to MR and NR, respectively.
-	m = bli_blksz_for_type( datatype, gemm_mr );
-	n = bli_blksz_for_type( datatype, gemm_nr );
+	m = bli_blksz_get_def( datatype, gemm_mr );
+	n = bli_blksz_get_def( datatype, gemm_nr );
 
 	// Store the register blocksizes so that the driver can retrieve the
 	// values later when printing results.

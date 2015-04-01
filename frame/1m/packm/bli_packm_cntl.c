@@ -39,7 +39,7 @@ blksz_t* packm_mult_nvec;
 
 func_t*  packm_struc_cxk_kers;
 func_t*  packm_struc_cxk_4mi_kers;
-func_t*  packm_struc_cxk_3mi_kers;
+func_t*  packm_struc_cxk_3mis_kers;
 func_t*  packm_struc_cxk_rih_kers;
 
 packm_t* packm_cntl_row;
@@ -68,12 +68,12 @@ void bli_packm_cntl_init()
 	                     bli_cpackm_struc_cxk_4mi, FALSE,
 	                     bli_zpackm_struc_cxk_4mi, FALSE );
 
-	packm_struc_cxk_3mi_kers
+	packm_struc_cxk_3mis_kers
 	=
-	bli_func_obj_create( NULL,                     FALSE,
-	                     NULL,                     FALSE,
-	                     bli_cpackm_struc_cxk_3mi, FALSE,
-	                     bli_zpackm_struc_cxk_3mi, FALSE );
+	bli_func_obj_create( NULL,                      FALSE,
+	                     NULL,                      FALSE,
+	                     bli_cpackm_struc_cxk_3mis, FALSE,
+	                     bli_zpackm_struc_cxk_3mis, FALSE );
 
 	packm_struc_cxk_rih_kers
 	=
@@ -153,7 +153,7 @@ void bli_packm_cntl_finalize()
 {
 	bli_func_obj_free( packm_struc_cxk_kers );
 	bli_func_obj_free( packm_struc_cxk_4mi_kers );
-	bli_func_obj_free( packm_struc_cxk_3mi_kers );
+	bli_func_obj_free( packm_struc_cxk_3mis_kers );
 	bli_func_obj_free( packm_struc_cxk_rih_kers );
 
 	bli_cntl_obj_free( packm_cntl_row );

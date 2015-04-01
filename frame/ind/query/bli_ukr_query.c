@@ -38,6 +38,12 @@
 // 3mh micro-kernels
 extern func_t* gemm3mh_ukrs;
 
+// 3m3 micro-kernels
+extern func_t* gemm3m3_ukrs;
+
+// 3m2 micro-kernels
+extern func_t* gemm3m2_ukrs;
+
 // 3m1 micro-kernels
 extern func_t* gemm3m1_ukrs;
 extern func_t* gemmtrsm3m1_l_ukrs;
@@ -81,6 +87,10 @@ static func_t** bli_ukrs[BLIS_NUM_IND_METHODS][BLIS_NUM_LEVEL3_UKRS] =
 {
         /*   gemm   gemmtrsm_l   gemmtrsm_u   trsm_l   trsm_u   */
 /* 3mh  */ { &gemm3mh_ukrs,                NULL,                NULL,
+                                           NULL,                NULL, },
+/* 3m3  */ { &gemm3m3_ukrs,                NULL,                NULL,
+                                           NULL,                NULL, },
+/* 3m2  */ { &gemm3m2_ukrs,                NULL,                NULL,
                                            NULL,                NULL, },
 /* 3m1  */ { &gemm3m1_ukrs, &gemmtrsm3m1_l_ukrs, &gemmtrsm3m1_u_ukrs,
                                 &trsm3m1_l_ukrs,     &trsm3m1_u_ukrs, },

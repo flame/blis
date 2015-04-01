@@ -43,11 +43,13 @@ typedef void (*FUNCPTR_T)(
                            void*      b,
                            void*      beta,
                            void*      c, inc_t rs_c, inc_t cs_c,
-                           auxinfo_t* data
+                           auxinfo_t* data,
+                           void*      ukr
                          );
 
 static FUNCPTR_T GENARRAY(ftypes,gemm_ukernel_void);
 
+extern func_t* gemm_ukrs;
 
 void bli_gemm_ukernel( obj_t*  alpha,
                        obj_t*  a,
@@ -71,14 +73,22 @@ void bli_gemm_ukernel( obj_t*  alpha,
 
 	void*     buf_beta  = bli_obj_buffer_for_1x1( dt, *beta );
 
+	auxinfo_t data;
+
 	FUNCPTR_T f;
 
-	auxinfo_t data;
+	void*     gemm_ukr;
 
 
 	// Fill the auxinfo_t struct in case the micro-kernel uses it.
 	bli_auxinfo_set_next_a( buf_a, data );
 	bli_auxinfo_set_next_b( buf_b, data );
+
+	bli_auxinfo_set_is_a( 1, data );
+	bli_auxinfo_set_is_b( 1, data );
+
+	// Query the function address from the micro-kernel func_t object.
+	gemm_ukr  = bli_func_obj_query( dt, gemm_ukrs );
 
 	// Index into the type combination array to extract the correct
 	// function pointer.
@@ -91,12 +101,13 @@ void bli_gemm_ukernel( obj_t*  alpha,
 	   buf_b,
 	   buf_beta,
 	   buf_c, rs_c, cs_c,
-	   &data );
+	   &data,
+	   gemm_ukr );
 }
 
 
 #undef  GENTFUNC
-#define GENTFUNC( ctype, ch, varname, ukrname ) \
+#define GENTFUNC( ctype, ch, varname, ukrtype ) \
 \
 void PASTEMAC(ch,varname)( \
                            dim_t      k, \
@@ -105,17 +116,21 @@ void PASTEMAC(ch,varname)( \
                            void*      b, \
                            void*      beta, \
                            void*      c, inc_t rs_c, inc_t cs_c, \
-                           auxinfo_t* data  \
+                           auxinfo_t* data, \
+                           void*      ukr  \
                          ) \
 { \
-	PASTEMAC(ch,ukrname)( k, \
-	                      alpha, \
-	                      a, \
-	                      b, \
-	                      beta, \
-	                      c, rs_c, cs_c, \
-	                      data ); \
+	/* Cast the micro-kernel address to its function pointer type. */ \
+	PASTECH(ch,ukrtype) ukr_cast = ukr; \
+\
+	ukr_cast( k, \
+	          alpha, \
+	          a, \
+	          b, \
+	          beta, \
+	          c, rs_c, cs_c, \
+	          data ); \
 }
 
-INSERT_GENTFUNC_BASIC( gemm_ukernel_void, GEMM_UKERNEL )
+INSERT_GENTFUNC_BASIC( gemm_ukernel_void, gemm_ukr_t )
 

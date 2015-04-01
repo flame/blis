@@ -47,7 +47,7 @@ typedef void (*FUNCPTR_T)(
                            dim_t   m_panel,
                            dim_t   n_panel,
                            void*   p, inc_t rs_p, inc_t cs_p,
-                                      inc_t pd_p, inc_t ps_p,
+                                      dim_t pd_p, inc_t ps_p,
                            void*   c, inc_t rs_c, inc_t cs_c
                          );
 
@@ -87,7 +87,7 @@ void bli_unpackm_blk_var2( obj_t*     p,
 	void*     buf_p     = bli_obj_buffer_at_off( *p );
 	inc_t     rs_p      = bli_obj_row_stride( *p );
 	inc_t     cs_p      = bli_obj_col_stride( *p );
-	inc_t     pd_p      = bli_obj_panel_dim( *p );
+	dim_t     pd_p      = bli_obj_panel_dim( *p );
 	inc_t     ps_p      = bli_obj_panel_stride( *p );
 
 	void*     buf_c     = bli_obj_buffer_at_off( *c );
@@ -130,7 +130,7 @@ void PASTEMAC(ch,varname )( \
                             dim_t   m_panel, \
                             dim_t   n_panel, \
                             void*   p, inc_t rs_p, inc_t cs_p, \
-                                       inc_t pd_p, inc_t ps_p, \
+                                       dim_t pd_p, inc_t ps_p, \
                             void*   c, inc_t rs_c, inc_t cs_c  \
                           ) \
 { \
