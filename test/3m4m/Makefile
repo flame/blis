@@ -127,6 +127,7 @@ BLIS_LIB       := $(BLIS_LIB_PATH)/libblis.a
 # BLAS library path(s). This is where the BLAS libraries reside.
 BLAS_LIB_PATH  := $(HOME)/flame/lib
 MKL_LIB_PATH   := /opt/apps/intel/13/composer_xe_2013.2.146/mkl/lib/intel64
+ICC_LIB_PATH   := /opt/apps/intel/13/composer_xe_2013.2.146/compiler/lib/intel64
 
 # OpenBLAS
 OPENBLAS_LIB   := $(BLAS_LIB_PATH)/libopenblas.a
@@ -141,6 +142,12 @@ MKL_LIB        := -L$(MKL_LIB_PATH) \
                   -lmkl_sequential \
                   -lmkl_core \
                   -lmkl_intel_lp64
+MKLP_LIB       := -L$(MKL_LIB_PATH) \
+                  -lmkl_intel_thread \
+                  -lmkl_core \
+                  -lmkl_intel_lp64 \
+                  -L$(ICC_LIB_PATH) \
+                  -liomp5
 
 
 
@@ -197,6 +204,7 @@ STR_4M1B := -DSTR=\"4m1b\"
 STR_4M1A := -DSTR=\"4m1a\"
 STR_NAT  := -DSTR=\"asm\"
 STR_OBL  := -DSTR=\"openblas\"
+STR_MKL  := -DSTR=\"mkl\"
 
 # Single or multithreaded string
 STR_ST   := -DTHR_STR=\"st\"
@@ -217,12 +225,11 @@ PDEF_MT  := -DP_BEGIN=200 \
 # --- Targets/rules ------------------------------------------------------------
 #
 
-# Complete list of possible targets when defining 'all':
-#
-#   blis openblas atlas mkl mac essl
-#
-#all: blis openblas atlas mkl
-all: blis blis-mt openblas openblas-mt
+all: seq mt
+
+seq: blis openblas mkl
+
+mt: blis-mt openblas-mt mkl-mt
 
 blis: \
       test_sgemm_asm_blis_st.x \
@@ -274,11 +281,13 @@ openblas-mt: \
       test_cgemm_openblas_mt.x \
       test_zgemm_openblas_mt.x
 
-#atlas: \
-#      test_gemm_atlas.x
+mkl: \
+      test_cgemm_mkl_st.x \
+      test_zgemm_mkl_st.x
 
-#mkl: \
-#      test_gemm_mkl.x
+mkl-mt: \
+      test_cgemm_mkl_mt.x \
+      test_zgemm_mkl_mt.x
 
 
 
@@ -416,6 +425,19 @@ test_z%_openblas_mt.o: test_%.c
 test_c%_openblas_mt.o: test_%.c
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLA_DEF) $(DNAT)  $(STR_OBL)  $(STR_MT) -c $< -o $@
 
+# mkl
+test_z%_mkl_st.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLA_DEF) $(DNAT)  $(STR_MKL)  $(STR_ST) -c $< -o $@
+
+test_c%_mkl_st.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLA_DEF) $(DNAT)  $(STR_MKL)  $(STR_ST) -c $< -o $@
+
+test_z%_mkl_mt.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_Z) $(BLA_DEF) $(DNAT)  $(STR_MKL)  $(STR_MT) -c $< -o $@
+
+test_c%_mkl_mt.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLA_DEF) $(DNAT)  $(STR_MKL)  $(STR_MT) -c $< -o $@
+
 
 # -- Executable file rules --
 
@@ -429,6 +451,12 @@ test_%_openblas_st.x: test_%_openblas_st.o $(BLIS_LIB)
 
 test_%_openblas_mt.x: test_%_openblas_mt.o $(BLIS_LIB)
 	$(LINKER) $<  $(OPENBLASP_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@
+
+test_%_mkl_st.x: test_%_mkl_st.o $(BLIS_LIB)
+	$(LINKER) $<  $(MKL_LIB)       $(BLIS_LIB) $(LDFLAGS) -o $@
+
+test_%_mkl_mt.x: test_%_mkl_mt.o $(BLIS_LIB)
+	$(LINKER) $<  $(MKLP_LIB)      $(BLIS_LIB) $(LDFLAGS) -o $@
 
 test_%_blis_st.x: test_%_blis_st.o $(BLIS_LIB)
 	$(LINKER) $<                   $(BLIS_LIB) $(LDFLAGS) -o $@
