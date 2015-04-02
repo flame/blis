@@ -47,6 +47,39 @@ static char *cpuname[] = {
   "cortex-a15",
 };
 
+
+int get_feature(char *search)
+{
+  FILE *infile;
+  char buffer[2048], *p,*t;
+  p = (char *) NULL;
+
+  infile = fopen("/proc/cpuinfo", "r");
+  if (infile == NULL) {
+    return 0;
+  }
+
+  while (fgets(buffer, sizeof(buffer), infile)) {
+    if (!strncmp("Features", buffer, 8)) {
+      p = strchr(buffer, ':') + 2;
+      break;
+    }
+  }
+  fclose(infile);
+
+  if( p == NULL ) return 0;
+
+  t = strtok(p," ");
+  if (t != NULL) {
+    if (!strcmp(t, search)) { return 1; }
+  }
+  while( t = strtok(NULL," ")){
+    if (!strcmp(t, search)) { return 1; }
+  }
+
+  return 0;
+}
+
 int cpu_detect(void)
 {
   FILE *infile;
@@ -67,10 +100,16 @@ int cpu_detect(void)
 
   if(p != NULL) {
     if (strstr(p, "0xc09")) {
-      return CPUNAME_CORTEXA9;
+      if(get_feature("neon"))
+	return CPUNAME_CORTEXA9;
+      else
+	return CPUNAME_ARMV7;
     }
     if (strstr(p, "0xc0f")) {
-      return CPUNAME_CORTEXA15;
+      if(get_feature("neon"))
+	return CPUNAME_CORTEXA15;
+      else
+	return CPUNAME_ARMV7;
     }
   }
 
