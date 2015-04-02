@@ -44,6 +44,7 @@ main()
 	CC=gcc
 	CPUID_SRC=cpuid_x86.c
 	CPUID_BIN=blis_cpu_detect
+	ARCH=reference
 
 	# The name of the script, stripped of any preceeding path.
 	script_name=${0##*/}
@@ -63,9 +64,38 @@ main()
 	if [ $OSNAME = "Darwin" ]; then
 		CC=clang
 	fi
+
+	#
+	# Detect architecture by predefined macros
+	#
+
+	out1=`$CC -E ${dist_path}/arch_detect.c`
+
+	ARCH=`echo $out1 | grep -o "ARCH_[a-zA-Z0-9_]*" | head -n1`
+
+	if [ $ARCH = "ARCH_X86_64" ]; then
+		CPUID_SRC=cpuid_x86.c
+	elif [ $ARCH = "ARCH_X86" ]; then
+		CPUID_SRC=cpuid_x86.c
+	elif [ $ARCH = "ARCH_ARM" ]; then
+		CPUID_SRC=cpuid_arm.c
+	elif [ $ARCH = "ARCH_AARCH64" ]; then
+	        #Only support armv8 now
+	        echo "armv8a"
+		return 0
+	else
+	        echo "reference"
+	        return 0
+	fi
+
+	#
+	# Detect CPU cores
+	#
+
 	$CC -o ${cur_dirpath}/$CPUID_BIN ${dist_path}/$CPUID_SRC
 	${cur_dirpath}/$CPUID_BIN
 	rm -rf ${cur_dirpath}/$CPUID_BIN
+
 	# Exit peacefully.
 	return 0
 }
