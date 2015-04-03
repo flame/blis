@@ -185,7 +185,7 @@ main()
 	# line option processing).
 	if [ $# = "0" ]; then
 
-		configs_avail=$(ls ${config_dirpath})
+		configs_avail="auto "$(ls ${config_dirpath})
 
 		echo "${script_name}: "
 		echo "${script_name}: *** No configuration given! ***"
@@ -216,7 +216,11 @@ main()
 
 	elif [ $# = "1" ]; then
 
-		config_name=$1
+	        if [ $1 = "auto" ]; then
+		    config_name=`${build_dirpath}/auto-detect/auto-detect.sh`
+                else
+		    config_name=$1
+		fi
 		echo "${script_name}: configuring with '${config_name}' configuration sub-directory."
 	else
 
