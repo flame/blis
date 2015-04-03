@@ -4,22 +4,40 @@
 exec_root="test"
 out_root="output"
 
+#sys="stampede"
+sys="wahlberg"
+
 # Bind threads to processors.
 #export OMP_PROC_BIND=true
 #export GOMP_CPU_AFFINITY="0 2 4 6 8 10 12 14 1 3 5 7 9 11 13 15"
 export GOMP_CPU_AFFINITY="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15"
 
-# A hack to use libiomp5 with gcc.
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/opt/apps/intel/13/composer_xe_2013.2.146/compiler/lib/intel64"
+if [ ${sys} = "stampede" ]; then
+	# A hack to use libiomp5 with gcc.
+	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/opt/apps/intel/13/composer_xe_2013.2.146/compiler/lib/intel64"
+elif [ ${sys} = "wahlberg" ]; then
+	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$HOME/flame/lib/acml/5.3.1/gfortran64_int64/lib"
+	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$HOME/flame/lib/acml/5.3.1/gfortran64_mp_int64/lib"
+fi
 
 # Threading scheme to use when multithreading
-ic_nt=8
-jc_nt=2
-nt=16
+if [ ${sys} = "stampede" ]; then
+	jc_nt=2 # 5th loop
+	ic_nt=8 # 3rd loop
+	jr_nt=1 # 2nd loop
+	ir_nt=1 # 1st loop
+	nt=16
+elif [ ${sys} = "wahlberg" ]; then
+	jc_nt=1 # 5th loop
+	ic_nt=2 # 3rd loop
+	jr_nt=2 # 2nd loop
+	ir_nt=1 # 1st loop
+	nt=4
+fi
 
 # Threadedness to test.
-threads="mt" # mt"
-threads_r="mt" # mt"
+threads="st" # mt"
+threads_r="st" # mt"
 
 # Datatypes to test.
 dts="z c"
@@ -31,9 +49,14 @@ test_ops="${l3_ops}"
 test_ops_r="${l3_ops}"
 
 # Implementations to test
-test_impls="openblas mkl asm_blis 4m1a_blis 4m1b_blis 4mhw_blis 3m1_blis 3m2_blis 3m3_blis 3mhw_blis"
-#test_impls="asm_blis"
+if [ ${sys} = "stampede" ]; then
+	test_impls="openblas mkl asm_blis 3mhw_blis 3m3_blis 3m2_blis 3m1_blis 4mhw_blis 4m1b_blis 4m1a_blis"
+elif [ ${sys} = "wahlberg" ]; then
+	#test_impls="openblas acml asm_blis 3mhw_blis 3m3_blis 3m2_blis 3m1_blis 4mhw_blis 4m1b_blis 4m1a_blis"
+	test_impls="acml"
+fi
 test_impls_r="asm_blis"
+test_impls_r=""
 
 # First perform real test cases.
 for th in ${threads_r}; do
@@ -47,14 +70,18 @@ for th in ${threads_r}; do
 				# Set the number of threads according to th.
 				if [ ${th} = "mt" ]; then
 
-					export BLIS_IC_NT=${ic_nt}
 					export BLIS_JC_NT=${jc_nt}
+					export BLIS_IC_NT=${ic_nt}
+					export BLIS_JR_NT=${jr_nt}
+					export BLIS_IR_NT=${ir_nt}
 					export OMP_NUM_THREADS=${nt}
 
 				else
 
-					export BLIS_IC_NT=1
 					export BLIS_JC_NT=1
+					export BLIS_IC_NT=1
+					export BLIS_JR_NT=1
+					export BLIS_IR_NT=1
 					export OMP_NUM_THREADS=1
 				fi
 
@@ -88,14 +115,18 @@ for th in ${threads}; do
 				# Set the number of threads according to th.
 				if [ ${th} = "mt" ]; then
 
-					export BLIS_IC_NT=${ic_nt}
 					export BLIS_JC_NT=${jc_nt}
+					export BLIS_IC_NT=${ic_nt}
+					export BLIS_JR_NT=${jr_nt}
+					export BLIS_IR_NT=${ir_nt}
 					export OMP_NUM_THREADS=${nt}
 
 				else
 
-					export BLIS_IC_NT=1
 					export BLIS_JC_NT=1
+					export BLIS_IC_NT=1
+					export BLIS_JR_NT=1
+					export BLIS_IR_NT=1
 					export OMP_NUM_THREADS=1
 				fi
 

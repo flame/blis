@@ -45,7 +45,8 @@
 #
 
 .PHONY: all \
-        blis blis-mt openblas openblas-mt atlas mkl \
+        blis openblas mkl \
+        blis-mt openblas-mt mkl-mt \
         clean cleanx
 
 
@@ -125,17 +126,19 @@ BLIS_INC_PATH  := $(INSTALL_PREFIX)/include/blis
 BLIS_LIB       := $(BLIS_LIB_PATH)/libblis.a
 
 # BLAS library path(s). This is where the BLAS libraries reside.
-BLAS_LIB_PATH  := $(HOME)/flame/lib
+HOME_LIB_PATH  := $(HOME)/flame/lib
 MKL_LIB_PATH   := /opt/apps/intel/13/composer_xe_2013.2.146/mkl/lib/intel64
 ICC_LIB_PATH   := /opt/apps/intel/13/composer_xe_2013.2.146/compiler/lib/intel64
+ACML_LIB_PATH  := $(HOME_LIB_PATH)/acml/5.3.1/gfortran64_fma4_int64/lib
+ACMLP_LIB_PATH := $(HOME_LIB_PATH)/acml/5.3.1/gfortran64_fma4_mp_int64/lib
 
 # OpenBLAS
-OPENBLAS_LIB   := $(BLAS_LIB_PATH)/libopenblas.a
-OPENBLASP_LIB  := $(BLAS_LIB_PATH)/libopenblasp.a
+OPENBLAS_LIB   := $(HOME_LIB_PATH)/libopenblas.a
+OPENBLASP_LIB  := $(HOME_LIB_PATH)/libopenblasp.a
 
 # ATLAS
-ATLAS_LIB      := $(BLAS_LIB_PATH)/libf77blas.a \
-                  $(BLAS_LIB_PATH)/libatlas.a
+ATLAS_LIB      := $(HOME_LIB_PATH)/libf77blas.a \
+                  $(HOME_LIB_PATH)/libatlas.a
 
 # MKL
 MKL_LIB        := -L$(MKL_LIB_PATH) \
@@ -148,6 +151,12 @@ MKLP_LIB       := -L$(MKL_LIB_PATH) \
                   -lmkl_intel_lp64 \
                   -L$(ICC_LIB_PATH) \
                   -liomp5
+
+# ACML
+ACML_LIB       := -L$(ACML_LIB_PATH) \
+                  -lgfortran -lm -lrt -ldl -lacml
+ACMLP_LIB      := -L$(ACMLP_LIB_PATH) \
+                  -lgfortran -lm -lrt -ldl -lacml_mp
 
 
 
@@ -167,7 +176,7 @@ TEST_OBJS      := $(patsubst $(TEST_SRC_PATH)/%.c, \
 #CFLAGS         := -g -O2 -march=native
 
 # Add installed and local header paths to CFLAGS
-CFLAGS         += -I$(BLIS_INC_PATH) -I$(TEST_SRC_PATH)
+CFLAGS         += -I$(BLIS_INC_PATH) -I$(TEST_SRC_PATH) #-I$(ACML_INC_PATH)
 
 LINKER         := $(CC)
 LDFLAGS        := #-L/home/00146/field/gnu/gcc-4.8.2/lib64
@@ -205,6 +214,7 @@ STR_4M1A := -DSTR=\"4m1a\"
 STR_NAT  := -DSTR=\"asm\"
 STR_OBL  := -DSTR=\"openblas\"
 STR_MKL  := -DSTR=\"mkl\"
+STR_ACML := -DSTR=\"acml\"
 
 # Single or multithreaded string
 STR_ST   := -DTHR_STR=\"st\"
@@ -227,9 +237,11 @@ PDEF_MT  := -DP_BEGIN=200 \
 
 all: seq mt
 
-seq: blis openblas mkl
+#seq: blis openblas mkl acml
+seq: blis openblas acml
 
-mt: blis-mt openblas-mt mkl-mt
+#mt: blis-mt openblas-mt mkl-mt acml-mt
+mt: blis-mt openblas-mt acml-mt
 
 blis: \
       test_sgemm_asm_blis_st.x \
@@ -288,6 +300,14 @@ mkl: \
 mkl-mt: \
       test_cgemm_mkl_mt.x \
       test_zgemm_mkl_mt.x
+
+acml: \
+      test_cgemm_acml_st.x \
+      test_zgemm_acml_st.x
+
+acml-mt: \
+      test_cgemm_acml_mt.x \
+      test_zgemm_acml_mt.x
 
 
 
@@ -438,6 +458,19 @@ test_z%_mkl_mt.o: test_%.c
 test_c%_mkl_mt.o: test_%.c
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLA_DEF) $(DNAT)  $(STR_MKL)  $(STR_MT) -c $< -o $@
 
+# acml
+test_z%_acml_st.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLA_DEF) $(DNAT)  $(STR_ACML) $(STR_ST) -c $< -o $@
+
+test_c%_acml_st.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLA_DEF) $(DNAT)  $(STR_ACML) $(STR_ST) -c $< -o $@
+
+test_z%_acml_mt.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_Z) $(BLA_DEF) $(DNAT)  $(STR_ACML) $(STR_MT) -c $< -o $@
+
+test_c%_acml_mt.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLA_DEF) $(DNAT)  $(STR_ACML) $(STR_MT) -c $< -o $@
+
 
 # -- Executable file rules --
 
@@ -457,6 +490,12 @@ test_%_mkl_st.x: test_%_mkl_st.o $(BLIS_LIB)
 
 test_%_mkl_mt.x: test_%_mkl_mt.o $(BLIS_LIB)
 	$(LINKER) $<  $(MKLP_LIB)      $(BLIS_LIB) $(LDFLAGS) -o $@
+
+test_%_acml_st.x: test_%_acml_st.o $(BLIS_LIB)
+	$(LINKER) $<  $(ACML_LIB)      $(BLIS_LIB) $(LDFLAGS) -o $@
+
+test_%_acml_mt.x: test_%_acml_mt.o $(BLIS_LIB)
+	$(LINKER) $<  $(ACMLP_LIB)     $(BLIS_LIB) $(LDFLAGS) -o $@
 
 test_%_blis_st.x: test_%_blis_st.o $(BLIS_LIB)
 	$(LINKER) $<                   $(BLIS_LIB) $(LDFLAGS) -o $@
