@@ -67,7 +67,6 @@ fi
 
 # Real domain implementations to test.
 test_impls_r="asm_blis"
-test_impls_r=""
 
 # First perform real test cases.
 for th in ${threads_r}; do

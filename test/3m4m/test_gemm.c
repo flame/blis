@@ -105,6 +105,20 @@ int main( int argc, char** argv )
 	bli_param_map_blis_to_netlib_trans( transa, &f77_transa );
 	bli_param_map_blis_to_netlib_trans( transb, &f77_transb );
 
+	// Begin with initializing the last entry to zero so that
+	// matlab allocates space for the entire array once up-front.
+	for ( p = p_begin; p + p_inc <= p_end; p += p_inc ) ;
+#ifdef BLIS
+	printf( "data_%s_%cgemm_%s_blis", THR_STR, dt_ch, STR );
+#else
+	printf( "data_%s_%cgemm_%s",      THR_STR, dt_ch, STR );
+#endif
+	printf( "( %2lu, 1:5 ) = [ %4lu %4lu %4lu  %10.3e  %6.3f ];\n",
+	        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
+	        ( unsigned long )0,
+	        ( unsigned long )0,
+	        ( unsigned long )0, 0.0, 0.0 );
+
 
 	for ( p = p_begin; p <= p_end; p += p_inc )
 	{
