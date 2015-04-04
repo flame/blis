@@ -144,13 +144,19 @@ ATLAS_LIB      := $(HOME_LIB_PATH)/libf77blas.a \
 MKL_LIB        := -L$(MKL_LIB_PATH) \
                   -lmkl_sequential \
                   -lmkl_core \
-                  -lmkl_intel_lp64
+                  -lmkl_intel_ilp64
+#MKLP_LIB       := -L$(MKL_LIB_PATH) \
+#                  -lmkl_intel_thread \
+#                  -lmkl_core \
+#                  -lmkl_intel_ilp64 \
+#                  -L$(ICC_LIB_PATH) \
+#                  -liomp5
 MKLP_LIB       := -L$(MKL_LIB_PATH) \
-                  -lmkl_intel_thread \
+                  -lmkl_gnu_thread \
                   -lmkl_core \
-                  -lmkl_intel_lp64 \
+                  -lmkl_intel_ilp64 \
                   -L$(ICC_LIB_PATH) \
-                  -liomp5
+                  -lgomp
 
 # ACML
 ACML_LIB       := -L$(ACML_LIB_PATH) \
@@ -235,13 +241,19 @@ PDEF_MT  := -DP_BEGIN=200 \
 # --- Targets/rules ------------------------------------------------------------
 #
 
-all: seq mt
+all: blis-all openblas-all
 
-#seq: blis openblas mkl acml
-seq: blis openblas acml
+intel: blis-all openblas-all mkl-all
 
-#mt: blis-mt openblas-mt mkl-mt acml-mt
-mt: blis-mt openblas-mt acml-mt
+amd: blis-all openblas-all acml-all
+
+blis-all: blis blis-mt
+
+openblas-all: openblas openblas-mt
+
+mkl-all: mkl mkl-mt
+
+acml-all: acml acml-mt
 
 blis: \
       test_sgemm_asm_blis_st.x \

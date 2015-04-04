@@ -85,7 +85,7 @@
 
 // The number of MC x KC, KC x NC, and MC x NC blocks to reserve in the
 // contiguous memory pools.
-#define BLIS_NUM_MC_X_KC_BLOCKS          8
+#define BLIS_NUM_MC_X_KC_BLOCKS          BLIS_MAX_NUM_THREADS
 #define BLIS_NUM_KC_X_NC_BLOCKS          2
 #define BLIS_NUM_MC_X_NC_BLOCKS          0
 

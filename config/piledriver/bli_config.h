@@ -71,6 +71,12 @@
 // The maximum number of BLIS threads that will run concurrently.
 #define BLIS_MAX_NUM_THREADS             4
 
+// Enable multithreading via POSIX threads.
+//#define BLIS_ENABLE_PTHREADS
+
+// Enable multithreading via OpenMP.
+#define BLIS_ENABLE_OPENMP
+
 
 
 // -- MEMORY ALLOCATION --------------------------------------------------------
