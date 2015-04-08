@@ -95,10 +95,15 @@ void bli_packm_init( obj_t*   a,
 	}
 
 	// If the object is marked as being filled with zeros, then we can skip
-	// the packm operation entirely and alias.
+	// the packm operation entirely and alias. Notice that we use pack-aware
+	// aliasing. This is needed because the object may have been packed in
+	// a previous iteration, which means the object currently contains the
+	// mem_t entry of an already-allocated block. bli_obj_alias_for_packing()
+	// will avoid overwriting that mem_t entry, which means it can be
+	// properly released later on.
 	if ( bli_obj_is_zeros( *a ) )
 	{
-		bli_obj_alias_to( *a, *p );
+		bli_obj_alias_for_packing( *a, *p );
 		return;
 	}
 
