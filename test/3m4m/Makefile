@@ -221,6 +221,9 @@ STR_NAT  := -DSTR=\"asm\"
 STR_OBL  := -DSTR=\"openblas\"
 STR_MKL  := -DSTR=\"mkl\"
 STR_ACML := -DSTR=\"acml\"
+STR_AMK  := -DSTR=\"amk\"
+STR_AKN  := -DSTR=\"akn\"
+STR_AMN  := -DSTR=\"amn\"
 
 # Single or multithreaded string
 STR_ST   := -DTHR_STR=\"st\"
@@ -231,9 +234,13 @@ PDEF_ST  := -DP_BEGIN=40 \
             -DP_END=2000 \
             -DP_INC=40
 
-PDEF_MT  := -DP_BEGIN=200 \
-            -DP_END=10000 \
-            -DP_INC=200
+PDEF_MT  := -DP_BEGIN=400 \
+            -DP_END=8000 \
+            -DP_INC=400
+
+ADJ_MK   := -DADJ_MK
+ADJ_KN   := -DADJ_KN
+ADJ_MN   := -DADJ_MN
 
 
 
@@ -274,7 +281,14 @@ blis: \
       test_cgemm_4m1a_blis_st.x \
       test_zgemm_4m1a_blis_st.x \
       test_cgemm_asm_blis_st.x \
-      test_zgemm_asm_blis_st.x
+      test_zgemm_asm_blis_st.x \
+      \
+      test_cgemm_amk_blis_st.x \
+      test_zgemm_amk_blis_st.x \
+      test_cgemm_akn_blis_st.x \
+      test_zgemm_akn_blis_st.x \
+      test_cgemm_amn_blis_st.x \
+      test_zgemm_amn_blis_st.x
 
 blis-mt: \
       test_sgemm_asm_blis_mt.x \
@@ -443,6 +457,25 @@ test_z%_asm_blis_mt.o: test_%.c
 
 test_c%_asm_blis_mt.o: test_%.c
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLI_DEF) $(DNAT)  $(STR_NAT)  $(STR_MT) -c $< -o $@
+
+# blis asm (adjusted)
+test_z%_amk_blis_st.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLI_DEF) $(DNAT)  $(STR_AMK)  $(STR_ST) $(ADJ_MK) -c $< -o $@
+
+test_c%_amk_blis_st.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLI_DEF) $(DNAT)  $(STR_AMK)  $(STR_ST) $(ADJ_MK) -c $< -o $@
+
+test_z%_akn_blis_st.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLI_DEF) $(DNAT)  $(STR_AKN)  $(STR_ST) $(ADJ_KN) -c $< -o $@
+
+test_c%_akn_blis_st.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLI_DEF) $(DNAT)  $(STR_AKN)  $(STR_ST) $(ADJ_KN) -c $< -o $@
+
+test_z%_amn_blis_st.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLI_DEF) $(DNAT)  $(STR_AMN)  $(STR_ST) $(ADJ_MN) -c $< -o $@
+
+test_c%_amn_blis_st.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLI_DEF) $(DNAT)  $(STR_AMN)  $(STR_ST) $(ADJ_MN) -c $< -o $@
 
 # openblas
 test_z%_openblas_st.o: test_%.c
