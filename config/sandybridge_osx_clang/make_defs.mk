@@ -47,8 +47,6 @@ BLIS_ENABLE_VERBOSE_MAKE_OUTPUT := no
 BLIS_ENABLE_STATIC_BUILD        := yes
 BLIS_ENABLE_DYNAMIC_BUILD       := yes
 
-
-
 #
 # --- Utility program definitions ----------------------------------------------
 #
@@ -62,7 +60,7 @@ SYMLINK    := ln -sf
 FIND       := find
 GREP       := grep
 XARGS      := xargs
-RANLIB     := emranlib
+RANLIB     := ranlib
 INSTALL    := install -c
 
 # Used to refresh CHANGELOG.
@@ -76,17 +74,17 @@ GIT_LOG    := $(GIT) log --decorate
 #
 
 # --- Determine the C compiler and related flags ---
-CC             := emcc
+CC             := clang
 # Enable IEEE Standard 1003.1-2004 (POSIX.1d). 
 # NOTE: This is needed to enable posix_memalign().
 CPPROCFLAGS    := -D_POSIX_C_SOURCE=200112L
-CMISCFLAGS     := -std=c99
+CMISCFLAGS     := -std=c99 -m64 
 CPICFLAGS      := -fPIC
-CDBGFLAGS      := #-g4
+CDBGFLAGS      := #-g
 CWARNFLAGS     := -Wall
-COPTFLAGS      := -O2
-CKOPTFLAGS     := -O3
-CVECFLAGS      :=
+COPTFLAGS      := -O3 -march=native
+CKOPTFLAGS     := $(COPTFLAGS)
+CVECFLAGS      := -mavx -mfpmath=sse #-msse3 -march=native # -mfpmath=sse
 
 # Aggregate all of the flags into multiple groups: one for standard
 # compilation, and one for each of the supported "special" compilation
@@ -96,16 +94,15 @@ CFLAGS         := $(COPTFLAGS)  $(CVECFLAGS) $(CFLAGS_NOOPT)
 CFLAGS_KERNELS := $(CKOPTFLAGS) $(CVECFLAGS) $(CFLAGS_NOOPT)
 
 # --- Determine the archiver and related flags ---
-AR             := emar
+AR             := ar
 ARFLAGS        := cru
 
 # --- Determine the linker and related flags ---
 LINKER         := $(CC)
 SOFLAGS        := -shared
-LDFLAGS        := -O3 -s TOTAL_MEMORY=67108864 -s FORCE_ALIGNED_MEMORY=1 -s PRECISE_F32=2 -s GC_SUPPORT=0 
+LDFLAGS        := -lm -lpthread
 
-# --- Determine JS interpreter ---
-JSINT          := node
+
 
 # end of ifndef MAKE_DEFS_MK_INCLUDED conditional block
 endif
