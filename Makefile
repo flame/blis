@@ -6,6 +6,8 @@
 #
 #  Copyright (C) 2014, The University of Texas at Austin
 #
+#  Copyright (C) 2015, Jack Poulson
+#
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
 #  met:
@@ -40,6 +42,22 @@
 # Top-level makefile for libflame linear algebra library.
 #
 #
+
+ifeq ($(OS),Windows_NT)
+  # This is a placeholder; the main change is to support dylib and so
+  BLIS_STATIC_SUFFIX=lib
+  BLIS_SHARED_SUFFIX=dll
+else
+  UNAME_S := $(shell uname -s)
+  ifeq ($(UNAME_S),Linux)
+    BLIS_STATIC_SUFFIX=a
+    BLIS_SHARED_SUFFIX=so
+  endif
+  ifeq ($(UNAME_S),Darwin)
+    BLIS_STATIC_SUFFIX=a
+    BLIS_SHARED_SUFFIX=dylib
+  endif
+endif
 
 #
 # --- Makefile PHONY target definitions ----------------------------------------
@@ -173,8 +191,8 @@ VERS_CONF              := $(VERSION)-$(CONFIG_NAME)
 
 # Note: These names will be modified later to include the configuration and
 # version strings.
-BLIS_LIB_NAME      := $(BLIS_LIB_BASE_NAME).a
-BLIS_DLL_NAME      := $(BLIS_LIB_BASE_NAME).so
+BLIS_LIB_NAME      := $(BLIS_LIB_BASE_NAME).${BLIS_STATIC_SUFFIX}
+BLIS_DLL_NAME      := $(BLIS_LIB_BASE_NAME).${BLIS_SHARED_SUFFIX}
 
 # --- BLIS framework source and object variable names ---
 
@@ -202,23 +220,25 @@ MK_ALL_BLIS_DLL        := $(BASE_LIB_PATH)/$(BLIS_DLL_NAME)
 
 # --- Define install target names for static libraries ---
 
-MK_BLIS_LIB                  := $(MK_ALL_BLIS_LIB)
-MK_BLIS_LIB_INST             := $(patsubst $(BASE_LIB_PATH)/%.a, \
-                                           $(INSTALL_PREFIX)/lib/%.a, \
-                                           $(MK_BLIS_LIB))
-MK_BLIS_LIB_INST_W_VERS_CONF := $(patsubst $(BASE_LIB_PATH)/%.a, \
-                                           $(INSTALL_PREFIX)/lib/%-$(VERS_CONF).a, \
-                                           $(MK_BLIS_LIB))
+MK_BLIS_LIB      := $(MK_ALL_BLIS_LIB)
+MK_BLIS_LIB_INST := $(patsubst $(BASE_LIB_PATH)/%.${BLIS_STATIC_SUFFIX}, \
+                               $(INSTALL_PREFIX)/lib/%.${BLIS_STATIC_SUFFIX}, \
+                               $(MK_BLIS_LIB))
+MK_BLIS_LIB_INST_W_VERS_CONF := $(patsubst \
+  $(BASE_LIB_PATH)/%.${BLIS_STATIC_SUFFIX}, \
+  $(INSTALL_PREFIX)/lib/%-$(VERS_CONF).${BLIS_STATIC_SUFFIX}, \
+  $(MK_BLIS_LIB))
 
 # --- Define install target names for shared libraries ---
 
-MK_BLIS_DLL                  := $(MK_ALL_BLIS_DLL)
-MK_BLIS_DLL_INST             := $(patsubst $(BASE_LIB_PATH)/%.so, \
-                                           $(INSTALL_PREFIX)/lib/%.so, \
-                                           $(MK_BLIS_DLL))
-MK_BLIS_DLL_INST_W_VERS_CONF := $(patsubst $(BASE_LIB_PATH)/%.so, \
-                                           $(INSTALL_PREFIX)/lib/%-$(VERS_CONF).so, \
-                                           $(MK_BLIS_DLL))
+MK_BLIS_DLL      := $(MK_ALL_BLIS_DLL)
+MK_BLIS_DLL_INST := $(patsubst $(BASE_LIB_PATH)/%.${BLIS_SHARED_SUFFIX}, \
+                               $(INSTALL_PREFIX)/lib/%.${BLIS_SHARED_SUFFIX}, \
+                               $(MK_BLIS_DLL))
+MK_BLIS_DLL_INST_W_VERS_CONF := $(patsubst \
+  $(BASE_LIB_PATH)/%.${BLIS_SHARED_SUFFIX}, \
+  $(INSTALL_PREFIX)/lib/%-$(VERS_CONF).${BLIS_SHARED_SUFFIX}, \
+  $(MK_BLIS_DLL))
 
 # --- Determine which libraries to build ---
 
@@ -417,12 +437,12 @@ endif # pnacl
 # --- Uninstall definitions ----------------------------------------------------
 #
 
-# This shell command grabs all files named "libblis-*.a" or "libblis-*.so" in
+# This shell command grabs all files named "libblis-*.[a,so,dylib]" in
 # the installation directory and then filters out the name of the library
 # archive for the current version/configuration. We consider this remaining set
 # of libraries to be "old" and eligible for removal upon running of the
 # uninstall-old target.
-UNINSTALL_LIBS   := $(shell $(FIND) $(INSTALL_PREFIX)/lib/ -name "$(BLIS_LIB_BASE_NAME)-*.[a|so]" 2> /dev/null | $(GREP) -v "$(BLIS_LIB_BASE_NAME)-$(VERS_CONF).[a|so]" | $(GREP) -v $(BLIS_LIB_NAME))
+UNINSTALL_LIBS   := $(shell $(FIND) $(INSTALL_PREFIX)/lib/ -name "$(BLIS_LIB_BASE_NAME)-*.[a|so|dylib]" 2> /dev/null | $(GREP) -v "$(BLIS_LIB_BASE_NAME)-$(VERS_CONF).[a|so]" | $(GREP) -v $(BLIS_LIB_NAME))
 
 
 
@@ -658,7 +678,7 @@ else
 	@$(INSTALL) -m 0644 $(MK_HEADER_FILES) $(@)
 endif
 
-$(INSTALL_PREFIX)/lib/%-$(VERS_CONF).a: $(BASE_LIB_PATH)/%.a $(CONFIG_MK_FILE)
+$(INSTALL_PREFIX)/lib/%-$(VERS_CONF).${BLIS_STATIC_SUFFIX}: $(BASE_LIB_PATH)/%.${BLIS_STATIC_SUFFIX} $(CONFIG_MK_FILE)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	$(MKDIR) $(@D)
 	$(INSTALL) -m 0644 $< $@
@@ -668,7 +688,7 @@ else
 	@$(INSTALL) -m 0644 $< $@
 endif
 
-$(INSTALL_PREFIX)/lib/%-$(VERS_CONF).so: $(BASE_LIB_PATH)/%.so $(CONFIG_MK_FILE)
+$(INSTALL_PREFIX)/lib/%-$(VERS_CONF).${BLIS_SHARED_SUFFIX}: $(BASE_LIB_PATH)/%.${BLIS_SHARED_SUFFIX} $(CONFIG_MK_FILE)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	$(MKDIR) $(@D)
 	$(INSTALL) -m 0644 $< $@
@@ -683,7 +703,7 @@ endif
 
 install-lib-symlinks: check-env $(MK_LIBS_INST)
 
-$(INSTALL_PREFIX)/lib/%.a: $(INSTALL_PREFIX)/lib/%-$(VERS_CONF).a
+$(INSTALL_PREFIX)/lib/%.${BLIS_STATIC_SUFFIX}: $(INSTALL_PREFIX)/lib/%-$(VERS_CONF).${BLIS_STATIC_SUFFIX}
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	$(SYMLINK) $(<F) $(@F)
 	$(MV) $(@F) $(INSTALL_PREFIX)/lib/
@@ -693,7 +713,7 @@ else
 	@$(MV) $(@F) $(INSTALL_PREFIX)/lib/
 endif
 
-$(INSTALL_PREFIX)/lib/%.so: $(INSTALL_PREFIX)/lib/%-$(VERS_CONF).so
+$(INSTALL_PREFIX)/lib/%.${BLIS_SHARED_SUFFIX}: $(INSTALL_PREFIX)/lib/%-$(VERS_CONF).${BLIS_SHARED_SUFFIX}
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	$(SYMLINK) $(<F) $(@F)
 	$(MV) $(@F) $(INSTALL_PREFIX)/lib/
@@ -716,17 +736,17 @@ cleanlib: check-env
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	- $(FIND) $(BASE_OBJ_CONFIG_PATH) -name "*.o" | $(XARGS) $(RM_F)
 	- $(FIND) $(BASE_OBJ_FRAME_PATH) -name "*.o" | $(XARGS) $(RM_F)
-	- $(FIND) $(BASE_LIB_PATH) -name "*.a" | $(XARGS) $(RM_F)
-	- $(FIND) $(BASE_LIB_PATH) -name "*.so" | $(XARGS) $(RM_F)
+	- $(FIND) $(BASE_LIB_PATH) -name "*.${BLIS_STATIC_SUFFIX}" | $(XARGS) $(RM_F)
+	- $(FIND) $(BASE_LIB_PATH) -name "*.${BLIS_SHARED_SUFFIX}" | $(XARGS) $(RM_F)
 else
 	@echo "Removing .o files from $(BASE_OBJ_CONFIG_PATH)."
 	@- $(FIND) $(BASE_OBJ_CONFIG_PATH) -name "*.o" | $(XARGS) $(RM_F)
 	@echo "Removing .o files from $(BASE_OBJ_FRAME_PATH)."
 	@- $(FIND) $(BASE_OBJ_FRAME_PATH) -name "*.o" | $(XARGS) $(RM_F)
-	@echo "Removing .a files from $(BASE_LIB_PATH)."
-	@- $(FIND) $(BASE_LIB_PATH) -name "*.a" | $(XARGS) $(RM_F)
-	@echo "Removing .so files from $(BASE_LIB_PATH)."
-	@- $(FIND) $(BASE_LIB_PATH) -name "*.so" | $(XARGS) $(RM_F)
+	@echo "Removing static libraries from $(BASE_LIB_PATH)."
+	@- $(FIND) $(BASE_LIB_PATH) -name "*.${BLIS_STATIC_SUFFIX}" | $(XARGS) $(RM_F)
+	@echo "Removing dynamic libraries from $(BASE_LIB_PATH)."
+	@- $(FIND) $(BASE_LIB_PATH) -name "*.${BLIS_SHARED_SUFFIX}" | $(XARGS) $(RM_F)
 endif
 
 cleantest: check-env
