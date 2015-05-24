@@ -6,6 +6,8 @@
 
    Copyright (C) 2014, The University of Texas at Austin
 
+   Copyright (C) 2015, Jack Poulson
+
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
    met:
@@ -36,6 +38,64 @@
 
 #ifdef BLIS_ENABLE_PTHREADS
 
+#ifdef __APPLE__
+#include <errno.h> 
+
+// Since OS X does not include pthread_barrier, the following snippet is taken
+// from the stackoverflow answer from:
+// http://stackoverflow.com/questions/3640853/performance-test-sem-t-v-s-dispatch-semaphore-t-and-pthread-once-t-v-s-dispat
+
+int pthread_barrier_init
+(pthread_barrier_t *barrier, const pthread_barrierattr_t *attr, 
+ unsigned int count)
+{
+    if(count == 0)
+    {
+        errno = EINVAL;
+        return -1;
+    }
+    if(pthread_mutex_init(&barrier->mutex, 0) < 0)
+    {
+        return -1;
+    }
+    if(pthread_cond_init(&barrier->cond, 0) < 0)
+    {
+        pthread_mutex_destroy(&barrier->mutex);
+        return -1;
+    }
+    barrier->tripCount = count;
+    barrier->count = 0;
+
+    return 0;
+}
+
+int pthread_barrier_destroy(pthread_barrier_t *barrier)
+{
+    pthread_cond_destroy(&barrier->cond);
+    pthread_mutex_destroy(&barrier->mutex);
+    return 0;
+}
+
+int pthread_barrier_wait(pthread_barrier_t *barrier)
+{
+    pthread_mutex_lock(&barrier->mutex);
+    ++(barrier->count);
+    if(barrier->count >= barrier->tripCount)
+    {
+        barrier->count = 0;
+        pthread_cond_broadcast(&barrier->cond);
+        pthread_mutex_unlock(&barrier->mutex);
+        return 1;
+    }
+    else
+    {
+        pthread_cond_wait(&barrier->cond, &(barrier->mutex));
+        pthread_mutex_unlock(&barrier->mutex);
+        return 0;
+    }
+}
+#endif
+
 typedef struct thread_data
 {
   level3_int_t func;
@@ -48,9 +108,14 @@ typedef struct thread_data
   void* thread;
 } thread_data_t;
 
-void* thread_decorator_helper( thread_data_t* data )
+void* thread_decorator_helper( void* dataVoid )
 {
+    thread_data_t* data = (thread_data_t*)dataVoid;
+
     data->func( data->alpha, data->a, data->b, data->beta, data->c, data->cntl, data->thread );
+    // This might not be the best return value, but nothing was returned
+    // before this was added.
+    return NULL;
 }
 void bli_level3_thread_decorator( dim_t n_threads, 
                                   level3_int_t func, 
@@ -65,7 +130,6 @@ void bli_level3_thread_decorator( dim_t n_threads,
     pthread_t* pthreads = (pthread_t*) bli_malloc(sizeof(pthread_t) * n_threads);
     //Saying "datas" is kind of like saying "all y'all"
     thread_data_t* datas = (thread_data_t*) bli_malloc(sizeof(thread_data_t) * n_threads);
-    pthread_attr_t* attr = (pthread_attr_t*) bli_malloc(sizeof(pthread_attr_t) * n_threads);
 
     for( int i = 0; i < n_threads; i++ )
     {

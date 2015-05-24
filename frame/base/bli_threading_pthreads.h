@@ -6,6 +6,8 @@
 
    Copyright (C) 2014, The University of Texas at Austin
 
+   Copyright (C) 2015, Jack Poulson
+
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
    met:
@@ -50,7 +52,9 @@ typedef struct
 } pthread_barrier_t;
 
 
-int pthread_barrier_init(pthread_barrier_t *barrier, const pthread_barrierattr_t *attr, unsigned int count);
+int pthread_barrier_init
+(pthread_barrier_t *barrier, const pthread_barrierattr_t *attr, 
+ unsigned int count);
 int pthread_barrier_destroy(pthread_barrier_t *barrier);
 int pthread_barrier_wait(pthread_barrier_t *barrier);
 #endif // __APPLE__
