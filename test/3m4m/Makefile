@@ -221,9 +221,6 @@ STR_NAT  := -DSTR=\"asm\"
 STR_OBL  := -DSTR=\"openblas\"
 STR_MKL  := -DSTR=\"mkl\"
 STR_ACML := -DSTR=\"acml\"
-STR_AMK  := -DSTR=\"amk\"
-STR_AKN  := -DSTR=\"akn\"
-STR_AMN  := -DSTR=\"amn\"
 
 # Single or multithreaded string
 STR_ST   := -DTHR_STR=\"st\"
@@ -237,10 +234,6 @@ PDEF_ST  := -DP_BEGIN=40 \
 PDEF_MT  := -DP_BEGIN=400 \
             -DP_END=8000 \
             -DP_INC=400
-
-ADJ_MK   := -DADJ_MK
-ADJ_KN   := -DADJ_KN
-ADJ_MN   := -DADJ_MN
 
 
 
@@ -281,14 +274,7 @@ blis: \
       test_cgemm_4m1a_blis_st.x \
       test_zgemm_4m1a_blis_st.x \
       test_cgemm_asm_blis_st.x \
-      test_zgemm_asm_blis_st.x \
-      \
-      test_cgemm_amk_blis_st.x \
-      test_zgemm_amk_blis_st.x \
-      test_cgemm_akn_blis_st.x \
-      test_zgemm_akn_blis_st.x \
-      test_cgemm_amn_blis_st.x \
-      test_zgemm_amn_blis_st.x
+      test_zgemm_asm_blis_st.x
 
 blis-mt: \
       test_sgemm_asm_blis_mt.x \
@@ -312,6 +298,8 @@ blis-mt: \
       test_zgemm_asm_blis_mt.x
 
 openblas: \
+      test_sgemm_openblas_st.x \
+      test_dgemm_openblas_st.x \
       test_cgemm_openblas_st.x \
       test_zgemm_openblas_st.x
 
@@ -320,6 +308,8 @@ openblas-mt: \
       test_zgemm_openblas_mt.x
 
 mkl: \
+      test_sgemm_mkl_st.x \
+      test_dgemm_mkl_st.x \
       test_cgemm_mkl_st.x \
       test_zgemm_mkl_st.x
 
@@ -328,6 +318,8 @@ mkl-mt: \
       test_zgemm_mkl_mt.x
 
 acml: \
+      test_sgemm_acml_st.x \
+      test_dgemm_acml_st.x \
       test_cgemm_acml_st.x \
       test_zgemm_acml_st.x
 
@@ -458,26 +450,13 @@ test_z%_asm_blis_mt.o: test_%.c
 test_c%_asm_blis_mt.o: test_%.c
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLI_DEF) $(DNAT)  $(STR_NAT)  $(STR_MT) -c $< -o $@
 
-# blis asm (adjusted)
-test_z%_amk_blis_st.o: test_%.c
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLI_DEF) $(DNAT)  $(STR_AMK)  $(STR_ST) $(ADJ_MK) -c $< -o $@
-
-test_c%_amk_blis_st.o: test_%.c
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLI_DEF) $(DNAT)  $(STR_AMK)  $(STR_ST) $(ADJ_MK) -c $< -o $@
-
-test_z%_akn_blis_st.o: test_%.c
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLI_DEF) $(DNAT)  $(STR_AKN)  $(STR_ST) $(ADJ_KN) -c $< -o $@
-
-test_c%_akn_blis_st.o: test_%.c
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLI_DEF) $(DNAT)  $(STR_AKN)  $(STR_ST) $(ADJ_KN) -c $< -o $@
-
-test_z%_amn_blis_st.o: test_%.c
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLI_DEF) $(DNAT)  $(STR_AMN)  $(STR_ST) $(ADJ_MN) -c $< -o $@
-
-test_c%_amn_blis_st.o: test_%.c
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLI_DEF) $(DNAT)  $(STR_AMN)  $(STR_ST) $(ADJ_MN) -c $< -o $@
-
 # openblas
+test_d%_openblas_st.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_D) $(BLA_DEF) $(DNAT)  $(STR_OBL)  $(STR_ST) -c $< -o $@
+
+test_s%_openblas_st.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_S) $(BLA_DEF) $(DNAT)  $(STR_OBL)  $(STR_ST) -c $< -o $@
+
 test_z%_openblas_st.o: test_%.c
 	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLA_DEF) $(DNAT)  $(STR_OBL)  $(STR_ST) -c $< -o $@
 
@@ -491,6 +470,12 @@ test_c%_openblas_mt.o: test_%.c
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLA_DEF) $(DNAT)  $(STR_OBL)  $(STR_MT) -c $< -o $@
 
 # mkl
+test_d%_mkl_st.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_D) $(BLA_DEF) $(DNAT)  $(STR_MKL)  $(STR_ST) -c $< -o $@
+
+test_s%_mkl_st.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_S) $(BLA_DEF) $(DNAT)  $(STR_MKL)  $(STR_ST) -c $< -o $@
+
 test_z%_mkl_st.o: test_%.c
 	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLA_DEF) $(DNAT)  $(STR_MKL)  $(STR_ST) -c $< -o $@
 
@@ -504,6 +489,12 @@ test_c%_mkl_mt.o: test_%.c
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLA_DEF) $(DNAT)  $(STR_MKL)  $(STR_MT) -c $< -o $@
 
 # acml
+test_d%_acml_st.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_D) $(BLA_DEF) $(DNAT)  $(STR_ACML) $(STR_ST) -c $< -o $@
+
+test_s%_acml_st.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_S) $(BLA_DEF) $(DNAT)  $(STR_ACML) $(STR_ST) -c $< -o $@
+
 test_z%_acml_st.o: test_%.c
 	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLA_DEF) $(DNAT)  $(STR_ACML) $(STR_ST) -c $< -o $@
 

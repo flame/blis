@@ -4,8 +4,8 @@
 exec_root="test"
 out_root="output"
 
-sys="stampede"
-#sys="wahlberg"
+#sys="stampede"
+sys="wahlberg"
 
 # Bind threads to processors.
 #export OMP_PROC_BIND=true

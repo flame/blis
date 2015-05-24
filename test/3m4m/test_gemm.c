@@ -49,7 +49,7 @@ int main( int argc, char** argv )
 	dim_t    p;
 	dim_t    p_begin, p_end, p_inc;
 	int      m_input, n_input, k_input;
-	num_t    dt, dt_real;
+	num_t    dt;
 	char     dt_ch;
 	int      r, n_repeats;
 	trans_t  transa;
@@ -61,7 +61,6 @@ int main( int argc, char** argv )
 	double   dtime_save;
 	double   gflops;
 
-	extern blksz_t* gemm_kc;
 
 	bli_init();
 
@@ -70,7 +69,6 @@ int main( int argc, char** argv )
 	n_repeats = 3;
 
 	dt      = DT;
-	dt_real = bli_datatype_proj_to_real( DT );
 
 	p_begin = P_BEGIN;
 	p_end   = P_END;
@@ -79,6 +77,11 @@ int main( int argc, char** argv )
 	m_input = -1;
 	n_input = -1;
 	k_input = -1;
+
+#if 0
+	extern blksz_t* gemm_kc;
+
+	num_t dt_real = bli_datatype_proj_to_real( DT );
 
 	// Extract the kc blocksize for the requested datatype and its
 	// real analogue.
@@ -92,14 +95,6 @@ int main( int argc, char** argv )
 	else if ( IND == BLIS_3M1  ) k_input = kc_real / 3;
 	else if ( IND == BLIS_4M1A ) k_input = kc_real / 2;
 	else                         k_input = kc_real;
-
-	// Adjust the relative dimensions, if requested.
-#if   (defined ADJ_MK)
-	m_input = -2; k_input = -2; n_input = -1;
-#elif (defined ADJ_KN)
-	k_input = -2; n_input = -2; m_input = -1;
-#elif (defined ADJ_MN)
-	m_input = -2; n_input = -2; k_input = -1;
 #endif
 
 	// Choose the char corresponding to the requested datatype.
@@ -131,6 +126,7 @@ int main( int argc, char** argv )
 
 	for ( p = p_begin; p <= p_end; p += p_inc )
 	{
+
 		if ( m_input < 0 ) m = p / ( dim_t )abs(m_input);
 		else               m =     ( dim_t )    m_input;
 		if ( n_input < 0 ) n = p / ( dim_t )abs(n_input);
