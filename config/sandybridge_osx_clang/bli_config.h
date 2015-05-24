@@ -72,10 +72,10 @@
 #define BLIS_MAX_NUM_THREADS             16
 
 // Enable multithreading via POSIX threads.
-//#define BLIS_ENABLE_PTHREADS
+#define BLIS_ENABLE_PTHREADS
 
 // Enable multithreading via OpenMP.
-#define BLIS_ENABLE_OPENMP
+//#define BLIS_ENABLE_OPENMP
 
 
 
