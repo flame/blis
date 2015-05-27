@@ -43,7 +43,7 @@ MAKE_DEFS_MK_INCLUDED := yes
 #
 
 # Variables corresponding to other configure-time options.
-BLIS_ENABLE_VERBOSE_MAKE_OUTPUT := no
+BLIS_ENABLE_VERBOSE_MAKE_OUTPUT := yes
 BLIS_ENABLE_STATIC_BUILD        := yes
 BLIS_ENABLE_DYNAMIC_BUILD       := yes
 
@@ -99,7 +99,7 @@ ARFLAGS        := cru
 
 # --- Determine the linker and related flags ---
 LINKER         := $(CC)
-SOFLAGS        := -shared
+SOFLAGS        := -shared -dynamiclib -Wl,-headerpad_max_install_names -Wl,-flat_namespace -install_name @rpath/libblis.dylib
 LDFLAGS        := -lm -lpthread
 
 
