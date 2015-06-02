@@ -53,7 +53,6 @@ thread_comm_t BLIS_SINGLE_COMM;
 
 #ifdef BLIS_ENABLE_PTHREADS
 pthread_mutex_t initialize_mutex = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t mem_manager_mutex;
 #endif
 
 err_t bli_init( void )
@@ -79,11 +78,11 @@ err_t bli_init( void )
 	// section to prevent a race condition of the type described above.
 
 	// BEGIN CRITICAL SECTION
-#ifdef BLIS_ENABLE_OPENMP        
+#ifdef BLIS_ENABLE_OPENMP
 	_Pragma( "omp critical (init)" )
 #endif
 #ifdef BLIS_ENABLE_PTHREADS
-    pthread_mutex_lock( &mem_manager_mutex );
+	pthread_mutex_lock( &initialize_mutex );
 #endif
 	{
 
@@ -102,9 +101,9 @@ err_t bli_init( void )
 		bli_error_msgs_init();
 
 		bli_mem_init();
-    
+
 		bli_ind_init();
-    
+
 		bli_setup_communicator( &BLIS_SINGLE_COMM, 1 );
 		bli_setup_packm_single_threaded_info( &BLIS_PACKM_SINGLE_THREADED );
 		bli_setup_gemm_single_threaded_info( &BLIS_GEMM_SINGLE_THREADED );
@@ -121,12 +120,9 @@ err_t bli_init( void )
 	// END CRITICAL SECTION
 	}
 #ifdef BLIS_ENABLE_PTHREADS
-    pthread_mutex_unlock( &mem_manager_mutex );
+	pthread_mutex_unlock( &initialize_mutex );
 #endif
 
-#ifdef BLIS_ENABLE_PTHREADS
-    pthread_mutex_init( &mem_manager_mutex, NULL );
-#endif
 	return r_val;
 }
 
@@ -153,11 +149,11 @@ err_t bli_finalize( void )
 	// section to prevent a race condition of the type described above.
 
 	// BEGIN CRITICAL SECTION
-#ifdef BLIS_ENABLE_OPENMP        
+#ifdef BLIS_ENABLE_OPENMP
 	_Pragma( "omp critical (init)" )
 #endif
 #ifdef BLIS_ENABLE_PTHREADS
-    pthread_mutex_lock( &mem_manager_mutex );
+	pthread_mutex_lock( &initialize_mutex );
 #endif
 	{
 
@@ -188,11 +184,11 @@ err_t bli_finalize( void )
 	// END CRITICAL SECTION
 	}
 #ifdef BLIS_ENABLE_PTHREADS
-    pthread_mutex_unlock( &mem_manager_mutex );
+	pthread_mutex_unlock( &initialize_mutex );
 #endif
 
 #ifdef BLIS_ENABLE_PTHREADS
-    pthread_mutex_destroy( &mem_manager_mutex );
+	pthread_mutex_destroy( &initialize_mutex );
 #endif
 
 	return r_val;

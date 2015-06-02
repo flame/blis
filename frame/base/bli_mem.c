@@ -35,7 +35,7 @@
 #include "blis.h"
 
 #ifdef BLIS_ENABLE_PTHREADS
-extern pthread_mutex_t mem_manager_mutex;
+pthread_mutex_t mem_manager_mutex = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
 // Declare one memory pool structure for each block size/shape we want to
@@ -128,14 +128,14 @@ void bli_mem_acquire_m( siz_t     req_size,
 		block_ptrs = bli_pool_block_ptrs( pool );
 
 
-		// BEGIN CRITICAL SECTION
-#ifdef BLIS_ENABLE_OPENMP        
-        _Pragma( "omp critical (mem)" )
+#ifdef BLIS_ENABLE_OPENMP
+		_Pragma( "omp critical (mem)" )
 #endif
 #ifdef BLIS_ENABLE_PTHREADS
-        pthread_mutex_lock( &mem_manager_mutex );
+		pthread_mutex_lock( &mem_manager_mutex );
 #endif
-        {
+		// BEGIN CRITICAL SECTION
+		{
 
 		// Query the index of the contiguous memory block that resides at the
 		// "top" of the pool.
@@ -152,10 +152,11 @@ void bli_mem_acquire_m( siz_t     req_size,
 		bli_pool_dec_top_index( pool );
 
 
+		}
 		// END CRITICAL SECTION
-        }
+
 #ifdef BLIS_ENABLE_PTHREADS
-        pthread_mutex_unlock( &mem_manager_mutex );
+		pthread_mutex_unlock( &mem_manager_mutex );
 #endif
 
 		// Query the size of the blocks in the pool so we can store it in the
@@ -208,15 +209,15 @@ void bli_mem_release( mem_t* mem )
 		// Extract the block pointer array associated with the pool.
 		block_ptrs = bli_pool_block_ptrs( pool );
 
-
-		// BEGIN CRITICAL SECTION
-#ifdef BLIS_ENABLE_OPENMP        
-        _Pragma( "omp critical (mem)" )
+#ifdef BLIS_ENABLE_OPENMP
+		_Pragma( "omp critical (mem)" )
 #endif
 #ifdef BLIS_ENABLE_PTHREADS
-        pthread_mutex_lock( &mem_manager_mutex );
+		pthread_mutex_lock( &mem_manager_mutex );
 #endif
-        {
+
+		// BEGIN CRITICAL SECTION
+		{
 
 		// Increment the top of the memory pool.
 		bli_pool_inc_top_index( pool );
@@ -227,11 +228,11 @@ void bli_mem_release( mem_t* mem )
 		// Place the address of the block back onto the top of the memory pool.
 		block_ptrs[i] = block;
 
-
+		}
 		// END CRITICAL SECTION
-        }
+
 #ifdef BLIS_ENABLE_PTHREADS
-        pthread_mutex_unlock( &mem_manager_mutex );
+		pthread_mutex_unlock( &mem_manager_mutex );
 #endif
 	}
 
@@ -269,6 +270,16 @@ void bli_mem_init()
 	index_b = bli_packbuf_index( BLIS_BUFFER_FOR_B_PANEL );
 	index_c = bli_packbuf_index( BLIS_BUFFER_FOR_C_PANEL );
 
+#ifdef BLIS_ENABLE_OPENMP
+	_Pragma( "omp critical (mem)" )
+#endif
+#ifdef BLIS_ENABLE_PTHREADS
+	pthread_mutex_lock( &mem_manager_mutex );
+#endif
+
+	// BEGIN CRITICAL SECTION
+	{
+
 	// Initialize contiguous memory pool for MC x KC blocks.
 	bli_mem_init_pool( pool_mk_mem,
 	                   BLIS_MK_BLOCK_SIZE,
@@ -289,6 +300,13 @@ void bli_mem_init()
 	                   BLIS_NUM_MC_X_NC_BLOCKS,
 	                   pool_mn_blk_ptrs,
 	                   &pools[ index_c ] );
+
+	}
+	// END CRITICAL SECTION
+
+#ifdef BLIS_ENABLE_PTHREADS
+	pthread_mutex_unlock( &mem_manager_mutex );
+#endif
 }
 
 
@@ -343,6 +361,27 @@ void bli_mem_init_pool( char*   pool_mem,
 
 void bli_mem_finalize()
 {
-	// Nothing to do.
+
+#ifdef BLIS_ENABLE_OPENMP
+	_Pragma( "omp critical (mem)" )
+#endif
+#ifdef BLIS_ENABLE_PTHREADS
+	pthread_mutex_lock( &mem_manager_mutex );
+#endif
+
+	// BEGIN CRITICAL SECTION
+	{
+		// Do nothing.
+	}
+	// END CRITICAL SECTION
+
+#ifdef BLIS_ENABLE_PTHREADS
+	pthread_mutex_unlock( &mem_manager_mutex );
+#endif
+
+#ifdef BLIS_ENABLE_PTHREADS
+	pthread_mutex_destroy( &mem_manager_mutex );
+#endif
+
 }
 

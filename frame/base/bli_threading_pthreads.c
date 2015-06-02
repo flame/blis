@@ -36,6 +36,8 @@
 
 #ifdef BLIS_ENABLE_PTHREADS
 
+void* thread_decorator_helper( void* data_void );
+
 typedef struct thread_data
 {
   level3_int_t func;
@@ -48,10 +50,15 @@ typedef struct thread_data
   void* thread;
 } thread_data_t;
 
-void* thread_decorator_helper( thread_data_t* data )
+void* thread_decorator_helper( void* data_void )
 {
+	thread_data_t* data = data_void;
+
     data->func( data->alpha, data->a, data->b, data->beta, data->c, data->cntl, data->thread );
+
+	return NULL;
 }
+
 void bli_level3_thread_decorator( dim_t n_threads, 
                                   level3_int_t func, 
                                   obj_t* alpha, 
@@ -65,7 +72,7 @@ void bli_level3_thread_decorator( dim_t n_threads,
     pthread_t* pthreads = (pthread_t*) bli_malloc(sizeof(pthread_t) * n_threads);
     //Saying "datas" is kind of like saying "all y'all"
     thread_data_t* datas = (thread_data_t*) bli_malloc(sizeof(thread_data_t) * n_threads);
-    pthread_attr_t* attr = (pthread_attr_t*) bli_malloc(sizeof(pthread_attr_t) * n_threads);
+    //pthread_attr_t* attr = (pthread_attr_t*) bli_malloc(sizeof(pthread_attr_t) * n_threads);
 
     for( int i = 0; i < n_threads; i++ )
     {
