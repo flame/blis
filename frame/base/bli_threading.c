@@ -34,6 +34,25 @@
 
 #include "blis.h"
 
+packm_thrinfo_t BLIS_PACKM_SINGLE_THREADED;
+gemm_thrinfo_t BLIS_GEMM_SINGLE_THREADED;
+herk_thrinfo_t BLIS_HERK_SINGLE_THREADED;
+thread_comm_t BLIS_SINGLE_COMM;
+
+void bli_thread_init( void )
+{
+
+	bli_setup_communicator( &BLIS_SINGLE_COMM, 1 );
+	bli_setup_packm_single_threaded_info( &BLIS_PACKM_SINGLE_THREADED );
+	bli_setup_gemm_single_threaded_info( &BLIS_GEMM_SINGLE_THREADED );
+	bli_setup_herk_single_threaded_info( &BLIS_HERK_SINGLE_THREADED );
+}
+
+void bli_thread_finalize( void )
+{
+	// Nothing to do.
+}
+
 //*********** Stuff Specific to single-threaded *************
 #ifndef BLIS_ENABLE_MULTITHREADING
 void bli_barrier( thread_comm_t* communicator, dim_t t_id )

@@ -32,17 +32,38 @@
 
 */
 
+#include "blis.h"
 
-errlev_t bli_error_checking_level( void );
-errlev_t bli_error_checking_level_set( errlev_t new_level );
+// These globally-declared obj_t's are used to store the so-called
+// "global scalar constants" for commonly-used 1x1 values.
 
-bool_t   bli_error_checking_is_enabled( void );
+obj_t BLIS_TWO;
+obj_t BLIS_ONE;
+obj_t BLIS_ONE_HALF;
+obj_t BLIS_ZERO;
+obj_t BLIS_MINUS_ONE_HALF;
+obj_t BLIS_MINUS_ONE;
+obj_t BLIS_MINUS_TWO;
 
-char*    bli_error_string_for_code( gint_t code );
+void bli_const_init( void )
+{
+	bli_obj_create_const(  2.0, &BLIS_TWO );
+	bli_obj_create_const(  1.0, &BLIS_ONE );
+	bli_obj_create_const(  0.5, &BLIS_ONE_HALF );
+	bli_obj_create_const(  0.0, &BLIS_ZERO );
+	bli_obj_create_const( -0.5, &BLIS_MINUS_ONE_HALF );
+	bli_obj_create_const( -1.0, &BLIS_MINUS_ONE );
+	bli_obj_create_const( -2.0, &BLIS_MINUS_TWO );
+}
 
-void     bli_abort( void );
-void     bli_print_msg( char* str, char* file, guint_t line );
-
-void     bli_error_init( void );
-void     bli_error_finalize( void );
+void bli_const_finalize( void )
+{
+	bli_obj_free( &BLIS_TWO );
+	bli_obj_free( &BLIS_ONE );
+	bli_obj_free( &BLIS_ONE_HALF );
+	bli_obj_free( &BLIS_ZERO );
+	bli_obj_free( &BLIS_MINUS_ONE_HALF );
+	bli_obj_free( &BLIS_MINUS_ONE );
+	bli_obj_free( &BLIS_MINUS_TWO );
+}
 

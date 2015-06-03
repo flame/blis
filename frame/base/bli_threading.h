@@ -87,6 +87,9 @@ typedef struct thread_comm_s thread_comm_t;
 #include "bli_threading_omp.h"
 #include "bli_threading_pthreads.h"
 
+void    bli_thread_init( void );
+void    bli_thread_finalize( void );
+
 // Thread Communicator Interface Definitions
 void    bli_setup_communicator( thread_comm_t* communicator, dim_t n_threads );
 void    bli_cleanup_communicator( thread_comm_t* communicator );

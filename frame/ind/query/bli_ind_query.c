@@ -222,6 +222,11 @@ void bli_ind_init( void )
 #endif
 }
 
+void bli_ind_finalize( void )
+{
+	// Nothing to do.
+}
+
 // -----------------------------------------------------------------------------
 
 void bli_ind_enable( ind_t method )

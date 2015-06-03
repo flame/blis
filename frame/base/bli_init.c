@@ -34,26 +34,12 @@
 
 #include "blis.h"
 
-// -- Global variables --
-
-static bool_t bli_initialized = FALSE;
-
-obj_t BLIS_TWO;
-obj_t BLIS_ONE;
-obj_t BLIS_ONE_HALF;
-obj_t BLIS_ZERO;
-obj_t BLIS_MINUS_ONE_HALF;
-obj_t BLIS_MINUS_ONE;
-obj_t BLIS_MINUS_TWO;
-
-packm_thrinfo_t BLIS_PACKM_SINGLE_THREADED;
-gemm_thrinfo_t BLIS_GEMM_SINGLE_THREADED;
-herk_thrinfo_t BLIS_HERK_SINGLE_THREADED;
-thread_comm_t BLIS_SINGLE_COMM;
-
 #ifdef BLIS_ENABLE_PTHREADS
 pthread_mutex_t initialize_mutex = PTHREAD_MUTEX_INITIALIZER;
 #endif
+
+static bool_t bli_initialized = FALSE;
+
 
 err_t bli_init( void )
 {
@@ -94,20 +80,13 @@ err_t bli_init( void )
 	// necessary initialization subtasks).
 	if ( bli_initialized == FALSE )
 	{
-		bli_init_const();
-
+		// Initialize various sub-APIs.
+		bli_const_init();
 		bli_cntl_init();
-
-		bli_error_msgs_init();
-
+		bli_error_init();
 		bli_mem_init();
-
 		bli_ind_init();
-
-		bli_setup_communicator( &BLIS_SINGLE_COMM, 1 );
-		bli_setup_packm_single_threaded_info( &BLIS_PACKM_SINGLE_THREADED );
-		bli_setup_gemm_single_threaded_info( &BLIS_GEMM_SINGLE_THREADED );
-		bli_setup_herk_single_threaded_info( &BLIS_HERK_SINGLE_THREADED );
+		bli_thread_init();
 
 		// After initialization is complete, mark BLIS as initialized.
 		bli_initialized = TRUE;
@@ -165,13 +144,13 @@ err_t bli_finalize( void )
 	// necessary finalization subtasks).
 	if ( bli_initialized == TRUE )
 	{
-		bli_finalize_const();
-
+		// Finalize various sub-APIs.
+		bli_const_finalize();
 		bli_cntl_finalize();
-
-		// Don't need to do anything to finalize error messages.
-
+		bli_error_finalize();
 		bli_mem_finalize();
+		bli_ind_finalize();
+		bli_thread_finalize();
 
 		// After finalization is complete, mark BLIS as uninitialized.
 		bli_initialized = FALSE;
@@ -192,28 +171,6 @@ err_t bli_finalize( void )
 #endif
 
 	return r_val;
-}
-
-void bli_init_const( void )
-{
-	bli_obj_create_const(  2.0, &BLIS_TWO );
-	bli_obj_create_const(  1.0, &BLIS_ONE );
-	bli_obj_create_const(  0.5, &BLIS_ONE_HALF );
-	bli_obj_create_const(  0.0, &BLIS_ZERO );
-	bli_obj_create_const( -0.5, &BLIS_MINUS_ONE_HALF );
-	bli_obj_create_const( -1.0, &BLIS_MINUS_ONE );
-	bli_obj_create_const( -2.0, &BLIS_MINUS_TWO );
-}
-
-void bli_finalize_const( void )
-{
-	bli_obj_free( &BLIS_TWO );
-	bli_obj_free( &BLIS_ONE );
-	bli_obj_free( &BLIS_ONE_HALF );
-	bli_obj_free( &BLIS_ZERO );
-	bli_obj_free( &BLIS_MINUS_ONE_HALF );
-	bli_obj_free( &BLIS_MINUS_ONE );
-	bli_obj_free( &BLIS_MINUS_TWO );
 }
 
 void bli_init_auto( err_t* init_result )

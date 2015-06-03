@@ -86,7 +86,7 @@ void bli_print_msg( char* str, char* file, guint_t line )
 	fflush( stderr );
 }
 
-void bli_error_msgs_init( void )
+void bli_error_init( void )
 {
 	sprintf( bli_error_string_for_code(BLIS_INVALID_ERROR_CHECKING_LEVEL),
 	         "Invalid error checking level." );
@@ -194,5 +194,10 @@ void bli_error_msgs_init( void )
 
 	sprintf( bli_error_string_for_code(BLIS_EXPECTED_OBJECT_ALIAS),
 	         "Expected object to be alias." );
+}
+
+void bli_error_finalize( void )
+{
+	// Nothing to do.
 }
 
