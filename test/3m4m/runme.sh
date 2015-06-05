@@ -64,12 +64,11 @@ if [ ${sys} = "stampede" ]; then
 elif [ ${sys} = "wahlberg" ]; then
 
 	test_impls="openblas acml asm_blis 3mhw_blis 3m3_blis 3m2_blis 3m1_blis 4mhw_blis 4m1b_blis 4m1a_blis"
-	#test_impls="openblas acml asm_blis"
+	test_impls="openblas acml asm_blis"
 fi
 
 # Real domain implementations to test.
-#test_impls_r="openblas acml asm_blis"
-test_impls_r="asm_blis"
+test_impls_r="openblas acml asm_blis"
 
 # First perform real test cases.
 for th in ${threads_r}; do

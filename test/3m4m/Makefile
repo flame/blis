@@ -45,8 +45,8 @@
 #
 
 .PHONY: all \
-        blis openblas mkl \
-        blis-mt openblas-mt mkl-mt \
+        blis-gemm-st openblas-gemm-st mkl-gemm-st acml-gemm-st \
+        blis-gemm-mt openblas-gemm-mt mkl-gemm-mt acml-gemm-mt \
         clean cleanx
 
 
@@ -247,15 +247,19 @@ intel: blis-all openblas-all mkl-all
 
 amd: blis-all openblas-all acml-all
 
-blis-all: blis blis-mt
+blis-all: blis-gemm-st \
+          blis-gemm-mt
 
-openblas-all: openblas openblas-mt
+openblas-all: openblas-gemm-st \
+              openblas-gemm-mt
 
-mkl-all: mkl mkl-mt
+mkl-all: mkl-gemm-st \
+         mkl-gemm-mt
 
-acml-all: acml acml-mt
+acml-all: acml-gemm-st \
+          acml-gemm-mt
 
-blis: \
+blis-gemm-st: \
       test_sgemm_asm_blis_st.x \
       test_dgemm_asm_blis_st.x \
       \
@@ -276,7 +280,7 @@ blis: \
       test_cgemm_asm_blis_st.x \
       test_zgemm_asm_blis_st.x
 
-blis-mt: \
+blis-gemm-mt: \
       test_sgemm_asm_blis_mt.x \
       test_dgemm_asm_blis_mt.x \
       \
@@ -297,33 +301,33 @@ blis-mt: \
       test_cgemm_asm_blis_mt.x \
       test_zgemm_asm_blis_mt.x
 
-openblas: \
+openblas-gemm-st: \
       test_sgemm_openblas_st.x \
       test_dgemm_openblas_st.x \
       test_cgemm_openblas_st.x \
       test_zgemm_openblas_st.x
 
-openblas-mt: \
+openblas-gemm-mt: \
       test_cgemm_openblas_mt.x \
       test_zgemm_openblas_mt.x
 
-mkl: \
+mkl-gemm-st: \
       test_sgemm_mkl_st.x \
       test_dgemm_mkl_st.x \
       test_cgemm_mkl_st.x \
       test_zgemm_mkl_st.x
 
-mkl-mt: \
+mkl-gemm-mt: \
       test_cgemm_mkl_mt.x \
       test_zgemm_mkl_mt.x
 
-acml: \
+acml-gemm-st: \
       test_sgemm_acml_st.x \
       test_dgemm_acml_st.x \
       test_cgemm_acml_st.x \
       test_zgemm_acml_st.x
 
-acml-mt: \
+acml-gemm-mt: \
       test_cgemm_acml_mt.x \
       test_zgemm_acml_mt.x
 
