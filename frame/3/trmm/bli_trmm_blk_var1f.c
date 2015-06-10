@@ -94,9 +94,9 @@ void bli_trmm_blk_var1f( obj_t*  a,
 		          bli_obj_width_after_trans( *a );
 
     dim_t start, end;
-    bli_get_range_weighted( thread, offA, m_trans, 
-                            bli_blksz_get_mult_for_obj( a, cntl_blocksize( cntl ) ),
-                            bli_obj_is_upper( *c ), &start, &end );
+    bli_get_range_weighted_t2b( thread, offA, m_trans, 
+                                bli_blksz_get_mult_for_obj( a, cntl_blocksize( cntl ) ),
+                                bli_obj_root_uplo( *a ), &start, &end );
 
 	// Partition along the m dimension.
 	for ( i = start; i < end; i += b_alg )

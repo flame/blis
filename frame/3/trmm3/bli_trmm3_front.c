@@ -129,8 +129,9 @@ void bli_trmm3_front( side_t  side,
 	bli_obj_set_as_root( b_local );
 	bli_obj_set_as_root( c_local );
 
-
-    trmm_thrinfo_t** infos = bli_create_trmm_thrinfo_paths( FALSE );
+	// Notice that, unlike trmm_r, there is no dependency in the jc loop
+	// for trmm3_r, so we can pass in FALSE for jc_dependency.
+	trmm_thrinfo_t** infos = bli_create_trmm_thrinfo_paths( FALSE );
     dim_t n_threads = thread_num_threads( infos[0] );
 
     // Invoke the internal back-end.

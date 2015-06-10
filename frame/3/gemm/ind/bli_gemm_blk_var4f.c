@@ -52,7 +52,7 @@ void bli_gemm_blk_var4f( obj_t*  a,
     obj_t b_pack_s;
     obj_t a1_pack_s, c1_pack_s;
 
-    obj_t a1, c1; 
+    obj_t a1, c1;
     obj_t* a1_pack  = NULL;
     obj_t* b_pack   = NULL;
     obj_t* c1_pack  = NULL;
@@ -91,9 +91,9 @@ void bli_gemm_blk_var4f( obj_t*  a,
 	// Query dimension in partitioning direction.
 	m_trans = bli_obj_length_after_trans( *a );
     dim_t start, end;
-    bli_get_range( thread, 0, m_trans, 
-                   bli_blksz_get_mult_for_obj( a, cntl_blocksize( cntl ) ),
-                   &start, &end );
+    bli_get_range_t2b( thread, 0, m_trans,
+                       bli_blksz_get_mult_for_obj( a, cntl_blocksize( cntl ) ),
+                       &start, &end );
 
 	// Partition along the m dimension.
 	for ( i = start; i < end; i += b_alg )
@@ -140,7 +140,7 @@ void bli_gemm_blk_var4f( obj_t*  a,
 		              c1_pack,
 		              cntl_sub_gemm( cntl ),
                       gemm_thread_sub_gemm( thread ) );
-        
+
         thread_ibarrier( thread );
 
 		// Only apply beta within the first of three subproblems.
@@ -167,7 +167,7 @@ void bli_gemm_blk_var4f( obj_t*  a,
 		              c1_pack,
 		              cntl_sub_gemm( cntl ),
                       gemm_thread_sub_gemm( thread ) );
-        
+
         thread_ibarrier( thread );
 
 
@@ -191,7 +191,7 @@ void bli_gemm_blk_var4f( obj_t*  a,
 		              c1_pack,
 		              cntl_sub_gemm( cntl ),
                       gemm_thread_sub_gemm( thread ) );
-        
+
         thread_ibarrier( thread );
 
 

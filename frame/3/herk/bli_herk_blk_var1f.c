@@ -52,7 +52,7 @@ void bli_herk_blk_var1f( obj_t*  a,
 	dim_t b_alg;
 	dim_t m_trans;
 
-    if( thread_am_ochief( thread ) ) { 
+    if( thread_am_ochief( thread ) ) {
         // Initialize object for packing A'.
         bli_obj_init_pack( &ah_pack_s );
         bli_packm_init( ah, &ah_pack_s,
@@ -61,9 +61,9 @@ void bli_herk_blk_var1f( obj_t*  a,
         // Scale C by beta (if instructed).
         // Since scalm doesn't support multithreading yet, must be done by chief thread (ew)
         bli_scalm_int( &BLIS_ONE,
-                       c,  
+                       c,
                        cntl_sub_scalm( cntl ) );
-    }   
+    }
     ah_pack = thread_obroadcast( thread, &ah_pack_s );
 
 	// Initialize pack objects that are passed into packm_init() for A and C.
@@ -82,9 +82,9 @@ void bli_herk_blk_var1f( obj_t*  a,
 	// Query dimension in partitioning direction.
 	m_trans = bli_obj_length_after_trans( *c );
     dim_t start, end;
-    bli_get_range_weighted( thread, 0, m_trans, 
-                            bli_blksz_get_mult_for_obj( a, cntl_blocksize( cntl ) ),
-                            bli_obj_is_upper( *c ), &start, &end );
+    bli_get_range_weighted_t2b( thread, 0, m_trans,
+                                bli_blksz_get_mult_for_obj( a, cntl_blocksize( cntl ) ),
+                                bli_obj_root_uplo( *c ), &start, &end );
 
 	// Partition along the m dimension.
 	for ( i = start; i < end; i += b_alg )

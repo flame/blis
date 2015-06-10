@@ -90,9 +90,9 @@ void bli_herk_blk_var2f( obj_t*  a,
     dim_t start, end;
 
     // Needs to be replaced with a weighted range because triangle
-    bli_get_range_weighted( thread, 0, n_trans, 
-                            bli_blksz_get_mult_for_obj( a, cntl_blocksize( cntl ) ),
-                            bli_obj_is_lower( *c ), &start, &end );
+    bli_get_range_weighted_l2r( thread, 0, n_trans,
+                                bli_blksz_get_mult_for_obj( a, cntl_blocksize( cntl ) ),
+                                bli_obj_root_uplo( *c ), &start, &end );
 
 	// Partition along the n dimension.
 	for ( i = start; i < end; i += b_alg )

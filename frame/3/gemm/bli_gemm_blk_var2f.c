@@ -42,7 +42,7 @@ void bli_gemm_blk_var2f( obj_t*  a,
 {
 	obj_t a_pack_s;
     obj_t b1_pack_s, c1_pack_s;
-    
+
     obj_t b1, c1;
     obj_t*  a_pack = NULL;
 	obj_t*  b1_pack = NULL;
@@ -82,9 +82,9 @@ void bli_gemm_blk_var2f( obj_t*  a,
 	// Query dimension in partitioning direction.
 	n_trans = bli_obj_width_after_trans( *b );
     dim_t start, end;
-    bli_get_range( thread, 0, n_trans, 
-                   bli_blksz_get_mult_for_obj( b, cntl_blocksize( cntl ) ),
-                   &start, &end );
+    bli_get_range_l2r( thread, 0, n_trans,
+                       bli_blksz_get_mult_for_obj( b, cntl_blocksize( cntl ) ),
+                       &start, &end );
 
 	// Partition along the n dimension.
 	for ( i = start; i < end; i += b_alg )
@@ -129,7 +129,7 @@ void bli_gemm_blk_var2f( obj_t*  a,
 		              c1_pack,
 		              cntl_sub_gemm( cntl ),
                       gemm_thread_sub_gemm( thread ) );
-        
+
         thread_ibarrier( thread );
 
         // Unpack C1 (if C1 was packed).

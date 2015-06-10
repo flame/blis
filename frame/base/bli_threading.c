@@ -142,65 +142,319 @@ void* bli_broadcast_structure( thread_comm_t* communicator, dim_t id, void* to_s
 }
 
 // Code for work assignments
-void bli_get_range( void* thr, dim_t all_start, dim_t all_end, dim_t block_factor, dim_t* start, dim_t* end )
+void bli_get_range( void* thr, dim_t all_start, dim_t all_end, dim_t block_factor, bool_t handle_edge_low, dim_t* start, dim_t* end )
 {
-    thrinfo_t* thread = (thrinfo_t*) thr;
-    dim_t n_way = thread->n_way;
-    dim_t work_id = thread->work_id;
+	thrinfo_t* thread     = ( thrinfo_t* )thr;
+	dim_t      n_way      = thread->n_way;
+	dim_t      work_id    = thread->work_id;
 
-    dim_t size = all_end - all_start;
-    dim_t n_pt = size / n_way;
-    n_pt = (n_pt * n_way < size) ? n_pt + 1 : n_pt;
-    n_pt = (n_pt % block_factor == 0) ? n_pt : n_pt + block_factor - (n_pt % block_factor); 
-    *start = work_id * n_pt + all_start;
-    *end   = bli_min( *start + n_pt, size + all_start );
+	dim_t      size       = all_end - all_start;
+
+	dim_t      n_bf_whole = size / block_factor;
+	dim_t      n_bf_left  = size % block_factor;
+
+	dim_t      n_bf_lo    = n_bf_whole / n_way;
+	dim_t      n_bf_hi    = n_bf_whole / n_way;
+
+	// In this function, we partition the space between all_start and
+	// all_end into n_way partitions, each a multiple of block_factor
+	// with the exception of the one partition that recieves the
+	// "edge" case (if applicable).
+	//
+	// Here are examples of various thread partitionings, in units of
+	// the block_factor, when n_way = 4. (A '+' indicates the thread
+	// that receives the leftover edge case (ie: n_bf_left extra
+	// rows/columns in its sub-range).
+	//                                        (all_start ... all_end)
+	// n_bf_whole  _left  hel  n_th_lo  _hi   thr0  thr1  thr2  thr3
+	//         12     =0    f        0    4      3     3     3     3
+	//         12     >0    f        0    4      3     3     3     3+
+	//         13     >0    f        1    3      4     3     3     3+
+	//         14     >0    f        2    2      4     4     3     3+
+	//         15     >0    f        3    1      4     4     4     3+
+	//         15     =0    f        3    1      4     4     4     3 
+	//
+	//         12     =0    t        4    0      3     3     3     3
+	//         12     >0    t        4    0      3+    3     3     3
+	//         13     >0    t        3    1      3+    3     3     4
+	//         14     >0    t        2    2      3+    3     4     4
+	//         15     >0    t        1    3      3+    4     4     4
+	//         15     =0    t        1    3      3     4     4     4
+
+	// As indicated by the table above, load is balanced as equally
+	// as possible, even in the presence of an edge case.
+
+	// First, we must differentiate between cases where the leftover
+	// "edge" case (n_bf_left) should be allocated to a thread partition
+	// at the low end of the index range or the high end.
+
+	if ( handle_edge_low == FALSE )
+	{
+		// Notice that if all threads receive the same number of
+		// block_factors, those threads are considered "high" and
+		// the "low" thread group is empty.
+		dim_t n_th_lo = n_bf_whole % n_way;
+		//dim_t n_th_hi = n_way - n_th_lo;
+
+		// If some partitions must have more block_factors than others
+		// assign the slightly larger partitions to lower index threads.
+		if ( n_th_lo != 0 ) n_bf_lo += 1;
+
+		// Compute the actual widths (in units of rows/columns) of
+		// individual threads in the low and high groups.
+		dim_t size_lo = n_bf_lo * block_factor;
+		dim_t size_hi = n_bf_hi * block_factor;
+
+		// Precompute the starting indices of the low and high groups.
+		dim_t lo_start = all_start;
+		dim_t hi_start = all_start + n_th_lo * size_lo;
+
+		// Compute the start and end of individual threads' ranges
+		// as a function of their work_ids and also the group to which
+		// they belong (low or high).
+		if ( work_id < n_th_lo )
+		{
+			*start = lo_start + (work_id  ) * size_lo;
+			*end   = lo_start + (work_id+1) * size_lo;
+		}
+		else // if ( n_th_lo <= work_id )
+		{
+			*start = hi_start + (work_id-n_th_lo  ) * size_hi;
+			*end   = hi_start + (work_id-n_th_lo+1) * size_hi;
+
+			// Since the edge case is being allocated to the high
+			// end of the index range, we have to advance the last
+			// thread's end.
+			if ( work_id == n_way - 1 ) *end += n_bf_left;
+		}
+	}
+	else // if ( handle_edge_low == TRUE )
+	{
+		// Notice that if all threads receive the same number of
+		// block_factors, those threads are considered "low" and
+		// the "high" thread group is empty.
+		dim_t n_th_hi = n_bf_whole % n_way;
+		dim_t n_th_lo = n_way - n_th_hi;
+
+		// If some partitions must have more block_factors than others
+		// assign the slightly larger partitions to higher index threads.
+		if ( n_th_hi != 0 ) n_bf_hi += 1;
+
+		// Compute the actual widths (in units of rows/columns) of
+		// individual threads in the low and high groups.
+		dim_t size_lo = n_bf_lo * block_factor;
+		dim_t size_hi = n_bf_hi * block_factor;
+
+		// Precompute the starting indices of the low and high groups.
+		dim_t lo_start = all_start;
+		dim_t hi_start = all_start + n_th_lo * size_lo
+		                           + n_bf_left;
+
+		// Compute the start and end of individual threads' ranges
+		// as a function of their work_ids and also the group to which
+		// they belong (low or high).
+		if ( work_id < n_th_lo )
+		{
+			*start = lo_start + (work_id  ) * size_lo;
+			*end   = lo_start + (work_id+1) * size_lo;
+
+			// Since the edge case is being allocated to the low
+			// end of the index range, we have to advance the
+			// starts/ends accordingly.
+			if ( work_id == 0 )   *end   += n_bf_left;
+			else                { *start += n_bf_left;
+			                      *end   += n_bf_left; }
+		}
+		else // if ( n_th_lo <= work_id )
+		{
+			*start = hi_start + (work_id-n_th_lo  ) * size_hi;
+			*end   = hi_start + (work_id-n_th_lo+1) * size_hi;
+		}
+	}
 }
 
-void bli_get_range_weighted( void* thr, dim_t all_start, dim_t all_end, dim_t block_factor, bool_t forward, dim_t* start, dim_t* end)
+void bli_get_range_l2r( void* thr, dim_t all_start, dim_t all_end, dim_t block_factor, dim_t* start, dim_t* end )
 {
-    thrinfo_t* thread = (thrinfo_t*) thr;
-    dim_t n_way = thread->n_way;
-    dim_t work_id = thread->work_id;
-    dim_t size = all_end - all_start;
+	bli_get_range( thr, all_start, all_end, block_factor,
+	               FALSE, start, end );
+}
 
-    *start = 0;
-    *end   = all_end - all_start;
-    double num = size*size / (double) n_way;
+void bli_get_range_r2l( void* thr, dim_t all_start, dim_t all_end, dim_t block_factor, dim_t* start, dim_t* end )
+{
+	bli_get_range( thr, all_start, all_end, block_factor,
+	               TRUE, start, end );
+}
 
-    if( forward ) {
-        dim_t curr_caucus = n_way - 1;
-        dim_t len = 0;
-        while(1){
-            dim_t width = ceil(sqrt( len*len + num )) - len; // The width of the current caucus
-            width = (width % block_factor == 0) ? width : width + block_factor - (width % block_factor);
-            if( curr_caucus == work_id ) {
-                *start = bli_max( 0 , *end - width ) + all_start;
-                *end = *end + all_start;
-                return;
-            }
-            else{
-                *end -= width;
-                len += width;
-                curr_caucus--;
-            }
-        }
-    }
-    else{
-        while(1){
-            dim_t width = ceil(sqrt(*start * *start + num)) - *start;
-            width = (width % block_factor == 0) ? width : width + block_factor - (width % block_factor);
+void bli_get_range_t2b( void* thr, dim_t all_start, dim_t all_end, dim_t block_factor, dim_t* start, dim_t* end )
+{
+	bli_get_range( thr, all_start, all_end, block_factor,
+	               FALSE, start, end );
+}
 
-            if( work_id == 0 ) {
-                *start = *start + all_start;
-                *end = bli_min( *start + width, all_end );
-                return;
-            }
-            else{
-                *start = *start + width;
-            }
-            work_id--;
-        }
-    }
+void bli_get_range_b2t( void* thr, dim_t all_start, dim_t all_end, dim_t block_factor, dim_t* start, dim_t* end )
+{
+	bli_get_range( thr, all_start, all_end, block_factor,
+	               TRUE, start, end );
+}
+
+void bli_get_range_weighted( void* thr, dim_t all_start, dim_t all_end, dim_t block_factor, uplo_t uplo, bool_t handle_edge_low, dim_t* start, dim_t* end )
+{
+	thrinfo_t* thread  = ( thrinfo_t* )thr;
+	dim_t      n_way   = thread->n_way;
+	dim_t      work_id = thread->work_id;
+	dim_t      size    = all_end - all_start;
+	dim_t      width;
+	dim_t      block_fac_leftover = size % block_factor;
+	dim_t      i;
+	double     num;
+
+	*start = 0;
+	*end   = all_end - all_start;
+	num    = size * size / ( double )n_way;
+
+	if ( bli_is_lower( uplo ) )
+	{
+		dim_t cur_caucus = n_way - 1;
+		dim_t len        = 0;
+
+		// This loop computes subpartitions backwards, from the high end
+		// of the index range to the low end. If the low end is assumed
+		// to be on the left and the high end the right, this assignment
+		// of widths is appropriate for n dimension partitioning of a
+		// lower triangular matrix.
+		for ( i = 0; TRUE; ++i )
+		{
+			width = ceil( sqrt( len*len + num ) ) - len;
+
+			// If we need to allocate the edge case (assuming it exists)
+			// to the high thread subpartition, adjust width so that it
+			// contains the exact amount of leftover edge dimension so that
+			// all remaining subpartitions can be multiples of block_factor.
+			// If the edge case is to be allocated to the low subpartition,
+			// or if there is no edge case, it is implicitly allocated to
+			// the low subpartition by virtue of the fact that all other
+			// subpartitions already assigned will be multiples of
+			// block_factor.
+			if ( i == 0 && !handle_edge_low )
+			{
+				if ( width % block_factor != block_fac_leftover )
+					width += block_fac_leftover - ( width % block_factor );
+			}
+			else
+			{
+				if ( width % block_factor != 0 )
+					width += block_factor - ( width % block_factor );
+			}
+
+			if ( cur_caucus == work_id )
+			{
+				*start = bli_max( 0, *end - width ) + all_start;
+				*end   = *end + all_start;
+				return;
+			}
+			else
+			{
+				*end -= width;
+				len  += width;
+				cur_caucus--;
+			}
+		}
+	}
+	else // if ( bli_is_upper( uplo ) )
+	{
+		// This loop computes subpartitions forwards, from the low end
+		// of the index range to the high end. If the low end is assumed
+		// to be on the left and the high end the right, this assignment
+		// of widths is appropriate for n dimension partitioning of an
+		// upper triangular matrix.
+		for ( i = 0; TRUE; ++i )
+		{
+			width = ceil( sqrt( *start * *start + num ) ) - *start;
+
+			if ( i == 0 && handle_edge_low )
+			{
+				if ( width % block_factor != block_fac_leftover )
+					width += block_fac_leftover - ( width % block_factor );
+			}
+			else
+			{
+				if ( width % block_factor != 0 )
+					width += block_factor - ( width % block_factor );
+			}
+
+			if ( work_id == 0 )
+			{
+				*start = *start + all_start;
+				*end = bli_min( *start + width, all_end );
+				return;
+			}
+			else
+			{
+				*start = *start + width;
+				work_id--;
+			}
+		}
+	}
+}
+
+void bli_get_range_weighted_l2r( void* thr, dim_t all_start, dim_t all_end, dim_t block_factor, uplo_t uplo, dim_t* start, dim_t* end )
+{
+	if ( bli_is_upper_or_lower( uplo ) )
+	{
+		bli_get_range_weighted( thr, all_start, all_end, block_factor,
+		                        uplo, FALSE, start, end );
+	}
+	else // if dense or zeros
+	{
+		bli_get_range_l2r( thr, all_start, all_end, block_factor,
+		                   start, end );
+	}
+}
+
+void bli_get_range_weighted_r2l( void* thr, dim_t all_start, dim_t all_end, dim_t block_factor, uplo_t uplo, dim_t* start, dim_t* end )
+{
+	if ( bli_is_upper_or_lower( uplo ) )
+	{
+//printf( "bli_get_range_weighted_r2l: is upper or lower\n" );
+		bli_toggle_uplo( uplo );
+		bli_get_range_weighted( thr, all_start, all_end, block_factor,
+		                        uplo, TRUE, start, end );
+	}
+	else // if dense or zeros
+	{
+//printf( "bli_get_range_weighted_r2l: is dense or zeros\n" );
+		bli_get_range_r2l( thr, all_start, all_end, block_factor,
+		                   start, end );
+	}
+}
+
+void bli_get_range_weighted_t2b( void* thr, dim_t all_start, dim_t all_end, dim_t block_factor, uplo_t uplo, dim_t* start, dim_t* end )
+{
+	if ( bli_is_upper_or_lower( uplo ) )
+	{
+		bli_toggle_uplo( uplo );
+		bli_get_range_weighted( thr, all_start, all_end, block_factor,
+		                        uplo, FALSE, start, end );
+	}
+	else // if dense or zeros
+	{
+		bli_get_range_t2b( thr, all_start, all_end, block_factor,
+		                   start, end );
+	}
+}
+
+void bli_get_range_weighted_b2t( void* thr, dim_t all_start, dim_t all_end, dim_t block_factor, uplo_t uplo, dim_t* start, dim_t* end )
+{
+	if ( bli_is_upper_or_lower( uplo ) )
+	{
+		bli_get_range_weighted( thr, all_start, all_end, block_factor,
+		                        uplo, TRUE, start, end );
+	}
+	else // if dense or zeros
+	{
+		bli_get_range_b2t( thr, all_start, all_end, block_factor,
+		                   start, end );
+	}
 }
 
 

@@ -378,12 +378,12 @@
 	} \
 }
 
-#define bli_obj_apply_trans( trans, obj )\
+#define bli_obj_apply_trans( trans, obj ) \
 { \
 	(obj).info = ( (obj).info ^ (trans) ); \
 }
 
-#define bli_obj_apply_conj( conjval, obj )\
+#define bli_obj_apply_conj( conjval, obj ) \
 { \
 	(obj).info = ( (obj).info ^ (conjval) ); \
 }
@@ -395,21 +395,25 @@
 \
 	((obj).root)
 
+#define bli_obj_root_uplo( obj ) \
+\
+	bli_obj_uplo( *bli_obj_root( obj ) )
+
 #define bli_obj_root_is_general( obj ) \
 \
-	bli_obj_is_general( *bli_obj_root( obj ) ) \
+	bli_obj_is_general( *bli_obj_root( obj ) )
 
 #define bli_obj_root_is_hermitian( obj ) \
 \
-	bli_obj_is_hermitian( *bli_obj_root( obj ) ) \
+	bli_obj_is_hermitian( *bli_obj_root( obj ) )
 
 #define bli_obj_root_is_symmetric( obj ) \
 \
-	bli_obj_is_symmetric( *bli_obj_root( obj ) ) \
+	bli_obj_is_symmetric( *bli_obj_root( obj ) )
 
 #define bli_obj_root_is_triangular( obj ) \
 \
-	bli_obj_is_triangular( *bli_obj_root( obj ) ) \
+	bli_obj_is_triangular( *bli_obj_root( obj ) )
 
 #define bli_obj_root_is_herm_or_symm( obj ) \
 \
@@ -418,11 +422,11 @@
 
 #define bli_obj_root_is_upper( obj ) \
 \
-	bli_obj_is_upper( *bli_obj_root( obj ) ) \
+	bli_obj_is_upper( *bli_obj_root( obj ) )
 
 #define bli_obj_root_is_lower( obj ) \
 \
-	bli_obj_is_lower( *bli_obj_root( obj ) ) \
+	bli_obj_is_lower( *bli_obj_root( obj ) )
 
 
 // Root matrix modification

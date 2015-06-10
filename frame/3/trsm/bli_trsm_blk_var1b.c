@@ -83,10 +83,10 @@ void bli_trsm_blk_var1b( obj_t*  a,
 
     dim_t start, end;
     num_t dt = bli_obj_execution_datatype( *a );
-    bli_get_range( thread, offA, m_trans, 
-                   //bli_lcm( bli_info_get_default_nr( BLIS_TRSM, dt ), bli_info_get_default_mr( BLIS_TRSM, dt ) ),
-                   bli_info_get_default_mc( BLIS_TRSM, dt ),
-                   &start, &end );
+    bli_get_range_b2t( thread, offA, m_trans,
+                       //bli_lcm( bli_info_get_default_nr( BLIS_TRSM, dt ), bli_info_get_default_mr( BLIS_TRSM, dt ) ),
+                       bli_info_get_default_mc( BLIS_TRSM, dt ),
+                       &start, &end );
 
 	// Partition along the remaining portion of the m dimension.
 	for ( i = start; i < end; i += b_alg )
