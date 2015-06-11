@@ -205,7 +205,8 @@ func_t* bli_ukr_get_funcs( l3ukr_t ukr, ind_t method )
 	// have been created (and thus contain valid function pointers).
 	bli_init();
 
-	// Avoid dereferencing NULL pointers.
+	// Avoid dereferencing NULL pointers. (A NULL pointer indicates that
+	// there is no kernel for the requested kernel type and method.)
 	if ( p == NULL ) return NULL;
 	else             return *p;
 }
@@ -219,7 +220,8 @@ func_t* bli_ukr_get_ref_funcs( l3ukr_t ukr )
 	// have been created (and thus contain valid function pointers).
 	bli_init();
 
-	// Avoid dereferencing NULL pointers.
+	// Avoid dereferencing NULL pointers. (A NULL pointer indicates that
+	// there is no reference kernel for the requested kernel type.)
 	if ( p == NULL ) return NULL;
 	else             return *p;
 }

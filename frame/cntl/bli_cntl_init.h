@@ -32,5 +32,6 @@
 
 */
 
-void bli_cntl_init( void );
-void bli_cntl_finalize( void );
+void   bli_cntl_init( void );
+void   bli_cntl_finalize( void );
+bool_t bli_cntl_is_initialized( void );

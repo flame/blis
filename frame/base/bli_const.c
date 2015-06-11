@@ -34,9 +34,6 @@
 
 #include "blis.h"
 
-// These globally-declared obj_t's are used to store the so-called
-// "global scalar constants" for commonly-used 1x1 values.
-
 obj_t BLIS_TWO;
 obj_t BLIS_ONE;
 obj_t BLIS_ONE_HALF;
@@ -44,6 +41,8 @@ obj_t BLIS_ZERO;
 obj_t BLIS_MINUS_ONE_HALF;
 obj_t BLIS_MINUS_ONE;
 obj_t BLIS_MINUS_TWO;
+
+static bool_t bli_const_is_init = FALSE;
 
 void bli_const_init( void )
 {
@@ -54,6 +53,9 @@ void bli_const_init( void )
 	bli_obj_create_const( -0.5, &BLIS_MINUS_ONE_HALF );
 	bli_obj_create_const( -1.0, &BLIS_MINUS_ONE );
 	bli_obj_create_const( -2.0, &BLIS_MINUS_TWO );
+
+	// Mark API as initialized.
+	bli_const_is_init = TRUE;
 }
 
 void bli_const_finalize( void )
@@ -65,5 +67,13 @@ void bli_const_finalize( void )
 	bli_obj_free( &BLIS_MINUS_ONE_HALF );
 	bli_obj_free( &BLIS_MINUS_ONE );
 	bli_obj_free( &BLIS_MINUS_TWO );
+
+	// Mark API as uninitialized.
+	bli_const_is_init = FALSE;
+}
+
+bool_t bli_const_is_initialized( void )
+{
+	return bli_const_is_init;
 }
 

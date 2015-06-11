@@ -34,59 +34,33 @@
 
 #include "blis.h"
 
-// Current error checking level.
-static errlev_t bli_err_chk_level = BLIS_FULL_ERROR_CHECKING;
+static bool_t bli_error_is_init = FALSE;
+
+void bli_error_init( void )
+{
+	bli_error_init_msgs();
+
+	// Mark API as initialized.
+	bli_error_is_init = TRUE;
+}
+
+void bli_error_finalize( void )
+{
+	// Mark API as uninitialized.
+	bli_error_is_init = FALSE;
+}
+
+bool_t bli_error_is_initialized( void )
+{
+	return bli_error_is_init;
+}
+
+// -----------------------------------------------------------------------------
 
 // Internal array to hold error strings.
 static char bli_error_string[BLIS_MAX_NUM_ERR_MSGS][BLIS_MAX_ERR_MSG_LENGTH];
 
-
-errlev_t bli_error_checking_level()
-{
-    return bli_err_chk_level;
-}
-
-errlev_t bli_error_checking_level_set( errlev_t new_level )
-{
-    err_t    e_val;
-    errlev_t old_level;
-
-    e_val = bli_check_valid_error_level( new_level );
-    bli_check_error_code( e_val );
-
-    old_level = bli_err_chk_level;
-
-    bli_err_chk_level = new_level;
-
-    return old_level;
-}
-
-bool_t bli_error_checking_is_enabled()
-{
-    return bli_error_checking_level() != BLIS_NO_ERROR_CHECKING;
-}
-
-char* bli_error_string_for_code( gint_t code )
-{
-	return bli_error_string[-code];
-}
-
-void bli_abort( void )
-{
-	fprintf( stderr, "libblis: Aborting.\n" );
-	//raise( SIGABRT );
-	abort();
-}
-
-void bli_print_msg( char* str, char* file, guint_t line )
-{
-	fprintf( stderr, "\n" );
-	fprintf( stderr, "libblis: %s (line %lu):\n", file, ( long unsigned int )line );
-	fprintf( stderr, "libblis: %s\n", str );
-	fflush( stderr );
-}
-
-void bli_error_init( void )
+void bli_error_init_msgs( void )
 {
 	sprintf( bli_error_string_for_code(BLIS_INVALID_ERROR_CHECKING_LEVEL),
 	         "Invalid error checking level." );
@@ -196,8 +170,53 @@ void bli_error_init( void )
 	         "Expected object to be alias." );
 }
 
-void bli_error_finalize( void )
+void bli_print_msg( char* str, char* file, guint_t line )
 {
-	// Nothing to do.
+	fprintf( stderr, "\n" );
+	fprintf( stderr, "libblis: %s (line %lu):\n", file, ( long unsigned int )line );
+	fprintf( stderr, "libblis: %s\n", str );
+	fflush( stderr );
+}
+
+void bli_abort( void )
+{
+	fprintf( stderr, "libblis: Aborting.\n" );
+	//raise( SIGABRT );
+	abort();
+}
+
+// -----------------------------------------------------------------------------
+
+// Current error checking level.
+static errlev_t bli_err_chk_level = BLIS_FULL_ERROR_CHECKING;
+
+errlev_t bli_error_checking_level( void )
+{
+    return bli_err_chk_level;
+}
+
+errlev_t bli_error_checking_level_set( errlev_t new_level )
+{
+    err_t    e_val;
+    errlev_t old_level;
+
+    e_val = bli_check_valid_error_level( new_level );
+    bli_check_error_code( e_val );
+
+    old_level = bli_err_chk_level;
+
+    bli_err_chk_level = new_level;
+
+    return old_level;
+}
+
+bool_t bli_error_checking_is_enabled( void )
+{
+    return bli_error_checking_level() != BLIS_NO_ERROR_CHECKING;
+}
+
+char* bli_error_string_for_code( gint_t code )
+{
+	return bli_error_string[-code];
 }
 

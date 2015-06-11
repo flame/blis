@@ -38,22 +38,22 @@
 pthread_mutex_t initialize_mutex = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
-static bool_t bli_initialized = FALSE;
+static bool_t bli_is_init = FALSE;
 
 
 err_t bli_init( void )
 {
 	err_t r_val = BLIS_FAILURE;
 
-	// If bli_initialized is TRUE, then we know without a doubt that
+	// If bli_is_init is TRUE, then we know without a doubt that
 	// BLIS is presently initialized, and thus we can return early.
-	if ( bli_initialized == TRUE ) return r_val;
+	if ( bli_is_init == TRUE ) return r_val;
 
-	// NOTE: if bli_initialized is FALSE, we cannot be certain that BLIS
+	// NOTE: if bli_is_init is FALSE, we cannot be certain that BLIS
 	// is ready to be initialized; it may be the case that a thread is
 	// inside the critical section below and is already in the process
 	// of initializing BLIS, but has not yet finished and updated
-	// bli_initialized accordingly. This boolean asymmetry is important!
+	// bli_is_init accordingly. This boolean asymmetry is important!
 
 	// We enclose the bodies of bli_init() and bli_finalize() in a
 	// critical section (both with the same name) so that they can be
@@ -75,10 +75,10 @@ err_t bli_init( void )
 	// Proceed with initialization only if BLIS is presently uninitialized.
 	// Since we bli_init() and bli_finalize() use the same named critical
 	// section, we can be sure that no other thread is either (a) updating
-	// bli_initialized, or (b) testing bli_initialized within the critical
+	// bli_is_init, or (b) testing bli_is_init within the critical
 	// section (for the purposes of deciding whether to perform the
 	// necessary initialization subtasks).
-	if ( bli_initialized == FALSE )
+	if ( bli_is_init == FALSE )
 	{
 		// Initialize various sub-APIs.
 		bli_const_init();
@@ -89,7 +89,7 @@ err_t bli_init( void )
 		bli_thread_init();
 
 		// After initialization is complete, mark BLIS as initialized.
-		bli_initialized = TRUE;
+		bli_is_init = TRUE;
 
 		// Only the thread that actually performs the initialization will
 		// return "success".
@@ -109,15 +109,15 @@ err_t bli_finalize( void )
 {
 	err_t r_val = BLIS_FAILURE;
 
-	// If bli_initialized is FALSE, then we know without a doubt that
+	// If bli_is_init is FALSE, then we know without a doubt that
 	// BLIS is presently uninitialized, and thus we can return early.
-	if ( bli_initialized == FALSE ) return r_val;
+	if ( bli_is_init == FALSE ) return r_val;
 
-	// NOTE: if bli_initialized is TRUE, we cannot be certain that BLIS
+	// NOTE: if bli_is_init is TRUE, we cannot be certain that BLIS
 	// is ready to be finalized; it may be the case that a thread is
 	// inside the critical section below and is already in the process
 	// of finalizing BLIS, but has not yet finished and updated
-	// bli_initialized accordingly. This boolean asymmetry is important!
+	// bli_is_init accordingly. This boolean asymmetry is important!
 
 	// We enclose the bodies of bli_init() and bli_finalize() in a
 	// critical section (both with the same name) so that they can be
@@ -139,10 +139,10 @@ err_t bli_finalize( void )
 	// Proceed with finalization only if BLIS is presently initialized.
 	// Since we bli_init() and bli_finalize() use the same named critical
 	// section, we can be sure that no other thread is either (a) updating
-	// bli_initialized, or (b) testing bli_initialized within the critical
+	// bli_is_init, or (b) testing bli_is_init within the critical
 	// section (for the purposes of deciding whether to perform the
 	// necessary finalization subtasks).
-	if ( bli_initialized == TRUE )
+	if ( bli_is_init == TRUE )
 	{
 		// Finalize various sub-APIs.
 		bli_const_finalize();
@@ -153,7 +153,7 @@ err_t bli_finalize( void )
 		bli_thread_finalize();
 
 		// After finalization is complete, mark BLIS as uninitialized.
-		bli_initialized = FALSE;
+		bli_is_init = FALSE;
 
 		// Only the thread that actually performs the finalization will
 		// return "success".
@@ -171,6 +171,11 @@ err_t bli_finalize( void )
 #endif
 
 	return r_val;
+}
+
+bool_t bli_is_initialized( void )
+{
+	return bli_is_init;
 }
 
 void bli_init_auto( err_t* init_result )

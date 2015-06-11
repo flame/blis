@@ -34,6 +34,8 @@
 
 #include "blis.h"
 
+static bool_t bli_mem_is_init = FALSE;
+
 #ifdef BLIS_ENABLE_PTHREADS
 pthread_mutex_t mem_manager_mutex = PTHREAD_MUTEX_INITIALIZER;
 #endif
@@ -259,7 +261,7 @@ void bli_mem_acquire_v( siz_t  req_size,
 
 
 
-void bli_mem_init()
+void bli_mem_init( void )
 {
 	dim_t index_a;
 	dim_t index_b;
@@ -307,6 +309,9 @@ void bli_mem_init()
 #ifdef BLIS_ENABLE_PTHREADS
 	pthread_mutex_unlock( &mem_manager_mutex );
 #endif
+
+	// Mark API as initialized.
+	bli_mem_is_init = TRUE;
 }
 
 
@@ -359,7 +364,7 @@ void bli_mem_init_pool( char*   pool_mem,
 
 
 
-void bli_mem_finalize()
+void bli_mem_finalize( void )
 {
 
 #ifdef BLIS_ENABLE_OPENMP
@@ -383,5 +388,12 @@ void bli_mem_finalize()
 	pthread_mutex_destroy( &mem_manager_mutex );
 #endif
 
+	// Mark API as uninitialized.
+	bli_mem_is_init = FALSE;
+}
+
+bool_t bli_mem_is_initialized( void )
+{
+	return bli_mem_is_init;
 }
 

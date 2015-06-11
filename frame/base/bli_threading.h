@@ -89,6 +89,7 @@ typedef struct thread_comm_s thread_comm_t;
 
 void    bli_thread_init( void );
 void    bli_thread_finalize( void );
+bool_t  bli_thread_is_initialized( void );
 
 // Thread Communicator Interface Definitions
 void    bli_setup_communicator( thread_comm_t* communicator, dim_t n_threads );

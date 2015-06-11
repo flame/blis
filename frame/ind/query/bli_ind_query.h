@@ -84,6 +84,7 @@ char*  bli_ind_oper_get_avail_impl_string( opid_t oper, num_t dt );
 
 void   bli_ind_init( void );
 void   bli_ind_finalize( void );
+bool_t bli_ind_is_initialized( void );
 
 void   bli_ind_enable( ind_t method );
 void   bli_ind_disable( ind_t method );

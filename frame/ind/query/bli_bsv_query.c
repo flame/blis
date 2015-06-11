@@ -169,7 +169,8 @@ blksz_t* bli_bsv_get_blksz( bszid_t bsv, ind_t method )
 {
 	// Initialize BLIS, if it isn't already initialized. This is
 	// needed because we have to ensure that the blksz_t objects
-	// have been created.
+	// have been created, otherwise this function could return a
+	// NULL (or garbage) address.
 	bli_init();
 
 	return *(bli_bsizes[ method ][ bsv ]);

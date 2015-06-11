@@ -34,6 +34,8 @@
 
 #include "blis.h"
 
+static bool_t bli_thread_is_init = FALSE;
+
 packm_thrinfo_t BLIS_PACKM_SINGLE_THREADED;
 gemm_thrinfo_t BLIS_GEMM_SINGLE_THREADED;
 herk_thrinfo_t BLIS_HERK_SINGLE_THREADED;
@@ -46,12 +48,23 @@ void bli_thread_init( void )
 	bli_setup_packm_single_threaded_info( &BLIS_PACKM_SINGLE_THREADED );
 	bli_setup_gemm_single_threaded_info( &BLIS_GEMM_SINGLE_THREADED );
 	bli_setup_herk_single_threaded_info( &BLIS_HERK_SINGLE_THREADED );
+
+	// Mark API as initialized.
+	bli_thread_is_init = TRUE;
 }
 
 void bli_thread_finalize( void )
 {
-	// Nothing to do.
+	// Mark API as uninitialized.
+	bli_thread_is_init = FALSE;
 }
+
+bool_t bli_thread_is_initialized( void )
+{
+	return bli_thread_is_init;
+}
+
+// -----------------------------------------------------------------------------
 
 //*********** Stuff Specific to single-threaded *************
 #ifndef BLIS_ENABLE_MULTITHREADING

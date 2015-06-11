@@ -33,6 +33,14 @@
 */
 
 
+void     bli_error_init( void );
+void     bli_error_finalize( void );
+bool_t   bli_error_is_initialized( void );
+
+void     bli_error_init_msgs( void );
+void     bli_print_msg( char* str, char* file, guint_t line );
+void     bli_abort( void );
+
 errlev_t bli_error_checking_level( void );
 errlev_t bli_error_checking_level_set( errlev_t new_level );
 
@@ -40,9 +48,4 @@ bool_t   bli_error_checking_is_enabled( void );
 
 char*    bli_error_string_for_code( gint_t code );
 
-void     bli_abort( void );
-void     bli_print_msg( char* str, char* file, guint_t line );
-
-void     bli_error_init( void );
-void     bli_error_finalize( void );
 
