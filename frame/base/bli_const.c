@@ -46,6 +46,9 @@ static bool_t bli_const_is_init = FALSE;
 
 void bli_const_init( void )
 {
+	// If the API is already initialized, return early.
+	if ( bli_const_is_initialized() ) return;
+
 	bli_obj_create_const(  2.0, &BLIS_TWO );
 	bli_obj_create_const(  1.0, &BLIS_ONE );
 	bli_obj_create_const(  0.5, &BLIS_ONE_HALF );

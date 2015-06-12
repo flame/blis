@@ -215,6 +215,9 @@ char* bli_ind_oper_get_avail_impl_string( opid_t oper, num_t dt )
 
 void bli_ind_init( void )
 {
+	// If the API is already initialized, return early.
+	if ( bli_ind_is_initialized() ) return;
+
 #ifdef BLIS_ENABLE_INDUCED_SCOMPLEX
 	bli_ind_enable_dt( BLIS_4M1A, BLIS_SCOMPLEX );
 #endif

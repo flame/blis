@@ -38,6 +38,9 @@ static bool_t bli_error_is_init = FALSE;
 
 void bli_error_init( void )
 {
+	// If the API is already initialized, return early.
+	if ( bli_error_is_initialized() ) return;
+
 	bli_error_init_msgs();
 
 	// Mark API as initialized.

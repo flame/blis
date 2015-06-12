@@ -43,6 +43,8 @@ thread_comm_t BLIS_SINGLE_COMM;
 
 void bli_thread_init( void )
 {
+	// If the API is already initialized, return early.
+	if ( bli_thread_is_initialized() ) return;
 
 	bli_setup_communicator( &BLIS_SINGLE_COMM, 1 );
 	bli_setup_packm_single_threaded_info( &BLIS_PACKM_SINGLE_THREADED );

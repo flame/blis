@@ -263,6 +263,9 @@ void bli_mem_acquire_v( siz_t  req_size,
 
 void bli_mem_init( void )
 {
+	// If the API is already initialized, return early.
+	if ( bli_mem_is_initialized() ) return;
+
 	dim_t index_a;
 	dim_t index_b;
 	dim_t index_c;

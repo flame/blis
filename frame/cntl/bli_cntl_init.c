@@ -38,6 +38,9 @@ static bool_t bli_cntl_is_init = FALSE;
 
 void bli_cntl_init( void )
 {
+	// If the API is already initialized, return early.
+	if ( bli_cntl_is_initialized() ) return;
+
 	// Level-1
 	bli_scalv_cntl_init();
 	bli_packv_cntl_init();
