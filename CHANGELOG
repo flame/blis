@@ -1,10 +1,825 @@
-commit 38ea5022e4ed846112198c4e1672fcdaeb90dc71 (HEAD, 0.1.6, master)
+commit 267253de8a7be546ce87626443ee38701c1d411f (HEAD -> master, tag: 0.1.7)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jun 19 12:01:49 2015 -0500
+
+    Version file update (0.1.7)
+
+commit 7cd01b71b5e757a6774625b3c9f427f5e7664a76 (origin/master, origin/HEAD)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jun 19 11:31:53 2015 -0500
+
+    Implemented dynamic allocation for packing buffers.
+    
+    Details:
+    - Replaced the old memory allocator, which was based on statically-
+      allocated arrays, with one based on a new internal pool_t type, which,
+      combined with a new bli_pool_*() API, provides a new abstract data
+      type that implements the same memory pool functionality but with blocks
+      from the heap (ie: malloc() or equivalent). Hiding the details of the
+      pool in a separate API also allows for a much simpler bli_mem.c family
+      of functions.
+    - Added a new internal header, bli_config_macro_defs.h, which enables
+      sane defaults for the values previously found in bli_config. Those
+      values can be overridden by #defining them in bli_config.h the same
+      way kernel defaults can be overridden in bli_kernel.h. This file most
+      resembles what was previously a typical configuration's bli_config.h.
+    - Added a new configuration macro, BLIS_POOL_ADDR_ALIGN_SIZE, which
+      defaults to BLIS_PAGE_SIZE, to specify the alignment of individual
+      blocks in the memory pool. Also added a corresponding query routine to
+      the bli_info API.
+    - Deprecated (once again) the micro-panel alignment feature. Upon further
+      reflection, it seems that the goal of more predictable L1 cache
+      replacement behavior is outweighed by the harm caused by non-contiguous
+      micro-panels when k % kc != 0. I honestly don't think anyone will even
+      miss this feature.
+    - Changed bli_ukr_get_funcs() and bli_ukr_get_ref_funcs() to call
+      bli_cntl_init() instead of bli_init().
+    - Removed query functions from bli_info.c that are no longer applicable
+      given the dynamic memory allocator.
+    - Removed unnecessary definitions from configurations' bli_config.h files,
+      which are now pleasantly sparse.
+    - Fixed incorrect flop counts in addv, subv, scal2v, scal2m testsuite
+      modules. Thanks to Devangi Parikh for pointing out these
+      miscalculations.
+    - Comment, whitespace changes.
+
+commit 9848f255a3bab17d1139c391cca13ff3f1ffe6ed
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jun 11 19:14:22 2015 -0500
+
+    Added early return to API-level _init() routines.
+    
+    Details:
+    - Added conditional code that returns early from the API-level _init()
+      routines if the API is already initialized. Actually meant for this to
+      be included in 5f93cbe8.
+
+commit 5f93cbe870f3478870e15581e7fd450dad5bba1e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jun 11 18:52:12 2015 -0500
+
+    Introduced API-level initialization.
+    
+    Details:
+    - Added API-level initialization state to _const, _error, _mem, _thread,
+      _ind, and _cntl APIs. While this functionality will mostly go unused,
+      adding miniscule overhead at init-time, there will be at least once
+      instance in the near future where, in order to avoid an infinite loop,
+      a certain portion of the initialization will call a query function that
+      itself attempts to call bli_init(). API-level initialization will allow
+      this later stage to verify that an earlier stage of initialization has
+      completed, even if the overall call to bli_init() has not yet returned.
+    - Added _is_initialized() functions for each API, setting the underlying
+      bool_t during _init() and unsetting it during _finalize().
+    - Comment, whitespace changes.
+
+commit ee129c6b028bc5ac88da7c74fde72c49803742ff
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jun 10 12:53:28 2015 -0500
+
+    Fixed bugs in _get_range(), _get_range_weighted().
+    
+    Details:
+    - Fixed some bugs that only manifested in multithreaded instances of
+      some (non-gemm) level-3 operations. The bugs were related to invalid
+      allocation of "edge" cases to thread subpartitions. (Here, we define
+      an "edge" case to be one where the dimension being partitioned for
+      parallelism is not a whole multiple of whatever register blocksize
+      is needed in that dimension.) In BLIS, we always require edge cases
+      to be part of the bottom, right, or bottom-right subpartitions.
+      (This is so that zero-padding only has to happen at the bottom, right,
+      or bottom-right edges of micro-panels.) The previous implementations
+      of bli_get_range() and _get_range_weighted() did not adhere to this
+      implicit policy and thus produced bad ranges for some combinations of
+      operation, parameter cases, problem sizes, and n-way parallelism.
+    - As part of the above fix, the functions bli_get_range() and
+      _get_range_weighted() have been renamed to use _l2r, _r2l, _t2b,
+      and _b2t suffixes, similar to the partitioning functions. This is
+      an easy way to make sure that the variants are calling the right
+      version of each function. The function signatures have also been
+      changed slightly.
+    - Comment/whitespace updates.
+    - Removed unnecessary '/' from macros in bli_obj_macro_defs.h.
+
+commit 9135dfd69d39f3bbd75034f479f27a78dbfebcce
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jun 5 13:37:44 2015 -0500
+
+    Minor updates to test/3m4m files.
+
+commit d62ceece943b20537ec4dd99f25136b9ba2ae340
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jun 3 12:56:45 2015 -0500
+
+    Minor update to test/3m4m/runme.sh.
+    
+    Details:
+    - Removed some stale script code that should have been removed
+      during 590bb3b8c.
+
+commit b6ee82a3d421c9c4f1eb6848c7c6e37aa46de799
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jun 3 12:14:23 2015 -0500
+
+    Minor cleanup to bli_init() and friends.
+    
+    Details:
+    - Spun-off initialization of global scalar constants to bli_const_init()
+      and of threading stuff to bli_thread_init().
+    - Added some missing _finalize() functions, even when there is nothing
+      to do.
+
+commit 1213f5cebabc1637ce9dd45c4bfa87bb93677c29
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jun 2 13:27:47 2015 -0500
+
+    POSIX thread bugfixes/edits to bli_init.c, _mem.c.
+    
+    Details:
+    - Fixed a sort-of bug in bli_init.c whereby the wrong pthread mutex
+      was used to lock access to initialization/finalization actions.
+      But everything worked out okay as long as bli_init() was called by
+      single-threaded code.
+    - Changed to static initialization for memory allocator mutex in
+      bli_mem.c, and moved mutex to that file (from bli_init.c).
+    - Fixed some type mismatches in bli_threading_pthreads.c that resulted
+      in compiler warnings.
+    - Fixed a small memory leak with allocated-but-never-freed (and unused)
+      pthread_attr_t objects.
+    - Whitespace changes to bli_init.c and bli_mem.c.
+
+commit 590bb3b8c5c0389159c5a9451b6c156c5f237e8a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun May 24 16:02:53 2015 -0500
+
+    Backed-out adjusted dim changes to test/3m4m.
+    
+    Details:
+    - Reverted most changes applied during commit ec25807b.
+
+commit ec25807b26da943868f0d0517c3720e50181b8f9
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Apr 10 13:23:50 2015 -0500
+
+    Tweaks to test/3m4m to test with adjusted dims.
+    
+    Details:
+    - Updated test/3m4m driver files to build test drivers that allow
+      comparision of real "asm_blis" results to complex "asm_blis" results,
+      except with the latter's problem sizes adjusted so that problems are
+      generated with equal flop counts.
+
+commit 426b6488580a92bf071a62dc319a9c837ce39821
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Apr 8 15:12:21 2015 -0500
+
+    Fixed a packing bug that manifested in trsm_r.
+    
+    Details:
+    - Fixed a bug that caused a memory leak in the contiguous memory
+      allocator. Because packm_init() was using simple aliasing when
+      a subpartition object was marked as zeros by bli_acquire_mpart_*(),
+      the "destination" pack object's mem_t entry was being overwritten
+      by the corresponding field of the "source" object (which was likely
+      NULL). This prevented the block from being released back to the
+      memory allocator. But this bug only manifested when changing the
+      location of packing B from outside the var1 loop to inside the
+      var3 loop, and only for trsm with triangular B (side = right). The
+      bug was fixed by changing the type of alias used in packm_init()
+      when handling zero partition cases. Specifically, we now use
+      bli_obj_alias_for_packing(), which does not clobber the destination
+      (pack) object's mem_t field. Thanks to Devangi Parikh for this bug
+      report.
+
+commit c84286d5cef48f16d83831baac1f46b9856b9a36
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Apr 4 15:39:14 2015 -0500
+
+    More minor tweaks to test/3m4m.
+    
+    Details:
+    - Added a line of output that forces matlab to allocate the entire array
+      up-front.
+    - Re-enabled real domain benchmarks in runme.sh, which were temporarily
+      disabled.
+
+commit 309717c8ebf4ef1369f15cf41340e13c25b41573
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Apr 3 19:28:49 2015 -0500
+
+    More tweaks to test/3m4m, configurations.
+    
+    Details:
+    - Fixed incorrect number of mc_x_kc memory blocks in
+      sandybridge/bli_config.h.
+    - Enabled OpenMP multithreding in piledriver/bli_config.h.
+    - More updates to test/3m4m driver files.
+
+commit 4baf3b9c69b2f648be9e46e07ccc9859dd675828
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Apr 3 16:44:32 2015 -0500
+
+    Tweaked test/3m4m driver, including acml support.
+    
+    Details:
+    - Added ACML support to test/3m4m driver Makefile and runme.sh script.
+
+commit a32f7c49ca4ea869d2a6c66818780f4321743d67
+Merge: 349e075 4bfd1ce
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Apr 3 08:28:11 2015 -0500
+
+    Merge pull request #23 from xianyi/master
+    
+    Add auto-detecting CPU  on configure stage.
+
+commit 349e075ad6a8e2a1211d94f36d24828c9d44b052
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Apr 2 18:12:28 2015 -0500
+
+    Tweaks to sandybridge config, test/3m4m driver.
+    
+    Details:
+    - Enable OpenMP support by default in sandybridge's bli_config.h.
+    - Reorganized sandybridge's bli_kernel.h.
+    - Updated 3m4m Makefile, runme.sh to also test MKL implementation.
+
+commit 4bfd1ce8ca93f93d170dd2715f0a32027b417b46
+Author: Zhang Xianyi <traits.zhang@gmail.com>
+Date:   Thu Apr 2 16:40:21 2015 -0500
+
+    Detect NEON for cortex-a9 and cortex-a15.
+
+commit aa6eec4f43137057276fe6119bdbfb5c52682527
+Author: Zhang Xianyi <traits.zhang@gmail.com>
+Date:   Thu Apr 2 16:03:44 2015 -0500
+
+    Detect the CPU architecture. Support ARM cores.
+    
+    Detect the CPU architecture by compiler's predefined macros.
+    Then, detect the CPU cores.
+    
+    Support detecting x86 and ARM architectures.
+
+commit 2947cfb749c937b0f62fac36cc92f123bd45b53c
+Author: Zhang Xianyi <traits.zhang@gmail.com>
+Date:   Wed Apr 1 12:24:00 2015 -0500
+
+    Add auto-detecting CPU  on configure stage.
+    e.g.  /Path_to_BLIS/configure auto
+    
+    Now, it only support detecting x86 CPUs.
+
+commit 26a4b8f6f985597f80e0174990bf541f1d9bafac
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Apr 1 10:44:54 2015 -0500
+
+    Implemented 3m2, 3m3 induced algorithms (gemm only).
+    
+    Details:
+    - Defined a new "3ms" (separated 3m) pack schema and added appropriate
+      support in packm_init(), packm_blk_var2().
+    - Generalized packm_struc_cxk_3mi to take the imaginary stride (is_p)
+      as an argument instead of computing it locally. Exception: for trmm,
+      is_p must be computed locally, since it changes for triangular
+      packed matrices. Also exposed is_p in interface to dt-specific
+      packm_blk_var2 (and _var1, even though it does not use imaginary
+      stride).
+    - Renamed many functions/variables from _3mi to _3mis to indicate that
+      they work for either interleaved or separated 3m pack schemas.
+    - Generalized gemm and herk macro-kernels to pass in imaginary stride
+      rather than compute them locally.
+    - Added support for 3m2 and 3m3 algorithms to frame/ind, including 3m2-
+      and 3m3-specific virtual micro-kernels.
+    - Added special gemm macro-kernels to support 3m2 and 3m3.
+    - Added support for 3m2 and 3m3 to testsuite.
+    - Corrected the type of the panel dimension (pd_) in various macro-
+      kernels from inc_t to dim_t.
+    - Renamed many functions defined in bli_blocksize.c.
+    - Moved most induced-related macro defs from frame/include to
+      frame/ind/include.
+    - Updated the _ukernel.c files so that the micro-kernel function pointers
+      are obtained from the func_t objects rather than the cpp macros that
+      define the function names.
+    - Updated test/3m4m driver, Makefile, and run script.
+
+commit ddf62ba7d2da08225b201585b85e06c967767dea
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Fri Mar 27 14:27:51 2015 -0500
+
+    Refuse to free the packm thread info if it uses the single threaded version
+
+commit 016fc587584d958a0e430a56a5e2c05022ac2f17
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Fri Mar 27 14:23:02 2015 -0500
+
+    Don't free packm thread info if it is null
+
+commit 00a443c529a60862a57b93e303a0b3212c9b1df4
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Fri Mar 27 14:11:07 2015 -0500
+
+    Use bli_malloc instead of malloc for the thread info paths
+
+commit f1a6b7d02861ccebdc500ea98778cc0f6cddad17
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Mar 18 15:37:10 2015 -0500
+
+    Reorganized code for induced complex methods.
+    
+    Details:
+    - Consolidated most of the code relating to induced complex methods
+      (e.g. 4mh, 4m1, 3mh, 3m1, etc.) into frame/ind. Induced methods
+      are now enabled on a per-operation basis. The current "available"
+      (enabled and implemented) implementation can then be queried on
+      an operation basis. Micro-kernel func_t objects as well as blksz_t
+      objects can also be queried in a similar maner.
+    - Redefined several micro-kernel and operation-related functions in
+      bli_info_*() API, in accordance with above changes.
+    - Added mr and nr fields to blksz_t object, which point to the mr
+      and nr blksz_t objects for each cache blocksize (and are NULL for
+      register blocksizes). Renamed the sub-blocksize field "sub" to
+      "mult" since it is really expressing a blocksize multiple.
+    - Updated bli_*_determine_kc_[fb]() for gemm/hemm/symm, trmm, and
+      trsm to correctly query mr and nr (for purposes of nudging kc).
+    - Introduced an enumerated opid_t in bli_type_defs.h that uniquely
+      identifies an operation. For now, only level-3 id values are defined,
+      along with a generic, catch-all BLIS_NOID value.
+    - Reworked testsuite so that all induced methods that are enabled
+      are tested (one at a time) rather than only testing the first
+      available method.
+    - Reformated summary at the beginning of testsuite output so that
+      blocksize and micro-kernel info is shown for each induced method
+      that was requested (as well as native execution).
+    - Reduced the number of columns needed to display non-matlab
+      testsuite output (from approx. 90 to 80).
+
+commit 8d5169ccda954e5f72944308a036dcb7ebfc9097
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Mar 18 11:38:08 2015 -0500
+
+    Fixed bug in release of mem_t buffer.
+    
+    Details:
+    - Fixed a bug that affects all level-2 and level-3 blocked variants. The
+      bug only manifested, however, if the packing of operands (A and B in
+      gemm, for example) spanned multiple nodes in the control tree. Until
+      recently, the main consumers of packm were level-3 operations, all of
+      which packed both input operands from blocked variant 1 (B outside of
+      the loop, and A within the loop). This particular usage masked a flaw
+      in the code whereby bli_obj_release_pack() would always release the
+      underlying mem_t buffer (provided it was allocated), even if the buffer
+      was not allocated in the current variant. This has been fixed by
+      replacing all calls to bli_obj_release_pack() with calls to a new
+      function, bli_packm_release(), which takes the same control tree node
+      argument passed into the object's corresponding call to packm_init()
+      or packv_init(). bli_packm_release() then proceeds to invoke
+      bli_obj_release_pack() only if the control tree node indicates that
+      packing was requested. Thanks to Devangi Parikh for identifying this
+      bug.
+
+commit c0acca0f5182ba96fd39c9d10b34a896a6e74206
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Mar 3 10:56:22 2015 -0600
+
+    Clarified comments in testsuite input.operations.
+
+commit 03ba9a6b17861d9e1adc0cf924439c4d7e860d19
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Feb 24 10:33:28 2015 -0600
+
+    Removed some 'old' directories.
+
+commit a86db60ee270cdeb745ae7cf68f9e0becc9f522d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Feb 23 18:42:39 2015 -0600
+
+    Extensive renaming of 3m/4m-related files, symbols.
+    
+    Details:
+    - Renamed all remaining 3m/4m packing files and symbols to 3mi/4mi
+      ('i' for "interleaved"). Similar changes to 3M/4M macros.
+    - Renamed all 3m/4m files and functions to 3m1/4m1.
+    - Whitespace changes.
+
+commit 8cf8da291a0fb2f491f410969a76ec0fbda47faf
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Feb 20 15:24:27 2015 -0600
+
+    Minor updates to induced complex mode management.
+    
+    Details:
+    - Relocated bli_4mh.c, bli_4mb.c, bli_4m.c, bli_3mh.c, bli_3m.c (and
+      associated headers) from frame/base to frame/base/induced.
+    - Added bli_xm.? to frame/base/induced, which implements
+      bli_xm_is_enabled(), which detects whether ANY induced complex method
+      is currently enabled.
+    - The new function bli_xm_is_enabled() is now used in bli_info.c to
+      detect when an induced complex method is used, so we know when to
+      return blocksizes from one of the induced methods' blocksize objects.
+
+commit 411e637ee7d1083a84f58f08938d51e63d7c3c9a
+Merge: c2569b8 fc0b771
+Author: Tyler Michael Smith <tms@cs.utexas.edu>
+Date:   Fri Feb 20 20:39:25 2015 -0600
+
+    Merge branch 'master' of http://github.com/flame/blis
+
+commit c2569b8803d4ccc1d7b6f391713461b51443601d
+Author: Tyler Michael Smith <tms@cs.utexas.edu>
+Date:   Fri Feb 20 20:38:19 2015 -0600
+
+    Fixed a memory leak in freeing the thread infos
+
+commit fc0b771227abf86d81f505b324f69f6e83db1d8f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Feb 20 11:47:44 2015 -0600
+
+    Added max(mr,nr) to kc in static mem pools.
+    
+    Details:
+    - Changed the static memory definitions to compute the maximum register
+      blocksize for each datatype and add it to kc when computing the size
+      of blocks of A and B. This formally accounts for the nudging of kc
+      up to a multiple of mr or nr at runtime for triangular operations
+      (e.g. trmm).
+
+commit af32e3a608631953ef770341df10a14a991bf290
+Author: Tyler Michael Smith <tms@cs.utexas.edu>
+Date:   Thu Feb 19 22:51:11 2015 -0600
+
+    Fixed a bug with get_range_weighted would return end = 0 for small problem sizes
+
+commit 441d47542a64e131578d00da7404c1ed387a721c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Feb 19 17:06:10 2015 -0600
+
+    Renamed 3m and 4m symbols/macros to 3mi and 4mi.
+    
+    Details:
+    - Renamed several variables and macros from 3m/4m to 3mi/4mi. This is
+      because those packing schemas were always implicitly "interleaved".
+      This new naming scheme will make way for new schemas that separate
+      instead of interleve the real and imaginary (and summed) parts.
+    - Expanded the pack format sub-field of the pack schema field of the
+      info_t to 4 bits (from 3). This will allow for more schema types
+      going forward.
+    - Removed old _cntl.c files for herk3m, herk4m, trmm3m, trmm4m.
+
+commit 518a1756ccf02122b96fc437b538604a597df42a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Feb 19 14:27:09 2015 -0600
+
+    Fixed indexing bug for trmm3 via 3mh, 4mh.
+    
+    Details:
+    - Fixed a bug that only affected trmm3 when performed via 3mh or 4mh,
+      whereby micro-panels of the triangular matrix were packed with "dead
+      space" between them due to failing to adjust for the fact that pointer
+      arithmetic was occurring in units of complex elements while the data
+      being packed consisted of real elements. It turns out that the macro-
+      kernel suffered from the same bug, meaning the panels were actually
+      being packed and read consistently. The only way I was able to
+      discover the bug in the first place was because the packed block of A
+      was overflowing into the beginning of the packed row panel of B using
+      the sandybridge configuration.
+
+commit 493087d730f01d5169434f461644e5633f48a42f
+Merge: 650d2a6 2502129
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Feb 18 09:45:51 2015 -0600
+
+    Merge branch 'master' of github.com:flame/blis
+
+commit 25021299b670775df8ca9c87910c63d7e74ed946
+Merge: fe2b8d3 f05a576
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Feb 11 20:03:21 2015 -0600
+
+    Merge branch 'master' of github.com:flame/blis
+
+commit fe2b8d39a445ac848686e78c7540fd046cb95492
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Feb 11 19:33:10 2015 -0600
+
+    Fixed an obscure bug in 3mh/3m/4mh/4m packing.
+    
+    Details:
+    - Modified bli_packm_blk_var1.c and _var2.c to increase the triangular
+      case's panel increment by 1 if it would otherwise be odd. This is
+      particularly necessary in _var2.c when handling the interleaved 3m
+      or ro/io/rpi pack schemas, since division of an odd number by 2 can
+      happen if both the panel length and the panel packing dimension
+      (register packing blocksize) are odd, thus making their product odd.
+    - Modified bli_packm_init.c so that panel strides are increased by 1
+      if they would otherwise be odd, even for non-3m related packing.
+    - Modified the trmm and trsm macro-kernels so that triangular packed
+      micro-panels are traversed with this new "increment by 1 if odd"
+      policy.
+    - Added sanity checks in trmm and trsm macro-kernels that would result
+      in an abort() if the conditions that would lead to a "divide odd
+      integer by 2" scenario ever manifest.
+    - Defined bli_is_odd(), _is_even() macros in bli_scalar_macro_defs.h.
+
+commit 650d2a6ff2e593151a296ca86b5214afcc747afc
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Feb 9 14:59:20 2015 -0600
+
+    Added initial support for imaginary stride.
+    
+    Details:
+    - Added an imaginary stride field ("is") to obj_t.
+    - Renamed bli_obj_set_incs() macro to bli_obj_set_strides().
+    - Defined bli_obj_imag_stride() and bli_obj_set_imag_stride() and
+      added invocations in key locations.
+    - Added some basic error-checking related to imaginary stride.
+    - For now, imaginary stride will not be exposed into the most-used
+      BLIS APIs such as bli_obj_create(), and certainly not the
+      computational APIs such as bli_dgemm().
+
+commit f05a57634a7c8e3864b25b3335d1194c1ea1aeb9
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Feb 8 19:40:34 2015 -0600
+
+    Defined gemm cntl function to query ukrs func_t.
+    
+    Details:
+    - Added a new function, bli_gemm_cntl_ukrs(), that returns the func_t*
+      for the gemm micro-kernels from the leaf node of the control tree.
+      This allows all the func_t* fields from higher-level nodes in the tree
+      to be NULL, which makes the function that builds the control trees
+      slightly easier to read.
+    - Call bli_gemm_cntl_ukrs() instead of the cntl_gemm_ukrs() macro in
+      all bli_*_front() functions (which is needed to apply the row/column
+      preference optimization).
+    - In all level-3 bli_*_cntl_init() functions, changed the _obj_create()
+      function arguments corresponding to the gemm_ukrs fields in higher-
+      level cntl tree nodes to NULL.
+    - Removed some old her2k macro-kernels.
+
+commit cefd3d5d2001264de17cf63dae541f890cb9daaf
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Thu Feb 5 11:09:12 2015 -0600
+
+    A couple of functions were incorrectly ifdeffed away on Xeon Phi. Fixed this
+
+commit 7574c9947d57a19f613880e3b9f62f8c8f6df4ec
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Feb 4 12:11:55 2015 -0600
+
+    Added basic flop-counting mechanism (level-3 only).
+    
+    Details:
+    - Added optional flop counting to all level-3 front-ends, which is
+      enabled via BLIS_ENABLE_FLOP_COUNT. The flop count can be
+      reset at any time via bli_flop_count_reset() and queried via
+      bli_flop_count(). Caveats:
+      - flop counts are approximate for her[2]k, syr[2]k, trmm, and
+        trsm operations;
+      - flop counts ignore extra flops due to non-unit alpha;
+      - flop counts do not account for situations where beta is zero.
+
+commit ceda4f27d1f1bcf19320e09848e0f2e3b9941e6c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jan 29 13:22:54 2015 -0600
+
+    Implemented bli_obj_imag_equals().
+    
+    Details:
+    - Implemented a new function, bli_obj_imag_equals(), which compares the
+      imaginary part of the first argument to the second argument, which may
+      be a BLIS_CONSTANT or of a regular real datatype.
+
+commit 81114824a05a9053229efd577a8a94a856deda93
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jan 6 12:15:21 2015 -0600
+
+    Minor 4m/3m consolidation to mem_pool_macro_defs.h.
+    
+    Details:
+    - Merged the 4m and 3m definitions in bli_mem_pool_macro_defs.h to
+      reduce code and improve readability.
+
+commit 36a9b7b7436d9423ba4de2a9f85cfcd43577b783
+Author: Tyler Michael Smith <tms@cs.utexas.edu>
+Date:   Wed Dec 17 21:53:50 2014 +0000
+
+    reduced the default number of MC by KC blocks for bgq
+
+commit c60619c7c3568f044a849abbab60209aa7455423
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Dec 16 17:08:22 2014 -0600
+
+    Minor tweaks for 3m4m test drivers.
+    
+    Details:
+    - Changed gemm_kc blocksizes to be reduced by two-thirds instead of
+      half.
+    - Changed 3m4m/test_gemm.c driver to divide by 3 instead of 2 when
+      computing the fixed k dimension.
+    - Fixed runme.sh so that it would use multiple threads for s/dgemm
+      cases.
+
+commit c6929ba6a5e6f633a7295e979a2b8df8c7ecdb1b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Dec 16 11:27:50 2014 -0600
+
+    Added 4m_1b to test/3m4m test driver and script.
+
+commit 785d480805fc0d6f4251b5499933515740b6b2a7
+Merge: 9456f33 4156c08
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Dec 12 14:34:19 2014 -0600
+
+    Merge branch 'master' of github.com:flame/blis
+
+commit 9456f330af4617f9ee32972d51f974aa2d84f97b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Dec 12 14:31:57 2014 -0600
+
+    Added 4m_1b implementation for gemm.
+    
+    Details:
+    - Added yet another 4m-based implementation for complex domain level-3
+      operations. This method, which the 3m/4m paper identifies as Algorithm
+      "4m_1b" fissures the first loop around the micro-kernel so that the
+      real sub-panel of the current micro-panel of B is multiplied against
+      (both sub-panels of) all micro-panels of A, before doing the same for
+      the imaginary sub-panel of the micro-panel of B. For now, only gemm is
+      supported, and 4m_1b (labeled "4mb" within the framework) is not yet
+      integrated into the test suite.
+
+commit 4156c0880d9aea4ff04a9c4fa139ba8c437d8bfb
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Dec 9 16:03:14 2014 -0600
+
+    Fixed obscure level-2 packing / general stride bug.
+    
+    Details:
+    - Fixed a bug in certain structured level-2 operations that manifested
+      only when the structured matrix was provided to BLIS as matrix stored
+      with general stride. The bug was introduced in c472993b when the
+      densify field was removed from the packm control tree node and
+      associated APIs. Since then, the packed object was unconditionally
+      marked with an uplo field of BLIS_DENSE. This is fine for level-3
+      operations where micro-panels are always densified, but in level-2
+      contexts, the underlying unblocked variant (fused or unfused) of
+      structured operations (e.g. trmv) still needs to know whether to
+      execute its "lower" or "upper" branches of code. Since this field
+      was unconditionally being set to BLIS_DENSE, the unblocked variants
+      were always executed the "else" branch, which happened to be the
+      "lower" case code. Thus, running an upper case produced the wrong
+      answer. This most obviously manifested in the form of failures for
+      trmm, trmm3, and trsm in the test suite.
+      The bug was fixed by setting the packed object's uplo field to
+      BLIS_DENSE only if the schema indicated that micro-panels were to be
+      packed. Otherwise, we can assume we are packing to regular row or
+      column storage, as is the case with level-2 packing. Thanks to
+      Francisco Igual for reporting the testsuite failures and ultimately
+      leading us to this bug.
+
+commit 689f60a578b461119e9ea90c74f642b9eb79addb
+Merge: bef24e6 483e4d6
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Dec 7 14:03:30 2014 -0600
+
+    Merge pull request #21 from figual/master
+    
+    Adding armv8a configuration and micro-kernels.
+
+commit 483e4d6a3fdbef9d9ab47fb674c9476c70ca9f0f
+Author: Francisco D. Igual <figual@ucm.es>
+Date:   Sun Dec 7 20:27:49 2014 +0100
+
+    Adding armv8a configuration and micro-kernels.
+    
+    Only sgemm micro-kernel is fully functional at this point.
+
+commit bef24e67e0f93579c2a80315348dc2e227f72a72
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Wed Nov 26 18:00:56 2014 -0600
+
+    Fixed a type of race condition exposed by pthreads implementation.
+    Lead thread of the inner thread communicator could exit subproblem, move on the next iteration of the loop and modify a1_pack, b1_pack, or c1_pack while other threads were still using those.
+    
+    Barriers were inserted to fix this.
+
+commit 76bde44411f0e34266bab9d666a54ef22be97320
+Merge: e56e614 f3d729e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Nov 26 17:25:24 2014 -0600
+
+    Merge branch 'master' of github.com:flame/blis
+
+commit f3d729e504ec012e7dc7e02b2ecd42e004c6894d
+Author: Tyler Michael Smith <tms@cs.utexas.edu>
+Date:   Wed Nov 26 22:25:24 2014 -0600
+
+    Added static mutex to bli_init and bli_finalize
+
+commit d71cc797866ff502ad1127527016f463267eef80
+Author: Tyler Michael Smith <tms@cs.utexas.edu>
+Date:   Wed Nov 26 21:35:39 2014 -0600
+
+    Refactored bli_threading files and added support for pthreads
+
+commit e56e61438ff7fcf25a48c0b7603f18df782b50b6
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Nov 26 17:20:35 2014 -0600
+
+    Minor cleanups to bli_threading.h and friends.
+    
+    Details:
+    - No longer need to define BLIS_ENABLE_MULTITHREADING manually in
+      bli_config.h; it now gets defined when BLIS_ENABLE_OPENMP or
+      BLIS_ENABLE_PTHREADS is defined.
+    - Added sanity check to prevent both BLIS__ENABLE_OPENMP and
+      BLIS_ENABLE_PTHREADS from being enabled simultaneously.
+    - Reorganization of bli_threading*.h header files, which led to
+      simplification of threading-related part of blis.h.
+    - added "-fopenmp -lpthread" to LDFLAGS of sandybridge make_defs.mk
+      file.
+
+commit 3be2744cbe2c56d38c23fd818aa5c1f10cc7ea51
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Nov 21 12:28:08 2014 -0600
+
+    Update to template gemm ukernel comments.
+    
+    Details:
+    - Updated comments on alignment of a1 and b1 to match wiki.
+
+commit 994429c6881b2ade92d9d7949bcaebfbf2cc65eb
+Merge: 58796ab 694029d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Nov 20 13:55:35 2014 -0600
+
+    Merge pull request #20 from TimmyLiu/master
+    
+    #define PASTEF773 required by cblas compatibility layer
+
+commit 694029d9d7db857d642ab536955c0621791108c8
+Author: Timmy <timmy.liu@amd.com>
+Date:   Wed Nov 19 15:25:14 2014 -0600
+
+    #define PASTEF773 required by cblas compatiility layer
+
+commit 58796abda66b133346f8d523b39178afc336351f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Nov 6 14:31:52 2014 -0600
+
+    Removed KC constraint comments from _kernel.h files.
+    
+    Details:
+    - Since 4674ca8c, the constraint that KC be a multiple of both MR and
+      NR have been relaxed, and thus it was time to remove the comments
+      from the top of the bli_kernel.h files of all configurations.
+
+commit 7bbc95a54f706d43c7f7951f0e5995f86130cd52
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Oct 29 10:52:23 2014 -0500
+
+    Added new piledriver micro-kernels.
+    
+    Details:
+    - Added new micro-kernels for the AMD piledriver architecture (one
+      for each datatype).
+    - Updates and tweaks to piledriver configuration.
+    - Added 3xk packm micro-kernel support.
+    - Explicitly unrolled some of the smaller packm micro-kernels.
+    - Added notes to avx/sandybridge and piledriver micro-kernel files
+      acknowledging the influence of the corresponding kernel code in
+      OpenBLAS.
+
+commit 59613f1d5500f6279963327db2fbc84bc9135183
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Oct 23 17:21:37 2014 -0500
+
+    Added separeate micro-panel alignment for A and B.
+    
+    Details:
+    - Changed the recently-added micro-panel alignment macros so that we now
+      have two sets--one for micro-panels of matrix A and one for micro-
+      panels of matrix B: BLIS_UPANEL_[AB]_ALIGN_SIZE_?.
+    - Store each set of alignment values into a separate blksz_t object in
+      bli_gemm_cntl_init().
+    - Adjusted packm_init() to use the separate alignment values.
+    - Added query routines for the new alignment values to bli_info.c.
+    - Modified test suite output accordingly.
+
+commit a8e12884ee1fddd3fd77ca5a68aa0cb857f3af57
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Oct 23 11:35:48 2014 -0500
+
+    CHANGELOG update (0.1.6)
+
+commit 38ea5022e4ed846112198c4e1672fcdaeb90dc71 (tag: 0.1.6)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Thu Oct 23 11:35:45 2014 -0500
 
     Version file update (0.1.6)
 
-commit a3e6341bdb0e28411f935d6b4708a6389663e004 (origin/master, origin/HEAD)
+commit a3e6341bdb0e28411f935d6b4708a6389663e004
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Thu Oct 23 11:13:28 2014 -0500
 
@@ -948,7 +1763,7 @@ Date:   Mon Aug 4 16:01:59 2014 -0500
 
     CHANGELOG update (0.1.5)
 
-commit bde56d0ecfd0ec20330fac290b91a6dca0cf94e9 (0.1.5)
+commit bde56d0ecfd0ec20330fac290b91a6dca0cf94e9 (tag: 0.1.5)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Mon Aug 4 16:01:58 2014 -0500
 
@@ -1097,7 +1912,7 @@ Date:   Sun Jul 27 18:20:13 2014 -0500
 
     CHANGELOG update (0.1.4)
 
-commit a7537071b152ecff671f8716595d37dc09e4fd51 (0.1.4)
+commit a7537071b152ecff671f8716595d37dc09e4fd51 (tag: 0.1.4)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Sun Jul 27 18:20:12 2014 -0500
 
@@ -1496,7 +2311,7 @@ Date:   Mon Jun 23 13:48:17 2014 -0500
 
     CHANGELOG update (0.1.3)
 
-commit 036cc634918463b1caa0fd89c9a211f2f5639af7 (0.1.3)
+commit 036cc634918463b1caa0fd89c9a211f2f5639af7 (tag: 0.1.3)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Mon Jun 23 13:48:17 2014 -0500
 
@@ -1629,7 +2444,7 @@ Date:   Thu Jun 5 10:54:16 2014 -0500
 
     CHANGELOG update (for 0.1.2).
 
-commit 00f232f8ed1f7c41619b12ebf779ebe2c3b2d3cd (0.1.2)
+commit 00f232f8ed1f7c41619b12ebf779ebe2c3b2d3cd (tag: 0.1.2)
 Author: Tyler Smith <tms@cs.utexas.edu>
 Date:   Mon Jun 2 13:40:57 2014 -0500
 
@@ -2257,7 +3072,7 @@ Date:   Tue Feb 25 17:58:42 2014 -0600
 
     CHANGELOG update (for 0.1.1).
 
-commit fde5f1fdece19881f50b142e8611b772a647e6d2 (0.1.1)
+commit fde5f1fdece19881f50b142e8611b772a647e6d2 (tag: 0.1.1)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Tue Feb 25 13:34:56 2014 -0600
 
@@ -3171,7 +3986,7 @@ Date:   Mon Nov 11 10:15:40 2013 -0600
 
     CHANGELOG update (for 0.1.0).
 
-commit 089048d5895a30221b6b1976c9be93ad6443420d (0.1.0)
+commit 089048d5895a30221b6b1976c9be93ad6443420d (tag: 0.1.0)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Sat Nov 9 17:18:00 2013 -0600
 
@@ -3886,7 +4701,7 @@ Date:   Fri Jul 19 17:15:03 2013 -0500
 
     CHANGELOG update (for 0.0.9).
 
-commit 0680916fdd532f7a4716b11a2515243b2c08d00f (0.0.9)
+commit 0680916fdd532f7a4716b11a2515243b2c08d00f (tag: 0.0.9)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Thu Jul 18 18:04:34 2013 -0500
 
@@ -4124,7 +4939,7 @@ Date:   Wed Jun 12 16:40:04 2013 -0500
 
     CHANGELOG update.
 
-commit 5b641c3bab31eac6a1795b9f6e3f86c59651ca50 (0.0.8)
+commit 5b641c3bab31eac6a1795b9f6e3f86c59651ca50 (tag: 0.0.8)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Wed Jun 12 16:02:12 2013 -0500
 
@@ -4311,7 +5126,7 @@ Date:   Wed May 1 15:00:30 2013 -0500
 
     CHANGELOG update.
 
-commit 6bfa96f84887dec0b4cf8be5d38dd634c2f8951d (0.0.7)
+commit 6bfa96f84887dec0b4cf8be5d38dd634c2f8951d (tag: 0.0.7)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Tue Apr 30 19:35:54 2013 -0500
 
@@ -4693,7 +5508,7 @@ Date:   Sat Apr 13 16:53:16 2013 -0500
 
     CHANGELOG update.
 
-commit ec16c52f2ecf419c749175ce0a297441c10f1c68 (0.0.6)
+commit ec16c52f2ecf419c749175ce0a297441c10f1c68 (tag: 0.0.6)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Sat Apr 13 16:41:16 2013 -0500
 
@@ -5003,7 +5818,7 @@ Date:   Sun Mar 24 20:18:12 2013 -0500
 
     CHANGELOG update.
 
-commit b65cdc57d9e51fa00e3c03539cfb7e045707d0f4 (0.0.5)
+commit b65cdc57d9e51fa00e3c03539cfb7e045707d0f4 (tag: 0.0.5)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Sun Mar 24 20:01:49 2013 -0500
 
@@ -5107,7 +5922,7 @@ Date:   Mon Mar 18 10:37:03 2013 -0500
 
     CHANGELOG update.
 
-commit e7d41229d3b1674e74f47d7f29fae004a745201a (0.0.4)
+commit e7d41229d3b1674e74f47d7f29fae004a745201a (tag: 0.0.4)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Fri Mar 15 17:12:36 2013 -0500
 
@@ -5235,7 +6050,7 @@ Date:   Fri Feb 22 12:38:45 2013 -0600
       configuration directory (bl2_config.h, specifically) given that it can be
       expected to be tweaked by some developers.
 
-commit ede75693e5a36c6006087c4a7df834175b604504 (0.0.3)
+commit ede75693e5a36c6006087c4a7df834175b604504 (tag: 0.0.3)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Fri Feb 22 12:11:24 2013 -0600
 
@@ -5445,7 +6260,7 @@ Date:   Mon Feb 11 13:38:07 2013 -0600
 
     CHANGELOG update.
 
-commit 768fcebaa8be0eb936a6e7a02cd8a19438c79d99 (0.0.2)
+commit 768fcebaa8be0eb936a6e7a02cd8a19438c79d99 (tag: 0.0.2)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Mon Feb 11 13:20:44 2013 -0600
 
@@ -5687,7 +6502,7 @@ Date:   Mon Dec 10 17:23:32 2012 -0600
 
     Minor updates towards to 0.0.1.
 
-commit 7ad4ebef38b8e6eea9b6091844ba7294ec870271 (0.0.1)
+commit 7ad4ebef38b8e6eea9b6091844ba7294ec870271 (tag: 0.0.1)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Mon Dec 10 16:18:40 2012 -0600
 
@@ -5755,7 +6570,7 @@ Date:   Thu Dec 6 14:27:11 2012 -0600
 
     Wrote first draft of INSTALL file.
 
-commit bcbe81235a35ccfdbcc2f2319a0ca6e04f75a785 (0.0.0)
+commit bcbe81235a35ccfdbcc2f2319a0ca6e04f75a785 (tag: 0.0.0)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Thu Dec 6 12:42:35 2012 -0600
 
