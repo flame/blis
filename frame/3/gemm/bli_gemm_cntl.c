@@ -43,9 +43,6 @@ blksz_t*          gemm_mr;
 blksz_t*          gemm_nr;
 blksz_t*          gemm_kr;
 
-blksz_t*          gemm_upanel_a_align;
-blksz_t*          gemm_upanel_b_align;
-
 func_t*           gemm_ukrs;
 func_t*           gemm_ref_ukrs;
 
@@ -98,21 +95,6 @@ void bli_gemm_cntl_init()
 	                      BLIS_DEFAULT_KR_D, BLIS_PACKDIM_KR_D,
 	                      BLIS_DEFAULT_KR_C, BLIS_PACKDIM_KR_C,
 	                      BLIS_DEFAULT_KR_Z, BLIS_PACKDIM_KR_Z );
-
-
-	// Create objects for micro-panel alignment (in bytes).
-	gemm_upanel_a_align
-	=
-	bli_blksz_obj_create( BLIS_UPANEL_A_ALIGN_SIZE_S, 0,
-	                      BLIS_UPANEL_A_ALIGN_SIZE_D, 0,
-	                      BLIS_UPANEL_A_ALIGN_SIZE_C, 0,
-	                      BLIS_UPANEL_A_ALIGN_SIZE_Z, 0 );
-	gemm_upanel_b_align
-	=
-	bli_blksz_obj_create( BLIS_UPANEL_B_ALIGN_SIZE_S, 0,
-	                      BLIS_UPANEL_B_ALIGN_SIZE_D, 0,
-	                      BLIS_UPANEL_B_ALIGN_SIZE_C, 0,
-	                      BLIS_UPANEL_B_ALIGN_SIZE_Z, 0 );
 
 
 	// Attach the register blksz_t objects as blocksize multiples to the cache
@@ -248,9 +230,6 @@ void bli_gemm_cntl_finalize()
 	bli_blksz_obj_free( gemm_mr );
 	bli_blksz_obj_free( gemm_nr );
 	bli_blksz_obj_free( gemm_kr );
-
-	bli_blksz_obj_free( gemm_upanel_a_align );
-	bli_blksz_obj_free( gemm_upanel_b_align );
 
 	bli_func_obj_free( gemm_ukrs );
 	bli_func_obj_free( gemm_ref_ukrs );

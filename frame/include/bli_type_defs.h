@@ -91,6 +91,11 @@ typedef guint_t  objbits_t;  // object information bit field
 
 // -- Real types --
 
+// Define the number of floating-point types supported, and the size of the
+// largest type.
+#define BLIS_NUM_FP_TYPES   4
+#define BLIS_MAX_TYPE_SIZE  sizeof(dcomplex)
+
 // There are some places where we need to use sizeof() inside of a C
 // preprocessor #if conditional, and so here we define the various sizes
 // for those purposes.
@@ -487,25 +492,40 @@ typedef enum
 // -- BLIS misc. structure types -----------------------------------------------
 //
 
-// -- Memory pool type --
+// -- Pool block type --
 
 typedef struct
 {
-    void** block_ptrs;
-    gint_t top_index;
-    siz_t  num_blocks;
-    siz_t  block_size;
+	void* buf_sys;
+	void* buf_align;
+} pblk_t;
+
+// -- Pool type --
+
+typedef struct
+{
+	pblk_t* block_ptrs;
+	dim_t   block_ptrs_len;
+
+	dim_t   top_index;
+	dim_t   num_blocks;
+
+	siz_t   block_size;
+	siz_t   align_size;
 } pool_t;
 
 // -- Memory object type --
 
 typedef struct mem_s
 {
-	void*     buf;
+	pblk_t    pblk;
 	packbuf_t buf_type;
 	pool_t*   pool;
 	siz_t     size;
 } mem_t;
+
+// -- Memory block type --
+
 
 // -- Blocksize object type --
 
@@ -711,17 +731,17 @@ typedef enum
 
 typedef enum
 {
-    BLIS_MACH_EPS = 0,
-    BLIS_MACH_SFMIN,
-    BLIS_MACH_BASE,
-    BLIS_MACH_PREC,
-    BLIS_MACH_NDIGMANT,
-    BLIS_MACH_RND,
-    BLIS_MACH_EMIN,
-    BLIS_MACH_RMIN,
-    BLIS_MACH_EMAX,
-    BLIS_MACH_RMAX,
-    BLIS_MACH_EPS2
+	BLIS_MACH_EPS = 0,
+	BLIS_MACH_SFMIN,
+	BLIS_MACH_BASE,
+	BLIS_MACH_PREC,
+	BLIS_MACH_NDIGMANT,
+	BLIS_MACH_RND,
+	BLIS_MACH_EMIN,
+	BLIS_MACH_RMIN,
+	BLIS_MACH_EMAX,
+	BLIS_MACH_RMAX,
+	BLIS_MACH_EPS2
 } machval_t;
 
 #define BLIS_NUM_MACH_PARAMS   11

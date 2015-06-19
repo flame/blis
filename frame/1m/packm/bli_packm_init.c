@@ -164,9 +164,6 @@ void bli_packm_init( obj_t*   a,
 }
 
 
-extern blksz_t* gemm_upanel_a_align;
-extern blksz_t* gemm_upanel_b_align;
-
 void bli_packm_init_pack( invdiag_t invert_diag,
                           pack_t    schema,
                           packord_t pack_ord_if_up,
@@ -327,7 +324,6 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 	{
 		dim_t m_panel;
 		dim_t ps_p, ps_p_orig;
-		dim_t upanel_a_align;
 
 		// The panel dimension (for each datatype) should be equal to the
 		// register blocksize in the m dimension.
@@ -361,9 +357,6 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 		// Preserve this early panel stride value for use later, if needed.
 		ps_p_orig = ps_p;
 
-		// Query the micro-panel alignment for A.
-		upanel_a_align = bli_blksz_get_def( dt, gemm_upanel_a_align );
-
 		// Here, we adjust the panel stride, if necessary. Remember: ps_p is
 		// always interpreted as being in units of the datatype of the object
 		// which is not necessarily how the micro-panels will be stored. For
@@ -374,26 +367,12 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 		if ( bli_is_3mi_packed( schema ) )
 		{
 			ps_p = ( ps_p * 3 ) / 2;
-
-			// Align the panel stride according to the micro-panel alignment.
-			ps_p = bli_align_dim_to_size( ps_p, elem_size_p, upanel_a_align );
 		}
 		else if ( bli_is_3ms_packed( schema ) ||
 		          bli_is_ro_packed( schema )  ||
 		          bli_is_io_packed( schema )  ||
 		          bli_is_rpi_packed( schema ) )
 		{
-			// Acquire the element size of the the real projection of the
-			// current complex datatype.
-			siz_t elem_size_p_real = elem_size_p / 2;
-
-			// Acquire the micro-panel alignment for the real projection of
-			// the current complex datatype.
-			upanel_a_align = bli_blksz_get_def( dt_real, gemm_upanel_a_align );
-
-			// Align the panel stride according to the micro-panel alignment.
-			ps_p = bli_align_dim_to_size( ps_p, elem_size_p_real, upanel_a_align );
-
 			// The division by 2 below assumes that ps_p is an even number.
 			// However, it is possible that, at this point, ps_p is an odd.
 			// If it is indeed odd, we nudge it higher.
@@ -407,11 +386,6 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 			// Since the indexing "increment" will be twice as large as each
 			// actual stored element, we divide the panel_stride by 2.
 			ps_p = ps_p / 2;
-		}
-		else
-		{
-			// Align the panel stride according to the micro-panel alignment.
-			ps_p = bli_align_dim_to_size( ps_p, elem_size_p, upanel_a_align );
 		}
 
 		// Set the imaginary stride (in units of fundamental elements) for
@@ -442,7 +416,6 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 	{
 		dim_t n_panel;
 		dim_t ps_p, ps_p_orig;
-		dim_t upanel_b_align;
 
 		// The panel dimension (for each datatype) should be equal to the
 		// register blocksize in the n dimension.
@@ -476,9 +449,6 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 		// Preserve this early panel stride value for use later, if needed.
 		ps_p_orig = ps_p;
 
-		// Query the micro-panel alignment for B.
-		upanel_b_align = bli_blksz_get_def( dt, gemm_upanel_b_align );
-
 		// Here, we adjust the panel stride, if necessary. Remember: ps_p is
 		// always interpreted as being in units of the datatype of the object
 		// which is not necessarily how the micro-panels will be stored. For
@@ -489,26 +459,12 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 		if ( bli_is_3mi_packed( schema ) )
 		{
 			ps_p = ( ps_p * 3 ) / 2;
-
-			// Align the panel stride according to the micro-panel alignment.
-			ps_p = bli_align_dim_to_size( ps_p, elem_size_p, upanel_b_align );
 		}
 		else if ( bli_is_3ms_packed( schema ) ||
 		          bli_is_ro_packed( schema ) ||
 		          bli_is_io_packed( schema ) ||
 		          bli_is_rpi_packed( schema ) )
 		{
-			// Acquire the element size of the the real projection of the
-			// current complex datatype.
-			siz_t elem_size_p_real = elem_size_p / 2;
-
-			// Acquire the micro-panel alignment for the real projection of
-			// the current complex datatype.
-			upanel_b_align = bli_blksz_get_def( dt_real, gemm_upanel_b_align );
-
-			// Align the panel stride according to the micro-panel alignment.
-			ps_p = bli_align_dim_to_size( ps_p, elem_size_p_real, upanel_b_align );
-
 			// The division by 2 below assumes that ps_p is an even number.
 			// However, it is possible that, at this point, ps_p is an odd.
 			// If it is indeed odd, we nudge it higher.
@@ -522,11 +478,6 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 			// Since the indexing "increment" will be twice as large as each
 			// actual stored element, we divide the panel_stride by 2.
 			ps_p = ps_p / 2;
-		}
-		else
-		{
-			// Align the panel stride according to the micro-panel alignment.
-			ps_p = bli_align_dim_to_size( ps_p, elem_size_p, upanel_b_align );
 		}
 
 		// Set the imaginary stride (in units of fundamental elements) for

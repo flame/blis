@@ -167,11 +167,11 @@ blksz_t* bli_bsv_get_avail_blksz( bszid_t bsv, opid_t oper, num_t dt )
 
 blksz_t* bli_bsv_get_blksz( bszid_t bsv, ind_t method )
 {
-	// Initialize BLIS, if it isn't already initialized. This is
-	// needed because we have to ensure that the blksz_t objects
-	// have been created, otherwise this function could return a
-	// NULL (or garbage) address.
-	bli_init();
+	// Initialize the cntl API, if it isn't already initialized. This is
+	// needed because we have to ensure that the blksz_t objects have
+	// been created, otherwise this function could return a NULL (or
+	// garbage) address.
+	bli_cntl_init();
 
 	return *(bli_bsizes[ method ][ bsv ]);
 }

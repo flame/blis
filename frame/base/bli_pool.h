@@ -32,8 +32,63 @@
 
 */
 
-#ifndef BLIS_POOL_MACRO_DEFS_H
-#define BLIS_POOL_MACRO_DEFS_H
+#ifndef BLIS_POOL_H
+#define BLIS_POOL_H
+
+// -- Pool block type --
+
+/*
+typedef struct
+{
+    void* buf_sys;
+    void* buf_align;
+} pblk_t;
+*/
+
+// -- Pool type --
+
+/*
+typedef struct
+{
+    pblk_t* block_ptrs;
+    dim_t   block_ptrs_len;
+
+    dim_t   top_index;
+    dim_t   num_blocks;
+
+    siz_t   block_size;
+    siz_t   align_size;
+} pool_t;
+*/
+
+
+// Pool block query
+
+#define bli_pblk_buf_sys( pblk_p ) \
+\
+    ( (pblk_p)->buf_sys )
+
+#define bli_pblk_buf_align( pblk_p ) \
+\
+    ( (pblk_p)->buf_align )
+
+// Pool block modification
+
+#define bli_pblk_set_buf_sys( buf_sys0, pblk_p ) \
+{ \
+    (pblk_p)->buf_sys = buf_sys0; \
+}
+
+#define bli_pblk_set_buf_align( buf_align0, pblk_p ) \
+{ \
+    (pblk_p)->buf_align = buf_align0; \
+}
+
+#define bli_pblk_clear( pblk_p ) \
+{ \
+	bli_pblk_set_buf_sys( NULL, pblk_p ); \
+	bli_pblk_set_buf_align( NULL, pblk_p ); \
+}
 
 
 // Pool entry query
@@ -41,6 +96,10 @@
 #define bli_pool_block_ptrs( pool_p ) \
 \
 	( (pool_p)->block_ptrs )
+
+#define bli_pool_block_ptrs_len( pool_p ) \
+\
+	( (pool_p)->block_ptrs_len )
 
 #define bli_pool_num_blocks( pool_p ) \
 \
@@ -50,20 +109,29 @@
 \
 	( (pool_p)->block_size )
 
+#define bli_pool_align_size( pool_p ) \
+\
+	( (pool_p)->align_size )
+
 #define bli_pool_top_index( pool_p ) \
 \
 	( (pool_p)->top_index )
 
 #define bli_pool_is_exhausted( pool_p ) \
 \
-	( bli_pool_top_index( pool_p ) == -1 )
-
+	( bli_pool_top_index( pool_p ) == \
+	  bli_pool_num_blocks( pool_p ) )
 
 // Pool entry modification
 
 #define bli_pool_set_block_ptrs( block_ptrs0, pool_p ) \
 { \
     (pool_p)->block_ptrs = block_ptrs0; \
+}
+
+#define bli_pool_set_block_ptrs_len( block_ptrs_len0, pool_p ) \
+{ \
+    (pool_p)->block_ptrs_len = block_ptrs_len0; \
 }
 
 #define bli_pool_set_num_blocks( num_blocks0, pool_p ) \
@@ -76,28 +144,37 @@
     (pool_p)->block_size = block_size0; \
 }
 
+#define bli_pool_set_align_size( align_size0, pool_p ) \
+{ \
+    (pool_p)->align_size = align_size0; \
+}
+
 #define bli_pool_set_top_index( top_index0, pool_p ) \
 { \
     (pool_p)->top_index = top_index0; \
 }
 
-#define bli_pool_dec_top_index( pool_p ) \
-{ \
-    ((pool_p)->top_index)--; \
-}
+#endif
 
-#define bli_pool_inc_top_index( pool_p ) \
-{ \
-    ((pool_p)->top_index)++; \
-}
+// -----------------------------------------------------------------------------
 
-#define bli_pool_init( num_blocks, block_size, block_ptrs, pool_p ) \
-{ \
-	bli_pool_set_num_blocks( num_blocks, pool_p ); \
-	bli_pool_set_block_size( block_size, pool_p ); \
-	bli_pool_set_block_ptrs( block_ptrs, pool_p ); \
-	bli_pool_set_top_index( num_blocks - 1, pool_p ); \
-}
+void bli_pool_init( dim_t   num_blocks_init,
+                    siz_t   block_size,
+                    siz_t   align_size,
+                    pool_t* pool );
+void bli_pool_finalize( pool_t* pool );
 
+void bli_pool_checkout_block( pblk_t* block, pool_t* pool );
+void bli_pool_checkin_block( pblk_t* block, pool_t* pool );
 
-#endif 
+void bli_pool_grow( dim_t num_blocks_add, pool_t* pool );
+void bli_pool_shrink( dim_t num_blocks_sub, pool_t* pool );
+
+void bli_pool_alloc_block( siz_t   block_size,
+                           siz_t   align_size,
+                           pblk_t* block );
+void bli_pool_free_block( pblk_t* block );
+
+void bli_pool_print( pool_t* pool );
+void bli_pblk_print( pblk_t* pblk );
+

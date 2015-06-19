@@ -57,16 +57,12 @@ char* bli_info_get_int_type_size_str( void )        { return bli_int_type_size_s
 gint_t bli_info_get_int_type_size( void )           { return BLIS_INT_TYPE_SIZE; }
 gint_t bli_info_get_num_fp_types( void )            { return BLIS_NUM_FP_TYPES; }
 gint_t bli_info_get_max_type_size( void )           { return BLIS_MAX_TYPE_SIZE; }
-gint_t bli_info_get_max_num_threads( void )         { return BLIS_MAX_NUM_THREADS; }
-gint_t bli_info_get_num_mc_x_kc_blocks( void )      { return BLIS_NUM_MC_X_KC_BLOCKS; }
-gint_t bli_info_get_num_kc_x_nc_blocks( void )      { return BLIS_NUM_KC_X_NC_BLOCKS; }
-gint_t bli_info_get_num_mc_x_nc_blocks( void )      { return BLIS_NUM_MC_X_NC_BLOCKS; }
-gint_t bli_info_get_max_preload_byte_offset( void ) { return BLIS_MAX_PRELOAD_BYTE_OFFSET; }
 gint_t bli_info_get_simd_align_size( void )         { return BLIS_SIMD_ALIGN_SIZE; }
+gint_t bli_info_get_page_size( void )               { return BLIS_PAGE_SIZE; }
 gint_t bli_info_get_stack_buf_align_size( void )    { return BLIS_STACK_BUF_ALIGN_SIZE; }
 gint_t bli_info_get_heap_addr_align_size( void )    { return BLIS_HEAP_ADDR_ALIGN_SIZE; }
 gint_t bli_info_get_heap_stride_align_size( void )  { return BLIS_HEAP_STRIDE_ALIGN_SIZE; }
-gint_t bli_info_get_contig_addr_align_size( void )  { return BLIS_CONTIG_ADDR_ALIGN_SIZE; }
+gint_t bli_info_get_pool_addr_align_size( void )    { return BLIS_POOL_ADDR_ALIGN_SIZE; }
 gint_t bli_info_get_enable_stay_auto_init( void )
 {
 #ifdef BLIS_ENABLE_STAY_AUTO_INITIALIZED
@@ -78,6 +74,14 @@ gint_t bli_info_get_enable_stay_auto_init( void )
 gint_t bli_info_get_enable_blas2blis( void )
 {
 #ifdef BLIS_ENABLE_BLAS2BLIS
+	return 1;
+#else
+	return 0;
+#endif
+}
+gint_t bli_info_get_enable_cblas( void )
+{
+#ifdef BLIS_ENABLE_CBLAS
 	return 1;
 #else
 	return 0;
@@ -111,41 +115,6 @@ gint_t bli_info_get_default_kr( opid_t oper, num_t dt ) { return bli_bsv_get_ava
 
 gint_t bli_info_get_packdim_mr( opid_t oper, num_t dt ) { return bli_bsv_get_avail_blksz_max_dt( BLIS_MR, oper, dt ); }
 gint_t bli_info_get_packdim_nr( opid_t oper, num_t dt ) { return bli_bsv_get_avail_blksz_max_dt( BLIS_NR, oper, dt ); }
-
-// -- Micro-panel alignment --
-
-extern blksz_t* gemm_upanel_a_align;
-extern blksz_t* gemm_upanel_b_align;
-
-// Micro-panel alignment of A
-
-gint_t bli_info_get_upanel_a_align_size( num_t dt )
-{
-	if      ( bli_is_float   ( dt ) ) return bli_info_get_upanel_a_align_size_s();
-	else if ( bli_is_double  ( dt ) ) return bli_info_get_upanel_a_align_size_d();
-	else if ( bli_is_scomplex( dt ) ) return bli_info_get_upanel_a_align_size_c();
-	else if ( bli_is_dcomplex( dt ) ) return bli_info_get_upanel_a_align_size_z();
-	else                              return 0;
-}
-gint_t bli_info_get_upanel_a_align_size_s( void ) { bli_init(); return bli_blksz_get_def( BLIS_FLOAT,    gemm_upanel_a_align ); }
-gint_t bli_info_get_upanel_a_align_size_d( void ) { bli_init(); return bli_blksz_get_def( BLIS_DOUBLE,   gemm_upanel_a_align ); }
-gint_t bli_info_get_upanel_a_align_size_c( void ) { bli_init(); return bli_blksz_get_def( BLIS_SCOMPLEX, gemm_upanel_a_align ); }
-gint_t bli_info_get_upanel_a_align_size_z( void ) { bli_init(); return bli_blksz_get_def( BLIS_DCOMPLEX, gemm_upanel_a_align ); }
-
-// Micro-panel alignment of B
-
-gint_t bli_info_get_upanel_b_align_size( num_t dt )
-{
-	if      ( bli_is_float   ( dt ) ) return bli_info_get_upanel_b_align_size_s();
-	else if ( bli_is_double  ( dt ) ) return bli_info_get_upanel_b_align_size_d();
-	else if ( bli_is_scomplex( dt ) ) return bli_info_get_upanel_b_align_size_c();
-	else if ( bli_is_dcomplex( dt ) ) return bli_info_get_upanel_b_align_size_z();
-	else                              return 0;
-}
-gint_t bli_info_get_upanel_b_align_size_s( void ) { bli_init(); return bli_blksz_get_def( BLIS_FLOAT,    gemm_upanel_b_align ); }
-gint_t bli_info_get_upanel_b_align_size_d( void ) { bli_init(); return bli_blksz_get_def( BLIS_DOUBLE,   gemm_upanel_b_align ); }
-gint_t bli_info_get_upanel_b_align_size_c( void ) { bli_init(); return bli_blksz_get_def( BLIS_SCOMPLEX, gemm_upanel_b_align ); }
-gint_t bli_info_get_upanel_b_align_size_z( void ) { bli_init(); return bli_blksz_get_def( BLIS_DCOMPLEX, gemm_upanel_b_align ); }
 
 
 // -- Level-2 cache blocksizes --
@@ -268,9 +237,9 @@ char* bli_info_get_trsm_u_ukr_impl_string( ind_t method, num_t dt )
 
 // -- bli_mem_pool_macro_defs.h ------------------------------------------------
 
-gint_t bli_info_get_mk_pool_size( void ) { return BLIS_MK_POOL_SIZE; }
-gint_t bli_info_get_kn_pool_size( void ) { return BLIS_KN_POOL_SIZE; }
-gint_t bli_info_get_mn_pool_size( void ) { return BLIS_MN_POOL_SIZE; }
+gint_t bli_info_get_mk_pool_size( void ) { return bli_mem_pool_size( BLIS_BUFFER_FOR_A_BLOCK ); }
+gint_t bli_info_get_kn_pool_size( void ) { return bli_mem_pool_size( BLIS_BUFFER_FOR_B_PANEL ); }
+gint_t bli_info_get_mn_pool_size( void ) { return bli_mem_pool_size( BLIS_BUFFER_FOR_C_PANEL ); }
 
 
 

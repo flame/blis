@@ -36,6 +36,7 @@ void   bli_mem_init( void );
 void   bli_mem_finalize( void );
 bool_t bli_mem_is_initialized( void );
 
+// -----------------------------------------------------------------------------
 
 void bli_mem_acquire_m( siz_t     req_size,
                         packbuf_t buf_type,
@@ -46,9 +47,16 @@ void bli_mem_acquire_v( siz_t     req_size,
 
 void bli_mem_release( mem_t* mem );
 
-void bli_mem_init_pool( char*   pool_mem,
-                        siz_t   block_size,
-                        dim_t   n_blocks,
-                        void**  block_ptrs,
-                        pool_t* pool_struct );
+siz_t bli_mem_pool_size( packbuf_t buf_type );
+
+// -----------------------------------------------------------------------------
+
+void bli_mem_init_pools( void );
+void bli_mem_finalize_pools( void );
+
+void bli_mem_compute_pool_block_sizes_dt( num_t  dt,
+                                          ind_t  method,
+                                          siz_t* bs_a,
+                                          siz_t* bs_b,
+                                          siz_t* bs_c );
 

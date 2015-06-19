@@ -595,39 +595,27 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "--- BLIS library info -------------------------------------\n" );
 	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "version string               %s\n", bli_info_get_version_str() );
+	libblis_test_fprintf_c( os, "version string                 %s\n", bli_info_get_version_str() );
 	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "--- BLIS config header ---\n" );
+	libblis_test_fprintf_c( os, "--- BLIS configuration info ---\n" );
 	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "integer type size (bits)     %d\n", ( int )int_type_size );
-	libblis_test_fprintf_c( os, "# of floating-point types    %d\n", ( int )bli_info_get_num_fp_types() );
-	libblis_test_fprintf_c( os, "maximum type size            %d\n", ( int )bli_info_get_max_type_size() );
+	libblis_test_fprintf_c( os, "integer type size (bits)       %d\n", ( int )int_type_size );
 	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "maximum number of threads    %d\n", ( int )bli_info_get_max_num_threads() );
+	libblis_test_fprintf_c( os, "SIMD alignment (bytes)         %d\n", ( int )bli_info_get_simd_align_size() );
+	libblis_test_fprintf_c( os, "Page size (bytes)              %d\n", ( int )bli_info_get_page_size() );
 	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "SIMD alignment (bytes)       %d\n", ( int )bli_info_get_simd_align_size() );
+	libblis_test_fprintf_c( os, "memory alignment (bytes)         \n" );
+	libblis_test_fprintf_c( os, "  stack address (def: simd)    %d\n", ( int )bli_info_get_stack_buf_align_size() );
+	libblis_test_fprintf_c( os, "  obj_t address (def: simd)    %d\n", ( int )bli_info_get_heap_addr_align_size() );
+	libblis_test_fprintf_c( os, "  obj_t stride (def: simd)     %d\n", ( int )bli_info_get_heap_stride_align_size() );
+	libblis_test_fprintf_c( os, "  pool block addr (def: page)  %d\n", ( int )bli_info_get_pool_addr_align_size() );
 	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "stack memory allocation        \n" );
-	libblis_test_fprintf_c( os, "  address alignment (bytes)  %d\n", ( int )bli_info_get_stack_buf_align_size() );
+	libblis_test_fprintf_c( os, "BLAS compatibility layer         \n" );
+	libblis_test_fprintf_c( os, "  enabled?                     %d\n", ( int )bli_info_get_enable_blas2blis() );
+	libblis_test_fprintf_c( os, "  integer type size (bits)     %d\n", ( int )bli_info_get_blas2blis_int_type_size() );
 	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "dynamic memory allocation      \n" );
-	libblis_test_fprintf_c( os, "  address alignment          %d\n", ( int )bli_info_get_heap_addr_align_size() );
-	libblis_test_fprintf_c( os, "  stride alignment           %d\n", ( int )bli_info_get_heap_stride_align_size() );
-	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "contiguous memory allocation   \n" );
-	libblis_test_fprintf_c( os, "  # of mc x kc blocks        %d\n", ( int )bli_info_get_num_mc_x_kc_blocks() );
-	libblis_test_fprintf_c( os, "  # of kc x nc blocks        %d\n", ( int )bli_info_get_num_kc_x_nc_blocks() );
-	libblis_test_fprintf_c( os, "  # of mc x nc blocks        %d\n", ( int )bli_info_get_num_mc_x_nc_blocks() );
-	libblis_test_fprintf_c( os, "  block address alignment    %d\n", ( int )bli_info_get_contig_addr_align_size() );
-	libblis_test_fprintf_c( os, "  max preload byte offset    %d\n", ( int )bli_info_get_max_preload_byte_offset() );
-	libblis_test_fprintf_c( os, "  actual pool sizes (bytes)    \n" );
-	libblis_test_fprintf_c( os, "    for mc x kc blocks of A  %d\n", ( int )bli_info_get_mk_pool_size() );
-	libblis_test_fprintf_c( os, "    for kc x nc panels of B  %d\n", ( int )bli_info_get_kn_pool_size() );
-	libblis_test_fprintf_c( os, "    for mc x nc panels of C  %d\n", ( int )bli_info_get_mn_pool_size() );
-	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "BLAS compatibility layer       \n" );
-	libblis_test_fprintf_c( os, "  enabled?                   %d\n", ( int )bli_info_get_enable_blas2blis() );
-	libblis_test_fprintf_c( os, "  integer type size (bits)   %d\n", ( int )bli_info_get_blas2blis_int_type_size() );
+	libblis_test_fprintf_c( os, "CBLAS compatibility layer        \n" );
+	libblis_test_fprintf_c( os, "  enabled?                     %d\n", ( int )bli_info_get_enable_cblas() );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "floating-point types           s       d       c       z \n" );
 	libblis_test_fprintf_c( os, "  sizes (bytes)          %7u %7u %7u %7u\n", sizeof(float),
@@ -861,18 +849,6 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "--- BLIS misc. other info ---\n" );
-	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "micro-panel alignment (bytes)  s       d       c       z \n" );
-	libblis_test_fprintf_c( os, "  A (left matrix)        %7d %7d %7d %7d\n",
-	                        ( int )bli_info_get_upanel_a_align_size_s(),
-	                        ( int )bli_info_get_upanel_a_align_size_d(),
-	                        ( int )bli_info_get_upanel_a_align_size_c(),
-	                        ( int )bli_info_get_upanel_a_align_size_z() );
-	libblis_test_fprintf_c( os, "  B (right matrix)       %7d %7d %7d %7d\n",
-	                        ( int )bli_info_get_upanel_b_align_size_s(),
-	                        ( int )bli_info_get_upanel_b_align_size_d(),
-	                        ( int )bli_info_get_upanel_b_align_size_c(),
-	                        ( int )bli_info_get_upanel_b_align_size_z() );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "level-2 cache blocksizes       s       d       c       z \n" );
 	libblis_test_fprintf_c( os, "  m dimension            %7d %7d %7d %7d\n",

@@ -34,8 +34,6 @@
 
 #include "blis.h"
 
-static bool_t bli_ind_is_init = FALSE;
-
 static void* bli_ind_oper_fp[BLIS_NUM_IND_METHODS][BLIS_NUM_LEVEL3_OPS] = 
 {
         /*   gemm   hemm   herk   her2k  symm   syrk,  syr2k  trmm3  trmm   trsm  */
@@ -212,6 +210,8 @@ char* bli_ind_oper_get_avail_impl_string( opid_t oper, num_t dt )
 }
 
 // -----------------------------------------------------------------------------
+
+static bool_t bli_ind_is_init = FALSE;
 
 void bli_ind_init( void )
 {

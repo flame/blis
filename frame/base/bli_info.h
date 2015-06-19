@@ -44,18 +44,15 @@ char* bli_info_get_int_type_size_str( void );
 gint_t bli_info_get_int_type_size( void );
 gint_t bli_info_get_num_fp_types( void );
 gint_t bli_info_get_max_type_size( void );
-gint_t bli_info_get_max_num_threads( void );
-gint_t bli_info_get_num_mc_x_kc_blocks( void );
-gint_t bli_info_get_num_kc_x_nc_blocks( void );
-gint_t bli_info_get_num_mc_x_nc_blocks( void );
-gint_t bli_info_get_max_preload_byte_offset( void );
 gint_t bli_info_get_simd_align_size( void );
+gint_t bli_info_get_page_size( void );
 gint_t bli_info_get_stack_buf_align_size( void );
 gint_t bli_info_get_heap_addr_align_size( void );
 gint_t bli_info_get_heap_stride_align_size( void );
-gint_t bli_info_get_contig_addr_align_size( void );
+gint_t bli_info_get_pool_addr_align_size( void );
 gint_t bli_info_get_enable_stay_auto_init( void );
 gint_t bli_info_get_enable_blas2blis( void );
+gint_t bli_info_get_enable_cblas( void );
 gint_t bli_info_get_blas2blis_int_type_size( void );
 
 
@@ -83,22 +80,6 @@ gint_t bli_info_get_default_nr( opid_t oper, num_t dt );
 
 gint_t bli_info_get_packdim_mr( opid_t oper, num_t dt );
 gint_t bli_info_get_packdim_nr( opid_t oper, num_t dt );
-
-// -- Micro-panel alignment for A --
-
-gint_t bli_info_get_upanel_a_align_size( num_t dt );
-gint_t bli_info_get_upanel_a_align_size_s( void );
-gint_t bli_info_get_upanel_a_align_size_d( void );
-gint_t bli_info_get_upanel_a_align_size_c( void );
-gint_t bli_info_get_upanel_a_align_size_z( void );
-
-// -- Micro-panel alignment for B --
-
-gint_t bli_info_get_upanel_b_align_size( num_t dt );
-gint_t bli_info_get_upanel_b_align_size_s( void );
-gint_t bli_info_get_upanel_b_align_size_d( void );
-gint_t bli_info_get_upanel_b_align_size_c( void );
-gint_t bli_info_get_upanel_b_align_size_z( void );
 
 
 // -- Level-2 cache blocksizes --

@@ -63,41 +63,44 @@ err_t bli_init( void )
 	// reasons), the conditional test below MUST be within the critical
 	// section to prevent a race condition of the type described above.
 
-	// BEGIN CRITICAL SECTION
 #ifdef BLIS_ENABLE_OPENMP
 	_Pragma( "omp critical (init)" )
 #endif
 #ifdef BLIS_ENABLE_PTHREADS
 	pthread_mutex_lock( &initialize_mutex );
 #endif
+
+	// BEGIN CRITICAL SECTION
 	{
 
-	// Proceed with initialization only if BLIS is presently uninitialized.
-	// Since we bli_init() and bli_finalize() use the same named critical
-	// section, we can be sure that no other thread is either (a) updating
-	// bli_is_init, or (b) testing bli_is_init within the critical
-	// section (for the purposes of deciding whether to perform the
-	// necessary initialization subtasks).
-	if ( bli_is_init == FALSE )
-	{
-		// Initialize various sub-APIs.
-		bli_const_init();
-		bli_cntl_init();
-		bli_error_init();
-		bli_mem_init();
-		bli_ind_init();
-		bli_thread_init();
+		// Proceed with initialization only if BLIS is presently uninitialized.
+		// Since we bli_init() and bli_finalize() use the same named critical
+		// section, we can be sure that no other thread is either (a) updating
+		// bli_is_init, or (b) testing bli_is_init within the critical section
+		// (for the purposes of deciding whether to perform the necessary
+		// initialization subtasks).
+		if ( bli_is_init == FALSE )
+		{
+			// Initialize various sub-APIs.
+			bli_const_init();
+			bli_cntl_init();
+			bli_error_init();
+			bli_mem_init();
+			bli_ind_init();
+			bli_thread_init();
 
-		// After initialization is complete, mark BLIS as initialized.
-		bli_is_init = TRUE;
+			// After initialization is complete, mark BLIS as initialized.
+			bli_is_init = TRUE;
 
-		// Only the thread that actually performs the initialization will
-		// return "success".
-		r_val = BLIS_SUCCESS;
+			//bli_mem_init();
+
+			// Only the thread that actually performs the initialization will
+			// return "success".
+			r_val = BLIS_SUCCESS;
+		}
 	}
-
 	// END CRITICAL SECTION
-	}
+
 #ifdef BLIS_ENABLE_PTHREADS
 	pthread_mutex_unlock( &initialize_mutex );
 #endif
@@ -127,41 +130,42 @@ err_t bli_finalize( void )
 	// reasons), the conditional test below MUST be within the critical
 	// section to prevent a race condition of the type described above.
 
-	// BEGIN CRITICAL SECTION
 #ifdef BLIS_ENABLE_OPENMP
 	_Pragma( "omp critical (init)" )
 #endif
 #ifdef BLIS_ENABLE_PTHREADS
 	pthread_mutex_lock( &initialize_mutex );
 #endif
+
+	// BEGIN CRITICAL SECTION
 	{
 
-	// Proceed with finalization only if BLIS is presently initialized.
-	// Since we bli_init() and bli_finalize() use the same named critical
-	// section, we can be sure that no other thread is either (a) updating
-	// bli_is_init, or (b) testing bli_is_init within the critical
-	// section (for the purposes of deciding whether to perform the
-	// necessary finalization subtasks).
-	if ( bli_is_init == TRUE )
-	{
-		// Finalize various sub-APIs.
-		bli_const_finalize();
-		bli_cntl_finalize();
-		bli_error_finalize();
-		bli_mem_finalize();
-		bli_ind_finalize();
-		bli_thread_finalize();
+		// Proceed with finalization only if BLIS is presently initialized.
+		// Since we bli_init() and bli_finalize() use the same named critical
+		// section, we can be sure that no other thread is either (a) updating
+		// bli_is_init, or (b) testing bli_is_init within the critical section
+		// (for the purposes of deciding whether to perform the necessary
+		// finalization subtasks).
+		if ( bli_is_init == TRUE )
+		{
+			// Finalize various sub-APIs.
+			bli_const_finalize();
+			bli_cntl_finalize();
+			bli_error_finalize();
+			bli_mem_finalize();
+			bli_ind_finalize();
+			bli_thread_finalize();
 
-		// After finalization is complete, mark BLIS as uninitialized.
-		bli_is_init = FALSE;
+			// After finalization is complete, mark BLIS as uninitialized.
+			bli_is_init = FALSE;
 
-		// Only the thread that actually performs the finalization will
-		// return "success".
-		r_val = BLIS_SUCCESS;
+			// Only the thread that actually performs the finalization will
+			// return "success".
+			r_val = BLIS_SUCCESS;
+		}
 	}
-
 	// END CRITICAL SECTION
-	}
+
 #ifdef BLIS_ENABLE_PTHREADS
 	pthread_mutex_unlock( &initialize_mutex );
 #endif
@@ -177,6 +181,8 @@ bool_t bli_is_initialized( void )
 {
 	return bli_is_init;
 }
+
+// -----------------------------------------------------------------------------
 
 void bli_init_auto( err_t* init_result )
 {

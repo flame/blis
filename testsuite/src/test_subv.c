@@ -165,7 +165,7 @@ void libblis_test_subv_experiment( test_params_t* params,
 	}
 
 	// Estimate the performance of the best experiment repeat.
-	*perf = ( 2.0 * m ) / time_min / FLOPS_PER_UNIT_PERF;
+	*perf = ( 1.0 * m ) / time_min / FLOPS_PER_UNIT_PERF;
 	if ( bli_obj_is_complex( x ) ) *perf *= 2.0;
 
 	// Perform checks.

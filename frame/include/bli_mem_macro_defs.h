@@ -38,17 +38,25 @@
 
 // Mem entry query
 
+#define bli_mem_pblk( mem_p ) \
+\
+	( &((mem_p)->pblk) )
+
 #define bli_mem_buffer( mem_p ) \
 \
-	( (mem_p)->buf )
+	( bli_pblk_buf_align( bli_mem_pblk( mem_p ) ) )
+
+#define bli_mem_buf_sys( mem_p ) \
+\
+	( bli_pblk_buf_sys( bli_mem_pblk( mem_p ) ) )
 
 #define bli_mem_buf_type( mem_p ) \
 \
-    ( (mem_p)->buf_type )
+	( (mem_p)->buf_type )
 
 #define bli_mem_pool( mem_p ) \
 \
-    ( (mem_p)->pool )
+	( (mem_p)->pool )
 
 #define bli_mem_size( mem_p ) \
 \
@@ -65,24 +73,42 @@
 
 // Mem entry modification
 
+#define bli_mem_set_pblk( pblk_p, mem_p ) \
+{ \
+	mem_p->pblk = *(pblk_p); \
+}
+
 #define bli_mem_set_buffer( buf0, mem_p ) \
 { \
-    mem_p->buf = buf0; \
+	bli_pblk_set_buf_align( buf0, &(mem_p->pblk) ); \
+}
+
+#define bli_mem_set_buf_sys( buf0, mem_p ) \
+{ \
+	bli_pblk_set_buf_sys( buf0, &(mem_p->pblk) ); \
 }
 
 #define bli_mem_set_buf_type( buf_type0, mem_p ) \
 { \
-    mem_p->buf_type = buf_type0; \
+	mem_p->buf_type = buf_type0; \
 }
 
 #define bli_mem_set_pool( pool0, mem_p ) \
 { \
-    mem_p->pool = pool0; \
+	mem_p->pool = pool0; \
 }
 
 #define bli_mem_set_size( size0, mem_p ) \
 { \
-    mem_p->size = size0; \
+	mem_p->size = size0; \
+}
+
+#define bli_mem_clear( mem_p ) \
+{ \
+	bli_mem_set_buffer( NULL, mem_p ); \
+	bli_mem_set_buf_sys( NULL, mem_p ); \
+	bli_mem_set_pool( NULL, mem_p ); \
+	bli_mem_set_size( 0, mem_p ); \
 }
 
 

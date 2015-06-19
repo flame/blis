@@ -151,6 +151,8 @@
 
 // -- gemm --
 
+#define BLIS_DGEMM_UKERNEL_PREFERS_CONTIG_ROWS
+
 #define BLIS_DGEMM_UKERNEL         bli_dgemm_opt_30x8
 #define BLIS_SGEMM_UKERNEL         bli_sgemm_opt_30x16
 

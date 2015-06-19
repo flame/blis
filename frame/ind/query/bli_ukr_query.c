@@ -200,10 +200,10 @@ func_t* bli_ukr_get_funcs( l3ukr_t ukr, ind_t method )
 {
 	func_t** p = bli_ukrs[ method ][ ukr ];
 
-	// Initialize BLIS, if it isn't already initialized. This is
-	// needed because we have to ensure that the ukr func_t objects
-	// have been created (and thus contain valid function pointers).
-	bli_init();
+	// Initialize the cntl API, if it isn't already initialized. This is
+	// needed because we have to ensure that the ukr func_t objects have
+	// been created (and thus contain valid function pointers).
+	bli_cntl_init();
 
 	// Avoid dereferencing NULL pointers. (A NULL pointer indicates that
 	// there is no kernel for the requested kernel type and method.)
@@ -215,10 +215,10 @@ func_t* bli_ukr_get_ref_funcs( l3ukr_t ukr )
 {
 	func_t** p = bli_ref_ukrs[ ukr ];
 
-	// Initialize BLIS, if it isn't already initialized. This is
-	// needed because we have to ensure that the ukr func_t objects
-	// have been created (and thus contain valid function pointers).
-	bli_init();
+	// Initialize the cntl API, if it isn't already initialized. This is
+	// needed because we have to ensure that the ukr func_t objects have
+	// been created (and thus contain valid function pointers).
+	bli_cntl_init();
 
 	// Avoid dereferencing NULL pointers. (A NULL pointer indicates that
 	// there is no reference kernel for the requested kernel type.)

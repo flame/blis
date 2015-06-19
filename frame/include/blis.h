@@ -54,6 +54,7 @@ extern "C" {
 // KNOW WHAT YOU ARE DOING.
 
 #include "bli_config.h"
+#include "bli_config_macro_defs.h"
 
 
 // -- System headers --
@@ -98,7 +99,7 @@ extern "C" {
 
 // -- BLIS memory pool definitions --
 
-#include "bli_mem_pool_macro_defs.h"
+//#include "bli_mem_pool_macro_defs.h"
 
 
 // -- Base operation prototypes --
@@ -108,6 +109,8 @@ extern "C" {
 #include "bli_malloc.h"
 #include "bli_obj.h"
 #include "bli_obj_scalar.h"
+#include "bli_ind.h"
+#include "bli_pool.h"
 #include "bli_mem.h"
 #include "bli_part.h"
 #include "bli_query.h"
@@ -123,7 +126,6 @@ extern "C" {
 #include "bli_opid.h"
 #include "bli_flops.h"
 #include "bli_cntl.h"
-#include "bli_ind.h"
 #include "bli_info.h"
 
 
