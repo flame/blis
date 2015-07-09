@@ -42,13 +42,15 @@
 #define CPUNAME_REFERENCE    0
 #define CPUNAME_DUNNINGTON   1
 #define CPUNAME_SANDYBRIDGE  2
-#define CPUNAME_BULLDOZER    3
-#define CPUNAME_PILEDRIVER   4
+#define CPUNAME_HASWELL      3
+#define CPUNAME_BULLDOZER    4
+#define CPUNAME_PILEDRIVER   5
 
 static char *cpuname[] = {
   "reference",
   "dunnington",
   "sandybridge",
+  "haswell",
   "bulldozer",
   "piledriver",
 };
@@ -122,72 +124,73 @@ int cpu_detect()
   int eax, ebx, ecx, edx;
   int vendor, family, extend_family, model, extend_model;
 
-  if (!have_cpuid()) return CPUNAME_REFERENCE;
+  if ( !have_cpuid() ) return CPUNAME_REFERENCE;
 
-  vendor=get_vendor();
+  vendor = get_vendor();
 
-  cpuid(1, &eax, &ebx, &ecx, &edx);
-  extend_family = BITMASK(eax, 20, 0xff);
-  extend_model=BITMASK(eax, 16, 0x0f);
-  family=BITMASK(eax,  8, 0x0f);
-  model=BITMASK(eax,  4, 0x0f);
+  cpuid( 1, &eax, &ebx, &ecx, &edx );
+
+  extend_family = BITMASK( eax, 20, 0xff );
+  extend_model  = BITMASK( eax, 16, 0x0f );
+  family        = BITMASK( eax,  8, 0x0f );
+  model         = BITMASK( eax,  4, 0x0f );
 
   if (vendor == VENDOR_INTEL){
     switch (family) {
     case 0x6:
       switch (extend_model) {
       case 1:
-	switch (model) {
-	case 7:
-	  //penryn uses dunnington config.
-	  return CPUNAME_DUNNINGTON;
-	case 13:
-	  return CPUNAME_DUNNINGTON;
-	}
-	break;
+        switch (model) {
+        case 7:
+          //penryn uses dunnington config.
+          return CPUNAME_DUNNINGTON;
+        case 13:
+          return CPUNAME_DUNNINGTON;
+        }
+        break;
       case 2:
-	switch (model) {
-	case 10:
-	case 13:
-	  if(support_avx()) {
-	    return CPUNAME_SANDYBRIDGE;
-	  }else{
-	    return CPUNAME_REFERENCE; //OS doesn't support AVX
-	  }
-	}
-	break;
+        switch (model) {
+        case 10:
+        case 13:
+          if(support_avx()) {
+            return CPUNAME_SANDYBRIDGE;
+          }else{
+            return CPUNAME_REFERENCE; //OS doesn't support AVX
+          }
+        }
+        break;
       case 3:
-	switch (model) {
-	case 10:
-	case 14:
-	  //Ivy Bridge
-	  if(support_avx()) {
-	    return CPUNAME_SANDYBRIDGE;
-	  }else{
-	    return CPUNAME_REFERENCE; //OS doesn't support AVX
-	  }
-	case 12:
-	case 15:
-	  //Haswell. Temp use Sandy Brdige
-	  if(support_avx()) {
-	    return CPUNAME_SANDYBRIDGE;
-	  }else{
-	    return CPUNAME_REFERENCE; //OS doesn't support AVX
-	  }
+        switch (model) {
+        case 10:
+        case 14:
+          //Ivy Bridge
+          if(support_avx()) {
+            return CPUNAME_SANDYBRIDGE;
+          }else{
+            return CPUNAME_REFERENCE; //OS doesn't support AVX
+          }
+        case 12:
+        case 15:
+          //Haswell
+          if(support_avx()) {
+            return CPUNAME_HASWELL;
+          }else{
+            return CPUNAME_REFERENCE; //OS doesn't support AVX
+          }
 
-	}
-	break;
+        }
+        break;
       case 4:
         switch (model) {
         case 5:
-	case 6:
-	  //Haswell. Temp use Sandy Brdige
-	  if(support_avx()) {
-	    return CPUNAME_SANDYBRIDGE;
-	  }else{
-	    return CPUNAME_REFERENCE; //OS doesn't support AVX
-	  }
-	}
+        case 6:
+          //Haswell
+          if(support_avx()) {
+            return CPUNAME_HASWELL;
+          }else{
+            return CPUNAME_REFERENCE; //OS doesn't support AVX
+          }
+        }
         break;
       }
       break;
@@ -197,24 +200,24 @@ int cpu_detect()
     case 0xf:
       switch (extend_family) {
       case 6:
-	switch (model) {
-	case 1:
-	  if(support_avx())
-	    return CPUNAME_BULLDOZER;
-	  else
-	    return CPUNAME_REFERENCE; //OS don't support AVX.
-	case 2:
-	  if(support_avx())
-	    return CPUNAME_PILEDRIVER;
-	  else
-	    return CPUNAME_REFERENCE; //OS don't support AVX.
-	case 0:
-	  //Steamroller. Temp use Piledriver.
-	  if(support_avx())
-	    return CPUNAME_PILEDRIVER;
-	  else
-	    return CPUNAME_REFERENCE; //OS don't support AVX.
-	}
+        switch (model) {
+        case 1:
+          if(support_avx())
+            return CPUNAME_BULLDOZER;
+          else
+            return CPUNAME_REFERENCE; //OS don't support AVX.
+        case 2:
+          if(support_avx())
+            return CPUNAME_PILEDRIVER;
+          else
+            return CPUNAME_REFERENCE; //OS don't support AVX.
+        case 0:
+          //Steamroller. Temp use Piledriver.
+          if(support_avx())
+            return CPUNAME_PILEDRIVER;
+          else
+            return CPUNAME_REFERENCE; //OS don't support AVX.
+        }
       }
       break;
     }

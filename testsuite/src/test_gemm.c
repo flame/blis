@@ -174,12 +174,12 @@ void libblis_test_gemm_experiment( test_params_t* params,
 	if ( bli_obj_is_real( c ) )
 	{
 		bli_setsc(  1.2,  0.0, &alpha );
-		bli_setsc( -1.0,  0.0, &beta );
+		bli_setsc(  0.9,  0.0, &beta );
 	}
 	else
 	{
 		bli_setsc(  1.2,  0.8, &alpha );
-		bli_setsc( -1.0,  1.0, &beta );
+		bli_setsc(  0.9,  1.0, &beta );
 	}
 
 	// Randomize A, B, and C, and save C.
