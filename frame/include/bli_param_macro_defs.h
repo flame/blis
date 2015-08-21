@@ -42,15 +42,15 @@
 
 #define bli_is_aligned_to( p, size ) \
 \
-	( ( siz_t )(p) % ( siz_t )(size) == 0 )
+	( ( uintptr_t )(p) % ( uintptr_t )(size) == 0 )
 
 #define bli_is_unaligned_to( p, size ) \
 \
-	( ( siz_t )(p) % ( siz_t )(size) != 0 )
+	( ( uintptr_t )(p) % ( uintptr_t )(size) != 0 )
 
 #define bli_offset_from_alignment( p, size ) \
 \
-	( ( siz_t )(p) % ( siz_t )(size) )
+	( ( uintptr_t )(p) % ( uintptr_t )(size) )
 
 
 // datatype
