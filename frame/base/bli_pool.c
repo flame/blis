@@ -282,13 +282,22 @@ void bli_pool_alloc_block( siz_t   block_size,
 	buf_sys   = bli_malloc( block_size + align_size );
 	buf_align = buf_sys;
 
-	// Advance the pointer to achieve the necessary alignment, if it
-	// is not already aligned.
-	if ( bli_is_unaligned_to( ( uintptr_t )buf_sys, ( uintptr_t )align_size ) )
+	// Advance the pointer to achieve the necessary alignment, if it is not
+	// already aligned.
+	if ( bli_is_unaligned_to( buf_sys, align_size ) )
 	{
-		// Notice that this works even if the alignment is not a power of two.
-		buf_align += (   ( uintptr_t )align_size - 
-		               ( ( uintptr_t )buf_sys % align_size ) );
+		// C99's stdint.h guarantees that a void* can be safely cast to a
+		// uintptr_t and then back to a void*, hence the casting of buf_sys
+		// and align_size to uintptr_t. buf_align is initially cast to char*
+		// to allow pointer arithmetic in units of bytes, and then advanced
+		// to the next nearest alignment boundary, and finally cast back to
+		// void* before being stored. Notice that the arithmetic works even
+		// if the alignment value is not a power of two.
+		buf_align = ( void* )(   ( char*     )buf_align +
+		                       ( ( uintptr_t )align_size -
+		                         ( uintptr_t )buf_sys %
+		                         ( uintptr_t )align_size )
+		                     );
 	}
 	
 	// Save the results in the pblk_t structure.
