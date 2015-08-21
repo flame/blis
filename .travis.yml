@@ -29,6 +29,6 @@ addons:
 
 script:
   - ./configure $BUILD_CONFIG
-  - make
-  - if [ $RUN_TEST -eq 1 ]; then make test; fi
+  - make CC=gcc-4.8
+  - if [ $RUN_TEST -eq 1 ]; then make BLIS_ENABLE_TEST_OUTPUT=yes test; fi
   - if [ $RUN_TEST -eq 1 ]; then ./build/check-test.sh ./output.testsuite; fi
