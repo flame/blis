@@ -52,6 +52,9 @@ void bli_herk_blk_var3f( obj_t*  a,
 	dim_t  b_alg;
 	dim_t  k_trans;
 
+	// Prune any zero region that exists along the partitioning dimension.
+	bli_herk_prune_unref_mparts_k( a, ah, c );
+
     if( thread_am_ochief( thread ) ) {
         // Initialize object for packing C.
 	    bli_obj_init_pack( &c_pack_s );

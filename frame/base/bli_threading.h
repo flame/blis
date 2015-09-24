@@ -101,13 +101,25 @@ void    bli_barrier( thread_comm_t* communicator, dim_t thread_id );
 
 struct thrinfo_s
 {
-    thread_comm_t*      ocomm;       //The thread communicator for the other threads sharing the same work at this level
-    dim_t               ocomm_id;    //Our thread id within that thread comm
-    thread_comm_t*      icomm;       //The thread communicator for the other threads sharing the same work at this level
-    dim_t               icomm_id;    //Our thread id within that thread comm
+    // The thread communicator for the other threads sharing the same work
+	// at this level.
+    thread_comm_t*      ocomm;
 
-    dim_t               n_way;       //Number of distinct  used to parallelize the loop
-    dim_t               work_id;     //What we're working on
+    // Our thread id within the ocomm thread communicator.
+    dim_t               ocomm_id;
+
+    // The thread communicator for the other threads sharing the same work
+	// at this level.
+    thread_comm_t*      icomm;
+
+	// Our thread id within the icomm thread communicator.
+    dim_t               icomm_id;
+
+	// The number of distinct threads used to parallelize the loop.
+    dim_t               n_way;
+
+	// What we're working on.
+    dim_t               work_id;
 };
 typedef struct thrinfo_s thrinfo_t;
 
@@ -128,39 +140,37 @@ typedef struct thrinfo_s thrinfo_t;
 #define thread_obarrier( thread )              bli_barrier( thread->ocomm, thread->ocomm_id )
 #define thread_ibarrier( thread )              bli_barrier( thread->icomm, thread->icomm_id )
 
-void bli_get_range( void* thr, dim_t all_start, dim_t all_end,
-                    dim_t block_factor,
-                    bool_t handle_edge_low,
+void bli_get_range( void* thr, dim_t n, dim_t bf, bool_t handle_edge_low,
                     dim_t* start, dim_t* end );
-void bli_get_range_l2r( void* thr, dim_t all_start, dim_t all_end,
-                        dim_t block_factor,
-                        dim_t* start, dim_t* end );
-void bli_get_range_r2l( void* thr, dim_t all_start, dim_t all_end,
-                        dim_t block_factor,
-                        dim_t* start, dim_t* end );
-void bli_get_range_t2b( void* thr, dim_t all_start, dim_t all_end,
-                        dim_t block_factor,
-                        dim_t* start, dim_t* end );
-void bli_get_range_b2t( void* thr, dim_t all_start, dim_t all_end,
-                        dim_t block_factor,
-                        dim_t* start, dim_t* end );
+siz_t bli_get_range_l2r( void* thr, obj_t* a, dim_t bf, dim_t* start, dim_t* end );
+siz_t bli_get_range_r2l( void* thr, obj_t* a, dim_t bf, dim_t* start, dim_t* end );
+siz_t bli_get_range_t2b( void* thr, obj_t* a, dim_t bf, dim_t* start, dim_t* end );
+siz_t bli_get_range_b2t( void* thr, obj_t* a, dim_t bf, dim_t* start, dim_t* end );
 
-void bli_get_range_weighted( void* thr, dim_t all_start, dim_t all_end,
-                             dim_t block_factor, uplo_t uplo,
-                             bool_t handle_edge_low,
-                             dim_t* start, dim_t* end );
-void bli_get_range_weighted_l2r( void* thr, dim_t all_start, dim_t all_end,
-                                 dim_t block_factor, uplo_t uplo,
-                                 dim_t* start, dim_t* end );
-void bli_get_range_weighted_r2l( void* thr, dim_t all_start, dim_t all_end,
-                                 dim_t block_factor, uplo_t uplo,
-                                 dim_t* start, dim_t* end );
-void bli_get_range_weighted_t2b( void* thr, dim_t all_start, dim_t all_end,
-                                 dim_t block_factor, uplo_t uplo,
-                                 dim_t* start, dim_t* end );
-void bli_get_range_weighted_b2t( void* thr, dim_t all_start, dim_t all_end,
-                                 dim_t block_factor, uplo_t uplo,
-                                 dim_t* start, dim_t* end );
+dim_t bli_get_range_width_l( doff_t diagoff_j,
+                             dim_t  m,
+                             dim_t  n_j,
+                             dim_t  j,
+                             dim_t  n_way,
+                             dim_t  bf,
+                             dim_t  bf_left,
+                             double area_per_thr,
+                             bool_t handle_edge_low );
+siz_t bli_find_area_trap_l( dim_t m, dim_t n, doff_t diagoff );
+siz_t bli_get_range_weighted( void*  thr,
+                              doff_t diagoff,
+                              uplo_t uplo,
+                              dim_t  m,
+                              dim_t  n,
+                              dim_t  bf,
+                              bool_t handle_edge_low,
+                              dim_t* j_start_thr,
+                              dim_t* j_end_thr );
+
+siz_t bli_get_range_weighted_l2r( void* thr, obj_t* a, dim_t bf, dim_t* start, dim_t* end );
+siz_t bli_get_range_weighted_r2l( void* thr, obj_t* a, dim_t bf, dim_t* start, dim_t* end );
+siz_t bli_get_range_weighted_t2b( void* thr, obj_t* a, dim_t bf, dim_t* start, dim_t* end );
+siz_t bli_get_range_weighted_b2t( void* thr, obj_t* a, dim_t bf, dim_t* start, dim_t* end );
 
 thrinfo_t* bli_create_thread_info( thread_comm_t* ocomm, dim_t ocomm_id, 
                                    thread_comm_t* icomm, dim_t icomm_id,

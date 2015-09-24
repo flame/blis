@@ -509,8 +509,8 @@ void bli_obj_print( char* label, obj_t* obj )
 	                                               ( unsigned long int )bli_obj_width( *obj ) );
 	fprintf( file, "\n" );
 
-	fprintf( file, " offm, offn      %lu, %lu\n", ( unsigned long int )bli_obj_row_offset( *obj ),
-	                                              ( unsigned long int )bli_obj_col_offset( *obj ) );
+	fprintf( file, " offm, offn      %lu, %lu\n", ( unsigned long int )bli_obj_row_off( *obj ),
+	                                              ( unsigned long int )bli_obj_col_off( *obj ) );
 	fprintf( file, " diagoff         %ld\n", ( signed long int )bli_obj_diag_offset( *obj ) );
 	fprintf( file, "\n" );
 

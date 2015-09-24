@@ -37,6 +37,7 @@
 #include "bli_trsm_check.h"
 #include "bli_trsm_front.h"
 #include "bli_trsm_int.h"
+#include "bli_trsm_prune.h"
 
 #include "bli_gemmtrsm_ukernel.h"
 #include "bli_trsm_ukernel.h"

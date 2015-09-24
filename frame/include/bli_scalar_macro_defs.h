@@ -243,6 +243,22 @@
 	bli_fmax( bli_fabs( a ), \
 	          bli_fabs( b ) )
 
+// round
+
+#define bli_round( val ) \
+\
+	( round( val ) )
+
+// round_to_mult
+
+#define bli_round_to_mult( val, mult ) \
+\
+	( guint_t )( ( ( ( guint_t )val + \
+	                 ( guint_t )mult / 2 \
+	               ) / mult \
+	             ) * mult \
+	           )
+
 // isnan, isinf
 
 #define bli_isinf( a )  isinf( a )

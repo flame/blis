@@ -156,8 +156,8 @@
 
 #define bli_obj_is_upper_or_lower( obj ) \
 \
-	( ( (obj).info & BLIS_UPLO_BITS ) == BLIS_BITVAL_UPPER || \
-	  ( (obj).info & BLIS_UPLO_BITS ) == BLIS_BITVAL_LOWER )
+	( bli_obj_is_upper( obj ) || \
+	  bli_obj_is_lower( obj ) )
 
 #define bli_obj_is_dense( obj ) \
 \
@@ -441,11 +441,15 @@
 
 #define bli_obj_length( obj ) \
 \
-	((obj).m)
+	( (obj).dim[BLIS_M] )
 
 #define bli_obj_width( obj ) \
 \
-	((obj).n)
+	( (obj).dim[BLIS_N] )
+
+#define bli_obj_dim( mdim, obj ) \
+\
+	( (obj).dim[mdim] )
 
 #define bli_obj_min_dim( obj ) \
 \
@@ -579,23 +583,38 @@ bli_obj_width_stored( obj )
 
 // Dimension modification
 
+#define bli_obj_set_length( dim_m, obj ) \
+{ \
+	(obj).dim[BLIS_M] = dim_m; \
+}
+
+#define bli_obj_set_width( dim_n, obj ) \
+{ \
+	(obj).dim[BLIS_N] = dim_n; \
+}
+
+#define bli_obj_set_dim( mdim, dim_val, obj ) \
+{ \
+	(obj).dim[mdim] = dim_val; \
+}
+
 #define bli_obj_set_dims( dim_m, dim_n, obj ) \
 { \
-	(obj).m = dim_m; \
-	(obj).n = dim_n; \
+	bli_obj_set_length( dim_m, obj ); \
+	bli_obj_set_width( dim_n, obj ); \
 }
 
 #define bli_obj_set_dims_with_trans( trans, dim_m, dim_n, obj ) \
 { \
 	if ( bli_does_notrans( trans ) ) \
 	{ \
-		(obj).m = dim_m; \
-		(obj).n = dim_n; \
+		bli_obj_set_length( dim_m, obj ); \
+		bli_obj_set_width( dim_n, obj ); \
 	} \
 	else \
 	{ \
-		(obj).m = dim_n; \
-		(obj).n = dim_m; \
+		bli_obj_set_length( dim_n, obj ); \
+		bli_obj_set_width( dim_m, obj ); \
 	} \
 }
 
@@ -604,15 +623,15 @@ bli_obj_width_stored( obj )
 
 #define bli_obj_row_stride( obj ) \
 \
-	((obj).rs)
+	( (obj).rs )
 
 #define bli_obj_col_stride( obj ) \
 \
-	((obj).cs)
+	( (obj).cs )
 
 #define bli_obj_imag_stride( obj ) \
 \
-	((obj).is)
+	( (obj).is )
 
 #define bli_obj_row_stride_mag( obj ) \
 \
@@ -671,41 +690,60 @@ bli_obj_width_stored( obj )
 
 // Offset query
 
-#define bli_obj_row_offset( obj ) \
+#define bli_obj_row_off( obj ) \
 \
-	( (obj).offm )
+	( (obj).off[BLIS_M] )
 
-#define bli_obj_col_offset( obj ) \
+#define bli_obj_col_off( obj ) \
 \
-	( (obj).offn )
+	( (obj).off[BLIS_N] )
+
+#define bli_obj_off( mdim, obj ) \
+\
+	( (obj).off[mdim] )
 
 
 // Offset modification
 
+#define bli_obj_set_off( mdim, offset, obj ) \
+{ \
+	(obj).off[mdim] = offset; \
+}
+
 #define bli_obj_set_offs( offset_m, offset_n, obj ) \
 { \
-	(obj).offm = offset_m; \
-	(obj).offn = offset_n; \
+	bli_obj_set_off( BLIS_M, offset_m, obj ); \
+	bli_obj_set_off( BLIS_N, offset_n, obj ); \
+}
+
+#define bli_obj_inc_off( mdim, offset, obj ) \
+{ \
+	(obj).off[mdim] += offset; \
+}
+
+#define bli_obj_inc_offm( offset, obj ) \
+{ \
+	bli_obj_inc_off( BLIS_M, offset, obj ); \
+}
+
+#define bli_obj_inc_offn( offset, obj ) \
+{ \
+	bli_obj_inc_off( BLIS_N, offset, obj ); \
 }
 
 #define bli_obj_inc_offs( offset_m, offset_n, obj ) \
 { \
-	(obj).offm += offset_m; \
-	(obj).offn += offset_n; \
+	bli_obj_inc_off( BLIS_M, offset_m, obj ); \
+	bli_obj_inc_off( BLIS_N, offset_n, obj ); \
 }
 
-#define bli_obj_dec_offs( offset_m, offset_n, obj ) \
-{ \
-	(obj).offm -= offset_m; \
-	(obj).offn -= offset_n; \
-}
 
 
 // Diagonal offset query
 
 #define bli_obj_diag_offset( obj ) \
 \
-	((obj).diag_off)
+	( (obj).diag_off )
 
 #define bli_obj_diag_offset_after_trans( obj ) \
 \
@@ -762,7 +800,7 @@ bli_obj_width_stored( obj )
 
 #define bli_obj_buffer( obj ) \
 \
-	(obj).buffer
+	( (obj).buffer )
 
 // Buffer address modification
 
@@ -776,7 +814,7 @@ bli_obj_width_stored( obj )
 
 #define bli_obj_internal_scalar_buffer( obj ) \
 \
-	&((obj).scalar)
+	&( (obj).scalar )
 
 // Bufferless scalar field modification
 
@@ -794,7 +832,7 @@ bli_obj_width_stored( obj )
 
 #define bli_obj_elem_size( obj ) \
 \
-	(obj).elem_size \
+	( (obj).elem_size )
 
 // Element size modification
 
@@ -851,19 +889,19 @@ bli_obj_width_stored( obj )
 
 #define bli_obj_panel_length( obj ) \
 \
-	((obj).m_panel)
+	( (obj).m_panel )
 
 #define bli_obj_panel_width( obj ) \
 \
-	((obj).n_panel)
+	( (obj).n_panel )
 
 #define bli_obj_panel_dim( obj ) \
 \
-	((obj).pd)
+	( (obj).pd )
 
 #define bli_obj_panel_stride( obj ) \
 \
-	((obj).ps)
+	( (obj).ps )
 
 // Packed panel info modification
 
@@ -969,15 +1007,19 @@ bli_obj_width_stored( obj )
 #define bli_obj_buffer_for_const( dt, obj ) \
 \
 	( void* )( \
-	           ( ( char* )( (obj).buffer ) ) + dt * BLIS_CONSTANT_SLOT_SIZE \
+	           ( ( char* )( bli_obj_buffer( obj ) ) ) + \
+                 ( dim_t )( dt * BLIS_CONSTANT_SLOT_SIZE ) \
 	         )
 
 #define bli_obj_buffer_at_off( obj ) \
 \
 	( void* )( \
-	           ( ( char* )( (obj).buffer ) ) + ( dim_t )(obj).elem_size * \
-	                                                    ( (obj).offn * (obj).cs + \
-	                                                      (obj).offm * (obj).rs ) \
+	           ( ( char* )( bli_obj_buffer   ( obj ) ) + \
+                 ( dim_t )( bli_obj_elem_size( obj ) ) * \
+                            ( bli_obj_col_off( obj ) * bli_obj_col_stride( obj ) + \
+                              bli_obj_row_off( obj ) * bli_obj_row_stride( obj ) \
+                            ) \
+               ) \
 	         )
 
 #define bli_obj_buffer_for_1x1( dt, obj ) \
@@ -1015,8 +1057,8 @@ bli_obj_width_stored( obj )
 		dim_t  n        = bli_obj_width( obj ); \
 		inc_t  rs       = bli_obj_row_stride( obj ); \
 		inc_t  cs       = bli_obj_col_stride( obj ); \
-		dim_t  offm     = bli_obj_row_offset( obj ); \
-		dim_t  offn     = bli_obj_col_offset( obj ); \
+		dim_t  offm     = bli_obj_row_off( obj ); \
+		dim_t  offn     = bli_obj_col_off( obj ); \
 		doff_t diag_off = bli_obj_diag_offset( obj ); \
 \
 		bli_obj_set_dims( n, m, obj ); \
@@ -1047,8 +1089,8 @@ bli_obj_width_stored( obj )
 	{ \
 		dim_t  m        = bli_obj_length( obj ); \
 		dim_t  n        = bli_obj_width( obj ); \
-		dim_t  offm     = bli_obj_row_offset( obj ); \
-		dim_t  offn     = bli_obj_col_offset( obj ); \
+		dim_t  offm     = bli_obj_row_off( obj ); \
+		dim_t  offn     = bli_obj_col_off( obj ); \
 		doff_t diag_off = bli_obj_diag_offset( obj ); \
 \
 		bli_obj_set_dims( n, m, obj ); \
