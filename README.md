@@ -52,7 +52,7 @@ automatically optimize performance across virtually all level-2 and level-3
 BLIS operations. In this way, the framework acts as a productivity multiplier.
 And since the optimized (non-portable) code is compartmentalized within these
 few kernels, instantiating a high-performance BLIS library on a new
-architecture is a relatively straightforward endeavour. 
+architecture is a relatively straightforward endeavor.
 
  * **Generalized matrix storage.** The BLIS framework exports interfaces that
 allow one to specify both the row stride and column stride of a matrix. This
@@ -84,7 +84,7 @@ infrastructure which encodes information about the logical thread topology and
 allows threads to query and communicate data amongst one another. BLIS also
 employs so-called "quadratic partitioning" when computing dimension sub-ranges
 for each thread, so that arbitrary diagonal offsets of structured matrices with
-unreferend regions are taken into account to achieve proper load balance.
+unreferenced regions are taken into account to achieve proper load balance.
 
  * **Ease of use.** The BLIS framework, and the library of routines it
 generates, are easy to use for end users, experts, and vendors alike. An
