@@ -12,9 +12,9 @@ but many others have contributed input and feedback, including:
   Vernon Austel               (IBM, T.J. Watson Research Center)
   Jed Brown                   (Argonne National Laboratory)
   John Gunnels                (IBM, T.J. Watson Research Center)
-  Jeff Hammond                (Argonne National Laboratory)
+  Jeff Hammond                (Intel)
   Francisco Igual             (Universidad Complutense de Madrid)
-  Lee Killough                (Appro International)
+  Lee Killough                (Cray)
   Mike Kistler                (IBM, Austin Research Laboratory)
   Bryan Marker                (The University of Texas at Austin)
   Devin Matthews              (The University of Texas at Austin)
@@ -33,6 +33,7 @@ BLIS to new architectures as proofs-of-concept:
   Tyler Smith                 (The University of Texas at Austin)
   Zhang Xianyi                (Chinese Academy of Sciences)
 
-BLIS's development was partially funded by grants from Microsoft and the
-National Science Foundation (NSF Awards CCF-0917167 and OCI-1148125).
+BLIS's development was partially funded by grants from Microsoft, Intel,
+Texas Instruments, AMD, and the National Science Foundation (NSF Awards
+CCF-0917167, ACI-1148125/1340293, and CCF-1320112).
 

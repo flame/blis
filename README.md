@@ -1,7 +1,7 @@
+![The BLIS cat is sleeping.](http://www.cs.utexas.edu/users/field/blis_cat.png)
+
 Introduction
 ------------
-
-Thank you for deciding to try out the BLIS framework!
 
 BLIS is a portable software framework for instantiating high-performance
 BLAS-like dense linear algebra libraries. The framework was designed to
