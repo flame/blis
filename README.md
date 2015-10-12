@@ -159,20 +159,20 @@ for a full list of optimized kernels.
 
 We also provide wikis on the following topics, which will likely be of interest
 to many users and developers:
- * **[Build system](https://github.com/flame/blis/wiki/BuildSystem).**
+ * [Build system](https://github.com/flame/blis/wiki/BuildSystem).
 This wiki provides step-by-step instructions for building a BLIS library.
 (Reminder: While BLIS supports configure-time hardware detection for certain
 architectures, you may need to manually specify a configuration to use.)
- * **[Configuration](https://github.com/flame/blis/wiki/ConfigurationHowTo).**
+ * [Configuration](https://github.com/flame/blis/wiki/ConfigurationHowTo).
 This wiki describes how to create a BLIS "configuration", which captures all of
 the details necessary to build BLIS for a specific hardware architecture.
 Configurations specify things like blocksizes, kernel names, and various
 optional configuration settings. 
- * **[Kernels](https://github.com/flame/blis/wiki/KernelsHowTo).**
+ * [Kernels](https://github.com/flame/blis/wiki/KernelsHowTo).
 This wiki describes each of the BLIS kernel operations in detail and should
 provide developers with most of the information needed to get started with
 writing and optimizing their own kernels. 
- * **[Test suite](https://github.com/flame/blis/wiki/Testsuite).**
+ * [Test suite](https://github.com/flame/blis/wiki/Testsuite).
 This wiki contains detailed instructions on running the BLIS test suite,
 located in the top-level directory testsuite. 
 
