@@ -125,7 +125,6 @@ extern "C" {
 #include "bli_machval.h"
 #include "bli_getopt.h"
 #include "bli_opid.h"
-#include "bli_flops.h"
 #include "bli_cntl.h"
 #include "bli_info.h"
 
