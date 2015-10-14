@@ -4,16 +4,24 @@
 exec_root="test"
 out_root="output"
 
+sys="blis"
 #sys="stampede"
-sys="wahlberg"
+#sys="wahlberg"
 
 # Bind threads to processors.
 #export OMP_PROC_BIND=true
 #export GOMP_CPU_AFFINITY="0 2 4 6 8 10 12 14 1 3 5 7 9 11 13 15"
-export GOMP_CPU_AFFINITY="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15"
+#export GOMP_CPU_AFFINITY="0 1 2 3 4 5 6 7"
+export GOMP_CPU_AFFINITY="0 1 2 3 4 5 6 7"
+#export GOMP_CPU_AFFINITY="0 2 4 6 1 3 5 7"
+#export GOMP_CPU_AFFINITY="0 4 1 5 2 6 3 7"
 
 # Modify LD_LIBRARY_PATH.
-if [ ${sys} = "stampede" ]; then
+if [ ${sys} = "blis" ]; then
+
+	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH"
+
+elif [ ${sys} = "stampede" ]; then
 
 	# A hack to use libiomp5 with gcc.
 	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/opt/apps/intel/13/composer_xe_2013.2.146/compiler/lib/intel64"
@@ -25,7 +33,15 @@ elif [ ${sys} = "wahlberg" ]; then
 fi
 
 # Threading scheme to use when multithreading
-if [ ${sys} = "stampede" ]; then
+if [ ${sys} = "blis" ]; then
+
+	jc_nt=1 # 5th loop
+	ic_nt=4 # 3rd loop
+	jr_nt=1 # 2nd loop
+	ir_nt=1 # 1st loop
+	nt=4
+
+elif [ ${sys} = "stampede" ]; then
 
 	jc_nt=2 # 5th loop
 	ic_nt=8 # 3rd loop
@@ -43,8 +59,8 @@ elif [ ${sys} = "wahlberg" ]; then
 fi
 
 # Threadedness to test.
-threads="st" # mt"
-threads_r="st" # mt"
+threads="st mt" # st mt"
+threads_r="st mt" # mt"
 
 # Datatypes to test.
 dts="z c"
@@ -56,7 +72,12 @@ test_ops="${l3_ops}"
 test_ops_r="${l3_ops}"
 
 # Complex domain implementations to test.
-if [ ${sys} = "stampede" ]; then
+if [ ${sys} = "blis" ]; then
+
+	#test_impls="openblas mkl 3mhw_blis 3m3_blis 3m2_blis 3m1_blis 4mhw_blis 4m1b_blis 4m1a_blis"
+	test_impls="openblas 3mhw_blis 3m3_blis 3m2_blis 3m1_blis 4mhw_blis 4m1b_blis 4m1a_blis"
+
+elif [ ${sys} = "stampede" ]; then
 
 	test_impls="openblas mkl asm_blis 3mhw_blis 3m3_blis 3m2_blis 3m1_blis 4mhw_blis 4m1b_blis 4m1a_blis"
 	#test_impls="openblas mkl asm_blis"
@@ -68,7 +89,8 @@ elif [ ${sys} = "wahlberg" ]; then
 fi
 
 # Real domain implementations to test.
-test_impls_r="openblas acml asm_blis"
+#test_impls_r="openblas mkl asm_blis"
+test_impls_r="openblas asm_blis"
 
 # First perform real test cases.
 for th in ${threads_r}; do
@@ -104,7 +126,6 @@ for th in ${threads_r}; do
 					export OMP_NUM_THREADS=1
 					#export GOMP_CPU_AFFINITY="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15"
 				fi
-
 
 				# Construct the name of the test executable.
 				exec_name="${exec_root}_${dt}${op}_${im}_${th}.x"

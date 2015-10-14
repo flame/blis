@@ -34,20 +34,38 @@
 
 #include "blis.h"
 
-static double bli_flops_executed = 0.0;
-
-void bli_flop_count_inc( double new_flops )
+void bli_trmm_prune_unref_mparts_m( obj_t* a,
+                                    obj_t* b,
+                                    obj_t* c )
 {
-	bli_flops_executed += new_flops;
+	// Prune any unreferenced part from the subpartition of A (that would
+	// be encountered from partitioning in the m dimension) and adjust the
+	// subpartition of C accordingly.
+	bli_prune_unref_mparts( a, BLIS_M, c, BLIS_M );
 }
 
-double bli_flop_count( void )
+void bli_trmm_prune_unref_mparts_n( obj_t* a,
+                                    obj_t* b,
+                                    obj_t* c )
 {
-	return bli_flops_executed;
+	// Prune any unreferenced part from the subpartition of B (that would
+	// be encountered from partitioning in the n dimension) and adjust the
+	// subpartition of C accordingly.
+	bli_prune_unref_mparts( b, BLIS_N, c, BLIS_N );
 }
 
-void bli_flop_count_reset( void )
+void bli_trmm_prune_unref_mparts_k( obj_t* a,
+                                    obj_t* b,
+                                    obj_t* c )
 {
-	bli_flops_executed = 0.0;
+	// Prune any unreferenced part from the subpartition of A (that would
+	// be encountered from partitioning in the k dimension) and adjust the
+	// subpartition of B accordingly.
+	bli_prune_unref_mparts( a, BLIS_N, b, BLIS_M );
+
+	// Prune any unreferenced part from the subpartition of B (that would
+	// be encountered from partitioning in the k dimension) and adjust the
+	// subpartition of A accordingly.
+	bli_prune_unref_mparts( b, BLIS_M, a, BLIS_N );
 }
 

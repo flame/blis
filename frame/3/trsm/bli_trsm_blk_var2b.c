@@ -50,7 +50,9 @@ void bli_trsm_blk_var2b( obj_t*  a,
 
 	dim_t i;
 	dim_t b_alg;
-	dim_t n_trans;
+
+	// Prune any zero region that exists along the partitioning dimension.
+	bli_trsm_prune_unref_mparts_n( a, b, c );
 
 	// Initialize pack objects for A that are passed into packm_init().
     if( thread_am_ochief( thread ) ) {
@@ -78,24 +80,21 @@ void bli_trsm_blk_var2b( obj_t*  a,
 	// Pack A (if instructed).
 	bli_packm_int( a, a_pack,
 	               cntl_sub_packm_a( cntl ),
-                   trmm_thread_sub_opackm( thread ) );
+                   trsm_thread_sub_opackm( thread ) );
 
-	// Query dimension in partitioning direction.
-	n_trans = bli_obj_width_after_trans( *b );
-    dim_t start, end;
+    dim_t my_start, my_end;
     num_t dt = bli_obj_execution_datatype( *a );
-    bli_get_range_r2l( thread, 0, n_trans,
-                       //bli_lcm( bli_info_get_default_nr( BLIS_TRSM, dt ),
-	                   //         bli_info_get_default_mr( BLIS_TRSM, dt ) ),
-	                   bli_lcm( bli_blksz_get_nr( dt, cntl_blocksize( cntl ) ),
-	                            bli_blksz_get_mr( dt, cntl_blocksize( cntl ) ) ),
-                       &start, &end );
+	dim_t bf = ( bli_obj_root_is_triangular( *b ) ?
+	             bli_info_get_default_mr( BLIS_TRSM, dt ) :
+	             bli_info_get_default_nr( BLIS_TRSM, dt ) );
+    bli_get_range_r2l( thread, b, bf,
+                       &my_start, &my_end );
 
 	// Partition along the n dimension.
-	for ( i = start; i < end; i += b_alg )
+	for ( i = my_start; i < my_end; i += b_alg )
 	{
 		// Determine the current algorithmic blocksize.
-		b_alg = bli_determine_blocksize_b( i, end, b,
+		b_alg = bli_determine_blocksize_b( i, my_end, b,
 		                                   cntl_blocksize( cntl ) );
 
 		// Acquire partitions for B1 and C1.

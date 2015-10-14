@@ -231,9 +231,9 @@ PDEF_ST  := -DP_BEGIN=40 \
             -DP_END=2000 \
             -DP_INC=40
 
-PDEF_MT  := -DP_BEGIN=400 \
-            -DP_END=8000 \
-            -DP_INC=400
+PDEF_MT  := -DP_BEGIN=80 \
+            -DP_END=4000 \
+            -DP_INC=80
 
 
 

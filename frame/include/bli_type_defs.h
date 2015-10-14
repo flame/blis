@@ -591,10 +591,8 @@ typedef struct obj_s
 	// Basic fields
 	struct obj_s* root;
 
-	dim_t         offm;
-	dim_t         offn;
-	dim_t         m;
-	dim_t         n;
+	dim_t         off[2];
+	dim_t         dim[2];
 	doff_t        diag_off;
 
 	objbits_t     info;
@@ -626,10 +624,10 @@ typedef struct obj_s
 { \
 	(b).root      = (a).root; \
 \
-	(b).offm      = (a).offm; \
-	(b).offn      = (a).offn; \
-	(b).m         = (a).m; \
-	(b).n         = (a).n; \
+	(b).off[0]    = (a).off[0]; \
+	(b).off[1]    = (a).off[1]; \
+	(b).dim[0]    = (a).dim[0]; \
+	(b).dim[1]    = (a).dim[1]; \
 	(b).diag_off  = (a).diag_off; \
 \
 	(b).info      = (a).info; \
@@ -669,8 +667,8 @@ typedef struct obj_s
 { \
 	(b).root      = (a).root; \
 \
-	(b).offm      = (a).offm; \
-	(b).offn      = (a).offn; \
+	(b).off[0]    = (a).off[0]; \
+	(b).off[1]    = (a).off[1]; \
 	/* Avoid copying m since it will be overwritten. */ \
 	/* Avoid copying n since it will be overwritten. */ \
 	(b).diag_off  = (a).diag_off; \
@@ -725,6 +723,15 @@ typedef enum
 	BLIS_SUBPART12,
 	BLIS_SUBPART22
 } subpart_t;
+
+
+// -- Matrix dimension type --
+
+typedef enum
+{
+	BLIS_M = 0,
+	BLIS_N = 1
+} mdim_t;
 
 
 // -- Machine parameter types --

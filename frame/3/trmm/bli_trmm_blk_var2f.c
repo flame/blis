@@ -50,8 +50,9 @@ void bli_trmm_blk_var2f( obj_t*  a,
 
 	dim_t i;
 	dim_t b_alg;
-	dim_t n_trans;
 
+	// Prune any zero region that exists along the partitioning dimension.
+	bli_trmm_prune_unref_mparts_n( a, b, c );
 
     if( thread_am_ochief( thread ) ) { 
         // Initialize object for packing A
@@ -79,18 +80,16 @@ void bli_trmm_blk_var2f( obj_t*  a,
 	               cntl_sub_packm_a( cntl ),
                    trmm_thread_sub_opackm( thread ) );
 
-	// Query dimension in partitioning direction.
-	n_trans = bli_obj_width_after_trans( *b );
-    dim_t start, end;
-    bli_get_range_weighted_l2r( thread, 0, n_trans, 
+    dim_t my_start, my_end;
+    bli_get_range_weighted_l2r( thread, b,
                                 bli_blksz_get_mult_for_obj( b, cntl_blocksize( cntl ) ),
-                                bli_obj_root_uplo( *b ), &start, &end );
+                                &my_start, &my_end );
 
 	// Partition along the n dimension.
-	for ( i = start; i < end; i += b_alg )
+	for ( i = my_start; i < my_end; i += b_alg )
 	{
 		// Determine the current algorithmic blocksize.
-		b_alg = bli_determine_blocksize_f( i, end, b,
+		b_alg = bli_determine_blocksize_f( i, my_end, b,
 		                                   cntl_blocksize( cntl ) );
 
 		// Acquire partitions for B1 and C1.

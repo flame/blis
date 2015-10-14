@@ -362,7 +362,7 @@ void libblis_test_build_filename_string( char*        prefix_str,
                                          char*        op_str,
                                          char*        funcname_str );
 
-void libblis_test_build_col_labels_string( test_op_t* op, char* l_str );
+void libblis_test_build_col_labels_string( test_params_t* params, test_op_t* op, char* l_str );
 
 void fill_string_with_n_spaces( char* str, unsigned int n_spaces );
 
