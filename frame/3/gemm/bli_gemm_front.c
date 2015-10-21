@@ -97,12 +97,5 @@ void bli_gemm_front( obj_t*  alpha,
 
     bli_gemm_thrinfo_free_paths( infos, n_threads );
 
-#ifdef BLIS_ENABLE_FLOP_COUNT
-	// Increment the global flop counter.
-	bli_flop_count_inc( 2.0 * bli_obj_length( *c )
-	                        * bli_obj_width( *c )
-	                        * bli_obj_width_after_trans( a_local )
-	                        * ( bli_obj_is_complex( *c ) ? 4.0 : 1.0 ) );
-#endif
 }
 

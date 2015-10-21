@@ -1,10 +1,58 @@
-commit 267253de8a7be546ce87626443ee38701c1d411f (HEAD -> master, tag: 0.1.7)
+commit 47caa33485b91ea6f2a5e386e61210c90c5f489f (HEAD -> master, tag: 0.1.8)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jul 29 13:31:09 2015 -0500
+
+    Version file update (0.1.8)
+
+commit ef0fbbbdb6148b96938733fce72cb4ed7dad685e (origin/master)
+Merge: fdfe14f d4b8913
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jul 9 13:54:54 2015 -0500
+
+    Merge branch 'master' of github.com:flame/blis
+
+commit fdfe14f1e17ba5a2f8dfa0bdb799c6b0e730211b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jul 9 13:52:39 2015 -0500
+
+    Added support for Intel Haswell/Broadwell.
+    
+    Details:
+    - Added sgemm and dgemm micro-kernels, which employ 256-bit AVX vectors
+      and FMA instructions. (Complex support is currently provided by default
+      induced method, 4m1a.)
+    - Added a 'haswell' configuration, which uses the aforementioned kernels.
+    - Inserted auto-detection support for haswell configuration in
+      build/auto-detect/cpuid_x86.c.
+    - Modified configure script to explicitly echo when automatic or manual
+      configuration is in progress.
+    - Changed beta scalar in test_gemm.c module of test suite to -1.0 to 0.9.
+
+commit d4b891369c1eb0879ade662ff896a5b9a7fca207
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jul 7 10:06:53 2015 -0500
+
+    Added 'carrizo' configuration.
+    
+    Details:
+    - Added a new configuration for AMD Excavator-based hardware also known
+      as Carrizo when referring to the entire APU. This configuration uses
+      the same micro-kernels as the piledriver, but with different
+      cache blocksizes.
+
+commit 0b7255a642d56723f02d7ca1f8f21809967b8515
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jun 19 12:01:50 2015 -0500
+
+    CHANGELOG update (0.1.7)
+
+commit 267253de8a7be546ce87626443ee38701c1d411f (tag: 0.1.7)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Fri Jun 19 12:01:49 2015 -0500
 
     Version file update (0.1.7)
 
-commit 7cd01b71b5e757a6774625b3c9f427f5e7664a76 (origin/master, origin/HEAD)
+commit 7cd01b71b5e757a6774625b3c9f427f5e7664a76
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Fri Jun 19 11:31:53 2015 -0500
 

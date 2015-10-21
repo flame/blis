@@ -592,6 +592,16 @@ void bli_acquire_mpart_tl2br( subpart_t  requested_part,
 	     requested_part != BLIS_SUBPART11 &&
 	     requested_part != BLIS_SUBPART22 )
 	{
+		// FGVZ: Fix me. This needs to be cleaned up. Either non-diagonal
+		// intersecting subpartitions should inherit their root object's
+		// uplo field, or it should not. Right now, they DO inherit the
+		// uplo (because they are not set to BLIS_DENSE when the diagonal
+		// does not intersect). But the whole point of being able to query
+		// the root object's properties (e.g. uplo field) was so that we
+		// COULD mark such subpartitions as dense, to make it easier for
+		// certain subproblems on those subpartitions--subproblems that
+		// are agnostic to where the subpartition came from.
+
 		// NOTE: This comment may be out-of-date since we now distinguish
 		// between uplo properties for the current and root objects...
 		// Note that we cannot mark the subpartition object as general/dense

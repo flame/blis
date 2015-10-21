@@ -157,16 +157,19 @@ void* bli_broadcast_structure( thread_comm_t* communicator, dim_t id, void* to_s
 }
 
 // Code for work assignments
-void bli_get_range( void* thr, dim_t all_start, dim_t all_end, dim_t block_factor, bool_t handle_edge_low, dim_t* start, dim_t* end )
+void bli_get_range( void* thr, dim_t n, dim_t bf, bool_t handle_edge_low, dim_t* start, dim_t* end )
 {
 	thrinfo_t* thread     = ( thrinfo_t* )thr;
 	dim_t      n_way      = thread->n_way;
 	dim_t      work_id    = thread->work_id;
 
+	dim_t      all_start  = 0;
+	dim_t      all_end    = n;
+
 	dim_t      size       = all_end - all_start;
 
-	dim_t      n_bf_whole = size / block_factor;
-	dim_t      n_bf_left  = size % block_factor;
+	dim_t      n_bf_whole = size / bf;
+	dim_t      n_bf_left  = size % bf;
 
 	dim_t      n_bf_lo    = n_bf_whole / n_way;
 	dim_t      n_bf_hi    = n_bf_whole / n_way;
@@ -217,8 +220,8 @@ void bli_get_range( void* thr, dim_t all_start, dim_t all_end, dim_t block_facto
 
 		// Compute the actual widths (in units of rows/columns) of
 		// individual threads in the low and high groups.
-		dim_t size_lo = n_bf_lo * block_factor;
-		dim_t size_hi = n_bf_hi * block_factor;
+		dim_t size_lo = n_bf_lo * bf;
+		dim_t size_hi = n_bf_hi * bf;
 
 		// Precompute the starting indices of the low and high groups.
 		dim_t lo_start = all_start;
@@ -257,8 +260,8 @@ void bli_get_range( void* thr, dim_t all_start, dim_t all_end, dim_t block_facto
 
 		// Compute the actual widths (in units of rows/columns) of
 		// individual threads in the low and high groups.
-		dim_t size_lo = n_bf_lo * block_factor;
-		dim_t size_hi = n_bf_hi * block_factor;
+		dim_t size_lo = n_bf_lo * bf;
+		dim_t size_hi = n_bf_hi * bf;
 
 		// Precompute the starting indices of the low and high groups.
 		dim_t lo_start = all_start;
@@ -288,188 +291,514 @@ void bli_get_range( void* thr, dim_t all_start, dim_t all_end, dim_t block_facto
 	}
 }
 
-void bli_get_range_l2r( void* thr, dim_t all_start, dim_t all_end, dim_t block_factor, dim_t* start, dim_t* end )
+siz_t bli_get_range_l2r( void* thr, obj_t* a, dim_t bf, dim_t* start, dim_t* end )
 {
-	bli_get_range( thr, all_start, all_end, block_factor,
+	dim_t m = bli_obj_length_after_trans( *a );
+	dim_t n = bli_obj_width_after_trans( *a );
+
+	bli_get_range( thr, n, bf,
 	               FALSE, start, end );
+
+	return m * ( *end - *start );
 }
 
-void bli_get_range_r2l( void* thr, dim_t all_start, dim_t all_end, dim_t block_factor, dim_t* start, dim_t* end )
+siz_t bli_get_range_r2l( void* thr, obj_t* a, dim_t bf, dim_t* start, dim_t* end )
 {
-	bli_get_range( thr, all_start, all_end, block_factor,
+	dim_t m = bli_obj_length_after_trans( *a );
+	dim_t n = bli_obj_width_after_trans( *a );
+
+	bli_get_range( thr, n, bf,
 	               TRUE, start, end );
+
+	return m * ( *end - *start );
 }
 
-void bli_get_range_t2b( void* thr, dim_t all_start, dim_t all_end, dim_t block_factor, dim_t* start, dim_t* end )
+siz_t bli_get_range_t2b( void* thr, obj_t* a, dim_t bf, dim_t* start, dim_t* end )
 {
-	bli_get_range( thr, all_start, all_end, block_factor,
+	dim_t m = bli_obj_length_after_trans( *a );
+	dim_t n = bli_obj_width_after_trans( *a );
+
+	bli_get_range( thr, m, bf,
 	               FALSE, start, end );
+
+	return n * ( *end - *start );
 }
 
-void bli_get_range_b2t( void* thr, dim_t all_start, dim_t all_end, dim_t block_factor, dim_t* start, dim_t* end )
+siz_t bli_get_range_b2t( void* thr, obj_t* a, dim_t bf, dim_t* start, dim_t* end )
 {
-	bli_get_range( thr, all_start, all_end, block_factor,
+	dim_t m = bli_obj_length_after_trans( *a );
+	dim_t n = bli_obj_width_after_trans( *a );
+
+	bli_get_range( thr, m, bf,
 	               TRUE, start, end );
+
+	return n * ( *end - *start );
 }
 
-void bli_get_range_weighted( void* thr, dim_t all_start, dim_t all_end, dim_t block_factor, uplo_t uplo, bool_t handle_edge_low, dim_t* start, dim_t* end )
+dim_t bli_get_range_width_l( doff_t diagoff_j,
+                             dim_t  m,
+                             dim_t  n_j,
+                             dim_t  j,
+                             dim_t  n_way,
+                             dim_t  bf,
+                             dim_t  bf_left,
+                             double area_per_thr,
+                             bool_t handle_edge_low )
+{
+	dim_t width;
+
+	// In this function, we assume that we are somewhere in the process of
+	// partitioning an m x n lower-stored region (with arbitrary diagonal
+	// offset) n_ways along the n dimension (into column panels). The value
+	// j identifies the left-to-right subpartition index (from 0 to n_way-1)
+	// of the subpartition whose width we are about to compute using the
+	// area per thread determined by the caller. n_j is the number of
+	// columns in the remaining region of the matrix being partitioned,
+	// and diagoff_j is that region's diagonal offset.
+
+	// If this is the last subpartition, the width is simply equal to n_j.
+	// Note that this statement handles cases where the "edge case" (if
+	// one exists) is assigned to the high end of the index range (ie:
+	// handle_edge_low == FALSE).
+	if ( j == n_way - 1 ) return n_j;
+
+	// At this point, we know there are at least two subpartitions left.
+	// We also know that IF the submatrix contains a completely dense
+	// rectangular submatrix, it will occur BEFORE the triangular (or
+	// trapezoidal) part.
+
+	// Here, we implement a somewhat minor load balancing optimization
+	// that ends up getting employed only for relatively small matrices.
+	// First, recall that all subpartition widths will be some multiple
+	// of the blocking factor bf, except perhaps either the first or last
+	// subpartition, which will receive the edge case, if it exists.
+	// Also recall that j represents the current thread (or thread group,
+	// or "caucus") for which we are computing a subpartition width.
+	// If n_j is sufficiently small that we can only allocate bf columns
+	// to each of the remaining threads, then we set the width to bf. We
+	// do not allow the subpartition width to be less than bf, so, under
+	// some conditions, if n_j is small enough, some of the reamining
+	// threads may not get any work. For the purposes of this lower bound
+	// on work (ie: width >= bf), we allow the edge case to count as a
+	// "full" set of bf columns.
+	{
+		dim_t n_j_bf = n_j / bf + ( bf_left > 0 ? 1 : 0 );
+
+		if ( n_j_bf <= n_way - j )
+		{
+			if ( j == 0 && handle_edge_low )
+				width = ( bf_left > 0 ? bf_left : bf );
+			else
+				width = bf;
+
+			// Make sure that the width does not exceed n_j. This would
+			// occur if and when n_j_bf < n_way - j; that is, when the
+			// matrix being partitioned is sufficiently small relative to
+			// n_way such that there is not even enough work for every
+			// (remaining) thread to get bf (or bf_left) columns. The
+			// net effect of this safeguard is that some threads may get
+			// assigned empty ranges (ie: no work), which of course must
+			// happen in some situations.
+			if ( width > n_j ) width = n_j;
+
+			return width;
+		}
+	}
+
+	// This block computes the width assuming that we are entirely within
+	// a dense rectangle that precedes the triangular (or trapezoidal)
+	// part.
+	{
+		// First compute the width of the current panel under the
+		// assumption that the diagonal offset would not intersect.
+		width = ( dim_t )bli_round( ( double )area_per_thr / ( double )m );
+
+		// Adjust the width, if necessary. Specifically, we may need
+		// to allocate the edge case to the first subpartition, if
+		// requested; otherwise, we just need to ensure that the
+		// subpartition is a multiple of the blocking factor.
+		if ( j == 0 && handle_edge_low )
+		{
+			if ( width % bf != bf_left ) width += bf_left - ( width % bf );
+		}
+		else // if interior case
+		{
+			// Round up to the next multiple of the blocking factor.
+			//if ( width % bf != 0       ) width += bf      - ( width % bf );
+			// Round to the nearest multiple of the blocking factor.
+			if ( width % bf != 0       ) width = bli_round_to_mult( width, bf );
+		}
+	}
+
+	// We need to recompute width if the panel, according to the width
+	// as currently computed, would intersect the diagonal.
+	if ( diagoff_j < width )
+	{
+		dim_t offm_inc, offn_inc;
+
+		// Prune away the unstored region above the diagonal, if it exists.
+		// Note that the entire region was pruned initially, so we know that
+		// we don't need to try to prune the right side. (Also, we discard
+		// the offset deltas since we don't need to actually index into the
+		// subpartition.)
+		bli_prune_unstored_region_top_l( diagoff_j, m, n_j, offm_inc );
+		//bli_prune_unstored_region_right_l( diagoff_j, m, n_j, offn_inc );
+
+		// We don't need offm_inc, offn_inc here. These statements should
+		// prevent compiler warnings.
+		( void )offm_inc;
+		( void )offn_inc;
+
+		// Solve a quadratic equation to find the width of the current (jth)
+		// subpartition given the m dimension, diagonal offset, and area.
+		// NOTE: We know that the +/- in the quadratic formula must be a +
+		// here because we know that the desired solution (the subpartition
+		// width) will be smaller than (m + diagoff), not larger. If you
+		// don't believe me, draw a picture!
+		const double a = -0.5;
+		const double b = ( double )m + ( double )diagoff_j + 0.5;
+		const double c = -0.5 * (   ( double )diagoff_j *
+		                          ( ( double )diagoff_j + 1.0 )
+		                        ) - area_per_thr;
+		const double x = ( -b + sqrt( b * b - 4.0 * a * c ) ) / ( 2.0 * a );
+
+		// Use the rounded solution as our width, but make sure it didn't
+		// round to zero.
+		width = ( dim_t )bli_round( x );
+		if ( width == 0 ) width = 1;
+
+		// Adjust the width, if necessary.
+		if ( j == 0 && handle_edge_low )
+		{
+			if ( width % bf != bf_left ) width += bf_left - ( width % bf );
+		}
+		else // if interior case
+		{
+			// Round up to the next multiple of the blocking factor.
+			//if ( width % bf != 0       ) width += bf      - ( width % bf );
+			// Round to the nearest multiple of the blocking factor.
+			if ( width % bf != 0       ) width = bli_round_to_mult( width, bf );
+		}
+	}
+
+	// Make sure that the width, after being adjusted, does not cause the
+	// subpartition to exceed n_j.
+	if ( width > n_j ) width = n_j;
+
+	return width;
+}
+
+siz_t bli_find_area_trap_l( dim_t m, dim_t n, doff_t diagoff )
+{
+	dim_t  offm_inc = 0;
+	dim_t  offn_inc = 0;
+	double tri_area;
+	double area;
+
+	// Prune away any rectangular region above where the diagonal
+	// intersects the left edge of the subpartition, if it exists.
+	bli_prune_unstored_region_top_l( diagoff, m, n, offm_inc );
+
+	// Prune away any rectangular region to the right of where the
+	// diagonal intersects the bottom edge of the subpartition, if
+	// it exists. (This shouldn't ever be needed, since the caller
+	// would presumably have already performed rightward pruning,
+	// but it's here just in case.)
+	bli_prune_unstored_region_right_l( diagoff, m, n, offn_inc );
+
+	( void )offm_inc;
+	( void )offn_inc;
+
+	// Compute the area of the empty triangle so we can subtract it
+	// from the area of the rectangle that bounds the subpartition.
+	if ( bli_intersects_diag_n( diagoff, m, n ) )
+	{
+		double tri_dim = ( double )( n - diagoff - 1 );
+		tri_area = tri_dim * ( tri_dim + 1.0 ) / 2.0;
+	}
+	else
+	{
+		// If the diagonal does not intersect the trapezoid, then
+		// we can compute the area as a simple rectangle.
+		tri_area = 0.0;
+	}
+
+	area = ( double )m * ( double )n - tri_area;
+
+	return ( siz_t )area;
+}
+
+siz_t bli_get_range_weighted( void*  thr,
+                              doff_t diagoff,
+                              uplo_t uplo,
+                              dim_t  m,
+                              dim_t  n,
+                              dim_t  bf,
+                              bool_t handle_edge_low,
+                              dim_t* j_start_thr,
+                              dim_t* j_end_thr )
 {
 	thrinfo_t* thread  = ( thrinfo_t* )thr;
-	dim_t      n_way   = thread->n_way;
-	dim_t      work_id = thread->work_id;
-	dim_t      size    = all_end - all_start;
-	dim_t      width;
-	dim_t      block_fac_leftover = size % block_factor;
-	dim_t      i;
-	double     num;
 
-	*start = 0;
-	*end   = all_end - all_start;
-	num    = size * size / ( double )n_way;
+	dim_t      n_way   = thread->n_way;
+	dim_t      my_id   = thread->work_id;
+
+	dim_t      bf_left = n % bf;
+
+	dim_t      j;
+
+	dim_t      off_j;
+	doff_t     diagoff_j;
+	dim_t      n_left;
+
+	dim_t      width_j;
+
+	dim_t      offm_inc, offn_inc;
+
+	double     tri_dim, tri_area;
+	double     area_total, area_per_thr;
+
+	siz_t      area = 0;
+
+	// In this function, we assume that the caller has already determined
+	// that (a) the diagonal intersects the submatrix, and (b) the submatrix
+	// is either lower- or upper-stored.
 
 	if ( bli_is_lower( uplo ) )
 	{
-		dim_t cur_caucus = n_way - 1;
-		dim_t len        = 0;
+		// Prune away the unstored region above the diagonal, if it exists,
+		// and then to the right of where the diagonal intersects the bottom,
+		// if it exists. (Also, we discard the offset deltas since we don't
+		// need to actually index into the subpartition.)
+		bli_prune_unstored_region_top_l( diagoff, m, n, offm_inc );
+		bli_prune_unstored_region_right_l( diagoff, m, n, offn_inc );
 
-		// This loop computes subpartitions backwards, from the high end
-		// of the index range to the low end. If the low end is assumed
-		// to be on the left and the high end the right, this assignment
-		// of widths is appropriate for n dimension partitioning of a
-		// lower triangular matrix.
-		for ( i = 0; TRUE; ++i )
+		// We don't need offm_inc, offn_inc here. These statements should
+		// prevent compiler warnings.
+		( void )offm_inc;
+		( void )offn_inc;
+
+		// Now that pruning has taken place, we know that diagoff >= 0.
+
+		// Compute the total area of the submatrix, accounting for the
+		// location of the diagonal, and divide it by the number of ways
+		// of parallelism.
+		tri_dim      = ( double )( n - diagoff - 1 );
+		tri_area     = tri_dim * ( tri_dim + 1.0 ) / 2.0;
+		area_total   = ( double )m * ( double )n - tri_area;
+		area_per_thr = area_total / ( double )n_way;
+
+		// Initialize some variables prior to the loop: the offset to the
+		// current subpartition, the remainder of the n dimension, and
+		// the diagonal offset of the current subpartition.
+		off_j     = 0;
+		diagoff_j = diagoff;
+		n_left    = n;
+
+		// Iterate over the subpartition indices corresponding to each
+		// thread/caucus participating in the n_way parallelism.
+		for ( j = 0; j < n_way; ++j )
 		{
-			width = ceil( sqrt( len*len + num ) ) - len;
+			// Compute the width of the jth subpartition, taking the
+			// current diagonal offset into account, if needed.
+			width_j = bli_get_range_width_l( diagoff_j, m, n_left,
+			                                 j, n_way,
+			                                 bf, bf_left,
+			                                 area_per_thr,
+			                                 handle_edge_low );
 
-			// If we need to allocate the edge case (assuming it exists)
-			// to the high thread subpartition, adjust width so that it
-			// contains the exact amount of leftover edge dimension so that
-			// all remaining subpartitions can be multiples of block_factor.
-			// If the edge case is to be allocated to the low subpartition,
-			// or if there is no edge case, it is implicitly allocated to
-			// the low subpartition by virtue of the fact that all other
-			// subpartitions already assigned will be multiples of
-			// block_factor.
-			if ( i == 0 && !handle_edge_low )
+			// If the current thread belongs to caucus j, this is his
+			// subpartition. So we compute the implied index range and
+			// end our search.
+			if ( j == my_id )
 			{
-				if ( width % block_factor != block_fac_leftover )
-					width += block_fac_leftover - ( width % block_factor );
-			}
-			else
-			{
-				if ( width % block_factor != 0 )
-					width += block_factor - ( width % block_factor );
+				*j_start_thr = off_j;
+				*j_end_thr   = off_j + width_j;
+
+				area = bli_find_area_trap_l( m, width_j, diagoff_j );
+
+				break;
 			}
 
-			if ( cur_caucus == work_id )
-			{
-				*start = bli_max( 0, *end - width ) + all_start;
-				*end   = *end + all_start;
-				return;
-			}
-			else
-			{
-				*end -= width;
-				len  += width;
-				cur_caucus--;
-			}
+			// Shift the current subpartition's starting and diagonal offsets,
+			// as well as the remainder of the n dimension, according to the
+			// computed width, and then iterate to the next subpartition.
+			off_j     += width_j;
+			diagoff_j -= width_j;
+			n_left    -= width_j;
 		}
 	}
 	else // if ( bli_is_upper( uplo ) )
 	{
-		// This loop computes subpartitions forwards, from the low end
-		// of the index range to the high end. If the low end is assumed
-		// to be on the left and the high end the right, this assignment
-		// of widths is appropriate for n dimension partitioning of an
-		// upper triangular matrix.
-		for ( i = 0; TRUE; ++i )
+		// Express the upper-stored case in terms of the lower-stored case.
+
+		// First, we convert the upper-stored trapezoid to an equivalent
+		// lower-stored trapezoid by rotating it 180 degrees.
+		bli_rotate180_trapezoid( diagoff, uplo );
+
+		// Now that the trapezoid is "flipped" in the n dimension, negate
+		// the bool that encodes whether to handle the edge case at the
+		// low (or high) end of the index range.
+		bli_toggle_bool( handle_edge_low );
+
+		// Compute the appropriate range for the rotated trapezoid.
+		area = bli_get_range_weighted( thr, diagoff, uplo, m, n, bf,
+		                               handle_edge_low,
+		                               j_start_thr, j_end_thr );
+
+		// Reverse the indexing basis for the subpartition ranges so that
+		// the indices, relative to left-to-right iteration through the
+		// unrotated upper-stored trapezoid, map to the correct columns
+		// (relative to the diagonal). This amounts to subtracting the
+		// range from n.
+		bli_reverse_index_direction( *j_start_thr, *j_end_thr, n );
+	}
+
+	return area;
+}
+
+siz_t bli_get_range_weighted_l2r( void* thr, obj_t* a, dim_t bf, dim_t* start, dim_t* end )
+{
+	siz_t area;
+
+	// This function assigns area-weighted ranges in the n dimension
+	// where the total range spans 0 to n-1 with 0 at the left end and
+	// n-1 at the right end.
+
+	if ( bli_obj_intersects_diag( *a ) &&
+	     bli_obj_is_upper_or_lower( *a ) )
+	{
+		doff_t diagoff = bli_obj_diag_offset( *a );
+		uplo_t uplo    = bli_obj_uplo( *a );
+		dim_t  m       = bli_obj_length( *a );
+		dim_t  n       = bli_obj_width( *a );
+
+		// Support implicit transposition.
+		if ( bli_obj_has_trans( *a ) )
 		{
-			width = ceil( sqrt( *start * *start + num ) ) - *start;
-
-			if ( i == 0 && handle_edge_low )
-			{
-				if ( width % block_factor != block_fac_leftover )
-					width += block_fac_leftover - ( width % block_factor );
-			}
-			else
-			{
-				if ( width % block_factor != 0 )
-					width += block_factor - ( width % block_factor );
-			}
-
-			if ( work_id == 0 )
-			{
-				*start = *start + all_start;
-				*end = bli_min( *start + width, all_end );
-				return;
-			}
-			else
-			{
-				*start = *start + width;
-				work_id--;
-			}
+			bli_reflect_about_diag( diagoff, uplo, m, n );
 		}
-	}
-}
 
-void bli_get_range_weighted_l2r( void* thr, dim_t all_start, dim_t all_end, dim_t block_factor, uplo_t uplo, dim_t* start, dim_t* end )
-{
-	if ( bli_is_upper_or_lower( uplo ) )
-	{
-		bli_get_range_weighted( thr, all_start, all_end, block_factor,
-		                        uplo, FALSE, start, end );
+		area = bli_get_range_weighted( thr, diagoff, uplo, m, n, bf,
+		                               FALSE, start, end );
 	}
 	else // if dense or zeros
 	{
-		bli_get_range_l2r( thr, all_start, all_end, block_factor,
-		                   start, end );
+		area = bli_get_range_l2r( thr, a, bf,
+		                          start, end );
 	}
+
+	return area;
 }
 
-void bli_get_range_weighted_r2l( void* thr, dim_t all_start, dim_t all_end, dim_t block_factor, uplo_t uplo, dim_t* start, dim_t* end )
+siz_t bli_get_range_weighted_r2l( void* thr, obj_t* a, dim_t bf, dim_t* start, dim_t* end )
 {
-	if ( bli_is_upper_or_lower( uplo ) )
+	siz_t area;
+
+	// This function assigns area-weighted ranges in the n dimension
+	// where the total range spans 0 to n-1 with 0 at the right end and
+	// n-1 at the left end.
+
+	if ( bli_obj_intersects_diag( *a ) &&
+	     bli_obj_is_upper_or_lower( *a ) )
 	{
-//printf( "bli_get_range_weighted_r2l: is upper or lower\n" );
-		bli_toggle_uplo( uplo );
-		bli_get_range_weighted( thr, all_start, all_end, block_factor,
-		                        uplo, TRUE, start, end );
+		doff_t diagoff = bli_obj_diag_offset( *a );
+		uplo_t uplo    = bli_obj_uplo( *a );
+		dim_t  m       = bli_obj_length( *a );
+		dim_t  n       = bli_obj_width( *a );
+
+		// Support implicit transposition.
+		if ( bli_obj_has_trans( *a ) )
+		{
+			bli_reflect_about_diag( diagoff, uplo, m, n );
+		}
+
+		bli_rotate180_trapezoid( diagoff, uplo );
+
+		area = bli_get_range_weighted( thr, diagoff, uplo, m, n, bf,
+		                               TRUE, start, end );
 	}
 	else // if dense or zeros
 	{
-//printf( "bli_get_range_weighted_r2l: is dense or zeros\n" );
-		bli_get_range_r2l( thr, all_start, all_end, block_factor,
-		                   start, end );
+		area = bli_get_range_r2l( thr, a, bf,
+		                          start, end );
 	}
+
+	return area;
 }
 
-void bli_get_range_weighted_t2b( void* thr, dim_t all_start, dim_t all_end, dim_t block_factor, uplo_t uplo, dim_t* start, dim_t* end )
+siz_t bli_get_range_weighted_t2b( void* thr, obj_t* a, dim_t bf, dim_t* start, dim_t* end )
 {
-	if ( bli_is_upper_or_lower( uplo ) )
+	siz_t area;
+
+	// This function assigns area-weighted ranges in the m dimension
+	// where the total range spans 0 to m-1 with 0 at the top end and
+	// m-1 at the bottom end.
+
+	if ( bli_obj_intersects_diag( *a ) &&
+	     bli_obj_is_upper_or_lower( *a ) )
 	{
-		bli_toggle_uplo( uplo );
-		bli_get_range_weighted( thr, all_start, all_end, block_factor,
-		                        uplo, FALSE, start, end );
+		doff_t diagoff = bli_obj_diag_offset( *a );
+		uplo_t uplo    = bli_obj_uplo( *a );
+		dim_t  m       = bli_obj_length( *a );
+		dim_t  n       = bli_obj_width( *a );
+
+		// Support implicit transposition.
+		if ( bli_obj_has_trans( *a ) )
+		{
+			bli_reflect_about_diag( diagoff, uplo, m, n );
+		}
+
+		bli_reflect_about_diag( diagoff, uplo, m, n );
+
+		area = bli_get_range_weighted( thr, diagoff, uplo, m, n, bf,
+		                               FALSE, start, end );
 	}
 	else // if dense or zeros
 	{
-		bli_get_range_t2b( thr, all_start, all_end, block_factor,
-		                   start, end );
+		area = bli_get_range_t2b( thr, a, bf,
+		                          start, end );
 	}
+
+	return area;
 }
 
-void bli_get_range_weighted_b2t( void* thr, dim_t all_start, dim_t all_end, dim_t block_factor, uplo_t uplo, dim_t* start, dim_t* end )
+siz_t bli_get_range_weighted_b2t( void* thr, obj_t* a, dim_t bf, dim_t* start, dim_t* end )
 {
-	if ( bli_is_upper_or_lower( uplo ) )
+	siz_t area;
+
+	// This function assigns area-weighted ranges in the m dimension
+	// where the total range spans 0 to m-1 with 0 at the bottom end and
+	// m-1 at the top end.
+
+	if ( bli_obj_intersects_diag( *a ) &&
+	     bli_obj_is_upper_or_lower( *a ) )
 	{
-		bli_get_range_weighted( thr, all_start, all_end, block_factor,
-		                        uplo, TRUE, start, end );
+		doff_t diagoff = bli_obj_diag_offset( *a );
+		uplo_t uplo    = bli_obj_uplo( *a );
+		dim_t  m       = bli_obj_length( *a );
+		dim_t  n       = bli_obj_width( *a );
+
+		// Support implicit transposition.
+		if ( bli_obj_has_trans( *a ) )
+		{
+			bli_reflect_about_diag( diagoff, uplo, m, n );
+		}
+
+		bli_reflect_about_diag( diagoff, uplo, m, n );
+
+		bli_rotate180_trapezoid( diagoff, uplo );
+
+		area = bli_get_range_weighted( thr, diagoff, uplo, m, n, bf,
+		                               TRUE, start, end );
 	}
 	else // if dense or zeros
 	{
-		bli_get_range_b2t( thr, all_start, all_end, block_factor,
-		                   start, end );
+		area = bli_get_range_b2t( thr, a, bf,
+		                          start, end );
 	}
+
+	return area;
 }
 
 

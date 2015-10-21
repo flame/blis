@@ -35,6 +35,7 @@
 #include "bli_herk_check.h"
 #include "bli_herk_front.h"
 #include "bli_herk_int.h"
+#include "bli_herk_prune.h"
 
 #include "bli_herk_blk_var1f.h"
 

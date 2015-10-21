@@ -172,6 +172,7 @@ int cpu_detect()
         case 12:
         case 15:
           //Haswell
+	case 13: //Broadwell
           if(support_avx()) {
             return CPUNAME_HASWELL;
           }else{
@@ -185,6 +186,9 @@ int cpu_detect()
         case 5:
         case 6:
           //Haswell
+	case 7:
+	case 15:
+	  //Broadwell
           if(support_avx()) {
             return CPUNAME_HASWELL;
           }else{
@@ -192,6 +196,17 @@ int cpu_detect()
           }
         }
         break;
+      case 5:
+	switch (model) {
+	case 6:
+	  //Broadwell
+          if(support_avx()) {
+            return CPUNAME_HASWELL;
+          }else{
+            return CPUNAME_REFERENCE; //OS doesn't support AVX
+          }
+	}
+	break;
       }
       break;
     }

@@ -42,15 +42,15 @@
 
 #define bli_is_aligned_to( p, size ) \
 \
-	( ( siz_t )(p) % ( siz_t )(size) == 0 )
+	( ( uintptr_t )(p) % ( uintptr_t )(size) == 0 )
 
 #define bli_is_unaligned_to( p, size ) \
 \
-	( ( siz_t )(p) % ( siz_t )(size) != 0 )
+	( ( uintptr_t )(p) % ( uintptr_t )(size) != 0 )
 
 #define bli_offset_from_alignment( p, size ) \
 \
-	( ( siz_t )(p) % ( siz_t )(size) )
+	( ( uintptr_t )(p) % ( uintptr_t )(size) )
 
 
 // datatype
@@ -144,7 +144,8 @@
 
 #define bli_is_upper_or_lower( uplo ) \
 \
-    ( bli_is_upper( uplo ) || bli_is_lower( uplo ) )
+    ( bli_is_upper( uplo ) || \
+	  bli_is_lower( uplo ) )
 
 #define bli_is_dense( uplo ) \
 \
@@ -468,6 +469,106 @@
 \
 	( ( bli_is_upper( uplo ) && bli_is_strictly_below_diag_n( diagoff, m, n ) ) || \
 	  ( bli_is_lower( uplo ) && bli_is_strictly_above_diag_n( diagoff, m, n ) ) )
+
+
+// pruning-related
+
+#define bli_prune_unstored_region_top_l( diagoff, m, n, offm_inc ) \
+{ \
+	offm_inc = 0; \
+\
+	/* If the diagonal intersects the left side of the matrix,
+	   ignore the area above that intersection. */ \
+	if ( diagoff < 0 ) \
+	{ \
+		m        = m    + diagoff; \
+		offm_inc =      - diagoff; \
+		diagoff  = 0; \
+	} \
+}
+
+#define bli_prune_unstored_region_right_l( diagoff, m, n, offn_inc ) \
+{ \
+	offn_inc = 0; \
+\
+	/* If the diagonal intersects the bottom side of the matrix,
+	   ignore the area to the right of that intersection. */ \
+	if ( n > diagoff + m ) \
+	{ \
+		n = diagoff + m; \
+	} \
+}
+
+#define bli_prune_unstored_region_left_u( diagoff, m, n, offn_inc ) \
+{ \
+	offn_inc = 0; \
+\
+	/* If the diagonal intersects the top side of the matrix,
+	   ignore the area to the left of that intersection. */ \
+	if ( diagoff > 0 ) \
+	{ \
+		n        = n    - diagoff; \
+		offn_inc =      + diagoff; \
+		diagoff  = 0; \
+	} \
+}
+
+#define bli_prune_unstored_region_bottom_u( diagoff, m, n, offm_inc ) \
+{ \
+	offm_inc = 0; \
+\
+	/* If the diagonal intersects the right side of the matrix,
+	   ignore the area below that intersection. */ \
+	if ( m > -diagoff + n ) \
+	{ \
+		m = -diagoff + n; \
+	} \
+}
+
+
+// thread range-related
+
+#define bli_rotate180_trapezoid( diagoff, uplo ) \
+{ \
+	diagoff = n - diagoff - m; \
+	bli_toggle_uplo( uplo ); \
+}
+
+#define bli_reverse_index_direction( start, end, n ) \
+{ \
+	dim_t start2 = n - start; \
+	dim_t end2   = n - end; \
+	start = end2; \
+	end   = start2; \
+}
+
+#define bli_reflect_about_diag( diagoff, uplo, m, n ) \
+{ \
+	bli_swap_dims( m, n ); \
+	bli_negate_diag_offset( diagoff ); \
+	bli_toggle_uplo( uplo ); \
+}
+
+
+// mdim_t-related
+
+#define bli_is_m_dim( mdim ) \
+\
+	( mdim == BLIS_M )
+
+#define bli_is_n_dim( mdim ) \
+\
+	( mdim == BLIS_N )
+
+#define bli_dim_toggled( mdim ) \
+\
+	( mdim == BLIS_M ? BLIS_N : BLIS_M )
+
+#define bli_toggle_dim( mdim ) \
+{ \
+	mdim = bli_dim_toggled( mdim ); \
+}
+
 
 
 // index-related

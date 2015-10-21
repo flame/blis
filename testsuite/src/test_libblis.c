@@ -1444,7 +1444,7 @@ void libblis_test_op_driver( test_params_t* params,
 			dt_char  = params->datatype_char[dt];
 
 			// Build a commented column label string.
-			libblis_test_build_col_labels_string( op, label_str );
+			libblis_test_build_col_labels_string( params, op, label_str );
 
 			// Output the column label string.
 			libblis_test_fprintf( stdout, "%s\n", label_str );
@@ -1707,7 +1707,7 @@ void libblis_test_build_dims_string( test_op_t* op,
 
 
 // % dtoper_params_storage                       m     n     k   gflops  resid       result
-void libblis_test_build_col_labels_string( test_op_t* op, char* l_str )
+void libblis_test_build_col_labels_string( test_params_t* params, test_op_t* op, char* l_str )
 {
 	unsigned int n_spaces;
 	char         blank_str[64];
@@ -1727,7 +1727,9 @@ void libblis_test_build_col_labels_string( test_op_t* op, char* l_str )
 		                                            "<dt><op>_<stor>         " );
 	}
 
-	n_spaces = 1;
+	if ( params->output_matlab_format ) n_spaces = 11;
+	else                                n_spaces = 1;
+
 	fill_string_with_n_spaces( blank_str, n_spaces );
 
 	sprintf( &l_str[strlen(l_str)], "%s", blank_str );

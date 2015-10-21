@@ -32,7 +32,7 @@
 
 */
 
-void   bli_flop_count_inc( double new_flops );
-double bli_flop_count( void );
-void   bli_flop_count_reset( void );
+void bli_trmm_prune_unref_mparts_m( obj_t* a, obj_t* b, obj_t* c );
+void bli_trmm_prune_unref_mparts_n( obj_t* a, obj_t* b, obj_t* c );
+void bli_trmm_prune_unref_mparts_k( obj_t* a, obj_t* b, obj_t* c );
 

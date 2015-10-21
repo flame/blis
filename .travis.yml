@@ -1,0 +1,34 @@
+language: c
+sudo: false
+
+compiler:
+  - gcc
+
+env:
+  - RUN_TEST=1 BUILD_CONFIG="auto"
+  - RUN_TEST=1 BUILD_CONFIG="reference"
+  - RUN_TEST=1 BUILD_CONFIG="dunnington"
+  - RUN_TEST=0 BUILD_CONFIG="sandybridge"
+  - RUN_TEST=0 BUILD_CONFIG="haswell"
+  - RUN_TEST=0 BUILD_CONFIG="bulldozer"
+  - RUN_TEST=0 BUILD_CONFIG="piledriver"
+  - RUN_TEST=0 BUILD_CONFIG="carrizo"
+
+install:
+- if [ "$CC" = "gcc" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - gcc-4.8
+    - g++-4.8
+    - clang
+
+
+
+script:
+  - ./configure $BUILD_CONFIG
+  - make CC=gcc-4.8
+  - if [ $RUN_TEST -eq 1 ]; then make BLIS_ENABLE_TEST_OUTPUT=yes test; fi
+  - if [ $RUN_TEST -eq 1 ]; then ./build/check-test.sh ./output.testsuite; fi

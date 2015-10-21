@@ -41,23 +41,18 @@ void bli_herk_blk_var2f( obj_t*  a,
                          herk_thrinfo_t* thread )
 {
     obj_t a_pack_s;
-    obj_t ah1_pack_s, c1S_pack_s;
+    obj_t ah1_pack_s, c1_pack_s;
 
-    obj_t ah1, c1, c1S;
-    obj_t aS_pack;
+    obj_t ah1, c1;
     obj_t* a_pack;
     obj_t* ah1_pack;
-    obj_t* c1S_pack;
+    obj_t* c1_pack;
 
 	dim_t i;
 	dim_t b_alg;
-	dim_t n_trans;
-	subpart_t stored_part;
 
-	// The upper and lower variants are identical, except for which
-	// merged subpartition is acquired in the loop body.
-	if ( bli_obj_is_lower( *c ) ) stored_part = BLIS_SUBPART1B;
-	else                          stored_part = BLIS_SUBPART1T;
+	// Prune any zero region that exists along the partitioning dimension.
+	bli_herk_prune_unref_mparts_n( a, ah, c );
 
     if( thread_am_ochief( thread ) ) {
         // Initialize object for packing A
@@ -75,30 +70,26 @@ void bli_herk_blk_var2f( obj_t*  a,
 	// Initialize pack objects for C and A' that are passed into packm_init().
     if( thread_am_ichief( thread ) ) {
         bli_obj_init_pack( &ah1_pack_s );
-        bli_obj_init_pack( &c1S_pack_s );
+        bli_obj_init_pack( &c1_pack_s );
     }
     ah1_pack = thread_ibroadcast( thread, &ah1_pack_s );
-    c1S_pack = thread_ibroadcast( thread, &c1S_pack_s );
+    c1_pack  = thread_ibroadcast( thread, &c1_pack_s );
 
 	// Pack A (if instructed).
 	bli_packm_int( a, a_pack,
 	               cntl_sub_packm_a( cntl ),
                    herk_thread_sub_opackm( thread ) );
 
-	// Query dimension in partitioning direction.
-	n_trans = bli_obj_width_after_trans( *c );
-    dim_t start, end;
-
-    // Needs to be replaced with a weighted range because triangle
-    bli_get_range_weighted_l2r( thread, 0, n_trans,
+    dim_t my_start, my_end;
+    bli_get_range_weighted_l2r( thread, c,
                                 bli_blksz_get_mult_for_obj( a, cntl_blocksize( cntl ) ),
-                                bli_obj_root_uplo( *c ), &start, &end );
+                                &my_start, &my_end );
 
 	// Partition along the n dimension.
-	for ( i = start; i < end; i += b_alg )
+	for ( i = my_start; i < my_end; i += b_alg )
 	{
 		// Determine the current algorithmic blocksize.
-		b_alg = bli_determine_blocksize_f( i, end, a,
+		b_alg = bli_determine_blocksize_f( i, my_end, a,
 		                                   cntl_blocksize( cntl ) );
 
 		// Acquire partitions for A1' and C1.
@@ -107,18 +98,11 @@ void bli_herk_blk_var2f( obj_t*  a,
 		bli_acquire_mpart_l2r( BLIS_SUBPART1,
 		                       i, b_alg, c, &c1 );
 
-		// Partition off the stored region of C1 and the corresponding region
-		// of A_pack.
-        bli_acquire_mpart_t2b( stored_part,
-                               i, b_alg, &c1, &c1S );
-        bli_acquire_mpart_t2b( stored_part,
-                               i, b_alg, a_pack, &aS_pack );
-
 		// Initialize objects for packing A1' and C1.
         if( thread_am_ichief( thread ) ) {
             bli_packm_init( &ah1, ah1_pack,
                             cntl_sub_packm_b( cntl ) );
-            bli_packm_init( &c1S, c1S_pack,
+            bli_packm_init( &c1, c1_pack,
                             cntl_sub_packm_c( cntl ) );
         }
         thread_ibarrier( thread ) ;
@@ -129,23 +113,23 @@ void bli_herk_blk_var2f( obj_t*  a,
                        herk_thread_sub_ipackm( thread ) );
 
 		// Pack C1 (if instructed).
-		bli_packm_int( &c1S, c1S_pack,
+		bli_packm_int( &c1, c1_pack,
 		               cntl_sub_packm_c( cntl ),
                        herk_thread_sub_ipackm( thread ) ) ;
 
 		// Perform herk subproblem.
 		bli_herk_int( &BLIS_ONE,
-		              &aS_pack,
+		              a_pack,
 		              ah1_pack,
 		              &BLIS_ONE,
-		              c1S_pack,
+		              c1_pack,
 		              cntl_sub_gemm( cntl ),
                       herk_thread_sub_herk( thread ) );
 
         thread_ibarrier( thread );
 
 		// Unpack C1 (if C1 was packed).
-        bli_unpackm_int( c1S_pack, &c1S,
+        bli_unpackm_int( c1_pack, &c1,
                          cntl_sub_unpackm_c( cntl ),
                          herk_thread_sub_ipackm( thread ) );
 	}
@@ -157,7 +141,7 @@ void bli_herk_blk_var2f( obj_t*  a,
         bli_packm_release( a_pack, cntl_sub_packm_a( cntl ) );
     if( thread_am_ichief( thread ) ) {
         bli_packm_release( ah1_pack, cntl_sub_packm_b( cntl ) );
-        bli_packm_release( c1S_pack, cntl_sub_packm_c( cntl ) );
+        bli_packm_release( c1_pack, cntl_sub_packm_c( cntl ) );
     }
 }
 

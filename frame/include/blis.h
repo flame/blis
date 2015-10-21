@@ -113,6 +113,7 @@ extern "C" {
 #include "bli_pool.h"
 #include "bli_mem.h"
 #include "bli_part.h"
+#include "bli_prune.h"
 #include "bli_query.h"
 #include "bli_blocksize.h"
 #include "bli_func.h"
@@ -124,7 +125,6 @@ extern "C" {
 #include "bli_machval.h"
 #include "bli_getopt.h"
 #include "bli_opid.h"
-#include "bli_flops.h"
 #include "bli_cntl.h"
 #include "bli_info.h"
 

@@ -50,8 +50,9 @@ void bli_trmm_blk_var1f( obj_t*  a,
 
 	dim_t i;
 	dim_t b_alg;
-	dim_t m_trans;
-	dim_t offA;
+
+	// Prune any zero region that exists along the partitioning dimension.
+	bli_trmm_prune_unref_mparts_m( a, b, c );
 
     if( thread_am_ochief( thread ) ) { 
         // Initialize object for packing B.
@@ -81,28 +82,28 @@ void bli_trmm_blk_var1f( obj_t*  a,
                    trmm_thread_sub_opackm( thread ) );
 
 	// Set the default length of and offset to the non-zero part of A.
-	m_trans = bli_obj_length_after_trans( *a );
-	offA    = 0;
+	//m_trans = bli_obj_length_after_trans( *a );
+	//offA    = 0;
 
 	// If A is lower triangular, we have to adjust where the non-zero part of
 	// A begins. If A is upper triangular, we have to adjust the length of
 	// the non-zero part. If A is general/dense, then we keep the defaults.
-	if      ( bli_obj_is_lower( *a ) )
-		offA    = bli_abs( bli_obj_diag_offset_after_trans( *a ) );
-	else if ( bli_obj_is_upper( *a ) )
-		m_trans = bli_abs( bli_obj_diag_offset_after_trans( *a ) ) +
-		          bli_obj_width_after_trans( *a );
+	//if      ( bli_obj_is_lower( *a ) )
+	//	offA    = bli_abs( bli_obj_diag_offset_after_trans( *a ) );
+	//else if ( bli_obj_is_upper( *a ) )
+	//	m_trans = bli_abs( bli_obj_diag_offset_after_trans( *a ) ) +
+	//	          bli_obj_width_after_trans( *a );
 
-    dim_t start, end;
-    bli_get_range_weighted_t2b( thread, offA, m_trans, 
+    dim_t my_start, my_end;
+    bli_get_range_weighted_t2b( thread, a, 
                                 bli_blksz_get_mult_for_obj( a, cntl_blocksize( cntl ) ),
-                                bli_obj_root_uplo( *a ), &start, &end );
+                                &my_start, &my_end );
 
 	// Partition along the m dimension.
-	for ( i = start; i < end; i += b_alg )
+	for ( i = my_start; i < my_end; i += b_alg )
 	{
 		// Determine the current algorithmic blocksize.
-		b_alg = bli_determine_blocksize_f( i, end, a,
+		b_alg = bli_determine_blocksize_f( i, my_end, a,
 		                                   cntl_blocksize( cntl ) );
 
 		// Acquire partitions for A1 and C1.

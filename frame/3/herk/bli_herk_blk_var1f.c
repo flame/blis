@@ -50,7 +50,9 @@ void bli_herk_blk_var1f( obj_t*  a,
 
 	dim_t i;
 	dim_t b_alg;
-	dim_t m_trans;
+
+	// Prune any zero region that exists along the partitioning dimension.
+	bli_herk_prune_unref_mparts_m( a, ah, c );
 
     if( thread_am_ochief( thread ) ) {
         // Initialize object for packing A'.
@@ -79,18 +81,16 @@ void bli_herk_blk_var1f( obj_t*  a,
 	               cntl_sub_packm_b( cntl ),
                    herk_thread_sub_opackm( thread ) );
 
-	// Query dimension in partitioning direction.
-	m_trans = bli_obj_length_after_trans( *c );
-    dim_t start, end;
-    bli_get_range_weighted_t2b( thread, 0, m_trans,
+    dim_t my_start, my_end;
+    bli_get_range_weighted_t2b( thread, c,
                                 bli_blksz_get_mult_for_obj( a, cntl_blocksize( cntl ) ),
-                                bli_obj_root_uplo( *c ), &start, &end );
+                                &my_start, &my_end );
 
 	// Partition along the m dimension.
-	for ( i = start; i < end; i += b_alg )
+	for ( i = my_start; i < my_end; i += b_alg )
 	{
 		// Determine the current algorithmic blocksize.
-		b_alg = bli_determine_blocksize_f( i, end, a,
+		b_alg = bli_determine_blocksize_f( i, my_end, a,
 		                                   cntl_blocksize( cntl ) );
 
 		// Acquire partitions for A1 and C1.

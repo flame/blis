@@ -52,6 +52,9 @@ void bli_trsm_blk_var3b( obj_t*  a,
 	dim_t  b_alg;
 	dim_t  k_trans;
 
+	// Prune any zero region that exists along the partitioning dimension.
+	bli_trsm_prune_unref_mparts_k( a, b, c );
+
 	// Initialize pack objects for C that are passed into packm_init().
     if( thread_am_ochief( thread ) ) {
 	    bli_obj_init_pack( &c_pack_s );
