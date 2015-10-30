@@ -210,6 +210,7 @@ void PASTEMAC(ch,varname)( \
 	inc_t           ss_b_num; \
 	inc_t           ss_b_den; \
 	inc_t           ps_b_cur; \
+	inc_t           is_b_cur; \
 	auxinfo_t       aux; \
 \
 	/*
@@ -342,6 +343,9 @@ void PASTEMAC(ch,varname)( \
 	istep_a = PACKMR * k_full; \
 	istep_b = PACKNR * k; \
 \
+	if ( bli_is_odd( istep_a ) ) istep_a += 1; \
+	if ( bli_is_odd( istep_b ) ) istep_b += 1; \
+\
 	/* Save the pack schemas of A and B to the auxinfo_t object.
 	   NOTE: We swap the values for A and B since the triangular
 	   "A" matrix is actually contained within B. */ \
@@ -392,18 +396,19 @@ void PASTEMAC(ch,varname)( \
 			/* Compute the addresses of the panel B10 and the triangular
 			   block B11. */ \
 			b01       = b1; \
-			b11       = b1 + ( k_b01 * PACKNR ) / off_scl; \
+			/* b11 = b1 + ( k_b01 * PACKNR ) / off_scl; */ \
+			bli_ptr_add( b11, b1, k_b01 * PACKNR, off_scl ); \
 \
 			/* Compute the panel stride for the current micro-panel. */ \
-			ps_b_cur  = k_b0111 * PACKNR; \
-			ps_b_cur += ( bli_is_odd( ps_b_cur ) ? 1 : 0 ); \
-			ps_b_cur  = ( ps_b_cur * ss_b_num ) / ss_b_den; \
+			is_b_cur  = k_b0111 * PACKNR; \
+			is_b_cur += ( bli_is_odd( is_b_cur ) ? 1 : 0 ); \
+			ps_b_cur  = ( is_b_cur * ss_b_num ) / ss_b_den; \
 \
 			/* Save the 4m1/3m1 imaginary stride of B to the auxinfo_t
 			   object.
 			   NOTE: We swap the values for A and B since the triangular
 			   "A" matrix is actually contained within B. */ \
-			bli_auxinfo_set_is_a( PACKNR * k_b0111, aux ); \
+			bli_auxinfo_set_is_a( is_b_cur, aux ); \
 \
 			/* Loop over the m dimension (MR rows at a time). */ \
 			for ( i = 0; i < m_iter; ++i ) \

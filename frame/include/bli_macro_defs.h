@@ -49,6 +49,17 @@
 #endif
 
 
+// -- Define typeof() operator if using non-GNU compiler --
+
+#ifndef __GNUC__
+  #define typeof __typeof__
+#else
+  #ifndef typeof
+  #define typeof __typeof__
+  #endif
+#endif
+
+
 // -- Boolean values --
 
 #ifndef TRUE

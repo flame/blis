@@ -210,6 +210,7 @@ void PASTEMAC(ch,varname)( \
 	inc_t           ss_a_num; \
 	inc_t           ss_a_den; \
 	inc_t           ps_a_cur; \
+	inc_t           is_a_cur; \
 	auxinfo_t       aux; \
 \
 	/*
@@ -326,6 +327,9 @@ void PASTEMAC(ch,varname)( \
 	istep_a = PACKMR * k; \
 	istep_b = PACKNR * k_full; \
 \
+	if ( bli_is_odd( istep_a ) ) istep_a += 1; \
+	if ( bli_is_odd( istep_b ) ) istep_b += 1; \
+\
 	/* Save the pack schemas of A and B to the auxinfo_t object. */ \
 	bli_auxinfo_set_schema_a( schema_a, aux ); \
 	bli_auxinfo_set_schema_b( schema_b, aux ); \
@@ -382,14 +386,15 @@ void PASTEMAC(ch,varname)( \
 \
 				/* Compute the panel stride for the current diagonal-
 				   intersecting micro-panel. */ \
-				ps_a_cur  = k_a1011 * PACKMR; \
-				ps_a_cur += ( bli_is_odd( ps_a_cur ) ? 1 : 0 ); \
-				ps_a_cur  = ( ps_a_cur * ss_a_num ) / ss_a_den; \
+				is_a_cur  = k_a1011 * PACKMR; \
+				is_a_cur += ( bli_is_odd( is_a_cur ) ? 1 : 0 ); \
+				ps_a_cur  = ( is_a_cur * ss_a_num ) / ss_a_den; \
 \
 				/* Compute the addresses of the panel A10 and the triangular
 				   block A11. */ \
 				a10 = a1; \
-				a11 = a1 + ( k_a10 * PACKMR ) / off_scl; \
+				/* a11 = a1 + ( k_a10 * PACKMR ) / off_scl; */ \
+				bli_ptr_add( a11, a1, k_a10 * PACKMR, off_scl ); \
 \
 				/* Compute the addresses of the panel B01 and the block
 				   B11. */ \
@@ -414,7 +419,7 @@ void PASTEMAC(ch,varname)( \
 \
 				/* Save the 4m1/3m1 imaginary stride of A to the auxinfo_t
 				   object. */ \
-				bli_auxinfo_set_is_a( PACKMR * k_a1011, aux ); \
+				bli_auxinfo_set_is_a( is_a_cur, aux ); \
 \
 				/* Handle interior and edge cases separately. */ \
 				if ( m_cur == MR && n_cur == NR ) \
@@ -513,6 +518,44 @@ void PASTEMAC(ch,varname)( \
 		b1 += cstep_b; \
 		c1 += cstep_c; \
 	} \
+\
+/*
+if ( bli_is_4mi_packed( schema_a ) ){ \
+PASTEMAC(d,fprintm)( stdout, "trsm4m1_ll_ker_var2: b_r before", k, n, \
+                     ( double* )b,    rs_b, 1, "%4.1f", "" ); \
+PASTEMAC(d,fprintm)( stdout, "trsm4m1_ll_ker_var2: b_i before", k, n, \
+                     ( double* )b+72, rs_b, 1, "%4.1f", "" ); \
+}else{ \
+PASTEMAC(d,fprintm)( stdout, "trsmnat_ll_ker_var2: b_r before", k, n, \
+                     ( double* )b,   2*rs_b, 2, "%4.1f", "" ); \
+PASTEMAC(d,fprintm)( stdout, "trsmnat_ll_ker_var2: b_i before", k, n, \
+                     ( double* )b+1, 2*rs_b, 2, "%4.1f", "" ); \
+} \
+*/ \
+\
+/*
+PASTEMAC(d,fprintm)( stdout, "trsm_ll_ker_var2: a11p_r computed", MR, MR, \
+                     ( double* )a11, 1, PACKMR, "%4.1f", "" ); \
+*/ \
+\
+/*
+if ( bli_is_4mi_packed( schema_a ) ){ \
+PASTEMAC(d,fprintm)( stdout, "trsm4m1_ll_ker_var2: b_r after", k, n, \
+                     ( double* )b,    rs_b, 1, "%4.1f", "" ); \
+PASTEMAC(d,fprintm)( stdout, "trsm4m1_ll_ker_var2: b_i after", k, n, \
+                     ( double* )b+72, rs_b, 1, "%4.1f", "" ); \
+}else{ \
+PASTEMAC(d,fprintm)( stdout, "trsmnat_ll_ker_var2: b_r after", k, n, \
+                     ( double* )b,   2*rs_b, 2, "%4.1f", "" ); \
+PASTEMAC(d,fprintm)( stdout, "trsmnat_ll_ker_var2: b_i after", k, n, \
+                     ( double* )b+1, 2*rs_b, 2, "%4.1f", "" ); \
+} \
+
+PASTEMAC(d,fprintm)( stdout, "trsm_ll_ker_var2: b_r", m, n, \
+                     ( double* )c,    1, cs_c, "%4.1f", "" ); \
+PASTEMAC(d,fprintm)( stdout, "trsm_ll_ker_var2: b_i", m, n, \
+                     ( double* )c + 8*9, 1, cs_c, "%4.1f", "" ); \
+*/ \
 \
 /*
 PASTEMAC(ch,fprintm)( stdout, "trsm_ll_ker_var2: a1 (diag)", MR, k_a1011, a1, 1, MR, "%5.2f", "" ); \

@@ -57,7 +57,6 @@ void PASTEMAC(ch,varname)( \
 { \
 	dim_t  panel_dim; \
 	dim_t  panel_len; \
-	dim_t  panel_len_max; \
 	inc_t  incc, ldc; \
 	inc_t  ldp; \
 \
@@ -69,7 +68,6 @@ void PASTEMAC(ch,varname)( \
 		/* Prepare to pack to row-stored column panel. */ \
 		panel_dim     = n_panel; \
 		panel_len     = m_panel; \
-		panel_len_max = m_panel_max; \
 		incc          = cs_c; \
 		ldc           = rs_c; \
 		ldp           = rs_p; \
@@ -79,7 +77,6 @@ void PASTEMAC(ch,varname)( \
 		/* Prepare to pack to column-stored row panel. */ \
 		panel_dim     = m_panel; \
 		panel_len     = n_panel; \
-		panel_len_max = n_panel_max; \
 		incc          = rs_c; \
 		ldc           = cs_c; \
 		ldp           = cs_p; \
@@ -122,11 +119,6 @@ void PASTEMAC(ch,varname)( \
 	} \
 	else /* ( bli_is_triangular( strucc ) ) */ \
 	{ \
-		/* We need to re-compute the imaginary stride as a function of
-		   panel_len_max since triangular packed matrices have panels
-		   of varying lengths. */ \
-		is_p = ldp * panel_len_max; \
-\
 		/* Call a helper function for micro-panels of triangular
 		   matrices. */ \
 		PASTEMAC(ch,packm_tri_cxk_4mi)( strucc, \

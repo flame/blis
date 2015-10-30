@@ -96,6 +96,9 @@ void bli_trmm_front( side_t  side,
 	// contiguous columns, or if C is stored by columns and the micro-kernel
 	// prefers contiguous rows, transpose the entire operation to allow the
 	// micro-kernel to access elements of C in its preferred manner.
+	// NOTE: We disable the optimization for 1x1 matrices since the concept
+	// of row- vs. column storage breaks down.
+	if ( !bli_obj_is_1x1( c_local ) )
 	if (
 	     ( bli_obj_is_row_stored( c_local ) &&
 	       bli_func_prefers_contig_cols( bli_obj_datatype( c_local ),

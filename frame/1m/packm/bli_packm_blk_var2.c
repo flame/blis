@@ -256,6 +256,7 @@ void PASTEMAC(ch,varname)( \
 	conj_t          conjc; \
 	bool_t          row_stored; \
 	bool_t          col_stored; \
+	inc_t           is_p_use; \
 	dim_t           ss_num; \
 	dim_t           ss_den; \
 \
@@ -428,6 +429,14 @@ PASTEMAC(ch,fprintm)( stdout, "packm_var2: a", m, n, \
 			c_use = c_begin + (panel_off_i  )*ldc; \
 			p_use = p_begin; \
 \
+			/* We need to re-compute the imaginary stride as a function of
+			   panel_len_max_i since triangular packed matrices have panels
+			   of varying lengths. */ \
+			is_p_use  = ldp * panel_len_max_i; \
+\
+			/* We nudge the imaginary stride up by one if it is odd. */ \
+			is_p_use += ( bli_is_odd( is_p_use ) ? 1 : 0 ); \
+\
 			if( packm_thread_my_iter( it, thread ) ) \
 			{ \
 				packm_ker_cast( strucc, \
@@ -444,18 +453,17 @@ PASTEMAC(ch,fprintm)( stdout, "packm_var2: a", m, n, \
 				                kappa_cast, \
 				                c_use, rs_c, cs_c, \
 				                p_use, rs_p, cs_p, \
-			                           is_p ); \
+			                           is_p_use ); \
 			} \
 \
 			/* NOTE: This value is usually LESS than ps_p because triangular
 			   matrices usually have several micro-panels that are shorter
 			   than a "full" micro-panel. */ \
+/*
 			p_inc = ldp * panel_len_max_i; \
-\
-			/* We nudge the panel increment up by one if it is odd. */ \
 			p_inc += ( bli_is_odd( p_inc ) ? 1 : 0 ); \
-\
-			p_inc = ( p_inc * ss_num ) / ss_den; \
+*/ \
+			p_inc = ( is_p_use * ss_num ) / ss_den; \
 		} \
 		else if ( bli_is_herm_or_symm( strucc ) ) \
 		{ \
@@ -468,6 +476,8 @@ PASTEMAC(ch,fprintm)( stdout, "packm_var2: a", m, n, \
 \
 			panel_len_i     = panel_len_full; \
 			panel_len_max_i = panel_len_max; \
+\
+			is_p_use = is_p; \
 \
 			if( packm_thread_my_iter( it, thread ) ) \
 			{ \
@@ -485,7 +495,7 @@ PASTEMAC(ch,fprintm)( stdout, "packm_var2: a", m, n, \
 				                kappa_cast, \
 				                c_use, rs_c, cs_c, \
 				                p_use, rs_p, cs_p, \
-			                           is_p ); \
+			                           is_p_use ); \
 			} \
 \
 			/* NOTE: This value is equivalent to ps_p. */ \
@@ -503,6 +513,8 @@ PASTEMAC(ch,fprintm)( stdout, "packm_var2: a", m, n, \
 			panel_len_i     = panel_len_full; \
 			panel_len_max_i = panel_len_max; \
 \
+			is_p_use = is_p; \
+\
 			if( packm_thread_my_iter( it, thread ) ) \
 			{ \
 				packm_ker_cast( BLIS_GENERAL, \
@@ -519,7 +531,7 @@ PASTEMAC(ch,fprintm)( stdout, "packm_var2: a", m, n, \
 				                kappa_cast, \
 				                c_use, rs_c, cs_c, \
 				                p_use, rs_p, cs_p, \
-			                           is_p ); \
+			                           is_p_use ); \
 			} \
 \
 			/* NOTE: This value is equivalent to ps_p. */ \
@@ -527,20 +539,32 @@ PASTEMAC(ch,fprintm)( stdout, "packm_var2: a", m, n, \
 		} \
 \
 /*
-		if ( bli_is_ro_packed( schema ) ) { \
+		if ( bli_is_4mi_packed( schema ) ) { \
+		printf( "packm_var2: is_p_use = %lu\n", is_p_use ); \
 		if ( col_stored ) { \
+		if ( 0 ) \
 		PASTEMAC(chr,fprintm)( stdout, "packm_var2: a_r", *m_panel_use, *n_panel_use, \
 		                       ( ctype_r* )c_use,         2*rs_c, 2*cs_c, "%4.1f", "" ); \
 		PASTEMAC(chr,fprintm)( stdout, "packm_var2: ap_r", *m_panel_max, *n_panel_max, \
-		                       ( ctype_r* )p_use,         rs_p, cs_p, "%4.1f", "" ); \
+		                       ( ctype_r* )p_use,            rs_p, cs_p, "%4.1f", "" ); \
+		PASTEMAC(chr,fprintm)( stdout, "packm_var2: ap_i", *m_panel_max, *n_panel_max, \
+		                       ( ctype_r* )p_use + is_p_use, rs_p, cs_p, "%4.1f", "" ); \
 		} \
-		if ( row_stored && *n_panel_use == 3 ) { \
+		if ( row_stored ) { \
+		if ( 0 ) \
 		PASTEMAC(chr,fprintm)( stdout, "packm_var2: b_r", *m_panel_use, *n_panel_use, \
 		                       ( ctype_r* )c_use,         2*rs_c, 2*cs_c, "%4.1f", "" ); \
 		PASTEMAC(chr,fprintm)( stdout, "packm_var2: bp_r", *m_panel_max, *n_panel_max, \
-		                       ( ctype_r* )p_use,         rs_p, cs_p, "%4.1f", "" ); \
+		                       ( ctype_r* )p_use,            rs_p, cs_p, "%4.1f", "" ); \
+		PASTEMAC(chr,fprintm)( stdout, "packm_var2: bp_i", *m_panel_max, *n_panel_max, \
+		                       ( ctype_r* )p_use + is_p_use, rs_p, cs_p, "%4.1f", "" ); \
 		} \
 		} \
+*/ \
+/*
+*/ \
+\
+/*
 */ \
 /*
 		PASTEMAC(chr,fprintm)( stdout, "packm_var2: bp_rpi", *m_panel_max, *n_panel_max, \

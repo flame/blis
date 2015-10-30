@@ -69,6 +69,13 @@ void PASTEMAC(ch,varname)( \
 	                      b11, \
 	                      c11, rs_c, cs_c, \
 	                      data ); \
+\
+/*
+PASTEMAC(d,fprintm)( stdout, "gemmtrsm_l_ukr: b0111p_r after", k+3, 8, \
+                     ( double* )b01,     2*PASTEMAC(ch,packnr), 2, "%4.1f", "" ); \
+PASTEMAC(d,fprintm)( stdout, "gemmtrsm_l_ukr: b0111p_i after", k+3, 8, \
+                     ( double* )b01 + 1, 2*PASTEMAC(ch,packnr), 2, "%4.1f", "" ); \
+*/ \
 }
 
 INSERT_GENTFUNC_BASIC2( gemmtrsm_l_ukr_ref, GEMM_UKERNEL, TRSM_L_UKERNEL )
