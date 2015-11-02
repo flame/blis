@@ -449,8 +449,9 @@ dim_t bli_get_range_width_l( doff_t diagoff_j,
 		( void )offm_inc;
 		( void )offn_inc;
 
-		// Solve a quadratic equation to find the width of the current (jth)
-		// subpartition given the m dimension, diagonal offset, and area.
+		// Prepare to solve a quadratic equation to find the width of the
+		// current (jth) subpartition given the m dimension, diagonal offset,
+		// and area.
 		// NOTE: We know that the +/- in the quadratic formula must be a +
 		// here because we know that the desired solution (the subpartition
 		// width) will be smaller than (m + diagoff), not larger. If you
@@ -460,12 +461,18 @@ dim_t bli_get_range_width_l( doff_t diagoff_j,
 		const double c = -0.5 * (   ( double )diagoff_j *
 		                          ( ( double )diagoff_j + 1.0 )
 		                        ) - area_per_thr;
-		const double x = ( -b + sqrt( b * b - 4.0 * a * c ) ) / ( 2.0 * a );
 
-		// Use the rounded solution as our width, but make sure it didn't
-		// round to zero.
-		width = ( dim_t )bli_round( x );
-		if ( width == 0 ) width = 1;
+		// If the quadratic solution is not imaginary, round it and use that
+		// as our width, but make sure it didn't round to zero. Otherwise,
+		// discard the quadratic solution and leave width, as previously
+		// computed, unchanged.
+		if ( b * b - 4.0 * a * c >= 0 )
+		{
+			const double x = ( -b + sqrt( b * b - 4.0 * a * c ) ) / ( 2.0 * a );
+
+			width = ( dim_t )bli_round( x );
+			if ( width == 0 ) width = 1;
+		}
 
 		// Adjust the width, if necessary.
 		if ( j == 0 && handle_edge_low )
