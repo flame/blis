@@ -461,14 +461,15 @@ dim_t bli_get_range_width_l( doff_t diagoff_j,
 		const double c = -0.5 * (   ( double )diagoff_j *
 		                          ( ( double )diagoff_j + 1.0 )
 		                        ) - area_per_thr;
+		const double r = b * b - 4.0 * a * c;
 
 		// If the quadratic solution is not imaginary, round it and use that
 		// as our width, but make sure it didn't round to zero. Otherwise,
 		// discard the quadratic solution and leave width, as previously
 		// computed, unchanged.
-		if ( b * b - 4.0 * a * c >= 0 )
+		if ( r >= 0.0 )
 		{
-			const double x = ( -b + sqrt( b * b - 4.0 * a * c ) ) / ( 2.0 * a );
+			const double x = ( -b + sqrt( r ) ) / ( 2.0 * a );
 
 			width = ( dim_t )bli_round( x );
 			if ( width == 0 ) width = 1;
