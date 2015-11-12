@@ -127,7 +127,7 @@ void bli_obj_alloc_buffer( inc_t  rs,
 
 	// Adjust the strides, if needed, before doing anything else
 	// (particularly, before doing any error checking).
-	bli_adjust_strides( m, n, &rs, &cs, &is );
+	bli_adjust_strides_alloc( m, n, &rs, &cs, &is );
 
 	if ( bli_error_checking_is_enabled() )
 		bli_obj_alloc_buffer_check( rs, cs, is, obj );
@@ -183,7 +183,7 @@ void bli_obj_alloc_buffer( inc_t  rs,
 			// If the row and column strides are equal, it almost certainly
 			// means that m == n == 1. (If that is not the case, then
 			// something is very wrong.)
-			if ( m != 1 || m != 1 )
+			if ( m != 1 || n != 1 )
 				bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 
 			n_elem = 1;
@@ -228,7 +228,7 @@ void bli_obj_attach_buffer( void*  p,
 	n = bli_obj_width( *obj );
 
 	// Adjust the strides, if necessary.
-	bli_adjust_strides( m, n, &rs, &cs, &is );
+	bli_adjust_strides_attach( m, n, &rs, &cs, &is );
 
 	// Notice that we wait until after strides have been adjusted to
 	// error-check.
@@ -357,11 +357,11 @@ void bli_obj_create_const_copy_of( obj_t* a, obj_t* b )
 	*temp_i = ( gint_t ) bli_zreal( value );
 }
 
-void bli_adjust_strides( dim_t  m,
-                         dim_t  n,
-                         inc_t* rs,
-                         inc_t* cs,
-                         inc_t* is )
+void bli_adjust_strides_alloc( dim_t  m,
+                               dim_t  n,
+                               inc_t* rs,
+                               inc_t* cs,
+                               inc_t* is )
 {
 	// Here, we check the strides that were input from the user and modify
 	// them if needed.
@@ -370,13 +370,30 @@ void bli_adjust_strides( dim_t  m,
 	// we set row and column strides to zero.
 	if ( m == 0 || n == 0 )
 	{
-		*rs = 0;
-		*cs = 0;
-		*is = 1;
+		// NOTE: Previously, we forced the row and column strides to be zero
+		// if the matrices was being created with a zero dimension. It is
+		// *probably* the case that this is not necessary. However, in case
+		// a problem turns up later on, I'm leaving these lines commented
+		// out.
+		//*rs = 0;
+		//*cs = 0;
+		//*is = 1;
 
 		return;
 	}
-		
+
+	bli_adjust_strides_attach( m, n, rs, cs, is );
+}
+
+void bli_adjust_strides_attach( dim_t  m,
+                                dim_t  n,
+                                inc_t* rs,
+                                inc_t* cs,
+                                inc_t* is )
+{
+	// Here, we check the strides that were input from the user and modify
+	// them if needed.
+
 	// Interpret rs = cs = 0 as request for column storage.
 	if ( *rs == 0 && *cs == 0 && ( *is == 0 || *is == 1 ) )
 	{
