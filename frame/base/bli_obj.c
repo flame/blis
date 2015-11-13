@@ -117,31 +117,23 @@ void bli_obj_alloc_buffer( inc_t  rs,
 {
 	dim_t  n_elem = 0;
 	dim_t  m, n;
-	inc_t  rs_abs, cs_abs, is_abs;
 	siz_t  elem_size;
 	siz_t  buffer_size;
 	void*  p;
 
-	m  = bli_obj_length( *obj );
-	n  = bli_obj_width( *obj );
-
-	// Adjust the strides, if needed, before doing anything else
-	// (particularly, before doing any error checking).
-	bli_adjust_strides_alloc( m, n, &rs, &cs, &is );
-
-	if ( bli_error_checking_is_enabled() )
-		bli_obj_alloc_buffer_check( rs, cs, is, obj );
+	// Query the dimensions of the object we are allocating.
+	m = bli_obj_length( *obj );
+	n = bli_obj_width( *obj );
 
 	// Query the size of one element.
 	elem_size = bli_obj_elem_size( *obj );
 
-	// Compute the magnitude of the row, column, and imaginary strides.
-	// We will use these in the comparisons below since those
-	// comparisions really relate only to the magnitudes of the strides,
-	// not their signs.
-	rs_abs = bli_abs( rs );
-	cs_abs = bli_abs( cs );
-	is_abs = bli_abs( is );
+	// Adjust the strides, if needed, before doing anything else
+	// (particularly, before doing any error checking).
+	bli_adjust_strides( m, n, elem_size, &rs, &cs, &is );
+
+	if ( bli_error_checking_is_enabled() )
+		bli_obj_alloc_buffer_check( rs, cs, is, obj );
 
 	// Determine how much object to allocate.
 	if ( m == 0 || n == 0 )
@@ -150,44 +142,13 @@ void bli_obj_alloc_buffer( inc_t  rs,
 		// should remain unchanged (because alignment is not needed).
 		n_elem = 0;
 	}
-	else if ( rs_abs == 1 )
-	{
-		cs     = bli_align_dim_to_size( cs, elem_size,
-		                                BLIS_HEAP_STRIDE_ALIGN_SIZE );
-		n_elem = bli_abs( cs ) * n;
-	}
-	else if ( cs_abs == 1 )
-	{
-		rs     = bli_align_dim_to_size( rs, elem_size,
-		                                BLIS_HEAP_STRIDE_ALIGN_SIZE );
-		n_elem = bli_abs( rs ) * m;
-	}
 	else
 	{
-		if ( rs_abs < cs_abs )
-		{
-			// Note this case is identical to that of rs == 1 above.
-			cs     = bli_align_dim_to_size( cs, elem_size,
-			                                BLIS_HEAP_STRIDE_ALIGN_SIZE );
-			n_elem = bli_abs( cs ) * n;
-		}
-		else if ( cs_abs < rs_abs )
-		{
-			// Note this case is identical to that of cs == 1 above.
-			rs     = bli_align_dim_to_size( rs, elem_size,
-			                                BLIS_HEAP_STRIDE_ALIGN_SIZE );
-			n_elem = bli_abs( rs ) * m;
-		}
-		else // if ( cs_abs == rs_abs )
-		{
-			// If the row and column strides are equal, it almost certainly
-			// means that m == n == 1. (If that is not the case, then
-			// something is very wrong.)
-			if ( m != 1 || n != 1 )
-				bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
-
-			n_elem = 1;
-		}
+		// The number of elements to allocate is given by the distance from
+		// the element with the lowest address (usually {0, 0}) to the element
+		// with the highest address (usually {m-1, n-1}), plus one for the
+		// highest element itself.
+		n_elem = (m-1) * bli_abs( rs ) + (n-1) * bli_abs( cs ) + 1;
 	}
 
 	// Handle the special case where imaginary stride is larger than
@@ -197,10 +158,7 @@ void bli_obj_alloc_buffer( inc_t  rs,
 		// Notice that adding is/2 works regardless of whether the
 		// imaginary stride is unit, something between unit and
 		// 2*n_elem, or something bigger than 2*n_elem.
-		if ( 1 > is_abs )
-		{
-			n_elem = is_abs / 2 + n_elem;
-		}
+		n_elem = bli_abs( is ) / 2 + n_elem;
 	}
 
 	// Compute the size of the total buffer to be allocated, which includes
@@ -222,16 +180,9 @@ void bli_obj_attach_buffer( void*  p,
                             inc_t  is,
                             obj_t* obj )
 {
-	dim_t  m, n;
-
-	m = bli_obj_length( *obj );
-	n = bli_obj_width( *obj );
-
-	// Adjust the strides, if necessary.
-	bli_adjust_strides_attach( m, n, &rs, &cs, &is );
-
-	// Notice that we wait until after strides have been adjusted to
-	// error-check.
+	// Check that the strides and lengths are compatible. Note that the
+	// user *must* specify valid row and column strides when attaching an
+	// external buffer.
 	if ( bli_error_checking_is_enabled() )
 		bli_obj_attach_buffer_check( p, rs, cs, is, obj );
 
@@ -357,42 +308,20 @@ void bli_obj_create_const_copy_of( obj_t* a, obj_t* b )
 	*temp_i = ( gint_t ) bli_zreal( value );
 }
 
-void bli_adjust_strides_alloc( dim_t  m,
-                               dim_t  n,
-                               inc_t* rs,
-                               inc_t* cs,
-                               inc_t* is )
+void bli_adjust_strides( dim_t  m,
+                         dim_t  n,
+                         siz_t  elem_size,
+                         inc_t* rs,
+                         inc_t* cs,
+                         inc_t* is )
 {
 	// Here, we check the strides that were input from the user and modify
 	// them if needed.
 
 	// Handle the special "empty" case first. If either dimension is zero,
-	// we set row and column strides to zero.
-	if ( m == 0 || n == 0 )
-	{
-		// NOTE: Previously, we forced the row and column strides to be zero
-		// if the matrices was being created with a zero dimension. It is
-		// *probably* the case that this is not necessary. However, in case
-		// a problem turns up later on, I'm leaving these lines commented
-		// out.
-		//*rs = 0;
-		//*cs = 0;
-		//*is = 1;
-
-		return;
-	}
-
-	bli_adjust_strides_attach( m, n, rs, cs, is );
-}
-
-void bli_adjust_strides_attach( dim_t  m,
-                                dim_t  n,
-                                inc_t* rs,
-                                inc_t* cs,
-                                inc_t* is )
-{
-	// Here, we check the strides that were input from the user and modify
-	// them if needed.
+	// do nothing (this could represent a zero-length "slice" of another
+	// matrix).
+	if ( m == 0 || n == 0 ) return;
 
 	// Interpret rs = cs = 0 as request for column storage.
 	if ( *rs == 0 && *cs == 0 && ( *is == 0 || *is == 1 ) )
@@ -418,6 +347,21 @@ void bli_adjust_strides_attach( dim_t  m,
 
 		// Use default complex storage.
 		*is = 1;
+
+		// Align the strides depending on the tilt of the matrix. Note that
+		// scalars are neither row nor column tilted. Also note that alignment
+		// is only done for rs = cs = 0, and any user-supplied row and column
+		// strides are preserved.
+		if ( bli_is_col_tilted( m, n, *rs, *cs ) )
+		{
+			*cs = bli_align_dim_to_size( *cs, elem_size,
+			                             BLIS_HEAP_STRIDE_ALIGN_SIZE );
+		}
+		else if ( bli_is_row_tilted( m, n, *rs, *cs ) )
+		{
+			*rs = bli_align_dim_to_size( *rs, elem_size,
+		                                 BLIS_HEAP_STRIDE_ALIGN_SIZE );
+		}
 	}
 	else if ( *rs == 1 && *cs == 1 )
 	{

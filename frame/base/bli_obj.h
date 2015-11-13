@@ -78,16 +78,12 @@ void bli_obj_create_const( double value, obj_t* obj );
 
 void bli_obj_create_const_copy_of( obj_t* a, obj_t* b );
 
-void bli_adjust_strides_alloc( dim_t  m,
-                               dim_t  n,
-                               inc_t* rs,
-                               inc_t* cs,
-                               inc_t* is );
-void bli_adjust_strides_attach( dim_t  m,
-                                dim_t  n,
-                                inc_t* rs,
-                                inc_t* cs,
-                                inc_t* is );
+void bli_adjust_strides( dim_t  m,
+                         dim_t  n,
+                         siz_t  elem_size,
+                         inc_t* rs,
+                         inc_t* cs,
+                         inc_t* is );
 
 siz_t bli_datatype_size( num_t dt );
 

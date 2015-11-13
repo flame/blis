@@ -378,13 +378,15 @@
 	( bli_abs( rs ) != 1 && \
 	  bli_abs( cs ) != 1 )
 
-#define bli_is_row_tilted( rs, cs ) \
+#define bli_is_row_tilted( m, n, rs, cs ) \
 \
-	( bli_abs( cs ) < bli_abs( rs ) )
+	( bli_abs( cs ) == bli_abs( rs ) ? n < m \
+	                                 : bli_abs( cs ) < bli_abs( rs ) )
 
-#define bli_is_col_tilted( rs, cs ) \
+#define bli_is_col_tilted( m, n, rs, cs ) \
 \
-	( bli_abs( rs ) < bli_abs( cs ) )
+	( bli_abs( rs ) == bli_abs( cs ) ? m < n \
+	                                 : bli_abs( rs ) < bli_abs( cs ) )
 
 #define bli_has_nonunit_inc1( inc1 ) \
 \
@@ -780,7 +782,7 @@
 		uplo_eff    = uploa; \
 		diagoff_eff = diagoffa_use; \
 \
-		if ( bli_is_row_tilted( inca, lda ) ) \
+		if ( bli_is_row_tilted( n_elem_max, n_iter_max, inca, lda ) ) \
 		{ \
 			bli_swap_dims( n_iter_max, n_elem_max ); \
 			bli_swap_incs( inca, lda ); \
@@ -967,8 +969,8 @@
 			bli_negate_diag_offset( diagoff_eff ); \
 		} \
 \
-		if ( bli_is_row_tilted( incb, ldb ) && \
-		     bli_is_row_tilted( inca, lda ) ) \
+		if ( bli_is_row_tilted( n_elem_max, n_iter_max, incb, ldb ) && \
+		     bli_is_row_tilted( n_elem_max, n_iter_max, inca, lda ) ) \
 		{ \
 			bli_swap_dims( n_iter_max, n_elem_max ); \
 			bli_swap_incs( inca, lda ); \
