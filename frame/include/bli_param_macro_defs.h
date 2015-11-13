@@ -654,6 +654,14 @@
 	  bli_is_io_packed( schema ) || \
 	  bli_is_rpi_packed( schema ) )
 
+#define bli_is_nat_packed( schema ) \
+\
+	( ( schema & BLIS_PACK_FORMAT_BITS ) == 0 )
+
+#define bli_is_ind_packed( schema ) \
+\
+	( ( schema & BLIS_PACK_FORMAT_BITS ) != 0 )
+
 
 // pointer-related
 
@@ -666,9 +674,6 @@
 	                       ) \
 	     ); \
 }
-
-
-
 
 
 // return datatype for char

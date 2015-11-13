@@ -112,7 +112,7 @@ void bli_trsm4m1_cntl_init()
 	trsm4m1_l_packa_cntl
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT2,
+	                           BLIS_VARIANT1,
 	                           // IMPORTANT: n dim multiple must be mr to
 	                           // support right and bottom-right edge cases
 	                           gemm4m1_mr,
@@ -126,7 +126,7 @@ void bli_trsm4m1_cntl_init()
 	trsm4m1_l_packb_cntl
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT2,
+	                           BLIS_VARIANT1,
 	                           // IMPORTANT: m dim multiple must be mr since
 	                           // B_pack is updated (ie: serves as C) in trsm
 	                           gemm4m1_mr,
@@ -141,7 +141,7 @@ void bli_trsm4m1_cntl_init()
 	trsm4m1_r_packa_cntl
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT2,
+	                           BLIS_VARIANT1,
 	                           gemm4m1_nr,
 	                           gemm4m1_mr,
 	                           FALSE, // do NOT invert diagonal
@@ -153,7 +153,7 @@ void bli_trsm4m1_cntl_init()
 	trsm4m1_r_packb_cntl
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT2,
+	                           BLIS_VARIANT1,
 	                           gemm4m1_mr,
 	                           gemm4m1_mr,
 	                           TRUE,  // invert diagonal

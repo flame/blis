@@ -145,7 +145,7 @@ void bli_gemm4mh_cntl_init()
 	gemm4mh_packa_cntl_ro
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT2,
+	                           BLIS_VARIANT1,
 	                           gemm4mh_mr,
 	                           gemm4mh_kr,
 	                           FALSE, // do NOT invert diagonal
@@ -157,7 +157,7 @@ void bli_gemm4mh_cntl_init()
 	gemm4mh_packb_cntl_ro
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT2,
+	                           BLIS_VARIANT1,
 	                           gemm4mh_kr,
 	                           gemm4mh_nr,
 	                           FALSE, // do NOT invert diagonal
@@ -170,7 +170,7 @@ void bli_gemm4mh_cntl_init()
 	gemm4mh_packa_cntl_io
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT2,
+	                           BLIS_VARIANT1,
 	                           gemm4mh_mr,
 	                           gemm4mh_kr,
 	                           FALSE, // do NOT invert diagonal
@@ -182,7 +182,7 @@ void bli_gemm4mh_cntl_init()
 	gemm4mh_packb_cntl_io
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT2,
+	                           BLIS_VARIANT1,
 	                           gemm4mh_kr,
 	                           gemm4mh_nr,
 	                           FALSE, // do NOT invert diagonal

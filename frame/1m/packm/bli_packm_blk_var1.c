@@ -62,6 +62,9 @@ typedef void (*FUNCPTR_T)(
 static FUNCPTR_T GENARRAY(ftypes,packm_blk_var1);
 
 extern func_t* packm_struc_cxk_kers;
+extern func_t* packm_struc_cxk_4mi_kers;
+extern func_t* packm_struc_cxk_3mis_kers;
+extern func_t* packm_struc_cxk_rih_kers;
 
 
 void bli_packm_blk_var1( obj_t*   c,
@@ -96,6 +99,8 @@ void bli_packm_blk_var1( obj_t*   c,
 	dim_t     pd_p       = bli_obj_panel_dim( *p );
 	inc_t     ps_p       = bli_obj_panel_stride( *p );
 
+	obj_t     kappa;
+	obj_t*    kappa_p;
 	void*     buf_kappa;
 
 	func_t*   packm_kers;
@@ -103,14 +108,61 @@ void bli_packm_blk_var1( obj_t*   c,
 
 	FUNCPTR_T f;
 
-	// This variant assumes that the micro-kernel will always apply the
-	// alpha scalar of the higher-level operation. Thus, we use BLIS_ONE
-	// for kappa so that the underlying packm implementation does not
-	// scale during packing.
-	buf_kappa = bli_obj_buffer_for_const( dt_cp, BLIS_ONE );
+	// Treatment of kappa (ie: packing during scaling) depends on
+	// whether we are executing an induced method.
+	if ( bli_is_ind_packed( schema ) )
+	{
+		// The value for kappa we use will depend on whether the scalar
+		// attached to A has a nonzero imaginary component. If it does,
+		// then we will apply the scalar during packing to facilitate
+		// implementing induced complex domain algorithms in terms of
+		// real domain micro-kernels. (In the aforementioned situation,
+		// applying a real scalar is easy, but applying a complex one is
+		// harder, so we avoid the need altogether with the code below.)
+		if( thread_am_ochief( t ) )
+		{
+			if ( bli_obj_scalar_has_nonzero_imag( p ) )
+			{
+				// Detach the scalar.
+				bli_obj_scalar_detach( p, &kappa );
+	
+				// Reset the attached scalar (to 1.0).
+				bli_obj_scalar_reset( p );
+	
+				kappa_p = &kappa;
+			}
+			else
+			{
+				// If the internal scalar of A has only a real component, then
+				// we will apply it later (in the micro-kernel), and so we will
+				// use BLIS_ONE to indicate no scaling during packing.
+				kappa_p = &BLIS_ONE;
+			}
+		}
+		kappa_p = thread_obroadcast( t, kappa_p );
+	
+		// Acquire the buffer to the kappa chosen above.
+		buf_kappa = bli_obj_buffer_for_1x1( dt_cp, *kappa_p );
+	}
+	else // if ( bli_is_nat_packed( schema ) )
+	{
+		// This branch if for native execution, where we assume that
+		// the micro-kernel will always apply the alpha scalar of the
+		// higher-level operation. Thus, we use BLIS_ONE for kappa so
+		// that the underlying packm implementation does not perform
+		// any scaling during packing.
+		buf_kappa = bli_obj_buffer_for_const( dt_cp, BLIS_ONE );
+	}
 
-	// Choose the correct func_t object.
-	packm_kers = packm_struc_cxk_kers;
+
+	// Choose the correct func_t object based on the pack_t schema.
+	if      ( bli_is_4mi_packed( schema ) ) packm_kers = packm_struc_cxk_4mi_kers;
+	else if ( bli_is_3mi_packed( schema ) ||
+	          bli_is_3ms_packed( schema ) ) packm_kers = packm_struc_cxk_3mis_kers;
+	else if ( bli_is_ro_packed( schema ) ||
+	          bli_is_io_packed( schema ) ||
+	         bli_is_rpi_packed( schema ) )  packm_kers = packm_struc_cxk_rih_kers;
+	else                                    packm_kers = packm_struc_cxk_kers;
 
 	// Query the datatype-specific function pointer from the func_t object.
 	packm_ker = bli_func_obj_query( dt_cp, packm_kers );
@@ -144,8 +196,8 @@ void bli_packm_blk_var1( obj_t*   c,
 }
 
 
-#undef  GENTFUNC
-#define GENTFUNC( ctype, ch, varname, kertype ) \
+#undef  GENTFUNCR
+#define GENTFUNCR( ctype, ctype_r, ch, chr, varname, kertype ) \
 \
 void PASTEMAC(ch,varname)( \
                            struc_t strucc, \
@@ -204,6 +256,9 @@ void PASTEMAC(ch,varname)( \
 	conj_t          conjc; \
 	bool_t          row_stored; \
 	bool_t          col_stored; \
+	inc_t           is_p_use; \
+	dim_t           ss_num; \
+	dim_t           ss_den; \
 \
 	ctype* restrict c_use; \
 	ctype* restrict p_use; \
@@ -275,6 +330,17 @@ void PASTEMAC(ch,varname)( \
 		n_panel_max    = &panel_len_max_i; \
 	} \
 \
+	/* Compute the storage stride scaling. Usually this is just 1. However,
+	   in the case of interleaved 3m, we need to scale by 3/2, and in the
+	   cases of real-only, imag-only, or summed-only, we need to scale by
+	   1/2. In both cases, we are compensating for the fact that pointer
+	   arithmetic occurs in terms of complex elements rather than real
+	   elements. */ \
+	if      ( bli_is_3mi_packed( schema ) ) { ss_num = 3; ss_den = 2; } \
+	else if ( bli_is_3ms_packed( schema ) ) { ss_num = 1; ss_den = 2; } \
+	else if ( bli_is_rih_packed( schema ) ) { ss_num = 1; ss_den = 2; } \
+	else                                    { ss_num = 1; ss_den = 1; } \
+\
 	/* Compute the total number of iterations we'll need. */ \
 	num_iter = iter_dim / panel_dim_max + ( iter_dim % panel_dim_max ? 1 : 0 ); \
 \
@@ -297,6 +363,15 @@ void PASTEMAC(ch,varname)( \
 	} \
 \
 	p_begin = p_cast; \
+\
+/*
+if ( row_stored ) \
+PASTEMAC(ch,fprintm)( stdout, "packm_var2: b", m, n, \
+                      c_cast,        rs_c, cs_c, "%4.1f", "" ); \
+if ( col_stored ) \
+PASTEMAC(ch,fprintm)( stdout, "packm_var2: a", m, n, \
+                      c_cast,        rs_c, cs_c, "%4.1f", "" ); \
+*/ \
 \
 	for ( ic  = ic0,    ip  = ip0,    it  = 0; it < num_iter; \
 	      ic += ic_inc, ip += ip_inc, it += 1 ) \
@@ -354,6 +429,15 @@ void PASTEMAC(ch,varname)( \
 			c_use = c_begin + (panel_off_i  )*ldc; \
 			p_use = p_begin; \
 \
+			/* We need to re-compute the imaginary stride as a function of
+			   panel_len_max_i since triangular packed matrices have panels
+			   of varying lengths. NOTE: This imaginary stride value is
+			   only referenced by the packm kernels for induced methods. */ \
+			is_p_use  = ldp * panel_len_max_i; \
+\
+			/* We nudge the imaginary stride up by one if it is odd. */ \
+			is_p_use += ( bli_is_odd( is_p_use ) ? 1 : 0 ); \
+\
 			if( packm_thread_my_iter( it, thread ) ) \
 			{ \
 				packm_ker_cast( strucc, \
@@ -370,16 +454,13 @@ void PASTEMAC(ch,varname)( \
 				                kappa_cast, \
 				                c_use, rs_c, cs_c, \
 				                p_use, rs_p, cs_p, \
-				                       is_p ); \
+			                           is_p_use ); \
 			} \
 \
 			/* NOTE: This value is usually LESS than ps_p because triangular
 			   matrices usually have several micro-panels that are shorter
 			   than a "full" micro-panel. */ \
-			p_inc = ldp * panel_len_max_i; \
-\
-			/* We nudge the panel increment up by one if it is odd. */ \
-			p_inc += ( bli_is_odd( p_inc ) ? 1 : 0 ); \
+			p_inc = ( is_p_use * ss_num ) / ss_den; \
 		} \
 		else if ( bli_is_herm_or_symm( strucc ) ) \
 		{ \
@@ -387,8 +468,13 @@ void PASTEMAC(ch,varname)( \
 			   symmetric matrix, which includes stored, unstored, and
 			   diagonal-intersecting panels. */ \
 \
+			c_use = c_begin; \
+			p_use = p_begin; \
+\
 			panel_len_i     = panel_len_full; \
 			panel_len_max_i = panel_len_max; \
+\
+			is_p_use = is_p; \
 \
 			if( packm_thread_my_iter( it, thread ) ) \
 			{ \
@@ -404,13 +490,11 @@ void PASTEMAC(ch,varname)( \
 				                *m_panel_max, \
 				                *n_panel_max, \
 				                kappa_cast, \
-				                c_begin, rs_c, cs_c, \
-				                p_begin, rs_p, cs_p, \
-				                         is_p ); \
+				                c_use, rs_c, cs_c, \
+				                p_use, rs_p, cs_p, \
+			                           is_p_use ); \
 			} \
 \
-			/* NOTE: This value is equivalent to ps_p. */ \
-			/*p_inc = ldp * panel_len_max_i;*/ \
 			p_inc = ps_p; \
 		} \
 		else \
@@ -419,8 +503,13 @@ void PASTEMAC(ch,varname)( \
 			   panel is part of a triangular matrix and is neither unstored
 			   (ie: zero) nor diagonal-intersecting. */ \
 \
+			c_use = c_begin; \
+			p_use = p_begin; \
+\
 			panel_len_i     = panel_len_full; \
 			panel_len_max_i = panel_len_max; \
+\
+			is_p_use = is_p; \
 \
 			if( packm_thread_my_iter( it, thread ) ) \
 			{ \
@@ -436,28 +525,81 @@ void PASTEMAC(ch,varname)( \
 				                *m_panel_max, \
 				                *n_panel_max, \
 				                kappa_cast, \
-				                c_begin, rs_c, cs_c, \
-				                p_begin, rs_p, cs_p, \
-				                         is_p ); \
+				                c_use, rs_c, cs_c, \
+				                p_use, rs_p, cs_p, \
+			                           is_p_use ); \
 			} \
-/*
-			if ( row_stored ) \
-			PASTEMAC(ch,fprintm)( stdout, "packm_var1: bp copied", panel_len_max_i, panel_dim_max, \
-			                      p_begin, rs_p, cs_p, "%9.2e", "" ); \
-			else if ( col_stored ) \
-			PASTEMAC(ch,fprintm)( stdout, "packm_var1: ap copied", panel_dim_max, panel_len_max_i, \
-			                      p_begin, rs_p, cs_p, "%9.2e", "" ); \
-*/ \
 \
 			/* NOTE: This value is equivalent to ps_p. */ \
-			/*p_inc = ldp * panel_len_max_i;*/ \
 			p_inc = ps_p; \
 		} \
 \
+/*
+		if ( bli_is_4mi_packed( schema ) ) { \
+		printf( "packm_var2: is_p_use = %lu\n", is_p_use ); \
+		if ( col_stored ) { \
+		if ( 0 ) \
+		PASTEMAC(chr,fprintm)( stdout, "packm_var2: a_r", *m_panel_use, *n_panel_use, \
+		                       ( ctype_r* )c_use,         2*rs_c, 2*cs_c, "%4.1f", "" ); \
+		PASTEMAC(chr,fprintm)( stdout, "packm_var2: ap_r", *m_panel_max, *n_panel_max, \
+		                       ( ctype_r* )p_use,            rs_p, cs_p, "%4.1f", "" ); \
+		PASTEMAC(chr,fprintm)( stdout, "packm_var2: ap_i", *m_panel_max, *n_panel_max, \
+		                       ( ctype_r* )p_use + is_p_use, rs_p, cs_p, "%4.1f", "" ); \
+		} \
+		if ( row_stored ) { \
+		if ( 0 ) \
+		PASTEMAC(chr,fprintm)( stdout, "packm_var2: b_r", *m_panel_use, *n_panel_use, \
+		                       ( ctype_r* )c_use,         2*rs_c, 2*cs_c, "%4.1f", "" ); \
+		PASTEMAC(chr,fprintm)( stdout, "packm_var2: bp_r", *m_panel_max, *n_panel_max, \
+		                       ( ctype_r* )p_use,            rs_p, cs_p, "%4.1f", "" ); \
+		PASTEMAC(chr,fprintm)( stdout, "packm_var2: bp_i", *m_panel_max, *n_panel_max, \
+		                       ( ctype_r* )p_use + is_p_use, rs_p, cs_p, "%4.1f", "" ); \
+		} \
+		} \
+*/ \
+/*
+*/ \
+\
+/*
+*/ \
+/*
+		PASTEMAC(chr,fprintm)( stdout, "packm_var2: bp_rpi", *m_panel_max, *n_panel_max, \
+		                       ( ctype_r* )p_use,         rs_p, cs_p, "%4.1f", "" ); \
+*/ \
+\
+\
+/*
+		if ( row_stored ) { \
+		PASTEMAC(chr,fprintm)( stdout, "packm_var2: b_r", *m_panel_max, *n_panel_max, \
+		                       ( ctype_r* )c_use,        2*rs_c, 2*cs_c, "%4.1f", "" ); \
+		PASTEMAC(chr,fprintm)( stdout, "packm_var2: b_i", *m_panel_max, *n_panel_max, \
+		                       (( ctype_r* )c_use)+rs_c, 2*rs_c, 2*cs_c, "%4.1f", "" ); \
+		PASTEMAC(chr,fprintm)( stdout, "packm_var2: bp_r", *m_panel_max, *n_panel_max, \
+		                       ( ctype_r* )p_use,         rs_p, cs_p, "%4.1f", "" ); \
+		inc_t is_b = rs_p * *m_panel_max; \
+		PASTEMAC(chr,fprintm)( stdout, "packm_var2: bp_i", *m_panel_max, *n_panel_max, \
+		                       ( ctype_r* )p_use + is_b, rs_p, cs_p, "%4.1f", "" ); \
+		} \
+*/ \
+\
+\
+/*
+		if ( col_stored ) { \
+		PASTEMAC(chr,fprintm)( stdout, "packm_var2: a_r", *m_panel_max, *n_panel_max, \
+		                       ( ctype_r* )c_use,        2*rs_c, 2*cs_c, "%4.1f", "" ); \
+		PASTEMAC(chr,fprintm)( stdout, "packm_var2: a_i", *m_panel_max, *n_panel_max, \
+		                       (( ctype_r* )c_use)+rs_c, 2*rs_c, 2*cs_c, "%4.1f", "" ); \
+		PASTEMAC(chr,fprintm)( stdout, "packm_var2: ap_r", *m_panel_max, *n_panel_max, \
+		                       ( ctype_r* )p_use,         rs_p, cs_p, "%4.1f", "" ); \
+		PASTEMAC(chr,fprintm)( stdout, "packm_var2: ap_i", *m_panel_max, *n_panel_max, \
+		                       ( ctype_r* )p_use + p_inc, rs_p, cs_p, "%4.1f", "" ); \
+		} \
+*/ \
 \
 		p_begin += p_inc; \
+\
 	} \
 }
 
-INSERT_GENTFUNC_BASIC( packm_blk_var1, packm_ker_t )
+INSERT_GENTFUNCR_BASIC( packm_blk_var1, packm_ker_t )
 
