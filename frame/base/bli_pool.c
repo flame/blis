@@ -64,24 +64,56 @@ void bli_pool_finalize( pool_t* pool )
 {
 	pblk_t* block_ptrs;
 	dim_t   num_blocks;
+	dim_t   top_index;
 	dim_t   i;
 
-	// NOTE: This implementation assumes that all blocks have been
-	// checked in by all threads.
+	// NOTE: This implementation assumes that either:
+	// - all blocks have been checked in by all threads, or
+	// - some subset of blocks have been checked in and the caller
+	//   is bli_pool_reinit().
 
-	// Query the current block_ptrs array and total number of blocks
-	// presently allocated.
+	// Query the current block_ptrs array.
 	block_ptrs = bli_pool_block_ptrs( pool );
+
+	// Query the total number of blocks presently allocated.
 	num_blocks = bli_pool_num_blocks( pool );
 
-	// Free the individual blocks.
-	for ( i = 0; i < num_blocks; ++i )
+	// Query the top_index of the pool.
+	top_index  = bli_pool_top_index( pool );
+
+	// Free the individual blocks currently in the pool.
+	for ( i = top_index; i < num_blocks; ++i )
 	{
 		bli_pool_free_block( &(block_ptrs[i]) );
 	}
 
 	// Free the block_ptrs array.
 	bli_free( block_ptrs );
+
+	// Clear the contents of the pool_t struct.
+	bli_pool_set_block_ptrs( NULL, pool );
+	bli_pool_set_block_ptrs_len( 0, pool );
+	bli_pool_set_num_blocks( 0, pool );
+	bli_pool_set_top_index( 0, pool );
+	bli_pool_set_block_size( 0, pool );
+	bli_pool_set_align_size( 0, pool );
+}
+
+void bli_pool_reinit( dim_t   num_blocks_new,
+                      siz_t   block_size_new,
+                      siz_t   align_size_new,
+                      pool_t* pool )
+{
+	// Finalize the pool as it is currently configured. If some blocks
+	// are still checked out to threads, those blocks are not freed
+	// here, and instead will be freed when the threads are ready to
+	// release the blocks. (This will happen because the threads will
+	// notice that the block size of the pool has changed.)
+	bli_pool_finalize( pool );
+
+	// Reinitialize the pool with the new parameters, in particular,
+	// the new block size.
+	bli_pool_init( num_blocks_new, block_size_new, align_size_new, pool );
 }
 
 void bli_pool_checkout_block( pblk_t* block, pool_t* pool )

@@ -175,7 +175,6 @@ void bli_packm_init_pack( invdiag_t invert_diag,
                           obj_t*    p )
 {
 	num_t   dt           = bli_obj_datatype( *c );
-	num_t   dt_real      = bli_obj_datatype_proj_to_real( *c );
 	trans_t transc       = bli_obj_onlytrans_status( *c );
 	dim_t   m_c          = bli_obj_length( *c );
 	dim_t   n_c          = bli_obj_width( *c );

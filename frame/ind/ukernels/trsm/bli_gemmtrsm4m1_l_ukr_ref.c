@@ -79,6 +79,17 @@ void PASTEMAC(ch,varname)( \
 \
 	dim_t             i, j; \
 \
+/*
+printf( "gemmtrsm4m1_l_ukr: is_a = %lu  is_b = %lu\n", is_a, is_b ); \
+PASTEMAC(chr,fprintm)( stdout, "gemmtrsm4m1_l_ukr: a1011p_r", m, k+m, \
+                       a10_r, 1, PASTEMAC(chr,packmr), "%4.1f", "" ); \
+PASTEMAC(chr,fprintm)( stdout, "gemmtrsm4m1_l_ukr: a1011p_i", m, k+m, \
+                       a10_i, 1, PASTEMAC(chr,packmr), "%4.1f", "" ); \
+PASTEMAC(chr,fprintm)( stdout, "gemmtrsm4m1_l_ukr: b0111p_r", k+m, n, \
+                       b01_r, PASTEMAC(chr,packnr), 1, "%4.1f", "" ); \
+PASTEMAC(chr,fprintm)( stdout, "gemmtrsm4m1_l_ukr: b0111p_i", k+m, n, \
+                       b01_i, PASTEMAC(chr,packnr), 1, "%4.1f", "" ); \
+*/ \
 \
 	/* Copy the contents of c to a temporary buffer ct. */ \
 	if ( !PASTEMAC(chr,eq0)( alpha_i ) ) \
@@ -99,7 +110,7 @@ void PASTEMAC(ch,varname)( \
 \
 \
 	/* b11.r = alpha.r * b11.r - ( a10.r * b01.r - a10.i * b01.i );
-	   b11.i = alpha.r * b11.r - ( a10.r * b01.i + a10.i * b01.r ); */ \
+	   b11.i = alpha.r * b11.i - ( a10.r * b01.i + a10.i * b01.r ); */ \
 \
 	bli_auxinfo_set_next_ab( a10_r, b01_i, *data ); \
 \
@@ -144,7 +155,12 @@ void PASTEMAC(ch,varname)( \
 	                       one_r, \
 	                       b11_r, rs_b, cs_b, \
 	                       data ); \
-\
+/*
+PASTEMAC(chr,fprintm)( stdout, "gemmtrsm4m1_l_ukr: b0111p_r post-gemm", k+m, n, \
+                       b01_r, PASTEMAC(chr,packnr), 1, "%4.1f", "" ); \
+PASTEMAC(chr,fprintm)( stdout, "gemmtrsm4m1_l_ukr: b0111p_i post-gemm", k+m, n, \
+                       b01_i, PASTEMAC(chr,packnr), 1, "%4.1f", "" ); \
+*/ \
 \
 	/* b11 = inv(a11) * b11;
 	   c11 = b11; */ \
@@ -152,6 +168,13 @@ void PASTEMAC(ch,varname)( \
 	                      b11_r, \
 	                      c11, rs_c, cs_c, \
 	                      data ); \
+\
+/*
+PASTEMAC(chr,fprintm)( stdout, "gemmtrsm4m1_l_ukr: b0111p_r after", k+m, n, \
+                       b01_r, PASTEMAC(chr,packnr), 1, "%4.1f", "" ); \
+PASTEMAC(chr,fprintm)( stdout, "gemmtrsm4m1_l_ukr: b0111p_i after", k+m, n, \
+                       b01_i, PASTEMAC(chr,packnr), 1, "%4.1f", "" ); \
+*/ \
 }
 
 INSERT_GENTFUNCCO_BASIC2( gemmtrsm4m1_l_ukr_ref, GEMM_UKERNEL, TRSM4M1_L_UKERNEL )

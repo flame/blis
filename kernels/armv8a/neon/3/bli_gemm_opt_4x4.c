@@ -1,4 +1,4 @@
-/*
+    /* 
 
    BLIS    
    An object-based framework for developing high-performance BLAS-like
@@ -36,12 +36,7 @@
 #include "blis.h"
 
 /*
-   o 4x4 Single precision micro-kernel fully functional.
-   o Runnable on ARMv8, compiled with aarch64 GCC.
-   o Use it together with the armv8 BLIS configuration.
    o Tested on Juno board. Around 7.3 GFLOPS @ 1.1 GHz. 
-
-   December 2014.
 */
 void bli_sgemm_opt_4x4(
                         dim_t              k,
@@ -55,15 +50,15 @@ void bli_sgemm_opt_4x4(
 {
 	void* a_next = bli_auxinfo_next_a( data );
 	void* b_next = bli_auxinfo_next_b( data );
-
+        
 	dim_t k_iter = k / 4;
-	dim_t k_left = k % 4;
+	dim_t k_left = k % 4; 
 
-__asm__ volatile
+__asm__ volatile 
 (
 "                                            \n\t"
 "                                            \n\t"
-" ldr x0,%[aaddr]                            \n\t" // Load address of A.
+" ldr x0,%[aaddr]                            \n\t" // Load address of A. 
 " ldr x1,%[baddr]                            \n\t" // Load address of B.
 " ldr x2,%[caddr]                            \n\t" // Load address of C.
 "                                            \n\t"
@@ -433,12 +428,8 @@ __asm__ volatile
 
 
 /*
-   o 4x4 Double precision micro-kernel NOT fully functional yet.
-   o Runnable on ARMv8, compiled with aarch64 GCC.
-   o Use it together with the armv8 BLIS configuration.
-   o Tested on Juno board. Around 3 GFLOPS @ 1.1 GHz. 
-
-   December 2014.
+ * Tested on Juno board. Around 5.6 GFLOPS, 2 A57 cores @ 1.1 GHz.
+ * Tested on Juno board. Around 4 GFLOPS, 4 A53 cores @ 850 MHz.
 */
 void bli_dgemm_opt_4x4(
                         dim_t              k,
@@ -458,8 +449,8 @@ void bli_dgemm_opt_4x4(
 
 __asm__ volatile
 (
-"                                            \n\t"
-" ldr x0,%[aaddr]                            \n\t" // Load address of A
+"                                            \n\t" 
+" ldr x0,%[aaddr]                            \n\t" // Load address of A 
 " ldr x1,%[baddr]                            \n\t" // Load address of B
 " ldr x2,%[caddr]                            \n\t" // Load address of C
 "                                            \n\t"
@@ -476,9 +467,16 @@ __asm__ volatile
 "                                            \n\t" 
 " ldr x9,%[cs_c]                             \n\t" // Load cs_c
 " lsl x10,x9,#3                              \n\t" // cs_c * sizeof(double)
-"                                            \n\t" 
-" ldp q0,q1,[x0],32                          \n\t" // Load a    into quad
-" ldp q4,q5,[x1],32                          \n\t" // Load b    into quad
+" lsl x11,x9,#4                              \n\t" // 2 * cs_c * sizeof(double) -- AUX.
+" lsl x12,x9,#5                              \n\t" // 3 * cs_c * sizeof(double) -- AUX.
+"                                            \n\t"
+" ldr x13,%[rs_c]                            \n\t" // Load rs_c.
+" lsl x14,x13,#3                             \n\t" // rs_c * sizeof(double). 
+"                                            \n\t"
+" prfm pldl1keep,[x2,0]                      \n\t" // Prefetch c.
+" prfm pldl1keep,[x2,x10]                    \n\t" // Prefetch c.
+" prfm pldl1keep,[x2,x11]                    \n\t" // Prefetch c.
+" prfm pldl1keep,[x2,x12]                    \n\t" // Prefetch c.
 "                                            \n\t"
 " movi v12.2d,#0                             \n\t" // Vector for accummulating column 0 
 " movi v13.2d,#0                             \n\t" // Vector for accummulating column 0
@@ -489,9 +487,32 @@ __asm__ volatile
 " movi v18.2d,#0                             \n\t" // Vector for accummulating column 3
 " movi v19.2d,#0                             \n\t" // Vector for accummulating column 3
 "                                            \n\t"
+" movi v20.2d,#0                             \n\t" // Vector for accummulating column 0 
+" movi v21.2d,#0                             \n\t" // Vector for accummulating column 0
+" movi v22.2d,#0                             \n\t" // Vector for accummulating column 1
+" movi v23.2d,#0                             \n\t" // Vector for accummulating column 1
+" movi v24.2d,#0                             \n\t" // Vector for accummulating column 2 
+" movi v25.2d,#0                             \n\t" // Vector for accummulating column 2
+" movi v26.2d,#0                             \n\t" // Vector for accummulating column 3
+" movi v27.2d,#0                             \n\t" // Vector for accummulating column 3
+"                                            \n\t"
 " ld1r {v31.2d},[x8]                         \n\t" // Load beta
 "                                            \n\t"
+"                                            \n\t"
+" cmp x5,#0                                  \n\t" // If k_iter == 0, jump to k_left.
+" beq .DCONSIDERKLEFT                        \n\t"
+"                                            \n\t"
+" ldp q0,q1,[x0],32                          \n\t" // Load a
+" ldp q4,q5,[x1],32                          \n\t" // Load b
+"                                            \n\t"
+" cmp x5,1                                   \n\t" // If there is just one k_iter, jump to that one. 
+" beq .DLASTITER                             \n\t" // (as loop is do-while-like).
+"                                            \n\t" 
+"                                            \n\t"
 " DLOOP:                                     \n\t" // Body
+"                                            \n\t"
+" prfm pldl1keep,[x0,#1024]                  \n\t" // Prefetch.    
+" prfm pldl1keep,[x1,#1024]                  \n\t" // Prefetch.    
 "                                            \n\t"
 " ldp q6,q7,[x1],32                          \n\t" // Load b+4  into quad
 "                                            \n\t"
@@ -525,9 +546,86 @@ __asm__ volatile
 " fmla v17.2d,v3.2d,v7.d[0]                  \n\t" // Accummulate
 " fmla v19.2d,v3.2d,v7.d[1]                  \n\t" // Accummulate
 "                                            \n\t"
-" add x4,x4,1                                \n\t" // i = i+1
-" cmp x4,x5                                  \n\t" // Continue
-" blt DLOOP                                  \n\t" // if i < N 
+" prfm pldl1keep,[x0,#64]                    \n\t" // Prefetch.  
+" prfm pldl1keep,[x1,#64]                    \n\t" // Prefetch.   
+"                                            \n\t"
+" sub x5,x5,1                                \n\t" // i-=1
+" cmp x5,1                                   \n\t" // Iterate again if we are not in k_iter == 1.
+"bne DLOOP                                   \n\t"
+"                                            \n\t"
+".DLASTITER:                                 \n\t"
+"                                            \n\t"
+" ldp q6,q7,[x1],32                          \n\t" // Load b+4  into quad
+"                                            \n\t"
+" fmla v12.2d,v0.2d,v4.d[0]                  \n\t" // Accummulate
+" fmla v14.2d,v0.2d,v4.d[1]                  \n\t" // Accummulate
+"                                            \n\t"
+" fmla v13.2d,v1.2d,v4.d[0]                  \n\t" // Accummulate
+" fmla v15.2d,v1.2d,v4.d[1]                  \n\t" // Accummulate
+"                                            \n\t"
+" ldp q2,q3,[x0],32                          \n\t" // Load a+4  into quad
+"                                            \n\t"
+" fmla v16.2d,v0.2d,v5.d[0]                  \n\t" // Accummulate
+" fmla v18.2d,v0.2d,v5.d[1]                  \n\t" // Accummulate
+"                                            \n\t"
+" fmla v17.2d,v1.2d,v5.d[0]                  \n\t" // Accummulate
+" fmla v19.2d,v1.2d,v5.d[1]                  \n\t" // Accummulate
+"                                            \n\t"
+" ld1r {v30.2d},[x7]                         \n\t" // Load alpha.
+"                                            \n\t"
+" fmla v12.2d,v2.2d,v6.d[0]                  \n\t" // Accummulate
+" fmla v14.2d,v2.2d,v6.d[1]                  \n\t" // Accummulate
+"                                            \n\t"
+" fmla v13.2d,v3.2d,v6.d[0]                  \n\t" // Accummulate
+" fmla v15.2d,v3.2d,v6.d[1]                  \n\t" // Accummulate
+"                                            \n\t"
+" fmla v16.2d,v2.2d,v7.d[0]                  \n\t" // Accummulate
+" fmla v18.2d,v2.2d,v7.d[1]                  \n\t" // Accummulate
+"                                            \n\t"
+" fmla v17.2d,v3.2d,v7.d[0]                  \n\t" // Accummulate
+" fmla v19.2d,v3.2d,v7.d[1]                  \n\t" // Accummulate
+"                                            \n\t"
+" .DCONSIDERKLEFT:                           \n\t" 
+" cmp x6,0                                   \n\t" // If k_left == 0, we are done.
+" beq .DPOSTACCUM                            \n\t" // else, we enter the k_left loop.
+"                                            \n\t"
+".DLOOPKLEFT:                                \n\t"
+"                                            \n\t"
+" prfm pldl1keep,[x0,#1024]                  \n\t" // Prefetch.
+" prfm pldl1keep,[x1,#1024]                  \n\t" // Prefetch.
+"                                            \n\t"
+" ldp q0,q1,[x0],32                          \n\t" // Load a    into quad
+" ldp q4,q5,[x1],32                          \n\t" // Load b    into quad
+"                                            \n\t"
+//" sub x6,x6,1                                \n\t"
+"                                            \n\t"
+" fmla v12.2d,v0.2d,v4.d[0]                  \n\t" // Accummulate
+" fmla v14.2d,v0.2d,v4.d[1]                  \n\t" // Accummulate
+"                                            \n\t"
+" fmla v13.2d,v1.2d,v4.d[0]                  \n\t" // Accummulate
+" fmla v15.2d,v1.2d,v4.d[1]                  \n\t" // Accummulate
+"                                            \n\t"
+" fmla v16.2d,v0.2d,v5.d[0]                  \n\t" // Accummulate
+" fmla v18.2d,v0.2d,v5.d[1]                  \n\t" // Accummulate
+"                                            \n\t"
+" fmla v17.2d,v1.2d,v5.d[0]                  \n\t" // Accummulate
+" fmla v19.2d,v1.2d,v5.d[1]                  \n\t" // Accummulate
+"                                            \n\t"
+//" cmp x6,0                                   \n\t" // Iterate again.
+//" bne .DLOOPKLEFT                            \n\t" // if i!=0.
+"                                            \n\t"
+" .DPOSTACCUM:                               \n\t"
+" ld1r {v30.2d},[x7]                         \n\t" // Load alpha.
+"                                            \n\t"
+" cmp x13,#1                                 \n\t" // If rs_c != 1 (column-major)
+" bne .DGENSTORED                            \n\t"
+"                                            \n\t"
+" .DCOLSTORED:                               \n\t" // C is column-major.
+" fcmp d31,#0.0                              \n\t"
+" beq .DBETAZEROCOLSTORED                    \n\t" // Taking care of the beta==0 case.
+"                                            \n\t"
+" ldr x2,%[caddr]                            \n\t" // Load address of C.
+"                                            \n\t"
 "                                            \n\t"
 " ldp q0,q1,[x2]                             \n\t" // Load c    into quad and increment by cs_c
 " add x2,x2,x10                              \n\t"
@@ -537,38 +635,140 @@ __asm__ volatile
 " add x2,x2,x10                              \n\t"
 " ldp q6,q7,[x2]                             \n\t" // Load c    into quad and increment by cs_c
 "                                            \n\t"
-" ld1r {v30.2d},[x7]                         \n\t" // Load alpha
 "                                            \n\t"
-" fmul v0.2d,v0.2d,v31.d[0]                  \n\t" // Scale by beta
-" fmul v1.2d,v1.2d,v31.d[0]                  \n\t" // Scale by beta
-" fmul v2.2d,v2.2d,v31.d[0]                  \n\t" // Scale by beta
-" fmul v3.2d,v3.2d,v31.d[0]                  \n\t" // Scale by beta
-" fmul v4.2d,v4.2d,v31.d[0]                  \n\t" // Scale by beta
-" fmul v5.2d,v5.2d,v31.d[0]                  \n\t" // Scale by beta
-" fmul v6.2d,v6.2d,v31.d[0]                  \n\t" // Scale by beta
-" fmul v7.2d,v7.2d,v31.d[0]                  \n\t" // Scale by beta
+" fmul v20.2d,v0.2d,v31.d[0]                 \n\t" // Scale by beta
+" fmul v21.2d,v1.2d,v31.d[0]                 \n\t" // Scale by beta
+" fmul v22.2d,v2.2d,v31.d[0]                 \n\t" // Scale by beta
+" fmul v23.2d,v3.2d,v31.d[0]                 \n\t" // Scale by beta
+" fmul v24.2d,v4.2d,v31.d[0]                 \n\t" // Scale by beta
+" fmul v25.2d,v5.2d,v31.d[0]                 \n\t" // Scale by beta
+" fmul v26.2d,v6.2d,v31.d[0]                 \n\t" // Scale by beta
+" fmul v27.2d,v7.2d,v31.d[0]                 \n\t" // Scale by beta
 "                                            \n\t"
 " prfm pldl2keep,[x16]                       \n\t"
 " prfm pldl2keep,[x17]                       \n\t"
 "                                            \n\t"
-" fmla v0.2d,v12.2d,v30.d[0]                 \n\t" // Scale by alpha
-" fmla v1.2d,v13.2d,v30.d[0]                 \n\t" // Scale by alpha
-" fmla v2.2d,v14.2d,v30.d[0]                 \n\t" // Scale by alpha
-" fmla v3.2d,v15.2d,v30.d[0]                 \n\t" // Scale by alpha
-" fmla v4.2d,v16.2d,v30.d[0]                 \n\t" // Scale by alpha
-" fmla v5.2d,v17.2d,v30.d[0]                 \n\t" // Scale by alpha
-" fmla v6.2d,v18.2d,v30.d[0]                 \n\t" // Scale by alpha
-" fmla v7.2d,v19.2d,v30.d[0]                 \n\t" // Scale by alpha
+" .DBETAZEROCOLSTORED:                       \n\t" // If beta==0, we won't read from C (nor scale).
 "                                            \n\t"
 " ldr x2,%[caddr]                            \n\t" // Load address of C
 "                                            \n\t"
-" stp q0,q1,[x2]                             \n\t" // Store quad into c    and increment by cs_c
+" fmla v20.2d,v12.2d,v30.d[0]                \n\t" // Scale by alpha
+" fmla v21.2d,v13.2d,v30.d[0]                \n\t" // Scale by alpha
+" fmla v22.2d,v14.2d,v30.d[0]                \n\t" // Scale by alpha
+" fmla v23.2d,v15.2d,v30.d[0]                \n\t" // Scale by alpha
+" fmla v24.2d,v16.2d,v30.d[0]                \n\t" // Scale by alpha
+" fmla v25.2d,v17.2d,v30.d[0]                \n\t" // Scale by alpha
+" fmla v26.2d,v18.2d,v30.d[0]                \n\t" // Scale by alpha
+" fmla v27.2d,v19.2d,v30.d[0]                \n\t" // Scale by alpha
+"                                            \n\t"
+" stp q20,q21,[x2]                           \n\t" // Store quad into c    and increment by cs_c
 " add x2,x2,x10                              \n\t"
-" stp q2,q3,[x2]                             \n\t" // Store quad into c+4  and increment by cs_c
+" stp q22,q23,[x2]                           \n\t" // Store quad into c+4  and increment by cs_c
 " add x2,x2,x10                              \n\t"
-" stp q4,q5,[x2]                             \n\t" // Store quad into c+8  and increment by cs_c
+" stp q24,q25,[x2]                           \n\t" // Store quad into c+8  and increment by cs_c
 " add x2,x2,x10                              \n\t"
-" stp q6,q7,[x2]                             \n\t" // Store quad into c+16 and increment by cs_c
+" stp q26,q27,[x2]                           \n\t" // Store quad into c+16 and increment by cs_c
+"                                            \n\t"
+" b .DEND                                    \n\t" // Done (TODO: this obviously needs to be moved down to remove jump).
+"                                            \n\t"
+" .DGENSTORED:                               \n\t" // C is general-stride stored.
+"                                            \n\t"
+" fcmp d31,#0.0                              \n\t"
+" beq .DBETAZEROGENSTORED                    \n\t"
+"                                            \n\t" // If beta!=0, then we can read from C.
+"                                            \n\t" // TODO: this was done fast. Rearrange to remove so many address reloads.
+" ldr x2,%[caddr]                            \n\t" // Load address of C.
+"                                            \n\t"
+" ld1 {v0.d}[0],[x2],x14                     \n\t" // Load c00  into quad and increment by rs_c.
+" ld1 {v0.d}[1],[x2],x14                     \n\t" // Load c01  into quad and increment by rs_c.
+" ld1 {v1.d}[0],[x2],x14                     \n\t" // Load c02  into quad and increment by rs_c.
+" ld1 {v1.d}[1],[x2],x14                     \n\t" // Load c03  into quad and increment by rs_c.
+"                                            \n\t"
+" ldr x2,%[caddr]                            \n\t" // Load address of C.
+" add x2,x2,x10                              \n\t" // c += cs_c.
+"                                            \n\t"
+" ld1 {v2.d}[0],[x2],x14                     \n\t" // Load c10  into quad and increment by rs_c.
+" ld1 {v2.d}[1],[x2],x14                     \n\t" // Load c11  into quad and increment by rs_c.
+" ld1 {v3.d}[0],[x2],x14                     \n\t" // Load c12  into quad and increment by rs_c.
+" ld1 {v3.d}[1],[x2],x14                     \n\t" // Load c13  into quad and increment by rs_c.
+"                                            \n\t"
+" ldr x2,%[caddr]                            \n\t" // Load address of C.
+" add x2,x2,x10                              \n\t" // c += cs_c.
+" add x2,x2,x10                              \n\t" // c += cs_c.
+"                                            \n\t"
+" ld1 {v4.d}[0],[x2],x14                    \n\t" // Load c10  into quad and increment by rs_c.
+" ld1 {v4.d}[1],[x2],x14                    \n\t" // Load c11  into quad and increment by rs_c.
+" ld1 {v5.d}[0],[x2],x14                    \n\t" // Load c12  into quad and increment by rs_c.
+" ld1 {v5.d}[1],[x2],x14                    \n\t" // Load c13  into quad and increment by rs_c.
+"                                            \n\t"
+" ldr x2,%[caddr]                            \n\t" // Load address of C.
+" add x2,x2,x10                              \n\t" // c += cs_c.
+" add x2,x2,x10                              \n\t" // c += cs_c.
+" add x2,x2,x10                              \n\t" // c += cs_c.
+"                                            \n\t"
+" ld1 {v6.d}[0],[x2],x14                    \n\t" // Load c10  into quad and increment by rs_c.
+" ld1 {v6.d}[1],[x2],x14                    \n\t" // Load c11  into quad and increment by rs_c.
+" ld1 {v7.d}[0],[x2],x14                    \n\t" // Load c12  into quad and increment by rs_c.
+" ld1 {v7.d}[1],[x2],x14                    \n\t" // Load c13  into quad and increment by rs_c.
+"                                            \n\t"
+" prfm pldl1keep,[x16,0]                     \n\t" // Prefetch.
+" prfm pldl1keep,[x17,0]                     \n\t" // Prefetch.
+"                                            \n\t"
+" fmul v20.2d,v0.2d,v31.d[0]                 \n\t" // Scale by beta
+" fmul v21.2d,v1.2d,v31.d[0]                 \n\t" // Scale by beta
+" fmul v22.2d,v2.2d,v31.d[0]                 \n\t" // Scale by beta
+" fmul v23.2d,v3.2d,v31.d[0]                 \n\t" // Scale by beta
+" fmul v24.2d,v4.2d,v31.d[0]                 \n\t" // Scale by beta
+" fmul v25.2d,v5.2d,v31.d[0]                 \n\t" // Scale by beta
+" fmul v26.2d,v6.2d,v31.d[0]                 \n\t" // Scale by beta
+" fmul v27.2d,v7.2d,v31.d[0]                 \n\t" // Scale by beta
+"                                            \n\t"
+" .DBETAZEROGENSTORED:                       \n\t" // If beta==0, we cannot read from C (nor scale).
+"                                            \n\t"
+" fmla v20.2d,v12.2d,v30.d[0]                \n\t" // Scale by alpha
+" fmla v21.2d,v13.2d,v30.d[0]                \n\t" // Scale by alpha
+" fmla v22.2d,v14.2d,v30.d[0]                \n\t" // Scale by alpha
+" fmla v23.2d,v15.2d,v30.d[0]                \n\t" // Scale by alpha
+" fmla v24.2d,v16.2d,v30.d[0]                \n\t" // Scale by alpha
+" fmla v25.2d,v17.2d,v30.d[0]                \n\t" // Scale by alpha
+" fmla v26.2d,v18.2d,v30.d[0]                \n\t" // Scale by alpha
+" fmla v27.2d,v19.2d,v30.d[0]                \n\t" // Scale by alpha
+"                                            \n\t"
+" ldr x2,%[caddr]                            \n\t" // Load address of C.
+"                                            \n\t"
+" st1 {v20.d}[0],[x2],x14                     \n\t" // Store c00  into quad and increment by rs_c.
+" st1 {v20.d}[1],[x2],x14                     \n\t" // Store c01  into quad and increment by rs_c.
+" st1 {v21.d}[0],[x2],x14                     \n\t" // Store c02  into quad and increment by rs_c.
+" st1 {v21.d}[1],[x2],x14                     \n\t" // Store c03  into quad and increment by rs_c.
+"                                            \n\t"
+" ldr x2,%[caddr]                            \n\t" // Load address of C.
+" add x2,x2,x10                              \n\t" // c += cs_c.
+"                                            \n\t"
+" st1 {v22.d}[0],[x2],x14                     \n\t" // Store c10  into quad and increment by rs_c.
+" st1 {v22.d}[1],[x2],x14                     \n\t" // Store c11  into quad and increment by rs_c.
+" st1 {v23.d}[0],[x2],x14                     \n\t" // Store c12  into quad and increment by rs_c.
+" st1 {v23.d}[1],[x2],x14                     \n\t" // Store c13  into quad and increment by rs_c.
+"                                            \n\t"
+" ldr x2,%[caddr]                            \n\t" // Load address of C.
+" add x2,x2,x10                              \n\t" // c += cs_c.
+" add x2,x2,x10                              \n\t" // c += cs_c.
+"                                            \n\t"
+" st1 {v24.d}[0],[x2],x14                    \n\t" // Store c10  into quad and increment by rs_c.
+" st1 {v24.d}[1],[x2],x14                    \n\t" // Store c11  into quad and increment by rs_c.
+" st1 {v25.d}[0],[x2],x14                    \n\t" // Store c12  into quad and increment by rs_c.
+" st1 {v25.d}[1],[x2],x14                    \n\t" // Store c13  into quad and increment by rs_c.
+"                                            \n\t"
+" ldr x2,%[caddr]                            \n\t" // Load address of C.
+" add x2,x2,x10                              \n\t" // c += cs_c.
+" add x2,x2,x10                              \n\t" // c += cs_c.
+" add x2,x2,x10                              \n\t" // c += cs_c.
+"                                            \n\t"
+" st1 {v26.d}[0],[x2],x14                    \n\t" // Store c10  into quad and increment by rs_c.
+" st1 {v26.d}[1],[x2],x14                    \n\t" // Store c11  into quad and increment by rs_c.
+" st1 {v27.d}[0],[x2],x14                    \n\t" // Store c12  into quad and increment by rs_c.
+" st1 {v27.d}[1],[x2],x14                    \n\t" // Store c13  into quad and increment by rs_c.
+"                                            \n\t"
+" .DEND:                                     \n\t" // Done!
 "                                            \n\t"
 :// output operands (none)
 :// input operands
@@ -587,13 +787,15 @@ __asm__ volatile
  "x0","x1","x2",
  "x4","x5","x6",
  "x7","x8","x9",
- "x10","x11","x12",
+ "x10","x11","x12","x13","x14","x16","x17",
  "v0","v1","v2",
  "v3","v4","v5",
  "v6","v7","v8",
  "v9","v10","v11",
  "v12","v13","v14",
  "v15","v16","v17","v18","v19",
+ "v20","v21","v22","v23",
+ "v24","v25","v26","v27",
  "v30","v31"
 );
 

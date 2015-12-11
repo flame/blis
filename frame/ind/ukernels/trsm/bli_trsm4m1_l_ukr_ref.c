@@ -66,6 +66,16 @@ void PASTEMAC(ch,varname)( \
 	dim_t             iter, i, j, l; \
 	dim_t             n_behind; \
 \
+/*
+PASTEMAC(chr,fprintm)( stdout, "trsm4m1_l_ukr: a11p_r", m, m, \
+                       a_r, 1, PASTEMAC(chr,packmr), "%4.1f", "" ); \
+PASTEMAC(chr,fprintm)( stdout, "trsm4m1_l_ukr: a11p_i", m, m, \
+                       a_i, 1, PASTEMAC(chr,packmr), "%4.1f", "" ); \
+PASTEMAC(chr,fprintm)( stdout, "trsm4m1_l_ukr: b11p_r", m, n, \
+                       b_r, PASTEMAC(chr,packnr), 1, "%4.1f", "" ); \
+PASTEMAC(chr,fprintm)( stdout, "trsm4m1_l_ukr: b11p_i", m, n, \
+                       b_i, PASTEMAC(chr,packnr), 1, "%4.1f", "" ); \
+*/ \
 \
 	for ( iter = 0; iter < m; ++iter ) \
 	{ \
@@ -136,6 +146,13 @@ void PASTEMAC(ch,varname)( \
 			PASTEMAC(chr,copys)( beta11c_i, *beta11_i ); \
 		} \
 	} \
+\
+/*
+PASTEMAC(chr,fprintm)( stdout, "trsm4m1_l_ukr: b11p_r after", m, n, \
+                       b_r, PASTEMAC(chr,packnr), 1, "%4.1f", "" ); \
+PASTEMAC(chr,fprintm)( stdout, "trsm4m1_l_ukr: b11p_i after", m, n, \
+                       b_i, PASTEMAC(chr,packnr), 1, "%4.1f", "" ); \
+*/ \
 }
 
 INSERT_GENTFUNCCO_BASIC0( trsm4m1_l_ukr_ref )

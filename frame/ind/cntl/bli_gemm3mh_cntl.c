@@ -143,7 +143,7 @@ void bli_gemm3mh_cntl_init()
 	gemm3mh_packa_cntl_ro
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT2,
+	                           BLIS_VARIANT1,
 	                           gemm3mh_mr,
 	                           gemm3mh_kr,
 	                           FALSE, // do NOT invert diagonal
@@ -155,7 +155,7 @@ void bli_gemm3mh_cntl_init()
 	gemm3mh_packb_cntl_ro
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT2,
+	                           BLIS_VARIANT1,
 	                           gemm3mh_kr,
 	                           gemm3mh_nr,
 	                           FALSE, // do NOT invert diagonal
@@ -168,7 +168,7 @@ void bli_gemm3mh_cntl_init()
 	gemm3mh_packa_cntl_io
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT2,
+	                           BLIS_VARIANT1,
 	                           gemm3mh_mr,
 	                           gemm3mh_kr,
 	                           FALSE, // do NOT invert diagonal
@@ -180,7 +180,7 @@ void bli_gemm3mh_cntl_init()
 	gemm3mh_packb_cntl_io
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT2,
+	                           BLIS_VARIANT1,
 	                           gemm3mh_kr,
 	                           gemm3mh_nr,
 	                           FALSE, // do NOT invert diagonal
@@ -193,7 +193,7 @@ void bli_gemm3mh_cntl_init()
 	gemm3mh_packa_cntl_rpi
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT2,
+	                           BLIS_VARIANT1,
 	                           gemm3mh_mr,
 	                           gemm3mh_kr,
 	                           FALSE, // do NOT invert diagonal
@@ -205,7 +205,7 @@ void bli_gemm3mh_cntl_init()
 	gemm3mh_packb_cntl_rpi
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT2,
+	                           BLIS_VARIANT1,
 	                           gemm3mh_kr,
 	                           gemm3mh_nr,
 	                           FALSE, // do NOT invert diagonal

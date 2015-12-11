@@ -40,12 +40,27 @@
 
 #ifdef __cplusplus
   // Language is C++; define restrict as nothing.
+  #ifndef restrict
   #define restrict
+  #endif
 #elif __STDC_VERSION__ >= 199901L
   // Language is C99 (or later); do nothing since restrict is recognized.
 #else
   // Language is pre-C99; define restrict as nothing.
+  #ifndef restrict
   #define restrict
+  #endif
+#endif
+
+
+// -- Define typeof() operator if using non-GNU compiler --
+
+#ifndef __GNUC__
+  #define typeof __typeof__
+#else
+  #ifndef typeof
+  #define typeof __typeof__
+  #endif
 #endif
 
 

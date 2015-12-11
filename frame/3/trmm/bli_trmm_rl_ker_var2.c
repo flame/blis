@@ -198,6 +198,7 @@ void PASTEMAC(ch,varname)( \
 	inc_t           ss_b_num; \
 	inc_t           ss_b_den; \
 	inc_t           ps_b_cur; \
+	inc_t           is_b_cur; \
 	auxinfo_t       aux; \
 \
 	/*
@@ -305,6 +306,9 @@ void PASTEMAC(ch,varname)( \
 	istep_a = PACKMR * k_full; \
 	istep_b = PACKNR * k; \
 \
+	if ( bli_is_odd( istep_a ) ) istep_a += 1; \
+	if ( bli_is_odd( istep_b ) ) istep_b += 1; \
+\
 	/* Save the pack schemas of A and B to the auxinfo_t object. */ \
 	bli_auxinfo_set_schema_a( schema_a, aux ); \
 	bli_auxinfo_set_schema_b( schema_b, aux ); \
@@ -350,15 +354,15 @@ void PASTEMAC(ch,varname)( \
 		{ \
 			/* Compute the panel stride for the current diagonal-
 			   intersecting micro-panel. */ \
-			ps_b_cur  = k_b1121 * PACKNR; \
-			ps_b_cur += ( bli_is_odd( ps_b_cur ) ? 1 : 0 ); \
-			ps_b_cur  = ( ps_b_cur * ss_b_num ) / ss_b_den; \
+			is_b_cur  = k_b1121 * PACKNR; \
+			is_b_cur += ( bli_is_odd( is_b_cur ) ? 1 : 0 ); \
+			ps_b_cur  = ( is_b_cur * ss_b_num ) / ss_b_den; \
 \
 			if ( trmm_r_jr_my_iter( j, jr_thread ) ) { \
 \
 			/* Save the 4m1/3m1 imaginary stride of B to the auxinfo_t
 			   object. */ \
-			bli_auxinfo_set_is_b( PACKNR * k_b1121, aux ); \
+			bli_auxinfo_set_is_b( is_b_cur, aux ); \
 \
 			/* Loop over the m dimension (MR rows at a time). */ \
 			for ( i = 0; i < m_iter; ++i ) \

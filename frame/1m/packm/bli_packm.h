@@ -42,7 +42,6 @@
 #include "bli_packm_unb_var1.h"
 
 #include "bli_packm_blk_var1.h"
-#include "bli_packm_blk_var2.h"
 
 #include "bli_packm_struc_cxk.h"
 #include "bli_packm_struc_cxk_4mi.h"

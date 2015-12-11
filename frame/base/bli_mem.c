@@ -117,17 +117,19 @@ void bli_mem_acquire_m( siz_t     req_size,
 			// the struct's pblk_t field.
 			bli_pool_checkout_block( pblk, pool );
 
+			// Query the size of the blocks in the pool so we can store it in
+			// the mem_t object. At this point, it is guaranteed to be at
+			// least as large as req_size. (NOTE: We must perform the query
+			// within the critical section to ensure that the pool hasn't
+			// changed, as unlikely as that would be.)
+			block_size = bli_pool_block_size( pool );
+
 		}
 		// END CRITICAL SECTION
 
 #ifdef BLIS_ENABLE_PTHREADS
 		pthread_mutex_unlock( &mem_manager_mutex );
 #endif
-
-		// Query the size of the blocks in the pool so we can store it in the
-		// mem_t object. At this point, it is guaranteed to be at least as
-		// large as req_size.
-		block_size = bli_pool_block_size( pool );
 
 		// Initialize the mem_t object with:
 		// - the buffer type (a packbuf_t value),
@@ -148,6 +150,8 @@ void bli_mem_release( mem_t* mem )
 	packbuf_t buf_type;
 	pool_t*   pool;
 	pblk_t*   pblk;
+	siz_t     block_size_cur;
+	siz_t     block_size_prev;
 
 	// Make sure the API is initialized.
 	bli_mem_init();
@@ -172,6 +176,11 @@ void bli_mem_release( mem_t* mem )
 		// Extract the address of the pblk_t struct within the mem_t struct.
 		pblk = bli_mem_pblk( mem );
 
+		// Query the size of the blocks that were in the pool at the time
+		// the pblk_t was checked out. (This is used below, in the critical
+		// section.)
+		block_size_prev = bli_mem_size( mem );
+
 #ifdef BLIS_ENABLE_OPENMP
 		_Pragma( "omp critical (mem)" )
 #endif
@@ -182,8 +191,26 @@ void bli_mem_release( mem_t* mem )
 		// BEGIN CRITICAL SECTION
 		{
 
-			// Check the block back into the pool.
-			bli_pool_checkin_block( pblk, pool );
+			// Query the size of the blocks currently in the pool.
+			block_size_cur = bli_pool_block_size( pool );
+
+			// If the block size of the pool has changed since the pblk_t
+			// was checked out, then we need to free the pblk_t rather
+			// than check it back in. Why? Because the pool's block size
+			// has (most likely) increased to meet changing needs (example:
+			// larger cache blocksizes). Thus, the current pblk_t's smaller
+			// allocated size is of no use anymore.
+			if ( block_size_cur != block_size_prev )
+			{
+				// Free the pblk_t using the appropriate function in the
+				// pool API.
+				bli_pool_free_block( pblk );
+			}
+			else
+			{
+				// Check the block back into the pool.
+				bli_pool_checkin_block( pblk, pool );
+			}
 
 		}
 		// END CRITICAL SECTION
@@ -281,6 +308,41 @@ void bli_mem_init( void )
 #endif
 }
 
+void bli_mem_reinit( void )
+{
+
+#ifdef BLIS_ENABLE_OPENMP
+	_Pragma( "omp critical (mem)" )
+#endif
+#ifdef BLIS_ENABLE_PTHREADS
+	pthread_mutex_lock( &mem_manager_mutex );
+#endif
+
+	// BEGIN CRITICAL SECTION
+	{
+		// If for some reason the memory pools have not yet been
+		// initialized (unlikely), we emulate the body of bli_mem_init().
+		if ( bli_mem_is_init == FALSE )
+		{
+			// Initialize the memory pools.
+			bli_mem_init_pools();
+
+			// After initialization, mark the API as initialized.
+			bli_mem_is_init = TRUE;
+		}
+		else
+		{
+			// Reinitialize the memory pools.
+			bli_mem_reinit_pools();
+		}
+	}
+	// END CRITICAL SECTION
+
+#ifdef BLIS_ENABLE_PTHREADS
+	pthread_mutex_unlock( &mem_manager_mutex );
+#endif
+}
+
 void bli_mem_finalize( void )
 {
 	// If the initialization flag is FALSE, we know the API is already
@@ -331,15 +393,80 @@ void bli_mem_init_pools( void )
 	dim_t index_b      = bli_packbuf_index( BLIS_BUFFER_FOR_B_PANEL );
 	dim_t index_c      = bli_packbuf_index( BLIS_BUFFER_FOR_C_PANEL );
 
+	siz_t align_size   = BLIS_POOL_ADDR_ALIGN_SIZE;
+
+	siz_t block_size_a = 0;
+	siz_t block_size_b = 0;
+	siz_t block_size_c = 0;
+
+	// Start with empty pools.
 	dim_t num_blocks_a = 0;
 	dim_t num_blocks_b = 0;
 	dim_t num_blocks_c = 0;
+
+	// Determine the block size for each memory pool.
+	bli_mem_compute_pool_block_sizes( &block_size_a,
+	                                  &block_size_b,
+	                                  &block_size_c );
+
+	// Initialize the memory pools for A, B, and C.
+	bli_pool_init( num_blocks_a, block_size_a, align_size, &pools[ index_a ] );
+	bli_pool_init( num_blocks_b, block_size_b, align_size, &pools[ index_b ] );
+	bli_pool_init( num_blocks_c, block_size_c, align_size, &pools[ index_c ] );
+}
+
+void bli_mem_reinit_pools( void )
+{
+	// Map each of the packbuf_t values to an index starting at zero.
+	dim_t index_a      = bli_packbuf_index( BLIS_BUFFER_FOR_A_BLOCK );
+	dim_t index_b      = bli_packbuf_index( BLIS_BUFFER_FOR_B_PANEL );
+	dim_t index_c      = bli_packbuf_index( BLIS_BUFFER_FOR_C_PANEL );
 
 	siz_t align_size   = BLIS_POOL_ADDR_ALIGN_SIZE;
 
 	siz_t block_size_a = 0;
 	siz_t block_size_b = 0;
 	siz_t block_size_c = 0;
+
+	// Query the number of blocks currently allocated in each pool.
+	dim_t num_blocks_a = bli_pool_num_blocks( &pools[ index_a ] );
+	dim_t num_blocks_b = bli_pool_num_blocks( &pools[ index_b ] );
+	dim_t num_blocks_c = bli_pool_num_blocks( &pools[ index_c ] );
+
+	// Determine the block size for each memory pool.
+	bli_mem_compute_pool_block_sizes( &block_size_a,
+	                                  &block_size_b,
+	                                  &block_size_c );
+
+	// Reinitialize the memory pools for A, B, and C with the same number
+	// of blocks as before, except with new block sizes.
+	bli_pool_reinit( num_blocks_a, block_size_a, align_size, &pools[ index_a ] );
+	bli_pool_reinit( num_blocks_b, block_size_b, align_size, &pools[ index_b ] );
+	bli_pool_reinit( num_blocks_c, block_size_c, align_size, &pools[ index_c ] );
+}
+
+void bli_mem_finalize_pools( void )
+{
+	// Map each of the packbuf_t values to an index starting at zero.
+	dim_t index_a = bli_packbuf_index( BLIS_BUFFER_FOR_A_BLOCK );
+	dim_t index_b = bli_packbuf_index( BLIS_BUFFER_FOR_B_PANEL );
+	dim_t index_c = bli_packbuf_index( BLIS_BUFFER_FOR_C_PANEL );
+
+	// Finalize the memory pools for A, B, and C.
+	bli_pool_finalize( &pools[ index_a ] );
+	bli_pool_finalize( &pools[ index_b ] );
+	bli_pool_finalize( &pools[ index_c ] );
+}
+
+// -----------------------------------------------------------------------------
+
+void bli_mem_compute_pool_block_sizes( siz_t* bs_a,
+                                       siz_t* bs_b,
+                                       siz_t* bs_c )
+{
+	siz_t bs_cand_a = 0;
+	siz_t bs_cand_b = 0;
+	siz_t bs_cand_c = 0;
 
 	ind_t im;
 	num_t dt;
@@ -355,38 +482,24 @@ void bli_mem_init_pools( void )
 			// Avoid considering induced methods for real datatypes.
 			if ( bli_is_complex( dt ) || im == BLIS_NAT )
 			{
-				siz_t bs_a, bs_b, bs_c;
-//printf( "bli_mem_init_pools: considering dt %lu im %lu\n", dt, im );
-				bli_mem_compute_pool_block_sizes_dt( dt, im,
-				                                     &bs_a,
-				                                     &bs_b,
-				                                     &bs_c );
+				siz_t bs_dt_a, bs_dt_b, bs_dt_c;
 
-//printf( "bli_mem_init_pools: bs a b c = %lu %lu %lu\n", bs_a, bs_b, bs_c );
-				block_size_a = bli_max( bs_a, block_size_a );
-				block_size_b = bli_max( bs_b, block_size_b );
-				block_size_c = bli_max( bs_c, block_size_c );
+				bli_mem_compute_pool_block_sizes_dt( dt, im,
+				                                     &bs_dt_a,
+				                                     &bs_dt_b,
+				                                     &bs_dt_c );
+
+				bs_cand_a = bli_max( bs_dt_a, bs_cand_a );
+				bs_cand_b = bli_max( bs_dt_b, bs_cand_b );
+				bs_cand_c = bli_max( bs_dt_c, bs_cand_c );
 			}
 		}
 	}
 
-	// Initialize the memory pools for A, B, and C.
-	bli_pool_init( num_blocks_a, block_size_a, align_size, &pools[ index_a ] );
-	bli_pool_init( num_blocks_b, block_size_b, align_size, &pools[ index_b ] );
-	bli_pool_init( num_blocks_c, block_size_c, align_size, &pools[ index_c ] );
-}
-
-void bli_mem_finalize_pools( void )
-{
-	// Map each of the packbuf_t values to an index starting at zero.
-	dim_t index_a = bli_packbuf_index( BLIS_BUFFER_FOR_A_BLOCK );
-	dim_t index_b = bli_packbuf_index( BLIS_BUFFER_FOR_B_PANEL );
-	dim_t index_c = bli_packbuf_index( BLIS_BUFFER_FOR_C_PANEL );
-
-	// Finalize the memory pools for A, B, and C.
-	bli_pool_finalize( &pools[ index_a ] );
-	bli_pool_finalize( &pools[ index_b ] );
-	bli_pool_finalize( &pools[ index_c ] );
+	// Save the results.
+	*bs_a = bs_cand_a;
+	*bs_b = bs_cand_b;
+	*bs_c = bs_cand_c;
 }
 
 // -----------------------------------------------------------------------------

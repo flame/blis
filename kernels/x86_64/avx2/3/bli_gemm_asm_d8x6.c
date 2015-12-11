@@ -84,6 +84,8 @@ void bli_sgemm_asm_16x6(
 	__asm__ volatile
 	(
 	"                                            \n\t"
+	"vzeroall                                    \n\t" // zero all xmm/ymm registers.
+	"                                            \n\t"
 	"                                            \n\t"
 	"movq                %2, %%rax               \n\t" // load address of a.
 	"movq                %3, %%rbx               \n\t" // load address of b.
@@ -107,18 +109,6 @@ void bli_sgemm_asm_16x6(
 	"prefetcht0   7 * 8(%%rdx,%%rdi)             \n\t" // prefetch c + 4*cs_c
 	"prefetcht0   7 * 8(%%rdx,%%rdi,2)           \n\t" // prefetch c + 5*cs_c
 	"                                            \n\t"
-	"vxorps    %%ymm4,  %%ymm4,  %%ymm4          \n\t"
-	"vxorps    %%ymm5,  %%ymm5,  %%ymm5          \n\t"
-	"vxorps    %%ymm6,  %%ymm6,  %%ymm6          \n\t"
-	"vxorps    %%ymm7,  %%ymm7,  %%ymm7          \n\t"
-	"vxorps    %%ymm8,  %%ymm8,  %%ymm8          \n\t"
-	"vxorps    %%ymm9,  %%ymm9,  %%ymm9          \n\t"
-	"vxorps    %%ymm10, %%ymm10, %%ymm10         \n\t"
-	"vxorps    %%ymm11, %%ymm11, %%ymm11         \n\t"
-	"vxorps    %%ymm12, %%ymm12, %%ymm12         \n\t"
-	"vxorps    %%ymm13, %%ymm13, %%ymm13         \n\t"
-	"vxorps    %%ymm14, %%ymm14, %%ymm14         \n\t"
-	"vxorps    %%ymm15, %%ymm15, %%ymm15         \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
@@ -705,6 +695,8 @@ void bli_dgemm_asm_8x6(
 	__asm__ volatile
 	(
 	"                                            \n\t"
+	"vzeroall                                    \n\t" // zero all xmm/ymm registers.
+	"                                            \n\t"
 	"                                            \n\t"
 	"movq                %2, %%rax               \n\t" // load address of a.
 	"movq                %3, %%rbx               \n\t" // load address of b.
@@ -728,18 +720,6 @@ void bli_dgemm_asm_8x6(
 	"prefetcht0   7 * 8(%%rdx,%%rdi)             \n\t" // prefetch c + 4*cs_c
 	"prefetcht0   7 * 8(%%rdx,%%rdi,2)           \n\t" // prefetch c + 5*cs_c
 	"                                            \n\t"
-	"vxorpd    %%ymm4,  %%ymm4,  %%ymm4          \n\t"
-	"vxorpd    %%ymm5,  %%ymm5,  %%ymm5          \n\t"
-	"vxorpd    %%ymm6,  %%ymm6,  %%ymm6          \n\t"
-	"vxorpd    %%ymm7,  %%ymm7,  %%ymm7          \n\t"
-	"vxorpd    %%ymm8,  %%ymm8,  %%ymm8          \n\t"
-	"vxorpd    %%ymm9,  %%ymm9,  %%ymm9          \n\t"
-	"vxorpd    %%ymm10, %%ymm10, %%ymm10         \n\t"
-	"vxorpd    %%ymm11, %%ymm11, %%ymm11         \n\t"
-	"vxorpd    %%ymm12, %%ymm12, %%ymm12         \n\t"
-	"vxorpd    %%ymm13, %%ymm13, %%ymm13         \n\t"
-	"vxorpd    %%ymm14, %%ymm14, %%ymm14         \n\t"
-	"vxorpd    %%ymm15, %%ymm15, %%ymm15         \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"

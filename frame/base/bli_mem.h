@@ -33,6 +33,7 @@
 */
 
 void   bli_mem_init( void );
+void   bli_mem_reinit( void );
 void   bli_mem_finalize( void );
 bool_t bli_mem_is_initialized( void );
 
@@ -52,8 +53,12 @@ siz_t bli_mem_pool_size( packbuf_t buf_type );
 // -----------------------------------------------------------------------------
 
 void bli_mem_init_pools( void );
+void bli_mem_reinit_pools( void );
 void bli_mem_finalize_pools( void );
 
+void bli_mem_compute_pool_block_sizes( siz_t* bs_a,
+                                       siz_t* bs_b,
+                                       siz_t* bs_c );
 void bli_mem_compute_pool_block_sizes_dt( num_t  dt,
                                           ind_t  method,
                                           siz_t* bs_a,

@@ -137,7 +137,7 @@ void bli_gemm4mb_cntl_init()
 	gemm4mb_packa_cntl
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT2,
+	                           BLIS_VARIANT1,
 	                           gemm4mb_mr,
 	                           gemm4mb_kr,
 	                           FALSE, // do NOT invert diagonal
@@ -149,7 +149,7 @@ void bli_gemm4mb_cntl_init()
 	gemm4mb_packb_cntl
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT2,
+	                           BLIS_VARIANT1,
 	                           gemm4mb_kr,
 	                           gemm4mb_nr,
 	                           FALSE, // do NOT invert diagonal

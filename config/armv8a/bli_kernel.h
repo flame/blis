@@ -51,12 +51,12 @@
 //     (b) MR (for zero-padding purposes when MR and NR are "swapped")
 //
 
-#define BLIS_DEFAULT_MC_S              416 // 1280 //160 // 160 // 160 //2048 //336 
-#define BLIS_DEFAULT_KC_S              704 //1280 //672 //528 // 856 //2048 //528 
+#define BLIS_DEFAULT_MC_S              336
+#define BLIS_DEFAULT_KC_S              336
 #define BLIS_DEFAULT_NC_S              4096
 
-#define BLIS_DEFAULT_MC_D              80 //176 
-#define BLIS_DEFAULT_KC_D              336 //368 
+#define BLIS_DEFAULT_MC_D              160
+#define BLIS_DEFAULT_KC_D              304
 #define BLIS_DEFAULT_NC_D              4096
 
 #define BLIS_DEFAULT_MC_C              64
@@ -131,8 +131,6 @@
 
 //#define BLIS_PACKDIM_MR_Z              (BLIS_DEFAULT_MR_Z + ...)
 //#define BLIS_PACKDIM_NR_Z              (BLIS_DEFAULT_NR_Z + ...)
-
-
 
 // -- LEVEL-2 KERNEL CONSTANTS -------------------------------------------------
 

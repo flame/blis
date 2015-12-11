@@ -550,8 +550,10 @@ err_t bli_check_matrix_strides( dim_t m, dim_t n, inc_t rs, inc_t cs, inc_t is )
 	{
 		if ( rs == 1 && cs == 1 )
 		{
-			// Only allow rs == cs == 1 for scalars.
-			if ( m > 1 || n > 1 )
+			// If rs == cs == 1, then we must be dealing with an m-by-1, a
+			// 1-by-n, or a 1-by-1 matrix and thus at least one of the
+			// dimensions, m or n, must be unit (even if the other is zero).
+			if ( m != 1 && n != 1 )
 				return BLIS_INVALID_DIM_STRIDE_COMBINATION;
 		}
 		else if ( rs == 1 )

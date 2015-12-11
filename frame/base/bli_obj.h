@@ -80,6 +80,7 @@ void bli_obj_create_const_copy_of( obj_t* a, obj_t* b );
 
 void bli_adjust_strides( dim_t  m,
                          dim_t  n,
+                         siz_t  elem_size,
                          inc_t* rs,
                          inc_t* cs,
                          inc_t* is );
