@@ -1,4 +1,5 @@
 #include "bli_config.h"
+#include "bli_config_macro_defs.h"
 #include "bli_system.h"
 #include "bli_type_defs.h"
 #include "bli_cblas.h"
