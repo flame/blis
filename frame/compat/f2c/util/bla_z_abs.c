@@ -38,7 +38,7 @@
 
 double bla_z_abs(bla_dcomplex *z)
 {
-	return( bla_f__cabs( bli_zbla_real( *z ),
+	return( bla_f__cabs( bli_zreal( *z ),
 	                     bli_zimag( *z ) ) );
 }
 

@@ -233,7 +233,7 @@ L20:
     }
     *c__ = 0.;
     bli_zsets( 1., 0., *s );
-    bli_zsets( bli_zbla_real(*cb), bli_zimag(*cb), *ca );
+    bli_zsets( bli_zreal(*cb), bli_zimag(*cb), *ca );
     goto L20;
 L10:
     scale = bla_z_abs(ca) + bla_z_abs(cb);
@@ -247,15 +247,15 @@ L10:
     d__2 = bla_z_abs(&z__3);
     norm = scale * sqrt(d__1 * d__1 + d__2 * d__2);
     d__1 = bla_z_abs(ca);
-    bli_zsets( (bli_zbla_real(*ca) / d__1), (bli_zimag(*ca) / d__1), z__1 );
-    bli_zsets( (bli_zbla_real(z__1)), (bli_zimag(z__1)), alpha );
+    bli_zsets( (bli_zreal(*ca) / d__1), (bli_zimag(*ca) / d__1), z__1 );
+    bli_zsets( (bli_zreal(z__1)), (bli_zimag(z__1)), alpha );
     *c__ = bla_z_abs(ca) / norm;
     bla_d_cnjg(&z__3, cb);
-    bli_zsets( (bli_zbla_real(alpha) * bli_zbla_real(z__3) - bli_zimag(alpha) * bli_zimag(z__3)), (bli_zbla_real(alpha) * bli_zimag(z__3) + bli_zimag(alpha) * bli_zbla_real(z__3)), z__2 );
-    bli_zsets( (bli_zbla_real(z__2) / norm), (bli_zimag(z__2) / norm), z__1 );
-    bli_zsets( bli_zbla_real(z__1), bli_zimag(z__1), *s );
-    bli_zsets( (norm * bli_zbla_real(alpha)), (norm * bli_zimag(alpha)), z__1 );
-    bli_zsets( bli_zbla_real(z__1), bli_zimag(z__1), *ca );
+    bli_zsets( (bli_zreal(alpha) * bli_zreal(z__3) - bli_zimag(alpha) * bli_zimag(z__3)), (bli_zreal(alpha) * bli_zimag(z__3) + bli_zimag(alpha) * bli_zreal(z__3)), z__2 );
+    bli_zsets( (bli_zreal(z__2) / norm), (bli_zimag(z__2) / norm), z__1 );
+    bli_zsets( bli_zreal(z__1), bli_zimag(z__1), *s );
+    bli_zsets( (norm * bli_zreal(alpha)), (norm * bli_zimag(alpha)), z__1 );
+    bli_zsets( bli_zreal(z__1), bli_zimag(z__1), *ca );
 L20:
     return 0;
 } /* zrotg_ */
