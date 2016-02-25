@@ -36,9 +36,9 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-double bla_z_abs(doublecomplex *z)
+double bla_z_abs(bla_dcomplex *z)
 {
-	return( bla_f__cabs( bli_zreal( *z ),
+	return( bla_f__cabs( bli_zbla_real( *z ),
 	                     bli_zimag( *z ) ) );
 }
 

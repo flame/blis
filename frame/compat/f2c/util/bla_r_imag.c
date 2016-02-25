@@ -36,7 +36,7 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-real bla_r_imag(singlecomplex *z)
+bla_real bla_r_imag(bla_scomplex *z)
 {
 	return bli_cimag( *z );
 }

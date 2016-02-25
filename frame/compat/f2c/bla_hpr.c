@@ -41,23 +41,23 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(c,hpr)(character *uplo, integer *n, real *alpha, singlecomplex *x, integer *incx, singlecomplex *ap)
+/* Subroutine */ int PASTEF77(c,hpr)(bla_character *uplo, bla_integer *n, bla_real *alpha, bla_scomplex *x, bla_integer *incx, bla_scomplex *ap)
 {
     /* System generated locals */
-    integer i__1, i__2, i__3, i__4, i__5;
-    real r__1;
-    singlecomplex q__1, q__2;
+    bla_integer i__1, i__2, i__3, i__4, i__5;
+    bla_real r__1;
+    bla_scomplex q__1, q__2;
 
     /* Builtin functions */
-    void bla_r_cnjg(singlecomplex *, singlecomplex *);
+    void bla_r_cnjg(bla_scomplex *, bla_scomplex *);
 
     /* Local variables */
-    integer info;
-    singlecomplex temp;
-    integer i__, j, k;
-    extern logical PASTEF770(lsame)(character *, character *, ftnlen, ftnlen);
-    integer kk, ix, jx, kx = 0;
-    extern /* Subroutine */ int PASTEF770(xerbla)(character *, integer *, ftnlen);
+    bla_integer info;
+    bla_scomplex temp;
+    bla_integer i__, j, k;
+    extern bla_logical PASTEF770(lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
+    bla_integer kk, ix, jx, kx = 0;
+    extern /* Subroutine */ int PASTEF770(xerbla)(bla_character *, bla_integer *, ftnlen);
 
 /*     .. Scalar Arguments .. */
 /*     .. Array Arguments .. */
@@ -70,7 +70,7 @@
 
 /*     A := alpha*x*conjg( x' ) + A, */
 
-/*  where alpha is a real scalar, x is an n element vector and A is an */
+/*  where alpha is a bla_real scalar, x is an n element vector and A is an */
 /*  n by n hermitian matrix, supplied in packed form. */
 
 /*  Parameters */
@@ -353,23 +353,23 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(z,hpr)(character *uplo, integer *n, doublereal *alpha, doublecomplex *x, integer *incx, doublecomplex *ap)
+/* Subroutine */ int PASTEF77(z,hpr)(bla_character *uplo, bla_integer *n, bla_double *alpha, bla_dcomplex *x, bla_integer *incx, bla_dcomplex *ap)
 {
     /* System generated locals */
-    integer i__1, i__2, i__3, i__4, i__5;
-    doublereal d__1;
-    doublecomplex z__1, z__2;
+    bla_integer i__1, i__2, i__3, i__4, i__5;
+    bla_double d__1;
+    bla_dcomplex z__1, z__2;
 
     /* Builtin functions */
-    void bla_d_cnjg(doublecomplex *, doublecomplex *);
+    void bla_d_cnjg(bla_dcomplex *, bla_dcomplex *);
 
     /* Local variables */
-    integer info;
-    doublecomplex temp;
-    integer i__, j, k;
-    extern logical PASTEF770(lsame)(character *, character *, ftnlen, ftnlen);
-    integer kk, ix, jx, kx = 0;
-    extern /* Subroutine */ int PASTEF770(xerbla)(character *, integer *, ftnlen);
+    bla_integer info;
+    bla_dcomplex temp;
+    bla_integer i__, j, k;
+    extern bla_logical PASTEF770(lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
+    bla_integer kk, ix, jx, kx = 0;
+    extern /* Subroutine */ int PASTEF770(xerbla)(bla_character *, bla_integer *, ftnlen);
 
 /*     .. Scalar Arguments .. */
 /*     .. Array Arguments .. */
@@ -382,7 +382,7 @@
 
 /*     A := alpha*x*conjg( x' ) + A, */
 
-/*  where alpha is a real scalar, x is an n element vector and A is an */
+/*  where alpha is a bla_real scalar, x is an n element vector and A is an */
 /*  n by n hermitian matrix, supplied in packed form. */
 
 /*  Parameters */
@@ -506,32 +506,32 @@
 	    i__1 = *n;
 	    for (j = 1; j <= i__1; ++j) {
 		i__2 = j;
-		if (bli_zreal(x[i__2]) != 0. || bli_zimag(x[i__2]) != 0.) {
+		if (bli_zbla_real(x[i__2]) != 0. || bli_zimag(x[i__2]) != 0.) {
 		    bla_d_cnjg(&z__2, &x[j]);
-		    bli_zsets( (*alpha * bli_zreal(z__2)), (*alpha * bli_zimag(z__2)), z__1 );
-		    bli_zsets( (bli_zreal(z__1)), (bli_zimag(z__1)), temp );
+		    bli_zsets( (*alpha * bli_zbla_real(z__2)), (*alpha * bli_zimag(z__2)), z__1 );
+		    bli_zsets( (bli_zbla_real(z__1)), (bli_zimag(z__1)), temp );
 		    k = kk;
 		    i__2 = j - 1;
 		    for (i__ = 1; i__ <= i__2; ++i__) {
 			i__3 = k;
 			i__4 = k;
 			i__5 = i__;
-			bli_zsets( (bli_zreal(x[i__5]) * bli_zreal(temp) - bli_zimag(x[i__5]) * bli_zimag(temp)), (bli_zreal(x[i__5]) * bli_zimag(temp) + bli_zimag(x[i__5]) * bli_zreal(temp)), z__2 );
-			bli_zsets( (bli_zreal(ap[i__4]) + bli_zreal(z__2)), (bli_zimag(ap[i__4]) + bli_zimag(z__2)), z__1 );
-			bli_zsets( (bli_zreal(z__1)), (bli_zimag(z__1)), ap[i__3] );
+			bli_zsets( (bli_zbla_real(x[i__5]) * bli_zbla_real(temp) - bli_zimag(x[i__5]) * bli_zimag(temp)), (bli_zbla_real(x[i__5]) * bli_zimag(temp) + bli_zimag(x[i__5]) * bli_zbla_real(temp)), z__2 );
+			bli_zsets( (bli_zbla_real(ap[i__4]) + bli_zbla_real(z__2)), (bli_zimag(ap[i__4]) + bli_zimag(z__2)), z__1 );
+			bli_zsets( (bli_zbla_real(z__1)), (bli_zimag(z__1)), ap[i__3] );
 			++k;
 /* L10: */
 		    }
 		    i__2 = kk + j - 1;
 		    i__3 = kk + j - 1;
 		    i__4 = j;
-		    bli_zsets( (bli_zreal(x[i__4]) * bli_zreal(temp) - bli_zimag(x[i__4]) * bli_zimag(temp)), (bli_zreal(x[i__4]) * bli_zimag(temp) + bli_zimag(x[i__4]) * bli_zreal(temp)), z__1 );
-		    d__1 = bli_zreal(ap[i__3]) + bli_zreal(z__1);
+		    bli_zsets( (bli_zbla_real(x[i__4]) * bli_zbla_real(temp) - bli_zimag(x[i__4]) * bli_zimag(temp)), (bli_zbla_real(x[i__4]) * bli_zimag(temp) + bli_zimag(x[i__4]) * bli_zbla_real(temp)), z__1 );
+		    d__1 = bli_zbla_real(ap[i__3]) + bli_zbla_real(z__1);
 		    bli_zsets( (d__1), (0.), ap[i__2] );
 		} else {
 		    i__2 = kk + j - 1;
 		    i__3 = kk + j - 1;
-		    d__1 = bli_zreal(ap[i__3]);
+		    d__1 = bli_zbla_real(ap[i__3]);
 		    bli_zsets( (d__1), (0.), ap[i__2] );
 		}
 		kk += j;
@@ -542,32 +542,32 @@
 	    i__1 = *n;
 	    for (j = 1; j <= i__1; ++j) {
 		i__2 = jx;
-		if (bli_zreal(x[i__2]) != 0. || bli_zimag(x[i__2]) != 0.) {
+		if (bli_zbla_real(x[i__2]) != 0. || bli_zimag(x[i__2]) != 0.) {
 		    bla_d_cnjg(&z__2, &x[jx]);
-		    bli_zsets( (*alpha * bli_zreal(z__2)), (*alpha * bli_zimag(z__2)), z__1 );
-		    bli_zsets( (bli_zreal(z__1)), (bli_zimag(z__1)), temp );
+		    bli_zsets( (*alpha * bli_zbla_real(z__2)), (*alpha * bli_zimag(z__2)), z__1 );
+		    bli_zsets( (bli_zbla_real(z__1)), (bli_zimag(z__1)), temp );
 		    ix = kx;
 		    i__2 = kk + j - 2;
 		    for (k = kk; k <= i__2; ++k) {
 			i__3 = k;
 			i__4 = k;
 			i__5 = ix;
-			bli_zsets( (bli_zreal(x[i__5]) * bli_zreal(temp) - bli_zimag(x[i__5]) * bli_zimag(temp)), (bli_zreal(x[i__5]) * bli_zimag(temp) + bli_zimag(x[i__5]) * bli_zreal(temp)), z__2 );
-			bli_zsets( (bli_zreal(ap[i__4]) + bli_zreal(z__2)), (bli_zimag(ap[i__4]) + bli_zimag(z__2)), z__1 );
-			bli_zsets( (bli_zreal(z__1)), (bli_zimag(z__1)), ap[i__3] );
+			bli_zsets( (bli_zbla_real(x[i__5]) * bli_zbla_real(temp) - bli_zimag(x[i__5]) * bli_zimag(temp)), (bli_zbla_real(x[i__5]) * bli_zimag(temp) + bli_zimag(x[i__5]) * bli_zbla_real(temp)), z__2 );
+			bli_zsets( (bli_zbla_real(ap[i__4]) + bli_zbla_real(z__2)), (bli_zimag(ap[i__4]) + bli_zimag(z__2)), z__1 );
+			bli_zsets( (bli_zbla_real(z__1)), (bli_zimag(z__1)), ap[i__3] );
 			ix += *incx;
 /* L30: */
 		    }
 		    i__2 = kk + j - 1;
 		    i__3 = kk + j - 1;
 		    i__4 = jx;
-		    bli_zsets( (bli_zreal(x[i__4]) * bli_zreal(temp) - bli_zimag(x[i__4]) * bli_zimag(temp)), (bli_zreal(x[i__4]) * bli_zimag(temp) + bli_zimag(x[i__4]) * bli_zreal(temp)), z__1 );
-		    d__1 = bli_zreal(ap[i__3]) + bli_zreal(z__1);
+		    bli_zsets( (bli_zbla_real(x[i__4]) * bli_zbla_real(temp) - bli_zimag(x[i__4]) * bli_zimag(temp)), (bli_zbla_real(x[i__4]) * bli_zimag(temp) + bli_zimag(x[i__4]) * bli_zbla_real(temp)), z__1 );
+		    d__1 = bli_zbla_real(ap[i__3]) + bli_zbla_real(z__1);
 		    bli_zsets( (d__1), (0.), ap[i__2] );
 		} else {
 		    i__2 = kk + j - 1;
 		    i__3 = kk + j - 1;
-		    d__1 = bli_zreal(ap[i__3]);
+		    d__1 = bli_zbla_real(ap[i__3]);
 		    bli_zsets( (d__1), (0.), ap[i__2] );
 		}
 		jx += *incx;
@@ -583,15 +583,15 @@
 	    i__1 = *n;
 	    for (j = 1; j <= i__1; ++j) {
 		i__2 = j;
-		if (bli_zreal(x[i__2]) != 0. || bli_zimag(x[i__2]) != 0.) {
+		if (bli_zbla_real(x[i__2]) != 0. || bli_zimag(x[i__2]) != 0.) {
 		    bla_d_cnjg(&z__2, &x[j]);
-		    bli_zsets( (*alpha * bli_zreal(z__2)), (*alpha * bli_zimag(z__2)), z__1 );
-		    bli_zsets( (bli_zreal(z__1)), (bli_zimag(z__1)), temp );
+		    bli_zsets( (*alpha * bli_zbla_real(z__2)), (*alpha * bli_zimag(z__2)), z__1 );
+		    bli_zsets( (bli_zbla_real(z__1)), (bli_zimag(z__1)), temp );
 		    i__2 = kk;
 		    i__3 = kk;
 		    i__4 = j;
-		    bli_zsets( (bli_zreal(temp) * bli_zreal(x[i__4]) - bli_zimag(temp) * bli_zimag(x[i__4])), (bli_zreal(temp) * bli_zimag(x[i__4]) + bli_zimag(temp) * bli_zreal(x[i__4])), z__1 );
-		    d__1 = bli_zreal(ap[i__3]) + bli_zreal(z__1);
+		    bli_zsets( (bli_zbla_real(temp) * bli_zbla_real(x[i__4]) - bli_zimag(temp) * bli_zimag(x[i__4])), (bli_zbla_real(temp) * bli_zimag(x[i__4]) + bli_zimag(temp) * bli_zbla_real(x[i__4])), z__1 );
+		    d__1 = bli_zbla_real(ap[i__3]) + bli_zbla_real(z__1);
 		    bli_zsets( (d__1), (0.), ap[i__2] );
 		    k = kk + 1;
 		    i__2 = *n;
@@ -599,16 +599,16 @@
 			i__3 = k;
 			i__4 = k;
 			i__5 = i__;
-			bli_zsets( (bli_zreal(x[i__5]) * bli_zreal(temp) - bli_zimag(x[i__5]) * bli_zimag(temp)), (bli_zreal(x[i__5]) * bli_zimag(temp) + bli_zimag(x[i__5]) * bli_zreal(temp)), z__2 );
-			bli_zsets( (bli_zreal(ap[i__4]) + bli_zreal(z__2)), (bli_zimag(ap[i__4]) + bli_zimag(z__2)), z__1 );
-			bli_zsets( (bli_zreal(z__1)), (bli_zimag(z__1)), ap[i__3] );
+			bli_zsets( (bli_zbla_real(x[i__5]) * bli_zbla_real(temp) - bli_zimag(x[i__5]) * bli_zimag(temp)), (bli_zbla_real(x[i__5]) * bli_zimag(temp) + bli_zimag(x[i__5]) * bli_zbla_real(temp)), z__2 );
+			bli_zsets( (bli_zbla_real(ap[i__4]) + bli_zbla_real(z__2)), (bli_zimag(ap[i__4]) + bli_zimag(z__2)), z__1 );
+			bli_zsets( (bli_zbla_real(z__1)), (bli_zimag(z__1)), ap[i__3] );
 			++k;
 /* L50: */
 		    }
 		} else {
 		    i__2 = kk;
 		    i__3 = kk;
-		    d__1 = bli_zreal(ap[i__3]);
+		    d__1 = bli_zbla_real(ap[i__3]);
 		    bli_zsets( (d__1), (0.), ap[i__2] );
 		}
 		kk = kk + *n - j + 1;
@@ -619,15 +619,15 @@
 	    i__1 = *n;
 	    for (j = 1; j <= i__1; ++j) {
 		i__2 = jx;
-		if (bli_zreal(x[i__2]) != 0. || bli_zimag(x[i__2]) != 0.) {
+		if (bli_zbla_real(x[i__2]) != 0. || bli_zimag(x[i__2]) != 0.) {
 		    bla_d_cnjg(&z__2, &x[jx]);
-		    bli_zsets( (*alpha * bli_zreal(z__2)), (*alpha * bli_zimag(z__2)), z__1 );
-		    bli_zsets( (bli_zreal(z__1)), (bli_zimag(z__1)), temp );
+		    bli_zsets( (*alpha * bli_zbla_real(z__2)), (*alpha * bli_zimag(z__2)), z__1 );
+		    bli_zsets( (bli_zbla_real(z__1)), (bli_zimag(z__1)), temp );
 		    i__2 = kk;
 		    i__3 = kk;
 		    i__4 = jx;
-		    bli_zsets( (bli_zreal(temp) * bli_zreal(x[i__4]) - bli_zimag(temp) * bli_zimag(x[i__4])), (bli_zreal(temp) * bli_zimag(x[i__4]) + bli_zimag(temp) * bli_zreal(x[i__4])), z__1 );
-		    d__1 = bli_zreal(ap[i__3]) + bli_zreal(z__1);
+		    bli_zsets( (bli_zbla_real(temp) * bli_zbla_real(x[i__4]) - bli_zimag(temp) * bli_zimag(x[i__4])), (bli_zbla_real(temp) * bli_zimag(x[i__4]) + bli_zimag(temp) * bli_zbla_real(x[i__4])), z__1 );
+		    d__1 = bli_zbla_real(ap[i__3]) + bli_zbla_real(z__1);
 		    bli_zsets( (d__1), (0.), ap[i__2] );
 		    ix = jx;
 		    i__2 = kk + *n - j;
@@ -636,15 +636,15 @@
 			i__3 = k;
 			i__4 = k;
 			i__5 = ix;
-			bli_zsets( (bli_zreal(x[i__5]) * bli_zreal(temp) - bli_zimag(x[i__5]) * bli_zimag(temp)), (bli_zreal(x[i__5]) * bli_zimag(temp) + bli_zimag(x[i__5]) * bli_zreal(temp)), z__2 );
-			bli_zsets( (bli_zreal(ap[i__4]) + bli_zreal(z__2)), (bli_zimag(ap[i__4]) + bli_zimag(z__2)), z__1 );
-			bli_zsets( (bli_zreal(z__1)), (bli_zimag(z__1)), ap[i__3] );
+			bli_zsets( (bli_zbla_real(x[i__5]) * bli_zbla_real(temp) - bli_zimag(x[i__5]) * bli_zimag(temp)), (bli_zbla_real(x[i__5]) * bli_zimag(temp) + bli_zimag(x[i__5]) * bli_zbla_real(temp)), z__2 );
+			bli_zsets( (bli_zbla_real(ap[i__4]) + bli_zbla_real(z__2)), (bli_zimag(ap[i__4]) + bli_zimag(z__2)), z__1 );
+			bli_zsets( (bli_zbla_real(z__1)), (bli_zimag(z__1)), ap[i__3] );
 /* L70: */
 		    }
 		} else {
 		    i__2 = kk;
 		    i__3 = kk;
-		    d__1 = bli_zreal(ap[i__3]);
+		    d__1 = bli_zbla_real(ap[i__3]);
 		    bli_zsets( (d__1), (0.), ap[i__2] );
 		}
 		jx += *incx;

@@ -43,7 +43,7 @@
 
 /* Table of constant values */
 
-/* Subroutine */ int PASTEF770(xerbla)(character *srname, integer *info, ftnlen srname_len)
+/* Subroutine */ int PASTEF770(xerbla)(bla_character *srname, bla_integer *info, ftnlen srname_len)
 {
 /*  -- LAPACK auxiliary routine (preliminary version) -- */
 /*     Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd., */

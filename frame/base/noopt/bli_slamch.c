@@ -8,17 +8,17 @@ extern "C" {
 #endif
 #include "blis.h"
 
-double bli_pow_ri( real* a, integer* n );
+double bli_pow_ri( bla_real* a, bla_integer* n );
 
 /* Table of constant values */
 
-//static integer c__1 = 1;
-static real c_b32 = (float)0.;
+//static bla_integer c__1 = 1;
+static bla_real c_b32 = (float)0.;
 
-double bli_pow_ri(real *ap, integer *bp)
+double bli_pow_ri(bla_real *ap, bla_integer *bp)
 {
 	double        pow, x;
-	integer       n;
+	bla_integer       n;
 	unsigned long u;
 
 	pow = 1;
@@ -45,32 +45,32 @@ double bli_pow_ri(real *ap, integer *bp)
 	return pow;
 }
 
-real bli_slamch(character *cmach, ftnlen cmach_len)
+bla_real bli_slamch(bla_character *cmach, ftnlen cmach_len)
 {
     /* Initialized data */
 
-    static logical first = TRUE_;
+    static bla_logical first = TRUE_;
 
     /* System generated locals */
-    integer i__1;
-    real ret_val;
+    bla_integer i__1;
+    bla_real ret_val;
 
     /* Builtin functions */
-    double bli_pow_ri(real *, integer *);
+    double bli_pow_ri(bla_real *, bla_integer *);
 
     /* Local variables */
-    static real base;
-    static integer beta;
-    static real emin, prec, emax;
-    static integer imin, imax;
-    static logical lrnd;
-    static real rmin, rmax, t, rmach;
-    extern logical bli_lsame(character *, character *, ftnlen, ftnlen);
-    static real smnum, sfmin;
-    extern /* Subroutine */ int bli_slamc2(integer *, integer *, logical *, real 
-	    *, integer *, real *, integer *, real *);
-    static integer it;
-    static real rnd, eps;
+    static bla_real base;
+    static bla_integer beta;
+    static bla_real emin, prec, emax;
+    static bla_integer imin, imax;
+    static bla_logical lrnd;
+    static bla_real rmin, rmax, t, rmach;
+    extern bla_logical bli_lsame(bla_character *, bla_character *, ftnlen, ftnlen);
+    static bla_real smnum, sfmin;
+    extern /* Subroutine */ int bli_slamc2(bla_integer *, bla_integer *, bla_logical *, bla_real
+	    *, bla_integer *, bla_real *, bla_integer *, bla_real *);
+    static bla_integer it;
+    static bla_real rnd, eps;
 
 
 /*  -- LAPACK auxiliary routine (version 3.2) -- */
@@ -132,8 +132,8 @@ real bli_slamch(character *cmach, ftnlen cmach_len)
 
     if (first) {
 	bli_slamc2(&beta, &it, &lrnd, &eps, &imin, &rmin, &imax, &rmax);
-	base = (real) beta;
-	t = (real) it;
+	base = (bla_real) beta;
+	t = (bla_real) it;
 	if (lrnd) {
 	    rnd = (float)1.;
 	    i__1 = 1 - it;
@@ -144,8 +144,8 @@ real bli_slamch(character *cmach, ftnlen cmach_len)
 	    eps = bli_pow_ri(&base, &i__1);
 	}
 	prec = eps * base;
-	emin = (real) imin;
-	emax = (real) imax;
+	emin = (bla_real) imin;
+	emax = (bla_real) imax;
 	sfmin = rmin;
 	smnum = (float)1. / rmax;
 	if (smnum >= sfmin) {
@@ -190,26 +190,26 @@ real bli_slamch(character *cmach, ftnlen cmach_len)
 
 /* *********************************************************************** */
 
-/* Subroutine */ int bli_slamc1(integer *beta, integer *t, logical *rnd, logical 
+/* Subroutine */ int bli_slamc1(bla_integer *beta, bla_integer *t, bla_logical *rnd, bla_logical
 	*ieee1)
 {
     /* Initialized data */
 
-    static logical first = TRUE_;
+    static bla_logical first = TRUE_;
 
     /* System generated locals */
-    real r__1, r__2;
+    bla_real r__1, r__2;
 
     /* Local variables */
-    static logical lrnd;
-    static real a, b, c__, f;
-    static integer lbeta;
-    static real savec;
-    static logical lieee1;
-    static real t1, t2;
-    extern real bli_slamc3(real *, real *);
-    static integer lt;
-    static real one, qtr;
+    static bla_logical lrnd;
+    static bla_real a, b, c__, f;
+    static bla_integer lbeta;
+    static bla_real savec;
+    static bla_logical lieee1;
+    static bla_real t1, t2;
+    extern bla_real bli_slamc3(bla_real *, bla_real *);
+    static bla_integer lt;
+    static bla_real one, qtr;
 
 
 /*  -- LAPACK auxiliary routine (version 3.2) -- */
@@ -279,7 +279,7 @@ real bli_slamch(character *cmach, ftnlen cmach_len)
 /*        that relevant values are  stored and not held in registers,  or */
 /*        are not affected by optimizers. */
 
-/*        Compute  a = 2.0**m  with the  smallest positive integer m such */
+/*        Compute  a = 2.0**m  with the  smallest positive bla_integer m such */
 /*        that */
 
 /*           fl( a + 1.0 ) = a. */
@@ -298,7 +298,7 @@ L10:
 	}
 /* +       END WHILE */
 
-/*        Now compute  b = 2.0**m  with the smallest positive integer m */
+/*        Now compute  b = 2.0**m  with the smallest positive bla_integer m */
 /*        such that */
 
 /*           fl( a + b ) .gt. a. */
@@ -329,7 +329,7 @@ L20:
 /*        Now determine whether rounding or chopping occurs,  by adding a */
 /*        bit  less  than  beta/2  and a  bit  more  than  beta/2  to  a. */
 
-	b = (real) lbeta;
+	b = (bla_real) lbeta;
 	r__1 = b / 2;
 	r__2 = -b / 100;
 	f = bli_slamc3(&r__1, &r__2);
@@ -359,9 +359,9 @@ L20:
 	t2 = bli_slamc3(&r__1, &savec);
 	lieee1 = t1 == a && t2 > savec && lrnd;
 
-/*        Now find  the  mantissa, t.  It should  be the  integer part of */
+/*        Now find  the  mantissa, t.  It should  be the  bla_integer part of */
 /*        log to the base beta of a,  however it is safer to determine  t */
-/*        by powering.  So we find t as the smallest positive integer for */
+/*        by powering.  So we find t as the smallest positive bla_integer for */
 /*        which */
 
 /*           fl( beta**t + 1.0 ) = 1.0. */
@@ -398,49 +398,49 @@ L30:
 
 /* *********************************************************************** */
 
-/* Subroutine */ int bli_slamc2(integer *beta, integer *t, logical *rnd, real *
-	eps, integer *emin, real *rmin, integer *emax, real *rmax)
+/* Subroutine */ int bli_slamc2(bla_integer *beta, bla_integer *t, bla_logical *rnd, bla_real *
+	eps, bla_integer *emin, bla_real *rmin, bla_integer *emax, bla_real *rmax)
 {
     /* Initialized data */
 
-    static logical first = TRUE_;
-    static logical iwarn = FALSE_;
+    static bla_logical first = TRUE_;
+    static bla_logical iwarn = FALSE_;
 
     /* Format strings */
-    static character fmt_9999[] = "(//\002 WARNING. The value EMIN may be incorre\
+    static bla_character fmt_9999[] = "(//\002 WARNING. The value EMIN may be incorre\
 ct:-\002,\002  EMIN = \002,i8,/\002 If, after inspection, the value EMIN loo\
 ks\002,\002 acceptable please comment out \002,/\002 the IF block as marked \
 within the code of routine\002,\002 SLAMC2,\002,/\002 otherwise supply EMIN \
 explicitly.\002,/)";
 
     /* System generated locals */
-    integer i__1;
-    real r__1, r__2, r__3, r__4, r__5;
+    bla_integer i__1;
+    bla_real r__1, r__2, r__3, r__4, r__5;
 
     /* Builtin functions */
-    double bli_pow_ri(real *, integer *);
-    //integer s_wsfe(cilist *), do_fio(integer *, character *, ftnlen), e_wsfe();
+    double bli_pow_ri(bla_real *, bla_integer *);
+    //bla_integer s_wsfe(cilist *), do_fio(bla_integer *, bla_character *, ftnlen), e_wsfe();
 
     /* Local variables */
-    static logical ieee;
-    static real half;
-    static logical lrnd;
-    static real leps, zero, a, b, c__;
-    static integer i__, lbeta;
-    static real rbase;
-    static integer lemin, lemax, gnmin;
-    static real smnum;
-    static integer gpmin;
-    static real third, lrmin, lrmax, sixth;
-    static logical lieee1;
-    extern /* Subroutine */ int bli_slamc1(integer *, integer *, logical *, 
-	    logical *);
-    extern real bli_slamc3(real *, real *);
-    extern /* Subroutine */ int bli_slamc4(integer *, real *, integer *), 
-	    bli_slamc5(integer *, integer *, integer *, logical *, integer *, 
-	    real *);
-    static integer lt, ngnmin, ngpmin;
-    static real one, two;
+    static bla_logical ieee;
+    static bla_real half;
+    static bla_logical lrnd;
+    static bla_real leps, zero, a, b, c__;
+    static bla_integer i__, lbeta;
+    static bla_real rbase;
+    static bla_integer lemin, lemax, gnmin;
+    static bla_real smnum;
+    static bla_integer gpmin;
+    static bla_real third, lrmin, lrmax, sixth;
+    static bla_logical lieee1;
+    extern /* Subroutine */ int bli_slamc1(bla_integer *, bla_integer *, bla_logical *,
+	    bla_logical *);
+    extern bla_real bli_slamc3(bla_real *, bla_real *);
+    extern /* Subroutine */ int bli_slamc4(bla_integer *, bla_real *, bla_integer *),
+	    bli_slamc5(bla_integer *, bla_integer *, bla_integer *, bla_logical *, bla_integer *,
+	    bla_real *);
+    static bla_integer lt, ngnmin, ngpmin;
+    static bla_real one, two;
 
     /* Fortran I/O blocks */
     //static cilist io___58 = { 0, 6, 0, fmt_9999, 0 };
@@ -538,7 +538,7 @@ explicitly.\002,/)";
 
 /*        Start to find EPS. */
 
-	b = (real) lbeta;
+	b = (bla_real) lbeta;
 	i__1 = -lt;
 	a = bli_pow_ri(&b, &i__1);
 	leps = a;
@@ -660,7 +660,7 @@ L10:
 	    first = TRUE_;
 /*
 	    s_wsfe(&io___58);
-	    do_fio(&c__1, (character *)&lemin, (ftnlen)sizeof(integer));
+	    do_fio(&c__1, (bla_character *)&lemin, (ftnlen)sizeof(bla_integer));
 	    e_wsfe();
 */
 	    printf( "%s", fmt_9999 );
@@ -710,10 +710,10 @@ L10:
 
 /* *********************************************************************** */
 
-real bli_slamc3(real *a, real *b)
+bla_real bli_slamc3(bla_real *a, bla_real *b)
 {
     /* System generated locals */
-    real ret_val;
+    bla_real ret_val;
 
 
 /*  -- LAPACK auxiliary routine (version 3.2) -- */
@@ -752,18 +752,18 @@ real bli_slamc3(real *a, real *b)
 
 /* *********************************************************************** */
 
-/* Subroutine */ int bli_slamc4(integer *emin, real *start, integer *base)
+/* Subroutine */ int bli_slamc4(bla_integer *emin, bla_real *start, bla_integer *base)
 {
     /* System generated locals */
-    integer i__1;
-    real r__1;
+    bla_integer i__1;
+    bla_real r__1;
 
     /* Local variables */
-    static real zero, a;
-    static integer i__;
-    static real rbase, b1, b2, c1, c2, d1, d2;
-    extern real bli_slamc3(real *, real *);
-    static real one;
+    static bla_real zero, a;
+    static bla_integer i__;
+    static bla_real rbase, b1, b2, c1, c2, d1, d2;
+    extern bla_real bli_slamc3(bla_real *, bla_real *);
+    static bla_real one;
 
 
 /*  -- LAPACK auxiliary routine (version 3.2) -- */
@@ -850,22 +850,22 @@ L10:
 
 /* *********************************************************************** */
 
-/* Subroutine */ int bli_slamc5(integer *beta, integer *p, integer *emin, 
-	logical *ieee, integer *emax, real *rmax)
+/* Subroutine */ int bli_slamc5(bla_integer *beta, bla_integer *p, bla_integer *emin,
+	bla_logical *ieee, bla_integer *emax, bla_real *rmax)
 {
     /* System generated locals */
-    integer i__1;
-    real r__1;
+    bla_integer i__1;
+    bla_real r__1;
 
     /* Local variables */
-    static integer lexp;
-    static real oldy;
-    static integer uexp, i__;
-    static real y, z__;
-    static integer nbits;
-    extern real bli_slamc3(real *, real *);
-    static real recbas;
-    static integer exbits, expsum, try__;
+    static bla_integer lexp;
+    static bla_real oldy;
+    static bla_integer uexp, i__;
+    static bla_real y, z__;
+    static bla_integer nbits;
+    extern bla_real bli_slamc3(bla_real *, bla_real *);
+    static bla_real recbas;
+    static bla_integer exbits, expsum, try__;
 
 
 /*  -- LAPACK auxiliary routine (version 3.2) -- */
@@ -899,7 +899,7 @@ L10:
 /*          The minimum exponent before (gradual) underflow. */
 
 /*  IEEE    (input) LOGICAL */
-/*          A logical flag specifying whether or not the arithmetic */
+/*          A bla_logical flag specifying whether or not the arithmetic */
 /*          system is thought to comply with the IEEE standard. */
 
 /*  EMAX    (output) INTEGER */

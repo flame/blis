@@ -8,17 +8,17 @@ extern "C" {
 #endif
 #include "blis.h"
 
-double bli_pow_di( doublereal* a, integer* n );
+double bli_pow_di( bla_double* a, bla_integer* n );
 
 /* Table of constant values */
 
-//static integer c__1 = 1;
-static doublereal c_b32 = 0.;
+//static bla_integer c__1 = 1;
+static bla_double c_b32 = 0.;
 
-double bli_pow_di(doublereal *ap, integer *bp)
+double bli_pow_di(bla_double *ap, bla_integer *bp)
 {
 	double        pow, x;
-	integer       n;
+	bla_integer       n;
 	unsigned long u;
 
 	pow = 1;
@@ -45,32 +45,32 @@ double bli_pow_di(doublereal *ap, integer *bp)
 	return pow;
 }
 
-doublereal bli_dlamch(character *cmach, ftnlen cmach_len)
+bla_double bli_dlamch(bla_character *cmach, ftnlen cmach_len)
 {
     /* Initialized data */
 
-    static logical first = TRUE_;
+    static bla_logical first = TRUE_;
 
     /* System generated locals */
-    integer i__1;
-    doublereal ret_val;
+    bla_integer i__1;
+    bla_double ret_val;
 
     /* Builtin functions */
-    double bli_pow_di(doublereal *, integer *);
+    double bli_pow_di(bla_double *, bla_integer *);
 
     /* Local variables */
-    static doublereal base;
-    static integer beta;
-    static doublereal emin, prec, emax;
-    static integer imin, imax;
-    static logical lrnd;
-    static doublereal rmin, rmax, t, rmach;
-    extern logical bli_lsame(character *, character *, ftnlen, ftnlen);
-    static doublereal smnum, sfmin;
-    extern /* Subroutine */ int bli_dlamc2(integer *, integer *, logical *, 
-	    doublereal *, integer *, doublereal *, integer *, doublereal *);
-    static integer it;
-    static doublereal rnd, eps;
+    static bla_double base;
+    static bla_integer beta;
+    static bla_double emin, prec, emax;
+    static bla_integer imin, imax;
+    static bla_logical lrnd;
+    static bla_double rmin, rmax, t, rmach;
+    extern bla_logical bli_lsame(bla_character *, bla_character *, ftnlen, ftnlen);
+    static bla_double smnum, sfmin;
+    extern /* Subroutine */ int bli_dlamc2(bla_integer *, bla_integer *, bla_logical *,
+	    bla_double *, bla_integer *, bla_double *, bla_integer *, bla_double *);
+    static bla_integer it;
+    static bla_double rnd, eps;
 
 
 /*  -- LAPACK auxiliary routine (version 3.2) -- */
@@ -132,8 +132,8 @@ doublereal bli_dlamch(character *cmach, ftnlen cmach_len)
 
     if (first) {
 	bli_dlamc2(&beta, &it, &lrnd, &eps, &imin, &rmin, &imax, &rmax);
-	base = (doublereal) beta;
-	t = (doublereal) it;
+	base = (bla_double) beta;
+	t = (bla_double) it;
 	if (lrnd) {
 	    rnd = 1.;
 	    i__1 = 1 - it;
@@ -144,8 +144,8 @@ doublereal bli_dlamch(character *cmach, ftnlen cmach_len)
 	    eps = bli_pow_di(&base, &i__1);
 	}
 	prec = eps * base;
-	emin = (doublereal) imin;
-	emax = (doublereal) imax;
+	emin = (bla_double) imin;
+	emax = (bla_double) imax;
 	sfmin = rmin;
 	smnum = 1. / rmax;
 	if (smnum >= sfmin) {
@@ -190,26 +190,26 @@ doublereal bli_dlamch(character *cmach, ftnlen cmach_len)
 
 /* *********************************************************************** */
 
-/* Subroutine */ int bli_dlamc1(integer *beta, integer *t, logical *rnd, logical 
+/* Subroutine */ int bli_dlamc1(bla_integer *beta, bla_integer *t, bla_logical *rnd, bla_logical
 	*ieee1)
 {
     /* Initialized data */
 
-    static logical first = TRUE_;
+    static bla_logical first = TRUE_;
 
     /* System generated locals */
-    doublereal d__1, d__2;
+    bla_double d__1, d__2;
 
     /* Local variables */
-    static logical lrnd;
-    static doublereal a, b, c__, f;
-    static integer lbeta;
-    static doublereal savec;
-    extern doublereal bli_dlamc3(doublereal *, doublereal *);
-    static logical lieee1;
-    static doublereal t1, t2;
-    static integer lt;
-    static doublereal one, qtr;
+    static bla_logical lrnd;
+    static bla_double a, b, c__, f;
+    static bla_integer lbeta;
+    static bla_double savec;
+    extern bla_double bli_dlamc3(bla_double *, bla_double *);
+    static bla_logical lieee1;
+    static bla_double t1, t2;
+    static bla_integer lt;
+    static bla_double one, qtr;
 
 
 /*  -- LAPACK auxiliary routine (version 3.2) -- */
@@ -279,7 +279,7 @@ doublereal bli_dlamch(character *cmach, ftnlen cmach_len)
 /*        that relevant values are  stored and not held in registers,  or */
 /*        are not affected by optimizers. */
 
-/*        Compute  a = 2.0**m  with the  smallest positive integer m such */
+/*        Compute  a = 2.0**m  with the  smallest positive bla_integer m such */
 /*        that */
 
 /*           fl( a + 1.0 ) = a. */
@@ -298,7 +298,7 @@ L10:
 	}
 /* +       END WHILE */
 
-/*        Now compute  b = 2.0**m  with the smallest positive integer m */
+/*        Now compute  b = 2.0**m  with the smallest positive bla_integer m */
 /*        such that */
 
 /*           fl( a + b ) .gt. a. */
@@ -324,13 +324,13 @@ L20:
 	savec = c__;
 	d__1 = -a;
 	c__ = bli_dlamc3(&c__, &d__1);
-	lbeta = (integer) (c__ + qtr);
+	lbeta = (bla_integer) (c__ + qtr);
 
 
 /*        Now determine whether rounding or chopping occurs,  by adding a */
 /*        bit  less  than  beta/2  and a  bit  more  than  beta/2  to  a. */
 
-	b = (doublereal) lbeta;
+	b = (bla_double) lbeta;
 	d__1 = b / 2;
 	d__2 = -b / 100;
 	f = bli_dlamc3(&d__1, &d__2);
@@ -360,9 +360,9 @@ L20:
 	t2 = bli_dlamc3(&d__1, &savec);
 	lieee1 = t1 == a && t2 > savec && lrnd;
 
-/*        Now find  the  mantissa, t.  It should  be the  integer part of */
+/*        Now find  the  mantissa, t.  It should  be the  bla_integer part of */
 /*        log to the base beta of a,  however it is safer to determine  t */
-/*        by powering.  So we find t as the smallest positive integer for */
+/*        by powering.  So we find t as the smallest positive bla_integer for */
 /*        which */
 
 /*           fl( beta**t + 1.0 ) = 1.0. */
@@ -400,50 +400,50 @@ L30:
 
 /* *********************************************************************** */
 
-/* Subroutine */ int bli_dlamc2(integer *beta, integer *t, logical *rnd, 
-	doublereal *eps, integer *emin, doublereal *rmin, integer *emax, 
-	doublereal *rmax)
+/* Subroutine */ int bli_dlamc2(bla_integer *beta, bla_integer *t, bla_logical *rnd,
+	bla_double *eps, bla_integer *emin, bla_double *rmin, bla_integer *emax,
+	bla_double *rmax)
 {
     /* Initialized data */
 
-    static logical first = TRUE_;
-    static logical iwarn = FALSE_;
+    static bla_logical first = TRUE_;
+    static bla_logical iwarn = FALSE_;
 
     /* Format strings */
-    static character fmt_9999[] = "(//\002 WARNING. The value EMIN may be incorre\
+    static bla_character fmt_9999[] = "(//\002 WARNING. The value EMIN may be incorre\
 ct:-\002,\002  EMIN = \002,i8,/\002 If, after inspection, the value EMIN loo\
 ks\002,\002 acceptable please comment out \002,/\002 the IF block as marked \
 within the code of routine\002,\002 DLAMC2,\002,/\002 otherwise supply EMIN \
 explicitly.\002,/)";
 
     /* System generated locals */
-    integer i__1;
-    doublereal d__1, d__2, d__3, d__4, d__5;
+    bla_integer i__1;
+    bla_double d__1, d__2, d__3, d__4, d__5;
 
     /* Builtin functions */
-    double bli_pow_di(doublereal *, integer *);
-    //integer s_wsfe(cilist *), do_fio(integer *, character *, ftnlen), e_wsfe();
+    double bli_pow_di(bla_double *, bla_integer *);
+    //bla_integer s_wsfe(cilist *), do_fio(bla_integer *, bla_character *, ftnlen), e_wsfe();
 
     /* Local variables */
-    static logical ieee;
-    static doublereal half;
-    static logical lrnd;
-    static doublereal leps, zero, a, b, c__;
-    static integer i__, lbeta;
-    static doublereal rbase;
-    static integer lemin, lemax, gnmin;
-    static doublereal smnum;
-    static integer gpmin;
-    static doublereal third, lrmin, lrmax, sixth;
-    extern /* Subroutine */ int bli_dlamc1(integer *, integer *, logical *, 
-	    logical *);
-    extern doublereal bli_dlamc3(doublereal *, doublereal *);
-    static logical lieee1;
-    extern /* Subroutine */ int bli_dlamc4(integer *, doublereal *, integer *), 
-	    bli_dlamc5(integer *, integer *, integer *, logical *, integer *, 
-	    doublereal *);
-    static integer lt, ngnmin, ngpmin;
-    static doublereal one, two;
+    static bla_logical ieee;
+    static bla_double half;
+    static bla_logical lrnd;
+    static bla_double leps, zero, a, b, c__;
+    static bla_integer i__, lbeta;
+    static bla_double rbase;
+    static bla_integer lemin, lemax, gnmin;
+    static bla_double smnum;
+    static bla_integer gpmin;
+    static bla_double third, lrmin, lrmax, sixth;
+    extern /* Subroutine */ int bli_dlamc1(bla_integer *, bla_integer *, bla_logical *,
+	    bla_logical *);
+    extern bla_double bli_dlamc3(bla_double *, bla_double *);
+    static bla_logical lieee1;
+    extern /* Subroutine */ int bli_dlamc4(bla_integer *, bla_double *, bla_integer *),
+	    bli_dlamc5(bla_integer *, bla_integer *, bla_integer *, bla_logical *, bla_integer *,
+	    bla_double *);
+    static bla_integer lt, ngnmin, ngpmin;
+    static bla_double one, two;
 
     /* Fortran I/O blocks */
     //static cilist io___58 = { 0, 6, 0, fmt_9999, 0 };
@@ -541,7 +541,7 @@ explicitly.\002,/)";
 
 /*        Start to find EPS. */
 
-	b = (doublereal) lbeta;
+	b = (bla_double) lbeta;
 	i__1 = -lt;
 	a = bli_pow_di(&b, &i__1);
 	leps = a;
@@ -664,7 +664,7 @@ L10:
 	    first = TRUE_;
 /*
 	    s_wsfe(&io___58);
-	    do_fio(&c__1, (character *)&lemin, (ftnlen)sizeof(integer));
+	    do_fio(&c__1, (bla_character *)&lemin, (ftnlen)sizeof(bla_integer));
 	    e_wsfe();
 */
 	    printf( "%s", fmt_9999 );
@@ -715,10 +715,10 @@ L10:
 
 /* *********************************************************************** */
 
-doublereal bli_dlamc3(doublereal *a, doublereal *b)
+bla_double bli_dlamc3(bla_double *a, bla_double *b)
 {
     /* System generated locals */
-    doublereal ret_val;
+    bla_double ret_val;
 
 
 /*  -- LAPACK auxiliary routine (version 3.2) -- */
@@ -757,18 +757,18 @@ doublereal bli_dlamc3(doublereal *a, doublereal *b)
 
 /* *********************************************************************** */
 
-/* Subroutine */ int bli_dlamc4(integer *emin, doublereal *start, integer *base)
+/* Subroutine */ int bli_dlamc4(bla_integer *emin, bla_double *start, bla_integer *base)
 {
     /* System generated locals */
-    integer i__1;
-    doublereal d__1;
+    bla_integer i__1;
+    bla_double d__1;
 
     /* Local variables */
-    static doublereal zero, a;
-    static integer i__;
-    static doublereal rbase, b1, b2, c1, c2, d1, d2;
-    extern doublereal bli_dlamc3(doublereal *, doublereal *);
-    static doublereal one;
+    static bla_double zero, a;
+    static bla_integer i__;
+    static bla_double rbase, b1, b2, c1, c2, d1, d2;
+    extern bla_double bli_dlamc3(bla_double *, bla_double *);
+    static bla_double one;
 
 
 /*  -- LAPACK auxiliary routine (version 3.2) -- */
@@ -855,22 +855,22 @@ L10:
 
 /* *********************************************************************** */
 
-/* Subroutine */ int bli_dlamc5(integer *beta, integer *p, integer *emin, 
-	logical *ieee, integer *emax, doublereal *rmax)
+/* Subroutine */ int bli_dlamc5(bla_integer *beta, bla_integer *p, bla_integer *emin,
+	bla_logical *ieee, bla_integer *emax, bla_double *rmax)
 {
     /* System generated locals */
-    integer i__1;
-    doublereal d__1;
+    bla_integer i__1;
+    bla_double d__1;
 
     /* Local variables */
-    static integer lexp;
-    static doublereal oldy;
-    static integer uexp, i__;
-    static doublereal y, z__;
-    static integer nbits;
-    extern doublereal bli_dlamc3(doublereal *, doublereal *);
-    static doublereal recbas;
-    static integer exbits, expsum, try__;
+    static bla_integer lexp;
+    static bla_double oldy;
+    static bla_integer uexp, i__;
+    static bla_double y, z__;
+    static bla_integer nbits;
+    extern bla_double bli_dlamc3(bla_double *, bla_double *);
+    static bla_double recbas;
+    static bla_integer exbits, expsum, try__;
 
 
 /*  -- LAPACK auxiliary routine (version 3.2) -- */
@@ -904,7 +904,7 @@ L10:
 /*          The minimum exponent before (gradual) underflow. */
 
 /*  IEEE    (input) LOGICAL */
-/*          A logical flag specifying whether or not the arithmetic */
+/*          A bla_logical flag specifying whether or not the arithmetic */
 /*          system is thought to comply with the IEEE standard. */
 
 /*  EMAX    (output) INTEGER */

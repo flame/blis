@@ -32,4 +32,4 @@
 
 */
 
-doublereal bli_dlamch( character* cmach, ftnlen cmach_len );
+bla_double bli_dlamch( bla_character* cmach, ftnlen cmach_len );

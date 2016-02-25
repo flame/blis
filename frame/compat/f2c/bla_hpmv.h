@@ -36,7 +36,7 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-int PASTEF77(c,hpmv)(character *uplo, integer *n, singlecomplex *alpha, singlecomplex * ap, singlecomplex *x, integer *incx, singlecomplex *beta, singlecomplex *y, integer *incy);
-int PASTEF77(z,hpmv)(character *uplo, integer *n, doublecomplex *alpha, doublecomplex *ap, doublecomplex *x, integer *incx, doublecomplex *beta, doublecomplex *y, integer *incy);
+int PASTEF77(c,hpmv)(bla_character *uplo, bla_integer *n, bla_scomplex *alpha, bla_scomplex * ap, bla_scomplex *x, bla_integer *incx, bla_scomplex *beta, bla_scomplex *y, bla_integer *incy);
+int PASTEF77(z,hpmv)(bla_character *uplo, bla_integer *n, bla_dcomplex *alpha, bla_dcomplex *ap, bla_dcomplex *x, bla_integer *incx, bla_dcomplex *beta, bla_dcomplex *y, bla_integer *incy);
 
 #endif

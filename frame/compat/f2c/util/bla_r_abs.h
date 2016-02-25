@@ -36,7 +36,7 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-double bla_r_abs(real *x);
+double bla_r_abs(bla_real *x);
 
 #endif
 

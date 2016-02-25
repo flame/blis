@@ -41,26 +41,26 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(s,rotmg)(real *sd1, real *sd2, real *sx1, real *sy1, real *sparam)
+/* Subroutine */ int PASTEF77(s,rotmg)(bla_real *sd1, bla_real *sd2, bla_real *sx1, bla_real *sy1, bla_real *sparam)
 {
     /* Initialized data */
 
-    static real zero = 0.f;
-    static real one = 1.f;
-    static real two = 2.f;
-    static real gam = 4096.f;
-    static real gamsq = 16777200.f;
-    static real rgamsq = 5.96046e-8f;
+    static bla_real zero = 0.f;
+    static bla_real one = 1.f;
+    static bla_real two = 2.f;
+    static bla_real gam = 4096.f;
+    static bla_real gamsq = 16777200.f;
+    static bla_real rgamsq = 5.96046e-8f;
 
     /* Format strings */
 
     /* System generated locals */
-    real r__1;
+    bla_real r__1;
 
     /* Local variables */
-    real sflag, stemp, su, sp1, sp2, sq2, sq1,
+    bla_real sflag, stemp, su, sp1, sp2, sq2, sq1,
          sh11 = 0.f, sh21 = 0.f, sh12 = 0.f, sh22 = 0.f;
-    integer igo;
+    bla_integer igo;
 
     /* Assigned format variables */
 
@@ -281,26 +281,26 @@ L260:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(d,rotmg)(doublereal *dd1, doublereal *dd2, doublereal *dx1, doublereal *dy1, doublereal *dparam)
+/* Subroutine */ int PASTEF77(d,rotmg)(bla_double *dd1, bla_double *dd2, bla_double *dx1, bla_double *dy1, bla_double *dparam)
 {
     /* Initialized data */
 
-    static doublereal zero = 0.;
-    static doublereal one = 1.;
-    static doublereal two = 2.;
-    static doublereal gam = 4096.;
-    static doublereal gamsq = 16777216.;
-    static doublereal rgamsq = 5.9604645e-8;
+    static bla_double zero = 0.;
+    static bla_double one = 1.;
+    static bla_double two = 2.;
+    static bla_double gam = 4096.;
+    static bla_double gamsq = 16777216.;
+    static bla_double rgamsq = 5.9604645e-8;
 
     /* Format strings */
 
     /* System generated locals */
-    doublereal d__1;
+    bla_double d__1;
 
     /* Local variables */
-    doublereal dflag, dtemp, du, dp1, dp2, dq2, dq1,
+    bla_double dflag, dtemp, du, dp1, dp2, dq2, dq1,
                dh11 = 0.f, dh21 = 0.f, dh12 = 0.f, dh22 = 0.f;
-    integer igo;
+    bla_integer igo;
 
     /* Assigned format variables */
 

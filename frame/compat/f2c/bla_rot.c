@@ -41,15 +41,15 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(s,rot)(integer *n, real *sx, integer *incx, real *sy, integer *incy, real *c__, real *s)
+/* Subroutine */ int PASTEF77(s,rot)(bla_integer *n, bla_real *sx, bla_integer *incx, bla_real *sy, bla_integer *incy, bla_real *c__, bla_real *s)
 {
     /* System generated locals */
-    integer i__1;
+    bla_integer i__1;
 
     /* Local variables */
-    integer i__;
-    real stemp;
-    integer ix, iy;
+    bla_integer i__;
+    bla_real stemp;
+    bla_integer ix, iy;
 
 
 /*     applies a plane rotation. */
@@ -109,15 +109,15 @@ L20:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(d,rot)(integer *n, doublereal *dx, integer *incx, doublereal *dy, integer *incy, doublereal *c__, doublereal *s)
+/* Subroutine */ int PASTEF77(d,rot)(bla_integer *n, bla_double *dx, bla_integer *incx, bla_double *dy, bla_integer *incy, bla_double *c__, bla_double *s)
 {
     /* System generated locals */
-    integer i__1;
+    bla_integer i__1;
 
     /* Local variables */
-    integer i__;
-    doublereal dtemp;
-    integer ix, iy;
+    bla_integer i__;
+    bla_double dtemp;
+    bla_integer ix, iy;
 
 
 /*     applies a plane rotation. */
@@ -177,19 +177,19 @@ L20:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(cs,rot)(integer *n, singlecomplex *cx, integer *incx, singlecomplex *cy, integer *incy, real *c__, real *s)
+/* Subroutine */ int PASTEF77(cs,rot)(bla_integer *n, bla_scomplex *cx, bla_integer *incx, bla_scomplex *cy, bla_integer *incy, bla_real *c__, bla_real *s)
 {
     /* System generated locals */
-    integer i__1, i__2, i__3, i__4;
-    singlecomplex q__1, q__2, q__3;
+    bla_integer i__1, i__2, i__3, i__4;
+    bla_scomplex q__1, q__2, q__3;
 
     /* Local variables */
-    integer i__;
-    singlecomplex ctemp;
-    integer ix, iy;
+    bla_integer i__;
+    bla_scomplex ctemp;
+    bla_integer ix, iy;
 
 
-/*     applies a plane rotation, where the cos and sin (c and s) are real */
+/*     applies a plane rotation, where the cos and sin (c and s) are bla_real */
 /*     and the vectors cx and cy are complex. */
 /*     jack dongarra, linpack, 3/11/78. */
 
@@ -270,16 +270,16 @@ L20:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(zd,rot)(integer *n, doublecomplex *zx, integer *incx, doublecomplex *zy, integer *incy, doublereal *c__, doublereal *s)
+/* Subroutine */ int PASTEF77(zd,rot)(bla_integer *n, bla_dcomplex *zx, bla_integer *incx, bla_dcomplex *zy, bla_integer *incy, bla_double *c__, bla_double *s)
 {
     /* System generated locals */
-    integer i__1, i__2, i__3, i__4;
-    doublecomplex z__1, z__2, z__3;
+    bla_integer i__1, i__2, i__3, i__4;
+    bla_dcomplex z__1, z__2, z__3;
 
     /* Local variables */
-    integer i__;
-    doublecomplex ztemp;
-    integer ix, iy;
+    bla_integer i__;
+    bla_dcomplex ztemp;
+    bla_integer ix, iy;
 
 
 /*     applies a plane rotation, where the cos and sin (c and s) are */
@@ -313,20 +313,20 @@ L20:
     i__1 = *n;
     for (i__ = 1; i__ <= i__1; ++i__) {
 	i__2 = ix;
-	bli_zsets( (*c__ * bli_zreal(zx[i__2])), (*c__ * bli_zimag(zx[i__2])), z__2 );
+	bli_zsets( (*c__ * bli_zbla_real(zx[i__2])), (*c__ * bli_zimag(zx[i__2])), z__2 );
 	i__3 = iy;
-	bli_zsets( (*s * bli_zreal(zy[i__3])), (*s * bli_zimag(zy[i__3])), z__3 );
-	bli_zsets( (bli_zreal(z__2) + bli_zreal(z__3)), (bli_zimag(z__2) + bli_zimag(z__3)), z__1 );
-	bli_zsets( (bli_zreal(z__1)), (bli_zimag(z__1)), ztemp );
+	bli_zsets( (*s * bli_zbla_real(zy[i__3])), (*s * bli_zimag(zy[i__3])), z__3 );
+	bli_zsets( (bli_zbla_real(z__2) + bli_zbla_real(z__3)), (bli_zimag(z__2) + bli_zimag(z__3)), z__1 );
+	bli_zsets( (bli_zbla_real(z__1)), (bli_zimag(z__1)), ztemp );
 	i__2 = iy;
 	i__3 = iy;
-	bli_zsets( (*c__ * bli_zreal(zy[i__3])), (*c__ * bli_zimag(zy[i__3])), z__2 );
+	bli_zsets( (*c__ * bli_zbla_real(zy[i__3])), (*c__ * bli_zimag(zy[i__3])), z__2 );
 	i__4 = ix;
-	bli_zsets( (*s * bli_zreal(zx[i__4])), (*s * bli_zimag(zx[i__4])), z__3 );
-	bli_zsets( (bli_zreal(z__2) - bli_zreal(z__3)), (bli_zimag(z__2) - bli_zimag(z__3)), z__1 );
-	bli_zsets( (bli_zreal(z__1)), (bli_zimag(z__1)), zy[i__2] );
+	bli_zsets( (*s * bli_zbla_real(zx[i__4])), (*s * bli_zimag(zx[i__4])), z__3 );
+	bli_zsets( (bli_zbla_real(z__2) - bli_zbla_real(z__3)), (bli_zimag(z__2) - bli_zimag(z__3)), z__1 );
+	bli_zsets( (bli_zbla_real(z__1)), (bli_zimag(z__1)), zy[i__2] );
 	i__2 = ix;
-	bli_zsets( (bli_zreal(ztemp)), (bli_zimag(ztemp)), zx[i__2] );
+	bli_zsets( (bli_zbla_real(ztemp)), (bli_zimag(ztemp)), zx[i__2] );
 	ix += *incx;
 	iy += *incy;
 /* L10: */
@@ -339,20 +339,20 @@ L20:
     i__1 = *n;
     for (i__ = 1; i__ <= i__1; ++i__) {
 	i__2 = i__;
-	bli_zsets( (*c__ * bli_zreal(zx[i__2])), (*c__ * bli_zimag(zx[i__2])), z__2 );
+	bli_zsets( (*c__ * bli_zbla_real(zx[i__2])), (*c__ * bli_zimag(zx[i__2])), z__2 );
 	i__3 = i__;
-	bli_zsets( (*s * bli_zreal(zy[i__3])), (*s * bli_zimag(zy[i__3])), z__3 );
-	bli_zsets( (bli_zreal(z__2) + bli_zreal(z__3)), (bli_zimag(z__2) + bli_zimag(z__3)), z__1 );
-	bli_zsets( (bli_zreal(z__1)), (bli_zimag(z__1)), ztemp );
+	bli_zsets( (*s * bli_zbla_real(zy[i__3])), (*s * bli_zimag(zy[i__3])), z__3 );
+	bli_zsets( (bli_zbla_real(z__2) + bli_zbla_real(z__3)), (bli_zimag(z__2) + bli_zimag(z__3)), z__1 );
+	bli_zsets( (bli_zbla_real(z__1)), (bli_zimag(z__1)), ztemp );
 	i__2 = i__;
 	i__3 = i__;
-	bli_zsets( (*c__ * bli_zreal(zy[i__3])), (*c__ * bli_zimag(zy[i__3])), z__2 );
+	bli_zsets( (*c__ * bli_zbla_real(zy[i__3])), (*c__ * bli_zimag(zy[i__3])), z__2 );
 	i__4 = i__;
-	bli_zsets( (*s * bli_zreal(zx[i__4])), (*s * bli_zimag(zx[i__4])), z__3 );
-	bli_zsets( (bli_zreal(z__2) - bli_zreal(z__3)), (bli_zimag(z__2) - bli_zimag(z__3)), z__1 );
-	bli_zsets( (bli_zreal(z__1)), (bli_zimag(z__1)), zy[i__2] );
+	bli_zsets( (*s * bli_zbla_real(zx[i__4])), (*s * bli_zimag(zx[i__4])), z__3 );
+	bli_zsets( (bli_zbla_real(z__2) - bli_zbla_real(z__3)), (bli_zimag(z__2) - bli_zimag(z__3)), z__1 );
+	bli_zsets( (bli_zbla_real(z__1)), (bli_zimag(z__1)), zy[i__2] );
 	i__2 = i__;
-	bli_zsets( (bli_zreal(ztemp)), (bli_zimag(ztemp)), zx[i__2] );
+	bli_zsets( (bli_zbla_real(ztemp)), (bli_zimag(ztemp)), zx[i__2] );
 /* L30: */
     }
     return 0;

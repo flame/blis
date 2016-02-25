@@ -41,21 +41,21 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(s,rotm)(integer *n, real *sx, integer *incx, real *sy, integer *incy, real *sparam)
+/* Subroutine */ int PASTEF77(s,rotm)(bla_integer *n, bla_real *sx, bla_integer *incx, bla_real *sy, bla_integer *incy, bla_real *sparam)
 {
     /* Initialized data */
 
-    static real zero = 0.f;
-    static real two = 2.f;
+    static bla_real zero = 0.f;
+    static bla_real two = 2.f;
 
     /* System generated locals */
-    integer i__1, i__2;
+    bla_integer i__1, i__2;
 
     /* Local variables */
-    integer i__;
-    real w, z__, sflag;
-    integer kx, ky, nsteps;
-    real sh11, sh12, sh21, sh22;
+    bla_integer i__;
+    bla_real w, z__, sflag;
+    bla_integer kx, ky, nsteps;
+    bla_real sh11, sh12, sh21, sh22;
 
 
 /*     APPLY THE MODIFIED GIVENS TRANSFORMATION, H, TO THE 2 BY N MATRIX */
@@ -207,21 +207,21 @@ L140:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(d,rotm)(integer *n, doublereal *dx, integer *incx, doublereal *dy, integer *incy, doublereal *dparam)
+/* Subroutine */ int PASTEF77(d,rotm)(bla_integer *n, bla_double *dx, bla_integer *incx, bla_double *dy, bla_integer *incy, bla_double *dparam)
 {
     /* Initialized data */
 
-    static doublereal zero = 0.;
-    static doublereal two = 2.;
+    static bla_double zero = 0.;
+    static bla_double two = 2.;
 
     /* System generated locals */
-    integer i__1, i__2;
+    bla_integer i__1, i__2;
 
     /* Local variables */
-    integer i__;
-    doublereal dflag, w, z__;
-    integer kx, ky, nsteps;
-    doublereal dh11, dh12, dh22, dh21;
+    bla_integer i__;
+    bla_double dflag, w, z__;
+    bla_integer kx, ky, nsteps;
+    bla_double dh11, dh12, dh22, dh21;
 
 
 /*     APPLY THE MODIFIED GIVENS TRANSFORMATION, H, TO THE 2 BY N MATRIX */
