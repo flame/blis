@@ -43,18 +43,18 @@
 
 /* Table of constant values */
 
-static real sc_b4 = 1.f;
+static bla_real sc_b4 = 1.f;
 
-/* Subroutine */ int PASTEF77(s,rotg)(real *sa, real *sb, real *c__, real *s)
+/* Subroutine */ int PASTEF77(s,rotg)(bla_real *sa, bla_real *sb, bla_real *c__, bla_real *s)
 {
     /* System generated locals */
-    real r__1, r__2;
+    bla_real r__1, r__2;
 
     /* Builtin functions */
-    double sqrt(doublereal), bla_r_sign(real *, real *);
+    double sqrt(bla_double), bla_r_sign(bla_real *, bla_real *);
 
     /* Local variables */
-    real r__, scale, z__, roe;
+    bla_real r__, scale, z__, roe;
 
 
 /*     construct givens plane rotation. */
@@ -103,18 +103,18 @@ L20:
 
 /* Table of constant values */
 
-static doublereal dc_b4 = 1.;
+static bla_double dc_b4 = 1.;
 
-/* Subroutine */ int PASTEF77(d,rotg)(doublereal *da, doublereal *db, doublereal *c__, doublereal *s)
+/* Subroutine */ int PASTEF77(d,rotg)(bla_double *da, bla_double *db, bla_double *c__, bla_double *s)
 {
     /* System generated locals */
-    doublereal d__1, d__2;
+    bla_double d__1, d__2;
 
     /* Builtin functions */
-    double sqrt(doublereal), bla_d_sign(doublereal *, doublereal *);
+    double sqrt(bla_double), bla_d_sign(bla_double *, bla_double *);
 
     /* Local variables */
-    doublereal r__, scale, z__, roe;
+    bla_double r__, scale, z__, roe;
 
 
 /*     construct givens plane rotation. */
@@ -161,20 +161,20 @@ L20:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(c,rotg)(singlecomplex *ca, singlecomplex *cb, real *c__, singlecomplex *s)
+/* Subroutine */ int PASTEF77(c,rotg)(bla_scomplex *ca, bla_scomplex *cb, bla_real *c__, bla_scomplex *s)
 {
     /* System generated locals */
-    real r__1, r__2;
-    singlecomplex q__1, q__2, q__3;
+    bla_real r__1, r__2;
+    bla_scomplex q__1, q__2, q__3;
 
     /* Builtin functions */
-    double bla_c_abs(singlecomplex *), sqrt(doublereal);
-    void bla_r_cnjg(singlecomplex *, singlecomplex *);
+    double bla_c_abs(bla_scomplex *), sqrt(bla_double);
+    void bla_r_cnjg(bla_scomplex *, bla_scomplex *);
 
     /* Local variables */
-    real norm;
-    singlecomplex alpha;
-    real scale;
+    bla_real norm;
+    bla_scomplex alpha;
+    bla_real scale;
 
     if (bla_c_abs(ca) != 0.f) {
 	goto L10;
@@ -211,22 +211,22 @@ L20:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(z,rotg)(doublecomplex *ca, doublecomplex *cb, doublereal *c__, doublecomplex *s)
+/* Subroutine */ int PASTEF77(z,rotg)(bla_dcomplex *ca, bla_dcomplex *cb, bla_double *c__, bla_dcomplex *s)
 {
     /* System generated locals */
-    doublereal d__1, d__2;
-    doublecomplex z__1, z__2, z__3, z__4;
+    bla_double d__1, d__2;
+    bla_dcomplex z__1, z__2, z__3, z__4;
 
     /* Builtin functions */
-    double bla_z_abs(doublecomplex *);
-    void bla_z_div(doublecomplex *, doublecomplex *, doublecomplex *);
-    double sqrt(doublereal);
-    void bla_d_cnjg(doublecomplex *, doublecomplex *);
+    double bla_z_abs(bla_dcomplex *);
+    void bla_z_div(bla_dcomplex *, bla_dcomplex *, bla_dcomplex *);
+    double sqrt(bla_double);
+    void bla_d_cnjg(bla_dcomplex *, bla_dcomplex *);
 
     /* Local variables */
-    doublereal norm;
-    doublecomplex alpha;
-    doublereal scale;
+    bla_double norm;
+    bla_dcomplex alpha;
+    bla_double scale;
 
     if (bla_z_abs(ca) != 0.) {
 	goto L10;

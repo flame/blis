@@ -36,7 +36,7 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-double bla_f__cabs(double real, double imag);
+double bla_f__cabs(double bla_real, double imag);
 
 #endif
 

@@ -41,23 +41,23 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(c,hbmv)(character *uplo, integer *n, integer *k, singlecomplex * alpha, singlecomplex *a, integer *lda, singlecomplex *x, integer *incx, singlecomplex *beta, singlecomplex *y, integer *incy)
+/* Subroutine */ int PASTEF77(c,hbmv)(bla_character *uplo, bla_integer *n, bla_integer *k, bla_scomplex * alpha, bla_scomplex *a, bla_integer *lda, bla_scomplex *x, bla_integer *incx, bla_scomplex *beta, bla_scomplex *y, bla_integer *incy)
 {
     /* System generated locals */
-    integer a_dim1, a_offset, i__1, i__2, i__3, i__4, i__5;
-    real r__1;
-    singlecomplex q__1, q__2, q__3, q__4;
+    bla_integer a_dim1, a_offset, i__1, i__2, i__3, i__4, i__5;
+    bla_real r__1;
+    bla_scomplex q__1, q__2, q__3, q__4;
 
     /* Builtin functions */
-    void bla_r_cnjg(singlecomplex *, singlecomplex *);
+    void bla_r_cnjg(bla_scomplex *, bla_scomplex *);
 
     /* Local variables */
-    integer info;
-    singlecomplex temp1, temp2;
-    integer i__, j, l;
-    extern logical PASTEF770(lsame)(character *, character *, ftnlen, ftnlen);
-    integer kplus1, ix, iy, jx, jy, kx, ky;
-    extern /* Subroutine */ int PASTEF770(xerbla)(character *, integer *, ftnlen);
+    bla_integer info;
+    bla_scomplex temp1, temp2;
+    bla_integer i__, j, l;
+    extern bla_logical PASTEF770(lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
+    bla_integer kplus1, ix, iy, jx, jy, kx, ky;
+    extern /* Subroutine */ int PASTEF770(xerbla)(bla_character *, bla_integer *, ftnlen);
 
 /*     .. Scalar Arguments .. */
 /*     .. Array Arguments .. */
@@ -487,23 +487,23 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(z,hbmv)(character *uplo, integer *n, integer *k, doublecomplex *alpha, doublecomplex *a, integer *lda, doublecomplex *x, integer * incx, doublecomplex *beta, doublecomplex *y, integer *incy)
+/* Subroutine */ int PASTEF77(z,hbmv)(bla_character *uplo, bla_integer *n, bla_integer *k, bla_dcomplex *alpha, bla_dcomplex *a, bla_integer *lda, bla_dcomplex *x, bla_integer * incx, bla_dcomplex *beta, bla_dcomplex *y, bla_integer *incy)
 {
     /* System generated locals */
-    integer a_dim1, a_offset, i__1, i__2, i__3, i__4, i__5;
-    doublereal d__1;
-    doublecomplex z__1, z__2, z__3, z__4;
+    bla_integer a_dim1, a_offset, i__1, i__2, i__3, i__4, i__5;
+    bla_double d__1;
+    bla_dcomplex z__1, z__2, z__3, z__4;
 
     /* Builtin functions */
-    void bla_d_cnjg(doublecomplex *, doublecomplex *);
+    void bla_d_cnjg(bla_dcomplex *, bla_dcomplex *);
 
     /* Local variables */
-    integer info;
-    doublecomplex temp1, temp2;
-    integer i__, j, l;
-    extern logical PASTEF770(lsame)(character *, character *, ftnlen, ftnlen);
-    integer kplus1, ix, iy, jx, jy, kx, ky;
-    extern /* Subroutine */ int PASTEF770(xerbla)(character *, integer *, ftnlen);
+    bla_integer info;
+    bla_dcomplex temp1, temp2;
+    bla_integer i__, j, l;
+    extern bla_logical PASTEF770(lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
+    bla_integer kplus1, ix, iy, jx, jy, kx, ky;
+    extern /* Subroutine */ int PASTEF770(xerbla)(bla_character *, bla_integer *, ftnlen);
 
 /*     .. Scalar Arguments .. */
 /*     .. Array Arguments .. */

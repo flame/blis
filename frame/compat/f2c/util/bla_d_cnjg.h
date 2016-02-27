@@ -36,7 +36,7 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-void bla_d_cnjg(doublecomplex *dest, doublecomplex *src);
+void bla_d_cnjg(bla_dcomplex *dest, bla_dcomplex *src);
 
 #endif
 

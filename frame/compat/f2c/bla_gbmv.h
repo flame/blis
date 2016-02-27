@@ -36,9 +36,9 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-int PASTEF77(c,gbmv)(character *trans, integer *m, integer *n, integer *kl, integer *ku, singlecomplex *alpha, singlecomplex *a, integer *lda, singlecomplex *x, integer *incx, singlecomplex *beta, singlecomplex *y, integer *incy);
-int PASTEF77(d,gbmv)(character *trans, integer *m, integer *n, integer *kl, integer *ku, doublereal *alpha, doublereal *a, integer *lda, doublereal *x, integer *incx, doublereal *beta, doublereal *y, integer *incy);
-int PASTEF77(s,gbmv)(character *trans, integer *m, integer *n, integer *kl, integer *ku, real *alpha, real *a, integer *lda, real *x, integer * incx, real *beta, real *y, integer *incy);
-int PASTEF77(z,gbmv)(character *trans, integer *m, integer *n, integer *kl, integer *ku, doublecomplex *alpha, doublecomplex *a, integer *lda, doublecomplex *x, integer *incx, doublecomplex *beta, doublecomplex * y, integer *incy);
+int PASTEF77(c,gbmv)(bla_character *trans, bla_integer *m, bla_integer *n, bla_integer *kl, bla_integer *ku, bla_scomplex *alpha, bla_scomplex *a, bla_integer *lda, bla_scomplex *x, bla_integer *incx, bla_scomplex *beta, bla_scomplex *y, bla_integer *incy);
+int PASTEF77(d,gbmv)(bla_character *trans, bla_integer *m, bla_integer *n, bla_integer *kl, bla_integer *ku, bla_double *alpha, bla_double *a, bla_integer *lda, bla_double *x, bla_integer *incx, bla_double *beta, bla_double *y, bla_integer *incy);
+int PASTEF77(s,gbmv)(bla_character *trans, bla_integer *m, bla_integer *n, bla_integer *kl, bla_integer *ku, bla_real *alpha, bla_real *a, bla_integer *lda, bla_real *x, bla_integer * incx, bla_real *beta, bla_real *y, bla_integer *incy);
+int PASTEF77(z,gbmv)(bla_character *trans, bla_integer *m, bla_integer *n, bla_integer *kl, bla_integer *ku, bla_dcomplex *alpha, bla_dcomplex *a, bla_integer *lda, bla_dcomplex *x, bla_integer *incx, bla_dcomplex *beta, bla_dcomplex * y, bla_integer *incy);
 
 #endif

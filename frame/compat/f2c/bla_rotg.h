@@ -36,9 +36,9 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-int PASTEF77(s,rotg)(real *sa, real *sb, real *c__, real *s);
-int PASTEF77(d,rotg)(doublereal *da, doublereal *db, doublereal *c__, doublereal *s);
-int PASTEF77(c,rotg)(singlecomplex *ca, singlecomplex *cb, real *c__, singlecomplex *s);
-int PASTEF77(z,rotg)(doublecomplex *ca, doublecomplex *cb, doublereal *c__, doublecomplex *s);
+int PASTEF77(s,rotg)(bla_real *sa, bla_real *sb, bla_real *c__, bla_real *s);
+int PASTEF77(d,rotg)(bla_double *da, bla_double *db, bla_double *c__, bla_double *s);
+int PASTEF77(c,rotg)(bla_scomplex *ca, bla_scomplex *cb, bla_real *c__, bla_scomplex *s);
+int PASTEF77(z,rotg)(bla_dcomplex *ca, bla_dcomplex *cb, bla_double *c__, bla_dcomplex *s);
 
 #endif

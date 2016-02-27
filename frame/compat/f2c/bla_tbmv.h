@@ -36,9 +36,9 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-int PASTEF77(c,tbmv)(character *uplo, character *trans, character *diag, integer *n, integer *k, singlecomplex *a, integer *lda, singlecomplex *x, integer *incx);
-int PASTEF77(d,tbmv)(character *uplo, character *trans, character *diag, integer *n, integer *k, doublereal *a, integer *lda, doublereal *x, integer *incx);
-int PASTEF77(s,tbmv)(character *uplo, character *trans, character *diag, integer *n, integer *k, real *a, integer *lda, real *x, integer *incx);
-int PASTEF77(z,tbmv)(character *uplo, character *trans, character *diag, integer *n, integer *k, doublecomplex *a, integer *lda, doublecomplex *x, integer *incx);
+int PASTEF77(c,tbmv)(bla_character *uplo, bla_character *trans, bla_character *diag, bla_integer *n, bla_integer *k, bla_scomplex *a, bla_integer *lda, bla_scomplex *x, bla_integer *incx);
+int PASTEF77(d,tbmv)(bla_character *uplo, bla_character *trans, bla_character *diag, bla_integer *n, bla_integer *k, bla_double *a, bla_integer *lda, bla_double *x, bla_integer *incx);
+int PASTEF77(s,tbmv)(bla_character *uplo, bla_character *trans, bla_character *diag, bla_integer *n, bla_integer *k, bla_real *a, bla_integer *lda, bla_real *x, bla_integer *incx);
+int PASTEF77(z,tbmv)(bla_character *uplo, bla_character *trans, bla_character *diag, bla_integer *n, bla_integer *k, bla_dcomplex *a, bla_integer *lda, bla_dcomplex *x, bla_integer *incx);
 
 #endif

@@ -8,13 +8,13 @@ extern "C" {
 #endif
 #include "blis.h"
 
-logical bli_lsame(character *ca, character *cb, ftnlen ca_len, ftnlen cb_len)
+bla_logical bli_lsame(bla_character *ca, bla_character *cb, ftnlen ca_len, ftnlen cb_len)
 {
     /* System generated locals */
-    logical ret_val;
+    bla_logical ret_val;
 
     /* Local variables */
-    static integer inta, intb, zcode;
+    static bla_integer inta, intb, zcode;
 
 
 /*  -- LAPACK auxiliary routine (version 3.2) -- */
@@ -35,7 +35,7 @@ logical bli_lsame(character *ca, character *cb, ftnlen ca_len, ftnlen cb_len)
 
 /*  CA      (input) CHARACTER*1 */
 /*  CB      (input) CHARACTER*1 */
-/*          CA and CB specify the single characters to be compared. */
+/*          CA and CB specify the single bla_characters to be compared. */
 
 /* ===================================================================== */
 
@@ -45,14 +45,14 @@ logical bli_lsame(character *ca, character *cb, ftnlen ca_len, ftnlen cb_len)
 /*     .. */
 /*     .. Executable Statements .. */
 
-/*     Test if the characters are equal */
+/*     Test if the bla_characters are equal */
 
     ret_val = *(unsigned char *)ca == *(unsigned char *)cb;
     if (ret_val) {
 	return ret_val;
     }
 
-/*     Now test for equivalence if both characters are alphabetic. */
+/*     Now test for equivalence if both bla_characters are alphabetic. */
 
     zcode = 'Z';
 
