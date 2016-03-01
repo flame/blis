@@ -152,10 +152,10 @@
 // leading dimensions (ie: column strides) within the BLAS compatibility layer.
 // A value of 32 results in the compatibility layer using 32-bit signed integers
 // while 64 results in 64-bit integers. Any other value results in use of the
-// C99 type "long int". Note that this ONLY affects integers used within the
+// C99 type "int". Note that this ONLY affects integers used within the
 // BLAS compatibility layer.
 #ifndef BLIS_BLAS2BLIS_INT_TYPE_SIZE
-#define BLIS_BLAS2BLIS_INT_TYPE_SIZE     64
+#define BLIS_BLAS2BLIS_INT_TYPE_SIZE     32
 #endif
 
 

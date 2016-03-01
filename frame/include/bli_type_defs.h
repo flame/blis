@@ -165,7 +165,7 @@ typedef int32_t   f77_int;
 #elif BLIS_BLAS2BLIS_INT_TYPE_SIZE == 64
 typedef int64_t   f77_int;
 #else
-typedef long int  f77_int;
+typedef      int  f77_int;
 #endif
 
 typedef char      f77_char;
