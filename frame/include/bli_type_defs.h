@@ -40,6 +40,8 @@
 // -- BLIS basic types ---------------------------------------------------------
 //
 
+#include <stddef.h>
+
 #ifdef __cplusplus
   // For C++, include stdint.h.
   #include <stdint.h>
@@ -68,8 +70,8 @@ typedef          uint32_t guint_t;
 typedef           int64_t  gint_t;
 typedef          uint64_t guint_t;
 #else
-typedef   signed long int  gint_t;
-typedef unsigned long int guint_t;
+typedef         ptrdiff_t  gint_t;
+typedef            size_t guint_t;
 #endif
 
 // -- Boolean type --
