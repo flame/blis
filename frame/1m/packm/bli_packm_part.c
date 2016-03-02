@@ -54,7 +54,7 @@ void bli_packm_acquire_mpart_t2b( subpart_t requested_part,
 
 	// Partitioning top-to-bottom through packed column panels (which are
 	// row-stored) is not yet supported.
-	if ( bli_obj_is_row_packed( *obj ) )
+	if ( bli_obj_is_col_packed( *obj ) )
 	{
 		bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 	}
@@ -130,7 +130,7 @@ void bli_packm_acquire_mpart_l2r( subpart_t requested_part,
 
 	// Partitioning left-to-right through packed row panels (which are
 	// column-stored) is not yet supported.
-	if ( bli_obj_is_col_packed( *obj ) )
+	if ( bli_obj_is_row_packed( *obj ) )
 	{
 		bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 	}
