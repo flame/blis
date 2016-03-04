@@ -40,9 +40,30 @@
 #include <math.h>
 #include <string.h>
 
-#ifdef BLIS_ENABLE_WINDOWS_BUILD
+#if defined(_WIN32) || defined(__CYGWIN__)
+#define BLIS_OS_WINDOWS 1
+#elif defined(__APPLE__) || defined(__MACH__)
+#define BLIS_OS_OSX 1
+#elif defined(__ANDROID__)
+#define BLIS_OS_ANDROID 1
+#elif defined(__linux__)
+#define BLIS_OS_LINUX 1
+#elif defined(__bgq__)
+#define BLIS_OS_BGQ 1
+#elif defined(__bg__)
+#define BLIS_OS_BGP 1
+#elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || \
+      defined(__bsdi__) || defined(__DragonFly__)
+#define BLIS_OS_BSD 1
+#else
+#error "Cannot determine operating system"
+#endif
+
+#if BLIS_OS_WINDOWS
 
   // Include Windows header file.
+  #define WIN32_LEAN_AND_MEAN
+  #define VC_EXTRALEAN
   #include <windows.h>
 
   // Undefine attribute specifiers in Windows.
@@ -54,8 +75,10 @@
 #endif
 
 // gettimeofday() needs this.
-#ifdef BLIS_ENABLE_WINDOWS_BUILD
+#if BLIS_OS_WINDOWS
   #include <time.h>
+#elif BLIS_OS_OSX
+  #include <mach/mach_time.h>
 #else
   #include <sys/time.h>
   #include <time.h>

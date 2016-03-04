@@ -160,6 +160,16 @@ endif
 
 
 #
+# --- Append OS-specific libraries to LDFLAGS ----------------------------------
+#
+
+ifeq ($(OS_NAME),Linux)
+LDFLAGS += -lrt
+endif
+
+
+
+#
 # --- Main target variable definitions -----------------------------------------
 #
 
