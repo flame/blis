@@ -39,6 +39,9 @@ CONFIG_MK_INCLUDED := yes
 # The name of the configuration sub-directory.
 CONFIG_NAME    := @config_name@
 
+# The operating system name, which should be either 'Linux' or 'Darwin'.
+OS_NAME        := $(shell uname -s)
+
 # The directory path to the top level of the source distribution.
 DIST_PATH      := @dist_path@
 
