@@ -52,7 +52,7 @@
 #define BLIS_OS_BGQ 1
 #elif defined(__bg__)
 #define BLIS_OS_BGP 1
-#elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) ||
+#elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || \
       defined(__bsdi__) || defined(__DragonFly__)
 #define BLIS_OS_BSD 1
 #else
