@@ -47,30 +47,48 @@ print_usage()
 	echo " "
 	echo " Usage:"
 	echo " "
-	echo "   ${script_name} [options] confname"
+	echo "   ${script_name} [options] [env. vars.] confname"
 	echo " "
 	echo " Arguments:"
 	echo " "
-	echo "   confname    The name of the sub-directory inside of the 'config'"
-	echo "               directory containing the desired BLIS configuration."
-	echo "               Note that confname MUST be specified; if it is not,"
-	echo "               configure will complain. To build a reference"
-	echo "               implementation, use the 'reference' configuration"
+	echo "   confname      The name of the sub-directory inside of the 'config'"
+	echo "                 directory containing the desired BLIS configuration."
+	echo "                 Note that confname MUST be specified; if it is not,"
+	echo "                 configure will complain. To build a reference"
+	echo "                 implementation, use the 'reference' configuration"
 	echo " "
 	echo " Options:"
 	echo " "
-	echo "   -p PREFIX   install prefix"
+	echo "   -p PREFIX, --prefix=PREFIX"
+	echo " "
 	echo "                 The path to which make will install buid products."
 	echo "                 If not given, PREFIX defaults to \$(HOME)/blis. If"
 	echo "                 the path refers to a directory that does not exist,"
 	echo "                 it will be created."
 	echo " "
-	echo "   -q          quiet"
-	echo "                 Suppress informational output. By default, configure"
+	echo "   -d DEBUG, --enable-debug[=DEBUG]"
+	echo " "
+	echo "                 Enable debugging symbols in the library. If argument"
+	echo "                 DEBUG is given as 'opt', then optimization flags are"
+	echo "                 kept in the framework, otherwise optimization is"
+	echo "                 turned off."
+	echo " "
+	echo "   -q, --quiet   Suppress informational output. By default, configure"
 	echo "                 is verbose. (NOTE: -q is not yet implemented)"
 	echo " "
-	echo "   -h          help"
-	echo "                 Output this information."
+	echo "   -h, --help    Output this information and quit."
+	echo " "
+	echo " Environment Variables:"
+	echo " "
+	echo "   CC            Specifies the C compiler to use."
+	echo " "
+	echo "   Environment variables may also be specified as command line"
+	echo "   options, e.g.:"
+	echo " "
+	echo "     ./configure CC=gcc sandybridge"
+	echo " "
+	echo "   Note that not all compilers are compatible with a given"
+	echo "   configuration."
 	echo " "
 
 	# Exit with non-zero exit status
@@ -142,6 +160,10 @@ main()
 	install_prefix=''
 	prefix_flag=''
 
+	# The debug flag.
+	debug_type=''
+	debug_flag=''
+
 	# Option variables.
 	quiet_flag=''
 
@@ -168,16 +190,68 @@ main()
 
 
 	# Process our command line options.
-	while getopts ":hp:q" opt; do
+	while getopts ":hp:d:q-:" opt; do
 		case $opt in
-			h  ) print_usage ;;
-			p  ) prefix_flag=1
-			     install_prefix=$OPTARG ;;
-			q  ) quiet_flag=1 ;;
-			\? ) print_usage
+			-)
+				case "$OPTARG" in
+					help)
+						print_usage
+						;;
+					quiet)
+						quiet_flag=1
+						;;
+					prefix=*)
+						prefix_flag=1
+						install_prefix=${OPTARG#*=}
+						;;
+					enable-debug)
+						debug_flag=1
+						;;
+					enable-debug=*)
+						debug_flag=1
+						debug_type=${OPTARG#*=}
+						;;
+					*)
+						print_usage
+						;;
+				esac;;
+			h)
+				print_usage
+				;;
+			p)
+				prefix_flag=1
+				install_prefix=$OPTARG
+				;;
+			d)
+				debug_flag=1
+				debug_type=$OPTARG
+				;;
+			q)
+				quiet_flag=1
+				;;
+			\?)
+				print_usage
+				;;
 		esac
 	done
 	shift $(($OPTIND - 1))
+	
+	
+	# Parse environment variables
+	while [ $# -gt 0 ]; do
+		case $1 in
+			CC=*)
+				CC=${1#*=}
+				shift
+				;;
+			*=*)
+				print_usage
+				;;
+			*)
+				break
+				;;
+		esac
+	done
 
 
 	# Initial message.
@@ -219,7 +293,7 @@ main()
 
 	elif [ $# = "1" ]; then
 
-        if [ $1 = "auto" ]; then
+		if [ $1 = "auto" ]; then
 
 			echo "${script_name}: automatic configuration requested."
 			config_name=`${build_dirpath}/auto-detect/auto-detect.sh`
@@ -244,16 +318,49 @@ main()
 	# Set the install prefix if it was not already set when parsing the install
 	# prefix flag.
 	if [ -n "${prefix_flag}" ]; then
-		echo "${script_name}: detected -p option; using install prefix '${install_prefix}'."
+		echo "${script_name}: using install prefix '${install_prefix}'."
 	else
 		install_prefix="${install_prefix_def}"
 		echo "${script_name}: no install prefix given; defaulting to '${install_prefix}'."
 	fi
 
 
+	# Check if the debug flag was specified.
+	if [ -n "${debug_flag}" ]; then
+		if [ ${debug_type} = 'opt' ]; then
+			echo "${script_name}: enabling debug symbols with optimizations."
+		else
+			debug_type='noopt'
+			echo "${script_name}: enabling debug symbols; optimizations disabled."
+		fi
+	else
+		debug_type='off'
+		echo "${script_name}: debug symbols disabled."
+	fi
+	
+	
+	# Determine the compiler vendor if CC was specified.
+	if [ -n "$CC" ]; then
+		if $CC --version 2>/dev/null | grep -q 'pnacl-version'; then
+			cc_vendor='pnacl-clang'
+		else
+			cc_vendor=`$CC --version 2>/dev/null | grep -Eo 'icc|gcc|clang|emcc'`
+		fi
+		if [ -z "$cc_vendor" ]; then
+			cc_vendor=`$CC -qversion 2>/dev/null | grep -o 'IBM'`
+		fi
+		if [ -z "$cc_vendor" ]; then
+			echo Unable to determine compiler vendor.
+			exit 1
+		fi
+		cc_vendor=`echo $cc_vendor | { read first rest; echo $first; }`
+	fi
+
+
 	# Insert escape characters into the paths used in the sed command below.
 	install_prefix_esc=$(echo "${install_prefix}" | sed 's/\//\\\//g')
 	dist_path_esc=$(echo "${dist_path}"           | sed 's/\//\\\//g')
+	cc_esc=$(echo "${CC}" | sed 's/\//\\\//g')
 	#echo "${install_prefix_esc}"
 	#exit 1
 
@@ -262,10 +369,13 @@ main()
 	# to config_mk_out.
 	echo "${script_name}: creating ${config_mk_out_path} from ${config_mk_in_path}"
 	cat "${config_mk_in_path}" \
-	    | sed "s/@config_name@/${config_name}/g" \
-	    | sed "s/@dist_path@/${dist_path_esc}/g" \
-	    | sed "s/@install_prefix@/${install_prefix_esc}/g" \
-	    > "${config_mk_out_path}"
+		| sed "s/@config_name@/${config_name}/g" \
+		| sed "s/@dist_path@/${dist_path_esc}/g" \
+		| sed "s/@CC@/${cc_esc}/g" \
+		| sed "s/@cc_vendor@/${cc_vendor}/g" \
+		| sed "s/@debug_type@/${debug_type}/g" \
+		| sed "s/@install_prefix@/${install_prefix_esc}/g" \
+		> "${config_mk_out_path}"
 
 
 	# Create obj sub-directories (if they do not already exist).
@@ -308,25 +418,25 @@ main()
 
 	# Generate makefile fragments in the chosen configuration directory.
 	${gen_make_frags_sh} \
-	         -h -r -v1 \
-	         -o ${script_name} \
-	         -p 'CONFIG' \
-	         ${configname_dirpath} \
-	         ${gen_make_frags_dirpath}/fragment.mk \
-	         ${gen_make_frags_dirpath}/suffix_list \
-	         ${gen_make_frags_dirpath}/ignore_list \
-	         ${gen_make_frags_dirpath}/special_list
+			 -h -r -v1 \
+			 -o ${script_name} \
+			 -p 'CONFIG' \
+			 ${configname_dirpath} \
+			 ${gen_make_frags_dirpath}/fragment.mk \
+			 ${gen_make_frags_dirpath}/suffix_list \
+			 ${gen_make_frags_dirpath}/ignore_list \
+			 ${gen_make_frags_dirpath}/special_list
 
 	# Generate makefile fragments in the framework directory.
 	${gen_make_frags_sh} \
-	         -h -r -v1 \
-	         -o ${script_name} \
-	         -p 'FRAME' \
-	         ${frame_dirpath} \
-	         ${gen_make_frags_dirpath}/fragment.mk \
-	         ${gen_make_frags_dirpath}/suffix_list \
-	         ${gen_make_frags_dirpath}/ignore_list \
-	         ${gen_make_frags_dirpath}/special_list
+			 -h -r -v1 \
+			 -o ${script_name} \
+			 -p 'FRAME' \
+			 ${frame_dirpath} \
+			 ${gen_make_frags_dirpath}/fragment.mk \
+			 ${gen_make_frags_dirpath}/suffix_list \
+			 ${gen_make_frags_dirpath}/ignore_list \
+			 ${gen_make_frags_dirpath}/special_list
 
 
 	# Under some circumstances, we need to create a symbolic link to the

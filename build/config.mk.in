@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  BLIS    
+#  BLIS
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
@@ -44,6 +44,13 @@ OS_NAME        := $(shell uname -s)
 
 # The directory path to the top level of the source distribution.
 DIST_PATH      := @dist_path@
+
+# The level of debugging info to generate.
+DEBUG_TYPE     := @debug_type@
+
+# The C compiler.
+CC             := @CC@
+CC_VENDOR      := @cc_vendor@
 
 # The install prefix tell us where to install the libraries and header file
 # directory. Notice that we support the use of DESTDIR so that advanced users
