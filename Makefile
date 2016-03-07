@@ -160,6 +160,20 @@ endif
 
 
 #
+# --- Adjust verbosity level manually using make V=[0,1] -----------------------
+#
+
+ifeq ($(V),1)
+BLIS_ENABLE_VERBOSE_MAKE_OUTPUT := yes
+endif
+
+ifeq ($(V),0)
+BLIS_ENABLE_VERBOSE_MAKE_OUTPUT := no
+endif
+
+
+
+#
 # --- Append OS-specific libraries to LDFLAGS ----------------------------------
 #
 
