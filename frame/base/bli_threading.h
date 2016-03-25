@@ -178,7 +178,7 @@ thrinfo_t* bli_create_thread_info( thread_comm_t* ocomm, dim_t ocomm_id,
 void bli_setup_thread_info( thrinfo_t* thread, thread_comm_t* ocomm, dim_t ocomm_id, 
                             thread_comm_t* icomm, dim_t icomm_id,
                             dim_t n_way, dim_t work_id );
-dim_t bli_read_nway_from_env( char* env );
+dim_t bli_read_nway_from_env( const char* env );
 
 //void bli_setup_single_threaded_info( thrinfo_t* thr, thread_comm_t* comm );
 //thrinfo_t* bli_create_thread_info( dim_t* n_threads_each_level, dim_t n_levels );

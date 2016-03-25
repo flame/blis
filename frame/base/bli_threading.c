@@ -811,7 +811,7 @@ siz_t bli_get_range_weighted_b2t( void* thr, obj_t* a, dim_t bf, dim_t* start, d
 
 
 // Some utilities
-dim_t bli_read_nway_from_env( char* env )
+dim_t bli_read_nway_from_env( const char* env )
 {
     dim_t number = 1;
     char* str = getenv( env );
