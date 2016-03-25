@@ -100,10 +100,7 @@ else
 COPTFLAGS      := -O3 -mtune=power7
 endif
 
-ifneq ($(DEBUG_TYPE),noopt)
 CVECFLAGS      := -mvsx
-endif
-
 CKOPTFLAGS     := $(COPTFLAGS)
 
 # Aggregate all of the flags into multiple groups: one for standard

@@ -100,10 +100,7 @@ else
 COPTFLAGS      := -O2
 endif
 
-ifneq ($(DEBUG_TYPE),noopt)
 CVECFLAGS      := #-msse3 -march=native # -mfpmath=sse
-endif
-
 CKOPTFLAGS     := $(COPTFLAGS)
 
 # Aggregate all of the flags into multiple groups: one for standard

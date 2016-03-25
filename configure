@@ -226,6 +226,7 @@ main()
 						;;
 					enable-debug)
 						debug_flag=1
+						debug_type=noopt
 						;;
 					enable-debug=*)
 						debug_flag=1
@@ -365,7 +366,7 @@ main()
 
 	# Check if the debug flag was specified.
 	if [ -n "${debug_flag}" ]; then
-		if [ ${debug_type} = 'opt' ]; then
+		if [ "x${debug_type}" = "xopt" ]; then
 			echo "${script_name}: enabling debug symbols with optimizations."
 		else
 			debug_type='noopt'
