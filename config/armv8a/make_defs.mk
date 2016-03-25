@@ -76,18 +76,32 @@ GIT_LOG    := $(GIT) log --decorate
 #
 
 # --- Determine the C compiler and related flags ---
+ifeq ($(CC),)
 CC             := gcc
-
+CC_VENDOR      := gcc
+endif
+ifneq ($(CC_VENDOR),gcc)
+$(error gcc is required for this configuration.)
+endif
 # Enable IEEE Standard 1003.1-2004 (POSIX.1d). 
 # NOTE: This is needed to enable posix_memalign().
 CPPROCFLAGS    := -D_GNU_SOURCE
-CMISCFLAGS     := -std=c99 -march=armv8-a+fp+simd -ftree-vectorize -O3 -fopenmp -mcpu=cortex-a57.cortex-a53 -mtune=cortex-a57.cortex-a53
+CMISCFLAGS     := -std=c99 -fopenmp
 CPICFLAGS      := -fPIC
-CDBGFLAGS      := -g #-g3 -gdwarf-2 
 CWARNFLAGS     := -Wall
-COPTFLAGS      := -march=armv8-a+fp+simd -ftree-vectorize -O3 -mcpu=cortex-a57.cortex-a53 -mtune=cortex-a57.cortex-a53
+
+ifneq ($(DEBUG_TYPE),off)
+CDBGFLAGS      := -g
+endif
+
+ifeq ($(DEBUG_TYPE),noopt)
+COPTFLAGS      := -O0
+else
+COPTFLAGS      := -O3 -ftree-vectorize -mtune=cortex-a57.cortex-a53
+endif
+
+CVECFLAGS      := -march=armv8-a+fp+simd -mcpu=cortex-a57.cortex-a53
 CKOPTFLAGS     := $(COPTFLAGS)
-CVECFLAGS      := #-march=armv8-a+fp+simd -ftree-vectorize -O3 -mcpu=cortex-a57.cortex-a53 -mtune=cortex-a57.cortex-a53 #-march=armv8-a -O2 -mtune=cortex-a57 -mfpu=neon-fp-armv8 
 
 # Aggregate all of the flags into multiple groups: one for standard
 # compilation, and one for each of the supported "special" compilation

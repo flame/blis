@@ -97,13 +97,10 @@ endif
 ifeq ($(DEBUG_TYPE),noopt)
 COPTFLAGS      := -O0
 else
-COPTFLAGS      := -march=armv7-a -mfpu=neon -O2 -mfloat-abi=hard
+COPTFLAGS      := -O2
 endif
 
-ifneq ($(DEBUG_TYPE),noopt)
-CVECFLAGS      := #-msse3 -march=native # -mfpmath=sse
-endif
-
+CVECFLAGS      := -march=armv7-a #-msse3 -march=native # -mfpmath=sse
 CKOPTFLAGS     := $(COPTFLAGS)
 
 # Aggregate all of the flags into multiple groups: one for standard
