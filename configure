@@ -73,6 +73,21 @@ print_usage()
 	echo "                 kept in the framework, otherwise optimization is"
 	echo "                 turned off."
 	echo " "
+	echo "   --enable-verbose-make, --disable-verbose-make"
+	echo " "
+	echo "                 Enable (disabled by default) verbose compilation"
+	echo "                 output during make."
+	echo " "
+	echo "   --disable-static, --enable-static"
+	echo " "
+	echo "                 Disable (enabled by default) building BLIS as a static"
+	echo "                 library. May be combined with --enable-shared."
+	echo " "
+	echo "   --enable-shared, --disable-static"
+	echo " "
+	echo "                 Enable (disabled by default) building BLIS as a shared"
+	echo "                 library. May be combined with --enable-static."
+	echo " "
 	echo "   -q, --quiet   Suppress informational output. By default, configure"
 	echo "                 is verbose. (NOTE: -q is not yet implemented)"
 	echo " "
@@ -85,7 +100,7 @@ print_usage()
 	echo "   Environment variables may also be specified as command line"
 	echo "   options, e.g.:"
 	echo " "
-	echo "     ./configure CC=gcc sandybridge"
+	echo "     ./configure [options] CC=gcc sandybridge"
 	echo " "
 	echo "   Note that not all compilers are compatible with a given"
 	echo "   configuration."
@@ -166,6 +181,11 @@ main()
 
 	# Option variables.
 	quiet_flag=''
+	
+	# Additional flags.
+	enable_verbose='yes'
+	enable_static='yes'
+	enable_shared='no'
 
 	# The path to the auto-detection script.
 	auto_detect_sh="${build_dirpath}/auto-detect/auto-detect.sh"
@@ -210,6 +230,24 @@ main()
 					enable-debug=*)
 						debug_flag=1
 						debug_type=${OPTARG#*=}
+						;;
+					enable-verbose-make)
+						enable_verbose='yes'
+						;;
+					disable-verbose-make)
+						enable_verbose='no'
+						;;
+					enable-static)
+						enable_static='yes'
+						;;
+					disable-static)
+						enable_static='no'
+						;;
+					enable-shared)
+						enable_shared='yes'
+						;;
+					disable-shared)
+						enable_shared='no'
 						;;
 					*)
 						print_usage
@@ -375,6 +413,9 @@ main()
 		| sed "s/@cc_vendor@/${cc_vendor}/g" \
 		| sed "s/@debug_type@/${debug_type}/g" \
 		| sed "s/@install_prefix@/${install_prefix_esc}/g" \
+		| sed "s/@enable_verbose@/${enable_verbose}/g" \
+		| sed "s/@enable_static@/${enable_static}/g" \
+		| sed "s/@enable_shared@/${enable_shared}/g" \
 		> "${config_mk_out_path}"
 
 

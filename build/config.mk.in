@@ -57,6 +57,10 @@ CC_VENDOR      := @cc_vendor@
 # may install to a temporary location.
 INSTALL_PREFIX := $(DESTDIR)@install_prefix@
 
+# Variables corresponding to other configure-time options.
+BLIS_ENABLE_VERBOSE_MAKE_OUTPUT := @enable_verbose@
+BLIS_ENABLE_STATIC_BUILD        := @enable_static@
+BLIS_ENABLE_DYNAMIC_BUILD       := @enable_dynamic@
 
 # end of ifndef CONFIG_MK_INCLUDED conditional block
 endif
