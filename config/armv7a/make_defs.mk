@@ -76,17 +76,32 @@ GIT_LOG    := $(GIT) log --decorate
 #
 
 # --- Determine the C compiler and related flags ---
+ifeq ($(CC),)
 CC             := gcc
+CC_VENDOR      := gcc
+endif
+ifneq ($(CC_VENDOR),gcc)
+$(error gcc is required for this configuration.)
+endif
 # Enable IEEE Standard 1003.1-2004 (POSIX.1d). 
 # NOTE: This is needed to enable posix_memalign().
 CPPROCFLAGS    := -D_POSIX_C_SOURCE=200112L
-CMISCFLAGS     := -std=c99 -O3 -mfloat-abi=hard -mfpu=vfpv3 -marm -march=armv7-a #-g
+CMISCFLAGS     := -std=c99 -mfloat-abi=hard
 CPICFLAGS      := -fPIC
-CDBGFLAGS      := #-g
 CWARNFLAGS     := -Wall
-COPTFLAGS      := -marm -march=armv7-a -mfpu=vfpv3 -O3 -mfloat-abi=hard #-g
+
+ifneq ($(DEBUG_TYPE),off)
+CDBGFLAGS      := -g
+endif
+
+ifeq ($(DEBUG_TYPE),noopt)
+COPTFLAGS      := -O0
+else
+COPTFLAGS      := -O3
+endif
+
+CVECFLAGS      := -mfpu=vfpv3 -marm -march=armv7-a
 CKOPTFLAGS     := $(COPTFLAGS)
-CVECFLAGS      := #-msse3  # -mfpmath=sse
 
 # Aggregate all of the flags into multiple groups: one for standard
 # compilation, and one for each of the supported "special" compilation

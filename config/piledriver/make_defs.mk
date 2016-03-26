@@ -97,13 +97,10 @@ endif
 ifeq ($(DEBUG_TYPE),noopt)
 COPTFLAGS      := -O0
 else
-COPTFLAGS      := -O2 -mfpmath=sse -fomit-frame-pointer
+COPTFLAGS      := -O2 -fomit-frame-pointer
 endif
 
-ifneq ($(DEBUG_TYPE),noopt)
-CVECFLAGS      := -mavx -mfma -march=native
-endif
-
+CVECFLAGS      := -mavx -mfma -march=native -mfpmath=sse
 CKOPTFLAGS     := $(COPTFLAGS)
 
 # Aggregate all of the flags into multiple groups: one for standard
