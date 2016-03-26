@@ -67,7 +67,7 @@ else
 COPTFLAGS      := -O2 -fomit-frame-pointer
 endif
 
-CVECFLAGS      := -mavx -mfma -march=native -mfpmath=sse
+CVECFLAGS      := -mavx -mfma -march=bdver4 -mfpmath=sse
 CKOPTFLAGS     := $(COPTFLAGS)
 
 # --- Determine the archiver and related flags ---

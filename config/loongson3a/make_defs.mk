@@ -67,7 +67,7 @@ else
 COPTFLAGS      := -O3 -mtune=loongson3a
 endif
 
-CVECFLAGS      := -march=loongson3a #-msse3 -march=native # -mfpmath=sse
+CVECFLAGS      := -march=loongson3a
 CKOPTFLAGS     := $(COPTFLAGS)
 
 # --- Determine the archiver and related flags ---

@@ -47,9 +47,7 @@ ifeq ($(CC),)
 CC             := gcc
 CC_VENDOR      := gcc
 endif
-ifneq ($(CC_VENDOR),gcc)
-$(error gcc is required for this configuration.)
-endif
+
 # Enable IEEE Standard 1003.1-2004 (POSIX.1d). 
 # NOTE: This is needed to enable posix_memalign().
 CPPROCFLAGS    := -D_POSIX_C_SOURCE=200112L
@@ -67,8 +65,17 @@ else
 COPTFLAGS      := -O2 -fomit-frame-pointer
 endif
 
-CVECFLAGS      := -msse3 -march=native -mfpmath=sse
 CKOPTFLAGS     := $(COPTFLAGS)
+
+ifeq ($(CC_VENDOR),gcc)
+CVECFLAGS      := -msse3 -march=nehalem -mfpmath=sse
+else
+ifeq ($(CC_VENDOR),icc)
+CVECFLAGS      := -xSSE4.2
+else
+$(error gcc or icc is required for this configuration.)
+endif
+endif
 
 # --- Determine the archiver and related flags ---
 AR             := ar

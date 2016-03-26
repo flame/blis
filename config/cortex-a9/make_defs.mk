@@ -67,7 +67,7 @@ else
 COPTFLAGS      := -O2
 endif
 
-CVECFLAGS      := -march=armv7-a #-msse3 -march=native # -mfpmath=sse
+CVECFLAGS      := -march=armv7-a
 CKOPTFLAGS     := $(COPTFLAGS)
 
 # --- Determine the archiver and related flags ---
