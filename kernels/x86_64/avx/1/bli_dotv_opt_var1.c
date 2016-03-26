@@ -41,6 +41,146 @@ typedef union
 	double  d[4];
 } v4df_t;
 
+typedef union
+{
+	__m256 v;
+	float  f[8];
+} v8ff_t;
+
+void bli_sdotv_opt_var1(
+			 conj_t           conjx,
+			 conj_t           conjy,
+			 dim_t            n,
+			 float* restrict x, inc_t incx,
+			 float* restrict y, inc_t incy,
+			 float* restrict rho
+		       )
+{
+	float*  restrict x_cast   = x;
+	float*  restrict y_cast   = y;
+	float*  restrict rho_cast = rho;
+
+	float*  restrict x1;
+	float*  restrict y1;
+	gint_t            i;
+	float            rho1;
+	v8ff_t            rho0v, rho1v, rho2v, rho3v;
+	v8ff_t            x0v, x1v, x2v, x3v;
+	v8ff_t            y0v, y1v, y2v, y3v;
+	gint_t            n_run, n_pre, n_left;
+
+	const dim_t       n_elem_per_reg = 8;
+	const dim_t       n_iter_unroll  = 4;
+
+	bool_t            use_ref = FALSE;
+
+	// If the vector lengths are zero, set rho to zero and return.
+	if ( bli_zero_dim1( n ) )
+	{
+		PASTEMAC(s,set0s)( *rho_cast );
+		return;
+	}
+
+	// If there is anything that would interfere with our use of aligned
+	// vector loads/stores, call the reference implementation.
+	if ( incx != 1 || incy != 1 )
+	{
+		use_ref = TRUE;
+	}
+
+	n_pre = 0;
+	if ( bli_is_unaligned_to( x, 32 ) ||
+	     bli_is_unaligned_to( y, 32 ) )
+	{
+		guint_t x_offset = bli_offset_from_alignment( x, 32 );
+		guint_t y_offset = bli_offset_from_alignment( y, 32 );
+
+		if ( x_offset % 4 != 0 ||
+		     x_offset != y_offset )
+		{
+			use_ref = TRUE;
+		}
+		else
+		{
+			n_pre = ( 32 - x_offset ) / 4;
+		}
+	}
+
+
+	// Call the reference implementation if needed.
+	if ( use_ref == TRUE )
+	{
+		BLIS_SDOTV_KERNEL_REF( conjx,
+				       conjy,
+				       n,
+				       x, incx,
+				       y, incy,
+				       rho );
+		return;
+	}
+
+	x1 = x_cast;
+	y1 = y_cast;
+
+	n_run       = ( n - n_pre ) / ( n_elem_per_reg * n_iter_unroll );
+	n_left      = ( n - n_pre ) % ( n_elem_per_reg * n_iter_unroll );
+
+	PASTEMAC(s,set0s)( rho1 );
+
+	while ( n_pre-- > 0 )
+	{
+		rho1 += *(x1++) * *(y1++);
+	}
+
+	rho0v.v = _mm256_setzero_ps();
+	rho1v.v = _mm256_setzero_ps();
+	rho2v.v = _mm256_setzero_ps();
+	rho3v.v = _mm256_setzero_ps();
+	x0v.v = _mm256_setzero_ps();
+	x1v.v = _mm256_setzero_ps();
+	x2v.v = _mm256_setzero_ps();
+	x3v.v = _mm256_setzero_ps();
+	y0v.v = _mm256_setzero_ps();
+	y1v.v = _mm256_setzero_ps();
+	y2v.v = _mm256_setzero_ps();
+	y3v.v = _mm256_setzero_ps();
+
+	for ( i = 0; i < n_run; i++ )
+	{
+		x0v.v = _mm256_load_ps( ( float* )(x1 + 0*n_elem_per_reg) );
+		x1v.v = _mm256_load_ps( ( float* )(x1 + 1*n_elem_per_reg) );
+		x2v.v = _mm256_load_ps( ( float* )(x1 + 2*n_elem_per_reg) );
+		x3v.v = _mm256_load_ps( ( float* )(x1 + 3*n_elem_per_reg) );
+
+		y0v.v = _mm256_load_ps( ( float* )(y1 + 0*n_elem_per_reg) );
+		y1v.v = _mm256_load_ps( ( float* )(y1 + 1*n_elem_per_reg) );
+		y2v.v = _mm256_load_ps( ( float* )(y1 + 2*n_elem_per_reg) );
+		y3v.v = _mm256_load_ps( ( float* )(y1 + 3*n_elem_per_reg) );
+
+		rho0v.v += x0v.v * y0v.v;
+		rho1v.v += x1v.v * y1v.v;
+		rho2v.v += x2v.v * y2v.v;
+		rho3v.v += x3v.v * y3v.v;
+
+		x1 += n_iter_unroll * n_elem_per_reg;
+		y1 += n_iter_unroll * n_elem_per_reg;
+	}
+
+	rho0v.v += rho2v.v;
+	rho1v.v += rho3v.v;
+	rho0v.v += rho1v.v;
+
+	rho1 += rho0v.f[0] + rho0v.f[1] + rho0v.f[2] + rho0v.f[3] + \
+	        rho0v.f[4] + rho0v.f[5] + rho0v.f[6] + rho0v.f[7];
+
+	while ( n_left-- > 0 )
+	{
+		rho1 += *(x1++) * *(y1++);
+	}
+
+	PASTEMAC(s,copys)( rho1, *rho_cast );
+}
+
 
 void bli_ddotv_opt_var1(
 			 conj_t           conjx,
