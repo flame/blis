@@ -189,11 +189,11 @@ THREADING_MODEL := omp
 endif
 ifeq ($(THREADING_MODEL),omp)
 CTHREADFLAGS := -fopenmp -DBLIS_ENABLE_OPENMP
-LD_FLAGS     += -fopenmp
+LDFLAGS      += -fopenmp
 endif
 ifeq ($(THREADING_MODEL),pthreads)
 CTHREADFLAGS := -pthread -DBLIS_ENABLE_PTHREADS
-LD_FLAGS     += -pthread
+LDFLAGS      += -pthread
 endif
 endif
 
@@ -203,11 +203,11 @@ THREADING_MODEL := omp
 endif
 ifeq ($(THREADING_MODEL),omp)
 CTHREADFLAGS := -openmp -DBLIS_ENABLE_OPENMP
-LD_FLAGS     += -openmp
+LDFLAGS      += -openmp
 endif
 ifeq ($(THREADING_MODEL),pthreads)
 CTHREADFLAGS := -pthread -DBLIS_ENABLE_PTHREADS
-LD_FLAGS     += -pthread
+LDFLAGS      += -pthread
 endif
 endif
 
@@ -220,7 +220,7 @@ $(error OpenMP is not supported with Clang.)
 endif
 ifeq ($(THREADING_MODEL),pthreads)
 CTHREADFLAGS := -pthread -DBLIS_ENABLE_PTHREADS
-LD_FLAGS     += -pthread
+LDFLAGS      += -pthread
 endif
 endif
 
