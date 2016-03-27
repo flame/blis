@@ -120,6 +120,8 @@
 
 // -- axpyv --
 
+#define BLIS_DAXPYV_KERNEL      bli_daxpyv_opt_var1
+
 // -- copyv --
 
 // -- dotv --
