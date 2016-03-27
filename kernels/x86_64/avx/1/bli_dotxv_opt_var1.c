@@ -47,23 +47,28 @@ typedef union
 	float  f[8];
 } v8ff_t;
 
-void bli_sdotv_opt_var1(
-			 conj_t           conjx,
-			 conj_t           conjy,
-			 dim_t            n,
-			 float* restrict x, inc_t incx,
-			 float* restrict y, inc_t incy,
-			 float* restrict rho
-		       )
+void bli_sdotxv_opt_var1(
+			  conj_t           conjx,
+			  conj_t           conjy,
+			  dim_t            n,
+			  float* restrict alpha,
+			  float* restrict x, inc_t incx,
+			  float* restrict y, inc_t incy,
+			  float* restrict beta,
+			  float* restrict rho
+			)
 {
+	float*  restrict alpha_cast = alpha;
 	float*  restrict x_cast   = x;
 	float*  restrict y_cast   = y;
+	float*  restrict beta_cast = beta;
 	float*  restrict rho_cast = rho;
 
 	float*  restrict x1;
 	float*  restrict y1;
 	gint_t            i;
-	float            rho1;
+	float             rho1;
+	float             dotxy;
 	v8ff_t            rho0v, rho1v, rho2v, rho3v;
 	v8ff_t            x0v, x1v, x2v, x3v;
 	v8ff_t            y0v, y1v, y2v, y3v;
@@ -73,13 +78,6 @@ void bli_sdotv_opt_var1(
 	const dim_t       n_iter_unroll  = 4;
 
 	bool_t            use_ref = FALSE;
-
-	// If the vector lengths are zero, set rho to zero and return.
-	if ( bli_zero_dim1( n ) )
-	{
-		PASTEMAC(s,set0s)( *rho_cast );
-		return;
-	}
 
 	// If there is anything that would interfere with our use of aligned
 	// vector loads/stores, call the reference implementation.
@@ -106,16 +104,30 @@ void bli_sdotv_opt_var1(
 		}
 	}
 
-
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE )
 	{
-		BLIS_SDOTV_KERNEL_REF( conjx,
-				       conjy,
-				       n,
-				       x, incx,
-				       y, incy,
-				       rho );
+		BLIS_SDOTXV_KERNEL_REF( conjx,
+		                        conjy,
+		                        n,
+		                        alpha,
+		                        x, incx,
+		                        y, incy,
+		                        beta,
+		                        rho );
+		return;
+	}
+
+	if ( PASTEMAC(d,eq0)( *beta_cast ) ) {
+		PASTEMAC(d,set0s)( rho1 );
+	} else {
+		rho1 = *rho_cast * *beta_cast;
+	}
+
+	// If the vector lengths are zero, set rho and return.
+	if ( bli_zero_dim1( n ) )
+	{
+		PASTEMAC(d,copys)( rho1, *rho_cast );
 		return;
 	}
 
@@ -125,11 +137,11 @@ void bli_sdotv_opt_var1(
 	n_run       = ( n - n_pre ) / ( n_elem_per_reg * n_iter_unroll );
 	n_left      = ( n - n_pre ) % ( n_elem_per_reg * n_iter_unroll );
 
-	PASTEMAC(s,set0s)( rho1 );
+	PASTEMAC(s,set0s)( dotxy );
 
 	while ( n_pre-- > 0 )
 	{
-		rho1 += *(x1++) * *(y1++);
+		dotxy += *(x1++) * *(y1++);
 	}
 
 	rho0v.v = _mm256_setzero_ps();
@@ -170,35 +182,41 @@ void bli_sdotv_opt_var1(
 	rho1v.v += rho3v.v;
 	rho0v.v += rho1v.v;
 
-	rho1 += rho0v.f[0] + rho0v.f[1] + rho0v.f[2] + rho0v.f[3] + \
-	        rho0v.f[4] + rho0v.f[5] + rho0v.f[6] + rho0v.f[7];
+	dotxy += rho0v.f[0] + rho0v.f[1] + rho0v.f[2] + rho0v.f[3] + \
+	         rho0v.f[4] + rho0v.f[5] + rho0v.f[6] + rho0v.f[7];
 
 	while ( n_left-- > 0 )
 	{
-		rho1 += *(x1++) * *(y1++);
+		dotxy += *(x1++) * *(y1++);
 	}
+	rho1 += *alpha_cast * dotxy;
 
 	PASTEMAC(s,copys)( rho1, *rho_cast );
 }
 
 
-void bli_ddotv_opt_var1(
-			 conj_t           conjx,
-			 conj_t           conjy,
-			 dim_t            n,
-			 double* restrict x, inc_t incx,
-			 double* restrict y, inc_t incy,
-			 double* restrict rho
-		       )
+void bli_ddotxv_opt_var1(
+			  conj_t           conjx,
+			  conj_t           conjy,
+			  dim_t            n,
+			  double* restrict alpha,
+			  double* restrict x, inc_t incx,
+			  double* restrict y, inc_t incy,
+			  double* restrict beta,
+			  double* restrict rho
+			)
 {
+	double*  restrict alpha_cast = alpha;
 	double*  restrict x_cast   = x;
 	double*  restrict y_cast   = y;
+	double*  restrict beta_cast = beta;
 	double*  restrict rho_cast = rho;
 
 	double*  restrict x1;
 	double*  restrict y1;
 	gint_t            i;
 	double            rho1;
+	double            dotxy;
 	v4df_t            rho0v, rho1v, rho2v, rho3v;
 	v4df_t            x0v, x1v, x2v, x3v;
 	v4df_t            y0v, y1v, y2v, y3v;
@@ -208,13 +226,6 @@ void bli_ddotv_opt_var1(
 	const dim_t       n_iter_unroll  = 4;
 
 	bool_t            use_ref = FALSE;
-
-	// If the vector lengths are zero, set rho to zero and return.
-	if ( bli_zero_dim1( n ) )
-	{
-		PASTEMAC(d,set0s)( *rho_cast );
-		return;
-	}
 
 	// If there is anything that would interfere with our use of aligned
 	// vector loads/stores, call the reference implementation.
@@ -245,12 +256,27 @@ void bli_ddotv_opt_var1(
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE )
 	{
-		BLIS_DDOTV_KERNEL_REF( conjx,
-				       conjy,
-				       n,
-				       x, incx,
-				       y, incy,
-				       rho );
+		BLIS_DDOTXV_KERNEL_REF( conjx,
+		                        conjy,
+		                        n,
+		                        alpha,
+		                        x, incx,
+		                        y, incy,
+		                        beta,
+		                        rho );
+		return;
+	}
+
+	if ( PASTEMAC(d,eq0)( *beta_cast ) ) {
+		PASTEMAC(d,set0s)( rho1 );
+	} else {
+		rho1 = *rho_cast * *beta_cast;
+	}
+
+	// If the vector lengths are zero, set rho and return.
+	if ( bli_zero_dim1( n ) )
+	{
+		PASTEMAC(d,copys)( rho1, *rho_cast );
 		return;
 	}
 
@@ -260,11 +286,11 @@ void bli_ddotv_opt_var1(
 	n_run       = ( n - n_pre ) / ( n_elem_per_reg * n_iter_unroll );
 	n_left      = ( n - n_pre ) % ( n_elem_per_reg * n_iter_unroll );
 
-	PASTEMAC(d,set0s)( rho1 );
+	PASTEMAC(d,set0s)( dotxy );
 
 	while ( n_pre-- > 0 )
 	{
-		rho1 += *(x1++) * *(y1++);
+		dotxy += *(x1++) * *(y1++);
 	}
 
 	rho0v.v = _mm256_setzero_pd();
@@ -305,12 +331,13 @@ void bli_ddotv_opt_var1(
 	rho1v.v += rho3v.v;
 	rho0v.v += rho1v.v;
 
-	rho1 += rho0v.d[0] + rho0v.d[1] + rho0v.d[2] + rho0v.d[3];
+	dotxy += rho0v.d[0] + rho0v.d[1] + rho0v.d[2] + rho0v.d[3];
 
 	while ( n_left-- > 0 )
 	{
-		rho1 += *(x1++) * *(y1++);
+		dotxy += *(x1++) * *(y1++);
 	}
+	rho1 += *alpha_cast * dotxy;
 
 	PASTEMAC(d,copys)( rho1, *rho_cast );
 }
