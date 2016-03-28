@@ -68,12 +68,16 @@ endif
 CKOPTFLAGS     := $(COPTFLAGS)
 
 ifeq ($(CC_VENDOR),gcc)
-CVECFLAGS      := -mavx2 -mfma -mfpmath=sse -march=haswell
+CVECFLAGS      := -mavx2 -mfma -mfpmath=sse -march=core-avx2
 else
 ifeq ($(CC_VENDOR),icc)
 CVECFLAGS      := -xCORE-AVX2
 else
-$(error gcc or icc is required for this configuration.)
+ifeq ($(CC_VENDOR),clang)
+CVECFLAGS      := -mavx2 -mfma -mfpmath=sse -march=core-avx2
+else
+$(error gcc, icc, or clang is required for this configuration.)
+endif
 endif
 endif
 

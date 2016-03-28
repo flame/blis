@@ -442,24 +442,6 @@ main()
 		echo "Unsupported threading model: ${threading_model}."
 		exit 1
 	fi
-	
-	
-	# Determine the compiler vendor if CC was specified.
-	if [ -n "$CC" ]; then
-		if $CC --version 2>/dev/null | grep -q 'pnacl-version'; then
-			cc_vendor='pnacl-clang'
-		else
-			cc_vendor=`$CC --version 2>/dev/null | grep -Eo 'icc|gcc|clang|emcc'`
-		fi
-		if [ -z "$cc_vendor" ]; then
-			cc_vendor=`$CC -qversion 2>/dev/null | grep -o 'IBM'`
-		fi
-		if [ -z "$cc_vendor" ]; then
-			echo "Unable to determine compiler vendor."
-			exit 1
-		fi
-		cc_vendor=`echo $cc_vendor | { read first rest; echo $first; }`
-	fi
 
 
 	# Insert escape characters into the paths used in the sed command below.
@@ -477,7 +459,6 @@ main()
 		| sed "s/@config_name@/${config_name}/g" \
 		| sed "s/@dist_path@/${dist_path_esc}/g" \
 		| sed "s/@CC@/${cc_esc}/g" \
-		| sed "s/@cc_vendor@/${cc_vendor}/g" \
 		| sed "s/@debug_type@/${debug_type}/g" \
 		| sed "s/@install_prefix@/${install_prefix_esc}/g" \
 		| sed "s/@enable_verbose@/${enable_verbose}/g" \

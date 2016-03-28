@@ -161,6 +161,29 @@ GIT_LOG    := $(GIT) log --decorate
 
 
 #
+# --- Determine the compiler vendor --------------------------------------------
+#
+
+ifneq ($(CC),)
+
+VENDOR_STRING := $(shell $(CC) --version 2>/dev/null)
+ifeq ($(VENDOR_STRING),)
+VENDOR_STRING := $(shell $(CC) -qversion 2>/dev/null)
+endif
+ifeq ($(VENDOR_STRING),)
+$(error Unable to determine compiler vendor.)
+endif
+
+CC_VENDOR := $(firstword $(shell echo '$(VENDOR_STRING)' | grep -Eo 'icc|gcc|clang|emcc|pnacl|IBM'))
+ifeq ($(CC_VENDOR),)
+$(error Unable to determine compiler vendor.)
+endif
+
+endif
+
+
+
+#
 # --- Include makefile definitions file ----------------------------------------
 #
 
@@ -179,9 +202,11 @@ else
 MAKE_DEFS_MK_PRESENT := no
 endif
 
-# Deal with threading flags and aggregate all of the flags into multiple groups:
-# one for standard compilation, and one for each of the supported "special"
-# compilation modes.
+
+
+#
+# --- Configuration-agnostic flags ---------------------------------------------
+#
 
 ifeq ($(CC_VENDOR),gcc)
 ifeq ($(THREADING_MODEL),auto)
@@ -223,6 +248,9 @@ CTHREADFLAGS := -pthread -DBLIS_ENABLE_PTHREADS
 LDFLAGS      += -pthread
 endif
 endif
+
+# Aggregate all of the flags into multiple groups: one for standard compilation,
+# and one for each of the supported "special" compilation modes.
 
 CFLAGS_NOOPT   := $(CDBGFLAGS) $(CWARNFLAGS) $(CPICFLAGS) $(CTHREADFLAGS) $(CMISCFLAGS) $(CPPROCFLAGS)
 CFLAGS         := $(COPTFLAGS)  $(CVECFLAGS) $(CFLAGS_NOOPT)
