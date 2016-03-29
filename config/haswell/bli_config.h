@@ -35,11 +35,6 @@
 #ifndef BLIS_CONFIG_H
 #define BLIS_CONFIG_H
 
-// Enable multithreading via POSIX threads.
-//#define BLIS_ENABLE_PTHREADS
-
-// Enable multithreading via OpenMP.
-#define BLIS_ENABLE_OPENMP
 
 
 

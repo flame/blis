@@ -139,6 +139,51 @@ BASE_LIB_PATH           := ./$(LIB_DIR)/$(CONFIG_NAME)
 
 
 #
+# --- Utility program definitions ----------------------------------------------
+#
+
+SH         := /bin/sh
+MV         := mv
+MKDIR      := mkdir -p
+RM_F       := rm -f
+RM_RF      := rm -rf
+SYMLINK    := ln -sf
+FIND       := find
+GREP       := grep
+XARGS      := xargs
+RANLIB     := ranlib
+INSTALL    := install -c
+
+# Used to refresh CHANGELOG.
+GIT        := git
+GIT_LOG    := $(GIT) log --decorate
+
+
+
+#
+# --- Determine the compiler vendor --------------------------------------------
+#
+
+ifneq ($(CC),)
+
+VENDOR_STRING := $(shell $(CC) --version 2>/dev/null)
+ifeq ($(VENDOR_STRING),)
+VENDOR_STRING := $(shell $(CC) -qversion 2>/dev/null)
+endif
+ifeq ($(VENDOR_STRING),)
+$(error Unable to determine compiler vendor.)
+endif
+
+CC_VENDOR := $(firstword $(shell echo '$(VENDOR_STRING)' | grep -Eo 'icc|gcc|clang|emcc|pnacl|IBM'))
+ifeq ($(CC_VENDOR),)
+$(error Unable to determine compiler vendor.)
+endif
+
+endif
+
+
+
+#
 # --- Include makefile definitions file ----------------------------------------
 #
 
@@ -156,6 +201,60 @@ MAKE_DEFS_MK_PRESENT := yes
 else
 MAKE_DEFS_MK_PRESENT := no
 endif
+
+
+
+#
+# --- Configuration-agnostic flags ---------------------------------------------
+#
+
+ifeq ($(CC_VENDOR),gcc)
+ifeq ($(THREADING_MODEL),auto)
+THREADING_MODEL := omp
+endif
+ifeq ($(THREADING_MODEL),omp)
+CTHREADFLAGS := -fopenmp -DBLIS_ENABLE_OPENMP
+LDFLAGS      += -fopenmp
+endif
+ifeq ($(THREADING_MODEL),pthreads)
+CTHREADFLAGS := -pthread -DBLIS_ENABLE_PTHREADS
+LDFLAGS      += -pthread
+endif
+endif
+
+ifeq ($(CC_VENDOR),icc)
+ifeq ($(THREADING_MODEL),auto)
+THREADING_MODEL := omp
+endif
+ifeq ($(THREADING_MODEL),omp)
+CTHREADFLAGS := -openmp -DBLIS_ENABLE_OPENMP
+LDFLAGS      += -openmp
+endif
+ifeq ($(THREADING_MODEL),pthreads)
+CTHREADFLAGS := -pthread -DBLIS_ENABLE_PTHREADS
+LDFLAGS      += -pthread
+endif
+endif
+
+ifeq ($(CC_VENDOR),clang)
+ifeq ($(THREADING_MODEL),auto)
+THREADING_MODEL := pthreads
+endif
+ifeq ($(THREADING_MODEL),omp)
+$(error OpenMP is not supported with Clang.)
+endif
+ifeq ($(THREADING_MODEL),pthreads)
+CTHREADFLAGS := -pthread -DBLIS_ENABLE_PTHREADS
+LDFLAGS      += -pthread
+endif
+endif
+
+# Aggregate all of the flags into multiple groups: one for standard compilation,
+# and one for each of the supported "special" compilation modes.
+
+CFLAGS_NOOPT   := $(CDBGFLAGS) $(CWARNFLAGS) $(CPICFLAGS) $(CTHREADFLAGS) $(CMISCFLAGS) $(CPPROCFLAGS)
+CFLAGS         := $(COPTFLAGS)  $(CVECFLAGS) $(CFLAGS_NOOPT)
+CFLAGS_KERNELS := $(CKOPTFLAGS) $(CVECFLAGS) $(CFLAGS_NOOPT)
 
 
 

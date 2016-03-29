@@ -39,44 +39,12 @@ MAKE_DEFS_MK_INCLUDED := yes
 
 
 #
-# --- Build definitions --------------------------------------------------------
-#
-
-# Variables corresponding to other configure-time options.
-BLIS_ENABLE_VERBOSE_MAKE_OUTPUT := no
-BLIS_ENABLE_STATIC_BUILD        := yes
-BLIS_ENABLE_DYNAMIC_BUILD       := no
-
-
-
-#
-# --- Utility program definitions ----------------------------------------------
-#
-
-SH         := /bin/sh
-MV         := mv
-MKDIR      := mkdir -p
-RM_F       := rm -f
-RM_RF      := rm -rf
-SYMLINK    := ln -sf
-FIND       := find
-GREP       := grep
-XARGS      := xargs
-RANLIB     := emranlib
-INSTALL    := install -c
-
-# Used to refresh CHANGELOG.
-GIT        := git
-GIT_LOG    := $(GIT) log --decorate
-
-
-
-#
 # --- Development tools definitions --------------------------------------------
 #
 
 # --- Determine the C compiler and related flags ---
 CC             := emcc
+CC_VENDOR      := emcc
 # Enable IEEE Standard 1003.1-2004 (POSIX.1d). 
 # NOTE: This is needed to enable posix_memalign().
 CPPROCFLAGS    := -D_POSIX_C_SOURCE=200112L
@@ -87,13 +55,6 @@ CWARNFLAGS     := -Wall
 COPTFLAGS      := -O2
 CKOPTFLAGS     := -O3
 CVECFLAGS      :=
-
-# Aggregate all of the flags into multiple groups: one for standard
-# compilation, and one for each of the supported "special" compilation
-# modes.
-CFLAGS_NOOPT   := $(CDBGFLAGS) $(CWARNFLAGS) $(CPICFLAGS) $(CMISCFLAGS) $(CPPROCFLAGS)
-CFLAGS         := $(COPTFLAGS)  $(CVECFLAGS) $(CFLAGS_NOOPT)
-CFLAGS_KERNELS := $(CKOPTFLAGS) $(CVECFLAGS) $(CFLAGS_NOOPT)
 
 # --- Determine the archiver and related flags ---
 AR             := emar
