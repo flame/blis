@@ -15,20 +15,19 @@ env:
   - RUN_TEST=0 BUILD_CONFIG="carrizo"
 
 install:
-- if [ "$CC" = "gcc" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
+- if [ "$CC" = "gcc" ]; then export CC="gcc-4.9"; fi
 addons:
   apt:
     sources:
     - ubuntu-toolchain-r-test
     packages:
-    - gcc-4.8
-    - g++-4.8
+    - gcc-4.9
     - clang
 
 
 
 script:
   - ./configure $BUILD_CONFIG
-  - make CC=gcc-4.8
+  - make CC=gcc-4.9
   - if [ $RUN_TEST -eq 1 ]; then make BLIS_ENABLE_TEST_OUTPUT=yes test; fi
   - if [ $RUN_TEST -eq 1 ]; then ./build/check-test.sh ./output.testsuite; fi

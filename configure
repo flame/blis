@@ -73,6 +73,29 @@ print_usage()
 	echo "                 kept in the framework, otherwise optimization is"
 	echo "                 turned off."
 	echo " "
+	echo "   --enable-verbose-make, --disable-verbose-make"
+	echo " "
+	echo "                 Enable (disabled by default) verbose compilation"
+	echo "                 output during make."
+	echo " "
+	echo "   --disable-static, --enable-static"
+	echo " "
+	echo "                 Disable (enabled by default) building BLIS as a static"
+	echo "                 library. May be combined with --enable-shared."
+	echo " "
+	echo "   --enable-shared, --disable-static"
+	echo " "
+	echo "                 Enable (disabled by default) building BLIS as a shared"
+	echo "                 library. May be combined with --enable-static."
+	echo " "
+	echo "   -t MODEL, --enable-threading[=MODEL], --disable-threading"
+	echo " "
+	echo "                 Enable threading in the library, using threading model"
+	echo "                 MODEL={auto,omp,pthreads,no}. If MODEL=no or "
+	echo "                 --disable-threading is specified, threading will be"
+	echo "                 disabled. If MODEL=auto or is unspecified, a model"
+	echo "                 will be chosen automatically. The default is 'auto'."
+	echo " "
 	echo "   -q, --quiet   Suppress informational output. By default, configure"
 	echo "                 is verbose. (NOTE: -q is not yet implemented)"
 	echo " "
@@ -85,7 +108,7 @@ print_usage()
 	echo "   Environment variables may also be specified as command line"
 	echo "   options, e.g.:"
 	echo " "
-	echo "     ./configure CC=gcc sandybridge"
+	echo "     ./configure [options] CC=gcc sandybridge"
 	echo " "
 	echo "   Note that not all compilers are compatible with a given"
 	echo "   configuration."
@@ -164,8 +187,16 @@ main()
 	debug_type=''
 	debug_flag=''
 
+	# The threading flag.
+	threading_model='auto'
+
 	# Option variables.
 	quiet_flag=''
+	
+	# Additional flags.
+	enable_verbose='no'
+	enable_static='yes'
+	enable_shared='no'
 
 	# The path to the auto-detection script.
 	auto_detect_sh="${build_dirpath}/auto-detect/auto-detect.sh"
@@ -190,7 +221,7 @@ main()
 
 
 	# Process our command line options.
-	while getopts ":hp:d:q-:" opt; do
+	while getopts ":hp:d:t:q-:" opt; do
 		case $opt in
 			-)
 				case "$OPTARG" in
@@ -212,6 +243,36 @@ main()
 						debug_flag=1
 						debug_type=${OPTARG#*=}
 						;;
+					disable-debug)
+						debug_flag=0
+						;;
+					enable-verbose-make)
+						enable_verbose='yes'
+						;;
+					disable-verbose-make)
+						enable_verbose='no'
+						;;
+					enable-static)
+						enable_static='yes'
+						;;
+					disable-static)
+						enable_static='no'
+						;;
+					enable-shared)
+						enable_shared='yes'
+						;;
+					disable-shared)
+						enable_shared='no'
+						;;
+					enable-threading)
+						threading_model='auto'
+						;;
+					enable-threading=*)
+						threading_model=${OPTARG#*=}
+						;;
+					disable-threading)
+						threading_model='no'
+						;;
 					*)
 						print_usage
 						;;
@@ -229,6 +290,9 @@ main()
 				;;
 			q)
 				quiet_flag=1
+				;;
+			t)
+				threading_model=$OPTARG
 				;;
 			\?)
 				print_usage
@@ -338,23 +402,45 @@ main()
 		debug_type='off'
 		echo "${script_name}: debug symbols disabled."
 	fi
+
+
+	# Check if the verbose make flag was specified.
+	if [ "x${enable_verbose}" = "xyes" ]; then
+		echo "${script_name}: enabling verbose make output, disable with 'make V=0'."
+	else
+		echo "${script_name}: disabling verbose make output, enable with 'make V=1'."
+	fi
+
+
+	# Check if the static lib flag was specified.
+	if [ "x${enable_static}" = "xyes" ]; then
+		echo "${script_name}: building BLIS as a static library."
+	fi
+	
+	# Check if the shared lib flag was specified.
+	if [ "x${enable_shared}" = "xyes" ]; then
+		echo "${script_name}: building BLIS as a shared library."
+	fi
+	
+	# Check if neither flag was specified.
+	if [ "x${enable_static}" = "xno" -a "x${enable_shared}" = "xno" ]; then
+		echo "Neither a shared nor static library build has been requested."
+		exit 1
+	fi
 	
 	
-	# Determine the compiler vendor if CC was specified.
-	if [ -n "$CC" ]; then
-		if $CC --version 2>/dev/null | grep -q 'pnacl-version'; then
-			cc_vendor='pnacl-clang'
-		else
-			cc_vendor=`$CC --version 2>/dev/null | grep -Eo 'icc|gcc|clang|emcc'`
-		fi
-		if [ -z "$cc_vendor" ]; then
-			cc_vendor=`$CC -qversion 2>/dev/null | grep -o 'IBM'`
-		fi
-		if [ -z "$cc_vendor" ]; then
-			echo Unable to determine compiler vendor.
-			exit 1
-		fi
-		cc_vendor=`echo $cc_vendor | { read first rest; echo $first; }`
+	# Check the threading model flag.
+	if [ "x${threading_model}" = "xauto" ]; then
+		echo "${script_name}: determining the threading model automatically."
+	elif [ "x${threading_model}" = "xomp" ]; then
+		echo "${script_name}: using OpenMP for threading."
+	elif [ "x${threading_model}" = "xpthreads" ]; then
+		echo "${script_name}: using Pthreads for threading."
+	elif [ "x${threading_model}" = "xno" ]; then
+		echo "${script_name}: threading is disabled."
+	else
+		echo "Unsupported threading model: ${threading_model}."
+		exit 1
 	fi
 
 
@@ -373,9 +459,12 @@ main()
 		| sed "s/@config_name@/${config_name}/g" \
 		| sed "s/@dist_path@/${dist_path_esc}/g" \
 		| sed "s/@CC@/${cc_esc}/g" \
-		| sed "s/@cc_vendor@/${cc_vendor}/g" \
 		| sed "s/@debug_type@/${debug_type}/g" \
 		| sed "s/@install_prefix@/${install_prefix_esc}/g" \
+		| sed "s/@enable_verbose@/${enable_verbose}/g" \
+		| sed "s/@enable_static@/${enable_static}/g" \
+		| sed "s/@enable_dynamic@/${enable_shared}/g" \
+		| sed "s/@threading_model@/${threading_model}/g" \
 		> "${config_mk_out_path}"
 
 

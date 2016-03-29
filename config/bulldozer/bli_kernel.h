@@ -51,9 +51,9 @@
 //     (b) MR (for zero-padding purposes when MR and NR are "swapped")
 //
 
-#define BLIS_DEFAULT_MC_S              256
-#define BLIS_DEFAULT_KC_S              256
-#define BLIS_DEFAULT_NC_S              8192
+#define BLIS_DEFAULT_MC_S              128
+#define BLIS_DEFAULT_KC_S              384
+#define BLIS_DEFAULT_NC_S              4096
 
 #define BLIS_DEFAULT_MC_D              1080
 #define BLIS_DEFAULT_KC_D              120
@@ -70,7 +70,7 @@
 // -- Register blocksizes --
 
 #define BLIS_DEFAULT_MR_S              8
-#define BLIS_DEFAULT_NR_S              4
+#define BLIS_DEFAULT_NR_S              8
 
 #define BLIS_DEFAULT_MR_D              4
 #define BLIS_DEFAULT_NR_D              6
@@ -149,6 +149,7 @@
 
 // -- gemm --
 
+#define BLIS_SGEMM_UKERNEL         bli_sgemm_8x8_FMA4
 #define BLIS_DGEMM_UKERNEL         bli_dgemm_4x6_FMA4
 
 // -- trsm-related --

@@ -39,39 +39,6 @@ MAKE_DEFS_MK_INCLUDED := yes
 
 
 #
-# --- Build definitions --------------------------------------------------------
-#
-
-# Variables corresponding to other configure-time options.
-BLIS_ENABLE_VERBOSE_MAKE_OUTPUT := no
-BLIS_ENABLE_STATIC_BUILD        := yes
-BLIS_ENABLE_DYNAMIC_BUILD       := no
-
-
-
-#
-# --- Utility program definitions ----------------------------------------------
-#
-
-SH         := /bin/sh
-MV         := mv
-MKDIR      := mkdir -p
-RM_F       := rm -f
-RM_RF      := rm -rf
-SYMLINK    := ln -sf
-FIND       := find
-GREP       := grep
-XARGS      := xargs
-RANLIB     := ranlib
-INSTALL    := install -c
-
-# Used to refresh CHANGELOG.
-GIT        := git
-GIT_LOG    := $(GIT) log --decorate
-
-
-
-#
 # --- Development tools definitions --------------------------------------------
 #
 
@@ -80,13 +47,11 @@ ifeq ($(CC),)
 CC             := gcc
 CC_VENDOR      := gcc
 endif
-ifneq ($(CC_VENDOR),gcc)
-$(error gcc is required for this configuration.)
-endif
+
 # Enable IEEE Standard 1003.1-2004 (POSIX.1d). 
 # NOTE: This is needed to enable posix_memalign().
 CPPROCFLAGS    := -D_POSIX_C_SOURCE=200112L
-CMISCFLAGS     := -std=c99 -m64 -fopenmp  # -fopenmp -pg
+CMISCFLAGS     := -std=c99 -m64
 CPICFLAGS      := -fPIC
 CWARNFLAGS     := -Wall
 
@@ -97,21 +62,24 @@ endif
 ifeq ($(DEBUG_TYPE),noopt)
 COPTFLAGS      := -O0
 else
-COPTFLAGS      := -O3 -march=native
-endif
-
-ifneq ($(DEBUG_TYPE),noopt)
-CVECFLAGS      := -mavx -mfpmath=sse #-msse3 -march=native # -mfpmath=sse
+COPTFLAGS      := -O3
 endif
 
 CKOPTFLAGS     := $(COPTFLAGS)
 
-# Aggregate all of the flags into multiple groups: one for standard
-# compilation, and one for each of the supported "special" compilation
-# modes.
-CFLAGS_NOOPT   := $(CDBGFLAGS) $(CWARNFLAGS) $(CPICFLAGS) $(CMISCFLAGS) $(CPPROCFLAGS)
-CFLAGS         := $(COPTFLAGS)  $(CVECFLAGS) $(CFLAGS_NOOPT)
-CFLAGS_KERNELS := $(CKOPTFLAGS) $(CVECFLAGS) $(CFLAGS_NOOPT)
+ifeq ($(CC_VENDOR),gcc)
+CVECFLAGS      := -mavx -mfpmath=sse -march=corei7-avx
+else
+ifeq ($(CC_VENDOR),icc)
+CVECFLAGS      := -xAVX
+else
+ifeq ($(CC_VENDOR),clang)
+CVECFLAGS      := -mavx -mfpmath=sse -march=corei7-avx
+else
+$(error gcc, icc, or clang is required for this configuration.)
+endif
+endif
+endif
 
 # --- Determine the archiver and related flags ---
 AR             := ar
@@ -120,7 +88,7 @@ ARFLAGS        := cru
 # --- Determine the linker and related flags ---
 LINKER         := $(CC)
 SOFLAGS        := -shared
-LDFLAGS        := -lm -fopenmp -lpthread
+LDFLAGS        := -lm
 
 
 

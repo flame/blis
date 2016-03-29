@@ -37,26 +37,32 @@ ifndef CONFIG_MK_INCLUDED
 CONFIG_MK_INCLUDED := yes
 
 # The name of the configuration sub-directory.
-CONFIG_NAME    := @config_name@
+CONFIG_NAME     := @config_name@
 
-# The operating system name, which should be either 'Linux' or 'Darwin'.
-OS_NAME        := $(shell uname -s)
+# The operatin g system name, which should be either 'Linux' or 'Darwin'.
+OS_NAME         := $(shell uname -s)
 
 # The directory path to the top level of the source distribution.
-DIST_PATH      := @dist_path@
+DIST_PATH       := @dist_path@
 
 # The level of debugging info to generate.
-DEBUG_TYPE     := @debug_type@
+DEBUG_TYPE      := @debug_type@
 
 # The C compiler.
-CC             := @CC@
-CC_VENDOR      := @cc_vendor@
+CC              := @CC@
+
+# The requested threading model.
+THREADING_MODEL := @threading_model@
 
 # The install prefix tell us where to install the libraries and header file
 # directory. Notice that we support the use of DESTDIR so that advanced users
 # may install to a temporary location.
 INSTALL_PREFIX := $(DESTDIR)@install_prefix@
 
+# Variables corresponding to other configure-time options.
+BLIS_ENABLE_VERBOSE_MAKE_OUTPUT := @enable_verbose@
+BLIS_ENABLE_STATIC_BUILD        := @enable_static@
+BLIS_ENABLE_DYNAMIC_BUILD       := @enable_dynamic@
 
 # end of ifndef CONFIG_MK_INCLUDED conditional block
 endif

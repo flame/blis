@@ -39,7 +39,6 @@
 #define BLIS_TREE_BARRIER
 #define BLIS_TREE_BARRIER_ARITY 4
 
-#define BLIS_ENABLE_OPENMP
 
 #define BLIS_SIMD_ALIGN_SIZE             32
 
