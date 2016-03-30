@@ -56,6 +56,14 @@ else
 CONFIG_MK_PRESENT := no
 endif
 
+# Locations of important files.
+CONFIG_DIR         := config
+
+# Now we have access to CONFIG_NAME, which tells us which sub-directory of the
+# config directory to use as our configuration. Also using CONFIG_NAME, we
+# construct the path to the general framework source tree.
+CONFIG_PATH       := $(DIST_PATH)/$(CONFIG_DIR)/$(CONFIG_NAME)
+
 
 
 #
