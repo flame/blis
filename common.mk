@@ -42,11 +42,15 @@ COMMON_MK_INCLUDED := yes
 # --- Include makefile configuration file --------------------------------------
 #
 
+ifeq ($(strip $(RELPATH)),)
+RELPATH := .
+endif
+
 # Define the name of the configuration file.
 CONFIG_MK_FILE     := config.mk
 
 # Include the configuration file.
--include $(CONFIG_MK_FILE)
+-include $(RELPATH)/$(CONFIG_MK_FILE)
 
 # Detect whether we actually got the configuration file. If we didn't, then
 # it is likely that the user has not yet generated it (via configure).
@@ -63,6 +67,12 @@ CONFIG_DIR         := config
 # config directory to use as our configuration. Also using CONFIG_NAME, we
 # construct the path to the general framework source tree.
 CONFIG_PATH       := $(DIST_PATH)/$(CONFIG_DIR)/$(CONFIG_NAME)
+
+# If CONFIG_PATH is not an absolute path (does not begin with /) then prepend
+# RELPATH to it.
+ifeq ($(strip $(filter /%,$(CONFIG_PATH))),)
+CONFIG_PATH := $(RELPATH)/$(CONFIG_PATH)
+endif
 
 
 
@@ -215,7 +225,7 @@ endif
 
 
 
-# end of ifndef CONFIG_MK_INCLUDED conditional block
+# end of ifndef COMMON_MK_INCLUDED conditional block
 endif
 
 

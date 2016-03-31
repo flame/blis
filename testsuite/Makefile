@@ -54,6 +54,8 @@
 # --- Makefile initialization --------------------------------------------------
 #
 
+RELPATH := ..
+
 # Define the name of the common makefile.
 COMMON_MK_FILE     := common.mk
 
