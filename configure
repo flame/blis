@@ -545,31 +545,31 @@ main()
 		# directory and thus we must create a symbolic link.
 		if [ ! -f "${dist_path}/${dummy_file}" ]; then
 
-            # If 'Makefile' does not already exist in the current directory,
-            # create a symbolic link to it. If one does exist, we us -f to
-            # force creation of a new link.
-            if [ ! -e "./Makefile" ]; then
+			# If 'Makefile' does not already exist in the current directory,
+			# create a symbolic link to it. If one does exist, we us -f to
+			# force creation of a new link.
+			if [ ! -e "./Makefile" ]; then
 
-                echo "${script_name}: creating symbolic link to Makefile."
-                ln -s "${dist_path}/Makefile"
+				echo "${script_name}: creating symbolic link to Makefile."
+				ln -s "${dist_path}/Makefile"
 
-            else
-                echo "${script_name}: symbolic link to Makefile already exists; forcing creation of new link."
-                ln -sf "${dist_path}/Makefile"
-            fi
+			else
+				echo "${script_name}: symbolic link to Makefile already exists; forcing creation of new link."
+				ln -sf "${dist_path}/Makefile"
+			fi
 
-            # If 'common.mk' does not already exist in the current directory,
-            # create a symbolic link to it. If one does exist, we us -f to
-            # force creation of a new link.
-            if [ ! -e "./common.mk" ]; then
+			# If 'common.mk' does not already exist in the current directory,
+			# create a symbolic link to it. If one does exist, we us -f to
+			# force creation of a new link.
+			if [ ! -e "./common.mk" ]; then
 
-                echo "${script_name}: creating symbolic link to common.mk."
-                ln -s "${dist_path}/common.mk"
+				echo "${script_name}: creating symbolic link to common.mk."
+				ln -s "${dist_path}/common.mk"
 
-            else
-                echo "${script_name}: symbolic link to common.mk already exists; forcing creation of new link."
-                ln -sf "${dist_path}/common.mk"
-            fi
+			else
+				echo "${script_name}: symbolic link to common.mk already exists; forcing creation of new link."
+				ln -sf "${dist_path}/common.mk"
+			fi
 
 			echo "${script_name}: configured to build outside of source distribution."
 		else
