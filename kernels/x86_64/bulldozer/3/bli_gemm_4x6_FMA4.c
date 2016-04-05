@@ -262,16 +262,16 @@ void bli_sgemm_8x8_FMA4(
 	"vfmaddps	%%ymm11, %%ymm0,  %%ymm4, %%ymm11\n\t"
 	"vfmaddps	%%ymm9, %%ymm0,  %%ymm5, %%ymm9\n\t"
 	"                                            \n\t"
-	"vfmaddps	%%ymm14, %%ymm0,  %%ymm2, %%ymm14\n\t"
+ 	"vfmaddps	%%ymm14, %%ymm0,  %%ymm2, %%ymm14\n\t"
 	"vperm2f128  $0x3, %%ymm2,  %%ymm2, %%ymm4   \n\t"
 	"vmovsldup  1 * 32(%%rbx),  %%ymm2           \n\t"
 	"addq           $8 * 1 * 4, %%rbx            \n\t" // b += 8 (1 x nr)
-	"vfmaddps	%%ymm12, %%ymm0,  %%ymm3, %%ymm12\n\t"
-	"vmulps            %%ymm0,  %%ymm3, %%ymm7   \n\t"
+ 	"vfmaddps	%%ymm12, %%ymm0,  %%ymm3, %%ymm12\n\t"
+	"vperm2f128  $0x3, %%ymm3,  %%ymm3, %%ymm5   \n\t"
 	"                                            \n\t"
 	"vpermilps  $0x4e, %%ymm2,  %%ymm3           \n\t"
-	"vfmaddps	%%ymm10, %%ymm0,  %%ymm4, %%ymm10\n\t"
-	"vfmaddps	%%ymm8, %%ymm0,  %%ymm5, %%ymm8\n\t"
+ 	"vfmaddps	%%ymm10, %%ymm0,  %%ymm4, %%ymm10\n\t"
+ 	"vfmaddps	%%ymm8, %%ymm0,  %%ymm5, %%ymm8\n\t"
 	"vmovaps           %%ymm1,  %%ymm0           \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
@@ -1120,11 +1120,9 @@ void bli_cgemm_8x4_FMA4(
 	MADD_TO_YMM("0")
 	"                                            \n\t"
 	"vpermilps $0xb1, %%ymm1,  %%ymm1            \n\t"
- 	"vmulps           %%ymm0,  %%ymm2,  %%ymm6   \n\t"
- 	"vaddsubps        %%ymm6,  %%ymm15, %%ymm15  \n\t"
-//	"vfmaddsubps	%%ymm15, %%ymm2, %%ymm15, %%ymm0	\n\t"
+	"vmulps           %%ymm0,  %%ymm2,  %%ymm6   \n\t"
+	"vaddsubps        %%ymm6,  %%ymm15, %%ymm15  \n\t"
 	"vmulps           %%ymm0,  %%ymm3,  %%ymm7   \n\t"
-//	"vfmaddsubps	%%ymm13, %%ymm0, %%ymm3, %%ymm13	\n\t"
 	"vaddsubps        %%ymm7,  %%ymm13, %%ymm13  \n\t"
 	"                                            \n\t"
 	"vmulps           %%ymm1,  %%ymm2,  %%ymm6   \n\t"
@@ -1832,15 +1830,39 @@ void bli_cgemm_8x4_FMA4(
 	: // register clobber list
 	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", 
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
-	  "xmm0", "xmm1", "xmm2", "xmm3",
-	  "xmm4", "xmm5", "xmm6", "xmm7",
-	  "xmm8", "xmm9", "xmm10", "xmm11",
-	  "xmm12", "xmm13", "xmm14", "xmm15",
+	  "ymm0", "ymm1", "ymm2", "ymm3",
+	  "ymm4", "ymm5", "ymm6", "ymm7",
+	  "ymm8", "ymm9", "ymm10", "ymm11",
+	  "ymm12", "ymm13", "ymm14", "ymm15",
 	  "memory"
 	);
 }
 
-void bli_zgemm_4x4_FMA4(
+#define MADDSUBPD_TO_YMM \
+	"vfmaddpd	%%ymm13, %%ymm0, %%ymm4, %%ymm13\n\t"\
+	"vfmaddpd	%%ymm9, %%ymm0, %%ymm5, %%ymm9\n\t"\
+	"vpermilpd  $0x5, %%ymm0,  %%ymm0            \n\t"\
+	"                                            \n\t"\
+	"vfmaddpd	%%ymm12, %%ymm1, %%ymm4, %%ymm12\n\t"\
+	"vperm2f128 $0x3, %%ymm2,  %%ymm2,  %%ymm4   \n\t"\
+	"vfmaddpd	%%ymm8, %%ymm1, %%ymm5, %%ymm8\n\t"\
+	"vperm2f128 $0x3, %%ymm3,  %%ymm3,  %%ymm5   \n\t"\
+	"                                            \n\t"\
+	"vpermilpd  $0x5, %%ymm1,  %%ymm1            \n\t"\
+	"vmulpd           %%ymm0,  %%ymm2,  %%ymm6   \n\t"\
+	"vmulpd           %%ymm0,  %%ymm3,  %%ymm7   \n\t"\
+	"vaddsubpd        %%ymm6,  %%ymm15, %%ymm15  \n\t"\
+	"vaddsubpd        %%ymm7,  %%ymm11, %%ymm11  \n\t"\
+	"                                            \n\t"\
+
+#define Z_ALPHA(i, j) \
+	"vpermilpd  $0x5, %%ymm"i", %%ymm"j"            \n\t"\
+	"vmulpd           %%ymm7,  %%ymm"i", %%ymm"i"  \n\t"\
+	"vmulpd           %%ymm6,  %%ymm"j",  %%ymm"j"   \n\t"\
+	"vaddsubpd        %%ymm"j",  %%ymm"i", %%ymm"i"  \n\t"\
+	"                                            \n\t"
+
+	void bli_zgemm_4x4_FMA4(
                         dim_t              k,
                         dcomplex* restrict alpha,
                         dcomplex* restrict a,
@@ -1910,21 +1932,7 @@ void bli_zgemm_4x4_FMA4(
 	"vfmaddpd	%%ymm10, %%ymm1, %%ymm3, %%ymm10\n\t"
 	"vmovddup   8 + 1 * 32(%%rbx),      %%ymm3   \n\t"
 	"                                            \n\t"
-	"vfmaddpd	%%ymm13, %%ymm0, %%ymm4, %%ymm13\n\t"
-	"vfmaddpd	%%ymm9, %%ymm0, %%ymm5, %%ymm9\n\t"
-	"vpermilpd  $0x5, %%ymm0,  %%ymm0            \n\t"
-	"                                            \n\t"
-	"vfmaddpd	%%ymm12, %%ymm1, %%ymm4, %%ymm12\n\t"
-	"vperm2f128 $0x3, %%ymm2,  %%ymm2,  %%ymm4   \n\t"
-	"vfmaddpd	%%ymm8, %%ymm1, %%ymm5, %%ymm8\n\t"
-	"vperm2f128 $0x3, %%ymm3,  %%ymm3,  %%ymm5   \n\t"
-	"                                            \n\t"
-	"vpermilpd  $0x5, %%ymm1,  %%ymm1            \n\t"
-	"vmulpd           %%ymm0,  %%ymm2,  %%ymm6   \n\t"
-	"vmulpd           %%ymm0,  %%ymm3,  %%ymm7   \n\t"
-	"vaddsubpd        %%ymm6,  %%ymm15, %%ymm15  \n\t"
-	"vaddsubpd        %%ymm7,  %%ymm11, %%ymm11  \n\t"
-	"                                            \n\t"
+	MADDSUBPD_TO_YMM
 	"vmulpd           %%ymm1,  %%ymm2,  %%ymm6   \n\t"
 	"vmovddup   0 + 2 * 32(%%rbx),      %%ymm2   \n\t"
 	"vmulpd           %%ymm1,  %%ymm3,  %%ymm7   \n\t"
@@ -1956,21 +1964,7 @@ void bli_zgemm_4x4_FMA4(
 	"vfmaddpd	%%ymm10, %%ymm1, %%ymm3, %%ymm10\n\t"
 	"vmovddup   8 + 3 * 32(%%rbx),      %%ymm3   \n\t"
 	"                                            \n\t"
-	"vfmaddpd	%%ymm13, %%ymm0, %%ymm4, %%ymm13\n\t"
-	"vfmaddpd	%%ymm9, %%ymm0, %%ymm5, %%ymm9\n\t"
-	"vpermilpd  $0x5, %%ymm0,  %%ymm0            \n\t"
-	"                                            \n\t"
-	"vfmaddpd	%%ymm12, %%ymm1, %%ymm4, %%ymm12\n\t"
-	"vperm2f128 $0x3, %%ymm2,  %%ymm2,  %%ymm4   \n\t"
-	"vfmaddpd	%%ymm8, %%ymm1, %%ymm5, %%ymm8\n\t"
-	"vperm2f128 $0x3, %%ymm3,  %%ymm3,  %%ymm5   \n\t"
-	"                                            \n\t"
-	"vpermilpd  $0x5, %%ymm1,  %%ymm1            \n\t"
-	"vmulpd           %%ymm0,  %%ymm2,  %%ymm6   \n\t"
-	"vmulpd           %%ymm0,  %%ymm3,  %%ymm7   \n\t"
-	"vaddsubpd        %%ymm6,  %%ymm15, %%ymm15  \n\t"
-	"vaddsubpd        %%ymm7,  %%ymm11, %%ymm11  \n\t"
-	"                                            \n\t"
+	MADDSUBPD_TO_YMM
 	"vmulpd           %%ymm1,  %%ymm2,  %%ymm6   \n\t"
 	"vmovddup   0 + 4 * 32(%%rbx),      %%ymm2   \n\t"
 	"vmulpd           %%ymm1,  %%ymm3,  %%ymm7   \n\t"
@@ -2002,21 +1996,7 @@ void bli_zgemm_4x4_FMA4(
 	"vfmaddpd	%%ymm10, %%ymm1, %%ymm3, %%ymm10\n\t"
 	"vmovddup   8 + 5 * 32(%%rbx),      %%ymm3   \n\t"
 	"                                            \n\t"
-	"vfmaddpd	%%ymm13, %%ymm0, %%ymm4, %%ymm13\n\t"
-	"vfmaddpd	%%ymm9, %%ymm0, %%ymm5, %%ymm9\n\t"
-	"vpermilpd  $0x5, %%ymm0,  %%ymm0            \n\t"
-	"                                            \n\t"
-	"vfmaddpd	%%ymm12, %%ymm1, %%ymm4, %%ymm12\n\t"
-	"vperm2f128 $0x3, %%ymm2,  %%ymm2,  %%ymm4   \n\t"
-	"vfmaddpd	%%ymm8, %%ymm1, %%ymm5, %%ymm8\n\t"
-	"vperm2f128 $0x3, %%ymm3,  %%ymm3,  %%ymm5   \n\t"
-	"                                            \n\t"
-	"vpermilpd  $0x5, %%ymm1,  %%ymm1            \n\t"
-	"vmulpd           %%ymm0,  %%ymm2,  %%ymm6   \n\t"
-	"vmulpd           %%ymm0,  %%ymm3,  %%ymm7   \n\t"
-	"vaddsubpd        %%ymm6,  %%ymm15, %%ymm15  \n\t"
-	"vaddsubpd        %%ymm7,  %%ymm11, %%ymm11  \n\t"
-	"                                            \n\t"
+	MADDSUBPD_TO_YMM
 	"vmulpd           %%ymm1,  %%ymm2,  %%ymm6   \n\t"
 	"vmovddup   0 + 6 * 32(%%rbx),      %%ymm2   \n\t"
 	"vmulpd           %%ymm1,  %%ymm3,  %%ymm7   \n\t"
@@ -2048,21 +2028,7 @@ void bli_zgemm_4x4_FMA4(
 	"vfmaddpd	%%ymm10, %%ymm1, %%ymm3, %%ymm10\n\t"
 	"vmovddup   8 + 7 * 32(%%rbx),      %%ymm3   \n\t"
 	"                                            \n\t"
-	"vfmaddpd	%%ymm13, %%ymm0, %%ymm4, %%ymm13\n\t"
-	"vfmaddpd	%%ymm9, %%ymm0, %%ymm5, %%ymm9\n\t"
-	"vpermilpd  $0x5, %%ymm0,  %%ymm0            \n\t"
-	"                                            \n\t"
-	"vfmaddpd	%%ymm12, %%ymm1, %%ymm4, %%ymm12\n\t"
-	"vperm2f128 $0x3, %%ymm2,  %%ymm2,  %%ymm4   \n\t"
-	"vfmaddpd	%%ymm8, %%ymm1, %%ymm5, %%ymm8\n\t"
-	"vperm2f128 $0x3, %%ymm3,  %%ymm3,  %%ymm5   \n\t"
-	"                                            \n\t"
-	"vpermilpd  $0x5, %%ymm1,  %%ymm1            \n\t"
-	"vmulpd           %%ymm0,  %%ymm2,  %%ymm6   \n\t"
-	"vmulpd           %%ymm0,  %%ymm3,  %%ymm7   \n\t"
-	"vaddsubpd        %%ymm6,  %%ymm15, %%ymm15  \n\t"
-	"vaddsubpd        %%ymm7,  %%ymm11, %%ymm11  \n\t"
-	"                                            \n\t"
+	MADDSUBPD_TO_YMM
 	"vmulpd           %%ymm1,  %%ymm2,  %%ymm6   \n\t"
 	"vmovddup   0 + 8 * 32(%%rbx),      %%ymm2   \n\t"
 	"vmulpd           %%ymm1,  %%ymm3,  %%ymm7   \n\t"
@@ -2096,45 +2062,22 @@ void bli_zgemm_4x4_FMA4(
 	"                                            \n\t" // else, we prepare to enter k_left loop.
 	"                                            \n\t"
 	"                                            \n\t"
-//ZLOOPKLEFT not tested by testsuite
 	".ZLOOPKLEFT:                                \n\t" // EDGE LOOP
 	"                                            \n\t"
 	"                                            \n\t" // iteration 0
 	"vmovapd        1 * 32(%%rax),      %%ymm1   \n\t"
-	"vmulpd           %%ymm0,  %%ymm2,  %%ymm6   \n\t"
+	"vfmaddpd	%%ymm15, %%ymm0, %%ymm2, %%ymm15\n\t"
 	"vperm2f128 $0x3, %%ymm2,  %%ymm2,  %%ymm4   \n\t"
-	"vmulpd           %%ymm0,  %%ymm3,  %%ymm7   \n\t"
+	"vfmaddpd	%%ymm11, %%ymm0, %%ymm3, %%ymm11\n\t"
 	"vperm2f128 $0x3, %%ymm3,  %%ymm3,  %%ymm5   \n\t"
-	"vaddpd           %%ymm6,  %%ymm15, %%ymm15  \n\t"
-	"vaddpd           %%ymm7,  %%ymm11, %%ymm11  \n\t"
 	"                                            \n\t"
 	"prefetcht0    16 * 32(%%rax)                \n\t"
-	"vmulpd           %%ymm1,  %%ymm2,  %%ymm6   \n\t"
+	"vfmaddpd	%%ymm14, %%ymm1, %%ymm2, %%ymm14\n\t"
 	"vmovddup   8 + 0 * 32(%%rbx),      %%ymm2   \n\t"
-	"vmulpd           %%ymm1,  %%ymm3,  %%ymm7   \n\t"
+	"vfmaddpd	%%ymm10, %%ymm1, %%ymm3, %%ymm10\n\t"
 	"vmovddup   8 + 1 * 32(%%rbx),      %%ymm3   \n\t"
-	"vaddpd           %%ymm6,  %%ymm14, %%ymm14  \n\t"
-	"vaddpd           %%ymm7,  %%ymm10, %%ymm10  \n\t"
 	"                                            \n\t"
-	"vmulpd           %%ymm0,  %%ymm4,  %%ymm6   \n\t"
-	"vmulpd           %%ymm0,  %%ymm5,  %%ymm7   \n\t"
-	"vpermilpd  $0x5, %%ymm0,  %%ymm0            \n\t"
-	"vaddpd           %%ymm6,  %%ymm13, %%ymm13  \n\t"
-	"vaddpd           %%ymm7,  %%ymm9,  %%ymm9   \n\t"
-	"                                            \n\t"
-	"vmulpd           %%ymm1,  %%ymm4,  %%ymm6   \n\t"
-	"vperm2f128 $0x3, %%ymm2,  %%ymm2,  %%ymm4   \n\t"
-	"vmulpd           %%ymm1,  %%ymm5,  %%ymm7   \n\t"
-	"vperm2f128 $0x3, %%ymm3,  %%ymm3,  %%ymm5   \n\t"
-	"vaddpd           %%ymm6,  %%ymm12, %%ymm12  \n\t"
-	"vaddpd           %%ymm7,  %%ymm8,  %%ymm8   \n\t"
-	"                                            \n\t"
-	"vpermilpd  $0x5, %%ymm1,  %%ymm1            \n\t"
-	"vmulpd           %%ymm0,  %%ymm2,  %%ymm6   \n\t"
-	"vmulpd           %%ymm0,  %%ymm3,  %%ymm7   \n\t"
-	"vaddsubpd        %%ymm6,  %%ymm15, %%ymm15  \n\t"
-	"vaddsubpd        %%ymm7,  %%ymm11, %%ymm11  \n\t"
-	"                                            \n\t"
+	MADDSUBPD_TO_YMM
 	"vmulpd           %%ymm1,  %%ymm2,  %%ymm6   \n\t"
 	"vmovddup   0 + 2 * 32(%%rbx),      %%ymm2   \n\t"
 	"vmulpd           %%ymm1,  %%ymm3,  %%ymm7   \n\t"
@@ -2210,48 +2153,15 @@ void bli_zgemm_4x4_FMA4(
 	"vbroadcastsd    (%%rax), %%ymm7             \n\t" // load alpha_r and duplicate
 	"vbroadcastsd   8(%%rax), %%ymm6             \n\t" // load alpha_i and duplicate
 	"                                            \n\t"
-	"vpermilpd  $0x5, %%ymm15, %%ymm3            \n\t"
-	"vmulpd           %%ymm7,  %%ymm15, %%ymm15  \n\t"
-	"vmulpd           %%ymm6,  %%ymm3,  %%ymm3   \n\t"
-	"vaddsubpd        %%ymm3,  %%ymm15, %%ymm15  \n\t"
-	"                                            \n\t"
-	"vpermilpd  $0x5, %%ymm14, %%ymm2            \n\t"
-	"vmulpd           %%ymm7,  %%ymm14, %%ymm14  \n\t"
-	"vmulpd           %%ymm6,  %%ymm2,  %%ymm2   \n\t"
-	"vaddsubpd        %%ymm2,  %%ymm14, %%ymm14  \n\t"
-	"                                            \n\t"
-	"vpermilpd  $0x5, %%ymm13, %%ymm1            \n\t"
-	"vmulpd           %%ymm7,  %%ymm13, %%ymm13  \n\t"
-	"vmulpd           %%ymm6,  %%ymm1,  %%ymm1   \n\t"
-	"vaddsubpd        %%ymm1,  %%ymm13, %%ymm13  \n\t"
-	"                                            \n\t"
-	"vpermilpd  $0x5, %%ymm12, %%ymm0            \n\t"
-	"vmulpd           %%ymm7,  %%ymm12, %%ymm12  \n\t"
-	"vmulpd           %%ymm6,  %%ymm0,  %%ymm0   \n\t"
-	"vaddsubpd        %%ymm0,  %%ymm12, %%ymm12  \n\t"
-	"                                            \n\t"
-	"vpermilpd  $0x5, %%ymm11, %%ymm3            \n\t"
-	"vmulpd           %%ymm7,  %%ymm11, %%ymm11  \n\t"
-	"vmulpd           %%ymm6,  %%ymm3,  %%ymm3   \n\t"
-	"vaddsubpd        %%ymm3,  %%ymm11, %%ymm11  \n\t"
-	"                                            \n\t"
-	"vpermilpd  $0x5, %%ymm10, %%ymm2            \n\t"
-	"vmulpd           %%ymm7,  %%ymm10, %%ymm10  \n\t"
-	"vmulpd           %%ymm6,  %%ymm2,  %%ymm2   \n\t"
-	"vaddsubpd        %%ymm2,  %%ymm10, %%ymm10  \n\t"
-	"                                            \n\t"
-	"vpermilpd  $0x5, %%ymm9,  %%ymm1            \n\t"
-	"vmulpd           %%ymm7,  %%ymm9,  %%ymm9   \n\t"
-	"vmulpd           %%ymm6,  %%ymm1,  %%ymm1   \n\t"
-	"vaddsubpd        %%ymm1,  %%ymm9,  %%ymm9   \n\t"
-	"                                            \n\t"
-	"vpermilpd  $0x5, %%ymm8,  %%ymm0            \n\t"
-	"vmulpd           %%ymm7,  %%ymm8,  %%ymm8   \n\t"
-	"vmulpd           %%ymm6,  %%ymm0,  %%ymm0   \n\t"
-	"vaddsubpd        %%ymm0,  %%ymm8,  %%ymm8   \n\t"
-	"                                            \n\t"
-	"                                            \n\t"
-	"                                            \n\t"
+	Z_ALPHA("15", "3")
+	Z_ALPHA("14", "2")
+	Z_ALPHA("13", "1")
+	Z_ALPHA("12", "0")
+
+	Z_ALPHA("11", "3")
+	Z_ALPHA("10", "2")
+	Z_ALPHA("9", "1")
+	Z_ALPHA("8", "0")
 	"                                            \n\t"
 	"movq         %5, %%rbx                      \n\t" // load address of beta 
 	"vbroadcastsd    (%%rbx), %%ymm7             \n\t" // load beta_r and duplicate
@@ -2306,10 +2216,7 @@ void bli_zgemm_4x4_FMA4(
 	"vmovupd    (%%rcx),       %%xmm0            \n\t" // load (c00,c10) into xmm0
 	"vmovupd    (%%rcx,%%rsi), %%xmm2            \n\t" // load (c20,c30) into xmm2
 	"vinsertf128  $1, %%xmm2,  %%ymm0,  %%ymm0   \n\t" // ymm0 := (ymm0[0:1],xmm2)
-	"vpermilpd  $0x5, %%ymm0,  %%ymm2            \n\t" // scale ymm0 by beta
-	"vmulpd           %%ymm7,  %%ymm0,  %%ymm0   \n\t"
-	"vmulpd           %%ymm6,  %%ymm2,  %%ymm2   \n\t"
-	"vaddsubpd        %%ymm2,  %%ymm0,  %%ymm0   \n\t"
+	Z_ALPHA("0", "2")									// scale ymm0 by beta
 	"vaddpd           %%ymm15, %%ymm0,  %%ymm0   \n\t" // add the gemm result to ymm0
 	"vextractf128 $1, %%ymm0,  %%xmm2            \n\t" // xmm2 := ymm0[2:3]
 	"vmovupd          %%xmm0,  (%%rcx)           \n\t" // store (c00,c10)
@@ -2321,10 +2228,7 @@ void bli_zgemm_4x4_FMA4(
 	"vmovupd    (%%rdx),       %%xmm0            \n\t" // load (c40,c50) into xmm0
 	"vmovupd    (%%rdx,%%rsi), %%xmm2            \n\t" // load (c60,c70) into xmm2
 	"vinsertf128  $1, %%xmm2,  %%ymm0,  %%ymm0   \n\t" // ymm0 := (ymm0[0:1],xmm2)
-	"vpermilpd  $0x5, %%ymm0,  %%ymm2            \n\t" // scale ymm0 by beta
-	"vmulpd           %%ymm7,  %%ymm0,  %%ymm0   \n\t"
-	"vmulpd           %%ymm6,  %%ymm2,  %%ymm2   \n\t"
-	"vaddsubpd        %%ymm2,  %%ymm0,  %%ymm0   \n\t"
+	Z_ALPHA("0", "2")									// scale ymm0 by beta
 	"vaddpd           %%ymm14, %%ymm0,  %%ymm0   \n\t" // add the gemm result to ymm0
 	"vextractf128 $1, %%ymm0,  %%xmm2            \n\t" // xmm2 := ymm0[2:3]
 	"vmovupd          %%xmm0,  (%%rdx)           \n\t" // store (c40,c50)
@@ -2336,10 +2240,7 @@ void bli_zgemm_4x4_FMA4(
 	"vmovupd    (%%rcx),       %%xmm0            \n\t" // load (c01,c11) into xmm0
 	"vmovupd    (%%rcx,%%rsi), %%xmm2            \n\t" // load (c21,c31) into xmm2
 	"vinsertf128  $1, %%xmm2,  %%ymm0,  %%ymm0   \n\t" // ymm0 := (ymm0[0:1],xmm2)
-	"vpermilpd  $0x5, %%ymm0,  %%ymm2            \n\t" // scale ymm0 by beta
-	"vmulpd           %%ymm7,  %%ymm0,  %%ymm0   \n\t"
-	"vmulpd           %%ymm6,  %%ymm2,  %%ymm2   \n\t"
-	"vaddsubpd        %%ymm2,  %%ymm0,  %%ymm0   \n\t"
+	Z_ALPHA("0", "2")									// scale ymm0 by beta
 	"vaddpd           %%ymm13, %%ymm0,  %%ymm0   \n\t" // add the gemm result to ymm0
 	"vextractf128 $1, %%ymm0,  %%xmm2            \n\t" // xmm2 := ymm0[2:3]
 	"vmovupd          %%xmm0,  (%%rcx)           \n\t" // store (c01,c11)
@@ -2351,10 +2252,7 @@ void bli_zgemm_4x4_FMA4(
 	"vmovupd    (%%rdx),       %%xmm0            \n\t" // load (c41,c51) into xmm0
 	"vmovupd    (%%rdx,%%rsi), %%xmm2            \n\t" // load (c61,c71) into xmm2
 	"vinsertf128  $1, %%xmm2,  %%ymm0,  %%ymm0   \n\t" // ymm0 := (ymm0[0:1],xmm2)
-	"vpermilpd  $0x5, %%ymm0,  %%ymm2            \n\t" // scale ymm0 by beta
-	"vmulpd           %%ymm7,  %%ymm0,  %%ymm0   \n\t"
-	"vmulpd           %%ymm6,  %%ymm2,  %%ymm2   \n\t"
-	"vaddsubpd        %%ymm2,  %%ymm0,  %%ymm0   \n\t"
+	Z_ALPHA("0", "2")									// scale ymm0 by beta
 	"vaddpd           %%ymm12, %%ymm0,  %%ymm0   \n\t" // add the gemm result to ymm0
 	"vextractf128 $1, %%ymm0,  %%xmm2            \n\t" // xmm2 := ymm0[2:3]
 	"vmovupd          %%xmm0,  (%%rdx)           \n\t" // store (c41,c51)
@@ -2366,10 +2264,7 @@ void bli_zgemm_4x4_FMA4(
 	"vmovupd    (%%rcx),       %%xmm0            \n\t" // load (c02,c12) into xmm0
 	"vmovupd    (%%rcx,%%rsi), %%xmm2            \n\t" // load (c22,c32) into xmm2
 	"vinsertf128  $1, %%xmm2,  %%ymm0,  %%ymm0   \n\t" // ymm0 := (ymm0[0:1],xmm2)
-	"vpermilpd  $0x5, %%ymm0,  %%ymm2            \n\t" // scale ymm0 by beta
-	"vmulpd           %%ymm7,  %%ymm0,  %%ymm0   \n\t"
-	"vmulpd           %%ymm6,  %%ymm2,  %%ymm2   \n\t"
-	"vaddsubpd        %%ymm2,  %%ymm0,  %%ymm0   \n\t"
+	Z_ALPHA("0", "2")									// scale ymm0 by beta
 	"vaddpd           %%ymm11, %%ymm0,  %%ymm0   \n\t" // add the gemm result to ymm0
 	"vextractf128 $1, %%ymm0,  %%xmm2            \n\t" // xmm2 := ymm0[2:3]
 	"vmovupd          %%xmm0,  (%%rcx)           \n\t" // store (c02,c12)
@@ -2381,10 +2276,7 @@ void bli_zgemm_4x4_FMA4(
 	"vmovupd    (%%rdx),       %%xmm0            \n\t" // load (c42,c52) into xmm0
 	"vmovupd    (%%rdx,%%rsi), %%xmm2            \n\t" // load (c62,c72) into xmm2
 	"vinsertf128  $1, %%xmm2,  %%ymm0,  %%ymm0   \n\t" // ymm0 := (ymm0[0:1],xmm2)
-	"vpermilpd  $0x5, %%ymm0,  %%ymm2            \n\t" // scale ymm0 by beta
-	"vmulpd           %%ymm7,  %%ymm0,  %%ymm0   \n\t"
-	"vmulpd           %%ymm6,  %%ymm2,  %%ymm2   \n\t"
-	"vaddsubpd        %%ymm2,  %%ymm0,  %%ymm0   \n\t"
+	Z_ALPHA("0", "2")									// scale ymm0 by beta
 	"vaddpd           %%ymm10, %%ymm0,  %%ymm0   \n\t" // add the gemm result to ymm0
 	"vextractf128 $1, %%ymm0,  %%xmm2            \n\t" // xmm2 := ymm0[2:3]
 	"vmovupd          %%xmm0,  (%%rdx)           \n\t" // store (c42,c52)
@@ -2396,10 +2288,7 @@ void bli_zgemm_4x4_FMA4(
 	"vmovupd    (%%rcx),       %%xmm0            \n\t" // load (c03,c13) into xmm0
 	"vmovupd    (%%rcx,%%rsi), %%xmm2            \n\t" // load (c23,c33) into xmm2
 	"vinsertf128  $1, %%xmm2,  %%ymm0,  %%ymm0   \n\t" // ymm0 := (ymm0[0:1],xmm2)
-	"vpermilpd  $0x5, %%ymm0,  %%ymm2            \n\t" // scale ymm0 by beta
-	"vmulpd           %%ymm7,  %%ymm0,  %%ymm0   \n\t"
-	"vmulpd           %%ymm6,  %%ymm2,  %%ymm2   \n\t"
-	"vaddsubpd        %%ymm2,  %%ymm0,  %%ymm0   \n\t"
+	Z_ALPHA("0", "2")									// scale ymm0 by beta
 	"vaddpd           %%ymm9,  %%ymm0,  %%ymm0   \n\t" // add the gemm result to ymm0
 	"vextractf128 $1, %%ymm0,  %%xmm2            \n\t" // xmm2 := ymm0[2:3]
 	"vmovupd          %%xmm0,  (%%rcx)           \n\t" // store (c03,c13)
@@ -2411,10 +2300,7 @@ void bli_zgemm_4x4_FMA4(
 	"vmovupd    (%%rdx),       %%xmm0            \n\t" // load (c43,c53) into xmm0
 	"vmovupd    (%%rdx,%%rsi), %%xmm2            \n\t" // load (c63,c73) into xmm2
 	"vinsertf128  $1, %%xmm2,  %%ymm0,  %%ymm0   \n\t" // ymm0 := (ymm0[0:1],xmm2)
-	"vpermilpd  $0x5, %%ymm0,  %%ymm2            \n\t" // scale ymm0 by beta
-	"vmulpd           %%ymm7,  %%ymm0,  %%ymm0   \n\t"
-	"vmulpd           %%ymm6,  %%ymm2,  %%ymm2   \n\t"
-	"vaddsubpd        %%ymm2,  %%ymm0,  %%ymm0   \n\t"
+	Z_ALPHA("0", "2")									// scale ymm0 by beta
 	"vaddpd           %%ymm8,  %%ymm0,  %%ymm0   \n\t" // add the gemm result to ymm0
 	"vextractf128 $1, %%ymm0,  %%xmm2            \n\t" // xmm2 := ymm0[2:3]
 	"vmovupd          %%xmm0,  (%%rdx)           \n\t" // store (c43,c53)
@@ -2430,10 +2316,7 @@ void bli_zgemm_4x4_FMA4(
 	"                                            \n\t" // update c00:c30
 	"                                            \n\t"
 	"vmovapd    (%%rcx),       %%ymm0            \n\t" // load c00:c30 into ymm0
-	"vpermilpd  $0x5, %%ymm0,  %%ymm2            \n\t" // scale ymm0 by beta
-	"vmulpd           %%ymm7,  %%ymm0,  %%ymm0   \n\t"
-	"vmulpd           %%ymm6,  %%ymm2,  %%ymm2   \n\t"
-	"vaddsubpd        %%ymm2,  %%ymm0,  %%ymm0   \n\t"
+	Z_ALPHA("0", "2")									// scale ymm0 by beta
 	"vaddpd           %%ymm15, %%ymm0,  %%ymm0   \n\t" // add the gemm result to ymm0
 	"vmovapd          %%ymm0,  (%%rcx)           \n\t" // store c00:c30
 	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
@@ -2441,10 +2324,7 @@ void bli_zgemm_4x4_FMA4(
 	"                                            \n\t" // update c40:c70
 	"                                            \n\t"
 	"vmovapd    (%%rdx),       %%ymm0            \n\t" // load c40:c70 into ymm0
-	"vpermilpd  $0x5, %%ymm0,  %%ymm2            \n\t" // scale ymm0 by beta
-	"vmulpd           %%ymm7,  %%ymm0,  %%ymm0   \n\t"
-	"vmulpd           %%ymm6,  %%ymm2,  %%ymm2   \n\t"
-	"vaddsubpd        %%ymm2,  %%ymm0,  %%ymm0   \n\t"
+	Z_ALPHA("0", "2")									// scale ymm0 by beta
 	"vaddpd           %%ymm14, %%ymm0,  %%ymm0   \n\t" // add the gemm result to ymm0
 	"vmovapd          %%ymm0,  (%%rdx)           \n\t" // store c40:c70
 	"addq      %%rdi, %%rdx                      \n\t" // c += cs_c;
@@ -2452,10 +2332,7 @@ void bli_zgemm_4x4_FMA4(
 	"                                            \n\t" // update c01:c31
 	"                                            \n\t"
 	"vmovapd    (%%rcx),       %%ymm0            \n\t" // load c01:c31 into ymm0
-	"vpermilpd  $0x5, %%ymm0,  %%ymm2            \n\t" // scale ymm0 by beta
-	"vmulpd           %%ymm7,  %%ymm0,  %%ymm0   \n\t"
-	"vmulpd           %%ymm6,  %%ymm2,  %%ymm2   \n\t"
-	"vaddsubpd        %%ymm2,  %%ymm0,  %%ymm0   \n\t"
+	Z_ALPHA("0", "2")									// scale ymm0 by beta
 	"vaddpd           %%ymm13, %%ymm0,  %%ymm0   \n\t" // add the gemm result to ymm0
 	"vmovapd          %%ymm0,  (%%rcx)           \n\t" // store c01:c31
 	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
@@ -2463,10 +2340,7 @@ void bli_zgemm_4x4_FMA4(
 	"                                            \n\t" // update c41:c71
 	"                                            \n\t"
 	"vmovapd    (%%rdx),       %%ymm0            \n\t" // load c41:c71 into ymm0
-	"vpermilpd  $0x5, %%ymm0,  %%ymm2            \n\t" // scale ymm0 by beta
-	"vmulpd           %%ymm7,  %%ymm0,  %%ymm0   \n\t"
-	"vmulpd           %%ymm6,  %%ymm2,  %%ymm2   \n\t"
-	"vaddsubpd        %%ymm2,  %%ymm0,  %%ymm0   \n\t"
+	Z_ALPHA("0", "2")									// scale ymm0 by beta
 	"vaddpd           %%ymm12, %%ymm0,  %%ymm0   \n\t" // add the gemm result to ymm0
 	"vmovapd          %%ymm0,  (%%rdx)           \n\t" // store c41:c71
 	"addq      %%rdi, %%rdx                      \n\t" // c += cs_c;
@@ -2474,10 +2348,7 @@ void bli_zgemm_4x4_FMA4(
 	"                                            \n\t" // update c02:c32
 	"                                            \n\t"
 	"vmovapd    (%%rcx),       %%ymm0            \n\t" // load c02:c32 into ymm0
-	"vpermilpd  $0x5, %%ymm0,  %%ymm2            \n\t" // scale ymm0 by beta
-	"vmulpd           %%ymm7,  %%ymm0,  %%ymm0   \n\t"
-	"vmulpd           %%ymm6,  %%ymm2,  %%ymm2   \n\t"
-	"vaddsubpd        %%ymm2,  %%ymm0,  %%ymm0   \n\t"
+	Z_ALPHA("0", "2")									// scale ymm0 by beta
 	"vaddpd           %%ymm11, %%ymm0,  %%ymm0   \n\t" // add the gemm result to ymm0
 	"vmovapd          %%ymm0,  (%%rcx)           \n\t" // store c02:c32
 	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
@@ -2485,10 +2356,7 @@ void bli_zgemm_4x4_FMA4(
 	"                                            \n\t" // update c42:c72
 	"                                            \n\t"
 	"vmovapd    (%%rdx),       %%ymm0            \n\t" // load c42:c72 into ymm0
-	"vpermilpd  $0x5, %%ymm0,  %%ymm2            \n\t" // scale ymm0 by beta
-	"vmulpd           %%ymm7,  %%ymm0,  %%ymm0   \n\t"
-	"vmulpd           %%ymm6,  %%ymm2,  %%ymm2   \n\t"
-	"vaddsubpd        %%ymm2,  %%ymm0,  %%ymm0   \n\t"
+	Z_ALPHA("0", "2")									// scale ymm0 by beta
 	"vaddpd           %%ymm10, %%ymm0,  %%ymm0   \n\t" // add the gemm result to ymm0
 	"vmovapd          %%ymm0,  (%%rdx)           \n\t" // store c42:c72
 	"addq      %%rdi, %%rdx                      \n\t" // c += cs_c;
@@ -2496,10 +2364,7 @@ void bli_zgemm_4x4_FMA4(
 	"                                            \n\t" // update c03:c33
 	"                                            \n\t"
 	"vmovapd    (%%rcx),       %%ymm0            \n\t" // load c03:c33 into ymm0
-	"vpermilpd  $0x5, %%ymm0,  %%ymm2            \n\t" // scale ymm0 by beta
-	"vmulpd           %%ymm7,  %%ymm0,  %%ymm0   \n\t"
-	"vmulpd           %%ymm6,  %%ymm2,  %%ymm2   \n\t"
-	"vaddsubpd        %%ymm2,  %%ymm0,  %%ymm0   \n\t"
+	Z_ALPHA("0", "2")									// scale ymm0 by beta
 	"vaddpd           %%ymm9,  %%ymm0,  %%ymm0   \n\t" // add the gemm result to ymm0
 	"vmovapd          %%ymm0,  (%%rcx)           \n\t" // store c03:c33
 	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
@@ -2507,10 +2372,7 @@ void bli_zgemm_4x4_FMA4(
 	"                                            \n\t" // update c43:c73
 	"                                            \n\t"
 	"vmovapd    (%%rdx),       %%ymm0            \n\t" // load c43:c73 into ymm0
-	"vpermilpd  $0x5, %%ymm0,  %%ymm2            \n\t" // scale ymm0 by beta
-	"vmulpd           %%ymm7,  %%ymm0,  %%ymm0   \n\t"
-	"vmulpd           %%ymm6,  %%ymm2,  %%ymm2   \n\t"
-	"vaddsubpd        %%ymm2,  %%ymm0,  %%ymm0   \n\t"
+	Z_ALPHA("0", "2")									// scale ymm0 by beta
 	"vaddpd           %%ymm8,  %%ymm0,  %%ymm0   \n\t" // add the gemm result to ymm0
 	"vmovapd          %%ymm0,  (%%rdx)           \n\t" // store c43:c73
 	"                                            \n\t"
@@ -2635,10 +2497,10 @@ void bli_zgemm_4x4_FMA4(
 	: // register clobber list
 	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", 
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
-	  "xmm0", "xmm1", "xmm2", "xmm3",
-	  "xmm4", "xmm5", "xmm6", "xmm7",
-	  "xmm8", "xmm9", "xmm10", "xmm11",
-	  "xmm12", "xmm13", "xmm14", "xmm15",
+	  "ymm0", "ymm1", "ymm2", "ymm3",
+	  "ymm4", "ymm5", "ymm6", "ymm7",
+	  "ymm8", "ymm9", "ymm10", "ymm11",
+	  "ymm12", "ymm13", "ymm14", "ymm15",
 	  "memory"
 	);
 }
