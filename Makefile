@@ -64,20 +64,16 @@
 # The base name of the BLIS library that we will build.
 BLIS_LIB_BASE_NAME := libblis
 
-# Define the name of the configuration file.
-CONFIG_MK_FILE     := config.mk
-
-# Define the name of the file containing build and architecture-specific
-# makefile definitions.
-MAKE_DEFS_FILE     := make_defs.mk
+# Define the name of the common makefile.
+COMMON_MK_FILE     := common.mk
 
 # All makefile fragments in the tree will have this name.
 FRAGMENT_MK        := .fragment.mk
 
 # Locations of important files.
-BUILD_DIR          := build
 CONFIG_DIR         := config
 FRAME_DIR          := frame
+BUILD_DIR          := build
 OBJ_DIR            := obj
 LIB_DIR            := lib
 TESTSUITE_DIR      := testsuite
@@ -108,18 +104,18 @@ CHANGELOG          := CHANGELOG
 
 
 #
-# --- Include makefile configuration file --------------------------------------
+# --- Include common makefile --------------------------------------------------
 #
 
 # Include the configuration file.
--include $(CONFIG_MK_FILE)
+-include $(COMMON_MK_FILE)
 
 # Detect whether we actually got the configuration file. If we didn't, then
 # it is likely that the user has not yet generated it (via configure).
-ifeq ($(strip $(CONFIG_MK_INCLUDED)),yes)
-CONFIG_MK_PRESENT := yes
+ifeq ($(strip $(COMMON_MK_INCLUDED)),yes)
+COMMON_MK_PRESENT := yes
 else
-CONFIG_MK_PRESENT := no
+COMMON_MK_PRESENT := no
 endif
 
 # Now we have access to CONFIG_NAME, which tells us which sub-directory of the
@@ -135,150 +131,6 @@ BASE_OBJ_FRAME_PATH     := $(BASE_OBJ_PATH)/$(FRAME_DIR)
 
 # Construct base path for the library.
 BASE_LIB_PATH           := ./$(LIB_DIR)/$(CONFIG_NAME)
-
-
-
-#
-# --- Utility program definitions ----------------------------------------------
-#
-
-SH         := /bin/sh
-MV         := mv
-MKDIR      := mkdir -p
-RM_F       := rm -f
-RM_RF      := rm -rf
-SYMLINK    := ln -sf
-FIND       := find
-GREP       := grep
-XARGS      := xargs
-RANLIB     := ranlib
-INSTALL    := install -c
-
-# Used to refresh CHANGELOG.
-GIT        := git
-GIT_LOG    := $(GIT) log --decorate
-
-
-
-#
-# --- Determine the compiler vendor --------------------------------------------
-#
-
-ifneq ($(CC),)
-
-VENDOR_STRING := $(shell $(CC) --version 2>/dev/null)
-ifeq ($(VENDOR_STRING),)
-VENDOR_STRING := $(shell $(CC) -qversion 2>/dev/null)
-endif
-ifeq ($(VENDOR_STRING),)
-$(error Unable to determine compiler vendor.)
-endif
-
-CC_VENDOR := $(firstword $(shell echo '$(VENDOR_STRING)' | grep -Eo 'icc|gcc|clang|emcc|pnacl|IBM'))
-ifeq ($(CC_VENDOR),)
-$(error Unable to determine compiler vendor.)
-endif
-
-endif
-
-
-
-#
-# --- Include makefile definitions file ----------------------------------------
-#
-
-# Construct the path to the makefile definitions file residing inside of
-# the configuration sub-directory.
-MAKE_DEFS_MK_PATH := $(CONFIG_PATH)/$(MAKE_DEFS_FILE)
-
-# Include the makefile definitions file.
--include $(MAKE_DEFS_MK_PATH)
-
-# Detect whether we actually got the make definitios file. If we didn't, then
-# it is likely that the configuration is invalid (or incomplete).
-ifeq ($(strip $(MAKE_DEFS_MK_INCLUDED)),yes)
-MAKE_DEFS_MK_PRESENT := yes
-else
-MAKE_DEFS_MK_PRESENT := no
-endif
-
-
-
-#
-# --- Configuration-agnostic flags ---------------------------------------------
-#
-
-ifeq ($(CC_VENDOR),gcc)
-ifeq ($(THREADING_MODEL),auto)
-THREADING_MODEL := omp
-endif
-ifeq ($(THREADING_MODEL),omp)
-CTHREADFLAGS := -fopenmp -DBLIS_ENABLE_OPENMP
-LDFLAGS      += -fopenmp
-endif
-ifeq ($(THREADING_MODEL),pthreads)
-CTHREADFLAGS := -pthread -DBLIS_ENABLE_PTHREADS
-LDFLAGS      += -pthread
-endif
-endif
-
-ifeq ($(CC_VENDOR),icc)
-ifeq ($(THREADING_MODEL),auto)
-THREADING_MODEL := omp
-endif
-ifeq ($(THREADING_MODEL),omp)
-CTHREADFLAGS := -openmp -DBLIS_ENABLE_OPENMP
-LDFLAGS      += -openmp
-endif
-ifeq ($(THREADING_MODEL),pthreads)
-CTHREADFLAGS := -pthread -DBLIS_ENABLE_PTHREADS
-LDFLAGS      += -pthread
-endif
-endif
-
-ifeq ($(CC_VENDOR),clang)
-ifeq ($(THREADING_MODEL),auto)
-THREADING_MODEL := pthreads
-endif
-ifeq ($(THREADING_MODEL),omp)
-$(error OpenMP is not supported with Clang.)
-endif
-ifeq ($(THREADING_MODEL),pthreads)
-CTHREADFLAGS := -pthread -DBLIS_ENABLE_PTHREADS
-LDFLAGS      += -pthread
-endif
-endif
-
-# Aggregate all of the flags into multiple groups: one for standard compilation,
-# and one for each of the supported "special" compilation modes.
-
-CFLAGS_NOOPT   := $(CDBGFLAGS) $(CWARNFLAGS) $(CPICFLAGS) $(CTHREADFLAGS) $(CMISCFLAGS) $(CPPROCFLAGS)
-CFLAGS         := $(COPTFLAGS)  $(CVECFLAGS) $(CFLAGS_NOOPT)
-CFLAGS_KERNELS := $(CKOPTFLAGS) $(CVECFLAGS) $(CFLAGS_NOOPT)
-
-
-
-#
-# --- Adjust verbosity level manually using make V=[0,1] -----------------------
-#
-
-ifeq ($(V),1)
-BLIS_ENABLE_VERBOSE_MAKE_OUTPUT := yes
-endif
-
-ifeq ($(V),0)
-BLIS_ENABLE_VERBOSE_MAKE_OUTPUT := no
-endif
-
-
-
-#
-# --- Append OS-specific libraries to LDFLAGS ----------------------------------
-#
-
-ifeq ($(OS_NAME),Linux)
-LDFLAGS += -lrt
-endif
 
 
 

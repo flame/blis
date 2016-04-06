@@ -51,35 +51,35 @@
 //     (b) MR (for zero-padding purposes when MR and NR are "swapped")
 //
 
-#define BLIS_DEFAULT_MC_S              128
-#define BLIS_DEFAULT_KC_S              384
-#define BLIS_DEFAULT_NC_S              4096
+// #define BLIS_DEFAULT_MC_S              128
+// #define BLIS_DEFAULT_KC_S              384
+// #define BLIS_DEFAULT_NC_S              4096
 
 #define BLIS_DEFAULT_MC_D              1080
 #define BLIS_DEFAULT_KC_D              120
 #define BLIS_DEFAULT_NC_D              8400
 
-#define BLIS_DEFAULT_MC_C              128
-#define BLIS_DEFAULT_KC_C              256
-#define BLIS_DEFAULT_NC_C              4096
-
-#define BLIS_DEFAULT_MC_Z              64
-#define BLIS_DEFAULT_KC_Z              256
-#define BLIS_DEFAULT_NC_Z              2048
+// #define BLIS_DEFAULT_MC_C              128
+// #define BLIS_DEFAULT_KC_C              256
+// #define BLIS_DEFAULT_NC_C              4096
+// 
+// #define BLIS_DEFAULT_MC_Z              64
+// #define BLIS_DEFAULT_KC_Z              256
+// #define BLIS_DEFAULT_NC_Z              2048
 
 // -- Register blocksizes --
 
-#define BLIS_DEFAULT_MR_S              8
-#define BLIS_DEFAULT_NR_S              8
+// #define BLIS_DEFAULT_MR_S              8
+// #define BLIS_DEFAULT_NR_S              8
 
 #define BLIS_DEFAULT_MR_D              4
 #define BLIS_DEFAULT_NR_D              6
 
-#define BLIS_DEFAULT_MR_C              8
-#define BLIS_DEFAULT_NR_C              4
-
-#define BLIS_DEFAULT_MR_Z              8
-#define BLIS_DEFAULT_NR_Z              4
+	// #define BLIS_DEFAULT_MR_C              8
+	// #define BLIS_DEFAULT_NR_C              4
+	// 
+	// #define BLIS_DEFAULT_MR_Z              8
+	// #define BLIS_DEFAULT_NR_Z              4
 
 // NOTE: If the micro-kernel, which is typically unrolled to a factor
 // of f, handles leftover edge cases (ie: when k % f > 0) then these
@@ -150,7 +150,27 @@
 // -- gemm --
 
 #define BLIS_SGEMM_UKERNEL         bli_sgemm_8x8_FMA4
+#define BLIS_DEFAULT_MC_S          128
+#define BLIS_DEFAULT_KC_S          384
+#define BLIS_DEFAULT_NC_S          4096
+#define BLIS_DEFAULT_MR_S          8
+#define BLIS_DEFAULT_NR_S          8
+
 #define BLIS_DGEMM_UKERNEL         bli_dgemm_4x6_FMA4
+
+#define BLIS_CGEMM_UKERNEL         bli_cgemm_8x4_FMA4
+#define BLIS_DEFAULT_MC_C          96
+#define BLIS_DEFAULT_KC_C          256
+#define BLIS_DEFAULT_NC_C          4096
+#define BLIS_DEFAULT_MR_C          8
+#define BLIS_DEFAULT_NR_C          4
+
+#define BLIS_ZGEMM_UKERNEL         bli_zgemm_4x4_FMA4
+#define BLIS_DEFAULT_MC_Z          64 
+#define BLIS_DEFAULT_KC_Z          192
+#define BLIS_DEFAULT_NC_Z          4096
+#define BLIS_DEFAULT_MR_Z          4
+#define BLIS_DEFAULT_NR_Z          4
 
 // -- trsm-related --
 
