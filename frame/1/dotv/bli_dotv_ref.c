@@ -96,7 +96,7 @@ void bli_dotv_ref( obj_t*  x,
 */
 
 #undef  GENTFUNC3
-#define GENTFUNC3( ctype_x, ctype_y, ctype_r, chx, chy, chr, varname ) \
+#define GENTFUNC3( ctype_x, ctype_y, ctype_r, chx, chy, chr, varname, kername ) \
 \
 void PASTEMAC3(chx,chy,chr,varname) \
      ( \
@@ -108,70 +108,27 @@ void PASTEMAC3(chx,chy,chr,varname) \
        ctype_r* restrict rho  \
      ) \
 { \
-	ctype_x* x_cast   = x; \
-	ctype_y* y_cast   = y; \
-	ctype_r* rho_cast = rho; \
-	ctype_x* chi1; \
-	ctype_y* psi1; \
-	ctype_r  dotxy; \
-	dim_t    i; \
-	conj_t   conjx_use; \
-\
-	if ( bli_zero_dim1( n ) ) \
-	{ \
-		PASTEMAC(chr,set0s)( *rho_cast ); \
-		return; \
-	} \
-\
-	PASTEMAC(chr,set0s)( dotxy ); \
-\
-	chi1 = x_cast; \
-	psi1 = y_cast; \
-\
-	conjx_use = conjx; \
-\
-	/* If y must be conjugated, we do so indirectly by first toggling the
-	   effective conjugation of x and then conjugating the resulting dot
-	   product. */ \
-	if ( bli_is_conj( conjy ) ) \
-		bli_toggle_conj( conjx_use ); \
-\
-	if ( bli_is_conj( conjx_use ) ) \
-	{ \
-		for ( i = 0; i < n; ++i ) \
-		{ \
-			PASTEMAC3(chx,chy,chr,dotjs)( *chi1, *psi1, dotxy ); \
-\
-			chi1 += incx; \
-			psi1 += incy; \
-		} \
-	} \
-	else \
-	{ \
-		for ( i = 0; i < n; ++i ) \
-		{ \
-			PASTEMAC3(chx,chy,chr,dots)( *chi1, *psi1, dotxy ); \
-\
-			chi1 += incx; \
-			psi1 += incy; \
-		} \
-	} \
-\
-	if ( bli_is_conj( conjy ) ) \
-		PASTEMAC(chr,conjs)( dotxy ); \
-\
-	PASTEMAC2(chr,chr,copys)( dotxy, *rho_cast ); \
+	ctype_r* one        = PASTEMAC(chr,1); \
+	ctype_r* zero       = PASTEMAC(chr,0); \
+	PASTEMAC3(chx,chy,chr,kername)( conjx, \
+	                                conjy, \
+	                                n, \
+	                                one, \
+	                                x, incx, \
+	                                y, incy, \
+	                                zero, \
+	                                rho ); \
 }
 
 // Define the basic set of functions unconditionally, and then also some
 // mixed datatype functions if requested.
-INSERT_GENTFUNC3_BASIC0( dotv_ref )
+INSERT_GENTFUNC3_BASIC( dotv_ref, DOTXV_KERNEL )
 
 #ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTFUNC3_MIX_D0( dotv_ref )
+INSERT_GENTFUNC3_MIX_D( dotv_ref, DOTXV_KERNEL )
 #endif
 
 #ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTFUNC3_MIX_P0( dotv_ref )
+INSERT_GENTFUNC3_MIX_P( dotv_ref, DOTXV_KERNEL )
 #endif
 
