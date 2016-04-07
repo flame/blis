@@ -816,10 +816,10 @@ dim_t bli_read_nway_from_env( char* env )
     dim_t number = 1;
     char* str = getenv( env );
     if( str != NULL )
-    {   
+    {
         number = strtol( str, NULL, 10 );
         number = max( number, 1 );
-    }   
+    }
     return number;
 }
 
