@@ -38,6 +38,7 @@
 
 typedef void (*FUNCPTR_T)( obj_t*     p,
                            obj_t*     a,
+                           cntx_t*    cntx,
                            unpackm_t* cntl );
 
 static FUNCPTR_T vars[2][3] =
@@ -49,6 +50,7 @@ static FUNCPTR_T vars[2][3] =
 
 void bli_unpackm_int( obj_t*     p,
                       obj_t*     a,
+                      cntx_t*    cntx,
                       unpackm_t* cntl,
                       packm_thrinfo_t* thread )
 {
@@ -90,7 +92,7 @@ void bli_unpackm_int( obj_t*     p,
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
-		bli_unpackm_check( p, a, cntl );
+		bli_unpackm_check( p, a, cntx, cntl );
 
 	// Now, if we are not skipping the unpack operation, then the only
 	// question left is whether we are to typecast matrix a after unpacking.
@@ -126,6 +128,7 @@ void bli_unpackm_int( obj_t*     p,
     if( thread_am_ochief( thread ) ) {
         f( p,
            &c,
+		   cntx,
            cntl );
     }
     thread_obarrier( thread );

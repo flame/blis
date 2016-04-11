@@ -39,10 +39,11 @@
 #undef  GENTPROTR2
 #define GENTPROTR2( ftype_x, ftype_r, chx, chr, blasname ) \
 \
-ftype_r PASTEF772(chr,chx,blasname)( \
-                                     f77_int* n, \
-                                     ftype_x* x, f77_int* incx  \
-                                   ); \
+ftype_r PASTEF772(chr,chx,blasname) \
+     ( \
+       f77_int* n, \
+       ftype_x* x, f77_int* incx  \
+     );
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 INSERT_GENTPROTR2_BLAS( asum )

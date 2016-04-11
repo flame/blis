@@ -64,7 +64,8 @@ void libblis_test_axpy2v_impl( iface_t   iface,
                                obj_t*    alpha2,
                                obj_t*    x,
                                obj_t*    y,
-                               obj_t*    z );
+                               obj_t*    z,
+                               cntx_t*   cntx );
 
 void libblis_test_axpy2v_check( obj_t*  alpha1,
                                 obj_t*  alpha2,
@@ -140,6 +141,10 @@ void libblis_test_axpy2v_experiment( test_params_t* params,
 	obj_t        alpha1, alpha2, x, y, z;
 	obj_t        z_save;
 
+	cntx_t       cntx;
+
+	// Initialize a context.
+	bli_axpy2v_cntx_init( &cntx );
 
 	// Map the dimension specifier to an actual dimension.
 	m = libblis_test_get_dim_from_prob_size( op->dim_spec[0], p_cur );
@@ -187,7 +192,9 @@ void libblis_test_axpy2v_experiment( test_params_t* params,
 
 		time = bli_clock();
 
-		libblis_test_axpy2v_impl( iface, &alpha1, &alpha2, &x, &y, &z );
+		libblis_test_axpy2v_impl( iface,
+		                          &alpha1, &alpha2, &x, &y, &z,
+		                          &cntx );
 
 		time_min = bli_clock_min_diff( time_min, time );
 	}
@@ -207,6 +214,9 @@ void libblis_test_axpy2v_experiment( test_params_t* params,
 	bli_obj_free( &y );
 	bli_obj_free( &z );
 	bli_obj_free( &z_save );
+
+	// Finalize the context.
+	bli_axpy2v_cntx_finalize( &cntx );
 }
 
 
@@ -216,12 +226,13 @@ void libblis_test_axpy2v_impl( iface_t   iface,
                                obj_t*    alpha2,
                                obj_t*    x,
                                obj_t*    y,
-                               obj_t*    z )
+                               obj_t*    z,
+                               cntx_t*   cntx )
 {
 	switch ( iface )
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
-		bli_axpy2v_kernel( alpha1, alpha2, x, y, z );
+		bli_axpy2v_ex( alpha1, alpha2, x, y, z, cntx );
 		break;
 
 		default:

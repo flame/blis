@@ -32,42 +32,8 @@
 
 */
 
-#include "bli_herk_check.h"
 #include "bli_herk_front.h"
 #include "bli_herk_int.h"
-#include "bli_herk_prune.h"
 
-#include "bli_herk_blk_var1f.h"
+#include "bli_herk_var.h"
 
-#include "bli_herk_blk_var2f.h"
-
-#include "bli_herk_blk_var3f.h"
-
-#include "bli_herk_l_ker_var2.h"
-#include "bli_herk_u_ker_var2.h"
-
-
-//
-// Prototype object-based interface.
-//
-void bli_herk( obj_t*  alpha,
-               obj_t*  a,
-               obj_t*  beta,
-               obj_t*  c );
-
-
-#undef  GENTPROTR
-#define GENTPROTR( ctype, ctype_r, ch, chr, opname ) \
-\
-void PASTEMAC(ch,opname)( \
-                          uplo_t    uploc, \
-                          trans_t   transa, \
-                          dim_t     m, \
-                          dim_t     k, \
-                          ctype_r*  alpha, \
-                          ctype*    a, inc_t rs_a, inc_t cs_a, \
-                          ctype_r*  beta, \
-                          ctype*    c, inc_t rs_c, inc_t cs_c  \
-                        );
-
-INSERT_GENTPROTR_BASIC( herk )

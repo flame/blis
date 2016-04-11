@@ -39,6 +39,7 @@
 void bli_gemm_ker_var3( obj_t*  a,
                         obj_t*  b,
                         obj_t*  c,
+                        cntx_t* cntx,
                         gemm_t* cntl,
                         gemm_thrinfo_t* thread );
 
@@ -62,6 +63,7 @@ void PASTEMAC(ch,varname)( \
                                       dim_t pd_b, inc_t ps_b, \
                            void*   beta, \
                            void*   c, inc_t rs_c, inc_t cs_c, \
+                           cntx_t* cntx, \
                            void*   gemm_ukr, \
                            gemm_thrinfo_t* thread  \
                          );

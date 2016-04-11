@@ -32,6 +32,9 @@
 
 */
 
-void bli_packv_check( obj_t*   c,
-                      obj_t*   p,
-                      packv_t* cntl );
+void bli_packv_check
+     (
+       obj_t*  c,
+       obj_t*  p,
+       cntx_t* cntx
+     );

@@ -34,14 +34,17 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-void bla_syr2k_check( char*     dt_str,
-                      char*     op_str,
-                      f77_char* uploa,
-                      f77_char* trans,
-                      f77_int*  m,
-                      f77_int*  k,
-                      f77_int*  lda,
-                      f77_int*  ldb,
-                      f77_int*  ldc );
+void bla_syr2k_check
+     (
+       char*     dt_str,
+       char*     op_str,
+       f77_char* uploa,
+       f77_char* trans,
+       f77_int*  m,
+       f77_int*  k,
+       f77_int*  lda,
+       f77_int*  ldb,
+       f77_int*  ldc
+     );
 
 #endif

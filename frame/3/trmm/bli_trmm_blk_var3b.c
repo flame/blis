@@ -37,6 +37,7 @@
 void bli_trmm_blk_var3b( obj_t*  a,
                          obj_t*  b,
                          obj_t*  c,
+                         cntx_t* cntx,
                          gemm_t* cntl,
                          trmm_thrinfo_t* thread )
 {
@@ -59,12 +60,12 @@ void bli_trmm_blk_var3b( obj_t*  a,
         // Initialize object for packing C
         bli_obj_init_pack( &c_pack_s );
         bli_packm_init( c, &c_pack_s,
-                        cntl_sub_packm_c( cntl ) );
+                        cntx, cntl_sub_packm_c( cntl ) );
 
         // Scale C by beta (if instructed).
         bli_scalm_int( &BLIS_ONE,
                        c,  
-                       cntl_sub_scalm( cntl ) );
+                       cntx, cntl_sub_scalm( cntl ) );
     }   
     c_pack = thread_obroadcast( thread, &c_pack_s );
 
@@ -78,7 +79,7 @@ void bli_trmm_blk_var3b( obj_t*  a,
 
 	// Pack C (if instructed).
 	bli_packm_int( c, c_pack,
-	               cntl_sub_packm_c( cntl ),
+	               cntx, cntl_sub_packm_c( cntl ),
                    trmm_thread_sub_opackm( thread ) );
 
 	// Query dimension in partitioning direction.
@@ -92,7 +93,7 @@ void bli_trmm_blk_var3b( obj_t*  a,
 		// blocksize so that we can implement the "nudging" of kc to be
 		// a multiple of mr or nr, as needed.
 		b_alg = bli_trmm_determine_kc_b( i, k_trans, a, b,
-		                                 cntl_blocksize( cntl ) );
+		                                 cntl_bszid( cntl ), cntx );
 
 		// Acquire partitions for A1 and B1.
 		bli_acquire_mpart_r2l( BLIS_SUBPART1,
@@ -103,20 +104,20 @@ void bli_trmm_blk_var3b( obj_t*  a,
 		// Initialize objects for packing A1 and B1.
         if( thread_am_ichief( thread ) ) {
             bli_packm_init( &a1, a1_pack,
-                            cntl_sub_packm_a( cntl ) );
+                            cntx, cntl_sub_packm_a( cntl ) );
             bli_packm_init( &b1, b1_pack,
-                            cntl_sub_packm_b( cntl ) );
+                            cntx, cntl_sub_packm_b( cntl ) );
         }
         thread_ibarrier( thread );
 
 		// Pack A1 (if instructed).
 		bli_packm_int( &a1, a1_pack,
-		               cntl_sub_packm_a( cntl ),
+		               cntx, cntl_sub_packm_a( cntl ),
                        trmm_thread_sub_ipackm( thread ) );
 
 		// Pack B1 (if instructed).
 		bli_packm_int( &b1, b1_pack,
-		               cntl_sub_packm_b( cntl ),
+		               cntx, cntl_sub_packm_b( cntl ),
                        trmm_thread_sub_ipackm( thread ) );
 
 		// Perform trmm subproblem.
@@ -125,6 +126,7 @@ void bli_trmm_blk_var3b( obj_t*  a,
 		              b1_pack,
 		              &BLIS_ONE,
 		              c_pack,
+		              cntx,
 		              cntl_sub_gemm( cntl ),
                       trmm_thread_sub_trmm( thread ) );
         thread_ibarrier( thread );
@@ -134,7 +136,7 @@ void bli_trmm_blk_var3b( obj_t*  a,
 
     // Unpack C (if C was packed).
     bli_unpackm_int( c_pack, c,
-                     cntl_sub_unpackm_c( cntl ),
+                     cntx, cntl_sub_unpackm_c( cntl ),
                      trmm_thread_sub_opackm( thread ) );
 
     // If any packing buffers were acquired within packm, release them back

@@ -35,21 +35,37 @@
 #include "blis.h"
 
 #undef  GENTFUNCCO
-#define GENTFUNCCO( ctype, ctype_r, ch, chr, varname, gemmukr, trsmukr ) \
+#define GENTFUNCCO( ctype, ctype_r, ch, chr, varname, gemmkerid, trsmkerid ) \
 \
-void PASTEMAC(ch,varname)( \
-                           dim_t           k, \
-                           ctype* restrict alpha, \
-                           ctype* restrict a10, \
-                           ctype* restrict a11, \
-                           ctype* restrict b01, \
-                           ctype* restrict b11, \
-                           ctype* restrict c11, inc_t rs_c, inc_t cs_c, \
-                           auxinfo_t*      data  \
-                         ) \
+void PASTEMAC(ch,varname) \
+     ( \
+       dim_t               k, \
+       ctype*     restrict alpha, \
+       ctype*     restrict a10, \
+       ctype*     restrict a11, \
+       ctype*     restrict b01, \
+       ctype*     restrict b11, \
+       ctype*     restrict c11, inc_t rs_c, inc_t cs_c, \
+       auxinfo_t* restrict data, \
+       cntx_t*    restrict cntx  \
+     ) \
 { \
-	const dim_t       m           = PASTEMAC(chr,mr); \
-	const dim_t       n           = PASTEMAC(chr,nr); \
+	const num_t       dt          = PASTEMAC(ch,type); \
+	const num_t       dt_r        = PASTEMAC(chr,type); \
+\
+	PASTECH(chr,gemm_ukr_ft) \
+	                  rgemm_ukr   = bli_cntx_get_l3_nat_ukr_dt( dt_r, gemmkerid, cntx ); \
+\
+	PASTECH(ch,trsm_ukr_ft) \
+	                ctrsm_vir_ukr = bli_cntx_get_l3_vir_ukr_dt( dt, trsmkerid, cntx ); \
+\
+	const dim_t       mr          = bli_cntx_get_blksz_def_dt( dt_r, BLIS_MR, cntx ); \
+	const dim_t       nr          = bli_cntx_get_blksz_def_dt( dt_r, BLIS_NR, cntx ); \
+\
+	const dim_t       packnr      = bli_cntx_get_blksz_max_dt( dt_r, BLIS_NR, cntx ); \
+\
+	const dim_t       m           = mr; \
+	const dim_t       n           = nr; \
 \
 	const inc_t       is_a        = bli_auxinfo_is_a( data ); \
 	const inc_t       is_b        = bli_auxinfo_is_b( data ); \
@@ -57,15 +73,13 @@ void PASTEMAC(ch,varname)( \
 	ctype_r* restrict a10_r       = ( ctype_r* )a10; \
 	ctype_r* restrict a10_i       = ( ctype_r* )a10 + is_a; \
 \
-	ctype_r* restrict a11_r       = ( ctype_r* )a11; \
-\
 	ctype_r* restrict b01_r       = ( ctype_r* )b01; \
 	ctype_r* restrict b01_i       = ( ctype_r* )b01 + is_b; \
 \
 	ctype_r* restrict b11_r       = ( ctype_r* )b11; \
 	ctype_r* restrict b11_i       = ( ctype_r* )b11 + is_b; \
 \
-	const inc_t       rs_b        = PASTEMAC(chr,packnr); \
+	const inc_t       rs_b        = packnr; \
 	const inc_t       cs_b        = 1; \
 \
 	ctype_r* restrict one_r       = PASTEMAC(chr,1); \
@@ -115,46 +129,62 @@ PASTEMAC(chr,fprintm)( stdout, "gemmtrsm4m1_l_ukr: b0111p_i", k+m, n, \
 	bli_auxinfo_set_next_ab( a10_r, b01_i, *data ); \
 \
 	/* b11.r = alpha.r * b11.r - a10.r * b01.r; */ \
-	PASTEMAC(chr,gemmukr)( k, \
-	                       minus_one_r, \
-	                       a10_r, \
-	                       b01_r, \
-	                       &alpha_r, \
-	                       b11_r, rs_b, cs_b, \
-	                       data ); \
+	rgemm_ukr \
+	( \
+	  k, \
+	  minus_one_r, \
+	  a10_r, \
+	  b01_r, \
+	  &alpha_r, \
+	  b11_r, rs_b, cs_b, \
+	  data, \
+	  cntx  \
+	); \
 \
 	bli_auxinfo_set_next_ab( a10_i, b01_r, *data ); \
 \
 	/* b11.i = alpha.r * b11.i - a10.r * b01.i; */ \
-	PASTEMAC(chr,gemmukr)( k, \
-	                       minus_one_r, \
-	                       a10_r, \
-	                       b01_i, \
-	                       &alpha_r, \
-	                       b11_i, rs_b, cs_b, \
-	                       data ); \
+	rgemm_ukr \
+	( \
+	  k, \
+	  minus_one_r, \
+	  a10_r, \
+	  b01_i, \
+	  &alpha_r, \
+	  b11_i, rs_b, cs_b, \
+	  data, \
+	  cntx  \
+	); \
 \
 	bli_auxinfo_set_next_ab( a10_i, b01_i, *data ); \
 \
 	/* b11.i =     1.0 * b11.i - a10.i * b01.r; */ \
-	PASTEMAC(chr,gemmukr)( k, \
-	                       minus_one_r, \
-	                       a10_i, \
-	                       b01_r, \
-	                       one_r, \
-	                       b11_i, rs_b, cs_b, \
-	                       data ); \
+	rgemm_ukr \
+	( \
+	  k, \
+	  minus_one_r, \
+	  a10_i, \
+	  b01_r, \
+	  one_r, \
+	  b11_i, rs_b, cs_b, \
+	  data, \
+	  cntx  \
+	); \
 \
 	bli_auxinfo_set_next_ab( a_next, b_next, *data ); \
 \
 	/* b11.r =     1.0 * b11.r + a10.i * b01.i; */ \
-	PASTEMAC(chr,gemmukr)( k, \
-	                       one_r, \
-	                       a10_i, \
-	                       b01_i, \
-	                       one_r, \
-	                       b11_r, rs_b, cs_b, \
-	                       data ); \
+	rgemm_ukr \
+	( \
+	  k, \
+	  one_r, \
+	  a10_i, \
+	  b01_i, \
+	  one_r, \
+	  b11_r, rs_b, cs_b, \
+	  data, \
+	  cntx  \
+	); \
 /*
 PASTEMAC(chr,fprintm)( stdout, "gemmtrsm4m1_l_ukr: b0111p_r post-gemm", k+m, n, \
                        b01_r, PASTEMAC(chr,packnr), 1, "%4.1f", "" ); \
@@ -164,10 +194,14 @@ PASTEMAC(chr,fprintm)( stdout, "gemmtrsm4m1_l_ukr: b0111p_i post-gemm", k+m, n, 
 \
 	/* b11 = inv(a11) * b11;
 	   c11 = b11; */ \
-	PASTEMAC(ch,trsmukr)( a11_r, \
-	                      b11_r, \
-	                      c11, rs_c, cs_c, \
-	                      data ); \
+	ctrsm_vir_ukr \
+	( \
+	  a11, \
+	  b11, \
+	  c11, rs_c, cs_c, \
+	  data, \
+	  cntx  \
+	); \
 \
 /*
 PASTEMAC(chr,fprintm)( stdout, "gemmtrsm4m1_l_ukr: b0111p_r after", k+m, n, \
@@ -177,5 +211,5 @@ PASTEMAC(chr,fprintm)( stdout, "gemmtrsm4m1_l_ukr: b0111p_i after", k+m, n, \
 */ \
 }
 
-INSERT_GENTFUNCCO_BASIC2( gemmtrsm4m1_l_ukr_ref, GEMM_UKERNEL, TRSM4M1_L_UKERNEL )
+INSERT_GENTFUNCCO_BASIC2( gemmtrsm4m1_l_ukr_ref, BLIS_GEMM_UKR, BLIS_TRSM_L_UKR )
 

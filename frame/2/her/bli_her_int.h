@@ -36,5 +36,6 @@ void bli_her_int( conj_t  conjh,
                   obj_t*  alpha,
                   obj_t*  x,
                   obj_t*  c,
+                  cntx_t* cntx,
                   her_t*  cntl );
 

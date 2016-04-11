@@ -144,25 +144,25 @@
 
 // -- Default fusing factors for level-1f operations --
 
-#define BLIS_L1F_FUSE_FAC_S        8
-#define BLIS_L1F_FUSE_FAC_D        8
-#define BLIS_L1F_FUSE_FAC_C        4
-#define BLIS_L1F_FUSE_FAC_Z        2
+#define BLIS_DEFAULT_1F_S        8
+#define BLIS_DEFAULT_1F_D        8
+#define BLIS_DEFAULT_1F_C        4
+#define BLIS_DEFAULT_1F_Z        2
 
-#define BLIS_AXPYF_FUSE_FAC_S          BLIS_L1F_FUSE_FAC_S
-#define BLIS_AXPYF_FUSE_FAC_D          BLIS_L1F_FUSE_FAC_D
-#define BLIS_AXPYF_FUSE_FAC_C          BLIS_L1F_FUSE_FAC_C
-#define BLIS_AXPYF_FUSE_FAC_Z          BLIS_L1F_FUSE_FAC_Z
+#define BLIS_DEFAULT_AF_S          BLIS_DEFAULT_1F_S
+#define BLIS_DEFAULT_AF_D          BLIS_DEFAULT_1F_D
+#define BLIS_DEFAULT_AF_C          BLIS_DEFAULT_1F_C
+#define BLIS_DEFAULT_AF_Z          BLIS_DEFAULT_1F_Z
 
-#define BLIS_DOTXF_FUSE_FAC_S          BLIS_L1F_FUSE_FAC_S
-#define BLIS_DOTXF_FUSE_FAC_D          BLIS_L1F_FUSE_FAC_D
-#define BLIS_DOTXF_FUSE_FAC_C          BLIS_L1F_FUSE_FAC_C
-#define BLIS_DOTXF_FUSE_FAC_Z          BLIS_L1F_FUSE_FAC_Z
+#define BLIS_DEFAULT_DF_S          BLIS_DEFAULT_1F_S
+#define BLIS_DEFAULT_DF_D          BLIS_DEFAULT_1F_D
+#define BLIS_DEFAULT_DF_C          BLIS_DEFAULT_1F_C
+#define BLIS_DEFAULT_DF_Z          BLIS_DEFAULT_1F_Z
 
-#define BLIS_DOTXAXPYF_FUSE_FAC_S      BLIS_L1F_FUSE_FAC_S
-#define BLIS_DOTXAXPYF_FUSE_FAC_D      BLIS_L1F_FUSE_FAC_D
-#define BLIS_DOTXAXPYF_FUSE_FAC_C      BLIS_L1F_FUSE_FAC_C
-#define BLIS_DOTXAXPYF_FUSE_FAC_Z      BLIS_L1F_FUSE_FAC_Z
+#define BLIS_DEFAULT_XF_S      BLIS_DEFAULT_1F_S
+#define BLIS_DEFAULT_XF_D      BLIS_DEFAULT_1F_D
+#define BLIS_DEFAULT_XF_C      BLIS_DEFAULT_1F_C
+#define BLIS_DEFAULT_XF_Z      BLIS_DEFAULT_1F_Z
 
 
 
@@ -173,8 +173,8 @@
 
 #include "bli_gemm_8x8.h"
 
-#define BLIS_DGEMM_UKERNEL         bli_dgemm_8x8
-#define BLIS_ZGEMM_UKERNEL         bli_zgemm_8x8
+#define BLIS_DGEMM_UKERNEL         bli_dgemm_int_8x8
+#define BLIS_ZGEMM_UKERNEL         bli_zgemm_int_8x8
 
 // -- trsm-related --
 

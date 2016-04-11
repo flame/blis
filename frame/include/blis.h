@@ -67,8 +67,6 @@ extern "C" {
 #include "bli_type_defs.h"
 #include "bli_macro_defs.h"
 
-#include "bli_level3_type_defs.h"
-
 
 // -- Threading definitions --
 
@@ -83,7 +81,7 @@ extern "C" {
 // -- BLIS kernel definitions --
 
 #include "bli_kernel.h"
-#include "bli_kernel_type_defs.h"
+//#include "bli_kernel_type_defs.h"
 
 #include "bli_kernel_pre_macro_defs.h"
 #include "bli_kernel_ind_pre_macro_defs.h"
@@ -91,15 +89,7 @@ extern "C" {
 #include "bli_kernel_macro_defs.h"
 #include "bli_kernel_ind_macro_defs.h"
 
-#include "bli_kernel_post_macro_defs.h"
-
 #include "bli_kernel_prototypes.h"
-#include "bli_kernel_ind_prototypes.h"
-
-
-// -- BLIS memory pool definitions --
-
-//#include "bli_mem_pool_macro_defs.h"
 
 
 // -- Base operation prototypes --
@@ -109,14 +99,17 @@ extern "C" {
 #include "bli_malloc.h"
 #include "bli_obj.h"
 #include "bli_obj_scalar.h"
+#include "bli_cntx.h"
+#include "bli_gks.h"
 #include "bli_ind.h"
 #include "bli_pool.h"
 #include "bli_mem.h"
 #include "bli_part.h"
 #include "bli_prune.h"
 #include "bli_query.h"
-#include "bli_blocksize.h"
+#include "bli_blksz.h"
 #include "bli_func.h"
+#include "bli_mbool.h"
 #include "bli_param_map.h"
 #include "bli_clock.h"
 #include "bli_check.h"
@@ -131,124 +124,42 @@ extern "C" {
 
 // -- Level-0 operations --
 
-#include "bli_absqsc.h"
-#include "bli_addsc.h"
-#include "bli_copysc.h"
-#include "bli_divsc.h"
-#include "bli_getsc.h"
-#include "bli_mulsc.h"
-#include "bli_normfsc.h"
-#include "bli_setsc.h"
-#include "bli_sqrtsc.h"
-#include "bli_subsc.h"
-#include "bli_zipsc.h"
-#include "bli_unzipsc.h"
+#include "bli_l0.h"
 
 
-// -- Level-1 operations --
+// -- Level-1v operations --
 
-// one vector operand
-#include "bli_invertv.h"
-#include "bli_scalv.h"
-#include "bli_setv.h"
-// two vector operands
-#include "bli_addv.h"
-#include "bli_axpyv.h"
-#include "bli_copyv.h"
-#include "bli_dotv.h"
-#include "bli_dotxv.h"
-#include "bli_scal2v.h"
-#include "bli_subv.h"
-#include "bli_swapv.h"
-#include "bli_packv.h"
-#include "bli_unpackv.h"
+#include "bli_l1v.h"
 
 
 // -- Level-1d operations --
 
-// one diagonal operand
-#include "bli_invertd.h"
-#include "bli_scald.h"
-#include "bli_setd.h"
-#include "bli_setid.h"
-// two diagonal operands
-#include "bli_addd.h"
-#include "bli_axpyd.h"
-#include "bli_copyd.h"
-#include "bli_scal2d.h"
-#include "bli_subd.h"
+#include "bli_l1d.h"
 
 
 // -- Level-1f operations --
 
-#include "bli_axpy2v.h"
-#include "bli_axpyf.h"
-#include "bli_dotxf.h"
-#include "bli_dotaxpyv.h"
-#include "bli_dotxaxpyf.h"
+#include "bli_l1f.h"
 
 
 // -- Level-1m operations --
 
-// one matrix operand
-#include "bli_scalm.h"
-#include "bli_setm.h"
-// two matrix operands
-#include "bli_addm.h"
-#include "bli_axpym.h"
-#include "bli_copym.h"
-#include "bli_scal2m.h"
-#include "bli_subm.h"
-#include "bli_packm.h"
-#include "bli_unpackm.h"
+#include "bli_l1m.h"
 
 
 // -- Level-2 operations --
 
-#include "bli_gemv.h"
-#include "bli_ger.h"
-#include "bli_hemv.h"
-#include "bli_her.h"
-#include "bli_her2.h"
-#include "bli_symv.h"
-#include "bli_syr.h"
-#include "bli_syr2.h"
-#include "bli_trmv.h"
-#include "bli_trsv.h"
+#include "bli_l2.h"
 
 
 // -- Level-3 operations --
 
-#include "bli_gemm.h"
-#include "bli_hemm.h"
-#include "bli_herk.h"
-#include "bli_her2k.h"
-#include "bli_symm.h"
-#include "bli_syrk.h"
-#include "bli_syr2k.h"
-#include "bli_trmm.h"
-#include "bli_trmm3.h"
-#include "bli_trsm.h"
+#include "bli_l3.h"
 
 
 // -- Utility operations --
 
-#include "bli_amaxv.h"
-#include "bli_asumv.h"
-#include "bli_mkherm.h"
-#include "bli_mksymm.h"
-#include "bli_mktrim.h"
-#include "bli_norm1v.h"
-#include "bli_norm1m.h"
-#include "bli_normfv.h"
-#include "bli_normfm.h"
-#include "bli_normiv.h"
-#include "bli_normim.h"
-#include "bli_printv.h"
-#include "bli_printm.h"
-#include "bli_randv.h"
-#include "bli_randm.h"
-#include "bli_sumsqv.h"
+#include "bli_util.h"
 
 
 // -- CBLAS compatibility layer --

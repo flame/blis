@@ -39,11 +39,12 @@
 #undef  GENTPROTSCAL
 #define GENTPROTSCAL( ftype_a, ftype_x, cha, chx, blasname ) \
 \
-void PASTEF772(chx,cha,blasname)( \
-                                  f77_int* n, \
-                                  ftype_a* alpha, \
-                                  ftype_x* x, f77_int* incx  \
-                                );
+void PASTEF772(chx,cha,blasname) \
+     ( \
+       f77_int* n, \
+       ftype_a* alpha, \
+       ftype_x* x, f77_int* incx  \
+     );
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 INSERT_GENTPROTSCAL_BLAS( scal )

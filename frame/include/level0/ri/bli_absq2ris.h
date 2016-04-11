@@ -49,13 +49,13 @@
 
 #define bli_cabsq2ris( ar, ai, br, bi ) \
 { \
-	(br) = (ar) * (ar) + (ai) + (ai); \
+	(br) = (ar) * (ar) + (ai) * (ai); \
 	(bi) = 0.0F; \
 }
 
 #define bli_zabsq2ris( ar, ai, br, bi ) \
 { \
-	(br) = (ar) * (ar) + (ai) + (ai); \
+	(br) = (ar) * (ar) + (ai) * (ai); \
 	(bi) = 0.0; \
 }
 

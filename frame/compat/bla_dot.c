@@ -41,11 +41,12 @@
 #undef  GENTFUNCDOT
 #define GENTFUNCDOT( ftype, chxy, chc, blis_conjx, blasname, blisname ) \
 \
-ftype PASTEF772(chxy,blasname,chc)( \
-                                    f77_int* n, \
-                                    ftype*   x, f77_int* incx, \
-                                    ftype*   y, f77_int* incy \
-                                  ) \
+ftype PASTEF772(chxy,blasname,chc) \
+     ( \
+       f77_int* n, \
+       ftype*   x, f77_int* incx, \
+       ftype*   y, f77_int* incy  \
+     ) \
 { \
 	dim_t  n0; \
 	ftype* x0; \
@@ -67,12 +68,16 @@ ftype PASTEF772(chxy,blasname,chc)( \
 	bli_convert_blas_incv( n0, y, *incy, y0, incy0 ); \
 \
 	/* Call BLIS interface. */ \
-	PASTEMAC3(chxy,chxy,chxy,blisname)( blis_conjx, \
-	                                    BLIS_NO_CONJUGATE, \
-	                                    n0, \
-	                                    x0, incx0, \
-	                                    y0, incy0, \
-	                                    &rho ); \
+	PASTEMAC(chxy,blisname) \
+	( \
+	  blis_conjx, \
+	  BLIS_NO_CONJUGATE, \
+	  n0, \
+	  x0, incx0, \
+	  y0, incy0, \
+	  &rho, \
+	  NULL  \
+	); \
 \
 	/* Finalize BLIS (if it was initialized above). */ \
 	bli_finalize_auto( init_result ); \
@@ -81,17 +86,19 @@ ftype PASTEF772(chxy,blasname,chc)( \
 }
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
-INSERT_GENTFUNCDOT_BLAS( dot, DOTV_KERNEL )
+INSERT_GENTFUNCDOT_BLAS( dot, dotv )
 
 
 // -- "Black sheep" dot product function definitions --
 
 // Input vectors stored in single precision, computed in double precision,
 // with result returned in single precision.
-float PASTEF77(sd,sdot)( f77_int* n,
-                         float*   x, f77_int* incx,
-                         float*   y, f77_int* incy
-                       )
+float PASTEF77(sd,sdot)
+     (
+       f77_int* n,
+       float*   x, f77_int* incx,
+       float*   y, f77_int* incy
+     )
 {
 	return ( float )PASTEF77(d,sdot)( n,
 	                                  x, incx,
@@ -100,10 +107,12 @@ float PASTEF77(sd,sdot)( f77_int* n,
 
 // Input vectors stored in single precision, computed in double precision,
 // with result returned in double precision.
-double PASTEF77(d,sdot)( f77_int* n,
-                         float*   x, f77_int* incx,
-                         float*   y, f77_int* incy
-                       )
+double PASTEF77(d,sdot)
+     (
+       f77_int* n,
+       float*   x, f77_int* incx,
+       float*   y, f77_int* incy
+     )
 {
 	dim_t   n0;
 	float*  x0;

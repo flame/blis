@@ -67,26 +67,6 @@
 //#define BLIS_DEFAULT_KC_Z              384
 //#define BLIS_DEFAULT_NC_Z              4096
 
-// NOTE: If 4m blocksizes are not defined here, they will be determined
-// from the corresponding real domain blocksizes.
-#define BLIS_DEFAULT_4M_MC_C           384
-#define BLIS_DEFAULT_4M_KC_C           512
-#define BLIS_DEFAULT_4M_NC_C           4096
-
-#define BLIS_DEFAULT_4M_MC_Z           192
-#define BLIS_DEFAULT_4M_KC_Z           256
-#define BLIS_DEFAULT_4M_NC_Z           4096
-
-// NOTE: If 3m blocksizes are not defined here, they will be determined
-// from the corresponding real domain blocksizes.
-#define BLIS_DEFAULT_3M_MC_C           384
-#define BLIS_DEFAULT_3M_KC_C           512
-#define BLIS_DEFAULT_3M_NC_C           4096
-
-#define BLIS_DEFAULT_3M_MC_Z           192
-#define BLIS_DEFAULT_3M_KC_Z           256
-#define BLIS_DEFAULT_3M_NC_Z           4096
-
 // -- Register blocksizes --
 
 #define BLIS_DEFAULT_MR_S              8
@@ -101,56 +81,6 @@
 #define BLIS_DEFAULT_MR_Z              2
 #define BLIS_DEFAULT_NR_Z              2
 
-// NOTE: If the micro-kernel, which is typically unrolled to a factor
-// of f, handles leftover edge cases (ie: when k % f > 0) then these
-// register blocksizes in the k dimension can be defined to 1.
-
-//#define BLIS_DEFAULT_KR_S              1
-//#define BLIS_DEFAULT_KR_D              1
-//#define BLIS_DEFAULT_KR_C              1
-//#define BLIS_DEFAULT_KR_Z              1
-
-// -- Maximum cache blocksizes (for optimizing edge cases) --
-
-// NOTE: These cache blocksize "extensions" have the same constraints as
-// the corresponding default blocksizes above. When these values are
-// larger than the default blocksizes, blocksizes used at edge cases are
-// enlarged if such an extension would encompass the remaining portion of
-// the matrix dimension.
-
-//#define BLIS_MAXIMUM_MC_S              (BLIS_DEFAULT_MC_S + BLIS_DEFAULT_MC_S/4)
-//#define BLIS_MAXIMUM_KC_S              (BLIS_DEFAULT_KC_S + BLIS_DEFAULT_KC_S/4)
-//#define BLIS_MAXIMUM_NC_S              (BLIS_DEFAULT_NC_S + BLIS_DEFAULT_NC_S/4)
-
-//#define BLIS_MAXIMUM_MC_D              (BLIS_DEFAULT_MC_D + BLIS_DEFAULT_MC_D/4)
-//#define BLIS_MAXIMUM_KC_D              (BLIS_DEFAULT_KC_D + BLIS_DEFAULT_KC_D/4)
-//#define BLIS_MAXIMUM_NC_D              (BLIS_DEFAULT_NC_D + BLIS_DEFAULT_NC_D/4)
-
-//#define BLIS_MAXIMUM_MC_C              (BLIS_DEFAULT_MC_C + BLIS_DEFAULT_MC_C/4)
-//#define BLIS_MAXIMUM_KC_C              (BLIS_DEFAULT_KC_C + BLIS_DEFAULT_KC_C/4)
-//#define BLIS_MAXIMUM_NC_C              (BLIS_DEFAULT_NC_C + BLIS_DEFAULT_NC_C/4)
-
-//#define BLIS_MAXIMUM_MC_Z              (BLIS_DEFAULT_MC_Z + BLIS_DEFAULT_MC_Z/4)
-//#define BLIS_MAXIMUM_KC_Z              (BLIS_DEFAULT_KC_Z + BLIS_DEFAULT_KC_Z/4)
-//#define BLIS_MAXIMUM_NC_Z              (BLIS_DEFAULT_NC_Z + BLIS_DEFAULT_NC_Z/4)
-
-// -- Packing register blocksize (for packed micro-panels) --
-
-// NOTE: These register blocksize "extensions" determine whether the
-// leading dimensions used within the packed micro-panels are equal to
-// or greater than their corresponding register blocksizes above.
-
-//#define BLIS_PACKDIM_MR_S              (BLIS_DEFAULT_MR_S + ...)
-//#define BLIS_PACKDIM_NR_S              (BLIS_DEFAULT_NR_S + ...)
-
-//#define BLIS_PACKDIM_MR_D              (BLIS_DEFAULT_MR_D + ...)
-//#define BLIS_PACKDIM_NR_D              (BLIS_DEFAULT_NR_D + ...)
-
-//#define BLIS_PACKDIM_MR_C              (BLIS_DEFAULT_MR_C + ...)
-//#define BLIS_PACKDIM_NR_C              (BLIS_DEFAULT_NR_C + ...)
-
-//#define BLIS_PACKDIM_MR_Z              (BLIS_DEFAULT_MR_Z + ...)
-//#define BLIS_PACKDIM_NR_Z              (BLIS_DEFAULT_NR_Z + ...)
 
 
 
@@ -169,13 +99,13 @@
 
 // -- gemm --
 
-#define BLIS_SGEMM_UKERNEL    bli_sgemm_opt_8x4
-#define BLIS_DGEMM_UKERNEL    bli_dgemm_opt_4x4
+#define BLIS_SGEMM_UKERNEL    bli_sgemm_asm_8x4
+#define BLIS_DGEMM_UKERNEL    bli_dgemm_asm_4x4
 
 // -- trsm-related --
 
-#define BLIS_DGEMMTRSM_L_UKERNEL   bli_dgemmtrsm_l_opt_4x4
-#define BLIS_DGEMMTRSM_U_UKERNEL   bli_dgemmtrsm_u_opt_4x4
+#define BLIS_DGEMMTRSM_L_UKERNEL   bli_dgemmtrsm_l_asm_4x4
+#define BLIS_DGEMMTRSM_U_UKERNEL   bli_dgemmtrsm_u_asm_4x4
 
 
 
@@ -184,23 +114,23 @@
 
 // -- axpy2v --
 
-#define BLIS_DAXPY2V_KERNEL     bli_daxpy2v_opt_var1
+#define BLIS_DAXPY2V_KERNEL     bli_daxpy2v_int_var1
 
 // -- dotaxpyv --
 
-#define BLIS_DDOTAXPYV_KERNEL   bli_ddotaxpyv_opt_var1
+#define BLIS_DDOTAXPYV_KERNEL   bli_ddotaxpyv_int_var1
 
 // -- axpyf --
 
-#define BLIS_DAXPYF_KERNEL      bli_daxpyf_opt_var1
+#define BLIS_DAXPYF_KERNEL      bli_daxpyf_int_var1
 
 // -- dotxf --
 
-#define BLIS_DDOTXF_KERNEL      bli_ddotxf_opt_var1
+#define BLIS_DDOTXF_KERNEL      bli_ddotxf_int_var1
 
 // -- dotxaxpyf --
 
-#define BLIS_DDOTXAXPYF_KERNEL  bli_ddotxaxpyf_opt_var1
+#define BLIS_DDOTXAXPYF_KERNEL  bli_ddotxaxpyf_int_var1
 
 
 

@@ -34,101 +34,117 @@
 
 #include "blis.h"
 
-extern void bli_sgemm_kernel_4x4(dim_t              k,
-                        float* alpha,
-                        float*   restrict a,
-                        float*   restrict b,
-                        float* beta,
-                        float*   restrict c, inc_t rs_c, inc_t cs_c,
-                        auxinfo_t*         data
-                      );
+extern
+void bli_sgemm_kernel_4x4
+     (
+       dim_t               k,
+       float*     restrict alpha,
+       float*     restrict a,
+       float*     restrict b,
+       float*     restrict beta,
+       float*     restrict c, inc_t rs_c, inc_t cs_c,
+       auxinfo_t* restrict data
+     );
 
-
-void bli_sgemm_opt_4x4(
-                        dim_t              k,
-                        float*    restrict alpha,
-                        float*    restrict a,
-                        float*    restrict b,
-                        float*    restrict beta,
-                        float*    restrict c, inc_t rs_c, inc_t cs_c,
-                        auxinfo_t*         data
-                      )
+void bli_sgemm_opt_4x4
+     (
+       dim_t               k,
+       float*     restrict alpha,
+       float*     restrict a,
+       float*     restrict b,
+       float*     restrict beta,
+       float*     restrict c, inc_t rs_c, inc_t cs_c,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
+     )
 {
-
-	bli_sgemm_kernel_4x4(k, alpha, a, b, beta, c, rs_c, cs_c, data);
-
+	bli_sgemm_kernel_4x4( k, alpha, a, b, beta, c, rs_c, cs_c, data );
 }
 
-extern void bli_dgemm_kernel_4x4(dim_t              k,
-                        double* alpha,
-                        double*   restrict a,
-                        double*   restrict b,
-                        double* beta,
-                        double*   restrict c, inc_t rs_c, inc_t cs_c,
-                        auxinfo_t*         data
-                      );
 
 
-void bli_dgemm_opt_4x4(
-                        dim_t              k,
-                        double*   restrict alpha,
-                        double*   restrict a,
-                        double*   restrict b,
-                        double*   restrict beta,
-                        double*   restrict c, inc_t rs_c, inc_t cs_c,
-                        auxinfo_t*         data
-                      )
+extern
+void bli_dgemm_kernel_4x4
+     (
+       dim_t               k,
+       double*    restrict alpha,
+       double*    restrict a,
+       double*    restrict b,
+       double*    restrict beta,
+       double*    restrict c, inc_t rs_c, inc_t cs_c,
+       auxinfo_t* restrict data
+     );
+
+void bli_dgemm_opt_4x4
+     (
+       dim_t               k,
+       double*    restrict alpha,
+       double*    restrict a,
+       double*    restrict b,
+       double*    restrict beta,
+       double*    restrict c, inc_t rs_c, inc_t cs_c,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
+     )
 {
-	bli_dgemm_kernel_4x4(k, alpha, a, b, beta, c, rs_c, cs_c, data);
+	bli_dgemm_kernel_4x4( k, alpha, a, b, beta, c, rs_c, cs_c, data );
 }
 
-extern void bli_cgemm_kernel_2x2(dim_t              k,
-                        scomplex* alpha,
-                        scomplex*   restrict a,
-                        scomplex*   restrict b,
-                        scomplex* beta,
-                        scomplex*   restrict c, inc_t rs_c, inc_t cs_c,
-                        auxinfo_t*         data
-                      );
 
 
+extern
+void bli_cgemm_kernel_2x2
+     (
+       dim_t               k,
+       scomplex*  restrict alpha,
+       scomplex*  restrict a,
+       scomplex*  restrict b,
+       scomplex*  restrict beta,
+       scomplex*  restrict c, inc_t rs_c, inc_t cs_c,
+       auxinfo_t* restrict data
+     );
 
-
-void bli_cgemm_opt_4x4(
-                        dim_t              k,
-                        scomplex* restrict alpha,
-                        scomplex* restrict a,
-                        scomplex* restrict b,
-                        scomplex* restrict beta,
-                        scomplex* restrict c, inc_t rs_c, inc_t cs_c,
-                        auxinfo_t*         data
-                      )
+void bli_cgemm_opt_4x4
+     (
+       dim_t               k,
+       scomplex*  restrict alpha,
+       scomplex*  restrict a,
+       scomplex*  restrict b,
+       scomplex*  restrict beta,
+       scomplex*  restrict c, inc_t rs_c, inc_t cs_c,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
+     )
 {
-
-	bli_cgemm_kernel_2x2(k, alpha, a, b, beta, c, rs_c, cs_c, data);
+	bli_cgemm_kernel_2x2( k, alpha, a, b, beta, c, rs_c, cs_c, data );
 }
 
-extern void bli_zgemm_kernel_2x2(dim_t              k,
-                        dcomplex* alpha,
-                        dcomplex*   restrict a,
-                        dcomplex*   restrict b,
-                        dcomplex* beta,
-                        dcomplex*   restrict c, inc_t rs_c, inc_t cs_c,
-                        auxinfo_t*         data
-                      );
 
 
-void bli_zgemm_opt_4x4(
-                        dim_t              k,
-                        dcomplex* restrict alpha,
-                        dcomplex* restrict a,
-                        dcomplex* restrict b,
-                        dcomplex* restrict beta,
-                        dcomplex* restrict c, inc_t rs_c, inc_t cs_c,
-                        auxinfo_t*         data
-                      )
+extern
+void bli_zgemm_kernel_2x2
+     (
+       dim_t               k,
+       dcomplex*  restrict alpha,
+       dcomplex*  restrict a,
+       dcomplex*  restrict b,
+       dcomplex*  restrict beta,
+       dcomplex*  restrict c, inc_t rs_c, inc_t cs_c,
+       auxinfo_t* restrict data
+     );
+
+void bli_zgemm_opt_4x4
+     (
+       dim_t               k,
+       dcomplex*  restrict alpha,
+       dcomplex*  restrict a,
+       dcomplex*  restrict b,
+       dcomplex*  restrict beta,
+       dcomplex*  restrict c, inc_t rs_c, inc_t cs_c,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
+     )
 {
-
-	bli_zgemm_kernel_2x2(k, alpha, a, b, beta, c, rs_c, cs_c, data);
+	bli_zgemm_kernel_2x2( k, alpha, a, b, beta, c, rs_c, cs_c, data );
 }
 

@@ -51,27 +51,32 @@ void bli_free_communicator( thread_comm_t* communicator )
     bli_free( communicator );
 }
 
-void bli_level3_thread_decorator( dim_t n_threads, 
-                                  level3_int_t func, 
-                                  obj_t* alpha, 
-                                  obj_t* a, 
-                                  obj_t* b, 
-                                  obj_t* beta, 
-                                  obj_t* c, 
-                                  void* cntl, 
-                                  void** thread )
+void bli_level3_thread_decorator
+     (
+       dim_t    n_threads,
+       l3_int_t func,
+       obj_t*   alpha,
+       obj_t*   a,
+       obj_t*   b,
+       obj_t*   beta,
+       obj_t*   c,
+       void*    cntx,
+       void*    cntl,
+       void**   thread
+     )
 {
     _Pragma( "omp parallel num_threads(n_threads)" )
     {
         dim_t omp_id = omp_get_thread_num();
 
         func( alpha,
-                  a,
-                  b,
-                  beta,
-                  c,
-                  cntl,
-                  thread[omp_id] );
+              a,
+              b,
+              beta,
+              c,
+              cntx,
+              cntl,
+              thread[omp_id] );
     }
 }
 

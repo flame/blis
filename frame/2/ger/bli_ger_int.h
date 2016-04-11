@@ -38,5 +38,6 @@ void bli_ger_int( conj_t  conjx,
                   obj_t*  x,
                   obj_t*  y,
                   obj_t*  a,
+                  cntx_t* cntx,
                   ger_t*  cntl );
 

@@ -35,41 +35,18 @@
 #include "blis.h"
 
 
-
-void bli_saxpyf_opt_var1(
-                          conj_t             conja,
-                          conj_t             conjx,
-                          dim_t              m,
-                          dim_t              b_n,
-                          float*    restrict alpha,
-                          float*    restrict a, inc_t inca, inc_t lda,
-                          float*    restrict x, inc_t incx,
-                          float*    restrict y, inc_t incy
-                        )
-{
-	/* Just call the reference implementation. */
-	BLIS_SAXPYF_KERNEL_REF( conja,
-	                       conjx,
-	                       m,
-	                       b_n,
-	                       alpha,
-	                       a, inca, lda,
-	                       x, incx,
-	                       y, incy );
-}
-
-
-
-void bli_daxpyf_opt_var1(
-                          conj_t             conja,
-                          conj_t             conjx,
-                          dim_t              m,
-                          dim_t              b_n,
-                          double*   restrict alpha,
-                          double*   restrict a, inc_t inca, inc_t lda,
-                          double*   restrict x, inc_t incx,
-                          double*   restrict y, inc_t incy
-                        )
+void bli_daxpyf_opt_var1
+     (
+       conj_t  conja,
+       conj_t  conjx,
+       dim_t   m,
+       dim_t   b_n,
+       double* alpha,
+       double* a, inc_t inca, inc_t lda,
+       double* x, inc_t incx,
+       double* y, inc_t incy,
+       cntx_t* cntx
+     )
 {
     if ( bli_zero_dim2( m, b_n ) ) return;
 
@@ -168,52 +145,5 @@ void bli_daxpyf_opt_var1(
                       +  chi7 * a7[4*m_run + i];
     }
 
-}
-
-
-
-void bli_caxpyf_opt_var1(
-                          conj_t             conja,
-                          conj_t             conjx,
-                          dim_t              m,
-                          dim_t              b_n,
-                          scomplex* restrict alpha,
-                          scomplex* restrict a, inc_t inca, inc_t lda,
-                          scomplex* restrict x, inc_t incx,
-                          scomplex* restrict y, inc_t incy
-                        )
-{
-	/* Just call the reference implementation. */
-	BLIS_CAXPYF_KERNEL_REF( conja,
-	                       conjx,
-	                       m,
-	                       b_n,
-	                       alpha,
-	                       a, inca, lda,
-	                       x, incx,
-	                       y, incy );
-}
-
-
-void bli_zaxpyf_opt_var1(
-                          conj_t             conja,
-                          conj_t             conjx,
-                          dim_t              m,
-                          dim_t              b_n,
-                          dcomplex* restrict alpha,
-                          dcomplex* restrict a, inc_t inca, inc_t lda,
-                          dcomplex* restrict x, inc_t incx,
-                          dcomplex* restrict y, inc_t incy
-                        )
-{
-	/* Just call the reference implementation. */
-	BLIS_ZAXPYF_KERNEL_REF( conja,
-	                       conjx,
-	                       m,
-	                       b_n,
-	                       alpha,
-	                       a, inca, lda,
-	                       x, incx,
-	                       y, incy );
 }
 

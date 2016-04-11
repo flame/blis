@@ -36,8 +36,8 @@ struct packm_s
 {
 	impl_t         impl_type;
 	varnum_t       var_num;
-	blksz_t*       mr;
-	blksz_t*       nr;
+	bszid_t        bmid_m;
+	bszid_t        bmid_n;
 	bool_t         does_invert_diag;
 	bool_t         rev_iter_if_upper;
 	bool_t         rev_iter_if_lower;
@@ -46,8 +46,8 @@ struct packm_s
 };
 typedef struct packm_s packm_t;
 
-#define cntl_mr( cntl )                cntl->mr
-#define cntl_nr( cntl )                cntl->nr
+#define cntl_bmid_m( cntl )           cntl->bmid_m
+#define cntl_bmid_n( cntl )           cntl->bmid_n
 
 #define cntl_does_invert_diag( cntl )  cntl->does_invert_diag
 #define cntl_rev_iter_if_upper( cntl ) cntl->rev_iter_if_upper
@@ -67,8 +67,8 @@ void     bli_packm_cntl_init( void );
 void     bli_packm_cntl_finalize( void );
 packm_t* bli_packm_cntl_obj_create( impl_t     impl_type,
                                     varnum_t   var_num,
-                                    blksz_t*   mr_def,
-                                    blksz_t*   nr_def,
+                                    bszid_t    bmid_m,
+                                    bszid_t    bmid_n,
                                     bool_t     does_invert_diag,
                                     bool_t     rev_iter_if_upper,
                                     bool_t     rev_iter_if_lower,
@@ -77,8 +77,8 @@ packm_t* bli_packm_cntl_obj_create( impl_t     impl_type,
 void bli_packm_cntl_obj_init( packm_t*   cntl,
                               impl_t     impl_type,
                               varnum_t   var_num,
-                              blksz_t*   mr_def,
-                              blksz_t*   nr_def,
+                              bszid_t    bmid_m,
+                              bszid_t    bmid_n,
                               bool_t     does_invert_diag,
                               bool_t     rev_iter_if_upper,
                               bool_t     rev_iter_if_lower,

@@ -38,4 +38,5 @@ void bli_hemv_int( conj_t  conjh,
                    obj_t*  x,
                    obj_t*  beta,
                    obj_t*  y,
+                   cntx_t* cntx,
                    hemv_t* cntl );

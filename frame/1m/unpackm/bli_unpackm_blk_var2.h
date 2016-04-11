@@ -34,6 +34,7 @@
 
 void bli_unpackm_blk_var2( obj_t*     p,
                            obj_t*     c,
+                           cntx_t*    cntx,
                            unpackm_t* cntl );
 
 
@@ -52,7 +53,8 @@ void PASTEMAC(ch,varname)( \
                            dim_t   n_panel, \
                            void*   p, inc_t rs_p, inc_t cs_p, \
                                       dim_t pd_p, inc_t ps_p, \
-                           void*   c, inc_t rs_c, inc_t cs_c  \
+                           void*   c, inc_t rs_c, inc_t cs_c, \
+                           cntx_t* cntx  \
                          );
 
 INSERT_GENTPROT_BASIC( unpackm_blk_var2 )

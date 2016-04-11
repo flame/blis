@@ -37,23 +37,25 @@
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, varname, kername ) \
 \
-void PASTEMAC(ch,varname)( \
-                           struc_t         strucc, \
-                           doff_t          diagoffc, \
-                           diag_t          diagc, \
-                           uplo_t          uploc, \
-                           conj_t          conjc, \
-                           pack_t          schema, \
-                           bool_t          invdiag, \
-                           dim_t           m_panel, \
-                           dim_t           n_panel, \
-                           dim_t           m_panel_max, \
-                           dim_t           n_panel_max, \
-                           ctype* restrict kappa, \
-                           ctype* restrict c, inc_t rs_c, inc_t cs_c, \
-                           ctype* restrict p, inc_t rs_p, inc_t cs_p, \
-                                              inc_t is_p  \
-                         ) \
+void PASTEMAC(ch,varname) \
+     ( \
+       struc_t         strucc, \
+       doff_t          diagoffc, \
+       diag_t          diagc, \
+       uplo_t          uploc, \
+       conj_t          conjc, \
+       pack_t          schema, \
+       bool_t          invdiag, \
+       dim_t           m_panel, \
+       dim_t           n_panel, \
+       dim_t           m_panel_max, \
+       dim_t           n_panel_max, \
+       ctype* restrict kappa, \
+       ctype* restrict c, inc_t rs_c, inc_t cs_c, \
+       ctype* restrict p, inc_t rs_p, inc_t cs_p, \
+                          inc_t is_p, \
+       cntx_t*         cntx  \
+     ) \
 { \
 	dim_t  panel_dim; \
 	dim_t  panel_len; \
@@ -89,56 +91,68 @@ void PASTEMAC(ch,varname)( \
 	{ \
 		/* For micro-panels of general matrices, we can call the pack
 		   kernel front-end directly. */ \
-		PASTEMAC(ch,kername)( conjc, \
-		                      panel_dim, \
-		                      panel_len, \
-		                      kappa, \
-		                      c, incc, ldc, \
-		                      p,       ldp ); \
+		PASTEMAC(ch,kername) \
+		( \
+		  conjc, \
+		  panel_dim, \
+		  panel_len, \
+		  kappa, \
+		  c, incc, ldc, \
+		  p,       ldp, \
+		  cntx  \
+		); \
 	} \
 	else if ( bli_is_herm_or_symm( strucc ) ) \
 	{ \
 		/* Call a helper function for micro-panels of Hermitian/symmetric
 		   matrices. */ \
-		PASTEMAC(ch,packm_herm_cxk)( strucc, \
-		                             diagoffc, \
-		                             uploc, \
-		                             conjc, \
-		                             schema, \
-		                             m_panel, \
-		                             n_panel, \
-		                             m_panel_max, \
-		                             n_panel_max, \
-		                             panel_dim, \
-		                             panel_len, \
-		                             kappa, \
-		                             c, rs_c, cs_c, \
-		                                incc, ldc, \
-		                             p, rs_p, cs_p, \
-		                                      ldp ); \
+		PASTEMAC(ch,packm_herm_cxk) \
+		( \
+		  strucc, \
+		  diagoffc, \
+		  uploc, \
+		  conjc, \
+		  schema, \
+		  m_panel, \
+		  n_panel, \
+		  m_panel_max, \
+		  n_panel_max, \
+		  panel_dim, \
+		  panel_len, \
+		  kappa, \
+		  c, rs_c, cs_c, \
+		     incc, ldc, \
+		  p, rs_p, cs_p, \
+		           ldp, \
+		  cntx  \
+		); \
 	} \
 	else /* ( bli_is_triangular( strucc ) ) */ \
 	{ \
 		/* Call a helper function for micro-panels of triangular
 		   matrices. */ \
-		PASTEMAC(ch,packm_tri_cxk)( strucc, \
-		                            diagoffc, \
-		                            diagc, \
-		                            uploc, \
-		                            conjc, \
-		                            schema, \
-		                            invdiag, \
-		                            m_panel, \
-		                            n_panel, \
-		                            m_panel_max, \
-		                            n_panel_max, \
-		                            panel_dim, \
-		                            panel_len, \
-		                            kappa, \
-		                            c, rs_c, cs_c, \
-		                               incc, ldc, \
-		                            p, rs_p, cs_p, \
-		                                     ldp ); \
+		PASTEMAC(ch,packm_tri_cxk) \
+		( \
+		  strucc, \
+		  diagoffc, \
+		  diagc, \
+		  uploc, \
+		  conjc, \
+		  schema, \
+		  invdiag, \
+		  m_panel, \
+		  n_panel, \
+		  m_panel_max, \
+		  n_panel_max, \
+		  panel_dim, \
+		  panel_len, \
+		  kappa, \
+		  c, rs_c, cs_c, \
+		     incc, ldc, \
+		  p, rs_p, cs_p, \
+		           ldp, \
+		  cntx  \
+		); \
 	} \
 \
 \
@@ -157,13 +171,18 @@ void PASTEMAC(ch,varname)( \
 		dim_t           n_edge = n_panel_max; \
 		ctype*          p_edge = p + (i  )*rs_p; \
 \
-		PASTEMAC(ch,setm)( 0, \
-		                   BLIS_NONUNIT_DIAG, \
-		                   BLIS_DENSE, \
-		                   m_edge, \
-		                   n_edge, \
-		                   zero, \
-		                   p_edge, rs_p, cs_p ); \
+		PASTEMAC(ch,setm) \
+		( \
+		  BLIS_NO_CONJUGATE, \
+		  0, \
+		  BLIS_NONUNIT_DIAG, \
+		  BLIS_DENSE, \
+		  m_edge, \
+		  n_edge, \
+		  zero, \
+		  p_edge, rs_p, cs_p, \
+		  cntx  \
+		); \
 	} \
 \
 	if ( n_panel != n_panel_max ) \
@@ -174,13 +193,18 @@ void PASTEMAC(ch,varname)( \
 		dim_t           n_edge = n_panel_max - j; \
 		ctype*          p_edge = p + (j  )*cs_p; \
 \
-		PASTEMAC(ch,setm)( 0, \
-		                   BLIS_NONUNIT_DIAG, \
-		                   BLIS_DENSE, \
-		                   m_edge, \
-		                   n_edge, \
-		                   zero, \
-		                   p_edge, rs_p, cs_p ); \
+		PASTEMAC(ch,setm) \
+		( \
+		  BLIS_NO_CONJUGATE, \
+		  0, \
+		  BLIS_NONUNIT_DIAG, \
+		  BLIS_DENSE, \
+		  m_edge, \
+		  n_edge, \
+		  zero, \
+		  p_edge, rs_p, cs_p, \
+		  cntx  \
+		); \
 	} \
 \
 \
@@ -204,11 +228,16 @@ void PASTEMAC(ch,varname)( \
 			dim_t           n_br   = n_panel_max - j; \
 			ctype*          p_br   = p + (i  )*rs_p + (j  )*cs_p; \
 \
-			PASTEMAC(ch,setd)( 0, \
-			                   m_br, \
-			                   n_br, \
-			                   one, \
-			                   p_br, rs_p, cs_p ); \
+			PASTEMAC(ch,setd) \
+			( \
+			  BLIS_NO_CONJUGATE, \
+			  0, \
+			  m_br, \
+			  n_br, \
+			  one, \
+			  p_br, rs_p, cs_p, \
+			  cntx  \
+			); \
 		} \
 	} \
 \
@@ -231,24 +260,26 @@ INSERT_GENTFUNC_BASIC( packm_struc_cxk, packm_cxk )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, varname, kername ) \
 \
-void PASTEMAC(ch,varname)( \
-                           struc_t         strucc, \
-                           doff_t          diagoffc, \
-                           uplo_t          uploc, \
-                           conj_t          conjc, \
-                           pack_t          schema, \
-                           dim_t           m_panel, \
-                           dim_t           n_panel, \
-                           dim_t           m_panel_max, \
-                           dim_t           n_panel_max, \
-                           dim_t           panel_dim, \
-                           dim_t           panel_len, \
-                           ctype* restrict kappa, \
-                           ctype* restrict c, inc_t rs_c, inc_t cs_c, \
-                                              inc_t incc, inc_t ldc, \
-                           ctype* restrict p, inc_t rs_p, inc_t cs_p, \
-                                                          inc_t ldp  \
-                         ) \
+void PASTEMAC(ch,varname) \
+     ( \
+       struc_t         strucc, \
+       doff_t          diagoffc, \
+       uplo_t          uploc, \
+       conj_t          conjc, \
+       pack_t          schema, \
+       dim_t           m_panel, \
+       dim_t           n_panel, \
+       dim_t           m_panel_max, \
+       dim_t           n_panel_max, \
+       dim_t           panel_dim, \
+       dim_t           panel_len, \
+       ctype* restrict kappa, \
+       ctype* restrict c, inc_t rs_c, inc_t cs_c, \
+                          inc_t incc, inc_t ldc, \
+       ctype* restrict p, inc_t rs_p, inc_t cs_p, \
+                                      inc_t ldp, \
+       cntx_t*         cntx  \
+     ) \
 { \
 	doff_t  diagoffc_abs; \
 	dim_t   i, j; \
@@ -284,12 +315,16 @@ void PASTEMAC(ch,varname)( \
 		} \
 \
 		/* Pack the full panel. */ \
-		PASTEMAC(ch,kername)( conjc, \
-		                      panel_dim, \
-		                      panel_len, \
-		                      kappa, \
-		                      c, incc, ldc, \
-		                      p,       ldp ); \
+		PASTEMAC(ch,kername) \
+		( \
+		  conjc, \
+		  panel_dim, \
+		  panel_len, \
+		  kappa, \
+		  c, incc, ldc, \
+		  p,       ldp, \
+		  cntx  \
+		); \
 	} \
 	else /* if ( bli_intersects_diag_n( diagoffc, m_panel, n_panel ) ) */ \
 	{ \
@@ -372,38 +407,50 @@ void PASTEMAC(ch,varname)( \
 \
 		/* Pack to p10. For upper storage, this includes the unstored
 		   triangle of c11. */ \
-		PASTEMAC(ch,kername)( conjc10, \
-		                      p10_dim, \
-		                      p10_len, \
-		                      kappa, \
-		                      c10, incc10, ldc10, \
-		                      p10,         ldp ); \
+		PASTEMAC(ch,kername) \
+		( \
+		  conjc10, \
+		  p10_dim, \
+		  p10_len, \
+		  kappa, \
+		  c10, incc10, ldc10, \
+		  p10,         ldp, \
+		  cntx  \
+		); \
 \
 		/* Pack to p12. For lower storage, this includes the unstored
 		   triangle of c11. */ \
-		PASTEMAC(ch,kername)( conjc12, \
-		                      p12_dim, \
-		                      p12_len, \
-		                      kappa, \
-		                      c12, incc12, ldc12, \
-		                      p12,         ldp ); \
+		PASTEMAC(ch,kername) \
+		( \
+		  conjc12, \
+		  p12_dim, \
+		  p12_len, \
+		  kappa, \
+		  c12, incc12, ldc12, \
+		  p12,         ldp, \
+		  cntx  \
+		); \
 \
 		/* Pack the stored triangle of c11 to p11. */ \
 		{ \
 			dim_t           p11_m = panel_dim; \
 			dim_t           p11_n = panel_dim; \
-			dim_t           j     = diagoffc_abs; \
-			ctype* restrict c11   = c + (j  )*ldc; \
-			ctype* restrict p11   = p + (j  )*ldp; \
+			dim_t           j2    = diagoffc_abs; \
+			ctype* restrict c11   = c + (j2 )*ldc; \
+			ctype* restrict p11   = p + (j2 )*ldp; \
 \
-			PASTEMAC(ch,copym)( 0, \
-			                    BLIS_NONUNIT_DIAG, \
-			                    uploc, \
-			                    conjc, \
-			                    p11_m, \
-			                    p11_n, \
-			                    c11, rs_c, cs_c, \
-			                    p11, rs_p, cs_p ); \
+			PASTEMAC(ch,copym) \
+			( \
+			  0, \
+			  BLIS_NONUNIT_DIAG, \
+			  uploc, \
+			  conjc, \
+			  p11_m, \
+			  p11_n, \
+			  c11, rs_c, cs_c, \
+			  p11, rs_p, cs_p, \
+			  cntx  \
+			); \
 \
 			/* If source matrix c is Hermitian, we have to zero out the
 			   imaginary components of the diagonal of p11 in case the
@@ -423,13 +470,18 @@ void PASTEMAC(ch,varname)( \
 			/* Now that the diagonal has been made explicitly Hermitian
 			   (if applicable), we can now safely scale the stored
 			   triangle specified by uploc. */ \
-			PASTEMAC(ch,scalm)( BLIS_NO_CONJUGATE, \
-			                    0, \
-			                    uploc, \
-			                    p11_m, \
-			                    p11_n, \
-			                    kappa, \
-			                    p11, rs_p, cs_p ); \
+			PASTEMAC(ch,scalm) \
+			( \
+			  BLIS_NO_CONJUGATE, \
+			  0, \
+			  BLIS_NONUNIT_DIAG, \
+			  uploc, \
+			  p11_m, \
+			  p11_n, \
+			  kappa, \
+			  p11, rs_p, cs_p, \
+			  cntx  \
+			); \
 		} \
 	} \
 }
@@ -443,54 +495,69 @@ INSERT_GENTFUNC_BASIC( packm_herm_cxk, packm_cxk )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, varname, kername ) \
 \
-void PASTEMAC(ch,varname)( \
-                           struc_t         strucc, \
-                           doff_t          diagoffp, \
-                           diag_t          diagc, \
-                           uplo_t          uploc, \
-                           conj_t          conjc, \
-                           pack_t          schema, \
-                           bool_t          invdiag, \
-                           dim_t           m_panel, \
-                           dim_t           n_panel, \
-                           dim_t           m_panel_max, \
-                           dim_t           n_panel_max, \
-                           dim_t           panel_dim, \
-                           dim_t           panel_len, \
-                           ctype* restrict kappa, \
-                           ctype* restrict c, inc_t rs_c, inc_t cs_c, \
-                                              inc_t incc, inc_t ldc, \
-                           ctype* restrict p, inc_t rs_p, inc_t cs_p, \
-                                                          inc_t ldp  \
-                         ) \
+void PASTEMAC(ch,varname) \
+     ( \
+       struc_t         strucc, \
+       doff_t          diagoffp, \
+       diag_t          diagc, \
+       uplo_t          uploc, \
+       conj_t          conjc, \
+       pack_t          schema, \
+       bool_t          invdiag, \
+       dim_t           m_panel, \
+       dim_t           n_panel, \
+       dim_t           m_panel_max, \
+       dim_t           n_panel_max, \
+       dim_t           panel_dim, \
+       dim_t           panel_len, \
+       ctype* restrict kappa, \
+       ctype* restrict c, inc_t rs_c, inc_t cs_c, \
+                          inc_t incc, inc_t ldc, \
+       ctype* restrict p, inc_t rs_p, inc_t cs_p, \
+                                      inc_t ldp, \
+       cntx_t*         cntx  \
+     ) \
 { \
 	/* Pack the panel. */ \
-	PASTEMAC(ch,kername)( conjc, \
-	                      panel_dim, \
-	                      panel_len, \
-	                      kappa, \
-	                      c, incc, ldc, \
-	                      p,       ldp ); \
+	PASTEMAC(ch,kername) \
+	( \
+	  conjc, \
+	  panel_dim, \
+	  panel_len, \
+	  kappa, \
+	  c, incc, ldc, \
+	  p,       ldp, \
+	  cntx  \
+	); \
 \
 \
 	/* If the diagonal of c is implicitly unit, explicitly set the
 	   the diagonal of the packed panel to kappa. */ \
 	if ( bli_is_unit_diag( diagc ) ) \
 	{ \
-		PASTEMAC(ch,setd)( diagoffp, \
-		                   m_panel, \
-		                   n_panel, \
-		                   kappa, \
-		                   p, rs_p, cs_p ); \
+		PASTEMAC(ch,setd) \
+		( \
+		  BLIS_NO_CONJUGATE, \
+		  diagoffp, \
+		  m_panel, \
+		  n_panel, \
+		  kappa, \
+		  p, rs_p, cs_p, \
+		  cntx  \
+		); \
 	} \
 \
 	/* If requested, invert the diagonal of the packed panel. */ \
 	if ( invdiag == TRUE ) \
 	{ \
-		PASTEMAC(ch,invertd)( diagoffp, \
-		                      m_panel, \
-		                      n_panel, \
-		                      p, rs_p, cs_p ); \
+		PASTEMAC(ch,invertd) \
+		( \
+		  diagoffp, \
+		  m_panel, \
+		  n_panel, \
+		  p, rs_p, cs_p, \
+		  cntx  \
+		); \
 	} \
 \
 	/* Set the region opposite the diagonal of p to zero. To do this,
@@ -508,13 +575,18 @@ void PASTEMAC(ch,varname)( \
 		bli_toggle_uplo( uplop ); \
 		bli_shift_diag_offset_to_shrink_uplo( uplop, diagoffp ); \
 \
-		PASTEMAC(ch,setm)( diagoffp, \
-		                   BLIS_NONUNIT_DIAG, \
-		                   uplop, \
-		                   m_panel, \
-		                   n_panel, \
-		                   zero, \
-		                   p, rs_p, cs_p ); \
+		PASTEMAC(ch,setm) \
+		( \
+		  BLIS_NO_CONJUGATE, \
+		  diagoffp, \
+		  BLIS_NONUNIT_DIAG, \
+		  uplop, \
+		  m_panel, \
+		  n_panel, \
+		  zero, \
+		  p, rs_p, cs_p, \
+		  cntx  \
+		); \
 	} \
 \
 }

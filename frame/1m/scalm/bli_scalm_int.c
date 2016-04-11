@@ -36,19 +36,22 @@
 
 #define FUNCPTR_T scalm_fp
 
-typedef void (*FUNCPTR_T)( obj_t* x );
+typedef void (*FUNCPTR_T)( obj_t*  alpha,
+                           obj_t*  x,
+                           cntx_t* cntx );
 
 static FUNCPTR_T vars[1][3] =
 {
 	// unblocked          optimized unblocked    blocked
-	{ bli_scalm_unb_var1, NULL,                  NULL }
+	{ bli_scalm_ex,       bli_scalm_ex,          NULL }
 };
 
-void bli_scalm_int( obj_t*   beta,
+void bli_scalm_int( obj_t*   alpha,
                     obj_t*   x,
+                    cntx_t*  cntx,
                     scalm_t* cntl )
 {
-	obj_t     x_local;
+	//obj_t     x_local;
 	varnum_t  n;
 	impl_t    i;
 	FUNCPTR_T f;
@@ -58,23 +61,28 @@ void bli_scalm_int( obj_t*   beta,
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
-		bli_scalm_int_check( beta, x, cntl );
+		bli_scalm_check( alpha, x );
 
 	// First check if we are to skip this operation.
 	if ( cntl_is_noop( cntl ) ) return;
 
-	// Return early if both beta and the scalar attached to x are unit.
-	if ( bli_obj_equals( beta, &BLIS_ONE ) &&
+	// Return early if both alpha and the scalar attached to x are unit.
+	if ( bli_obj_equals( alpha, &BLIS_ONE ) &&
 	     bli_obj_scalar_equals( x, &BLIS_ONE ) ) return;
 
-	// Alias x to x_local so we can apply beta if it is non-unit.
-	bli_obj_alias_to( *x, x_local );
+	//
+	// This code has been disabled since we've now added the alpha
+	// parameter back to the object interface to the underlying
+	// scalm variant.
+	//
+	// Alias x to x_local so we can apply alpha if it is non-unit.
+	//bli_obj_alias_to( *x, x_local );
 
-	// If beta is non-unit, apply it to the scalar attached to x.
-	if ( !bli_obj_equals( beta, &BLIS_ONE ) )
-	{
-		bli_obj_scalar_apply_scalar( beta, &x_local );
-	}
+	// If alpha is non-unit, apply it to the scalar attached to x.
+	//if ( !bli_obj_equals( alpha, &BLIS_ONE ) )
+	//{
+	//	bli_obj_scalar_apply_scalar( alpha, &x_local );
+	//}
 
 	// Extract the variant number and implementation type.
 	n = cntl_var_num( cntl );
@@ -84,6 +92,8 @@ void bli_scalm_int( obj_t*   beta,
 	f = vars[n][i];
 
 	// Invoke the variant.
-	f( &x_local );
+	f( alpha,
+	   x,
+	   cntx );
 }
 

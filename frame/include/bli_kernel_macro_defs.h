@@ -519,10 +519,6 @@
 
 // axpy2v kernels
 
-//#ifndef       AXPY2V_KERNEL
-//#define       AXPY2V_KERNEL       AXPY2V_KERNEL_REF
-//#endif
-
 #ifndef BLIS_SAXPY2V_KERNEL
 #define BLIS_SAXPY2V_KERNEL BLIS_SAXPY2V_KERNEL_REF
 #endif
@@ -540,10 +536,6 @@
 #endif
 
 // dotaxpyv kernels
-
-//#ifndef       DOTAXPYV_KERNEL
-//#define       DOTAXPYV_KERNEL       DOTAXPYV_KERNEL_REF
-//#endif
 
 #ifndef BLIS_SDOTAXPYV_KERNEL
 #define BLIS_SDOTAXPYV_KERNEL BLIS_SDOTAXPYV_KERNEL_REF
@@ -563,10 +555,6 @@
 
 // axpyf kernels
 
-//#ifndef       AXPYF_KERNEL
-//#define       AXPYF_KERNEL       AXPYF_KERNEL_REF
-//#endif
-
 #ifndef BLIS_SAXPYF_KERNEL
 #define BLIS_SAXPYF_KERNEL BLIS_SAXPYF_KERNEL_REF
 #endif
@@ -585,10 +573,6 @@
 
 // dotxf kernels
 
-//#ifndef       DOTXF_KERNEL
-//#define       DOTXF_KERNEL       DOTXF_KERNEL_REF
-//#endif
-
 #ifndef BLIS_SDOTXF_KERNEL
 #define BLIS_SDOTXF_KERNEL BLIS_SDOTXF_KERNEL_REF
 #endif
@@ -606,10 +590,6 @@
 #endif
 
 // dotxaxpyf kernels
-
-//#ifndef       DOTXAXPYF_KERNEL
-//#define       DOTXAXPYF_KERNEL       DOTXAXPYF_KERNEL_REF
-//#endif
 
 #ifndef BLIS_SDOTXAXPYF_KERNEL
 #define BLIS_SDOTXAXPYF_KERNEL BLIS_SDOTXAXPYF_KERNEL_REF
@@ -633,10 +613,6 @@
 
 // addv kernels
 
-//#ifndef       ADDV_KERNEL
-//#define       ADDV_KERNEL       ADDV_KERNEL_REF
-//#endif
-
 #ifndef BLIS_SADDV_KERNEL
 #define BLIS_SADDV_KERNEL BLIS_SADDV_KERNEL_REF
 #endif
@@ -654,10 +630,6 @@
 #endif
 
 // axpyv kernels
-
-//#ifndef       AXPYV_KERNEL
-//#define       AXPYV_KERNEL       AXPYV_KERNEL_REF
-//#endif
 
 #ifndef BLIS_SAXPYV_KERNEL
 #define BLIS_SAXPYV_KERNEL BLIS_SAXPYV_KERNEL_REF
@@ -677,10 +649,6 @@
 
 // copyv kernels
 
-//#ifndef       COPYV_KERNEL
-//#define       COPYV_KERNEL       COPYV_KERNEL_REF
-//#endif
-
 #ifndef BLIS_SCOPYV_KERNEL
 #define BLIS_SCOPYV_KERNEL BLIS_SCOPYV_KERNEL_REF
 #endif
@@ -698,10 +666,6 @@
 #endif
 
 // dotv kernels
-
-//#ifndef       DOTV_KERNEL
-//#define       DOTV_KERNEL       DOTV_KERNEL_REF
-//#endif
 
 #ifndef BLIS_SDOTV_KERNEL
 #define BLIS_SDOTV_KERNEL BLIS_SDOTV_KERNEL_REF
@@ -721,10 +685,6 @@
 
 // dotxv kernels
 
-//#ifndef       DOTXV_KERNEL
-//#define       DOTXV_KERNEL       DOTXV_KERNEL_REF
-//#endif
-
 #ifndef BLIS_SDOTXV_KERNEL
 #define BLIS_SDOTXV_KERNEL BLIS_SDOTXV_KERNEL_REF
 #endif
@@ -742,10 +702,6 @@
 #endif
 
 // invertv kernels
-
-//#ifndef       INVERTV_KERNEL
-//#define       INVERTV_KERNEL       INVERTV_KERNEL_REF
-//#endif
 
 #ifndef BLIS_SINVERTV_KERNEL
 #define BLIS_SINVERTV_KERNEL BLIS_SINVERTV_KERNEL_REF
@@ -765,10 +721,6 @@
 
 // scal2v kernels
 
-//#ifndef       SCAL2V_KERNEL
-//#define       SCAL2V_KERNEL       SCAL2V_KERNEL_REF
-//#endif
-
 #ifndef BLIS_SSCAL2V_KERNEL
 #define BLIS_SSCAL2V_KERNEL BLIS_SSCAL2V_KERNEL_REF
 #endif
@@ -786,10 +738,6 @@
 #endif
 
 // scalv kernels
-
-//#ifndef       SCALV_KERNEL
-//#define       SCALV_KERNEL       SCALV_KERNEL_REF
-//#endif
 
 #ifndef BLIS_SSCALV_KERNEL
 #define BLIS_SSCALV_KERNEL BLIS_SSCALV_KERNEL_REF
@@ -809,10 +757,6 @@
 
 // setv kernels
 
-//#ifndef       SETV_KERNEL
-//#define       SETV_KERNEL       SETV_KERNEL_REF
-//#endif
-
 #ifndef BLIS_SSETV_KERNEL
 #define BLIS_SSETV_KERNEL BLIS_SSETV_KERNEL_REF
 #endif
@@ -831,10 +775,6 @@
 
 // subv kernels
 
-//#ifndef       SUBV_KERNEL
-//#define       SUBV_KERNEL       SUBV_KERNEL_REF
-//#endif
-
 #ifndef BLIS_SSUBV_KERNEL
 #define BLIS_SSUBV_KERNEL BLIS_SSUBV_KERNEL_REF
 #endif
@@ -852,10 +792,6 @@
 #endif
 
 // swapv kernels
-
-//#ifndef       SWAPV_KERNEL
-//#define       SWAPV_KERNEL       SWAPV_KERNEL_REF
-//#endif
 
 #ifndef BLIS_SSWAPV_KERNEL
 #define BLIS_SSWAPV_KERNEL BLIS_SSWAPV_KERNEL_REF
@@ -1106,42 +1042,42 @@
 
 // NOTE: These values determine high-level cache blocking for level-2
 // operations ONLY. So, if gemv is performed with a 2000x2000 matrix A and
-// MC = NC = 1000, then a total of four unblocked (or unblocked fused)
+// M2 = N2 = 1000, then a total of four unblocked (or unblocked fused)
 // gemv subproblems are called. The blocked algorithms are only useful in
 // that they provide the opportunity for packing vectors. (Matrices can also
 // be packed here, but this tends to be much too expensive in practice to
 // actually employ.)
 
-#ifndef BLIS_DEFAULT_L2_MC_S
-#define BLIS_DEFAULT_L2_MC_S 1000
+#ifndef BLIS_DEFAULT_M2_S
+#define BLIS_DEFAULT_M2_S 1000
 #endif
 
-#ifndef BLIS_DEFAULT_L2_NC_S
-#define BLIS_DEFAULT_L2_NC_S 1000
+#ifndef BLIS_DEFAULT_N2_S
+#define BLIS_DEFAULT_N2_S 1000
 #endif
 
-#ifndef BLIS_DEFAULT_L2_MC_D
-#define BLIS_DEFAULT_L2_MC_D 1000
+#ifndef BLIS_DEFAULT_M2_D
+#define BLIS_DEFAULT_M2_D 1000
 #endif
 
-#ifndef BLIS_DEFAULT_L2_NC_D
-#define BLIS_DEFAULT_L2_NC_D 1000
+#ifndef BLIS_DEFAULT_N2_D
+#define BLIS_DEFAULT_N2_D 1000
 #endif
 
-#ifndef BLIS_DEFAULT_L2_MC_C
-#define BLIS_DEFAULT_L2_MC_C 1000
+#ifndef BLIS_DEFAULT_M2_C
+#define BLIS_DEFAULT_M2_C 1000
 #endif
 
-#ifndef BLIS_DEFAULT_L2_NC_C
-#define BLIS_DEFAULT_L2_NC_C 1000
+#ifndef BLIS_DEFAULT_N2_C
+#define BLIS_DEFAULT_N2_C 1000
 #endif
 
-#ifndef BLIS_DEFAULT_L2_MC_Z
-#define BLIS_DEFAULT_L2_MC_Z 1000
+#ifndef BLIS_DEFAULT_M2_Z
+#define BLIS_DEFAULT_M2_Z 1000
 #endif
 
-#ifndef BLIS_DEFAULT_L2_NC_Z
-#define BLIS_DEFAULT_L2_NC_Z 1000
+#ifndef BLIS_DEFAULT_N2_Z
+#define BLIS_DEFAULT_N2_Z 1000
 #endif
 
 //
@@ -1150,74 +1086,74 @@
 
 // Global level-1f fusing factors.
 
-#ifndef BLIS_L1F_FUSE_FAC_S
-#define BLIS_L1F_FUSE_FAC_S 8
+#ifndef BLIS_DEFAULT_1F_S
+#define BLIS_DEFAULT_1F_S 8
 #endif
 
-#ifndef BLIS_L1F_FUSE_FAC_D
-#define BLIS_L1F_FUSE_FAC_D 4
+#ifndef BLIS_DEFAULT_1F_D
+#define BLIS_DEFAULT_1F_D 4
 #endif
 
-#ifndef BLIS_L1F_FUSE_FAC_C
-#define BLIS_L1F_FUSE_FAC_C 4
+#ifndef BLIS_DEFAULT_1F_C
+#define BLIS_DEFAULT_1F_C 4
 #endif
 
-#ifndef BLIS_L1F_FUSE_FAC_Z
-#define BLIS_L1F_FUSE_FAC_Z 2
+#ifndef BLIS_DEFAULT_1F_Z
+#define BLIS_DEFAULT_1F_Z 2
 #endif
 
 // axpyf
 
-#ifndef BLIS_AXPYF_FUSE_FAC_S
-#define BLIS_AXPYF_FUSE_FAC_S BLIS_L1F_FUSE_FAC_S
+#ifndef BLIS_DEFAULT_AF_S
+#define BLIS_DEFAULT_AF_S BLIS_DEFAULT_1F_S
 #endif
 
-#ifndef BLIS_AXPYF_FUSE_FAC_D
-#define BLIS_AXPYF_FUSE_FAC_D BLIS_L1F_FUSE_FAC_D
+#ifndef BLIS_DEFAULT_AF_D
+#define BLIS_DEFAULT_AF_D BLIS_DEFAULT_1F_D
 #endif
 
-#ifndef BLIS_AXPYF_FUSE_FAC_C
-#define BLIS_AXPYF_FUSE_FAC_C BLIS_L1F_FUSE_FAC_C
+#ifndef BLIS_DEFAULT_AF_C
+#define BLIS_DEFAULT_AF_C BLIS_DEFAULT_1F_C
 #endif
 
-#ifndef BLIS_AXPYF_FUSE_FAC_Z
-#define BLIS_AXPYF_FUSE_FAC_Z BLIS_L1F_FUSE_FAC_Z
+#ifndef BLIS_DEFAULT_AF_Z
+#define BLIS_DEFAULT_AF_Z BLIS_DEFAULT_1F_Z
 #endif
 
 // dotxf
 
-#ifndef BLIS_DOTXF_FUSE_FAC_S
-#define BLIS_DOTXF_FUSE_FAC_S BLIS_L1F_FUSE_FAC_S
+#ifndef BLIS_DEFAULT_DF_S
+#define BLIS_DEFAULT_DF_S BLIS_DEFAULT_1F_S
 #endif
 
-#ifndef BLIS_DOTXF_FUSE_FAC_D
-#define BLIS_DOTXF_FUSE_FAC_D BLIS_L1F_FUSE_FAC_D
+#ifndef BLIS_DEFAULT_DF_D
+#define BLIS_DEFAULT_DF_D BLIS_DEFAULT_1F_D
 #endif
 
-#ifndef BLIS_DOTXF_FUSE_FAC_C
-#define BLIS_DOTXF_FUSE_FAC_C BLIS_L1F_FUSE_FAC_C
+#ifndef BLIS_DEFAULT_DF_C
+#define BLIS_DEFAULT_DF_C BLIS_DEFAULT_1F_C
 #endif
 
-#ifndef BLIS_DOTXF_FUSE_FAC_Z
-#define BLIS_DOTXF_FUSE_FAC_Z BLIS_L1F_FUSE_FAC_Z
+#ifndef BLIS_DEFAULT_DF_Z
+#define BLIS_DEFAULT_DF_Z BLIS_DEFAULT_1F_Z
 #endif
 
 // dotxaxpyf
 
-#ifndef BLIS_DOTXAXPYF_FUSE_FAC_S
-#define BLIS_DOTXAXPYF_FUSE_FAC_S BLIS_L1F_FUSE_FAC_S
+#ifndef BLIS_DEFAULT_XF_S
+#define BLIS_DEFAULT_XF_S BLIS_DEFAULT_1F_S
 #endif
 
-#ifndef BLIS_DOTXAXPYF_FUSE_FAC_D
-#define BLIS_DOTXAXPYF_FUSE_FAC_D BLIS_L1F_FUSE_FAC_D
+#ifndef BLIS_DEFAULT_XF_D
+#define BLIS_DEFAULT_XF_D BLIS_DEFAULT_1F_D
 #endif
 
-#ifndef BLIS_DOTXAXPYF_FUSE_FAC_C
-#define BLIS_DOTXAXPYF_FUSE_FAC_C BLIS_L1F_FUSE_FAC_C
+#ifndef BLIS_DEFAULT_XF_C
+#define BLIS_DEFAULT_XF_C BLIS_DEFAULT_1F_C
 #endif
 
-#ifndef BLIS_DOTXAXPYF_FUSE_FAC_Z
-#define BLIS_DOTXAXPYF_FUSE_FAC_Z BLIS_L1F_FUSE_FAC_Z
+#ifndef BLIS_DEFAULT_XF_Z
+#define BLIS_DEFAULT_XF_Z BLIS_DEFAULT_1F_Z
 #endif
 
 //
@@ -1228,20 +1164,20 @@
 // non-contiguous vectors. Similar to that of KR, they can
 // typically be set to 1.
 
-#ifndef BLIS_DEFAULT_VR_S
-#define BLIS_DEFAULT_VR_S   1
+#ifndef BLIS_DEFAULT_VF_S
+#define BLIS_DEFAULT_VF_S   1
 #endif
 
-#ifndef BLIS_DEFAULT_VR_D
-#define BLIS_DEFAULT_VR_D   1
+#ifndef BLIS_DEFAULT_VF_D
+#define BLIS_DEFAULT_VF_D   1
 #endif
 
-#ifndef BLIS_DEFAULT_VR_C
-#define BLIS_DEFAULT_VR_C   1
+#ifndef BLIS_DEFAULT_VF_C
+#define BLIS_DEFAULT_VF_C   1
 #endif
 
-#ifndef BLIS_DEFAULT_VR_Z
-#define BLIS_DEFAULT_VR_Z   1
+#ifndef BLIS_DEFAULT_VF_Z
+#define BLIS_DEFAULT_VF_Z   1
 #endif
 
 
@@ -1312,99 +1248,5 @@
   #error "KC must be multiple of KR for all datatypes."
 #endif
 
-
-// -- Abbreiviated kernel blocksize macros -------------------------------------
-
-// Here, we shorten the blocksizes defined in bli_kernel.h so that they can
-// derived via the PASTEMAC macro.
-
-// Default (minimum) cache blocksizes
-
-#define bli_smc      BLIS_DEFAULT_MC_S 
-#define bli_skc      BLIS_DEFAULT_KC_S
-#define bli_snc      BLIS_DEFAULT_NC_S
-
-#define bli_dmc      BLIS_DEFAULT_MC_D 
-#define bli_dkc      BLIS_DEFAULT_KC_D
-#define bli_dnc      BLIS_DEFAULT_NC_D
-
-#define bli_cmc      BLIS_DEFAULT_MC_C 
-#define bli_ckc      BLIS_DEFAULT_KC_C
-#define bli_cnc      BLIS_DEFAULT_NC_C
-
-#define bli_zmc      BLIS_DEFAULT_MC_Z 
-#define bli_zkc      BLIS_DEFAULT_KC_Z
-#define bli_znc      BLIS_DEFAULT_NC_Z
-
-// Register blocksizes
-
-#define bli_smr      BLIS_DEFAULT_MR_S 
-#define bli_skr      BLIS_DEFAULT_KR_S
-#define bli_snr      BLIS_DEFAULT_NR_S
-
-#define bli_dmr      BLIS_DEFAULT_MR_D 
-#define bli_dkr      BLIS_DEFAULT_KR_D
-#define bli_dnr      BLIS_DEFAULT_NR_D
-
-#define bli_cmr      BLIS_DEFAULT_MR_C 
-#define bli_ckr      BLIS_DEFAULT_KR_C
-#define bli_cnr      BLIS_DEFAULT_NR_C
-
-#define bli_zmr      BLIS_DEFAULT_MR_Z 
-#define bli_zkr      BLIS_DEFAULT_KR_Z
-#define bli_znr      BLIS_DEFAULT_NR_Z
-
-// Extended (maximum) cache blocksizes
-
-#define bli_smaxmc   BLIS_MAXIMUM_MC_S
-#define bli_smaxkc   BLIS_MAXIMUM_KC_S
-#define bli_smaxnc   BLIS_MAXIMUM_NC_S
-
-#define bli_dmaxmc   BLIS_MAXIMUM_MC_D
-#define bli_dmaxkc   BLIS_MAXIMUM_KC_D
-#define bli_dmaxnc   BLIS_MAXIMUM_NC_D
-
-#define bli_cmaxmc   BLIS_MAXIMUM_MC_C
-#define bli_cmaxkc   BLIS_MAXIMUM_KC_C
-#define bli_cmaxnc   BLIS_MAXIMUM_NC_C
-
-#define bli_zmaxmc   BLIS_MAXIMUM_MC_Z
-#define bli_zmaxkc   BLIS_MAXIMUM_KC_Z
-#define bli_zmaxnc   BLIS_MAXIMUM_NC_Z
-
-// Extended (packing) register blocksizes
-
-#define bli_spackmr  BLIS_PACKDIM_MR_S
-#define bli_spackkr  BLIS_PACKDIM_KR_S
-#define bli_spacknr  BLIS_PACKDIM_NR_S
-
-#define bli_dpackmr  BLIS_PACKDIM_MR_D
-#define bli_dpackkr  BLIS_PACKDIM_KR_D
-#define bli_dpacknr  BLIS_PACKDIM_NR_D
-
-#define bli_cpackmr  BLIS_PACKDIM_MR_C
-#define bli_cpackkr  BLIS_PACKDIM_KR_C
-#define bli_cpacknr  BLIS_PACKDIM_NR_C
-
-#define bli_zpackmr  BLIS_PACKDIM_MR_Z
-#define bli_zpackkr  BLIS_PACKDIM_KR_Z
-#define bli_zpacknr  BLIS_PACKDIM_NR_Z
-
-// Level-1f fusing factors
-
-#define bli_saxpyf_fusefac       BLIS_AXPYF_FUSE_FAC_S
-#define bli_daxpyf_fusefac       BLIS_AXPYF_FUSE_FAC_D
-#define bli_caxpyf_fusefac       BLIS_AXPYF_FUSE_FAC_C
-#define bli_zaxpyf_fusefac       BLIS_AXPYF_FUSE_FAC_Z
-
-#define bli_sdotxf_fusefac       BLIS_DOTXF_FUSE_FAC_S
-#define bli_ddotxf_fusefac       BLIS_DOTXF_FUSE_FAC_D
-#define bli_cdotxf_fusefac       BLIS_DOTXF_FUSE_FAC_C
-#define bli_zdotxf_fusefac       BLIS_DOTXF_FUSE_FAC_Z
-
-#define bli_sdotxaxpyf_fusefac   BLIS_DOTXAXPYF_FUSE_FAC_S
-#define bli_ddotxaxpyf_fusefac   BLIS_DOTXAXPYF_FUSE_FAC_D
-#define bli_cdotxaxpyf_fusefac   BLIS_DOTXAXPYF_FUSE_FAC_C
-#define bli_zdotxaxpyf_fusefac   BLIS_DOTXAXPYF_FUSE_FAC_Z
 
 #endif 

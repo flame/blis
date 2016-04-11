@@ -34,34 +34,37 @@
 
 void bli_packm_blk_var1( obj_t*   c,
                          obj_t*   p,
+                         cntx_t*  cntx,
                          packm_thrinfo_t* t );
 
 
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, varname ) \
 \
-void PASTEMAC(ch,varname)( \
-                           struc_t strucc, \
-                           doff_t  diagoffc, \
-                           diag_t  diagc, \
-                           uplo_t  uploc, \
-                           trans_t transc, \
-                           pack_t  schema, \
-                           bool_t  invdiag, \
-                           bool_t  revifup, \
-                           bool_t  reviflo, \
-                           dim_t   m, \
-                           dim_t   n, \
-                           dim_t   m_max, \
-                           dim_t   n_max, \
-                           void*   kappa, \
-                           void*   c, inc_t rs_c, inc_t cs_c, \
-                           void*   p, inc_t rs_p, inc_t cs_p, \
-                                      inc_t is_p, \
-                                      dim_t pd_p, inc_t ps_p, \
-                           void*   packm_ker, \
-                           packm_thrinfo_t* thread \
-                         );
+void PASTEMAC(ch,varname) \
+     ( \
+       struc_t strucc, \
+       doff_t  diagoffc, \
+       diag_t  diagc, \
+       uplo_t  uploc, \
+       trans_t transc, \
+       pack_t  schema, \
+       bool_t  invdiag, \
+       bool_t  revifup, \
+       bool_t  reviflo, \
+       dim_t   m, \
+       dim_t   n, \
+       dim_t   m_max, \
+       dim_t   n_max, \
+       void*   kappa, \
+       void*   c, inc_t rs_c, inc_t cs_c, \
+       void*   p, inc_t rs_p, inc_t cs_p, \
+                  inc_t is_p, \
+                  dim_t pd_p, inc_t ps_p, \
+       void*   packm_ker, \
+       cntx_t* cntx, \
+       packm_thrinfo_t* thread  \
+     );
 
 INSERT_GENTPROT_BASIC( packm_blk_var1 )
 

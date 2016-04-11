@@ -42,6 +42,7 @@ typedef void (*FUNCPTR_T)( conj_t  conjh,
                            obj_t*  x,
                            obj_t*  beta,
                            obj_t*  y,
+                           cntx_t* cntx,
                            hemv_t* cntl );
 
 static FUNCPTR_T vars[4][3] =
@@ -59,6 +60,7 @@ void bli_hemv_int( conj_t  conjh,
                    obj_t*  x,
                    obj_t*  beta,
                    obj_t*  y,
+                   cntx_t* cntx,
                    hemv_t* cntl )
 {
 	varnum_t  n;
@@ -68,7 +70,10 @@ void bli_hemv_int( conj_t  conjh,
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
-		bli_hemv_int_check( conjh, alpha, a, x, beta, y, cntl );
+	{
+		if ( bli_is_conj( conjh ) ) bli_hemv_check( alpha, a, x, beta, y );
+		else                        bli_symv_check( alpha, a, x, beta, y );
+	}
 
 	// If y has a zero dimension, return early.
 	if ( bli_obj_has_zero_dim( *y ) ) return;
@@ -112,6 +117,7 @@ void bli_hemv_int( conj_t  conjh,
 	   x,
 	   beta,
 	   y,
+	   cntx,
 	   cntl );
 }
 

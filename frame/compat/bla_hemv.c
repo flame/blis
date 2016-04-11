@@ -41,15 +41,16 @@
 #undef  GENTFUNCCO
 #define GENTFUNCCO( ftype, ftype_r, ch, chr, blasname, blisname ) \
 \
-void PASTEF77(ch,blasname)( \
-                            f77_char* uploa, \
-                            f77_int*  m, \
-                            ftype*    alpha, \
-                            ftype*    a, f77_int* lda, \
-                            ftype*    x, f77_int* incx, \
-                            ftype*    beta, \
-                            ftype*    y, f77_int* incy  \
-                          ) \
+void PASTEF77(ch,blasname) \
+     ( \
+       f77_char* uploa, \
+       f77_int*  m, \
+       ftype*    alpha, \
+       ftype*    a, f77_int* lda, \
+       ftype*    x, f77_int* incx, \
+       ftype*    beta, \
+       ftype*    y, f77_int* incy  \
+     ) \
 { \
 	uplo_t  blis_uploa; \
 	dim_t   m0; \
@@ -64,13 +65,16 @@ void PASTEF77(ch,blasname)( \
 	bli_init_auto( &init_result ); \
 \
 	/* Perform BLAS parameter checking. */ \
-	PASTEBLACHK(blasname)( MKSTR(ch), \
-	                       MKSTR(blasname), \
-	                       uploa, \
-	                       m, \
-	                       lda, \
-	                       incx, \
-	                       incy ); \
+	PASTEBLACHK(blasname) \
+	( \
+	  MKSTR(ch), \
+	  MKSTR(blasname), \
+	  uploa, \
+	  m, \
+	  lda, \
+	  incx, \
+	  incy  \
+	); \
 \
 	/* Map BLAS chars to their corresponding BLIS enumerated type value. */ \
 	bli_param_map_netlib_to_blis_uplo( *uploa, &blis_uploa ); \
@@ -88,15 +92,19 @@ void PASTEF77(ch,blasname)( \
 	cs_a = *lda; \
 \
 	/* Call BLIS interface. */ \
-	PASTEMAC(ch,blisname)( blis_uploa, \
-	                       BLIS_NO_CONJUGATE, \
-	                       BLIS_NO_CONJUGATE, \
-	                       m0, \
-	                       alpha, \
-	                       a,  rs_a, cs_a, \
-	                       x0, incx0, \
-	                       beta, \
-	                       y0, incy0 ); \
+	PASTEMAC(ch,blisname) \
+	( \
+	  blis_uploa, \
+	  BLIS_NO_CONJUGATE, \
+	  BLIS_NO_CONJUGATE, \
+	  m0, \
+	  alpha, \
+	  a,  rs_a, cs_a, \
+	  x0, incx0, \
+	  beta, \
+	  y0, incy0, \
+	  NULL  \
+	); \
 \
 	/* Finalize BLIS (if it was initialized above). */ \
 	bli_finalize_auto( init_result ); \

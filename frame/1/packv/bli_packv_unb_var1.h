@@ -34,18 +34,19 @@
 
 void bli_packv_unb_var1( obj_t*   c,
                          obj_t*   p,
+                         cntx_t*  cntx,
                          packv_t* cntl );
-void bli_packv_unb_var1_set_strides( obj_t*   p,
-                                     packv_t* cntl );
 
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, varname ) \
 \
-void PASTEMAC(ch,varname)( \
-                           dim_t   m, \
-                           void*   c, inc_t incc, \
-                           void*   p, inc_t incp \
-                         );
+void PASTEMAC(ch,varname) \
+     ( \
+       dim_t   m, \
+       void*   c, inc_t incc, \
+       void*   p, inc_t incp, \
+       cntx_t* cntx  \
+     );
 
 INSERT_GENTPROT_BASIC( packv_unb_var1 )
 

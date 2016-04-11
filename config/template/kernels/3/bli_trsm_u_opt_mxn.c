@@ -36,18 +36,24 @@
 
 
 
-void bli_strsm_u_opt_mxn(
-                          float*    restrict a11,
-                          float*    restrict b11,
-                          float*    restrict c11, inc_t rs_c, inc_t cs_c,
-                          auxinfo_t*         data
-                        )
+void bli_strsm_u_opt_mxn
+     (
+       float*     restrict a11,
+       float*     restrict b11,
+       float*     restrict c11, inc_t rs_c, inc_t cs_c,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
+     )
 {
 	/* Just call the reference implementation. */
-	BLIS_STRSM_U_UKERNEL_REF( a11,
-	                     b11,
-	                     c11, rs_c, cs_c,
-	                     data );
+	BLIS_STRSM_U_UKERNEL_REF
+	(
+	  a11,
+	  b11,
+	  c11, rs_c, cs_c,
+	  data,
+	  cntx
+	);
 }
 
 
@@ -58,6 +64,13 @@ void bli_dtrsm_u_opt_mxn(
                           double*   restrict c11, inc_t rs_c, inc_t cs_c,
                           auxinfo_t*         data
                         )
+     (
+       double*    restrict a11,
+       double*    restrict b11,
+       double*    restrict c11, inc_t rs_c, inc_t cs_c,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
+     )
 {
 /*
   Template trsm_u micro-kernel implementation
@@ -100,6 +113,14 @@ void bli_dtrsm_u_opt_mxn(
             information that may be useful when optimizing the trsm
             micro-kernel implementation. (See BLIS KernelsHowTo wiki for
             more info.)
+  - cntx:   The address of the runtime context. The context can be queried
+            for implementation-specific values such as cache and register
+            blocksizes. However, most micro-kernels intrinsically "know"
+            these values already, and thus the cntx argument usually can
+            be safely ignored. (The following template micro-kernel code
+            does in fact query MR, NR, PACKMR, and PACKNR, as needed, but
+            only because those values are not hard-coded, as they would be
+            in a typical optimized micro-kernel implementation.)
 
   Diagrams for trsm
 
@@ -141,14 +162,20 @@ void bli_dtrsm_u_opt_mxn(
 
   -FGVZ
 */
-	const dim_t        m     = bli_dmr;
-	const dim_t        n     = bli_dnr;
+	const dim_t        mr     = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx );
+	const dim_t        nr     = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx );
 
-	const inc_t        rs_a  = 1;
-	const inc_t        cs_a  = bli_dpackmr;
+	const inc_t        packmr = bli_cntx_get_blksz_max_dt( dt, BLIS_MR, cntx );
+	const inc_t        packnr = bli_cntx_get_blksz_max_dt( dt, BLIS_NR, cntx );
 
-	const inc_t        rs_b  = bli_dpacknr;
-	const inc_t        cs_b  = 1;
+	const dim_t        m      = mr;
+	const dim_t        n      = nr;
+
+	const inc_t        rs_a   = 1;
+	const inc_t        cs_a   = packmr;
+
+	const inc_t        rs_b   = packnr;
+	const inc_t        cs_b   = 1;
 
 	dim_t              iter, i, j, l;
 	dim_t              n_behind;
@@ -207,33 +234,45 @@ void bli_dtrsm_u_opt_mxn(
 
 
 
-void bli_ctrsm_u_opt_mxn(
-                          scomplex* restrict a11,
-                          scomplex* restrict b11,
-                          scomplex* restrict c11, inc_t rs_c, inc_t cs_c,
-                          auxinfo_t*         data
-                        )
+void bli_ctrsm_u_opt_mxn
+     (
+       scomplex*  restrict a11,
+       scomplex*  restrict b11,
+       scomplex*  restrict c11, inc_t rs_c, inc_t cs_c,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
+     )
 {
 	/* Just call the reference implementation. */
-	BLIS_CTRSM_U_UKERNEL_REF( a11,
-	                     b11,
-	                     c11, rs_c, cs_c,
-	                     data );
+	BLIS_CTRSM_U_UKERNEL_REF
+	(
+	  a11,
+	  b11,
+	  c11, rs_c, cs_c,
+	  data,
+	  cntx
+	);
 }
 
 
 
-void bli_ztrsm_u_opt_mxn(
-                          dcomplex* restrict a11,
-                          dcomplex* restrict b11,
-                          dcomplex* restrict c11, inc_t rs_c, inc_t cs_c,
-                          auxinfo_t*         data
-                        )
+void bli_ztrsm_u_opt_mxn
+     (
+       dcomplex*  restrict a11,
+       dcomplex*  restrict b11,
+       dcomplex*  restrict c11, inc_t rs_c, inc_t cs_c,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
+     )
 {
 	/* Just call the reference implementation. */
-	BLIS_ZTRSM_U_UKERNEL_REF( a11,
-	                     b11,
-	                     c11, rs_c, cs_c,
-	                     data );
+	BLIS_ZTRSM_U_UKERNEL_REF
+	(
+	  a11,
+	  b11,
+	  c11, rs_c, cs_c,
+	  data,
+	  cntx
+	);
 }
 

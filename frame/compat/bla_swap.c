@@ -41,11 +41,12 @@
 #undef  GENTFUNC
 #define GENTFUNC( ftype, ch, blasname, blisname ) \
 \
-void PASTEF77(ch,blasname)( \
-                            f77_int* n, \
-                            ftype*   x, f77_int* incx, \
-                            ftype*   y, f77_int* incy \
-                          ) \
+void PASTEF77(ch,blasname) \
+     ( \
+       f77_int* n, \
+       ftype*   x, f77_int* incx, \
+       ftype*   y, f77_int* incy  \
+     ) \
 { \
 	dim_t  n0; \
 	ftype* x0; \
@@ -66,15 +67,19 @@ void PASTEF77(ch,blasname)( \
 	bli_convert_blas_incv( n0, y, *incy, y0, incy0 ); \
 \
 	/* Call BLIS interface. */ \
-	PASTEMAC2(ch,ch,blisname)( n0, \
-	                           x0, incx0, \
-	                           y0, incy0 ); \
+	PASTEMAC(ch,blisname) \
+	( \
+	  n0, \
+	  x0, incx0, \
+	  y0, incy0, \
+	  NULL  \
+	); \
 \
 	/* Finalize BLIS (if it was initialized above). */ \
 	bli_finalize_auto( init_result ); \
 }
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
-INSERT_GENTFUNC_BLAS( swap, SWAPV_KERNEL )
+INSERT_GENTFUNC_BLAS( swap, swapv )
 #endif
 

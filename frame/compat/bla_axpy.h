@@ -39,12 +39,13 @@
 #undef  GENTPROT
 #define GENTPROT( ftype, ch, blasname ) \
 \
-void PASTEF77(ch,blasname)( \
-                            f77_int* n, \
-                            ftype*   alpha, \
-                            ftype*   x, f77_int* incx, \
-                            ftype*   y, f77_int* incy \
-                          );
+void PASTEF77(ch,blasname) \
+     ( \
+       f77_int* n, \
+       ftype*   alpha, \
+       ftype*   x, f77_int* incx, \
+       ftype*   y, f77_int* incy \
+     );
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 INSERT_GENTPROT_BLAS( axpy )

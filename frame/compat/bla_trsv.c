@@ -41,14 +41,15 @@
 #undef  GENTFUNC
 #define GENTFUNC( ftype, ch, blasname, blisname ) \
 \
-void PASTEF77(ch,blasname)( \
-                            f77_char* uploa, \
-                            f77_char* transa, \
-                            f77_char* diaga, \
-                            f77_int*  m, \
-                            ftype*    a, f77_int* lda, \
-                            ftype*    x, f77_int* incx  \
-                          ) \
+void PASTEF77(ch,blasname) \
+     ( \
+       f77_char* uploa, \
+       f77_char* transa, \
+       f77_char* diaga, \
+       f77_int*  m, \
+       ftype*    a, f77_int* lda, \
+       ftype*    x, f77_int* incx  \
+     ) \
 { \
 	uplo_t  blis_uploa; \
 	trans_t blis_transa; \
@@ -64,14 +65,17 @@ void PASTEF77(ch,blasname)( \
 	bli_init_auto( &init_result ); \
 \
 	/* Perform BLAS parameter checking. */ \
-	PASTEBLACHK(blasname)( MKSTR(ch), \
-	                       MKSTR(blasname), \
-	                       uploa, \
-	                       transa, \
-	                       diaga, \
-	                       m, \
-	                       lda, \
-	                       incx ); \
+	PASTEBLACHK(blasname) \
+	( \
+	  MKSTR(ch), \
+	  MKSTR(blasname), \
+	  uploa, \
+	  transa, \
+	  diaga, \
+	  m, \
+	  lda, \
+	  incx  \
+	); \
 \
 	/* Map BLAS chars to their corresponding BLIS enumerated type value. */ \
 	bli_param_map_netlib_to_blis_uplo( *uploa, &blis_uploa ); \
@@ -93,13 +97,17 @@ void PASTEF77(ch,blasname)( \
 	one_p = PASTEMAC(ch,1); \
 \
 	/* Call BLIS interface. */ \
-	PASTEMAC(ch,blisname)( blis_uploa, \
-	                       blis_transa, \
-	                       blis_diaga, \
-	                       m0, \
-	                       one_p, \
-	                       a,  rs_a, cs_a, \
-	                       x0, incx0 ); \
+	PASTEMAC(ch,blisname) \
+	( \
+	  blis_uploa, \
+	  blis_transa, \
+	  blis_diaga, \
+	  m0, \
+	  one_p, \
+	  a,  rs_a, cs_a, \
+	  x0, incx0, \
+	  NULL  \
+	); \
 \
 	/* Finalize BLIS (if it was initialized above). */ \
 	bli_finalize_auto( init_result ); \

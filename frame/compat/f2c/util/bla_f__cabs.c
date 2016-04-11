@@ -36,26 +36,26 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-double bla_f__cabs(double bla_real, double imag)
+double bla_f__cabs(double real_val, double imag_val)
 {
 	double temp;
 
-	if(bla_real < 0)
-		bla_real = -bla_real;
-	if(imag < 0)
-		imag = -imag;
-	if(imag > bla_real)
+	if(real_val < 0)
+		real_val = -real_val;
+	if(imag_val < 0)
+		imag_val = -imag_val;
+	if(imag_val > real_val)
 	{
-		temp = bla_real;
-		bla_real = imag;
-		imag = temp;
+		temp = real_val;
+		real_val = imag_val;
+		imag_val = temp;
 	}
 
-	if((bla_real+imag) == bla_real)
-		return(bla_real);
+	if((real_val+imag_val) == real_val)
+		return(real_val);
 
-	temp = imag/bla_real;
-	temp = bla_real*sqrt(1.0 + temp*temp);
+	temp = imag_val/real_val;
+	temp = real_val*sqrt(1.0 + temp*temp);
 
 	return(temp);
 }

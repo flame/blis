@@ -44,8 +44,6 @@ extern gemv_t*    gemv_cntl_rp_bs_axpy;
 extern gemv_t*    gemv_cntl_cp_bs_dot;
 extern gemv_t*    gemv_cntl_cp_bs_axpy;
 
-extern blksz_t*   gemv_mc;
-
 hemv_t*           hemv_cntl_bs_ke_lrow_ucol;
 hemv_t*           hemv_cntl_bs_ke_lcol_urow;
 hemv_t*           hemv_cntl_ge_lrow_ucol;
@@ -60,16 +58,18 @@ void bli_hemv_cntl_init()
 	=
 	bli_hemv_cntl_obj_create( BLIS_UNB_FUSED,
 	                          BLIS_VARIANT1,
+	                          0,
 	                          NULL, NULL, NULL, NULL,
 	                          NULL, NULL, NULL, NULL,
-	                          NULL, NULL, NULL );
+	                          NULL, NULL );
 	hemv_cntl_bs_ke_lcol_urow
 	=
 	bli_hemv_cntl_obj_create( BLIS_UNB_FUSED,
 	                          BLIS_VARIANT3,
+	                          0,
 	                          NULL, NULL, NULL, NULL,
 	                          NULL, NULL, NULL, NULL,
-	                          NULL, NULL, NULL );
+	                          NULL, NULL );
 
 
 	// Create control trees for generally large problems. Here, we choose a
@@ -78,7 +78,7 @@ void bli_hemv_cntl_init()
 	=
 	bli_hemv_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT2,
-	                          gemv_mc,
+	                          BLIS_M2,
 	                          scalv_cntl,           // scale y up-front
 	                          packm_cntl,           // pack A11 (if needed)
 	                          packv_cntl,           // pack x1 (if needed)
@@ -93,7 +93,7 @@ void bli_hemv_cntl_init()
 	=
 	bli_hemv_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT2,
-	                          gemv_mc,
+	                          BLIS_M2,
 	                          scalv_cntl,           // scale y up-front
 	                          packm_cntl,           // pack A11 (if needed)
 	                          packv_cntl,           // pack x1 (if needed)
@@ -117,7 +117,7 @@ void bli_hemv_cntl_finalize()
 
 hemv_t* bli_hemv_cntl_obj_create( impl_t     impl_type,
                                   varnum_t   var_num,
-                                  blksz_t*   b,
+                                  bszid_t    bszid,
                                   scalv_t*   sub_scalv,
                                   packm_t*   sub_packm_a11,
                                   packv_t*   sub_packv_x1,
@@ -135,7 +135,7 @@ hemv_t* bli_hemv_cntl_obj_create( impl_t     impl_type,
 
 	cntl->impl_type      = impl_type;
 	cntl->var_num        = var_num;
-	cntl->b              = b;
+	cntl->bszid          = bszid;
 	cntl->sub_scalv      = sub_scalv;
 	cntl->sub_packm_a11  = sub_packm_a11;
 	cntl->sub_packv_x1   = sub_packv_x1;
@@ -153,7 +153,7 @@ hemv_t* bli_hemv_cntl_obj_create( impl_t     impl_type,
 void bli_hemv_cntl_obj_init( hemv_t*    cntl,
                              impl_t     impl_type,
                              varnum_t   var_num,
-                             blksz_t*   b,
+                             bszid_t    bszid,
                              scalv_t*   sub_scalv,
                              packm_t*   sub_packm_a11,
                              packv_t*   sub_packv_x1,
@@ -167,7 +167,7 @@ void bli_hemv_cntl_obj_init( hemv_t*    cntl,
 {
 	cntl->impl_type      = impl_type;
 	cntl->var_num        = var_num;
-	cntl->b              = b;
+	cntl->bszid          = bszid;
 	cntl->sub_scalv      = sub_scalv;
 	cntl->sub_packm_a11  = sub_packm_a11;
 	cntl->sub_packv_x1   = sub_packv_x1;

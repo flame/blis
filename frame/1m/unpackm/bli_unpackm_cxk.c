@@ -150,7 +150,7 @@ static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] =
 
 
 #undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, copyvker ) \
+#define GENTFUNC( ctype, ch, opname ) \
 \
 void PASTEMAC(ch,opname)( \
                           conj_t  conjp, \
@@ -158,7 +158,8 @@ void PASTEMAC(ch,opname)( \
                           dim_t   n, \
                           void*   beta, \
                           void*   p,             inc_t ldp, \
-                          void*   a, inc_t inca, inc_t lda  \
+                          void*   a, inc_t inca, inc_t lda, \
+                          cntx_t* cntx  \
                         ) \
 { \
 	dim_t     panel_dim; \
@@ -166,13 +167,17 @@ void PASTEMAC(ch,opname)( \
 	FUNCPTR_T f; \
 \
 	/* If the panel dimension is unit, then we recognize that this allows
-	   the kernel to reduce to a copyv, so we call that kernel directly. */ \
+	   the kernel to reduce to a copyv, so we call that directly. */ \
 	if ( m == 1 ) \
 	{ \
-		PASTEMAC2(ch,ch,copyvker)( conjp, \
-		                           n, \
-		                           p, 1, \
-		                           a, lda ); \
+		PASTEMAC(ch,copyv) \
+		( \
+		  conjp, \
+		  n, \
+		  p, 1, \
+		  a, lda, \
+		  cntx  \
+		); \
 		return; \
 	} \
 \
@@ -196,26 +201,33 @@ void PASTEMAC(ch,opname)( \
 	   allow the kernel implementations to remain very simple. */ \
 	if ( f != NULL && m == panel_dim ) \
 	{ \
-		f( conjp, \
-		   n, \
-		   beta, \
-		   p, \
-		   a, inca, lda ); \
+		f \
+		( \
+		  conjp, \
+		  n, \
+		  beta, \
+		  p, \
+		  a, inca, lda  \
+		); \
 	} \
 	else \
 	{ \
 		/* Treat the panel as m x n and column-stored (unit row stride). */ \
-		PASTEMAC3(ch,ch,ch,scal2m)( 0, \
-		                            BLIS_NONUNIT_DIAG, \
-		                            BLIS_DENSE, \
-		                            conjp, \
-		                            m, \
-		                            n, \
-		                            beta, \
-		                            p, 1,    ldp, \
-		                            a, inca, lda ); \
+		PASTEMAC(ch,scal2m) \
+		( \
+		  0, \
+		  BLIS_NONUNIT_DIAG, \
+		  BLIS_DENSE, \
+		  conjp, \
+		  m, \
+		  n, \
+		  beta, \
+		  p, 1,    ldp, \
+		  a, inca, lda, \
+		  cntx  \
+		); \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC( unpackm_cxk, COPYV_KERNEL )
+INSERT_GENTFUNC_BASIC0( unpackm_cxk )
 

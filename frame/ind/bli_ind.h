@@ -32,25 +32,51 @@
 
 */
 
+#ifndef BLIS_IND_H
+#define BLIS_IND_H
 
-// cntl
-#include "bli_ind_cntl_init.h"
-#include "bli_gemmind_cntl.h"
-#include "bli_trsmind_cntl.h"
+// level-3 induced method management
+#include "bli_l3_ind.h"
 
-// object API
-#include "bli_oapi_ind.h"
+// level-3 object APIs
+#include "bli_l3_ind_oapi.h"
 
-// typed API
-#include "bli_tapi_ind.h"
+// level-3 typed APIs
+#include "bli_l3_ind_tapi.h"
 
-// query
-#include "bli_ind_query.h"
-#include "bli_ukr_query.h"
-#include "bli_bsv_query.h"
+// level-3 cntx initialization
+#include "bli_gemmind_cntx.h"
+#include "bli_trsmind_cntx.h"
 
-// ukernels
+// level-3 ukernels
 #include "bli_gemmind_ukr_ref.h"
 #include "bli_gemmtrsmind_x_ukr_ref.h"
 #include "bli_trsmind_x_ukr_ref.h"
+
+
+void   bli_ind_init( void );
+void   bli_ind_finalize( void );
+bool_t bli_ind_is_initialized( void );
+
+void   bli_ind_enable( ind_t method );
+void   bli_ind_disable( ind_t method );
+void   bli_ind_disable_all( void );
+
+void   bli_ind_enable_dt( ind_t method, num_t dt );
+void   bli_ind_disable_dt( ind_t method, num_t dt );
+void   bli_ind_disable_all_dt( num_t dt );
+
+void   bli_ind_oper_enable_only( opid_t oper, ind_t method, num_t dt );
+
+bool_t bli_ind_oper_is_impl( opid_t oper, ind_t method );
+bool_t bli_ind_oper_has_avail( opid_t oper, num_t dt );
+void*  bli_ind_oper_get_avail( opid_t oper, num_t dt );
+ind_t  bli_ind_oper_find_avail( opid_t oper, num_t dt );
+char*  bli_ind_oper_get_avail_impl_string( opid_t oper, num_t dt );
+
+char*  bli_ind_get_impl_string( ind_t method );
+num_t  bli_ind_map_cdt_to_index( num_t dt );
+
+
+#endif
 

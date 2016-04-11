@@ -54,6 +54,7 @@ static FUNCPTR_T GENARRAY(ftypes,gemm_ker_var5);
 void bli_gemm_ker_var5( obj_t*  a,
                         obj_t*  b,
                         obj_t*  c,
+                        cntx_t* cntx,
                         gemm_t* cntl,
                         gemm_thrinfo_t* thread )
 {
@@ -103,11 +104,11 @@ void bli_gemm_ker_var5( obj_t*  a,
 	// function pointer.
 	f = ftypes[dt_exec];
 
-	// Extract from the control tree node the func_t object containing
+	// Extract from the context the func_t object containing
 	// the gemm micro-kernel function addresses, and then query the
 	// function address corresponding to the current datatype.
-	gemm_ukrs = cntl_gemm_ukrs( cntl );
-	gemm_ukr  = bli_func_obj_query( dt_exec, gemm_ukrs );
+	gemm_ukrs = bli_cntx_get_l3_ukr( BLIS_GEMM_UKR, cntx );
+	gemm_ukr  = bli_func_get_dt( dt_exec, gemm_ukrs );
 
 	// Invoke the function.
 	f( m,

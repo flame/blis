@@ -39,6 +39,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include <stdarg.h>
 
 #if defined(_WIN32) || defined(__CYGWIN__)
 #define BLIS_OS_WINDOWS 1

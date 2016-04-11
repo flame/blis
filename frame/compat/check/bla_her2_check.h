@@ -34,12 +34,15 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-void bla_her2_check( char*     dt_str,
-                     char*     op_str,
-                     f77_char* uploa,
-                     f77_int*  m,
-                     f77_int*  incx,
-                     f77_int*  incy,
-                     f77_int*  lda );
+void bla_her2_check
+     (
+       char*     dt_str,
+       char*     op_str,
+       f77_char* uploa,
+       f77_int*  m,
+       f77_int*  incx,
+       f77_int*  incy,
+       f77_int*  lda
+     );
 
 #endif

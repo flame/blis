@@ -36,7 +36,7 @@ struct ger_s
 {
 	impl_t             impl_type;
 	varnum_t           var_num;
-	blksz_t*           b;
+	bszid_t            bszid;
 	struct packv_s*    sub_packv_x;
 	struct packv_s*    sub_packv_y;
 	struct packm_s*    sub_packm_a;
@@ -53,7 +53,7 @@ void   bli_ger_cntl_init( void );
 void   bli_ger_cntl_finalize( void );
 ger_t* bli_ger_cntl_obj_create( impl_t     impl_type,
                                 varnum_t   var_num,
-                                blksz_t*   b,
+                                bszid_t    bszid,
                                 packv_t*   sub_packv_x,
                                 packv_t*   sub_packv_y,
                                 packm_t*   sub_packm_a,
@@ -62,7 +62,7 @@ ger_t* bli_ger_cntl_obj_create( impl_t     impl_type,
 void bli_ger_cntl_obj_init( ger_t*     cntl,
                             impl_t     impl_type,
                             varnum_t   var_num,
-                            blksz_t*   b,
+                            bszid_t    bszid,
                             packv_t*   sub_packv_x,
                             packv_t*   sub_packv_y,
                             packm_t*   sub_packm_a,

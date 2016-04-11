@@ -39,11 +39,12 @@
 #undef  GENTPROTDOT
 #define GENTPROTDOT( ftype, chxy, chc, blasname ) \
 \
-ftype PASTEF772(chxy,blasname,chc)( \
-                                    f77_int* n, \
-                                    ftype*   x, f77_int* incx, \
-                                    ftype*   y, f77_int* incy \
-                                  );
+ftype PASTEF772(chxy,blasname,chc) \
+     ( \
+       f77_int* n, \
+       ftype*   x, f77_int* incx, \
+       ftype*   y, f77_int* incy  \
+     );
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 INSERT_GENTPROTDOT_BLAS( dot )
@@ -51,13 +52,17 @@ INSERT_GENTPROTDOT_BLAS( dot )
 
 // -- "Black sheep" dot product function prototypes --
 
-float PASTEF77(sd,sdot)( f77_int* n,
-                         float*   x, f77_int* incx,
-                         float*   y, f77_int* incy
-                       );
+float PASTEF77(sd,sdot)
+     (
+       f77_int* n,
+       float*   x, f77_int* incx,
+       float*   y, f77_int* incy
+     );
 
-double PASTEF77(d,sdot)( f77_int* n,
-                         float*   x, f77_int* incx,
-                         float*   y, f77_int* incy
-                       );
+double PASTEF77(d,sdot)
+     (
+       f77_int* n,
+       float*   x, f77_int* incx,
+       float*   y, f77_int* incy
+     );
 #endif

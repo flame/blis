@@ -33,78 +33,8 @@
 */
 
 #include "bli_hemv_cntl.h"
-#include "bli_hemv_check.h"
+#include "bli_hemv_front.h"
 #include "bli_hemv_int.h"
 
-#include "bli_hemv_unb_var1.h"
-#include "bli_hemv_unb_var2.h"
-#include "bli_hemv_unb_var3.h"
-#include "bli_hemv_unb_var4.h"
-
-#include "bli_hemv_unf_var1a.h"
-#include "bli_hemv_unf_var3a.h"
-#include "bli_hemv_unf_var1.h"
-#include "bli_hemv_unf_var3.h"
-
-#include "bli_hemv_blk_var1.h"
-#include "bli_hemv_blk_var2.h"
-#include "bli_hemv_blk_var3.h"
-#include "bli_hemv_blk_var4.h"
-
-
-void bli_hemv( obj_t*  alpha,
-               obj_t*  a,
-               obj_t*  x,
-               obj_t*  beta,
-               obj_t*  y );
-
-
-//
-// Prototype BLAS-like interfaces with homogeneous-typed operands.
-//
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname)( \
-                          uplo_t  uploa, \
-                          conj_t  conja, \
-                          conj_t  conjx, \
-                          dim_t   m, \
-                          ctype*  alpha, \
-                          ctype*  a, inc_t rs_a, inc_t cs_a, \
-                          ctype*  x, inc_t incx, \
-                          ctype*  beta, \
-                          ctype*  y, inc_t incy  \
-                        );
-
-INSERT_GENTPROT_BASIC( hemv )
-
-
-//
-// Prototype BLAS-like interfaces with heterogeneous-typed operands.
-//
-#undef  GENTPROT3U12
-#define GENTPROT3U12( ctype_a, ctype_x, ctype_y, ctype_ax, cha, chx, chy, chax, opname ) \
-\
-void PASTEMAC3(cha,chx,chy,opname)( \
-                                    uplo_t    uploa, \
-                                    conj_t    conja, \
-                                    conj_t    conjx, \
-                                    dim_t     m, \
-                                    ctype_ax* alpha, \
-                                    ctype_a*  a, inc_t rs_a, inc_t cs_a, \
-                                    ctype_x*  x, inc_t incx, \
-                                    ctype_y*  beta, \
-                                    ctype_y*  y, inc_t incy  \
-                                  );
-
-INSERT_GENTPROT3U12_BASIC( hemv )
-
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTPROT3U12_MIX_D( hemv )
-#endif
-
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTPROT3U12_MIX_P( hemv )
-#endif
+#include "bli_hemv_var.h"
 

@@ -40,6 +40,7 @@ void bli_hemm_front( side_t  side,
                      obj_t*  b,
                      obj_t*  beta,
                      obj_t*  c,
+                     cntx_t* cntx,
                      gemm_t* cntl )
 {
 	obj_t   a_local;
@@ -48,7 +49,7 @@ void bli_hemm_front( side_t  side,
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
-		bli_hemm_check( side, alpha, a, b, beta, c );
+		bli_hemm_check( side, alpha, a, b, beta, c, cntx );
 
 	// If alpha is zero, scale by beta and return.
 	if ( bli_obj_equals( alpha, &BLIS_ZERO ) )
@@ -56,6 +57,10 @@ void bli_hemm_front( side_t  side,
 		bli_scalm( beta, c );
 		return;
 	}
+
+	// Reinitialize the memory allocator to accommodate the blocksizes
+	// in the current context.
+	bli_mem_reinit( cntx );
 
 	// Alias A, B, and C in case we need to apply transformations.
 	bli_obj_alias_to( *a, a_local );
@@ -66,14 +71,7 @@ void bli_hemm_front( side_t  side,
 	// contiguous columns, or if C is stored by columns and the micro-kernel
 	// prefers contiguous rows, transpose the entire operation to allow the
 	// micro-kernel to access elements of C in its preferred manner.
-	if (
-	     ( bli_obj_is_row_stored( c_local ) &&
-	       bli_func_prefers_contig_cols( bli_obj_datatype( c_local ),
-	                                     bli_gemm_cntl_ukrs( cntl ) ) ) ||
-	     ( bli_obj_is_col_stored( c_local ) &&
-	       bli_func_prefers_contig_rows( bli_obj_datatype( c_local ),
-	                                     bli_gemm_cntl_ukrs( cntl ) ) )
-	   )
+	if ( bli_cntx_l3_nat_ukr_dislikes_storage_of( &c_local, BLIS_GEMM_UKR, cntx ) )
 	{
 		bli_toggle_side( side );
 		bli_obj_toggle_conj( a_local );
@@ -93,12 +91,13 @@ void bli_hemm_front( side_t  side,
 
     // Invoke the internal back-end.
     bli_level3_thread_decorator( n_threads,   
-                                 (level3_int_t) bli_gemm_int, 
+                                 (l3_int_t) bli_gemm_int, 
                                  alpha, 
                                  &a_local,  
                                  &b_local,  
                                  beta, 
                                  &c_local,  
+                                 (void*) cntx, 
                                  (void*) cntl, 
                                  (void**) infos );
 

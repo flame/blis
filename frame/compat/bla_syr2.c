@@ -41,14 +41,15 @@
 #undef  GENTFUNCRO
 #define GENTFUNCRO( ftype, ch, blasname, blisname ) \
 \
-void PASTEF77(ch,blasname)( \
-                            f77_char* uploa, \
-                            f77_int*  m, \
-                            ftype*    alpha, \
-                            ftype*    x, f77_int* incx, \
-                            ftype*    y, f77_int* incy, \
-                            ftype*    a, f77_int* lda   \
-                          ) \
+void PASTEF77(ch,blasname) \
+     ( \
+       f77_char* uploa, \
+       f77_int*  m, \
+       ftype*    alpha, \
+       ftype*    x, f77_int* incx, \
+       ftype*    y, f77_int* incy, \
+       ftype*    a, f77_int* lda  \
+     ) \
 { \
 	uplo_t  blis_uploa; \
 	dim_t   m0; \
@@ -63,13 +64,17 @@ void PASTEF77(ch,blasname)( \
 	bli_init_auto( &init_result ); \
 \
 	/* Perform BLAS parameter checking. */ \
-	PASTEBLACHK(blasname)( MKSTR(ch), \
-	                       MKSTR(blasname), \
-	                       uploa, \
-	                       m, \
-	                       incx, \
-	                       incy, \
-	                       lda ); \
+	PASTEBLACHK(blasname) \
+	( \
+	  MKSTR(ch), \
+	  MKSTR(blasname), \
+	  uploa, \
+	  m, \
+	  incx, \
+	  incy, \
+	  lda  \
+	); \
+\
 \
 	/* Map BLAS chars to their corresponding BLIS enumerated type value. */ \
 	bli_param_map_netlib_to_blis_uplo( *uploa, &blis_uploa ); \
@@ -87,14 +92,18 @@ void PASTEF77(ch,blasname)( \
 	cs_a = *lda; \
 \
 	/* Call BLIS interface. */ \
-	PASTEMAC(ch,blisname)( blis_uploa, \
-	                       BLIS_NO_CONJUGATE, \
-	                       BLIS_NO_CONJUGATE, \
-	                       m0, \
-	                       alpha, \
-	                       x0, incx0, \
-	                       y0, incy0, \
-	                       a,  rs_a, cs_a ); \
+	PASTEMAC(ch,blisname) \
+	( \
+	  blis_uploa, \
+	  BLIS_NO_CONJUGATE, \
+	  BLIS_NO_CONJUGATE, \
+	  m0, \
+	  alpha, \
+	  x0, incx0, \
+	  y0, incy0, \
+	  a,  rs_a, cs_a, \
+	  NULL  \
+	); \
 \
 	/* Finalize BLIS (if it was initialized above). */ \
 	bli_finalize_auto( init_result ); \

@@ -38,9 +38,6 @@ extern packm_t*   packm_cntl;
 extern packv_t*   packv_cntl;
 extern unpackm_t* unpackm_cntl;
 
-extern blksz_t*   gemv_mc;
-extern blksz_t*   gemv_nc;
-
 ger_t*            ger_cntl_bs_ke_row;
 ger_t*            ger_cntl_bs_ke_col;
 
@@ -62,14 +59,16 @@ void bli_ger_cntl_init()
 	=
 	bli_ger_cntl_obj_create( BLIS_UNBLOCKED,
 	                         BLIS_VARIANT1,
+	                         0,
 	                         NULL, NULL, NULL,
-	                         NULL, NULL, NULL );
+	                         NULL, NULL );
 	ger_cntl_bs_ke_col
 	=
 	bli_ger_cntl_obj_create( BLIS_UNBLOCKED,
 	                         BLIS_VARIANT2,
+	                         0,
 	                         NULL, NULL, NULL,
-	                         NULL, NULL, NULL );
+	                         NULL, NULL );
 
 
 	// Create control trees for problems with relatively small m dimension
@@ -78,7 +77,7 @@ void bli_ger_cntl_init()
 	=
 	bli_ger_cntl_obj_create( BLIS_BLOCKED,
 	                         BLIS_VARIANT2,
-	                         gemv_nc,
+	                         BLIS_N2,
 	                         NULL,           // x is not partitioned in var2
 	                         packv_cntl,     // pack y1 (if needed)
 	                         packm_cntl,     // pack A1 (if needed)
@@ -88,7 +87,7 @@ void bli_ger_cntl_init()
 	=
 	bli_ger_cntl_obj_create( BLIS_BLOCKED,
 	                         BLIS_VARIANT2,
-	                         gemv_nc,
+	                         BLIS_N2,
 	                         NULL,           // x is not partitioned in var2
 	                         packv_cntl,     // pack y1 (if needed)
 	                         packm_cntl,     // pack A1 (if needed)
@@ -102,7 +101,7 @@ void bli_ger_cntl_init()
 	=
 	bli_ger_cntl_obj_create( BLIS_BLOCKED,
 	                         BLIS_VARIANT1,
-	                         gemv_mc,
+	                         BLIS_M2,
 	                         packv_cntl,     // pack x1 (if needed)
 	                         NULL,           // y is not partitioned in var1
 	                         packm_cntl,     // pack A1 (if needed)
@@ -112,7 +111,7 @@ void bli_ger_cntl_init()
 	=
 	bli_ger_cntl_obj_create( BLIS_BLOCKED,
 	                         BLIS_VARIANT1,
-	                         gemv_mc,
+	                         BLIS_M2,
 	                         packv_cntl,     // pack x1 (if needed)
 	                         NULL,           // y is not partitioned in var1
 	                         packm_cntl,     // pack A1 (if needed)
@@ -126,7 +125,7 @@ void bli_ger_cntl_init()
 	=
 	bli_ger_cntl_obj_create( BLIS_BLOCKED,
 	                         BLIS_VARIANT2,
-	                         gemv_nc,
+	                         BLIS_N2,
 	                         NULL,           // x is not partitioned in var2
 	                         packv_cntl,     // pack y1 (if needed)
 	                         NULL,           // do not pack A1
@@ -136,7 +135,7 @@ void bli_ger_cntl_init()
 	=
 	bli_ger_cntl_obj_create( BLIS_BLOCKED,
 	                         BLIS_VARIANT2,
-	                         gemv_nc,
+	                         BLIS_N2,
 	                         NULL,           // x is not partitioned in var2
 	                         packv_cntl,     // pack y1 (if needed)
 	                         NULL,           // do not pack A1
@@ -162,7 +161,7 @@ void bli_ger_cntl_finalize()
 
 ger_t* bli_ger_cntl_obj_create( impl_t     impl_type,
                                 varnum_t   var_num,
-                                blksz_t*   b,
+                                bszid_t    bszid,
                                 packv_t*   sub_packv_x,
                                 packv_t*   sub_packv_y,
                                 packm_t*   sub_packm_a,
@@ -171,11 +170,11 @@ ger_t* bli_ger_cntl_obj_create( impl_t     impl_type,
 {
 	ger_t* cntl;
 
-	cntl = ( ger_t* ) bli_malloc( sizeof(ger_t) );	
+	cntl = ( ger_t* ) bli_malloc( sizeof(ger_t) );
 
 	cntl->impl_type     = impl_type;
 	cntl->var_num       = var_num;
-	cntl->b             = b;
+	cntl->bszid         = bszid;
 	cntl->sub_packv_x   = sub_packv_x;
 	cntl->sub_packv_y   = sub_packv_y;
 	cntl->sub_packm_a   = sub_packm_a;
@@ -188,7 +187,7 @@ ger_t* bli_ger_cntl_obj_create( impl_t     impl_type,
 void bli_ger_cntl_obj_init( ger_t*     cntl,
                             impl_t     impl_type,
                             varnum_t   var_num,
-                            blksz_t*   b,
+                            bszid_t    bszid,
                             packv_t*   sub_packv_x,
                             packv_t*   sub_packv_y,
                             packm_t*   sub_packm_a,
@@ -197,7 +196,7 @@ void bli_ger_cntl_obj_init( ger_t*     cntl,
 {
 	cntl->impl_type     = impl_type;
 	cntl->var_num       = var_num;
-	cntl->b             = b;
+	cntl->bszid         = bszid;
 	cntl->sub_packv_x   = sub_packv_x;
 	cntl->sub_packv_y   = sub_packv_y;
 	cntl->sub_packm_a   = sub_packm_a;

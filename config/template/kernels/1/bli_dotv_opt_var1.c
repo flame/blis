@@ -36,66 +36,94 @@
 
 
 
-void bli_sdotv_opt_var1( conj_t             conjx,
-                         conj_t             conjy,
-                         dim_t              n,
-                         float*    restrict x, inc_t incx,
-                         float*    restrict y, inc_t incy,
-                         float*    restrict rho )
+void bli_sdotv_opt_var1
+     (
+       conj_t    conjx,
+       conj_t    conjy,
+       dim_t     n,
+       float*    x, inc_t incx,
+       float*    y, inc_t incy,
+       float*    rho,
+       cntx_t*   cntx
+     )
 {
 	/* Just call the reference implementation. */
-	BLIS_SDOTV_KERNEL_REF( conjx,
-	                       conjy,
-	                       n,
-	                       x, incx,
-	                       y, incy,
-	                       rho );
+	BLIS_SDOTV_KERNEL_REF
+	(
+	  conjx,
+	  conjy,
+	  n,
+	  x, incx,
+	  y, incy,
+	  rho,
+	  cntx
+	);
 }
 
 
 
-void bli_ddotv_opt_var1( conj_t             conjx,
-                         conj_t             conjy,
-                         dim_t              n,
-                         double*   restrict x, inc_t incx,
-                         double*   restrict y, inc_t incy,
-                         double*   restrict rho )
+void bli_ddotv_opt_var1
+     (
+       conj_t    conjx,
+       conj_t    conjy,
+       dim_t     n,
+       double*   x, inc_t incx,
+       double*   y, inc_t incy,
+       double*   rho,
+       cntx_t*   cntx
+     )
 {
 	/* Just call the reference implementation. */
-	BLIS_DDOTV_KERNEL_REF( conjx,
-	                       conjy,
-	                       n,
-	                       x, incx,
-	                       y, incy,
-	                       rho );
+	BLIS_DDOTV_KERNEL_REF
+	(
+	  conjx,
+	  conjy,
+	  n,
+	  x, incx,
+	  y, incy,
+	  rho,
+	  cntx
+	);
 }
 
 
 
-void bli_cdotv_opt_var1( conj_t             conjx,
-                         conj_t             conjy,
-                         dim_t              n,
-                         scomplex* restrict x, inc_t incx,
-                         scomplex* restrict y, inc_t incy,
-                         scomplex* restrict rho )
+void bli_cdotv_opt_var1
+     (
+       conj_t    conjx,
+       conj_t    conjy,
+       dim_t     n,
+       scomplex* x, inc_t incx,
+       scomplex* y, inc_t incy,
+       scomplex* rho,
+       cntx_t*   cntx
+     )
 {
 	/* Just call the reference implementation. */
-	BLIS_CDOTV_KERNEL_REF( conjx,
-	                       conjy,
-	                       n,
-	                       x, incx,
-	                       y, incy,
-	                       rho );
+	BLIS_CDOTV_KERNEL_REF
+	(
+	  conjx,
+	  conjy,
+	  n,
+	  x, incx,
+	  y, incy,
+	  rho,
+	  cntx
+	);
 }
 
 
 
-void bli_zdotv_opt_var1( conj_t             conjx,
-                         conj_t             conjy,
-                         dim_t              n,
-                         dcomplex* restrict x, inc_t incx,
-                         dcomplex* restrict y, inc_t incy,
-                         dcomplex* restrict rho )
+void bli_zdotv_opt_var1
+     (
+       conj_t    conjx,
+       conj_t    conjy,
+       dim_t     n,
+       dcomplex* x, inc_t incx,
+       dcomplex* y, inc_t incy,
+       dcomplex* rho,
+       cntx_t*   cntx
+     )
 {
 /*
   Template dotv kernel implementation
@@ -210,12 +238,16 @@ void bli_zdotv_opt_var1( conj_t             conjx,
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE )
 	{
-		BLIS_ZDOTV_KERNEL_REF( conjx,
-		                       conjy,
-		                       n,
-		                       x, incx,
-		                       y, incy,
-		                       rho );
+		BLIS_ZDOTV_KERNEL_REF
+		(
+		  conjx,
+		  conjy,
+		  n,
+		  x, incx,
+		  y, incy,
+		  rho,
+		  cntx
+		);
         return;
 	}
 
@@ -250,7 +282,7 @@ void bli_zdotv_opt_var1( conj_t             conjx,
 		// Compute front edge cases if x and y were unaligned.
 		for ( i = 0; i < n_pre; ++i )
 		{
-			bli_zzzdots( *xp, *yp, dotxy );
+			bli_zdots( *xp, *yp, dotxy );
 
 			xp += 1; yp += 1;
 		}
@@ -259,7 +291,7 @@ void bli_zdotv_opt_var1( conj_t             conjx,
 		// yp are guaranteed to be aligned to BLIS_SIMD_ALIGN_SIZE.
 		for ( i = 0; i < n_iter; ++i )
 		{
-			bli_zzzdots( *xp, *yp, dotxy );
+			bli_zdots( *xp, *yp, dotxy );
 
 			xp += n_elem_per_iter;
 			yp += n_elem_per_iter;
@@ -268,7 +300,7 @@ void bli_zdotv_opt_var1( conj_t             conjx,
 		// Compute tail edge cases, if applicable.
 		for ( i = 0; i < n_left; ++i )
 		{
-			bli_zzzdots( *xp, *yp, dotxy );
+			bli_zdots( *xp, *yp, dotxy );
 
 			xp += 1; yp += 1;
 		}
@@ -278,7 +310,7 @@ void bli_zdotv_opt_var1( conj_t             conjx,
 		// Compute front edge cases if x and y were unaligned.
 		for ( i = 0; i < n_pre; ++i )
 		{
-			bli_zzzdotjs( *xp, *yp, dotxy );
+			bli_zdotjs( *xp, *yp, dotxy );
 
 			xp += 1; yp += 1;
 		}
@@ -287,7 +319,7 @@ void bli_zdotv_opt_var1( conj_t             conjx,
 		// yp are guaranteed to be aligned to BLIS_SIMD_ALIGN_SIZE.
 		for ( i = 0; i < n_iter; ++i )
 		{
-			bli_zzzdotjs( *xp, *yp, dotxy );
+			bli_zdotjs( *xp, *yp, dotxy );
 
 			xp += n_elem_per_iter;
 			yp += n_elem_per_iter;
@@ -296,7 +328,7 @@ void bli_zdotv_opt_var1( conj_t             conjx,
 		// Compute tail edge cases, if applicable.
 		for ( i = 0; i < n_left; ++i )
 		{
-			bli_zzzdotjs( *xp, *yp, dotxy );
+			bli_zdotjs( *xp, *yp, dotxy );
 
 			xp += 1; yp += 1;
 		}
@@ -307,6 +339,6 @@ void bli_zdotv_opt_var1( conj_t             conjx,
 	if ( bli_is_conj( conjy ) )
 		bli_zconjs( dotxy );
 
-	bli_zzcopys( dotxy, *rho );
+	bli_zcopys( dotxy, *rho );
 }
 

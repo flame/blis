@@ -42,32 +42,32 @@
 	const float  a_r     = bli_zreal( *a ); \
 	const float  a_i     = bli_zimag( *a ); \
 	dim_t        min_m_n = bli_min( m, n ); \
-	dim_t        i; \
+	dim_t        _i; \
 \
 	/* Handle ro, io, and rpi separately. */ \
 	if ( bli_is_ro_packed( schema ) ) \
 	{ \
-		for ( i = 0; i < min_m_n; ++i ) \
+		for ( _i = 0; _i < min_m_n; ++_i ) \
 		{ \
 			bli_scopys(  (a_r), \
-			            *(y_r + i*rs_y + i*cs_y) ); \
+			            *(y_r + _i*rs_y + _i*cs_y) ); \
 		} \
 	} \
 	else if ( bli_is_io_packed( schema ) ) \
 	{ \
-		for ( i = 0; i < min_m_n; ++i ) \
+		for ( _i = 0; _i < min_m_n; ++_i ) \
 		{ \
 			bli_scopys(  (a_i), \
-			            *(y_r + i*rs_y + i*cs_y) ); \
+			            *(y_r + _i*rs_y + _i*cs_y) ); \
 		} \
 	} \
 	else /* if ( bli_is_rpi_packed( schema ) ) */ \
 	{ \
-		for ( i = 0; i < min_m_n; ++i ) \
+		for ( _i = 0; _i < min_m_n; ++_i ) \
 		{ \
 			bli_sadd3s(  (a_r), \
 			             (a_i), \
-			            *(y_r + i*rs_y + i*cs_y) ); \
+			            *(y_r + _i*rs_y + _i*cs_y) ); \
 		} \
 	} \
 }
@@ -77,32 +77,32 @@
 	const double a_r     = bli_zreal( *a ); \
 	const double a_i     = bli_zimag( *a ); \
 	dim_t        min_m_n = bli_min( m, n ); \
-	dim_t        i; \
+	dim_t        _i; \
 \
 	/* Handle ro, io, and rpi separately. */ \
 	if ( bli_is_ro_packed( schema ) ) \
 	{ \
-		for ( i = 0; i < min_m_n; ++i ) \
+		for ( _i = 0; _i < min_m_n; ++_i ) \
 		{ \
 			bli_dcopys(  (a_r), \
-			            *(y_r + i*rs_y + i*cs_y) ); \
+			            *(y_r + _i*rs_y + _i*cs_y) ); \
 		} \
 	} \
 	else if ( bli_is_io_packed( schema ) ) \
 	{ \
-		for ( i = 0; i < min_m_n; ++i ) \
+		for ( _i = 0; _i < min_m_n; ++_i ) \
 		{ \
 			bli_dcopys(  (a_i), \
-			            *(y_r + i*rs_y + i*cs_y) ); \
+			            *(y_r + _i*rs_y + _i*cs_y) ); \
 		} \
 	} \
 	else /* if ( bli_is_rpi_packed( schema ) ) */ \
 	{ \
-		for ( i = 0; i < min_m_n; ++i ) \
+		for ( _i = 0; _i < min_m_n; ++_i ) \
 		{ \
 			bli_dadd3s(  (a_r), \
 			             (a_i), \
-			            *(y_r + i*rs_y + i*cs_y) ); \
+			            *(y_r + _i*rs_y + _i*cs_y) ); \
 		} \
 	} \
 }

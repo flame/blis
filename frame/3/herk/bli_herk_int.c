@@ -39,6 +39,7 @@
 typedef void (*FUNCPTR_T)( obj_t*  a,
                            obj_t*  ah,
                            obj_t*  c,
+                           cntx_t* cntx,
                            gemm_t* cntl,
                            herk_thrinfo_t* thread );
 
@@ -67,6 +68,7 @@ void bli_herk_int( obj_t*  alpha,
                    obj_t*  ah,
                    obj_t*  beta,
                    obj_t*  c,
+                   cntx_t* cntx,
                    gemm_t* cntl,
                    herk_thrinfo_t* thread )
 {
@@ -80,7 +82,7 @@ void bli_herk_int( obj_t*  alpha,
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
-		bli_herk_int_check( alpha, a, ah, beta, c, cntl );
+		bli_gemm_basic_check( alpha, a, ah, beta, c, cntx );
 
 	// If C has a zero dimension, return early.
 	if ( bli_obj_has_zero_dim( *c ) ) return;
@@ -142,6 +144,7 @@ void bli_herk_int( obj_t*  alpha,
 	f( &a_local,
 	   &ah_local,
 	   &c_local,
+	   cntx,
 	   cntl,
        thread );
 }

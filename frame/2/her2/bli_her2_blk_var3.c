@@ -40,6 +40,7 @@ void bli_her2_blk_var3( conj_t  conjh,
                         obj_t*  x,
                         obj_t*  y,
                         obj_t*  c,
+                        cntx_t* cntx,
                         her2_t* cntl )
 {
 	obj_t   c11, c11_pack;
@@ -76,7 +77,7 @@ void bli_her2_blk_var3( conj_t  conjh,
 	{
 		// Determine the current algorithmic blocksize.
 		b_alg = bli_determine_blocksize_f( ij, mn, c,
-		                                   cntl_blocksize( cntl ) );
+		                                   cntl_bszid( cntl ), cntx );
 
 		// Acquire partitions for C11, C10, C21, x1, y1, y0, and y2.
 		bli_acquire_mpart_tl2br( BLIS_SUBPART11,
@@ -96,20 +97,20 @@ void bli_her2_blk_var3( conj_t  conjh,
 
 		// Initialize objects for packing C11, x1, and y1 (if needed).
 		bli_packm_init( &c11, &c11_pack,
-		                cntl_sub_packm_c11( cntl ) );
+		                cntx, cntl_sub_packm_c11( cntl ) );
 		bli_packv_init( &x1, &x1_pack,
-		                cntl_sub_packv_x1( cntl ) );
+		                cntx, cntl_sub_packv_x1( cntl ) );
 		bli_packv_init( &y1, &y1_pack,
-		                cntl_sub_packv_y1( cntl ) );
+		                cntx, cntl_sub_packv_y1( cntl ) );
 
 		// Copy/pack C11, x1, y1 (if needed).
 		bli_packm_int( &c11, &c11_pack,
-		               cntl_sub_packm_c11( cntl ),
+		               cntx, cntl_sub_packm_c11( cntl ),
                        &BLIS_PACKM_SINGLE_THREADED );
 		bli_packv_int( &x1, &x1_pack,
-		               cntl_sub_packv_x1( cntl ) );
+		               cntx, cntl_sub_packv_x1( cntl ) );
 		bli_packv_int( &y1, &y1_pack,
-		               cntl_sub_packv_y1( cntl ) );
+		               cntx, cntl_sub_packv_y1( cntl ) );
 
 		// C10 = C10 + alpha * x1 * y0';
 		bli_ger_int( BLIS_NO_CONJUGATE,
@@ -118,6 +119,7 @@ void bli_her2_blk_var3( conj_t  conjh,
 		             &x1_pack,
 		             &y0,
 		             &c10,
+		             cntx,
 		             cntl_sub_ger_rp( cntl ) );
 
 		// C21 = C21 + conj(alpha) * y2 * x1';
@@ -127,6 +129,7 @@ void bli_her2_blk_var3( conj_t  conjh,
 		             &y2,
 		             &x1_pack,
 		             &c21,
+		             cntx,
 		             cntl_sub_ger_cp( cntl ) );
 
 		// C11 = C11 + alpha * x1 * y1' + conj(alpha) * y1 * x1';
@@ -136,11 +139,12 @@ void bli_her2_blk_var3( conj_t  conjh,
 		              &x1_pack,
 		              &y1_pack,
 		              &c11_pack,
+		              cntx,
 		              cntl_sub_her2( cntl ) );
 
 		// Copy/unpack C11 (if C11 was packed).
 		bli_unpackm_int( &c11_pack, &c11,
-		                 cntl_sub_unpackm_c11( cntl ),
+		                 cntx, cntl_sub_unpackm_c11( cntl ),
                          &BLIS_PACKM_SINGLE_THREADED );
 	}
 

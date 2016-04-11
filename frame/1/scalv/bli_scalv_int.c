@@ -34,19 +34,19 @@
 
 #include "blis.h"
 
-#define FUNCPTR_T scalv_fp
-
-typedef void (*FUNCPTR_T)( obj_t* beta,
-                           obj_t* x );
+typedef void (*FUNCPTR_T)( obj_t*  alpha,
+                           obj_t*  x,
+                           cntx_t* cntx );
 
 static FUNCPTR_T vars[1][3] =
 {
 	// unblocked          optimized unblocked    blocked
-	{ bli_scalv_kernel,   bli_scalv_kernel,      NULL }
+	{ bli_scalv_ex,       bli_scalv_ex,          NULL }
 };
 
-void bli_scalv_int( obj_t*   beta,
+void bli_scalv_int( obj_t*   alpha,
                     obj_t*   x,
+                    cntx_t*  cntx,
                     scalv_t* cntl )
 {
 	varnum_t  n;
@@ -58,13 +58,13 @@ void bli_scalv_int( obj_t*   beta,
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
-		bli_scalv_int_check( beta, x, cntl );
+		bli_scalv_check( alpha, x );
 
 	// First check if we are to skip this operation.
 	if ( cntl_is_noop( cntl ) ) return;
 
-	// Return early if the beta scalar equals one.
-	if ( bli_obj_equals( beta, &BLIS_ONE ) ) return;
+	// Return early if the alpha scalar equals one.
+	if ( bli_obj_equals( alpha, &BLIS_ONE ) ) return;
 
 	// Extract the variant number and implementation type.
 	n = cntl_var_num( cntl );
@@ -74,7 +74,8 @@ void bli_scalv_int( obj_t*   beta,
 	f = vars[n][i];
 
 	// Invoke the variant.
-	f( beta,
-	   x );
+	f( alpha,
+	   x,
+	   cntx );
 }
 

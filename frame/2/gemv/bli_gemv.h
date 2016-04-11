@@ -33,72 +33,8 @@
 */
 
 #include "bli_gemv_cntl.h"
-#include "bli_gemv_check.h"
+#include "bli_gemv_front.h"
 #include "bli_gemv_int.h"
 
-#include "bli_gemv_unb_var1.h"
-#include "bli_gemv_unb_var2.h"
-
-#include "bli_gemv_unf_var1.h"
-#include "bli_gemv_unf_var2.h"
-
-#include "bli_gemv_blk_var1.h"
-#include "bli_gemv_blk_var2.h"
-
-
-void bli_gemv( obj_t* alpha,
-               obj_t* a,
-               obj_t* x,
-               obj_t* beta,
-               obj_t* y );
-
-
-//
-// Prototype BLAS-like interfaces with homogeneous-typed operands.
-//
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname)( \
-                          trans_t transa, \
-                          conj_t  conjx, \
-                          dim_t   m, \
-                          dim_t   n, \
-                          ctype*  alpha, \
-                          ctype*  a, inc_t rs_a, inc_t cs_a, \
-                          ctype*  x, inc_t incx, \
-                          ctype*  beta, \
-                          ctype*  y, inc_t incy  \
-                        );
-
-INSERT_GENTPROT_BASIC( gemv )
-
-
-//
-// Prototype BLAS-like interfaces with heterogeneous-typed operands.
-//
-#undef  GENTPROT3U12
-#define GENTPROT3U12( ctype_a, ctype_x, ctype_y, ctype_ax, cha, chx, chy, chax, opname ) \
-\
-void PASTEMAC3(cha,chx,chy,opname)( \
-                                    trans_t   transa, \
-                                    conj_t    conjx, \
-                                    dim_t     m, \
-                                    dim_t     n, \
-                                    ctype_ax* alpha, \
-                                    ctype_a*  a, inc_t rs_a, inc_t cs_a, \
-                                    ctype_x*  x, inc_t incx, \
-                                    ctype_y*  beta, \
-                                    ctype_y*  y, inc_t incy  \
-                                  );
-
-INSERT_GENTPROT3U12_BASIC( gemv )
-
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTPROT3U12_MIX_D( gemv )
-#endif
-
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTPROT3U12_MIX_P( gemv )
-#endif
+#include "bli_gemv_var.h"
 

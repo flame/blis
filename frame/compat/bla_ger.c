@@ -41,14 +41,15 @@
 #undef  GENTFUNCDOT
 #define GENTFUNCDOT( ftype, chxy, chc, blis_conjy, blasname, blisname ) \
 \
-void PASTEF772(chxy,blasname,chc)( \
-                                   f77_int* m, \
-                                   f77_int* n, \
-                                   ftype*   alpha, \
-                                   ftype*   x, f77_int* incx, \
-                                   ftype*   y, f77_int* incy, \
-                                   ftype*   a, f77_int* lda   \
-                                 ) \
+void PASTEF772(chxy,blasname,chc) \
+     ( \
+       f77_int* m, \
+       f77_int* n, \
+       ftype*   alpha, \
+       ftype*   x, f77_int* incx, \
+       ftype*   y, f77_int* incy, \
+       ftype*   a, f77_int* lda  \
+     ) \
 { \
 	dim_t   m0, n0; \
 	ftype*  x0; \
@@ -62,13 +63,16 @@ void PASTEF772(chxy,blasname,chc)( \
 	bli_init_auto( &init_result ); \
 \
 	/* Perform BLAS parameter checking. */ \
-	PASTEBLACHK(blasname)( MKSTR(ch), \
-	                       MKSTR(blasname), \
-	                       m, \
-	                       n, \
-	                       incx, \
-	                       incy, \
-	                       lda ); \
+	PASTEBLACHK(blasname) \
+	( \
+	  MKSTR(ch), \
+	  MKSTR(blasname), \
+	  m, \
+	  n, \
+	  incx, \
+	  incy, \
+	  lda  \
+	); \
 \
 	/* Convert/typecast negative values of m and n to zero. */ \
 	bli_convert_blas_dim1( *m, m0 ); \
@@ -84,14 +88,18 @@ void PASTEF772(chxy,blasname,chc)( \
 	cs_a = *lda; \
 \
 	/* Call BLIS interface. */ \
-	PASTEMAC(chxy,blisname)( BLIS_NO_CONJUGATE, \
-	                         blis_conjy, \
-	                         m0, \
-	                         n0, \
-	                         alpha, \
-	                         x0, incx0, \
-	                         y0, incy0, \
-	                         a,  rs_a, cs_a ); \
+	PASTEMAC(chxy,blisname) \
+	( \
+	  BLIS_NO_CONJUGATE, \
+	  blis_conjy, \
+	  m0, \
+	  n0, \
+	  alpha, \
+	  x0, incx0, \
+	  y0, incy0, \
+	  a,  rs_a, cs_a, \
+	  NULL  \
+	); \
 \
 	/* Finalize BLIS (if it was initialized above). */ \
 	bli_finalize_auto( init_result ); \

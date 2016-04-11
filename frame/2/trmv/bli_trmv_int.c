@@ -39,6 +39,7 @@
 typedef void (*FUNCPTR_T)( obj_t*  alpha,
                            obj_t*  a,
                            obj_t*  x,
+                           cntx_t* cntx,
                            trmv_t* cntl );
 
 static FUNCPTR_T vars[2][3][3] =
@@ -62,6 +63,7 @@ static FUNCPTR_T vars[2][3][3] =
 void bli_trmv_int( obj_t*  alpha,
                    obj_t*  a,
                    obj_t*  x,
+                   cntx_t* cntx,
                    trmv_t* cntl )
 {
 	varnum_t  n;
@@ -72,7 +74,7 @@ void bli_trmv_int( obj_t*  alpha,
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
-		bli_trmv_int_check( alpha, a, x, cntl );
+		bli_trmv_check( alpha, a, x );
 
 	// If A or x has a zero dimension, return early.
 	if ( bli_obj_has_zero_dim( *a ) ) return;
@@ -123,6 +125,7 @@ void bli_trmv_int( obj_t*  alpha,
 	f( alpha,
 	   &a_local,
 	   x,
+	   cntx,
 	   cntl );
 }
 

@@ -36,32 +36,23 @@
 
 packv_t* packv_cntl;
 
-blksz_t* packv_mult_dim;
-
-void bli_packv_cntl_init()
+void bli_packv_cntl_init( void )
 {
-	packv_mult_dim  = bli_blksz_obj_create( BLIS_DEFAULT_VR_S, 0,
-	                                        BLIS_DEFAULT_VR_D, 0,
-	                                        BLIS_DEFAULT_VR_C, 0,
-	                                        BLIS_DEFAULT_VR_Z, 0 );
-
 	packv_cntl = bli_packv_cntl_obj_create( BLIS_UNBLOCKED,
 	                                        BLIS_VARIANT1,
-	                                        packv_mult_dim,
+	                                        BLIS_VF,
 	                                        BLIS_PACKED_VECTOR );
 }
 
-void bli_packv_cntl_finalize()
+void bli_packv_cntl_finalize( void )
 {
 	bli_cntl_obj_free( packv_cntl );
-
-	bli_blksz_obj_free( packv_mult_dim );
 }
 
-packv_t* bli_packv_cntl_obj_create( impl_t     impl_type,
-                                    varnum_t   var_num,
-                                    blksz_t*   mult_dim,
-                                    pack_t     pack_schema )
+packv_t* bli_packv_cntl_obj_create( impl_t   impl_type,
+                                    varnum_t var_num,
+                                    bszid_t  bmid,
+                                    pack_t   pack_schema )
 {
 	packv_t* cntl;
 
@@ -69,7 +60,7 @@ packv_t* bli_packv_cntl_obj_create( impl_t     impl_type,
 
 	cntl->impl_type        = impl_type;
 	cntl->var_num          = var_num;
-	cntl->mult_dim         = mult_dim;
+	cntl->bmid             = bmid;
 	cntl->pack_schema      = pack_schema;
 
 	return cntl;
@@ -78,12 +69,12 @@ packv_t* bli_packv_cntl_obj_create( impl_t     impl_type,
 void bli_packv_cntl_obj_init( packv_t*   cntl,
                               impl_t     impl_type,
                               varnum_t   var_num,
-                              blksz_t*   mult_dim,
+                              bszid_t    bmid,
                               pack_t     pack_schema )
 {
 	cntl->impl_type        = impl_type;
 	cntl->var_num          = var_num;
-	cntl->mult_dim         = mult_dim;
+	cntl->bmid             = bmid;
 	cntl->pack_schema      = pack_schema;
 }
 

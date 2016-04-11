@@ -43,8 +43,6 @@ extern gemv_t*    gemv_cntl_rp_bs_axpy;
 extern gemv_t*    gemv_cntl_cp_bs_dot;
 extern gemv_t*    gemv_cntl_cp_bs_axpy;
 
-extern blksz_t*   gemv_mc;
-
 trmv_t*           trmv_cntl_bs_ke_nrow_tcol;
 trmv_t*           trmv_cntl_bs_ke_ncol_trow;
 trmv_t*           trmv_cntl_ge_nrow_tcol;
@@ -59,17 +57,17 @@ void bli_trmv_cntl_init()
 	=
 	bli_trmv_cntl_obj_create( BLIS_UNB_FUSED,
 	                          BLIS_VARIANT1,
+	                          0,
 	                          NULL, NULL, NULL,
-	                          NULL, NULL, NULL,
-	                          NULL );
+	                          NULL, NULL, NULL );
 
 	trmv_cntl_bs_ke_ncol_trow
 	=
 	bli_trmv_cntl_obj_create( BLIS_UNB_FUSED,
 	                          BLIS_VARIANT2,
+	                          0,
 	                          NULL, NULL, NULL,
-	                          NULL, NULL, NULL,
-	                          NULL );
+	                          NULL, NULL, NULL );
 
 
 	// Create control trees for generally large problems. Here we choose a
@@ -78,7 +76,7 @@ void bli_trmv_cntl_init()
 	=
 	bli_trmv_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT1,         // use var1 to maximize x1 usage
-	                          gemv_mc,
+	                          BLIS_M2,
 	                          packm_cntl,            // pack A11 (if needed)
 	                          packv_cntl,            // pack x1 (if needed)
 	                          gemv_cntl_rp_bs_dot,   // gemv_rp needed by var1
@@ -89,7 +87,7 @@ void bli_trmv_cntl_init()
 	=
 	bli_trmv_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT1,        // use var1 to maximize x1 usage
-	                          gemv_mc,
+	                          BLIS_M2,
 	                          packm_cntl,           // pack A11 (if needed)
 	                          packv_cntl,           // pack x1 (if needed)
 	                          gemv_cntl_rp_bs_axpy, // gemv_rp needed by var1
@@ -109,7 +107,7 @@ void bli_trmv_cntl_finalize()
 
 trmv_t* bli_trmv_cntl_obj_create( impl_t     impl_type,
                                   varnum_t   var_num,
-                                  blksz_t*   b,
+                                  bszid_t    bszid,
                                   packm_t*   sub_packm_a11,
                                   packv_t*   sub_packv_x1,
                                   gemv_t*    sub_gemv_rp,
@@ -123,7 +121,7 @@ trmv_t* bli_trmv_cntl_obj_create( impl_t     impl_type,
 
 	cntl->impl_type      = impl_type;
 	cntl->var_num        = var_num;
-	cntl->b              = b;
+	cntl->bszid          = bszid;
 	cntl->sub_packm_a11  = sub_packm_a11;
 	cntl->sub_packv_x1   = sub_packv_x1;
 	cntl->sub_gemv_rp    = sub_gemv_rp;
@@ -137,7 +135,7 @@ trmv_t* bli_trmv_cntl_obj_create( impl_t     impl_type,
 void bli_trmv_cntl_obj_init( trmv_t*    cntl,
                              impl_t     impl_type,
                              varnum_t   var_num,
-                             blksz_t*   b,
+                             bszid_t    bszid,
                              packm_t*   sub_packm_a11,
                              packv_t*   sub_packv_x1,
                              gemv_t*    sub_gemv_rp,
@@ -147,7 +145,7 @@ void bli_trmv_cntl_obj_init( trmv_t*    cntl,
 {
 	cntl->impl_type      = impl_type;
 	cntl->var_num        = var_num;
-	cntl->b              = b;
+	cntl->bszid          = bszid;
 	cntl->sub_packm_a11  = sub_packm_a11;
 	cntl->sub_packv_x1   = sub_packv_x1;
 	cntl->sub_gemv_rp    = sub_gemv_rp;

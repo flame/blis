@@ -35,32 +35,42 @@
 #include "blis.h"
 
 #undef  GENTFUNCCO
-#define GENTFUNCCO( ctype, ctype_r, ch, chr, varname, gemmukr ) \
+#define GENTFUNCCO( ctype, ctype_r, ch, chr, varname, gemmkerid ) \
 \
-void PASTEMAC(ch,varname)( \
-                           dim_t           k, \
-                           ctype* restrict alpha, \
-                           ctype* restrict a, \
-                           ctype* restrict b, \
-                           ctype* restrict beta, \
-                           ctype* restrict c, inc_t rs_c, inc_t cs_c, \
-                           auxinfo_t*      data \
-                         ) \
+void PASTEMAC(ch,varname) \
+     ( \
+       dim_t               k, \
+       ctype*     restrict alpha, \
+       ctype*     restrict a, \
+       ctype*     restrict b, \
+       ctype*     restrict beta, \
+       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
+       auxinfo_t* restrict data, \
+       cntx_t*    restrict cntx  \
+     ) \
 { \
-	ctype_r           ab_r[ PASTEMAC(chr,mr) * \
-	                        PASTEMAC(chr,nr) ] \
-	                   __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	ctype_r           ab_i[ PASTEMAC(chr,mr) * \
-	                        PASTEMAC(chr,nr) ] \
-	                   __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	ctype_r           ab_rpi[ PASTEMAC(chr,mr) * \
-	                          PASTEMAC(chr,nr) ] \
-	                   __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
+	const num_t       dt_r      = PASTEMAC(chr,type); \
+\
+	PASTECH(chr,gemm_ukr_ft) \
+	                  rgemm_ukr = bli_cntx_get_l3_nat_ukr_dt( dt_r, gemmkerid, cntx ); \
+\
+	const dim_t       mr        = bli_cntx_get_blksz_def_dt( dt_r, BLIS_MR, cntx ); \
+	const dim_t       nr        = bli_cntx_get_blksz_def_dt( dt_r, BLIS_NR, cntx ); \
+\
+	const dim_t       m         = mr; \
+	const dim_t       n         = nr; \
+\
+	ctype_r           ab_r[ BLIS_STACK_BUF_MAX_SIZE \
+	                        / sizeof( ctype_r ) ] \
+	                        __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
+	ctype_r           ab_i[ BLIS_STACK_BUF_MAX_SIZE \
+	                        / sizeof( ctype_r ) ] \
+	                        __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
+	ctype_r           ab_rpi[ BLIS_STACK_BUF_MAX_SIZE \
+	                        / sizeof( ctype_r ) ] \
+	                        __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
 	inc_t             rs_ab; \
 	inc_t             cs_ab; \
-\
-	const dim_t       m         = PASTEMAC(chr,mr); \
-	const dim_t       n         = PASTEMAC(chr,nr); \
 \
 	const inc_t       is_a      = bli_auxinfo_is_a( data ); \
 	const inc_t       is_b      = bli_auxinfo_is_b( data ); \
@@ -127,41 +137,54 @@ void PASTEMAC(ch,varname)( \
 	     c_r +=                        + a_r * b_r - a_i * b_i;
 	     c_i += (a_r + a_i)(b_r + b_i) - a_r * b_r - a_i * b_i;
 
-	   NOTE: Scaling by alpha_r is not shown for space reasons. */ \
+	   NOTE: Scaling by alpha_r is not shown above, but is implemented
+	   below. */ \
 \
 \
 	bli_auxinfo_set_next_ab( a_i, b_i, *data ); \
 \
 	/* ab_r = alpha_r * a_r * b_r; */ \
-	PASTEMAC(chr,gemmukr)( k, \
-	                       alpha_r, \
-	                       a_r, \
-	                       b_r, \
-	                       zero_r, \
-	                       ab_r, rs_ab, cs_ab, \
-	                       data ); \
+	rgemm_ukr \
+	( \
+	  k, \
+	  alpha_r, \
+	  a_r, \
+	  b_r, \
+	  zero_r, \
+	  ab_r, rs_ab, cs_ab, \
+	  data, \
+	  cntx  \
+	); \
 \
 	bli_auxinfo_set_next_ab( a_rpi, b_rpi, *data ); \
 \
 	/* ab_i = alpha_r * a_i * b_i; */ \
-	PASTEMAC(chr,gemmukr)( k, \
-	                       alpha_r, \
-	                       a_i, \
-	                       b_i, \
-	                       zero_r, \
-	                       ab_i, rs_ab, cs_ab, \
-	                       data ); \
+	rgemm_ukr \
+	( \
+	  k, \
+	  alpha_r, \
+	  a_i, \
+	  b_i, \
+	  zero_r, \
+	  ab_i, rs_ab, cs_ab, \
+	  data, \
+	  cntx  \
+	); \
 \
 	bli_auxinfo_set_next_ab( a_next, b_next, *data ); \
 \
 	/* ct_i = alpha_r * a_ri * b_ri; */ \
-	PASTEMAC(chr,gemmukr)( k, \
-	                       alpha_r, \
-	                       a_rpi, \
-	                       b_rpi, \
-	                       zero_r, \
-	                       ab_rpi, rs_ab, cs_ab, \
-	                       data ); \
+	rgemm_ukr \
+	( \
+	  k, \
+	  alpha_r, \
+	  a_rpi, \
+	  b_rpi, \
+	  zero_r, \
+	  ab_rpi, rs_ab, cs_ab, \
+	  data, \
+	  cntx  \
+	); \
 \
 \
 	/* How we accumulate the intermediate matrix products stored in ab_r,
@@ -309,5 +332,5 @@ void PASTEMAC(ch,varname)( \
 	} \
 }
 
-INSERT_GENTFUNCCO_BASIC( gemm3m1_ukr_ref, GEMM_UKERNEL )
+INSERT_GENTFUNCCO_BASIC( gemm3m1_ukr_ref, BLIS_GEMM_UKR )
 

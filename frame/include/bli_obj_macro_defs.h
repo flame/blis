@@ -213,36 +213,6 @@
 \
 	( ( (obj).info & BLIS_PACK_PANEL_BIT ) )
 
-#define bli_obj_is_4mi_packed( obj ) \
-\
-	( ( (obj).info & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_4MI )
-
-#define bli_obj_is_3mi_packed( obj ) \
-\
-	( ( (obj).info & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_3MI )
-
-#define bli_obj_is_3ms_packed( obj ) \
-\
-	( ( (obj).info & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_3MS )
-
-#define bli_obj_is_ro_packed( obj ) \
-\
-	( ( (obj).info & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_RO )
-
-#define bli_obj_is_io_packed( obj ) \
-\
-	( ( (obj).info & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_IO )
-
-#define bli_obj_is_rpi_packed( obj ) \
-\
-	( ( (obj).info & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_RPI )
-
-#define bli_obj_is_rih_packed( obj ) \
-\
-	( bli_obj_is_ro_packed( obj ) || \
-	  bli_obj_is_io_packed( obj ) || \
-	  bli_obj_is_rpi_packed( obj ) )
-
 #define bli_obj_pack_buffer_type( obj ) \
 \
 	(   (obj).info & BLIS_PACK_BUFFER_BITS )
@@ -981,9 +951,9 @@ bli_obj_width_stored( obj )
 
 #define bli_obj_init_pack( obj_p ) \
 { \
-	mem_t* pack_mem = bli_obj_pack_mem( *obj_p ); \
+	mem_t* pack_mem_ = bli_obj_pack_mem( *obj_p ); \
 \
-	bli_mem_set_buffer( NULL, pack_mem ); \
+	bli_mem_set_buffer( NULL, pack_mem_ ); \
 }
 
 
@@ -991,10 +961,10 @@ bli_obj_width_stored( obj )
 
 #define bli_obj_release_pack( obj_p ) \
 { \
-	mem_t* pack_mem = bli_obj_pack_mem( *(obj_p) ); \
+	mem_t* pack_mem_ = bli_obj_pack_mem( *(obj_p) ); \
 \
-	if ( bli_mem_is_alloc( pack_mem ) ) \
-		bli_mem_release( pack_mem ); \
+	if ( bli_mem_is_alloc( pack_mem_ ) ) \
+		bli_mem_release( pack_mem_ ); \
 }
 
 
@@ -1033,8 +1003,8 @@ bli_obj_width_stored( obj )
 
 #define bli_obj_swap( a, b ) \
 { \
-	obj_t t; \
-	t = b; b = a; a = t; \
+	obj_t t_; \
+	t_ = b; b = a; a = t_; \
 }
 
 
@@ -1042,8 +1012,8 @@ bli_obj_width_stored( obj )
 
 #define bli_obj_swap_pointers( a, b ) \
 { \
-	obj_t* t; \
-	t = b; b = a; a = t; \
+	obj_t* t_; \
+	t_ = b; b = a; a = t_; \
 }
 
 
@@ -1053,18 +1023,18 @@ bli_obj_width_stored( obj )
 #define bli_obj_induce_trans( obj ) \
 { \
 	{ \
-		dim_t  m        = bli_obj_length( obj ); \
-		dim_t  n        = bli_obj_width( obj ); \
-		inc_t  rs       = bli_obj_row_stride( obj ); \
-		inc_t  cs       = bli_obj_col_stride( obj ); \
-		dim_t  offm     = bli_obj_row_off( obj ); \
-		dim_t  offn     = bli_obj_col_off( obj ); \
-		doff_t diag_off = bli_obj_diag_offset( obj ); \
+		dim_t  m_        = bli_obj_length( obj ); \
+		dim_t  n_        = bli_obj_width( obj ); \
+		inc_t  rs_       = bli_obj_row_stride( obj ); \
+		inc_t  cs_       = bli_obj_col_stride( obj ); \
+		dim_t  offm_     = bli_obj_row_off( obj ); \
+		dim_t  offn_     = bli_obj_col_off( obj ); \
+		doff_t diag_off_ = bli_obj_diag_offset( obj ); \
 \
-		bli_obj_set_dims( n, m, obj ); \
-		bli_obj_set_strides( cs, rs, obj ); \
-		bli_obj_set_offs( offn, offm, obj ); \
-		bli_obj_set_diag_offset( -diag_off, obj ); \
+		bli_obj_set_dims( n_, m_, obj ); \
+		bli_obj_set_strides( cs_, rs_, obj ); \
+		bli_obj_set_offs( offn_, offm_, obj ); \
+		bli_obj_set_diag_offset( -diag_off_, obj ); \
 \
 		if ( bli_obj_is_upper_or_lower( obj ) ) \
 			bli_obj_toggle_uplo( obj ); \
@@ -1087,15 +1057,15 @@ bli_obj_width_stored( obj )
 #define bli_obj_reflect_about_diag( obj ) \
 { \
 	{ \
-		dim_t  m        = bli_obj_length( obj ); \
-		dim_t  n        = bli_obj_width( obj ); \
-		dim_t  offm     = bli_obj_row_off( obj ); \
-		dim_t  offn     = bli_obj_col_off( obj ); \
-		doff_t diag_off = bli_obj_diag_offset( obj ); \
+		dim_t  m_        = bli_obj_length( obj ); \
+		dim_t  n_        = bli_obj_width( obj ); \
+		dim_t  offm_     = bli_obj_row_off( obj ); \
+		dim_t  offn_     = bli_obj_col_off( obj ); \
+		doff_t diag_off_ = bli_obj_diag_offset( obj ); \
 \
-		bli_obj_set_dims( n, m, obj ); \
-		bli_obj_set_offs( offn, offm, obj ); \
-		bli_obj_set_diag_offset( -diag_off, obj ); \
+		bli_obj_set_dims( n_, m_, obj ); \
+		bli_obj_set_offs( offn_, offm_, obj ); \
+		bli_obj_set_diag_offset( -diag_off_, obj ); \
 \
 		bli_obj_toggle_trans( obj ); \
 	} \

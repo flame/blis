@@ -36,7 +36,7 @@ struct gemv_s
 {
 	impl_t             impl_type;
 	varnum_t           var_num;
-	blksz_t*           b;
+	bszid_t            bszid;
 	struct scalv_s*    sub_scalv;
 	struct packm_s*    sub_packm_a;
 	struct packv_s*    sub_packv_x;
@@ -58,7 +58,7 @@ void    bli_gemv_cntl_init( void );
 void    bli_gemv_cntl_finalize( void );
 gemv_t* bli_gemv_cntl_obj_create( impl_t     impl_type,
                                   varnum_t   var_num,
-                                  blksz_t*   b,
+                                  bszid_t    bszid,
                                   scalv_t*   sub_scalv,
                                   packm_t*   sub_packm_a,
                                   packv_t*   sub_packv_x,
@@ -68,7 +68,7 @@ gemv_t* bli_gemv_cntl_obj_create( impl_t     impl_type,
 void bli_gemv_cntl_obj_init( gemv_t*    cntl,
                              impl_t     impl_type,
                              varnum_t   var_num,
-                             blksz_t*   b,
+                             bszid_t    bszid,
                              scalv_t*   sub_scalv,
                              packm_t*   sub_packm_a,
                              packv_t*   sub_packv_x,

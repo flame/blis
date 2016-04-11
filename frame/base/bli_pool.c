@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-void bli_pool_init( dim_t   num_blocks_init,
+void bli_pool_init( dim_t   num_blocks,
                     siz_t   block_size,
                     siz_t   align_size,
                     pool_t* pool )
@@ -43,18 +43,18 @@ void bli_pool_init( dim_t   num_blocks_init,
 	dim_t   i;
 
 	// Allocate the block_ptrs array.
-	block_ptrs = bli_malloc( num_blocks_init * sizeof( pblk_t ) );
+	block_ptrs = bli_malloc( num_blocks * sizeof( pblk_t ) );
 
 	// Allocate and initialize each entry in the block_ptrs array.
-	for ( i = 0; i < num_blocks_init; ++i )
+	for ( i = 0; i < num_blocks; ++i )
 	{
 		bli_pool_alloc_block( block_size, align_size, &(block_ptrs[i]) );
 	}
 
 	// Initialize the pool_t structure.
 	bli_pool_set_block_ptrs( block_ptrs, pool );
-	bli_pool_set_block_ptrs_len( num_blocks_init, pool );
-	bli_pool_set_num_blocks( num_blocks_init, pool );
+	bli_pool_set_block_ptrs_len( num_blocks, pool );
+	bli_pool_set_num_blocks( num_blocks, pool );
 	bli_pool_set_top_index( 0, pool );
 	bli_pool_set_block_size( block_size, pool );
 	bli_pool_set_align_size( align_size, pool );
@@ -114,6 +114,38 @@ void bli_pool_reinit( dim_t   num_blocks_new,
 	// Reinitialize the pool with the new parameters, in particular,
 	// the new block size.
 	bli_pool_init( num_blocks_new, block_size_new, align_size_new, pool );
+}
+
+void bli_pool_reinit_if( dim_t   num_blocks_new,
+                         siz_t   block_size_new,
+                         siz_t   align_size_new,
+                         pool_t* pool )
+{
+	const dim_t num_blocks = bli_pool_num_blocks( pool );
+	const dim_t block_size = bli_pool_block_size( pool );
+	const dim_t align_size = bli_pool_align_size( pool );
+
+	// Reinitialize the pool, but only if one or more of new pool
+	// parameters would require it. Otherwise, if only the number
+	// of blocks has increased, we can skip a full reinit and just
+	// grow the pool.
+	if ( block_size_new >  block_size ||
+	     align_size_new != align_size )
+	{
+		// Reinitialize the pool with the new parameters, in particular,
+		// the new block size.
+		bli_pool_reinit( num_blocks_new,
+		                 block_size_new,
+		                 align_size_new,
+		                 pool );
+	}
+	else if ( num_blocks_new > num_blocks )
+	{
+		const dim_t num_blocks_add = num_blocks_new -
+		                             num_blocks;
+
+		bli_pool_grow( num_blocks_add, pool );
+	}
 }
 
 void bli_pool_checkout_block( pblk_t* block, pool_t* pool )

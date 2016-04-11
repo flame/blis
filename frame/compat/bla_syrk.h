@@ -39,16 +39,17 @@
 #undef  GENTPROT
 #define GENTPROT( ftype, ch, blasname ) \
 \
-void PASTEF77(ch,blasname)( \
-                            f77_char* uploc, \
-                            f77_char* transa, \
-                            f77_int*  m, \
-                            f77_int*  k, \
-                            ftype*    alpha, \
-                            ftype*    a, f77_int* lda, \
-                            ftype*    beta, \
-                            ftype*    c, f77_int* ldc  \
-                          );
+void PASTEF77(ch,blasname) \
+     ( \
+       f77_char* uploc, \
+       f77_char* transa, \
+       f77_int*  m, \
+       f77_int*  k, \
+       ftype*    alpha, \
+       ftype*    a, f77_int* lda, \
+       ftype*    beta, \
+       ftype*    c, f77_int* ldc  \
+     );
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 INSERT_GENTPROT_BLAS( syrk )

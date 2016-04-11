@@ -34,77 +34,13 @@
 
 #include "blis.h"
 
-blksz_t* packm_mult_ldim;
-blksz_t* packm_mult_nvec;
-
-func_t*  packm_struc_cxk_kers;
-func_t*  packm_struc_cxk_4mi_kers;
-func_t*  packm_struc_cxk_3mis_kers;
-func_t*  packm_struc_cxk_rih_kers;
-
 packm_t* packm_cntl_row;
 packm_t* packm_cntl_col;
-
-packm_t* packm_cntl_rpn;
-packm_t* packm_cntl_cpn;
 
 packm_t* packm_cntl;
 
 void bli_packm_cntl_init()
 {
-	// Create function pointer object for each datatype-specific packm
-	// kernel.
-	packm_struc_cxk_kers
-	=
-	bli_func_obj_create( bli_spackm_struc_cxk, FALSE,
-	                     bli_dpackm_struc_cxk, FALSE,
-	                     bli_cpackm_struc_cxk, FALSE,
-	                     bli_zpackm_struc_cxk, FALSE );
-
-	packm_struc_cxk_4mi_kers
-	=
-	bli_func_obj_create( NULL,                     FALSE,
-	                     NULL,                     FALSE,
-	                     bli_cpackm_struc_cxk_4mi, FALSE,
-	                     bli_zpackm_struc_cxk_4mi, FALSE );
-
-	packm_struc_cxk_3mis_kers
-	=
-	bli_func_obj_create( NULL,                      FALSE,
-	                     NULL,                      FALSE,
-	                     bli_cpackm_struc_cxk_3mis, FALSE,
-	                     bli_zpackm_struc_cxk_3mis, FALSE );
-
-	packm_struc_cxk_rih_kers
-	=
-	bli_func_obj_create( NULL,                     FALSE,
-	                     NULL,                     FALSE,
-	                     bli_cpackm_struc_cxk_rih, FALSE,
-	                     bli_zpackm_struc_cxk_rih, FALSE );
-
-
-	// Create blocksize objects for m and n register blocking. We will attach
-	// these to the packm control node so they can be used to (a) allocate a
-	// block whose m and n dimension are multiples of mr and nr, and (b) know
-	// how much zero-padding is necessary for edge cases. 
-	// NOTE: these alignments end up getting applied to matrices packed for
-	// level-2 operations, even though they are not needed, and/or smaller
-	// alignments may be sufficient. For simplicity, we choose to tweak the
-	// dimensions of all pack matrix buffers the same amount.
-	packm_mult_ldim
-	=
-	bli_blksz_obj_create( BLIS_DEFAULT_MR_S, 0,
-	                      BLIS_DEFAULT_MR_D, 0,
-	                      BLIS_DEFAULT_MR_C, 0,
-	                      BLIS_DEFAULT_MR_Z, 0 );
-
-	packm_mult_nvec
-	=
-	bli_blksz_obj_create( BLIS_DEFAULT_NR_S, 0,
-	                      BLIS_DEFAULT_NR_D, 0,
-	                      BLIS_DEFAULT_NR_C, 0,
-	                      BLIS_DEFAULT_NR_Z, 0 );
-
 	// Generally speaking, the BLIS_PACKED_ROWS and BLIS_PACKED_COLUMNS
 	// are used by the level-2 operations. These schemas amount to simple
 	// copies to row or column storage. These simple schemas may be used
@@ -121,8 +57,8 @@ void bli_packm_cntl_init()
 	=
 	bli_packm_cntl_obj_create( BLIS_UNBLOCKED,
 	                           BLIS_VARIANT1,    // When packing to rows:
-	                           packm_mult_nvec,  // - nvec multiple is used for m dimension
-	                           packm_mult_ldim,  // - ldim multiple is used for n dimension
+	                           BLIS_VF,          // used for m dimension
+	                           BLIS_VF,          // used for n dimension
 	                           FALSE,            // do NOT invert diagonal
 	                           FALSE,            // do NOT iterate backwards if upper
 	                           FALSE,            // do NOT iterate backwards if lower
@@ -135,8 +71,8 @@ void bli_packm_cntl_init()
 	=
 	bli_packm_cntl_obj_create( BLIS_UNBLOCKED,
 	                           BLIS_VARIANT1,    // When packing to columns:
-	                           packm_mult_ldim,  // - ldim multiple is used for m dimension
-	                           packm_mult_nvec,  // - nvec multiple is used for n dimension
+	                           BLIS_VF,          // used for m dimension
+	                           BLIS_VF,          // used for n dimension
 	                           FALSE,            // do NOT invert diagonal
 	                           FALSE,            // do NOT iterate backwards if upper
 	                           FALSE,            // do NOT iterate backwards if lower
@@ -151,22 +87,14 @@ void bli_packm_cntl_init()
 
 void bli_packm_cntl_finalize()
 {
-	bli_func_obj_free( packm_struc_cxk_kers );
-	bli_func_obj_free( packm_struc_cxk_4mi_kers );
-	bli_func_obj_free( packm_struc_cxk_3mis_kers );
-	bli_func_obj_free( packm_struc_cxk_rih_kers );
-
 	bli_cntl_obj_free( packm_cntl_row );
 	bli_cntl_obj_free( packm_cntl_col );
-
-	bli_blksz_obj_free( packm_mult_ldim );
-	bli_blksz_obj_free( packm_mult_nvec );
 }
 
 packm_t* bli_packm_cntl_obj_create( impl_t     impl_type,
                                     varnum_t   var_num,
-                                    blksz_t*   mr,
-                                    blksz_t*   nr,
+                                    bszid_t    bmid_m,
+                                    bszid_t    bmid_n,
                                     bool_t     does_invert_diag,
                                     bool_t     rev_iter_if_upper,
                                     bool_t     rev_iter_if_lower,
@@ -179,8 +107,8 @@ packm_t* bli_packm_cntl_obj_create( impl_t     impl_type,
 
 	cntl->impl_type         = impl_type;
 	cntl->var_num           = var_num;
-	cntl->mr                = mr;
-	cntl->nr                = nr;
+	cntl->bmid_m            = bmid_m;
+	cntl->bmid_n            = bmid_n;
 	cntl->does_invert_diag  = does_invert_diag;
 	cntl->rev_iter_if_upper = rev_iter_if_upper;
 	cntl->rev_iter_if_lower = rev_iter_if_lower;
@@ -193,8 +121,8 @@ packm_t* bli_packm_cntl_obj_create( impl_t     impl_type,
 void bli_packm_cntl_obj_init( packm_t*   cntl,
                               impl_t     impl_type,
                               varnum_t   var_num,
-                              blksz_t*   mr,
-                              blksz_t*   nr,
+                              bszid_t    bmid_m,
+                              bszid_t    bmid_n,
                               bool_t     does_invert_diag,
                               bool_t     rev_iter_if_upper,
                               bool_t     rev_iter_if_lower,
@@ -203,8 +131,8 @@ void bli_packm_cntl_obj_init( packm_t*   cntl,
 {
 	cntl->impl_type         = impl_type;
 	cntl->var_num           = var_num;
-	cntl->mr                = mr;
-	cntl->nr                = nr;
+	cntl->bmid_m            = bmid_m;
+	cntl->bmid_n            = bmid_n;
 	cntl->does_invert_diag  = does_invert_diag;
 	cntl->rev_iter_if_upper = rev_iter_if_upper;
 	cntl->rev_iter_if_lower = rev_iter_if_lower;

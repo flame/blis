@@ -66,7 +66,8 @@ void libblis_test_gemmtrsm_ukr_impl( iface_t   iface,
                                      obj_t*    a11,
                                      obj_t*    bx1,
                                      obj_t*    b11,
-                                     obj_t*    c11 );
+                                     obj_t*    c11,
+                                     cntx_t*   cntx );
 
 void libblis_test_gemmtrsm_ukr_check( side_t  side,
                                       obj_t*  alpha,
@@ -168,13 +169,17 @@ void libblis_test_gemmtrsm_ukr_experiment( test_params_t* params,
 	obj_t        a1xp, a11p, bx1p, b11p;
 	obj_t        c11_save;
 
+	cntx_t       cntx;
+
+	// Initialize a context.
+	bli_trsm_cntx_init( &cntx );
 
 	// Map the dimension specifier to actual dimensions.
 	k = libblis_test_get_dim_from_prob_size( op->dim_spec[0], p_cur );
 
 	// Fix m and n to MR and NR, respectively.
-	m = bli_blksz_get_def( datatype, gemm_mr );
-	n = bli_blksz_get_def( datatype, gemm_nr );
+	m = bli_cntx_get_blksz_def_dt( datatype, BLIS_MR, &cntx );
+	n = bli_cntx_get_blksz_def_dt( datatype, BLIS_NR, &cntx );
 
 	// Store the register blocksizes so that the driver can retrieve the
 	// values later when printing results.
@@ -237,24 +242,26 @@ void libblis_test_gemmtrsm_ukr_experiment( test_params_t* params,
 	bli_obj_init_pack( &bp );
 
 	// Create pack objects for a and b.
-	libblis_test_pobj_create( gemm_mr,
-	                          gemm_mr,
+	libblis_test_pobj_create( BLIS_MR,
+	                          BLIS_MR,
 	                          BLIS_INVERT_DIAG,
 	                          BLIS_PACKED_ROW_PANELS,
 	                          BLIS_BUFFER_FOR_A_BLOCK,
-	                          &a, &ap );
-	libblis_test_pobj_create( gemm_mr,
-	                          gemm_nr,
+	                          &a, &ap,
+	                          &cntx );
+	libblis_test_pobj_create( BLIS_MR,
+	                          BLIS_NR,
 	                          BLIS_NO_INVERT_DIAG,
 	                          BLIS_PACKED_COL_PANELS,
 	                          BLIS_BUFFER_FOR_B_PANEL,
-	                          &b, &bp );
+	                          &b, &bp,
+	                          &cntx );
 
 	// Pack the contents of a to ap.
-	bli_packm_blk_var1( &a, &ap, &BLIS_PACKM_SINGLE_THREADED );
+	bli_packm_blk_var1( &a, &ap, &cntx, &BLIS_PACKM_SINGLE_THREADED );
 
 	// Pack the contents of b to bp.
-	bli_packm_blk_var1( &b, &bp, &BLIS_PACKM_SINGLE_THREADED );
+	bli_packm_blk_var1( &b, &bp, &cntx, &BLIS_PACKM_SINGLE_THREADED );
 
 	// Set the uplo field of ap since the default for packed objects is
 	// BLIS_DENSE, and the _make_subparts() routine needs this information
@@ -278,12 +285,13 @@ void libblis_test_gemmtrsm_ukr_experiment( test_params_t* params,
 		bli_copym( &c11_save, &c11 );
 
 		// Re-pack the contents of b to bp.
-		bli_packm_blk_var1( &b, &bp, &BLIS_PACKM_SINGLE_THREADED );
+		bli_packm_blk_var1( &b, &bp, &cntx, &BLIS_PACKM_SINGLE_THREADED );
 
 		time = bli_clock();
 
 		libblis_test_gemmtrsm_ukr_impl( iface, side, &alpha,
-		                                &a1xp, &a11p, &bx1p, &b11p, &c11 );
+		                                &a1xp, &a11p, &bx1p, &b11p, &c11,
+		                                &cntx );
 
 		time_min = bli_clock_min_diff( time_min, time );
 	}
@@ -308,6 +316,9 @@ void libblis_test_gemmtrsm_ukr_experiment( test_params_t* params,
 	bli_obj_free( &b );
 	bli_obj_free( &c11 );
 	bli_obj_free( &c11_save );
+
+	// Finalize the context.
+	bli_trsm_cntx_finalize( &cntx );
 }
 
 
@@ -319,12 +330,13 @@ void libblis_test_gemmtrsm_ukr_impl( iface_t   iface,
                                      obj_t*    a11,
                                      obj_t*    bx1,
                                      obj_t*    b11,
-                                     obj_t*    c11 )
+                                     obj_t*    c11,
+                                     cntx_t*   cntx )
 {
 	switch ( iface )
 	{
 		case BLIS_TEST_SEQ_UKERNEL:
-		bli_gemmtrsm_ukernel( alpha, a1x, a11, bx1, b11, c11 );
+		bli_gemmtrsm_ukernel( alpha, a1x, a11, bx1, b11, c11, cntx );
 		break;
 
 		default:

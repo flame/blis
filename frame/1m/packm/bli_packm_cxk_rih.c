@@ -36,14 +36,15 @@
 
 #define FUNCPTR_T packm_cxk_fp
 
-typedef void (*FUNCPTR_T)(
-                           conj_t  conja,
-                           pack_t  schema,
-                           dim_t   panel_len,
-                           void*   kappa,
-                           void*   a, inc_t inca, inc_t lda,
-                           void*   p,             inc_t ldp
-                         );
+typedef void (*FUNCPTR_T)
+     (
+       conj_t  conja,
+       pack_t  schema,
+       dim_t   panel_len,
+       void*   kappa,
+       void*   a, inc_t inca, inc_t lda,
+       void*   p,             inc_t ldp
+     );
 
 #undef  FUNCPTR_ARRAY_LENGTH
 #define FUNCPTR_ARRAY_LENGTH 32
@@ -194,15 +195,17 @@ static FUNCPTR_T ftypes_rih[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] =
 #undef  GENTFUNCCO
 #define GENTFUNCCO( ctype, ctype_r, ch, chr, varname ) \
 \
-void PASTEMAC(ch,varname)( \
-                           conj_t  conja, \
-                           pack_t  schema, \
-                           dim_t   panel_dim, \
-                           dim_t   panel_len, \
-                           void*   kappa, \
-                           void*   a, inc_t inca, inc_t lda, \
-                           void*   p,             inc_t ldp  \
-                         ) \
+void PASTEMAC(ch,varname) \
+     ( \
+       conj_t  conja, \
+       pack_t  schema, \
+       dim_t   panel_dim, \
+       dim_t   panel_len, \
+       void*   kappa, \
+       void*   a, inc_t inca, inc_t lda, \
+       void*   p,             inc_t ldp, \
+       cntx_t* cntx  \
+     ) \
 { \
 	num_t     dt; \
 	FUNCPTR_T f; \
@@ -221,12 +224,15 @@ void PASTEMAC(ch,varname)( \
 	   provided, we invoke the implementation. Otherwise, we use scal2m. */ \
 	if ( f != NULL ) \
 	{ \
-		f( conja, \
-		   schema, \
-		   panel_len, \
-		   kappa, \
-		   a, inca, lda, \
-		   p,       ldp ); \
+		f \
+		( \
+		  conja, \
+		  schema, \
+		  panel_len, \
+		  kappa, \
+		  a, inca, lda, \
+		  p,       ldp  \
+		); \
 	} \
 	else \
 	{ \
@@ -252,9 +258,12 @@ void PASTEMAC(ch,varname)( \
 						ctype*   restrict alpha11 = a_r + (i  )*inca1 + (j  )*lda1; \
 						ctype_r* restrict pi11_r  = p_r + (i  )*1     + (j  )*ldp1; \
 \
-						PASTEMAC(ch,scal2jros)( *kappa_cast, \
-						                        *alpha11, \
-						                        *pi11_r ); \
+						PASTEMAC(ch,scal2jros) \
+						( \
+						  *kappa_cast, \
+						  *alpha11, \
+						  *pi11_r  \
+						); \
 					} \
 				} \
 			} \
@@ -267,9 +276,12 @@ void PASTEMAC(ch,varname)( \
 						ctype*   restrict alpha11 = a_r + (i  )*inca1 + (j  )*lda1; \
 						ctype_r* restrict pi11_r  = p_r + (i  )*1     + (j  )*ldp1; \
 \
-						PASTEMAC(ch,scal2ros)( *kappa_cast, \
-						                       *alpha11, \
-						                       *pi11_r ); \
+						PASTEMAC(ch,scal2ros) \
+						( \
+						  *kappa_cast, \
+						  *alpha11, \
+						  *pi11_r  \
+						); \
 					} \
 				} \
 			} \
@@ -285,9 +297,12 @@ void PASTEMAC(ch,varname)( \
 						ctype*   restrict alpha11 = a_r + (i  )*inca1 + (j  )*lda1; \
 						ctype_r* restrict pi11_r  = p_r + (i  )*1     + (j  )*ldp1; \
 \
-						PASTEMAC(ch,scal2jios)( *kappa_cast, \
-						                        *alpha11, \
-						                        *pi11_r ); \
+						PASTEMAC(ch,scal2jios) \
+						( \
+						  *kappa_cast, \
+						  *alpha11, \
+						  *pi11_r  \
+						); \
 					} \
 				} \
 			} \
@@ -300,9 +315,12 @@ void PASTEMAC(ch,varname)( \
 						ctype*   restrict alpha11 = a_r + (i  )*inca1 + (j  )*lda1; \
 						ctype_r* restrict pi11_r  = p_r + (i  )*1     + (j  )*ldp1; \
 \
-						PASTEMAC(ch,scal2ios)( *kappa_cast, \
-						                       *alpha11, \
-						                       *pi11_r ); \
+						PASTEMAC(ch,scal2ios) \
+						( \
+						  *kappa_cast, \
+						  *alpha11, \
+						  *pi11_r  \
+						); \
 					} \
 				} \
 			} \
@@ -318,9 +336,12 @@ void PASTEMAC(ch,varname)( \
 						ctype*   restrict alpha11 = a_r + (i  )*inca1 + (j  )*lda1; \
 						ctype_r* restrict pi11_r  = p_r + (i  )*1     + (j  )*ldp1; \
 \
-						PASTEMAC(ch,scal2jrpis)( *kappa_cast, \
-						                         *alpha11, \
-						                         *pi11_r ); \
+						PASTEMAC(ch,scal2jrpis) \
+						( \
+						  *kappa_cast, \
+						  *alpha11, \
+						  *pi11_r  \
+						); \
 					} \
 				} \
 			} \
@@ -333,9 +354,12 @@ void PASTEMAC(ch,varname)( \
 						ctype*   restrict alpha11 = a_r + (i  )*inca1 + (j  )*lda1; \
 						ctype_r* restrict pi11_r  = p_r + (i  )*1     + (j  )*ldp1; \
 \
-						PASTEMAC(ch,scal2rpis)( *kappa_cast, \
-						                        *alpha11, \
-						                        *pi11_r ); \
+						PASTEMAC(ch,scal2rpis) \
+						( \
+						  *kappa_cast, \
+						  *alpha11, \
+						  *pi11_r  \
+						); \
 					} \
 				} \
 			} \

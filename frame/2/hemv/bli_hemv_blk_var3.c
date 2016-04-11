@@ -40,6 +40,7 @@ void bli_hemv_blk_var3( conj_t  conjh,
                         obj_t*  x,
                         obj_t*  beta,
                         obj_t*  y,
+                        cntx_t* cntx,
                         hemv_t* cntl )
 {
 	obj_t   a11, a11_pack;
@@ -73,14 +74,14 @@ void bli_hemv_blk_var3( conj_t  conjh,
 	// y = beta * y;
 	bli_scalv_int( beta,
 	               y,
-	               cntl_sub_scalv( cntl ) );
+	               cntx, cntl_sub_scalv( cntl ) );
 
 	// Partition diagonally.
 	for ( ij = 0; ij < mn; ij += b_alg )
 	{
 		// Determine the current algorithmic blocksize.
 		b_alg = bli_determine_blocksize_f( ij, mn, a,
-		                                   cntl_blocksize( cntl ) );
+		                                   cntl_bszid( cntl ), cntx );
 
 		// Acquire partitions for A11, A10, x1, x0, y1, and y0.
 		bli_acquire_mpart_tl2br( BLIS_SUBPART11,
@@ -98,20 +99,20 @@ void bli_hemv_blk_var3( conj_t  conjh,
 
 		// Initialize objects for packing A11, x1, and y1 (if needed).
 		bli_packm_init( &a11, &a11_pack,
-		                cntl_sub_packm_a11( cntl ) );
+		                cntx, cntl_sub_packm_a11( cntl ) );
 		bli_packv_init( &x1, &x1_pack,
-		                cntl_sub_packv_x1( cntl ) );
+		                cntx, cntl_sub_packv_x1( cntl ) );
 		bli_packv_init( &y1, &y1_pack,
-		                cntl_sub_packv_y1( cntl ) );
+		                cntx, cntl_sub_packv_y1( cntl ) );
 
 		// Copy/pack A11, x1, y1 (if needed).
 		bli_packm_int( &a11, &a11_pack,
-		               cntl_sub_packm_a11( cntl ),
+		               cntx, cntl_sub_packm_a11( cntl ),
                        &BLIS_PACKM_SINGLE_THREADED );
 		bli_packv_int( &x1, &x1_pack,
-		               cntl_sub_packv_x1( cntl ) );
+		               cntx, cntl_sub_packv_x1( cntl ) );
 		bli_packv_int( &y1, &y1_pack,
-		               cntl_sub_packv_y1( cntl ) );
+		               cntx, cntl_sub_packv_y1( cntl ) );
 
 		// y1 = y1 + alpha * A21' * x2;
 		bli_gemv_int( bli_apply_conj( conjh, BLIS_TRANSPOSE ),
@@ -121,6 +122,7 @@ void bli_hemv_blk_var3( conj_t  conjh,
 		              &x2,
 		              &BLIS_ONE,
 		              &y1_pack,
+		              cntx,
 		              cntl_sub_gemv_t_cp( cntl ) );
 
 		// y1 = y1 + alpha * A11 * x1;
@@ -130,6 +132,7 @@ void bli_hemv_blk_var3( conj_t  conjh,
 		              &x1_pack,
 		              &BLIS_ONE,
 		              &y1_pack,
+		              cntx,
 		              cntl_sub_hemv( cntl ) );
 
 		// y2 = y2 + alpha * A21 * x1;
@@ -140,11 +143,12 @@ void bli_hemv_blk_var3( conj_t  conjh,
 		              &x1_pack,
 		              &BLIS_ONE,
 		              &y2,
+		              cntx,
 		              cntl_sub_gemv_n_cp( cntl ) );
 
 		// Copy/unpack y1 (if y1 was packed).
 		bli_unpackv_int( &y1_pack, &y1,
-		                 cntl_sub_unpackv_y1( cntl ) );
+		                 cntx, cntl_sub_unpackv_y1( cntl ) );
 	}
 
 	// If any packing buffers were acquired within packm, release them back

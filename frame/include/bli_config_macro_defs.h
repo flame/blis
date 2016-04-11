@@ -87,10 +87,32 @@
 #define BLIS_PAGE_SIZE                   4096
 #endif
 
+// Number of named SIMD vector registers available for use.
+#ifndef BLIS_SIMD_NUM_REGISTERS
+#define BLIS_SIMD_NUM_REGISTERS          16
+#endif
+
+// Size (in bytes) of each SIMD vector.
+#ifndef BLIS_SIMD_SIZE
+#define BLIS_SIMD_SIZE                   32
+#endif
+
 // Alignment size (in bytes) needed by the instruction set for aligned
 // SIMD/vector instructions.
 #ifndef BLIS_SIMD_ALIGN_SIZE
-#define BLIS_SIMD_ALIGN_SIZE             32
+#define BLIS_SIMD_ALIGN_SIZE             BLIS_SIMD_SIZE
+#endif
+
+// The maximum size in bytes of local stack buffers within macro-kernel
+// functions. These buffers are usually used to store a temporary copy
+// of a single microtile. The reason we multiply by 2 is to handle induced
+// methods, where we use real domain register blocksizes in units of
+// complex elements. Specifically, the macro-kernels will need this larger
+// micro-tile footprint, even though the virtual micro-kernels will only
+// ever be writing to half (real or imaginary part) at a time.
+#ifndef BLIS_STACK_BUF_MAX_SIZE
+#define BLIS_STACK_BUF_MAX_SIZE          ( BLIS_SIMD_NUM_REGISTERS * \
+                                           BLIS_SIMD_SIZE * 2 )
 #endif
 
 // Alignment size used to align local stack buffers within macro-kernel

@@ -64,7 +64,7 @@ void bli_cntl_obj_free( void* cntl );
 
 #define cntl_impl_type( cntl )     cntl->impl_type
 #define cntl_var_num( cntl )       cntl->var_num
-#define cntl_blocksize( cntl )     cntl->b
+#define cntl_bszid( cntl )         cntl->bszid
 
 
 

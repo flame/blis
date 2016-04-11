@@ -38,8 +38,36 @@
 
 // -- Macros to generate function arrays ---------------------------------------
 
-// -- One-operand macro --
+// -- "Smart" one-operand macro --
 
+#define GENARRAY_VFP(ftname,opname) \
+\
+PASTECH(ftname,_vft) \
+PASTECH(opname,_vfp)[BLIS_NUM_FP_TYPES] = \
+{ \
+	PASTEMAC(s,opname), \
+	PASTEMAC(c,opname), \
+	PASTEMAC(d,opname), \
+	PASTEMAC(z,opname)  \
+}
+
+// -- "Smart" two-operand macro --
+
+/*
+#define GENARRAY2_VFP(arrayname,op) \
+\
+arrayname[BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES] = \
+{ \
+	{ PASTEMAC2(s,s,op), PASTEMAC2(s,c,op), PASTEMAC2(s,d,op), PASTEMAC2(s,z,op) }, \
+	{ PASTEMAC2(c,s,op), PASTEMAC2(c,c,op), PASTEMAC2(c,d,op), PASTEMAC2(c,z,op) }, \
+	{ PASTEMAC2(d,s,op), PASTEMAC2(d,c,op), PASTEMAC2(d,d,op), PASTEMAC2(d,z,op) }, \
+	{ PASTEMAC2(z,s,op), PASTEMAC2(z,c,op), PASTEMAC2(z,d,op), PASTEMAC2(z,z,op) }  \
+}
+*/
+
+
+
+// -- One-operand macro --
 
 #define GENARRAY(arrayname,op) \
 \

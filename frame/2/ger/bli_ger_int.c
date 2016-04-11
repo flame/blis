@@ -40,6 +40,7 @@ typedef void (*FUNCPTR_T)( obj_t*  alpha,
                            obj_t*  x,
                            obj_t*  y,
                            obj_t*  a,
+                           cntx_t* cntx,
                            ger_t*  cntl );
 
 static FUNCPTR_T vars[4][3] =
@@ -57,6 +58,7 @@ void bli_ger_int( conj_t  conjx,
                   obj_t*  x,
                   obj_t*  y,
                   obj_t*  a,
+                  cntx_t* cntx,
                   ger_t*  cntl )
 {
 	varnum_t  n;
@@ -69,7 +71,7 @@ void bli_ger_int( conj_t  conjx,
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
-		bli_ger_int_check( alpha, x, y, a, cntl );
+		bli_ger_check( alpha, x, y, a );
 
 	// If A has a zero dimension, return early.
 	if ( bli_obj_has_zero_dim( *a ) ) return;
@@ -123,6 +125,7 @@ void bli_ger_int( conj_t  conjx,
 	   &x_local,
 	   &y_local,
 	   &a_local,
+	   cntx,
 	   cntl );
 }
 

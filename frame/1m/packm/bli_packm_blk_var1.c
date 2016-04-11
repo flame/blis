@@ -56,19 +56,46 @@ typedef void (*FUNCPTR_T)(
                                       inc_t is_p,
                                       dim_t pd_p, inc_t ps_p,
                            void*   packm_ker,
+                           cntx_t* cntx,
                            packm_thrinfo_t* thread
                          );
 
 static FUNCPTR_T GENARRAY(ftypes,packm_blk_var1);
 
-extern func_t* packm_struc_cxk_kers;
-extern func_t* packm_struc_cxk_4mi_kers;
-extern func_t* packm_struc_cxk_3mis_kers;
-extern func_t* packm_struc_cxk_rih_kers;
+
+static func_t packm_struc_cxk_kers[BLIS_NUM_PACK_SCHEMA_TYPES] =
+{
+                /* float (0)  scomplex (1)  double (2)  dcomplex (3) */
+// 0000 row/col panels
+               { { bli_spackm_struc_cxk,      bli_cpackm_struc_cxk,
+                   bli_dpackm_struc_cxk,      bli_zpackm_struc_cxk,      } },
+// 0001 row/col panels: 4m interleaved
+               { { NULL,                      bli_cpackm_struc_cxk_4mi,
+                   NULL,                      bli_zpackm_struc_cxk_4mi,  } },
+// 0010 row/col panels: 3m interleaved
+               { { NULL,                      bli_cpackm_struc_cxk_3mis,
+                   NULL,                      bli_zpackm_struc_cxk_3mis, } },
+// 0011 row/col panels: 4m separated (NOT IMPLEMENTED)
+               { { NULL,                      NULL,
+                   NULL,                      NULL,                      } },
+// 0100 row/col panels: 3m separated
+               { { NULL,                      bli_cpackm_struc_cxk_3mis,
+                   NULL,                      bli_zpackm_struc_cxk_3mis, } },
+// 0101 row/col panels: real only
+               { { NULL,                      bli_cpackm_struc_cxk_rih,
+                   NULL,                      bli_zpackm_struc_cxk_rih,  } },
+// 0110 row/col panels: imaginary only
+               { { NULL,                      bli_cpackm_struc_cxk_rih,
+                   NULL,                      bli_zpackm_struc_cxk_rih,  } },
+// 0111 row/col panels: real+imaginary only
+               { { NULL,                      bli_cpackm_struc_cxk_rih,
+                   NULL,                      bli_zpackm_struc_cxk_rih,  } },
+};
 
 
 void bli_packm_blk_var1( obj_t*   c,
                          obj_t*   p,
+                         cntx_t*  cntx,
                          packm_thrinfo_t* t )
 {
 	num_t     dt_cp      = bli_obj_datatype( *c );
@@ -108,9 +135,19 @@ void bli_packm_blk_var1( obj_t*   c,
 
 	FUNCPTR_T f;
 
+
 	// Treatment of kappa (ie: packing during scaling) depends on
 	// whether we are executing an induced method.
-	if ( bli_is_ind_packed( schema ) )
+	if ( bli_is_nat_packed( schema ) )
+	{
+		// This branch if for native execution, where we assume that
+		// the micro-kernel will always apply the alpha scalar of the
+		// higher-level operation. Thus, we use BLIS_ONE for kappa so
+		// that the underlying packm implementation does not perform
+		// any scaling during packing.
+		buf_kappa = bli_obj_buffer_for_const( dt_cp, BLIS_ONE );
+	}
+	else // if ( bli_is_ind_packed( schema ) )
 	{
 		// The value for kappa we use will depend on whether the scalar
 		// attached to A has a nonzero imaginary component. If it does,
@@ -123,6 +160,7 @@ void bli_packm_blk_var1( obj_t*   c,
 		{
 			if ( bli_obj_scalar_has_nonzero_imag( p ) )
 			{
+//printf( "applying non-zero imag kappa\n" );
 				// Detach the scalar.
 				bli_obj_scalar_detach( p, &kappa );
 	
@@ -144,18 +182,10 @@ void bli_packm_blk_var1( obj_t*   c,
 		// Acquire the buffer to the kappa chosen above.
 		buf_kappa = bli_obj_buffer_for_1x1( dt_cp, *kappa_p );
 	}
-	else // if ( bli_is_nat_packed( schema ) )
-	{
-		// This branch if for native execution, where we assume that
-		// the micro-kernel will always apply the alpha scalar of the
-		// higher-level operation. Thus, we use BLIS_ONE for kappa so
-		// that the underlying packm implementation does not perform
-		// any scaling during packing.
-		buf_kappa = bli_obj_buffer_for_const( dt_cp, BLIS_ONE );
-	}
 
 
 	// Choose the correct func_t object based on the pack_t schema.
+#if 0
 	if      ( bli_is_4mi_packed( schema ) ) packm_kers = packm_struc_cxk_4mi_kers;
 	else if ( bli_is_3mi_packed( schema ) ||
 	          bli_is_3ms_packed( schema ) ) packm_kers = packm_struc_cxk_3mis_kers;
@@ -163,11 +193,39 @@ void bli_packm_blk_var1( obj_t*   c,
 	          bli_is_io_packed( schema ) ||
 	         bli_is_rpi_packed( schema ) )  packm_kers = packm_struc_cxk_rih_kers;
 	else                                    packm_kers = packm_struc_cxk_kers;
+#else
+	func_t* cntx_packm_kers = bli_cntx_get_packm_ukr( cntx );
+
+	//if ( bli_func_is_null_dt( dt_cp, cntx_packm_kers ) )
+	{
+		// If the packm structure-aware kernel func_t in the context is
+		// NULL (which is the default value after the context is created),
+		// we use the default lookup table to determine the right func_t
+		// for the current schema.
+		const dim_t i = bli_pack_schema_index( schema );
+//printf( "bli_packm_blk_var1: pack schema index = %lu (schema = %x)\n", i, schema );
+
+		packm_kers = &packm_struc_cxk_kers[ i ];
+	}
+#if 0
+	else // cntx's packm func_t overrides
+	{
+		// If the packm structure-aware kernel func_t in the context is
+		// non-NULL (ie: assumed to be valid), we use that instead.
+		//packm_kers = bli_cntx_packm_ukrs( cntx );
+		packm_kers = cntx_packm_kers;
+	}
+#endif
+#endif
 
 	// Query the datatype-specific function pointer from the func_t object.
-	packm_ker = bli_func_obj_query( dt_cp, packm_kers );
+	packm_ker = bli_func_get_dt( dt_cp, packm_kers );
 
 
+//bli_cntx_print( cntx );
+//printf( "bli_packm_blk_var1: packm_ker = %p\n", packm_ker );
+//printf( "bli_packm_blk_var1: cntx_packm_ker = %p\n", cntx_packm_kers );
+//printf( "bli_packm_blk_var1: local_table_entry = %p\n", &packm_struc_cxk_kers[ bli_pack_schema_index( schema ) ] );
 	// Index into the type combination array to extract the correct
 	// function pointer.
 	f = ftypes[dt_cp];
@@ -192,37 +250,40 @@ void bli_packm_blk_var1( obj_t*   c,
 	          is_p,
 	          pd_p, ps_p,
 	   packm_ker,
+	   cntx,
 	   t );
 }
 
 
 #undef  GENTFUNCR
-#define GENTFUNCR( ctype, ctype_r, ch, chr, varname, kertype ) \
+#define GENTFUNCR( ctype, ctype_r, ch, chr, opname, varname ) \
 \
-void PASTEMAC(ch,varname)( \
-                           struc_t strucc, \
-                           doff_t  diagoffc, \
-                           diag_t  diagc, \
-                           uplo_t  uploc, \
-                           trans_t transc, \
-                           pack_t  schema, \
-                           bool_t  invdiag, \
-                           bool_t  revifup, \
-                           bool_t  reviflo, \
-                           dim_t   m, \
-                           dim_t   n, \
-                           dim_t   m_max, \
-                           dim_t   n_max, \
-                           void*   kappa, \
-                           void*   c, inc_t rs_c, inc_t cs_c, \
-                           void*   p, inc_t rs_p, inc_t cs_p, \
-                                      inc_t is_p, \
-                                      dim_t pd_p, inc_t ps_p, \
-                           void*   packm_ker, \
-                           packm_thrinfo_t* thread \
-                         ) \
+void PASTEMAC(ch,varname) \
+     ( \
+       struc_t strucc, \
+       doff_t  diagoffc, \
+       diag_t  diagc, \
+       uplo_t  uploc, \
+       trans_t transc, \
+       pack_t  schema, \
+       bool_t  invdiag, \
+       bool_t  revifup, \
+       bool_t  reviflo, \
+       dim_t   m, \
+       dim_t   n, \
+       dim_t   m_max, \
+       dim_t   n_max, \
+       void*   kappa, \
+       void*   c, inc_t rs_c, inc_t cs_c, \
+       void*   p, inc_t rs_p, inc_t cs_p, \
+                  inc_t is_p, \
+                  dim_t pd_p, inc_t ps_p, \
+       void*   packm_ker, \
+       cntx_t* cntx, \
+       packm_thrinfo_t* thread  \
+     ) \
 { \
-	PASTECH(ch,kertype) packm_ker_cast = packm_ker; \
+	PASTECH2(ch,opname,_ft) packm_ker_cast = packm_ker; \
 \
 	ctype* restrict kappa_cast = kappa; \
 	ctype* restrict c_cast     = c; \
@@ -454,7 +515,8 @@ PASTEMAC(ch,fprintm)( stdout, "packm_var2: a", m, n, \
 				                kappa_cast, \
 				                c_use, rs_c, cs_c, \
 				                p_use, rs_p, cs_p, \
-			                           is_p_use ); \
+			                           is_p_use, \
+				                cntx ); \
 			} \
 \
 			/* NOTE: This value is usually LESS than ps_p because triangular
@@ -492,7 +554,8 @@ PASTEMAC(ch,fprintm)( stdout, "packm_var2: a", m, n, \
 				                kappa_cast, \
 				                c_use, rs_c, cs_c, \
 				                p_use, rs_p, cs_p, \
-			                           is_p_use ); \
+			                           is_p_use, \
+				                cntx ); \
 			} \
 \
 			p_inc = ps_p; \
@@ -527,7 +590,8 @@ PASTEMAC(ch,fprintm)( stdout, "packm_var2: a", m, n, \
 				                kappa_cast, \
 				                c_use, rs_c, cs_c, \
 				                p_use, rs_p, cs_p, \
-			                           is_p_use ); \
+			                           is_p_use, \
+				                cntx ); \
 			} \
 \
 			/* NOTE: This value is equivalent to ps_p. */ \
@@ -601,5 +665,5 @@ PASTEMAC(ch,fprintm)( stdout, "packm_var2: a", m, n, \
 	} \
 }
 
-INSERT_GENTFUNCR_BASIC( packm_blk_var1, packm_ker_t )
+INSERT_GENTFUNCR_BASIC( packm, packm_blk_var1 )
 

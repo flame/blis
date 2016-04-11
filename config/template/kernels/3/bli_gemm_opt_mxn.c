@@ -36,37 +36,45 @@
 
 
 
-void bli_sgemm_opt_mxn(
-                        dim_t              k,
-                        float*    restrict alpha,
-                        float*    restrict a1,
-                        float*    restrict b1,
-                        float*    restrict beta,
-                        float*    restrict c11, inc_t rs_c, inc_t cs_c,
-                        auxinfo_t*         data
-                      )
+void bli_sgemm_opt_mxn
+     (
+       dim_t               k,
+       float*     restrict alpha,
+       float*     restrict a1,
+       float*     restrict b1,
+       float*     restrict beta,
+       float*     restrict c11, inc_t rs_c, inc_t cs_c,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
+     )
 {
 	/* Just call the reference implementation. */
-	BLIS_SGEMM_UKERNEL_REF( k,
-	                   alpha,
-	                   a1,
-	                   b1,
-	                   beta,
-	                   c11, rs_c, cs_c,
-	                   data );
+	BLIS_SGEMM_UKERNEL_REF
+	(
+	  k,
+	  alpha,
+	  a1,
+	  b1,
+	  beta,
+	  c11, rs_c, cs_c,
+	  data,
+	  cntx
+	);
 }
 
 
 
-void bli_dgemm_opt_mxn(
-                        dim_t              k,
-                        double*   restrict alpha,
-                        double*   restrict a1,
-                        double*   restrict b1,
-                        double*   restrict beta,
-                        double*   restrict c11, inc_t rs_c, inc_t cs_c,
-                        auxinfo_t*         data
-                      )
+void bli_dgemm_opt_mxn
+     (
+       dim_t               k,
+       double*    restrict alpha,
+       double*    restrict a1,
+       double*    restrict b1,
+       double*    restrict beta,
+       double*    restrict c11, inc_t rs_c, inc_t cs_c,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
+     )
 {
 /*
   Template gemm micro-kernel implementation
@@ -106,6 +114,14 @@ void bli_dgemm_opt_mxn(
             information that may be useful when optimizing the gemm
             micro-kernel implementation. (See BLIS KernelsHowTo wiki for
             more info.)
+  - cntx:   The address of the runtime context. The context can be queried
+            for implementation-specific values such as cache and register
+            blocksizes. However, most micro-kernels intrinsically "know"
+            these values already, and thus the cntx argument usually can
+            be safely ignored. (The following template micro-kernel code
+            does in fact query MR, NR, PACKMR, and PACKNR, as needed, but
+            only because those values are not hard-coded, as they would be
+            in a typical optimized micro-kernel implementation.)
 
   Diagram for gemm
 
@@ -203,15 +219,19 @@ void bli_dgemm_opt_mxn(
 
   -FGVZ
 */
-	const dim_t        mr    = bli_dmr;
-	const dim_t        nr    = bli_dnr;
+	const num_t        dt     = BLIS_DOUBLE;
 
-	const inc_t        cs_a  = bli_dpackmr;
+	const dim_t        mr     = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx );
+	const dim_t        nr     = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx );
 
-	const inc_t        rs_b  = bli_dpacknr;
+	const inc_t        packmr = bli_cntx_get_blksz_max_dt( dt, BLIS_MR, cntx );
+	const inc_t        packnr = bli_cntx_get_blksz_max_dt( dt, BLIS_NR, cntx );
 
-	const inc_t        rs_ab = 1;
-	const inc_t        cs_ab = bli_dmr;
+	const inc_t        cs_a   = packmr;
+	const inc_t        rs_b   = packnr;
+
+	const inc_t        rs_ab  = 1;
+	const inc_t        cs_ab  = mr;
 
 	dim_t              l, j, i;
 
@@ -291,36 +311,56 @@ void bli_cgemm_opt_mxn(
                         scomplex* restrict c11, inc_t rs_c, inc_t cs_c,
                         auxinfo_t*         data
                       )
+     (
+       dim_t               k,
+       scomplex*  restrict alpha,
+       scomplex*  restrict a1,
+       scomplex*  restrict b1,
+       scomplex*  restrict beta,
+       scomplex*  restrict c11, inc_t rs_c, inc_t cs_c,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
+     )
 {
 	/* Just call the reference implementation. */
-	BLIS_CGEMM_UKERNEL_REF( k,
-	                   alpha,
-	                   a1,
-	                   b1,
-	                   beta,
-	                   c11, rs_c, cs_c,
-	                   data );
+	BLIS_CGEMM_UKERNEL_REF
+	(
+	  k,
+	  alpha,
+	  a1,
+	  b1,
+	  beta,
+	  c11, rs_c, cs_c,
+	  data,
+	  cntx
+	);
 }
 
 
 
-void bli_zgemm_opt_mxn(
-                        dim_t              k,
-                        dcomplex* restrict alpha,
-                        dcomplex* restrict a1,
-                        dcomplex* restrict b1,
-                        dcomplex* restrict beta,
-                        dcomplex* restrict c11, inc_t rs_c, inc_t cs_c,
-                        auxinfo_t*         data
-                      )
+void bli_zgemm_opt_mxn
+     (
+       dim_t               k,
+       dcomplex*  restrict alpha,
+       dcomplex*  restrict a1,
+       dcomplex*  restrict b1,
+       dcomplex*  restrict beta,
+       dcomplex*  restrict c11, inc_t rs_c, inc_t cs_c,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
+     )
 {
 	/* Just call the reference implementation. */
-	BLIS_ZGEMM_UKERNEL_REF( k,
-	                   alpha,
-	                   a1,
-	                   b1,
-	                   beta,
-	                   c11, rs_c, cs_c,
-	                   data );
+	BLIS_ZGEMM_UKERNEL_REF
+	(
+	  k,
+	  alpha,
+	  a1,
+	  b1,
+	  beta,
+	  c11, rs_c, cs_c,
+	  data,
+	  cntx
+	);
 }
 

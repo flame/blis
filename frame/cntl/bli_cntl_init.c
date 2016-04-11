@@ -64,9 +64,6 @@ void bli_cntl_init( void )
 	bli_gemm_cntl_init();
 	bli_trsm_cntl_init();
 
-	// Level-3 induced
-	bli_ind_cntl_init();
-
 	// Mark API as initialized.
 	bli_cntl_is_init = TRUE;
 }
@@ -95,9 +92,6 @@ void bli_cntl_finalize( void )
 	// Level-3
 	bli_gemm_cntl_finalize();
 	bli_trsm_cntl_finalize();
-
-	// Level-3 induced
-	bli_ind_cntl_finalize();
 
 	// Mark API as uninitialized.
 	bli_cntl_is_init = FALSE;

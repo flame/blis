@@ -36,18 +36,24 @@
 
 
 
-void bli_sgemmtrsm_u_opt_mxn(
-                              dim_t              k,
-                              float*    restrict alpha,
-                              float*    restrict a12,
-                              float*    restrict a11,
-                              float*    restrict b21,
-                              float*    restrict b11,
-                              float*    restrict c11, inc_t rs_c, inc_t cs_c,
-                              auxinfo_t*         data
-                            )
+void bli_sgemmtrsm_u_opt_mxn
+     (
+       dim_t               k,
+       float*     restrict alpha,
+       float*     restrict a10,
+       float*     restrict a11,
+       float*     restrict b01,
+       float*     restrict b11,
+       float*     restrict c11, inc_t rs_c, inc_t cs_c,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
+     )
 {
-	const inc_t        rs_b      = bli_spacknr;
+	const num_t        dt        = BLIS_FLOAT;
+
+	const inc_t        packnr    = bli_cntx_get_blksz_max_dt( dt, BLIS_NR, cntx );
+
+	const inc_t        rs_b      = packnr;
 	const inc_t        cs_b      = 1;
 
 	float*    restrict minus_one = bli_sm1;
@@ -69,16 +75,18 @@ void bli_sgemmtrsm_u_opt_mxn(
 
 
 
-void bli_dgemmtrsm_u_opt_mxn(
-                              dim_t              k,
-                              double*   restrict alpha,
-                              double*   restrict a12,
-                              double*   restrict a11,
-                              double*   restrict b21,
-                              double*   restrict b11,
-                              double*   restrict c11, inc_t rs_c, inc_t cs_c,
-                              auxinfo_t*         data
-                            )
+void bli_dgemmtrsm_u_opt_mxn
+     (
+       dim_t               k,
+       double*    restrict alpha,
+       double*    restrict a10,
+       double*    restrict a11,
+       double*    restrict b01,
+       double*    restrict b11,
+       double*    restrict c11, inc_t rs_c, inc_t cs_c,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
+     )
 {
 /*
   Template gemmtrsm_u micro-kernel implementation
@@ -131,6 +139,14 @@ void bli_dgemmtrsm_u_opt_mxn(
             information that may be useful when optimizing the gemmtrsm
             micro-kernel implementation. (See BLIS KernelsHowTo wiki for
             more info.)
+  - cntx:   The address of the runtime context. The context can be queried
+            for implementation-specific values such as cache and register
+            blocksizes. However, most micro-kernels intrinsically "know"
+            these values already, and thus the cntx argument usually can
+            be safely ignored. (The following template micro-kernel code
+            does in fact query MR, NR, PACKMR, and PACKNR, as needed, but
+            only because those values are not hard-coded, as they would be
+            in a typical optimized micro-kernel implementation.)
 
   Diagram for gemmtrsm_u
 
@@ -200,7 +216,11 @@ void bli_dgemmtrsm_u_opt_mxn(
   blis-devel mailing list.
 
 */
-	const inc_t        rs_b      = bli_dpacknr;
+	const num_t        dt        = BLIS_DOUBLE;
+
+	const inc_t        packnr    = bli_cntx_get_blksz_max_dt( dt, BLIS_NR, cntx );
+
+	const inc_t        rs_b      = packnr;
 	const inc_t        cs_b      = 1;
 
 	double*   restrict minus_one = bli_dm1;
@@ -224,18 +244,24 @@ void bli_dgemmtrsm_u_opt_mxn(
 
 
 
-void bli_cgemmtrsm_u_opt_mxn(
-                              dim_t              k,
-                              scomplex* restrict alpha,
-                              scomplex* restrict a12,
-                              scomplex* restrict a11,
-                              scomplex* restrict b21,
-                              scomplex* restrict b11,
-                              scomplex* restrict c11, inc_t rs_c, inc_t cs_c,
-                              auxinfo_t*         data
-                            )
+void bli_cgemmtrsm_u_opt_mxn
+     (
+       dim_t               k,
+       scomplex*  restrict alpha,
+       scomplex*  restrict a10,
+       scomplex*  restrict a11,
+       scomplex*  restrict b01,
+       scomplex*  restrict b11,
+       scomplex*  restrict c11, inc_t rs_c, inc_t cs_c,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
+     )
 {
-	const inc_t        rs_b      = bli_cpacknr;
+	const num_t        dt        = BLIS_SCOMPLEX;
+
+	const inc_t        packnr    = bli_cntx_get_blksz_max_dt( dt, BLIS_NR, cntx );
+
+	const inc_t        rs_b      = packnr;
 	const inc_t        cs_b      = 1;
 
 	scomplex* restrict minus_one = bli_cm1;
@@ -257,18 +283,24 @@ void bli_cgemmtrsm_u_opt_mxn(
 
 
 
-void bli_zgemmtrsm_u_opt_mxn(
-                              dim_t              k,
-                              dcomplex* restrict alpha,
-                              dcomplex* restrict a12,
-                              dcomplex* restrict a11,
-                              dcomplex* restrict b21,
-                              dcomplex* restrict b11,
-                              dcomplex* restrict c11, inc_t rs_c, inc_t cs_c,
-                              auxinfo_t*         data
-                            )
+void bli_zgemmtrsm_u_opt_mxn
+     (
+       dim_t               k,
+       dcomplex*  restrict alpha,
+       dcomplex*  restrict a10,
+       dcomplex*  restrict a11,
+       dcomplex*  restrict b01,
+       dcomplex*  restrict b11,
+       dcomplex*  restrict c11, inc_t rs_c, inc_t cs_c,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
+     )
 {
-	const inc_t        rs_b      = bli_zpacknr;
+	const num_t        dt        = BLIS_DCOMPLEX;
+
+	const inc_t        packnr    = bli_cntx_get_blksz_max_dt( dt, BLIS_NR, cntx );
+
+	const inc_t        rs_b      = packnr;
 	const inc_t        cs_b      = 1;
 
 	dcomplex* restrict minus_one = bli_zm1;

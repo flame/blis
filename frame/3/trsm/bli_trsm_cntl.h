@@ -36,10 +36,7 @@ struct trsm_s
 {
 	impl_t             impl_type;
 	varnum_t           var_num;
-	blksz_t*           b;
-	func_t*            gemm_ukrs;
-	func_t*            gemmtrsm_l_ukrs;
-	func_t*            gemmtrsm_u_ukrs;
+	bszid_t            bszid;
 	struct scalm_s*    sub_scalm;
 	struct packm_s*    sub_packm_a;
 	struct packm_s*    sub_packm_b;
@@ -51,17 +48,12 @@ struct trsm_s
 typedef struct trsm_s trsm_t;
 
 #define cntl_sub_trsm( cntl )         cntl->sub_trsm
-#define cntl_gemmtrsm_l_ukrs( cntl )  cntl->gemmtrsm_l_ukrs
-#define cntl_gemmtrsm_u_ukrs( cntl )  cntl->gemmtrsm_u_ukrs
 
 void    bli_trsm_cntl_init( void );
 void    bli_trsm_cntl_finalize( void );
 trsm_t* bli_trsm_cntl_obj_create( impl_t       impl_type,
                                   varnum_t     var_num,
-                                  blksz_t*     b,
-                                  func_t*      gemm_ukrs,
-                                  func_t*      gemmtrsm_l_ukrs,
-                                  func_t*      gemmtrsm_u_ukrs,
+                                  bszid_t      bszid,
                                   scalm_t*     sub_scalm,
                                   packm_t*     sub_pack_a,
                                   packm_t*     sub_pack_b,

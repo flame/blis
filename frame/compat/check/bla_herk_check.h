@@ -34,13 +34,16 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-void bla_herk_check( char*     dt_str,
-                     char*     op_str,
-                     f77_char* uploc,
-                     f77_char* transa,
-                     f77_int*  m,
-                     f77_int*  k,
-                     f77_int*  lda,
-                     f77_int*  ldc );
+void bla_herk_check
+     (
+       char*     dt_str,
+       char*     op_str,
+       f77_char* uploc,
+       f77_char* transa,
+       f77_int*  m,
+       f77_int*  k,
+       f77_int*  lda,
+       f77_int*  ldc
+     );
 
 #endif

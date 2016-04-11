@@ -617,6 +617,18 @@ err_t bli_check_triangular_object( obj_t* a )
 	return e_val;
 }
 
+err_t bli_check_object_struc( obj_t* a, struc_t struc )
+{
+	err_t e_val = BLIS_SUCCESS;
+
+	if      ( bli_is_general( struc ) )    e_val = bli_check_general_object( a );
+	else if ( bli_is_hermitian( struc ) )  e_val = bli_check_hermitian_object( a );
+	else if ( bli_is_symmetric( struc ) )  e_val = bli_check_symmetric_object( a );
+	else if ( bli_is_triangular( struc ) ) e_val = bli_check_triangular_object( a );
+
+	return e_val;
+}
+
 // -- Storage-related checks ---------------------------------------------------
 
 err_t bli_check_upper_or_lower_object( obj_t* a )
@@ -765,7 +777,27 @@ err_t bli_check_if_exhausted_pool( pool_t* pool )
 	return e_val;
 }
 
-// -- Memory allocator checks --------------------------------------------------
+err_t bli_check_sufficient_stack_buf_size( num_t dt, cntx_t* cntx )
+{
+	err_t e_val = BLIS_SUCCESS;
+
+	dim_t mr      = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx );
+	dim_t nr      = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx );
+	siz_t dt_size = bli_datatype_size( dt );
+
+	// NOTE: For induced methods, we use the size of the complex datatypes
+	// (rather than the size of the native micro-kernels' datatype) because
+	// the macro-kernel needs this larger micro-tile footprint, even if the
+	// virtual micro-kernel implementation will only ever be writing to half
+	// of it (real or imaginary part) at a time.
+
+	if ( mr * nr * dt_size > BLIS_STACK_BUF_MAX_SIZE )
+		e_val = BLIS_INSUFFICIENT_STACK_BUF_SIZE;
+
+	return e_val;
+}
+
+// -- Object-related errors ----------------------------------------------------
 
 err_t bli_check_object_alias_of( obj_t* a, obj_t* b )
 {

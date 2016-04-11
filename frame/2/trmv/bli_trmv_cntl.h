@@ -36,7 +36,7 @@ struct trmv_s
 {
 	impl_t             impl_type;
 	varnum_t           var_num;
-	blksz_t*           b;
+	bszid_t            bszid;
 	struct packm_s*    sub_packm_a11;
 	struct packv_s*    sub_packv_x1;
 	struct gemv_s*     sub_gemv_rp;
@@ -52,7 +52,7 @@ void    bli_trmv_cntl_init( void );
 void    bli_trmv_cntl_finalize( void );
 trmv_t* bli_trmv_cntl_obj_create( impl_t     impl_type,
                                   varnum_t   var_num,
-                                  blksz_t*   b,
+                                  bszid_t    bszid,
                                   packm_t*   sub_packm_a11,
                                   packv_t*   sub_packv_x1,
                                   gemv_t*    sub_gemv_rp,
@@ -62,7 +62,7 @@ trmv_t* bli_trmv_cntl_obj_create( impl_t     impl_type,
 void bli_trmv_cntl_obj_init( trmv_t*    cntl,
                              impl_t     impl_type,
                              varnum_t   var_num,
-                             blksz_t*   b,
+                             bszid_t    bszid,
                              packm_t*   sub_packm_a11,
                              packv_t*   sub_packv_x1,
                              gemv_t*    sub_gemv_rp,

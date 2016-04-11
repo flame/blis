@@ -32,6 +32,9 @@
 
 */
 
-void bli_unpackv_check( obj_t*     p,
-                        obj_t*     a,
-                        unpackv_t* cntl );
+void bli_unpackv_check
+     (
+       obj_t*  p,
+       obj_t*  a,
+       cntx_t* cntx
+     );

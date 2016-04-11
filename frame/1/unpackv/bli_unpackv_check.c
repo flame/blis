@@ -34,9 +34,12 @@
 
 #include "blis.h"
 
-void bli_unpackv_check( obj_t*     p,
-                        obj_t*     a,
-                        unpackv_t* cntl )
+void bli_unpackv_check
+     (
+       obj_t*  p,
+       obj_t*  a,
+       cntx_t* cntx
+     )
 {
 	err_t e_val;
 
@@ -58,11 +61,5 @@ void bli_unpackv_check( obj_t*     p,
 	e_val = bli_check_packv_schema_on_unpack( p );
 	bli_check_error_code( e_val );
 
-	// Check control tree pointer
-
-	// NOTE: We can't check the control tree until we stop interpreting a
-	// NULL value (in bli_unpackv_int()) as a request to skip the operation.
-	//e_val = bli_check_valid_cntl( ( void* )cntl );
-	//bli_check_error_code( e_val );
 }
 

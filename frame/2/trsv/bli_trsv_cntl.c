@@ -44,8 +44,6 @@ extern gemv_t*    gemv_cntl_rp_bs_axpy;
 extern gemv_t*    gemv_cntl_cp_bs_dot;
 extern gemv_t*    gemv_cntl_cp_bs_axpy;
 
-extern blksz_t*   gemv_mc;
-
 trsv_t*           trsv_cntl_bs_ke_nrow_tcol;
 trsv_t*           trsv_cntl_bs_ke_ncol_trow;
 trsv_t*           trsv_cntl_ge_nrow_tcol;
@@ -60,16 +58,18 @@ void bli_trsv_cntl_init()
 	=
 	bli_trsv_cntl_obj_create( BLIS_UNB_FUSED,
 	                          BLIS_VARIANT1,
+	                          0,
 	                          NULL, NULL, NULL,
 	                          NULL, NULL, NULL,
-	                          NULL, NULL );
+	                          NULL );
 	trsv_cntl_bs_ke_ncol_trow
 	=
 	bli_trsv_cntl_obj_create( BLIS_UNB_FUSED,
 	                          BLIS_VARIANT2,
+	                          0,
 	                          NULL, NULL, NULL,
 	                          NULL, NULL, NULL,
-	                          NULL, NULL );
+	                          NULL );
 
 	// Create control trees for generally large problems. Here we choose a
 	// variant that prioritizes keeping a subvector of x in cache.
@@ -77,7 +77,7 @@ void bli_trsv_cntl_init()
     =
 	bli_trsv_cntl_obj_create( BLIS_BLOCKED,
                               BLIS_VARIANT1,        // use var1 to maximize x1 usage
-                              gemv_mc,
+                              BLIS_M2,
                               scalv_cntl,           // scale x up-front
                               packm_cntl,           // pack A11 (if needed)
                               packv_cntl,           // pack x1 (if needed)
@@ -89,7 +89,7 @@ void bli_trsv_cntl_init()
     =
 	bli_trsv_cntl_obj_create( BLIS_BLOCKED,
                               BLIS_VARIANT1,        // use var1 to maximize x1 usage
-                              gemv_mc,
+                              BLIS_M2,
                               scalv_cntl,           // scale x up-front
                               packm_cntl,           // pack A11 (if needed)
                               packv_cntl,           // pack x1 (if needed)
@@ -110,7 +110,7 @@ void bli_trsv_cntl_finalize()
 
 trsv_t* bli_trsv_cntl_obj_create( impl_t     impl_type,
                                   varnum_t   var_num,
-                                  blksz_t*   b,
+                                  bszid_t    bszid,
                                   scalv_t*   sub_scalv,
                                   packm_t*   sub_packm_a11,
                                   packv_t*   sub_packv_x1,
@@ -125,7 +125,7 @@ trsv_t* bli_trsv_cntl_obj_create( impl_t     impl_type,
 
 	cntl->impl_type      = impl_type;
 	cntl->var_num        = var_num;
-	cntl->b              = b;
+	cntl->bszid          = bszid;
 	cntl->sub_scalv      = sub_scalv;
 	cntl->sub_packm_a11  = sub_packm_a11;
 	cntl->sub_packv_x1   = sub_packv_x1;
@@ -140,7 +140,7 @@ trsv_t* bli_trsv_cntl_obj_create( impl_t     impl_type,
 void bli_trsv_cntl_obj_init( trsv_t*    cntl,
                              impl_t     impl_type,
                              varnum_t   var_num,
-                             blksz_t*   b,
+                             bszid_t    bszid,
                              scalv_t*   sub_scalv,
                              packm_t*   sub_packm_a11,
                              packv_t*   sub_packv_x1,
@@ -151,7 +151,7 @@ void bli_trsv_cntl_obj_init( trsv_t*    cntl,
 {
 	cntl->impl_type      = impl_type;
 	cntl->var_num        = var_num;
-	cntl->b              = b;
+	cntl->bszid          = bszid;
 	cntl->sub_scalv      = sub_scalv;
 	cntl->sub_packm_a11  = sub_packm_a11;
 	cntl->sub_packv_x1   = sub_packv_x1;

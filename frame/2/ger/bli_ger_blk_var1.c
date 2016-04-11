@@ -38,6 +38,7 @@ void bli_ger_blk_var1( obj_t* alpha,
                        obj_t* x,
                        obj_t* y,
                        obj_t* a,
+                       cntx_t* cntx,
                        ger_t* cntl )
 {
 	obj_t a1, a1_pack;
@@ -59,7 +60,7 @@ void bli_ger_blk_var1( obj_t* alpha,
 	{
 		// Determine the current algorithmic blocksize.
 		b_alg = bli_determine_blocksize_f( i, m_trans, a,
-		                                   cntl_blocksize( cntl ) );
+		                                   cntl_bszid( cntl ), cntx );
 
 		// Acquire partitions for A1 and x1.
 		bli_acquire_mpart_t2b( BLIS_SUBPART1,
@@ -69,16 +70,16 @@ void bli_ger_blk_var1( obj_t* alpha,
 
 		// Initialize objects for packing A1 and x1 (if needed).
 		bli_packm_init( &a1, &a1_pack,
-		                cntl_sub_packm_a( cntl ) );
+		                cntx, cntl_sub_packm_a( cntl ) );
 		bli_packv_init( &x1, &x1_pack,
-		                cntl_sub_packv_x( cntl ) );
+		                cntx, cntl_sub_packv_x( cntl ) );
 
 		// Copy/pack A1, x1 (if needed).
 		bli_packm_int( &a1, &a1_pack,
-		               cntl_sub_packm_a( cntl ),
+		               cntx, cntl_sub_packm_a( cntl ),
                        &BLIS_PACKM_SINGLE_THREADED );
 		bli_packv_int( &x1, &x1_pack,
-		               cntl_sub_packv_x( cntl ) );
+		               cntx, cntl_sub_packv_x( cntl ) );
 
 		// A1 = A1 + alpha * x1 * y;
 		bli_ger_int( BLIS_NO_CONJUGATE,
@@ -87,11 +88,12 @@ void bli_ger_blk_var1( obj_t* alpha,
 		             &x1_pack,
 		             y,
 		             &a1_pack,
+		             cntx,
 		             cntl_sub_ger( cntl ) );
 
 		// Copy/unpack A1 (if A1 was packed).
 		bli_unpackm_int( &a1_pack, &a1,
-		                 cntl_sub_unpackm_a( cntl ),
+		                 cntx, cntl_sub_unpackm_a( cntl ),
                          &BLIS_PACKM_SINGLE_THREADED );
 	}
 

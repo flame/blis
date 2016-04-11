@@ -43,8 +43,6 @@ extern ger_t*     ger_cntl_cp_bs_col;
 extern ger_t*     ger_cntl_bs_ke_row;
 extern ger_t*     ger_cntl_bs_ke_col;
 
-extern blksz_t*   gemv_mc;
-
 her_t*            her_cntl_bs_ke_lrow_ucol;
 her_t*            her_cntl_bs_ke_lcol_urow;
 
@@ -60,14 +58,16 @@ void bli_her_cntl_init()
 	=
 	bli_her_cntl_obj_create( BLIS_UNBLOCKED,
 	                         BLIS_VARIANT1,
+	                         0,
 	                         NULL, NULL, NULL,
-	                         NULL, NULL, NULL );
+	                         NULL, NULL );
 	her_cntl_bs_ke_lcol_urow
 	=
 	bli_her_cntl_obj_create( BLIS_UNBLOCKED,
 	                         BLIS_VARIANT2,
+	                         0,
 	                         NULL, NULL, NULL,
-	                         NULL, NULL, NULL );
+	                         NULL, NULL );
 
 
 	// Create control trees for generally large problems. Here, we choose
@@ -77,7 +77,7 @@ void bli_her_cntl_init()
 	=
 	bli_her_cntl_obj_create( BLIS_BLOCKED,
 	                         BLIS_VARIANT1,
-	                         gemv_mc,
+	                         BLIS_M2,
 	                         packv_cntl,       // pack x1 (if needed)
 	                         NULL,             // do NOT pack C11
 	                         ger_cntl_rp_bs_row,
@@ -87,7 +87,7 @@ void bli_her_cntl_init()
 	=
 	bli_her_cntl_obj_create( BLIS_BLOCKED,
 	                         BLIS_VARIANT2,
-	                         gemv_mc,
+	                         BLIS_M2,
 	                         packv_cntl,       // pack x1 (if needed)
 	                         NULL,             // do NOT pack C11
 	                         ger_cntl_cp_bs_col,
@@ -106,7 +106,7 @@ void bli_her_cntl_finalize()
 
 her_t* bli_her_cntl_obj_create( impl_t     impl_type,
                                 varnum_t   var_num,
-                                blksz_t*   b,
+                                bszid_t    bszid,
                                 packv_t*   sub_packv_x1,
                                 packm_t*   sub_packm_c11,
                                 ger_t*     sub_ger,
@@ -119,7 +119,7 @@ her_t* bli_her_cntl_obj_create( impl_t     impl_type,
 
 	cntl->impl_type       = impl_type;
 	cntl->var_num         = var_num;
-	cntl->b               = b;
+	cntl->bszid           = bszid;
 	cntl->sub_packv_x1    = sub_packv_x1;
 	cntl->sub_packm_c11   = sub_packm_c11;
 	cntl->sub_ger         = sub_ger;
@@ -132,7 +132,7 @@ her_t* bli_her_cntl_obj_create( impl_t     impl_type,
 void bli_her_cntl_obj_init( her_t*     cntl,
                             impl_t     impl_type,
                             varnum_t   var_num,
-                            blksz_t*   b,
+                            bszid_t    bszid,
                             packv_t*   sub_packv_x1,
                             packm_t*   sub_packm_c11,
                             ger_t*     sub_ger,
@@ -141,7 +141,7 @@ void bli_her_cntl_obj_init( her_t*     cntl,
 {
 	cntl->impl_type       = impl_type;
 	cntl->var_num         = var_num;
-	cntl->b               = b;
+	cntl->bszid           = bszid;
 	cntl->sub_packv_x1    = sub_packv_x1;
 	cntl->sub_packm_c11   = sub_packm_c11;
 	cntl->sub_ger         = sub_ger;

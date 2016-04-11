@@ -32,32 +32,5 @@
 
 */
 
-#include "bli_syrk_check.h"
 #include "bli_syrk_front.h"
-
-
-//
-// Prototype object-based interface.
-//
-void bli_syrk( obj_t*  alpha,
-               obj_t*  a,
-               obj_t*  beta,
-               obj_t*  c );
-
-
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname)( \
-                          uplo_t  uploc, \
-                          trans_t transa, \
-                          dim_t   m, \
-                          dim_t   k, \
-                          ctype*  alpha, \
-                          ctype*  a, inc_t rs_a, inc_t cs_a, \
-                          ctype*  beta, \
-                          ctype*  c, inc_t rs_c, inc_t cs_c  \
-                        );
-
-INSERT_GENTPROT_BASIC( syrk )
 

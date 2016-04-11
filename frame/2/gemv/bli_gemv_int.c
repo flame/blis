@@ -41,6 +41,7 @@ typedef void (*FUNCPTR_T)( obj_t*  alpha,
                            obj_t*  x,
                            obj_t*  beta,
                            obj_t*  y,
+                           cntx_t* cntx,
                            gemv_t* cntl );
 
 static FUNCPTR_T vars[3][3] =
@@ -58,6 +59,7 @@ void bli_gemv_int( trans_t transa,
                    obj_t*  x,
                    obj_t*  beta,
                    obj_t*  y,
+                   cntx_t* cntx,
                    gemv_t* cntl )
 {
 	varnum_t  n;
@@ -73,7 +75,7 @@ void bli_gemv_int( trans_t transa,
 	// Check parameters. We use the aliased copy of A so the transa parameter
 	// is taken into account for dimension checking.
 	if ( bli_error_checking_is_enabled() )
-		bli_gemv_int_check( alpha, &a_local, &x_local, beta, y, cntl );
+		bli_gemv_check( alpha, &a_local, &x_local, beta, y );
 
 	// If y has a zero dimension, return early.
 	if ( bli_obj_has_zero_dim( *y ) ) return;
@@ -98,6 +100,7 @@ void bli_gemv_int( trans_t transa,
 	   &x_local,
 	   beta,
 	   y,
+	   cntx,
 	   cntl );
 }
 

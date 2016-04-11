@@ -51,7 +51,7 @@
 //     (b) MR (for zero-padding purposes when MR and NR are "swapped")
 //
 
-#define BLIS_SGEMM_UKERNEL         bli_sgemm_new_16x3
+#define BLIS_SGEMM_UKERNEL         bli_sgemm_asm_16x3
 #define BLIS_DEFAULT_MC_S              2016
 #define BLIS_DEFAULT_KC_S              128
 #define BLIS_DEFAULT_NC_S              8400
@@ -59,7 +59,7 @@
 #define BLIS_DEFAULT_NR_S              3
 //#define BLIS_UPANEL_B_ALIGN_SIZE_S     4096
 
-#define BLIS_DGEMM_UKERNEL         bli_dgemm_new_8x3
+#define BLIS_DGEMM_UKERNEL         bli_dgemm_asm_8x3
 //#define BLIS_DEFAULT_MC_D              768
 //#define BLIS_DEFAULT_KC_D              168
 #define BLIS_DEFAULT_MC_D              1008
@@ -69,14 +69,14 @@
 #define BLIS_DEFAULT_NR_D              3
 //#define BLIS_UPANEL_B_ALIGN_SIZE_D     4096
 
-#define BLIS_CGEMM_UKERNEL         bli_cgemm_new_4x2
+#define BLIS_CGEMM_UKERNEL         bli_cgemm_asm_4x2
 #define BLIS_DEFAULT_MC_C              512
 #define BLIS_DEFAULT_KC_C              256
 #define BLIS_DEFAULT_NC_C              8400
 #define BLIS_DEFAULT_MR_C              4
 #define BLIS_DEFAULT_NR_C              2
 
-#define BLIS_ZGEMM_UKERNEL         bli_zgemm_new_2x2
+#define BLIS_ZGEMM_UKERNEL         bli_zgemm_asm_2x2
 #define BLIS_DEFAULT_MC_Z              400
 #define BLIS_DEFAULT_KC_Z              160
 #define BLIS_DEFAULT_NC_Z              8400

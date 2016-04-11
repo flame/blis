@@ -38,6 +38,7 @@
 
 typedef void (*FUNCPTR_T)( obj_t*     p,
                            obj_t*     a,
+                           cntx_t*    cntx,
                            unpackv_t* cntl );
 
 static FUNCPTR_T vars[1][3] =
@@ -48,6 +49,7 @@ static FUNCPTR_T vars[1][3] =
 
 void bli_unpackv_int( obj_t*     p,
                       obj_t*     a,
+                      cntx_t*    cntx,
                       unpackv_t* cntl )
 {
 	// The unpackv operation consists of an optional casting post-process.
@@ -69,7 +71,7 @@ void bli_unpackv_int( obj_t*     p,
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
-		bli_unpackv_check( p, a, cntl );
+		bli_unpackv_check( p, a, cntx );
 
 	// Sanity check; A should never have a zero dimension. If we must support
 	// it, then we should fold it into the next alias-and-early-exit block.
@@ -123,6 +125,7 @@ void bli_unpackv_int( obj_t*     p,
 	// Invoke the variant.
 	f( p,
 	   &c,
+	   cntx,
 	   cntl );
 
 	// Now, if necessary, we cast the contents of c to vector a. If casting

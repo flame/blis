@@ -32,33 +32,39 @@
 
 */
 
+// -----------------------------------------------------------------------------
 
-func_t* bli_func_obj_create( void* ptr_s, bool_t pref_s,
-                             void* ptr_d, bool_t pref_d,
-                             void* ptr_c, bool_t pref_c,
-                             void* ptr_z, bool_t pref_z );
+// func_t query
+
+#define bli_func_get_dt( dt, f ) \
+\
+    ( (f)->ptr[ dt ] )
+
+// func_t modification
+
+#define bli_func_set_dt( fp, dt, f ) \
+{ \
+    (f)->ptr[ dt ] = fp; \
+}
+
+// -----------------------------------------------------------------------------
+
+func_t* bli_func_obj_create( void* ptr_s,
+                             void* ptr_d,
+                             void* ptr_c,
+                             void* ptr_z );
 
 void bli_func_obj_init( func_t* f,
-                        void*   ptr_s, bool_t pref_s,
-                        void*   ptr_d, bool_t pref_d,
-                        void*   ptr_c, bool_t pref_c,
-                        void*   ptr_z, bool_t pref_z );
+                        void*   ptr_s,
+                        void*   ptr_d,
+                        void*   ptr_c,
+                        void*   ptr_z );
 
 void bli_func_obj_free( func_t* f );
 
+// -----------------------------------------------------------------------------
 
-void* bli_func_obj_query( num_t   dt,
-                          func_t* f );
-
-bool_t bli_func_prefers_contig_rows( num_t   dt,
-                                     func_t* f );
-
-bool_t bli_func_prefers_contig_cols( num_t   dt,
-                                     func_t* f );
-
-bool_t bli_func_pref_is_sat_by( obj_t*  a,
-                                func_t* f );
-
-bool_t bli_func_pref_is_unsat_by( obj_t*  a,
-                                  func_t* f );
+bool_t bli_func_is_null_dt( num_t   dt,
+                            func_t* f );
+bool_t bli_func_is_null( func_t* f );
 

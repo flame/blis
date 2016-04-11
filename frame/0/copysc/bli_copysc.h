@@ -32,51 +32,37 @@
 
 */
 
-#include "bli_copysc_check.h"
-#include "bli_copysc_unb_var1.h"
-
 
 //
-// Prototype object-based interface.
+// Prototype object-based interfaces.
 //
-void bli_copysc( obj_t* chi,
-                 obj_t* psi );
 
-
-//
-// Prototype BLAS-like interfaces with homogeneous-typed operands.
-//
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
+#undef  GENFRONT
+#define GENFRONT( opname ) \
 \
-void PASTEMAC(ch,opname)( \
-                          conj_t conjchi, \
-                          ctype* chi, \
-                          ctype* psi  \
-                        );
-
-INSERT_GENTPROT_BASIC( copysc )
+void PASTEMAC0(opname) \
+     ( \
+       obj_t*  chi, \
+       obj_t*  psi  \
+     );
+GENFRONT( copysc )
 
 
 //
-// Prototype BLAS-like interfaces with heterogeneous-typed operands.
+// Define BLAS-like interfaces with heterogeneous-typed operands.
 //
+
 #undef  GENTPROT2
-#define GENTPROT2( ctype_x, ctype_y, chx, chy, opname ) \
+#define GENTPROT2( ctype_x, ctype_y, chx, chy, varname ) \
 \
-void PASTEMAC2(chx,chy,opname)( \
-                                conj_t   conjchi, \
-                                ctype_x* chi, \
-                                ctype_y* psi  \
-                              );
+void PASTEMAC2(chx,chy,varname) \
+     ( \
+       conj_t conjchi, \
+       void*  chi, \
+       void*  psi \
+     );
 
 INSERT_GENTPROT2_BASIC( copysc )
-
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
 INSERT_GENTPROT2_MIX_D( copysc )
-#endif
-
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
 INSERT_GENTPROT2_MIX_P( copysc )
-#endif
 

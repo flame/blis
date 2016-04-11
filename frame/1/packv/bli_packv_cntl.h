@@ -36,12 +36,12 @@ struct packv_s
 {
 	impl_t         impl_type;
 	varnum_t       var_num;
+	bszid_t        bmid;
 	pack_t         pack_schema;
-	blksz_t*       mult_dim;
 };
 typedef struct packv_s packv_t;
 
-#define cntl_mult_dim( cntl ) cntl->mult_dim
+#define cntl_bmid( cntl )          cntl->bmid
 
 #define cntl_sub_packv( cntl )     cntl->sub_packv
 #define cntl_sub_packv_x( cntl )   cntl->sub_packv_x
@@ -53,11 +53,11 @@ void     bli_packv_cntl_init( void );
 void     bli_packv_cntl_finalize( void );
 packv_t* bli_packv_cntl_obj_create( impl_t     impl_type,
                                     varnum_t   var_num,
-                                    blksz_t*   mult_dim,
+                                    bszid_t    bmid,
                                     pack_t     pack_schema );
 void bli_packv_cntl_obj_init( packv_t*   cntl,
                               impl_t     impl_type,
                               varnum_t   var_num,
-                              blksz_t*   mult_dim,
+                              bszid_t    bmid,
                               pack_t     pack_schema );
 

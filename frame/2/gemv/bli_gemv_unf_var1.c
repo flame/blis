@@ -34,124 +34,33 @@
 
 #include "blis.h"
 
-#define FUNCPTR_T gemv_fp
-
-typedef void (*FUNCPTR_T)(
-                           trans_t transa,
-                           conj_t  conjx,
-                           dim_t   m,
-                           dim_t   n,
-                           void*   alpha,
-                           void*   a, inc_t rs_a, inc_t cs_a,
-                           void*   x, inc_t incx,
-                           void*   beta,
-                           void*   y, inc_t incy
-                         );
-
-// If some mixed datatype functions will not be compiled, we initialize
-// the corresponding elements of the function array to NULL.
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-static FUNCPTR_T GENARRAY3_ALL(ftypes,gemv_unf_var1);
-#else
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-static FUNCPTR_T GENARRAY3_EXT(ftypes,gemv_unf_var1);
-#else
-static FUNCPTR_T GENARRAY3_MIN(ftypes,gemv_unf_var1);
-#endif
-#endif
-
-
-void bli_gemv_unf_var1( obj_t*  alpha,
-                        obj_t*  a,
-                        obj_t*  x,
-                        obj_t*  beta,
-                        obj_t*  y,
-                        gemv_t* cntl )
-{
-	num_t     dt_a      = bli_obj_datatype( *a );
-	num_t     dt_x      = bli_obj_datatype( *x );
-	num_t     dt_y      = bli_obj_datatype( *y );
-
-	conj_t    transa    = bli_obj_conjtrans_status( *a );
-	conj_t    conjx     = bli_obj_conj_status( *x );
-
-	dim_t     m         = bli_obj_length( *a );
-	dim_t     n         = bli_obj_width( *a );
-
-	void*     buf_a     = bli_obj_buffer_at_off( *a );
-	inc_t     rs_a      = bli_obj_row_stride( *a );
-	inc_t     cs_a      = bli_obj_col_stride( *a );
-
-	void*     buf_x     = bli_obj_buffer_at_off( *x );
-	inc_t     incx      = bli_obj_vector_inc( *x );
-
-	void*     buf_y     = bli_obj_buffer_at_off( *y );
-	inc_t     incy      = bli_obj_vector_inc( *y );
-
-	num_t     dt_alpha;
-	void*     buf_alpha;
-
-	num_t     dt_beta;
-	void*     buf_beta;
-
-	FUNCPTR_T f;
-
-	// The datatype of alpha MUST be the type union of a and x. This is to
-	// prevent any unnecessary loss of information during computation.
-	dt_alpha  = bli_datatype_union( dt_a, dt_x );
-	buf_alpha = bli_obj_buffer_for_1x1( dt_alpha, *alpha );
-
-	// The datatype of beta MUST be the same as the datatype of y.
-	dt_beta   = dt_y;
-	buf_beta  = bli_obj_buffer_for_1x1( dt_beta, *beta );
-
-	// Index into the type combination array to extract the correct
-	// function pointer.
-	f = ftypes[dt_a][dt_x][dt_y];
-
-	// Invoke the function.
-	f( transa,
-	   conjx,
-	   m,
-	   n,
-	   buf_alpha,
-	   buf_a, rs_a, cs_a,
-	   buf_x, incx,
-	   buf_beta,
-	   buf_y, incy );
-}
-
-
-#undef  GENTFUNC3U12
-#define GENTFUNC3U12( ctype_a, ctype_x, ctype_y, ctype_ax, cha, chx, chy, chax, varname, kername ) \
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, varname ) \
 \
-void PASTEMAC3(cha,chx,chy,varname)( \
-                                     trans_t transa, \
-                                     conj_t  conjx, \
-                                     dim_t   m, \
-                                     dim_t   n, \
-                                     void*   alpha, \
-                                     void*   a, inc_t rs_a, inc_t cs_a, \
-                                     void*   x, inc_t incx, \
-                                     void*   beta, \
-                                     void*   y, inc_t incy  \
-                         ) \
+void PASTEMAC(ch,varname) \
+     ( \
+       trans_t transa, \
+       conj_t  conjx, \
+       dim_t   m, \
+       dim_t   n, \
+       ctype*  alpha, \
+       ctype*  a, inc_t rs_a, inc_t cs_a, \
+       ctype*  x, inc_t incx, \
+       ctype*  beta, \
+       ctype*  y, inc_t incy, \
+       cntx_t* cntx  \
+     ) \
 { \
-	ctype_ax* alpha_cast = alpha; \
-	ctype_y*  beta_cast  = beta; \
-	ctype_a*  a_cast     = a; \
-	ctype_x*  x_cast     = x; \
-	ctype_y*  y_cast     = y; \
-	ctype_a*  A1; \
-	ctype_x*  x1; \
-	ctype_y*  y1; \
-	dim_t     i; \
-	dim_t     b_fuse, f; \
-	dim_t     n_elem, n_iter; \
-	inc_t     rs_at, cs_at; \
-	conj_t    conja; \
+	const num_t dt = PASTEMAC(ch,type); \
 \
-	if ( bli_zero_dim2( m, n ) ) return; \
+	ctype*  A1; \
+	ctype*  x1; \
+	ctype*  y1; \
+	dim_t   i; \
+	dim_t   b_fuse, f; \
+	dim_t   n_elem, n_iter; \
+	inc_t   rs_at, cs_at; \
+	conj_t  conja; \
 \
 	bli_set_dims_incs_with_trans( transa, \
 	                              m, n, rs_a, cs_a, \
@@ -159,40 +68,37 @@ void PASTEMAC3(cha,chx,chy,varname)( \
 \
 	conja = bli_extract_conj( transa ); \
 \
-	/* Query the fusing factor for the dotxf implementation. */ \
-	b_fuse = PASTEMAC(chax,dotxf_fusefac); \
+	PASTECH(ch,dotxf_ft) kfp_df; \
+\
+	/* Query the context for the kernel function pointer and fusing factor. */ \
+	kfp_df = bli_cntx_get_l1f_ker_dt( dt, BLIS_DOTXF_KER, cntx ); \
+	b_fuse = bli_cntx_get_blksz_def_dt( dt, BLIS_DF, cntx ); \
 \
 	for ( i = 0; i < n_iter; i += f ) \
 	{ \
 		f  = bli_determine_blocksize_dim_f( i, n_iter, b_fuse ); \
 \
-		A1 = a_cast + (i  )*rs_at + (0  )*cs_at; \
-		x1 = x_cast + (0  )*incy; \
-		y1 = y_cast + (i  )*incy; \
+		A1 = a + (i  )*rs_at + (0  )*cs_at; \
+		x1 = x + (0  )*incy; \
+		y1 = y + (i  )*incy; \
 \
 		/* y1 = beta * y1 + alpha * A1 * x; */ \
-		PASTEMAC3(cha,chx,chy,kername)( conja, \
-		                                conjx, \
-		                                n_elem, \
-		                                f, \
-		                                alpha_cast, \
-		                                A1,   cs_at, rs_at, \
-		                                x1,   incx, \
-		                                beta_cast, \
-		                                y1,   incy ); \
+		kfp_df \
+		( \
+		  conja, \
+		  conjx, \
+		  n_elem, \
+		  f, \
+		  alpha, \
+		  A1,   cs_at, rs_at, \
+		  x1,   incx, \
+		  beta, \
+		  y1,   incy, \
+		  cntx  \
+		); \
 \
 	} \
 }
 
-// Define the basic set of functions unconditionally, and then also some
-// mixed datatype functions if requested.
-INSERT_GENTFUNC3U12_BASIC( gemv_unf_var1, DOTXF_KERNEL )
-
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTFUNC3U12_MIX_D( gemv_unf_var1, DOTXF_KERNEL )
-#endif
-
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTFUNC3U12_MIX_P( gemv_unf_var1, DOTXF_KERNEL )
-#endif
+INSERT_GENTFUNC_BASIC0( gemv_unf_var1 )
 

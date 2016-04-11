@@ -46,6 +46,7 @@ typedef struct thread_data
   obj_t* b; 
   obj_t* beta;
   obj_t* c;
+  void* cntx;
   void* cntl;
   void* thread;
 } thread_data_t;
@@ -54,20 +55,34 @@ void* thread_decorator_helper( void* data_void )
 {
 	thread_data_t* data = data_void;
 
-    data->func( data->alpha, data->a, data->b, data->beta, data->c, data->cntl, data->thread );
+    data->func
+	(
+	  data->alpha,
+	  data->a,
+	  data->b,
+	  data->beta,
+	  data->c,
+	  data->cntx,
+	  data->cntl,
+	  data->thread
+	);
 
 	return NULL;
 }
 
-void bli_level3_thread_decorator( dim_t n_threads, 
-                                  level3_int_t func, 
-                                  obj_t* alpha, 
-                                  obj_t* a, 
-                                  obj_t* b, 
-                                  obj_t* beta, 
-                                  obj_t* c, 
-                                  void* cntl, 
-                                  void** thread )
+void bli_level3_thread_decorator
+     (
+       dim_t    n_threads,
+       l3_int_t func,
+       obj_t*   alpha,
+       obj_t*   a,
+       obj_t*   b,
+       obj_t*   beta,
+       obj_t*   c,
+       void*    cntx,
+       void*    cntl,
+       void**   thread
+     )
 {
     pthread_t* pthreads = (pthread_t*) bli_malloc(sizeof(pthread_t) * n_threads);
     //Saying "datas" is kind of like saying "all y'all"
@@ -83,8 +98,10 @@ void bli_level3_thread_decorator( dim_t n_threads,
         datas[i].b = b;
         datas[i].beta = beta;
         datas[i].c = c;
+        datas[i].cntx = cntx;
         datas[i].cntl = cntl;
         datas[i].thread = thread[i];
+
         pthread_create( &pthreads[i], NULL, &thread_decorator_helper, &datas[i] );
     }
 

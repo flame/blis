@@ -36,87 +36,107 @@
 
 
 
-void bli_saxpyf_opt_var1(
-                          conj_t             conja,
-                          conj_t             conjx,
-                          dim_t              m,
-                          dim_t              b_n,
-                          float*    restrict alpha,
-                          float*    restrict a, inc_t inca, inc_t lda,
-                          float*    restrict x, inc_t incx,
-                          float*    restrict y, inc_t incy
-                        )
+void bli_saxpyf_opt_var1
+     (
+       conj_t    conja,
+       conj_t    conjx,
+       dim_t     m,
+       dim_t     b_n,
+       float*    alpha,
+       float*    a, inc_t inca, inc_t lda,
+       float*    x, inc_t incx,
+       float*    y, inc_t incy,
+       cntx_t*   cntx
+     )
 {
 	/* Just call the reference implementation. */
-	BLIS_SAXPYF_KERNEL_REF( conja,
-	                        conjx,
-	                        m,
-	                        b_n,
-	                        alpha,
-	                        a, inca, lda,
-	                        x, incx,
-	                        y, incy );
+	BLIS_SAXPYF_KERNEL_REF
+	(
+	  conja,
+	  conjx,
+	  m,
+	  b_n,
+	  alpha,
+	  a, inca, lda,
+	  x, incx,
+	  y, incy,
+	  cntx
+	);
 }
 
 
 
-void bli_daxpyf_opt_var1(
-                          conj_t             conja,
-                          conj_t             conjx,
-                          dim_t              m,
-                          dim_t              b_n,
-                          double*   restrict alpha,
-                          double*   restrict a, inc_t inca, inc_t lda,
-                          double*   restrict x, inc_t incx,
-                          double*   restrict y, inc_t incy
-                        )
+void bli_daxpyf_opt_var1
+     (
+       conj_t    conja,
+       conj_t    conjx,
+       dim_t     m,
+       dim_t     b_n,
+       double*   alpha,
+       double*   a, inc_t inca, inc_t lda,
+       double*   x, inc_t incx,
+       double*   y, inc_t incy,
+       cntx_t*   cntx
+     )
 {
 	/* Just call the reference implementation. */
-	BLIS_DAXPYF_KERNEL_REF( conja,
-	                        conjx,
-	                        m,
-	                        b_n,
-	                        alpha,
-	                        a, inca, lda,
-	                        x, incx,
-	                        y, incy );
+	BLIS_DAXPYF_KERNEL_REF
+	(
+	  conja,
+	  conjx,
+	  m,
+	  b_n,
+	  alpha,
+	  a, inca, lda,
+	  x, incx,
+	  y, incy,
+	  cntx
+	);
 }
 
 
 
-void bli_caxpyf_opt_var1(
-                          conj_t             conja,
-                          conj_t             conjx,
-                          dim_t              m,
-                          dim_t              b_n,
-                          scomplex* restrict alpha,
-                          scomplex* restrict a, inc_t inca, inc_t lda,
-                          scomplex* restrict x, inc_t incx,
-                          scomplex* restrict y, inc_t incy
-                        )
+void bli_caxpyf_opt_var1
+     (
+       conj_t    conja,
+       conj_t    conjx,
+       dim_t     m,
+       dim_t     b_n,
+       scomplex* alpha,
+       scomplex* a, inc_t inca, inc_t lda,
+       scomplex* x, inc_t incx,
+       scomplex* y, inc_t incy,
+       cntx_t*   cntx
+     )
 {
 	/* Just call the reference implementation. */
-	BLIS_CAXPYF_KERNEL_REF( conja,
-	                        conjx,
-	                        m,
-	                        b_n,
-	                        alpha,
-	                        a, inca, lda,
-	                        x, incx,
-	                        y, incy );
+	BLIS_CAXPYF_KERNEL_REF
+	(
+	  conja,
+	  conjx,
+	  m,
+	  b_n,
+	  alpha,
+	  a, inca, lda,
+	  x, incx,
+	  y, incy,
+	  cntx
+	);
 }
 
 
-void bli_zaxpyf_opt_var1(
-                          conj_t             conja,
-                          conj_t             conjx,
-                          dim_t              m,
-                          dim_t              b_n,
-                          dcomplex* restrict alpha,
-                          dcomplex* restrict a, inc_t inca, inc_t lda,
-                          dcomplex* restrict x, inc_t incx,
-                          dcomplex* restrict y, inc_t incy
-                        )
+void bli_zaxpyf_opt_var1
+     (
+       conj_t    conja,
+       conj_t    conjx,
+       dim_t     m,
+       dim_t     b_n,
+       dcomplex* alpha,
+       dcomplex* a, inc_t inca, inc_t lda,
+       dcomplex* x, inc_t incx,
+       dcomplex* y, inc_t incy,
+       cntx_t*   cntx
+     )
 {
 /*
   Template axpyf kernel implementation
@@ -243,14 +263,18 @@ void bli_zaxpyf_opt_var1(
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE )
 	{
-		BLIS_ZAXPYF_KERNEL_REF( conja,
-		                        conjx,
-		                        m,
-		                        b_n,
-		                        alpha,
-		                        a, inca, lda,
-		                        x, incx,
-		                        y, incy );
+		BLIS_ZAXPYF_KERNEL_REF
+		(
+		  conja,
+		  conjx,
+		  m,
+		  b_n,
+		  alpha,
+		  a, inca, lda,
+		  x, incx,
+		  y, incy,
+		  cntx
+		);
         return;
 	}
 
@@ -274,16 +298,16 @@ void bli_zaxpyf_opt_var1(
 	{
 		for ( j = 0; j < b_n; ++j )
 		{
-			bli_zzcopys( *xp[ j ], alpha_x[ j ] );
-			bli_zzscals( *alpha, alpha_x[ j ] );
+			bli_zcopys( *xp[ j ], alpha_x[ j ] );
+			bli_zscals( *alpha, alpha_x[ j ] );
 		}
 	}
 	else // if ( bli_is_conj( conjx ) )
 	{
 		for ( j = 0; j < b_n; ++j )
 		{
-			bli_zzcopyjs( *xp[ j ], alpha_x[ j ] );
-			bli_zzscals( *alpha, alpha_x[ j ] );
+			bli_zcopyjs( *xp[ j ], alpha_x[ j ] );
+			bli_zscals( *alpha, alpha_x[ j ] );
 		}
 	}
 
@@ -296,7 +320,7 @@ void bli_zaxpyf_opt_var1(
 		{
 			for ( j = 0; j < b_n; ++j )
 			{
-				bli_zzzaxpys( alpha_x[ j ], *ap[ j ], *yp );
+				bli_zaxpys( alpha_x[ j ], *ap[ j ], *yp );
 
 				ap[ j ] += 1;
 			}
@@ -312,7 +336,7 @@ void bli_zaxpyf_opt_var1(
 		{
 			for ( j = 0; j < b_n; ++j )
 			{
-				bli_zzzaxpys( alpha_x[ j ], *ap[ j ], *yp );
+				bli_zaxpys( alpha_x[ j ], *ap[ j ], *yp );
 
 				ap[ j ] += n_elem_per_iter;
 			}
@@ -324,7 +348,7 @@ void bli_zaxpyf_opt_var1(
 		{
 			for ( j = 0; j < b_n; ++j )
 			{
-				bli_zzzaxpys( alpha_x[ j ], *ap[ j ], *yp );
+				bli_zaxpys( alpha_x[ j ], *ap[ j ], *yp );
 
 				ap[ j ] += 1;
 			}
@@ -338,7 +362,7 @@ void bli_zaxpyf_opt_var1(
 		{
 			for ( j = 0; j < b_n; ++j )
 			{
-				bli_zzzaxpyjs( alpha_x[ j ], *ap[ j ], *yp );
+				bli_zaxpyjs( alpha_x[ j ], *ap[ j ], *yp );
 
 				ap[ j ] += 1;
 			}
@@ -354,7 +378,7 @@ void bli_zaxpyf_opt_var1(
 		{
 			for ( j = 0; j < b_n; ++j )
 			{
-				bli_zzzaxpyjs( alpha_x[ j ], *ap[ j ], *yp );
+				bli_zaxpyjs( alpha_x[ j ], *ap[ j ], *yp );
 
 				ap[ j ] += n_elem_per_iter;
 			}
@@ -366,7 +390,7 @@ void bli_zaxpyf_opt_var1(
 		{
 			for ( j = 0; j < b_n; ++j )
 			{
-				bli_zzzaxpyjs( alpha_x[ j ], *ap[ j ], *yp );
+				bli_zaxpyjs( alpha_x[ j ], *ap[ j ], *yp );
 
 				ap[ j ] += 1;
 			}
