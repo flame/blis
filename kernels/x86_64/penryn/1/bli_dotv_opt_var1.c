@@ -38,28 +38,26 @@
 #include "pmmintrin.h"
 typedef union
 {
-	__m128d v;
-	double  d[2];
+    __m128d v;
+    double  d[2];
 } v2df_t;
 
 
-void bli_daxpyv_int_var1
+void bli_ddotv_opt_var1 
      ( 
        conj_t  conjx,
+       conj_t  conjy,
        dim_t   n,
-       double* alpha,
        double* x, inc_t incx,
        double* y, inc_t incy,
+       double* rho,
        cntx_t* cntx
      )
-{
-	double*  restrict alpha_cast = alpha;
-	double*  restrict x_cast = x;
-	double*  restrict y_cast = y;
-	dim_t             i;
-
-	const dim_t       n_elem_per_reg = 2;
-	const dim_t       n_iter_unroll  = 4;
+{ 
+	double*  restrict x_cast   = x; 
+	double*  restrict y_cast   = y; 
+	double*  restrict rho_cast = rho; 
+	dim_t             i; 
 
 	dim_t             n_pre;
 	dim_t             n_run;
@@ -67,16 +65,20 @@ void bli_daxpyv_int_var1
 
 	double*  restrict x1;
 	double*  restrict y1;
-	double            alpha1c, x1c;
+	double            rho1;
+	double            x1c, y1c;
 
-	v2df_t            alpha1v;
-	v2df_t            x1v, x2v, x3v, x4v;
-	v2df_t            y1v, y2v, y3v, y4v;
+	v2df_t            rho1v;
+	v2df_t            x1v, y1v;
 
 	bool_t            use_ref = FALSE;
 
-
-	if ( bli_zero_dim1( n ) ) return;
+	// If the vector lengths are zero, set rho to zero and return.
+	if ( bli_zero_dim1( n ) ) 
+	{ 
+		PASTEMAC(d,set0s)( *rho_cast ); 
+		return; 
+	} 
 
 	n_pre = 0;
 
@@ -95,87 +97,72 @@ void bli_daxpyv_int_var1
 		     bli_is_unaligned_to( y, 16 ) )
 		{
 			use_ref = FALSE;
-			n_pre   = 1;
+			n_pre = 1;
 		}
 	}
 
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE )
 	{
-		BLIS_DAXPYV_KERNEL_REF( conjx,
-		                        n,
-		                        alpha,
-		                        x, incx,
-		                        y, incy );
+		BLIS_DDOTV_KERNEL_REF( conjx,
+		                       conjy,
+		                       n,
+		                       x, incx,
+		                       y, incy,
+		                       rho,
+		                       cntx );
 		return;
 	}
 
-
-	n_run       = ( n - n_pre ) / ( n_elem_per_reg * n_iter_unroll );
-	n_left      = ( n - n_pre ) % ( n_elem_per_reg * n_iter_unroll );
-
-	alpha1c = *alpha_cast;
+	n_run       = ( n - n_pre ) / 2;
+	n_left      = ( n - n_pre ) % 2;
 
 	x1 = x_cast;
 	y1 = y_cast;
 
+	PASTEMAC(d,set0s)( rho1 ); 
+
 	if ( n_pre == 1 )
 	{
 		x1c = *x1;
+		y1c = *y1;
 
-		*y1 += alpha1c * x1c;
+		rho1 += x1c * y1c;
 
 		x1 += incx;
 		y1 += incy;
 	}
 
-	alpha1v.v = _mm_loaddup_pd( ( double* )&alpha1c );
+	rho1v.v = _mm_setzero_pd();
 
 	for ( i = 0; i < n_run; ++i )
 	{
-		y1v.v = _mm_load_pd( ( double* )y1 );
 		x1v.v = _mm_load_pd( ( double* )x1 );
+		y1v.v = _mm_load_pd( ( double* )y1 );
 
-		y1v.v += alpha1v.v * x1v.v;
+		rho1v.v += x1v.v * y1v.v;
 
-		_mm_store_pd( ( double* )(y1    ), y1v.v );
-
-		y2v.v = _mm_load_pd( ( double* )(y1 + 2) );
-		x2v.v = _mm_load_pd( ( double* )(x1 + 2) );
-
-		y2v.v += alpha1v.v * x2v.v;
-
-		_mm_store_pd( ( double* )(y1 + 2), y2v.v );
-
-		y3v.v = _mm_load_pd( ( double* )(y1 + 4) );
-		x3v.v = _mm_load_pd( ( double* )(x1 + 4) );
-
-		y3v.v += alpha1v.v * x3v.v;
-
-		_mm_store_pd( ( double* )(y1 + 4), y3v.v );
-
-		y4v.v = _mm_load_pd( ( double* )(y1 + 6) );
-		x4v.v = _mm_load_pd( ( double* )(x1 + 6) );
-
-		y4v.v += alpha1v.v * x4v.v;
-
-		_mm_store_pd( ( double* )(y1 + 6), y4v.v );
-
-
-		x1 += n_elem_per_reg * n_iter_unroll;
-		y1 += n_elem_per_reg * n_iter_unroll;
+		//x1 += 2*incx;
+		//y1 += 2*incy;
+		x1 += 2;
+		y1 += 2;
 	}
+
+	rho1 += rho1v.d[0] + rho1v.d[1];
 
 	if ( n_left > 0 )
 	{
 		for ( i = 0; i < n_left; ++i )
 		{
 			x1c = *x1;
+			y1c = *y1;
 
-			*y1 += alpha1c * x1c;
+			rho1 += x1c * y1c;
 
 			x1 += incx;
 			y1 += incy;
 		}
 	}
+
+	PASTEMAC(d,copys)( rho1, *rho_cast ); 
 }

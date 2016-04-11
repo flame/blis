@@ -117,7 +117,8 @@ void bli_daxpy2v_int_var1
 		                         beta,
 		                         x, incx,
 		                         y, incy,
-		                         z, incz );
+		                         z, incz,
+		                         cntx );
 		return;
 	}
 

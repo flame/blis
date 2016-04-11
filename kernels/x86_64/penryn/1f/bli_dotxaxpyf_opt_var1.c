@@ -104,10 +104,11 @@ void bli_ddotxaxpyf_int_var1
 	// If the vector lengths are zero, scale y by beta and return.
 	if ( bli_zero_dim1( m ) ) 
 	{ 
-		PASTEMAC2(d,d,scalv)( BLIS_NO_CONJUGATE,
-		                      b_n,
-		                      beta,
-		                      y, incy );
+		bli_dscalv( BLIS_NO_CONJUGATE,
+		            b_n,
+		            beta,
+		            y, incy,
+		            cntx );
 		return; 
 	} 
 
@@ -115,7 +116,7 @@ void bli_ddotxaxpyf_int_var1
 
     // If there is anything that would interfere with our use of aligned
     // vector loads/stores, call the reference implementation.
-	if ( b_n < PASTEMAC(d,dotxaxpyf_fusefac) )
+	if ( b_n < bli_cntx_get_blksz_def_dt( BLIS_DOUBLE, BLIS_XF, cntx ) )
 	{
 		use_ref = TRUE;
 	}
@@ -155,7 +156,8 @@ void bli_ddotxaxpyf_int_var1
 		                            x_cast, incx,
 		                            beta_cast,
 		                            y_cast, incy,
-		                            z_cast, incz );
+		                            z_cast, incz,
+		                            cntx );
 		return;
 	}
 

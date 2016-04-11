@@ -90,7 +90,7 @@ void bli_daxpyf_int_var1
 
 	// If there is anything that would interfere with our use of aligned
 	// vector loads/stores, call the reference implementation.
-	if ( b_n < PASTEMAC(d,axpyf_fusefac) )
+	if ( b_n < bli_cntx_get_blksz_def_dt( BLIS_DOUBLE, BLIS_AF, cntx ) )
 	{
 		use_ref = TRUE;
 	}
@@ -122,7 +122,8 @@ void bli_daxpyf_int_var1
 		                        alpha_cast,
 		                        a_cast, inca, lda,
 		                        x_cast, incx,
-		                        y_cast, incy );
+		                        y_cast, incy,
+		                        cntx );
 		return;
 	}
 

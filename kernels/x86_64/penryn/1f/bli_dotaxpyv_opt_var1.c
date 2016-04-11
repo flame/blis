@@ -120,7 +120,8 @@ void bli_ddotaxpyv_int_var1
 		                           x, incx,
 		                           y, incy,
 		                           rho,
-		                           z, incz );
+		                           z, incz,
+		                           cntx );
 		return;
 	}
 
