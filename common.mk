@@ -161,7 +161,7 @@ LDFLAGS      += -fopenmp
 endif
 ifeq ($(THREADING_MODEL),pthreads)
 CTHREADFLAGS := -pthread -DBLIS_ENABLE_PTHREADS
-LDFLAGS      += -pthread
+LDFLAGS      += -lpthread
 endif
 endif
 
@@ -175,7 +175,7 @@ LDFLAGS      += -openmp
 endif
 ifeq ($(THREADING_MODEL),pthreads)
 CTHREADFLAGS := -pthread -DBLIS_ENABLE_PTHREADS
-LDFLAGS      += -pthread
+LDFLAGS      += -lpthread
 endif
 endif
 
@@ -188,7 +188,7 @@ $(error OpenMP is not supported with Clang.)
 endif
 ifeq ($(THREADING_MODEL),pthreads)
 CTHREADFLAGS := -pthread -DBLIS_ENABLE_PTHREADS
-LDFLAGS      += -pthread
+LDFLAGS      += -lpthread
 endif
 endif
 
