@@ -171,8 +171,6 @@
 
 // -- gemm --
 
-#include "bli_gemm_8x8.h"
-
 #define BLIS_DGEMM_UKERNEL         bli_dgemm_int_8x8
 #define BLIS_ZGEMM_UKERNEL         bli_zgemm_int_8x8
 
