@@ -254,7 +254,9 @@ gen_mkfiles()
 	
 	
 	# Append a relevant suffix to the makefile variable name, if necesary
-	all_add_src_var_name "$cur_dir"
+	# NOTE: This step is disabled because special directories are presently
+	# ignored when generating makefile variable names.
+	#all_add_src_var_name "$cur_dir"
 	
 	
 	# Be verbose if level 2 was requested
@@ -286,7 +288,9 @@ gen_mkfiles()
 	
 	
 	# Remove a relevant suffix from the makefile variable name, if necesary
-	all_del_src_var_name "$cur_dir"
+	# NOTE: This step is disabled because special directories are presently
+	# ignored when generating makefile variable names.
+	#all_del_src_var_name "$cur_dir"
 	
 	
 	# Return peacefully
@@ -295,42 +299,44 @@ gen_mkfiles()
 
 
 
-update_src_var_name_special()
-{
-	local dir act i name var_suffix
-	
-	# Extract arguments.
-	act="$1"
-	dir="$2"
-	
-	# Strip / from end of directory path, if there is one, and then strip
-	# path from directory name.
-	dir=${dir%/}
-	dir=${dir##*/}
-	
-	# Run through our list.
-	for specdir in "${special_dirs}"; do
-		
-		# If the current item matches sdir, then we'll have
-		# to make a modification of some form.
-		if [ "$dir" = "$specdir" ]; then
-			
-			# Convert the directory name to uppercase.
-			var_suffix=$(echo "$dir" | tr '[:lower:]' '[:upper:]')
-			
-			# Either add or remove the suffix, and also update the
-			# source file suffix variable.
-			if [ "$act" == "+" ]; then
-				src_var_name=${src_var_name}_$var_suffix
-			else
-				src_var_name=${src_var_name%_$var_suffix}
-			fi
-			
-			# No need to continue iterating.
-			break;
-		fi
-	done
-}
+#update_src_var_name_special()
+#{
+#	local dir act i name var_suffix
+#	
+#	# Extract arguments.
+#	act="$1"
+#	dir="$2"
+#	
+#	# Strip / from end of directory path, if there is one, and then strip
+#	# path from directory name.
+#	dir=${dir%/}
+#	dir=${dir##*/}
+#	
+#	# Run through our list.
+#	# NOTE: CURRENTLY, SPECIAL DIRECTORY NAMES ARE IGNORED. In order to
+#	#       re-enable them, remove the quotes from "${special_dirs}".
+#	for specdir in "${special_dirs}"; do
+#		
+#		# If the current item matches sdir, then we'll have
+#		# to make a modification of some form.
+#		if [ "$dir" = "$specdir" ]; then
+#			
+#			# Convert the directory name to uppercase.
+#			var_suffix=$(echo "$dir" | tr '[:lower:]' '[:upper:]')
+#			
+#			# Either add or remove the suffix, and also update the
+#			# source file suffix variable.
+#			if [ "$act" == "+" ]; then
+#				src_var_name=${src_var_name}_$var_suffix
+#			else
+#				src_var_name=${src_var_name%_$var_suffix}
+#			fi
+#			
+#			# No need to continue iterating.
+#			break;
+#		fi
+#	done
+#}
 
 #init_src_var_name()
 #{
@@ -351,20 +357,20 @@ update_src_var_name_special()
 #	done
 #}
 
-all_add_src_var_name()
-{
-	local dir="$1"
-	
-	update_src_var_name_special "+" "$dir"
+#all_add_src_var_name()
+#{
+#	local dir="$1"
+#	
+#	update_src_var_name_special "+" "$dir"
+#
+#}
 
-}
-
-all_del_src_var_name()
-{
-	local dir="$1"
-	
-	update_src_var_name_special "-" "$dir"
-}
+#all_del_src_var_name()
+#{
+#	local dir="$1"
+#	
+#	update_src_var_name_special "-" "$dir"
+#}
 
 read_mkfile_config()
 {
