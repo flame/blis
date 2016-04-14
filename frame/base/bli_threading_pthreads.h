@@ -39,15 +39,17 @@
 
 #include <pthread.h>
 
-#ifdef __APPLE__
+#if !_POSIX_BARRIER
 typedef int pthread_barrierattr_t;
-typedef struct
+
+struct pthread_barrier_s
 {
     pthread_mutex_t mutex;
-    pthread_cond_t cond;
-    int count;
-    int tripCount;
-} pthread_barrier_t;
+    bool_t  sense;
+    dim_t   threads_arrived;
+    dim_t   n_threads;
+};
+typedef struct pthread_barrier_s pthread_barrier_t;
 
 
 int pthread_barrier_init(pthread_barrier_t *barrier, const pthread_barrierattr_t *attr, unsigned int count);
