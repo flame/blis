@@ -144,25 +144,7 @@
 
 // -- Default fusing factors for level-1f operations --
 
-#define BLIS_DEFAULT_1F_S        8
-#define BLIS_DEFAULT_1F_D        8
-#define BLIS_DEFAULT_1F_C        4
-#define BLIS_DEFAULT_1F_Z        2
-
-#define BLIS_DEFAULT_AF_S          BLIS_DEFAULT_1F_S
-#define BLIS_DEFAULT_AF_D          BLIS_DEFAULT_1F_D
-#define BLIS_DEFAULT_AF_C          BLIS_DEFAULT_1F_C
-#define BLIS_DEFAULT_AF_Z          BLIS_DEFAULT_1F_Z
-
-#define BLIS_DEFAULT_DF_S          BLIS_DEFAULT_1F_S
-#define BLIS_DEFAULT_DF_D          BLIS_DEFAULT_1F_D
-#define BLIS_DEFAULT_DF_C          BLIS_DEFAULT_1F_C
-#define BLIS_DEFAULT_DF_Z          BLIS_DEFAULT_1F_Z
-
-#define BLIS_DEFAULT_XF_S      BLIS_DEFAULT_1F_S
-#define BLIS_DEFAULT_XF_D      BLIS_DEFAULT_1F_D
-#define BLIS_DEFAULT_XF_C      BLIS_DEFAULT_1F_C
-#define BLIS_DEFAULT_XF_Z      BLIS_DEFAULT_1F_Z
+#define BLIS_DEFAULT_AF_D          8
 
 
 

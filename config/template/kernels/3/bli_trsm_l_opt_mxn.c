@@ -84,77 +84,11 @@ void bli_dtrsm_l_opt_mxn
   where A11 is MR x MR and lower triangular, B11 is MR x NR, and C11 is
   MR x NR.
 
-  Parameters:
+  For more info, please refer to the BLIS website's wiki on kernels:
 
-  - a11:    The address of A11, which is the MR x MR lower triangular
-            submatrix within the packed micro-panel of matrix A. A11 is
-            stored by columns with leading dimension PACKMR, where
-            typically PACKMR = MR. Note that A11 contains elements in both
-            triangles, though elements in the unstored triangle are not
-            guaranteed to be zero and thus should not be referenced.
-  - b11:    The address of B11, which is an MR x NR submatrix of the
-            packed micro-panel of B. B11 is stored by rows with leading
-            dimension PACKNR, where typically PACKNR = NR.
-  - c11:    The address of C11, which is an MR x NR submatrix of matrix C,
-            stored according to rs_c and cs_c. C11 is the submatrix within
-            C that corresponds to the elements which were packed into B11.
-            Thus, C is the original input matrix B to the overall trsm
-            operation.
-  - rs_c:   The row stride of C11 (ie: the distance to the next row of C11,
-            in units of matrix elements).
-  - cs_c:   The column stride of C11 (ie: the distance to the next column of
-            C11, in units of matrix elements).
-  - data:   The address of an auxinfo_t object that contains auxiliary
-            information that may be useful when optimizing the trsm
-            micro-kernel implementation. (See BLIS KernelsHowTo wiki for
-            more info.)
-  - cntx:   The address of the runtime context. The context can be queried
-            for implementation-specific values such as cache and register
-            blocksizes. However, most micro-kernels intrinsically "know"
-            these values already, and thus the cntx argument usually can
-            be safely ignored. (The following template micro-kernel code
-            does in fact query MR, NR, PACKMR, and PACKNR, as needed, but
-            only because those values are not hard-coded, as they would be
-            in a typical optimized micro-kernel implementation.)
+    https://github.com/flame/blis/wiki/KernelsHowTo
 
-  Diagrams for trsm
-
-  Please see the diagram for gemmtrsm_l to see depiction of the trsm_l and
-  where it fits in with its preceding gemm subproblem.
-
-  Implementation Notes for trsm
-
-  - Register blocksizes. See Implementation Notes for gemm.
-  - Leading dimensions of a11 and b11: PACKMR and PACKNR. See
-    Implementation Notes for gemm.
-  - Edge cases in MR, NR dimensions. See Implementation Notes for gemm.
-  - Alignment of a11 and b11. See Implementation Notes for gemmtrsm.
-  - Unrolling loops. Most optimized implementations should unroll all
-    three loops within the trsm micro-kernel.
-  - Prefetching next micro-panels of A and B. We advise against using
-    the bli_auxinfo_next_a() and bli_auxinfo_next_b() macros from within
-    the trsm_l and trsm_u micro-kernels, since the values returned usually
-    only make sense in the context of the overall gemmtrsm subproblem. 
-  - Diagonal elements of A11. At the time this micro-kernel is called,
-    the diagonal entries of triangular matrix A11 contain the inverse of
-    the original elements. This inversion is done during packing so that
-    we can avoid expensive division instructions within the micro-kernel
-    itself. If the diag parameter to the higher level trsm operation was
-    equal to BLIS_UNIT_DIAG, the diagonal elements will be explicitly
-    unit.
-  - Zero elements of A11. Since A11 is lower triangular (for trsm_l), the
-    strictly upper triangle implicitly contains zeros. Similarly, the
-    strictly lower triangle of A11 implicitly contains zeros when A11 is
-    upper triangular (for trsm_u). However, the packing function may or
-    may not actually write zeros to this region. Thus, while the
-    implementation may reference these elements, it should not use them
-    in any computation.
-  - Output. This micro-kernel must write its result to two places: the
-    submatrix B11 of the current packed micro-panel of B and the submatrix
-    C11 of the output matrix C.
-
-  For more info, please refer to the BLIS website and/or contact the
-  blis-devel mailing list.
+  and/or contact the blis-devel mailing list.
 
   -FGVZ
 */

@@ -104,117 +104,13 @@ void bli_dgemmtrsm_u_opt_mxn
   B11 is MR x NR, and alpha is a scalar. Here, inv() denotes matrix
   inverse.
 
-  Parameters:
+  For more info, please refer to the BLIS website's wiki on kernels:
 
-  - k:      The number of columns of A12 and rows of B21.
-  - alpha:  The address of a scalar to be applied to B11.
-  - a12:    The address of A12, which is the MR x k submatrix of the packed
-            micro-panel of A that is situated to the right of the MR x MR
-            triangular submatrix A11. A12 is stored by columns with leading
-            dimension PACKMR, where typically PACKMR = MR.
-  - a11:    The address of A11, which is the MR x MR upper triangular
-            submatrix within the packed micro-panel of matrix A that is
-            situated to the left of A12. A11 is stored by columns with
-            leading dimension PACKMR, where typically PACKMR = MR. Note
-            that A11 contains elements in both triangles, though elements
-            in the unstored triangle are not guaranteed to be zero and
-            thus should not be referenced.
-  - b21:    The address of B21, which is the k x NR submatrix of the packed
-            micro-panel of B that is situated above the MR x NR submatrix
-            B11. B01 is stored by rows with leading dimension PACKNR, where
-            typically PACKNR = NR.
-  - b11:    The address B11, which is the MR x NR submatrix of the packed
-            micro-panel of B, situated below B01. B11 is stored by rows
-            with leading dimension PACKNR, where typically PACKNR = NR.
-  - c11:    The address of C11, which is the MR x NR submatrix of matrix
-            C, stored according to rs_c and cs_c. C11 is the submatrix
-            within C that corresponds to the elements which were packed
-            into B11. Thus, C is the original input matrix B to the overall
-            trsm operation.
-  - rs_c:   The row stride of C11 (ie: the distance to the next row of C11,
-            in units of matrix elements).
-  - cs_c:   The column stride of C11 (ie: the distance to the next column of
-            C11, in units of matrix elements).
-  - data:   The address of an auxinfo_t object that contains auxiliary
-            information that may be useful when optimizing the gemmtrsm
-            micro-kernel implementation. (See BLIS KernelsHowTo wiki for
-            more info.)
-  - cntx:   The address of the runtime context. The context can be queried
-            for implementation-specific values such as cache and register
-            blocksizes. However, most micro-kernels intrinsically "know"
-            these values already, and thus the cntx argument usually can
-            be safely ignored. (The following template micro-kernel code
-            does in fact query MR, NR, PACKMR, and PACKNR, as needed, but
-            only because those values are not hard-coded, as they would be
-            in a typical optimized micro-kernel implementation.)
+    https://github.com/flame/blis/wiki/KernelsHowTo
 
-  Diagram for gemmtrsm_u
+  and/or contact the blis-devel mailing list.
 
-  The diagram below shows the packed micro-panel operands for trsm_l and
-  how elements of each would be stored when MR = NR = 4. (The hex digits
-  indicate the layout and order (but NOT the numeric contents) in memory.
-  Here, matrix A11 (referenced by a11) is upper triangular. Matrix A11
-  does contain elements corresponding to the strictly lower triangle,
-  however, they are not guaranteed to contain zeros and thus these elements
-  should not be referenced.
-
-       a11:     a12:                          NR    
-       ________ ___________________         _______ 
-      |`.      |0 4 8              |   b11:|0 1 2 3|
-  MR  |  `.    |1 5 9 . . .        |       |4 5 6 7|
-      |    `.  |2 6 A              |    MR |8 9 A B|
-      |______`.|3_7_B______________|       |___.___|
-                                       b21:|   .   |
-          MR             k                 |   .   |
-                                           |       |
-                                           |       |
-    NOTE: Storage digits are shown       k |       |
-    starting with a12 to avoid             |       |
-    obscuring triangular structure         |       |
-    of a11.                                |_______|
-                                                    
-
-  Implementation Notes for gemmtrsm
-
-  - Register blocksizes. See Implementation Notes for gemm.
-  - Leading dimensions of a1 and b1: PACKMR and PACKNR. See Implementation
-    Notes for gemm.
-  - Edge cases in MR, NR dimensions. See Implementation Notes for gemm.
-  - Alignment of a1 and b1. The addresses a1 and b1 are aligned according
-    to PACKMR*sizeof(type) and PACKNR*sizeof(type), respectively.
-  - Unrolling loops. Most optimized implementations should unroll all
-    three loops within the trsm subproblem of gemmtrsm. See Implementation
-    Notes for gemm for remarks on unrolling the gemm subproblem.
-  - Prefetching next micro-panels of A and B. When invoked from within a
-    gemmtrsm_l micro-kernel, the addresses accessible via
-    bli_auxinfo_next_a() and bli_auxinfo_next_b() refer to the next
-    invocation's a10 and b01, respectively, while in gemmtrsm_u, the
-    _next_a() and _next_b() macros return the addresses of the next
-    invocation's a11 and b11 (since those submatrices precede a12 and b21).
-    (See BLIS KernelsHowTo wiki for more info.)
-  - Zero alpha. The micro-kernel can safely assume that alpha is non-zero;
-    "alpha equals zero" handling is performed at a much higher level,
-    which means that, in such a scenario, the micro-kernel will never get
-    called.
-  - Diagonal elements of A11. See Implementation Notes for trsm.
-  - Zero elements of A11. See Implementation Notes for trsm.
-  - Output. See Implementation Notes for trsm.
-  - Optimization. Let's assume that the gemm micro-kernel has already been
-    optimized. You have two options with regard to optimizing the fused
-    gemmtrsm micro-kernels:
-    (1) Optimize only the trsm micro-kernels. This will result in the gemm
-        and trsm_l micro-kernels being called in sequence. (Likewise for
-        gemm and trsm_u.)
-    (2) Fuse the implementation of the gemm micro-kernel with that of the
-        trsm micro-kernels by inlining both into the gemmtrsm_l and
-        gemmtrsm_u micro-kernel definitions. This option is more labor-
-        intensive, but also more likely to yield higher performance because
-        it avoids redundant memory operations on the packed MR x NR
-        submatrix B11.
-
-  For more info, please refer to the BLIS website and/or contact the
-  blis-devel mailing list.
-
+  -FGVZ
 */
 	const num_t        dt        = BLIS_DOUBLE;
 
