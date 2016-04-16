@@ -304,7 +304,7 @@ void bli_dgemm_opt_30x8(
     __asm je POSTACCUM
 
     __asm LOOP_UNDER_40:
-        ONE_ITER_MAIN_LOOP(rcx, rsi)
+        ONE_ITER_MAIN_LOOP(rsi)
     __asm jne LOOP_UNDER_40
 
     __asm POSTACCUM:
