@@ -36,16 +36,6 @@
 
 extern scalm_t*   scalm_cntl;
 
-blksz_t*          gemm_mc;
-blksz_t*          gemm_nc;
-blksz_t*          gemm_kc;
-blksz_t*          gemm_mr;
-blksz_t*          gemm_nr;
-blksz_t*          gemm_kr;
-
-func_t*           gemm_ukrs;
-func_t*           gemm_ref_ukrs;
-
 packm_t*          gemm_packa_cntl;
 packm_t*          gemm_packb_cntl;
 
@@ -58,88 +48,13 @@ gemm_t*           gemm_cntl;
 
 void bli_gemm_cntl_init()
 {
-	// Create blocksize objects for each dimension.
-	gemm_mc
-	=
-	bli_blksz_obj_create( BLIS_DEFAULT_MC_S, BLIS_MAXIMUM_MC_S,
-	                      BLIS_DEFAULT_MC_D, BLIS_MAXIMUM_MC_D,
-	                      BLIS_DEFAULT_MC_C, BLIS_MAXIMUM_MC_C,
-	                      BLIS_DEFAULT_MC_Z, BLIS_MAXIMUM_MC_Z );
-	gemm_nc
-	=
-	bli_blksz_obj_create( BLIS_DEFAULT_NC_S, BLIS_MAXIMUM_NC_S,
-	                      BLIS_DEFAULT_NC_D, BLIS_MAXIMUM_NC_D,
-	                      BLIS_DEFAULT_NC_C, BLIS_MAXIMUM_NC_C,
-	                      BLIS_DEFAULT_NC_Z, BLIS_MAXIMUM_NC_Z );
-	gemm_kc
-	=
-	bli_blksz_obj_create( BLIS_DEFAULT_KC_S, BLIS_MAXIMUM_KC_S,
-	                      BLIS_DEFAULT_KC_D, BLIS_MAXIMUM_KC_D,
-	                      BLIS_DEFAULT_KC_C, BLIS_MAXIMUM_KC_C,
-	                      BLIS_DEFAULT_KC_Z, BLIS_MAXIMUM_KC_Z );
-	gemm_mr
-	=
-	bli_blksz_obj_create( BLIS_DEFAULT_MR_S, BLIS_PACKDIM_MR_S,
-	                      BLIS_DEFAULT_MR_D, BLIS_PACKDIM_MR_D,
-	                      BLIS_DEFAULT_MR_C, BLIS_PACKDIM_MR_C,
-	                      BLIS_DEFAULT_MR_Z, BLIS_PACKDIM_MR_Z );
-	gemm_nr
-	=
-	bli_blksz_obj_create( BLIS_DEFAULT_NR_S, BLIS_PACKDIM_NR_S,
-	                      BLIS_DEFAULT_NR_D, BLIS_PACKDIM_NR_D,
-	                      BLIS_DEFAULT_NR_C, BLIS_PACKDIM_NR_C,
-	                      BLIS_DEFAULT_NR_Z, BLIS_PACKDIM_NR_Z );
-	gemm_kr
-	=
-	bli_blksz_obj_create( BLIS_DEFAULT_KR_S, BLIS_PACKDIM_KR_S,
-	                      BLIS_DEFAULT_KR_D, BLIS_PACKDIM_KR_D,
-	                      BLIS_DEFAULT_KR_C, BLIS_PACKDIM_KR_C,
-	                      BLIS_DEFAULT_KR_Z, BLIS_PACKDIM_KR_Z );
-
-
-	// Attach the register blksz_t objects as blocksize multiples to the cache
-	// blksz_t objects.
-	bli_blksz_obj_attach_mult_to( gemm_mr, gemm_mc );
-	bli_blksz_obj_attach_mult_to( gemm_nr, gemm_nc );
-	bli_blksz_obj_attach_mult_to( gemm_kr, gemm_kc );
-
-
-	// Attach the mr and nr blksz_t objects to each cache blksz_t object.
-	// The primary example of why this is needed relates to nudging kc.
-	// In hemm, symm, trmm, or trmm3, we need to know both mr and nr,
-	// since the multiple we target in nudging depends on whether the
-	// structured matrix is on the left or the right.
-	bli_blksz_obj_attach_mr_nr_to( gemm_mr, gemm_nr, gemm_mc );
-	bli_blksz_obj_attach_mr_nr_to( gemm_mr, gemm_nr, gemm_nc );
-	bli_blksz_obj_attach_mr_nr_to( gemm_mr, gemm_nr, gemm_kc );
-
-
-	// Create function pointer object for each datatype-specific gemm
-	// micro-kernel.
-	gemm_ukrs
-	=
-	bli_func_obj_create( BLIS_SGEMM_UKERNEL, BLIS_SGEMM_UKERNEL_PREFERS_CONTIG_ROWS,
-	                     BLIS_DGEMM_UKERNEL, BLIS_DGEMM_UKERNEL_PREFERS_CONTIG_ROWS,
-	                     BLIS_CGEMM_UKERNEL, BLIS_CGEMM_UKERNEL_PREFERS_CONTIG_ROWS,
-	                     BLIS_ZGEMM_UKERNEL, BLIS_ZGEMM_UKERNEL_PREFERS_CONTIG_ROWS );
-
-
-	// Create function pointer object for reference micro-kernels.
-	gemm_ref_ukrs
-	=
-	bli_func_obj_create( BLIS_SGEMM_UKERNEL_REF, FALSE,
-	                     BLIS_DGEMM_UKERNEL_REF, FALSE,
-	                     BLIS_CGEMM_UKERNEL_REF, FALSE,
-	                     BLIS_ZGEMM_UKERNEL_REF, FALSE );
-
-
 	// Create control tree objects for packm operations.
 	gemm_packa_cntl
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
 	                           BLIS_VARIANT1,
-	                           gemm_mr,
-	                           gemm_kr,
+	                           BLIS_MR,
+	                           BLIS_KR,
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
 	                           FALSE, // reverse iteration if lower?
@@ -150,8 +65,8 @@ void bli_gemm_cntl_init()
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
 	                           BLIS_VARIANT1,
-	                           gemm_kr,
-	                           gemm_nr,
+	                           BLIS_KR,
+	                           BLIS_NR,
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
 	                           FALSE, // reverse iteration if lower?
@@ -168,8 +83,7 @@ void bli_gemm_cntl_init()
 	=
 	bli_gemm_cntl_obj_create( BLIS_UNB_OPT,
 	                          BLIS_VARIANT2,
-	                          NULL,
-	                          gemm_ukrs,
+	                          0, // bszid_t not used by macro-kernel
 	                          NULL, NULL, NULL,
 	                          NULL, NULL, NULL );
 
@@ -179,8 +93,7 @@ void bli_gemm_cntl_init()
 	=
 	bli_gemm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT1,
-	                          gemm_mc,
-	                          NULL,
+	                          BLIS_MC,
 	                          NULL,
 	                          gemm_packa_cntl,
 	                          gemm_packb_cntl,
@@ -194,8 +107,7 @@ void bli_gemm_cntl_init()
 	=
 	bli_gemm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT3,
-	                          gemm_kc,
-	                          NULL,
+	                          BLIS_KC,
 	                          NULL,
 	                          NULL,
 	                          NULL,
@@ -209,8 +121,7 @@ void bli_gemm_cntl_init()
 	=
 	bli_gemm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT2,
-	                          gemm_nc,
-	                          NULL,
+	                          BLIS_NC,
 	                          NULL,
 	                          NULL,
 	                          NULL,
@@ -224,16 +135,6 @@ void bli_gemm_cntl_init()
 
 void bli_gemm_cntl_finalize()
 {
-	bli_blksz_obj_free( gemm_mc );
-	bli_blksz_obj_free( gemm_nc );
-	bli_blksz_obj_free( gemm_kc );
-	bli_blksz_obj_free( gemm_mr );
-	bli_blksz_obj_free( gemm_nr );
-	bli_blksz_obj_free( gemm_kr );
-
-	bli_func_obj_free( gemm_ukrs );
-	bli_func_obj_free( gemm_ref_ukrs );
-
 	bli_cntl_obj_free( gemm_packa_cntl );
 	bli_cntl_obj_free( gemm_packb_cntl );
 
@@ -245,8 +146,7 @@ void bli_gemm_cntl_finalize()
 
 gemm_t* bli_gemm_cntl_obj_create( impl_t     impl_type,
                                   varnum_t   var_num,
-                                  blksz_t*   b,
-                                  func_t*    gemm_ukrs_,
+                                  bszid_t    bszid,
                                   scalm_t*   sub_scalm,
                                   packm_t*   sub_packm_a,
                                   packm_t*   sub_packm_b,
@@ -260,8 +160,7 @@ gemm_t* bli_gemm_cntl_obj_create( impl_t     impl_type,
 
 	cntl->impl_type     = impl_type;
 	cntl->var_num       = var_num;
-	cntl->b             = b;
-	cntl->gemm_ukrs     = gemm_ukrs_; // avoid name conflict with global symbol
+	cntl->bszid         = bszid;
 	cntl->sub_scalm     = sub_scalm;
 	cntl->sub_packm_a   = sub_packm_a;
 	cntl->sub_packm_b   = sub_packm_b;
@@ -270,27 +169,5 @@ gemm_t* bli_gemm_cntl_obj_create( impl_t     impl_type,
 	cntl->sub_unpackm_c = sub_unpackm_c;
 
 	return cntl;
-}
-
-func_t* bli_gemm_cntl_ukrs( gemm_t* cntl )
-{
-	dim_t max_depth = 10;
-	dim_t i;
-
-	for ( i = 0; ; ++i )
-	{
-		// If the gemm sub-tree is NULL, we are at the leaf.
-		if ( cntl_sub_gemm( cntl ) == NULL ) break;
-
-		// If the above branch was not taken, we can assume the gemm
-		// sub-tree is valid. Here, we step down into that sub-tree.
-		cntl = cntl_sub_gemm( cntl );
-
-		// Safeguard against infinite loops due to bad control tree
-		// configuration.
-		if ( i == max_depth ) bli_abort();
-	}
-
-	return cntl_gemm_ukrs( cntl );
 }
 

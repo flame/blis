@@ -38,6 +38,7 @@ void bli_trsm_front( side_t  side,
                      obj_t*  alpha,
                      obj_t*  a,
                      obj_t*  b,
+                     cntx_t* cntx,
                      trsm_t* l_cntl,
                      trsm_t* r_cntl )
 {
@@ -48,7 +49,7 @@ void bli_trsm_front( side_t  side,
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
-		bli_trsm_check( side, alpha, a, b );
+		bli_trsm_check( side, alpha, a, b, &BLIS_ZERO, b, cntx );
 
 	// If alpha is zero, scale by beta and return.
 	if ( bli_obj_equals( alpha, &BLIS_ZERO ) )
@@ -56,6 +57,10 @@ void bli_trsm_front( side_t  side,
 		bli_scalm( alpha, b );
 		return;
 	}
+
+	// Reinitialize the memory allocator to accommodate the blocksizes
+	// in the current context.
+	bli_mem_reinit( cntx );
 
 	// Alias A and B so we can tweak the objects if necessary.
 	bli_obj_alias_to( *a, a_local );
@@ -119,12 +124,13 @@ void bli_trsm_front( side_t  side,
     
     // Invoke the internal back-end.
     bli_level3_thread_decorator( n_threads,   
-                                 (level3_int_t) bli_trsm_int, 
+                                 (l3_int_t) bli_trsm_int, 
                                  alpha, 
                                  &a_local,  
                                  &b_local,  
                                  alpha, 
                                  &c_local,  
+                                 (void*) cntx, 
                                  (void*) cntl, 
                                  (void**) infos );
 

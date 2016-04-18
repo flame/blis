@@ -48,15 +48,17 @@
  *   a is mr x k in packed col-maj format (leading dim is mr)
  *   b is k x nr in packed row-maj format (leading dim is nr)
  */
-void bli_sgemm_opt_8x4(
-                        dim_t              k,
-                        float*    restrict alpha,
-                        float*    restrict a,
-                        float*    restrict b,
-                        float*    restrict beta,
-                        float*    restrict c, inc_t rs_c, inc_t cs_c,
-                        auxinfo_t*         data
-                      )
+void bli_sgemm_opt_8x4
+     (
+       dim_t               k,
+       float*     restrict alpha,
+       float*     restrict a,
+       float*     restrict b,
+       float*     restrict beta,
+       float*     restrict c, inc_t rs_c, inc_t cs_c,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
+     )
 {
 #if 0 || defined(UTEST)
     const long MR = BLIS_DEFAULT_MR_S, NR = BLIS_DEFAULT_NR_S;
@@ -86,15 +88,17 @@ void bli_sgemm_opt_8x4(
  *   a is mr x k in packed col-maj format (leading dim is mr)
  *   b is k x nr in packed row-maj format (leading dim is nr)
  */
-void bli_dgemm_opt_8x4(
-                        dim_t              k,
-                        double*   restrict alpha,
-                        double*   restrict a,
-                        double*   restrict b,
-                        double*   restrict beta,
-                        double*   restrict c, inc_t rs_c, inc_t cs_c,
-                        auxinfo_t*         data
-                      )
+void bli_dgemm_opt_8x4
+     (
+       dim_t               k,
+       double*    restrict alpha,
+       double*    restrict a,
+       double*    restrict b,
+       double*    restrict beta,
+       double*    restrict c, inc_t rs_c, inc_t cs_c,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
+     )
 {
 #if 1
     if (rs_c == 1) {
@@ -459,15 +463,17 @@ void bli_dgemm_opt_8x4(
  *   a is mr x k in packed col-maj format (leading dim is mr)
  *   b is k x nr in packed row-maj format (leading dim is nr)
  */
-void bli_cgemm_opt_8x4(
-                        dim_t              k,
-                        scomplex* restrict alpha,
-                        scomplex* restrict a,
-                        scomplex* restrict b,
-                        scomplex* restrict beta,
-                        scomplex* restrict c, inc_t rs_c, inc_t cs_c,
-                        auxinfo_t*         data
-                       )
+void bli_cgemm_opt_8x4
+     (
+       dim_t               k,
+       scomplex*  restrict alpha,
+       scomplex*  restrict a,
+       scomplex*  restrict b,
+       scomplex*  restrict beta,
+       scomplex*  restrict c, inc_t rs_c, inc_t cs_c,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
+     )
 {
 #if 0 || defined(UTEST)
     const long MR = BLIS_DEFAULT_MR_C, NR = BLIS_DEFAULT_NR_C;
@@ -508,15 +514,17 @@ void bli_cgemm_opt_8x4(
  *   a is mr x k in packed col-maj format (leading dim is mr)
  *   b is k x nr in packed row-maj format (leading dim is nr)
  */
-void bli_zgemm_opt_8x4(
-                        dim_t              k,
-                        dcomplex* restrict alpha,
-                        dcomplex* restrict a,
-                        dcomplex* restrict b,
-                        dcomplex* restrict beta,
-                        dcomplex* restrict c, inc_t rs_c, inc_t cs_c,
-                        auxinfo_t*         data
-                       )
+void bli_zgemm_opt_8x4
+     (
+       dim_t               k,
+       scomplex*  restrict alpha,
+       scomplex*  restrict a,
+       scomplex*  restrict b,
+       scomplex*  restrict beta,
+       scomplex*  restrict c, inc_t rs_c, inc_t cs_c,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
+     )
 {
 #if 0 || defined(UTEST)
     const long MR = BLIS_DEFAULT_MR_Z, NR = BLIS_DEFAULT_NR_Z;

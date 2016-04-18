@@ -34,6 +34,7 @@
 
 void bli_packm_init( obj_t*   a,
                      obj_t*   p,
+                     cntx_t*  cntx,
                      packm_t* cntl );
 
 void bli_packm_init_pack( invdiag_t invert_diag,
@@ -41,10 +42,11 @@ void bli_packm_init_pack( invdiag_t invert_diag,
                           packord_t pack_ord_if_up,
                           packord_t pack_ord_if_lo,
                           packbuf_t pack_buf_type,
-                          blksz_t*  mr,
-                          blksz_t*  nr,
+                          bszid_t   mr_id,
+                          bszid_t   nr_id,
                           obj_t*    c,
-                          obj_t*    p );
+                          obj_t*    p,
+                          cntx_t*   cntx );
 
 /*
 void bli_packm_init_cast( obj_t*  a,

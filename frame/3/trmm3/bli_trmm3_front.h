@@ -38,4 +38,5 @@ void bli_trmm3_front( side_t  side,
                       obj_t*  b,
                       obj_t*  beta,
                       obj_t*  c,
+                      cntx_t* cntx,
                       gemm_t* cntl );

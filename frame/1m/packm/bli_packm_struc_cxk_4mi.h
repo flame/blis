@@ -35,23 +35,25 @@
 #undef  GENTPROTCO
 #define GENTPROTCO( ctype, ctype_r, ch, chr, varname ) \
 \
-void PASTEMAC(ch,varname)( \
-                           struc_t         strucc, \
-                           doff_t          diagoffp, \
-                           diag_t          diagc, \
-                           uplo_t          uploc, \
-                           conj_t          conjc, \
-                           pack_t          schema, \
-                           bool_t          invdiag, \
-                           dim_t           m_panel, \
-                           dim_t           n_panel, \
-                           dim_t           m_panel_max, \
-                           dim_t           n_panel_max, \
-                           ctype* restrict kappa, \
-                           ctype* restrict c, inc_t rs_c, inc_t cs_c, \
-                           ctype* restrict p, inc_t rs_p, inc_t cs_p, \
-                                              inc_t is_p  \
-                         );
+void PASTEMAC(ch,varname) \
+     ( \
+       struc_t         strucc, \
+       doff_t          diagoffp, \
+       diag_t          diagc, \
+       uplo_t          uploc, \
+       conj_t          conjc, \
+       pack_t          schema, \
+       bool_t          invdiag, \
+       dim_t           m_panel, \
+       dim_t           n_panel, \
+       dim_t           m_panel_max, \
+       dim_t           n_panel_max, \
+       ctype* restrict kappa, \
+       ctype* restrict c, inc_t rs_c, inc_t cs_c, \
+       ctype* restrict p, inc_t rs_p, inc_t cs_p, \
+                          inc_t is_p, \
+       cntx_t*         cntx  \
+     );
 
 INSERT_GENTPROTCO_BASIC( packm_struc_cxk_4mi )
 
@@ -60,24 +62,26 @@ INSERT_GENTPROTCO_BASIC( packm_struc_cxk_4mi )
 #undef  GENTPROTCO
 #define GENTPROTCO( ctype, ctype_r, ch, chr, varname ) \
 \
-void PASTEMAC(ch,varname)( \
-                           struc_t         strucc, \
-                           doff_t          diagoffc, \
-                           uplo_t          uploc, \
-                           conj_t          conjc, \
-                           pack_t          schema, \
-                           dim_t           m_panel, \
-                           dim_t           n_panel, \
-                           dim_t           m_panel_max, \
-                           dim_t           n_panel_max, \
-                           dim_t           panel_dim, \
-                           dim_t           panel_len, \
-                           ctype* restrict kappa, \
-                           ctype* restrict c, inc_t rs_c, inc_t cs_c, \
-                                              inc_t incc, inc_t ldc, \
-                           ctype* restrict p, inc_t rs_p, inc_t cs_p, \
-                                              inc_t is_p, inc_t ldp  \
-                         );
+void PASTEMAC(ch,varname) \
+     ( \
+       struc_t         strucc, \
+       doff_t          diagoffc, \
+       uplo_t          uploc, \
+       conj_t          conjc, \
+       pack_t          schema, \
+       dim_t           m_panel, \
+       dim_t           n_panel, \
+       dim_t           m_panel_max, \
+       dim_t           n_panel_max, \
+       dim_t           panel_dim, \
+       dim_t           panel_len, \
+       ctype* restrict kappa, \
+       ctype* restrict c, inc_t rs_c, inc_t cs_c, \
+                          inc_t incc, inc_t ldc, \
+       ctype* restrict p, inc_t rs_p, inc_t cs_p, \
+                          inc_t is_p, inc_t ldp, \
+       cntx_t*         cntx  \
+     );
 
 INSERT_GENTPROTCO_BASIC( packm_herm_cxk_4mi )
 
@@ -86,26 +90,28 @@ INSERT_GENTPROTCO_BASIC( packm_herm_cxk_4mi )
 #undef  GENTPROTCO
 #define GENTPROTCO( ctype, ctype_r, ch, chr, varname ) \
 \
-void PASTEMAC(ch,varname)( \
-                           struc_t         strucc, \
-                           doff_t          diagoffc, \
-                           diag_t          diagc, \
-                           uplo_t          uploc, \
-                           conj_t          conjc, \
-                           pack_t          schema, \
-                           bool_t          invdiag, \
-                           dim_t           m_panel, \
-                           dim_t           n_panel, \
-                           dim_t           m_panel_max, \
-                           dim_t           n_panel_max, \
-                           dim_t           panel_dim, \
-                           dim_t           panel_len, \
-                           ctype* restrict kappa, \
-                           ctype* restrict c, inc_t rs_c, inc_t cs_c, \
-                                              inc_t incc, inc_t ldc, \
-                           ctype* restrict p, inc_t rs_p, inc_t cs_p, \
-                                              inc_t is_p, inc_t ldp  \
-                         );
+void PASTEMAC(ch,varname) \
+     ( \
+       struc_t         strucc, \
+       doff_t          diagoffc, \
+       diag_t          diagc, \
+       uplo_t          uploc, \
+       conj_t          conjc, \
+       pack_t          schema, \
+       bool_t          invdiag, \
+       dim_t           m_panel, \
+       dim_t           n_panel, \
+       dim_t           m_panel_max, \
+       dim_t           n_panel_max, \
+       dim_t           panel_dim, \
+       dim_t           panel_len, \
+       ctype* restrict kappa, \
+       ctype* restrict c, inc_t rs_c, inc_t cs_c, \
+                          inc_t incc, inc_t ldc, \
+       ctype* restrict p, inc_t rs_p, inc_t cs_p, \
+                          inc_t is_p, inc_t ldp, \
+       cntx_t*         cntx  \
+     );
 
 INSERT_GENTPROTCO_BASIC( packm_tri_cxk_4mi )
 

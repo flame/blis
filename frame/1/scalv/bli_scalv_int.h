@@ -32,7 +32,8 @@
 
 */
 
-void bli_scalv_int( obj_t*   beta,
+void bli_scalv_int( obj_t*   alpha,
                     obj_t*   x,
+                    cntx_t*  cntx,
                     scalv_t* cntl );
 

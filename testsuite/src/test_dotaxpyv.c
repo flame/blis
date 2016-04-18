@@ -65,7 +65,8 @@ void libblis_test_dotaxpyv_impl( iface_t   iface,
                                  obj_t*    x,
                                  obj_t*    y,
                                  obj_t*    rho,
-                                 obj_t*    z );
+                                 obj_t*    z,
+                                 cntx_t*   cntx );
 
 void libblis_test_dotaxpyv_check( obj_t*  alpha,
                                   obj_t*  xt,
@@ -143,6 +144,10 @@ void libblis_test_dotaxpyv_experiment( test_params_t* params,
 	obj_t        alpha, xt, x, y, rho, z;
 	obj_t        z_save;
 
+	cntx_t       cntx;
+
+	// Initialize a context.
+	bli_dotaxpyv_cntx_init( &cntx );
 
 	// Map the dimension specifier to an actual dimension.
 	m = libblis_test_get_dim_from_prob_size( op->dim_spec[0], p_cur );
@@ -207,7 +212,9 @@ void libblis_test_dotaxpyv_experiment( test_params_t* params,
 
 		time = bli_clock();
 
-		libblis_test_dotaxpyv_impl( iface, &alpha, &xt, &x, &y, &rho, &z );
+		libblis_test_dotaxpyv_impl( iface,
+		                            &alpha, &xt, &x, &y, &rho, &z,
+		                            &cntx );
 
 		time_min = bli_clock_min_diff( time_min, time );
 	}
@@ -227,6 +234,9 @@ void libblis_test_dotaxpyv_experiment( test_params_t* params,
 	bli_obj_free( &y );
 	bli_obj_free( &z );
 	bli_obj_free( &z_save );
+
+	// Finalize the context.
+	bli_dotaxpyv_cntx_finalize( &cntx );
 }
 
 
@@ -237,12 +247,13 @@ void libblis_test_dotaxpyv_impl( iface_t   iface,
                                  obj_t*    x,
                                  obj_t*    y,
                                  obj_t*    rho,
-                                 obj_t*    z )
+                                 obj_t*    z,
+                                 cntx_t*   cntx )
 {
 	switch ( iface )
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
-		bli_dotaxpyv_kernel( alpha, xt, x, y, rho, z );
+		bli_dotaxpyv_ex( alpha, xt, x, y, rho, z, cntx );
 		break;
 
 		default:

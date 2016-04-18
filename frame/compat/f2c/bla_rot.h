@@ -32,8 +32,6 @@
 
 */
 
-#include "blis.h"
-
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
 int PASTEF77(s,rot)(bla_integer *n, bla_real *sx, bla_integer *incx, bla_real *sy, bla_integer *incy, bla_real *c__, bla_real *s);

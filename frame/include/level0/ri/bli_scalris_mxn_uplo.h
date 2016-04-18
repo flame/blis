@@ -39,34 +39,34 @@
 
 #define bli_cscalris_mxn_u( diagoff, m, n, ar, ai, xr, xi, rs_x, cs_x ) \
 { \
-	dim_t i, j; \
+	dim_t _i, _j; \
 \
-	for ( j = 0; j < n; ++j ) \
-	for ( i = 0; i < m; ++i ) \
+	for ( _j = 0; _j < n; ++_j ) \
+	for ( _i = 0; _i < m; ++_i ) \
 	{ \
-		if ( (doff_t)j - (doff_t)i >= diagoff ) \
+		if ( (doff_t)_j - (doff_t)_i >= diagoff ) \
 		{ \
 			bli_cscalris( *(ar), \
 			              *(ai), \
-			              *((xr) + i*rs_x + j*cs_x), \
-			              *((xi) + i*rs_x + j*cs_x) ); \
+			              *((xr) + _i*rs_x + _j*cs_x), \
+			              *((xi) + _i*rs_x + _j*cs_x) ); \
 		} \
 	} \
 }
 
 #define bli_zscalris_mxn_u( diagoff, m, n, ar, ai, xr, xi, rs_x, cs_x ) \
 { \
-	dim_t i, j; \
+	dim_t _i, _j; \
 \
-	for ( j = 0; j < n; ++j ) \
-	for ( i = 0; i < m; ++i ) \
+	for ( _j = 0; _j < n; ++_j ) \
+	for ( _i = 0; _i < m; ++_i ) \
 	{ \
-		if ( (doff_t)j - (doff_t)i >= diagoff ) \
+		if ( (doff_t)_j - (doff_t)_i >= diagoff ) \
 		{ \
 			bli_zscalris( *(ar), \
 			              *(ai), \
-			              *((xr) + i*rs_x + j*cs_x), \
-			              *((xi) + i*rs_x + j*cs_x) ); \
+			              *((xr) + _i*rs_x + _j*cs_x), \
+			              *((xi) + _i*rs_x + _j*cs_x) ); \
 		} \
 	} \
 }
@@ -75,34 +75,34 @@
 
 #define bli_cscalris_mxn_l( diagoff, m, n, ar, ai, xr, xi, rs_x, cs_x ) \
 { \
-	dim_t i, j; \
+	dim_t _i, _j; \
 \
-	for ( j = 0; j < n; ++j ) \
-	for ( i = 0; i < m; ++i ) \
+	for ( _j = 0; _j < n; ++_j ) \
+	for ( _i = 0; _i < m; ++_i ) \
 	{ \
-		if ( (doff_t)j - (doff_t)i <= diagoff ) \
+		if ( (doff_t)_j - (doff_t)_i <= diagoff ) \
 		{ \
 			bli_cscalris( *(ar), \
 			              *(ai), \
-			              *((xr) + i*rs_x + j*cs_x), \
-			              *((xi) + i*rs_x + j*cs_x) ); \
+			              *((xr) + _i*rs_x + _j*cs_x), \
+			              *((xi) + _i*rs_x + _j*cs_x) ); \
 		} \
 	} \
 }
 
 #define bli_zscalris_mxn_l( diagoff, m, n, ar, ai, xr, xi, rs_x, cs_x ) \
 { \
-	dim_t i, j; \
+	dim_t _i, _j; \
 \
-	for ( j = 0; j < n; ++j ) \
-	for ( i = 0; i < m; ++i ) \
+	for ( _j = 0; _j < n; ++_j ) \
+	for ( _i = 0; _i < m; ++_i ) \
 	{ \
-		if ( (doff_t)j - (doff_t)i <= diagoff ) \
+		if ( (doff_t)_j - (doff_t)_i <= diagoff ) \
 		{ \
 			bli_zscalris( *(ar), \
 			              *(ai), \
-			              *((xr) + i*rs_x + j*cs_x), \
-			              *((xi) + i*rs_x + j*cs_x) ); \
+			              *((xr) + _i*rs_x + _j*cs_x), \
+			              *((xi) + _i*rs_x + _j*cs_x) ); \
 		} \
 	} \
 }

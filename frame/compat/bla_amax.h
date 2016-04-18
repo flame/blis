@@ -39,10 +39,11 @@
 #undef  GENTPROT
 #define GENTPROT( ftype_x, chx, blasname ) \
 \
-f77_int PASTEF772(i,chx,blasname)( \
-                                   f77_int* n, \
-                                   ftype_x* x, f77_int* incx  \
-                                 ); \
+f77_int PASTEF772(i,chx,blasname) \
+     ( \
+       f77_int* n, \
+       ftype_x* x, f77_int* incx  \
+     );
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 INSERT_GENTPROT_BLAS( amax )

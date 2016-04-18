@@ -177,17 +177,17 @@
 // be packed here, but this tends to be much too expensive in practice to
 // actually employ.)
 
-//#define BLIS_DEFAULT_L2_MC_S           1000
-//#define BLIS_DEFAULT_L2_NC_S           1000
+//#define BLIS_DEFAULT_M2_S           1000
+//#define BLIS_DEFAULT_N2_S           1000
 
-//#define BLIS_DEFAULT_L2_MC_D           1000
-//#define BLIS_DEFAULT_L2_NC_D           1000
+//#define BLIS_DEFAULT_M2_D           1000
+//#define BLIS_DEFAULT_N2_D           1000
 
-//#define BLIS_DEFAULT_L2_MC_C           1000
-//#define BLIS_DEFAULT_L2_NC_C           1000
+//#define BLIS_DEFAULT_M2_C           1000
+//#define BLIS_DEFAULT_N2_C           1000
 
-//#define BLIS_DEFAULT_L2_MC_Z           1000
-//#define BLIS_DEFAULT_L2_NC_Z           1000
+//#define BLIS_DEFAULT_M2_Z           1000
+//#define BLIS_DEFAULT_N2_Z           1000
 
 
 
@@ -196,25 +196,25 @@
 
 // -- Default fusing factors for level-1f operations --
 
-//#define BLIS_L1F_FUSE_FAC_S            8
-//#define BLIS_L1F_FUSE_FAC_D            4
-//#define BLIS_L1F_FUSE_FAC_C            4
-//#define BLIS_L1F_FUSE_FAC_Z            2
+//#define BLIS_DEFAULT_1F_S            8
+//#define BLIS_DEFAULT_1F_D            4
+//#define BLIS_DEFAULT_1F_C            4
+//#define BLIS_DEFAULT_1F_Z            2
 
-//#define BLIS_AXPYF_FUSE_FAC_S          BLIS_L1F_FUSE_FAC_S
-//#define BLIS_AXPYF_FUSE_FAC_D          BLIS_L1F_FUSE_FAC_D
-//#define BLIS_AXPYF_FUSE_FAC_C          BLIS_L1F_FUSE_FAC_C
-//#define BLIS_AXPYF_FUSE_FAC_Z          BLIS_L1F_FUSE_FAC_Z
+//#define BLIS_DEFAULT_AF_S          BLIS_DEFAULT_1F_S
+//#define BLIS_DEFAULT_AF_D          BLIS_DEFAULT_1F_D
+//#define BLIS_DEFAULT_AF_C          BLIS_DEFAULT_1F_C
+//#define BLIS_DEFAULT_AF_Z          BLIS_DEFAULT_1F_Z
 
-//#define BLIS_DOTXF_FUSE_FAC_S          BLIS_L1F_FUSE_FAC_S
-//#define BLIS_DOTXF_FUSE_FAC_D          BLIS_L1F_FUSE_FAC_D
-//#define BLIS_DOTXF_FUSE_FAC_C          BLIS_L1F_FUSE_FAC_C
-//#define BLIS_DOTXF_FUSE_FAC_Z          BLIS_L1F_FUSE_FAC_Z
+//#define BLIS_DEFAULT_DF_S          BLIS_DEFAULT_1F_S
+//#define BLIS_DEFAULT_DF_D          BLIS_DEFAULT_1F_D
+//#define BLIS_DEFAULT_DF_C          BLIS_DEFAULT_1F_C
+//#define BLIS_DEFAULT_DF_Z          BLIS_DEFAULT_1F_Z
 
-//#define BLIS_DOTXAXPYF_FUSE_FAC_S      BLIS_L1F_FUSE_FAC_S
-//#define BLIS_DOTXAXPYF_FUSE_FAC_D      BLIS_L1F_FUSE_FAC_D
-//#define BLIS_DOTXAXPYF_FUSE_FAC_C      BLIS_L1F_FUSE_FAC_C
-//#define BLIS_DOTXAXPYF_FUSE_FAC_Z      BLIS_L1F_FUSE_FAC_Z
+//#define BLIS_DEFAULT_XF_S      BLIS_DEFAULT_1F_S
+//#define BLIS_DEFAULT_XF_D      BLIS_DEFAULT_1F_D
+//#define BLIS_DEFAULT_XF_C      BLIS_DEFAULT_1F_C
+//#define BLIS_DEFAULT_XF_Z      BLIS_DEFAULT_1F_Z
 
 
 

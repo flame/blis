@@ -32,11 +32,12 @@
 
 */
 
-void bli_her2_int( conj_t   conjh,
-                   obj_t*   alpha,
-                   obj_t*   alpha_conj,
-                   obj_t*   x,
-                   obj_t*   y,
-                   obj_t*   c,
-                   her2_t*  cntl );
+void bli_her2_int( conj_t  conjh,
+                   obj_t*  alpha,
+                   obj_t*  alpha_conj,
+                   obj_t*  x,
+                   obj_t*  y,
+                   obj_t*  c,
+                   cntx_t* cntx,
+                   her2_t* cntl );
 

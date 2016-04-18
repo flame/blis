@@ -147,7 +147,7 @@ void bli_packm_blk_var1( obj_t*   c,
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, varname, kertype ) \
 \
-void PASTEMAC(ch,varname)( \
+void PASTEMAC(ch,varname) \
                            struc_t strucc, \
                            doff_t  diagoffc, \
                            diag_t  diagc, \

@@ -39,7 +39,7 @@
 
 #define bli_cscal2rihs_mxn_uplo( schema, uplo, conjx, m, a, x, rs_x, cs_x, y_r, rs_y, cs_y ) \
 { \
-	dim_t i, j; \
+	dim_t _i, _j; \
 \
 	/* Handle ro, io, and rpi separately. */ \
 	if ( bli_is_ro_packed( schema ) ) \
@@ -48,22 +48,22 @@
 		{ \
 			if ( bli_is_conj( conjx ) ) \
 			{ \
-				for ( j = 0; j < m; ++j ) \
-				for ( i = j; i < m; ++i ) \
+				for ( _j = 0; _j < m; ++_j ) \
+				for ( _i = _j; _i < m; ++_i ) \
 				{ \
 					bli_cscal2jros( *(a), \
-					                *(x   + i*rs_x + j*cs_x), \
-					                *(y_r + i*rs_y + j*cs_y) ); \
+					                *(x   + _i*rs_x + _j*cs_x), \
+					                *(y_r + _i*rs_y + _j*cs_y) ); \
 				} \
 			} \
 			else /* if ( bli_is_noconj( conjx ) ) */ \
 			{ \
-				for ( j = 0; j < m; ++j ) \
-				for ( i = j; i < m; ++i ) \
+				for ( _j = 0; _j < m; ++_j ) \
+				for ( _i = _j; _i < m; ++_i ) \
 				{ \
 					bli_cscal2ros( *(a), \
-					               *(x   + i*rs_x + j*cs_x), \
-					               *(y_r + i*rs_y + j*cs_y) ); \
+					               *(x   + _i*rs_x + _j*cs_x), \
+					               *(y_r + _i*rs_y + _j*cs_y) ); \
 				} \
 			} \
 		} \
@@ -71,22 +71,22 @@
 		{ \
 			if ( bli_is_conj( conjx ) ) \
 			{ \
-				for ( j = 0; j < m; ++j ) \
-				for ( i = 0; i < j + 1; ++i ) \
+				for ( _j = 0; _j < m; ++_j ) \
+				for ( _i = 0; _i < _j + 1; ++_i ) \
 				{ \
 					bli_cscal2jros( *(a), \
-					                *(x   + i*rs_x + j*cs_x), \
-					                *(y_r + i*rs_y + j*cs_y) ); \
+					                *(x   + _i*rs_x + _j*cs_x), \
+					                *(y_r + _i*rs_y + _j*cs_y) ); \
 				} \
 			} \
 			else /* if ( bli_is_noconj( conjx ) ) */ \
 			{ \
-				for ( j = 0; j < m; ++j ) \
-				for ( i = 0; i < j + 1; ++i ) \
+				for ( _j = 0; _j < m; ++_j ) \
+				for ( _i = 0; _i < _j + 1; ++_i ) \
 				{ \
 					bli_cscal2ros( *(a), \
-					               *(x   + i*rs_x + j*cs_x), \
-					               *(y_r + i*rs_y + j*cs_y) ); \
+					               *(x   + _i*rs_x + _j*cs_x), \
+					               *(y_r + _i*rs_y + _j*cs_y) ); \
 				} \
 			} \
 		} \
@@ -97,22 +97,22 @@
 		{ \
 			if ( bli_is_conj( conjx ) ) \
 			{ \
-				for ( j = 0; j < m; ++j ) \
-				for ( i = j; i < m; ++i ) \
+				for ( _j = 0; _j < m; ++_j ) \
+				for ( _i = _j; _i < m; ++_i ) \
 				{ \
 					bli_cscal2jios( *(a), \
-					                *(x   + i*rs_x + j*cs_x), \
-					                *(y_r + i*rs_y + j*cs_y) ); \
+					                *(x   + _i*rs_x + _j*cs_x), \
+					                *(y_r + _i*rs_y + _j*cs_y) ); \
 				} \
 			} \
 			else /* if ( bli_is_noconj( conjx ) ) */ \
 			{ \
-				for ( j = 0; j < m; ++j ) \
-				for ( i = j; i < m; ++i ) \
+				for ( _j = 0; _j < m; ++_j ) \
+				for ( _i = _j; _i < m; ++_i ) \
 				{ \
 					bli_cscal2ios( *(a), \
-					               *(x   + i*rs_x + j*cs_x), \
-					               *(y_r + i*rs_y + j*cs_y) ); \
+					               *(x   + _i*rs_x + _j*cs_x), \
+					               *(y_r + _i*rs_y + _j*cs_y) ); \
 				} \
 			} \
 		} \
@@ -120,22 +120,22 @@
 		{ \
 			if ( bli_is_conj( conjx ) ) \
 			{ \
-				for ( j = 0; j < m; ++j ) \
-				for ( i = 0; i < j + 1; ++i ) \
+				for ( _j = 0; _j < m; ++_j ) \
+				for ( _i = 0; _i < _j + 1; ++_i ) \
 				{ \
 					bli_cscal2jios( *(a), \
-					                *(x   + i*rs_x + j*cs_x), \
-					                *(y_r + i*rs_y + j*cs_y) ); \
+					                *(x   + _i*rs_x + _j*cs_x), \
+					                *(y_r + _i*rs_y + _j*cs_y) ); \
 				} \
 			} \
 			else /* if ( bli_is_noconj( conjx ) ) */ \
 			{ \
-				for ( j = 0; j < m; ++j ) \
-				for ( i = 0; i < j + 1; ++i ) \
+				for ( _j = 0; _j < m; ++_j ) \
+				for ( _i = 0; _i < _j + 1; ++_i ) \
 				{ \
 					bli_cscal2ios( *(a), \
-					               *(x   + i*rs_x + j*cs_x), \
-					               *(y_r + i*rs_y + j*cs_y) ); \
+					               *(x   + _i*rs_x + _j*cs_x), \
+					               *(y_r + _i*rs_y + _j*cs_y) ); \
 				} \
 			} \
 		} \
@@ -146,22 +146,22 @@
 		{ \
 			if ( bli_is_conj( conjx ) ) \
 			{ \
-				for ( j = 0; j < m; ++j ) \
-				for ( i = j; i < m; ++i ) \
+				for ( _j = 0; _j < m; ++_j ) \
+				for ( _i = _j; _i < m; ++_i ) \
 				{ \
 					bli_cscal2jrpis( *(a), \
-					                 *(x   + i*rs_x + j*cs_x), \
-					                 *(y_r + i*rs_y + j*cs_y) ); \
+					                 *(x   + _i*rs_x + _j*cs_x), \
+					                 *(y_r + _i*rs_y + _j*cs_y) ); \
 				} \
 			} \
 			else /* if ( bli_is_noconj( conjx ) ) */ \
 			{ \
-				for ( j = 0; j < m; ++j ) \
-				for ( i = j; i < m; ++i ) \
+				for ( _j = 0; _j < m; ++_j ) \
+				for ( _i = _j; _i < m; ++_i ) \
 				{ \
 					bli_cscal2rpis( *(a), \
-					                *(x   + i*rs_x + j*cs_x), \
-					                *(y_r + i*rs_y + j*cs_y) ); \
+					                *(x   + _i*rs_x + _j*cs_x), \
+					                *(y_r + _i*rs_y + _j*cs_y) ); \
 				} \
 			} \
 		} \
@@ -169,22 +169,22 @@
 		{ \
 			if ( bli_is_conj( conjx ) ) \
 			{ \
-				for ( j = 0; j < m; ++j ) \
-				for ( i = 0; i < j + 1; ++i ) \
+				for ( _j = 0; _j < m; ++_j ) \
+				for ( _i = 0; _i < _j + 1; ++_i ) \
 				{ \
 					bli_cscal2jrpis( *(a), \
-					                 *(x   + i*rs_x + j*cs_x), \
-					                 *(y_r + i*rs_y + j*cs_y) ); \
+					                 *(x   + _i*rs_x + _j*cs_x), \
+					                 *(y_r + _i*rs_y + _j*cs_y) ); \
 				} \
 			} \
 			else /* if ( bli_is_noconj( conjx ) ) */ \
 			{ \
-				for ( j = 0; j < m; ++j ) \
-				for ( i = 0; i < j + 1; ++i ) \
+				for ( _j = 0; _j < m; ++_j ) \
+				for ( _i = 0; _i < _j + 1; ++_i ) \
 				{ \
 					bli_cscal2rpis( *(a), \
-					                *(x   + i*rs_x + j*cs_x), \
-					                *(y_r + i*rs_y + j*cs_y) ); \
+					                *(x   + _i*rs_x + _j*cs_x), \
+					                *(y_r + _i*rs_y + _j*cs_y) ); \
 				} \
 			} \
 		} \
@@ -193,7 +193,7 @@
 
 #define bli_zscal2rihs_mxn_uplo( schema, uplo, conjx, m, a, x, rs_x, cs_x, y_r, rs_y, cs_y ) \
 { \
-	dim_t i, j; \
+	dim_t _i, _j; \
 \
 	/* Handle ro, io, and rpi separately. */ \
 	if ( bli_is_ro_packed( schema ) ) \
@@ -202,22 +202,22 @@
 		{ \
 			if ( bli_is_conj( conjx ) ) \
 			{ \
-				for ( j = 0; j < m; ++j ) \
-				for ( i = j; i < m; ++i ) \
+				for ( _j = 0; _j < m; ++_j ) \
+				for ( _i = _j; _i < m; ++_i ) \
 				{ \
 					bli_zscal2jros( *(a), \
-					                *(x   + i*rs_x + j*cs_x), \
-					                *(y_r + i*rs_y + j*cs_y) ); \
+					                *(x   + _i*rs_x + _j*cs_x), \
+					                *(y_r + _i*rs_y + _j*cs_y) ); \
 				} \
 			} \
 			else /* if ( bli_is_noconj( conjx ) ) */ \
 			{ \
-				for ( j = 0; j < m; ++j ) \
-				for ( i = j; i < m; ++i ) \
+				for ( _j = 0; _j < m; ++_j ) \
+				for ( _i = _j; _i < m; ++_i ) \
 				{ \
 					bli_zscal2ros( *(a), \
-					               *(x   + i*rs_x + j*cs_x), \
-					               *(y_r + i*rs_y + j*cs_y) ); \
+					               *(x   + _i*rs_x + _j*cs_x), \
+					               *(y_r + _i*rs_y + _j*cs_y) ); \
 				} \
 			} \
 		} \
@@ -225,22 +225,22 @@
 		{ \
 			if ( bli_is_conj( conjx ) ) \
 			{ \
-				for ( j = 0; j < m; ++j ) \
-				for ( i = 0; i < j + 1; ++i ) \
+				for ( _j = 0; _j < m; ++_j ) \
+				for ( _i = 0; _i < _j + 1; ++_i ) \
 				{ \
 					bli_zscal2jros( *(a), \
-					                *(x   + i*rs_x + j*cs_x), \
-					                *(y_r + i*rs_y + j*cs_y) ); \
+					                *(x   + _i*rs_x + _j*cs_x), \
+					                *(y_r + _i*rs_y + _j*cs_y) ); \
 				} \
 			} \
 			else /* if ( bli_is_noconj( conjx ) ) */ \
 			{ \
-				for ( j = 0; j < m; ++j ) \
-				for ( i = 0; i < j + 1; ++i ) \
+				for ( _j = 0; _j < m; ++_j ) \
+				for ( _i = 0; _i < _j + 1; ++_i ) \
 				{ \
 					bli_zscal2ros( *(a), \
-					               *(x   + i*rs_x + j*cs_x), \
-					               *(y_r + i*rs_y + j*cs_y) ); \
+					               *(x   + _i*rs_x + _j*cs_x), \
+					               *(y_r + _i*rs_y + _j*cs_y) ); \
 				} \
 			} \
 		} \
@@ -251,22 +251,22 @@
 		{ \
 			if ( bli_is_conj( conjx ) ) \
 			{ \
-				for ( j = 0; j < m; ++j ) \
-				for ( i = j; i < m; ++i ) \
+				for ( _j = 0; _j < m; ++_j ) \
+				for ( _i = _j; _i < m; ++_i ) \
 				{ \
 					bli_zscal2jios( *(a), \
-					                *(x   + i*rs_x + j*cs_x), \
-					                *(y_r + i*rs_y + j*cs_y) ); \
+					                *(x   + _i*rs_x + _j*cs_x), \
+					                *(y_r + _i*rs_y + _j*cs_y) ); \
 				} \
 			} \
 			else /* if ( bli_is_noconj( conjx ) ) */ \
 			{ \
-				for ( j = 0; j < m; ++j ) \
-				for ( i = j; i < m; ++i ) \
+				for ( _j = 0; _j < m; ++_j ) \
+				for ( _i = _j; _i < m; ++_i ) \
 				{ \
 					bli_zscal2ios( *(a), \
-					               *(x   + i*rs_x + j*cs_x), \
-					               *(y_r + i*rs_y + j*cs_y) ); \
+					               *(x   + _i*rs_x + _j*cs_x), \
+					               *(y_r + _i*rs_y + _j*cs_y) ); \
 				} \
 			} \
 		} \
@@ -274,22 +274,22 @@
 		{ \
 			if ( bli_is_conj( conjx ) ) \
 			{ \
-				for ( j = 0; j < m; ++j ) \
-				for ( i = 0; i < j + 1; ++i ) \
+				for ( _j = 0; _j < m; ++_j ) \
+				for ( _i = 0; _i < _j + 1; ++_i ) \
 				{ \
 					bli_zscal2jios( *(a), \
-					                *(x   + i*rs_x + j*cs_x), \
-					                *(y_r + i*rs_y + j*cs_y) ); \
+					                *(x   + _i*rs_x + _j*cs_x), \
+					                *(y_r + _i*rs_y + _j*cs_y) ); \
 				} \
 			} \
 			else /* if ( bli_is_noconj( conjx ) ) */ \
 			{ \
-				for ( j = 0; j < m; ++j ) \
-				for ( i = 0; i < j + 1; ++i ) \
+				for ( _j = 0; _j < m; ++_j ) \
+				for ( _i = 0; _i < _j + 1; ++_i ) \
 				{ \
 					bli_zscal2ios( *(a), \
-					               *(x   + i*rs_x + j*cs_x), \
-					               *(y_r + i*rs_y + j*cs_y) ); \
+					               *(x   + _i*rs_x + _j*cs_x), \
+					               *(y_r + _i*rs_y + _j*cs_y) ); \
 				} \
 			} \
 		} \
@@ -300,22 +300,22 @@
 		{ \
 			if ( bli_is_conj( conjx ) ) \
 			{ \
-				for ( j = 0; j < m; ++j ) \
-				for ( i = j; i < m; ++i ) \
+				for ( _j = 0; _j < m; ++_j ) \
+				for ( _i = _j; _i < m; ++_i ) \
 				{ \
 					bli_zscal2jrpis( *(a), \
-					                 *(x   + i*rs_x + j*cs_x), \
-					                 *(y_r + i*rs_y + j*cs_y) ); \
+					                 *(x   + _i*rs_x + _j*cs_x), \
+					                 *(y_r + _i*rs_y + _j*cs_y) ); \
 				} \
 			} \
 			else /* if ( bli_is_noconj( conjx ) ) */ \
 			{ \
-				for ( j = 0; j < m; ++j ) \
-				for ( i = j; i < m; ++i ) \
+				for ( _j = 0; _j < m; ++_j ) \
+				for ( _i = _j; _i < m; ++_i ) \
 				{ \
 					bli_zscal2rpis( *(a), \
-					                *(x   + i*rs_x + j*cs_x), \
-					                *(y_r + i*rs_y + j*cs_y) ); \
+					                *(x   + _i*rs_x + _j*cs_x), \
+					                *(y_r + _i*rs_y + _j*cs_y) ); \
 				} \
 			} \
 		} \
@@ -323,22 +323,22 @@
 		{ \
 			if ( bli_is_conj( conjx ) ) \
 			{ \
-				for ( j = 0; j < m; ++j ) \
-				for ( i = 0; i < j + 1; ++i ) \
+				for ( _j = 0; _j < m; ++_j ) \
+				for ( _i = 0; _i < _j + 1; ++_i ) \
 				{ \
 					bli_zscal2jrpis( *(a), \
-					                 *(x   + i*rs_x + j*cs_x), \
-					                 *(y_r + i*rs_y + j*cs_y) ); \
+					                 *(x   + _i*rs_x + _j*cs_x), \
+					                 *(y_r + _i*rs_y + _j*cs_y) ); \
 				} \
 			} \
 			else /* if ( bli_is_noconj( conjx ) ) */ \
 			{ \
-				for ( j = 0; j < m; ++j ) \
-				for ( i = 0; i < j + 1; ++i ) \
+				for ( _j = 0; _j < m; ++_j ) \
+				for ( _i = 0; _i < _j + 1; ++_i ) \
 				{ \
 					bli_zscal2rpis( *(a), \
-					                *(x   + i*rs_x + j*cs_x), \
-					                *(y_r + i*rs_y + j*cs_y) ); \
+					                *(x   + _i*rs_x + _j*cs_x), \
+					                *(y_r + _i*rs_y + _j*cs_y) ); \
 				} \
 			} \
 		} \

@@ -41,20 +41,21 @@
 #undef  GENTFUNC
 #define GENTFUNC( ftype, ch, blasname, blisname ) \
 \
-void PASTEF77(ch,blasname)( \
-                            f77_char* uploc, \
-                            f77_char* trans, \
-                            f77_int*  m, \
-                            f77_int*  k, \
-                            ftype*    alpha, \
-                            ftype*    a, f77_int* lda, \
-                            ftype*    b, f77_int* ldb, \
-                            ftype*    beta, \
-                            ftype*    c, f77_int* ldc  \
-                          ) \
+void PASTEF77(ch,blasname) \
+     ( \
+       f77_char* uploc, \
+       f77_char* transa, \
+       f77_int*  m, \
+       f77_int*  k, \
+       ftype*    alpha, \
+       ftype*    a, f77_int* lda, \
+       ftype*    b, f77_int* ldb, \
+       ftype*    beta, \
+       ftype*    c, f77_int* ldc  \
+     ) \
 { \
 	uplo_t  blis_uploc; \
-	trans_t blis_trans; \
+	trans_t blis_transa; \
 	dim_t   m0, k0; \
 	inc_t   rs_a, cs_a; \
 	inc_t   rs_b, cs_b; \
@@ -65,27 +66,30 @@ void PASTEF77(ch,blasname)( \
 	bli_init_auto( &init_result ); \
 \
 	/* Perform BLAS parameter checking. */ \
-	PASTEBLACHK(blasname)( MKSTR(ch), \
-	                       MKSTR(blasname), \
-	                       uploc, \
-	                       trans, \
-	                       m, \
-	                       k, \
-	                       lda, \
-	                       ldb, \
-	                       ldc ); \
+	PASTEBLACHK(blasname) \
+	( \
+	  MKSTR(ch), \
+	  MKSTR(blasname), \
+	  uploc, \
+	  transa, \
+	  m, \
+	  k, \
+	  lda, \
+	  ldb, \
+	  ldc  \
+	); \
 \
 	/* Map BLAS chars to their corresponding BLIS enumerated type value. */ \
 	bli_param_map_netlib_to_blis_uplo( *uploc, &blis_uploc ); \
-	bli_param_map_netlib_to_blis_trans( *trans, &blis_trans ); \
+	bli_param_map_netlib_to_blis_trans( *transa, &blis_transa ); \
 \
 	/* The real domain ssyr2k and dsyr2k in netlib BLAS treat a trans value
 	   of 'C' (conjugate-transpose) as 'T' (transpose only). So, we have
 	   to go out of our way a little to support this behavior. */ \
 	if ( bli_is_real( PASTEMAC(ch,type) ) && \
-	     bli_is_conjtrans( blis_trans ) ) \
+	     bli_is_conjtrans( blis_transa ) ) \
 	{ \
-		blis_trans = BLIS_TRANSPOSE; \
+		blis_transa = BLIS_TRANSPOSE; \
 	} \
 \
 	/* Convert/typecast negative values of m and k to zero. */ \
@@ -101,16 +105,20 @@ void PASTEF77(ch,blasname)( \
 	cs_c = *ldc; \
 \
 	/* Call BLIS interface. */ \
-	PASTEMAC(ch,blisname)( blis_uploc, \
-	                       blis_trans, \
-	                       blis_trans, \
-	                       m0, \
-	                       k0, \
-	                       alpha, \
-	                       a, rs_a, cs_a, \
-	                       b, rs_b, cs_b, \
-	                       beta, \
-	                       c, rs_c, cs_c ); \
+	PASTEMAC(ch,blisname) \
+	( \
+	  blis_uploc, \
+	  blis_transa, \
+	  blis_transa, \
+	  m0, \
+	  k0, \
+	  alpha, \
+	  a, rs_a, cs_a, \
+	  b, rs_b, cs_b, \
+	  beta, \
+	  c, rs_c, cs_c, \
+	  NULL  \
+	); \
 \
 	/* Finalize BLIS (if it was initialized above). */ \
 	bli_finalize_auto( init_result ); \

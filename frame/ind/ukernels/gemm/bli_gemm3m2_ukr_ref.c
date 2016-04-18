@@ -35,26 +35,36 @@
 #include "blis.h"
 
 #undef  GENTFUNCCO
-#define GENTFUNCCO( ctype, ctype_r, ch, chr, varname, gemmukr ) \
+#define GENTFUNCCO( ctype, ctype_r, ch, chr, varname, gemmkerid ) \
 \
-void PASTEMAC(ch,varname)( \
-                           dim_t           k, \
-                           ctype* restrict alpha, \
-                           ctype* restrict a, \
-                           ctype* restrict b, \
-                           ctype* restrict beta, \
-                           ctype* restrict c, inc_t rs_c, inc_t cs_c, \
-                           auxinfo_t*      data \
-                         ) \
+void PASTEMAC(ch,varname) \
+     ( \
+       dim_t               k, \
+       ctype*     restrict alpha, \
+       ctype*     restrict a, \
+       ctype*     restrict b, \
+       ctype*     restrict beta, \
+       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
+       auxinfo_t* restrict data, \
+       cntx_t*    restrict cntx  \
+     ) \
 { \
-	ctype_r           ct[ PASTEMAC(chr,mr) * \
-	                      PASTEMAC(chr,nr) ] \
-	                   __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
+	const num_t       dt_r      = PASTEMAC(chr,type); \
+\
+	PASTECH(chr,gemm_ukr_ft) \
+	                  rgemm_ukr = bli_cntx_get_l3_nat_ukr_dt( dt_r, gemmkerid, cntx ); \
+\
+	const dim_t       mr        = bli_cntx_get_blksz_def_dt( dt_r, BLIS_MR, cntx ); \
+	const dim_t       nr        = bli_cntx_get_blksz_def_dt( dt_r, BLIS_NR, cntx ); \
+\
+	const dim_t       m         = mr; \
+	const dim_t       n         = nr; \
+\
+	ctype_r           ct[ BLIS_STACK_BUF_MAX_SIZE \
+	                      / sizeof( ctype_r ) ] \
+	                      __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
 	inc_t             rs_ct; \
 	inc_t             cs_ct; \
-\
-	const dim_t       m         = PASTEMAC(chr,mr); \
-	const dim_t       n         = PASTEMAC(chr,nr); \
 \
 	ctype_r* restrict a_cast    = ( ctype_r* )a; \
 \
@@ -118,7 +128,8 @@ void PASTEMAC(ch,varname)( \
 	     c_r +=                        + a_r * b_r - a_i * b_i;
 	     c_i += (a_r + a_i)(b_r + b_i) - a_r * b_r - a_i * b_i;
 
-	   NOTE: Scaling by alpha_r is not shown for space reasons. */ \
+	   NOTE: Scaling by alpha_r is not shown above, but is implemented
+	   below. */ \
 \
 \
 	/* Compute the offset to the real, imaginary, or summed micro-panel
@@ -132,13 +143,17 @@ void PASTEMAC(ch,varname)( \
 		ctype_r* restrict b_cur = b_cast + off_b; \
 \
 		/* ct = alpha_r * a * b; */ \
-		PASTEMAC(chr,gemmukr)( k, \
-		                       alpha_r, \
-		                       a_cur, \
-		                       b_cur, \
-		                       zero_r, \
-		                       ct, rs_ct, cs_ct, \
-		                       data ); \
+		rgemm_ukr \
+		( \
+		  k, \
+		  alpha_r, \
+		  a_cur, \
+		  b_cur, \
+		  zero_r, \
+		  ct, rs_ct, cs_ct, \
+		  data, \
+		  cntx  \
+		); \
 	} \
 \
 \
@@ -291,5 +306,5 @@ void PASTEMAC(ch,varname)( \
 PASTEMAC(chr,fprintm)( stdout, "gemm3m2_ukr: a1", m, k, a_cast, 1, m, "%4.1f", "" );*/ \
 }
 
-INSERT_GENTFUNCCO_BASIC( gemm3m2_ukr_ref, GEMM_UKERNEL )
+INSERT_GENTFUNCCO_BASIC( gemm3m2_ukr_ref, BLIS_GEMM_UKR )
 

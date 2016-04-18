@@ -41,10 +41,11 @@
 #undef  GENTFUNC
 #define GENTFUNC( ftype_x, chx, blasname, blisname ) \
 \
-f77_int PASTEF772(i,chx,blasname)( \
-                                   f77_int* n, \
-                                   ftype_x* x, f77_int* incx  \
-                                 ) \
+f77_int PASTEF772(i,chx,blasname) \
+     ( \
+       f77_int* n, \
+       ftype_x* x, f77_int* incx  \
+     ) \
 { \
 	dim_t    n0; \
 	ftype_x* x0; \
@@ -70,9 +71,13 @@ f77_int PASTEF772(i,chx,blasname)( \
 	bli_convert_blas_incv( n0, x, *incx, x0, incx0 ); \
 \
 	/* Call BLIS interface. */ \
-	PASTEMAC(chx,blisname)( n0, \
-	                        x0, incx0, \
-	                        &bli_index ); \
+	PASTEMAC(chx,blisname) \
+	( \
+	  n0, \
+	  x0, incx0, \
+	  &bli_index, \
+	  NULL  \
+	); \
 \
 	/* Convert zero-based BLIS (C) index to one-based BLAS (Fortran)
 	   index. */ \

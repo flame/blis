@@ -33,6 +33,7 @@
 */
 
 #include "bli_packm_cntl.h"
+#include "bli_packm_cntx.h"
 #include "bli_packm_check.h"
 #include "bli_packm_init.h"
 #include "bli_packm_int.h"

@@ -43,7 +43,8 @@ typedef void (*FUNCPTR_T)(
                            dim_t   m,
                            dim_t   n,
                            void*   p, inc_t rs_p, inc_t cs_p,
-                           void*   c, inc_t rs_c, inc_t cs_c
+                           void*   c, inc_t rs_c, inc_t cs_c,
+                           cntx_t* cntx
                          );
 
 static FUNCPTR_T GENARRAY(ftypes,unpackm_unb_var1);
@@ -51,6 +52,7 @@ static FUNCPTR_T GENARRAY(ftypes,unpackm_unb_var1);
 
 void bli_unpackm_unb_var1( obj_t*     p,
                            obj_t*     c,
+                           cntx_t*    cntx,
                            unpackm_t* cntl )
 {
 	num_t     dt_pc     = bli_obj_datatype( *p );
@@ -83,7 +85,9 @@ void bli_unpackm_unb_var1( obj_t*     p,
 	   m_c,
 	   n_c,
 	   buf_p, rs_p, cs_p,
-	   buf_c, rs_c, cs_c );
+	   buf_c, rs_c, cs_c,
+	   cntx
+	);
 }
 
 
@@ -97,20 +101,25 @@ void PASTEMAC(ch,varname)( \
                            dim_t   m, \
                            dim_t   n, \
                            void*   p, inc_t rs_p, inc_t cs_p, \
-                           void*   c, inc_t rs_c, inc_t cs_c \
+                           void*   c, inc_t rs_c, inc_t cs_c, \
+                           cntx_t* cntx  \
                          ) \
 { \
 	ctype* p_cast = p; \
 	ctype* c_cast = c; \
 \
-	PASTEMAC2(ch,ch,copym)( diagoffp,\
-	                        BLIS_NONUNIT_DIAG, \
-	                        uplop, \
-		                    transp, \
-	                        m, \
-	                        n, \
-	                        p_cast, rs_p, cs_p, \
-	                        c_cast, rs_c, cs_c ); \
+	PASTEMAC(ch,copym) \
+	( \
+	  diagoffp,\
+	  BLIS_NONUNIT_DIAG, \
+	  uplop, \
+	  transp, \
+	  m, \
+	  n, \
+	  p_cast, rs_p, cs_p, \
+	  c_cast, rs_c, cs_c, \
+	  cntx  \
+	); \
 }
 
 INSERT_GENTFUNC_BASIC( unpackm, unpackm_unb_var1 )

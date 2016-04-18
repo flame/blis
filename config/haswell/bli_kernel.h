@@ -89,21 +89,6 @@
 
 #endif
 
-/*
-#define BLIS_CGEMM_UKERNEL         bli_cgemm_asm_8x4
-#define BLIS_DEFAULT_MC_C          96
-#define BLIS_DEFAULT_KC_C          256
-#define BLIS_DEFAULT_NC_C          4096
-#define BLIS_DEFAULT_MR_C          8
-#define BLIS_DEFAULT_NR_C          4
-
-#define BLIS_ZGEMM_UKERNEL         bli_zgemm_asm_4x4
-#define BLIS_DEFAULT_MC_Z          64 
-#define BLIS_DEFAULT_KC_Z          192
-#define BLIS_DEFAULT_NC_Z          4096
-#define BLIS_DEFAULT_MR_Z          4
-#define BLIS_DEFAULT_NR_Z          4
-*/
 
 
 

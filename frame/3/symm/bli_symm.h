@@ -32,37 +32,5 @@
 
 */
 
-#include "bli_symm_check.h"
 #include "bli_symm_front.h"
-
-
-//
-// Prototype object-based interface.
-//
-void bli_symm( side_t  side,
-               obj_t*  alpha,
-               obj_t*  a,
-               obj_t*  b,
-               obj_t*  beta,
-               obj_t*  c );
-
-
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname)( \
-                          side_t  side, \
-                          uplo_t  uploa, \
-                          conj_t  conja, \
-                          trans_t transb, \
-                          dim_t   m, \
-                          dim_t   n, \
-                          ctype*  alpha, \
-                          ctype*  a, inc_t rs_a, inc_t cs_a, \
-                          ctype*  b, inc_t rs_b, inc_t cs_b, \
-                          ctype*  beta, \
-                          ctype*  c, inc_t rs_c, inc_t cs_c  \
-                        );
-
-INSERT_GENTPROT_BASIC( symm )
 

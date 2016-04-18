@@ -36,6 +36,7 @@
 
 void bli_packm_init( obj_t*   a,
                      obj_t*   p,
+                     cntx_t*  cntx,
                      packm_t* cntl )
 {
 	// The purpose of packm_init() is to initialize an object P so that
@@ -49,13 +50,13 @@ void bli_packm_init( obj_t*   a,
 	packord_t pack_ord_if_up;
 	packord_t pack_ord_if_lo;
 	packbuf_t pack_buf_type;
-	blksz_t*  mr;
-	blksz_t*  nr;
+	bszid_t   bmult_id_m;
+	bszid_t   bmult_id_n;
 	obj_t     c;
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
-		bli_packm_init_check( a, p, cntl );
+		bli_packm_init_check( a, p, cntx );
 
 	// First check if we are to skip this operation because the control tree
 	// is NULL, and if so, simply alias the object to its packed counterpart.
@@ -132,13 +133,38 @@ void bli_packm_init( obj_t*   a,
 	}
 
 	
-	// Extract various fields from the control tree and pass them in
-	// explicitly into _init_pack(). This allows external code generators
-	// the option of bypassing usage of control trees altogether.
-	schema         = cntl_pack_schema( cntl );
-	pack_buf_type  = cntl_pack_buf_type( cntl );
-	mr             = cntl_mr( cntl );
-	nr             = cntl_nr( cntl );
+	// Extract various fields from the control tree.
+	pack_buf_type = cntl_pack_buf_type( cntl );
+	bmult_id_m    = cntl_bmid_m( cntl );
+	bmult_id_n    = cntl_bmid_n( cntl );
+
+	// Extract the schema from the context, depending on whether we are
+	// preparing to pack a block of A or panel of B. For A and B, we must
+	// obtain the schema from the context since the induced methods reuse
+	// the same control trees used by native execution, and those induced
+	// methods specify the schema used by the current execution phase
+	// within the context (whereas the control tree does not change).
+	if ( pack_buf_type == BLIS_BUFFER_FOR_A_BLOCK )
+	{
+		schema = bli_cntx_get_pack_schema_a( cntx );
+//printf( "bli_packm_init: pack schema a = %x\n", schema );
+	}
+	else if ( pack_buf_type == BLIS_BUFFER_FOR_B_PANEL )
+	{
+		schema = bli_cntx_get_pack_schema_b( cntx );
+//printf( "bli_packm_init: pack schema b = %x\n", schema );
+	}
+	else // if ( pack_buf_type == BLIS_BUFFER_FOR_C_PANEL )
+	{
+		// If we get a request to pack C for some reason, it is likely
+		// not part of an induced method, and so it would be safe (and
+		// necessary) to read the pack schema from the control tree.
+		schema = cntl_pack_schema( cntl );
+//printf( "bli_packm_init: pack schema c = %x\n", schema );
+	}
+
+	// Prepare a few other variables based on properties of the control
+	// tree.
 
 	if ( cntl_does_invert_diag( cntl ) ) invert_diag = BLIS_INVERT_DIAG;
 	else                                 invert_diag = BLIS_NO_INVERT_DIAG;
@@ -155,10 +181,11 @@ void bli_packm_init( obj_t*   a,
 	                     pack_ord_if_up,
 	                     pack_ord_if_lo,
 	                     pack_buf_type,
-	                     mr,
-	                     nr,
+	                     bmult_id_m,
+	                     bmult_id_n,
 	                     &c,
-	                     p );
+	                     p,
+	                     cntx );
 
 	// Now p is ready to be packed.
 }
@@ -169,19 +196,20 @@ void bli_packm_init_pack( invdiag_t invert_diag,
                           packord_t pack_ord_if_up,
                           packord_t pack_ord_if_lo,
                           packbuf_t pack_buf_type,
-                          blksz_t*  mr,
-                          blksz_t*  nr,
+                          bszid_t   bmult_id_m,
+                          bszid_t   bmult_id_n,
                           obj_t*    c,
-                          obj_t*    p )
+                          obj_t*    p,
+                          cntx_t*   cntx )
 {
 	num_t   dt           = bli_obj_datatype( *c );
 	trans_t transc       = bli_obj_onlytrans_status( *c );
 	dim_t   m_c          = bli_obj_length( *c );
 	dim_t   n_c          = bli_obj_width( *c );
-	dim_t   mr_def_dim   = bli_blksz_get_def( dt, mr );
-	dim_t   mr_pack_dim  = bli_blksz_get_max( dt, mr );
-	dim_t   nr_def_dim   = bli_blksz_get_def( dt, nr );
-	dim_t   nr_pack_dim  = bli_blksz_get_max( dt, nr );
+	dim_t   bmult_m_def  = bli_cntx_get_blksz_def_dt( dt, bmult_id_m, cntx );
+	dim_t   bmult_m_pack = bli_cntx_get_blksz_max_dt( dt, bmult_id_m, cntx );
+	dim_t   bmult_n_def  = bli_cntx_get_blksz_def_dt( dt, bmult_id_n, cntx );
+	dim_t   bmult_n_pack = bli_cntx_get_blksz_max_dt( dt, bmult_id_n, cntx );
 
 	mem_t*  mem_p;
 	dim_t   m_p, n_p;
@@ -255,8 +283,8 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 	// level-2 operations, but that's okay with us.
 	m_p     = bli_obj_length( *p );
 	n_p     = bli_obj_width( *p );
-	m_p_pad = bli_align_dim_to_mult( m_p, mr_def_dim );
-	n_p_pad = bli_align_dim_to_mult( n_p, nr_def_dim );
+	m_p_pad = bli_align_dim_to_mult( m_p, bmult_m_def );
+	n_p_pad = bli_align_dim_to_mult( n_p, bmult_n_def );
 
 	// Save the padded dimensions into the packed object. It is important
 	// to save these dimensions since they represent the actual dimensions
@@ -325,13 +353,14 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 		dim_t ps_p, ps_p_orig;
 
 		// The panel dimension (for each datatype) should be equal to the
-		// register blocksize in the m dimension.
-		m_panel = mr_def_dim;
+		// default (logical) blocksize multiple in the m dimension.
+		m_panel = bmult_m_def;
 
 		// The "column stride" of a row panel packed object is interpreted as
-		// the column stride WITHIN a panel. Thus, this is equal to the panel
-		// pack dimension (which may be equal to the panel dimension).
-		cs_p = mr_pack_dim;
+		// the column stride WITHIN a panel. Thus, this is equal to the
+		// packing (storage) blocksize multiple (which may be equal to the
+		// default (logical) blocksize multiple.
+		cs_p = bmult_m_pack;
 
 		// The "row stride" of a row panel packed object is interpreted
 		// as the row stride WITHIN a panel. Thus, it is unit.
@@ -417,13 +446,14 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 		dim_t ps_p, ps_p_orig;
 
 		// The panel dimension (for each datatype) should be equal to the
-		// register blocksize in the n dimension.
-		n_panel = nr_def_dim;
+		// default (logical) blocksize multiple in the n dimension.
+		n_panel = bmult_n_def;
 
 		// The "row stride" of a column panel packed object is interpreted as
-		// the row stride WITHIN a panel. Thus, this is equal to the panel
-		// pack dimension (which may be equal to the panel dimension).
-		rs_p = nr_pack_dim;
+		// the row stride WITHIN a panel. Thus, this is equal to the
+		// packing (storage) blocksize multiple (which may be equal to the
+		// default (logical) blocksize multiple.
+		rs_p = bmult_n_pack;
 
 		// The "column stride" of a column panel packed object is interpreted
 		// as the column stride WITHIN a panel. Thus, it is unit.

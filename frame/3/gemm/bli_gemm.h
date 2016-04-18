@@ -33,52 +33,8 @@
 */
 
 #include "bli_gemm_cntl.h"
-#include "bli_gemm_blocksize.h"
-#include "bli_gemm_check.h"
 #include "bli_gemm_front.h"
 #include "bli_gemm_int.h"
 
-#include "bli_gemm_ukernel.h"
-
-#include "bli_gemm_blk_var1f.h"
-#include "bli_gemm_blk_var2f.h"
-#include "bli_gemm_blk_var3f.h"
-
-#include "bli_gemm_ker_var2.h"
-
-// Headers for induced algorithms:
-#include "bli_gemm_blk_var4f.h" // 3m3
-#include "bli_gemm_ker_var3.h"  // 4m1b
-#include "bli_gemm_ker_var4.h"  // 3m2
-
-#include "bli_gemm_ukr_ref.h"
-
-
-//
-// Prototype object-based interface.
-//
-void bli_gemm( obj_t*  alpha,
-               obj_t*  a,
-               obj_t*  b,
-               obj_t*  beta,
-               obj_t*  c );
-
-
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname)( \
-                          trans_t transa, \
-                          trans_t transb, \
-                          dim_t   m, \
-                          dim_t   n, \
-                          dim_t   k, \
-                          ctype*  alpha, \
-                          ctype*  a, inc_t rs_a, inc_t cs_a, \
-                          ctype*  b, inc_t rs_b, inc_t cs_b, \
-                          ctype*  beta, \
-                          ctype*  c, inc_t rs_c, inc_t cs_c  \
-                        );
-
-INSERT_GENTPROT_BASIC( gemm )
+#include "bli_gemm_var.h"
 

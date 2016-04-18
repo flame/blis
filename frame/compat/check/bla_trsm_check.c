@@ -36,18 +36,23 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-void bla_trsm_check( char*     dt_str,
-                     char*     op_str,
-                     f77_char* sidea,
-                     f77_char* uploa,
-                     f77_char* transa,
-                     f77_char* diaga,
-                     f77_int*  m,
-                     f77_int*  n,
-                     f77_int*  lda,
-                     f77_int*  ldb )
+void bla_trsm_check
+     (
+       char*     dt_str,
+       char*     op_str,
+       f77_char* sidea,
+       f77_char* uploa,
+       f77_char* transa,
+       f77_char* diaga,
+       f77_int*  m,
+       f77_int*  n,
+       f77_int*  lda,
+       f77_int*  ldb
+     )
 {
-	bla_trmm_check( dt_str,
+	bla_trmm_check
+     (
+       dt_str,
 	                op_str,
 	                sidea,
 	                uploa,
@@ -56,7 +61,8 @@ void bla_trsm_check( char*     dt_str,
 	                m,
 	                n,
 	                lda,
-	                ldb );
+	                ldb
+     );
 }
 
 #endif

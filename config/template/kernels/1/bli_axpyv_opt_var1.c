@@ -36,59 +36,87 @@
 
 
 
-void bli_saxpyv_opt_var1( conj_t             conjx,
-                          dim_t              n,
-                          float*    restrict alpha,
-                          float*    restrict x, inc_t incx,
-                          float*    restrict y, inc_t incy )
+void bli_saxpyv_opt_var1
+     (
+       conj_t    conjx,
+       dim_t     n,
+       float*    alpha,
+       float*    x, inc_t incx,
+       float*    y, inc_t incy,
+       cntx_t*   cntx
+     )
 {
 	/* Just call the reference implementation. */
-	BLIS_SAXPYV_KERNEL_REF( conjx,
-	                        n,
-	                        alpha,
-	                        x, incx,
-	                        y, incy );
+	BLIS_SAXPYV_KERNEL_REF
+	(
+	  conjx,
+	  n,
+	  alpha,
+	  x, incx,
+	  y, incy,
+	  cntx
+	);
 }
 
 
 
-void bli_daxpyv_opt_var1( conj_t             conjx,
-                          dim_t              n,
-                          double*   restrict alpha,
-                          double*   restrict x, inc_t incx,
-                          double*   restrict y, inc_t incy )
+void bli_daxpyv_opt_var1
+     (
+       conj_t    conjx,
+       dim_t     n,
+       double*   alpha,
+       double*   x, inc_t incx,
+       double*   y, inc_t incy,
+       cntx_t*   cntx
+     )
 {
 	/* Just call the reference implementation. */
-	BLIS_DAXPYV_KERNEL_REF( conjx,
-	                        n,
-	                        alpha,
-	                        x, incx,
-	                        y, incy );
+	BLIS_DAXPYV_KERNEL_REF
+	(
+	  conjx,
+	  n,
+	  alpha,
+	  x, incx,
+	  y, incy,
+	  cntx
+	);
 }
 
 
 
-void bli_caxpyv_opt_var1( conj_t             conjx,
-                          dim_t              n,
-                          scomplex* restrict alpha,
-                          scomplex* restrict x, inc_t incx,
-                          scomplex* restrict y, inc_t incy )
+void bli_caxpyv_opt_var1
+     (
+       conj_t    conjx,
+       dim_t     n,
+       scomplex* alpha,
+       scomplex* x, inc_t incx,
+       scomplex* y, inc_t incy,
+       cntx_t*   cntx
+     )
 {
 	/* Just call the reference implementation. */
-	BLIS_CAXPYV_KERNEL_REF( conjx,
-	                        n,
-	                        alpha,
-	                        x, incx,
-	                        y, incy );
+	BLIS_CAXPYV_KERNEL_REF
+	(
+	  conjx,
+	  n,
+	  alpha,
+	  x, incx,
+	  y, incy,
+	  cntx
+	);
 }
 
 
 
-void bli_zaxpyv_opt_var1( conj_t             conjx,
-                          dim_t              n,
-                          dcomplex* restrict alpha,
-                          dcomplex* restrict x, inc_t incx,
-                          dcomplex* restrict y, inc_t incy )
+void bli_zaxpyv_opt_var1
+     (
+       conj_t    conjx,
+       dim_t     n,
+       dcomplex* alpha,
+       dcomplex* x, inc_t incx,
+       dcomplex* y, inc_t incy,
+       cntx_t*   cntx
+     )
 {
 /*
   Template axpyv kernel implementation
@@ -193,11 +221,15 @@ void bli_zaxpyv_opt_var1( conj_t             conjx,
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE )
 	{
-		BLIS_ZAXPYV_KERNEL_REF( conjx,
-		                        n,
-		                        alpha,
-		                        x, incx,
-		                        y, incy );
+		BLIS_ZAXPYV_KERNEL_REF
+		(
+		  conjx,
+		  n,
+		  alpha,
+		  x, incx,
+		  y, incy,
+		  cntx
+		);
         return;
 	}
 
@@ -219,7 +251,7 @@ void bli_zaxpyv_opt_var1( conj_t             conjx,
 		// Compute front edge cases if x and y were unaligned.
 		for ( i = 0; i < n_pre; ++i )
 		{
-			bli_zzzaxpys( *alpha, *xp, *yp );
+			bli_zaxpys( *alpha, *xp, *yp );
 
 			xp += 1; yp += 1;
 		}
@@ -228,7 +260,7 @@ void bli_zaxpyv_opt_var1( conj_t             conjx,
 		// yp are guaranteed to be aligned to BLIS_SIMD_ALIGN_SIZE.
 		for ( i = 0; i < n_iter; ++i )
 		{
-			bli_zzzaxpys( *alpha, *xp, *yp );
+			bli_zaxpys( *alpha, *xp, *yp );
 
 			xp += n_elem_per_iter;
 			yp += n_elem_per_iter;
@@ -237,7 +269,7 @@ void bli_zaxpyv_opt_var1( conj_t             conjx,
 		// Compute tail edge cases, if applicable.
 		for ( i = 0; i < n_left; ++i )
 		{
-			bli_zzzaxpys( *alpha, *xp, *yp );
+			bli_zaxpys( *alpha, *xp, *yp );
 
 			xp += 1; yp += 1;
 		}
@@ -247,7 +279,7 @@ void bli_zaxpyv_opt_var1( conj_t             conjx,
 		// Compute front edge cases if x and y were unaligned.
 		for ( i = 0; i < n_pre; ++i )
 		{
-			bli_zzzaxpyjs( *alpha, *xp, *yp );
+			bli_zaxpyjs( *alpha, *xp, *yp );
 
 			xp += 1; yp += 1;
 		}
@@ -256,7 +288,7 @@ void bli_zaxpyv_opt_var1( conj_t             conjx,
 		// yp are guaranteed to be aligned to BLIS_SIMD_ALIGN_SIZE.
 		for ( i = 0; i < n_iter; ++i )
 		{
-			bli_zzzaxpyjs( *alpha, *xp, *yp );
+			bli_zaxpyjs( *alpha, *xp, *yp );
 
 			xp += n_elem_per_iter;
 			yp += n_elem_per_iter;
@@ -265,7 +297,7 @@ void bli_zaxpyv_opt_var1( conj_t             conjx,
 		// Compute tail edge cases, if applicable.
 		for ( i = 0; i < n_left; ++i )
 		{
-			bli_zzzaxpyjs( *alpha, *xp, *yp );
+			bli_zaxpyjs( *alpha, *xp, *yp );
 
 			xp += 1; yp += 1;
 		}

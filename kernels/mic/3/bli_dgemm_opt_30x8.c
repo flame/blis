@@ -254,15 +254,17 @@ extern int offsets[16];
 
 //#define MONITORS
 //#define LOOPMON
-void bli_dgemm_opt_30x8(
-                    dim_t            k,
-                    double* restrict alpha,
-                    double* restrict a,
-                    double* restrict b,
-                    double* restrict beta,
-                    double* restrict c, inc_t rs_c, inc_t cs_c,
-                    auxinfo_t*       data
-                  )
+void bli_dgemm_asm_30x8
+     (
+       dim_t               k,
+       double*    restrict alpha,
+       double*    restrict a,
+       double*    restrict b,
+       double*    restrict beta,
+       double*    restrict c, inc_t rs_c, inc_t cs_c,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
+     )
 {
     double * a_next = bli_auxinfo_next_a( data );
     double * b_next = bli_auxinfo_next_b( data );
@@ -574,43 +576,3 @@ void bli_dgemm_opt_30x8(
 #endif
 }
 
-
-
-void bli_cgemm_opt_30x8(
-                    dim_t              k,
-                    scomplex* restrict alpha,
-                    scomplex* restrict a,
-                    scomplex* restrict b,
-                    scomplex* restrict beta,
-                    scomplex* restrict c, inc_t rs_c, inc_t cs_c,
-                    auxinfo_t*         data
-                  )
-{
-	BLIS_CGEMM_UKERNEL_REF( k,
-	                       alpha,
-	                       a,
-	                       b,
-	                       beta,
-	                       c, rs_c, cs_c,
-	                       data );
-}
-
-
-void bli_zgemm_opt_30x8(
-                    dim_t              k,
-                    dcomplex* restrict alpha,
-                    dcomplex* restrict a,
-                    dcomplex* restrict b,
-                    dcomplex* restrict beta,
-                    dcomplex* restrict c, inc_t rs_c, inc_t cs_c,
-                    auxinfo_t*         data
-                  )
-{
-	BLIS_ZGEMM_UKERNEL_REF( k,
-	                       alpha,
-	                       a,
-	                       b,
-	                       beta,
-	                       c, rs_c, cs_c,
-	                       data );
-}

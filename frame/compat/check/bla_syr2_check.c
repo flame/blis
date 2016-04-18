@@ -36,21 +36,27 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-void bla_syr2_check( char*     dt_str,
-                     char*     op_str,
-                     f77_char* uploc,
-                     f77_int*  m,
-                     f77_int*  incx,
-                     f77_int*  incy,
-                     f77_int*  lda )
+void bla_syr2_check
+     (
+       char*     dt_str,
+       char*     op_str,
+       f77_char* uploc,
+       f77_int*  m,
+       f77_int*  incx,
+       f77_int*  incy,
+       f77_int*  lda
+     )
 {
-	bla_her2_check( dt_str,
+	bla_her2_check
+     (
+       dt_str,
 	                op_str,
 	                uploc,
 	                m,
 	                incx,
 	                incy,
-	                lda );
+	                lda
+     );
 }
 
 #endif

@@ -1,10 +1,772 @@
-commit 47caa33485b91ea6f2a5e386e61210c90c5f489f (HEAD -> master, tag: 0.1.8)
+commit 898614a555ea0aa7de4ca07bb3cb8f5708b6a002 (HEAD -> master, tag: 0.2.0)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Apr 11 17:32:09 2016 -0500
+
+    Version file update (0.2.0)
+
+commit 537a1f4f85ce1aa008901857cb3182e6b4546d7f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Apr 11 17:21:28 2016 -0500
+
+    Implemented runtime contexts and reorganized code.
+    
+    Details:
+    - Retrofitted a new data structure, known as a context, into virtually
+      all internal APIs for computational operations in BLIS. The structure
+      is now present within the type-aware APIs, as well as many supporting
+      utility functions that require information stored in the context. User-
+      level object APIs were unaffected and continue to be "context-free,"
+      however, these APIs were duplicated/mirrored so that "context-aware"
+      APIs now also exist, differentiated with an "_ex" suffix (for "expert").
+      These new context-aware object APIs (along with the lower-level, type-
+      aware, BLAS-like APIs) contain the the address of a context as a last
+      parameter, after all other operands. Contexts, or specifically, cntx_t
+      object pointers, are passed all the way down the function stack into
+      the kernels and allow the code at any level to query information about
+      the runtime, such as kernel addresses and blocksizes, in a thread-
+      friendly manner--that is, one that allows thread-safety, even if the
+      original source of the information stored in the context changes at
+      run-time; see next bullet for more on this "original source" of info).
+      (Special thanks go to Lee Killough for suggesting the use of this kind
+      of data structure in discussions that transpired during the early
+      planning stages of BLIS, and also for suggesting such a perfectly
+      appropriate name.)
+    - Added a new API, in frame/base/bli_gks.c, to define a "global kernel
+      structure" (gks). This data structure and API will allow the caller to
+      initialize a context with the kernel addresses, blocksizes, and other
+      information associated with the currently active kernel configuration.
+      The currently active kernel configuration within the gks cannot be
+      changed (for now), and is initialized with the traditional cpp macros
+      that define kernel function names, blocksizes, and the like. However,
+      in the future, the gks API will be expanded to allow runtime management
+      of kernels and runtime parameters. The most obvious application of this
+      new infrastructure is the runtime detection of hardware (and the
+      implied selection of appropriate kernels). With contexts in place,
+      kernels may even be "hot swapped" at runtime within the gks. Once
+      execution enters a level-3 _front() function, the memory allocator will
+      be reinitialized on-the-fly, if necessary, to accommodate the new
+      kernels' blocksizes. If another application thread is executing with
+      another (previously loaded) kernel, it will finish in a deterministic
+      fashion because its kernel information was loaded into its context
+      before computation began, and also because the blocks it checked out
+      from the internal memory pools will be unaffected by the newer threads'
+      reinitialization of the allocator.
+    - Reorganized and streamlined the 'ind' directory, which contains much of
+      the code enabling use of induced methods for complex domain matrix
+      multiplication; deprecated bli_bsv_query.c and bli_ukr_query.c, as
+      those APIs' functionality is now mostly subsumed within the global
+      kernel structure.
+    - Updated bli_pool.c to define a new function, bli_pool_reinit_if(),
+      that will reinitialize a memory pool if the necessary pool block size
+      has increased.
+    - Updated bli_mem.c to use bli_pool_reinit_if() instead of
+      bli_pool_reinit() in the definition of bli_mem_pool_init(), and placed
+      usage of contexts where appropriate to communicate cache and register
+      blocksizes to bli_mem_compute_pool_block_sizes().
+    - Simplified control trees now that much of the information resides in
+      the context and/or the global kernel structure:
+      - Removed blocksize object pointers (blksz_t*) fields from all control
+        tree node definitions and replaced them with blocksize id (bszid_t)
+        values instead, which may be passed into a context query routine in
+        order to extract the corresponding blocksize from the given context.
+      - Removed micro-kernel function pointers (func_t*) fields from all
+        control tree node definitions. Now, any code that needs these function
+        pointers can query them from the local context, as identified by a
+        level-3 micro-kernel id (l3ukr_t), level-1f kernel id, (l1fkr_t), or
+        level-1v kernel id (l1vkr_t).
+      - Removed blksz_t object creation and initialization, as well as kernel
+        function object creation and initialization, from all operation-
+        specific control tree initialization files (bli_*_cntl.c), since this
+        information will now live in the gks and, secondarily, in the context.
+    - Removed blocksize multiples from blksz_t objects. Now, we track
+      blocksize multiples for each blocksize id (bszid_t) in the context
+      object.
+    - Removed the bool_t's that were required when a func_t was initialized.
+      These bools are meant to allow one to track the micro-kernel's storage
+      preferences (by rows or columns). This preference is now tracked
+      separately within the gks and contexts.
+    - Merged and reorganized many separate-but-related functions into single
+      files. This reorganization affects frame/0, 1, 1d, 1m, 1f, 2, 3, and
+      util directories, but has the most obvious effect of allowing BLIS
+      to compile noticeably faster.
+    - Reorganized execution paths for level-1v, -1d, -1m, and -2 operations
+      in an attempt to reduce overhead for memory-bound operations. This
+      includes removal of default use of object-based variants for level-2
+      operations. Now, by default, level-2 operations will directly call a
+      low-level (non-object based) loop over a level-1v or -1f kernel.
+    - Converted many common query functions in blk_blksz.c (renamed from
+      bli_blocksize.c) and bli_func.c into cpp macros, now defined in their
+      respective header files.
+    - Defined bli_mbool.c API to create and query "multi-bools", or
+      heterogeneous bool_t's (one for each floating-point datatype), in the
+      same spirit as blksz_t and func_t.
+    - Introduced two key parameters of the hardware: BLIS_SIMD_NUM_REGISTERS
+      and BLIS_SIMD_SIZE. These values are needed in order to compute a third
+      new parameter, which may be set indirectly via the aforementioned
+      macros or directly: BLIS_STACK_BUF_MAX_SIZE. This value is used to
+      statically allocate memory in macro-kernels and the induced methods'
+      virtual kernels to be used as temporary space to hold a single
+      micro-tile. These values are now output by the testsuite. The default
+      value of BLIS_STACK_BUF_MAX_SIZE is computed as
+      "2 * BLIS_SIMD_NUM_REGISTERS * BLIS_SIMD_SIZE".
+    - Cleaned up top-level 'kernels' directory (for example, renaming the
+      embarrassingly misleading "avx" and "avx2" directories to "sandybridge"
+      and "haswell," respectively, and gave more consistent and meaningful
+      names to many kernel files (as well as updating their interfaces to
+      conform to the new context-aware kernel APIs).
+    - Updated the testsuite to query blocksizes from a locally-initialized
+      context for test modules that need those values: axpyf, dotxf,
+      dotxaxpyf, gemm_ukr, gemmtrsm_ukr, and trsm_ukr.
+    - Reformatted many function signatures into a standard format that will
+      more easily facilitate future API-wide changes.
+    - Updated many "mxn" level-0 macros (ie: those used to inline double loops
+      for level-1m-like operations on small matrices) in frame/include/level0
+      to use more obscure local variable names in an effort to avoid variable
+      shaddowing. (Thanks to Devin Matthews for pointing these gcc warnings,
+      which are only output using -Wshadow.)
+    - Added a conj argument to setm, so that its interface now mirrors that
+      of scalm. The semantic meaning of the conj argument is to optionally
+      allow implicit conjugation of the scalar prior to being populated into
+      the object.
+    - Deprecated all type-aware mixed domain and mixed precision APIs. Note
+      that this does not preclude supporting mixed types via the object APIs,
+      where it produces absolutely zero API code bloat.
+
+commit d1f8e5d9b2ecd054ed103f4d642d748db2d4f173 (origin/master)
+Merge: 20af937 c11d28e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Apr 5 12:21:27 2016 -0500
+
+    Merge pull request #60 from esauvage/master
+    
+    sgemm µkernel for bulldozer : bug correction for k%4 != 0
+
+commit c11d28eed89d65494bc4019f04d046520866c0ff
+Author: Etienne Sauvage <etienne.sauvage@gmail.com>
+Date:   Sat Apr 2 21:15:48 2016 +0200
+
+    cgemm µkernel for bulldozer : bug correction for k%4 != 0
+
+commit 20af937b57f82bb3acb09418d5c0206e1b24f2c7
+Merge: 36c3abb fc61a11
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Mar 31 14:37:30 2016 -0500
+
+    Merge pull request #59 from devinamatthews/fix_testsuite_makefile
+    
+    Fix testsuite makefile
+
+commit fc61a1143edeba4946d4b9915f1775bb08e643fc
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Thu Mar 31 10:53:01 2016 -0500
+
+    Fix formatting in configure.
+
+commit 26379b14de630e3a6c6eef5dfe87ff001558a8a6
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Thu Mar 31 10:45:48 2016 -0500
+
+    Adjust paths in common.mk to support building from testsuite dir.
+
+commit 36c3abb05fecb02d4a9ab13b2b69d133adf34583
+Merge: 64b41fa 917ce75
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Mar 31 10:26:17 2016 -0500
+
+    Merge pull request #58 from esauvage/master
+    
+    cgemm & zgemm micro-kernels for FMA4 instruction set (bulldozer confi…
+
+commit 356d854fc9e34642cc46e0e02a8ceb56114878af
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Wed Mar 30 16:33:15 2016 -0500
+
+    Make symlink to common.mk in build directory.
+
+commit edbb8470044f82ef959583ee09613a5a985292b5
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Wed Mar 30 16:27:11 2016 -0500
+
+    Refactor out some definitions which moved from make_defs.mk to Makefile for use in testsuite Makefile.
+
+commit 917ce75482a543fef46553efff6c246939761e59
+Author: Etienne Sauvage <etienne.sauvage@gmail.com>
+Date:   Wed Mar 30 22:03:09 2016 +0200
+
+    cgemm & zgemm micro-kernels for FMA4 instruction set (bulldozer configuration), based on x86_64/avx micro-kernel
+
+commit 64b41fa554dff44b2f9ad48901b67c63836407a8
+Merge: 1b09e34 0171ad5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Mar 29 15:19:41 2016 -0500
+
+    Merge pull request #54 from devinamatthews/more_config_opts
+    
+    More config opts
+
+commit 1b09e343dfe5b48b4842e2cb96f41c8cc249bad0
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Mar 29 12:55:28 2016 -0500
+
+    Updated gcc version from 4.8 to 4.9 in .travis.yml.
+
+commit 0171ad58997b3a5a9b76301511dbe0751fffc940
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Mon Mar 28 13:55:06 2016 -0500
+
+    Add icc and clang support for Intel architectures, fixes #47. 2bd036f fixes #49 BTW.
+
+commit 3090fff64cc87ff2519a09f38e6b8699cf3cba11
+Merge: 8624e36 4ca5d5b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Mar 28 12:36:25 2016 -0500
+
+    Merge pull request #44 from esauvage/master
+    
+    sgemm micro-kernel for FMA4 instruction set
+
+commit e6e566426ac3ded7ef87cd8ff9be98accfdc4acc
+Merge: 469429e 8624e36
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Sat Mar 26 14:10:15 2016 -0500
+
+    Merge branch 'master' into more_config_opts
+
+commit 8624e36543160739d954c4dbcc5a5594458f3a12
+Merge: a315833 2bd036f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Mar 26 13:56:28 2016 -0500
+
+    Merge pull request #50 from devinamatthews/fix_noopt_avx
+    
+    Fix configuration issue where instruction set flags are not specified for debug builds.
+
+commit 469429ec34e5b1a172ce35596f9c7afdaacac131
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Fri Mar 25 20:45:41 2016 -0500
+
+     Fix LD_FLAGS -> LDFLAGS.
+
+commit 8442d65c9ead0376fc5f2dfad62fd4862ab9b2b3
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Fri Mar 25 20:06:48 2016 -0500
+
+    Replace -march=native with specific architecture flags to support cross-compiling, and add icc support for Intel architectures.
+
+commit 76099f20be1b49ac960f7e3c5a8296bbf4e1782d
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Fri Mar 25 17:22:58 2016 -0500
+
+    Add threading option to configure.
+
+commit ad43eab4c7899d56d8d7caa6e2d92bc0581ea5a5
+Merge: 9452bdb 2bd036f
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Fri Mar 25 15:00:02 2016 -0500
+
+    Merge branch 'fix_noopt_avx' into more_config_opts
+
+commit 9452bdb3afbf2d7f898134a091d7790817e7be9c
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Fri Mar 25 14:59:50 2016 -0500
+
+    Add options for verbose make output and static/shared linking to configure.
+
+commit 2bd036f1f9ce1ee0864365557f66d9415dd42de3
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Fri Mar 25 12:16:49 2016 -0500
+
+    Fix configuration issue where instruction set flags are not specified for debug builds.
+
+commit a315833f067944fb0bc14cf60f0c7dcb5dc897b6
+Merge: 1d1a426 af92773
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Mar 24 12:30:21 2016 -0500
+
+    Merge pull request #48 from figual/master
+    
+    Updated and improved ARMv8 micro-kernels.
+
+commit af92773f4f85a2441fe0c6e3a52c31b07253d08e
+Author: figual <figual@ucm.es>
+Date:   Wed Mar 23 22:07:02 2016 +0100
+
+    Updated and improved ARMv8 micro-kernels.
+
+commit 1d1a426d18ec03754021456862a1f4d1dfec1fbf
+Merge: 5a978ff d226dfa
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Mar 7 15:17:53 2016 -0600
+
+    Merge pull request #46 from devinamatthews/new-config-opts
+    
+    Add several changes to the build system.
+
+commit d226dfa05190eb477b33563b1edccf8603973336
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Sat Mar 5 16:18:14 2016 -0600
+
+    Add several changes to the build system.
+    
+    1) Add -- options.
+    2) Add -d/--enable-debug option to enable debugging symbols with and without optimization.
+    3) Allow user to specify CC at configure time, and determine vendor (gcc/icc/etc.). For now configurations enforce a particular vendor.
+    4) Add make V=[0,1] option to control build verbosity.
+
+commit 5a978fffdb8f09a81c89541d541d4a6830cd70a4
+Merge: adb2b4e 63e2642
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Mar 4 17:26:58 2016 -0600
+
+    Merge pull request #45 from devinamatthews/high_prec_timers
+    
+    Use clock_gettime(CLOCK_MONOTONIC) and mach_absolute_time instead of gettimeofday
+
+commit 63e264239053b913164a849dd8a45829087eaddc
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Fri Mar 4 13:17:50 2016 -0600
+
+    Make sure that -lrt is linked on Linux.
+
+commit 44fddd48dc1708a956803d1948f04429ec0d8700
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Fri Mar 4 12:36:38 2016 -0600
+
+    Add missing \.
+
+commit 7cabd2131f953de23e7015d760b0ddfda51b1251
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Thu Mar 3 11:43:07 2016 -0600
+
+    Use clock_gettime(CLOCK_MONOTONIC) and mach_absolute_time instead of gettimeofday.
+
+commit adb2b4e096c78e8b2f85fd372cf0d5eb04af5be8
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Wed Mar 2 14:48:12 2016 -0600
+
+    Fixing guard for non implemented partitioning through packed matrices
+
+commit 4ca5d5b1fd6f2e4a8b2e139c5405475239581e51
+Author: Etienne Sauvage <etienne.sauvage@gmail.com>
+Date:   Tue Mar 1 21:33:01 2016 +0100
+
+    sgemm micro-kernel for FMA4 instruction set (bulldozer configuration), based on x86_64/avx micro-kernel
+
+commit 627d59b5ba06866b26f46e4434a0435b600925e3
+Author: Etienne Sauvage <etienne.sauvage@gmail.com>
+Date:   Mon Feb 29 21:53:12 2016 +0100
+
+    symbolic link for bulldozer configuration to kernels
+
+commit 2dc5c0ae038ed175fab85751803ada05734d1ba1
+Merge: f2809fc 3d0fae8
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Feb 29 12:22:51 2016 -0600
+
+    Merge pull request #40 from tkelman/bulldozer-symlink
+    
+    Add symlink from config/bulldozer/kernels to kernels/x86_64/bulldozer
+
+commit f2809fc5f74466c755da6a5b4632853e634060b5
+Merge: f86b94f 8624a33
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Feb 27 13:06:03 2016 -0600
+
+    Merge pull request #39 from devinamatthews/fix_f2c_conflicts
+    
+    Devin's f2c type namespace update.
+    
+    Details:
+    - Added "bla_" prefix to f2c type names to prevent conflicts with external user code.
+    - Removed most of the body of bli_f2c.h, which was unused.
+
+commit 3d0fae810d942085d8f2d389820b4e0027577db8
+Author: Tony Kelman <tony@kelman.net>
+Date:   Thu Feb 25 23:24:03 2016 -0800
+
+    Add symlink from config/bulldozer/kernels to kernels/x86_64/bulldozer
+    
+    to fix linking issue mentioned in #37 and https://groups.google.com/forum/#!topic/blis-devel/iypwljcaeEI
+
+commit 8624a33ccc12dff6f6c4f92992ca5636af1576a6
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Thu Feb 25 13:51:26 2016 -0600
+
+    Fix remaining f2c conflicts.
+
+commit 372eef0b6c0a535bf88d4b46b72f61266e8491ba
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Thu Feb 25 12:01:58 2016 -0600
+
+     Fixed most conflicts after hack-n-slash ofr bli_f2c.h, cleanup in
+    progress.
+
+commit f86b94f206e2e09fa3221cc55c3dc5b05ca4775a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Feb 23 18:12:34 2016 -0600
+
+    Included missing blas2blis integer def to CBLAS.
+    
+    Details:
+    - Added #include "bli_config_macro_defs" to all cblas_*.c files in
+      compat/cblas/src. This has the effect of defining
+      BLIS_BLAS2BLIS_INT_TYPE_SIZE to the default value if bli_config.h does
+      not define it. Thanks to Tony Kelman for reporting this bug.
+    - In cblas_i?amax.c, changed the type of the variable 'iamax' from 'int'
+      to 'f77_int'. This eliminates a compiler warning and a potential
+      runtime bug and/or crash when the size of an int differs from the size
+      of f77_int (as determined by BLIS_BLAS2BLIS_INT_TYPE_SIZE).
+
+commit 0b126de1342c11c65623bcb38e258e21e9244e3d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Nov 13 16:29:12 2015 -0600
+
+    Consolidated packm_blk_var1 and packm_blk_var2.
+    
+    Details:
+    - Consolidated the two blocked variants for packm into a single
+      implementation (packm_blk_var1) and removed the other variant.
+    - Updated all induced method _cntl_init() functions in frame/cntl/ind/
+      to use the new blocked variant 1.
+    - Defined two new macros, bli_is_ind_packed() and bli_is_nat_packed(),
+      to detect pack_t schemas for induced methods and native execution,
+      respectively.
+
+commit 30e5eb29e060b97752f702d2ea5d101d950f53b2
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Nov 13 12:14:19 2015 -0600
+
+    Minor changes to treatment of rs, cs in bli_obj.c.
+    
+    Details:
+    - Applied a patch submitted by Devin Matthews that:
+      - implements subtle changes to handling of somewhat unusual cases of
+        row and column strides to accommodate certail tensor cases, which
+        includes adding dimension parameters to _is_col_tilted() and
+        _is_row_tilted() macros,
+      - simplifies how buffers are sized when requested BLIS-allocated
+        objects,
+      - re-consolidates bli_adjust_strides_*() into one function, and
+      - defines 'restrict' keyword as a "nothing" macro for C++ and pre-C99
+        environments.
+
+commit f0a4f41b5acf55b41707ec821c4c5f9076dfbc24
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Nov 12 15:22:50 2015 -0600
+
+    Fixed unimplemented case in core2 sgemm ukernel.
+    
+    Details:
+    - Implemented the "beta == 0" case for general stride output for the
+      dunnington sgemm micro-kernel. This case had been, up until now,
+      identical to the "beta != 0" case, which does not work when the
+      output matrix has nan's and inf's. It had manifested as nan residuals
+      in the test suite for right-side tests of ctrsm4m1a. Thanks to Devin
+      Matthews for reporting this bug.
+
+commit 42810bbfa0b8f006ecc5128d903909ec13ea63f9
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Nov 12 12:07:46 2015 -0600
+
+    Fixed minor bugs for uncommon obj_create cases.
+    
+    Details:
+    - Separated bli_adjust_strides() into _alloc() and _attach() flavors so
+      that the latter can avoid a test performed by the former, in which the
+      rs and cs are overridden and set to zero if either matrix dimension is
+      zero. Actually, we also disable this overridding behavior, even for the
+      _alloc() case, since keeping the original strides (probably) does not
+      hurt anything. The original code has been kept commented-out, though,
+      in case an unintended consequence is later discovered.
+    - Fixed a typo in an error check for general stride cases where rs == cs.
+
+commit 3e6dd11467643fbc2cb45c13cec8dd6024232833
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Nov 3 10:30:08 2015 -0600
+
+    Minor re-expression in quadratic partitioning code.
+    
+    Details:
+    - Minor change to quadratic equation solution code that avoids
+      recomputation of the sqrt() parameter when the compiler is not
+      smart enough to perform this optimization automatically.
+
+commit 0694b722f7e4df00efb32639095a2aca80e67f52
+Merge: 3e116f0 33557ec
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Nov 2 17:24:25 2015 -0600
+
+    Merge branch 'master' of github.com:flame/blis
+
+commit 3e116f0a2953f50b3c068759a775ad7ffae04e49
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Nov 2 17:18:23 2015 -0600
+
+    Fixed imaginary bug in quadratic partitioning code.
+    
+    Details:
+    - Fixed a bug in the relatively new quadratic partitioning code that,
+      under the right conditions, would perform sqrt() on a negative value.
+      If the solution is imaginary, we discard it and use an alternate
+      partition width that assumes no diagonal intersection. That alternate
+      width is actually already computed, so, the fix was quite simple.
+      Thanks to Devangi Parikh for reporting this bug.
+
+commit 33557ecccaf49b2569b7f3d7bcea52c2aab94c68
+Author: Jeff Hammond <jeff.science@gmail.com>
+Date:   Mon Nov 2 12:18:43 2015 -0800
+
+    add Travis CI build status icon to the README
+
+commit 4a502fbe77bd0f701108baaa559d9cfb483f88de
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Nov 2 13:28:34 2015 -0600
+
+    Laid groundwork for runtime memory pool resizing.
+    
+    Details:
+    - Changed bli_pool_finalize() so that the freeing begins with the block
+      at top_index instead of block 0. This allows us to use the function
+      for terminal finalization as well as temporary cleanup prior to
+      reinitialization. Also, clear the pool_t struct upon _pool_finalize()
+      in case it is called in the terminal case with some blocks still
+      checked out to threads (in which case the threads will see the new
+      block size as 0 and thus release the block as intended).
+    - Added bli_pool_reinit(), which calls _pool_finalize() followed by
+      _pool_init() with new parameters.
+    - Added bli_mem_reinit(), which is based on bli_pool_reinit().
+    - Added new wrapper, _mem_compute_pool_block_sizes(), which calls
+      _mem_compute_pool_block_sizes_dt().
+    - Updated bli_mem_release() so that the pblk_t is freed, via
+      _pool_free_block(), if the block size recorded in the mem_t at the
+      time the pblk_t was acquired is now different from the value in the
+      pool_t.
+
+commit 37e55ca39bdbddaec03ad30d43e8ad2b3e549c96
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Oct 30 18:25:04 2015 -0500
+
+    Fixed obscure 3m1/4m1a bugs in trmm[3] and trsm.
+    
+    Details:
+    - Fixed a family of bugs in the triangular level-3 operations for
+      certain complex implementations (3m1 and 4m1a) that only manifest if
+      one of the register blocksizes (PACKMR/PACKNR, actually) is odd:
+      - Fixed incorrect imaginary stride computation in bli_packm_blk_var2()
+        for the triangular case.
+      - Fixed the incorrect computation of imaginary stride, as stored in
+        the auxinfo_t struct in trmm and trsm macro-kernels.
+      - Fixed incorrect pointer arithmetic in the trsm macro-kernels in the
+        cases where the the register blocksize for the triangular matrix is
+        odd. Introduced a new byte-granular pointer arithmetic macro,
+        bli_ptr_add(), that computes the correct value.
+    - Added cpp macro to bli_macro_defs.h for typeof() operator, defined in
+      terms of __typeof__, which is used by bli_ptr_add() macro.
+    - Disabled the row- vs. column-storage optimization in bli_trmm_front()
+      for singleton problems because the inherent ambiguity of whether a
+      scalar is row-stored or column-stored causes the wrong parameter
+      combination code to be executed (by dumb luck of our checking for
+      row storage first).
+    - Added commented-out debugging lines to 3m1/4m1a and reference
+      micro-kernels, and trsm_ll macro-kernel.
+
+commit 46294d80e5a79c598e200e1c8ec2a642ff839971
+Merge: d3159c5 a0a7b85
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Oct 27 12:41:23 2015 -0500
+
+    Merge pull request #35 from figual/master
+    
+    Fixed incomplete code in the double precision ARMv8 microkernel.
+
+commit a0a7b85ac3e157af53cff8db0e008f4a3f90372c
+Author: Francisco Igual <figual@ucm.es>
+Date:   Tue Oct 27 08:59:15 2015 +0000
+
+    Fixed incomplete code in the double precision ARMv8 microkernel.
+
+commit d3159c5740c9ee7f8c0b661003aab6f00646ad6f
+Merge: b489152 7e03e45
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Oct 21 14:54:00 2015 -0500
+
+    Merge branch 'master' of github.com:flame/blis
+
+commit b489152e112644ec3b6d19e687231a9607f7694f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Oct 21 14:53:17 2015 -0500
+
+    Use vzeroall in haswell micro-kernels.
+
+commit 7e03e45bfe6c27c4fdbf06b1caa7f49e9a5fef49
+Merge: 77ddb0b 4f88c29
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Oct 14 13:26:07 2015 -0500
+
+    Merge pull request #33 from xianyi/master
+    
+    Enable Travis CI
+
+commit 4f88c29f9e634cbb6fb22d8c88931f0ec78ad7db
+Author: Zhang Xianyi <traits.zhang@gmail.com>
+Date:   Wed Oct 14 12:57:50 2015 -0500
+
+    Detect Intel Broadwell (using Haswell config).
+
+commit 4b0ac1a9984a93f7ad4369b10fca63991107d9f5
+Merge: fe3e355 77ddb0b
+Author: Zhang Xianyi <traits.zhang@gmail.com>
+Date:   Wed Oct 14 12:51:05 2015 -0500
+
+    Merge branch 'upstream_master'
+
+commit 77ddb0b1d31ada111dadf392766ba6d9210ed9fb
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Oct 13 12:53:06 2015 -0500
+
+    Removed flop-counting mechanism.
+    
+    Details:
+    - Removed the optional flop-counting feature introduced in commit
+      7574c994.
+
+commit 276da366187460a4c8e6e0910e79cb39ce780bfe
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Oct 12 11:43:03 2015 -0500
+
+    Minor formatting change to README.md.
+
+commit d17057446f5404824478e8a6cd08f242ab75544a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Oct 12 11:39:49 2015 -0500
+
+    Added "Getting Started" section to README.md.
+    
+    Details:
+    - Added section to README.md file containing links to wikis with brief
+      descriptions.
+
+commit e7e1f2f7b601b21b50e3cdad8972cb3fe11018d3
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Oct 2 16:51:52 2015 -0500
+
+    Minor updates to CREDITS, README files.
+
+commit 55329906ecd7ce1ab910e4d30a29354a9172e7ea
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Sep 26 20:47:19 2015 -0500
+
+    Minor edits to README.md, testsuite.
+    
+    Details:
+    - Fixed typos in README.md.
+    - Fixed column heading alignment for testsuite when matlab output is
+      enabled.
+    - Minor updates to test/3m4m/runme.sh and test/3m4m/Makefile.
+
+commit bbebdb5793a8fd6aaf257012ab0272beaa04a0de
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Sep 25 14:47:27 2015 -0500
+
+    Replaced README with README.md.
+    
+    Details:
+    - Replaced the old (and short) README file with a much more comprehensive
+      version written in github-flavored markdown. The new file is based on
+      content taken from the old Google Code homepage.
+
+commit e2e9d64a63485461192d9c2a6dd0183a8b71013c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Sep 24 12:14:03 2015 -0500
+
+    Load balance thread ranges for arbitrary diagonals.
+    
+    Details:
+    - Expanded/updated interface for bli_get_range_weighted() and
+      bli_get_range() so that the direction of movement is specified in the
+      function name (e.g. bli_get_range_l2r(), bli_get_range_weighted_t2b())
+      and also so that the object being partitioned is passed instead of an
+      uplo parameter. Updated invocations in level-3 blocked variants, as
+      appropriate.
+    - (Re)implemented bli_get_range_*() and bli_get_range_weighted_*() to
+      carefully take into account the location of the diagonal when computing
+      ranges so that the area of each subpartition (which, in all present
+      level-3 operations, is proportional to the amount of computation
+      engendered) is as equal as possible.
+    - Added calls to a new class of routines to all non-gemm level-3 blocked
+      variants:
+        bli_<oper>_prune_unref_mparts_[mnk]()
+      where <oper> is herk, trmm, or trsm and [mnk] is chosen based on which
+      dimension is being partitioned. These routines call a more basic
+      routine, bli_prune_unref_mparts(), to prune unreferenced/unstored
+      regions from matrices and simultaneously adjust other matrices which
+      share the same dimension accordingly.
+    - Simplified herk_blk_var2f, trmm_blk_var1f/b as a result of more the
+      new pruning routines.
+    - Fixed incorrect blocking factors passed into bli_get_range_*() in
+      bli_trsm_blk_var[12][fb].c
+    - Added a new test driver in test/thread_ranges that can exercise the new
+      bli_get_range_*() and bli_get_range_weighted_*() under a range of
+      conditions.
+    - Reimplemented m and n fields of obj_t as elements in a "dim"
+      array field so that dimensions could be queried via index constant
+      (e.g. BLIS_M, BLIS_N). Adjusted/added query and modification
+      macros accordingly.
+    - Defined mdim_t type to enumerate BLIS_M and BLIS_N indexing values.
+    - Added bli_round() macro, which calls C math library function round(),
+      and bli_round_to_mult(), which rounds a value to the nearest multiple
+      of some other value.
+    - Added miscellaneous pruning- and mdim_t-related macros.
+    - Renamed bli_obj_row_offset(), bli_obj_col_offset() macros to
+      bli_obj_row_off(), bli_obj_col_off().
+
+commit fe3e355c9c5a6f65b8736b009e2d501b62a83ea1
+Merge: efa641e 4dd9dd3
+Author: Zhang Xianyi <traits.zhang@gmail.com>
+Date:   Fri Aug 21 14:38:36 2015 -0500
+
+    Merge branch 'upstream_master'
+
+commit efa641e36b73abee34166a252e90e28a6281d92d
+Author: Zhang Xianyi <traits.zhang@gmail.com>
+Date:   Sat Aug 22 03:15:50 2015 +0800
+
+    Try to fix the compiling bug on travis.
+
+commit 4dd9dd3e1de626b51bfe85d9ee65f193d60e8d38
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Aug 21 11:52:37 2015 -0500
+
+    Fixed minor alignment ambiguity bug in bli_pool.c.
+    
+    Details:
+    - Fixed a typecasting ambiguity in bli_pool_alloc_block() in which
+      pointer arithmetic was performed on a void* as if it were a byte
+      pointer (such as char*). Some compilers may have already been
+      interpreting this situation as intended, despite the sloppiness.
+      Thanks to Aleksei Rechinskii for reporting this issue.
+    - Redefined pointer alignment macros to typecast to uintptr_t instead of
+      siz_t.
+
+commit 12ffd568b04feda57147c13b67717416a01c82f8
+Author: Zhang Xianyi <traits.zhang@gmail.com>
+Date:   Sat Aug 22 00:24:28 2015 +0800
+
+    Add Travis CI.
+
+commit ecc3ebb749e0861c27deda52b5f87236ede4901b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jul 29 13:31:12 2015 -0500
+
+    CHANGELOG update (0.1.8)
+
+commit 47caa33485b91ea6f2a5e386e61210c90c5f489f (tag: 0.1.8)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Wed Jul 29 13:31:09 2015 -0500
 
     Version file update (0.1.8)
 
-commit ef0fbbbdb6148b96938733fce72cb4ed7dad685e (origin/master)
+commit ef0fbbbdb6148b96938733fce72cb4ed7dad685e
 Merge: fdfe14f d4b8913
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Thu Jul 9 13:54:54 2015 -0500

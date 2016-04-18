@@ -39,13 +39,14 @@
 // Define BLAS-to-BLIS interfaces.
 //
 #undef  GENTFUNCSCAL
-#define GENTFUNCSCAL( ftype_a, ftype_x, cha, chx, blasname, blisname ) \
+#define GENTFUNCSCAL( ftype_x, ftype_a, chx, cha, blasname, blisname ) \
 \
-void PASTEF772(chx,cha,blasname)( \
-                                  f77_int* n, \
-                                  ftype_a* alpha, \
-                                  ftype_x* x, f77_int* incx  \
-                                ) \
+void PASTEF772(chx,cha,blasname) \
+     ( \
+       f77_int* n, \
+       ftype_a* alpha, \
+       ftype_x* x, f77_int* incx  \
+     ) \
 { \
 	dim_t    n0; \
 	ftype_x* x0; \
@@ -63,25 +64,27 @@ void PASTEF772(chx,cha,blasname)( \
 	   use positive increments instead. */ \
 	bli_convert_blas_incv( n0, x, *incx, x0, incx0 ); \
 \
-	/* NOTE: We do not natively implement BLAS's csscal/zdscal in BLIS
-	   UNLESS mixed domain functionality is enabled at configure-time.
-	   However, we don't want to assume that BLIS was configured that
-	   way, so we will just always sub-optimally implement those cases
+	/* NOTE: We do not natively implement BLAS's csscal/zdscal in BLIS.
+	   that is, we just always sub-optimally implement those cases
 	   by casting alpha to ctype_x (potentially the complex domain) and
 	   using the homogeneous datatype instance according to that type. */ \
 	PASTEMAC2(cha,chx,cast)( alpha, alpha_cast ); \
 \
 	/* Call BLIS interface. */ \
-	PASTEMAC2(chx,chx,blisname)( BLIS_NO_CONJUGATE, \
-	                             n0, \
-	                             &alpha_cast, \
-	                             x0, incx0 ); \
+	PASTEMAC(chx,blisname) \
+	( \
+	  BLIS_NO_CONJUGATE, \
+	  n0, \
+	  &alpha_cast, \
+	  x0, incx0, \
+	  NULL  \
+	); \
 \
 	/* Finalize BLIS (if it was initialized above). */ \
 	bli_finalize_auto( init_result ); \
 }
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
-INSERT_GENTFUNCSCAL_BLAS( scal, SCALV_KERNEL )
+INSERT_GENTFUNCSCAL_BLAS( scal, scalv )
 #endif
 

@@ -41,18 +41,19 @@
 #undef  GENTFUNC
 #define GENTFUNC( ftype, ch, blasname, blisname ) \
 \
-void PASTEF77(ch,blasname)( \
-                            f77_char* transa, \
-                            f77_char* transb, \
-                            f77_int*  m, \
-                            f77_int*  n, \
-                            f77_int*  k, \
-                            ftype*    alpha, \
-                            ftype*    a, f77_int* lda, \
-                            ftype*    b, f77_int* ldb, \
-                            ftype*    beta, \
-                            ftype*    c, f77_int* ldc  \
-                          ) \
+void PASTEF77(ch,blasname) \
+     ( \
+       f77_char* transa, \
+       f77_char* transb, \
+       f77_int*  m, \
+       f77_int*  n, \
+       f77_int*  k, \
+       ftype*    alpha, \
+       ftype*    a, f77_int* lda, \
+       ftype*    b, f77_int* ldb, \
+       ftype*    beta, \
+       ftype*    c, f77_int* ldc  \
+     ) \
 { \
 	trans_t blis_transa; \
 	trans_t blis_transb; \
@@ -66,16 +67,19 @@ void PASTEF77(ch,blasname)( \
 	bli_init_auto( &init_result ); \
 \
 	/* Perform BLAS parameter checking. */ \
-	PASTEBLACHK(blasname)( MKSTR(ch), \
-	                       MKSTR(blasname), \
-	                       transa, \
-	                       transb, \
-	                       m, \
-	                       n, \
-	                       k, \
-	                       lda, \
-	                       ldb, \
-	                       ldc ); \
+	PASTEBLACHK(blasname) \
+	( \
+	  MKSTR(ch), \
+	  MKSTR(blasname), \
+	  transa, \
+	  transb, \
+	  m, \
+	  n, \
+	  k, \
+	  lda, \
+	  ldb, \
+	  ldc  \
+	); \
 \
 	/* Map BLAS chars to their corresponding BLIS enumerated type value. */ \
 	bli_param_map_netlib_to_blis_trans( *transa, &blis_transa ); \
@@ -95,16 +99,20 @@ void PASTEF77(ch,blasname)( \
 	cs_c = *ldc; \
 \
 	/* Call BLIS interface. */ \
-	PASTEMAC(ch,blisname)( blis_transa, \
-	                       blis_transb, \
-	                       m0, \
-	                       n0, \
-	                       k0, \
-	                       alpha, \
-	                       a, rs_a, cs_a, \
-	                       b, rs_b, cs_b, \
-	                       beta, \
-	                       c, rs_c, cs_c ); \
+	PASTEMAC(ch,blisname) \
+	( \
+	  blis_transa, \
+	  blis_transb, \
+	  m0, \
+	  n0, \
+	  k0, \
+	  alpha, \
+	  a, rs_a, cs_a, \
+	  b, rs_b, cs_b, \
+	  beta, \
+	  c, rs_c, cs_c, \
+	  NULL  \
+	); \
 \
 	/* Finalize BLIS (if it was initialized above). */ \
 	bli_finalize_auto( init_result ); \

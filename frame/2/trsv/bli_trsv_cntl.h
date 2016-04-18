@@ -36,7 +36,7 @@ struct trsv_s
 {
 	impl_t             impl_type;
 	varnum_t           var_num;
-	blksz_t*           b;
+	bszid_t            bszid;
 	struct scalv_s*    sub_scalv;
 	struct packm_s*    sub_packm_a11;
 	struct packv_s*    sub_packv_x1;
@@ -53,7 +53,7 @@ void    bli_trsv_cntl_init( void );
 void    bli_trsv_cntl_finalize( void );
 trsv_t* bli_trsv_cntl_obj_create( impl_t     impl_type,
                                   varnum_t   var_num,
-                                  blksz_t*   b,
+                                  bszid_t    bszid,
                                   scalv_t*   sub_scalv,
                                   packm_t*   sub_packm_a11,
                                   packv_t*   sub_packv_x1,
@@ -64,7 +64,7 @@ trsv_t* bli_trsv_cntl_obj_create( impl_t     impl_type,
 void bli_trsv_cntl_obj_init( trsv_t*    cntl,
                              impl_t     impl_type,
                              varnum_t   var_num,
-                             blksz_t*   b,
+                             bszid_t    bszid,
                              scalv_t*   sub_scalv,
                              packm_t*   sub_packm_a11,
                              packv_t*   sub_packv_x1,

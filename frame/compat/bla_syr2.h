@@ -39,14 +39,15 @@
 #undef  GENTPROTRO
 #define GENTPROTRO( ftype, ch, blasname ) \
 \
-void PASTEF77(ch,blasname)( \
-                            f77_char* uploa, \
-                            f77_int*  m, \
-                            ftype*    alpha, \
-                            ftype*    x, f77_int* incx, \
-                            ftype*    y, f77_int* incy, \
-                            ftype*    a, f77_int* lda   \
-                          );
+void PASTEF77(ch,blasname) \
+     ( \
+       f77_char* uploa, \
+       f77_int*  m, \
+       ftype*    alpha, \
+       ftype*    x, f77_int* incx, \
+       ftype*    y, f77_int* incy, \
+       ftype*    a, f77_int* lda  \
+     );
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 INSERT_GENTPROTRO_BLAS( syr2 )

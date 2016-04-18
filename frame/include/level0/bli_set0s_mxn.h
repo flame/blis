@@ -43,38 +43,38 @@
 
 #define bli_sset0s_mxn( m, n, y, rs_y, cs_y ) \
 { \
-	dim_t i, j; \
+	dim_t _i, _j; \
 \
-	for ( j = 0; j < n; ++j ) \
-	for ( i = 0; i < m; ++i ) \
-	bli_sset0s( *(y + i*rs_y + j*cs_y) ); \
+	for ( _j = 0; _j < n; ++_j ) \
+	for ( _i = 0; _i < m; ++_i ) \
+	bli_sset0s( *(y + _i*rs_y + _j*cs_y) ); \
 }
 
 #define bli_dset0s_mxn( m, n, y, rs_y, cs_y ) \
 { \
-	dim_t i, j; \
+	dim_t _i, _j; \
 \
-	for ( j = 0; j < n; ++j ) \
-	for ( i = 0; i < m; ++i ) \
-	bli_dset0s( *(y + i*rs_y + j*cs_y) ); \
+	for ( _j = 0; _j < n; ++_j ) \
+	for ( _i = 0; _i < m; ++_i ) \
+	bli_dset0s( *(y + _i*rs_y + _j*cs_y) ); \
 }
 
 #define bli_cset0s_mxn( m, n, y, rs_y, cs_y ) \
 { \
-	dim_t i, j; \
+	dim_t _i, _j; \
 \
-	for ( j = 0; j < n; ++j ) \
-	for ( i = 0; i < m; ++i ) \
-	bli_cset0s( *(y + i*rs_y + j*cs_y) ); \
+	for ( _j = 0; _j < n; ++_j ) \
+	for ( _i = 0; _i < m; ++_i ) \
+	bli_cset0s( *(y + _i*rs_y + _j*cs_y) ); \
 }
 
 #define bli_zset0s_mxn( m, n, y, rs_y, cs_y ) \
 { \
-	dim_t i, j; \
+	dim_t _i, _j; \
 \
-	for ( j = 0; j < n; ++j ) \
-	for ( i = 0; i < m; ++i ) \
-	bli_zset0s( *(y + i*rs_y + j*cs_y) ); \
+	for ( _j = 0; _j < n; ++_j ) \
+	for ( _i = 0; _i < m; ++_i ) \
+	bli_zset0s( *(y + _i*rs_y + _j*cs_y) ); \
 }
 
 

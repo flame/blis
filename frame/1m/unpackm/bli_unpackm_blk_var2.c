@@ -48,7 +48,8 @@ typedef void (*FUNCPTR_T)(
                            dim_t   n_panel,
                            void*   p, inc_t rs_p, inc_t cs_p,
                                       dim_t pd_p, inc_t ps_p,
-                           void*   c, inc_t rs_c, inc_t cs_c
+                           void*   c, inc_t rs_c, inc_t cs_c,
+                           cntx_t* cntx
                          );
 
 static FUNCPTR_T GENARRAY(ftypes,unpackm_blk_var2);
@@ -56,6 +57,7 @@ static FUNCPTR_T GENARRAY(ftypes,unpackm_blk_var2);
 
 void bli_unpackm_blk_var2( obj_t*     p,
                            obj_t*     c,
+                           cntx_t*    cntx,
                            unpackm_t* cntl )
 {
 	num_t     dt_cp     = bli_obj_datatype( *c );
@@ -112,27 +114,30 @@ void bli_unpackm_blk_var2( obj_t*     p,
 	   n_panel,
 	   buf_p, rs_p, cs_p,
 	          pd_p, ps_p,
-	   buf_c, rs_c, cs_c );
+	   buf_c, rs_c, cs_c,
+	   cntx );
 }
 
 
 #undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, varname ) \
+#define GENTFUNC( ctype, ch, varname ) \
 \
-void PASTEMAC(ch,varname )( \
-                            struc_t strucc, \
-                            doff_t  diagoffc, \
-                            diag_t  diagc, \
-                            uplo_t  uploc, \
-                            trans_t transc, \
-                            dim_t   m, \
-                            dim_t   n, \
-                            dim_t   m_panel, \
-                            dim_t   n_panel, \
-                            void*   p, inc_t rs_p, inc_t cs_p, \
-                                       dim_t pd_p, inc_t ps_p, \
-                            void*   c, inc_t rs_c, inc_t cs_c  \
-                          ) \
+void PASTEMAC(ch,varname) \
+     ( \
+       struc_t strucc, \
+       doff_t  diagoffc, \
+       diag_t  diagc, \
+       uplo_t  uploc, \
+       trans_t transc, \
+       dim_t   m, \
+       dim_t   n, \
+       dim_t   m_panel, \
+       dim_t   n_panel, \
+       void*   p, inc_t rs_p, inc_t cs_p, \
+                  dim_t pd_p, inc_t ps_p, \
+       void*   c, inc_t rs_c, inc_t cs_c, \
+       cntx_t* cntx  \
+     ) \
 { \
 	ctype* restrict one       = PASTEMAC(ch,1); \
 	ctype* restrict c_cast    = c; \
@@ -226,25 +231,33 @@ void PASTEMAC(ch,varname )( \
 		if ( bli_intersects_diag_n( diagoffc_i, *m_panel_full, *n_panel_full ) && \
 		     bli_is_upper_or_lower( uploc ) ) \
 		{ \
-			PASTEMAC3(ch,ch,ch,scal2m)( diagoffc_i, \
-			                            diagc, \
-			                            uploc, \
-			                            transc, \
-			                            *m_panel_full, \
-			                            *n_panel_full, \
-			                            one, \
-			                            p_begin, rs_p, cs_p, \
-			                            c_begin, rs_c, cs_c ); \
+			PASTEMAC(ch,scal2m) \
+			( \
+			  diagoffc_i, \
+			  diagc, \
+			  uploc, \
+			  transc, \
+			  *m_panel_full, \
+			  *n_panel_full, \
+			  one, \
+			  p_begin, rs_p, cs_p, \
+			  c_begin, rs_c, cs_c, \
+			  cntx  \
+			); \
 		} \
 		else \
 		{ \
 			/* Pack the current panel. */ \
-			PASTEMAC(ch,unpackm_cxk)( BLIS_NO_CONJUGATE, \
-			                          panel_dim_i, \
-			                          panel_len, \
-			                          one, \
-			                          p_begin,       ldp, \
-			                          c_begin, incc, ldc ); \
+			PASTEMAC(ch,unpackm_cxk) \
+			( \
+			  BLIS_NO_CONJUGATE, \
+			  panel_dim_i, \
+			  panel_len, \
+			  one, \
+			  p_begin,       ldp, \
+			  c_begin, incc, ldc, \
+			  cntx  \
+			); \
 		} \
 \
 		/*PASTEMAC(ch,fprintm)( stdout, "p copied", *m_panel_full, *n_panel_full, \
@@ -253,5 +266,5 @@ void PASTEMAC(ch,varname )( \
 \
 }
 
-INSERT_GENTFUNC_BASIC( unpackm, unpackm_blk_var2 )
+INSERT_GENTFUNC_BASIC0( unpackm_blk_var2 )
 

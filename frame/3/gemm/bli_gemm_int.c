@@ -39,6 +39,7 @@
 typedef void (*FUNCPTR_T)( obj_t*  a,
                            obj_t*  b,
                            obj_t*  c,
+                           cntx_t* cntx,
                            gemm_t* cntl,
                            gemm_thrinfo_t* thread );
 
@@ -47,8 +48,8 @@ static FUNCPTR_T vars[6][3] =
     // unblocked          optimized unblocked   blocked
     { NULL,               NULL,                 bli_gemm_blk_var1f },
     { NULL,               bli_gemm_ker_var2,    bli_gemm_blk_var2f },
-    { NULL,               bli_gemm_ker_var3,    bli_gemm_blk_var3f },
-    { NULL,               bli_gemm_ker_var4,    bli_gemm_blk_var4f },
+    { NULL,               NULL,                 bli_gemm_blk_var3f },
+    { NULL,               NULL,                 NULL,              },
     { NULL,               NULL,                 NULL               },
     { NULL,               NULL,                 NULL               }
 };
@@ -58,6 +59,7 @@ void bli_gemm_int( obj_t*  alpha,
                    obj_t*  b,
                    obj_t*  beta,
                    obj_t*  c,
+                   cntx_t* cntx,
                    gemm_t* cntl,
                    gemm_thrinfo_t* thread )
 {
@@ -67,10 +69,11 @@ void bli_gemm_int( obj_t*  alpha,
 	varnum_t  n;
 	impl_t    i;
 	FUNCPTR_T f;
+	ind_t     im;
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
-		bli_gemm_int_check( alpha, a, b, beta, c, cntl );
+		bli_gemm_basic_check( alpha, a, b, beta, c, cntx );
 
 	// If C has a zero dimension, return early.
 	if ( bli_obj_has_zero_dim( *c ) ) return;
@@ -137,10 +140,21 @@ void bli_gemm_int( obj_t*  alpha,
 	// Index into the variant array to extract the correct function pointer.
 	f = vars[n][i];
 
+	// Somewhat hackish support for 3m3, 3m2, and 4m1b method implementations.
+	im = bli_cntx_get_ind_method( cntx );
+
+	if ( im != BLIS_NAT )
+	{
+		if      ( im == BLIS_3M3  && f == bli_gemm_blk_var1f ) f = bli_gemm_blk_var4f;
+		else if ( im == BLIS_3M2  && f == bli_gemm_ker_var2  ) f = bli_gemm_ker_var4;
+		else if ( im == BLIS_4M1B && f == bli_gemm_ker_var2  ) f = bli_gemm_ker_var3;
+	}
+
 	// Invoke the variant.
 	f( &a_local,
 	   &b_local,
 	   &c_local,
+	   cntx,
 	   cntl,
        thread );
 }

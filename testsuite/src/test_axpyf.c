@@ -63,7 +63,8 @@ void libblis_test_axpyf_impl( iface_t   iface,
                               obj_t*    alpha,
                               obj_t*    a,
                               obj_t*    x,
-                              obj_t*    y );
+                              obj_t*    y,
+                              cntx_t*   cntx );
 
 void libblis_test_axpyf_check( obj_t*  alpha,
                                obj_t*  a,
@@ -138,12 +139,16 @@ void libblis_test_axpyf_experiment( test_params_t* params,
 	obj_t        alpha, a, x, y;
 	obj_t        y_save;
 
+	cntx_t       cntx;
+
+	// Initialize a context.
+	bli_axpyf_cntx_init( &cntx );
 
 	// Map the dimension specifier to an actual dimension.
 	m = libblis_test_get_dim_from_prob_size( op->dim_spec[0], p_cur );
 
 	// Query the operation's fusing factor for the current datatype.
-	b_n = bli_axpyf_fusefac( datatype );
+	b_n = bli_cntx_get_blksz_def_dt( datatype, BLIS_AF, &cntx );
 
 	// Store the fusing factor so that the driver can retrieve the value
 	// later when printing results.
@@ -190,7 +195,9 @@ void libblis_test_axpyf_experiment( test_params_t* params,
 
 		time = bli_clock();
 
-		libblis_test_axpyf_impl( iface, &alpha, &a, &x, &y );
+		libblis_test_axpyf_impl( iface,
+		                         &alpha, &a, &x, &y,
+		                         &cntx );
 
 		time_min = bli_clock_min_diff( time_min, time );
 	}
@@ -210,6 +217,9 @@ void libblis_test_axpyf_experiment( test_params_t* params,
 	bli_obj_free( &x );
 	bli_obj_free( &y );
 	bli_obj_free( &y_save );
+
+	// Finalize the context.
+	bli_axpyf_cntx_finalize( &cntx );
 }
 
 
@@ -218,12 +228,13 @@ void libblis_test_axpyf_impl( iface_t   iface,
                               obj_t*    alpha,
                               obj_t*    a,
                               obj_t*    x,
-                              obj_t*    y )
+                              obj_t*    y,
+                              cntx_t*   cntx )
 {
 	switch ( iface )
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
-		bli_axpyf_kernel( alpha, a, x, y );
+		bli_axpyf_ex( alpha, a, x, y, cntx );
 		break;
 
 		default:

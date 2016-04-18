@@ -33,66 +33,7 @@
 */
 
 #include "bli_ger_cntl.h"
-#include "bli_ger_check.h"
+#include "bli_ger_front.h"
 #include "bli_ger_int.h"
 
-#include "bli_ger_unb_var1.h"
-#include "bli_ger_unb_var2.h"
-
-#include "bli_ger_blk_var1.h"
-#include "bli_ger_blk_var2.h"
-
-
-void bli_ger( obj_t*  alpha,
-              obj_t*  x,
-              obj_t*  y,
-              obj_t*  a );
-
-
-//
-// Prototype BLAS-like interfaces with homogeneous-typed operands.
-//
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname)( \
-                          conj_t    conjx, \
-                          conj_t    conjy, \
-                          dim_t     m, \
-                          dim_t     n, \
-                          ctype*    alpha, \
-                          ctype*    x, inc_t incx, \
-                          ctype*    y, inc_t incy, \
-                          ctype*    a, inc_t rs_a, inc_t cs_a \
-                        );
-
-INSERT_GENTPROT_BASIC( ger )
-
-
-//
-// Prototype BLAS-like interfaces with heterogeneous-typed operands.
-//
-#undef  GENTPROT3U12
-#define GENTPROT3U12( ctype_x, ctype_y, ctype_a, ctype_xy, chx, chy, cha, chxy, opname ) \
-\
-void PASTEMAC3(chx,chy,cha,opname)( \
-                                    conj_t    conjx, \
-                                    conj_t    conjy, \
-                                    dim_t     m, \
-                                    dim_t     n, \
-                                    ctype_xy* alpha, \
-                                    ctype_x*  x, inc_t incx, \
-                                    ctype_y*  y, inc_t incy, \
-                                    ctype_a*  a, inc_t rs_a, inc_t cs_a \
-                                  );
-
-INSERT_GENTPROT3U12_BASIC( ger )
-
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTPROT3U12_MIX_D( ger )
-#endif
-
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTPROT3U12_MIX_P( ger )
-#endif
-
+#include "bli_ger_var.h"

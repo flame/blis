@@ -114,12 +114,12 @@ GENTFUNCR2( dcomplex, double, z, d, blasname, blisname )
 
 #define INSERT_GENTFUNCSCAL_BLAS( blasname, blisname ) \
 \
-GENTFUNCSCAL( float,    float,     , s, blasname, blisname ) \
-GENTFUNCSCAL( double,   double,    , d, blasname, blisname ) \
-GENTFUNCSCAL( scomplex, scomplex,  , c, blasname, blisname ) \
-GENTFUNCSCAL( dcomplex, dcomplex,  , z, blasname, blisname ) \
-GENTFUNCSCAL( float,    scomplex, s, c, blasname, blisname ) \
-GENTFUNCSCAL( double,   dcomplex, d, z, blasname, blisname )
+GENTFUNCSCAL( float,    float,    s,  , blasname, blisname ) \
+GENTFUNCSCAL( double,   double,   d,  , blasname, blisname ) \
+GENTFUNCSCAL( scomplex, scomplex, c,  , blasname, blisname ) \
+GENTFUNCSCAL( dcomplex, dcomplex, z,  , blasname, blisname ) \
+GENTFUNCSCAL( scomplex, float,    c, s, blasname, blisname ) \
+GENTFUNCSCAL( dcomplex, double,   z, d, blasname, blisname )
 
 
 
@@ -156,6 +156,24 @@ GENTFUNC( double,   d, tfuncname, varname1, varname2 ) \
 GENTFUNC( scomplex, c, tfuncname, varname1, varname2 ) \
 GENTFUNC( dcomplex, z, tfuncname, varname1, varname2 )
 
+// -- (three auxiliary arguments) --
+
+#define INSERT_GENTFUNC_BASIC3( tfuncname, varname1, varname2, varname3 ) \
+\
+GENTFUNC( float,    s, tfuncname, varname1, varname2, varname3 ) \
+GENTFUNC( double,   d, tfuncname, varname1, varname2, varname3 ) \
+GENTFUNC( scomplex, c, tfuncname, varname1, varname2, varname3 ) \
+GENTFUNC( dcomplex, z, tfuncname, varname1, varname2, varname3 )
+
+// -- (four auxiliary arguments) --
+
+#define INSERT_GENTFUNC_BASIC4( tfuncname, varname1, varname2, varname3, varname4 ) \
+\
+GENTFUNC( float,    s, tfuncname, varname1, varname2, varname3, varname4 ) \
+GENTFUNC( double,   d, tfuncname, varname1, varname2, varname3, varname4 ) \
+GENTFUNC( scomplex, c, tfuncname, varname1, varname2, varname3, varname4 ) \
+GENTFUNC( dcomplex, z, tfuncname, varname1, varname2, varname3, varname4 )
+
 
 
 // -- Basic one-operand with real projection --
@@ -177,6 +195,33 @@ GENTFUNCR( float,    float,  s, s, tfuncname, varname ) \
 GENTFUNCR( double,   double, d, d, tfuncname, varname ) \
 GENTFUNCR( scomplex, float,  c, s, tfuncname, varname ) \
 GENTFUNCR( dcomplex, double, z, d, tfuncname, varname )
+
+// -- (two auxiliary arguments) --
+
+#define INSERT_GENTFUNCR_BASIC2( tfuncname, varname1, varname2 ) \
+\
+GENTFUNCR( float,    float,  s, s, tfuncname, varname1, varname2 ) \
+GENTFUNCR( double,   double, d, d, tfuncname, varname1, varname2 ) \
+GENTFUNCR( scomplex, float,  c, s, tfuncname, varname1, varname2 ) \
+GENTFUNCR( dcomplex, double, z, d, tfuncname, varname1, varname2 )
+
+// -- (three auxiliary arguments) --
+
+#define INSERT_GENTFUNCR_BASIC3( tfuncname, varname1, varname2, varname3  ) \
+\
+GENTFUNCR( float,    float,  s, s, tfuncname, varname1, varname2, varname3 ) \
+GENTFUNCR( double,   double, d, d, tfuncname, varname1, varname2, varname3 ) \
+GENTFUNCR( scomplex, float,  c, s, tfuncname, varname1, varname2, varname3 ) \
+GENTFUNCR( dcomplex, double, z, d, tfuncname, varname1, varname2, varname3 )
+
+// -- (four auxiliary arguments) --
+
+#define INSERT_GENTFUNCR_BASIC4( tfuncname, varname1, varname2, varname3, varname4  ) \
+\
+GENTFUNCR( float,    float,  s, s, tfuncname, varname1, varname2, varname3, varname4 ) \
+GENTFUNCR( double,   double, d, d, tfuncname, varname1, varname2, varname3, varname4 ) \
+GENTFUNCR( scomplex, float,  c, s, tfuncname, varname1, varname2, varname3, varname4 ) \
+GENTFUNCR( dcomplex, double, z, d, tfuncname, varname1, varname2, varname3, varname4 )
 
 
 
@@ -207,6 +252,16 @@ GENTFUNCCO( dcomplex, double, z, d, tfuncname, varname1, varname2 )
 
 // -- Basic one-operand macro with integer instance --
 
+// -- (no auxiliary arguments) --
+
+#define INSERT_GENTFUNC_BASIC0_I( tfuncname ) \
+\
+GENTFUNC( float,    s, tfuncname ) \
+GENTFUNC( double,   d, tfuncname ) \
+GENTFUNC( scomplex, c, tfuncname ) \
+GENTFUNC( dcomplex, z, tfuncname ) \
+GENTFUNC( gint_t,   i, tfuncname )
+
 // -- (one auxiliary argument) --
 
 #define INSERT_GENTFUNC_BASIC_I( tfuncname, varname ) \
@@ -220,6 +275,15 @@ GENTFUNC( gint_t,   i, tfuncname, varname )
 
 
 // -- Basic one-operand with integer projection --
+
+// -- (no auxiliary arguments) --
+
+#define INSERT_GENTFUNCI_BASIC0( tfuncname ) \
+\
+GENTFUNCI( float,    gint_t, s, i, tfuncname ) \
+GENTFUNCI( double,   gint_t, d, i, tfuncname ) \
+GENTFUNCI( scomplex, gint_t, c, i, tfuncname ) \
+GENTFUNCI( dcomplex, gint_t, z, i, tfuncname )
 
 // -- (one auxiliary argument) --
 

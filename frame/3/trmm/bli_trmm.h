@@ -32,49 +32,8 @@
 
 */
 
-#include "bli_trmm_blocksize.h"
-#include "bli_trmm_check.h"
 #include "bli_trmm_front.h"
 #include "bli_trmm_int.h"
-#include "bli_trmm_prune.h"
 
-#include "bli_trmm_blk_var1f.h"
-
-#include "bli_trmm_blk_var2f.h"
-#include "bli_trmm_blk_var2b.h"
-
-#include "bli_trmm_blk_var3f.h"
-#include "bli_trmm_blk_var3b.h"
-
-#include "bli_trmm_ll_ker_var2.h"
-#include "bli_trmm_lu_ker_var2.h"
-#include "bli_trmm_rl_ker_var2.h"
-#include "bli_trmm_ru_ker_var2.h"
-
-
-//
-// Prototype object-based interface.
-//
-void bli_trmm( side_t  side,
-               obj_t*  alpha,
-               obj_t*  a,
-               obj_t*  b );
-
-
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname)( \
-                          side_t  side, \
-                          uplo_t  uploa, \
-                          trans_t transa, \
-                          diag_t  diaga, \
-                          dim_t   m, \
-                          dim_t   n, \
-                          ctype*  alpha, \
-                          ctype*  a, inc_t rs_a, inc_t cs_a, \
-                          ctype*  b, inc_t rs_b, inc_t cs_b  \
-                        );
-
-INSERT_GENTPROT_BASIC( trmm )
+#include "bli_trmm_var.h"
 

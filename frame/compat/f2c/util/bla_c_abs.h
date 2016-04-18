@@ -32,8 +32,6 @@
 
 */
 
-#include "blis.h"
-
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
 double bla_c_abs(bla_scomplex *z);

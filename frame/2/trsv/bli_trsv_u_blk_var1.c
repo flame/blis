@@ -37,6 +37,7 @@
 void bli_trsv_u_blk_var1( obj_t*  alpha,
                           obj_t*  a,
                           obj_t*  x,
+                          cntx_t* cntx,
                           trsv_t* cntl )
 {
 	obj_t   a11, a11_pack;
@@ -58,14 +59,14 @@ void bli_trsv_u_blk_var1( obj_t*  alpha,
 	// x = alpha * x;
 	bli_scalv_int( alpha,
 	               x,
-	               cntl_sub_scalv( cntl ) );
+	               cntx, cntl_sub_scalv( cntl ) );
 
 	// Partition diagonally.
 	for ( ij = 0; ij < mn; ij += b_alg )
 	{
 		// Determine the current algorithmic blocksize.
 		b_alg = bli_determine_blocksize_b( ij, mn, a,
-		                                   cntl_blocksize( cntl ) );
+		                                   cntl_bszid( cntl ), cntx );
 
 		// Acquire partitions for A11, A12, x1, and x2.
 		bli_acquire_mpart_br2tl( BLIS_SUBPART11,
@@ -79,16 +80,16 @@ void bli_trsv_u_blk_var1( obj_t*  alpha,
 
 		// Initialize objects for packing A11 and x1 (if needed).
 		bli_packm_init( &a11, &a11_pack,
-		                cntl_sub_packm_a11( cntl ) );
+		                cntx, cntl_sub_packm_a11( cntl ) );
 		bli_packv_init( &x1, &x1_pack,
-		                cntl_sub_packv_x1( cntl ) );
+		                cntx, cntl_sub_packv_x1( cntl ) );
 
 		// Copy/pack A11, x1 (if needed).
 		bli_packm_int( &a11, &a11_pack,
-		               cntl_sub_packm_a11( cntl ),
+		               cntx, cntl_sub_packm_a11( cntl ),
                        &BLIS_PACKM_SINGLE_THREADED );
 		bli_packv_int( &x1, &x1_pack,
-		               cntl_sub_packv_x1( cntl ) );
+		               cntx, cntl_sub_packv_x1( cntl ) );
 
 		// x1 = x1 - A12 * x2;
 		bli_gemv_int( BLIS_NO_TRANSPOSE,
@@ -98,17 +99,19 @@ void bli_trsv_u_blk_var1( obj_t*  alpha,
 		              &x2,
 		              &BLIS_ONE,
 		              &x1_pack,
+		              cntx,
 		              cntl_sub_gemv_rp( cntl ) );
 
 		// x1 = x1 / tril( A11 );
 		bli_trsv_int( &BLIS_ONE,
 		              &a11_pack,
 		              &x1_pack,
+		              cntx,
 		              cntl_sub_trsv( cntl ) );
 
 		// Copy/unpack x1 (if x1 was packed).
 		bli_unpackv_int( &x1_pack, &x1,
-		                 cntl_sub_unpackv_x1( cntl ) );
+		                 cntx, cntl_sub_unpackv_x1( cntl ) );
 	}
 
 	// If any packing buffers were acquired within packm, release them back

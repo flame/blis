@@ -39,16 +39,16 @@
 
 #define bli_ssadds_mxn_u( diagoff, m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
 { \
-	dim_t i, j; \
+	dim_t _i, _j; \
 \
-	for ( j = 0; j < n; ++j ) \
+	for ( _j = 0; _j < n; ++_j ) \
 	{ \
-		for ( i = 0; i < m; ++i ) \
+		for ( _i = 0; _i < m; ++_i ) \
 		{ \
-			if ( (doff_t)j - (doff_t)i >= diagoff ) \
+			if ( (doff_t)_j - (doff_t)_i >= diagoff ) \
 			{ \
-				bli_ssadds( *(x + i*rs_x + j*cs_x), \
-				            *(y + i*rs_y + j*cs_y) ); \
+				bli_ssadds( *(x + _i*rs_x + _j*cs_x), \
+				            *(y + _i*rs_y + _j*cs_y) ); \
 			} \
 		} \
 	} \
@@ -56,16 +56,16 @@
 
 #define bli_ddadds_mxn_u( diagoff, m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
 { \
-	dim_t i, j; \
+	dim_t _i, _j; \
 \
-	for ( j = 0; j < n; ++j ) \
+	for ( _j = 0; _j < n; ++_j ) \
 	{ \
-		for ( i = 0; i < m; ++i ) \
+		for ( _i = 0; _i < m; ++_i ) \
 		{ \
-			if ( (doff_t)j - (doff_t)i >= diagoff ) \
+			if ( (doff_t)_j - (doff_t)_i >= diagoff ) \
 			{ \
-				bli_ddadds( *(x + i*rs_x + j*cs_x), \
-				            *(y + i*rs_y + j*cs_y) ); \
+				bli_ddadds( *(x + _i*rs_x + _j*cs_x), \
+				            *(y + _i*rs_y + _j*cs_y) ); \
 			} \
 		} \
 	} \
@@ -73,16 +73,16 @@
 
 #define bli_ccadds_mxn_u( diagoff, m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
 { \
-	dim_t i, j; \
+	dim_t _i, _j; \
 \
-	for ( j = 0; j < n; ++j ) \
+	for ( _j = 0; _j < n; ++_j ) \
 	{ \
-		for ( i = 0; i < m; ++i ) \
+		for ( _i = 0; _i < m; ++_i ) \
 		{ \
-			if ( (doff_t)j - (doff_t)i >= diagoff ) \
+			if ( (doff_t)_j - (doff_t)_i >= diagoff ) \
 			{ \
-				bli_ccadds( *(x + i*rs_x + j*cs_x), \
-				            *(y + i*rs_y + j*cs_y) ); \
+				bli_ccadds( *(x + _i*rs_x + _j*cs_x), \
+				            *(y + _i*rs_y + _j*cs_y) ); \
 			} \
 		} \
 	} \
@@ -90,16 +90,16 @@
 
 #define bli_zzadds_mxn_u( diagoff, m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
 { \
-	dim_t i, j; \
+	dim_t _i, _j; \
 \
-	for ( j = 0; j < n; ++j ) \
+	for ( _j = 0; _j < n; ++_j ) \
 	{ \
-		for ( i = 0; i < m; ++i ) \
+		for ( _i = 0; _i < m; ++_i ) \
 		{ \
-			if ( (doff_t)j - (doff_t)i >= diagoff ) \
+			if ( (doff_t)_j - (doff_t)_i >= diagoff ) \
 			{ \
-				bli_zzadds( *(x + i*rs_x + j*cs_x), \
-				            *(y + i*rs_y + j*cs_y) ); \
+				bli_zzadds( *(x + _i*rs_x + _j*cs_x), \
+				            *(y + _i*rs_y + _j*cs_y) ); \
 			} \
 		} \
 	} \
@@ -109,16 +109,16 @@
 
 #define bli_ssadds_mxn_l( diagoff, m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
 { \
-	dim_t i, j; \
+	dim_t _i, _j; \
 \
-	for ( j = 0; j < n; ++j ) \
+	for ( _j = 0; _j < n; ++_j ) \
 	{ \
-		for ( i = 0; i < m; ++i ) \
+		for ( _i = 0; _i < m; ++_i ) \
 		{ \
-			if ( (doff_t)j - (doff_t)i <= diagoff ) \
+			if ( (doff_t)_j - (doff_t)_i <= diagoff ) \
 			{ \
-				bli_ssadds( *(x + i*rs_x + j*cs_x), \
-				            *(y + i*rs_y + j*cs_y) ); \
+				bli_ssadds( *(x + _i*rs_x + _j*cs_x), \
+				            *(y + _i*rs_y + _j*cs_y) ); \
 			} \
 		} \
 	} \
@@ -126,16 +126,16 @@
 
 #define bli_ddadds_mxn_l( diagoff, m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
 { \
-	dim_t i, j; \
+	dim_t _i, _j; \
 \
-	for ( j = 0; j < n; ++j ) \
+	for ( _j = 0; _j < n; ++_j ) \
 	{ \
-		for ( i = 0; i < m; ++i ) \
+		for ( _i = 0; _i < m; ++_i ) \
 		{ \
-			if ( (doff_t)j - (doff_t)i <= diagoff ) \
+			if ( (doff_t)_j - (doff_t)_i <= diagoff ) \
 			{ \
-				bli_ddadds( *(x + i*rs_x + j*cs_x), \
-				            *(y + i*rs_y + j*cs_y) ); \
+				bli_ddadds( *(x + _i*rs_x + _j*cs_x), \
+				            *(y + _i*rs_y + _j*cs_y) ); \
 			} \
 		} \
 	} \
@@ -143,16 +143,16 @@
 
 #define bli_ccadds_mxn_l( diagoff, m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
 { \
-	dim_t i, j; \
+	dim_t _i, _j; \
 \
-	for ( j = 0; j < n; ++j ) \
+	for ( _j = 0; _j < n; ++_j ) \
 	{ \
-		for ( i = 0; i < m; ++i ) \
+		for ( _i = 0; _i < m; ++_i ) \
 		{ \
-			if ( (doff_t)j - (doff_t)i <= diagoff ) \
+			if ( (doff_t)_j - (doff_t)_i <= diagoff ) \
 			{ \
-				bli_ccadds( *(x + i*rs_x + j*cs_x), \
-				            *(y + i*rs_y + j*cs_y) ); \
+				bli_ccadds( *(x + _i*rs_x + _j*cs_x), \
+				            *(y + _i*rs_y + _j*cs_y) ); \
 			} \
 		} \
 	} \
@@ -160,16 +160,16 @@
 
 #define bli_zzadds_mxn_l( diagoff, m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
 { \
-	dim_t i, j; \
+	dim_t _i, _j; \
 \
-	for ( j = 0; j < n; ++j ) \
+	for ( _j = 0; _j < n; ++_j ) \
 	{ \
-		for ( i = 0; i < m; ++i ) \
+		for ( _i = 0; _i < m; ++_i ) \
 		{ \
-			if ( (doff_t)j - (doff_t)i <= diagoff ) \
+			if ( (doff_t)_j - (doff_t)_i <= diagoff ) \
 			{ \
-				bli_zzadds( *(x + i*rs_x + j*cs_x), \
-				            *(y + i*rs_y + j*cs_y) ); \
+				bli_zzadds( *(x + _i*rs_x + _j*cs_x), \
+				            *(y + _i*rs_y + _j*cs_y) ); \
 			} \
 		} \
 	} \

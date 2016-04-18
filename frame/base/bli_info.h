@@ -39,13 +39,16 @@ char* bli_info_get_version_str( void );
 char* bli_info_get_int_type_size_str( void );
 
 
-// -- bli_config.h -------------------------------------------------------------
+// -- General configuration-related --------------------------------------------
 
 gint_t bli_info_get_int_type_size( void );
 gint_t bli_info_get_num_fp_types( void );
 gint_t bli_info_get_max_type_size( void );
-gint_t bli_info_get_simd_align_size( void );
 gint_t bli_info_get_page_size( void );
+gint_t bli_info_get_simd_num_registers( void );
+gint_t bli_info_get_simd_size( void );
+gint_t bli_info_get_simd_align_size( void );
+gint_t bli_info_get_stack_buf_max_size( void );
 gint_t bli_info_get_stack_buf_align_size( void );
 gint_t bli_info_get_heap_addr_align_size( void );
 gint_t bli_info_get_heap_stride_align_size( void );
@@ -56,70 +59,7 @@ gint_t bli_info_get_enable_cblas( void );
 gint_t bli_info_get_blas2blis_int_type_size( void );
 
 
-// -- bli_kernel.h -------------------------------------------------------------
-
-// -- Default cache blocksizes --
-
-gint_t bli_info_get_default_mc( opid_t oper, num_t dt );
-gint_t bli_info_get_default_kc( opid_t oper, num_t dt );
-gint_t bli_info_get_default_nc( opid_t oper, num_t dt );
-
-// -- Maximum cache blocksizes --
-
-gint_t bli_info_get_maximum_mc( opid_t oper, num_t dt );
-gint_t bli_info_get_maximum_kc( opid_t oper, num_t dt );
-gint_t bli_info_get_maximum_nc( opid_t oper, num_t dt );
-
-// -- Default register blocksizes --
-
-gint_t bli_info_get_default_mr( opid_t oper, num_t dt );
-gint_t bli_info_get_default_kr( opid_t oper, num_t dt );
-gint_t bli_info_get_default_nr( opid_t oper, num_t dt );
-
-// -- Packing register blocksizes --
-
-gint_t bli_info_get_packdim_mr( opid_t oper, num_t dt );
-gint_t bli_info_get_packdim_nr( opid_t oper, num_t dt );
-
-
-// -- Level-2 cache blocksizes --
-
-gint_t bli_info_get_default_l2_mc_s( void );
-gint_t bli_info_get_default_l2_mc_d( void );
-gint_t bli_info_get_default_l2_mc_c( void );
-gint_t bli_info_get_default_l2_mc_z( void );
-
-gint_t bli_info_get_default_l2_nc_s( void );
-gint_t bli_info_get_default_l2_nc_d( void );
-gint_t bli_info_get_default_l2_nc_c( void );
-gint_t bli_info_get_default_l2_nc_z( void );
-
-
-// -- Level-1f fusing factors --
-
-gint_t bli_info_get_default_l1f_fuse_fac( num_t dt );
-gint_t bli_info_get_default_l1f_fuse_fac_s( void );
-gint_t bli_info_get_default_l1f_fuse_fac_d( void );
-gint_t bli_info_get_default_l1f_fuse_fac_c( void );
-gint_t bli_info_get_default_l1f_fuse_fac_z( void );
-
-gint_t bli_info_get_axpyf_fuse_fac( num_t dt );
-gint_t bli_info_get_axpyf_fuse_fac_s( void );
-gint_t bli_info_get_axpyf_fuse_fac_d( void );
-gint_t bli_info_get_axpyf_fuse_fac_c( void );
-gint_t bli_info_get_axpyf_fuse_fac_z( void );
-
-gint_t bli_info_get_dotxf_fuse_fac( num_t dt );
-gint_t bli_info_get_dotxf_fuse_fac_s( void );
-gint_t bli_info_get_dotxf_fuse_fac_d( void );
-gint_t bli_info_get_dotxf_fuse_fac_c( void );
-gint_t bli_info_get_dotxf_fuse_fac_z( void );
-
-gint_t bli_info_get_dotxaxpyf_fuse_fac( num_t dt );
-gint_t bli_info_get_dotxaxpyf_fuse_fac_s( void );
-gint_t bli_info_get_dotxaxpyf_fuse_fac_d( void );
-gint_t bli_info_get_dotxaxpyf_fuse_fac_c( void );
-gint_t bli_info_get_dotxaxpyf_fuse_fac_z( void );
+// -- Kernel implementation-related --------------------------------------------
 
 
 // -- Level-3 kernel definitions --
@@ -131,7 +71,7 @@ char* bli_info_get_trsm_l_ukr_impl_string( ind_t method, num_t dt );
 char* bli_info_get_trsm_u_ukr_impl_string( ind_t method, num_t dt );
 
 
-// -- bli_mem_pool_macro_defs.h ------------------------------------------------
+// -- Memory pool-related ------------------------------------------------------
 
 gint_t bli_info_get_mk_pool_size( void );
 gint_t bli_info_get_kn_pool_size( void );

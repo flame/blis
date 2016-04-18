@@ -36,12 +36,14 @@
 #undef  GENTPROTCO
 #define GENTPROTCO( ctype, ctype_r, ch, chr, varname ) \
 \
-void PASTEMAC(ch,varname)( \
-                           ctype_r* restrict ar, \
-                           ctype_r* restrict br, \
-                           ctype*   restrict c, inc_t rs_c, inc_t cs_c, \
-                           auxinfo_t*        data  \
-                         );
+void PASTEMAC(ch,varname) \
+     ( \
+       ctype*     restrict a, \
+       ctype*     restrict b, \
+       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
+       auxinfo_t* restrict data, \
+       cntx_t*    restrict cntx  \
+     );
 
 INSERT_GENTPROTCO_BASIC( trsm4m1_l_ukr_ref )
 INSERT_GENTPROTCO_BASIC( trsm4m1_u_ukr_ref )

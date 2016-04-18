@@ -254,15 +254,17 @@ int offsets[16] __attribute__((aligned(0x1000))) = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 
 //#define MONITORS
 //#define LOOPMON
-void bli_sgemm_opt_30x16(
-                    dim_t            k,
-                    float* restrict alpha,
-                    float* restrict a,
-                    float* restrict b,
-                    float* restrict beta,
-                    float* restrict c, inc_t rs_c, inc_t cs_c,
-                    auxinfo_t*       data
-                  )
+void bli_sgemm_asm_30x16
+     (
+       dim_t               k,
+       float*     restrict alpha,
+       float*     restrict a,
+       float*     restrict b,
+       float*     restrict beta,
+       float*     restrict c, inc_t rs_c, inc_t cs_c,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
+     )
 {
     float * a_next = bli_auxinfo_next_a( data );
     float * b_next = bli_auxinfo_next_b( data );

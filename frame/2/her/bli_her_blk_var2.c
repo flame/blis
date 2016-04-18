@@ -38,6 +38,7 @@ void bli_her_blk_var2( conj_t  conjh,
                        obj_t*  alpha,
                        obj_t*  x,
                        obj_t*  c,
+                       cntx_t* cntx,
                        her_t*  cntl )
 {
 	obj_t   c11, c11_pack;
@@ -70,7 +71,7 @@ void bli_her_blk_var2( conj_t  conjh,
 	{
 		// Determine the current algorithmic blocksize.
 		b_alg = bli_determine_blocksize_f( ij, mn, c,
-		                                   cntl_blocksize( cntl ) );
+		                                   cntl_bszid( cntl ), cntx );
 
 		// Acquire partitions for C11, C21, x1, and x2.
 		bli_acquire_mpart_tl2br( BLIS_SUBPART11,
@@ -84,16 +85,16 @@ void bli_her_blk_var2( conj_t  conjh,
 
 		// Initialize objects for packing C11 and x1 (if needed).
 		bli_packm_init( &c11, &c11_pack,
-		                cntl_sub_packm_c11( cntl ) );
+		                cntx, cntl_sub_packm_c11( cntl ) );
 		bli_packv_init( &x1, &x1_pack,
-		                cntl_sub_packv_x1( cntl ) );
+		                cntx, cntl_sub_packv_x1( cntl ) );
 
 		// Copy/pack C11, x1 (if needed).
 		bli_packm_int( &c11, &c11_pack,
-		               cntl_sub_packm_c11( cntl ),
+		               cntx, cntl_sub_packm_c11( cntl ),
                        &BLIS_PACKM_SINGLE_THREADED );
 		bli_packv_int( &x1, &x1_pack,
-		               cntl_sub_packv_x1( cntl ) );
+		               cntx, cntl_sub_packv_x1( cntl ) );
 
 		// C21 = C21 + alpha * x2 * x1';
 		bli_ger_int( BLIS_NO_CONJUGATE,
@@ -102,6 +103,7 @@ void bli_her_blk_var2( conj_t  conjh,
 		             &x2,
 		             &x1_pack,
 		             &c21,
+		             cntx,
 		             cntl_sub_ger( cntl ) );
 
 		// C11 = C11 + alpha * x1 * x1';
@@ -109,11 +111,12 @@ void bli_her_blk_var2( conj_t  conjh,
 		             alpha,
 		             &x1_pack,
 		             &c11_pack,
+		             cntx,
 		             cntl_sub_her( cntl ) );
 
 		// Copy/unpack C11 (if C11 was packed).
 		bli_unpackm_int( &c11_pack, &c11,
-		                 cntl_sub_unpackm_c11( cntl ),
+		                 cntx, cntl_sub_unpackm_c11( cntl ),
                          &BLIS_PACKM_SINGLE_THREADED );
 	}
 

@@ -154,22 +154,13 @@ BLIS_DLL_NAME      := $(BLIS_LIB_BASE_NAME).so
 # --- BLIS framework source and object variable names ---
 
 # These are the makefile variables that source code files will be accumulated
-# into by the makefile fragments. Notice that we include separate variables
-# for regular and "special" source.
+# into by the makefile fragments.
 MK_FRAME_SRC           :=
-MK_FRAME_NOOPT_SRC     :=
-MK_FRAME_KERNELS_SRC   :=
 MK_CONFIG_SRC          :=
-MK_CONFIG_NOOPT_SRC    :=
-MK_CONFIG_KERNELS_SRC  :=
 
 # These hold object filenames corresponding to above.
 MK_FRAME_OBJS          :=
-MK_FRAME_NOOPT_OBJS    :=
-MK_FRAME_KERNELS_OBJS  :=
 MK_CONFIG_OBJS         :=
-MK_CONFIG_NOOPT_OBJS   :=
-MK_CONFIG_KERNELS_OBJS :=
 
 # Append the base library path to the library names.
 MK_ALL_BLIS_LIB        := $(BASE_LIB_PATH)/$(BLIS_LIB_NAME)
@@ -309,41 +300,17 @@ CFLAGS_KERNELS := $(CFLAGS_KERNELS) $(VERS_DEF)
 # Convert source file paths to object file paths by replacing the base source
 # directories with the base object directories, and also replacing the source
 # file suffix (eg: '.c') with '.o'.
-MK_BLIS_FRAME_OBJS         := $(patsubst $(FRAME_PATH)/%.c, $(BASE_OBJ_FRAME_PATH)/%.o, \
-                                          $(filter %.c, $(MK_FRAME_SRC)))
-MK_BLIS_FRAME_NOOPT_OBJS   := $(patsubst $(FRAME_PATH)/%.c, $(BASE_OBJ_FRAME_PATH)/%.o, \
-                                          $(filter %.c, $(MK_FRAME_NOOPT_SRC)))
-MK_BLIS_FRAME_KERNELS_OBJS := $(patsubst $(FRAME_PATH)/%.c, $(BASE_OBJ_FRAME_PATH)/%.o, \
-                                          $(filter %.c, $(MK_FRAME_KERNELS_SRC)))
+MK_BLIS_FRAME_OBJS   := $(patsubst $(FRAME_PATH)/%.c, $(BASE_OBJ_FRAME_PATH)/%.o, \
+                                        $(filter %.c, $(MK_FRAME_SRC)))
 
-MK_BLIS_CONFIG_OBJS          := $(patsubst $(CONFIG_PATH)/%.S, $(BASE_OBJ_CONFIG_PATH)/%.o, \
-                                          $(filter %.S, $(MK_CONFIG_SRC)))
-MK_BLIS_CONFIG_OBJS          += $(patsubst $(CONFIG_PATH)/%.c, $(BASE_OBJ_CONFIG_PATH)/%.o, \
-                                          $(filter %.c, $(MK_CONFIG_SRC)))
-
-MK_BLIS_CONFIG_NOOPT_OBJS    := $(patsubst $(CONFIG_PATH)/%.S, $(BASE_OBJ_CONFIG_PATH)/%.o, \
-                                          $(filter %.S, $(MK_CONFIG_NOOPT_SRC)))
-MK_BLIS_CONFIG_NOOPT_OBJS    += $(patsubst $(CONFIG_PATH)/%.c, $(BASE_OBJ_CONFIG_PATH)/%.o, \
-                                          $(filter %.c, $(MK_CONFIG_NOOPT_SRC)))
-
-MK_BLIS_CONFIG_KERNELS_OBJS  := $(patsubst $(CONFIG_PATH)/%.S, $(BASE_OBJ_CONFIG_PATH)/%.o, \
-                                          $(filter %.S, $(MK_CONFIG_KERNELS_SRC)))
-MK_BLIS_CONFIG_KERNELS_OBJS  += $(patsubst $(CONFIG_PATH)/%.c, $(BASE_OBJ_CONFIG_PATH)/%.o, \
-                                          $(filter %.c, $(MK_CONFIG_KERNELS_SRC)))
+MK_BLIS_CONFIG_OBJS  := $(patsubst $(CONFIG_PATH)/%.S, $(BASE_OBJ_CONFIG_PATH)/%.o, \
+                                         $(filter %.S, $(MK_CONFIG_SRC)))
+MK_BLIS_CONFIG_OBJS  += $(patsubst $(CONFIG_PATH)/%.c, $(BASE_OBJ_CONFIG_PATH)/%.o, \
+                                         $(filter %.c, $(MK_CONFIG_SRC)))
 
 # Combine all of the object files into some readily-accessible variables.
-MK_ALL_BLIS_OPT_OBJS      := $(MK_BLIS_CONFIG_OBJS) \
-                             $(MK_BLIS_FRAME_OBJS)
-
-MK_ALL_BLIS_NOOPT_OBJS    := $(MK_BLIS_CONFIG_NOOPT_OBJS) \
-                             $(MK_BLIS_FRAME_NOOPT_OBJS)
-
-MK_ALL_BLIS_KERNELS_OBJS  := $(MK_BLIS_CONFIG_KERNELS_OBJS) \
-                             $(MK_BLIS_FRAME_KERNELS_OBJS)
-
-MK_ALL_BLIS_OBJS          := $(MK_ALL_BLIS_OPT_OBJS) \
-                             $(MK_ALL_BLIS_NOOPT_OBJS) \
-                             $(MK_ALL_BLIS_KERNELS_OBJS)
+MK_ALL_BLIS_OBJS     := $(MK_BLIS_CONFIG_OBJS) \
+                        $(MK_BLIS_FRAME_OBJS)
 
 
 
@@ -424,15 +391,15 @@ clean: cleanlib cleantest
 
 # Define two functions, each of which takes one argument (an object file
 # path). The functions determine which CFLAGS and text string are needed to
-# compile the object file. Note that we match with a preceding forward slash,
-# so the directory name must begin with the special directory name, but it
-# can have trailing characters (e.g. 'kernels_x86').
-get_cflags_for_obj = $(if $(findstring /$(NOOPT_DIR),$1),$(CFLAGS_NOOPT),\
-                     $(if $(findstring /$(KERNELS_DIR),$1),$(CFLAGS_KERNELS),\
+# compile the object file. Note that we match without a preceding forward slash,
+# so the directory name may have 'kernels' as a substring (e.g. 'ukernels' or
+# 'kernels_opt').
+get_cflags_for_obj = $(if $(findstring $(NOOPT_DIR),$1),$(CFLAGS_NOOPT),\
+                     $(if $(findstring $(KERNELS_DIR),$1),$(CFLAGS_KERNELS),\
                      $(CFLAGS)))
 
-get_ctext_for_obj = $(if $(findstring /$(NOOPT_DIR),$1),$(NOOPT_TEXT),\
-                    $(if $(findstring /$(KERNELS_DIR),$1),$(KERNELS_TEXT),))
+get_ctext_for_obj = $(if $(findstring $(NOOPT_DIR),$1),$(NOOPT_TEXT),\
+                    $(if $(findstring $(KERNELS_DIR),$1),$(KERNELS_TEXT),))
 
 $(BASE_OBJ_FRAME_PATH)/%.o: $(FRAME_PATH)/%.c $(MK_HEADER_FILES) $(MAKE_DEFS_MK_PATH)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)

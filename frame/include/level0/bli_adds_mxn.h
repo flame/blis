@@ -43,42 +43,42 @@
 
 #define bli_ssadds_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
 { \
-	dim_t i, j; \
+	dim_t _i, _j; \
 \
-	for ( j = 0; j < n; ++j ) \
-	for ( i = 0; i < m; ++i ) \
-	bli_ssadds( *(x + i*rs_x + j*cs_x), \
-	            *(y + i*rs_y + j*cs_y) ); \
+	for ( _j = 0; _j < n; ++_j ) \
+	for ( _i = 0; _i < m; ++_i ) \
+	bli_ssadds( *(x + _i*rs_x + _j*cs_x), \
+	            *(y + _i*rs_y + _j*cs_y) ); \
 }
 
 #define bli_ddadds_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
 { \
-	dim_t i, j; \
+	dim_t _i, _j; \
 \
-	for ( j = 0; j < n; ++j ) \
-	for ( i = 0; i < m; ++i ) \
-	bli_ddadds( *(x + i*rs_x + j*cs_x), \
-	            *(y + i*rs_y + j*cs_y) ); \
+	for ( _j = 0; _j < n; ++_j ) \
+	for ( _i = 0; _i < m; ++_i ) \
+	bli_ddadds( *(x + _i*rs_x + _j*cs_x), \
+	            *(y + _i*rs_y + _j*cs_y) ); \
 }
 
 #define bli_ccadds_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
 { \
-	dim_t i, j; \
+	dim_t _i, _j; \
 \
-	for ( j = 0; j < n; ++j ) \
-	for ( i = 0; i < m; ++i ) \
-	bli_ccadds( *(x + i*rs_x + j*cs_x), \
-	            *(y + i*rs_y + j*cs_y) ); \
+	for ( _j = 0; _j < n; ++_j ) \
+	for ( _i = 0; _i < m; ++_i ) \
+	bli_ccadds( *(x + _i*rs_x + _j*cs_x), \
+	            *(y + _i*rs_y + _j*cs_y) ); \
 }
 
 #define bli_zzadds_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
 { \
-	dim_t i, j; \
+	dim_t _i, _j; \
 \
-	for ( j = 0; j < n; ++j ) \
-	for ( i = 0; i < m; ++i ) \
-	bli_zzadds( *(x + i*rs_x + j*cs_x), \
-	            *(y + i*rs_y + j*cs_y) ); \
+	for ( _j = 0; _j < n; ++_j ) \
+	for ( _i = 0; _i < m; ++_i ) \
+	bli_zzadds( *(x + _i*rs_x + _j*cs_x), \
+	            *(y + _i*rs_y + _j*cs_y) ); \
 }
 
 

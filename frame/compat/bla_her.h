@@ -39,13 +39,14 @@
 #undef  GENTPROTCO
 #define GENTPROTCO( ftype, ftype_r, ch, chr, blasname ) \
 \
-void PASTEF77(ch,blasname)( \
-                            f77_char* uploa, \
-                            f77_int*  m, \
-                            ftype_r*  alpha, \
-                            ftype*    x, f77_int* incx, \
-                            ftype*    a, f77_int* lda   \
-                          );
+void PASTEF77(ch,blasname) \
+     ( \
+       f77_char* uploa, \
+       f77_int*  m, \
+       ftype_r*  alpha, \
+       ftype*    x, f77_int* incx, \
+       ftype*    a, f77_int* lda  \
+     );
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 INSERT_GENTPROTCO_BLAS( her )

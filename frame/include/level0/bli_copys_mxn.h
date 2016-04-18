@@ -43,42 +43,42 @@
 
 #define bli_sscopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
 { \
-	dim_t i, j; \
+	dim_t _i, _j; \
 \
-	for ( j = 0; j < n; ++j ) \
-	for ( i = 0; i < m; ++i ) \
-	bli_sscopys( *(x + i*rs_x + j*cs_x), \
-	             *(y + i*rs_y + j*cs_y) ); \
+	for ( _j = 0; _j < n; ++_j ) \
+	for ( _i = 0; _i < m; ++_i ) \
+	bli_sscopys( *(x + _i*rs_x + _j*cs_x), \
+	             *(y + _i*rs_y + _j*cs_y) ); \
 }
 
 #define bli_ddcopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
 { \
-	dim_t i, j; \
+	dim_t _i, _j; \
 \
-	for ( j = 0; j < n; ++j ) \
-	for ( i = 0; i < m; ++i ) \
-	bli_ddcopys( *(x + i*rs_x + j*cs_x), \
-	             *(y + i*rs_y + j*cs_y) ); \
+	for ( _j = 0; _j < n; ++_j ) \
+	for ( _i = 0; _i < m; ++_i ) \
+	bli_ddcopys( *(x + _i*rs_x + _j*cs_x), \
+	             *(y + _i*rs_y + _j*cs_y) ); \
 }
 
 #define bli_cccopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
 { \
-	dim_t i, j; \
+	dim_t _i, _j; \
 \
-	for ( j = 0; j < n; ++j ) \
-	for ( i = 0; i < m; ++i ) \
-	bli_cccopys( *(x + i*rs_x + j*cs_x), \
-	             *(y + i*rs_y + j*cs_y) ); \
+	for ( _j = 0; _j < n; ++_j ) \
+	for ( _i = 0; _i < m; ++_i ) \
+	bli_cccopys( *(x + _i*rs_x + _j*cs_x), \
+	             *(y + _i*rs_y + _j*cs_y) ); \
 }
 
 #define bli_zzcopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
 { \
-	dim_t i, j; \
+	dim_t _i, _j; \
 \
-	for ( j = 0; j < n; ++j ) \
-	for ( i = 0; i < m; ++i ) \
-	bli_zzcopys( *(x + i*rs_x + j*cs_x), \
-	             *(y + i*rs_y + j*cs_y) ); \
+	for ( _j = 0; _j < n; ++_j ) \
+	for ( _i = 0; _i < m; ++_i ) \
+	bli_zzcopys( *(x + _i*rs_x + _j*cs_x), \
+	             *(y + _i*rs_y + _j*cs_y) ); \
 }
 
 

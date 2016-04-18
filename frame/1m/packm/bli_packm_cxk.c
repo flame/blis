@@ -36,13 +36,14 @@
 
 #define FUNCPTR_T packm_cxk_fp
 
-typedef void (*FUNCPTR_T)(
-                           conj_t  conja,
-                           dim_t   panel_len,
-                           void*   kappa,
-                           void*   a, inc_t inca, inc_t lda,
-                           void*   p,             inc_t ldp
-                         );
+typedef void (*FUNCPTR_T)
+     (
+       conj_t  conja,
+       dim_t   panel_len,
+       void*   kappa,
+       void*   a, inc_t inca, inc_t lda,
+       void*   p,             inc_t ldp
+     );
 
 #undef  FUNCPTR_ARRAY_LENGTH
 #define FUNCPTR_ARRAY_LENGTH 18
@@ -155,14 +156,16 @@ static FUNCPTR_T ftypes[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] =
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, varname ) \
 \
-void PASTEMAC(ch,varname)( \
-                           conj_t  conja, \
-                           dim_t   panel_dim, \
-                           dim_t   panel_len, \
-                           void*   kappa, \
-                           void*   a, inc_t inca, inc_t lda, \
-                           void*   p,             inc_t ldp  \
-                         ) \
+void PASTEMAC(ch,varname) \
+     ( \
+       conj_t  conja, \
+       dim_t   panel_dim, \
+       dim_t   panel_len, \
+       void*   kappa, \
+       void*   a, inc_t inca, inc_t lda, \
+       void*   p,             inc_t ldp, \
+       cntx_t* cntx  \
+     ) \
 { \
 	num_t     dt; \
 	FUNCPTR_T f; \
@@ -181,25 +184,32 @@ void PASTEMAC(ch,varname)( \
 	   provided, we invoke the implementation. Otherwise, we use scal2m. */ \
 	if ( f != NULL ) \
 	{ \
-		f( conja, \
-		   panel_len, \
-		   kappa, \
-		   a, inca, lda, \
-		   p,       ldp ); \
+		f \
+		( \
+		  conja, \
+		  panel_len, \
+		  kappa, \
+		  a, inca, lda, \
+		  p,       ldp  \
+		); \
 	} \
 	else \
 	{ \
 		/* Treat the micro-panel as panel_dim x panel_len and column-stored
 		   (unit row stride). */ \
-		PASTEMAC3(ch,ch,ch,scal2m)( 0, \
-		                            BLIS_NONUNIT_DIAG, \
-		                            BLIS_DENSE, \
-		                            conja, \
-		                            panel_dim, \
-		                            panel_len, \
-		                            kappa, \
-		                            a, inca, lda, \
-		                            p, 1,    ldp ); \
+		PASTEMAC(ch,scal2m) \
+		( \
+		  0, \
+		  BLIS_NONUNIT_DIAG, \
+		  BLIS_DENSE, \
+		  conja, \
+		  panel_dim, \
+		  panel_len, \
+		  kappa, \
+		  a, inca, lda, \
+		  p, 1,    ldp, \
+		  cntx  \
+		); \
 	} \
 }
 

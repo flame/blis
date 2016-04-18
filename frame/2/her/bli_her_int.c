@@ -40,6 +40,7 @@ typedef void (*FUNCPTR_T)( conj_t  conjh,
                            obj_t*  alpha,
                            obj_t*  x,
                            obj_t*  c,
+                           cntx_t* cntx,
                            her_t*  cntl );
 
 static FUNCPTR_T vars[4][3] =
@@ -55,6 +56,7 @@ void bli_her_int( conj_t  conjh,
                   obj_t*  alpha,
                   obj_t*  x,
                   obj_t*  c,
+                  cntx_t* cntx,
                   her_t*  cntl )
 {
 	varnum_t  n;
@@ -65,7 +67,10 @@ void bli_her_int( conj_t  conjh,
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
-		bli_her_int_check( conjh, alpha, x, c, cntl );
+	{
+		if ( bli_is_conj( conjh ) ) bli_her_check( alpha, x, c );
+		else                        bli_syr_check( alpha, x, c );
+	}
 
 	// If C or x has a zero dimension, return early.
 	if ( bli_obj_has_zero_dim( *c ) ) return;
@@ -98,6 +103,7 @@ void bli_her_int( conj_t  conjh,
 	   alpha,
 	   &x_local,
 	   &c_local,
+	   cntx,
 	   cntl );
 }
 

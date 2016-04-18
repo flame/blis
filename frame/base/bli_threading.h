@@ -142,10 +142,10 @@ typedef struct thrinfo_s thrinfo_t;
 
 void bli_get_range( void* thr, dim_t n, dim_t bf, bool_t handle_edge_low,
                     dim_t* start, dim_t* end );
-siz_t bli_get_range_l2r( void* thr, obj_t* a, dim_t bf, dim_t* start, dim_t* end );
-siz_t bli_get_range_r2l( void* thr, obj_t* a, dim_t bf, dim_t* start, dim_t* end );
-siz_t bli_get_range_t2b( void* thr, obj_t* a, dim_t bf, dim_t* start, dim_t* end );
-siz_t bli_get_range_b2t( void* thr, obj_t* a, dim_t bf, dim_t* start, dim_t* end );
+siz_t bli_get_range_l2r( void* thr, obj_t* a, blksz_t* bmult, dim_t* start, dim_t* end );
+siz_t bli_get_range_r2l( void* thr, obj_t* a, blksz_t* bmult, dim_t* start, dim_t* end );
+siz_t bli_get_range_t2b( void* thr, obj_t* a, blksz_t* bmult, dim_t* start, dim_t* end );
+siz_t bli_get_range_b2t( void* thr, obj_t* a, blksz_t* bmult, dim_t* start, dim_t* end );
 
 dim_t bli_get_range_width_l( doff_t diagoff_j,
                              dim_t  m,
@@ -167,10 +167,10 @@ siz_t bli_get_range_weighted( void*  thr,
                               dim_t* j_start_thr,
                               dim_t* j_end_thr );
 
-siz_t bli_get_range_weighted_l2r( void* thr, obj_t* a, dim_t bf, dim_t* start, dim_t* end );
-siz_t bli_get_range_weighted_r2l( void* thr, obj_t* a, dim_t bf, dim_t* start, dim_t* end );
-siz_t bli_get_range_weighted_t2b( void* thr, obj_t* a, dim_t bf, dim_t* start, dim_t* end );
-siz_t bli_get_range_weighted_b2t( void* thr, obj_t* a, dim_t bf, dim_t* start, dim_t* end );
+siz_t bli_get_range_weighted_l2r( void* thr, obj_t* a, blksz_t* bmult, dim_t* start, dim_t* end );
+siz_t bli_get_range_weighted_r2l( void* thr, obj_t* a, blksz_t* bmult, dim_t* start, dim_t* end );
+siz_t bli_get_range_weighted_t2b( void* thr, obj_t* a, blksz_t* bmult, dim_t* start, dim_t* end );
+siz_t bli_get_range_weighted_b2t( void* thr, obj_t* a, blksz_t* bmult, dim_t* start, dim_t* end );
 
 thrinfo_t* bli_create_thread_info( thread_comm_t* ocomm, dim_t ocomm_id, 
                                    thread_comm_t* icomm, dim_t icomm_id,
@@ -193,16 +193,31 @@ dim_t bli_read_nway_from_env( const char* env );
 #include "bli_trmm_threading.h"
 #include "bli_trsm_threading.h"
 
-typedef void (*level3_int_t) ( obj_t* alpha, obj_t* a, obj_t* b, obj_t* beta, obj_t* c, void* cntl, void* thread );
-void bli_level3_thread_decorator( dim_t num_threads, 
-                                  level3_int_t func, 
-                                  obj_t* alpha, 
-                                  obj_t* a,  
-                                  obj_t* b,  
-                                  obj_t* beta, 
-                                  obj_t* c,  
-                                  void* cntl, 
-                                  void** thread );
+typedef void (*l3_int_t)
+     (
+       obj_t* alpha,
+       obj_t* a,
+       obj_t* b,
+       obj_t* beta,
+       obj_t* c,
+       void*  cntx,
+       void*  cntl,
+       void*  thread
+     );
+
+void bli_level3_thread_decorator
+     (
+       dim_t    num_threads, 
+       l3_int_t func, 
+       obj_t*   alpha, 
+       obj_t*   a,  
+       obj_t*   b,  
+       obj_t*   beta, 
+       obj_t*   c,  
+       void*    cntx, 
+       void*    cntl, 
+       void**   thread
+     );
 
 
 dim_t bli_gcd( dim_t x, dim_t y );

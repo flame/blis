@@ -32,11 +32,15 @@
 
 */
 
-void bli_gemv_int( trans_t transa,
-                   conj_t  conjx,
-                   obj_t*  alpha,
-                   obj_t*  a,
-                   obj_t*  x,
-                   obj_t*  beta,
-                   obj_t*  y,
-                   gemv_t* cntl );
+void bli_gemv_int
+     (
+       trans_t transa,
+       conj_t  conjx,
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  x,
+       obj_t*  beta,
+       obj_t*  y,
+       cntx_t* cntx,
+       gemv_t* cntl
+     );

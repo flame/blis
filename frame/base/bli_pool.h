@@ -158,15 +158,19 @@ typedef struct
 
 // -----------------------------------------------------------------------------
 
-void bli_pool_init( dim_t   num_blocks_init,
+void bli_pool_init( dim_t   num_blocks,
                     siz_t   block_size,
                     siz_t   align_size,
                     pool_t* pool );
 void bli_pool_finalize( pool_t* pool );
 void bli_pool_reinit( dim_t   num_blocks_new,
-                      siz_t   block_size,
-                      siz_t   align_size,
+                      siz_t   block_size_new,
+                      siz_t   align_size_new,
                       pool_t* pool );
+void bli_pool_reinit_if( dim_t   num_blocks_new,
+                         siz_t   block_size_new,
+                         siz_t   align_size_new,
+                         pool_t* pool );
 
 void bli_pool_checkout_block( pblk_t* block, pool_t* pool );
 void bli_pool_checkin_block( pblk_t* block, pool_t* pool );

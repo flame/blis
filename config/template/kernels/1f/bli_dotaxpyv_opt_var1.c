@@ -36,87 +36,115 @@
 
 
 
-void bli_sdotaxpyv_opt_var1( conj_t             conjxt,
-                             conj_t             conjx,
-                             conj_t             conjy,
-                             dim_t              n,
-                             float*    restrict alpha,
-                             float*    restrict x, inc_t incx,
-                             float*    restrict y, inc_t incy,
-                             float*    restrict rho,
-                             float*    restrict z, inc_t incz )
+void bli_sdotaxpyv_opt_var1
+     (
+       conj_t    conjxt,
+       conj_t    conjx,
+       conj_t    conjy,
+       dim_t     n,
+       float*    alpha,
+       float*    x, inc_t incx,
+       float*    y, inc_t incy,
+       float*    rho,
+       float*    z, inc_t incz,
+       cntx_t*   cntx
+     )
 {
 	/* Just call the reference implementation. */
-	BLIS_SDOTAXPYV_KERNEL_REF( conjxt,
-	                           conjx,
-	                           conjy,
-	                           n,
-	                           alpha,
-	                           x, incx,
-	                           y, incy,
-	                           rho,
-	                           z, incz );
+	BLIS_SDOTAXPYV_KERNEL_REF
+	(
+	  conjxt,
+	  conjx,
+	  conjy,
+	  n,
+	  alpha,
+	  x, incx,
+	  y, incy,
+	  rho,
+	  z, incz,
+	  cntx
+	);
 }
 
 
 
-void bli_ddotaxpyv_opt_var1( conj_t             conjxt,
-                             conj_t             conjx,
-                             conj_t             conjy,
-                             dim_t              n,
-                             double*   restrict alpha,
-                             double*   restrict x, inc_t incx,
-                             double*   restrict y, inc_t incy,
-                             double*   restrict rho,
-                             double*   restrict z, inc_t incz )
+void bli_ddotaxpyv_opt_var1
+     (
+       conj_t    conjxt,
+       conj_t    conjx,
+       conj_t    conjy,
+       dim_t     n,
+       double*   alpha,
+       double*   x, inc_t incx,
+       double*   y, inc_t incy,
+       double*   rho,
+       double*   z, inc_t incz,
+       cntx_t*   cntx
+     )
 {
 	/* Just call the reference implementation. */
-	BLIS_DDOTAXPYV_KERNEL_REF( conjxt,
-	                           conjx,
-	                           conjy,
-	                           n,
-	                           alpha,
-	                           x, incx,
-	                           y, incy,
-	                           rho,
-	                           z, incz );
+	BLIS_DDOTAXPYV_KERNEL_REF
+	(
+	  conjxt,
+	  conjx,
+	  conjy,
+	  n,
+	  alpha,
+	  x, incx,
+	  y, incy,
+	  rho,
+	  z, incz,
+	  cntx
+	);
 }
 
 
 
-void bli_cdotaxpyv_opt_var1( conj_t             conjxt,
-                             conj_t             conjx,
-                             conj_t             conjy,
-                             dim_t              n,
-                             scomplex* restrict alpha,
-                             scomplex* restrict x, inc_t incx,
-                             scomplex* restrict y, inc_t incy,
-                             scomplex* restrict rho,
-                             scomplex* restrict z, inc_t incz )
+void bli_cdotaxpyv_opt_var1
+     (
+       conj_t    conjxt,
+       conj_t    conjx,
+       conj_t    conjy,
+       dim_t     n,
+       scomplex* alpha,
+       scomplex* x, inc_t incx,
+       scomplex* y, inc_t incy,
+       scomplex* rho,
+       scomplex* z, inc_t incz,
+       cntx_t*   cntx
+     )
 {
 	/* Just call the reference implementation. */
-	BLIS_CDOTAXPYV_KERNEL_REF( conjxt,
-	                           conjx,
-	                           conjy,
-	                           n,
-	                           alpha,
-	                           x, incx,
-	                           y, incy,
-	                           rho,
-	                           z, incz );
+	BLIS_CDOTAXPYV_KERNEL_REF
+	(
+	  conjxt,
+	  conjx,
+	  conjy,
+	  n,
+	  alpha,
+	  x, incx,
+	  y, incy,
+	  rho,
+	  z, incz,
+	  cntx
+	);
 }
 
 
 
-void bli_zdotaxpyv_opt_var1( conj_t             conjxt,
-                             conj_t             conjx,
-                             conj_t             conjy,
-                             dim_t              n,
-                             dcomplex* restrict alpha,
-                             dcomplex* restrict x, inc_t incx,
-                             dcomplex* restrict y, inc_t incy,
-                             dcomplex* restrict rho,
-                             dcomplex* restrict z, inc_t incz )
+void bli_zdotaxpyv_opt_var1
+     (
+       conj_t    conjxt,
+       conj_t    conjx,
+       conj_t    conjy,
+       dim_t     n,
+       dcomplex* alpha,
+       dcomplex* x, inc_t incx,
+       dcomplex* y, inc_t incy,
+       dcomplex* rho,
+       dcomplex* z, inc_t incz,
+       cntx_t*   cntx
+     )
 {
 /*
   Template dotaxpyv kernel implementation
@@ -240,15 +268,19 @@ void bli_zdotaxpyv_opt_var1( conj_t             conjxt,
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE )
 	{
-		BLIS_ZDOTAXPYV_KERNEL_REF( conjxt,
-		                           conjx,
-		                           conjy,
-		                           n,
-		                           alpha,
-		                           x, incx,
-		                           y, incy,
-		                           rho,
-		                           z, incz );
+		BLIS_ZDOTAXPYV_KERNEL_REF
+		(
+		  conjxt,
+		  conjx,
+		  conjy,
+		  n,
+		  alpha,
+		  x, incx,
+		  y, incy,
+		  rho,
+		  z, incz,
+		  cntx
+		);
         return;
 	}
 
@@ -285,8 +317,8 @@ void bli_zdotaxpyv_opt_var1( conj_t             conjxt,
 		// Compute front edge cases if x, y, and z were unaligned.
 		for ( i = 0; i < n_pre; ++i )
 		{
-			bli_zzzdots( *xp, *yp, dotxy );
-			bli_zzzaxpys( *alpha, *xp, *zp );
+			bli_zdots( *xp, *yp, dotxy );
+			bli_zaxpys( *alpha, *xp, *zp );
 
 			xp += 1; yp += 1; zp += 1;
 		}
@@ -298,8 +330,8 @@ void bli_zdotaxpyv_opt_var1( conj_t             conjxt,
 		// guaranteed to be aligned to BLIS_SIMD_ALIGN_SIZE.
 		for ( i = 0; i < n_iter; ++i )
 		{
-			bli_zzzdots( *xp, *yp, dotxy );
-			bli_zzzaxpys( *alpha, *xp, *zp );
+			bli_zdots( *xp, *yp, dotxy );
+			bli_zaxpys( *alpha, *xp, *zp );
 
 			xp += n_elem_per_iter;
 			yp += n_elem_per_iter;
@@ -309,8 +341,8 @@ void bli_zdotaxpyv_opt_var1( conj_t             conjxt,
 		// Compute tail edge cases, if applicable.
 		for ( i = 0; i < n_left; ++i )
 		{
-			bli_zzzdots( *xp, *yp, dotxy );
-			bli_zzzaxpys( *alpha, *xp, *zp );
+			bli_zdots( *xp, *yp, dotxy );
+			bli_zaxpys( *alpha, *xp, *zp );
 
 			xp += 1; yp += 1; zp += 1;
 		}
@@ -320,8 +352,8 @@ void bli_zdotaxpyv_opt_var1( conj_t             conjxt,
 		// Compute front edge cases if x, y, and z were unaligned.
 		for ( i = 0; i < n_pre; ++i )
 		{
-			bli_zzzdotjs( *xp, *yp, dotxy );
-			bli_zzzaxpys( *alpha, *xp, *zp );
+			bli_zdotjs( *xp, *yp, dotxy );
+			bli_zaxpys( *alpha, *xp, *zp );
 
 			xp += 1; yp += 1; zp += 1;
 		}
@@ -333,8 +365,8 @@ void bli_zdotaxpyv_opt_var1( conj_t             conjxt,
 		// guaranteed to be aligned to BLIS_SIMD_ALIGN_SIZE.
 		for ( i = 0; i < n_iter; ++i )
 		{
-			bli_zzzdotjs( *xp, *yp, dotxy );
-			bli_zzzaxpys( *alpha, *xp, *zp );
+			bli_zdotjs( *xp, *yp, dotxy );
+			bli_zaxpys( *alpha, *xp, *zp );
 
 			xp += n_elem_per_iter;
 			yp += n_elem_per_iter;
@@ -344,8 +376,8 @@ void bli_zdotaxpyv_opt_var1( conj_t             conjxt,
 		// Compute tail edge cases, if applicable.
 		for ( i = 0; i < n_left; ++i )
 		{
-			bli_zzzdotjs( *xp, *yp, dotxy );
-			bli_zzzaxpys( *alpha, *xp, *zp );
+			bli_zdotjs( *xp, *yp, dotxy );
+			bli_zaxpys( *alpha, *xp, *zp );
 
 			xp += 1; yp += 1; zp += 1;
 		}
@@ -355,8 +387,8 @@ void bli_zdotaxpyv_opt_var1( conj_t             conjxt,
 		// Compute front edge cases if x, y, and z were unaligned.
 		for ( i = 0; i < n_pre; ++i )
 		{
-			bli_zzzdots( *xp, *yp, dotxy );
-			bli_zzzaxpyjs( *alpha, *xp, *zp );
+			bli_zdots( *xp, *yp, dotxy );
+			bli_zaxpyjs( *alpha, *xp, *zp );
 
 			xp += 1; yp += 1; zp += 1;
 		}
@@ -368,8 +400,8 @@ void bli_zdotaxpyv_opt_var1( conj_t             conjxt,
 		// guaranteed to be aligned to BLIS_SIMD_ALIGN_SIZE.
 		for ( i = 0; i < n_iter; ++i )
 		{
-			bli_zzzdots( *xp, *yp, dotxy );
-			bli_zzzaxpyjs( *alpha, *xp, *zp );
+			bli_zdots( *xp, *yp, dotxy );
+			bli_zaxpyjs( *alpha, *xp, *zp );
 
 			xp += n_elem_per_iter;
 			yp += n_elem_per_iter;
@@ -379,8 +411,8 @@ void bli_zdotaxpyv_opt_var1( conj_t             conjxt,
 		// Compute tail edge cases, if applicable.
 		for ( i = 0; i < n_left; ++i )
 		{
-			bli_zzzdots( *xp, *yp, dotxy );
-			bli_zzzaxpyjs( *alpha, *xp, *zp );
+			bli_zdots( *xp, *yp, dotxy );
+			bli_zaxpyjs( *alpha, *xp, *zp );
 
 			xp += 1; yp += 1; zp += 1;
 		}
@@ -390,8 +422,8 @@ void bli_zdotaxpyv_opt_var1( conj_t             conjxt,
 		// Compute front edge cases if x, y, and z were unaligned.
 		for ( i = 0; i < n_pre; ++i )
 		{
-			bli_zzzdotjs( *xp, *yp, dotxy );
-			bli_zzzaxpyjs( *alpha, *xp, *zp );
+			bli_zdotjs( *xp, *yp, dotxy );
+			bli_zaxpyjs( *alpha, *xp, *zp );
 
 			xp += 1; yp += 1; zp += 1;
 		}
@@ -403,8 +435,8 @@ void bli_zdotaxpyv_opt_var1( conj_t             conjxt,
 		// guaranteed to be aligned to BLIS_SIMD_ALIGN_SIZE.
 		for ( i = 0; i < n_iter; ++i )
 		{
-			bli_zzzdotjs( *xp, *yp, dotxy );
-			bli_zzzaxpyjs( *alpha, *xp, *zp );
+			bli_zdotjs( *xp, *yp, dotxy );
+			bli_zaxpyjs( *alpha, *xp, *zp );
 
 			xp += n_elem_per_iter;
 			yp += n_elem_per_iter;
@@ -414,8 +446,8 @@ void bli_zdotaxpyv_opt_var1( conj_t             conjxt,
 		// Compute tail edge cases, if applicable.
 		for ( i = 0; i < n_left; ++i )
 		{
-			bli_zzzdotjs( *xp, *yp, dotxy );
-			bli_zzzaxpyjs( *alpha, *xp, *zp );
+			bli_zdotjs( *xp, *yp, dotxy );
+			bli_zaxpyjs( *alpha, *xp, *zp );
 
 			xp += 1; yp += 1; zp += 1;
 		}
@@ -426,6 +458,6 @@ void bli_zdotaxpyv_opt_var1( conj_t             conjxt,
 	if ( bli_is_conj( conjy ) )
 		bli_zconjs( dotxy );
 
-	bli_zzcopys( dotxy, *rho );
+	bli_zcopys( dotxy, *rho );
 }
 

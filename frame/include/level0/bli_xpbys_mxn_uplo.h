@@ -39,112 +39,112 @@
 
 #define bli_sssxpbys_mxn_u( diagoff, m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ) \
 { \
-	dim_t i, j; \
+	dim_t _i, _j; \
 \
 	/* If beta is zero, overwrite y with x (in case y has infs or NaNs). */ \
 	if ( bli_seq0( *beta ) ) \
 	{ \
-		for ( j = 0; j < n; ++j ) \
-		for ( i = 0; i < m; ++i ) \
-		if ( (doff_t)j - (doff_t)i >= diagoff ) \
+		for ( _j = 0; _j < n; ++_j ) \
+		for ( _i = 0; _i < m; ++_i ) \
+		if ( (doff_t)_j - (doff_t)_i >= diagoff ) \
 		{ \
-			bli_sscopys( *(x + i*rs_x + j*cs_x), \
-			             *(y + i*rs_y + j*cs_y) ); \
+			bli_sscopys( *(x + _i*rs_x + _j*cs_x), \
+			             *(y + _i*rs_y + _j*cs_y) ); \
 		} \
 	} \
 	else \
 	{ \
-		for ( j = 0; j < n; ++j ) \
-		for ( i = 0; i < m; ++i ) \
-		if ( (doff_t)j - (doff_t)i >= diagoff ) \
+		for ( _j = 0; _j < n; ++_j ) \
+		for ( _i = 0; _i < m; ++_i ) \
+		if ( (doff_t)_j - (doff_t)_i >= diagoff ) \
 		{ \
-			bli_sssxpbys( *(x + i*rs_x + j*cs_x), \
+			bli_sssxpbys( *(x + _i*rs_x + _j*cs_x), \
 			              *(beta), \
-			              *(y + i*rs_y + j*cs_y) ); \
+			              *(y + _i*rs_y + _j*cs_y) ); \
 		} \
 	} \
 }
 
 #define bli_dddxpbys_mxn_u( diagoff, m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ) \
 { \
-	dim_t i, j; \
+	dim_t _i, _j; \
 \
 	/* If beta is zero, overwrite y with x (in case y has infs or NaNs). */ \
 	if ( bli_deq0( *beta ) ) \
 	{ \
-		for ( j = 0; j < n; ++j ) \
-		for ( i = 0; i < m; ++i ) \
-		if ( (doff_t)j - (doff_t)i >= diagoff ) \
+		for ( _j = 0; _j < n; ++_j ) \
+		for ( _i = 0; _i < m; ++_i ) \
+		if ( (doff_t)_j - (doff_t)_i >= diagoff ) \
 		{ \
-			bli_ddcopys( *(x + i*rs_x + j*cs_x), \
-			             *(y + i*rs_y + j*cs_y) ); \
+			bli_ddcopys( *(x + _i*rs_x + _j*cs_x), \
+			             *(y + _i*rs_y + _j*cs_y) ); \
 		} \
 	} \
 	else \
 	{ \
-		for ( j = 0; j < n; ++j ) \
-		for ( i = 0; i < m; ++i ) \
-		if ( (doff_t)j - (doff_t)i >= diagoff ) \
+		for ( _j = 0; _j < n; ++_j ) \
+		for ( _i = 0; _i < m; ++_i ) \
+		if ( (doff_t)_j - (doff_t)_i >= diagoff ) \
 		{ \
-			bli_dddxpbys( *(x + i*rs_x + j*cs_x), \
+			bli_dddxpbys( *(x + _i*rs_x + _j*cs_x), \
 			              *(beta), \
-			              *(y + i*rs_y + j*cs_y) ); \
+			              *(y + _i*rs_y + _j*cs_y) ); \
 		} \
 	} \
 }
 
 #define bli_cccxpbys_mxn_u( diagoff, m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ) \
 { \
-	dim_t i, j; \
+	dim_t _i, _j; \
 \
 	/* If beta is zero, overwrite y with x (in case y has infs or NaNs). */ \
 	if ( bli_ceq0( *beta ) ) \
 	{ \
-		for ( j = 0; j < n; ++j ) \
-		for ( i = 0; i < m; ++i ) \
-		if ( (doff_t)j - (doff_t)i >= diagoff ) \
+		for ( _j = 0; _j < n; ++_j ) \
+		for ( _i = 0; _i < m; ++_i ) \
+		if ( (doff_t)_j - (doff_t)_i >= diagoff ) \
 		{ \
-			bli_cccopys( *(x + i*rs_x + j*cs_x), \
-			             *(y + i*rs_y + j*cs_y) ); \
+			bli_cccopys( *(x + _i*rs_x + _j*cs_x), \
+			             *(y + _i*rs_y + _j*cs_y) ); \
 		} \
 	} \
 	else \
 	{ \
-		for ( j = 0; j < n; ++j ) \
-		for ( i = 0; i < m; ++i ) \
-		if ( (doff_t)j - (doff_t)i >= diagoff ) \
+		for ( _j = 0; _j < n; ++_j ) \
+		for ( _i = 0; _i < m; ++_i ) \
+		if ( (doff_t)_j - (doff_t)_i >= diagoff ) \
 		{ \
-			bli_cccxpbys( *(x + i*rs_x + j*cs_x), \
+			bli_cccxpbys( *(x + _i*rs_x + _j*cs_x), \
 			              *(beta), \
-			              *(y + i*rs_y + j*cs_y) ); \
+			              *(y + _i*rs_y + _j*cs_y) ); \
 		} \
 	} \
 }
 
 #define bli_zzzxpbys_mxn_u( diagoff, m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ) \
 { \
-	dim_t i, j; \
+	dim_t _i, _j; \
 \
 	/* If beta is zero, overwrite y with x (in case y has infs or NaNs). */ \
 	if ( bli_zeq0( *beta ) ) \
 	{ \
-		for ( j = 0; j < n; ++j ) \
-		for ( i = 0; i < m; ++i ) \
-		if ( (doff_t)j - (doff_t)i >= diagoff ) \
+		for ( _j = 0; _j < n; ++_j ) \
+		for ( _i = 0; _i < m; ++_i ) \
+		if ( (doff_t)_j - (doff_t)_i >= diagoff ) \
 		{ \
-			bli_zzcopys( *(x + i*rs_x + j*cs_x), \
-			             *(y + i*rs_y + j*cs_y) ); \
+			bli_zzcopys( *(x + _i*rs_x + _j*cs_x), \
+			             *(y + _i*rs_y + _j*cs_y) ); \
 		} \
 	} \
 	else \
 	{ \
-		for ( j = 0; j < n; ++j ) \
-		for ( i = 0; i < m; ++i ) \
-		if ( (doff_t)j - (doff_t)i >= diagoff ) \
+		for ( _j = 0; _j < n; ++_j ) \
+		for ( _i = 0; _i < m; ++_i ) \
+		if ( (doff_t)_j - (doff_t)_i >= diagoff ) \
 		{ \
-			bli_zzzxpbys( *(x + i*rs_x + j*cs_x), \
+			bli_zzzxpbys( *(x + _i*rs_x + _j*cs_x), \
 			              *(beta), \
-			              *(y + i*rs_y + j*cs_y) ); \
+			              *(y + _i*rs_y + _j*cs_y) ); \
 		} \
 	} \
 }
@@ -153,112 +153,112 @@
 
 #define bli_sssxpbys_mxn_l( diagoff, m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ) \
 { \
-	dim_t i, j; \
+	dim_t _i, _j; \
 \
 	/* If beta is zero, overwrite y with x (in case y has infs or NaNs). */ \
 	if ( bli_seq0( *beta ) ) \
 	{ \
-		for ( j = 0; j < n; ++j ) \
-		for ( i = 0; i < m; ++i ) \
-		if ( (doff_t)j - (doff_t)i <= diagoff ) \
+		for ( _j = 0; _j < n; ++_j ) \
+		for ( _i = 0; _i < m; ++_i ) \
+		if ( (doff_t)_j - (doff_t)_i <= diagoff ) \
 		{ \
-			bli_sscopys( *(x + i*rs_x + j*cs_x), \
-			             *(y + i*rs_y + j*cs_y) ); \
+			bli_sscopys( *(x + _i*rs_x + _j*cs_x), \
+			             *(y + _i*rs_y + _j*cs_y) ); \
 		} \
 	} \
 	else \
 	{ \
-		for ( j = 0; j < n; ++j ) \
-		for ( i = 0; i < m; ++i ) \
-		if ( (doff_t)j - (doff_t)i <= diagoff ) \
+		for ( _j = 0; _j < n; ++_j ) \
+		for ( _i = 0; _i < m; ++_i ) \
+		if ( (doff_t)_j - (doff_t)_i <= diagoff ) \
 		{ \
-			bli_sssxpbys( *(x + i*rs_x + j*cs_x), \
+			bli_sssxpbys( *(x + _i*rs_x + _j*cs_x), \
 			              *(beta), \
-			              *(y + i*rs_y + j*cs_y) ); \
+			              *(y + _i*rs_y + _j*cs_y) ); \
 		} \
 	} \
 }
 
 #define bli_dddxpbys_mxn_l( diagoff, m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ) \
 { \
-	dim_t i, j; \
+	dim_t _i, _j; \
 \
 	/* If beta is zero, overwrite y with x (in case y has infs or NaNs). */ \
 	if ( bli_deq0( *beta ) ) \
 	{ \
-		for ( j = 0; j < n; ++j ) \
-		for ( i = 0; i < m; ++i ) \
-		if ( (doff_t)j - (doff_t)i <= diagoff ) \
+		for ( _j = 0; _j < n; ++_j ) \
+		for ( _i = 0; _i < m; ++_i ) \
+		if ( (doff_t)_j - (doff_t)_i <= diagoff ) \
 		{ \
-			bli_ddcopys( *(x + i*rs_x + j*cs_x), \
-			             *(y + i*rs_y + j*cs_y) ); \
+			bli_ddcopys( *(x + _i*rs_x + _j*cs_x), \
+			             *(y + _i*rs_y + _j*cs_y) ); \
 		} \
 	} \
 	else \
 	{ \
-		for ( j = 0; j < n; ++j ) \
-		for ( i = 0; i < m; ++i ) \
-		if ( (doff_t)j - (doff_t)i <= diagoff ) \
+		for ( _j = 0; _j < n; ++_j ) \
+		for ( _i = 0; _i < m; ++_i ) \
+		if ( (doff_t)_j - (doff_t)_i <= diagoff ) \
 		{ \
-			bli_dddxpbys( *(x + i*rs_x + j*cs_x), \
+			bli_dddxpbys( *(x + _i*rs_x + _j*cs_x), \
 			              *(beta), \
-			              *(y + i*rs_y + j*cs_y) ); \
+			              *(y + _i*rs_y + _j*cs_y) ); \
 		} \
 	} \
 }
 
 #define bli_cccxpbys_mxn_l( diagoff, m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ) \
 { \
-	dim_t i, j; \
+	dim_t _i, _j; \
 \
 	/* If beta is zero, overwrite y with x (in case y has infs or NaNs). */ \
 	if ( bli_ceq0( *beta ) ) \
 	{ \
-		for ( j = 0; j < n; ++j ) \
-		for ( i = 0; i < m; ++i ) \
-		if ( (doff_t)j - (doff_t)i <= diagoff ) \
+		for ( _j = 0; _j < n; ++_j ) \
+		for ( _i = 0; _i < m; ++_i ) \
+		if ( (doff_t)_j - (doff_t)_i <= diagoff ) \
 		{ \
-			bli_cccopys( *(x + i*rs_x + j*cs_x), \
-			             *(y + i*rs_y + j*cs_y) ); \
+			bli_cccopys( *(x + _i*rs_x + _j*cs_x), \
+			             *(y + _i*rs_y + _j*cs_y) ); \
 		} \
 	} \
 	else \
 	{ \
-		for ( j = 0; j < n; ++j ) \
-		for ( i = 0; i < m; ++i ) \
-		if ( (doff_t)j - (doff_t)i <= diagoff ) \
+		for ( _j = 0; _j < n; ++_j ) \
+		for ( _i = 0; _i < m; ++_i ) \
+		if ( (doff_t)_j - (doff_t)_i <= diagoff ) \
 		{ \
-			bli_cccxpbys( *(x + i*rs_x + j*cs_x), \
+			bli_cccxpbys( *(x + _i*rs_x + _j*cs_x), \
 			              *(beta), \
-			              *(y + i*rs_y + j*cs_y) ); \
+			              *(y + _i*rs_y + _j*cs_y) ); \
 		} \
 	} \
 }
 
 #define bli_zzzxpbys_mxn_l( diagoff, m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ) \
 { \
-	dim_t i, j; \
+	dim_t _i, _j; \
 \
 	/* If beta is zero, overwrite y with x (in case y has infs or NaNs). */ \
 	if ( bli_zeq0( *beta ) ) \
 	{ \
-		for ( j = 0; j < n; ++j ) \
-		for ( i = 0; i < m; ++i ) \
-		if ( (doff_t)j - (doff_t)i <= diagoff ) \
+		for ( _j = 0; _j < n; ++_j ) \
+		for ( _i = 0; _i < m; ++_i ) \
+		if ( (doff_t)_j - (doff_t)_i <= diagoff ) \
 		{ \
-			bli_zzcopys( *(x + i*rs_x + j*cs_x), \
-			             *(y + i*rs_y + j*cs_y) ); \
+			bli_zzcopys( *(x + _i*rs_x + _j*cs_x), \
+			             *(y + _i*rs_y + _j*cs_y) ); \
 		} \
 	} \
 	else \
 	{ \
-		for ( j = 0; j < n; ++j ) \
-		for ( i = 0; i < m; ++i ) \
-		if ( (doff_t)j - (doff_t)i <= diagoff ) \
+		for ( _j = 0; _j < n; ++_j ) \
+		for ( _i = 0; _i < m; ++_i ) \
+		if ( (doff_t)_j - (doff_t)_i <= diagoff ) \
 		{ \
-			bli_zzzxpbys( *(x + i*rs_x + j*cs_x), \
+			bli_zzzxpbys( *(x + _i*rs_x + _j*cs_x), \
 			              *(beta), \
-			              *(y + i*rs_y + j*cs_y) ); \
+			              *(y + _i*rs_y + _j*cs_y) ); \
 		} \
 	} \
 }

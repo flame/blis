@@ -570,10 +570,12 @@ void libblis_test_output_section_overrides( FILE* os, test_ops_t* ops )
 
 void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 {
-	int    i;
+	int     i;
 	//char   int_type_size_str[8];
-	gint_t int_type_size;
-	ind_t  ind;
+	gint_t  int_type_size;
+	ind_t   im;
+	cntx_t  cntx_s;
+	cntx_t* cntx = &cntx_s;
 
 	// If bli_info_get_int_type_size() returns 32 or 64, the size is forced.
 	// Otherwise, the size is chosen automatically. We query the result of
@@ -601,14 +603,17 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "integer type size (bits)       %d\n", ( int )int_type_size );
 	libblis_test_fprintf_c( os, "\n" );
+	libblis_test_fprintf_c( os, "SIMD number of registers       %d\n", ( int )bli_info_get_simd_num_registers() );
+	libblis_test_fprintf_c( os, "SIMD size (bytes)              %d\n", ( int )bli_info_get_simd_size() );
 	libblis_test_fprintf_c( os, "SIMD alignment (bytes)         %d\n", ( int )bli_info_get_simd_align_size() );
+	libblis_test_fprintf_c( os, "Max stack buffer size (bytes)  %d\n", ( int )bli_info_get_stack_buf_max_size() );
 	libblis_test_fprintf_c( os, "Page size (bytes)              %d\n", ( int )bli_info_get_page_size() );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "memory alignment (bytes)         \n" );
-	libblis_test_fprintf_c( os, "  stack address (def: simd)    %d\n", ( int )bli_info_get_stack_buf_align_size() );
-	libblis_test_fprintf_c( os, "  obj_t address (def: simd)    %d\n", ( int )bli_info_get_heap_addr_align_size() );
-	libblis_test_fprintf_c( os, "  obj_t stride (def: simd)     %d\n", ( int )bli_info_get_heap_stride_align_size() );
-	libblis_test_fprintf_c( os, "  pool block addr (def: page)  %d\n", ( int )bli_info_get_pool_addr_align_size() );
+	libblis_test_fprintf_c( os, "  stack address                %d\n", ( int )bli_info_get_stack_buf_align_size() );
+	libblis_test_fprintf_c( os, "  obj_t address                %d\n", ( int )bli_info_get_heap_addr_align_size() );
+	libblis_test_fprintf_c( os, "  obj_t stride                 %d\n", ( int )bli_info_get_heap_stride_align_size() );
+	libblis_test_fprintf_c( os, "  pool block addr              %d\n", ( int )bli_info_get_pool_addr_align_size() );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "BLAS compatibility layer         \n" );
 	libblis_test_fprintf_c( os, "  enabled?                     %d\n", ( int )bli_info_get_enable_blas2blis() );
@@ -692,60 +697,63 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	                        bli_ind_oper_get_avail_impl_string( BLIS_GEMM, BLIS_SCOMPLEX ),
 	                        bli_ind_oper_get_avail_impl_string( BLIS_GEMM, BLIS_DCOMPLEX ) );
 	libblis_test_fprintf_c( os, "\n" );
+
+	bli_gemmnat_cntx_init( cntx );
+
 	libblis_test_fprintf_c( os, "level-3 blocksizes             s       d       c       z \n" );
 	libblis_test_fprintf_c( os, "  mc                     %7d %7d %7d %7d\n",
-	                        ( int )bli_info_get_default_mc( BLIS_GEMM, BLIS_FLOAT ),
-	                        ( int )bli_info_get_default_mc( BLIS_GEMM, BLIS_DOUBLE ),
-	                        ( int )bli_info_get_default_mc( BLIS_GEMM, BLIS_SCOMPLEX ),
-	                        ( int )bli_info_get_default_mc( BLIS_GEMM, BLIS_DCOMPLEX ) );
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_FLOAT,    BLIS_MC, cntx ),
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_DOUBLE,   BLIS_MC, cntx ),
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_SCOMPLEX, BLIS_MC, cntx ),
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_DCOMPLEX, BLIS_MC, cntx ) );
 	libblis_test_fprintf_c( os, "  kc                     %7d %7d %7d %7d\n",
-	                        ( int )bli_info_get_default_kc( BLIS_GEMM, BLIS_FLOAT ),
-	                        ( int )bli_info_get_default_kc( BLIS_GEMM, BLIS_DOUBLE ),
-	                        ( int )bli_info_get_default_kc( BLIS_GEMM, BLIS_SCOMPLEX ),
-	                        ( int )bli_info_get_default_kc( BLIS_GEMM, BLIS_DCOMPLEX ) );
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_FLOAT,    BLIS_KC, cntx ),
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_DOUBLE,   BLIS_KC, cntx ),
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_SCOMPLEX, BLIS_KC, cntx ),
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_DCOMPLEX, BLIS_KC, cntx ) );
 	libblis_test_fprintf_c( os, "  nc                     %7d %7d %7d %7d\n",
-	                        ( int )bli_info_get_default_nc( BLIS_GEMM, BLIS_FLOAT ),
-	                        ( int )bli_info_get_default_nc( BLIS_GEMM, BLIS_DOUBLE ),
-	                        ( int )bli_info_get_default_nc( BLIS_GEMM, BLIS_SCOMPLEX ),
-	                        ( int )bli_info_get_default_nc( BLIS_GEMM, BLIS_DCOMPLEX ) );
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_FLOAT,    BLIS_NC, cntx ),
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_DOUBLE,   BLIS_NC, cntx ),
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_SCOMPLEX, BLIS_NC, cntx ),
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_DCOMPLEX, BLIS_NC, cntx ) );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "  mc maximum             %7d %7d %7d %7d\n",
-	                        ( int )bli_info_get_maximum_mc( BLIS_GEMM, BLIS_FLOAT ),
-	                        ( int )bli_info_get_maximum_mc( BLIS_GEMM, BLIS_DOUBLE ),
-	                        ( int )bli_info_get_maximum_mc( BLIS_GEMM, BLIS_SCOMPLEX ),
-	                        ( int )bli_info_get_maximum_mc( BLIS_GEMM, BLIS_DCOMPLEX ) );
+	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_FLOAT,    BLIS_MC, cntx ),
+	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_DOUBLE,   BLIS_MC, cntx ),
+	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_SCOMPLEX, BLIS_MC, cntx ),
+	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_DCOMPLEX, BLIS_MC, cntx ) );
 	libblis_test_fprintf_c( os, "  kc maximum             %7d %7d %7d %7d\n",
-	                        ( int )bli_info_get_maximum_kc( BLIS_GEMM, BLIS_FLOAT ),
-	                        ( int )bli_info_get_maximum_kc( BLIS_GEMM, BLIS_DOUBLE ),
-	                        ( int )bli_info_get_maximum_kc( BLIS_GEMM, BLIS_SCOMPLEX ),
-	                        ( int )bli_info_get_maximum_kc( BLIS_GEMM, BLIS_DCOMPLEX ) );
+	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_FLOAT,    BLIS_KC, cntx ),
+	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_DOUBLE,   BLIS_KC, cntx ),
+	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_SCOMPLEX, BLIS_KC, cntx ),
+	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_DCOMPLEX, BLIS_KC, cntx ) );
 	libblis_test_fprintf_c( os, "  nc maximum             %7d %7d %7d %7d\n",
-	                        ( int )bli_info_get_maximum_nc( BLIS_GEMM, BLIS_FLOAT ),
-	                        ( int )bli_info_get_maximum_nc( BLIS_GEMM, BLIS_DOUBLE ),
-	                        ( int )bli_info_get_maximum_nc( BLIS_GEMM, BLIS_SCOMPLEX ),
-	                        ( int )bli_info_get_maximum_nc( BLIS_GEMM, BLIS_DCOMPLEX ) );
+	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_FLOAT,    BLIS_NC, cntx ),
+	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_DOUBLE,   BLIS_NC, cntx ),
+	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_SCOMPLEX, BLIS_NC, cntx ),
+	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_DCOMPLEX, BLIS_NC, cntx ) );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "  mr                     %7d %7d %7d %7d\n",
-	                        ( int )bli_info_get_default_mr( BLIS_GEMM, BLIS_FLOAT ),
-	                        ( int )bli_info_get_default_mr( BLIS_GEMM, BLIS_DOUBLE ),
-	                        ( int )bli_info_get_default_mr( BLIS_GEMM, BLIS_SCOMPLEX ),
-	                        ( int )bli_info_get_default_mr( BLIS_GEMM, BLIS_DCOMPLEX ) );
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_FLOAT,    BLIS_MR, cntx ),
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_DOUBLE,   BLIS_MR, cntx ),
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_SCOMPLEX, BLIS_MR, cntx ),
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_DCOMPLEX, BLIS_MR, cntx ) );
 	libblis_test_fprintf_c( os, "  nr                     %7d %7d %7d %7d\n",
-	                        ( int )bli_info_get_default_nr( BLIS_GEMM, BLIS_FLOAT ),
-	                        ( int )bli_info_get_default_nr( BLIS_GEMM, BLIS_DOUBLE ),
-	                        ( int )bli_info_get_default_nr( BLIS_GEMM, BLIS_SCOMPLEX ),
-	                        ( int )bli_info_get_default_nr( BLIS_GEMM, BLIS_DCOMPLEX ) );
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_FLOAT,    BLIS_NR, cntx ),
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_DOUBLE,   BLIS_NR, cntx ),
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_SCOMPLEX, BLIS_NR, cntx ),
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_DCOMPLEX, BLIS_NR, cntx ) );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "  mr packdim             %7d %7d %7d %7d\n",
-	                        ( int )bli_info_get_packdim_mr( BLIS_GEMM, BLIS_FLOAT ),
-	                        ( int )bli_info_get_packdim_mr( BLIS_GEMM, BLIS_DOUBLE ),
-	                        ( int )bli_info_get_packdim_mr( BLIS_GEMM, BLIS_SCOMPLEX ),
-	                        ( int )bli_info_get_packdim_mr( BLIS_GEMM, BLIS_DCOMPLEX ) );
+	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_FLOAT,    BLIS_MR, cntx ),
+	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_DOUBLE,   BLIS_MR, cntx ),
+	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_SCOMPLEX, BLIS_MR, cntx ),
+	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_DCOMPLEX, BLIS_MR, cntx ) );
 	libblis_test_fprintf_c( os, "  nr packdim             %7d %7d %7d %7d\n",
-	                        ( int )bli_info_get_packdim_nr( BLIS_GEMM, BLIS_FLOAT ),
-	                        ( int )bli_info_get_packdim_nr( BLIS_GEMM, BLIS_DOUBLE ),
-	                        ( int )bli_info_get_packdim_nr( BLIS_GEMM, BLIS_SCOMPLEX ),
-	                        ( int )bli_info_get_packdim_nr( BLIS_GEMM, BLIS_DCOMPLEX ) );
+	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_FLOAT,    BLIS_NR, cntx ),
+	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_DOUBLE,   BLIS_NR, cntx ),
+	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_SCOMPLEX, BLIS_NR, cntx ),
+	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_DCOMPLEX, BLIS_NR, cntx ) );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "micro-kernel types             s       d       c       z\n" );
 	libblis_test_fprintf_c( os, "  gemm                   %7s %7s %7s %7s\n",
@@ -776,115 +784,123 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "\n" );
 
+	bli_gemmnat_cntx_finalize( cntx );
+
 	libblis_test_fprintf_c( os, "--- BLIS induced implementation info ---\n" );
 	libblis_test_fprintf_c( os, "\n" );
 
-	for ( ind = 0; ind < BLIS_NAT; ++ind )
+	for ( im = 0; im < BLIS_NAT; ++im )
 	{
-	if ( params->ind_enable[ ind ] == 0 ) continue;
+	if ( params->ind_enable[ im ] == 0 ) continue;
 
-	bli_ind_oper_enable_only( BLIS_GEMM, ind, BLIS_SCOMPLEX );
-	bli_ind_oper_enable_only( BLIS_GEMM, ind, BLIS_DCOMPLEX );
+	bli_ind_oper_enable_only( BLIS_GEMM, im, BLIS_SCOMPLEX );
+	bli_ind_oper_enable_only( BLIS_GEMM, im, BLIS_DCOMPLEX );
 
 	libblis_test_fprintf_c( os, "                               c       z \n" );
 	libblis_test_fprintf_c( os, "complex implementation   %7s %7s\n",
 	                        bli_ind_oper_get_avail_impl_string( BLIS_GEMM, BLIS_SCOMPLEX ),
 	                        bli_ind_oper_get_avail_impl_string( BLIS_GEMM, BLIS_DCOMPLEX ) );
 	libblis_test_fprintf_c( os, "\n" );
+
+	bli_gemmind_cntx_init( im, cntx );
+
 	libblis_test_fprintf_c( os, "level-3 blocksizes             c       z \n" );
 	libblis_test_fprintf_c( os, "  mc                     %7d %7d\n",
-	                        ( int )bli_info_get_default_mc( BLIS_GEMM, BLIS_SCOMPLEX ),
-	                        ( int )bli_info_get_default_mc( BLIS_GEMM, BLIS_DCOMPLEX ) );
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_SCOMPLEX, BLIS_MC, cntx ),
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_DCOMPLEX, BLIS_MC, cntx ) );
 	libblis_test_fprintf_c( os, "  kc                     %7d %7d\n",
-	                        ( int )bli_info_get_default_kc( BLIS_GEMM, BLIS_SCOMPLEX ),
-	                        ( int )bli_info_get_default_kc( BLIS_GEMM, BLIS_DCOMPLEX ) );
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_SCOMPLEX, BLIS_KC, cntx ),
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_DCOMPLEX, BLIS_KC, cntx ) );
 	libblis_test_fprintf_c( os, "  nc                     %7d %7d\n",
-	                        ( int )bli_info_get_default_nc( BLIS_GEMM, BLIS_SCOMPLEX ),
-	                        ( int )bli_info_get_default_nc( BLIS_GEMM, BLIS_DCOMPLEX ) );
+	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_SCOMPLEX, BLIS_NC, cntx ),
+	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_DCOMPLEX, BLIS_NC, cntx ) );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "  mc maximum             %7d %7d\n",
-	                        ( int )bli_info_get_maximum_mc( BLIS_GEMM, BLIS_SCOMPLEX ),
-	                        ( int )bli_info_get_maximum_mc( BLIS_GEMM, BLIS_DCOMPLEX ) );
+	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_SCOMPLEX, BLIS_MC, cntx ),
+	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_DCOMPLEX, BLIS_MC, cntx ) );
 	libblis_test_fprintf_c( os, "  kc maximum             %7d %7d\n",
-	                        ( int )bli_info_get_maximum_kc( BLIS_GEMM, BLIS_SCOMPLEX ),
-	                        ( int )bli_info_get_maximum_kc( BLIS_GEMM, BLIS_DCOMPLEX ) );
+	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_SCOMPLEX, BLIS_KC, cntx ),
+	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_DCOMPLEX, BLIS_KC, cntx ) );
 	libblis_test_fprintf_c( os, "  nc maximum             %7d %7d\n",
-	                        ( int )bli_info_get_maximum_nc( BLIS_GEMM, BLIS_SCOMPLEX ),
-	                        ( int )bli_info_get_maximum_nc( BLIS_GEMM, BLIS_DCOMPLEX ) );
+	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_SCOMPLEX, BLIS_NC, cntx ),
+	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_DCOMPLEX, BLIS_NC, cntx ) );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "  mr                     %7d %7d\n",
-	                        ( int )bli_info_get_default_mr( BLIS_GEMM, BLIS_SCOMPLEX ),
-	                        ( int )bli_info_get_default_mr( BLIS_GEMM, BLIS_DCOMPLEX ) );
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_SCOMPLEX, BLIS_MR, cntx ),
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_DCOMPLEX, BLIS_MR, cntx ) );
 	libblis_test_fprintf_c( os, "  nr                     %7d %7d\n",
-	                        ( int )bli_info_get_default_nr( BLIS_GEMM, BLIS_SCOMPLEX ),
-	                        ( int )bli_info_get_default_nr( BLIS_GEMM, BLIS_DCOMPLEX ) );
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_SCOMPLEX, BLIS_NR, cntx ),
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_DCOMPLEX, BLIS_NR, cntx ) );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "  mr packdim             %7d %7d\n",
-	                        ( int )bli_info_get_packdim_mr( BLIS_GEMM, BLIS_SCOMPLEX ),
-	                        ( int )bli_info_get_packdim_mr( BLIS_GEMM, BLIS_DCOMPLEX ) );
+	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_SCOMPLEX, BLIS_MR, cntx ),
+	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_DCOMPLEX, BLIS_MR, cntx ) );
 	libblis_test_fprintf_c( os, "  nr packdim             %7d %7d\n",
-	                        ( int )bli_info_get_packdim_nr( BLIS_GEMM, BLIS_SCOMPLEX ),
-	                        ( int )bli_info_get_packdim_nr( BLIS_GEMM, BLIS_DCOMPLEX ) );
+	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_SCOMPLEX, BLIS_NR, cntx ),
+	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_DCOMPLEX, BLIS_NR, cntx ) );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "micro-kernel types             c       z\n" );
 	libblis_test_fprintf_c( os, "  gemm                   %7s %7s\n",
-	                        bli_info_get_gemm_ukr_impl_string( ind, BLIS_SCOMPLEX ),
-	                        bli_info_get_gemm_ukr_impl_string( ind, BLIS_DCOMPLEX ) );
+	                        bli_info_get_gemm_ukr_impl_string( im, BLIS_SCOMPLEX ),
+	                        bli_info_get_gemm_ukr_impl_string( im, BLIS_DCOMPLEX ) );
 	libblis_test_fprintf_c( os, "  gemmtrsm_l             %7s %7s\n",
-	                        bli_info_get_gemmtrsm_l_ukr_impl_string( ind, BLIS_SCOMPLEX ),
-	                        bli_info_get_gemmtrsm_l_ukr_impl_string( ind, BLIS_DCOMPLEX ) );
+	                        bli_info_get_gemmtrsm_l_ukr_impl_string( im, BLIS_SCOMPLEX ),
+	                        bli_info_get_gemmtrsm_l_ukr_impl_string( im, BLIS_DCOMPLEX ) );
 	libblis_test_fprintf_c( os, "  gemmtrsm_u             %7s %7s\n",
-	                        bli_info_get_gemmtrsm_u_ukr_impl_string( ind, BLIS_SCOMPLEX ),
-	                        bli_info_get_gemmtrsm_u_ukr_impl_string( ind, BLIS_DCOMPLEX ) );
+	                        bli_info_get_gemmtrsm_u_ukr_impl_string( im, BLIS_SCOMPLEX ),
+	                        bli_info_get_gemmtrsm_u_ukr_impl_string( im, BLIS_DCOMPLEX ) );
 	libblis_test_fprintf_c( os, "  trsm_l                 %7s %7s\n",
-	                        bli_info_get_trsm_l_ukr_impl_string( ind, BLIS_SCOMPLEX ),
-	                        bli_info_get_trsm_l_ukr_impl_string( ind, BLIS_DCOMPLEX ) );
+	                        bli_info_get_trsm_l_ukr_impl_string( im, BLIS_SCOMPLEX ),
+	                        bli_info_get_trsm_l_ukr_impl_string( im, BLIS_DCOMPLEX ) );
 	libblis_test_fprintf_c( os, "  trsm_u                 %7s %7s\n",
-	                        bli_info_get_trsm_u_ukr_impl_string( ind, BLIS_SCOMPLEX ),
-	                        bli_info_get_trsm_u_ukr_impl_string( ind, BLIS_DCOMPLEX ) );
+	                        bli_info_get_trsm_u_ukr_impl_string( im, BLIS_SCOMPLEX ),
+	                        bli_info_get_trsm_u_ukr_impl_string( im, BLIS_DCOMPLEX ) );
 	libblis_test_fprintf_c( os, "\n" );
+
+	bli_gemmind_cntx_finalize( im, cntx );
 	}
 
 	bli_ind_disable_all();
+
+	// We use hemv's context because we know it is initialized with all of the fields
+	// we will be outputing.
+	bli_hemv_cntx_init( cntx );
 
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "--- BLIS misc. other info ---\n" );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "level-2 cache blocksizes       s       d       c       z \n" );
 	libblis_test_fprintf_c( os, "  m dimension            %7d %7d %7d %7d\n",
-	                        ( int )bli_info_get_default_l2_mc_s(),
-	                        ( int )bli_info_get_default_l2_mc_d(),
-	                        ( int )bli_info_get_default_l2_mc_c(),
-	                        ( int )bli_info_get_default_l2_mc_z() );
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_FLOAT,    BLIS_M2, cntx ),
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_DOUBLE,   BLIS_M2, cntx ),
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_SCOMPLEX, BLIS_M2, cntx ),
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_DCOMPLEX, BLIS_M2, cntx ) );
 	libblis_test_fprintf_c( os, "  n dimension            %7d %7d %7d %7d\n",
-	                        ( int )bli_info_get_default_l2_nc_s(),
-	                        ( int )bli_info_get_default_l2_nc_d(),
-	                        ( int )bli_info_get_default_l2_nc_c(),
-	                        ( int )bli_info_get_default_l2_nc_z() );
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_FLOAT,    BLIS_N2, cntx ),
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_DOUBLE,   BLIS_N2, cntx ),
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_SCOMPLEX, BLIS_N2, cntx ),
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_DCOMPLEX, BLIS_N2, cntx ) );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "level-1f fusing factors        s       d       c       z \n" );
-	libblis_test_fprintf_c( os, "  default                %7d %7d %7d %7d\n",
-	                        ( int )bli_info_get_default_l1f_fuse_fac_s(),
-	                        ( int )bli_info_get_default_l1f_fuse_fac_d(),
-	                        ( int )bli_info_get_default_l1f_fuse_fac_c(),
-	                        ( int )bli_info_get_default_l1f_fuse_fac_z() );
 	libblis_test_fprintf_c( os, "  axpyf                  %7d %7d %7d %7d\n",
-	                        ( int )bli_info_get_axpyf_fuse_fac_s(),
-	                        ( int )bli_info_get_axpyf_fuse_fac_d(),
-	                        ( int )bli_info_get_axpyf_fuse_fac_c(),
-	                        ( int )bli_info_get_axpyf_fuse_fac_z() );
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_FLOAT,    BLIS_AF, cntx ),
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_DOUBLE,   BLIS_AF, cntx ),
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_SCOMPLEX, BLIS_AF, cntx ),
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_DCOMPLEX, BLIS_AF, cntx ) );
 	libblis_test_fprintf_c( os, "  dotxf                  %7d %7d %7d %7d\n",
-	                        ( int )bli_info_get_dotxf_fuse_fac_s(),
-	                        ( int )bli_info_get_dotxf_fuse_fac_d(),
-	                        ( int )bli_info_get_dotxf_fuse_fac_c(),
-	                        ( int )bli_info_get_dotxf_fuse_fac_z() );
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_FLOAT,    BLIS_DF, cntx ),
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_DOUBLE,   BLIS_DF, cntx ),
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_SCOMPLEX, BLIS_DF, cntx ),
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_DCOMPLEX, BLIS_DF, cntx ) );
 	libblis_test_fprintf_c( os, "  dotxaxpyf              %7d %7d %7d %7d\n",
-	                        ( int )bli_info_get_dotxaxpyf_fuse_fac_s(),
-	                        ( int )bli_info_get_dotxaxpyf_fuse_fac_d(),
-	                        ( int )bli_info_get_dotxaxpyf_fuse_fac_c(),
-	                        ( int )bli_info_get_dotxaxpyf_fuse_fac_z() );
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_FLOAT,    BLIS_XF, cntx ),
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_DOUBLE,   BLIS_XF, cntx ),
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_SCOMPLEX, BLIS_XF, cntx ),
+	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_DCOMPLEX, BLIS_XF, cntx ) );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf( os, "\n" );
+
+	bli_hemv_cntx_finalize( cntx );
 
 	// Output the contents of the param struct.
 	libblis_test_fprintf_c( os, "\n" );
@@ -1809,7 +1825,7 @@ void libblis_test_mobj_create( test_params_t* params, num_t dt, trans_t trans, c
 
 
 
-void libblis_test_pobj_create( blksz_t* m, blksz_t* n, invdiag_t inv_diag, pack_t pack_schema, packbuf_t pack_buf, obj_t* a, obj_t* p )
+void libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, invdiag_t inv_diag, pack_t pack_schema, packbuf_t pack_buf, obj_t* a, obj_t* p, cntx_t* cntx )
 {
 	// Start with making p and alias to a.
 	bli_obj_alias_to( *a, *p );
@@ -1820,9 +1836,11 @@ void libblis_test_pobj_create( blksz_t* m, blksz_t* n, invdiag_t inv_diag, pack_
 	                     BLIS_PACK_FWD_IF_UPPER,
 	                     BLIS_PACK_FWD_IF_LOWER,
 	                     pack_buf,
-	                     m, n,
+	                     bmult_id_m,
+	                     bmult_id_n,
 	                     a,
-	                     p );
+	                     p,
+	                     cntx );
 }
 
 

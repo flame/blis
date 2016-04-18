@@ -34,9 +34,13 @@
 
 #include "blis.h"
 
-void bli_packv_init( obj_t*   a,
-                     obj_t*   p,
-                     packv_t* cntl )
+void bli_packv_init
+     (
+       obj_t*   a,
+       obj_t*   p,
+       cntx_t*  cntx,
+       packv_t* cntl
+     )
 {
 	// The purpose of packm_init() is to initialize an object P so that
 	// a source object A can be packed into P via one of the packv
@@ -45,12 +49,12 @@ void bli_packv_init( obj_t*   a,
 	// has not already been allocated previously.
 
 	pack_t   pack_schema;
-	blksz_t* mult_m;
+	bszid_t  bmult_id;
 	obj_t    c;
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
-		bli_packv_check( a, p, cntl );
+		bli_packv_check( a, p, cntx );
 
 	// First check if we are to skip this operation because the control tree
 	// is NULL, and if so, simply alias the object to its packed counterpart.
@@ -103,26 +107,34 @@ void bli_packv_init( obj_t*   a,
 	// explicitly into _init_pack(). This allows external code generators
 	// the option of bypassing usage of control trees altogether.
 	pack_schema = cntl_pack_schema( cntl );
-	mult_m      = cntl_mult_dim( cntl );
+	bmult_id    = cntl_bmid( cntl );
 
 	// Initialize object p for the final packed vector.
-	bli_packv_init_pack( pack_schema,
-	                     mult_m,
-	                     &c,
-	                     p );
+	bli_packv_init_pack
+	(
+	  pack_schema,
+	  bmult_id,
+	  &c,
+	  p,
+	  cntx
+	);
 
 	// Now p is ready to be packed.
 }
 
 
-void bli_packv_init_pack( pack_t   pack_schema,
-                          blksz_t* mult_m,
-                          obj_t*   c,
-                          obj_t*   p )
+void bli_packv_init_pack
+     (
+       pack_t  pack_schema,
+       bszid_t bmult_id,
+       obj_t*  c,
+       obj_t*  p,
+       cntx_t* cntx
+     )
 {
-	num_t  datatype     = bli_obj_datatype( *c );
-	dim_t  dim_c        = bli_obj_vector_dim( *c );
-	dim_t  mult_m_dim   = bli_blksz_get_def( datatype, mult_m );
+	num_t  dt    = bli_obj_datatype( *c );
+	dim_t  dim_c = bli_obj_vector_dim( *c );
+	dim_t  bmult = bli_cntx_get_blksz_def_dt( dt, bmult_id, cntx );
 
 	mem_t* mem_p;
 	dim_t  m_p_pad;
@@ -149,7 +161,7 @@ void bli_packv_init_pack( pack_t   pack_schema,
 	mem_p = bli_obj_pack_mem( *p );
 
 	// Compute the dimensions padded by the dimension multiples.
-	m_p_pad = bli_align_dim_to_mult( bli_obj_vector_dim( *p ), mult_m_dim );
+	m_p_pad = bli_align_dim_to_mult( bli_obj_vector_dim( *p ), bmult );
 
 	// Compute the size of the packed buffer.
 	size_p = m_p_pad * 1 * bli_obj_elem_size( *p );
@@ -199,8 +211,11 @@ void bli_packv_init_pack( pack_t   pack_schema,
 	}
 }
 
-void bli_packv_release( obj_t*   p,
-                        packv_t* cntl )
+void bli_packv_release
+     (
+       obj_t*   p,
+       packv_t* cntl
+     )
 {
 	if ( !cntl_is_noop( cntl ) )
 	    bli_obj_release_pack( p );

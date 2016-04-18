@@ -36,17 +36,22 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-void bla_symm_check( char*     dt_str,
-                     char*     op_str,
-                     f77_char* sidea,
-                     f77_char* uploa,
-                     f77_int*  m,
-                     f77_int*  n,
-                     f77_int*  lda,
-                     f77_int*  ldb,
-                     f77_int*  ldc )
+void bla_symm_check
+     (
+       char*     dt_str,
+       char*     op_str,
+       f77_char* sidea,
+       f77_char* uploa,
+       f77_int*  m,
+       f77_int*  n,
+       f77_int*  lda,
+       f77_int*  ldb,
+       f77_int*  ldc
+     )
 {
-	bla_hemm_check( dt_str,
+	bla_hemm_check
+     (
+       dt_str,
 	                op_str,
 	                sidea,
 	                uploa,
@@ -54,7 +59,8 @@ void bla_symm_check( char*     dt_str,
 	                n,
 	                lda,
 	                ldb,
-	                ldc );
+	                ldc
+     );
 }
 
 #endif

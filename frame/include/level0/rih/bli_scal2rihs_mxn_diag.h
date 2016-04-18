@@ -40,34 +40,34 @@
 #define bli_cscscal2rihs_mxn_diag( schema, m, n, a, x, rs_x, cs_x, y_r, rs_y, cs_y ) \
 { \
 	dim_t min_m_n = bli_min( m, n ); \
-	dim_t i; \
+	dim_t _i; \
 \
 	/* Handle ro, io, and rpi separately. */ \
 	if ( bli_is_ro_packed( schema ) ) \
 	{ \
-		for ( i = 0; i < min_m_n; ++i ) \
+		for ( _i = 0; _i < min_m_n; ++_i ) \
 		{ \
-			bli_scscal2ros( *(x   + i*rs_x + i*cs_x), \
+			bli_scscal2ros( *(x   + _i*rs_x + _i*cs_x), \
 			                *(a), \
-			                *(y_r + i*rs_y + i*cs_y) ); \
+			                *(y_r + _i*rs_y + _i*cs_y) ); \
 		} \
 	} \
 	else if ( bli_is_io_packed( schema ) ) \
 	{ \
-		for ( i = 0; i < min_m_n; ++i ) \
+		for ( _i = 0; _i < min_m_n; ++_i ) \
 		{ \
-			bli_scscal2ios( *(x   + i*rs_x + i*cs_x), \
+			bli_scscal2ios( *(x   + _i*rs_x + _i*cs_x), \
 			                *(a), \
-			                *(y_r + i*rs_y + i*cs_y) ); \
+			                *(y_r + _i*rs_y + _i*cs_y) ); \
 		} \
 	} \
 	else /* if ( bli_is_rpi_packed( schema ) ) */ \
 	{ \
-		for ( i = 0; i < min_m_n; ++i ) \
+		for ( _i = 0; _i < min_m_n; ++_i ) \
 		{ \
-			bli_scscal2rpis( *(x   + i*rs_x + i*cs_x), \
+			bli_scscal2rpis( *(x   + _i*rs_x + _i*cs_x), \
 			                 *(a), \
-			                 *(y_r + i*rs_y + i*cs_y) ); \
+			                 *(y_r + _i*rs_y + _i*cs_y) ); \
 		} \
 	} \
 }
@@ -75,34 +75,34 @@
 #define bli_zdzscal2rihs_mxn_diag( schema, m, n, a, x, rs_x, cs_x, y_r, rs_y, cs_y ) \
 { \
 	dim_t min_m_n = bli_min( m, n ); \
-	dim_t i; \
+	dim_t _i; \
 \
 	/* Handle ro, io, and rpi separately. */ \
 	if ( bli_is_ro_packed( schema ) ) \
 	{ \
-		for ( i = 0; i < min_m_n; ++i ) \
+		for ( _i = 0; _i < min_m_n; ++_i ) \
 		{ \
-			bli_dzscal2ros( *(x   + i*rs_x + i*cs_x), \
+			bli_dzscal2ros( *(x   + _i*rs_x + _i*cs_x), \
 			                *(a), \
-			                *(y_r + i*rs_y + i*cs_y) ); \
+			                *(y_r + _i*rs_y + _i*cs_y) ); \
 		} \
 	} \
 	else if ( bli_is_io_packed( schema ) ) \
 	{ \
-		for ( i = 0; i < min_m_n; ++i ) \
+		for ( _i = 0; _i < min_m_n; ++_i ) \
 		{ \
-			bli_dzscal2ios( *(x   + i*rs_x + i*cs_x), \
+			bli_dzscal2ios( *(x   + _i*rs_x + _i*cs_x), \
 			                *(a), \
-			                *(y_r + i*rs_y + i*cs_y) ); \
+			                *(y_r + _i*rs_y + _i*cs_y) ); \
 		} \
 	} \
 	else /* if ( bli_is_rpi_packed( schema ) ) */ \
 	{ \
-		for ( i = 0; i < min_m_n; ++i ) \
+		for ( _i = 0; _i < min_m_n; ++_i ) \
 		{ \
-			bli_dzscal2rpis( *(x   + i*rs_x + i*cs_x), \
+			bli_dzscal2rpis( *(x   + _i*rs_x + _i*cs_x), \
 			                 *(a), \
-			                 *(y_r + i*rs_y + i*cs_y) ); \
+			                 *(y_r + _i*rs_y + _i*cs_y) ); \
 		} \
 	} \
 }

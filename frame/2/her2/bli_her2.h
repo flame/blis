@@ -33,73 +33,7 @@
 */
 
 #include "bli_her2_cntl.h"
-#include "bli_her2_check.h"
+#include "bli_her2_front.h"
 #include "bli_her2_int.h"
 
-#include "bli_her2_unb_var1.h"
-#include "bli_her2_unb_var2.h"
-#include "bli_her2_unb_var3.h"
-#include "bli_her2_unb_var4.h"
-
-#include "bli_her2_unf_var1.h"
-#include "bli_her2_unf_var4.h"
-
-#include "bli_her2_blk_var1.h"
-#include "bli_her2_blk_var2.h"
-#include "bli_her2_blk_var3.h"
-#include "bli_her2_blk_var4.h"
-
-
-void bli_her2( obj_t*  alpha,
-               obj_t*  x,
-               obj_t*  y,
-               obj_t*  c );
-
-
-//
-// Prototype BLAS-like interfaces with homogeneous-typed operands.
-//
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname)( \
-                          uplo_t    uploc, \
-                          conj_t    conjx, \
-                          conj_t    conjy, \
-                          dim_t     m, \
-                          ctype*    alpha, \
-                          ctype*    x, inc_t incx, \
-                          ctype*    y, inc_t incy, \
-                          ctype*    c, inc_t rs_c, inc_t cs_c \
-                        );
-
-INSERT_GENTPROT_BASIC( her2 )
-
-
-//
-// Prototype BLAS-like interfaces with heterogeneous-typed operands.
-//
-#undef  GENTPROT3U12
-#define GENTPROT3U12( ctype_x, ctype_y, ctype_c, ctype_xy, chx, chy, chc, chxy, opname ) \
-\
-void PASTEMAC3(chx,chy,chc,opname)( \
-                                    uplo_t    uploc, \
-                                    conj_t    conjx, \
-                                    conj_t    conjy, \
-                                    dim_t     m, \
-                                    ctype_xy* alpha, \
-                                    ctype_x*  x, inc_t incx, \
-                                    ctype_y*  y, inc_t incy, \
-                                    ctype_c*  c, inc_t rs_c, inc_t cs_c \
-                                  );
-
-INSERT_GENTPROT3U12_BASIC( her2 )
-
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTPROT3U12_MIX_D( her2 )
-#endif
-
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTPROT3U12_MIX_P( her2 )
-#endif
-
+#include "bli_her2_var.h"

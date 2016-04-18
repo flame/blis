@@ -39,7 +39,8 @@
 typedef void (*FUNCPTR_T)(
                            dim_t   m,
                            void*   p, inc_t incp,
-                           void*   c, inc_t incc
+                           void*   c, inc_t incc,
+                           cntx_t* cntx
                          );
 
 static FUNCPTR_T GENARRAY(ftypes,unpackv_unb_var1);
@@ -47,6 +48,7 @@ static FUNCPTR_T GENARRAY(ftypes,unpackv_unb_var1);
 
 void bli_unpackv_unb_var1( obj_t*     p,
                            obj_t*     c,
+                           cntx_t*    cntx,
                            unpackv_t* cntl )
 {
 	num_t     dt_pc     = bli_obj_datatype( *p );
@@ -66,29 +68,40 @@ void bli_unpackv_unb_var1( obj_t*     p,
 	f = ftypes[dt_pc];
 
 	// Invoke the function.
-	f( dim_c,
-	   buf_p, incp,
-	   buf_c, incc );
+	f
+	(
+	  dim_c,
+	  buf_p, incp,
+	  buf_c, incc,
+	  cntx
+	);
 }
 
 
 #undef  GENTFUNC
-#define GENTFUNC( ctype_pc, chpc, varname, kername ) \
+#define GENTFUNC( ctype, ch, varname ) \
 \
-void PASTEMAC(chpc,varname)( \
-                             dim_t   m, \
-                             void*   p, inc_t incp, \
-                             void*   c, inc_t incc \
-                           ) \
+void PASTEMAC(ch,varname) \
+     ( \
+       dim_t   m, \
+       void*   p, inc_t incp, \
+       void*   c, inc_t incc, \
+       cntx_t* cntx  \
+     ) \
 { \
-	ctype_pc* p_cast = p; \
-	ctype_pc* c_cast = c; \
+	const num_t dt  = PASTEMAC(ch,type); \
 \
-	PASTEMAC2(chpc,chpc,kername)( BLIS_NO_CONJUGATE, \
-	                              m, \
-	                              p_cast, incp, \
-	                              c_cast, incc ); \
+	PASTECH(ch,copyv_ft) copyv_p = bli_cntx_get_l1v_ker_dt( dt, BLIS_COPYV_KER, cntx ); \
+\
+	copyv_p \
+	( \
+	  BLIS_NO_CONJUGATE, \
+	  m, \
+	  p, incp, \
+	  c, incc, \
+	  cntx  \
+	); \
 }
 
-INSERT_GENTFUNC_BASIC( unpackv_unb_var1, COPYV_KERNEL )
+INSERT_GENTFUNC_BASIC0( unpackv_unb_var1 )
 

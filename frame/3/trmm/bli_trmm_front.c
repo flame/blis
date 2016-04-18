@@ -38,6 +38,7 @@ void bli_trmm_front( side_t  side,
                      obj_t*  alpha,
                      obj_t*  a,
                      obj_t*  b,
+                     cntx_t* cntx,
                      gemm_t* cntl )
 {
 	obj_t   a_local;
@@ -46,7 +47,7 @@ void bli_trmm_front( side_t  side,
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
-		bli_trmm_check( side, alpha, a, b );
+		bli_trmm_check( side, alpha, a, b, &BLIS_ZERO, b, cntx );
 
 	// If alpha is zero, scale by beta and return.
 	if ( bli_obj_equals( alpha, &BLIS_ZERO ) )
@@ -54,6 +55,10 @@ void bli_trmm_front( side_t  side,
 		bli_scalm( alpha, b );
 		return;
 	}
+
+	// Reinitialize the memory allocator to accommodate the blocksizes
+	// in the current context.
+	bli_mem_reinit( cntx );
 
 	// Alias A and B so we can tweak the objects if necessary.
 	bli_obj_alias_to( *a, a_local );
@@ -99,14 +104,7 @@ void bli_trmm_front( side_t  side,
 	// NOTE: We disable the optimization for 1x1 matrices since the concept
 	// of row- vs. column storage breaks down.
 	if ( !bli_obj_is_1x1( c_local ) )
-	if (
-	     ( bli_obj_is_row_stored( c_local ) &&
-	       bli_func_prefers_contig_cols( bli_obj_datatype( c_local ),
-	                                     bli_gemm_cntl_ukrs( cntl ) ) ) ||
-	     ( bli_obj_is_col_stored( c_local ) &&
-	       bli_func_prefers_contig_rows( bli_obj_datatype( c_local ),
-	                                     bli_gemm_cntl_ukrs( cntl ) ) )
-	   )
+	if ( bli_cntx_l3_nat_ukr_dislikes_storage_of( &c_local, BLIS_GEMM_UKR, cntx ) )
 	{
 		bli_toggle_side( side );
 		bli_obj_induce_trans( a_local );
@@ -136,12 +134,13 @@ void bli_trmm_front( side_t  side,
 
     // Invoke the internal back-end.
     bli_level3_thread_decorator( n_threads,   
-                                 (level3_int_t) bli_trmm_int, 
+                                 (l3_int_t) bli_trmm_int, 
                                  alpha, 
                                  &a_local,  
                                  &b_local,  
                                  &BLIS_ZERO, 
                                  &c_local,  
+                                 (void*) cntx, 
                                  (void*) cntl, 
                                  (void**) infos );
 

@@ -116,6 +116,7 @@
 // -- Include other groups of macros
 
 #include "bli_genarray_macro_defs.h"
+#include "bli_gentdef_macro_defs.h"
 #include "bli_gentfunc_macro_defs.h"
 #include "bli_gentprot_macro_defs.h"
 

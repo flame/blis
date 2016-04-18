@@ -33,68 +33,8 @@
 */
 
 #include "bli_trmv_cntl.h"
-#include "bli_trmv_check.h"
+#include "bli_trmv_front.h"
 #include "bli_trmv_int.h"
 
-#include "bli_trmv_unb_var1.h"
-#include "bli_trmv_unb_var2.h"
-
-#include "bli_trmv_unf_var1.h"
-#include "bli_trmv_unf_var2.h"
-
-#include "bli_trmv_l_blk_var1.h"
-#include "bli_trmv_l_blk_var2.h"
-#include "bli_trmv_u_blk_var1.h"
-#include "bli_trmv_u_blk_var2.h"
-
-
-void bli_trmv( obj_t*  alpha,
-               obj_t*  a,
-               obj_t*  x );
-
-
-//
-// Prototype BLAS-like interfaces with homogeneous-typed operands.
-//
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname)( \
-                          uplo_t   uploa, \
-                          trans_t  transa, \
-                          diag_t   diaga, \
-                          dim_t    m, \
-                          ctype*   alpha, \
-                          ctype*   a, inc_t rs_a, inc_t cs_a, \
-                          ctype*   x, inc_t incx \
-                        );
-
-INSERT_GENTPROT_BASIC( trmv )
-
-
-//
-// Prototype BLAS-like interfaces with heterogeneous-typed operands.
-//
-#undef  GENTPROT2U
-#define GENTPROT2U( ctype_a, ctype_x, ctype_ax, cha, chx, chax, opname ) \
-\
-void PASTEMAC2(cha,chx,opname)( \
-                                uplo_t    uploa, \
-                                trans_t   transa, \
-                                diag_t    diaga, \
-                                dim_t     m, \
-                                ctype_ax* alpha, \
-                                ctype_a*  a, inc_t rs_a, inc_t cs_a, \
-                                ctype_x*  x, inc_t incx \
-                              );
-
-INSERT_GENTPROT2U_BASIC( trmv )
-
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTPROT2U_MIX_D( trmv )
-#endif
-
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTPROT2U_MIX_P( trmv )
-#endif
+#include "bli_trmv_var.h"
 

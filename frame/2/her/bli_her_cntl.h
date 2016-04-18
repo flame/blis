@@ -36,7 +36,7 @@ struct her_s
 {
 	impl_t             impl_type;
 	varnum_t           var_num;
-	blksz_t*           b;
+	bszid_t            bszid;
 	struct packv_s*    sub_packv_x1;
 	struct packm_s*    sub_packm_c11;
 	struct ger_s*      sub_ger;
@@ -51,7 +51,7 @@ void   bli_her_cntl_init( void );
 void   bli_her_cntl_finalize( void );
 her_t* bli_her_cntl_obj_create( impl_t     impl_type,
                                 varnum_t   var_num,
-                                blksz_t*   b,
+                                bszid_t    bszid,
                                 packv_t*   sub_packv_x1,
                                 packm_t*   sub_packm_c11,
                                 ger_t*     sub_ger,
@@ -60,7 +60,7 @@ her_t* bli_her_cntl_obj_create( impl_t     impl_type,
 void bli_her_cntl_obj_init( her_t*     cntl,
                             impl_t     impl_type,
                             varnum_t   var_num,
-                            blksz_t*   b,
+                            bszid_t    bszid,
                             packv_t*   sub_packv_x1,
                             packm_t*   sub_packm_c11,
                             ger_t*     sub_ger,

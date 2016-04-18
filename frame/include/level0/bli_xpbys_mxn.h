@@ -44,8 +44,6 @@
 
 #define bli_sssxpbys_mxn( m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ) \
 { \
-	dim_t i, j; \
-\
 	/* If beta is zero, overwrite y with x (in case y has infs or NaNs). */ \
 	if ( bli_seq0( *beta ) ) \
 	{ \
@@ -55,18 +53,18 @@
 	} \
 	else \
 	{ \
-		for ( j = 0; j < n; ++j ) \
-		for ( i = 0; i < m; ++i ) \
-		bli_sssxpbys( *(x + i*rs_x + j*cs_x), \
+		dim_t _i, _j; \
+\
+		for ( _j = 0; _j < n; ++_j ) \
+		for ( _i = 0; _i < m; ++_i ) \
+		bli_sssxpbys( *(x + _i*rs_x + _j*cs_x), \
 		              *(beta), \
-		              *(y + i*rs_y + j*cs_y) ); \
+		              *(y + _i*rs_y + _j*cs_y) ); \
 	} \
 }
 
 #define bli_dddxpbys_mxn( m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ) \
 { \
-	dim_t i, j; \
-\
 	/* If beta is zero, overwrite y with x (in case y has infs or NaNs). */ \
 	if ( bli_deq0( *beta ) ) \
 	{ \
@@ -76,18 +74,18 @@
 	} \
 	else \
 	{ \
-		for ( j = 0; j < n; ++j ) \
-		for ( i = 0; i < m; ++i ) \
-		bli_dddxpbys( *(x + i*rs_x + j*cs_x), \
+		dim_t _i, _j; \
+\
+		for ( _j = 0; _j < n; ++_j ) \
+		for ( _i = 0; _i < m; ++_i ) \
+		bli_dddxpbys( *(x + _i*rs_x + _j*cs_x), \
 		              *(beta), \
-		              *(y + i*rs_y + j*cs_y) ); \
+		              *(y + _i*rs_y + _j*cs_y) ); \
 	} \
 }
 
 #define bli_cccxpbys_mxn( m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ) \
 { \
-	dim_t i, j; \
-\
 	/* If beta is zero, overwrite y with x (in case y has infs or NaNs). */ \
 	if ( bli_ceq0( *beta ) ) \
 	{ \
@@ -97,18 +95,18 @@
 	} \
 	else \
 	{ \
-		for ( j = 0; j < n; ++j ) \
-		for ( i = 0; i < m; ++i ) \
-		bli_cccxpbys( *(x + i*rs_x + j*cs_x), \
+		dim_t _i, _j; \
+\
+		for ( _j = 0; _j < n; ++_j ) \
+		for ( _i = 0; _i < m; ++_i ) \
+		bli_cccxpbys( *(x + _i*rs_x + _j*cs_x), \
 		              *(beta), \
-		              *(y + i*rs_y + j*cs_y) ); \
+		              *(y + _i*rs_y + _j*cs_y) ); \
 	} \
 }
 
 #define bli_zzzxpbys_mxn( m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ) \
 { \
-	dim_t i, j; \
-\
 	/* If beta is zero, overwrite y with x (in case y has infs or NaNs). */ \
 	if ( bli_zeq0( *beta ) ) \
 	{ \
@@ -118,11 +116,13 @@
 	} \
 	else \
 	{ \
-		for ( j = 0; j < n; ++j ) \
-		for ( i = 0; i < m; ++i ) \
-		bli_zzzxpbys( *(x + i*rs_x + j*cs_x), \
+		dim_t _i, _j; \
+\
+		for ( _j = 0; _j < n; ++_j ) \
+		for ( _i = 0; _i < m; ++_i ) \
+		bli_zzzxpbys( *(x + _i*rs_x + _j*cs_x), \
 		              *(beta), \
-		              *(y + i*rs_y + j*cs_y) ); \
+		              *(y + _i*rs_y + _j*cs_y) ); \
 	} \
 }
 

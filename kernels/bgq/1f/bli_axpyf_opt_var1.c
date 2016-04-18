@@ -35,54 +35,33 @@
 #include "blis.h"
 
 
-
-void bli_saxpyf_opt_var1(
-                          conj_t             conja,
-                          conj_t             conjx,
-                          dim_t              m,
-                          dim_t              b_n,
-                          float*    restrict alpha,
-                          float*    restrict a, inc_t inca, inc_t lda,
-                          float*    restrict x, inc_t incx,
-                          float*    restrict y, inc_t incy
-                        )
+void bli_daxpyf_opt_var1
+     (
+       conj_t  conja,
+       conj_t  conjx,
+       dim_t   m,
+       dim_t   b_n,
+       double* alpha,
+       double* a, inc_t inca, inc_t lda,
+       double* x, inc_t incx,
+       double* y, inc_t incy,
+       cntx_t* cntx
+     )
 {
-	/* Just call the reference implementation. */
-	BLIS_SAXPYF_KERNEL_REF( conja,
-	                       conjx,
-	                       m,
-	                       b_n,
-	                       alpha,
-	                       a, inca, lda,
-	                       x, incx,
-	                       y, incy );
-}
+	const dim_t fusefac = 8;
 
-
-
-void bli_daxpyf_opt_var1(
-                          conj_t             conja,
-                          conj_t             conjx,
-                          dim_t              m,
-                          dim_t              b_n,
-                          double*   restrict alpha,
-                          double*   restrict a, inc_t inca, inc_t lda,
-                          double*   restrict x, inc_t incx,
-                          double*   restrict y, inc_t incy
-                        )
-{
     if ( bli_zero_dim2( m, b_n ) ) return;
 
 	bool_t            use_ref = FALSE;
-//    printf("%d\t%d\t%d\t%d\t%d\t%d\t%d\n", b_n, PASTEMAC(d, axpyf_fusefac), inca, incx, incy, bli_is_unaligned_to(a, 32), bli_is_unaligned_to( y, 32));
+//    printf("%d\t%d\t%d\t%d\t%d\t%d\t%d\n", b_n, fusefac, inca, incx, incy, bli_is_unaligned_to(a, 32), bli_is_unaligned_to( y, 32));
 	// If there is anything that would interfere with our use of aligned
 	// vector loads/stores, call the reference implementation.
-	if ( b_n < PASTEMAC(d,axpyf_fusefac) || inca != 1 || incx != 1 || incy != 1 || bli_is_unaligned_to( a, 32 ) || bli_is_unaligned_to( y, 32 ) )
+	if ( b_n < fusefac) || inca != 1 || incx != 1 || incy != 1 || bli_is_unaligned_to( a, 32 ) || bli_is_unaligned_to( y, 32 ) )
 		use_ref = TRUE;
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE )
 	{   
-//        printf("%d\t%d\t%d\t%d\t%d\t%d\n", PASTEMAC(d, axpyf_fusefac), inca, incx, incy, bli_is_unaligned_to(a, 32), bli_is_unaligned_to( y, 32));
+//        printf("%d\t%d\t%d\t%d\t%d\t%d\n", fusefac, inca, incx, incy, bli_is_unaligned_to(a, 32), bli_is_unaligned_to( y, 32));
 //        printf("DEFAULTING TO REFERENCE IMPLEMENTATION\n");
 		BLIS_DAXPYF_KERNEL_REF( conja, conjx, m, b_n, alpha, a, inca, lda, x, incx, y, incy );
 		return;
@@ -168,52 +147,5 @@ void bli_daxpyf_opt_var1(
                       +  chi7 * a7[4*m_run + i];
     }
 
-}
-
-
-
-void bli_caxpyf_opt_var1(
-                          conj_t             conja,
-                          conj_t             conjx,
-                          dim_t              m,
-                          dim_t              b_n,
-                          scomplex* restrict alpha,
-                          scomplex* restrict a, inc_t inca, inc_t lda,
-                          scomplex* restrict x, inc_t incx,
-                          scomplex* restrict y, inc_t incy
-                        )
-{
-	/* Just call the reference implementation. */
-	BLIS_CAXPYF_KERNEL_REF( conja,
-	                       conjx,
-	                       m,
-	                       b_n,
-	                       alpha,
-	                       a, inca, lda,
-	                       x, incx,
-	                       y, incy );
-}
-
-
-void bli_zaxpyf_opt_var1(
-                          conj_t             conja,
-                          conj_t             conjx,
-                          dim_t              m,
-                          dim_t              b_n,
-                          dcomplex* restrict alpha,
-                          dcomplex* restrict a, inc_t inca, inc_t lda,
-                          dcomplex* restrict x, inc_t incx,
-                          dcomplex* restrict y, inc_t incy
-                        )
-{
-	/* Just call the reference implementation. */
-	BLIS_ZAXPYF_KERNEL_REF( conja,
-	                       conjx,
-	                       m,
-	                       b_n,
-	                       alpha,
-	                       a, inca, lda,
-	                       x, incx,
-	                       y, incy );
 }
 

@@ -34,66 +34,93 @@
 
 #include "blis.h"
 
+// NOTE: This is one of the few functions in BLIS that is defined
+// with heterogeneous type support. This is done so that we have
+// an operation that can be used to typecast (copy-cast) a scalar
+// of one datatype to a scalar of another datatype.
+
+typedef void (*FUNCPTR_T)(
+                           conj_t conjchi,
+                           void*  chi,
+                           void*  psi
+                         );
+
+static FUNCPTR_T GENARRAY2_ALL(ftypes,copysc);
 
 //
-// Define object-based interface.
+// Define object-based interfaces.
 //
-void bli_copysc( obj_t* chi,
-                 obj_t* psi )
-{
-	if ( bli_error_checking_is_enabled() )
-		bli_copysc_check( chi, psi );
 
-	bli_copysc_unb_var1( chi, psi );
-}
-
-
-//
-// Define BLAS-like interfaces with homogeneous-typed operands.
-//
-#undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, varname ) \
+#undef  GENFRONT
+#define GENFRONT( opname ) \
 \
-void PASTEMAC(ch,opname)( \
-                          conj_t conjchi, \
-                          ctype* chi, \
-                          ctype* psi  \
-                        ) \
+void PASTEMAC0(opname) \
+     ( \
+       obj_t*  chi, \
+       obj_t*  psi  \
+     ) \
 { \
-	PASTEMAC2(ch,ch,varname)( conjchi, \
-	                          chi, \
-	                          psi ); \
+	conj_t    conjchi   = bli_obj_conj_status( *chi ); \
+\
+	num_t     dt_psi    = bli_obj_datatype( *psi ); \
+    void*     buf_psi   = bli_obj_buffer_at_off( *psi ); \
+\
+	num_t     dt_chi; \
+	void*     buf_chi; \
+\
+	FUNCPTR_T f; \
+\
+	if ( bli_error_checking_is_enabled() ) \
+	    PASTEMAC(opname,_check)( chi, psi ); \
+\
+	/* If chi is a scalar constant, use dt_psi to extract the address of the
+	   corresponding constant value; otherwise, use the datatype encoded
+	   within the chi object and extract the buffer at the chi offset. */ \
+	bli_set_scalar_dt_buffer( chi, dt_psi, dt_chi, buf_chi ); \
+\
+	/* Index into the type combination array to extract the correct
+	   function pointer. */ \
+	f = ftypes[dt_chi][dt_psi]; \
+\
+	/* Invoke the void pointer-based function. */ \
+	f( \
+	   conjchi, \
+	   buf_chi, \
+	   buf_psi  \
+	 ); \
 }
 
-INSERT_GENTFUNC_BASIC( copysc, copysc_unb_var1 )
+GENFRONT( copysc )
 
 
 //
-// Define BLAS-like interfaces with heterogeneous-typed operands.
+// Define BLAS-like interfaces with typed operands.
 //
+
 #undef  GENTFUNC2
-#define GENTFUNC2( ctype_x, ctype_y, chx, chy, opname, varname ) \
+#define GENTFUNC2( ctype_x, ctype_y, chx, chy, varname ) \
 \
-void PASTEMAC2(chx,chy,opname)( \
-                                conj_t   conjchi, \
-                                ctype_x* chi, \
-                                ctype_y* psi  \
-                              ) \
+void PASTEMAC2(chx,chy,varname) \
+     ( \
+       conj_t conjchi, \
+       void*  chi, \
+       void*  psi \
+     ) \
 { \
-	PASTEMAC2(chx,chy,varname)( conjchi, \
-	                            chi, \
-	                            psi ); \
+	ctype_x* chi_cast = chi; \
+	ctype_y* psi_cast = psi; \
+\
+	if ( bli_is_conj( conjchi ) ) \
+	{ \
+		PASTEMAC2(chx,chy,copyjs)( *chi_cast, *psi_cast ); \
+	} \
+	else \
+	{ \
+		PASTEMAC2(chx,chy,copys)( *chi_cast, *psi_cast ); \
+	} \
 }
 
-// Define the basic set of functions unconditionally, and then also some
-// mixed datatype functions if requested.
-INSERT_GENTFUNC2_BASIC( copysc, copysc_unb_var1 )
-
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTFUNC2_MIX_D( copysc, copysc_unb_var1 )
-#endif
-
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTFUNC2_MIX_P( copysc, copysc_unb_var1 )
-#endif
+INSERT_GENTFUNC2_BASIC0( copysc )
+INSERT_GENTFUNC2_MIX_D0( copysc )
+INSERT_GENTFUNC2_MIX_P0( copysc )
 

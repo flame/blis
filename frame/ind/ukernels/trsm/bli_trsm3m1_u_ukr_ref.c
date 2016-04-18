@@ -38,30 +38,40 @@
 #undef  GENTFUNCCO
 #define GENTFUNCCO( ctype, ctype_r, ch, chr, varname ) \
 \
-void PASTEMAC(ch,varname)( \
-                           ctype_r* restrict ar, \
-                           ctype_r* restrict br, \
-                           ctype*   restrict c, inc_t rs_c, inc_t cs_c, \
-                           auxinfo_t*        data  \
-                         ) \
+void PASTEMAC(ch,varname) \
+     ( \
+       ctype*     restrict a, \
+       ctype*     restrict b, \
+       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
+       auxinfo_t* restrict data, \
+       cntx_t*    restrict cntx  \
+     ) \
 { \
-	const dim_t       m     = PASTEMAC(chr,mr); \
-	const dim_t       n     = PASTEMAC(chr,nr); \
+	const num_t       dt_r   = PASTEMAC(chr,type); \
+\
+	const dim_t       mr     = bli_cntx_get_blksz_def_dt( dt_r, BLIS_MR, cntx ); \
+	const dim_t       nr     = bli_cntx_get_blksz_def_dt( dt_r, BLIS_NR, cntx ); \
+\
+	const inc_t       packmr = bli_cntx_get_blksz_max_dt( dt_r, BLIS_MR, cntx ); \
+	const inc_t       packnr = bli_cntx_get_blksz_max_dt( dt_r, BLIS_NR, cntx ); \
+\
+	const dim_t       m      = mr; \
+	const dim_t       n      = nr; \
 \
 	const inc_t       is_a  = bli_auxinfo_is_a( data ); \
 	const inc_t       is_b  = bli_auxinfo_is_b( data ); \
 \
-	ctype_r* restrict a_r   = ( ctype_r* )ar; \
-	ctype_r* restrict a_i   = ( ctype_r* )ar +   is_a; \
+	ctype_r* restrict a_r   = ( ctype_r* )a; \
+	ctype_r* restrict a_i   = ( ctype_r* )a +   is_a; \
 \
-	ctype_r* restrict b_r   = ( ctype_r* )br; \
-	ctype_r* restrict b_i   = ( ctype_r* )br +   is_b; \
-	ctype_r* restrict b_ri  = ( ctype_r* )br + 2*is_b; \
+	ctype_r* restrict b_r   = ( ctype_r* )b; \
+	ctype_r* restrict b_i   = ( ctype_r* )b +   is_b; \
+	ctype_r* restrict b_ri  = ( ctype_r* )b + 2*is_b; \
 \
 	const inc_t       rs_a  = 1; \
-	const inc_t       cs_a  = PASTEMAC(chr,packmr); \
+	const inc_t       cs_a  = packmr; \
 \
-	const inc_t       rs_b  = PASTEMAC(chr,packnr); \
+	const inc_t       rs_b  = packnr; \
 	const inc_t       cs_b  = 1; \
 \
 	dim_t             iter, i, j, l; \

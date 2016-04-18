@@ -274,9 +274,15 @@ static bool_t bli_mem_is_init = FALSE;
 
 void bli_mem_init( void )
 {
+	cntx_t cntx;
+
 	// If the initialization flag is TRUE, we know the API is already
 	// initialized, so we can return early.
 	if ( bli_mem_is_init == TRUE ) return;
+
+	// Create and initialize a context for gemm so we have something
+	// to pass into bli_mem_init_pools().
+	bli_gemm_cntx_init( &cntx );
 
 #ifdef BLIS_ENABLE_OPENMP
 	_Pragma( "omp critical (mem)" )
@@ -295,7 +301,7 @@ void bli_mem_init( void )
 		if ( bli_mem_is_init == FALSE )
 		{
 			// Initialize the memory pools.
-			bli_mem_init_pools();
+			bli_mem_init_pools( &cntx );
 
 			// After initialization, mark the API as initialized.
 			bli_mem_is_init = TRUE;
@@ -306,11 +312,13 @@ void bli_mem_init( void )
 #ifdef BLIS_ENABLE_PTHREADS
 	pthread_mutex_unlock( &mem_manager_mutex );
 #endif
+
+	// Finalize the temporary gemm context.
+	bli_gemm_cntx_finalize( &cntx );
 }
 
-void bli_mem_reinit( void )
+void bli_mem_reinit( cntx_t* cntx )
 {
-
 #ifdef BLIS_ENABLE_OPENMP
 	_Pragma( "omp critical (mem)" )
 #endif
@@ -325,7 +333,7 @@ void bli_mem_reinit( void )
 		if ( bli_mem_is_init == FALSE )
 		{
 			// Initialize the memory pools.
-			bli_mem_init_pools();
+			bli_mem_init_pools( cntx );
 
 			// After initialization, mark the API as initialized.
 			bli_mem_is_init = TRUE;
@@ -333,7 +341,7 @@ void bli_mem_reinit( void )
 		else
 		{
 			// Reinitialize the memory pools.
-			bli_mem_reinit_pools();
+			bli_mem_reinit_pools( cntx );
 		}
 	}
 	// END CRITICAL SECTION
@@ -386,114 +394,134 @@ bool_t bli_mem_is_initialized( void )
 
 // -----------------------------------------------------------------------------
 
-void bli_mem_init_pools( void )
+void bli_mem_init_pools( cntx_t* cntx )
 {
 	// Map each of the packbuf_t values to an index starting at zero.
-	dim_t index_a      = bli_packbuf_index( BLIS_BUFFER_FOR_A_BLOCK );
-	dim_t index_b      = bli_packbuf_index( BLIS_BUFFER_FOR_B_PANEL );
-	dim_t index_c      = bli_packbuf_index( BLIS_BUFFER_FOR_C_PANEL );
+	const dim_t index_a      = bli_packbuf_index( BLIS_BUFFER_FOR_A_BLOCK );
+	const dim_t index_b      = bli_packbuf_index( BLIS_BUFFER_FOR_B_PANEL );
+	const dim_t index_c      = bli_packbuf_index( BLIS_BUFFER_FOR_C_PANEL );
 
-	siz_t align_size   = BLIS_POOL_ADDR_ALIGN_SIZE;
+	const siz_t align_size   = BLIS_POOL_ADDR_ALIGN_SIZE;
 
-	siz_t block_size_a = 0;
-	siz_t block_size_b = 0;
-	siz_t block_size_c = 0;
+	// Alias the pool addresses to convenient identifiers.
+	pool_t*     pool_a       = &pools[ index_a ];
+	pool_t*     pool_b       = &pools[ index_b ];
+	pool_t*     pool_c       = &pools[ index_c ];
 
 	// Start with empty pools.
-	dim_t num_blocks_a = 0;
-	dim_t num_blocks_b = 0;
-	dim_t num_blocks_c = 0;
+	const dim_t num_blocks_a = 0;
+	const dim_t num_blocks_b = 0;
+	const dim_t num_blocks_c = 0;
+
+	siz_t       block_size_a = 0;
+	siz_t       block_size_b = 0;
+	siz_t       block_size_c = 0;
 
 	// Determine the block size for each memory pool.
 	bli_mem_compute_pool_block_sizes( &block_size_a,
 	                                  &block_size_b,
-	                                  &block_size_c );
+	                                  &block_size_c,
+	                                  cntx );
 
 	// Initialize the memory pools for A, B, and C.
-	bli_pool_init( num_blocks_a, block_size_a, align_size, &pools[ index_a ] );
-	bli_pool_init( num_blocks_b, block_size_b, align_size, &pools[ index_b ] );
-	bli_pool_init( num_blocks_c, block_size_c, align_size, &pools[ index_c ] );
+	bli_pool_init( num_blocks_a, block_size_a, align_size, pool_a );
+	bli_pool_init( num_blocks_b, block_size_b, align_size, pool_b );
+	bli_pool_init( num_blocks_c, block_size_c, align_size, pool_c );
 }
 
-void bli_mem_reinit_pools( void )
+void bli_mem_reinit_pools( cntx_t* cntx )
 {
 	// Map each of the packbuf_t values to an index starting at zero.
-	dim_t index_a      = bli_packbuf_index( BLIS_BUFFER_FOR_A_BLOCK );
-	dim_t index_b      = bli_packbuf_index( BLIS_BUFFER_FOR_B_PANEL );
-	dim_t index_c      = bli_packbuf_index( BLIS_BUFFER_FOR_C_PANEL );
+	const dim_t index_a      = bli_packbuf_index( BLIS_BUFFER_FOR_A_BLOCK );
+	const dim_t index_b      = bli_packbuf_index( BLIS_BUFFER_FOR_B_PANEL );
+	const dim_t index_c      = bli_packbuf_index( BLIS_BUFFER_FOR_C_PANEL );
 
-	siz_t align_size   = BLIS_POOL_ADDR_ALIGN_SIZE;
+	const siz_t align_size   = BLIS_POOL_ADDR_ALIGN_SIZE;
 
-	siz_t block_size_a = 0;
-	siz_t block_size_b = 0;
-	siz_t block_size_c = 0;
+	// Alias the pool addresses to convenient identifiers.
+	pool_t*     pool_a       = &pools[ index_a ];
+	pool_t*     pool_b       = &pools[ index_b ];
+	pool_t*     pool_c       = &pools[ index_c ];
 
 	// Query the number of blocks currently allocated in each pool.
-	dim_t num_blocks_a = bli_pool_num_blocks( &pools[ index_a ] );
-	dim_t num_blocks_b = bli_pool_num_blocks( &pools[ index_b ] );
-	dim_t num_blocks_c = bli_pool_num_blocks( &pools[ index_c ] );
+	const dim_t num_blocks_a = bli_pool_num_blocks( pool_a );
+	const dim_t num_blocks_b = bli_pool_num_blocks( pool_b );
+	const dim_t num_blocks_c = bli_pool_num_blocks( pool_c );
 
-	// Determine the block size for each memory pool.
-	bli_mem_compute_pool_block_sizes( &block_size_a,
-	                                  &block_size_b,
-	                                  &block_size_c );
+	siz_t       block_size_a_new = 0;
+	siz_t       block_size_b_new = 0;
+	siz_t       block_size_c_new = 0;
 
-	// Reinitialize the memory pools for A, B, and C with the same number
-	// of blocks as before, except with new block sizes.
-	bli_pool_reinit( num_blocks_a, block_size_a, align_size, &pools[ index_a ] );
-	bli_pool_reinit( num_blocks_b, block_size_b, align_size, &pools[ index_b ] );
-	bli_pool_reinit( num_blocks_c, block_size_c, align_size, &pools[ index_c ] );
+	// Determine the context-implied block size needed for each pool.
+	bli_mem_compute_pool_block_sizes( &block_size_a_new,
+	                                  &block_size_b_new,
+	                                  &block_size_c_new,
+	                                  cntx );
+
+	// Reinitialize the pool, but only if one of the parameters has
+	// changed in such a way that reinitialization would be required.
+	// In this case, the align_size is constant, as is num_blocks, so
+	// what this actually boils down to is that reinitialization of a
+	// pool occurs only if the block size for that pool has increased.
+	bli_pool_reinit_if( num_blocks_a, block_size_a_new, align_size, pool_a );
+	bli_pool_reinit_if( num_blocks_b, block_size_b_new, align_size, pool_b );
+	bli_pool_reinit_if( num_blocks_c, block_size_c_new, align_size, pool_c );
 }
 
 void bli_mem_finalize_pools( void )
 {
 	// Map each of the packbuf_t values to an index starting at zero.
-	dim_t index_a = bli_packbuf_index( BLIS_BUFFER_FOR_A_BLOCK );
-	dim_t index_b = bli_packbuf_index( BLIS_BUFFER_FOR_B_PANEL );
-	dim_t index_c = bli_packbuf_index( BLIS_BUFFER_FOR_C_PANEL );
+	dim_t   index_a = bli_packbuf_index( BLIS_BUFFER_FOR_A_BLOCK );
+	dim_t   index_b = bli_packbuf_index( BLIS_BUFFER_FOR_B_PANEL );
+	dim_t   index_c = bli_packbuf_index( BLIS_BUFFER_FOR_C_PANEL );
+
+	// Alias the pool addresses to convenient identifiers.
+	pool_t* pool_a  = &pools[ index_a ];
+	pool_t* pool_b  = &pools[ index_b ];
+	pool_t* pool_c  = &pools[ index_c ];
 
 	// Finalize the memory pools for A, B, and C.
-	bli_pool_finalize( &pools[ index_a ] );
-	bli_pool_finalize( &pools[ index_b ] );
-	bli_pool_finalize( &pools[ index_c ] );
+	bli_pool_finalize( pool_a );
+	bli_pool_finalize( pool_b );
+	bli_pool_finalize( pool_c );
 }
 
 // -----------------------------------------------------------------------------
 
-void bli_mem_compute_pool_block_sizes( siz_t* bs_a,
-                                       siz_t* bs_b,
-                                       siz_t* bs_c )
+void bli_mem_compute_pool_block_sizes( siz_t*  bs_a,
+                                       siz_t*  bs_b,
+                                       siz_t*  bs_c,
+                                       cntx_t* cntx )
 {
+	const ind_t im = bli_cntx_get_ind_method( cntx );
+
 	siz_t bs_cand_a = 0;
 	siz_t bs_cand_b = 0;
 	siz_t bs_cand_c = 0;
 
-	ind_t im;
 	num_t dt;
 
-	// Compute pool block sizes for datatype and each implemented
-	// method and find the maximum size for each pool. This is done
-	// so that new pools do not need to be allocated if the user
-	// switches datatypes or methods later on.
-	for ( im = 0; im < BLIS_NUM_IND_METHODS; ++im )
+	// Compute pool block sizes for each datatype and find the maximum
+	// size for each pool. This is done so that new pools do not need
+	// to be allocated if the user switches datatypes.
+	for ( dt = BLIS_DT_LO; dt <= BLIS_DT_HI; ++dt )
 	{
-		for ( dt = BLIS_DT_LO; dt <= BLIS_DT_HI; ++dt )
-		{
-			// Avoid considering induced methods for real datatypes.
-			if ( bli_is_complex( dt ) || im == BLIS_NAT )
-			{
-				siz_t bs_dt_a, bs_dt_b, bs_dt_c;
+		siz_t bs_dt_a;
+		siz_t bs_dt_b;
+		siz_t bs_dt_c;
 
-				bli_mem_compute_pool_block_sizes_dt( dt, im,
-				                                     &bs_dt_a,
-				                                     &bs_dt_b,
-				                                     &bs_dt_c );
+		// Avoid considering induced methods for real datatypes.
+		if ( bli_is_real( dt ) && im != BLIS_NAT ) continue;
 
-				bs_cand_a = bli_max( bs_dt_a, bs_cand_a );
-				bs_cand_b = bli_max( bs_dt_b, bs_cand_b );
-				bs_cand_c = bli_max( bs_dt_c, bs_cand_c );
-			}
-		}
+		bli_mem_compute_pool_block_sizes_dt( dt,
+		                                     &bs_dt_a,
+		                                     &bs_dt_b,
+		                                     &bs_dt_c,
+		                                     cntx );
+
+		bs_cand_a = bli_max( bs_dt_a, bs_cand_a );
+		bs_cand_b = bli_max( bs_dt_b, bs_cand_b );
+		bs_cand_c = bli_max( bs_dt_c, bs_cand_c );
 	}
 
 	// Save the results.
@@ -504,11 +532,11 @@ void bli_mem_compute_pool_block_sizes( siz_t* bs_a,
 
 // -----------------------------------------------------------------------------
 
-void bli_mem_compute_pool_block_sizes_dt( num_t  dt,
-                                          ind_t  method,
-                                          siz_t* bs_a,
-                                          siz_t* bs_b,
-                                          siz_t* bs_c )
+void bli_mem_compute_pool_block_sizes_dt( num_t   dt,
+                                          siz_t*  bs_a,
+                                          siz_t*  bs_b,
+                                          siz_t*  bs_c,
+                                          cntx_t* cntx )
 {
 	siz_t    size_dt = bli_datatype_size( dt );
 
@@ -527,7 +555,8 @@ void bli_mem_compute_pool_block_sizes_dt( num_t  dt,
 	dim_t    kc_max_dt;
 	dim_t    nc_max_dt;
 
-	dim_t    packmr_dt, packnr_dt;
+	dim_t    packmr_dt;
+	dim_t    packnr_dt;
 	dim_t    max_packmnr_dt;
 
 	dim_t    scale_num_dt;
@@ -543,8 +572,8 @@ void bli_mem_compute_pool_block_sizes_dt( num_t  dt,
 
 	// Query the mr and nr blksz_t objects for the given method of
 	// execution.
-	mr = bli_bsv_get_blksz( BLIS_MR, method );
-	nr = bli_bsv_get_blksz( BLIS_NR, method );
+	mr = bli_cntx_get_blksz( BLIS_MR, cntx );
+	nr = bli_cntx_get_blksz( BLIS_NR, cntx );
 
 	// Extract the mr and nr values specific to the current datatype.
 	mr_dt = bli_blksz_get_def( dt, mr );
@@ -558,9 +587,9 @@ void bli_mem_compute_pool_block_sizes_dt( num_t  dt,
 	//
 
 	// Query the mc, kc, and nc blksz_t objects for native execution.
-	mc = bli_bsv_get_blksz( BLIS_MC, method );
-	kc = bli_bsv_get_blksz( BLIS_KC, method );
-	nc = bli_bsv_get_blksz( BLIS_NC, method );
+	mc = bli_cntx_get_blksz( BLIS_MC, cntx );
+	kc = bli_cntx_get_blksz( BLIS_KC, cntx );
+	nc = bli_cntx_get_blksz( BLIS_NC, cntx );
 
 	// Extract the maximum mc, kc, and nc values specific to the current
 	// datatype.

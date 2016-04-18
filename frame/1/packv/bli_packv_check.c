@@ -34,9 +34,12 @@
 
 #include "blis.h"
 
-void bli_packv_check( obj_t*   c,
-                      obj_t*   p,
-                      packv_t* cntl )
+void bli_packv_check
+     (
+       obj_t*  c,
+       obj_t*  p,
+       cntx_t* cntx
+     )
 {
 	err_t e_val;
 
@@ -50,11 +53,5 @@ void bli_packv_check( obj_t*   c,
 	// We don't check for conformal dimensions between c and p because
 	// p has not yet been initialized.
 
-	// Check control tree pointer
-
-	// NOTE: We can't check the control tree until we stop interpreting a
-	// NULL value (in bli_packv_int()) as a request to skip the operation.
-	//e_val = bli_check_valid_cntl( ( void* )cntl );
-	//bli_check_error_code( e_val );
 }
 

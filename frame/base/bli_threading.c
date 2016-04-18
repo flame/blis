@@ -75,17 +75,21 @@ void bli_barrier( thread_comm_t* communicator, dim_t t_id )
     return;
 }
 
-void bli_level3_thread_decorator( dim_t n_threads, 
-                                  level3_int_t func, 
-                                  obj_t* alpha, 
-                                  obj_t* a, 
-                                  obj_t* b, 
-                                  obj_t* beta, 
-                                  obj_t* c, 
-                                  void* cntl, 
-                                  void** thread )
+void bli_level3_thread_decorator
+     (
+       dim_t    n_threads,
+       l3_int_t func,
+       obj_t*   alpha,
+       obj_t*   a,
+       obj_t*   b,
+       obj_t*   beta,
+       obj_t*   c,
+       void*    cntx,
+       void*    cntl,
+       void**   thread
+     )
 {
-        func( alpha, a, b, beta, c, cntl, thread[0] );
+        func( alpha, a, b, beta, c, cntx, cntl, thread[0] );
 }
 
 
@@ -291,10 +295,11 @@ void bli_get_range( void* thr, dim_t n, dim_t bf, bool_t handle_edge_low, dim_t*
 	}
 }
 
-siz_t bli_get_range_l2r( void* thr, obj_t* a, dim_t bf, dim_t* start, dim_t* end )
+siz_t bli_get_range_l2r( void* thr, obj_t* a, blksz_t* bmult, dim_t* start, dim_t* end )
 {
-	dim_t m = bli_obj_length_after_trans( *a );
-	dim_t n = bli_obj_width_after_trans( *a );
+	dim_t m  = bli_obj_length_after_trans( *a );
+	dim_t n  = bli_obj_width_after_trans( *a );
+	dim_t bf = bli_blksz_get_def_for_obj( a, bmult );
 
 	bli_get_range( thr, n, bf,
 	               FALSE, start, end );
@@ -302,10 +307,11 @@ siz_t bli_get_range_l2r( void* thr, obj_t* a, dim_t bf, dim_t* start, dim_t* end
 	return m * ( *end - *start );
 }
 
-siz_t bli_get_range_r2l( void* thr, obj_t* a, dim_t bf, dim_t* start, dim_t* end )
+siz_t bli_get_range_r2l( void* thr, obj_t* a, blksz_t* bmult, dim_t* start, dim_t* end )
 {
-	dim_t m = bli_obj_length_after_trans( *a );
-	dim_t n = bli_obj_width_after_trans( *a );
+	dim_t m  = bli_obj_length_after_trans( *a );
+	dim_t n  = bli_obj_width_after_trans( *a );
+	dim_t bf = bli_blksz_get_def_for_obj( a, bmult );
 
 	bli_get_range( thr, n, bf,
 	               TRUE, start, end );
@@ -313,10 +319,11 @@ siz_t bli_get_range_r2l( void* thr, obj_t* a, dim_t bf, dim_t* start, dim_t* end
 	return m * ( *end - *start );
 }
 
-siz_t bli_get_range_t2b( void* thr, obj_t* a, dim_t bf, dim_t* start, dim_t* end )
+siz_t bli_get_range_t2b( void* thr, obj_t* a, blksz_t* bmult, dim_t* start, dim_t* end )
 {
-	dim_t m = bli_obj_length_after_trans( *a );
-	dim_t n = bli_obj_width_after_trans( *a );
+	dim_t m  = bli_obj_length_after_trans( *a );
+	dim_t n  = bli_obj_width_after_trans( *a );
+	dim_t bf = bli_blksz_get_def_for_obj( a, bmult );
 
 	bli_get_range( thr, m, bf,
 	               FALSE, start, end );
@@ -324,10 +331,11 @@ siz_t bli_get_range_t2b( void* thr, obj_t* a, dim_t bf, dim_t* start, dim_t* end
 	return n * ( *end - *start );
 }
 
-siz_t bli_get_range_b2t( void* thr, obj_t* a, dim_t bf, dim_t* start, dim_t* end )
+siz_t bli_get_range_b2t( void* thr, obj_t* a, blksz_t* bmult, dim_t* start, dim_t* end )
 {
-	dim_t m = bli_obj_length_after_trans( *a );
-	dim_t n = bli_obj_width_after_trans( *a );
+	dim_t m  = bli_obj_length_after_trans( *a );
+	dim_t n  = bli_obj_width_after_trans( *a );
+	dim_t bf = bli_blksz_get_def_for_obj( a, bmult );
 
 	bli_get_range( thr, m, bf,
 	               TRUE, start, end );
@@ -665,7 +673,7 @@ siz_t bli_get_range_weighted( void*  thr,
 	return area;
 }
 
-siz_t bli_get_range_weighted_l2r( void* thr, obj_t* a, dim_t bf, dim_t* start, dim_t* end )
+siz_t bli_get_range_weighted_l2r( void* thr, obj_t* a, blksz_t* bmult, dim_t* start, dim_t* end )
 {
 	siz_t area;
 
@@ -680,6 +688,7 @@ siz_t bli_get_range_weighted_l2r( void* thr, obj_t* a, dim_t bf, dim_t* start, d
 		uplo_t uplo    = bli_obj_uplo( *a );
 		dim_t  m       = bli_obj_length( *a );
 		dim_t  n       = bli_obj_width( *a );
+		dim_t  bf      = bli_blksz_get_def_for_obj( a, bmult );
 
 		// Support implicit transposition.
 		if ( bli_obj_has_trans( *a ) )
@@ -692,14 +701,14 @@ siz_t bli_get_range_weighted_l2r( void* thr, obj_t* a, dim_t bf, dim_t* start, d
 	}
 	else // if dense or zeros
 	{
-		area = bli_get_range_l2r( thr, a, bf,
+		area = bli_get_range_l2r( thr, a, bmult,
 		                          start, end );
 	}
 
 	return area;
 }
 
-siz_t bli_get_range_weighted_r2l( void* thr, obj_t* a, dim_t bf, dim_t* start, dim_t* end )
+siz_t bli_get_range_weighted_r2l( void* thr, obj_t* a, blksz_t* bmult, dim_t* start, dim_t* end )
 {
 	siz_t area;
 
@@ -714,6 +723,7 @@ siz_t bli_get_range_weighted_r2l( void* thr, obj_t* a, dim_t bf, dim_t* start, d
 		uplo_t uplo    = bli_obj_uplo( *a );
 		dim_t  m       = bli_obj_length( *a );
 		dim_t  n       = bli_obj_width( *a );
+		dim_t  bf      = bli_blksz_get_def_for_obj( a, bmult );
 
 		// Support implicit transposition.
 		if ( bli_obj_has_trans( *a ) )
@@ -728,14 +738,14 @@ siz_t bli_get_range_weighted_r2l( void* thr, obj_t* a, dim_t bf, dim_t* start, d
 	}
 	else // if dense or zeros
 	{
-		area = bli_get_range_r2l( thr, a, bf,
+		area = bli_get_range_r2l( thr, a, bmult,
 		                          start, end );
 	}
 
 	return area;
 }
 
-siz_t bli_get_range_weighted_t2b( void* thr, obj_t* a, dim_t bf, dim_t* start, dim_t* end )
+siz_t bli_get_range_weighted_t2b( void* thr, obj_t* a, blksz_t* bmult, dim_t* start, dim_t* end )
 {
 	siz_t area;
 
@@ -750,6 +760,7 @@ siz_t bli_get_range_weighted_t2b( void* thr, obj_t* a, dim_t bf, dim_t* start, d
 		uplo_t uplo    = bli_obj_uplo( *a );
 		dim_t  m       = bli_obj_length( *a );
 		dim_t  n       = bli_obj_width( *a );
+		dim_t  bf      = bli_blksz_get_def_for_obj( a, bmult );
 
 		// Support implicit transposition.
 		if ( bli_obj_has_trans( *a ) )
@@ -764,14 +775,14 @@ siz_t bli_get_range_weighted_t2b( void* thr, obj_t* a, dim_t bf, dim_t* start, d
 	}
 	else // if dense or zeros
 	{
-		area = bli_get_range_t2b( thr, a, bf,
+		area = bli_get_range_t2b( thr, a, bmult,
 		                          start, end );
 	}
 
 	return area;
 }
 
-siz_t bli_get_range_weighted_b2t( void* thr, obj_t* a, dim_t bf, dim_t* start, dim_t* end )
+siz_t bli_get_range_weighted_b2t( void* thr, obj_t* a, blksz_t* bmult, dim_t* start, dim_t* end )
 {
 	siz_t area;
 
@@ -786,6 +797,7 @@ siz_t bli_get_range_weighted_b2t( void* thr, obj_t* a, dim_t bf, dim_t* start, d
 		uplo_t uplo    = bli_obj_uplo( *a );
 		dim_t  m       = bli_obj_length( *a );
 		dim_t  n       = bli_obj_width( *a );
+		dim_t  bf      = bli_blksz_get_def_for_obj( a, bmult );
 
 		// Support implicit transposition.
 		if ( bli_obj_has_trans( *a ) )
@@ -802,7 +814,7 @@ siz_t bli_get_range_weighted_b2t( void* thr, obj_t* a, dim_t bf, dim_t* start, d
 	}
 	else // if dense or zeros
 	{
-		area = bli_get_range_b2t( thr, a, bf,
+		area = bli_get_range_b2t( thr, a, bmult,
 		                          start, end );
 	}
 

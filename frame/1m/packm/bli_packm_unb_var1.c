@@ -48,7 +48,8 @@ typedef void (*FUNCPTR_T)(
                            dim_t   n_max,
                            void*   kappa,
                            void*   c, inc_t rs_c, inc_t cs_c,
-                           void*   p, inc_t rs_p, inc_t cs_p
+                           void*   p, inc_t rs_p, inc_t cs_p,
+                           cntx_t* cntx
                          );
 
 static FUNCPTR_T GENARRAY(ftypes,packm_unb_var1);
@@ -56,6 +57,7 @@ static FUNCPTR_T GENARRAY(ftypes,packm_unb_var1);
 
 void bli_packm_unb_var1( obj_t*   c,
                          obj_t*   p,
+                         cntx_t*  cntx,
                          packm_thrinfo_t* thread )
 {
 	num_t     dt_cp     = bli_obj_datatype( *c );
@@ -96,39 +98,45 @@ void bli_packm_unb_var1( obj_t*   c,
 
     if( thread_am_ochief( thread ) ) {
         // Invoke the function.
-        f( strucc,
-           diagoffc,
-           diagc,
-           uploc,
-           transc,
-           m_p,
-           n_p,
-           m_max_p,
-           n_max_p,
-           buf_kappa,
-           buf_c, rs_c, cs_c,
-           buf_p, rs_p, cs_p );
+        f
+		(
+		  strucc,
+          diagoffc,
+          diagc,
+          uploc,
+          transc,
+          m_p,
+          n_p,
+          m_max_p,
+          n_max_p,
+          buf_kappa,
+          buf_c, rs_c, cs_c,
+          buf_p, rs_p, cs_p,
+		  cntx
+		);
     }
 }
 
 
 #undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, varname ) \
+#define GENTFUNC( ctype, ch, varname ) \
 \
-void PASTEMAC(ch,varname)( \
-                           struc_t strucc, \
-                           doff_t  diagoffc, \
-                           diag_t  diagc, \
-                           uplo_t  uploc, \
-                           trans_t transc, \
-                           dim_t   m, \
-                           dim_t   n, \
-                           dim_t   m_max, \
-                           dim_t   n_max, \
-                           void*   kappa, \
-                           void*   c, inc_t rs_c, inc_t cs_c, \
-                           void*   p, inc_t rs_p, inc_t cs_p \
-                         ) \
+void PASTEMAC(ch,varname) \
+     ( \
+       struc_t strucc, \
+       doff_t  diagoffc, \
+       diag_t  diagc, \
+       uplo_t  uploc, \
+       trans_t transc, \
+       dim_t   m, \
+       dim_t   n, \
+       dim_t   m_max, \
+       dim_t   n_max, \
+       void*   kappa, \
+       void*   c, inc_t rs_c, inc_t cs_c, \
+       void*   p, inc_t rs_p, inc_t cs_p, \
+       cntx_t* cntx  \
+     ) \
 { \
 	ctype* restrict kappa_cast = kappa; \
 	ctype* restrict c_cast     = c; \
@@ -140,15 +148,19 @@ void PASTEMAC(ch,varname)( \
 	   because the structure has already been "densified"), this ends
 	   up being the only action we take. Note that if kappa is unit,
 	   the data is simply copied (rather than scaled by one). */ \
-	PASTEMAC3(ch,ch,ch,scal2m)( diagoffc, \
-	                            diagc, \
-	                            uploc, \
-	                            transc, \
-	                            m, \
-	                            n, \
-	                            kappa_cast, \
-	                            c_cast, rs_c, cs_c, \
-	                            p_cast, rs_p, cs_p ); \
+	PASTEMAC(ch,scal2m) \
+	( \
+	  diagoffc, \
+	  diagc, \
+	  uploc, \
+	  transc, \
+	  m, \
+	  n, \
+	  kappa_cast, \
+	  c_cast, rs_c, cs_c, \
+	  p_cast, rs_p, cs_p, \
+	  cntx  \
+	); \
 \
 	/* If uploc is upper or lower, then the structure of c is necessarily
 	   non-dense (ie: Hermitian, symmetric, or triangular, where part of the
@@ -178,15 +190,19 @@ void PASTEMAC(ch,varname)( \
 			   (as specified by the original value of diagoffc). Notice
 			   that we use a diag parameter of non-unit since we can
 			   assume nothing about the neighboring off-diagonal. */ \
-			PASTEMAC3(ch,ch,ch,scal2m)( diagoffc, \
-			                            BLIS_NONUNIT_DIAG, \
-			                            uploc, \
-			                            transc, \
-			                            m, \
-			                            n, \
-			                            kappa_cast, \
-			                            c_cast, rs_c, cs_c, \
-			                            p_cast, rs_p, cs_p ); \
+			PASTEMAC(ch,scal2m) \
+			( \
+			  diagoffc, \
+			  BLIS_NONUNIT_DIAG, \
+			  uploc, \
+			  transc, \
+			  m, \
+			  n, \
+			  kappa_cast, \
+			  c_cast, rs_c, cs_c, \
+			  p_cast, rs_p, cs_p, \
+			  cntx  \
+			); \
 		} \
 		else /* if ( bli_is_triangular( strucc ) ) */ \
 		{ \
@@ -209,13 +225,18 @@ void PASTEMAC(ch,varname)( \
 			bli_shift_diag_offset_to_shrink_uplo( uplop, diagoffp ); \
 \
 			/* Set the region opposite the diagonal of p to zero. */ \
-			PASTEMAC2(ch,ch,setm)( diagoffp, \
-			                       BLIS_NONUNIT_DIAG, \
-			                       uplop, \
-			                       m, \
-			                       n, \
-			                       zero, \
-			                       p_cast, rs_p, cs_p ); \
+			PASTEMAC(ch,setm) \
+			( \
+			  BLIS_NO_CONJUGATE, \
+			  diagoffp, \
+			  BLIS_NONUNIT_DIAG, \
+			  uplop, \
+			  m, \
+			  n, \
+			  zero, \
+			  p_cast, rs_p, cs_p, \
+			  cntx  \
+			); \
 		} \
 	} \
 \
@@ -230,28 +251,38 @@ void PASTEMAC(ch,varname)( \
 	{ \
 		ctype* p_edge = p_cast + (m  )*rs_p; \
 \
-		PASTEMAC2(ch,ch,setm)( 0, \
-		                       BLIS_NONUNIT_DIAG, \
-		                       BLIS_DENSE, \
-		                       m_max - m, \
-		                       n_max, \
-		                       zero, \
-		                       p_edge, rs_p, cs_p ); \
+		PASTEMAC(ch,setm) \
+		( \
+		  BLIS_NO_CONJUGATE, \
+		  0, \
+		  BLIS_NONUNIT_DIAG, \
+		  BLIS_DENSE, \
+		  m_max - m, \
+		  n_max, \
+		  zero, \
+		  p_edge, rs_p, cs_p, \
+		  cntx  \
+		); \
 	} \
 \
 	if ( n != n_max ) \
 	{ \
 		ctype* p_edge = p_cast + (n  )*cs_p; \
 \
-		PASTEMAC2(ch,ch,setm)( 0, \
-		                       BLIS_NONUNIT_DIAG, \
-		                       BLIS_DENSE, \
-		                       m_max, \
-		                       n_max - n, \
-		                       zero, \
-		                       p_edge, rs_p, cs_p ); \
+		PASTEMAC(ch,setm) \
+		( \
+		  BLIS_NO_CONJUGATE, \
+		  0, \
+		  BLIS_NONUNIT_DIAG, \
+		  BLIS_DENSE, \
+		  m_max, \
+		  n_max - n, \
+		  zero, \
+		  p_edge, rs_p, cs_p, \
+		  cntx  \
+		); \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC( packm, packm_unb_var1 )
+INSERT_GENTFUNC_BASIC0( packm_unb_var1 )
 

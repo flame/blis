@@ -64,7 +64,8 @@ void libblis_test_gemm_ukr_impl( iface_t   iface,
                                  obj_t*    a,
                                  obj_t*    b,
                                  obj_t*    beta,
-                                 obj_t*    c );
+                                 obj_t*    c,
+                                 cntx_t*   cntx );
 
 void libblis_test_gemm_ukr_check( obj_t*  alpha,
                                   obj_t*  a,
@@ -119,10 +120,6 @@ void libblis_test_gemm_ukr( test_params_t* params, test_op_t* op )
 }
 
 
-// Import the register blocksizes used by the micro-kernel(s).
-extern blksz_t* gemm_mr;
-extern blksz_t* gemm_nr;
-extern blksz_t* gemm_kr;
 
 void libblis_test_gemm_ukr_experiment( test_params_t* params,
                                        test_op_t*     op,
@@ -150,13 +147,17 @@ void libblis_test_gemm_ukr_experiment( test_params_t* params,
 	obj_t        ap, bp;
 	obj_t        c_save;
 
+	cntx_t       cntx;
+
+	// Initialize a context.
+	bli_gemm_cntx_init( &cntx );
 
 	// Map the dimension specifier to actual dimensions.
 	k = libblis_test_get_dim_from_prob_size( op->dim_spec[0], p_cur );
 
 	// Fix m and n to MR and NR, respectively.
-	m = bli_blksz_get_def( datatype, gemm_mr );
-	n = bli_blksz_get_def( datatype, gemm_nr );
+	m = bli_cntx_get_blksz_def_dt( datatype, BLIS_MR, &cntx );
+	n = bli_cntx_get_blksz_def_dt( datatype, BLIS_NR, &cntx );
 
 	// Store the register blocksizes so that the driver can retrieve the
 	// values later when printing results.
@@ -207,22 +208,24 @@ void libblis_test_gemm_ukr_experiment( test_params_t* params,
 	bli_obj_init_pack( &bp );
 
 	// Create pack objects for a and b.
-	libblis_test_pobj_create( gemm_mr,
-	                          gemm_kr,
+	libblis_test_pobj_create( BLIS_MR,
+	                          BLIS_KR,
 	                          BLIS_NO_INVERT_DIAG,
 	                          BLIS_PACKED_ROW_PANELS,
 	                          BLIS_BUFFER_FOR_A_BLOCK,
-	                          &a, &ap );
-	libblis_test_pobj_create( gemm_kr,
-	                          gemm_nr,
+	                          &a, &ap,
+	                          &cntx );
+	libblis_test_pobj_create( BLIS_KR,
+	                          BLIS_NR,
 	                          BLIS_NO_INVERT_DIAG,
 	                          BLIS_PACKED_COL_PANELS,
 	                          BLIS_BUFFER_FOR_B_PANEL,
-	                          &b, &bp );
+	                          &b, &bp,
+	                          &cntx );
 
 	// Pack the contents of a and b to ap and bp, respectively.
-	bli_packm_blk_var1( &a, &ap, &BLIS_PACKM_SINGLE_THREADED );
-	bli_packm_blk_var1( &b, &bp, &BLIS_PACKM_SINGLE_THREADED );
+	bli_packm_blk_var1( &a, &ap, &cntx, &BLIS_PACKM_SINGLE_THREADED );
+	bli_packm_blk_var1( &b, &bp, &cntx, &BLIS_PACKM_SINGLE_THREADED );
 	                          
 
 	// Repeat the experiment n_repeats times and record results. 
@@ -232,7 +235,9 @@ void libblis_test_gemm_ukr_experiment( test_params_t* params,
 
 		time = bli_clock();
 
-		libblis_test_gemm_ukr_impl( iface, &alpha, &ap, &bp, &beta, &c );
+		libblis_test_gemm_ukr_impl( iface,
+		                            &alpha, &ap, &bp, &beta, &c,
+		                            &cntx );
 
 		time_min = bli_clock_min_diff( time_min, time );
 	}
@@ -256,6 +261,9 @@ void libblis_test_gemm_ukr_experiment( test_params_t* params,
 	bli_obj_free( &b );
 	bli_obj_free( &c );
 	bli_obj_free( &c_save );
+
+	// Finalize the context.
+	bli_gemm_cntx_finalize( &cntx );
 }
 
 
@@ -265,12 +273,13 @@ void libblis_test_gemm_ukr_impl( iface_t   iface,
                                  obj_t*    a,
                                  obj_t*    b,
                                  obj_t*    beta,
-                                 obj_t*    c )
+                                 obj_t*    c,
+                                 cntx_t*   cntx )
 {
 	switch ( iface )
 	{
 		case BLIS_TEST_SEQ_UKERNEL:
-		bli_gemm_ukernel( alpha, a, b, beta, c );
+		bli_gemm_ukernel( alpha, a, b, beta, c, cntx );
 		break;
 
 		default:

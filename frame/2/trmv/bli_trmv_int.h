@@ -35,5 +35,6 @@
 void bli_trmv_int( obj_t*  alpha,
                    obj_t*  a,
                    obj_t*  x,
+                   cntx_t* cntx,
                    trmv_t* cntl );
 

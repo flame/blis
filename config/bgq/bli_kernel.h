@@ -144,25 +144,7 @@
 
 // -- Default fusing factors for level-1f operations --
 
-#define BLIS_L1F_FUSE_FAC_S        8
-#define BLIS_L1F_FUSE_FAC_D        8
-#define BLIS_L1F_FUSE_FAC_C        4
-#define BLIS_L1F_FUSE_FAC_Z        2
-
-#define BLIS_AXPYF_FUSE_FAC_S          BLIS_L1F_FUSE_FAC_S
-#define BLIS_AXPYF_FUSE_FAC_D          BLIS_L1F_FUSE_FAC_D
-#define BLIS_AXPYF_FUSE_FAC_C          BLIS_L1F_FUSE_FAC_C
-#define BLIS_AXPYF_FUSE_FAC_Z          BLIS_L1F_FUSE_FAC_Z
-
-#define BLIS_DOTXF_FUSE_FAC_S          BLIS_L1F_FUSE_FAC_S
-#define BLIS_DOTXF_FUSE_FAC_D          BLIS_L1F_FUSE_FAC_D
-#define BLIS_DOTXF_FUSE_FAC_C          BLIS_L1F_FUSE_FAC_C
-#define BLIS_DOTXF_FUSE_FAC_Z          BLIS_L1F_FUSE_FAC_Z
-
-#define BLIS_DOTXAXPYF_FUSE_FAC_S      BLIS_L1F_FUSE_FAC_S
-#define BLIS_DOTXAXPYF_FUSE_FAC_D      BLIS_L1F_FUSE_FAC_D
-#define BLIS_DOTXAXPYF_FUSE_FAC_C      BLIS_L1F_FUSE_FAC_C
-#define BLIS_DOTXAXPYF_FUSE_FAC_Z      BLIS_L1F_FUSE_FAC_Z
+#define BLIS_DEFAULT_AF_D          8
 
 
 
@@ -171,10 +153,8 @@
 
 // -- gemm --
 
-#include "bli_gemm_8x8.h"
-
-#define BLIS_DGEMM_UKERNEL         bli_dgemm_8x8
-#define BLIS_ZGEMM_UKERNEL         bli_zgemm_8x8
+#define BLIS_DGEMM_UKERNEL         bli_dgemm_int_8x8
+#define BLIS_ZGEMM_UKERNEL         bli_zgemm_int_8x8
 
 // -- trsm-related --
 

@@ -36,8 +36,7 @@ struct gemm_s
 {
 	impl_t             impl_type;
 	varnum_t           var_num;
-	blksz_t*           b;
-	func_t*            gemm_ukrs;
+	bszid_t            bszid;
 	struct scalm_s*    sub_scalm;
 	struct packm_s*    sub_packm_a;
 	struct packm_s*    sub_packm_b;
@@ -48,19 +47,16 @@ struct gemm_s
 typedef struct gemm_s gemm_t;
 
 #define cntl_sub_gemm( cntl )      cntl->sub_gemm
-#define cntl_gemm_ukrs( cntl )     cntl->gemm_ukrs
 
 void    bli_gemm_cntl_init( void );
 void    bli_gemm_cntl_finalize( void );
 gemm_t* bli_gemm_cntl_obj_create( impl_t       impl_type,
                                   varnum_t     var_num,
-                                  blksz_t*     b,
-                                  func_t*      gemm_ukrs,
+                                  bszid_t      bszid,
                                   scalm_t*     sub_scalm,
                                   packm_t*     sub_pack_a,
                                   packm_t*     sub_pack_b,
                                   packm_t*     sub_pack_c,
                                   gemm_t*      sub_gemm,
                                   unpackm_t*   sub_unpack_c );
-func_t* bli_gemm_cntl_ukrs( gemm_t* cntl );
 

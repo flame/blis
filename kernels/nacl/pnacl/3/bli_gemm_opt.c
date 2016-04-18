@@ -61,16 +61,19 @@
 		return (v4sf) { 0.0f, 0.0f, 0.0f, 0.0f };
 	}
 
-	void bli_sgemm_opt(
-		dim_t      k,
-		float      alpha[restrict static 1],
-		float      a[restrict static 8*k],
-		float      b[restrict static k*4],
-		float      beta[restrict static 1],
-		float      c[restrict static 8*4],
-		inc_t      rs_c,
-		inc_t      cs_c,
-		auxinfo_t* data)
+	void bli_sgemm_opt
+	     (
+		   dim_t      k,
+		   float      alpha[restrict static 1],
+		   float      a[restrict static 8*k],
+		   float      b[restrict static k*4],
+		   float      beta[restrict static 1],
+		   float      c[restrict static 8*4],
+		   inc_t      rs_c,
+		   inc_t      cs_c,
+		   auxinfo_t* data,
+		   cntx_t*    cntx
+	     )
 	{
 		// Vectors for accummulating column 0, 1, 2, 3 (initialize to 0.0)
 		v4sf abv0t = v4sf_zero(), abv1t = v4sf_zero(), abv2t = v4sf_zero(), abv3t = v4sf_zero();
@@ -201,16 +204,19 @@
 		}
 	}
 
-	void bli_cgemm_opt(
-		dim_t      k,
-		scomplex   alpha[restrict static 1],
-		scomplex   a[restrict static 4*k],
-		scomplex   b[restrict static k*4],
-		scomplex   beta[restrict static 1],
-		scomplex   c[restrict static 4*4],
-		inc_t      rs_c,
-		inc_t      cs_c,
-		auxinfo_t* data)
+	void bli_cgemm_opt
+	     (
+		   dim_t      k,
+		   scomplex   alpha[restrict static 1],
+		   scomplex   a[restrict static 4*k],
+		   scomplex   b[restrict static k*4],
+		   scomplex   beta[restrict static 1],
+		   scomplex   c[restrict static 4*4],
+		   inc_t      rs_c,
+		   inc_t      cs_c,
+		   auxinfo_t* data,
+		   cntx_t*    cntx
+	     )
 	{
 		// Vectors for accummulating column 0, 1, 2, 3 (initialize to 0.0)
 		v4sf abv0r = v4sf_zero(), abv1r = v4sf_zero(), abv2r = v4sf_zero(), abv3r = v4sf_zero();

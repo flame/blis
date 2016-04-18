@@ -149,7 +149,7 @@
 
 // -- gemm --
 
-#define BLIS_DGEMM_UKERNEL         bli_dgemm_opt_d4x4
+#define BLIS_DGEMM_UKERNEL         bli_dgemm_opt_4x4
 
 // -- trsm-related --
 

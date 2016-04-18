@@ -36,115 +36,143 @@
 
 
 
-void bli_sdotxaxpyf_opt_var1( conj_t             conjat,
-                              conj_t             conja,
-                              conj_t             conjw,
-                              conj_t             conjx,
-                              dim_t              m,
-                              dim_t              b_n,
-                              float*    restrict alpha,
-                              float*    restrict a, inc_t inca, inc_t lda,
-                              float*    restrict w, inc_t incw,
-                              float*    restrict x, inc_t incx,
-                              float*    restrict beta,
-                              float*    restrict y, inc_t incy,
-                              float*    restrict z, inc_t incz )
+void bli_sdotxaxpyf_opt_var1
+     (
+       conj_t    conjat,
+       conj_t    conja,
+       conj_t    conjw,
+       conj_t    conjx,
+       dim_t     m,
+       dim_t     b_n,
+       float*    alpha,
+       float*    a, inc_t inca, inc_t lda,
+       float*    w, inc_t incw,
+       float*    x, inc_t incx,
+       float*    beta,
+       float*    y, inc_t incy,
+       float*    z, inc_t incz,
+       cntx_t*   cntx
+     )
 {
 	/* Just call the reference implementation. */
-	BLIS_SDOTXAXPYF_KERNEL_REF( conjat,
-	                            conja,
-	                            conjw,
-	                            conjx,
-	                            m,
-	                            b_n,
-	                            alpha,
-	                            a, inca, lda,
-	                            w, incw,
-	                            x, incx,
-	                            beta,
-	                            y, incy,
-	                            z, incz );
+	BLIS_SDOTXAXPYF_KERNEL_REF
+	(
+	  conjat,
+	  conja,
+	  conjw,
+	  conjx,
+	  m,
+	  b_n,
+	  alpha,
+	  a, inca, lda,
+	  w, incw,
+	  x, incx,
+	  beta,
+	  y, incy,
+	  z, incz,
+	  cntx
+	);
 }
 
 
 
-void bli_ddotxaxpyf_opt_var1( conj_t             conjat,
-                              conj_t             conja,
-                              conj_t             conjw,
-                              conj_t             conjx,
-                              dim_t              m,
-                              dim_t              b_n,
-                              double*   restrict alpha,
-                              double*   restrict a, inc_t inca, inc_t lda,
-                              double*   restrict w, inc_t incw,
-                              double*   restrict x, inc_t incx,
-                              double*   restrict beta,
-                              double*   restrict y, inc_t incy,
-                              double*   restrict z, inc_t incz )
+void bli_ddotxaxpyf_opt_var1
+     (
+       conj_t    conjat,
+       conj_t    conja,
+       conj_t    conjw,
+       conj_t    conjx,
+       dim_t     m,
+       dim_t     b_n,
+       double*   alpha,
+       double*   a, inc_t inca, inc_t lda,
+       double*   w, inc_t incw,
+       double*   x, inc_t incx,
+       double*   beta,
+       double*   y, inc_t incy,
+       double*   z, inc_t incz,
+       cntx_t*   cntx
+     )
 {
 	/* Just call the reference implementation. */
-	BLIS_DDOTXAXPYF_KERNEL_REF( conjat,
-	                            conja,
-	                            conjw,
-	                            conjx,
-	                            m,
-	                            b_n,
-	                            alpha,
-	                            a, inca, lda,
-	                            w, incw,
-	                            x, incx,
-	                            beta,
-	                            y, incy,
-	                            z, incz );
+	BLIS_DDOTXAXPYF_KERNEL_REF
+	(
+	  conjat,
+	  conja,
+	  conjw,
+	  conjx,
+	  m,
+	  b_n,
+	  alpha,
+	  a, inca, lda,
+	  w, incw,
+	  x, incx,
+	  beta,
+	  y, incy,
+	  z, incz,
+	  cntx
+	);
 }
 
 
 
-void bli_cdotxaxpyf_opt_var1( conj_t             conjat,
-                              conj_t             conja,
-                              conj_t             conjw,
-                              conj_t             conjx,
-                              dim_t              m,
-                              dim_t              b_n,
-                              scomplex* restrict alpha,
-                              scomplex* restrict a, inc_t inca, inc_t lda,
-                              scomplex* restrict w, inc_t incw,
-                              scomplex* restrict x, inc_t incx,
-                              scomplex* restrict beta,
-                              scomplex* restrict y, inc_t incy,
-                              scomplex* restrict z, inc_t incz )
+void bli_cdotxaxpyf_opt_var1
+     (
+       conj_t    conjat,
+       conj_t    conja,
+       conj_t    conjw,
+       conj_t    conjx,
+       dim_t     m,
+       dim_t     b_n,
+       scomplex* alpha,
+       scomplex* a, inc_t inca, inc_t lda,
+       scomplex* w, inc_t incw,
+       scomplex* x, inc_t incx,
+       scomplex* beta,
+       scomplex* y, inc_t incy,
+       scomplex* z, inc_t incz,
+       cntx_t*   cntx
+     )
 {
 	/* Just call the reference implementation. */
-	BLIS_CDOTXAXPYF_KERNEL_REF( conjat,
-	                            conja,
-	                            conjw,
-	                            conjx,
-	                            m,
-	                            b_n,
-	                            alpha,
-	                            a, inca, lda,
-	                            w, incw,
-	                            x, incx,
-	                            beta,
-	                            y, incy,
-	                            z, incz );
+	BLIS_CDOTXAXPYF_KERNEL_REF
+	(
+	  conjat,
+	  conja,
+	  conjw,
+	  conjx,
+	  m,
+	  b_n,
+	  alpha,
+	  a, inca, lda,
+	  w, incw,
+	  x, incx,
+	  beta,
+	  y, incy,
+	  z, incz,
+	  cntx
+	);
 }
 
 
 
-void bli_zdotxaxpyf_opt_var1( conj_t             conjat,
-                              conj_t             conja,
-                              conj_t             conjw,
-                              conj_t             conjx,
-                              dim_t              m,
-                              dim_t              b_n,
-                              dcomplex* restrict alpha,
-                              dcomplex* restrict a, inc_t inca, inc_t lda,
-                              dcomplex* restrict w, inc_t incw,
-                              dcomplex* restrict x, inc_t incx,
-                              dcomplex* restrict beta,
-                              dcomplex* restrict y, inc_t incy,
-                              dcomplex* restrict z, inc_t incz )
+void bli_zdotxaxpyf_opt_var1
+     (
+       conj_t    conjat,
+       conj_t    conja,
+       conj_t    conjw,
+       conj_t    conjx,
+       dim_t     m,
+       dim_t     b_n,
+       dcomplex* alpha,
+       dcomplex* a, inc_t inca, inc_t lda,
+       dcomplex* w, inc_t incw,
+       dcomplex* x, inc_t incx,
+       dcomplex* beta,
+       dcomplex* y, inc_t incy,
+       dcomplex* z, inc_t incz,
+       cntx_t*   cntx
+     )
 
 {
 /*
@@ -289,19 +317,23 @@ void bli_zdotxaxpyf_opt_var1( conj_t             conjat,
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE )
 	{
-		BLIS_ZDOTXAXPYF_KERNEL_REF( conjat,
-		                            conja,
-		                            conjw,
-		                            conjx,
-		                            m,
-		                            b_n,
-		                            alpha,
-		                            a, inca, lda,
-		                            w, incw,
-		                            x, incx,
-		                            beta,
-		                            y, incy,
-		                            z, incz );
+		BLIS_ZDOTXAXPYF_KERNEL_REF
+		(
+		  conjat,
+		  conja,
+		  conjw,
+		  conjx,
+		  m,
+		  b_n,
+		  alpha,
+		  a, inca, lda,
+		  w, incw,
+		  x, incx,
+		  beta,
+		  y, incy,
+		  z, incz,
+		  cntx
+		);
         return;
 	}
 
@@ -326,16 +358,16 @@ void bli_zdotxaxpyf_opt_var1( conj_t             conjat,
 	{
 		for ( j = 0; j < b_n; ++j )
 		{
-			bli_zzcopys( *xp[ j ], alpha_x[ j ] );
-			bli_zzscals( *alpha, alpha_x[ j ] );
+			bli_zcopys( *xp[ j ], alpha_x[ j ] );
+			bli_zscals( *alpha, alpha_x[ j ] );
 		}
 	}
 	else // if ( bli_is_conj( conjx ) )
 	{
 		for ( j = 0; j < b_n; ++j )
 		{
-			bli_zzcopyjs( *xp[ j ], alpha_x[ j ] );
-			bli_zzscals( *alpha, alpha_x[ j ] );
+			bli_zcopyjs( *xp[ j ], alpha_x[ j ] );
+			bli_zscals( *alpha, alpha_x[ j ] );
 		}
 	}
 
@@ -366,8 +398,8 @@ void bli_zdotxaxpyf_opt_var1( conj_t             conjat,
 		{
 			for ( j = 0; j < b_n; ++j )
 			{
-				bli_zzzdots( *ap[ j ], *wp, At_w[ j ] );
-				bli_zzzdots( *ap[ j ], alpha_x[ j ], *zp );
+				bli_zdots( *ap[ j ], *wp, At_w[ j ] );
+				bli_zdots( *ap[ j ], alpha_x[ j ], *zp );
 
 				ap[ j ] += 1;
 			}
@@ -383,8 +415,8 @@ void bli_zdotxaxpyf_opt_var1( conj_t             conjat,
 		{
 			for ( j = 0; j < b_n; ++j )
 			{
-				bli_zzzdots( *ap[ j ], *wp, At_w[ j ] );
-				bli_zzzdots( *ap[ j ], alpha_x[ j ], *zp );
+				bli_zdots( *ap[ j ], *wp, At_w[ j ] );
+				bli_zdots( *ap[ j ], alpha_x[ j ], *zp );
 
 				ap[ j ] += n_elem_per_iter;
 			}
@@ -396,8 +428,8 @@ void bli_zdotxaxpyf_opt_var1( conj_t             conjat,
 		{
 			for ( j = 0; j < b_n; ++j )
 			{
-				bli_zzzdots( *ap[ j ], *wp, At_w[ j ] );
-				bli_zzzdots( *ap[ j ], alpha_x[ j ], *zp );
+				bli_zdots( *ap[ j ], *wp, At_w[ j ] );
+				bli_zdots( *ap[ j ], alpha_x[ j ], *zp );
 
 				ap[ j ] += 1;
 			}
@@ -411,8 +443,8 @@ void bli_zdotxaxpyf_opt_var1( conj_t             conjat,
 		{
 			for ( j = 0; j < b_n; ++j )
 			{
-				bli_zzzdotjs( *ap[ j ], *wp, At_w[ j ] );
-				bli_zzzdots( *ap[ j ], alpha_x[ j ], *zp );
+				bli_zdotjs( *ap[ j ], *wp, At_w[ j ] );
+				bli_zdots( *ap[ j ], alpha_x[ j ], *zp );
 
 				ap[ j ] += 1;
 			}
@@ -428,8 +460,8 @@ void bli_zdotxaxpyf_opt_var1( conj_t             conjat,
 		{
 			for ( j = 0; j < b_n; ++j )
 			{
-				bli_zzzdotjs( *ap[ j ], *wp, At_w[ j ] );
-				bli_zzzdots( *ap[ j ], alpha_x[ j ], *zp );
+				bli_zdotjs( *ap[ j ], *wp, At_w[ j ] );
+				bli_zdots( *ap[ j ], alpha_x[ j ], *zp );
 
 				ap[ j ] += n_elem_per_iter;
 			}
@@ -441,8 +473,8 @@ void bli_zdotxaxpyf_opt_var1( conj_t             conjat,
 		{
 			for ( j = 0; j < b_n; ++j )
 			{
-				bli_zzzdotjs( *ap[ j ], *wp, At_w[ j ] );
-				bli_zzzdots( *ap[ j ], alpha_x[ j ], *zp );
+				bli_zdotjs( *ap[ j ], *wp, At_w[ j ] );
+				bli_zdots( *ap[ j ], alpha_x[ j ], *zp );
 
 				ap[ j ] += 1;
 			}
@@ -456,8 +488,8 @@ void bli_zdotxaxpyf_opt_var1( conj_t             conjat,
 		{
 			for ( j = 0; j < b_n; ++j )
 			{
-				bli_zzzdots( *ap[ j ], *wp, At_w[ j ] );
-				bli_zzzdotjs( *ap[ j ], alpha_x[ j ], *zp );
+				bli_zdots( *ap[ j ], *wp, At_w[ j ] );
+				bli_zdotjs( *ap[ j ], alpha_x[ j ], *zp );
 
 				ap[ j ] += 1;
 			}
@@ -473,8 +505,8 @@ void bli_zdotxaxpyf_opt_var1( conj_t             conjat,
 		{
 			for ( j = 0; j < b_n; ++j )
 			{
-				bli_zzzdots( *ap[ j ], *wp, At_w[ j ] );
-				bli_zzzdotjs( *ap[ j ], alpha_x[ j ], *zp );
+				bli_zdots( *ap[ j ], *wp, At_w[ j ] );
+				bli_zdotjs( *ap[ j ], alpha_x[ j ], *zp );
 
 				ap[ j ] += n_elem_per_iter;
 			}
@@ -486,8 +518,8 @@ void bli_zdotxaxpyf_opt_var1( conj_t             conjat,
 		{
 			for ( j = 0; j < b_n; ++j )
 			{
-				bli_zzzdots( *ap[ j ], *wp, At_w[ j ] );
-				bli_zzzdotjs( *ap[ j ], alpha_x[ j ], *zp );
+				bli_zdots( *ap[ j ], *wp, At_w[ j ] );
+				bli_zdotjs( *ap[ j ], alpha_x[ j ], *zp );
 
 				ap[ j ] += 1;
 			}
@@ -501,8 +533,8 @@ void bli_zdotxaxpyf_opt_var1( conj_t             conjat,
 		{
 			for ( j = 0; j < b_n; ++j )
 			{
-				bli_zzzdotjs( *ap[ j ], *wp, At_w[ j ] );
-				bli_zzzdotjs( *ap[ j ], alpha_x[ j ], *zp );
+				bli_zdotjs( *ap[ j ], *wp, At_w[ j ] );
+				bli_zdotjs( *ap[ j ], alpha_x[ j ], *zp );
 
 				ap[ j ] += 1;
 			}
@@ -518,8 +550,8 @@ void bli_zdotxaxpyf_opt_var1( conj_t             conjat,
 		{
 			for ( j = 0; j < b_n; ++j )
 			{
-				bli_zzzdotjs( *ap[ j ], *wp, At_w[ j ] );
-				bli_zzzdotjs( *ap[ j ], alpha_x[ j ], *zp );
+				bli_zdotjs( *ap[ j ], *wp, At_w[ j ] );
+				bli_zdotjs( *ap[ j ], alpha_x[ j ], *zp );
 
 				ap[ j ] += n_elem_per_iter;
 			}
@@ -531,8 +563,8 @@ void bli_zdotxaxpyf_opt_var1( conj_t             conjat,
 		{
 			for ( j = 0; j < b_n; ++j )
 			{
-				bli_zzzdotjs( *ap[ j ], *wp, At_w[ j ] );
-				bli_zzzdotjs( *ap[ j ], alpha_x[ j ], *zp );
+				bli_zdotjs( *ap[ j ], *wp, At_w[ j ] );
+				bli_zdotjs( *ap[ j ], alpha_x[ j ], *zp );
 
 				ap[ j ] += 1;
 			}
@@ -555,8 +587,8 @@ void bli_zdotxaxpyf_opt_var1( conj_t             conjat,
 	// scaling by beta.
 	for ( j = 0; j < b_n; ++j )
 	{
-		bli_zzscals( *beta, *yp[ j ] );
-		bli_zzzaxpys( *alpha, At_w[ j ], *yp[ j ] );
+		bli_zscals( *beta, *yp[ j ] );
+		bli_zaxpys( *alpha, At_w[ j ], *yp[ j ] );
 	}
 }
 

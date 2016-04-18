@@ -32,17 +32,28 @@
 
 */
 
-void bli_packv_init( obj_t*   a,
-                     obj_t*   p,
-                     packv_t* cntl );
+void bli_packv_init
+     (
+       obj_t*   a,
+       obj_t*   p,
+       cntx_t*  cntx,
+       packv_t* cntl
+     );
 
-void bli_packv_init_pack( pack_t   pack_schema,
-                          blksz_t* mult_m,
-                          obj_t*   c,
-                          obj_t*   p );
+void bli_packv_init_pack
+     (
+       pack_t   pack_schema,
+       bszid_t  bmult_id,
+       obj_t*   c,
+       obj_t*   p,
+       cntx_t*  cntx
+     );
 
-void bli_packv_release( obj_t*   p,
-                        packv_t* cntl );
+void bli_packv_release
+     (
+       obj_t*   p,
+       packv_t* cntl
+     );
 
 /*
 void bli_packv_init_cast( obj_t*  a,

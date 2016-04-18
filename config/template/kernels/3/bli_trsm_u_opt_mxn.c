@@ -36,18 +36,24 @@
 
 
 
-void bli_strsm_u_opt_mxn(
-                          float*    restrict a11,
-                          float*    restrict b11,
-                          float*    restrict c11, inc_t rs_c, inc_t cs_c,
-                          auxinfo_t*         data
-                        )
+void bli_strsm_u_opt_mxn
+     (
+       float*     restrict a11,
+       float*     restrict b11,
+       float*     restrict c11, inc_t rs_c, inc_t cs_c,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
+     )
 {
 	/* Just call the reference implementation. */
-	BLIS_STRSM_U_UKERNEL_REF( a11,
-	                     b11,
-	                     c11, rs_c, cs_c,
-	                     data );
+	BLIS_STRSM_U_UKERNEL_REF
+	(
+	  a11,
+	  b11,
+	  c11, rs_c, cs_c,
+	  data,
+	  cntx
+	);
 }
 
 
@@ -58,6 +64,13 @@ void bli_dtrsm_u_opt_mxn(
                           double*   restrict c11, inc_t rs_c, inc_t cs_c,
                           auxinfo_t*         data
                         )
+     (
+       double*    restrict a11,
+       double*    restrict b11,
+       double*    restrict c11, inc_t rs_c, inc_t cs_c,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
+     )
 {
 /*
   Template trsm_u micro-kernel implementation
@@ -76,79 +89,28 @@ void bli_dtrsm_u_opt_mxn(
   where A11 is MR x MR and upper triangular, B11 is MR x NR, and C11 is
   MR x NR.
 
-  Parameters:
+  For more info, please refer to the BLIS website's wiki on kernels:
 
-  - a11:    The address of A11, which is the MR x MR upper triangular
-            submatrix within the packed micro-panel of matrix A. A11 is
-            stored by columns with leading dimension PACKMR, where
-            typically PACKMR = MR. Note that A11 contains elements in both
-            triangles, though elements in the unstored triangle are not
-            guaranteed to be zero and thus should not be referenced.
-  - b11:    The address of B11, which is an MR x NR submatrix of the
-            packed micro-panel of B. B11 is stored by rows with leading
-            dimension PACKNR, where typically PACKNR = NR.
-  - c11:    The address of C11, which is an MR x NR submatrix of matrix C,
-            stored according to rs_c and cs_c. C11 is the submatrix within
-            C that corresponds to the elements which were packed into B11.
-            Thus, C is the original input matrix B to the overall trsm
-            operation.
-  - rs_c:   The row stride of C11 (ie: the distance to the next row of C11,
-            in units of matrix elements).
-  - cs_c:   The column stride of C11 (ie: the distance to the next column of
-            C11, in units of matrix elements).
-  - data:   The address of an auxinfo_t object that contains auxiliary
-            information that may be useful when optimizing the trsm
-            micro-kernel implementation. (See BLIS KernelsHowTo wiki for
-            more info.)
+    https://github.com/flame/blis/wiki/KernelsHowTo
 
-  Diagrams for trsm
-
-  Please see the diagram for gemmtrsm_u to see depiction of the trsm_u and
-  where it fits in with its preceding gemm subproblem.
-
-  Implementation Notes for trsm
-
-  - Register blocksizes. See Implementation Notes for gemm.
-  - Leading dimensions of a11 and b11: PACKMR and PACKNR. See
-    Implementation Notes for gemm.
-  - Edge cases in MR, NR dimensions. See Implementation Notes for gemm.
-  - Alignment of a11 and b11. See Implementation Notes for gemmtrsm.
-  - Unrolling loops. Most optimized implementations should unroll all
-    three loops within the trsm micro-kernel.
-  - Prefetching next micro-panels of A and B. We advise against using
-    the bli_auxinfo_next_a() and bli_auxinfo_next_b() macros from within
-    the trsm_l and trsm_u micro-kernels, since the values returned usually
-    only make sense in the context of the overall gemmtrsm subproblem. 
-  - Diagonal elements of A11. At the time this micro-kernel is called,
-    the diagonal entries of triangular matrix A11 contain the inverse of
-    the original elements. This inversion is done during packing so that
-    we can avoid expensive division instructions within the micro-kernel
-    itself. If the diag parameter to the higher level trsm operation was
-    equal to BLIS_UNIT_DIAG, the diagonal elements will be explicitly
-    unit.
-  - Zero elements of A11. Since A11 is lower triangular (for trsm_l), the
-    strictly upper triangle implicitly contains zeros. Similarly, the
-    strictly lower triangle of A11 implicitly contains zeros when A11 is
-    upper triangular (for trsm_u). However, the packing function may or
-    may not actually write zeros to this region. Thus, the implementation
-    should not reference these elements.
-  - Output. This micro-kernel must write its result to two places: the
-    submatrix B11 of the current packed micro-panel of B and the submatrix
-    C11 of the output matrix C.
-
-  For more info, please refer to the BLIS website and/or contact the
-  blis-devel mailing list.
+  and/or contact the blis-devel mailing list.
 
   -FGVZ
 */
-	const dim_t        m     = bli_dmr;
-	const dim_t        n     = bli_dnr;
+	const dim_t        mr     = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx );
+	const dim_t        nr     = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx );
 
-	const inc_t        rs_a  = 1;
-	const inc_t        cs_a  = bli_dpackmr;
+	const inc_t        packmr = bli_cntx_get_blksz_max_dt( dt, BLIS_MR, cntx );
+	const inc_t        packnr = bli_cntx_get_blksz_max_dt( dt, BLIS_NR, cntx );
 
-	const inc_t        rs_b  = bli_dpacknr;
-	const inc_t        cs_b  = 1;
+	const dim_t        m      = mr;
+	const dim_t        n      = nr;
+
+	const inc_t        rs_a   = 1;
+	const inc_t        cs_a   = packmr;
+
+	const inc_t        rs_b   = packnr;
+	const inc_t        cs_b   = 1;
 
 	dim_t              iter, i, j, l;
 	dim_t              n_behind;
@@ -207,33 +169,45 @@ void bli_dtrsm_u_opt_mxn(
 
 
 
-void bli_ctrsm_u_opt_mxn(
-                          scomplex* restrict a11,
-                          scomplex* restrict b11,
-                          scomplex* restrict c11, inc_t rs_c, inc_t cs_c,
-                          auxinfo_t*         data
-                        )
+void bli_ctrsm_u_opt_mxn
+     (
+       scomplex*  restrict a11,
+       scomplex*  restrict b11,
+       scomplex*  restrict c11, inc_t rs_c, inc_t cs_c,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
+     )
 {
 	/* Just call the reference implementation. */
-	BLIS_CTRSM_U_UKERNEL_REF( a11,
-	                     b11,
-	                     c11, rs_c, cs_c,
-	                     data );
+	BLIS_CTRSM_U_UKERNEL_REF
+	(
+	  a11,
+	  b11,
+	  c11, rs_c, cs_c,
+	  data,
+	  cntx
+	);
 }
 
 
 
-void bli_ztrsm_u_opt_mxn(
-                          dcomplex* restrict a11,
-                          dcomplex* restrict b11,
-                          dcomplex* restrict c11, inc_t rs_c, inc_t cs_c,
-                          auxinfo_t*         data
-                        )
+void bli_ztrsm_u_opt_mxn
+     (
+       dcomplex*  restrict a11,
+       dcomplex*  restrict b11,
+       dcomplex*  restrict c11, inc_t rs_c, inc_t cs_c,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
+     )
 {
 	/* Just call the reference implementation. */
-	BLIS_ZTRSM_U_UKERNEL_REF( a11,
-	                     b11,
-	                     c11, rs_c, cs_c,
-	                     data );
+	BLIS_ZTRSM_U_UKERNEL_REF
+	(
+	  a11,
+	  b11,
+	  c11, rs_c, cs_c,
+	  data,
+	  cntx
+	);
 }
 

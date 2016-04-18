@@ -174,8 +174,8 @@ void libblis_test_gemv_experiment( test_params_t* params,
 	}
 	else
 	{
-		bli_setsc(  0.0,  2.0, &alpha );
-		bli_setsc(  0.0, -1.0, &beta );
+		bli_setsc(  1.0,  2.0, &alpha );
+		bli_setsc(  1.0, -1.0, &beta );
 	}
 
 	// Initialize diagonal of matrix A.

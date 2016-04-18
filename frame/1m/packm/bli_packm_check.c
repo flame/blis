@@ -35,9 +35,9 @@
 #include "blis.h"
 
 
-void bli_packm_init_check( obj_t*   a,
-                           obj_t*   p,
-                           packm_t* cntl )
+void bli_packm_init_check( obj_t*  a,
+                           obj_t*  p,
+                           cntx_t* cntx )
 {
 	err_t e_val;
 
@@ -54,9 +54,9 @@ void bli_packm_init_check( obj_t*   a,
 	//bli_check_error_code( e_val );
 }
 
-void bli_packm_int_check( obj_t*   a,
-                          obj_t*   p,
-                          packm_t* cntl )
+void bli_packm_int_check( obj_t*  a,
+                          obj_t*  p,
+                          cntx_t* cntx )
 {
 	err_t e_val;
 

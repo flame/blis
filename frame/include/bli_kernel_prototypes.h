@@ -35,494 +35,130 @@
 #ifndef BLIS_KERNEL_PROTOTYPES_H
 #define BLIS_KERNEL_PROTOTYPES_H
 
-
-// -- Define PASTEMAC-friendly kernel function name macros ---------------------
+// Generate prototypes for level-3 micro-kernels.
 
 //
 // Level-3
 //
 
-// gemm micro-kernels
+#define bli_sgemm_ukr_name       BLIS_SGEMM_UKERNEL
+#define bli_dgemm_ukr_name       BLIS_DGEMM_UKERNEL
+#define bli_cgemm_ukr_name       BLIS_CGEMM_UKERNEL
+#define bli_zgemm_ukr_name       BLIS_ZGEMM_UKERNEL
 
-#define bli_sGEMM_UKERNEL BLIS_SGEMM_UKERNEL
-#define bli_dGEMM_UKERNEL BLIS_DGEMM_UKERNEL
-#define bli_cGEMM_UKERNEL BLIS_CGEMM_UKERNEL
-#define bli_zGEMM_UKERNEL BLIS_ZGEMM_UKERNEL
+#define bli_sgemmtrsm_l_ukr_name BLIS_SGEMMTRSM_L_UKERNEL
+#define bli_dgemmtrsm_l_ukr_name BLIS_DGEMMTRSM_L_UKERNEL
+#define bli_cgemmtrsm_l_ukr_name BLIS_CGEMMTRSM_L_UKERNEL
+#define bli_zgemmtrsm_l_ukr_name BLIS_ZGEMMTRSM_L_UKERNEL
 
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, kername ) \
-\
-void PASTEMAC(ch,kername) \
-     ( \
-       dim_t           k, \
-       ctype* restrict alpha, \
-       ctype* restrict a, \
-       ctype* restrict b, \
-       ctype* restrict beta, \
-       ctype* restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t*      data  \
-     );
+#define bli_sgemmtrsm_u_ukr_name BLIS_SGEMMTRSM_U_UKERNEL
+#define bli_dgemmtrsm_u_ukr_name BLIS_DGEMMTRSM_U_UKERNEL
+#define bli_cgemmtrsm_u_ukr_name BLIS_CGEMMTRSM_U_UKERNEL
+#define bli_zgemmtrsm_u_ukr_name BLIS_ZGEMMTRSM_U_UKERNEL
 
-INSERT_GENTPROT_BASIC( GEMM_UKERNEL )
+#define bli_strsm_l_ukr_name     BLIS_STRSM_L_UKERNEL
+#define bli_dtrsm_l_ukr_name     BLIS_DTRSM_L_UKERNEL
+#define bli_ctrsm_l_ukr_name     BLIS_CTRSM_L_UKERNEL
+#define bli_ztrsm_l_ukr_name     BLIS_ZTRSM_L_UKERNEL
 
-// gemmtrsm_l micro-kernels
+#define bli_strsm_u_ukr_name     BLIS_STRSM_U_UKERNEL
+#define bli_dtrsm_u_ukr_name     BLIS_DTRSM_U_UKERNEL
+#define bli_ctrsm_u_ukr_name     BLIS_CTRSM_U_UKERNEL
+#define bli_ztrsm_u_ukr_name     BLIS_ZTRSM_U_UKERNEL
 
-#define bli_sGEMMTRSM_L_UKERNEL BLIS_SGEMMTRSM_L_UKERNEL
-#define bli_dGEMMTRSM_L_UKERNEL BLIS_DGEMMTRSM_L_UKERNEL
-#define bli_cGEMMTRSM_L_UKERNEL BLIS_CGEMMTRSM_L_UKERNEL
-#define bli_zGEMMTRSM_L_UKERNEL BLIS_ZGEMMTRSM_L_UKERNEL
-
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, kername ) \
-\
-void PASTEMAC(ch,kername) \
-     ( \
-       dim_t           k, \
-       ctype* restrict alpha, \
-       ctype* restrict a10, \
-       ctype* restrict a11, \
-       ctype* restrict b01, \
-       ctype* restrict b11, \
-       ctype* restrict c11, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t*      data  \
-     );
-
-INSERT_GENTPROT_BASIC( GEMMTRSM_L_UKERNEL )
-
-// gemmtrsm_u micro-kernels
-
-#define bli_sGEMMTRSM_U_UKERNEL BLIS_SGEMMTRSM_U_UKERNEL
-#define bli_dGEMMTRSM_U_UKERNEL BLIS_DGEMMTRSM_U_UKERNEL
-#define bli_cGEMMTRSM_U_UKERNEL BLIS_CGEMMTRSM_U_UKERNEL
-#define bli_zGEMMTRSM_U_UKERNEL BLIS_ZGEMMTRSM_U_UKERNEL
-
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, kername ) \
-\
-void PASTEMAC(ch,kername) \
-     ( \
-       dim_t           k, \
-       ctype* restrict alpha, \
-       ctype* restrict a12, \
-       ctype* restrict a11, \
-       ctype* restrict b21, \
-       ctype* restrict b11, \
-       ctype* restrict c11, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t*      data  \
-     );
-
-INSERT_GENTPROT_BASIC( GEMMTRSM_U_UKERNEL )
-
-// trsm_l micro-kernels
-
-#define bli_sTRSM_L_UKERNEL BLIS_STRSM_L_UKERNEL
-#define bli_dTRSM_L_UKERNEL BLIS_DTRSM_L_UKERNEL
-#define bli_cTRSM_L_UKERNEL BLIS_CTRSM_L_UKERNEL
-#define bli_zTRSM_L_UKERNEL BLIS_ZTRSM_L_UKERNEL
-
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, kername ) \
-\
-void PASTEMAC(ch,kername) \
-     ( \
-       ctype* restrict a11, \
-       ctype* restrict b11, \
-       ctype* restrict c11, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t*      data  \
-     );
-
-INSERT_GENTPROT_BASIC( TRSM_L_UKERNEL )
-
-// trsm_u micro-kernels
-
-#define bli_sTRSM_U_UKERNEL BLIS_STRSM_U_UKERNEL
-#define bli_dTRSM_U_UKERNEL BLIS_DTRSM_U_UKERNEL
-#define bli_cTRSM_U_UKERNEL BLIS_CTRSM_U_UKERNEL
-#define bli_zTRSM_U_UKERNEL BLIS_ZTRSM_U_UKERNEL
-
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, kername ) \
-\
-void PASTEMAC(ch,kername) \
-     ( \
-       ctype* restrict a11, \
-       ctype* restrict b11, \
-       ctype* restrict c11, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t*      data  \
-     );
-
-INSERT_GENTPROT_BASIC( TRSM_U_UKERNEL )
-
-
-//
-// Level-1m
-//
-
-// NOTE: We don't need any PASTEMAC-friendly aliases to packm kernel
-// macros because they are used directly in the initialization of the
-// function pointer array, rather than via a templatizing wrapper macro.
-
+#include "bli_l3_ukr.h"
 
 //
 // Level-1f
 //
 
-// axpy2v kernels
+#define bli_saxpy2v_ker_name    BLIS_SAXPY2V_KERNEL
+#define bli_daxpy2v_ker_name    BLIS_DAXPY2V_KERNEL
+#define bli_caxpy2v_ker_name    BLIS_CAXPY2V_KERNEL
+#define bli_zaxpy2v_ker_name    BLIS_ZAXPY2V_KERNEL
 
-#define bli_sssAXPY2V_KERNEL BLIS_SAXPY2V_KERNEL
-#define bli_dddAXPY2V_KERNEL BLIS_DAXPY2V_KERNEL
-#define bli_cccAXPY2V_KERNEL BLIS_CAXPY2V_KERNEL
-#define bli_zzzAXPY2V_KERNEL BLIS_ZAXPY2V_KERNEL
+#define bli_sdotaxpyv_ker_name  BLIS_SDOTAXPYV_KERNEL
+#define bli_ddotaxpyv_ker_name  BLIS_DDOTAXPYV_KERNEL
+#define bli_cdotaxpyv_ker_name  BLIS_CDOTAXPYV_KERNEL
+#define bli_zdotaxpyv_ker_name  BLIS_ZDOTAXPYV_KERNEL
 
-#undef  GENTPROT3U12
-#define GENTPROT3U12( ctype_x, ctype_y, ctype_z, ctype_xy, chx, chy, chz, chxy, kername ) \
-\
-void PASTEMAC3(chx,chy,chz,kername) \
-     ( \
-       conj_t             conjx, \
-       conj_t             conjy, \
-       dim_t              n, \
-       ctype_xy* restrict alpha1, \
-       ctype_xy* restrict alpha2, \
-       ctype_x*  restrict x, inc_t incx, \
-       ctype_y*  restrict y, inc_t incy, \
-       ctype_z*  restrict z, inc_t incz  \
-     );
+#define bli_sdotxf_ker_name     BLIS_SDOTXF_KERNEL
+#define bli_ddotxf_ker_name     BLIS_DDOTXF_KERNEL
+#define bli_cdotxf_ker_name     BLIS_CDOTXF_KERNEL
+#define bli_zdotxf_ker_name     BLIS_ZDOTXF_KERNEL
 
-INSERT_GENTPROT3U12_BASIC( AXPY2V_KERNEL )
+#define bli_saxpyf_ker_name     BLIS_SAXPYF_KERNEL
+#define bli_daxpyf_ker_name     BLIS_DAXPYF_KERNEL
+#define bli_caxpyf_ker_name     BLIS_CAXPYF_KERNEL
+#define bli_zaxpyf_ker_name     BLIS_ZAXPYF_KERNEL
 
-// dotaxpyv kernels
+#define bli_sdotxaxpyf_ker_name BLIS_SDOTXAXPYF_KERNEL
+#define bli_ddotxaxpyf_ker_name BLIS_DDOTXAXPYF_KERNEL
+#define bli_cdotxaxpyf_ker_name BLIS_CDOTXAXPYF_KERNEL
+#define bli_zdotxaxpyf_ker_name BLIS_ZDOTXAXPYF_KERNEL
 
-#define bli_sssDOTAXPYV_KERNEL BLIS_SDOTAXPYV_KERNEL
-#define bli_dddDOTAXPYV_KERNEL BLIS_DDOTAXPYV_KERNEL
-#define bli_cccDOTAXPYV_KERNEL BLIS_CDOTAXPYV_KERNEL
-#define bli_zzzDOTAXPYV_KERNEL BLIS_ZDOTAXPYV_KERNEL
-
-#undef  GENTPROT3U12
-#define GENTPROT3U12( ctype_x, ctype_y, ctype_z, ctype_xy, chx, chy, chz, chxy, kername ) \
-\
-void PASTEMAC3(chx,chy,chz,kername) \
-     ( \
-       conj_t             conjxt, \
-       conj_t             conjx, \
-       conj_t             conjy, \
-       dim_t              m, \
-       ctype_x*  restrict alpha, \
-       ctype_x*  restrict x, inc_t incx, \
-       ctype_y*  restrict y, inc_t incy, \
-       ctype_xy* restrict rho, \
-       ctype_z*  restrict z, inc_t incz  \
-     );
-
-INSERT_GENTPROT3U12_BASIC( DOTAXPYV_KERNEL )
-
-// axpyf kernels
-
-#define bli_sssAXPYF_KERNEL BLIS_SAXPYF_KERNEL
-#define bli_dddAXPYF_KERNEL BLIS_DAXPYF_KERNEL
-#define bli_cccAXPYF_KERNEL BLIS_CAXPYF_KERNEL
-#define bli_zzzAXPYF_KERNEL BLIS_ZAXPYF_KERNEL
-
-#undef  GENTPROT3U12
-#define GENTPROT3U12( ctype_a, ctype_x, ctype_y, ctype_ax, cha, chx, chy, chax, kername ) \
-\
-void PASTEMAC3(cha,chx,chy,kername) \
-     ( \
-       conj_t             conja, \
-       conj_t             conjx, \
-       dim_t              m, \
-       dim_t              b_n, \
-       ctype_ax* restrict alpha, \
-       ctype_a*  restrict a, inc_t inca, inc_t lda, \
-       ctype_x*  restrict x, inc_t incx, \
-       ctype_y*  restrict y, inc_t incy  \
-     );
-
-INSERT_GENTPROT3U12_BASIC( AXPYF_KERNEL )
-
-// dotxf kernels
-
-#define bli_sssDOTXF_KERNEL BLIS_SDOTXF_KERNEL
-#define bli_dddDOTXF_KERNEL BLIS_DDOTXF_KERNEL
-#define bli_cccDOTXF_KERNEL BLIS_CDOTXF_KERNEL
-#define bli_zzzDOTXF_KERNEL BLIS_ZDOTXF_KERNEL
-
-#undef  GENTPROT3U12
-#define GENTPROT3U12( ctype_a, ctype_x, ctype_y, ctype_ax, cha, chx, chy, chax, kername ) \
-\
-void PASTEMAC3(cha,chx,chy,kername) \
-     ( \
-       conj_t             conjat, \
-       conj_t             conjx, \
-       dim_t              m, \
-       dim_t              b_n, \
-       ctype_ax* restrict alpha, \
-       ctype_a*  restrict a, inc_t inca, inc_t lda, \
-       ctype_x*  restrict x, inc_t incx, \
-       ctype_y*  restrict beta, \
-       ctype_y*  restrict y, inc_t incy  \
-     );
-
-INSERT_GENTPROT3U12_BASIC( DOTXF_KERNEL )
-
-// dotxaxpyf kernels
-
-#define bli_sssDOTXAXPYF_KERNEL BLIS_SDOTXAXPYF_KERNEL
-#define bli_dddDOTXAXPYF_KERNEL BLIS_DDOTXAXPYF_KERNEL
-#define bli_cccDOTXAXPYF_KERNEL BLIS_CDOTXAXPYF_KERNEL
-#define bli_zzzDOTXAXPYF_KERNEL BLIS_ZDOTXAXPYF_KERNEL
-
-#undef  GENTPROT3U12
-#define GENTPROT3U12( ctype_a, ctype_b, ctype_c, ctype_ab, cha, chb, chc, chab, kername ) \
-\
-void PASTEMAC3(cha,chb,chc,kername) \
-     ( \
-       conj_t             conjat, \
-       conj_t             conja, \
-       conj_t             conjw, \
-       conj_t             conjx, \
-       dim_t              m, \
-       dim_t              b_n, \
-       ctype_ab* restrict alpha, \
-       ctype_a*  restrict a, inc_t inca, inc_t lda, \
-       ctype_b*  restrict w, inc_t incw, \
-       ctype_b*  restrict x, inc_t incx, \
-       ctype_c*  restrict beta, \
-       ctype_c*  restrict y, inc_t incy, \
-       ctype_c*  restrict z, inc_t incz  \
-     );
-
-INSERT_GENTPROT3U12_BASIC( DOTXAXPYF_KERNEL )
-
+#include "bli_l1f_ker.h"
 
 //
 // Level-1v
 //
 
-// addv kernels
+#define bli_saddv_ker_name      BLIS_SADDV_KERNEL
+#define bli_daddv_ker_name      BLIS_DADDV_KERNEL
+#define bli_caddv_ker_name      BLIS_CADDV_KERNEL
+#define bli_zaddv_ker_name      BLIS_ZADDV_KERNEL
 
-#define bli_ssADDV_KERNEL BLIS_SADDV_KERNEL
-#define bli_ddADDV_KERNEL BLIS_DADDV_KERNEL
-#define bli_ccADDV_KERNEL BLIS_CADDV_KERNEL
-#define bli_zzADDV_KERNEL BLIS_ZADDV_KERNEL
+#define bli_saxpyv_ker_name     BLIS_SAXPYV_KERNEL
+#define bli_daxpyv_ker_name     BLIS_DAXPYV_KERNEL
+#define bli_caxpyv_ker_name     BLIS_CAXPYV_KERNEL
+#define bli_zaxpyv_ker_name     BLIS_ZAXPYV_KERNEL
 
-#undef  GENTPROT2
-#define GENTPROT2( ctype_x, ctype_y, chx, chy, kername ) \
-\
-void PASTEMAC2(chx,chy,kername) \
-     ( \
-       conj_t            conjx, \
-       dim_t             n, \
-       ctype_x* restrict x, inc_t incx, \
-       ctype_y* restrict y, inc_t incy  \
-     );
+#define bli_scopyv_ker_name     BLIS_SCOPYV_KERNEL
+#define bli_dcopyv_ker_name     BLIS_DCOPYV_KERNEL
+#define bli_ccopyv_ker_name     BLIS_CCOPYV_KERNEL
+#define bli_zcopyv_ker_name     BLIS_ZCOPYV_KERNEL
 
-INSERT_GENTPROT2_BASIC( ADDV_KERNEL )
+#define bli_sdotv_ker_name      BLIS_SDOTV_KERNEL
+#define bli_ddotv_ker_name      BLIS_DDOTV_KERNEL
+#define bli_cdotv_ker_name      BLIS_CDOTV_KERNEL
+#define bli_zdotv_ker_name      BLIS_ZDOTV_KERNEL
 
-// axpyv kernels
+#define bli_sdotxv_ker_name     BLIS_SDOTXV_KERNEL
+#define bli_ddotxv_ker_name     BLIS_DDOTXV_KERNEL
+#define bli_cdotxv_ker_name     BLIS_CDOTXV_KERNEL
+#define bli_zdotxv_ker_name     BLIS_ZDOTXV_KERNEL
 
-#define bli_sssAXPYV_KERNEL BLIS_SAXPYV_KERNEL
-#define bli_dddAXPYV_KERNEL BLIS_DAXPYV_KERNEL
-#define bli_cccAXPYV_KERNEL BLIS_CAXPYV_KERNEL
-#define bli_zzzAXPYV_KERNEL BLIS_ZAXPYV_KERNEL
+#define bli_sinvertv_ker_name   BLIS_SINVERTV_KERNEL
+#define bli_dinvertv_ker_name   BLIS_DINVERTV_KERNEL
+#define bli_cinvertv_ker_name   BLIS_CINVERTV_KERNEL
+#define bli_zinvertv_ker_name   BLIS_ZINVERTV_KERNEL
 
-#undef  GENTPROT3
-#define GENTPROT3( ctype_a, ctype_x, ctype_y, cha, chx, chy, kername ) \
-\
-void PASTEMAC3(cha,chx,chy,kername) \
-     ( \
-       conj_t            conjx, \
-       dim_t             n, \
-       ctype_a* restrict alpha, \
-       ctype_x* restrict x, inc_t incx, \
-       ctype_y* restrict y, inc_t incy  \
-     );
+#define bli_sscalv_ker_name     BLIS_SSCALV_KERNEL
+#define bli_dscalv_ker_name     BLIS_DSCALV_KERNEL
+#define bli_cscalv_ker_name     BLIS_CSCALV_KERNEL
+#define bli_zscalv_ker_name     BLIS_ZSCALV_KERNEL
 
-INSERT_GENTPROT3_BASIC( AXPYV_KERNEL )
+#define bli_sscal2v_ker_name    BLIS_SSCAL2V_KERNEL
+#define bli_dscal2v_ker_name    BLIS_DSCAL2V_KERNEL
+#define bli_cscal2v_ker_name    BLIS_CSCAL2V_KERNEL
+#define bli_zscal2v_ker_name    BLIS_ZSCAL2V_KERNEL
 
-// copyv kernels
+#define bli_ssetv_ker_name      BLIS_SSETV_KERNEL
+#define bli_dsetv_ker_name      BLIS_DSETV_KERNEL
+#define bli_csetv_ker_name      BLIS_CSETV_KERNEL
+#define bli_zsetv_ker_name      BLIS_ZSETV_KERNEL
 
-#define bli_ssCOPYV_KERNEL BLIS_SCOPYV_KERNEL
-#define bli_ddCOPYV_KERNEL BLIS_DCOPYV_KERNEL
-#define bli_ccCOPYV_KERNEL BLIS_CCOPYV_KERNEL
-#define bli_zzCOPYV_KERNEL BLIS_ZCOPYV_KERNEL
+#define bli_ssubv_ker_name      BLIS_SSUBV_KERNEL
+#define bli_dsubv_ker_name      BLIS_DSUBV_KERNEL
+#define bli_csubv_ker_name      BLIS_CSUBV_KERNEL
+#define bli_zsubv_ker_name      BLIS_ZSUBV_KERNEL
 
-#undef  GENTPROT2
-#define GENTPROT2( ctype_x, ctype_y, chx, chy, kername ) \
-\
-void PASTEMAC2(chx,chy,kername) \
-     ( \
-       conj_t            conjx, \
-       dim_t             n, \
-       ctype_x* restrict x, inc_t incx, \
-       ctype_y* restrict y, inc_t incy  \
-     );
+#define bli_sswapv_ker_name     BLIS_SSWAPV_KERNEL
+#define bli_dswapv_ker_name     BLIS_DSWAPV_KERNEL
+#define bli_cswapv_ker_name     BLIS_CSWAPV_KERNEL
+#define bli_zswapv_ker_name     BLIS_ZSWAPV_KERNEL
 
-INSERT_GENTPROT2_BASIC( COPYV_KERNEL )
-
-// dotv kernels
-
-#define bli_sssDOTV_KERNEL BLIS_SDOTV_KERNEL
-#define bli_dddDOTV_KERNEL BLIS_DDOTV_KERNEL
-#define bli_cccDOTV_KERNEL BLIS_CDOTV_KERNEL
-#define bli_zzzDOTV_KERNEL BLIS_ZDOTV_KERNEL
-
-#undef  GENTPROT3
-#define GENTPROT3( ctype_x, ctype_y, ctype_r, chx, chy, chr, kername ) \
-\
-void PASTEMAC3(chx,chy,chr,kername) \
-     ( \
-       conj_t            conjx, \
-       conj_t            conjy, \
-       dim_t             n, \
-       ctype_x* restrict x, inc_t incx, \
-       ctype_y* restrict y, inc_t incy, \
-       ctype_r* restrict rho  \
-     );
-
-INSERT_GENTPROT3_BASIC( DOTV_KERNEL )
-
-// dotxv kernels
-
-#define bli_sssDOTXV_KERNEL BLIS_SDOTXV_KERNEL
-#define bli_dddDOTXV_KERNEL BLIS_DDOTXV_KERNEL
-#define bli_cccDOTXV_KERNEL BLIS_CDOTXV_KERNEL
-#define bli_zzzDOTXV_KERNEL BLIS_ZDOTXV_KERNEL
-
-#undef  GENTPROT3U12
-#define GENTPROT3U12( ctype_x, ctype_y, ctype_r, ctype_xy, chx, chy, chr, chxy, kername ) \
-\
-void PASTEMAC3(chx,chy,chr,kername) \
-     ( \
-       conj_t             conjx, \
-       conj_t             conjy, \
-       dim_t              n, \
-       ctype_xy* restrict alpha, \
-       ctype_x*  restrict x, inc_t incx, \
-       ctype_y*  restrict y, inc_t incy, \
-       ctype_r*  restrict beta, \
-       ctype_r*  restrict rho  \
-     );
-
-INSERT_GENTPROT3U12_BASIC( DOTXV_KERNEL )
-
-// invertv kernels
-
-#define bli_sINVERTV_KERNEL BLIS_SINVERTV_KERNEL
-#define bli_dINVERTV_KERNEL BLIS_DINVERTV_KERNEL
-#define bli_cINVERTV_KERNEL BLIS_CINVERTV_KERNEL
-#define bli_zINVERTV_KERNEL BLIS_ZINVERTV_KERNEL
-
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, kername ) \
-\
-void PASTEMAC(ch,kername) \
-     ( \
-       dim_t           n, \
-       ctype* restrict x, inc_t incx  \
-     );
-
-INSERT_GENTPROT_BASIC( INVERTV_KERNEL )
-
-// scal2v kernels
-
-#define bli_sssSCAL2V_KERNEL BLIS_SSCAL2V_KERNEL
-#define bli_dddSCAL2V_KERNEL BLIS_DSCAL2V_KERNEL
-#define bli_cccSCAL2V_KERNEL BLIS_CSCAL2V_KERNEL
-#define bli_zzzSCAL2V_KERNEL BLIS_ZSCAL2V_KERNEL
-
-#undef  GENTPROT3
-#define GENTPROT3( ctype_b, ctype_x, ctype_y, chb, chx, chy, kername ) \
-\
-void PASTEMAC3(chb,chx,chy,kername) \
-     ( \
-       conj_t            conjx, \
-       dim_t             n, \
-       ctype_b* restrict beta, \
-       ctype_x* restrict x, inc_t incx, \
-       ctype_y* restrict y, inc_t incy  \
-     );
-
-INSERT_GENTPROT3_BASIC( SCAL2V_KERNEL )
-
-// scalv kernels
-
-#define bli_ssSCALV_KERNEL BLIS_SSCALV_KERNEL
-#define bli_ddSCALV_KERNEL BLIS_DSCALV_KERNEL
-#define bli_ccSCALV_KERNEL BLIS_CSCALV_KERNEL
-#define bli_zzSCALV_KERNEL BLIS_ZSCALV_KERNEL
-
-#undef  GENTPROT2
-#define GENTPROT2( ctype_b, ctype_x, chb, chx, kername ) \
-\
-void PASTEMAC2(chb,chx,kername) \
-     ( \
-       conj_t            conjbeta, \
-       dim_t             n, \
-       ctype_b* restrict beta, \
-       ctype_x* restrict x, inc_t incx \
-     );
-
-INSERT_GENTPROT2_BASIC( SCALV_KERNEL )
-
-// setv kernels
-
-#define bli_ssSETV_KERNEL BLIS_SSETV_KERNEL
-#define bli_ddSETV_KERNEL BLIS_DSETV_KERNEL
-#define bli_ccSETV_KERNEL BLIS_CSETV_KERNEL
-#define bli_zzSETV_KERNEL BLIS_ZSETV_KERNEL
-
-#undef  GENTPROT2
-#define GENTPROT2( ctype_b, ctype_x, chb, chx, kername ) \
-\
-void PASTEMAC2(chb,chx,kername) \
-     ( \
-       dim_t             n, \
-       ctype_b* restrict beta, \
-       ctype_x* restrict x, inc_t incx \
-     );
-
-INSERT_GENTPROT2_BASIC( SETV_KERNEL )
-
-// subv kernels
-
-#define bli_ssSUBV_KERNEL BLIS_SSUBV_KERNEL
-#define bli_ddSUBV_KERNEL BLIS_DSUBV_KERNEL
-#define bli_ccSUBV_KERNEL BLIS_CSUBV_KERNEL
-#define bli_zzSUBV_KERNEL BLIS_ZSUBV_KERNEL
-
-#undef  GENTPROT2
-#define GENTPROT2( ctype_x, ctype_y, chx, chy, kername ) \
-\
-void PASTEMAC2(chx,chy,kername) \
-     ( \
-       conj_t            conjx, \
-       dim_t             n, \
-       ctype_x* restrict x, inc_t incx, \
-       ctype_y* restrict y, inc_t incy  \
-     );
-
-INSERT_GENTPROT2_BASIC( SUBV_KERNEL )
-
-// swapv kernels
-
-#define bli_ssSWAPV_KERNEL BLIS_SSWAPV_KERNEL
-#define bli_ddSWAPV_KERNEL BLIS_DSWAPV_KERNEL
-#define bli_ccSWAPV_KERNEL BLIS_CSWAPV_KERNEL
-#define bli_zzSWAPV_KERNEL BLIS_ZSWAPV_KERNEL
-
-#undef  GENTPROT2
-#define GENTPROT2( ctype_x, ctype_y, chx, chy, kername ) \
-\
-void PASTEMAC2(chx,chy,kername) \
-     ( \
-       dim_t             n, \
-       ctype_x* restrict x, inc_t incx, \
-       ctype_y* restrict y, inc_t incy  \
-     );
-
-INSERT_GENTPROT2_BASIC( SWAPV_KERNEL )
-
+#include "bli_l1v_ker.h"
 
 
 #endif

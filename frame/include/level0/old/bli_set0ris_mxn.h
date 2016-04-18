@@ -39,42 +39,42 @@
 
 #define bli_sset0ris_mxn( m, n, ar, ai, rs_a, cs_a ) \
 { \
-	dim_t i, j; \
+	dim_t _i, _j; \
 \
-	for ( j = 0; j < n; ++j ) \
-	for ( i = 0; i < m; ++i ) \
-	bli_sset0ris( *(ar + i*rs_a + j*cs_a), \
-	              *(ai + i*rs_a + j*cs_a) ); \
+	for ( _j = 0; _j < n; ++_j ) \
+	for ( _i = 0; _i < m; ++_i ) \
+	bli_sset0ris( *(ar + _i*rs_a + _j*cs_a), \
+	              *(ai + _i*rs_a + _j*cs_a) ); \
 }
 
 #define bli_dset0ris_mxn( m, n, ar, ai, rs_a, cs_a ) \
 { \
-	dim_t i, j; \
+	dim_t _i, _j; \
 \
-	for ( j = 0; j < n; ++j ) \
-	for ( i = 0; i < m; ++i ) \
-	bli_dset0ris( *(ar + i*rs_a + j*cs_a), \
-	              *(ai + i*rs_a + j*cs_a) ); \
+	for ( _j = 0; _j < n; ++_j ) \
+	for ( _i = 0; _i < m; ++_i ) \
+	bli_dset0ris( *(ar + _i*rs_a + _j*cs_a), \
+	              *(ai + _i*rs_a + _j*cs_a) ); \
 }
 
 #define bli_cset0ris_mxn( m, n, ar, ai, rs_a, cs_a ) \
 { \
-	dim_t i, j; \
+	dim_t _i, _j; \
 \
-	for ( j = 0; j < n; ++j ) \
-	for ( i = 0; i < m; ++i ) \
-	bli_cset0ris( *(ar + i*rs_a + j*cs_a), \
-	              *(ai + i*rs_a + j*cs_a) ); \
+	for ( _j = 0; _j < n; ++_j ) \
+	for ( _i = 0; _i < m; ++_i ) \
+	bli_cset0ris( *(ar + _i*rs_a + _j*cs_a), \
+	              *(ai + _i*rs_a + _j*cs_a) ); \
 }
 
 #define bli_zset0ris_mxn( m, n, ar, ai, rs_a, cs_a ) \
 { \
-	dim_t i, j; \
+	dim_t _i, _j; \
 \
-	for ( j = 0; j < n; ++j ) \
-	for ( i = 0; i < m; ++i ) \
-	bli_zset0ris( *(ar + i*rs_a + j*cs_a), \
-	              *(ai + i*rs_a + j*cs_a) ); \
+	for ( _j = 0; _j < n; ++_j ) \
+	for ( _i = 0; _i < m; ++_i ) \
+	bli_zset0ris( *(ar + _i*rs_a + _j*cs_a), \
+	              *(ai + _i*rs_a + _j*cs_a) ); \
 }
 
 

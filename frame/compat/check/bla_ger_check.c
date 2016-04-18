@@ -36,34 +36,45 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-void bla_ger_check( char*     dt_str,
-                    char*     op_str,
-                    f77_int*  m,
-                    f77_int*  n,
-                    f77_int*  incx,
-                    f77_int*  incy,
-                    f77_int*  lda )
+void bla_ger_check
+     (
+       char*     dt_str,
+       char*     op_str,
+       f77_int*  m,
+       f77_int*  n,
+       f77_int*  incx,
+       f77_int*  incy,
+       f77_int*  lda
+     )
 {
 	f77_int info = 0;
 
-	if      ( *m < 0 )
+	if      ( *m < 0
+     )
 		info = 1;
-	else if ( *n < 0 )
+	else if ( *n < 0
+     )
 		info = 2;
-	else if ( *incx == 0 )
+	else if ( *incx == 0
+     )
 		info = 5;
-	else if ( *incy == 0 )
+	else if ( *incy == 0
+     )
 		info = 7;
-	else if ( *lda < bli_max( 1, *m ) )
+	else if ( *lda < bli_max( 1, *m )
+     )
 		info = 9;
 
-	if ( info != 0 )
+	if ( info != 0
+     )
 	{
 		char func_str[ BLIS_MAX_BLAS_FUNC_STR_LENGTH ];
 
-		sprintf( func_str, "%s%-5s", dt_str, op_str );
+		sprintf( func_str, "%s%-5s", dt_str, op_str
+     );
 
-		PASTEF770(xerbla)( func_str, &info, (ftnlen)6 );
+		PASTEF770(xerbla)( func_str, &info, (ftnlen)6
+     );
 	}
 }
 

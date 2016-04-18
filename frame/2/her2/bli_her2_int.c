@@ -36,13 +36,14 @@
 
 #define FUNCPTR_T her2_fp
 
-typedef void (*FUNCPTR_T)( conj_t   conjh,
-                           obj_t*   alpha,
-                           obj_t*   alpha_conj,
-                           obj_t*   x,
-                           obj_t*   y,
-                           obj_t*   c,
-                           her2_t*  cntl );
+typedef void (*FUNCPTR_T)( conj_t  conjh,
+                           obj_t*  alpha,
+                           obj_t*  alpha_conj,
+                           obj_t*  x,
+                           obj_t*  y,
+                           obj_t*  c,
+                           cntx_t* cntx,
+                           her2_t* cntl );
 
 static FUNCPTR_T vars[4][3] =
 {
@@ -53,13 +54,14 @@ static FUNCPTR_T vars[4][3] =
 	{ bli_her2_unb_var4,  bli_her2_unf_var4,      bli_her2_blk_var4 },
 };
 
-void bli_her2_int( conj_t   conjh,
-                   obj_t*   alpha,
-                   obj_t*   alpha_conj,
-                   obj_t*   x,
-                   obj_t*   y,
-                   obj_t*   c,
-                   her2_t*  cntl )
+void bli_her2_int( conj_t  conjh,
+                   obj_t*  alpha,
+                   obj_t*  alpha_conj,
+                   obj_t*  x,
+                   obj_t*  y,
+                   obj_t*  c,
+                   cntx_t* cntx,
+                   her2_t* cntl )
 {
 	varnum_t  n;
 	impl_t    i;
@@ -72,7 +74,10 @@ void bli_her2_int( conj_t   conjh,
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
-		bli_her2_int_check( conjh, alpha, x, y, c, cntl );
+	{
+		if ( bli_is_conj( conjh ) ) bli_her2_check( alpha, x, y, c );
+		else                        bli_syr2_check( alpha, x, y, c );
+	}
 
 	// If C, x, or y has a zero dimension, return early.
 	if ( bli_obj_has_zero_dim( *c ) ) return;
@@ -123,6 +128,7 @@ void bli_her2_int( conj_t   conjh,
 	   &x_local,
 	   &y_local,
 	   &c_local,
+	   cntx,
 	   cntl );
 }
 

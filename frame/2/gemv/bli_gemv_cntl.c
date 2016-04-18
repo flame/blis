@@ -39,9 +39,6 @@ extern packm_t*   packm_cntl;
 extern packv_t*   packv_cntl;
 extern unpackv_t* unpackv_cntl;
 
-blksz_t*          gemv_mc;
-blksz_t*          gemv_nc;
-
 gemv_t*           gemv_cntl_bs_ke_dot;
 gemv_t*           gemv_cntl_bs_ke_axpy;
 
@@ -57,37 +54,22 @@ gemv_t*           gemv_cntl_ge_axpy;
 
 void bli_gemv_cntl_init()
 {
-	// Create blocksize objects for each dimension.
-	gemv_mc
-	=
-	bli_blksz_obj_create( BLIS_DEFAULT_L2_MC_S, 0,
-	                      BLIS_DEFAULT_L2_MC_D, 0,
-	                      BLIS_DEFAULT_L2_MC_C, 0,
-	                      BLIS_DEFAULT_L2_MC_Z, 0 );
-	gemv_nc
-	=
-	bli_blksz_obj_create( BLIS_DEFAULT_L2_NC_S, 0,
-	                      BLIS_DEFAULT_L2_NC_D, 0,
-	                      BLIS_DEFAULT_L2_NC_C, 0,
-	                      BLIS_DEFAULT_L2_NC_Z, 0 );
-
-
 	// Create control trees for the lowest-level kernels. These trees induce
 	// operations on (persumably) relatively small block-subvector problems.
 	gemv_cntl_bs_ke_dot
 	=
 	bli_gemv_cntl_obj_create( BLIS_UNB_FUSED,
 	                          BLIS_VARIANT1,
+	                          0,
 	                          NULL, NULL, NULL,
-	                          NULL, NULL, NULL,
-	                          NULL );
+	                          NULL, NULL, NULL );
 	gemv_cntl_bs_ke_axpy
 	=
 	bli_gemv_cntl_obj_create( BLIS_UNB_FUSED,
 	                          BLIS_VARIANT2,
+	                          0,
 	                          NULL, NULL, NULL,
-	                          NULL, NULL, NULL,
-	                          NULL );
+	                          NULL, NULL, NULL );
 
 
 	// Create control trees for problems with relatively small m dimension
@@ -96,7 +78,7 @@ void bli_gemv_cntl_init()
 	=
 	bli_gemv_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT2,
-	                          gemv_nc,
+	                          BLIS_N2,
 	                          scalv_cntl,     // scale y up-front
 	                          packm_cntl,     // pack A1 (if needed)
 	                          packv_cntl,     // pack x1 (if needed)
@@ -107,7 +89,7 @@ void bli_gemv_cntl_init()
 	=
 	bli_gemv_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT2,
-	                          gemv_nc,
+	                          BLIS_N2,
 	                          scalv_cntl,     // scale y up-front
 	                          packm_cntl,     // pack A1 (if needed)
 	                          packv_cntl,     // pack x1 (if needed)
@@ -122,7 +104,7 @@ void bli_gemv_cntl_init()
 	=
 	bli_gemv_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT1,
-	                          gemv_mc,
+	                          BLIS_M2,
 	                          NULL,           // no scaling in blk_var1
 	                          packm_cntl,     // pack A1 (if needed)
 	                          NULL,           // x is not partitioned in var1
@@ -133,7 +115,7 @@ void bli_gemv_cntl_init()
 	=
 	bli_gemv_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT1,
-	                          gemv_mc,
+	                          BLIS_M2,
 	                          NULL,           // no scaling in blk_var1
 	                          packm_cntl,     // pack A1 (if needed)
 	                          NULL,           // x is not partitioned in var1
@@ -148,7 +130,7 @@ void bli_gemv_cntl_init()
 	=
 	bli_gemv_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT1,
-	                          gemv_mc,
+	                          BLIS_M2,
 	                          NULL,           // no scaling in blk_var1
 	                          NULL,           // do not pack A1
 	                          NULL,           // x is not partitioned in var1
@@ -159,7 +141,7 @@ void bli_gemv_cntl_init()
 	=
 	bli_gemv_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT1,
-	                          gemv_mc,
+	                          BLIS_M2,
 	                          NULL,           // no scaling in blk_var1
 	                          NULL,           // do not pack A1
 	                          NULL,           // x is not partitioned in var1
@@ -170,9 +152,6 @@ void bli_gemv_cntl_init()
 
 void bli_gemv_cntl_finalize()
 {
-	bli_blksz_obj_free( gemv_mc );
-	bli_blksz_obj_free( gemv_nc );
-
 	bli_cntl_obj_free( gemv_cntl_bs_ke_dot );
 	bli_cntl_obj_free( gemv_cntl_bs_ke_axpy );
 
@@ -189,7 +168,7 @@ void bli_gemv_cntl_finalize()
 
 gemv_t* bli_gemv_cntl_obj_create( impl_t     impl_type,
                                   varnum_t   var_num,
-                                  blksz_t*   b,
+                                  bszid_t    bszid,
                                   scalv_t*   sub_scalv,
                                   packm_t*   sub_packm_a,
                                   packv_t*   sub_packv_x,
@@ -199,11 +178,11 @@ gemv_t* bli_gemv_cntl_obj_create( impl_t     impl_type,
 {
 	gemv_t* cntl;
 
-	cntl = ( gemv_t* ) bli_malloc( sizeof(gemv_t) );	
+	cntl = ( gemv_t* ) bli_malloc( sizeof(gemv_t) );
 
 	cntl->impl_type     = impl_type;
 	cntl->var_num       = var_num;
-	cntl->b             = b;
+	cntl->bszid         = bszid;
 	cntl->sub_scalv     = sub_scalv;
 	cntl->sub_packm_a   = sub_packm_a;
 	cntl->sub_packv_x   = sub_packv_x;
@@ -217,7 +196,7 @@ gemv_t* bli_gemv_cntl_obj_create( impl_t     impl_type,
 void bli_gemv_cntl_obj_init( gemv_t*    cntl,
                              impl_t     impl_type,
                              varnum_t   var_num,
-                             blksz_t*   b,
+                             bszid_t    bszid,
                              scalv_t*   sub_scalv,
                              packm_t*   sub_packm_a,
                              packv_t*   sub_packv_x,
@@ -227,7 +206,7 @@ void bli_gemv_cntl_obj_init( gemv_t*    cntl,
 {
 	cntl->impl_type     = impl_type;
 	cntl->var_num       = var_num;
-	cntl->b             = b;
+	cntl->bszid         = bszid;
 	cntl->sub_scalv     = sub_scalv;
 	cntl->sub_packm_a   = sub_packm_a;
 	cntl->sub_packv_x   = sub_packv_x;

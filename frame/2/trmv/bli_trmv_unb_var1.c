@@ -34,190 +34,121 @@
 
 #include "blis.h"
 
-#define FUNCPTR_T trmv_fp
-
-typedef void (*FUNCPTR_T)(
-                           uplo_t  uplo,
-                           trans_t trans,
-                           diag_t  diag,
-                           dim_t   m,
-                           void*   alpha,
-                           void*   a, inc_t rs_a, inc_t cs_a,
-                           void*   x, inc_t incx
-                         );
-
-// If some mixed datatype functions will not be compiled, we initialize
-// the corresponding elements of the function array to NULL.
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-static FUNCPTR_T GENARRAY2_ALL(ftypes,trmv_unb_var1);
-#else
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-static FUNCPTR_T GENARRAY2_EXT(ftypes,trmv_unb_var1);
-#else
-static FUNCPTR_T GENARRAY2_MIN(ftypes,trmv_unb_var1);
-#endif
-#endif
-
-
-void bli_trmv_unb_var1( obj_t*  alpha,
-                        obj_t*  a,
-                        obj_t*  x,
-                        trmv_t* cntl )
-{
-	num_t     dt_a      = bli_obj_datatype( *a );
-	num_t     dt_x      = bli_obj_datatype( *x );
-
-	uplo_t    uplo      = bli_obj_uplo( *a );
-	trans_t   trans     = bli_obj_conjtrans_status( *a );
-	diag_t    diag      = bli_obj_diag( *a );
-
-	dim_t     m         = bli_obj_length( *a );
-
-	void*     buf_a     = bli_obj_buffer_at_off( *a );
-	inc_t     rs_a      = bli_obj_row_stride( *a );
-	inc_t     cs_a      = bli_obj_col_stride( *a );
-
-	void*     buf_x     = bli_obj_buffer_at_off( *x );
-	inc_t     incx      = bli_obj_vector_inc( *x );
-
-	num_t     dt_alpha;
-	void*     buf_alpha;
-
-	FUNCPTR_T f;
-
-	// The datatype of alpha MUST be the type union of a and x. This is to
-	// prevent any unnecessary loss of information during computation.
-	dt_alpha  = bli_datatype_union( dt_a, dt_x );
-	buf_alpha = bli_obj_buffer_for_1x1( dt_alpha, *alpha );
-
-	// Index into the type combination array to extract the correct
-	// function pointer.
-	f = ftypes[dt_a][dt_x];
-
-	// Invoke the function.
-	f( uplo,
-	   trans,
-	   diag,
-	   m,
-	   buf_alpha,
-	   buf_a, rs_a, cs_a,
-	   buf_x, incx );
-}
-
-
-#undef  GENTFUNC2U
-#define GENTFUNC2U( ctype_a, ctype_x, ctype_ax, cha, chx, chax, varname, kername ) \
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, varname ) \
 \
-void PASTEMAC2(cha,chx,varname)( \
-                                 uplo_t  uplo, \
-                                 trans_t trans, \
-                                 diag_t  diag, \
-                                 dim_t   m, \
-                                 void*   alpha, \
-                                 void*   a, inc_t rs_a, inc_t cs_a, \
-                                 void*   x, inc_t incx  \
-                               ) \
+void PASTEMAC(ch,varname) \
+     ( \
+       uplo_t  uploa, \
+       trans_t transa, \
+       diag_t  diaga, \
+       dim_t   m, \
+       ctype*  alpha, \
+       ctype*  a, inc_t rs_a, inc_t cs_a, \
+       ctype*  x, inc_t incx, \
+       cntx_t* cntx  \
+     ) \
 { \
-	ctype_ax* alpha_cast = alpha; \
-	ctype_a*  a_cast     = a; \
-	ctype_x*  x_cast     = x; \
-	ctype_a*  a10t; \
-	ctype_a*  alpha11; \
-	ctype_a*  a12t; \
-	ctype_x*  x0; \
-	ctype_x*  chi1; \
-	ctype_x*  x2; \
-	ctype_ax  alpha_alpha11_conj; \
-	ctype_ax  rho; \
-	dim_t     iter, i; \
-	dim_t     n_ahead; \
-	inc_t     rs_at, cs_at; \
-	uplo_t    uplo_trans; \
-	conj_t    conja; \
+	const num_t dt = PASTEMAC(ch,type); \
 \
-	if ( bli_zero_dim1( m ) ) return; \
+	ctype*  a10t; \
+	ctype*  alpha11; \
+	ctype*  a12t; \
+	ctype*  x0; \
+	ctype*  chi1; \
+	ctype*  x2; \
+	ctype   alpha_alpha11_conj; \
+	ctype   rho; \
+	dim_t   iter, i; \
+	dim_t   n_ahead; \
+	inc_t   rs_at, cs_at; \
+	uplo_t  uploa_trans; \
+	conj_t  conja; \
 \
-	if      ( bli_does_notrans( trans ) ) \
+	if      ( bli_does_notrans( transa ) ) \
 	{ \
 		rs_at = rs_a; \
 		cs_at = cs_a; \
-		uplo_trans = uplo; \
+		uploa_trans = uploa; \
 	} \
-	else /* if ( bli_does_trans( trans ) ) */ \
+	else /* if ( bli_does_trans( transa ) ) */ \
 	{ \
 		rs_at = cs_a; \
 		cs_at = rs_a; \
-		uplo_trans = bli_uplo_toggled( uplo ); \
+		uploa_trans = bli_uplo_toggled( uploa ); \
 	} \
 \
-	conja = bli_extract_conj( trans ); \
+	conja = bli_extract_conj( transa ); \
+\
+	PASTECH(ch,dotv_ft) kfp_dv; \
+\
+	/* Query the context for the kernel function pointer. */ \
+	kfp_dv = bli_cntx_get_l1v_ker_dt( dt, BLIS_DOTV_KER, cntx ); \
 \
 	/* We reduce all of the possible cases down to just lower/upper. */ \
-	if      ( bli_is_upper( uplo_trans ) ) \
+	if      ( bli_is_upper( uploa_trans ) ) \
 	{ \
 		for ( iter = 0; iter < m; ++iter ) \
 		{ \
 			i        = iter; \
 			n_ahead  = m - iter - 1; \
-			alpha11  = a_cast + (i  )*rs_at + (i  )*cs_at; \
-			a12t     = a_cast + (i  )*rs_at + (i+1)*cs_at; \
-			chi1     = x_cast + (i  )*incx; \
-			x2       = x_cast + (i+1)*incx; \
+			alpha11  = a + (i  )*rs_at + (i  )*cs_at; \
+			a12t     = a + (i  )*rs_at + (i+1)*cs_at; \
+			chi1     = x + (i  )*incx; \
+			x2       = x + (i+1)*incx; \
 \
 			/* chi1 = alpha * alpha11 * chi1; */ \
-			PASTEMAC2(chax,chax,copys)( *alpha_cast, alpha_alpha11_conj ); \
-			if ( bli_is_nonunit_diag( diag ) ) \
-				PASTEMAC2(cha,chax,scalcjs)( conja, *alpha11, alpha_alpha11_conj ); \
-			PASTEMAC2(chax,chx,scals)( alpha_alpha11_conj, *chi1 ); \
+			PASTEMAC(ch,copys)( *alpha, alpha_alpha11_conj ); \
+			if ( bli_is_nonunit_diag( diaga ) ) \
+				PASTEMAC(ch,scalcjs)( conja, *alpha11, alpha_alpha11_conj ); \
+			PASTEMAC(ch,scals)( alpha_alpha11_conj, *chi1 ); \
 \
 			/* chi1 = chi1 + alpha * a12t * x2; */ \
-			PASTEMAC3(cha,chx,chax,dotv)( conja, \
-			                              BLIS_NO_CONJUGATE, \
-			                              n_ahead, \
-			                              a12t, cs_at, \
-			                              x2,   incx, \
-			                              &rho ); \
-			PASTEMAC3(chax,chax,chx,axpys)( *alpha_cast, rho, *chi1 ); \
+			kfp_dv \
+			( \
+			  conja, \
+			  BLIS_NO_CONJUGATE, \
+			  n_ahead, \
+			  a12t, cs_at, \
+			  x2,   incx, \
+			  &rho, \
+			  cntx  \
+			); \
+			PASTEMAC(ch,axpys)( *alpha, rho, *chi1 ); \
 		} \
 	} \
-	else /* if ( bli_is_lower( uplo_trans ) ) */ \
+	else /* if ( bli_is_lower( uploa_trans ) ) */ \
 	{ \
 		for ( iter = 0; iter < m; ++iter ) \
 		{ \
 			i        = m - iter - 1; \
 			n_ahead  = i; \
-			alpha11  = a_cast + (i  )*rs_at + (i  )*cs_at; \
-			a10t     = a_cast + (i  )*rs_at + (0  )*cs_at; \
-			chi1     = x_cast + (i  )*incx; \
-			x0       = x_cast + (0  )*incx; \
+			alpha11  = a + (i  )*rs_at + (i  )*cs_at; \
+			a10t     = a + (i  )*rs_at + (0  )*cs_at; \
+			chi1     = x + (i  )*incx; \
+			x0       = x + (0  )*incx; \
 \
 			/* chi1 = alpha * alpha11 * chi1; */ \
-			PASTEMAC2(chax,chax,copys)( *alpha_cast, alpha_alpha11_conj ); \
-			if ( bli_is_nonunit_diag( diag ) ) \
-				PASTEMAC2(cha,chax,scalcjs)( conja, *alpha11, alpha_alpha11_conj ); \
-			PASTEMAC2(chax,chx,scals)( alpha_alpha11_conj, *chi1 ); \
+			PASTEMAC(ch,copys)( *alpha, alpha_alpha11_conj ); \
+			if ( bli_is_nonunit_diag( diaga ) ) \
+				PASTEMAC(ch,scalcjs)( conja, *alpha11, alpha_alpha11_conj ); \
+			PASTEMAC(ch,scals)( alpha_alpha11_conj, *chi1 ); \
 \
 			/* chi1 = chi1 + alpha * a10t * x0; */ \
-			PASTEMAC3(cha,chx,chax,kername)( conja, \
-			                                 BLIS_NO_CONJUGATE, \
-			                                 n_ahead, \
-			                                 a10t, cs_at, \
-			                                 x0,   incx, \
-			                                 &rho ); \
-			PASTEMAC3(chax,chax,chx,axpys)( *alpha_cast, rho, *chi1 ); \
+			kfp_dv \
+			( \
+			  conja, \
+			  BLIS_NO_CONJUGATE, \
+			  n_ahead, \
+			  a10t, cs_at, \
+			  x0,   incx, \
+			  &rho, \
+			  cntx  \
+			); \
+			PASTEMAC(ch,axpys)( *alpha, rho, *chi1 ); \
 		} \
 	} \
 }
 
-// Define the basic set of functions unconditionally, and then also some
-// mixed datatype functions if requested.
-INSERT_GENTFUNC2U_BASIC( trmv_unb_var1, DOTV_KERNEL )
-
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTFUNC2U_MIX_D( trmv_unb_var1, DOTV_KERNEL )
-#endif
-
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTFUNC2U_MIX_P( trmv_unb_var1, DOTV_KERNEL )
-#endif
+INSERT_GENTFUNC_BASIC0( trmv_unb_var1 )
 

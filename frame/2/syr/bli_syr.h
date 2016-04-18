@@ -32,54 +32,5 @@
 
 */
 
-#include "bli_syr_check.h"
-
-
-void bli_syr( obj_t*  alpha,
-              obj_t*  x,
-              obj_t*  c );
-
-
-//
-// Prototype BLAS-like interfaces with homogeneous-typed operands.
-//
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname)( \
-                          uplo_t    uploc, \
-                          conj_t    conjx, \
-                          dim_t     m, \
-                          ctype*    alpha, \
-                          ctype*    x, inc_t incx, \
-                          ctype*    c, inc_t rs_c, inc_t cs_c \
-                        );
-
-INSERT_GENTPROT_BASIC( syr )
-
-
-//
-// Prototype BLAS-like interfaces with heterogeneous-typed operands.
-//
-#undef  GENTPROT2
-#define GENTPROT2( ctype_x, ctype_c, chx, chc, opname ) \
-\
-void PASTEMAC2(chx,chc,opname)( \
-                                uplo_t    uploc, \
-                                conj_t    conjx, \
-                                dim_t     m, \
-                                ctype_x*  alpha, \
-                                ctype_x*  x, inc_t incx, \
-                                ctype_c*  c, inc_t rs_c, inc_t cs_c \
-                              );
-
-INSERT_GENTPROT2_BASIC( syr )
-
-#ifdef BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-INSERT_GENTPROT2_MIX_D( syr )
-#endif
-
-#ifdef BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-INSERT_GENTPROT2_MIX_P( syr )
-#endif
+#include "bli_syr_front.h"
 

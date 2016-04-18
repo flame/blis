@@ -36,26 +36,7 @@
 
 extern scalm_t*   scalm_cntl;
 
-extern blksz_t*   gemm_mc;
-extern blksz_t*   gemm_nc;
-extern blksz_t*   gemm_kc;
-extern blksz_t*   gemm_mr;
-extern blksz_t*   gemm_nr;
-extern blksz_t*   gemm_kr;
-
-extern func_t*    gemm_ukrs;
-
 extern gemm_t*    gemm_cntl_bp_ke;
-
-func_t*           gemmtrsm_l_ukrs;
-func_t*           gemmtrsm_u_ukrs;
-func_t*           trsm_l_ukrs;
-func_t*           trsm_u_ukrs;
-
-func_t*           gemmtrsm_l_ref_ukrs;
-func_t*           gemmtrsm_u_ref_ukrs;
-func_t*           trsm_l_ref_ukrs;
-func_t*           trsm_u_ref_ukrs;
 
 packm_t*          trsm_l_packa_cntl;
 packm_t*          trsm_l_packb_cntl;
@@ -80,60 +61,6 @@ trsm_t*           trsm_r_cntl;
 void bli_trsm_cntl_init()
 {
 
-	// Create function pointer objects for each datatype-specific
-	// micro-kernel (for gemmtrsm and trsm).
-	gemmtrsm_l_ukrs
-	=
-	bli_func_obj_create( BLIS_SGEMMTRSM_L_UKERNEL, FALSE,
-	                     BLIS_DGEMMTRSM_L_UKERNEL, FALSE,
-	                     BLIS_CGEMMTRSM_L_UKERNEL, FALSE,
-	                     BLIS_ZGEMMTRSM_L_UKERNEL, FALSE );
-	gemmtrsm_u_ukrs
-	=
-	bli_func_obj_create( BLIS_SGEMMTRSM_U_UKERNEL, FALSE,
-	                     BLIS_DGEMMTRSM_U_UKERNEL, FALSE,
-	                     BLIS_CGEMMTRSM_U_UKERNEL, FALSE,
-	                     BLIS_ZGEMMTRSM_U_UKERNEL, FALSE );
-	trsm_l_ukrs
-	=
-	bli_func_obj_create( BLIS_STRSM_L_UKERNEL, FALSE,
-	                     BLIS_DTRSM_L_UKERNEL, FALSE,
-	                     BLIS_CTRSM_L_UKERNEL, FALSE,
-	                     BLIS_ZTRSM_L_UKERNEL, FALSE );
-	trsm_u_ukrs
-	=
-	bli_func_obj_create( BLIS_STRSM_U_UKERNEL, FALSE,
-	                     BLIS_DTRSM_U_UKERNEL, FALSE,
-	                     BLIS_CTRSM_U_UKERNEL, FALSE,
-	                     BLIS_ZTRSM_U_UKERNEL, FALSE );
-
-	// Create function pointer objects for reference micro-kernels.
-	gemmtrsm_l_ref_ukrs
-	=
-	bli_func_obj_create( BLIS_SGEMMTRSM_L_UKERNEL_REF, FALSE,
-	                     BLIS_DGEMMTRSM_L_UKERNEL_REF, FALSE,
-	                     BLIS_CGEMMTRSM_L_UKERNEL_REF, FALSE,
-	                     BLIS_ZGEMMTRSM_L_UKERNEL_REF, FALSE );
-	gemmtrsm_u_ref_ukrs
-	=
-	bli_func_obj_create( BLIS_SGEMMTRSM_U_UKERNEL_REF, FALSE,
-	                     BLIS_DGEMMTRSM_U_UKERNEL_REF, FALSE,
-	                     BLIS_CGEMMTRSM_U_UKERNEL_REF, FALSE,
-	                     BLIS_ZGEMMTRSM_U_UKERNEL_REF, FALSE );
-	trsm_l_ref_ukrs
-	=
-	bli_func_obj_create( BLIS_STRSM_L_UKERNEL_REF, FALSE,
-	                     BLIS_DTRSM_L_UKERNEL_REF, FALSE,
-	                     BLIS_CTRSM_L_UKERNEL_REF, FALSE,
-	                     BLIS_ZTRSM_L_UKERNEL_REF, FALSE );
-	trsm_u_ref_ukrs
-	=
-	bli_func_obj_create( BLIS_STRSM_U_UKERNEL_REF, FALSE,
-	                     BLIS_DTRSM_U_UKERNEL_REF, FALSE,
-	                     BLIS_CTRSM_U_UKERNEL_REF, FALSE,
-	                     BLIS_ZTRSM_U_UKERNEL_REF, FALSE );
-
-
 	// Create control tree objects for packm operations (left side).
 	trsm_l_packa_cntl
 	=
@@ -141,8 +68,8 @@ void bli_trsm_cntl_init()
 	                           BLIS_VARIANT1,
 	                           // IMPORTANT: n dim multiple must be mr to
 	                           // support right and bottom-right edge cases
-	                           gemm_mr,
-	                           gemm_mr,
+	                           BLIS_MR,
+	                           BLIS_MR,
 	                           TRUE,  // invert diagonal
 	                           TRUE,  // reverse iteration if upper?
 	                           FALSE, // reverse iteration if lower?
@@ -155,8 +82,8 @@ void bli_trsm_cntl_init()
 	                           BLIS_VARIANT1,
 	                           // IMPORTANT: m dim multiple must be mr since
 	                           // B_pack is updated (ie: serves as C) in trsm
-	                           gemm_mr,
-	                           gemm_nr,
+	                           BLIS_MR,
+	                           BLIS_NR,
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
 	                           FALSE, // reverse iteration if lower?
@@ -168,8 +95,8 @@ void bli_trsm_cntl_init()
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
 	                           BLIS_VARIANT1,
-	                           gemm_nr,
-	                           gemm_mr,
+	                           BLIS_NR,
+	                           BLIS_MR,
 	                           FALSE, // do NOT invert diagonal
 	                           FALSE, // reverse iteration if upper?
 	                           FALSE, // reverse iteration if lower?
@@ -180,8 +107,8 @@ void bli_trsm_cntl_init()
 	=
 	bli_packm_cntl_obj_create( BLIS_BLOCKED,
 	                           BLIS_VARIANT1, // pack panels of B compactly
-	                           gemm_mr,
-	                           gemm_mr,
+	                           BLIS_MR,
+	                           BLIS_MR,
 	                           TRUE,  // invert diagonal
 	                           FALSE, // reverse iteration if upper?
 	                           TRUE,  // reverse iteration if lower?
@@ -194,10 +121,7 @@ void bli_trsm_cntl_init()
 	=
 	bli_trsm_cntl_obj_create( BLIS_UNB_OPT,
 	                          BLIS_VARIANT2,
-	                          NULL,
-	                          gemm_ukrs,
-	                          gemmtrsm_l_ukrs,
-	                          gemmtrsm_u_ukrs,
+	                          0, // bszid_t not used by macro-kernel
 	                          NULL, NULL, NULL, NULL,
 	                          NULL, NULL, NULL );
 
@@ -207,8 +131,7 @@ void bli_trsm_cntl_init()
 	=
 	bli_trsm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT1,
-	                          gemm_mc,
-	                          NULL, NULL, NULL,
+	                          BLIS_MC,
 	                          NULL,
 	                          trsm_l_packa_cntl,
 	                          trsm_l_packb_cntl,
@@ -223,8 +146,7 @@ void bli_trsm_cntl_init()
 	=
 	bli_trsm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT3,
-	                          gemm_kc,
-	                          NULL, NULL, NULL,
+	                          BLIS_KC,
 	                          NULL,
 	                          NULL, 
 	                          NULL,
@@ -239,8 +161,7 @@ void bli_trsm_cntl_init()
 	=
 	bli_trsm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT2,
-	                          gemm_nc,
-	                          NULL, NULL, NULL,
+	                          BLIS_NC,
 	                          NULL,
 	                          NULL,
 	                          NULL,
@@ -255,8 +176,7 @@ void bli_trsm_cntl_init()
 	=
 	bli_trsm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT1,
-	                          gemm_mc,
-	                          NULL, NULL, NULL,
+	                          BLIS_MC,
 	                          NULL,
 	                          trsm_r_packa_cntl,
 	                          trsm_r_packb_cntl,
@@ -271,8 +191,7 @@ void bli_trsm_cntl_init()
 	=
 	bli_trsm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT3,
-	                          gemm_kc,
-	                          NULL, NULL, NULL,
+	                          BLIS_KC,
 	                          NULL,
 	                          NULL, 
 	                          NULL,
@@ -287,8 +206,7 @@ void bli_trsm_cntl_init()
 	=
 	bli_trsm_cntl_obj_create( BLIS_BLOCKED,
 	                          BLIS_VARIANT2,
-	                          gemm_nc,
-	                          NULL, NULL, NULL,
+	                          BLIS_NC,
 	                          NULL,
 	                          NULL,
 	                          NULL,
@@ -304,16 +222,6 @@ void bli_trsm_cntl_init()
 
 void bli_trsm_cntl_finalize()
 {
-	bli_func_obj_free( gemmtrsm_l_ukrs );
-	bli_func_obj_free( gemmtrsm_u_ukrs );
-	bli_func_obj_free( trsm_l_ukrs );
-	bli_func_obj_free( trsm_u_ukrs );
-
-	bli_func_obj_free( gemmtrsm_l_ref_ukrs );
-	bli_func_obj_free( gemmtrsm_u_ref_ukrs );
-	bli_func_obj_free( trsm_l_ref_ukrs );
-	bli_func_obj_free( trsm_u_ref_ukrs );
-
 	bli_cntl_obj_free( trsm_l_packa_cntl );
 	bli_cntl_obj_free( trsm_l_packb_cntl );
 	bli_cntl_obj_free( trsm_r_packa_cntl );
@@ -331,10 +239,7 @@ void bli_trsm_cntl_finalize()
 
 trsm_t* bli_trsm_cntl_obj_create( impl_t     impl_type,
                                   varnum_t   var_num,
-                                  blksz_t*   b,
-                                  func_t*    gemm_ukrs_,
-                                  func_t*    gemmtrsm_l_ukrs_,
-                                  func_t*    gemmtrsm_u_ukrs_,
+                                  bszid_t    bszid,
                                   scalm_t*   sub_scalm,
                                   packm_t*   sub_packm_a,
                                   packm_t*   sub_packm_b,
@@ -349,10 +254,7 @@ trsm_t* bli_trsm_cntl_obj_create( impl_t     impl_type,
 
 	cntl->impl_type       = impl_type;
 	cntl->var_num         = var_num;
-	cntl->b               = b;
-	cntl->gemm_ukrs       = gemm_ukrs_;
-	cntl->gemmtrsm_l_ukrs = gemmtrsm_l_ukrs_;
-	cntl->gemmtrsm_u_ukrs = gemmtrsm_u_ukrs_;
+	cntl->bszid           = bszid;
 	cntl->sub_scalm       = sub_scalm;
 	cntl->sub_packm_a     = sub_packm_a;
 	cntl->sub_packm_b     = sub_packm_b;
