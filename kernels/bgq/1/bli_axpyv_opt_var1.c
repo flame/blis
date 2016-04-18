@@ -54,7 +54,7 @@ void bli_daxpyv_opt_var1
 	}
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE ) {
-		BLIS_DAXPYV_KERNEL_REF( conjx, n, alpha, x, incx, y, incy );
+		BLIS_DAXPYV_KERNEL_REF( conjx, n, alpha, x, incx, y, incy, cntx );
 		return;
 	}
 

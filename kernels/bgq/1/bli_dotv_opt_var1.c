@@ -58,7 +58,7 @@ void bli_ddotv_opt_var1
 		use_ref = TRUE;
 	// Call the reference implementation if needed.
 	if ( use_ref ) {
-		BLIS_DDOTV_KERNEL_REF( conjx, conjy, n, x, incx, y, incy, rho );
+		BLIS_DDOTV_KERNEL_REF( conjx, conjy, n, x, incx, y, incy, rho, cntx );
 		return;
 	}
 

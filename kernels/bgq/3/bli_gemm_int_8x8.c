@@ -215,20 +215,18 @@ void printvec(vector4double v)
 void bli_zgemm_int_8x8
      (
        dim_t               k,
-       scomplex*  restrict alpha,
-       scomplex*  restrict a,
-       scomplex*  restrict b,
-       scomplex*  restrict beta,
-       scomplex*  restrict c, inc_t rs_c, inc_t cs_c,
+       dcomplex*  restrict alpha,
+       dcomplex*  restrict a,
+       dcomplex*  restrict b,
+       dcomplex*  restrict beta,
+       dcomplex*  restrict c, inc_t rs_c, inc_t cs_c,
        auxinfo_t* restrict data,
        cntx_t*    restrict cntx
      )
 {
-    double * alpha = (double*) alpha_z;
-    double * beta =  (double*) beta_z;
-    double * a = (double*) a_z;
-    double * b = (double*) b_z;
-    double * c = (double*) c_z;
+    double* a_d = ( double* )a;
+    double* b_d = ( double* )b;
+    double* c_d = ( double* )c;
 
     //Registers for storing C.
     //2 2x4 subblocks of C, c0, and c1
@@ -259,13 +257,13 @@ void bli_zgemm_int_8x8
     for( dim_t i = 0; i < k; i++ )
     {
         
-        b0 = vec_ld2a( 0 * sizeof(double), &b[8*i] );
-        b1 = vec_ld2a( 2 * sizeof(double), &b[8*i] );
-        b2 = vec_ld2a( 4 * sizeof(double), &b[8*i] );
-        b3 = vec_ld2a( 6 * sizeof(double), &b[8*i] );
+        b0 = vec_ld2a( 0 * sizeof(double), &b_d[8*i] );
+        b1 = vec_ld2a( 2 * sizeof(double), &b_d[8*i] );
+        b2 = vec_ld2a( 4 * sizeof(double), &b_d[8*i] );
+        b3 = vec_ld2a( 6 * sizeof(double), &b_d[8*i] );
 
-        a0 = vec_lda ( 0 * sizeof(double), &a[8*i] );
-        a1 = vec_lda ( 4 * sizeof(double), &a[8*i] );
+        a0 = vec_lda ( 0 * sizeof(double), &a_d[8*i] );
+        a1 = vec_lda ( 4 * sizeof(double), &a_d[8*i] );
         
         c00a    = vec_xmadd ( b0, a0, c00a );
         c00b    = vec_xxcpnmadd( a0, b0, c00b );
@@ -299,10 +297,10 @@ void bli_zgemm_int_8x8
     vector4double C1 = vec_splats( 0.0 );
     vector4double C2 = vec_splats( 0.0 );
 
-    double alphar = *alpha;
-    double alphai = *(alpha+1);
-    double betar = *beta;
-    double betai = *(beta+1);
+    double alphar = bli_zreal( alpha );
+    double alphai = bli_zimag( alpha );
+    double betar  = bli_zreal( beta );
+    double betai  = bli_zimag( beta );
     vector4double alphav = vec_splats( 0.0 ); 
     vector4double betav = vec_splats( 0.0 );
     alphav = vec_insert( alphar, alphav, 0);
@@ -359,15 +357,15 @@ void bli_zgemm_int_8x8
 }
 
 
-    ZUPDATE( c00a, c00b, c, 0 );
-    ZUPDATE( c10a, c10b, c, 4 );
-    c += 2*cs_c;
-    ZUPDATE( c01a, c01b, c, 0 );
-    ZUPDATE( c11a, c11b, c, 4 );
-    c += 2*cs_c;
-    ZUPDATE( c02a, c02b, c, 0 );
-    ZUPDATE( c12a, c12b, c, 4 );
-    c += 2*cs_c;
-    ZUPDATE( c03a, c03b, c, 0 );
-    ZUPDATE( c13a, c13b, c, 4 );
+    ZUPDATE( c00a, c00b, c_d, 0 );
+    ZUPDATE( c10a, c10b, c_d, 4 );
+    c_d += 2*cs_c;
+    ZUPDATE( c01a, c01b, c_d, 0 );
+    ZUPDATE( c11a, c11b, c_d, 4 );
+    c_d += 2*cs_c;
+    ZUPDATE( c02a, c02b, c_d, 0 );
+    ZUPDATE( c12a, c12b, c_d, 4 );
+    c_d += 2*cs_c;
+    ZUPDATE( c03a, c03b, c_d, 0 );
+    ZUPDATE( c13a, c13b, c_d, 4 );
 }
