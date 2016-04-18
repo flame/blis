@@ -44,15 +44,15 @@
 //Alternate code path uused if C is not row-major
 // r9 = c
 // ebx = 0xff
-// zmm30 = cs_c * 1...8
+// ymm30 = cs_c * 1...8
 // r11 = rs_c
 // r12 = &alpha
 // r13 = &beta
-#define UPDATE_C_ROW_SCATTERED(NUM) \
+#define UPDATE_C_ROW_SCATTERED(NUM, SCALE) \
 \
     KMOV(K(3), EBX) \
     LABEL(GATHER##NUM) \
-    VGATHERDPD(ZMM(31) MASK_K(3), MEM(R(9),ZMM(30),8)) \
+    VGATHERDPD(ZMM(31) MASK_K(3), MEM(R(9),SCALE,8)) \
     JKNZD(K(3), GATHER##NUM) \
     \
     VMULPD(ZMM(NUM), ZMM(NUM), MEM_1TO8(R(12))) /*scale by alpha*/ \
@@ -60,7 +60,7 @@
     \
     KMOV(K(3), EBX) \
     LABEL(SCATTER##NUM) \
-    VSCATTERDPD(ZMM(31) MASK_K(3), MEM(R(9),ZMM(30),8)) \
+    VSCATTERDPD(MEM(R(9),SCALE,8) MASK_K(3), ZMM(31)) \
     JKNZD(K(3), SCATTER##NUM) \
     \
     ADD(R(9), R(11))
@@ -77,14 +77,14 @@
     VMULPD(ZMM(R2), ZMM(R2), MEM_1TO8(R(12))) \
     VMULPD(ZMM(R3), ZMM(R3), MEM_1TO8(R(12))) \
     VMULPD(ZMM(R4), ZMM(R4), MEM_1TO8(R(12))) \
-    VFMADD231PD(ZMM(R1), ZMM(31), MEM_1TO8(R(9)        )) \
-    VFMADD231PD(ZMM(R2), ZMM(31), MEM_1TO8(R(9),R(11),1)) \
-    VFMADD231PD(ZMM(R3), ZMM(31), MEM_1TO8(R(9),R(11),2)) \
-    VFMADD231PD(ZMM(R4), ZMM(31), MEM_1TO8(R(9),R(10),1)) \
-    VMOVAPD(MEM_1TO8(R(9)        ), ZMM(R1)) \
-    VMOVAPD(MEM_1TO8(R(9),R(11),1), ZMM(R1)) \
-    VMOVAPD(MEM_1TO8(R(9),R(11),2), ZMM(R1)) \
-    VMOVAPD(MEM_1TO8(R(9),R(10),1), ZMM(R1)) \
+    VFMADD231PD(ZMM(R1), ZMM(31), MEM(R(9)        )) \
+    VFMADD231PD(ZMM(R2), ZMM(31), MEM(R(9),R(11),1)) \
+    VFMADD231PD(ZMM(R3), ZMM(31), MEM(R(9),R(11),2)) \
+    VFMADD231PD(ZMM(R4), ZMM(31), MEM(R(9),R(10),1)) \
+    VMOVAPD(MEM(R(9)        ), ZMM(R1)) \
+    VMOVAPD(MEM(R(9),R(11),1), ZMM(R1)) \
+    VMOVAPD(MEM(R(9),R(11),2), ZMM(R1)) \
+    VMOVAPD(MEM(R(9),R(10),1), ZMM(R1)) \
     ADD(R(9), RDI)
 
 // r12 = &alpha
@@ -95,17 +95,17 @@
 \
     VMULPD(ZMM(R1), ZMM(R1), MEM_1TO8(R(12))) \
     VMULPD(ZMM(R2), ZMM(R2), MEM_1TO8(R(12))) \
-    VFMADD231PD(ZMM(R1), ZMM(31), MEM_1TO8(R(9)        )) \
-    VFMADD231PD(ZMM(R2), ZMM(31), MEM_1TO8(R(9),R(11),1)) \
-    VMOVAPD(MEM_1TO8(R(9)        ), ZMM(R1)) \
-    VMOVAPD(MEM_1TO8(R(9),R(11),1), ZMM(R1)) \
+    VFMADD231PD(ZMM(R1), ZMM(31), MEM(R(9)        )) \
+    VFMADD231PD(ZMM(R2), ZMM(31), MEM(R(9),R(11),1)) \
+    VMOVAPD(MEM(R(9)        ), ZMM(R1)) \
+    VMOVAPD(MEM(R(9),R(11),1), ZMM(R1)) \
 
 #define A_TIMES_B_ROW(n) VFMADD231PD(ZMM(n), ZMM(31), MEM_1TO8(R(15),n*8))
 #define A_TIMES_B_ROW_PREV(n) VFMADD231PD(ZMM(n), ZMM(31), MEM_1TO8(R(15),(n-32)*8))
-#define PREFETCH_A_L1(n) VPREFETCH(0, MEM(R(15),A_L1_PREFETCH_DIST*8*32+n*64))
-#define PREFETCH_A_L2(n) VPREFETCH(1, MEM(R(15),R(14),1,n*64))
-#define PREFETCH_B_L1 VPREFETCH(0, MEM(RBX,B_L1_PREFETCH_DIST*8*8))
-#define PREFETCH_B_L2 VPREFETCH(1, MEM(RBX,R(13),1))
+#define PREFETCH_A_L1(n) PREFETCH(0, MEM(R(15),A_L1_PREFETCH_DIST*8*32+n*64))
+#define PREFETCH_A_L2(n) PREFETCH(1, MEM(R(15),R(14),1,n*64))
+#define PREFETCH_B_L1 PREFETCH(0, MEM(RBX,B_L1_PREFETCH_DIST*8*8))
+#define PREFETCH_B_L2 PREFETCH(1, MEM(RBX,R(13),1))
 
 //One iteration of the k_r loop.
 //Each iteration, we prefetch A into L1 and into L2
@@ -128,17 +128,17 @@
     A_TIMES_B_ROW     ( 3)    PREFETCH_A_L1(2)                       \
     A_TIMES_B_ROW     ( 4)    PREFETCH_A_L1(3)                       \
     A_TIMES_B_ROW     ( 5)    PREFETCH_A_L2(0)                       \
-    A_TIMES_B_ROW     ( 6)    PC_L1_1 VPREFETCH(0, MEM(RCX)) PC_L1_2 \
+    A_TIMES_B_ROW     ( 6)    PC_L1_1 PREFETCH(0, MEM(RCX)) PC_L1_2 \
     A_TIMES_B_ROW     ( 7)    PC_L1_1 ADD(RCX, R(11))        PC_L1_2 \
     A_TIMES_B_ROW     ( 8)                                           \
-    A_TIMES_B_ROW     ( 9)    PC_L2_1 VPREFETCH(1, MEM(RCX)) PC_L2_2 \
+    A_TIMES_B_ROW     ( 9)    PC_L2_1 PREFETCH(1, MEM(RCX)) PC_L2_2 \
     A_TIMES_B_ROW     (10)    PREFETCH_A_L2(1)                       \
-    A_TIMES_B_ROW     (11)    PC_L1_1 VPREFETCH(0, MEM(RCX)) PC_L1_2 \
+    A_TIMES_B_ROW     (11)    PC_L1_1 PREFETCH(0, MEM(RCX)) PC_L1_2 \
     A_TIMES_B_ROW     (12)    PC_L1_1 ADD(RCX, R(11))        PC_L1_2 \
     A_TIMES_B_ROW     (13)                                           \
     A_TIMES_B_ROW     (14)                                           \
     A_TIMES_B_ROW     (15)    PREFETCH_A_L2(2)                       \
-    A_TIMES_B_ROW     (16)    PC_L1_1 VPREFETCH(0, MEM(RCX)) PC_L1_2 \
+    A_TIMES_B_ROW     (16)    PC_L1_1 PREFETCH(0, MEM(RCX)) PC_L1_2 \
     A_TIMES_B_ROW     (17)    PC_L1_1 ADD(RCX, R(11))        PC_L1_2 \
     A_TIMES_B_ROW     (18)                                           \
     A_TIMES_B_ROW     (19)                                           \
@@ -210,8 +210,8 @@ void bli_dgemm_opt_30x8(
     VMOVAPS(ZMM(14), ZMM(0))    MOV(R(8), VAR(k))
     VMOVAPS(ZMM(15), ZMM(0))
     VMOVAPS(ZMM(16), ZMM(0))
-    VMOVAPS(ZMM(17), ZMM(0))    MOV(R(13), IMM(L2_PREFETCH_DIST*8*8))
-    VMOVAPS(ZMM(18), ZMM(0))    MOV(R(14), IMM(L2_PREFETCH_DIST*8*32))
+    VMOVAPS(ZMM(17), ZMM(0))    MOV(R(13), IMM(8*8*L2_PREFETCH_DIST))
+    VMOVAPS(ZMM(18), ZMM(0))    MOV(R(14), IMM(8*32*L2_PREFETCH_DIST))
     VMOVAPS(ZMM(19), ZMM(0))
     VMOVAPS(ZMM(20), ZMM(0))
     VMOVAPS(ZMM(21), ZMM(0))
@@ -219,7 +219,7 @@ void bli_dgemm_opt_30x8(
     VMOVAPS(ZMM(23), ZMM(0))    SUB(R(8), IMM(30+L2_PREFETCH_DIST)) //Check if we have over 40 operations to do.
     VMOVAPS(ZMM(24), ZMM(0))    MOV(R(8), IMM(30))
     VMOVAPS(ZMM(25), ZMM(0))    MOV(R(9), IMM(8*8)) //amount to increment b* by each iteration
-    VMOVAPS(ZMM(26), ZMM(0))    MOV(R(12) IMM(8*32)) //amount to increment a* by each iteration
+    VMOVAPS(ZMM(26), ZMM(0))    MOV(R(12), IMM(8*32)) //amount to increment a* by each iteration
     VMOVAPS(ZMM(27), ZMM(0))
     VMOVAPS(ZMM(28), ZMM(0))
     VMOVAPS(ZMM(29), ZMM(0))
@@ -250,7 +250,8 @@ void bli_dgemm_opt_30x8(
     MOV(R(13), VAR(b_next))
     SUB(R(14), R(15))
     SUB(R(13), RBX)
-    MOV(RSI, IMM(L2_PREFETCH_DIST-10))
+    //Yes, I know 10-20 = -10
+    MOV(RSI, IMM(10+L2_PREFETCH_DIST-20))
 
     LABEL(LOOPMAIN2)
     MAIN_LOOP(RSI)
@@ -311,43 +312,50 @@ void bli_dgemm_opt_30x8(
 
     LABEL(SCATTEREDUPDATE)
 
+    /* vgatherdpd needs a ymm register */
+    /* use ymm1 for first row, then move to ymm0 */
+    /* save zmm1 in zmm30 */
+    VMOVAPS(ZMM(30), ZMM(1))
+
     MOV(R(10), VAR(offsetPtr))
-    VMOVAPD(ZMM(31), MEM(R(10)))
-    VPBROADCASTD(ZMM(30), VAR(cs_c))
+    VMOVAPD(ZMM(1), MEM(R(10)))
+    VPBROADCASTD(ZMM(31), VAR(cs_c))
     MOV(R(13), VAR(beta))
-    VPMULLD(ZMM(30), ZMM(31), ZMM(30))
+    VPMULLD(ZMM(1), ZMM(31), ZMM(1))
 
     MOV(EBX, IMM(0xFF))
-    UPDATE_C_ROW_SCATTERED( 0)
-    UPDATE_C_ROW_SCATTERED( 1)
-    UPDATE_C_ROW_SCATTERED( 2)
-    UPDATE_C_ROW_SCATTERED( 3)
-    UPDATE_C_ROW_SCATTERED( 4)
-    UPDATE_C_ROW_SCATTERED( 5)
-    UPDATE_C_ROW_SCATTERED( 6)
-    UPDATE_C_ROW_SCATTERED( 7)
-    UPDATE_C_ROW_SCATTERED( 8)
-    UPDATE_C_ROW_SCATTERED( 9)
-    UPDATE_C_ROW_SCATTERED(10)
-    UPDATE_C_ROW_SCATTERED(11)
-    UPDATE_C_ROW_SCATTERED(12)
-    UPDATE_C_ROW_SCATTERED(13)
-    UPDATE_C_ROW_SCATTERED(14)
-    UPDATE_C_ROW_SCATTERED(15)
-    UPDATE_C_ROW_SCATTERED(16)
-    UPDATE_C_ROW_SCATTERED(17)
-    UPDATE_C_ROW_SCATTERED(18)
-    UPDATE_C_ROW_SCATTERED(19)
-    UPDATE_C_ROW_SCATTERED(20)
-    UPDATE_C_ROW_SCATTERED(21)
-    UPDATE_C_ROW_SCATTERED(22)
-    UPDATE_C_ROW_SCATTERED(23)
-    UPDATE_C_ROW_SCATTERED(24)
-    UPDATE_C_ROW_SCATTERED(25)
-    UPDATE_C_ROW_SCATTERED(26)
-    UPDATE_C_ROW_SCATTERED(27)
-    UPDATE_C_ROW_SCATTERED(28)
-    UPDATE_C_ROW_SCATTERED(29)
+    UPDATE_C_ROW_SCATTERED( 0, YMM(1))
+    VMOVAPS(ZMM(0), ZMM(1))
+    VMOVAPS(ZMM(1), ZMM(30))
+    UPDATE_C_ROW_SCATTERED( 1, YMM(0))
+    UPDATE_C_ROW_SCATTERED( 2, YMM(0))
+    UPDATE_C_ROW_SCATTERED( 3, YMM(0))
+    UPDATE_C_ROW_SCATTERED( 4, YMM(0))
+    UPDATE_C_ROW_SCATTERED( 5, YMM(0))
+    UPDATE_C_ROW_SCATTERED( 6, YMM(0))
+    UPDATE_C_ROW_SCATTERED( 7, YMM(0))
+    UPDATE_C_ROW_SCATTERED( 8, YMM(0))
+    UPDATE_C_ROW_SCATTERED( 9, YMM(0))
+    UPDATE_C_ROW_SCATTERED(10, YMM(0))
+    UPDATE_C_ROW_SCATTERED(11, YMM(0))
+    UPDATE_C_ROW_SCATTERED(12, YMM(0))
+    UPDATE_C_ROW_SCATTERED(13, YMM(0))
+    UPDATE_C_ROW_SCATTERED(14, YMM(0))
+    UPDATE_C_ROW_SCATTERED(15, YMM(0))
+    UPDATE_C_ROW_SCATTERED(16, YMM(0))
+    UPDATE_C_ROW_SCATTERED(17, YMM(0))
+    UPDATE_C_ROW_SCATTERED(18, YMM(0))
+    UPDATE_C_ROW_SCATTERED(19, YMM(0))
+    UPDATE_C_ROW_SCATTERED(20, YMM(0))
+    UPDATE_C_ROW_SCATTERED(21, YMM(0))
+    UPDATE_C_ROW_SCATTERED(22, YMM(0))
+    UPDATE_C_ROW_SCATTERED(23, YMM(0))
+    UPDATE_C_ROW_SCATTERED(24, YMM(0))
+    UPDATE_C_ROW_SCATTERED(25, YMM(0))
+    UPDATE_C_ROW_SCATTERED(26, YMM(0))
+    UPDATE_C_ROW_SCATTERED(27, YMM(0))
+    UPDATE_C_ROW_SCATTERED(28, YMM(0))
+    UPDATE_C_ROW_SCATTERED(29, YMM(0))
 
     LABEL(END)
 

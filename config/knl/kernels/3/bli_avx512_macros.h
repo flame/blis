@@ -12,6 +12,8 @@
 #define ASM(...) STRINGIFY(__VA_ARGS__) "\n\t"
 #define LABEL(label) STRINGIFY(label) ":\n\t"
 
+#define XMM(x) %% xmm##x
+#define YMM(x) %% ymm##x
 #define ZMM(x) %% zmm##x
 #define EAX %%eax
 #define EBX %%ebx
@@ -88,6 +90,6 @@
 #define VBROADCASTSD(_0, _1) ASM(vbroadcastsd _1, _0)
 #define VPBROADCASTD(_0, _1) ASM(vpbroadcastd _1, _0)
 #define VPBROADCASTQ(_0, _1) ASM(vpbroadcastq _1, _0)
-#define VPREFETCH(LEVEL,ADDRESS) ASM(vprefetch##LEVEL ADDRESS)
+#define PREFETCH(LEVEL,ADDRESS) ASM(prefetcht##LEVEL ADDRESS)
 
 #endif
