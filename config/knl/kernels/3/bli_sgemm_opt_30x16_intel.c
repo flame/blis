@@ -51,16 +51,16 @@
 \
     __asm kmovw k3, ebx \
     __asm GATHER##NUM: \
-        __asm vgatherqpd zmm31{k3}, [r9 + zmm30*8] \
+        __asm vgatherdps zmm31{k3}, [r9 + zmm30*4] \
         __asm kortestw k3, k3 \
         __asm jnz k3, GATHER##NUM \
     \
-    __asm vmulpd zmm##NUM, zmm##NUM, 0[r12]{1to8} /*scale by alpha*/ \
-    __asm vfmadd132pd zmm31, zmm##NUM, 0[r13]{1to8} /*scale by beta, add in result*/\
+    __asm vmulps zmm##NUM, zmm##NUM, 0[r12]{1to16} /*scale by alpha*/ \
+    __asm vfmadd132ps zmm31, zmm##NUM, 0[r13]{1to16} /*scale by beta, add in result*/\
     \
     __asm kmovw k3, ebx \
     __asm SCATTER##NUM: \
-        __asm vscatterqpd [r9 + zmm30*8]{k3}, zmm31 \
+        __asm vscatterdps [r9 + zmm30*4]{k3}, zmm31 \
         __asm kortestw k3, k3 \
         __asm jnz k3, SCATTER##NUM \
     __asm add r9, r11 \
@@ -73,18 +73,18 @@
 // rdi = 4*rs_c
 #define UPDATE_C_4_ROWS(R1, R2, R3, R4) \
 \
-    __asm vmulpd zmm##R1, zmm##R1, 0[r12]{1to8} \
-    __asm vmulpd zmm##R2, zmm##R2, 0[r12]{1to8} \
-    __asm vmulpd zmm##R3, zmm##R3, 0[r12]{1to8} \
-    __asm vmulpd zmm##R4, zmm##R4, 0[r12]{1to8} \
-    __asm vfmadd231pd zmm##R1, zmm31, [r9+0] \
-    __asm vfmadd231pd zmm##R2, zmm31, [r9+r11+0] \
-    __asm vfmadd231pd zmm##R3, zmm31, [r9+2*r11+0] \
-    __asm vfmadd231pd zmm##R4, zmm31, [r9+r10+0] \
-    __asm vmovapd [r9+0], zmm##R1 \
-    __asm vmovapd [r9+r11+0], zmm##R2 \
-    __asm vmovapd [r9+2*r11+0], zmm##R3 \
-    __asm vmovapd [r9+r10+0], zmm##R4 \
+    __asm vmulps zmm##R1, zmm##R1, 0[r12]{1to16} \
+    __asm vmulps zmm##R2, zmm##R2, 0[r12]{1to16} \
+    __asm vmulps zmm##R3, zmm##R3, 0[r12]{1to16} \
+    __asm vmulps zmm##R4, zmm##R4, 0[r12]{1to16} \
+    __asm vfmadd231ps zmm##R1, zmm31, [r9+0] \
+    __asm vfmadd231ps zmm##R2, zmm31, [r9+r11+0] \
+    __asm vfmadd231ps zmm##R3, zmm31, [r9+2*r11+0] \
+    __asm vfmadd231ps zmm##R4, zmm31, [r9+r10+0] \
+    __asm vmovaps [r9+0], zmm##R1 \
+    __asm vmovaps [r9+r11+0], zmm##R2 \
+    __asm vmovaps [r9+2*r11+0], zmm##R3 \
+    __asm vmovaps [r9+r10+0], zmm##R4 \
     __asm add r9, rdi
 
 // r12 = &alpha
@@ -93,12 +93,12 @@
 // r11 = rs_c
 #define UPDATE_C_2_ROWS(R1, R2) \
 \
-    __asm vmulpd zmm##R1, zmm##R1, 0[r12]{1to8} \
-    __asm vmulpd zmm##R2, zmm##R2, 0[r12]{1to8} \
-    __asm vfmadd231pd zmm##R1, zmm31, [r9+0] \
-    __asm vfmadd231pd zmm##R2, zmm31, [r9+r11+0] \
-    __asm vmovapd [r9+0], zmm##R1 \
-    __asm vmovapd [r9+r11+0], zmm##R2
+    __asm vmulps zmm##R1, zmm##R1, 0[r12]{1to16} \
+    __asm vmulps zmm##R2, zmm##R2, 0[r12]{1to16} \
+    __asm vfmadd231ps zmm##R1, zmm31, [r9+0] \
+    __asm vfmadd231ps zmm##R2, zmm31, [r9+r11+0] \
+    __asm vmovaps [r9+0], zmm##R1 \
+    __asm vmovaps [r9+r11+0], zmm##R2
 
 //One iteration of the k_r loop.
 //Each iteration, we prefetch A into L1 and into L2
@@ -112,87 +112,86 @@
 #define ONE_ITER_MAIN_LOOP(COUNTER, PC_L1, PC_L2) \
 \
     /* Can this be pre-loaded for next iter. in zmm30? */ \
-    __asm vmovapd zmm31, 0[rbx]                     \
+    __asm vmovaps zmm31, 0[rbx]                     \
                                                     \
-    __asm vfmadd231pd zmm0, zmm31,  0*8[r15]{1to8}  \
-    __asm vfmadd231pd zmm4, zmm31,  4*8[r15]{1to8}  \
+    __asm vfmadd231ps zmm0, zmm31,  0*4[r15]{1to16}  \
+    __asm vfmadd231ps zmm4, zmm31,  4*4[r15]{1to16}  \
     __asm vprefetch0 A_L1_PREFETCH_DIST*256[r15]    \
-    __asm vfmadd231pd zmm5, zmm31,  5*8[r15]{1to8}  \
+    __asm vfmadd231ps zmm5, zmm31,  5*4[r15]{1to16}  \
     __asm vprefetch0 A_L1_PREFETCH_DIST*256+64[r15] \
-    __asm vfmadd231pd zmm6, zmm31,  6*8[r15]{1to8}  \
+    __asm vfmadd231ps zmm6, zmm31,  6*4[r15]{1to16}  \
     __asm vprefetch0 A_L1_PREFETCH_DIST*256+128[r15]\
-    __asm vfmadd231pd zmm7, zmm31,  7*8[r15]{1to8}  \
+    __asm vfmadd231ps zmm7, zmm31,  7*4[r15]{1to16}  \
     __asm vprefetch0 A_L1_PREFETCH_DIST*256+192[r15]\
-    __asm vfmadd231pd zmm8, zmm31,  8*8[r15]{1to8}  \
+    __asm vfmadd231ps zmm8, zmm31,  8*4[r15]{1to16}  \
                                                     \
     __asm vprefetch1 0[r15 + r14]                   \
-    __asm vfmadd231pd zmm9, zmm31,  9*8[r15]{1to8}  \
+    __asm vfmadd231ps zmm9, zmm31,  9*4[r15]{1to16}  \
     if (PC_L1) __asm vprefetch0 0[rcx]              \
-    __asm vfmadd231pd zmm1, zmm31, 1*8[r15]{1to8}   \
+    __asm vfmadd231ps zmm1, zmm31, 1*4[r15]{1to16}   \
     if (PC_L1) __asm add rcx, r11                   \
-    __asm vfmadd231pd zmm2, zmm31, 2*8[r15]{1to8}   \
-    __asm vfmadd231pd zmm3, zmm31, 3*8[r15]{1to8}   \
-    __asm vfmadd231pd zmm10, zmm31, 10*8[r15]{1to8} \
+    __asm vfmadd231ps zmm2, zmm31, 2*4[r15]{1to16}   \
+    __asm vfmadd231ps zmm3, zmm31, 3*4[r15]{1to16}   \
+    __asm vfmadd231ps zmm10, zmm31, 10*4[r15]{1to16} \
                                                     \
     __asm vprefetch1 64[r15 + r14]                  \
-    __asm vfmadd231pd zmm11, zmm31, 11*8[r15]{1to8} \
+    __asm vfmadd231ps zmm11, zmm31, 11*4[r15]{1to16} \
     if (PC_L2) __asm vprefetch1 0[rcx]              \
     if (PC_L1) __asm vprefetch0 0[rcx]              \
-    __asm vfmadd231pd zmm12, zmm31, 12*8[r15]{1to8} \
+    __asm vfmadd231ps zmm12, zmm31, 12*4[r15]{1to16} \
     if (PC_L1) __asm add rcx, r11                   \
-    __asm vfmadd231pd zmm13, zmm31, 13*8[r15]{1to8} \
-    __asm vfmadd231pd zmm14, zmm31, 14*8[r15]{1to8} \
-    __asm vfmadd231pd zmm15, zmm31, 15*8[r15]{1to8} \
+    __asm vfmadd231ps zmm13, zmm31, 13*4[r15]{1to16} \
+    __asm vfmadd231ps zmm14, zmm31, 14*4[r15]{1to16} \
+    __asm vfmadd231ps zmm15, zmm31, 15*4[r15]{1to16} \
                                                     \
     __asm vprefetch1 2*64[r15 + r14]                \
-    __asm vfmadd231pd zmm16, zmm31, 16*8[r15]{1to8} \
+    __asm vfmadd231ps zmm16, zmm31, 16*4[r15]{1to16} \
     if (PC_L1) __asm vprefetch0 0[rcx]              \
-    __asm vfmadd231pd zmm17, zmm31, 17*8[r15]{1to8} \
+    __asm vfmadd231ps zmm17, zmm31, 17*4[r15]{1to16} \
     if (PC_L1) __asm add rcx, r11                   \
-    __asm vfmadd231pd zmm18, zmm31, 18*8[r15]{1to8} \
-    __asm vfmadd231pd zmm19, zmm31, 19*8[r15]{1to8} \
-    __asm vfmadd231pd zmm20, zmm31, 20*8[r15]{1to8} \
+    __asm vfmadd231ps zmm18, zmm31, 18*4[r15]{1to16} \
+    __asm vfmadd231ps zmm19, zmm31, 19*4[r15]{1to16} \
+    __asm vfmadd231ps zmm20, zmm31, 20*4[r15]{1to16} \
                                                     \
     __asm vprefetch1 3*64[r15 + r14]                \
-    __asm vfmadd231pd zmm21, zmm31, 21*8[r15]{1to8} \
+    __asm vfmadd231ps zmm21, zmm31, 21*4[r15]{1to16} \
     __asm add r15, r12                              \
-    __asm vfmadd231pd zmm22, zmm31, -10*8[r15]{1to8}\
-    __asm vfmadd231pd zmm23, zmm31, -9*8[r15]{1to8} \
+    __asm vfmadd231ps zmm22, zmm31, -10*4[r15]{1to16}\
+    __asm vfmadd231ps zmm23, zmm31, -9*4[r15]{1to16} \
     if (PC_L2) __asm add rcx, r11                   \
-    __asm vfmadd231pd zmm24, zmm31, -8*8[r15]{1to8} \
+    __asm vfmadd231ps zmm24, zmm31, -8*4[r15]{1to16} \
     __asm dec COUNTER                               \
-    __asm vfmadd231pd zmm25, zmm31, -7*8[r15]{1to8} \
+    __asm vfmadd231ps zmm25, zmm31, -7*4[r15]{1to16} \
                                                     \
     __asm vprefetch1 0[rbx + r13]                   \
-    __asm vfmadd231pd zmm26, zmm31, -6*8[r15]{1to8} \
-    __asm vprefetch0 B_L1_PREFETCH_DIST*8*8[rbx]    \
-    __asm vfmadd231pd zmm27, zmm31, -5*8[r15]{1to8} \
+    __asm vfmadd231ps zmm26, zmm31, -6*4[r15]{1to16} \
+    __asm vprefetch0 B_L1_PREFETCH_DIST*4*16[rbx]    \
+    __asm vfmadd231ps zmm27, zmm31, -5*4[r15]{1to16} \
     __asm add rbx, r9                               \
-    __asm vfmadd231pd zmm28, zmm31, -4*8[r15]{1to8} \
+    __asm vfmadd231ps zmm28, zmm31, -4*4[r15]{1to16} \
     __asm cmp COUNTER, 0                            \
-    __asm vfmadd231pd zmm29, zmm31, -3*8[r15]{1to8}
+    __asm vfmadd231ps zmm29, zmm31, -3*4[r15]{1to16}
 
-//This is an array used for the scattter/gather instructions.
-extern int64_t offsets64[8];
-
+//This is an array used for the scatter/gather instructions.
+extern int32_t offsets32[16];
 
 //#define MONITORS
 //#define LOOPMON
-void bli_dgemm_opt_30x8(
+void bli_sgemm_opt_30x16(
                     dim_t            k,
-                    double* restrict alpha,
-                    double* restrict a,
-                    double* restrict b,
-                    double* restrict beta,
-                    double* restrict c, inc_t rs_c, inc_t cs_c,
+                    float*  restrict alpha,
+                    float*  restrict a,
+                    float*  restrict b,
+                    float*  restrict beta,
+                    float*  restrict c, inc_t rs_c, inc_t cs_c,
                     auxinfo_t*       data,
                     cntx_t* restrict cntx
                   )
 {
-    double * a_next = bli_auxinfo_next_a( data );
-    double * b_next = bli_auxinfo_next_b( data );
+    float * a_next = bli_auxinfo_next_a( data );
+    float * b_next = bli_auxinfo_next_b( data );
 
-    int64_t * offsetPtr = &offsets64[0];
+    int32_t * offsetPtr = &offsets32[0];
 
 #ifdef MONITORS
     int toph, topl, both, botl, midl, midh, mid2l, mid2h;
@@ -215,7 +214,7 @@ void bli_dgemm_opt_30x8(
 
     __asm mov r11, rs_c           //load row stride
     __asm vmovaps zmm4,  zmm0
-    __asm sal r11, 3              //scale row stride
+    __asm sal r11, 4              //scale row stride
     __asm vmovaps zmm5,  zmm0
     __asm mov r15, a              //load address of a
     __asm vmovaps zmm6,  zmm0
@@ -239,9 +238,9 @@ void bli_dgemm_opt_30x8(
 
     __asm vmovaps zmm16, zmm0
     __asm vmovaps zmm17, zmm0
-    __asm mov r13, L2_PREFETCH_DIST*8*8
+    __asm mov r13, L2_PREFETCH_DIST*4*16
     __asm vmovaps zmm18, zmm0
-    __asm mov r14, L2_PREFETCH_DIST*8*32
+    __asm mov r14, L2_PREFETCH_DIST*4*32
     __asm vmovaps zmm19, zmm0
     __asm vmovaps zmm20, zmm0
     __asm vmovaps zmm21, zmm0
@@ -252,9 +251,9 @@ void bli_dgemm_opt_30x8(
     __asm vmovaps zmm24, zmm0
     __asm mov r8, 30
     __asm vmovaps zmm25, zmm0
-    __asm mov r9, 8*8                         //amount to increment b* by each iteration
+    __asm mov r9, 16*4                        //amount to increment b* by each iteration
     __asm vmovaps zmm26, zmm0
-    __asm mov r12, 32*8                       //amount to increment a* by each iteration
+    __asm mov r12, 32*4                       //amount to increment a* by each iteration
     __asm vmovaps zmm27, zmm0
     __asm vmovaps zmm28, zmm0
     __asm vmovaps zmm29, zmm0
@@ -327,7 +326,7 @@ void bli_dgemm_opt_30x8(
     __asm jne SCATTEREDUPDATE
 
     __asm mov r14, beta
-    __asm vbroadcastsd zmm31, 0[r14]
+    __asm vbroadcastss zmm31, 0[r14]
 
     /* Alignment??? */
     UPDATE_C_4_ROWS( 0, 1, 2, 3)
@@ -344,12 +343,12 @@ void bli_dgemm_opt_30x8(
     __asm SCATTEREDUPDATE:
 
     __asm mov r10, offsetPtr
-    __asm vmovapd zmm31, 0[r10]
-    __asm vpbroadcastq zmm30, cs_c
+    __asm vmovaps zmm31, 0[r10]
+    __asm vpbroadcastd zmm30, cs_c
     __asm mov r13, beta
-    __asm vpmullq zmm30, zmm31, zmm30
+    __asm vpmulld zmm30, zmm31, zmm30
 
-    __asm mov ebx, 255
+    __asm mov ebx, 0xffff
     UPDATE_C_ROW_SCATTERED( 0)
     UPDATE_C_ROW_SCATTERED( 1)
     UPDATE_C_ROW_SCATTERED( 2)

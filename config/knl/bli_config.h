@@ -40,7 +40,10 @@
 #define BLIS_TREE_BARRIER_ARITY 4
 
 
-#define BLIS_SIMD_ALIGN_SIZE             32
+#define BLIS_SIMD_ALIGN_SIZE             64
+
+#define BLIS_SIMD_SIZE                   64
+#define BLIS_SIMD_NUM_REGISTERS          32
 
 
 
