@@ -115,8 +115,8 @@
 // r11 = rs_c
 // r13 = L2_PREFETCH_DIST*8*8
 // r14 = L2_PREFETCH_DIST*8*32
-// 32*8 = dist. to next sliver of a
-// 8*8 = dist. to next sliver of b
+// r12 = 32*8 = dist. to next sliver of a
+// r9  =  8*8 = dist. to next sliver of b
 #define MAIN_LOOP_(COUNTER, PC_L1_1, PC_L1_2, PC_L2_1, PC_L2_2) \
 \
     /* Can this be pre-loaded for next it. in zmm30? */              \
@@ -157,8 +157,9 @@
 #define MAIN_LOOP_PC_L1(COUNTER) MAIN_LOOP_(COUNTER,,,COMMENT_BEGIN,COMMENT_END)
 #define MAIN_LOOP_PC_L2(COUNTER) MAIN_LOOP_(COUNTER,COMMENT_BEGIN,COMMENT_END,,)
 
-//This is an array used for the scattter/gather instructions.
-extern int offsets[16];
+//This is an array used for the scatter/gather instructions.
+extern int32_t offsets32[16];
+extern int64_t offsets64[8];
 
 //#define MONITORS
 //#define LOOPMON
