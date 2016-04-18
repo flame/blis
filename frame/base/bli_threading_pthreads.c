@@ -36,7 +36,7 @@
 
 #ifdef BLIS_ENABLE_PTHREADS
 
-#ifndef _POSIX_BARRIERS
+#ifdef __APPLE__
 
 int pthread_barrier_init(pthread_barrier_t *barrier, const pthread_barrierattr_t *attr, unsigned int count)
 {
