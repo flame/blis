@@ -32,6 +32,8 @@
 
 */
 
+#ifdef __INTEL_COMPILER
+
 #include "blis.h"
 #include <assert.h>
 
@@ -397,3 +399,5 @@ void bli_dgemm_opt_30x8(
     printf("setup =\t%u\tmain loop =\t%u\tcleanup=\t%u\ttotal=\t%u\n", mid - top, mid2 - mid, bot - mid2, bot - top);
 #endif
 }
+
+#endif

@@ -44,16 +44,14 @@ MAKE_DEFS_MK_INCLUDED := yes
 
 # --- Determine the C compiler and related flags ---
 ifeq ($(CC),)
-CC             := icc
-CC_VENDOR      := icc
+CC             := gcc
+CC_VENDOR      := gcc
 endif
-ifneq ($(CC_VENDOR),icc)
-$(error icc is required for this configuration.)
-endif
+
 # Enable IEEE Standard 1003.1-2004 (POSIX.1d). 
 # NOTE: This is needed to enable posix_memalign().
 CPPROCFLAGS    := -D_POSIX_C_SOURCE=200112L
-CMISCFLAGS     := -mmic -fasm-blocks -std=c99
+CMISCFLAGS     := -std=c99 -m64
 CPICFLAGS      := -fPIC
 CWARNFLAGS     := -Wall
 
@@ -67,8 +65,28 @@ else
 COPTFLAGS      := -O3
 endif
 
-CVECFLAGS      := 
 CKOPTFLAGS     := $(COPTFLAGS)
+
+ifeq ($(CC_VENDOR),gcc)
+CVECFLAGS      := -mavx512f -mavx512pf -mfpmath=sse -march=knl
+else
+ifeq ($(CC_VENDOR),icc)
+CVECFLAGS      := -xMIC-AVX512
+else
+ifeq ($(CC_VENDOR),clang)
+CVECFLAGS      := -mavx512f -mavx512pf -mfpmath=sse -march=knl
+else
+$(error gcc, icc, or clang is required for this configuration.)
+endif
+endif
+endif
+
+# The assembler on OS X won't recognize AVX512 without help
+ifneq ($(CC_VENDOR),icc)
+ifeq ($(OS_NAME),Darwin)
+CVECFLAGS      += -Wa,-march=knl
+endif
+endif
 
 # --- Determine the archiver and related flags ---
 AR             := ar
@@ -77,7 +95,7 @@ ARFLAGS        := cru
 # --- Determine the linker and related flags ---
 LINKER         := $(CC)
 SOFLAGS        := -shared
-LDFLAGS        := -mmic -lm
+LDFLAGS        := -lm
 
 
 
