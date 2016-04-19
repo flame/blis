@@ -130,8 +130,8 @@ void bli_dgemm_int_8x8
 
     vector4double AB;
     vector4double C = vec_splats( 0.0 );
-    vector4double betav  = vec_lds( 0, beta );
-    vector4double alphav = vec_lds( 0, alpha );
+    vector4double betav  = vec_lds( 0, ( double* )beta );
+    vector4double alphav = vec_lds( 0, ( double* )alpha );
     double ct;
   
     //Macro to update 4 elements of C in a column.
@@ -297,10 +297,10 @@ void bli_zgemm_int_8x8
     vector4double C1 = vec_splats( 0.0 );
     vector4double C2 = vec_splats( 0.0 );
 
-    double alphar = bli_zreal( alpha );
-    double alphai = bli_zimag( alpha );
-    double betar  = bli_zreal( beta );
-    double betai  = bli_zimag( beta );
+    double alphar = bli_zreal( *alpha );
+    double alphai = bli_zimag( *alpha );
+    double betar  = bli_zreal( *beta );
+    double betai  = bli_zimag( *beta );
     vector4double alphav = vec_splats( 0.0 ); 
     vector4double betav = vec_splats( 0.0 );
     alphav = vec_insert( alphar, alphav, 0);
