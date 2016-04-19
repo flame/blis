@@ -143,7 +143,7 @@ endif
 
 # Expand the fragment paths that contain .h files to attain the set of header
 # files present in all fragment paths.
-MK_HEADER_FILES := $(foreach frag_path, $(FRAGMENT_DIR_PATHS), \
+MK_HEADER_FILES := $(foreach frag_path, .. $(FRAGMENT_DIR_PATHS), \
                                         $(wildcard $(frag_path)/*.h))
 
 # Strip the leading, internal, and trailing whitespace from our list of header
@@ -154,7 +154,7 @@ MK_HEADER_FILES := $(strip $(MK_HEADER_FILES))
 # expansion. Then, strip the header filename to leave the path to each header
 # location. Notice this process even weeds out duplicates! Add the config
 # directory manually since it contains FLA_config.h.
-MK_HEADER_DIR_PATHS := $(dir $(foreach frag_path, $(FRAGMENT_DIR_PATHS), \
+MK_HEADER_DIR_PATHS := $(dir $(foreach frag_path, .. $(FRAGMENT_DIR_PATHS), \
                                        $(firstword $(wildcard $(frag_path)/*.h))))
 
 # Add -I to each header path so we can specify our include search paths to the

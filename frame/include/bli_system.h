@@ -41,6 +41,15 @@
 #include <string.h>
 #include <stdarg.h>
 
+// Determine if we are on a 64-bit or 32-bit architecture
+#if defined(_M_X64) || defined(__x86_64) || defined(__aarch64__) || \
+    defined(_ARCH_PPC64)
+#define BLIS_ARCH_64
+#else
+#define BLIS_ARCH_32
+#endif
+
+// Determine the target operating system
 #if defined(_WIN32) || defined(__CYGWIN__)
 #define BLIS_OS_WINDOWS 1
 #elif defined(__APPLE__) || defined(__MACH__)

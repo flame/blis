@@ -36,6 +36,9 @@
 #define BLIS_KERNEL_H
 
 
+#undef restrict
+
+
 // -- LEVEL-3 MICRO-KERNEL CONSTANTS -------------------------------------------
 
 // -- Cache blocksizes --
