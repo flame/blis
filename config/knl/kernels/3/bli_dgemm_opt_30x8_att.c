@@ -82,9 +82,9 @@
     VFMADD231PD(ZMM(R3), ZMM(31), MEM(R(9),R(11),2)) \
     VFMADD231PD(ZMM(R4), ZMM(31), MEM(R(9),R(10),1)) \
     VMOVAPD(MEM(R(9)        ), ZMM(R1)) \
-    VMOVAPD(MEM(R(9),R(11),1), ZMM(R1)) \
-    VMOVAPD(MEM(R(9),R(11),2), ZMM(R1)) \
-    VMOVAPD(MEM(R(9),R(10),1), ZMM(R1)) \
+    VMOVAPD(MEM(R(9),R(11),1), ZMM(R2)) \
+    VMOVAPD(MEM(R(9),R(11),2), ZMM(R3)) \
+    VMOVAPD(MEM(R(9),R(10),1), ZMM(R4)) \
     ADD(R(9), RDI)
 
 // r12 = &alpha
@@ -98,7 +98,7 @@
     VFMADD231PD(ZMM(R1), ZMM(31), MEM(R(9)        )) \
     VFMADD231PD(ZMM(R2), ZMM(31), MEM(R(9),R(11),1)) \
     VMOVAPD(MEM(R(9)        ), ZMM(R1)) \
-    VMOVAPD(MEM(R(9),R(11),1), ZMM(R1)) \
+    VMOVAPD(MEM(R(9),R(11),1), ZMM(R2)) \
 
 #define A_TIMES_B_ROW(n) VFMADD231PD(ZMM(n), ZMM(31), MEM_1TO8(R(15),n*8))
 #define A_TIMES_B_ROW_PREV(n) VFMADD231PD(ZMM(n), ZMM(31), MEM_1TO8(R(15),(n-32)*8))

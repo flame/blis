@@ -82,9 +82,9 @@
     VFMADD231PS(ZMM(R3), ZMM(31), MEM(R(9),R(11),2)) \
     VFMADD231PS(ZMM(R4), ZMM(31), MEM(R(9),R(10),1)) \
     VMOVAPS(MEM(R(9)        ), ZMM(R1)) \
-    VMOVAPS(MEM(R(9),R(11),1), ZMM(R1)) \
-    VMOVAPS(MEM(R(9),R(11),2), ZMM(R1)) \
-    VMOVAPS(MEM(R(9),R(10),1), ZMM(R1)) \
+    VMOVAPS(MEM(R(9),R(11),1), ZMM(R2)) \
+    VMOVAPS(MEM(R(9),R(11),2), ZMM(R3)) \
+    VMOVAPS(MEM(R(9),R(10),1), ZMM(R4)) \
     ADD(R(9), RDI)
 
 // r12 = &alpha
@@ -98,7 +98,7 @@
     VFMADD231PS(ZMM(R1), ZMM(31), MEM(R(9)        )) \
     VFMADD231PS(ZMM(R2), ZMM(31), MEM(R(9),R(11),1)) \
     VMOVAPS(MEM(R(9)        ), ZMM(R1)) \
-    VMOVAPS(MEM(R(9),R(11),1), ZMM(R1))
+    VMOVAPS(MEM(R(9),R(11),1), ZMM(R2))
 
 #define A_TIMES_B_ROW(n) VFMADD231PS(ZMM(n), ZMM(31), MEM_1TO16(R(15),n*4))
 #define A_TIMES_B_ROW_PREV(n) VFMADD231PS(ZMM(n), ZMM(31), MEM_1TO16(R(15),(n-32)*4))
@@ -297,7 +297,6 @@ void bli_sgemm_opt_30x16(
     JNZ(SCATTEREDUPDATE)
 
     MOV(R(14), VAR(beta))
-
     VBROADCASTSS(ZMM(31), MEM(R(14)))
 
     /* Alignment??? */
