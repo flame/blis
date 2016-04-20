@@ -43,7 +43,7 @@
 
 /* Table of constant values */
 
-/* Subroutine */ int PASTEF770(xerbla)(bla_character *srname, bla_integer *info, ftnlen srname_len)
+/* Subroutine */ int PASTEF770(xerbla)(const bla_character *srname, const bla_integer *info, ftnlen srname_len)
 {
 /*  -- LAPACK auxiliary routine (preliminary version) -- */
 /*     Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd., */
@@ -72,10 +72,10 @@
 /*  INFO    (input) INTEGER */
 /*          The position of the invalid parameter in the parameter list */
 /*          of the calling routine. */
-    int i;
+    //int i;
 
-    for ( i = 0; i < srname_len; ++i )
-        srname[i] = toupper( srname[i] );
+    //for ( i = 0; i < srname_len; ++i )
+    //    srname[i] = toupper( srname[i] );
 
     printf("** On entry to %6s, parameter number %2i had an illegal value\n",
         srname, (int)*info);

@@ -43,12 +43,12 @@
 \
 void PASTEF772(chxy,blasname,chc) \
      ( \
-       f77_int* m, \
-       f77_int* n, \
-       ftype*   alpha, \
-       ftype*   x, f77_int* incx, \
-       ftype*   y, f77_int* incy, \
-       ftype*   a, f77_int* lda  \
+       const f77_int* m, \
+       const f77_int* n, \
+       const ftype*   alpha, \
+       const ftype*   x, const f77_int* incx, \
+       const ftype*   y, const f77_int* incy, \
+             ftype*   a, const f77_int* lda  \
      ) \
 { \
 	dim_t   m0, n0; \
@@ -80,8 +80,8 @@ void PASTEF772(chxy,blasname,chc) \
 \
 	/* If the input increments are negative, adjust the pointers so we can
 	   use positive increments instead. */ \
-	bli_convert_blas_incv( m0, x, *incx, x0, incx0 ); \
-	bli_convert_blas_incv( n0, y, *incy, y0, incy0 ); \
+	bli_convert_blas_incv( m0, (ftype*)x, *incx, x0, incx0 ); \
+	bli_convert_blas_incv( n0, (ftype*)y, *incy, y0, incy0 ); \
 \
 	/* Set the row and column strides of A. */ \
 	rs_a = 1; \
@@ -94,10 +94,10 @@ void PASTEF772(chxy,blasname,chc) \
 	  blis_conjy, \
 	  m0, \
 	  n0, \
-	  alpha, \
+	  (ftype*)alpha, \
 	  x0, incx0, \
 	  y0, incy0, \
-	  a,  rs_a, cs_a, \
+	  (ftype*)a,  rs_a, cs_a, \
 	  NULL  \
 	); \
 \

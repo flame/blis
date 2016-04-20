@@ -1,8 +1,4 @@
-#include "bli_config.h"
-#include "bli_config_macro_defs.h"
-#include "bli_system.h"
-#include "bli_type_defs.h"
-#include "bli_cblas.h"
+#include "blis.h"
 #ifdef BLIS_ENABLE_CBLAS
 /*
  * cblas_caxpy.c
@@ -14,8 +10,8 @@
  */
 #include "cblas.h"
 #include "cblas_f77.h"
-void cblas_caxpy( const int N, const void *alpha, const void *X,
-                       const int incX, void *Y, const int incY)
+void cblas_caxpy( f77_int N, const void *alpha, const void *X,
+                       f77_int incX, void *Y, f77_int incY)
 {
 #ifdef F77_INT
    F77_INT F77_N=N, F77_incX=incX, F77_incY=incY;
@@ -24,6 +20,6 @@ void cblas_caxpy( const int N, const void *alpha, const void *X,
    #define F77_incX incX
    #define F77_incY incY
 #endif
-   F77_caxpy( &F77_N, alpha, X, &F77_incX, Y, &F77_incY);
+   F77_caxpy( &F77_N, (scomplex*)alpha, (scomplex*)X, &F77_incX, (scomplex*)Y, &F77_incY);
 } 
 #endif

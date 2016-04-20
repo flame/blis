@@ -162,13 +162,14 @@ extern "C" {
 #include "bli_util.h"
 
 
-// -- CBLAS compatibility layer --
-
-#include "bli_cblas.h"
-
 // -- BLAS compatibility layer --
 
 #include "bli_blas.h"
+
+
+// -- CBLAS compatibility layer --
+
+#include "bli_cblas.h"
 
 
 // End extern "C" construct block.

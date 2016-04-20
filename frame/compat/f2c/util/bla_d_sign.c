@@ -36,7 +36,7 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-double bla_d_sign(bla_double *a, bla_double *b)
+double bla_d_sign(const bla_double *a, const bla_double *b)
 {
 	double x = (*a >= 0.0 ? *a : - *a);
 

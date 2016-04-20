@@ -34,7 +34,7 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-double bla_r_sign(bla_real *a, bla_real *b);
+double bla_r_sign(const bla_real *a, const bla_real *b);
 
 #endif
 

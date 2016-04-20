@@ -1,8 +1,4 @@
-#include "bli_config.h"
-#include "bli_config_macro_defs.h"
-#include "bli_system.h"
-#include "bli_type_defs.h"
-#include "bli_cblas.h"
+#include "blis.h"
 #ifdef BLIS_ENABLE_CBLAS
 /*
  *
@@ -15,11 +11,11 @@
 
 #include "cblas.h"
 #include "cblas_f77.h"
-void cblas_csyr2k(const enum CBLAS_ORDER Order, const enum CBLAS_UPLO Uplo,
-                  const enum CBLAS_TRANSPOSE Trans, const int N, const int K,
-                  const void *alpha, const void  *A, const int lda,
-                  const void  *B, const int ldb, const void *beta,
-                  void  *C, const int ldc)
+void cblas_csyr2k(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
+                  enum CBLAS_TRANSPOSE Trans, f77_int N, f77_int K,
+                  const void *alpha, const void  *A, f77_int lda,
+                  const void  *B, f77_int ldb, const void *beta,
+                  void  *C, f77_int ldc)
 {
    char UL, TR;   
 #ifdef F77_CHAR
@@ -75,8 +71,8 @@ void cblas_csyr2k(const enum CBLAS_ORDER Order, const enum CBLAS_UPLO Uplo,
          F77_TR = C2F_CHAR(&TR);
       #endif
 
-      F77_csyr2k(F77_UL, F77_TR, &F77_N, &F77_K, alpha, A, &F77_lda,
-                      B, &F77_ldb, beta, C, &F77_ldc);
+      F77_csyr2k(F77_UL, F77_TR, &F77_N, &F77_K, (scomplex*)alpha, (scomplex*)A, &F77_lda,
+                 (scomplex*)B, &F77_ldb, (scomplex*)beta, (scomplex*)C, &F77_ldc);
    } else if (Order == CblasRowMajor)
    {
       RowMajorStrg = 1;
@@ -105,7 +101,7 @@ void cblas_csyr2k(const enum CBLAS_ORDER Order, const enum CBLAS_UPLO Uplo,
          F77_TR = C2F_CHAR(&TR);
       #endif
 
-      F77_csyr2k(F77_UL, F77_TR, &F77_N, &F77_K, alpha, A, &F77_lda, B, &F77_ldb, beta, C, &F77_ldc);
+      F77_csyr2k(F77_UL, F77_TR, &F77_N, &F77_K, (scomplex*)alpha, (scomplex*)A, &F77_lda, (scomplex*)B, &F77_ldb, (scomplex*)beta, (scomplex*)C, &F77_ldc);
    } 
    else  cblas_xerbla(1, "cblas_csyr2k", "Illegal Order setting, %d\n", Order);
    CBLAS_CallFromC = 0;

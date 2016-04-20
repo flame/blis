@@ -38,15 +38,15 @@
 
 void bla_syr2k_check
      (
-       char*     dt_str,
-       char*     op_str,
-       f77_char* uploa,
-       f77_char* trans,
-       f77_int*  m,
-       f77_int*  k,
-       f77_int*  lda,
-       f77_int*  ldb,
-       f77_int*  ldc
+       const char*     dt_str,
+       const char*     op_str,
+       const f77_char* uploa,
+       const f77_char* trans,
+       const f77_int*  m,
+       const f77_int*  k,
+       const f77_int*  lda,
+       const f77_int*  ldb,
+       const f77_int*  ldc
      )
 {
 	f77_int info = 0;

@@ -1,8 +1,4 @@
-#include "bli_config.h"
-#include "bli_config_macro_defs.h"
-#include "bli_system.h"
-#include "bli_type_defs.h"
-#include "bli_cblas.h"
+#include "blis.h"
 #ifdef BLIS_ENABLE_CBLAS
 /*
  * cblas_ztbmv.c
@@ -13,10 +9,10 @@
  */
 #include "cblas.h"
 #include "cblas_f77.h"
-void cblas_ztbmv(const enum CBLAS_ORDER order, const enum CBLAS_UPLO Uplo,
-                 const enum CBLAS_TRANSPOSE TransA, const enum CBLAS_DIAG Diag,
-                 const int N, const int K, const void  *A, const int lda,
-                 void  *X, const int incX)
+void cblas_ztbmv(enum CBLAS_ORDER order, enum CBLAS_UPLO Uplo,
+                 enum CBLAS_TRANSPOSE TransA, enum CBLAS_DIAG Diag,
+                 f77_int N, f77_int K, const void  *A, f77_int lda,
+                 void  *X, f77_int incX)
 {
    char TA;
    char UL;
@@ -78,7 +74,7 @@ void cblas_ztbmv(const enum CBLAS_ORDER order, const enum CBLAS_UPLO Uplo,
          F77_TA = C2F_CHAR(&TA);
          F77_DI = C2F_CHAR(&DI);
       #endif
-      F77_ztbmv( F77_UL, F77_TA, F77_DI, &F77_N, &F77_K, A, &F77_lda, X,
+      F77_ztbmv( F77_UL, F77_TA, F77_DI, &F77_N, &F77_K, (dcomplex*)A, &F77_lda, (dcomplex*)X,
                       &F77_incX);
    }
    else if (order == CblasRowMajor)
@@ -141,7 +137,7 @@ void cblas_ztbmv(const enum CBLAS_ORDER order, const enum CBLAS_UPLO Uplo,
          F77_DI = C2F_CHAR(&DI);
       #endif
 
-      F77_ztbmv( F77_UL, F77_TA, F77_DI, &F77_N, &F77_K, A, &F77_lda, X,
+      F77_ztbmv( F77_UL, F77_TA, F77_DI, &F77_N, &F77_K, (dcomplex*)A, &F77_lda, (dcomplex*)X,
                       &F77_incX);
 
       if (TransA == CblasConjTrans)
