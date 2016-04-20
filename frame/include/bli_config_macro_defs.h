@@ -45,7 +45,11 @@
 // internally within BLIS as well as those exposed in the native BLAS-like BLIS
 // interface.
 #ifndef BLIS_INT_TYPE_SIZE
+#ifdef BLIS_ARCH_64
 #define BLIS_INT_TYPE_SIZE               64
+#else
+#define BLIS_INT_TYPE_SIZE               32
+#endif
 #endif
 
 
@@ -177,7 +181,7 @@
 // C99 type "long int". Note that this ONLY affects integers used within the
 // BLAS compatibility layer.
 #ifndef BLIS_BLAS2BLIS_INT_TYPE_SIZE
-#define BLIS_BLAS2BLIS_INT_TYPE_SIZE     64
+#define BLIS_BLAS2BLIS_INT_TYPE_SIZE     32
 #endif
 
 

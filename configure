@@ -91,13 +91,33 @@ print_usage()
 	echo "   -t MODEL, --enable-threading[=MODEL], --disable-threading"
 	echo " "
 	echo "                 Enable threading in the library, using threading model"
-	echo "                 MODEL={auto,omp,pthreads,no}. If MODEL=no or "
+	echo "                 MODEL={omp,pthreads,no}. If MODEL=no or "
 	echo "                 --disable-threading is specified, threading will be"
-	echo "                 disabled. If MODEL=auto or is unspecified, a model"
-	echo "                 will be chosen automatically. The default is 'auto'."
+	echo "                 disabled. The default is 'no'."
 	echo " "
 	echo "   -q, --quiet   Suppress informational output. By default, configure"
 	echo "                 is verbose. (NOTE: -q is not yet implemented)"
+	echo " "
+	echo "   -i SIZE, --int-size=SIZE"
+	echo " "
+	echo "                 Set the size (in bits) of internal BLIS integers and"
+	echo "                 integer types used in native BLIS interfaces."
+	echo " "
+	echo "   -b SIZE, --blas-int-size=SIZE"
+	echo " "
+	echo "                 Set the size (in bits) of integer types in external"
+	echo "                 BLAS and CBLAS interfaces, if enabled."
+	echo " "
+	echo "   --disable-blas, --enable-blas"
+	echo " "
+	echo "                 Disable (enabled by default) building the BLAS"
+	echo "                 compatibility layer."
+	echo " "
+	echo "   --enable-cblas, --disable-cblas"
+	echo " "
+	echo "                 Enable (disabled by default) building the CBLAS"
+	echo "                 compatibility layer. This automatically enables the"
+	echo "                 BLAS compatibility layer as well."
 	echo " "
 	echo "   -h, --help    Output this information and quit."
 	echo " "
@@ -149,6 +169,13 @@ main()
 	config_mk_in_path="${build_dirpath}/${config_mk_in}"
 	config_mk_out_path="${cur_dirpath}/${config_mk_out}"
 
+	# The names/paths for the template bli_config.h.in and its instantiated
+	# counterpart.
+	bli_config_h_in='bli_config.h.in'
+	bli_config_h_out='bli_config.h'
+	bli_config_h_in_path="${build_dirpath}/${bli_config_h_in}"
+	bli_config_h_out_path="${cur_dirpath}/${bli_config_h_out}"
+
 	# Path to 'update-version-file.sh' script.
 	update_version_file_sh="${build_dirpath}/update-version-file.sh"
 
@@ -188,7 +215,7 @@ main()
 	debug_flag=''
 
 	# The threading flag.
-	threading_model='auto'
+	threading_model='no'
 
 	# Option variables.
 	quiet_flag=''
@@ -197,6 +224,10 @@ main()
 	enable_verbose='no'
 	enable_static='yes'
 	enable_shared='no'
+	int_type_size=0
+	blas2blis_int_type_size=32
+	enable_blas2blis='yes'
+	enable_cblas='no'
 
 	# The path to the auto-detection script.
 	auto_detect_sh="${build_dirpath}/auto-detect/auto-detect.sh"
@@ -221,7 +252,7 @@ main()
 
 
 	# Process our command line options.
-	while getopts ":hp:d:t:q-:" opt; do
+	while getopts ":hp:d:t:qi:b:-:" opt; do
 		case $opt in
 			-)
 				case "$OPTARG" in
@@ -264,14 +295,29 @@ main()
 					disable-shared)
 						enable_shared='no'
 						;;
-					enable-threading)
-						threading_model='auto'
-						;;
 					enable-threading=*)
 						threading_model=${OPTARG#*=}
 						;;
 					disable-threading)
 						threading_model='no'
+						;;
+					int-size=*)
+						int_type_size=${OPTARG#*=}
+						;;
+					blas-int-size=*)
+						blas2blis_int_type_size=${OPTARG#*=}
+						;;
+					enable-blas)
+						enable_blas2blis='yes'
+						;;
+					disable-blas)
+						enable_blas2blis='no'
+						;;
+					enable-cblas)
+						enable_cblas='yes'
+						;;
+					disable-cblas)
+						enable_cblas='no'
 						;;
 					*)
 						print_usage
@@ -293,6 +339,12 @@ main()
 				;;
 			t)
 				threading_model=$OPTARG
+				;;
+			i)
+				int_type_size=$OPTARG
+				;;
+			b)
+				blas2blis_int_type_size=$OPTARG
 				;;
 			\?)
 				print_usage
@@ -430,17 +482,57 @@ main()
 	
 	
 	# Check the threading model flag.
+	enable_openmp=0
+	enable_pthreads=0
 	if [ "x${threading_model}" = "xauto" ]; then
 		echo "${script_name}: determining the threading model automatically."
 	elif [ "x${threading_model}" = "xomp" ]; then
 		echo "${script_name}: using OpenMP for threading."
+		enable_openmp=1
 	elif [ "x${threading_model}" = "xpthreads" ]; then
 		echo "${script_name}: using Pthreads for threading."
+		enable_pthreads=1
 	elif [ "x${threading_model}" = "xno" ]; then
 		echo "${script_name}: threading is disabled."
 	else
 		echo "Unsupported threading model: ${threading_model}."
 		exit 1
+	fi
+	
+	
+	# Convert 'yes' and 'no' flags to booleans.
+	if [ "x${enable_cblas}" = "xyes" ]; then
+	   echo "${script_name}: the CBLAS compatibility layer is enabled."
+	   enable_cblas=1
+	   # Force BLAS layer when CBLAS is enabled
+	   enable_blas='yes'
+	else
+	   echo "${script_name}: the CBLAS compatibility layer is disabled."
+	   enable_cblas=0
+	fi
+	if [ "x${enable_blas2blis}" = "xyes" ]; then
+	   echo "${script_name}: the BLAS compatibility layer is enabled."
+	   enable_blas2blis=1
+	else
+	   echo "${script_name}: the BLAS compatibility layer is disabled."
+	   enable_blas2blis=0
+	fi
+	
+	
+	# Report integer sizes
+	if [ "x${int_type_size}" = "x32" ]; then
+		echo "${script_name}: the internal integer size is 32-bit."
+	elif [ "x${int_type_size}" = "x64" ]; then
+		echo "${script_name}: the internal integer size is 64-bit."
+	else
+		echo "${script_name}: the internal integer size is automatically determined."
+	fi
+	if [ "x${blas2blis_int_type_size}" = "x32" ]; then
+		echo "${script_name}: the BLAS/CBLAS interface integer size is 32-bit."
+	elif [ "x${blas2blis_int_type_size}" = "x64" ]; then
+		echo "${script_name}: the BLAS/CBLAS interface integer size is 64-bit."
+	else
+		echo "${script_name}: the BLAS/CBLAS interface integer size is automatically determined."
 	fi
 
 
@@ -466,6 +558,19 @@ main()
 		| sed "s/@enable_dynamic@/${enable_shared}/g" \
 		| sed "s/@threading_model@/${threading_model}/g" \
 		> "${config_mk_out_path}"
+		
+
+	# Begin substituting information into the bli_config_h_in file, outputting
+	# to bli_config_h_out.
+	echo "${script_name}: creating ${bli_config_h_out_path} from ${bli_config_h_in_path}"
+	cat "${bli_config_h_in_path}" \
+		| sed "s/@enable_openmp@/${enable_openmp}/g" \
+		| sed "s/@enable_pthreads@/${enable_pthreads}/g" \
+		| sed "s/@int_type_size@/${int_type_size}/g" \
+		| sed "s/@blas2blis_int_type_size@/${blas2blis_int_type_size}/g" \
+		| sed "s/@enable_blas2blis@/${enable_blas2blis}/g" \
+		| sed "s/@enable_cblas@/${enable_cblas}/g" \
+		> "${bli_config_h_out_path}"
 
 
 	# Create obj sub-directories (if they do not already exist).

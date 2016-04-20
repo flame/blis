@@ -109,6 +109,10 @@ void bli_cntx_obj_clear( cntx_t* cntx )
 
 void bli_cntx_init( cntx_t* cntx )
 {
+	// This function initializes a "universal" context that is pre-loaded
+	// with kernel addresses for all level-1v, -1f, and -3 kernels, in
+	// addition to all level-1f and -3 blocksizes.
+
 	bli_gks_cntx_set_l3_nat_ukr( BLIS_GEMM_UKR, cntx );
 	bli_gks_cntx_set_l3_nat_ukr( BLIS_GEMMTRSM_L_UKR, cntx );
 	bli_gks_cntx_set_l3_nat_ukr( BLIS_GEMMTRSM_U_UKR, cntx );
@@ -161,6 +165,7 @@ blksz_t* bli_cntx_get_blksz( bszid_t bs_id,
 	return blksz;
 }
 
+#if 0
 dim_t bli_cntx_get_blksz_def_dt( num_t   dt,
                                  bszid_t bs_id,
                                  cntx_t* cntx )
@@ -182,6 +187,7 @@ dim_t bli_cntx_get_blksz_max_dt( num_t   dt,
 	// Return the default blocksize value for the datatype given.
 	return bli_blksz_get_max( dt, blksz );
 }
+#endif
 
 blksz_t* bli_cntx_get_bmult( bszid_t bs_id,
                              cntx_t* cntx )
@@ -196,6 +202,7 @@ blksz_t* bli_cntx_get_bmult( bszid_t bs_id,
 	return bmult;
 }
 
+#if 0
 dim_t bli_cntx_get_bmult_dt( num_t   dt,
                              bszid_t bs_id,
                              cntx_t* cntx )
@@ -203,21 +210,8 @@ dim_t bli_cntx_get_bmult_dt( num_t   dt,
 	blksz_t* bmult = bli_cntx_get_bmult( bs_id, cntx );
 
 	return bli_blksz_get_def( dt, bmult );
-#if 0
-	blksz_t* blkszs = bli_cntx_blkszs_buf( cntx );
-	bszid_t* bmults = bli_cntx_bmults_buf( cntx );
-	bszid_t  bm_id  = bmults[ bs_id ];
-
-	// A little hack to ensure we don't try to access a blocksize object
-	// using an uninitialized/garbage value in the bmults array (which
-	// may exist because that blocksize in the context was never set).
-	if ( bm_id < BLIS_BSZID_LO && BLIS_BSZID_HI < bm_id ) return 0;
-
-	blksz_t* bmult  = &blkszs[ bm_id ];
-
-	return bli_blksz_get_def( dt, bmult );
-#endif
 }
+#endif
 
 func_t* bli_cntx_get_l3_ukr( l3ukr_t ukr_id,
                              cntx_t* cntx )
@@ -240,6 +234,7 @@ func_t* bli_cntx_get_l3_ukr( l3ukr_t ukr_id,
 	return l3_ukr;
 }
 
+#if 0
 void* bli_cntx_get_l3_ukr_dt( num_t   dt,
                               l3ukr_t ukr_id,
                               cntx_t* cntx )
@@ -260,6 +255,7 @@ void* bli_cntx_get_l3_ukr_dt( num_t   dt,
 
 	return bli_func_get_dt( dt, l3_ukr );
 }
+#endif
 
 func_t* bli_cntx_get_l3_vir_ukr( l3ukr_t ukr_id,
                                  cntx_t* cntx )
@@ -272,6 +268,7 @@ func_t* bli_cntx_get_l3_vir_ukr( l3ukr_t ukr_id,
 	return l3_vir_ukr;
 }
 
+#if 0
 void* bli_cntx_get_l3_vir_ukr_dt( num_t   dt,
                                   l3ukr_t ukr_id,
                                   cntx_t* cntx )
@@ -283,6 +280,7 @@ void* bli_cntx_get_l3_vir_ukr_dt( num_t   dt,
 	// identified by ukr_id.
 	return bli_func_get_dt( dt, l3_vir_ukr );
 }
+#endif
 
 func_t* bli_cntx_get_l3_nat_ukr( l3ukr_t ukr_id,
                                  cntx_t* cntx )
@@ -295,6 +293,7 @@ func_t* bli_cntx_get_l3_nat_ukr( l3ukr_t ukr_id,
 	return l3_nat_ukr;
 }
 
+#if 0
 void* bli_cntx_get_l3_nat_ukr_dt( num_t   dt,
                                   l3ukr_t ukr_id,
                                   cntx_t* cntx )
@@ -306,6 +305,7 @@ void* bli_cntx_get_l3_nat_ukr_dt( num_t   dt,
 	// identified by ukr_id.
 	return bli_func_get_dt( dt, l3_nat_ukr );
 }
+#endif
 
 func_t* bli_cntx_get_l1f_ker( l1fkr_t ker_id,
                               cntx_t* cntx )
@@ -318,6 +318,7 @@ func_t* bli_cntx_get_l1f_ker( l1fkr_t ker_id,
 	return l1f_ker;
 }
 
+#if 0
 void* bli_cntx_get_l1f_ker_dt( num_t   dt,
                                l1fkr_t ker_id,
                                cntx_t* cntx )
@@ -327,6 +328,7 @@ void* bli_cntx_get_l1f_ker_dt( num_t   dt,
 
 	return bli_func_get_dt( dt, l1f_ker );
 }
+#endif
 
 func_t* bli_cntx_get_l1v_ker( l1vkr_t ker_id,
                               cntx_t* cntx )
@@ -339,6 +341,7 @@ func_t* bli_cntx_get_l1v_ker( l1vkr_t ker_id,
 	return l1v_ker;
 }
 
+#if 0
 void* bli_cntx_get_l1v_ker_dt( num_t   dt,
                                l1vkr_t ker_id,
                                cntx_t* cntx )
@@ -348,6 +351,7 @@ void* bli_cntx_get_l1v_ker_dt( num_t   dt,
 
 	return bli_func_get_dt( dt, l1v_ker );
 }
+#endif
 
 mbool_t* bli_cntx_get_l3_nat_ukr_prefs( l3ukr_t ukr_id,
                                         cntx_t* cntx )
@@ -367,6 +371,7 @@ func_t* bli_cntx_get_packm_ukr( cntx_t* cntx )
 	return packm_ukrs;
 }
 
+#if 0
 ind_t bli_cntx_get_ind_method( cntx_t* cntx )
 {
 	return bli_cntx_method( cntx );
@@ -381,6 +386,7 @@ pack_t bli_cntx_get_pack_schema_b( cntx_t* cntx )
 {
 	return bli_cntx_schema_b( cntx );
 }
+#endif
 
 // -----------------------------------------------------------------------------
 

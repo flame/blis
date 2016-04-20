@@ -156,11 +156,11 @@ ifeq ($(THREADING_MODEL),auto)
 THREADING_MODEL := omp
 endif
 ifeq ($(THREADING_MODEL),omp)
-CTHREADFLAGS := -fopenmp -DBLIS_ENABLE_OPENMP
+CTHREADFLAGS := -fopenmp
 LDFLAGS      += -fopenmp
 endif
 ifeq ($(THREADING_MODEL),pthreads)
-CTHREADFLAGS := -pthread -DBLIS_ENABLE_PTHREADS
+CTHREADFLAGS := -pthread
 LDFLAGS      += -lpthread
 endif
 endif
@@ -170,11 +170,11 @@ ifeq ($(THREADING_MODEL),auto)
 THREADING_MODEL := omp
 endif
 ifeq ($(THREADING_MODEL),omp)
-CTHREADFLAGS := -openmp -DBLIS_ENABLE_OPENMP
+CTHREADFLAGS := -openmp
 LDFLAGS      += -openmp
 endif
 ifeq ($(THREADING_MODEL),pthreads)
-CTHREADFLAGS := -pthread -DBLIS_ENABLE_PTHREADS
+CTHREADFLAGS := -pthread
 LDFLAGS      += -lpthread
 endif
 endif
@@ -184,10 +184,11 @@ ifeq ($(THREADING_MODEL),auto)
 THREADING_MODEL := pthreads
 endif
 ifeq ($(THREADING_MODEL),omp)
-$(error OpenMP is not supported with Clang.)
+CTHREADFLAGS := -fopenmp
+LDFLAGS      += -fopenmp
 endif
 ifeq ($(THREADING_MODEL),pthreads)
-CTHREADFLAGS := -pthread -DBLIS_ENABLE_PTHREADS
+CTHREADFLAGS := -pthread
 LDFLAGS      += -lpthread
 endif
 endif
@@ -207,10 +208,12 @@ CFLAGS_KERNELS := $(CKOPTFLAGS) $(CVECFLAGS) $(CFLAGS_NOOPT)
 
 ifeq ($(V),1)
 BLIS_ENABLE_VERBOSE_MAKE_OUTPUT := yes
+BLIS_ENABLE_TEST_OUTPUT := yes
 endif
 
 ifeq ($(V),0)
 BLIS_ENABLE_VERBOSE_MAKE_OUTPUT := no
+BLIS_ENABLE_TEST_OUTPUT := no
 endif
 
 
