@@ -36,7 +36,7 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-void bla_d_cnjg(bla_dcomplex *dest, bla_dcomplex *src)
+void bla_d_cnjg(bla_dcomplex *dest, const bla_dcomplex *src)
 {
 	bli_zcopyjs( *src, *dest );
 }

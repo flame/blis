@@ -51,7 +51,7 @@ static bla_real sc_b4 = 1.f;
     bla_real r__1, r__2;
 
     /* Builtin functions */
-    double sqrt(bla_double), bla_r_sign(bla_real *, bla_real *);
+    //double sqrt(bla_double), bla_r_sign(bla_real *, bla_real *);
 
     /* Local variables */
     bla_real r__, scale, z__, roe;
@@ -111,7 +111,7 @@ static bla_double dc_b4 = 1.;
     bla_double d__1, d__2;
 
     /* Builtin functions */
-    double sqrt(bla_double), bla_d_sign(bla_double *, bla_double *);
+    //double sqrt(bla_double), bla_d_sign(bla_double *, bla_double *);
 
     /* Local variables */
     bla_double r__, scale, z__, roe;
@@ -168,8 +168,8 @@ L20:
     bla_scomplex q__1, q__2, q__3;
 
     /* Builtin functions */
-    double bla_c_abs(bla_scomplex *), sqrt(bla_double);
-    void bla_r_cnjg(bla_scomplex *, bla_scomplex *);
+    //double bla_c_abs(bla_scomplex *), sqrt(bla_double);
+    //void bla_r_cnjg(bla_scomplex *, bla_scomplex *);
 
     /* Local variables */
     bla_real norm;
@@ -218,10 +218,10 @@ L20:
     bla_dcomplex z__1, z__2, z__3, z__4;
 
     /* Builtin functions */
-    double bla_z_abs(bla_dcomplex *);
-    void bla_z_div(bla_dcomplex *, bla_dcomplex *, bla_dcomplex *);
-    double sqrt(bla_double);
-    void bla_d_cnjg(bla_dcomplex *, bla_dcomplex *);
+    //double bla_z_abs(bla_dcomplex *);
+    //void bla_z_div(bla_dcomplex *, bla_dcomplex *, bla_dcomplex *);
+    //double sqrt(bla_double);
+    //void bla_d_cnjg(bla_dcomplex *, bla_dcomplex *);
 
     /* Local variables */
     bla_double norm;

@@ -1,8 +1,4 @@
-#include "bli_config.h"
-#include "bli_config_macro_defs.h"
-#include "bli_system.h"
-#include "bli_type_defs.h"
-#include "bli_cblas.h"
+#include "blis.h"
 #ifdef BLIS_ENABLE_CBLAS
 /*
  * cblas_dcopy.c
@@ -14,8 +10,8 @@
  */
 #include "cblas.h"
 #include "cblas_f77.h"
-void cblas_dcopy( const int N, const double *X,
-                      const int incX, double *Y, const int incY)
+void cblas_dcopy( f77_int N, const double *X,
+                      f77_int incX, double *Y, f77_int incY)
 {
 #ifdef F77_INT
    F77_INT F77_N=N, F77_incX=incX, F77_incY=incY;

@@ -1,8 +1,4 @@
-#include "bli_config.h"
-#include "bli_config_macro_defs.h"
-#include "bli_system.h"
-#include "bli_type_defs.h"
-#include "bli_cblas.h"
+#include "blis.h"
 #ifdef BLIS_ENABLE_CBLAS
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,7 +7,7 @@
 #include "cblas.h"
 #include "cblas_f77.h"
 
-void cblas_xerbla(int info, const char *rout, const char *form, ...)
+void cblas_xerbla(f77_int info, const char *rout, const char *form, ...)
 {
    extern int RowMajorStrg;
    char empty[1] = "";
@@ -69,7 +65,7 @@ void cblas_xerbla(int info, const char *rout, const char *form, ...)
    vfprintf(stderr, form, argptr);
    va_end(argptr);
    if (info && !info) 
-      F77_xerbla(empty, &info); /* Force link of our F77 error handler */
+      F77_xerbla(empty, &info, 0); /* Force link of our F77 error handler */
    exit(-1);
 }
 #endif

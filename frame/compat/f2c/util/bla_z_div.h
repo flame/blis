@@ -34,7 +34,7 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-void bla_z_div(bla_dcomplex *cp, bla_dcomplex *ap, bla_dcomplex *bp);
+void bla_z_div(bla_dcomplex *cp, const bla_dcomplex *ap, const bla_dcomplex *bp);
 
 #endif
 

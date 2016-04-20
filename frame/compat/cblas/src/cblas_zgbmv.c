@@ -1,8 +1,4 @@
-#include "bli_config.h"
-#include "bli_config_macro_defs.h"
-#include "bli_system.h"
-#include "bli_type_defs.h"
-#include "bli_cblas.h"
+#include "blis.h"
 #ifdef BLIS_ENABLE_CBLAS
 /*
  * cblas_zgbmv.c
@@ -15,12 +11,12 @@
 #include <stdlib.h>
 #include "cblas.h"
 #include "cblas_f77.h"
-void cblas_zgbmv(const enum CBLAS_ORDER order,
-                 const enum CBLAS_TRANSPOSE TransA, const int M, const int N,
-                 const int KL, const int KU,
-                 const void *alpha, const void  *A, const int lda,
-                 const void  *X, const int incX, const void *beta,
-                 void  *Y, const int incY)
+void cblas_zgbmv(enum CBLAS_ORDER order,
+                 enum CBLAS_TRANSPOSE TransA, f77_int M, f77_int N,
+                 f77_int KL, f77_int KU,
+                 const void *alpha, const void  *A, f77_int lda,
+                 const void  *X, f77_int incX, const void *beta,
+                 void  *Y, f77_int incY)
 {
    char TA;
 #ifdef F77_CHAR
@@ -37,7 +33,7 @@ void cblas_zgbmv(const enum CBLAS_ORDER order,
    #define F77_lda lda
    #define F77_KL KL
    #define F77_KU KU
-   #define F77_incX incx
+   #define F77_incX incX
    #define F77_incY incY
 #endif
    int n, i=0;
@@ -65,8 +61,8 @@ void cblas_zgbmv(const enum CBLAS_ORDER order,
       #ifdef F77_CHAR
          F77_TA = C2F_CHAR(&TA);
       #endif
-      F77_zgbmv(F77_TA, &F77_M, &F77_N, &F77_KL, &F77_KU, alpha,  
-                     A, &F77_lda, X, &F77_incX, beta, Y, &F77_incY);
+      F77_zgbmv(F77_TA, &F77_M, &F77_N, &F77_KL, &F77_KU, (dcomplex*)alpha,
+                (dcomplex*)A, &F77_lda, (dcomplex*)X, &F77_incX, (dcomplex*)beta, (dcomplex*)Y, &F77_incY);
    }
    else if (order == CblasRowMajor)
    {
@@ -109,7 +105,7 @@ void cblas_zgbmv(const enum CBLAS_ORDER order,
             #ifdef F77_INT
                F77_incX = 1;
             #else
-               incx = 1;
+               incX = 1;
             #endif
 
             if( incY > 0 )
@@ -146,11 +142,11 @@ void cblas_zgbmv(const enum CBLAS_ORDER order,
          F77_TA = C2F_CHAR(&TA);
       #endif
       if (TransA == CblasConjTrans)
-         F77_zgbmv(F77_TA, &F77_N, &F77_M, &F77_KU, &F77_KL, ALPHA, 
-                        A ,&F77_lda, x,&F77_incX, BETA, Y, &F77_incY);
+         F77_zgbmv(F77_TA, &F77_N, &F77_M, &F77_KU, &F77_KL, (dcomplex*)ALPHA,
+                   (dcomplex*)A ,&F77_lda, (dcomplex*)x,&F77_incX, (dcomplex*)BETA, (dcomplex*)Y, &F77_incY);
       else
-         F77_zgbmv(F77_TA, &F77_N, &F77_M, &F77_KU, &F77_KL, alpha, 
-                        A ,&F77_lda, x,&F77_incX, beta, Y, &F77_incY);
+         F77_zgbmv(F77_TA, &F77_N, &F77_M, &F77_KU, &F77_KL, (dcomplex*)alpha,
+                   (dcomplex*)A ,&F77_lda, (dcomplex*)x,&F77_incX, (dcomplex*)beta, (dcomplex*)Y, &F77_incY);
       if (TransA == CblasConjTrans)
       {
          if (x != X) free(x);

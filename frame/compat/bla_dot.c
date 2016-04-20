@@ -43,9 +43,9 @@
 \
 ftype PASTEF772(chxy,blasname,chc) \
      ( \
-       f77_int* n, \
-       ftype*   x, f77_int* incx, \
-       ftype*   y, f77_int* incy  \
+       const f77_int* n, \
+       const ftype*   x, const f77_int* incx, \
+       const ftype*   y, const f77_int* incy  \
      ) \
 { \
 	dim_t  n0; \
@@ -64,8 +64,8 @@ ftype PASTEF772(chxy,blasname,chc) \
 \
 	/* If the input increments are negative, adjust the pointers so we can
 	   use positive increments instead. */ \
-	bli_convert_blas_incv( n0, x, *incx, x0, incx0 ); \
-	bli_convert_blas_incv( n0, y, *incy, y0, incy0 ); \
+	bli_convert_blas_incv( n0, (ftype*)x, *incx, x0, incx0 ); \
+	bli_convert_blas_incv( n0, (ftype*)y, *incy, y0, incy0 ); \
 \
 	/* Call BLIS interface. */ \
 	PASTEMAC(chxy,blisname) \
@@ -95,9 +95,9 @@ INSERT_GENTFUNCDOT_BLAS( dot, dotv )
 // with result returned in single precision.
 float PASTEF77(sd,sdot)
      (
-       f77_int* n,
-       float*   x, f77_int* incx,
-       float*   y, f77_int* incy
+       const f77_int* n,
+       const float*   x, const f77_int* incx,
+       const float*   y, const f77_int* incy
      )
 {
 	return ( float )PASTEF77(d,sdot)( n,
@@ -109,9 +109,9 @@ float PASTEF77(sd,sdot)
 // with result returned in double precision.
 double PASTEF77(d,sdot)
      (
-       f77_int* n,
-       float*   x, f77_int* incx,
-       float*   y, f77_int* incy
+       const f77_int* n,
+       const float*   x, const f77_int* incx,
+       const float*   y, const f77_int* incy
      )
 {
 	dim_t   n0;
@@ -129,8 +129,8 @@ double PASTEF77(d,sdot)
 
 	/* If the input increments are negative, adjust the pointers so we can
 	   use positive increments instead. */
-	bli_convert_blas_incv( n0, x, *incx, x0, incx0 );
-	bli_convert_blas_incv( n0, y, *incy, y0, incy0 );
+	bli_convert_blas_incv( n0, (float*)x, *incx, x0, incx0 );
+	bli_convert_blas_incv( n0, (float*)y, *incy, y0, incy0 );
 
 	rho = 0.0;
 

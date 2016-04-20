@@ -36,7 +36,7 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-double bla_c_abs(bla_scomplex *z)
+double bla_c_abs(const bla_scomplex *z)
 {
 	return( bla_f__cabs( bli_creal( *z ),
 	                     bli_cimag( *z ) ) );

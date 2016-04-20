@@ -1,8 +1,4 @@
-#include "bli_config.h"
-#include "bli_config_macro_defs.h"
-#include "bli_system.h"
-#include "bli_type_defs.h"
-#include "bli_cblas.h"
+#include "blis.h"
 #ifdef BLIS_ENABLE_CBLAS
 /*
  * cblas_chpr2.c
@@ -15,9 +11,9 @@
 #include <stdlib.h>
 #include "cblas.h"
 #include "cblas_f77.h"
-void cblas_chpr2(const enum CBLAS_ORDER order, const enum CBLAS_UPLO Uplo,
-                      const int N,const void *alpha, const void *X, 
-                      const int incX,const void *Y, const int incY, void *Ap)
+void cblas_chpr2(enum CBLAS_ORDER order, enum CBLAS_UPLO Uplo,
+                      f77_int N,const void *alpha, const void *X, 
+                      f77_int incX,const void *Y, f77_int incY, void *Ap)
 
 {
    char UL;
@@ -31,8 +27,8 @@ void cblas_chpr2(const enum CBLAS_ORDER order, const enum CBLAS_UPLO Uplo,
    F77_INT F77_N=N,  F77_incX=incX, F77_incY=incY;
 #else
    #define F77_N N
-   #define F77_incX incx
-   #define F77_incY incy
+   #define F77_incX incX
+   #define F77_incY incY
 #endif
    int n, i, j, tincx, tincy;
    float *x=(float *)X, *xx=(float *)X, *y=(float *)Y,
@@ -58,7 +54,7 @@ void cblas_chpr2(const enum CBLAS_ORDER order, const enum CBLAS_UPLO Uplo,
          F77_UL = C2F_CHAR(&UL);
       #endif
 
-      F77_chpr2(F77_UL, &F77_N, alpha, X, &F77_incX, Y, &F77_incY, Ap);
+      F77_chpr2(F77_UL, &F77_N, (scomplex*)alpha, (scomplex*)X, &F77_incX, (scomplex*)Y, &F77_incY, (scomplex*)Ap);
 
    }  else if (order == CblasRowMajor)
    {
@@ -128,8 +124,8 @@ void cblas_chpr2(const enum CBLAS_ORDER order, const enum CBLAS_UPLO Uplo,
             F77_incX = 1;
             F77_incY = 1;
          #else
-            incx = 1;
-            incy = 1;
+            incX = 1;
+            incY = 1;
          #endif
 
       }  else 
@@ -137,7 +133,7 @@ void cblas_chpr2(const enum CBLAS_ORDER order, const enum CBLAS_UPLO Uplo,
          x = (float *) X;
          y = (void  *) Y;
       }
-      F77_chpr2(F77_UL, &F77_N, alpha, y, &F77_incY, x, &F77_incX, Ap);
+      F77_chpr2(F77_UL, &F77_N, (scomplex*)alpha, (scomplex*)y, &F77_incY, (scomplex*)x, &F77_incX, (scomplex*)Ap);
    } else 
    {
       cblas_xerbla(1, "cblas_chpr2","Illegal Order setting, %d\n", order);

@@ -35,22 +35,14 @@
 #ifndef BLIS_CBLAS_H
 #define BLIS_CBLAS_H
 
-
 #ifdef BLIS_ENABLE_CBLAS
 
-// If the BLAS compatibility layer was not explicitly enabled, we must
-// enable it here.
-#ifndef BLIS_ENABLE_BLAS2BLIS
-#define BLIS_ENABLE_BLAS2BLIS
-#endif
 
-// Force trailing underscores. BLIS does not support any other type of
-// Fortran name-mangling.
-#define ADD_
-
-// Define the Fortran integer to be the same kind assumed by BLIS's
-// BLAS compatibility layer.
-#define F77_INT f77_int
+// Undefine these macros so that no internal conversion is done by CBLAS.
+// The function signatures have been modified to use the proper integer types
+// directly.
+#undef F77_INT
+#undef F77_CHAR
 
 // Include the main CBLAS header so that including this header file
 // (probably via blis.h) allows applications to access CBLAS

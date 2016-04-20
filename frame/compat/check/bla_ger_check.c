@@ -38,13 +38,13 @@
 
 void bla_ger_check
      (
-       char*     dt_str,
-       char*     op_str,
-       f77_int*  m,
-       f77_int*  n,
-       f77_int*  incx,
-       f77_int*  incy,
-       f77_int*  lda
+       const char*     dt_str,
+       const char*     op_str,
+       const f77_int*  m,
+       const f77_int*  n,
+       const f77_int*  incx,
+       const f77_int*  incy,
+       const f77_int*  lda
      )
 {
 	f77_int info = 0;

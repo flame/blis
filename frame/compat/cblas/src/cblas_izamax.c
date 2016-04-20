@@ -1,8 +1,4 @@
-#include "bli_config.h"
-#include "bli_config_macro_defs.h"
-#include "bli_system.h"
-#include "bli_type_defs.h"
-#include "bli_cblas.h"
+#include "blis.h"
 #ifdef BLIS_ENABLE_CBLAS
 /*
  * cblas_izamax.c
@@ -15,7 +11,7 @@
  */
 #include "cblas.h"
 #include "cblas_f77.h"
-CBLAS_INDEX cblas_izamax( const int N, const void *X, const int incX)
+f77_int cblas_izamax( f77_int N, const void *X, f77_int incX)
 {
    f77_int iamax;
 #ifdef F77_INT
@@ -24,7 +20,7 @@ CBLAS_INDEX cblas_izamax( const int N, const void *X, const int incX)
    #define F77_N N
    #define F77_incX incX
 #endif
-   F77_izamax_sub( &F77_N, X, &F77_incX, &iamax);
+   F77_izamax_sub( &F77_N, (dcomplex*)X, &F77_incX, &iamax);
    return (iamax ? iamax-1 : 0);
 }
 #endif

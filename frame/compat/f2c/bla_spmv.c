@@ -41,7 +41,7 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(d,spmv)(bla_character *uplo, bla_integer *n, bla_double *alpha, bla_double *ap, bla_double *x, bla_integer *incx, bla_double *beta, bla_double *y, bla_integer *incy)
+/* Subroutine */ int PASTEF77(d,spmv)(const bla_character *uplo, const bla_integer *n, const bla_double *alpha, const bla_double *ap, const bla_double *x, const bla_integer *incx, const bla_double *beta, bla_double *y, const bla_integer *incy)
 {
     /* System generated locals */
     bla_integer i__1, i__2;
@@ -50,9 +50,9 @@
     bla_integer info;
     bla_double temp1, temp2;
     bla_integer i__, j, k;
-    extern bla_logical PASTEF770(lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
+    //extern bla_logical PASTEF770(lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
     bla_integer kk, ix, iy, jx, jy, kx, ky;
-    extern /* Subroutine */ int PASTEF770(xerbla)(bla_character *, bla_integer *, ftnlen);
+    //extern /* Subroutine */ int PASTEF770(xerbla)(bla_character *, bla_integer *, ftnlen);
 
 /*     .. Scalar Arguments .. */
 /*     .. Array Arguments .. */
@@ -342,7 +342,7 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(s,spmv)(bla_character *uplo, bla_integer *n, bla_real *alpha, bla_real *ap, bla_real *x, bla_integer *incx, bla_real *beta, bla_real *y, bla_integer *incy)
+/* Subroutine */ int PASTEF77(s,spmv)(const bla_character *uplo, const bla_integer *n, const bla_real *alpha, const bla_real *ap, const bla_real *x, const bla_integer *incx, const bla_real *beta, bla_real *y, const bla_integer *incy)
 {
     /* System generated locals */
     bla_integer i__1, i__2;
@@ -351,9 +351,9 @@
     bla_integer info;
     bla_real temp1, temp2;
     bla_integer i__, j, k;
-    extern bla_logical PASTEF770(lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
+    //extern bla_logical PASTEF770(lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
     bla_integer kk, ix, iy, jx, jy, kx, ky;
-    extern /* Subroutine */ int PASTEF770(xerbla)(bla_character *, bla_integer *, ftnlen);
+    //extern /* Subroutine */ int PASTEF770(xerbla)(bla_character *, bla_integer *, ftnlen);
 
 /*     .. Scalar Arguments .. */
 /*     .. Array Arguments .. */
