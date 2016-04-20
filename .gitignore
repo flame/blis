@@ -29,6 +29,7 @@
 # -- build system files --
 
 config.mk
+bli_config.h
 
 # -- makefile fragments --
 
