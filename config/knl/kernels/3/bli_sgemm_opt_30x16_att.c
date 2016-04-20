@@ -315,6 +315,7 @@ void bli_sgemm_opt_30x16(
 
     MOV(R(10), VAR(offsetPtr))
     VMOVAPS(ZMM(30), MEM(R(10)))
+    /* Note that this ignores the upper 32 bits in cs_c */
     VPBROADCASTD(ZMM(31), VAR(cs_c))
     MOV(R(13), VAR(beta))
     VPMULLD(ZMM(30), ZMM(31), ZMM(30))

@@ -74,6 +74,8 @@
 #define JMP(_0) ASM(jmp _0)
 #define VGATHERDPS(_0, _1) ASM(vgatherdps _1, _0)
 #define VSCATTERDPS(_0, _1) ASM(vscatterdps _1, _0)
+#define VGATHERDPD(_0, _1) ASM(vgatherdpd _1, _0)
+#define VSCATTERDPD(_0, _1) ASM(vscatterdpd _1, _0)
 #define VGATHERQPD(_0, _1) ASM(vgatherqpd _1, _0)
 #define VSCATTERQPD(_0, _1) ASM(vscatterqpd _1, _0)
 #define VMULPS(_0, _1, _2) ASM(vmulps _2, _1, _0)
