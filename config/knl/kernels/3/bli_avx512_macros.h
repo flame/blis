@@ -56,6 +56,7 @@
 #define JKNZD(kreg,label) \
     ASM(kortestw kreg, kreg) \
     ASM(jnz label)
+#define KXNORW(_0, _1, _2) ASM(kxnorw _2, _1, _0)
 
 #define RDTSC ASM(rdstc)
 #define DEC(_0) ASM(dec _0)

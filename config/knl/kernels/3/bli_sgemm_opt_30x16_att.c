@@ -43,26 +43,18 @@
 
 //Alternate code path uused if C is not row-major
 // r9 = c
-// ebx = 0xff
 // zmm30 = cs_c * 1...16
 // r11 = rs_c
 // r12 = &alpha
 // r13 = &beta
 #define UPDATE_C_ROW_SCATTERED(NUM) \
 \
-    KMOV(K(3), EBX) \
-    LABEL(GATHER##NUM) \
-    VGATHERDPS(ZMM(31) MASK_K(3), MEM(R(9),ZMM(30),4)) \
-    JKNZD(K(3), GATHER##NUM) \
-    \
+    KXNORW(K(2), K(0), K(0)) \
+    KXNORW(K(3), K(0), K(0)) \
+    VGATHERDPS(ZMM(31) MASK_K(2), MEM(R(9),ZMM(30),4)) \
     VMULPS(ZMM(NUM), ZMM(NUM), MEM_1TO16(R(12))) /*scale by alpha*/ \
     VFMADD132PS(ZMM(31), ZMM(NUM), MEM_1TO16(R(13))) /*scale by beta, add in result*/ \
-    \
-    KMOV(K(3), EBX) \
-    LABEL(SCATTER##NUM) \
     VSCATTERDPS(MEM(R(9),ZMM(30),4) MASK_K(3), ZMM(31)) \
-    JKNZD(K(3), SCATTER##NUM) \
-    \
     ADD(R(9), R(11))
 
 // r12 = &alpha
@@ -158,8 +150,7 @@
 #define MAIN_LOOP_PC_L2(COUNTER) MAIN_LOOP_(COUNTER,COMMENT_BEGIN,COMMENT_END,,)
 
 //This is an array used for the scatter/gather instructions.
-int32_t offsets32[16] __attribute__((aligned(64))) = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
-int64_t offsets64[ 8] __attribute__((aligned(64))) = {0, 1, 2, 3, 4, 5, 6, 7};
+int32_t offsets[16] __attribute__((aligned(64))) = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
 
 //#define MONITORS
 //#define LOOPMON
@@ -177,7 +168,7 @@ void bli_sgemm_opt_30x16(
     const float * a_next = bli_auxinfo_next_a( data );
     const float * b_next = bli_auxinfo_next_b( data );
 
-    const int32_t * offsetPtr = &offsets32[0];
+    const int32_t * offsetPtr = &offsets[0];
 
 #ifdef MONITORS
     int toph, topl, both, botl, midl, midh, mid2l, mid2h;
@@ -320,7 +311,6 @@ void bli_sgemm_opt_30x16(
     MOV(R(13), VAR(beta))
     VPMULLD(ZMM(30), ZMM(31), ZMM(30))
 
-    MOV(EBX, IMM(0xFFFF))
     UPDATE_C_ROW_SCATTERED( 0)
     UPDATE_C_ROW_SCATTERED( 1)
     UPDATE_C_ROW_SCATTERED( 2)

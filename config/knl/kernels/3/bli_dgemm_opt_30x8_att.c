@@ -43,26 +43,18 @@
 
 //Alternate code path uused if C is not row-major
 // r9 = c
-// ebx = 0xff
-// ymm30 = cs_c * 1...8
+// ymm0 = cs_c * 1...8
 // r11 = rs_c
 // r12 = &alpha
 // r13 = &beta
-#define UPDATE_C_ROW_SCATTERED(NUM, SCALE) \
+#define UPDATE_C_ROW_SCATTERED(NUM) \
 \
-    KMOV(K(3), EBX) \
-    LABEL(GATHER##NUM) \
-    VGATHERDPD(ZMM(31) MASK_K(3), MEM(R(9),SCALE,8)) \
-    JKNZD(K(3), GATHER##NUM) \
-    \
+    KXNORW(K(2), K(0), K(0)) \
+    KXNORW(K(3), K(0), K(0)) \
+    VGATHERDPD(ZMM(31) MASK_K(2), MEM(R(9),YMM(0),8)) \
     VMULPD(ZMM(NUM), ZMM(NUM), MEM_1TO8(R(12))) /*scale by alpha*/ \
     VFMADD132PD(ZMM(31), ZMM(NUM), MEM_1TO8(R(13))) /*scale by beta, add in result*/ \
-    \
-    KMOV(K(3), EBX) \
-    LABEL(SCATTER##NUM) \
-    VSCATTERDPD(MEM(R(9),SCALE,8) MASK_K(3), ZMM(31)) \
-    JKNZD(K(3), SCATTER##NUM) \
-    \
+    VSCATTERDPD(MEM(R(9),YMM(0),8) MASK_K(3), ZMM(31)) \
     ADD(R(9), R(11))
 
 // r12 = &alpha
@@ -100,8 +92,8 @@
     VMOVAPD(MEM(R(9)        ), ZMM(R1)) \
     VMOVAPD(MEM(R(9),R(11),1), ZMM(R2)) \
 
-#define A_TIMES_B_ROW(n) VFMADD231PD(ZMM(n), ZMM(31), MEM_1TO8(R(15),n*8))
-#define A_TIMES_B_ROW_PREV(n) VFMADD231PD(ZMM(n), ZMM(31), MEM_1TO8(R(15),(n-32)*8))
+#define A_TIMES_B_ROW(n) VFMADD231PD(ZMM(n), ZMM(31), MEM_1TO8(R(15),(n-1)*8))
+#define A_TIMES_B_ROW_PREV(n) VFMADD231PD(ZMM(n), ZMM(31), MEM_1TO8(R(15),((n-1)-32)*8))
 #define PREFETCH_A_L1(n) PREFETCH(0, MEM(R(15),A_L1_PREFETCH_DIST*8*32+n*64))
 #define PREFETCH_A_L2(n) PREFETCH(1, MEM(R(15),R(14),1,n*64))
 #define PREFETCH_B_L1 PREFETCH(0, MEM(RBX,B_L1_PREFETCH_DIST*8*8))
@@ -119,46 +111,46 @@
 // r9  =  8*8 = dist. to next sliver of b
 #define MAIN_LOOP_(COUNTER, PC_L1_1, PC_L1_2, PC_L2_1, PC_L2_2) \
 \
-    /* Can this be pre-loaded for next it. in zmm30? */              \
+    /* Can this be pre-loaded for next it. in zmm0? */               \
     VMOVAPD(ZMM(31), MEM(RBX))                                       \
                                                                      \
-    A_TIMES_B_ROW     ( 0)                                           \
-    A_TIMES_B_ROW     ( 1)    PREFETCH_A_L1(0)                       \
-    A_TIMES_B_ROW     ( 2)    PREFETCH_A_L1(1)                       \
-    A_TIMES_B_ROW     ( 3)    PREFETCH_A_L1(2)                       \
-    A_TIMES_B_ROW     ( 4)    PREFETCH_A_L1(3)                       \
-    A_TIMES_B_ROW     ( 5)    PREFETCH_A_L2(0)                       \
-    A_TIMES_B_ROW     ( 6)    PC_L1_1 PREFETCH(0, MEM(RCX)) PC_L1_2 \
-    A_TIMES_B_ROW     ( 7)    PC_L1_1 ADD(RCX, R(11))        PC_L1_2 \
-    A_TIMES_B_ROW     ( 8)                                           \
-    A_TIMES_B_ROW     ( 9)    PC_L2_1 PREFETCH(1, MEM(RCX)) PC_L2_2 \
-    A_TIMES_B_ROW     (10)    PREFETCH_A_L2(1)                       \
-    A_TIMES_B_ROW     (11)    PC_L1_1 PREFETCH(0, MEM(RCX)) PC_L1_2 \
-    A_TIMES_B_ROW     (12)    PC_L1_1 ADD(RCX, R(11))        PC_L1_2 \
-    A_TIMES_B_ROW     (13)                                           \
+    A_TIMES_B_ROW     ( 1)                                           \
+    A_TIMES_B_ROW     ( 2)    PREFETCH_A_L1(0)                       \
+    A_TIMES_B_ROW     ( 3)    PREFETCH_A_L1(1)                       \
+    A_TIMES_B_ROW     ( 4)    PREFETCH_A_L1(2)                       \
+    A_TIMES_B_ROW     ( 5)    PREFETCH_A_L1(3)                       \
+    A_TIMES_B_ROW     ( 6)    PREFETCH_A_L2(0)                       \
+    A_TIMES_B_ROW     ( 7)    PC_L1_1 PREFETCH(0, MEM(RCX))  PC_L1_2 \
+    A_TIMES_B_ROW     ( 8)    PC_L1_1 ADD(RCX, R(11))        PC_L1_2 \
+    A_TIMES_B_ROW     ( 9)                                           \
+    A_TIMES_B_ROW     (10)    PC_L2_1 PREFETCH(1, MEM(RCX))  PC_L2_2 \
+    A_TIMES_B_ROW     (11)    PREFETCH_A_L2(1)                       \
+    A_TIMES_B_ROW     (12)    PC_L1_1 PREFETCH(0, MEM(RCX))  PC_L1_2 \
+    A_TIMES_B_ROW     (13)    PC_L1_1 ADD(RCX, R(11))        PC_L1_2 \
     A_TIMES_B_ROW     (14)                                           \
-    A_TIMES_B_ROW     (15)    PREFETCH_A_L2(2)                       \
-    A_TIMES_B_ROW     (16)    PC_L1_1 PREFETCH(0, MEM(RCX)) PC_L1_2 \
-    A_TIMES_B_ROW     (17)    PC_L1_1 ADD(RCX, R(11))        PC_L1_2 \
-    A_TIMES_B_ROW     (18)                                           \
+    A_TIMES_B_ROW     (15)                                           \
+    A_TIMES_B_ROW     (16)    PREFETCH_A_L2(2)                       \
+    A_TIMES_B_ROW     (17)    PC_L1_1 PREFETCH(0, MEM(RCX))  PC_L1_2 \
+    A_TIMES_B_ROW     (18)    PC_L1_1 ADD(RCX, R(11))        PC_L1_2 \
     A_TIMES_B_ROW     (19)                                           \
-    A_TIMES_B_ROW     (20)    PREFETCH_A_L2(3)                       \
-    A_TIMES_B_ROW     (21)    ADD(R(15), R(12))                      \
-    A_TIMES_B_ROW_PREV(22)                                           \
-    A_TIMES_B_ROW_PREV(23)    PC_L2_1 ADD(RCX, R(11))        PC_L2_2 \
-    A_TIMES_B_ROW_PREV(24)    DEC(COUNTER)                           \
-    A_TIMES_B_ROW_PREV(25)    PREFETCH_B_L2                          \
-    A_TIMES_B_ROW_PREV(26)    PREFETCH_B_L1                          \
-    A_TIMES_B_ROW_PREV(27)    ADD(RBX, R(9))                         \
-    A_TIMES_B_ROW_PREV(28)    CMP(COUNTER, IMM(0))                   \
-    A_TIMES_B_ROW_PREV(29)
+    A_TIMES_B_ROW     (20)                                           \
+    A_TIMES_B_ROW     (21)    PREFETCH_A_L2(3)                       \
+    A_TIMES_B_ROW     (22)    ADD(R(15), R(12))                      \
+    A_TIMES_B_ROW_PREV(23)                                           \
+    A_TIMES_B_ROW_PREV(24)    PC_L2_1 ADD(RCX, R(11))        PC_L2_2 \
+    A_TIMES_B_ROW_PREV(25)    DEC(COUNTER)                           \
+    A_TIMES_B_ROW_PREV(26)    PREFETCH_B_L2                          \
+    A_TIMES_B_ROW_PREV(27)    PREFETCH_B_L1                          \
+    A_TIMES_B_ROW_PREV(28)    ADD(RBX, R(9))                         \
+    A_TIMES_B_ROW_PREV(29)    CMP(COUNTER, IMM(0))                   \
+    A_TIMES_B_ROW_PREV(30)
 
 #define MAIN_LOOP(COUNTER) MAIN_LOOP_(COUNTER,COMMENT_BEGIN,COMMENT_END,COMMENT_BEGIN,COMMENT_END)
 #define MAIN_LOOP_PC_L1(COUNTER) MAIN_LOOP_(COUNTER,,,COMMENT_BEGIN,COMMENT_END)
 #define MAIN_LOOP_PC_L2(COUNTER) MAIN_LOOP_(COUNTER,COMMENT_BEGIN,COMMENT_END,,)
 
 //This is an array used for the scatter/gather instructions.
-extern int64_t offsets64[8];
+extern int32_t offsets[16];
 
 //#define MONITORS
 //#define LOOPMON
@@ -176,7 +168,7 @@ void bli_dgemm_opt_30x8(
     const double * a_next = bli_auxinfo_next_a( data );
     const double * b_next = bli_auxinfo_next_b( data );
 
-    const int64_t * offsetPtr = &offsets64[0];
+    const int32_t * offsetPtr = &offsets[0];
 
 #ifdef MONITORS
     int toph, topl, both, botl, midl, midh, mid2l, mid2h;
@@ -193,37 +185,37 @@ void bli_dgemm_opt_30x8(
     MOV(VAR(toph), EDX)
 #endif
 
-    VPXORD(ZMM(0), ZMM(0), ZMM(0)) //clear out registers
+    VPXORD(ZMM(1), ZMM(1), ZMM(1)) //clear out registers
 
-    VMOVAPS(ZMM( 1), ZMM(0))
-    VMOVAPS(ZMM( 2), ZMM(0))    MOV(RSI, VAR(k)) //loop index
-    VMOVAPS(ZMM( 3), ZMM(0))    MOV(R(11), VAR(rs_c)) //load row stride
-    VMOVAPS(ZMM( 4), ZMM(0))    SAL(R(11), IMM(3)) //scale row stride
-    VMOVAPS(ZMM( 5), ZMM(0))    MOV(R(15), VAR(a)) //load address of a
-    VMOVAPS(ZMM( 6), ZMM(0))    MOV(RBX, VAR(b)) //load address of b
-    VMOVAPS(ZMM( 7), ZMM(0))
-    VMOVAPS(ZMM( 8), ZMM(0))    LEA(R(10), MEM(R(11),R(11),2)) //r10 has 3 * r11
-    VMOVAPS(ZMM( 9), ZMM(0))
-    VMOVAPS(ZMM(10), ZMM(0))    MOV(RDI, R(11))
-    VMOVAPS(ZMM(11), ZMM(0))    SAL(RDI, IMM(2)) //rdi has 4*r11
-    VMOVAPS(ZMM(12), ZMM(0))    MOV(RCX, VAR(c)) //load address of c for prefetching
-    VMOVAPS(ZMM(13), ZMM(0))
-    VMOVAPS(ZMM(14), ZMM(0))    MOV(R(8), VAR(k))
-    VMOVAPS(ZMM(15), ZMM(0))
-    VMOVAPS(ZMM(16), ZMM(0))
-    VMOVAPS(ZMM(17), ZMM(0))    MOV(R(13), IMM(8*8*L2_PREFETCH_DIST))
-    VMOVAPS(ZMM(18), ZMM(0))    MOV(R(14), IMM(8*32*L2_PREFETCH_DIST))
-    VMOVAPS(ZMM(19), ZMM(0))
-    VMOVAPS(ZMM(20), ZMM(0))
-    VMOVAPS(ZMM(21), ZMM(0))
-    VMOVAPS(ZMM(22), ZMM(0))
-    VMOVAPS(ZMM(23), ZMM(0))    SUB(R(8), IMM(30+L2_PREFETCH_DIST)) //Check if we have over 40 operations to do.
-    VMOVAPS(ZMM(24), ZMM(0))    MOV(R(8), IMM(30))
-    VMOVAPS(ZMM(25), ZMM(0))    MOV(R(9), IMM(8*8)) //amount to increment b* by each iteration
-    VMOVAPS(ZMM(26), ZMM(0))    MOV(R(12), IMM(8*32)) //amount to increment a* by each iteration
-    VMOVAPS(ZMM(27), ZMM(0))
-    VMOVAPS(ZMM(28), ZMM(0))
-    VMOVAPS(ZMM(29), ZMM(0))
+    VMOVAPS(ZMM( 2), ZMM(1))
+    VMOVAPS(ZMM( 3), ZMM(1))    MOV(RSI, VAR(k)) //loop index
+    VMOVAPS(ZMM( 4), ZMM(1))    MOV(R(11), VAR(rs_c)) //load row stride
+    VMOVAPS(ZMM( 5), ZMM(1))    SAL(R(11), IMM(3)) //scale row stride
+    VMOVAPS(ZMM( 6), ZMM(1))    MOV(R(15), VAR(a)) //load address of a
+    VMOVAPS(ZMM( 7), ZMM(1))    MOV(RBX, VAR(b)) //load address of b
+    VMOVAPS(ZMM( 8), ZMM(1))
+    VMOVAPS(ZMM( 9), ZMM(1))    LEA(R(10), MEM(R(11),R(11),2)) //r10 has 3 * r11
+    VMOVAPS(ZMM(10), ZMM(1))
+    VMOVAPS(ZMM(11), ZMM(1))    MOV(RDI, R(11))
+    VMOVAPS(ZMM(12), ZMM(1))    SAL(RDI, IMM(2)) //rdi has 4*r11
+    VMOVAPS(ZMM(13), ZMM(1))    MOV(RCX, VAR(c)) //load address of c for prefetching
+    VMOVAPS(ZMM(14), ZMM(1))
+    VMOVAPS(ZMM(15), ZMM(1))    MOV(R(8), VAR(k))
+    VMOVAPS(ZMM(16), ZMM(1))
+    VMOVAPS(ZMM(17), ZMM(1))
+    VMOVAPS(ZMM(18), ZMM(1))    MOV(R(13), IMM(8*8*L2_PREFETCH_DIST))
+    VMOVAPS(ZMM(19), ZMM(1))    MOV(R(14), IMM(8*32*L2_PREFETCH_DIST))
+    VMOVAPS(ZMM(20), ZMM(1))
+    VMOVAPS(ZMM(21), ZMM(1))
+    VMOVAPS(ZMM(22), ZMM(1))
+    VMOVAPS(ZMM(23), ZMM(1))
+    VMOVAPS(ZMM(24), ZMM(1))    SUB(R(8), IMM(30+L2_PREFETCH_DIST)) //Check if we have over 40 operations to do.
+    VMOVAPS(ZMM(25), ZMM(1))    MOV(R(8), IMM(30))
+    VMOVAPS(ZMM(26), ZMM(1))    MOV(R(9), IMM(8*8)) //amount to increment b* by each iteration
+    VMOVAPS(ZMM(27), ZMM(1))    MOV(R(12), IMM(8*32)) //amount to increment a* by each iteration
+    VMOVAPS(ZMM(28), ZMM(1))
+    VMOVAPS(ZMM(29), ZMM(1))
+    VMOVAPS(ZMM(30), ZMM(1))
 
 #ifdef MONITORS
     RDTSC
@@ -300,64 +292,56 @@ void bli_dgemm_opt_30x8(
     VBROADCASTSD(ZMM(31), MEM(R(14)))
 
     /* Alignment??? */
-    UPDATE_C_4_ROWS( 0, 1, 2, 3)
-    UPDATE_C_4_ROWS( 4, 5, 6, 7)
-    UPDATE_C_4_ROWS( 8, 9,10,11)
-    UPDATE_C_4_ROWS(12,13,14,15)
-    UPDATE_C_4_ROWS(16,17,18,19)
-    UPDATE_C_4_ROWS(20,21,22,23)
-    UPDATE_C_4_ROWS(24,25,26,27)
-    UPDATE_C_2_ROWS(28,29)
+    UPDATE_C_4_ROWS( 1, 2, 3, 4)
+    UPDATE_C_4_ROWS( 5, 6, 7, 8)
+    UPDATE_C_4_ROWS( 9,10,11,12)
+    UPDATE_C_4_ROWS(13,14,15,16)
+    UPDATE_C_4_ROWS(17,18,19,20)
+    UPDATE_C_4_ROWS(21,22,23,24)
+    UPDATE_C_4_ROWS(25,26,27,28)
+    UPDATE_C_2_ROWS(29,30)
 
     JMP(END)
 
     LABEL(SCATTEREDUPDATE)
 
-    /* Move ZMM1 to ZMM30, and use YMM1 as the scatter vector for the first */
-    /* update. Then, move YMM1 to YMM0 and ZMM30 back to ZMM1 so that we can */
-    /* use YMM0 as the scatter vector for the rest. */
-
-    VMOVAPS(ZMM(30), ZMM(1))
     MOV(R(10), VAR(offsetPtr))
-    VMOVAPS(ZMM(1), MEM(R(10)))
+    VMOVAPS(ZMM(0), MEM(R(10)))
     /* Note that this ignores the upper 32 bits in cs_c */
     VPBROADCASTD(ZMM(31), VAR(cs_c))
     MOV(R(13), VAR(beta))
-    VPMULLD(ZMM(1), ZMM(31), ZMM(1))
+    VPMULLD(ZMM(0), ZMM(31), ZMM(0))
 
-    MOV(EBX, IMM(0xFF))
-    UPDATE_C_ROW_SCATTERED( 0, YMM(1))
-    VMOVAPS(ZMM(0), ZMM(1))
-    VMOVAPS(ZMM(1), ZMM(30))
-    UPDATE_C_ROW_SCATTERED( 1, YMM(0))
-    UPDATE_C_ROW_SCATTERED( 2, YMM(0))
-    UPDATE_C_ROW_SCATTERED( 3, YMM(0))
-    UPDATE_C_ROW_SCATTERED( 4, YMM(0))
-    UPDATE_C_ROW_SCATTERED( 5, YMM(0))
-    UPDATE_C_ROW_SCATTERED( 6, YMM(0))
-    UPDATE_C_ROW_SCATTERED( 7, YMM(0))
-    UPDATE_C_ROW_SCATTERED( 8, YMM(0))
-    UPDATE_C_ROW_SCATTERED( 9, YMM(0))
-    UPDATE_C_ROW_SCATTERED(10, YMM(0))
-    UPDATE_C_ROW_SCATTERED(11, YMM(0))
-    UPDATE_C_ROW_SCATTERED(12, YMM(0))
-    UPDATE_C_ROW_SCATTERED(13, YMM(0))
-    UPDATE_C_ROW_SCATTERED(14, YMM(0))
-    UPDATE_C_ROW_SCATTERED(15, YMM(0))
-    UPDATE_C_ROW_SCATTERED(16, YMM(0))
-    UPDATE_C_ROW_SCATTERED(17, YMM(0))
-    UPDATE_C_ROW_SCATTERED(18, YMM(0))
-    UPDATE_C_ROW_SCATTERED(19, YMM(0))
-    UPDATE_C_ROW_SCATTERED(20, YMM(0))
-    UPDATE_C_ROW_SCATTERED(21, YMM(0))
-    UPDATE_C_ROW_SCATTERED(22, YMM(0))
-    UPDATE_C_ROW_SCATTERED(23, YMM(0))
-    UPDATE_C_ROW_SCATTERED(24, YMM(0))
-    UPDATE_C_ROW_SCATTERED(25, YMM(0))
-    UPDATE_C_ROW_SCATTERED(26, YMM(0))
-    UPDATE_C_ROW_SCATTERED(27, YMM(0))
-    UPDATE_C_ROW_SCATTERED(28, YMM(0))
-    UPDATE_C_ROW_SCATTERED(29, YMM(0))
+    UPDATE_C_ROW_SCATTERED( 1)
+    UPDATE_C_ROW_SCATTERED( 2)
+    UPDATE_C_ROW_SCATTERED( 3)
+    UPDATE_C_ROW_SCATTERED( 4)
+    UPDATE_C_ROW_SCATTERED( 5)
+    UPDATE_C_ROW_SCATTERED( 6)
+    UPDATE_C_ROW_SCATTERED( 7)
+    UPDATE_C_ROW_SCATTERED( 8)
+    UPDATE_C_ROW_SCATTERED( 9)
+    UPDATE_C_ROW_SCATTERED(10)
+    UPDATE_C_ROW_SCATTERED(11)
+    UPDATE_C_ROW_SCATTERED(12)
+    UPDATE_C_ROW_SCATTERED(13)
+    UPDATE_C_ROW_SCATTERED(14)
+    UPDATE_C_ROW_SCATTERED(15)
+    UPDATE_C_ROW_SCATTERED(16)
+    UPDATE_C_ROW_SCATTERED(17)
+    UPDATE_C_ROW_SCATTERED(18)
+    UPDATE_C_ROW_SCATTERED(19)
+    UPDATE_C_ROW_SCATTERED(20)
+    UPDATE_C_ROW_SCATTERED(21)
+    UPDATE_C_ROW_SCATTERED(22)
+    UPDATE_C_ROW_SCATTERED(23)
+    UPDATE_C_ROW_SCATTERED(24)
+    UPDATE_C_ROW_SCATTERED(25)
+    UPDATE_C_ROW_SCATTERED(26)
+    UPDATE_C_ROW_SCATTERED(27)
+    UPDATE_C_ROW_SCATTERED(28)
+    UPDATE_C_ROW_SCATTERED(29)
+    UPDATE_C_ROW_SCATTERED(30)
 
     LABEL(END)
 
