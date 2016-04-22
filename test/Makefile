@@ -175,7 +175,7 @@ CFLAGS         += -I$(BLIS_INC_PATH) -I$(TEST_SRC_PATH)
 
 LINKER         := $(CC)
 LDFLAGS        := #-L/home/00146/field/gnu/gcc-4.8.2/lib64
-LDFLAGS        += -lgfortran -lm -lpthread
+LDFLAGS        += -lgfortran -lm -lpthread -fopenmp
 
 
 
@@ -187,7 +187,8 @@ LDFLAGS        += -lgfortran -lm -lpthread
 #
 #   blis openblas atlas mkl mac essl
 #
-all: blis openblas #atlas mkl
+#all: blis openblas atlas mkl
+all: blis openblas
 
 blis: test_gemv_blis.x \
       test_ger_blis.x \
