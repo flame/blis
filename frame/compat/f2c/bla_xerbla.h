@@ -34,6 +34,6 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-int PASTEF770(xerbla)(bla_character *srname, bla_integer *info, ftnlen srname_len);
+int PASTEF770(xerbla)(const bla_character *srname, const bla_integer *info, ftnlen srname_len);
 
 #endif

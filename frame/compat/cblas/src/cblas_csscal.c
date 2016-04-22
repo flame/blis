@@ -1,8 +1,4 @@
-#include "bli_config.h"
-#include "bli_config_macro_defs.h"
-#include "bli_system.h"
-#include "bli_type_defs.h"
-#include "bli_cblas.h"
+#include "blis.h"
 #ifdef BLIS_ENABLE_CBLAS
 /*
  * cblas_csscal.c
@@ -14,8 +10,8 @@
  */
 #include "cblas.h"
 #include "cblas_f77.h"
-void cblas_csscal( const int N, const float alpha, void *X,
-                       const int incX)
+void cblas_csscal( f77_int N, float alpha, void *X,
+                       f77_int incX)
 {
 #ifdef F77_INT
    F77_INT F77_N=N, F77_incX=incX;
@@ -23,6 +19,6 @@ void cblas_csscal( const int N, const float alpha, void *X,
    #define F77_N N
    #define F77_incX incX
 #endif
-   F77_csscal( &F77_N, &alpha, X, &F77_incX);
+   F77_csscal( &F77_N, &alpha, (scomplex*)X, &F77_incX);
 }
 #endif

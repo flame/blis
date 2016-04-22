@@ -41,12 +41,12 @@
 \
 void PASTEF77(ch,blasname) \
      ( \
-       f77_char* uploa, \
-       f77_char* transa, \
-       f77_char* diaga, \
-       f77_int*  m, \
-       ftype*    a, f77_int* lda, \
-       ftype*    x, f77_int* incx  \
+       const f77_char* uploa, \
+       const f77_char* transa, \
+       const f77_char* diaga, \
+       const f77_int*  m, \
+       const ftype*    a, const f77_int* lda, \
+             ftype*    x, const f77_int* incx  \
      );
 
 #ifdef BLIS_ENABLE_BLAS2BLIS

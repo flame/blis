@@ -32,6 +32,15 @@
 
 */
 
+#ifdef BLIS_ENABLE_CBLAS
+
+// If the BLAS compatibility layer was not explicitly enabled, we must
+// enable it here.
+#ifndef BLIS_ENABLE_BLAS2BLIS
+#define BLIS_ENABLE_BLAS2BLIS
+#endif
+
+#endif // BLIS_ENABLE_CBLAS
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
@@ -84,6 +93,11 @@
 #include "bla_rotmg.h"
 #include "bla_scal.h"
 #include "bla_swap.h"
+
+#include "f77_amax_sub.h"
+#include "f77_asum_sub.h"
+#include "f77_dot_sub.h"
+#include "f77_nrm2_sub.h"
 
 
 // -- Level-2 BLAS prototypes --

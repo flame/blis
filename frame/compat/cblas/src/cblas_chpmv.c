@@ -1,8 +1,4 @@
-#include "bli_config.h"
-#include "bli_config_macro_defs.h"
-#include "bli_system.h"
-#include "bli_type_defs.h"
-#include "bli_cblas.h"
+#include "blis.h"
 #ifdef BLIS_ENABLE_CBLAS
 /*
  * cblas_chpmv.c
@@ -15,11 +11,11 @@
 #include <stdlib.h>
 #include "cblas.h"
 #include "cblas_f77.h"
-void cblas_chpmv(const enum CBLAS_ORDER order,
-                 const enum CBLAS_UPLO Uplo,const int N,
+void cblas_chpmv(enum CBLAS_ORDER order,
+                 enum CBLAS_UPLO Uplo,f77_int N,
                  const void *alpha, const void  *AP,
-                 const void  *X, const int incX, const void *beta,
-                 void  *Y, const int incY)
+                 const void  *X, f77_int incX, const void *beta,
+                 void  *Y, f77_int incY)
 {
    char UL;
 #ifdef F77_CHAR
@@ -31,7 +27,7 @@ void cblas_chpmv(const enum CBLAS_ORDER order,
    F77_INT F77_N=N, F77_incX=incX, F77_incY=incY;
 #else
    #define F77_N N
-   #define F77_incX incx
+   #define F77_incX incX
    #define F77_incY incY
 #endif
    int n, i=0;
@@ -58,8 +54,8 @@ void cblas_chpmv(const enum CBLAS_ORDER order,
       #ifdef F77_CHAR
          F77_UL = C2F_CHAR(&UL);
       #endif
-      F77_chpmv(F77_UL, &F77_N, alpha, AP, X,  
-                     &F77_incX, beta, Y, &F77_incY);
+      F77_chpmv(F77_UL, &F77_N, (scomplex*)alpha, (scomplex*)AP, (scomplex*)X,
+                     &F77_incX, (scomplex*)beta, (scomplex*)Y, &F77_incY);
    }
    else if (order == CblasRowMajor)
    {
@@ -100,7 +96,7 @@ void cblas_chpmv(const enum CBLAS_ORDER order,
          #ifdef F77_INT
             F77_incX = 1;
          #else
-            incx = 1;
+            incX = 1;
          #endif
  
          if(incY > 0)
@@ -134,8 +130,8 @@ void cblas_chpmv(const enum CBLAS_ORDER order,
          F77_UL = C2F_CHAR(&UL);
       #endif
 
-      F77_chpmv(F77_UL, &F77_N, ALPHA, 
-                     AP, x, &F77_incX, BETA, Y, &F77_incY);
+      F77_chpmv(F77_UL, &F77_N, (scomplex*)ALPHA,
+                (scomplex*)AP, (scomplex*)x, &F77_incX, (scomplex*)BETA, (scomplex*)Y, &F77_incY);
    }
    else 
    {

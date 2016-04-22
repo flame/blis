@@ -34,9 +34,9 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-int PASTEF77(c,tpmv)(bla_character *uplo, bla_character *trans, bla_character *diag, bla_integer *n, bla_scomplex *ap, bla_scomplex *x, bla_integer *incx);
-int PASTEF77(d,tpmv)(bla_character *uplo, bla_character *trans, bla_character *diag, bla_integer *n, bla_double *ap, bla_double *x, bla_integer *incx);
-int PASTEF77(s,tpmv)(bla_character *uplo, bla_character *trans, bla_character *diag, bla_integer *n, bla_real *ap, bla_real *x, bla_integer *incx);
-int PASTEF77(z,tpmv)(bla_character *uplo, bla_character *trans, bla_character *diag, bla_integer *n, bla_dcomplex *ap, bla_dcomplex *x, bla_integer *incx);
+int PASTEF77(c,tpmv)(const bla_character *uplo, const bla_character *trans, const bla_character *diag, const bla_integer *n, const bla_scomplex *ap, bla_scomplex *x, const bla_integer *incx);
+int PASTEF77(d,tpmv)(const bla_character *uplo, const bla_character *trans, const bla_character *diag, const bla_integer *n, const bla_double *ap, bla_double *x, const bla_integer *incx);
+int PASTEF77(s,tpmv)(const bla_character *uplo, const bla_character *trans, const bla_character *diag, const bla_integer *n, const bla_real *ap, bla_real *x, const bla_integer *incx);
+int PASTEF77(z,tpmv)(const bla_character *uplo, const bla_character *trans, const bla_character *diag, const bla_integer *n, const bla_dcomplex *ap, bla_dcomplex *x, const bla_integer *incx);
 
 #endif

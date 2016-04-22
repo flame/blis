@@ -1,8 +1,4 @@
-#include "bli_config.h"
-#include "bli_config_macro_defs.h"
-#include "bli_system.h"
-#include "bli_type_defs.h"
-#include "bli_cblas.h"
+#include "blis.h"
 #ifdef BLIS_ENABLE_CBLAS
 /*
  * cblas_zher2.c
@@ -15,9 +11,9 @@
 #include <stdlib.h>
 #include "cblas.h"
 #include "cblas_f77.h"
-void cblas_zher2(const enum CBLAS_ORDER order, const enum CBLAS_UPLO Uplo,
-                 const int N, const void *alpha, const void *X, const int incX,
-                 const void *Y, const int incY, void *A, const int lda)
+void cblas_zher2(enum CBLAS_ORDER order, enum CBLAS_UPLO Uplo,
+                 f77_int N, const void *alpha, const void *X, f77_int incX,
+                 const void *Y, f77_int incY, void *A, f77_int lda)
 {
    char UL;
 #ifdef F77_CHAR
@@ -31,8 +27,8 @@ void cblas_zher2(const enum CBLAS_ORDER order, const enum CBLAS_UPLO Uplo,
 #else
    #define F77_N N
    #define F77_lda lda
-   #define F77_incX incx
-   #define F77_incY incy
+   #define F77_incX incX
+   #define F77_incY incY
 #endif
    int n, i, j, tincx, tincy;
    double *x=(double *)X, *xx=(double *)X, *y=(double *)Y, 
@@ -58,8 +54,8 @@ void cblas_zher2(const enum CBLAS_ORDER order, const enum CBLAS_UPLO Uplo,
          F77_UL = C2F_CHAR(&UL);
       #endif
 
-      F77_zher2(F77_UL, &F77_N, alpha, X, &F77_incX, 
-                                            Y, &F77_incY, A, &F77_lda);
+      F77_zher2(F77_UL, &F77_N, (dcomplex*)alpha, (dcomplex*)X, &F77_incX,
+                (dcomplex*)Y, &F77_incY, (dcomplex*)A, &F77_lda);
 
    }  else if (order == CblasRowMajor)
    {
@@ -130,16 +126,16 @@ void cblas_zher2(const enum CBLAS_ORDER order, const enum CBLAS_UPLO Uplo,
             F77_incX = 1;
             F77_incY = 1;
          #else
-            incx = 1;
-            incy = 1;
+            incX = 1;
+            incY = 1;
          #endif
       }  else 
       {
          x = (double *) X;
          y = (double *) Y;
       }
-      F77_zher2(F77_UL, &F77_N, alpha, y, &F77_incY, x, 
-                                      &F77_incX, A, &F77_lda);
+      F77_zher2(F77_UL, &F77_N, (dcomplex*)alpha, (dcomplex*)y, &F77_incY, (dcomplex*)x,
+                                      &F77_incX, (dcomplex*)A, &F77_lda);
    } 
    else 
    {

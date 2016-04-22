@@ -1,8 +1,4 @@
-#include "bli_config.h"
-#include "bli_config_macro_defs.h"
-#include "bli_system.h"
-#include "bli_type_defs.h"
-#include "bli_cblas.h"
+#include "blis.h"
 #ifdef BLIS_ENABLE_CBLAS
 /*
  * cblas_zher.c
@@ -15,9 +11,9 @@
 #include <stdlib.h>
 #include "cblas.h"
 #include "cblas_f77.h"
-void cblas_zher(const enum CBLAS_ORDER order, const enum CBLAS_UPLO Uplo,
-                const int N, const double alpha, const void *X, const int incX
-                ,void *A, const int lda)
+void cblas_zher(enum CBLAS_ORDER order, enum CBLAS_UPLO Uplo,
+                f77_int N, double alpha, const void *X, f77_int incX
+                ,void *A, f77_int lda)
 {
    char UL;
 #ifdef F77_CHAR
@@ -31,7 +27,7 @@ void cblas_zher(const enum CBLAS_ORDER order, const enum CBLAS_UPLO Uplo,
 #else
    #define F77_N N
    #define F77_lda lda
-   #define F77_incX incx
+   #define F77_incX incX
 #endif
    int n, i, tincx;
    double *x=(double *)X, *xx=(double *)X, *tx, *st;
@@ -56,7 +52,7 @@ void cblas_zher(const enum CBLAS_ORDER order, const enum CBLAS_UPLO Uplo,
          F77_UL = C2F_CHAR(&UL);
       #endif
 
-      F77_zher(F77_UL, &F77_N, &alpha, X, &F77_incX, A, &F77_lda);
+      F77_zher(F77_UL, &F77_N, &alpha, (dcomplex*)X, &F77_incX, (dcomplex*)A, &F77_lda);
 
    }  else if (order == CblasRowMajor)
    {
@@ -101,11 +97,11 @@ void cblas_zher(const enum CBLAS_ORDER order, const enum CBLAS_UPLO Uplo,
          #ifdef F77_INT
            F77_incX = 1;
          #else
-           incx = 1;
+           incX = 1;
          #endif
       }
       else x = (double *) X;
-      F77_zher(F77_UL, &F77_N, &alpha, x, &F77_incX, A, &F77_lda);
+      F77_zher(F77_UL, &F77_N, &alpha, (dcomplex*)x, &F77_incX, (dcomplex*)A, &F77_lda);
    } else cblas_xerbla(1, "cblas_zher", "Illegal Order setting, %d\n", order);
    if(X!=x) 
       free(x);

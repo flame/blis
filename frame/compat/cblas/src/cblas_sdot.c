@@ -1,8 +1,4 @@
-#include "bli_config.h"
-#include "bli_config_macro_defs.h"
-#include "bli_system.h"
-#include "bli_type_defs.h"
-#include "bli_cblas.h"
+#include "blis.h"
 #ifdef BLIS_ENABLE_CBLAS
 /*
  * cblas_sdot.c
@@ -15,8 +11,8 @@
  */
 #include "cblas.h"
 #include "cblas_f77.h"
-float cblas_sdot( const int N, const float *X,
-                      const int incX, const float *Y, const int incY)
+float cblas_sdot( f77_int N, const float *X,
+                      f77_int incX, const float *Y, f77_int incY)
 {
    float dot;
 #ifdef F77_INT

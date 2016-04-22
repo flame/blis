@@ -1,8 +1,4 @@
-#include "bli_config.h"
-#include "bli_config_macro_defs.h"
-#include "bli_system.h"
-#include "bli_type_defs.h"
-#include "bli_cblas.h"
+#include "blis.h"
 #ifdef BLIS_ENABLE_CBLAS
 /*
  * cblas_sswap.c
@@ -14,8 +10,8 @@
  */
 #include "cblas.h"
 #include "cblas_f77.h"
-void cblas_sswap( const int N, float *X, const int incX, float *Y,
-                       const int incY)
+void cblas_sswap( f77_int N, float *X, f77_int incX, float *Y,
+                       f77_int incY)
 {
 #ifdef F77_INT
    F77_INT F77_N=N, F77_incX=incX, F77_incY=incY;

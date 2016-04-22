@@ -1,8 +1,4 @@
-#include "bli_config.h"
-#include "bli_config_macro_defs.h"
-#include "bli_system.h"
-#include "bli_type_defs.h"
-#include "bli_cblas.h"
+#include "blis.h"
 #ifdef BLIS_ENABLE_CBLAS
 /*
  *
@@ -15,11 +11,11 @@
 
 #include "cblas.h"
 #include "cblas_f77.h"
-void cblas_strsm(const enum CBLAS_ORDER Order, const enum CBLAS_SIDE Side,
-                 const enum CBLAS_UPLO Uplo, const enum CBLAS_TRANSPOSE TransA,
-                 const enum CBLAS_DIAG Diag, const int M, const int N,
-                 const float alpha, const float  *A, const int lda,
-                 float  *B, const int ldb)
+void cblas_strsm(enum CBLAS_ORDER Order, enum CBLAS_SIDE Side,
+                 enum CBLAS_UPLO Uplo, enum CBLAS_TRANSPOSE TransA,
+                 enum CBLAS_DIAG Diag, f77_int M, f77_int N,
+                 float alpha, const float  *A, f77_int lda,
+                 float  *B, f77_int ldb)
 
 {
    char UL, TA, SD, DI;   

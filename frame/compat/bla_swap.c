@@ -43,9 +43,9 @@
 \
 void PASTEF77(ch,blasname) \
      ( \
-       f77_int* n, \
-       ftype*   x, f77_int* incx, \
-       ftype*   y, f77_int* incy  \
+       const f77_int* n, \
+       ftype*   x, const f77_int* incx, \
+       ftype*   y, const f77_int* incy  \
      ) \
 { \
 	dim_t  n0; \
@@ -63,8 +63,8 @@ void PASTEF77(ch,blasname) \
 \
 	/* If the input increments are negative, adjust the pointers so we can
 	   use positive increments instead. */ \
-	bli_convert_blas_incv( n0, x, *incx, x0, incx0 ); \
-	bli_convert_blas_incv( n0, y, *incy, y0, incy0 ); \
+	bli_convert_blas_incv( n0, (ftype*)x, *incx, x0, incx0 ); \
+	bli_convert_blas_incv( n0, (ftype*)y, *incy, y0, incy0 ); \
 \
 	/* Call BLIS interface. */ \
 	PASTEMAC(ch,blisname) \

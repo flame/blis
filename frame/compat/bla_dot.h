@@ -41,9 +41,9 @@
 \
 ftype PASTEF772(chxy,blasname,chc) \
      ( \
-       f77_int* n, \
-       ftype*   x, f77_int* incx, \
-       ftype*   y, f77_int* incy  \
+       const f77_int* n, \
+       const ftype*   x, const f77_int* incx, \
+       const ftype*   y, const f77_int* incy  \
      );
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
@@ -54,15 +54,15 @@ INSERT_GENTPROTDOT_BLAS( dot )
 
 float PASTEF77(sd,sdot)
      (
-       f77_int* n,
-       float*   x, f77_int* incx,
-       float*   y, f77_int* incy
+       const f77_int* n,
+       const float*   x, const f77_int* incx,
+       const float*   y, const f77_int* incy
      );
 
 double PASTEF77(d,sdot)
      (
-       f77_int* n,
-       float*   x, f77_int* incx,
-       float*   y, f77_int* incy
+         const f77_int* n,
+         const float*   x, const f77_int* incx,
+         const float*   y, const f77_int* incy
      );
 #endif

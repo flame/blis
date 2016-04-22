@@ -40,8 +40,8 @@
 #define GENTPROTR2( ftype_x, ftype_r, chx, chr, blasname ) \
 \
 void PASTEF773(chr,chx,blasname,sub)( \
-                                      f77_int* n, \
-                                      ftype_x* x, f77_int* incx, \
+                                      const f77_int* n, \
+                                      const ftype_x* x, const f77_int* incx, \
                                       ftype_r* rval  \
                                     );
 
