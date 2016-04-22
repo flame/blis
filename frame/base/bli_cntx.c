@@ -56,55 +56,8 @@ void bli_cntx_obj_free( cntx_t* cntx )
 
 void bli_cntx_obj_clear( cntx_t* cntx )
 {
-	blksz_t* blkszs            = bli_cntx_blkszs_buf( cntx );
-	bszid_t* bmults            = bli_cntx_bmults_buf( cntx );
-	func_t*  l3_vir_ukrs       = bli_cntx_l3_vir_ukrs_buf( cntx );
-	func_t*  l3_nat_ukrs       = bli_cntx_l3_nat_ukrs_buf( cntx );
-	mbool_t* l3_nat_ukrs_prefs = bli_cntx_l3_nat_ukrs_prefs_buf( cntx );
-	func_t*  l1f_kers          = bli_cntx_l1f_kers_buf( cntx );
-	func_t*  l1v_kers          = bli_cntx_l1v_kers_buf( cntx );
-	func_t*  packm_ukrs        = bli_cntx_packm_ukrs_buf( cntx );
-
-	dim_t    i;
-
-	// Initialize all of the elements of every array to a sane initial
-	// value. (Strictly speaking, there is no "null" value for typedef'ed
-	// enums such as bszid_t, so we cheat a little by using 0.)
-
-	func_t   null_func  = { { NULL,  NULL,  NULL,  NULL  } };
-	blksz_t  null_blksz = { { 0,     0,     0,     0,    } };
-	mbool_t  null_mbool = { { FALSE, FALSE, FALSE, FALSE } };
-	bszid_t  null_bszid = 0;
-
-	for ( i = 0; i < BLIS_NUM_BLKSZS; ++i )
-	{
-		blkszs[ i ] = null_blksz;
-	}
-	for ( i = 0; i < BLIS_NUM_BLKSZS; ++i )
-	{
-		bmults[ i ] = null_bszid;
-	}
-	for ( i = 0; i < BLIS_NUM_LEVEL3_UKRS; ++i )
-	{
-		l3_vir_ukrs[ i ] = null_func;
-		l3_nat_ukrs[ i ] = null_func;
-		l3_nat_ukrs_prefs[ i ] = null_mbool;
-	}
-	for ( i = 0; i < BLIS_NUM_LEVEL1F_KERS; ++i )
-	{
-		l1f_kers[ i ] = null_func;
-	}
-	for ( i = 0; i < BLIS_NUM_LEVEL1V_KERS; ++i )
-	{
-		l1v_kers[ i ] = null_func;
-	}
-	{
-		packm_ukrs[ 0 ] = null_func;
-	}
-
-	// NOTE: It doesn't make sense to initialize method or schema fields
-	// at this time; the method field would normally be set by _set_blkszs()
-	// and the schema fields are set by _set_pack_schema_[abc]().
+	// Fill the entire cntx_t structure with zeros.
+	memset( ( void* )cntx, 0, sizeof( cntx ) );
 }
 
 void bli_cntx_init( cntx_t* cntx )

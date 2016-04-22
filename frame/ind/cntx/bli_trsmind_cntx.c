@@ -40,8 +40,8 @@ void bli_trsm3m1_cntx_init( cntx_t* cntx )
 {
 	const ind_t method = BLIS_3M1;
 
-	// Perform basic setup on the context.
-	bli_cntx_obj_create( cntx );
+	// Clear the context fields.
+	bli_cntx_obj_clear( cntx );
 
 	// Initialize the context with the current architecture's native
 	// level-3 gemm micro-kernel, and its output preferences.
@@ -78,8 +78,6 @@ void bli_trsm3m1_cntx_init( cntx_t* cntx )
 
 void bli_trsm3m1_cntx_finalize( cntx_t* cntx )
 {
-	// Free the context and all memory allocated to it.
-	bli_cntx_obj_free( cntx );
 }
 
 // -----------------------------------------------------------------------------
@@ -88,8 +86,8 @@ void bli_trsm4m1_cntx_init( cntx_t* cntx )
 {
 	const ind_t method = BLIS_4M1A;
 
-	// Perform basic setup on the context.
-	bli_cntx_obj_create( cntx );
+	// Clear the context fields.
+	bli_cntx_obj_clear( cntx );
 
 	// Initialize the context with the current architecture's native
 	// level-3 gemm micro-kernel, and its output preferences.
@@ -126,8 +124,6 @@ void bli_trsm4m1_cntx_init( cntx_t* cntx )
 
 void bli_trsm4m1_cntx_finalize( cntx_t* cntx )
 {
-	// Free the context and all memory allocated to it.
-	bli_cntx_obj_free( cntx );
 }
 
 // -----------------------------------------------------------------------------
