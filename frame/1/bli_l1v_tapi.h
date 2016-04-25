@@ -40,6 +40,9 @@
 #undef  addv_ker_name
 #define addv_ker_name       addv
 
+#undef  axpbyv_ker_name
+#define axpbyv_ker_name      axpbyv
+
 #undef  axpyv_ker_name
 #define axpyv_ker_name      axpyv
 
@@ -69,6 +72,9 @@
 
 #undef  swapv_ker_name
 #define swapv_ker_name      swapv
+
+#undef  xpbyv_ker_name
+#define xpbyv_ker_name      xpbyv
 
 
 // Include the level-1v kernel API template.

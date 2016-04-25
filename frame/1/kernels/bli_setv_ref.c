@@ -41,12 +41,12 @@ void PASTEMAC(ch,varname) \
      ( \
        conj_t  conjalpha, \
        dim_t   n, \
-       ctype*  alpha, \
-       ctype*  x, inc_t incx, \
+       ctype* restrict alpha, \
+       ctype* restrict x, inc_t incx, \
        cntx_t* cntx  \
      ) \
 { \
-	ctype* chi1; \
+	ctype* restrict chi1; \
 	ctype  alpha_conj; \
 	dim_t  i; \
 \
@@ -56,23 +56,43 @@ void PASTEMAC(ch,varname) \
 \
 	if ( PASTEMAC(ch,eq0)( *alpha ) ) \
 	{ \
-		for ( i = 0; i < n; ++i ) \
-		{ \
-			PASTEMAC(ch,set0s)( *chi1 ); \
-\
-			chi1 += incx; \
-		} \
+	    if ( incx == 1 ) \
+	    { \
+            for ( i = 0; i < n; ++i ) \
+            { \
+                PASTEMAC(ch,set0s)( chi1[i] ); \
+            } \
+	    } \
+	    else \
+        { \
+            for ( i = 0; i < n; ++i ) \
+            { \
+                PASTEMAC(ch,set0s)( *chi1 ); \
+    \
+                chi1 += incx; \
+            } \
+        } \
 	} \
 	else \
 	{ \
 		PASTEMAC(ch,copycjs)( conjalpha, *alpha, alpha_conj ); \
 \
-		for ( i = 0; i < n; ++i ) \
-		{ \
-			PASTEMAC(ch,copys)( alpha_conj, *chi1 ); \
-\
-			chi1 += incx; \
-		} \
+        if ( incx == 1 ) \
+        { \
+            for ( i = 0; i < n; ++i ) \
+            { \
+                PASTEMAC(ch,copys)( alpha_conj, chi1[i] ); \
+            } \
+        } \
+        else \
+        { \
+            for ( i = 0; i < n; ++i ) \
+            { \
+                PASTEMAC(ch,copys)( alpha_conj, *chi1 ); \
+    \
+                chi1 += incx; \
+            } \
+        } \
 	} \
 }
 

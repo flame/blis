@@ -75,6 +75,9 @@
 
 #include "bli_add3ris.h"
 
+#include "bli_axpbyris.h"
+#include "bli_axpbyjris.h"
+
 #include "bli_axpyris.h"
 #include "bli_axpyjris.h"
 
@@ -112,6 +115,7 @@
 #include "bli_swapris.h"
 
 #include "bli_xpbyris.h"
+#include "bli_xpbyjris.h"
 
 // Inlined scalar macros in loops
 #include "bli_scalris_mxn_uplo.h"
@@ -127,6 +131,9 @@
 #include "bli_addjs.h"
 
 #include "bli_add3s.h"
+
+#include "bli_axpbys.h"
+#include "bli_axpbyjs.h"
 
 #include "bli_axpys.h"
 #include "bli_axpyjs.h"
@@ -178,6 +185,7 @@
 #include "bli_swaps.h"
 
 #include "bli_xpbys.h"
+#include "bli_xpbyjs.h"
 
 // Inlined scalar macros in loops
 #include "bli_adds_mxn.h"

@@ -44,6 +44,7 @@ void PASTEMAC(opname,_cntx_init)( cntx_t* cntx ); \
 void PASTEMAC(opname,_cntx_finalize)( cntx_t* cntx );
 
 GENPROT( addv )
+GENPROT( axpbyv )
 GENPROT( axpyv )
 GENPROT( copyv )
 GENPROT( dotv )
@@ -54,4 +55,5 @@ GENPROT( scal2v )
 GENPROT( setv )
 GENPROT( subv )
 GENPROT( swapv )
+GENPROT( xpbyv )
 

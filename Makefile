@@ -678,11 +678,11 @@ endif
 
 cleantest: check-env
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	- $(FIND) $(BASE_OBJ_TESTSUITE_PATH) -name "*.o" -name "*.pexe" | $(XARGS) $(RM_F)
+	- $(FIND) $(BASE_OBJ_TESTSUITE_PATH) \( -name "*.o" -o -name "*.pexe" \) | $(XARGS) $(RM_F)
 	- $(RM_RF) $(TESTSUITE_BIN)
 else
 	@echo "Removing object files from $(BASE_OBJ_TESTSUITE_PATH)."
-	@- $(FIND) $(BASE_OBJ_TESTSUITE_PATH) -name "*.o" -name "*.pexe" | $(XARGS) $(RM_F)
+	@- $(FIND) $(BASE_OBJ_TESTSUITE_PATH) \( -name "*.o" -o -name "*.pexe" \) | $(XARGS) $(RM_F)
 	@echo "Removing $(TESTSUITE_BIN) binary."
 	@- $(RM_RF) $(TESTSUITE_BIN)
 endif

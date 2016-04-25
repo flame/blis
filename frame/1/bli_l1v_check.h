@@ -72,6 +72,33 @@ GENTPROT( scal2v )
 void PASTEMAC(opname,_check) \
      ( \
        obj_t*  x, \
+       obj_t*  beta, \
+       obj_t*  y  \
+     );
+
+GENTPROT( xpbyv )
+
+
+#undef  GENTPROT
+#define GENTPROT( opname ) \
+\
+void PASTEMAC(opname,_check) \
+     ( \
+       obj_t*  alpha, \
+       obj_t*  x, \
+       obj_t*  beta, \
+       obj_t*  y  \
+     );
+
+GENTPROT( axpbyv )
+
+
+#undef  GENTPROT
+#define GENTPROT( opname ) \
+\
+void PASTEMAC(opname,_check) \
+     ( \
+       obj_t*  x, \
        obj_t*  y, \
        obj_t*  rho  \
      ); 
@@ -131,6 +158,21 @@ void bli_l1v_axy_check
        obj_t*  alpha,
        obj_t*  x,
        obj_t*  y 
+     );
+
+void bli_l1v_xby_check
+     (
+       obj_t*  x,
+       obj_t*  beta,
+       obj_t*  y
+     );
+
+void bli_l1v_axby_check
+     (
+       obj_t*  alpha,
+       obj_t*  x,
+       obj_t*  beta,
+       obj_t*  y
      );
 
 void bli_l1v_dot_check

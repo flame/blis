@@ -136,6 +136,119 @@ GENFRONT( axpyv )
 GENFRONT( scal2v )
 
 
+
+#undef  GENFRONT
+#define GENFRONT( opname ) \
+\
+void PASTEMAC(opname,EX_SUF) \
+     ( \
+       obj_t*  x, \
+       obj_t*  beta, \
+       obj_t*  y  \
+       BLIS_OAPI_CNTX_PARAM  \
+     ) \
+{ \
+    BLIS_OAPI_CNTX_DECL \
+\
+    num_t     dt        = bli_obj_datatype( *x ); \
+\
+    conj_t    conjx     = bli_obj_conj_status( *x ); \
+    dim_t     n         = bli_obj_vector_dim( *x ); \
+    void*     buf_x     = bli_obj_buffer_at_off( *x ); \
+    inc_t     inc_x     = bli_obj_vector_inc( *x ); \
+    void*     buf_y     = bli_obj_buffer_at_off( *y ); \
+    inc_t     inc_y     = bli_obj_vector_inc( *y ); \
+\
+    void*     buf_beta; \
+\
+    obj_t     beta_local; \
+\
+    if ( bli_error_checking_is_enabled() ) \
+        PASTEMAC(opname,_check)( x, beta, y ); \
+\
+    /* Create local copy-casts of scalars (and apply internal conjugation
+       as needed). */ \
+    bli_obj_scalar_init_detached_copy_of( dt, BLIS_NO_CONJUGATE, \
+                                          beta, &beta_local ); \
+    buf_beta = bli_obj_buffer_for_1x1( dt, beta_local ); \
+\
+    /* Invoke the void pointer-based function. */ \
+    bli_call_ft_8 \
+    ( \
+       dt, \
+       opname, \
+       conjx, \
+       n, \
+       buf_x, inc_x, \
+       buf_beta, \
+       buf_y, inc_y, \
+       cntx  \
+    ); \
+}
+
+GENFRONT( xpbyv )
+
+
+
+#undef  GENFRONT
+#define GENFRONT( opname ) \
+\
+void PASTEMAC(opname,EX_SUF) \
+     ( \
+       obj_t*  alpha, \
+       obj_t*  x, \
+       obj_t*  beta, \
+       obj_t*  y  \
+       BLIS_OAPI_CNTX_PARAM  \
+     ) \
+{ \
+    BLIS_OAPI_CNTX_DECL \
+\
+    num_t     dt        = bli_obj_datatype( *x ); \
+\
+    conj_t    conjx     = bli_obj_conj_status( *x ); \
+    dim_t     n         = bli_obj_vector_dim( *x ); \
+    void*     buf_x     = bli_obj_buffer_at_off( *x ); \
+    inc_t     inc_x     = bli_obj_vector_inc( *x ); \
+    void*     buf_y     = bli_obj_buffer_at_off( *y ); \
+    inc_t     inc_y     = bli_obj_vector_inc( *y ); \
+\
+    void*     buf_alpha; \
+    void*     buf_beta; \
+\
+    obj_t     alpha_local; \
+    obj_t     beta_local; \
+\
+    if ( bli_error_checking_is_enabled() ) \
+        PASTEMAC(opname,_check)( alpha, x, beta, y ); \
+\
+    /* Create local copy-casts of scalars (and apply internal conjugation
+       as needed). */ \
+    bli_obj_scalar_init_detached_copy_of( dt, BLIS_NO_CONJUGATE, \
+                                          alpha, &alpha_local ); \
+    bli_obj_scalar_init_detached_copy_of( dt, BLIS_NO_CONJUGATE, \
+                                          beta, &beta_local ); \
+    buf_alpha = bli_obj_buffer_for_1x1( dt, alpha_local ); \
+    buf_beta = bli_obj_buffer_for_1x1( dt, beta_local ); \
+\
+    /* Invoke the void pointer-based function. */ \
+    bli_call_ft_9 \
+    ( \
+       dt, \
+       opname, \
+       conjx, \
+       n, \
+       buf_alpha, \
+       buf_x, inc_x, \
+       buf_beta, \
+       buf_y, inc_y, \
+       cntx  \
+    ); \
+}
+
+GENFRONT( axpbyv )
+
+
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \

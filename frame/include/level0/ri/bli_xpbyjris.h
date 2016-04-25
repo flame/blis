@@ -32,70 +32,48 @@
 
 */
 
-#include "blis.h"
+#ifndef BLIS_XPBYJRIS_H
+#define BLIS_XPBYJRIS_H
 
-#undef  GENTFUNC
-#define GENTFUNC( ctype, ch, varname ) \
-\
-void PASTEMAC(ch,varname) \
-     ( \
-       conj_t  conjx, \
-       dim_t   n, \
-       ctype* restrict x, inc_t incx, \
-       ctype* restrict y, inc_t incy, \
-       cntx_t* cntx  \
-     ) \
+// xpbyjris
+
+#define bli_sxpbyjris( xr, xi, br, bi, yr, yi ) \
 { \
-	ctype* restrict chi1; \
-	ctype* restrict psi1; \
-	dim_t  i; \
-\
-	if ( bli_zero_dim1( n ) ) return; \
-\
-	chi1 = x; \
-	psi1 = y; \
-\
-	if ( bli_is_conj( conjx ) ) \
-	{ \
-        if ( incx == 1 && incy == 1 ) \
-        { \
-            for ( i = 0; i < n; ++i ) \
-            { \
-                PASTEMAC(ch,copyjs)( chi1[i], psi1[i] ); \
-            } \
-        } \
-        else \
-        { \
-            for ( i = 0; i < n; ++i ) \
-            { \
-                PASTEMAC(ch,copyjs)( *chi1, *psi1 ); \
-    \
-                chi1 += incx; \
-                psi1 += incy; \
-            } \
-        } \
-	} \
-	else \
-	{ \
-        if ( incx == 1 && incy == 1 ) \
-        { \
-            for ( i = 0; i < n; ++i ) \
-            { \
-                PASTEMAC(ch,copys)( chi1[i], psi1[i] ); \
-            } \
-        } \
-        else \
-        { \
-            for ( i = 0; i < n; ++i ) \
-            { \
-                PASTEMAC(ch,copys)( *chi1, *psi1 ); \
-    \
-                chi1 += incx; \
-                psi1 += incy; \
-            } \
-        } \
-	} \
+	(yr)        = (xr) + (br) * (yr); \
 }
 
-INSERT_GENTFUNC_BASIC0( copyv_ref )
+#define bli_dxpbyjris( xr, xi, br, bi, yr, yi ) \
+{ \
+	(yr)        = (xr) + (br) * (yr); \
+}
+
+#define bli_cxpbyjris( xr, xi, br, bi, yr, yi ) \
+{ \
+	float  yt_r =  (xr) + (br) * (yr) - (bi) * (yi); \
+	float  yt_i = -(xi) + (bi) * (yr) + (br) * (yi); \
+	(yr) = yt_r; \
+	(yi) = yt_i; \
+}
+
+#define bli_zxpbyjris( xr, xi, br, bi, yr, yi ) \
+{ \
+	double yt_r =  (xr) + (br) * (yr) - (bi) * (yi); \
+	double yt_i = -(xi) + (bi) * (yr) + (br) * (yi); \
+	(yr) = yt_r; \
+	(yi) = yt_i; \
+}
+
+#define bli_scxpbyjris( xr, xi, br, bi, yr, yi ) \
+{ \
+	(yr)        =  (xr) + (br) * (yr); \
+	(yi)        = -(xi) + (br) * (yi); \
+}
+
+#define bli_dzxpbyjris( xr, xi, br, bi, yr, yi ) \
+{ \
+	(yr)        =  (xr) + (br) * (yr); \
+	(yi)        = -(xi) + (br) * (yi); \
+}
+
+#endif
 

@@ -76,6 +76,41 @@ typedef void (*PASTECH2(ch,opname,tsuf)) \
 INSERT_GENTDEF( axpyv )
 INSERT_GENTDEF( scal2v )
 
+// xpybv
+
+#undef  GENTDEF
+#define GENTDEF( ctype, ch, opname, tsuf ) \
+\
+typedef void (*PASTECH2(ch,opname,tsuf)) \
+     ( \
+       conj_t          conjx, \
+       dim_t           n, \
+       ctype*          x, inc_t incx, \
+       ctype*          beta, \
+       ctype*          y, inc_t incy, \
+       cntx_t*         cntx  \
+     );
+
+INSERT_GENTDEF( xpbyv )
+
+// axpbyv
+
+#undef  GENTDEF
+#define GENTDEF( ctype, ch, opname, tsuf ) \
+\
+typedef void (*PASTECH2(ch,opname,tsuf)) \
+     ( \
+       conj_t          conjx, \
+       dim_t           n, \
+       ctype*          alpha, \
+       ctype*          x, inc_t incx, \
+       ctype*          beta, \
+       ctype*          y, inc_t incy, \
+       cntx_t*         cntx  \
+     );
+
+INSERT_GENTDEF( axpbyv )
+
 // dotv
 
 #undef  GENTDEF

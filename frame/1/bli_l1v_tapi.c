@@ -117,6 +117,80 @@ INSERT_GENTFUNC_BASIC( scal2v, BLIS_SCAL2V_KER )
 void PASTEMAC(ch,opname) \
      ( \
        conj_t  conjx, \
+       dim_t   n, \
+       ctype*  x, inc_t incx, \
+       ctype*  beta, \
+       ctype*  y, inc_t incy, \
+       cntx_t* cntx  \
+     ) \
+{ \
+    const num_t dt = PASTEMAC(ch,type); \
+    cntx_t*     cntx_p; \
+\
+    bli_cntx_init_local_if( opname, cntx, cntx_p ); \
+\
+    PASTECH2(ch,opname,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx_p ); \
+\
+    f \
+    ( \
+       conjx, \
+       n, \
+       x, incx, \
+       beta, \
+       y, incy, \
+       cntx_p  \
+    ); \
+\
+    bli_cntx_finalize_local_if( opname, cntx ); \
+}
+
+INSERT_GENTFUNC_BASIC( xpbyv,  BLIS_XPBYV_KER )
+
+
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, opname, kerid ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       conj_t  conjx, \
+       dim_t   n, \
+       ctype*  alpha, \
+       ctype*  x, inc_t incx, \
+       ctype*  beta, \
+       ctype*  y, inc_t incy, \
+       cntx_t* cntx  \
+     ) \
+{ \
+    const num_t dt = PASTEMAC(ch,type); \
+    cntx_t*     cntx_p; \
+\
+    bli_cntx_init_local_if( opname, cntx, cntx_p ); \
+\
+    PASTECH2(ch,opname,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx_p ); \
+\
+    f \
+    ( \
+       conjx, \
+       n, \
+       alpha, \
+       x, incx, \
+       beta, \
+       y, incy, \
+       cntx_p  \
+    ); \
+\
+    bli_cntx_finalize_local_if( opname, cntx ); \
+}
+
+INSERT_GENTFUNC_BASIC( axpbyv,  BLIS_AXPBYV_KER )
+
+
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, opname, kerid ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       conj_t  conjx, \
        conj_t  conjy, \
        dim_t   n, \
        ctype*  x, inc_t incx, \

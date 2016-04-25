@@ -42,6 +42,7 @@ void PASTEMAC(ch,varname) \
        conj_t  conjx, \
        dim_t   n, \
        ctype* restrict x, inc_t incx, \
+       ctype* restrict beta, \
        ctype* restrict y, inc_t incy, \
        cntx_t* cntx  \
      ) \
@@ -52,28 +53,63 @@ void PASTEMAC(ch,varname) \
 \
 	if ( bli_zero_dim1( n ) ) return; \
 \
+	/* If beta is zero, use copyv. */ \
+	if ( PASTEMAC(ch,eq0)( *beta ) ) \
+    { \
+        /* Query the context for the kernel function pointer. */ \
+        const num_t          dt      = PASTEMAC(ch,type); \
+        PASTECH(ch,copyv_ft) copyv_p = bli_cntx_get_l1v_ker_dt( dt, BLIS_COPYV_KER, cntx ); \
+\
+        copyv_p \
+        ( \
+          conjx, \
+          n, \
+          x, incx, \
+          y, incy, \
+          cntx  \
+        ); \
+        return; \
+    } \
+	/* If alpha is one, use addv. */ \
+	else if ( PASTEMAC(ch,eq1)( *beta ) ) \
+	{ \
+		/* Query the context for the kernel function pointer. */ \
+		const num_t         dt     = PASTEMAC(ch,type); \
+		PASTECH(ch,addv_ft) addv_p = bli_cntx_get_l1v_ker_dt( dt, BLIS_ADDV_KER, cntx ); \
+\
+		addv_p \
+		( \
+		  conjx, \
+		  n, \
+		  x, incx, \
+		  y, incy, \
+		  cntx  \
+		); \
+		return; \
+	} \
+\
 	chi1 = x; \
 	psi1 = y; \
 \
 	if ( bli_is_conj( conjx ) ) \
 	{ \
-        if ( incx == 1 && incy == 1 ) \
-        { \
+	    if ( incx == 1 && incy == 1 ) \
+	    { \
             for ( i = 0; i < n; ++i ) \
             { \
-                PASTEMAC(ch,copyjs)( chi1[i], psi1[i] ); \
+                PASTEMAC(ch,xpbyjs)( chi1[i], *beta, psi1[i] ); \
             } \
-        } \
-        else \
-        { \
+	    } \
+	    else \
+	    { \
             for ( i = 0; i < n; ++i ) \
             { \
-                PASTEMAC(ch,copyjs)( *chi1, *psi1 ); \
+                PASTEMAC(ch,xpbyjs)( *chi1, *beta, *psi1 ); \
     \
                 chi1 += incx; \
                 psi1 += incy; \
             } \
-        } \
+	    } \
 	} \
 	else \
 	{ \
@@ -81,14 +117,14 @@ void PASTEMAC(ch,varname) \
         { \
             for ( i = 0; i < n; ++i ) \
             { \
-                PASTEMAC(ch,copys)( chi1[i], psi1[i] ); \
+                PASTEMAC(ch,xpbys)( chi1[i], *beta, psi1[i] ); \
             } \
         } \
         else \
         { \
             for ( i = 0; i < n; ++i ) \
             { \
-                PASTEMAC(ch,copys)( *chi1, *psi1 ); \
+                PASTEMAC(ch,xpbys)( *chi1, *beta, *psi1 ); \
     \
                 chi1 += incx; \
                 psi1 += incy; \
@@ -97,5 +133,5 @@ void PASTEMAC(ch,varname) \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC0( copyv_ref )
+INSERT_GENTFUNC_BASIC0( xpbyv_ref )
 
