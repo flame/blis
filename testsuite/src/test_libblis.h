@@ -204,7 +204,8 @@ typedef struct test_ops_s
 
 	// level-1v
 	test_op_t addv;
-	test_op_t axpyv;
+    test_op_t axpbyv;
+    test_op_t axpyv;
 	test_op_t copyv;
 	test_op_t dotv;
 	test_op_t dotxv;
@@ -213,6 +214,7 @@ typedef struct test_ops_s
 	test_op_t scal2v;
 	test_op_t setv;
 	test_op_t subv;
+    test_op_t xpbyv;
 	
 	// level-1m
 	test_op_t addm;
@@ -415,6 +417,7 @@ void libblis_test_check_empty_problem( obj_t* c, double* perf, double* resid );
 
 // Level-1v
 #include "test_addv.h"
+#include "test_axpbyv.h"
 #include "test_axpyv.h"
 #include "test_copyv.h"
 #include "test_dotv.h"
@@ -424,6 +427,7 @@ void libblis_test_check_empty_problem( obj_t* c, double* perf, double* resid );
 #include "test_scal2v.h"
 #include "test_setv.h"
 #include "test_subv.h"
+#include "test_xpbyv.h"
 
 // Level-1m
 #include "test_addm.h"

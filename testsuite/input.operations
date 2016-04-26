@@ -107,6 +107,11 @@
 -1       #   dimensions: m
 ?        #   parameters: conjx
 
+1        # axpbyv
+1        #   test sequential front-end
+-1       #   dimensions: m
+?        #   parameters: conjx
+
 1        # axpyv
 1        #   test sequential front-end
 -1       #   dimensions: m
@@ -146,6 +151,11 @@
 -1       #   dimensions: m
 
 1        # subv
+1        #   test sequential front-end
+-1       #   dimensions: m
+?        #   parameters: conjx
+
+1        # xpbyv
 1        #   test sequential front-end
 -1       #   dimensions: m
 ?        #   parameters: conjx

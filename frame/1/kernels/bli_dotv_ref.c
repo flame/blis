@@ -42,14 +42,14 @@ void PASTEMAC(ch,varname) \
        conj_t  conjx, \
        conj_t  conjy, \
        dim_t   n, \
-       ctype*  x, inc_t incx, \
-       ctype*  y, inc_t incy, \
-       ctype*  rho, \
+       ctype* restrict x, inc_t incx, \
+       ctype* restrict y, inc_t incy, \
+       ctype* restrict rho, \
        cntx_t* cntx  \
      ) \
 { \
-	ctype* chi1; \
-	ctype* psi1; \
+	ctype* restrict chi1; \
+	ctype* restrict psi1; \
 	ctype  dotxy; \
 	dim_t  i; \
 	conj_t conjx_use; \
@@ -75,23 +75,43 @@ void PASTEMAC(ch,varname) \
 \
 	if ( bli_is_conj( conjx_use ) ) \
 	{ \
-		for ( i = 0; i < n; ++i ) \
-		{ \
-			PASTEMAC(ch,dotjs)( *chi1, *psi1, dotxy ); \
-\
-			chi1 += incx; \
-			psi1 += incy; \
-		} \
+	    if ( incx == 1 && incy == 1 ) \
+	    { \
+            for ( i = 0; i < n; ++i ) \
+            { \
+                PASTEMAC(ch,dotjs)( chi1[i], psi1[i], dotxy ); \
+            } \
+	    } \
+	    else \
+	    { \
+            for ( i = 0; i < n; ++i ) \
+            { \
+                PASTEMAC(ch,dotjs)( *chi1, *psi1, dotxy ); \
+    \
+                chi1 += incx; \
+                psi1 += incy; \
+            } \
+	    } \
 	} \
 	else \
 	{ \
-		for ( i = 0; i < n; ++i ) \
-		{ \
-			PASTEMAC(ch,dots)( *chi1, *psi1, dotxy ); \
-\
-			chi1 += incx; \
-			psi1 += incy; \
-		} \
+        if ( incx == 1 && incy == 1 ) \
+        { \
+            for ( i = 0; i < n; ++i ) \
+            { \
+                PASTEMAC(ch,dots)( chi1[i], psi1[i], dotxy ); \
+            } \
+        } \
+        else \
+        { \
+            for ( i = 0; i < n; ++i ) \
+            { \
+                PASTEMAC(ch,dots)( *chi1, *psi1, dotxy ); \
+    \
+                chi1 += incx; \
+                psi1 += incy; \
+            } \
+        } \
 	} \
 \
 	if ( bli_is_conj( conjy ) ) \

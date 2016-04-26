@@ -754,6 +754,9 @@ static func_t bli_gks_l1v_kers[BLIS_NUM_LEVEL1V_KERS] =
 /* addv       */ { { BLIS_SADDV_KERNEL, BLIS_CADDV_KERNEL,
                      BLIS_DADDV_KERNEL, BLIS_ZADDV_KERNEL, }
                  },
+/* axpbyv     */ { { BLIS_SAXPBYV_KERNEL, BLIS_CAXPBYV_KERNEL,
+                     BLIS_DAXPBYV_KERNEL, BLIS_ZAXPBYV_KERNEL, }
+                 },
 /* axpyv      */ { { BLIS_SAXPYV_KERNEL, BLIS_CAXPYV_KERNEL,
                      BLIS_DAXPYV_KERNEL, BLIS_ZAXPYV_KERNEL, }
                  },
@@ -784,6 +787,9 @@ static func_t bli_gks_l1v_kers[BLIS_NUM_LEVEL1V_KERS] =
 /* swapv      */ { { BLIS_SSWAPV_KERNEL, BLIS_CSWAPV_KERNEL,
                      BLIS_DSWAPV_KERNEL, BLIS_ZSWAPV_KERNEL, }
                  },
+/* xpbyv      */ { { BLIS_SXPBYV_KERNEL, BLIS_CXPBYV_KERNEL,
+                     BLIS_DXPBYV_KERNEL, BLIS_ZXPBYV_KERNEL, }
+                 },
 };
 
 static func_t bli_gks_l1v_ref_kers[BLIS_NUM_LEVEL1V_KERS] =
@@ -791,6 +797,9 @@ static func_t bli_gks_l1v_ref_kers[BLIS_NUM_LEVEL1V_KERS] =
                 /* float (0)  scomplex (1)  double (2)  dcomplex (3) */
 /* addv       */ { { BLIS_SADDV_KERNEL_REF, BLIS_CADDV_KERNEL_REF,
                      BLIS_DADDV_KERNEL_REF, BLIS_ZADDV_KERNEL_REF, }
+                 },
+/* axpbyv     */ { { BLIS_SAXPBYV_KERNEL_REF, BLIS_CAXPBYV_KERNEL_REF,
+                     BLIS_DAXPBYV_KERNEL_REF, BLIS_ZAXPBYV_KERNEL_REF, }
                  },
 /* axpyv      */ { { BLIS_SAXPYV_KERNEL_REF, BLIS_CAXPYV_KERNEL_REF,
                      BLIS_DAXPYV_KERNEL_REF, BLIS_ZAXPYV_KERNEL_REF, }
@@ -821,6 +830,9 @@ static func_t bli_gks_l1v_ref_kers[BLIS_NUM_LEVEL1V_KERS] =
                  },
 /* swapv      */ { { BLIS_SSWAPV_KERNEL_REF, BLIS_CSWAPV_KERNEL_REF,
                      BLIS_DSWAPV_KERNEL_REF, BLIS_ZSWAPV_KERNEL_REF, }
+                 },
+/* xpbyv      */ { { BLIS_SXPBYV_KERNEL_REF, BLIS_CXPBYV_KERNEL_REF,
+                     BLIS_DXPBYV_KERNEL_REF, BLIS_ZXPBYV_KERNEL_REF, }
                  },
 };
 

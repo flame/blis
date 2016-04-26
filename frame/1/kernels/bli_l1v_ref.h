@@ -40,8 +40,8 @@ void PASTEMAC(ch,varname) \
      ( \
        conj_t  conjx, \
        dim_t   n, \
-       ctype*  x, inc_t incx, \
-       ctype*  y, inc_t incy, \
+       ctype* restrict x, inc_t incx, \
+       ctype* restrict y, inc_t incy, \
        cntx_t* cntx  \
      );
 
@@ -57,9 +57,9 @@ void PASTEMAC(ch,varname) \
      ( \
        conj_t  conjx, \
        dim_t   n, \
-       ctype*  alpha, \
-       ctype*  x, inc_t incx, \
-       ctype*  y, inc_t incy, \
+       ctype* restrict alpha, \
+       ctype* restrict x, inc_t incx, \
+       ctype* restrict y, inc_t incy, \
        cntx_t* cntx  \
      );
 
@@ -73,11 +73,44 @@ INSERT_GENTPROT_BASIC( scal2v_ref )
 void PASTEMAC(ch,varname) \
      ( \
        conj_t  conjx, \
+       dim_t   n, \
+       ctype* restrict x, inc_t incx, \
+       ctype* restrict beta, \
+       ctype* restrict y, inc_t incy, \
+       cntx_t* cntx  \
+     );
+
+INSERT_GENTPROT_BASIC( xpbyv_ref )
+
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, varname ) \
+\
+void PASTEMAC(ch,varname) \
+     ( \
+       conj_t  conjx, \
+       dim_t   n, \
+       ctype* restrict alpha, \
+       ctype* restrict x, inc_t incx, \
+       ctype* restrict beta, \
+       ctype* restrict y, inc_t incy, \
+       cntx_t* cntx  \
+     );
+
+INSERT_GENTPROT_BASIC( axpbyv_ref )
+
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, varname ) \
+\
+void PASTEMAC(ch,varname) \
+     ( \
+       conj_t  conjx, \
        conj_t  conjy, \
        dim_t   n, \
-       ctype*  x, inc_t incx, \
-       ctype*  y, inc_t incy, \
-       ctype*  rho, \
+       ctype* restrict x, inc_t incx, \
+       ctype* restrict y, inc_t incy, \
+       ctype* restrict rho, \
        cntx_t* cntx  \
      );
 
@@ -92,11 +125,11 @@ void PASTEMAC(ch,varname) \
        conj_t  conjx, \
        conj_t  conjy, \
        dim_t   n, \
-       ctype*  alpha, \
-       ctype*  x, inc_t incx, \
-       ctype*  y, inc_t incy, \
-       ctype*  beta, \
-       ctype*  rho, \
+       ctype* restrict alpha, \
+       ctype* restrict x, inc_t incx, \
+       ctype* restrict y, inc_t incy, \
+       ctype* restrict beta, \
+       ctype* restrict rho, \
        cntx_t* cntx  \
      );
 
@@ -109,7 +142,7 @@ INSERT_GENTPROT_BASIC( dotxv_ref )
 void PASTEMAC(ch,varname) \
      ( \
        dim_t   n, \
-       ctype*  x, inc_t incx, \
+       ctype* restrict x, inc_t incx, \
        cntx_t* cntx  \
      );
 
@@ -123,8 +156,8 @@ void PASTEMAC(ch,varname) \
      ( \
        conj_t  conjalpha, \
        dim_t   n, \
-       ctype*  alpha, \
-       ctype*  x, inc_t incx, \
+       ctype* restrict alpha, \
+       ctype* restrict x, inc_t incx, \
        cntx_t* cntx \
      );
 
@@ -138,8 +171,8 @@ INSERT_GENTPROT_BASIC( setv_ref )
 void PASTEMAC(ch,varname) \
      ( \
        dim_t   n, \
-       ctype*  x, inc_t incx, \
-       ctype*  y, inc_t incy, \
+       ctype* restrict x, inc_t incx, \
+       ctype* restrict y, inc_t incy, \
        cntx_t* cntx  \
      );
 

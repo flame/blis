@@ -77,6 +77,39 @@ INSERT_GENTPROT_BASIC( scal2v_ker_name )
 void PASTEMAC(ch,opname) \
      ( \
        conj_t  conjx, \
+       dim_t   n, \
+       ctype*  x, inc_t incx, \
+       ctype*  beta, \
+       ctype*  y, inc_t incy, \
+       cntx_t* cntx  \
+     ); \
+
+INSERT_GENTPROT_BASIC( xpbyv_ker_name )
+
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       conj_t  conjx, \
+       dim_t   n, \
+       ctype*  alpha, \
+       ctype*  x, inc_t incx, \
+       ctype*  beta, \
+       ctype*  y, inc_t incy, \
+       cntx_t* cntx  \
+     ); \
+
+INSERT_GENTPROT_BASIC( axpbyv_ker_name )
+
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       conj_t  conjx, \
        conj_t  conjy, \
        dim_t   n, \
        ctype*  x, inc_t incx, \
