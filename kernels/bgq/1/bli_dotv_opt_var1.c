@@ -36,13 +36,13 @@
 
 void bli_ddotv_opt_var1 
      ( 
-       conj_t  conjx,
-       conj_t  conjy,
-       dim_t   n,
-       double* x, inc_t incx,
-       double* y, inc_t incy,
-       double* rho,
-       cntx_t* cntx
+       conj_t           conjx,
+       conj_t           conjy,
+       dim_t            n,
+       double* restrict x, inc_t incx,
+       double* restrict y, inc_t incy,
+       double* restrict rho,
+       cntx_t*          cntx
      )
 { 
 	bool_t use_ref = FALSE;

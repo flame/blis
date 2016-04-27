@@ -81,7 +81,6 @@ extern "C" {
 // -- BLIS kernel definitions --
 
 #include "bli_kernel.h"
-//#include "bli_kernel_type_defs.h"
 
 #include "bli_kernel_pre_macro_defs.h"
 #include "bli_kernel_ind_pre_macro_defs.h"
