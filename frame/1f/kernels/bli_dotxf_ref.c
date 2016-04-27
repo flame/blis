@@ -40,16 +40,16 @@
 \
 void PASTEMAC(ch,varname) \
      ( \
-       conj_t  conjat, \
-       conj_t  conjx, \
-       dim_t   m, \
-       dim_t   b_n, \
-       ctype*  alpha, \
-       ctype*  a, inc_t inca, inc_t lda, \
-       ctype*  x, inc_t incx, \
-       ctype*  beta, \
-       ctype*  y, inc_t incy, \
-       cntx_t* cntx  \
+       conj_t          conjat, \
+       conj_t          conjx, \
+       dim_t           m, \
+       dim_t           b_n, \
+       ctype* restrict alpha, \
+       ctype* restrict a, inc_t inca, inc_t lda, \
+       ctype* restrict x, inc_t incx, \
+       ctype* restrict beta, \
+       ctype* restrict y, inc_t incy, \
+       cntx_t*         cntx  \
      ) \
 { \
 	ctype* a1; \

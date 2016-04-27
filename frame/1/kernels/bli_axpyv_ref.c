@@ -39,12 +39,12 @@
 \
 void PASTEMAC(ch,varname) \
      ( \
-       conj_t  conjx, \
-       dim_t   n, \
+       conj_t          conjx, \
+       dim_t           n, \
        ctype* restrict alpha, \
        ctype* restrict x, inc_t incx, \
        ctype* restrict y, inc_t incy, \
-       cntx_t* cntx  \
+       cntx_t*         cntx  \
      ) \
 { \
 	ctype* restrict chi1; \
@@ -79,43 +79,43 @@ void PASTEMAC(ch,varname) \
 \
 	if ( bli_is_conj( conjx ) ) \
 	{ \
-        if ( incx == 1 && incy == 1 ) \
-        { \
-            for ( i = 0; i < n; ++i ) \
-            { \
-                PASTEMAC(ch,axpyjs)( *alpha, chi1[i], psi1[i] ); \
-            } \
-        } \
-        else \
-        { \
-            for ( i = 0; i < n; ++i ) \
-            { \
-                PASTEMAC(ch,axpyjs)( *alpha, *chi1, *psi1 ); \
-    \
-                chi1 += incx; \
-                psi1 += incy; \
-            } \
-        } \
+		if ( incx == 1 && incy == 1 ) \
+		{ \
+			for ( i = 0; i < n; ++i ) \
+			{ \
+				PASTEMAC(ch,axpyjs)( *alpha, chi1[i], psi1[i] ); \
+			} \
+		} \
+		else \
+		{ \
+			for ( i = 0; i < n; ++i ) \
+			{ \
+				PASTEMAC(ch,axpyjs)( *alpha, *chi1, *psi1 ); \
+\
+				chi1 += incx; \
+				psi1 += incy; \
+			} \
+		} \
 	} \
 	else \
 	{ \
-        if ( incx == 1 && incy == 1 ) \
-        { \
-            for ( i = 0; i < n; ++i ) \
-            { \
-                PASTEMAC(ch,axpys)( *alpha, chi1[i], psi1[i] ); \
-            } \
-        } \
-        else \
-        { \
-            for ( i = 0; i < n; ++i ) \
-            { \
-                PASTEMAC(ch,axpys)( *alpha, *chi1, *psi1 ); \
-    \
-                chi1 += incx; \
-                psi1 += incy; \
-            } \
-        } \
+		if ( incx == 1 && incy == 1 ) \
+		{ \
+			for ( i = 0; i < n; ++i ) \
+			{ \
+				PASTEMAC(ch,axpys)( *alpha, chi1[i], psi1[i] ); \
+			} \
+		} \
+		else \
+		{ \
+			for ( i = 0; i < n; ++i ) \
+			{ \
+				PASTEMAC(ch,axpys)( *alpha, *chi1, *psi1 ); \
+\
+				chi1 += incx; \
+				psi1 += incy; \
+			} \
+		} \
 	} \
 }
 

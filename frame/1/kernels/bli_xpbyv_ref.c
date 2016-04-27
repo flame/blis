@@ -39,12 +39,12 @@
 \
 void PASTEMAC(ch,varname) \
      ( \
-       conj_t  conjx, \
-       dim_t   n, \
+       conj_t          conjx, \
+       dim_t           n, \
        ctype* restrict x, inc_t incx, \
        ctype* restrict beta, \
        ctype* restrict y, inc_t incy, \
-       cntx_t* cntx  \
+       cntx_t*         cntx  \
      ) \
 { \
 	ctype* restrict chi1; \
@@ -55,21 +55,21 @@ void PASTEMAC(ch,varname) \
 \
 	/* If beta is zero, use copyv. */ \
 	if ( PASTEMAC(ch,eq0)( *beta ) ) \
-    { \
-        /* Query the context for the kernel function pointer. */ \
-        const num_t          dt      = PASTEMAC(ch,type); \
-        PASTECH(ch,copyv_ft) copyv_p = bli_cntx_get_l1v_ker_dt( dt, BLIS_COPYV_KER, cntx ); \
+	{ \
+		/* Query the context for the kernel function pointer. */ \
+		const num_t          dt      = PASTEMAC(ch,type); \
+		PASTECH(ch,copyv_ft) copyv_p = bli_cntx_get_l1v_ker_dt( dt, BLIS_COPYV_KER, cntx ); \
 \
-        copyv_p \
-        ( \
-          conjx, \
-          n, \
-          x, incx, \
-          y, incy, \
-          cntx  \
-        ); \
-        return; \
-    } \
+		copyv_p \
+		( \
+		  conjx, \
+		  n, \
+		  x, incx, \
+		  y, incy, \
+		  cntx  \
+		); \
+		return; \
+	} \
 	/* If alpha is one, use addv. */ \
 	else if ( PASTEMAC(ch,eq1)( *beta ) ) \
 	{ \
@@ -93,43 +93,43 @@ void PASTEMAC(ch,varname) \
 \
 	if ( bli_is_conj( conjx ) ) \
 	{ \
-	    if ( incx == 1 && incy == 1 ) \
-	    { \
-            for ( i = 0; i < n; ++i ) \
-            { \
-                PASTEMAC(ch,xpbyjs)( chi1[i], *beta, psi1[i] ); \
-            } \
-	    } \
-	    else \
-	    { \
-            for ( i = 0; i < n; ++i ) \
-            { \
-                PASTEMAC(ch,xpbyjs)( *chi1, *beta, *psi1 ); \
-    \
-                chi1 += incx; \
-                psi1 += incy; \
-            } \
-	    } \
+		if ( incx == 1 && incy == 1 ) \
+		{ \
+			for ( i = 0; i < n; ++i ) \
+			{ \
+				PASTEMAC(ch,xpbyjs)( chi1[i], *beta, psi1[i] ); \
+			} \
+		} \
+		else \
+		{ \
+			for ( i = 0; i < n; ++i ) \
+			{ \
+				PASTEMAC(ch,xpbyjs)( *chi1, *beta, *psi1 ); \
+\
+				chi1 += incx; \
+				psi1 += incy; \
+			} \
+		} \
 	} \
 	else \
 	{ \
-        if ( incx == 1 && incy == 1 ) \
-        { \
-            for ( i = 0; i < n; ++i ) \
-            { \
-                PASTEMAC(ch,xpbys)( chi1[i], *beta, psi1[i] ); \
-            } \
-        } \
-        else \
-        { \
-            for ( i = 0; i < n; ++i ) \
-            { \
-                PASTEMAC(ch,xpbys)( *chi1, *beta, *psi1 ); \
-    \
-                chi1 += incx; \
-                psi1 += incy; \
-            } \
-        } \
+		if ( incx == 1 && incy == 1 ) \
+		{ \
+			for ( i = 0; i < n; ++i ) \
+			{ \
+				PASTEMAC(ch,xpbys)( chi1[i], *beta, psi1[i] ); \
+			} \
+		} \
+		else \
+		{ \
+			for ( i = 0; i < n; ++i ) \
+			{ \
+				PASTEMAC(ch,xpbys)( *chi1, *beta, *psi1 ); \
+\
+				chi1 += incx; \
+				psi1 += incy; \
+			} \
+		} \
 	} \
 }
 

@@ -40,15 +40,15 @@
 \
 void PASTEMAC(ch,varname) \
      ( \
-       conj_t  conjx, \
-       conj_t  conjy, \
-       dim_t   n, \
-       ctype*  alphax, \
-       ctype*  alphay, \
-       ctype*  x, inc_t incx, \
-       ctype*  y, inc_t incy, \
-       ctype*  z, inc_t incz, \
-       cntx_t* cntx  \
+       conj_t          conjx, \
+       conj_t          conjy, \
+       dim_t           n, \
+       ctype* restrict alphax, \
+       ctype* restrict alphay, \
+       ctype* restrict x, inc_t incx, \
+       ctype* restrict y, inc_t incy, \
+       ctype* restrict z, inc_t incz, \
+       cntx_t*         cntx  \
      ) \
 { \
 	/* Query the context for the kernel function pointer. */ \

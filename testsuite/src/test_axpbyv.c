@@ -79,12 +79,12 @@ void libblis_test_axpbyv_deps( test_params_t* params, test_op_t* op )
 	libblis_test_randv( params, &(op->ops->randv) );
 	libblis_test_normfv( params, &(op->ops->normfv) );
 	libblis_test_addv( params, &(op->ops->addv) );
-    libblis_test_axpyv( params, &(op->ops->axpyv) );
+	libblis_test_axpyv( params, &(op->ops->axpyv) );
 	libblis_test_subv( params, &(op->ops->subv) );
 	libblis_test_copyv( params, &(op->ops->copyv) );
-    libblis_test_scalv( params, &(op->ops->scalv) );
-    libblis_test_scal2v( params, &(op->ops->scal2v) );
-    libblis_test_xpbyv( params, &(op->ops->xpbyv) );
+	libblis_test_scalv( params, &(op->ops->scalv) );
+	libblis_test_scal2v( params, &(op->ops->scal2v) );
+	libblis_test_xpbyv( params, &(op->ops->xpbyv) );
 }
 
 
@@ -149,8 +149,8 @@ void libblis_test_axpbyv_experiment( test_params_t* params,
 	bli_param_map_char_to_blis_conj( pc_str[0], &conjx );
 
 	// Create test scalars.
-    bli_obj_scalar_init_detached( datatype, &alpha );
-    bli_obj_scalar_init_detached( datatype, &beta );
+	bli_obj_scalar_init_detached( datatype, &alpha );
+	bli_obj_scalar_init_detached( datatype, &beta );
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_vobj_create( params, datatype, sc_str[0], m, &x );
@@ -165,7 +165,7 @@ void libblis_test_axpbyv_experiment( test_params_t* params,
 	else
 		bli_setsc(  0.0, -2.0, &alpha );
 
-    bli_setsc( -1.0,  0.0, &beta );
+	bli_setsc( -1.0,  0.0, &beta );
 
 	// Randomize x and y, and save y.
 	bli_randv( &x );
@@ -268,8 +268,8 @@ void libblis_test_axpbyv_check( obj_t*  alpha,
 	bli_copyv( x,      &x_temp );
 	bli_copyv( y_orig, &y_temp );
 
-    bli_scalv( alpha, &x_temp );
-    bli_scalv(  beta, &y_temp );
+	bli_scalv( alpha, &x_temp );
+	bli_scalv(  beta, &y_temp );
 	bli_addv( &x_temp, &y_temp );
 
 	bli_subv( &y_temp, y );

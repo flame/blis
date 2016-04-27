@@ -39,10 +39,10 @@
 \
 void PASTEMAC(ch,varname) \
      ( \
-       dim_t   n, \
+       dim_t           n, \
        ctype* restrict x, inc_t incx, \
        ctype* restrict y, inc_t incy, \
-       cntx_t* cntx  \
+       cntx_t*         cntx  \
      ) \
 { \
 	ctype* restrict chi1; \
@@ -54,23 +54,23 @@ void PASTEMAC(ch,varname) \
 	chi1 = x; \
 	psi1 = y; \
 \
-    if ( incx == 1 && incy == 1 ) \
-    { \
-        for ( i = 0; i < n; ++i ) \
-        { \
-            PASTEMAC(ch,swaps)( chi1[i], psi1[i] ); \
-        } \
-    } \
-    else \
-    { \
-        for ( i = 0; i < n; ++i ) \
-        { \
-            PASTEMAC(ch,swaps)( *chi1, *psi1 ); \
-    \
-            chi1 += incx; \
-            psi1 += incy; \
-        } \
-    } \
+	if ( incx == 1 && incy == 1 ) \
+	{ \
+		for ( i = 0; i < n; ++i ) \
+		{ \
+			PASTEMAC(ch,swaps)( chi1[i], psi1[i] ); \
+		} \
+	} \
+	else \
+	{ \
+		for ( i = 0; i < n; ++i ) \
+		{ \
+			PASTEMAC(ch,swaps)( *chi1, *psi1 ); \
+\
+			chi1 += incx; \
+			psi1 += incy; \
+		} \
+	} \
 }
 
 INSERT_GENTFUNC_BASIC0( swapv_ref )

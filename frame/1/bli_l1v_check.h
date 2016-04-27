@@ -59,24 +59,11 @@ void PASTEMAC(opname,_check) \
      ( \
        obj_t*  alpha, \
        obj_t*  x, \
-       obj_t*  y  \
-     ); 
-
-GENTPROT( axpyv )
-GENTPROT( scal2v )
-
-
-#undef  GENTPROT
-#define GENTPROT( opname ) \
-\
-void PASTEMAC(opname,_check) \
-     ( \
-       obj_t*  x, \
        obj_t*  beta, \
        obj_t*  y  \
      );
 
-GENTPROT( xpbyv )
+GENTPROT( axpbyv )
 
 
 #undef  GENTPROT
@@ -86,11 +73,11 @@ void PASTEMAC(opname,_check) \
      ( \
        obj_t*  alpha, \
        obj_t*  x, \
-       obj_t*  beta, \
        obj_t*  y  \
-     );
+     ); 
 
-GENTPROT( axpbyv )
+GENTPROT( axpyv )
+GENTPROT( scal2v )
 
 
 #undef  GENTPROT
@@ -143,6 +130,20 @@ void PASTEMAC(opname,_check) \
 
 GENTPROT( scalv )
 GENTPROT( setv )
+
+
+#undef  GENTPROT
+#define GENTPROT( opname ) \
+\
+void PASTEMAC(opname,_check) \
+     ( \
+       obj_t*  x, \
+       obj_t*  beta, \
+       obj_t*  y  \
+     );
+
+GENTPROT( xpbyv )
+
 
 
 // -----------------------------------------------------------------------------

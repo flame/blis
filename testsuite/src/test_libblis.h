@@ -204,8 +204,8 @@ typedef struct test_ops_s
 
 	// level-1v
 	test_op_t addv;
-    test_op_t axpbyv;
-    test_op_t axpyv;
+	test_op_t axpbyv;
+	test_op_t axpyv;
 	test_op_t copyv;
 	test_op_t dotv;
 	test_op_t dotxv;
@@ -214,8 +214,8 @@ typedef struct test_ops_s
 	test_op_t scal2v;
 	test_op_t setv;
 	test_op_t subv;
-    test_op_t xpbyv;
-	
+	test_op_t xpbyv;
+
 	// level-1m
 	test_op_t addm;
 	test_op_t axpym;

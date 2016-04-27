@@ -143,7 +143,7 @@ void libblis_test_xpbyv_experiment( test_params_t* params,
 	bli_param_map_char_to_blis_conj( pc_str[0], &conjx );
 
 	// Create test scalars.
-    bli_obj_scalar_init_detached( datatype, &beta );
+	bli_obj_scalar_init_detached( datatype, &beta );
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_vobj_create( params, datatype, sc_str[0], m, &x );
@@ -255,7 +255,7 @@ void libblis_test_xpbyv_check( obj_t*  x,
 	bli_copyv( x,      &x_temp );
 	bli_copyv( y_orig, &y_temp );
 
-    bli_scalv( beta, &y_temp );
+	bli_scalv( beta, &y_temp );
 	bli_addv( &x_temp, &y_temp );
 
 	bli_subv( &y_temp, y );

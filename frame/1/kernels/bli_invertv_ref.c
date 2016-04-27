@@ -39,9 +39,9 @@
 \
 void PASTEMAC(ch,varname) \
      ( \
-       dim_t   n, \
+       dim_t           n, \
        ctype* restrict x, inc_t incx, \
-       cntx_t* cntx  \
+       cntx_t*         cntx  \
      ) \
 { \
 	ctype* restrict chi1; \
@@ -51,22 +51,22 @@ void PASTEMAC(ch,varname) \
 \
 	chi1 = x; \
 \
-    if ( incx == 1 ) \
-    { \
-        for ( i = 0; i < n; ++i ) \
-        { \
-            PASTEMAC(ch,inverts)( chi1[i] ); \
-        } \
-    } \
-    else \
-    { \
-        for ( i = 0; i < n; ++i ) \
-        { \
-            PASTEMAC(ch,inverts)( *chi1 ); \
-    \
-            chi1 += incx; \
-        } \
-    } \
+	if ( incx == 1 ) \
+	{ \
+		for ( i = 0; i < n; ++i ) \
+		{ \
+			PASTEMAC(ch,inverts)( chi1[i] ); \
+		} \
+	} \
+	else \
+	{ \
+		for ( i = 0; i < n; ++i ) \
+		{ \
+			PASTEMAC(ch,inverts)( *chi1 ); \
+	\
+			chi1 += incx; \
+		} \
+	} \
 }
 
 INSERT_GENTFUNC_BASIC0( invertv_ref )

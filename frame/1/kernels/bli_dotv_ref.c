@@ -39,13 +39,13 @@
 \
 void PASTEMAC(ch,varname) \
      ( \
-       conj_t  conjx, \
-       conj_t  conjy, \
-       dim_t   n, \
+       conj_t          conjx, \
+       conj_t          conjy, \
+       dim_t           n, \
        ctype* restrict x, inc_t incx, \
        ctype* restrict y, inc_t incy, \
        ctype* restrict rho, \
-       cntx_t* cntx  \
+       cntx_t*         cntx  \
      ) \
 { \
 	ctype* restrict chi1; \
@@ -75,43 +75,43 @@ void PASTEMAC(ch,varname) \
 \
 	if ( bli_is_conj( conjx_use ) ) \
 	{ \
-	    if ( incx == 1 && incy == 1 ) \
-	    { \
-            for ( i = 0; i < n; ++i ) \
-            { \
-                PASTEMAC(ch,dotjs)( chi1[i], psi1[i], dotxy ); \
-            } \
-	    } \
-	    else \
-	    { \
-            for ( i = 0; i < n; ++i ) \
-            { \
-                PASTEMAC(ch,dotjs)( *chi1, *psi1, dotxy ); \
-    \
-                chi1 += incx; \
-                psi1 += incy; \
-            } \
-	    } \
+		if ( incx == 1 && incy == 1 ) \
+		{ \
+			for ( i = 0; i < n; ++i ) \
+			{ \
+				PASTEMAC(ch,dotjs)( chi1[i], psi1[i], dotxy ); \
+			} \
+		} \
+		else \
+		{ \
+			for ( i = 0; i < n; ++i ) \
+			{ \
+				PASTEMAC(ch,dotjs)( *chi1, *psi1, dotxy ); \
+\
+				chi1 += incx; \
+				psi1 += incy; \
+			} \
+		} \
 	} \
 	else \
 	{ \
-        if ( incx == 1 && incy == 1 ) \
-        { \
-            for ( i = 0; i < n; ++i ) \
-            { \
-                PASTEMAC(ch,dots)( chi1[i], psi1[i], dotxy ); \
-            } \
-        } \
-        else \
-        { \
-            for ( i = 0; i < n; ++i ) \
-            { \
-                PASTEMAC(ch,dots)( *chi1, *psi1, dotxy ); \
-    \
-                chi1 += incx; \
-                psi1 += incy; \
-            } \
-        } \
+		if ( incx == 1 && incy == 1 ) \
+		{ \
+			for ( i = 0; i < n; ++i ) \
+			{ \
+				PASTEMAC(ch,dots)( chi1[i], psi1[i], dotxy ); \
+			} \
+		} \
+		else \
+		{ \
+			for ( i = 0; i < n; ++i ) \
+			{ \
+				PASTEMAC(ch,dots)( *chi1, *psi1, dotxy ); \
+\
+				chi1 += incx; \
+				psi1 += incy; \
+			} \
+		} \
 	} \
 \
 	if ( bli_is_conj( conjy ) ) \

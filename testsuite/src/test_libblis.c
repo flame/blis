@@ -113,8 +113,8 @@ void libblis_test_utility_ops( test_params_t* params, test_ops_t* ops )
 void libblis_test_level1v_ops( test_params_t* params, test_ops_t* ops )
 {
 	libblis_test_addv( params, &(ops->addv) );
-    libblis_test_axpbyv( params, &(ops->axpbyv) );
-    libblis_test_axpyv( params, &(ops->axpyv) );
+	libblis_test_axpbyv( params, &(ops->axpbyv) );
+	libblis_test_axpyv( params, &(ops->axpyv) );
 	libblis_test_copyv( params, &(ops->copyv) );
 	libblis_test_dotv( params, &(ops->dotv) );
 	libblis_test_dotxv( params, &(ops->dotxv) );
@@ -123,7 +123,7 @@ void libblis_test_level1v_ops( test_params_t* params, test_ops_t* ops )
 	libblis_test_scal2v( params, &(ops->scal2v) );
 	libblis_test_setv( params, &(ops->setv) );
 	libblis_test_subv( params, &(ops->subv) );
-    libblis_test_xpbyv( params, &(ops->xpbyv) );
+	libblis_test_xpbyv( params, &(ops->xpbyv) );
 }
 
 
@@ -222,7 +222,7 @@ void libblis_test_read_ops_file( char* input_filename, test_ops_t* ops )
 
 	// Level-1v
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   1, &(ops->addv) );
-    libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   1, &(ops->axpbyv) );
+	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   1, &(ops->axpbyv) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   1, &(ops->axpyv) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   1, &(ops->copyv) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   2, &(ops->dotv) );
@@ -232,7 +232,7 @@ void libblis_test_read_ops_file( char* input_filename, test_ops_t* ops )
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   1, &(ops->scal2v) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   0, &(ops->setv) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   1, &(ops->subv) );
-    libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   1, &(ops->xpbyv) );
+	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   1, &(ops->xpbyv) );
 
 	// Level-1m
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_MN,  1, &(ops->addm) );

@@ -785,7 +785,7 @@ typedef enum
 typedef enum
 {
 	BLIS_ADDV_KER  = 0,
-    BLIS_AXPBYV_KER,
+	BLIS_AXPBYV_KER,
 	BLIS_AXPYV_KER,
 	BLIS_COPYV_KER,
 	BLIS_DOTV_KER,
@@ -796,7 +796,7 @@ typedef enum
 	BLIS_SETV_KER,
 	BLIS_SUBV_KER,
 	BLIS_SWAPV_KER,
-    BLIS_XPBYV_KER,
+	BLIS_XPBYV_KER,
 } l1vkr_t;
 
 #define BLIS_NUM_LEVEL1V_KERS 13

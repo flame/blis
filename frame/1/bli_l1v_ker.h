@@ -42,11 +42,11 @@
 \
 void PASTEMAC(ch,opname) \
       ( \
-        conj_t  conjx, \
-        dim_t   n, \
-        ctype*  x, inc_t incx, \
-        ctype*  y, inc_t incy, \
-        cntx_t* cntx  \
+        conj_t          conjx, \
+        dim_t           n, \
+        ctype* restrict x, inc_t incx, \
+        ctype* restrict y, inc_t incy, \
+        cntx_t*         cntx  \
       );
 
 INSERT_GENTPROT_BASIC( addv_ker_name )
@@ -59,12 +59,29 @@ INSERT_GENTPROT_BASIC( subv_ker_name )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       conj_t  conjx, \
-       dim_t   n, \
-       ctype*  alpha, \
-       ctype*  x, inc_t incx, \
-       ctype*  y, inc_t incy, \
-       cntx_t* cntx  \
+       conj_t          conjx, \
+       dim_t           n, \
+       ctype* restrict alpha, \
+       ctype* restrict x, inc_t incx, \
+       ctype* restrict beta, \
+       ctype* restrict y, inc_t incy, \
+       cntx_t*         cntx  \
+     ); \
+
+INSERT_GENTPROT_BASIC( axpbyv_ker_name )
+
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       conj_t          conjx, \
+       dim_t           n, \
+       ctype* restrict alpha, \
+       ctype* restrict x, inc_t incx, \
+       ctype* restrict y, inc_t incy, \
+       cntx_t*         cntx  \
      ); \
 
 INSERT_GENTPROT_BASIC( axpyv_ker_name )
@@ -76,46 +93,13 @@ INSERT_GENTPROT_BASIC( scal2v_ker_name )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       conj_t  conjx, \
-       dim_t   n, \
-       ctype*  x, inc_t incx, \
-       ctype*  beta, \
-       ctype*  y, inc_t incy, \
-       cntx_t* cntx  \
-     ); \
-
-INSERT_GENTPROT_BASIC( xpbyv_ker_name )
-
-
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname) \
-     ( \
-       conj_t  conjx, \
-       dim_t   n, \
-       ctype*  alpha, \
-       ctype*  x, inc_t incx, \
-       ctype*  beta, \
-       ctype*  y, inc_t incy, \
-       cntx_t* cntx  \
-     ); \
-
-INSERT_GENTPROT_BASIC( axpbyv_ker_name )
-
-
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname) \
-     ( \
-       conj_t  conjx, \
-       conj_t  conjy, \
-       dim_t   n, \
-       ctype*  x, inc_t incx, \
-       ctype*  y, inc_t incy, \
-       ctype*  rho, \
-       cntx_t* cntx  \
+       conj_t          conjx, \
+       conj_t          conjy, \
+       dim_t           n, \
+       ctype* restrict x, inc_t incx, \
+       ctype* restrict y, inc_t incy, \
+       ctype* restrict rho, \
+       cntx_t*         cntx  \
      ); \
 
 INSERT_GENTPROT_BASIC( dotv_ker_name )
@@ -126,15 +110,15 @@ INSERT_GENTPROT_BASIC( dotv_ker_name )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       conj_t  conjx, \
-       conj_t  conjy, \
-       dim_t   n, \
-       ctype*  alpha, \
-       ctype*  x, inc_t incx, \
-       ctype*  y, inc_t incy, \
-       ctype*  beta, \
-       ctype*  rho, \
-       cntx_t* cntx  \
+       conj_t          conjx, \
+       conj_t          conjy, \
+       dim_t           n, \
+       ctype* restrict alpha, \
+       ctype* restrict x, inc_t incx, \
+       ctype* restrict y, inc_t incy, \
+       ctype* restrict beta, \
+       ctype* restrict rho, \
+       cntx_t*         cntx  \
      ); \
 
 INSERT_GENTPROT_BASIC( dotxv_ker_name )
@@ -145,9 +129,9 @@ INSERT_GENTPROT_BASIC( dotxv_ker_name )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       dim_t   n, \
-       ctype*  x, inc_t incx, \
-       cntx_t* cntx  \
+       dim_t           n, \
+       ctype* restrict x, inc_t incx, \
+       cntx_t*         cntx  \
      ); \
 
 INSERT_GENTPROT_BASIC( invertv_ker_name )
@@ -158,11 +142,11 @@ INSERT_GENTPROT_BASIC( invertv_ker_name )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       conj_t  conjalpha, \
-       dim_t   n, \
-       ctype*  alpha, \
-       ctype*  x, inc_t incx, \
-       cntx_t* cntx  \
+       conj_t          conjalpha, \
+       dim_t           n, \
+       ctype* restrict alpha, \
+       ctype* restrict x, inc_t incx, \
+       cntx_t*         cntx  \
      ); \
 
 INSERT_GENTPROT_BASIC( scalv_ker_name )
@@ -174,11 +158,27 @@ INSERT_GENTPROT_BASIC( setv_ker_name )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       dim_t   n, \
-       ctype*  x, inc_t incx, \
-       ctype*  y, inc_t incy, \
-       cntx_t* cntx  \
+       dim_t           n, \
+       ctype* restrict x, inc_t incx, \
+       ctype* restrict y, inc_t incy, \
+       cntx_t*         cntx  \
      ); \
 
 INSERT_GENTPROT_BASIC( swapv_ker_name )
+
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       conj_t          conjx, \
+       dim_t           n, \
+       ctype* restrict x, inc_t incx, \
+       ctype* restrict beta, \
+       ctype* restrict y, inc_t incy, \
+       cntx_t*         cntx  \
+     ); \
+
+INSERT_GENTPROT_BASIC( xpbyv_ker_name )
 

@@ -262,10 +262,10 @@
 
 // axpbyv kernels
 
-#define BLIS_SAXPBYV_KERNEL_REF           bli_saxpbyv_ref
-#define BLIS_DAXPBYV_KERNEL_REF           bli_daxpbyv_ref
-#define BLIS_CAXPBYV_KERNEL_REF           bli_caxpbyv_ref
-#define BLIS_ZAXPBYV_KERNEL_REF           bli_zaxpbyv_ref
+#define BLIS_SAXPBYV_KERNEL_REF          bli_saxpbyv_ref
+#define BLIS_DAXPBYV_KERNEL_REF          bli_daxpbyv_ref
+#define BLIS_CAXPBYV_KERNEL_REF          bli_caxpbyv_ref
+#define BLIS_ZAXPBYV_KERNEL_REF          bli_zaxpbyv_ref
 
 // axpyv kernels
 
