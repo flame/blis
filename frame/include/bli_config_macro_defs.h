@@ -137,19 +137,6 @@
 #define BLIS_POOL_ADDR_ALIGN_SIZE        BLIS_PAGE_SIZE
 
 
-// -- MIXED DATATYPE SUPPORT ---------------------------------------------------
-
-// Basic (homogeneous) datatype support always enabled.
-
-// AVOID ENABLING MIXED DATATYPE SUPPORT! IT IS PROBABLY BROKEN.
-
-// Enable mixed domain operations?
-//#define BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-
-// Enable extra mixed precision operations?
-//#define BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-
-
 // -- MISCELLANEOUS OPTIONS ----------------------------------------------------
 
 // Stay initialized after auto-initialization, unless and until the user

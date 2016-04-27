@@ -35,21 +35,21 @@
 // Redefine level-1f kernel API names to induce prototypes.
 
 #undef  axpy2v_ker_name
-#define axpy2v_ker_name    axpy2v_ref
+#define axpy2v_ker_name     axpy2v_ref
 
 #undef  dotaxpyv_ker_name
-#define dotaxpyv_ker_name  dotaxpyv_ref
+#define dotaxpyv_ker_name   dotaxpyv_ref
 
 #undef  axpyf_ker_name
-#define axpyf_ker_name     axpyf_ref
+#define axpyf_ker_name      axpyf_ref
 
 #undef  dotxf_ker_name
-#define dotxf_ker_name     dotxf_ref
+#define dotxf_ker_name      dotxf_ref
 
-#undef  dotxaxpy_ker_name
-#define dotxaxpy_ker_name  dotxaxpyf_ref
+#undef  dotxaxpyf_ker_name
+#define dotxaxpyf_ker_name  dotxaxpyf_ref_var2
 
 // Include the level-1f kernel API template.
 
-#include "bli_l1v_ker.h"
+#include "bli_l1f_ker.h"
 
