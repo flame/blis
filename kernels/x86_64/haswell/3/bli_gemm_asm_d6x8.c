@@ -65,7 +65,7 @@
 	"vpermilps  $0x39, %%xmm2,  %%xmm1           \n\t" \
 	"vmovss            %%xmm1, (%%rcx,%%r10  )   \n\t"
 
-void bli_sgemm_asm_16x6
+void bli_sgemm_asm_6x16
      (
        dim_t               k,
        float*     restrict alpha,
@@ -93,23 +93,23 @@ void bli_sgemm_asm_16x6
 	"movq                %3, %%rbx               \n\t" // load address of b.
 	//"movq                %9, %%r15               \n\t" // load address of b_next.
 	"                                            \n\t"
-	"addq           $32 * 4, %%rax               \n\t"
+	"addq           $32 * 4, %%rbx               \n\t"
 	"                                            \n\t" // initialize loop by pre-loading
-	"vmovaps           -4 * 32(%%rax), %%ymm0    \n\t"
-	"vmovaps           -3 * 32(%%rax), %%ymm1    \n\t"
+	"vmovaps           -4 * 32(%%rbx), %%ymm0    \n\t"
+	"vmovaps           -3 * 32(%%rbx), %%ymm1    \n\t"
 	"                                            \n\t"
 	"movq                %6, %%rcx               \n\t" // load address of c
-	"movq                %8, %%rdi               \n\t" // load cs_c
-	"leaq        (,%%rdi,4), %%rdi               \n\t" // cs_c *= sizeof(float)
+	"movq                %7, %%rdi               \n\t" // load rs_c
+	"leaq        (,%%rdi,4), %%rdi               \n\t" // rs_c *= sizeof(float)
 	"                                            \n\t"
-	"leaq   (%%rdi,%%rdi,2), %%r13               \n\t" // r13 = 3*cs_c;
-	"leaq   (%%rcx,%%r13,1), %%rdx               \n\t" // rdx = c + 3*cs_c;
-	"prefetcht0   7 * 8(%%rcx)                   \n\t" // prefetch c + 0*cs_c
-	"prefetcht0   7 * 8(%%rcx,%%rdi)             \n\t" // prefetch c + 1*cs_c
-	"prefetcht0   7 * 8(%%rcx,%%rdi,2)           \n\t" // prefetch c + 2*cs_c
-	"prefetcht0   7 * 8(%%rdx)                   \n\t" // prefetch c + 3*cs_c
-	"prefetcht0   7 * 8(%%rdx,%%rdi)             \n\t" // prefetch c + 4*cs_c
-	"prefetcht0   7 * 8(%%rdx,%%rdi,2)           \n\t" // prefetch c + 5*cs_c
+	"leaq   (%%rdi,%%rdi,2), %%r13               \n\t" // r13 = 3*rs_c;
+	"leaq   (%%rcx,%%r13,1), %%rdx               \n\t" // rdx = c + 3*rs_c;
+	"prefetcht0   7 * 8(%%rcx)                   \n\t" // prefetch c + 0*rs_c
+	"prefetcht0   7 * 8(%%rcx,%%rdi)             \n\t" // prefetch c + 1*rs_c
+	"prefetcht0   7 * 8(%%rcx,%%rdi,2)           \n\t" // prefetch c + 2*rs_c
+	"prefetcht0   7 * 8(%%rdx)                   \n\t" // prefetch c + 3*rs_c
+	"prefetcht0   7 * 8(%%rdx,%%rdi)             \n\t" // prefetch c + 4*rs_c
+	"prefetcht0   7 * 8(%%rdx,%%rdi,2)           \n\t" // prefetch c + 5*rs_c
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
@@ -124,111 +124,111 @@ void bli_sgemm_asm_16x6
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t" // iteration 0
-	"prefetcht0  128 * 4(%%rax)                  \n\t"
+	"prefetcht0   64 * 4(%%rax)                  \n\t"
 	"                                            \n\t"
-	"vbroadcastss       0 *  4(%%rbx), %%ymm2    \n\t"
-	"vbroadcastss       1 *  4(%%rbx), %%ymm3    \n\t"
+	"vbroadcastss       0 *  4(%%rax), %%ymm2    \n\t"
+	"vbroadcastss       1 *  4(%%rax), %%ymm3    \n\t"
 	"vfmadd231ps       %%ymm0, %%ymm2, %%ymm4    \n\t"
 	"vfmadd231ps       %%ymm1, %%ymm2, %%ymm5    \n\t"
 	"vfmadd231ps       %%ymm0, %%ymm3, %%ymm6    \n\t"
 	"vfmadd231ps       %%ymm1, %%ymm3, %%ymm7    \n\t"
 	"                                            \n\t"
-	"vbroadcastss       2 *  4(%%rbx), %%ymm2    \n\t"
-	"vbroadcastss       3 *  4(%%rbx), %%ymm3    \n\t"
+	"vbroadcastss       2 *  4(%%rax), %%ymm2    \n\t"
+	"vbroadcastss       3 *  4(%%rax), %%ymm3    \n\t"
 	"vfmadd231ps       %%ymm0, %%ymm2, %%ymm8    \n\t"
 	"vfmadd231ps       %%ymm1, %%ymm2, %%ymm9    \n\t"
 	"vfmadd231ps       %%ymm0, %%ymm3, %%ymm10   \n\t"
 	"vfmadd231ps       %%ymm1, %%ymm3, %%ymm11   \n\t"
 	"                                            \n\t"
-	"vbroadcastss       4 *  4(%%rbx), %%ymm2    \n\t"
-	"vbroadcastss       5 *  4(%%rbx), %%ymm3    \n\t"
+	"vbroadcastss       4 *  4(%%rax), %%ymm2    \n\t"
+	"vbroadcastss       5 *  4(%%rax), %%ymm3    \n\t"
 	"vfmadd231ps       %%ymm0, %%ymm2, %%ymm12   \n\t"
 	"vfmadd231ps       %%ymm1, %%ymm2, %%ymm13   \n\t"
 	"vfmadd231ps       %%ymm0, %%ymm3, %%ymm14   \n\t"
 	"vfmadd231ps       %%ymm1, %%ymm3, %%ymm15   \n\t"
 	"                                            \n\t"
-	"vmovaps           -2 * 32(%%rax), %%ymm0    \n\t"
-	"vmovaps           -1 * 32(%%rax), %%ymm1    \n\t"
+	"vmovaps           -2 * 32(%%rbx), %%ymm0    \n\t"
+	"vmovaps           -1 * 32(%%rbx), %%ymm1    \n\t"
 	"                                            \n\t"
 	"                                            \n\t" // iteration 1
-	"vbroadcastss       6 *  4(%%rbx), %%ymm2    \n\t"
-	"vbroadcastss       7 *  4(%%rbx), %%ymm3    \n\t"
+	"vbroadcastss       6 *  4(%%rax), %%ymm2    \n\t"
+	"vbroadcastss       7 *  4(%%rax), %%ymm3    \n\t"
 	"vfmadd231ps       %%ymm0, %%ymm2, %%ymm4    \n\t"
 	"vfmadd231ps       %%ymm1, %%ymm2, %%ymm5    \n\t"
 	"vfmadd231ps       %%ymm0, %%ymm3, %%ymm6    \n\t"
 	"vfmadd231ps       %%ymm1, %%ymm3, %%ymm7    \n\t"
 	"                                            \n\t"
-	"vbroadcastss       8 *  4(%%rbx), %%ymm2    \n\t"
-	"vbroadcastss       9 *  4(%%rbx), %%ymm3    \n\t"
+	"vbroadcastss       8 *  4(%%rax), %%ymm2    \n\t"
+	"vbroadcastss       9 *  4(%%rax), %%ymm3    \n\t"
 	"vfmadd231ps       %%ymm0, %%ymm2, %%ymm8    \n\t"
 	"vfmadd231ps       %%ymm1, %%ymm2, %%ymm9    \n\t"
 	"vfmadd231ps       %%ymm0, %%ymm3, %%ymm10   \n\t"
 	"vfmadd231ps       %%ymm1, %%ymm3, %%ymm11   \n\t"
 	"                                            \n\t"
-	"vbroadcastss      10 *  4(%%rbx), %%ymm2    \n\t"
-	"vbroadcastss      11 *  4(%%rbx), %%ymm3    \n\t"
+	"vbroadcastss      10 *  4(%%rax), %%ymm2    \n\t"
+	"vbroadcastss      11 *  4(%%rax), %%ymm3    \n\t"
 	"vfmadd231ps       %%ymm0, %%ymm2, %%ymm12   \n\t"
 	"vfmadd231ps       %%ymm1, %%ymm2, %%ymm13   \n\t"
 	"vfmadd231ps       %%ymm0, %%ymm3, %%ymm14   \n\t"
 	"vfmadd231ps       %%ymm1, %%ymm3, %%ymm15   \n\t"
 	"                                            \n\t"
-	"vmovaps            0 * 32(%%rax), %%ymm0    \n\t"
-	"vmovaps            1 * 32(%%rax), %%ymm1    \n\t"
+	"vmovaps            0 * 32(%%rbx), %%ymm0    \n\t"
+	"vmovaps            1 * 32(%%rbx), %%ymm1    \n\t"
 	"                                            \n\t"
 	"                                            \n\t" // iteration 2
-	"prefetcht0  160 * 4(%%rax)                  \n\t"
+	"prefetcht0   76 * 4(%%rax)                  \n\t"
 	"                                            \n\t"
-	"vbroadcastss      12 *  4(%%rbx), %%ymm2    \n\t"
-	"vbroadcastss      13 *  4(%%rbx), %%ymm3    \n\t"
+	"vbroadcastss      12 *  4(%%rax), %%ymm2    \n\t"
+	"vbroadcastss      13 *  4(%%rax), %%ymm3    \n\t"
 	"vfmadd231ps       %%ymm0, %%ymm2, %%ymm4    \n\t"
 	"vfmadd231ps       %%ymm1, %%ymm2, %%ymm5    \n\t"
 	"vfmadd231ps       %%ymm0, %%ymm3, %%ymm6    \n\t"
 	"vfmadd231ps       %%ymm1, %%ymm3, %%ymm7    \n\t"
 	"                                            \n\t"
-	"vbroadcastss      14 *  4(%%rbx), %%ymm2    \n\t"
-	"vbroadcastss      15 *  4(%%rbx), %%ymm3    \n\t"
+	"vbroadcastss      14 *  4(%%rax), %%ymm2    \n\t"
+	"vbroadcastss      15 *  4(%%rax), %%ymm3    \n\t"
 	"vfmadd231ps       %%ymm0, %%ymm2, %%ymm8    \n\t"
 	"vfmadd231ps       %%ymm1, %%ymm2, %%ymm9    \n\t"
 	"vfmadd231ps       %%ymm0, %%ymm3, %%ymm10   \n\t"
 	"vfmadd231ps       %%ymm1, %%ymm3, %%ymm11   \n\t"
 	"                                            \n\t"
-	"vbroadcastss      16 *  4(%%rbx), %%ymm2    \n\t"
-	"vbroadcastss      17 *  4(%%rbx), %%ymm3    \n\t"
+	"vbroadcastss      16 *  4(%%rax), %%ymm2    \n\t"
+	"vbroadcastss      17 *  4(%%rax), %%ymm3    \n\t"
 	"vfmadd231ps       %%ymm0, %%ymm2, %%ymm12   \n\t"
 	"vfmadd231ps       %%ymm1, %%ymm2, %%ymm13   \n\t"
 	"vfmadd231ps       %%ymm0, %%ymm3, %%ymm14   \n\t"
 	"vfmadd231ps       %%ymm1, %%ymm3, %%ymm15   \n\t"
 	"                                            \n\t"
-	"vmovaps            2 * 32(%%rax), %%ymm0    \n\t"
-	"vmovaps            3 * 32(%%rax), %%ymm1    \n\t"
+	"vmovaps            2 * 32(%%rbx), %%ymm0    \n\t"
+	"vmovaps            3 * 32(%%rbx), %%ymm1    \n\t"
 	"                                            \n\t"
 	"                                            \n\t" // iteration 3
-	"vbroadcastss      18 *  4(%%rbx), %%ymm2    \n\t"
-	"vbroadcastss      19 *  4(%%rbx), %%ymm3    \n\t"
+	"vbroadcastss      18 *  4(%%rax), %%ymm2    \n\t"
+	"vbroadcastss      19 *  4(%%rax), %%ymm3    \n\t"
 	"vfmadd231ps       %%ymm0, %%ymm2, %%ymm4    \n\t"
 	"vfmadd231ps       %%ymm1, %%ymm2, %%ymm5    \n\t"
 	"vfmadd231ps       %%ymm0, %%ymm3, %%ymm6    \n\t"
 	"vfmadd231ps       %%ymm1, %%ymm3, %%ymm7    \n\t"
 	"                                            \n\t"
-	"vbroadcastss      20 *  4(%%rbx), %%ymm2    \n\t"
-	"vbroadcastss      21 *  4(%%rbx), %%ymm3    \n\t"
+	"vbroadcastss      20 *  4(%%rax), %%ymm2    \n\t"
+	"vbroadcastss      21 *  4(%%rax), %%ymm3    \n\t"
 	"vfmadd231ps       %%ymm0, %%ymm2, %%ymm8    \n\t"
 	"vfmadd231ps       %%ymm1, %%ymm2, %%ymm9    \n\t"
 	"vfmadd231ps       %%ymm0, %%ymm3, %%ymm10   \n\t"
 	"vfmadd231ps       %%ymm1, %%ymm3, %%ymm11   \n\t"
 	"                                            \n\t"
-	"vbroadcastss      22 *  4(%%rbx), %%ymm2    \n\t"
-	"vbroadcastss      23 *  4(%%rbx), %%ymm3    \n\t"
+	"vbroadcastss      22 *  4(%%rax), %%ymm2    \n\t"
+	"vbroadcastss      23 *  4(%%rax), %%ymm3    \n\t"
 	"vfmadd231ps       %%ymm0, %%ymm2, %%ymm12   \n\t"
 	"vfmadd231ps       %%ymm1, %%ymm2, %%ymm13   \n\t"
 	"vfmadd231ps       %%ymm0, %%ymm3, %%ymm14   \n\t"
 	"vfmadd231ps       %%ymm1, %%ymm3, %%ymm15   \n\t"
 	"                                            \n\t"
-	"addq          $4 * 16 * 4, %%rax            \n\t" // a += 4*16 (unroll x mr)
-	"addq          $4 *  6 * 4, %%rbx            \n\t" // b += 4*6  (unroll x nr)
+	"addq          $4 *  6 * 4, %%rax            \n\t" // a += 4*6  (unroll x mr)
+	"addq          $4 * 16 * 4, %%rbx            \n\t" // b += 4*16 (unroll x nr)
 	"                                            \n\t"
-	"vmovaps           -4 * 32(%%rax), %%ymm0    \n\t"
-	"vmovaps           -3 * 32(%%rax), %%ymm1    \n\t"
+	"vmovaps           -4 * 32(%%rbx), %%ymm0    \n\t"
+	"vmovaps           -3 * 32(%%rbx), %%ymm1    \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
 	"decq   %%rsi                                \n\t" // i -= 1;
@@ -249,34 +249,34 @@ void bli_sgemm_asm_16x6
 	"                                            \n\t"
 	".SLOOPKLEFT:                                \n\t" // EDGE LOOP
 	"                                            \n\t"
-	"prefetcht0  128 * 4(%%rax)                  \n\t"
+	"prefetcht0  16 * 32(%%rax)                  \n\t"
 	"                                            \n\t"
-	"vbroadcastss       0 *  4(%%rbx), %%ymm2    \n\t"
-	"vbroadcastss       1 *  4(%%rbx), %%ymm3    \n\t"
+	"vbroadcastss       0 *  4(%%rax), %%ymm2    \n\t"
+	"vbroadcastss       1 *  4(%%rax), %%ymm3    \n\t"
 	"vfmadd231ps       %%ymm0, %%ymm2, %%ymm4    \n\t"
 	"vfmadd231ps       %%ymm1, %%ymm2, %%ymm5    \n\t"
 	"vfmadd231ps       %%ymm0, %%ymm3, %%ymm6    \n\t"
 	"vfmadd231ps       %%ymm1, %%ymm3, %%ymm7    \n\t"
 	"                                            \n\t"
-	"vbroadcastss       2 *  4(%%rbx), %%ymm2    \n\t"
-	"vbroadcastss       3 *  4(%%rbx), %%ymm3    \n\t"
+	"vbroadcastss       2 *  4(%%rax), %%ymm2    \n\t"
+	"vbroadcastss       3 *  4(%%rax), %%ymm3    \n\t"
 	"vfmadd231ps       %%ymm0, %%ymm2, %%ymm8    \n\t"
 	"vfmadd231ps       %%ymm1, %%ymm2, %%ymm9    \n\t"
 	"vfmadd231ps       %%ymm0, %%ymm3, %%ymm10   \n\t"
 	"vfmadd231ps       %%ymm1, %%ymm3, %%ymm11   \n\t"
 	"                                            \n\t"
-	"vbroadcastss       4 *  4(%%rbx), %%ymm2    \n\t"
-	"vbroadcastss       5 *  4(%%rbx), %%ymm3    \n\t"
+	"vbroadcastss       4 *  4(%%rax), %%ymm2    \n\t"
+	"vbroadcastss       5 *  4(%%rax), %%ymm3    \n\t"
 	"vfmadd231ps       %%ymm0, %%ymm2, %%ymm12   \n\t"
 	"vfmadd231ps       %%ymm1, %%ymm2, %%ymm13   \n\t"
 	"vfmadd231ps       %%ymm0, %%ymm3, %%ymm14   \n\t"
 	"vfmadd231ps       %%ymm1, %%ymm3, %%ymm15   \n\t"
 	"                                            \n\t"
-	"addq          $1 * 16 * 4, %%rax            \n\t" // a += 1*16 (unroll x mr)
-	"addq          $1 *  6 * 4, %%rbx            \n\t" // b += 1*6  (unroll x nr)
+	"addq          $1 *  6 * 4, %%rax            \n\t" // a += 1*6  (unroll x mr)
+	"addq          $1 * 16 * 4, %%rbx            \n\t" // b += 1*16 (unroll x nr)
 	"                                            \n\t"
-	"vmovaps           -4 * 32(%%rax), %%ymm0    \n\t"
-	"vmovaps           -3 * 32(%%rax), %%ymm1    \n\t"
+	"vmovaps           -4 * 32(%%rbx), %%ymm0    \n\t"
+	"vmovaps           -3 * 32(%%rbx), %%ymm1    \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
 	"decq   %%rsi                                \n\t" // i -= 1;
@@ -312,29 +312,29 @@ void bli_sgemm_asm_16x6
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
-	"movq                %7, %%rsi               \n\t" // load rs_c
-	"leaq        (,%%rsi,4), %%rsi               \n\t" // rsi = rs_c * sizeof(float)
+	"movq                %8, %%rsi               \n\t" // load cs_c
+	"leaq        (,%%rsi,4), %%rsi               \n\t" // rsi = cs_c * sizeof(float)
 	"                                            \n\t"
-	"leaq   (%%rcx,%%rsi,8), %%rdx               \n\t" // load address of c +  8*rs_c;
+	"leaq   (%%rcx,%%rsi,8), %%rdx               \n\t" // load address of c +  8*cs_c;
 	"                                            \n\t"
-	"leaq   (%%rsi,%%rsi,2), %%r13               \n\t" // r13 = 3*rs_c;
-	"leaq   (%%rsi,%%rsi,4), %%r15               \n\t" // r15 = 5*rs_c;
-	"leaq   (%%r13,%%rsi,4), %%r10               \n\t" // r10 = 7*rs_c;
+	"leaq   (%%rsi,%%rsi,2), %%r13               \n\t" // r13 = 3*cs_c;
+	"leaq   (%%rsi,%%rsi,4), %%r15               \n\t" // r15 = 5*cs_c;
+	"leaq   (%%r13,%%rsi,4), %%r10               \n\t" // r10 = 7*cs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t" // determine if
 	"                                            \n\t" //    c    % 32 == 0, AND
-	"                                            \n\t" //  4*cs_c % 32 == 0, AND
-	"                                            \n\t" //    rs_c      == 1
+	"                                            \n\t" //  4*rs_c % 32 == 0, AND
+	"                                            \n\t" //    cs_c      == 1
 	"                                            \n\t" // ie: aligned, ldim aligned, and
-	"                                            \n\t" // column-stored
+	"                                            \n\t" // row-stored
 	"                                            \n\t"
-	"cmpq       $4, %%rsi                        \n\t" // set ZF if (4*rs_c) == 4.
+	"cmpq       $4, %%rsi                        \n\t" // set ZF if (4*cs_c) == 4.
 	"sete           %%bl                         \n\t" // bl = ( ZF == 1 ? 1 : 0 );
 	"testq     $31, %%rcx                        \n\t" // set ZF if c & 32 is zero.
 	"setz           %%bh                         \n\t" // bh = ( ZF == 0 ? 1 : 0 );
-	"testq     $31, %%rdi                        \n\t" // set ZF if (4*cs_c) & 32 is zero.
+	"testq     $31, %%rdi                        \n\t" // set ZF if (4*rs_c) & 32 is zero.
 	"setz           %%al                         \n\t" // al = ( ZF == 0 ? 1 : 0 );
 	"                                            \n\t" // and(bl,bh) followed by
 	"                                            \n\t" // and(bh,al) will reveal result
@@ -346,10 +346,10 @@ void bli_sgemm_asm_16x6
 	"je      .SBETAZERO                          \n\t" // if ZF = 1, jump to beta == 0 case
 	"                                            \n\t"
 	"                                            \n\t"
-	"                                            \n\t" // check if aligned/column-stored
+	"                                            \n\t" // check if aligned/row-stored
 	"andb     %%bl, %%bh                         \n\t" // set ZF if bl & bh == 1.
 	"andb     %%bh, %%al                         \n\t" // set ZF if bh & al == 1.
-	"jne     .SCOLSTORED                         \n\t" // jump to column storage case
+	"jne     .SROWSTORED                         \n\t" // jump to row storage case
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
@@ -359,76 +359,76 @@ void bli_sgemm_asm_16x6
 	SGEMM_INPUT_GS_BETA_NZ
 	"vfmadd213ps      %%ymm4,  %%ymm3,  %%ymm0   \n\t"
 	SGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	SGEMM_INPUT_GS_BETA_NZ
 	"vfmadd213ps      %%ymm6,  %%ymm3,  %%ymm0   \n\t"
 	SGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	SGEMM_INPUT_GS_BETA_NZ
 	"vfmadd213ps      %%ymm8,  %%ymm3,  %%ymm0   \n\t"
 	SGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	SGEMM_INPUT_GS_BETA_NZ
 	"vfmadd213ps      %%ymm10, %%ymm3,  %%ymm0   \n\t"
 	SGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	SGEMM_INPUT_GS_BETA_NZ
 	"vfmadd213ps      %%ymm12, %%ymm3,  %%ymm0   \n\t"
 	SGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	SGEMM_INPUT_GS_BETA_NZ
 	"vfmadd213ps      %%ymm14, %%ymm3,  %%ymm0   \n\t"
 	SGEMM_OUTPUT_GS_BETA_NZ
-	//"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	//"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
-	"movq      %%rdx, %%rcx                      \n\t" // rcx = c + 8*rs_c
+	"movq      %%rdx, %%rcx                      \n\t" // rcx = c + 8*cs_c
 	"                                            \n\t"
 	"                                            \n\t"
 	SGEMM_INPUT_GS_BETA_NZ
 	"vfmadd213ps      %%ymm5,  %%ymm3,  %%ymm0   \n\t"
 	SGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	SGEMM_INPUT_GS_BETA_NZ
 	"vfmadd213ps      %%ymm7,  %%ymm3,  %%ymm0   \n\t"
 	SGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	SGEMM_INPUT_GS_BETA_NZ
 	"vfmadd213ps      %%ymm9,  %%ymm3,  %%ymm0   \n\t"
 	SGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	SGEMM_INPUT_GS_BETA_NZ
 	"vfmadd213ps      %%ymm11, %%ymm3,  %%ymm0   \n\t"
 	SGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	SGEMM_INPUT_GS_BETA_NZ
 	"vfmadd213ps      %%ymm13, %%ymm3,  %%ymm0   \n\t"
 	SGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	SGEMM_INPUT_GS_BETA_NZ
 	"vfmadd213ps      %%ymm15, %%ymm3,  %%ymm0   \n\t"
 	SGEMM_OUTPUT_GS_BETA_NZ
-	//"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	//"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
@@ -436,7 +436,7 @@ void bli_sgemm_asm_16x6
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
-	".SCOLSTORED:                                \n\t"
+	".SROWSTORED:                                \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
 	"vmovaps    (%%rcx),       %%ymm0            \n\t"
@@ -505,10 +505,10 @@ void bli_sgemm_asm_16x6
 	"                                            \n\t"
 	"                                            \n\t"
 	".SBETAZERO:                                 \n\t"
-	"                                            \n\t" // check if aligned/column-stored
+	"                                            \n\t" // check if aligned/row-stored
 	"andb     %%bl, %%bh                         \n\t" // set ZF if bl & bh == 1.
 	"andb     %%bh, %%al                         \n\t" // set ZF if bh & al == 1.
-	"jne     .SCOLSTORBZ                         \n\t" // jump to column storage case
+	"jne     .SROWSTORBZ                         \n\t" // jump to row storage case
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
@@ -517,65 +517,65 @@ void bli_sgemm_asm_16x6
 	"                                            \n\t"
 	"vmovaps           %%ymm4,  %%ymm0           \n\t"
 	SGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	"vmovaps           %%ymm6,  %%ymm0           \n\t"
 	SGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	"vmovaps           %%ymm8,  %%ymm0           \n\t"
 	SGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	"vmovaps           %%ymm10, %%ymm0           \n\t"
 	SGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	"vmovaps           %%ymm12, %%ymm0           \n\t"
 	SGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	"vmovaps           %%ymm14, %%ymm0           \n\t"
 	SGEMM_OUTPUT_GS_BETA_NZ
-	//"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	//"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
-	"movq      %%rdx, %%rcx                      \n\t" // rcx = c + 8*rs_c
+	"movq      %%rdx, %%rcx                      \n\t" // rcx = c + 8*cs_c
 	"                                            \n\t"
 	"                                            \n\t"
 	"vmovaps           %%ymm5,  %%ymm0           \n\t"
 	SGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	"vmovaps           %%ymm7,  %%ymm0           \n\t"
 	SGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	"vmovaps           %%ymm9,  %%ymm0           \n\t"
 	SGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	"vmovaps           %%ymm11, %%ymm0           \n\t"
 	SGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	"vmovaps           %%ymm13, %%ymm0           \n\t"
 	SGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	"vmovaps           %%ymm15, %%ymm0           \n\t"
 	SGEMM_OUTPUT_GS_BETA_NZ
-	//"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	//"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
@@ -583,7 +583,7 @@ void bli_sgemm_asm_16x6
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
-	".SCOLSTORBZ:                                \n\t"
+	".SROWSTORBZ:                                \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
 	"vmovaps          %%ymm4,  (%%rcx)           \n\t"
@@ -653,6 +653,7 @@ void bli_sgemm_asm_16x6
 	);
 }
 
+
 #define DGEMM_INPUT_GS_BETA_NZ \
 	"vmovlpd    (%%rcx        ),  %%xmm0,  %%xmm0  \n\t" \
 	"vmovhpd    (%%rcx,%%rsi,1),  %%xmm0,  %%xmm0  \n\t" \
@@ -677,7 +678,7 @@ void bli_sgemm_asm_16x6
 	"vmovlpd           %%xmm1,  (%%rcx,%%r13,2)  \n\t" \
 	"vmovhpd           %%xmm1,  (%%rcx,%%r10  )  \n\t"*/
 
-void bli_dgemm_asm_8x6
+void bli_dgemm_asm_6x8
      (
        dim_t               k,
        double*    restrict alpha,
@@ -705,23 +706,23 @@ void bli_dgemm_asm_8x6
 	"movq                %3, %%rbx               \n\t" // load address of b.
 	//"movq                %9, %%r15               \n\t" // load address of b_next.
 	"                                            \n\t"
-	"addq           $32 * 4, %%rax               \n\t"
+	"addq           $32 * 4, %%rbx               \n\t"
 	"                                            \n\t" // initialize loop by pre-loading
-	"vmovaps           -4 * 32(%%rax), %%ymm0    \n\t"
-	"vmovaps           -3 * 32(%%rax), %%ymm1    \n\t"
+	"vmovaps           -4 * 32(%%rbx), %%ymm0    \n\t"
+	"vmovaps           -3 * 32(%%rbx), %%ymm1    \n\t"
 	"                                            \n\t"
 	"movq                %6, %%rcx               \n\t" // load address of c
-	"movq                %8, %%rdi               \n\t" // load cs_c
-	"leaq        (,%%rdi,8), %%rdi               \n\t" // cs_c *= sizeof(double)
+	"movq                %7, %%rdi               \n\t" // load rs_c
+	"leaq        (,%%rdi,8), %%rdi               \n\t" // rs_c *= sizeof(double)
 	"                                            \n\t"
-	"leaq   (%%rdi,%%rdi,2), %%r13               \n\t" // r13 = 3*cs_c;
-	"leaq   (%%rcx,%%r13,1), %%rdx               \n\t" // rdx = c + 3*cs_c;
-	"prefetcht0   7 * 8(%%rcx)                   \n\t" // prefetch c + 0*cs_c
-	"prefetcht0   7 * 8(%%rcx,%%rdi)             \n\t" // prefetch c + 1*cs_c
-	"prefetcht0   7 * 8(%%rcx,%%rdi,2)           \n\t" // prefetch c + 2*cs_c
-	"prefetcht0   7 * 8(%%rdx)                   \n\t" // prefetch c + 3*cs_c
-	"prefetcht0   7 * 8(%%rdx,%%rdi)             \n\t" // prefetch c + 4*cs_c
-	"prefetcht0   7 * 8(%%rdx,%%rdi,2)           \n\t" // prefetch c + 5*cs_c
+	"leaq   (%%rdi,%%rdi,2), %%r13               \n\t" // r13 = 3*rs_c;
+	"leaq   (%%rcx,%%r13,1), %%rdx               \n\t" // rdx = c + 3*rs_c;
+	"prefetcht0   7 * 8(%%rcx)                   \n\t" // prefetch c + 0*rs_c
+	"prefetcht0   7 * 8(%%rcx,%%rdi)             \n\t" // prefetch c + 1*rs_c
+	"prefetcht0   7 * 8(%%rcx,%%rdi,2)           \n\t" // prefetch c + 2*rs_c
+	"prefetcht0   7 * 8(%%rdx)                   \n\t" // prefetch c + 3*rs_c
+	"prefetcht0   7 * 8(%%rdx,%%rdi)             \n\t" // prefetch c + 4*rs_c
+	"prefetcht0   7 * 8(%%rdx,%%rdi,2)           \n\t" // prefetch c + 5*rs_c
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
@@ -738,109 +739,109 @@ void bli_dgemm_asm_8x6
 	"                                            \n\t" // iteration 0
 	"prefetcht0   64 * 8(%%rax)                  \n\t"
 	"                                            \n\t"
-	"vbroadcastsd       0 *  8(%%rbx), %%ymm2    \n\t"
-	"vbroadcastsd       1 *  8(%%rbx), %%ymm3    \n\t"
+	"vbroadcastsd       0 *  8(%%rax), %%ymm2    \n\t"
+	"vbroadcastsd       1 *  8(%%rax), %%ymm3    \n\t"
 	"vfmadd231pd       %%ymm0, %%ymm2, %%ymm4    \n\t"
 	"vfmadd231pd       %%ymm1, %%ymm2, %%ymm5    \n\t"
 	"vfmadd231pd       %%ymm0, %%ymm3, %%ymm6    \n\t"
 	"vfmadd231pd       %%ymm1, %%ymm3, %%ymm7    \n\t"
 	"                                            \n\t"
-	"vbroadcastsd       2 *  8(%%rbx), %%ymm2    \n\t"
-	"vbroadcastsd       3 *  8(%%rbx), %%ymm3    \n\t"
+	"vbroadcastsd       2 *  8(%%rax), %%ymm2    \n\t"
+	"vbroadcastsd       3 *  8(%%rax), %%ymm3    \n\t"
 	"vfmadd231pd       %%ymm0, %%ymm2, %%ymm8    \n\t"
 	"vfmadd231pd       %%ymm1, %%ymm2, %%ymm9    \n\t"
 	"vfmadd231pd       %%ymm0, %%ymm3, %%ymm10   \n\t"
 	"vfmadd231pd       %%ymm1, %%ymm3, %%ymm11   \n\t"
 	"                                            \n\t"
-	"vbroadcastsd       4 *  8(%%rbx), %%ymm2    \n\t"
-	"vbroadcastsd       5 *  8(%%rbx), %%ymm3    \n\t"
+	"vbroadcastsd       4 *  8(%%rax), %%ymm2    \n\t"
+	"vbroadcastsd       5 *  8(%%rax), %%ymm3    \n\t"
 	"vfmadd231pd       %%ymm0, %%ymm2, %%ymm12   \n\t"
 	"vfmadd231pd       %%ymm1, %%ymm2, %%ymm13   \n\t"
 	"vfmadd231pd       %%ymm0, %%ymm3, %%ymm14   \n\t"
 	"vfmadd231pd       %%ymm1, %%ymm3, %%ymm15   \n\t"
 	"                                            \n\t"
-	"vmovaps           -2 * 32(%%rax), %%ymm0    \n\t"
-	"vmovaps           -1 * 32(%%rax), %%ymm1    \n\t"
+	"vmovaps           -2 * 32(%%rbx), %%ymm0    \n\t"
+	"vmovaps           -1 * 32(%%rbx), %%ymm1    \n\t"
 	"                                            \n\t"
 	"                                            \n\t" // iteration 1
-	"vbroadcastsd       6 *  8(%%rbx), %%ymm2    \n\t"
-	"vbroadcastsd       7 *  8(%%rbx), %%ymm3    \n\t"
+	"vbroadcastsd       6 *  8(%%rax), %%ymm2    \n\t"
+	"vbroadcastsd       7 *  8(%%rax), %%ymm3    \n\t"
 	"vfmadd231pd       %%ymm0, %%ymm2, %%ymm4    \n\t"
 	"vfmadd231pd       %%ymm1, %%ymm2, %%ymm5    \n\t"
 	"vfmadd231pd       %%ymm0, %%ymm3, %%ymm6    \n\t"
 	"vfmadd231pd       %%ymm1, %%ymm3, %%ymm7    \n\t"
 	"                                            \n\t"
-	"vbroadcastsd       8 *  8(%%rbx), %%ymm2    \n\t"
-	"vbroadcastsd       9 *  8(%%rbx), %%ymm3    \n\t"
+	"vbroadcastsd       8 *  8(%%rax), %%ymm2    \n\t"
+	"vbroadcastsd       9 *  8(%%rax), %%ymm3    \n\t"
 	"vfmadd231pd       %%ymm0, %%ymm2, %%ymm8    \n\t"
 	"vfmadd231pd       %%ymm1, %%ymm2, %%ymm9    \n\t"
 	"vfmadd231pd       %%ymm0, %%ymm3, %%ymm10   \n\t"
 	"vfmadd231pd       %%ymm1, %%ymm3, %%ymm11   \n\t"
 	"                                            \n\t"
-	"vbroadcastsd      10 *  8(%%rbx), %%ymm2    \n\t"
-	"vbroadcastsd      11 *  8(%%rbx), %%ymm3    \n\t"
+	"vbroadcastsd      10 *  8(%%rax), %%ymm2    \n\t"
+	"vbroadcastsd      11 *  8(%%rax), %%ymm3    \n\t"
 	"vfmadd231pd       %%ymm0, %%ymm2, %%ymm12   \n\t"
 	"vfmadd231pd       %%ymm1, %%ymm2, %%ymm13   \n\t"
 	"vfmadd231pd       %%ymm0, %%ymm3, %%ymm14   \n\t"
 	"vfmadd231pd       %%ymm1, %%ymm3, %%ymm15   \n\t"
 	"                                            \n\t"
-	"vmovaps            0 * 32(%%rax), %%ymm0    \n\t"
-	"vmovaps            1 * 32(%%rax), %%ymm1    \n\t"
+	"vmovaps            0 * 32(%%rbx), %%ymm0    \n\t"
+	"vmovaps            1 * 32(%%rbx), %%ymm1    \n\t"
 	"                                            \n\t"
 	"                                            \n\t" // iteration 2
 	"prefetcht0   76 * 8(%%rax)                  \n\t"
 	"                                            \n\t"
-	"vbroadcastsd      12 *  8(%%rbx), %%ymm2    \n\t"
-	"vbroadcastsd      13 *  8(%%rbx), %%ymm3    \n\t"
+	"vbroadcastsd      12 *  8(%%rax), %%ymm2    \n\t"
+	"vbroadcastsd      13 *  8(%%rax), %%ymm3    \n\t"
 	"vfmadd231pd       %%ymm0, %%ymm2, %%ymm4    \n\t"
 	"vfmadd231pd       %%ymm1, %%ymm2, %%ymm5    \n\t"
 	"vfmadd231pd       %%ymm0, %%ymm3, %%ymm6    \n\t"
 	"vfmadd231pd       %%ymm1, %%ymm3, %%ymm7    \n\t"
 	"                                            \n\t"
-	"vbroadcastsd      14 *  8(%%rbx), %%ymm2    \n\t"
-	"vbroadcastsd      15 *  8(%%rbx), %%ymm3    \n\t"
+	"vbroadcastsd      14 *  8(%%rax), %%ymm2    \n\t"
+	"vbroadcastsd      15 *  8(%%rax), %%ymm3    \n\t"
 	"vfmadd231pd       %%ymm0, %%ymm2, %%ymm8    \n\t"
 	"vfmadd231pd       %%ymm1, %%ymm2, %%ymm9    \n\t"
 	"vfmadd231pd       %%ymm0, %%ymm3, %%ymm10   \n\t"
 	"vfmadd231pd       %%ymm1, %%ymm3, %%ymm11   \n\t"
 	"                                            \n\t"
-	"vbroadcastsd      16 *  8(%%rbx), %%ymm2    \n\t"
-	"vbroadcastsd      17 *  8(%%rbx), %%ymm3    \n\t"
+	"vbroadcastsd      16 *  8(%%rax), %%ymm2    \n\t"
+	"vbroadcastsd      17 *  8(%%rax), %%ymm3    \n\t"
 	"vfmadd231pd       %%ymm0, %%ymm2, %%ymm12   \n\t"
 	"vfmadd231pd       %%ymm1, %%ymm2, %%ymm13   \n\t"
 	"vfmadd231pd       %%ymm0, %%ymm3, %%ymm14   \n\t"
 	"vfmadd231pd       %%ymm1, %%ymm3, %%ymm15   \n\t"
 	"                                            \n\t"
-	"vmovaps            2 * 32(%%rax), %%ymm0    \n\t"
-	"vmovaps            3 * 32(%%rax), %%ymm1    \n\t"
+	"vmovaps            2 * 32(%%rbx), %%ymm0    \n\t"
+	"vmovaps            3 * 32(%%rbx), %%ymm1    \n\t"
 	"                                            \n\t"
 	"                                            \n\t" // iteration 3
-	"vbroadcastsd      18 *  8(%%rbx), %%ymm2    \n\t"
-	"vbroadcastsd      19 *  8(%%rbx), %%ymm3    \n\t"
+	"vbroadcastsd      18 *  8(%%rax), %%ymm2    \n\t"
+	"vbroadcastsd      19 *  8(%%rax), %%ymm3    \n\t"
 	"vfmadd231pd       %%ymm0, %%ymm2, %%ymm4    \n\t"
 	"vfmadd231pd       %%ymm1, %%ymm2, %%ymm5    \n\t"
 	"vfmadd231pd       %%ymm0, %%ymm3, %%ymm6    \n\t"
 	"vfmadd231pd       %%ymm1, %%ymm3, %%ymm7    \n\t"
 	"                                            \n\t"
-	"vbroadcastsd      20 *  8(%%rbx), %%ymm2    \n\t"
-	"vbroadcastsd      21 *  8(%%rbx), %%ymm3    \n\t"
+	"vbroadcastsd      20 *  8(%%rax), %%ymm2    \n\t"
+	"vbroadcastsd      21 *  8(%%rax), %%ymm3    \n\t"
 	"vfmadd231pd       %%ymm0, %%ymm2, %%ymm8    \n\t"
 	"vfmadd231pd       %%ymm1, %%ymm2, %%ymm9    \n\t"
 	"vfmadd231pd       %%ymm0, %%ymm3, %%ymm10   \n\t"
 	"vfmadd231pd       %%ymm1, %%ymm3, %%ymm11   \n\t"
 	"                                            \n\t"
-	"vbroadcastsd      22 *  8(%%rbx), %%ymm2    \n\t"
-	"vbroadcastsd      23 *  8(%%rbx), %%ymm3    \n\t"
+	"vbroadcastsd      22 *  8(%%rax), %%ymm2    \n\t"
+	"vbroadcastsd      23 *  8(%%rax), %%ymm3    \n\t"
 	"vfmadd231pd       %%ymm0, %%ymm2, %%ymm12   \n\t"
 	"vfmadd231pd       %%ymm1, %%ymm2, %%ymm13   \n\t"
 	"vfmadd231pd       %%ymm0, %%ymm3, %%ymm14   \n\t"
 	"vfmadd231pd       %%ymm1, %%ymm3, %%ymm15   \n\t"
 	"                                            \n\t"
-	"addq           $4 * 8 * 8, %%rax            \n\t" // a += 4*8 (unroll x mr)
-	"addq           $4 * 6 * 8, %%rbx            \n\t" // b += 4*6 (unroll x nr)
+	"addq           $4 * 6 * 8, %%rax            \n\t" // a += 4*6 (unroll x mr)
+	"addq           $4 * 8 * 8, %%rbx            \n\t" // b += 4*8 (unroll x nr)
 	"                                            \n\t"
-	"vmovaps           -4 * 32(%%rax), %%ymm0    \n\t"
-	"vmovaps           -3 * 32(%%rax), %%ymm1    \n\t"
+	"vmovaps           -4 * 32(%%rbx), %%ymm0    \n\t"
+	"vmovaps           -3 * 32(%%rbx), %%ymm1    \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
 	"decq   %%rsi                                \n\t" // i -= 1;
@@ -863,32 +864,32 @@ void bli_dgemm_asm_8x6
 	"                                            \n\t"
 	"prefetcht0   64 * 8(%%rax)                  \n\t"
 	"                                            \n\t"
-	"vbroadcastsd       0 *  8(%%rbx), %%ymm2    \n\t"
-	"vbroadcastsd       1 *  8(%%rbx), %%ymm3    \n\t"
+	"vbroadcastsd       0 *  8(%%rax), %%ymm2    \n\t"
+	"vbroadcastsd       1 *  8(%%rax), %%ymm3    \n\t"
 	"vfmadd231pd       %%ymm0, %%ymm2, %%ymm4    \n\t"
 	"vfmadd231pd       %%ymm1, %%ymm2, %%ymm5    \n\t"
 	"vfmadd231pd       %%ymm0, %%ymm3, %%ymm6    \n\t"
 	"vfmadd231pd       %%ymm1, %%ymm3, %%ymm7    \n\t"
 	"                                            \n\t"
-	"vbroadcastsd       2 *  8(%%rbx), %%ymm2    \n\t"
-	"vbroadcastsd       3 *  8(%%rbx), %%ymm3    \n\t"
+	"vbroadcastsd       2 *  8(%%rax), %%ymm2    \n\t"
+	"vbroadcastsd       3 *  8(%%rax), %%ymm3    \n\t"
 	"vfmadd231pd       %%ymm0, %%ymm2, %%ymm8    \n\t"
 	"vfmadd231pd       %%ymm1, %%ymm2, %%ymm9    \n\t"
 	"vfmadd231pd       %%ymm0, %%ymm3, %%ymm10   \n\t"
 	"vfmadd231pd       %%ymm1, %%ymm3, %%ymm11   \n\t"
 	"                                            \n\t"
-	"vbroadcastsd       4 *  8(%%rbx), %%ymm2    \n\t"
-	"vbroadcastsd       5 *  8(%%rbx), %%ymm3    \n\t"
+	"vbroadcastsd       4 *  8(%%rax), %%ymm2    \n\t"
+	"vbroadcastsd       5 *  8(%%rax), %%ymm3    \n\t"
 	"vfmadd231pd       %%ymm0, %%ymm2, %%ymm12   \n\t"
 	"vfmadd231pd       %%ymm1, %%ymm2, %%ymm13   \n\t"
 	"vfmadd231pd       %%ymm0, %%ymm3, %%ymm14   \n\t"
 	"vfmadd231pd       %%ymm1, %%ymm3, %%ymm15   \n\t"
 	"                                            \n\t"
-	"addq           $1 * 8 * 8, %%rax            \n\t" // a += 1*8 (unroll x mr)
-	"addq           $1 * 6 * 8, %%rbx            \n\t" // b += 1*6 (unroll x nr)
+	"addq           $1 * 6 * 8, %%rax            \n\t" // a += 1*6 (unroll x mr)
+	"addq           $1 * 8 * 8, %%rbx            \n\t" // b += 1*8 (unroll x nr)
 	"                                            \n\t"
-	"vmovaps           -4 * 32(%%rax), %%ymm0    \n\t"
-	"vmovaps           -3 * 32(%%rax), %%ymm1    \n\t"
+	"vmovaps           -4 * 32(%%rbx), %%ymm0    \n\t"
+	"vmovaps           -3 * 32(%%rbx), %%ymm1    \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
 	"decq   %%rsi                                \n\t" // i -= 1;
@@ -924,29 +925,29 @@ void bli_dgemm_asm_8x6
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
-	"movq                %7, %%rsi               \n\t" // load rs_c
-	"leaq        (,%%rsi,8), %%rsi               \n\t" // rsi = rs_c * sizeof(double)
+	"movq                %8, %%rsi               \n\t" // load cs_c
+	"leaq        (,%%rsi,8), %%rsi               \n\t" // rsi = cs_c * sizeof(double)
 	"                                            \n\t"
-	"leaq   (%%rcx,%%rsi,4), %%rdx               \n\t" // load address of c +  4*rs_c;
+	"leaq   (%%rcx,%%rsi,4), %%rdx               \n\t" // load address of c +  4*cs_c;
 	"                                            \n\t"
-	"leaq   (%%rsi,%%rsi,2), %%r13               \n\t" // r13 = 3*rs_c;
-	//"leaq   (%%rsi,%%rsi,4), %%r15               \n\t" // r15 = 5*rs_c;
-	//"leaq   (%%r13,%%rsi,4), %%r10               \n\t" // r10 = 7*rs_c;
+	"leaq   (%%rsi,%%rsi,2), %%r13               \n\t" // r13 = 3*cs_c;
+	//"leaq   (%%rsi,%%rsi,4), %%r15               \n\t" // r15 = 5*cs_c;
+	//"leaq   (%%r13,%%rsi,4), %%r10               \n\t" // r10 = 7*cs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t" // determine if
 	"                                            \n\t" //    c    % 32 == 0, AND
-	"                                            \n\t" //  8*cs_c % 32 == 0, AND
-	"                                            \n\t" //    rs_c      == 1
+	"                                            \n\t" //  8*rs_c % 32 == 0, AND
+	"                                            \n\t" //    cs_c      == 1
 	"                                            \n\t" // ie: aligned, ldim aligned, and
-	"                                            \n\t" // column-stored
+	"                                            \n\t" // row-stored
 	"                                            \n\t"
-	"cmpq       $8, %%rsi                        \n\t" // set ZF if (8*rs_c) == 8.
+	"cmpq       $8, %%rsi                        \n\t" // set ZF if (8*cs_c) == 8.
 	"sete           %%bl                         \n\t" // bl = ( ZF == 1 ? 1 : 0 );
 	"testq     $31, %%rcx                        \n\t" // set ZF if c & 32 is zero.
 	"setz           %%bh                         \n\t" // bh = ( ZF == 0 ? 1 : 0 );
-	"testq     $31, %%rdi                        \n\t" // set ZF if (8*cs_c) & 32 is zero.
+	"testq     $31, %%rdi                        \n\t" // set ZF if (8*rs_c) & 32 is zero.
 	"setz           %%al                         \n\t" // al = ( ZF == 0 ? 1 : 0 );
 	"                                            \n\t" // and(bl,bh) followed by
 	"                                            \n\t" // and(bh,al) will reveal result
@@ -958,10 +959,10 @@ void bli_dgemm_asm_8x6
 	"je      .DBETAZERO                          \n\t" // if ZF = 1, jump to beta == 0 case
 	"                                            \n\t"
 	"                                            \n\t"
-	"                                            \n\t" // check if aligned/column-stored
+	"                                            \n\t" // check if aligned/row-stored
 	"andb     %%bl, %%bh                         \n\t" // set ZF if bl & bh == 1.
 	"andb     %%bh, %%al                         \n\t" // set ZF if bh & al == 1.
-	"jne     .DCOLSTORED                         \n\t" // jump to column storage case
+	"jne     .DROWSTORED                         \n\t" // jump to row storage case
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
@@ -971,76 +972,74 @@ void bli_dgemm_asm_8x6
 	DGEMM_INPUT_GS_BETA_NZ
 	"vfmadd213pd      %%ymm4,  %%ymm3,  %%ymm0   \n\t"
 	DGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	DGEMM_INPUT_GS_BETA_NZ
 	"vfmadd213pd      %%ymm6,  %%ymm3,  %%ymm0   \n\t"
 	DGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	DGEMM_INPUT_GS_BETA_NZ
 	"vfmadd213pd      %%ymm8,  %%ymm3,  %%ymm0   \n\t"
 	DGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	DGEMM_INPUT_GS_BETA_NZ
 	"vfmadd213pd      %%ymm10, %%ymm3,  %%ymm0   \n\t"
 	DGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	DGEMM_INPUT_GS_BETA_NZ
 	"vfmadd213pd      %%ymm12, %%ymm3,  %%ymm0   \n\t"
 	DGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	DGEMM_INPUT_GS_BETA_NZ
 	"vfmadd213pd      %%ymm14, %%ymm3,  %%ymm0   \n\t"
 	DGEMM_OUTPUT_GS_BETA_NZ
-	//"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
 	"                                            \n\t"
 	"                                            \n\t"
-	"movq      %%rdx, %%rcx                      \n\t" // rcx = c + 4*rs_c
+	"movq      %%rdx, %%rcx                      \n\t" // rcx = c + 4*cs_c
 	"                                            \n\t"
 	"                                            \n\t"
 	DGEMM_INPUT_GS_BETA_NZ
 	"vfmadd213pd      %%ymm5,  %%ymm3,  %%ymm0   \n\t"
 	DGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	DGEMM_INPUT_GS_BETA_NZ
 	"vfmadd213pd      %%ymm7,  %%ymm3,  %%ymm0   \n\t"
 	DGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	DGEMM_INPUT_GS_BETA_NZ
 	"vfmadd213pd      %%ymm9,  %%ymm3,  %%ymm0   \n\t"
 	DGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	DGEMM_INPUT_GS_BETA_NZ
 	"vfmadd213pd      %%ymm11, %%ymm3,  %%ymm0   \n\t"
 	DGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	DGEMM_INPUT_GS_BETA_NZ
 	"vfmadd213pd      %%ymm13, %%ymm3,  %%ymm0   \n\t"
 	DGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	DGEMM_INPUT_GS_BETA_NZ
 	"vfmadd213pd      %%ymm15, %%ymm3,  %%ymm0   \n\t"
 	DGEMM_OUTPUT_GS_BETA_NZ
-	//"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
@@ -1048,7 +1047,7 @@ void bli_dgemm_asm_8x6
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
-	".DCOLSTORED:                                \n\t"
+	".DROWSTORED:                                \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
 	"vmovaps    (%%rcx),       %%ymm0            \n\t"
@@ -1117,10 +1116,10 @@ void bli_dgemm_asm_8x6
 	"                                            \n\t"
 	"                                            \n\t"
 	".DBETAZERO:                                 \n\t"
-	"                                            \n\t" // check if aligned/column-stored
+	"                                            \n\t" // check if aligned/row-stored
 	"andb     %%bl, %%bh                         \n\t" // set ZF if bl & bh == 1.
 	"andb     %%bh, %%al                         \n\t" // set ZF if bh & al == 1.
-	"jne     .DCOLSTORBZ                         \n\t" // jump to column storage case
+	"jne     .DROWSTORBZ                         \n\t" // jump to row storage case
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
@@ -1129,65 +1128,63 @@ void bli_dgemm_asm_8x6
 	"                                            \n\t"
 	"vmovaps           %%ymm4,  %%ymm0           \n\t"
 	DGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	"vmovaps           %%ymm6,  %%ymm0           \n\t"
 	DGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	"vmovaps           %%ymm8,  %%ymm0           \n\t"
 	DGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	"vmovaps           %%ymm10, %%ymm0           \n\t"
 	DGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	"vmovaps           %%ymm12, %%ymm0           \n\t"
 	DGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	"vmovaps           %%ymm14, %%ymm0           \n\t"
 	DGEMM_OUTPUT_GS_BETA_NZ
-	//"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
 	"                                            \n\t"
 	"                                            \n\t"
-	"movq      %%rdx, %%rcx                      \n\t" // rcx = c + 4*rs_c
+	"movq      %%rdx, %%rcx                      \n\t" // rcx = c + 4*cs_c
 	"                                            \n\t"
 	"                                            \n\t"
 	"vmovaps           %%ymm5,  %%ymm0           \n\t"
 	DGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	"vmovaps           %%ymm7,  %%ymm0           \n\t"
 	DGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	"vmovaps           %%ymm9,  %%ymm0           \n\t"
 	DGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	"vmovaps           %%ymm11, %%ymm0           \n\t"
 	DGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	"vmovaps           %%ymm13, %%ymm0           \n\t"
 	DGEMM_OUTPUT_GS_BETA_NZ
-	"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
+	"addq      %%rdi, %%rcx                      \n\t" // c += rs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	"vmovaps           %%ymm15, %%ymm0           \n\t"
 	DGEMM_OUTPUT_GS_BETA_NZ
-	//"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
@@ -1195,7 +1192,7 @@ void bli_dgemm_asm_8x6
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
-	".DCOLSTORBZ:                                \n\t"
+	".DROWSTORBZ:                                \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
 	"vmovaps          %%ymm4,  (%%rcx)           \n\t"
@@ -1231,7 +1228,6 @@ void bli_dgemm_asm_8x6
 	//"addq      %%rdi, %%rcx                      \n\t"
 	"vmovaps          %%ymm15, (%%rdx)           \n\t"
 	//"addq      %%rdi, %%rdx                      \n\t"
-	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"

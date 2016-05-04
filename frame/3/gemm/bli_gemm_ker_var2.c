@@ -322,9 +322,11 @@ void PASTEMAC(ch,varname) \
 		} \
 	} \
 \
-/*PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: c", MR, NR, c11, rs_c, cs_c, "%4.1f", "" );*/ \
-/*PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: b1", k, NR, b1, NR, 1, "%4.1f", "" ); \
-PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: a1", MR, k, a1, 1, MR, "%4.1f", "" );*/ \
+/*
+PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: b1", k, NR, b1, NR, 1, "%4.1f", "" ); \
+PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: a1", MR, k, a1, 1, MR, "%4.1f", "" ); \
+PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: c after", m_cur, n_cur, c11, rs_c, cs_c, "%4.1f", "" ); \
+*/ \
 }
 
 INSERT_GENTFUNC_BASIC0( gemm_ker_var2 )
