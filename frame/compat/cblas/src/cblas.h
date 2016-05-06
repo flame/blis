@@ -2,6 +2,14 @@
 #define CBLAS_H
 #include <stddef.h>
 
+// We need to #include "bli_type_defs.h" in order to pull in the
+// definition of f77_int. But in order to #include that header, we
+// also need to pull in the headers that precede it in blis.h.
+#include "bli_system.h"
+#include "bli_config.h"
+#include "bli_config_macro_defs.h"
+#include "bli_type_defs.h"
+
 /*
  * Enumerated and derived types
  */
