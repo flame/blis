@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-unpackm_t* unpackm_cntl;
+unpackm_t* unpackm_cntl = NULL;
 
 void bli_unpackm_cntl_init()
 {

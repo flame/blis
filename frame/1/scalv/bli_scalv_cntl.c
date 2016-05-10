@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-scalv_t* scalv_cntl;
+scalv_t* scalv_cntl = NULL;
 
 void bli_scalv_cntl_init()
 {

@@ -36,10 +36,10 @@
 
 static bool_t bli_thread_is_init = FALSE;
 
-packm_thrinfo_t BLIS_PACKM_SINGLE_THREADED;
-gemm_thrinfo_t BLIS_GEMM_SINGLE_THREADED;
-herk_thrinfo_t BLIS_HERK_SINGLE_THREADED;
-thread_comm_t BLIS_SINGLE_COMM;
+packm_thrinfo_t BLIS_PACKM_SINGLE_THREADED = {};
+gemm_thrinfo_t BLIS_GEMM_SINGLE_THREADED = {};
+herk_thrinfo_t BLIS_HERK_SINGLE_THREADED = {};
+thread_comm_t BLIS_SINGLE_COMM = {};
 
 void bli_thread_init( void )
 {

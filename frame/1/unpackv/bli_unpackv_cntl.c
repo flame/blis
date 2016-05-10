@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-unpackv_t* unpackv_cntl;
+unpackv_t* unpackv_cntl = NULL;
 
 void bli_unpackv_cntl_init()
 {

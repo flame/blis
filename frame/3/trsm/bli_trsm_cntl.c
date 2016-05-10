@@ -38,24 +38,24 @@ extern scalm_t*   scalm_cntl;
 
 extern gemm_t*    gemm_cntl_bp_ke;
 
-packm_t*          trsm_l_packa_cntl;
-packm_t*          trsm_l_packb_cntl;
+packm_t*          trsm_l_packa_cntl = NULL;
+packm_t*          trsm_l_packb_cntl = NULL;
 
-packm_t*          trsm_r_packa_cntl;
-packm_t*          trsm_r_packb_cntl;
+packm_t*          trsm_r_packa_cntl = NULL;
+packm_t*          trsm_r_packb_cntl = NULL;
 
-trsm_t*           trsm_cntl_bp_ke;
+trsm_t*           trsm_cntl_bp_ke = NULL;
 
-trsm_t*           trsm_l_cntl_op_bp;
-trsm_t*           trsm_l_cntl_mm_op;
-trsm_t*           trsm_l_cntl_vl_mm;
+trsm_t*           trsm_l_cntl_op_bp = NULL;
+trsm_t*           trsm_l_cntl_mm_op = NULL;
+trsm_t*           trsm_l_cntl_vl_mm = NULL;
 
-trsm_t*           trsm_r_cntl_op_bp;
-trsm_t*           trsm_r_cntl_mm_op;
-trsm_t*           trsm_r_cntl_vl_mm;
+trsm_t*           trsm_r_cntl_op_bp = NULL;
+trsm_t*           trsm_r_cntl_mm_op = NULL;
+trsm_t*           trsm_r_cntl_vl_mm = NULL;
 
-trsm_t*           trsm_l_cntl;
-trsm_t*           trsm_r_cntl;
+trsm_t*           trsm_l_cntl = NULL;
+trsm_t*           trsm_r_cntl = NULL;
 
 
 void bli_trsm_cntl_init()
