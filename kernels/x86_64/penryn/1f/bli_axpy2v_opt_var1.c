@@ -45,15 +45,15 @@ typedef union
 
 void bli_daxpy2v_int_var1
      (
-       conj_t  conjx,
-       conj_t  conjy,
-       dim_t   n,
-       double* alpha,
-       double* beta,
-       double* x, inc_t incx,
-       double* y, inc_t incy,
-       double* z, inc_t incz,
-       cntx_t* cntx
+       conj_t           conjx,
+       conj_t           conjy,
+       dim_t            n,
+       double* restrict alpha,
+       double* restrict beta,
+       double* restrict x, inc_t incx,
+       double* restrict y, inc_t incy,
+       double* restrict z, inc_t incz,
+       cntx_t*          cntx
      )
 {
 	double*  restrict alpha_cast  = alpha;

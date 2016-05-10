@@ -108,6 +108,11 @@
 #define bli_caddv_ker_name      BLIS_CADDV_KERNEL
 #define bli_zaddv_ker_name      BLIS_ZADDV_KERNEL
 
+#define bli_saxpbyv_ker_name    BLIS_SAXPBYV_KERNEL
+#define bli_daxpbyv_ker_name    BLIS_DAXPBYV_KERNEL
+#define bli_caxpbyv_ker_name    BLIS_CAXPBYV_KERNEL
+#define bli_zaxpbyv_ker_name    BLIS_ZAXPBYV_KERNEL
+
 #define bli_saxpyv_ker_name     BLIS_SAXPYV_KERNEL
 #define bli_daxpyv_ker_name     BLIS_DAXPYV_KERNEL
 #define bli_caxpyv_ker_name     BLIS_CAXPYV_KERNEL
@@ -157,6 +162,11 @@
 #define bli_dswapv_ker_name     BLIS_DSWAPV_KERNEL
 #define bli_cswapv_ker_name     BLIS_CSWAPV_KERNEL
 #define bli_zswapv_ker_name     BLIS_ZSWAPV_KERNEL
+
+#define bli_sxpbyv_ker_name     BLIS_SXPBYV_KERNEL
+#define bli_dxpbyv_ker_name     BLIS_DXPBYV_KERNEL
+#define bli_cxpbyv_ker_name     BLIS_CXPBYV_KERNEL
+#define bli_zxpbyv_ker_name     BLIS_ZXPBYV_KERNEL
 
 #include "bli_l1v_ker.h"
 

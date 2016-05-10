@@ -66,55 +66,55 @@ typedef struct cntx_s
 
 #define bli_cntx_blkszs_buf( cntx ) \
 \
-	( cntx->blkszs )
+	( (cntx)->blkszs )
 
 #define bli_cntx_bmults_buf( cntx ) \
 \
-	( cntx->bmults )
+	( (cntx)->bmults )
 
 #define bli_cntx_l3_vir_ukrs_buf( cntx ) \
 \
-	( cntx->l3_vir_ukrs )
+	( (cntx)->l3_vir_ukrs )
 
 #define bli_cntx_l3_nat_ukrs_buf( cntx ) \
 \
-	( cntx->l3_nat_ukrs )
+	( (cntx)->l3_nat_ukrs )
 
 #define bli_cntx_l3_nat_ukrs_prefs_buf( cntx ) \
 \
-	( cntx->l3_nat_ukrs_prefs )
+	( (cntx)->l3_nat_ukrs_prefs )
 
 #define bli_cntx_l1f_kers_buf( cntx ) \
 \
-	( cntx->l1f_kers )
+	( (cntx)->l1f_kers )
 
 #define bli_cntx_l1v_kers_buf( cntx ) \
 \
-	( cntx->l1v_kers )
+	( (cntx)->l1v_kers )
 
 #define bli_cntx_packm_ukrs_buf( cntx ) \
 \
-	(&(cntx->packm_ukrs) )
+	(&((cntx)->packm_ukrs) )
 
 #define bli_cntx_packm_ukrs( cntx ) \
 \
-	(&(cntx->packm_ukrs) )
+	(&((cntx)->packm_ukrs) )
 
 #define bli_cntx_method( cntx ) \
 \
-	( cntx->method )
+	( (cntx)->method )
 
 #define bli_cntx_schema_a( cntx ) \
 \
-	( cntx->schema_a )
+	( (cntx)->schema_a )
 
 #define bli_cntx_schema_b( cntx ) \
 \
-	( cntx->schema_b )
+	( (cntx)->schema_b )
 
 #define bli_cntx_schema_c( cntx ) \
 \
-	( cntx->schema_c )
+	( (cntx)->schema_c )
 
 // cntx_t modification (fields only)
 
@@ -178,13 +178,99 @@ typedef struct cntx_s
     (cntx_p)->schema_c = _schema_c; \
 }
 
+// cntx_t query (complex)
+
+#define bli_cntx_get_blksz_def_dt( dt, bs_id, cntx ) \
+\
+	bli_blksz_get_def \
+	( \
+	  (dt), (&(bli_cntx_blkszs_buf( (cntx) ))[ bs_id ]) \
+	)
+
+#define bli_cntx_get_blksz_max_dt( dt, bs_id, cntx ) \
+\
+	bli_blksz_get_max \
+	( \
+	  (dt), (&(bli_cntx_blkszs_buf( (cntx) ))[ bs_id ]) \
+	)
+
+#define bli_cntx_get_bmult_dt( dt, bs_id, cntx ) \
+\
+	bli_blksz_get_def \
+	( \
+	  (dt), \
+	  (&(bli_cntx_blkszs_buf( (cntx) )) \
+	  [ \
+	    (bli_cntx_bmults_buf( (cntx) ))[ bs_id ] \
+	  ]) \
+	)
+
+#define bli_cntx_get_l3_ukr_dt( dt, ukr_id, cntx ) \
+\
+	bli_func_get_dt \
+	( \
+	  (dt), \
+	  &(( \
+	    bli_cntx_method( (cntx) ) != BLIS_NAT \
+		  ? bli_cntx_l3_vir_ukrs_buf( (cntx) ) \
+	      : bli_cntx_l3_nat_ukrs_buf( (cntx) ) \
+	  )[ ukr_id ]) \
+	)
+
+#define bli_cntx_get_l3_vir_ukr_dt( dt, ukr_id, cntx ) \
+\
+	bli_func_get_dt \
+	( \
+	  (dt), (&(bli_cntx_l3_vir_ukrs_buf( (cntx) ))[ ukr_id ]) \
+	)
+
+#define bli_cntx_get_l3_nat_ukr_dt( dt, ukr_id, cntx ) \
+\
+	bli_func_get_dt \
+	( \
+	  (dt), (&(bli_cntx_l3_nat_ukrs_buf( (cntx) ))[ ukr_id ]) \
+	)
+
+#define bli_cntx_get_l1f_ker_dt( dt, ker_id, cntx ) \
+\
+	bli_func_get_dt \
+	( \
+	  (dt), (&(bli_cntx_l1f_kers_buf( (cntx) ))[ ker_id ]) \
+	)
+
+#define bli_cntx_get_l1v_ker_dt( dt, ker_id, cntx ) \
+\
+	bli_func_get_dt \
+	( \
+	  (dt), (&(bli_cntx_l1v_kers_buf( (cntx) ))[ ker_id ]) \
+	)
+
+#define bli_cntx_get_l3_nat_ukr_prefs_dt( dt, ukr_id, cntx ) \
+\
+	bli_mbool_get_dt \
+	( \
+	  (dt), (&(bli_cntx_l3_nat_ukrs_prefs_buf( (cntx) ))[ ukr_id ]) \
+	)
+
+#define bli_cntx_get_ind_method( cntx ) \
+\
+	bli_cntx_method( cntx )
+
+#define bli_cntx_get_pack_schema_a( cntx ) \
+\
+	bli_cntx_schema_a( cntx )
+
+#define bli_cntx_get_pack_schema_b( cntx ) \
+\
+	bli_cntx_schema_b( cntx )
+
+
+
 // -----------------------------------------------------------------------------
 
 // create/free
 
 //void     bli_cntx_obj_create( cntx_t* cntx );
-//void     bli_cntx_obj_copy( cntx_t* src,
-//                            cntx_t* dst );
 //void     bli_cntx_obj_free( cntx_t* cntx );
 void     bli_cntx_obj_clear( cntx_t* cntx );
 void     bli_cntx_init( cntx_t* cntx );
@@ -193,49 +279,53 @@ void     bli_cntx_init( cntx_t* cntx );
 
 blksz_t* bli_cntx_get_blksz( bszid_t bs_id,
                              cntx_t* cntx );
-dim_t    bli_cntx_get_blksz_def_dt( num_t   dt,
-                                    bszid_t bs_id,
-                                    cntx_t* cntx );
-dim_t    bli_cntx_get_blksz_max_dt( num_t   dt,
-                                    bszid_t bs_id,
-                                    cntx_t* cntx );
 blksz_t* bli_cntx_get_bmult( bszid_t bs_id,
                              cntx_t* cntx );
-dim_t    bli_cntx_get_bmult_dt( num_t   dt,
-                                bszid_t bs_id,
-                                cntx_t* cntx );
 func_t*  bli_cntx_get_l3_ukr( l3ukr_t ukr_id,
                               cntx_t* cntx );
-void*    bli_cntx_get_l3_ukr_dt( num_t   dt,
-                                 l3ukr_t ukr_id,
-                                 cntx_t* cntx );
 func_t*  bli_cntx_get_l3_vir_ukr( l3ukr_t ukr_id,
                                   cntx_t* cntx );
-void*    bli_cntx_get_l3_vir_ukr_dt( num_t   dt,
-                                     l3ukr_t ukr_id,
-                                     cntx_t* cntx );
 func_t*  bli_cntx_get_l3_nat_ukr( l3ukr_t ukr_id,
                                   cntx_t* cntx );
-void*    bli_cntx_get_l3_nat_ukr_dt( num_t   dt,
-                                     l3ukr_t ukr_id,
-                                     cntx_t* cntx );
 mbool_t* bli_cntx_get_l3_nat_ukr_prefs( l3ukr_t ukr_id,
                                         cntx_t* cntx );
 func_t*  bli_cntx_get_l1f_ker( l1fkr_t ker_id,
                                cntx_t* cntx );
-void*    bli_cntx_get_l1f_ker_dt( num_t   dt,
-                                  l1fkr_t ker_id,
-                                  cntx_t* cntx );
 func_t*  bli_cntx_get_l1v_ker( l1vkr_t ker_id,
                                cntx_t* cntx );
-void*    bli_cntx_get_l1v_ker_dt( num_t   dt,
-                                  l1vkr_t ker_id,
-                                  cntx_t* cntx );
 func_t*  bli_cntx_get_packm_ukr( cntx_t* cntx );
-ind_t    bli_cntx_get_ind_method( cntx_t* cntx );
-pack_t   bli_cntx_get_pack_schema_a( cntx_t* cntx );
-pack_t   bli_cntx_get_pack_schema_b( cntx_t* cntx );
-pack_t   bli_cntx_get_pack_schema_c( cntx_t* cntx );
+
+//dim_t    bli_cntx_get_blksz_def_dt( num_t   dt,
+//                                    bszid_t bs_id,
+//                                    cntx_t* cntx );
+//dim_t    bli_cntx_get_blksz_max_dt( num_t   dt,
+//                                    bszid_t bs_id,
+//                                    cntx_t* cntx );
+//dim_t    bli_cntx_get_bmult_dt( num_t   dt,
+//                                bszid_t bs_id,
+//                                cntx_t* cntx );
+//void*    bli_cntx_get_l3_ukr_dt( num_t   dt,
+//                                 l3ukr_t ukr_id,
+//                                 cntx_t* cntx );
+//void*    bli_cntx_get_l3_vir_ukr_dt( num_t   dt,
+//                                     l3ukr_t ukr_id,
+//                                     cntx_t* cntx );
+//void*    bli_cntx_get_l3_nat_ukr_dt( num_t   dt,
+//                                     l3ukr_t ukr_id,
+//                                     cntx_t* cntx );
+//bool_t   bli_cntx_get_l3_nat_ukr_prefs_dt( num_t   dt,
+//                                           l3ukr_t ukr_id,
+//                                           cntx_t* cntx );
+//void*    bli_cntx_get_l1f_ker_dt( num_t   dt,
+//                                  l1fkr_t ker_id,
+//                                  cntx_t* cntx );
+//void*    bli_cntx_get_l1v_ker_dt( num_t   dt,
+//                                  l1vkr_t ker_id,
+//                                  cntx_t* cntx );
+//ind_t    bli_cntx_get_ind_method( cntx_t* cntx );
+//pack_t   bli_cntx_get_pack_schema_a( cntx_t* cntx );
+//pack_t   bli_cntx_get_pack_schema_b( cntx_t* cntx );
+//pack_t   bli_cntx_get_pack_schema_c( cntx_t* cntx );
 
 // set functions
 
@@ -294,10 +384,17 @@ void bli_cntx_print( cntx_t* cntx );
 
 // Preprocess out these calls entirely, since they are currently just empty
 // functions that do nothing.
-//#define bli_cntx_obj_create( cntx ) { bli_cntx_obj_clear( cntx ); }
-//#define bli_cntx_obj_free( cntx )   { bli_cntx_obj_clear( cntx ); }
-#define bli_cntx_obj_create( cntx ) { ; }
-#define bli_cntx_obj_free( cntx )   { ; }
+#if 0
+  #define bli_cntx_obj_create( cntx ) { bli_cntx_obj_clear( cntx ); }
+  #define bli_cntx_obj_free( cntx )   { bli_cntx_obj_clear( cntx ); }
+#else
+  #define bli_cntx_obj_create( cntx ) { ; }
+  #define bli_cntx_obj_free( cntx )   { ; }
+#endif
+
+// These macros initialize/finalize a local context if the given context
+// pointer is NULL. When initializing, the context address that should
+// be used (local or external) is assigned to cntx_p.
 
 #define bli_cntx_init_local_if( opname, cntx, cntx_p ) \
 \

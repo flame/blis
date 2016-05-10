@@ -1,8 +1,4 @@
-#include "bli_config.h"
-#include "bli_config_macro_defs.h"
-#include "bli_system.h"
-#include "bli_type_defs.h"
-#include "bli_cblas.h"
+#include "blis.h"
 #ifdef BLIS_ENABLE_CBLAS
 /*
  *
@@ -15,11 +11,11 @@
 
 #include "cblas.h"
 #include "cblas_f77.h"
-void cblas_sgemm(const enum CBLAS_ORDER Order, const enum CBLAS_TRANSPOSE TransA,
-                 const enum CBLAS_TRANSPOSE TransB, const int M, const int N,
-                 const int K, const float alpha, const float  *A,
-                 const int lda, const float  *B, const int ldb,
-                 const float beta, float  *C, const int ldc)
+void cblas_sgemm(enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
+                 enum CBLAS_TRANSPOSE TransB, f77_int M, f77_int N,
+                 f77_int K, float alpha, const float  *A,
+                 f77_int lda, const float  *B, f77_int ldb,
+                 float beta, float  *C, f77_int ldc)
 {
    char TA, TB;   
 #ifdef F77_CHAR

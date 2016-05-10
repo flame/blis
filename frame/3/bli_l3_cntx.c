@@ -40,9 +40,8 @@
 
 void bli_gemm_cntx_init( cntx_t* cntx )
 {
-	bli_cntx_obj_create( cntx );
-
-	//bli_cntx_obj_clear( cntx );
+	// Clear the context fields.
+	bli_cntx_obj_clear( cntx );
 
 	// Initialize the context with the current architecture's native
 	// level-3 gemm micro-kernel, and its output preferences.
@@ -71,16 +70,14 @@ void bli_gemm_cntx_init( cntx_t* cntx )
 
 void bli_gemm_cntx_finalize( cntx_t* cntx )
 {
-	bli_cntx_obj_free( cntx );
 }
 
 // -----------------------------------------------------------------------------
 
 void bli_trsm_cntx_init( cntx_t* cntx )
 {
-	bli_cntx_obj_create( cntx );
-
-	//bli_cntx_obj_clear( cntx );
+	// Clear the context fields.
+	bli_cntx_obj_clear( cntx );
 
 	// Initialize the context with the current architecture's native
 	// level-3 gemm micro-kernel, and its output preferences.
@@ -116,6 +113,5 @@ void bli_trsm_cntx_init( cntx_t* cntx )
 
 void bli_trsm_cntx_finalize( cntx_t* cntx )
 {
-	bli_cntx_obj_free( cntx );
 }
 

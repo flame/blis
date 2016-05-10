@@ -43,9 +43,9 @@
 #define GENTFUNCDOT( ftype, chxy, chc, blis_conjx, blasname, blisname ) \
 \
 void PASTEF773(chxy,blasname,chc,sub)( \
-                                       f77_int* n, \
-                                       ftype*   x, f77_int* incx, \
-                                       ftype*   y, f77_int* incy, \
+                                       const f77_int* n, \
+                                       const ftype*   x, const f77_int* incx, \
+                                       const ftype*   y, const f77_int* incy, \
                                        ftype*   rval  \
                                      ) \
 { \
@@ -62,22 +62,23 @@ INSERT_GENTFUNCDOT_BLAS( dot, NULL )
 
 // Input vectors stored in single precision, computed in double precision,
 // with result returned in single precision.
-void PASTEF772(sds,dot,sub)( f77_int* n,
-                             float*   x, f77_int* incx,
-                             float*   y, f77_int* incy,
+void PASTEF772(sds,dot,sub)( const f77_int* n,
+                             const float*  sb,
+                             const float*   x, const f77_int* incx,
+                             const float*   y, const f77_int* incy,
                              float*   rval
                            )
 {
-	*rval = PASTEF77(sds,dot)( n,
-	                           x, incx,
-	                           y, incy );
+	*rval = *sb + PASTEF77(sds,dot)( n,
+	                                 x, incx,
+	                                 y, incy );
 }
 
 // Input vectors stored in single precision, computed in double precision,
 // with result returned in double precision.
-void PASTEF772(ds,dot,sub)( f77_int* n,
-                            float*   x, f77_int* incx,
-                            float*   y, f77_int* incy,
+void PASTEF772(ds,dot,sub)( const f77_int* n,
+                            const float*   x, const f77_int* incx,
+                            const float*   y, const f77_int* incy,
                             double*  rval
                           )
 {

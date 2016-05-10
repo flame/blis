@@ -50,11 +50,11 @@ typedef void (*PASTECH2(ch,opname,tsuf)) \
        conj_t          conjx, \
        conj_t          conjy, \
        dim_t           n, \
-       ctype*          alpha1, \
-       ctype*          alpha2, \
-       ctype*          x, inc_t incx, \
-       ctype*          y, inc_t incy, \
-       ctype*          z, inc_t incz, \
+       ctype* restrict alpha1, \
+       ctype* restrict alpha2, \
+       ctype* restrict x, inc_t incx, \
+       ctype* restrict y, inc_t incy, \
+       ctype* restrict z, inc_t incz, \
        cntx_t*         cntx  \
      );
 
@@ -71,10 +71,10 @@ typedef void (*PASTECH2(ch,opname,tsuf)) \
        conj_t          conjx, \
        dim_t           m, \
        dim_t           b_n, \
-       ctype*          alpha, \
-       ctype*          a, inc_t inca, inc_t lda, \
-       ctype*          x, inc_t incx, \
-       ctype*          y, inc_t incy, \
+       ctype* restrict alpha, \
+       ctype* restrict a, inc_t inca, inc_t lda, \
+       ctype* restrict x, inc_t incx, \
+       ctype* restrict y, inc_t incy, \
        cntx_t*         cntx  \
      );
 
@@ -91,11 +91,11 @@ typedef void (*PASTECH2(ch,opname,tsuf)) \
        conj_t          conjx, \
        conj_t          conjy, \
        dim_t           m, \
-       ctype*          alpha, \
-       ctype*          x, inc_t incx, \
-       ctype*          y, inc_t incy, \
-       ctype*          rho, \
-       ctype*          z, inc_t incz, \
+       ctype* restrict alpha, \
+       ctype* restrict x, inc_t incx, \
+       ctype* restrict y, inc_t incy, \
+       ctype* restrict rho, \
+       ctype* restrict z, inc_t incz, \
        cntx_t*         cntx  \
      );
 
@@ -112,11 +112,11 @@ typedef void (*PASTECH2(ch,opname,tsuf)) \
        conj_t          conjx, \
        dim_t           m, \
        dim_t           b_n, \
-       ctype*          alpha, \
-       ctype*          a, inc_t inca, inc_t lda, \
-       ctype*          x, inc_t incx, \
-       ctype*          beta, \
-       ctype*          y, inc_t incy, \
+       ctype* restrict alpha, \
+       ctype* restrict a, inc_t inca, inc_t lda, \
+       ctype* restrict x, inc_t incx, \
+       ctype* restrict beta, \
+       ctype* restrict y, inc_t incy, \
        cntx_t*         cntx  \
      );
 
@@ -135,13 +135,13 @@ typedef void (*PASTECH2(ch,opname,tsuf)) \
        conj_t          conjx, \
        dim_t           m, \
        dim_t           b_n, \
-       ctype*          alpha, \
-       ctype*          a, inc_t inca, inc_t lda, \
-       ctype*          w, inc_t incw, \
-       ctype*          x, inc_t incx, \
-       ctype*          beta, \
-       ctype*          y, inc_t incy, \
-       ctype*          z, inc_t incz, \
+       ctype* restrict alpha, \
+       ctype* restrict a, inc_t inca, inc_t lda, \
+       ctype* restrict w, inc_t incw, \
+       ctype* restrict x, inc_t incx, \
+       ctype* restrict beta, \
+       ctype* restrict y, inc_t incy, \
+       ctype* restrict z, inc_t incz, \
        cntx_t*         cntx  \
      );
 

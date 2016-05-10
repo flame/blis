@@ -32,129 +32,24 @@
 
 */
 
+// Redefine level-1f kernel API names to induce prototypes.
 
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTEMAC(ch,varname) \
-     ( \
-       conj_t  conjx, \
-       conj_t  conjy, \
-       dim_t   n, \
-       ctype*  alpha1, \
-       ctype*  alpha2, \
-       ctype*  x, inc_t incx, \
-       ctype*  y, inc_t incy, \
-       ctype*  z, inc_t incz, \
-       cntx_t* cntx  \
-     );
+#undef  axpy2v_ker_name
+#define axpy2v_ker_name     axpy2v_ref
 
-INSERT_GENTPROT_BASIC( axpy2v_ref )
+#undef  dotaxpyv_ker_name
+#define dotaxpyv_ker_name   dotaxpyv_ref
 
+#undef  axpyf_ker_name
+#define axpyf_ker_name      axpyf_ref
 
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTEMAC(ch,varname) \
-     ( \
-       conj_t  conja, \
-       conj_t  conjx, \
-       dim_t   m, \
-       dim_t   b_n, \
-       ctype*  alpha, \
-       ctype*  a, inc_t inca, inc_t lda, \
-       ctype*  x, inc_t incx, \
-       ctype*  y, inc_t incy, \
-       cntx_t* cntx  \
-     );
+#undef  dotxf_ker_name
+#define dotxf_ker_name      dotxf_ref
 
-INSERT_GENTPROT_BASIC( axpyf_ref )
+#undef  dotxaxpyf_ker_name
+#define dotxaxpyf_ker_name  dotxaxpyf_ref_var2
 
+// Include the level-1f kernel API template.
 
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTEMAC(ch,varname) \
-     ( \
-       conj_t  conjxt, \
-       conj_t  conjx, \
-       conj_t  conjy, \
-       dim_t   m, \
-       ctype*  alpha, \
-       ctype*  x, inc_t incx, \
-       ctype*  y, inc_t incy, \
-       ctype*  rho, \
-       ctype*  z, inc_t incz, \
-       cntx_t* cntx  \
-     );
-
-INSERT_GENTPROT_BASIC( dotaxpyv_ref )
-
-
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTEMAC(ch,varname) \
-     ( \
-       conj_t  conjat, \
-       conj_t  conja, \
-       conj_t  conjw, \
-       conj_t  conjx, \
-       dim_t   m, \
-       dim_t   b_n, \
-       ctype*  alpha, \
-       ctype*  a, inc_t inca, inc_t lda, \
-       ctype*  w, inc_t incw, \
-       ctype*  x, inc_t incx, \
-       ctype*  beta, \
-       ctype*  y, inc_t incy, \
-       ctype*  z, inc_t incz, \
-       cntx_t* cntx  \
-     );
-
-INSERT_GENTPROT_BASIC( dotxaxpyf_ref_var1 )
-
-
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTEMAC(ch,varname) \
-     ( \
-       conj_t  conjat, \
-       conj_t  conja, \
-       conj_t  conjw, \
-       conj_t  conjx, \
-       dim_t   m, \
-       dim_t   b_n, \
-       ctype*  alpha, \
-       ctype*  a, inc_t inca, inc_t lda, \
-       ctype*  w, inc_t incw, \
-       ctype*  x, inc_t incx, \
-       ctype*  beta, \
-       ctype*  y, inc_t incy, \
-       ctype*  z, inc_t incz, \
-       cntx_t* cntx  \
-     );
-
-INSERT_GENTPROT_BASIC( dotxaxpyf_ref_var2 )
-
-
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTEMAC(ch,varname) \
-     ( \
-       conj_t  conjat, \
-       conj_t  conjx, \
-       dim_t   m, \
-       dim_t   b_n, \
-       ctype*  alpha, \
-       ctype*  a, inc_t inca, inc_t lda, \
-       ctype*  x, inc_t incx, \
-       ctype*  beta, \
-       ctype*  y, inc_t incy, \
-       cntx_t* cntx  \
-     );
-
-INSERT_GENTPROT_BASIC( dotxf_ref )
+#include "bli_l1f_ker.h"
 

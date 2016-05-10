@@ -260,6 +260,13 @@
 #define BLIS_CADDV_KERNEL_REF            bli_caddv_ref
 #define BLIS_ZADDV_KERNEL_REF            bli_zaddv_ref
 
+// axpbyv kernels
+
+#define BLIS_SAXPBYV_KERNEL_REF          bli_saxpbyv_ref
+#define BLIS_DAXPBYV_KERNEL_REF          bli_daxpbyv_ref
+#define BLIS_CAXPBYV_KERNEL_REF          bli_caxpbyv_ref
+#define BLIS_ZAXPBYV_KERNEL_REF          bli_zaxpbyv_ref
+
 // axpyv kernels
 
 #define BLIS_SAXPYV_KERNEL_REF           bli_saxpyv_ref
@@ -329,6 +336,13 @@
 #define BLIS_DSWAPV_KERNEL_REF           bli_dswapv_ref
 #define BLIS_CSWAPV_KERNEL_REF           bli_cswapv_ref
 #define BLIS_ZSWAPV_KERNEL_REF           bli_zswapv_ref
+
+// xpbyv kernels
+
+#define BLIS_SXPBYV_KERNEL_REF           bli_sxpbyv_ref
+#define BLIS_DXPBYV_KERNEL_REF           bli_dxpbyv_ref
+#define BLIS_CXPBYV_KERNEL_REF           bli_cxpbyv_ref
+#define BLIS_ZXPBYV_KERNEL_REF           bli_zxpbyv_ref
 
 
 

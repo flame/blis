@@ -1,8 +1,4 @@
-#include "bli_config.h"
-#include "bli_config_macro_defs.h"
-#include "bli_system.h"
-#include "bli_type_defs.h"
-#include "bli_cblas.h"
+#include "blis.h"
 #ifdef BLIS_ENABLE_CBLAS
 /*
  * cblas_idamax.c
@@ -15,7 +11,7 @@
  */
 #include "cblas.h"
 #include "cblas_f77.h"
-CBLAS_INDEX cblas_idamax( const int N, const double *X, const int incX)
+f77_int cblas_idamax( f77_int N, const double *X, f77_int incX)
 {
    f77_int iamax;
 #ifdef F77_INT

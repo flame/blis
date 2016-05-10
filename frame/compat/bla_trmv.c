@@ -43,12 +43,12 @@
 \
 void PASTEF77(ch,blasname) \
      ( \
-       f77_char* uploa, \
-       f77_char* transa, \
-       f77_char* diaga, \
-       f77_int*  m, \
-       ftype*    a, f77_int* lda, \
-       ftype*    x, f77_int* incx  \
+       const f77_char* uploa, \
+       const f77_char* transa, \
+       const f77_char* diaga, \
+       const f77_int*  m, \
+       const ftype*    a, const f77_int* lda, \
+             ftype*    x, const f77_int* incx  \
      ) \
 { \
 	uplo_t  blis_uploa; \
@@ -87,7 +87,7 @@ void PASTEF77(ch,blasname) \
 \
 	/* If the input increments are negative, adjust the pointers so we can
 	   use positive increments instead. */ \
-	bli_convert_blas_incv( m0, x, *incx, x0, incx0 ); \
+	bli_convert_blas_incv( m0, (ftype*)x, *incx, x0, incx0 ); \
 \
 	/* Set the row and column strides of A. */ \
 	rs_a = 1; \
@@ -104,7 +104,7 @@ void PASTEF77(ch,blasname) \
 	  blis_diaga, \
 	  m0, \
 	  one_p, \
-	  a,  rs_a, cs_a, \
+	  (ftype*)a,  rs_a, cs_a, \
 	  x0, incx0, \
 	  NULL  \
 	); \

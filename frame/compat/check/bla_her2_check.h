@@ -36,13 +36,13 @@
 
 void bla_her2_check
      (
-       char*     dt_str,
-       char*     op_str,
-       f77_char* uploa,
-       f77_int*  m,
-       f77_int*  incx,
-       f77_int*  incy,
-       f77_int*  lda
+       const char*     dt_str,
+       const char*     op_str,
+       const f77_char* uploa,
+       const f77_int*  m,
+       const f77_int*  incx,
+       const f77_int*  incy,
+       const f77_int*  lda
      );
 
 #endif

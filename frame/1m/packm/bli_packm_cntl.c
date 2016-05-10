@@ -34,10 +34,10 @@
 
 #include "blis.h"
 
-packm_t* packm_cntl_row;
-packm_t* packm_cntl_col;
+packm_t* packm_cntl_row = NULL;
+packm_t* packm_cntl_col = NULL;
 
-packm_t* packm_cntl;
+packm_t* packm_cntl = NULL;
 
 void bli_packm_cntl_init()
 {

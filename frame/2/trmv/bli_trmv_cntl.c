@@ -43,10 +43,10 @@ extern gemv_t*    gemv_cntl_rp_bs_axpy;
 extern gemv_t*    gemv_cntl_cp_bs_dot;
 extern gemv_t*    gemv_cntl_cp_bs_axpy;
 
-trmv_t*           trmv_cntl_bs_ke_nrow_tcol;
-trmv_t*           trmv_cntl_bs_ke_ncol_trow;
-trmv_t*           trmv_cntl_ge_nrow_tcol;
-trmv_t*           trmv_cntl_ge_ncol_trow;
+trmv_t*           trmv_cntl_bs_ke_nrow_tcol = NULL;
+trmv_t*           trmv_cntl_bs_ke_ncol_trow = NULL;
+trmv_t*           trmv_cntl_ge_nrow_tcol = NULL;
+trmv_t*           trmv_cntl_ge_ncol_trow = NULL;
 
 
 void bli_trmv_cntl_init()

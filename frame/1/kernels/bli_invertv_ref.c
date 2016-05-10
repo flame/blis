@@ -39,23 +39,33 @@
 \
 void PASTEMAC(ch,varname) \
      ( \
-       dim_t   n, \
-       ctype*  x, inc_t incx, \
-       cntx_t* cntx  \
+       dim_t           n, \
+       ctype* restrict x, inc_t incx, \
+       cntx_t*         cntx  \
      ) \
 { \
-	ctype* chi1; \
+	ctype* restrict chi1; \
 	dim_t  i; \
 \
 	if ( bli_zero_dim1( n ) ) return; \
 \
 	chi1 = x; \
 \
-	for ( i = 0; i < n; ++i ) \
+	if ( incx == 1 ) \
 	{ \
-		PASTEMAC(ch,inverts)( *chi1 ); \
-\
-		chi1 += incx; \
+		for ( i = 0; i < n; ++i ) \
+		{ \
+			PASTEMAC(ch,inverts)( chi1[i] ); \
+		} \
+	} \
+	else \
+	{ \
+		for ( i = 0; i < n; ++i ) \
+		{ \
+			PASTEMAC(ch,inverts)( *chi1 ); \
+	\
+			chi1 += incx; \
+		} \
 	} \
 }
 

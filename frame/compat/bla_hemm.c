@@ -43,15 +43,15 @@
 \
 void PASTEF77(ch,blasname) \
      ( \
-       f77_char* side, \
-       f77_char* uploa, \
-       f77_int*  m, \
-       f77_int*  n, \
-       ftype*    alpha, \
-       ftype*    a, f77_int* lda, \
-       ftype*    b, f77_int* ldb, \
-       ftype*    beta, \
-       ftype*    c, f77_int* ldc  \
+       const f77_char* side, \
+       const f77_char* uploa, \
+       const f77_int*  m, \
+       const f77_int*  n, \
+       const ftype*    alpha, \
+       const ftype*    a, const f77_int* lda, \
+       const ftype*    b, const f77_int* ldb, \
+       const ftype*    beta, \
+             ftype*    c, const f77_int* ldc  \
      ) \
 { \
 	side_t  blis_side; \
@@ -104,11 +104,11 @@ void PASTEF77(ch,blasname) \
 	  BLIS_NO_TRANSPOSE, \
 	  m0, \
 	  n0, \
-	  alpha, \
-	  a, rs_a, cs_a, \
-	  b, rs_b, cs_b, \
-	  beta, \
-	  c, rs_c, cs_c, \
+	  (ftype*)alpha, \
+	  (ftype*)a, rs_a, cs_a, \
+	  (ftype*)b, rs_b, cs_b, \
+	  (ftype*)beta, \
+	  (ftype*)c, rs_c, cs_c, \
 	  NULL  \
 	); \
 \

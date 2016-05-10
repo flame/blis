@@ -59,6 +59,21 @@ void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  alpha, \
        obj_t*  x, \
+       obj_t*  beta, \
+       obj_t*  y  \
+       BLIS_OAPI_CNTX_PARAM  \
+     );
+
+GENTPROT( axpbyv )
+
+
+#undef  GENTPROT
+#define GENTPROT( opname ) \
+\
+void PASTEMAC(opname,EX_SUF) \
+     ( \
+       obj_t*  alpha, \
+       obj_t*  x, \
        obj_t*  y  \
        BLIS_OAPI_CNTX_PARAM  \
      ); 
@@ -134,4 +149,18 @@ void PASTEMAC(opname,EX_SUF) \
      ); 
 
 GENTPROT( swapv )
+
+
+#undef  GENTPROT
+#define GENTPROT( opname ) \
+\
+void PASTEMAC(opname,EX_SUF) \
+     ( \
+       obj_t*  x, \
+       obj_t*  beta, \
+       obj_t*  y  \
+       BLIS_OAPI_CNTX_PARAM  \
+     );
+
+GENTPROT( xpbyv )
 

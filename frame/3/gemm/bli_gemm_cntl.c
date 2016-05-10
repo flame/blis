@@ -36,15 +36,15 @@
 
 extern scalm_t*   scalm_cntl;
 
-packm_t*          gemm_packa_cntl;
-packm_t*          gemm_packb_cntl;
+packm_t*          gemm_packa_cntl = NULL;
+packm_t*          gemm_packb_cntl = NULL;
 
-gemm_t*           gemm_cntl_bp_ke;
-gemm_t*           gemm_cntl_op_bp;
-gemm_t*           gemm_cntl_mm_op;
-gemm_t*           gemm_cntl_vl_mm;
+gemm_t*           gemm_cntl_bp_ke = NULL;
+gemm_t*           gemm_cntl_op_bp = NULL;
+gemm_t*           gemm_cntl_mm_op = NULL;
+gemm_t*           gemm_cntl_vl_mm = NULL;
 
-gemm_t*           gemm_cntl;
+gemm_t*           gemm_cntl = NULL;
 
 void bli_gemm_cntl_init()
 {

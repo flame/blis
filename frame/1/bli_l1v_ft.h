@@ -49,14 +49,32 @@ typedef void (*PASTECH2(ch,opname,tsuf)) \
      ( \
        conj_t          conjx, \
        dim_t           n, \
-       ctype*          x, inc_t incx, \
-       ctype*          y, inc_t incy, \
+       ctype* restrict x, inc_t incx, \
+       ctype* restrict y, inc_t incy, \
        cntx_t*         cntx  \
      );
 
 INSERT_GENTDEF( addv )
 INSERT_GENTDEF( copyv )
 INSERT_GENTDEF( subv )
+
+// axpbyv
+
+#undef  GENTDEF
+#define GENTDEF( ctype, ch, opname, tsuf ) \
+\
+typedef void (*PASTECH2(ch,opname,tsuf)) \
+     ( \
+       conj_t          conjx, \
+       dim_t           n, \
+       ctype* restrict alpha, \
+       ctype* restrict x, inc_t incx, \
+       ctype* restrict beta, \
+       ctype* restrict y, inc_t incy, \
+       cntx_t*         cntx  \
+     );
+
+INSERT_GENTDEF( axpbyv )
 
 // axpyv, scal2v
 
@@ -67,9 +85,9 @@ typedef void (*PASTECH2(ch,opname,tsuf)) \
      ( \
        conj_t          conjx, \
        dim_t           n, \
-       ctype*          alpha, \
-       ctype*          x, inc_t incx, \
-       ctype*          y, inc_t incy, \
+       ctype* restrict alpha, \
+       ctype* restrict x, inc_t incx, \
+       ctype* restrict y, inc_t incy, \
        cntx_t*         cntx  \
      );
 
@@ -86,9 +104,9 @@ typedef void (*PASTECH2(ch,opname,tsuf)) \
        conj_t          conjx, \
        conj_t          conjy, \
        dim_t           n, \
-       ctype*          x, inc_t incx, \
-       ctype*          y, inc_t incy, \
-       ctype*          rho, \
+       ctype* restrict x, inc_t incx, \
+       ctype* restrict y, inc_t incy, \
+       ctype* restrict rho, \
        cntx_t*         cntx  \
      );
 
@@ -104,11 +122,11 @@ typedef void (*PASTECH2(ch,opname,tsuf)) \
        conj_t          conjx, \
        conj_t          conjy, \
        dim_t           n, \
-       ctype*          alpha, \
-       ctype*          x, inc_t incx, \
-       ctype*          y, inc_t incy, \
-       ctype*          beta, \
-       ctype*          rho, \
+       ctype* restrict alpha, \
+       ctype* restrict x, inc_t incx, \
+       ctype* restrict y, inc_t incy, \
+       ctype* restrict beta, \
+       ctype* restrict rho, \
        cntx_t*         cntx  \
      );
 
@@ -122,7 +140,7 @@ INSERT_GENTDEF( dotxv )
 typedef void (*PASTECH2(ch,opname,tsuf)) \
      ( \
        dim_t           n, \
-       ctype*          x, inc_t incx, \
+       ctype* restrict x, inc_t incx, \
        cntx_t*         cntx  \
      );
 
@@ -137,8 +155,8 @@ typedef void (*PASTECH2(ch,opname,tsuf)) \
      ( \
        conj_t          conjalpha, \
        dim_t           n, \
-       ctype*          alpha, \
-       ctype*          x, inc_t incx, \
+       ctype* restrict alpha, \
+       ctype* restrict x, inc_t incx, \
        cntx_t*         cntx  \
      );
 
@@ -153,14 +171,29 @@ INSERT_GENTDEF( setv )
 typedef void (*PASTECH2(ch,opname,tsuf)) \
      ( \
        dim_t           n, \
-       ctype*          x, inc_t incx, \
-       ctype*          y, inc_t incy, \
+       ctype* restrict x, inc_t incx, \
+       ctype* restrict y, inc_t incy, \
        cntx_t*         cntx  \
      );
 
 INSERT_GENTDEF( swapv )
 
+// xpybv
 
+#undef  GENTDEF
+#define GENTDEF( ctype, ch, opname, tsuf ) \
+\
+typedef void (*PASTECH2(ch,opname,tsuf)) \
+     ( \
+       conj_t          conjx, \
+       dim_t           n, \
+       ctype* restrict x, inc_t incx, \
+       ctype* restrict beta, \
+       ctype* restrict y, inc_t incy, \
+       cntx_t*         cntx  \
+     );
+
+INSERT_GENTDEF( xpbyv )
 
 
 #endif

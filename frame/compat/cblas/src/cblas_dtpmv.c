@@ -1,8 +1,4 @@
-#include "bli_config.h"
-#include "bli_config_macro_defs.h"
-#include "bli_system.h"
-#include "bli_type_defs.h"
-#include "bli_cblas.h"
+#include "blis.h"
 #ifdef BLIS_ENABLE_CBLAS
 /*
  * cblas_dtpmv.c
@@ -13,9 +9,9 @@
  */
 #include "cblas.h"
 #include "cblas_f77.h"
-void cblas_dtpmv(const enum CBLAS_ORDER order, const enum CBLAS_UPLO Uplo,
-                 const enum CBLAS_TRANSPOSE TransA, const enum CBLAS_DIAG Diag,
-                 const int N, const double  *Ap, double  *X, const int incX)
+void cblas_dtpmv(enum CBLAS_ORDER order, enum CBLAS_UPLO Uplo,
+                 enum CBLAS_TRANSPOSE TransA, enum CBLAS_DIAG Diag,
+                 f77_int N, const double  *Ap, double  *X, f77_int incX)
 {
    char TA;
    char UL;

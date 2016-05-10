@@ -1,6 +1,6 @@
 /*
 
-   BLIS
+   BLIS    
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -32,12 +32,48 @@
 
 */
 
-#ifndef BLIS_CONFIG_H
-#define BLIS_CONFIG_H
+#ifndef BLIS_XPBYJRIS_H
+#define BLIS_XPBYJRIS_H
 
+// xpbyjris
 
+#define bli_sxpbyjris( xr, xi, br, bi, yr, yi ) \
+{ \
+	(yr)        = (xr) + (br) * (yr); \
+}
 
-#define BLIS_SIMD_ALIGN_SIZE 16
+#define bli_dxpbyjris( xr, xi, br, bi, yr, yi ) \
+{ \
+	(yr)        = (xr) + (br) * (yr); \
+}
 
+#define bli_cxpbyjris( xr, xi, br, bi, yr, yi ) \
+{ \
+	float  yt_r =  (xr) + (br) * (yr) - (bi) * (yi); \
+	float  yt_i = -(xi) + (bi) * (yr) + (br) * (yi); \
+	(yr) = yt_r; \
+	(yi) = yt_i; \
+}
+
+#define bli_zxpbyjris( xr, xi, br, bi, yr, yi ) \
+{ \
+	double yt_r =  (xr) + (br) * (yr) - (bi) * (yi); \
+	double yt_i = -(xi) + (bi) * (yr) + (br) * (yi); \
+	(yr) = yt_r; \
+	(yi) = yt_i; \
+}
+
+#define bli_scxpbyjris( xr, xi, br, bi, yr, yi ) \
+{ \
+	(yr)        =  (xr) + (br) * (yr); \
+	(yi)        = -(xi) + (br) * (yi); \
+}
+
+#define bli_dzxpbyjris( xr, xi, br, bi, yr, yi ) \
+{ \
+	(yr)        =  (xr) + (br) * (yr); \
+	(yi)        = -(xi) + (br) * (yi); \
+}
 
 #endif
+

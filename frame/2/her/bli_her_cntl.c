@@ -43,11 +43,11 @@ extern ger_t*     ger_cntl_cp_bs_col;
 extern ger_t*     ger_cntl_bs_ke_row;
 extern ger_t*     ger_cntl_bs_ke_col;
 
-her_t*            her_cntl_bs_ke_lrow_ucol;
-her_t*            her_cntl_bs_ke_lcol_urow;
+her_t*            her_cntl_bs_ke_lrow_ucol = NULL;
+her_t*            her_cntl_bs_ke_lcol_urow = NULL;
 
-her_t*            her_cntl_ge_lrow_ucol;
-her_t*            her_cntl_ge_lcol_urow;
+her_t*            her_cntl_ge_lrow_ucol = NULL;
+her_t*            her_cntl_ge_lcol_urow = NULL;
 
 
 void bli_her_cntl_init()

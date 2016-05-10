@@ -49,10 +49,58 @@
 
 #define bli_caxpbyris( ar, ai, xr, xi, br, bi, yr, yi ) \
 { \
-	float  yt_r = (ar) * (xr) - (ai) * (xi) + (br) * (yr) - (bi) * (yi); \
-	float  yt_i = (ai) * (xr) + (ar) * (xi) + (bi) * (yr) + (br) * (yi); \
-	(yr) = yt_r; \
-	(yi) = yt_i; \
+    float  yt_r = (ar) * (xr) - (ai) * (xi) + (br) * (yr) - (bi) * (yi); \
+    float  yt_i = (ai) * (xr) + (ar) * (xi) + (bi) * (yr) + (br) * (yi); \
+    (yr) = yt_r; \
+    (yi) = yt_i; \
+}
+
+#define bli_sccaxpbyris( ar, ai, xr, xi, br, bi, yr, yi ) \
+{ \
+    float  yt_r = (ar) * (xr) + (br) * (yr) - (bi) * (yi); \
+    float  yt_i = (ar) * (xi) + (bi) * (yr) + (br) * (yi); \
+    (yr) = yt_r; \
+    (yi) = yt_i; \
+}
+
+#define bli_ccsaxpbyris( ar, ai, xr, xi, br, bi, yr, yi ) \
+{ \
+    float  yt_r = (ar) * (xr) - (ai) * (xi) + (br) * (yr); \
+    float  yt_i = (ai) * (xr) + (ar) * (xi) + (br) * (yi); \
+    (yr) = yt_r; \
+    (yi) = yt_i; \
+}
+
+#define bli_cscaxpbyris( ar, ai, xr, xi, br, bi, yr, yi ) \
+{ \
+    float  yt_r = (ar) * (xr) + (br) * (yr) - (bi) * (yi); \
+    float  yt_i = (ai) * (xr) + (bi) * (yr) + (br) * (yi); \
+    (yr) = yt_r; \
+    (yi) = yt_i; \
+}
+
+#define bli_sscaxpbyris( ar, ai, xr, xi, br, bi, yr, yi ) \
+{ \
+    float  yt_r = (ar) * (xr) + (br) * (yr) - (bi) * (yi); \
+    float  yt_i =               (bi) * (yr) + (br) * (yi); \
+    (yr) = yt_r; \
+    (yi) = yt_i; \
+}
+
+#define bli_cssaxpbyris( ar, ai, xr, xi, br, bi, yr, yi ) \
+{ \
+    float  yt_r = (ar) * (xr) + (br) * (yr); \
+    float  yt_i = (ai) * (xr) + (br) * (yi); \
+    (yr) = yt_r; \
+    (yi) = yt_i; \
+}
+
+#define bli_scsaxpbyris( ar, ai, xr, xi, br, bi, yr, yi ) \
+{ \
+    float  yt_r = (ar) * (xr) + (br) * (yr); \
+    float  yt_i = (ar) * (xi) + (br) * (yi); \
+    (yr) = yt_r; \
+    (yi) = yt_i; \
 }
 
 #define bli_zaxpbyris( ar, ai, xr, xi, br, bi, yr, yi ) \
@@ -61,6 +109,54 @@
 	double yt_i = (ai) * (xr) + (ar) * (xi) + (bi) * (yr) + (br) * (yi); \
 	(yr) = yt_r; \
 	(yi) = yt_i; \
+}
+
+#define bli_dzzaxpbyris( ar, ai, xr, xi, br, bi, yr, yi ) \
+{ \
+    double yt_r = (ar) * (xr) + (br) * (yr) - (bi) * (yi); \
+    double yt_i = (ar) * (xi) + (bi) * (yr) + (br) * (yi); \
+    (yr) = yt_r; \
+    (yi) = yt_i; \
+}
+
+#define bli_zzdaxpbyris( ar, ai, xr, xi, br, bi, yr, yi ) \
+{ \
+    double yt_r = (ar) * (xr) - (ai) * (xi) + (br) * (yr); \
+    double yt_i = (ai) * (xr) + (ar) * (xi) + (br) * (yi); \
+    (yr) = yt_r; \
+    (yi) = yt_i; \
+}
+
+#define bli_zdzaxpbyris( ar, ai, xr, xi, br, bi, yr, yi ) \
+{ \
+    double yt_r = (ar) * (xr) + (br) * (yr) - (bi) * (yi); \
+    double yt_i = (ai) * (xr) + (bi) * (yr) + (br) * (yi); \
+    (yr) = yt_r; \
+    (yi) = yt_i; \
+}
+
+#define bli_ddzaxpbyris( ar, ai, xr, xi, br, bi, yr, yi ) \
+{ \
+    double yt_r = (ar) * (xr) + (br) * (yr) - (bi) * (yi); \
+    double yt_i =               (bi) * (yr) + (br) * (yi); \
+    (yr) = yt_r; \
+    (yi) = yt_i; \
+}
+
+#define bli_zddaxpbyris( ar, ai, xr, xi, br, bi, yr, yi ) \
+{ \
+    double yt_r = (ar) * (xr) + (br) * (yr); \
+    double yt_i = (ai) * (xr) + (br) * (yi); \
+    (yr) = yt_r; \
+    (yi) = yt_i; \
+}
+
+#define bli_dzdaxpbyris( ar, ai, xr, xi, br, bi, yr, yi ) \
+{ \
+    double yt_r = (ar) * (xr) + (br) * (yr); \
+    double yt_i = (ar) * (xi) + (br) * (yi); \
+    (yr) = yt_r; \
+    (yi) = yt_i; \
 }
 
 #endif

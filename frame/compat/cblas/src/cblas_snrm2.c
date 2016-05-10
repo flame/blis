@@ -1,8 +1,4 @@
-#include "bli_config.h"
-#include "bli_config_macro_defs.h"
-#include "bli_system.h"
-#include "bli_type_defs.h"
-#include "bli_cblas.h"
+#include "blis.h"
 #ifdef BLIS_ENABLE_CBLAS
 /*
  * cblas_snrm2.c
@@ -15,7 +11,7 @@
  */
 #include "cblas.h"
 #include "cblas_f77.h"
-float cblas_snrm2( const int N, const float *X, const int incX) 
+float cblas_snrm2( f77_int N, const float *X, f77_int incX) 
 {
    float nrm2;
 #ifdef F77_INT

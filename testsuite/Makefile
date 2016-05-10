@@ -46,7 +46,7 @@
 
 .PHONY: all bin clean \
         check-env check-env-mk check-env-fragments check-env-make-defs \
-	run run-amd64 run-x86 run-arm
+        run run-amd64 run-x86 run-arm
 
 
 
@@ -54,15 +54,15 @@
 # --- Makefile initialization --------------------------------------------------
 #
 
-RELPATH := ..
 
-# Define the name of the common makefile.
+# Define the name of the common makefile fragment.
 COMMON_MK_FILE     := common.mk
 
 # All makefile fragments in the tree will have this name.
 FRAGMENT_MK        := .fragment.mk
 
-# Locations of important files.
+# Important locations and directory names.
+RELPATH            := ..
 CONFIG_DIR         := config
 FRAME_DIR          := frame
 LIB_DIR            := lib
@@ -77,11 +77,11 @@ LIB_DIR            := lib
 # the configure script.
 COMMON_MK_PATH    := ../$(COMMON_MK_FILE)
 
-# Include the configuration file.
+# Include the common makefile fragment.
 -include $(COMMON_MK_PATH)
 
-# Detect whether we actually got the configuration file. If we didn't, then
-# it is likely that the user has not yet generated it (via configure).
+# Detect whether we actually got the common makefile fragment. If we didn't,
+# then it is likely that the user has not yet generated it (via configure).
 ifeq ($(strip $(COMMON_MK_INCLUDED)),yes)
 COMMON_MK_PRESENT := yes
 else
@@ -143,7 +143,7 @@ endif
 
 # Expand the fragment paths that contain .h files to attain the set of header
 # files present in all fragment paths.
-MK_HEADER_FILES := $(foreach frag_path, $(FRAGMENT_DIR_PATHS), \
+MK_HEADER_FILES := $(foreach frag_path, .. $(FRAGMENT_DIR_PATHS), \
                                         $(wildcard $(frag_path)/*.h))
 
 # Strip the leading, internal, and trailing whitespace from our list of header
@@ -154,7 +154,7 @@ MK_HEADER_FILES := $(strip $(MK_HEADER_FILES))
 # expansion. Then, strip the header filename to leave the path to each header
 # location. Notice this process even weeds out duplicates! Add the config
 # directory manually since it contains FLA_config.h.
-MK_HEADER_DIR_PATHS := $(dir $(foreach frag_path, $(FRAGMENT_DIR_PATHS), \
+MK_HEADER_DIR_PATHS := $(dir $(foreach frag_path, .. $(FRAGMENT_DIR_PATHS), \
                                        $(firstword $(wildcard $(frag_path)/*.h))))
 
 # Add -I to each header path so we can specify our include search paths to the

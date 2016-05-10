@@ -44,6 +44,11 @@ extern "C" {
 #endif
 
 
+// -- System headers --
+
+#include "bli_system.h"
+
+
 // -- BLIS configuration definition --
 
 // NOTE: We include bli_config.h first because there might be something
@@ -55,11 +60,6 @@ extern "C" {
 
 #include "bli_config.h"
 #include "bli_config_macro_defs.h"
-
-
-// -- System headers --
-
-#include "bli_system.h"
 
 
 // -- Common BLIS definitions --
@@ -81,7 +81,6 @@ extern "C" {
 // -- BLIS kernel definitions --
 
 #include "bli_kernel.h"
-//#include "bli_kernel_type_defs.h"
 
 #include "bli_kernel_pre_macro_defs.h"
 #include "bli_kernel_ind_pre_macro_defs.h"
@@ -162,13 +161,14 @@ extern "C" {
 #include "bli_util.h"
 
 
-// -- CBLAS compatibility layer --
-
-#include "bli_cblas.h"
-
 // -- BLAS compatibility layer --
 
 #include "bli_blas.h"
+
+
+// -- CBLAS compatibility layer --
+
+#include "bli_cblas.h"
 
 
 // End extern "C" construct block.

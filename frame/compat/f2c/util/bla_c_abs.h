@@ -34,7 +34,7 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-double bla_c_abs(bla_scomplex *z);
+double bla_c_abs(const bla_scomplex *z);
 
 #endif
 

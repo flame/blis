@@ -44,10 +44,10 @@ extern gemv_t*    gemv_cntl_rp_bs_axpy;
 extern gemv_t*    gemv_cntl_cp_bs_dot;
 extern gemv_t*    gemv_cntl_cp_bs_axpy;
 
-trsv_t*           trsv_cntl_bs_ke_nrow_tcol;
-trsv_t*           trsv_cntl_bs_ke_ncol_trow;
-trsv_t*           trsv_cntl_ge_nrow_tcol;
-trsv_t*           trsv_cntl_ge_ncol_trow;
+trsv_t*           trsv_cntl_bs_ke_nrow_tcol = NULL;
+trsv_t*           trsv_cntl_bs_ke_ncol_trow = NULL;
+trsv_t*           trsv_cntl_ge_nrow_tcol = NULL;
+trsv_t*           trsv_cntl_ge_ncol_trow = NULL;
 
 
 void bli_trsv_cntl_init()

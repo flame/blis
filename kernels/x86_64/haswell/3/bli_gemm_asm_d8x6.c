@@ -124,7 +124,7 @@ void bli_sgemm_asm_16x6
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t" // iteration 0
-	"prefetcht0  16 * 32(%%rax)                  \n\t"
+	"prefetcht0  128 * 4(%%rax)                  \n\t"
 	"                                            \n\t"
 	"vbroadcastss       0 *  4(%%rbx), %%ymm2    \n\t"
 	"vbroadcastss       1 *  4(%%rbx), %%ymm3    \n\t"
@@ -149,8 +149,6 @@ void bli_sgemm_asm_16x6
 	"                                            \n\t"
 	"vmovaps           -2 * 32(%%rax), %%ymm0    \n\t"
 	"vmovaps           -1 * 32(%%rax), %%ymm1    \n\t"
-	"                                            \n\t"
-	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t" // iteration 1
 	"vbroadcastss       6 *  4(%%rbx), %%ymm2    \n\t"
@@ -177,10 +175,8 @@ void bli_sgemm_asm_16x6
 	"vmovaps            0 * 32(%%rax), %%ymm0    \n\t"
 	"vmovaps            1 * 32(%%rax), %%ymm1    \n\t"
 	"                                            \n\t"
-	"                                            \n\t"
-	"                                            \n\t"
 	"                                            \n\t" // iteration 2
-	"prefetcht0  20 * 32(%%rax)                  \n\t"
+	"prefetcht0  160 * 4(%%rax)                  \n\t"
 	"                                            \n\t"
 	"vbroadcastss      12 *  4(%%rbx), %%ymm2    \n\t"
 	"vbroadcastss      13 *  4(%%rbx), %%ymm3    \n\t"
@@ -205,8 +201,6 @@ void bli_sgemm_asm_16x6
 	"                                            \n\t"
 	"vmovaps            2 * 32(%%rax), %%ymm0    \n\t"
 	"vmovaps            3 * 32(%%rax), %%ymm1    \n\t"
-	"                                            \n\t"
-	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t" // iteration 3
 	"vbroadcastss      18 *  4(%%rbx), %%ymm2    \n\t"
@@ -255,7 +249,7 @@ void bli_sgemm_asm_16x6
 	"                                            \n\t"
 	".SLOOPKLEFT:                                \n\t" // EDGE LOOP
 	"                                            \n\t"
-	"prefetcht0  16 * 32(%%rax)                  \n\t"
+	"prefetcht0  128 * 4(%%rax)                  \n\t"
 	"                                            \n\t"
 	"vbroadcastss       0 *  4(%%rbx), %%ymm2    \n\t"
 	"vbroadcastss       1 *  4(%%rbx), %%ymm3    \n\t"
@@ -395,6 +389,7 @@ void bli_sgemm_asm_16x6
 	SGEMM_INPUT_GS_BETA_NZ
 	"vfmadd213ps      %%ymm14, %%ymm3,  %%ymm0   \n\t"
 	SGEMM_OUTPUT_GS_BETA_NZ
+	//"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	"movq      %%rdx, %%rcx                      \n\t" // rcx = c + 8*rs_c
@@ -433,6 +428,7 @@ void bli_sgemm_asm_16x6
 	SGEMM_INPUT_GS_BETA_NZ
 	"vfmadd213ps      %%ymm15, %%ymm3,  %%ymm0   \n\t"
 	SGEMM_OUTPUT_GS_BETA_NZ
+	//"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
@@ -496,11 +492,11 @@ void bli_sgemm_asm_16x6
 	"vmovaps    (%%rcx),       %%ymm0            \n\t"
 	"vfmadd213ps      %%ymm14, %%ymm3,  %%ymm0   \n\t"
 	"vmovaps          %%ymm0,  (%%rcx)           \n\t"
-	"addq      %%rdi, %%rcx                      \n\t"
+	//"addq      %%rdi, %%rcx                      \n\t"
 	"vmovaps    (%%rdx),       %%ymm1            \n\t"
 	"vfmadd213ps      %%ymm15, %%ymm3,  %%ymm1   \n\t"
 	"vmovaps          %%ymm1,  (%%rdx)           \n\t"
-	"addq      %%rdi, %%rdx                      \n\t"
+	//"addq      %%rdi, %%rdx                      \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
@@ -546,6 +542,7 @@ void bli_sgemm_asm_16x6
 	"                                            \n\t"
 	"vmovaps           %%ymm14, %%ymm0           \n\t"
 	SGEMM_OUTPUT_GS_BETA_NZ
+	//"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	"movq      %%rdx, %%rcx                      \n\t" // rcx = c + 8*rs_c
@@ -578,6 +575,7 @@ void bli_sgemm_asm_16x6
 	"                                            \n\t"
 	"vmovaps           %%ymm15, %%ymm0           \n\t"
 	SGEMM_OUTPUT_GS_BETA_NZ
+	//"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
@@ -618,8 +616,9 @@ void bli_sgemm_asm_16x6
 	"                                            \n\t"
 	"                                            \n\t"
 	"vmovaps          %%ymm14, (%%rcx)           \n\t"
-	"                                            \n\t"
+	//"addq      %%rdi, %%rcx                      \n\t"
 	"vmovaps          %%ymm15, (%%rdx)           \n\t"
+	//"addq      %%rdi, %%rdx                      \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
@@ -737,7 +736,7 @@ void bli_dgemm_asm_8x6
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t" // iteration 0
-	"prefetcht0  16 * 32(%%rax)                  \n\t"
+	"prefetcht0   64 * 8(%%rax)                  \n\t"
 	"                                            \n\t"
 	"vbroadcastsd       0 *  8(%%rbx), %%ymm2    \n\t"
 	"vbroadcastsd       1 *  8(%%rbx), %%ymm3    \n\t"
@@ -762,8 +761,6 @@ void bli_dgemm_asm_8x6
 	"                                            \n\t"
 	"vmovaps           -2 * 32(%%rax), %%ymm0    \n\t"
 	"vmovaps           -1 * 32(%%rax), %%ymm1    \n\t"
-	"                                            \n\t"
-	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t" // iteration 1
 	"vbroadcastsd       6 *  8(%%rbx), %%ymm2    \n\t"
@@ -790,10 +787,8 @@ void bli_dgemm_asm_8x6
 	"vmovaps            0 * 32(%%rax), %%ymm0    \n\t"
 	"vmovaps            1 * 32(%%rax), %%ymm1    \n\t"
 	"                                            \n\t"
-	"                                            \n\t"
-	"                                            \n\t"
 	"                                            \n\t" // iteration 2
-	"prefetcht0  20 * 32(%%rax)                  \n\t"
+	"prefetcht0   76 * 8(%%rax)                  \n\t"
 	"                                            \n\t"
 	"vbroadcastsd      12 *  8(%%rbx), %%ymm2    \n\t"
 	"vbroadcastsd      13 *  8(%%rbx), %%ymm3    \n\t"
@@ -818,8 +813,6 @@ void bli_dgemm_asm_8x6
 	"                                            \n\t"
 	"vmovaps            2 * 32(%%rax), %%ymm0    \n\t"
 	"vmovaps            3 * 32(%%rax), %%ymm1    \n\t"
-	"                                            \n\t"
-	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t" // iteration 3
 	"vbroadcastsd      18 *  8(%%rbx), %%ymm2    \n\t"
@@ -868,7 +861,7 @@ void bli_dgemm_asm_8x6
 	"                                            \n\t"
 	".DLOOPKLEFT:                                \n\t" // EDGE LOOP
 	"                                            \n\t"
-	"prefetcht0  16 * 32(%%rax)                  \n\t"
+	"prefetcht0   64 * 8(%%rax)                  \n\t"
 	"                                            \n\t"
 	"vbroadcastsd       0 *  8(%%rbx), %%ymm2    \n\t"
 	"vbroadcastsd       1 *  8(%%rbx), %%ymm3    \n\t"
@@ -1008,6 +1001,7 @@ void bli_dgemm_asm_8x6
 	DGEMM_INPUT_GS_BETA_NZ
 	"vfmadd213pd      %%ymm14, %%ymm3,  %%ymm0   \n\t"
 	DGEMM_OUTPUT_GS_BETA_NZ
+	//"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	"movq      %%rdx, %%rcx                      \n\t" // rcx = c + 4*rs_c
@@ -1046,6 +1040,7 @@ void bli_dgemm_asm_8x6
 	DGEMM_INPUT_GS_BETA_NZ
 	"vfmadd213pd      %%ymm15, %%ymm3,  %%ymm0   \n\t"
 	DGEMM_OUTPUT_GS_BETA_NZ
+	//"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
@@ -1159,6 +1154,7 @@ void bli_dgemm_asm_8x6
 	"                                            \n\t"
 	"vmovaps           %%ymm14, %%ymm0           \n\t"
 	DGEMM_OUTPUT_GS_BETA_NZ
+	//"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	"movq      %%rdx, %%rcx                      \n\t" // rcx = c + 4*rs_c
@@ -1191,6 +1187,7 @@ void bli_dgemm_asm_8x6
 	"                                            \n\t"
 	"vmovaps           %%ymm15, %%ymm0           \n\t"
 	DGEMM_OUTPUT_GS_BETA_NZ
+	//"addq      %%rdi, %%rcx                      \n\t" // c += cs_c;
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
@@ -1231,8 +1228,9 @@ void bli_dgemm_asm_8x6
 	"                                            \n\t"
 	"                                            \n\t"
 	"vmovaps          %%ymm14, (%%rcx)           \n\t"
-	"                                            \n\t"
+	//"addq      %%rdi, %%rcx                      \n\t"
 	"vmovaps          %%ymm15, (%%rdx)           \n\t"
+	//"addq      %%rdi, %%rdx                      \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"

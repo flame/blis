@@ -38,17 +38,17 @@ extern packm_t*   packm_cntl;
 extern packv_t*   packv_cntl;
 extern unpackm_t* unpackm_cntl;
 
-ger_t*            ger_cntl_bs_ke_row;
-ger_t*            ger_cntl_bs_ke_col;
+ger_t*            ger_cntl_bs_ke_row = NULL;
+ger_t*            ger_cntl_bs_ke_col = NULL;
 
-ger_t*            ger_cntl_rp_bs_row;
-ger_t*            ger_cntl_rp_bs_col;
+ger_t*            ger_cntl_rp_bs_row = NULL;
+ger_t*            ger_cntl_rp_bs_col = NULL;
 
-ger_t*            ger_cntl_cp_bs_row;
-ger_t*            ger_cntl_cp_bs_col;
+ger_t*            ger_cntl_cp_bs_row = NULL;
+ger_t*            ger_cntl_cp_bs_col = NULL;
 
-ger_t*            ger_cntl_ge_row;
-ger_t*            ger_cntl_ge_col;
+ger_t*            ger_cntl_ge_row = NULL;
+ger_t*            ger_cntl_ge_col = NULL;
 
 
 void bli_ger_cntl_init()

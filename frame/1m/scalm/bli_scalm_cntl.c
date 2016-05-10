@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-scalm_t* scalm_cntl;
+scalm_t* scalm_cntl = NULL;
 
 void bli_scalm_cntl_init()
 {

@@ -41,9 +41,9 @@
 \
 void PASTEF77(ch,blasname) \
      ( \
-       f77_int* n, \
-       ftype*   x, f77_int* incx, \
-       ftype*   y, f77_int* incy \
+       const f77_int* n, \
+       ftype*   x, const f77_int* incx, \
+       ftype*   y, const f77_int* incy \
      );
 
 #ifdef BLIS_ENABLE_BLAS2BLIS

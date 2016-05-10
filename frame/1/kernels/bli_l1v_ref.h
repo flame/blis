@@ -32,116 +32,48 @@
 
 */
 
+// Redefine level-1v kernel API names to induce prototypes.
 
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTEMAC(ch,varname) \
-     ( \
-       conj_t  conjx, \
-       dim_t   n, \
-       ctype*  x, inc_t incx, \
-       ctype*  y, inc_t incy, \
-       cntx_t* cntx  \
-     );
+#undef  addv_ker_name
+#define addv_ker_name      addv_ref
 
-INSERT_GENTPROT_BASIC( addv_ref )
-INSERT_GENTPROT_BASIC( copyv_ref )
-INSERT_GENTPROT_BASIC( subv_ref )
+#undef  axpbyv_ker_name
+#define axpbyv_ker_name    axpbyv_ref
 
+#undef  axpyv_ker_name
+#define axpyv_ker_name     axpyv_ref
 
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTEMAC(ch,varname) \
-     ( \
-       conj_t  conjx, \
-       dim_t   n, \
-       ctype*  alpha, \
-       ctype*  x, inc_t incx, \
-       ctype*  y, inc_t incy, \
-       cntx_t* cntx  \
-     );
+#undef  copyv_ker_name
+#define copyv_ker_name     copyv_ref
 
-INSERT_GENTPROT_BASIC( axpyv_ref )
-INSERT_GENTPROT_BASIC( scal2v_ref )
+#undef  dotv_ker_name
+#define dotv_ker_name      dotv_ref
 
+#undef  dotxv_ker_name
+#define dotxv_ker_name     dotxv_ref
 
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTEMAC(ch,varname) \
-     ( \
-       conj_t  conjx, \
-       conj_t  conjy, \
-       dim_t   n, \
-       ctype*  x, inc_t incx, \
-       ctype*  y, inc_t incy, \
-       ctype*  rho, \
-       cntx_t* cntx  \
-     );
+#undef  invertv_ker_name
+#define invertv_ker_name   invertv_ref
 
-INSERT_GENTPROT_BASIC( dotv_ref )
+#undef  scalv_ker_name
+#define scalv_ker_name     scalv_ref
 
+#undef  scal2v_ker_name
+#define scal2v_ker_name    scal2v_ref
 
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTEMAC(ch,varname) \
-     ( \
-       conj_t  conjx, \
-       conj_t  conjy, \
-       dim_t   n, \
-       ctype*  alpha, \
-       ctype*  x, inc_t incx, \
-       ctype*  y, inc_t incy, \
-       ctype*  beta, \
-       ctype*  rho, \
-       cntx_t* cntx  \
-     );
+#undef  setv_ker_name
+#define setv_ker_name      setv_ref
 
-INSERT_GENTPROT_BASIC( dotxv_ref )
+#undef  subv_ker_name
+#define subv_ker_name      subv_ref
 
+#undef  swapv_ker_name
+#define swapv_ker_name     swapv_ref
 
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTEMAC(ch,varname) \
-     ( \
-       dim_t   n, \
-       ctype*  x, inc_t incx, \
-       cntx_t* cntx  \
-     );
+#undef  xpbyv_ker_name
+#define xpbyv_ker_name     xpbyv_ref
 
-INSERT_GENTPROT_BASIC( invertv_ref )
+// Include the level-1v kernel API template.
 
-
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTEMAC(ch,varname) \
-     ( \
-       conj_t  conjalpha, \
-       dim_t   n, \
-       ctype*  alpha, \
-       ctype*  x, inc_t incx, \
-       cntx_t* cntx \
-     );
-
-INSERT_GENTPROT_BASIC( scalv_ref )
-INSERT_GENTPROT_BASIC( setv_ref )
-
-
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTEMAC(ch,varname) \
-     ( \
-       dim_t   n, \
-       ctype*  x, inc_t incx, \
-       ctype*  y, inc_t incy, \
-       cntx_t* cntx  \
-     );
-
-INSERT_GENTPROT_BASIC( swapv_ref )
+#include "bli_l1v_ker.h"
 

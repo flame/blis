@@ -34,7 +34,7 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-double bla_d_imag(bla_dcomplex *z);
+double bla_d_imag(const bla_dcomplex *z);
 
 #endif
 

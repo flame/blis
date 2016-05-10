@@ -109,8 +109,8 @@ void bli_gemm3m1_cntx_init( cntx_t* cntx )
 {
 	const ind_t method = BLIS_3M1;
 
-	// Perform basic setup on the context.
-	bli_cntx_obj_create( cntx );
+	// Clear the context fields.
+	bli_cntx_obj_clear( cntx );
 
 	// Initialize the context with the current architecture's native
 	// level-3 gemm micro-kernel, and its output preferences.
@@ -147,8 +147,6 @@ void bli_gemm3m1_cntx_stage( dim_t stage, cntx_t* cntx )
 
 void bli_gemm3m1_cntx_finalize( cntx_t* cntx )
 {
-	// Free the context and all memory allocated to it.
-	bli_cntx_obj_free( cntx );
 }
 
 // -----------------------------------------------------------------------------
@@ -157,8 +155,8 @@ void bli_gemm3m2_cntx_init( cntx_t* cntx )
 {
 	const ind_t method = BLIS_3M2;
 
-	// Perform basic setup on the context.
-	bli_cntx_obj_create( cntx );
+	// Clear the context fields.
+	bli_cntx_obj_clear( cntx );
 
 	// Initialize the context with the current architecture's native
 	// level-3 gemm micro-kernel, and its output preferences.
@@ -195,8 +193,6 @@ void bli_gemm3m2_cntx_stage( dim_t stage, cntx_t* cntx )
 
 void bli_gemm3m2_cntx_finalize( cntx_t* cntx )
 {
-	// Free the context and all memory allocated to it.
-	bli_cntx_obj_free( cntx );
 }
 
 // -----------------------------------------------------------------------------
@@ -205,8 +201,8 @@ void bli_gemm3m3_cntx_init( cntx_t* cntx )
 {
 	const ind_t method = BLIS_3M3;
 
-	// Perform basic setup on the context.
-	bli_cntx_obj_create( cntx );
+	// Clear the context fields.
+	bli_cntx_obj_clear( cntx );
 
 	// Initialize the context with the current architecture's native
 	// level-3 gemm micro-kernel, and its output preferences.
@@ -256,8 +252,6 @@ void bli_gemm3m3_cntx_stage( dim_t stage, cntx_t* cntx )
 
 void bli_gemm3m3_cntx_finalize( cntx_t* cntx )
 {
-	// Free the context and all memory allocated to it.
-	bli_cntx_obj_free( cntx );
 }
 
 // -----------------------------------------------------------------------------
@@ -266,8 +260,8 @@ void bli_gemm3mh_cntx_init( cntx_t* cntx )
 {
 	const ind_t method = BLIS_3MH;
 
-	// Perform basic setup on the context.
-	bli_cntx_obj_create( cntx );
+	// Clear the context fields.
+	bli_cntx_obj_clear( cntx );
 
 	// Initialize the context with the current architecture's native
 	// level-3 gemm micro-kernel, and its output preferences.
@@ -320,8 +314,6 @@ void bli_gemm3mh_cntx_stage( dim_t stage, cntx_t* cntx )
 
 void bli_gemm3mh_cntx_finalize( cntx_t* cntx )
 {
-	// Free the context and all memory allocated to it.
-	bli_cntx_obj_free( cntx );
 }
 
 // -----------------------------------------------------------------------------
@@ -330,8 +322,8 @@ void bli_gemm4m1_cntx_init( cntx_t* cntx )
 {
 	const ind_t method = BLIS_4M1A;
 
-	// Perform basic setup on the context.
-	bli_cntx_obj_create( cntx );
+	// Clear the context fields.
+	bli_cntx_obj_clear( cntx );
 
 	// Initialize the context with the current architecture's native
 	// level-3 gemm micro-kernel, and its output preferences.
@@ -368,8 +360,6 @@ void bli_gemm4m1_cntx_stage( dim_t stage, cntx_t* cntx )
 
 void bli_gemm4m1_cntx_finalize( cntx_t* cntx )
 {
-	// Free the context and all memory allocated to it.
-	bli_cntx_obj_free( cntx );
 }
 
 // -----------------------------------------------------------------------------
@@ -378,8 +368,8 @@ void bli_gemm4mb_cntx_init( cntx_t* cntx )
 {
 	const ind_t method = BLIS_4M1B;
 
-	// Perform basic setup on the context.
-	bli_cntx_obj_create( cntx );
+	// Clear the context fields.
+	bli_cntx_obj_clear( cntx );
 
 	// Initialize the context with the current architecture's native
 	// level-3 gemm micro-kernel, and its output preferences.
@@ -416,8 +406,6 @@ void bli_gemm4mb_cntx_stage( dim_t stage, cntx_t* cntx )
 
 void bli_gemm4mb_cntx_finalize( cntx_t* cntx )
 {
-	// Free the context and all memory allocated to it.
-	bli_cntx_obj_free( cntx );
 }
 
 // -----------------------------------------------------------------------------
@@ -426,8 +414,8 @@ void bli_gemm4mh_cntx_init( cntx_t* cntx )
 {
 	const ind_t method = BLIS_4MH;
 
-	// Perform basic setup on the context.
-	bli_cntx_obj_create( cntx );
+	// Clear the context fields.
+	bli_cntx_obj_clear( cntx );
 
 	// Initialize the context with the current architecture's native
 	// level-3 gemm micro-kernel, and its output preferences.
@@ -485,8 +473,6 @@ void bli_gemm4mh_cntx_stage( dim_t stage, cntx_t* cntx )
 
 void bli_gemm4mh_cntx_finalize( cntx_t* cntx )
 {
-	// Free the context and all memory allocated to it.
-	bli_cntx_obj_free( cntx );
 }
 
 // -----------------------------------------------------------------------------

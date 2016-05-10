@@ -45,7 +45,11 @@
 // internally within BLIS as well as those exposed in the native BLAS-like BLIS
 // interface.
 #ifndef BLIS_INT_TYPE_SIZE
+#ifdef BLIS_ARCH_64
 #define BLIS_INT_TYPE_SIZE               64
+#else
+#define BLIS_INT_TYPE_SIZE               32
+#endif
 #endif
 
 
@@ -133,19 +137,6 @@
 #define BLIS_POOL_ADDR_ALIGN_SIZE        BLIS_PAGE_SIZE
 
 
-// -- MIXED DATATYPE SUPPORT ---------------------------------------------------
-
-// Basic (homogeneous) datatype support always enabled.
-
-// AVOID ENABLING MIXED DATATYPE SUPPORT! IT IS PROBABLY BROKEN.
-
-// Enable mixed domain operations?
-//#define BLIS_ENABLE_MIXED_DOMAIN_SUPPORT
-
-// Enable extra mixed precision operations?
-//#define BLIS_ENABLE_MIXED_PRECISION_SUPPORT
-
-
 // -- MISCELLANEOUS OPTIONS ----------------------------------------------------
 
 // Stay initialized after auto-initialization, unless and until the user
@@ -177,7 +168,7 @@
 // C99 type "long int". Note that this ONLY affects integers used within the
 // BLAS compatibility layer.
 #ifndef BLIS_BLAS2BLIS_INT_TYPE_SIZE
-#define BLIS_BLAS2BLIS_INT_TYPE_SIZE     64
+#define BLIS_BLAS2BLIS_INT_TYPE_SIZE     32
 #endif
 
 

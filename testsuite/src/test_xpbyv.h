@@ -1,6 +1,6 @@
 /*
 
-   BLIS
+   BLIS    
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -32,12 +32,5 @@
 
 */
 
-#ifndef BLIS_CONFIG_H
-#define BLIS_CONFIG_H
+void libblis_test_xpbyv( test_params_t* params, test_op_t* op );
 
-
-#define BLIS_SIMD_ALIGN_SIZE 16
-
-
-
-#endif

@@ -45,20 +45,20 @@ typedef union
 
 void bli_ddotxaxpyf_int_var1
      (
-       conj_t  conjat,
-       conj_t  conja,
-       conj_t  conjw,
-       conj_t  conjx,
-       dim_t   m,
-       dim_t   b_n,
-       double* alpha,
-       double* a, inc_t inca, inc_t lda,
-       double* w, inc_t incw,
-       double* x, inc_t incx,
-       double* beta,
-       double* y, inc_t incy,
-       double* z, inc_t incz,
-       cntx_t* cntx
+       conj_t           conjat,
+       conj_t           conja,
+       conj_t           conjw,
+       conj_t           conjx,
+       dim_t            m,
+       dim_t            b_n,
+       double* restrict alpha,
+       double* restrict a, inc_t inca, inc_t lda,
+       double* restrict w, inc_t incw,
+       double* restrict x, inc_t incx,
+       double* restrict beta,
+       double* restrict y, inc_t incy,
+       double* restrict z, inc_t incz,
+       cntx_t*          cntx
      )
 { 
 	double*  restrict alpha_cast = alpha; 

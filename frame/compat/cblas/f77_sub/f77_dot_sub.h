@@ -40,9 +40,9 @@
 #define GENTPROTDOT( ftype, chxy, chc, blasname ) \
 \
 void PASTEF773(chxy,blasname,chc,sub)( \
-                                       f77_int* n, \
-                                       ftype*   x, f77_int* incx, \
-                                       ftype*   y, f77_int* incy, \
+                                       const f77_int* n, \
+                                       const ftype*   x, const f77_int* incx, \
+                                       const ftype*   y, const f77_int* incy, \
                                        ftype*   rval  \
                                      );
 
@@ -52,15 +52,16 @@ INSERT_GENTPROTDOT_BLAS( dot )
 
 // -- "Black sheep" dot product function prototypes --
 
-void PASTEF772(sds,dot,sub)( f77_int* n,
-                             float*   x, f77_int* incx,
-                             float*   y, f77_int* incy,
+void PASTEF772(sds,dot,sub)( const f77_int* n,
+                             const float*  sb,
+                             const float*   x, const f77_int* incx,
+                             const float*   y, const f77_int* incy,
                              float*   rval
                            );
 
-void PASTEF772(ds,dot,sub)( f77_int* n,
-                            float*   x, f77_int* incx,
-                            float*   y, f77_int* incy,
+void PASTEF772(ds,dot,sub)( const f77_int* n,
+                            const float*   x, const f77_int* incx,
+                            const float*   y, const f77_int* incy,
                             double*  rval
                           );
 #endif

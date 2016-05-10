@@ -37,15 +37,15 @@
 
 void bli_daxpyf_opt_var1
      (
-       conj_t  conja,
-       conj_t  conjx,
-       dim_t   m,
-       dim_t   b_n,
-       double* alpha,
-       double* a, inc_t inca, inc_t lda,
-       double* x, inc_t incx,
-       double* y, inc_t incy,
-       cntx_t* cntx
+       conj_t           conja,
+       conj_t           conjx,
+       dim_t            m,
+       dim_t            b_n,
+       double* restrict alpha,
+       double* restrict a, inc_t inca, inc_t lda,
+       double* restrict x, inc_t incx,
+       double* restrict y, inc_t incy,
+       cntx_t*          cntx
      )
 {
 	const dim_t fusefac = 8;
@@ -56,14 +56,14 @@ void bli_daxpyf_opt_var1
 //    printf("%d\t%d\t%d\t%d\t%d\t%d\t%d\n", b_n, fusefac, inca, incx, incy, bli_is_unaligned_to(a, 32), bli_is_unaligned_to( y, 32));
 	// If there is anything that would interfere with our use of aligned
 	// vector loads/stores, call the reference implementation.
-	if ( b_n < fusefac) || inca != 1 || incx != 1 || incy != 1 || bli_is_unaligned_to( a, 32 ) || bli_is_unaligned_to( y, 32 ) )
+	if ( ( b_n < fusefac) || inca != 1 || incx != 1 || incy != 1 || bli_is_unaligned_to( a, 32 ) || bli_is_unaligned_to( y, 32 ) )
 		use_ref = TRUE;
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE )
 	{   
 //        printf("%d\t%d\t%d\t%d\t%d\t%d\n", fusefac, inca, incx, incy, bli_is_unaligned_to(a, 32), bli_is_unaligned_to( y, 32));
 //        printf("DEFAULTING TO REFERENCE IMPLEMENTATION\n");
-		BLIS_DAXPYF_KERNEL_REF( conja, conjx, m, b_n, alpha, a, inca, lda, x, incx, y, incy );
+		BLIS_DAXPYF_KERNEL_REF( conja, conjx, m, b_n, alpha, a, inca, lda, x, incx, y, incy, cntx );
 		return;
 	}
 

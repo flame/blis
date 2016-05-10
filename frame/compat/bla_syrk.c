@@ -43,14 +43,14 @@
 \
 void PASTEF77(ch,blasname) \
      ( \
-       f77_char* uploc, \
-       f77_char* transa, \
-       f77_int*  m, \
-       f77_int*  k, \
-       ftype*    alpha, \
-       ftype*    a, f77_int* lda, \
-       ftype*    beta, \
-       ftype*    c, f77_int* ldc  \
+       const f77_char* uploc, \
+       const f77_char* transa, \
+       const f77_int*  m, \
+       const f77_int*  k, \
+       const ftype*    alpha, \
+       const ftype*    a, const f77_int* lda, \
+       const ftype*    beta, \
+             ftype*    c, const f77_int* ldc  \
      ) \
 { \
 	uplo_t  blis_uploc; \
@@ -106,10 +106,10 @@ void PASTEF77(ch,blasname) \
 	  blis_transa, \
 	  m0, \
 	  k0, \
-	  alpha, \
-	  a, rs_a, cs_a, \
-	  beta, \
-	  c, rs_c, cs_c, \
+	  (ftype*)alpha, \
+	  (ftype*)a, rs_a, cs_a, \
+	  (ftype*)beta, \
+	  (ftype*)c, rs_c, cs_c, \
 	  NULL  \
 	); \
 \

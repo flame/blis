@@ -39,14 +39,14 @@
 \
 void PASTEMAC(ch,varname) \
      ( \
-       dim_t   n, \
-       ctype*  x, inc_t incx, \
-       ctype*  y, inc_t incy, \
-       cntx_t* cntx  \
+       dim_t           n, \
+       ctype* restrict x, inc_t incx, \
+       ctype* restrict y, inc_t incy, \
+       cntx_t*         cntx  \
      ) \
 { \
-	ctype* chi1; \
-	ctype* psi1; \
+	ctype* restrict chi1; \
+	ctype* restrict psi1; \
 	dim_t  i; \
 \
 	if ( bli_zero_dim1( n ) ) return; \
@@ -54,12 +54,22 @@ void PASTEMAC(ch,varname) \
 	chi1 = x; \
 	psi1 = y; \
 \
-	for ( i = 0; i < n; ++i ) \
+	if ( incx == 1 && incy == 1 ) \
 	{ \
-		PASTEMAC(ch,swaps)( *chi1, *psi1 ); \
+		for ( i = 0; i < n; ++i ) \
+		{ \
+			PASTEMAC(ch,swaps)( chi1[i], psi1[i] ); \
+		} \
+	} \
+	else \
+	{ \
+		for ( i = 0; i < n; ++i ) \
+		{ \
+			PASTEMAC(ch,swaps)( *chi1, *psi1 ); \
 \
-		chi1 += incx; \
-		psi1 += incy; \
+			chi1 += incx; \
+			psi1 += incy; \
+		} \
 	} \
 }
 

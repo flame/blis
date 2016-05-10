@@ -34,9 +34,9 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-int PASTEF77(c,gbmv)(bla_character *trans, bla_integer *m, bla_integer *n, bla_integer *kl, bla_integer *ku, bla_scomplex *alpha, bla_scomplex *a, bla_integer *lda, bla_scomplex *x, bla_integer *incx, bla_scomplex *beta, bla_scomplex *y, bla_integer *incy);
-int PASTEF77(d,gbmv)(bla_character *trans, bla_integer *m, bla_integer *n, bla_integer *kl, bla_integer *ku, bla_double *alpha, bla_double *a, bla_integer *lda, bla_double *x, bla_integer *incx, bla_double *beta, bla_double *y, bla_integer *incy);
-int PASTEF77(s,gbmv)(bla_character *trans, bla_integer *m, bla_integer *n, bla_integer *kl, bla_integer *ku, bla_real *alpha, bla_real *a, bla_integer *lda, bla_real *x, bla_integer * incx, bla_real *beta, bla_real *y, bla_integer *incy);
-int PASTEF77(z,gbmv)(bla_character *trans, bla_integer *m, bla_integer *n, bla_integer *kl, bla_integer *ku, bla_dcomplex *alpha, bla_dcomplex *a, bla_integer *lda, bla_dcomplex *x, bla_integer *incx, bla_dcomplex *beta, bla_dcomplex * y, bla_integer *incy);
+int PASTEF77(c,gbmv)(const bla_character *trans, const bla_integer *m, const bla_integer *n, const bla_integer *kl, const bla_integer *ku, const bla_scomplex *alpha, const bla_scomplex *a, const bla_integer *lda, const bla_scomplex *x, const bla_integer *incx, const bla_scomplex *beta, bla_scomplex *y, const bla_integer *incy);
+int PASTEF77(d,gbmv)(const bla_character *trans, const bla_integer *m, const bla_integer *n, const bla_integer *kl, const bla_integer *ku, const bla_double *alpha, const bla_double *a, const bla_integer *lda, const bla_double *x, const bla_integer *incx, const bla_double *beta, bla_double *y, const bla_integer *incy);
+int PASTEF77(s,gbmv)(const bla_character *trans, const bla_integer *m, const bla_integer *n, const bla_integer *kl, const bla_integer *ku, const bla_real *alpha, const bla_real *a, const bla_integer *lda, const bla_real *x, const bla_integer * incx, const bla_real *beta, bla_real *y, const bla_integer *incy);
+int PASTEF77(z,gbmv)(const bla_character *trans, const bla_integer *m, const bla_integer *n, const bla_integer *kl, const bla_integer *ku, const bla_dcomplex *alpha, const bla_dcomplex *a, const bla_integer *lda, const bla_dcomplex *x, const bla_integer *incx, const bla_dcomplex *beta, bla_dcomplex * y, const bla_integer *incy);
 
 #endif

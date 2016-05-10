@@ -43,9 +43,9 @@
 \
 void PASTEF772(chx,cha,blasname) \
      ( \
-       f77_int* n, \
-       ftype_a* alpha, \
-       ftype_x* x, f77_int* incx  \
+       const f77_int* n, \
+       const ftype_a* alpha, \
+       ftype_x* x, const f77_int* incx  \
      ) \
 { \
 	dim_t    n0; \
@@ -62,13 +62,13 @@ void PASTEF772(chx,cha,blasname) \
 \
 	/* If the input increments are negative, adjust the pointers so we can
 	   use positive increments instead. */ \
-	bli_convert_blas_incv( n0, x, *incx, x0, incx0 ); \
+	bli_convert_blas_incv( n0, (ftype_x*)x, *incx, x0, incx0 ); \
 \
 	/* NOTE: We do not natively implement BLAS's csscal/zdscal in BLIS.
 	   that is, we just always sub-optimally implement those cases
 	   by casting alpha to ctype_x (potentially the complex domain) and
 	   using the homogeneous datatype instance according to that type. */ \
-	PASTEMAC2(cha,chx,cast)( alpha, alpha_cast ); \
+	PASTEMAC2(cha,chx,cast)( (ftype_a*)alpha, alpha_cast ); \
 \
 	/* Call BLIS interface. */ \
 	PASTEMAC(chx,blisname) \
