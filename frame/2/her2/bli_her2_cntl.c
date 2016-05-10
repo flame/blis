@@ -41,11 +41,11 @@ extern unpackm_t* unpackm_cntl;
 extern ger_t*     ger_cntl_rp_bs_row;
 extern ger_t*     ger_cntl_cp_bs_col;
 
-her2_t*           her2_cntl_bs_ke_lrow_ucol;
-her2_t*           her2_cntl_bs_ke_lcol_urow;
+her2_t*           her2_cntl_bs_ke_lrow_ucol = NULL;
+her2_t*           her2_cntl_bs_ke_lcol_urow = NULL;
 
-her2_t*           her2_cntl_ge_lrow_ucol;
-her2_t*           her2_cntl_ge_lcol_urow;
+her2_t*           her2_cntl_ge_lrow_ucol = NULL;
+her2_t*           her2_cntl_ge_lcol_urow = NULL;
 
 
 void bli_her2_cntl_init()

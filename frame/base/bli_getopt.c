@@ -35,11 +35,11 @@
 #include "blis.h"
 
 
-char       *bli_optarg;
+char       *bli_optarg = NULL;
 int         bli_optind = 1;
 
 int         bli_opterr = 0;
-int         bli_optopt;
+int         bli_optopt = 0;
 
 static char OPT_MARKER = '-';
 

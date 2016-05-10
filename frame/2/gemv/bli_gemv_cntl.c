@@ -39,17 +39,17 @@ extern packm_t*   packm_cntl;
 extern packv_t*   packv_cntl;
 extern unpackv_t* unpackv_cntl;
 
-gemv_t*           gemv_cntl_bs_ke_dot;
-gemv_t*           gemv_cntl_bs_ke_axpy;
+gemv_t*           gemv_cntl_bs_ke_dot = NULL;
+gemv_t*           gemv_cntl_bs_ke_axpy = NULL;
 
-gemv_t*           gemv_cntl_rp_bs_dot;
-gemv_t*           gemv_cntl_rp_bs_axpy;
+gemv_t*           gemv_cntl_rp_bs_dot = NULL;
+gemv_t*           gemv_cntl_rp_bs_axpy = NULL;
 
-gemv_t*           gemv_cntl_cp_bs_dot;
-gemv_t*           gemv_cntl_cp_bs_axpy;
+gemv_t*           gemv_cntl_cp_bs_dot = NULL;
+gemv_t*           gemv_cntl_cp_bs_axpy = NULL;
 
-gemv_t*           gemv_cntl_ge_dot;
-gemv_t*           gemv_cntl_ge_axpy;
+gemv_t*           gemv_cntl_ge_dot = NULL;
+gemv_t*           gemv_cntl_ge_axpy = NULL;
 
 
 void bli_gemv_cntl_init()

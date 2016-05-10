@@ -44,10 +44,10 @@ extern gemv_t*    gemv_cntl_rp_bs_axpy;
 extern gemv_t*    gemv_cntl_cp_bs_dot;
 extern gemv_t*    gemv_cntl_cp_bs_axpy;
 
-hemv_t*           hemv_cntl_bs_ke_lrow_ucol;
-hemv_t*           hemv_cntl_bs_ke_lcol_urow;
-hemv_t*           hemv_cntl_ge_lrow_ucol;
-hemv_t*           hemv_cntl_ge_lcol_urow;
+hemv_t*           hemv_cntl_bs_ke_lrow_ucol = NULL;
+hemv_t*           hemv_cntl_bs_ke_lcol_urow = NULL;
+hemv_t*           hemv_cntl_ge_lrow_ucol = NULL;
+hemv_t*           hemv_cntl_ge_lcol_urow = NULL;
 
 
 void bli_hemv_cntl_init()

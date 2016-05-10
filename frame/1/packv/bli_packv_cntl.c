@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-packv_t* packv_cntl;
+packv_t* packv_cntl = NULL;
 
 void bli_packv_cntl_init( void )
 {
