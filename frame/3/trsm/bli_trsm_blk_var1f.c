@@ -74,7 +74,7 @@ void bli_trsm_blk_var1f( obj_t*  a,
                    trsm_thread_sub_opackm( thread ) );
 
     dim_t my_start, my_end;
-    bli_get_range_b2t( thread, a,
+    bli_get_range_t2b( thread, a,
 	                   ( bli_obj_root_is_triangular( *a ) ?
 	                     bli_cntx_get_bmult( BLIS_MR, cntx ) :
 	                     bli_cntx_get_bmult( BLIS_NR, cntx ) ),
