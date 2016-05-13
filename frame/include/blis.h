@@ -68,16 +68,6 @@ extern "C" {
 #include "bli_macro_defs.h"
 
 
-// -- Threading definitions --
-
-#include "bli_threading.h"
-
-
-// -- Constant definitions --
-
-#include "bli_extern_defs.h"
-
-
 // -- BLIS kernel definitions --
 
 #include "bli_kernel.h"
@@ -89,6 +79,16 @@ extern "C" {
 #include "bli_kernel_ind_macro_defs.h"
 
 #include "bli_kernel_prototypes.h"
+
+
+// -- Threading definitions --
+
+#include "bli_threading.h"
+
+
+// -- Constant definitions --
+
+#include "bli_extern_defs.h"
 
 
 // -- Base operation prototypes --
