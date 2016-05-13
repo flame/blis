@@ -35,6 +35,13 @@
 #ifndef BLIS_KERNEL_H
 #define BLIS_KERNEL_H
 
+#define BLIS_TREE_BARRIER
+#define BLIS_TREE_BARRIER_ARITY 4
+
+#define BLIS_SIMD_ALIGN_SIZE             64
+
+#define BLIS_SIMD_SIZE                   64
+#define BLIS_SIMD_NUM_REGISTERS          32
 
 // -- LEVEL-3 MICRO-KERNEL CONSTANTS -------------------------------------------
 
@@ -151,6 +158,7 @@
 
 // -- gemm --
 
+#define BLIS_SGEMM_UKERNEL_PREFERS_CONTIG_ROWS
 #define BLIS_DGEMM_UKERNEL_PREFERS_CONTIG_ROWS
 
 #define BLIS_DGEMM_UKERNEL         bli_dgemm_opt_30x8
