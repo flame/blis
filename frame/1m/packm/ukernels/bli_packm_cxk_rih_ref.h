@@ -32,26 +32,30 @@
 
 */
 
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTEMAC(ch,varname) \
-     ( \
-       conj_t  conja, \
-       pack_t  schema, \
-       dim_t   n, \
-       void*   kappa, \
-       void*   a, inc_t inca, inc_t lda, \
-       void*   p,             inc_t ldp  \
-     );
+// Redefine level-1m kernel API names to induce prototypes.
 
-INSERT_GENTPROT_BASIC( packm_2xk_rih_ref )
-INSERT_GENTPROT_BASIC( packm_4xk_rih_ref )
-INSERT_GENTPROT_BASIC( packm_6xk_rih_ref )
-INSERT_GENTPROT_BASIC( packm_8xk_rih_ref )
-INSERT_GENTPROT_BASIC( packm_10xk_rih_ref )
-INSERT_GENTPROT_BASIC( packm_12xk_rih_ref )
-INSERT_GENTPROT_BASIC( packm_14xk_rih_ref )
-INSERT_GENTPROT_BASIC( packm_16xk_rih_ref )
-INSERT_GENTPROT_BASIC( packm_30xk_rih_ref )
+#undef  packm_2xk_rih_ker_name
+#define packm_2xk_rih_ker_name  packm_2xk_rih_ref
+#undef  packm_3xk_rih_ker_name
+#define packm_3xk_rih_ker_name  packm_3xk_rih_ref
+#undef  packm_4xk_rih_ker_name
+#define packm_4xk_rih_ker_name  packm_4xk_rih_ref
+#undef  packm_6xk_rih_ker_name
+#define packm_6xk_rih_ker_name  packm_6xk_rih_ref
+#undef  packm_8xk_rih_ker_name
+#define packm_8xk_rih_ker_name  packm_8xk_rih_ref
+#undef  packm_10xk_rih_ker_name
+#define packm_10xk_rih_ker_name packm_10xk_rih_ref
+#undef  packm_12xk_rih_ker_name
+#define packm_12xk_rih_ker_name packm_12xk_rih_ref
+#undef  packm_14xk_rih_ker_name
+#define packm_14xk_rih_ker_name packm_14xk_rih_ref
+#undef  packm_16xk_rih_ker_name
+#define packm_16xk_rih_ker_name packm_16xk_rih_ref
+#undef  packm_30xk_rih_ker_name
+#define packm_30xk_rih_ker_name packm_30xk_rih_ref
+
+// Include the level-1m kernel API template.
+
+#include "bli_l1m_ker.h"
 

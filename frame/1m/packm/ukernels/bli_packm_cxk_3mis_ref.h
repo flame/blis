@@ -32,25 +32,30 @@
 
 */
 
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTEMAC(ch,varname) \
-     ( \
-       conj_t  conja, \
-       dim_t   n, \
-       void*   kappa, \
-       void*   a, inc_t inca, inc_t lda, \
-       void*   p, inc_t is_p, inc_t ldp  \
-     );
+// Redefine level-1m kernel API names to induce prototypes.
 
-INSERT_GENTPROT_BASIC( packm_2xk_3mis_ref )
-INSERT_GENTPROT_BASIC( packm_4xk_3mis_ref )
-INSERT_GENTPROT_BASIC( packm_6xk_3mis_ref )
-INSERT_GENTPROT_BASIC( packm_8xk_3mis_ref )
-INSERT_GENTPROT_BASIC( packm_10xk_3mis_ref )
-INSERT_GENTPROT_BASIC( packm_12xk_3mis_ref )
-INSERT_GENTPROT_BASIC( packm_14xk_3mis_ref )
-INSERT_GENTPROT_BASIC( packm_16xk_3mis_ref )
-INSERT_GENTPROT_BASIC( packm_30xk_3mis_ref )
+#undef  packm_2xk_3mis_ker_name
+#define packm_2xk_3mis_ker_name  packm_2xk_3mis_ref
+#undef  packm_3xk_3mis_ker_name
+#define packm_3xk_3mis_ker_name  packm_3xk_3mis_ref
+#undef  packm_4xk_3mis_ker_name
+#define packm_4xk_3mis_ker_name  packm_4xk_3mis_ref
+#undef  packm_6xk_3mis_ker_name
+#define packm_6xk_3mis_ker_name  packm_6xk_3mis_ref
+#undef  packm_8xk_3mis_ker_name
+#define packm_8xk_3mis_ker_name  packm_8xk_3mis_ref
+#undef  packm_10xk_3mis_ker_name
+#define packm_10xk_3mis_ker_name packm_10xk_3mis_ref
+#undef  packm_12xk_3mis_ker_name
+#define packm_12xk_3mis_ker_name packm_12xk_3mis_ref
+#undef  packm_14xk_3mis_ker_name
+#define packm_14xk_3mis_ker_name packm_14xk_3mis_ref
+#undef  packm_16xk_3mis_ker_name
+#define packm_16xk_3mis_ker_name packm_16xk_3mis_ref
+#undef  packm_30xk_3mis_ker_name
+#define packm_30xk_3mis_ker_name packm_30xk_3mis_ref
+
+// Include the level-1m kernel API template.
+
+#include "bli_l1m_ker.h"
 
