@@ -338,6 +338,10 @@ void libblis_test_read_params_file( char* input_filename, test_params_t* params 
 	libblis_test_read_next_line( buffer, input_stream );
 	sscanf( buffer, "%u ", &(params->mix_all_storage) );
 
+	// Read whether to mix all storage combinations.
+	libblis_test_read_next_line( buffer, input_stream );
+	sscanf( buffer, "%u ", &(params->alignment) );
+
 	// Read the general stride "spacing".
 	libblis_test_read_next_line( buffer, input_stream );
 	sscanf( buffer, "%u ", &(params->gs_spacing) );
@@ -916,6 +920,7 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "num vector storage schemes   %u\n", params->n_vstorage );
 	libblis_test_fprintf_c( os, "storage[ vector ]            %s\n", params->storage[ BLIS_TEST_VECTOR_OPERAND ] );
 	libblis_test_fprintf_c( os, "mix all storage schemes?     %u\n", params->mix_all_storage );
+	libblis_test_fprintf_c( os, "test with aligned memory?    %u\n", params->alignment );
 	libblis_test_fprintf_c( os, "general stride spacing       %u\n", params->gs_spacing );
 	libblis_test_fprintf_c( os, "num datatypes                %u\n", params->n_datatypes );
 	libblis_test_fprintf_c( os, "datatype[0]                  %d (%c)\n", params->datatype[0],
@@ -1804,27 +1809,56 @@ void fill_string_with_n_spaces( char* str, unsigned int n_spaces )
 
 void libblis_test_mobj_create( test_params_t* params, num_t dt, trans_t trans, char storage, dim_t m, dim_t n, obj_t* a )
 {
-	dim_t gs      = params->gs_spacing;
-	dim_t m_trans = m;
-	dim_t n_trans = n;
-	dim_t rs_g;
-	dim_t cs_g;
+	dim_t  gs        = params->gs_spacing;
+	bool_t alignment = params->alignment;
+	siz_t  elem_size = bli_datatype_size( dt );
+	dim_t  m_trans   = m;
+	dim_t  n_trans   = n;
+	dim_t  rs        = 1; // Initialization avoids a compiler warning.
+	dim_t  cs        = 1; // Initialization avoids a compiler warning.
 	
 	// Apply the trans parameter to the dimensions (if needed).
 	bli_set_dims_with_trans( trans, m, n, m_trans, n_trans );
 
-	// In case of general strides, use the general stride spacing specified by the
-	// user to create strides with a column-major tilt.
-	rs_g = gs * 1;
-	cs_g = gs * m_trans;
+	// Compute unaligned strides according to the storage case encoded in
+	// the storage char, and then align the leading dimension if alignment
+	// was requested.
+	if      ( storage == 'c' )
+	{
+		rs = 1;
+		cs = m_trans;
 
-	if      ( storage == 'c' ) bli_obj_create( dt, m_trans, n_trans, 0,       0, a );
-	else if ( storage == 'r' ) bli_obj_create( dt, m_trans, n_trans, n_trans, 1, a );
-	else if ( storage == 'g' ) bli_obj_create( dt, m_trans, n_trans, rs_g, cs_g, a );
+		if ( alignment )
+			cs = bli_align_dim_to_size( cs, elem_size,
+			                            BLIS_HEAP_STRIDE_ALIGN_SIZE );
+	}
+	else if ( storage == 'r' )
+	{
+		rs = n_trans;
+		cs = 1;
+
+		if ( alignment )
+			rs = bli_align_dim_to_size( rs, elem_size,
+			                            BLIS_HEAP_STRIDE_ALIGN_SIZE );
+	}
+	else if ( storage == 'g' )
+	{
+		// We apply (arbitrarily) a column tilt, instead of a row tilt, to
+		// all general stride cases.
+		rs = gs;
+		cs = gs * m_trans;
+
+		if ( alignment )
+			cs = bli_align_dim_to_size( cs, elem_size,
+			                            BLIS_HEAP_STRIDE_ALIGN_SIZE );
+	}
 	else
 	{
 		libblis_test_printf_error( "Invalid storage character: %c\n", storage );
 	}
+
+	// Create the object using the dimensions and strides computed above.
+	bli_obj_create( dt, m_trans, n_trans, rs, cs, a );
 }
 
 

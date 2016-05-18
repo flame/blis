@@ -153,6 +153,7 @@ typedef struct
 	unsigned int  n_vstorage;
 	char          storage[ NUM_OPERAND_TYPES ][ MAX_NUM_MSTORAGE + 1 ];
 	unsigned int  mix_all_storage;
+	unsigned int  alignment;
 	unsigned int  gs_spacing;
 	unsigned int  n_datatypes;
 	char          datatype_char[ MAX_NUM_DATATYPES + 1 ];
