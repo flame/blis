@@ -96,7 +96,7 @@ void bli_level3_thread_decorator
 //Constructors and destructors for constructors
 thread_comm_t* bli_create_communicator( dim_t n_threads )
 {
-    thread_comm_t* comm = (thread_comm_t*) bli_malloc( sizeof(thread_comm_t) );
+    thread_comm_t* comm = (thread_comm_t*) bli_malloc_intl( sizeof(thread_comm_t) );
     bli_setup_communicator( comm, n_threads );
     return comm;
 }
@@ -114,7 +114,7 @@ void bli_free_communicator( thread_comm_t* communicator )
 {
     if( communicator == NULL ) return;
     bli_cleanup_communicator( communicator );
-    bli_free( communicator );
+    bli_free_intl( communicator );
 }
 
 void bli_cleanup_communicator( thread_comm_t* communicator )
@@ -129,7 +129,7 @@ thrinfo_t* bli_create_thread_info( thread_comm_t* ocomm, dim_t ocomm_id, thread_
                              dim_t n_way, dim_t work_id )
 {
 
-        thrinfo_t* thr = (thrinfo_t*) bli_malloc( sizeof(thrinfo_t) );
+        thrinfo_t* thr = (thrinfo_t*) bli_malloc_intl( sizeof(thrinfo_t) );
         bli_setup_thread_info( thr, ocomm, ocomm_id, icomm, icomm_id, n_way, work_id );
         return thr;
 }

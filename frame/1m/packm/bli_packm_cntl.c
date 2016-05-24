@@ -103,7 +103,7 @@ packm_t* bli_packm_cntl_obj_create( impl_t     impl_type,
 {
 	packm_t* cntl;
 
-	cntl = ( packm_t* ) bli_malloc( sizeof(packm_t) );
+	cntl = ( packm_t* ) bli_malloc_intl( sizeof(packm_t) );
 
 	cntl->impl_type         = impl_type;
 	cntl->var_num           = var_num;

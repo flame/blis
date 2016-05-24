@@ -32,44 +32,19 @@
 
 */
 
-#include "blis.h"
+#ifndef BLIS_MALLOC_PROTOTYPES_H
+#define BLIS_MALLOC_PROTOTYPES_H
 
-unpackm_t* unpackm_cntl = NULL;
+// Generate prototypes for each of the malloc() and free() functions
+// defined in BLIS
 
-void bli_unpackm_cntl_init()
-{
-	unpackm_cntl = bli_unpackm_cntl_obj_create( BLIS_UNBLOCKED,
-	                                            BLIS_VARIANT1,
-	                                            NULL ); // no blocksize needed
-}
+void* BLIS_MALLOC_POOL( size_t size );
+void  BLIS_FREE_POOL( void* p );
 
-void bli_unpackm_cntl_finalize()
-{
-	bli_cntl_obj_free( unpackm_cntl );
-}
+void* BLIS_MALLOC_INTL( size_t size );
+void  BLIS_FREE_INTL( void* p );
 
-unpackm_t* bli_unpackm_cntl_obj_create( impl_t     impl_type,
-                                        varnum_t   var_num,
-                                        blksz_t*   b )
-{
-	unpackm_t* cntl;
+void* BLIS_MALLOC_USER( size_t size );
+void  BLIS_FREE_USER( void* p );
 
-	cntl = ( unpackm_t* ) bli_malloc_intl( sizeof(unpackm_t) );
-
-	cntl->impl_type = impl_type;
-	cntl->var_num   = var_num;
-	cntl->b         = b;
-
-	return cntl;
-}
-
-void bli_unpackm_cntl_obj_init( unpackm_t* cntl,
-                                impl_t     impl_type,
-                                varnum_t   var_num,
-                                blksz_t*   b )
-{
-	cntl->impl_type = impl_type;
-	cntl->var_num   = var_num;
-	cntl->b         = b;
-}
-
+#endif

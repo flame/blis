@@ -38,8 +38,49 @@
 
 // -- MEMORY ALLOCATION --------------------------------------------------------
 
-// Size of a virtual memory page. This is used to align certain memory
-// buffers which are allocated and used internally.
+// Memory allocation functions. These macros define the three types of
+// malloc()-style functions, and their free() counterparts: one for each
+// type of memory to be allocated.
+// NOTE: ANY ALTERNATIVE TO malloc()/free() USED FOR ANY OF THE FOLLOWING
+// THREE PAIRS OF MACROS MUST USE THE SAME FUNCTION PROTOTYPE AS malloc()
+// and free():
+//
+//   void* malloc( size_t size );
+//   void  free( void* p );
+//
+
+// This allocation function is called to allocate memory for blocks within
+// BLIS's internal memory pools.
+#ifndef BLIS_MALLOC_POOL
+#define BLIS_MALLOC_POOL                 malloc
+#endif
+
+#ifndef BLIS_FREE_POOL
+#define BLIS_FREE_POOL                   free
+#endif
+
+// This allocation function is called to allocate memory for internally-
+// used objects and structures, such as control tree nodes.
+#ifndef BLIS_MALLOC_INTL
+#define BLIS_MALLOC_INTL                 malloc
+#endif
+
+#ifndef BLIS_FREE_INTL
+#define BLIS_FREE_INTL                   free
+#endif
+
+// This allocation function is called to allocate memory for objects
+// created by user-level API functions, such as bli_obj_create().
+#ifndef BLIS_MALLOC_USER
+#define BLIS_MALLOC_USER                 malloc
+#endif
+
+#ifndef BLIS_FREE_USER
+#define BLIS_FREE_USER                   free
+#endif
+
+// Size of a virtual memory page. This is used to align blocks within the
+// memory pools.
 #ifndef BLIS_PAGE_SIZE
 #define BLIS_PAGE_SIZE                   4096
 #endif
@@ -76,17 +117,16 @@
 // functions.
 #define BLIS_STACK_BUF_ALIGN_SIZE        BLIS_SIMD_ALIGN_SIZE
 
-// Alignment size used when allocating memory dynamically from the operating
-// system (eg: posix_memalign()). To disable heap alignment and just use
-// malloc() instead, set this to 1.
+// Alignment size used when allocating memory via BLIS_MALLOC_USER.
+// To disable heap alignment, set this to 1.
 #define BLIS_HEAP_ADDR_ALIGN_SIZE        BLIS_SIMD_ALIGN_SIZE
 
-// Alignment size used when sizing leading dimensions of dynamically
-// allocated memory.
+// Alignment size used when sizing leading dimensions of memory allocated
+// via BLIS_MALLOC_USER.
 #define BLIS_HEAP_STRIDE_ALIGN_SIZE      BLIS_SIMD_ALIGN_SIZE
 
 // Alignment size used when allocating blocks to the internal memory
-// pool (for packing buffers).
+// pool, via BLIS_MALLOC_POOL.
 #define BLIS_POOL_ADDR_ALIGN_SIZE        BLIS_PAGE_SIZE
 
 

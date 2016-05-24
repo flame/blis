@@ -131,7 +131,7 @@ hemv_t* bli_hemv_cntl_obj_create( impl_t     impl_type,
 {
 	hemv_t* cntl;
 
-	cntl = ( hemv_t* ) bli_malloc( sizeof(hemv_t) );	
+	cntl = ( hemv_t* ) bli_malloc_intl( sizeof(hemv_t) );
 
 	cntl->impl_type      = impl_type;
 	cntl->var_num        = var_num;

@@ -34,37 +34,171 @@
 
 #include "blis.h"
 
-void* bli_malloc( siz_t size )
-{
-	void* p = NULL;
-	int   r_val;
+// -----------------------------------------------------------------------------
 
+void* bli_malloc_pool( size_t size )
+{
+	const malloc_ft malloc_fp  = BLIS_MALLOC_POOL;
+	const size_t    align_size = BLIS_POOL_ADDR_ALIGN_SIZE;
+
+	return bli_malloc_align( malloc_fp, size, align_size );
+}
+
+void bli_free_pool( void* p )
+{
+	bli_free_align( BLIS_FREE_POOL, p );
+}
+
+// -----------------------------------------------------------------------------
+
+void* bli_malloc_user( size_t size )
+{
+	const malloc_ft malloc_fp  = BLIS_MALLOC_USER;
+	const size_t    align_size = BLIS_HEAP_ADDR_ALIGN_SIZE;
+
+	return bli_malloc_align( malloc_fp, size, align_size );
+}
+
+void bli_free_user( void* p )
+{
+	bli_free_align( BLIS_FREE_USER, p );
+}
+
+// -----------------------------------------------------------------------------
+
+void* bli_malloc_intl( size_t size )
+{
+	const malloc_ft malloc_fp = BLIS_MALLOC_INTL;
+
+	return bli_malloc_noalign( malloc_fp, size );
+}
+
+void bli_free_intl( void* p )
+{
+	bli_free_noalign( BLIS_FREE_INTL, p );
+}
+
+// -----------------------------------------------------------------------------
+
+void* bli_malloc_align
+     (
+       malloc_ft f,
+       size_t    size,
+       size_t    align_size
+     )
+{
+	const size_t ptr_size     = sizeof( void* );
+	size_t       align_offset = 0;
+	void*        p_orig;
+	int8_t*      p_byte;
+	void**       p_addr;
+
+	// Check parameters.
+	if ( bli_error_checking_is_enabled() )
+		bli_malloc_align_check( f, size, align_size );
+
+	// Return early if zero bytes were requested.
 	if ( size == 0 ) return NULL;
 
-#if BLIS_HEAP_ADDR_ALIGN_SIZE == 1
-	p = malloc( ( size_t )size );
-#elif defined(_WIN32)
-	p = _aligned_malloc( ( size_t )size,
-	                     ( size_t )BLIS_HEAP_ADDR_ALIGN_SIZE );
-#else
-	r_val = posix_memalign( &p,
-	                        ( size_t )BLIS_HEAP_ADDR_ALIGN_SIZE,
-	                        ( size_t )size );
+	// Add the alignment size and the size of a pointer to the number
+	// of bytes to allocate.
+	size += align_size + ptr_size;
 
-	if ( r_val != 0 ) bli_abort();
-#endif
+	// Call the allocation function.
+	p_orig = f( size );
 
-	if ( p == NULL ) bli_abort();
+	// If NULL was returned, something is probably very wrong.
+	if ( p_orig == NULL ) bli_abort();
 
-	return p;
+	// Advance the pointer by one pointer element.
+	p_byte = p_orig;
+	p_byte += ptr_size;
+
+	// Compute the offset to the desired alignment.
+	if ( bli_is_unaligned_to( p_byte, align_size ) )
+	{
+		align_offset = align_size -
+		               bli_offset_past_alignment( p_byte, align_size );
+	}
+
+	// Advance the pointer using the difference between the alignment
+	// size and the alignment offset.
+	p_byte += align_offset;
+
+	// Compute the address of the pointer element just before the start
+	// of the aligned address, and store the original address there.
+	p_addr = ( void** )(p_byte - ptr_size);
+	*p_addr = p_orig;
+
+	// Return the aligned pointer.
+	return p_byte;
 }
 
-void bli_free( void* p )
+void bli_free_align
+     (
+       free_ft f,
+       void*   p
+     )
 {
-#if BLIS_HEAP_ADDR_ALIGN_SIZE == 1 || !defined(_WIN32)
-	free( p );
-#else
-	_aligned_free( p );
-#endif
+	const size_t ptr_size = sizeof( void* );
+	void*        p_orig;
+	int8_t*      p_byte;
+	void**       p_addr;
+
+	// Since the bli_malloc_pool() function returned the aligned pointer,
+	// we have to first recover the original pointer before we can free
+	// the memory.
+
+	// Start by casting the pointer to a byte pointer.
+	p_byte = p;
+
+	// Compute the address of the pointer element just before the start
+	// of the aligned address, and recover the original address.
+	p_addr = ( void** )( p_byte - ptr_size );
+	p_orig = *p_addr;
+
+	// Free the original pointer.
+	f( p_orig );
 }
+
+// -----------------------------------------------------------------------------
+
+void* bli_malloc_noalign
+     (
+       malloc_ft f,
+       size_t    size
+     )
+{
+	return f( size );
+}
+
+void bli_free_noalign
+     (
+       free_ft f,
+       void*   p
+     )
+{
+	f( p );
+}
+
+// -----------------------------------------------------------------------------
+
+void bli_malloc_align_check 
+     (
+       malloc_ft f,
+       size_t    size,
+       size_t    align_size
+     )
+{
+	err_t e_val;
+
+	// Check for valid alignment.
+
+	e_val = bli_check_alignment_is_power_of_two( align_size );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_alignment_is_mult_of_ptr_size( align_size );
+	bli_check_error_code( e_val );
+}
+
 

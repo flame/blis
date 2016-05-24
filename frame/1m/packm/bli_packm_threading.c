@@ -37,7 +37,7 @@
 void bli_packm_thrinfo_free( packm_thrinfo_t* thread )
 {
     if( thread != NULL && thread != &BLIS_PACKM_SINGLE_THREADED)
-        bli_free(thread);
+        bli_free_intl(thread);
 }
 
 packm_thrinfo_t* bli_create_packm_thread_info( thread_comm_t* ocomm, dim_t ocomm_id, thread_comm_t* icomm, dim_t icomm_id,

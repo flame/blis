@@ -74,7 +74,7 @@ gemm_thrinfo_t* bli_create_gemm_thrinfo_node( thread_comm_t* ocomm, dim_t ocomm_
                                               packm_thrinfo_t* ipackm,
                                               gemm_thrinfo_t* sub_gemm )
 {
-    gemm_thrinfo_t* thread = ( gemm_thrinfo_t* ) bli_malloc( sizeof( gemm_thrinfo_t ) );
+    gemm_thrinfo_t* thread = ( gemm_thrinfo_t* ) bli_malloc_intl( sizeof( gemm_thrinfo_t ) );
     bli_setup_gemm_thrinfo_node( thread, ocomm, ocomm_id,
                               icomm, icomm_id,
                               n_way, work_id, 
@@ -98,7 +98,7 @@ void bli_gemm_thrinfo_free( gemm_thrinfo_t* thread)
     bli_packm_thrinfo_free( thread->opackm );
     bli_packm_thrinfo_free( thread->ipackm );
     bli_gemm_thrinfo_free( thread->sub_gemm );
-    bli_free( thread );
+    bli_free_intl( thread );
     
     return; 
 }
@@ -106,7 +106,7 @@ void bli_gemm_thrinfo_free_paths( gemm_thrinfo_t** threads, dim_t num )
 {
     for( int i = 0; i < num; i++)
         bli_gemm_thrinfo_free( threads[i] );
-    bli_free( threads );
+    bli_free_intl( threads );
 }
 
 gemm_thrinfo_t** bli_create_gemm_thrinfo_paths( )
@@ -138,7 +138,7 @@ gemm_thrinfo_t** bli_create_gemm_thrinfo_paths( )
     dim_t ir_nt  = 1;
 
     
-    gemm_thrinfo_t** paths = (gemm_thrinfo_t**) bli_malloc( global_num_threads * sizeof( gemm_thrinfo_t* ) );
+    gemm_thrinfo_t** paths = (gemm_thrinfo_t**) bli_malloc_intl( global_num_threads * sizeof( gemm_thrinfo_t* ) );
 
     thread_comm_t*  global_comm = bli_create_communicator( global_num_threads );
     for( int a = 0; a < jc_way; a++ )

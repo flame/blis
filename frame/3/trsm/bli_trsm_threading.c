@@ -74,7 +74,7 @@ trsm_thrinfo_t* bli_create_trsm_thrinfo_node( thread_comm_t* ocomm, dim_t ocomm_
                                               packm_thrinfo_t* ipackm,
                                               trsm_thrinfo_t* sub_trsm )
 {
-    trsm_thrinfo_t* thread = ( trsm_thrinfo_t* ) bli_malloc( sizeof( trsm_thrinfo_t ) );
+    trsm_thrinfo_t* thread = ( trsm_thrinfo_t* ) bli_malloc_intl( sizeof( trsm_thrinfo_t ) );
     bli_setup_trsm_thrinfo_node( thread, ocomm, ocomm_id,
                               icomm, icomm_id,
                               n_way, work_id, 
@@ -98,7 +98,7 @@ void bli_trsm_thrinfo_free( trsm_thrinfo_t* thread)
     bli_packm_thrinfo_free( thread->opackm );
     bli_packm_thrinfo_free( thread->ipackm );
     bli_trsm_thrinfo_free( thread->sub_trsm );
-    bli_free( thread );
+    bli_free_intl( thread );
 
     return;
 }
@@ -106,7 +106,7 @@ void bli_trsm_thrinfo_free_paths( trsm_thrinfo_t** threads, dim_t num )
 {
     for( int i = 0; i < num; i++)
         bli_trsm_thrinfo_free( threads[i] );
-    bli_free( threads );
+    bli_free_intl( threads );
 }
 
 trsm_thrinfo_t** bli_create_trsm_thrinfo_paths( bool_t right_sided )
@@ -144,7 +144,7 @@ trsm_thrinfo_t** bli_create_trsm_thrinfo_paths( bool_t right_sided )
     dim_t ir_nt  = 1;
 
     
-    trsm_thrinfo_t** paths = (trsm_thrinfo_t**) bli_malloc( global_num_threads * sizeof( trsm_thrinfo_t* ) );
+    trsm_thrinfo_t** paths = (trsm_thrinfo_t**) bli_malloc_intl( global_num_threads * sizeof( trsm_thrinfo_t* ) );
 
     thread_comm_t*  global_comm = bli_create_communicator( global_num_threads );
     for( int a = 0; a < jc_way; a++ )

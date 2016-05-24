@@ -32,5 +32,28 @@
 
 */
 
-void* bli_malloc( siz_t size );
-void  bli_free( void* p );
+// Typedef function pointer types for malloc() and free() substitutes.
+typedef void* (*malloc_ft) ( size_t size );
+typedef void  (*free_ft)   ( void*  p    );
+
+// -----------------------------------------------------------------------------
+
+void* bli_malloc_pool( size_t size );
+void  bli_free_pool( void* p );
+
+void* bli_malloc_intl( size_t size );
+void  bli_free_intl( void* p );
+
+void* bli_malloc_user( size_t size );
+void  bli_free_user( void* p );
+
+// -----------------------------------------------------------------------------
+
+void* bli_malloc_align( malloc_ft f, size_t size, size_t align_size );
+void  bli_free_align( free_ft f, void* p );
+
+void* bli_malloc_noalign( malloc_ft f, size_t size );
+void  bli_free_noalign( free_ft f, void* p );
+
+void bli_malloc_align_check( malloc_ft f, size_t size, size_t align_size );
+

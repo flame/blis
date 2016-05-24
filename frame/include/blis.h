@@ -90,6 +90,8 @@ extern "C" {
 
 #include "bli_kernel_prototypes.h"
 
+#include "bli_malloc_prototypes.h"
+
 
 // -- Base operation prototypes --
 

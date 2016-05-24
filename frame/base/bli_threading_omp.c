@@ -39,7 +39,7 @@
 //Constructors and destructors for constructors
 thread_comm_t* bli_create_communicator( dim_t n_threads )
 {
-    thread_comm_t* comm = (thread_comm_t*) bli_malloc( sizeof(thread_comm_t) );
+    thread_comm_t* comm = (thread_comm_t*) bli_malloc_intl( sizeof(thread_comm_t) );
     bli_setup_communicator( comm, n_threads );
     return comm;
 }
@@ -48,7 +48,7 @@ void bli_free_communicator( thread_comm_t* communicator )
 {
     if( communicator == NULL ) return;
     bli_cleanup_communicator( communicator );
-    bli_free( communicator );
+    bli_free_intl( communicator );
 }
 
 void bli_level3_thread_decorator
@@ -129,7 +129,7 @@ void bli_free_barrier_tree( barrier_t* barrier )
     if( barrier->count == 0 )
     {
         bli_free_barrier_tree( barrier->dad );
-        bli_free( barrier );
+        bli_free_intl( barrier );
     }
     return;
 }
@@ -178,7 +178,7 @@ void bli_cleanup_communicator( thread_comm_t* communicator )
     {
        bli_free_barrier_tree( communicator->barriers[i] );
     }
-    bli_free( communicator->barriers );
+    bli_free_intl( communicator->barriers );
 }
 
 
@@ -187,7 +187,7 @@ void bli_setup_communicator( thread_comm_t* communicator, dim_t n_threads)
     if( communicator == NULL ) return;
     communicator->sent_object = NULL;
     communicator->n_threads = n_threads;
-    communicator->barriers = ( barrier_t** ) bli_malloc( sizeof( barrier_t* ) * n_threads );
+    communicator->barriers = ( barrier_t** ) bli_malloc_intl( sizeof( barrier_t* ) * n_threads );
     bli_create_tree_barrier( n_threads, BLIS_TREE_BARRIER_ARITY, communicator->barriers, 0 );
 }
 

@@ -125,8 +125,8 @@ void bli_level3_thread_decorator
        void**   thread
      )
 {
-    pthread_t* pthreads = (pthread_t*) bli_malloc(sizeof(pthread_t) * n_threads);
-    thread_data_t* datas = (thread_data_t*) bli_malloc(sizeof(thread_data_t) * n_threads);
+    pthread_t* pthreads = (pthread_t*) bli_malloc_intl(sizeof(pthread_t) * n_threads);
+    thread_data_t* datas = (thread_data_t*) bli_malloc_intl(sizeof(thread_data_t) * n_threads);
 
     for( int i = 1; i < n_threads; i++ )
     {
@@ -151,8 +151,8 @@ void bli_level3_thread_decorator
         pthread_join( pthreads[i], NULL );
     }
 
-    bli_free( pthreads );
-    bli_free( datas );
+    bli_free_intl( pthreads );
+    bli_free_intl( datas );
 }
 
 //barrier routine taken from art of multicore programming
@@ -164,7 +164,7 @@ void bli_barrier( thread_comm_t* communicator, dim_t t_id )
 //Constructors and destructors for constructors
 thread_comm_t* bli_create_communicator( dim_t n_threads )
 {
-    thread_comm_t* comm = (thread_comm_t*) bli_malloc( sizeof(thread_comm_t) );
+    thread_comm_t* comm = (thread_comm_t*) bli_malloc_intl( sizeof(thread_comm_t) );
     bli_setup_communicator( comm, n_threads );
     return comm;
 }
@@ -181,7 +181,7 @@ void bli_free_communicator( thread_comm_t* communicator )
 {
     if( communicator == NULL ) return;
     bli_cleanup_communicator( communicator );
-    bli_free( communicator );
+    bli_free_intl( communicator );
 }
 
 void bli_cleanup_communicator( thread_comm_t* communicator )

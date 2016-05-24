@@ -797,6 +797,34 @@ err_t bli_check_sufficient_stack_buf_size( num_t dt, cntx_t* cntx )
 	return e_val;
 }
 
+err_t bli_check_alignment_is_power_of_two( size_t align_size )
+{
+	err_t e_val = BLIS_SUCCESS;
+
+	// This function returns an error code if align_size is zero or not
+	// a power of two.
+
+	if ( align_size == 0 )
+		e_val = BLIS_ALIGNMENT_NOT_POWER_OF_TWO;
+	else if ( ( align_size & ( align_size - 1 ) ) )
+		e_val = BLIS_ALIGNMENT_NOT_POWER_OF_TWO;
+
+	return e_val;
+}
+
+err_t bli_check_alignment_is_mult_of_ptr_size( size_t align_size )
+{
+	err_t e_val = BLIS_SUCCESS;
+
+	// This function returns an error code if align_size is not a whole
+	// multiple of the size of a pointer.
+
+	if ( align_size % sizeof( void* ) != 0 )
+		e_val = BLIS_ALIGNMENT_NOT_MULT_OF_PTR_SIZE;
+
+	return e_val;
+}
+
 // -- Object-related errors ----------------------------------------------------
 
 err_t bli_check_object_alias_of( obj_t* a, obj_t* b )
