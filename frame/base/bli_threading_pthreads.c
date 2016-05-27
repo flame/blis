@@ -71,7 +71,7 @@ int pthread_barrier_wait(pthread_barrier_t *barrier)
     }
     else {
         volatile bool_t* listener = &barrier->sense;
-        while( *listener == my_sense ) {}
+        while( *listener == my_sense ) { BLIS_YIELD(); }
     }
     return 0;
 }

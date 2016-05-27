@@ -223,4 +223,6 @@ void bli_level3_thread_decorator
 dim_t bli_gcd( dim_t x, dim_t y );
 dim_t bli_lcm( dim_t x, dim_t y );
 
+void bli_default_yield( void );
+
 #endif

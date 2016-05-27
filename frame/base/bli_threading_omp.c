@@ -99,7 +99,7 @@ void bli_barrier( thread_comm_t* communicator, dim_t t_id )
     }
     else {
         volatile bool_t* listener = &communicator->barrier_sense;
-        while( *listener == my_sense ) {}
+        while( *listener == my_sense ) { BLIS_YIELD(); }
     }
 }
 
@@ -208,7 +208,7 @@ void tree_barrier( barrier_t* barack )
     }
     else {
         volatile int* listener = &barack->signal;
-        while( *listener == my_signal ) {}
+        while( *listener == my_signal ) { BLIS_YIELD(); }
     }
 }
 

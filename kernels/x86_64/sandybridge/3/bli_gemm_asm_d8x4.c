@@ -37,6 +37,12 @@
 
 #include "blis.h"
 
+void bli_intel_yield()
+{
+    //_mm_pause();
+    __asm__ __volatile__ ("pause");
+}
+
 void bli_sgemm_asm_8x8
      (
        dim_t               k,

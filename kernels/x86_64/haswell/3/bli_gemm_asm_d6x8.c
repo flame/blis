@@ -34,6 +34,12 @@
 
 #include "blis.h"
 
+void bli_intel_yield()
+{
+    //_mm_pause();
+    __asm__ __volatile__ ("pause");
+}
+
 
 #define SGEMM_INPUT_GS_BETA_NZ \
 	"vmovlps    (%%rcx        ),  %%xmm0,  %%xmm0  \n\t" \

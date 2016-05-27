@@ -36,6 +36,18 @@
 #define BLIS_KERNEL_MACRO_DEFS_H
 
 
+// -- THREAD YIELDING ----------------------------------------------------------
+
+// Thread yield function for spin-loops.
+//
+//   void BLIS_YIELD( void );
+//
+
+#ifndef BLIS_YIELD
+#define BLIS_YIELD                      bli_default_yield
+#endif
+
+
 // -- MEMORY ALLOCATION --------------------------------------------------------
 
 // Memory allocation functions. These macros define the three types of

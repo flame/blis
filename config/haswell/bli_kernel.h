@@ -36,6 +36,9 @@
 #define BLIS_KERNEL_H
 
 
+#define BLIS_YIELD bli_intel_yield
+
+
 // -- LEVEL-3 MICRO-KERNEL CONSTANTS AND DEFINITIONS ---------------------------
 
 //

@@ -35,6 +35,10 @@
 #ifndef BLIS_KERNEL_PROTOTYPES_H
 #define BLIS_KERNEL_PROTOTYPES_H
 
+// Generate prototype for thread yield function.
+
+void BLIS_YIELD( void );
+
 // Generate prototypes for level-3 micro-kernels.
 
 //

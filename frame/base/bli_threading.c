@@ -848,3 +848,5 @@ dim_t bli_lcm( dim_t x, dim_t y)
 {
     return x * y / bli_gcd( x, y );
 }
+
+void bli_default_yield( void ) {}
