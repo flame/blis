@@ -44,7 +44,9 @@ typedef int pthread_barrierattr_t;
 
 struct pthread_barrier_s
 {
+#ifdef BLIS_USE_PTHREAD_MUTEX
     pthread_mutex_t mutex;
+#endif
     bool_t  sense;
     dim_t   threads_arrived;
     dim_t   n_threads;

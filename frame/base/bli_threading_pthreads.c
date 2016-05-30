@@ -44,14 +44,18 @@ int pthread_barrier_init(pthread_barrier_t *barrier, const pthread_barrierattr_t
     barrier->n_threads = count;
     barrier->sense = 0;
     barrier->threads_arrived = 0;
+#ifdef BLIS_USE_PTHREAD_MUTEX
     pthread_mutex_init( &barrier->mutex, NULL );
+#endif
     return 0;
 }
 
 int pthread_barrier_destroy(pthread_barrier_t *barrier)
 {
     if( barrier == NULL ) return 0;
+#ifdef BLIS_USE_PTHREAD_MUTEX
     pthread_mutex_destroy( &barrier->mutex );
+#endif
     return 0;
 }
 
@@ -61,9 +65,13 @@ int pthread_barrier_wait(pthread_barrier_t *barrier)
     bool_t my_sense = barrier->sense;
     dim_t my_threads_arrived;
 
+#ifdef BLIS_USE_PTHREAD_MUTEX
     pthread_mutex_lock( &barrier->mutex );
     my_threads_arrived = ++(barrier->threads_arrived);
     pthread_mutex_unlock( &barrier->mutex );
+#else
+    my_threads_arrived = __sync_add_and_fetch(&(barrier->threads_arrived), 1);
+#endif
 
     if( my_threads_arrived == barrier->n_threads ) {
         barrier->threads_arrived = 0;
