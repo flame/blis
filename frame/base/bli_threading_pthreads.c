@@ -62,9 +62,13 @@ void bli_barrier( thread_comm_t* communicator, dim_t t_id )
     bool_t my_sense = communicator->sense;
     dim_t my_threads_arrived;
 
-    BLIS_PTHREAD_MUTEX_LOCK( &communicator->mutex );
+#ifdef BLIS_USE_PTHREAD_MUTEX
+    pthread_mutex_lock( &communicator->mutex );
     my_threads_arrived = ++(communicator->threads_arrived);
-    BLIS_PTHREAD_MUTEX_UNLOCK( &communicator->mutex );
+    pthread_mutex_unlock( &communicator->mutex );
+#else
+    my_threads_arrived = __sync_add_and_fetch(&(communicator->threads_arrived), 1);
+#endif
 
     if( my_threads_arrived == communicator->n_threads ) {
         communicator->threads_arrived = 0;
@@ -83,14 +87,18 @@ void bli_setup_communicator( thread_comm_t* communicator, dim_t n_threads)
     communicator->n_threads = n_threads;
     communicator->sense = 0;
     communicator->threads_arrived = 0;
-    
-    BLIS_PTHREAD_MUTEX_INIT( &communicator->mutex );
+ 
+#ifdef BLIS_USE_PTHREAD_MUTEX
+    pthread_mutex_init( &communicator->mutex, NULL );
+#endif
 }
 
 void bli_cleanup_communicator( thread_comm_t* communicator )
 {
+#ifdef BLIS_USE_PTHREAD_MUTEX
     if( communicator == NULL ) return;
-    BLIS_PTHREAD_MUTEX_DESTROY( &communicator->mutex );
+    pthread_mutex_destroy( &communicator->mutex );
+#endif
 }
 #endif
 
