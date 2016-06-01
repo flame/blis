@@ -39,24 +39,7 @@
 
 #include <pthread.h>
 
-#ifdef __APPLE__
-typedef int pthread_barrierattr_t;
-
-struct pthread_barrier_s
-{
-    pthread_mutex_t mutex;
-    bool_t  sense;
-    dim_t   threads_arrived;
-    dim_t   n_threads;
-};
-typedef struct pthread_barrier_s pthread_barrier_t;
-
-
-int pthread_barrier_init(pthread_barrier_t *barrier, const pthread_barrierattr_t *attr, unsigned int count);
-int pthread_barrier_destroy(pthread_barrier_t *barrier);
-int pthread_barrier_wait(pthread_barrier_t *barrier);
-#endif
-
+#ifdef BLIS_USE_PTHREAD_BARRIER
 struct thread_comm_s
 {
     void*   sent_object;
@@ -64,7 +47,40 @@ struct thread_comm_s
 
     pthread_barrier_t barrier;
 };
+#else
+
+#define BLIS_PTHREAD_MUTEX pthread_mutex_t
+#define BLIS_PTHREAD_MUTEX_LOCK(M) pthread_mutex_lock( M )
+#define BLIS_PTHREAD_MUTEX_UNLOCK(M) pthread_mutex_unlock( M ) 
+#define BLIS_PTHREAD_MUTEX_INIT(M) pthread_mutex_init( M, NULL )
+#define BLIS_PTHREAD_MUTEX_DESTROY(M) pthread_mutex_destroy( M );
+
+struct thread_comm_s
+{
+    void*   sent_object;
+    dim_t   n_threads;
+
+    BLIS_PTHREAD_MUTEX mutex;
+    volatile bool_t  sense;
+    volatile dim_t   threads_arrived;
+};
+#endif
+
 typedef struct thread_comm_s thread_comm_t;
+
+/*
+#ifdef __APPLE__
+typedef int pthread_barrierattr_t;
+
+typedef struct pthread_barrier_s pthread_barrier_t;
+
+
+int pthread_barrier_init(pthread_barrier_t *barrier, const pthread_barrierattr_t *attr, unsigned int count);
+int pthread_barrier_destroy(pthread_barrier_t *barrier);
+int pthread_barrier_wait(pthread_barrier_t *barrier);
+#endif
+*/
+
 #endif
 
 #endif

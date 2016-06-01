@@ -36,46 +36,64 @@
 
 #ifdef BLIS_ENABLE_PTHREADS
 
-#ifdef __APPLE__
-
-int pthread_barrier_init(pthread_barrier_t *barrier, const pthread_barrierattr_t *attr, unsigned int count)
+#ifdef BLIS_USE_PTHREAD_BARRIER
+void bli_barrier( thread_comm_t* communicator, dim_t t_id )
 {
-    if( barrier == NULL ) return 0;
-    barrier->n_threads = count;
-    barrier->sense = 0;
-    barrier->threads_arrived = 0;
-    pthread_mutex_init( &barrier->mutex, NULL );
-    return 0;
+    pthread_barrier_wait( &communicator->barrier );
 }
 
-int pthread_barrier_destroy(pthread_barrier_t *barrier)
+void bli_setup_communicator( thread_comm_t* communicator, dim_t n_threads)
 {
-    if( barrier == NULL ) return 0;
-    pthread_mutex_destroy( &barrier->mutex );
-    return 0;
+    if( communicator == NULL ) return;
+    communicator->sent_object = NULL;
+    communicator->n_threads = n_threads;
+    pthread_barrier_init( &communicator->barrier, NULL, n_threads );
 }
 
-int pthread_barrier_wait(pthread_barrier_t *barrier)
+void bli_cleanup_communicator( thread_comm_t* communicator )
 {
-    if(barrier == NULL || barrier->n_threads == 1) return 0;
-    bool_t my_sense = barrier->sense;
+    if( communicator == NULL ) return;
+    pthread_barrier_destroy( &communicator->barrier );
+}
+#else
+void bli_barrier( thread_comm_t* communicator, dim_t t_id )
+{
+    if(communicator == NULL || communicator->n_threads == 1) return;
+    bool_t my_sense = communicator->sense;
     dim_t my_threads_arrived;
 
-    pthread_mutex_lock( &barrier->mutex );
-    my_threads_arrived = ++(barrier->threads_arrived);
-    pthread_mutex_unlock( &barrier->mutex );
+    BLIS_PTHREAD_MUTEX_LOCK( &communicator->mutex );
+    my_threads_arrived = ++(communicator->threads_arrived);
+    BLIS_PTHREAD_MUTEX_UNLOCK( &communicator->mutex );
 
-    if( my_threads_arrived == barrier->n_threads ) {
-        barrier->threads_arrived = 0;
-        barrier->sense = !barrier->sense;
+    if( my_threads_arrived == communicator->n_threads ) {
+        communicator->threads_arrived = 0;
+        communicator->sense = !communicator->sense;
     }
     else {
-        volatile bool_t* listener = &barrier->sense;
+        volatile bool_t* listener = &communicator->sense;
         while( *listener == my_sense ) {}
     }
-    return 0;
+}
+
+void bli_setup_communicator( thread_comm_t* communicator, dim_t n_threads)
+{
+    if( communicator == NULL ) return;
+    communicator->sent_object = NULL;
+    communicator->n_threads = n_threads;
+    communicator->sense = 0;
+    communicator->threads_arrived = 0;
+    
+    BLIS_PTHREAD_MUTEX_INIT( &communicator->mutex );
+}
+
+void bli_cleanup_communicator( thread_comm_t* communicator )
+{
+    if( communicator == NULL ) return;
+    BLIS_PTHREAD_MUTEX_DESTROY( &communicator->mutex );
 }
 #endif
+
 
 void* thread_decorator_helper( void* data_void );
 
@@ -155,11 +173,6 @@ void bli_level3_thread_decorator
     bli_free_intl( datas );
 }
 
-//barrier routine taken from art of multicore programming
-void bli_barrier( thread_comm_t* communicator, dim_t t_id )
-{
-    pthread_barrier_wait( &communicator->barrier );
-}
 
 //Constructors and destructors for constructors
 thread_comm_t* bli_create_communicator( dim_t n_threads )
@@ -169,13 +182,6 @@ thread_comm_t* bli_create_communicator( dim_t n_threads )
     return comm;
 }
 
-void bli_setup_communicator( thread_comm_t* communicator, dim_t n_threads)
-{
-    if( communicator == NULL ) return;
-    communicator->sent_object = NULL;
-    communicator->n_threads = n_threads;
-    pthread_barrier_init( &communicator->barrier, NULL, n_threads );
-}
 
 void bli_free_communicator( thread_comm_t* communicator )
 {
@@ -184,9 +190,4 @@ void bli_free_communicator( thread_comm_t* communicator )
     bli_free_intl( communicator );
 }
 
-void bli_cleanup_communicator( thread_comm_t* communicator )
-{
-    if( communicator == NULL ) return;
-    pthread_barrier_destroy( &communicator->barrier );
-}
 #endif

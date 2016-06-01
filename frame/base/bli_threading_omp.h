@@ -45,7 +45,7 @@
         int arity;
         int count;
         struct barrier_s* dad;
-        int signal;
+        volatile int signal;
     };  
     typedef struct barrier_s barrier_t;
 
@@ -61,7 +61,7 @@
         void*   sent_object;
         dim_t   n_threads;
 
-        bool_t  barrier_sense;
+        volatile bool_t  barrier_sense;
         dim_t   barrier_threads_arrived;
     };
 #endif
