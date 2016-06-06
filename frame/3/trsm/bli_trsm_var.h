@@ -47,7 +47,7 @@ void PASTEMAC0(opname) \
        obj_t*  c, \
        cntx_t* cntx, \
        trsm_t* cntl, \
-       trsm_thrinfo_t* thread  \
+       thrinfo_t* thread  \
      );
 
 GENPROT( trsm_blk_var1f )
@@ -86,7 +86,7 @@ void PASTEMAC(ch,varname) \
        void*   alpha2, \
        void*   c, inc_t rs_c, inc_t cs_c, \
        cntx_t* cntx, \
-       trsm_thrinfo_t* thread  \
+       thrinfo_t* thread  \
      );
 
 INSERT_GENTPROT_BASIC( trsm_ll_ker_var2 )

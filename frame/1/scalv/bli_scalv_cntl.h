@@ -39,7 +39,7 @@ struct scalv_s
 };
 typedef struct scalv_s scalv_t;
 
-#define cntl_sub_scalv( cntl )  cntl->sub_scalv
+#define bli_cntl_sub_scalv( cntl )  cntl->sub_scalv
 
 void     bli_scalv_cntl_init( void );
 void     bli_scalv_cntl_finalize( void );

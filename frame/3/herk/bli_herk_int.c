@@ -41,7 +41,7 @@ typedef void (*FUNCPTR_T)( obj_t*  a,
                            obj_t*  c,
                            cntx_t* cntx,
                            gemm_t* cntl,
-                           herk_thrinfo_t* thread );
+                           thrinfo_t* thread );
 
 static FUNCPTR_T vars[2][4][3] =
 {
@@ -70,7 +70,7 @@ void bli_herk_int( obj_t*  alpha,
                    obj_t*  c,
                    cntx_t* cntx,
                    gemm_t* cntl,
-                   herk_thrinfo_t* thread )
+                   thrinfo_t* thread )
 {
 	obj_t     a_local;
 	obj_t     ah_local;
@@ -91,9 +91,9 @@ void bli_herk_int( obj_t*  alpha,
 	if ( bli_obj_has_zero_dim( *a ) ||
 	     bli_obj_has_zero_dim( *ah ) )
 	{
-        if( thread_am_ochief( thread ) )
+        if( bli_thread_am_ochief( thread ) )
             bli_scalm( beta, c );
-        thread_obarrier( thread );
+        bli_thread_obarrier( thread );
 		return;
 	}
 
@@ -109,7 +109,7 @@ void bli_herk_int( obj_t*  alpha,
 	// strides and dimensions. Note that this transposition would normally
 	// be handled explicitly in the packing of C, but if C is not being
 	// packed, this is our last chance to handle the transposition.
-	if ( cntl_is_leaf( cntl ) && bli_obj_has_trans( *c ) )
+	if ( bli_cntl_is_leaf( cntl ) && bli_obj_has_trans( *c ) )
 	{
         bli_obj_induce_trans( c_local );
         bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, c_local );
@@ -134,8 +134,8 @@ void bli_herk_int( obj_t*  alpha,
 	else                                    uplo = 1;
 
 	// Extract the variant number and implementation type.
-	n = cntl_var_num( cntl );
-	i = cntl_impl_type( cntl );
+	n = bli_cntl_var_num( cntl );
+	i = bli_cntl_impl_type( cntl );
 
 	// Index into the variant array to extract the correct function pointer.
 	f = vars[uplo][n][i];

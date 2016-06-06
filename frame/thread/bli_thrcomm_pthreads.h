@@ -32,39 +32,40 @@
 
 */
 
-#ifndef BLIS_THREADING_PTHREADS_H
-#define BLIS_THREADING_PTHREADS_H
+#ifndef BLIS_THRCOMM_PTHREADS_H
+#define BLIS_THRCOMM_PTHREADS_H
 
+// Define thrcomm_t for situations when POSIX multithreading is enabled.
 #ifdef BLIS_ENABLE_PTHREADS 
 
 #include <pthread.h>
 
 #ifdef BLIS_USE_PTHREAD_BARRIER
-struct thread_comm_s
+struct thrcomm_s
 {
-    void*   sent_object;
-    dim_t   n_threads;
+	void*             sent_object;
+	dim_t             n_threads;
 
-    pthread_barrier_t barrier;
+	pthread_barrier_t barrier;
 };
 #else
-
-struct thread_comm_s
+struct thrcomm_s
 {
-    void*   sent_object;
-    dim_t   n_threads;
+	void*  sent_object;
+	dim_t  n_threads;
 
 #ifdef BLIS_USE_PTHREAD_MUTEX
-    pthread_mutex_t mutex;
+	pthread_mutex_t mutex;
 #endif
 
-    volatile bool_t  sense;
-    volatile dim_t   threads_arrived;
+	volatile bool_t  sense;
+	volatile dim_t   threads_arrived;
 };
 #endif
 
-typedef struct thread_comm_s thread_comm_t;
+typedef struct thrcomm_s thrcomm_t;
 
 #endif
 
 #endif
+

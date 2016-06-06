@@ -39,11 +39,11 @@ struct unpackv_s
 };
 typedef struct unpackv_s unpackv_t;
 
-#define cntl_sub_unpackv( cntl )      cntl->sub_unpackv
-#define cntl_sub_unpackv_x( cntl )    cntl->sub_unpackv_x
-#define cntl_sub_unpackv_x1( cntl )   cntl->sub_unpackv_x1
-#define cntl_sub_unpackv_y( cntl )    cntl->sub_unpackv_y
-#define cntl_sub_unpackv_y1( cntl )   cntl->sub_unpackv_y1
+#define bli_cntl_sub_unpackv( cntl )      cntl->sub_unpackv
+#define bli_cntl_sub_unpackv_x( cntl )    cntl->sub_unpackv_x
+#define bli_cntl_sub_unpackv_x1( cntl )   cntl->sub_unpackv_x1
+#define bli_cntl_sub_unpackv_y( cntl )    cntl->sub_unpackv_y
+#define bli_cntl_sub_unpackv_y1( cntl )   cntl->sub_unpackv_y1
 
 void     bli_unpackv_cntl_init( void );
 void     bli_unpackv_cntl_finalize( void );

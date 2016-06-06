@@ -47,7 +47,7 @@ struct trsm_s
 };
 typedef struct trsm_s trsm_t;
 
-#define cntl_sub_trsm( cntl )         cntl->sub_trsm
+#define bli_cntl_sub_trsm( cntl )         cntl->sub_trsm
 
 void    bli_trsm_cntl_init( void );
 void    bli_trsm_cntl_finalize( void );

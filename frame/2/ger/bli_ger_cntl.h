@@ -45,9 +45,9 @@ struct ger_s
 };
 typedef struct ger_s ger_t;
 
-#define cntl_sub_ger( cntl )      cntl->sub_ger
-#define cntl_sub_ger_rp( cntl )   cntl->sub_ger_rp
-#define cntl_sub_ger_cp( cntl )   cntl->sub_ger_cp
+#define bli_cntl_sub_ger( cntl )      cntl->sub_ger
+#define bli_cntl_sub_ger_rp( cntl )   cntl->sub_ger_rp
+#define bli_cntl_sub_ger_cp( cntl )   cntl->sub_ger_cp
 
 void   bli_ger_cntl_init( void );
 void   bli_ger_cntl_finalize( void );

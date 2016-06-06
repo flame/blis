@@ -49,7 +49,7 @@ typedef void (*FUNCPTR_T)(
                            void*   beta,
                            void*   c, inc_t rs_c, inc_t cs_c,
                            cntx_t* cntx,
-                           trmm_thrinfo_t* thread
+                           thrinfo_t* thread
                          );
 
 static FUNCPTR_T GENARRAY(ftypes,trmm_ll_ker_var2);
@@ -60,7 +60,7 @@ void bli_trmm_ll_ker_var2( obj_t*  a,
                            obj_t*  c,
                            cntx_t* cntx,
                            gemm_t* cntl,
-                           trmm_thrinfo_t* thread )
+                           thrinfo_t* thread )
 {
 	num_t     dt_exec   = bli_obj_execution_datatype( *c );
 
@@ -143,7 +143,7 @@ void PASTEMAC(ch,varname) \
        void*   beta, \
        void*   c, inc_t rs_c, inc_t cs_c, \
        cntx_t* cntx, \
-       trmm_thrinfo_t* jr_thread  \
+       thrinfo_t* jr_thread  \
      ) \
 { \
 	const num_t     dt         = PASTEMAC(ch,type); \
@@ -308,9 +308,9 @@ void PASTEMAC(ch,varname) \
 	b1 = b_cast; \
 	c1 = c_cast; \
 \
-	trmm_thrinfo_t* ir_thread = trmm_thread_sub_trmm( jr_thread ); \
-	dim_t jr_num_threads      = thread_n_way( jr_thread ); \
-	dim_t jr_thread_id        = thread_work_id( jr_thread ); \
+	thrinfo_t* ir_thread      = bli_thrinfo_sub_self( jr_thread ); \
+	dim_t jr_num_threads      = bli_thread_n_way( jr_thread ); \
+	dim_t jr_thread_id        = bli_thread_work_id( jr_thread ); \
 \
 	/* Loop over the n dimension (NR columns at a time). */ \
 	for ( j = 0; j < n_iter; ++j ) \

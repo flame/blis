@@ -43,11 +43,11 @@ typedef struct packv_s packv_t;
 
 #define cntl_bmid( cntl )          cntl->bmid
 
-#define cntl_sub_packv( cntl )     cntl->sub_packv
-#define cntl_sub_packv_x( cntl )   cntl->sub_packv_x
-#define cntl_sub_packv_x1( cntl )  cntl->sub_packv_x1
-#define cntl_sub_packv_y( cntl )   cntl->sub_packv_y
-#define cntl_sub_packv_y1( cntl )  cntl->sub_packv_y1
+#define bli_cntl_sub_packv( cntl )     cntl->sub_packv
+#define bli_cntl_sub_packv_x( cntl )   cntl->sub_packv_x
+#define bli_cntl_sub_packv_x1( cntl )  cntl->sub_packv_x1
+#define bli_cntl_sub_packv_y( cntl )   cntl->sub_packv_y
+#define bli_cntl_sub_packv_y1( cntl )  cntl->sub_packv_y1
 
 void     bli_packv_cntl_init( void );
 void     bli_packv_cntl_finalize( void );

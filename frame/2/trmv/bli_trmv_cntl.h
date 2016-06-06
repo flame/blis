@@ -46,7 +46,7 @@ struct trmv_s
 };
 typedef struct trmv_s trmv_t;
 
-#define cntl_sub_trmv( cntl )      cntl->sub_trmv
+#define bli_cntl_sub_trmv( cntl )      cntl->sub_trmv
 
 void    bli_trmv_cntl_init( void );
 void    bli_trmv_cntl_finalize( void );

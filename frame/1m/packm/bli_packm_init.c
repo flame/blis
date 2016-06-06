@@ -60,7 +60,7 @@ void bli_packm_init( obj_t*   a,
 
 	// First check if we are to skip this operation because the control tree
 	// is NULL, and if so, simply alias the object to its packed counterpart.
-	if ( cntl_is_noop( cntl ) )
+	if ( bli_cntl_is_noop( cntl ) )
 	{
 		bli_obj_alias_to( *a, *p );
 		return;
@@ -581,7 +581,7 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 void bli_packm_release( obj_t*   p,
                         packm_t* cntl )
 {
-	if ( !cntl_is_noop( cntl ) )
+	if ( !bli_cntl_is_noop( cntl ) )
 	    bli_obj_release_pack( p );
 }
 

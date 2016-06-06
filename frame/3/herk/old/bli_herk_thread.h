@@ -32,33 +32,13 @@
 
 */
 
-#include "blis.h"
+#define bli_thrinfo_sub_self( thread )    thread->sub_l3op
+#define bli_thrinfo_sub_opackm( thread )  thread->opackm
+#define bli_thrinfo_sub_ipackm( thread )  thread->ipackm
 
-void bli_packm_thrinfo_free( packm_thrinfo_t* thread )
-{
-    if( thread != NULL && thread != &BLIS_PACKM_SINGLE_THREADED)
-        bli_free_intl(thread);
-}
+// For use in herk micro-kernel
+#define herk_get_next_a_micropanel( thread, a1, step ) ( a1 + step * thread->n_way )
+#define herk_get_next_b_micropanel( thread, b1, step ) ( b1 + step * thread->n_way )
 
-packm_thrinfo_t* bli_create_packm_thread_info( thread_comm_t* ocomm, dim_t ocomm_id, thread_comm_t* icomm, dim_t icomm_id,
-                                               dim_t n_way, dim_t work_id )
-{
-    return (packm_thrinfo_t*) bli_create_thread_info( ocomm, ocomm_id, icomm, icomm_id, n_way, work_id );
-}
+//thrinfo_t** bli_herk_thrinfo_create_paths( void );
 
-void bli_setup_packm_thread_info( packm_thrinfo_t* thread, thread_comm_t* ocomm, dim_t ocomm_id,
-                                  thread_comm_t* icomm, dim_t icomm_id,
-                                  dim_t n_way, dim_t work_id )
-{
-    bli_setup_thread_info( (thrinfo_t*) thread, ocomm, ocomm_id, icomm, icomm_id, n_way, work_id );
-}
-
-void bli_setup_packm_single_threaded_info( packm_thrinfo_t* thread )
-{
-    thread->ocomm = &BLIS_SINGLE_COMM;
-    thread->ocomm_id = 0;
-    thread->icomm = &BLIS_SINGLE_COMM;
-    thread->icomm_id = 0;
-    thread->n_way = 1;
-    thread->work_id = 0;
-}

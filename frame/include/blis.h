@@ -70,7 +70,7 @@ extern "C" {
 
 // -- Threading definitions --
 
-#include "bli_threading.h"
+#include "bli_thread.h"
 
 
 // -- Constant definitions --

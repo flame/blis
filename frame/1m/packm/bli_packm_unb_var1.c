@@ -58,7 +58,7 @@ static FUNCPTR_T GENARRAY(ftypes,packm_unb_var1);
 void bli_packm_unb_var1( obj_t*   c,
                          obj_t*   p,
                          cntx_t*  cntx,
-                         packm_thrinfo_t* thread )
+                         thrinfo_t* thread )
 {
 	num_t     dt_cp     = bli_obj_datatype( *c );
 
@@ -96,7 +96,7 @@ void bli_packm_unb_var1( obj_t*   c,
 	// function pointer.
 	f = ftypes[dt_cp];
 
-    if( thread_am_ochief( thread ) ) {
+    if( bli_thread_am_ochief( thread ) ) {
         // Invoke the function.
         f
 		(

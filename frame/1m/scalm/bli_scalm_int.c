@@ -64,7 +64,7 @@ void bli_scalm_int( obj_t*   alpha,
 		bli_scalm_check( alpha, x );
 
 	// First check if we are to skip this operation.
-	if ( cntl_is_noop( cntl ) ) return;
+	if ( bli_cntl_is_noop( cntl ) ) return;
 
 	// Return early if both alpha and the scalar attached to x are unit.
 	if ( bli_obj_equals( alpha, &BLIS_ONE ) &&
@@ -85,8 +85,8 @@ void bli_scalm_int( obj_t*   alpha,
 	//}
 
 	// Extract the variant number and implementation type.
-	n = cntl_var_num( cntl );
-	i = cntl_impl_type( cntl );
+	n = bli_cntl_var_num( cntl );
+	i = bli_cntl_impl_type( cntl );
 
 	// Index into the variant array to extract the correct function pointer.
 	f = vars[n][i];

@@ -62,23 +62,23 @@ void bli_cntl_obj_free( void* cntl );
 
 // -- Control tree accessor macros (common to many node types) --
 
-#define cntl_impl_type( cntl )     cntl->impl_type
-#define cntl_var_num( cntl )       cntl->var_num
-#define cntl_bszid( cntl )         cntl->bszid
+#define bli_cntl_impl_type( cntl )     cntl->impl_type
+#define bli_cntl_var_num( cntl )       cntl->var_num
+#define bli_cntl_bszid( cntl )         cntl->bszid
 
 
 
 // -- Control tree query macros --
 
-#define cntl_is_noop( cntl ) \
+#define bli_cntl_is_noop( cntl ) \
 \
 	( cntl == NULL )
 
-#define cntl_is_leaf( cntl ) \
+#define bli_cntl_is_leaf( cntl ) \
 \
-	( cntl_impl_type( cntl ) != BLIS_BLOCKED )
+	( bli_cntl_impl_type( cntl ) != BLIS_BLOCKED )
 
-#define cntl_is_blocked( cntl ) \
+#define bli_cntl_is_blocked( cntl ) \
 \
-	( cntl_impl_type( cntl ) == BLIS_BLOCKED )
+	( bli_cntl_impl_type( cntl ) == BLIS_BLOCKED )
 

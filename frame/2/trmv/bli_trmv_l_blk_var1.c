@@ -61,7 +61,7 @@ void bli_trmv_l_blk_var1( obj_t*  alpha,
 	{
 		// Determine the current algorithmic blocksize.
 		b_alg = bli_determine_blocksize_b( ij, mn, a,
-		                                   cntl_bszid( cntl ), cntx );
+		                                   bli_cntl_bszid( cntl ), cntx );
 
 		// Acquire partitions for A11, A10, x1, and x0.
 		bli_acquire_mpart_br2tl( BLIS_SUBPART11,
@@ -75,23 +75,23 @@ void bli_trmv_l_blk_var1( obj_t*  alpha,
 
 		// Initialize objects for packing A11 and x1 (if needed).
 		bli_packm_init( &a11, &a11_pack,
-		                cntx, cntl_sub_packm_a11( cntl ) );
+		                cntx, bli_cntl_sub_packm_a11( cntl ) );
 		bli_packv_init( &x1, &x1_pack,
-		                cntx, cntl_sub_packv_x1( cntl ) );
+		                cntx, bli_cntl_sub_packv_x1( cntl ) );
 
 		// Copy/pack A11, x1 (if needed).
 		bli_packm_int( &a11, &a11_pack,
-		               cntx, cntl_sub_packm_a11( cntl ),
+		               cntx, bli_cntl_sub_packm_a11( cntl ),
                        &BLIS_PACKM_SINGLE_THREADED );
 		bli_packv_int( &x1, &x1_pack,
-		               cntx, cntl_sub_packv_x1( cntl ) );
+		               cntx, bli_cntl_sub_packv_x1( cntl ) );
 
 		// x1 = alpha * tril( A11 ) * x1;
 		bli_trmv_int( alpha,
 		              &a11_pack,
 		              &x1_pack,
 		              cntx,
-		              cntl_sub_trmv( cntl ) );
+		              bli_cntl_sub_trmv( cntl ) );
 
 		// x1 = x1 + alpha * A10 * x0;
 		bli_gemv_int( BLIS_NO_TRANSPOSE,
@@ -102,16 +102,16 @@ void bli_trmv_l_blk_var1( obj_t*  alpha,
 		              &BLIS_ONE,
 		              &x1_pack,
 		              cntx,
-		              cntl_sub_gemv_rp( cntl ) );
+		              bli_cntl_sub_gemv_rp( cntl ) );
 
 		// Copy/unpack x1 (if x1 was packed).
 		bli_unpackv_int( &x1_pack, &x1,
-		                 cntx, cntl_sub_unpackv_x1( cntl ) );
+		                 cntx, bli_cntl_sub_unpackv_x1( cntl ) );
 	}
 
 	// If any packing buffers were acquired within packm, release them back
 	// to the memory manager.
-	bli_packm_release( &a11_pack, cntl_sub_packm_a11( cntl ) );
-	bli_packv_release( &x1_pack, cntl_sub_packv_x1( cntl ) );
+	bli_packm_release( &a11_pack, bli_cntl_sub_packm_a11( cntl ) );
+	bli_packv_release( &x1_pack, bli_cntl_sub_packv_x1( cntl ) );
 }
 

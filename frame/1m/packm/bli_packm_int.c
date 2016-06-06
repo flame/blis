@@ -39,7 +39,7 @@
 typedef void (*FUNCPTR_T)( obj_t*   a,
                            obj_t*   p,
                            cntx_t*  cntx,
-                           packm_thrinfo_t* t );
+                           thrinfo_t* t );
 
 static FUNCPTR_T vars[6][3] =
 {
@@ -56,7 +56,7 @@ void bli_packm_int( obj_t*   a,
                     obj_t*   p,
                     cntx_t*  cntx,
                     packm_t* cntl,
-                    packm_thrinfo_t* thread )
+                    thrinfo_t* thread )
 {
 	varnum_t  n;
 	impl_t    i;
@@ -73,7 +73,7 @@ void bli_packm_int( obj_t*   a,
 	// First check if we are to skip this operation because the control tree
 	// is NULL. We return without taking any action because a was already
 	// aliased to p in packm_init().
-	if ( cntl_is_noop( cntl ) )
+	if ( bli_cntl_is_noop( cntl ) )
 	{
 		return;
 	}
@@ -115,8 +115,8 @@ void bli_packm_int( obj_t*   a,
 
 
 	// Extract the variant number and implementation type.
-	n = cntl_var_num( cntl );
-	i = cntl_impl_type( cntl );
+	n = bli_cntl_var_num( cntl );
+	i = bli_cntl_impl_type( cntl );
 
 	// Index into the variant array to extract the correct function pointer.
 	f = vars[n][i];
@@ -128,6 +128,6 @@ void bli_packm_int( obj_t*   a,
        thread );
 
     // Barrier so that packing is done before computation
-    thread_obarrier( thread );
+    bli_thread_obarrier( thread );
 }
 

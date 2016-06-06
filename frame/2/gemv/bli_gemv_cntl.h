@@ -46,13 +46,13 @@ struct gemv_s
 };
 typedef struct gemv_s gemv_t;
 
-#define cntl_sub_gemv( cntl )       cntl->sub_gemv
-#define cntl_sub_gemv_rp( cntl )    cntl->sub_gemv_rp
-#define cntl_sub_gemv_cp( cntl )    cntl->sub_gemv_cp
-#define cntl_sub_gemv_n_rp( cntl )  cntl->sub_gemv_n_rp
-#define cntl_sub_gemv_n_cp( cntl )  cntl->sub_gemv_n_cp
-#define cntl_sub_gemv_t_rp( cntl )  cntl->sub_gemv_t_rp
-#define cntl_sub_gemv_t_cp( cntl )  cntl->sub_gemv_t_cp
+#define bli_cntl_sub_gemv( cntl )       cntl->sub_gemv
+#define bli_cntl_sub_gemv_rp( cntl )    cntl->sub_gemv_rp
+#define bli_cntl_sub_gemv_cp( cntl )    cntl->sub_gemv_cp
+#define bli_cntl_sub_gemv_n_rp( cntl )  cntl->sub_gemv_n_rp
+#define bli_cntl_sub_gemv_n_cp( cntl )  cntl->sub_gemv_n_cp
+#define bli_cntl_sub_gemv_t_rp( cntl )  cntl->sub_gemv_t_rp
+#define bli_cntl_sub_gemv_t_cp( cntl )  cntl->sub_gemv_t_cp
 
 void    bli_gemv_cntl_init( void );
 void    bli_gemv_cntl_finalize( void );

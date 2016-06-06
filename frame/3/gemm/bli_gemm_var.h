@@ -47,7 +47,7 @@ void PASTEMAC0(opname) \
        obj_t*  c, \
        cntx_t* cntx, \
        gemm_t* cntl, \
-       gemm_thrinfo_t* thread  \
+       thrinfo_t* thread  \
      );
 
 GENPROT( gemm_blk_var1f )
@@ -84,7 +84,7 @@ void PASTEMAC(ch,varname) \
        void*   beta, \
        void*   c, inc_t rs_c, inc_t cs_c, \
        cntx_t* cntx, \
-       gemm_thrinfo_t* thread  \
+       thrinfo_t* thread  \
      );
 
 INSERT_GENTPROT_BASIC( gemm_ker_var2 )
