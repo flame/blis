@@ -45,7 +45,7 @@
 
 // -- LEVEL-3 MICRO-KERNEL CONSTANTS -------------------------------------------
 
-// -- Cache blocksizes --
+// -- Cache and register blocksizes --
 
 //
 // Constraints:
@@ -58,37 +58,59 @@
 //     (b) MR (for zero-padding purposes when MR and NR are "swapped")
 //
 
+#define BLIS_SGEMM_UKERNEL_PREFERS_CONTIG_ROWS
+#define BLIS_SGEMM_UKERNEL             bli_sgemm_opt_30x16
 #define BLIS_DEFAULT_MC_S              240
 #define BLIS_DEFAULT_KC_S              240
 #define BLIS_DEFAULT_NC_S              14400
+#define BLIS_DEFAULT_MR_S              30
+#define BLIS_DEFAULT_NR_S              16
+#define BLIS_PACKDIM_MR_S              32
+#define BLIS_PACKDIM_NR_S              16
 
+#if 1
+
+#define BLIS_DGEMM_UKERNEL_PREFERS_CONTIG_ROWS
+#define BLIS_DGEMM_UKERNEL             bli_dgemm_opt_30x8
 #define BLIS_DEFAULT_MC_D              120
 #define BLIS_DEFAULT_KC_D              240
 #define BLIS_DEFAULT_NC_D              14400
+#define BLIS_DEFAULT_MR_D              30
+#define BLIS_DEFAULT_NR_D              8
+#define BLIS_PACKDIM_MR_D              32
+#define BLIS_PACKDIM_NR_D              8
+
+#else
+
+#define BLIS_DGEMM_UKERNEL_PREFERS_CONTIG_ROWS
+#define BLIS_DGEMM_UKERNEL             bli_dgemm_opt_12x16
+#define BLIS_DEFAULT_MC_D              144
+#define BLIS_DEFAULT_KC_D              128
+#define BLIS_DEFAULT_NC_D              14400
+#define BLIS_DEFAULT_MR_D              12
+#define BLIS_DEFAULT_NR_D              16
+#define BLIS_PACKDIM_MR_D              12
+#define BLIS_PACKDIM_NR_D              16
+
+#endif
 
 /*
 #define BLIS_DEFAULT_MC_C              120
 #define BLIS_DEFAULT_KC_C              240
 #define BLIS_DEFAULT_NC_C              9600
+#define BLIS_DEFAULT_MR_C              8
+#define BLIS_DEFAULT_NR_C              4
+#define BLIS_PACKDIM_MR_C              8
+#define BLIS_PACKDIM_NR_C              4
 
 #define BLIS_DEFAULT_MC_Z              120
 #define BLIS_DEFAULT_KC_Z              240
 #define BLIS_DEFAULT_NC_Z              9600
+#define BLIS_DEFAULT_MR_Z              8
+#define BLIS_DEFAULT_NR_Z              4
+#define BLIS_PACKDIM_MR_Z              8
+#define BLIS_PACKDIM_NR_Z              4
 */
-
-// -- Register blocksizes --
-
-#define BLIS_DEFAULT_MR_S              30
-#define BLIS_DEFAULT_NR_S              16
-
-#define BLIS_DEFAULT_MR_D              30
-#define BLIS_DEFAULT_NR_D              8
-
-//#define BLIS_DEFAULT_MR_C              8
-//#define BLIS_DEFAULT_NR_C              4
-
-//#define BLIS_DEFAULT_MR_Z              8
-//#define BLIS_DEFAULT_NR_Z              4
 
 // NOTE: If the micro-kernel, which is typically unrolled to a factor
 // of f, handles leftover edge cases (ie: when k % f > 0) then these
@@ -122,99 +144,6 @@
 //#define BLIS_MAXIMUM_MC_Z              (BLIS_DEFAULT_MC_Z + BLIS_DEFAULT_MC_Z/4)
 //#define BLIS_MAXIMUM_KC_Z              (BLIS_DEFAULT_KC_Z + BLIS_DEFAULT_KC_Z/4)
 //#define BLIS_MAXIMUM_NC_Z              (BLIS_DEFAULT_NC_Z + BLIS_DEFAULT_NC_Z/4)
-
-// -- Packing register blocksize (for packed micro-panels) --
-
-// NOTE: These register blocksize "extensions" determine whether the
-// leading dimensions used within the packed micro-panels are equal to
-// or greater than their corresponding register blocksizes above.
-
-#define BLIS_PACKDIM_MR_S              (BLIS_DEFAULT_MR_S + 2)
-//#define BLIS_PACKDIM_NR_S              (BLIS_DEFAULT_NR_S + ...)
-
-#define BLIS_PACKDIM_MR_D              (BLIS_DEFAULT_MR_D + 2)
-//#define BLIS_PACKDIM_NR_D              (BLIS_DEFAULT_NR_D + ...)
-
-//#define BLIS_PACKDIM_MR_C              (BLIS_DEFAULT_MR_C + ...)
-//#define BLIS_PACKDIM_NR_C              (BLIS_DEFAULT_NR_C + ...)
-
-//#define BLIS_PACKDIM_MR_Z              (BLIS_DEFAULT_MR_Z + ...)
-//#define BLIS_PACKDIM_NR_Z              (BLIS_DEFAULT_NR_Z + ...)
-
-
-
-
-// -- LEVEL-2 KERNEL CONSTANTS -------------------------------------------------
-
-
-
-
-// -- LEVEL-1F KERNEL CONSTANTS ------------------------------------------------
-
-
-
-
-// -- LEVEL-3 KERNEL DEFINITIONS -----------------------------------------------
-
-// -- gemm --
-
-#define BLIS_SGEMM_UKERNEL_PREFERS_CONTIG_ROWS
-#define BLIS_DGEMM_UKERNEL_PREFERS_CONTIG_ROWS
-
-#define BLIS_DGEMM_UKERNEL         bli_dgemm_opt_30x8
-#define BLIS_SGEMM_UKERNEL         bli_sgemm_opt_30x16
-
-// -- trsm-related --
-
-
-// -- LEVEL-1M KERNEL DEFINITIONS ----------------------------------------------
-
-// -- packm --
-
-// -- unpackm --
-
-
-
-
-// -- LEVEL-1F KERNEL DEFINITIONS ----------------------------------------------
-
-// -- axpy2v --
-
-// -- dotaxpyv --
-
-// -- axpyf --
-
-// -- dotxf --
-
-// -- dotxaxpyf --
-
-
-
-
-// -- LEVEL-1V KERNEL DEFINITIONS ----------------------------------------------
-
-// -- addv --
-
-// -- axpyv --
-
-// -- copyv --
-
-// -- dotv --
-
-// -- dotxv --
-
-// -- invertv --
-
-// -- scal2v --
-
-// -- scalv --
-
-// -- setv --
-
-// -- subv --
-
-// -- swapv --
-
 
 
 #endif
