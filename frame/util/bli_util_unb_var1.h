@@ -161,6 +161,7 @@ void PASTEMAC(ch,varname) \
      );
 
 INSERT_GENTPROT_BASIC( randv_unb_var1 )
+INSERT_GENTPROT_BASIC( randnv_unb_var1 )
 
 
 #undef  GENTPROT
@@ -177,6 +178,7 @@ void PASTEMAC(ch,varname) \
      );
 
 INSERT_GENTPROT_BASIC( randm_unb_var1 )
+INSERT_GENTPROT_BASIC( randnm_unb_var1 )
 
 
 #undef  GENTPROTR

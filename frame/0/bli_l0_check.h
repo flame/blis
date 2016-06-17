@@ -59,6 +59,17 @@ GENTPROT( subsc )
 \
 void PASTEMAC(opname,_check) \
      ( \
+       obj_t*  chi  \
+     );
+
+GENTPROT( invertsc )
+
+
+#undef  GENTPROT
+#define GENTPROT( opname ) \
+\
+void PASTEMAC(opname,_check) \
+     ( \
        obj_t*  chi, \
        obj_t*  absq  \
      );
@@ -120,6 +131,11 @@ GENTPROT( zipsc )
 
 
 // -----------------------------------------------------------------------------
+
+void bli_l0_xsc_check
+     (
+       obj_t*  chi
+     );
 
 void bli_l0_xxsc_check
      (

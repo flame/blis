@@ -50,9 +50,14 @@
 #define bli_csqrt2ris( xr, xi, ar, ai ) \
 { \
 	float  s   = bli_fmaxabs( (xr), (xi) ); \
-	float  mag = sqrtf( s ) * \
-	             sqrtf( ( (xr) / s ) * (xr) + \
-	                    ( (xi) / s ) * (xi) ); \
+	float  mag; \
+	if ( s == 0.0F ) mag = 0.0F; \
+	else \
+	{ \
+		mag = sqrtf( s ) * \
+		      sqrtf( ( (xr) / s ) * (xr) + \
+		             ( (xi) / s ) * (xi) ); \
+	} \
 \
 	(ar)       = sqrtf( ( mag + (xr) ) / 2.0F ); \
 	(ai)       = sqrtf( ( mag - (xi) ) / 2.0F ); \
@@ -61,9 +66,14 @@
 #define bli_zsqrt2ris( xr, xi, ar, ai ) \
 { \
 	double s   = bli_fmaxabs( (xr), (xi) ); \
-	double mag = sqrt( s ) * \
-	             sqrt( ( (xr) / s ) * (xr) + \
-	                   ( (xi) / s ) * (xi) ); \
+	double mag; \
+	if ( s == 0.0 ) mag = 0.0; \
+	else \
+	{ \
+		mag = sqrt( s ) * \
+		      sqrt( ( (xr) / s ) * (xr) + \
+		            ( (xi) / s ) * (xi) ); \
+	} \
 \
 	(ar)       = sqrt( ( mag + (xr) ) / 2.0 ); \
 	(ai)       = sqrt( ( mag - (xi) ) / 2.0 ); \

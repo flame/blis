@@ -145,6 +145,15 @@ typedef enum
 } iface_t;
 
 
+typedef enum
+{
+	BLIS_TEST_RAND_REAL_VALUES = 0,
+	BLIS_TEST_RAND_NARROW_POW2 = 1,
+} rand_t;
+
+
+
+
 
 typedef struct
 {
@@ -154,6 +163,7 @@ typedef struct
 	char          storage[ NUM_OPERAND_TYPES ][ MAX_NUM_MSTORAGE + 1 ];
 	unsigned int  mix_all_storage;
 	unsigned int  alignment;
+	unsigned int  rand_method;
 	unsigned int  gs_spacing;
 	unsigned int  n_datatypes;
 	char          datatype_char[ MAX_NUM_DATATYPES + 1 ];
@@ -374,6 +384,13 @@ void fill_string_with_n_spaces( char* str, unsigned int n_spaces );
 void libblis_test_mobj_create( test_params_t* params, num_t dt, trans_t trans, char storage, dim_t m, dim_t n, obj_t* a );
 void libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, invdiag_t inv_diag, pack_t pack_schema, packbuf_t pack_buf, obj_t* a, obj_t* p, cntx_t* cntx );
 void libblis_test_vobj_create( test_params_t* params, num_t dt, char storage, dim_t m, obj_t* x );
+
+// --- Randomize/initialize object ---
+
+void libblis_test_vobj_randomize( test_params_t* params, bool_t normalize, obj_t* x );
+void libblis_test_mobj_randomize( test_params_t* params, bool_t normalize, obj_t* a );
+void libblis_test_mobj_load_diag( test_params_t* params, obj_t* a );
+void libblis_test_ceil_pow2( obj_t* alpha );
 
 // --- Global string initialization ---
 

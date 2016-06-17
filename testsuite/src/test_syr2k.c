@@ -46,37 +46,54 @@ static thresh_t  thresh[BLIS_NUM_FP_TYPES] = { { 1e-04, 1e-05 },   // warn, pass
                                                { 1e-13, 1e-14 } }; // warn, pass for z
 
 // Local prototypes.
-void libblis_test_syr2k_deps( test_params_t* params,
-                              test_op_t*     op );
+void libblis_test_syr2k_deps
+     (
+       test_params_t* params,
+       test_op_t*     op
+     );
 
-void libblis_test_syr2k_experiment( test_params_t* params,
-                                    test_op_t*     op,
-                                    iface_t        iface,
-                                    num_t          datatype,
-                                    char*          pc_str,
-                                    char*          sc_str,
-                                    unsigned int   p_cur,
-                                    double*        perf,
-                                    double*        resid );
+void libblis_test_syr2k_experiment
+     (
+       test_params_t* params,
+       test_op_t*     op,
+       iface_t        iface,
+       num_t          datatype,
+       char*          pc_str,
+       char*          sc_str,
+       unsigned int   p_cur,
+       double*        perf,
+       double*        resid
+     );
 
-void libblis_test_syr2k_impl( iface_t   iface,
-                              obj_t*    alpha,
-                              obj_t*    a,
-                              obj_t*    b,
-                              obj_t*    beta,
-                              obj_t*    c );
+void libblis_test_syr2k_impl
+     (
+       iface_t   iface,
+       obj_t*    alpha,
+       obj_t*    a,
+       obj_t*    b,
+       obj_t*    beta,
+       obj_t*    c
+     );
 
-void libblis_test_syr2k_check( obj_t*  alpha,
-                               obj_t*  a,
-                               obj_t*  b,
-                               obj_t*  beta,
-                               obj_t*  c,
-                               obj_t*  c_orig,
-                               double* resid );
+void libblis_test_syr2k_check
+     (
+       test_params_t* params,
+       obj_t*         alpha,
+       obj_t*         a,
+       obj_t*         b,
+       obj_t*         beta,
+       obj_t*         c,
+       obj_t*         c_orig,
+       double*        resid
+     );
 
 
 
-void libblis_test_syr2k_deps( test_params_t* params, test_op_t* op )
+void libblis_test_syr2k_deps
+     (
+       test_params_t* params,
+       test_op_t*     op
+     )
 {
 	libblis_test_randv( params, &(op->ops->randv) );
 	libblis_test_randm( params, &(op->ops->randm) );
@@ -92,7 +109,11 @@ void libblis_test_syr2k_deps( test_params_t* params, test_op_t* op )
 
 
 
-void libblis_test_syr2k( test_params_t* params, test_op_t* op )
+void libblis_test_syr2k
+     (
+       test_params_t* params,
+       test_op_t*     op
+     )
 {
 
 	// Return early if this test has already been done.
@@ -121,15 +142,18 @@ void libblis_test_syr2k( test_params_t* params, test_op_t* op )
 
 
 
-void libblis_test_syr2k_experiment( test_params_t* params,
-                                    test_op_t*     op,
-                                    iface_t        iface,
-                                    num_t          datatype,
-                                    char*          pc_str,
-                                    char*          sc_str,
-                                    unsigned int   p_cur,
-                                    double*        perf,
-                                    double*        resid )
+void libblis_test_syr2k_experiment
+     (
+       test_params_t* params,
+       test_op_t*     op,
+       iface_t        iface,
+       num_t          datatype,
+       char*          pc_str,
+       char*          sc_str,
+       unsigned int   p_cur,
+       double*        perf,
+       double*        resid
+     )
 {
 	unsigned int n_repeats = params->n_repeats;
 	unsigned int i;
@@ -142,7 +166,6 @@ void libblis_test_syr2k_experiment( test_params_t* params,
 	uplo_t       uploc;
 	trans_t      transa, transb;
 
-	obj_t        kappa;
 	obj_t        alpha, a, b, beta, c;
 	obj_t        c_save;
 
@@ -157,7 +180,6 @@ void libblis_test_syr2k_experiment( test_params_t* params,
 	bli_param_map_char_to_blis_trans( pc_str[2], &transb );
 
 	// Create test scalars.
-	bli_obj_scalar_init_detached( datatype, &kappa );
 	bli_obj_scalar_init_detached( datatype, &alpha );
 	bli_obj_scalar_init_detached( datatype, &beta );
 
@@ -186,8 +208,8 @@ void libblis_test_syr2k_experiment( test_params_t* params,
 	}
 
 	// Randomize A and B.
-	bli_randm( &a );
-	bli_randm( &b );
+	libblis_test_mobj_randomize( params, TRUE, &a );
+	libblis_test_mobj_randomize( params, TRUE, &b );
 
 	// Set the structure and uplo properties of C.
 	bli_obj_set_struc( BLIS_SYMMETRIC, c );
@@ -195,7 +217,7 @@ void libblis_test_syr2k_experiment( test_params_t* params,
 
 	// Randomize A, make it densely symmetric, and zero the unstored triangle
 	// to ensure the implementation is reads only from the stored region.
-	bli_randm( &c );
+	libblis_test_mobj_randomize( params, TRUE, &c );
 	bli_mksymm( &c );
 	bli_mktrim( &c );
 
@@ -203,11 +225,6 @@ void libblis_test_syr2k_experiment( test_params_t* params,
 	bli_obj_set_struc( BLIS_SYMMETRIC, c_save );
 	bli_obj_set_uplo( uploc, c_save );
 	bli_copym( &c, &c_save );
-
-	// Normalize by k.
-	bli_setsc( 1.0/( double )k, 0.0, &kappa );
-	bli_scalm( &kappa, &a );
-	bli_scalm( &kappa, &b );
 
 	// Apply the remaining parameters.
 	bli_obj_set_conjtrans( transa, a );
@@ -230,7 +247,7 @@ void libblis_test_syr2k_experiment( test_params_t* params,
 	if ( bli_obj_is_complex( c ) ) *perf *= 4.0;
 
 	// Perform checks.
-	libblis_test_syr2k_check( &alpha, &a, &b, &beta, &c, &c_save, resid );
+	libblis_test_syr2k_check( params, &alpha, &a, &b, &beta, &c, &c_save, resid );
 
 	// Zero out performance and residual if output matrix is empty.
 	libblis_test_check_empty_problem( &c, perf, resid );
@@ -244,12 +261,15 @@ void libblis_test_syr2k_experiment( test_params_t* params,
 
 
 
-void libblis_test_syr2k_impl( iface_t   iface,
-                              obj_t*    alpha,
-                              obj_t*    a,
-                              obj_t*    b,
-                              obj_t*    beta,
-                              obj_t*    c )
+void libblis_test_syr2k_impl
+     (
+       iface_t   iface,
+       obj_t*    alpha,
+       obj_t*    a,
+       obj_t*    b,
+       obj_t*    beta,
+       obj_t*    c
+     )
 {
 	switch ( iface )
 	{
@@ -266,13 +286,17 @@ void libblis_test_syr2k_impl( iface_t   iface,
 
 
 
-void libblis_test_syr2k_check( obj_t*  alpha,
-                               obj_t*  a,
-                               obj_t*  b,
-                               obj_t*  beta,
-                               obj_t*  c,
-                               obj_t*  c_orig,
-                               double* resid )
+void libblis_test_syr2k_check
+     (
+       test_params_t* params,
+       obj_t*         alpha,
+       obj_t*         a,
+       obj_t*         b,
+       obj_t*         beta,
+       obj_t*         c,
+       obj_t*         c_orig,
+       double*        resid
+     )
 {
 	num_t  dt      = bli_obj_datatype( *c );
 	num_t  dt_real = bli_obj_datatype_proj_to_real( *c );
@@ -281,7 +305,7 @@ void libblis_test_syr2k_check( obj_t*  alpha,
 	dim_t  k       = bli_obj_width_after_trans( *a );
 
 	obj_t  at, bt;
-	obj_t  kappa, norm;
+	obj_t  norm;
 	obj_t  t, v, w1, w2, z;
 
 	double junk;
@@ -317,7 +341,6 @@ void libblis_test_syr2k_check( obj_t*  alpha,
 	bli_obj_alias_with_trans( BLIS_TRANSPOSE, *a, at );
 	bli_obj_alias_with_trans( BLIS_TRANSPOSE, *b, bt );
 
-	bli_obj_scalar_init_detached( dt,      &kappa );
 	bli_obj_scalar_init_detached( dt_real, &norm );
 
 	bli_obj_create( dt, m, 1, 0, 0, &t );
@@ -326,9 +349,7 @@ void libblis_test_syr2k_check( obj_t*  alpha,
 	bli_obj_create( dt, k, 1, 0, 0, &w2 );
 	bli_obj_create( dt, m, 1, 0, 0, &z );
 
-	bli_randv( &t );
-	bli_setsc( 1.0/( double )m, 0.0, &kappa );
-	bli_scalv( &kappa, &t );
+	libblis_test_vobj_randomize( params, TRUE, &t );
 
 	bli_symv( &BLIS_ONE, c, &t, &BLIS_ZERO, &v );
 

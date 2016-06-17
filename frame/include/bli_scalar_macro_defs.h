@@ -163,6 +163,7 @@
 #include "bli_neg2s.h"
 
 #include "bli_rands.h"
+#include "bli_randnp2s.h"
 
 #include "bli_scals.h"
 #include "bli_scaljs.h"

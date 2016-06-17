@@ -46,33 +46,50 @@ static thresh_t  thresh[BLIS_NUM_FP_TYPES] = { { 1e-04, 1e-05 },   // warn, pass
                                                { 1e-13, 1e-14 } }; // warn, pass for z
 
 // Local prototypes.
-void libblis_test_syr_deps( test_params_t* params,
-                            test_op_t*     op );
+void libblis_test_syr_deps
+     (
+       test_params_t* params,
+       test_op_t*     op
+     );
 
-void libblis_test_syr_experiment( test_params_t* params,
-                                  test_op_t*     op,
-                                  iface_t        iface,
-                                  num_t          datatype,
-                                  char*          pc_str,
-                                  char*          sc_str,
-                                  unsigned int   p_cur,
-                                  double*        perf,
-                                  double*        resid );
+void libblis_test_syr_experiment
+     (
+       test_params_t* params,
+       test_op_t*     op,
+       iface_t        iface,
+       num_t          datatype,
+       char*          pc_str,
+       char*          sc_str,
+       unsigned int   p_cur,
+       double*        perf,
+       double*        resid
+     );
 
-void libblis_test_syr_impl( iface_t   iface,
-                            obj_t*    alpha,
-                            obj_t*    x,
-                            obj_t*    a );
+void libblis_test_syr_impl
+     (
+       iface_t   iface,
+       obj_t*    alpha,
+       obj_t*    x,
+       obj_t*    a
+     );
 
-void libblis_test_syr_check( obj_t*  alpha,
-                             obj_t*  x,
-                             obj_t*  a,
-                             obj_t*  a_orig,
-                             double* resid );
+void libblis_test_syr_check
+     (
+       test_params_t* params,
+       obj_t*         alpha,
+       obj_t*         x,
+       obj_t*         a,
+       obj_t*         a_orig,
+       double*        resid
+     );
 
 
 
-void libblis_test_syr_deps( test_params_t* params, test_op_t* op )
+void libblis_test_syr_deps
+     (
+       test_params_t* params,
+       test_op_t*     op
+     )
 {
 	libblis_test_randv( params, &(op->ops->randv) );
 	libblis_test_randm( params, &(op->ops->randm) );
@@ -86,7 +103,11 @@ void libblis_test_syr_deps( test_params_t* params, test_op_t* op )
 
 
 
-void libblis_test_syr( test_params_t* params, test_op_t* op )
+void libblis_test_syr
+     (
+       test_params_t* params,
+       test_op_t*     op
+     )
 {
 
 	// Return early if this test has already been done.
@@ -115,15 +136,18 @@ void libblis_test_syr( test_params_t* params, test_op_t* op )
 
 
 
-void libblis_test_syr_experiment( test_params_t* params,
-                                  test_op_t*     op,
-                                  iface_t        iface,
-                                  num_t          datatype,
-                                  char*          pc_str,
-                                  char*          sc_str,
-                                  unsigned int   p_cur,
-                                  double*        perf,
-                                  double*        resid )
+void libblis_test_syr_experiment
+     (
+       test_params_t* params,
+       test_op_t*     op,
+       iface_t        iface,
+       num_t          datatype,
+       char*          pc_str,
+       char*          sc_str,
+       unsigned int   p_cur,
+       double*        perf,
+       double*        resid
+     )
 {
 	unsigned int n_repeats = params->n_repeats;
 	unsigned int i;
@@ -160,10 +184,10 @@ void libblis_test_syr_experiment( test_params_t* params,
 
 	// Set alpha.
 	//bli_copysc( &BLIS_MINUS_ONE, &alpha );
-	bli_setsc( -1.0, 1.0, &alpha );
+	bli_setsc( -1.0, 0.5, &alpha );
 
 	// Randomize x.
-	bli_randv( &x );
+	libblis_test_vobj_randomize( params, TRUE, &x );
 
 	// Set the structure and uplo properties of A.
 	bli_obj_set_struc( BLIS_SYMMETRIC, a );
@@ -171,7 +195,7 @@ void libblis_test_syr_experiment( test_params_t* params,
 
 	// Randomize A, make it densely symmetric, and zero the unstored triangle
 	// to ensure the implementation is reads only from the stored region.
-	bli_randm( &a );
+	libblis_test_mobj_randomize( params, TRUE, &a );
 	bli_mksymm( &a );
 	bli_mktrim( &a );
 
@@ -199,7 +223,7 @@ void libblis_test_syr_experiment( test_params_t* params,
 	if ( bli_obj_is_complex( a ) ) *perf *= 4.0;
 
 	// Perform checks.
-	libblis_test_syr_check( &alpha, &x, &a, &a_save, resid );
+	libblis_test_syr_check( params, &alpha, &x, &a, &a_save, resid );
 
 	// Zero out performance and residual if output matrix is empty.
 	libblis_test_check_empty_problem( &a, perf, resid );
@@ -212,10 +236,13 @@ void libblis_test_syr_experiment( test_params_t* params,
 
 
 
-void libblis_test_syr_impl( iface_t   iface,
-                            obj_t*    alpha,
-                            obj_t*    x,
-                            obj_t*    a )
+void libblis_test_syr_impl
+     (
+       iface_t   iface,
+       obj_t*    alpha,
+       obj_t*    x,
+       obj_t*    a
+     )
 {
 	switch ( iface )
 	{
@@ -230,11 +257,15 @@ void libblis_test_syr_impl( iface_t   iface,
 
 
 
-void libblis_test_syr_check( obj_t*  alpha,
-                             obj_t*  x,
-                             obj_t*  a,
-                             obj_t*  a_orig,
-                             double* resid )
+void libblis_test_syr_check
+     (
+       test_params_t* params,
+       obj_t*         alpha,
+       obj_t*         x,
+       obj_t*         a,
+       obj_t*         a_orig,
+       double*        resid
+     )
 {
 	num_t  dt      = bli_obj_datatype( *a );
 	num_t  dt_real = bli_obj_datatype_proj_to_real( *a );
@@ -242,7 +273,7 @@ void libblis_test_syr_check( obj_t*  alpha,
 	dim_t  m_a     = bli_obj_length( *a );
 
 	obj_t  xt, t, v, w;
-	obj_t  tau, rho, norm;
+	obj_t  rho, norm;
 
 	double junk;
 
@@ -278,7 +309,6 @@ void libblis_test_syr_check( obj_t*  alpha,
 	bli_obj_set_uplo( BLIS_DENSE, *a );
 	bli_obj_set_uplo( BLIS_DENSE, *a_orig );
 
-	bli_obj_scalar_init_detached( dt,      &tau );
 	bli_obj_scalar_init_detached( dt,      &rho );
 	bli_obj_scalar_init_detached( dt_real, &norm );
 
@@ -288,8 +318,7 @@ void libblis_test_syr_check( obj_t*  alpha,
 
 	bli_obj_alias_to( *x, xt );
 
-	bli_setsc( 1.0/( double )m_a, -1.0/( double )m_a, &tau );
-	bli_setv( &tau, &t );
+	libblis_test_vobj_randomize( params, TRUE, &t );
 
 	bli_gemv( &BLIS_ONE, a, &t, &BLIS_ZERO, &v );
 

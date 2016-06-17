@@ -46,35 +46,52 @@ static thresh_t  thresh[BLIS_NUM_FP_TYPES] = { { 1e-04, 1e-05 },   // warn, pass
                                                { 1e-13, 1e-14 } }; // warn, pass for z
 
 // Local prototypes.
-void libblis_test_trsm_ukr_deps( test_params_t* params,
-                                 test_op_t*     op );
+void libblis_test_trsm_ukr_deps
+     (
+       test_params_t* params,
+       test_op_t*     op
+     );
 
-void libblis_test_trsm_ukr_experiment( test_params_t* params,
-                                       test_op_t*     op,
-                                       iface_t        iface,
-                                       num_t          datatype,
-                                       char*          pc_str,
-                                       char*          sc_str,
-                                       unsigned int   p_cur,
-                                       double*        perf,
-                                       double*        resid );
+void libblis_test_trsm_ukr_experiment
+     (
+       test_params_t* params,
+       test_op_t*     op,
+       iface_t        iface,
+       num_t          datatype,
+       char*          pc_str,
+       char*          sc_str,
+       unsigned int   p_cur,
+       double*        perf,
+       double*        resid
+     );
 
-void libblis_test_trsm_ukr_impl( iface_t   iface,
-                                 side_t    side,
-                                 obj_t*    a,
-                                 obj_t*    b,
-                                 obj_t*    c,
-                                 cntx_t*   cntx );
+void libblis_test_trsm_ukr_impl
+     (
+       iface_t   iface,
+       side_t    side,
+       obj_t*    a,
+       obj_t*    b,
+       obj_t*    c,
+       cntx_t*   cntx
+     );
 
-void libblis_test_trsm_ukr_check( side_t  side,
-                                  obj_t*  a,
-                                  obj_t*  b,
-                                  obj_t*  b_orig,
-                                  double* resid );
+void libblis_test_trsm_ukr_check
+     (
+       test_params_t* params,
+       side_t         side,
+       obj_t*         a,
+       obj_t*         b,
+       obj_t*         b_orig,
+       double*        resid
+     );
 
 
 
-void libblis_test_trsm_ukr_deps( test_params_t* params, test_op_t* op )
+void libblis_test_trsm_ukr_deps
+     (
+       test_params_t* params,
+       test_op_t*     op
+     )
 {
 	libblis_test_randv( params, &(op->ops->randv) );
 	libblis_test_randm( params, &(op->ops->randm) );
@@ -90,7 +107,11 @@ void libblis_test_trsm_ukr_deps( test_params_t* params, test_op_t* op )
 
 
 
-void libblis_test_trsm_ukr( test_params_t* params, test_op_t* op )
+void libblis_test_trsm_ukr
+     (
+       test_params_t* params,
+       test_op_t*     op
+     )
 {
 
 	// Return early if this test has already been done.
@@ -123,15 +144,18 @@ extern blksz_t* gemm_mr;
 extern blksz_t* gemm_nr;
 extern blksz_t* gemm_kr;
 
-void libblis_test_trsm_ukr_experiment( test_params_t* params,
-                                       test_op_t*     op,
-                                       iface_t        iface,
-                                       num_t          datatype,
-                                       char*          pc_str,
-                                       char*          sc_str,
-                                       unsigned int   p_cur,
-                                       double*        perf,
-                                       double*        resid )
+void libblis_test_trsm_ukr_experiment
+     (
+       test_params_t* params,
+       test_op_t*     op,
+       iface_t        iface,
+       num_t          datatype,
+       char*          pc_str,
+       char*          sc_str,
+       unsigned int   p_cur,
+       double*        perf,
+       double*        resid
+     )
 {
 	unsigned int n_repeats = params->n_repeats;
 	unsigned int i;
@@ -147,7 +171,6 @@ void libblis_test_trsm_ukr_experiment( test_params_t* params,
 	side_t       side = BLIS_LEFT;
 	uplo_t       uploa;
 
-	obj_t        kappa;
 	obj_t        a, b, c;
 	obj_t        ap, bp;
 	obj_t        c_save;
@@ -170,7 +193,6 @@ void libblis_test_trsm_ukr_experiment( test_params_t* params,
 	bli_param_map_char_to_blis_uplo( pc_str[0], &uploa );
 
 	// Create test scalars.
-	bli_obj_scalar_init_detached( datatype, &kappa );
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
@@ -188,20 +210,16 @@ void libblis_test_trsm_ukr_experiment( test_params_t* params,
 	bli_obj_set_diag_offset( 0, a );
 
 	// Randomize A, make it densely triangular.
-	bli_randm( &a );
+	libblis_test_mobj_randomize( params, TRUE, &a );
+	libblis_test_mobj_load_diag( params, &a );
 	bli_mktrim( &a );
 
 	// Randomize B.
-	bli_randm( &b );
+	libblis_test_mobj_randomize( params, TRUE, &b );
 
 	// Randomize C and save C.
-	bli_randm( &c );
+	libblis_test_mobj_randomize( params, TRUE, &c );
 	bli_copym( &c, &c_save );
-
-	// Normalize by m.
-	bli_setsc( 1.0/( double )m, 0.0, &kappa );
-	bli_scalm( &kappa, &b );
-
 
 	// Initialize pack objects.
 	bli_obj_init_pack( &ap );
@@ -254,7 +272,7 @@ void libblis_test_trsm_ukr_experiment( test_params_t* params,
 	if ( bli_obj_is_complex( b ) ) *perf *= 4.0;
 
 	// Perform checks.
-	libblis_test_trsm_ukr_check( side, &a, &c, &b, resid );
+	libblis_test_trsm_ukr_check( params, side, &a, &c, &b, resid );
 
 	// Zero out performance and residual if output matrix is empty.
 	libblis_test_check_empty_problem( &c, perf, resid );
@@ -275,12 +293,15 @@ void libblis_test_trsm_ukr_experiment( test_params_t* params,
 
 
 
-void libblis_test_trsm_ukr_impl( iface_t   iface,
-                                 side_t    side,
-                                 obj_t*    a,
-                                 obj_t*    b,
-                                 obj_t*    c,
-                                 cntx_t*   cntx )
+void libblis_test_trsm_ukr_impl
+     (
+       iface_t   iface,
+       side_t    side,
+       obj_t*    a,
+       obj_t*    b,
+       obj_t*    c,
+       cntx_t*   cntx
+     )
 {
 	switch ( iface )
 	{
@@ -295,11 +316,15 @@ void libblis_test_trsm_ukr_impl( iface_t   iface,
 
 
 
-void libblis_test_trsm_ukr_check( side_t  side,
-                                  obj_t*  a,
-                                  obj_t*  b,
-                                  obj_t*  b_orig,
-                                  double* resid )
+void libblis_test_trsm_ukr_check
+     (
+       test_params_t* params,
+       side_t         side,
+       obj_t*         a,
+       obj_t*         b,
+       obj_t*         b_orig,
+       double*        resid
+     )
 {
 	num_t  dt      = bli_obj_datatype( *b );
 	num_t  dt_real = bli_obj_datatype_proj_to_real( *b );
@@ -307,7 +332,7 @@ void libblis_test_trsm_ukr_check( side_t  side,
 	dim_t  m       = bli_obj_length( *b );
 	dim_t  n       = bli_obj_width( *b );
 
-	obj_t  kappa, norm;
+	obj_t  norm;
 	obj_t  t, v, w, z;
 
 	double junk;
@@ -338,7 +363,6 @@ void libblis_test_trsm_ukr_check( side_t  side,
 	//     = B * tinv(ransa(A)) * t
 	//     = B * w
 
-	bli_obj_scalar_init_detached( dt,      &kappa );
 	bli_obj_scalar_init_detached( dt_real, &norm );
 
 	if ( bli_is_left( side ) )
@@ -356,9 +380,7 @@ void libblis_test_trsm_ukr_check( side_t  side,
 		bli_obj_create( dt, m, 1, 0, 0, &z );
 	}
 
-	bli_randv( &t );
-	bli_setsc( 1.0/( double )n, 0.0, &kappa );
-	bli_scalv( &kappa, &t );
+	libblis_test_vobj_randomize( params, TRUE, &t );
 
 	bli_gemv( &BLIS_ONE, b, &t, &BLIS_ZERO, &v );
 

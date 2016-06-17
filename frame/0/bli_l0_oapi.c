@@ -116,6 +116,36 @@ GENFRONT( subsc )
 \
 void PASTEMAC0(opname) \
      ( \
+       obj_t*  chi  \
+     ) \
+{ \
+	num_t     dt        = bli_obj_datatype( *chi ); \
+\
+	conj_t    conjchi   = bli_obj_conj_status( *chi ); \
+\
+    void*     buf_chi   = bli_obj_buffer_for_1x1( dt, *chi ); \
+\
+	if ( bli_error_checking_is_enabled() ) \
+	    PASTEMAC(opname,_check)( chi ); \
+\
+	/* Invoke the typed function. */ \
+	bli_call_ft_2 \
+	( \
+	   dt, \
+	   opname, \
+	   conjchi, \
+	   buf_chi  \
+	); \
+}
+
+GENFRONT( invertsc )
+
+
+#undef  GENFRONT
+#define GENFRONT( opname ) \
+\
+void PASTEMAC0(opname) \
+     ( \
        obj_t*  chi, \
        obj_t*  psi  \
      ) \
