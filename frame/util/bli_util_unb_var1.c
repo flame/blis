@@ -947,6 +947,8 @@ void PASTEMAC(ch,varname) \
 				  cntx  \
 				); \
 \
+				( void )x0; \
+				( void )chi1; \
 				/* We want positive diagonal elements between 1 and 2. */ \
 /*
 				PASTEMAC(ch,abval2s)( *chi1, *chi1 ); \
@@ -984,6 +986,8 @@ void PASTEMAC(ch,varname) \
 				  cntx  \
 				); \
 \
+				( void )x2; \
+				( void )chi1; \
 				/* We want positive diagonal elements between 1 and 2. */ \
 /*
 				PASTEMAC(ch,abval2s)( *chi1, *chi1 ); \
