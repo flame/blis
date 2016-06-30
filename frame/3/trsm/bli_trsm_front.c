@@ -34,13 +34,16 @@
 
 #include "blis.h"
 
-void bli_trsm_front( side_t  side,
-                     obj_t*  alpha,
-                     obj_t*  a,
-                     obj_t*  b,
-                     cntx_t* cntx,
-                     trsm_t* l_cntl,
-                     trsm_t* r_cntl )
+void bli_trsm_front
+     (
+       side_t  side,
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       cntx_t* cntx,
+       trsm_t* l_cntl,
+       trsm_t* r_cntl
+     )
 {
 	trsm_t* cntl;
 	obj_t   a_local;

@@ -55,12 +55,15 @@ typedef void (*FUNCPTR_T)(
 static FUNCPTR_T GENARRAY(ftypes,trmm_lu_ker_var2);
 
 
-void bli_trmm_lu_ker_var2( obj_t*  a,
-                           obj_t*  b,
-                           obj_t*  c,
-                           cntx_t* cntx,
-                           gemm_t* cntl,
-                           thrinfo_t* thread )
+void bli_trmm_lu_ker_var2
+     (
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  c,
+       cntx_t* cntx,
+       gemm_t* cntl,
+       thrinfo_t* thread
+     )
 {
 	num_t     dt_exec   = bli_obj_execution_datatype( *c );
 

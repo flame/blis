@@ -68,7 +68,7 @@ void    bli_thread_finalize( void );
 bool_t  bli_thread_is_initialized( void );
 
 // Thread range-related prototypes.
-void bli_thread_get_range
+void bli_thread_get_range_sub
      (
        thrinfo_t* thread,
        dim_t      n,
@@ -77,6 +77,24 @@ void bli_thread_get_range
        dim_t*     start,
        dim_t*     end
      );
+
+#undef  GENPROT
+#define GENPROT( opname ) \
+\
+siz_t PASTEMAC0( opname ) \
+     ( \
+       dir_t      direct, \
+       thrinfo_t* thr, \
+       obj_t*     a, \
+       blksz_t*   bmult, \
+       dim_t*     start, \
+       dim_t*     end  \
+     );
+
+GENPROT( thread_get_range_mdim )
+GENPROT( thread_get_range_ndim )
+GENPROT( thread_get_range_weighted_mdim )
+GENPROT( thread_get_range_weighted_ndim )
 
 #undef  GENPROT
 #define GENPROT( opname ) \
@@ -119,7 +137,7 @@ siz_t bli_find_area_trap_l
        dim_t  n,
        doff_t diagoff
      );
-siz_t bli_thread_get_range_weighted
+siz_t bli_thread_get_range_weighted_sub
      (
        thrinfo_t* thread,
        doff_t     diagoff,

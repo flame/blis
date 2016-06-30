@@ -50,16 +50,16 @@ void PASTEMAC0(opname) \
        thrinfo_t* thread  \
      );
 
-GENPROT( gemm_blk_var1f )
-GENPROT( gemm_blk_var2f )
-GENPROT( gemm_blk_var3f )
+GENPROT( gemm_blk_var1 )
+GENPROT( gemm_blk_var2 )
+GENPROT( gemm_blk_var3 )
 
 GENPROT( gemm_ker_var2 )
 
 // Headers for induced algorithms:
-GENPROT( gemm_blk_var4f ) // 3m3
-GENPROT( gemm_ker_var3 )  // 4m1b
-GENPROT( gemm_ker_var4 )  // 3m2
+GENPROT( gemm_blk_var4 ) // 3m3
+GENPROT( gemm_ker_var3 ) // 4m1b
+GENPROT( gemm_ker_var4 ) // 3m2
 
 
 //

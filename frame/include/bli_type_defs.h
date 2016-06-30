@@ -501,6 +501,15 @@ typedef enum
 } packbuf_t;
 
 
+// -- Partitioning direction --
+
+typedef enum
+{
+	BLIS_FWD,
+	BLIS_BWD
+} dir_t;
+
+
 //
 // -- BLIS misc. structure types -----------------------------------------------
 //

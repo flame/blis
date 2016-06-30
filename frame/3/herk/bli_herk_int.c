@@ -34,51 +34,38 @@
 
 #include "blis.h"
 
-#define FUNCPTR_T herk_fp
-
-typedef void (*FUNCPTR_T)( obj_t*  a,
-                           obj_t*  ah,
-                           obj_t*  c,
-                           cntx_t* cntx,
-                           gemm_t* cntl,
-                           thrinfo_t* thread );
-
-static FUNCPTR_T vars[2][4][3] =
+#if 1
+static gemm_voft vars[4][3] =
 {
-	// lower
-	{
-		// unblocked          optimized unblocked   blocked
-		{ NULL,               NULL,                 bli_herk_blk_var1f  },
-		{ NULL,               bli_herk_l_ker_var2,  bli_herk_blk_var2f  },
-		{ NULL,               NULL,                 bli_herk_blk_var3f  },
-		{ NULL,               NULL,                 NULL                },
-	},
-	// upper
-	{
-		// unblocked          optimized unblocked   blocked
-		{ NULL,               NULL,                 bli_herk_blk_var1f  },
-		{ NULL,               bli_herk_u_ker_var2,  bli_herk_blk_var2f  },
-		{ NULL,               NULL,                 bli_herk_blk_var3f  },
-		{ NULL,               NULL,                 NULL                },
-	}
+    // unblocked            optimized unblocked    blocked
+    { NULL,                 NULL,                 bli_herk_blk_var1 },
+    { NULL,                 bli_herk_x_ker_var2,  bli_herk_blk_var2 },
+    { NULL,                 NULL,                 bli_herk_blk_var3 },
+    { NULL,                 NULL,                 NULL              },
 };
+#endif
 
-void bli_herk_int( obj_t*  alpha,
-                   obj_t*  a,
-                   obj_t*  ah,
-                   obj_t*  beta,
-                   obj_t*  c,
-                   cntx_t* cntx,
-                   gemm_t* cntl,
-                   thrinfo_t* thread )
+void bli_herk_int
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  ah,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       gemm_t* cntl,
+       thrinfo_t* thread
+     )
 {
 	obj_t     a_local;
 	obj_t     ah_local;
 	obj_t     c_local;
+#if 0
+	bool_t    uplo;
+#endif
 	varnum_t  n;
 	impl_t    i;
-	bool_t    uplo;
-	FUNCPTR_T f;
+	gemm_voft f;
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
@@ -129,23 +116,31 @@ void bli_herk_int( obj_t*  alpha,
         bli_obj_scalar_apply_scalar( beta, &c_local );
 	}
 
+#if 0
 	// Set a bool based on the uplo field of C's root object.
 	if ( bli_obj_root_is_lower( c_local ) ) uplo = 0;
 	else                                    uplo = 1;
+#endif
 
 	// Extract the variant number and implementation type.
 	n = bli_cntl_var_num( cntl );
 	i = bli_cntl_impl_type( cntl );
 
 	// Index into the variant array to extract the correct function pointer.
-	f = vars[uplo][n][i];
+	f = vars[n][i];
+
+	// Extract the function pointer from the current control tree node.
+	//f = bli_cntl_sub_prob( cntl );
 
 	// Invoke the variant.
-	f( &a_local,
-	   &ah_local,
-	   &c_local,
-	   cntx,
-	   cntl,
-       thread );
+	f
+	(
+	  &a_local,
+	  &ah_local,
+	  &c_local,
+	  cntx,
+	  cntl,
+      thread
+	);
 }
 

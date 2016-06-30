@@ -32,12 +32,14 @@
 
 */
 
-void bli_herk_int( obj_t*  alpha,
-                   obj_t*  a,
-                   obj_t*  ah,
-                   obj_t*  beta,
-                   obj_t*  c,
-                   cntx_t* cntx,
-                   gemm_t* cntl,
-                   thrinfo_t* thread );
-
+void bli_herk_int
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  ah,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       gemm_t* cntl,
+       thrinfo_t* thread
+     );

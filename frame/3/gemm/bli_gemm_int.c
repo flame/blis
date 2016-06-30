@@ -34,41 +34,35 @@
 
 #include "blis.h"
 
-#define FUNCPTR_T gemm_fp
-
-typedef void (*FUNCPTR_T)( obj_t*  a,
-                           obj_t*  b,
-                           obj_t*  c,
-                           cntx_t* cntx,
-                           gemm_t* cntl,
-                           thrinfo_t* thread );
-
-static FUNCPTR_T vars[6][3] =
+#if 1
+static gemm_voft vars[4][3] =
 {
-    // unblocked          optimized unblocked   blocked
-    { NULL,               NULL,                 bli_gemm_blk_var1f },
-    { NULL,               bli_gemm_ker_var2,    bli_gemm_blk_var2f },
-    { NULL,               NULL,                 bli_gemm_blk_var3f },
-    { NULL,               NULL,                 NULL,              },
-    { NULL,               NULL,                 NULL               },
-    { NULL,               NULL,                 NULL               }
+    // unblocked            optimized unblocked    blocked
+    { NULL,                 NULL,               bli_gemm_blk_var1 },
+    { NULL,                 bli_gemm_ker_var2,  bli_gemm_blk_var2 },
+    { NULL,                 NULL,               bli_gemm_blk_var3 },
+    { NULL,                 NULL,               NULL              },
 };
+#endif
 
-void bli_gemm_int( obj_t*  alpha,
-                   obj_t*  a,
-                   obj_t*  b,
-                   obj_t*  beta,
-                   obj_t*  c,
-                   cntx_t* cntx,
-                   gemm_t* cntl,
-                   thrinfo_t* thread )
+void bli_gemm_int
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       gemm_t* cntl,
+       thrinfo_t* thread
+     )
 {
 	obj_t     a_local;
 	obj_t     b_local;
 	obj_t     c_local;
 	varnum_t  n;
 	impl_t    i;
-	FUNCPTR_T f;
+	gemm_voft f;
 	ind_t     im;
 
 	// Check parameters.
@@ -140,22 +134,28 @@ void bli_gemm_int( obj_t*  alpha,
 	// Index into the variant array to extract the correct function pointer.
 	f = vars[n][i];
 
+	// Extract the function pointer from the current control tree node.
+	//f = bli_cntl_sub_prob( cntl );
+
 	// Somewhat hackish support for 3m3, 3m2, and 4m1b method implementations.
 	im = bli_cntx_get_ind_method( cntx );
 
 	if ( im != BLIS_NAT )
 	{
-		if      ( im == BLIS_3M3  && f == bli_gemm_blk_var1f ) f = bli_gemm_blk_var4f;
-		else if ( im == BLIS_3M2  && f == bli_gemm_ker_var2  ) f = bli_gemm_ker_var4;
-		else if ( im == BLIS_4M1B && f == bli_gemm_ker_var2  ) f = bli_gemm_ker_var3;
+		if      ( im == BLIS_3M3  && f == bli_gemm_blk_var1 ) f = bli_gemm_blk_var4;
+		else if ( im == BLIS_3M2  && f == bli_gemm_ker_var2 ) f = bli_gemm_ker_var4;
+		else if ( im == BLIS_4M1B && f == bli_gemm_ker_var2 ) f = bli_gemm_ker_var3;
 	}
 
 	// Invoke the variant.
-	f( &a_local,
-	   &b_local,
-	   &c_local,
-	   cntx,
-	   cntl,
-       thread );
+	f
+	(
+	  &a_local,
+	  &b_local,
+	  &c_local,
+	  cntx,
+	  cntl,
+      thread
+	);
 }
 

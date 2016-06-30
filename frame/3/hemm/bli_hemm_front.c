@@ -34,14 +34,17 @@
 
 #include "blis.h"
 
-void bli_hemm_front( side_t  side,
-                     obj_t*  alpha,
-                     obj_t*  a,
-                     obj_t*  b,
-                     obj_t*  beta,
-                     obj_t*  c,
-                     cntx_t* cntx,
-                     gemm_t* cntl )
+void bli_hemm_front
+     (
+       side_t  side,
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       gemm_t* cntl
+     )
 {
 	obj_t   a_local;
 	obj_t   b_local;

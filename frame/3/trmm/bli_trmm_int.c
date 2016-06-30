@@ -34,73 +34,38 @@
 
 #include "blis.h"
 
-#define FUNCPTR_T trmm_fp
-
-typedef void (*FUNCPTR_T)( obj_t*  a,
-                           obj_t*  b,
-                           obj_t*  c,
-                           cntx_t* cntx,
-                           gemm_t* cntl,
-                           thrinfo_t* thread );
-
-static FUNCPTR_T vars[2][2][4][3] =
+#if 1
+static gemm_voft vars[4][3] =
 {
-	// left
-	{
-		// lower
-		{
-		    // unblocked            optimized unblocked    blocked
-		    { NULL,                 NULL,                  bli_trmm_blk_var1f  },
-		    { NULL,                 bli_trmm_ll_ker_var2,  bli_trmm_blk_var2b  },
-		    { NULL,                 NULL,                  bli_trmm_blk_var3b  },
-		    { NULL,                 NULL,                  NULL                },
-		},
-		// upper
-		{
-		    // unblocked            optimized unblocked    blocked
-		    { NULL,                 NULL,                  bli_trmm_blk_var1f  },
-		    { NULL,                 bli_trmm_lu_ker_var2,  bli_trmm_blk_var2f  },
-		    { NULL,                 NULL,                  bli_trmm_blk_var3f  },
-		    { NULL,                 NULL,                  NULL                },
-		}
-	},
-	// right
-	{
-		// lower
-		{
-		    // unblocked            optimized unblocked    blocked
-		    { NULL,                 NULL,                  bli_trmm_blk_var1f  },
-		    { NULL,                 bli_trmm_rl_ker_var2,  bli_trmm_blk_var2f  },
-		    { NULL,                 NULL,                  bli_trmm_blk_var3f  },
-		    { NULL,                 NULL,                  NULL                },
-		},
-		// upper
-		{
-		    // unblocked            optimized unblocked    blocked
-		    { NULL,                 NULL,                  bli_trmm_blk_var1f  },
-		    { NULL,                 bli_trmm_ru_ker_var2,  bli_trmm_blk_var2b  },
-		    { NULL,                 NULL,                  bli_trmm_blk_var3b  },
-		    { NULL,                 NULL,                  NULL                },
-		}
-	}
+    // unblocked            optimized unblocked    blocked
+    { NULL,                 NULL,                  bli_trmm_blk_var1 },
+    { NULL,                 bli_trmm_xx_ker_var2,  bli_trmm_blk_var2 },
+    { NULL,                 NULL,                  bli_trmm_blk_var3 },
+    { NULL,                 NULL,                  NULL              },
 };
+#endif
 
-void bli_trmm_int( obj_t*  alpha,
-                   obj_t*  a,
-                   obj_t*  b,
-                   obj_t*  beta,
-                   obj_t*  c,
-                   cntx_t* cntx,
-                   gemm_t* cntl,
-                   thrinfo_t* thread )
+void bli_trmm_int
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       gemm_t* cntl,
+       thrinfo_t* thread
+     )
 {
 	obj_t     a_local;
 	obj_t     b_local;
 	obj_t     c_local;
+#if 0
 	bool_t    side, uplo;
+#endif
 	varnum_t  n;
 	impl_t    i;
-	FUNCPTR_T f;
+	gemm_voft f;
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
@@ -151,6 +116,7 @@ void bli_trmm_int( obj_t*  alpha,
         bli_obj_scalar_apply_scalar( beta, &c_local );
 	}
 
+#if 0
 	// Set two bools: one based on the implied side parameter (the structure
 	// of the root object) and one based on the uplo field of the triangular
 	// matrix's root object (whether that is matrix A or matrix B).
@@ -163,24 +129,30 @@ void bli_trmm_int( obj_t*  alpha,
 	else // if ( bli_obj_root_is_triangular( *b ) )
 	{
 		side = 1;
-		// Set a bool based on the uplo field of A's root object.
 		if ( bli_obj_root_is_lower( *b ) ) uplo = 0;
 		else                               uplo = 1;
 	}
+#endif
 
 	// Extract the variant number and implementation type.
 	n = bli_cntl_var_num( cntl );
 	i = bli_cntl_impl_type( cntl );
 
 	// Index into the variant array to extract the correct function pointer.
-	f = vars[side][uplo][n][i];
+	f = vars[n][i];
+
+	// Extract the function pointer from the current control tree node.
+	//f = bli_cntl_sub_prob( cntl );
 
 	// Invoke the variant.
-	f( &a_local,
-	   &b_local,
-	   &c_local,
-	   cntx,
-	   cntl,
-       thread );
+	f
+	(
+	  &a_local,
+	  &b_local,
+	  &c_local,
+	  cntx,
+	  cntl,
+	  thread
+	);
 }
 

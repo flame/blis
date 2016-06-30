@@ -50,10 +50,11 @@ void PASTEMAC0(opname) \
        thrinfo_t* thread  \
      );
 
-GENPROT( herk_blk_var1f )
-GENPROT( herk_blk_var2f )
-GENPROT( herk_blk_var3f )
+GENPROT( herk_blk_var1 )
+GENPROT( herk_blk_var2 )
+GENPROT( herk_blk_var3 )
 
+GENPROT( herk_x_ker_var2 )
 GENPROT( herk_l_ker_var2 )
 GENPROT( herk_u_ker_var2 )
 

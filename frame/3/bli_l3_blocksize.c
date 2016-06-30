@@ -34,18 +34,43 @@
 
 #include "blis.h"
 
+#undef  GENFRONT
+#define GENFRONT( opname, l3op ) \
+\
+dim_t PASTEMAC0(opname) \
+      ( \
+        dir_t   direct, \
+        dim_t   i, \
+        dim_t   dim, \
+        obj_t*  a, \
+        obj_t*  b, \
+        bszid_t bszid, \
+        cntx_t* cntx  \
+      ) \
+{ \
+	if ( direct == BLIS_FWD ) \
+		return PASTEMAC(l3op,_determine_kc_f)( i, dim, a, b, bszid, cntx ); \
+	else \
+		return PASTEMAC(l3op,_determine_kc_b)( i, dim, a, b, bszid, cntx ); \
+}
+
+GENFRONT( gemm_determine_kc, gemm )
+GENFRONT( trmm_determine_kc, trmm )
+GENFRONT( trsm_determine_kc, trsm )
+
+// -----------------------------------------------------------------------------
 
 #undef  GENFRONT
 #define GENFRONT( opname, chdir ) \
 \
 dim_t PASTEMAC0(opname) \
       ( \
-        dim_t    i, \
-        dim_t    dim, \
-        obj_t*   a, \
-        obj_t*   b, \
-        bszid_t  bszid, \
-        cntx_t*  cntx  \
+        dim_t   i, \
+        dim_t   dim, \
+        obj_t*  a, \
+        obj_t*  b, \
+        bszid_t bszid, \
+        cntx_t* cntx  \
       ) \
 { \
 	num_t    dt; \
@@ -105,12 +130,12 @@ GENFRONT( gemm_determine_kc_b, b )
 \
 dim_t PASTEMAC0(opname) \
       ( \
-        dim_t    i, \
-        dim_t    dim, \
-        obj_t*   a, \
-        obj_t*   b, \
-        bszid_t  bszid, \
-        cntx_t*  cntx  \
+        dim_t   i, \
+        dim_t   dim, \
+        obj_t*  a, \
+        obj_t*  b, \
+        bszid_t bszid, \
+        cntx_t* cntx  \
       ) \
 { \
 	num_t    dt; \
@@ -164,12 +189,12 @@ GENFRONT( trmm_determine_kc_b, b )
 \
 dim_t PASTEMAC0(opname) \
       ( \
-        dim_t    i, \
-        dim_t    dim, \
-        obj_t*   a, \
-        obj_t*   b, \
-        bszid_t  bszid, \
-        cntx_t*  cntx  \
+        dim_t   i, \
+        dim_t   dim, \
+        obj_t*  a, \
+        obj_t*  b, \
+        bszid_t bszid, \
+        cntx_t* cntx  \
       ) \
 { \
 	num_t    dt; \

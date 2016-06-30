@@ -39,6 +39,7 @@
 #include "bli_l3_oft.h"
 
 #include "bli_l3_blocksize.h"
+#include "bli_l3_direct.h"
 #include "bli_l3_prune.h"
 
 // Prototype object APIs with and without contexts.
@@ -66,4 +67,7 @@
 #include "bli_trmm.h"
 #include "bli_trmm3.h"
 #include "bli_trsm.h"
+
+// Variant object function pointer types.
+#include "bli_l3_var_oft.h"
 
