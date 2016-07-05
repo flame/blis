@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/flame/blis.svg?branch=master)](https://travis-ci.org/flame/blis)
 
-Introduction..
+Introduction....
 ------------
 
 BLIS is a portable software framework for instantiating high-performance
