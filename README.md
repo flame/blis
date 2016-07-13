@@ -203,7 +203,8 @@ Citations
 
 For those of you looking for the appropriate article to cite regarding BLIS, we
 recommend citing our
-[first ACM TOMS journal paper](http://www.cs.utexas.edu/users/flame/pubs/blis1_toms_rev3.pdf):
+[first ACM TOMS journal paper](http://dl.acm.org/authorize?N91172) 
+([unofficial backup link](http://www.cs.utexas.edu/users/flame/pubs/blis1_toms_rev3.pdf)):
 
 ```
 @article{BLIS1,
@@ -213,6 +214,7 @@ recommend citing our
    volume      = {41},
    number      = {3},
    pages       = {14:1--14:33},
+   month       = jun,
    year        = {2015},
    issue_date  = {June 2015},
    url         = {http://doi.acm.org/10.1145/2764454},
@@ -220,7 +222,8 @@ recommend citing our
 ``` 
 
 You may also cite the
-[second ACM TOMS journal paper](http://www.cs.utexas.edu/users/flame/pubs/blis2_toms_rev3.pdf):
+[second ACM TOMS journal paper](http://dl.acm.org/authorize?N16240) 
+([unofficial backup link](http://www.cs.utexas.edu/users/flame/pubs/blis2_toms_rev3.pdf)):
 
 ```
 @article{BLIS2,
@@ -230,8 +233,13 @@ You may also cite the
                   Robert A. {v}an~{d}e~{G}eijn},
    title       = {The {BLIS} Framework: Experiments in Portability},
    journal     = {ACM Transactions on Mathematical Software},
-   year        = 2015,
-   note        = {Accepted},
+   volume      = {42},
+   number      = {2},
+   pages       = {12:1--12:19},
+   month       = jun,
+   year        = {2016},
+   issue_date  = {June 2016},
+   url         = {http://doi.acm.org/10.1145/2755561},
 }
 ``` 
 
@@ -257,8 +265,8 @@ A fourth paper, submitted to ACM TOMS, also exists, which proposes an
    author      = {Tze Meng Low and Francisco D. Igual and Tyler M. Smith and Enrique S. Quintana-Ort\'{\i}},
    title       = {Analytical Models for the {BLIS} Framework},
    journal     = {ACM Transactions on Mathematical Software},
-   year        = 2015,
-   note        = {Pending},
+   year        = 2016,
+   note        = {Accepted},
 }
 ```
 
