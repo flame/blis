@@ -122,8 +122,25 @@
 
 
 // -- LEVEL-1F KERNEL CONSTANTS ------------------------------------------------
+#define BLIS_DEFAULT_1F_S            8
+#define BLIS_DEFAULT_1F_D 	 		 4
 
 
+// -- LEVEL-1F KERNEL DEFINITIONS ----------------------------------------------
+
+// -- axpy2v --
+
+// -- dotaxpyv --
+
+// -- axpyf --
+#define BLIS_SAXPYF_KERNEL           bli_saxpyf_int_var1
+#define BLIS_DAXPYF_KERNEL           bli_daxpyf_int_var1
+
+// -- dotxf --
+#define BLIS_SDOTXF_KERNEL           bli_sdotxf_int_var1
+#define BLIS_DDOTXF_KERNEL           bli_ddotxf_int_var1
+
+// -- dotxaxpyf --
 
 
 // -- LEVEL-1M KERNEL DEFINITIONS ----------------------------------------------
@@ -135,31 +152,18 @@
 
 
 
-// -- LEVEL-1F KERNEL DEFINITIONS ----------------------------------------------
-
-// -- axpy2v --
-
-// -- dotaxpyv --
-
-// -- axpyf --
-
-// -- dotxf --
-
-// -- dotxaxpyf --
-
-
-
-
 // -- LEVEL-1V KERNEL DEFINITIONS ----------------------------------------------
 
 // -- addv --
 
 // -- axpyv --
-
+#define BLIS_DAXPYV_KERNEL         bli_daxpyv_opt_var1
+#define BLIS_SAXPYV_KERNEL         bli_saxpyv_opt_var1
 // -- copyv --
 
 // -- dotv --
-
+#define BLIS_DDOTV_KERNEL          bli_ddotv_opt_var1
+#define BLIS_SDOTV_KERNEL          bli_sdotv_opt_var1
 // -- dotxv --
 
 // -- invertv --
