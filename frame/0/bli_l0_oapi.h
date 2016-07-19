@@ -71,6 +71,17 @@ GENPROT( subsc )
 \
 void PASTEMAC0(opname) \
      ( \
+       obj_t*  chi  \
+     );
+
+GENPROT( invertsc )
+
+
+#undef  GENPROT
+#define GENPROT( opname ) \
+\
+void PASTEMAC0(opname) \
+     ( \
        obj_t*  chi, \
        double* zeta_r, \
        double* zeta_i  \

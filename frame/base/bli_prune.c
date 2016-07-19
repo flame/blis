@@ -45,7 +45,7 @@ void bli_prune_unref_mparts( obj_t* p, mdim_t mdim_p,
 	// matrix is empty. This is not strictly needed but rather a minor
 	// optimization, as it would prevent threads that would otherwise get
 	// subproblems on BLIS_ZEROS operands from calling the macro-kernel,
-	// because bli_get_range*() would return empty ranges, which would
+	// because bli_thread_get_range*() would return empty ranges, which would
 	// cause the variant's for loop from executing any iterations.
 	// NOTE: this should only ever execute if the primary object is
 	// triangular because that is the only structure type with subpartitions

@@ -49,7 +49,7 @@ typedef void (*FUNCPTR_T)(
                            void*   alpha2,
                            void*   c, inc_t rs_c, inc_t cs_c,
                            cntx_t* cntx,
-                           trsm_thrinfo_t* thread
+                           thrinfo_t* thread
                          );
 
 static FUNCPTR_T GENARRAY(ftypes,trsm_ll_ker_var2);
@@ -60,7 +60,7 @@ void bli_trsm_ll_ker_var2( obj_t*  a,
                            obj_t*  c,
                            cntx_t* cntx,
                            trsm_t* cntl,
-                           trsm_thrinfo_t* thread )
+                           thrinfo_t* thread )
 {
 	num_t     dt_exec   = bli_obj_execution_datatype( *c );
 
@@ -145,7 +145,7 @@ void PASTEMAC(ch,varname) \
        void*   alpha2, \
        void*   c, inc_t rs_c, inc_t cs_c, \
        cntx_t* cntx, \
-       trsm_thrinfo_t* thread  \
+       thrinfo_t* thread  \
      ) \
 { \
 	const num_t     dt          = PASTEMAC(ch,type); \
@@ -397,7 +397,7 @@ void PASTEMAC(ch,varname) \
 					a2 = a_cast; \
 					b2 = b1; \
 					/*if ( bli_is_last_iter( j, n_iter, 0, 1 ) ) */\
-					if ( j + thread_num_threads(thread) >= n_iter ) \
+					if ( j + bli_thread_num_threads(thread) >= n_iter ) \
 						b2 = b_cast; \
 				} \
 \
@@ -462,7 +462,7 @@ void PASTEMAC(ch,varname) \
 					a2 = a_cast; \
 					b2 = b1; \
 					/*if ( bli_is_last_iter( j, n_iter, 0, 1 ) ) */\
-					if ( j + thread_num_threads(thread) >= n_iter ) \
+					if ( j + bli_thread_num_threads(thread) >= n_iter ) \
 						b2 = b_cast; \
 				} \
 \

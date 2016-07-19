@@ -156,7 +156,7 @@ gemm_t* bli_gemm_cntl_obj_create( impl_t     impl_type,
 {
 	gemm_t* cntl;
 
-	cntl = ( gemm_t* ) bli_malloc( sizeof(gemm_t) );
+	cntl = ( gemm_t* ) bli_malloc_intl( sizeof(gemm_t) );
 
 	cntl->impl_type     = impl_type;
 	cntl->var_num       = var_num;

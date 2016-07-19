@@ -341,6 +341,7 @@ void PASTEMAC(ch,opname) \
 }
 
 INSERT_GENTFUNC_BASIC0( randv )
+INSERT_GENTFUNC_BASIC0( randnv )
 
 
 #undef  GENTFUNC
@@ -381,6 +382,7 @@ void PASTEMAC(ch,opname) \
 }
 
 INSERT_GENTFUNC_BASIC0( randm )
+INSERT_GENTFUNC_BASIC0( randnm )
 
 
 #undef  GENTFUNCR

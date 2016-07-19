@@ -338,6 +338,21 @@ void libblis_test_read_params_file( char* input_filename, test_params_t* params 
 	libblis_test_read_next_line( buffer, input_stream );
 	sscanf( buffer, "%u ", &(params->mix_all_storage) );
 
+	// Read whether to perform all tests with aligned addresses and ldims.
+	libblis_test_read_next_line( buffer, input_stream );
+	sscanf( buffer, "%u ", &(params->alignment) );
+
+	// Read the randomization method.
+	libblis_test_read_next_line( buffer, input_stream );
+	sscanf( buffer, "%u ", &(params->rand_method) );
+
+	if ( params->rand_method != BLIS_TEST_RAND_REAL_VALUES &&
+	     params->rand_method != BLIS_TEST_RAND_NARROW_POW2 )
+	{
+		libblis_test_printf_error( "Invalid randomization method (%u) in input file.\n",
+		                           params->rand_method );
+	}
+
 	// Read the general stride "spacing".
 	libblis_test_read_next_line( buffer, input_stream );
 	sscanf( buffer, "%u ", &(params->gs_spacing) );
@@ -916,6 +931,8 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "num vector storage schemes   %u\n", params->n_vstorage );
 	libblis_test_fprintf_c( os, "storage[ vector ]            %s\n", params->storage[ BLIS_TEST_VECTOR_OPERAND ] );
 	libblis_test_fprintf_c( os, "mix all storage schemes?     %u\n", params->mix_all_storage );
+	libblis_test_fprintf_c( os, "test with aligned memory?    %u\n", params->alignment );
+	libblis_test_fprintf_c( os, "randomization method         %u\n", params->rand_method );
 	libblis_test_fprintf_c( os, "general stride spacing       %u\n", params->gs_spacing );
 	libblis_test_fprintf_c( os, "num datatypes                %u\n", params->n_datatypes );
 	libblis_test_fprintf_c( os, "datatype[0]                  %d (%c)\n", params->datatype[0],
@@ -1804,27 +1821,56 @@ void fill_string_with_n_spaces( char* str, unsigned int n_spaces )
 
 void libblis_test_mobj_create( test_params_t* params, num_t dt, trans_t trans, char storage, dim_t m, dim_t n, obj_t* a )
 {
-	dim_t gs      = params->gs_spacing;
-	dim_t m_trans = m;
-	dim_t n_trans = n;
-	dim_t rs_g;
-	dim_t cs_g;
+	dim_t  gs        = params->gs_spacing;
+	bool_t alignment = params->alignment;
+	siz_t  elem_size = bli_datatype_size( dt );
+	dim_t  m_trans   = m;
+	dim_t  n_trans   = n;
+	dim_t  rs        = 1; // Initialization avoids a compiler warning.
+	dim_t  cs        = 1; // Initialization avoids a compiler warning.
 	
 	// Apply the trans parameter to the dimensions (if needed).
 	bli_set_dims_with_trans( trans, m, n, m_trans, n_trans );
 
-	// In case of general strides, use the general stride spacing specified by the
-	// user to create strides with a column-major tilt.
-	rs_g = gs * 1;
-	cs_g = gs * m_trans;
+	// Compute unaligned strides according to the storage case encoded in
+	// the storage char, and then align the leading dimension if alignment
+	// was requested.
+	if      ( storage == 'c' )
+	{
+		rs = 1;
+		cs = m_trans;
 
-	if      ( storage == 'c' ) bli_obj_create( dt, m_trans, n_trans, 0,       0, a );
-	else if ( storage == 'r' ) bli_obj_create( dt, m_trans, n_trans, n_trans, 1, a );
-	else if ( storage == 'g' ) bli_obj_create( dt, m_trans, n_trans, rs_g, cs_g, a );
+		if ( alignment )
+			cs = bli_align_dim_to_size( cs, elem_size,
+			                            BLIS_HEAP_STRIDE_ALIGN_SIZE );
+	}
+	else if ( storage == 'r' )
+	{
+		rs = n_trans;
+		cs = 1;
+
+		if ( alignment )
+			rs = bli_align_dim_to_size( rs, elem_size,
+			                            BLIS_HEAP_STRIDE_ALIGN_SIZE );
+	}
+	else if ( storage == 'g' )
+	{
+		// We apply (arbitrarily) a column tilt, instead of a row tilt, to
+		// all general stride cases.
+		rs = gs;
+		cs = gs * m_trans;
+
+		if ( alignment )
+			cs = bli_align_dim_to_size( cs, elem_size,
+			                            BLIS_HEAP_STRIDE_ALIGN_SIZE );
+	}
 	else
 	{
 		libblis_test_printf_error( "Invalid storage character: %c\n", storage );
 	}
+
+	// Create the object using the dimensions and strides computed above.
+	bli_obj_create( dt, m_trans, n_trans, rs, cs, a );
 }
 
 
@@ -1865,6 +1911,109 @@ void libblis_test_vobj_create( test_params_t* params, num_t dt, char storage, di
 	{
 		libblis_test_printf_error( "Invalid storage character: %c\n", storage );
 	}
+}
+
+
+
+void libblis_test_vobj_randomize( test_params_t* params, bool_t normalize, obj_t* x )
+{
+	if ( params->rand_method == BLIS_TEST_RAND_REAL_VALUES )
+		bli_randv( x );
+	else // if ( params->rand_method == BLIS_TEST_RAND_NARROW_POW2 )
+		bli_randnv( x );
+
+	if ( normalize )
+	{
+		num_t dt   = bli_obj_datatype( *x );
+		num_t dt_r = bli_obj_datatype_proj_to_real( *x );
+		obj_t kappa;
+		obj_t kappa_r;
+
+		bli_obj_scalar_init_detached( dt,   &kappa );
+		bli_obj_scalar_init_detached( dt_r, &kappa_r );
+
+		// Normalize vector elements.
+		//bli_setsc( 1.0/( double )bli_obj_vector_dim( *x ), 0.0, &kappa );
+		bli_normfv( x, &kappa_r );
+		libblis_test_ceil_pow2( &kappa_r );
+		bli_copysc( &kappa_r, &kappa );
+		bli_invertsc( &kappa );
+		bli_scalv( &kappa, x );
+	}
+}
+
+
+
+void libblis_test_mobj_randomize( test_params_t* params, bool_t normalize, obj_t* a )
+{
+	if ( params->rand_method == BLIS_TEST_RAND_REAL_VALUES )
+		bli_randm( a );
+	else // if ( params->rand_method == BLIS_TEST_RAND_NARROW_POW2 )
+		bli_randnm( a );
+
+	if ( normalize )
+	{
+#if 0
+		num_t dt      = bli_obj_datatype( *a );
+		dim_t max_m_n = bli_obj_max_dim( *a );
+		obj_t kappa;
+
+		bli_obj_scalar_init_detached( dt, &kappa );
+
+		// Normalize vector elements by maximum matrix dimension.
+		bli_setsc( 1.0/( double )max_m_n, 0.0, &kappa );
+		bli_scalm( &kappa, a );
+#endif
+		num_t dt   = bli_obj_datatype( *a );
+		num_t dt_r = bli_obj_datatype_proj_to_real( *a );
+		obj_t kappa;
+		obj_t kappa_r;
+
+		bli_obj_scalar_init_detached( dt,   &kappa );
+		bli_obj_scalar_init_detached( dt_r, &kappa_r );
+
+		// Normalize matrix elements.
+		bli_norm1m( a, &kappa_r );
+		libblis_test_ceil_pow2( &kappa_r );
+		bli_copysc( &kappa_r, &kappa );
+		bli_invertsc( &kappa );
+		bli_scalm( &kappa, a );
+	}
+}
+
+
+
+void libblis_test_ceil_pow2( obj_t* alpha )
+{
+	double alpha_r;
+	double alpha_i;
+
+	bli_getsc( alpha, &alpha_r, &alpha_i );
+
+	alpha_r = pow( 2.0, ceil( log2( alpha_r ) ) );
+
+	bli_setsc( alpha_r, alpha_i, alpha );
+}
+
+
+
+void libblis_test_mobj_load_diag( test_params_t* params, obj_t* a )
+{
+	num_t dt = bli_obj_datatype( *a );
+	dim_t m  = bli_obj_length( *a );
+	dim_t n  = bli_obj_width( *a );
+
+	obj_t d;
+
+	// We assume that all elements of a were intialized on interval [-1,1].
+
+	bli_obj_create( dt, m, n, 0, 0, &d );
+
+	// Initialize the diagonal of d to 2.0 and then add the diagonal of a.
+	bli_setd( &BLIS_TWO, &d );
+	bli_addd( &d, a );
+
+	bli_obj_free( &d );
 }
 
 

@@ -392,10 +392,10 @@ void bli_cntx_set_blkszs( ind_t method, dim_t n_bs, ... )
 
 
 	// Allocate some temporary local arrays.
-	bszids = bli_malloc( n_bs * sizeof( bszid_t  ) );
-	blkszs = bli_malloc( n_bs * sizeof( blksz_t* ) );
-	bmults = bli_malloc( n_bs * sizeof( bszid_t  ) );
-	scalrs = bli_malloc( n_bs * sizeof( dim_t    ) );
+	bszids = bli_malloc_intl( n_bs * sizeof( bszid_t  ) );
+	blkszs = bli_malloc_intl( n_bs * sizeof( blksz_t* ) );
+	bmults = bli_malloc_intl( n_bs * sizeof( bszid_t  ) );
+	scalrs = bli_malloc_intl( n_bs * sizeof( dim_t    ) );
 
 	// -- Begin variable argument section --
 
@@ -541,10 +541,10 @@ void bli_cntx_set_blkszs( ind_t method, dim_t n_bs, ... )
 	}
 
 	// Free the temporary local arrays.
-	bli_free( blkszs );
-	bli_free( bszids );
-	bli_free( bmults );
-	bli_free( scalrs );
+	bli_free_intl( blkszs );
+	bli_free_intl( bszids );
+	bli_free_intl( bmults );
+	bli_free_intl( scalrs );
 }
 #endif
 

@@ -16,6 +16,11 @@ c       # Vector storage scheme(s) to test:
         #   'c' = colvec / unit stride; 'j' = colvec / non-unit stride;
         #   'r' = rowvec / unit stride; 'i' = rowvec / non-unit stride
 0       # Test all combinations of storage schemes?
+1       # Perform all tests with alignment?
+        #   '0' = do NOT align buffers/ldims; '1' = align buffers/ldims
+0       # Randomize vectors and matrices using:
+        #   '0' = real values on [-1,1];
+        #   '1' = powers of 2 in narrow precision range
 32      # General stride spacing (for cases when testing general stride)
 sdcz    # Datatype(s) to test:
         #   's' = single real; 'c' = single complex;

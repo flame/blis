@@ -166,7 +166,7 @@ void bli_obj_alloc_buffer( inc_t  rs,
 	buffer_size = ( siz_t )n_elem * elem_size;
 
 	// Allocate the buffer.
-	p = bli_malloc( buffer_size );
+	p = bli_malloc_user( buffer_size );
 
 	// Set individual fields.
 	bli_obj_set_buffer( p, *obj );
@@ -221,7 +221,7 @@ void bli_obj_free( obj_t* obj )
 		// is a detached scalar (ie: if the buffer pointer refers to the
 		// address of the internal scalar buffer).
 		if ( bli_obj_buffer( *obj ) != bli_obj_internal_scalar_buffer( *obj ) )
-			bli_free( bli_obj_buffer( *obj ) );
+			bli_free_user( bli_obj_buffer( *obj ) );
 	}
 }
 
@@ -432,6 +432,17 @@ dim_t bli_align_dim_to_size( dim_t dim, siz_t elem_size, siz_t align_size )
 	        ) *
 	        ( dim_t )align_size /
 	        ( dim_t )elem_size;
+
+	return dim;
+}
+
+dim_t bli_align_ptr_to_size( void* p, size_t align_size )
+{
+	dim_t dim;
+
+	dim = ( ( ( uintptr_t )p + align_size - 1 ) /
+	        align_size
+	      ) * align_size;
 
 	return dim;
 }

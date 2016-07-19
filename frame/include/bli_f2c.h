@@ -2,8 +2,8 @@
 //  barf  [ba:rf]  2.  "He suggested using FORTRAN, and everybody barfed."
 //  - From The Shogakukan DICTIONARY OF NEW ENGLISH (Second edition)
 
-#ifndef F2C_INCLUDE
-#define F2C_INCLUDE
+#ifndef BLIS_F2C_H
+#define BLIS_F2C_H
 
 typedef f77_int bla_integer;
 typedef f77_char bla_character;
@@ -24,8 +24,13 @@ typedef unsigned long long ulongint;	/* system-dependent */
 #define qbit_set(a,b)	((a) |  ((ulongint)1 << (b)))
 #endif
 
+#ifndef TRUE_
 #define TRUE_ (1)
+#endif
+
+#ifndef FALSE_
 #define FALSE_ (0)
+#endif
 
 /* Extern is for use with -E */
 #ifndef Extern
@@ -45,7 +50,9 @@ typedef long int ftnlen;
 typedef long int ftnint;
 #endif
 
+#ifndef VOID
 #define VOID void
+#endif
 
 #ifndef f2c_abs
   #define f2c_abs(x) ((x) >= 0 ? (x) : -(x))
@@ -66,9 +73,17 @@ typedef long int ftnint;
   #define f2c_dmax(a,b) (doublereal)f2c_max(a,b)
 #endif
 
-#define bit_test(a,b)	((a) >> (b) & 1)
-#define bit_clear(a,b)	((a) & ~((uinteger)1 << (b)))
-#define bit_set(a,b)	((a) |  ((uinteger)1 << (b)))
+#ifndef bit_test
+  #define bit_test(a,b)  ((a) >> (b) & 1)
+#endif
+
+#ifndef bit_clear
+  #define bit_clear(a,b) ((a) & ~((uinteger)1 << (b)))
+#endif
+
+#ifndef bit_set
+  #define bit_set(a,b)   ((a) |  ((uinteger)1 << (b)))
+#endif
 
 /* undef any lower-case symbols that your C compiler predefines, e.g.: */
 
@@ -92,4 +107,5 @@ typedef long int ftnint;
 #undef unix
 #undef vax
 #endif
+
 #endif

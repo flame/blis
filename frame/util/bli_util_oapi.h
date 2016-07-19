@@ -150,6 +150,7 @@ void PASTEMAC(opname,EX_SUF) \
      );
 
 GENPROT( randv )
+GENPROT( randnv )
 
 
 #undef  GENPROT
@@ -162,6 +163,7 @@ void PASTEMAC(opname,EX_SUF) \
      );
 
 GENPROT( randm )
+GENPROT( randnm )
 
 
 #undef  GENPROT

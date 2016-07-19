@@ -46,33 +46,50 @@ static thresh_t  thresh[BLIS_NUM_FP_TYPES] = { { 1e-04, 1e-05 },   // warn, pass
                                                { 1e-13, 1e-14 } }; // warn, pass for z
 
 // Local prototypes.
-void libblis_test_axpyv_deps( test_params_t* params,
-                              test_op_t*     op );
+void libblis_test_axpyv_deps
+     (
+       test_params_t* params,
+       test_op_t*     op
+     );
 
-void libblis_test_axpyv_experiment( test_params_t* params,
-                                    test_op_t*     op,
-                                    iface_t        iface,
-                                    num_t          datatype,
-                                    char*          pc_str,
-                                    char*          sc_str,
-                                    unsigned int   p_cur,
-                                    double*        perf,
-                                    double*        resid );
+void libblis_test_axpyv_experiment
+     (
+       test_params_t* params,
+       test_op_t*     op,
+       iface_t        iface,
+       num_t          datatype,
+       char*          pc_str,
+       char*          sc_str,
+       unsigned int   p_cur,
+       double*        perf,
+       double*        resid
+     );
 
-void libblis_test_axpyv_impl( iface_t   iface,
-                              obj_t*    alpha,
-                              obj_t*    x,
-                              obj_t*    y );
+void libblis_test_axpyv_impl
+     (
+       iface_t   iface,
+       obj_t*    alpha,
+       obj_t*    x,
+       obj_t*    y
+     );
 
-void libblis_test_axpyv_check( obj_t*  alpha,
-                               obj_t*  x,
-                               obj_t*  y,
-                               obj_t*  y_orig,
-                               double* resid );
+void libblis_test_axpyv_check
+     (
+       test_params_t* params,
+       obj_t*         alpha,
+       obj_t*         x,
+       obj_t*         y,
+       obj_t*         y_orig,
+       double*        resid
+     );
 
 
 
-void libblis_test_axpyv_deps( test_params_t* params, test_op_t* op )
+void libblis_test_axpyv_deps
+     (
+       test_params_t* params,
+       test_op_t*     op
+     )
 {
 	libblis_test_randv( params, &(op->ops->randv) );
 	libblis_test_normfv( params, &(op->ops->normfv) );
@@ -84,7 +101,11 @@ void libblis_test_axpyv_deps( test_params_t* params, test_op_t* op )
 
 
 
-void libblis_test_axpyv( test_params_t* params, test_op_t* op )
+void libblis_test_axpyv
+     (
+       test_params_t* params,
+       test_op_t*     op
+     )
 {
 
 	// Return early if this test has already been done.
@@ -113,15 +134,18 @@ void libblis_test_axpyv( test_params_t* params, test_op_t* op )
 
 
 
-void libblis_test_axpyv_experiment( test_params_t* params,
-                                    test_op_t*     op,
-                                    iface_t        iface,
-                                    num_t          datatype,
-                                    char*          pc_str,
-                                    char*          sc_str,
-                                    unsigned int   p_cur,
-                                    double*        perf,
-                                    double*        resid )
+void libblis_test_axpyv_experiment
+     (
+       test_params_t* params,
+       test_op_t*     op,
+       iface_t        iface,
+       num_t          datatype,
+       char*          pc_str,
+       char*          sc_str,
+       unsigned int   p_cur,
+       double*        perf,
+       double*        resid
+     )
 {
 	unsigned int n_repeats = params->n_repeats;
 	unsigned int i;
@@ -160,8 +184,8 @@ void libblis_test_axpyv_experiment( test_params_t* params,
 		bli_setsc(  0.0, -2.0, &alpha );
 
 	// Randomize x and y, and save y.
-	bli_randv( &x );
-	bli_randv( &y );
+	libblis_test_vobj_randomize( params, FALSE, &x );
+	libblis_test_vobj_randomize( params, FALSE, &y );
 	bli_copyv( &y, &y_save );
 
 	// Apply the parameters.
@@ -184,7 +208,7 @@ void libblis_test_axpyv_experiment( test_params_t* params,
 	if ( bli_obj_is_complex( y ) ) *perf *= 4.0;
 
 	// Perform checks.
-	libblis_test_axpyv_check( &alpha, &x, &y, &y_save, resid );
+	libblis_test_axpyv_check( params, &alpha, &x, &y, &y_save, resid );
 
 	// Zero out performance and residual if output vector is empty.
 	libblis_test_check_empty_problem( &y, perf, resid );
@@ -197,10 +221,13 @@ void libblis_test_axpyv_experiment( test_params_t* params,
 
 
 
-void libblis_test_axpyv_impl( iface_t   iface,
-                              obj_t*    alpha,
-                              obj_t*    x,
-                              obj_t*    y )
+void libblis_test_axpyv_impl
+     (
+       iface_t   iface,
+       obj_t*    alpha,
+       obj_t*    x,
+       obj_t*    y
+     )
 {
 	switch ( iface )
 	{
@@ -215,11 +242,15 @@ void libblis_test_axpyv_impl( iface_t   iface,
 
 
 
-void libblis_test_axpyv_check( obj_t*  alpha,
-                               obj_t*  x,
-                               obj_t*  y,
-                               obj_t*  y_orig,
-                               double* resid )
+void libblis_test_axpyv_check
+     (
+       test_params_t* params,
+       obj_t*         alpha,
+       obj_t*         x,
+       obj_t*         y,
+       obj_t*         y_orig,
+       double*        resid
+     )
 {
 	num_t  dt      = bli_obj_datatype( *y );
 	num_t  dt_real = bli_obj_datatype_proj_to_real( *y );

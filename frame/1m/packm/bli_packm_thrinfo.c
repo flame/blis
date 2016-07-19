@@ -32,23 +32,80 @@
 
 */
 
-struct packm_thrinfo_s //implements thrinfo_t
+#include "blis.h"
+
+thrinfo_t* bli_packm_thrinfo_create
+     (
+       thrcomm_t* ocomm,
+       dim_t      ocomm_id,
+       thrcomm_t* icomm,
+       dim_t      icomm_id,
+       dim_t      n_way,
+       dim_t      work_id
+     )
 {
-    thread_comm_t*      ocomm;       //The thread communicator for the other threads sharing the same work at this level
-    dim_t               ocomm_id;    //Our thread id within that thread comm
-    thread_comm_t*      icomm;       //The thread communicator for the other threads sharing the same work at this level
-    dim_t               icomm_id;    //Our thread id within that thread comm
+	thrinfo_t* thread = bli_malloc_intl( sizeof( thrinfo_t ) );
 
-    dim_t               n_way;       //Number of distinct caucuses used to parallelize the loop
-    dim_t               work_id;     //What we're working on
-};
-typedef struct packm_thrinfo_s packm_thrinfo_t;
+	bli_thrinfo_init
+	(
+	  thread,
+	  ocomm, ocomm_id,
+	  icomm, icomm_id,
+	  n_way,
+	  work_id,
+	  NULL,
+	  NULL,
+	  NULL
+	);
 
-#define packm_thread_my_iter( index, thread ) ( index % thread->n_way == thread->work_id % thread->n_way )
+	return thread;
+}
 
-void bli_packm_thrinfo_free( packm_thrinfo_t* thread );
-packm_thrinfo_t* bli_create_packm_thread_info( thread_comm_t* ocomm, dim_t ocomm_id, thread_comm_t* icomm, dim_t icomm_id,
-                             dim_t n_way, dim_t work_id );
-void bli_setup_packm_thread_info( packm_thrinfo_t* thread, thread_comm_t* ocomm, dim_t ocomm_id, thread_comm_t* icomm, dim_t icomm_id,
-                             dim_t n_way, dim_t work_id );
-void bli_setup_packm_single_threaded_info( packm_thrinfo_t* thread );
+void bli_packm_thrinfo_init
+     (
+       thrinfo_t* thread,
+       thrcomm_t* ocomm,
+       dim_t      ocomm_id,
+       thrcomm_t* icomm,
+       dim_t      icomm_id,
+       dim_t      n_way,
+       dim_t      work_id
+     )
+{
+	bli_thrinfo_init
+	(
+	  thread,
+	  ocomm, ocomm_id,
+	  icomm, icomm_id,
+	  n_way, work_id,
+	  NULL,
+	  NULL,
+	  NULL
+	);
+}
+
+void bli_packm_thrinfo_init_single
+     (
+       thrinfo_t* thread
+     )
+{
+	bli_packm_thrinfo_init
+	(
+	  thread,
+	  &BLIS_SINGLE_COMM, 0,
+	  &BLIS_SINGLE_COMM, 0,
+	  1,
+	  0
+	);
+}
+
+void bli_packm_thrinfo_free
+     (
+       thrinfo_t* thread
+     )
+{
+	if ( thread != NULL &&
+	     thread != &BLIS_PACKM_SINGLE_THREADED )
+		bli_free_intl( thread );
+}
+

@@ -53,7 +53,7 @@ scalm_t* bli_scalm_cntl_obj_create( impl_t     impl_type,
 {
 	scalm_t* cntl;
 
-	cntl = ( scalm_t* ) bli_malloc( sizeof(scalm_t) );	
+	cntl = ( scalm_t* ) bli_malloc_intl( sizeof(scalm_t) );
 
 	cntl->impl_type = impl_type;
 	cntl->var_num   = var_num;

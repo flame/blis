@@ -32,39 +32,40 @@
 
 */
 
-#ifndef BLIS_THREADING_PTHREADS_H
-#define BLIS_THREADING_PTHREADS_H
+#ifndef BLIS_THRCOMM_PTHREADS_H
+#define BLIS_THRCOMM_PTHREADS_H
 
+// Define thrcomm_t for situations when POSIX multithreading is enabled.
 #ifdef BLIS_ENABLE_PTHREADS 
 
 #include <pthread.h>
 
-#ifdef __APPLE__
-typedef int pthread_barrierattr_t;
-
-struct pthread_barrier_s
+#ifdef BLIS_USE_PTHREAD_BARRIER
+struct thrcomm_s
 {
-    pthread_mutex_t mutex;
-    bool_t  sense;
-    dim_t   threads_arrived;
-    dim_t   n_threads;
+	void*             sent_object;
+	dim_t             n_threads;
+
+	pthread_barrier_t barrier;
 };
-typedef struct pthread_barrier_s pthread_barrier_t;
-
-
-int pthread_barrier_init(pthread_barrier_t *barrier, const pthread_barrierattr_t *attr, unsigned int count);
-int pthread_barrier_destroy(pthread_barrier_t *barrier);
-int pthread_barrier_wait(pthread_barrier_t *barrier);
-#endif
-
-struct thread_comm_s
+#else
+struct thrcomm_s
 {
-    void*   sent_object;
-    dim_t   n_threads;
+	void*  sent_object;
+	dim_t  n_threads;
 
-    pthread_barrier_t barrier;
+#ifdef BLIS_USE_PTHREAD_MUTEX
+	pthread_mutex_t mutex;
+#endif
+
+	volatile bool_t  sense;
+	volatile dim_t   threads_arrived;
 };
-typedef struct thread_comm_s thread_comm_t;
+#endif
+
+typedef struct thrcomm_s thrcomm_t;
+
 #endif
 
 #endif
+

@@ -170,6 +170,10 @@ void bli_error_init_msgs( void )
 	         "Attempted to allocate more memory from contiguous pool than is available." );
 	sprintf( bli_error_string_for_code(BLIS_INSUFFICIENT_STACK_BUF_SIZE),
 	         "Configured maximum stack buffer size is insufficient for register blocksizes currently in use." );
+	sprintf( bli_error_string_for_code(BLIS_ALIGNMENT_NOT_POWER_OF_TWO),
+	         "Encountered memory alignment value that is either zero or not a power of two." );
+	sprintf( bli_error_string_for_code(BLIS_ALIGNMENT_NOT_MULT_OF_PTR_SIZE),
+	         "Encountered memory alignment value that is not a multiple of sizeof(void*)." );
 
 	sprintf( bli_error_string_for_code(BLIS_EXPECTED_OBJECT_ALIAS),
 	         "Expected object to be alias." );

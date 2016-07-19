@@ -121,7 +121,7 @@ her2_t* bli_her2_cntl_obj_create( impl_t     impl_type,
 {
 	her2_t* cntl;
 
-	cntl = ( her2_t* ) bli_malloc( sizeof(her2_t) );	
+	cntl = ( her2_t* ) bli_malloc_intl( sizeof(her2_t) );
 
 	cntl->impl_type       = impl_type;
 	cntl->var_num         = var_num;

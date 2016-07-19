@@ -59,14 +59,14 @@ void bli_gemv_blk_var2( obj_t*  alpha,
 	// y = beta * y;
 	bli_scalv_int( beta,
 	               y,
-	               cntx, cntl_sub_scalv( cntl ) );
+	               cntx, bli_cntl_sub_scalv( cntl ) );
 
 	// Partition along the "k" dimension (n dimension of A).
 	for ( i = 0; i < n_trans; i += b_alg )
 	{
 		// Determine the current algorithmic blocksize.
 		b_alg = bli_determine_blocksize_f( i, n_trans, a,
-		                                   cntl_bszid( cntl ), cntx );
+		                                   bli_cntl_bszid( cntl ), cntx );
 
 		// Acquire partitions for A1 and x1.
 		bli_acquire_mpart_l2r( BLIS_SUBPART1,
@@ -76,16 +76,16 @@ void bli_gemv_blk_var2( obj_t*  alpha,
 
 		// Initialize objects for packing A1 and x1 (if needed).
 		bli_packm_init( &a1, &a1_pack,
-		                cntx, cntl_sub_packm_a( cntl ) );
+		                cntx, bli_cntl_sub_packm_a( cntl ) );
 		bli_packv_init( &x1, &x1_pack,
-		                cntx, cntl_sub_packv_x( cntl ) );
+		                cntx, bli_cntl_sub_packv_x( cntl ) );
 
 		// Copy/pack A1, x1 (if needed).
 		bli_packm_int( &a1, &a1_pack,
-		               cntx, cntl_sub_packm_a( cntl ),
+		               cntx, bli_cntl_sub_packm_a( cntl ),
                        &BLIS_PACKM_SINGLE_THREADED );
 		bli_packv_int( &x1, &x1_pack,
-		               cntx, cntl_sub_packv_x( cntl ) );
+		               cntx, bli_cntl_sub_packv_x( cntl ) );
 
 		// y = y + alpha * A1 * x1;
 		bli_gemv_int( BLIS_NO_TRANSPOSE,
@@ -96,12 +96,12 @@ void bli_gemv_blk_var2( obj_t*  alpha,
 		              &BLIS_ONE,
 		              y,
 		              cntx,
-		              cntl_sub_gemv( cntl ) );
+		              bli_cntl_sub_gemv( cntl ) );
 	}
 
 	// If any packing buffers were acquired within packm, release them back
 	// to the memory manager.
-	bli_packm_release( &a1_pack, cntl_sub_packm_a( cntl ) );
-	bli_packv_release( &x1_pack, cntl_sub_packv_x( cntl ) );
+	bli_packm_release( &a1_pack, bli_cntl_sub_packm_a( cntl ) );
+	bli_packv_release( &x1_pack, bli_cntl_sub_packv_x( cntl ) );
 }
 

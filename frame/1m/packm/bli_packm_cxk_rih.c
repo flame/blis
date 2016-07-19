@@ -34,17 +34,7 @@
 
 #include "blis.h"
 
-#define FUNCPTR_T packm_cxk_fp
-
-typedef void (*FUNCPTR_T)
-     (
-       conj_t  conja,
-       pack_t  schema,
-       dim_t   panel_len,
-       void*   kappa,
-       void*   a, inc_t inca, inc_t lda,
-       void*   p,             inc_t ldp
-     );
+#define FUNCPTR_T packm_cxk_rih_ker_vft
 
 #undef  FUNCPTR_ARRAY_LENGTH
 #define FUNCPTR_ARRAY_LENGTH 32

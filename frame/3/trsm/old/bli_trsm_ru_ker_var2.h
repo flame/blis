@@ -40,7 +40,7 @@ void bli_trsm_ru_ker_var2( obj_t*  a,
                            obj_t*  b,
                            obj_t*  c,
                            trsm_t* cntl,
-                           trsm_thrinfo_t* thread );
+                           thrinfo_t* thread );
 
 
 //
@@ -64,7 +64,7 @@ void PASTEMAC(ch,varname)( \
                            void*   gemmtrsm_ukr, \
                            cntx_t* cntx, \
                            void*   gemm_ukr, \
-                           trsm_thrinfo_t* thread \
+                           thrinfo_t* thread \
                          );
 
 INSERT_GENTPROT_BASIC( trsm_ru_ker_var2 )

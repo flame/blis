@@ -46,30 +46,47 @@ static thresh_t  thresh[BLIS_NUM_FP_TYPES] = { { 1e-04, 1e-05 },   // warn, pass
                                                { 1e-13, 1e-14 } }; // warn, pass for z
 
 // Local prototypes.
-void libblis_test_copyv_deps( test_params_t* params,
-                              test_op_t*     op );
+void libblis_test_copyv_deps
+     (
+       test_params_t* params,
+       test_op_t*     op
+     );
 
-void libblis_test_copyv_experiment( test_params_t* params,
-                                    test_op_t*     op,
-                                    iface_t        iface,
-                                    num_t          datatype,
-                                    char*          pc_str,
-                                    char*          sc_str,
-                                    unsigned int   p_cur,
-                                    double*        perf,
-                                    double*        resid );
+void libblis_test_copyv_experiment
+     (
+       test_params_t* params,
+       test_op_t*     op,
+       iface_t        iface,
+       num_t          datatype,
+       char*          pc_str,
+       char*          sc_str,
+       unsigned int   p_cur,
+       double*        perf,
+       double*        resid
+     );
 
-void libblis_test_copyv_impl( iface_t   iface,
-                              obj_t*    x,
-                              obj_t*    y );
+void libblis_test_copyv_impl
+     (
+       iface_t   iface,
+       obj_t*    x,
+       obj_t*    y
+     );
 
-void libblis_test_copyv_check( obj_t*  x,
-                               obj_t*  y,
-                               double* resid );
+void libblis_test_copyv_check
+     (
+       test_params_t* params,
+       obj_t*         x,
+       obj_t*         y,
+       double*        resid
+     );
 
 
 
-void libblis_test_copyv_deps( test_params_t* params, test_op_t* op )
+void libblis_test_copyv_deps
+     (
+       test_params_t* params,
+       test_op_t*     op
+     )
 {
 	libblis_test_randv( params, &(op->ops->randv) );
 	libblis_test_subv( params, &(op->ops->subv) );
@@ -78,7 +95,11 @@ void libblis_test_copyv_deps( test_params_t* params, test_op_t* op )
 
 
 
-void libblis_test_copyv( test_params_t* params, test_op_t* op )
+void libblis_test_copyv
+     (
+       test_params_t* params,
+       test_op_t*     op
+     )
 {
 
 	// Return early if this test has already been done.
@@ -107,15 +128,18 @@ void libblis_test_copyv( test_params_t* params, test_op_t* op )
 
 
 
-void libblis_test_copyv_experiment( test_params_t* params,
-                                    test_op_t*     op,
-                                    iface_t        iface,
-                                    num_t          datatype,
-                                    char*          pc_str,
-                                    char*          sc_str,
-                                    unsigned int   p_cur,
-                                    double*        perf,
-                                    double*        resid )
+void libblis_test_copyv_experiment
+     (
+       test_params_t* params,
+       test_op_t*     op,
+       iface_t        iface,
+       num_t          datatype,
+       char*          pc_str,
+       char*          sc_str,
+       unsigned int   p_cur,
+       double*        perf,
+       double*        resid
+     )
 {
 	double       time_min  = 1e9;
 	double       time;
@@ -138,7 +162,7 @@ void libblis_test_copyv_experiment( test_params_t* params,
 	libblis_test_vobj_create( params, datatype, sc_str[1], m, &y );
 
 	// Randomize x and set y to one.
-	bli_randv( &x );
+	libblis_test_vobj_randomize( params, FALSE, &x );
 	bli_setv( &BLIS_ONE, &y );
 
 	// Apply the parameters.
@@ -159,7 +183,7 @@ void libblis_test_copyv_experiment( test_params_t* params,
 	if ( bli_obj_is_complex( x ) ) *perf *= 2.0;
 
 	// Perform checks.
-	libblis_test_copyv_check( &x, &y, resid );
+	libblis_test_copyv_check( params, &x, &y, resid );
 
 	// Zero out performance and residual if output vector is empty.
 	libblis_test_check_empty_problem( &y, perf, resid );
@@ -171,9 +195,12 @@ void libblis_test_copyv_experiment( test_params_t* params,
 
 
 
-void libblis_test_copyv_impl( iface_t   iface,
-                              obj_t*    x,
-                              obj_t*    y )
+void libblis_test_copyv_impl
+     (
+       iface_t   iface,
+       obj_t*    x,
+       obj_t*    y
+     )
 {
 	switch ( iface )
 	{
@@ -188,9 +215,13 @@ void libblis_test_copyv_impl( iface_t   iface,
 
 
 
-void libblis_test_copyv_check( obj_t*  x,
-                               obj_t*  y,
-                               double* resid )
+void libblis_test_copyv_check
+     (
+       test_params_t* params,
+       obj_t*         x,
+       obj_t*         y,
+       double*        resid
+     )
 {
 	num_t  dt_real = bli_obj_datatype_proj_to_real( *x );
 

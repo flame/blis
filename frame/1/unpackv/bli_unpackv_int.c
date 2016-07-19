@@ -79,7 +79,7 @@ void bli_unpackv_int( obj_t*     p,
 
 	// First check if we are to skip this operation because the control tree
 	// is NULL, and if so, simply return.
-	if ( cntl_is_noop( cntl ) )
+	if ( bli_cntl_is_noop( cntl ) )
 	{
 		return;
 	}
@@ -116,8 +116,8 @@ void bli_unpackv_int( obj_t*     p,
 	// Now we are ready to proceed with the unpacking.
 
 	// Extract the variant number and implementation type.
-	n = cntl_var_num( cntl );
-	i = cntl_impl_type( cntl );
+	n = bli_cntl_var_num( cntl );
+	i = bli_cntl_impl_type( cntl );
 
 	// Index into the variant array to extract the correct function pointer.
 	f = vars[n][i];

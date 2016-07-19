@@ -42,7 +42,7 @@ mbool_t* bli_mbool_obj_create( bool_t b_s,
 {
 	mbool_t* b;
 
-	b = ( mbool_t* ) bli_malloc( sizeof(mbool_t) );	
+	b = ( mbool_t* ) bli_malloc_intl( sizeof(mbool_t) );
 
 	bli_mbool_obj_init( b,
 	                    b_s,
@@ -67,6 +67,6 @@ void bli_mbool_obj_init( mbool_t* b,
 
 void bli_mbool_obj_free( mbool_t* b )
 {
-	bli_free( b );
+	bli_free_intl( b );
 }
 

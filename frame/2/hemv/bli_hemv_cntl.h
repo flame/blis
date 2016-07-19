@@ -50,7 +50,7 @@ struct hemv_s
 };
 typedef struct hemv_s hemv_t;
 
-#define cntl_sub_hemv( cntl )      cntl->sub_hemv
+#define bli_cntl_sub_hemv( cntl )      cntl->sub_hemv
 
 void    bli_hemv_cntl_init( void );
 void    bli_hemv_cntl_finalize( void );

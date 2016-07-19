@@ -46,33 +46,50 @@ static thresh_t  thresh[BLIS_NUM_FP_TYPES] = { { 1e-04, 1e-05 },   // warn, pass
                                                { 1e-13, 1e-14 } }; // warn, pass for z
 
 // Local prototypes.
-void libblis_test_trsv_deps( test_params_t* params,
-                             test_op_t*     op );
+void libblis_test_trsv_deps
+     (
+       test_params_t* params,
+       test_op_t*     op
+     );
 
-void libblis_test_trsv_experiment( test_params_t* params,
-                                   test_op_t*     op,
-                                   iface_t        iface,
-                                   num_t          datatype,
-                                   char*          pc_str,
-                                   char*          sc_str,
-                                   unsigned int   p_cur,
-                                   double*        perf,
-                                   double*        resid );
+void libblis_test_trsv_experiment
+     (
+       test_params_t* params,
+       test_op_t*     op,
+       iface_t        iface,
+       num_t          datatype,
+       char*          pc_str,
+       char*          sc_str,
+       unsigned int   p_cur,
+       double*        perf,
+       double*        resid
+     );
 
-void libblis_test_trsv_impl( iface_t   iface,
-                             obj_t*    alpha,
-                             obj_t*    a,
-                             obj_t*    x );
+void libblis_test_trsv_impl
+     (
+       iface_t   iface,
+       obj_t*    alpha,
+       obj_t*    a,
+       obj_t*    x
+     );
 
-void libblis_test_trsv_check( obj_t*  alpha,
-                              obj_t*  a,
-                              obj_t*  x,
-                              obj_t*  x_orig,
-                              double* resid );
+void libblis_test_trsv_check
+     (
+       test_params_t* params,
+       obj_t*         alpha,
+       obj_t*         a,
+       obj_t*         x,
+       obj_t*         x_orig,
+       double*        resid
+     );
 
 
 
-void libblis_test_trsv_deps( test_params_t* params, test_op_t* op )
+void libblis_test_trsv_deps
+     (
+       test_params_t* params,
+       test_op_t*     op
+     )
 {
 	libblis_test_randv( params, &(op->ops->randv) );
 	libblis_test_randm( params, &(op->ops->randm) );
@@ -85,7 +102,11 @@ void libblis_test_trsv_deps( test_params_t* params, test_op_t* op )
 
 
 
-void libblis_test_trsv( test_params_t* params, test_op_t* op )
+void libblis_test_trsv
+     (
+       test_params_t* params,
+       test_op_t*     op
+     )
 {
 
 	// Return early if this test has already been done.
@@ -114,15 +135,18 @@ void libblis_test_trsv( test_params_t* params, test_op_t* op )
 
 
 
-void libblis_test_trsv_experiment( test_params_t* params,
-                                   test_op_t*     op,
-                                   iface_t        iface,
-                                   num_t          datatype,
-                                   char*          pc_str,
-                                   char*          sc_str,
-                                   unsigned int   p_cur,
-                                   double*        perf,
-                                   double*        resid )
+void libblis_test_trsv_experiment
+     (
+       test_params_t* params,
+       test_op_t*     op,
+       iface_t        iface,
+       num_t          datatype,
+       char*          pc_str,
+       char*          sc_str,
+       unsigned int   p_cur,
+       double*        perf,
+       double*        resid
+     )
 {
 	unsigned int n_repeats = params->n_repeats;
 	unsigned int i;
@@ -136,7 +160,6 @@ void libblis_test_trsv_experiment( test_params_t* params,
 	trans_t      transa;
 	diag_t       diaga;
 
-	obj_t        kappa;
 	obj_t        alpha, a, x;
 	obj_t        x_save;
 
@@ -151,7 +174,6 @@ void libblis_test_trsv_experiment( test_params_t* params,
 
 	// Create test scalars.
 	bli_obj_scalar_init_detached( datatype, &alpha );
-	bli_obj_scalar_init_detached( datatype, &kappa );
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
@@ -171,18 +193,14 @@ void libblis_test_trsv_experiment( test_params_t* params,
 	bli_obj_set_struc( BLIS_TRIANGULAR, a );
 	bli_obj_set_uplo( uploa, a );
 
-	// Randomize A, make it densely triangular.
-	bli_randm( &a );
+	// Randomize A, load the diagonal, make it densely triangular.
+	libblis_test_mobj_randomize( params, TRUE, &a );
+	libblis_test_mobj_load_diag( params, &a );
 	bli_mktrim( &a );
 
 	// Randomize x and save.
-	bli_randv( &x );
+	libblis_test_vobj_randomize( params, TRUE, &x );
 	bli_copyv( &x, &x_save );
-
-	// Normalize vectors by m.
-	bli_setsc( 1.0/( double )m, 0.0, &kappa );
-	bli_scalv( &kappa, &x );
-	bli_scalv( &kappa, &x_save );
 
 	// Apply the remaining parameters.
 	bli_obj_set_conjtrans( transa, a );
@@ -205,7 +223,7 @@ void libblis_test_trsv_experiment( test_params_t* params,
 	if ( bli_obj_is_complex( x ) ) *perf *= 4.0;
 
 	// Perform checks.
-	libblis_test_trsv_check( &alpha, &a, &x, &x_save, resid );
+	libblis_test_trsv_check( params, &alpha, &a, &x, &x_save, resid );
 
 	// Zero out performance and residual if output vector is empty.
 	libblis_test_check_empty_problem( &x, perf, resid );
@@ -218,10 +236,13 @@ void libblis_test_trsv_experiment( test_params_t* params,
 
 
 
-void libblis_test_trsv_impl( iface_t   iface,
-                             obj_t*    alpha,
-                             obj_t*    a,
-                             obj_t*    x )
+void libblis_test_trsv_impl
+     (
+       iface_t   iface,
+       obj_t*    alpha,
+       obj_t*    a,
+       obj_t*    x
+     )
 {
 	switch ( iface )
 	{
@@ -236,11 +257,15 @@ void libblis_test_trsv_impl( iface_t   iface,
 
 
 
-void libblis_test_trsv_check( obj_t*  alpha,
-                              obj_t*  a,
-                              obj_t*  x,
-                              obj_t*  x_orig,
-                              double* resid )
+void libblis_test_trsv_check
+     (
+       test_params_t* params,
+       obj_t*         alpha,
+       obj_t*         a,
+       obj_t*         x,
+       obj_t*         x_orig,
+       double*        resid
+     )
 {
 	num_t   dt      = bli_obj_datatype( *x );
 	num_t   dt_real = bli_obj_datatype_proj_to_real( *x );

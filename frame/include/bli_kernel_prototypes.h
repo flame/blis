@@ -69,6 +69,62 @@
 #include "bli_l3_ukr.h"
 
 //
+// Level-1m
+//
+
+#define bli_spackm_2xk_ker_name  BLIS_SPACKM_2XK_KERNEL
+#define bli_dpackm_2xk_ker_name  BLIS_DPACKM_2XK_KERNEL
+#define bli_cpackm_2xk_ker_name  BLIS_CPACKM_2XK_KERNEL
+#define bli_zpackm_2xk_ker_name  BLIS_ZPACKM_2XK_KERNEL
+
+#define bli_spackm_3xk_ker_name  BLIS_SPACKM_3XK_KERNEL
+#define bli_dpackm_3xk_ker_name  BLIS_DPACKM_3XK_KERNEL
+#define bli_cpackm_3xk_ker_name  BLIS_CPACKM_3XK_KERNEL
+#define bli_zpackm_3xk_ker_name  BLIS_ZPACKM_3XK_KERNEL
+
+#define bli_spackm_4xk_ker_name  BLIS_SPACKM_4XK_KERNEL
+#define bli_dpackm_4xk_ker_name  BLIS_DPACKM_4XK_KERNEL
+#define bli_cpackm_4xk_ker_name  BLIS_CPACKM_4XK_KERNEL
+#define bli_zpackm_4xk_ker_name  BLIS_ZPACKM_4XK_KERNEL
+
+#define bli_spackm_6xk_ker_name  BLIS_SPACKM_6XK_KERNEL
+#define bli_dpackm_6xk_ker_name  BLIS_DPACKM_6XK_KERNEL
+#define bli_cpackm_6xk_ker_name  BLIS_CPACKM_6XK_KERNEL
+#define bli_zpackm_6xk_ker_name  BLIS_ZPACKM_6XK_KERNEL
+
+#define bli_spackm_8xk_ker_name  BLIS_SPACKM_8XK_KERNEL
+#define bli_dpackm_8xk_ker_name  BLIS_DPACKM_8XK_KERNEL
+#define bli_cpackm_8xk_ker_name  BLIS_CPACKM_8XK_KERNEL
+#define bli_zpackm_8xk_ker_name  BLIS_ZPACKM_8XK_KERNEL
+
+#define bli_spackm_10xk_ker_name BLIS_SPACKM_10XK_KERNEL
+#define bli_dpackm_10xk_ker_name BLIS_DPACKM_10XK_KERNEL
+#define bli_cpackm_10xk_ker_name BLIS_CPACKM_10XK_KERNEL
+#define bli_zpackm_10xk_ker_name BLIS_ZPACKM_10XK_KERNEL
+
+#define bli_spackm_12xk_ker_name BLIS_SPACKM_12XK_KERNEL
+#define bli_dpackm_12xk_ker_name BLIS_DPACKM_12XK_KERNEL
+#define bli_cpackm_12xk_ker_name BLIS_CPACKM_12XK_KERNEL
+#define bli_zpackm_12xk_ker_name BLIS_ZPACKM_12XK_KERNEL
+
+#define bli_spackm_14xk_ker_name BLIS_SPACKM_14XK_KERNEL
+#define bli_dpackm_14xk_ker_name BLIS_DPACKM_14XK_KERNEL
+#define bli_cpackm_14xk_ker_name BLIS_CPACKM_14XK_KERNEL
+#define bli_zpackm_14xk_ker_name BLIS_ZPACKM_14XK_KERNEL
+
+#define bli_spackm_16xk_ker_name BLIS_SPACKM_16XK_KERNEL
+#define bli_dpackm_16xk_ker_name BLIS_DPACKM_16XK_KERNEL
+#define bli_cpackm_16xk_ker_name BLIS_CPACKM_16XK_KERNEL
+#define bli_zpackm_16xk_ker_name BLIS_ZPACKM_16XK_KERNEL
+
+#define bli_spackm_30xk_ker_name BLIS_SPACKM_30XK_KERNEL
+#define bli_dpackm_30xk_ker_name BLIS_DPACKM_30XK_KERNEL
+#define bli_cpackm_30xk_ker_name BLIS_CPACKM_30XK_KERNEL
+#define bli_zpackm_30xk_ker_name BLIS_ZPACKM_30XK_KERNEL
+
+#include "bli_l1m_ker.h"
+
+//
 // Level-1f
 //
 

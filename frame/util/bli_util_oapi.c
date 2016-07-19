@@ -424,6 +424,7 @@ void PASTEMAC(opname,EX_SUF) \
 }
 
 GENFRONT( randv )
+GENFRONT( randnv )
 
 
 #undef  GENFRONT
@@ -465,6 +466,7 @@ void PASTEMAC(opname,EX_SUF) \
 }
 
 GENFRONT( randm )
+GENFRONT( randnm )
 
 
 #undef  GENFRONT

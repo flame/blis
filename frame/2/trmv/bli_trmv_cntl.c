@@ -117,7 +117,7 @@ trmv_t* bli_trmv_cntl_obj_create( impl_t     impl_type,
 {
 	trmv_t* cntl;
 
-	cntl = ( trmv_t* ) bli_malloc( sizeof(trmv_t) );	
+	cntl = ( trmv_t* ) bli_malloc_intl( sizeof(trmv_t) );
 
 	cntl->impl_type      = impl_type;
 	cntl->var_num        = var_num;

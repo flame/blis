@@ -46,31 +46,48 @@ static thresh_t  thresh[BLIS_NUM_FP_TYPES] = { { 1e-04, 1e-05 },   // warn, pass
                                                { 1e-13, 1e-14 } }; // warn, pass for z
 
 // Local prototypes.
-void libblis_test_addv_deps( test_params_t* params,
-                             test_op_t*     op );
+void libblis_test_addv_deps
+     (
+       test_params_t* params,
+       test_op_t*     op
+     );
 
-void libblis_test_addv_experiment( test_params_t* params,
-                                   test_op_t*     op,
-                                   iface_t        iface,
-                                   num_t          datatype,
-                                   char*          pc_str,
-                                   char*          sc_str,
-                                   unsigned int   p_cur,
-                                   double*        perf,
-                                   double*        resid );
+void libblis_test_addv_experiment
+     (
+       test_params_t* params,
+       test_op_t*     op,
+       iface_t        iface,
+       num_t          datatype,
+       char*          pc_str,
+       char*          sc_str,
+       unsigned int   p_cur,
+       double*        perf,
+       double*        resid
+     );
 
-void libblis_test_addv_impl( iface_t   iface,
-                             obj_t*    x,
-                             obj_t*    y );
+void libblis_test_addv_impl
+     (
+       iface_t   iface,
+       obj_t*    x,
+       obj_t*    y
+     );
 
-void libblis_test_addv_check( obj_t*  alpha,
-                              obj_t*  beta,
-                              obj_t*  x,
-                              obj_t*  y,
-                              double* resid );
+void libblis_test_addv_check
+     (
+       test_params_t* params,
+       obj_t*         alpha,
+       obj_t*         beta,
+       obj_t*         x,
+       obj_t*         y,
+       double*        resid
+     );
 
 
-void libblis_test_addv_deps( test_params_t* params, test_op_t* op )
+void libblis_test_addv_deps
+     (
+       test_params_t* params,
+       test_op_t*     op
+     )
 {
 	libblis_test_setv( params, &(op->ops->setv) );
 	libblis_test_normfv( params, &(op->ops->normfv) );
@@ -78,7 +95,11 @@ void libblis_test_addv_deps( test_params_t* params, test_op_t* op )
 
 
 
-void libblis_test_addv( test_params_t* params, test_op_t* op )
+void libblis_test_addv
+     (
+       test_params_t* params,
+       test_op_t*     op
+     )
 {
 
 	// Return early if this test has already been done.
@@ -107,15 +128,18 @@ void libblis_test_addv( test_params_t* params, test_op_t* op )
 
 
 
-void libblis_test_addv_experiment( test_params_t* params,
-                                   test_op_t*     op,
-                                   iface_t        iface,
-                                   num_t          datatype,
-                                   char*          pc_str,
-                                   char*          sc_str,
-                                   unsigned int   p_cur,
-                                   double*        perf,
-                                   double*        resid )
+void libblis_test_addv_experiment
+     (
+       test_params_t* params,
+       test_op_t*     op,
+       iface_t        iface,
+       num_t          datatype,
+       char*          pc_str,
+       char*          sc_str,
+       unsigned int   p_cur,
+       double*        perf,
+       double*        resid
+     )
 {
 	double       time_min  = 1e9;
 	double       time;
@@ -168,7 +192,7 @@ void libblis_test_addv_experiment( test_params_t* params,
 	if ( bli_obj_is_complex( x ) ) *perf *= 2.0;
 
 	// Perform checks.
-	libblis_test_addv_check( &alpha, &beta, &x, &y, resid );
+	libblis_test_addv_check( params, &alpha, &beta, &x, &y, resid );
 
 	// Zero out performance and residual if output vector is empty.
 	libblis_test_check_empty_problem( &y, perf, resid );
@@ -180,9 +204,12 @@ void libblis_test_addv_experiment( test_params_t* params,
 
 
 
-void libblis_test_addv_impl( iface_t   iface,
-                             obj_t*    x,
-                             obj_t*    y )
+void libblis_test_addv_impl
+     (
+       iface_t   iface,
+       obj_t*    x,
+       obj_t*    y
+     )
 {
 	switch ( iface )
 	{
@@ -197,11 +224,15 @@ void libblis_test_addv_impl( iface_t   iface,
 
 
 
-void libblis_test_addv_check( obj_t*  alpha,
-                              obj_t*  beta,
-                              obj_t*  x,
-                              obj_t*  y,
-                              double* resid )
+void libblis_test_addv_check
+     (
+       test_params_t* params,
+       obj_t*         alpha,
+       obj_t*         beta,
+       obj_t*         x,
+       obj_t*         y,
+       double*        resid
+     )
 {
 	num_t  dt      = bli_obj_datatype( *x );
 	num_t  dt_real = bli_obj_datatype_proj_to_real( *x );

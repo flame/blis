@@ -842,7 +842,7 @@ INSERT_GENTFUNC_BASIC0_I( fprintm )
 
 
 #undef  GENTFUNC
-#define GENTFUNC( ctype, ch, varname ) \
+#define GENTFUNC( ctype, ch, varname, randmac ) \
 \
 void PASTEMAC(ch,varname) \
      ( \
@@ -858,17 +858,18 @@ void PASTEMAC(ch,varname) \
 \
 	for ( i = 0; i < n; ++i ) \
 	{ \
-		PASTEMAC(ch,rands)( *chi1 ); \
+		PASTEMAC(ch,randmac)( *chi1 ); \
 \
 		chi1 += incx; \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC0( randv_unb_var1 )
+INSERT_GENTFUNC_BASIC( randv_unb_var1,  rands )
+INSERT_GENTFUNC_BASIC( randnv_unb_var1, randnp2s )
 
 
 #undef  GENTFUNC
-#define GENTFUNC( ctype, ch, varname ) \
+#define GENTFUNC( ctype, ch, varname, kername ) \
 \
 void PASTEMAC(ch,varname) \
      ( \
@@ -913,7 +914,7 @@ void PASTEMAC(ch,varname) \
 \
 			x1     = x + (j  )*ldx + (0  )*incx; \
 \
-			PASTEMAC(ch,randv) \
+			PASTEMAC(ch,kername) \
 			( \
 			  n_elem, \
 			  x1, incx, \
@@ -939,18 +940,23 @@ void PASTEMAC(ch,varname) \
 				x0     = x1; \
 				chi1   = x1 + (n_elem-1)*incx; \
 \
-				PASTEMAC(ch,randv) \
+				PASTEMAC(ch,kername) \
 				( \
 				  n_elem, \
 				  x1, incx, \
 				  cntx  \
 				); \
 \
+				( void )x0; \
+				( void )chi1; \
 				/* We want positive diagonal elements between 1 and 2. */ \
+/*
 				PASTEMAC(ch,abval2s)( *chi1, *chi1 ); \
 				PASTEMAC(ch,adds)( *one, *chi1 ); \
+*/ \
 \
 				/* Scale the super-diagonal elements by 1/max(m,n). */ \
+/*
 				PASTEMAC(ch,scalv) \
 				( \
 				  BLIS_NO_CONJUGATE, \
@@ -959,6 +965,7 @@ void PASTEMAC(ch,varname) \
 				  x0, incx, \
                   cntx  \
 				); \
+*/ \
 			} \
 		} \
 		else if ( bli_is_lower( uplox_eff ) ) \
@@ -972,18 +979,23 @@ void PASTEMAC(ch,varname) \
 				x2     = x1 + incx; \
 				chi1   = x1; \
 \
-				PASTEMAC(ch,randv) \
+				PASTEMAC(ch,kername) \
 				( \
 				  n_elem, \
 				  x1, incx, \
 				  cntx  \
 				); \
 \
+				( void )x2; \
+				( void )chi1; \
 				/* We want positive diagonal elements between 1 and 2. */ \
+/*
 				PASTEMAC(ch,abval2s)( *chi1, *chi1 ); \
 				PASTEMAC(ch,adds)( *one, *chi1 ); \
+*/ \
 \
 				/* Scale the sub-diagonal elements by 1/max(m,n). */ \
+/*
 				PASTEMAC(ch,scalv) \
 				( \
 				  BLIS_NO_CONJUGATE, \
@@ -992,12 +1004,14 @@ void PASTEMAC(ch,varname) \
 				  x2, incx, \
                   cntx  \
 				); \
+*/ \
 			} \
 		} \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC0( randm_unb_var1 )
+INSERT_GENTFUNC_BASIC( randm_unb_var1,  randv )
+INSERT_GENTFUNC_BASIC( randnm_unb_var1, randnv )
 
 
 #undef  GENTFUNCR

@@ -133,9 +133,9 @@ void bli_gks_cntx_set_blkszs( ind_t method, dim_t n_bs, ... )
 	double    scalr;
 
 	// Allocate some temporary local arrays.
-	bszids = bli_malloc( n_bs * sizeof( bszid_t  ) );
-	bmults = bli_malloc( n_bs * sizeof( bszid_t  ) );
-	scalrs = bli_malloc( n_bs * sizeof( double   ) );
+	bszids = bli_malloc_intl( n_bs * sizeof( bszid_t  ) );
+	bmults = bli_malloc_intl( n_bs * sizeof( bszid_t  ) );
+	scalrs = bli_malloc_intl( n_bs * sizeof( double   ) );
 
 	// -- Begin variable argument section --
 
@@ -274,9 +274,9 @@ void bli_gks_cntx_set_blkszs( ind_t method, dim_t n_bs, ... )
 	}
 
 	// Free the temporary local arrays.
-	bli_free( bszids );
-	bli_free( bmults );
-	bli_free( scalrs );
+	bli_free_intl( bszids );
+	bli_free_intl( bmults );
+	bli_free_intl( scalrs );
 }
 
 
@@ -415,7 +415,7 @@ void bli_gks_cntx_set_l3_nat_ukrs( dim_t n_uk, ... )
 	cntx_t*   cntx;
 
 	// Allocate some temporary local arrays.
-	l3_ukrs = bli_malloc( n_uk * sizeof( l3ukr_t ) );
+	l3_ukrs = bli_malloc_intl( n_uk * sizeof( l3ukr_t ) );
 
 	// -- Begin variable argument section --
 
@@ -452,7 +452,7 @@ void bli_gks_cntx_set_l3_nat_ukrs( dim_t n_uk, ... )
 	}
 
 	// Free the temporary local array.
-	bli_free( l3_ukrs );
+	bli_free_intl( l3_ukrs );
 }
 
 void bli_gks_cntx_set_l3_vir_ukr( ind_t   method,
@@ -485,7 +485,7 @@ void bli_gks_cntx_set_l3_vir_ukrs( ind_t method, dim_t n_uk, ... )
 	cntx_t*   cntx;
 
 	// Allocate some temporary local arrays.
-	l3_ukrs = bli_malloc( n_uk * sizeof( l3ukr_t ) );
+	l3_ukrs = bli_malloc_intl( n_uk * sizeof( l3ukr_t ) );
 
 	// -- Begin variable argument section --
 
@@ -522,7 +522,7 @@ void bli_gks_cntx_set_l3_vir_ukrs( ind_t method, dim_t n_uk, ... )
 	}
 
 	// Free the temporary local array.
-	bli_free( l3_ukrs );
+	bli_free_intl( l3_ukrs );
 }
 
 
@@ -703,7 +703,7 @@ void bli_gks_cntx_set_l1f_kers( dim_t n_kr, ... )
 	cntx_t*   cntx;
 
 	// Allocate some temporary local arrays.
-	l1f_kers = bli_malloc( n_kr * sizeof( l1fkr_t ) );
+	l1f_kers = bli_malloc_intl( n_kr * sizeof( l1fkr_t ) );
 
 	// -- Begin variable argument section --
 
@@ -740,7 +740,7 @@ void bli_gks_cntx_set_l1f_kers( dim_t n_kr, ... )
 	}
 
 	// Free the temporary local array.
-	bli_free( l1f_kers );
+	bli_free_intl( l1f_kers );
 }
 
 
@@ -879,7 +879,7 @@ void bli_gks_cntx_set_l1v_kers( dim_t n_kr, ... )
 	cntx_t*   cntx;
 
 	// Allocate some temporary local arrays.
-	l1v_kers = bli_malloc( n_kr * sizeof( l1vkr_t ) );
+	l1v_kers = bli_malloc_intl( n_kr * sizeof( l1vkr_t ) );
 
 	// -- Begin variable argument section --
 
@@ -916,7 +916,7 @@ void bli_gks_cntx_set_l1v_kers( dim_t n_kr, ... )
 	}
 
 	// Free the temporary local array.
-	bli_free( l1v_kers );
+	bli_free_intl( l1v_kers );
 }
 
 

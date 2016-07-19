@@ -46,35 +46,56 @@ static thresh_t  thresh[BLIS_NUM_FP_TYPES] = { { 1e-04, 1e-05 },   // warn, pass
                                                { 1e-13, 1e-14 } }; // warn, pass for z
 
 // Local prototypes.
-void libblis_test_randv_deps( test_params_t* params,
-                              test_op_t*     op );
+void libblis_test_randv_deps
+     (
+       test_params_t* params,
+       test_op_t*     op
+     );
 
-void libblis_test_randv_experiment( test_params_t* params,
-                                    test_op_t*     op,
-                                    iface_t        iface,
-                                    num_t          datatype,
-                                    char*          pc_str,
-                                    char*          sc_str,
-                                    unsigned int   p_cur,
-                                    double*        perf,
-                                    double*        resid );
+void libblis_test_randv_experiment
+     (
+       test_params_t* params,
+       test_op_t*     op,
+       iface_t        iface,
+       num_t          datatype,
+       char*          pc_str,
+       char*          sc_str,
+       unsigned int   p_cur,
+       double*        perf,
+       double*        resid
+     );
 
-void libblis_test_randv_impl( iface_t   iface,
-                              obj_t*    x );
+void libblis_test_randv_impl
+     (
+       iface_t   iface,
+       obj_t*    x
+     );
 
-void libblis_test_randv_check( obj_t*  x,
-                               double* resid );
+void libblis_test_randv_check
+     (
+       test_params_t* params,
+       obj_t*         x,
+       double*        resid
+     );
 
 
 
-void libblis_test_randv_deps( test_params_t* params, test_op_t* op )
+void libblis_test_randv_deps
+     (
+       test_params_t* params,
+       test_op_t*     op
+     )
 {
 	// No dependencies.
 }
 
 
 
-void libblis_test_randv( test_params_t* params, test_op_t* op )
+void libblis_test_randv
+     (
+       test_params_t* params,
+       test_op_t*     op
+     )
 {
 
 	// Return early if this test has already been done.
@@ -103,15 +124,18 @@ void libblis_test_randv( test_params_t* params, test_op_t* op )
 
 
 
-void libblis_test_randv_experiment( test_params_t* params,
-                                    test_op_t*     op,
-                                    iface_t        iface,
-                                    num_t          datatype,
-                                    char*          pc_str,
-                                    char*          sc_str,
-                                    unsigned int   p_cur,
-                                    double*        perf,
-                                    double*        resid )
+void libblis_test_randv_experiment
+     (
+       test_params_t* params,
+       test_op_t*     op,
+       iface_t        iface,
+       num_t          datatype,
+       char*          pc_str,
+       char*          sc_str,
+       unsigned int   p_cur,
+       double*        perf,
+       double*        resid
+     )
 {
 	unsigned int n_repeats = params->n_repeats;
 	unsigned int i;
@@ -157,7 +181,7 @@ void libblis_test_randv_experiment( test_params_t* params,
 	// really say for sure what is "random" and what is not, so instead we
 	// manually perform some checks that will fail under some scenarios whic
 	// we consider to be likely.
-	libblis_test_randv_check( &x, resid );
+	libblis_test_randv_check( params, &x, resid );
 
 	// Zero out performance and residual if output vector is empty.
 	libblis_test_check_empty_problem( &x, perf, resid );
@@ -168,8 +192,11 @@ void libblis_test_randv_experiment( test_params_t* params,
 
 
 
-void libblis_test_randv_impl( iface_t   iface,
-                              obj_t*    x )
+void libblis_test_randv_impl
+     (
+       iface_t   iface,
+       obj_t*    x
+     )
 {
 	switch ( iface )
 	{
@@ -184,8 +211,12 @@ void libblis_test_randv_impl( iface_t   iface,
 
 
 
-void libblis_test_randv_check( obj_t*  x,
-                               double* resid )
+void libblis_test_randv_check
+     (
+       test_params_t* params,
+       obj_t*         x,
+       double*        resid
+     )
 {
 	num_t  dt_real = bli_obj_datatype_proj_to_real( *x );
 	dim_t  m_x     = bli_obj_vector_dim( *x );

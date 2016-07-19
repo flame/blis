@@ -149,7 +149,9 @@ void PASTEMAC(opname,_check) \
 }
 
 GENFRONT( randv )
+GENFRONT( randnv )
 GENFRONT( randm )
+GENFRONT( randnm )
 
 
 #undef  GENFRONT
@@ -295,6 +297,9 @@ void bli_utilv_norm_check
 	e_val = bli_check_nonconstant_object( norm );
 	bli_check_error_code( e_val );
 
+	e_val = bli_check_object_real_proj_of( x, norm );
+	bli_check_error_code( e_val );
+
 	// Check object dimensions.
 
 	e_val = bli_check_vector_object( x );
@@ -330,6 +335,9 @@ void bli_utilm_norm_check
 	bli_check_error_code( e_val );
 
 	e_val = bli_check_nonconstant_object( norm );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_real_proj_of( x, norm );
 	bli_check_error_code( e_val );
 
 	// Check object dimensions.

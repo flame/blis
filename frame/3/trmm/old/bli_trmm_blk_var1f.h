@@ -37,5 +37,5 @@ void bli_trmm_blk_var1f( obj_t*  a,
                          obj_t*  c,
                          cntx_t* cntx,
                          gemm_t* cntl,
-                         trmm_thrinfo_t* thread );
+                         thrinfo_t* thread );
 

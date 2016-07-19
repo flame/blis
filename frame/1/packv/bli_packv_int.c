@@ -80,7 +80,7 @@ void bli_packv_int( obj_t*   a,
 	// First check if we are to skip this operation because the control tree
 	// is NULL. We return without taking any action because a was already
 	// aliased to p in packv_init().
-	if ( cntl_is_noop( cntl ) )
+	if ( bli_cntl_is_noop( cntl ) )
 	{
 		return;
 	}
@@ -114,8 +114,8 @@ void bli_packv_int( obj_t*   a,
 	}
 
 	// Extract the variant number and implementation type.
-	n = cntl_var_num( cntl );
-	i = cntl_impl_type( cntl );
+	n = bli_cntl_var_num( cntl );
+	i = bli_cntl_impl_type( cntl );
 
 	// Index into the variant array to extract the correct function pointer.
 	f = vars[n][i];

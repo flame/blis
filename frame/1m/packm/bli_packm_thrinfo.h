@@ -32,40 +32,44 @@
 
 */
 
-#ifndef BLIS_THREADING_OMP_H
-#define BLIS_THREADING_OMP_H
+//
+// thrinfo_t macros specific to packm.
+//
 
-#ifdef BLIS_ENABLE_OPENMP
+#define packm_thread_my_iter( index, thread ) ( index % thread->n_way == thread->work_id % thread->n_way )
 
-#include <omp.h>
+//
+// thrinfo_t APIs specific to packm.
+//
 
-#ifdef BLIS_TREE_BARRIER
-    struct barrier_s
-    {   
-        int arity;
-        int count;
-        struct barrier_s* dad;
-        int signal;
-    };  
-    typedef struct barrier_s barrier_t;
+thrinfo_t* bli_packm_thrinfo_create
+     (
+       thrcomm_t* ocomm,
+       dim_t      ocomm_id,
+       thrcomm_t* icomm,
+       dim_t      icomm_id,
+       dim_t      n_way,
+       dim_t      work_id
+     );
 
-    struct thread_comm_s
-    {   
-        void*   sent_object;
-        dim_t   n_threads;
-        barrier_t** barriers;
-    }; 
-#else
-    struct thread_comm_s
-    {
-        void*   sent_object;
-        dim_t   n_threads;
+void bli_packm_thrinfo_init
+     (
+       thrinfo_t* thread,
+       thrcomm_t* ocomm,
+       dim_t      ocomm_id,
+       thrcomm_t* icomm,
+       dim_t      icomm_id,
+       dim_t      n_way,
+       dim_t      work_id
+     );
 
-        bool_t  barrier_sense;
-        dim_t   barrier_threads_arrived;
-    };
-#endif
-typedef struct thread_comm_s thread_comm_t;
+void bli_packm_thrinfo_init_single
+     (
+       thrinfo_t* thread
+     );
 
-#endif
-#endif
+void bli_packm_thrinfo_free
+     (
+       thrinfo_t* thread
+     );
+

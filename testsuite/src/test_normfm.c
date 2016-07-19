@@ -46,38 +46,59 @@ static thresh_t  thresh[BLIS_NUM_FP_TYPES] = { { 1e-04, 1e-05 },   // warn, pass
                                                { 1e-13, 1e-14 } }; // warn, pass for z
 
 // Local prototypes.
-void libblis_test_normfm_deps( test_params_t* params,
-                               test_op_t*     op );
+void libblis_test_normfm_deps
+     (
+       test_params_t* params,
+       test_op_t*     op
+     );
 
-void libblis_test_normfm_experiment( test_params_t* params,
-                                     test_op_t*     op,
-                                     iface_t        iface,
-                                     num_t          datatype,
-                                     char*          pc_str,
-                                     char*          sc_str,
-                                     unsigned int   p_cur,
-                                     double*        perf,
-                                     double*        resid );
+void libblis_test_normfm_experiment
+     (
+       test_params_t* params,
+       test_op_t*     op,
+       iface_t        iface,
+       num_t          datatype,
+       char*          pc_str,
+       char*          sc_str,
+       unsigned int   p_cur,
+       double*        perf,
+       double*        resid
+     );
 
-void libblis_test_normfm_impl( iface_t   iface,
-                               obj_t*    x,
-                               obj_t*    norm );
+void libblis_test_normfm_impl
+     (
+       iface_t   iface,
+       obj_t*    x,
+       obj_t*    norm
+     );
 
-void libblis_test_normfm_check( obj_t*  beta,
-                                obj_t*  x,
-                                obj_t*  norm,
-                                double* resid );
+void libblis_test_normfm_check
+     (
+       test_params_t* params,
+       obj_t*         beta,
+       obj_t*         x,
+       obj_t*         norm,
+       double*        resid
+     );
 
 
 
-void libblis_test_normfm_deps( test_params_t* params, test_op_t* op )
+void libblis_test_normfm_deps
+     (
+       test_params_t* params,
+       test_op_t*     op
+     )
 {
 	libblis_test_setm( params, &(op->ops->setm) );
 }
 
 
 
-void libblis_test_normfm( test_params_t* params, test_op_t* op )
+void libblis_test_normfm
+     (
+       test_params_t* params,
+       test_op_t*     op
+     )
 {
 
 	// Return early if this test has already been done.
@@ -106,15 +127,18 @@ void libblis_test_normfm( test_params_t* params, test_op_t* op )
 
 
 
-void libblis_test_normfm_experiment( test_params_t* params,
-                                     test_op_t*     op,
-                                     iface_t        iface,
-                                     num_t          datatype,
-                                     char*          pc_str,
-                                     char*          sc_str,
-                                     unsigned int   p_cur,
-                                     double*        perf,
-                                     double*        resid )
+void libblis_test_normfm_experiment
+     (
+       test_params_t* params,
+       test_op_t*     op,
+       iface_t        iface,
+       num_t          datatype,
+       char*          pc_str,
+       char*          sc_str,
+       unsigned int   p_cur,
+       double*        perf,
+       double*        resid
+     )
 {
 	unsigned int n_repeats = params->n_repeats;
 	unsigned int i;
@@ -166,7 +190,7 @@ void libblis_test_normfm_experiment( test_params_t* params,
 	if ( bli_obj_is_complex( x ) ) *perf *= 2.0;
 
 	// Perform checks.
-	libblis_test_normfm_check( &beta, &x, &norm, resid );
+	libblis_test_normfm_check( params, &beta, &x, &norm, resid );
 
 	// Zero out performance and residual if input matrix is empty.
 	libblis_test_check_empty_problem( &x, perf, resid );
@@ -177,9 +201,12 @@ void libblis_test_normfm_experiment( test_params_t* params,
 
 
 
-void libblis_test_normfm_impl( iface_t   iface,
-                               obj_t*    x,
-                               obj_t*    norm )
+void libblis_test_normfm_impl
+     (
+       iface_t   iface,
+       obj_t*    x,
+       obj_t*    norm
+     )
 {
 	switch ( iface )
 	{
@@ -194,10 +221,14 @@ void libblis_test_normfm_impl( iface_t   iface,
 
 
 
-void libblis_test_normfm_check( obj_t*  beta,
-                                obj_t*  x,
-                                obj_t*  norm,
-                                double* resid )
+void libblis_test_normfm_check
+     (
+       test_params_t* params,
+       obj_t*         beta,
+       obj_t*         x,
+       obj_t*         norm,
+       double*        resid
+     )
 {
 	num_t  dt_real = bli_obj_datatype_proj_to_real( *x );
 	dim_t  m       = bli_obj_length( *x );

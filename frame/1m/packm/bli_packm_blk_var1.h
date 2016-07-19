@@ -35,7 +35,7 @@
 void bli_packm_blk_var1( obj_t*   c,
                          obj_t*   p,
                          cntx_t*  cntx,
-                         packm_thrinfo_t* t );
+                         thrinfo_t* t );
 
 
 #undef  GENTPROT
@@ -63,7 +63,7 @@ void PASTEMAC(ch,varname) \
                   dim_t pd_p, inc_t ps_p, \
        void*   packm_ker, \
        cntx_t* cntx, \
-       packm_thrinfo_t* thread  \
+       thrinfo_t* thread  \
      );
 
 INSERT_GENTPROT_BASIC( packm_blk_var1 )

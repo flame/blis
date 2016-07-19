@@ -68,6 +68,66 @@ typedef void (*PASTECH2(ch,opname,tsuf)) \
 INSERT_GENTDEF( packm )
 
 
+// NOTE: the following macros generate packm kernel function type definitions
+// that are "ctyped" and void-typed, for each of the floating-point datatypes.
+// However, we will only make use of the void-typed definitions because the
+// functions such as bli_?packm_cxk() (currently) use arrays of function
+// pointers to store and access the function pointers for various unrolling
+// (register blocksize) values, and therefore they must all be of the same
+// type (hence the use of void* for kappa, a, and p).
+
+// packm_ker
+
+#undef  GENTDEF
+#define GENTDEF( ctype, ch, opname, tsuf ) \
+\
+typedef void (*PASTECH2(ch,opname,tsuf)) \
+     ( \
+       conj_t          conja, \
+       dim_t           n, \
+       ctype* restrict kappa, \
+       ctype* restrict a, inc_t inca, inc_t lda, \
+       ctype* restrict p,             inc_t ldp  \
+     );
+
+INSERT_GENTDEF( packm_cxk_ker )
+
+
+// packm_3mis_ker
+
+#undef  GENTDEF
+#define GENTDEF( ctype, ch, opname, tsuf ) \
+\
+typedef void (*PASTECH2(ch,opname,tsuf)) \
+     ( \
+       conj_t          conja, \
+       dim_t           n, \
+       ctype* restrict kappa, \
+       ctype* restrict a, inc_t inca, inc_t lda, \
+       ctype* restrict p, inc_t is_p, inc_t ldp  \
+     );
+
+INSERT_GENTDEF( packm_cxk_3mis_ker )
+INSERT_GENTDEF( packm_cxk_4mi_ker )
+
+
+// packm_rih_ker
+
+#undef  GENTDEF
+#define GENTDEF( ctype, ch, opname, tsuf ) \
+\
+typedef void (*PASTECH2(ch,opname,tsuf)) \
+     ( \
+       conj_t          conja, \
+       pack_t          schema, \
+       dim_t           n, \
+       ctype* restrict kappa, \
+       ctype* restrict a, inc_t inca, inc_t lda, \
+       ctype* restrict p,             inc_t ldp  \
+     );
+
+INSERT_GENTDEF( packm_cxk_rih_ker )
+
 
 
 #endif

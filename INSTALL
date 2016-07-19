@@ -7,7 +7,7 @@ For a detailed description of how to configure, compile, install, and link
 to a BLIS library on your local system, please read the build system wiki
 located at the BLIS project's official website:
 
-  http://code.google.com/p/blis/wiki/BuildSystem
+  https://github.com/flame/blis/wiki/BuildSystem
 
 This document will always contain the most up-to-date information related
 to instantiating a BLIS library from the framework source code. If you have

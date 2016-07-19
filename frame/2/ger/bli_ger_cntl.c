@@ -170,7 +170,7 @@ ger_t* bli_ger_cntl_obj_create( impl_t     impl_type,
 {
 	ger_t* cntl;
 
-	cntl = ( ger_t* ) bli_malloc( sizeof(ger_t) );
+	cntl = ( ger_t* ) bli_malloc_intl( sizeof(ger_t) );
 
 	cntl->impl_type     = impl_type;
 	cntl->var_num       = var_num;

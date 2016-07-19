@@ -36,5 +36,5 @@
 
 void bli_cntl_obj_free( void* cntl )
 {
-	bli_free( cntl );
+	bli_free_intl( cntl );
 }

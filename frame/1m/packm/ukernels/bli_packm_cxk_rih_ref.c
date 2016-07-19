@@ -39,12 +39,12 @@
 \
 void PASTEMAC(ch,varname) \
      ( \
-       conj_t  conja, \
-       pack_t  schema, \
-       dim_t   n, \
-       void*   kappa, \
-       void*   a, inc_t inca, inc_t lda, \
-       void*   p,             inc_t ldp  \
+       conj_t         conja, \
+       pack_t         schema, \
+       dim_t          n, \
+       void* restrict kappa, \
+       void* restrict a, inc_t inca, inc_t lda, \
+       void* restrict p,             inc_t ldp  \
      ) \
 { \
 	const inc_t       inca2      = 2 * inca; \
@@ -219,12 +219,12 @@ INSERT_GENTFUNCCO_BASIC0( packm_2xk_rih_ref )
 \
 void PASTEMAC(ch,varname) \
      ( \
-       conj_t  conja, \
-       pack_t  schema, \
-       dim_t   n, \
-       void*   kappa, \
-       void*   a, inc_t inca, inc_t lda, \
-       void*   p,             inc_t ldp  \
+       conj_t         conja, \
+       pack_t         schema, \
+       dim_t          n, \
+       void* restrict kappa, \
+       void* restrict a, inc_t inca, inc_t lda, \
+       void* restrict p,             inc_t ldp  \
      ) \
 { \
 	const inc_t       inca2      = 2 * inca; \
@@ -421,12 +421,12 @@ INSERT_GENTFUNCCO_BASIC0( packm_4xk_rih_ref )
 \
 void PASTEMAC(ch,varname) \
      ( \
-       conj_t  conja, \
-       pack_t  schema, \
-       dim_t   n, \
-       void*   kappa, \
-       void*   a, inc_t inca, inc_t lda, \
-       void*   p,             inc_t ldp  \
+       conj_t         conja, \
+       pack_t         schema, \
+       dim_t          n, \
+       void* restrict kappa, \
+       void* restrict a, inc_t inca, inc_t lda, \
+       void* restrict p,             inc_t ldp  \
      ) \
 { \
 	const inc_t       inca2      = 2 * inca; \
@@ -645,12 +645,12 @@ INSERT_GENTFUNCCO_BASIC0( packm_6xk_rih_ref )
 \
 void PASTEMAC(ch,varname) \
      ( \
-       conj_t  conja, \
-       pack_t  schema, \
-       dim_t   n, \
-       void*   kappa, \
-       void*   a, inc_t inca, inc_t lda, \
-       void*   p,             inc_t ldp  \
+       conj_t         conja, \
+       pack_t         schema, \
+       dim_t          n, \
+       void* restrict kappa, \
+       void* restrict a, inc_t inca, inc_t lda, \
+       void* restrict p,             inc_t ldp  \
      ) \
 { \
 	const inc_t       inca2      = 2 * inca; \
@@ -891,12 +891,12 @@ INSERT_GENTFUNCCO_BASIC0( packm_8xk_rih_ref )
 \
 void PASTEMAC(ch,varname) \
      ( \
-       conj_t  conja, \
-       pack_t  schema, \
-       dim_t   n, \
-       void*   kappa, \
-       void*   a, inc_t inca, inc_t lda, \
-       void*   p,             inc_t ldp  \
+       conj_t         conja, \
+       pack_t         schema, \
+       dim_t          n, \
+       void* restrict kappa, \
+       void* restrict a, inc_t inca, inc_t lda, \
+       void* restrict p,             inc_t ldp  \
      ) \
 { \
 	const inc_t       inca2      = 2 * inca; \
@@ -1159,12 +1159,12 @@ INSERT_GENTFUNCCO_BASIC0( packm_10xk_rih_ref )
 \
 void PASTEMAC(ch,varname) \
      ( \
-       conj_t  conja, \
-       pack_t  schema, \
-       dim_t   n, \
-       void*   kappa, \
-       void*   a, inc_t inca, inc_t lda, \
-       void*   p,             inc_t ldp  \
+       conj_t         conja, \
+       pack_t         schema, \
+       dim_t          n, \
+       void* restrict kappa, \
+       void* restrict a, inc_t inca, inc_t lda, \
+       void* restrict p,             inc_t ldp  \
      ) \
 { \
 	const inc_t       inca2      = 2 * inca; \
@@ -1449,12 +1449,12 @@ INSERT_GENTFUNCCO_BASIC0( packm_12xk_rih_ref )
 \
 void PASTEMAC(ch,varname) \
      ( \
-       conj_t  conja, \
-       pack_t  schema, \
-       dim_t   n, \
-       void*   kappa, \
-       void*   a, inc_t inca, inc_t lda, \
-       void*   p,             inc_t ldp  \
+       conj_t         conja, \
+       pack_t         schema, \
+       dim_t          n, \
+       void* restrict kappa, \
+       void* restrict a, inc_t inca, inc_t lda, \
+       void* restrict p,             inc_t ldp  \
      ) \
 { \
 	const inc_t       inca2      = 2 * inca; \
@@ -1761,12 +1761,12 @@ INSERT_GENTFUNCCO_BASIC0( packm_14xk_rih_ref )
 \
 void PASTEMAC(ch,varname) \
      ( \
-       conj_t  conja, \
-       pack_t  schema, \
-       dim_t   n, \
-       void*   kappa, \
-       void*   a, inc_t inca, inc_t lda, \
-       void*   p,             inc_t ldp  \
+       conj_t         conja, \
+       pack_t         schema, \
+       dim_t          n, \
+       void* restrict kappa, \
+       void* restrict a, inc_t inca, inc_t lda, \
+       void* restrict p,             inc_t ldp  \
      ) \
 { \
 	const inc_t       inca2      = 2 * inca; \
@@ -2095,12 +2095,12 @@ INSERT_GENTFUNCCO_BASIC0( packm_16xk_rih_ref )
 \
 void PASTEMAC(ch,varname) \
      ( \
-       conj_t  conja, \
-       pack_t  schema, \
-       dim_t   n, \
-       void*   kappa, \
-       void*   a, inc_t inca, inc_t lda, \
-       void*   p,             inc_t ldp  \
+       conj_t         conja, \
+       pack_t         schema, \
+       dim_t          n, \
+       void* restrict kappa, \
+       void* restrict a, inc_t inca, inc_t lda, \
+       void* restrict p,             inc_t ldp  \
      ) \
 { \
 	const inc_t       inca2      = 2 * inca; \

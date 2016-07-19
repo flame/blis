@@ -47,7 +47,7 @@ struct her2_s
 };
 typedef struct her2_s her2_t;
 
-#define cntl_sub_her2( cntl )      cntl->sub_her2
+#define bli_cntl_sub_her2( cntl )      cntl->sub_her2
 
 void    bli_her2_cntl_init( void );
 void    bli_her2_cntl_finalize( void );
