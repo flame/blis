@@ -42,7 +42,7 @@ func_t* bli_func_obj_create( void* ptr_s,
 {
 	func_t* f;
 
-	f = ( func_t* ) bli_malloc( sizeof(func_t) );	
+	f = ( func_t* ) bli_malloc_intl( sizeof(func_t) );
 
 	bli_func_obj_init( f,
 	                   ptr_s,
@@ -67,7 +67,7 @@ void bli_func_obj_init( func_t* f,
 
 void bli_func_obj_free( func_t* f )
 {
-	bli_free( f );
+	bli_free_intl( f );
 }
 
 // -----------------------------------------------------------------------------

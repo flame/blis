@@ -49,7 +49,7 @@ typedef void (*FUNCPTR_T)(
                            void*   alpha2,
                            void*   c, inc_t rs_c, inc_t cs_c,
                            cntx_t* cntx,
-                           trsm_thrinfo_t* thread
+                           thrinfo_t* thread
                          );
 
 static FUNCPTR_T GENARRAY(ftypes,trsm_ru_ker_var2);
@@ -60,7 +60,7 @@ void bli_trsm_ru_ker_var2( obj_t*  a,
                            obj_t*  c,
                            cntx_t* cntx,
                            trsm_t* cntl,
-                           trsm_thrinfo_t* thread )
+                           thrinfo_t* thread )
 {
 	num_t     dt_exec   = bli_obj_execution_datatype( *c );
 
@@ -145,7 +145,7 @@ void PASTEMAC(ch,varname) \
        void*   alpha2, \
        void*   c, inc_t rs_c, inc_t cs_c, \
        cntx_t* cntx, \
-       trsm_thrinfo_t* thread  \
+       thrinfo_t* thread  \
      ) \
 { \
 	const num_t     dt          = PASTEMAC(ch,type); \
@@ -422,7 +422,7 @@ void PASTEMAC(ch,varname) \
 				/* Compute the addresses of the next panels of A and B. */ \
 				a2 = a1; \
 				/*if ( bli_is_last_iter( i, m_iter, 0, 1 ) ) */\
-				if ( i + thread_num_threads(thread) >= m_iter ) \
+				if ( i + bli_thread_num_threads(thread) >= m_iter ) \
 				{ \
 					a2 = a_cast; \
 					b2 = b1 + ps_b_cur; \
@@ -502,7 +502,7 @@ void PASTEMAC(ch,varname) \
 				/* Compute the addresses of the next panels of A and B. */ \
 				a2 = a1; \
 				/*if ( bli_is_last_iter( i, m_iter, 0, 1 ) ) */\
-				if ( i + thread_num_threads(thread) >= m_iter ) \
+				if ( i + bli_thread_num_threads(thread) >= m_iter ) \
 				{ \
 					a2 = a_cast; \
 					b2 = b1 + cstep_b; \

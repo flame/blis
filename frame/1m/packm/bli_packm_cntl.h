@@ -55,13 +55,13 @@ typedef struct packm_s packm_t;
 #define cntl_pack_schema( cntl )       cntl->pack_schema
 #define cntl_pack_buf_type( cntl )     cntl->pack_buf_type
 
-#define cntl_sub_packm( cntl )         cntl->sub_packm
-#define cntl_sub_packm_a( cntl )       cntl->sub_packm_a
-#define cntl_sub_packm_a11( cntl )     cntl->sub_packm_a11
-#define cntl_sub_packm_b( cntl )       cntl->sub_packm_b
-#define cntl_sub_packm_b11( cntl )     cntl->sub_packm_b11
-#define cntl_sub_packm_c( cntl )       cntl->sub_packm_c
-#define cntl_sub_packm_c11( cntl )     cntl->sub_packm_c11
+#define bli_cntl_sub_packm( cntl )         cntl->sub_packm
+#define bli_cntl_sub_packm_a( cntl )       cntl->sub_packm_a
+#define bli_cntl_sub_packm_a11( cntl )     cntl->sub_packm_a11
+#define bli_cntl_sub_packm_b( cntl )       cntl->sub_packm_b
+#define bli_cntl_sub_packm_b11( cntl )     cntl->sub_packm_b11
+#define bli_cntl_sub_packm_c( cntl )       cntl->sub_packm_c
+#define bli_cntl_sub_packm_c11( cntl )     cntl->sub_packm_c11
 
 void     bli_packm_cntl_init( void );
 void     bli_packm_cntl_finalize( void );

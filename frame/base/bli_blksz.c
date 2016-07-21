@@ -42,7 +42,7 @@ blksz_t* bli_blksz_obj_create( dim_t b_s, dim_t be_s,
 {
 	blksz_t* b;
 
-	b = ( blksz_t* ) bli_malloc( sizeof(blksz_t) );	
+	b = ( blksz_t* ) bli_malloc_intl( sizeof(blksz_t) );
 
 	bli_blksz_obj_init( b,
 	                    b_s, be_s,
@@ -71,7 +71,7 @@ void bli_blksz_obj_init( blksz_t* b,
 
 void bli_blksz_obj_free( blksz_t* b )
 {
-	bli_free( b );
+	bli_free_intl( b );
 }
 
 // -----------------------------------------------------------------------------

@@ -53,6 +53,18 @@ INSERT_GENTPROT_BASIC( mulsc )
 INSERT_GENTPROT_BASIC( subsc )
 
 
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       conj_t  conjchi, \
+       ctype*  chi  \
+     );
+
+INSERT_GENTPROT_BASIC( invertsc )
+
+
 #undef  GENTPROTR
 #define GENTPROTR( ctype, ctype_r, ch, chr, opname ) \
 \

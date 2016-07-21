@@ -54,7 +54,7 @@ unpackm_t* bli_unpackm_cntl_obj_create( impl_t     impl_type,
 {
 	unpackm_t* cntl;
 
-	cntl = ( unpackm_t* ) bli_malloc( sizeof(unpackm_t) );
+	cntl = ( unpackm_t* ) bli_malloc_intl( sizeof(unpackm_t) );
 
 	cntl->impl_type = impl_type;
 	cntl->var_num   = var_num;

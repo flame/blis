@@ -39,7 +39,7 @@ void bli_gemm_blk_var4f( obj_t*  a,
                          obj_t*  c,
                          cntx_t* cntx,
                          gemm_t* cntl,
-                         gemm_thrinfo_t* thread )
+                         thrinfo_t* thread )
 {
     //The s is for "lives on the stack"
     obj_t b_pack_s;
@@ -58,37 +58,37 @@ void bli_gemm_blk_var4f( obj_t*  a,
 	cntx_t cntx_io = *cntx;
 	cntx_t cntx_rpi = *cntx;
 
-    if( thread_am_ochief( thread ) ) {
+    if( bli_thread_am_ochief( thread ) ) {
 	    // Initialize object for packing B.
 	    bli_obj_init_pack( &b_pack_s );
 	    bli_packm_init( b, &b_pack_s,
-	                    cntx, cntl_sub_packm_b( cntl ) );
+	                    cntx, bli_cntl_sub_packm_b( cntl ) );
 
         // Scale C by beta (if instructed).
         // Since scalm doesn't support multithreading yet, must be done by
 		// chief thread (ew)
         bli_scalm_int( &BLIS_ONE,
                        c,
-                       cntx, cntl_sub_scalm( cntl ) );
+                       cntx, bli_cntl_sub_scalm( cntl ) );
     }
-    b_pack = thread_obroadcast( thread, &b_pack_s );
+    b_pack = bli_thread_obroadcast( thread, &b_pack_s );
 
 	// Initialize objects passed into bli_packm_init for A and C
-    if( thread_am_ichief( thread ) ) {
+    if( bli_thread_am_ichief( thread ) ) {
         bli_obj_init_pack( &a1_pack_s );
         bli_obj_init_pack( &c1_pack_s );
     }
-    a1_pack = thread_ibroadcast( thread, &a1_pack_s );
-    c1_pack = thread_ibroadcast( thread, &c1_pack_s );
+    a1_pack = bli_thread_ibroadcast( thread, &a1_pack_s );
+    c1_pack = bli_thread_ibroadcast( thread, &c1_pack_s );
 
 	// Pack B (if instructed).
 	bli_packm_int( b, b_pack,
-	               cntx, cntl_sub_packm_b( cntl ),
-                   gemm_thread_sub_opackm( thread ) );
+	               cntx, bli_cntl_sub_packm_b( cntl ),
+                   bli_thrinfo_sub_opackm( thread ) );
 
     dim_t my_start, my_end;
-    bli_get_range_t2b( thread, a,
-                       bli_cntx_get_bmult( cntl_bszid( cntl ), cntx ),
+    bli_thread_get_range_t2b( thread, a,
+                       bli_cntx_get_bmult( bli_cntl_bszid( cntl ), cntx ),
                        &my_start, &my_end );
 
 	// Partition along the m dimension.
@@ -99,7 +99,7 @@ void bli_gemm_blk_var4f( obj_t*  a,
 		// This causes the right blocksize to be used if c and a are
 		// complex and b is real.
 		b_alg = bli_determine_blocksize_f( i, my_end, a,
-		                                   cntl_bszid( cntl ), cntx );
+		                                   bli_cntl_bszid( cntl ), cntx );
 
 		// Acquire partitions for A1 and C1.
 		bli_acquire_mpart_t2b( BLIS_SUBPART1,
@@ -112,23 +112,23 @@ void bli_gemm_blk_var4f( obj_t*  a,
 		bli_gemm3m3_cntx_stage( 0, &cntx_ro );
 
         // Initialize objects for packing A1 and C1.
-        if( thread_am_ichief( thread ) ) {
+        if( bli_thread_am_ichief( thread ) ) {
             bli_packm_init( &a1, a1_pack,
-                            &cntx_ro, cntl_sub_packm_a( cntl ) );
+                            &cntx_ro, bli_cntl_sub_packm_a( cntl ) );
             bli_packm_init( &c1, c1_pack,
-                            &cntx_ro, cntl_sub_packm_c( cntl ) );
+                            &cntx_ro, bli_cntl_sub_packm_c( cntl ) );
         }
-        thread_ibarrier( thread );
+        bli_thread_ibarrier( thread );
 
 		// Pack A1 (if instructed).
 		bli_packm_int( &a1, a1_pack,
-		               &cntx_ro, cntl_sub_packm_a( cntl ),
-                       gemm_thread_sub_ipackm( thread ) );
+		               &cntx_ro, bli_cntl_sub_packm_a( cntl ),
+                       bli_thrinfo_sub_ipackm( thread ) );
 
 		// Pack C1 (if instructed).
 		bli_packm_int( &c1, c1_pack,
-		               &cntx_ro, cntl_sub_packm_c( cntl ),
-                       gemm_thread_sub_ipackm( thread ) );
+		               &cntx_ro, bli_cntl_sub_packm_c( cntl ),
+                       bli_thrinfo_sub_ipackm( thread ) );
 
 		// Perform gemm subproblem (real-only).
 		bli_gemm_int( &BLIS_ONE,
@@ -137,30 +137,30 @@ void bli_gemm_blk_var4f( obj_t*  a,
 		              &BLIS_ONE,
 		              c1_pack,
 		              cntx,
-		              cntl_sub_gemm( cntl ),
-                      gemm_thread_sub_gemm( thread ) );
+		              bli_cntl_sub_gemm( cntl ),
+                      bli_thrinfo_sub_self( thread ) );
 
-        thread_ibarrier( thread );
+        bli_thread_ibarrier( thread );
 
 
 		// Only apply beta within the first of three subproblems.
-		if ( thread_am_ichief( thread ) ) bli_obj_scalar_reset( c1_pack );
+		if ( bli_thread_am_ichief( thread ) ) bli_obj_scalar_reset( c1_pack );
 
 
 		// Initialize the context for the imag-only stage.
 		bli_gemm3m3_cntx_stage( 1, &cntx_io );
 
         // Initialize objects for packing A1 and C1.
-        if( thread_am_ichief( thread ) ) {
+        if( bli_thread_am_ichief( thread ) ) {
             bli_packm_init( &a1, a1_pack,
-                            &cntx_io, cntl_sub_packm_a( cntl ) );
+                            &cntx_io, bli_cntl_sub_packm_a( cntl ) );
         }
-        thread_ibarrier( thread );
+        bli_thread_ibarrier( thread );
 
 		// Pack A1 (if instructed).
 		bli_packm_int( &a1, a1_pack,
-		               &cntx_io, cntl_sub_packm_a( cntl ),
-                       gemm_thread_sub_ipackm( thread ) );
+		               &cntx_io, bli_cntl_sub_packm_a( cntl ),
+                       bli_thrinfo_sub_ipackm( thread ) );
 
 		// Perform gemm subproblem (imag-only).
 		bli_gemm_int( &BLIS_ONE,
@@ -169,26 +169,26 @@ void bli_gemm_blk_var4f( obj_t*  a,
 		              &BLIS_ONE,
 		              c1_pack,
 		              cntx,
-		              cntl_sub_gemm( cntl ),
-                      gemm_thread_sub_gemm( thread ) );
+		              bli_cntl_sub_gemm( cntl ),
+                      bli_thrinfo_sub_self( thread ) );
 
-        thread_ibarrier( thread );
+        bli_thread_ibarrier( thread );
 
 
 		// Initialize the context for the real+imag stage.
 		bli_gemm3m3_cntx_stage( 2, &cntx_rpi );
 
         // Initialize objects for packing A1 and C1.
-        if( thread_am_ichief( thread ) ) {
+        if( bli_thread_am_ichief( thread ) ) {
             bli_packm_init( &a1, a1_pack,
-                            &cntx_rpi, cntl_sub_packm_a( cntl ) );
+                            &cntx_rpi, bli_cntl_sub_packm_a( cntl ) );
         }
-        thread_ibarrier( thread );
+        bli_thread_ibarrier( thread );
 
 		// Pack A1 (if instructed).
 		bli_packm_int( &a1, a1_pack,
-		               &cntx_rpi, cntl_sub_packm_a( cntl ),
-                       gemm_thread_sub_ipackm( thread ) );
+		               &cntx_rpi, bli_cntl_sub_packm_a( cntl ),
+                       bli_thrinfo_sub_ipackm( thread ) );
 
 		// Perform gemm subproblem (real+imag).
 		bli_gemm_int( &BLIS_ONE,
@@ -197,30 +197,30 @@ void bli_gemm_blk_var4f( obj_t*  a,
 		              &BLIS_ONE,
 		              c1_pack,
 		              cntx,
-		              cntl_sub_gemm( cntl ),
-                      gemm_thread_sub_gemm( thread ) );
+		              bli_cntl_sub_gemm( cntl ),
+                      bli_thrinfo_sub_self( thread ) );
 
-        thread_ibarrier( thread );
+        bli_thread_ibarrier( thread );
 
 
 		// Unpack C1 (if C1 was packed).
         // Currently must be done by 1 thread
         bli_unpackm_int( c1_pack, &c1,
-                         cntx, cntl_sub_unpackm_c( cntl ),
-                         gemm_thread_sub_ipackm( thread ) );
+                         cntx, bli_cntl_sub_unpackm_c( cntl ),
+                         bli_thrinfo_sub_ipackm( thread ) );
 	}
 
 	// If any packing buffers were acquired within packm, release them back
 	// to the memory manager.
-    thread_obarrier( thread );
-    if( thread_am_ochief( thread ) )
-	    bli_packm_release( b_pack, cntl_sub_packm_b( cntl ) );
-    if( thread_am_ichief( thread ) ){
+    bli_thread_obarrier( thread );
+    if( bli_thread_am_ochief( thread ) )
+	    bli_packm_release( b_pack, bli_cntl_sub_packm_b( cntl ) );
+    if( bli_thread_am_ichief( thread ) ){
 		// It doesn't matter which packm cntl node we pass in, as long
 		// as it is valid, packm_release() will release the mem_t entry
 		// stored in a1_pack.
-        bli_packm_release( a1_pack, cntl_sub_packm_a( cntl ) );
-        bli_packm_release( c1_pack, cntl_sub_packm_c( cntl ) );
+        bli_packm_release( a1_pack, bli_cntl_sub_packm_a( cntl ) );
+        bli_packm_release( c1_pack, bli_cntl_sub_packm_c( cntl ) );
     }
 }
 

@@ -46,37 +46,54 @@ static thresh_t  thresh[BLIS_NUM_FP_TYPES] = { { 1e-04, 1e-05 },   // warn, pass
                                                { 1e-13, 1e-14 } }; // warn, pass for z
 
 // Local prototypes.
-void libblis_test_dotxv_deps( test_params_t* params,
-                              test_op_t*     op );
+void libblis_test_dotxv_deps
+     (
+       test_params_t* params,
+       test_op_t*     op
+     );
 
-void libblis_test_dotxv_experiment( test_params_t* params,
-                                    test_op_t*     op,
-                                    iface_t        iface,
-                                    num_t          datatype,
-                                    char*          pc_str,
-                                    char*          sc_str,
-                                    unsigned int   p_cur,
-                                    double*        perf,
-                                    double*        resid );
+void libblis_test_dotxv_experiment
+     (
+       test_params_t* params,
+       test_op_t*     op,
+       iface_t        iface,
+       num_t          datatype,
+       char*          pc_str,
+       char*          sc_str,
+       unsigned int   p_cur,
+       double*        perf,
+       double*        resid
+     );
 
-void libblis_test_dotxv_impl( iface_t   iface,
-                              obj_t*    alpha,
-                              obj_t*    x,
-                              obj_t*    y,
-                              obj_t*    beta,
-                              obj_t*    rho );
+void libblis_test_dotxv_impl
+     (
+       iface_t   iface,
+       obj_t*    alpha,
+       obj_t*    x,
+       obj_t*    y,
+       obj_t*    beta,
+       obj_t*    rho
+     );
 
-void libblis_test_dotxv_check( obj_t*  alpha,
-                               obj_t*  x,
-                               obj_t*  y,
-                               obj_t*  beta,
-                               obj_t*  rho,
-                               obj_t*  rho_orig,
-                               double* resid );
+void libblis_test_dotxv_check
+     (
+       test_params_t* params,
+       obj_t*         alpha,
+       obj_t*         x,
+       obj_t*         y,
+       obj_t*         beta,
+       obj_t*         rho,
+       obj_t*         rho_orig,
+       double*        resid
+     );
 
 
 
-void libblis_test_dotxv_deps( test_params_t* params, test_op_t* op )
+void libblis_test_dotxv_deps
+     (
+       test_params_t* params,
+       test_op_t*     op
+     )
 {
 	libblis_test_randv( params, &(op->ops->randv) );
 	libblis_test_normfv( params, &(op->ops->normfv) );
@@ -85,7 +102,11 @@ void libblis_test_dotxv_deps( test_params_t* params, test_op_t* op )
 
 
 
-void libblis_test_dotxv( test_params_t* params, test_op_t* op )
+void libblis_test_dotxv
+     (
+       test_params_t* params,
+       test_op_t*     op
+     )
 {
 
 	// Return early if this test has already been done.
@@ -114,15 +135,18 @@ void libblis_test_dotxv( test_params_t* params, test_op_t* op )
 
 
 
-void libblis_test_dotxv_experiment( test_params_t* params,
-                                    test_op_t*     op,
-                                    iface_t        iface,
-                                    num_t          datatype,
-                                    char*          pc_str,
-                                    char*          sc_str,
-                                    unsigned int   p_cur,
-                                    double*        perf,
-                                    double*        resid )
+void libblis_test_dotxv_experiment
+     (
+       test_params_t* params,
+       test_op_t*     op,
+       iface_t        iface,
+       num_t          datatype,
+       char*          pc_str,
+       char*          sc_str,
+       unsigned int   p_cur,
+       double*        perf,
+       double*        resid
+     )
 {
 	unsigned int n_repeats = params->n_repeats;
 	unsigned int i;
@@ -156,13 +180,13 @@ void libblis_test_dotxv_experiment( test_params_t* params,
 	libblis_test_vobj_create( params, datatype, sc_str[1], m, &y );
 
 	// Initialize alpha, beta, and rho.
-	bli_copysc( &BLIS_TWO, &alpha );
+	bli_copysc( &BLIS_ONE, &alpha );
 	bli_copysc( &BLIS_ZERO, &beta );
 	bli_copysc( &BLIS_MINUS_ONE, &rho );
 	bli_copysc( &rho, &rho_save );
 
 	// Randomize x.
-	bli_randv( &x );
+	libblis_test_vobj_randomize( params, TRUE, &x );
 
 	// Determine whether to make a copy of x with or without conjugation.
 	// 
@@ -198,7 +222,7 @@ void libblis_test_dotxv_experiment( test_params_t* params,
 	if ( bli_obj_is_complex( y ) ) *perf *= 4.0;
 
 	// Perform checks.
-	libblis_test_dotxv_check( &alpha, &x, &y, &beta, &rho, &rho_save, resid );
+	libblis_test_dotxv_check( params, &alpha, &x, &y, &beta, &rho, &rho_save, resid );
 
 	// Zero out performance and residual if output scalar is empty.
 	libblis_test_check_empty_problem( &rho, perf, resid );
@@ -210,12 +234,15 @@ void libblis_test_dotxv_experiment( test_params_t* params,
 
 
 
-void libblis_test_dotxv_impl( iface_t   iface,
-                              obj_t*    alpha,
-                              obj_t*    x,
-                              obj_t*    y,
-                              obj_t*    beta,
-                              obj_t*    rho )
+void libblis_test_dotxv_impl
+     (
+       iface_t   iface,
+       obj_t*    alpha,
+       obj_t*    x,
+       obj_t*    y,
+       obj_t*    beta,
+       obj_t*    rho
+     )
 {
 	switch ( iface )
 	{
@@ -230,13 +257,17 @@ void libblis_test_dotxv_impl( iface_t   iface,
 
 
 
-void libblis_test_dotxv_check( obj_t*  alpha,
-                               obj_t*  x,
-                               obj_t*  y,
-                               obj_t*  beta,
-                               obj_t*  rho,
-                               obj_t*  rho_orig,
-                               double* resid )
+void libblis_test_dotxv_check
+     (
+       test_params_t* params,
+       obj_t*         alpha,
+       obj_t*         x,
+       obj_t*         y,
+       obj_t*         beta,
+       obj_t*         rho,
+       obj_t*         rho_orig,
+       double*        resid
+     )
 {
 	num_t  dt_real = bli_obj_datatype_proj_to_real( *y );
 

@@ -287,13 +287,13 @@ int main( int argc, char** argv )
 			thrinfo.work_id = t;
 
 			if      ( part_n_dim && go_fwd )
-				area = bli_get_range_weighted_l2r( &thrinfo, &a, bf, &start, &end );
+				area = bli_thread_get_range_weighted_l2r( &thrinfo, &a, bf, &start, &end );
 			else if ( part_n_dim && go_bwd )
-				area = bli_get_range_weighted_r2l( &thrinfo, &a, bf, &start, &end );
+				area = bli_thread_get_range_weighted_r2l( &thrinfo, &a, bf, &start, &end );
 			else if ( part_m_dim && go_fwd )
-				area = bli_get_range_weighted_t2b( &thrinfo, &a, bf, &start, &end );
+				area = bli_thread_get_range_weighted_t2b( &thrinfo, &a, bf, &start, &end );
 			else // ( part_m_dim && go_bwd )
-				area = bli_get_range_weighted_b2t( &thrinfo, &a, bf, &start, &end );
+				area = bli_thread_get_range_weighted_b2t( &thrinfo, &a, bf, &start, &end );
 
 			width = end - start;
 

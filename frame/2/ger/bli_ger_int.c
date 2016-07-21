@@ -107,15 +107,15 @@ void bli_ger_int( conj_t  conjx,
 	// If we are about the call a leaf-level implementation, and matrix A
 	// still needs a transposition, then we must induce one by swapping the
 	// strides and dimensions.
-	if ( cntl_is_leaf( cntl ) && bli_obj_has_trans( a_local ) )
+	if ( bli_cntl_is_leaf( cntl ) && bli_obj_has_trans( a_local ) )
 	{
 		bli_obj_induce_trans( a_local );
 		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, a_local );
 	}
 
 	// Extract the variant number and implementation type.
-	n = cntl_var_num( cntl );
-	i = cntl_impl_type( cntl );
+	n = bli_cntl_var_num( cntl );
+	i = bli_cntl_impl_type( cntl );
 
 	// Index into the variant array to extract the correct function pointer.
 	f = vars[n][i];

@@ -46,7 +46,7 @@ struct gemm_s
 };
 typedef struct gemm_s gemm_t;
 
-#define cntl_sub_gemm( cntl )      cntl->sub_gemm
+#define bli_cntl_sub_gemm( cntl )      cntl->sub_gemm
 
 void    bli_gemm_cntl_init( void );
 void    bli_gemm_cntl_finalize( void );

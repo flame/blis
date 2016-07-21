@@ -63,6 +63,20 @@ GENFRONT( subsc )
 \
 void PASTEMAC(opname,_check) \
      ( \
+       obj_t*  chi  \
+     ) \
+{ \
+	bli_l0_xsc_check( chi ); \
+}
+
+GENFRONT( invertsc )
+
+
+#undef  GENFRONT
+#define GENFRONT( opname ) \
+\
+void PASTEMAC(opname,_check) \
+     ( \
        obj_t*  chi, \
        obj_t*  norm  \
      ) \
@@ -236,6 +250,32 @@ void bli_zipsc_check
 
 
 // -----------------------------------------------------------------------------
+
+void bli_l0_xsc_check
+     (
+       obj_t*  chi
+     )
+{
+	err_t e_val;
+
+	// Check object datatypes.
+
+	e_val = bli_check_noninteger_object( chi );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_nonconstant_object( chi );
+	bli_check_error_code( e_val );
+
+	// Check object dimensions.
+
+	e_val = bli_check_scalar_object( chi );
+	bli_check_error_code( e_val );
+
+	// Check object buffers (for non-NULLness).
+
+	e_val = bli_check_object_buffer( chi );
+	bli_check_error_code( e_val );
+}
 
 void bli_l0_xxsc_check
      (

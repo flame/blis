@@ -61,7 +61,7 @@ void bli_gemv_blk_var1( obj_t*  alpha,
 	{
 		// Determine the current algorithmic blocksize.
 		b_alg = bli_determine_blocksize_f( i, m_trans, a,
-		                                   cntl_bszid( cntl ), cntx );
+		                                   bli_cntl_bszid( cntl ), cntx );
 
 		// Acquire partitions for A1 and y1.
 		bli_acquire_mpart_t2b( BLIS_SUBPART1,
@@ -71,16 +71,16 @@ void bli_gemv_blk_var1( obj_t*  alpha,
 
 		// Initialize objects for packing A1 and y1 (if needed).
 		bli_packm_init( &a1, &a1_pack,
-		                cntx, cntl_sub_packm_a( cntl ) );
+		                cntx, bli_cntl_sub_packm_a( cntl ) );
 		bli_packv_init( &y1, &y1_pack,
-		                cntx, cntl_sub_packv_y( cntl ) );
+		                cntx, bli_cntl_sub_packv_y( cntl ) );
 
 		// Copy/pack A1, y1 (if needed).
 		bli_packm_int( &a1, &a1_pack,
-		               cntx, cntl_sub_packm_a( cntl ),
+		               cntx, bli_cntl_sub_packm_a( cntl ),
                        &BLIS_PACKM_SINGLE_THREADED );
 		bli_packv_int( &y1, &y1_pack,
-		               cntx, cntl_sub_packv_y( cntl ) );
+		               cntx, bli_cntl_sub_packv_y( cntl ) );
 
 		// y1 = beta * y1 + alpha * A1 * x;
 		bli_gemv_int( BLIS_NO_TRANSPOSE,
@@ -91,16 +91,16 @@ void bli_gemv_blk_var1( obj_t*  alpha,
 		              beta,
 		              &y1_pack,
 		              cntx,
-		              cntl_sub_gemv( cntl ) );
+		              bli_cntl_sub_gemv( cntl ) );
 
 		// Copy/unpack y1 (if y1 was packed).
 		bli_unpackv_int( &y1_pack, &y1,
-		                 cntx, cntl_sub_unpackv_y( cntl ) );
+		                 cntx, bli_cntl_sub_unpackv_y( cntl ) );
 	}
 
 	// If any packing buffers were acquired within packm, release them back
 	// to the memory manager.
-	bli_packm_release( &a1_pack, cntl_sub_packm_a( cntl ) );
-	bli_packv_release( &y1_pack, cntl_sub_packv_y( cntl ) );
+	bli_packm_release( &a1_pack, bli_cntl_sub_packm_a( cntl ) );
+	bli_packv_release( &y1_pack, bli_cntl_sub_packv_y( cntl ) );
 }
 

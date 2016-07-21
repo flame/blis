@@ -39,7 +39,7 @@ struct scalm_s
 };
 typedef struct scalm_s scalm_t;
 
-#define cntl_sub_scalm( cntl )  cntl->sub_scalm
+#define bli_cntl_sub_scalm( cntl )  cntl->sub_scalm
 
 void     bli_scalm_cntl_init( void );
 void     bli_scalm_cntl_finalize( void );

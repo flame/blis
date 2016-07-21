@@ -50,9 +50,14 @@
 #define bli_cabval2ris( xr, xi, ar, ai ) \
 { \
 	float  s   = bli_fmaxabs( (xr), (xi) ); \
-	float  mag = sqrtf( s ) * \
-	             sqrtf( ( (xr) / s ) * (xr) + \
-	                    ( (xi) / s ) * (xi) ); \
+	float  mag; \
+	if ( s == 0.0F ) mag = 0.0F; \
+	else \
+	{ \
+		mag = sqrtf( s ) * \
+		      sqrtf( ( (xr) / s ) * (xr) + \
+		             ( (xi) / s ) * (xi) ); \
+	} \
 	(ar)       = mag; \
 	(ai)       = 0.0F; \
 }
@@ -60,9 +65,14 @@
 #define bli_zabval2ris( xr, xi, ar, ai ) \
 { \
 	double s   = bli_fmaxabs( (xr), (xi) ); \
-	double mag = sqrt( s ) * \
-	             sqrt( ( (xr) / s ) * (xr) + \
-	                   ( (xi) / s ) * (xi) ); \
+	double mag; \
+	if ( s == 0.0 ) mag = 0.0; \
+	else \
+	{ \
+		mag = sqrt( s ) * \
+		      sqrt( ( (xr) / s ) * (xr) + \
+		            ( (xi) / s ) * (xi) ); \
+	} \
 	(ar)       = mag; \
 	(ai)       = 0.0; \
 }

@@ -127,7 +127,9 @@ void PASTEMAC(opname,_check) \
      );
 
 GENPROT( randv )
+GENPROT( randnv )
 GENPROT( randm )
+GENPROT( randnm )
 
 
 #undef  GENPROT

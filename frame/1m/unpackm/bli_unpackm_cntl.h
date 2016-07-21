@@ -40,13 +40,13 @@ struct unpackm_s
 };
 typedef struct unpackm_s unpackm_t;
 
-#define cntl_sub_unpackm( cntl )      cntl->sub_unpackm
-#define cntl_sub_unpackm_a( cntl )    cntl->sub_unpackm_a
-#define cntl_sub_unpackm_a11( cntl )  cntl->sub_unpackm_a11
-#define cntl_sub_unpackm_b( cntl )    cntl->sub_unpackm_b
-#define cntl_sub_unpackm_b11( cntl )  cntl->sub_unpackm_b11
-#define cntl_sub_unpackm_c( cntl )    cntl->sub_unpackm_c
-#define cntl_sub_unpackm_c11( cntl )  cntl->sub_unpackm_c11
+#define bli_cntl_sub_unpackm( cntl )      cntl->sub_unpackm
+#define bli_cntl_sub_unpackm_a( cntl )    cntl->sub_unpackm_a
+#define bli_cntl_sub_unpackm_a11( cntl )  cntl->sub_unpackm_a11
+#define bli_cntl_sub_unpackm_b( cntl )    cntl->sub_unpackm_b
+#define bli_cntl_sub_unpackm_b11( cntl )  cntl->sub_unpackm_b11
+#define bli_cntl_sub_unpackm_c( cntl )    cntl->sub_unpackm_c
+#define bli_cntl_sub_unpackm_c11( cntl )  cntl->sub_unpackm_c11
 
 void       bli_unpackm_cntl_init( void );
 void       bli_unpackm_cntl_finalize( void );

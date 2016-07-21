@@ -35,7 +35,7 @@
 void bli_packm_unb_var1( obj_t*   c,
                          obj_t*   p,
                          cntx_t*  cntx,
-                         packm_thrinfo_t* thread );
+                         thrinfo_t* thread );
 
 
 #undef  GENTPROT

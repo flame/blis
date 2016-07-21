@@ -61,8 +61,8 @@ void bli_mem_acquire_m( siz_t     req_size,
 	if ( buf_type == BLIS_BUFFER_FOR_GEN_USE )
 	{
 		// For general-use buffer requests, such as those used by level-2
-		// operations, using bli_malloc() is sufficient.
-		void* buf_sys = bli_malloc( req_size );
+		// operations, dynamically allocating memory is sufficient.
+		void* buf_sys = bli_malloc_pool( req_size );
 
 		// Initialize the mem_t object with:
 		// - the address of the memory block,
@@ -163,9 +163,9 @@ void bli_mem_release( mem_t* mem )
 	{
 		void* buf_sys = bli_mem_buf_sys( mem );
 
-		// For general-use buffers, we allocate with bli_malloc(), and so
-		// here we need to call bli_free().
-		bli_free( buf_sys );
+		// For general-use buffers, we dynamically allocate memory, and so
+		// here we need to free.
+		bli_free_pool( buf_sys );
 	}
 	else
 	{

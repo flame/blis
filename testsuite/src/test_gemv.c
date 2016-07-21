@@ -46,38 +46,55 @@ static thresh_t  thresh[BLIS_NUM_FP_TYPES] = { { 1e-04, 1e-05 },   // warn, pass
                                                { 1e-13, 1e-14 } }; // warn, pass for z
 
 // Local prototypes.
-void libblis_test_gemv_deps( test_params_t* params,
-                             test_op_t*     op );
+void libblis_test_gemv_deps
+     (
+       test_params_t* params,
+       test_op_t*     op
+     );
 
-void libblis_test_gemv_experiment( test_params_t* params,
-                                   test_op_t*     op,
-                                   iface_t        iface,
-                                   num_t          datatype,
-                                   char*          pc_str,
-                                   char*          sc_str,
-                                   unsigned int   p_cur,
-                                   double*        perf,
-                                   double*        resid );
+void libblis_test_gemv_experiment
+     (
+       test_params_t* params,
+       test_op_t*     op,
+       iface_t        iface,
+       num_t          datatype,
+       char*          pc_str,
+       char*          sc_str,
+       unsigned int   p_cur,
+       double*        perf,
+       double*        resid
+     );
 
-void libblis_test_gemv_impl( iface_t   iface,
-                             obj_t*    alpha,
-                             obj_t*    a,
-                             obj_t*    x,
-                             obj_t*    beta,
-                             obj_t*    y );
+void libblis_test_gemv_impl
+     (
+       iface_t   iface,
+       obj_t*    alpha,
+       obj_t*    a,
+       obj_t*    x,
+       obj_t*    beta,
+       obj_t*    y
+     );
 
-void libblis_test_gemv_check( obj_t*  kappa,
-                              obj_t*  alpha,
-                              obj_t*  a,
-                              obj_t*  x,
-                              obj_t*  beta,
-                              obj_t*  y,
-                              obj_t*  y_orig,
-                              double* resid );
+void libblis_test_gemv_check
+     (
+       test_params_t* params,
+       obj_t*         kappa,
+       obj_t*         alpha,
+       obj_t*         a,
+       obj_t*         x,
+       obj_t*         beta,
+       obj_t*         y,
+       obj_t*         y_orig,
+       double*        resid
+     );
 
 
 
-void libblis_test_gemv_deps( test_params_t* params, test_op_t* op )
+void libblis_test_gemv_deps
+     (
+       test_params_t* params,
+       test_op_t*     op
+     )
 {
 	libblis_test_randv( params, &(op->ops->randv) );
 	libblis_test_normfv( params, &(op->ops->normfv) );
@@ -88,7 +105,11 @@ void libblis_test_gemv_deps( test_params_t* params, test_op_t* op )
 
 
 
-void libblis_test_gemv( test_params_t* params, test_op_t* op )
+void libblis_test_gemv
+     (
+       test_params_t* params,
+       test_op_t*     op
+     )
 {
 
 	// Return early if this test has already been done.
@@ -117,15 +138,18 @@ void libblis_test_gemv( test_params_t* params, test_op_t* op )
 
 
 
-void libblis_test_gemv_experiment( test_params_t* params,
-                                   test_op_t*     op,
-                                   iface_t        iface,
-                                   num_t          datatype,
-                                   char*          pc_str,
-                                   char*          sc_str,
-                                   unsigned int   p_cur,
-                                   double*        perf,
-                                   double*        resid )
+void libblis_test_gemv_experiment
+     (
+       test_params_t* params,
+       test_op_t*     op,
+       iface_t        iface,
+       num_t          datatype,
+       char*          pc_str,
+       char*          sc_str,
+       unsigned int   p_cur,
+       double*        perf,
+       double*        resid
+     )
 {
 	unsigned int n_repeats = params->n_repeats;
 	unsigned int i;
@@ -184,8 +208,8 @@ void libblis_test_gemv_experiment( test_params_t* params,
 	bli_setd( &kappa, &a );
 
 	// Randomize x and y, and save y.
-	bli_randv( &x );
-	bli_randv( &y );
+	libblis_test_vobj_randomize( params, TRUE, &x );
+	libblis_test_vobj_randomize( params, TRUE, &y );
 	bli_copyv( &y, &y_save );
 
 	// Apply the parameters.
@@ -209,7 +233,7 @@ void libblis_test_gemv_experiment( test_params_t* params,
 	if ( bli_obj_is_complex( y ) ) *perf *= 4.0;
 
 	// Perform checks.
-	libblis_test_gemv_check( &kappa, &alpha, &a, &x, &beta, &y, &y_save, resid );
+	libblis_test_gemv_check( params, &kappa, &alpha, &a, &x, &beta, &y, &y_save, resid );
 
 	// Zero out performance and residual if output vector is empty.
 	libblis_test_check_empty_problem( &y, perf, resid );
@@ -223,12 +247,15 @@ void libblis_test_gemv_experiment( test_params_t* params,
 
 
 
-void libblis_test_gemv_impl( iface_t   iface,
-                             obj_t*    alpha,
-                             obj_t*    a,
-                             obj_t*    x,
-                             obj_t*    beta,
-                             obj_t*    y )
+void libblis_test_gemv_impl
+     (
+       iface_t   iface,
+       obj_t*    alpha,
+       obj_t*    a,
+       obj_t*    x,
+       obj_t*    beta,
+       obj_t*    y
+     )
 {
 	switch ( iface )
 	{
@@ -243,14 +270,18 @@ void libblis_test_gemv_impl( iface_t   iface,
 
 
 
-void libblis_test_gemv_check( obj_t*  kappa,
-                              obj_t*  alpha,
-                              obj_t*  a,
-                              obj_t*  x,
-                              obj_t*  beta,
-                              obj_t*  y,
-                              obj_t*  y_orig,
-                              double* resid )
+void libblis_test_gemv_check
+     (
+       test_params_t* params,
+       obj_t*         kappa,
+       obj_t*         alpha,
+       obj_t*         a,
+       obj_t*         x,
+       obj_t*         beta,
+       obj_t*         y,
+       obj_t*         y_orig,
+       double*        resid
+     )
 {
 	num_t  dt      = bli_obj_datatype( *y );
 	num_t  dt_real = bli_obj_datatype_proj_to_real( *y );

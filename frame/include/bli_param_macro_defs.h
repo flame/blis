@@ -48,7 +48,7 @@
 \
 	( ( uintptr_t )(p) % ( uintptr_t )(size) != 0 )
 
-#define bli_offset_from_alignment( p, size ) \
+#define bli_offset_past_alignment( p, size ) \
 \
 	( ( uintptr_t )(p) % ( uintptr_t )(size) )
 

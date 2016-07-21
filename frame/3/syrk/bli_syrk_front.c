@@ -78,11 +78,11 @@ void bli_syrk_front( obj_t*  alpha,
 		bli_obj_induce_trans( c_local );
 	}
     
-    herk_thrinfo_t** infos = bli_create_herk_thrinfo_paths();
-    dim_t n_threads = thread_num_threads( infos[0] );
+    thrinfo_t** infos = bli_l3_thrinfo_create_paths( BLIS_SYRK, BLIS_LEFT );
+    dim_t n_threads = bli_thread_num_threads( infos[0] );
 
     // Invoke the internal back-end.
-    bli_level3_thread_decorator( n_threads,   
+    bli_l3_thread_decorator( n_threads,
                                  (l3_int_t) bli_herk_int, 
                                  alpha, 
                                  &a_local,  
@@ -93,7 +93,7 @@ void bli_syrk_front( obj_t*  alpha,
                                  (void*) cntl, 
                                  (void**) infos );
 
-    bli_herk_thrinfo_free_paths( infos, n_threads );
+    bli_l3_thrinfo_free_paths( infos, n_threads );
 
 }
 

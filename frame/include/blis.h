@@ -70,7 +70,7 @@ extern "C" {
 
 // -- Threading definitions --
 
-#include "bli_threading.h"
+#include "bli_thread.h"
 
 
 // -- Constant definitions --
@@ -89,6 +89,8 @@ extern "C" {
 #include "bli_kernel_ind_macro_defs.h"
 
 #include "bli_kernel_prototypes.h"
+
+#include "bli_malloc_prototypes.h"
 
 
 // -- Base operation prototypes --

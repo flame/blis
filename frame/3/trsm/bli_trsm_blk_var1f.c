@@ -39,7 +39,7 @@ void bli_trsm_blk_var1f( obj_t*  a,
                          obj_t*  c,
                          cntx_t* cntx,
                          trsm_t* cntl,
-                         trsm_thrinfo_t* thread )
+                         thrinfo_t* thread )
 {
     obj_t b_pack_s;
     obj_t a1_pack_s;
@@ -55,26 +55,26 @@ void bli_trsm_blk_var1f( obj_t*  a,
 	bli_trsm_prune_unref_mparts_m( a, b, c );
 
     // Initialize object for packing B.
-    if( thread_am_ochief( thread ) ) {
+    if( bli_thread_am_ochief( thread ) ) {
 	    bli_obj_init_pack( &b_pack_s );
         bli_packm_init( b, &b_pack_s,
-                        cntx, cntl_sub_packm_b( cntl ) );
+                        cntx, bli_cntl_sub_packm_b( cntl ) );
     }
-    b_pack = thread_obroadcast( thread, &b_pack_s );
+    b_pack = bli_thread_obroadcast( thread, &b_pack_s );
 
     // Initialize object for packing B.
-    if( thread_am_ichief( thread ) ) {
+    if( bli_thread_am_ichief( thread ) ) {
         bli_obj_init_pack( &a1_pack_s );
     }
-    a1_pack = thread_ibroadcast( thread, &a1_pack_s );
+    a1_pack = bli_thread_ibroadcast( thread, &a1_pack_s );
 
 	// Pack B1 (if instructed).
 	bli_packm_int( b, b_pack,
-	               cntx, cntl_sub_packm_b( cntl ),
-                   trsm_thread_sub_opackm( thread ) );
+	               cntx, bli_cntl_sub_packm_b( cntl ),
+                   bli_thrinfo_sub_opackm( thread ) );
 
     dim_t my_start, my_end;
-    bli_get_range_t2b( thread, a,
+    bli_thread_get_range_t2b( thread, a,
 	                   ( bli_obj_root_is_triangular( *a ) ?
 	                     bli_cntx_get_bmult( BLIS_MR, cntx ) :
 	                     bli_cntx_get_bmult( BLIS_NR, cntx ) ),
@@ -85,7 +85,7 @@ void bli_trsm_blk_var1f( obj_t*  a,
 	{
 		// Determine the current algorithmic blocksize.
 		b_alg = bli_determine_blocksize_f( i, my_end, a,
-		                                   cntl_bszid( cntl ), cntx );
+		                                   bli_cntl_bszid( cntl ), cntx );
 
 		// Acquire partitions for A1 and C1.
 		bli_acquire_mpart_t2b( BLIS_SUBPART1,
@@ -94,16 +94,16 @@ void bli_trsm_blk_var1f( obj_t*  a,
 		                       i, b_alg, c, &c1 );
 
 		// Initialize object for packing A1.
-        if( thread_am_ichief( thread ) ) {
+        if( bli_thread_am_ichief( thread ) ) {
             bli_packm_init( &a1, a1_pack,
-                            cntx, cntl_sub_packm_a( cntl ) );
+                            cntx, bli_cntl_sub_packm_a( cntl ) );
         }
-        thread_ibarrier( thread );
+        bli_thread_ibarrier( thread );
 
 		// Pack A1 (if instructed).
 		bli_packm_int( &a1, a1_pack,
-		               cntx, cntl_sub_packm_a( cntl ),
-                       trsm_thread_sub_ipackm( thread ) );
+		               cntx, bli_cntl_sub_packm_a( cntl ),
+                       bli_thrinfo_sub_ipackm( thread ) );
 
 		// Perform trsm subproblem.
 		bli_trsm_int( &BLIS_ONE,
@@ -112,17 +112,17 @@ void bli_trsm_blk_var1f( obj_t*  a,
 		              &BLIS_ONE,
 		              &c1,
 		              cntx,
-		              cntl_sub_trsm( cntl ),
-                      trsm_thread_sub_trsm( thread ) );
-        thread_ibarrier( thread );
+		              bli_cntl_sub_trsm( cntl ),
+                      bli_thrinfo_sub_self( thread ) );
+        bli_thread_ibarrier( thread );
 	}
 
 	// If any packing buffers were acquired within packm, release them back
 	// to the memory manager.
-    thread_obarrier( thread );
-    if( thread_am_ochief( thread ) )
-    	bli_packm_release( b_pack, cntl_sub_packm_b( cntl ) );
-    if( thread_am_ichief( thread ) )
-    	bli_packm_release( a1_pack, cntl_sub_packm_a( cntl ) );
+    bli_thread_obarrier( thread );
+    if( bli_thread_am_ochief( thread ) )
+    	bli_packm_release( b_pack, bli_cntl_sub_packm_b( cntl ) );
+    if( bli_thread_am_ichief( thread ) )
+    	bli_packm_release( a1_pack, bli_cntl_sub_packm_a( cntl ) );
 }
 

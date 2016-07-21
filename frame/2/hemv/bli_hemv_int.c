@@ -96,7 +96,7 @@ void bli_hemv_int( conj_t  conjh,
 	// triangular case. But we only need to do this for blocked algorithms,
 	// since unblocked algorithms are responsible for handling the upper case
 	// explicitly (and they should not be inspecting the transposition bit anyway).
-	if ( cntl_is_blocked( cntl ) && bli_obj_is_upper( *a ) )
+	if ( bli_cntl_is_blocked( cntl ) && bli_obj_is_upper( *a ) )
 	{
 		bli_obj_toggle_conj( a_local );
 		bli_obj_toggle_trans( a_local );
@@ -104,8 +104,8 @@ void bli_hemv_int( conj_t  conjh,
 */
 
 	// Extract the variant number and implementation type.
-	n = cntl_var_num( cntl );
-	i = cntl_impl_type( cntl );
+	n = bli_cntl_var_num( cntl );
+	i = bli_cntl_impl_type( cntl );
 
 	// Index into the variant array to extract the correct function pointer.
 	f = vars[n][i];

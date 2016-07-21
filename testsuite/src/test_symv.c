@@ -46,37 +46,54 @@ static thresh_t  thresh[BLIS_NUM_FP_TYPES] = { { 1e-04, 1e-05 },   // warn, pass
                                                { 1e-13, 1e-14 } }; // warn, pass for z
 
 // Local prototypes.
-void libblis_test_symv_deps( test_params_t* params,
-                             test_op_t*     op );
+void libblis_test_symv_deps
+     (
+       test_params_t* params,
+       test_op_t*     op
+     );
 
-void libblis_test_symv_experiment( test_params_t* params,
-                                   test_op_t*     op,
-                                   iface_t        iface,
-                                   num_t          datatype,
-                                   char*          pc_str,
-                                   char*          sc_str,
-                                   unsigned int   p_cur,
-                                   double*        perf,
-                                   double*        resid );
+void libblis_test_symv_experiment
+     (
+       test_params_t* params,
+       test_op_t*     op,
+       iface_t        iface,
+       num_t          datatype,
+       char*          pc_str,
+       char*          sc_str,
+       unsigned int   p_cur,
+       double*        perf,
+       double*        resid
+     );
 
-void libblis_test_symv_impl( iface_t   iface,
-                             obj_t*    alpha,
-                             obj_t*    a,
-                             obj_t*    x,
-                             obj_t*    beta,
-                             obj_t*    y );
+void libblis_test_symv_impl
+     (
+       iface_t   iface,
+       obj_t*    alpha,
+       obj_t*    a,
+       obj_t*    x,
+       obj_t*    beta,
+       obj_t*    y
+     );
 
-void libblis_test_symv_check( obj_t*  alpha,
-                              obj_t*  a,
-                              obj_t*  x,
-                              obj_t*  beta,
-                              obj_t*  y,
-                              obj_t*  y_orig,
-                              double* resid );
+void libblis_test_symv_check
+     (
+       test_params_t* params,
+       obj_t*         alpha,
+       obj_t*         a,
+       obj_t*         x,
+       obj_t*         beta,
+       obj_t*         y,
+       obj_t*         y_orig,
+       double*        resid
+     );
 
 
 
-void libblis_test_symv_deps( test_params_t* params, test_op_t* op )
+void libblis_test_symv_deps
+     (
+       test_params_t* params,
+       test_op_t*     op
+     )
 {
 	libblis_test_randv( params, &(op->ops->randv) );
 	libblis_test_randm( params, &(op->ops->randm) );
@@ -89,7 +106,11 @@ void libblis_test_symv_deps( test_params_t* params, test_op_t* op )
 
 
 
-void libblis_test_symv( test_params_t* params, test_op_t* op )
+void libblis_test_symv
+     (
+       test_params_t* params,
+       test_op_t*     op
+     )
 {
 
 	// Return early if this test has already been done.
@@ -118,15 +139,18 @@ void libblis_test_symv( test_params_t* params, test_op_t* op )
 
 
 
-void libblis_test_symv_experiment( test_params_t* params,
-                                   test_op_t*     op,
-                                   iface_t        iface,
-                                   num_t          datatype,
-                                   char*          pc_str,
-                                   char*          sc_str,
-                                   unsigned int   p_cur,
-                                   double*        perf,
-                                   double*        resid )
+void libblis_test_symv_experiment
+     (
+       test_params_t* params,
+       test_op_t*     op,
+       iface_t        iface,
+       num_t          datatype,
+       char*          pc_str,
+       char*          sc_str,
+       unsigned int   p_cur,
+       double*        perf,
+       double*        resid
+     )
 {
 	unsigned int n_repeats = params->n_repeats;
 	unsigned int i;
@@ -140,7 +164,6 @@ void libblis_test_symv_experiment( test_params_t* params,
 	conj_t       conja;
 	conj_t       conjx;
 
-	obj_t        kappa;
 	obj_t        alpha, a, x, beta, y;
 	obj_t        y_save;
 
@@ -156,7 +179,6 @@ void libblis_test_symv_experiment( test_params_t* params,
 	// Create test scalars.
 	bli_obj_scalar_init_detached( datatype, &alpha );
 	bli_obj_scalar_init_detached( datatype, &beta );
-	bli_obj_scalar_init_detached( datatype, &kappa );
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
@@ -176,8 +198,8 @@ void libblis_test_symv_experiment( test_params_t* params,
 	}
 	else
 	{
-		bli_setsc(  0.0,  1.0, &alpha );
-		bli_setsc(  0.0, -1.0, &beta );
+		bli_setsc(  0.5,  0.5, &alpha );
+		bli_setsc( -0.5,  0.5, &beta );
 	}
 
 	// Set the structure and uplo properties of A.
@@ -186,20 +208,14 @@ void libblis_test_symv_experiment( test_params_t* params,
 
 	// Randomize A, make it densely symmetric, and zero the unstored triangle
 	// to ensure the implementation reads only from the stored region.
-	bli_randm( &a );
+	libblis_test_mobj_randomize( params, TRUE, &a );
 	bli_mksymm( &a );
 	bli_mktrim( &a );
 
 	// Randomize x and y, and save y.
-	bli_randv( &x );
-	bli_randv( &y );
+	libblis_test_vobj_randomize( params, TRUE, &x );
+	libblis_test_vobj_randomize( params, TRUE, &y );
 	bli_copyv( &y, &y_save );
-
-	// Normalize vectors by m.
-	bli_setsc( 1.0/( double )m, 0.0, &kappa );
-	bli_scalv( &kappa, &x );
-	bli_scalv( &kappa, &y );
-	bli_scalv( &kappa, &y_save );
 
 	// Apply the remaining parameters.
 	bli_obj_set_conj( conja, a );
@@ -222,7 +238,7 @@ void libblis_test_symv_experiment( test_params_t* params,
 	if ( bli_obj_is_complex( y ) ) *perf *= 4.0;
 
 	// Perform checks.
-	libblis_test_symv_check( &alpha, &a, &x, &beta, &y, &y_save, resid );
+	libblis_test_symv_check( params, &alpha, &a, &x, &beta, &y, &y_save, resid );
 
 	// Zero out performance and residual if output vector is empty.
 	libblis_test_check_empty_problem( &y, perf, resid );
@@ -236,12 +252,15 @@ void libblis_test_symv_experiment( test_params_t* params,
 
 
 
-void libblis_test_symv_impl( iface_t   iface,
-                             obj_t*    alpha,
-                             obj_t*    a,
-                             obj_t*    x,
-                             obj_t*    beta,
-                             obj_t*    y )
+void libblis_test_symv_impl
+     (
+       iface_t   iface,
+       obj_t*    alpha,
+       obj_t*    a,
+       obj_t*    x,
+       obj_t*    beta,
+       obj_t*    y
+     )
 {
 	switch ( iface )
 	{
@@ -256,13 +275,17 @@ void libblis_test_symv_impl( iface_t   iface,
 
 
 
-void libblis_test_symv_check( obj_t*  alpha,
-                              obj_t*  a,
-                              obj_t*  x,
-                              obj_t*  beta,
-                              obj_t*  y,
-                              obj_t*  y_orig,
-                              double* resid )
+void libblis_test_symv_check
+     (
+       test_params_t* params,
+       obj_t*         alpha,
+       obj_t*         a,
+       obj_t*         x,
+       obj_t*         beta,
+       obj_t*         y,
+       obj_t*         y_orig,
+       double*        resid
+     )
 {
 	num_t  dt      = bli_obj_datatype( *y );
 	num_t  dt_real = bli_obj_datatype_proj_to_real( *y );

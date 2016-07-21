@@ -57,7 +57,7 @@ typedef void (*FUNCPTR_T)(
                                       dim_t pd_p, inc_t ps_p,
                            void*   packm_ker,
                            cntx_t* cntx,
-                           packm_thrinfo_t* thread
+                           thrinfo_t* thread
                          );
 
 static FUNCPTR_T GENARRAY(ftypes,packm_blk_var1);
@@ -96,7 +96,7 @@ static func_t packm_struc_cxk_kers[BLIS_NUM_PACK_SCHEMA_TYPES] =
 void bli_packm_blk_var1( obj_t*   c,
                          obj_t*   p,
                          cntx_t*  cntx,
-                         packm_thrinfo_t* t )
+                         thrinfo_t* t )
 {
 	num_t     dt_cp      = bli_obj_datatype( *c );
 
@@ -156,7 +156,7 @@ void bli_packm_blk_var1( obj_t*   c,
 		// real domain micro-kernels. (In the aforementioned situation,
 		// applying a real scalar is easy, but applying a complex one is
 		// harder, so we avoid the need altogether with the code below.)
-		if( thread_am_ochief( t ) )
+		if( bli_thread_am_ochief( t ) )
 		{
 			if ( bli_obj_scalar_has_nonzero_imag( p ) )
 			{
@@ -177,7 +177,7 @@ void bli_packm_blk_var1( obj_t*   c,
 				kappa_p = &BLIS_ONE;
 			}
 		}
-		kappa_p = thread_obroadcast( t, kappa_p );
+		kappa_p = bli_thread_obroadcast( t, kappa_p );
 	
 		// Acquire the buffer to the kappa chosen above.
 		buf_kappa = bli_obj_buffer_for_1x1( dt_cp, *kappa_p );
@@ -280,7 +280,7 @@ void PASTEMAC(ch,varname) \
                   dim_t pd_p, inc_t ps_p, \
        void*   packm_ker, \
        cntx_t* cntx, \
-       packm_thrinfo_t* thread  \
+       thrinfo_t* thread  \
      ) \
 { \
 	PASTECH2(ch,opname,_ft) packm_ker_cast = packm_ker; \

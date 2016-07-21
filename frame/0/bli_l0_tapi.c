@@ -65,6 +65,25 @@ INSERT_GENTFUNC_BASIC( subsc, subs )
 void PASTEMAC(ch,opname) \
      ( \
        conj_t  conjchi, \
+       ctype*  chi  \
+     ) \
+{ \
+	ctype chi_conj; \
+\
+	PASTEMAC(ch,copycjs)( conjchi, *chi, chi_conj ); \
+	PASTEMAC(ch,kername)( chi_conj ); \
+	PASTEMAC(ch,copys)( chi_conj, *chi ); \
+}
+
+INSERT_GENTFUNC_BASIC( invertsc, inverts )
+
+
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, opname, kername ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       conj_t  conjchi, \
        ctype*  chi, \
        ctype*  psi  \
      ) \

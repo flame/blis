@@ -32,5 +32,9 @@
 
 */
 
-void libblis_test_copyv( test_params_t* params, test_op_t* op );
+void libblis_test_copyv
+     (
+       test_params_t* params,
+       test_op_t*     op
+     );
 

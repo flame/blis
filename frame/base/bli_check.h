@@ -100,6 +100,8 @@ err_t bli_check_valid_packbuf( packbuf_t buf_type );
 err_t bli_check_requested_block_size_for_pool( siz_t req_size, pool_t* pool );
 err_t bli_check_if_exhausted_pool( pool_t* pool );
 err_t bli_check_sufficient_stack_buf_size( num_t dt, cntx_t* cntx );
+err_t bli_check_alignment_is_power_of_two( size_t align_size );
+err_t bli_check_alignment_is_mult_of_ptr_size( size_t align_size );
 
 err_t bli_check_object_alias_of( obj_t* a, obj_t* b );
 

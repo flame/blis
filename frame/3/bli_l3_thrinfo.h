@@ -32,48 +32,83 @@
 
 */
 
+//
+// thrinfo_t macros specific to various level-3 operations.
+//
 
-struct trmm_thrinfo_s //implements thrinfo_t
-{
-    thread_comm_t*      ocomm;       //The thread communicator for the other threads sharing the same work at this level
-    dim_t               ocomm_id;    //Our thread id within that thread comm
-    thread_comm_t*      icomm;       //The thread communicator for the other threads sharing the same work at this level
-    dim_t               icomm_id;    //Our thread id within that thread comm
+// gemm
 
-    dim_t               n_way;       //Number of distinct caucuses used to parallelize the loop
-    dim_t               work_id;     //What we're working on
+#define gemm_get_next_a_micropanel( thread, a1, step ) ( a1 + step * thread->n_way )
+#define gemm_get_next_b_micropanel( thread, b1, step ) ( b1 + step * thread->n_way )
 
-    packm_thrinfo_t*    opackm;
-    packm_thrinfo_t*    ipackm;
-    struct trmm_thrinfo_s*    sub_trmm;
-};
-typedef struct trmm_thrinfo_s trmm_thrinfo_t;
+// herk
 
-#define trmm_thread_sub_trmm( thread )  thread->sub_trmm
-#define trmm_thread_sub_opackm( thread )  thread->opackm
-#define trmm_thread_sub_ipackm( thread )  thread->ipackm
+#define herk_get_next_a_micropanel( thread, a1, step ) ( a1 + step * thread->n_way )
+#define herk_get_next_b_micropanel( thread, b1, step ) ( b1 + step * thread->n_way )
+
+// trmm
 
 #define trmm_r_ir_my_iter( index, thread ) ( index % thread->n_way == thread->work_id % thread->n_way )
 #define trmm_r_jr_my_iter( index, thread ) ( index % thread->n_way == thread->work_id % thread->n_way )
 #define trmm_l_ir_my_iter( index, thread ) ( index % thread->n_way == thread->work_id % thread->n_way )
 #define trmm_l_jr_my_iter( index, thread ) ( index % thread->n_way == thread->work_id % thread->n_way )
 
-trmm_thrinfo_t** bli_create_trmm_thrinfo_paths( bool_t jc_dependency );
-void bli_trmm_thrinfo_free_paths( trmm_thrinfo_t** info, dim_t n_threads );
+// trsm
 
-void bli_setup_trmm_thrinfo_node( trmm_thrinfo_t* thread,
-                                  thread_comm_t* ocomm, dim_t ocomm_id,
-                                  thread_comm_t* icomm, dim_t icomm_id,
-                                  dim_t n_way, dim_t work_id, 
-                                  packm_thrinfo_t* opackm,
-                                  packm_thrinfo_t* ipackm,
-                                  trmm_thrinfo_t* sub_trmm );
+#define trsm_my_iter( index, thread ) ( index % thread->n_way == thread->work_id % thread->n_way )
 
-trmm_thrinfo_t* bli_create_trmm_thrinfo_node( thread_comm_t* ocomm, dim_t ocomm_id,
-                                              thread_comm_t* icomm, dim_t icomm_id,
-                                              dim_t n_way, dim_t work_id, 
-                                              packm_thrinfo_t* opackm,
-                                              packm_thrinfo_t* ipackm,
-                                              trmm_thrinfo_t* sub_trmm );
+//
+// thrinfo_t APIs specific to level-3 operations.
+//
 
-void bli_setup_trmm_single_threaded_info( trmm_thrinfo_t* thread );
+thrinfo_t* bli_l3_thrinfo_create
+     (
+       thrcomm_t* ocomm,
+       dim_t      ocomm_id,
+       thrcomm_t* icomm,
+       dim_t      icomm_id,
+       dim_t      n_way,
+       dim_t      work_id,
+       thrinfo_t* opackm,
+       thrinfo_t* ipackm,
+       thrinfo_t* sub_self
+     );
+
+void bli_l3_thrinfo_init
+     (
+       thrinfo_t* thread,
+       thrcomm_t* ocomm,
+       dim_t      ocomm_id,
+       thrcomm_t* icomm,
+       dim_t      icomm_id,
+       dim_t      n_way,
+       dim_t      work_id,
+       thrinfo_t* opackm,
+       thrinfo_t* ipackm,
+       thrinfo_t* sub_self
+     );
+
+void bli_l3_thrinfo_init_single
+     (
+       thrinfo_t* thread
+     );
+
+void bli_l3_thrinfo_free
+     (
+       thrinfo_t* thread
+     );
+
+// -----------------------------------------------------------------------------
+
+thrinfo_t** bli_l3_thrinfo_create_paths
+     (
+       opid_t l3_op,
+       side_t side
+     );
+
+void bli_l3_thrinfo_free_paths
+     (
+       thrinfo_t** threads,
+       dim_t       num
+     );
+

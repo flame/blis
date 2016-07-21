@@ -52,7 +52,7 @@ void bli_unpackm_int( obj_t*     p,
                       obj_t*     a,
                       cntx_t*    cntx,
                       unpackm_t* cntl,
-                      packm_thrinfo_t* thread )
+                      thrinfo_t* thread )
 {
 	// The unpackm operation consists of an optional post-process: castm.
 	// (This post-process is analogous to the castm pre-process in packm.)
@@ -77,7 +77,7 @@ void bli_unpackm_int( obj_t*     p,
 
 	// First check if we are to skip this operation because the control tree
 	// is NULL, and if so, simply return.
-	if ( cntl_is_noop( cntl ) )
+	if ( bli_cntl_is_noop( cntl ) )
 	{
 		return;
 	}
@@ -118,20 +118,20 @@ void bli_unpackm_int( obj_t*     p,
 	// Now we are ready to proceed with the unpacking.
 
 	// Extract the variant number and implementation type.
-	n = cntl_var_num( cntl );
-	i = cntl_impl_type( cntl );
+	n = bli_cntl_var_num( cntl );
+	i = bli_cntl_impl_type( cntl );
 
 	// Index into the variant array to extract the correct function pointer.
 	f = vars[n][i];
 
 	// Invoke the variant.
-    if( thread_am_ochief( thread ) ) {
+    if( bli_thread_am_ochief( thread ) ) {
         f( p,
            &c,
 		   cntx,
            cntl );
     }
-    thread_obarrier( thread );
+    bli_thread_obarrier( thread );
 
 	// Now, if necessary, we cast the contents of c to matrix a. If casting
 	// was not necessary, then we are done because the call to the unpackm

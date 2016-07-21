@@ -47,7 +47,7 @@ struct trsv_s
 };
 typedef struct trsv_s trsv_t;
 
-#define cntl_sub_trsv( cntl )      cntl->sub_trsv
+#define bli_cntl_sub_trsv( cntl )      cntl->sub_trsv
 
 void    bli_trsv_cntl_init( void );
 void    bli_trsv_cntl_finalize( void );

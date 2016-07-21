@@ -43,7 +43,7 @@ void bli_pool_init( dim_t   num_blocks,
 	dim_t   i;
 
 	// Allocate the block_ptrs array.
-	block_ptrs = bli_malloc( num_blocks * sizeof( pblk_t ) );
+	block_ptrs = bli_malloc_intl( num_blocks * sizeof( pblk_t ) );
 
 	// Allocate and initialize each entry in the block_ptrs array.
 	for ( i = 0; i < num_blocks; ++i )
@@ -88,7 +88,7 @@ void bli_pool_finalize( pool_t* pool )
 	}
 
 	// Free the block_ptrs array.
-	bli_free( block_ptrs );
+	bli_free_intl( block_ptrs );
 
 	// Clear the contents of the pool_t struct.
 	bli_pool_set_block_ptrs( NULL, pool );
@@ -235,7 +235,7 @@ void bli_pool_grow( dim_t num_blocks_add, pool_t* pool )
 		block_ptrs_cur = bli_pool_block_ptrs( pool );
 
 		// Allocate a new block_ptrs array of length num_blocks_new.
-		block_ptrs_new = bli_malloc( num_blocks_new * sizeof( pblk_t ) );
+		block_ptrs_new = bli_malloc_intl( num_blocks_new * sizeof( pblk_t ) );
 
 		// Query the top_index of the pool.
 		top_index = bli_pool_top_index( pool );
@@ -251,7 +251,7 @@ void bli_pool_grow( dim_t num_blocks_add, pool_t* pool )
 
 //printf( "bli_pool_grow: bp_cur: %p\n", block_ptrs_cur );
 		// Free the old block_ptrs array.
-		bli_free( block_ptrs_cur );
+		bli_free_intl( block_ptrs_cur );
 
 		// Update the pool_t struct with the new block_ptrs array and
 		// record its allocated length.
@@ -343,7 +343,7 @@ void bli_pool_alloc_block( siz_t   block_size,
 
 	// Allocate the block. We add the alignment size to ensure we will
 	// have enough usable space after alignment.
-	buf_sys   = bli_malloc( block_size + align_size );
+	buf_sys   = bli_malloc_pool( block_size + align_size );
 	buf_align = buf_sys;
 
 	// Advance the pointer to achieve the necessary alignment, if it is not
@@ -378,7 +378,7 @@ void bli_pool_free_block( pblk_t* block )
 	buf_sys = bli_pblk_buf_sys( block );
 
 	// Free the block.
-	bli_free( buf_sys );
+	bli_free_pool( buf_sys );
 }
 
 void bli_pool_print( pool_t* pool )

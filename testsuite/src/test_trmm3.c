@@ -46,39 +46,56 @@ static thresh_t  thresh[BLIS_NUM_FP_TYPES] = { { 1e-04, 1e-05 },   // warn, pass
                                                { 1e-13, 1e-14 } }; // warn, pass for z
 
 // Local prototypes.
-void libblis_test_trmm3_deps( test_params_t* params,
-                              test_op_t*     op );
+void libblis_test_trmm3_deps
+     (
+       test_params_t* params,
+       test_op_t*     op
+     );
 
-void libblis_test_trmm3_experiment( test_params_t* params,
-                                    test_op_t*     op,
-                                    iface_t        iface,
-                                    num_t          datatype,
-                                    char*          pc_str,
-                                    char*          sc_str,
-                                    unsigned int   p_cur,
-                                    double*        perf,
-                                    double*        resid );
+void libblis_test_trmm3_experiment
+     (
+       test_params_t* params,
+       test_op_t*     op,
+       iface_t        iface,
+       num_t          datatype,
+       char*          pc_str,
+       char*          sc_str,
+       unsigned int   p_cur,
+       double*        perf,
+       double*        resid
+     );
 
-void libblis_test_trmm3_impl( iface_t   iface,
-                              side_t    side,
-                              obj_t*    alpha,
-                              obj_t*    a,
-                              obj_t*    b,
-                              obj_t*    beta,
-                              obj_t*    c );
+void libblis_test_trmm3_impl
+     (
+       iface_t   iface,
+       side_t    side,
+       obj_t*    alpha,
+       obj_t*    a,
+       obj_t*    b,
+       obj_t*    beta,
+       obj_t*    c
+     );
 
-void libblis_test_trmm3_check( side_t  side,
-                               obj_t*  alpha,
-                               obj_t*  a,
-                               obj_t*  b,
-                               obj_t*  beta,
-                               obj_t*  c,
-                               obj_t*  c_orig,
-                               double* resid );
+void libblis_test_trmm3_check
+     (
+       test_params_t* params,
+       side_t         side,
+       obj_t*         alpha,
+       obj_t*         a,
+       obj_t*         b,
+       obj_t*         beta,
+       obj_t*         c,
+       obj_t*         c_orig,
+       double*        resid
+     );
 
 
 
-void libblis_test_trmm3_deps( test_params_t* params, test_op_t* op )
+void libblis_test_trmm3_deps
+     (
+       test_params_t* params,
+       test_op_t*     op
+     )
 {
 	libblis_test_randv( params, &(op->ops->randv) );
 	libblis_test_randm( params, &(op->ops->randm) );
@@ -94,7 +111,11 @@ void libblis_test_trmm3_deps( test_params_t* params, test_op_t* op )
 
 
 
-void libblis_test_trmm3( test_params_t* params, test_op_t* op )
+void libblis_test_trmm3
+     (
+       test_params_t* params,
+       test_op_t*     op
+     )
 {
 
 	// Return early if this test has already been done.
@@ -123,15 +144,18 @@ void libblis_test_trmm3( test_params_t* params, test_op_t* op )
 
 
 
-void libblis_test_trmm3_experiment( test_params_t* params,
-                                    test_op_t*     op,
-                                    iface_t        iface,
-                                    num_t          datatype,
-                                    char*          pc_str,
-                                    char*          sc_str,
-                                    unsigned int   p_cur,
-                                    double*        perf,
-                                    double*        resid )
+void libblis_test_trmm3_experiment
+     (
+       test_params_t* params,
+       test_op_t*     op,
+       iface_t        iface,
+       num_t          datatype,
+       char*          pc_str,
+       char*          sc_str,
+       unsigned int   p_cur,
+       double*        perf,
+       double*        resid
+     )
 {
 	unsigned int n_repeats = params->n_repeats;
 	unsigned int i;
@@ -148,7 +172,6 @@ void libblis_test_trmm3_experiment( test_params_t* params,
 	diag_t       diaga;
 	trans_t      transb;
 
-	obj_t        kappa;
 	obj_t        alpha, a, b, beta, c;
 	obj_t        c_save;
 
@@ -165,7 +188,6 @@ void libblis_test_trmm3_experiment( test_params_t* params,
 	bli_param_map_char_to_blis_trans( pc_str[4], &transb );
 
 	// Create test scalars.
-	bli_obj_scalar_init_detached( datatype, &kappa );
 	bli_obj_scalar_init_detached( datatype, &alpha );
 	bli_obj_scalar_init_detached( datatype, &beta );
 
@@ -197,17 +219,13 @@ void libblis_test_trmm3_experiment( test_params_t* params,
 	bli_obj_set_uplo( uploa, a );
 
 	// Randomize A, make it densely triangular.
-	bli_randm( &a );
+	libblis_test_mobj_randomize( params, TRUE, &a );
 	bli_mktrim( &a );
 
 	// Randomize B and C, and save C.
-	bli_randm( &b );
-	bli_randm( &c );
+	libblis_test_mobj_randomize( params, TRUE, &b );
+	libblis_test_mobj_randomize( params, TRUE, &c );
 	bli_copym( &c, &c_save );
-
-	// Normalize by m.
-	bli_setsc( 1.0/( double )m, 0.0, &kappa );
-	bli_scalm( &kappa, &b );
 
 	// Apply the remaining parameters.
 	bli_obj_set_conjtrans( transa, a );
@@ -231,7 +249,7 @@ void libblis_test_trmm3_experiment( test_params_t* params,
 	if ( bli_obj_is_complex( c ) ) *perf *= 4.0;
 
 	// Perform checks.
-	libblis_test_trmm3_check( side, &alpha, &a, &b, &beta, &c, &c_save, resid );
+	libblis_test_trmm3_check( params, side, &alpha, &a, &b, &beta, &c, &c_save, resid );
 
 	// Zero out performance and residual if output matrix is empty.
 	libblis_test_check_empty_problem( &c, perf, resid );
@@ -245,13 +263,16 @@ void libblis_test_trmm3_experiment( test_params_t* params,
 
 
 
-void libblis_test_trmm3_impl( iface_t   iface,
-                              side_t    side,
-                              obj_t*    alpha,
-                              obj_t*    a,
-                              obj_t*    b,
-                              obj_t*    beta,
-                              obj_t*    c )
+void libblis_test_trmm3_impl
+     (
+       iface_t   iface,
+       side_t    side,
+       obj_t*    alpha,
+       obj_t*    a,
+       obj_t*    b,
+       obj_t*    beta,
+       obj_t*    c
+     )
 {
 	switch ( iface )
 	{
@@ -268,14 +289,18 @@ void libblis_test_trmm3_impl( iface_t   iface,
 
 
 
-void libblis_test_trmm3_check( side_t  side,
-                               obj_t*  alpha,
-                               obj_t*  a,
-                               obj_t*  b,
-                               obj_t*  beta,
-                               obj_t*  c,
-                               obj_t*  c_orig,
-                               double* resid )
+void libblis_test_trmm3_check
+     (
+       test_params_t* params,
+       side_t         side,
+       obj_t*         alpha,
+       obj_t*         a,
+       obj_t*         b,
+       obj_t*         beta,
+       obj_t*         c,
+       obj_t*         c_orig,
+       double*        resid
+     )
 {
 	num_t  dt      = bli_obj_datatype( *c );
 	num_t  dt_real = bli_obj_datatype_proj_to_real( *c );
@@ -283,7 +308,7 @@ void libblis_test_trmm3_check( side_t  side,
 	dim_t  m       = bli_obj_length( *c );
 	dim_t  n       = bli_obj_width( *c );
 
-	obj_t  kappa, norm;
+	obj_t  norm;
 	obj_t  t, v, w, z;
 
 	double junk;
@@ -320,7 +345,6 @@ void libblis_test_trmm3_check( side_t  side,
 	//     = beta * C_orig * t + alpha * transb(B) * w
 	//     = beta * C_orig * t + z
 
-	bli_obj_scalar_init_detached( dt,      &kappa );
 	bli_obj_scalar_init_detached( dt_real, &norm );
 
 	if ( bli_is_left( side ) )
@@ -338,9 +362,7 @@ void libblis_test_trmm3_check( side_t  side,
 		bli_obj_create( dt, m, 1, 0, 0, &z );
 	}
 
-	bli_randv( &t );
-	bli_setsc( 1.0/( double )n, 0.0, &kappa );
-	bli_scalv( &kappa, &t );
+	libblis_test_vobj_randomize( params, TRUE, &t );
 
 	bli_gemv( &BLIS_ONE, c, &t, &BLIS_ZERO, &v );
 

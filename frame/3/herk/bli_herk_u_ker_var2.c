@@ -51,7 +51,7 @@ typedef void (*FUNCPTR_T)(
                            void*   beta,
                            void*   c, inc_t rs_c, inc_t cs_c,
                            cntx_t* cntx,
-                           herk_thrinfo_t* thread
+                           thrinfo_t* thread
                          );
 
 static FUNCPTR_T GENARRAY(ftypes,herk_u_ker_var2);
@@ -62,7 +62,7 @@ void bli_herk_u_ker_var2( obj_t*  a,
                           obj_t*  c,
                           cntx_t* cntx,
                           gemm_t* cntl,
-                          herk_thrinfo_t* thread )
+                          thrinfo_t* thread )
 {
 	num_t     dt_exec   = bli_obj_execution_datatype( *c );
 
@@ -151,7 +151,7 @@ void PASTEMAC(ch,varname) \
        void*   beta, \
        void*   c, inc_t rs_c, inc_t cs_c, \
        cntx_t* cntx, \
-       herk_thrinfo_t* thread  \
+       thrinfo_t* thread  \
      ) \
 { \
 	const num_t     dt         = PASTEMAC(ch,type); \
@@ -270,11 +270,11 @@ void PASTEMAC(ch,varname) \
 	b1 = b_cast; \
 	c1 = c_cast; \
 \
-	herk_thrinfo_t* caucus = herk_thread_sub_herk( thread ); \
-	dim_t jr_num_threads = thread_n_way( thread ); \
-	dim_t jr_thread_id   = thread_work_id( thread ); \
-	dim_t ir_num_threads = thread_n_way( caucus ); \
-	dim_t ir_thread_id   = thread_work_id( caucus ); \
+	thrinfo_t* caucus    = bli_thrinfo_sub_self( thread ); \
+	dim_t jr_num_threads = bli_thread_n_way( thread ); \
+	dim_t jr_thread_id   = bli_thread_work_id( thread ); \
+	dim_t ir_num_threads = bli_thread_n_way( caucus ); \
+	dim_t ir_thread_id   = bli_thread_work_id( caucus ); \
 \
 	/* Loop over the n dimension (NR columns at a time). */ \
 	for ( j = jr_thread_id; j < n_iter; j += jr_num_threads ) \

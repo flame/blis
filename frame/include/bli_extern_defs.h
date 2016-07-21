@@ -43,9 +43,9 @@ extern obj_t BLIS_MINUS_ONE_HALF;
 extern obj_t BLIS_MINUS_ONE;
 extern obj_t BLIS_MINUS_TWO;
 
-extern thread_comm_t    BLIS_SINGLE_COMM;
-extern packm_thrinfo_t  BLIS_PACKM_SINGLE_THREADED;
-extern gemm_thrinfo_t   BLIS_GEMM_SINGLE_THREADED;
-extern herk_thrinfo_t   BLIS_HERK_SINGLE_THREADED;
+extern thrcomm_t BLIS_SINGLE_COMM;
+extern thrinfo_t BLIS_PACKM_SINGLE_THREADED;
+extern thrinfo_t BLIS_GEMM_SINGLE_THREADED;
+extern thrinfo_t BLIS_HERK_SINGLE_THREADED;
 
 #endif

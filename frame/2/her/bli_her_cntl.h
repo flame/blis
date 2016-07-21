@@ -45,7 +45,7 @@ struct her_s
 };
 typedef struct her_s her_t;
 
-#define cntl_sub_her( cntl )      cntl->sub_her
+#define bli_cntl_sub_her( cntl )      cntl->sub_her
 
 void   bli_her_cntl_init( void );
 void   bli_her_cntl_finalize( void );

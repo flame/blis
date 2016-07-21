@@ -89,6 +89,7 @@ siz_t bli_datatype_size( num_t dt );
 
 dim_t bli_align_dim_to_mult( dim_t dim, dim_t dim_mult );
 dim_t bli_align_dim_to_size( dim_t dim, siz_t elem_size, siz_t align_size );
+dim_t bli_align_ptr_to_size( void* p, size_t align_size );
 
 num_t bli_datatype_union( num_t dt1, num_t dt2 );
 
