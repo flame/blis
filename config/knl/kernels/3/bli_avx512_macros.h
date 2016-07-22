@@ -19,6 +19,8 @@
 #define EBX %%ebx
 #define ECX %%ecx
 #define EDX %%edx
+#define EDI %%edi
+#define ESI %%esi
 #define RAX %%rax
 #define RBX %%rbx
 #define RCX %%rcx
@@ -27,7 +29,23 @@
 #define RSI %%rsi
 #define K(x) %% k##x
 #define R(x) %% r##x
+#define R8 %%r8
+#define R9 %%r9
+#define R10 %%r10
+#define R11 %%r11
+#define R12 %%r12
+#define R13 %%r13
+#define R14 %%r14
+#define R15 %%r15
 #define RD(x) %% r##x##d
+#define R8D %%r8d
+#define R9D %%r9d
+#define R10D %%r10d
+#define R11D %%r11d
+#define R12D %%r12d
+#define R13D %%r13d
+#define R14D %%r14d
+#define R15D %%r15d
 #define IMM(x) $##x
 #define VAR(x) %[x]
 
@@ -52,14 +70,15 @@
 #define MEM_1TO16(...) GET_MACRO(__VA_ARGS__,MEM_1TO16_4,MEM_1TO16_3,MEM_1TO16_2,MEM_1TO16_1)(__VA_ARGS__)
 
 #define MASK_K(n) %{%% k##n %}
+#define MASK_KZ(n) %{%% k##n %} %{z%}
 #define KMOV(to,from) ASM(kmovw from, to)
 #define JKNZD(kreg,label) \
     ASM(kortestw kreg, kreg) \
     ASM(jnz label)
 #define KXNORW(_0, _1, _2) ASM(kxnorw _2, _1, _0)
 
-#define ALIGN16 ASM(.palign 4)
-#define ALIGN32 ASM(.palign 5)
+#define ALIGN16 ASM(.p2align 4)
+#define ALIGN32 ASM(.p2align 5)
 #define RDTSC ASM(rdstc)
 #define MOV(_0, _1) ASM(mov _1, _0)
 #define MOVD(_0, _1) ASM(movd _1, _0)
@@ -90,6 +109,8 @@
 #define VMULPS(_0, _1, _2) ASM(vmulps _2, _1, _0)
 #define VMULPD(_0, _1, _2) ASM(vmulpd _2, _1, _0)
 #define VPMULLD(_0, _1, _2) ASM(vpmulld _2, _1, _0)
+#define VPADDD(_0, _1, _2) ASM(vpaddd _2, _1, _0)
+#define VPSLLD(_0, _1, _2) ASM(vpslld _2, _1, _0)
 #define VPXORD(_0, _1, _2) ASM(vpxord _2, _1, _0)
 #define VFMADD132PS(_0, _1, _2) ASM(vfmadd132ps _2, _1, _0)
 #define VFMADD213PS(_0, _1, _2) ASM(vfmadd213ps _2, _1, _0)
