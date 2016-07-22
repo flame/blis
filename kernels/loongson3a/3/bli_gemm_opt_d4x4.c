@@ -47,8 +47,8 @@ void bli_dgemm_opt_4x4
        cntx_t*    restrict cntx
      )
 {
-	dim_t k_iter  = k / 4;
-	dim_t k_left  = k % 4;
+    uint64_t k_iter  = k / 4;
+    uint64_t k_left  = k % 4;
 
 	__asm__ volatile
 	(

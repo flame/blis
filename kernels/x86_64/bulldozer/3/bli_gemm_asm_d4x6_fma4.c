@@ -97,8 +97,8 @@ void bli_sgemm_asm_8x8_fma4
        cntx_t*    restrict cntx
      )
 {
-	dim_t   k_iter = k / 4;
-	dim_t   k_left = k % 4;
+    uint64_t   k_iter = k / 4;
+	uint64_t   k_left = k % 4;
 
 	__asm__ volatile
 	(
