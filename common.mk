@@ -170,8 +170,8 @@ ifeq ($(THREADING_MODEL),auto)
 THREADING_MODEL := omp
 endif
 ifeq ($(THREADING_MODEL),omp)
-CTHREADFLAGS := -openmp
-LDFLAGS      += -openmp
+CTHREADFLAGS := -fopenmp
+LDFLAGS      += -fopenmp
 endif
 ifeq ($(THREADING_MODEL),pthreads)
 CTHREADFLAGS := -pthread
