@@ -101,6 +101,8 @@
 #define JZ(_0) ASM(jz _0)
 #define JNE(_0) ASM(jne _0)
 #define JE(_0) ASM(je _0)
+#define JNC(_0) ASM(jnc _0)
+#define JC(_0) ASM(jc _0)
 #define JMP(_0) ASM(jmp _0)
 #define VGATHERDPS(_0, _1) ASM(vgatherdps _1, _0)
 #define VSCATTERDPS(_0, _1) ASM(vscatterdps _1, _0)
