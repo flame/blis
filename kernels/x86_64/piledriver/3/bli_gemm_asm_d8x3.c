@@ -52,8 +52,8 @@ void bli_sgemm_asm_16x3
 	void*   a_next = bli_auxinfo_next_a( data );
 	void*   b_next = bli_auxinfo_next_b( data );
 
-	dim_t   k_iter = k / 8;
-	dim_t   k_left = k % 8;
+	uint64_t   k_iter = k / 8;
+	uint64_t   k_left = k % 8;
 
 	__asm__ volatile
 	(

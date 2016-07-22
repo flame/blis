@@ -271,6 +271,8 @@ void bli_dgemm_asm_30x8
 
     int * offsetPtr = &offsets[0];
 
+    uint64_t k64 = k;
+
 #ifdef MONITORS
     int toph, topl, both, botl, midl, midh, mid2l, mid2h;
 #endif
@@ -288,7 +290,7 @@ void bli_dgemm_asm_30x8
         vpxord  zmm0,  zmm0, zmm0
         vmovaps zmm1,  zmm0  //clear out registers
         vmovaps zmm2,  zmm0 
-        mov rsi, k    //loop index
+        mov rsi, k64    //loop index
         vmovaps zmm3,  zmm0 
 
         mov r11, rs_c           //load row stride
@@ -312,7 +314,7 @@ void bli_dgemm_asm_30x8
         mov rcx, c              //load address of c for prefetching
         vmovaps zmm13, zmm0 
         vmovaps zmm14, zmm0 
-        mov r8, k 
+        mov r8, k64
         vmovaps zmm15, zmm0 
 
         vmovaps zmm16, zmm0
@@ -381,7 +383,7 @@ void bli_dgemm_asm_30x8
         //Alternate main loop, with no prefetching of C
         //Used when <= 40 iterations
         CONSIDER_UNDER_40:
-        mov rsi, k
+        mov rsi, k64
         test rsi, rsi
         je POSTACCUM
         LOOP_UNDER_40:
