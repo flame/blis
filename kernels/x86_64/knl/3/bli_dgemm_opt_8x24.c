@@ -70,6 +70,8 @@ void bli_dgemm_opt_8x24
 
     const int32_t * offsetPtr = &offsets[ 0];
 
+    uint64_t k64 = k;
+
 	__asm__ volatile
 	(
 	//if columns of C are cache-split, prefetch second cache line
@@ -358,7 +360,7 @@ void bli_dgemm_opt_8x24
 
 	: // output operands (none)
     : // input operands
-      [k]         "m" (k),
+      [k]         "m" (k64),
       [a]         "m" (a),
       [b]         "m" (b),
       [alpha]     "m" (alpha),
