@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2016 Hewlett Packard Enterprise Development LP
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -957,14 +958,14 @@ bli_obj_width_stored( obj )
 }
 
 
-// Release object's pack (and cast) memory entries back to memory manager
+// Release object's pack mem_t entries back to memory manager
 
 #define bli_obj_release_pack( obj_p ) \
 { \
 	mem_t* pack_mem_ = bli_obj_pack_mem( *(obj_p) ); \
 \
 	if ( bli_mem_is_alloc( pack_mem_ ) ) \
-		bli_mem_release( pack_mem_ ); \
+		bli_membrk_release( pack_mem_ ); \
 }
 
 

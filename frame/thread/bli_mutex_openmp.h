@@ -33,21 +33,40 @@
 
 */
 
-#ifndef BLIS_MEM_H
-#define BLIS_MEM_H
+#ifndef BLIS_MUTEX_OPENMP_H
+#define BLIS_MUTEX_OPENMP_H
 
-// -----------------------------------------------------------------------------
+// Define mutex_t for situations when OpenMP multithreading is enabled.
+#ifdef BLIS_ENABLE_OPENMP
 
-membrk_t* bli_mem_global_membrk( void );
-siz_t     bli_mem_pool_size( packbuf_t buf_type );
+#include <omp.h>
 
-// -----------------------------------------------------------------------------
+// Define mtx_t.
+typedef struct mtx_s
+{
+	omp_lock_t mutex;
+} mtx_t;
 
-void   bli_mem_init( void );
-void   bli_mem_reinit( cntx_t* cntx );
-void   bli_mem_finalize( void );
-bool_t bli_mem_is_initialized( void );
+// Define macros to operate on OpenMP-based mtx_t.
+#define bli_mutex_init( mtx_p ) \
+{ \
+	omp_init_lock( mtx_p ); \
+}
+#define bli_mutex_finalize( mtx_p ) \
+{ \
+	omp_destroy_lock( mtx_p ); \
+}
 
+#define bli_mutex_lock( mtx_p ) \
+{ \
+	omp_set_lock( mtx_p ); \
+}
+#define bli_mutex_unlock( mtx_p ) \
+{ \
+	omp_unset_lock( mtx_p ); \
+}
+
+#endif
 
 #endif
 

@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2016 Hewlett Packard Enterprise Development LP
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -202,23 +203,25 @@ void bli_packm_init_pack( invdiag_t invert_diag,
                           obj_t*    p,
                           cntx_t*   cntx )
 {
-	num_t   dt           = bli_obj_datatype( *c );
-	trans_t transc       = bli_obj_onlytrans_status( *c );
-	dim_t   m_c          = bli_obj_length( *c );
-	dim_t   n_c          = bli_obj_width( *c );
-	dim_t   bmult_m_def  = bli_cntx_get_blksz_def_dt( dt, bmult_id_m, cntx );
-	dim_t   bmult_m_pack = bli_cntx_get_blksz_max_dt( dt, bmult_id_m, cntx );
-	dim_t   bmult_n_def  = bli_cntx_get_blksz_def_dt( dt, bmult_id_n, cntx );
-	dim_t   bmult_n_pack = bli_cntx_get_blksz_max_dt( dt, bmult_id_n, cntx );
+	num_t     dt           = bli_obj_datatype( *c );
+	trans_t   transc       = bli_obj_onlytrans_status( *c );
+	dim_t     m_c          = bli_obj_length( *c );
+	dim_t     n_c          = bli_obj_width( *c );
+	dim_t     bmult_m_def  = bli_cntx_get_blksz_def_dt( dt, bmult_id_m, cntx );
+	dim_t     bmult_m_pack = bli_cntx_get_blksz_max_dt( dt, bmult_id_m, cntx );
+	dim_t     bmult_n_def  = bli_cntx_get_blksz_def_dt( dt, bmult_id_n, cntx );
+	dim_t     bmult_n_pack = bli_cntx_get_blksz_max_dt( dt, bmult_id_n, cntx );
 
-	mem_t*  mem_p;
-	dim_t   m_p, n_p;
-	dim_t   m_p_pad, n_p_pad;
-	siz_t   size_p;
-	siz_t   elem_size_p;
-	inc_t   rs_p, cs_p;
-	inc_t   is_p;
-	void*   buf;
+	membrk_t* membrk       = bli_cntx_get_membrk( cntx );
+
+	mem_t*    mem_p;
+	dim_t     m_p, n_p;
+	dim_t     m_p_pad, n_p_pad;
+	siz_t     size_p;
+	siz_t     elem_size_p;
+	inc_t     rs_p, cs_p;
+	inc_t     is_p;
+	void*     buf;
 
 
 	// We begin by copying the basic fields of c. We do NOT copy the
@@ -549,9 +552,10 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 	{
 		// If the mem_t object of p has not yet been allocated, then acquire
 		// a memory block of type pack_buf_type.
-		bli_mem_acquire_m( size_p,
-		                   pack_buf_type,
-		                   mem_p );
+		bli_membrk_acquire_m( membrk,
+		                      size_p,
+		                      pack_buf_type,
+		                      mem_p );
 	}
 	else
 	{
@@ -562,10 +566,11 @@ void bli_packm_init_pack( invdiag_t invert_diag,
 		// pack_buf_type value.
 		if ( bli_mem_size( mem_p ) < size_p )
 		{
-			bli_mem_release( mem_p );
-			bli_mem_acquire_m( size_p,
-			                   pack_buf_type,
-			                   mem_p );
+			bli_membrk_release( mem_p );
+			bli_membrk_acquire_m( membrk,
+			                      size_p,
+			                      pack_buf_type,
+			                      mem_p );
 		}
 	}
 
@@ -582,7 +587,7 @@ void bli_packm_release( obj_t*   p,
                         packm_t* cntl )
 {
 	if ( !bli_cntl_is_noop( cntl ) )
-	    bli_obj_release_pack( p );
+		bli_obj_release_pack( p );
 }
 
 

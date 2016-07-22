@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2016 Hewlett Packard Enterprise Development LP
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -171,7 +172,6 @@ typedef float     f77_float;
 typedef double    f77_double;
 typedef scomplex  f77_scomplex;
 typedef dcomplex  f77_dcomplex;
-
 
 
 //
@@ -505,6 +505,10 @@ typedef enum
 // -- BLIS misc. structure types -----------------------------------------------
 //
 
+// -- Mutex type --
+
+typedef struct mtx_s mtx_t;
+
 // -- Pool block type --
 
 typedef struct
@@ -527,6 +531,19 @@ typedef struct
 	siz_t   align_size;
 } pool_t;
 
+// -- Memory broker object type --
+
+typedef struct membrk_s membrk_t;
+/*
+{
+	pool_t    pools[3];
+	mtx_t     mutex;
+
+	malloc_ft malloc_fp;
+	free_ft   free_fp;
+} membrk_t;
+*/
+
 // -- Memory object type --
 
 typedef struct mem_s
@@ -534,6 +551,7 @@ typedef struct mem_s
 	pblk_t    pblk;
 	packbuf_t buf_type;
 	pool_t*   pool;
+	membrk_t* membrk;
 	siz_t     size;
 } mem_t;
 
@@ -910,6 +928,7 @@ typedef struct cntx_s
 	pack_t    schema_b;
 	pack_t    schema_c;
 
+	membrk_t* membrk;
 } cntx_t;
 
 

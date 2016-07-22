@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2016 Hewlett Packard Enterprise Development LP
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -103,6 +104,7 @@ extern "C" {
 #include "bli_cntx.h"
 #include "bli_gks.h"
 #include "bli_ind.h"
+#include "bli_membrk.h"
 #include "bli_pool.h"
 #include "bli_mem.h"
 #include "bli_part.h"
