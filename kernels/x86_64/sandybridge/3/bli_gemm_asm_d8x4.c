@@ -52,8 +52,8 @@ void bli_sgemm_asm_8x8
 	//void*   a_next = bli_auxinfo_next_a( data );
 	//void*   b_next = bli_auxinfo_next_b( data );
 
-	dim_t   k_iter = k / 4;
-	dim_t   k_left = k % 4;
+    uint64_t   k_iter = k / 4;
+    uint64_t   k_left = k % 4;
 
 	__asm__ volatile
 	(
@@ -1052,8 +1052,8 @@ void bli_dgemm_asm_8x4
 	//void*   a_next = bli_auxinfo_next_a( data );
 	void*   b_next = bli_auxinfo_next_b( data );
 
-	dim_t   k_iter = k / 4;
-	dim_t   k_left = k % 4;
+	uint64_t   k_iter = k / 4;
+	uint64_t   k_left = k % 4;
 
 	__asm__ volatile
 	(
@@ -1739,8 +1739,8 @@ void bli_cgemm_asm_8x4
 	//void*   a_next = bli_auxinfo_next_a( data );
 	void*   b_next = bli_auxinfo_next_b( data );
 
-	dim_t   k_iter = k / 4;
-	dim_t   k_left = k % 4;
+	uint64_t   k_iter = k / 4;
+	uint64_t   k_left = k % 4;
 
 	__asm__ volatile
 	(
@@ -2715,8 +2715,8 @@ void bli_zgemm_asm_4x4
 	//void*   a_next = bli_auxinfo_next_a( data );
 	//void*   b_next = bli_auxinfo_next_b( data );
 
-	dim_t   k_iter = k / 4;
-	dim_t   k_left = k % 4;
+    uint64_t   k_iter = k / 4;
+    uint64_t   k_left = k % 4;
 
 	__asm__ volatile
 	(
