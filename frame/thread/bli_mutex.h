@@ -33,20 +33,16 @@
 
 */
 
-#ifndef BLIS_MEM_H
-#define BLIS_MEM_H
+#ifndef BLIS_MUTEX_H
+#define BLIS_MUTEX_H
 
-// -----------------------------------------------------------------------------
+// Include definitions (mostly mtx_t) specific to the method of
+// multithreading.
+#include "bli_mutex_single.h"
+#include "bli_mutex_openmp.h"
+#include "bli_mutex_pthreads.h"
 
-membrk_t* bli_mem_global_membrk( void );
-siz_t     bli_mem_pool_size( packbuf_t buf_type );
-
-// -----------------------------------------------------------------------------
-
-void   bli_mem_init( void );
-void   bli_mem_reinit( cntx_t* cntx );
-void   bli_mem_finalize( void );
-bool_t bli_mem_is_initialized( void );
+// Thread mutex prototypes.
 
 
 #endif

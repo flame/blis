@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2016 Hewlett Packard Enterprise Development LP
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -58,6 +59,10 @@
 \
 	( (mem_p)->pool )
 
+#define bli_mem_membrk( mem_p ) \
+\
+	( (mem_p)->membrk )
+
 #define bli_mem_size( mem_p ) \
 \
 	( (mem_p)->size )
@@ -90,12 +95,17 @@
 
 #define bli_mem_set_buf_type( buf_type0, mem_p ) \
 { \
-	mem_p->buf_type = buf_type0; \
+	(mem_p)->buf_type = buf_type0; \
 }
 
 #define bli_mem_set_pool( pool0, mem_p ) \
 { \
-	mem_p->pool = pool0; \
+	(mem_p)->pool = pool0; \
+}
+
+#define bli_mem_set_membrk( membrk0, mem_p ) \
+{ \
+	(mem_p)->membrk = membrk0; \
 }
 
 #define bli_mem_set_size( size0, mem_p ) \
@@ -109,6 +119,7 @@
 	bli_mem_set_buf_sys( NULL, mem_p ); \
 	bli_mem_set_pool( NULL, mem_p ); \
 	bli_mem_set_size( 0, mem_p ); \
+	bli_mem_set_membrk( NULL, mem_p ); \
 }
 
 
