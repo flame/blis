@@ -38,11 +38,11 @@
 
 extern int32_t offsets[24];
 
-#define A_PREFETCH_DIST 5
+#define A_PREFETCH_DIST 10
 #define PREFETCH_A 1
 #define PIPELINE_A 1
-#define UNROLL_X2 0
-#define UNROLL_X4 1
+#define UNROLL_X2 1
+#define UNROLL_X4 0
 
 #define UPDATE_SCATTERED(n) \
     KMOV(K(1), ESI) \
@@ -609,8 +609,7 @@ void bli_dgemm_opt_8x24
     MOV(RDI, VAR(cs_c))
     LEA(RDI, MEM(,RDI,8))
     MOV(R8, MEM(RBX))
-    MOV(RDX, VAR(rs_c))
-    VBROADCASTSS(YMM(5), MEM(RDX))
+    VBROADCASTSS(YMM(4), VAR(rs_c))
     //MOV(RAX, 0xCC)
     //MOV(RBX, 0xF0)
     //MOV(RSI, 0xAA)
@@ -623,11 +622,11 @@ void bli_dgemm_opt_8x24
     //VPADDD(ZMM(4) MASK_K(1), ZMM(4), ZMM(2))
     //VPADDD(ZMM(4) MASK_K(2), ZMM(4), ZMM(3))
     MOV(RSI, VAR(offsetPtr))
-    VMOVAPS(YMM(5), MEM(RSI))
+    VMOVUPS(YMM(5), MEM(RSI))
     VPMULLD(YMM(4), YMM(5), YMM(4))
-    MOV(RSI, 0xFF)
+    MOV(RSI, IMM(0xFF))
     SAL1(R8) // shift out the sign bit to check for +/- zero
-    //JZ(.DGENSTORBZ)
+    JZ(.DGENSTORBZ)
 
     UPDATE_SCATTERED( 8)
     UPDATE_SCATTERED( 9)
