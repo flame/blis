@@ -37,7 +37,7 @@
 
 #include "bli_avx512_macros.h"
 
-#define UNROLL_K 16
+#define UNROLL_K 1
 
 #define PREFETCH_A_L2 0
 #define PREFETCH_B_L2 0
@@ -180,8 +180,8 @@
 \
         VMOVAPD(ZMM(0), ZMM(1)) \
 \
-        ADD(RAX, 24*8) \
-        ADD(RBX,  8*8) \
+        ADD(RAX, IMM(24*8)) \
+        ADD(RBX, IMM( 8*8)) \
 \
         SUB(RDI, IMM(1)) \
 \
@@ -196,8 +196,8 @@
 \
         VMOVAPD(ZMM(0), ZMM(1)) \
 \
-        ADD(RAX, 24*8) \
-        ADD(RBX,  8*8) \
+        ADD(RAX, IMM(24*8)) \
+        ADD(RBX, IMM( 8*8)) \
 \
         SUB(RSI, IMM(1)) \
 \
@@ -216,8 +216,8 @@
         SUBITER(0,1,0,RAX) \
         SUBITER(1,0,1,RAX) \
 \
-        ADD(RAX, 2*24*8) \
-        ADD(RBX, 2* 8*8) \
+        ADD(RAX, IMM(2*24*8)) \
+        ADD(RBX, IMM(2* 8*8)) \
 \
         SUB(RSI, IMM(1)) \
 \
@@ -230,8 +230,8 @@
 \
     VMOVAPD(ZMM(0), ZMM(1)) \
 \
-    ADD(RAX, 24*8) \
-    ADD(RBX,  8*8) \
+    ADD(RAX, IMM(24*8)) \
+    ADD(RBX, IMM( 8*8)) \
 \
     LABEL(NAME##_DONE)
 
@@ -250,8 +250,8 @@
         SUBITER(2,1,0,RAX) \
         SUBITER(3,0,1,RAX) \
 \
-        ADD(RAX, 4*24*8) \
-        ADD(RBX, 4* 8*8) \
+        ADD(RAX, IMM(4*24*8)) \
+        ADD(RBX, IMM(4* 8*8)) \
 \
         SUB(RSI, IMM(1)) \
 \
@@ -283,8 +283,8 @@
         SUBITER(6,1,0,RAX,R8,1) \
         SUBITER(7,0,1,RAX,R8,1) \
 \
-        ADD(RAX, 8*24*8) \
-        ADD(RBX, 8* 8*8) \
+        ADD(RAX, IMM(8*24*8)) \
+        ADD(RBX, IMM(8* 8*8)) \
 \
         SUB(RSI, IMM(1)) \
 \
@@ -324,8 +324,8 @@
         SUBITER(14,1,0,RAX,R9,1) \
         SUBITER(15,0,1,RAX,R9,1) \
 \
-        ADD(RAX, 16*24*8) \
-        ADD(RBX, 16* 8*8) \
+        ADD(RAX, IMM(16*24*8)) \
+        ADD(RBX, IMM(16* 8*8)) \
 \
         SUB(RSI, IMM(1)) \
 \
@@ -381,8 +381,8 @@
         SUBITER(30,1,0,RAX,R11,1) \
         SUBITER(31,0,1,RAX,R11,1) \
 \
-        ADD(RAX, 32*24*8) \
-        ADD(RBX, 32* 8*8) \
+        ADD(RAX, IMM(32*24*8)) \
+        ADD(RBX, IMM(32* 8*8)) \
 \
         SUB(RSI, IMM(1)) \
 \
@@ -399,7 +399,8 @@
 #define LOOP_K(M,K,NAME) LOOP_K_(M,K)(NAME)
 
 #define MAIN_LOOP_L2 LOOP_K(MAIN_LOOP_,UNROLL_K,MAIN_LOOP_L2)
-#define MAIN_LOOP_L1 LOOP_K(MAIN_LOOP_,C_L1_ITERS,MAIN_LOOP_L1)
+//#define MAIN_LOOP_L1 LOOP_K(MAIN_LOOP_,C_L1_ITERS,MAIN_LOOP_L1)
+#define MAIN_LOOP_L1 LOOP_K(MAIN_LOOP_,1,MAIN_LOOP_L1)
 
 //This is an array used for the scatter/gather instructions.
 extern int32_t offsets[24];
@@ -471,28 +472,28 @@ void bli_dgemm_opt_24x8(
 #endif
 
     //need 0+... to satisfy preprocessor
-    CMP(RSI, IMM(0+C_MIN_L2_ITERS))
-    JLE(PREFETCH_C_L1)
+    //CMP(RSI, IMM(0+C_MIN_L2_ITERS))
+    //JLE(PREFETCH_C_L1)
 
-    SUB(RSI, IMM(0+C_L1_ITERS))
+    //SUB(RSI, IMM(0+C_L1_ITERS))
 
     //prefetch C into L2
-    KXNORW(K(1), K(0), K(0))
-    KXNORW(K(2), K(0), K(0))
-    VSCATTERPFDPS(1, MEM(RCX,ZMM(2),8) MASK_K(1))
-    VSCATTERPFDPD(1, MEM(RCX,YMM(3),8) MASK_K(2))
+    //KXNORW(K(1), K(0), K(0))
+    //KXNORW(K(2), K(0), K(0))
+    //VSCATTERPFDPS(1, MEM(RCX,ZMM(2),8) MASK_K(1))
+    //VSCATTERPFDPD(1, MEM(RCX,YMM(3),8) MASK_K(2))
 
-    MAIN_LOOP_L2
+    //MAIN_LOOP_L2
 
-    MOV(RSI, IMM(0+C_L1_ITERS))
+    //MOV(RSI, IMM(0+C_L1_ITERS))
 
     LABEL(PREFETCH_C_L1)
 
     //prefetch C into L1
-    KXNORW(K(1), K(0), K(0))
-    KXNORW(K(2), K(0), K(0))
-    VSCATTERPFDPS(0, MEM(RCX,ZMM(2),8) MASK_K(1))
-    VSCATTERPFDPD(0, MEM(RCX,YMM(3),8) MASK_K(2))
+    //KXNORW(K(1), K(0), K(0))
+    //KXNORW(K(2), K(0), K(0))
+    //VSCATTERPFDPS(0, MEM(RCX,ZMM(2),8) MASK_K(1))
+    //VSCATTERPFDPD(0, MEM(RCX,YMM(3),8) MASK_K(2))
 
     MAIN_LOOP_L1
 
@@ -512,11 +513,13 @@ void bli_dgemm_opt_24x8(
     MOV(RBX, VAR(cs_c))
     LEA(RDI, MEM(RAX,RAX,2))
     CMP(RBX, IMM(1))
-    JNE(SCATTEREDUPDATE)
+    //JNE(SCATTEREDUPDATE)
+    JMP(SCATTEREDUPDATE)
 
     VMOVQ(RDX, XMM(1))
     SAL1(RDX) //shift out sign bit
-    JZ(COLSTORBZ)
+    //JZ(COLSTORBZ)
+    JMP(COLSTORBZ)
 
     UPDATE_C_FOUR_ROWS( 8, 9,10,11)
     UPDATE_C_FOUR_ROWS(12,13,14,15)
@@ -548,7 +551,8 @@ void bli_dgemm_opt_24x8(
 
     VMOVQ(RDX, XMM(1))
     SAL1(RDX) //shift out sign bit
-    JZ(SCATTERBZ)
+    //JZ(SCATTERBZ)
+    JMP(SCATTERBZ)
 
     UPDATE_C_ROW_SCATTERED( 8)
     UPDATE_C_ROW_SCATTERED( 9)
