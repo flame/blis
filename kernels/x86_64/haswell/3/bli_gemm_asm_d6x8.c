@@ -80,8 +80,8 @@ void bli_sgemm_asm_6x16
 	//void*   a_next = bli_auxinfo_next_a( data );
 	//void*   b_next = bli_auxinfo_next_b( data );
 
-	dim_t   k_iter = k / 4;
-	dim_t   k_left = k % 4;
+	uint64_t   k_iter = k / 4;
+	uint64_t   k_left = k % 4;
 
 	__asm__ volatile
 	(
@@ -322,23 +322,6 @@ void bli_sgemm_asm_6x16
 	"leaq   (%%r13,%%rsi,4), %%r10               \n\t" // r10 = 7*cs_c;
 	"                                            \n\t"
 	"                                            \n\t"
-	"                                            \n\t"
-	"                                            \n\t" // determine if
-	"                                            \n\t" //    c    % 32 == 0, AND
-	"                                            \n\t" //  4*rs_c % 32 == 0, AND
-	"                                            \n\t" //    cs_c      == 1
-	"                                            \n\t" // ie: aligned, ldim aligned, and
-	"                                            \n\t" // row-stored
-	"                                            \n\t"
-	"cmpq       $4, %%rsi                        \n\t" // set ZF if (4*cs_c) == 4.
-	"sete           %%bl                         \n\t" // bl = ( ZF == 1 ? 1 : 0 );
-	"testq     $31, %%rcx                        \n\t" // set ZF if c & 32 is zero.
-	"setz           %%bh                         \n\t" // bh = ( ZF == 0 ? 1 : 0 );
-	"testq     $31, %%rdi                        \n\t" // set ZF if (4*rs_c) & 32 is zero.
-	"setz           %%al                         \n\t" // al = ( ZF == 0 ? 1 : 0 );
-	"                                            \n\t" // and(bl,bh) followed by
-	"                                            \n\t" // and(bh,al) will reveal result
-	"                                            \n\t"
 	"                                            \n\t" // now avoid loading C if beta == 0
 	"                                            \n\t"
 	"vxorps    %%ymm0,  %%ymm0,  %%ymm0          \n\t" // set ymm0 to zero.
@@ -346,10 +329,8 @@ void bli_sgemm_asm_6x16
 	"je      .SBETAZERO                          \n\t" // if ZF = 1, jump to beta == 0 case
 	"                                            \n\t"
 	"                                            \n\t"
-	"                                            \n\t" // check if aligned/row-stored
-	"andb     %%bl, %%bh                         \n\t" // set ZF if bl & bh == 1.
-	"andb     %%bh, %%al                         \n\t" // set ZF if bh & al == 1.
-	"jne     .SROWSTORED                         \n\t" // jump to row storage case
+    "cmpq       $4, %%rsi                        \n\t" // set ZF if (4*cs_c) == 4.
+	"jz      .SROWSTORED                         \n\t" // jump to row storage case
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
@@ -439,63 +420,51 @@ void bli_sgemm_asm_6x16
 	".SROWSTORED:                                \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
-	"vmovaps    (%%rcx),       %%ymm0            \n\t"
-	"vfmadd213ps      %%ymm4,  %%ymm3,  %%ymm0   \n\t"
-	"vmovaps          %%ymm0,  (%%rcx)           \n\t"
+	"vfmadd231ps      (%%rcx), %%ymm3,  %%ymm4   \n\t"
+	"vmovups          %%ymm4,  (%%rcx)           \n\t"
 	"addq      %%rdi, %%rcx                      \n\t"
-	"vmovaps    (%%rdx),       %%ymm1            \n\t"
-	"vfmadd213ps      %%ymm5,  %%ymm3,  %%ymm1   \n\t"
-	"vmovaps          %%ymm1,  (%%rdx)           \n\t"
+	"vfmadd231ps      (%%rdx), %%ymm3,  %%ymm5   \n\t"
+	"vmovups          %%ymm5,  (%%rdx)           \n\t"
 	"addq      %%rdi, %%rdx                      \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
-	"vmovaps    (%%rcx),       %%ymm0            \n\t"
-	"vfmadd213ps      %%ymm6,  %%ymm3,  %%ymm0   \n\t"
-	"vmovaps          %%ymm0,  (%%rcx)           \n\t"
+	"vfmadd231ps      (%%rcx), %%ymm3,  %%ymm6   \n\t"
+	"vmovups          %%ymm6,  (%%rcx)           \n\t"
 	"addq      %%rdi, %%rcx                      \n\t"
-	"vmovaps    (%%rdx),       %%ymm1            \n\t"
-	"vfmadd213ps      %%ymm7,  %%ymm3,  %%ymm1   \n\t"
-	"vmovaps          %%ymm1,  (%%rdx)           \n\t"
+	"vfmadd231ps      (%%rdx), %%ymm3,  %%ymm7   \n\t"
+	"vmovups          %%ymm7,  (%%rdx)           \n\t"
 	"addq      %%rdi, %%rdx                      \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
-	"vmovaps    (%%rcx),       %%ymm0            \n\t"
-	"vfmadd213ps      %%ymm8,  %%ymm3,  %%ymm0   \n\t"
-	"vmovaps          %%ymm0,  (%%rcx)           \n\t"
+	"vfmadd231ps      (%%rcx), %%ymm3,  %%ymm8   \n\t"
+	"vmovups          %%ymm8,  (%%rcx)           \n\t"
 	"addq      %%rdi, %%rcx                      \n\t"
-	"vmovaps    (%%rdx),       %%ymm1            \n\t"
-	"vfmadd213ps      %%ymm9,  %%ymm3,  %%ymm1   \n\t"
-	"vmovaps          %%ymm1,  (%%rdx)           \n\t"
+	"vfmadd231ps      (%%rdx), %%ymm3,  %%ymm9   \n\t"
+	"vmovups          %%ymm9,  (%%rdx)           \n\t"
 	"addq      %%rdi, %%rdx                      \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
-	"vmovaps    (%%rcx),       %%ymm0            \n\t"
-	"vfmadd213ps      %%ymm10, %%ymm3,  %%ymm0   \n\t"
-	"vmovaps          %%ymm0,  (%%rcx)           \n\t"
+	"vfmadd231ps      (%%rcx), %%ymm3,  %%ymm10  \n\t"
+	"vmovups          %%ymm10, (%%rcx)           \n\t"
 	"addq      %%rdi, %%rcx                      \n\t"
-	"vmovaps    (%%rdx),       %%ymm1            \n\t"
-	"vfmadd213ps      %%ymm11, %%ymm3,  %%ymm1   \n\t"
-	"vmovaps          %%ymm1,  (%%rdx)           \n\t"
+	"vfmadd231ps      (%%rdx), %%ymm3,  %%ymm11  \n\t"
+	"vmovups          %%ymm11, (%%rdx)           \n\t"
 	"addq      %%rdi, %%rdx                      \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
-	"vmovaps    (%%rcx),       %%ymm0            \n\t"
-	"vfmadd213ps      %%ymm12, %%ymm3,  %%ymm0   \n\t"
-	"vmovaps          %%ymm0,  (%%rcx)           \n\t"
+	"vfmadd231ps      (%%rcx), %%ymm3,  %%ymm12  \n\t"
+	"vmovups          %%ymm12, (%%rcx)           \n\t"
 	"addq      %%rdi, %%rcx                      \n\t"
-	"vmovaps    (%%rdx),       %%ymm1            \n\t"
-	"vfmadd213ps      %%ymm13, %%ymm3,  %%ymm1   \n\t"
-	"vmovaps          %%ymm1,  (%%rdx)           \n\t"
+	"vfmadd231ps      (%%rdx), %%ymm3,  %%ymm13  \n\t"
+	"vmovups          %%ymm13, (%%rdx)           \n\t"
 	"addq      %%rdi, %%rdx                      \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
-	"vmovaps    (%%rcx),       %%ymm0            \n\t"
-	"vfmadd213ps      %%ymm14, %%ymm3,  %%ymm0   \n\t"
-	"vmovaps          %%ymm0,  (%%rcx)           \n\t"
+	"vfmadd231ps      (%%rcx), %%ymm3,  %%ymm14  \n\t"
+	"vmovups          %%ymm14, (%%rcx)           \n\t"
 	//"addq      %%rdi, %%rcx                      \n\t"
-	"vmovaps    (%%rdx),       %%ymm1            \n\t"
-	"vfmadd213ps      %%ymm15, %%ymm3,  %%ymm1   \n\t"
-	"vmovaps          %%ymm1,  (%%rdx)           \n\t"
+	"vfmadd231ps      (%%rdx), %%ymm3,  %%ymm15  \n\t"
+	"vmovups          %%ymm15, (%%rdx)           \n\t"
 	//"addq      %%rdi, %%rdx                      \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
@@ -505,10 +474,9 @@ void bli_sgemm_asm_6x16
 	"                                            \n\t"
 	"                                            \n\t"
 	".SBETAZERO:                                 \n\t"
-	"                                            \n\t" // check if aligned/row-stored
-	"andb     %%bl, %%bh                         \n\t" // set ZF if bl & bh == 1.
-	"andb     %%bh, %%al                         \n\t" // set ZF if bh & al == 1.
-	"jne     .SROWSTORBZ                         \n\t" // jump to row storage case
+    "                                            \n\t"
+    "cmpq       $4, %%rsi                        \n\t" // set ZF if (4*cs_c) == 4.
+	"jz      .SROWSTORBZ                         \n\t" // jump to row storage case
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
@@ -586,38 +554,38 @@ void bli_sgemm_asm_6x16
 	".SROWSTORBZ:                                \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
-	"vmovaps          %%ymm4,  (%%rcx)           \n\t"
+	"vmovups          %%ymm4,  (%%rcx)           \n\t"
 	"addq      %%rdi, %%rcx                      \n\t"
-	"vmovaps          %%ymm5,  (%%rdx)           \n\t"
+	"vmovups          %%ymm5,  (%%rdx)           \n\t"
 	"addq      %%rdi, %%rdx                      \n\t"
 	"                                            \n\t"
-	"vmovaps          %%ymm6,  (%%rcx)           \n\t"
+	"vmovups          %%ymm6,  (%%rcx)           \n\t"
 	"addq      %%rdi, %%rcx                      \n\t"
-	"vmovaps          %%ymm7,  (%%rdx)           \n\t"
-	"addq      %%rdi, %%rdx                      \n\t"
-	"                                            \n\t"
-	"                                            \n\t"
-	"vmovaps          %%ymm8,  (%%rcx)           \n\t"
-	"addq      %%rdi, %%rcx                      \n\t"
-	"vmovaps          %%ymm9,  (%%rdx)           \n\t"
+	"vmovups          %%ymm7,  (%%rdx)           \n\t"
 	"addq      %%rdi, %%rdx                      \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
-	"vmovaps          %%ymm10, (%%rcx)           \n\t"
+	"vmovups          %%ymm8,  (%%rcx)           \n\t"
 	"addq      %%rdi, %%rcx                      \n\t"
-	"vmovaps          %%ymm11, (%%rdx)           \n\t"
+	"vmovups          %%ymm9,  (%%rdx)           \n\t"
 	"addq      %%rdi, %%rdx                      \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
-	"vmovaps          %%ymm12, (%%rcx)           \n\t"
+	"vmovups          %%ymm10, (%%rcx)           \n\t"
 	"addq      %%rdi, %%rcx                      \n\t"
-	"vmovaps          %%ymm13, (%%rdx)           \n\t"
+	"vmovups          %%ymm11, (%%rdx)           \n\t"
 	"addq      %%rdi, %%rdx                      \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
-	"vmovaps          %%ymm14, (%%rcx)           \n\t"
+	"vmovups          %%ymm12, (%%rcx)           \n\t"
+	"addq      %%rdi, %%rcx                      \n\t"
+	"vmovups          %%ymm13, (%%rdx)           \n\t"
+	"addq      %%rdi, %%rdx                      \n\t"
+	"                                            \n\t"
+	"                                            \n\t"
+	"vmovups          %%ymm14, (%%rcx)           \n\t"
 	//"addq      %%rdi, %%rcx                      \n\t"
-	"vmovaps          %%ymm15, (%%rdx)           \n\t"
+	"vmovups          %%ymm15, (%%rdx)           \n\t"
 	//"addq      %%rdi, %%rdx                      \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
@@ -693,8 +661,8 @@ void bli_dgemm_asm_6x8
 	//void*   a_next = bli_auxinfo_next_a( data );
 	//void*   b_next = bli_auxinfo_next_b( data );
 
-	dim_t   k_iter = k / 4;
-	dim_t   k_left = k % 4;
+    uint64_t   k_iter = k / 4;
+    uint64_t   k_left = k % 4;
 
 	__asm__ volatile
 	(
@@ -935,23 +903,6 @@ void bli_dgemm_asm_6x8
 	//"leaq   (%%r13,%%rsi,4), %%r10               \n\t" // r10 = 7*cs_c;
 	"                                            \n\t"
 	"                                            \n\t"
-	"                                            \n\t"
-	"                                            \n\t" // determine if
-	"                                            \n\t" //    c    % 32 == 0, AND
-	"                                            \n\t" //  8*rs_c % 32 == 0, AND
-	"                                            \n\t" //    cs_c      == 1
-	"                                            \n\t" // ie: aligned, ldim aligned, and
-	"                                            \n\t" // row-stored
-	"                                            \n\t"
-	"cmpq       $8, %%rsi                        \n\t" // set ZF if (8*cs_c) == 8.
-	"sete           %%bl                         \n\t" // bl = ( ZF == 1 ? 1 : 0 );
-	"testq     $31, %%rcx                        \n\t" // set ZF if c & 32 is zero.
-	"setz           %%bh                         \n\t" // bh = ( ZF == 0 ? 1 : 0 );
-	"testq     $31, %%rdi                        \n\t" // set ZF if (8*rs_c) & 32 is zero.
-	"setz           %%al                         \n\t" // al = ( ZF == 0 ? 1 : 0 );
-	"                                            \n\t" // and(bl,bh) followed by
-	"                                            \n\t" // and(bh,al) will reveal result
-	"                                            \n\t"
 	"                                            \n\t" // now avoid loading C if beta == 0
 	"                                            \n\t"
 	"vxorpd    %%ymm0,  %%ymm0,  %%ymm0          \n\t" // set ymm0 to zero.
@@ -959,10 +910,8 @@ void bli_dgemm_asm_6x8
 	"je      .DBETAZERO                          \n\t" // if ZF = 1, jump to beta == 0 case
 	"                                            \n\t"
 	"                                            \n\t"
-	"                                            \n\t" // check if aligned/row-stored
-	"andb     %%bl, %%bh                         \n\t" // set ZF if bl & bh == 1.
-	"andb     %%bh, %%al                         \n\t" // set ZF if bh & al == 1.
-	"jne     .DROWSTORED                         \n\t" // jump to row storage case
+    "cmpq       $8, %%rsi                        \n\t" // set ZF if (8*cs_c) == 8.
+	"jz      .DROWSTORED                         \n\t" // jump to row storage case
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
@@ -1050,63 +999,51 @@ void bli_dgemm_asm_6x8
 	".DROWSTORED:                                \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
-	"vmovaps    (%%rcx),       %%ymm0            \n\t"
-	"vfmadd213pd      %%ymm4,  %%ymm3,  %%ymm0   \n\t"
-	"vmovaps          %%ymm0,  (%%rcx)           \n\t"
+	"vfmadd231pd      (%%rcx), %%ymm3, %%ymm4    \n\t"
+	"vmovups          %%ymm4,  (%%rcx)           \n\t"
 	"addq      %%rdi, %%rcx                      \n\t"
-	"vmovaps    (%%rdx),       %%ymm1            \n\t"
-	"vfmadd213pd      %%ymm5,  %%ymm3,  %%ymm1   \n\t"
-	"vmovaps          %%ymm1,  (%%rdx)           \n\t"
+	"vfmadd231pd      (%%rdx), %%ymm3, %%ymm5    \n\t"
+	"vmovups          %%ymm5,  (%%rdx)           \n\t"
 	"addq      %%rdi, %%rdx                      \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
-	"vmovaps    (%%rcx),       %%ymm0            \n\t"
-	"vfmadd213pd      %%ymm6,  %%ymm3,  %%ymm0   \n\t"
-	"vmovaps          %%ymm0,  (%%rcx)           \n\t"
+	"vfmadd231pd      (%%rcx), %%ymm3, %%ymm6    \n\t"
+	"vmovups          %%ymm6,  (%%rcx)           \n\t"
 	"addq      %%rdi, %%rcx                      \n\t"
-	"vmovaps    (%%rdx),       %%ymm1            \n\t"
-	"vfmadd213pd      %%ymm7,  %%ymm3,  %%ymm1   \n\t"
-	"vmovaps          %%ymm1,  (%%rdx)           \n\t"
+	"vfmadd231pd      (%%rdx), %%ymm3, %%ymm7    \n\t"
+	"vmovups          %%ymm7,  (%%rdx)           \n\t"
 	"addq      %%rdi, %%rdx                      \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
-	"vmovaps    (%%rcx),       %%ymm0            \n\t"
-	"vfmadd213pd      %%ymm8,  %%ymm3,  %%ymm0   \n\t"
-	"vmovaps          %%ymm0,  (%%rcx)           \n\t"
+	"vfmadd231pd      (%%rcx), %%ymm3, %%ymm8    \n\t"
+	"vmovups          %%ymm8,  (%%rcx)           \n\t"
 	"addq      %%rdi, %%rcx                      \n\t"
-	"vmovaps    (%%rdx),       %%ymm1            \n\t"
-	"vfmadd213pd      %%ymm9,  %%ymm3,  %%ymm1   \n\t"
-	"vmovaps          %%ymm1,  (%%rdx)           \n\t"
+	"vfmadd231pd      (%%rdx), %%ymm3, %%ymm9    \n\t"
+	"vmovups          %%ymm9,  (%%rdx)           \n\t"
 	"addq      %%rdi, %%rdx                      \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
-	"vmovaps    (%%rcx),       %%ymm0            \n\t"
-	"vfmadd213pd      %%ymm10, %%ymm3,  %%ymm0   \n\t"
-	"vmovaps          %%ymm0,  (%%rcx)           \n\t"
+	"vfmadd231pd      (%%rcx), %%ymm3, %%ymm10   \n\t"
+	"vmovups          %%ymm10, (%%rcx)           \n\t"
 	"addq      %%rdi, %%rcx                      \n\t"
-	"vmovaps    (%%rdx),       %%ymm1            \n\t"
-	"vfmadd213pd      %%ymm11, %%ymm3,  %%ymm1   \n\t"
-	"vmovaps          %%ymm1,  (%%rdx)           \n\t"
+	"vfmadd231pd      (%%rdx), %%ymm3, %%ymm11   \n\t"
+	"vmovups          %%ymm11, (%%rdx)           \n\t"
 	"addq      %%rdi, %%rdx                      \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
-	"vmovaps    (%%rcx),       %%ymm0            \n\t"
-	"vfmadd213pd      %%ymm12, %%ymm3,  %%ymm0   \n\t"
-	"vmovaps          %%ymm0,  (%%rcx)           \n\t"
+	"vfmadd231pd      (%%rcx), %%ymm3, %%ymm12   \n\t"
+	"vmovups          %%ymm12, (%%rcx)           \n\t"
 	"addq      %%rdi, %%rcx                      \n\t"
-	"vmovaps    (%%rdx),       %%ymm1            \n\t"
-	"vfmadd213pd      %%ymm13, %%ymm3,  %%ymm1   \n\t"
-	"vmovaps          %%ymm1,  (%%rdx)           \n\t"
+	"vfmadd231pd      (%%rdx), %%ymm3, %%ymm13   \n\t"
+	"vmovups          %%ymm13, (%%rdx)           \n\t"
 	"addq      %%rdi, %%rdx                      \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
-	"vmovaps    (%%rcx),       %%ymm0            \n\t"
-	"vfmadd213pd      %%ymm14, %%ymm3,  %%ymm0   \n\t"
-	"vmovaps          %%ymm0,  (%%rcx)           \n\t"
+	"vfmadd231pd      (%%rcx), %%ymm3, %%ymm14   \n\t"
+	"vmovups          %%ymm14, (%%rcx)           \n\t"
 	//"addq      %%rdi, %%rcx                      \n\t"
-	"vmovaps    (%%rdx),       %%ymm1            \n\t"
-	"vfmadd213pd      %%ymm15, %%ymm3,  %%ymm1   \n\t"
-	"vmovaps          %%ymm1,  (%%rdx)           \n\t"
+	"vfmadd231pd      (%%rdx), %%ymm3, %%ymm15   \n\t"
+	"vmovups          %%ymm15, (%%rdx)           \n\t"
 	//"addq      %%rdi, %%rdx                      \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
@@ -1116,10 +1053,9 @@ void bli_dgemm_asm_6x8
 	"                                            \n\t"
 	"                                            \n\t"
 	".DBETAZERO:                                 \n\t"
-	"                                            \n\t" // check if aligned/row-stored
-	"andb     %%bl, %%bh                         \n\t" // set ZF if bl & bh == 1.
-	"andb     %%bh, %%al                         \n\t" // set ZF if bh & al == 1.
-	"jne     .DROWSTORBZ                         \n\t" // jump to row storage case
+    "                                            \n\t"
+    "cmpq       $8, %%rsi                        \n\t" // set ZF if (8*cs_c) == 8.
+	"jz      .DROWSTORBZ                         \n\t" // jump to row storage case
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
@@ -1195,38 +1131,38 @@ void bli_dgemm_asm_6x8
 	".DROWSTORBZ:                                \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
-	"vmovaps          %%ymm4,  (%%rcx)           \n\t"
+	"vmovups          %%ymm4,  (%%rcx)           \n\t"
 	"addq      %%rdi, %%rcx                      \n\t"
-	"vmovaps          %%ymm5,  (%%rdx)           \n\t"
+	"vmovups          %%ymm5,  (%%rdx)           \n\t"
 	"addq      %%rdi, %%rdx                      \n\t"
 	"                                            \n\t"
-	"vmovaps          %%ymm6,  (%%rcx)           \n\t"
+	"vmovups          %%ymm6,  (%%rcx)           \n\t"
 	"addq      %%rdi, %%rcx                      \n\t"
-	"vmovaps          %%ymm7,  (%%rdx)           \n\t"
-	"addq      %%rdi, %%rdx                      \n\t"
-	"                                            \n\t"
-	"                                            \n\t"
-	"vmovaps          %%ymm8,  (%%rcx)           \n\t"
-	"addq      %%rdi, %%rcx                      \n\t"
-	"vmovaps          %%ymm9,  (%%rdx)           \n\t"
+	"vmovups          %%ymm7,  (%%rdx)           \n\t"
 	"addq      %%rdi, %%rdx                      \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
-	"vmovaps          %%ymm10, (%%rcx)           \n\t"
+	"vmovups          %%ymm8,  (%%rcx)           \n\t"
 	"addq      %%rdi, %%rcx                      \n\t"
-	"vmovaps          %%ymm11, (%%rdx)           \n\t"
+	"vmovups          %%ymm9,  (%%rdx)           \n\t"
 	"addq      %%rdi, %%rdx                      \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
-	"vmovaps          %%ymm12, (%%rcx)           \n\t"
+	"vmovups          %%ymm10, (%%rcx)           \n\t"
 	"addq      %%rdi, %%rcx                      \n\t"
-	"vmovaps          %%ymm13, (%%rdx)           \n\t"
+	"vmovups          %%ymm11, (%%rdx)           \n\t"
 	"addq      %%rdi, %%rdx                      \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
-	"vmovaps          %%ymm14, (%%rcx)           \n\t"
+	"vmovups          %%ymm12, (%%rcx)           \n\t"
+	"addq      %%rdi, %%rcx                      \n\t"
+	"vmovups          %%ymm13, (%%rdx)           \n\t"
+	"addq      %%rdi, %%rdx                      \n\t"
+	"                                            \n\t"
+	"                                            \n\t"
+	"vmovups          %%ymm14, (%%rcx)           \n\t"
 	//"addq      %%rdi, %%rcx                      \n\t"
-	"vmovaps          %%ymm15, (%%rdx)           \n\t"
+	"vmovups          %%ymm15, (%%rdx)           \n\t"
 	//"addq      %%rdi, %%rdx                      \n\t"
 	"                                            \n\t"
 	"                                            \n\t"

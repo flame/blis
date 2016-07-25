@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2016 Hewlett Packard Enterprise Development LP
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -49,6 +50,9 @@ void bli_packm_cntx_init( cntx_t* cntx )
 	bli_gks_cntx_set_l1v_ker( BLIS_SCALV_KER, cntx );
 	bli_gks_cntx_set_l1v_ker( BLIS_SCAL2V_KER, cntx );
 	bli_gks_cntx_set_l1v_ker( BLIS_SETV_KER, cntx );
+
+	// Initialize the context with the global membrk object.
+	bli_cntx_set_membrk( bli_mem_global_membrk(), cntx );
 }
 
 void bli_packm_cntx_finalize( cntx_t* cntx )
