@@ -33,21 +33,40 @@
 
 */
 
-#ifndef BLIS_MEM_H
-#define BLIS_MEM_H
+#ifndef BLIS_MUTEX_PTHREADS_H
+#define BLIS_MUTEX_PTHREADS_H
 
-// -----------------------------------------------------------------------------
+// Define mutex_t for situations when POSIX multithreading is enabled.
+#ifdef BLIS_ENABLE_PTHREADS
 
-membrk_t* bli_mem_global_membrk( void );
-siz_t     bli_mem_pool_size( packbuf_t buf_type );
+#include <pthread.h>
 
-// -----------------------------------------------------------------------------
+// Define mtx_t.
+typedef struct mtx_s
+{
+	pthread_mutex_t mutex;
+} mtx_t;
 
-void   bli_mem_init( void );
-void   bli_mem_reinit( cntx_t* cntx );
-void   bli_mem_finalize( void );
-bool_t bli_mem_is_initialized( void );
+// Define macros to operate on pthread-based mtx_t.
+#define bli_mutex_init( mtx_p ) \
+{ \
+	pthread_mutex_init( mtx_p ); \
+}
+#define bli_mutex_finalize( mtx_p ) \
+{ \
+	pthread_mutex_destroy( mtx_p ); \
+}
 
+#define bli_mutex_lock( mtx_p ) \
+{ \
+	pthread_mutex_lock( mtx_p ); \
+}
+#define bli_mutex_unlock( mtx_p ) \
+{ \
+	pthread_mutex_unlock( mtx_p ); \
+}
+
+#endif
 
 #endif
 

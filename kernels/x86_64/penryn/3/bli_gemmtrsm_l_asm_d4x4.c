@@ -66,8 +66,8 @@ void bli_dgemmtrsm_l_asm_4x4
 {
 	void*   b_next  = bli_auxinfo_next_b( data );
 
-	dim_t   k_iter  = k / 4;
-	dim_t   k_left  = k % 4;
+	uint64_t   k_iter  = k / 4;
+	uint64_t   k_left  = k % 4;
 
 	__asm__ volatile
 	(

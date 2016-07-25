@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2016 Hewlett Packard Enterprise Development LP
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -43,6 +44,7 @@ void bli_packv_init
      )
 {
 	// The purpose of packm_init() is to initialize an object P so that
+
 	// a source object A can be packed into P via one of the packv
 	// implementations. This initialization includes acquiring a suitable
 	// block of memory from the memory allocator, if such a block of memory
@@ -132,15 +134,17 @@ void bli_packv_init_pack
        cntx_t* cntx
      )
 {
-	num_t  dt    = bli_obj_datatype( *c );
-	dim_t  dim_c = bli_obj_vector_dim( *c );
-	dim_t  bmult = bli_cntx_get_blksz_def_dt( dt, bmult_id, cntx );
+	num_t     dt     = bli_obj_datatype( *c );
+	dim_t     dim_c  = bli_obj_vector_dim( *c );
+	dim_t     bmult  = bli_cntx_get_blksz_def_dt( dt, bmult_id, cntx );
 
-	mem_t* mem_p;
-	dim_t  m_p_pad;
-	siz_t  size_p;
-	inc_t  rs_p, cs_p;
-	void*  buf;
+	membrk_t* membrk = bli_cntx_membrk( cntx );
+
+	mem_t*    mem_p;
+	dim_t     m_p_pad;
+	siz_t     size_p;
+	inc_t     rs_p, cs_p;
+	void*     buf;
 
 
 	// We begin by copying the basic fields of c.
@@ -170,8 +174,9 @@ void bli_packv_init_pack
 	{
 		// If the mem_t object of p has not yet been allocated, then acquire
 		// a memory block suitable for a vector.
-		bli_mem_acquire_v( size_p,
-		                   mem_p );
+		bli_membrk_acquire_v( membrk,
+		                      size_p,
+		                      mem_p );
 	}
 	else
 	{
@@ -179,10 +184,11 @@ void bli_packv_init_pack
 		// re-acquire the memory so there is sufficient space.
 		if ( bli_mem_size( mem_p ) < size_p )
 		{
-			bli_mem_release( mem_p ); 
+			bli_membrk_release( mem_p );
 
-			bli_mem_acquire_v( size_p,
-			                   mem_p );
+			bli_membrk_acquire_v( membrk,
+			                      size_p,
+			                      mem_p );
 		}
 	}
 
@@ -218,7 +224,7 @@ void bli_packv_release
      )
 {
 	if ( !bli_cntl_is_noop( cntl ) )
-	    bli_obj_release_pack( p );
+		bli_obj_release_pack( p );
 }
 
 
