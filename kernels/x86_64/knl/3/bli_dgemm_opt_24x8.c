@@ -50,7 +50,7 @@
 #define C_L1_ITERS 16 //number of iterations before the end to prefetch C into L1
                       //make sure there is an unrolled MAIN_LOOP_X for this number
 
-#define LOOP_ALIGN ALIGN32
+#define LOOP_ALIGN ALIGN16
 
 #define UPDATE_C_FOUR_ROWS(R1,R2,R3,R4) \
 \
@@ -99,18 +99,18 @@
 
 #define PREFETCH_A_L1(n) \
 \
-    PREFETCH(0, MEM(RAX,(A_L1_PREFETCH_DIST+n)*8*24-15*8)) \
-    PREFETCH(0, MEM(RAX,(A_L1_PREFETCH_DIST+n)*8*24- 7*8)) \
-    PREFETCH(0, MEM(RAX,(A_L1_PREFETCH_DIST+n)*8*24+ 1*8))
+    PREFETCH(0, MEM(RAX,(A_L1_PREFETCH_DIST+n)*24*8)) \
+    PREFETCH(0, MEM(RAX,(A_L1_PREFETCH_DIST+n)*24*8+64)) \
+    PREFETCH(0, MEM(RAX,(A_L1_PREFETCH_DIST+n)*24*8+128))
 
 #if PREFETCH_A_L2
 #undef PREFETCH_A_L2
 
 #define PREFETCH_A_L2(n) \
 \
-    PREFETCH(1, MEM(RAX,(L2_PREFETCH_DIST+n)*8*24-15*8)) \
-    PREFETCH(1, MEM(RAX,(L2_PREFETCH_DIST+n)*8*24- 7*8)) \
-    PREFETCH(1, MEM(RAX,(L2_PREFETCH_DIST+n)*8*24+ 1*8))
+    PREFETCH(1, MEM(RAX,(L2_PREFETCH_DIST+n)*24*8)) \
+    PREFETCH(1, MEM(RAX,(L2_PREFETCH_DIST+n)*24*8+64)) \
+    PREFETCH(1, MEM(RAX,(L2_PREFETCH_DIST+n)*24*8+128))
 
 #else
 #undef PREFETCH_A_L2
@@ -135,51 +135,48 @@
 // a: ZMM register to load into
 // b: ZMM register to read from
 //
-// BI,BS,BO: index, stride, and offset for load of B, use RDX for 0 index
-// AI,AS: index and stride for loads of A (offset added here), use RDX for 0 index
+// ...: addressing for A, except for offset
 //
-// BO must fit in 2 bytes!
-//
-#define SUBITER(n,a,b,BI,BS,BO,AI,AS) \
+#define SUBITER(n,a,b,...) \
 \
-        VMOVAPD(ZMM(a), MEM(RBX,BI,BS,BO)) \
+        VMOVAPD(ZMM(a), MEM(RBX,(n+1)*64)) \
 \
         PREFETCH_A_L1(n) \
         PREFETCH_B_L1(n) \
         PREFETCH_A_L2(n) \
         PREFETCH_B_L2(n) \
 \
-        VFMADD231PD(ZMM( 8), ZMM(b), MEM_1TO8(RAX,AI,AS,-15*8)) \
-        VFMADD231PD(ZMM( 9), ZMM(b), MEM_1TO8(RAX,AI,AS,-14*8)) \
-        VFMADD231PD(ZMM(10), ZMM(b), MEM_1TO8(RAX,AI,AS,-13*8)) \
-        VFMADD231PD(ZMM(11), ZMM(b), MEM_1TO8(RAX,AI,AS,-12*8)) \
-        VFMADD231PD(ZMM(12), ZMM(b), MEM_1TO8(RAX,AI,AS,-11*8)) \
-        VFMADD231PD(ZMM(13), ZMM(b), MEM_1TO8(RAX,AI,AS,-10*8)) \
-        VFMADD231PD(ZMM(14), ZMM(b), MEM_1TO8(RAX,AI,AS, -9*8)) \
-        VFMADD231PD(ZMM(15), ZMM(b), MEM_1TO8(RAX,AI,AS, -8*8)) \
-        VFMADD231PD(ZMM(16), ZMM(b), MEM_1TO8(RAX,AI,AS, -7*8)) \
-        VFMADD231PD(ZMM(17), ZMM(b), MEM_1TO8(RAX,AI,AS, -6*8)) \
-        VFMADD231PD(ZMM(18), ZMM(b), MEM_1TO8(RAX,AI,AS, -5*8)) \
-        VFMADD231PD(ZMM(19), ZMM(b), MEM_1TO8(RAX,AI,AS, -4*8)) \
-        VFMADD231PD(ZMM(20), ZMM(b), MEM_1TO8(RAX,AI,AS, -3*8)) \
-        VFMADD231PD(ZMM(21), ZMM(b), MEM_1TO8(RAX,AI,AS, -2*8)) \
-        VFMADD231PD(ZMM(22), ZMM(b), MEM_1TO8(RAX,AI,AS, -1*8)) \
-        VFMADD231PD(ZMM(23), ZMM(b), MEM_1TO8(RAX,AI,AS,  0*8)) \
-        VFMADD231PD(ZMM(24), ZMM(b), MEM_1TO8(RAX,AI,AS,  1*8)) \
-        VFMADD231PD(ZMM(25), ZMM(b), MEM_1TO8(RAX,AI,AS,  2*8)) \
-        VFMADD231PD(ZMM(26), ZMM(b), MEM_1TO8(RAX,AI,AS,  3*8)) \
-        VFMADD231PD(ZMM(27), ZMM(b), MEM_1TO8(RAX,AI,AS,  4*8)) \
-        VFMADD231PD(ZMM(28), ZMM(b), MEM_1TO8(RAX,AI,AS,  5*8)) \
-        VFMADD231PD(ZMM(29), ZMM(b), MEM_1TO8(RAX,AI,AS,  6*8)) \
-        VFMADD231PD(ZMM(30), ZMM(b), MEM_1TO8(RAX,AI,AS,  7*8)) \
-        VFMADD231PD(ZMM(31), ZMM(b), MEM_1TO8(RAX,AI,AS,  8*8))
+        VFMADD231PD(ZMM( 8), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+ 0)*8)) \
+        VFMADD231PD(ZMM( 9), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+ 1)*8)) \
+        VFMADD231PD(ZMM(10), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+ 2)*8)) \
+        VFMADD231PD(ZMM(11), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+ 3)*8)) \
+        VFMADD231PD(ZMM(12), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+ 4)*8)) \
+        VFMADD231PD(ZMM(13), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+ 5)*8)) \
+        VFMADD231PD(ZMM(14), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+ 6)*8)) \
+        VFMADD231PD(ZMM(15), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+ 7)*8)) \
+        VFMADD231PD(ZMM(16), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+ 8)*8)) \
+        VFMADD231PD(ZMM(17), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+ 9)*8)) \
+        VFMADD231PD(ZMM(18), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+10)*8)) \
+        VFMADD231PD(ZMM(19), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+11)*8)) \
+        VFMADD231PD(ZMM(20), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+12)*8)) \
+        VFMADD231PD(ZMM(21), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+13)*8)) \
+        VFMADD231PD(ZMM(22), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+14)*8)) \
+        VFMADD231PD(ZMM(23), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+15)*8)) \
+        VFMADD231PD(ZMM(24), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+16)*8)) \
+        VFMADD231PD(ZMM(25), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+17)*8)) \
+        VFMADD231PD(ZMM(26), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+18)*8)) \
+        VFMADD231PD(ZMM(27), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+19)*8)) \
+        VFMADD231PD(ZMM(28), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+20)*8)) \
+        VFMADD231PD(ZMM(29), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+21)*8)) \
+        VFMADD231PD(ZMM(30), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+22)*8)) \
+        VFMADD231PD(ZMM(31), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+23)*8))
 
 #define TAIL_LOOP(NAME) \
 \
     LOOP_ALIGN \
     LABEL(NAME) \
 \
-        SUBITER(0,1,0,RDX,1,0*8*8,RDX,1) \
+        SUBITER(0,1,0,RAX) \
 \
         VMOVAPD(ZMM(0), ZMM(1)) \
 \
@@ -195,7 +192,7 @@
     LOOP_ALIGN \
     LABEL(NAME##_LOOP) \
 \
-        SUBITER(0,1,0,RDX,1,0*8*8,RDX,1) \
+        SUBITER(0,1,0,RAX) \
 \
         VMOVAPD(ZMM(0), ZMM(1)) \
 \
@@ -216,8 +213,8 @@
     LOOP_ALIGN \
     LABEL(NAME##_LOOP) \
 \
-        SUBITER(0,1,0,RDX,1,0*8*8,RDX,1) \
-        SUBITER(1,0,1,RDX,1,1*8*8,R8 ,1) \
+        SUBITER(0,1,0,RAX) \
+        SUBITER(1,0,1,RAX) \
 \
         ADD(RAX, 2*24*8) \
         ADD(RBX, 2* 8*8) \
@@ -229,7 +226,12 @@
     TEST(RDI, RDI) \
     JZ(NAME##_DONE) \
 \
-    SUBITER(0,RAX,-15*8) \
+    SUBITER(0,1,0,RAX) \
+\
+    VMOVAPD(ZMM(0), ZMM(1)) \
+\
+    ADD(RAX, 24*8) \
+    ADD(RBX,  8*8) \
 \
     LABEL(NAME##_DONE)
 
@@ -243,10 +245,10 @@
     LOOP_ALIGN \
     LABEL(NAME##_LOOP) \
 \
-        SUBITER(0,1,0,RDX,1,0*8*8,RDX,1) \
-        SUBITER(1,0,1,RDX,1,1*8*8,R8 ,1) \
-        SUBITER(2,1,0,RDX,1,2*8*8,R8 ,2) \
-        SUBITER(3,0,1,R8 ,1,0*8*8,R9 ,1) \
+        SUBITER(0,1,0,RAX) \
+        SUBITER(1,0,1,RAX) \
+        SUBITER(2,1,0,RAX) \
+        SUBITER(3,0,1,RAX) \
 \
         ADD(RAX, 4*24*8) \
         ADD(RBX, 4* 8*8) \
@@ -272,14 +274,14 @@
     LOOP_ALIGN \
     LABEL(NAME##_LOOP) \
 \
-        SUBITER(0,1,0,RDX,1,0*8*8,RDX,1) \
-        SUBITER(1,0,1,RDX,1,1*8*8,R8 ,1) \
-        SUBITER(2,1,0,RDX,1,2*8*8,R8 ,2) \
-        SUBITER(3,0,1,R8 ,1,0*8*8,R9 ,1) \
-        SUBITER(4,1,0,R8 ,1,1*8*8,R8 ,4) \
-        SUBITER(5,0,1,R8 ,1,2*8*8,R10,1) \
-        SUBITER(6,1,0,R8 ,2,0*8*8,R9 ,2) \
-        SUBITER(7,0,1,R8 ,2,1*8*8,R11,1) \
+        SUBITER(0,1,0,RAX) \
+        SUBITER(1,0,1,RAX) \
+        SUBITER(2,1,0,RAX) \
+        SUBITER(3,0,1,RAX) \
+        SUBITER(4,1,0,RAX,R8,1) \
+        SUBITER(5,0,1,RAX,R8,1) \
+        SUBITER(6,1,0,RAX,R8,1) \
+        SUBITER(7,0,1,RAX,R8,1) \
 \
         ADD(RAX, 8*24*8) \
         ADD(RBX, 8* 8*8) \
@@ -305,25 +307,82 @@
     LOOP_ALIGN \
     LABEL(NAME##_LOOP) \
 \
-        SUBITER( 0,1,0,RDX,1,0*8*8,RDX,1) \
-        SUBITER( 1,0,1,RDX,1,1*8*8,R8 ,1) \
-        SUBITER( 2,1,0,RDX,1,2*8*8,R8 ,2) \
-        SUBITER( 3,0,1,R8 ,1,0*8*8,R9 ,1) \
-        SUBITER( 4,1,0,R8 ,1,1*8*8,R8 ,4) \
-        SUBITER( 5,0,1,R8 ,1,2*8*8,R10,1) \
-        SUBITER( 6,1,0,R8 ,2,0*8*8,R9 ,2) \
-        SUBITER( 7,0,1,R8 ,2,1*8*8,R11,1) \
-        SUBITER( 8,1,0,R8 ,2,2*8*8,R8 ,8) \
-        SUBITER( 9,0,1,R9 ,1,0*8*8,R12,1) \
-        SUBITER(10,1,0,R9 ,1,1*8*8,R10,2) \
-        SUBITER(11,0,1,R9 ,1,2*8*8,R13,1) \
-        SUBITER(12,1,0,R8 ,4,0*8*8,R9 ,4) \
-        SUBITER(13,0,1,R8 ,4,1*8*8,R14,1) \
-        SUBITER(14,1,0,R8 ,4,2*8*8,R11,2) \
-        SUBITER(15,0,1,R10,1,0*8*8,R15,1) \
+        SUBITER( 0,1,0,RAX) \
+        SUBITER( 1,0,1,RAX) \
+        SUBITER( 2,1,0,RAX) \
+        SUBITER( 3,0,1,RAX) \
+        SUBITER( 4,1,0,RAX,R8,1) \
+        SUBITER( 5,0,1,RAX,R8,1) \
+        SUBITER( 6,1,0,RAX,R8,1) \
+        SUBITER( 7,0,1,RAX,R8,1) \
+        SUBITER( 8,1,0,RAX,R8,2) \
+        SUBITER( 9,0,1,RAX,R8,2) \
+        SUBITER(10,1,0,RAX,R8,2) \
+        SUBITER(11,0,1,RAX,R8,2) \
+        SUBITER(12,1,0,RAX,R9,1) \
+        SUBITER(13,0,1,RAX,R9,1) \
+        SUBITER(14,1,0,RAX,R9,1) \
+        SUBITER(15,0,1,RAX,R9,1) \
 \
         ADD(RAX, 16*24*8) \
         ADD(RBX, 16* 8*8) \
+\
+        SUB(RSI, IMM(1)) \
+\
+    JNZ(NAME##_LOOP) \
+\
+    TEST(RDI, RDI) \
+    JZ(NAME##_DONE) \
+\
+    TAIL_LOOP(NAME##_TAIL) \
+\
+    LABEL(NAME##_DONE)
+
+#define MAIN_LOOP_32(NAME) \
+\
+    MOV(RDI, RSI) \
+    AND(RDI, IMM(31)) \
+    SAR(RSI, IMM(5)) \
+    JZ(NAME##_TAIL) \
+\
+    LOOP_ALIGN \
+    LABEL(NAME##_LOOP) \
+\
+        SUBITER( 0,1,0,RAX) \
+        SUBITER( 1,0,1,RAX) \
+        SUBITER( 2,1,0,RAX) \
+        SUBITER( 3,0,1,RAX) \
+        SUBITER( 4,1,0,RAX,R8,1) \
+        SUBITER( 5,0,1,RAX,R8,1) \
+        SUBITER( 6,1,0,RAX,R8,1) \
+        SUBITER( 7,0,1,RAX,R8,1) \
+        SUBITER( 8,1,0,RAX,R8,2) \
+        SUBITER( 9,0,1,RAX,R8,2) \
+        SUBITER(10,1,0,RAX,R8,2) \
+        SUBITER(11,0,1,RAX,R8,2) \
+        SUBITER(12,1,0,RAX,R9,1) \
+        SUBITER(13,0,1,RAX,R9,1) \
+        SUBITER(14,1,0,RAX,R9,1) \
+        SUBITER(15,0,1,RAX,R9,1) \
+        SUBITER(16,1,0,RAX,R8,4) \
+        SUBITER(17,0,1,RAX,R8,4) \
+        SUBITER(18,1,0,RAX,R8,4) \
+        SUBITER(19,0,1,RAX,R8,4) \
+        SUBITER(20,1,0,RAX,R10,1) \
+        SUBITER(21,0,1,RAX,R10,1) \
+        SUBITER(22,1,0,RAX,R10,1) \
+        SUBITER(23,0,1,RAX,R10,1) \
+        SUBITER(24,1,0,RAX,R9,2) \
+        SUBITER(25,0,1,RAX,R9,2) \
+        SUBITER(26,1,0,RAX,R9,2) \
+        SUBITER(27,0,1,RAX,R9,2) \
+        SUBITER(28,1,0,RAX,R11,1) \
+        SUBITER(29,0,1,RAX,R11,1) \
+        SUBITER(30,1,0,RAX,R11,1) \
+        SUBITER(31,0,1,RAX,R11,1) \
+\
+        ADD(RAX, 32*24*8) \
+        ADD(RBX, 32* 8*8) \
 \
         SUB(RSI, IMM(1)) \
 \
@@ -384,10 +443,10 @@ void bli_dgemm_opt_24x8(
     VMOVAPS(ZMM( 9), ZMM(8))
     VMOVAPS(ZMM(10), ZMM(8))   MOV(RSI, VAR(k)) //loop index
     VMOVAPS(ZMM(11), ZMM(8))   MOV(RAX, VAR(a)) //load address of a
-    VMOVAPS(ZMM(12), ZMM(8))   ADD(RAX, IMM(15*8)) //offset a address
+    VMOVAPS(ZMM(12), ZMM(8))
     VMOVAPS(ZMM(13), ZMM(8))   MOV(RBX, VAR(b)) //load address of b
     VMOVAPS(ZMM(14), ZMM(8))   VMOVAPD(ZMM(0), MEM(RBX)) //pre-load b
-    VMOVAPS(ZMM(15), ZMM(8))   ADD(RBX, IMM(8*8)) //offset b address
+    VMOVAPS(ZMM(15), ZMM(8))
     VMOVAPS(ZMM(16), ZMM(8))   MOV(RCX, VAR(c)) //load address of c
     VMOVAPS(ZMM(17), ZMM(8))   //set up indexing information for prefetching C
     VMOVAPS(ZMM(18), ZMM(8))   MOV(RDI, VAR(offsetPtr))
@@ -395,15 +454,15 @@ void bli_dgemm_opt_24x8(
     VMOVAPS(ZMM(20), ZMM(8))   VBROADCASTSS(ZMM(3), VAR(cs_c))
     VMOVAPS(ZMM(21), ZMM(8))   VPMULLD(ZMM(2), ZMM(2), ZMM(3)) //and now zmm2 contains (rs_c*0...15)
     VMOVAPS(ZMM(22), ZMM(8))
-    VMOVAPS(ZMM(23), ZMM(8))   MOV(RDX, IMM(0))         //needed to avoid preprocessor problems later
-    VMOVAPS(ZMM(24), ZMM(8))   MOV(R8, IMM(24*8))       //increment for a
+    VMOVAPS(ZMM(23), ZMM(8))
+    VMOVAPS(ZMM(24), ZMM(8))   MOV(R8, IMM(4*24*8))     //offset for 4 iterations
     VMOVAPS(ZMM(25), ZMM(8))   LEA(R9, MEM(R8,R8,2))    //*3
     VMOVAPS(ZMM(26), ZMM(8))   LEA(R10, MEM(R8,R8,4))   //*5
     VMOVAPS(ZMM(27), ZMM(8))   LEA(R11, MEM(R9,R8,4))   //*7
-    VMOVAPS(ZMM(28), ZMM(8))   LEA(R12, MEM(R9,R9,2))   //*9
-    VMOVAPS(ZMM(29), ZMM(8))   LEA(R13, MEM(R12,R8,2))  //*11
-    VMOVAPS(ZMM(30), ZMM(8))   LEA(R14, MEM(R12,R8,4))  //*13
-    VMOVAPS(ZMM(31), ZMM(8))   LEA(R15, MEM(R10,R10,2)) //*15
+    VMOVAPS(ZMM(28), ZMM(8))
+    VMOVAPS(ZMM(29), ZMM(8))
+    VMOVAPS(ZMM(30), ZMM(8))
+    VMOVAPS(ZMM(31), ZMM(8))
 
 #ifdef MONITORS
     RDTSC
