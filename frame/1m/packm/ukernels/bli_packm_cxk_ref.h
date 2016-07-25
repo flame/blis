@@ -52,6 +52,8 @@
 #define packm_14xk_ker_name packm_14xk_ref
 #undef  packm_16xk_ker_name
 #define packm_16xk_ker_name packm_16xk_ref
+#undef  packm_24xk_ker_name
+#define packm_24xk_ker_name packm_24xk_ref
 #undef  packm_30xk_ker_name
 #define packm_30xk_ker_name packm_30xk_ref
 
