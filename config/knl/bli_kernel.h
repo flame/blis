@@ -94,14 +94,15 @@
 
 #else
 
-#define BLIS_DGEMM_UKERNEL             bli_dgemm_opt_8x24
-#define BLIS_DEFAULT_MC_D              384
-#define BLIS_DEFAULT_KC_D              96
+#define BLIS_DGEMM_UKERNEL_PREFERS_CONTIG_ROWS
+#define BLIS_DGEMM_UKERNEL             bli_dgemm_opt_24x8
+#define BLIS_DEFAULT_MC_D              120
+#define BLIS_DEFAULT_KC_D              336
 #define BLIS_DEFAULT_NC_D              14400
-#define BLIS_DEFAULT_MR_D              8
-#define BLIS_DEFAULT_NR_D              24
-#define BLIS_PACKDIM_MR_D              8
-#define BLIS_PACKDIM_NR_D              24
+#define BLIS_DEFAULT_MR_D              24
+#define BLIS_DEFAULT_NR_D              8
+#define BLIS_PACKDIM_MR_D              24
+#define BLIS_PACKDIM_NR_D              8
 
 #endif
 
