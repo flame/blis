@@ -85,17 +85,19 @@
 #define BLIS_PACKDIM_MR_D              32
 #define BLIS_PACKDIM_NR_D              8
 
-#elif 0
+#elif 1
 
-#define BLIS_DGEMM_UKERNEL_PREFERS_CONTIG_ROWS
-#define BLIS_DGEMM_UKERNEL             bli_dgemm_opt_12x16
-#define BLIS_DEFAULT_MC_D              144
-#define BLIS_DEFAULT_KC_D              128
+#define BLIS_DGEMM_UKERNEL             bli_dgemm_opt_8x24
+#define BLIS_DEFAULT_MC_D              120
+#define BLIS_DEFAULT_KC_D              336
 #define BLIS_DEFAULT_NC_D              14400
-#define BLIS_DEFAULT_MR_D              12
-#define BLIS_DEFAULT_NR_D              16
-#define BLIS_PACKDIM_MR_D              12
-#define BLIS_PACKDIM_NR_D              16
+#define BLIS_DEFAULT_MR_D              8
+#define BLIS_DEFAULT_NR_D              24
+#define BLIS_PACKDIM_MR_D              8
+#define BLIS_PACKDIM_NR_D              24
+
+#define BLIS_DPACKM_8XK_KERNEL         bli_dpackm_8xk_opt
+#define BLIS_DPACKM_24XK_KERNEL        bli_dpackm_24xk_opt
 
 #else
 
