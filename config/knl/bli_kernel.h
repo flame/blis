@@ -35,13 +35,18 @@
 #ifndef BLIS_KERNEL_H
 #define BLIS_KERNEL_H
 
-#define BLIS_TREE_BARRIER
-#define BLIS_TREE_BARRIER_ARITY 4
+//#define BLIS_TREE_BARRIER
+//#define BLIS_TREE_BARRIER_ARITY 4
 
 #define BLIS_SIMD_ALIGN_SIZE             64
 
 #define BLIS_SIMD_SIZE                   64
 #define BLIS_SIMD_NUM_REGISTERS          32
+
+#include <hbwmalloc.h>
+
+#define BLIS_MALLOC_POOL hbw_malloc
+#define BLIS_FREE_POOL hbw_free
 
 // -- LEVEL-3 MICRO-KERNEL CONSTANTS -------------------------------------------
 
