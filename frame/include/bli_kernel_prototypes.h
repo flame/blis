@@ -117,6 +117,11 @@
 #define bli_cpackm_16xk_ker_name BLIS_CPACKM_16XK_KERNEL
 #define bli_zpackm_16xk_ker_name BLIS_ZPACKM_16XK_KERNEL
 
+#define bli_spackm_24xk_ker_name BLIS_SPACKM_24XK_KERNEL
+#define bli_dpackm_24xk_ker_name BLIS_DPACKM_24XK_KERNEL
+#define bli_cpackm_24xk_ker_name BLIS_CPACKM_24XK_KERNEL
+#define bli_zpackm_24xk_ker_name BLIS_ZPACKM_24XK_KERNEL
+
 #define bli_spackm_30xk_ker_name BLIS_SPACKM_30XK_KERNEL
 #define bli_dpackm_30xk_ker_name BLIS_DPACKM_30XK_KERNEL
 #define bli_cpackm_30xk_ker_name BLIS_CPACKM_30XK_KERNEL

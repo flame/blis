@@ -19,12 +19,14 @@
 #define EBX %%ebx
 #define ECX %%ecx
 #define EDX %%edx
+#define EBP %%ebp
 #define EDI %%edi
 #define ESI %%esi
 #define RAX %%rax
 #define RBX %%rbx
 #define RCX %%rcx
 #define RDX %%rdx
+#define RBP %%rbp
 #define RDI %%rdi
 #define RSI %%rsi
 #define K(x) %% k##x
@@ -91,6 +93,7 @@
 #define ADD(_0, _1) ASM(add _1, _0)
 #define SUB(_0, _1) ASM(sub _1, _0)
 #define SAL(_0, _1) ASM(sal _1, _0)
+#define SHLX(_0, _1, _2) ASM(shlx _2, _1, _0)
 #define SAR(_0, _1) ASM(sar _1, _0)
 #define SAL1(_0) ASM(sal _0)
 #define SAR1(_0) ASM(sar _0)
@@ -132,6 +135,9 @@
 #define VPBROADCASTQ(_0, _1) ASM(vpbroadcastq _1, _0)
 #define VBROADCASTF64X4(_0, _1) ASM(vbroadcastf64x4 _1, _0)
 #define VINSERTF64X4(_0, _1, _2, _3) ASM(vinsertf64x4 _3, _2, _1, _0)
+#define VUNPCKLPD(_0, _1, _2) ASM(vunpcklpd _2, _1, _0)
+#define VUNPCKHPD(_0, _1, _2) ASM(vunpckhpd _2, _1, _0)
+#define VSHUFF64X2(_0, _1, _2, _3) ASM(vshuff64x2 _3, _2, _1, _0)
 #define PREFETCH(LEVEL,ADDRESS) ASM(prefetcht##LEVEL ADDRESS)
 #define VGATHERPFDPS(LEVEL,ADDRESS) ASM(vgatherpf##LEVEL##dps ADDRESS)
 #define VSCATTERPFDPS(LEVEL,ADDRESS) ASM(vscatterpf##LEVEL##dps ADDRESS)
