@@ -163,7 +163,7 @@ void libblis_test_dotxaxpyf_experiment
 	unsigned int n_repeats = params->n_repeats;
 	unsigned int i;
 
-	double       time_min  = 1e9;
+	double       time_min  = DBL_MAX;
 	double       time;
 
 	dim_t        m, b_n;

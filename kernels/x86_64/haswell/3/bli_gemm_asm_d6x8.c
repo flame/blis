@@ -329,7 +329,7 @@ void bli_sgemm_asm_6x16
 	"je      .SBETAZERO                          \n\t" // if ZF = 1, jump to beta == 0 case
 	"                                            \n\t"
 	"                                            \n\t"
-    "cmpq       $4, %%rsi                        \n\t" // set ZF if (4*cs_c) == 4.
+	"cmpq       $4, %%rsi                        \n\t" // set ZF if (4*cs_c) == 4.
 	"jz      .SROWSTORED                         \n\t" // jump to row storage case
 	"                                            \n\t"
 	"                                            \n\t"
@@ -474,8 +474,8 @@ void bli_sgemm_asm_6x16
 	"                                            \n\t"
 	"                                            \n\t"
 	".SBETAZERO:                                 \n\t"
-    "                                            \n\t"
-    "cmpq       $4, %%rsi                        \n\t" // set ZF if (4*cs_c) == 4.
+	"                                            \n\t"
+	"cmpq       $4, %%rsi                        \n\t" // set ZF if (4*cs_c) == 4.
 	"jz      .SROWSTORBZ                         \n\t" // jump to row storage case
 	"                                            \n\t"
 	"                                            \n\t"
@@ -910,7 +910,7 @@ void bli_dgemm_asm_6x8
 	"je      .DBETAZERO                          \n\t" // if ZF = 1, jump to beta == 0 case
 	"                                            \n\t"
 	"                                            \n\t"
-    "cmpq       $8, %%rsi                        \n\t" // set ZF if (8*cs_c) == 8.
+	"cmpq       $8, %%rsi                        \n\t" // set ZF if (8*cs_c) == 8.
 	"jz      .DROWSTORED                         \n\t" // jump to row storage case
 	"                                            \n\t"
 	"                                            \n\t"
@@ -1053,8 +1053,8 @@ void bli_dgemm_asm_6x8
 	"                                            \n\t"
 	"                                            \n\t"
 	".DBETAZERO:                                 \n\t"
-    "                                            \n\t"
-    "cmpq       $8, %%rsi                        \n\t" // set ZF if (8*cs_c) == 8.
+	"                                            \n\t"
+	"cmpq       $8, %%rsi                        \n\t" // set ZF if (8*cs_c) == 8.
 	"jz      .DROWSTORBZ                         \n\t" // jump to row storage case
 	"                                            \n\t"
 	"                                            \n\t"
