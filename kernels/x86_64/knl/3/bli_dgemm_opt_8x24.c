@@ -37,7 +37,7 @@
 
 #include "bli_avx512_macros.h"
 
-#define UNROLL_K 32
+#define UNROLL_K 8
 
 #define SCATTER_PREFETCH_AB 0
 #define SCATTER_PREFETCH_C 1
@@ -46,11 +46,11 @@
 #define PREFETCH_B_L2 0
 #define L2_PREFETCH_DIST 64
 
-#define A_L1_PREFETCH_DIST 10
-#define B_L1_PREFETCH_DIST 30
+#define A_L1_PREFETCH_DIST 32
+#define B_L1_PREFETCH_DIST 12
 
-#define C_MIN_L2_ITERS 40 //C is not prefetched into L2 for k <= this
-#define C_L1_ITERS 16 //number of iterations before the end to prefetch C into L1
+#define C_MIN_L2_ITERS 64 //C is not prefetched into L2 for k <= this
+#define C_L1_ITERS 8 //number of iterations before the end to prefetch C into L1
                       //make sure there is an unrolled MAIN_LOOP_X for this number
 
 #define LOOP_ALIGN ALIGN16
