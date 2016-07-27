@@ -79,14 +79,15 @@ int main( int argc, char** argv )
 	k_input = -1;
 
 #if 0
-	extern blksz_t* gemm_kc;
+	num_t  dt_real = bli_datatype_proj_to_real( DT );
+	cntx_t cntx;
 
-	num_t dt_real = bli_datatype_proj_to_real( DT );
+	bli_gemm_cntx_init( &cntx );
 
 	// Extract the kc blocksize for the requested datatype and its
 	// real analogue.
-	dim_t kc      = bli_blksz_get_def( dt,      gemm_kc );
-	dim_t kc_real = bli_blksz_get_def( dt_real, gemm_kc );
+	dim_t kc      = bli_cntx_get_blksz_def_dt( dt,      BLIS_KC, &cntx );
+	dim_t kc_real = bli_cntx_get_blksz_def_dt( dt_real, BLIS_KC, &cntx );
 
 	// Assign the k dimension depending on which implementation is
 	// being tested. Note that the BLIS_NAT case handles the real
@@ -163,7 +164,7 @@ int main( int argc, char** argv )
 		bli_ind_enable_dt( IND, dt );
 #endif
 
-		dtime_save = 1.0e9;
+		dtime_save = DBL_MAX;
 
 		for ( r = 0; r < n_repeats; ++r )
 		{
