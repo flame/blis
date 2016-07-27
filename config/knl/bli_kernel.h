@@ -104,6 +104,9 @@
 #define BLIS_PACKDIM_MR_D              24
 #define BLIS_PACKDIM_NR_D              8
 
+#define BLIS_DPACKM_8XK_KERNEL         bli_dpackm_8xk_opt
+#define BLIS_DPACKM_24XK_KERNEL        bli_dpackm_24xk_opt
+
 #endif
 
 /*
