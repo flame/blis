@@ -107,7 +107,7 @@ int main( int argc, char** argv )
 
 		bli_copym( &y, &y_save );
 	
-		dtime_save = 1.0e9;
+		dtime_save = DBL_MAX;
 
 		for ( r = 0; r < n_repeats; ++r )
 		{

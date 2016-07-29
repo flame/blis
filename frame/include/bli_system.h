@@ -40,6 +40,7 @@
 #include <math.h>
 #include <string.h>
 #include <stdarg.h>
+#include <float.h>
 
 // Determine if we are on a 64-bit or 32-bit architecture
 #if defined(_M_X64) || defined(__x86_64) || defined(__aarch64__) || \
