@@ -140,6 +140,8 @@
 #define VUNPCKHPD(_0, _1, _2) ASM(vunpckhpd _2, _1, _0)
 #define VSHUFF64X2(_0, _1, _2, _3) ASM(vshuff64x2 _3, _2, _1, _0)
 #define PREFETCH(LEVEL,ADDRESS) ASM(prefetcht##LEVEL ADDRESS)
+#define PREFETCHW0(ADDRESS) ASM(prefetchw ADDRESS)
+#define PREFETCHW1(ADDRESS) ASM(prefetchwt1 ADDRESS)
 #define VGATHERPFDPS(LEVEL,ADDRESS) ASM(vgatherpf##LEVEL##dps ADDRESS)
 #define VSCATTERPFDPS(LEVEL,ADDRESS) ASM(vscatterpf##LEVEL##dps ADDRESS)
 #define VGATHERPFDPD(LEVEL,ADDRESS) ASM(vgatherpf##LEVEL##dpd ADDRESS)
