@@ -39,7 +39,7 @@
 
 #define UNROLL_K 32
 
-#define SCATTER_PREFETCH_C 0
+#define SCATTER_PREFETCH_C 1
 
 #define PREFETCH_A_L2 0
 #define PREFETCH_B_L2 0
@@ -301,7 +301,7 @@ void bli_dgemm_opt_24x8(
     PREFETCHW1(MEM(RDX,R15,1))
     SUBITER(15,0,1,RAX,R9, 1)
 
-    LEA(RDX, MEM(RDX,R12,8))
+    LEA(RDI, MEM(RDX,R12,8))
 
     PREFETCHW1(MEM(RDI      ))
     SUBITER(16,1,0,RAX,R8, 4)

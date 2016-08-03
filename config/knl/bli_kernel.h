@@ -88,7 +88,7 @@
 #define BLIS_PACKDIM_MR_D              32
 #define BLIS_PACKDIM_NR_D              8
 
-#elif 1
+#elif 0
 
 #define BLIS_DGEMM_UKERNEL_PREFERS_CONTIG_ROWS
 #define BLIS_DGEMM_UKERNEL             bli_dgemm_opt_30x8
