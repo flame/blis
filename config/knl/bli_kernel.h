@@ -48,6 +48,9 @@
 #define BLIS_MALLOC_POOL hbw_malloc
 #define BLIS_FREE_POOL hbw_free
 
+//#define BLIS_MALLOC_INTL hbw_malloc
+//#define BLIS_FREE_INTL hbw_free
+
 // -- LEVEL-3 MICRO-KERNEL CONSTANTS -------------------------------------------
 
 // -- Cache and register blocksizes --
