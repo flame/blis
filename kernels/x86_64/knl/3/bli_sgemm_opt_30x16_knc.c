@@ -158,15 +158,14 @@
 #define MAIN_LOOP_PC_L2(COUNTER) MAIN_LOOP_(COUNTER,COMMENT_BEGIN,COMMENT_END,,)
 
 //This is an array used for the scatter/gather instructions.
-//Need 28 so that we can do 512b load from offsets[12]
-int32_t offsets[28] __attribute__((aligned(0x1000))) = { 0,  1,  2,  3,  4,  5,  6,  7,
+int32_t offsets[32] __attribute__((aligned(0x1000))) = { 0,  1,  2,  3,  4,  5,  6,  7,
                                                          8,  9, 10, 11, 12, 13, 14, 15,
                                                         16, 17, 18, 19, 20, 21, 22, 23,
-                                                         0,  0,  0,  0};
+                                                        24, 25, 26, 27, 28, 29, 30, 31};
 
 //#define MONITORS
 //#define LOOPMON
-void bli_sgemm_opt_30x16(
+void bli_sgemm_opt_30x16_knc(
                     dim_t            k,
                     float*  restrict alpha,
                     float*  restrict a,

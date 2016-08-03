@@ -162,7 +162,7 @@ extern int32_t offsets[16];
 
 //#define MONITORS
 //#define LOOPMON
-void bli_dgemm_opt_30x8(
+void bli_dgemm_opt_30x8_knc(
                     dim_t            k,
                     double* restrict alpha,
                     double* restrict a,

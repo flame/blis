@@ -78,6 +78,7 @@
     ASM(kortestw kreg, kreg) \
     ASM(jnz label)
 #define KXNORW(_0, _1, _2) ASM(kxnorw _2, _1, _0)
+#define KSHIFTRW(_0, _1, _2) ASM(kshiftrw _2, _1, _0)
 
 #define ALIGN16 ASM(.p2align 4)
 #define ALIGN32 ASM(.p2align 5)
