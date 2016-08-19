@@ -50,20 +50,20 @@ typedef struct mtx_s
 // Define macros to operate on OpenMP-based mtx_t.
 #define bli_mutex_init( mtx_p ) \
 { \
-	omp_init_lock( mtx_p ); \
+	omp_init_lock( &((mtx_p)->mutex) ); \
 }
 #define bli_mutex_finalize( mtx_p ) \
 { \
-	omp_destroy_lock( mtx_p ); \
+	omp_destroy_lock( &((mtx_p)->mutex) ); \
 }
 
 #define bli_mutex_lock( mtx_p ) \
 { \
-	omp_set_lock( mtx_p ); \
+	omp_set_lock( &((mtx_p)->mutex) ); \
 }
 #define bli_mutex_unlock( mtx_p ) \
 { \
-	omp_unset_lock( mtx_p ); \
+	omp_unset_lock( &((mtx_p)->mutex) ); \
 }
 
 #endif
