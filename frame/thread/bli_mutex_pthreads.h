@@ -50,20 +50,20 @@ typedef struct mtx_s
 // Define macros to operate on pthread-based mtx_t.
 #define bli_mutex_init( mtx_p ) \
 { \
-	pthread_mutex_init( mtx_p ); \
+	pthread_mutex_init( &((mtx_p)->mutex), NULL ); \
 }
 #define bli_mutex_finalize( mtx_p ) \
 { \
-	pthread_mutex_destroy( mtx_p ); \
+	pthread_mutex_destroy( &((mtx_p)->mutex) ); \
 }
 
 #define bli_mutex_lock( mtx_p ) \
 { \
-	pthread_mutex_lock( mtx_p ); \
+	pthread_mutex_lock( &((mtx_p)->mutex) ); \
 }
 #define bli_mutex_unlock( mtx_p ) \
 { \
-	pthread_mutex_unlock( mtx_p ); \
+	pthread_mutex_unlock( &((mtx_p)->mutex) ); \
 }
 
 #endif
