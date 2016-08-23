@@ -64,5 +64,9 @@ BLIS_ENABLE_VERBOSE_MAKE_OUTPUT := @enable_verbose@
 BLIS_ENABLE_STATIC_BUILD        := @enable_static@
 BLIS_ENABLE_DYNAMIC_BUILD       := @enable_dynamic@
 
+# The status of BLAS and CBLAS compatibility layers
+BLIS_ENABLE_BLAS2BLIS := @enable_blas2blis@
+BLIS_ENABLE_CBLAS     := @enable_cblas@
+
 # end of ifndef CONFIG_MK_INCLUDED conditional block
 endif
