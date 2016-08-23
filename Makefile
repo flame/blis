@@ -312,6 +312,19 @@ MK_BLIS_CONFIG_OBJS  += $(patsubst $(CONFIG_PATH)/%.c, $(BASE_OBJ_CONFIG_PATH)/%
 MK_ALL_BLIS_OBJS     := $(MK_BLIS_CONFIG_OBJS) \
                         $(MK_BLIS_FRAME_OBJS)
 
+# Optionally filter out the BLAS and CBLAS compatibility layer object files.
+# This is not actually necessary, since each affected file is guarded by C
+# preprocessor macros, but it but prevents "empty" object files from being
+# added into the library (and reduces compilation time).
+BASE_OBJ_BLAS_PATH   := $(BASE_OBJ_FRAME_PATH)/compat
+BASE_OBJ_CBLAS_PATH  := $(BASE_OBJ_FRAME_PATH)/compat/cblas
+ifeq ($(BLIS_ENABLE_CBLAS),no)
+MK_ALL_BLIS_OBJS     := $(filter-out $(BASE_OBJ_CBLAS_PATH)/%.o, $(MK_ALL_BLIS_OBJS) )
+endif
+ifeq ($(BLIS_ENABLE_BLAS2BLIS),no)
+MK_ALL_BLIS_OBJS     := $(filter-out $(BASE_OBJ_BLAS_PATH)/%.o,  $(MK_ALL_BLIS_OBJS) )
+endif
+
 
 
 #
