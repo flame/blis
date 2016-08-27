@@ -46,13 +46,13 @@ void PASTEMAC0(opname) \
        obj_t*  b, \
        obj_t*  c, \
        cntx_t* cntx, \
-       gemm_t* cntl, \
+       cntl_t* cntl, \
        thrinfo_t* thread  \
      );
 
-GENPROT( trmm_blk_var1 )
-GENPROT( trmm_blk_var2 )
-GENPROT( trmm_blk_var3 )
+//GENPROT( trmm_blk_var1 )
+//GENPROT( trmm_blk_var2 )
+//GENPROT( trmm_blk_var3 )
 
 GENPROT( trmm_xx_ker_var2 )
 GENPROT( trmm_ll_ker_var2 )

@@ -201,21 +201,27 @@ void bli_thrcomm_tree_barrier( barrier_t* barack )
 
 void bli_l3_thread_decorator
      (
-       dim_t    n_threads,
-       l3_int_t func,
-       obj_t*   alpha,
-       obj_t*   a,
-       obj_t*   b,
-       obj_t*   beta,
-       obj_t*   c,
-       void*    cntx,
-       void*    cntl,
-       void**   thread
+       dim_t       n_threads,
+       l3int_t     func,
+       obj_t*      alpha,
+       obj_t*      a,
+       obj_t*      b,
+       obj_t*      beta,
+       obj_t*      c,
+       cntx_t*     cntx,
+       cntl_t*     cntl,
+       thrinfo_t** thread
      )
 {
 	_Pragma( "omp parallel num_threads(n_threads)" )
 	{
-		dim_t omp_id = omp_get_thread_num();
+		dim_t      omp_id   = omp_get_thread_num();
+		thrinfo_t* thread_i = thread[omp_id];
+
+		cntl_t*    cntl_use;
+
+		// Create a default control tree for the operation, if needed.
+		bli_l3_cntl_create_if( a, b, c, cntx, cntl, &cntl_use );
 
 		func
 		(
@@ -225,9 +231,12 @@ void bli_l3_thread_decorator
 		  beta,
 		  c,
 		  cntx,
-		  cntl,
+		  cntl_use,
 		  thread[omp_id]
 		);
+
+		// Free the control tree, if one was created locally.
+		bli_l3_cntl_free_if( a, b, c, cntx, cntl, cntl_use, thread_i );
 	}
 }
 

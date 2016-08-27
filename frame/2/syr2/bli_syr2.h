@@ -32,5 +32,6 @@
 
 */
 
-#include "bli_syr2_front.h"
+// NOTE: level-2 control tree code is temporarily disabled.
+//#include "bli_syr2_front.h"
 

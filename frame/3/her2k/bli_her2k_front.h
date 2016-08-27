@@ -40,5 +40,5 @@ void bli_her2k_front
        obj_t*  beta,
        obj_t*  c,
        cntx_t* cntx,
-       gemm_t* cntl
+       cntl_t* cntl
      );

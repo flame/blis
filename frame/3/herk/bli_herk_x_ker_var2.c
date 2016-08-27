@@ -45,7 +45,7 @@ void bli_herk_x_ker_var2
        obj_t*  ah,
        obj_t*  c,
        cntx_t* cntx,
-       gemm_t* cntl,
+       cntl_t* cntl,
        thrinfo_t* thread
      )
 {

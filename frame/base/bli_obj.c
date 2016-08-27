@@ -65,7 +65,6 @@ void bli_obj_create_without_buffer( num_t  dt,
                                     obj_t* obj )
 {
 	siz_t  elem_size;
-	mem_t* pack_mem;
 	void*  s;
 
 	if ( bli_error_checking_is_enabled() )
@@ -97,9 +96,6 @@ void bli_obj_create_without_buffer( num_t  dt,
 	bli_obj_set_dims( m, n, *obj );
 	bli_obj_set_offs( 0, 0, *obj );
 	bli_obj_set_diag_offset( 0, *obj );
-
-	pack_mem = bli_obj_pack_mem( *obj );
-	bli_mem_set_buffer( NULL, pack_mem );
 
 	// Set the internal scalar to 1.0.
 	s = bli_obj_internal_scalar_buffer( *obj );
@@ -467,8 +463,6 @@ num_t bli_datatype_union( num_t dt1, num_t dt2 )
 void bli_obj_print( char* label, obj_t* obj )
 {
 	FILE*  file     = stdout;
-	mem_t* pack_mem = bli_obj_pack_mem( *obj );
-	//mem_t* cast_mem = bli_obj_cast_mem( *obj );
 
 	if ( bli_error_checking_is_enabled() )
 		bli_obj_print_check( label, obj );
@@ -491,10 +485,6 @@ void bli_obj_print( char* label, obj_t* obj )
 	fprintf( file, " rs, cs          %ld, %ld\n", ( signed long int )bli_obj_row_stride( *obj ),
 	                                              ( signed long int )bli_obj_col_stride( *obj ) );
 	fprintf( file, " is              %ld\n", ( signed long int )bli_obj_imag_stride( *obj ) );
-	fprintf( file, " pack_mem          \n" );
-	fprintf( file, " - buf           %p\n",  ( void* )bli_mem_buffer( pack_mem ) );
-	fprintf( file, " - buf_type      %lu\n", ( unsigned long int )bli_mem_buf_type( pack_mem ) );
-	fprintf( file, " - size          %lu\n", ( unsigned long int )bli_mem_size( pack_mem ) );
 	fprintf( file, " m_padded        %lu\n", ( unsigned long int )bli_obj_padded_length( *obj ) );
 	fprintf( file, " n_padded        %lu\n", ( unsigned long int )bli_obj_padded_width( *obj ) );
 	fprintf( file, " ps              %lu\n", ( unsigned long int )bli_obj_panel_stride( *obj ) );

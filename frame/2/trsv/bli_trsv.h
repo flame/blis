@@ -32,9 +32,10 @@
 
 */
 
-#include "bli_trsv_cntl.h"
-#include "bli_trsv_front.h"
-#include "bli_trsv_int.h"
+// NOTE: level-2 control tree code is temporarily disabled.
+//#include "bli_trsv_cntl.h"
+//#include "bli_trsv_front.h"
+//#include "bli_trsv_int.h"
 
 #include "bli_trsv_var.h"
 

@@ -46,7 +46,7 @@ void PASTEMAC0(opname) \
        obj_t*  a, \
        obj_t*  x, \
        cntx_t* cntx, \
-       trsv_t* cntl  \
+       cntl_t* cntl  \
      );
 
 GENPROT( trsv_l_blk_var1 )

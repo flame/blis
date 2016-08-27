@@ -34,17 +34,6 @@
 
 #include "blis.h"
 
-#if 1
-static gemm_voft vars[4][3] =
-{
-    // unblocked            optimized unblocked    blocked
-    { NULL,                 NULL,               bli_gemm_blk_var1 },
-    { NULL,                 bli_gemm_ker_var2,  bli_gemm_blk_var2 },
-    { NULL,                 NULL,               bli_gemm_blk_var3 },
-    { NULL,                 NULL,               NULL              },
-};
-#endif
-
 void bli_gemm_int
      (
        obj_t*  alpha,
@@ -53,15 +42,13 @@ void bli_gemm_int
        obj_t*  beta,
        obj_t*  c,
        cntx_t* cntx,
-       gemm_t* cntl,
+       cntl_t* cntl,
        thrinfo_t* thread
      )
 {
 	obj_t     a_local;
 	obj_t     b_local;
 	obj_t     c_local;
-	varnum_t  n;
-	impl_t    i;
 	gemm_voft f;
 	ind_t     im;
 
@@ -76,7 +63,7 @@ void bli_gemm_int
 	if ( bli_obj_has_zero_dim( *a ) ||
 	     bli_obj_has_zero_dim( *b ) )
 	{
-        if( bli_thread_am_ochief( thread ) )
+        if ( bli_thread_am_ochief( thread ) )
 		    bli_scalm( beta, c );
         bli_thread_obarrier( thread );
 		return;
@@ -87,31 +74,19 @@ void bli_gemm_int
 	if ( bli_obj_is_zeros( *a ) ||
 	     bli_obj_is_zeros( *b ) )
 	{
-        if( bli_thread_am_ochief( thread ) )
+		// This should never execute.
+		bli_abort();
+
+        if ( bli_thread_am_ochief( thread ) )
 		    bli_scalm( beta, c );
         bli_thread_obarrier( thread );
 		return;
 	}
 
-	// Alias A and B in case we need to update attached scalars.
+	// Alias A, B, and C in case we need to update attached scalars.
 	bli_obj_alias_to( *a, a_local );
 	bli_obj_alias_to( *b, b_local );
-
-	// Alias C in case we need to induce a transposition.
 	bli_obj_alias_to( *c, c_local );
-
-	// If we are about to call a leaf-level implementation, and matrix C
-	// still needs a transposition, then we must induce one by swapping the
-	// strides and dimensions. Note that this transposition would normally
-	// be handled explicitly in the packing of C, but if C is not being
-	// packed, this is our last chance to handle the transposition.
-	if ( bli_cntl_is_leaf( cntl ) && bli_obj_has_trans( *c ) )
-	{
-        //if( bli_thread_am_ochief( thread ) ) {
-            bli_obj_induce_trans( c_local );
-            bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, c_local );
-       // }
-	}
 
 	// If alpha is non-unit, typecast and apply it to the scalar attached
 	// to B.
@@ -127,24 +102,17 @@ void bli_gemm_int
         bli_obj_scalar_apply_scalar( beta, &c_local );
 	}
 
-	// Extract the variant number and implementation type.
-	n = bli_cntl_var_num( cntl );
-	i = bli_cntl_impl_type( cntl );
-
-	// Index into the variant array to extract the correct function pointer.
-	f = vars[n][i];
-
 	// Extract the function pointer from the current control tree node.
-	//f = bli_cntl_sub_prob( cntl );
+	f = bli_cntl_var_func( cntl );
 
 	// Somewhat hackish support for 3m3, 3m2, and 4m1b method implementations.
 	im = bli_cntx_get_ind_method( cntx );
 
 	if ( im != BLIS_NAT )
 	{
-		if      ( im == BLIS_3M3  && f == bli_gemm_blk_var1 ) f = bli_gemm_blk_var4;
-		else if ( im == BLIS_3M2  && f == bli_gemm_ker_var2 ) f = bli_gemm_ker_var4;
-		else if ( im == BLIS_4M1B && f == bli_gemm_ker_var2 ) f = bli_gemm_ker_var3;
+		if      ( im == BLIS_3M3  && f == bli_gemm_packa    ) f = bli_gemm3m3_packa;
+		else if ( im == BLIS_3M2  && f == bli_gemm_ker_var2 ) f = bli_gemm3m2_ker_var2;
+		else if ( im == BLIS_4M1B && f == bli_gemm_ker_var2 ) f = bli_gemm4mb_ker_var2;
 	}
 
 	// Invoke the variant.

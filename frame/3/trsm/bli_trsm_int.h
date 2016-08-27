@@ -40,7 +40,7 @@ void bli_trsm_int
        obj_t*  beta,
        obj_t*  c,
        cntx_t* cntx,
-       trsm_t* cntl,
+       cntl_t* cntl,
        thrinfo_t* thread
      );
 

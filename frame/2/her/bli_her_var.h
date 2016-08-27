@@ -47,7 +47,7 @@ void PASTEMAC0(opname) \
        obj_t*  x, \
        obj_t*  c, \
        cntx_t* cntx, \
-       her_t*  cntl  \
+       cntl_t* cntl  \
      );
 
 GENPROT( her_blk_var1 )

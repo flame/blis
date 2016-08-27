@@ -46,17 +46,19 @@ void PASTEMAC0(opname) \
        obj_t*  ah, \
        obj_t*  c, \
        cntx_t* cntx, \
-       gemm_t* cntl, \
+       cntl_t* cntl, \
        thrinfo_t* thread  \
      );
 
-GENPROT( herk_blk_var1 )
-GENPROT( herk_blk_var2 )
-GENPROT( herk_blk_var3 )
+//GENPROT( herk_blk_var1 )
+//GENPROT( herk_blk_var2 )
+//GENPROT( herk_blk_var3 )
 
 GENPROT( herk_x_ker_var2 )
 GENPROT( herk_l_ker_var2 )
 GENPROT( herk_u_ker_var2 )
+//GENPROT( herk_packa )
+//GENPROT( herk_packb )
 
 
 //

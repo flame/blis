@@ -40,64 +40,35 @@ void bli_gemm_blk_var2
        obj_t*  b,
        obj_t*  c,
        cntx_t* cntx,
-       gemm_t* cntl,
+       cntl_t* cntl,
        thrinfo_t* thread
      )
 {
-	obj_t a_pack_s;
-    obj_t b1_pack_s, c1_pack_s;
-
-    obj_t b1, c1;
-    obj_t*  a_pack = NULL;
-	obj_t*  b1_pack = NULL;
-	obj_t*  c1_pack = NULL;
+	obj_t b1, c1;
 
 	dir_t direct;
 
 	dim_t i;
 	dim_t b_alg;
+	dim_t my_start, my_end;
 
 	// Determine the direction in which to partition (forwards or backwards).
-	direct = bli_gemm_direct( a, b, c );
+	direct = bli_l3_direct( a, b, c, cntx );
 
-    if( bli_thread_am_ochief( thread ) ) {
-        // Initialize object for packing A
-	    bli_obj_init_pack( &a_pack_s );
-        bli_packm_init( a, &a_pack_s,
-                        cntx, bli_cntl_sub_packm_a( cntl ) );
+	// Prune any zero region that exists along the partitioning dimension.
+	bli_l3_prune_unref_mparts_n( a, b, c, cntx );
 
-        // Scale C by beta (if instructed).
-        bli_scalm_int( &BLIS_ONE,
-                       c,
-                       cntx, bli_cntl_sub_scalm( cntl ) );
-    }
-    a_pack = bli_thread_obroadcast( thread, &a_pack_s );
-
-	// Initialize pack objects for B and C that are passed into packm_init().
-    if( bli_thread_am_ichief( thread ) ) {
-        bli_obj_init_pack( &b1_pack_s );
-        bli_obj_init_pack( &c1_pack_s );
-    }
-    b1_pack = bli_thread_ibroadcast( thread, &b1_pack_s );
-    c1_pack = bli_thread_ibroadcast( thread, &c1_pack_s );
-
-	// Pack A (if instructed).
-	bli_packm_int( a, a_pack,
-	               cntx, bli_cntl_sub_packm_a( cntl ),
-                   bli_thrinfo_sub_opackm( thread ) );
-
-    dim_t my_start, my_end;
-    bli_thread_get_range_ndim( direct, thread, b,
-                       bli_cntx_get_bmult( bli_cntl_bszid( cntl ), cntx ),
-                       &my_start, &my_end );
+	// Determine the current thread's subpartition range.
+	bli_thread_get_range_ndim
+	(
+	  direct, thread, a, b, c, cntl, cntx,
+	  &my_start, &my_end
+	);
 
 	// Partition along the n dimension.
 	for ( i = my_start; i < my_end; i += b_alg )
 	{
 		// Determine the current algorithmic blocksize.
-		// NOTE: Use of b (for execution datatype) is intentional!
-		// This causes the right blocksize to be used if c and a are
-		// complex and b is real.
 		b_alg = bli_determine_blocksize( direct, i, my_end, b,
 		                                 bli_cntl_bszid( cntl ), cntx );
 
@@ -107,52 +78,20 @@ void bli_gemm_blk_var2
 		bli_acquire_mpart_ndim( direct, BLIS_SUBPART1,
 		                        i, b_alg, c, &c1 );
 
-		// Initialize objects for packing A1 and B1.
-        if( bli_thread_am_ichief( thread ) ) {
-            bli_packm_init( &b1, b1_pack,
-                            cntx, bli_cntl_sub_packm_b( cntl ) );
-            bli_packm_init( &c1, c1_pack,
-                            cntx, bli_cntl_sub_packm_c( cntl ) );
-        }
-        bli_thread_ibarrier( thread );
-
-		// Pack B1 (if instructed).
-		bli_packm_int( &b1, b1_pack,
-		               cntx, bli_cntl_sub_packm_b( cntl ),
-                       bli_thrinfo_sub_ipackm( thread ) );
-
-		// Pack C1 (if instructed).
-		bli_packm_int( &c1, c1_pack,
-		               cntx, bli_cntl_sub_packm_c( cntl ),
-                       bli_thrinfo_sub_ipackm( thread ) );
-
 		// Perform gemm subproblem.
-		bli_gemm_int( &BLIS_ONE,
-		              a_pack,
-		              b1_pack,
-		              &BLIS_ONE,
-		              c1_pack,
-		              cntx,
-		              bli_cntl_sub_gemm( cntl ),
-                      bli_thrinfo_sub_self( thread ) );
+		bli_gemm_int
+		(
+		  &BLIS_ONE,
+		  a,
+		  &b1,
+		  &BLIS_ONE,
+		  &c1,
+		  cntx,
+		  bli_cntl_sub_node( cntl ),
+		  bli_thrinfo_sub_node( thread )
+		);
 
-        bli_thread_ibarrier( thread );
-
-        // Unpack C1 (if C1 was packed).
-        // Currently must be done by 1 thread
-        bli_unpackm_int( c1_pack, &c1,
-                         cntx, bli_cntl_sub_unpackm_c( cntl ),
-                         bli_thrinfo_sub_ipackm( thread ) );
+		bli_thread_ibarrier( thread );
 	}
-
-	// If any packing buffers were acquired within packm, release them back
-	// to the memory manager.
-    bli_thread_obarrier( thread );
-    if( bli_thread_am_ochief( thread ) )
-    	bli_packm_release( a_pack, bli_cntl_sub_packm_a( cntl ) );
-    if( bli_thread_am_ichief( thread ) ) {
-        bli_packm_release( b1_pack, bli_cntl_sub_packm_b( cntl ) );
-        bli_packm_release( c1_pack, bli_cntl_sub_packm_c( cntl ) );
-    }
 }
 

@@ -58,9 +58,13 @@ struct thrinfo_s
 	// What we're working on.
 	dim_t              work_id;
 
-	struct thrinfo_s*  opackm;
-	struct thrinfo_s*  ipackm;
-	struct thrinfo_s*  sub_self;
+	// When freeing, should the communicators in this node be freed? Usually,
+	// this is field is true, but when nodes are created that share the same
+	// communicators as other nodes (such as with packm nodes), this is set
+	// to false.
+	bool_t             free_comms;
+
+	struct thrinfo_s*  sub_node;
 };
 typedef struct thrinfo_s thrinfo_t;
 
@@ -81,9 +85,11 @@ typedef struct thrinfo_s thrinfo_t;
 // Generic accessor macros for all thrinfo_t objects.
 //
 
-#define bli_thrinfo_sub_opackm( t )     ( t->opackm )
-#define bli_thrinfo_sub_ipackm( t )     ( t->ipackm )
-#define bli_thrinfo_sub_self( t )       ( t->sub_self )
+#define bli_thrinfo_ocomm( t )             ( t->ocomm )
+#define bli_thrinfo_icomm( t )             ( t->icomm )
+#define bli_thrinfo_needs_free_comms( t )  ( t->free_comms )
+
+#define bli_thrinfo_sub_node( t )          ( t->sub_node )
 
 //
 // Prototypes for level-3 thrinfo functions not specific to any operation.
@@ -97,9 +103,8 @@ thrinfo_t* bli_thrinfo_create
        dim_t      icomm_id,
        dim_t      n_way,
        dim_t      work_id, 
-       thrinfo_t* opackm,
-       thrinfo_t* ipackm,
-       thrinfo_t* sub_self
+       bool_t     free_comms,
+       thrinfo_t* sub_node
      );
 
 void bli_thrinfo_init
@@ -111,9 +116,8 @@ void bli_thrinfo_init
        dim_t      icomm_id,
        dim_t      n_way,
        dim_t      work_id, 
-       thrinfo_t* opackm,
-       thrinfo_t* ipackm,
-       thrinfo_t* sub_self
+       bool_t     free_comms,
+       thrinfo_t* sub_node
      );
 
 void bli_thrinfo_init_single

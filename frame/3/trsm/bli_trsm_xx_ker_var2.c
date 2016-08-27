@@ -46,7 +46,7 @@ void bli_trsm_xx_ker_var2
        obj_t*  b,
        obj_t*  c,
        cntx_t* cntx,
-       trsm_t* cntl,
+       cntl_t* cntl,
        thrinfo_t* thread
      )
 {

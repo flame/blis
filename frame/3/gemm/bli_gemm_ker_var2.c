@@ -62,7 +62,7 @@ void bli_gemm_ker_var2
        obj_t*  b,
        obj_t*  c,
        cntx_t* cntx,
-       gemm_t* cntl,
+       cntl_t* cntl,
        thrinfo_t* thread
      )
 {
@@ -239,7 +239,7 @@ void PASTEMAC(ch,varname) \
 	bli_auxinfo_set_is_a( is_a, aux ); \
 	bli_auxinfo_set_is_b( is_b, aux ); \
 \
-	thrinfo_t* caucus    = bli_thrinfo_sub_self( thread ); \
+	thrinfo_t* caucus    = bli_thrinfo_sub_node( thread ); \
 	dim_t jr_num_threads = bli_thread_n_way( thread ); \
 	dim_t jr_thread_id   = bli_thread_work_id( thread ); \
 	dim_t ir_num_threads = bli_thread_n_way( caucus ); \

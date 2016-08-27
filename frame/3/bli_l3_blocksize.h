@@ -47,7 +47,10 @@ dim_t PASTEMAC0(opname) \
          cntx_t* cntx  \
       );
 
+GENPROT( l3_determine_kc )
+
 GENPROT( gemm_determine_kc )
+GENPROT( herk_determine_kc )
 GENPROT( trmm_determine_kc )
 GENPROT( trsm_determine_kc )
 
@@ -67,6 +70,9 @@ dim_t PASTEMAC0(opname) \
 
 GENPROT( gemm_determine_kc_f )
 GENPROT( gemm_determine_kc_b )
+
+GENPROT( herk_determine_kc_f )
+GENPROT( herk_determine_kc_b )
 
 GENPROT( trmm_determine_kc_f )
 GENPROT( trmm_determine_kc_b )

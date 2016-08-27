@@ -34,38 +34,25 @@
 
 #include "blis.h"
 
-scalm_t* scalm_cntl = NULL;
-
-void bli_scalm_cntl_init()
+cntl_t* bli_scalm_cntl_obj_create
+     (
+       void*   var_func,
+       cntl_t* sub_node
+     )
 {
-	scalm_cntl = bli_scalm_cntl_obj_create( BLIS_UNBLOCKED,
-	                                        BLIS_VARIANT1 );
-}
+	cntl_t* cntl;
 
-void bli_scalm_cntl_finalize()
-{
-	bli_cntl_obj_free( scalm_cntl );
-}
-
-
-scalm_t* bli_scalm_cntl_obj_create( impl_t     impl_type,
-                                    varnum_t   var_num )
-{
-	scalm_t* cntl;
-
-	cntl = ( scalm_t* ) bli_malloc_intl( sizeof(scalm_t) );
-
-	cntl->impl_type = impl_type;
-	cntl->var_num   = var_num;
+	// It's important that we set the bszid field to BLIS_NO_PART to indicate
+	// that no blocksize partitioning is performed. bli_cntl_free() will rely
+	// on this information to know how to step through the thrinfo_t tree in
+	// sync with the cntl_t tree.
+	cntl = bli_cntl_obj_create
+	(
+	  BLIS_NO_PART,
+	  var_func,
+	  NULL,
+	  sub_node
+	);
 
 	return cntl;
 }
-
-void bli_scalm_cntl_obj_init( scalm_t*   cntl,
-                              impl_t     impl_type,
-                              varnum_t   var_num )
-{
-	cntl->impl_type = impl_type;
-	cntl->var_num   = var_num;
-}
-

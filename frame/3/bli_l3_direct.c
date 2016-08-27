@@ -34,6 +34,28 @@
 
 #include "blis.h"
 
+dir_t bli_l3_direct
+     (
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  c,
+       cntx_t* cntx
+     )
+{
+	// Query the operation family.
+	opid_t family = bli_cntx_family( cntx );
+
+	if      ( family == BLIS_GEMM ) return bli_gemm_direct( a, b, c );
+	else if ( family == BLIS_HERK ) return bli_herk_direct( a, b, c );
+	else if ( family == BLIS_TRMM ) return bli_trmm_direct( a, b, c );
+	else if ( family == BLIS_TRSM ) return bli_trsm_direct( a, b, c );
+
+	// This should never execute.
+	return BLIS_FWD;
+}
+
+// -----------------------------------------------------------------------------
+
 dir_t bli_gemm_direct
      (
        obj_t* a,

@@ -32,28 +32,23 @@
 
 */
 
-struct unpackm_s
+struct unpackm_params_s
 {
-	impl_t         impl_type;
-	varnum_t       var_num;
-	blksz_t*       b;
+	uint64_t      size; // size field must be present and come first.
+	unpackm_voft  var_func;
 };
-typedef struct unpackm_s unpackm_t;
+typedef struct unpackm_params_s unpackm_params_t;
 
-#define bli_cntl_sub_unpackm( cntl )      cntl->sub_unpackm
-#define bli_cntl_sub_unpackm_a( cntl )    cntl->sub_unpackm_a
-#define bli_cntl_sub_unpackm_a11( cntl )  cntl->sub_unpackm_a11
-#define bli_cntl_sub_unpackm_b( cntl )    cntl->sub_unpackm_b
-#define bli_cntl_sub_unpackm_b11( cntl )  cntl->sub_unpackm_b11
-#define bli_cntl_sub_unpackm_c( cntl )    cntl->sub_unpackm_c
-#define bli_cntl_sub_unpackm_c11( cntl )  cntl->sub_unpackm_c11
+#define bli_cntl_unpackm_params_var_func( cntl ) \
+\
+	( ( (unpackm_params_t*)(cntl)->params )->var_func )
 
-void       bli_unpackm_cntl_init( void );
-void       bli_unpackm_cntl_finalize( void );
-unpackm_t* bli_unpackm_cntl_obj_create( impl_t     impl_type,
-                                        varnum_t   var_num,
-                                        blksz_t*   b );
-void bli_unpackm_cntl_obj_init( unpackm_t* cntl,
-                                impl_t     impl_type,
-                                varnum_t   var_num,
-                                blksz_t*   b );
+// -----------------------------------------------------------------------------
+
+cntl_t* bli_unpackm_cntl_obj_create
+     (
+       void*     var_func,
+       void*     unpackm_var_func,
+       cntl_t*   sub_node
+     );
+

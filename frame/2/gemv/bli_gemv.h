@@ -32,9 +32,10 @@
 
 */
 
-#include "bli_gemv_cntl.h"
-#include "bli_gemv_front.h"
-#include "bli_gemv_int.h"
+// NOTE: level-2 control tree code is temporarily disabled.
+//#include "bli_gemv_cntl.h"
+//#include "bli_gemv_front.h"
+//#include "bli_gemv_int.h"
 
 #include "bli_gemv_var.h"
 

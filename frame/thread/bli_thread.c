@@ -38,7 +38,6 @@ static bool_t bli_thread_is_init         = FALSE;
 
 thrinfo_t     BLIS_PACKM_SINGLE_THREADED = {};
 thrinfo_t     BLIS_GEMM_SINGLE_THREADED  = {};
-thrinfo_t     BLIS_HERK_SINGLE_THREADED  = {};
 thrcomm_t     BLIS_SINGLE_COMM           = {};
 
 // -----------------------------------------------------------------------------
@@ -51,7 +50,6 @@ void bli_thread_init( void )
 	bli_thrcomm_init( &BLIS_SINGLE_COMM, 1 );
 	bli_packm_thrinfo_init_single( &BLIS_PACKM_SINGLE_THREADED );
 	bli_l3_thrinfo_init_single( &BLIS_GEMM_SINGLE_THREADED );
-	bli_l3_thrinfo_init_single( &BLIS_HERK_SINGLE_THREADED );
 
 	// Mark API as initialized.
 	bli_thread_is_init = TRUE;
@@ -209,38 +207,6 @@ void bli_thread_get_range_sub
 			*end   = hi_start + (work_id-n_th_lo+1) * size_hi;
 		}
 	}
-}
-
-siz_t bli_thread_get_range_mdim
-     (
-       dir_t      direct,
-       thrinfo_t* thr,
-       obj_t*     a,
-       blksz_t*   bmult,
-       dim_t*     start,
-       dim_t*     end
-     )
-{
-	if ( direct == BLIS_FWD )
-		return bli_thread_get_range_t2b( thr, a, bmult, start, end );
-	else
-		return bli_thread_get_range_b2t( thr, a, bmult, start, end );
-}
-
-siz_t bli_thread_get_range_ndim
-     (
-       dir_t      direct,
-       thrinfo_t* thr,
-       obj_t*     a,
-       blksz_t*   bmult,
-       dim_t*     start,
-       dim_t*     end
-     )
-{
-	if ( direct == BLIS_FWD )
-		return bli_thread_get_range_l2r( thr, a, bmult, start, end );
-	else
-		return bli_thread_get_range_r2l( thr, a, bmult, start, end );
 }
 
 siz_t bli_thread_get_range_l2r
@@ -669,36 +635,122 @@ siz_t bli_thread_get_range_weighted_sub
 	return area;
 }
 
-siz_t bli_thread_get_range_weighted_mdim
+siz_t bli_thread_get_range_mdim
      (
        dir_t      direct,
        thrinfo_t* thr,
        obj_t*     a,
-       blksz_t*   bmult,
+       obj_t*     b,
+       obj_t*     c,
+       cntl_t*    cntl,
+       cntx_t*    cntx,
        dim_t*     start,
        dim_t*     end
      )
 {
-	if ( direct == BLIS_FWD )
-		return bli_thread_get_range_t2b( thr, a, bmult, start, end );
+	bszid_t  bszid  = bli_cntl_bszid( cntl );
+	opid_t   family = bli_cntx_get_family( cntx );
+
+	// This is part of trsm's current implementation, whereby right side
+	// cases are implemented in left-side micro-kernels, which requires
+	// we swap the usage of the register blocksizes for the purposes of
+	// packing A and B.
+	if ( family == BLIS_TRSM )
+	{
+		if ( bli_obj_root_is_triangular( *a ) ) bszid = BLIS_MR;
+		else                                    bszid = BLIS_NR;
+	}
+
+	blksz_t* bmult  = bli_cntx_get_bmult( bszid, cntx );
+	obj_t*   x;
+	bool_t   use_weighted;
+
+	// Use the operation family to choose the one of the two matrices
+	// being partitioned that potentially has structure, and also to
+	// decide whether or not we need to use weighted range partitioning.
+	// NOTE: It's important that we use non-weighted range partitioning
+	// for hemm and symm (ie: the gemm family) because the weighted
+	// function will mistakenly skip over unstored regions of the
+	// structured matrix, even though they represent part of that matrix
+	// that will be dense and full (after packing).
+	if      ( family == BLIS_GEMM ) { x = a; use_weighted = FALSE; }
+	else if ( family == BLIS_HERK ) { x = c; use_weighted = TRUE;  }
+	else if ( family == BLIS_TRMM ) { x = a; use_weighted = TRUE;  }
+	else    /*family == BLIS_TRSM*/ { x = a; use_weighted = FALSE; }
+
+	if ( use_weighted )
+	{
+		if ( direct == BLIS_FWD )
+			return bli_thread_get_range_weighted_t2b( thr, x, bmult, start, end );
+		else
+			return bli_thread_get_range_weighted_b2t( thr, x, bmult, start, end );
+	}
 	else
-		return bli_thread_get_range_b2t( thr, a, bmult, start, end );
+	{
+		if ( direct == BLIS_FWD )
+			return bli_thread_get_range_t2b( thr, x, bmult, start, end );
+		else
+			return bli_thread_get_range_b2t( thr, x, bmult, start, end );
+	}
 }
 
-siz_t bli_thread_get_range_weighted_ndim
+siz_t bli_thread_get_range_ndim
      (
        dir_t      direct,
        thrinfo_t* thr,
        obj_t*     a,
-       blksz_t*   bmult,
+       obj_t*     b,
+       obj_t*     c,
+       cntl_t*    cntl,
+       cntx_t*    cntx,
        dim_t*     start,
        dim_t*     end
      )
 {
-	if ( direct == BLIS_FWD )
-		return bli_thread_get_range_l2r( thr, a, bmult, start, end );
+	bszid_t  bszid  = bli_cntl_bszid( cntl );
+	opid_t   family = bli_cntx_get_family( cntx );
+
+	// This is part of trsm's current implementation, whereby right side
+	// cases are implemented in left-side micro-kernels, which requires
+	// we swap the usage of the register blocksizes for the purposes of
+	// packing A and B.
+	if ( family == BLIS_TRSM )
+	{
+		if ( bli_obj_root_is_triangular( *b ) ) bszid = BLIS_MR;
+		else                                    bszid = BLIS_NR;
+	}
+
+	blksz_t* bmult  = bli_cntx_get_bmult( bszid, cntx );
+	obj_t*   x;
+	bool_t   use_weighted;
+
+	// Use the operation family to choose the one of the two matrices
+	// being partitioned that potentially has structure, and also to
+	// decide whether or not we need to use weighted range partitioning.
+	// NOTE: It's important that we use non-weighted range partitioning
+	// for hemm and symm (ie: the gemm family) because the weighted
+	// function will mistakenly skip over unstored regions of the
+	// structured matrix, even though they represent part of that matrix
+	// that will be dense and full (after packing).
+	if      ( family == BLIS_GEMM ) { x = b; use_weighted = FALSE; }
+	else if ( family == BLIS_HERK ) { x = c; use_weighted = TRUE;  }
+	else if ( family == BLIS_TRMM ) { x = b; use_weighted = TRUE;  }
+	else    /*family == BLIS_TRSM*/ { x = b; use_weighted = FALSE; }
+
+	if ( use_weighted )
+	{
+		if ( direct == BLIS_FWD )
+			return bli_thread_get_range_weighted_l2r( thr, x, bmult, start, end );
+		else
+			return bli_thread_get_range_weighted_r2l( thr, x, bmult, start, end );
+	}
 	else
-		return bli_thread_get_range_r2l( thr, a, bmult, start, end );
+	{
+		if ( direct == BLIS_FWD )
+			return bli_thread_get_range_l2r( thr, x, bmult, start, end );
+		else
+			return bli_thread_get_range_r2l( thr, x, bmult, start, end );
+	}
 }
 
 siz_t bli_thread_get_range_weighted_l2r

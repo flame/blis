@@ -37,8 +37,7 @@
 #include "bli_unpackm_int.h"
 
 #include "bli_unpackm_unb_var1.h"
-//#include "bli_unpackm_blk_var1.h"
 
-#include "bli_unpackm_blk_var2.h"
+#include "bli_unpackm_blk_var1.h"
 
 #include "bli_unpackm_cxk.h"

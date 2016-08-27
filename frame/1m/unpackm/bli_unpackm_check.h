@@ -32,7 +32,10 @@
 
 */
 
-void bli_unpackm_check( obj_t*     p,
-                        obj_t*     a,
-                        cntx_t*    cntx,
-                        unpackm_t* cntl );
+void bli_unpackm_int_check
+     (
+       obj_t*  p,
+       obj_t*  a,
+       cntx_t* cntx
+     );
+

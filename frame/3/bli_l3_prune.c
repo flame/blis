@@ -34,6 +34,86 @@
 
 #include "blis.h"
 
+/*
+void bli_l3_prune_unref_mparts_m
+     (
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  c,
+       cntx_t* cntx
+     )
+{
+	// Query the operation family.
+	opid_t family = bli_cntx_family( cntx );
+
+	if      ( family == BLIS_GEMM ) return; // No pruning is necessary for gemm.
+	else if ( family == BLIS_HERK ) bli_herk_prune_unref_mparts_m( a, b, c );
+	else if ( family == BLIS_TRMM ) bli_trmm_prune_unref_mparts_m( a, b, c );
+	else if ( family == BLIS_TRSM ) bli_trsm_prune_unref_mparts_m( a, b, c );
+}
+*/
+
+#undef  GENFRONT
+#define GENFRONT( dim ) \
+\
+void PASTEMAC(l3_prune_unref_mparts_,dim) \
+     ( \
+       obj_t*  a, \
+       obj_t*  b, \
+       obj_t*  c, \
+       cntx_t* cntx  \
+     ) \
+{ \
+	/* Query the operation family. */ \
+	opid_t family = bli_cntx_family( cntx ); \
+\
+	if      ( family == BLIS_GEMM ) return; /* No pruning is necessary for gemm. */ \
+	else if ( family == BLIS_HERK ) PASTEMAC(herk_prune_unref_mparts_,dim)( a, b, c ); \
+	else if ( family == BLIS_TRMM ) PASTEMAC(trmm_prune_unref_mparts_,dim)( a, b, c ); \
+	else if ( family == BLIS_TRSM ) PASTEMAC(trsm_prune_unref_mparts_,dim)( a, b, c ); \
+}
+
+GENFRONT( m )
+GENFRONT( n )
+GENFRONT( k )
+
+// -----------------------------------------------------------------------------
+
+#undef  GENFRONT
+#define GENFRONT( opname ) \
+\
+void PASTEMAC(opname,_prune_unref_mparts_m) \
+     ( \
+       obj_t*  a, \
+       obj_t*  b, \
+       obj_t*  c  \
+     ) \
+{ \
+	/* No pruning is necessary for gemm. */ \
+} \
+void PASTEMAC(opname,_prune_unref_mparts_n) \
+     ( \
+       obj_t*  a, \
+       obj_t*  b, \
+       obj_t*  c  \
+     ) \
+{ \
+	/* No pruning is necessary for gemm. */ \
+} \
+void PASTEMAC(opname,_prune_unref_mparts_k) \
+     ( \
+       obj_t*  a, \
+       obj_t*  b, \
+       obj_t*  c  \
+     ) \
+{ \
+	/* No pruning is necessary for gemm. */ \
+}
+
+GENFRONT( gemm )
+
+// -----------------------------------------------------------------------------
+
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \

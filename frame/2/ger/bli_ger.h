@@ -32,8 +32,9 @@
 
 */
 
-#include "bli_ger_cntl.h"
-#include "bli_ger_front.h"
-#include "bli_ger_int.h"
+// NOTE: level-2 control tree code is temporarily disabled.
+//#include "bli_ger_cntl.h"
+//#include "bli_ger_front.h"
+//#include "bli_ger_int.h"
 
 #include "bli_ger_var.h"

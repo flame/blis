@@ -39,5 +39,5 @@ void bli_trmm_front
        obj_t*  a,
        obj_t*  b,
        cntx_t* cntx,
-       gemm_t* cntl
+       cntl_t* cntl
      );

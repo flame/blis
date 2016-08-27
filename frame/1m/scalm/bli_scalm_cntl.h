@@ -32,20 +32,9 @@
 
 */
 
-struct scalm_s
-{
-	impl_t          impl_type;
-	varnum_t        var_num;
-};
-typedef struct scalm_s scalm_t;
 
-#define bli_cntl_sub_scalm( cntl )  cntl->sub_scalm
-
-void     bli_scalm_cntl_init( void );
-void     bli_scalm_cntl_finalize( void );
-scalm_t* bli_scalm_cntl_obj_create( impl_t       impl_type,
-                                    varnum_t     var_num );
-void bli_scalm_cntl_obj_init( scalm_t*   cntl,
-                              impl_t     impl_type,
-                              varnum_t   var_num );
-
+cntl_t* bli_scalm_cntl_obj_create
+     (
+       void*   var_func,
+       cntl_t* sub_node
+     );

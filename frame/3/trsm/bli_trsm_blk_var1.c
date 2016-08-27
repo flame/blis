@@ -40,55 +40,32 @@ void bli_trsm_blk_var1
        obj_t*  b,
        obj_t*  c,
        cntx_t* cntx,
-       trsm_t* cntl,
+       cntl_t* cntl,
        thrinfo_t* thread
      )
 {
-    obj_t b_pack_s;
-    obj_t a1_pack_s;
-
 	obj_t a1, c1;
-	obj_t* b_pack = NULL;
-	obj_t* a1_pack = NULL;
 
 	dir_t direct;
 
 	dim_t i;
 	dim_t b_alg;
+	dim_t my_start, my_end;
 
 	// Determine the direction in which to partition (forwards or backwards).
-	direct = bli_trsm_direct( a, b, c );
+	direct = bli_l3_direct( a, b, c, cntx );
 
 	// Prune any zero region that exists along the partitioning dimension.
-	bli_trsm_prune_unref_mparts_m( a, b, c );
+	bli_l3_prune_unref_mparts_m( a, b, c, cntx );
 
-    // Initialize object for packing B.
-    if( bli_thread_am_ochief( thread ) ) {
-	    bli_obj_init_pack( &b_pack_s );
-        bli_packm_init( b, &b_pack_s,
-                        cntx, bli_cntl_sub_packm_b( cntl ) );
-    }
-    b_pack = bli_thread_obroadcast( thread, &b_pack_s );
+	// Determine the current thread's subpartition range.
+	bli_thread_get_range_mdim
+	(
+	  direct, thread, a, b, c, cntl, cntx,
+      &my_start, &my_end
+	);
 
-    // Initialize object for packing B.
-    if( bli_thread_am_ichief( thread ) ) {
-        bli_obj_init_pack( &a1_pack_s );
-    }
-    a1_pack = bli_thread_ibroadcast( thread, &a1_pack_s );
-
-	// Pack B1 (if instructed).
-	bli_packm_int( b, b_pack,
-	               cntx, bli_cntl_sub_packm_b( cntl ),
-                   bli_thrinfo_sub_opackm( thread ) );
-
-    dim_t my_start, my_end;
-    bli_thread_get_range_mdim( direct, thread, a,
-	                   ( bli_obj_root_is_triangular( *a ) ?
-	                     bli_cntx_get_bmult( BLIS_MR, cntx ) :
-	                     bli_cntx_get_bmult( BLIS_NR, cntx ) ),
-                       &my_start, &my_end );
-
-	// Partition along the remaining portion of the m dimension.
+	// Partition along the m dimension.
 	for ( i = my_start; i < my_end; i += b_alg )
 	{
 		// Determine the current algorithmic blocksize.
@@ -101,36 +78,20 @@ void bli_trsm_blk_var1
 		bli_acquire_mpart_mdim( direct, BLIS_SUBPART1,
 		                        i, b_alg, c, &c1 );
 
-		// Initialize object for packing A1.
-        if( bli_thread_am_ichief( thread ) ) {
-            bli_packm_init( &a1, a1_pack,
-                            cntx, bli_cntl_sub_packm_a( cntl ) );
-        }
-        bli_thread_ibarrier( thread );
-
-		// Pack A1 (if instructed).
-		bli_packm_int( &a1, a1_pack,
-		               cntx, bli_cntl_sub_packm_a( cntl ),
-                       bli_thrinfo_sub_ipackm( thread ) );
-
 		// Perform trsm subproblem.
-		bli_trsm_int( &BLIS_ONE,
-		              a1_pack,
-		              b_pack,
-		              &BLIS_ONE,
-		              &c1,
-		              cntx,
-		              bli_cntl_sub_trsm( cntl ),
-                      bli_thrinfo_sub_self( thread ) );
-        bli_thread_ibarrier( thread );
-	}
+		bli_trsm_int
+		(
+		  &BLIS_ONE,
+		  &a1,
+		  b,
+		  &BLIS_ONE,
+		  &c1,
+		  cntx,
+		  bli_cntl_sub_node( cntl ),
+		  bli_thrinfo_sub_node( thread )
+		);
 
-	// If any packing buffers were acquired within packm, release them back
-	// to the memory manager.
-    bli_thread_obarrier( thread );
-    if( bli_thread_am_ochief( thread ) )
-    	bli_packm_release( b_pack, bli_cntl_sub_packm_b( cntl ) );
-    if( bli_thread_am_ichief( thread ) )
-    	bli_packm_release( a1_pack, bli_cntl_sub_packm_a( cntl ) );
+		bli_thread_ibarrier( thread );
+	}
 }
 

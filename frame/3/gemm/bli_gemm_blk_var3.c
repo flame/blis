@@ -40,52 +40,23 @@ void bli_gemm_blk_var3
        obj_t*  b,
        obj_t*  c,
        cntx_t* cntx,
-       gemm_t* cntl,
+       cntl_t* cntl,
        thrinfo_t* thread
      )
 {
-    obj_t  c_pack_s;
-    obj_t  a1_pack_s, b1_pack_s;
-
-    obj_t  a1, b1;
-    obj_t* a1_pack = NULL;
-    obj_t* b1_pack = NULL;
-    obj_t* c_pack = NULL;
+	obj_t a1, b1;
 
 	dir_t direct;
 
-	dim_t  i;
-	dim_t  b_alg;
-	dim_t  k_trans;
+	dim_t i;
+	dim_t b_alg;
+	dim_t k_trans;
 
 	// Determine the direction in which to partition (forwards or backwards).
-	direct = bli_gemm_direct( a, b, c );
+	direct = bli_l3_direct( a, b, c, cntx );
 
-    if( bli_thread_am_ochief( thread ) ){
-        // Initialize object for packing C
-	    bli_obj_init_pack( &c_pack_s );
-        bli_packm_init( c, &c_pack_s,
-                        cntx, bli_cntl_sub_packm_c( cntl ) );
-
-        // Scale C by beta (if instructed).
-        bli_scalm_int( &BLIS_ONE,
-                       c,
-                       cntx, bli_cntl_sub_scalm( cntl ) );
-    }
-    c_pack = bli_thread_obroadcast( thread, &c_pack_s );
-
-    // Initialize pack objects for A and B that are passed into packm_init().
-    if( bli_thread_am_ichief( thread ) ){
-        bli_obj_init_pack( &a1_pack_s );
-        bli_obj_init_pack( &b1_pack_s );
-    }
-    a1_pack = bli_thread_ibroadcast( thread, &a1_pack_s );
-    b1_pack = bli_thread_ibroadcast( thread, &b1_pack_s );
-
-	// Pack C (if instructed).
-	bli_packm_int( c, c_pack,
-	               cntx, bli_cntl_sub_packm_c( cntl ),
-                   bli_thrinfo_sub_opackm( thread ) );
+	// Prune any zero region that exists along the partitioning dimension.
+	bli_l3_prune_unref_mparts_k( a, b, c, cntx );
 
 	// Query dimension in partitioning direction.
 	k_trans = bli_obj_width_after_trans( *a );
@@ -94,11 +65,8 @@ void bli_gemm_blk_var3
 	for ( i = 0; i < k_trans; i += b_alg )
 	{
 		// Determine the current algorithmic blocksize.
-		// NOTE: We call a gemm/hemm/symm-specific function to determine
-		// the kc blocksize so that we can implement the "nudging" of kc
-		// to be a multiple of mr or nr, as needed.
-		b_alg = bli_gemm_determine_kc( direct, i, k_trans, a, b,
-		                               bli_cntl_bszid( cntl ), cntx );
+		b_alg = bli_l3_determine_kc( direct, i, k_trans, a, b,
+		                             bli_cntl_bszid( cntl ), cntx );
 
 		// Acquire partitions for A1 and B1.
 		bli_acquire_mpart_ndim( direct, BLIS_SUBPART1,
@@ -106,60 +74,43 @@ void bli_gemm_blk_var3
 		bli_acquire_mpart_mdim( direct, BLIS_SUBPART1,
 		                        i, b_alg, b, &b1 );
 
-		// Initialize objects for packing A1 and B1.
-        if( bli_thread_am_ichief( thread ) ) {
-            bli_packm_init( &a1, a1_pack,
-                            cntx, bli_cntl_sub_packm_a( cntl ) );
-            bli_packm_init( &b1, b1_pack,
-                            cntx, bli_cntl_sub_packm_b( cntl ) );
-        }
-        bli_thread_ibarrier( thread );
-
-		// Pack A1 (if instructed).
-		bli_packm_int( &a1, a1_pack,
-		               cntx, bli_cntl_sub_packm_a( cntl ),
-                       bli_thrinfo_sub_ipackm( thread ) );
-
-		// Pack B1 (if instructed).
-		bli_packm_int( &b1, b1_pack,
-		               cntx, bli_cntl_sub_packm_b( cntl ),
-                       bli_thrinfo_sub_ipackm( thread ) );
-
 		// Perform gemm subproblem.
-		bli_gemm_int( &BLIS_ONE,
-		              a1_pack,
-		              b1_pack,
-		              &BLIS_ONE,
-		              c_pack,
-		              cntx,
-		              bli_cntl_sub_gemm( cntl ),
-                      bli_thrinfo_sub_self( thread) );
+		bli_gemm_int
+		(
+		  &BLIS_ONE,
+		  &a1,
+		  &b1,
+		  &BLIS_ONE,
+		  c,
+		  cntx,
+		  bli_cntl_sub_node( cntl ),
+		  bli_thrinfo_sub_node( thread)
+		);
+
+		bli_thread_ibarrier( thread );
 
 		// This variant executes multiple rank-k updates. Therefore, if the
 		// internal beta scalar on matrix C is non-zero, we must use it
 		// only for the first iteration (and then BLIS_ONE for all others).
-		// And since c_pack is a local obj_t, we can simply overwrite the
-		// internal beta scalar with BLIS_ONE once it has been used in the
-		// first iteration.
-        bli_thread_ibarrier( thread );
-		if ( i == 0 && bli_thread_am_ichief( thread ) ) bli_obj_scalar_reset( c_pack );
+		// And since c is a locally aliased obj_t (see _int() function), we
+		// can simply overwrite the internal beta scalar with BLIS_ONE once
+		// it has been used in the first iteration. However...
 
+		// Unlike variant 3 of gemm and herk, which reset the internal scalar
+		// on C at the end of the first iteration so that subsequent iterations
+		// do not erroneously apply beta more than once, it is important that
+		// this behavior not be applied to trmm. That is because the order of
+		// computation is always such that the beta that is passed into the
+		// macro-kernel must be zero, since the macro-kernel only applies that
+		// beta to (and thus overwrites) the row-panel of C that corresponds to
+		// the current block intersecting the diagonal. It turns out that this
+		// same pattern holds for trmm3 as well--except there, the beta scalar
+		// is potentially non-zero, but is still applied only to the current
+		// row-panel of C, and thus beta is applied to all of C exactly once.
+		// Thus, for neither trmm nor trmm3 should we reset the scalar on C
+		// after the first iteration.
+		if ( bli_cntx_get_family( cntx ) != BLIS_TRMM )
+		if ( i == 0 ) bli_obj_scalar_reset( c );
 	}
-
-    bli_thread_obarrier( thread );
-
-	// Unpack C (if C was packed).
-    bli_unpackm_int( c_pack, c,
-                     cntx, bli_cntl_sub_unpackm_c( cntl ),
-                     bli_thrinfo_sub_opackm( thread ) );
-
-	// If any packing buffers were acquired within packm, release them back
-	// to the memory manager.
-    if( bli_thread_am_ochief( thread ) )
-        bli_packm_release( c_pack, bli_cntl_sub_packm_c( cntl ) );
-    if( bli_thread_am_ichief( thread ) ){
-        bli_packm_release( a1_pack, bli_cntl_sub_packm_a( cntl ) );
-        bli_packm_release( b1_pack, bli_cntl_sub_packm_b( cntl ) );
-    }
 }
 

@@ -43,9 +43,7 @@ thrinfo_t* bli_l3_thrinfo_create
        dim_t      icomm_id,
        dim_t      n_way,
        dim_t      work_id,
-       thrinfo_t* opackm,
-       thrinfo_t* ipackm,
-       thrinfo_t* sub_self
+       thrinfo_t* sub_node
      )
 {
 	return bli_thrinfo_create
@@ -54,9 +52,8 @@ thrinfo_t* bli_l3_thrinfo_create
 	  icomm, icomm_id,
 	  n_way,
 	  work_id,
-	  opackm,
-	  ipackm,
-	  sub_self
+	  TRUE,
+	  sub_node
 	);
 }
 
@@ -69,9 +66,7 @@ void bli_l3_thrinfo_init
        dim_t      icomm_id,
        dim_t      n_way,
        dim_t      work_id,
-       thrinfo_t* opackm,
-       thrinfo_t* ipackm,
-       thrinfo_t* sub_self
+       thrinfo_t* sub_node
      )
 {
 	bli_thrinfo_init
@@ -81,9 +76,8 @@ void bli_l3_thrinfo_init
 	  icomm, icomm_id,
 	  n_way,
 	  work_id,
-	  opackm,
-	  ipackm,
-	  sub_self
+	  TRUE,
+	  sub_node
 	);
 }
 
@@ -101,20 +95,30 @@ void bli_l3_thrinfo_free
      )
 {
 	if ( thread == NULL ||
-	     thread == &BLIS_GEMM_SINGLE_THREADED ||
-	     thread == &BLIS_HERK_SINGLE_THREADED
+	     thread == &BLIS_PACKM_SINGLE_THREADED ||
+	     thread == &BLIS_GEMM_SINGLE_THREADED
 	   ) return;
 
-	// Free Communicators
-	if ( bli_thread_am_ochief( thread ) )
-		bli_thrcomm_free( thread->ocomm );
-	if ( bli_thrinfo_sub_self( thread ) == NULL && bli_thread_am_ichief( thread ) )
-		bli_thrcomm_free( thread->icomm );
+	thrinfo_t* thrinfo_sub_node = bli_thrinfo_sub_node( thread );
 
-	// Free thrinfo chidren
-	bli_packm_thrinfo_free( thread->opackm );
-	bli_packm_thrinfo_free( thread->ipackm );
-	bli_l3_thrinfo_free( thread->sub_self );
+	// Free the communicators, but only if the current thrinfo_t struct
+	// is marked as needing them to be freed. The most common example of
+	// thrinfo_t nodes NOT marked as needing their comms freed are those
+	// associated with packm thrinfo_t nodes.
+	if ( bli_thrinfo_needs_free_comms( thread ) )
+	{
+		// The ochief always frees his communicator, and the ichief free its
+		// communicator if we are at the leaf node.
+		if ( bli_thread_am_ochief( thread ) )
+			bli_thrcomm_free( bli_thrinfo_ocomm( thread ) );
+		if ( thrinfo_sub_node == NULL && bli_thread_am_ichief( thread ) )
+			bli_thrcomm_free( bli_thrinfo_icomm( thread ) );
+	}
+
+	// Free all children of the current thrinfo_t.
+	bli_l3_thrinfo_free( thrinfo_sub_node );
+
+	// Free the thrinfo_t struct.
 	bli_free_intl( thread );
 }
 
@@ -230,14 +234,8 @@ thrinfo_t** bli_l3_thrinfo_create_paths
 
 					for( int e = 0; e < ir_way; e++ )
 					{
-						thrcomm_t* ir_comm        = bli_thrcomm_create( ir_nt );
-						dim_t      ir_comm_id     = 0;
-						dim_t      jr_comm_id     = e*ir_nt + ir_comm_id;
-						dim_t      ic_comm_id     = d*jr_nt + jr_comm_id;
-						dim_t      kc_comm_id     = c*ic_nt + ic_comm_id;
-						dim_t      jc_comm_id     = b*kc_nt + kc_comm_id;
-						dim_t      global_comm_id = a*jc_nt + jc_comm_id;
-
+						thrcomm_t* ir_comm = bli_thrcomm_create( ir_nt );
+#if 0
 						// Macrokernel loops
 						thrinfo_t* ir_info
 						=
@@ -309,6 +307,69 @@ thrinfo_t** bli_l3_thrinfo_create_paths
 						                       jc_comm, jc_comm_id,
 						                       jc_way, a,
 						                       pack_jc_out, pack_jc_in, kc_info );
+// assume ic = 2; jr = 4
+
+	dim_t jc_nt  = kc_way * ic_way * jr_way * ir_way; = 1*2*4*1
+	dim_t kc_nt  = ic_way * jr_way * ir_way;          =   2*4*1
+	dim_t ic_nt  = jr_way * ir_way;                   =     4*1
+	dim_t jr_nt  = ir_way;                            =       1
+	dim_t ir_nt  = 1;
+#endif
+						dim_t      ir_comm_id     = 0;
+						dim_t      jr_comm_id     = e*ir_nt + ir_comm_id;
+						dim_t      ic_comm_id     = d*jr_nt + jr_comm_id;
+						dim_t      kc_comm_id     = c*ic_nt + ic_comm_id;
+						dim_t      jc_comm_id     = b*kc_nt + kc_comm_id;
+						dim_t      global_comm_id = a*jc_nt + jc_comm_id;
+
+						// macro-kernel loops
+						thrinfo_t* ir_info
+						=
+						bli_l3_thrinfo_create( jr_comm, jr_comm_id,
+						                       ir_comm, ir_comm_id,
+						                       ir_way, e,
+						                       NULL );
+						thrinfo_t* jr_info
+						=
+						bli_l3_thrinfo_create( ic_comm, ic_comm_id,
+						                       jr_comm, jr_comm_id,
+						                       jr_way, d,
+						                       ir_info );
+						// packa
+						thrinfo_t* pack_ic_in
+						=
+						bli_packm_thrinfo_create( ic_comm, ic_comm_id,
+						                          jr_comm, jr_comm_id,
+						                          ic_nt, ic_comm_id,
+						                          jr_info );
+						// blk_var1
+						thrinfo_t* ic_info
+						=
+						bli_l3_thrinfo_create( kc_comm, kc_comm_id,
+						                       ic_comm, ic_comm_id,
+						                       ic_way, c,
+						                       pack_ic_in );
+						// packb
+						thrinfo_t* pack_kc_in
+						=
+						bli_packm_thrinfo_create( kc_comm, kc_comm_id,
+						                          ic_comm, ic_comm_id,
+						                          kc_nt, kc_comm_id,
+						                          ic_info );
+						// blk_var3
+						thrinfo_t* kc_info
+						=
+						bli_l3_thrinfo_create( jc_comm, jc_comm_id,
+						                       kc_comm, kc_comm_id,
+						                       kc_way, b,
+						                       pack_kc_in );
+						// blk_var2
+						thrinfo_t* jc_info
+						=
+						bli_l3_thrinfo_create( global_comm, global_comm_id,
+						                       jc_comm, jc_comm_id,
+						                       jc_way, a,
+						                       kc_info );
 
 						paths[global_comm_id] = jc_info;
 					}

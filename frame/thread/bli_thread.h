@@ -90,15 +90,16 @@ siz_t PASTEMAC0( opname ) \
        dir_t      direct, \
        thrinfo_t* thr, \
        obj_t*     a, \
-       blksz_t*   bmult, \
+       obj_t*     b, \
+       obj_t*     c, \
+       cntl_t*    cntl, \
+       cntx_t*    cntx, \
        dim_t*     start, \
        dim_t*     end  \
      );
 
 GENPROT( thread_get_range_mdim )
 GENPROT( thread_get_range_ndim )
-GENPROT( thread_get_range_weighted_mdim )
-GENPROT( thread_get_range_weighted_ndim )
 
 #undef  GENPROT
 #define GENPROT( opname ) \
@@ -157,31 +158,31 @@ siz_t bli_thread_get_range_weighted_sub
 
 
 // Level-3 internal function type
-typedef void (*l3_int_t)
+typedef void (*l3int_t)
      (
-       obj_t* alpha,
-       obj_t* a,
-       obj_t* b,
-       obj_t* beta,
-       obj_t* c,
-       void*  cntx,
-       void*  cntl,
-       void*  thread
+       obj_t*     alpha,
+       obj_t*     a,
+       obj_t*     b,
+       obj_t*     beta,
+       obj_t*     c,
+       cntx_t*    cntx,
+       cntl_t*    cntl,
+       thrinfo_t* thread
      );
 
 // Level-3 thread decorator prototype
 void bli_l3_thread_decorator
      (
-       dim_t    num_threads, 
-       l3_int_t func, 
-       obj_t*   alpha, 
-       obj_t*   a,  
-       obj_t*   b,  
-       obj_t*   beta, 
-       obj_t*   c,  
-       void*    cntx, 
-       void*    cntl, 
-       void**   thread
+       dim_t       n_threads,
+       l3int_t     func,
+       obj_t*      alpha,
+       obj_t*      a,
+       obj_t*      b,
+       obj_t*      beta,
+       obj_t*      c,
+       cntx_t*     cntx,
+       cntl_t*     cntl,
+       thrinfo_t** thread
      );
 
 // Miscellaneous prototypes

@@ -32,6 +32,15 @@
 
 */
 
+dir_t bli_l3_direct
+     (
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  c,
+       cntx_t* cntx
+     );
+
+// -----------------------------------------------------------------------------
 
 #undef  GENPROT
 #define GENPROT( opname ) \

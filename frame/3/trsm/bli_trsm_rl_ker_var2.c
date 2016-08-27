@@ -61,7 +61,7 @@ void bli_trsm_rl_ker_var2
        obj_t*  b,
        obj_t*  c,
        cntx_t* cntx,
-       trsm_t* cntl,
+       cntl_t* cntl,
        thrinfo_t* thread
      )
 {
@@ -96,10 +96,11 @@ void bli_trsm_rl_ker_var2
 	FUNCPTR_T f;
 
 	// Grab the address of the internal scalar buffer for the scalar
-	// attached to A. This will be the alpha scalar used in the gemmtrsm
-	// subproblems (ie: the scalar that would be applied to the packed
-	// copy of A prior to it being updated by the trsm subproblem). This
-	// scalar may be unit, if for example it was applied during packing.
+	// attached to A (the non-triangular matrix). This will be the alpha
+	// scalar used in the gemmtrsm subproblems (ie: the scalar that would
+	// be applied to the packed copy of A prior to it being updated by
+	// the trsm subproblem). This scalar may be unit, if for example it
+	// was applied during packing.
 	buf_alpha1 = bli_obj_internal_scalar_buffer( *a );
 
 	// Grab the address of the internal scalar buffer for the scalar

@@ -61,7 +61,7 @@ void bli_trmm_rl_ker_var2
        obj_t*  b,
        obj_t*  c,
        cntx_t* cntx,
-       gemm_t* cntl,
+       cntl_t* cntl,
        thrinfo_t* thread
      )
 {
@@ -318,7 +318,7 @@ void PASTEMAC(ch,varname) \
 	b1 = b_cast; \
 	c1 = c_cast; \
 \
-	thrinfo_t* ir_thread      = bli_thrinfo_sub_self( jr_thread ); \
+	thrinfo_t* ir_thread      = bli_thrinfo_sub_node( jr_thread ); \
 	dim_t jr_num_threads      = bli_thread_n_way( jr_thread ); \
 	dim_t jr_thread_id        = bli_thread_work_id( jr_thread ); \
 \

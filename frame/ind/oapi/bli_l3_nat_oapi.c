@@ -34,11 +34,6 @@
 
 #include "blis.h"
 
-// Bring control trees into scope.
-extern gemm_t* gemm_cntl;
-extern trsm_t* trsm_l_cntl;
-extern trsm_t* trsm_r_cntl;
-
 // NOTE: The function definitions in this file can be consolidated with the
 // definitions for the other induced methods. The only advantage of keeping
 // them separate is that it allows us to avoid the very small loop overhead
@@ -69,8 +64,7 @@ void PASTEMAC(opname,imeth) \
 	   tree. */ \
 	PASTEMAC(opname,_front) \
 	( \
-	  alpha, a, b, beta, c, cntx_p, \
-	  PASTECH(cname,_cntl) \
+	  alpha, a, b, beta, c, cntx_p, NULL \
 	); \
 \
 	/* Finalize the local context if it was initialized here. */ \
@@ -107,8 +101,7 @@ void PASTEMAC(opname,imeth) \
 	   tree. */ \
 	PASTEMAC(opname,_front) \
 	( \
-	  side, alpha, a, b, beta, c, cntx_p, \
-	  PASTECH(cname,_cntl) \
+	  side, alpha, a, b, beta, c, cntx_p, NULL \
 	); \
 \
 	/* Finalize the local context if it was initialized here. */ \
@@ -143,8 +136,7 @@ void PASTEMAC(opname,imeth) \
 	   tree. */ \
 	PASTEMAC(opname,_front) \
 	( \
-	  alpha, a, beta, c, cntx_p, \
-	  PASTECH(cname,_cntl) \
+	  alpha, a, beta, c, cntx_p, NULL \
 	); \
 \
 	/* Finalize the local context if it was initialized here. */ \
@@ -178,8 +170,7 @@ void PASTEMAC(opname,imeth) \
 	   tree. */ \
 	PASTEMAC(opname,_front) \
 	( \
-	  side, alpha, a, b, cntx_p, \
-	  PASTECH(cname,_cntl) \
+	  side, alpha, a, b, cntx_p, NULL \
 	); \
 \
 	/* Finalize the local context if it was initialized here. */ \
@@ -212,9 +203,7 @@ void PASTEMAC(opname,imeth) \
 	   tree. */ \
 	PASTEMAC(opname,_front) \
 	( \
-	  side, alpha, a, b, cntx_p, \
-	  PASTECH(cname,_l_cntl), \
-	  PASTECH(cname,_r_cntl) \
+	  side, alpha, a, b, cntx_p, NULL \
 	); \
 \
 	/* Finalize the local context if it was initialized here. */ \

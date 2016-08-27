@@ -34,17 +34,6 @@
 
 #include "blis.h"
 
-#if 1
-static trsm_voft vars[4][3] =
-{
-    // unblocked            optimized unblocked    blocked
-    { NULL,                 NULL,                  bli_trsm_blk_var1 },
-    { NULL,                 bli_trsm_xx_ker_var2,  bli_trsm_blk_var2 },
-    { NULL,                 NULL,                  bli_trsm_blk_var3 },
-    { NULL,                 NULL,                  NULL              },
-};
-#endif
-
 void bli_trsm_int
      (
        obj_t*  alpha,
@@ -53,18 +42,13 @@ void bli_trsm_int
        obj_t*  beta,
        obj_t*  c,
        cntx_t* cntx,
-       trsm_t* cntl,
+       cntl_t* cntl,
        thrinfo_t* thread
      )
 {
 	obj_t     a_local;
 	obj_t     b_local;
 	obj_t     c_local;
-#if 0
-	bool_t    side, uplo;
-#endif
-	varnum_t  n;
-	impl_t    i;
 	trsm_voft f;
 
 	// Check parameters.
@@ -78,9 +62,9 @@ void bli_trsm_int
 	if ( bli_obj_has_zero_dim( *a ) ||
 	     bli_obj_has_zero_dim( *b ) )
 	{
-        if( bli_thread_am_ochief( thread ) )
-            bli_scalm( beta, c );
-        bli_thread_obarrier( thread );
+		if ( bli_thread_am_ochief( thread ) )
+		    bli_scalm( beta, c );
+		bli_thread_obarrier( thread );
 		return;
 	}
 
@@ -98,14 +82,14 @@ void bli_trsm_int
 	// packed, this is our last chance to handle the transposition.
 	if ( bli_cntl_is_leaf( cntl ) && bli_obj_has_trans( *c ) )
 	{
-        bli_obj_induce_trans( c_local );
-        bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, c_local );
+		bli_obj_induce_trans( c_local );
+		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, c_local );
 	}
 
 	// If beta is non-unit, apply it to the scalar attached to C.
 	if ( !bli_obj_equals( beta, &BLIS_ONE ) )
 	{
-        bli_obj_scalar_apply_scalar( beta, &c_local );
+		bli_obj_scalar_apply_scalar( beta, &c_local );
 	}
 
 	// Set two bools: one based on the implied side parameter (the structure
@@ -113,28 +97,15 @@ void bli_trsm_int
 	// matrix's root object (whether that is matrix A or matrix B).
 	if ( bli_obj_root_is_triangular( *a ) )
 	{
-#if 0
-		side = 0;
-		if ( bli_obj_root_is_lower( *a ) ) uplo = 0;
-		else                               uplo = 1;
-#endif
-
 		// If alpha is non-unit, typecast and apply it to the scalar
 		// attached to B (the non-triangular matrix).
 		if ( !bli_obj_equals( alpha, &BLIS_ONE ) )
 		{
-            bli_obj_scalar_apply_scalar( alpha, &b_local );
+			bli_obj_scalar_apply_scalar( alpha, &b_local );
 		}
 	}
 	else // if ( bli_obj_root_is_triangular( *b ) )
 	{
-#if 0
-		side = 1;
-		// Set a bool based on the uplo field of A's root object.
-		if ( bli_obj_root_is_lower( *b ) ) uplo = 0;
-		else                               uplo = 1;
-#endif
-
 		// If alpha is non-unit, typecast and apply it to the scalar
 		// attached to A (the non-triangular matrix).
 		if ( !bli_obj_equals( alpha, &BLIS_ONE ) )
@@ -143,17 +114,11 @@ void bli_trsm_int
 		}
 	}
 
-    bli_thread_obarrier( thread );
-
-	// Extract the variant number and implementation type.
-	n = bli_cntl_var_num( cntl );
-	i = bli_cntl_impl_type( cntl );
-
-	// Index into the variant array to extract the correct function pointer.
-	f = vars[n][i];
+	// FGVZ->TMS: Is this barrier still needed?
+	bli_thread_obarrier( thread );
 
 	// Extract the function pointer from the current control tree node.
-	//f = bli_cntl_sub_prob( cntl );
+	f = bli_cntl_var_func( cntl );
 
 	// Invoke the variant.
 	f
@@ -163,7 +128,7 @@ void bli_trsm_int
 	  &c_local,
 	  cntx,
 	  cntl,
-      thread
+	  thread
 	);
 }
 

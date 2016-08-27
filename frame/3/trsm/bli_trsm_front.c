@@ -41,11 +41,9 @@ void bli_trsm_front
        obj_t*  a,
        obj_t*  b,
        cntx_t* cntx,
-       trsm_t* l_cntl,
-       trsm_t* r_cntl
+       cntl_t* cntl
      )
 {
-	trsm_t* cntl;
 	obj_t   a_local;
 	obj_t   b_local;
 	obj_t   c_local;
@@ -63,7 +61,7 @@ void bli_trsm_front
 
 	// Reinitialize the memory allocator to accommodate the blocksizes
 	// in the current context.
-	bli_mem_reinit( cntx );
+	bli_memsys_reinit( cntx );
 
 	// Alias A and B so we can tweak the objects if necessary.
 	bli_obj_alias_to( *a, a_local );
@@ -118,26 +116,27 @@ void bli_trsm_front
 	bli_obj_set_as_root( b_local );
 	bli_obj_set_as_root( c_local );
 
-	// Choose the control tree.
-	if ( bli_is_left( side ) ) cntl = l_cntl;
-	else                       cntl = r_cntl;
+	// Set the operation family id in the context.
+	bli_cntx_set_family( BLIS_TRSM, cntx );
 
-    thrinfo_t** infos = bli_l3_thrinfo_create_paths( BLIS_TRSM, side );
-    dim_t n_threads = bli_thread_num_threads( infos[0] );
-    
-    // Invoke the internal back-end.
-    bli_l3_thread_decorator( n_threads,
-                                 (l3_int_t) bli_trsm_int, 
-                                 alpha, 
-                                 &a_local,  
-                                 &b_local,  
-                                 alpha, 
-                                 &c_local,  
-                                 (void*) cntx, 
-                                 (void*) cntl, 
-                                 (void**) infos );
+	thrinfo_t** infos = bli_l3_thrinfo_create_paths( BLIS_TRSM, side );
+	dim_t n_threads = bli_thread_num_threads( infos[0] );
 
-    bli_l3_thrinfo_free_paths( infos, n_threads );
+	// Invoke the internal back-end.
+	bli_l3_thread_decorator
+	(
+	  n_threads,
+	  bli_trsm_int,
+	  alpha,
+	  &a_local,
+	  &b_local,
+	  alpha,
+	  &c_local,
+	  cntx,
+	  cntl,
+	  infos
+	);
 
+	bli_l3_thrinfo_free_paths( infos, n_threads );
 }
 
