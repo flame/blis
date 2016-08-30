@@ -262,11 +262,17 @@ A fourth paper, submitted to ACM TOMS, also exists, which proposes an
 
 ```
 @article{BLIS4,
-   author      = {Tze Meng Low and Francisco D. Igual and Tyler M. Smith and Enrique S. Quintana-Ort\'{\i}},
-   title       = {Analytical Models for the {BLIS} Framework},
+   author      = {Tze Meng Low and Francisco D. Igual and Tyler M. Smith and
+                  Enrique S. Quintana-Ort\'{\i}},
+   title       = {Analytical Modeling Is Enough for High-Performance {BLIS}},
    journal     = {ACM Transactions on Mathematical Software},
-   year        = 2016,
-   note        = {Accepted},
+   volume      = {43},
+   number      = {2},
+   pages       = {12:1--12:18},
+   month       = aug,
+   year        = {2016},
+   issue_date  = {August 2016},
+   url         = {http://doi.acm.org/10.1145/2925987},
 }
 ```
 
