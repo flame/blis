@@ -80,7 +80,7 @@ void bli_gemm3m3_packa
 	);
 
 	// Only apply beta within the first of three subproblems.
-	if ( bli_thread_am_ichief( thread ) ) bli_obj_scalar_reset( c );
+	bli_obj_scalar_reset( c );
 
 	// -----------------------------------------------------
 

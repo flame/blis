@@ -100,8 +100,5 @@ void bli_packm_int
 	  cntl,
 	  thread
 	);
-
-	// Barrier so that packing is done before computation.
-	bli_thread_obarrier( thread );
 }
 

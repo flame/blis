@@ -48,6 +48,9 @@ void bli_l3_packm
 	mem_t*    cntl_mem_p;
 	siz_t     size_needed;
 
+	// FGVZ: Not sure why we need this barrier, but we do.
+	bli_thread_obarrier( thread );
+
 	// Every thread initializes x_pack and determines the size of memory
 	// block needed (which gets embedded into the otherwise "blank" mem_t
 	// entry in the control tree node).
@@ -148,6 +151,8 @@ void bli_l3_packm
 			// then we use it as-is. No action is needed, because all threads
 			// will already have the cached values in their local control
 			// trees' mem_t entries, currently pointed to by cntl_mem_p.
+
+			bli_thread_obarrier( thread );
 		}
 	}
 
@@ -167,5 +172,8 @@ void bli_l3_packm
 	  cntl,
 	  thread
 	);
+
+	// Barrier so that packing is done before computation.
+	bli_thread_obarrier( thread );
 }
 

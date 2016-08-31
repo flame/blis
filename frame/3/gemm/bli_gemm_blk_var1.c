@@ -90,8 +90,6 @@ void bli_gemm_blk_var1
 		  bli_cntl_sub_node( cntl ),
 		  bli_thrinfo_sub_node( thread )
 		);
-
-		bli_thread_ibarrier( thread );
 	}
 }
 
