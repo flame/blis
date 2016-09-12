@@ -124,6 +124,8 @@ void bli_l3_thrinfo_free
 
 // -----------------------------------------------------------------------------
 
+//#define PRINT_THRINFO
+
 thrinfo_t** bli_l3_thrinfo_create_paths
      (
        opid_t l3_op,
@@ -211,6 +213,16 @@ thrinfo_t** bli_l3_thrinfo_create_paths
 	dim_t jr_nt  = ir_way;
 	dim_t ir_nt  = 1;
 
+#ifdef PRINT_THRINFO
+printf( "                 jc   kc   ic   jr   ir\n" );
+printf( "xx_way:        %4lu %4lu %4lu %4lu %4lu\n",
+                   jc_way, kc_way, ic_way, jr_way, ir_way );
+printf( "\n" );
+printf( "            gl   jc   kc   ic   jr   ir\n" );
+printf( "xx_nt:    %4lu %4lu %4lu %4lu %4lu %4lu\n",
+global_num_threads, jc_nt, kc_nt, ic_nt, jr_nt, ir_nt );
+printf( "=======================================\n" );
+#endif
 
 	thrinfo_t** paths = bli_malloc_intl( global_num_threads * sizeof( thrinfo_t* ) );
 
@@ -235,86 +247,7 @@ thrinfo_t** bli_l3_thrinfo_create_paths
 					for( int e = 0; e < ir_way; e++ )
 					{
 						thrcomm_t* ir_comm = bli_thrcomm_create( ir_nt );
-#if 0
-						// Macrokernel loops
-						thrinfo_t* ir_info
-						=
-						bli_l3_thrinfo_create( jr_comm, jr_comm_id,
-						                       ir_comm, ir_comm_id,
-						                       ir_way, e,
-						                       NULL, NULL, NULL );
 
-						thrinfo_t* jr_info
-						=
-						bli_l3_thrinfo_create( ic_comm, ic_comm_id,
-						                       jr_comm, jr_comm_id,
-						                       jr_way, d,
-						                       NULL, NULL, ir_info );
-						//blk_var_1
-						thrinfo_t* pack_ic_in
-						=
-						bli_packm_thrinfo_create( ic_comm, ic_comm_id,
-						                          jr_comm, jr_comm_id,
-						                          ic_nt, ic_comm_id );
-
-						thrinfo_t* pack_ic_out
-						=
-						bli_packm_thrinfo_create( kc_comm, kc_comm_id,
-						                          ic_comm, ic_comm_id,
-						                          kc_nt, kc_comm_id );
-
-						thrinfo_t* ic_info
-						=
-						bli_l3_thrinfo_create( kc_comm, kc_comm_id,
-						                       ic_comm, ic_comm_id,
-						                       ic_way, c,
-						                       pack_ic_out, pack_ic_in, jr_info );
-						//blk_var_3
-						thrinfo_t* pack_kc_in
-						=
-						bli_packm_thrinfo_create( kc_comm, kc_comm_id,
-						                          ic_comm, ic_comm_id,
-						                          kc_nt, kc_comm_id );
-
-						thrinfo_t* pack_kc_out
-						=
-						bli_packm_thrinfo_create( jc_comm, jc_comm_id,
-						                          jc_comm, jc_comm_id,
-						                          jc_nt, jc_comm_id );
-
-						thrinfo_t* kc_info
-						=
-						bli_l3_thrinfo_create( jc_comm, jc_comm_id,
-						                       kc_comm, kc_comm_id,
-						                       kc_way, b,
-						                       pack_kc_out, pack_kc_in, ic_info );
-						//blk_var_2
-						thrinfo_t* pack_jc_in
-						=
-						bli_packm_thrinfo_create( jc_comm, jc_comm_id,
-						                          kc_comm, kc_comm_id,
-						                          jc_nt, jc_comm_id );
-
-						thrinfo_t* pack_jc_out
-						=
-						bli_packm_thrinfo_create( global_comm, global_comm_id,
-						                          jc_comm, jc_comm_id,
-						                          global_num_threads, global_comm_id );
-
-						thrinfo_t* jc_info
-						=
-						bli_l3_thrinfo_create( global_comm, global_comm_id,
-						                       jc_comm, jc_comm_id,
-						                       jc_way, a,
-						                       pack_jc_out, pack_jc_in, kc_info );
-// assume ic = 2; jr = 4
-
-	dim_t jc_nt  = kc_way * ic_way * jr_way * ir_way; = 1*2*4*1
-	dim_t kc_nt  = ic_way * jr_way * ir_way;          =   2*4*1
-	dim_t ic_nt  = jr_way * ir_way;                   =     4*1
-	dim_t jr_nt  = ir_way;                            =       1
-	dim_t ir_nt  = 1;
-#endif
 						dim_t      ir_comm_id     = 0;
 						dim_t      jr_comm_id     = e*ir_nt + ir_comm_id;
 						dim_t      ic_comm_id     = d*jr_nt + jr_comm_id;
@@ -372,11 +305,25 @@ thrinfo_t** bli_l3_thrinfo_create_paths
 						                       kc_info );
 
 						paths[global_comm_id] = jc_info;
+
+#ifdef PRINT_THRINFO
+printf( "            gl   jc   kc   ic   jr   ir\n" );
+printf( "comm ids: %4lu %4lu %4lu %4lu %4lu %4lu\n",
+global_comm_id, jc_comm_id, kc_comm_id, ic_comm_id, jr_comm_id, ir_comm_id );
+//printf( "                  a    b    c    d    e\n" );
+printf( "work ids:      %4ld %4ld %4ld %4ld %4ld\n", (long int)a, (long int)b, (long int)c, (long int)d, (long int)e );
+printf( "---------------------------------------\n" );
+#endif
+
 					}
 				}
 			}
 		}
 	}
+#ifdef PRINT_THRINFO
+exit(1);
+#endif
+
 
 	return paths;
 }

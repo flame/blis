@@ -68,28 +68,33 @@ struct thrinfo_s
 };
 typedef struct thrinfo_s thrinfo_t;
 
-
-#define bli_thread_num_threads( t )     ( t->ocomm->n_threads )
-
-#define bli_thread_n_way( t )           ( t->n_way )
-#define bli_thread_work_id( t )         ( t->work_id )
-#define bli_thread_am_ochief( t )       ( t->ocomm_id == 0 )
-#define bli_thread_am_ichief( t )       ( t->icomm_id == 0 )
-
-#define bli_thread_obroadcast( t, ptr ) bli_thrcomm_bcast( t->ocomm, t->ocomm_id, ptr )
-#define bli_thread_ibroadcast( t, ptr ) bli_thrcomm_bcast( t->icomm, t->icomm_id, ptr )
-#define bli_thread_obarrier( t )        bli_thrcomm_barrier( t->ocomm, t->ocomm_id )
-#define bli_thread_ibarrier( t )        bli_thrcomm_barrier( t->icomm, t->icomm_id )
-
 //
-// Generic accessor macros for all thrinfo_t objects.
+// thrinfo_t macros
+// NOTE: The naming of these should be made consistent at some point.
 //
 
-#define bli_thrinfo_ocomm( t )             ( t->ocomm )
-#define bli_thrinfo_icomm( t )             ( t->icomm )
-#define bli_thrinfo_needs_free_comms( t )  ( t->free_comms )
+#define bli_thread_num_threads( t )   ( (t)->ocomm->n_threads )
 
-#define bli_thrinfo_sub_node( t )          ( t->sub_node )
+#define bli_thread_n_way( t )         ( (t)->n_way )
+#define bli_thread_work_id( t )       ( (t)->work_id )
+
+#define bli_thread_am_ochief( t )     ( (t)->ocomm_id == 0 )
+#define bli_thread_am_ichief( t )     ( (t)->icomm_id == 0 )
+
+#define bli_thread_obroadcast( t, p ) bli_thrcomm_bcast( (t)->ocomm, \
+                                                         (t)->ocomm_id, p )
+#define bli_thread_ibroadcast( t, p ) bli_thrcomm_bcast( (t)->icomm, \
+                                                         (t)->icomm_id, p )
+#define bli_thread_obarrier( t )      bli_thrcomm_barrier( (t)->ocomm, \
+                                                           (t)->ocomm_id )
+#define bli_thread_ibarrier( t )      bli_thrcomm_barrier( (t)->icomm, \
+                                                           (t)->icomm_id )
+
+#define bli_thrinfo_ocomm( t )             ( (t)->ocomm )
+#define bli_thrinfo_icomm( t )             ( (t)->icomm )
+#define bli_thrinfo_needs_free_comms( t )  ( (t)->free_comms )
+
+#define bli_thrinfo_sub_node( t )          ( (t)->sub_node )
 
 //
 // Prototypes for level-3 thrinfo functions not specific to any operation.
