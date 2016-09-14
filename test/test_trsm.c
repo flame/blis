@@ -66,12 +66,12 @@ int main( int argc, char** argv )
 
 	//bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
 
-	n_repeats = 3;
+	n_repeats = 1;
 
 #ifndef PRINT
-	p_begin = 200;
-	p_end   = 2000;
-	p_inc   = 200;
+	p_begin = 32;
+	p_end   = 1600;
+	p_inc   = 32;
 
 	m_input = -1;
 	n_input = -1;
@@ -85,20 +85,20 @@ int main( int argc, char** argv )
 #endif
 
 #if 1
-	//dt = BLIS_FLOAT;
-	dt = BLIS_DOUBLE;
+	dt = BLIS_FLOAT;
+	//dt = BLIS_DOUBLE;
 #else
-	//dt = BLIS_SCOMPLEX;
-	dt = BLIS_DCOMPLEX;
+	dt = BLIS_SCOMPLEX;
+	//dt = BLIS_DCOMPLEX;
 #endif
 
-	side = BLIS_LEFT;
-	//side = BLIS_RIGHT;
+	//side = BLIS_LEFT;
+	side = BLIS_RIGHT;
 
 	uploa = BLIS_LOWER;
 	//uploa = BLIS_UPPER;
 
-	transa = BLIS_NO_TRANSPOSE;
+	transa = BLIS_CONJ_TRANSPOSE;
 
 	diaga = BLIS_NONUNIT_DIAG;
 
