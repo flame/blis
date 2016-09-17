@@ -424,6 +424,14 @@ main()
 
 			echo "${script_name}: manual configuration requested."
 			config_name=$1
+
+			# Ensure configuration is valid.
+			if [ ! -d "${config_dirpath}/${config_name}" ]; then
+				echo "${script_name}: "
+				echo "${script_name}: *** configuration '${config_name}' does not exist. ***"
+				echo "${script_name}: "
+				exit 1;
+			fi
 		fi
 
 		echo "${script_name}: configuring with '${config_name}' configuration sub-directory."
