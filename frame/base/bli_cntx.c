@@ -341,6 +341,37 @@ pack_t bli_cntx_get_pack_schema_b( cntx_t* cntx )
 }
 #endif
 
+dim_t bli_cntx_get_num_threads( cntx_t* cntx )
+{
+	return bli_cntx_jc_way( cntx ) *
+	       bli_cntx_pc_way( cntx ) *
+	       bli_cntx_ic_way( cntx ) *
+	       bli_cntx_jr_way( cntx ) *
+	       bli_cntx_ir_way( cntx );
+}
+
+dim_t bli_cntx_get_num_threads_in( cntx_t* cntx, cntl_t* cntl )
+{
+	dim_t n_threads_in = 1;
+
+	for ( ; cntl != NULL; cntl = bli_cntl_sub_node( cntl ) )
+	{
+		bszid_t bszid = bli_cntl_bszid( cntl );
+		dim_t   cur_way;
+
+		// We assume bszid is in {KR,MR,NR,MC,KC,NR} if it is not
+		// BLIS_NO_PART.
+		if ( bszid != BLIS_NO_PART )
+			cur_way = bli_cntx_way_for_bszid( bszid, cntx );
+		else
+			cur_way = 1;
+
+		n_threads_in *= cur_way;
+	}
+
+	return n_threads_in;
+}
+
 // -----------------------------------------------------------------------------
 
 #if 1
@@ -662,6 +693,96 @@ void bli_cntx_set_pack_schema_c( pack_t  schema_c,
 {
 	bli_cntx_set_schema_c( schema_c, cntx );
 }
+
+void bli_cntx_set_thrloop_from_env( opid_t l3_op, side_t side, cntx_t* cntx )
+{
+	dim_t jc, pc, ic, jr, ir;
+
+#ifdef BLIS_ENABLE_MULTITHREADING
+	jc = bli_env_read_nway( "BLIS_JC_NT" );
+	//pc = bli_env_read_nway( "BLIS_KC_NT" );
+	pc = 1;
+	ic = bli_env_read_nway( "BLIS_IC_NT" );
+	jr = bli_env_read_nway( "BLIS_JR_NT" );
+	ir = bli_env_read_nway( "BLIS_IR_NT" );
+#else
+	jc = 1;
+	pc = 1;
+	ic = 1;
+	jr = 1;
+	ir = 1;
+#endif
+
+	if ( l3_op == BLIS_TRMM )
+	{
+		// We reconfigure the paralelism from trmm_r due to a dependency in
+		// the jc loop. (NOTE: This dependency does not exist for trmm3 )
+		if ( bli_is_right( side ) )
+		{
+			bli_cntx_set_thrloop
+			(
+			  1,
+			  pc,
+			  ic,
+			  jr * jc,
+			  ir,
+			  cntx
+			);
+		}
+		else // if ( bli_is_left( side ) )
+		{
+			bli_cntx_set_thrloop
+			(
+			  jc,
+			  pc,
+			  ic,
+			  jr,
+			  ir,
+			  cntx
+			);
+		}
+	}
+	else if ( l3_op == BLIS_TRSM )
+	{
+		if ( bli_is_right( side ) )
+		{
+			bli_cntx_set_thrloop
+			(
+			  1,
+			  1,
+			  jc * ic * jr,
+			  1,
+			  1,
+			  cntx
+			);
+		}
+		else // if ( bli_is_left( side ) )
+		{
+			bli_cntx_set_thrloop
+			(
+			  1,
+			  1,
+			  1,
+			  ic * jr * ir,
+			  1,
+			  cntx
+			);
+		}
+	}
+	else // if ( l3_op == BLIS_TRSM )
+	{
+		bli_cntx_set_thrloop
+		(
+		  jc,
+		  pc,
+		  ic,
+		  jr,
+		  ir,
+		  cntx
+		);
+	}
+}
+
 
 // -----------------------------------------------------------------------------
 

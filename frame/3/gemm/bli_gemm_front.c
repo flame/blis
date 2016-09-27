@@ -85,13 +85,19 @@ void bli_gemm_front
 	// Set the operation family id in the context.
 	bli_cntx_set_family( BLIS_GEMM, cntx );
 
-	thrinfo_t** infos = bli_l3_thrinfo_create_paths( BLIS_GEMM, BLIS_LEFT );
-	dim_t n_threads = bli_thread_num_threads( infos[0] );
+	// Record the threading for each level within the context.
+	bli_cntx_set_thrloop_from_env( BLIS_GEMM, BLIS_LEFT, cntx );
 
-	// Invoke the internal back-end.
+	// Create the first node in the thrinfo_t tree for each thread.
+//thrinfo_t** infos = bli_l3_thrinfo_create_full_paths( cntx );
+//bli_l3_thrinfo_print_paths( infos );
+//exit(1);
+//cntl = bli_gemm_cntl_create( BLIS_GEMM );
+	//thrinfo_t** infos = bli_l3_thrinfo_create_roots( cntx, cntl );
+
+	// Invoke the internal back-end via the thread handler.
 	bli_l3_thread_decorator
 	(
-	  n_threads,
 	  bli_gemm_int,
 	  alpha,
 	  &a_local,
@@ -99,10 +105,12 @@ void bli_gemm_front
 	  beta,
 	  &c_local,
 	  cntx,
-	  cntl,
-	  infos
+	  cntl
 	);
+//bli_l3_thrinfo_print_paths( infos );
+//exit(1);
 
-	bli_l3_thrinfo_free_paths( infos, n_threads );
+	// Free the thrinfo_t structures.
+	//bli_l3_thrinfo_free_paths( infos );
 }
 

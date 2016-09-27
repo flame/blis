@@ -201,7 +201,6 @@ void bli_thrcomm_tree_barrier( barrier_t* barack )
 
 void bli_l3_thread_decorator
      (
-       dim_t       n_threads,
        l3int_t     func,
        obj_t*      alpha,
        obj_t*      a,
@@ -209,19 +208,27 @@ void bli_l3_thread_decorator
        obj_t*      beta,
        obj_t*      c,
        cntx_t*     cntx,
-       cntl_t*     cntl,
-       thrinfo_t** thread
+       cntl_t*     cntl
      )
 {
+	// Query the total number of threads from the context.
+	dim_t       n_threads = bli_cntx_get_num_threads( cntx );
+
+	// Allcoate a global communicator for the root thrinfo_t structures.
+	thrcomm_t*  gl_comm   = bli_thrcomm_create( n_threads );
+
 	_Pragma( "omp parallel num_threads(n_threads)" )
 	{
-		dim_t      omp_id   = omp_get_thread_num();
-		thrinfo_t* thread_i = thread[omp_id];
+		dim_t      id = omp_get_thread_num();
 
 		cntl_t*    cntl_use;
+		thrinfo_t* thread;
 
 		// Create a default control tree for the operation, if needed.
 		bli_l3_cntl_create_if( a, b, c, cntx, cntl, &cntl_use );
+
+		// Create the root node of the current thread's thrinfo_t structure.
+		bli_l3_thrinfo_create_root( id, gl_comm, cntx, cntl_use, &thread );
 
 		func
 		(
@@ -232,12 +239,19 @@ void bli_l3_thread_decorator
 		  c,
 		  cntx,
 		  cntl_use,
-		  thread[omp_id]
+		  thread
 		);
 
 		// Free the control tree, if one was created locally.
-		bli_l3_cntl_free_if( a, b, c, cntx, cntl, cntl_use, thread_i );
+		bli_l3_cntl_free_if( a, b, c, cntx, cntl, cntl_use, thread );
+
+		// Free the current thread's thrinfo_t structure.
+		bli_l3_thrinfo_free( thread );
 	}
+
+	// We shouldn't free the global communicator since it was already freed
+	// by the global communicator's chief thread in bli_l3_thrinfo_free()
+	// (called above).
 }
 
 #endif

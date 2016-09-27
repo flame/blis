@@ -84,10 +84,10 @@ void bli_gemm_blk_var3
 		  c,
 		  cntx,
 		  bli_cntl_sub_node( cntl ),
-		  bli_thrinfo_sub_node( thread)
+		  bli_thrinfo_sub_node( thread )
 		);
 
-		bli_thread_ibarrier( thread );
+		bli_thread_obarrier( bli_thrinfo_sub_node( thread ) );
 
 		// This variant executes multiple rank-k updates. Therefore, if the
 		// internal beta scalar on matrix C is non-zero, we must use it

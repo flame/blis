@@ -136,7 +136,8 @@ typedef struct thread_data
 	obj_t*     c;
 	cntx_t*    cntx;
 	cntl_t*    cntl;
-	thrinfo_t* thread;
+	dim_t      id;
+	thrcomm_t* gl_comm;
 } thread_data_t;
 
 // Entry point for additional threads
@@ -151,12 +152,17 @@ void* bli_l3_thread_entry( void* data_void )
 	obj_t*         c        = data->c;
 	cntx_t*        cntx     = data->cntx;
 	cntl_t*        cntl     = data->cntl;
-	thrinfo_t*     thread_i = data->thread;
+	dim_t          id       = data->id;
+	thrcomm_t*     gl_comm  = data->gl_comm;
 
 	cntl_t*        cntl_use;
+	thrinfo_t*     thread;
 
 	// Create a default control tree for the operation, if needed.
 	bli_l3_cntl_create_if( a, b, c, cntx, cntl, &cntl_use );
+
+	// Create the root node of the current thread's thrinfo_t structure.
+	bli_l3_thrinfo_create_root( id, gl_comm, cntx, cntl_use, &thread );
 
 	data->func
 	(
@@ -171,14 +177,16 @@ void* bli_l3_thread_entry( void* data_void )
 	);
 
 	// Free the control tree, if one was created locally.
-	bli_l3_cntl_free_if( a, b, c, cntx, cntl, cntl_use, thread_i );
+	bli_l3_cntl_free_if( a, b, c, cntx, cntl, cntl_use, thread );
+
+	// Free the current thread's thrinfo_t structure.
+	bli_l3_thrinfo_free( thread );
 
 	return NULL;
 }
 
 void bli_l3_thread_decorator
      (
-       dim_t       n_threads,
        l3int_t     func,
        obj_t*      alpha,
        obj_t*      a,
@@ -186,50 +194,51 @@ void bli_l3_thread_decorator
        obj_t*      beta,
        obj_t*      c,
        cntx_t*     cntx,
-       cntl_t*     cntl,
-       thrinfo_t** thread
+       cntl_t*     cntl
      )
 {
-	pthread_t*     pthreads = bli_malloc_intl( sizeof( pthread_t ) * n_threads );
-	thread_data_t* datas    = bli_malloc_intl( sizeof( thread_data_t ) * n_threads );
+	// Query the total number of threads from the context.
+	dim_t          n_threads = bli_cntx_get_num_threads( cntx );
 
-	for ( int i = 1; i < n_threads; i++ )
+	// Allocate an array of pthread objects and auxiliary data structs to pass
+	// to the thread entry functions.
+	pthread_t*     pthreads  = bli_malloc_intl( sizeof( pthread_t     ) * n_threads );
+	thread_data_t* datas     = bli_malloc_intl( sizeof( thread_data_t ) * n_threads );
+
+	// Allocate a global communicator for the root thrinfo_t structures.
+	thrcomm_t*     gl_comm   = bli_thrcomm_create( n_threads );
+
+	// NOTE: We must iterate backwards so that the chief thread (thread id 0)
+	// can spawn all other threads before proceeding with its own computation.
+	for ( dim_t id = n_threads - 1; 0 <= id; id-- )
 	{
 		// Set up thread data for additional threads (beyond thread 0).
-		datas[i].func   = func;
-		datas[i].alpha  = alpha;
-		datas[i].a      = a;
-		datas[i].b      = b;
-		datas[i].beta   = beta;
-		datas[i].c      = c;
-		datas[i].cntx   = cntx;
-		datas[i].cntl   = cntl;
-		datas[i].thread = thread[i];
+		datas[id].func    = func;
+		datas[id].alpha   = alpha;
+		datas[id].a       = a;
+		datas[id].b       = b;
+		datas[id].beta    = beta;
+		datas[id].c       = c;
+		datas[id].cntx    = cntx;
+		datas[id].cntl    = cntl;
+		datas[id].id      = id;
+		datas[id].gl_comm = gl_comm;
 
-		// Spawn additional threads.
-		pthread_create( &pthreads[i], NULL, &bli_l3_thread_entry, &datas[i] );
+		// Spawn additional threads for ids greater than 1.
+		if ( id != 0 )
+			pthread_create( &pthreads[id], NULL, &bli_l3_thread_entry, &datas[id] );
+		else
+			bli_l3_thread_entry( ( void* )(&datas[0]) );
 	}
 
-
-	// The main thread executes this.
-	{
-		cntl_t* cntl_use;
-
-		// Create a default control tree for the operation, if needed.
-		bli_l3_cntl_create_if( a, b, c, cntx, cntl, &cntl_use );
-
-		// Thread 0 simply executes func.
-		func( alpha, a, b, beta, c, cntx, cntl, thread[0] );
-
-		// Free the control tree, if one was created locally.
-		bli_l3_cntl_free_if( a, b, c, cntx, cntl, cntl_use, thread[0] );
-	}
-
+	// We shouldn't free the global communicator since it was already freed
+	// by the global communicator's chief thread in bli_l3_thrinfo_free()
+	// (called from the thread entry function).
 
 	// Thread 0 waits for additional threads to finish.
-	for ( int i = 1; i < n_threads; i++)
+	for ( dim_t id = 1; id < n_threads; id++ )
 	{
-		pthread_join( pthreads[i], NULL );
+		pthread_join( pthreads[id], NULL );
 	}
 
 	bli_free_intl( pthreads );
