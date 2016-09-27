@@ -55,12 +55,15 @@ typedef void (*FUNCPTR_T)(
 static FUNCPTR_T GENARRAY(ftypes,trsm_lu_ker_var2);
 
 
-void bli_trsm_lu_ker_var2( obj_t*  a,
-                           obj_t*  b,
-                           obj_t*  c,
-                           cntx_t* cntx,
-                           trsm_t* cntl,
-                           thrinfo_t* thread )
+void bli_trsm_lu_ker_var2
+     (
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  c,
+       cntx_t* cntx,
+       cntl_t* cntl,
+       thrinfo_t* thread
+     )
 {
 	num_t     dt_exec   = bli_obj_execution_datatype( *c );
 
@@ -93,10 +96,11 @@ void bli_trsm_lu_ker_var2( obj_t*  a,
 	FUNCPTR_T f;
 
 	// Grab the address of the internal scalar buffer for the scalar
-	// attached to B. This will be the alpha scalar used in the gemmtrsm
-	// subproblems (ie: the scalar that would be applied to the packed
-	// copy of B prior to it being updated by the trsm subproblem). This
-	// scalar may be unit, if for example it was applied during packing.
+	// attached to B (the non-triangular matrix). This will be the alpha
+	// scalar used in the gemmtrsm subproblems (ie: the scalar that would
+	// be applied to the packed copy of B prior to it being updated by
+	// the trsm subproblem). This scalar may be unit, if for example it
+	// was applied during packing.
 	buf_alpha1 = bli_obj_internal_scalar_buffer( *b );
 
 	// Grab the address of the internal scalar buffer for the scalar

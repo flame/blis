@@ -41,7 +41,8 @@ thrinfo_t* bli_packm_thrinfo_create
        thrcomm_t* icomm,
        dim_t      icomm_id,
        dim_t      n_way,
-       dim_t      work_id
+       dim_t      work_id,
+       thrinfo_t* sub_node
      )
 {
 	thrinfo_t* thread = bli_malloc_intl( sizeof( thrinfo_t ) );
@@ -53,9 +54,8 @@ thrinfo_t* bli_packm_thrinfo_create
 	  icomm, icomm_id,
 	  n_way,
 	  work_id,
-	  NULL,
-	  NULL,
-	  NULL
+	  FALSE,
+	  sub_node
 	);
 
 	return thread;
@@ -69,7 +69,8 @@ void bli_packm_thrinfo_init
        thrcomm_t* icomm,
        dim_t      icomm_id,
        dim_t      n_way,
-       dim_t      work_id
+       dim_t      work_id,
+       thrinfo_t* sub_node
      )
 {
 	bli_thrinfo_init
@@ -78,9 +79,8 @@ void bli_packm_thrinfo_init
 	  ocomm, ocomm_id,
 	  icomm, icomm_id,
 	  n_way, work_id,
-	  NULL,
-	  NULL,
-	  NULL
+	  FALSE,
+	  sub_node
 	);
 }
 
@@ -95,7 +95,8 @@ void bli_packm_thrinfo_init_single
 	  &BLIS_SINGLE_COMM, 0,
 	  &BLIS_SINGLE_COMM, 0,
 	  1,
-	  0
+	  0,
+	  NULL
 	);
 }
 

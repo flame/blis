@@ -34,33 +34,16 @@
 
 #include "blis.h"
 
-#define FUNCPTR_T packm_fp
-
-typedef void (*FUNCPTR_T)( obj_t*   a,
-                           obj_t*   p,
-                           cntx_t*  cntx,
-                           thrinfo_t* t );
-
-static FUNCPTR_T vars[6][3] =
+void bli_packm_int
+     (
+       obj_t*  a,
+       obj_t*  p,
+       cntx_t* cntx,
+       cntl_t* cntl,
+       thrinfo_t* thread
+     )
 {
-	// unblocked          optimized unblocked    blocked
-	{ bli_packm_unb_var1, NULL,                  bli_packm_blk_var1 },
-	{ NULL,               NULL,                  NULL,              },
-	{ NULL,               NULL,                  NULL,              },
-	{ NULL,               NULL,                  NULL,              },
-	{ NULL,               NULL,                  NULL,              },
-	{ NULL,               NULL,                  NULL,              },
-};
-
-void bli_packm_int( obj_t*   a,
-                    obj_t*   p,
-                    cntx_t*  cntx,
-                    packm_t* cntl,
-                    thrinfo_t* thread )
-{
-	varnum_t  n;
-	impl_t    i;
-	FUNCPTR_T f;
+	packm_voft f;
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
@@ -69,14 +52,6 @@ void bli_packm_int( obj_t*   a,
 	// Sanity check; A should never have a zero dimension. If we must support
 	// it, then we should fold it into the next alias-and-early-exit block.
 	//if ( bli_obj_has_zero_dim( *a ) ) bli_abort();
-
-	// First check if we are to skip this operation because the control tree
-	// is NULL. We return without taking any action because a was already
-	// aliased to p in packm_init().
-	if ( bli_cntl_is_noop( cntl ) )
-	{
-		return;
-	}
 
 	// Let us now check to see if the object has already been packed. First
 	// we check if it has been packed to an unspecified (row or column)
@@ -101,7 +76,7 @@ void bli_packm_int( obj_t*   a,
 	// already taken place, or does not need to take place, and so that will
 	// be indicated by the pack status). Also, not all combinations of
 	// current pack status and desired pack schema are valid.
-	if ( bli_obj_pack_schema( *a ) == cntl_pack_schema( cntl ) )
+	if ( bli_obj_pack_schema( *a ) == bli_cntl_packm_params_pack_schema( cntl ) )
 	{
 		return;
 	}
@@ -113,21 +88,17 @@ void bli_packm_int( obj_t*   a,
 		return;
 	}
 
-
-	// Extract the variant number and implementation type.
-	n = bli_cntl_var_num( cntl );
-	i = bli_cntl_impl_type( cntl );
-
-	// Index into the variant array to extract the correct function pointer.
-	f = vars[n][i];
+	// Extract the function pointer from the current control tree node.
+	f = bli_cntl_packm_params_var_func( cntl );
 
 	// Invoke the variant with kappa_use.
-	f( a,
-	   p,
-	   cntx,
-       thread );
-
-    // Barrier so that packing is done before computation
-    bli_thread_obarrier( thread );
+	f
+	(
+	  a,
+	  p,
+	  cntx,
+	  cntl,
+	  thread
+	);
 }
 

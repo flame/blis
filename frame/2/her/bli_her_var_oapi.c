@@ -44,7 +44,7 @@ void PASTEMAC0(opname) \
        obj_t*  x, \
        obj_t*  c, \
        cntx_t* cntx, \
-       her_t*  cntl \
+       cntl_t* cntl \
      ) \
 { \
 	num_t     dt        = bli_obj_datatype( *c ); \

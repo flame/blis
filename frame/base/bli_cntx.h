@@ -53,6 +53,7 @@ typedef struct cntx_s
 
 	func_t    packm_ukrs;
 
+	opid_t    family;
 	ind_t     method;
 	pack_t    schema_a;
 	pack_t    schema_b;
@@ -101,6 +102,10 @@ typedef struct cntx_s
 #define bli_cntx_packm_ukrs( cntx ) \
 \
 	(&((cntx)->packm_ukrs) )
+
+#define bli_cntx_family( cntx ) \
+\
+	( (cntx)->family )
 
 #define bli_cntx_method( cntx ) \
 \
@@ -162,6 +167,11 @@ typedef struct cntx_s
 #define bli_cntx_set_packm_ukrs( _packm_ukrs, cntx_p ) \
 { \
 	(cntx_p)->packm_ukrs = _packm_ukrs; \
+}
+
+#define bli_cntx_set_family( _family, cntx_p ) \
+{ \
+	(cntx_p)->family = _family; \
 }
 
 #define bli_cntx_set_method( _method, cntx_p ) \
@@ -262,6 +272,10 @@ typedef struct cntx_s
 	( \
 	  (dt), (&(bli_cntx_l3_nat_ukrs_prefs_buf( (cntx) ))[ ukr_id ]) \
 	)
+
+#define bli_cntx_get_family( cntx ) \
+\
+	bli_cntx_family( cntx )
 
 #define bli_cntx_get_ind_method( cntx ) \
 \
@@ -391,6 +405,12 @@ bool_t   bli_cntx_l3_nat_ukr_prefers_storage_of( obj_t*  obj,
 bool_t   bli_cntx_l3_nat_ukr_dislikes_storage_of( obj_t*  obj,
                                                   l3ukr_t ukr_id,
                                                   cntx_t* cntx );
+bool_t   bli_cntx_l3_ukr_prefers_storage_of( obj_t*  obj,
+                                             l3ukr_t ukr_id,
+                                             cntx_t* cntx );
+bool_t   bli_cntx_l3_ukr_dislikes_storage_of( obj_t*  obj,
+                                              l3ukr_t ukr_id,
+                                              cntx_t* cntx );
 
 // print function
 

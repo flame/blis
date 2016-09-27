@@ -32,9 +32,10 @@
 
 */
 
-#include "bli_hemv_cntl.h"
-#include "bli_hemv_front.h"
-#include "bli_hemv_int.h"
+// NOTE: level-2 control tree code is temporarily disabled.
+//#include "bli_hemv_cntl.h"
+//#include "bli_hemv_front.h"
+//#include "bli_hemv_int.h"
 
 #include "bli_hemv_var.h"
 

@@ -34,109 +34,49 @@
 
 #include "blis.h"
 
-packm_t* packm_cntl_row = NULL;
-packm_t* packm_cntl_col = NULL;
-
-packm_t* packm_cntl = NULL;
-
-void bli_packm_cntl_init()
+cntl_t* bli_packm_cntl_obj_create
+     (
+       void*     var_func,
+       void*     packm_var_func,
+       bszid_t   bmid_m,
+       bszid_t   bmid_n,
+       bool_t    does_invert_diag,
+       bool_t    rev_iter_if_upper,
+       bool_t    rev_iter_if_lower,
+       pack_t    pack_schema,
+       packbuf_t pack_buf_type,
+       cntl_t*   sub_node
+     )
 {
-	// Generally speaking, the BLIS_PACKED_ROWS and BLIS_PACKED_COLUMNS
-	// are used by the level-2 operations. These schemas amount to simple
-	// copies to row or column storage. These simple schemas may be used
-	// by level-3 operations, but they should never be used for matrices
-	// with structure (since they do not densify).
-	// The BLIS_PACKED_ROW_PANELS and BLIS_PACKED_COL_PANELS schemas are
-	// used only in level-3 operations. They pack to (typically) skinny
-	// row and column panels, where the width of the panel is determined
-	// by register blocksizes. It is assumed that matrices with structure
-	// will be densified.
+	cntl_t*         cntl;
+	packm_params_t* params;
 
-	// Create control trees to pack by rows.
-	packm_cntl_row
-	=
-	bli_packm_cntl_obj_create( BLIS_UNBLOCKED,
-	                           BLIS_VARIANT1,    // When packing to rows:
-	                           BLIS_VF,          // used for m dimension
-	                           BLIS_VF,          // used for n dimension
-	                           FALSE,            // do NOT invert diagonal
-	                           FALSE,            // do NOT iterate backwards if upper
-	                           FALSE,            // do NOT iterate backwards if lower
-	                           BLIS_PACKED_ROWS,
-	                           BLIS_BUFFER_FOR_GEN_USE );
+	// Allocate a packm_params_t struct.
+	params = bli_malloc_intl( sizeof( packm_params_t ) );
 
+	// Initialize the packm_params_t struct.
+	params->size              = sizeof( packm_params_t );
+	params->var_func          = packm_var_func;
+	params->bmid_m            = bmid_m;
+	params->bmid_n            = bmid_n;
+	params->does_invert_diag  = does_invert_diag;
+	params->rev_iter_if_upper = rev_iter_if_upper;
+	params->rev_iter_if_lower = rev_iter_if_lower;
+	params->pack_schema       = pack_schema;
+	params->pack_buf_type     = pack_buf_type;
 
-	// Create control trees to pack by columns.
-	packm_cntl_col
-	=
-	bli_packm_cntl_obj_create( BLIS_UNBLOCKED,
-	                           BLIS_VARIANT1,    // When packing to columns:
-	                           BLIS_VF,          // used for m dimension
-	                           BLIS_VF,          // used for n dimension
-	                           FALSE,            // do NOT invert diagonal
-	                           FALSE,            // do NOT iterate backwards if upper
-	                           FALSE,            // do NOT iterate backwards if lower
-	                           BLIS_PACKED_COLUMNS,
-	                           BLIS_BUFFER_FOR_GEN_USE );
-
-
-	// Set defaults when we don't care whether the packing is by rows or
-	// by columns.
-	packm_cntl = packm_cntl_col;
-}
-
-void bli_packm_cntl_finalize()
-{
-	bli_cntl_obj_free( packm_cntl_row );
-	bli_cntl_obj_free( packm_cntl_col );
-}
-
-packm_t* bli_packm_cntl_obj_create( impl_t     impl_type,
-                                    varnum_t   var_num,
-                                    bszid_t    bmid_m,
-                                    bszid_t    bmid_n,
-                                    bool_t     does_invert_diag,
-                                    bool_t     rev_iter_if_upper,
-                                    bool_t     rev_iter_if_lower,
-                                    pack_t     pack_schema,
-                                    packbuf_t  pack_buf_type )
-{
-	packm_t* cntl;
-
-	cntl = ( packm_t* ) bli_malloc_intl( sizeof(packm_t) );
-
-	cntl->impl_type         = impl_type;
-	cntl->var_num           = var_num;
-	cntl->bmid_m            = bmid_m;
-	cntl->bmid_n            = bmid_n;
-	cntl->does_invert_diag  = does_invert_diag;
-	cntl->rev_iter_if_upper = rev_iter_if_upper;
-	cntl->rev_iter_if_lower = rev_iter_if_lower;
-	cntl->pack_schema       = pack_schema;
-	cntl->pack_buf_type     = pack_buf_type;
+	// It's important that we set the bszid field to BLIS_NO_PART to indicate
+	// that no blocksize partitioning is performed. bli_cntl_free() will rely
+	// on this information to know how to step through the thrinfo_t tree in
+	// sync with the cntl_t tree.
+	cntl = bli_cntl_obj_create
+	(
+	  BLIS_NO_PART,
+	  var_func,
+	  params,
+	  sub_node
+	);
 
 	return cntl;
-}
-
-void bli_packm_cntl_obj_init( packm_t*   cntl,
-                              impl_t     impl_type,
-                              varnum_t   var_num,
-                              bszid_t    bmid_m,
-                              bszid_t    bmid_n,
-                              bool_t     does_invert_diag,
-                              bool_t     rev_iter_if_upper,
-                              bool_t     rev_iter_if_lower,
-                              pack_t     pack_schema,
-                              packbuf_t  pack_buf_type )
-{
-	cntl->impl_type         = impl_type;
-	cntl->var_num           = var_num;
-	cntl->bmid_m            = bmid_m;
-	cntl->bmid_n            = bmid_n;
-	cntl->does_invert_diag  = does_invert_diag;
-	cntl->rev_iter_if_upper = rev_iter_if_upper;
-	cntl->rev_iter_if_lower = rev_iter_if_lower;
-	cntl->pack_schema       = pack_schema;
-	cntl->pack_buf_type     = pack_buf_type;
 }
 

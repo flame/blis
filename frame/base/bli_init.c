@@ -83,16 +83,13 @@ err_t bli_init( void )
 		{
 			// Initialize various sub-APIs.
 			bli_const_init();
-			bli_cntl_init();
 			bli_error_init();
-			bli_mem_init();
+			bli_memsys_init();
 			bli_ind_init();
 			bli_thread_init();
 
 			// After initialization is complete, mark BLIS as initialized.
 			bli_is_init = TRUE;
-
-			//bli_mem_init();
 
 			// Only the thread that actually performs the initialization will
 			// return "success".
@@ -150,9 +147,8 @@ err_t bli_finalize( void )
 		{
 			// Finalize various sub-APIs.
 			bli_const_finalize();
-			bli_cntl_finalize();
 			bli_error_finalize();
-			bli_mem_finalize();
+			bli_memsys_finalize();
 			bli_ind_finalize();
 			bli_thread_finalize();
 

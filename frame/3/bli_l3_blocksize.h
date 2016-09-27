@@ -38,16 +38,41 @@
 \
 dim_t PASTEMAC0(opname) \
       ( \
-         dim_t    i, \
-         dim_t    dim, \
-         obj_t*   a, \
-         obj_t*   b, \
-         bszid_t  bszid, \
-         cntx_t*  cntx  \
+         dir_t   direct, \
+         dim_t   i, \
+         dim_t   dim, \
+         obj_t*  a, \
+         obj_t*  b, \
+         bszid_t bszid, \
+         cntx_t* cntx  \
+      );
+
+GENPROT( l3_determine_kc )
+
+GENPROT( gemm_determine_kc )
+GENPROT( herk_determine_kc )
+GENPROT( trmm_determine_kc )
+GENPROT( trsm_determine_kc )
+
+
+#undef  GENPROT
+#define GENPROT( opname ) \
+\
+dim_t PASTEMAC0(opname) \
+      ( \
+         dim_t   i, \
+         dim_t   dim, \
+         obj_t*  a, \
+         obj_t*  b, \
+         bszid_t bszid, \
+         cntx_t* cntx  \
       );
 
 GENPROT( gemm_determine_kc_f )
 GENPROT( gemm_determine_kc_b )
+
+GENPROT( herk_determine_kc_f )
+GENPROT( herk_determine_kc_b )
 
 GENPROT( trmm_determine_kc_f )
 GENPROT( trmm_determine_kc_b )

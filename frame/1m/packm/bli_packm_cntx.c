@@ -52,7 +52,7 @@ void bli_packm_cntx_init( cntx_t* cntx )
 	bli_gks_cntx_set_l1v_ker( BLIS_SETV_KER, cntx );
 
 	// Initialize the context with the global membrk object.
-	bli_cntx_set_membrk( bli_mem_global_membrk(), cntx );
+	bli_cntx_set_membrk( bli_memsys_global_membrk(), cntx );
 }
 
 void bli_packm_cntx_finalize( cntx_t* cntx )

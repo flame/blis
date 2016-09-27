@@ -36,18 +36,91 @@
 #ifndef BLIS_MEM_H
 #define BLIS_MEM_H
 
-// -----------------------------------------------------------------------------
 
-membrk_t* bli_mem_global_membrk( void );
-siz_t     bli_mem_pool_size( packbuf_t buf_type );
+// Mem entry query
 
-// -----------------------------------------------------------------------------
+#define bli_mem_pblk( mem_p ) \
+\
+	( &((mem_p)->pblk) )
 
-void   bli_mem_init( void );
-void   bli_mem_reinit( cntx_t* cntx );
-void   bli_mem_finalize( void );
-bool_t bli_mem_is_initialized( void );
+#define bli_mem_buffer( mem_p ) \
+\
+	( bli_pblk_buf_align( bli_mem_pblk( mem_p ) ) )
+
+#define bli_mem_buf_sys( mem_p ) \
+\
+	( bli_pblk_buf_sys( bli_mem_pblk( mem_p ) ) )
+
+#define bli_mem_buf_type( mem_p ) \
+\
+	( (mem_p)->buf_type )
+
+#define bli_mem_pool( mem_p ) \
+\
+	( (mem_p)->pool )
+
+#define bli_mem_membrk( mem_p ) \
+\
+	( (mem_p)->membrk )
+
+#define bli_mem_size( mem_p ) \
+\
+	( (mem_p)->size )
+
+#define bli_mem_is_alloc( mem_p ) \
+\
+	( bli_mem_buffer( mem_p ) != NULL )
+
+#define bli_mem_is_unalloc( mem_p ) \
+\
+	( bli_mem_buffer( mem_p ) == NULL )
 
 
-#endif
+// Mem entry modification
 
+#define bli_mem_set_pblk( pblk_p, mem_p ) \
+{ \
+	mem_p->pblk = *(pblk_p); \
+}
+
+#define bli_mem_set_buffer( buf0, mem_p ) \
+{ \
+	bli_pblk_set_buf_align( buf0, &(mem_p->pblk) ); \
+}
+
+#define bli_mem_set_buf_sys( buf0, mem_p ) \
+{ \
+	bli_pblk_set_buf_sys( buf0, &(mem_p->pblk) ); \
+}
+
+#define bli_mem_set_buf_type( buf_type0, mem_p ) \
+{ \
+	(mem_p)->buf_type = buf_type0; \
+}
+
+#define bli_mem_set_pool( pool0, mem_p ) \
+{ \
+	(mem_p)->pool = pool0; \
+}
+
+#define bli_mem_set_membrk( membrk0, mem_p ) \
+{ \
+	(mem_p)->membrk = membrk0; \
+}
+
+#define bli_mem_set_size( size0, mem_p ) \
+{ \
+	mem_p->size = size0; \
+}
+
+#define bli_mem_clear( mem_p ) \
+{ \
+	bli_mem_set_buffer( NULL, mem_p ); \
+	bli_mem_set_buf_sys( NULL, mem_p ); \
+	bli_mem_set_pool( NULL, mem_p ); \
+	bli_mem_set_size( 0, mem_p ); \
+	bli_mem_set_membrk( NULL, mem_p ); \
+}
+
+
+#endif 

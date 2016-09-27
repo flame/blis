@@ -32,10 +32,12 @@
 
 */
 
-void bli_syrk_front( obj_t*  alpha,
-                     obj_t*  a,
-                     obj_t*  beta,
-                     obj_t*  c,
-                     cntx_t* cntx,
-                     gemm_t* cntl );
-
+void bli_syrk_front
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       cntl_t* cntl
+     );

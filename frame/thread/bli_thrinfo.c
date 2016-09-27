@@ -42,9 +42,8 @@ thrinfo_t* bli_thrinfo_create
        dim_t      icomm_id,
        dim_t      n_way,
        dim_t      work_id, 
-       thrinfo_t* opackm,
-       thrinfo_t* ipackm,
-       thrinfo_t* sub_self
+       bool_t     free_comms,
+       thrinfo_t* sub_node
      )
 {
     thrinfo_t* thread = bli_malloc_intl( sizeof( thrinfo_t ) );
@@ -55,9 +54,8 @@ thrinfo_t* bli_thrinfo_create
 	  ocomm, ocomm_id,
 	  icomm, icomm_id,
 	  n_way, work_id, 
-	  opackm,
-	  ipackm,
-	  sub_self
+	  free_comms,
+	  sub_node
 	);
 
     return thread;
@@ -72,21 +70,19 @@ void bli_thrinfo_init
        dim_t      icomm_id,
        dim_t      n_way,
        dim_t      work_id, 
-       thrinfo_t* opackm,
-       thrinfo_t* ipackm,
-       thrinfo_t* sub_self
+       bool_t     free_comms,
+       thrinfo_t* sub_node
      )
 {
-	thread->ocomm    = ocomm;
-	thread->ocomm_id = ocomm_id;
-	thread->icomm    = icomm;
-	thread->icomm_id = icomm_id;
-	thread->n_way    = n_way;
-	thread->work_id  = work_id;
+	thread->ocomm      = ocomm;
+	thread->ocomm_id   = ocomm_id;
+	thread->icomm      = icomm;
+	thread->icomm_id   = icomm_id;
+	thread->n_way      = n_way;
+	thread->work_id    = work_id;
+	thread->free_comms = free_comms;
 
-	thread->opackm   = opackm;
-	thread->ipackm   = ipackm;
-	thread->sub_self = sub_self;
+	thread->sub_node   = sub_node;
 }
 
 void bli_thrinfo_init_single
@@ -101,37 +97,8 @@ void bli_thrinfo_init_single
 	  &BLIS_SINGLE_COMM, 0,
 	  1,
 	  0,
-	  &BLIS_PACKM_SINGLE_THREADED,
-	  &BLIS_PACKM_SINGLE_THREADED,
+	  FALSE,
 	  thread
 	);
 }
-
-#if 0
-void bli_thrinfo_free
-     (
-       thrinfo_t* thread
-     )
-{
-	if ( thread == NULL ||
-	     thread == &BLIS_GEMM_SINGLE_THREADED ||
-	     thread == &BLIS_HERK_SINGLE_THREADED ||
-	     thread == &BLIS_PACKM_SINGLE_THREADED
-	   ) return;
-
-	// Free Communicators
-	if ( bli_thread_am_ochief( thread ) )
-		bli_thrcomm_free( thread->ocomm );
-	if ( bli_thrinfo_sub_self( thread ) == NULL && bli_thread_am_ichief( thread ) )
-		bli_thrcomm_free( thread->icomm );
-
-	// Free thrinfo chidren
-	bli_packm_thrinfo_free( thread->opackm );
-	bli_packm_thrinfo_free( thread->ipackm );
-	bli_l3_thrinfo_free( thread->sub_self );
-	bli_free_intl( thread );
-	
-	return; 
-}
-#endif
 

@@ -49,7 +49,8 @@ thrinfo_t* bli_packm_thrinfo_create
        thrcomm_t* icomm,
        dim_t      icomm_id,
        dim_t      n_way,
-       dim_t      work_id
+       dim_t      work_id,
+       thrinfo_t* sub_node
      );
 
 void bli_packm_thrinfo_init
@@ -60,7 +61,8 @@ void bli_packm_thrinfo_init
        thrcomm_t* icomm,
        dim_t      icomm_id,
        dim_t      n_way,
-       dim_t      work_id
+       dim_t      work_id,
+       thrinfo_t* sub_node
      );
 
 void bli_packm_thrinfo_init_single

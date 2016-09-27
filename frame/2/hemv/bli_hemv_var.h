@@ -49,7 +49,7 @@ void PASTEMAC0(opname) \
        obj_t*  beta, \
        obj_t*  y, \
        cntx_t* cntx, \
-       hemv_t* cntl  \
+       cntl_t* cntl  \
      );
 
 GENPROT( hemv_blk_var1 )

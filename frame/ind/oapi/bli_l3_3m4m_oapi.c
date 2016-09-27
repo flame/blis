@@ -34,12 +34,6 @@
 
 #include "blis.h"
 
-// Bring control trees into scope.
-extern gemm_t* gemm_cntl;
-extern trsm_t* trsm_l_cntl;
-extern trsm_t* trsm_r_cntl;
-
-
 // -- gemm/her2k/syr2k ---------------------------------------------------------
 
 #undef  GENFRONT
@@ -81,10 +75,9 @@ void PASTEMAC(opname,imeth) \
 		   stage. */ \
 		if ( i > 0 ) beta_use = &BLIS_ONE; \
 \
-		/* Invoke the operation's front end with the appropriate control
+		/* Invoke the operation's front end and request the default control
 		   tree. */ \
-		PASTEMAC(opname,_front)( alpha, a, b, beta_use, c, cntx_p, \
-		                         PASTECH(cname,_cntl) ); \
+		PASTEMAC(opname,_front)( alpha, a, b, beta_use, c, cntx_p, NULL ); \
 	} \
 \
 	/* Finalize the local context if it was initialized here. */ \
@@ -161,10 +154,9 @@ void PASTEMAC(opname,imeth) \
 		   stage. */ \
 		if ( i > 0 ) beta_use = &BLIS_ONE; \
 \
-		/* Invoke the operation's front end with the appropriate control
+		/* Invoke the operation's front end and request the default control
 		   tree. */ \
-		PASTEMAC(opname,_front)( side, alpha, a, b, beta_use, c, cntx_p, \
-		                         PASTECH(cname,_cntl) ); \
+		PASTEMAC(opname,_front)( side, alpha, a, b, beta_use, c, cntx_p, NULL ); \
 	} \
 \
 	/* Finalize the local context if it was initialized here. */ \
@@ -239,10 +231,9 @@ void PASTEMAC(opname,imeth) \
 		   stage. */ \
 		if ( i > 0 ) beta_use = &BLIS_ONE; \
 \
-		/* Invoke the operation's front end with the appropriate control
+		/* Invoke the operation's front end and request the default control
 		   tree. */ \
-		PASTEMAC(opname,_front)( alpha, a, beta_use, c, cntx_p, \
-		                         PASTECH(cname,_cntl) ); \
+		PASTEMAC(opname,_front)( alpha, a, beta_use, c, cntx_p, NULL ); \
 	} \
 \
 	/* Finalize the local context if it was initialized here. */ \
@@ -302,10 +293,9 @@ void PASTEMAC(opname,imeth) \
 		/* Prepare the context for the ith stage of computation. */ \
 		PASTEMAC2(cname,imeth,_cntx_stage)( i, cntx_p ); \
 \
-		/* Invoke the operation's front end with the appropriate control
+		/* Invoke the operation's front end and request the default control
 		   tree. */ \
-		PASTEMAC(opname,_front)( side, alpha, a, b, cntx_p, \
-		                         PASTECH(cname,_cntl) ); \
+		PASTEMAC(opname,_front)( side, alpha, a, b, cntx_p, NULL ); \
 	} \
 \
 	/* Finalize the local context if it was initialized here. */ \
@@ -353,11 +343,9 @@ void PASTEMAC(opname,imeth) \
 		/* NOTE: trsm cannot be implemented via any induced method that
 		   needs to execute in stages (e.g. 3mh, 4mh). */ \
 \
-		/* Invoke the operation's front end with the appropriate control
+		/* Invoke the operation's front end and request the default control
 		   tree. */ \
-		PASTEMAC(opname,_front)( side, alpha, a, b, cntx_p, \
-		                         PASTECH(cname,_l_cntl), \
-		                         PASTECH(cname,_r_cntl) ); \
+		PASTEMAC(opname,_front)( side, alpha, a, b, cntx_p, NULL ); \
 	} \
 \
 	/* Finalize the local context if it was initialized here. */ \
@@ -372,11 +360,4 @@ GENFRONT( trsm, trsm, 3m1, 1 )
 //GENFRONT( trmm, trsm, 4mh, 4 ) // Unimplementable.
 //GENFRONT( trmm, trsm, 4mb, 1 ) // Unimplementable.
 GENFRONT( trsm, trsm, 4m1, 1 )
-
-
-//
-// -----------------------------------------------------------------------------
-// -----------------------------------------------------------------------------
-// -----------------------------------------------------------------------------
-//
 

@@ -32,9 +32,11 @@
 
 */
 
-void bli_packm_int( obj_t*   a,
-                    obj_t*   p,
-                    cntx_t*  cntx,
-                    packm_t* cntl,
-                    thrinfo_t* thread );
-
+void bli_packm_int
+     (
+       obj_t*  a,
+       obj_t*  p,
+       cntx_t* cntx,
+       cntl_t* cntl,
+       thrinfo_t* thread
+     );

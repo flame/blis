@@ -46,7 +46,7 @@ void PASTEMAC0(opname) \
        obj_t*  beta, \
        obj_t*  y, \
        cntx_t* cntx, \
-       hemv_t* cntl \
+       cntl_t* cntl \
      ) \
 { \
 	num_t     dt        = bli_obj_datatype( *a ); \

@@ -97,43 +97,79 @@
 
 // -----------------------------------------------------------------------------
 
-blksz_t* bli_blksz_obj_create( dim_t b_s, dim_t be_s,
-                               dim_t b_d, dim_t be_d,
-                               dim_t b_c, dim_t be_c,
-                               dim_t b_z, dim_t be_z );
+blksz_t* bli_blksz_obj_create
+     (
+       dim_t b_s, dim_t be_s,
+       dim_t b_d, dim_t be_d,
+       dim_t b_c, dim_t be_c,
+       dim_t b_z, dim_t be_z
+     );
 
-void bli_blksz_obj_init( blksz_t* b,
-                         dim_t    b_s, dim_t be_s,
-                         dim_t    b_d, dim_t be_d,
-                         dim_t    b_c, dim_t be_c,
-                         dim_t    b_z, dim_t be_z );
+void bli_blksz_obj_init
+     (
+       blksz_t* b,
+       dim_t    b_s, dim_t be_s,
+       dim_t    b_d, dim_t be_d,
+       dim_t    b_c, dim_t be_c,
+       dim_t    b_z, dim_t be_z
+     );
 
-void bli_blksz_obj_free( blksz_t* b );
+void bli_blksz_obj_free
+     (
+       blksz_t* b
+     );
 
 // -----------------------------------------------------------------------------
 
-void bli_blksz_reduce_dt_to( num_t dt_bm, blksz_t* bmult,
-                             num_t dt_bs, blksz_t* blksz );
+void bli_blksz_reduce_dt_to
+     (
+       num_t dt_bm, blksz_t* bmult,
+       num_t dt_bs, blksz_t* blksz
+     );
 
 // -----------------------------------------------------------------------------
 
-dim_t bli_determine_blocksize_f( dim_t    i,
-                                 dim_t    dim,
-                                 obj_t*   obj,
-                                 bszid_t  bszid,
-                                 cntx_t*  cntx );
-dim_t bli_determine_blocksize_f_sub( dim_t  i,
-                                     dim_t  dim,
-                                     dim_t  b_alg,
-                                     dim_t  b_max );
+dim_t bli_determine_blocksize
+     (
+       dir_t   direct,
+       dim_t   i,
+       dim_t   dim,
+       obj_t*  obj,
+       bszid_t bszid,
+       cntx_t* cntx
+     );
 
-dim_t bli_determine_blocksize_b( dim_t    i,
-                                 dim_t    dim,
-                                 obj_t*   obj,
-                                 bszid_t  bszid,
-                                 cntx_t*  cntx );
-dim_t bli_determine_blocksize_b_sub( dim_t  i,
-                                     dim_t  dim,
-                                     dim_t  b_alg,
-                                     dim_t  b_max );
+dim_t bli_determine_blocksize_f
+     (
+       dim_t   i,
+       dim_t   dim,
+       obj_t*  obj,
+       bszid_t bszid,
+       cntx_t* cntx
+     );
+
+dim_t bli_determine_blocksize_b
+     (
+       dim_t   i,
+       dim_t   dim,
+       obj_t*  obj,
+       bszid_t bszid,
+       cntx_t* cntx
+     );
+
+dim_t bli_determine_blocksize_f_sub
+     (
+       dim_t  i,
+       dim_t  dim,
+       dim_t  b_alg,
+       dim_t  b_max
+     );
+
+dim_t bli_determine_blocksize_b_sub
+     (
+       dim_t  i,
+       dim_t  dim,
+       dim_t  b_alg,
+       dim_t  b_max
+     );
 

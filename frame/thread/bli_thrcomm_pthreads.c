@@ -80,7 +80,7 @@ void bli_thrcomm_init( thrcomm_t* communicator, dim_t n_threads)
 	communicator->n_threads = n_threads;
 	communicator->sense = 0;
 	communicator->threads_arrived = 0;
- 
+
 #ifdef BLIS_USE_PTHREAD_MUTEX
 	pthread_mutex_init( &communicator->mutex, NULL );
 #endif
@@ -123,52 +123,71 @@ void bli_thrcomm_barrier( thrcomm_t* communicator, dim_t t_id )
 #endif
 
 
-void* thread_decorator_helper( void* data_void );
+void* bli_l3_thread_entry( void* data_void );
 
+// A data structure to assist in passing operands to additional threads.
 typedef struct thread_data
 {
-	l3_int_t func;
-	obj_t* alpha; 
-	obj_t* a; 
-	obj_t* b; 
-	obj_t* beta;
-	obj_t* c;
-	void* cntx;
-	void* cntl;
-	void* thread;
+	l3int_t    func;
+	obj_t*     alpha;
+	obj_t*     a;
+	obj_t*     b;
+	obj_t*     beta;
+	obj_t*     c;
+	cntx_t*    cntx;
+	cntl_t*    cntl;
+	thrinfo_t* thread;
 } thread_data_t;
 
-void* thread_decorator_helper( void* data_void )
+// Entry point for additional threads
+void* bli_l3_thread_entry( void* data_void )
 {
-	thread_data_t* data = data_void;
+	thread_data_t* data     = data_void;
+
+	obj_t*         alpha    = data->alpha;
+	obj_t*         a        = data->a;
+	obj_t*         b        = data->b;
+	obj_t*         beta     = data->beta;
+	obj_t*         c        = data->c;
+	cntx_t*        cntx     = data->cntx;
+	cntl_t*        cntl     = data->cntl;
+	thrinfo_t*     thread_i = data->thread;
+
+	cntl_t*        cntl_use;
+
+	// Create a default control tree for the operation, if needed.
+	bli_l3_cntl_create_if( a, b, c, cntx, cntl, &cntl_use );
 
 	data->func
 	(
-	  data->alpha,
-	  data->a,
-	  data->b,
-	  data->beta,
-	  data->c,
-	  data->cntx,
-	  data->cntl,
-	  data->thread
+	  alpha,
+	  a,
+	  b,
+	  beta,
+	  c,
+	  cntx,
+	  cntl_use,
+	  thread
 	);
+
+	// Free the control tree, if one was created locally.
+	bli_l3_cntl_free_if( a, b, c, cntx, cntl, cntl_use, thread_i );
 
 	return NULL;
 }
 
 void bli_l3_thread_decorator
      (
-       dim_t    n_threads,
-       l3_int_t func,
-       obj_t*   alpha,
-       obj_t*   a,
-       obj_t*   b,
-       obj_t*   beta,
-       obj_t*   c,
-       void*    cntx,
-       void*    cntl,
-       void**   thread
+       dim_t       n_threads,
+       l3int_t     func,
+       obj_t*      alpha,
+       obj_t*      a,
+       obj_t*      b,
+       obj_t*      beta,
+       obj_t*      c,
+       cntx_t*     cntx,
+       cntl_t*     cntl,
+       thrinfo_t** thread
      )
 {
 	pthread_t*     pthreads = bli_malloc_intl( sizeof( pthread_t ) * n_threads );
@@ -176,22 +195,38 @@ void bli_l3_thread_decorator
 
 	for ( int i = 1; i < n_threads; i++ )
 	{
-		//Setup the thread data
-		datas[i].func = func;
-		datas[i].alpha = alpha;
-		datas[i].a = a;
-		datas[i].b = b;
-		datas[i].beta = beta;
-		datas[i].c = c;
-		datas[i].cntx = cntx;
-		datas[i].cntl = cntl;
+		// Set up thread data for additional threads (beyond thread 0).
+		datas[i].func   = func;
+		datas[i].alpha  = alpha;
+		datas[i].a      = a;
+		datas[i].b      = b;
+		datas[i].beta   = beta;
+		datas[i].c      = c;
+		datas[i].cntx   = cntx;
+		datas[i].cntl   = cntl;
 		datas[i].thread = thread[i];
 
-		pthread_create( &pthreads[i], NULL, &thread_decorator_helper, &datas[i] );
+		// Spawn additional threads.
+		pthread_create( &pthreads[i], NULL, &bli_l3_thread_entry, &datas[i] );
 	}
 
-	func( alpha, a, b, beta, c, cntx, cntl, thread[0] );
 
+	// The main thread executes this.
+	{
+		cntl_t* cntl_use;
+
+		// Create a default control tree for the operation, if needed.
+		bli_l3_cntl_create_if( a, b, c, cntx, cntl, &cntl_use );
+
+		// Thread 0 simply executes func.
+		func( alpha, a, b, beta, c, cntx, cntl, thread[0] );
+
+		// Free the control tree, if one was created locally.
+		bli_l3_cntl_free_if( a, b, c, cntx, cntl, cntl_use, thread[0] );
+	}
+
+
+	// Thread 0 waits for additional threads to finish.
 	for ( int i = 1; i < n_threads; i++)
 	{
 		pthread_join( pthreads[i], NULL );

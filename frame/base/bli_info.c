@@ -114,9 +114,9 @@ char* bli_info_get_trsm_u_ukr_impl_string( ind_t method, num_t dt )
 
 // -- Memory pool-related ------------------------------------------------------
 
-gint_t bli_info_get_mk_pool_size( void ) { return bli_mem_pool_size( BLIS_BUFFER_FOR_A_BLOCK ); }
-gint_t bli_info_get_kn_pool_size( void ) { return bli_mem_pool_size( BLIS_BUFFER_FOR_B_PANEL ); }
-gint_t bli_info_get_mn_pool_size( void ) { return bli_mem_pool_size( BLIS_BUFFER_FOR_C_PANEL ); }
+gint_t bli_info_get_mk_pool_size( void ) { return bli_membrk_pool_size( bli_memsys_global_membrk(), BLIS_BUFFER_FOR_A_BLOCK ); }
+gint_t bli_info_get_kn_pool_size( void ) { return bli_membrk_pool_size( bli_memsys_global_membrk(), BLIS_BUFFER_FOR_B_PANEL ); }
+gint_t bli_info_get_mn_pool_size( void ) { return bli_membrk_pool_size( bli_memsys_global_membrk(), BLIS_BUFFER_FOR_C_PANEL ); }
 
 
 

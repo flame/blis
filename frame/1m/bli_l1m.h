@@ -36,6 +36,7 @@
 #include "bli_l1m_check.h"
 
 #include "bli_l1m_ft.h"
+#include "bli_l1m_voft.h"
 
 // Prototype object APIs with and without contexts.
 #include "bli_oapi_w_cntx.h"
@@ -51,6 +52,5 @@
 #include "bli_unpackm.h"
 
 // Other
-#include "bli_scalm_cntl.h"
-#include "bli_scalm_int.h"
+#include "bli_scalm.h"
 
