@@ -46,27 +46,38 @@
 #define bli_dsgets( x, yr, yi )  { (yr) = bli_dreal(x); (yi) = bli_dimag(x); }
 #define bli_csgets( x, yr, yi )  { (yr) = bli_creal(x); (yi) = bli_cimag(x); }
 #define bli_zsgets( x, yr, yi )  { (yr) = bli_zreal(x); (yi) = bli_zimag(x); }
+#define bli_isgets( x, yr, yi )  { (yr) = ( float )(x); (yi) = 0.0F; }
 
 #define bli_sdgets( x, yr, yi )  { (yr) = bli_sreal(x); (yi) = bli_simag(x); }
 #define bli_ddgets( x, yr, yi )  { (yr) = bli_dreal(x); (yi) = bli_dimag(x); }
 #define bli_cdgets( x, yr, yi )  { (yr) = bli_creal(x); (yi) = bli_cimag(x); }
 #define bli_zdgets( x, yr, yi )  { (yr) = bli_zreal(x); (yi) = bli_zimag(x); }
+#define bli_idgets( x, yr, yi )  { (yr) = ( double )(x); (yi) = 0.0; }
 
 #define bli_scgets( x, yr, yi )  { (yr) = bli_sreal(x); (yi) = bli_simag(x); }
 #define bli_dcgets( x, yr, yi )  { (yr) = bli_dreal(x); (yi) = bli_dimag(x); }
 #define bli_ccgets( x, yr, yi )  { (yr) = bli_creal(x); (yi) = bli_cimag(x); }
 #define bli_zcgets( x, yr, yi )  { (yr) = bli_zreal(x); (yi) = bli_zimag(x); }
+#define bli_icgets( x, yr, yi )  { (yr) = ( float )(x); (yi) = 0.0F; }
 
 #define bli_szgets( x, yr, yi )  { (yr) = bli_sreal(x); (yi) = bli_simag(x); }
 #define bli_dzgets( x, yr, yi )  { (yr) = bli_dreal(x); (yi) = bli_dimag(x); }
 #define bli_czgets( x, yr, yi )  { (yr) = bli_creal(x); (yi) = bli_cimag(x); }
 #define bli_zzgets( x, yr, yi )  { (yr) = bli_zreal(x); (yi) = bli_zimag(x); }
+#define bli_izgets( x, yr, yi )  { (yr) = ( double )(x); (yi) = 0.0; }
+
+#define bli_sigets( x, yr, yi )  { (yr) = bli_sreal(x); (yi) = 0; }
+#define bli_digets( x, yr, yi )  { (yr) = bli_dreal(x); (yi) = 0; }
+#define bli_cigets( x, yr, yi )  { (yr) = bli_creal(x); (yi) = 0; }
+#define bli_zigets( x, yr, yi )  { (yr) = bli_zreal(x); (yi) = 0; }
+#define bli_iigets( x, yr, yi )  { (yr) =          (x); (yi) = 0; }
 
 
 #define bli_sgets( x, yr, yi )  bli_ssgets( x, yr, yi )
 #define bli_dgets( x, yr, yi )  bli_ddgets( x, yr, yi )
 #define bli_cgets( x, yr, yi )  bli_csgets( x, yr, yi )
 #define bli_zgets( x, yr, yi )  bli_zdgets( x, yr, yi )
+#define bli_igets( x, yr, yi )  bli_idgets( x, yr, yi )
 
 
 #endif

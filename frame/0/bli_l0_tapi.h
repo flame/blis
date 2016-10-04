@@ -141,3 +141,19 @@ void PASTEMAC(ch,opname) \
 
 INSERT_GENTPROTR_BASIC( zipsc )
 
+// -----------------------------------------------------------------------------
+
+void bli_igetsc
+     (
+       dim_t*  chi,
+       double* zeta_r,
+       double* zeta_i
+     );
+
+void bli_isetsc
+     (
+       double  zeta_r,
+       double  zeta_i,
+       dim_t*  chi
+     );
+

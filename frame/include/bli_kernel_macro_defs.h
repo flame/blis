@@ -705,6 +705,24 @@
 // Level-1v
 //
 
+// amaxv kernels
+
+#ifndef BLIS_SAMAXV_KERNEL
+#define BLIS_SAMAXV_KERNEL BLIS_SAMAXV_KERNEL_REF
+#endif
+
+#ifndef BLIS_DAMAXV_KERNEL
+#define BLIS_DAMAXV_KERNEL BLIS_DAMAXV_KERNEL_REF
+#endif
+
+#ifndef BLIS_CAMAXV_KERNEL
+#define BLIS_CAMAXV_KERNEL BLIS_CAMAXV_KERNEL_REF
+#endif
+
+#ifndef BLIS_ZAMAXV_KERNEL
+#define BLIS_ZAMAXV_KERNEL BLIS_ZAMAXV_KERNEL_REF
+#endif
+
 // addv kernels
 
 #ifndef BLIS_SADDV_KERNEL

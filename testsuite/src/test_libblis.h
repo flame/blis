@@ -215,6 +215,7 @@ typedef struct test_ops_s
 
 	// level-1v
 	test_op_t addv;
+	test_op_t amaxv;
 	test_op_t axpbyv;
 	test_op_t axpyv;
 	test_op_t copyv;
@@ -435,6 +436,7 @@ void libblis_test_check_empty_problem( obj_t* c, double* perf, double* resid );
 
 // Level-1v
 #include "test_addv.h"
+#include "test_amaxv.h"
 #include "test_axpbyv.h"
 #include "test_axpyv.h"
 #include "test_copyv.h"

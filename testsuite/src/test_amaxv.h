@@ -32,65 +32,9 @@
 
 */
 
-#include "blis.h"
-
-
-//
-// Define BLAS-to-BLIS interfaces.
-//
-#undef  GENTFUNC
-#define GENTFUNC( ftype_x, chx, blasname, blisname ) \
-\
-f77_int PASTEF772(i,chx,blasname) \
-     ( \
-       const f77_int* n, \
-       const ftype_x* x, const f77_int* incx  \
-     ) \
-{ \
-	dim_t    n0; \
-	ftype_x* x0; \
-	inc_t    incx0; \
-	gint_t   bli_index; \
-	f77_int  f77_index; \
-	err_t    init_result; \
-\
-	/* If the vector is empty, return an index of zero. This early check
-	   is needed to emulate netlib BLAS. Without it, bli_?amaxv() will
-	   return 0, which ends up getting incremented to 1 (below) before
-	   being returned, which is not what we want. */ \
-	if ( *n < 1 || *incx <= 0 ) return 0; \
-\
-	/* Initialize BLIS (if it is not already initialized). */ \
-	bli_init_auto( &init_result ); \
-\
-	/* Convert/typecast negative values of n to zero. */ \
-	bli_convert_blas_dim1( *n, n0 ); \
-\
-	/* If the input increments are negative, adjust the pointers so we can
-	   use positive increments instead. */ \
-	bli_convert_blas_incv( n0, (ftype_x*)x, *incx, x0, incx0 ); \
-\
-	/* Call BLIS interface. */ \
-	PASTEMAC(chx,blisname) \
-	( \
-	  n0, \
-	  x0, incx0, \
-	  &bli_index, \
-	  NULL  \
-	); \
-\
-	/* Convert zero-based BLIS (C) index to one-based BLAS (Fortran)
-	   index. Also, if the BLAS integer size differs from the BLIS
-	   integer size, that typecast occurs here. */ \
-	f77_index = bli_index + 1; \
-\
-	/* Finalize BLIS (if it was initialized above). */ \
-	bli_finalize_auto( init_result ); \
-\
-	return f77_index; \
-}
-
-#ifdef BLIS_ENABLE_BLAS2BLIS
-INSERT_GENTFUNC_BLAS( amax, amaxv )
-#endif
+void libblis_test_amaxv
+     (
+       test_params_t* params,
+       test_op_t*     op
+     );
 

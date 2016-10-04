@@ -79,6 +79,38 @@ INSERT_GENTFUNC_BASIC( subv,  BLIS_SUBV_KER )
 \
 void PASTEMAC(ch,opname) \
      ( \
+       dim_t   n, \
+       ctype*  x, inc_t incx, \
+       dim_t*  index, \
+       cntx_t* cntx  \
+     ) \
+{ \
+	const num_t dt = PASTEMAC(ch,type); \
+	cntx_t*     cntx_p; \
+\
+	bli_cntx_init_local_if( opname, cntx, cntx_p ); \
+\
+	PASTECH2(ch,opname,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx_p ); \
+\
+	f \
+	( \
+	   n, \
+	   x, incx, \
+	   index, \
+	   cntx_p  \
+	); \
+\
+	bli_cntx_finalize_local_if( opname, cntx ); \
+}
+
+INSERT_GENTFUNC_BASIC( amaxv, BLIS_AMAXV_KER )
+
+
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, opname, kerid ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
        conj_t  conjx, \
        dim_t   n, \
        ctype*  alpha, \

@@ -37,20 +37,6 @@
 // Prototype BLAS-like interfaces with typed operands.
 //
 
-#undef  GENTPROTI
-#define GENTPROTI( ctype, ctype_i, ch, chi, opname ) \
-\
-void PASTEMAC(ch,opname) \
-     ( \
-       dim_t    n, \
-       ctype*   x, inc_t incx, \
-       ctype_i* index, \
-       cntx_t*  cntx  \
-     );
-
-INSERT_GENTPROTI_BASIC( amaxv )
-
-
 #undef  GENTPROTR
 #define GENTPROTR( ctype, ctype_r, ch, chr, opname ) \
 \

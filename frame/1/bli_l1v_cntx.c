@@ -55,6 +55,7 @@ void PASTEMAC(opname,_cntx_finalize)( cntx_t* cntx ) \
 }
 
 GENFRONT( addv,    BLIS_ADDV_KER )
+GENFRONT( amaxv,   BLIS_AMAXV_KER )
 GENFRONT( copyv,   BLIS_COPYV_KER )
 GENFRONT( dotv,    BLIS_DOTV_KER )
 GENFRONT( dotxv,   BLIS_DOTXV_KER )

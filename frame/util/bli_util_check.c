@@ -44,21 +44,6 @@
 void PASTEMAC(opname,_check) \
      ( \
        obj_t*  x, \
-       obj_t*  index  \
-     ) \
-{ \
-	bli_utilv_xi_check( x, index ); \
-}
-
-GENFRONT( amaxv )
-
-
-#undef  GENFRONT
-#define GENFRONT( opname ) \
-\
-void PASTEMAC(opname,_check) \
-     ( \
-       obj_t*  x, \
        obj_t*  asum  \
      ) \
 { \
@@ -171,42 +156,6 @@ GENFRONT( sumsqv )
 
 
 // -----------------------------------------------------------------------------
-
-void bli_utilv_xi_check
-     (
-       obj_t*  x,
-       obj_t*  index
-     )
-{
-	err_t e_val;
-
-	// Check object datatypes.
-
-	e_val = bli_check_floating_object( x );
-	bli_check_error_code( e_val );
-
-	e_val = bli_check_integer_object( index );
-	bli_check_error_code( e_val );
-
-	e_val = bli_check_nonconstant_object( index );
-	bli_check_error_code( e_val );
-
-	// Check object dimensions.
-
-	e_val = bli_check_vector_object( x );
-	bli_check_error_code( e_val );
-
-	e_val = bli_check_scalar_object( index );
-	bli_check_error_code( e_val );
-
-	// Check object buffers (for non-NULLness).
-
-	e_val = bli_check_object_buffer( x );
-	bli_check_error_code( e_val );
-
-	e_val = bli_check_object_buffer( index );
-	bli_check_error_code( e_val );
-}
 
 void bli_utilv_xa_check
      (

@@ -260,6 +260,13 @@
 #define BLIS_CADDV_KERNEL_REF            bli_caddv_ref
 #define BLIS_ZADDV_KERNEL_REF            bli_zaddv_ref
 
+// amaxv kernels
+
+#define BLIS_SAMAXV_KERNEL_REF           bli_samaxv_ref
+#define BLIS_DAMAXV_KERNEL_REF           bli_damaxv_ref
+#define BLIS_CAMAXV_KERNEL_REF           bli_camaxv_ref
+#define BLIS_ZAMAXV_KERNEL_REF           bli_zamaxv_ref
+
 // axpbyv kernels
 
 #define BLIS_SAXPBYV_KERNEL_REF          bli_saxpbyv_ref

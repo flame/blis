@@ -43,19 +43,6 @@
 void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  x, \
-       obj_t*  index  \
-       BLIS_OAPI_CNTX_PARAM  \
-     );
-
-GENPROT( amaxv )
-
-
-#undef  GENPROT
-#define GENPROT( opname ) \
-\
-void PASTEMAC(opname,EX_SUF) \
-     ( \
-       obj_t*  x, \
        obj_t*  asum  \
        BLIS_OAPI_CNTX_PARAM  \
      );

@@ -113,6 +113,7 @@ void libblis_test_utility_ops( test_params_t* params, test_ops_t* ops )
 void libblis_test_level1v_ops( test_params_t* params, test_ops_t* ops )
 {
 	libblis_test_addv( params, &(ops->addv) );
+	libblis_test_amaxv( params, &(ops->amaxv) );
 	libblis_test_axpbyv( params, &(ops->axpbyv) );
 	libblis_test_axpyv( params, &(ops->axpyv) );
 	libblis_test_copyv( params, &(ops->copyv) );
@@ -222,6 +223,7 @@ void libblis_test_read_ops_file( char* input_filename, test_ops_t* ops )
 
 	// Level-1v
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   1, &(ops->addv) );
+	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   0, &(ops->amaxv) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   1, &(ops->axpbyv) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   1, &(ops->axpyv) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   1, &(ops->copyv) );
@@ -1946,8 +1948,8 @@ void libblis_test_vobj_randomize( test_params_t* params, bool_t normalize, obj_t
 		bli_obj_scalar_init_detached( dt,   &kappa );
 		bli_obj_scalar_init_detached( dt_r, &kappa_r );
 
-		// Normalize vector elements.
-		//bli_setsc( 1.0/( double )bli_obj_vector_dim( *x ), 0.0, &kappa );
+		// Normalize vector elements. The following code ensures that we
+		// always invert-scale by whole power of two.
 		bli_normfv( x, &kappa_r );
 		libblis_test_ceil_pow2( &kappa_r );
 		bli_copysc( &kappa_r, &kappa );

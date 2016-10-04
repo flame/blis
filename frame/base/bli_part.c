@@ -740,3 +740,35 @@ void bli_acquire_vpart_b2f
 		bli_acquire_mpart_r2l( req_part, i, b, obj, sub_obj );
 }
 
+
+// -- Scalar acquisition -------------------------------------------------------
+
+
+void bli_acquire_mij
+     (
+       dim_t     i,
+       dim_t     j,
+       obj_t*    obj,
+       obj_t*    sub_obj
+     )
+{
+	obj_t tmp_obj;
+
+	bli_acquire_mpart_l2r( BLIS_SUBPART1, j, 1,      obj, &tmp_obj );
+	bli_acquire_mpart_t2b( BLIS_SUBPART1, i, 1, &tmp_obj,  sub_obj );
+}
+
+
+void bli_acquire_vi
+     (
+       dim_t     i,
+       obj_t*    obj,
+       obj_t*    sub_obj
+     )
+{
+	if ( bli_obj_is_col_vector( *obj ) )
+		bli_acquire_mpart_t2b( BLIS_SUBPART1, i, 1, obj, sub_obj );
+	else // if ( bli_obj_is_row_vector( *obj ) )
+		bli_acquire_mpart_l2r( BLIS_SUBPART1, i, 1, obj, sub_obj );
+}
+

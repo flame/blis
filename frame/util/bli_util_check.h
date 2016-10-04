@@ -43,18 +43,6 @@
 void PASTEMAC(opname,_check) \
      ( \
        obj_t*  x, \
-       obj_t*  index  \
-     );
-
-GENPROT( amaxv )
-
-
-#undef  GENPROT
-#define GENPROT( opname ) \
-\
-void PASTEMAC(opname,_check) \
-     ( \
-       obj_t*  x, \
        obj_t*  asum  \
      );
 

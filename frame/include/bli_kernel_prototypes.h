@@ -164,6 +164,11 @@
 #define bli_caddv_ker_name      BLIS_CADDV_KERNEL
 #define bli_zaddv_ker_name      BLIS_ZADDV_KERNEL
 
+#define bli_samaxv_ker_name     BLIS_SAMAXV_KERNEL
+#define bli_damaxv_ker_name     BLIS_DAMAXV_KERNEL
+#define bli_camaxv_ker_name     BLIS_CAMAXV_KERNEL
+#define bli_zamaxv_ker_name     BLIS_ZAMAXV_KERNEL
+
 #define bli_saxpbyv_ker_name    BLIS_SAXPBYV_KERNEL
 #define bli_daxpbyv_ker_name    BLIS_DAXPBYV_KERNEL
 #define bli_caxpbyv_ker_name    BLIS_CAXPBYV_KERNEL

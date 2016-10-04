@@ -754,6 +754,9 @@ static func_t bli_gks_l1v_kers[BLIS_NUM_LEVEL1V_KERS] =
 /* addv       */ { { BLIS_SADDV_KERNEL, BLIS_CADDV_KERNEL,
                      BLIS_DADDV_KERNEL, BLIS_ZADDV_KERNEL, }
                  },
+/* amaxv      */ { { BLIS_SAMAXV_KERNEL, BLIS_CAMAXV_KERNEL,
+                     BLIS_DAMAXV_KERNEL, BLIS_ZAMAXV_KERNEL, }
+                 },
 /* axpbyv     */ { { BLIS_SAXPBYV_KERNEL, BLIS_CAXPBYV_KERNEL,
                      BLIS_DAXPBYV_KERNEL, BLIS_ZAXPBYV_KERNEL, }
                  },
@@ -797,6 +800,9 @@ static func_t bli_gks_l1v_ref_kers[BLIS_NUM_LEVEL1V_KERS] =
                 /* float (0)  scomplex (1)  double (2)  dcomplex (3) */
 /* addv       */ { { BLIS_SADDV_KERNEL_REF, BLIS_CADDV_KERNEL_REF,
                      BLIS_DADDV_KERNEL_REF, BLIS_ZADDV_KERNEL_REF, }
+                 },
+/* amaxv      */ { { BLIS_SAMAXV_KERNEL_REF, BLIS_CAMAXV_KERNEL_REF,
+                     BLIS_DAMAXV_KERNEL_REF, BLIS_ZAMAXV_KERNEL_REF, }
                  },
 /* axpbyv     */ { { BLIS_SAXPBYV_KERNEL_REF, BLIS_CAXPBYV_KERNEL_REF,
                      BLIS_DAXPBYV_KERNEL_REF, BLIS_ZAXPBYV_KERNEL_REF, }

@@ -76,3 +76,20 @@ GENPROT( acquire_mpart_br2tl )
 GENPROT( acquire_vpart_f2b )
 GENPROT( acquire_vpart_b2f )
 
+// -- Scalar acquisition -------------------------------------------------------
+
+void bli_acquire_mij
+     (
+       dim_t     i,
+       dim_t     j,
+       obj_t*    obj,
+       obj_t*    sub_obj
+     );
+
+void bli_acquire_vi
+     (
+       dim_t     i,
+       obj_t*    obj,
+       obj_t*    sub_obj
+     );
+

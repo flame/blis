@@ -45,11 +45,13 @@
 #define bli_dssets( xr, xi, y )  { (y) = (xr); }
 #define bli_cssets( xr, xi, y )  { (y) = (xr); }
 #define bli_zssets( xr, xi, y )  { (y) = (xr); }
+#define bli_issets( xr, xi, y )  { (y) = (xr); }
 
 #define bli_sdsets( xr, xi, y )  { (y) = (xr); }
 #define bli_ddsets( xr, xi, y )  { (y) = (xr); }
 #define bli_cdsets( xr, xi, y )  { (y) = (xr); }
 #define bli_zdsets( xr, xi, y )  { (y) = (xr); }
+#define bli_idsets( xr, xi, y )  { (y) = (xr); }
 
 #ifndef BLIS_ENABLE_C99_COMPLEX 
 
@@ -57,11 +59,13 @@
 #define bli_dcsets( xr, xi, y ) { bli_creal(y) = (xr); bli_cimag(y) = (xi); }
 #define bli_ccsets( xr, xi, y ) { bli_creal(y) = (xr); bli_cimag(y) = (xi); }
 #define bli_zcsets( xr, xi, y ) { bli_creal(y) = (xr); bli_cimag(y) = (xi); }
+#define bli_icsets( xr, xi, y ) { bli_creal(y) = (xr); bli_cimag(y) = (xi); }
 
 #define bli_szsets( xr, xi, y ) { bli_zreal(y) = (xr); bli_zimag(y) = (xi); }
 #define bli_dzsets( xr, xi, y ) { bli_zreal(y) = (xr); bli_zimag(y) = (xi); }
 #define bli_czsets( xr, xi, y ) { bli_zreal(y) = (xr); bli_zimag(y) = (xi); }
 #define bli_zzsets( xr, xi, y ) { bli_zreal(y) = (xr); bli_zimag(y) = (xi); }
+#define bli_izsets( xr, xi, y ) { bli_zreal(y) = (xr); bli_zimag(y) = (xi); }
 
 #else // ifdef BLIS_ENABLE_C99_COMPLEX
 
@@ -77,11 +81,18 @@
 
 #endif // BLIS_ENABLE_C99_COMPLEX
 
+#define bli_sisets( xr, xi, y ) { (y) = bli_sreal(xr); }
+#define bli_disets( xr, xi, y ) { (y) = bli_dreal(xr); }
+#define bli_cisets( xr, xi, y ) { (y) = bli_creal(xr); }
+#define bli_zisets( xr, xi, y ) { (y) = bli_zreal(xr); }
+#define bli_iisets( xr, xi, y ) { (y) =          (xr); }
+
 
 #define bli_ssets( xr, xi, y )  bli_sssets( xr, xi, y )
 #define bli_dsets( xr, xi, y )  bli_ddsets( xr, xi, y )
 #define bli_csets( xr, xi, y )  bli_scsets( xr, xi, y )
 #define bli_zsets( xr, xi, y )  bli_dzsets( xr, xi, y )
+#define bli_isets( xr, xi, y )  bli_disets( xr, xi, y )
 
 
 #endif
