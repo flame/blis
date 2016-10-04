@@ -46,12 +46,19 @@ cntl_t* bli_gemm_cntl_create
 	if      ( family == BLIS_HERK ) macro_kernel_p = bli_herk_x_ker_var2;
 	else if ( family == BLIS_TRMM ) macro_kernel_p = bli_trmm_xx_ker_var2;
 
-	// Create a node for the macro-kernel.
-	cntl_t* gemm_cntl_bp_ke = bli_gemm_cntl_obj_create
+	// Create two nodes for the macro-kernel.
+	cntl_t* gemm_cntl_bu_ke = bli_gemm_cntl_obj_create
 	(
-	  BLIS_NR, // bszid not used by macro-kernel.
-	  macro_kernel_p,
+	  BLIS_MR, // needed for bli_thrinfo_rgrow()
+	  NULL,    // variant function pointer not used
 	  NULL     // no sub-node; this is the leaf of the tree.
+	);
+
+	cntl_t* gemm_cntl_bp_bu = bli_gemm_cntl_obj_create
+	(
+	  BLIS_NR, // not used by macro-kernel, but needed for bli_thrinfo_rgrow()
+	  macro_kernel_p,
+	  gemm_cntl_bu_ke
 	);
 
 	// Create a node for packing matrix A.
@@ -66,7 +73,7 @@ cntl_t* bli_gemm_cntl_create
 	  FALSE,   // reverse iteration if lower?
 	  BLIS_PACKED_ROW_PANELS,
 	  BLIS_BUFFER_FOR_A_BLOCK,
-	  gemm_cntl_bp_ke
+	  gemm_cntl_bp_bu
 	);
 
 	// Create a node for partitioning the m dimension by MC.

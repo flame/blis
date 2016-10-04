@@ -41,6 +41,12 @@
 #include "bli_thrcomm_openmp.h"
 #include "bli_thrcomm_pthreads.h"
 
+
+// thrcomm_t query (field only)
+
+#define bli_thrcomm_num_threads( comm )   ( (comm)->n_threads )
+
+
 // Thread communicator prototypes.
 thrcomm_t* bli_thrcomm_create( dim_t n_threads );
 void       bli_thrcomm_free( thrcomm_t* communicator );

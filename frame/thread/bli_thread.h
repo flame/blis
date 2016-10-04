@@ -173,16 +173,14 @@ typedef void (*l3int_t)
 // Level-3 thread decorator prototype
 void bli_l3_thread_decorator
      (
-       dim_t       n_threads,
-       l3int_t     func,
-       obj_t*      alpha,
-       obj_t*      a,
-       obj_t*      b,
-       obj_t*      beta,
-       obj_t*      c,
-       cntx_t*     cntx,
-       cntl_t*     cntl,
-       thrinfo_t** thread
+       l3int_t func,
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       cntl_t* cntl
      );
 
 // Miscellaneous prototypes

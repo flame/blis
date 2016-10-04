@@ -90,13 +90,12 @@ void bli_herk_front
 	// Set the operation family id in the context.
 	bli_cntx_set_family( BLIS_HERK, cntx );
 
-	thrinfo_t** infos = bli_l3_thrinfo_create_paths( BLIS_HERK, BLIS_LEFT );
-	dim_t n_threads = bli_thread_num_threads( infos[0] );
+	// Record the threading for each level within the context.
+	bli_cntx_set_thrloop_from_env( BLIS_HERK, BLIS_LEFT, cntx );
 
 	// Invoke the internal back-end.
 	bli_l3_thread_decorator
 	(
-	  n_threads,
 	  bli_gemm_int,
 	  alpha,
 	  &a_local,
@@ -104,11 +103,8 @@ void bli_herk_front
 	  beta,
 	  &c_local,
 	  cntx,
-	  cntl,
-	  infos
+	  cntl
 	);
-
-	bli_l3_thrinfo_free_paths( infos, n_threads );
 
 	// The Hermitian rank-k product was computed as A*A', even for the
 	// diagonal elements. Mathematically, the imaginary components of

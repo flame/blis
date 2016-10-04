@@ -638,6 +638,21 @@ typedef enum
 #define BLIS_NUM_UKR_IMPL_TYPES 4
 
 
+#if 0
+typedef enum
+{
+	BLIS_JC_IDX = 0,
+	BLIS_PC_IDX,
+	BLIS_IC_IDX,
+	BLIS_JR_IDX,
+	BLIS_IR_IDX,
+	BLIS_PR_IDX,
+} thridx_t;
+#endif
+
+#define BLIS_NUM_LOOPS 6
+
+
 // -- Operation ID type --
 
 typedef enum
@@ -948,6 +963,8 @@ typedef struct cntx_s
 	pack_t    schema_a;
 	pack_t    schema_b;
 	pack_t    schema_c;
+
+	dim_t     thrloop[ BLIS_NUM_LOOPS ];
 
 	membrk_t* membrk;
 } cntx_t;
