@@ -117,6 +117,9 @@ void bli_trsm_int
 	// FGVZ->TMS: Is this barrier still needed?
 	bli_thread_obarrier( thread );
 
+	// Create the next node in the thrinfo_t structure.
+	bli_thrinfo_grow( cntx, cntl, thread );
+
 	// Extract the function pointer from the current control tree node.
 	f = bli_cntl_var_func( cntl );
 

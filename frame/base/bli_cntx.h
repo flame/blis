@@ -59,6 +59,8 @@ typedef struct cntx_s
 	pack_t    schema_b;
 	pack_t    schema_c;
 
+	dim_t*    thrloop;
+
 	membrk_t* membrk;
 } cntx_t;
 */
@@ -126,6 +128,36 @@ typedef struct cntx_s
 #define bli_cntx_membrk( cntx ) \
 \
 	( (cntx)->membrk )
+
+#define bli_cntx_thrloop( cntx ) \
+\
+	( (cntx)->thrloop )
+
+#if 1
+#define bli_cntx_jc_way( cntx ) \
+\
+	( (cntx)->thrloop[ BLIS_NC ] )
+
+#define bli_cntx_pc_way( cntx ) \
+\
+	( (cntx)->thrloop[ BLIS_KC ] )
+
+#define bli_cntx_ic_way( cntx ) \
+\
+	( (cntx)->thrloop[ BLIS_MC ] )
+
+#define bli_cntx_jr_way( cntx ) \
+\
+	( (cntx)->thrloop[ BLIS_NR ] )
+
+#define bli_cntx_ir_way( cntx ) \
+\
+	( (cntx)->thrloop[ BLIS_MR ] )
+#endif
+
+#define bli_cntx_way_for_bszid( bszid, cntx ) \
+\
+    ( (cntx)->thrloop[ bszid ] )
 
 // cntx_t modification (fields only)
 
@@ -197,6 +229,16 @@ typedef struct cntx_s
 #define bli_cntx_set_membrk( _membrk, cntx_p ) \
 { \
 	(cntx_p)->membrk = _membrk; \
+}
+
+#define bli_cntx_set_thrloop( jc_, pc_, ic_, jr_, ir_, cntx_p ) \
+{ \
+	(cntx_p)->thrloop[ BLIS_NC ] = jc_; \
+	(cntx_p)->thrloop[ BLIS_KC ] = pc_; \
+	(cntx_p)->thrloop[ BLIS_MC ] = ic_; \
+	(cntx_p)->thrloop[ BLIS_NR ] = jr_; \
+	(cntx_p)->thrloop[ BLIS_MR ] = ir_; \
+	(cntx_p)->thrloop[ BLIS_KR ] = 1;   \
 }
 
 // cntx_t query (complex)
@@ -356,6 +398,8 @@ func_t*  bli_cntx_get_packm_ukr( cntx_t* cntx );
 //pack_t   bli_cntx_get_pack_schema_a( cntx_t* cntx );
 //pack_t   bli_cntx_get_pack_schema_b( cntx_t* cntx );
 //pack_t   bli_cntx_get_pack_schema_c( cntx_t* cntx );
+dim_t    bli_cntx_get_num_threads( cntx_t* cntx );
+dim_t    bli_cntx_get_num_threads_in( cntx_t* cntx, cntl_t* cntl );
 
 // set functions
 
@@ -390,6 +434,9 @@ void     bli_cntx_set_pack_schema_b( pack_t  schema_b,
                                      cntx_t* cntx );
 void     bli_cntx_set_pack_schema_c( pack_t  schema_c,
                                      cntx_t* cntx );
+void     bli_cntx_set_thrloop_from_env( opid_t  l3_op,
+                                        side_t  side,
+                                        cntx_t* cntx );
 
 // other query functions
 

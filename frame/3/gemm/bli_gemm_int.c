@@ -50,7 +50,6 @@ void bli_gemm_int
 	obj_t     b_local;
 	obj_t     c_local;
 	gemm_voft f;
-	ind_t     im;
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
@@ -102,17 +101,22 @@ void bli_gemm_int
         bli_obj_scalar_apply_scalar( beta, &c_local );
 	}
 
+	// Create the next node in the thrinfo_t structure.
+	bli_thrinfo_grow( cntx, cntl, thread );
+
 	// Extract the function pointer from the current control tree node.
 	f = bli_cntl_var_func( cntl );
 
 	// Somewhat hackish support for 3m3, 3m2, and 4m1b method implementations.
-	im = bli_cntx_get_ind_method( cntx );
-
-	if ( im != BLIS_NAT )
 	{
-		if      ( im == BLIS_3M3  && f == bli_gemm_packa    ) f = bli_gemm3m3_packa;
-		else if ( im == BLIS_3M2  && f == bli_gemm_ker_var2 ) f = bli_gemm3m2_ker_var2;
-		else if ( im == BLIS_4M1B && f == bli_gemm_ker_var2 ) f = bli_gemm4mb_ker_var2;
+		ind_t im = bli_cntx_get_ind_method( cntx );
+
+		if ( im != BLIS_NAT )
+		{
+			if      ( im == BLIS_3M3  && f == bli_gemm_packa    ) f = bli_gemm3m3_packa;
+			else if ( im == BLIS_3M2  && f == bli_gemm_ker_var2 ) f = bli_gemm3m2_ker_var2;
+			else if ( im == BLIS_4M1B && f == bli_gemm_ker_var2 ) f = bli_gemm4mb_ker_var2;
+		}
 	}
 
 	// Invoke the variant.
