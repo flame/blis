@@ -486,10 +486,7 @@ main()
 	
 	
 	# Check the threading model flag.
-<<<<<<< HEAD
-=======
 	# NOTE: 'omp' is deprecated but still supported; 'openmp' is preferred.
->>>>>>> origin/master
 	enable_openmp='no'
 	enable_openmp_01=0
 	enable_pthreads='no'
