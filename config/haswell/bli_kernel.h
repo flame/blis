@@ -152,8 +152,18 @@
 
 
 // -- LEVEL-1F KERNEL CONSTANTS ------------------------------------------------
+
+
+
+
+// -- LEVEL-1M KERNEL DEFINITIONS ----------------------------------------------
+
+// -- packm --
+
+// -- unpackm --
+
 #define BLIS_DEFAULT_1F_S            8
-#define BLIS_DEFAULT_1F_D 	 		 4
+#define BLIS_DEFAULT_1F_D 	     4
 
 
 // -- LEVEL-1F KERNEL DEFINITIONS ----------------------------------------------
@@ -171,13 +181,6 @@
 #define BLIS_DDOTXF_KERNEL           bli_ddotxf_int_var1
 
 // -- dotxaxpyf --
-
-
-// -- LEVEL-1M KERNEL DEFINITIONS ----------------------------------------------
-
-// -- packm --
-
-// -- unpackm --
 
 
 
