@@ -32,11 +32,15 @@
 
 */
 
-void bli_trsm_int( obj_t*  alpha,
-                   obj_t*  a,
-                   obj_t*  b,
-                   obj_t*  beta,
-                   obj_t*  c,
-                   cntx_t* cntx,
-                   trsm_t* cntl,
-                   thrinfo_t* thread );
+void bli_trsm_int
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       cntl_t* cntl,
+       thrinfo_t* thread
+     );
+

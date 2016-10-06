@@ -32,28 +32,24 @@
 
 */
 
-void bli_packm_init( obj_t*   a,
-                     obj_t*   p,
-                     cntx_t*  cntx,
-                     packm_t* cntl );
+siz_t bli_packm_init
+     (
+       obj_t*  a,
+       obj_t*  p,
+       cntx_t* cntx,
+       cntl_t* cntl
+     );
 
-void bli_packm_init_pack( invdiag_t invert_diag,
-                          pack_t    pack_schema,
-                          packord_t pack_ord_if_up,
-                          packord_t pack_ord_if_lo,
-                          packbuf_t pack_buf_type,
-                          bszid_t   mr_id,
-                          bszid_t   nr_id,
-                          obj_t*    c,
-                          obj_t*    p,
-                          cntx_t*   cntx );
-
-/*
-void bli_packm_init_cast( obj_t*  a,
-                          obj_t*  p,
-                          obj_t*  c );
-*/
-
-void bli_packm_release( obj_t*   p,
-                        packm_t* cntl );
+siz_t bli_packm_init_pack
+     (
+       invdiag_t invert_diag,
+       pack_t    schema,
+       packord_t pack_ord_if_up,
+       packord_t pack_ord_if_lo,
+       bszid_t   bmult_id_m,
+       bszid_t   bmult_id_n,
+       obj_t*    a,
+       obj_t*    p,
+       cntx_t*   cntx
+     );
 

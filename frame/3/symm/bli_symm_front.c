@@ -34,14 +34,17 @@
 
 #include "blis.h"
 
-void bli_symm_front( side_t  side,
-                     obj_t*  alpha,
-                     obj_t*  a,
-                     obj_t*  b,
-                     obj_t*  beta,
-                     obj_t*  c,
-                     cntx_t* cntx,
-                     gemm_t* cntl )
+void bli_symm_front
+     (
+       side_t  side,
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       cntl_t* cntl
+     )
 {
 	obj_t   a_local;
 	obj_t   b_local;
@@ -60,7 +63,7 @@ void bli_symm_front( side_t  side,
 
 	// Reinitialize the memory allocator to accommodate the blocksizes
 	// in the current context.
-	bli_mem_reinit( cntx );
+	bli_memsys_reinit( cntx );
 
 	// Alias A, B, and C in case we need to apply transformations.
 	bli_obj_alias_to( *a, a_local );
@@ -71,7 +74,7 @@ void bli_symm_front( side_t  side,
 	// contiguous columns, or if C is stored by columns and the micro-kernel
 	// prefers contiguous rows, transpose the entire operation to allow the
 	// micro-kernel to access elements of C in its preferred manner.
-	if ( bli_cntx_l3_nat_ukr_dislikes_storage_of( &c_local, BLIS_GEMM_UKR, cntx ) )
+	if ( bli_cntx_l3_ukr_dislikes_storage_of( &c_local, BLIS_GEMM_UKR, cntx ) )
 	{
 		bli_toggle_side( side );
 		bli_obj_induce_trans( b_local );
@@ -85,22 +88,27 @@ void bli_symm_front( side_t  side,
 		bli_obj_swap( a_local, b_local );
 	}
 
-    thrinfo_t** infos = bli_l3_thrinfo_create_paths( BLIS_SYMM, BLIS_LEFT );
-    dim_t n_threads = bli_thread_num_threads( infos[0] );
-    
-    // Invoke the internal back-end.
-    bli_l3_thread_decorator( n_threads,
-                                 (l3_int_t) bli_gemm_int, 
-                                 alpha, 
-                                 &a_local,  
-                                 &b_local,  
-                                 beta, 
-                                 &c_local,  
-                                 (void*) cntx, 
-                                 (void*) cntl, 
-                                 (void**) infos );
+	// Set the operation family id in the context.
+	bli_cntx_set_family( BLIS_GEMM, cntx );
 
-     bli_l3_thrinfo_free_paths( infos, n_threads );
+	thrinfo_t** infos = bli_l3_thrinfo_create_paths( BLIS_SYMM, BLIS_LEFT );
+	dim_t n_threads = bli_thread_num_threads( infos[0] );
 
+	// Invoke the internal back-end.
+	bli_l3_thread_decorator
+	(
+	  n_threads,
+	  bli_gemm_int,
+	  alpha,
+	  &a_local,
+	  &b_local,
+	  beta,
+	  &c_local,
+	  cntx,
+	  cntl,
+	  infos
+	);
+
+	bli_l3_thrinfo_free_paths( infos, n_threads );
 }
 

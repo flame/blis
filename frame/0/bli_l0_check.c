@@ -99,8 +99,8 @@ void bli_getsc_check
 
 	// Check object datatypes.
 
-	e_val = bli_check_noninteger_object( chi );
-	bli_check_error_code( e_val );
+	//e_val = bli_check_noninteger_object( chi );
+	//bli_check_error_code( e_val );
 
 	// Check object dimensions.
 
@@ -125,8 +125,8 @@ void bli_setsc_check
 
 	// Check object datatypes.
 
-	e_val = bli_check_floating_object( chi );
-	bli_check_error_code( e_val );
+	//e_val = bli_check_floating_object( chi );
+	//bli_check_error_code( e_val );
 
 	// Check object dimensions.
 

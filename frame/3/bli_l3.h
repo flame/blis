@@ -33,13 +33,17 @@
 */
 
 #include "bli_l3_cntx.h"
+#include "bli_l3_cntl.h"
 #include "bli_l3_check.h"
 
 #include "bli_l3_ft.h"
 #include "bli_l3_oft.h"
+#include "bli_l3_voft.h"
 
 #include "bli_l3_blocksize.h"
+#include "bli_l3_direct.h"
 #include "bli_l3_prune.h"
+#include "bli_l3_packm.h"
 
 // Prototype object APIs with and without contexts.
 #include "bli_oapi_w_cntx.h"

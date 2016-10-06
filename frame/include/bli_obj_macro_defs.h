@@ -812,21 +812,6 @@ bli_obj_width_stored( obj )
 	(obj).elem_size = size; \
 }
 
-
-// Pack mem_t entry query
-
-#define bli_obj_pack_mem( obj ) \
-\
-	( &((obj).pack_mem) )
-
-// Pack mem_t entry modification
-
-#define bli_obj_set_pack_mem( mem_p, obj ) \
-{ \
-	(obj).pack_mem = *mem_p; \
-}
-
-
 // Packed matrix info query
 
 #define bli_obj_padded_length( obj ) \
@@ -838,6 +823,12 @@ bli_obj_width_stored( obj )
 	( (obj).n_padded )
 
 // Packed matrix info modification
+
+#define bli_obj_set_buffer_to_mem( mem_p, obj ) \
+{ \
+	void* buf = bli_mem_buffer( mem_p ); \
+	bli_obj_set_buffer( buf, obj ); \
+} \
 
 #define bli_obj_set_padded_length( m0, obj ) \
 { \
@@ -900,15 +891,7 @@ bli_obj_width_stored( obj )
 
 // -- Miscellaneous object macros --
 
-// Make a special alias (shallow copy) that does not overwrite pack_mem
-// entry.
-
-#define bli_obj_alias_for_packing( a, b ) \
-{ \
-	bli_obj_init_basic_shallow_copy_of( a, b ); \
-}
-
-// Make a full alias (shallow copy), including pack_mem and friends
+// Make a full alias (shallow copy)
 
 #define bli_obj_alias_to( a, b ) \
 { \
@@ -946,28 +929,6 @@ bli_obj_width_stored( obj )
 	(obj).info = 0x0; \
 	(obj).info = (obj).info | BLIS_BITVAL_DENSE | BLIS_BITVAL_GENERAL; \
 }
-
-
-// Initialize object for packing purposes
-
-#define bli_obj_init_pack( obj_p ) \
-{ \
-	mem_t* pack_mem_ = bli_obj_pack_mem( *obj_p ); \
-\
-	bli_mem_set_buffer( NULL, pack_mem_ ); \
-}
-
-
-// Release object's pack mem_t entries back to memory manager
-
-#define bli_obj_release_pack( obj_p ) \
-{ \
-	mem_t* pack_mem_ = bli_obj_pack_mem( *(obj_p) ); \
-\
-	if ( bli_mem_is_alloc( pack_mem_ ) ) \
-		bli_membrk_release( pack_mem_ ); \
-}
-
 
 
 // Submatrix/scalar buffer acquisition

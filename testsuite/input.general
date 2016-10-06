@@ -36,6 +36,7 @@ sdcz    # Datatype(s) to test:
 1       #   4mh  ('1' = enable; '0' = disable)
 1       #   4m1b ('1' = enable; '0' = disable)
 1       #   4m1a ('1' = enable; '0' = disable)
+1       #   native ('1' = enable; '0' = disable)
 1       # Error-checking level:
         #   '0' = disable error checking; '1' = full error checking
 i       # Reaction to test failure:

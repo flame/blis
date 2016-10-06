@@ -93,10 +93,14 @@ static func_t packm_struc_cxk_kers[BLIS_NUM_PACK_SCHEMA_TYPES] =
 };
 
 
-void bli_packm_blk_var1( obj_t*   c,
-                         obj_t*   p,
-                         cntx_t*  cntx,
-                         thrinfo_t* t )
+void bli_packm_blk_var1
+     (
+       obj_t*   c,
+       obj_t*   p,
+       cntx_t*  cntx,
+       cntl_t*  cntl,
+       thrinfo_t* t
+     )
 {
 	num_t     dt_cp      = bli_obj_datatype( *c );
 
@@ -140,7 +144,7 @@ void bli_packm_blk_var1( obj_t*   c,
 	// whether we are executing an induced method.
 	if ( bli_is_nat_packed( schema ) )
 	{
-		// This branch if for native execution, where we assume that
+		// This branch is for native execution, where we assume that
 		// the micro-kernel will always apply the alpha scalar of the
 		// higher-level operation. Thus, we use BLIS_ONE for kappa so
 		// that the underlying packm implementation does not perform
@@ -156,28 +160,25 @@ void bli_packm_blk_var1( obj_t*   c,
 		// real domain micro-kernels. (In the aforementioned situation,
 		// applying a real scalar is easy, but applying a complex one is
 		// harder, so we avoid the need altogether with the code below.)
-		if( bli_thread_am_ochief( t ) )
+		if ( bli_obj_scalar_has_nonzero_imag( p ) )
 		{
-			if ( bli_obj_scalar_has_nonzero_imag( p ) )
-			{
-//printf( "applying non-zero imag kappa\n" );
-				// Detach the scalar.
-				bli_obj_scalar_detach( p, &kappa );
-	
-				// Reset the attached scalar (to 1.0).
-				bli_obj_scalar_reset( p );
-	
-				kappa_p = &kappa;
-			}
-			else
-			{
-				// If the internal scalar of A has only a real component, then
-				// we will apply it later (in the micro-kernel), and so we will
-				// use BLIS_ONE to indicate no scaling during packing.
-				kappa_p = &BLIS_ONE;
-			}
+			//printf( "applying non-zero imag kappa\n" );
+
+			// Detach the scalar.
+			bli_obj_scalar_detach( p, &kappa );
+
+			// Reset the attached scalar (to 1.0).
+			bli_obj_scalar_reset( p );
+
+			kappa_p = &kappa;
 		}
-		kappa_p = bli_thread_obroadcast( t, kappa_p );
+		else
+		{
+			// If the internal scalar of A has only a real component, then
+			// we will apply it later (in the micro-kernel), and so we will
+			// use BLIS_ONE to indicate no scaling during packing.
+			kappa_p = &BLIS_ONE;
+		}
 	
 		// Acquire the buffer to the kappa chosen above.
 		buf_kappa = bli_obj_buffer_for_1x1( dt_cp, *kappa_p );
@@ -194,7 +195,12 @@ void bli_packm_blk_var1( obj_t*   c,
 	         bli_is_rpi_packed( schema ) )  packm_kers = packm_struc_cxk_rih_kers;
 	else                                    packm_kers = packm_struc_cxk_kers;
 #else
-	func_t* cntx_packm_kers = bli_cntx_get_packm_ukr( cntx );
+	// The original idea here was to read the packm_ukr from the context
+	// if it is non-NULL. The problem is, it requires that we be able to
+	// assume that the packm_ukr field is initialized to NULL, which it
+	// currently is not.
+
+	//func_t* cntx_packm_kers = bli_cntx_get_packm_ukr( cntx );
 
 	//if ( bli_func_is_null_dt( dt_cp, cntx_packm_kers ) )
 	{
@@ -203,7 +209,6 @@ void bli_packm_blk_var1( obj_t*   c,
 		// we use the default lookup table to determine the right func_t
 		// for the current schema.
 		const dim_t i = bli_pack_schema_index( schema );
-//printf( "bli_packm_blk_var1: pack schema index = %lu (schema = %x)\n", i, schema );
 
 		packm_kers = &packm_struc_cxk_kers[ i ];
 	}
@@ -221,11 +226,6 @@ void bli_packm_blk_var1( obj_t*   c,
 	// Query the datatype-specific function pointer from the func_t object.
 	packm_ker = bli_func_get_dt( dt_cp, packm_kers );
 
-
-//bli_cntx_print( cntx );
-//printf( "bli_packm_blk_var1: packm_ker = %p\n", packm_ker );
-//printf( "bli_packm_blk_var1: cntx_packm_ker = %p\n", cntx_packm_kers );
-//printf( "bli_packm_blk_var1: local_table_entry = %p\n", &packm_struc_cxk_kers[ bli_pack_schema_index( schema ) ] );
 	// Index into the type combination array to extract the correct
 	// function pointer.
 	f = ftypes[dt_cp];
@@ -597,6 +597,57 @@ PASTEMAC(ch,fprintm)( stdout, "packm_var2: a", m, n, \
 			/* NOTE: This value is equivalent to ps_p. */ \
 			p_inc = ps_p; \
 		} \
+\
+/*
+if ( col_stored ) { \
+	if ( bli_thread_work_id( thread ) == 0 ) \
+	{ \
+	printf( "packm_blk_var1: thread %lu  (a = %p, ap = %p)\n", bli_thread_work_id( thread ), c_use, p_use ); \
+	fflush( stdout ); \
+	PASTEMAC(ch,fprintm)( stdout, "packm_blk_var1: a", *m_panel_use, *n_panel_use, \
+	                      ( ctype* )c_use,         rs_c, cs_c, "%4.1f", "" ); \
+	PASTEMAC(ch,fprintm)( stdout, "packm_blk_var1: ap", *m_panel_max, *n_panel_max, \
+	                      ( ctype* )p_use,         rs_p, cs_p, "%4.1f", "" ); \
+	fflush( stdout ); \
+	} \
+bli_thread_obarrier( thread ); \
+	if ( bli_thread_work_id( thread ) == 1 ) \
+	{ \
+	printf( "packm_blk_var1: thread %lu  (a = %p, ap = %p)\n", bli_thread_work_id( thread ), c_use, p_use ); \
+	fflush( stdout ); \
+	PASTEMAC(ch,fprintm)( stdout, "packm_blk_var1: a", *m_panel_use, *n_panel_use, \
+	                      ( ctype* )c_use,         rs_c, cs_c, "%4.1f", "" ); \
+	PASTEMAC(ch,fprintm)( stdout, "packm_blk_var1: ap", *m_panel_max, *n_panel_max, \
+	                      ( ctype* )p_use,         rs_p, cs_p, "%4.1f", "" ); \
+	fflush( stdout ); \
+	} \
+bli_thread_obarrier( thread ); \
+} \
+else { \
+	if ( bli_thread_work_id( thread ) == 0 ) \
+	{ \
+	printf( "packm_blk_var1: thread %lu  (b = %p, bp = %p)\n", bli_thread_work_id( thread ), c_use, p_use ); \
+	fflush( stdout ); \
+	PASTEMAC(ch,fprintm)( stdout, "packm_blk_var1: b", *m_panel_use, *n_panel_use, \
+	                      ( ctype* )c_use,         rs_c, cs_c, "%4.1f", "" ); \
+	PASTEMAC(ch,fprintm)( stdout, "packm_blk_var1: bp", *m_panel_max, *n_panel_max, \
+	                      ( ctype* )p_use,         rs_p, cs_p, "%4.1f", "" ); \
+	fflush( stdout ); \
+	} \
+bli_thread_obarrier( thread ); \
+	if ( bli_thread_work_id( thread ) == 1 ) \
+	{ \
+	printf( "packm_blk_var1: thread %lu  (b = %p, bp = %p)\n", bli_thread_work_id( thread ), c_use, p_use ); \
+	fflush( stdout ); \
+	PASTEMAC(ch,fprintm)( stdout, "packm_blk_var1: b", *m_panel_use, *n_panel_use, \
+	                      ( ctype* )c_use,         rs_c, cs_c, "%4.1f", "" ); \
+	PASTEMAC(ch,fprintm)( stdout, "packm_blk_var1: bp", *m_panel_max, *n_panel_max, \
+	                      ( ctype* )p_use,         rs_p, cs_p, "%4.1f", "" ); \
+	fflush( stdout ); \
+	} \
+bli_thread_obarrier( thread ); \
+} \
+*/ \
 \
 /*
 		if ( bli_is_4mi_packed( schema ) ) { \

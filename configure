@@ -91,7 +91,7 @@ print_usage()
 	echo "   -t MODEL, --enable-threading[=MODEL], --disable-threading"
 	echo " "
 	echo "                 Enable threading in the library, using threading model"
-	echo "                 MODEL={omp,pthreads,no}. If MODEL=no or "
+	echo "                 MODEL={openmp,pthreads,no}. If MODEL=no or "
 	echo "                 --disable-threading is specified, threading will be"
 	echo "                 disabled. The default is 'no'."
 	echo " "
@@ -486,13 +486,18 @@ main()
 	
 	
 	# Check the threading model flag.
+<<<<<<< HEAD
+=======
+	# NOTE: 'omp' is deprecated but still supported; 'openmp' is preferred.
+>>>>>>> origin/master
 	enable_openmp='no'
 	enable_openmp_01=0
 	enable_pthreads='no'
 	enable_pthreads_01=0
 	if [ "x${threading_model}" = "xauto" ]; then
 		echo "${script_name}: determining the threading model automatically."
-	elif [ "x${threading_model}" = "xomp" ]; then
+	elif [ "x${threading_model}" = "xopenmp" ] ||
+	     [ "x${threading_model}" = "xomp" ]; then
 		echo "${script_name}: using OpenMP for threading."
 		enable_openmp='yes'
 		enable_openmp_01=1

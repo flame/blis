@@ -58,6 +58,21 @@ INSERT_GENTDEF( addv )
 INSERT_GENTDEF( copyv )
 INSERT_GENTDEF( subv )
 
+// amaxv
+
+#undef  GENTDEF
+#define GENTDEF( ctype, ch, opname, tsuf ) \
+\
+typedef void (*PASTECH2(ch,opname,tsuf)) \
+     ( \
+       dim_t           n, \
+       ctype* restrict x, inc_t incx, \
+       dim_t* restrict index, \
+       cntx_t*         cntx  \
+     );
+
+INSERT_GENTDEF( amaxv )
+
 // axpbyv
 
 #undef  GENTDEF

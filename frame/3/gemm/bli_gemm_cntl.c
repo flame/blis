@@ -34,140 +34,101 @@
 
 #include "blis.h"
 
-extern scalm_t*   scalm_cntl;
-
-packm_t*          gemm_packa_cntl = NULL;
-packm_t*          gemm_packb_cntl = NULL;
-
-gemm_t*           gemm_cntl_bp_ke = NULL;
-gemm_t*           gemm_cntl_op_bp = NULL;
-gemm_t*           gemm_cntl_mm_op = NULL;
-gemm_t*           gemm_cntl_vl_mm = NULL;
-
-gemm_t*           gemm_cntl = NULL;
-
-void bli_gemm_cntl_init()
+cntl_t* bli_gemm_cntl_create
+     (
+       opid_t family
+     )
 {
-	// Create control tree objects for packm operations.
-	gemm_packa_cntl
-	=
-	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT1,
-	                           BLIS_MR,
-	                           BLIS_KR,
-	                           FALSE, // do NOT invert diagonal
-	                           FALSE, // reverse iteration if upper?
-	                           FALSE, // reverse iteration if lower?
-	                           BLIS_PACKED_ROW_PANELS,
-	                           BLIS_BUFFER_FOR_A_BLOCK );
-
-	gemm_packb_cntl
-	=
-	bli_packm_cntl_obj_create( BLIS_BLOCKED,
-	                           BLIS_VARIANT1,
-	                           BLIS_KR,
-	                           BLIS_NR,
-	                           FALSE, // do NOT invert diagonal
-	                           FALSE, // reverse iteration if upper?
-	                           FALSE, // reverse iteration if lower?
-	                           BLIS_PACKED_COL_PANELS,
-	                           BLIS_BUFFER_FOR_B_PANEL );
+	void* macro_kernel_p = bli_gemm_ker_var2;
 
 
-	//
-	// Create a control tree for packing A and B, and streaming C.
-	//
+	// Change the macro-kernel if the operation family is herk or trmm.
+	if      ( family == BLIS_HERK ) macro_kernel_p = bli_herk_x_ker_var2;
+	else if ( family == BLIS_TRMM ) macro_kernel_p = bli_trmm_xx_ker_var2;
 
-	// Create control tree object for lowest-level block-panel kernel.
-	gemm_cntl_bp_ke
-	=
-	bli_gemm_cntl_obj_create( BLIS_UNB_OPT,
-	                          BLIS_VARIANT2,
-	                          0, // bszid_t not used by macro-kernel
-	                          NULL, NULL, NULL,
-	                          NULL, NULL, NULL );
+	// Create a node for the macro-kernel.
+	cntl_t* gemm_cntl_bp_ke = bli_gemm_cntl_obj_create
+	(
+	  BLIS_NR, // bszid not used by macro-kernel.
+	  macro_kernel_p,
+	  NULL     // no sub-node; this is the leaf of the tree.
+	);
 
-	// Create control tree object for outer panel (to block-panel)
-	// problem.
-	gemm_cntl_op_bp
-	=
-	bli_gemm_cntl_obj_create( BLIS_BLOCKED,
-	                          BLIS_VARIANT1,
-	                          BLIS_MC,
-	                          NULL,
-	                          gemm_packa_cntl,
-	                          gemm_packb_cntl,
-	                          NULL,
-	                          gemm_cntl_bp_ke,
-	                          NULL );
+	// Create a node for packing matrix A.
+	cntl_t* gemm_cntl_packa = bli_packm_cntl_obj_create
+	(
+	  bli_gemm_packa,
+	  bli_packm_blk_var1,
+	  BLIS_MR,
+	  BLIS_KR,
+	  FALSE,   // do NOT invert diagonal
+	  FALSE,   // reverse iteration if upper?
+	  FALSE,   // reverse iteration if lower?
+	  BLIS_PACKED_ROW_PANELS,
+	  BLIS_BUFFER_FOR_A_BLOCK,
+	  gemm_cntl_bp_ke
+	);
 
-	// Create control tree object for general problem via multiple
-	// rank-k (outer panel) updates.
-	gemm_cntl_mm_op
-	=
-	bli_gemm_cntl_obj_create( BLIS_BLOCKED,
-	                          BLIS_VARIANT3,
-	                          BLIS_KC,
-	                          NULL,
-	                          NULL,
-	                          NULL,
-	                          NULL,
-	                          gemm_cntl_op_bp,
-	                          NULL );
+	// Create a node for partitioning the m dimension by MC.
+	cntl_t* gemm_cntl_op_bp = bli_gemm_cntl_obj_create
+	(
+	  BLIS_MC,
+	  bli_gemm_blk_var1,
+	  gemm_cntl_packa
+	);
 
-	// Create control tree object for very large problem via multiple
-	// general problems.
-	gemm_cntl_vl_mm
-	=
-	bli_gemm_cntl_obj_create( BLIS_BLOCKED,
-	                          BLIS_VARIANT2,
-	                          BLIS_NC,
-	                          NULL,
-	                          NULL,
-	                          NULL,
-	                          NULL,
-	                          gemm_cntl_mm_op,
-	                          NULL );
+	// Create a node for packing matrix B.
+	cntl_t* gemm_cntl_packb = bli_packm_cntl_obj_create
+	(
+	  bli_gemm_packb,
+	  bli_packm_blk_var1,
+	  BLIS_KR,
+	  BLIS_NR,
+	  FALSE,   // do NOT invert diagonal
+	  FALSE,   // reverse iteration if upper?
+	  FALSE,   // reverse iteration if lower?
+	  BLIS_PACKED_COL_PANELS,
+	  BLIS_BUFFER_FOR_B_PANEL,
+	  gemm_cntl_op_bp
+	);
 
-	// Alias the "master" gemm control tree to a shorter name.
-	gemm_cntl = gemm_cntl_vl_mm;
+	// Create a node for partitioning the k dimension by KC.
+	cntl_t* gemm_cntl_mm_op = bli_gemm_cntl_obj_create
+	(
+	  BLIS_KC,
+	  bli_gemm_blk_var3,
+	  gemm_cntl_packb
+	);
+
+	// Create a node for partitioning the n dimension by NC.
+	cntl_t* gemm_cntl_vl_mm = bli_gemm_cntl_obj_create
+	(
+	  BLIS_NC,
+	  bli_gemm_blk_var2,
+	  gemm_cntl_mm_op
+	);
+
+	return gemm_cntl_vl_mm;
 }
 
-void bli_gemm_cntl_finalize()
+void bli_gemm_cntl_free
+     (
+       cntl_t* cntl,
+       thrinfo_t* thread
+     )
 {
-	bli_cntl_obj_free( gemm_packa_cntl );
-	bli_cntl_obj_free( gemm_packb_cntl );
-
-	bli_cntl_obj_free( gemm_cntl_bp_ke );
-	bli_cntl_obj_free( gemm_cntl_op_bp );
-	bli_cntl_obj_free( gemm_cntl_mm_op );
-	bli_cntl_obj_free( gemm_cntl_vl_mm );
+	bli_cntl_free( cntl, thread );
 }
 
-gemm_t* bli_gemm_cntl_obj_create( impl_t     impl_type,
-                                  varnum_t   var_num,
-                                  bszid_t    bszid,
-                                  scalm_t*   sub_scalm,
-                                  packm_t*   sub_packm_a,
-                                  packm_t*   sub_packm_b,
-                                  packm_t*   sub_packm_c,
-                                  gemm_t*    sub_gemm,
-                                  unpackm_t* sub_unpackm_c )
+// -----------------------------------------------------------------------------
+
+cntl_t* bli_gemm_cntl_obj_create
+     (
+       bszid_t bszid,
+       void*   var_func,
+       cntl_t* sub_node
+     )
 {
-	gemm_t* cntl;
-
-	cntl = ( gemm_t* ) bli_malloc_intl( sizeof(gemm_t) );
-
-	cntl->impl_type     = impl_type;
-	cntl->var_num       = var_num;
-	cntl->bszid         = bszid;
-	cntl->sub_scalm     = sub_scalm;
-	cntl->sub_packm_a   = sub_packm_a;
-	cntl->sub_packm_b   = sub_packm_b;
-	cntl->sub_packm_c   = sub_packm_c;
-	cntl->sub_gemm      = sub_gemm;
-	cntl->sub_unpackm_c = sub_unpackm_c;
-
-	return cntl;
+	return bli_cntl_obj_create( bszid, var_func, NULL, sub_node );
 }
 

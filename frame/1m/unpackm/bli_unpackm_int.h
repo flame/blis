@@ -32,14 +32,12 @@
 
 */
 
-void bli_unpackm_int( obj_t*     p,
-                      obj_t*     a,
-                      cntx_t*    cntx,
-                      unpackm_t* cntl,
-                      thrinfo_t* thread );
+void bli_unpackm_int
+     (
+       obj_t*  p,
+       obj_t*  a,
+       cntx_t* cntx,
+       cntl_t* cntl,
+       thrinfo_t* thread
+     );
 
-/*
-void bli_unpackm_init_cast( obj_t*  p,
-                            obj_t*  a,
-                            obj_t*  c );
-*/

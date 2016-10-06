@@ -50,10 +50,14 @@ typedef void (*FUNCPTR_T)(
 static FUNCPTR_T GENARRAY(ftypes,unpackm_unb_var1);
 
 
-void bli_unpackm_unb_var1( obj_t*     p,
-                           obj_t*     c,
-                           cntx_t*    cntx,
-                           unpackm_t* cntl )
+void bli_unpackm_unb_var1
+     (
+       obj_t*  p,
+       obj_t*  c,
+       cntx_t* cntx,
+       cntl_t* cntl,
+       thrinfo_t* thread
+     )
 {
 	num_t     dt_pc     = bli_obj_datatype( *p );
 

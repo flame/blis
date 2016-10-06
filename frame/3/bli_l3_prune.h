@@ -34,6 +34,23 @@
 
 
 #undef  GENPROT
+#define GENPROT( dim ) \
+\
+void PASTEMAC(l3_prune_unref_mparts_,dim) \
+     ( \
+       obj_t*  a, \
+       obj_t*  b, \
+       obj_t*  c, \
+       cntx_t* cntx  \
+     );
+
+GENPROT( m )
+GENPROT( n )
+GENPROT( k )
+
+// -----------------------------------------------------------------------------
+
+#undef  GENPROT
 #define GENPROT( opname, dim ) \
 \
 void PASTEMAC2(opname,_prune_unref_mparts_,dim) \
@@ -42,6 +59,10 @@ void PASTEMAC2(opname,_prune_unref_mparts_,dim) \
        obj_t*  b, \
        obj_t*  c  \
      );
+
+GENPROT( gemm, m )
+GENPROT( gemm, n )
+GENPROT( gemm, k )
 
 GENPROT( herk, m )
 GENPROT( herk, n )

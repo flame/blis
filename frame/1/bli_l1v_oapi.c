@@ -87,6 +87,44 @@ GENFRONT( subv )
 \
 void PASTEMAC(opname,EX_SUF) \
      ( \
+       obj_t*  x, \
+       obj_t*  index  \
+       BLIS_OAPI_CNTX_PARAM  \
+     ) \
+{ \
+	BLIS_OAPI_CNTX_DECL \
+\
+	num_t     dt        = bli_obj_datatype( *x ); \
+\
+	dim_t     n         = bli_obj_vector_dim( *x ); \
+	void*     buf_x     = bli_obj_buffer_at_off( *x ); \
+	inc_t     incx      = bli_obj_vector_inc( *x ); \
+\
+	void*     buf_index = bli_obj_buffer_at_off( *index ); \
+\
+	if ( bli_error_checking_is_enabled() ) \
+	    PASTEMAC(opname,_check)( x, index ); \
+\
+	/* Invoke the typed function. */ \
+	bli_call_ft_5 \
+	( \
+	   dt, \
+	   opname, \
+	   n, \
+	   buf_x, incx, \
+	   buf_index, \
+	   cntx  \
+	); \
+}
+
+GENFRONT( amaxv )
+
+
+#undef  GENFRONT
+#define GENFRONT( opname ) \
+\
+void PASTEMAC(opname,EX_SUF) \
+     ( \
        obj_t*  alpha, \
        obj_t*  x, \
        obj_t*  beta, \

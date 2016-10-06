@@ -69,9 +69,7 @@ thrinfo_t* bli_l3_thrinfo_create
        dim_t      icomm_id,
        dim_t      n_way,
        dim_t      work_id,
-       thrinfo_t* opackm,
-       thrinfo_t* ipackm,
-       thrinfo_t* sub_self
+       thrinfo_t* sub_node
      );
 
 void bli_l3_thrinfo_init
@@ -83,9 +81,7 @@ void bli_l3_thrinfo_init
        dim_t      icomm_id,
        dim_t      n_way,
        dim_t      work_id,
-       thrinfo_t* opackm,
-       thrinfo_t* ipackm,
-       thrinfo_t* sub_self
+       thrinfo_t* sub_node
      );
 
 void bli_l3_thrinfo_init_single

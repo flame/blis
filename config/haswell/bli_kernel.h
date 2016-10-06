@@ -125,6 +125,18 @@
 #define BLIS_CGEMM_UKERNEL_PREFERS_CONTIG_ROWS
 #endif
 
+// zgemm micro-kernel
+
+#if 1
+#define BLIS_ZGEMM_UKERNEL         bli_zgemm_asm_3x4
+#define BLIS_DEFAULT_MC_Z          72
+#define BLIS_DEFAULT_KC_Z          256
+#define BLIS_DEFAULT_NC_Z          4080
+#define BLIS_DEFAULT_MR_Z          3
+#define BLIS_DEFAULT_NR_Z          4
+
+#define BLIS_ZGEMM_UKERNEL_PREFERS_CONTIG_ROWS
+#endif
 
 // -- trsm-related --
 

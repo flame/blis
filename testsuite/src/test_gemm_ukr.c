@@ -220,30 +220,28 @@ void libblis_test_gemm_ukr_experiment
 	libblis_test_mobj_randomize( params, TRUE, &c );
 	bli_copym( &c, &c_save );
 
-	// Initialize pack objects.
-	bli_obj_init_pack( &ap );
-	bli_obj_init_pack( &bp );
-
-	// Create pack objects for a and b.
-	libblis_test_pobj_create( BLIS_MR,
-	                          BLIS_KR,
-	                          BLIS_NO_INVERT_DIAG,
-	                          BLIS_PACKED_ROW_PANELS,
-	                          BLIS_BUFFER_FOR_A_BLOCK,
-	                          &a, &ap,
-	                          &cntx );
-	libblis_test_pobj_create( BLIS_KR,
-	                          BLIS_NR,
-	                          BLIS_NO_INVERT_DIAG,
-	                          BLIS_PACKED_COL_PANELS,
-	                          BLIS_BUFFER_FOR_B_PANEL,
-	                          &b, &bp,
-	                          &cntx );
-
-	// Pack the contents of a and b to ap and bp, respectively.
-	bli_packm_blk_var1( &a, &ap, &cntx, &BLIS_PACKM_SINGLE_THREADED );
-	bli_packm_blk_var1( &b, &bp, &cntx, &BLIS_PACKM_SINGLE_THREADED );
-	                          
+	// Create pack objects for a and b, and pack them to ap and bp,
+	// respectively.
+	cntl_t* cntl_a = libblis_test_pobj_create
+	(
+	  BLIS_MR,
+	  BLIS_KR,
+	  BLIS_NO_INVERT_DIAG,
+	  BLIS_PACKED_ROW_PANELS,
+	  BLIS_BUFFER_FOR_A_BLOCK,
+	  &a, &ap,
+	  &cntx
+	);
+	cntl_t* cntl_b = libblis_test_pobj_create
+	(
+	  BLIS_KR,
+	  BLIS_NR,
+	  BLIS_NO_INVERT_DIAG,
+	  BLIS_PACKED_COL_PANELS,
+	  BLIS_BUFFER_FOR_B_PANEL,
+	  &b, &bp,
+	  &cntx
+	);
 
 	// Repeat the experiment n_repeats times and record results. 
 	for ( i = 0; i < n_repeats; ++i )
@@ -269,9 +267,10 @@ void libblis_test_gemm_ukr_experiment
 	// Zero out performance and residual if output matrix is empty.
 	libblis_test_check_empty_problem( &c, perf, resid );
 
-	// Release packing buffers within pack objects.
-	bli_obj_release_pack( &ap );
-	bli_obj_release_pack( &bp );
+	// Free the control tree nodes and release their cached mem_t entries
+	// back to the memory broker.
+	bli_cntl_free( cntl_a, &BLIS_PACKM_SINGLE_THREADED );
+	bli_cntl_free( cntl_b, &BLIS_PACKM_SINGLE_THREADED );
 
 	// Free the test objects.
 	bli_obj_free( &a );

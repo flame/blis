@@ -57,6 +57,19 @@ GENTPROT( subv )
 \
 void PASTEMAC(opname,EX_SUF) \
      ( \
+       obj_t*  x, \
+       obj_t*  index  \
+       BLIS_OAPI_CNTX_PARAM  \
+     );
+
+GENTPROT( amaxv )
+
+
+#undef  GENTPROT
+#define GENTPROT( opname ) \
+\
+void PASTEMAC(opname,EX_SUF) \
+     ( \
        obj_t*  alpha, \
        obj_t*  x, \
        obj_t*  beta, \

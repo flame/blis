@@ -32,8 +32,9 @@
 
 */
 
-#include "bli_her_cntl.h"
-#include "bli_her_front.h"
-#include "bli_her_int.h"
+// NOTE: level-2 control tree code is temporarily disabled.
+//#include "bli_her_cntl.h"
+//#include "bli_her_front.h"
+//#include "bli_her_int.h"
 
 #include "bli_her_var.h"

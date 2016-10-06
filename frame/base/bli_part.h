@@ -36,50 +36,60 @@
 
 // -- Matrix partitioning ------------------------------------------------------
 
-void bli_acquire_mpart_t2b( subpart_t  requested_part,
-                                dim_t  i,
-                                dim_t  b,
-                                obj_t* obj,
-                                obj_t* sub_obj );
-void bli_acquire_mpart_b2t( subpart_t  requested_part,
-                                dim_t  i,
-                                dim_t  b,
-                                obj_t* obj,
-                                obj_t* sub_obj );
+#undef  GENPROT
+#define GENPROT( opname ) \
+\
+void PASTEMAC0( opname ) \
+     ( \
+       dir_t     direct, \
+       subpart_t req_part, \
+       dim_t     i, \
+       dim_t     b, \
+       obj_t*    obj, \
+       obj_t*    sub_obj \
+     );
 
-void bli_acquire_mpart_l2r( subpart_t  requested_part,
-                                dim_t  j,
-                                dim_t  b,
-                                obj_t* obj,
-                                obj_t* sub_obj );
-void bli_acquire_mpart_r2l( subpart_t  requested_part,
-                                dim_t  j,
-                                dim_t  b,
-                                obj_t* obj,
-                                obj_t* sub_obj );
+GENPROT( acquire_mpart_mdim )
+GENPROT( acquire_mpart_ndim )
 
-void bli_acquire_mpart_tl2br( subpart_t  requested_part,
-                                  dim_t  ij,
-                                  dim_t  b,
-                                  obj_t* obj,
-                                  obj_t* sub_obj );
-void bli_acquire_mpart_br2tl( subpart_t  requested_part,
-                                  dim_t  ij,
-                                  dim_t  b,
-                                  obj_t* obj,
-                                  obj_t* sub_obj );
+#undef  GENPROT
+#define GENPROT( opname ) \
+\
+void PASTEMAC0( opname ) \
+     ( \
+       subpart_t req_part, \
+       dim_t     i, \
+       dim_t     b, \
+       obj_t*    obj, \
+       obj_t*    sub_obj \
+     );
+
+GENPROT( acquire_mpart_t2b )
+GENPROT( acquire_mpart_b2t )
+GENPROT( acquire_mpart_l2r )
+GENPROT( acquire_mpart_r2l )
+GENPROT( acquire_mpart_tl2br )
+GENPROT( acquire_mpart_br2tl )
 
 // -- Vector partitioning ------------------------------------------------------
 
-void bli_acquire_vpart_f2b( subpart_t  requested_part,
-                                dim_t  i,
-                                dim_t  b,
-                                obj_t* obj,
-                                obj_t* sub_obj );
+GENPROT( acquire_vpart_f2b )
+GENPROT( acquire_vpart_b2f )
 
-void bli_acquire_vpart_b2f( subpart_t  requested_part,
-                                dim_t  i,
-                                dim_t  b,
-                                obj_t* obj,
-                                obj_t* sub_obj );
+// -- Scalar acquisition -------------------------------------------------------
+
+void bli_acquire_mij
+     (
+       dim_t     i,
+       dim_t     j,
+       obj_t*    obj,
+       obj_t*    sub_obj
+     );
+
+void bli_acquire_vi
+     (
+       dim_t     i,
+       obj_t*    obj,
+       obj_t*    sub_obj
+     );
 

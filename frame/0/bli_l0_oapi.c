@@ -198,8 +198,8 @@ void PASTEMAC0(opname) \
 	if ( bli_is_constant( dt_chi ) ) dt_use = dt_def; \
 	else                             dt_use = dt_chi; \
 \
-	/* Invoke the typed function. */ \
-	bli_call_ft_3 \
+	/* Invoke the typed function (with integer support). */ \
+	bli_call_ft_3i \
 	( \
 	   dt_use, \
 	   opname, \
@@ -229,8 +229,8 @@ void PASTEMAC0(opname) \
 	if ( bli_error_checking_is_enabled() ) \
 	    PASTEMAC(opname,_check)( zeta_r, zeta_i, chi ); \
 \
-	/* Invoke the typed function. */ \
-	bli_call_ft_3 \
+	/* Invoke the typed function (with integer support). */ \
+	bli_call_ft_3i \
 	( \
 	   dt_chi, \
 	   opname, \
