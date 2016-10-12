@@ -174,8 +174,8 @@
 
 // -- unpackm --
 
-#define BLIS_DEFAULT_1F_S            8
-#define BLIS_DEFAULT_1F_D 	     4
+#define BLIS_DEFAULT_1F_S        8
+#define BLIS_DEFAULT_1F_D 	 4
 
 
 // -- LEVEL-1F KERNEL DEFINITIONS ----------------------------------------------
@@ -198,7 +198,8 @@
 
 
 // -- LEVEL-1V KERNEL DEFINITIONS ----------------------------------------------
-
+// -- amax --
+#define BLIS_SAMAXV_KERNEL         bli_samaxv_opt_var1
 // -- addv --
 
 // -- axpyv --

@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2016, Advanced Micro Devices, Inc
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -49,6 +50,8 @@
 //     (b) MR (for zero-padding purposes when MR and NR are "swapped")
 //
 
+// sgemm micro-kernel
+
 #if 0
 
 #define BLIS_SGEMM_UKERNEL         bli_sgemm_asm_24x4
@@ -57,18 +60,18 @@
 #define BLIS_DEFAULT_NC_S          4080
 #define BLIS_DEFAULT_MR_S          24
 #define BLIS_DEFAULT_NR_S          4
+#endif
 
-#else
-
-/*
+#if 0
 #define BLIS_SGEMM_UKERNEL         bli_sgemm_asm_16x6
 #define BLIS_DEFAULT_MC_S          144
 #define BLIS_DEFAULT_KC_S          256
 #define BLIS_DEFAULT_NC_S          4080
 #define BLIS_DEFAULT_MR_S          16
 #define BLIS_DEFAULT_NR_S          6
-*/
+#endif
 
+#if 1
 #define BLIS_SGEMM_UKERNEL         bli_sgemm_asm_6x16
 #define BLIS_DEFAULT_MC_S          144
 #define BLIS_DEFAULT_KC_S          256
@@ -80,6 +83,8 @@
 
 #endif
 
+// dgemm micro-kernel
+
 #if 0
 
 #define BLIS_DGEMM_UKERNEL         bli_dgemm_asm_12x4
@@ -88,18 +93,18 @@
 #define BLIS_DEFAULT_NC_D          4080
 #define BLIS_DEFAULT_MR_D          12
 #define BLIS_DEFAULT_NR_D          4
+#endif
 
-#else
-
-/*
+#if 0
 #define BLIS_DGEMM_UKERNEL         bli_dgemm_asm_8x6
 #define BLIS_DEFAULT_MC_D          72
 #define BLIS_DEFAULT_KC_D          256
 #define BLIS_DEFAULT_NC_D          4080
 #define BLIS_DEFAULT_MR_D          8
 #define BLIS_DEFAULT_NR_D          6
-*/
+#endif
 
+#if 1
 #define BLIS_DGEMM_UKERNEL         bli_dgemm_asm_6x8
 #define BLIS_DEFAULT_MC_D          72
 #define BLIS_DEFAULT_KC_D          256
@@ -108,10 +113,50 @@
 #define BLIS_DEFAULT_NR_D          8
 
 #define BLIS_DGEMM_UKERNEL_PREFERS_CONTIG_ROWS
-
-
 #endif
 
+// cgemm micro-kernel
+
+#if 1
+#define BLIS_CGEMM_UKERNEL         bli_cgemm_asm_3x8
+#define BLIS_DEFAULT_MC_C          144
+#define BLIS_DEFAULT_KC_C          256
+#define BLIS_DEFAULT_NC_C          4080
+#define BLIS_DEFAULT_MR_C          3
+#define BLIS_DEFAULT_NR_C          8
+
+#define BLIS_CGEMM_UKERNEL_PREFERS_CONTIG_ROWS
+#endif
+
+// zgemm micro-kernel
+
+#if 1
+#define BLIS_ZGEMM_UKERNEL         bli_zgemm_asm_3x4
+#define BLIS_DEFAULT_MC_Z          72
+#define BLIS_DEFAULT_KC_Z          256
+#define BLIS_DEFAULT_NC_Z          4080
+#define BLIS_DEFAULT_MR_Z          3
+#define BLIS_DEFAULT_NR_Z          4
+
+#define BLIS_ZGEMM_UKERNEL_PREFERS_CONTIG_ROWS
+#endif
+
+// -- trsm-related --
+
+#define BLIS_STRSM_L_UKERNEL   bli_strsm_l_int_6x16
+
+// zgemm micro-kernel
+
+#if 1
+#define BLIS_ZGEMM_UKERNEL         bli_zgemm_asm_3x4
+#define BLIS_DEFAULT_MC_Z          72
+#define BLIS_DEFAULT_KC_Z          256
+#define BLIS_DEFAULT_NC_Z          4080
+#define BLIS_DEFAULT_MR_Z          3
+#define BLIS_DEFAULT_NR_Z          4
+
+#define BLIS_ZGEMM_UKERNEL_PREFERS_CONTIG_ROWS
+#endif
 
 
 
@@ -122,8 +167,18 @@
 
 
 // -- LEVEL-1F KERNEL CONSTANTS ------------------------------------------------
-#define BLIS_DEFAULT_1F_S            8
-#define BLIS_DEFAULT_1F_D 	 		 4
+
+
+
+
+// -- LEVEL-1M KERNEL DEFINITIONS ----------------------------------------------
+
+// -- packm --
+
+// -- unpackm --
+
+#define BLIS_DEFAULT_1F_S        8
+#define BLIS_DEFAULT_1F_D 	 4
 
 
 // -- LEVEL-1F KERNEL DEFINITIONS ----------------------------------------------
@@ -153,7 +208,8 @@
 
 
 // -- LEVEL-1V KERNEL DEFINITIONS ----------------------------------------------
-
+// -- amax --
+#define BLIS_SAMAXV_KERNEL         bli_samaxv_opt_var1
 // -- addv --
 
 // -- axpyv --
