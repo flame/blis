@@ -145,6 +145,10 @@ void bli_free_align
 	int8_t*      p_byte;
 	void**       p_addr;
 
+	// If the pointer to free is NULL, it was obviously not aligned and
+	// does not need to be freed.
+	if ( p == NULL ) return;
+
 	// Since the bli_malloc_pool() function returned the aligned pointer,
 	// we have to first recover the original pointer before we can free
 	// the memory.

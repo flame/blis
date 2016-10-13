@@ -61,24 +61,22 @@
 // thrinfo_t APIs specific to level-3 operations.
 //
 
+#if 0
 thrinfo_t* bli_l3_thrinfo_create
      (
        thrcomm_t* ocomm,
        dim_t      ocomm_id,
-       thrcomm_t* icomm,
-       dim_t      icomm_id,
        dim_t      n_way,
        dim_t      work_id,
        thrinfo_t* sub_node
      );
+#endif
 
 void bli_l3_thrinfo_init
      (
        thrinfo_t* thread,
        thrcomm_t* ocomm,
        dim_t      ocomm_id,
-       thrcomm_t* icomm,
-       dim_t      icomm_id,
        dim_t      n_way,
        dim_t      work_id,
        thrinfo_t* sub_node
@@ -96,15 +94,37 @@ void bli_l3_thrinfo_free
 
 // -----------------------------------------------------------------------------
 
-thrinfo_t** bli_l3_thrinfo_create_paths
+void bli_l3_thrinfo_create_root
      (
-       opid_t l3_op,
-       side_t side
+       dim_t       id,
+       thrcomm_t*  gl_comm,
+       cntx_t*     cntx,
+       cntl_t*     cntl,
+       thrinfo_t** thread
+     );
+
+void bli_l3_thrinfo_print_paths
+     (
+       thrinfo_t** threads
+     );
+
+// -----------------------------------------------------------------------------
+
+#if 0
+thrinfo_t** bli_l3_thrinfo_create_roots
+     (
+       cntx_t* cntx,
+       cntl_t* cntl
+     );
+
+thrinfo_t** bli_l3_thrinfo_create_full_paths
+     (
+       cntx_t* cntx
      );
 
 void bli_l3_thrinfo_free_paths
      (
-       thrinfo_t** threads,
-       dim_t       num
+       thrinfo_t** threads
      );
+#endif
 

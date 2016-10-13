@@ -34,12 +34,11 @@
 
 #include "blis.h"
 
+#if 0
 thrinfo_t* bli_packm_thrinfo_create
      (
        thrcomm_t* ocomm,
        dim_t      ocomm_id,
-       thrcomm_t* icomm,
-       dim_t      icomm_id,
        dim_t      n_way,
        dim_t      work_id,
        thrinfo_t* sub_node
@@ -51,7 +50,6 @@ thrinfo_t* bli_packm_thrinfo_create
 	(
 	  thread,
 	  ocomm, ocomm_id,
-	  icomm, icomm_id,
 	  n_way,
 	  work_id,
 	  FALSE,
@@ -60,14 +58,13 @@ thrinfo_t* bli_packm_thrinfo_create
 
 	return thread;
 }
+#endif
 
 void bli_packm_thrinfo_init
      (
        thrinfo_t* thread,
        thrcomm_t* ocomm,
        dim_t      ocomm_id,
-       thrcomm_t* icomm,
-       dim_t      icomm_id,
        dim_t      n_way,
        dim_t      work_id,
        thrinfo_t* sub_node
@@ -77,7 +74,6 @@ void bli_packm_thrinfo_init
 	(
 	  thread,
 	  ocomm, ocomm_id,
-	  icomm, icomm_id,
 	  n_way, work_id,
 	  FALSE,
 	  sub_node
@@ -93,13 +89,13 @@ void bli_packm_thrinfo_init_single
 	(
 	  thread,
 	  &BLIS_SINGLE_COMM, 0,
-	  &BLIS_SINGLE_COMM, 0,
 	  1,
 	  0,
 	  NULL
 	);
 }
 
+#if 0
 void bli_packm_thrinfo_free
      (
        thrinfo_t* thread
@@ -109,4 +105,4 @@ void bli_packm_thrinfo_free
 	     thread != &BLIS_PACKM_SINGLE_THREADED )
 		bli_free_intl( thread );
 }
-
+#endif

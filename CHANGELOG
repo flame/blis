@@ -1,4 +1,1054 @@
-commit 898614a555ea0aa7de4ca07bb3cb8f5708b6a002 (HEAD -> master, tag: 0.2.0)
+commit 866b2dde3f41760121115fb25f096d4344e8b4f9 (HEAD -> master, tag: 0.2.1)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Oct 5 14:41:34 2016 -0500
+
+    Version file update (0.2.1)
+
+commit 87fddeab3c8a5ccb1bbf02e5f89db1464e459ba9 (origin/master)
+Merge: 8696987 6f71cd3
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Oct 5 13:35:01 2016 -0500
+
+    Merge branch 'compose'
+
+commit 6f71cd344951854e4cff9ea21bbdfe536e72611d (origin/compose)
+Merge: c0630c4 8d55033
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Oct 4 15:53:46 2016 -0500
+
+    Merge pull request #94 from flame/distcomm
+    
+    Implemented distributed thrinfo_t management.
+
+commit 86969873b5b861966d717d8f9f370af39e3d9de6
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Oct 4 14:24:59 2016 -0500
+
+    Reclassified amaxv operation as a level-1v kernel.
+    
+    Details:
+    - Moved amaxv from being a utility operation to being a level-1v operation.
+      This includes the establishment of a new amaxv kernel to live beside all
+      of the other level-1v kernels.
+    - Added two new functions to bli_part.c:
+        bli_acquire_mij()
+        bli_acquire_vi()
+      The first acquires a scalar object for the (i,j) element of a matrix,
+      and the second acquires a scalar object for the ith element of a vector.
+    - Added integer support to bli_getsc level-0 operation. This involved
+      adding integer support to the bli_*gets level-0 scalar macros.
+    - Added a new test module to test amaxv as a level-1v operation. The test
+      module works by comparing the value identified by bli_amaxv() to the
+      the value found from a reference-like code local to the test module
+      source file. In other words, it (intentionally) does not guarantee the
+      same index is found; only the same value. This allows for different
+      implementations in the case where a vector contains two or more elements
+      containing exactly the same floating point value (or values, in the case
+      of the complex domain).
+    - Removed the directory frame/include/old/.
+
+commit 8d55033c966feed99fcca2a58017c3ab5b1646dc (origin/distcomm)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Sep 27 15:20:58 2016 -0500
+
+    Implemented distributed thrinfo_t management.
+    
+    Details:
+    - Implemented Ricardo Magana's distributed thread info/communicator
+      management. Rather that fully construct the thrinfo_t structures, from
+      root to leaf, prior to spawning threads, the threads individually
+      construct their thrinfo_t trees (or, chains), and do so incrementally,
+      as needed, reusing the same structure nodes during subsequent blocked
+      variant iterations. This required moving the initial creation of the
+      thrinfo_t structure (now, the root nodes) from the _front() functions
+      to the bli_l3_thread_decorator(). The incremental "growing" of the tree
+      is performed in the internal back-end (ie: _int()) function, and so
+      mostly invisible. Also, the incremental growth of the thrinfo_t tree is
+      done as a function of the current and parent control tree nodes (as well
+      as the parent thrinfo_t node), further reinforcing the parallel
+      relationship between the two data structures.
+    - Removed the "inner" communicator from thrinfo_t structure definition,
+      as well as its id. Changed all APIs accordingly. Renamed
+      bli_thrinfo_needs_free_comms() to bli_thrinfo_needs_free_comm().
+    - Defined bli_l3_thrinfo_print_paths(), which prints the information
+      in an array of thrinfo_t* structure pointers. (Used only as a
+      debugging/verification tool.)
+    - Deprecated the following thrinfo_t creation functions:
+        bli_packm_thrinfo_create()
+        bli_l3_thrinfo_create()
+      because they are no longer used. bli_thrinfo_create() is now called
+      directly when creating thrinfo_t nodes.
+
+commit fd04869ae4d4a3b0ebb9052557c296456bce7c0d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Sep 27 14:14:11 2016 -0500
+
+    Changed configure's 'omp' threading to 'openmp'.
+    
+    Details:
+    - Changed the configure script so that the expected string argument to the
+      -t (or --enable-threading=) option that enables OpenMP multithreading is
+      'openmp'. The previous expected string, 'omp', is still supported but
+      should be considered deprecated.
+
+commit 9424af87209e4e435e2e742430945152690170b0
+Merge: efa7341 c0630c4
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Sep 27 12:51:08 2016 -0500
+
+    Merge branch 'compose'
+
+commit efa7341df0b0115926aa8a6e8a4ebfb24fdbf11e
+Merge: 121c39d e1453f6
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Sep 16 11:01:57 2016 -0500
+
+    Merge pull request #92 from ShadenSmith/readme_fix
+    
+    Fixes broken URL in README.md
+
+commit e1453f68f6afd90ae9a29b7a5faa46aa79bbf741
+Author: Shaden Smith <ShadenTSmith@gmail.com>
+Date:   Fri Sep 16 09:29:28 2016 -0500
+
+    Fixes broken URL in README.md
+
+commit c0630c4024b08750043a2942a3e8a037aa6b6259 (compose)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Sep 12 13:59:02 2016 -0500
+
+    Added debugging printf()'s to bli_l3_thrinfo.c.
+    
+    Details:
+    - Added optional printf() statements to print out thread communicator
+      info as the thrinfo_t structure is built in bli_l3_thrinfo.c.
+    - Minor changes to frame/thread/bli_thrinfo.h.
+
+commit 7b3bf1ffcd7160ccbf6c2518af6d88f6742e4977
+Merge: 3550981 121c39d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Sep 6 15:47:13 2016 -0500
+
+    Merge branch 'master' into compose
+
+commit 121c39d455f2db6f7ce6802ba7f73ad5e088c68c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Sep 5 13:11:42 2016 -0500
+
+    Added complex gemm micro-kernels for haswell.
+    
+    Details:
+    - Defined cgemm (3x8) and zgemm (3x4) micro-kernels for haswell-based
+      architectures. As with their real domain brethren, these kernels perfer
+      row storage, (though this doesn't affect most users due to high-level
+      optimizations in most level-3 operations that induce a transpose to
+      whatever storage preference the kernel may have).
+
+commit 35509818cbea1598b123421f81c42120889a03c3
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Aug 31 17:34:15 2016 -0500
+
+    Added, moved some thread barriers.
+    
+    Details:
+    - Removed thread barriers from the end of the loop bodies of
+      bli_gemm_blk_var1(), bli_gemm_blk_var2(), bli_trsm_blk_var1(),
+      and bli_trsm_blk_var2().
+    - Moved the thread barrier at the end of bli_packm_int() to the
+      end of bli_l3_packm(), and added missing barriers to that function.
+    - Removed the no longer necessary (and now incorrect) ochief guard
+      in bli_gemm3m3_packa() on the bli_obj_scalar_reset() on C.
+    - Thanks to Tyler Smith for help with these changes.
+
+commit abd61f9fa75d77a96d1491b3e035451ee73238fe
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Aug 30 12:34:19 2016 -0500
+
+    Updated BLIS4 TOMS citation in README.md.
+
+commit 701b9aa3ff028decbf90efac0dca5bd64fe26269
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Aug 26 19:04:45 2016 -0500
+
+    Redesigned control tree infrastructure.
+    
+    Details:
+    - Altered control tree node struct definitions so that all nodes have the
+      same struct definition, whose primary fields consist of a blocksize id,
+      a variant function pointer, a pointer to an optional parameter struct,
+      and a pointer to a (single) sub-node. This unified control tree type is
+      now named cntl_t.
+    - Changed the way control tree nodes are connected, and what computation
+      they represent, such that, for example, packing operations are now
+      associated with nodes that are "inline" in the tree, rather than off-
+      shoot braches. The original tree for the classic Goto gemm algorithm was
+      expressed (roughly) as:
+    
+        blk_var2 -> blk_var3 -> blk_var1 -> ker_var2
+                             |           |
+                             -> packb    -> packa
+    
+      and now, the same tree would look like:
+    
+        blk_var2 -> blk_var3 -> packb -> blk_var1 -> packa -> ker_var2
+    
+      Specifically, the packb and packa nodes perform their respective packing
+      operations and then recurse (without any loop) to a subproblem. This means
+      there are now two kinds of level-3 control tree nodes: partitioning and
+      non-partitioning. The blocked variants are members of the former, because
+      they iteratively partition off submatrices and perform suboperations on
+      those partitions, while the packing variants belong to the latter group.
+      (This change has the effect of allowing greatly simplified initialization
+      of the nodes, which previously involved setting many unused node fields to
+      NULL.)
+    - Changed the way thrinfo_t tree nodes are arranged to mirror the new
+      connective structure of control trees. That is, packm nodes are no longer
+      off-shoot branches of the main algorithmic nodes, but rather connected
+      "inline".
+    - Simplified control tree creation functions. Partitioning nodes are created
+      concisely with just a few fields needing initialization. By contrast, the
+      packing nodes require additional parameters, which are stored in a
+      packm-specific struct that is tracked via the optional parameters pointer
+      within the control tree struct. (This parameter struct must always begin
+      with a uint64_t that contains the byte size of the struct. This allows
+      us to use a generic function to recursively copy control trees.) gemm,
+      herk, and trmm control tree creation continues to be consolidated into
+      a single function, with the operation family being used to select
+      among the parameter-agnostic macro-kernel wrappers. A single routine,
+      bli_cntl_free(), is provided to free control trees recursively, whereby
+      the chief thread within a groups release the blocks associated with
+      mem_t entries back to the memory broker from which they were acquired.
+    - Updated internal back-ends, e.g. bli_gemm_int(), to query and call the
+      function pointer stored in the current control tree node (rather than
+      index into a local function pointer array). Before being invoked, these
+      function pointers are first cast to a gemm_voft (for gemm, herk, or trmm
+      families) or trsm_voft (for trsm family) type, which is defined in
+      frame/3/bli_l3_var_oft.h.
+    - Retired herk and trmm internal back-ends, since all execution now flows
+      through gemm or trsm blocked variants.
+    - Merged forwards- and backwards-moving variants by querying the direction
+      from routines as a function of the variant's matrix operands. gemm and
+      herk always move forward, while trmm and trsm move in a direction that
+      is dependent on which operand (a or b) is triangular.
+    - Added functions bli_thread_get_range_mdim(), bli_thread_get_range_ndim(),
+      each of which takes additional arguments and hides complexity in managing
+      the difference between the way ranges are computed for the four families
+      of operations.
+    - Simplified level-3 blocked variants according to the above changes, so that
+      the only steps taken are:
+      1. Query partitioning direction (forwards or backwards).
+      2. Prune unreferenced regions, if they exist.
+      3. Determine the thread partitioning sub-ranges.
+      <begin loop>
+        4. Determine the partitioning blocksize (passing in the partitioning
+           direction)
+        5. Acquire the curren iteration's partitions for the matrices affected
+           by the current variants's partitioning dimension (m, k, n).
+        6. Call the subproblem.
+      <end loop>
+    - Instantiate control trees once per thread, per operation invocation.
+      (This is a change from the previous regime in which control trees were
+      treated as stateless objects, initialized with the library, and shared
+      as read-only objects between threads.) This once-per-thread allocation
+      is done primarily to allow threads to use the control tree as as place
+      to cache certain data for use in subsequent loop iterations. Presently,
+      the only application of this caching is a mem_t entry for the packing
+      blocks checked out from the memory broker (allocator). If a non-NULL
+      control tree is passed in by the (expert) user, then the tree is copied
+      by each thread. This is done in bli_l3_thread_decorator(), in
+      bli_thrcomm_*.c.
+    - Added a new field to the context, and opid_t which tracks the "family"
+      of the operation being executed. For example, gemm, hemm, and symm are
+      all part of the gemm family, while herk, syrk, her2k, and syr2k are
+      all part of the herk family. Knowing the operation's family is necessary
+      when conditionally executing the internal (beta) scalar reset on on
+      C in blocked variant 3, which is needed for gemm and herk families,
+      but must not be performed for the trmm family (because beta has only
+      been applied to the current row-panel of C after the first rank-kc
+      iteration).
+    - Reexpressed 3m3 induced method blocked variant in frame/3/gemm/ind
+      to comform with the new control tree design, and renamed the macro-
+      kernel codes corresponding to 3m2 and 4m1b.
+    - Renamed bli_mem.c (and its APIs) to bli_memsys.c, and renamed/relocated
+      bli_mem_macro_defs.h from frame/include to frame/base/bli_mem.h.
+    - Renamed/relocated bli_auxinfo_macro_defs.h from frame/include to
+      frame/base/bli_auxinfo.h.
+    - Fixed a minor bug whereby the storage-to-ukr-preference matching
+      optimization in the various level-3 front-ends was not being applied
+      properly when the context indicated that execution would be via an
+      induced method. (Before, we always checked the native micro-kernel
+      corresponding to the datatype being executed, whereas now we check
+      the native micro-kernel corresponding to the datatype's real projection,
+      since that is the micro-kernel that is actually used by induced methods.
+    - Added an option to the testsuite to skip the testing of native level-3
+      complex implementations. Previously, it was always tested, provided that
+      the c/z datatypes were enabled. However, some configurations use
+      reference micro-kernels for complex datatypes, and testing these
+      implementations can slow down the testsuite considerably.
+
+commit 73517f522b69de429dd7f3df60a70c068149ab28
+Merge: c6f5c21 50293da
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Aug 23 13:46:59 2016 -0500
+
+    Merge branch 'master' into compose
+
+commit 50293da38d5f2b7be9bbc94b9e85aacb6a10f672
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Aug 23 13:38:36 2016 -0500
+
+    Avoid compiling BLAS/CBLAS files when disabled.
+    
+    Details:
+    - Updated the top-level Makefile, build/config.mk.in template, and
+      configure script so that object files corresponding to source files
+      belonging to the BLAS compatibility layer are not compiled (or archived)
+      when the compatibility layer is disabled. (Same for CBLAS.) Thanks
+      to Devin Matthews for suggesting this optimization.
+    - Slight change to the way configure handles internal variables. Instead
+      of converting (overwriting) some, such as enable_blas2blis and
+      enable_cblas, from a "yes" or "no" to a "1" or "0" value, the latter are
+      now stored in new variables that live alongside the originals (with the
+      suffix "_01").  This is convenient since some values need to be
+      sed-substituted into the config.mk.in template, which requires "yes" or
+      "no", while some need to be written to the bli_config.h.in template,
+      which requires "0" or "1".
+
+commit c6f5c215ee793d03ea834469fc2adc53feaffc42
+Merge: d52cb76 16a4c7a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Aug 22 17:33:02 2016 -0500
+
+    Merge branch 'master' into compose
+
+commit 16a4c7a823d60707ed9272f5d36e5c5d54c0ba4b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Aug 19 11:38:36 2016 -0500
+
+    Fixed bugs in bli_mutex_init() and friends.
+    
+    Details:
+    - Fixed a couple of bugs that affected OpenMP and POSIX threads
+      configurations that resulted in compiler errors and warnings due
+      to type mismatch, and in the case of pthreads, a missing function
+      argument. The bugs are fairly recent, introduced in a017062.
+
+commit d52cb7671509592a8078729477b40b60380518a2
+Merge: 95abea4 c31b1e7
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jul 27 16:04:55 2016 -0500
+
+    Merge branch 'master' into compose
+
+commit c31b1e7b9d659b96433a87e5aecb90e457a104cc
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jul 27 15:58:07 2016 -0500
+
+    Relax alignment restrictions for sandybridge ukrs.
+    
+    Details:
+    - Relaxed the base pointer and leading dimension alignment restrictions
+      in the sandybridge gemm microkernels, allowing the use of vmovups/vmovupd
+      instead of vmovaps/vmovapd. These change mimic those made to the haswell
+      microkernels in e0d2fa0 and ee2c139.
+    - Updated testsuite modules as well as standalone test drivers in 'test'
+      directory to use DBL_MAX as the initial time candidate. Thanks to Devin
+      Matthews for suggesting this change.
+    - Inserted #include "float.h" into bli_system.h (to gain access to DBL_MAX).
+    - Minor update (vis-a-vis contexts) to driver code in test/3m4m.
+
+commit 95abea46f86816fddfc9ff0abfa52880801461be
+Merge: d0dfe5b a017062
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Jul 23 15:38:33 2016 -0500
+
+    Merge branch 'master' into compose
+
+commit a017062fdf763037da9d971a028bb07d47aa1c8a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jul 22 17:02:59 2016 -0500
+
+    Integrated "memory broker" (membrk_t) abstraction.
+    
+    Details:
+    - Integrated a patch originally authored and submitted by Ricardo Magana
+      of HP Enterprise. The changeset inserts use of a new object type, membrk_t,
+      (memory broker) that allows multiple sets of memory pools on, for example,
+      separate NUMA nodes, each of which has a separate memory space.
+    - Added membrk field to cntx_t and defined corresponding accessor macros.
+    - Added membrk field to mem_t object and defined corresponding accessor macros.
+    - Created new bli_membrk.c file, which contains the new memory broker API,
+      including:
+        bli_membrk_init(), bli_membrk_finalize()
+        bli_membrk_acquire_[mv](), bli_membrk_release(),
+        bli_membrk_init_pools(), bli_membrk_reinit_pools(),
+        bli_membrk_finalize_pools(),
+        bli_membrk_pool_size()
+    - In bli_mem.c, changed function calls to
+        bli_mem_init_pools()     -> bli_membrk_init()
+        bli_mem_reinit_pools()   -> bli_membrk_reinit()
+        bli_mem_finalize_pools() -> bli_membrk_finalize()
+    - In bli_packv_init.c, bli_packm_init.c, changed function calls to:
+        bli_mem_acquire_[mv]() -> bli_membrk_acquire_[mv]()
+        bli_mem_release()      -> bli_membrk_release()
+    - Added bli_mutex.c and related files to frame/thread. These files define
+      abstract mutexes (locks) and corresponding APIs for pthreads, openmp, or
+      single-threaded execution. This new API is employed within functions
+      such as bli_membrk_acquire_[mv]() and bli_membrk_release().
+
+commit ce59f81108ec9aea918a7e77030da8acfdd397ce
+Merge: ff41153 707a2b7
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jul 22 14:48:14 2016 -0500
+
+    Merge pull request #88 from devinamatthews/32bit-dim_t
+    
+    Handle 32-bit dim_t in 64-bit microkernels.
+
+commit 707a2b7faca137cca7cab7b11a12c44ddaf7ad53
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Fri Jul 22 13:49:44 2016 -0500
+
+    Somehow forgot the most important microkernel.
+
+commit 47ec045056351ac4f0791c071fa0daaa81699c8c
+Merge: 08f1d6b ff41153
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Fri Jul 22 13:45:23 2016 -0500
+
+    Merge remote-tracking branch 'upstream/master' into 32bit-dim_t
+
+commit 08f1d6b6fa344275de0f675f69737145ccf6646a
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Fri Jul 22 13:44:37 2016 -0500
+
+    Use 64-bit intermediate variable for k for architectures that do 64-bit loads in case dim_t is 32-bit.
+
+commit ff41153f4eb7f38ed94bdd9a3fd81fb979f3f401
+Merge: f9214ce e0d2fa0
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jul 22 13:21:03 2016 -0500
+
+    Merge pull request #86 from devinamatthews/haswell-vmovups
+    
+    Remove alignment restrictions on C in haswell kernel.
+
+commit e0d2fa0d835ab49366aeb790363bb2b571d36ed8
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Fri Jul 22 12:56:51 2016 -0500
+
+    Relax alignment restrictions for haswell sgemm.
+
+commit f9214ced97392861f5a0ea72abfcf6f41faf674c
+Merge: 413d62a 08666ea
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jul 22 12:16:39 2016 -0500
+
+    Merge pull request #85 from devinamatthews/qopenmp
+    
+    Change -openmp to -fopenmp for icc.
+
+commit ee2c139df6ad53c6aec8a67ab23b3b1912e8d259
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Fri Jul 22 12:06:03 2016 -0500
+
+    Remove alignment restrictions on C in haswell kernel.
+
+commit 08666eaa20d8a31f2f92f944e5bfa7c1558c53e4
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Fri Jul 22 11:07:34 2016 -0500
+
+    Change -openmp to -fopenmp for icc.
+
+commit d0dfe5b5372cc7558ee9c4104b29f82eecc7ed61
+Merge: 31def12 413d62a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jul 14 11:01:06 2016 -0500
+
+    Merge branch 'master' into compose
+
+commit 413d62aca28edabba56605a9f87d5b715831e1db
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jul 12 15:02:52 2016 -0500
+
+    README update (use official ACM TOMS links).
+
+commit dfa431f696db2df4065ea454df268a2e0bc02eac
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jul 12 14:21:19 2016 -0500
+
+    README update (BLIS2 TOMS article now in-print).
+
+commit 31def12e2629f187e40f93f6bae9e26a6c2660e2
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jun 30 15:19:20 2016 -0500
+
+    First phase of control tree redesign.
+    
+    Details:
+    - These changes constitute the first set of changes in preparation to
+      revamping the structure and use of control trees in BLIS. Modifications
+      in this commit don't affect the control tree code yet, but rather lay
+      the groundwork.
+    - Defined wrappers for the following functions, where the the wrappers
+      each take a direction parameter of a new enumerated type (BLIS_BWD or
+      BLIS_FWD), dir_t, and executes the correct underlying function.
+      - bli_acquire_mpart_*() and _vpart_*()
+      - bli_*_determine_kc_[fb]()
+      - bli_thread_get_range_*() and bli_thread_get_range_weighted_*()
+    - Consolidated all 'f' (forwards-moving) and 'b' (backwards-moving)
+      blocked variants for trmm and trsm, and renamed gemm and herk variants
+      accordingly. The direction is now queried via routines such as
+      bli_trmm_direct(), which deterines the direction from the implied side
+      and uplo parameters. For gemm and herk, it is uncondtionally BLIS_FWD.
+    - Defined wrappers to parameter-specific macrokernels for herk, trmm, and
+      trsm, e.g. bli_trmm_xx_ker_var2(), that execute the correct underlying
+      macrokernel based on the implied parameters. The same logic used to
+      choose the dir_t in _direct() functions is used here.
+    - Simplified the function pointer arrays in _int() functions given the
+      consolidation and dir_t querying mentioned above.
+    - Function signature (whitespace) reformatting for various functions.
+    - Removed old code in various 'old' directories.
+
+commit 232754feecf29452987666b9f5ebba2619bfd0b0
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jun 21 14:25:39 2016 -0500
+
+    Fixed compiler warning in rand[vm], randn[vm].
+    
+    Details:
+    - Fixed compiler warnings about unused variables related to the disabling
+      of normalization in the structured cases of the rand[vm] and randn[vm]
+      operations.
+
+commit a89555d1605574f3685813dcc972b636dd61264d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jun 17 14:08:35 2016 -0500
+
+    Added randn[vm] operations, support in testsuite.
+    
+    Details:
+    - Defined a new randomization operation, randn, on vectors and matrices.
+      The randnv and randnm operations randomize each element of the target
+      object with values from a narrow range of values. Presently, those
+      values are all integer powers of two, but they do not need to be powers
+      of two in order to achieve the primary goal, which is to initialize
+      objects that can be operated on with plenty of precision "slack"
+      available to allow computations that avoid roundoff. Using this method
+      of randomization makes it much more likely that testsuite residuals of
+      properly-functioning operations are close to zero, if not exactly zero.
+    - Updated existing randomization operations randv and randm to skip
+      special diagonal handling and normalization for matrices with structure.
+      This is now handled by the testsuite modules by explicitly calling a
+      testsuite function that loads the diagonal (and scales off-diagonal
+      elements).
+    - Added support for randnv and randnm in the testsuite with a new switch
+      in input.general that universally toggles between use of the classic
+      randv/randm, which use real values on the interval [-1,1], and
+      randnv/randnm, which use only values from a narrow range. Currently,
+      the narrow range is: +/-{2^0, 2^-1, 2^-2, 2^-3, 2^-4, 2^-5, 2^-6}, as
+      well as 0.0.
+    - Updated testsuite modules so that a testsutie wrapper function is called
+      instead of directly calling the randomization operations (such as
+      bli_randv() and bli_randm()). This wrapper also takes a bool_t that
+      indicates whether the object's elements should be normalized. (NOTE: As
+      alluded to above, in the test modules of triangular solve operations such
+      as trsv and trsm, we perform the extra step of loading the diagonal.)
+    - Defined a new level-0 operation, invertsc, which inverts a scalar.
+    - Updated the abval2ris and sqrt2ris level-0 macros to avoid an unlikely
+      but possible divide-by-zero.
+    - Updated function signature and prototype formatting in testsuite.
+
+commit 096895c5d538a7f8817603d7cf28c52e99340def
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jun 6 13:32:04 2016 -0500
+
+    Reorganized code, APIs related to multithreading.
+    
+    Details:
+    - Reorganized code and renamed files defining APIs related to multithreading.
+      All code that is not specific to a particular operation is now located in a
+      new directory: frame/thread. Code is now organized, roughly, by the
+      namespace to which it belongs (see below).
+    - Consolidated all operation-specific *_thrinfo_t object types into a single
+      thrinfo_t object type. Operation-specific level-3 *_thrinfo_t APIs were
+      also consolidated, leaving bli_l3_thrinfo_*() and bli_packm_thrinfo_*()
+      functions (aside from a few general purpose bli_thrinfo_*() functions).
+    - Renamed thread_comm_t object type to thrcomm_t.
+    - Renamed many of the routines and functions (and macros) for multithreading.
+      We now have the following API namespaces:
+      - bli_thrinfo_*(): functions related to thrinfo_t objects
+      - bli_thrcomm_*(): functions related to thrcomm_t objects.
+      - bli_thread_*(): general-purpose functions, such as initialization,
+        finalization, and computing ranges. (For now, some macros, such as
+        bli_thread_[io]broadcast() and bli_thread_[io]barrier() use the
+        bli_thread_ namespace prefix, even though bli_thrinfo_ may be more
+        appropriate.)
+    - Renamed thread-related macros so that they use a bli_ prefix.
+    - Renamed control tree-related macros so that they use a bli_ prefix (to be
+      consistent with the thread-related macros that were also renamed).
+    - Removed #undef BLIS_SIMD_ALIGN_SIZE from dunnington's bli_kernel.h. This
+      #undef was a temporary fix to some macro defaults which were being applied
+      in the wrong order, which was recently fixed.
+
+commit 232530e88ff99f37abcae5b6fb5319a9a375a45f
+Merge: 4bcabd1 eef37f8
+Author: Tyler Michael Smith <tms@cs.utexas.edu>
+Date:   Wed Jun 1 15:14:10 2016 -0500
+
+    Merge commit 'refs/pull/81/head' of https://github.com/flame/blis
+    
+    Conflicts:
+            frame/base/bli_threading_pthreads.c
+            frame/base/bli_threading_pthreads.h
+
+commit 4bcabd1bf60688c38cf562459fc5e8be8b831756
+Author: Tyler Michael Smith <tms@cs.utexas.edu>
+Date:   Wed Jun 1 13:27:28 2016 -0500
+
+    Use spin locks instead of pthread barriers
+
+commit eef37f8b4d81845a6ba4bf25586d32b50c3e8a68
+Author: Jeff Hammond <jeff.science@gmail.com>
+Date:   Sun May 29 22:28:13 2016 -0700
+
+    use GCC intrinsic instead of pthread_mutex for atomic increment and fetch
+
+commit 9dcd6f05c4c3ff2ce7cd87a9951a96ebef22681e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue May 24 13:15:32 2016 -0500
+
+    Implemented developer-configurable malloc()/free().
+    
+    Details:
+    - Replaced all instances of bli_malloc() and bli_free() with one of:
+      - bli_malloc_pool()/bli_free_pool()
+      - bli_malloc_user()/bli_free_user()
+      - bli_malloc_intl()/bli_free_intl()
+      each of which can be configured to call malloc()/free() substitutes,
+      so long as the substitute functions have the same function type
+      signatures as malloc() and free() defined by C's stdlib.h. The _pool()
+      function is called when allocating blocks for the memory pools (used
+      for packing buffers, primarily), the _user() function is called when
+      obj_t's are created (via bli_obj_create() and friends), and the _intl()
+      function is called for internal use by BLIS, such as when creating
+      control tree nodes or temporary buffers for manipulating internal data
+      structures. Substitutes for any of the three types of bli_malloc() may
+      be specified by #defining the following pairs of cpp macros in
+      bli_kernel.h:
+      - BLIS_MALLOC_POOL/BLIS_FREE_POOL
+      - BLIS_MALLOC_USER/BLIS_FREE_USER
+      - BLIS_MALLOC_INTL/BLIS_FREE_INTL
+      to be the name of the substitute functions. (Obviously, the object
+      code that contains these functions must be provided at link-time.)
+      These macros default to malloc() and free(). Subsitute functions are
+      also automatically prototyped by BLIS (in bli_malloc_prototypes.h).
+    - Removed definitions for bli_malloc() and bli_free().
+    - Note that bli_malloc_pool() and bli_malloc_user() are now defined in
+      terms of a new function, bli_malloc_align(), which aligns memory to an
+      arbitrary (power of two) alignment boundary, but does so manually,
+      whereas before alignment was performed behind the scenes by
+      posix_memalign(). Currently, bli_malloc_intl() is defined in terms
+      of bli_malloc_noalign(), which serves as a simple wrapper to the
+      designated function that is passed in (e.g. BLIS_MALLOC_INTL).
+      Similarly, there are bli_free_align() and bli_free_noalign(), which
+      are used in concert with their bli_malloc_*() counterparts.
+
+commit 9dd440109a9d964f5cd286e9f83c487ad703e1e4
+Author: Jeff Hammond <jeff.science@gmail.com>
+Date:   Sat May 21 15:21:58 2016 -0700
+
+    fix 404 link to BuildSystem
+    
+    Google Code is dead.  Long live GitHub!
+
+commit d309f20b7376a68efa3b864ad790c2021c071655
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed May 18 15:13:53 2016 -0500
+
+    Added alignment switch to testsuite.
+    
+    Details:
+    - Added a new input parameter to input.general that globally toggles
+      whether testsuite tests are performed on objects whose buffers and
+      leading dimensions have been aligned, and changed the implementation
+      of libblis_test_mobj_create() to employ alignment (or not) regardless
+      of whether row, column, or general storage is being tested.
+    - Updated configure script's "--help" text to indicate default behavior
+      for internal integer type size and BLAS/CBLAS integer type size
+      options.
+
+commit 32db0adc218ea4ae370164dbe8d23b41cd3526d3
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue May 17 15:20:16 2016 -0500
+
+    Generate prototypes for user-defined packm kernels.
+    
+    Details:
+    - Created template prototypes for packm kernels (in bli_l1m_ker.h), and
+      then redefined reference packm kernels' prototyping headers in terms of
+      this template, as is already done for level-1v, -1f, and -3 kernels.
+    - Automatically generate prototypes for user-defined packm kernels in
+      bli_kernel_prototypes.h (using the new template prototypes in
+      bli_l1m_ker.h).
+    - Defined packm kernel function types in bli_l1m_ft.h, including for
+      packm kernels specific to induced methods, which are now used in
+      bli_packm_cxk.c and friends rather than using a locally-defined
+      function type.
+    - In bli_packm_cxk.c, extended function pointer for packm kernels array
+      from out to index 31 (from previous maximum of 17). This allows us to
+      store the unrolled 30xk kernel in the array for use (on knc, for
+      example). Note: This should have been done a long time ago.
+
+commit 4bcf1b35abea3f3dfc8f2fe462dcf155cf199e55
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed May 11 16:09:49 2016 -0500
+
+    Fixed bli_get_range_*() bugs in trsm variants.
+    
+    Details:
+    - Fixed incorrect calls to bli_get_range_*() from within trsm blocked
+      variants 1f, 2b, and 2f. The bug somehow went undetected since the
+      big commit (537a1f4), and, strangely, did not manifest via the BLIS
+      testsuite. The bug finally came to our attention when running thei
+      libflame test suite while linking to BLIS. Thanks to Kiran Varaganti
+      for submitting the initial report that led to this bug.
+
+commit 9cfa33023f123a6c17e987f72fba174ce073f0b6
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed May 11 16:02:30 2016 -0500
+
+    Minor updates to bli_f2c.h.
+    
+    Details:
+    - Added #undef guards to certain #define statements in bli_f2c.h,
+      and renamed the file guard to BLIS_F2C_H. This helps when
+      #including "blis.h" from an application or library that already
+      #includes an "f2c.h" header.
+
+commit a09a2e23eacf5328858c8318bb637c5ff3b71d08
+Merge: 4dcd37e 7c604e1
+Author: Tyler Michael Smith <tms@cs.utexas.edu>
+Date:   Wed May 11 10:47:11 2016 -0500
+
+    Merge pull request #76 from devinamatthews/move_simd_defs
+    
+    Move default SIMD-related definitions to bli_kernel_macro_defs.h
+
+commit 4dcd37eb1b12a6e08cc13df7b61391ef8363f5d8
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Tue May 10 16:28:59 2016 -0500
+
+    fixing knc simd align size
+
+commit 7c604e1cbc1609b6e12d3ee973c08b7af5035be4
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Tue May 10 12:11:55 2016 -0500
+
+    Move default SIMD-related definitions to bli_kernel_macro_defs.h. Otherwise, configurations which customize these fail as these are now defined in bli_kernel.h.
+
+commit a7be2d28e8930b154d0da1d6929b54a96e210af6
+Merge: 97b512e 4b1e55e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue May 10 11:48:51 2016 -0500
+
+    Merge pull request #74 from devinamatthews/fix_common_symbols
+    
+    Default-initialize all extern global variables to avoid generating common symbols.
+
+commit 4b1e55edbfe0e1cb2e7b9428424903497cb7a841
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Tue May 10 10:08:47 2016 -0500
+
+    Default-initialize all extern global variables to avoid generating common symbols. Fixes #73.
+
+commit 97b512ef62c7e25c97ed5e9eca81cd7015b2ac91
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri May 6 10:24:30 2016 -0500
+
+    Include headers from cblas.h to pull in f77_int.
+    
+    Details:
+    - Added #include statements for certain key BLIS headers so that the
+      definition of f77_int is pulled in when a user compiles application
+      code with only #include "cblas.h" (and no other BLIS header). This
+      is necessary since f77_int is now used within the cblas API.
+
+commit c3a4d39d03665135f1616588b5ef7c3e9ef5688d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed May 4 17:22:56 2016 -0500
+
+    Updates to haswell gemm micro-kernels.
+    
+    Details:
+    - Added two new sets of [sd]gemm micro-kernels for haswell architectures,
+      one that is 4x24/4x12 (s and d) and one that is 6x16/6x8.
+    - Changed the haswell configuration to use the 6x16/6x8 micro-kernels
+      by default.
+    - Updated various Makefiles, in test, test/3m4m, and testsuite.
+
+commit 0b01d355ae861754ae2da6c9a545474af010f02e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Apr 27 15:21:10 2016 -0500
+
+    Miscellaneous cleanups, fixes to recent commits.
+    
+    Details:
+    - Fixed a typo in bli_l1f_ref.h, introduced into bbb8569, that only
+      manifested when non-reference level-1f kernels were used.
+    - Added an #undef BLIS_SIMD_ALIGN_SIZE to bli_kernel.h of dunnington
+      configuration to prevent a compile-time warning until I can figure out
+      the proper permanent fix.
+    - Moved frame/1f/kernels/bli_dotxaxpyf_ref_var1.c out of the compilation
+      path (into 'other' directory). _ref_var2 is used by default, which is
+      the variant that is built on axpyf and dotxf instead of dotaxpyv.
+    - Removed section of frame/include/bli_config_macro_defs.h pertaining to
+      mixed datatype support.
+
+commit ed7326c836f427e2f8420b015220ce293207b10c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Apr 27 14:57:40 2016 -0500
+
+    Added 'restrict' to l1v/l1f code in 'kernels' dir.
+    
+    Details:
+    - Added 'restrict' keyword to existing kernel definitions in 'kernels'
+      directory. These changes were meant for inclusion in bbb8569.
+
+commit bbb8569b2a08c3bcd631d5a05eb389d01d94ac07
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Apr 27 14:13:46 2016 -0500
+
+    Use 'restrict' in all kernel APIs; wspace changes.
+    
+    Details:
+    - Updated level-1v, level-1f kernel function types (bli_l1?_ft.h) and
+      generic kernel prototypes (bli_l1?_ker.h) to use 'restrict' for all
+      numerical operand pointers (ie: all pointers except the cntx_t).
+    - Updated level-1f reference kernel definitions to use 'restrict' for
+      all numerical operand pointers. (Level-1v reference kernel definitions
+      were already updated in bdbda6e.)
+    - Rewrote the level-1v and level-1f reference kernel prototypes in
+      bli_l1v_ref.h and bli_l1f_ref.h, respectively, to simply #include
+      bli_l1v_ker.h and bli_l1f_ker.h with redefined function base names
+      (as was already being done for the level-3 micro-kernel prototypes
+      in bli_l3_ref.h), rather than duplicate the signatures from the
+      _ker.h files.
+    - Added definitions to frame/include/bli_kernel_prototypes.h for axpbyv
+      and xpbyv, which were probably meant for inclusion in bdbda6e.
+    - Converted a number of instances of four spaces, as introduced in
+      bdbda6e, to tabs.
+
+commit 4ea419c72c789825e1f93a1eee88219bbf873930
+Merge: f1e9be2 bdbda6e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Apr 26 12:50:45 2016 -0500
+
+    Merge pull request #70 from devinamatthews/daxpby
+    
+    Give the level1v operations some love
+
+commit bdbda6e6acc682ab1b6ca680edebd09ae12a832c
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Mon Apr 25 11:05:57 2016 -0500
+
+    Give the level1v operations some love:
+    
+    - Add missing axpby and xpby operations (plus test cases).
+    - Add special case for scal2v with alpha=1.
+    - Add restrict qualifiers.
+    - Add special-case algorithms for incx=incy=1.
+
+commit f1e9be2aba1a057eedb947bbae96848597777408
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Apr 22 15:34:02 2016 -0500
+
+    Minor tweak to test/Makefile.
+    
+    Details:
+    - Just committing a minor change to test/Makefile that has been lingering
+      in my local working copy for longer than I can remember.
+
+commit aa0bceec277938328dabeb744680623f24fb0b61
+Merge: 4136553 e2784b4
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Apr 22 12:01:31 2016 -0500
+
+    Merge branch 'master' of github.com:flame/blis
+
+commit 4136553f0d0661a668dfdb9edcd7ce1c5773dde7
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Apr 22 11:53:53 2016 -0500
+
+    Clear level-3 cntx_t's via memset() before use.
+    
+    Details:
+    - In all level-3 operations' _cntx_init() functions, replaced calls to
+      bli_cntx_obj_init() with calls to bli_cntx_obj_clear(), and in all
+      level-3 operations' _cntx_finalize() functions, removed calls to
+      bli_cntx_obj_finalize(), leaving those function definitions empty.
+    - Changed the definition of bli_cntx_obj_clear() so that the clearing
+      occurs via a single call to memset().
+
+commit e2784b4c921f706e756df3e146e20a4cb63f53e3
+Merge: dd0ab1d a9b6c3a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Apr 20 18:34:09 2016 -0500
+
+    Merge pull request #67 from devinamatthews/cblas-f77-int
+    
+    Change CBLAS integer type to f77_int
+
+commit a9b6c3abda6222a8b240361643932e83cf726c4f
+Merge: e4c54c8 dd0ab1d
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Wed Apr 20 16:00:10 2016 -0500
+
+    Merge remote-tracking branch 'origin/master' into cblas-f77-int
+    
+    # Conflicts:
+    #       config/haswell/bli_config.h
+
+commit e4c54c81463c2a19c9bb6b1f0f1be3fa9d018a45
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Wed Apr 20 15:56:46 2016 -0500
+
+    Change integer type in CBLAS function signatures to f77_int, and add proper const-correctness to BLAS layer.
+
+commit dd0ab1d93f33abca6af9edd7b8e52da62dcfa5b1
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Apr 20 14:38:23 2016 -0500
+
+    Converted some bli_cntx query functions to macros.
+    
+    Details:
+    - Commented out several datatype-aware query functions (those ending in
+      _dt) from bli_cntx.c, as well as their prototypes in bli_cntx.h, and
+      added equivalent cpp query macros to bli_cntx.h.
+    - Added 'bli_config.h' to .gitignore.
+
+commit a30ccbc4c6a6e6460e78af6b5c530ee0d06f98fb
+Merge: eb2f18e 0e1a982
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Apr 19 15:04:33 2016 -0500
+
+    Merge pull request #66 from devinamatthews/blas-configure
+    
+    Add configure options and generate bli_config.h automatically.
+
+commit eb2f18e4844d985715df20798f50f9cc12e3b5ad
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Apr 19 12:50:32 2016 -0500
+
+    More compile-time fixes to bgq gemm ukernel code.
+
+commit 0e1a9821d860f6c1d818baf4c48d21a23726c132
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Tue Apr 19 11:44:37 2016 -0500
+
+    Add configure options and generate bli_config.h automatically.
+    
+    Options to configure have been added for:
+    - Setting the internal BLIS and BLAS/CBLAS integer sizes.
+    - Enabling and disabling the BLAS and CBLAS layers.
+    
+    Additionally, configure options which require defining macros (the above plus the threading model), write their macros to the automatically-generated bli_config.h file in the top-level build directory. The old bli_config.h files in the config dirs were removed, and any kernel-related macros (SIMD size and alignment etc.) were moved to bli_kernel.h. The Makefiles were also modified to find the new bli_config.h file.
+    
+    Lastly, support for OMP in clang has been added (closes #56).
+
+commit ff84469a4575f1ef8a0010046fde52240a312cae
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Apr 18 12:29:09 2016 -0500
+
+    Applied various compilation fixes to bgq kernels.
+
+commit cbcd0b739dc54bd14fbb46aeda267c26725cd70f
+Author: Tyler Michael Smith <tms@cs.utexas.edu>
+Date:   Mon Apr 18 03:12:57 2016 -0500
+
+    Changing ifdef for OSX pthread barriers
+
+commit dd62080cea78f3a23616200d6640e52c102b2bb9
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Apr 15 11:15:41 2016 -0500
+
+    Compile-time fix to bgq l1f kernels.
+    
+    Details:
+    - Fixed an old reference to bli_daxpyf_fusefac, which no longer exists,
+      by replacing it with the axpyf fusing factor (8), and cleaned up the
+      relevant section of config/bgq/bli_kernel.h.
+    - Removed most of the details of the level-3 kernels from the template
+      kernel code in config/template/kernels/3 and replaced it with a
+      reference to the relevant kernel wiki maintained on the BLIS github
+      website.
+
+commit d5a915dd8d7a6ead42a68772e4420eb3647e6f1a
+Merge: 4320b72 4169467
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Apr 14 12:56:36 2016 -0500
+
+    Merge branch 'master' of github.com:flame/blis
+
+commit 4320b725a1f8fd34101470b6cf52ad504a79c517
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Apr 14 12:51:29 2016 -0500
+
+    Use kernel CFLAGS on "ukernels" directories.
+    
+    Details:
+    - Updated the top-level Makefile so that the CFLAGS variable designated
+      for kernel source code is applied not only to source code in
+      directories named "kernels" but source code in any directory that
+      contains the substring "kernels", such as "ukernels".
+    - Formally disabled some code in gen-make-frag.sh script that was already
+      effectively disabled. The code was related to handling "noopt" and
+      "kernel" directories, which is now handled independently within the
+      top-level Makefile without needing to place these source files into
+      a spearate makefile variable.
+
+commit 41694675e4cb56e2e0323c7a7db48e0819606a31
+Author: Tyler Smith <tms@cs.utexas.edu>
+Date:   Wed Apr 13 15:51:08 2016 -0500
+
+    pthreads bugfixes
+    
+    Getting pthreads to work on my Mac
+    Implemented a pthread barrier when _POSIX_BARRIER isn't defined
+    Now spawn n-1 threads instead of n threads so that master thread isn't just spinning the whole time
+    Add -lpthread instead of -pthread to LDFLAGS (for clang)
+
+commit f756dbfa0d542cbc497724981520c83abf049c4b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Apr 13 11:25:33 2016 -0500
+
+    Removed stale #include from bgq configuration.
+    
+    Details:
+    - Removed an old #include statement ("bli_gemm_8x8.h") from the
+      bli_kernel.h file in the bgq configuration. It turns out this
+      file was no longer needed even prior to 537a1f4.
+
+commit 0bd4169ea75f690714e7d2912229932a75d8a7e2
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Apr 11 18:08:32 2016 -0500
+
+    Fixed context-broken dunnington/penryn kernels.
+    
+    Details:
+    - Added missing context parameters to several instances where simpler
+      kernels, or reference kernels, are called instead of executing the
+      main body code contained in the kernel function in question.
+    - Renamed axpyv and dotv kernel files to use "opt" instead of "int"
+      substring, for consistency with level-1f kernels.
+
+commit 7912af5db45b7372d19a9a3dfeb82df302a05628
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Apr 11 17:32:13 2016 -0500
+
+    CHANGELOG update (0.2.0)
+
+commit 898614a555ea0aa7de4ca07bb3cb8f5708b6a002 (tag: 0.2.0)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Mon Apr 11 17:32:09 2016 -0500
 
@@ -132,7 +1182,7 @@ Date:   Mon Apr 11 17:21:28 2016 -0500
       that this does not preclude supporting mixed types via the object APIs,
       where it produces absolutely zero API code bloat.
 
-commit d1f8e5d9b2ecd054ed103f4d642d748db2d4f173 (origin/master)
+commit d1f8e5d9b2ecd054ed103f4d642d748db2d4f173
 Merge: 20af937 c11d28e
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Tue Apr 5 12:21:27 2016 -0500
@@ -2384,8 +3434,8 @@ Date:   Wed Aug 20 14:44:51 2014 -0500
     Merge branch 'master' of http://github.com/flame/blis
     
     Conflicts:
-    	frame/3/trsm/bli_trsm_blk_var2b.c
-    	frame/3/trsm/bli_trsm_blk_var2f.c
+            frame/3/trsm/bli_trsm_blk_var2b.c
+            frame/3/trsm/bli_trsm_blk_var2f.c
 
 commit 699a8151ca3d5021e834a1784ef45dcc3a3d17cd
 Author: Tyler Smith <tms@cs.utexas.edu>
@@ -3492,8 +4542,8 @@ Date:   Fri Apr 4 09:54:54 2014 -0500
     Merge http://github.com/flame/blis
     
     Conflicts:
-    	kernels/bgq/1/bli_axpyv_opt_var1.c
-    	kernels/bgq/1/bli_dotv_opt_var1.c
+            kernels/bgq/1/bli_axpyv_opt_var1.c
+            kernels/bgq/1/bli_dotv_opt_var1.c
 
 commit 4e3eb39aca4df0b9fdc003d468f368a2f2ba597d
 Author: Tyler Michael Smith <tmsmith@vestalac1.ftd.alcf.anl.gov>
@@ -3793,7 +4843,7 @@ Date:   Thu Feb 27 16:46:23 2014 -0600
     Merge https://github.com/flame/blis
     
     Conflicts:
-    	frame/1m/packm/bli_packm_blk_var1.c
+            frame/1m/packm/bli_packm_blk_var1.c
 
 commit e8757b03a74f9891632242e9a90efb32150826f5
 Author: Field G. Van Zee <field@cs.utexas.edu>

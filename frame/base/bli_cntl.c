@@ -107,9 +107,13 @@ void bli_cntl_free
 
 	thrinfo_t* thread_sub_node = bli_thrinfo_sub_node( thread );
 
-	// Recursively free all memory associated with the sub-node and its
-	// children.
-	bli_cntl_free( cntl_sub_node, thread_sub_node );
+	// Only recurse if the current thrinfo_t node has a child.
+	if ( thread_sub_node != NULL )
+	{
+		// Recursively free all memory associated with the sub-node and its
+		// children.
+		bli_cntl_free( cntl_sub_node, thread_sub_node );
+	}
 
 	// Free the current node's params field, if it is non-NULL.
 	if ( cntl_params != NULL )
