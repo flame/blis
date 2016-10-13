@@ -121,10 +121,10 @@ thrinfo_t** bli_l3_thrinfo_create_full_paths
      (
        cntx_t* cntx
      );
+#endif
 
 void bli_l3_thrinfo_free_paths
      (
        thrinfo_t** threads
      );
-#endif
 

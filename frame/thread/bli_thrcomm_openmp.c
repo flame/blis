@@ -199,6 +199,8 @@ void bli_thrcomm_tree_barrier( barrier_t* barack )
 
 #endif
 
+//#define PRINT_THRINFO
+
 void bli_l3_thread_decorator
      (
        l3int_t     func,
@@ -216,6 +218,10 @@ void bli_l3_thread_decorator
 
 	// Allcoate a global communicator for the root thrinfo_t structures.
 	thrcomm_t*  gl_comm   = bli_thrcomm_create( n_threads );
+
+#ifdef PRINT_THRINFO
+	thrinfo_t** threads   = bli_malloc_intl( n_threads * sizeof( thrinfo_t* ) );
+#endif
 
 	_Pragma( "omp parallel num_threads(n_threads)" )
 	{
@@ -245,13 +251,24 @@ void bli_l3_thread_decorator
 		// Free the control tree, if one was created locally.
 		bli_l3_cntl_free_if( a, b, c, cntx, cntl, cntl_use, thread );
 
+#ifdef PRINT_THRINFO
+		threads[id] = thread;
+#else
 		// Free the current thread's thrinfo_t structure.
 		bli_l3_thrinfo_free( thread );
+#endif
 	}
 
 	// We shouldn't free the global communicator since it was already freed
 	// by the global communicator's chief thread in bli_l3_thrinfo_free()
 	// (called above).
+
+
+#ifdef PRINT_THRINFO
+	bli_l3_thrinfo_print_paths( threads );
+	bli_l3_thrinfo_free_paths( threads );
+	exit(1);
+#endif
 }
 
 #endif
