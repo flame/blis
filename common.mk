@@ -153,9 +153,9 @@ endif
 
 ifeq ($(CC_VENDOR),gcc)
 ifeq ($(THREADING_MODEL),auto)
-THREADING_MODEL := omp
+THREADING_MODEL := openmp
 endif
-ifeq ($(THREADING_MODEL),omp)
+ifeq ($(THREADING_MODEL),openmp)
 CTHREADFLAGS := -fopenmp
 LDFLAGS      += -fopenmp
 endif
@@ -167,9 +167,9 @@ endif
 
 ifeq ($(CC_VENDOR),icc)
 ifeq ($(THREADING_MODEL),auto)
-THREADING_MODEL := omp
+THREADING_MODEL := openmp
 endif
-ifeq ($(THREADING_MODEL),omp)
+ifeq ($(THREADING_MODEL),openmp)
 CTHREADFLAGS := -fopenmp
 LDFLAGS      += -fopenmp
 endif
@@ -183,7 +183,7 @@ ifeq ($(CC_VENDOR),clang)
 ifeq ($(THREADING_MODEL),auto)
 THREADING_MODEL := pthreads
 endif
-ifeq ($(THREADING_MODEL),omp)
+ifeq ($(THREADING_MODEL),openmp)
 CTHREADFLAGS := -fopenmp
 LDFLAGS      += -fopenmp
 endif
