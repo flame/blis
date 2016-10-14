@@ -422,6 +422,7 @@ exit(1);
 
 	return paths;
 }
+#endif
 
 void bli_l3_thrinfo_free_paths
      (
@@ -436,5 +437,4 @@ void bli_l3_thrinfo_free_paths
 
 	bli_free_intl( threads );
 }
-#endif
 

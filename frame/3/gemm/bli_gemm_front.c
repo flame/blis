@@ -88,13 +88,6 @@ void bli_gemm_front
 	// Record the threading for each level within the context.
 	bli_cntx_set_thrloop_from_env( BLIS_GEMM, BLIS_LEFT, cntx );
 
-	// Create the first node in the thrinfo_t tree for each thread.
-//thrinfo_t** infos = bli_l3_thrinfo_create_full_paths( cntx );
-//bli_l3_thrinfo_print_paths( infos );
-//exit(1);
-//cntl = bli_gemm_cntl_create( BLIS_GEMM );
-	//thrinfo_t** infos = bli_l3_thrinfo_create_roots( cntx, cntl );
-
 	// Invoke the internal back-end via the thread handler.
 	bli_l3_thread_decorator
 	(
@@ -107,10 +100,5 @@ void bli_gemm_front
 	  cntx,
 	  cntl
 	);
-//bli_l3_thrinfo_print_paths( infos );
-//exit(1);
-
-	// Free the thrinfo_t structures.
-	//bli_l3_thrinfo_free_paths( infos );
 }
 
