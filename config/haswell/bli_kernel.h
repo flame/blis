@@ -140,7 +140,6 @@
 
 // -- trsm-related --
 
-#define BLIS_STRSM_L_UKERNEL   bli_strsm_l_int_6x16
 
 // zgemm micro-kernel
 
@@ -174,9 +173,6 @@
 
 // -- unpackm --
 
-#define BLIS_DEFAULT_1F_S        8
-#define BLIS_DEFAULT_1F_D 	 4
-
 
 // -- LEVEL-1F KERNEL DEFINITIONS ----------------------------------------------
 
@@ -185,12 +181,8 @@
 // -- dotaxpyv --
 
 // -- axpyf --
-#define BLIS_SAXPYF_KERNEL           bli_saxpyf_int_var1
-#define BLIS_DAXPYF_KERNEL           bli_daxpyf_int_var1
 
 // -- dotxf --
-#define BLIS_SDOTXF_KERNEL           bli_sdotxf_int_var1
-#define BLIS_DDOTXF_KERNEL           bli_ddotxf_int_var1
 
 // -- dotxaxpyf --
 
@@ -199,17 +191,15 @@
 
 // -- LEVEL-1V KERNEL DEFINITIONS ----------------------------------------------
 // -- amax --
-#define BLIS_SAMAXV_KERNEL         bli_samaxv_opt_var1
+
 // -- addv --
 
 // -- axpyv --
-#define BLIS_DAXPYV_KERNEL         bli_daxpyv_opt_var1
-#define BLIS_SAXPYV_KERNEL         bli_saxpyv_opt_var1
+
 // -- copyv --
 
 // -- dotv --
-#define BLIS_DDOTV_KERNEL          bli_ddotv_opt_var1
-#define BLIS_SDOTV_KERNEL          bli_sdotv_opt_var1
+
 // -- dotxv --
 
 // -- invertv --
