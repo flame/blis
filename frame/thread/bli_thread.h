@@ -52,9 +52,6 @@
   #define BLIS_ENABLE_MULTITHREADING
 #endif
 
-// Include thread mutex (mtx_t) object definitions and prototypes.
-#include "bli_mutex.h"
-
 // Include thread communicator (thrcomm_t) object definitions and prototypes.
 #include "bli_thrcomm.h"
 

@@ -98,7 +98,6 @@ extern "C" {
 
 #include "bli_init.h"
 #include "bli_const.h"
-#include "bli_malloc.h"
 #include "bli_obj.h"
 #include "bli_obj_scalar.h"
 #include "bli_cntx.h"

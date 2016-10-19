@@ -715,10 +715,6 @@ typedef enum
 // -- BLIS misc. structure types -----------------------------------------------
 //
 
-// -- Mutex type --
-
-typedef struct mtx_s mtx_t;
-
 // -- Pool block type --
 
 typedef struct
@@ -741,10 +737,14 @@ typedef struct
 	siz_t   align_size;
 } pool_t;
 
+// -- Mutex object type --
+
+#include "bli_mutex.h"
+#include "bli_malloc.h"
+
 // -- Memory broker object type --
 
-typedef struct membrk_s membrk_t;
-/*
+typedef struct membrk_s
 {
 	pool_t    pools[3];
 	mtx_t     mutex;
@@ -752,7 +752,6 @@ typedef struct membrk_s membrk_t;
 	malloc_ft malloc_fp;
 	free_ft   free_fp;
 } membrk_t;
-*/
 
 // -- Memory object type --
 
