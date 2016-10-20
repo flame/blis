@@ -141,9 +141,6 @@
 #define BLIS_ZGEMM_UKERNEL_PREFERS_CONTIG_ROWS
 #endif
 
-// -- trsm-related --
-
-#define BLIS_STRSM_L_UKERNEL   bli_strsm_l_int_6x16
 
 // zgemm micro-kernel
 
@@ -157,6 +154,13 @@
 
 #define BLIS_ZGEMM_UKERNEL_PREFERS_CONTIG_ROWS
 #endif
+
+// -- trsm-related --
+
+#define BLIS_STRSM_L_UKERNEL   bli_strsm_l_int_6x16
+#define BLIS_DTRSM_L_UKERNEL   bli_dtrsm_l_int_6x16
+
+
 
 
 
@@ -227,6 +231,8 @@
 // -- scal2v --
 
 // -- scalv --
+#define BLIS_SSCALV_KERNEL   bli_sscalv_opt
+#define BLIS_DSCALV_KERNEL   bli_dscalv_opt
 
 // -- setv --
 
