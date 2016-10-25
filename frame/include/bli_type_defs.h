@@ -830,8 +830,8 @@ typedef struct
 
 	// Pointers to the micro-panels of A and B which will be used by the
 	// next call to the micro-kernel.
-	const void*  a_next;
-	const void*  b_next;
+	void*  a_next;
+	void*  b_next;
 
 	// The imaginary strides of A and B.
 	inc_t  is_a;
