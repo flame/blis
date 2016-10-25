@@ -506,11 +506,14 @@ main()
 		echo "${script_name}: using OpenMP for threading."
 		enable_openmp='yes'
 		enable_openmp_01=1
-	elif [ "x${threading_model}" = "xpthreads" ]; then
+	elif [ "x${threading_model}" = "xpthreads" ] ||
+	     [ "x${threading_model}" = "xpthread" ] ||
+	     [ "x${threading_model}" = "xposix" ]; then
 		echo "${script_name}: using Pthreads for threading."
 		enable_pthreads='yes'
 		enable_pthreads_01=1
-	elif [ "x${threading_model}" = "xno" ]; then
+	elif [ "x${threading_model}" = "xno" ] ||
+	     [ "x${threading_model}" = "xnone" ]; then
 		echo "${script_name}: threading is disabled."
 	else
 		echo "Unsupported threading model: ${threading_model}."
