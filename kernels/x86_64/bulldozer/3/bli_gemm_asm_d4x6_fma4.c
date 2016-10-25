@@ -763,7 +763,7 @@ void bli_sgemm_asm_8x8_fma4
 #undef KERNEL4x6_4
 
 #define KERNEL4x6_1(xx) \
-		".align 4											\n\t"\
+		".p2align 2											\n\t"\
 		"vmovddup -8 * 8(%%rax), %%xmm0						\n\t"\
 		"vfmaddpd %%xmm4,  %%xmm1, %%xmm0, %%xmm4			\n\t"\
 		"vfmaddpd %%xmm5,  %%xmm2, %%xmm0, %%xmm5			\n\t"\
@@ -888,7 +888,7 @@ void bli_dgemm_asm_4x6_fma4
 		"testq  %%rsi, %%rsi            \n\t"
 		"je .CONSIDERKLEFT   		\n\t"
 		"                       	\n\t"
-		".align 32              	\n\t"
+		".p2align 5              	\n\t"
 		".LOOPKITER:                    \n\t" // MAIN LOOP
 		"                       	\n\t"
         KERNEL4x6_1(xx)

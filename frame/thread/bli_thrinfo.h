@@ -45,45 +45,59 @@ struct thrinfo_s
 	// Our thread id within the ocomm thread communicator.
 	dim_t              ocomm_id;
 
-	// The thread communicator for the other threads sharing the same work
-	// at this level.
-	thrcomm_t*         icomm;
-
-	// Our thread id within the icomm thread communicator.
-	dim_t              icomm_id;
-
 	// The number of distinct threads used to parallelize the loop.
 	dim_t              n_way;
 
 	// What we're working on.
 	dim_t              work_id;
 
-	struct thrinfo_s*  opackm;
-	struct thrinfo_s*  ipackm;
-	struct thrinfo_s*  sub_self;
+	// When freeing, should the communicators in this node be freed? Usually,
+	// this is field is true, but when nodes are created that share the same
+	// communicators as other nodes (such as with packm nodes), this is set
+	// to false.
+	bool_t             free_comm;
+
+	struct thrinfo_s*  sub_node;
 };
 typedef struct thrinfo_s thrinfo_t;
 
-
-#define bli_thread_num_threads( t )     ( t->ocomm->n_threads )
-
-#define bli_thread_n_way( t )           ( t->n_way )
-#define bli_thread_work_id( t )         ( t->work_id )
-#define bli_thread_am_ochief( t )       ( t->ocomm_id == 0 )
-#define bli_thread_am_ichief( t )       ( t->icomm_id == 0 )
-
-#define bli_thread_obroadcast( t, ptr ) bli_thrcomm_bcast( t->ocomm, t->ocomm_id, ptr )
-#define bli_thread_ibroadcast( t, ptr ) bli_thrcomm_bcast( t->icomm, t->icomm_id, ptr )
-#define bli_thread_obarrier( t )        bli_thrcomm_barrier( t->ocomm, t->ocomm_id )
-#define bli_thread_ibarrier( t )        bli_thrcomm_barrier( t->icomm, t->icomm_id )
-
 //
-// Generic accessor macros for all thrinfo_t objects.
+// thrinfo_t macros
+// NOTE: The naming of these should be made consistent at some point.
+// (ie: bli_thrinfo_ vs. bli_thread_)
 //
 
-#define bli_thrinfo_sub_opackm( t )     ( t->opackm )
-#define bli_thrinfo_sub_ipackm( t )     ( t->ipackm )
-#define bli_thrinfo_sub_self( t )       ( t->sub_self )
+// thrinfo_t query (field only)
+
+#define bli_thread_num_threads( t )        ( (t)->ocomm->n_threads )
+
+#define bli_thread_n_way( t )              ( (t)->n_way )
+#define bli_thread_work_id( t )            ( (t)->work_id )
+#define bli_thread_ocomm_id( t )           ( (t)->ocomm_id )
+
+#define bli_thrinfo_ocomm( t )             ( (t)->ocomm )
+#define bli_thrinfo_needs_free_comm( t )   ( (t)->free_comm )
+
+#define bli_thrinfo_sub_node( t )          ( (t)->sub_node )
+
+// thrinfo_t query (complex)
+
+#define bli_thread_am_ochief( t )          ( (t)->ocomm_id == 0 )
+
+// thrinfo_t modification
+
+#define bli_thrinfo_set_sub_node( _sub_node, thread ) \
+{ \
+	(thread)->sub_node = _sub_node; \
+}
+
+// other thrinfo_t-related macros
+
+#define bli_thread_obroadcast( t, p ) bli_thrcomm_bcast( (t)->ocomm, \
+                                                         (t)->ocomm_id, p )
+#define bli_thread_obarrier( t )      bli_thrcomm_barrier( (t)->ocomm, \
+                                                           (t)->ocomm_id )
+
 
 //
 // Prototypes for level-3 thrinfo functions not specific to any operation.
@@ -93,13 +107,10 @@ thrinfo_t* bli_thrinfo_create
      (
        thrcomm_t* ocomm,
        dim_t      ocomm_id,
-       thrcomm_t* icomm,
-       dim_t      icomm_id,
        dim_t      n_way,
        dim_t      work_id, 
-       thrinfo_t* opackm,
-       thrinfo_t* ipackm,
-       thrinfo_t* sub_self
+       bool_t     free_comm,
+       thrinfo_t* sub_node
      );
 
 void bli_thrinfo_init
@@ -107,13 +118,10 @@ void bli_thrinfo_init
        thrinfo_t* thread,
        thrcomm_t* ocomm,
        dim_t      ocomm_id,
-       thrcomm_t* icomm,
-       dim_t      icomm_id,
        dim_t      n_way,
        dim_t      work_id, 
-       thrinfo_t* opackm,
-       thrinfo_t* ipackm,
-       thrinfo_t* sub_self
+       bool_t     free_comm,
+       thrinfo_t* sub_node
      );
 
 void bli_thrinfo_init_single
@@ -121,9 +129,29 @@ void bli_thrinfo_init_single
        thrinfo_t* thread
      );
 
-void bli_thrinfo_free
+// -----------------------------------------------------------------------------
+
+thrinfo_t* bli_thrinfo_create_for_cntl
      (
+       cntx_t*    cntx,
+       cntl_t*    cntl_par,
+       cntl_t*    cntl_chl,
+       thrinfo_t* thread_par
+     );
+
+void bli_thrinfo_grow
+     (
+       cntx_t*    cntx,
+       cntl_t*    cntl,
        thrinfo_t* thread
+     );
+
+thrinfo_t* bli_thrinfo_rgrow
+     (
+       cntx_t*    cntx,
+       cntl_t*    cntl_par,
+       cntl_t*    cntl_cur,
+       thrinfo_t* thread_par
      );
 
 #endif

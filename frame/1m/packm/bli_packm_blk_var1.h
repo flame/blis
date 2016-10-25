@@ -32,10 +32,14 @@
 
 */
 
-void bli_packm_blk_var1( obj_t*   c,
-                         obj_t*   p,
-                         cntx_t*  cntx,
-                         thrinfo_t* t );
+void bli_packm_blk_var1
+     (
+       obj_t*   c,
+       obj_t*   p,
+       cntx_t*  cntx,
+       cntl_t*  cntl,
+       thrinfo_t* t
+     );
 
 
 #undef  GENTPROT

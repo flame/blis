@@ -32,5 +32,6 @@
 
 */
 
-#include "bli_symv_front.h"
+// NOTE: level-2 control tree code is temporarily disabled.
+//#include "bli_symv_front.h"
 

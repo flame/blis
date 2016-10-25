@@ -40,6 +40,9 @@
 #undef  addv_ker_name
 #define addv_ker_name       addv
 
+#undef  amaxv_ker_name
+#define amaxv_ker_name      amaxv
+
 #undef  axpbyv_ker_name
 #define axpbyv_ker_name     axpbyv
 

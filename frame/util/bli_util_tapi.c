@@ -38,50 +38,6 @@
 // Define BLAS-like interfaces with typed operands.
 //
 
-#undef  GENTFUNCI
-#define GENTFUNCI( ctype, ctype_i, ch, chi, opname ) \
-\
-void PASTEMAC(ch,opname) \
-     ( \
-       dim_t    n, \
-       ctype*   x, inc_t incx, \
-       ctype_i* index, \
-       cntx_t*  cntx  \
-     ) \
-{ \
-	cntx_t*  cntx_p = cntx; \
-\
-	/* If the vector length is zero, set the index to zero and return
-	   early. This directly emulatess the behavior of netlib LAPACK's
-	   i?amax() routines. */ \
-	if ( bli_zero_dim1( n ) ) \
-	{ \
-		ctype_i* zero_i = PASTEMAC(chi,0); \
-\
-		PASTEMAC(chi,copys)( *zero_i, *index ); \
-		return; \
-	} \
-\
-	/* Initialize a local context if the given context is NULL. */ \
-	/*bli_cntx_init_local_if( opname, cntx, cntx_p );*/ \
-\
-	/* Invoke the helper variant, which loops over the appropriate kernel
-	   to implement the current operation. */ \
-	PASTEMAC2(ch,opname,_unb_var1) \
-	( \
-	  n, \
-	  x, incx, \
-	  index, \
-	  cntx_p  \
-	); \
-\
-	/* Finalize the context if it was initialized locally. */ \
-	/*bli_cntx_finalize_local_if( opname, cntx );*/ \
-}
-
-INSERT_GENTFUNCI_BASIC0( amaxv )
-
-
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, opname ) \
 \

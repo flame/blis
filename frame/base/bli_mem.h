@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2016 Hewlett Packard Enterprise Development LP
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,37 +33,94 @@
 
 */
 
-void   bli_mem_init( void );
-void   bli_mem_reinit( cntx_t* cntx );
-void   bli_mem_finalize( void );
-bool_t bli_mem_is_initialized( void );
+#ifndef BLIS_MEM_H
+#define BLIS_MEM_H
 
-// -----------------------------------------------------------------------------
 
-void bli_mem_acquire_m( siz_t     req_size,
-                        packbuf_t buf_type,
-                        mem_t*    mem );
+// Mem entry query
 
-void bli_mem_acquire_v( siz_t     req_size,
-                        mem_t*    mem );
+#define bli_mem_pblk( mem_p ) \
+\
+	( &((mem_p)->pblk) )
 
-void bli_mem_release( mem_t* mem );
+#define bli_mem_buffer( mem_p ) \
+\
+	( bli_pblk_buf_align( bli_mem_pblk( mem_p ) ) )
 
-siz_t bli_mem_pool_size( packbuf_t buf_type );
+#define bli_mem_buf_sys( mem_p ) \
+\
+	( bli_pblk_buf_sys( bli_mem_pblk( mem_p ) ) )
 
-// -----------------------------------------------------------------------------
+#define bli_mem_buf_type( mem_p ) \
+\
+	( (mem_p)->buf_type )
 
-void bli_mem_init_pools( cntx_t* cntx );
-void bli_mem_reinit_pools( cntx_t* cntx );
-void bli_mem_finalize_pools( void );
+#define bli_mem_pool( mem_p ) \
+\
+	( (mem_p)->pool )
 
-void bli_mem_compute_pool_block_sizes( siz_t*  bs_a,
-                                       siz_t*  bs_b,
-                                       siz_t*  bs_c,
-                                       cntx_t* cntx );
-void bli_mem_compute_pool_block_sizes_dt( num_t   dt,
-                                          siz_t*  bs_a,
-                                          siz_t*  bs_b,
-                                          siz_t*  bs_c,
-                                          cntx_t* cntx );
+#define bli_mem_membrk( mem_p ) \
+\
+	( (mem_p)->membrk )
 
+#define bli_mem_size( mem_p ) \
+\
+	( (mem_p)->size )
+
+#define bli_mem_is_alloc( mem_p ) \
+\
+	( bli_mem_buffer( mem_p ) != NULL )
+
+#define bli_mem_is_unalloc( mem_p ) \
+\
+	( bli_mem_buffer( mem_p ) == NULL )
+
+
+// Mem entry modification
+
+#define bli_mem_set_pblk( pblk_p, mem_p ) \
+{ \
+	mem_p->pblk = *(pblk_p); \
+}
+
+#define bli_mem_set_buffer( buf0, mem_p ) \
+{ \
+	bli_pblk_set_buf_align( buf0, &(mem_p->pblk) ); \
+}
+
+#define bli_mem_set_buf_sys( buf0, mem_p ) \
+{ \
+	bli_pblk_set_buf_sys( buf0, &(mem_p->pblk) ); \
+}
+
+#define bli_mem_set_buf_type( buf_type0, mem_p ) \
+{ \
+	(mem_p)->buf_type = buf_type0; \
+}
+
+#define bli_mem_set_pool( pool0, mem_p ) \
+{ \
+	(mem_p)->pool = pool0; \
+}
+
+#define bli_mem_set_membrk( membrk0, mem_p ) \
+{ \
+	(mem_p)->membrk = membrk0; \
+}
+
+#define bli_mem_set_size( size0, mem_p ) \
+{ \
+	mem_p->size = size0; \
+}
+
+#define bli_mem_clear( mem_p ) \
+{ \
+	bli_mem_set_buffer( NULL, mem_p ); \
+	bli_mem_set_buf_sys( NULL, mem_p ); \
+	bli_mem_set_pool( NULL, mem_p ); \
+	bli_mem_set_size( 0, mem_p ); \
+	bli_mem_set_membrk( NULL, mem_p ); \
+}
+
+
+#endif 

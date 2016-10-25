@@ -55,10 +55,14 @@ typedef void (*FUNCPTR_T)(
 static FUNCPTR_T GENARRAY(ftypes,packm_unb_var1);
 
 
-void bli_packm_unb_var1( obj_t*   c,
-                         obj_t*   p,
-                         cntx_t*  cntx,
-                         thrinfo_t* thread )
+void bli_packm_unb_var1
+     (
+       obj_t*  c,
+       obj_t*  p,
+       cntx_t* cntx,
+       cntl_t* cntl,
+       thrinfo_t* thread
+     )
 {
 	num_t     dt_cp     = bli_obj_datatype( *c );
 

@@ -80,7 +80,8 @@ f77_int PASTEF772(i,chx,blasname) \
 	); \
 \
 	/* Convert zero-based BLIS (C) index to one-based BLAS (Fortran)
-	   index. */ \
+	   index. Also, if the BLAS integer size differs from the BLIS
+	   integer size, that typecast occurs here. */ \
 	f77_index = bli_index + 1; \
 \
 	/* Finalize BLIS (if it was initialized above). */ \

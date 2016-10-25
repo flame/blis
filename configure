@@ -91,7 +91,7 @@ print_usage()
 	echo "   -t MODEL, --enable-threading[=MODEL], --disable-threading"
 	echo " "
 	echo "                 Enable threading in the library, using threading model"
-	echo "                 MODEL={omp,pthreads,no}. If MODEL=no or "
+	echo "                 MODEL={openmp,pthreads,no}. If MODEL=no or "
 	echo "                 --disable-threading is specified, threading will be"
 	echo "                 disabled. The default is 'no'."
 	echo " "
@@ -424,6 +424,14 @@ main()
 
 			echo "${script_name}: manual configuration requested."
 			config_name=$1
+
+			# Ensure configuration is valid.
+			if [ ! -d "${config_dirpath}/${config_name}" ]; then
+				echo "${script_name}: "
+				echo "${script_name}: *** configuration '${config_name}' does not exist. ***"
+				echo "${script_name}: "
+				exit 1;
+			fi
 		fi
 
 		echo "${script_name}: configuring with '${config_name}' configuration sub-directory."
@@ -486,17 +494,26 @@ main()
 	
 	
 	# Check the threading model flag.
-	enable_openmp=0
-	enable_pthreads=0
+	# NOTE: 'omp' is deprecated but still supported; 'openmp' is preferred.
+	enable_openmp='no'
+	enable_openmp_01=0
+	enable_pthreads='no'
+	enable_pthreads_01=0
 	if [ "x${threading_model}" = "xauto" ]; then
 		echo "${script_name}: determining the threading model automatically."
-	elif [ "x${threading_model}" = "xomp" ]; then
+	elif [ "x${threading_model}" = "xopenmp" ] ||
+	     [ "x${threading_model}" = "xomp" ]; then
 		echo "${script_name}: using OpenMP for threading."
-		enable_openmp=1
-	elif [ "x${threading_model}" = "xpthreads" ]; then
+		enable_openmp='yes'
+		enable_openmp_01=1
+	elif [ "x${threading_model}" = "xpthreads" ] ||
+	     [ "x${threading_model}" = "xpthread" ] ||
+	     [ "x${threading_model}" = "xposix" ]; then
 		echo "${script_name}: using Pthreads for threading."
-		enable_pthreads=1
-	elif [ "x${threading_model}" = "xno" ]; then
+		enable_pthreads='yes'
+		enable_pthreads_01=1
+	elif [ "x${threading_model}" = "xno" ] ||
+	     [ "x${threading_model}" = "xnone" ]; then
 		echo "${script_name}: threading is disabled."
 	else
 		echo "Unsupported threading model: ${threading_model}."
@@ -507,19 +524,19 @@ main()
 	# Convert 'yes' and 'no' flags to booleans.
 	if [ "x${enable_cblas}" = "xyes" ]; then
 	   echo "${script_name}: the CBLAS compatibility layer is enabled."
-	   enable_cblas=1
+	   enable_cblas_01=1
 	   # Force BLAS layer when CBLAS is enabled
-	   enable_blas='yes'
+	   enable_blas2blis='yes'
 	else
 	   echo "${script_name}: the CBLAS compatibility layer is disabled."
-	   enable_cblas=0
+	   enable_cblas_01=0
 	fi
 	if [ "x${enable_blas2blis}" = "xyes" ]; then
 	   echo "${script_name}: the BLAS compatibility layer is enabled."
-	   enable_blas2blis=1
+	   enable_blas2blis_01=1
 	else
 	   echo "${script_name}: the BLAS compatibility layer is disabled."
-	   enable_blas2blis=0
+	   enable_blas2blis_01=0
 	fi
 	
 	
@@ -561,6 +578,8 @@ main()
 		| sed "s/@enable_static@/${enable_static}/g" \
 		| sed "s/@enable_dynamic@/${enable_shared}/g" \
 		| sed "s/@threading_model@/${threading_model}/g" \
+		| sed "s/@enable_blas2blis@/${enable_blas2blis}/g" \
+		| sed "s/@enable_cblas@/${enable_cblas}/g" \
 		> "${config_mk_out_path}"
 		
 
@@ -568,12 +587,12 @@ main()
 	# to bli_config_h_out.
 	echo "${script_name}: creating ${bli_config_h_out_path} from ${bli_config_h_in_path}"
 	cat "${bli_config_h_in_path}" \
-		| sed "s/@enable_openmp@/${enable_openmp}/g" \
-		| sed "s/@enable_pthreads@/${enable_pthreads}/g" \
+		| sed "s/@enable_openmp@/${enable_openmp_01}/g" \
+		| sed "s/@enable_pthreads@/${enable_pthreads_01}/g" \
 		| sed "s/@int_type_size@/${int_type_size}/g" \
 		| sed "s/@blas2blis_int_type_size@/${blas2blis_int_type_size}/g" \
-		| sed "s/@enable_blas2blis@/${enable_blas2blis}/g" \
-		| sed "s/@enable_cblas@/${enable_cblas}/g" \
+		| sed "s/@enable_blas2blis@/${enable_blas2blis_01}/g" \
+		| sed "s/@enable_cblas@/${enable_cblas_01}/g" \
 		> "${bli_config_h_out_path}"
 
 

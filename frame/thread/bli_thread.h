@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2016 Hewlett Packard Enterprise Development LP
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -35,22 +36,6 @@
 #ifndef BLIS_THREAD_H
 #define BLIS_THREAD_H
 
-// Perform a sanity check to make sure the user doesn't try to enable
-// both OpenMP and pthreads.
-#if defined ( BLIS_ENABLE_OPENMP ) && \
-    defined ( BLIS_ENABLE_PTHREADS )
-  #error "BLIS_ENABLE_OPENMP and BLIS_ENABLE_PTHREADS may not be simultaneously defined."
-#endif
-
-// Here, we define BLIS_ENABLE_MULTITHREADING if either OpenMP
-// or pthreads are enabled. This macro is useful in situations when
-// we want to detect use of either OpenMP or pthreads (as opposed
-// to neither being used).
-#if defined ( BLIS_ENABLE_OPENMP ) || \
-    defined ( BLIS_ENABLE_PTHREADS )
-  #define BLIS_ENABLE_MULTITHREADING
-#endif
-
 // Include thread communicator (thrcomm_t) object definitions and prototypes.
 #include "bli_thrcomm.h"
 
@@ -68,7 +53,7 @@ void    bli_thread_finalize( void );
 bool_t  bli_thread_is_initialized( void );
 
 // Thread range-related prototypes.
-void bli_thread_get_range
+void bli_thread_get_range_sub
      (
        thrinfo_t* thread,
        dim_t      n,
@@ -77,6 +62,25 @@ void bli_thread_get_range
        dim_t*     start,
        dim_t*     end
      );
+
+#undef  GENPROT
+#define GENPROT( opname ) \
+\
+siz_t PASTEMAC0( opname ) \
+     ( \
+       dir_t      direct, \
+       thrinfo_t* thr, \
+       obj_t*     a, \
+       obj_t*     b, \
+       obj_t*     c, \
+       cntl_t*    cntl, \
+       cntx_t*    cntx, \
+       dim_t*     start, \
+       dim_t*     end  \
+     );
+
+GENPROT( thread_get_range_mdim )
+GENPROT( thread_get_range_ndim )
 
 #undef  GENPROT
 #define GENPROT( opname ) \
@@ -119,7 +123,7 @@ siz_t bli_find_area_trap_l
        dim_t  n,
        doff_t diagoff
      );
-siz_t bli_thread_get_range_weighted
+siz_t bli_thread_get_range_weighted_sub
      (
        thrinfo_t* thread,
        doff_t     diagoff,
@@ -135,31 +139,29 @@ siz_t bli_thread_get_range_weighted
 
 
 // Level-3 internal function type
-typedef void (*l3_int_t)
+typedef void (*l3int_t)
      (
-       obj_t* alpha,
-       obj_t* a,
-       obj_t* b,
-       obj_t* beta,
-       obj_t* c,
-       void*  cntx,
-       void*  cntl,
-       void*  thread
+       obj_t*     alpha,
+       obj_t*     a,
+       obj_t*     b,
+       obj_t*     beta,
+       obj_t*     c,
+       cntx_t*    cntx,
+       cntl_t*    cntl,
+       thrinfo_t* thread
      );
 
 // Level-3 thread decorator prototype
 void bli_l3_thread_decorator
      (
-       dim_t    num_threads,
-       l3_int_t func,
-       obj_t*   alpha,
-       obj_t*   a,
-       obj_t*   b,
-       obj_t*   beta,
-       obj_t*   c,
-       void*    cntx,
-       void*    cntl,
-       void**   thread
+       l3int_t func,
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       cntl_t* cntl
      );
 
 // Miscellaneous prototypes

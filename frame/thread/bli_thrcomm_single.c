@@ -36,24 +36,6 @@
 
 #ifndef BLIS_ENABLE_MULTITHREADING
 
-void bli_l3_thread_decorator
-     (
-       dim_t    n_threads,
-       l3_int_t func,
-       obj_t*   alpha,
-       obj_t*   a,
-       obj_t*   b,
-       obj_t*   beta,
-       obj_t*   c,
-       void*    cntx,
-       void*    cntl,
-       void**   thread
-     )
-{
-	func( alpha, a, b, beta, c, cntx, cntl, thread[0] );
-}
-
-
 //Constructors and destructors for constructors
 thrcomm_t* bli_thrcomm_create( dim_t n_threads )
 {
@@ -88,6 +70,58 @@ void bli_thrcomm_barrier( thrcomm_t* communicator, dim_t t_id )
 {
 	return;
 }
+
+void bli_l3_thread_decorator
+     (
+       l3int_t     func,
+       obj_t*      alpha,
+       obj_t*      a,
+       obj_t*      b,
+       obj_t*      beta,
+       obj_t*      c,
+       cntx_t*     cntx,
+       cntl_t*     cntl
+     )
+{
+	// For sequential execution, we use only one thread.
+	dim_t      n_threads = 1;
+	dim_t      id        = 0;
+
+	// Allcoate a global communicator for the root thrinfo_t structures.
+	thrcomm_t* gl_comm   = bli_thrcomm_create( n_threads );
+
+	cntl_t*    cntl_use;
+	thrinfo_t* thread;
+
+	// Create a default control tree for the operation, if needed.
+	bli_l3_cntl_create_if( a, b, c, cntx, cntl, &cntl_use );
+
+	// Create the root node of the thread's thrinfo_t structure.
+	bli_l3_thrinfo_create_root( id, gl_comm, cntx, cntl_use, &thread );
+
+	func
+	(
+	  alpha,
+	  a,
+	  b,
+	  beta,
+	  c,
+	  cntx,
+	  cntl_use,
+	  thread
+	);
+
+	// Free the control tree, if one was created locally.
+	bli_l3_cntl_free_if( a, b, c, cntx, cntl, cntl_use, thread );
+
+	// Free the current thread's thrinfo_t structure.
+	bli_l3_thrinfo_free( thread );
+
+	// We shouldn't free the global communicator since it was already freed
+	// by the global communicator's chief thread in bli_l3_thrinfo_free()
+	// (called above).
+}
+
 
 #endif
 

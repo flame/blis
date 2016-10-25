@@ -227,3 +227,25 @@ void PASTEMAC(ch,opname) \
 
 INSERT_GENTFUNCR_BASIC0( zipsc )
 
+// -----------------------------------------------------------------------------
+
+void bli_igetsc
+     (
+       dim_t*  chi,
+       double* zeta_r,
+       double* zeta_i
+     )
+{
+	PASTEMAC2(i,d,gets)( *chi, *zeta_r, *zeta_i );
+}
+
+void bli_isetsc
+     (
+       double  zeta_r,
+       double  zeta_i,
+       dim_t*  chi
+     )
+{
+	PASTEMAC2(d,i,sets)( zeta_r, zeta_i, *chi );
+}
+

@@ -113,6 +113,7 @@ void libblis_test_utility_ops( test_params_t* params, test_ops_t* ops )
 void libblis_test_level1v_ops( test_params_t* params, test_ops_t* ops )
 {
 	libblis_test_addv( params, &(ops->addv) );
+	libblis_test_amaxv( params, &(ops->amaxv) );
 	libblis_test_axpbyv( params, &(ops->axpbyv) );
 	libblis_test_axpyv( params, &(ops->axpyv) );
 	libblis_test_copyv( params, &(ops->copyv) );
@@ -222,6 +223,7 @@ void libblis_test_read_ops_file( char* input_filename, test_ops_t* ops )
 
 	// Level-1v
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   1, &(ops->addv) );
+	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   0, &(ops->amaxv) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   1, &(ops->axpbyv) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   1, &(ops->axpyv) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   1, &(ops->copyv) );
@@ -425,7 +427,9 @@ void libblis_test_read_params_file( char* input_filename, test_params_t* params 
 	libblis_test_read_next_line( buffer, input_stream );
 	sscanf( buffer, "%u ", &(params->ind_enable[ BLIS_4M1A ]) );
 
-	params->ind_enable[ BLIS_NAT ] = 1;
+	// Read whether to native (complex) execution.
+	libblis_test_read_next_line( buffer, input_stream );
+	sscanf( buffer, "%u ", &(params->ind_enable[ BLIS_NAT ]) );
 
 	// Read the requested error-checking level.
 	libblis_test_read_next_line( buffer, input_stream );
@@ -943,7 +947,7 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "problem size: first to test  %u\n", params->p_first );
 	libblis_test_fprintf_c( os, "problem size: max to test    %u\n", params->p_max );
 	libblis_test_fprintf_c( os, "problem size increment       %u\n", params->p_inc );
-	libblis_test_fprintf_c( os, "test induced complex           \n" );
+	libblis_test_fprintf_c( os, "complex implementations        \n" );
 	libblis_test_fprintf_c( os, "  3mh?                       %u\n", params->ind_enable[ BLIS_3MH ] );
 	libblis_test_fprintf_c( os, "  3m3?                       %u\n", params->ind_enable[ BLIS_3M3 ] );
 	libblis_test_fprintf_c( os, "  3m2?                       %u\n", params->ind_enable[ BLIS_3M2 ] );
@@ -951,7 +955,7 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "  4mh?                       %u\n", params->ind_enable[ BLIS_4MH ] );
 	libblis_test_fprintf_c( os, "  4m1b (4mb)?                %u\n", params->ind_enable[ BLIS_4M1B ] );
 	libblis_test_fprintf_c( os, "  4m1a (4m1)?                %u\n", params->ind_enable[ BLIS_4M1A ] );
-	libblis_test_fprintf_c( os, "test native complex?         %u\n", params->ind_enable[ BLIS_NAT ] );
+	libblis_test_fprintf_c( os, "  native?                    %u\n", params->ind_enable[ BLIS_NAT ] );
 	libblis_test_fprintf_c( os, "error-checking level         %u\n", params->error_checking_level );
 	libblis_test_fprintf_c( os, "reaction to failure          %c\n", params->reaction_to_failure );
 	libblis_test_fprintf_c( os, "output in matlab format?     %u\n", params->output_matlab_format );
@@ -1503,12 +1507,12 @@ void libblis_test_op_driver( test_params_t* params,
 			// Loop over induced methods (or just BLIS_NAT).
 			for ( indi = ind_first; indi <= ind_last; ++indi )
 			{
-				// If the current induced method is native execution, OR
-				// if the current induced method is implemented (for the
-				// operation being tested) AND it was requested, then we
-				// enable ONLY that method and proceed. Otherwise, we
-				// skip the current method and go to the next method.
-				if ( indi == BLIS_NAT ) { ; }
+				// If the current datatype is real, OR if the current
+				// induced method is implemented (for the operation
+				// being tested) AND it was requested, then we enable
+				// ONLY that method and proceed. Otherwise, we skip the
+				// current method and go to the next method.
+				if ( bli_is_real( datatype ) ) { ; }
 				else if ( bli_ind_oper_is_impl( op->opid, indi ) &&
 				          params->ind_enable[ indi ] == 1 ) { ; }
 				else { continue; }
@@ -1875,22 +1879,34 @@ void libblis_test_mobj_create( test_params_t* params, num_t dt, trans_t trans, c
 
 
 
-void libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, invdiag_t inv_diag, pack_t pack_schema, packbuf_t pack_buf, obj_t* a, obj_t* p, cntx_t* cntx )
+cntl_t* libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, invdiag_t inv_diag, pack_t pack_schema, packbuf_t pack_buf, obj_t* a, obj_t* p, cntx_t* cntx )
 {
-	// Start with making p and alias to a.
-	bli_obj_alias_to( *a, *p );
+	bool_t does_inv_diag;
 
-	// Then initialize p appropriately for packing.
-	bli_packm_init_pack( inv_diag,
-	                     pack_schema,
-	                     BLIS_PACK_FWD_IF_UPPER,
-	                     BLIS_PACK_FWD_IF_LOWER,
-	                     pack_buf,
-	                     bmult_id_m,
-	                     bmult_id_n,
-	                     a,
-	                     p,
-	                     cntx );
+	if ( inv_diag == BLIS_NO_INVERT_DIAG ) does_inv_diag = FALSE;
+	else                                   does_inv_diag = TRUE;
+
+	// Create a control tree node for the packing operation.
+	cntl_t* cntl = bli_packm_cntl_obj_create
+	(
+	  NULL, // func ptr is not referenced b/c we don't call via l3 _int().
+	  bli_packm_blk_var1,
+	  bmult_id_m,
+	  bmult_id_n,
+	  does_inv_diag,
+	  FALSE,
+	  FALSE,
+	  pack_schema,
+	  pack_buf,
+	  NULL  // no child node needed
+	);
+
+	// Pack the contents of A to P.
+	bli_l3_packm( a, p, cntx, cntl, &BLIS_PACKM_SINGLE_THREADED );
+
+	// Return the control tree pointer so the caller can free the cntl_t and its
+	// mem_t entry later on.
+	return cntl;
 }
 
 
@@ -1932,8 +1948,8 @@ void libblis_test_vobj_randomize( test_params_t* params, bool_t normalize, obj_t
 		bli_obj_scalar_init_detached( dt,   &kappa );
 		bli_obj_scalar_init_detached( dt_r, &kappa_r );
 
-		// Normalize vector elements.
-		//bli_setsc( 1.0/( double )bli_obj_vector_dim( *x ), 0.0, &kappa );
+		// Normalize vector elements. The following code ensures that we
+		// always invert-scale by whole power of two.
 		bli_normfv( x, &kappa_r );
 		libblis_test_ceil_pow2( &kappa_r );
 		bli_copysc( &kappa_r, &kappa );

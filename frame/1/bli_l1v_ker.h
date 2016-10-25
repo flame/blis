@@ -59,6 +59,20 @@ INSERT_GENTPROT_BASIC( subv_ker_name )
 \
 void PASTEMAC(ch,opname) \
      ( \
+       dim_t           n, \
+       ctype* restrict x, inc_t incx, \
+       dim_t* restrict index, \
+       cntx_t*         cntx  \
+     ); \
+
+INSERT_GENTPROT_BASIC( amaxv_ker_name )
+
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
        conj_t          conjx, \
        dim_t           n, \
        ctype* restrict alpha, \

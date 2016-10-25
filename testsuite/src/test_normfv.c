@@ -145,7 +145,7 @@ void libblis_test_normfv_experiment
 
 	num_t        dt_real   = bli_datatype_proj_to_real( datatype );
 
-	double       time_min  = 1e9;
+	double       time_min  = DBL_MAX;
 	double       time;
 
 	dim_t        m;

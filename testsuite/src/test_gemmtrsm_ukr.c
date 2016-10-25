@@ -177,7 +177,7 @@ void libblis_test_gemmtrsm_ukr_experiment
 	unsigned int n_repeats = params->n_repeats;
 	unsigned int i;
 
-	double       time_min  = 1e9;
+	double       time_min  = DBL_MAX;
 	double       time;
 
 	dim_t        m, n, k;
@@ -260,38 +260,33 @@ void libblis_test_gemmtrsm_ukr_experiment
 	bli_copym( &b11, &c11 );
 	bli_copym( &c11, &c11_save );
 
-
-	// Initialize pack objects.
-	bli_obj_init_pack( &ap );
-	bli_obj_init_pack( &bp );
-
-	// Create pack objects for a and b.
-	libblis_test_pobj_create( BLIS_MR,
-	                          BLIS_MR,
-	                          BLIS_INVERT_DIAG,
-	                          BLIS_PACKED_ROW_PANELS,
-	                          BLIS_BUFFER_FOR_A_BLOCK,
-	                          &a, &ap,
-	                          &cntx );
-	libblis_test_pobj_create( BLIS_MR,
-	                          BLIS_NR,
-	                          BLIS_NO_INVERT_DIAG,
-	                          BLIS_PACKED_COL_PANELS,
-	                          BLIS_BUFFER_FOR_B_PANEL,
-	                          &b, &bp,
-	                          &cntx );
-
-	// Pack the contents of a to ap.
-	bli_packm_blk_var1( &a, &ap, &cntx, &BLIS_PACKM_SINGLE_THREADED );
-
-	// Pack the contents of b to bp.
-	bli_packm_blk_var1( &b, &bp, &cntx, &BLIS_PACKM_SINGLE_THREADED );
+	// Create pack objects for a and b, and pack them to ap and bp,
+	// respectively.
+	cntl_t* cntl_a = libblis_test_pobj_create
+	(
+	  BLIS_MR,
+	  BLIS_MR,
+	  BLIS_INVERT_DIAG,
+	  BLIS_PACKED_ROW_PANELS,
+	  BLIS_BUFFER_FOR_A_BLOCK,
+	  &a, &ap,
+	  &cntx
+	);
+	cntl_t* cntl_b = libblis_test_pobj_create
+	(
+	  BLIS_MR,
+	  BLIS_NR,
+	  BLIS_NO_INVERT_DIAG,
+	  BLIS_PACKED_COL_PANELS,
+	  BLIS_BUFFER_FOR_B_PANEL,
+	  &b, &bp,
+	  &cntx
+	);
 
 	// Set the uplo field of ap since the default for packed objects is
 	// BLIS_DENSE, and the _make_subparts() routine needs this information
 	// to know how to initialize the subpartitions.
 	bli_obj_set_uplo( uploa, ap );
-
 
 	// Create subpartitions from the a and b panels.
 	bli_gemmtrsm_ukr_make_subparts( k, &ap, &bp,
@@ -302,14 +297,13 @@ void libblis_test_gemmtrsm_ukr_experiment
 	// know which set of micro-kernels (lower or upper) to choose from.
 	bli_obj_set_uplo( uploa, a11p );
 
-
 	// Repeat the experiment n_repeats times and record results. 
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		bli_copym( &c11_save, &c11 );
 
 		// Re-pack the contents of b to bp.
-		bli_packm_blk_var1( &b, &bp, &cntx, &BLIS_PACKM_SINGLE_THREADED );
+		bli_packm_blk_var1( &b, &bp, &cntx, cntl_b, &BLIS_PACKM_SINGLE_THREADED );
 
 		time = bli_clock();
 
@@ -331,9 +325,10 @@ void libblis_test_gemmtrsm_ukr_experiment
 	// Zero out performance and residual if output matrix is empty.
 	//libblis_test_check_empty_problem( &c11, perf, resid );
 
-	// Release packing buffers within pack objects.
-	bli_obj_release_pack( &ap );
-	bli_obj_release_pack( &bp );
+	// Free the control tree nodes and release their cached mem_t entries
+	// back to the memory broker.
+	bli_cntl_free( cntl_a, &BLIS_PACKM_SINGLE_THREADED );
+	bli_cntl_free( cntl_b, &BLIS_PACKM_SINGLE_THREADED );
 
 	// Free the test objects.
 	bli_obj_free( &a_big );

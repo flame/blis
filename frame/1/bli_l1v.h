@@ -46,12 +46,14 @@
 #include "bli_l1v_tapi.h"
 
 // Pack-related
-#include "bli_packv.h"
-#include "bli_unpackv.h"
+// NOTE: packv and unpackv are temporarily disabled.
+//#include "bli_packv.h"
+//#include "bli_unpackv.h"
 
 // Other
-#include "bli_scalv_cntl.h"
-#include "bli_scalv_int.h"
+// NOTE: scalv control tree code is temporarily disabled.
+//#include "bli_scalv_cntl.h"
+//#include "bli_scalv_int.h"
 
 // Reference kernel headers
 #include "bli_l1v_ref.h"

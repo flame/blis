@@ -34,42 +34,35 @@
 
 #include "blis.h"
 
-unpackm_t* unpackm_cntl = NULL;
-
-void bli_unpackm_cntl_init()
+cntl_t* bli_unpackm_cntl_obj_create
+     (
+       void*     var_func,
+       void*     unpackm_var_func,
+       cntl_t*   sub_node
+     )
 {
-	unpackm_cntl = bli_unpackm_cntl_obj_create( BLIS_UNBLOCKED,
-	                                            BLIS_VARIANT1,
-	                                            NULL ); // no blocksize needed
-}
+	cntl_t*           cntl;
+	unpackm_params_t* params;
 
-void bli_unpackm_cntl_finalize()
-{
-	bli_cntl_obj_free( unpackm_cntl );
-}
+	// Allocate an unpackm_params_t struct.
+	params = bli_malloc_intl( sizeof( unpackm_params_t ) );
 
-unpackm_t* bli_unpackm_cntl_obj_create( impl_t     impl_type,
-                                        varnum_t   var_num,
-                                        blksz_t*   b )
-{
-	unpackm_t* cntl;
+	// Initialize the unpackm_params_t struct.
+	params->size      = sizeof( unpackm_params_t );
+	params->var_func  = unpackm_var_func;
 
-	cntl = ( unpackm_t* ) bli_malloc_intl( sizeof(unpackm_t) );
-
-	cntl->impl_type = impl_type;
-	cntl->var_num   = var_num;
-	cntl->b         = b;
+	// It's important that we set the bszid field to BLIS_NO_PART to indicate
+	// that no blocksize partitioning is performed. bli_cntl_free() will rely
+	// on this information to know how to step through the thrinfo_t tree in
+	// sync with the cntl_t tree.
+	cntl = bli_cntl_obj_create
+	(
+	  BLIS_NO_PART,
+	  var_func,
+	  params,
+	  sub_node
+	);
 
 	return cntl;
-}
-
-void bli_unpackm_cntl_obj_init( unpackm_t* cntl,
-                                impl_t     impl_type,
-                                varnum_t   var_num,
-                                blksz_t*   b )
-{
-	cntl->impl_type = impl_type;
-	cntl->var_num   = var_num;
-	cntl->b         = b;
 }
 

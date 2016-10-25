@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2016 Hewlett Packard Enterprise Development LP
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -80,8 +81,6 @@ extern "C" {
 
 #include "bli_kernel_prototypes.h"
 
-#include "bli_malloc_prototypes.h"
-
 
 // -- Threading definitions --
 
@@ -97,13 +96,14 @@ extern "C" {
 
 #include "bli_init.h"
 #include "bli_const.h"
-#include "bli_malloc.h"
 #include "bli_obj.h"
 #include "bli_obj_scalar.h"
 #include "bli_cntx.h"
 #include "bli_gks.h"
 #include "bli_ind.h"
+#include "bli_membrk.h"
 #include "bli_pool.h"
+#include "bli_memsys.h"
 #include "bli_mem.h"
 #include "bli_part.h"
 #include "bli_prune.h"
@@ -111,6 +111,7 @@ extern "C" {
 #include "bli_blksz.h"
 #include "bli_func.h"
 #include "bli_mbool.h"
+#include "bli_auxinfo.h"
 #include "bli_param_map.h"
 #include "bli_clock.h"
 #include "bli_check.h"

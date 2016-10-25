@@ -38,7 +38,6 @@ static bool_t bli_thread_is_init         = FALSE;
 
 thrinfo_t     BLIS_PACKM_SINGLE_THREADED = {};
 thrinfo_t     BLIS_GEMM_SINGLE_THREADED  = {};
-thrinfo_t     BLIS_HERK_SINGLE_THREADED  = {};
 thrcomm_t     BLIS_SINGLE_COMM           = {};
 
 // -----------------------------------------------------------------------------
@@ -51,7 +50,6 @@ void bli_thread_init( void )
 	bli_thrcomm_init( &BLIS_SINGLE_COMM, 1 );
 	bli_packm_thrinfo_init_single( &BLIS_PACKM_SINGLE_THREADED );
 	bli_l3_thrinfo_init_single( &BLIS_GEMM_SINGLE_THREADED );
-	bli_l3_thrinfo_init_single( &BLIS_HERK_SINGLE_THREADED );
 
 	// Mark API as initialized.
 	bli_thread_is_init = TRUE;
@@ -70,7 +68,7 @@ bool_t bli_thread_is_initialized( void )
 
 // -----------------------------------------------------------------------------
 
-void bli_thread_get_range
+void bli_thread_get_range_sub
      (
        thrinfo_t* thread,
        dim_t      n,
@@ -80,8 +78,8 @@ void bli_thread_get_range
        dim_t*     end
      )
 {
-	dim_t      n_way      = thread->n_way;
-	dim_t      work_id    = thread->work_id;
+	dim_t      n_way      = bli_thread_n_way( thread );
+	dim_t      work_id    = bli_thread_work_id( thread );
 
 	dim_t      all_start  = 0;
 	dim_t      all_end    = n;
@@ -224,8 +222,8 @@ siz_t bli_thread_get_range_l2r
 	dim_t n  = bli_obj_width_after_trans( *a );
 	dim_t bf = bli_blksz_get_def_for_obj( a, bmult );
 
-	bli_thread_get_range( thr, n, bf,
-	                      FALSE, start, end );
+	bli_thread_get_range_sub( thr, n, bf,
+	                          FALSE, start, end );
 
 	return m * ( *end - *start );
 }
@@ -243,8 +241,8 @@ siz_t bli_thread_get_range_r2l
 	dim_t n  = bli_obj_width_after_trans( *a );
 	dim_t bf = bli_blksz_get_def_for_obj( a, bmult );
 
-	bli_thread_get_range( thr, n, bf,
-	                      TRUE, start, end );
+	bli_thread_get_range_sub( thr, n, bf,
+	                          TRUE, start, end );
 
 	return m * ( *end - *start );
 }
@@ -262,8 +260,8 @@ siz_t bli_thread_get_range_t2b
 	dim_t n  = bli_obj_width_after_trans( *a );
 	dim_t bf = bli_blksz_get_def_for_obj( a, bmult );
 
-	bli_thread_get_range( thr, m, bf,
-	                      FALSE, start, end );
+	bli_thread_get_range_sub( thr, m, bf,
+	                          FALSE, start, end );
 
 	return n * ( *end - *start );
 }
@@ -281,11 +279,13 @@ siz_t bli_thread_get_range_b2t
 	dim_t n  = bli_obj_width_after_trans( *a );
 	dim_t bf = bli_blksz_get_def_for_obj( a, bmult );
 
-	bli_thread_get_range( thr, m, bf,
-	                      TRUE, start, end );
+	bli_thread_get_range_sub( thr, m, bf,
+	                          TRUE, start, end );
 
 	return n * ( *end - *start );
 }
+
+// -----------------------------------------------------------------------------
 
 dim_t bli_thread_get_range_width_l
      (
@@ -496,7 +496,9 @@ siz_t bli_find_area_trap_l
 	return ( siz_t )area;
 }
 
-siz_t bli_thread_get_range_weighted
+// -----------------------------------------------------------------------------
+
+siz_t bli_thread_get_range_weighted_sub
      (
        thrinfo_t* thread,
        doff_t     diagoff,
@@ -509,8 +511,8 @@ siz_t bli_thread_get_range_weighted
        dim_t*     j_end_thr
      )
 {
-	dim_t      n_way   = thread->n_way;
-	dim_t      my_id   = thread->work_id;
+	dim_t      n_way   = bli_thread_n_way( thread );
+	dim_t      my_id   = bli_thread_work_id( thread );
 
 	dim_t      bf_left = n % bf;
 
@@ -570,11 +572,15 @@ siz_t bli_thread_get_range_weighted
 		{
 			// Compute the width of the jth subpartition, taking the
 			// current diagonal offset into account, if needed.
-			width_j = bli_thread_get_range_width_l( diagoff_j, m, n_left,
-			                                        j, n_way,
-			                                        bf, bf_left,
-			                                        area_per_thr,
-			                                        handle_edge_low );
+			width_j =
+			bli_thread_get_range_width_l
+			(
+			  diagoff_j, m, n_left,
+			  j, n_way,
+			  bf, bf_left,
+			  area_per_thr,
+			  handle_edge_low
+			);
 
 			// If the current thread belongs to caucus j, this is his
 			// subpartition. So we compute the implied index range and
@@ -611,9 +617,12 @@ siz_t bli_thread_get_range_weighted
 		bli_toggle_bool( handle_edge_low );
 
 		// Compute the appropriate range for the rotated trapezoid.
-		area = bli_thread_get_range_weighted( thread, diagoff, uplo, m, n, bf,
-		                                      handle_edge_low,
-		                                      j_start_thr, j_end_thr );
+		area = bli_thread_get_range_weighted_sub
+		(
+		  thread, diagoff, uplo, m, n, bf,
+		  handle_edge_low,
+		  j_start_thr, j_end_thr
+		);
 
 		// Reverse the indexing basis for the subpartition ranges so that
 		// the indices, relative to left-to-right iteration through the
@@ -624,6 +633,124 @@ siz_t bli_thread_get_range_weighted
 	}
 
 	return area;
+}
+
+siz_t bli_thread_get_range_mdim
+     (
+       dir_t      direct,
+       thrinfo_t* thr,
+       obj_t*     a,
+       obj_t*     b,
+       obj_t*     c,
+       cntl_t*    cntl,
+       cntx_t*    cntx,
+       dim_t*     start,
+       dim_t*     end
+     )
+{
+	bszid_t  bszid  = bli_cntl_bszid( cntl );
+	opid_t   family = bli_cntx_get_family( cntx );
+
+	// This is part of trsm's current implementation, whereby right side
+	// cases are implemented in left-side micro-kernels, which requires
+	// we swap the usage of the register blocksizes for the purposes of
+	// packing A and B.
+	if ( family == BLIS_TRSM )
+	{
+		if ( bli_obj_root_is_triangular( *a ) ) bszid = BLIS_MR;
+		else                                    bszid = BLIS_NR;
+	}
+
+	blksz_t* bmult  = bli_cntx_get_bmult( bszid, cntx );
+	obj_t*   x;
+	bool_t   use_weighted;
+
+	// Use the operation family to choose the one of the two matrices
+	// being partitioned that potentially has structure, and also to
+	// decide whether or not we need to use weighted range partitioning.
+	// NOTE: It's important that we use non-weighted range partitioning
+	// for hemm and symm (ie: the gemm family) because the weighted
+	// function will mistakenly skip over unstored regions of the
+	// structured matrix, even though they represent part of that matrix
+	// that will be dense and full (after packing).
+	if      ( family == BLIS_GEMM ) { x = a; use_weighted = FALSE; }
+	else if ( family == BLIS_HERK ) { x = c; use_weighted = TRUE;  }
+	else if ( family == BLIS_TRMM ) { x = a; use_weighted = TRUE;  }
+	else    /*family == BLIS_TRSM*/ { x = a; use_weighted = FALSE; }
+
+	if ( use_weighted )
+	{
+		if ( direct == BLIS_FWD )
+			return bli_thread_get_range_weighted_t2b( thr, x, bmult, start, end );
+		else
+			return bli_thread_get_range_weighted_b2t( thr, x, bmult, start, end );
+	}
+	else
+	{
+		if ( direct == BLIS_FWD )
+			return bli_thread_get_range_t2b( thr, x, bmult, start, end );
+		else
+			return bli_thread_get_range_b2t( thr, x, bmult, start, end );
+	}
+}
+
+siz_t bli_thread_get_range_ndim
+     (
+       dir_t      direct,
+       thrinfo_t* thr,
+       obj_t*     a,
+       obj_t*     b,
+       obj_t*     c,
+       cntl_t*    cntl,
+       cntx_t*    cntx,
+       dim_t*     start,
+       dim_t*     end
+     )
+{
+	bszid_t  bszid  = bli_cntl_bszid( cntl );
+	opid_t   family = bli_cntx_get_family( cntx );
+
+	// This is part of trsm's current implementation, whereby right side
+	// cases are implemented in left-side micro-kernels, which requires
+	// we swap the usage of the register blocksizes for the purposes of
+	// packing A and B.
+	if ( family == BLIS_TRSM )
+	{
+		if ( bli_obj_root_is_triangular( *b ) ) bszid = BLIS_MR;
+		else                                    bszid = BLIS_NR;
+	}
+
+	blksz_t* bmult  = bli_cntx_get_bmult( bszid, cntx );
+	obj_t*   x;
+	bool_t   use_weighted;
+
+	// Use the operation family to choose the one of the two matrices
+	// being partitioned that potentially has structure, and also to
+	// decide whether or not we need to use weighted range partitioning.
+	// NOTE: It's important that we use non-weighted range partitioning
+	// for hemm and symm (ie: the gemm family) because the weighted
+	// function will mistakenly skip over unstored regions of the
+	// structured matrix, even though they represent part of that matrix
+	// that will be dense and full (after packing).
+	if      ( family == BLIS_GEMM ) { x = b; use_weighted = FALSE; }
+	else if ( family == BLIS_HERK ) { x = c; use_weighted = TRUE;  }
+	else if ( family == BLIS_TRMM ) { x = b; use_weighted = TRUE;  }
+	else    /*family == BLIS_TRSM*/ { x = b; use_weighted = FALSE; }
+
+	if ( use_weighted )
+	{
+		if ( direct == BLIS_FWD )
+			return bli_thread_get_range_weighted_l2r( thr, x, bmult, start, end );
+		else
+			return bli_thread_get_range_weighted_r2l( thr, x, bmult, start, end );
+	}
+	else
+	{
+		if ( direct == BLIS_FWD )
+			return bli_thread_get_range_l2r( thr, x, bmult, start, end );
+		else
+			return bli_thread_get_range_r2l( thr, x, bmult, start, end );
+	}
 }
 
 siz_t bli_thread_get_range_weighted_l2r
@@ -656,13 +783,20 @@ siz_t bli_thread_get_range_weighted_l2r
 			bli_reflect_about_diag( diagoff, uplo, m, n );
 		}
 
-		area = bli_thread_get_range_weighted( thr, diagoff, uplo, m, n, bf,
-		                                      FALSE, start, end );
+		area =
+		bli_thread_get_range_weighted_sub
+		(
+		  thr, diagoff, uplo, m, n, bf,
+		  FALSE, start, end
+		);
 	}
 	else // if dense or zeros
 	{
-		area = bli_thread_get_range_l2r( thr, a, bmult,
-		                                 start, end );
+		area = bli_thread_get_range_l2r
+		(
+		  thr, a, bmult,
+		  start, end
+		);
 	}
 
 	return area;
@@ -700,13 +834,20 @@ siz_t bli_thread_get_range_weighted_r2l
 
 		bli_rotate180_trapezoid( diagoff, uplo );
 
-		area = bli_thread_get_range_weighted( thr, diagoff, uplo, m, n, bf,
-		                                      TRUE, start, end );
+		area =
+		bli_thread_get_range_weighted_sub
+		(
+		  thr, diagoff, uplo, m, n, bf,
+		  TRUE, start, end
+		);
 	}
 	else // if dense or zeros
 	{
-		area = bli_thread_get_range_r2l( thr, a, bmult,
-		                                 start, end );
+		area = bli_thread_get_range_r2l
+		(
+		  thr, a, bmult,
+		  start, end
+		);
 	}
 
 	return area;
@@ -744,13 +885,20 @@ siz_t bli_thread_get_range_weighted_t2b
 
 		bli_reflect_about_diag( diagoff, uplo, m, n );
 
-		area = bli_thread_get_range_weighted( thr, diagoff, uplo, m, n, bf,
-		                                      FALSE, start, end );
+		area =
+		bli_thread_get_range_weighted_sub
+		(
+		  thr, diagoff, uplo, m, n, bf,
+		  FALSE, start, end
+		);
 	}
 	else // if dense or zeros
 	{
-		area = bli_thread_get_range_t2b( thr, a, bmult,
-		                                 start, end );
+		area = bli_thread_get_range_t2b
+		(
+		  thr, a, bmult,
+		  start, end
+		);
 	}
 
 	return area;
@@ -790,18 +938,25 @@ siz_t bli_thread_get_range_weighted_b2t
 
 		bli_rotate180_trapezoid( diagoff, uplo );
 
-		area = bli_thread_get_range_weighted( thr, diagoff, uplo, m, n, bf,
-		                                      TRUE, start, end );
+		area = bli_thread_get_range_weighted_sub
+		(
+		  thr, diagoff, uplo, m, n, bf,
+		  TRUE, start, end
+		);
 	}
 	else // if dense or zeros
 	{
-		area = bli_thread_get_range_b2t( thr, a, bmult,
-		                                 start, end );
+		area = bli_thread_get_range_b2t
+		(
+		  thr, a, bmult,
+		  start, end
+		);
 	}
 
 	return area;
 }
 
+// -----------------------------------------------------------------------------
 
 // Some utilities
 dim_t bli_env_read_nway( const char* env )

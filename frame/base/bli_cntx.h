@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2016 Hewlett Packard Enterprise Development LP
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -52,11 +53,15 @@ typedef struct cntx_s
 
 	func_t    packm_ukrs;
 
+	opid_t    family;
 	ind_t     method;
 	pack_t    schema_a;
 	pack_t    schema_b;
 	pack_t    schema_c;
 
+	dim_t*    thrloop;
+
+	membrk_t* membrk;
 } cntx_t;
 */
 
@@ -100,6 +105,10 @@ typedef struct cntx_s
 \
 	(&((cntx)->packm_ukrs) )
 
+#define bli_cntx_family( cntx ) \
+\
+	( (cntx)->family )
+
 #define bli_cntx_method( cntx ) \
 \
 	( (cntx)->method )
@@ -116,66 +125,120 @@ typedef struct cntx_s
 \
 	( (cntx)->schema_c )
 
+#define bli_cntx_membrk( cntx ) \
+\
+	( (cntx)->membrk )
+
+#define bli_cntx_thrloop( cntx ) \
+\
+	( (cntx)->thrloop )
+
+#if 1
+#define bli_cntx_jc_way( cntx ) \
+\
+	( (cntx)->thrloop[ BLIS_NC ] )
+
+#define bli_cntx_pc_way( cntx ) \
+\
+	( (cntx)->thrloop[ BLIS_KC ] )
+
+#define bli_cntx_ic_way( cntx ) \
+\
+	( (cntx)->thrloop[ BLIS_MC ] )
+
+#define bli_cntx_jr_way( cntx ) \
+\
+	( (cntx)->thrloop[ BLIS_NR ] )
+
+#define bli_cntx_ir_way( cntx ) \
+\
+	( (cntx)->thrloop[ BLIS_MR ] )
+#endif
+
+#define bli_cntx_way_for_bszid( bszid, cntx ) \
+\
+    ( (cntx)->thrloop[ bszid ] )
+
 // cntx_t modification (fields only)
 
 #define bli_cntx_set_blkszs_buf( _blkszs, cntx_p ) \
 { \
-    (cntx_p)->blkszs = _blkszs; \
+	(cntx_p)->blkszs = _blkszs; \
 }
 
 #define bli_cntx_set_bmults_buf( _bmults, cntx_p ) \
 { \
-    (cntx_p)->bmults = _bmults; \
+	(cntx_p)->bmults = _bmults; \
 }
 
 #define bli_cntx_set_l3_vir_ukrs_buf( _l3_vir_ukrs, cntx_p ) \
 { \
-    (cntx_p)->l3_vir_ukrs = _l3_vir_ukrs; \
+	(cntx_p)->l3_vir_ukrs = _l3_vir_ukrs; \
 }
 
 #define bli_cntx_set_l3_nat_ukrs_buf( _l3_nat_ukrs, cntx_p ) \
 { \
-    (cntx_p)->l3_nat_ukrs = _l3_nat_ukrs; \
+	(cntx_p)->l3_nat_ukrs = _l3_nat_ukrs; \
 }
 
 #define bli_cntx_set_l3_nat_ukrs_prefs_buf( _l3_nat_ukrs_prefs, cntx_p ) \
 { \
-    (cntx_p)->l3_nat_ukrs_prefs = _l3_nat_ukrs_prefs; \
+	(cntx_p)->l3_nat_ukrs_prefs = _l3_nat_ukrs_prefs; \
 }
 
 #define bli_cntx_set_l1f_kers_buf( _l1f_kers, cntx_p ) \
 { \
-    (cntx_p)->l1f_kers = _l1f_kers; \
+	(cntx_p)->l1f_kers = _l1f_kers; \
 }
 
 #define bli_cntx_set_l1v_kers_buf( _l1v_kers, cntx_p ) \
 { \
-    (cntx_p)->l1v_kers = _l1v_kers; \
+	(cntx_p)->l1v_kers = _l1v_kers; \
 }
 
 #define bli_cntx_set_packm_ukrs( _packm_ukrs, cntx_p ) \
 { \
-    (cntx_p)->packm_ukrs = _packm_ukrs; \
+	(cntx_p)->packm_ukrs = _packm_ukrs; \
+}
+
+#define bli_cntx_set_family( _family, cntx_p ) \
+{ \
+	(cntx_p)->family = _family; \
 }
 
 #define bli_cntx_set_method( _method, cntx_p ) \
 { \
-    (cntx_p)->method = _method; \
+	(cntx_p)->method = _method; \
 }
 
 #define bli_cntx_set_schema_a( _schema_a, cntx_p ) \
 { \
-    (cntx_p)->schema_a = _schema_a; \
+	(cntx_p)->schema_a = _schema_a; \
 }
 
 #define bli_cntx_set_schema_b( _schema_b, cntx_p ) \
 { \
-    (cntx_p)->schema_b = _schema_b; \
+	(cntx_p)->schema_b = _schema_b; \
 }
 
 #define bli_cntx_set_schema_c( _schema_c, cntx_p ) \
 { \
-    (cntx_p)->schema_c = _schema_c; \
+	(cntx_p)->schema_c = _schema_c; \
+}
+
+#define bli_cntx_set_membrk( _membrk, cntx_p ) \
+{ \
+	(cntx_p)->membrk = _membrk; \
+}
+
+#define bli_cntx_set_thrloop( jc_, pc_, ic_, jr_, ir_, cntx_p ) \
+{ \
+	(cntx_p)->thrloop[ BLIS_NC ] = jc_; \
+	(cntx_p)->thrloop[ BLIS_KC ] = pc_; \
+	(cntx_p)->thrloop[ BLIS_MC ] = ic_; \
+	(cntx_p)->thrloop[ BLIS_NR ] = jr_; \
+	(cntx_p)->thrloop[ BLIS_MR ] = ir_; \
+	(cntx_p)->thrloop[ BLIS_KR ] = 1;   \
 }
 
 // cntx_t query (complex)
@@ -252,6 +315,10 @@ typedef struct cntx_s
 	  (dt), (&(bli_cntx_l3_nat_ukrs_prefs_buf( (cntx) ))[ ukr_id ]) \
 	)
 
+#define bli_cntx_get_family( cntx ) \
+\
+	bli_cntx_family( cntx )
+
 #define bli_cntx_get_ind_method( cntx ) \
 \
 	bli_cntx_method( cntx )
@@ -263,6 +330,11 @@ typedef struct cntx_s
 #define bli_cntx_get_pack_schema_b( cntx ) \
 \
 	bli_cntx_schema_b( cntx )
+
+#define bli_cntx_get_membrk( cntx ) \
+\
+	bli_cntx_membrk( cntx )
+
 
 
 
@@ -326,6 +398,8 @@ func_t*  bli_cntx_get_packm_ukr( cntx_t* cntx );
 //pack_t   bli_cntx_get_pack_schema_a( cntx_t* cntx );
 //pack_t   bli_cntx_get_pack_schema_b( cntx_t* cntx );
 //pack_t   bli_cntx_get_pack_schema_c( cntx_t* cntx );
+dim_t    bli_cntx_get_num_threads( cntx_t* cntx );
+dim_t    bli_cntx_get_num_threads_in( cntx_t* cntx, cntl_t* cntl );
 
 // set functions
 
@@ -360,6 +434,9 @@ void     bli_cntx_set_pack_schema_b( pack_t  schema_b,
                                      cntx_t* cntx );
 void     bli_cntx_set_pack_schema_c( pack_t  schema_c,
                                      cntx_t* cntx );
+void     bli_cntx_set_thrloop_from_env( opid_t  l3_op,
+                                        side_t  side,
+                                        cntx_t* cntx );
 
 // other query functions
 
@@ -375,6 +452,12 @@ bool_t   bli_cntx_l3_nat_ukr_prefers_storage_of( obj_t*  obj,
 bool_t   bli_cntx_l3_nat_ukr_dislikes_storage_of( obj_t*  obj,
                                                   l3ukr_t ukr_id,
                                                   cntx_t* cntx );
+bool_t   bli_cntx_l3_ukr_prefers_storage_of( obj_t*  obj,
+                                             l3ukr_t ukr_id,
+                                             cntx_t* cntx );
+bool_t   bli_cntx_l3_ukr_dislikes_storage_of( obj_t*  obj,
+                                              l3ukr_t ukr_id,
+                                              cntx_t* cntx );
 
 // print function
 

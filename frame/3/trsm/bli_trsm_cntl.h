@@ -32,33 +32,33 @@
 
 */
 
-struct trsm_s
-{
-	impl_t             impl_type;
-	varnum_t           var_num;
-	bszid_t            bszid;
-	struct scalm_s*    sub_scalm;
-	struct packm_s*    sub_packm_a;
-	struct packm_s*    sub_packm_b;
-	struct packm_s*    sub_packm_c;
-	struct trsm_s*     sub_trsm;
-	struct gemm_s*     sub_gemm;
-	struct unpackm_s*  sub_unpackm_c;
-};
-typedef struct trsm_s trsm_t;
+cntl_t* bli_trsm_cntl_create
+     (
+       side_t side
+     );
 
-#define bli_cntl_sub_trsm( cntl )         cntl->sub_trsm
+cntl_t* bli_trsm_l_cntl_create
+     (
+       void
+     );
 
-void    bli_trsm_cntl_init( void );
-void    bli_trsm_cntl_finalize( void );
-trsm_t* bli_trsm_cntl_obj_create( impl_t       impl_type,
-                                  varnum_t     var_num,
-                                  bszid_t      bszid,
-                                  scalm_t*     sub_scalm,
-                                  packm_t*     sub_pack_a,
-                                  packm_t*     sub_pack_b,
-                                  packm_t*     sub_pack_c,
-                                  trsm_t*      sub_trsm,
-                                  gemm_t*      sub_gemm,
-                                  unpackm_t*   sub_unpack_c );
+cntl_t* bli_trsm_r_cntl_create
+     (
+       void
+     );
+
+void bli_trsm_cntl_free
+     (
+       cntl_t* cntl,
+       thrinfo_t* thread
+     );
+
+// -----------------------------------------------------------------------------
+
+cntl_t* bli_trsm_cntl_obj_create
+     (
+       bszid_t bszid,
+       void*   var_func, 
+       cntl_t* sub_node
+     );
 

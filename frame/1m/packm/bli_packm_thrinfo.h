@@ -42,25 +42,25 @@
 // thrinfo_t APIs specific to packm.
 //
 
+#if 0
 thrinfo_t* bli_packm_thrinfo_create
      (
        thrcomm_t* ocomm,
        dim_t      ocomm_id,
-       thrcomm_t* icomm,
-       dim_t      icomm_id,
        dim_t      n_way,
-       dim_t      work_id
+       dim_t      work_id,
+       thrinfo_t* sub_node
      );
+#endif
 
 void bli_packm_thrinfo_init
      (
        thrinfo_t* thread,
        thrcomm_t* ocomm,
        dim_t      ocomm_id,
-       thrcomm_t* icomm,
-       dim_t      icomm_id,
        dim_t      n_way,
-       dim_t      work_id
+       dim_t      work_id,
+       thrinfo_t* sub_node
      );
 
 void bli_packm_thrinfo_init_single
@@ -68,8 +68,10 @@ void bli_packm_thrinfo_init_single
        thrinfo_t* thread
      );
 
+#if 0
 void bli_packm_thrinfo_free
      (
        thrinfo_t* thread
      );
+#endif
 

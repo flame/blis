@@ -44,12 +44,24 @@ void PASTEMAC(opname,_check) \
      ( \
        obj_t*  x, \
        obj_t*  y  \
-     ); 
+     );
 
 GENTPROT( addv )
 GENTPROT( copyv )
 GENTPROT( subv )
 GENTPROT( swapv )
+
+
+#undef  GENTPROT
+#define GENTPROT( opname ) \
+\
+void PASTEMAC(opname,_check) \
+     ( \
+       obj_t*  x, \
+       obj_t*  index  \
+     );
+
+GENTPROT( amaxv )
 
 
 #undef  GENTPROT
@@ -74,7 +86,7 @@ void PASTEMAC(opname,_check) \
        obj_t*  alpha, \
        obj_t*  x, \
        obj_t*  y  \
-     ); 
+     );
 
 GENTPROT( axpyv )
 GENTPROT( scal2v )
@@ -88,7 +100,7 @@ void PASTEMAC(opname,_check) \
        obj_t*  x, \
        obj_t*  y, \
        obj_t*  rho  \
-     ); 
+     );
 
 GENTPROT( dotv )
 
@@ -103,7 +115,7 @@ void PASTEMAC(opname,_check) \
        obj_t*  y, \
        obj_t*  beta, \
        obj_t*  rho  \
-     ); 
+     );
 
 GENTPROT( dotxv )
 
@@ -114,7 +126,7 @@ GENTPROT( dotxv )
 void PASTEMAC(opname,_check) \
      ( \
        obj_t*  x  \
-     ); 
+     );
 
 GENTPROT( invertv )
 
@@ -126,7 +138,7 @@ void PASTEMAC(opname,_check) \
      ( \
        obj_t*  alpha, \
        obj_t*  x  \
-     ); 
+     );
 
 GENTPROT( scalv )
 GENTPROT( setv )
@@ -194,5 +206,11 @@ void bli_l1v_ax_check
      (
        obj_t*  alpha,
        obj_t*  x 
+     );
+
+void bli_l1v_xi_check
+     (
+       obj_t*  x,
+       obj_t*  index
      );
 

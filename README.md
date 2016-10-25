@@ -6,16 +6,17 @@ Introduction
 ------------
 
 BLIS is a portable software framework for instantiating high-performance
-BLAS-like dense linear algebra libraries. The framework was designed to
-isolate essential kernels of computation that, when optimized, immediately
-enable optimized implementations of most of its commonly used and
-computationally intensive operations. BLIS is written in [ISO
+BLAS-like dense linear algebra libraries. The framework was designed to isolate
+essential kernels of computation that, when optimized, immediately enable
+optimized implementations of most of its commonly used and computationally
+intensive operations. BLIS is written in [ISO
 C99](http://en.wikipedia.org/wiki/C99) and available under a
 [new/modified/3-clause BSD
 license](http://opensource.org/licenses/BSD-3-Clause). While BLIS exports a
-[new BLAS-like API](), it also includes a BLAS compatibility layer which gives
-application developers access to BLIS implementations via traditional [BLAS
-routine calls](http://www.netlib.org/lapack/lug/node145.html).
+[new BLAS-like API](https://github.com/flame/blis/wiki/BLISAPIQuickReference),
+it also includes a BLAS compatibility layer which gives application developers
+access to BLIS implementations via traditional [BLAS routine
+calls](http://www.netlib.org/lapack/lug/node145.html).
 
 For a thorough presentation of our framework, please read our recently accepted
 journal article, ["BLIS: A Framework for Rapidly Instantiating BLAS
@@ -262,11 +263,17 @@ A fourth paper, submitted to ACM TOMS, also exists, which proposes an
 
 ```
 @article{BLIS4,
-   author      = {Tze Meng Low and Francisco D. Igual and Tyler M. Smith and Enrique S. Quintana-Ort\'{\i}},
-   title       = {Analytical Models for the {BLIS} Framework},
+   author      = {Tze Meng Low and Francisco D. Igual and Tyler M. Smith and
+                  Enrique S. Quintana-Ort\'{\i}},
+   title       = {Analytical Modeling Is Enough for High-Performance {BLIS}},
    journal     = {ACM Transactions on Mathematical Software},
-   year        = 2016,
-   note        = {Accepted},
+   volume      = {43},
+   number      = {2},
+   pages       = {12:1--12:18},
+   month       = aug,
+   year        = {2016},
+   issue_date  = {August 2016},
+   url         = {http://doi.acm.org/10.1145/2925987},
 }
 ```
 

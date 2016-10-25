@@ -32,10 +32,14 @@
 
 */
 
-void bli_unpackm_unb_var1( obj_t*     p,
-                           obj_t*     c,
-                           cntx_t*    cntx,
-                           unpackm_t* cntl );
+void bli_unpackm_unb_var1
+     (
+       obj_t*  p,
+       obj_t*  c,
+       cntx_t* cntx,
+       cntl_t* cntl,
+       thrinfo_t* thread
+     );
 
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, varname ) \

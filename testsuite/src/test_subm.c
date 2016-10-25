@@ -142,7 +142,7 @@ void libblis_test_subm_experiment
        double*        resid
      )
 {
-	double       time_min  = 1e9;
+	double       time_min  = DBL_MAX;
 	double       time;
 
 	dim_t        m, n;

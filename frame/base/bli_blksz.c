@@ -35,10 +35,13 @@
 #include "blis.h"
 
 
-blksz_t* bli_blksz_obj_create( dim_t b_s, dim_t be_s,
-                               dim_t b_d, dim_t be_d,
-                               dim_t b_c, dim_t be_c,
-                               dim_t b_z, dim_t be_z )
+blksz_t* bli_blksz_obj_create
+     (
+       dim_t b_s, dim_t be_s,
+       dim_t b_d, dim_t be_d,
+       dim_t b_c, dim_t be_c,
+       dim_t b_z, dim_t be_z
+     )
 {
 	blksz_t* b;
 
@@ -53,11 +56,14 @@ blksz_t* bli_blksz_obj_create( dim_t b_s, dim_t be_s,
 	return b;
 }
 
-void bli_blksz_obj_init( blksz_t* b,
-                         dim_t    b_s, dim_t be_s,
-                         dim_t    b_d, dim_t be_d,
-                         dim_t    b_c, dim_t be_c,
-                         dim_t    b_z, dim_t be_z )
+void bli_blksz_obj_init
+     (
+       blksz_t* b,
+       dim_t b_s, dim_t be_s,
+       dim_t b_d, dim_t be_d,
+       dim_t b_c, dim_t be_c,
+       dim_t b_z, dim_t be_z
+     )
 {
 	b->v[BLIS_FLOAT]    = b_s;
 	b->v[BLIS_DOUBLE]   = b_d;
@@ -69,15 +75,21 @@ void bli_blksz_obj_init( blksz_t* b,
 	b->e[BLIS_DCOMPLEX] = be_z;
 }
 
-void bli_blksz_obj_free( blksz_t* b )
+void bli_blksz_obj_free
+     (
+       blksz_t* b
+     )
 {
 	bli_free_intl( b );
 }
 
 // -----------------------------------------------------------------------------
 
-void bli_blksz_reduce_dt_to( num_t dt_bm, blksz_t* bmult,
-                             num_t dt_bs, blksz_t* blksz )
+void bli_blksz_reduce_dt_to
+     (
+       num_t dt_bm, blksz_t* bmult,
+       num_t dt_bs, blksz_t* blksz
+     )
 {
 	dim_t blksz_def = bli_blksz_get_def( dt_bs, blksz );
 	dim_t blksz_max = bli_blksz_get_max( dt_bs, blksz );
@@ -107,11 +119,30 @@ void bli_blksz_reduce_dt_to( num_t dt_bm, blksz_t* bmult,
 
 // -----------------------------------------------------------------------------
 
-dim_t bli_determine_blocksize_f( dim_t    i,
-                                 dim_t    dim,
-                                 obj_t*   obj,
-                                 bszid_t  bszid,
-                                 cntx_t*  cntx )
+dim_t bli_determine_blocksize
+     (
+       dir_t   direct,
+       dim_t   i,
+       dim_t   dim,
+       obj_t*  obj,
+       bszid_t bszid,
+       cntx_t* cntx
+     )
+{
+	if ( direct == BLIS_FWD )
+		return bli_determine_blocksize_f( i, dim, obj, bszid, cntx );
+	else
+		return bli_determine_blocksize_b( i, dim, obj, bszid, cntx );
+}
+
+dim_t bli_determine_blocksize_f
+     (
+       dim_t   i,
+       dim_t   dim,
+       obj_t*  obj,
+       bszid_t bszid,
+       cntx_t* cntx
+     )
 {
 	num_t    dt;
 	blksz_t* bsize;
@@ -130,10 +161,39 @@ dim_t bli_determine_blocksize_f( dim_t    i,
 	return b_use;
 }
 
-dim_t bli_determine_blocksize_f_sub( dim_t  i,
-                                     dim_t  dim,
-                                     dim_t  b_alg,
-                                     dim_t  b_max )
+dim_t bli_determine_blocksize_b
+     (
+       dim_t   i,
+       dim_t   dim,
+       obj_t*  obj,
+       bszid_t bszid,
+       cntx_t* cntx
+     )
+{
+	num_t    dt;
+	blksz_t* bsize;
+	dim_t    b_alg, b_max;
+	dim_t    b_use;
+
+	// Extract the execution datatype and use it to query the corresponding
+	// blocksize and blocksize maximum values from the blksz_t object.
+	dt    = bli_obj_execution_datatype( *obj );
+	bsize = bli_cntx_get_blksz( bszid, cntx );
+	b_alg = bli_blksz_get_def( dt, bsize );
+	b_max = bli_blksz_get_max( dt, bsize );
+
+	b_use = bli_determine_blocksize_b_sub( i, dim, b_alg, b_max );
+
+	return b_use;
+}
+
+dim_t bli_determine_blocksize_f_sub
+     (
+       dim_t  i,
+       dim_t  dim,
+       dim_t  b_alg,
+       dim_t  b_max
+     )
 {
 	dim_t b_now;
 	dim_t dim_left_now;
@@ -161,33 +221,13 @@ dim_t bli_determine_blocksize_f_sub( dim_t  i,
 	return b_now;
 }
 
-dim_t bli_determine_blocksize_b( dim_t    i,
-                                 dim_t    dim,
-                                 obj_t*   obj,
-                                 bszid_t  bszid,
-                                 cntx_t*  cntx )
-{
-	num_t    dt;
-	blksz_t* bsize;
-	dim_t    b_alg, b_max;
-	dim_t    b_use;
-
-	// Extract the execution datatype and use it to query the corresponding
-	// blocksize and blocksize maximum values from the blksz_t object.
-	dt    = bli_obj_execution_datatype( *obj );
-	bsize = bli_cntx_get_blksz( bszid, cntx );
-	b_alg = bli_blksz_get_def( dt, bsize );
-	b_max = bli_blksz_get_max( dt, bsize );
-
-	b_use = bli_determine_blocksize_b_sub( i, dim, b_alg, b_max );
-
-	return b_use;
-}
-
-dim_t bli_determine_blocksize_b_sub( dim_t  i,
-                                     dim_t  dim,
-                                     dim_t  b_alg,
-                                     dim_t  b_max )
+dim_t bli_determine_blocksize_b_sub
+     (
+       dim_t  i,
+       dim_t  dim,
+       dim_t  b_alg,
+       dim_t  b_max
+     )
 {
 	dim_t b_now;
 	dim_t dim_left_now;

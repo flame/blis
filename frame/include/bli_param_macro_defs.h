@@ -1104,6 +1104,14 @@
 	else if ( bli_is_scomplex( dt ) ) PASTEMAC(c,fname)(o0,o1,o2); \
 	else if ( bli_is_dcomplex( dt ) ) PASTEMAC(z,fname)(o0,o1,o2); \
 }
+#define bli_call_ft_3i( dt, fname, o0, o1, o2 ) \
+{ \
+	if      ( bli_is_float( dt )    ) PASTEMAC(s,fname)(o0,o1,o2); \
+	else if ( bli_is_double( dt )   ) PASTEMAC(d,fname)(o0,o1,o2); \
+	else if ( bli_is_scomplex( dt ) ) PASTEMAC(c,fname)(o0,o1,o2); \
+	else if ( bli_is_dcomplex( dt ) ) PASTEMAC(z,fname)(o0,o1,o2); \
+	else if ( bli_is_int( dt )      ) PASTEMAC(i,fname)(o0,o1,o2); \
+}
 #define bli_call_ft_4( dt, fname, o0, o1, o2, o3 ) \
 { \
 	if      ( bli_is_float( dt )    ) PASTEMAC(s,fname)(o0,o1,o2,o3); \

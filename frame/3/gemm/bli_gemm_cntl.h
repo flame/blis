@@ -32,31 +32,23 @@
 
 */
 
-struct gemm_s
-{
-	impl_t             impl_type;
-	varnum_t           var_num;
-	bszid_t            bszid;
-	struct scalm_s*    sub_scalm;
-	struct packm_s*    sub_packm_a;
-	struct packm_s*    sub_packm_b;
-	struct packm_s*    sub_packm_c;
-	struct gemm_s*     sub_gemm;
-	struct unpackm_s*  sub_unpackm_c;
-};
-typedef struct gemm_s gemm_t;
+cntl_t* bli_gemm_cntl_create
+     (
+       opid_t family
+     );
 
-#define bli_cntl_sub_gemm( cntl )      cntl->sub_gemm
+void bli_gemm_cntl_free
+     (
+       cntl_t* cntl,
+       thrinfo_t* thread
+     );
 
-void    bli_gemm_cntl_init( void );
-void    bli_gemm_cntl_finalize( void );
-gemm_t* bli_gemm_cntl_obj_create( impl_t       impl_type,
-                                  varnum_t     var_num,
-                                  bszid_t      bszid,
-                                  scalm_t*     sub_scalm,
-                                  packm_t*     sub_pack_a,
-                                  packm_t*     sub_pack_b,
-                                  packm_t*     sub_pack_c,
-                                  gemm_t*      sub_gemm,
-                                  unpackm_t*   sub_unpack_c );
+// -----------------------------------------------------------------------------
+
+cntl_t* bli_gemm_cntl_obj_create
+     (
+       bszid_t bszid,
+       void*   var_func,
+       cntl_t* sub_node
+     );
 

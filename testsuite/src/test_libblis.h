@@ -215,6 +215,7 @@ typedef struct test_ops_s
 
 	// level-1v
 	test_op_t addv;
+	test_op_t amaxv;
 	test_op_t axpbyv;
 	test_op_t axpyv;
 	test_op_t copyv;
@@ -382,7 +383,7 @@ void fill_string_with_n_spaces( char* str, unsigned int n_spaces );
 // --- Create object ---
 
 void libblis_test_mobj_create( test_params_t* params, num_t dt, trans_t trans, char storage, dim_t m, dim_t n, obj_t* a );
-void libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, invdiag_t inv_diag, pack_t pack_schema, packbuf_t pack_buf, obj_t* a, obj_t* p, cntx_t* cntx );
+cntl_t* libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, invdiag_t inv_diag, pack_t pack_schema, packbuf_t pack_buf, obj_t* a, obj_t* p, cntx_t* cntx );
 void libblis_test_vobj_create( test_params_t* params, num_t dt, char storage, dim_t m, obj_t* x );
 
 // --- Randomize/initialize object ---
@@ -435,6 +436,7 @@ void libblis_test_check_empty_problem( obj_t* c, double* perf, double* resid );
 
 // Level-1v
 #include "test_addv.h"
+#include "test_amaxv.h"
 #include "test_axpbyv.h"
 #include "test_axpyv.h"
 #include "test_copyv.h"

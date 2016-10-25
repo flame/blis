@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2016 Hewlett Packard Enterprise Development LP
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -171,7 +172,6 @@ typedef float     f77_float;
 typedef double    f77_double;
 typedef scomplex  f77_scomplex;
 typedef dcomplex  f77_dcomplex;
-
 
 
 //
@@ -501,215 +501,14 @@ typedef enum
 } packbuf_t;
 
 
-//
-// -- BLIS misc. structure types -----------------------------------------------
-//
+// -- Partitioning direction --
 
-// -- Pool block type --
-
-typedef struct
+typedef enum
 {
-	void* buf_sys;
-	void* buf_align;
-} pblk_t;
+	BLIS_FWD,
+	BLIS_BWD
+} dir_t;
 
-// -- Pool type --
-
-typedef struct
-{
-	pblk_t* block_ptrs;
-	dim_t   block_ptrs_len;
-
-	dim_t   top_index;
-	dim_t   num_blocks;
-
-	siz_t   block_size;
-	siz_t   align_size;
-} pool_t;
-
-// -- Memory object type --
-
-typedef struct mem_s
-{
-	pblk_t    pblk;
-	packbuf_t buf_type;
-	pool_t*   pool;
-	siz_t     size;
-} mem_t;
-
-// -- Blocksize object type --
-
-typedef struct blksz_s
-{
-	// Primary blocksize values.
-	dim_t  v[BLIS_NUM_FP_TYPES];
-
-	// Blocksize extensions.
-	dim_t  e[BLIS_NUM_FP_TYPES];
-
-} blksz_t;
-
-// -- Function pointer object type --
-
-typedef struct func_s
-{
-	// Kernel function address.
-	void*  ptr[BLIS_NUM_FP_TYPES];
-
-} func_t;
-
-// -- Multi-boolean object type --
-
-typedef struct mbool_s
-{
-	bool_t  v[BLIS_NUM_FP_TYPES];
-
-} mbool_t;
-
-// -- Auxiliary kernel info type --
-
-// Note: This struct is used by macro-kernels to package together extra
-// parameter values that may be of use to the micro-kernel without
-// cluttering up the micro-kernel interface itself.
-
-typedef struct
-{
-	// The pack schemas of A and B.
-	pack_t schema_a;
-	pack_t schema_b;
-
-	// Pointers to the micro-panels of A and B which will be used by the
-	// next call to the micro-kernel.
-	const void*  a_next;
-	const void*  b_next;
-
-	// The imaginary strides of A and B.
-	inc_t  is_a;
-	inc_t  is_b;
-
-} auxinfo_t;
-
-
-
-//
-// -- BLIS object type definitions ---------------------------------------------
-//
-
-typedef struct obj_s
-{
-	// Basic fields
-	struct obj_s* root;
-
-	dim_t         off[2];
-	dim_t         dim[2];
-	doff_t        diag_off;
-
-	objbits_t     info;
-	siz_t         elem_size;
-
-	void*         buffer;
-	inc_t         rs;
-	inc_t         cs;
-	inc_t         is;
-
-	// Bufferless scalar storage
-	atom_t        scalar;
-
-	// Pack-related fields
-	mem_t         pack_mem; // cached memory region for packing
-	dim_t         m_padded; // m dimension of matrix, including any padding
-	dim_t         n_padded; // n dimension of matrix, including any padding
-	inc_t         ps;       // panel stride (distance to next panel)
-	inc_t         pd;       // panel dimension (the "width" of a panel:
-	                        // usually MR or NR)
-	dim_t         m_panel;  // m dimension of a "full" panel
-	dim_t         n_panel;  // n dimension of a "full" panel
-} obj_t;
-
-
-// Define these macros here since they must be updated if contents of
-// obj_t changes.
-#define bli_obj_init_basic_shallow_copy_of( a, b ) \
-{ \
-	(b).root      = (a).root; \
-\
-	(b).off[0]    = (a).off[0]; \
-	(b).off[1]    = (a).off[1]; \
-	(b).dim[0]    = (a).dim[0]; \
-	(b).dim[1]    = (a).dim[1]; \
-	(b).diag_off  = (a).diag_off; \
-\
-	(b).info      = (a).info; \
-	(b).elem_size = (a).elem_size; \
-\
-	(b).buffer    = (a).buffer; \
-	(b).rs        = (a).rs; \
-	(b).cs        = (a).cs; \
-	(b).is        = (a).is; \
-\
-	(b).scalar    = (a).scalar; \
-\
-	/* We must NOT copy pack_mem field since this macro forms the basis of
-	   bli_obj_alias_to(), which is used in packm_init(). There, we want to
-	   copy the basic fields of the obj_t but PRESERVE the pack_mem field
-	   of the destination object since it holds the "cached" mem_t object
-	   and buffer. The other fields, such as padded dimensions, are always
-	   set by bli_packm_init(), so we don't need to copy them either. */ \
-}
-
-#define bli_obj_init_full_shallow_copy_of( a, b ) \
-{ \
-	/* This macro implements a full alias (shallow copy) that copies all
-	   fields of the obj_t struct. */ \
-	bli_obj_init_basic_shallow_copy_of( a, b ); \
-\
-	(b).pack_mem  = (a).pack_mem; \
-	(b).m_padded  = (a).m_padded; \
-	(b).n_padded  = (a).n_padded; \
-	(b).ps        = (a).ps; \
-	(b).pd        = (a).pd; \
-	(b).m_panel   = (a).m_panel; \
-	(b).n_panel   = (a).n_panel; \
-}
-
-#define bli_obj_init_subpart_from( a, b ) \
-{ \
-	(b).root      = (a).root; \
-\
-	(b).off[0]    = (a).off[0]; \
-	(b).off[1]    = (a).off[1]; \
-	/* Avoid copying m since it will be overwritten. */ \
-	/* Avoid copying n since it will be overwritten. */ \
-	(b).diag_off  = (a).diag_off; \
-\
-	(b).info      = (a).info; \
-	(b).elem_size = (a).elem_size; \
-\
-	(b).buffer    = (a).buffer; \
-	(b).rs        = (a).rs; \
-	(b).cs        = (a).cs; \
-	(b).is        = (a).is; \
-\
-	(b).scalar    = (a).scalar; \
-\
-	/* We want to copy the pack_mem field here because this macro is used
-	   when creating subpartitions, including those of packed objects. In
-	   those situations, we want the subpartition to inherit the pack_mem
-	   field of its parent, as well as other related fields such as the
-	   padded dimensions. */ \
-	(b).pack_mem  = (a).pack_mem; \
-	(b).m_padded  = (a).m_padded; \
-	(b).n_padded  = (a).n_padded; \
-	(b).pd        = (a).pd; \
-	(b).ps        = (a).ps; \
-	(b).m_panel   = (a).m_panel; \
-	(b).n_panel   = (a).n_panel; \
-}
-
-
-//
-// -- Other BLIS enumerated type definitions -----------------------------------
-//
 
 // -- Subpartition type --
 
@@ -764,6 +563,7 @@ typedef enum
 #define BLIS_MACH_PARAM_FIRST  BLIS_MACH_EPS
 #define BLIS_MACH_PARAM_LAST   BLIS_MACH_EPS2
 
+
 // -- Induced method types --
 
 typedef enum
@@ -780,11 +580,13 @@ typedef enum
 
 #define BLIS_NUM_IND_METHODS (BLIS_NAT+1)
 
+
 // -- Kernel ID types --
 
 typedef enum
 {
 	BLIS_ADDV_KER  = 0,
+	BLIS_AMAXV_KER,
 	BLIS_AXPBYV_KER,
 	BLIS_AXPYV_KER,
 	BLIS_COPYV_KER,
@@ -799,7 +601,8 @@ typedef enum
 	BLIS_XPBYV_KER,
 } l1vkr_t;
 
-#define BLIS_NUM_LEVEL1V_KERS 13
+#define BLIS_NUM_LEVEL1V_KERS 14
+
 
 typedef enum
 {
@@ -812,6 +615,7 @@ typedef enum
 
 #define BLIS_NUM_LEVEL1F_KERS 5
 
+
 typedef enum
 {
 	BLIS_GEMM_UKR = 0,
@@ -823,6 +627,7 @@ typedef enum
 
 #define BLIS_NUM_LEVEL3_UKRS 5
 
+
 typedef enum
 {
 	BLIS_REFERENCE_UKERNEL = 0,
@@ -832,6 +637,21 @@ typedef enum
 } kimpl_t;
 
 #define BLIS_NUM_UKR_IMPL_TYPES 4
+
+
+#if 0
+typedef enum
+{
+	BLIS_JC_IDX = 0,
+	BLIS_PC_IDX,
+	BLIS_IC_IDX,
+	BLIS_JR_IDX,
+	BLIS_IR_IDX,
+	BLIS_PR_IDX,
+} thridx_t;
+#endif
+
+#define BLIS_NUM_LOOPS 6
 
 
 // -- Operation ID type --
@@ -884,9 +704,242 @@ typedef enum
 	BLIS_DF, // level-1f dotxf fusing factor
 	BLIS_XF, // level-1f dotxaxpyf fusing factor
 	BLIS_VF, // level-1v vector fusing factor
+
+	BLIS_NO_PART, // used as a placeholder when blocksizes are not applicable.
 } bszid_t;
 
 #define BLIS_NUM_BLKSZS 13
+
+
+//
+// -- BLIS misc. structure types -----------------------------------------------
+//
+
+// -- Pool block type --
+
+typedef struct
+{
+	void* buf_sys;
+	void* buf_align;
+} pblk_t;
+
+// -- Pool type --
+
+typedef struct
+{
+	pblk_t* block_ptrs;
+	dim_t   block_ptrs_len;
+
+	dim_t   top_index;
+	dim_t   num_blocks;
+
+	siz_t   block_size;
+	siz_t   align_size;
+} pool_t;
+
+// -- Mutex object type --
+
+#include "bli_mutex.h"
+#include "bli_malloc.h"
+
+// -- Memory broker object type --
+
+typedef struct membrk_s
+{
+	pool_t    pools[3];
+	mtx_t     mutex;
+
+	malloc_ft malloc_fp;
+	free_ft   free_fp;
+} membrk_t;
+
+// -- Memory object type --
+
+typedef struct mem_s
+{
+	pblk_t    pblk;
+	packbuf_t buf_type;
+	pool_t*   pool;
+	membrk_t* membrk;
+	siz_t     size;
+} mem_t;
+
+// -- Control tree node type --
+
+struct cntl_s
+{
+	// Basic fields (usually required).
+	bszid_t        bszid;
+	void*          var_func;
+	struct cntl_s* sub_node;
+
+	// Optional fields (needed only by some operations such as packm).
+	// NOTE: first field of params must be a uint64_t containing the size
+	// of the struct.
+	void*          params;
+
+	// Internal fields that track "cached" data.
+	mem_t          pack_mem;
+};
+typedef struct cntl_s cntl_t;
+
+
+// -- Blocksize object type --
+
+typedef struct blksz_s
+{
+	// Primary blocksize values.
+	dim_t  v[BLIS_NUM_FP_TYPES];
+
+	// Blocksize extensions.
+	dim_t  e[BLIS_NUM_FP_TYPES];
+
+} blksz_t;
+
+
+// -- Function pointer object type --
+
+typedef struct func_s
+{
+	// Kernel function address.
+	void*  ptr[BLIS_NUM_FP_TYPES];
+
+} func_t;
+
+
+// -- Multi-boolean object type --
+
+typedef struct mbool_s
+{
+	bool_t  v[BLIS_NUM_FP_TYPES];
+
+} mbool_t;
+
+
+// -- Auxiliary kernel info type --
+
+// Note: This struct is used by macro-kernels to package together extra
+// parameter values that may be of use to the micro-kernel without
+// cluttering up the micro-kernel interface itself.
+
+typedef struct
+{
+	// The pack schemas of A and B.
+	pack_t schema_a;
+	pack_t schema_b;
+
+	// Pointers to the micro-panels of A and B which will be used by the
+	// next call to the micro-kernel.
+	const void*  a_next;
+	const void*  b_next;
+
+	// The imaginary strides of A and B.
+	inc_t  is_a;
+	inc_t  is_b;
+
+} auxinfo_t;
+
+
+//
+// -- BLIS object type definitions ---------------------------------------------
+//
+
+typedef struct obj_s
+{
+	// Basic fields
+	struct obj_s* root;
+
+	dim_t         off[2];
+	dim_t         dim[2];
+	doff_t        diag_off;
+
+	objbits_t     info;
+	siz_t         elem_size;
+
+	void*         buffer;
+	inc_t         rs;
+	inc_t         cs;
+	inc_t         is;
+
+	// Bufferless scalar storage
+	atom_t        scalar;
+
+	// Pack-related fields
+	dim_t         m_padded; // m dimension of matrix, including any padding
+	dim_t         n_padded; // n dimension of matrix, including any padding
+	inc_t         ps;       // panel stride (distance to next panel)
+	inc_t         pd;       // panel dimension (the "width" of a panel:
+	                        // usually MR or NR)
+	dim_t         m_panel;  // m dimension of a "full" panel
+	dim_t         n_panel;  // n dimension of a "full" panel
+} obj_t;
+
+
+// Define these macros here since they must be updated if contents of
+// obj_t changes.
+
+#define bli_obj_init_full_shallow_copy_of( a, b ) \
+{ \
+	(b).root      = (a).root; \
+\
+	(b).off[0]    = (a).off[0]; \
+	(b).off[1]    = (a).off[1]; \
+	(b).dim[0]    = (a).dim[0]; \
+	(b).dim[1]    = (a).dim[1]; \
+	(b).diag_off  = (a).diag_off; \
+\
+	(b).info      = (a).info; \
+	(b).elem_size = (a).elem_size; \
+\
+	(b).buffer    = (a).buffer; \
+	(b).rs        = (a).rs; \
+	(b).cs        = (a).cs; \
+	(b).is        = (a).is; \
+\
+	(b).scalar    = (a).scalar; \
+\
+	/*(b).pack_mem  = (a).pack_mem;*/ \
+	(b).m_padded  = (a).m_padded; \
+	(b).n_padded  = (a).n_padded; \
+	(b).ps        = (a).ps; \
+	(b).pd        = (a).pd; \
+	(b).m_panel   = (a).m_panel; \
+	(b).n_panel   = (a).n_panel; \
+}
+
+#define bli_obj_init_subpart_from( a, b ) \
+{ \
+	(b).root      = (a).root; \
+\
+	(b).off[0]    = (a).off[0]; \
+	(b).off[1]    = (a).off[1]; \
+	/* Avoid copying m since it will be overwritten. */ \
+	/* Avoid copying n since it will be overwritten. */ \
+	(b).diag_off  = (a).diag_off; \
+\
+	(b).info      = (a).info; \
+	(b).elem_size = (a).elem_size; \
+\
+	(b).buffer    = (a).buffer; \
+	(b).rs        = (a).rs; \
+	(b).cs        = (a).cs; \
+	(b).is        = (a).is; \
+\
+	(b).scalar    = (a).scalar; \
+\
+	/* We want to copy the pack_mem field here because this macro is used
+	   when creating subpartitions, including those of packed objects. In
+	   those situations, we want the subpartition to inherit the pack_mem
+	   field of its parent, as well as other related fields such as the
+	   padded dimensions. */ \
+	/*(b).pack_mem  = (a).pack_mem;*/ \
+	(b).m_padded  = (a).m_padded; \
+	(b).n_padded  = (a).n_padded; \
+	(b).pd        = (a).pd; \
+	(b).ps        = (a).ps; \
+	(b).m_panel   = (a).m_panel; \
+	(b).n_panel   = (a).n_panel; \
+}
 
 
 // -- Context type --
@@ -905,11 +958,15 @@ typedef struct cntx_s
 
 	func_t    packm_ukrs;
 
+	opid_t    family;
 	ind_t     method;
 	pack_t    schema_a;
 	pack_t    schema_b;
 	pack_t    schema_c;
 
+	dim_t     thrloop[ BLIS_NUM_LOOPS ];
+
+	membrk_t* membrk;
 } cntx_t;
 
 
