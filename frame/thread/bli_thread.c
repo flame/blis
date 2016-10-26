@@ -959,7 +959,7 @@ siz_t bli_thread_get_range_weighted_b2t
 // -----------------------------------------------------------------------------
 
 // Some utilities
-dim_t bli_env_read_nway( char* env )
+dim_t bli_env_read_nway( const char* env )
 {
 	dim_t num = 1;
 	char* str = getenv( env );

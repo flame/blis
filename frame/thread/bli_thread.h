@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -165,7 +165,7 @@ void bli_l3_thread_decorator
      );
 
 // Miscellaneous prototypes
-dim_t bli_env_read_nway( char* env );
+dim_t bli_env_read_nway( const char* env );
 dim_t bli_gcd( dim_t x, dim_t y );
 dim_t bli_lcm( dim_t x, dim_t y );
 

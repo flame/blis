@@ -60,6 +60,7 @@ INSERT_GENTPROT_BASIC( packm_10xk_ker_name )
 INSERT_GENTPROT_BASIC( packm_12xk_ker_name )
 INSERT_GENTPROT_BASIC( packm_14xk_ker_name )
 INSERT_GENTPROT_BASIC( packm_16xk_ker_name )
+INSERT_GENTPROT_BASIC( packm_24xk_ker_name )
 INSERT_GENTPROT_BASIC( packm_30xk_ker_name )
 
 
