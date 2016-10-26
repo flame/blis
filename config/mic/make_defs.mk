@@ -77,7 +77,11 @@ ARFLAGS        := cru
 # --- Determine the linker and related flags ---
 LINKER         := $(CC)
 SOFLAGS        := -shared
+ifeq ($(CC_VENDOR),icc)
+LDFLAGS        := -mmic
+else
 LDFLAGS        := -mmic -lm
+endif
 
 
 
