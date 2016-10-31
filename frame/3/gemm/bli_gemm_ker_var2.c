@@ -165,12 +165,15 @@ void PASTEMAC(ch,varname) \
 	PASTECH(ch,gemm_ukr_ft) \
 	                gemm_ukr   = bli_cntx_get_l3_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
 \
-	/* Temporary C buffer for edge cases. */ \
+	/* Temporary C buffer for edge cases. Note that the strides of this
+	   temporary buffer are set so that they match the storage of the
+	   original C matrix. For example, if C is column-stored, ct will be
+	   column-stored as well. */ \
 	ctype           ct[ BLIS_STACK_BUF_MAX_SIZE \
 	                    / sizeof( ctype ) ] \
 	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	const inc_t     rs_ct      = 1; \
-	const inc_t     cs_ct      = MR; \
+	const inc_t     rs_ct      = ( bli_is_col_stored( rs_c, cs_c ) ? 1 : NR ); \
+	const inc_t     cs_ct      = ( bli_is_col_stored( rs_c, cs_c ) ? MR : 1 ); \
 \
 	ctype* restrict zero       = PASTEMAC(ch,0); \
 	ctype* restrict a_cast     = a; \
