@@ -49,7 +49,18 @@
 //     (b) MR (for zero-padding purposes when MR and NR are "swapped")
 //
 
-// sgemm micro-kernel
+// -- sgemm micro-kernel --
+
+#if 1
+#define BLIS_SGEMM_UKERNEL         bli_sgemm_asm_6x16
+#define BLIS_DEFAULT_MC_S          144
+#define BLIS_DEFAULT_KC_S          256
+#define BLIS_DEFAULT_NC_S          4080
+#define BLIS_DEFAULT_MR_S          6
+#define BLIS_DEFAULT_NR_S          16
+
+#define BLIS_SGEMM_UKERNEL_PREFERS_CONTIG_ROWS
+#endif
 
 #if 0
 #define BLIS_SGEMM_UKERNEL         bli_sgemm_asm_24x4
@@ -69,18 +80,18 @@
 #define BLIS_DEFAULT_NR_S          6
 #endif
 
+// -- dgemm micro-kernel --
+
 #if 1
-#define BLIS_SGEMM_UKERNEL         bli_sgemm_asm_6x16
-#define BLIS_DEFAULT_MC_S          144
-#define BLIS_DEFAULT_KC_S          256
-#define BLIS_DEFAULT_NC_S          4080
-#define BLIS_DEFAULT_MR_S          6
-#define BLIS_DEFAULT_NR_S          16
+#define BLIS_DGEMM_UKERNEL         bli_dgemm_asm_6x8
+#define BLIS_DEFAULT_MC_D          72
+#define BLIS_DEFAULT_KC_D          256
+#define BLIS_DEFAULT_NC_D          4080
+#define BLIS_DEFAULT_MR_D          6
+#define BLIS_DEFAULT_NR_D          8
 
-#define BLIS_SGEMM_UKERNEL_PREFERS_CONTIG_ROWS
+#define BLIS_DGEMM_UKERNEL_PREFERS_CONTIG_ROWS
 #endif
-
-// dgemm micro-kernel
 
 #if 0
 #define BLIS_DGEMM_UKERNEL         bli_dgemm_asm_12x4
@@ -100,18 +111,7 @@
 #define BLIS_DEFAULT_NR_D          6
 #endif
 
-#if 1
-#define BLIS_DGEMM_UKERNEL         bli_dgemm_asm_6x8
-#define BLIS_DEFAULT_MC_D          72
-#define BLIS_DEFAULT_KC_D          256
-#define BLIS_DEFAULT_NC_D          4080
-#define BLIS_DEFAULT_MR_D          6
-#define BLIS_DEFAULT_NR_D          8
-
-#define BLIS_DGEMM_UKERNEL_PREFERS_CONTIG_ROWS
-#endif
-
-// cgemm micro-kernel
+// -- cgemm micro-kernel --
 
 #if 1
 #define BLIS_CGEMM_UKERNEL         bli_cgemm_asm_3x8
@@ -124,7 +124,16 @@
 #define BLIS_CGEMM_UKERNEL_PREFERS_CONTIG_ROWS
 #endif
 
-// zgemm micro-kernel
+#if 0
+#define BLIS_CGEMM_UKERNEL         bli_cgemm_asm_8x3
+#define BLIS_DEFAULT_MC_C          144
+#define BLIS_DEFAULT_KC_C          256
+#define BLIS_DEFAULT_NC_C          4080
+#define BLIS_DEFAULT_MR_C          8
+#define BLIS_DEFAULT_NR_C          3
+#endif
+
+//  -- zgemm micro-kernel --
 
 #if 1
 #define BLIS_ZGEMM_UKERNEL         bli_zgemm_asm_3x4
@@ -135,6 +144,15 @@
 #define BLIS_DEFAULT_NR_Z          4
 
 #define BLIS_ZGEMM_UKERNEL_PREFERS_CONTIG_ROWS
+#endif
+
+#if 0
+#define BLIS_ZGEMM_UKERNEL         bli_zgemm_asm_4x3
+#define BLIS_DEFAULT_MC_Z          72
+#define BLIS_DEFAULT_KC_Z          256
+#define BLIS_DEFAULT_NC_Z          4080
+#define BLIS_DEFAULT_MR_Z          4
+#define BLIS_DEFAULT_NR_Z          3
 #endif
 
 
