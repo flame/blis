@@ -7,6 +7,7 @@ os:
 
 compiler:
   - gcc
+  - clang
 
 env:
   - RUN_TEST=1 THREADING="none" BUILD_CONFIG="auto"
@@ -18,11 +19,15 @@ env:
   - RUN_TEST=0 THREADING="none" BUILD_CONFIG="bulldozer"
   - RUN_TEST=0 THREADING="none" BUILD_CONFIG="piledriver"
   - RUN_TEST=0 THREADING="none" BUILD_CONFIG="carrizo"
-  - RUN_TEST=1 THREADING="openmp" BUILD_CONFIG="auto"
-  - RUN_TEST=1 THREADING="pthreads" BUILD_CONFIG="auto"
+  - RUN_TEST=0 THREADING="openmp" BUILD_CONFIG="auto"
+  - RUN_TEST=0 THREADING="pthreads" BUILD_CONFIG="auto"
   
 matrix:
   exclude:
+    - os: linux
+      compiler: clang
+    - os: osx
+      compiler: gcc
     - os: osx
       env: RUN_TEST=1 THREADING="none" BUILD_CONFIG="reference"
     - os: osx
@@ -40,26 +45,26 @@ matrix:
     - os: osx
       env: RUN_TEST=0 THREADING="none" BUILD_CONFIG="carrizo"
     - os: osx
-      env: RUN_TEST=1 THREADING="openmp" BUILD_CONFIG="auto"
+      env: RUN_TEST=0 THREADING="openmp" BUILD_CONFIG="auto"
 
 install:
-  - if [ "$CC" = "gcc" ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then export CC="gcc-4.9"; fi
+  - if [ "$CC" = "gcc" ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then export CC="gcc-5"; fi
 
 addons:
   apt:
     sources:
     - ubuntu-toolchain-r-test
     packages:
-    - gcc-4.9
+    - gcc-5
     - clang
     
 script:
-  - ./configure -t $THREADING $BUILD_CONFIG
+  - ./configure -t $THREADING CC=$CC $BUILD_CONFIG
   - $CC --version
-  - make -j 4
+  - make -j 2
   - export BLIS_IC_NT=2
   - export BLIS_JC_NT=1
   - export BLIS_IR_NT=1
-  - export BLIS_JR_NT=2
+  - export BLIS_JR_NT=1
   - if [ $RUN_TEST -eq 1 ]; then make BLIS_ENABLE_TEST_OUTPUT=yes test; fi
   - if [ $RUN_TEST -eq 1 ]; then ./build/check-test.sh ./output.testsuite; fi
