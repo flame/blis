@@ -43,14 +43,18 @@
 #define CPUNAME_DUNNINGTON   1
 #define CPUNAME_SANDYBRIDGE  2
 #define CPUNAME_HASWELL      3
-#define CPUNAME_BULLDOZER    4
-#define CPUNAME_PILEDRIVER   5
+#define CPUNAME_KNL          4
+#define CPUNAME_KNC          5
+#define CPUNAME_BULLDOZER    6
+#define CPUNAME_PILEDRIVER   7
 
 static char *cpuname[] = {
   "reference",
   "dunnington",
   "sandybridge",
   "haswell",
+  "knl",
+  "mic",
   "bulldozer",
   "piledriver",
 };
@@ -118,6 +122,19 @@ int support_avx(){
   return ret;
 }
 
+int support_avx512(){
+  int eax, ebx, ecx, edx;
+  int ret=0;
+
+  cpuid(1, &eax, &ebx, &ecx, &edx);
+  if ((ecx & (1 << 28)) != 0 && (ecx & (1 << 27)) != 0 && (ecx & (1 << 26)) != 0){
+    xgetbv(0, &eax, &edx);
+    if((eax & 0xE6) == 0xE6){
+      ret=1;  //OS support AVX-512
+    }
+  }
+  return ret;
+}
 
 int cpu_detect()
 {
@@ -136,79 +153,56 @@ int cpu_detect()
   model         = BITMASK( eax,  4, 0x0f );
 
   if (vendor == VENDOR_INTEL){
+    model |= extend_model<<4;
     switch (family) {
     case 0x6:
-      switch (extend_model) {
-      case 1:
-        switch (model) {
-        case 7:
-          //penryn uses dunnington config.
+      switch (model) {
+        case 0x0F: //Core2
+        case 0x16: //Core2
+        case 0x17: //Penryn
+        case 0x1D: //Penryn
+        case 0x1A: //Nehalem
+        case 0x1E: //Nehalem
+        case 0x2E: //Nehalem
+        case 0x25: //Westmere
+        case 0x2C: //Westmere
+        case 0x2F: //Westmere
           return CPUNAME_DUNNINGTON;
-        case 13:
-          return CPUNAME_DUNNINGTON;
-        }
-        break;
-      case 2:
-        switch (model) {
-        case 10:
-        case 13:
+        case 0x2A: //Sandy Bridge
+        case 0x2D: //Sandy Bridge
+        case 0x3A: //Ivy Bridge
+        case 0x3E: //Ivy Bridge
           if(support_avx()) {
             return CPUNAME_SANDYBRIDGE;
           }else{
             return CPUNAME_REFERENCE; //OS doesn't support AVX
           }
-        }
-        break;
-      case 3:
-        switch (model) {
-        case 10:
-        case 14:
-          //Ivy Bridge
-          if(support_avx()) {
-            return CPUNAME_SANDYBRIDGE;
-          }else{
-            return CPUNAME_REFERENCE; //OS doesn't support AVX
-          }
-        case 12:
-        case 15:
-          //Haswell
-	case 13: //Broadwell
+        case 0x3C: //Haswell
+        case 0x3F: //Haswell
+        case 0x3D: //Broadwell
+        case 0x47: //Broadwell
+        case 0x4F: //Broadwell
+        case 0x56: //Broadwell
+        case 0x4E: //Skylake
+        case 0x5E: //Skylake
           if(support_avx()) {
             return CPUNAME_HASWELL;
           }else{
             return CPUNAME_REFERENCE; //OS doesn't support AVX
           }
-
-        }
-        break;
-      case 4:
-        switch (model) {
-        case 5:
-        case 6:
-          //Haswell
-	case 7:
-	case 15:
-	  //Broadwell
-          if(support_avx()) {
-            return CPUNAME_HASWELL;
+	case 0x57: //KNL
+          if(support_avx512()) {
+            return CPUNAME_KNL;
           }else{
             return CPUNAME_REFERENCE; //OS doesn't support AVX
           }
-        }
-        break;
-      case 5:
-	switch (model) {
-	case 6:
-	  //Broadwell
-          if(support_avx()) {
-            return CPUNAME_HASWELL;
-          }else{
-            return CPUNAME_REFERENCE; //OS doesn't support AVX
-          }
-	}
-	break;
       }
       break;
+    case 0xB:
+      switch (model) {
+        case 0x01: //KNC
+          return CPUNAME_KNC;
+      }
     }
   }else if (vendor == VENDOR_AMD){
     switch (family) {
