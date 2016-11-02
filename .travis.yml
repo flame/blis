@@ -23,6 +23,8 @@ env:
   - RUN_TEST=0 THREADING="pthreads" BUILD_CONFIG="auto"
   
 matrix:
+  allow_failures:
+    - env: RUN_TEST=0 THREADING="none" BUILD_CONFIG="knl"
   exclude:
     - os: linux
       compiler: clang
