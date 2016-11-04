@@ -1347,6 +1347,26 @@
 #endif
 
 
+// -- Define default threading parameters --------------------------------------
+
+
+#ifndef BLIS_DEFAULT_M_THREAD_RATIO
+#define BLIS_DEFAULT_M_THREAD_RATIO 2
+#endif
+
+#ifndef BLIS_DEFAULT_N_THREAD_RATIO
+#define BLIS_DEFAULT_N_THREAD_RATIO 1
+#endif
+
+#ifndef BLIS_DEFAULT_MR_THREAD_MAX
+#define BLIS_DEFAULT_MR_THREAD_MAX 1
+#endif
+
+#ifndef BLIS_DEFAULT_NR_THREAD_MAX
+#define BLIS_DEFAULT_NR_THREAD_MAX 3
+#endif
+
+
 // -- Kernel blocksize checks --------------------------------------------------
 
 // Verify that cache blocksizes are whole multiples of register blocksizes.

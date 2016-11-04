@@ -164,10 +164,25 @@ void bli_l3_thread_decorator
        cntl_t* cntl
      );
 
+// Factorization and partitioning prototypes
+typedef struct
+{
+    dim_t n;
+    dim_t sqrt_n;
+    dim_t f;
+} bli_prime_factors_t;
+
+void bli_prime_factorization(dim_t n, bli_prime_factors_t* factors);
+
+dim_t bli_next_prime_factor(bli_prime_factors_t* factors);
+
+void bli_partition_2x2(dim_t nthread, dim_t work1, dim_t work2, dim_t* nt1, dim_t* nt2);
+
 // Miscellaneous prototypes
-dim_t bli_env_read_nway( const char* env );
+dim_t bli_env_read_nway( const char* env, dim_t fallback );
 dim_t bli_gcd( dim_t x, dim_t y );
 dim_t bli_lcm( dim_t x, dim_t y );
+dim_t bli_ipow( dim_t base, dim_t power );
 
 #endif
 
