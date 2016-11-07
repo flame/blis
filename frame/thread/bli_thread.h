@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -35,25 +35,6 @@
 
 #ifndef BLIS_THREAD_H
 #define BLIS_THREAD_H
-
-// Perform a sanity check to make sure the user doesn't try to enable
-// both OpenMP and pthreads.
-#if defined ( BLIS_ENABLE_OPENMP ) && \
-    defined ( BLIS_ENABLE_PTHREADS )
-  #error "BLIS_ENABLE_OPENMP and BLIS_ENABLE_PTHREADS may not be simultaneously defined."
-#endif
-
-// Here, we define BLIS_ENABLE_MULTITHREADING if either OpenMP
-// or pthreads are enabled. This macro is useful in situations when
-// we want to detect use of either OpenMP or pthreads (as opposed
-// to neither being used).
-#if defined ( BLIS_ENABLE_OPENMP ) || \
-    defined ( BLIS_ENABLE_PTHREADS )
-  #define BLIS_ENABLE_MULTITHREADING
-#endif
-
-// Include thread mutex (mtx_t) object definitions and prototypes.
-#include "bli_mutex.h"
 
 // Include thread communicator (thrcomm_t) object definitions and prototypes.
 #include "bli_thrcomm.h"
@@ -184,7 +165,7 @@ void bli_l3_thread_decorator
      );
 
 // Miscellaneous prototypes
-dim_t bli_env_read_nway( char* env );
+dim_t bli_env_read_nway( const char* env );
 dim_t bli_gcd( dim_t x, dim_t y );
 dim_t bli_lcm( dim_t x, dim_t y );
 

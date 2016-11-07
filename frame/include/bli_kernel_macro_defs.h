@@ -445,6 +445,24 @@
 #define BLIS_ZPACKM_16XK_KERNEL BLIS_ZPACKM_16XK_KERNEL_REF
 #endif
 
+// packm_24xk kernels
+
+#ifndef BLIS_SPACKM_24XK_KERNEL
+#define BLIS_SPACKM_24XK_KERNEL BLIS_SPACKM_24XK_KERNEL_REF
+#endif
+
+#ifndef BLIS_DPACKM_24XK_KERNEL
+#define BLIS_DPACKM_24XK_KERNEL BLIS_DPACKM_24XK_KERNEL_REF
+#endif
+
+#ifndef BLIS_CPACKM_24XK_KERNEL
+#define BLIS_CPACKM_24XK_KERNEL BLIS_CPACKM_24XK_KERNEL_REF
+#endif
+
+#ifndef BLIS_ZPACKM_24XK_KERNEL
+#define BLIS_ZPACKM_24XK_KERNEL BLIS_ZPACKM_24XK_KERNEL_REF
+#endif
+
 // packm_30xk kernels
 
 #ifndef BLIS_SPACKM_30XK_KERNEL
@@ -1333,11 +1351,19 @@
 
 // Verify that cache blocksizes are whole multiples of register blocksizes.
 // Specifically, verify that:
-//   - MC is a whole multiple of MR *AND* NR.
-//   - NC is a whole multiple of NR *AND* MR.
-//   - KC is a whole multiple of KR *AND* both MR, NR.
+//   - MC is a whole multiple of MR.
+//   - NC is a whole multiple of NR.
+//   - KC is a whole multiple of KR.
 // These constraints are enforced because it makes it easier to handle diagonals
-// in the macro-kernel implementations. 
+// in the macro-kernel implementations. Additionally, we optionally verify that:
+//   - MC is a whole multiple of NR.
+//   - NC is a whole multiple of MR.
+// These latter constraints, guarded by #ifndef BLIS_RELAX_MCNR_NCMR_CONSTRAINTS
+// below, are only enforced when we wish to be able to handle the trsm right-
+// side case handling that swaps A and B, so that B is the triangular matrix,
+// with NR blocking used to pack A and MR blocking used to pack B, with the
+// arguments to the gemmtrsm microkernel swapped at the last minute, as the
+// kernel is called.
 
 //
 // MC must be a whole multiple of MR and NR.
@@ -1352,6 +1378,7 @@
   #error "MC must be multiple of MR for all datatypes."
 #endif
 
+#ifndef BLIS_RELAX_MCNR_NCMR_CONSTRAINTS
 #if ( \
       ( BLIS_DEFAULT_MC_S % BLIS_DEFAULT_NR_S != 0 ) || \
       ( BLIS_DEFAULT_MC_D % BLIS_DEFAULT_NR_D != 0 ) || \
@@ -1359,6 +1386,7 @@
       ( BLIS_DEFAULT_MC_Z % BLIS_DEFAULT_NR_Z != 0 )    \
     )
   #error "MC must be multiple of NR for all datatypes."
+#endif
 #endif
 
 //
@@ -1374,6 +1402,7 @@
   #error "NC must be multiple of NR for all datatypes."
 #endif
 
+#ifndef BLIS_RELAX_MCNR_NCMR_CONSTRAINTS
 #if ( \
       ( BLIS_DEFAULT_NC_S % BLIS_DEFAULT_MR_S != 0 ) || \
       ( BLIS_DEFAULT_NC_D % BLIS_DEFAULT_MR_D != 0 ) || \
@@ -1381,6 +1410,7 @@
       ( BLIS_DEFAULT_NC_Z % BLIS_DEFAULT_MR_Z != 0 )    \
     )
   #error "NC must be multiple of MR for all datatypes."
+#endif
 #endif
 
 //

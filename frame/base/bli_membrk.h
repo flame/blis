@@ -36,16 +36,6 @@
 #ifndef BLIS_MEMBRK_H
 #define BLIS_MEMBRK_H
 
-// -- Memory broker object type --
-
-typedef struct membrk_s
-{
-	pool_t    pools[3];
-	mtx_t     mutex;
-
-	malloc_ft malloc_fp;
-	free_ft   free_fp;
-} membrk_t;
 
 #define bli_membrk_pool( pool_index, membrk_p ) \
 \

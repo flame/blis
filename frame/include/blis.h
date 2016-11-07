@@ -91,14 +91,11 @@ extern "C" {
 
 #include "bli_kernel_prototypes.h"
 
-#include "bli_malloc_prototypes.h"
-
 
 // -- Base operation prototypes --
 
 #include "bli_init.h"
 #include "bli_const.h"
-#include "bli_malloc.h"
 #include "bli_obj.h"
 #include "bli_obj_scalar.h"
 #include "bli_cntx.h"
