@@ -92,7 +92,10 @@ void bli_syr2k_front
 	bli_cntx_set_family( BLIS_HERK, cntx );
 
 	// Record the threading for each level within the context.
-	bli_cntx_set_thrloop_from_env( BLIS_SYR2K, BLIS_LEFT, cntx );
+	bli_cntx_set_thrloop_from_env( BLIS_SYR2K, BLIS_LEFT, cntx,
+                                   bli_obj_length( c_local ),
+                                   bli_obj_width( c_local ),
+                                   bli_obj_width( a_local ) );
 
 	// Invoke herk twice, using beta only the first time.
 

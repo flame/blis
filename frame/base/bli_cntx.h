@@ -436,7 +436,10 @@ void     bli_cntx_set_pack_schema_c( pack_t  schema_c,
                                      cntx_t* cntx );
 void     bli_cntx_set_thrloop_from_env( opid_t  l3_op,
                                         side_t  side,
-                                        cntx_t* cntx );
+                                        cntx_t* cntx,
+                                        dim_t m,
+                                        dim_t n,
+                                        dim_t k );
 
 // other query functions
 
