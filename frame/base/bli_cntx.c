@@ -783,7 +783,7 @@ void bli_cntx_set_thrloop_from_env( opid_t l3_op, side_t side, cntx_t* cntx,
 			(
 			  1,
 			  1,
-			  ic * pc * jc * ic * jr,
+			  ic * pc * jc * ir * jr,
 			  1,
 			  1,
 			  cntx

@@ -1363,7 +1363,7 @@
 #endif
 
 #ifndef BLIS_DEFAULT_NR_THREAD_MAX
-#define BLIS_DEFAULT_NR_THREAD_MAX 3
+#define BLIS_DEFAULT_NR_THREAD_MAX 4
 #endif
 
 
