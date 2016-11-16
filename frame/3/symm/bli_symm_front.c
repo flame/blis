@@ -92,7 +92,10 @@ void bli_symm_front
 	bli_cntx_set_family( BLIS_GEMM, cntx );
 
 	// Record the threading for each level within the context.
-	bli_cntx_set_thrloop_from_env( BLIS_SYMM, BLIS_LEFT, cntx );
+	bli_cntx_set_thrloop_from_env( BLIS_SYMM, BLIS_LEFT, cntx,
+                                   bli_obj_length( c_local ),
+                                   bli_obj_width( c_local ),
+                                   bli_obj_width( a_local ) );
 
 	// Invoke the internal back-end.
 	bli_l3_thread_decorator

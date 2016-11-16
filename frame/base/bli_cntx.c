@@ -694,23 +694,56 @@ void bli_cntx_set_pack_schema_c( pack_t  schema_c,
 	bli_cntx_set_schema_c( schema_c, cntx );
 }
 
-void bli_cntx_set_thrloop_from_env( opid_t l3_op, side_t side, cntx_t* cntx )
+void bli_cntx_set_thrloop_from_env( opid_t l3_op, side_t side, cntx_t* cntx,
+                                    dim_t m, dim_t n, dim_t k )
 {
 	dim_t jc, pc, ic, jr, ir;
 
 #ifdef BLIS_ENABLE_MULTITHREADING
-	jc = bli_env_read_nway( "BLIS_JC_NT" );
-	//pc = bli_env_read_nway( "BLIS_KC_NT" );
+
+	int nthread = bli_env_read_nway( "BLIS_NUM_THREADS", -1 );
+
+	if ( nthread == -1 )
+	    nthread = bli_env_read_nway( "OMP_NUM_THREADS", -1 );
+
+	if ( nthread < 1 ) nthread = 1;
+
+    bli_partition_2x2( nthread, m*BLIS_DEFAULT_M_THREAD_RATIO,
+                                n*BLIS_DEFAULT_N_THREAD_RATIO, &ic, &jc );
+
+    for ( ir = BLIS_DEFAULT_MR_THREAD_MAX ; ir > 1 ; ir-- )
+    {
+        if ( ic % ir == 0 )
+        {
+            ic /= ir;
+            break;
+        }
+    }
+
+    for ( jr = BLIS_DEFAULT_NR_THREAD_MAX ; jr > 1 ; jr-- )
+    {
+        if ( jc % jr == 0 )
+        {
+            jc /= jr;
+            break;
+        }
+    }
+
+	jc = bli_env_read_nway( "BLIS_JC_NT", jc );
+	//pc = bli_env_read_nway( "BLIS_KC_NT", 1 );
 	pc = 1;
-	ic = bli_env_read_nway( "BLIS_IC_NT" );
-	jr = bli_env_read_nway( "BLIS_JR_NT" );
-	ir = bli_env_read_nway( "BLIS_IR_NT" );
+	ic = bli_env_read_nway( "BLIS_IC_NT", ic );
+	jr = bli_env_read_nway( "BLIS_JR_NT", jr );
+	ir = bli_env_read_nway( "BLIS_IR_NT", ir );
+
 #else
+
 	jc = 1;
 	pc = 1;
 	ic = 1;
 	jr = 1;
 	ir = 1;
+
 #endif
 
 	if ( l3_op == BLIS_TRMM )
@@ -750,7 +783,7 @@ void bli_cntx_set_thrloop_from_env( opid_t l3_op, side_t side, cntx_t* cntx )
 			(
 			  1,
 			  1,
-			  jc * ic * jr,
+			  ic * pc * jc * ir * jr,
 			  1,
 			  1,
 			  cntx
@@ -763,7 +796,7 @@ void bli_cntx_set_thrloop_from_env( opid_t l3_op, side_t side, cntx_t* cntx )
 			  1,
 			  1,
 			  1,
-			  ic * jr * ir,
+			  ic * pc * jc * jr * ir,
 			  1,
 			  cntx
 			);

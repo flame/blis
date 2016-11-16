@@ -958,10 +958,208 @@ siz_t bli_thread_get_range_weighted_b2t
 
 // -----------------------------------------------------------------------------
 
-// Some utilities
-dim_t bli_env_read_nway( const char* env )
+void bli_prime_factorization( dim_t n, bli_prime_factors_t* factors )
 {
-	dim_t num = 1;
+    factors->n = n;
+    factors->sqrt_n = (dim_t)sqrt(n);
+    factors->f = 2;
+}
+
+dim_t bli_next_prime_factor( bli_prime_factors_t* factors )
+{
+    // Return the prime factorization of the original number n one-by-one.
+    // Return 1 after all factors have been exhausted.
+
+    // Looping over possible factors in increasing order assures we will
+    // only return prime factors (a la the Sieve of Eratosthenes).
+    while ( factors->f <= factors->sqrt_n )
+    {
+        // Special cases for factors 2-7 handle all numbers not divisible by 11
+        // or another larger prime. The slower loop version is used after that.
+        // If you use a number of threads with large prime factors you get
+        // what you deserve.
+        if ( factors->f == 2 )
+        {
+            if ( factors->n % 2 == 0 )
+            {
+                factors->n /= 2;
+                return 2;
+            }
+            factors->f = 3;
+        }
+        else if ( factors->f == 3 )
+        {
+            if ( factors->n % 3 == 0 )
+            {
+                factors->n /= 3;
+                return 3;
+            }
+            factors->f = 5;
+        }
+        else if ( factors->f == 5 )
+        {
+            if ( factors->n % 5 == 0 )
+            {
+                factors->n /= 5;
+                return 5;
+            }
+            factors->f = 7;
+        }
+        else if ( factors->f == 7 )
+        {
+            if ( factors->n % 7 == 0 )
+            {
+                factors->n /= 7;
+                return 7;
+            }
+            factors->f = 11;
+        }
+        else
+        {
+            if ( factors->n % factors->f == 0 )
+            {
+                factors->n /= factors->f;
+                return factors->f;
+            }
+            factors->f++;
+        }
+    }
+
+    // To get here we must be out of prime factors, leaving only n (if it is
+    // prime) or an endless string of 1s.
+    dim_t tmp = factors->n;
+    factors->n = 1;
+    return tmp;
+}
+
+void bli_partition_2x2( dim_t nthread, dim_t work1, dim_t work2,
+                        dim_t* nt1, dim_t* nt2 )
+{
+    // Partition a number of threads into two factors nt1 and nt2 such that
+    // nt1/nt2 ~= work1/work2. There is a fast heuristic algorithm and a
+    // slower optimal algorithm (which minizes |nt1*work2 - nt2*work1|).
+
+    // Return early small prime numbers of threads
+    if (nthread < 4)
+    {
+        *nt1 = ( work1 >= work2 ? nthread : 1 );
+        *nt2 = ( work1 <  work2 ? nthread : 1 );
+    }
+
+    *nt1 = 1;
+    *nt2 = 1;
+
+    // Both algorithms need the prime factorization of nthread.
+    bli_prime_factors_t factors;
+    bli_prime_factorization( nthread, &factors );
+
+    #if 1
+
+    // Fast algorithm: assign prime factors in increasing order to whichever
+    // partition has more work to do. The work is divided by the number of
+    // threads assigned at each iteration. This algorithm is sub-optimal,
+    // for example in the partitioning of 12 with equal work (optimal solution
+    // is 4x3, this algorithm finds 6x2).
+
+    dim_t f;
+    while ( ( f = bli_next_prime_factor( &factors ) ) > 1 )
+    {
+        if ( work1 > work2 )
+        {
+            work1 /= f;
+            *nt1 *= f;
+        }
+        else
+        {
+            work2 /= f;
+            *nt2 *= f;
+        }
+    }
+
+    #else
+
+    // Slow algorithm: exhaustively constructs all factor pairs of nthread and
+    // chooses the best one.
+
+    // Eight prime factors handles nthread up to 223092870.
+    dim_t fact[8];
+    dim_t mult[8];
+
+    // There is always at least one prime factor, so use if for initialization.
+    dim_t nfact = 1;
+    fact[0] = bli_next_prime_factor( &factors );
+    mult[0] = 1;
+
+    // Collect the remaining prime factors, accounting for multiplicity of
+    // repeated factors.
+    dim_t f;
+    while ( ( f = bli_next_prime_factor( &factors ) ) > 1 )
+    {
+        if ( f == fact[nfact-1] )
+        {
+            mult[nfact-1]++;
+        }
+        else
+        {
+            nfact++;
+            fact[nfact-1] = f;
+            mult[nfact-1] = 1;
+        }
+    }
+
+    // Now loop over all factor pairs. A single factor pair is denoted by how
+    // many of each prime factor are included in the first factor (ntaken).
+    dim_t ntake[8] = {0};
+    dim_t min_diff = INT_MAX;
+
+    // Loop over how many prime factors to assign to the first factor in the
+    // pair, for each prime factor. The total number of iterations is
+    // \Prod_{i=0}^{nfact-1} mult[i].
+    bool done = false;
+    while ( !done )
+    {
+        dim_t x = 1;
+        dim_t y = 1;
+
+        // Form the factors by integer exponentiation and accumulation.
+        for  (dim_t i = 0 ; i < nfact ; i++ )
+        {
+            x *= bli_ipow( fact[i], ntake[i] );
+            y *= bli_ipow( fact[i], mult[i]-ntake[i] );
+        }
+
+        // Check if this factor pair is optimal by checking
+        // |nt1*work2 - nt2*work1|.
+        dim_t diff = llabs( x*work2 - y*work1 );
+        if ( diff < min_diff )
+        {
+            min_diff = diff;
+            *nt1 = x;
+            *nt2 = y;
+        }
+
+        // Go to the next factor pair by doing an "odometer loop".
+        for ( dim_t i = 0 ; i < nfact ; i++ )
+        {
+            if ( ++ntake[i] > mult[i] )
+            {
+                ntake[i] = 0;
+                if ( i == nfact-1 ) done = true;
+                else continue;
+            }
+            break;
+        }
+    }
+
+    #endif
+}
+
+// -----------------------------------------------------------------------------
+
+// Some utilities
+dim_t bli_env_read_nway( const char* env, dim_t fallback )
+{
+	dim_t num = fallback;
 	char* str = getenv( env );
 
 	if ( str != NULL )
@@ -985,4 +1183,17 @@ dim_t bli_gcd( dim_t x, dim_t y )
 dim_t bli_lcm( dim_t x, dim_t y)
 {
 	return x * y / bli_gcd( x, y );
+}
+
+dim_t bli_ipow( dim_t base, dim_t power )
+{
+    dim_t p = 1;
+
+    for ( dim_t mask = 0x1 ; mask <= power ; mask <<= 1 )
+    {
+        if ( power & mask ) p *= base;
+        base *= base;
+    }
+
+    return p;
 }

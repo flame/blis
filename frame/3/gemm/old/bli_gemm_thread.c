@@ -40,12 +40,12 @@ thrinfo_t** bli_gemm_thrinfo_create_paths( void )
 {
 
 #ifdef BLIS_ENABLE_MULTITHREADING
-    dim_t jc_way = bli_env_read_nway( "BLIS_JC_NT" );
-//    dim_t kc_way = bli_env_read_nway( "BLIS_KC_NT" );
+    dim_t jc_way = bli_env_read_nway( "BLIS_JC_NT", 1 );
+//    dim_t kc_way = bli_env_read_nway( "BLIS_KC_NT", 1 );
     dim_t kc_way = 1;
-    dim_t ic_way = bli_env_read_nway( "BLIS_IC_NT" );
-    dim_t jr_way = bli_env_read_nway( "BLIS_JR_NT" );
-    dim_t ir_way = bli_env_read_nway( "BLIS_IR_NT" );
+    dim_t ic_way = bli_env_read_nway( "BLIS_IC_NT", 1 );
+    dim_t jr_way = bli_env_read_nway( "BLIS_JR_NT", 1 );
+    dim_t ir_way = bli_env_read_nway( "BLIS_IR_NT", 1 );
 #else
     dim_t jc_way = 1;
     dim_t kc_way = 1;

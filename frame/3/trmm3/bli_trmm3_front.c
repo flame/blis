@@ -134,7 +134,10 @@ void bli_trmm3_front
 	bli_cntx_set_family( BLIS_TRMM, cntx );
 
 	// Record the threading for each level within the context.
-	bli_cntx_set_thrloop_from_env( BLIS_TRMM3, side, cntx );
+	bli_cntx_set_thrloop_from_env( BLIS_TRMM3, side, cntx,
+                                   bli_obj_length( c_local ),
+                                   bli_obj_width( c_local ),
+                                   bli_obj_width( a_local ) );
 
 	// Invoke the internal back-end.
 	bli_l3_thread_decorator
