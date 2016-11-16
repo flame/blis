@@ -214,6 +214,7 @@
 // -- LEVEL-1V KERNEL DEFINITIONS ----------------------------------------------
 // -- amax --
 #define BLIS_SAMAXV_KERNEL         bli_samaxv_opt_var1
+#define BLIS_DAMAXV_KERNEL         bli_damaxv_opt_var1
 // -- addv --
 
 // -- axpyv --

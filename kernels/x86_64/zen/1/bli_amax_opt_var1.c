@@ -78,6 +78,10 @@ void bli_samaxv_opt_var1
     /* Initialize the index of the maximum absolute value to zero. */
     { (i_max) = ( gint_t ) (*zero_i); };
 
+    /* If the vector length is zero, return early. This directly emulates
+       the behavior of netlib BLAS's i?amax() routines. */
+    if ( ( (n) == 0 ) ) return;
+
     /* Initialize the maximum absolute value search candidate with
        -1, which is guaranteed to be less than all values we will
        compute. */
@@ -201,6 +205,166 @@ void bli_samaxv_opt_var1
     /* Store final index to output variable. */
     { (*abmax_i) = ( gint_t ) (i_max); };
 }
+/* Union data structure to access AVX registers
+*  AVX 256 bit register holds 4 DP data*/
+typedef union
+{
+    __m256d v;
+    double d[4];
+}v4dd_t;
+
+typedef union
+{
+    __m128d v;
+    double d[2];
+}v2dd_t;
+
+void bli_damaxv_opt_var1
+     (
+       dim_t    n,
+       double*  x, inc_t incx,
+       dim_t*   i_max,
+       cntx_t*  cntx
+     )
+{
+    double* minus_one = ( ( double*   ) ( void* )(
+               ( ( char* )( ( (BLIS_MINUS_ONE).buffer ) ) ) +
+                 ( dim_t )( BLIS_DOUBLE * sizeof(dcomplex) )
+             ) );
+    dim_t*   zero_i    = ( ( gint_t*   ) ( void* )(
+               ( ( char* )( ( (BLIS_ZERO).buffer ) ) ) +
+                 ( dim_t )( BLIS_INT * sizeof(dcomplex) )
+             ) );
+
+    double  chi1_r;
+    double  abs_chi1;
+    double  abs_chi1_max;
+    dim_t    i;
+
+    /* Initialize the index of the maximum absolute value to zero. */ \
+    { (*i_max) = ( gint_t ) (zero_i); };
+
+    /* If the vector length is zero, return early. This directly emulates
+       the behavior of netlib BLAS's i?amax() routines. */
+    if ( ( (n) == 0 ) ) return;
+
+    /* Initialize the maximum absolute value search candidate with
+       -1, which is guaranteed to be less than all values we will
+       compute. */
+
+    (( abs_chi1_max )) = (( *minus_one ));
+
+
+    if( (incx != 1) || (n < 4))
+    {
+        for ( i = 0; i < n; ++i )
+         {
+             double* chi1 = x + i * incx;
+
+             /* Get the real and imaginary components of chi1. */
+             chi1_r  = ( *chi1 );
+
+             /* Replace chi1_r and chi1_i with their absolute values. */
+             chi1_r = fabs(chi1_r);
+
+             /* Add the real and imaginary absolute values together. */
+
+             abs_chi1 = chi1_r ;
+
+             /* If the absolute value of the current element exceeds that of
+                the previous largest, save it and its index. If NaN is
+                encountered, then treat it the same as if it were a valid
+                value that was smaller than any previously seen. This
+                behavior mimics that of LAPACK's ?lange(). */
+             if ( abs_chi1_max < abs_chi1 || isnan( abs_chi1 ) )
+             {
+                 abs_chi1_max = abs_chi1;
+                 *i_max       = i;
+             }
+         }
+    }
+    else
+    {
+        int n_iter, n_left;
+        int num_vec_elements = 4;
+        v4dd_t x_vec, max_vec, maxInx_vec, mask_vec;
+        v4dd_t idx_vec, inc_vec;
+        v4dd_t sign_mask;
+
+        v2dd_t max_vec_lo, max_vec_hi, mask_vec_lo;
+        v2dd_t maxInx_vec_lo, maxInx_vec_hi;
+
+        n_iter = n / num_vec_elements;
+        n_left = n % num_vec_elements;
+
+        idx_vec.v = _mm256_set_pd(3,2,1,0);
+        inc_vec.v = _mm256_set1_pd(4);
+        max_vec.v = _mm256_set1_pd(-1);
+        maxInx_vec.v = _mm256_setzero_pd();
+        sign_mask.v = _mm256_set1_pd(-0.f);
+
+        for( i = 0; i < n_iter; i++)
+        {
+            x_vec.v = _mm256_loadu_pd(x);
+            // get the absolute value of the vector element
+            x_vec.v = _mm256_andnot_pd(sign_mask.v, x_vec.v);
+
+            mask_vec.v = _mm256_cmp_pd(x_vec.v, max_vec.v, _CMP_GT_OS);
+
+            max_vec.v = _mm256_blendv_pd(max_vec.v, x_vec.v, mask_vec.v);
+            maxInx_vec.v = _mm256_blendv_pd(maxInx_vec.v, idx_vec.v, mask_vec.v);
+
+            idx_vec.v += inc_vec.v;
+            x += num_vec_elements;
+        }
+
+        max_vec_lo.v = _mm256_extractf128_pd(max_vec.v, 0);
+        max_vec_hi.v = _mm256_extractf128_pd(max_vec.v, 1);
+        mask_vec_lo.v = _mm_cmp_pd(max_vec_hi.v, max_vec_lo.v, _CMP_GT_OS);
+
+        max_vec_lo.v = _mm_blendv_pd(max_vec_lo.v, max_vec_hi.v, mask_vec_lo.v);
+
+        maxInx_vec_lo.v = _mm256_extractf128_pd(maxInx_vec.v, 0);
+        maxInx_vec_hi.v = _mm256_extractf128_pd(maxInx_vec.v, 1);
+        maxInx_vec_lo.v = _mm_blendv_pd(maxInx_vec_lo.v, maxInx_vec_hi.v, mask_vec_lo.v);
+
+        if(max_vec_lo.d[0] > max_vec_lo.d[1])
+        {
+            abs_chi1_max = max_vec_lo.d[0];
+            *i_max = maxInx_vec_lo.d[0];
+        }
+        else
+        {
+            abs_chi1_max = max_vec_lo.d[1];
+            *i_max = maxInx_vec_lo.d[1];
+        }
+
+        for(i = n - n_left; i < n; i++)
+          {
+              /* Get the real and imaginary components of chi1. */
+              (chi1_r) = ( *x );
+
+              /* Replace chi1_r and chi1_i with their absolute values. */
+
+              (chi1_r)       = fabsf(chi1_r);
+
+              /* If the absolute value of the current element exceeds that of
+             the previous largest, save it and its index. If NaN is
+             encountered, then treat it the same as if it were a valid
+             value that was smaller than any previously seen. This
+             behavior mimics that of LAPACK's ?lange(). */
+              if ( abs_chi1_max < chi1_r || isnan( chi1_r ) )
+              {
+
+                  (( abs_chi1_max )) = (( chi1_r ));
+
+                  (*i_max) = ( gint_t ) (i);
+              }
+
+              x += 1;
+          }
+    }
+}
 
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, varname ) \
@@ -293,7 +457,6 @@ void PASTEMAC(ch,varname) \
 		} \
 	} \
 }
-GENTFUNCR( double,   double, d, d, amaxv_opt_var1 )
 GENTFUNCR( scomplex, float,  c, s, amaxv_opt_var1 )
 GENTFUNCR( dcomplex, double, z, d, amaxv_opt_var1 )
 
