@@ -224,7 +224,10 @@
 // -- dotv --
 #define BLIS_DDOTV_KERNEL          bli_ddotv_opt_var1
 #define BLIS_SDOTV_KERNEL          bli_sdotv_opt_var1
+
 // -- dotxv --
+#define BLIS_SDOTXV_KERNEL         bli_sdotxv_unb_var1
+#define BLIS_DDOTXV_KERNEL         bli_ddotxv_unb_var1
 
 // -- invertv --
 
