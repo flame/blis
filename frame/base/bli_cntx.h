@@ -455,6 +455,12 @@ bool_t   bli_cntx_l3_nat_ukr_prefers_storage_of( obj_t*  obj,
 bool_t   bli_cntx_l3_nat_ukr_dislikes_storage_of( obj_t*  obj,
                                                   l3ukr_t ukr_id,
                                                   cntx_t* cntx );
+bool_t   bli_cntx_l3_ukr_prefers_rows_dt( num_t   dt,
+                                          l3ukr_t ukr_id,
+                                          cntx_t* cntx );
+bool_t   bli_cntx_l3_ukr_prefers_cols_dt( num_t   dt,
+                                          l3ukr_t ukr_id,
+                                          cntx_t* cntx );
 bool_t   bli_cntx_l3_ukr_prefers_storage_of( obj_t*  obj,
                                              l3ukr_t ukr_id,
                                              cntx_t* cntx );
