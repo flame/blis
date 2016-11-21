@@ -254,48 +254,6 @@ void PASTEMAC(ch,varname) \
 
 INSERT_GENTFUNCR_BASIC0( norm1v_unb_var1 )
 
-#if 0
-#undef  GENTFUNCR
-#define GENTFUNCR( ctype, ctype_r, ch, chr, varname, kername ) \
-\
-void PASTEMAC(ch,varname) \
-     ( \
-       dim_t    n, \
-       ctype*   x, inc_t incx, \
-       ctype_r* norm, \
-       cntx_t*  cntx  \
-     ) \
-{ \
-	ctype_r* zero       = PASTEMAC(chr,0); \
-	ctype_r* one        = PASTEMAC(chr,1); \
-	ctype_r  scale; \
-	ctype_r  sumsq; \
-	ctype_r  sqrt_sumsq; \
-\
-	/* Initialize scale and sumsq to begin the summation. */ \
-	PASTEMAC(chr,copys)( *zero, scale ); \
-	PASTEMAC(chr,copys)( *one,  sumsq ); \
-\
-	/* Compute the sum of the squares of the vector. */ \
-	PASTEMAC(ch,kername) \
-	( \
-	  n, \
-	  x, incx, \
-	  &scale, \
-	  &sumsq, \
-	  cntx  \
-	); \
-\
-	/* Compute: norm = scale * sqrt( sumsq ) */ \
-	PASTEMAC(chr,sqrt2s)( sumsq, sqrt_sumsq ); \
-	PASTEMAC(chr,scals)( scale, sqrt_sumsq ); \
-\
-	/* Store the final value to the output variable. */ \
-	PASTEMAC(chr,copys)( sqrt_sumsq, *norm ); \
-}
-
-INSERT_GENTFUNCR_BASIC( normfv_unb_var1, sumsqv_unb_var1 )
-#else
 
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, varname, kername ) \
@@ -337,81 +295,113 @@ void PASTEMAC(ch,varname) \
 }
 
 //INSERT_GENTFUNCR_BASIC( normfv_unb_var1, sumsqv_unb_var1 )
-GENTFUNCR( double,   double, d, d, normfv_unb_var1, sumsqv_unb_var1 )
 GENTFUNCR( scomplex, float,  c, s, normfv_unb_var1, sumsqv_unb_var1 )
 GENTFUNCR( dcomplex, double, z, d, normfv_unb_var1, sumsqv_unb_var1 )
 
-void bli_snormfv_unb_var1
-     (
-       dim_t    n,
-       float*   x, inc_t incx,
-       float* norm,
-       cntx_t*  cntx
-     )
-{
-    float* zero       = ( ( float*    ) ( void* )(
-               ( ( char* )( ( (BLIS_ZERO).buffer ) ) ) +
-                 ( dim_t )( BLIS_FLOAT * sizeof(dcomplex) )
-             ) );
-    float* one        = ( ( float*    ) ( void* )(
-               ( ( char* )( ( (BLIS_ONE).buffer ) ) ) +
-                 ( dim_t )( BLIS_FLOAT * sizeof(dcomplex) )
-             ) );
-    float  scale;
-    float  sumsq;
-    float  sqrt_sumsq;
-
-    /* Initialize scale and sumsq to begin the summation. */
-    {
-        (( scale )) = (( *zero ));
-    };
-
-    {
-        (( sumsq )) = (( *one ));
-    };
-
-    /* Compute the sum of the squares of the vector. */
-
+#undef  GENTFUNCR
 #ifdef FE_OVERFLOW
-
-    float res;
-    f77_int  nn     = n ;
-    f77_int  incx_f  = incx;
-
- //   feenableexcept (FE_INVALID|FE_DIVBYZERO|FE_OVERFLOW);
-
-    feclearexcept (FE_ALL_EXCEPT);
-
-    res = sdot_(
-                  &nn,
-                  x, &incx_f,
-                  x, &incx_f );
-
-
-    f77_int f_exp_raised = fetestexcept (FE_OVERFLOW | FE_INVALID);
-
-    if(!f_exp_raised)
-    {
-    *norm  = sqrtf( res );
-    return;
-    }
-#endif
-    bli_ssumsqv_unb_var1(
-          n,
-          x, incx,
-          &scale,
-          &sumsq,
-          cntx
-    );
-
-    sqrt_sumsq  = sqrtf(sumsq );
-    sqrt_sumsq  = ( scale ) * ( sqrt_sumsq );
-    *norm       = sqrt_sumsq;
-
+#define GENTFUNCR( ctype, ctype_r, ch, chr, varname, kername ) \
+\
+void PASTEMAC(ch,varname) \
+     ( \
+       dim_t    n, \
+       ctype*   x, inc_t incx, \
+       ctype_r* norm, \
+       cntx_t*  cntx  \
+     ) \
+{ \
+    ctype_r* zero       = PASTEMAC(chr,0); \
+    ctype_r* one        = PASTEMAC(chr,1); \
+    ctype_r  scale; \
+    ctype_r  sumsq; \
+    ctype_r  sqrt_sumsq; \
+\
+    /* Initialize scale and sumsq to begin the summation. */ \
+    PASTEMAC(chr,copys)( *zero, scale ); \
+    PASTEMAC(chr,copys)( *one,  sumsq ); \
+\
+\
+    f77_int  nn     = n ;\
+    f77_int  incx_f  = incx;\
+    f77_int f_exp_raised;\
+\
+    feclearexcept (FE_ALL_EXCEPT);\
+\
+    sumsq = PASTECH(ch,dot_)\
+             (\
+              &nn,\
+              x, &incx_f,\
+              x, &incx_f );\
+\
+    f_exp_raised = fetestexcept (FE_OVERFLOW | FE_INVALID);\
+\
+    if(!f_exp_raised)\
+    {\
+        PASTEMAC(chr,sqrt2s)( sumsq, sqrt_sumsq ); \
+        PASTEMAC(chr,copys)( sqrt_sumsq, *norm ); \
+        return;\
+    }\
+    \
+    /* Compute the sum of the squares of the vector. */ \
+    \
+    PASTEMAC(ch,kername) \
+    ( \
+      n, \
+      x, incx, \
+      &scale, \
+      &sumsq, \
+      cntx  \
+    ); \
+\
+    /* Compute: norm = scale * sqrt( sumsq ) */ \
+    PASTEMAC(chr,sqrt2s)( sumsq, sqrt_sumsq ); \
+    PASTEMAC(chr,scals)( scale, sqrt_sumsq ); \
+\
+    /* Store the final value to the output variable. */ \
+    PASTEMAC(chr,copys)( sqrt_sumsq, *norm ); \
 }
-
-
+#else
+#define GENTFUNCR( ctype, ctype_r, ch, chr, varname, kername ) \
+\
+void PASTEMAC(ch,varname) \
+     ( \
+       dim_t    n, \
+       ctype*   x, inc_t incx, \
+       ctype_r* norm, \
+       cntx_t*  cntx  \
+     ) \
+{ \
+    ctype_r* zero       = PASTEMAC(chr,0); \
+    ctype_r* one        = PASTEMAC(chr,1); \
+    ctype_r  scale; \
+    ctype_r  sumsq; \
+    ctype_r  sqrt_sumsq; \
+\
+    /* Initialize scale and sumsq to begin the summation. */ \
+    PASTEMAC(chr,copys)( *zero, scale ); \
+    PASTEMAC(chr,copys)( *one,  sumsq ); \
+\
+    /* Compute the sum of the squares of the vector. */ \
+    \
+    PASTEMAC(ch,kername) \
+    ( \
+      n, \
+      x, incx, \
+      &scale, \
+      &sumsq, \
+      cntx  \
+    ); \
+\
+    /* Compute: norm = scale * sqrt( sumsq ) */ \
+    PASTEMAC(chr,sqrt2s)( sumsq, sqrt_sumsq ); \
+    PASTEMAC(chr,scals)( scale, sqrt_sumsq ); \
+\
+    /* Store the final value to the output variable. */ \
+    PASTEMAC(chr,copys)( sqrt_sumsq, *norm ); \
+}
 #endif
+GENTFUNCR( float,   float, s, s, normfv_unb_var1, sumsqv_unb_var1 )
+GENTFUNCR( double,   double, d, d, normfv_unb_var1, sumsqv_unb_var1 )
 
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, varname ) \
