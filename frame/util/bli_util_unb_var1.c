@@ -337,8 +337,7 @@ void PASTEMAC(ch,varname) \
 \
     if(!f_exp_raised)\
     {\
-        PASTEMAC(chr,sqrt2s)( sumsq, sqrt_sumsq ); \
-        PASTEMAC(chr,copys)( sqrt_sumsq, *norm ); \
+        PASTEMAC(chr,sqrt2s)( sumsq, *norm ); \
         return;\
     }\
     \
