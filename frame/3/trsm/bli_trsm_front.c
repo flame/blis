@@ -85,7 +85,7 @@ void bli_trsm_front
 		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, a_local );
 	}
 
-#if 0
+#if 1
 
 	// If A is being solved against from the right, transpose all operands
 	// so that we can perform the computation as if A were being solved
