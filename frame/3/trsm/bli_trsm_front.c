@@ -86,9 +86,6 @@ void bli_trsm_front
 	}
 
 #if 0
-	// NOTE: Enabling this code requires that BLIS be configured with
-	// BLIS_RELAX_MCNR_NCMR_CONSTRAINTS defined.
-#ifdef BLIS_RELAX_MCNR_NCMR_CONSTRAINTS
 
 	// If A is being solved against from the right, transpose all operands
 	// so that we can perform the computation as if A were being solved
@@ -101,8 +98,13 @@ void bli_trsm_front
 		bli_obj_induce_trans( c_local );
 	}
 
-#endif
 #else
+
+	// NOTE: Enabling this code requires that BLIS NOT be configured with
+	// BLIS_RELAX_MCNR_NCMR_CONSTRAINTS defined.
+#ifdef BLIS_RELAX_MCNR_NCMR_CONSTRAINTS
+	#error "BLIS_RELAX_MCNR_NCMR_CONSTRAINTS must not be defined for current trsm_r implementation."
+#endif
 
 	// If A is being solved against from the right, swap A and B so that
 	// the triangular matrix will actually be on the right.
