@@ -101,6 +101,14 @@
 
 // -- MISCELLANEOUS OPTIONS ----------------------------------------------------
 
+// Do NOT require the cross-blocksize constraints. That is, do not enforce
+// MC % NR = 0 and NC % MR = 0 in bli_kernel_macro_defs.h. These are ONLY
+// needed when implementing trsm_r by allowing the right-hand matrix B to
+// be triangular.
+#ifndef BLIS_RELAX_MCNR_NCMR_CONSTRAINTS
+  #define BLIS_RELAX_MCNR_NCMR_CONSTRAINTS
+#endif
+
 // Stay initialized after auto-initialization, unless and until the user
 // explicitly calls bli_finalize().
 #ifdef BLIS_DISABLE_STAY_AUTO_INITIALIZED
