@@ -90,6 +90,12 @@ static func_t packm_struc_cxk_kers[BLIS_NUM_PACK_SCHEMA_TYPES] =
 // 0111 row/col panels: real+imaginary only
                { { NULL,                      bli_cpackm_struc_cxk_rih,
                    NULL,                      bli_zpackm_struc_cxk_rih,  } },
+// 1000 row/col panels: 1m-expanded (1e)
+               { { NULL,                      bli_cpackm_struc_cxk_1er,
+                   NULL,                      bli_zpackm_struc_cxk_1er,  } },
+// 1001 row/col panels: 1m-reordered (1r)
+               { { NULL,                      bli_cpackm_struc_cxk_1er,
+                   NULL,                      bli_zpackm_struc_cxk_1er,  } },
 };
 
 

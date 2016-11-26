@@ -171,7 +171,7 @@ void libblis_test_dotaxpyv_experiment
 	cntx_t       cntx;
 
 	// Initialize a context.
-	bli_dotaxpyv_cntx_init( &cntx );
+	bli_dotaxpyv_cntx_init( datatype, &cntx );
 
 	// Map the dimension specifier to an actual dimension.
 	m = libblis_test_get_dim_from_prob_size( op->dim_spec[0], p_cur );

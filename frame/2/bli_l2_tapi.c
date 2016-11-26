@@ -55,8 +55,9 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
-	cntx_t* cntx_p; \
-	dim_t   m_y, n_x; \
+	const num_t dt = PASTEMAC(ch,type); \
+	cntx_t*     cntx_p; \
+	dim_t       m_y, n_x; \
 \
 	/* Determine the dimensions of y and x. */ \
 	bli_set_dims_with_trans( transa, m, n, m_y, n_x ); \
@@ -65,7 +66,7 @@ void PASTEMAC(ch,opname) \
 	if ( bli_zero_dim1( m_y ) ) return; \
 \
 	/* Initialize a local context if the given context is NULL. */ \
-	bli_cntx_init_local_if( opname, cntx, cntx_p ); \
+	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
 \
 	/* If x has zero elements, or if alpha is zero, scale y by beta and
 	   return early. */ \
@@ -135,13 +136,14 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
-	cntx_t* cntx_p; \
+	const num_t dt = PASTEMAC(ch,type); \
+	cntx_t*     cntx_p; \
 \
 	/* If x or y has zero elements, or if alpha is zero, return early. */ \
 	if ( bli_zero_dim2( m, n ) || PASTEMAC(ch,eq0)( *alpha ) ) return; \
 \
 	/* Initialize a local context if the given context is NULL. */ \
-	bli_cntx_init_local_if( opname, cntx, cntx_p ); \
+	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
 \
 	/* Declare a void function pointer for the current operation. */ \
 	PASTECH2(ch,ftname,_ft) f; \
@@ -188,10 +190,11 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
-	cntx_t* cntx_p; \
+	const num_t dt = PASTEMAC(ch,type); \
+	cntx_t*     cntx_p; \
 \
 	/* Initialize a local context if the given context is NULL. */ \
-	bli_cntx_init_local_if( opname, cntx, cntx_p ); \
+	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
 \
 	/* If x has zero elements, or if alpha is zero, scale y by beta and
 	   return early. */ \
@@ -261,8 +264,9 @@ void PASTEMAC(ch,opname) \
        cntx_t*  cntx  \
      ) \
 { \
-	cntx_t* cntx_p; \
-	ctype   alpha_local; \
+	const num_t dt = PASTEMAC(ch,type); \
+	cntx_t*     cntx_p; \
+	ctype       alpha_local; \
 \
 	/* If x has zero elements, or if alpha is zero, return early. */ \
 	if ( bli_zero_dim1( m ) || PASTEMAC(chr,eq0)( *alpha ) ) return; \
@@ -273,7 +277,7 @@ void PASTEMAC(ch,opname) \
 	PASTEMAC2(chr,ch,copys)( *alpha, alpha_local ); \
 \
 	/* Initialize a local context if the given context is NULL. */ \
-	bli_cntx_init_local_if( opname, cntx, cntx_p ); \
+	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
 \
 	/* Declare a void function pointer for the current operation. */ \
 	PASTECH2(ch,ftname,_ft) f; \
@@ -324,13 +328,14 @@ void PASTEMAC(ch,opname) \
        cntx_t*  cntx  \
      ) \
 { \
-	cntx_t* cntx_p; \
+	const num_t dt = PASTEMAC(ch,type); \
+	cntx_t*     cntx_p; \
 \
 	/* If x has zero elements, or if alpha is zero, return early. */ \
 	if ( bli_zero_dim1( m ) || PASTEMAC(ch,eq0)( *alpha ) ) return; \
 \
 	/* Initialize a local context if the given context is NULL. */ \
-	bli_cntx_init_local_if( opname, cntx, cntx_p ); \
+	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
 \
 	/* Declare a void function pointer for the current operation. */ \
 	PASTECH2(ch,ftname,_ft) f; \
@@ -383,13 +388,14 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
-	cntx_t* cntx_p; \
+	const num_t dt = PASTEMAC(ch,type); \
+	cntx_t*     cntx_p; \
 \
 	/* If x has zero elements, or if alpha is zero, return early. */ \
 	if ( bli_zero_dim1( m ) || PASTEMAC(ch,eq0)( *alpha ) ) return; \
 \
 	/* Initialize a local context if the given context is NULL. */ \
-	bli_cntx_init_local_if( opname, cntx, cntx_p ); \
+	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
 \
 	/* Declare a void function pointer for the current operation. */ \
 	PASTECH2(ch,ftname,_ft) f; \
@@ -444,10 +450,11 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
-	cntx_t* cntx_p; \
+	const num_t dt = PASTEMAC(ch,type); \
+	cntx_t*     cntx_p; \
 \
 	/* Initialize a local context if the given context is NULL. */ \
-	bli_cntx_init_local_if( opname, cntx, cntx_p ); \
+	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
 \
 	/* If x has zero elements, return early. */ \
 	if ( bli_zero_dim1( m ) ) return; \

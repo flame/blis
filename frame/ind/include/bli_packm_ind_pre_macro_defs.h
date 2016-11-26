@@ -177,5 +177,102 @@
 
 
 
+// packm_2xk_1e kernels
+
+#define BLIS_CPACKM_2XK_1E_KERNEL_REF   bli_cpackm_2xk_1e_ref
+#define BLIS_ZPACKM_2XK_1E_KERNEL_REF   bli_zpackm_2xk_1e_ref
+
+// packm_4xk_1e kernels
+
+#define BLIS_CPACKM_4XK_1E_KERNEL_REF   bli_cpackm_4xk_1e_ref
+#define BLIS_ZPACKM_4XK_1E_KERNEL_REF   bli_zpackm_4xk_1e_ref
+
+// packm_6xk_1e kernels
+
+#define BLIS_CPACKM_6XK_1E_KERNEL_REF   bli_cpackm_6xk_1e_ref
+#define BLIS_ZPACKM_6XK_1E_KERNEL_REF   bli_zpackm_6xk_1e_ref
+
+// packm_8xk_1e kernels
+
+#define BLIS_CPACKM_8XK_1E_KERNEL_REF   bli_cpackm_8xk_1e_ref
+#define BLIS_ZPACKM_8XK_1E_KERNEL_REF   bli_zpackm_8xk_1e_ref
+
+// packm_10xk_1e kernels
+
+#define BLIS_CPACKM_10XK_1E_KERNEL_REF  bli_cpackm_10xk_1e_ref
+#define BLIS_ZPACKM_10XK_1E_KERNEL_REF  bli_zpackm_10xk_1e_ref
+
+// packm_12xk_1e kernels
+
+#define BLIS_CPACKM_12XK_1E_KERNEL_REF  bli_cpackm_12xk_1e_ref
+#define BLIS_ZPACKM_12XK_1E_KERNEL_REF  bli_zpackm_12xk_1e_ref
+
+// packm_14xk_1e kernels
+
+#define BLIS_CPACKM_14XK_1E_KERNEL_REF  bli_cpackm_14xk_1e_ref
+#define BLIS_ZPACKM_14XK_1E_KERNEL_REF  bli_zpackm_14xk_1e_ref
+
+// packm_16xk_1e kernels
+
+#define BLIS_CPACKM_16XK_1E_KERNEL_REF  bli_cpackm_16xk_1e_ref
+#define BLIS_ZPACKM_16XK_1E_KERNEL_REF  bli_zpackm_16xk_1e_ref
+
+// packm_30xk_1e kernels
+
+#define BLIS_CPACKM_30XK_1E_KERNEL_REF  bli_cpackm_30xk_1e_ref
+#define BLIS_ZPACKM_30XK_1E_KERNEL_REF  bli_zpackm_30xk_1e_ref
+
+// packm_2xk_1r kernels
+
+#define BLIS_CPACKM_2XK_1R_KERNEL_REF   bli_cpackm_2xk_1r_ref
+#define BLIS_ZPACKM_2XK_1R_KERNEL_REF   bli_zpackm_2xk_1r_ref
+
+// packm_3xk_1r kernels
+
+#define BLIS_CPACKM_3XK_1R_KERNEL_REF   bli_cpackm_3xk_1r_ref
+#define BLIS_ZPACKM_3XK_1R_KERNEL_REF   bli_zpackm_3xk_1r_ref
+
+// packm_4xk_1r kernels
+
+#define BLIS_CPACKM_4XK_1R_KERNEL_REF   bli_cpackm_4xk_1r_ref
+#define BLIS_ZPACKM_4XK_1R_KERNEL_REF   bli_zpackm_4xk_1r_ref
+
+// packm_6xk_1r kernels
+
+#define BLIS_CPACKM_6XK_1R_KERNEL_REF   bli_cpackm_6xk_1r_ref
+#define BLIS_ZPACKM_6XK_1R_KERNEL_REF   bli_zpackm_6xk_1r_ref
+
+// packm_8xk_1r kernels
+
+#define BLIS_CPACKM_8XK_1R_KERNEL_REF   bli_cpackm_8xk_1r_ref
+#define BLIS_ZPACKM_8XK_1R_KERNEL_REF   bli_zpackm_8xk_1r_ref
+
+// packm_10xk_1r kernels
+
+#define BLIS_CPACKM_10XK_1R_KERNEL_REF  bli_cpackm_10xk_1r_ref
+#define BLIS_ZPACKM_10XK_1R_KERNEL_REF  bli_zpackm_10xk_1r_ref
+
+// packm_12xk_1r kernels
+
+#define BLIS_CPACKM_12XK_1R_KERNEL_REF  bli_cpackm_12xk_1r_ref
+#define BLIS_ZPACKM_12XK_1R_KERNEL_REF  bli_zpackm_12xk_1r_ref
+
+// packm_14xk_1r kernels
+
+#define BLIS_CPACKM_14XK_1R_KERNEL_REF  bli_cpackm_14xk_1r_ref
+#define BLIS_ZPACKM_14XK_1R_KERNEL_REF  bli_zpackm_14xk_1r_ref
+
+// packm_16xk_1r kernels
+
+#define BLIS_CPACKM_16XK_1R_KERNEL_REF  bli_cpackm_16xk_1r_ref
+#define BLIS_ZPACKM_16XK_1R_KERNEL_REF  bli_zpackm_16xk_1r_ref
+
+// packm_30xk_1r kernels
+
+#define BLIS_CPACKM_30XK_1R_KERNEL_REF  bli_cpackm_30xk_1r_ref
+#define BLIS_ZPACKM_30XK_1R_KERNEL_REF  bli_zpackm_30xk_1r_ref
+
+
+
 #endif 
 

@@ -90,7 +90,7 @@ void PASTEMAC(ch,opname) \
 	} \
 \
 	/* Initialize a local context if the given context is NULL. */ \
-	bli_cntx_init_local_if( opname, cntx, cntx_p ); \
+	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
 \
 	/* Query the context for the operation's kernel address. */ \
 	PASTECH2(ch,kername,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx_p ); \
@@ -166,7 +166,7 @@ void PASTEMAC(ch,opname) \
 	} \
 \
 	/* Initialize a local context if the given context is NULL. */ \
-	bli_cntx_init_local_if( opname, cntx, cntx_p ); \
+	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
 \
 	/* Query the context for the operation's kernel address. */ \
 	PASTECH2(ch,kername,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx_p ); \
@@ -222,7 +222,7 @@ void PASTEMAC(ch,opname) \
     x1 = x + offx; \
 \
 	/* Initialize a local context if the given context is NULL. */ \
-	bli_cntx_init_local_if( opname, cntx, cntx_p ); \
+	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
 \
 	/* Query the context for the operation's kernel address. */ \
 	PASTECH2(ch,kername,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx_p ); \
@@ -276,7 +276,7 @@ void PASTEMAC(ch,opname) \
     x1 = x + offx; \
 \
 	/* Initialize a local context if the given context is NULL. */ \
-	bli_cntx_init_local_if( opname, cntx, cntx_p ); \
+	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
 \
 	/* Query the context for the operation's kernel address. */ \
 	PASTECH2(ch,kername,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx_p ); \
@@ -349,7 +349,7 @@ void PASTEMAC(ch,opname) \
 	incx = 2*incx; \
 \
 	/* Initialize a local context if the given context is NULL. */ \
-	bli_cntx_init_local_if( opname, cntx, cntx_p ); \
+	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
 \
 	/* Query the context for the operation's kernel address. */ \
 	PASTECH2(chr,kername,_ft) f = bli_cntx_get_l1v_ker_dt( dt_r, kerid, cntx_p ); \

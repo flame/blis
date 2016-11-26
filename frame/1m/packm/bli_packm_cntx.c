@@ -39,7 +39,7 @@
 // Define context initialization functions.
 //
 
-void bli_packm_cntx_init( cntx_t* cntx )
+void bli_packm_cntx_init( num_t dt, cntx_t* cntx )
 {
 	bli_cntx_obj_create( cntx );
 

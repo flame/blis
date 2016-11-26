@@ -41,7 +41,7 @@
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC(opname,_cntx_init)( cntx_t* cntx ) \
+void PASTEMAC(opname,_cntx_init)( num_t dt, cntx_t* cntx ) \
 { \
 	/* Perform basic setup on the context. */ \
 	bli_cntx_obj_create( cntx ); \
@@ -50,20 +50,20 @@ void PASTEMAC(opname,_cntx_init)( cntx_t* cntx ) \
 	   operation. */ \
 	/*bli_gks_cntx_set_l1f_ker( BLIS_AXPYF_KER, cntx );*/ \
 	/*bli_gks_cntx_set_l1f_ker( BLIS_DOTXF_KER, cntx );*/ \
-	bli_axpyf_cntx_init( cntx ); \
-	bli_dotxf_cntx_init( cntx ); \
+	bli_axpyf_cntx_init( dt, cntx ); \
+	bli_dotxf_cntx_init( dt, cntx ); \
 \
 	/*bli_gks_cntx_set_l1v_ker( BLIS_AXPYV_KER, cntx );*/ \
 	/*bli_gks_cntx_set_l1v_ker( BLIS_DOTXV_KER, cntx );*/ \
 	/*bli_gks_cntx_set_l1v_ker( BLIS_SCALV_KER, cntx );*/ \
 	/*bli_gks_cntx_set_l1v_ker( BLIS_SETV_KER, cntx );*/ \
-	bli_axpyv_cntx_init( cntx ); \
-	bli_dotxv_cntx_init( cntx ); \
-	bli_scalv_cntx_init( cntx ); \
-	bli_setv_cntx_init( cntx ); \
+	bli_axpyv_cntx_init( dt, cntx ); \
+	bli_dotxv_cntx_init( dt, cntx ); \
+	bli_scalv_cntx_init( dt, cntx ); \
+	bli_setv_cntx_init( dt, cntx ); \
 \
 	/* Initialize the context with packm-related kernels. */ \
-	bli_packm_cntx_init( cntx ); \
+	bli_packm_cntx_init( dt, cntx ); \
 \
 	/* Set the register and cache blocksizes and multiples, as well
 	   as the execution method. */ \
@@ -88,7 +88,7 @@ GENFRONT( trsv )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC(opname,_cntx_init)( cntx_t* cntx ) \
+void PASTEMAC(opname,_cntx_init)( num_t dt, cntx_t* cntx ) \
 { \
 	/* Perform basic setup on the context. */ \
 	bli_cntx_obj_create( cntx ); \
@@ -96,10 +96,10 @@ void PASTEMAC(opname,_cntx_init)( cntx_t* cntx ) \
 	/* Initialize the context with kernels employed by the current
 	   operation. */ \
 	/*bli_gks_cntx_set_l1v_ker( BLIS_AXPYV_KER, cntx );*/ \
-	bli_axpyv_cntx_init( cntx ); \
+	bli_axpyv_cntx_init( dt, cntx ); \
 \
 	/* Initialize the context with packm-related kernels. */ \
-	bli_packm_cntx_init( cntx ); \
+	bli_packm_cntx_init( dt, cntx ); \
 \
 	/* Set the register and cache blocksizes and multiples, as well
 	   as the execution method. */ \
@@ -122,7 +122,7 @@ GENFRONT( syr )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC(opname,_cntx_init)( cntx_t* cntx ) \
+void PASTEMAC(opname,_cntx_init)( num_t dt, cntx_t* cntx ) \
 { \
 	/* Perform basic setup on the context. */ \
 	bli_cntx_obj_create( cntx ); \
@@ -133,22 +133,22 @@ void PASTEMAC(opname,_cntx_init)( cntx_t* cntx ) \
 	/*bli_gks_cntx_set_l1f_ker( BLIS_AXPYF_KER, cntx );*/ \
 	/*bli_gks_cntx_set_l1f_ker( BLIS_DOTXF_KER, cntx );*/ \
 	/*bli_gks_cntx_set_l1f_ker( BLIS_DOTXAXPYF_KER, cntx );*/ \
-	bli_dotaxpyv_cntx_init( cntx ); \
-	bli_axpyf_cntx_init( cntx ); \
-	bli_dotxf_cntx_init( cntx ); \
-	bli_dotxaxpyf_cntx_init( cntx ); \
+	bli_dotaxpyv_cntx_init( dt, cntx ); \
+	bli_axpyf_cntx_init( dt, cntx ); \
+	bli_dotxf_cntx_init( dt, cntx ); \
+	bli_dotxaxpyf_cntx_init( dt, cntx ); \
 \
 	/*bli_gks_cntx_set_l1v_ker( BLIS_AXPYV_KER, cntx );*/ \
 	/*bli_gks_cntx_set_l1v_ker( BLIS_DOTXV_KER, cntx );*/ \
 	/*bli_gks_cntx_set_l1v_ker( BLIS_SCALV_KER, cntx );*/ \
 	/*bli_gks_cntx_set_l1v_ker( BLIS_SETV_KER, cntx );*/ \
-	bli_axpyv_cntx_init( cntx ); \
-	bli_dotxv_cntx_init( cntx ); \
-	bli_scalv_cntx_init( cntx ); \
-	bli_setv_cntx_init( cntx ); \
+	bli_axpyv_cntx_init( dt, cntx ); \
+	bli_dotxv_cntx_init( dt, cntx ); \
+	bli_scalv_cntx_init( dt, cntx ); \
+	bli_setv_cntx_init( dt, cntx ); \
 \
 	/* Initialize the context with packm-related kernels. */ \
-	bli_packm_cntx_init( cntx ); \
+	bli_packm_cntx_init( dt, cntx ); \
 \
 	/* Set the register and cache blocksizes and multiples, as well
 	   as the execution method. */ \
@@ -173,7 +173,7 @@ GENFRONT( symv )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC(opname,_cntx_init)( cntx_t* cntx ) \
+void PASTEMAC(opname,_cntx_init)( num_t dt, cntx_t* cntx ) \
 { \
 	/* Perform basic setup on the context. */ \
 	bli_cntx_obj_create( cntx ); \
@@ -182,11 +182,11 @@ void PASTEMAC(opname,_cntx_init)( cntx_t* cntx ) \
 	   operation. */ \
 	/*bli_gks_cntx_set_l1f_ker( BLIS_AXPY2V_KER, cntx );*/ \
 	/*bli_gks_cntx_set_l1v_ker( BLIS_AXPYV_KER, cntx );*/ \
-	bli_axpy2v_cntx_init( cntx ); \
-	bli_axpyv_cntx_init( cntx ); \
+	bli_axpy2v_cntx_init( dt, cntx ); \
+	bli_axpyv_cntx_init( dt, cntx ); \
 \
 	/* Initialize the context with packm-related kernels. */ \
-	bli_packm_cntx_init( cntx ); \
+	bli_packm_cntx_init( dt, cntx ); \
 \
 	/* Set the register and cache blocksizes and multiples, as well
 	   as the execution method. */ \

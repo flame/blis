@@ -109,6 +109,26 @@ void bli_gemm_ker_var2
 	buf_alpha = bli_obj_internal_scalar_buffer( scalar_b );
 	buf_beta  = bli_obj_internal_scalar_buffer( *c );
 
+    // If 1m is being employed on a column- or row-stored matrix with a
+    // real-valued beta, we can use the real domain macro-kernel, which
+	// eliminates a little overhead associated with the 1m virtual
+	// micro-kernel.
+#if 1
+	if ( bli_is_1m_packed( schema_a ) )
+	{
+		bli_l3_ind_recast_1m_params
+		(
+		  dt_exec,
+		  schema_a,
+		  c,
+		  m, n, k,
+		  pd_a, ps_a,
+		  pd_b, ps_b,
+		  rs_c, cs_c
+		);
+	}
+#endif
+
 	// Index into the type combination array to extract the correct
 	// function pointer.
 	f = ftypes[dt_exec];

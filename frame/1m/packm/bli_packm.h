@@ -48,9 +48,11 @@
 #include "bli_packm_struc_cxk_4mi.h"
 #include "bli_packm_struc_cxk_3mis.h"
 #include "bli_packm_struc_cxk_rih.h"
+#include "bli_packm_struc_cxk_1er.h"
 
 #include "bli_packm_cxk.h"
 #include "bli_packm_cxk_4mi.h"
 #include "bli_packm_cxk_3mis.h"
 #include "bli_packm_cxk_rih.h"
+#include "bli_packm_cxk_1er.h"
 

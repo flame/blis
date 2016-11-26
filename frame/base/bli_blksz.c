@@ -85,6 +85,7 @@ void bli_blksz_obj_free
 
 // -----------------------------------------------------------------------------
 
+#if 0
 void bli_blksz_reduce_dt_to
      (
        num_t dt_bm, blksz_t* bmult,
@@ -114,6 +115,66 @@ void bli_blksz_reduce_dt_to
 
 	// Store the new blocksizes back to the object.
 	bli_blksz_set_def( blksz_def, dt_bs, blksz );
+	bli_blksz_set_max( blksz_max, dt_bs, blksz );
+}
+#endif
+
+// -----------------------------------------------------------------------------
+
+void bli_blksz_reduce_def_to
+     (
+       num_t dt_bm, blksz_t* bmult,
+       num_t dt_bs, blksz_t* blksz
+     )
+{
+	dim_t blksz_def = bli_blksz_get_def( dt_bs, blksz );
+
+	dim_t bmult_val = bli_blksz_get_def( dt_bm, bmult );
+
+	// If the blocksize multiple is zero, we do nothing.
+	if ( bmult_val == 0 ) return;
+
+	// Round the default and maximum blocksize values down to their
+	// respective nearest multiples of bmult_val. (Notice that we
+	// ignore the "max" entry in the bmult object since that would
+	// correspond to the packing dimension, which plays no role
+	// as a blocksize multiple.)
+	blksz_def = ( blksz_def / bmult_val ) * bmult_val;
+
+	// Make sure the new blocksize values are at least the blocksize
+	// multiple.
+	if ( blksz_def == 0 ) blksz_def = bmult_val;
+
+	// Store the new blocksizes back to the object.
+	bli_blksz_set_def( blksz_def, dt_bs, blksz );
+}
+
+// -----------------------------------------------------------------------------
+
+void bli_blksz_reduce_max_to
+     (
+       num_t dt_bm, blksz_t* bmult,
+       num_t dt_bs, blksz_t* blksz
+     )
+{
+	dim_t blksz_max = bli_blksz_get_max( dt_bs, blksz );
+
+	dim_t bmult_val = bli_blksz_get_def( dt_bm, bmult );
+
+	// If the blocksize multiple is zero, we do nothing.
+	if ( bmult_val == 0 ) return;
+
+	// Round the blocksize values down to its nearest multiple of
+	// of bmult_val. (Notice that we ignore the "max" entry in the
+	// bmult object since that would correspond to the packing
+	// dimension, which plays no role as a blocksize multiple.)
+	blksz_max = ( blksz_max / bmult_val ) * bmult_val;
+
+	// Make sure the new blocksize value is at least the blocksize
+	// multiple.
+	if ( blksz_max == 0 ) blksz_max = bmult_val;
+
+	// Store the new blocksize back to the object.
 	bli_blksz_set_max( blksz_max, dt_bs, blksz );
 }
 

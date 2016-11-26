@@ -32,29 +32,15 @@
 
 */
 
-/*
-//
-// Generate prototypes for _cntx_init(), _cntx_stage(), and _cntx_finalize()
-// for each induced method (including native execution) based on trsm.
-//
-
-#undef  GENPROT
-#define GENPROT( opname, imeth ) \
-\
-void  PASTEMAC2(opname,imeth,_cntx_init)( void ); \
-void  PASTEMAC2(opname,imeth,_cntx_finalize)( void );
-
-GENPROT( trsm, nat )
-GENPROT( trsm, 3m1 )
-GENPROT( trsm, 4m1 )
-*/
-
-void  bli_trsmnat_cntx_init( cntx_t* cntx );
+void  bli_trsmnat_cntx_init( num_t dt, cntx_t* cntx );
 void  bli_trsmnat_cntx_finalize( cntx_t* cntx );
 
-void  bli_trsm4m1_cntx_init( cntx_t* cntx );
+void  bli_trsm4m1_cntx_init( num_t dt, cntx_t* cntx );
 void  bli_trsm4m1_cntx_finalize( cntx_t* cntx );
 
-void  bli_trsm3m1_cntx_init( cntx_t* cntx );
+void  bli_trsm3m1_cntx_init( num_t dt, cntx_t* cntx );
 void  bli_trsm3m1_cntx_finalize( cntx_t* cntx );
+
+void  bli_trsm1m_cntx_init( num_t dt, cntx_t* cntx );
+void  bli_trsm1m_cntx_finalize( cntx_t* cntx );
 

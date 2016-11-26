@@ -34,23 +34,35 @@
 
 #include "blis.h"
 
-typedef void (*cntx_ft)( cntx_t* cntx );
+typedef void (*cntx_init_ft)( num_t dt, cntx_t* cntx );
+typedef void (*cntx_finalize_ft)( cntx_t* cntx );
 
-static void* bli_gemmind_cntx_fp[BLIS_NUM_IND_METHODS][2] = 
+static void* bli_gemmind_cntx_init_fp[BLIS_NUM_IND_METHODS] =
 {
-        /*              _cntx_init             _cntx_finalize   */
-/* 3mh  */ { bli_gemm3mh_cntx_init, bli_gemm3mh_cntx_finalize },
-/* 3m3  */ { bli_gemm3m3_cntx_init, bli_gemm3m3_cntx_finalize },
-/* 3m2  */ { bli_gemm3m2_cntx_init, bli_gemm3m2_cntx_finalize },
-/* 3m1  */ { bli_gemm3m1_cntx_init, bli_gemm3m1_cntx_finalize },
-/* 4mh  */ { bli_gemm4mh_cntx_init, bli_gemm4mh_cntx_finalize },
-/* 4mb  */ { bli_gemm4mb_cntx_init, bli_gemm4mb_cntx_finalize },
-/* 4m1  */ { bli_gemm4m1_cntx_init, bli_gemm4m1_cntx_finalize },
-/* nat  */ { bli_gemmnat_cntx_init, bli_gemmnat_cntx_finalize }
+/* 3mh  */ bli_gemm3mh_cntx_init,
+/* 3m3  */ bli_gemm3m3_cntx_init,
+/* 3m2  */ bli_gemm3m2_cntx_init,
+/* 3m1  */ bli_gemm3m1_cntx_init,
+/* 4mh  */ bli_gemm4mh_cntx_init,
+/* 4mb  */ bli_gemm4mb_cntx_init,
+/* 4m1  */ bli_gemm4m1_cntx_init,
+/* 1m   */ bli_gemm1m_cntx_init,
+/* nat  */ bli_gemmnat_cntx_init
 };
 
-#define BLIS_CNTX_INIT_INDEX     0
-#define BLIS_CNTX_FINALIZE_INDEX 1
+static void* bli_gemmind_cntx_finalize_fp[BLIS_NUM_IND_METHODS] =
+{
+/* 3mh  */ bli_gemm3mh_cntx_finalize,
+/* 3m3  */ bli_gemm3m3_cntx_finalize,
+/* 3m2  */ bli_gemm3m2_cntx_finalize,
+/* 3m1  */ bli_gemm3m1_cntx_finalize,
+/* 4mh  */ bli_gemm4mh_cntx_finalize,
+/* 4mb  */ bli_gemm4mb_cntx_finalize,
+/* 4m1  */ bli_gemm4m1_cntx_finalize,
+/* 1m   */ bli_gemm1m_cntx_finalize,
+/* nat  */ bli_gemmnat_cntx_finalize
+};
+
 
 // -----------------------------------------------------------------------------
 
@@ -62,7 +74,7 @@ void bli_gemmind_cntx_init_avail( num_t dt, cntx_t* cntx )
 {
 	ind_t method = bli_ind_oper_find_avail( BLIS_GEMM, dt );
 
-	bli_gemmind_cntx_init( method, cntx );
+	bli_gemmind_cntx_init( method, dt, cntx );
 }
 
 void bli_gemmind_cntx_finalize_avail( num_t dt, cntx_t* cntx )
@@ -77,16 +89,16 @@ void bli_gemmind_cntx_finalize_avail( num_t dt, cntx_t* cntx )
 // Execute the context initialization/finalization function associated
 // with a given induced method.
 
-void bli_gemmind_cntx_init( ind_t method, cntx_t* cntx )
+void bli_gemmind_cntx_init( ind_t method, num_t dt, cntx_t* cntx )
 {
-	cntx_ft func = bli_gemmind_cntx_init_get_func( method );
+	cntx_init_ft func = bli_gemmind_cntx_init_get_func( method );
 
-	func( cntx );
+	func( dt, cntx );
 }
 
 void bli_gemmind_cntx_finalize( ind_t method, cntx_t* cntx )
 {
-	cntx_ft func = bli_gemmind_cntx_finalize_get_func( method );
+	cntx_finalize_ft func = bli_gemmind_cntx_finalize_get_func( method );
 
 	func( cntx );
 }
@@ -95,17 +107,17 @@ void bli_gemmind_cntx_finalize( ind_t method, cntx_t* cntx )
 
 void* bli_gemmind_cntx_init_get_func( ind_t method )
 {
-	return bli_gemmind_cntx_fp[ method ][ BLIS_CNTX_INIT_INDEX ];
+	return bli_gemmind_cntx_init_fp[ method ];
 }
 
 void* bli_gemmind_cntx_finalize_get_func( ind_t method )
 {
-	return bli_gemmind_cntx_fp[ method ][ BLIS_CNTX_FINALIZE_INDEX ];
+	return bli_gemmind_cntx_finalize_fp[ method ];
 }
 
 // -----------------------------------------------------------------------------
 
-void bli_gemm3m1_cntx_init( cntx_t* cntx )
+void bli_gemm3m1_cntx_init( num_t dt, cntx_t* cntx )
 {
 	const ind_t method = BLIS_3M1;
 
@@ -122,18 +134,21 @@ void bli_gemm3m1_cntx_init( cntx_t* cntx )
 	bli_gks_cntx_set_l3_vir_ukr( method, BLIS_GEMM_UKR, cntx );
 
 	// Initialize the context with packm-related kernels.
-	bli_packm_cntx_init( cntx );
+	bli_packm_cntx_init( dt, cntx );
 
 	// Initialize the context with the current architecture's register
 	// and cache blocksizes (and multiples), and the induced method.
-	bli_gks_cntx_set_blkszs( method, 6,
-	                         BLIS_NC, BLIS_NR, 1.0,
-	                         BLIS_KC, BLIS_KR, 3.0,
-	                         BLIS_MC, BLIS_MR, 1.0,
-	                         BLIS_NR, BLIS_NR, 1.0,
-	                         BLIS_MR, BLIS_MR, 1.0,
-	                         BLIS_KR, BLIS_KR, 1.0,
-	                         cntx );
+	bli_gks_cntx_set_blkszs
+	(
+	  method, 6,
+	  BLIS_NC, BLIS_NR, 1.0, 1.0,
+	  BLIS_KC, BLIS_KR, 3.0, 3.0,
+	  BLIS_MC, BLIS_MR, 1.0, 1.0,
+	  BLIS_NR, BLIS_NR, 1.0, 1.0,
+	  BLIS_MR, BLIS_MR, 1.0, 1.0,
+	  BLIS_KR, BLIS_KR, 1.0, 1.0,
+	  cntx
+	);
 
 	// Set the pack_t schemas for the current induced method.
 	bli_cntx_set_pack_schema_ab( BLIS_PACKED_ROW_PANELS_3MI,
@@ -151,7 +166,7 @@ void bli_gemm3m1_cntx_finalize( cntx_t* cntx )
 
 // -----------------------------------------------------------------------------
 
-void bli_gemm3m2_cntx_init( cntx_t* cntx )
+void bli_gemm3m2_cntx_init( num_t dt, cntx_t* cntx )
 {
 	const ind_t method = BLIS_3M2;
 
@@ -168,18 +183,21 @@ void bli_gemm3m2_cntx_init( cntx_t* cntx )
 	bli_gks_cntx_set_l3_vir_ukr( method, BLIS_GEMM_UKR, cntx );
 
 	// Initialize the context with packm-related kernels.
-	bli_packm_cntx_init( cntx );
+	bli_packm_cntx_init( dt, cntx );
 
 	// Initialize the context with the current architecture's register
 	// and cache blocksizes (and multiples), and the induced method.
-	bli_gks_cntx_set_blkszs( method, 6,
-	                         BLIS_NC, BLIS_NR, 3.0,
-	                         BLIS_KC, BLIS_KR, 1.0,
-	                         BLIS_MC, BLIS_MR, 3.0,
-	                         BLIS_NR, BLIS_NR, 1.0,
-	                         BLIS_MR, BLIS_MR, 1.0,
-	                         BLIS_KR, BLIS_KR, 1.0,
-	                         cntx );
+	bli_gks_cntx_set_blkszs
+	(
+	  method, 6,
+	  BLIS_NC, BLIS_NR, 3.0, 3.0,
+	  BLIS_KC, BLIS_KR, 1.0, 1.0,
+	  BLIS_MC, BLIS_MR, 3.0, 3.0,
+	  BLIS_NR, BLIS_NR, 1.0, 1.0,
+	  BLIS_MR, BLIS_MR, 1.0, 1.0,
+	  BLIS_KR, BLIS_KR, 1.0, 1.0,
+	  cntx
+	);
 
 	// Set the pack_t schemas for the current induced method.
 	bli_cntx_set_pack_schema_ab( BLIS_PACKED_ROW_PANELS_3MS,
@@ -197,7 +215,7 @@ void bli_gemm3m2_cntx_finalize( cntx_t* cntx )
 
 // -----------------------------------------------------------------------------
 
-void bli_gemm3m3_cntx_init( cntx_t* cntx )
+void bli_gemm3m3_cntx_init( num_t dt, cntx_t* cntx )
 {
 	const ind_t method = BLIS_3M3;
 
@@ -214,18 +232,21 @@ void bli_gemm3m3_cntx_init( cntx_t* cntx )
 	bli_gks_cntx_set_l3_vir_ukr( method, BLIS_GEMM_UKR, cntx );
 
 	// Initialize the context with packm-related kernels.
-	bli_packm_cntx_init( cntx );
+	bli_packm_cntx_init( dt, cntx );
 
 	// Initialize the context with the current architecture's register
 	// and cache blocksizes (and multiples), and the induced method.
-	bli_gks_cntx_set_blkszs( method, 6,
-	                         BLIS_NC, BLIS_NR, 3.0,
-	                         BLIS_KC, BLIS_KR, 1.0,
-	                         BLIS_MC, BLIS_MR, 1.0,
-	                         BLIS_NR, BLIS_NR, 1.0,
-	                         BLIS_MR, BLIS_MR, 1.0,
-	                         BLIS_KR, BLIS_KR, 1.0,
-	                         cntx );
+	bli_gks_cntx_set_blkszs
+	(
+	  method, 6,
+	  BLIS_NC, BLIS_NR, 3.0, 3.0,
+	  BLIS_KC, BLIS_KR, 1.0, 1.0,
+	  BLIS_MC, BLIS_MR, 1.0, 1.0,
+	  BLIS_NR, BLIS_NR, 1.0, 1.0,
+	  BLIS_MR, BLIS_MR, 1.0, 1.0,
+	  BLIS_KR, BLIS_KR, 1.0, 1.0,
+	  cntx
+	);
 
 	// Set the pack_t schemas for the current induced method.
 	bli_cntx_set_pack_schema_ab( 0, // not yet needed; varies with _stage()
@@ -256,7 +277,7 @@ void bli_gemm3m3_cntx_finalize( cntx_t* cntx )
 
 // -----------------------------------------------------------------------------
 
-void bli_gemm3mh_cntx_init( cntx_t* cntx )
+void bli_gemm3mh_cntx_init( num_t dt, cntx_t* cntx )
 {
 	const ind_t method = BLIS_3MH;
 
@@ -273,18 +294,21 @@ void bli_gemm3mh_cntx_init( cntx_t* cntx )
 	bli_gks_cntx_set_l3_vir_ukr( method, BLIS_GEMM_UKR, cntx );
 
 	// Initialize the context with packm-related kernels.
-	bli_packm_cntx_init( cntx );
+	bli_packm_cntx_init( dt, cntx );
 
 	// Initialize the context with the current architecture's register
 	// and cache blocksizes (and multiples), and the induced method.
-	bli_gks_cntx_set_blkszs( method, 6,
-	                         BLIS_NC, BLIS_NR, 1.0,
-	                         BLIS_KC, BLIS_KR, 1.0,
-	                         BLIS_MC, BLIS_MR, 1.0,
-	                         BLIS_NR, BLIS_NR, 1.0,
-	                         BLIS_MR, BLIS_MR, 1.0,
-	                         BLIS_KR, BLIS_KR, 1.0,
-	                         cntx );
+	bli_gks_cntx_set_blkszs
+	(
+	  method, 6,
+	  BLIS_NC, BLIS_NR, 1.0, 1.0,
+	  BLIS_KC, BLIS_KR, 1.0, 1.0,
+	  BLIS_MC, BLIS_MR, 1.0, 1.0,
+	  BLIS_NR, BLIS_NR, 1.0, 1.0,
+	  BLIS_MR, BLIS_MR, 1.0, 1.0,
+	  BLIS_KR, BLIS_KR, 1.0, 1.0,
+	  cntx
+	);
 
 	// Set the pack_t schemas for the current induced method.
 	bli_cntx_set_pack_schema_ab( 0, // not yet needed; varies with _stage()
@@ -318,7 +342,7 @@ void bli_gemm3mh_cntx_finalize( cntx_t* cntx )
 
 // -----------------------------------------------------------------------------
 
-void bli_gemm4m1_cntx_init( cntx_t* cntx )
+void bli_gemm4m1_cntx_init( num_t dt, cntx_t* cntx )
 {
 	const ind_t method = BLIS_4M1A;
 
@@ -335,18 +359,21 @@ void bli_gemm4m1_cntx_init( cntx_t* cntx )
 	bli_gks_cntx_set_l3_vir_ukr( method, BLIS_GEMM_UKR, cntx );
 
 	// Initialize the context with packm-related kernels.
-	bli_packm_cntx_init( cntx );
+	bli_packm_cntx_init( dt, cntx );
 
 	// Initialize the context with the current architecture's register
 	// and cache blocksizes (and multiples), and the induced method.
-	bli_gks_cntx_set_blkszs( method, 6,
-	                         BLIS_NC, BLIS_NR, 1.0,
-	                         BLIS_KC, BLIS_KR, 2.0,
-	                         BLIS_MC, BLIS_MR, 1.0,
-	                         BLIS_NR, BLIS_NR, 1.0,
-	                         BLIS_MR, BLIS_MR, 1.0,
-	                         BLIS_KR, BLIS_KR, 1.0,
-	                         cntx );
+	bli_gks_cntx_set_blkszs
+	(
+	  method, 6,
+	  BLIS_NC, BLIS_NR, 1.0, 1.0,
+	  BLIS_KC, BLIS_KR, 2.0, 2.0,
+	  BLIS_MC, BLIS_MR, 1.0, 1.0,
+	  BLIS_NR, BLIS_NR, 1.0, 1.0,
+	  BLIS_MR, BLIS_MR, 1.0, 1.0,
+	  BLIS_KR, BLIS_KR, 1.0, 1.0,
+	  cntx
+	);
 
 	// Set the pack_t schemas for the current induced method.
 	bli_cntx_set_pack_schema_ab( BLIS_PACKED_ROW_PANELS_4MI,
@@ -364,7 +391,7 @@ void bli_gemm4m1_cntx_finalize( cntx_t* cntx )
 
 // -----------------------------------------------------------------------------
 
-void bli_gemm4mb_cntx_init( cntx_t* cntx )
+void bli_gemm4mb_cntx_init( num_t dt, cntx_t* cntx )
 {
 	const ind_t method = BLIS_4M1B;
 
@@ -381,18 +408,21 @@ void bli_gemm4mb_cntx_init( cntx_t* cntx )
 	bli_gks_cntx_set_l3_vir_ukr( method, BLIS_GEMM_UKR, cntx );
 
 	// Initialize the context with packm-related kernels.
-	bli_packm_cntx_init( cntx );
+	bli_packm_cntx_init( dt, cntx );
 
 	// Initialize the context with the current architecture's register
 	// and cache blocksizes (and multiples), and the induced method.
-	bli_gks_cntx_set_blkszs( method, 6,
-	                         BLIS_NC, BLIS_NR, 2.0,
-	                         BLIS_KC, BLIS_KR, 1.0,
-	                         BLIS_MC, BLIS_MR, 2.0,
-	                         BLIS_NR, BLIS_NR, 1.0,
-	                         BLIS_MR, BLIS_MR, 1.0,
-	                         BLIS_KR, BLIS_KR, 1.0,
-	                         cntx );
+	bli_gks_cntx_set_blkszs
+	(
+	  method, 6,
+	  BLIS_NC, BLIS_NR, 2.0, 2.0,
+	  BLIS_KC, BLIS_KR, 1.0, 1.0,
+	  BLIS_MC, BLIS_MR, 2.0, 2.0,
+	  BLIS_NR, BLIS_NR, 1.0, 1.0,
+	  BLIS_MR, BLIS_MR, 1.0, 1.0,
+	  BLIS_KR, BLIS_KR, 1.0, 1.0,
+	  cntx
+	);
 
 	// Set the pack_t schemas for the current induced method.
 	bli_cntx_set_pack_schema_ab( BLIS_PACKED_ROW_PANELS_4MI,
@@ -410,7 +440,7 @@ void bli_gemm4mb_cntx_finalize( cntx_t* cntx )
 
 // -----------------------------------------------------------------------------
 
-void bli_gemm4mh_cntx_init( cntx_t* cntx )
+void bli_gemm4mh_cntx_init( num_t dt, cntx_t* cntx )
 {
 	const ind_t method = BLIS_4MH;
 
@@ -427,18 +457,21 @@ void bli_gemm4mh_cntx_init( cntx_t* cntx )
 	bli_gks_cntx_set_l3_vir_ukr( method, BLIS_GEMM_UKR, cntx );
 
 	// Initialize the context with packm-related kernels.
-	bli_packm_cntx_init( cntx );
+	bli_packm_cntx_init( dt, cntx );
 
 	// Initialize the context with the current architecture's register
 	// and cache blocksizes (and multiples), and the induced method.
-	bli_gks_cntx_set_blkszs( method, 6,
-	                         BLIS_NC, BLIS_NR, 1.0,
-	                         BLIS_KC, BLIS_KR, 1.0,
-	                         BLIS_MC, BLIS_MR, 1.0,
-	                         BLIS_NR, BLIS_NR, 1.0,
-	                         BLIS_MR, BLIS_MR, 1.0,
-	                         BLIS_KR, BLIS_KR, 1.0,
-	                         cntx );
+	bli_gks_cntx_set_blkszs
+	(
+	  method, 6,
+	  BLIS_NC, BLIS_NR, 1.0, 1.0,
+	  BLIS_KC, BLIS_KR, 1.0, 1.0,
+	  BLIS_MC, BLIS_MR, 1.0, 1.0,
+	  BLIS_NR, BLIS_NR, 1.0, 1.0,
+	  BLIS_MR, BLIS_MR, 1.0, 1.0,
+	  BLIS_KR, BLIS_KR, 1.0, 1.0,
+	  cntx
+	);
 
 	// Set the pack_t schemas for the current induced method.
 	bli_cntx_set_pack_schema_ab( 0, // not yet needed; varies with _stage()
@@ -477,9 +510,82 @@ void bli_gemm4mh_cntx_finalize( cntx_t* cntx )
 
 // -----------------------------------------------------------------------------
 
-void bli_gemmnat_cntx_init( cntx_t* cntx )
+void bli_gemm1m_cntx_init( num_t dt, cntx_t* cntx )
 {
-	bli_gemm_cntx_init( cntx );
+	const ind_t method = BLIS_1M;
+
+	// Clear the context fields.
+	bli_cntx_obj_clear( cntx );
+
+	// Initialize the context with the current architecture's native
+	// level-3 gemm micro-kernel, and its output preferences.
+	bli_gks_cntx_set_l3_nat_ukr( BLIS_GEMM_UKR, cntx );
+	bli_gks_cntx_set_l3_nat_ukr_prefs( BLIS_GEMM_UKR, cntx );
+
+	// Initialize the context with the virtual micro-kernel associated with
+	// the current induced method.
+	bli_gks_cntx_set_l3_vir_ukr( method, BLIS_GEMM_UKR, cntx );
+
+	// Initialize the context with packm-related kernels.
+	bli_packm_cntx_init( dt, cntx );
+
+	if ( bli_cntx_l3_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ) )
+	{
+		// Initialize the context with the current architecture's register
+		// and cache blocksizes (and multiples), and the induced method.
+		bli_gks_cntx_set_blkszs
+		(
+		  method, 6,
+		  BLIS_NC, BLIS_NR, 1.0, 1.0,
+		  BLIS_KC, BLIS_KR, 2.0, 2.0, // halve kc...
+		  BLIS_MC, BLIS_MR, 2.0, 2.0, // halve mc...
+		  BLIS_NR, BLIS_NR, 1.0, 1.0,
+		  BLIS_MR, BLIS_MR, 2.0, 1.0, // ...and mr (but NOT packmr)
+		  BLIS_KR, BLIS_KR, 1.0, 1.0,
+		  cntx
+		);
+
+		// Set the pack_t schemas for the current induced method.
+		bli_cntx_set_pack_schema_ab( BLIS_PACKED_ROW_PANELS_1E,
+		                             BLIS_PACKED_COL_PANELS_1R,
+		                             cntx );
+	}
+	else // if ( bli_cntx_l3_ukr_prefers_rows_dt( dt, BLIS_GEMM_UKR, cntx ) )
+	{
+		// Initialize the context with the current architecture's register
+		// and cache blocksizes (and multiples), and the induced method.
+		bli_gks_cntx_set_blkszs
+		(
+		  method, 6,
+		  BLIS_NC, BLIS_NR, 2.0, 2.0, // halve nc...
+		  BLIS_KC, BLIS_KR, 2.0, 2.0, // halve kc...
+		  BLIS_MC, BLIS_MR, 1.0, 1.0,
+		  BLIS_NR, BLIS_NR, 2.0, 1.0, // ...and nr (but NOT packnr)
+		  BLIS_MR, BLIS_MR, 1.0, 1.0,
+		  BLIS_KR, BLIS_KR, 1.0, 1.0,
+		  cntx
+		);
+
+		// Set the pack_t schemas for the current induced method.
+		bli_cntx_set_pack_schema_ab( BLIS_PACKED_ROW_PANELS_1R,
+		                             BLIS_PACKED_COL_PANELS_1E,
+		                             cntx );
+	}
+}
+
+void bli_gemm1m_cntx_stage( dim_t stage, cntx_t* cntx )
+{
+}
+
+void bli_gemm1m_cntx_finalize( cntx_t* cntx )
+{
+}
+
+// -----------------------------------------------------------------------------
+
+void bli_gemmnat_cntx_init( num_t dt, cntx_t* cntx )
+{
+	bli_gemm_cntx_init( dt, cntx );
 }
 
 void bli_gemmnat_cntx_stage( dim_t stage, cntx_t* cntx )

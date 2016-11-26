@@ -140,6 +140,35 @@
 #define BLIS_CTRSM4M1_U_UKERNEL_REF      bli_ctrsm4m1_u_ukr_ref
 #define BLIS_ZTRSM4M1_U_UKERNEL_REF      bli_ztrsm4m1_u_ukr_ref
 
+//
+// Level-3 1m
+//
+
+// gemm1m micro-kernels
+
+#define BLIS_CGEMM1M_UKERNEL_REF         bli_cgemm1m_ukr_ref
+#define BLIS_ZGEMM1M_UKERNEL_REF         bli_zgemm1m_ukr_ref
+
+// gemmtrsm1m_l micro-kernels
+
+#define BLIS_CGEMMTRSM1M_L_UKERNEL_REF   bli_cgemmtrsm1m_l_ukr_ref
+#define BLIS_ZGEMMTRSM1M_L_UKERNEL_REF   bli_zgemmtrsm1m_l_ukr_ref
+
+// gemmtrsm1m_u micro-kernels
+
+#define BLIS_CGEMMTRSM1M_U_UKERNEL_REF   bli_cgemmtrsm1m_u_ukr_ref
+#define BLIS_ZGEMMTRSM1M_U_UKERNEL_REF   bli_zgemmtrsm1m_u_ukr_ref
+
+// trsm1m_l micro-kernels
+
+#define BLIS_CTRSM1M_L_UKERNEL_REF       bli_ctrsm1m_l_ukr_ref
+#define BLIS_ZTRSM1M_L_UKERNEL_REF       bli_ztrsm1m_l_ukr_ref
+
+// trsm1m_u micro-kernels
+
+#define BLIS_CTRSM1M_U_UKERNEL_REF       bli_ctrsm1m_u_ukr_ref
+#define BLIS_ZTRSM1M_U_UKERNEL_REF       bli_ztrsm1m_u_ukr_ref
+
 
 
 #endif 

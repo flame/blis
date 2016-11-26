@@ -55,10 +55,11 @@ void PASTEMAC(opname,imeth) \
        cntx_t* cntx  \
      ) \
 { \
+	num_t   dt       = bli_obj_datatype( *c ); \
 	cntx_t* cntx_p; \
 \
 	/* Initialize a local context if the one provided is NULL. */ \
-	bli_cntx_init_local_if2( cname, imeth, cntx, cntx_p ); \
+	bli_cntx_init_local_if2( cname, imeth, dt, cntx, cntx_p ); \
 \
 	/* Invoke the operation's front end with the appropriate control
 	   tree. */ \
@@ -92,10 +93,11 @@ void PASTEMAC(opname,imeth) \
        cntx_t* cntx  \
      ) \
 { \
+	num_t   dt       = bli_obj_datatype( *c ); \
 	cntx_t* cntx_p; \
 \
 	/* Initialize a local context if the one provided is NULL. */ \
-	bli_cntx_init_local_if2( cname, imeth, cntx, cntx_p ); \
+	bli_cntx_init_local_if2( cname, imeth, dt, cntx, cntx_p ); \
 \
 	/* Invoke the operation's front end with the appropriate control
 	   tree. */ \
@@ -127,10 +129,11 @@ void PASTEMAC(opname,imeth) \
        cntx_t* cntx  \
      ) \
 { \
+	num_t   dt       = bli_obj_datatype( *c ); \
 	cntx_t* cntx_p; \
 \
 	/* Initialize a local context if the one provided is NULL. */ \
-	bli_cntx_init_local_if2( cname, imeth, cntx, cntx_p ); \
+	bli_cntx_init_local_if2( cname, imeth, dt, cntx, cntx_p ); \
 \
 	/* Invoke the operation's front end with the appropriate control
 	   tree. */ \
@@ -161,10 +164,11 @@ void PASTEMAC(opname,imeth) \
        cntx_t* cntx  \
      ) \
 { \
+	num_t   dt       = bli_obj_datatype( *b ); \
 	cntx_t* cntx_p; \
 \
 	/* Initialize a local context if the one provided is NULL. */ \
-	bli_cntx_init_local_if2( cname, imeth, cntx, cntx_p ); \
+	bli_cntx_init_local_if2( cname, imeth, dt, cntx, cntx_p ); \
 \
 	/* Invoke the operation's front end with the appropriate control
 	   tree. */ \
@@ -194,10 +198,11 @@ void PASTEMAC(opname,imeth) \
        cntx_t* cntx  \
      ) \
 { \
+	num_t   dt       = bli_obj_datatype( *b ); \
 	cntx_t* cntx_p; \
 \
 	/* Initialize a local context if the one provided is NULL. */ \
-	bli_cntx_init_local_if2( cname, imeth, cntx, cntx_p ); \
+	bli_cntx_init_local_if2( cname, imeth, dt, cntx, cntx_p ); \
 \
 	/* Invoke the operation's front end with the appropriate control
 	   tree. */ \

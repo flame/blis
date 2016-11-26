@@ -49,10 +49,11 @@ void PASTEMAC(opname,imeth) \
        cntx_t* cntx  \
      ) \
 { \
+	num_t   dt       = bli_obj_datatype( *c ); \
+	obj_t*  beta_use = beta; \
+\
 	cntx_t* cntx_p; \
 	dim_t   i; \
-\
-	obj_t*  beta_use = beta; \
 \
 	/* If the objects are in the real domain, execute the native
 	   implementation. */ \
@@ -63,7 +64,7 @@ void PASTEMAC(opname,imeth) \
 	} \
 \
 	/* Initialize a local context if the one provided is NULL. */ \
-	bli_cntx_init_local_if2( cname, imeth, cntx, cntx_p ); \
+	bli_cntx_init_local_if2( cname, imeth, dt, cntx, cntx_p ); \
 \
 	/* Some induced methods execute in multiple "stages". */ \
 	for ( i = 0; i < nstage; ++i ) \
@@ -92,6 +93,7 @@ GENFRONT( gemm, gemm, 3m1, 1 )
 GENFRONT( gemm, gemm, 4mh, 4 )
 GENFRONT( gemm, gemm, 4mb, 1 )
 GENFRONT( gemm, gemm, 4m1, 1 )
+GENFRONT( gemm, gemm, 1m,  1 )
 
 // her2k
 GENFRONT( her2k, gemm, 3mh, 3 )
@@ -101,6 +103,7 @@ GENFRONT( her2k, gemm, 3m1, 1 )
 GENFRONT( her2k, gemm, 4mh, 4 )
 //GENFRONT( her2k, gemm, 4mb, 1 ) // Not implemented.
 GENFRONT( her2k, gemm, 4m1, 1 )
+GENFRONT( her2k, gemm, 1m,  1 )
 
 // syr2k
 GENFRONT( syr2k, gemm, 3mh, 3 )
@@ -110,6 +113,7 @@ GENFRONT( syr2k, gemm, 3m1, 1 )
 GENFRONT( syr2k, gemm, 4mh, 4 )
 //GENFRONT( syr2k, gemm, 4mb, 1 ) // Not implemented.
 GENFRONT( syr2k, gemm, 4m1, 1 )
+GENFRONT( syr2k, gemm, 1m,  1 )
 
 
 // -- hemm/symm/trmm3 ----------------------------------------------------------
@@ -128,10 +132,11 @@ void PASTEMAC(opname,imeth) \
        cntx_t* cntx  \
      ) \
 { \
+	num_t   dt       = bli_obj_datatype( *c ); \
+	obj_t*  beta_use = beta; \
+\
 	cntx_t* cntx_p; \
 	dim_t   i; \
-\
-	obj_t*  beta_use = beta; \
 \
 	/* If the objects are in the real domain, execute the native
 	   implementation. */ \
@@ -142,7 +147,7 @@ void PASTEMAC(opname,imeth) \
 	} \
 \
 	/* Initialize a local context if the one provided is NULL. */ \
-	bli_cntx_init_local_if2( cname, imeth, cntx, cntx_p ); \
+	bli_cntx_init_local_if2( cname, imeth, dt, cntx, cntx_p ); \
 \
 	/* Some induced methods execute in multiple "stages". */ \
 	for ( i = 0; i < nstage; ++i ) \
@@ -171,6 +176,7 @@ GENFRONT( hemm, gemm, 3m1, 1 )
 GENFRONT( hemm, gemm, 4mh, 4 )
 //GENFRONT( hemm, gemm, 4mb, 1 ) // Not implemented.
 GENFRONT( hemm, gemm, 4m1, 1 )
+GENFRONT( hemm, gemm, 1m,  1 )
 
 // symm
 GENFRONT( symm, gemm, 3mh, 3 )
@@ -180,6 +186,7 @@ GENFRONT( symm, gemm, 3m1, 1 )
 GENFRONT( symm, gemm, 4mh, 4 )
 //GENFRONT( symm, gemm, 4mb, 1 ) // Not implemented.
 GENFRONT( symm, gemm, 4m1, 1 )
+GENFRONT( symm, gemm, 1m,  1 )
 
 // trmm3
 GENFRONT( trmm3, gemm, 3mh, 3 )
@@ -189,6 +196,7 @@ GENFRONT( trmm3, gemm, 3m1, 1 )
 GENFRONT( trmm3, gemm, 4mh, 4 )
 //GENFRONT( trmm3, gemm, 4mb, 1 ) // Not implemented.
 GENFRONT( trmm3, gemm, 4m1, 1 )
+GENFRONT( trmm3, gemm, 1m,  1 )
 
 
 // -- herk/syrk ----------------------------------------------------------------
@@ -205,10 +213,11 @@ void PASTEMAC(opname,imeth) \
        cntx_t* cntx  \
      ) \
 { \
+	num_t   dt       = bli_obj_datatype( *c ); \
+	obj_t*  beta_use = beta; \
+\
 	cntx_t* cntx_p; \
 	dim_t   i; \
-\
-	obj_t*  beta_use = beta; \
 \
 	/* If the objects are in the real domain, execute the native
 	   implementation. */ \
@@ -219,7 +228,7 @@ void PASTEMAC(opname,imeth) \
 	} \
 \
 	/* Initialize a local context if the one provided is NULL. */ \
-	bli_cntx_init_local_if2( cname, imeth, cntx, cntx_p ); \
+	bli_cntx_init_local_if2( cname, imeth, dt, cntx, cntx_p ); \
 \
 	/* Some induced methods execute in multiple "stages". */ \
 	for ( i = 0; i < nstage; ++i ) \
@@ -248,6 +257,7 @@ GENFRONT( herk, gemm, 3m1, 1 )
 GENFRONT( herk, gemm, 4mh, 4 )
 //GENFRONT( herk, gemm, 4mb, 1 ) // Not implemented.
 GENFRONT( herk, gemm, 4m1, 1 )
+GENFRONT( herk, gemm, 1m,  1 )
 
 // syrk
 GENFRONT( syrk, gemm, 3mh, 3 )
@@ -257,6 +267,7 @@ GENFRONT( syrk, gemm, 3m1, 1 )
 GENFRONT( syrk, gemm, 4mh, 4 )
 //GENFRONT( syrk, gemm, 4mb, 1 ) // Not implemented.
 GENFRONT( syrk, gemm, 4m1, 1 )
+GENFRONT( syrk, gemm, 1m,  1 )
 
 
 // -- trmm ---------------------------------------------------------------------
@@ -273,6 +284,8 @@ void PASTEMAC(opname,imeth) \
        cntx_t* cntx  \
      ) \
 { \
+	num_t   dt       = bli_obj_datatype( *b ); \
+\
 	cntx_t* cntx_p; \
 	dim_t   i; \
 \
@@ -285,7 +298,7 @@ void PASTEMAC(opname,imeth) \
 	} \
 \
 	/* Initialize a local context if the one provided is NULL. */ \
-	bli_cntx_init_local_if2( cname, imeth, cntx, cntx_p ); \
+	bli_cntx_init_local_if2( cname, imeth, dt, cntx, cntx_p ); \
 \
 	/* Some induced methods execute in multiple "stages". */ \
 	for ( i = 0; i < nstage; ++i ) \
@@ -310,6 +323,7 @@ GENFRONT( trmm, gemm, 3m1, 1 )
 //GENFRONT( trmm, gemm, 4mh, 4 ) // Unimplementable.
 //GENFRONT( trmm, gemm, 4mb, 1 ) // Unimplementable.
 GENFRONT( trmm, gemm, 4m1, 1 )
+GENFRONT( trmm, gemm, 1m,  1 )
 
 
 // -- trsm ---------------------------------------------------------------------
@@ -326,6 +340,8 @@ void PASTEMAC(opname,imeth) \
        cntx_t* cntx  \
      ) \
 { \
+	num_t   dt       = bli_obj_datatype( *b ); \
+\
 	cntx_t* cntx_p; \
 \
 	/* If the objects are in the real domain, execute the native
@@ -337,7 +353,7 @@ void PASTEMAC(opname,imeth) \
 	} \
 \
 	/* Initialize a local context if the one provided is NULL. */ \
-	bli_cntx_init_local_if2( cname, imeth, cntx, cntx_p ); \
+	bli_cntx_init_local_if2( cname, imeth, dt, cntx, cntx_p ); \
 \
 	{ \
 		/* NOTE: trsm cannot be implemented via any induced method that
@@ -360,4 +376,5 @@ GENFRONT( trsm, trsm, 3m1, 1 )
 //GENFRONT( trmm, trsm, 4mh, 4 ) // Unimplementable.
 //GENFRONT( trmm, trsm, 4mb, 1 ) // Unimplementable.
 GENFRONT( trsm, trsm, 4m1, 1 )
+GENFRONT( trsm, trsm, 1m,  1 )
 

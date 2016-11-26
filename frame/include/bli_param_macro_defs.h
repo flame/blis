@@ -654,6 +654,19 @@
 	  bli_is_io_packed( schema ) || \
 	  bli_is_rpi_packed( schema ) )
 
+#define bli_is_1r_packed( schema ) \
+\
+	( ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_1R )
+
+#define bli_is_1e_packed( schema ) \
+\
+	( ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_1E )
+
+#define bli_is_1m_packed( schema ) \
+\
+	( bli_is_1r_packed( schema ) || \
+	  bli_is_1e_packed( schema ) )
+
 #define bli_is_nat_packed( schema ) \
 \
 	( ( schema & BLIS_PACK_FORMAT_BITS ) == 0 )

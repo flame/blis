@@ -60,7 +60,7 @@ void PASTEMAC(ch,opname) \
 	} \
 \
 	/* Initialize a local context if the given context is NULL. */ \
-	/*bli_cntx_init_local_if( opname, cntx, cntx_p );*/ \
+	/*bli_cntx_init_local_if( opname, dt, cntx, cntx_p );*/ \
 \
 	/* Invoke the helper variant, which loops over the appropriate kernel
 	   to implement the current operation. */ \
@@ -96,7 +96,7 @@ void PASTEMAC(ch,opname) \
 	if ( bli_zero_dim2( m, m ) ) return; \
 \
 	/* Initialize a local context if the given context is NULL. */ \
-	/*bli_cntx_init_local_if( opname, cntx, cntx_p );*/ \
+	/*bli_cntx_init_local_if( opname, dt, cntx, cntx_p );*/ \
 \
 	/* Invoke the helper variant, which loops over the appropriate kernel
 	   to implement the current operation. */ \
@@ -139,7 +139,7 @@ void PASTEMAC(ch,opname) \
 	} \
 \
 	/* Initialize a local context if the given context is NULL. */ \
-	/*bli_cntx_init_local_if( opname, cntx, cntx_p );*/ \
+	/*bli_cntx_init_local_if( opname, dt, cntx, cntx_p );*/ \
 \
 	/* Invoke the helper variant, which loops over the appropriate kernel
 	   to implement the current operation. */ \
@@ -186,7 +186,7 @@ void PASTEMAC(ch,opname) \
 	} \
 \
 	/* Initialize a local context if the given context is NULL. */ \
-	/*bli_cntx_init_local_if( opname, cntx, cntx_p );*/ \
+	/*bli_cntx_init_local_if( opname, dt, cntx, cntx_p );*/ \
 \
 	/* Invoke the helper variant, which loops over the appropriate kernel
 	   to implement the current operation. */ \
@@ -281,7 +281,7 @@ void PASTEMAC(ch,opname) \
 	if ( bli_zero_dim1( n ) ) return; \
 \
 	/* Initialize a local context if the given context is NULL. */ \
-	/*bli_cntx_init_local_if( opname, cntx, cntx_p );*/ \
+	/*bli_cntx_init_local_if( opname, dt, cntx, cntx_p );*/ \
 \
 	/* Invoke the helper variant, which loops over the appropriate kernel
 	   to implement the current operation. */ \
@@ -319,7 +319,7 @@ void PASTEMAC(ch,opname) \
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
 	/* Initialize a local context if the given context is NULL. */ \
-	/*bli_cntx_init_local_if( opname, cntx, cntx_p );*/ \
+	/*bli_cntx_init_local_if( opname, dt, cntx, cntx_p );*/ \
 \
 	/* Invoke the helper variant, which loops over the appropriate kernel
 	   to implement the current operation. */ \
@@ -359,7 +359,7 @@ void PASTEMAC(ch,opname) \
 	if ( bli_zero_dim1( n ) ) return; \
 \
 	/* Initialize a local context if the given context is NULL. */ \
-	/*bli_cntx_init_local_if( opname, cntx, cntx_p );*/ \
+	/*bli_cntx_init_local_if( opname, dt, cntx, cntx_p );*/ \
 \
 	/* Invoke the helper variant, which loops over the appropriate kernel
 	   to implement the current operation. */ \

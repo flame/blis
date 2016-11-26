@@ -41,7 +41,7 @@
 #undef  GENFRONT
 #define GENFRONT( opname, kertype ) \
 \
-void PASTEMAC(opname,_cntx_init)( cntx_t* cntx ) \
+void PASTEMAC(opname,_cntx_init)( num_t dt, cntx_t* cntx ) \
 { \
 	bli_cntx_obj_create( cntx ); \
 \
@@ -68,15 +68,15 @@ GENFRONT( swapv,   BLIS_SWAPV_KER )
 #undef  GENFRONT
 #define GENFRONT( opname, kertype, dep1, dep2, dep3, dep4 ) \
 \
-void PASTEMAC(opname,_cntx_init)( cntx_t* cntx ) \
+void PASTEMAC(opname,_cntx_init)( num_t dt, cntx_t* cntx ) \
 { \
 	bli_cntx_obj_create( cntx ); \
 \
 	/* Initialize the context with kernel dependencies. */ \
-	PASTEMAC(dep1,_cntx_init)( cntx ); \
-	PASTEMAC(dep2,_cntx_init)( cntx ); \
-	PASTEMAC(dep3,_cntx_init)( cntx ); \
-	PASTEMAC(dep4,_cntx_init)( cntx ); \
+	PASTEMAC(dep1,_cntx_init)( dt, cntx ); \
+	PASTEMAC(dep2,_cntx_init)( dt, cntx ); \
+	PASTEMAC(dep3,_cntx_init)( dt, cntx ); \
+	PASTEMAC(dep4,_cntx_init)( dt, cntx ); \
 \
 	/* Initialize the context with the kernel associated with the current
 	   operation. */ \
@@ -93,12 +93,12 @@ GENFRONT( axpbyv, BLIS_AXPBYV_KER, axpyv, xpbyv, scal2v, scalv )
 #undef  GENFRONT
 #define GENFRONT( opname, kertype, depname ) \
 \
-void PASTEMAC(opname,_cntx_init)( cntx_t* cntx ) \
+void PASTEMAC(opname,_cntx_init)( num_t dt, cntx_t* cntx ) \
 { \
 	bli_cntx_obj_create( cntx ); \
 \
 	/* Initialize the context with kernel dependencies. */ \
-	PASTEMAC(depname,_cntx_init)( cntx ); \
+	PASTEMAC(depname,_cntx_init)( dt, cntx ); \
 \
 	/* Initialize the context with the kernel associated with the current
 	   operation. */ \
@@ -116,13 +116,13 @@ GENFRONT( scalv,  BLIS_SCALV_KER,  setv )
 #undef  GENFRONT
 #define GENFRONT( opname, kertype, dep1, dep2 ) \
 \
-void PASTEMAC(opname,_cntx_init)( cntx_t* cntx ) \
+void PASTEMAC(opname,_cntx_init)( num_t dt, cntx_t* cntx ) \
 { \
 	bli_cntx_obj_create( cntx ); \
 \
 	/* Initialize the context with kernel dependencies. */ \
-	PASTEMAC(dep1,_cntx_init)( cntx ); \
-	PASTEMAC(dep2,_cntx_init)( cntx ); \
+	PASTEMAC(dep1,_cntx_init)( dt, cntx ); \
+	PASTEMAC(dep2,_cntx_init)( dt, cntx ); \
 \
 	/* Initialize the context with the kernel associated with the current
 	   operation. */ \
