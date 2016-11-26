@@ -178,7 +178,7 @@ void libblis_test_trsm_ukr_experiment
 	cntx_t       cntx;
 
 	// Initialize a context.
-	bli_trsm_cntx_init( &cntx );
+	bli_trsm_cntx_init( datatype, &cntx );
 
 	// Fix m and n to MR and NR, respectively.
 	m = bli_cntx_get_blksz_def_dt( datatype, BLIS_MR, &cntx );

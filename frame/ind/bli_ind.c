@@ -45,6 +45,7 @@ static char* bli_ind_impl_str[BLIS_NUM_IND_METHODS] =
 /* 4mh  */ "4mh",
 /* 4m1b */ "4m1b",
 /* 4m1a */ "4m1a",
+/* 1m   */ "1m",
 /* nat  */ "native",
 };
 
@@ -56,10 +57,12 @@ void bli_ind_init( void )
 	if ( bli_ind_is_initialized() ) return;
 
 #ifdef BLIS_ENABLE_INDUCED_SCOMPLEX
-	bli_ind_enable_dt( BLIS_4M1A, BLIS_SCOMPLEX );
+	//bli_ind_enable_dt( BLIS_4M1A, BLIS_SCOMPLEX );
+	bli_ind_enable_dt( BLIS_1M, BLIS_SCOMPLEX );
 #endif
 #ifdef BLIS_ENABLE_INDUCED_DCOMPLEX
-	bli_ind_enable_dt( BLIS_4M1A, BLIS_DCOMPLEX );
+	//bli_ind_enable_dt( BLIS_4M1A, BLIS_DCOMPLEX );
+	bli_ind_enable_dt( BLIS_1M, BLIS_DCOMPLEX );
 #endif
 
 	// Mark API as initialized.

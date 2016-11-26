@@ -90,6 +90,7 @@ INSERT_GENTFUNC_BASIC0( gemm3m1 )
 INSERT_GENTFUNC_BASIC0( gemm4mh )
 INSERT_GENTFUNC_BASIC0( gemm4mb )
 INSERT_GENTFUNC_BASIC0( gemm4m1 )
+INSERT_GENTFUNC_BASIC0( gemm1m )
 
 
 // -- hemm ---------------------------------------------------------------------
@@ -149,6 +150,7 @@ INSERT_GENTFUNC_BASIC0( hemm3mh )
 INSERT_GENTFUNC_BASIC0( hemm3m1 )
 INSERT_GENTFUNC_BASIC0( hemm4mh )
 INSERT_GENTFUNC_BASIC0( hemm4m1 )
+INSERT_GENTFUNC_BASIC0( hemm1m )
 
 
 // -- herk ---------------------------------------------------------------------
@@ -200,6 +202,7 @@ INSERT_GENTFUNCR_BASIC0( herk3mh )
 INSERT_GENTFUNCR_BASIC0( herk3m1 )
 INSERT_GENTFUNCR_BASIC0( herk4mh )
 INSERT_GENTFUNCR_BASIC0( herk4m1 )
+INSERT_GENTFUNCR_BASIC0( herk1m )
 
 
 // -- her2k --------------------------------------------------------------------
@@ -258,6 +261,7 @@ INSERT_GENTFUNCR_BASIC0( her2k3mh )
 INSERT_GENTFUNCR_BASIC0( her2k3m1 )
 INSERT_GENTFUNCR_BASIC0( her2k4mh )
 INSERT_GENTFUNCR_BASIC0( her2k4m1 )
+INSERT_GENTFUNCR_BASIC0( her2k1m )
 
 
 // -- symm ---------------------------------------------------------------------
@@ -317,6 +321,7 @@ INSERT_GENTFUNC_BASIC0( symm3mh )
 INSERT_GENTFUNC_BASIC0( symm3m1 )
 INSERT_GENTFUNC_BASIC0( symm4mh )
 INSERT_GENTFUNC_BASIC0( symm4m1 )
+INSERT_GENTFUNC_BASIC0( symm1m )
 
 
 // -- syrk ---------------------------------------------------------------------
@@ -367,6 +372,7 @@ INSERT_GENTFUNC_BASIC0( syrk3mh )
 INSERT_GENTFUNC_BASIC0( syrk3m1 )
 INSERT_GENTFUNC_BASIC0( syrk4mh )
 INSERT_GENTFUNC_BASIC0( syrk4m1 )
+INSERT_GENTFUNC_BASIC0( syrk1m )
 
 
 // -- syr2k --------------------------------------------------------------------
@@ -424,6 +430,7 @@ INSERT_GENTFUNC_BASIC0( syr2k3mh )
 INSERT_GENTFUNC_BASIC0( syr2k3m1 )
 INSERT_GENTFUNC_BASIC0( syr2k4mh )
 INSERT_GENTFUNC_BASIC0( syr2k4m1 )
+INSERT_GENTFUNC_BASIC0( syr2k1m )
 
 
 // -- trmm3 --------------------------------------------------------------------
@@ -485,6 +492,7 @@ INSERT_GENTFUNC_BASIC0( trmm33mh )
 INSERT_GENTFUNC_BASIC0( trmm33m1 )
 INSERT_GENTFUNC_BASIC0( trmm34mh )
 INSERT_GENTFUNC_BASIC0( trmm34m1 )
+INSERT_GENTFUNC_BASIC0( trmm31m )
 
 
 // -- trmm ---------------------------------------------------------------------
@@ -534,6 +542,7 @@ void PASTEMAC(ch,opname) \
 
 INSERT_GENTFUNC_BASIC0( trmm3m1 )
 INSERT_GENTFUNC_BASIC0( trmm4m1 )
+INSERT_GENTFUNC_BASIC0( trmm1m )
 
 
 // -- trsm ---------------------------------------------------------------------
@@ -583,4 +592,5 @@ void PASTEMAC(ch,opname) \
 
 INSERT_GENTFUNC_BASIC0( trsm3m1 )
 INSERT_GENTFUNC_BASIC0( trsm4m1 )
+INSERT_GENTFUNC_BASIC0( trsm1m )
 

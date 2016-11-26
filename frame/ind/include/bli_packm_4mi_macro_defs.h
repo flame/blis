@@ -38,9 +38,6 @@
 
 // -- Define default 4mi-specific kernel names ---------------------------------
 
-//
-// Level-1m
-//
 
 // packm_2xk_4mi kernels
 

@@ -55,3 +55,6 @@ INSERT_GENTPROTCO_BASIC( gemmtrsm4m1_u_ukr_ref )
 INSERT_GENTPROTCO_BASIC( gemmtrsm3m1_l_ukr_ref )
 INSERT_GENTPROTCO_BASIC( gemmtrsm3m1_u_ukr_ref )
 
+INSERT_GENTPROTCO_BASIC( gemmtrsm1m_l_ukr_ref )
+INSERT_GENTPROTCO_BASIC( gemmtrsm1m_u_ukr_ref )
+

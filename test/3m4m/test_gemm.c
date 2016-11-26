@@ -79,23 +79,19 @@ int main( int argc, char** argv )
 	k_input = -1;
 
 #if 0
-	num_t  dt_real = bli_datatype_proj_to_real( DT );
+
 	cntx_t cntx;
 
-	bli_gemm_cntx_init( &cntx );
+	// Initialize a context for the current induced method and datatype.
+	bli_gemmind_cntx_init( IND, dt, &cntx );
 
-	// Extract the kc blocksize for the requested datatype and its
-	// real analogue.
-	dim_t kc      = bli_cntx_get_blksz_def_dt( dt,      BLIS_KC, &cntx );
-	dim_t kc_real = bli_cntx_get_blksz_def_dt( dt_real, BLIS_KC, &cntx );
+	// Set k to the kc blocksize for the current datatype.
+	k_input = bli_cntx_get_blksz_def_dt( dt, BLIS_KC, &cntx );
 
-	// Assign the k dimension depending on which implementation is
-	// being tested. Note that the BLIS_NAT case handles the real
-	// domain cases as well as native complex.
-	if      ( IND == BLIS_NAT  ) k_input = kc;
-	else if ( IND == BLIS_3M1  ) k_input = kc_real / 3;
-	else if ( IND == BLIS_4M1A ) k_input = kc_real / 2;
-	else                         k_input = kc_real;
+#elif 0
+
+	k_input = 256;
+
 #endif
 
 	// Choose the char corresponding to the requested datatype.
@@ -154,7 +150,7 @@ int main( int argc, char** argv )
 		bli_obj_set_conjtrans( transb, b );
 
 		bli_setsc(  (2.0/1.0), 0.0, &alpha );
-		bli_setsc( -(1.0/1.0), 0.0, &beta );
+		bli_setsc(  (1.0/1.0), 0.0, &beta );
 
 
 		bli_copym( &c, &c_save );

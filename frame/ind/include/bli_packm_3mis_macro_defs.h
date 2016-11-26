@@ -38,9 +38,6 @@
 
 // -- Define default 3mis-specific kernel names --------------------------------
 
-//
-// Level-1m
-//
 
 // packm_2xk_3mis kernels
 

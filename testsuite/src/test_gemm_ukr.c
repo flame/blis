@@ -173,7 +173,7 @@ void libblis_test_gemm_ukr_experiment
 	cntx_t       cntx;
 
 	// Initialize a context.
-	bli_gemm_cntx_init( &cntx );
+	bli_gemm_cntx_init( datatype, &cntx );
 
 	// Map the dimension specifier to actual dimensions.
 	k = libblis_test_get_dim_from_prob_size( op->dim_spec[0], p_cur );

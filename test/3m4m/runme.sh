@@ -75,16 +75,16 @@ test_ops_r="${l3_ops}"
 if [ ${sys} = "blis" ]; then
 
 	#test_impls="openblas mkl 3mhw_blis 3m3_blis 3m2_blis 3m1_blis 4mhw_blis 4m1b_blis 4m1a_blis"
-	test_impls="openblas 3mhw_blis 3m3_blis 3m2_blis 3m1_blis 4mhw_blis 4m1b_blis 4m1a_blis"
+	test_impls="openblas 3mhw_blis 3m3_blis 3m2_blis 3m1_blis 4mhw_blis 4m1b_blis 4m1a_blis 1m_blis"
 
 elif [ ${sys} = "stampede" ]; then
 
-	test_impls="openblas mkl asm_blis 3mhw_blis 3m3_blis 3m2_blis 3m1_blis 4mhw_blis 4m1b_blis 4m1a_blis"
+	test_impls="openblas mkl asm_blis 3mhw_blis 3m3_blis 3m2_blis 3m1_blis 4mhw_blis 4m1b_blis 4m1a_blis 1m_blis"
 	#test_impls="openblas mkl asm_blis"
 
 elif [ ${sys} = "wahlberg" ]; then
 
-	test_impls="openblas acml asm_blis 3mhw_blis 3m3_blis 3m2_blis 3m1_blis 4mhw_blis 4m1b_blis 4m1a_blis"
+	test_impls="openblas acml asm_blis 3mhw_blis 3m3_blis 3m2_blis 3m1_blis 4mhw_blis 4m1b_blis 4m1a_blis 1m_blis"
 	test_impls="openblas acml asm_blis"
 fi
 

@@ -54,12 +54,13 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
-	cntx_t* cntx_p; \
+	const num_t dt = PASTEMAC(ch,type); \
+	cntx_t*     cntx_p; \
 \
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
 	/* Initialize a local context if the given context is NULL. */ \
-	bli_cntx_init_local_if( opname, cntx, cntx_p ); \
+	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
 \
 	/* Invoke the helper variant, which loops over the appropriate kernel
 	   to implement the current operation. */ \
@@ -118,12 +119,13 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
-	cntx_t* cntx_p; \
+	const num_t dt = PASTEMAC(ch,type); \
+	cntx_t*     cntx_p; \
 \
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
 	/* Initialize a local context if the given context is NULL. */ \
-	bli_cntx_init_local_if( opname, cntx, cntx_p ); \
+	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
 \
 	/* Invoke the helper variant, which loops over the appropriate kernel
 	   to implement the current operation. */ \
@@ -187,7 +189,8 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
-	cntx_t* cntx_p; \
+	const num_t dt = PASTEMAC(ch,type); \
+	cntx_t*     cntx_p; \
 \
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
@@ -195,7 +198,7 @@ void PASTEMAC(ch,opname) \
 	if ( PASTEMAC(ch,eq0)( *alpha ) ) return; \
 \
 	/* Initialize a local context if the given context is NULL. */ \
-	bli_cntx_init_local_if( opname, cntx, cntx_p ); \
+	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
 \
 	/* Invoke the helper variant, which loops over the appropriate kernel
 	   to implement the current operation. */ \
@@ -256,12 +259,13 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
-	cntx_t* cntx_p; \
+	const num_t dt = PASTEMAC(ch,type); \
+	cntx_t*     cntx_p; \
 \
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
 	/* Initialize a local context if the given context is NULL. */ \
-	bli_cntx_init_local_if( opname, cntx, cntx_p ); \
+	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
 \
 	/* If alpha is zero, then we set the output matrix to zero. This
 	   seemingly minor optimization is important because it will clear
@@ -344,12 +348,13 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
-	cntx_t* cntx_p; \
+	const num_t dt = PASTEMAC(ch,type); \
+	cntx_t*     cntx_p; \
 \
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
 	/* Initialize a local context if the given context is NULL. */ \
-	bli_cntx_init_local_if( opname, cntx, cntx_p ); \
+	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
 \
 	/* Invoke the helper variant, which loops over the appropriate kernel
 	   to implement the current operation. */ \

@@ -488,13 +488,13 @@ void bli_cntx_print( cntx_t* cntx );
 // pointer is NULL. When initializing, the context address that should
 // be used (local or external) is assigned to cntx_p.
 
-#define bli_cntx_init_local_if( opname, cntx, cntx_p ) \
+#define bli_cntx_init_local_if( opname, dt, cntx, cntx_p ) \
 \
 	cntx_t _cntx_l; \
 \
 	if ( bli_is_null( cntx ) ) \
 	{ \
-		PASTEMAC(opname,_cntx_init)( &_cntx_l ); \
+		PASTEMAC(opname,_cntx_init)( dt, &_cntx_l ); \
 		cntx_p = &_cntx_l; \
 	} \
 	else \
@@ -510,13 +510,13 @@ void bli_cntx_print( cntx_t* cntx );
 	}
 
 
-#define bli_cntx_init_local_if2( opname, suf, cntx, cntx_p ) \
+#define bli_cntx_init_local_if2( opname, suf, dt, cntx, cntx_p ) \
 \
 	cntx_t _cntx_l; \
 \
 	if ( bli_is_null( cntx ) ) \
 	{ \
-		PASTEMAC2(opname,suf,_cntx_init)( &_cntx_l ); \
+		PASTEMAC2(opname,suf,_cntx_init)( dt, &_cntx_l ); \
 		cntx_p = &_cntx_l; \
 	} \
 	else \

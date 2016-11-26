@@ -55,6 +55,7 @@ GENPROT( nat )
 GENPROT( ind )
 GENPROT( 3m1 )
 GENPROT( 4m1 )
+GENPROT( 1m )
 
 
 //
