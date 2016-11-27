@@ -57,7 +57,8 @@ void bli_sgemm_opt_8x12(
                         float*    restrict b,
                         float*    restrict beta,
                         float*    restrict c, inc_t rs_c, inc_t cs_c,
-                        auxinfo_t*         data
+                        auxinfo_t*         data,
+                        cntx_t*   restrict cntx
                       )
 {
 	void* a_next = bli_auxinfo_next_a( data );
@@ -1106,7 +1107,8 @@ void bli_dgemm_opt_6x8(
                         double*   restrict b,
                         double*   restrict beta,
                         double*   restrict c, inc_t rs_c, inc_t cs_c,
-                        auxinfo_t*         data
+                        auxinfo_t*         data,
+                        cntx_t*   restrict cntx
                       )
 {
 	void* a_next = bli_auxinfo_next_a( data );
@@ -2075,7 +2077,8 @@ void bli_cgemm_opt_4x4(
                         scomplex* restrict b,
                         scomplex* restrict beta,
                         scomplex* restrict c, inc_t rs_c, inc_t cs_c,
-                        auxinfo_t*         data
+                        auxinfo_t*         data,
+                        cntx_t*   restrict cntx
                       )
 {
 	/* Just call the reference implementation. */
@@ -2085,7 +2088,8 @@ void bli_cgemm_opt_4x4(
 	                   b,
 	                   beta,
 	                   c, rs_c, cs_c,
-	                   data );
+	                   data,
+	                   cntx );
 }
 
 void bli_zgemm_opt_4x4(
@@ -2095,7 +2099,8 @@ void bli_zgemm_opt_4x4(
                         dcomplex* restrict b,
                         dcomplex* restrict beta,
                         dcomplex* restrict c, inc_t rs_c, inc_t cs_c,
-                        auxinfo_t*         data
+                        auxinfo_t*         data,
+                        cntx_t*   restrict cntx
                       )
 {
 	/* Just call the reference implementation. */
@@ -2105,6 +2110,7 @@ void bli_zgemm_opt_4x4(
 	                   b,
 	                   beta,
 	                   c, rs_c, cs_c,
-	                   data );
+	                   data,
+	                   cntx );
 }
 
