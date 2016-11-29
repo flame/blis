@@ -160,8 +160,8 @@
 #define BLIS_STRSM_L_UKERNEL   bli_strsm_l_int_6x16
 #define BLIS_DTRSM_L_UKERNEL   bli_dtrsm_l_int_6x8
 
-
-
+// --gemmtrsm-related --
+#define BLIS_SGEMMTRSM_L_UKERNEL bli_sgemmtrsm_l_6x16
 
 
 
