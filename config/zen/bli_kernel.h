@@ -4,8 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2016, Advanced Micro Devices, Inc
+   Copyright (C) 2017, Advanced Micro Devices, Inc
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -164,6 +163,20 @@
 #define BLIS_SGEMMTRSM_L_UKERNEL bli_sgemmtrsm_l_6x16
 
 
+#define BLIS_SMALL_MATRIX_ENABLE
+//This will select the threshold below which small matrix code will be called.
+#define SMALL_MATRIX_THRES 240
+
+gint_t bli_gemm_small_matrix
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       cntl_t* cntl
+     );
 
 // -- LEVEL-2 KERNEL CONSTANTS -------------------------------------------------
 

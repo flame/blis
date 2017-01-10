@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2017, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -45,63 +46,69 @@ void bli_gemm_front
        cntl_t* cntl
      )
 {
-	obj_t   a_local;
-	obj_t   b_local;
-	obj_t   c_local;
+#ifdef BLIS_SMALL_MATRIX_ENABLE
+    gint_t status = bli_gemm_small_matrix(alpha, a, b, beta, c, cntx, cntl);
+    if(BLIS_SUCCESS != status)
+#endif
+    {
+	    obj_t   a_local;
+	    obj_t   b_local;
+	    obj_t   c_local;
 
-	// Check parameters.
-	if ( bli_error_checking_is_enabled() )
-		bli_gemm_check( alpha, a, b, beta, c, cntx );
+	    // Check parameters.
+	    if ( bli_error_checking_is_enabled() )
+		    bli_gemm_check( alpha, a, b, beta, c, cntx );
 
-	// If alpha is zero, scale by beta and return.
-	if ( bli_obj_equals( alpha, &BLIS_ZERO ) )
-	{
-		bli_scalm( beta, c );
-		return;
-	}
+	    // If alpha is zero, scale by beta and return.
+	    if ( bli_obj_equals( alpha, &BLIS_ZERO ) )
+	    {
+		    bli_scalm( beta, c );
+		    return;
+	    }
 
-	// Reinitialize the memory allocator to accommodate the blocksizes
-	// in the current context.
-	bli_memsys_reinit( cntx );
+	    // Reinitialize the memory allocator to accommodate the blocksizes
+	    // in the current context.
+	    bli_memsys_reinit( cntx );
 
-	// Alias A, B, and C in case we need to apply transformations.
-	bli_obj_alias_to( *a, a_local );
-	bli_obj_alias_to( *b, b_local );
-	bli_obj_alias_to( *c, c_local );
+	    // Alias A, B, and C in case we need to apply transformations.
+	    bli_obj_alias_to( *a, a_local );
+	    bli_obj_alias_to( *b, b_local );
+	    bli_obj_alias_to( *c, c_local );
 
-	// An optimization: If C is stored by rows and the micro-kernel prefers
-	// contiguous columns, or if C is stored by columns and the micro-kernel
-	// prefers contiguous rows, transpose the entire operation to allow the
-	// micro-kernel to access elements of C in its preferred manner.
-	if ( bli_cntx_l3_ukr_dislikes_storage_of( &c_local, BLIS_GEMM_UKR, cntx ) )
-	{
-		bli_obj_swap( a_local, b_local );
+	    // An optimization: If C is stored by rows and the micro-kernel prefers
+	    // contiguous columns, or if C is stored by columns and the micro-kernel
+	    // prefers contiguous rows, transpose the entire operation to allow the
+	    // micro-kernel to access elements of C in its preferred manner.
+	    if ( bli_cntx_l3_ukr_dislikes_storage_of( &c_local, BLIS_GEMM_UKR, cntx ) )
+	    {
+		    bli_obj_swap( a_local, b_local );
 
-		bli_obj_induce_trans( a_local );
-		bli_obj_induce_trans( b_local );
-		bli_obj_induce_trans( c_local );
-	}
+		    bli_obj_induce_trans( a_local );
+		    bli_obj_induce_trans( b_local );
+		    bli_obj_induce_trans( c_local );
+	    }
 
-	// Set the operation family id in the context.
-	bli_cntx_set_family( BLIS_GEMM, cntx );
+	    // Set the operation family id in the context.
+	    bli_cntx_set_family( BLIS_GEMM, cntx );
 
-	// Record the threading for each level within the context.
-	bli_cntx_set_thrloop_from_env( BLIS_GEMM, BLIS_LEFT, cntx,
-                                   bli_obj_length( c_local ),
-                                   bli_obj_width( c_local ),
-                                   bli_obj_width( a_local ) );
+	    // Record the threading for each level within the context.
+	    bli_cntx_set_thrloop_from_env( BLIS_GEMM, BLIS_LEFT, cntx,
+                                       bli_obj_length( c_local ),
+                                       bli_obj_width( c_local ),
+                                       bli_obj_width( a_local ) );
 
-	// Invoke the internal back-end via the thread handler.
-	bli_l3_thread_decorator
-	(
-	  bli_gemm_int,
-	  alpha,
-	  &a_local,
-	  &b_local,
-	  beta,
-	  &c_local,
-	  cntx,
-	  cntl
-	);
+	    // Invoke the internal back-end via the thread handler.
+	    bli_l3_thread_decorator
+	    (
+	      bli_gemm_int,
+	      alpha,
+	      &a_local,
+	      &b_local,
+	      beta,
+	      &c_local,
+	      cntx,
+	      cntl
+	    );
+    }
 }
 
