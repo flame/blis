@@ -606,6 +606,9 @@ void bli_gks_cntx_set_l3_nat_ukr_prefs( l3ukr_t ukr,
 	mbool_t* cntx_l3_nat_ukr_pref  = &cntx_l3_nat_ukr_prefs[ ukr ];
 
 	bli_gks_get_l3_nat_ukr_prefs( ukr, cntx_l3_nat_ukr_pref );
+
+	// Explicitly set the anti-preference to FALSE.
+	bli_cntx_set_anti_pref( FALSE, cntx );
 }
 
 

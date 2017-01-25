@@ -65,6 +65,9 @@ void  bli_gemm4m1_cntx_stage( dim_t stage, cntx_t* cntx );
 void  bli_gemm4m1_cntx_finalize( cntx_t* cntx );
 
 void  bli_gemm1m_cntx_init( num_t dt, cntx_t* cntx );
+void  bli_gemm1mbp_cntx_init( num_t dt, cntx_t* cntx );
+void  bli_gemm1mpb_cntx_init( num_t dt, cntx_t* cntx );
+void  bli_gemm1mxx_cntx_init( num_t dt, bool_t is_pb, cntx_t* cntx );
 void  bli_gemm1m_cntx_stage( dim_t stage, cntx_t* cntx );
 void  bli_gemm1m_cntx_finalize( cntx_t* cntx );
 

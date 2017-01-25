@@ -67,7 +67,7 @@ void PASTEMAC(ch,varname) \
 	const inc_t       ld_a  = cs_a; \
 	const inc_t       ld_b  = rs_b; \
 \
-	const pack_t      schema_b = bli_cntx_schema_b( cntx ); \
+	const pack_t      schema_b = bli_cntx_schema_b_panel( cntx ); \
 \
 	dim_t             iter, i, j, l; \
 	dim_t             n_behind; \
@@ -273,7 +273,7 @@ void PASTEMAC(ch,varname) \
 	const inc_t       ld_a  = cs_a; \
 	const inc_t       ld_b  = rs_b; \
 \
-	const pack_t      schema_b = bli_cntx_schema_b( cntx ); \
+	const pack_t      schema_b = bli_cntx_schema_b_panel( cntx ); \
 \
 	dim_t             iter, i, j, l; \
 	dim_t             n_behind; \

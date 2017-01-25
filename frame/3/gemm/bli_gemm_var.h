@@ -56,6 +56,7 @@ GENPROT( gemm_blk_var3 )
 GENPROT( gemm_packa )
 GENPROT( gemm_packb )
 
+GENPROT( gemm_ker_var1 )
 GENPROT( gemm_ker_var2 )
 
 // Headers for induced algorithms:

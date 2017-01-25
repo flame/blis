@@ -63,9 +63,8 @@ void bli_gemm_cntx_init( num_t dt, cntx_t* cntx )
 	                         cntx );
 
 	// Set the pack_t schemas for native execution.
-	bli_cntx_set_pack_schema_ab( BLIS_PACKED_ROW_PANELS,
-	                             BLIS_PACKED_COL_PANELS,
-	                             cntx );
+	bli_cntx_set_pack_schema_a_block( BLIS_PACKED_ROW_PANELS, cntx );
+	bli_cntx_set_pack_schema_b_panel( BLIS_PACKED_COL_PANELS, cntx );
 }
 
 void bli_gemm_cntx_finalize( cntx_t* cntx )
@@ -106,9 +105,8 @@ void bli_trsm_cntx_init( num_t dt, cntx_t* cntx )
 	                         cntx );
 
 	// Set the pack_t schemas for native execution.
-	bli_cntx_set_pack_schema_ab( BLIS_PACKED_ROW_PANELS,
-	                             BLIS_PACKED_COL_PANELS,
-	                             cntx );
+	bli_cntx_set_pack_schema_a_block( BLIS_PACKED_ROW_PANELS, cntx );
+	bli_cntx_set_pack_schema_b_panel( BLIS_PACKED_COL_PANELS, cntx );
 }
 
 void bli_trsm_cntx_finalize( cntx_t* cntx )

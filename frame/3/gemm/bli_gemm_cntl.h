@@ -37,6 +37,20 @@ cntl_t* bli_gemm_cntl_create
        opid_t family
      );
 
+// -----------------------------------------------------------------------------
+
+cntl_t* bli_gemmbp_cntl_create
+     (
+       opid_t family
+     );
+
+cntl_t* bli_gemmpb_cntl_create
+     (
+       opid_t family
+     );
+
+// -----------------------------------------------------------------------------
+
 void bli_gemm_cntl_free
      (
        cntl_t* cntl,
