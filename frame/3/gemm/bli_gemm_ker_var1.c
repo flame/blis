@@ -34,81 +34,23 @@
 
 #include "blis.h"
 
-
-void bli_l3_cntl_create_if
-     (
-       obj_t*   a,
-       obj_t*   b,
-       obj_t*   c,
-       cntx_t*  cntx,
-       cntl_t*  cntl_orig,
-       cntl_t** cntl_use
-     )
-{
-	// If the control tree pointer is NULL, we construct a default
-	// tree as a function of the operation family.
-	if ( cntl_orig == NULL )
-	{
-		opid_t family = bli_cntx_get_family( cntx );
-
-		if ( family == BLIS_GEMM ||
-		     family == BLIS_HERK ||
-		     family == BLIS_TRMM )
-		{
-			*cntl_use = bli_gemm_cntl_create( family );
-		}
-		else // if ( family == BLIS_TRSM )
-		{
-			side_t side;
-
-			if ( bli_obj_is_triangular( *a ) ) side = BLIS_LEFT;
-			else                               side = BLIS_RIGHT;
-
-			*cntl_use = bli_trsm_cntl_create( side );
-		}
-	}
-	else
-	{
-		// If the user provided a control tree, create a copy and use it
-		// instead (so that threads can use its local tree as a place to
-		// cache things like pack mem_t entries).
-		*cntl_use = bli_cntl_copy( cntl_orig );
-	}
-}
-
-void bli_l3_cntl_free_if
+void bli_gemm_ker_var1
      (
        obj_t*  a,
        obj_t*  b,
        obj_t*  c,
        cntx_t* cntx,
-       cntl_t* cntl_orig,
-       cntl_t* cntl_use,
+       cntl_t* cntl,
        thrinfo_t* thread
      )
 {
-	// If the control tree pointer is NULL, a default tree would have
-	// been created, so we now must free it.
-	if ( cntl_orig == NULL )
-	{
-		opid_t family = bli_cntx_get_family( cntx );
+	// Implement _ker_var1() in terms of _ker_var2() by transposing the
+	// entire suboperation (which also requires swapping A and B).
 
-		if ( family == BLIS_GEMM ||
-		     family == BLIS_HERK ||
-		     family == BLIS_TRMM )
-		{
-			bli_gemm_cntl_free( cntl_use, thread );
-		}
-		else // if ( family == BLIS_TRSM )
-		{
-			bli_trsm_cntl_free( cntl_use, thread );
-		}
-	}
-	else
-	{
-		// If the user provided a control tree, free the copy of it that
-		// was created.
-		bli_cntl_free( cntl_use, thread );
-	}
+	bli_obj_induce_trans( *a );
+	bli_obj_induce_trans( *b );
+	bli_obj_induce_trans( *c );
+
+	bli_gemm_ker_var2( b, a, c, cntx, cntl, thread );
 }
 

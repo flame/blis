@@ -34,81 +34,52 @@
 
 #include "blis.h"
 
+// -- gemmbp/gemmpb ------------------------------------------------------------
 
-void bli_l3_cntl_create_if
-     (
-       obj_t*   a,
-       obj_t*   b,
-       obj_t*   c,
-       cntx_t*  cntx,
-       cntl_t*  cntl_orig,
-       cntl_t** cntl_use
-     )
-{
-	// If the control tree pointer is NULL, we construct a default
-	// tree as a function of the operation family.
-	if ( cntl_orig == NULL )
-	{
-		opid_t family = bli_cntx_get_family( cntx );
-
-		if ( family == BLIS_GEMM ||
-		     family == BLIS_HERK ||
-		     family == BLIS_TRMM )
-		{
-			*cntl_use = bli_gemm_cntl_create( family );
-		}
-		else // if ( family == BLIS_TRSM )
-		{
-			side_t side;
-
-			if ( bli_obj_is_triangular( *a ) ) side = BLIS_LEFT;
-			else                               side = BLIS_RIGHT;
-
-			*cntl_use = bli_trsm_cntl_create( side );
-		}
-	}
-	else
-	{
-		// If the user provided a control tree, create a copy and use it
-		// instead (so that threads can use its local tree as a place to
-		// cache things like pack mem_t entries).
-		*cntl_use = bli_cntl_copy( cntl_orig );
-	}
+#undef  GENFRONT
+#define GENFRONT( opname, imeth, alg ) \
+\
+void PASTEMAC2(opname,imeth,alg) \
+     ( \
+       obj_t*  alpha, \
+       obj_t*  a, \
+       obj_t*  b, \
+       obj_t*  beta, \
+       obj_t*  c  \
+     ) \
+{ \
+	num_t   dt     = bli_obj_datatype( *c ); \
+	cntx_t  cntx; \
+	cntl_t* cntl_p; \
+\
+	/* If the objects are in the real domain, execute the native
+	   implementation. */ \
+	if ( bli_obj_is_real( *c ) ) \
+	{ \
+		PASTEMAC(opname,nat)( alpha, a, b, beta, c, NULL ); \
+		return; \
+	} \
+\
+	/* Initialize a local 1m context for the current algorithm (bp or pb). */ \
+	PASTEMAC3(opname,imeth,alg,_cntx_init)( dt, &cntx );  \
+\
+	/* Create a control tree for the current algorithm (bp or pb). */ \
+	cntl_p = PASTEMAC2(opname,alg,_cntl_create)( BLIS_GEMM );  \
+\
+	/* Invoke the operation's front end using the context and control
+	   tree we just created. */ \
+	PASTEMAC(opname,_front)( alpha, a, b, beta, c, &cntx, cntl_p ); \
+\
+	/* Free the control tree. Since the implementation will only make
+	   copies of it (and not use it directly) we do not need to supply
+	   a thread object. */ \
+	bli_cntl_free( cntl_p, NULL ); \
+\
+	/* Finalize the local context. */ \
+	PASTEMAC2(opname,imeth,_cntx_finalize)( &cntx ); \
 }
 
-void bli_l3_cntl_free_if
-     (
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  c,
-       cntx_t* cntx,
-       cntl_t* cntl_orig,
-       cntl_t* cntl_use,
-       thrinfo_t* thread
-     )
-{
-	// If the control tree pointer is NULL, a default tree would have
-	// been created, so we now must free it.
-	if ( cntl_orig == NULL )
-	{
-		opid_t family = bli_cntx_get_family( cntx );
-
-		if ( family == BLIS_GEMM ||
-		     family == BLIS_HERK ||
-		     family == BLIS_TRMM )
-		{
-			bli_gemm_cntl_free( cntl_use, thread );
-		}
-		else // if ( family == BLIS_TRSM )
-		{
-			bli_trsm_cntl_free( cntl_use, thread );
-		}
-	}
-	else
-	{
-		// If the user provided a control tree, free the copy of it that
-		// was created.
-		bli_cntl_free( cntl_use, thread );
-	}
-}
+// gemm
+GENFRONT( gemm, 1m, bp )
+GENFRONT( gemm, 1m, pb )
 

@@ -330,14 +330,24 @@ ind_t bli_cntx_get_ind_method( cntx_t* cntx )
 	return bli_cntx_method( cntx );
 }
 
-pack_t bli_cntx_get_pack_schema_a( cntx_t* cntx )
+pack_t bli_cntx_get_pack_schema_a_block( cntx_t* cntx )
 {
-	return bli_cntx_schema_a( cntx );
+	return bli_cntx_schema_a_block( cntx );
 }
 
-pack_t bli_cntx_get_pack_schema_b( cntx_t* cntx )
+pack_t bli_cntx_get_pack_schema_b_panel( cntx_t* cntx )
 {
-	return bli_cntx_schema_b( cntx );
+	return bli_cntx_schema_b_panel( cntx );
+}
+
+pack_t bli_cntx_get_pack_schema_c_panel( cntx_t* cntx )
+{
+	return bli_cntx_schema_c_panel( cntx );
+}
+
+bool_t bli_cntx_get_ukr_anti_pref( cntx_t* cntx )
+{
+	return bli_cntx_anti_pref( cntx );
 }
 #endif
 
@@ -705,31 +715,39 @@ void bli_cntx_set_ind_method( ind_t   method,
 	bli_cntx_set_method( method, cntx );
 }
 
-void bli_cntx_set_pack_schema_ab( pack_t  schema_a,
-                                  pack_t  schema_b,
-                                  cntx_t* cntx )
+void bli_cntx_set_pack_schema_ab_blockpanel( pack_t  schema_a,
+                                             pack_t  schema_b,
+                                             cntx_t* cntx )
 {
-	bli_cntx_set_schema_a( schema_a, cntx );
-	bli_cntx_set_schema_b( schema_b, cntx );
+	bli_cntx_set_schema_a_block( schema_a, cntx );
+	bli_cntx_set_schema_b_panel( schema_b, cntx );
 }
 
-void bli_cntx_set_pack_schema_a( pack_t  schema_a,
-                                 cntx_t* cntx )
+void bli_cntx_set_pack_schema_a_block( pack_t  schema_a,
+                                       cntx_t* cntx )
 {
-	bli_cntx_set_schema_a( schema_a, cntx );
+	bli_cntx_set_schema_a_block( schema_a, cntx );
 }
 
-void bli_cntx_set_pack_schema_b( pack_t  schema_b,
-                                 cntx_t* cntx )
+void bli_cntx_set_pack_schema_b_panel( pack_t  schema_b,
+                                       cntx_t* cntx )
 {
-	bli_cntx_set_schema_b( schema_b, cntx );
+	bli_cntx_set_schema_b_panel( schema_b, cntx );
 }
 
-void bli_cntx_set_pack_schema_c( pack_t  schema_c,
+void bli_cntx_set_pack_schema_c_panel( pack_t  schema_c,
+                                       cntx_t* cntx )
+{
+	bli_cntx_set_schema_c_panel( schema_c, cntx );
+}
+
+#if 0
+void bli_cntx_set_ukr_anti_pref( bool_t  anti_pref,
                                  cntx_t* cntx )
 {
-	bli_cntx_set_schema_c( schema_c, cntx );
+	bli_cntx_set_anti_pref( anti_pref, cntx );
 }
+#endif
 
 void bli_cntx_set_thrloop_from_env( opid_t l3_op, side_t side, cntx_t* cntx,
                                     dim_t m, dim_t n, dim_t k )
@@ -904,6 +922,32 @@ bool_t bli_cntx_l3_nat_ukr_dislikes_storage_of( obj_t*  obj,
 	return r_val;
 }
 
+bool_t bli_cntx_l3_nat_ukr_eff_prefers_storage_of( obj_t*  obj,
+                                                   l3ukr_t ukr_id,
+                                                   cntx_t* cntx )
+{
+	bool_t r_val = bli_cntx_l3_nat_ukr_prefers_storage_of( obj, ukr_id, cntx );
+
+	// If the anti-preference is set, negate the result.
+	if ( bli_cntx_anti_pref( cntx ) ) r_val = !r_val;
+
+	return r_val;
+}
+
+bool_t bli_cntx_l3_nat_ukr_eff_dislikes_storage_of( obj_t*  obj,
+                                                    l3ukr_t ukr_id,
+                                                    cntx_t* cntx )
+{
+	bool_t r_val = bli_cntx_l3_nat_ukr_dislikes_storage_of( obj, ukr_id, cntx );
+
+	// If the anti-preference is set, negate the result.
+	if ( bli_cntx_anti_pref( cntx ) ) r_val = !r_val;
+
+	return r_val;
+}
+
+// -----------------------------------------------------------------------------
+
 bool_t bli_cntx_l3_ukr_prefers_rows_dt( num_t   dt,
                                         l3ukr_t ukr_id,
                                         cntx_t* cntx )
@@ -949,6 +993,30 @@ bool_t bli_cntx_l3_ukr_dislikes_storage_of( obj_t*  obj,
 
 	if      ( bli_obj_is_row_stored( *obj ) && ukr_prefers_cols ) r_val = TRUE;
 	else if ( bli_obj_is_col_stored( *obj ) && ukr_prefers_rows ) r_val = TRUE;
+
+	return r_val;
+}
+
+bool_t bli_cntx_l3_ukr_eff_prefers_storage_of( obj_t*  obj,
+                                               l3ukr_t ukr_id,
+                                               cntx_t* cntx )
+{
+	bool_t r_val = bli_cntx_l3_ukr_prefers_storage_of( obj, ukr_id, cntx );
+
+	// If the anti-preference is set, negate the result.
+	if ( bli_cntx_anti_pref( cntx ) ) r_val = !r_val;
+
+	return r_val;
+}
+
+bool_t bli_cntx_l3_ukr_eff_dislikes_storage_of( obj_t*  obj,
+                                                l3ukr_t ukr_id,
+                                                cntx_t* cntx )
+{
+	bool_t r_val = bli_cntx_l3_ukr_dislikes_storage_of( obj, ukr_id, cntx );
+
+	// If the anti-preference is set, negate the result.
+	if ( bli_cntx_anti_pref( cntx ) ) r_val = !r_val;
 
 	return r_val;
 }

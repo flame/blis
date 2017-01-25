@@ -74,9 +74,9 @@ void bli_trsm3m1_cntx_init( num_t dt, cntx_t* cntx )
 	);
 
 	// Set the pack_t schemas for native execution.
-	bli_cntx_set_pack_schema_ab( BLIS_PACKED_ROW_PANELS_3MI,
-	                             BLIS_PACKED_COL_PANELS_3MI,
-	                             cntx );
+	bli_cntx_set_pack_schema_ab_blockpanel( BLIS_PACKED_ROW_PANELS_3MI,
+	                                        BLIS_PACKED_COL_PANELS_3MI,
+	                                        cntx );
 }
 
 void bli_trsm3m1_cntx_finalize( cntx_t* cntx )
@@ -123,9 +123,9 @@ void bli_trsm4m1_cntx_init( num_t dt, cntx_t* cntx )
 	);
 
 	// Set the pack_t schemas for native execution.
-	bli_cntx_set_pack_schema_ab( BLIS_PACKED_ROW_PANELS_4MI,
-	                             BLIS_PACKED_COL_PANELS_4MI,
-	                             cntx );
+	bli_cntx_set_pack_schema_ab_blockpanel( BLIS_PACKED_ROW_PANELS_4MI,
+	                                        BLIS_PACKED_COL_PANELS_4MI,
+	                                        cntx );
 }
 
 void bli_trsm4m1_cntx_finalize( cntx_t* cntx )
@@ -174,9 +174,9 @@ void bli_trsm1m_cntx_init( num_t dt, cntx_t* cntx )
 		);
 
 		// Set the pack_t schemas for the current induced method.
-		bli_cntx_set_pack_schema_ab( BLIS_PACKED_ROW_PANELS_1E,
-		                             BLIS_PACKED_COL_PANELS_1R,
-		                             cntx );
+		bli_cntx_set_pack_schema_ab_blockpanel( BLIS_PACKED_ROW_PANELS_1E,
+		                                        BLIS_PACKED_COL_PANELS_1R,
+		                                        cntx );
 	}
 	else // if ( bli_cntx_l3_ukr_prefers_rows_dt( dt, BLIS_GEMM_UKR, cntx ) )
 	{
@@ -195,9 +195,9 @@ void bli_trsm1m_cntx_init( num_t dt, cntx_t* cntx )
 		);
 
 		// Set the pack_t schemas for the current induced method.
-		bli_cntx_set_pack_schema_ab( BLIS_PACKED_ROW_PANELS_1R,
-		                             BLIS_PACKED_COL_PANELS_1E,
-		                             cntx );
+		bli_cntx_set_pack_schema_ab_blockpanel( BLIS_PACKED_ROW_PANELS_1R,
+		                                        BLIS_PACKED_COL_PANELS_1E,
+		                                        cntx );
 	}
 }
 

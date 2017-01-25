@@ -877,6 +877,12 @@ bli_obj_width_stored( obj )
 	(obj).n_panel = n0; \
 }
 
+#define bli_obj_set_panel_dims( m0, n0, obj ) \
+{ \
+	bli_obj_set_panel_length( m0, obj ); \
+	bli_obj_set_panel_width( n0, obj ); \
+}
+
 #define bli_obj_set_panel_dim( panel_dim, obj ) \
 { \
 	(obj).pd = panel_dim; \
@@ -985,6 +991,7 @@ bli_obj_width_stored( obj )
 #define bli_obj_induce_trans( obj ) \
 { \
 	{ \
+		/* Induce transposition among basic fields. */ \
 		dim_t  m_        = bli_obj_length( obj ); \
 		dim_t  n_        = bli_obj_width( obj ); \
 		inc_t  rs_       = bli_obj_row_stride( obj ); \
@@ -1000,6 +1007,15 @@ bli_obj_width_stored( obj )
 \
 		if ( bli_obj_is_upper_or_lower( obj ) ) \
 			bli_obj_toggle_uplo( obj ); \
+\
+		/* Induce transposition among packed fields. */ \
+		dim_t  m_padded_ = bli_obj_padded_length( obj ); \
+		dim_t  n_padded_ = bli_obj_padded_width( obj ); \
+		dim_t  m_panel_  = bli_obj_panel_length( obj ); \
+		dim_t  n_panel_  = bli_obj_panel_width( obj ); \
+\
+		bli_obj_set_padded_dims( n_padded_, m_padded_, obj ); \
+		bli_obj_set_panel_dims( n_panel_, m_panel_, obj ); \
 \
 		/* Note that this macro DOES NOT touch the transposition bit! If
 		   the calling code is using this macro to handle an object whose

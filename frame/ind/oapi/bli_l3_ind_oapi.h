@@ -80,3 +80,17 @@ GENPROT_NO2OP( 3m2 )
 GENPROT_NO2OP( 4mh )
 GENPROT_NO2OP( 4mb )
 
+
+//
+// Generate object-based prototypes for 1m methods that specify an algorithm
+// (e.g., block-panel or panel-block).
+//
+
+#undef  GENPROT
+#define GENPROT( imeth, alg ) \
+\
+void PASTEMAC2(gemm,imeth,alg) (              obj_t* alpha, obj_t* a, obj_t* b, obj_t* beta, obj_t* c ); \
+
+GENPROT( 1m, bp )
+GENPROT( 1m, pb )
+

@@ -151,9 +151,8 @@ void bli_gemm3m1_cntx_init( num_t dt, cntx_t* cntx )
 	);
 
 	// Set the pack_t schemas for the current induced method.
-	bli_cntx_set_pack_schema_ab( BLIS_PACKED_ROW_PANELS_3MI,
-	                             BLIS_PACKED_COL_PANELS_3MI,
-	                             cntx );
+	bli_cntx_set_pack_schema_a_block( BLIS_PACKED_ROW_PANELS_3MI, cntx );
+	bli_cntx_set_pack_schema_b_panel( BLIS_PACKED_COL_PANELS_3MI, cntx );
 }
 
 void bli_gemm3m1_cntx_stage( dim_t stage, cntx_t* cntx )
@@ -200,9 +199,8 @@ void bli_gemm3m2_cntx_init( num_t dt, cntx_t* cntx )
 	);
 
 	// Set the pack_t schemas for the current induced method.
-	bli_cntx_set_pack_schema_ab( BLIS_PACKED_ROW_PANELS_3MS,
-	                             BLIS_PACKED_COL_PANELS_3MI,
-	                             cntx );
+	bli_cntx_set_pack_schema_a_block( BLIS_PACKED_ROW_PANELS_3MS, cntx );
+	bli_cntx_set_pack_schema_b_panel( BLIS_PACKED_COL_PANELS_3MI, cntx );
 }
 
 void bli_gemm3m2_cntx_stage( dim_t stage, cntx_t* cntx )
@@ -249,9 +247,8 @@ void bli_gemm3m3_cntx_init( num_t dt, cntx_t* cntx )
 	);
 
 	// Set the pack_t schemas for the current induced method.
-	bli_cntx_set_pack_schema_ab( 0, // not yet needed; varies with _stage()
-	                             BLIS_PACKED_COL_PANELS_3MS,
-	                             cntx );
+	bli_cntx_set_pack_schema_a_block( 0, cntx ); // not yet needed; varies with _stage()
+	bli_cntx_set_pack_schema_b_panel( BLIS_PACKED_COL_PANELS_3MS, cntx );
 }
 
 void bli_gemm3m3_cntx_stage( dim_t stage, cntx_t* cntx )
@@ -259,15 +256,15 @@ void bli_gemm3m3_cntx_stage( dim_t stage, cntx_t* cntx )
 	// Set the pack_t schemas as a function of the stage of execution.
 	if ( stage == 0 )
 	{
-		bli_cntx_set_pack_schema_a( BLIS_PACKED_ROW_PANELS_RO, cntx );
+		bli_cntx_set_pack_schema_a_block( BLIS_PACKED_ROW_PANELS_RO, cntx );
 	}
 	else if ( stage == 1 )
 	{
-		bli_cntx_set_pack_schema_a( BLIS_PACKED_ROW_PANELS_IO, cntx );
+		bli_cntx_set_pack_schema_a_block( BLIS_PACKED_ROW_PANELS_IO, cntx );
 	}
 	else // if ( stage == 2 )
 	{
-		bli_cntx_set_pack_schema_a( BLIS_PACKED_ROW_PANELS_RPI, cntx );
+		bli_cntx_set_pack_schema_a_block( BLIS_PACKED_ROW_PANELS_RPI, cntx );
 	}
 }
 
@@ -311,9 +308,8 @@ void bli_gemm3mh_cntx_init( num_t dt, cntx_t* cntx )
 	);
 
 	// Set the pack_t schemas for the current induced method.
-	bli_cntx_set_pack_schema_ab( 0, // not yet needed; varies with _stage()
-	                             0, // not yet needed; varies with _stage()
-	                             cntx );
+	bli_cntx_set_pack_schema_a_block( 0, cntx ); // not yet needed; varies with _stage()
+	bli_cntx_set_pack_schema_b_panel( 0, cntx ); // not yet needed; varies with _stage()
 }
 
 void bli_gemm3mh_cntx_stage( dim_t stage, cntx_t* cntx )
@@ -321,18 +317,18 @@ void bli_gemm3mh_cntx_stage( dim_t stage, cntx_t* cntx )
 	// Set the pack_t schemas as a function of the stage of execution.
 	if ( stage == 0 )
 	{
-		bli_cntx_set_pack_schema_ab( BLIS_PACKED_ROW_PANELS_RO,
-		                             BLIS_PACKED_COL_PANELS_RO, cntx );
+		bli_cntx_set_pack_schema_a_block( BLIS_PACKED_ROW_PANELS_RO, cntx );
+		bli_cntx_set_pack_schema_b_panel( BLIS_PACKED_COL_PANELS_RO, cntx );
 	}
 	else if ( stage == 1 )
 	{
-		bli_cntx_set_pack_schema_ab( BLIS_PACKED_ROW_PANELS_IO,
-		                             BLIS_PACKED_COL_PANELS_IO, cntx );
+		bli_cntx_set_pack_schema_a_block( BLIS_PACKED_ROW_PANELS_IO, cntx );
+		bli_cntx_set_pack_schema_b_panel( BLIS_PACKED_COL_PANELS_IO, cntx );
 	}
 	else // if ( stage == 2 )
 	{
-		bli_cntx_set_pack_schema_ab( BLIS_PACKED_ROW_PANELS_RPI,
-		                             BLIS_PACKED_COL_PANELS_RPI, cntx );
+		bli_cntx_set_pack_schema_a_block( BLIS_PACKED_ROW_PANELS_RPI, cntx );
+		bli_cntx_set_pack_schema_b_panel( BLIS_PACKED_COL_PANELS_RPI, cntx );
 	}
 }
 
@@ -376,9 +372,8 @@ void bli_gemm4m1_cntx_init( num_t dt, cntx_t* cntx )
 	);
 
 	// Set the pack_t schemas for the current induced method.
-	bli_cntx_set_pack_schema_ab( BLIS_PACKED_ROW_PANELS_4MI,
-	                             BLIS_PACKED_COL_PANELS_4MI,
-	                             cntx );
+	bli_cntx_set_pack_schema_a_block( BLIS_PACKED_ROW_PANELS_4MI, cntx );
+	bli_cntx_set_pack_schema_b_panel( BLIS_PACKED_COL_PANELS_4MI, cntx );
 }
 
 void bli_gemm4m1_cntx_stage( dim_t stage, cntx_t* cntx )
@@ -425,9 +420,8 @@ void bli_gemm4mb_cntx_init( num_t dt, cntx_t* cntx )
 	);
 
 	// Set the pack_t schemas for the current induced method.
-	bli_cntx_set_pack_schema_ab( BLIS_PACKED_ROW_PANELS_4MI,
-	                             BLIS_PACKED_COL_PANELS_4MI,
-	                             cntx );
+	bli_cntx_set_pack_schema_a_block( BLIS_PACKED_ROW_PANELS_4MI, cntx );
+	bli_cntx_set_pack_schema_b_panel( BLIS_PACKED_COL_PANELS_4MI, cntx );
 }
 
 void bli_gemm4mb_cntx_stage( dim_t stage, cntx_t* cntx )
@@ -474,9 +468,8 @@ void bli_gemm4mh_cntx_init( num_t dt, cntx_t* cntx )
 	);
 
 	// Set the pack_t schemas for the current induced method.
-	bli_cntx_set_pack_schema_ab( 0, // not yet needed; varies with _stage()
-	                             0, // not yet needed; varies with _stage()
-	                             cntx );
+	bli_cntx_set_pack_schema_a_block( 0, cntx ); // not yet needed; varies with _stage()
+	bli_cntx_set_pack_schema_b_panel( 0, cntx ); // not yet needed; varies with _stage()
 }
 
 void bli_gemm4mh_cntx_stage( dim_t stage, cntx_t* cntx )
@@ -484,23 +477,23 @@ void bli_gemm4mh_cntx_stage( dim_t stage, cntx_t* cntx )
 	// Set the pack_t schemas as a function of the stage of execution.
 	if ( stage == 0 )
 	{
-		bli_cntx_set_pack_schema_ab( BLIS_PACKED_ROW_PANELS_RO,
-		                             BLIS_PACKED_COL_PANELS_RO, cntx );
+		bli_cntx_set_pack_schema_a_block( BLIS_PACKED_ROW_PANELS_RO, cntx );
+		bli_cntx_set_pack_schema_b_panel( BLIS_PACKED_COL_PANELS_RO, cntx );
 	}
 	else if ( stage == 1 )
 	{
-		bli_cntx_set_pack_schema_ab( BLIS_PACKED_ROW_PANELS_IO,
-		                             BLIS_PACKED_COL_PANELS_IO, cntx );
+		bli_cntx_set_pack_schema_a_block( BLIS_PACKED_ROW_PANELS_IO, cntx );
+		bli_cntx_set_pack_schema_b_panel( BLIS_PACKED_COL_PANELS_IO, cntx );
 	}
 	else if ( stage == 2 )
 	{
-		bli_cntx_set_pack_schema_ab( BLIS_PACKED_ROW_PANELS_RO,
-		                             BLIS_PACKED_COL_PANELS_IO, cntx );
+		bli_cntx_set_pack_schema_a_block( BLIS_PACKED_ROW_PANELS_RO, cntx );
+		bli_cntx_set_pack_schema_b_panel( BLIS_PACKED_COL_PANELS_IO, cntx );
 	}
 	else // if ( stage == 3 )
 	{
-		bli_cntx_set_pack_schema_ab( BLIS_PACKED_ROW_PANELS_IO,
-		                             BLIS_PACKED_COL_PANELS_RO, cntx );
+		bli_cntx_set_pack_schema_a_block( BLIS_PACKED_ROW_PANELS_IO, cntx );
+		bli_cntx_set_pack_schema_b_panel( BLIS_PACKED_COL_PANELS_RO, cntx );
 	}
 }
 
@@ -511,6 +504,22 @@ void bli_gemm4mh_cntx_finalize( cntx_t* cntx )
 // -----------------------------------------------------------------------------
 
 void bli_gemm1m_cntx_init( num_t dt, cntx_t* cntx )
+{
+	// Default to context for block-panel algorithm.
+	bli_gemm1mbp_cntx_init( dt, cntx );
+}
+
+void bli_gemm1mbp_cntx_init( num_t dt, cntx_t* cntx )
+{
+	bli_gemm1mxx_cntx_init( dt, FALSE, cntx );
+}
+
+void bli_gemm1mpb_cntx_init( num_t dt, cntx_t* cntx )
+{
+	bli_gemm1mxx_cntx_init( dt, TRUE, cntx );
+}
+
+void bli_gemm1mxx_cntx_init( num_t dt, bool_t is_pb, cntx_t* cntx )
 {
 	const ind_t method = BLIS_1M;
 
@@ -529,8 +538,24 @@ void bli_gemm1m_cntx_init( num_t dt, cntx_t* cntx )
 	// Initialize the context with packm-related kernels.
 	bli_packm_cntx_init( dt, cntx );
 
+	// Initialize the blocksizes according to the micro-kernel preference as
+	// well as the algorithm.
 	if ( bli_cntx_l3_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ) )
 	{
+		// This branch is used for algorithms 1m_c_bp, 1m_r_pb.
+
+		// Set the pack_t schemas for the c_bp or r_pb algorithms.
+		if ( !is_pb )
+		{
+			bli_cntx_set_pack_schema_a_block( BLIS_PACKED_ROW_PANELS_1E, cntx );
+			bli_cntx_set_pack_schema_b_panel( BLIS_PACKED_COL_PANELS_1R, cntx );
+		}
+		else // if ( is_pb )
+		{
+			bli_cntx_set_pack_schema_b_panel( BLIS_PACKED_ROW_PANELS_1R, cntx );
+			bli_cntx_set_pack_schema_a_block( BLIS_PACKED_COL_PANELS_1E, cntx );
+		}
+
 		// Initialize the context with the current architecture's register
 		// and cache blocksizes (and multiples), and the induced method.
 		bli_gks_cntx_set_blkszs
@@ -544,14 +569,23 @@ void bli_gemm1m_cntx_init( num_t dt, cntx_t* cntx )
 		  BLIS_KR, BLIS_KR, 1.0, 1.0,
 		  cntx
 		);
-
-		// Set the pack_t schemas for the current induced method.
-		bli_cntx_set_pack_schema_ab( BLIS_PACKED_ROW_PANELS_1E,
-		                             BLIS_PACKED_COL_PANELS_1R,
-		                             cntx );
 	}
 	else // if ( bli_cntx_l3_ukr_prefers_rows_dt( dt, BLIS_GEMM_UKR, cntx ) )
 	{
+		// This branch is used for algorithms 1m_r_bp, 1m_c_pb.
+
+		// Set the pack_t schemas for the r_bp or c_pb algorithms.
+		if ( !is_pb )
+		{
+			bli_cntx_set_pack_schema_a_block( BLIS_PACKED_ROW_PANELS_1R, cntx );
+			bli_cntx_set_pack_schema_b_panel( BLIS_PACKED_COL_PANELS_1E, cntx );
+		}
+		else // if ( is_pb )
+		{
+			bli_cntx_set_pack_schema_b_panel( BLIS_PACKED_ROW_PANELS_1E, cntx );
+			bli_cntx_set_pack_schema_a_block( BLIS_PACKED_COL_PANELS_1R, cntx );
+		}
+
 		// Initialize the context with the current architecture's register
 		// and cache blocksizes (and multiples), and the induced method.
 		bli_gks_cntx_set_blkszs
@@ -565,12 +599,15 @@ void bli_gemm1m_cntx_init( num_t dt, cntx_t* cntx )
 		  BLIS_KR, BLIS_KR, 1.0, 1.0,
 		  cntx
 		);
-
-		// Set the pack_t schemas for the current induced method.
-		bli_cntx_set_pack_schema_ab( BLIS_PACKED_ROW_PANELS_1R,
-		                             BLIS_PACKED_COL_PANELS_1E,
-		                             cntx );
 	}
+
+	// Set the anti-preference field to TRUE when executing a panel-block
+	// algorithm, and FALSE otherwise. This will cause higher-level generic
+	// code to establish (if needed) disagreement between the storage of C and
+	// the micro-kernel output preference so that the two will come back into
+	// agreement in the panel-block macro-kernel (which implemented in terms
+	// of the block-panel macro-kernel with some induced transpositions).
+	bli_cntx_set_anti_pref( is_pb, cntx );
 }
 
 void bli_gemm1m_cntx_stage( dim_t stage, cntx_t* cntx )

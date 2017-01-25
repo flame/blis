@@ -75,10 +75,23 @@ void bli_cntl_obj_clear
        cntl_t* cntl
      );
 
+// -----------------------------------------------------------------------------
+
 void bli_cntl_free
      (
        cntl_t* cntl,
        thrinfo_t* thread
+     );
+
+void bli_cntl_free_w_thrinfo
+     (
+       cntl_t* cntl,
+       thrinfo_t* thread
+     );
+
+void bli_cntl_free_wo_thrinfo
+     (
+       cntl_t* cntl
      );
 
 cntl_t* bli_cntl_copy

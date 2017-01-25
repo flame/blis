@@ -975,9 +975,11 @@ typedef struct cntx_s
 
 	opid_t    family;
 	ind_t     method;
-	pack_t    schema_a;
-	pack_t    schema_b;
-	pack_t    schema_c;
+	pack_t    schema_a_block;
+	pack_t    schema_b_panel;
+	pack_t    schema_c_panel;
+
+	bool_t    anti_pref;
 
 	dim_t     thrloop[ BLIS_NUM_LOOPS ];
 
