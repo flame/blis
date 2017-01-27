@@ -120,6 +120,12 @@
 
 #endif
 
+#define BLIS_DEFAULT_M_THREAD_RATIO 4
+#define BLIS_DEFAULT_N_THREAD_RATIO 1
+
+#define BLIS_DEFAULT_MR_THREAD_MAX 1
+#define BLIS_DEFAULT_NR_THREAD_MAX 1
+
 /*
 #define BLIS_DEFAULT_MC_C              120
 #define BLIS_DEFAULT_KC_C              240
