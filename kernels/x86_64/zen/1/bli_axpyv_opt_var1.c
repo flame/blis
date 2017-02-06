@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2016 - 2017, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -294,4 +295,174 @@ void bli_saxpyv_opt_var1
             y1 += incy;
         }
     }
-}
+}// end of function
+
+
+void bli_saxpyv_opt_var3  (
+			   conj_t          conjx,
+			   dim_t           n,
+			   float* restrict alpha,
+			   float* restrict x, inc_t incx,
+			   float* restrict y, inc_t incy,
+                            cntx_t*         cntx
+			   )
+{
+  float* restrict x1 = x;
+  float* restrict y1 = y;
+  dim_t  i;
+  v8ff_t            alpha1v;
+  v8ff_t            x1v;
+  v8ff_t            y1v;
+  v8ff_t            x2v;
+  v8ff_t            y2v;
+
+
+  if ( ( (n) == 0 ) ) return;
+
+  /* If alpha is zero, return. */
+  if ( ( ((*alpha)) == (0.0F) ) ) return;
+
+
+#if 0
+  /* If alpha is one, use addv. */
+  if ( ( ((*alpha)) == (1.0F) ) )
+    {
+      /* Query the context for the kernel function pointer. */
+      const num_t         dt     = ( BLIS_FLOAT    );
+      saddv_ft addv_p = ( ((&(( ((cntx))->l1v_kers ))[ BLIS_ADDV_KER ]))->ptr[ (dt) ] );
+
+      addv_p (
+              conjx,
+              n,
+              x, incx,
+              y, incy,
+              cntx
+	      );
+      return;
+    }
+#endif
+
+  if ( incx == 1 && incy == 1 )
+    {
+      alpha1v.v = _mm256_broadcast_ss( alpha );
+
+      for ( i = 0; i + 15 < n; i += 16 )
+        {
+          x1v.v = _mm256_loadu_ps( ( float* )x1 );
+          x2v.v = _mm256_loadu_ps( ( float* )(x1 + 8));
+          y1v.v = _mm256_loadu_ps( ( float* )y1 );
+          y2v.v = _mm256_loadu_ps( ( float* )(y1 + 8 ) );
+
+          y1v.v += alpha1v.v * x1v.v;
+          y2v.v += alpha1v.v * x2v.v;
+
+          _mm256_storeu_ps( ( float* )(y1), y1v.v );
+          _mm256_storeu_ps( ( float* )(y1 + 8), y2v.v );
+          
+	  x1 += 16;
+          y1 += 16;
+        }
+
+      for (; i + 7 < n; i += 8)
+        {
+          x1v.v = _mm256_loadu_ps( ( float* )x1 );
+          y1v.v = _mm256_loadu_ps( ( float* )y1 );
+
+          y1v.v += alpha1v.v * x1v.v;
+          _mm256_storeu_ps( ( float* )(y1), y1v.v );
+
+          x1 += 8;
+          y1 += 8;
+        }
+
+      for(; i < n; i++) {
+        y[i] += (*alpha) * x[i];
+      }
+    }
+  else
+    {
+      for ( i = 0; i < n; ++i )
+        {
+          (( *y1 )) += (( *alpha )) * (( *x1 ));
+
+          x1 += incx;
+          y1 += incy;
+        }
+    }
+}  // End of function
+
+
+void bli_daxpyv_opt_var3  (
+			   conj_t          conjx,
+			   dim_t           n,
+			   double* restrict alpha,
+			   double* restrict x, inc_t incx,
+			   double* restrict y, inc_t incy,
+                            cntx_t*         cntx
+			   )
+{
+  double* restrict x1 = x;
+  double* restrict y1 = y;
+  dim_t  i;
+  v4df_t            alpha1v;
+  v4df_t            x1v;
+  v4df_t            y1v;
+  v4df_t            x2v;
+  v4df_t            y2v;
+
+
+  if ( ( (n) == 0 ) ) return;
+
+  /* If alpha is zero, return. */
+  if ( ( ((*alpha)) == (0.0F) ) ) return;
+
+
+  if ( incx == 1 && incy == 1 )
+    {
+      alpha1v.v = _mm256_broadcast_sd( alpha );
+
+      for ( i = 0; i + 7 < n; i += 8 )
+        {
+          x1v.v = _mm256_loadu_pd( ( double* )x1 );
+          x2v.v = _mm256_loadu_pd( ( double* )(x1 + 4));
+          y1v.v = _mm256_loadu_pd( ( double* )y1 );
+          y2v.v = _mm256_loadu_pd( ( double* )(y1 + 4 ) );
+
+          y1v.v += alpha1v.v * x1v.v;
+          y2v.v += alpha1v.v * x2v.v;
+
+          _mm256_storeu_pd( ( double* )(y1), y1v.v );
+          _mm256_storeu_pd( ( double* )(y1 + 4), y2v.v );
+          
+	  x1 += 8;
+          y1 += 8;
+        }
+
+      for (; i + 3 < n; i += 4)
+        {
+          x1v.v = _mm256_loadu_pd( ( double* )x1 );
+          y1v.v = _mm256_loadu_pd( ( double* )y1 );
+
+          y1v.v += alpha1v.v * x1v.v;
+          _mm256_storeu_pd( ( double* )(y1), y1v.v );
+
+          x1 += 4;
+          y1 += 4;
+        }
+
+      for(; i < n; i++) {
+        y[i] += (*alpha) * x[i];
+      }
+    }
+  else
+    {
+      for ( i = 0; i < n; ++i )
+        {
+          (( *y1 )) += (( *alpha )) * (( *x1 ));
+
+          x1 += incx;
+          y1 += incy;
+        }
+    }
+}  // End of function
+

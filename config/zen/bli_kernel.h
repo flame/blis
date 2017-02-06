@@ -231,8 +231,17 @@ gint_t bli_gemm_small_matrix
 // -- addv --
 
 // -- axpyv --
+#if 0
+
 #define BLIS_DAXPYV_KERNEL         bli_daxpyv_opt_var1
 #define BLIS_SAXPYV_KERNEL         bli_saxpyv_opt_var1
+
+#else
+
+#define BLIS_DAXPYV_KERNEL         bli_daxpyv_opt_var3
+#define BLIS_SAXPYV_KERNEL         bli_saxpyv_opt_var3
+
+#endif
 // -- copyv --
 
 // -- dotv --
