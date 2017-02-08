@@ -174,7 +174,7 @@ void bli_daxpyv_opt_var1
 typedef union
 {
     __m256 v;
-    float  f[8];
+  float  f[8] __attribute__((aligned(64)));
 } v8ff_t;
 
 /* ! /brief Single precision axpyv function.
@@ -517,18 +517,12 @@ void bli_saxpyv_opt_var4  (
           y4v.v = _mm256_loadu_ps( ( float* )(y1 + 24));
           y5v.v = _mm256_loadu_ps( ( float* )(y1 + 32));
 
-#if 0
-	  x1v.v =   _mm256_fmadd_ps(x1v.v, y1v.v, alpha1v.v); // x1 = alpha * x1 + y1
-	  x2v.v =  _mm256_fmadd_ps(x2v.v, y2v.v, alpha1v.v);
-	  x3v.v =  _mm256_fmadd_ps(x3v.v, y3v.v, alpha1v.v);
-	  x4v.v =  _mm256_fmadd_ps(x4v.v, y4v.v, alpha1v.v);
-	  x5v.v =  _mm256_fmadd_ps(x5v.v, y5v.v, alpha1v.v);
-#endif
-	  _mm256_fmadd_ps(x1v.v, y1v.v, alpha1v.v); // x1 = alpha * x1 + y1
-	  _mm256_fmadd_ps(x2v.v, y2v.v, alpha1v.v);
-	  _mm256_fmadd_ps(x3v.v, y3v.v, alpha1v.v);
-	  _mm256_fmadd_ps(x4v.v, y4v.v, alpha1v.v);
-	  _mm256_fmadd_ps(x5v.v, y5v.v, alpha1v.v);
+
+	  x1v.v =  _mm256_fmadd_ps(x1v.v,  alpha1v.v, y1v.v); // x1 = alpha * x1 + y1
+	  x2v.v =  _mm256_fmadd_ps(x2v.v,  alpha1v.v, y2v.v);
+	  x3v.v =  _mm256_fmadd_ps(x3v.v,  alpha1v.v, y3v.v);
+	  x4v.v =  _mm256_fmadd_ps(x4v.v,  alpha1v.v, y4v.v);
+	  x5v.v =  _mm256_fmadd_ps(x5v.v,  alpha1v.v, y5v.v);
 
 
           _mm256_storeu_ps( ( float* )(y1), x1v.v );
@@ -536,18 +530,6 @@ void bli_saxpyv_opt_var4  (
           _mm256_storeu_ps( ( float* )(y1 + 16), x3v.v );
           _mm256_storeu_ps( ( float* )(y1 + 24), x4v.v );
           _mm256_storeu_ps( ( float* )(y1 + 32), x5v.v );
-#if 0
-          y1v.v += alpha1v.v * x1v.v;
-          y2v.v += alpha1v.v * x2v.v;
-          y3v.v += alpha1v.v * x3v.v;
-          y4v.v += alpha1v.v * x4v.v;
-          y5v.v += alpha1v.v * x5v.v;
-          _mm256_storeu_ps( ( float* )(y1), y1v.v );
-          _mm256_storeu_ps( ( float* )(y1 + 8), y2v.v );
-          _mm256_storeu_ps( ( float* )(y1 + 16), y3v.v );
-          _mm256_storeu_ps( ( float* )(y1 + 24), y4v.v );
-          _mm256_storeu_ps( ( float* )(y1 + 32), y5v.v );
-#endif
 
           x1 += 40;
           y1 += 40;
@@ -565,29 +547,16 @@ void bli_saxpyv_opt_var4  (
           y3v.v = _mm256_loadu_ps( ( float* )(y1 + 16));
           y4v.v = _mm256_loadu_ps( ( float* )(y1 + 24));
 
-	  _mm256_fmadd_ps(x1v.v, y1v.v, alpha1v.v); // x1v = alpha * x1v + y1v
-	  _mm256_fmadd_ps(x2v.v, y2v.v, alpha1v.v);
-	  _mm256_fmadd_ps(x3v.v, y3v.v, alpha1v.v);
-	  _mm256_fmadd_ps(x4v.v, y4v.v, alpha1v.v);
+	  x1v.v =   _mm256_fmadd_ps(x1v.v, alpha1v.v, y1v.v); // x1v = alpha * x1v + y1v
+	  x2v.v =   _mm256_fmadd_ps(x2v.v, alpha1v.v, y2v.v);
+	  x3v.v =   _mm256_fmadd_ps(x3v.v, alpha1v.v, y3v.v);
+	  x4v.v =   _mm256_fmadd_ps(x4v.v, alpha1v.v, y4v.v);
 
 
           _mm256_storeu_ps( ( float* )(y1), x1v.v );
           _mm256_storeu_ps( ( float* )(y1 + 8), x2v.v );
           _mm256_storeu_ps( ( float* )(y1 + 16), x3v.v );
           _mm256_storeu_ps( ( float* )(y1 + 24), x4v.v );
-
-
-#if 0
-          y1v.v += alpha1v.v * x1v.v;
-          y2v.v += alpha1v.v * x2v.v;
-          y3v.v += alpha1v.v * x3v.v;
-          y4v.v += alpha1v.v * x4v.v;
-
-          _mm256_storeu_ps( ( float* )(y1), y1v.v );
-          _mm256_storeu_ps( ( float* )(y1 + 8), y2v.v );
-          _mm256_storeu_ps( ( float* )(y1 + 16), y3v.v );
-          _mm256_storeu_ps( ( float* )(y1 + 24), y4v.v );
-#endif
 
           x1 += 32;
           y1 += 32;
@@ -601,19 +570,11 @@ void bli_saxpyv_opt_var4  (
           y1v.v = _mm256_loadu_ps( ( float* )y1 );
           y2v.v = _mm256_loadu_ps( ( float* )(y1 + 8 ) );
 
-	  _mm256_fmadd_ps(x1v.v, y1v.v, alpha1v.v); // x1v = alpha * x1v + y1v
-	  _mm256_fmadd_ps(x2v.v, y2v.v, alpha1v.v);
+	  x1v.v =  _mm256_fmadd_ps(x1v.v, alpha1v.v, y1v.v); // x1v = alpha * x1v + y1v
+	  x2v.v =  _mm256_fmadd_ps(x2v.v, alpha1v.v, y2v.v);
 
           _mm256_storeu_ps( ( float* )(y1), x1v.v );
           _mm256_storeu_ps( ( float* )(y1 + 8), x2v.v );
-
-#if 0
-          y1v.v += alpha1v.v * x1v.v;
-          y2v.v += alpha1v.v * x2v.v;
-
-          _mm256_storeu_ps( ( float* )(y1), y1v.v );
-          _mm256_storeu_ps( ( float* )(y1 + 8), y2v.v );
-#endif
 
           x1 += 16;
 	  y1 += 16;
@@ -624,14 +585,9 @@ void bli_saxpyv_opt_var4  (
           x1v.v = _mm256_loadu_ps( ( float* )x1 );
           y1v.v = _mm256_loadu_ps( ( float* )y1 );
 
-	  _mm256_fmadd_ps(x1v.v, y1v.v, alpha1v.v); // x1v = alpha * x1v + y1v
+	  x1v.v = _mm256_fmadd_ps(x1v.v, alpha1v.v, y1v.v); // x1v = alpha * x1v + y1v
 
           _mm256_storeu_ps( ( float* )(y1), x1v.v );
-
-#if 0
-          y1v.v += alpha1v.v * x1v.v;
-          _mm256_storeu_ps( ( float* )(y1), y1v.v );
-#endif
 
           x1 += 8;
           y1 += 8;
