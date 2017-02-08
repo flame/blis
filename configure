@@ -493,7 +493,7 @@ main()
 	fi
 	
 	
-	# Check the threading model flag.
+	# Check the threading model flag and standardize its value, if needed.
 	# NOTE: 'omp' is deprecated but still supported; 'openmp' is preferred.
 	enable_openmp='no'
 	enable_openmp_01=0
@@ -506,12 +506,14 @@ main()
 		echo "${script_name}: using OpenMP for threading."
 		enable_openmp='yes'
 		enable_openmp_01=1
+		threading_model="openmp" # Standardize the value.
 	elif [ "x${threading_model}" = "xpthreads" ] ||
 	     [ "x${threading_model}" = "xpthread" ] ||
 	     [ "x${threading_model}" = "xposix" ]; then
 		echo "${script_name}: using Pthreads for threading."
 		enable_pthreads='yes'
 		enable_pthreads_01=1
+		threading_model="pthreads" # Standardize the value.
 	elif [ "x${threading_model}" = "xno" ] ||
 	     [ "x${threading_model}" = "xnone" ]; then
 		echo "${script_name}: threading is disabled."
