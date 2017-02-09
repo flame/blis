@@ -79,6 +79,11 @@
 #include "bla_xerbla.h"
 
 
+// -- Level-0 BLAS prototypes --
+
+#include "bla_cabs1.h"
+
+
 // -- Level-1 BLAS prototypes --
 
 #include "bla_amax.h"
