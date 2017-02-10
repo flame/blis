@@ -215,3 +215,193 @@ void bli_dscalv_opt(
       }
   }
 }  // End of function
+
+
+void bli_sscalv_opt_var2(
+                          conj_t          conjalpha,
+                          dim_t           n,
+                          float* restrict alpha,
+                          float* restrict x, 
+                          inc_t           incx,
+                          cntx_t*         cntx
+                        )
+{
+    float* restrict chi1;
+    float  alpha_conj;
+    dim_t  i;
+    
+
+    if (((n) == 0)) return;
+
+    /* If alpha is one, return. */
+    if ((((*alpha)) == (1.0F))) return;
+
+    /* If alpha is zero, use setv. */
+    if ((((*alpha)) == (0.0F)))
+    {
+        float* zero = ((float*)(void*)(
+            ((char*)(((BLIS_ZERO).buffer))) +
+            (dim_t)(BLIS_FLOAT * sizeof(dcomplex))
+            ));
+
+        /* Query the context for the kernel function pointer. */
+        const num_t         dt = (BLIS_FLOAT);
+        ssetv_ft setv_p = (((&((((cntx))->l1v_kers))[BLIS_SETV_KER]))->ptr[(dt)]);
+
+        setv_p(
+            BLIS_NO_CONJUGATE,
+            n,
+            zero,
+            x, incx,
+            cntx
+            );
+        return;
+    }
+
+    {
+        {
+            (((alpha_conj))) = (((*alpha)));
+        };
+    };
+
+   
+    float* x1 = x;
+    __m256 alphaV;
+    __m256 x1v; //
+    __m256 x2v;
+    __m256 y1v; // x
+    __m256 y2v; 
+
+    if (incx == 1)
+    {
+      alphaV = _mm256_broadcast_ss(alpha);
+
+        for (i = 0; i+15 < n; i += 16)       
+        {
+	  x1v = _mm256_loadu_ps(x1);
+	  x2v = _mm256_loadu_ps(x1 + 8);
+	  y1v = _mm256_mul_ps(x1v, alphaV);
+	  y2v = _mm256_mul_ps(x2v, alphaV);
+	  _mm256_storeu_ps(x1, y1v);
+	  _mm256_storeu_ps(x1 + 8, y2v);
+	  x1 += 16;
+	}
+	for (; i + 7 < n; i += 8)
+	  {
+	    x1v = _mm256_loadu_ps(x1);
+	    y1v = _mm256_mul_ps(x1v, alphaV);
+	    _mm256_storeu_ps( (float*)x1, y1v);
+	    x1 += 8;
+	  }
+	for (; i < n; i++)
+	  {
+	    x[i] = (alpha_conj) * x[i];
+	  }
+    }
+    else
+    {
+      chi1 = x;
+        for (i = 0; i < n; ++i)
+        {
+            {
+                ((*chi1)) = ((alpha_conj)) * ((*chi1));
+            };
+
+            chi1 += incx;
+        }
+    }
+}// end of function
+
+
+void bli_dscalv_opt_var2(
+                      conj_t           conjalpha,
+                      dim_t            n,
+                      double* restrict alpha,
+                      double* restrict x, 
+                      inc_t           incx,
+                      cntx_t*         cntx
+                   )
+{
+    double* restrict chi1;
+    double  alpha_conj;
+    dim_t  i;
+
+    if (((n) == 0)) return;
+
+    /* If alpha is one, return. */
+    if ((((*alpha)) == (1.0))) return;
+
+    /* If alpha is zero, use setv. */
+    if ((((*alpha)) == (0.0)))
+    {
+        double* zero = ((double*)(void*)(
+            ((char*)(((BLIS_ZERO).buffer))) +
+            (dim_t)(BLIS_DOUBLE * sizeof(dcomplex))
+            ));
+
+        /* Query the context for the kernel function pointer. */
+        const num_t         dt = (BLIS_DOUBLE);
+        dsetv_ft setv_p = (((&((((cntx))->l1v_kers))[BLIS_SETV_KER]))->ptr[(dt)]);
+
+        setv_p(
+                BLIS_NO_CONJUGATE,
+                n,
+                zero,
+                x, incx,
+                cntx
+            );
+        return;
+    }
+
+  {
+      {
+          (((alpha_conj))) = (((*alpha)));
+      };
+  };
+  
+  double* x1 = x;
+    __m256d alphaV;
+    __m256d x1v; //
+    __m256d x2v;
+    __m256d y1v; 
+    __m256d y2v; 
+
+    if (incx == 1)
+    {
+      alphaV = _mm256_broadcast_sd(alpha);
+
+        for (i = 0; i+7 < n; i += 8)       
+        {
+	  x1v = _mm256_loadu_pd(x1);
+	  x2v = _mm256_loadu_pd(x1 + 4);
+	  y1v = _mm256_mul_pd(x1v, alphaV);
+	  y2v = _mm256_mul_pd(x2v, alphaV);
+	  _mm256_storeu_pd(x1, y1v);
+	  _mm256_storeu_pd(x1 + 4, y2v);
+	  x1 += 8;
+	}
+	for (; i + 3 < n; i += 4)
+	  {
+	    x1v = _mm256_loadu_pd(x1);
+	    y1v = _mm256_mul_pd(x1v, alphaV);
+	    _mm256_storeu_pd( (double*)x1, y1v);
+	    x1 += 4;
+	  }
+	for (; i < n; i++)
+	  {
+	    x[i] = (alpha_conj) * x[i];
+	  }
+    }
+    else
+    {
+      chi1 = x;
+        for (i = 0; i < n; ++i)
+        {
+            {
+                ((*chi1)) = ((alpha_conj)) * ((*chi1));
+            };
+
+            chi1 += incx;
+        }
+    }
+}// end of function

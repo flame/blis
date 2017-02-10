@@ -257,8 +257,14 @@ gint_t bli_gemm_small_matrix
 // -- scal2v --
 
 // -- scalv --
+#if 0
 #define BLIS_SSCALV_KERNEL   bli_sscalv_opt
 #define BLIS_DSCALV_KERNEL   bli_dscalv_opt
+#else
+#define BLIS_SSCALV_KERNEL   bli_sscalv_opt_var2
+#define BLIS_DSCALV_KERNEL   bli_dscalv_opt_var2
+
+#endif
 
 // -- setv --
 
