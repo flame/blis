@@ -161,7 +161,7 @@
 
 // --gemmtrsm-related --
 #define BLIS_SGEMMTRSM_L_UKERNEL bli_sgemmtrsm_l_6x16
-
+#define BLIS_DGEMMTRSM_L_UKERNEL bli_dgemmtrsm_l_6x8
 
 #define BLIS_SMALL_MATRIX_ENABLE
 //This will select the threshold below which small matrix code will be called.

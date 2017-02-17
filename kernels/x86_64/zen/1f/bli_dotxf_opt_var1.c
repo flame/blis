@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2017, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -388,7 +388,7 @@ void bli_ddotxf_int_var1
 
     double            rho0, rho1, rho2, rho3;
     double            a0c, a1c, a2c, a3c, x0c;
-    dim_t  i;
+    dim_t  i, j;
     bool_t            use_ref = FALSE;
     const dim_t fusefac = 4;
     const dim_t n_elem_per_reg = 4;
@@ -413,7 +413,7 @@ void bli_ddotxf_int_var1
 
     // If there is anything that would interfere with our use of aligned
     // vector loads/stores, call the reference implementation.
-    if ( b_n != fusefac )
+    if ( b_n > fusefac )
     {
         use_ref = TRUE;
     }
@@ -439,12 +439,6 @@ void bli_ddotxf_int_var1
         return;
     }
 
-    a0 = a_cast;
-    a1 = a_cast +   lda;
-    a2 = a_cast + 2*lda;
-    a3 = a_cast + 3*lda;
-    x0 = x_cast;
-
     m_run =  m / n_elem_per_reg;
     m_left = m % n_elem_per_reg;
 
@@ -453,66 +447,107 @@ void bli_ddotxf_int_var1
     rho2_vec.v = _mm256_setzero_pd();
     rho3_vec.v = _mm256_setzero_pd();
 
-    for(i = 0; i < m_run; i++)
+    if(b_n == fusefac)
     {
-        // load the input
-        a0c_vec.v = _mm256_loadu_pd(a0);
-        a1c_vec.v = _mm256_loadu_pd(a1);
-        a2c_vec.v = _mm256_loadu_pd(a2);
-        a3c_vec.v = _mm256_loadu_pd(a3);
+        a0 = a_cast;
+        a1 = a_cast +   lda;
+        a2 = a_cast + 2*lda;
+        a3 = a_cast + 3*lda;
+        x0 = x_cast;
 
-        x0c_vec.v = _mm256_loadu_pd(x0);
+        for(i = 0; i < m_run; i++)
+        {
+            // load the input
+            a0c_vec.v = _mm256_loadu_pd(a0);
+            a1c_vec.v = _mm256_loadu_pd(a1);
+            a2c_vec.v = _mm256_loadu_pd(a2);
+            a3c_vec.v = _mm256_loadu_pd(a3);
 
-        //calculate the dot product
-        rho0_vec.v += a0c_vec.v * x0c_vec.v;
-        rho1_vec.v += a1c_vec.v * x0c_vec.v;
-        rho2_vec.v += a2c_vec.v * x0c_vec.v;
-        rho3_vec.v += a3c_vec.v * x0c_vec.v;
+            x0c_vec.v = _mm256_loadu_pd(x0);
 
-        a0 += n_elem_per_reg;
-        a1 += n_elem_per_reg;
-        a2 += n_elem_per_reg;
-        a3 += n_elem_per_reg;
-        x0 += n_elem_per_reg;
+            //calculate the dot product
+            rho0_vec.v = _mm256_fmadd_pd(a0c_vec.v, x0c_vec.v, rho0_vec.v);
+            rho1_vec.v = _mm256_fmadd_pd(a1c_vec.v, x0c_vec.v, rho1_vec.v);
+            rho2_vec.v = _mm256_fmadd_pd(a2c_vec.v, x0c_vec.v, rho2_vec.v);
+            rho3_vec.v = _mm256_fmadd_pd(a3c_vec.v, x0c_vec.v, rho3_vec.v);
 
+            a0 += n_elem_per_reg;
+            a1 += n_elem_per_reg;
+            a2 += n_elem_per_reg;
+            a3 += n_elem_per_reg;
+            x0 += n_elem_per_reg;
+
+        }
+
+        // Accumulate the output from vector register
+        rho0 = rho0_vec.d[0] + rho0_vec.d[1] + rho0_vec.d[2] + rho0_vec.d[3];
+        rho1 = rho1_vec.d[0] + rho1_vec.d[1] + rho1_vec.d[2] + rho1_vec.d[3];
+        rho2 = rho2_vec.d[0] + rho2_vec.d[1] + rho2_vec.d[2] + rho2_vec.d[3];
+        rho3 = rho3_vec.d[0] + rho3_vec.d[1] + rho3_vec.d[2] + rho3_vec.d[3];
+
+        // if input data size is non multiple of the number of elements in vector register
+        for(i = 0; i < m_left; i++)
+        {
+
+            a0c = *a0;
+            a1c = *a1;
+            a2c = *a2;
+            a3c = *a3;
+            x0c = *x0;
+
+            rho0 += a0c * x0c;
+            rho1 += a1c * x0c;
+            rho2 += a2c * x0c;
+            rho3 += a3c * x0c;
+
+            a0 += 1;
+            a1 += 1;
+            a2 += 1;
+            a3 += 1;
+            x0 += 1;
+        }
+
+        y0 = y_cast;
+        y1 = y0 + 1;
+        y2 = y1 + 1;
+        y3 = y2 + 1;
+
+        //store the output data
+        (*y0) = (*y0) * (*beta_cast) + rho0 * (*alpha_cast);
+        (*y1) = (*y1) * (*beta_cast) + rho1 * (*alpha_cast);
+        (*y2) = (*y2) * (*beta_cast) + rho2 * (*alpha_cast);
+        (*y3) = (*y3) * (*beta_cast) + rho3 * (*alpha_cast);
     }
-
-    // Accumulate the output from vector register
-    rho0 = rho0_vec.d[0] + rho0_vec.d[1] + rho0_vec.d[2] + rho0_vec.d[3];
-    rho1 = rho1_vec.d[0] + rho1_vec.d[1] + rho1_vec.d[2] + rho1_vec.d[3];
-    rho2 = rho2_vec.d[0] + rho2_vec.d[1] + rho2_vec.d[2] + rho2_vec.d[3];
-    rho3 = rho3_vec.d[0] + rho3_vec.d[1] + rho3_vec.d[2] + rho3_vec.d[3];
-
-    // if input data size is non multiple of the number of elements in vector register
-    for(i = 0; i < m_left; i++)
+    else
     {
+        // the case where b_n is less than fuse factor
+        for ( i = 0; i < b_n; ++i )
+        {
+            a0   = a + (0  )*inca + (i  )*lda;
+            x0   = x + (0  )*incx;
+            y0   = y + (i  )*incy;
+            rho0 = 0.0;
 
-        a0c = *a0;
-        a1c = *a1;
-        a2c = *a2;
-        a3c = *a3;
-        x0c = *x0;
+            rho0_vec.v = _mm256_setzero_pd();
 
-        rho0 += a0c * x0c;
-        rho1 += a1c * x0c;
-        rho2 += a2c * x0c;
-        rho3 += a3c * x0c;
+            for(j = 0; j < m_run; j++)
+            {
+                a0c_vec.v = _mm256_loadu_pd(a0);
+                x0c_vec.v = _mm256_loadu_pd(x0);
+                rho0_vec.v = _mm256_fmadd_pd(a0c_vec.v, x0c_vec.v, rho0_vec.v);
 
-        a0 += 1;
-        a1 += 1;
-        a2 += 1;
-        a3 += 1;
-        x0 += 1;
+                a0 += n_elem_per_reg;
+                x0 += n_elem_per_reg;
+            }
+
+           rho0 = rho0_vec.d[0] + rho0_vec.d[1] + rho0_vec.d[2] + rho0_vec.d[3];
+
+           for(j = 0; j < m_left; j++)
+           {
+                rho0 += a0[j] * x0[j];
+           }
+
+           (*y0) = (*y0) *  (*beta) + rho0 * (*alpha);
+        }
     }
-
-    y0 = y_cast;
-    y1 = y0 + 1;
-    y2 = y1 + 1;
-    y3 = y2 + 1;
-
-    //store the output data
-    (*y0) = (*y0) * (*beta_cast) + rho0 * (*alpha_cast);
-    (*y1) = (*y1) * (*beta_cast) + rho1 * (*alpha_cast);
-    (*y2) = (*y2) * (*beta_cast) + rho2 * (*alpha_cast);
-    (*y3) = (*y3) * (*beta_cast) + rho3 * (*alpha_cast);
 }
