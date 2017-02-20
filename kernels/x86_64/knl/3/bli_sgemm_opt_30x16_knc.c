@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -166,20 +166,26 @@ int32_t offsets[32] __attribute__((aligned(0x1000))) = { 0,  1,  2,  3,  4,  5, 
 //#define MONITORS
 //#define LOOPMON
 void bli_sgemm_opt_30x16_knc(
-                    dim_t            k,
+                    dim_t            k_,
                     float*  restrict alpha,
                     float*  restrict a,
                     float*  restrict b,
                     float*  restrict beta,
-                    float*  restrict c, inc_t rs_c, inc_t cs_c,
+                    float*  restrict c, inc_t rs_c_, inc_t cs_c_,
                     auxinfo_t*      data,
                     cntx_t* restrict cntx
                   )
 {
+    (void)data;
+    (void)cntx;
+
     const float * a_next = bli_auxinfo_next_a( data );
     const float * b_next = bli_auxinfo_next_b( data );
 
     const int32_t * offsetPtr = &offsets[0];
+    const int64_t k = k_;
+    const int64_t rs_c = rs_c_;
+    const int64_t cs_c = cs_c_;
 
 #ifdef MONITORS
     int toph, topl, both, botl, midl, midh, mid2l, mid2h;
