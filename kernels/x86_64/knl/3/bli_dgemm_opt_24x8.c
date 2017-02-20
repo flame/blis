@@ -223,7 +223,7 @@ void bli_dgemm_opt_24x8(
     VMOVAPS(ZMM(11), ZMM(8))   MOV(RAX, VAR(a)) //load address of a
     VMOVAPS(ZMM(12), ZMM(8))   MOV(RBX, VAR(b)) //load address of b
     VMOVAPS(ZMM(13), ZMM(8))   MOV(RCX, VAR(c)) //load address of c
-    VMOVAPS(ZMM(14), ZMM(8))   VMOVAPD(ZMM(0), MEM(RBX)) //pre-load b
+    VMOVAPS(ZMM(14), ZMM(8))
     VMOVAPS(ZMM(15), ZMM(8))   MOV(RDI, VAR(offsetPtr))
     VMOVAPS(ZMM(16), ZMM(8))   VMOVAPS(ZMM(4), MEM(RDI))
 #if SCATTER_PREFETCH_C
@@ -257,6 +257,11 @@ void bli_dgemm_opt_24x8(
     MOV(VAR(midl), EAX)
     MOV(VAR(midh), EDX)
 #endif
+
+    TEST(RSI, RSI)
+    JZ(POSTACCUM)
+    
+    VMOVAPD(ZMM(0), MEM(RBX)) //pre-load b
 
     SUB(RSI, IMM(32))
     JLE(TAIL)
