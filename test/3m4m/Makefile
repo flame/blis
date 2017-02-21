@@ -107,8 +107,9 @@ BLIS_LIB       := $(BLIS_LIB_PATH)/libblis.a
 # BLAS library path(s). This is where the BLAS libraries reside.
 HOME_LIB_PATH  := $(HOME)/flame/lib
 #MKL_LIB_PATH   := /opt/apps/intel/13/composer_xe_2013.2.146/mkl/lib/intel64
-MKL_LIB_PATH   := $(HOME)/intel/mkl/lib/intel64
-ICC_LIB_PATH   := /opt/apps/intel/13/composer_xe_2013.2.146/compiler/lib/intel64
+#MKL_LIB_PATH   := $(HOME)/intel/mkl/lib/intel64
+MKL_LIB_PATH   := ${MKLROOT}/lib/intel64
+#ICC_LIB_PATH   := /opt/apps/intel/13/composer_xe_2013.2.146/compiler/lib/intel64
 ACML_LIB_PATH  := $(HOME_LIB_PATH)/acml/5.3.1/gfortran64_fma4_int64/lib
 ACMLP_LIB_PATH := $(HOME_LIB_PATH)/acml/5.3.1/gfortran64_fma4_mp_int64/lib
 
@@ -168,7 +169,7 @@ CFLAGS         += -I$(BLIS_INC_PATH) -I$(TEST_SRC_PATH) #-I$(ACML_INC_PATH)
 
 LINKER         := $(CC)
 LDFLAGS        := #-L/home/00146/field/gnu/gcc-4.8.2/lib64
-LDFLAGS        += -lgfortran -lm -lpthread -fopenmp
+LDFLAGS        += -lgfortran -lm -lrt -lpthread -fopenmp
 
 
 # Datatype
@@ -211,13 +212,13 @@ STR_ST   := -DTHR_STR=\"st\"
 STR_MT   := -DTHR_STR=\"mt\"
 
 # Problem size specification
-PDEF_ST  := -DP_BEGIN=100 \
-            -DP_END=1000 \
-            -DP_INC=100
-
-PDEF_MT  := -DP_BEGIN=100 \
+PDEF_ST  := -DP_BEGIN=40 \
             -DP_END=2000 \
-            -DP_INC=100
+            -DP_INC=40
+
+PDEF_MT  := -DP_BEGIN=200 \
+            -DP_END=10000 \
+            -DP_INC=200
 
 
 
@@ -296,6 +297,8 @@ openblas-gemm-st: \
       test_zgemm_openblas_st.x
 
 openblas-gemm-mt: \
+      test_sgemm_openblas_mt.x \
+      test_dgemm_openblas_mt.x \
       test_cgemm_openblas_mt.x \
       test_zgemm_openblas_mt.x
 
@@ -306,6 +309,8 @@ mkl-gemm-st: \
       test_zgemm_mkl_st.x
 
 mkl-gemm-mt: \
+      test_sgemm_mkl_mt.x \
+      test_dgemm_mkl_mt.x \
       test_cgemm_mkl_mt.x \
       test_zgemm_mkl_mt.x
 
@@ -316,6 +321,8 @@ acml-gemm-st: \
       test_zgemm_acml_st.x
 
 acml-gemm-mt: \
+      test_sgemm_acml_mt.x \
+      test_dgemm_acml_mt.x \
       test_cgemm_acml_mt.x \
       test_zgemm_acml_mt.x
 
@@ -468,6 +475,12 @@ test_z%_openblas_st.o: test_%.c
 test_c%_openblas_st.o: test_%.c
 	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLA_DEF) $(DNAT)  $(STR_OBL)  $(STR_ST) -c $< -o $@
 
+test_d%_openblas_mt.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_D) $(BLA_DEF) $(DNAT)  $(STR_OBL)  $(STR_MT) -c $< -o $@
+
+test_s%_openblas_mt.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_S) $(BLA_DEF) $(DNAT)  $(STR_OBL)  $(STR_MT) -c $< -o $@
+
 test_z%_openblas_mt.o: test_%.c
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_Z) $(BLA_DEF) $(DNAT)  $(STR_OBL)  $(STR_MT) -c $< -o $@
 
@@ -487,6 +500,12 @@ test_z%_mkl_st.o: test_%.c
 test_c%_mkl_st.o: test_%.c
 	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLA_DEF) $(DNAT)  $(STR_MKL)  $(STR_ST) -c $< -o $@
 
+test_d%_mkl_mt.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_D) $(BLA_DEF) $(DNAT)  $(STR_MKL)  $(STR_MT) -c $< -o $@
+
+test_s%_mkl_mt.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_S) $(BLA_DEF) $(DNAT)  $(STR_MKL)  $(STR_MT) -c $< -o $@
+
 test_z%_mkl_mt.o: test_%.c
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_Z) $(BLA_DEF) $(DNAT)  $(STR_MKL)  $(STR_MT) -c $< -o $@
 
@@ -505,6 +524,12 @@ test_z%_acml_st.o: test_%.c
 
 test_c%_acml_st.o: test_%.c
 	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLA_DEF) $(DNAT)  $(STR_ACML) $(STR_ST) -c $< -o $@
+
+test_d%_acml_mt.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_D) $(BLA_DEF) $(DNAT)  $(STR_ACML) $(STR_MT) -c $< -o $@
+
+test_s%_acml_mt.o: test_%.c
+	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_S) $(BLA_DEF) $(DNAT)  $(STR_ACML) $(STR_MT) -c $< -o $@
 
 test_z%_acml_mt.o: test_%.c
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_Z) $(BLA_DEF) $(DNAT)  $(STR_ACML) $(STR_MT) -c $< -o $@

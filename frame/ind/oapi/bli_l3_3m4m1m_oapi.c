@@ -65,11 +65,18 @@ void PASTEMAC(opname,imeth) \
 \
 	/* A temporary hack to easily specify the 1m algorithm (block-panel or
 	   panel-block). */ \
+/*
 	if ( PASTEMAC(opname,imeth) == bli_gemm1m ) \
 	{ \
 		bli_gemm1mbp( alpha, a, b, beta, c ); \
 		return; \
 	} \
+	else if ( PASTEMAC(opname,imeth) == bli_gemm3m1 ) \
+	{ \
+		bli_gemm1mpb( alpha, a, b, beta, c ); \
+		return; \
+	} \
+*/ \
 \
 	/* Initialize a local context if the one provided is NULL. */ \
 	bli_cntx_init_local_if2( cname, imeth, dt, cntx, cntx_p ); \
