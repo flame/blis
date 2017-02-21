@@ -49,6 +49,7 @@ int main( int argc, char** argv )
 	dim_t    p;
 	dim_t    p_begin, p_end, p_inc;
 	int      m_input, n_input, k_input;
+	ind_t    ind;
 	num_t    dt;
 	char     dt_ch;
 	int      r, n_repeats;
@@ -70,6 +71,8 @@ int main( int argc, char** argv )
 
 	dt      = DT;
 
+	ind     = IND;
+
 	p_begin = P_BEGIN;
 	p_end   = P_END;
 	p_inc   = P_INC;
@@ -78,12 +81,21 @@ int main( int argc, char** argv )
 	n_input = -1;
 	k_input = -1;
 
-#if 0
+
+	// Supress compiler warnings about unused variable 'ind'.
+	( void )ind;
+
+#if 1
 
 	cntx_t cntx;
 
+	ind_t ind_mod = ind;
+
+	// A hack to use 3m1 as 1mpb (with 1m as 1mbp).
+	if ( ind == BLIS_3M1 ) ind_mod = BLIS_1M;
+
 	// Initialize a context for the current induced method and datatype.
-	bli_gemmind_cntx_init( IND, dt, &cntx );
+	bli_gemmind_cntx_init( ind_mod, dt, &cntx );
 
 	// Set k to the kc blocksize for the current datatype.
 	k_input = bli_cntx_get_blksz_def_dt( dt, BLIS_KC, &cntx );
@@ -157,7 +169,7 @@ int main( int argc, char** argv )
 	
 #ifdef BLIS
 		bli_ind_disable_all_dt( dt );
-		bli_ind_enable_dt( IND, dt );
+		bli_ind_enable_dt( ind, dt );
 #endif
 
 		dtime_save = DBL_MAX;
