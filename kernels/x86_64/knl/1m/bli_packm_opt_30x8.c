@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -133,16 +133,22 @@ extern int32_t offsets[32];
 void bli_dpackm_30xk_opt
      (
        conj_t         conja,
-       dim_t          n,
+       dim_t          n_,
        void* restrict kappa_,
-       void* restrict a_, inc_t inca, inc_t lda,
-       void* restrict p_,             inc_t ldp
+       void* restrict a_, inc_t inca_, inc_t lda_,
+       void* restrict p_,              inc_t ldp_
      )
 {
+    (void)conja;
+
     const int32_t * offsetPtr = &offsets[0];
     double* a = (double*)a_;
     double* p = (double*)p_;
     double* kappa = (double*)kappa_;
+    const int64_t n = n_;
+    const int64_t inca = inca_;
+    const int64_t lda = lda_;
+    const int64_t ldp = ldp_;
 
     __asm__ volatile
     (

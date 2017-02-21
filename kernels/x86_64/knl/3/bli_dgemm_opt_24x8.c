@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -181,22 +181,26 @@ extern int32_t offsets[24];
 //#define MONITORS
 //#define LOOPMON
 void bli_dgemm_opt_24x8(
-                    dim_t            k,
+                    dim_t            k_,
                     double* restrict alpha,
                     double* restrict a,
                     double* restrict b,
                     double* restrict beta,
-                    double* restrict c, inc_t rs_c, inc_t cs_c,
+                    double* restrict c, inc_t rs_c_, inc_t cs_c_,
                     auxinfo_t*       data,
                     cntx_t* restrict cntx
                   )
 {
+    (void)data;
+    (void)cntx;
+
     const double * a_next = bli_auxinfo_next_a( data );
     const double * b_next = bli_auxinfo_next_b( data );
 
     const int32_t * offsetPtr = &offsets[0];
-
-    uint64_t k64 = k;
+    const int64_t k = k_;
+    const int64_t rs_c = rs_c_;
+    const int64_t cs_c = cs_c_;
 
 #ifdef MONITORS
     int toph, topl, both, botl, midl, midh, mid2l, mid2h;
@@ -204,7 +208,7 @@ void bli_dgemm_opt_24x8(
 #ifdef LOOPMON
     int tlooph, tloopl, blooph, bloopl;
 #endif
-    
+
     __asm__ volatile
     (
 #ifdef MONITORS
@@ -219,26 +223,26 @@ void bli_dgemm_opt_24x8(
     VMOVAPS(ZMM(11), ZMM(8))   MOV(RAX, VAR(a)) //load address of a
     VMOVAPS(ZMM(12), ZMM(8))   MOV(RBX, VAR(b)) //load address of b
     VMOVAPS(ZMM(13), ZMM(8))   MOV(RCX, VAR(c)) //load address of c
-    VMOVAPS(ZMM(14), ZMM(8))   VMOVAPD(ZMM(0), MEM(RBX)) //pre-load b
+    VMOVAPS(ZMM(14), ZMM(8))
     VMOVAPS(ZMM(15), ZMM(8))   MOV(RDI, VAR(offsetPtr))
     VMOVAPS(ZMM(16), ZMM(8))   VMOVAPS(ZMM(4), MEM(RDI))
 #if SCATTER_PREFETCH_C
-    VMOVAPS(ZMM(17), ZMM(8))   
-    VMOVAPS(ZMM(18), ZMM(8))   
+    VMOVAPS(ZMM(17), ZMM(8))
+    VMOVAPS(ZMM(18), ZMM(8))
     VMOVAPS(ZMM(19), ZMM(8))   VBROADCASTSS(ZMM(5), VAR(rs_c))
-    VMOVAPS(ZMM(20), ZMM(8))   
+    VMOVAPS(ZMM(20), ZMM(8))
     VMOVAPS(ZMM(21), ZMM(8))   VPMULLD(ZMM(2), ZMM(4), ZMM(5))
     VMOVAPS(ZMM(22), ZMM(8))   VMOVAPS(YMM(3), MEM(RDI,64))
     VMOVAPS(ZMM(23), ZMM(8))   VPMULLD(YMM(3), YMM(3), YMM(5))
 #else
-    VMOVAPS(ZMM(17), ZMM(8))   
+    VMOVAPS(ZMM(17), ZMM(8))
     VMOVAPS(ZMM(18), ZMM(8))   LEA(R13, MEM(R12,R12,2))
     VMOVAPS(ZMM(19), ZMM(8))   LEA(R14, MEM(R12,R12,4))
     VMOVAPS(ZMM(20), ZMM(8))   LEA(R15, MEM(R13,R12,4))
     VMOVAPS(ZMM(21), ZMM(8))
     VMOVAPS(ZMM(22), ZMM(8))
     VMOVAPS(ZMM(23), ZMM(8))
-#endif   
+#endif
     VMOVAPS(ZMM(24), ZMM(8))   VPSLLD(ZMM(4), ZMM(4), IMM(3))
     VMOVAPS(ZMM(25), ZMM(8))   MOV(R8, IMM(4*24*8))     //offset for 4 iterations
     VMOVAPS(ZMM(26), ZMM(8))   LEA(R9, MEM(R8,R8,2))    //*3
@@ -253,6 +257,11 @@ void bli_dgemm_opt_24x8(
     MOV(VAR(midl), EAX)
     MOV(VAR(midh), EDX)
 #endif
+
+    TEST(RSI, RSI)
+    JZ(POSTACCUM)
+    
+    VMOVAPD(ZMM(0), MEM(RBX)) //pre-load b
 
     SUB(RSI, IMM(32))
     JLE(TAIL)
@@ -670,7 +679,7 @@ void bli_dgemm_opt_24x8(
       [both]  "=m" (both)
 #endif
     : // input operands
-      [k]         "m" (k64),
+      [k]         "m" (k),
       [a]         "m" (a),
       [b]         "m" (b),
       [alpha]     "m" (alpha),
