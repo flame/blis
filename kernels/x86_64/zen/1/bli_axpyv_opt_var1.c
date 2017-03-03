@@ -608,3 +608,238 @@ void bli_saxpyv_opt_var4  (
     }
 }  // End of function
 
+void bli_saxpyv_opt_var10  (
+			     conj_t           conjx,
+			     dim_t            n,
+			     float* restrict alpha,
+			     float* restrict x, inc_t incx,
+			     float* restrict y, inc_t incy,
+                             cntx_t*          cntx
+			    )
+{
+  float* restrict x1 = x;
+  float* restrict y1 = y;
+  dim_t  i;
+  //  dim_t j;
+  __m256  alpha1v;
+  __m256 xv[10];
+  __m256 yv[10];
+  __m256 zv[10];
+  
+  if ( ( (n) == 0 ) ) return;
+
+  /* If alpha is zero, return. */
+  if ( ( ((*alpha)) == (0.0F) ) ) return;
+
+
+  if ( incx == 1 && incy == 1 )
+    {
+      alpha1v = _mm256_broadcast_ss( alpha );
+     
+      for (i = 0; (i + 79) < n; i += 80)
+        {
+          // 80 elements will be processed per loop. 10 FMAs will run per loop
+          xv[0] = _mm256_loadu_ps( ( float* )(x1 + 0*8 ) );
+          xv[1] = _mm256_loadu_ps( ( float* )(x1 + 1*8 ) );
+          xv[2] = _mm256_loadu_ps( ( float* )(x1 + 2*8 ) );
+          xv[3] = _mm256_loadu_ps( ( float* )(x1 + 3*8 ) );
+	  xv[4] = _mm256_loadu_ps( ( float* )(x1 + 4*8 ) );
+          xv[5] = _mm256_loadu_ps( ( float* )(x1 + 5*8 ) );
+          xv[6] = _mm256_loadu_ps( ( float* )(x1 + 6*8 ) );
+          xv[7] = _mm256_loadu_ps( ( float* )(x1 + 7*8 ) );
+          xv[8] = _mm256_loadu_ps( ( float* )(x1 + 8*8 ) );
+          xv[9] = _mm256_loadu_ps( ( float* )(x1 + 9*8 ) );
+
+          yv[0] = _mm256_loadu_ps( ( float* )(y1 + 0*8 ) );
+          yv[1] = _mm256_loadu_ps( ( float* )(y1 + 1*8 ) );
+          yv[2] = _mm256_loadu_ps( ( float* )(y1 + 2*8 ) );
+          yv[3] = _mm256_loadu_ps( ( float* )(y1 + 3*8 ) );
+          yv[4] = _mm256_loadu_ps( ( float* )(y1 + 4*8 ) );
+          yv[5] = _mm256_loadu_ps( ( float* )(y1 + 5*8 ) );
+          yv[6] = _mm256_loadu_ps( ( float* )(y1 + 6*8 ) );
+          yv[7] = _mm256_loadu_ps( ( float* )(y1 + 7*8 ) );
+          yv[8] = _mm256_loadu_ps( ( float* )(y1 + 8*8 ) );
+          yv[9] = _mm256_loadu_ps( ( float* )(y1 + 9*8 ) );
+
+          zv[0] =  _mm256_fmadd_ps(xv[0],  alpha1v, yv[0]);
+          zv[1] =  _mm256_fmadd_ps(xv[1],  alpha1v, yv[1]);
+          zv[2] =  _mm256_fmadd_ps(xv[2],  alpha1v, yv[2]);
+          zv[3] =  _mm256_fmadd_ps(xv[3],  alpha1v, yv[3]);
+          zv[4] =  _mm256_fmadd_ps(xv[4],  alpha1v, yv[4]);
+          zv[5] =  _mm256_fmadd_ps(xv[5],  alpha1v, yv[5]);
+          zv[6] =  _mm256_fmadd_ps(xv[6],  alpha1v, yv[6]);
+          zv[7] =  _mm256_fmadd_ps(xv[7],  alpha1v, yv[7]);
+          zv[8] =  _mm256_fmadd_ps(xv[8],  alpha1v, yv[8]);
+          zv[9] =  _mm256_fmadd_ps(xv[9],  alpha1v, yv[9]);
+
+          _mm256_storeu_ps( ( float* )(y1 + 0*8 ), zv[0] );
+          _mm256_storeu_ps( ( float* )(y1 + 1*8 ), zv[1] );
+          _mm256_storeu_ps( ( float* )(y1 + 2*8 ), zv[2] );
+          _mm256_storeu_ps( ( float* )(y1 + 3*8 ), zv[3] );
+          _mm256_storeu_ps( ( float* )(y1 + 4*8 ), zv[4] );
+          _mm256_storeu_ps( ( float* )(y1 + 5*8 ), zv[5] );
+          _mm256_storeu_ps( ( float* )(y1 + 6*8 ), zv[6] );
+          _mm256_storeu_ps( ( float* )(y1 + 7*8 ), zv[7] );
+          _mm256_storeu_ps( ( float* )(y1 + 8*8 ), zv[8] );
+          _mm256_storeu_ps( ( float* )(y1 + 9*8 ), zv[9] );
+#if 0
+          for (j = 0; j < 10; j++)
+            {
+              xv[j] = _mm256_loadu_ps( ( float* )(x1 + j*8 ) );
+            }
+          for (j = 0; j < 10; j++)
+            {
+              yv[j] = _mm256_loadu_ps( ( float* )(y1 + j*8 ) );
+            }
+          for (j = 0; j < 10; j++)
+            {
+              zv[j] =  _mm256_fmadd_ps(xv[j],  alpha1v, yv[j]); // x1 = alpha * x1 + y1
+            }
+          for (j = 0; j < 10; j++)
+            {
+              _mm256_storeu_ps( ( float* )(y1 + j*8 ), zv[j] );
+            }
+#endif
+          x1 += 80;
+          y1 += 80;
+        }
+     
+      for ( ; (i + 39) < n; i += 40 )
+        {
+          xv[0] = _mm256_loadu_ps( ( float* )(x1 + 0*8 ) );
+          xv[1] = _mm256_loadu_ps( ( float* )(x1 + 1*8 ) );
+          xv[2] = _mm256_loadu_ps( ( float* )(x1 + 2*8 ) );
+          xv[3] = _mm256_loadu_ps( ( float* )(x1 + 3*8 ) );
+          xv[4] = _mm256_loadu_ps( ( float* )(x1 + 4*8 ) );
+
+          yv[0] = _mm256_loadu_ps( ( float* )(y1 + 0*8 ) );
+          yv[1] = _mm256_loadu_ps( ( float* )(y1 + 1*8 ) );
+          yv[2] = _mm256_loadu_ps( ( float* )(y1 + 2*8 ) );
+          yv[3] = _mm256_loadu_ps( ( float* )(y1 + 3*8 ) );
+          yv[4] = _mm256_loadu_ps( ( float* )(y1 + 4*8 ) );
+
+          zv[0] =  _mm256_fmadd_ps(xv[0],  alpha1v, yv[0]);
+          zv[1] =  _mm256_fmadd_ps(xv[1],  alpha1v, yv[1]);
+          zv[2] =  _mm256_fmadd_ps(xv[2],  alpha1v, yv[2]);
+          zv[3] =  _mm256_fmadd_ps(xv[3],  alpha1v, yv[3]);
+          zv[4] =  _mm256_fmadd_ps(xv[4],  alpha1v, yv[4]);
+
+
+          _mm256_storeu_ps( ( float* )(y1 + 0*8 ), zv[0] );
+          _mm256_storeu_ps( ( float* )(y1 + 1*8 ), zv[1] );
+          _mm256_storeu_ps( ( float* )(y1 + 2*8 ), zv[2] );
+          _mm256_storeu_ps( ( float* )(y1 + 3*8 ), zv[3] );
+          _mm256_storeu_ps( ( float* )(y1 + 4*8 ), zv[4] );
+
+#if 0
+          for (j = 0; j < 5; j++)
+            {
+              xv[j] = _mm256_loadu_ps( ( float* )(x1 + j*8 ) );
+            }
+          for (j = 0; j < 5; j++)
+            {
+              yv[j] = _mm256_loadu_ps( ( float* )(y1 + j*8 ) );
+            }
+          for (j = 0; j < 5; j++)
+            {
+              zv[j] =  _mm256_fmadd_ps(xv[j],  alpha1v, yv[j]); // x1 = alpha * x1 + y1
+            }
+          for (j = 0; j < 5; j++)
+            {
+              _mm256_storeu_ps( ( float* )(y1 + j*8 ), zv[j] );
+            }
+#endif
+          x1 += 40;
+          y1 += 40;
+        }
+
+      for (; i + 31 < n; i += 32 )
+        {
+          xv[0] = _mm256_loadu_ps( ( float* )(x1 + 0*8 ) );
+          xv[1] = _mm256_loadu_ps( ( float* )(x1 + 1*8 ) );
+          xv[2] = _mm256_loadu_ps( ( float* )(x1 + 2*8 ) );
+          xv[3] = _mm256_loadu_ps( ( float* )(x1 + 3*8 ) );
+
+
+          yv[0] = _mm256_loadu_ps( ( float* )(y1 + 0*8 ) );
+          yv[1] = _mm256_loadu_ps( ( float* )(y1 + 1*8 ) );
+          yv[2] = _mm256_loadu_ps( ( float* )(y1 + 2*8 ) );
+          yv[3] = _mm256_loadu_ps( ( float* )(y1 + 3*8 ) );
+
+
+          zv[0] =  _mm256_fmadd_ps(xv[0],  alpha1v, yv[0]);
+          zv[1] =  _mm256_fmadd_ps(xv[1],  alpha1v, yv[1]);
+          zv[2] =  _mm256_fmadd_ps(xv[2],  alpha1v, yv[2]);
+          zv[3] =  _mm256_fmadd_ps(xv[3],  alpha1v, yv[3]);
+
+          _mm256_storeu_ps( ( float* )(y1 + 0*8 ), zv[0] );
+          _mm256_storeu_ps( ( float* )(y1 + 1*8 ), zv[1] );
+          _mm256_storeu_ps( ( float* )(y1 + 2*8 ), zv[2] );
+          _mm256_storeu_ps( ( float* )(y1 + 3*8 ), zv[3] );
+
+#if 0
+          for (j = 0; j < 4; j++)
+            {
+              xv[j] = _mm256_loadu_ps( ( float* )(x1 + j*8 ) );
+            }
+          for (j = 0; j < 4; j++)
+            {
+              yv[j] = _mm256_loadu_ps( ( float* )(y1 + j*8 ) );
+            }
+          for (j = 0; j < 4; j++)
+            {
+              zv[j] =  _mm256_fmadd_ps(xv[j],  alpha1v, yv[j]); // x1 = alpha * x1 + y1
+            }
+          for (j = 0; j < 4; j++)
+            {
+              _mm256_storeu_ps( ( float* )(y1 + j*8 ), zv[j] );
+            }
+#endif
+          x1 += 32;
+          y1 += 32;
+        }
+      for (; i + 15 < n; i += 16 )
+        {
+          xv[0] = _mm256_loadu_ps( ( float* )x1 );
+          xv[1] = _mm256_loadu_ps( ( float* )(x1 + 8));
+
+          yv[0] = _mm256_loadu_ps( ( float* )y1 );
+          yv[1] = _mm256_loadu_ps( ( float* )(y1 + 8 ) );
+
+          zv[0] =  _mm256_fmadd_ps(xv[0], alpha1v, yv[0]); // x1v = alpha * x1v + y1v
+          zv[1] =  _mm256_fmadd_ps(xv[1], alpha1v, yv[1]);
+
+          _mm256_storeu_ps( ( float* )(y1), zv[0] );
+          _mm256_storeu_ps( ( float* )(y1 + 8), zv[1] );
+
+          x1 += 16;
+          y1 += 16;
+        }
+      for (; i + 7 < n; i += 8)
+        {
+          xv[2] = _mm256_loadu_ps( ( float* )x1 );
+          yv[2] = _mm256_loadu_ps( ( float* )y1 );
+
+          zv[2] = _mm256_fmadd_ps(xv[2], alpha1v, yv[2]); // x1v = alpha * x1v + y1v
+
+          _mm256_storeu_ps( ( float* )(y1), zv[2] );
+
+          x1 += 8;
+          y1 += 8;
+        }
+
+      for(; i < n; i++) {
+        y[i] += (*alpha) * x[i];
+      }
+    }
+  else
+    {
+      for ( i = 0; i < n; ++i )
+        {
+          (( *y1 )) += (( *alpha )) * (( *x1 ));
+
+          x1 += incx;
+          y1 += incy;
+        }
+    }
+}  // End of function
