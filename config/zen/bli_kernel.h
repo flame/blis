@@ -166,6 +166,8 @@
 #define BLIS_SMALL_MATRIX_ENABLE
 //This will select the threshold below which small matrix code will be called.
 #define BLIS_SMALL_MATRIX_THRES 700
+#define BLIS_SMALL_M_RECT_MATRIX_THRES 160
+#define BLIS_SMALL_K_RECT_MATRIX_THRES 128
 
 gint_t bli_gemm_small_matrix
      (
