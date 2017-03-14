@@ -309,20 +309,20 @@ void bli_dtrsm_l_int_6x8(
 {
   v4df_t ymm8a;
   v4df_t ymm8b;
-  v4df_t ymm12a;
-  v4df_t ymm12b;
+
+
   v4df_t ymm9a;
   v4df_t ymm9b;
-  v4df_t ymm13a;
-  v4df_t ymm13b;
+
+
   v4df_t ymm10a;
   v4df_t ymm10b;
-  v4df_t ymm14a;
-  v4df_t ymm14b;
+
+
   v4df_t ymm11a;
   v4df_t ymm11b;
-  v4df_t ymm15a;
-  v4df_t ymm15b;
+
+
   v4df_t ymm0a;
   v4df_t ymm0b;
   v4df_t ymm1a;
@@ -334,20 +334,20 @@ void bli_dtrsm_l_int_6x8(
   v4df_t ymm4a;
   v4df_t ymm4b;
   v4df_t ymm5a;
-  v4df_t ymm5b;
-  v4df_t ymm6a;
-  v4df_t ymm6b;
-  v4df_t ymm7a;
-  v4df_t ymm7b;
+
+
+
+
+
 
   v4df_t ymm16a;
   v4df_t ymm16b;
-  v4df_t ymm17a;
-  v4df_t ymm17b;
+
+
   v4df_t ymm18a;
   v4df_t ymm18b;
-  v4df_t ymm19a;
-  v4df_t ymm19b;
+
+
 
   // b11 - row major
   // a11 - column major
