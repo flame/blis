@@ -95,7 +95,14 @@ ARFLAGS        := cru
 # --- Determine the linker and related flags ---
 LINKER         := $(CC)
 SOFLAGS        := -shared
-LDFLAGS        := -lm -lmemkind
+
+# Intel compilers have libimf, which is much faster than libm
+ifeq ($(CC_VENDOR),icc)
+LDFLAGS        := -lmemkind
+else
+LDFLAGS        := -lmemkind -lm
+endif
+
 
 
 
