@@ -209,9 +209,9 @@ STR_ST   := -DTHR_STR=\"st\"
 STR_MT   := -DTHR_STR=\"mt\"
 
 # Problem size specification
-PDEF_ST  := -DP_BEGIN=80 \
+PDEF_ST  := -DP_BEGIN=40 \
             -DP_END=2000 \
-            -DP_INC=80
+            -DP_INC=40
 
 PDEF_MT  := -DP_BEGIN=80 \
             -DP_END=4000 \
