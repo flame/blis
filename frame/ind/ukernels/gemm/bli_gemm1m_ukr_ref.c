@@ -55,7 +55,7 @@ void PASTEMAC(ch,varname) \
 	PASTECH(chr,gemm_ukr_ft) \
 	                  rgemm_ukr = bli_cntx_get_l3_nat_ukr_dt( dt_r, gemmkerid, cntx ); \
 	const bool_t      col_pref  = bli_cntx_l3_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
-	/*const bool_t      row_pref  = !col_pref;*/ \
+	const bool_t      row_pref  = !col_pref; \
 \
 	const dim_t       mr        = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
 	const dim_t       nr        = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx ); \
@@ -95,23 +95,18 @@ void PASTEMAC(ch,varname) \
 		bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \
 \
 \
-	/* Sanity check: These should never occur because storage/preference
-	   agreement is handled at a higher level. */ \
-	/*
-	if      ( bli_is_col_stored( rs_c, cs_c ) && row_pref ) bli_abort(); \
-	else if ( bli_is_row_stored( rs_c, cs_c ) && col_pref ) bli_abort(); \
-	*/ \
-\
-\
 	/* If beta has a non-zero imaginary component OR if c is stored with
 	   general stride, then we compute the alpha*a*b product into temporary
 	   storage and then accumulate that result into c afterwards. Note that
 	   the other two cases concerning disagreement between the storage of C
-	   and the output preference of the micro-kernel, should never occur
-	   (though we could handle them if they did occur). */ \
+	   and the output preference of the micro-kernel, should ONLY occur in
+	   the context of trsm, whereby this virtual micro-kernel is called
+	   directly from the trsm macro-kernel to update the micro-tile b11
+	   that exists within the packed row-panel of B. Indeed that is the
+	   reason those cases MUST be explicitly handled. */ \
 	if      ( !PASTEMAC(chr,eq0)( *beta_i ) )               using_ct = TRUE; \
-	/*else if ( bli_is_col_stored( rs_c, cs_c ) && row_pref ) using_ct = TRUE; \
-	else if ( bli_is_row_stored( rs_c, cs_c ) && col_pref ) using_ct = TRUE;*/ \
+	else if ( bli_is_col_stored( rs_c, cs_c ) && row_pref ) using_ct = TRUE; \
+	else if ( bli_is_row_stored( rs_c, cs_c ) && col_pref ) using_ct = TRUE; \
 	else if ( bli_is_gen_stored( rs_c, cs_c ) )             using_ct = TRUE; \
 	else                                                    using_ct = FALSE; \
 \
