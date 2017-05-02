@@ -280,7 +280,7 @@ for determining blocksize parameters in BLIS:
 ```
 
 A fifth paper, submitted to ACM TOMS, begins the study of so-called
-[induced methods for complex matrix multiplication](http://www.cs.utexas.edu/users/flame/pubs/blis5_toms_rev2.pdf)):
+[induced methods for complex matrix multiplication](http://www.cs.utexas.edu/users/flame/pubs/blis5_toms_rev2.pdf):
 
 ```
 @article{BLIS5,
@@ -293,7 +293,7 @@ A fifth paper, submitted to ACM TOMS, begins the study of so-called
 ``` 
 
 A sixth paper, submitted to ACM TOMS, revisits the topic of the previous
-article and derives a [superior induced method](http://www.cs.utexas.edu/users/flame/pubs/blis6_toms_rev0.pdf)):
+article and derives a [superior induced method](http://www.cs.utexas.edu/users/flame/pubs/blis6_toms_rev0.pdf):
 
 ```
 @article{BLIS6,
