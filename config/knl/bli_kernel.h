@@ -43,10 +43,21 @@
 #define BLIS_SIMD_SIZE                   64
 #define BLIS_SIMD_NUM_REGISTERS          32
 
+#ifdef BLIS_NO_HBWMALLOC
+
+#include <stdlib.h>
+
+#define BLIS_MALLOC_POOL malloc
+#define BLIS_FREE_POOL free
+
+#else
+
 #include <hbwmalloc.h>
 
 #define BLIS_MALLOC_POOL hbw_malloc
 #define BLIS_FREE_POOL hbw_free
+
+#endif
 
 //#define BLIS_MALLOC_INTL hbw_malloc
 //#define BLIS_FREE_INTL hbw_free
