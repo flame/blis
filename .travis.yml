@@ -25,6 +25,8 @@ env:
 
 matrix:
   allow_failures:
+    - env: RUN_TEST=1 THREADING="none" BUILD_CONFIG="haswell"
+    - env: RUN_TEST=1 THREADING="none" BUILD_CONFIG="skx"
     - env: RUN_TEST=1 THREADING="none" BUILD_CONFIG="knl"
   exclude:
     - os: linux
