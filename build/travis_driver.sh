@@ -46,9 +46,9 @@ case "$TARGET" in
         ;;
 esac
 
-if [ "x$TARGET" == "xknl" ] ; then
+# older binutils do not support AVX-512 (need at least 2.25)
+if [ "x$TARGET" == "xknl" ] || [ "x$TARGET" == "xskx" ]; then
     pushd /tmp
-    # older binutils do not support AVX-512 (need at least 2.25)
     wget https://ftp.gnu.org/gnu/binutils/binutils-2.28.tar.bz2
     tar -xaf binutils-2.28.tar.bz2
     cd binutils-2.28
@@ -60,14 +60,19 @@ if [ "x$TARGET" == "xknl" ] ; then
     export LD_LIBRARY_PATH=$BINUTILS_PATH/lib:$LD_LIBRARY_PATH
     popd
     which ld
-    # now configure BLIS
+fi
+
+# configure BLIS
+if [ "x$TARGET" == "xknl" ] ; then
     ./configure -d sde -t $THREADING CC=$CC $TARGET
 else
     ./configure        -t $THREADING CC=$CC $TARGET
 fi
 
+# compile BLIS library
 make
 
+# compile and run BLIS tests
 if [ "x${RUN_TEST}" == "x1" ] ; then
     make testsuite-bin
     # We make no attempt to run SDE_OPTIONS on Mac.  It is supported but requires elevated permissions.
