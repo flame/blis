@@ -65,6 +65,10 @@ else
 COPTFLAGS      := -O3
 endif
 
+ifeq ($(DEBUG_TYPE),sde)
+CPPROCFLAGS    += -DBLIS_NO_HBWMALLOC
+endif
+
 CKOPTFLAGS     := $(COPTFLAGS)
 
 ifeq ($(CC_VENDOR),gcc)
@@ -95,11 +99,16 @@ ARFLAGS        := cru
 # --- Determine the linker and related flags ---
 LINKER         := $(CC)
 SOFLAGS        := -shared
-ifeq ($(CC_VENDOR),icc)
+
+ifneq ($(DEBUG_TYPE),sde)
 LDFLAGS        := -lmemkind
 else
-LDFLAGS        := -lmemkind -lm
+LDFLAGS        :=
 endif
+
+ifneq ($(CC_VENDOR),icc)
+LDFLAGS        += -lm
+endif 
 
 
 
