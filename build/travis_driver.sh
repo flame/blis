@@ -17,23 +17,42 @@ HARDWARE=0
 SDE_OPTIONS="false"
 case "$TARGET" in
     knl)
-        if $(grep avx512f -q /proc/cpuinfo) && $(grep avx512pf -q /proc/cpuinfo) ; then HARDWARE=1 ; fi
+        if [ "$TRAVIS_OS_NAME" = "linux" ] ; then
+            if $(grep avx512f -q /proc/cpuinfo) && $(grep avx512pf -q /proc/cpuinfo) ; then HARDWARE=1 ; fi
+        fi
         SDE_OPTIONS="-knl"
         ;;
     skx)
-        if $(grep avx512f -q /proc/cpuinfo) && $(grep avx512vl -q /proc/cpuinfo) && $(grep avx512dq -q /proc/cpuinfo) ; then HARDWARE=1 ; fi
+        if [ "$TRAVIS_OS_NAME" = "linux" ] ; then
+            if $(grep avx512f -q /proc/cpuinfo) && $(grep avx512vl -q /proc/cpuinfo) && $(grep avx512dq -q /proc/cpuinfo) ; then HARDWARE=1 ; fi
+        fi
         SDE_OPTIONS="-skx"
         ;;
     haswell)
-        if $(grep avx2 -q /proc/cpuinfo) ; then HARDWARE=1 ; fi
+        if [ "$TRAVIS_OS_NAME" = "linux" ] ; then
+            if $(grep avx2 -q /proc/cpuinfo) ; then HARDWARE=1 ; fi
+        elif [ "$TRAVIS_OS_NAME" = "osx" ] ; then
+            #if $(sysctl -a | grep machdep.cpu.leaf7_features | grep -q AVX2) ; then HARDWARE=1 ; fi
+            if [ $(sysctl -n hw.optional.avx2_0) -eq 1 ] ; then HARDWARE=1 ; fi
+        fi
         SDE_OPTIONS="-hsw"
         ;;
     sandybridge)
-        if $(grep avx -q /proc/cpuinfo) ; then HARDWARE=1 ; fi
+        if [ "$TRAVIS_OS_NAME" = "linux" ] ; then
+            if $(grep avx -q /proc/cpuinfo) ; then HARDWARE=1 ; fi
+        elif [ "$TRAVIS_OS_NAME" = "osx" ] ; then
+            #if $(sysctl -a | grep machdep.cpu.features | grep -q AVX1) ; then HARDWARE=1 ; fi
+            if [ $(sysctl -n hw.optional.avx1_0) -eq 1 ] ; then HARDWARE=1 ; fi
+        fi
         SDE_OPTIONS="-snb"
         ;;
     dunnington)
-        if $(grep ssse3 -q /proc/cpuinfo) && $(grep sse4_1 -q /proc/cpuinfo) ; then HARDWARE=1 ; fi
+        if [ "$TRAVIS_OS_NAME" = "linux" ] ; then
+            if $(grep ssse3 -q /proc/cpuinfo) && $(grep sse4_1 -q /proc/cpuinfo) ; then HARDWARE=1 ; fi
+        elif [ "$TRAVIS_OS_NAME" = "osx" ] ; then
+            #if $(sysctl -a | grep machdep.cpu.features | grep -q "SSE4.1") ; then HARDWARE=1 ; fi
+            if [ $(sysctl -n hw.optional.sse4_1) -eq 1 ] ; then HARDWARE=1 ; fi
+        fi
         SDE_OPTIONS="-pnr"
         ;;
     auto)
