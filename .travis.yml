@@ -14,8 +14,9 @@ env:
   - RUN_TEST=1 THREADING="none" BUILD_CONFIG="reference"
   - RUN_TEST=1 THREADING="none" BUILD_CONFIG="dunnington"
   - RUN_TEST=1 THREADING="none" BUILD_CONFIG="sandybridge"
-  - RUN_TEST=1 THREADING="none" BUILD_CONFIG="knl"
   - RUN_TEST=1 THREADING="none" BUILD_CONFIG="haswell"
+  - RUN_TEST=1 THREADING="none" BUILD_CONFIG="skx"
+  - RUN_TEST=1 THREADING="none" BUILD_CONFIG="knl"
   - RUN_TEST=0 THREADING="none" BUILD_CONFIG="bulldozer"
   - RUN_TEST=0 THREADING="none" BUILD_CONFIG="piledriver"
   - RUN_TEST=0 THREADING="none" BUILD_CONFIG="carrizo"
@@ -37,9 +38,11 @@ matrix:
     - os: osx
       env: RUN_TEST=1 THREADING="none" BUILD_CONFIG="sandybridge"
     - os: osx
-      env: RUN_TEST=1 THREADING="none" BUILD_CONFIG="knl"
-    - os: osx
       env: RUN_TEST=1 THREADING="none" BUILD_CONFIG="haswell"
+    - os: osx
+      env: RUN_TEST=1 THREADING="none" BUILD_CONFIG="skx"
+    - os: osx
+      env: RUN_TEST=1 THREADING="none" BUILD_CONFIG="knl"
     - os: osx
       env: RUN_TEST=0 THREADING="none" BUILD_CONFIG="bulldozer"
     - os: osx
