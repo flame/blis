@@ -72,7 +72,10 @@ if [ "x${RUN_TEST}" == "x1" ] ; then
     make testsuite-bin
     # We make no attempt to run SDE_OPTIONS on Mac.  It is supported but requires elevated permissions.
     if [ "x${HARDWARE}" != "x1" ] && [ "${TRAVIS_OS_NAME}" == "linux" ] ; then
+        set +x
+        echo wget -q SDE_LOCATION
         wget -q ${SDE_LOCATION}
+        set -x
         tar -xaf sde-external-7.58.0-2017-01-23-lin.tar.bz2
         export PATH=${PWD}/sde-external-7.58.0-2017-01-23-lin:${PATH}
         if [ `uname -m` = x86_64 ] ; then SDE_BIN=sde64 ; else SDE_BIN=sde ; fi
