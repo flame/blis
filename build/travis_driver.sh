@@ -47,6 +47,20 @@ case "$TARGET" in
 esac
 
 if [ "x$TARGET" == "xknl" ] ; then
+    pushd /tmp
+    # older binutils do not support AVX-512 (need at least 2.25)
+    wget https://ftp.gnu.org/gnu/binutils/binutils-2.28.tar.bz2
+    tar -xaf binutils-2.28.tar.bz2
+    cd binutils-2.28
+    export BINUTILS_PATH=/tmp/mybinutils
+    ./configure --prefix=$BINUTILS_PATH
+    make
+    make install
+    export PATH=$BINUTILS_PATH/bin:$PATH
+    export LD_LIBRARY_PATH=$BINUTILS_PATH/lib:$LD_LIBRARY_PATH
+    popd
+    which ld
+    # now configure BLIS
     ./configure -d sde -t $THREADING CC=$CC $TARGET
 else
     ./configure        -t $THREADING CC=$CC $TARGET
