@@ -784,12 +784,20 @@ void bli_cntx_set_thrloop_from_env( opid_t l3_op, side_t side, cntx_t* cntx,
         }
     }
 
-	jc = bli_env_read_nway( "BLIS_JC_NT", jc );
-	//pc = bli_env_read_nway( "BLIS_KC_NT", 1 );
-	pc = 1;
-	ic = bli_env_read_nway( "BLIS_IC_NT", ic );
-	jr = bli_env_read_nway( "BLIS_JR_NT", jr );
-	ir = bli_env_read_nway( "BLIS_IR_NT", ir );
+    pc = 1;
+
+    dim_t jc_env = bli_env_read_nway( "BLIS_JC_NT", -1 );
+    dim_t ic_env = bli_env_read_nway( "BLIS_IC_NT", -1 );
+    dim_t jr_env = bli_env_read_nway( "BLIS_JR_NT", -1 );
+    dim_t ir_env = bli_env_read_nway( "BLIS_IR_NT", -1 );
+
+    if (jc_env != -1 || ic_env != -1 || jr_env != -1 || ir_env != -1)
+    {
+        jc = (jc_env == -1 ? 1 : jc_env);
+        ic = (ic_env == -1 ? 1 : ic_env);
+        jr = (jr_env == -1 ? 1 : jr_env);
+        ir = (ir_env == -1 ? 1 : ir_env);
+    }
 
 #else
 
