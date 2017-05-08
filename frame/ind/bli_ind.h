@@ -51,10 +51,10 @@
 #include "bli_gemmind_cntx.h"
 #include "bli_trsmind_cntx.h"
 
-// level-3 ukernels
-#include "bli_gemmind_ukr_ref.h"
-#include "bli_gemmtrsmind_x_ukr_ref.h"
-#include "bli_trsmind_x_ukr_ref.h"
+// level-3 virtual ukernels
+#include "bli_gemmind_ukr_vir.h"
+#include "bli_gemmtrsmind_x_ukr_vir.h"
+#include "bli_trsmind_x_ukr_vir.h"
 
 
 void   bli_ind_init( void );

@@ -32,76 +32,25 @@
 
 */
 
-#ifndef BLIS_KERNEL_4M1_MACRO_DEFS_H
-#define BLIS_KERNEL_4M1_MACRO_DEFS_H
 
+#undef  GENTPROTCO
+#define GENTPROTCO( ctype, ctype_r, ch, chr, varname ) \
+\
+void PASTEMAC(ch,varname) \
+     ( \
+       ctype*     restrict a, \
+       ctype*     restrict b, \
+       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
+       auxinfo_t* restrict data, \
+       cntx_t*    restrict cntx  \
+     );
 
-// -- Define row access bools --------------------------------------------------
+INSERT_GENTPROTCO_BASIC( trsm4m1_l_ukr_vir )
+INSERT_GENTPROTCO_BASIC( trsm4m1_u_ukr_vir )
 
-// gemm4m1 micro-kernels
+INSERT_GENTPROTCO_BASIC( trsm3m1_l_ukr_vir )
+INSERT_GENTPROTCO_BASIC( trsm3m1_u_ukr_vir )
 
-#define BLIS_CGEMM4M1_UKERNEL_PREFERS_CONTIG_ROWS \
-        BLIS_SGEMM_UKERNEL_PREFERS_CONTIG_ROWS
-#define BLIS_ZGEMM4M1_UKERNEL_PREFERS_CONTIG_ROWS \
-        BLIS_DGEMM_UKERNEL_PREFERS_CONTIG_ROWS
+INSERT_GENTPROTCO_BASIC( trsm1m_l_ukr_vir )
+INSERT_GENTPROTCO_BASIC( trsm1m_u_ukr_vir )
 
-
-// -- Define default 4m1-specific kernel names ---------------------------------
-
-//
-// Level-3
-//
-
-// gemm4m1 micro-kernels
-
-#ifndef BLIS_CGEMM4M1_UKERNEL
-#define BLIS_CGEMM4M1_UKERNEL BLIS_CGEMM4M1_UKERNEL_VIR
-#endif
-
-#ifndef BLIS_ZGEMM4M1_UKERNEL
-#define BLIS_ZGEMM4M1_UKERNEL BLIS_ZGEMM4M1_UKERNEL_VIR
-#endif
-
-// gemmtrsm4m1_l micro-kernels
-
-#ifndef BLIS_CGEMMTRSM4M1_L_UKERNEL
-#define BLIS_CGEMMTRSM4M1_L_UKERNEL BLIS_CGEMMTRSM4M1_L_UKERNEL_VIR
-#endif
-
-#ifndef BLIS_ZGEMMTRSM4M1_L_UKERNEL
-#define BLIS_ZGEMMTRSM4M1_L_UKERNEL BLIS_ZGEMMTRSM4M1_L_UKERNEL_VIR
-#endif
-
-// gemmtrsm4m1_u micro-kernels
-
-#ifndef BLIS_CGEMMTRSM4M1_U_UKERNEL
-#define BLIS_CGEMMTRSM4M1_U_UKERNEL BLIS_CGEMMTRSM4M1_U_UKERNEL_VIR
-#endif
-
-#ifndef BLIS_ZGEMMTRSM4M1_U_UKERNEL
-#define BLIS_ZGEMMTRSM4M1_U_UKERNEL BLIS_ZGEMMTRSM4M1_U_UKERNEL_VIR
-#endif
-
-// trsm4m1_l micro-kernels
-
-#ifndef BLIS_CTRSM4M1_L_UKERNEL
-#define BLIS_CTRSM4M1_L_UKERNEL BLIS_CTRSM4M1_L_UKERNEL_VIR
-#endif
-
-#ifndef BLIS_ZTRSM4M1_L_UKERNEL
-#define BLIS_ZTRSM4M1_L_UKERNEL BLIS_ZTRSM4M1_L_UKERNEL_VIR
-#endif
-
-// trsm4m1_u micro-kernels
-
-#ifndef BLIS_CTRSM4M1_U_UKERNEL
-#define BLIS_CTRSM4M1_U_UKERNEL BLIS_CTRSM4M1_U_UKERNEL_VIR
-#endif
-
-#ifndef BLIS_ZTRSM4M1_U_UKERNEL
-#define BLIS_ZTRSM4M1_U_UKERNEL BLIS_ZTRSM4M1_U_UKERNEL_VIR
-#endif
-
-
-
-#endif 

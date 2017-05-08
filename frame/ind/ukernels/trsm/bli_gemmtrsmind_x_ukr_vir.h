@@ -26,42 +26,35 @@
    SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
    LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
    DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+   THEORY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#ifndef BLIS_KERNEL_3M3_MACRO_DEFS_H
-#define BLIS_KERNEL_3M3_MACRO_DEFS_H
 
+#undef  GENTPROTCO
+#define GENTPROTCO( ctype, ctype_r, ch, chr, varname ) \
+\
+void PASTEMAC(ch,varname) \
+     ( \
+       dim_t               k, \
+       ctype*     restrict alpha, \
+       ctype*     restrict a1x, \
+       ctype*     restrict a11, \
+       ctype*     restrict bx1, \
+       ctype*     restrict b11, \
+       ctype*     restrict c11, inc_t rs_c, inc_t cs_c, \
+       auxinfo_t* restrict data, \
+       cntx_t*    restrict cntx  \
+     );
 
-// -- Define row access bools --------------------------------------------------
+INSERT_GENTPROTCO_BASIC( gemmtrsm4m1_l_ukr_vir )
+INSERT_GENTPROTCO_BASIC( gemmtrsm4m1_u_ukr_vir )
 
-// gemm3m2 micro-kernels
+INSERT_GENTPROTCO_BASIC( gemmtrsm3m1_l_ukr_vir )
+INSERT_GENTPROTCO_BASIC( gemmtrsm3m1_u_ukr_vir )
 
-#define BLIS_CGEMM3M3_UKERNEL_PREFERS_CONTIG_ROWS \
-        BLIS_SGEMM_UKERNEL_PREFERS_CONTIG_ROWS
-#define BLIS_ZGEMM3M3_UKERNEL_PREFERS_CONTIG_ROWS \
-        BLIS_DGEMM_UKERNEL_PREFERS_CONTIG_ROWS
+INSERT_GENTPROTCO_BASIC( gemmtrsm1m_l_ukr_vir )
+INSERT_GENTPROTCO_BASIC( gemmtrsm1m_u_ukr_vir )
 
-
-// -- Define default 3m-specific kernel names ----------------------------------
-
-//
-// Level-3
-//
-
-// gemm3m2 micro-kernels
-
-#ifndef BLIS_CGEMM3M3_UKERNEL
-#define BLIS_CGEMM3M3_UKERNEL BLIS_CGEMM3M3_UKERNEL_VIR
-#endif
-
-#ifndef BLIS_ZGEMM3M3_UKERNEL
-#define BLIS_ZGEMM3M3_UKERNEL BLIS_ZGEMM3M3_UKERNEL_VIR
-#endif
-
-
-
-#endif 
