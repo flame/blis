@@ -48,6 +48,7 @@ CC             := gcc
 CC_VENDOR      := gcc
 endif
 ifeq ($(CC_VENDOR),gcc)
+else
 ifeq ($(CC_VENDOR),clang)
 else
 $(error gcc or clang are required for this configuration.)
