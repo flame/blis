@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 #
 #  BLIS    
 #  An object-based framework for developing high-performance BLAS-like

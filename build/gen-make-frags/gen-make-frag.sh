@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 #
 #  BLIS    
 #  An object-based framework for developing high-performance BLAS-like
@@ -374,10 +374,6 @@ gen_mkfiles()
 
 read_mkfile_config()
 {
-	local index lname
-	declare -i count
-	
-	
 	# Read the file describing file suffixes.
 	src_file_suffixes=$(cat "${suffix_file}")
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 #
 #  BLIS    
 #  An object-based framework for developing high-performance BLAS-like
@@ -41,7 +41,11 @@
 
 main()
 {
-	CC=gcc
+	if [ clang -v > /dev/null 2>&1 ]; then
+	    CC=clang
+	else
+	    CC=gcc
+    fi
 	CPUID_SRC=cpuid_x86.c
 	CPUID_BIN=blis_cpu_detect
 	ARCH=reference
@@ -58,12 +62,6 @@ main()
 	# make explicit that we distinguish between the top-level directory
 	# of the distribution and the directory in which we are building.
 	cur_dirpath="."
-
-
-	OSNAME=`uname`
-	if [ $OSNAME = "Darwin" ]; then
-		CC=clang
-	fi
 
 	#
 	# Detect architecture by predefined macros
