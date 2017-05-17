@@ -50,7 +50,7 @@ endif
 ifeq ($(CC_VENDOR),gcc)
 ifeq ($(CC_VENDOR),clang)
 else
-$(error gcc is required for this configuration.)
+$(error gcc or clang are required for this configuration.)
 endif
 endif
 # Enable IEEE Standard 1003.1-2004 (POSIX.1d). 
