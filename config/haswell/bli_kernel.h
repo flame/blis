@@ -52,17 +52,6 @@
 
 // -- sgemm micro-kernel --
 
-#if 1
-#define BLIS_SGEMM_UKERNEL         bli_sgemm_asm_6x16
-#define BLIS_DEFAULT_MC_S          144
-#define BLIS_DEFAULT_KC_S          256
-#define BLIS_DEFAULT_NC_S          4080
-#define BLIS_DEFAULT_MR_S          6
-#define BLIS_DEFAULT_NR_S          16
-
-#define BLIS_SGEMM_UKERNEL_PREFERS_CONTIG_ROWS
-#endif
-
 #if 0
 #define BLIS_SGEMM_UKERNEL         bli_sgemm_asm_4x24
 #define BLIS_DEFAULT_MC_S          256
@@ -70,6 +59,17 @@
 #define BLIS_DEFAULT_NC_S          4080
 #define BLIS_DEFAULT_MR_S          4
 #define BLIS_DEFAULT_NR_S          24
+
+#define BLIS_SGEMM_UKERNEL_PREFERS_CONTIG_ROWS
+#endif
+
+#if 1
+#define BLIS_SGEMM_UKERNEL         bli_sgemm_asm_6x16
+#define BLIS_DEFAULT_MC_S          144
+#define BLIS_DEFAULT_KC_S          256
+#define BLIS_DEFAULT_NC_S          4080
+#define BLIS_DEFAULT_MR_S          6
+#define BLIS_DEFAULT_NR_S          16
 
 #define BLIS_SGEMM_UKERNEL_PREFERS_CONTIG_ROWS
 #endif
@@ -85,17 +85,6 @@
 
 // -- dgemm micro-kernel --
 
-#if 1
-#define BLIS_DGEMM_UKERNEL         bli_dgemm_asm_6x8
-#define BLIS_DEFAULT_MC_D          72
-#define BLIS_DEFAULT_KC_D          256
-#define BLIS_DEFAULT_NC_D          4080
-#define BLIS_DEFAULT_MR_D          6
-#define BLIS_DEFAULT_NR_D          8
-
-#define BLIS_DGEMM_UKERNEL_PREFERS_CONTIG_ROWS
-#endif
-
 #if 0
 #define BLIS_DGEMM_UKERNEL         bli_dgemm_asm_4x12
 #define BLIS_DEFAULT_MC_D          152
@@ -103,6 +92,17 @@
 #define BLIS_DEFAULT_NC_D          4080
 #define BLIS_DEFAULT_MR_D          4
 #define BLIS_DEFAULT_NR_D          12
+
+#define BLIS_DGEMM_UKERNEL_PREFERS_CONTIG_ROWS
+#endif
+
+#if 1
+#define BLIS_DGEMM_UKERNEL         bli_dgemm_asm_6x8
+#define BLIS_DEFAULT_MC_D          72
+#define BLIS_DEFAULT_KC_D          256
+#define BLIS_DEFAULT_NC_D          4080
+#define BLIS_DEFAULT_MR_D          6
+#define BLIS_DEFAULT_NR_D          8
 
 #define BLIS_DGEMM_UKERNEL_PREFERS_CONTIG_ROWS
 #endif

@@ -94,48 +94,47 @@ void bli_gks_cntx_set_blkszs( ind_t method, dim_t n_bs, ... )
 {
 	/* Example prototypes:
 
-	   void
-	   bli_gks_cntx_set_blkszs(
+	   void bli_gks_cntx_set_blkszs
+	   (
+	     ind_t   method = BLIS_NAT,
+	     dim_t   n_bs,
+	     bszid_t bs0_id, bszid_t bm0_id,
+	     bszid_t bs1_id, bszid_t bm1_id,
+	     bszid_t bs2_id, bszid_t bm2_id,
+	     ...
+	     cntx_t* cntx
+	   );
 
-	             ind_t   method = BLIS_NAT,
-	             dim_t   n_bs,
-	             bszid_t bs0_id, bszid_t bm0_id,
-	             bszid_t bs1_id, bszid_t bm1_id,
-	             bszid_t bs2_id, bszid_t bm2_id,
-	             ...
-	             cntx_t* cntx );
-
-	   void
-	   bli_gks_cntx_set_blkszs(
-
-	             ind_t   method != BLIS_NAT,
-	             dim_t   n_bs,
-	             bszid_t bs0_id, bszid_t bm0_id, dim_t scalr0,
-	             bszid_t bs1_id, bszid_t bm1_id, dim_t scalr1,
-	             bszid_t bs2_id, bszid_t bm2_id, dim_t scalr2,
-	             ...
-	             cntx_t* cntx );
+	   void bli_gks_cntx_set_blkszs
+	   (
+	     ind_t   method != BLIS_NAT,
+	     dim_t   n_bs,
+	     bszid_t bs0_id, bszid_t bm0_id, dim_t def_scalr0, dim_t max_scalr0,
+	     bszid_t bs1_id, bszid_t bm1_id, dim_t def_scalr1, dim_t max_scalr1,
+	     bszid_t bs2_id, bszid_t bm2_id, dim_t def_scalr2, dim_t max_scalr2,
+	     ...
+	     cntx_t* cntx
+	   );
 	*/
 	va_list   args;
 	dim_t     i;
 
 	bszid_t*  bszids;
 	bszid_t*  bmults;
-	double*   scalrs;
+	double*   dsclrs;
+	double*   msclrs;
 
 	cntx_t*   cntx;
 
 	blksz_t*  cntx_blkszs;
 	bszid_t*  cntx_bmults;
 
-	bszid_t   bs_id;
-	bszid_t   bm_id;
-	double    scalr;
 
 	// Allocate some temporary local arrays.
 	bszids = bli_malloc_intl( n_bs * sizeof( bszid_t  ) );
 	bmults = bli_malloc_intl( n_bs * sizeof( bszid_t  ) );
-	scalrs = bli_malloc_intl( n_bs * sizeof( double   ) );
+	dsclrs = bli_malloc_intl( n_bs * sizeof( double   ) );
+	msclrs = bli_malloc_intl( n_bs * sizeof( double   ) );
 
 	// -- Begin variable argument section --
 
@@ -152,8 +151,8 @@ void bli_gks_cntx_set_blkszs( ind_t method, dim_t n_bs, ... )
 			// - the bszid_t of the blocksize we're about to process,
 			// - the bszid_t of the multiple we need to associate with
 			//   the blksz_t object.
-			bs_id = va_arg( args, bszid_t  );
-			bm_id = va_arg( args, bszid_t  );
+			bszid_t  bs_id = va_arg( args, bszid_t  );
+			bszid_t  bm_id = va_arg( args, bszid_t  );
 
 			// Store the values in our temporary arrays.
 			bszids[ i ] = bs_id;
@@ -169,16 +168,19 @@ void bli_gks_cntx_set_blkszs( ind_t method, dim_t n_bs, ... )
 			// - the bszid_t of the blocksize we're about to process,
 			// - the bszid_t of the multiple we need to associate with
 			//   the blksz_t object.
-			// - the scalar we wish to apply to the real blocksizes to
-			//   come up with the induced complex blocksizes.
-			bs_id = va_arg( args, bszid_t  );
-			bm_id = va_arg( args, bszid_t  );
-			scalr = va_arg( args, double   );
+			// - the scalars we wish to apply to the real blocksizes to
+			//   come up with the induced complex blocksizes (for default
+			//   and maximum blocksizes).
+			bszid_t  bs_id = va_arg( args, bszid_t  );
+			bszid_t  bm_id = va_arg( args, bszid_t  );
+			double   dsclr = va_arg( args, double   );
+			double   msclr = va_arg( args, double   );
 
 			// Store the values in our temporary arrays.
 			bszids[ i ] = bs_id;
 			bmults[ i ] = bm_id;
-			scalrs[ i ] = scalr;
+			dsclrs[ i ] = dsclr;
+			msclrs[ i ] = msclr;
 		}
 	}
 
@@ -210,10 +212,10 @@ void bli_gks_cntx_set_blkszs( ind_t method, dim_t n_bs, ... )
 		for ( i = 0; i < n_bs; ++i )
 		{
 			// Read the current blocksize id, blocksize multiple id.
-			      bszid_t  bs_id = bszids[ i ];
-			      bszid_t  bm_id = bmults[ i ];
+			bszid_t  bs_id = bszids[ i ];
+			bszid_t  bm_id = bmults[ i ];
 
-			      blksz_t* cntx_blksz = &cntx_blkszs[ bs_id ];
+			blksz_t* cntx_blksz = &cntx_blkszs[ bs_id ];
 
 			// Query the blocksizes (blksz_t) associated with bs_id and save
 			// them directly into the appropriate location in the context's
@@ -231,41 +233,75 @@ void bli_gks_cntx_set_blkszs( ind_t method, dim_t n_bs, ... )
 		{
 			// Read the current blocksize id, blocksize multiple id,
 			// and blocksize scalar.
-			      bszid_t  bs_id = bszids[ i ];
-			      bszid_t  bm_id = bmults[ i ];
-			      double   scalr = scalrs[ i ];
+			bszid_t  bs_id = bszids[ i ];
+			bszid_t  bm_id = bmults[ i ];
+			double   dsclr = dsclrs[ i ];
+			double   msclr = msclrs[ i ];
 
-			      blksz_t  blksz;
-			      blksz_t  bmult;
+			blksz_t  blksz_l;
+			blksz_t  bmult_l;
 
-			      blksz_t* cntx_blksz = &cntx_blkszs[ bs_id ];
+			blksz_t* blksz = &blksz_l;
+			blksz_t* bmult = &bmult_l;
+
+			blksz_t* cntx_blksz = &cntx_blkszs[ bs_id ];
 
 			// Query the blocksizes (blksz_t) associated with bs_id and bm_id
 			// and use them to populate a pair of local blksz_t objects.
-			bli_gks_get_blksz( bs_id, &blksz );
-			bli_gks_get_blksz( bm_id, &bmult );
+			bli_gks_get_blksz( bs_id, blksz );
+			bli_gks_get_blksz( bm_id, bmult );
 
 			// Copy the real domain values of the source blksz_t object into
 			// the context, duplicating into the complex domain fields.
-			bli_blksz_copy_dt( BLIS_FLOAT,  &blksz, BLIS_FLOAT,    cntx_blksz );
-			bli_blksz_copy_dt( BLIS_DOUBLE, &blksz, BLIS_DOUBLE,   cntx_blksz );
-			bli_blksz_copy_dt( BLIS_FLOAT,  &blksz, BLIS_SCOMPLEX, cntx_blksz );
-			bli_blksz_copy_dt( BLIS_DOUBLE, &blksz, BLIS_DCOMPLEX, cntx_blksz );
+			bli_blksz_copy_dt( BLIS_FLOAT,  blksz, BLIS_FLOAT,    cntx_blksz );
+			bli_blksz_copy_dt( BLIS_DOUBLE, blksz, BLIS_DOUBLE,   cntx_blksz );
+			bli_blksz_copy_dt( BLIS_FLOAT,  blksz, BLIS_SCOMPLEX, cntx_blksz );
+			bli_blksz_copy_dt( BLIS_DOUBLE, blksz, BLIS_DCOMPLEX, cntx_blksz );
 
-			// The next steps apply only to cache blocksizes, and not register
-			// blocksizes (ie: they only apply to blocksizes for which the
-			// blocksize multiple id is different than the blocksize id) and
-			// only when the scalar provided is non-unit.
-			if ( bs_id != bm_id && scalr != 1.0 ) 
+			// If the default blocksize scalar is non-unit, we need to scale
+			// the complex domain default blocksizes.
+			if ( dsclr != 1.0 )
 			{
-				// Scale the complex domain values in the blocksize object.
-				bli_blksz_scale_dt_by( 1, (dim_t)scalr, BLIS_SCOMPLEX, cntx_blksz );
-				bli_blksz_scale_dt_by( 1, (dim_t)scalr, BLIS_DCOMPLEX, cntx_blksz );
+				// Scale the complex domain default blocksize values in the
+				// blocksize object.
+				bli_blksz_scale_def( 1, ( dim_t )dsclr, BLIS_SCOMPLEX, cntx_blksz );
+				bli_blksz_scale_def( 1, ( dim_t )dsclr, BLIS_DCOMPLEX, cntx_blksz );
 
-				// Finally, round the newly-scaled blocksizes down to their
-				// respective multiples.
-				bli_blksz_reduce_dt_to( BLIS_FLOAT,  &bmult, BLIS_SCOMPLEX, cntx_blksz );
-				bli_blksz_reduce_dt_to( BLIS_DOUBLE, &bmult, BLIS_DCOMPLEX, cntx_blksz );
+				if ( bs_id != bm_id )
+				{
+					// Round the newly-scaled blocksizes down to their multiple.
+					// (Note that both the default and maximum blocksize values
+					// must be a multiple of the same blocksize multiple.) Also,
+					// note that this is only done when the blocksize id is not
+					// equal to the blocksize multiple id (ie: we don't round
+					// down scaled register blocksizes since they are their own
+					// multiples).
+					bli_blksz_reduce_def_to( BLIS_FLOAT,  bmult, BLIS_SCOMPLEX, cntx_blksz );
+					bli_blksz_reduce_def_to( BLIS_DOUBLE, bmult, BLIS_DCOMPLEX, cntx_blksz );
+				}
+			}
+
+			// Similarly, if the maximum blocksize scalar is non-unit, we need
+			// to scale the complex domain maximum blocksizes.
+			if ( msclr != 1.0 )
+			{
+				// Scale the complex domain maximum blocksize values in the
+				// blocksize object.
+				bli_blksz_scale_max( 1, ( dim_t )msclr, BLIS_SCOMPLEX, cntx_blksz );
+				bli_blksz_scale_max( 1, ( dim_t )msclr, BLIS_DCOMPLEX, cntx_blksz );
+
+				if ( bs_id != bm_id )
+				{
+					// Round the newly-scaled blocksizes down to their multiple.
+					// (Note that both the default and maximum blocksize values
+					// must be a multiple of the same blocksize multiple.) Also,
+					// note that this is only done when the blocksize id is not
+					// equal to the blocksize multiple id (ie: we don't round
+					// down scaled register blocksizes since they are their own
+					// multiples).
+					bli_blksz_reduce_max_to( BLIS_FLOAT,  bmult, BLIS_SCOMPLEX, cntx_blksz );
+					bli_blksz_reduce_max_to( BLIS_DOUBLE, bmult, BLIS_DCOMPLEX, cntx_blksz );
+				}
 			}
 
 			// Copy the blocksize multiple id into the context.
@@ -276,7 +312,8 @@ void bli_gks_cntx_set_blkszs( ind_t method, dim_t n_bs, ... )
 	// Free the temporary local arrays.
 	bli_free_intl( bszids );
 	bli_free_intl( bmults );
-	bli_free_intl( scalrs );
+	bli_free_intl( dsclrs );
+	bli_free_intl( msclrs );
 }
 
 
@@ -336,6 +373,18 @@ static func_t bli_gks_l3_ind_ukrs[BLIS_NUM_IND_METHODS]
 /* gemmtrsm_u */  { { NULL, BLIS_CGEMMTRSM4M1_U_UKERNEL, NULL, BLIS_ZGEMMTRSM4M1_U_UKERNEL, } },
 /* trsm_l     */  { { NULL, BLIS_CTRSM4M1_L_UKERNEL,     NULL, BLIS_ZTRSM4M1_L_UKERNEL,     } },
 /* trsm_u     */  { { NULL, BLIS_CTRSM4M1_U_UKERNEL,     NULL, BLIS_ZTRSM4M1_U_UKERNEL,     } },
+                  },
+/* 1m         */  {
+/* gemm       */  { { BLIS_SGEMM_UKERNEL,       BLIS_CGEMM1M_UKERNEL,
+                      BLIS_DGEMM_UKERNEL,       BLIS_ZGEMM1M_UKERNEL,       } },
+/* gemmtrsm_l */  { { NULL,                     BLIS_CGEMMTRSM1M_L_UKERNEL,
+                      NULL,                     BLIS_ZGEMMTRSM1M_L_UKERNEL, } },
+/* gemmtrsm_u */  { { NULL,                     BLIS_CGEMMTRSM1M_U_UKERNEL,
+                      NULL,                     BLIS_ZGEMMTRSM1M_U_UKERNEL, } },
+/* trsm_l     */  { { NULL,                     BLIS_CTRSM1M_L_UKERNEL,
+                      NULL,                     BLIS_ZTRSM1M_L_UKERNEL,     } },
+/* trsm_u     */  { { NULL,                     BLIS_CTRSM1M_U_UKERNEL,
+                      NULL,                     BLIS_ZTRSM1M_U_UKERNEL,     } },
                   },
 /* nat        */  {
 /* gemm       */  { { BLIS_SGEMM_UKERNEL,       BLIS_CGEMM_UKERNEL,
@@ -557,6 +606,9 @@ void bli_gks_cntx_set_l3_nat_ukr_prefs( l3ukr_t ukr,
 	mbool_t* cntx_l3_nat_ukr_pref  = &cntx_l3_nat_ukr_prefs[ ukr ];
 
 	bli_gks_get_l3_nat_ukr_prefs( ukr, cntx_l3_nat_ukr_pref );
+
+	// Explicitly set the anti-preference to FALSE.
+	bli_cntx_set_anti_pref( FALSE, cntx );
 }
 
 
@@ -564,6 +616,8 @@ void bli_gks_cntx_set_l3_nat_ukr_prefs( l3ukr_t ukr,
 //
 // -- packm structure-aware kernel structure -----------------------------------
 //
+
+// IF ENABLED: NEEDS UPDATING FOR 1M.
 
 static func_t bli_gks_packm_struc_kers[BLIS_NUM_PACK_SCHEMA_TYPES] =
 {

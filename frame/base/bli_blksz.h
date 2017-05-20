@@ -89,11 +89,23 @@
 	(b_dst)->e[ dt_dst ] = (b_src)->e[ dt_src ]; \
 }
 
+#define bli_blksz_scale_def( num, den, dt, b ) \
+{ \
+	(b)->v[ dt ] = ( (b)->v[ dt ] * num ) / den; \
+}
+
+#define bli_blksz_scale_max( num, den, dt, b ) \
+{ \
+	(b)->e[ dt ] = ( (b)->e[ dt ] * num ) / den; \
+}
+
+#if 0
 #define bli_blksz_scale_dt_by( num, den, dt, b ) \
 { \
 	(b)->v[ dt ] = ( (b)->v[ dt ] * num ) / den; \
 	(b)->e[ dt ] = ( (b)->e[ dt ] * num ) / den; \
 }
+#endif
 
 // -----------------------------------------------------------------------------
 
@@ -121,12 +133,25 @@ void bli_blksz_obj_free
 
 // -----------------------------------------------------------------------------
 
+#if 0
 void bli_blksz_reduce_dt_to
      (
        num_t dt_bm, blksz_t* bmult,
        num_t dt_bs, blksz_t* blksz
      );
+#endif
 
+void bli_blksz_reduce_def_to
+     (
+       num_t dt_bm, blksz_t* bmult,
+       num_t dt_bs, blksz_t* blksz
+     );
+
+void bli_blksz_reduce_max_to
+     (
+       num_t dt_bm, blksz_t* bmult,
+       num_t dt_bs, blksz_t* blksz
+     );
 // -----------------------------------------------------------------------------
 
 dim_t bli_determine_blocksize

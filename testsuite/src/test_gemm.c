@@ -259,8 +259,6 @@ void libblis_test_gemm_impl
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
 		bli_gemm( alpha, a, b, beta, c );
-		//bli_gemm4m( alpha, a, b, beta, c );
-		//bli_gemm3m( alpha, a, b, beta, c );
 		break;
 
 		default:

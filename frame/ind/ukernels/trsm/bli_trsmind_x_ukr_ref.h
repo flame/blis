@@ -51,3 +51,6 @@ INSERT_GENTPROTCO_BASIC( trsm4m1_u_ukr_ref )
 INSERT_GENTPROTCO_BASIC( trsm3m1_l_ukr_ref )
 INSERT_GENTPROTCO_BASIC( trsm3m1_u_ukr_ref )
 
+INSERT_GENTPROTCO_BASIC( trsm1m_l_ukr_ref )
+INSERT_GENTPROTCO_BASIC( trsm1m_u_ukr_ref )
+

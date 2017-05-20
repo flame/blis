@@ -1,4 +1,4 @@
-#!/bin/bash
+#
 #
 #  BLIS    
 #  An object-based framework for developing high-performance BLAS-like
@@ -63,7 +63,9 @@ ARFLAGS        := rcs
 # --- Determine the linker and related flags ---
 LINKER         := $(CC)
 SOFLAGS        := 
+ifneq ($(CC_VENDOR),icc)
 LDFLAGS        := -lm
+endif
 
 # --- Determine the finalizer and related flags ---
 FINALIZER      := pnacl-finalize

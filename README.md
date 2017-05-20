@@ -260,7 +260,9 @@ We also have a third paper, submitted to IPDPS 2014, on achieving
 ```
 
 A fourth paper, submitted to ACM TOMS, also exists, which proposes an
-[analytical model](http://www.cs.utexas.edu/users/flame/pubs/TOMS-BLIS-Analytical.pdf) for determining blocksize parameters in BLIS: 
+[analytical model](http://dl.acm.org/citation.cfm?id=2925987) 
+([unofficial backup link](http://www.cs.utexas.edu/users/flame/pubs/TOMS-BLIS-Analytical.pdf))
+for determining blocksize parameters in BLIS: 
 
 ```
 @article{BLIS4,
@@ -277,6 +279,32 @@ A fourth paper, submitted to ACM TOMS, also exists, which proposes an
    url         = {http://doi.acm.org/10.1145/2925987},
 }
 ```
+
+A fifth paper, submitted to ACM TOMS, begins the study of so-called
+[induced methods for complex matrix multiplication](http://www.cs.utexas.edu/users/flame/pubs/blis5_toms_rev2.pdf):
+
+```
+@article{BLIS5,
+   author      = {Field G. {V}an~{Z}ee and Tyler Smith},
+   title       = {Implementing high-performance complex matrix multiplication via the 3m and 4m methods},
+   journal     = {ACM Transactions on Mathematical Software},
+   year        = {2017},
+   note        = {accepted}
+}
+``` 
+
+A sixth paper, submitted to ACM TOMS, revisits the topic of the previous
+article and derives a [superior induced method](http://www.cs.utexas.edu/users/flame/pubs/blis6_toms_rev0.pdf):
+
+```
+@article{BLIS6,
+   author      = {Field G. {V}an~{Z}ee},
+   title       = {Implementing high-performance complex matrix multiplication via the 1m method},
+   journal     = {ACM Transactions on Mathematical Software},
+   note        = {submitted}
+}
+``` 
+
 
 Funding
 -------

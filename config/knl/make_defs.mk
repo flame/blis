@@ -1,4 +1,4 @@
-#!/bin/bash
+#
 #
 #  BLIS    
 #  An object-based framework for developing high-performance BLAS-like
@@ -65,6 +65,10 @@ else
 COPTFLAGS      := -O3
 endif
 
+ifeq ($(DEBUG_TYPE),sde)
+CPPROCFLAGS    += -DBLIS_NO_HBWMALLOC
+endif
+
 CKOPTFLAGS     := $(COPTFLAGS)
 
 ifeq ($(CC_VENDOR),gcc)
@@ -95,7 +99,16 @@ ARFLAGS        := cru
 # --- Determine the linker and related flags ---
 LINKER         := $(CC)
 SOFLAGS        := -shared
-LDFLAGS        := -lm -lmemkind
+
+ifneq ($(DEBUG_TYPE),sde)
+LDFLAGS        := -lmemkind
+else
+LDFLAGS        :=
+endif
+
+ifneq ($(CC_VENDOR),icc)
+LDFLAGS        += -lm
+endif 
 
 
 

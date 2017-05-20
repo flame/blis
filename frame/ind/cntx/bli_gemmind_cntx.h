@@ -32,67 +32,51 @@
 
 */
 
-#if 0
-//
-// Generate prototypes for _cntx_init(), _cntx_stage(), and _cntx_finalize()
-// for each induced method (including native execution) based on gemm.
-//
-
-#undef  GENPROT
-#define GENPROT( opname, imeth ) \
-\
-void  PASTEMAC2(opname,imeth,_cntx_init)( void ); \
-void  PASTEMAC2(opname,imeth,_cntx_stage)( dim_t stage, cntx_t* cntx ); \
-void  PASTEMAC2(opname,imeth,_cntx_finalize)( void );
-
-GENPROT( gemm, nat )
-GENPROT( gemm, 3mh )
-GENPROT( gemm, 3m3 )
-GENPROT( gemm, 3m2 )
-GENPROT( gemm, 3m1 )
-GENPROT( gemm, 4mh )
-GENPROT( gemm, 4mb )
-GENPROT( gemm, 4m1 )
-#endif
-
-void  bli_gemmnat_cntx_init( cntx_t* cntx );
+void  bli_gemmnat_cntx_init( num_t dt, cntx_t* cntx );
 void  bli_gemmnat_cntx_stage( dim_t stage, cntx_t* cntx );
 void  bli_gemmnat_cntx_finalize( cntx_t* cntx );
 
-void  bli_gemm3mh_cntx_init( cntx_t* cntx );
+void  bli_gemm3mh_cntx_init( num_t dt, cntx_t* cntx );
 void  bli_gemm3mh_cntx_stage( dim_t stage, cntx_t* cntx );
 void  bli_gemm3mh_cntx_finalize( cntx_t* cntx );
 
-void  bli_gemm3m3_cntx_init( cntx_t* cntx );
+void  bli_gemm3m3_cntx_init( num_t dt, cntx_t* cntx );
 void  bli_gemm3m3_cntx_stage( dim_t stage, cntx_t* cntx );
 void  bli_gemm3m3_cntx_finalize( cntx_t* cntx );
 
-void  bli_gemm3m2_cntx_init( cntx_t* cntx );
+void  bli_gemm3m2_cntx_init( num_t dt, cntx_t* cntx );
 void  bli_gemm3m2_cntx_stage( dim_t stage, cntx_t* cntx );
 void  bli_gemm3m2_cntx_finalize( cntx_t* cntx );
 
-void  bli_gemm3m1_cntx_init( cntx_t* cntx );
+void  bli_gemm3m1_cntx_init( num_t dt, cntx_t* cntx );
 void  bli_gemm3m1_cntx_stage( dim_t stage, cntx_t* cntx );
 void  bli_gemm3m1_cntx_finalize( cntx_t* cntx );
 
-void  bli_gemm4mh_cntx_init( cntx_t* cntx );
+void  bli_gemm4mh_cntx_init( num_t dt, cntx_t* cntx );
 void  bli_gemm4mh_cntx_stage( dim_t stage, cntx_t* cntx );
 void  bli_gemm4mh_cntx_finalize( cntx_t* cntx );
 
-void  bli_gemm4mb_cntx_init( cntx_t* cntx );
+void  bli_gemm4mb_cntx_init( num_t dt, cntx_t* cntx );
 void  bli_gemm4mb_cntx_stage( dim_t stage, cntx_t* cntx );
 void  bli_gemm4mb_cntx_finalize( cntx_t* cntx );
 
-void  bli_gemm4m1_cntx_init( cntx_t* cntx );
+void  bli_gemm4m1_cntx_init( num_t dt, cntx_t* cntx );
 void  bli_gemm4m1_cntx_stage( dim_t stage, cntx_t* cntx );
 void  bli_gemm4m1_cntx_finalize( cntx_t* cntx );
+
+void  bli_gemm1m_cntx_init( num_t dt, cntx_t* cntx );
+void  bli_gemm1mbp_cntx_init( num_t dt, cntx_t* cntx );
+void  bli_gemm1mpb_cntx_init( num_t dt, cntx_t* cntx );
+void  bli_gemm1mxx_cntx_init( num_t dt, bool_t is_pb, cntx_t* cntx );
+void  bli_gemm1m_cntx_stage( dim_t stage, cntx_t* cntx );
+void  bli_gemm1m_cntx_finalize( cntx_t* cntx );
 
 // -----------------------------------------------------------------------------
 
 void  bli_gemmind_cntx_init_avail( num_t dt, cntx_t* cntx );
 void  bli_gemmind_cntx_finalize_avail( num_t dt, cntx_t* cntx );
 
-void  bli_gemmind_cntx_init( ind_t method, cntx_t* cntx );
+void  bli_gemmind_cntx_init( ind_t method, num_t dt, cntx_t* cntx );
 void  bli_gemmind_cntx_finalize( ind_t method, cntx_t* cntx );
 
 void* bli_gemmind_cntx_init_get_func( ind_t method );

@@ -41,9 +41,11 @@
 #include "bli_kernel_4mh_macro_defs.h"
 #include "bli_kernel_4mb_macro_defs.h"
 #include "bli_kernel_4m1_macro_defs.h"
+#include "bli_kernel_1m_macro_defs.h"
 
 // Storage format headers
 #include "bli_packm_3mis_macro_defs.h"
 #include "bli_packm_4mi_macro_defs.h"
 #include "bli_packm_rih_macro_defs.h"
+#include "bli_packm_1er_macro_defs.h"
 

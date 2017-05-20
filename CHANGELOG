@@ -1,18 +1,706 @@
-commit 866b2dde3f41760121115fb25f096d4344e8b4f9 (HEAD -> master, tag: 0.2.1)
+commit 940a707ac78de975110e17c95765e65b89aa5e10 (HEAD -> master, tag: 0.2.2)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue May 2 16:38:42 2017 -0500
+
+    Version file update (0.2.2)
+
+commit d5a5e003ea9b24bb6abf12e88862e8eb61ffb03d (origin/master, origin/HEAD, origin/1m, 1m)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue May 2 15:48:30 2017 -0500
+
+    Fixed a trsm1m bug that affected right-side cases.
+    
+    Details:
+    - Fixed a bug introduced in 1c732d3 that affected trsm1m_r. The result
+      was nondeterministic behavior (usually segmentation faults) for certain
+      problem sizes beyond the 1m instance of kc (e.g. 128 on haswell). The
+      cause of the bug was my commenting out lines in bli_gemm1m_ukr_ref.c
+      which explicitly directed the virtual gemm micro-kernel to use temporary
+      space if the storage preference of the [real domain] gemm ukernel did
+      not match the storage of the output matrix C. In the context of gemm,
+      this handling is not needed because agreement between the storage pref
+      and the matrix is guaranteed by a high-level optimization in BLIS.
+      However, this optimization is not applied to trsm because the storage
+      of C is not necessarily the same as the storage of the micro-panels of
+      B--both of which are updated by the micro-kernel during a trsm
+      operation. Thus, the guarantee of storage/preference agreement is not
+      in place for trsm, which means we must handle that case within the
+      virtual gemm micro-kernel.
+    - Comment updates and a minor macro change to bli_trsm*_cntx_init() for
+      3m1, 4m1a, and 1m.
+
+commit e80993e71f4d571e9650a8e90ed386e32059eae5
+Merge: a509fbd5 ca3a7924
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue May 2 12:30:28 2017 -0500
+
+    Merge branch 'master' into 1m
+
+commit ca3a7924770d6cf203cce4ca9f5482e1d0d4e961
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue May 2 12:09:39 2017 -0500
+
+    README.md update.
+    
+    Details:
+    - Updated bibtex entries for 4th BLIS paper, and adds entries for 5th
+      and 6th BLIS papers.
+
+commit 6e7de6ef84babb273dc5528a9b9d01f0febe394b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Mar 17 12:10:24 2017 -0500
+
+    Minor updates to test/3m4m.
+    
+    Details:
+    - Updated initial problem size and increment in Makefile.
+    - Updated code in test_gemm.c to correctly query kc from context.
+
+commit f484c6cd4389dc7ae5b972849e12e98ad5bbf9a4
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Mar 17 12:07:27 2017 -0500
+
+    Whitespace reformatting to armv8a kernels file.
+    
+    Details:
+    - Updated formatting of function signature/header in
+      kernels/armv8a/3/bli_gemm_opt_4x4.c.
+
+commit a509fbd5ac04fafd4e51b43d2f59ca56432dc212
+Merge: 69b4846a 513944e4
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Feb 21 17:06:16 2017 -0600
+
+    Merge branch 'master' into 1m
+
+commit 69b4846ae9adb157c4171b52e159684db2867853
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Feb 21 15:33:39 2017 -0600
+
+    Disabled experiment-related 1m code.
+    
+    Details:
+    - Commented out code in frame/ind/oapi/bli_l3_3m4m1m_oapi.c that was
+      specifically inserted to facilitate the benchmarking of 1m block-panel
+      and panel-block algorithms.
+    - Updates to test/3m4m/Makefile, runme.sh script, and test_gemm.c to
+      reflect changes used/needed during benchmarking.
+
+commit 513944e4a951d8823b4de161b86ad7a965b4d99b
+Merge: 8b462a0e 0e18f68c
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Mon Feb 20 10:04:33 2017 -0500
+
+    Merge pull request #118 from devinamatthews/master
+    
+    Handle k=0 correctly in KNL dgemm ukernel.
+
+commit 0e18f68cf12eb9189ba901a20040b1cdae417670
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Mon Feb 20 09:03:21 2017 -0600
+
+    Handle k=0 correctly in KNL dgemm ukernel.
+
+commit 8b462a0e8c3e9252f0401940849e53cc772256fa
+Merge: c362afc5 7d42fc07
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Sun Feb 19 23:03:03 2017 -0500
+
+    Merge pull request #117 from devinamatthews/master
+    
+    Cast dim_t and inc_t parameters to 64-bit in KNL microkernels.
+
+commit 7d42fc0796ef0c010375fd8e59b1240ba41ce4d2
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Sun Feb 19 21:10:55 2017 -0500
+
+    Cast dim_t and inc_t parameters to 64-bit in KNL microkernels.
+
+commit c362afc525bab4050581d1b0fcea2fe4d582c608
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Feb 9 11:54:59 2017 -0600
+
+    Added missing "level-0" BLAS [sd]cabs1_().
+    
+    Details:
+    - Fixed issue #115 by adding implementations for scabs1_() and dcabs1_()
+      to the BLAS compatibility layer. Thanks to heroxbd for pointing out
+      their absence.
+
+commit 018180c938c32efbeaaf626ba71ec5b780664db1
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Feb 8 11:20:52 2017 -0600
+
+    Fixed a minor bug in configure (issue #114).
+    
+    Details:
+    - Fixed a bug in the configure script whereby a non-preferred value for
+      --enable-threading would cause problems in common.mk vis-a-vis detecting
+      which threading model was chosen. Thanks to heroxbd for reporting this
+      issue.
+
+commit ddf45e71770c55ea4a58ca24ea4913fe5d8beb9b
+Merge: a6ab91bc 78e1b16e
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Fri Jan 27 14:25:40 2017 -0600
+
+    Merge pull request #113 from devinamatthews/knl_thread_params
+    
+    Change default threading parameters for KNL.
+
+commit 78e1b16e16d589ed31b2e712115ee282097f114d
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Fri Jan 27 14:22:20 2017 -0600
+
+    Change default threading parameters for KNL.
+
+commit 1c732d3ddc4ac0861d3b0e0dd15eb7e071615502
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jan 25 16:25:46 2017 -0600
+
+    Added 1m-specific APIs for bp, pb gemm algorithms.
+    
+    Details:
+    - Defined bli_gemmbp_cntl_create(), bli_gemmpb_cntl_create(), with the
+      body of bli_gemm_cntl_create() replaced with a call to the former.
+    - Defined bli_cntl_free_w_thrinfo(), bli_cntl_free_wo_thrinfo(). Now,
+      bli_cntl_free() can check if the thread parameter is NULL, and if so,
+      call the latter, and otherwise call the former.
+    - Defined bli_gemm1mbp_cntx_init(), bli_gemm1mpb_cntx_init(), both in
+      terms of bli_gemm1mxx_cntx_init(), which behaves the same as
+      bli_gemm1m_cntx_init() did before, except that an extra bool parameter
+      (is_pb) is used to support both bp and pb algorithms (including to
+      support the anti-preference field described below).
+    - Added support for "anti-preference" in context. The anti_pref field,
+      when true, will toggle the boolean return value of routines such as
+      bli_cntx_l3_ukr_eff_prefers_storage_of(), which has the net effect of
+      causing BLIS to transpose the operation to achieve disagreement (rather
+      than agreement) between the storage of C and the micro-kernel output
+      preference. This disagreement is needed for panel-block implementations,
+      since they induce a transposition of the suboperation immediately before
+      the macro-kernel is called, which changes the apparent storage of C. For
+      now, anti-preference is used only with the pb algorithm for 1m (and not
+      with any other non-1m implementation).
+    - Defined new functions,
+        bli_cntx_l3_ukr_eff_prefers_storage_of()
+        bli_cntx_l3_ukr_eff_dislikes_storage_of()
+        bli_cntx_l3_nat_ukr_eff_prefers_storage_of()
+        bli_cntx_l3_nat_ukr_eff_dislikes_storage_of()
+      which are identical to their non-"eff" (effectively) counterparts except
+      that they take the anti-preference field of the context into account.
+    - Explicitly initialize the anti-pref field to FALSE in
+      bli_gks_cntx_set_l3_nat_ukr_prefs().
+    - Added bli_gemm_ker_var1.c, which implements a panel-block macro-kernel
+      in terms of the existing block-panel macro-kernel _ker_var2(). This
+      technique requires inducing transposes on all operands and swapping
+      the A and B.
+    - Changed bli_obj_induce_trans() macro so that pack-related fields are
+      also changed to reflect the induced transposition.
+    - Added a temporary hack to bli_l3_3m4m1m_oapi.c that allows us to easily
+      specify the 1m algorithm (block-panel or panel-block).
+    - Renamed the following cntx_t-related macros:
+        bli_cntx_get_pack_schema_a() -> bli_cntx_get_pack_schema_a_block()
+        bli_cntx_get_pack_schema_b() -> bli_cntx_get_pack_schema_b_panel()
+        bli_cntx_get_pack_schema_c() -> bli_cntx_get_pack_schema_c_panel()
+      and updated all instantiations. Also updated the field names in the
+      cntx_t struct.
+    - Comment updates.
+
+commit a6ab91bc61432490fadf18d596de4589645f37dd
+Merge: 145a551d 7f31a630
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Nov 30 09:26:58 2016 -0600
+
+    Merge pull request #111 from figual/master
+    
+    Fixed missing cntx argument in ARMv8 microkernels.
+
+commit 7f31a6307b7bd35f913c895947552c3a176f789b
+Author: Francisco Igual <figual@ucm.es>
+Date:   Sun Nov 27 14:40:47 2016 +0100
+
+    Fixed missing cntx argument in ARMv8 microkernels.
+
+commit 126482a3b609b9ad7026ba348f6c4bf6a29be8a1
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Nov 25 18:29:49 2016 -0600
+
+    Implemented the 1m method.
+    
+    Details:
+    - Implemented the 1m method for inducing complex domain matrix
+      multiplication. 1m support has been added to all level-3 operations,
+      including trsm, and is now the default induced method when native
+      complex domain gemm microkernels are omitted from the configuration.
+    - Updated _cntx_init() operations to take a datatype parameter. This was
+      needed for the corresponding function for 1m (because 1m requires us
+      to choose between column-oriented or row-oriented execution, which
+      requires us to query the context for the storage preference of the
+      gemm microkernel, which requires knowing the datatype) but I decided
+      that it made sense for consistency to add the parameter to all other
+      cntx initialization functions as well, even though those functions
+      don't use the parameter.
+    - Updated bli_cntx_set_blkszs() and bli_gks_cntx_set_blkszs() to take
+      a second scalar for each blocksize entry. The semantic meaning of the
+      two scalars now is that the first will scale the default blocksize
+      while the second will scale the maximum blocksize. This allows scaling
+      the two independently, and was needed to support 1m, which requires
+      scaling for a register blocksize but not the register storage
+      blocksize (ie: "packdim") analogue.
+    - Deprecated bli_blksz_reduce_dt_to() and defined two new functions,
+      bli_blksz_reduce_def_to() and bli_blksz_reduce_max_to(), for reducing
+      default and maximum blocksizes to some desired blocksize multiple.
+      These functions are needed in the updated definitions of
+      bli_cntx_set_blkszs() and bli_gks_cntx_set_blkszs().
+    - Added support for the 1e and 1r packing schemas to packm, including
+      1e/1r packing kernels.
+    - Added a minor optimization to bli_gemm_ker_var2() that allows, under
+      certain circumstances (specifically, real domain beta and row- or
+      column-stored matrix C), the real domain macrokernel and microkernel
+      to be called directly, rather than using the virtual microkernel
+      via the complex domain macrokernel, which carries a slight additional
+      amount of overhead.
+    - Added 1m support to the testsuite.
+    - Added 1m support to Makefile and runme.sh in test/3m4m. Also simplified
+      some code in test_gemm.c driver.
+
+commit 145a551d524ae5492667a05fc248923d922df850
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Nov 23 17:59:06 2016 -0600
+
+    Switched to simpler trsm_r implementation.
+    
+    Details:
+    - Disabled the implementation of trsm_r that allows the right-hand matrix
+      B to be trianglar, and switched to the implementation that simply
+      transposes the operation (and thus the storage of C) in order to recast
+      the operation as trsm_l. This avoids the need to use trsm_rl and trsm_ru
+      macrokernels, which require an awkward swapping of MR and NR. For now,
+      the support for trsm_r macrokernels, via separate control trees, remains.
+    - Modified bli_config_macro_defs.h so that BLIS_RELAX_MCNR_NCMR_CONSTRAINTS
+      is defined by default. This is mostly a safety precaution in case someone
+      tries to switch back to the previous trsm_r implementation, but also
+      serves as a convenience on some systems where one does not naturally
+      choose blocksizes in a way that satisfies MC % NR = 0 and NC % MR = 0.
+
+commit b3e58ee30307cf1e11529f2113acb9abbeda25af
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Nov 23 17:58:26 2016 -0600
+
+    Reimplemented 4x12 haswell ukernels (real only).
+    
+    Details:
+    - Replaced permutation-based implementations in bli_gemm_asm_d4x12.c, which
+      defines 4x24 single real and 4x12 double real gemm microkernels, with
+      broadcast-based implementations. (The previous microkernel file has been
+      moved to an 'old' subdirectory.)
+
+commit bdc0a264d2fb5940bfd09298b1de823674a39053
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Nov 16 14:13:08 2016 -0600
+
+    Adjusted stride selection of ct in macrokernels.
+    
+    Details:
+    - Updated the changes introduced in 618f433 so that the strides of the
+      temporary microtile ct used in the macrokernels is determined based
+      on the storage preference of the microkernel (via the new functions
+      below), rather than the strides of c. In almost all cases, presently,
+      this change results in no net effect, as a high-level optimization
+      in the _front() functions aligns the storage of c to that of the
+      microkernel's preference. However, I encountered some cases where
+      this is not always the case in some development code that has yet
+      to be committed, and therefore I'm generalizing the framework code
+      in advance.
+    - Defined two new functions in bli_cntx.c:
+        bli_cntx_l3_ukr_prefers_rows_dt()
+        bli_cntx_l3_ukr_prefers_cols_dt()
+      which return bool_t's based on the current micro-kernel's storage
+      preferences. For induced methods, the preference of the underlying
+      real domain microkernel is returned.
+    - Updated definition of bli_cntx_l3_ukr_dislikes_storage_of(), and
+      by proxy bli_cntx_l3_ukr_prefers_storage_of(), to be in terms of
+      the above functions, rather than querying the preferences of the
+      native microkernel directly (which did the wrong thing for induced
+      methods).
+
+commit 031978d2647cf08316858baf29c84ebba9c3133e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Nov 16 14:04:33 2016 -0600
+
+    Fixed inactive trsm_r blocksize constraint code.
+    
+    Details:
+    - Changed a cpp macro that was meant to prevent using certain trsm_r code
+      if BLIS_RELAX_MCNR_NCMR_CONSTRAINTS was defined. It was actually coded
+      incorrectly at first. I've now fixed its location and changed its
+      consequence to a compile-time #error message.
+
+commit 6b5a4032d2e3ed29a272c7f738b7e3ed6657e556
+Merge: 3b524a08 a8220e3a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Nov 10 15:28:24 2016 -0600
+
+    Merge pull request #109 from devinamatthews/omp_num_threads
+    
+    Add automatic loop thread assignment.
+
+commit a8220e3a86433b5d76789e32ea7ca014a11b6d17
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Thu Nov 10 14:19:34 2016 -0600
+
+    - Fix typo in bli_cntx.c
+    - Bump BLIS_DEFAULT_NR_THREAD_MAX to 4
+
+commit c05b3862f6241486442b313eff0c8bee7b5e1274
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Fri Nov 4 15:48:02 2016 -0500
+
+    Add automatic loop thread assignment.
+    
+    - Number of threads is determined by BLIS_NUM_THREADS or OMP_NUM_THREADS, but can be overridden by BLIS_XX_NT as before.
+    - Threads are assigned to loops (ic, jc, ir, and jc) automatically by weighted partitioning and heuristics, both of which are tunable via bli_kernel.h.
+    - All level-3 BLAS covered.
+
+commit 3b524a08e3fb8380e7b8b2ba835312c51a331570
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Nov 2 17:45:18 2016 -0500
+
+    Consolidated 3m1/4m1 gemmtrsm, trsm ukernel code.
+    
+    Details:
+    - Consolidated the macros that define the lower and upper versions of the
+      gemmtrsm microkernels into a single macro that is instantiated twice.
+      Did this for both 3m1 and 4m1 microkernels.
+    - Consolidated lower and upper versions of the trsm microkernels for 3m1
+      and 4m1 into single files (each).
+
+commit ead231aca635deb3db270f118454e4222c627f31
+Merge: d25e6f8b 62987f60
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Nov 2 13:03:50 2016 -0500
+
+    Merge pull request #108 from devinamatthews/patch-2
+    
+    Update .travis.yml with additional tests
+
+commit 62987f60a6a6ff0a75b31d0404f493593ce35ccc
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Wed Nov 2 11:20:37 2016 -0500
+
+    Allow KNL to fail
+
+commit 8f9010542c751ae3cbfe6121cb011d8985c1e00d
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Wed Nov 2 11:18:32 2016 -0500
+
+    Fix some problems with OSX builds:
+    
+    - Update CPU detection for Intel archs (esp. Skylake)
+    - Allow clang for the reference config
+
+commit d25e6f8b63c57f30b8a67dffbf4995977cf9f235
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Nov 1 14:35:15 2016 -0500
+
+    Can disable trsm_r-specific blocksize constraints.
+    
+    Details:
+    - Added cpp guards around the constraints in bli_kernel_macro_defs.h
+      that enforce MC % NR = 0 and NC % MR = 0. These constraints are ONLY
+      needed when handling right-side trsm by allowing the matrix on the
+      right (matrix B) to be triangular, because it involves swapping
+      register, but not cache, blocksizes (packing A by NR and B by MR)
+      and then swapping the operands to gemmtrsm just before that kernel
+      is called. It may be useful to disable these constraints if, for
+      example, the developer wishes to test the configuration with
+      a different set of cache blocksizes where only MC % MR = 0 and
+      NC % NR = 0 are enforced.
+    - In summary, #defining BLIS_RELAX_MCNR_NCMR_CONSTRAINTS will bypass
+      the enforcement of MC % NR = 0 and NC % MR = 0.
+
+commit 1a67e3688edb073a9d44c160e7b0798e08796b8a
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Tue Nov 1 13:53:18 2016 -0500
+
+    Bogus commit
+    
+    Need to trigger another Travis build.
+
+commit 2cd82d67b372cad1bed50cfd99e524f1f40b4e24
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Tue Nov 1 13:25:50 2016 -0500
+
+    Some fixes for .travis.yml
+    
+    - Switch to gcc-5 to support knl
+    - Don't run tests in parallel -- it is super slow.
+    - Use clang on OSX since gcc is only a zombie husk.
+
+commit a3db4e6bdfe745083acf704ab0f51f74ea869538
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Tue Nov 1 10:33:18 2016 -0500
+
+    Update .travis.yml with additional tests
+    
+    - Test knl configuration (without running of course).
+    - Test openmp and pthreads threading for auto configuration with 4 threads.
+    - Test auto configuration with and without pthreads on OSX.
+    - Also, run make in parallel.
+    
+    I don't know how the `addons:` section works on OSX; hopefully it is just ignored.
+
+commit 8a11a2174a1a5b9426f13bbc5338dc86ab138cdd
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Oct 31 19:07:55 2016 -0500
+
+    Updates to non-default haswell microkernels.
+    
+    Details:
+    - Updated s and d microkernels in bli_gemm_asm_d8x6.c to relax alignment
+      constraints.
+    - Added missing c and z microkernels, which are based on the corresponding
+      kernels in the d6x8 set.
+    - This completes the d8x6 set (which may be used for situations when it
+      is desirable to have a microkernel with a column preference).
+
+commit 618f4331eba209803ecab99747872eceb1b5f091
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Oct 31 14:40:51 2016 -0500
+
+    Align strides of ct in macrokernels to that of c.
+    
+    Details:
+    - Previously, rs_ct and cs_ct, the strides of the temporary microtile used
+      primarily in the macrokernels' edge case handling, were unconditionally
+      set to 1 and MR, respectively. However, Devin Matthews noted that this
+      ought to be changed so that the strides of ct were in agreement with the
+      strides of C. (That is, if C was row-stored, then ct should be accessed
+      as by rows as well.) The implicit assumption is that the strides of C
+      have already been adjusted, via induced transposition, if the storage
+      preference of the microkernel is at odds with the storage of C. So, if
+      the microkernel prefers row storage, the macrokernel's interior cases
+      would present row-stored (ideal) microkernel subproblems to the
+      microkernel, but for edge cases, it would still see column-stored
+      subproblems (not ideal). This commit fixes this issue. Thanks to Devin
+      for his suggestion.
+
+commit 630391002325a589063aec2ab0a7d89ef2e178c0
+Merge: 956b3edf 216206c1
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Oct 25 19:34:51 2016 -0500
+
+    Merge pull request #105 from devinamatthews/knl
+    
+    Support for Intel Knight's Landing.
+
+commit 216206c1d328a865c2192e35a4df6e9aff79a85b
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Tue Oct 25 13:56:18 2016 -0500
+
+    Fix up for merge to master.
+
+commit 11eb7957abbcdf02d5e312898e094260eadb1209
+Merge: cd5b6681 956b3edf
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Tue Oct 25 13:51:07 2016 -0500
+
+    Merge branch 'master' into knl
+    
+    # Conflicts:
+    #       frame/thread/bli_thread.h
+
+commit cd5b6681838899283cd94e5427dfda206e7fbabe
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Tue Oct 25 13:49:27 2016 -0500
+
+    Don't use %rbp in KNL packing kernels.
+
+commit 956b3edf8eb09480f31f2e861c1b10f9ecbb2e52
+Merge: b7e41d71 0662a3c1
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Oct 25 13:02:57 2016 -0500
+
+    Merge pull request #104 from devinamatthews/misspellings
+    
+    Add flexible options for thread model (pthread/posix for pthreads etc.).
+
+commit 0662a3c1b1f4644a86bf8e5073d1391808c91b4a
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Tue Oct 25 12:42:44 2016 -0500
+
+    Add flexible options for thread model (pthread/posix for pthreads etc.).
+
+commit b7e41d71b07d2af6d22d632c70e0c5f7ce46852c
+Merge: 4bd905bd 5117d444
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Oct 24 16:47:46 2016 -0500
+
+    Merge pull request #103 from devinamatthews/patch-1
+    
+    Change .align to .p2align in Bulldozer ukernels.
+
+commit 5117d444f7f3a2bc327f067926eaf2398212edda
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Mon Oct 24 16:20:47 2016 -0500
+
+    Change .align to .p2align in Bulldozer ukernels
+    
+    Apparently OSX doesn't allow .align directives for >16B, so I've changed these to their .p2align counterparts.
+
+commit 4bd905bd4597e0ad7bedf31e25e779d3e2dfda29
+Merge: 936d5fdc 7f32dd57
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Oct 21 14:48:44 2016 -0500
+
+    Merge pull request #93 from ShadenSmith/config_check
+    
+    Adds sanity check to configuration choice.
+
+commit 936d5fdc26c6c4dab199a8d11fde948975cfa1d6
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Oct 21 14:34:27 2016 -0500
+
+    Fixed multithreading compilation bug in 970745a.
+    
+    Details:
+    - Moved the definition of the cpp macro BLIS_ENABLE_MULTITHREADING
+      from bli_thread.h to bli_config_macro_defs.h. Also moved the
+      sanity check that OpenMP and POSIX threads are not both enabled.
+    - Thanks to Krzysztof Drewniak for reporting this bug.
+
+commit 8feb0f85a674e84bec2417486e3bcea584b14c04
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Oct 19 16:05:41 2016 -0500
+
+    Removed auto-prototyping of malloc()/free() substitutes.
+    
+    Details:
+    - Removed the header file, bli_malloc_prototypes.h, which automatically
+      generated prototypes for the functions specified by the following
+      cpp macros:
+        BLIS_MALLOC_INTL
+        BLIS_FREE_INTL
+        BLIS_MALLOC_POOL
+        BLIS_FREE_POOL
+        BLIS_MALLOC_USER
+        BLIS_FREE_USER
+      These prototypes were originally provided primarily as a convenience
+      to those developers who specified their own malloc()/free() substitutes
+      for one or more of the following. However, we generated these prototypes
+      regardless, even when the default values (malloc and free) of the
+      macros above were used. A problem arose under certain circumstances
+      (e.g., gcc in C++ mode on Linux with glibc) when including blis.h that
+      stemmed from the "throw" specification which was added to the glibc's
+      malloc() prototype, resulting in a prototype mismatch. Therefore, going
+      forward, developers who specify their own custom malloc()/free()
+      substitutes must also prototype those substitutes via bli_kernel.h.
+      Thanks to Krzysztof Drewniak for reporting this bug, and Devin Matthews
+      for researching the nature and potential solutions.
+
+commit 970745a5fc7c29de3e202988e5eb104fabca4fdc
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Oct 19 15:58:03 2016 -0500
+
+    Reorganized typedefs to avoid compiler warnings.
+    
+    Details:
+    - Relocated membrk_t definition from bli_membrk.h to bli_type_defs.h.
+    - Moved #include of bli_malloc.h from blis.h to bli_type_defs.h.
+    - Removed standalone mtx_t and mutex_t typedefs in bli_type_defs.h.
+    - Moved #include of bli_mutex.h from bli_thread.h to bli_typedefs.h.
+    - The redundant typedefs of membrk_t and mtx_t caused a warning on some C
+      compilers. Thanks to Tyler Smith for reporting this issue.
+
+commit 28b2af8a71133ce68774e153b6e05afb05affba8
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Oct 13 14:50:08 2016 -0500
+
+    Added disabled code to print thrinfo_t structures.
+    
+    Details:
+    - Added cpp-guarded code to bli_thrcomm_openmp.c that allows a curious
+      developer to print the contents of the thrinfo_t structures of each
+      thread, for verification purposes or just to study the way thread
+      information and communicators are used in BLIS.
+    - Enabled some previously-disabled code in bli_l3_thrinfo.c for freeing
+      an array of thrinfo_t* values that is used in the new, cpp-guarde code
+      mentioned above.
+    - Removed some old commented lines from bli_gemm_front.c.
+
+commit 11eed3f683d09e65f721567b346b0f733bff9a64
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Oct 13 14:23:23 2016 -0500
+
+    Fixed a configure -t omp/openmp bug from fd04869.
+    
+    Details:
+    - Forgot to update certain occurrences of "omp" in common.mk during
+      commit fd04869, which changed the preferred configure option string
+      for enabling OpenMP from "omp" to "openmp".
+
+commit 9cda6057eaa16a24ac8785a9fa167df6c9edba44
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Oct 11 13:21:26 2016 -0500
+
+    Removed previously renamed/old files.
+    
+    Details:
+    - Removed frame/base/bli_mem.c and frame/include/bli_auxinfo_macro_defs.h,
+      both of which were renamed/removed in 701b9aa. For some reason, these
+      files survived when the compose branch was merged back into master.
+      (Clearly, git's merging algorithm is not perfect.)
+    - Removed frame/base/bli_mem.c.prev (an artifact of the long-ago changed
+      memory allocator that I was keeping around for no particular reason).
+
+commit 22377abd84b9e560ffe1c4e4d284eb443ddb7133
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Oct 10 13:43:56 2016 -0500
+
+    Fixed bli_gemm() segfault on empty C matrices.
+    
+    Details:
+    - Fixed a bug that would manifest in the form of a segmentation fault
+      in bli_cntl_free() when calling any level-3 operation on an empty
+      output matrix (ie: m = n = 0). Specifically, the code previously
+      assumed that the entire control tree was built prior to it being
+      freed. However, if the level-3 operation performs an early exit, the
+      control tree will be incomplete, and this scenario is now handled.
+      Thanks to Elmar Peise for reporting this bug.
+
+commit 0b571cd94d9b175331c9453258a6b1389a718ae8
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Oct 6 14:48:15 2016 -0500
+
+    Fixed segfault in bli_free_align() for NULL ptrs.
+    
+    Details:
+    - Fixed a bug in bli_free_align() caused by failing to handle NULL pointers
+      up-front, which led to performing pointer arithmetic on NULL pointers in
+      order to free the address immediately before the pointer. Thanks to Devin
+      Matthews for reporting this bug.
+
+commit 4fb9b4ef2e4cf2626a6e000a41628fb823f16da8
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Oct 5 14:41:35 2016 -0500
+
+    CHANGELOG update (0.2.1)
+
+commit 866b2dde3f41760121115fb25f096d4344e8b4f9 (tag: 0.2.1)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Wed Oct 5 14:41:34 2016 -0500
 
     Version file update (0.2.1)
 
-commit 87fddeab3c8a5ccb1bbf02e5f89db1464e459ba9 (origin/master)
-Merge: 8696987 6f71cd3
+commit 87fddeab3c8a5ccb1bbf02e5f89db1464e459ba9
+Merge: 86969873 6f71cd34
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Wed Oct 5 13:35:01 2016 -0500
 
     Merge branch 'compose'
 
-commit 6f71cd344951854e4cff9ea21bbdfe536e72611d (origin/compose)
-Merge: c0630c4 8d55033
+commit 6f71cd344951854e4cff9ea21bbdfe536e72611d (origin/compose, compose)
+Merge: c0630c40 8d55033c
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Tue Oct 4 15:53:46 2016 -0500
 
@@ -92,14 +780,20 @@ Date:   Tue Sep 27 14:14:11 2016 -0500
       should be considered deprecated.
 
 commit 9424af87209e4e435e2e742430945152690170b0
-Merge: efa7341 c0630c4
+Merge: efa7341d c0630c40
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Tue Sep 27 12:51:08 2016 -0500
 
     Merge branch 'compose'
 
+commit 7f32dd57c6bd41c0704341752842277dd6a4c8eb
+Author: Shaden Smith <shaden@cs.umn.edu>
+Date:   Sat Sep 17 11:33:57 2016 -0500
+
+    Adds sanity check to configuration choice.
+
 commit efa7341df0b0115926aa8a6e8a4ebfb24fdbf11e
-Merge: 121c39d e1453f6
+Merge: 121c39d4 e1453f68
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Fri Sep 16 11:01:57 2016 -0500
 
@@ -113,7 +807,7 @@ Date:   Fri Sep 16 09:29:28 2016 -0500
 
     Fixes broken URL in README.md
 
-commit c0630c4024b08750043a2942a3e8a037aa6b6259 (compose)
+commit c0630c4024b08750043a2942a3e8a037aa6b6259
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Mon Sep 12 13:59:02 2016 -0500
 
@@ -125,7 +819,7 @@ Date:   Mon Sep 12 13:59:02 2016 -0500
     - Minor changes to frame/thread/bli_thrinfo.h.
 
 commit 7b3bf1ffcd7160ccbf6c2518af6d88f6742e4977
-Merge: 3550981 121c39d
+Merge: 35509818 121c39d4
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Tue Sep 6 15:47:13 2016 -0500
 
@@ -287,7 +981,7 @@ Date:   Fri Aug 26 19:04:45 2016 -0500
       implementations can slow down the testsuite considerably.
 
 commit 73517f522b69de429dd7f3df60a70c068149ab28
-Merge: c6f5c21 50293da
+Merge: c6f5c215 50293da3
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Tue Aug 23 13:46:59 2016 -0500
 
@@ -315,7 +1009,7 @@ Date:   Tue Aug 23 13:38:36 2016 -0500
       which requires "0" or "1".
 
 commit c6f5c215ee793d03ea834469fc2adc53feaffc42
-Merge: d52cb76 16a4c7a
+Merge: d52cb767 16a4c7a8
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Mon Aug 22 17:33:02 2016 -0500
 
@@ -333,8 +1027,48 @@ Date:   Fri Aug 19 11:38:36 2016 -0500
       to type mismatch, and in the case of pthreads, a missing function
       argument. The bugs are fairly recent, introduced in a017062.
 
+commit c8e4ef93953ba2b79fb7e0973c08469c0e28a2cd
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Wed Aug 3 16:13:03 2016 -0500
+
+    Add prefetchw to 30x8 kernel.
+
+commit 4b5a2f3d6e7ffeb5cc2be8448554f5c2083ad68f
+Merge: 380736bf 9f52a587
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Wed Aug 3 16:09:51 2016 -0500
+
+    Merge remote-tracking branch 'origin/knl' into knl
+    
+    # Conflicts:
+    #       kernels/x86_64/knl/3/bli_dgemm_opt_24x8.c
+
+commit 380736bfe955efbdd7274c90b6fd635688e83bc4
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Wed Aug 3 16:08:28 2016 -0500
+
+    Add (new) 30x8 KNL kernel and fix non-scatter prefetch bug.
+
+commit 9f52a587dee855daa73c194e41b6951416544e9a
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Wed Aug 3 16:03:53 2016 -0500
+
+    Try prefetchw[t1] instead of regular prefetch for C.
+
+commit 8945a1512d366bc6a8a85718d12cbf5de6f2898b
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Wed Aug 3 11:28:24 2016 -0500
+
+    This version gets ~1550 GFLOPs on KNL wuth 16x4.
+
+commit 6ce4c022ebdea00c2b951090e3c2e9e88735b9ce
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Wed Jul 27 16:26:36 2016 -0500
+
+    Switch back to 24x8. I could only squeeze 24.5GFLOP out of 8x24, and scalability is not improved.
+
 commit d52cb7671509592a8078729477b40b60380518a2
-Merge: 95abea4 c31b1e7
+Merge: 95abea46 c31b1e7b
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Wed Jul 27 16:04:55 2016 -0500
 
@@ -357,8 +1091,87 @@ Date:   Wed Jul 27 15:58:07 2016 -0500
     - Inserted #include "float.h" into bli_system.h (to gain access to DBL_MAX).
     - Minor update (vis-a-vis contexts) to driver code in test/3m4m.
 
+commit b8f2b55532849d45d379afbdd05a52ff6100800d
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Wed Jul 27 15:22:55 2016 -0500
+
+    Try an 8x24 kernel for the hell of it.
+
+commit 7ede5863ae3567f7c0852efc2d5cd649ca19e0f3
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Wed Jul 27 13:41:27 2016 -0600
+
+    Allocate pack buffer on MCDRAM for KNL.
+
+commit ad89ed2e829c7b261d8ba0998a3cb83ad576ee04
+Merge: 2c9de740 81e2b05f
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Wed Jul 27 11:45:40 2016 -0500
+
+    Merge branch 'knl' of github.com:devinamatthews/blis into knl
+
+commit 2c9de740edb66c4692c200731763bbd1d3171ccb
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Wed Jul 27 11:44:54 2016 -0500
+
+     This version gets ~26GF on one core.
+
+commit 81e2b05f31bca4e1e1676e7b533d1868d9f9be33
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Wed Jul 27 11:39:05 2016 -0500
+
+    Add optimized packing kernels for KNL.
+
+commit a7d8ca97b8d835c32d90ff20a565c82733f014a8
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Mon Jul 25 15:15:13 2016 -0500
+
+    All fixed.
+
+commit 963d0393b023f4134bb0c682923faf9964c0e645
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Mon Jul 25 14:40:53 2016 -0500
+
+    Add 24xk pack kernel.
+
+commit 117b76739afba481768897d2580f8365d3345417
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Mon Jul 25 13:53:07 2016 -0500
+
+    In the midst of debugging.
+
+commit 8c0a4fd1d3535d608a9a309a61ffee0a73c3646f
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Mon Jul 25 13:09:24 2016 -0500
+
+    Fix some row/column confusion.
+
+commit c44f9f96930312125b15e64c326ab5ab5cc02633
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Mon Jul 25 12:02:24 2016 -0500
+
+    Simplify displacements -- clang assembler was badly botching EVEX compressed displacements giving false alarms for instruction length.
+
+commit e0cce177cc1b47ec9f11ac0556241feaa3564df1
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Mon Jul 25 10:02:25 2016 -0500
+
+    Minor fixes for 8x24 KNL kernel.
+
+commit 65735bbedf75784c48bd11e05b3fdc98fc66b4bc
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Sun Jul 24 21:50:32 2016 -0500
+
+    Switch to 24x8 kernel, unrolled by 16.
+
+commit 45d5dc97177117220bd9dd0abf85aafc185acad1
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Sun Jul 24 14:25:26 2016 -0500
+
+    Add 24x8 "KNC-style" kernel for KNL.
+
 commit 95abea46f86816fddfc9ff0abfa52880801461be
-Merge: d0dfe5b a017062
+Merge: d0dfe5b5 a017062f
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Sat Jul 23 15:38:33 2016 -0500
 
@@ -396,8 +1209,39 @@ Date:   Fri Jul 22 17:02:59 2016 -0500
       single-threaded execution. This new API is employed within functions
       such as bli_membrk_acquire_[mv]() and bli_membrk_release().
 
+commit 8ff2e069c48c12fd06b9c48c6b3aeb4ea9b0e6e1
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Fri Jul 22 16:22:26 2016 -0500
+
+    Add 4x unrolled variant for KNL microkernel.
+
+commit 9cb2ed9b0c25f31a22c1c9719b062fa665ad7adf
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Fri Jul 22 16:10:30 2016 -0500
+
+    Git rid of one RBX update.
+
+commit 451bde076f0320d60cd2475cfb048ac4a2b798bb
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Fri Jul 22 15:43:00 2016 -0500
+
+    Add some more knobs to twiddle for KNL microkernel.
+
+commit 8c6e621c099521e7a4d87e007bb8224faa5f33a3
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Fri Jul 22 15:05:15 2016 -0500
+
+    Make knl conform to new kernel dir structure.
+
+commit ce7214c6618d6f22f4ce2ee452336236916d1f30
+Merge: 119d0399 ce59f811
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Fri Jul 22 14:59:53 2016 -0500
+
+    Merge remote-tracking branch 'origin/master' into knl
+
 commit ce59f81108ec9aea918a7e77030da8acfdd397ce
-Merge: ff41153 707a2b7
+Merge: ff41153f 707a2b7f
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Fri Jul 22 14:48:14 2016 -0500
 
@@ -412,7 +1256,7 @@ Date:   Fri Jul 22 13:49:44 2016 -0500
     Somehow forgot the most important microkernel.
 
 commit 47ec045056351ac4f0791c071fa0daaa81699c8c
-Merge: 08f1d6b ff41153
+Merge: 08f1d6b6 ff41153f
 Author: Devin Matthews <dmatthews@utexas.edu>
 Date:   Fri Jul 22 13:45:23 2016 -0500
 
@@ -425,7 +1269,7 @@ Date:   Fri Jul 22 13:44:37 2016 -0500
     Use 64-bit intermediate variable for k for architectures that do 64-bit loads in case dim_t is 32-bit.
 
 commit ff41153f4eb7f38ed94bdd9a3fd81fb979f3f401
-Merge: f9214ce e0d2fa0
+Merge: f9214ced e0d2fa0d
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Fri Jul 22 13:21:03 2016 -0500
 
@@ -440,7 +1284,7 @@ Date:   Fri Jul 22 12:56:51 2016 -0500
     Relax alignment restrictions for haswell sgemm.
 
 commit f9214ced97392861f5a0ea72abfcf6f41faf674c
-Merge: 413d62a 08666ea
+Merge: 413d62ac 08666eaa
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Fri Jul 22 12:16:39 2016 -0500
 
@@ -460,8 +1304,26 @@ Date:   Fri Jul 22 11:07:34 2016 -0500
 
     Change -openmp to -fopenmp for icc.
 
+commit 119d0399428905053265f3aca1cc8cc1fde3b363
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Fri Jul 22 10:23:31 2016 -0500
+
+    Add 8x24 KNL kernel.
+
+commit b58cda9eba0c1e175460aae109baf792d29ba5bf
+Merge: 318f063d 413d62ac
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Tue Jul 19 14:09:09 2016 -0500
+
+    Merge remote-tracking branch 'origin/master' into knl
+    
+    # Conflicts:
+    #       frame/base/bli_threading.h
+    #       frame/include/blis.h
+    #       frame/thread/bli_thread.c
+
 commit d0dfe5b5372cc7558ee9c4104b29f82eecc7ed61
-Merge: 31def12 413d62a
+Merge: 31def12e 413d62ac
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Thu Jul 14 11:01:06 2016 -0500
 
@@ -559,6 +1421,12 @@ Date:   Fri Jun 17 14:08:35 2016 -0500
       but possible divide-by-zero.
     - Updated function signature and prototype formatting in testsuite.
 
+commit 318f063dcbd8b594969e401bc99146d24b01066a
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Wed Jun 8 17:46:50 2016 -0500
+
+    Add new KNL microkernel derived from Haswell.
+
 commit 096895c5d538a7f8817603d7cf28c52e99340def
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Mon Jun 6 13:32:04 2016 -0500
@@ -592,7 +1460,7 @@ Date:   Mon Jun 6 13:32:04 2016 -0500
       in the wrong order, which was recently fixed.
 
 commit 232530e88ff99f37abcae5b6fb5319a9a375a45f
-Merge: 4bcabd1 eef37f8
+Merge: 4bcabd1b eef37f8b
 Author: Tyler Michael Smith <tms@cs.utexas.edu>
 Date:   Wed Jun 1 15:14:10 2016 -0500
 
@@ -700,6 +1568,18 @@ Date:   Tue May 17 15:20:16 2016 -0500
       store the unrolled 30xk kernel in the array for use (on knc, for
       example). Note: This should have been done a long time ago.
 
+commit e3bd5ca64ae7c190ba689396c0de687b829a11fe
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Thu May 12 20:54:13 2016 -0500
+
+     Fix SIMD definitions in KNL config, and a couple of fixes to C update.
+
+commit 4fe02e3d497995d94d34d3fcf5af895084cfc8b9
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Thu May 12 20:53:58 2016 -0500
+
+    Move bli_kernel.h before bli_threading.h in order of inclusion in blis.h.
+
 commit 4bcf1b35abea3f3dfc8f2fe462dcf155cf199e55
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Wed May 11 16:09:49 2016 -0500
@@ -727,7 +1607,7 @@ Date:   Wed May 11 16:02:30 2016 -0500
       #includes an "f2c.h" header.
 
 commit a09a2e23eacf5328858c8318bb637c5ff3b71d08
-Merge: 4dcd37e 7c604e1
+Merge: 4dcd37eb 7c604e1c
 Author: Tyler Michael Smith <tms@cs.utexas.edu>
 Date:   Wed May 11 10:47:11 2016 -0500
 
@@ -741,14 +1621,28 @@ Date:   Tue May 10 16:28:59 2016 -0500
 
     fixing knc simd align size
 
+commit 619dee0daec3474b4e5a55df90a61aabcae194f2
+Merge: b790b3d9 7c604e1c
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Tue May 10 12:13:24 2016 -0500
+
+    Merge branch 'move_simd_defs' into knl
+
 commit 7c604e1cbc1609b6e12d3ee973c08b7af5035be4
 Author: Devin Matthews <dmatthews@utexas.edu>
 Date:   Tue May 10 12:11:55 2016 -0500
 
     Move default SIMD-related definitions to bli_kernel_macro_defs.h. Otherwise, configurations which customize these fail as these are now defined in bli_kernel.h.
 
+commit b790b3d9e1820f3b691676de48c291cae083452d
+Merge: 4f8c05c9 a7be2d28
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Tue May 10 11:49:47 2016 -0500
+
+    Merge branch 'master' into knl
+
 commit a7be2d28e8930b154d0da1d6929b54a96e210af6
-Merge: 97b512e 4b1e55e
+Merge: 97b512ef 4b1e55ed
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Tue May 10 11:48:51 2016 -0500
 
@@ -840,7 +1734,7 @@ Date:   Wed Apr 27 14:13:46 2016 -0500
       bdbda6e, to tabs.
 
 commit 4ea419c72c789825e1f93a1eee88219bbf873930
-Merge: f1e9be2 bdbda6e
+Merge: f1e9be2a bdbda6e6
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Tue Apr 26 12:50:45 2016 -0500
 
@@ -870,7 +1764,7 @@ Date:   Fri Apr 22 15:34:02 2016 -0500
       in my local working copy for longer than I can remember.
 
 commit aa0bceec277938328dabeb744680623f24fb0b61
-Merge: 4136553 e2784b4
+Merge: 4136553f e2784b4c
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Fri Apr 22 12:01:31 2016 -0500
 
@@ -890,8 +1784,14 @@ Date:   Fri Apr 22 11:53:53 2016 -0500
     - Changed the definition of bli_cntx_obj_clear() so that the clearing
       occurs via a single call to memset().
 
+commit 4f8c05c9e2ef4cbb82b35a3ebf1f0a0ac665830e
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Thu Apr 21 10:00:59 2016 -0500
+
+    Rearrange KNL dgemm kernel again to streamline usage of ymm register. sgemm and dgemm now both working with Intel SDE.
+
 commit e2784b4c921f706e756df3e146e20a4cb63f53e3
-Merge: dd0ab1d a9b6c3a
+Merge: dd0ab1d9 a9b6c3ab
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Wed Apr 20 18:34:09 2016 -0500
 
@@ -900,7 +1800,7 @@ Date:   Wed Apr 20 18:34:09 2016 -0500
     Change CBLAS integer type to f77_int
 
 commit a9b6c3abda6222a8b240361643932e83cf726c4f
-Merge: e4c54c8 dd0ab1d
+Merge: e4c54c81 dd0ab1d9
 Author: Devin Matthews <dmatthews@utexas.edu>
 Date:   Wed Apr 20 16:00:10 2016 -0500
 
@@ -927,14 +1827,26 @@ Date:   Wed Apr 20 14:38:23 2016 -0500
       added equivalent cpp query macros to bli_cntx.h.
     - Added 'bli_config.h' to .gitignore.
 
+commit 7193230f7d35edbd1d2f77842a613971f1603463
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Wed Apr 20 09:37:30 2016 -0500
+
+    Work around missing VPMULLQ on KNL.
+
 commit a30ccbc4c6a6e6460e78af6b5c530ee0d06f98fb
-Merge: eb2f18e 0e1a982
+Merge: eb2f18e4 0e1a9821
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Tue Apr 19 15:04:33 2016 -0500
 
     Merge pull request #66 from devinamatthews/blas-configure
     
     Add configure options and generate bli_config.h automatically.
+
+commit bd44cf13e886069bc66c10ac0db178be96629a0d
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Tue Apr 19 13:43:04 2016 -0500
+
+    Fix copy-paste errors in KNL kernels.
 
 commit eb2f18e4844d985715df20798f50f9cc12e3b5ad
 Author: Field G. Van Zee <field@cs.utexas.edu>
@@ -956,17 +1868,55 @@ Date:   Tue Apr 19 11:44:37 2016 -0500
     
     Lastly, support for OMP in clang has been added (closes #56).
 
+commit a11eec05928ddc5c43fa5dbcd35f2edd24ff35a1
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Mon Apr 18 13:13:36 2016 -0500
+
+    Add sgemm ukernels for KNL. vpmullq is not implemented on KNL -- needs workaround.
+
 commit ff84469a4575f1ef8a0010046fde52240a312cae
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Mon Apr 18 12:29:09 2016 -0500
 
     Applied various compilation fixes to bgq kernels.
 
+commit c38e0dab05b2dc36672eab96e1248fb7fb2d785b
+Merge: bd5e2296 cbcd0b73
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Mon Apr 18 10:21:35 2016 -0500
+
+    Merge remote-tracking branch 'origin/master' into knl
+
+commit bd5e2296e98e042c31f1e8ece2c1ca8e4bdc2d4c
+Merge: 4745def0 49f85177
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Mon Apr 18 10:15:22 2016 -0500
+
+    Merge remote-tracking branch 'origin/knl' into knl
+
+commit 4745def0c87377ae83ad73ac514d7de08a96b2ac
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Mon Apr 18 10:15:05 2016 -0500
+
+    Add 64-bit offset vector so we can use vgatherqpd.
+
+commit 49f85177f886f38889b60503a4e12fa7f04be1fd
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Mon Apr 18 10:14:11 2016 -0500
+
+    KNL ukernel compiles with gcc.
+
 commit cbcd0b739dc54bd14fbb46aeda267c26725cd70f
 Author: Tyler Michael Smith <tms@cs.utexas.edu>
 Date:   Mon Apr 18 03:12:57 2016 -0500
 
     Changing ifdef for OSX pthread barriers
+
+commit 58b2c3cf040134d1be913c585a3c6905629116c0
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Sat Apr 16 16:12:24 2016 -0500
+
+     Rewrite of KNL kernel in GNU extended asm syntax.
 
 commit dd62080cea78f3a23616200d6640e52c102b2bb9
 Author: Field G. Van Zee <field@cs.utexas.edu>
@@ -984,7 +1934,7 @@ Date:   Fri Apr 15 11:15:41 2016 -0500
       website.
 
 commit d5a915dd8d7a6ead42a68772e4420eb3647e6f1a
-Merge: 4320b72 4169467
+Merge: 4320b725 41694675
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Thu Apr 14 12:56:36 2016 -0500
 
@@ -1182,8 +2132,34 @@ Date:   Mon Apr 11 17:21:28 2016 -0500
       that this does not preclude supporting mixed types via the object APIs,
       where it produces absolutely zero API code bloat.
 
+commit dd856c2cb75a2221a503a73dde27790c34b91570
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Mon Apr 11 10:39:18 2016 -0500
+
+    Translated MIC kernel to KNL and cleaned up a bit. Only real change is lack of swizzle modifiers for FMA instructions (used bcast from memory instead).
+
+commit 7f27431d3fffdda99c282ec412731d0a90cb32a7
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Fri Apr 8 10:04:39 2016 -0500
+
+    Copy mic kernel to knl for transliteration.
+
+commit f8f02f0334ac020021e15a415bcd33aeea01deb4
+Merge: 32c92d94 d1f8e5d9
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Wed Apr 6 11:37:05 2016 -0500
+
+    Merge branch 'master' into const_correctness
+
+commit 32c92d945c55708da0eb63be1771f8c5430e3910
+Merge: 62914ccb 20af937b
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Wed Apr 6 11:36:02 2016 -0500
+
+    Merge branch 'master' into const_correctness
+
 commit d1f8e5d9b2ecd054ed103f4d642d748db2d4f173
-Merge: 20af937 c11d28e
+Merge: 20af937b c11d28ee
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Tue Apr 5 12:21:27 2016 -0500
 
@@ -1198,7 +2174,7 @@ Date:   Sat Apr 2 21:15:48 2016 +0200
     cgemm µkernel for bulldozer : bug correction for k%4 != 0
 
 commit 20af937b57f82bb3acb09418d5c0206e1b24f2c7
-Merge: 36c3abb fc61a11
+Merge: 36c3abb0 fc61a114
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Thu Mar 31 14:37:30 2016 -0500
 
@@ -1219,7 +2195,7 @@ Date:   Thu Mar 31 10:45:48 2016 -0500
     Adjust paths in common.mk to support building from testsuite dir.
 
 commit 36c3abb05fecb02d4a9ab13b2b69d133adf34583
-Merge: 64b41fa 917ce75
+Merge: 64b41fa5 917ce754
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Thu Mar 31 10:26:17 2016 -0500
 
@@ -1245,8 +2221,15 @@ Date:   Wed Mar 30 22:03:09 2016 +0200
 
     cgemm & zgemm micro-kernels for FMA4 instruction set (bulldozer configuration), based on x86_64/avx micro-kernel
 
+commit 62914ccbcdb3c594f065dcfa65bd7e7b95c79283
+Merge: bbf704bf 64b41fa5
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Tue Mar 29 15:24:25 2016 -0500
+
+    Merge branch 'master' into const_correctness
+
 commit 64b41fa554dff44b2f9ad48901b67c63836407a8
-Merge: 1b09e34 0171ad5
+Merge: 1b09e343 0171ad58
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Tue Mar 29 15:19:41 2016 -0500
 
@@ -1267,7 +2250,7 @@ Date:   Mon Mar 28 13:55:06 2016 -0500
     Add icc and clang support for Intel architectures, fixes #47. 2bd036f fixes #49 BTW.
 
 commit 3090fff64cc87ff2519a09f38e6b8699cf3cba11
-Merge: 8624e36 4ca5d5b
+Merge: 8624e365 4ca5d5b1
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Mon Mar 28 12:36:25 2016 -0500
 
@@ -1276,14 +2259,14 @@ Date:   Mon Mar 28 12:36:25 2016 -0500
     sgemm micro-kernel for FMA4 instruction set
 
 commit e6e566426ac3ded7ef87cd8ff9be98accfdc4acc
-Merge: 469429e 8624e36
+Merge: 469429ec 8624e365
 Author: Devin Matthews <dmatthews@utexas.edu>
 Date:   Sat Mar 26 14:10:15 2016 -0500
 
     Merge branch 'master' into more_config_opts
 
 commit 8624e36543160739d954c4dbcc5a5594458f3a12
-Merge: a315833 2bd036f
+Merge: a315833f 2bd036f1
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Sat Mar 26 13:56:28 2016 -0500
 
@@ -1310,7 +2293,7 @@ Date:   Fri Mar 25 17:22:58 2016 -0500
     Add threading option to configure.
 
 commit ad43eab4c7899d56d8d7caa6e2d92bc0581ea5a5
-Merge: 9452bdb 2bd036f
+Merge: 9452bdb3 2bd036f1
 Author: Devin Matthews <dmatthews@utexas.edu>
 Date:   Fri Mar 25 15:00:02 2016 -0500
 
@@ -1328,8 +2311,14 @@ Date:   Fri Mar 25 12:16:49 2016 -0500
 
     Fix configuration issue where instruction set flags are not specified for debug builds.
 
+commit bbf704bf7501411964a63a68f1af541f612cf92d
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Fri Mar 25 09:55:35 2016 -0500
+
+     Add missing const to bli_read_nway_from_env.
+
 commit a315833f067944fb0bc14cf60f0c7dcb5dc897b6
-Merge: 1d1a426 af92773
+Merge: 1d1a426d af92773f
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Thu Mar 24 12:30:21 2016 -0500
 
@@ -1343,8 +2332,20 @@ Date:   Wed Mar 23 22:07:02 2016 +0100
 
     Updated and improved ARMv8 micro-kernels.
 
+commit a4d7729776d17d9bdf2341eacd70b9770b9ba8d2
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Mon Mar 21 09:55:21 2016 -0500
+
+    Set default value for debug_type variable.
+
+commit 0e2447fa55d8c5fa2b1fc4150073512495c5f9eb
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Thu Mar 17 16:32:05 2016 -0500
+
+    Add const correctness to auxinfo_t struct (microkernels need update theoretically).
+
 commit 1d1a426d18ec03754021456862a1f4d1dfec1fbf
-Merge: 5a978ff d226dfa
+Merge: 5a978fff d226dfa0
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Mon Mar 7 15:17:53 2016 -0600
 
@@ -1364,7 +2365,7 @@ Date:   Sat Mar 5 16:18:14 2016 -0600
     4) Add make V=[0,1] option to control build verbosity.
 
 commit 5a978fffdb8f09a81c89541d541d4a6830cd70a4
-Merge: adb2b4e 63e2642
+Merge: adb2b4e0 63e26423
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Fri Mar 4 17:26:58 2016 -0600
 
@@ -1409,7 +2410,7 @@ Date:   Mon Feb 29 21:53:12 2016 +0100
     symbolic link for bulldozer configuration to kernels
 
 commit 2dc5c0ae038ed175fab85751803ada05734d1ba1
-Merge: f2809fc 3d0fae8
+Merge: f2809fc5 3d0fae81
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Mon Feb 29 12:22:51 2016 -0600
 
@@ -1418,7 +2419,7 @@ Date:   Mon Feb 29 12:22:51 2016 -0600
     Add symlink from config/bulldozer/kernels to kernels/x86_64/bulldozer
 
 commit f2809fc5f74466c755da6a5b4632853e634060b5
-Merge: f86b94f 8624a33
+Merge: f86b94f2 8624a33c
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Sat Feb 27 13:06:03 2016 -0600
 
@@ -1542,7 +2543,7 @@ Date:   Tue Nov 3 10:30:08 2015 -0600
       smart enough to perform this optimization automatically.
 
 commit 0694b722f7e4df00efb32639095a2aca80e67f52
-Merge: 3e116f0 33557ec
+Merge: 3e116f0a 33557ecc
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Mon Nov 2 17:24:25 2015 -0600
 
@@ -1621,7 +2622,7 @@ Date:   Fri Oct 30 18:25:04 2015 -0500
       micro-kernels, and trsm_ll macro-kernel.
 
 commit 46294d80e5a79c598e200e1c8ec2a642ff839971
-Merge: d3159c5 a0a7b85
+Merge: d3159c57 a0a7b85a
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Tue Oct 27 12:41:23 2015 -0500
 
@@ -1636,7 +2637,7 @@ Date:   Tue Oct 27 08:59:15 2015 +0000
     Fixed incomplete code in the double precision ARMv8 microkernel.
 
 commit d3159c5740c9ee7f8c0b661003aab6f00646ad6f
-Merge: b489152 7e03e45
+Merge: b489152e 7e03e45b
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Wed Oct 21 14:54:00 2015 -0500
 
@@ -1649,7 +2650,7 @@ Date:   Wed Oct 21 14:53:17 2015 -0500
     Use vzeroall in haswell micro-kernels.
 
 commit 7e03e45bfe6c27c4fdbf06b1caa7f49e9a5fef49
-Merge: 77ddb0b 4f88c29
+Merge: 77ddb0b1 4f88c29f
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Wed Oct 14 13:26:07 2015 -0500
 
@@ -1664,7 +2665,7 @@ Date:   Wed Oct 14 12:57:50 2015 -0500
     Detect Intel Broadwell (using Haswell config).
 
 commit 4b0ac1a9984a93f7ad4369b10fca63991107d9f5
-Merge: fe3e355 77ddb0b
+Merge: fe3e355c 77ddb0b1
 Author: Zhang Xianyi <traits.zhang@gmail.com>
 Date:   Wed Oct 14 12:51:05 2015 -0500
 
@@ -1771,7 +2772,7 @@ Date:   Thu Sep 24 12:14:03 2015 -0500
       bli_obj_row_off(), bli_obj_col_off().
 
 commit fe3e355c9c5a6f65b8736b009e2d501b62a83ea1
-Merge: efa641e 4dd9dd3
+Merge: efa641e3 4dd9dd3e
 Author: Zhang Xianyi <traits.zhang@gmail.com>
 Date:   Fri Aug 21 14:38:36 2015 -0500
 
@@ -1817,7 +2818,7 @@ Date:   Wed Jul 29 13:31:09 2015 -0500
     Version file update (0.1.8)
 
 commit ef0fbbbdb6148b96938733fce72cb4ed7dad685e
-Merge: fdfe14f d4b8913
+Merge: fdfe14f1 d4b89136
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Thu Jul 9 13:54:54 2015 -0500
 
@@ -2085,7 +3086,7 @@ Date:   Fri Apr 3 16:44:32 2015 -0500
     - Added ACML support to test/3m4m driver Makefile and runme.sh script.
 
 commit a32f7c49ca4ea869d2a6c66818780f4321743d67
-Merge: 349e075 4bfd1ce
+Merge: 349e075a 4bfd1ce8
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Fri Apr 3 08:28:11 2015 -0500
 
@@ -2279,7 +3280,7 @@ Date:   Fri Feb 20 15:24:27 2015 -0600
       return blocksizes from one of the induced methods' blocksize objects.
 
 commit 411e637ee7d1083a84f58f08938d51e63d7c3c9a
-Merge: c2569b8 fc0b771
+Merge: c2569b88 fc0b7712
 Author: Tyler Michael Smith <tms@cs.utexas.edu>
 Date:   Fri Feb 20 20:39:25 2015 -0600
 
@@ -2345,14 +3346,14 @@ Date:   Thu Feb 19 14:27:09 2015 -0600
       the sandybridge configuration.
 
 commit 493087d730f01d5169434f461644e5633f48a42f
-Merge: 650d2a6 2502129
+Merge: 650d2a6f 25021299
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Wed Feb 18 09:45:51 2015 -0600
 
     Merge branch 'master' of github.com:flame/blis
 
 commit 25021299b670775df8ca9c87910c63d7e74ed946
-Merge: fe2b8d3 f05a576
+Merge: fe2b8d39 f05a5763
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Wed Feb 11 20:03:21 2015 -0600
 
@@ -2487,7 +3488,7 @@ Date:   Tue Dec 16 11:27:50 2014 -0600
     Added 4m_1b to test/3m4m test driver and script.
 
 commit 785d480805fc0d6f4251b5499933515740b6b2a7
-Merge: 9456f33 4156c08
+Merge: 9456f330 4156c088
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Fri Dec 12 14:34:19 2014 -0600
 
@@ -2539,7 +3540,7 @@ Date:   Tue Dec 9 16:03:14 2014 -0600
       leading us to this bug.
 
 commit 689f60a578b461119e9ea90c74f642b9eb79addb
-Merge: bef24e6 483e4d6
+Merge: bef24e67 483e4d6a
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Sun Dec 7 14:03:30 2014 -0600
 
@@ -2565,7 +3566,7 @@ Date:   Wed Nov 26 18:00:56 2014 -0600
     Barriers were inserted to fix this.
 
 commit 76bde44411f0e34266bab9d666a54ef22be97320
-Merge: e56e614 f3d729e
+Merge: e56e6143 f3d729e5
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Wed Nov 26 17:25:24 2014 -0600
 
@@ -2610,7 +3611,7 @@ Date:   Fri Nov 21 12:28:08 2014 -0600
     - Updated comments on alignment of a1 and b1 to match wiki.
 
 commit 994429c6881b2ade92d9d7949bcaebfbf2cc65eb
-Merge: 58796ab 694029d
+Merge: 58796abd 694029d9
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Thu Nov 20 13:55:35 2014 -0600
 
@@ -2857,7 +3858,7 @@ Date:   Fri Oct 10 10:01:45 2014 -0500
     - Updated sandybridge configuration accordingly.
 
 commit 23ce7ee542a12ca40b4b6090ad2558d180e16d37
-Merge: 99fd9a3 7a8ad47
+Merge: 99fd9a39 7a8ad47f
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Thu Oct 9 16:41:22 2014 -0500
 
@@ -2918,7 +3919,7 @@ Date:   Mon Sep 29 14:56:36 2014 -0500
     Fixed bug when packing anywhere besides in blk_var_1 for gemm.
 
 commit 614a4afc9272adb47e5a8b83b39d56c2804d95d6
-Merge: b541b66 4a7df04
+Merge: b541b667 4a7df04e
 Author: Tyler Smith <tms@cs.utexas.edu>
 Date:   Fri Sep 26 10:49:57 2014 -0500
 
@@ -3008,7 +4009,7 @@ Date:   Wed Sep 17 11:10:07 2014 -0500
       implementations. Thanks to Devin Matthews for reporting this bug.
 
 commit 870761eb902e4866090d1d3446a345df3d6d4599
-Merge: e9899be a2b59a3
+Merge: e9899be0 a2b59a37
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Tue Sep 16 18:20:49 2014 -0500
 
@@ -3304,7 +4305,7 @@ Date:   Thu Aug 28 11:55:12 2014 -0500
       we now pass in the pack schema itself.
 
 commit a0ff6066e06075ab5f92b19247b39b92ed15f1bf
-Merge: c4c99c4 d40b32b
+Merge: c4c99c48 d40b32bc
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Sun Aug 24 15:56:21 2014 -0500
 
@@ -3325,7 +4326,7 @@ Date:   Sun Aug 24 15:52:22 2014 -0500
       level-2 or level-3 operation.
 
 commit d40b32bc24ffbae24123e054307b3138969bb095
-Merge: 9331f79 6c25c37
+Merge: 9331f794 6c25c379
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Sun Aug 24 13:46:36 2014 -0500
 
@@ -3343,7 +4344,7 @@ Date:   Sun Aug 24 13:44:10 2014 -0500
       ukernels in commit 4cc2b46.
 
 commit 9331f79443223fe267676ee54c439e1ed320380c
-Merge: 7fc48a7 670b639
+Merge: 7fc48a7d 670b6392
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Sun Aug 24 10:54:21 2014 -0500
 
@@ -3427,7 +4428,7 @@ Date:   Thu Aug 21 18:25:48 2014 -0500
       those blocksizes at runtime.
 
 commit b541b667cabfa6d41b50ad1e49209651ee6812cc
-Merge: 699a815 dd61307
+Merge: 699a8151 dd61307f
 Author: Tyler Smith <tms@cs.utexas.edu>
 Date:   Wed Aug 20 14:44:51 2014 -0500
 
@@ -3654,7 +4655,7 @@ Date:   Mon Aug 4 15:49:59 2014 -0500
     - Updated blis.h to include necessary CBLAS-related headers.
 
 commit caab62dac0fb0bd0d674118f409c81680db94d29
-Merge: 383631b db97ce9
+Merge: 383631b5 db97ce97
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Sun Aug 3 14:36:18 2014 -0500
 
@@ -3779,7 +4780,7 @@ Date:   Sun Jul 27 18:20:12 2014 -0500
     Version file update (0.1.4)
 
 commit acff74041bf02c7b9fdfa24b507bca782a4c5fce
-Merge: cdb9413 47b243e
+Merge: cdb9413e 47b243ef
 Author: Tyler Smith <tms@cs.utexas.edu>
 Date:   Wed Jul 23 15:07:30 2014 -0500
 
@@ -3807,7 +4808,7 @@ Date:   Wed Jul 23 13:41:13 2014 -0500
     - Comment update.
 
 commit 3e7b0db5b0e24f5fd66c60bacabc019885ddbec5
-Merge: 2f8a357 ed3e33d
+Merge: 2f8a357d ed3e33d5
 Author: Tyler Smith <tms@cs.utexas.edu>
 Date:   Wed Jul 23 13:40:44 2014 -0500
 
@@ -3853,7 +4854,7 @@ Date:   Tue Jul 22 14:36:02 2014 -0500
       matrix real-valued.
 
 commit 8965a965931318619ceaebd7c32edccf3022d0c7
-Merge: 1785efb 5b73e80
+Merge: 1785efb5 5b73e80b
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Tue Jul 22 14:34:32 2014 -0500
 
@@ -3870,7 +4871,7 @@ Date:   Tue Jul 22 14:33:01 2014 -0500
     - Changed setd front-end call of scald_check() to setd_check().
 
 commit 5b73e80b71c054c1945a06aff044ef629bc1a9a0
-Merge: a41e68e 20690fe
+Merge: a41e68e0 20690fe3
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Fri Jul 18 12:21:20 2014 -0500
 
@@ -3942,7 +4943,7 @@ Date:   Mon Jul 14 16:05:03 2014 -0500
       2012).
 
 commit fcec68cda3f6e90ae055e7304e6674c1c5c8d010
-Merge: 94c0df7 4a20ed1
+Merge: 94c0df79 4a20ed1a
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Mon Jul 14 11:35:34 2014 -0500
 
@@ -3977,7 +4978,7 @@ Date:   Sun Jul 13 22:50:56 2014 -0700
     Emscripten port
 
 commit 4a20ed1a3f5e9e5232df30aa0e568e6c00c56ce1
-Merge: 6a515e9 8ccdfae
+Merge: 6a515e98 8ccdfaef
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Sun Jul 13 17:45:01 2014 -0500
 
@@ -4076,7 +5077,7 @@ Date:   Tue Jul 8 10:25:27 2014 -0500
     - Added *.so files to '.gitignore'.
 
 commit 6c65e9a58fe55990ebb99ec3986443e18af35338
-Merge: cb12e45 daca500
+Merge: cb12e456 daca500d
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Tue Jul 8 10:13:49 2014 -0500
 
@@ -4095,7 +5096,7 @@ Date:   Tue Jul 8 10:07:46 2014 -0500
       uninitialized. Thanks to Tony Kelman for isolating this bug.
 
 commit daca500db5e2448ba0da8047b75eb0f88d9f40e3
-Merge: ab3bc91 4702350
+Merge: ab3bc915 47023502
 Author: Tyler Smith <tms@cs.utexas.edu>
 Date:   Thu Jul 3 12:52:52 2014 -0500
 
@@ -4200,7 +5201,7 @@ Date:   Mon Jun 23 10:42:29 2014 -0500
     Removed 'version' from .gitignore file.
 
 commit b40dcefc5ee31f67aa3990e2e9d2ef8ed1386a25
-Merge: 7101a8e b693b0c
+Merge: 7101a8ee b693b0cd
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Mon Jun 23 10:39:05 2014 -0500
 
@@ -4215,7 +5216,7 @@ Date:   Sun Jun 22 13:44:25 2014 -0700
     [SC]AXPY kernels for PNaCl
 
 commit 7101a8eec0327d6c3a7eb36eb4b0fd45c1c6d162
-Merge: ad48dca 020a831
+Merge: ad48dca2 020a831b
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Thu Jun 19 21:46:50 2014 -0500
 
@@ -4278,7 +5279,7 @@ Date:   Sun Jun 15 06:27:37 2014 -0400
     SGEMM and DGEMM kernels for PNaCl
 
 commit ad48dca22913a363899f0bef45553898718eebb1
-Merge: ee2b679 7118f87
+Merge: ee2b6792 7118f87e
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Sat Jun 14 15:10:13 2014 -0500
 
@@ -4327,7 +5328,7 @@ Date:   Wed May 21 11:34:42 2014 -0500
       reporting this bug.
 
 commit 77a2d8dac8b242d7a202c9aabda3927ab68cf987
-Merge: 8c5d607 21fb089
+Merge: 8c5d6071 21fb0893
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Tue May 20 09:53:19 2014 -0500
 
@@ -4395,7 +5396,7 @@ Date:   Wed Apr 30 12:28:00 2014 -0500
     Replaced register blocksize hack with querying the register blocksize for determining parallelism granularity
 
 commit f4fdfe8fc573553eb36795b79cdf681270dab71b
-Merge: 31bb065 8c5d607
+Merge: 31bb065b 8c5d6071
 Author: Tyler Smith <tms@cs.utexas.edu>
 Date:   Wed Apr 30 11:46:35 2014 -0500
 
@@ -4435,7 +5436,7 @@ Date:   Mon Apr 28 16:48:25 2014 -0500
       to Jack Poulson for reporting this bug.
 
 commit 31bb065ba40ae0c5a614e743b8025abca012b99e
-Merge: 20e2443 7c61959
+Merge: 20e24430 7c619599
 Author: Tyler Smith <tms@cs.utexas.edu>
 Date:   Wed Apr 23 12:30:19 2014 -0500
 
@@ -4535,7 +5536,7 @@ Date:   Fri Apr 4 10:22:48 2014 -0500
     Also made herk IC and JC loops do weighted partitioning
 
 commit 2b6848b2397d6d84ca4e5f792fc51ad05e351a36
-Merge: 4e3eb39 21a0efb
+Merge: 4e3eb39a 21a0efb3
 Author: Tyler Smith <tms@cs.utexas.edu>
 Date:   Fri Apr 4 09:54:54 2014 -0500
 
@@ -4654,7 +5655,7 @@ Date:   Mon Mar 24 15:21:42 2014 -0500
     a_next and b_next point to the current micropanels in trmm
 
 commit 23d9eab354fbc88165889832955e126772bf8488
-Merge: 5d5dc2e fd3e32a
+Merge: 5d5dc2ee fd3e32a5
 Author: Tyler Smith <tms@cs.utexas.edu>
 Date:   Thu Mar 20 16:54:35 2014 -0500
 
@@ -4796,7 +5797,7 @@ Date:   Mon Mar 10 15:47:28 2014 -0500
     Added single threaded thread info data structures specifically for gemm and packm
 
 commit 0e8677761175189583ca7d855e24b2bbdd2dada8
-Merge: 2e727a0 b3bff63
+Merge: 2e727a02 b3bff631
 Author: Tyler Smith <tms@cs.utexas.edu>
 Date:   Mon Mar 10 15:16:21 2014 -0500
 
@@ -4829,14 +5830,14 @@ Date:   Mon Mar 3 14:31:44 2014 -0600
       are currently implemented in terms of isinf() and isnan() from math.h.
 
 commit b3bff631eadf98b15cb422fb4a8e2f855c23e8a7
-Merge: 2c158fb e8757b0
+Merge: 2c158fb8 e8757b03
 Author: Tyler Smith <tms@cs.utexas.edu>
 Date:   Thu Feb 27 16:53:24 2014 -0600
 
     Merge https://github.com/flame/blis
 
 commit 2c158fb885c27f7b599dc1e85b57edd684f19223
-Merge: e4738c4 c2b2ab6
+Merge: e4738c48 c2b2ab62
 Author: Tyler Smith <tms@cs.utexas.edu>
 Date:   Thu Feb 27 16:46:23 2014 -0600
 
@@ -4896,7 +5897,7 @@ Date:   Thu Feb 27 14:09:19 2014 -0600
     Fixed bug in thread trees
 
 commit ac5a2de1d17ffd460b00fee9757898525a09abae
-Merge: 01b125e bd3c7ec
+Merge: 01b125e8 bd3c7ecf
 Author: Tyler Smith <tms@cs.utexas.edu>
 Date:   Thu Feb 27 11:59:33 2014 -0600
 
@@ -4973,14 +5974,14 @@ Date:   Tue Feb 25 13:34:56 2014 -0600
       only the real gemm micro-kernel.
 
 commit 15b51e990f1d21333b5f7af97c211756247336e5
-Merge: 6363a9f fc04b5e
+Merge: 6363a9f6 fc04b5eb
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Fri Feb 21 09:04:32 2014 -0600
 
     Merge branch 'master' of github.com:fgvanzee/blis
 
 commit fc04b5eb69868c341ce03f5ef1f02de4b8c121b0
-Merge: b29e1c2 d1813c9
+Merge: b29e1c2b d1813c9d
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Fri Feb 21 09:04:13 2014 -0600
 
@@ -5023,7 +6024,7 @@ Date:   Wed Feb 19 17:00:52 2014 -0600
     - Various other minor changes to facilitate 4m/3m methods.
 
 commit b29e1c2b278c177e104c84ba462820ee8296df6c
-Merge: ee60377 bd3c7ec
+Merge: ee60377e bd3c7ecf
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Fri Feb 14 14:11:54 2014 -0600
 
@@ -5676,7 +6677,7 @@ Date:   Tue Dec 3 16:08:30 2013 -0600
       beta are applied to the attached scalars.
 
 commit 992de486d6f23e69a623abd15ae77d7881d13871
-Merge: 9552e6e fd4ac63
+Merge: 9552e6ee fd4ac636
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Mon Dec 2 13:58:46 2013 -0600
 
@@ -5742,7 +6743,7 @@ Date:   Mon Nov 18 18:11:07 2013 -0600
       that already existed in kernels/x86_64/core2-sse3/3.
 
 commit 85e7e02ea3a9190b6fcff5d46b00d41c79cb1242
-Merge: 67761e2 7072005
+Merge: 67761e22 70720054
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Mon Nov 18 12:02:00 2013 -0600
 
@@ -6513,7 +7514,7 @@ Date:   Thu Aug 1 11:24:23 2013 -0500
       dimension of the gemm macro-kernel.
 
 commit f8980edf9c318453bb1962ac4939c06bf11e6d5e
-Merge: 67a8b94 6e7e452
+Merge: 67a8b949 6e7e4523
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Fri Jul 26 11:14:27 2013 -0500
 

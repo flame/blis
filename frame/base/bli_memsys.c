@@ -61,8 +61,10 @@ void bli_memsys_init( void )
 	if ( bli_memsys_is_init == TRUE ) return;
 
 	// Create and initialize a context for gemm so we have something
-	// to pass into bli_membrk_init_pools().
-	bli_gemm_cntx_init( &cntx );
+	// to pass into bli_membrk_init_pools(). We use BLIS_DOUBLE for
+	// the datatype, but the dt argument is actually only used when
+	// initializing contexts for induced methods.
+	bli_gemm_cntx_init( BLIS_DOUBLE, &cntx );
 
 #ifdef BLIS_ENABLE_OPENMP
 	_Pragma( "omp critical (mem)" )

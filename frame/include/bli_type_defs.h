@@ -224,6 +224,10 @@ typedef dcomplex  f77_dcomplex;
            - 1 0110 11: packed imag-only column panels
            - 1 0111 10: packed real+imag row panels
            - 1 0111 11: packed real+imag column panels
+           - 1 1000 10: packed by 1m expanded row panels
+           - 1 1000 11: packed by 1m expanded column panels
+           - 1 1001 10: packed by 1m reordered row panels
+           - 1 1001 11: packed by 1m reordered column panels
        23  Packed panel order if upper-stored
            - 0 == forward order if upper
            - 1 == reverse order if upper
@@ -329,6 +333,8 @@ typedef dcomplex  f77_dcomplex;
 #define   BLIS_BITVAL_RO                    ( 0x5  << BLIS_PACK_FORMAT_SHIFT )
 #define   BLIS_BITVAL_IO                    ( 0x6  << BLIS_PACK_FORMAT_SHIFT )
 #define   BLIS_BITVAL_RPI                   ( 0x7  << BLIS_PACK_FORMAT_SHIFT )
+#define   BLIS_BITVAL_1E                    ( 0x8  << BLIS_PACK_FORMAT_SHIFT )
+#define   BLIS_BITVAL_1R                    ( 0x9  << BLIS_PACK_FORMAT_SHIFT )
 #define   BLIS_BITVAL_PACKED_UNSPEC         ( BLIS_PACK_BIT                                                            )
 #define   BLIS_BITVAL_PACKED_ROWS           ( BLIS_PACK_BIT                                                            )
 #define   BLIS_BITVAL_PACKED_COLUMNS        ( BLIS_PACK_BIT                                         | BLIS_PACK_RC_BIT )
@@ -348,6 +354,10 @@ typedef dcomplex  f77_dcomplex;
 #define   BLIS_BITVAL_PACKED_COL_PANELS_IO  ( BLIS_PACK_BIT | BLIS_BITVAL_IO  | BLIS_PACK_PANEL_BIT | BLIS_PACK_RC_BIT )
 #define   BLIS_BITVAL_PACKED_ROW_PANELS_RPI ( BLIS_PACK_BIT | BLIS_BITVAL_RPI | BLIS_PACK_PANEL_BIT                    )
 #define   BLIS_BITVAL_PACKED_COL_PANELS_RPI ( BLIS_PACK_BIT | BLIS_BITVAL_RPI | BLIS_PACK_PANEL_BIT | BLIS_PACK_RC_BIT )
+#define   BLIS_BITVAL_PACKED_ROW_PANELS_1E  ( BLIS_PACK_BIT | BLIS_BITVAL_1E  | BLIS_PACK_PANEL_BIT                    )
+#define   BLIS_BITVAL_PACKED_COL_PANELS_1E  ( BLIS_PACK_BIT | BLIS_BITVAL_1E  | BLIS_PACK_PANEL_BIT | BLIS_PACK_RC_BIT )
+#define   BLIS_BITVAL_PACKED_ROW_PANELS_1R  ( BLIS_PACK_BIT | BLIS_BITVAL_1R  | BLIS_PACK_PANEL_BIT                    )
+#define   BLIS_BITVAL_PACKED_COL_PANELS_1R  ( BLIS_PACK_BIT | BLIS_BITVAL_1R  | BLIS_PACK_PANEL_BIT | BLIS_PACK_RC_BIT )
 #define BLIS_BITVAL_PACK_FWD_IF_UPPER         0x0
 #define BLIS_BITVAL_PACK_REV_IF_UPPER         BLIS_PACK_REV_IF_UPPER_BIT
 #define BLIS_BITVAL_PACK_FWD_IF_LOWER         0x0
@@ -469,13 +479,17 @@ typedef enum
 	BLIS_PACKED_COL_PANELS_IO  = BLIS_BITVAL_PACKED_COL_PANELS_IO,
 	BLIS_PACKED_ROW_PANELS_RPI = BLIS_BITVAL_PACKED_ROW_PANELS_RPI,
 	BLIS_PACKED_COL_PANELS_RPI = BLIS_BITVAL_PACKED_COL_PANELS_RPI,
+	BLIS_PACKED_ROW_PANELS_1E  = BLIS_BITVAL_PACKED_ROW_PANELS_1E,
+	BLIS_PACKED_COL_PANELS_1E  = BLIS_BITVAL_PACKED_COL_PANELS_1E,
+	BLIS_PACKED_ROW_PANELS_1R  = BLIS_BITVAL_PACKED_ROW_PANELS_1R,
+	BLIS_PACKED_COL_PANELS_1R  = BLIS_BITVAL_PACKED_COL_PANELS_1R,
 } pack_t;
 
 // We combine row and column packing into one "type", and we start
 // with BLIS_PACKED_ROW_PANELS, _COLUMN_PANELS. We also count the
 // schema pair for "4ms" (4m separated), because its bit value has
 // been reserved, even though we don't use it.
-#define BLIS_NUM_PACK_SCHEMA_TYPES 8
+#define BLIS_NUM_PACK_SCHEMA_TYPES 10
 
 
 // -- Pack order type --
@@ -575,6 +589,7 @@ typedef enum
 	BLIS_4MH,
 	BLIS_4M1B,
 	BLIS_4M1A,
+	BLIS_1M,
 	BLIS_NAT,
 } ind_t;
 
@@ -960,9 +975,11 @@ typedef struct cntx_s
 
 	opid_t    family;
 	ind_t     method;
-	pack_t    schema_a;
-	pack_t    schema_b;
-	pack_t    schema_c;
+	pack_t    schema_a_block;
+	pack_t    schema_b_panel;
+	pack_t    schema_c_panel;
+
+	bool_t    anti_pref;
 
 	dim_t     thrloop[ BLIS_NUM_LOOPS ];
 

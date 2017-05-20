@@ -1,4 +1,4 @@
-#!/bin/bash
+#
 #
 #  BLIS    
 #  An object-based framework for developing high-performance BLAS-like
@@ -86,7 +86,9 @@ ARFLAGS        := cru
 # --- Determine the linker and related flags ---
 LINKER         := $(CC)
 SOFLAGS        := -shared
+ifneq ($(CC_VENDOR),icc)
 LDFLAGS        := -lm
+endif
 
 
 

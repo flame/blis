@@ -41,12 +41,12 @@
 #undef  GENFRONT
 #define GENFRONT( opname, depname ) \
 \
-void PASTEMAC(opname,_cntx_init)( cntx_t* cntx ) \
+void PASTEMAC(opname,_cntx_init)( num_t dt, cntx_t* cntx ) \
 { \
 	bli_cntx_obj_create( cntx ); \
 \
 	/* Initialize the context with kernel dependencies. */ \
-	PASTEMAC(depname,_cntx_init)( cntx ); \
+	PASTEMAC(depname,_cntx_init)( dt, cntx ); \
 } \
 \
 void PASTEMAC(opname,_cntx_finalize)( cntx_t* cntx ) \

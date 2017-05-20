@@ -330,14 +330,24 @@ ind_t bli_cntx_get_ind_method( cntx_t* cntx )
 	return bli_cntx_method( cntx );
 }
 
-pack_t bli_cntx_get_pack_schema_a( cntx_t* cntx )
+pack_t bli_cntx_get_pack_schema_a_block( cntx_t* cntx )
 {
-	return bli_cntx_schema_a( cntx );
+	return bli_cntx_schema_a_block( cntx );
 }
 
-pack_t bli_cntx_get_pack_schema_b( cntx_t* cntx )
+pack_t bli_cntx_get_pack_schema_b_panel( cntx_t* cntx )
 {
-	return bli_cntx_schema_b( cntx );
+	return bli_cntx_schema_b_panel( cntx );
+}
+
+pack_t bli_cntx_get_pack_schema_c_panel( cntx_t* cntx )
+{
+	return bli_cntx_schema_c_panel( cntx );
+}
+
+bool_t bli_cntx_get_ukr_anti_pref( cntx_t* cntx )
+{
+	return bli_cntx_anti_pref( cntx );
 }
 #endif
 
@@ -386,27 +396,27 @@ void bli_cntx_set_blkszs( ind_t method, dim_t n_bs, ... )
 {
 	/* Example prototypes:
 
-	   void
-	   bli_cntx_set_blkszs(
+	   void bli_cntx_set_blkszs
+	   (
+	     ind_t   method = BLIS_NAT,
+	     dim_t   n_bs,
+	     bszid_t bs0_id, blksz_t* blksz0, bszid_t bm0_id,
+	     bszid_t bs1_id, blksz_t* blksz1, bszid_t bm1_id,
+	     bszid_t bs2_id, blksz_t* blksz2, bszid_t bm2_id,
+	     ...
+	     cntx_t* cntx
+	   );
 
-	             ind_t   method = BLIS_NAT,
-	             dim_t   n_bs,
-	             bszid_t bs0_id, blksz_t* blksz0, bszid_t bm0_id,
-	             bszid_t bs1_id, blksz_t* blksz1, bszid_t bm1_id,
-	             bszid_t bs2_id, blksz_t* blksz2, bszid_t bm2_id,
-	             ...
-	             cntx_t* cntx );
-
-	   void
-	   bli_cntx_set_blkszs(
-
-	             ind_t   method != BLIS_NAT,
-	             dim_t   n_bs,
-	             bszid_t bs0_id, blksz_t* blksz0, bszid_t bm0_id, dim_t scalr0,
-	             bszid_t bs1_id, blksz_t* blksz1, bszid_t bm1_id, dim_t scalr1,
-	             bszid_t bs2_id, blksz_t* blksz2, bszid_t bm2_id, dim_t scalr2,
-	             ...
-	             cntx_t* cntx );
+	   void bli_cntx_set_blkszs
+	   (
+	     ind_t   method != BLIS_NAT,
+	     dim_t   n_bs,
+	     bszid_t bs0_id, blksz_t* blksz0, bszid_t bm0_id, dim_t def_scalr0, dim_t max_scalr0,
+	     bszid_t bs1_id, blksz_t* blksz1, bszid_t bm1_id, dim_t def_scalr1, dim_t max_scalr1,
+	     bszid_t bs2_id, blksz_t* blksz2, bszid_t bm2_id, dim_t def_scalr2, dim_t max_scalr2,
+	     ...
+	     cntx_t* cntx
+	   );
 	*/
 	va_list   args;
 	dim_t     i;
@@ -414,7 +424,8 @@ void bli_cntx_set_blkszs( ind_t method, dim_t n_bs, ... )
 	bszid_t*  bszids;
 	blksz_t** blkszs;
 	bszid_t*  bmults;
-	dim_t*    scalrs;
+	double*   dsclrs;
+	double*   msclrs;
 
 	cntx_t*   cntx;
 
@@ -426,7 +437,8 @@ void bli_cntx_set_blkszs( ind_t method, dim_t n_bs, ... )
 	bszids = bli_malloc_intl( n_bs * sizeof( bszid_t  ) );
 	blkszs = bli_malloc_intl( n_bs * sizeof( blksz_t* ) );
 	bmults = bli_malloc_intl( n_bs * sizeof( bszid_t  ) );
-	scalrs = bli_malloc_intl( n_bs * sizeof( dim_t    ) );
+	dsclrs = bli_malloc_intl( n_bs * sizeof( double   ) );
+	msclrs = bli_malloc_intl( n_bs * sizeof( double   ) );
 
 	// -- Begin variable argument section --
 
@@ -444,9 +456,9 @@ void bli_cntx_set_blkszs( ind_t method, dim_t n_bs, ... )
 			// - the address of the blksz_t object, and
 			// - the bszid_t of the multiple we need to associate with
 			//   the blksz_t object.
-			const bszid_t  bs_id = va_arg( args, bszid_t  );
-			      blksz_t* blksz = va_arg( args, blksz_t* );
-			const bszid_t  bm_id = va_arg( args, bszid_t  );
+			bszid_t  bs_id = va_arg( args, bszid_t  );
+			blksz_t* blksz = va_arg( args, blksz_t* );
+			bszid_t  bm_id = va_arg( args, bszid_t  );
 
 			// Store the values in our temporary arrays.
 			bszids[ i ] = bs_id;
@@ -464,18 +476,21 @@ void bli_cntx_set_blkszs( ind_t method, dim_t n_bs, ... )
 			// - the address of the blksz_t object, and
 			// - the bszid_t of the multiple we need to associate with
 			//   the blksz_t object.
-			// - the scalar we wish to apply to the real blocksizes to
-			//   come up with the induced complex blocksizes.
-			const bszid_t  bs_id = va_arg( args, bszid_t  );
-			      blksz_t* blksz = va_arg( args, blksz_t* );
-			const bszid_t  bm_id = va_arg( args, bszid_t  );
-			const dim_t    scalr = va_arg( args, dim_t    );
+			// - the scalars we wish to apply to the real blocksizes to
+			//   come up with the induced complex blocksizes (for default
+			//   and maximum blocksizes).
+			bszid_t  bs_id = va_arg( args, bszid_t  );
+			blksz_t* blksz = va_arg( args, blksz_t* );
+			bszid_t  bm_id = va_arg( args, bszid_t  );
+			double   dsclr = va_arg( args, double   );
+			double   msclr = va_arg( args, double   );
 
 			// Store the values in our temporary arrays.
 			bszids[ i ] = bs_id;
 			blkszs[ i ] = blksz;
 			bmults[ i ] = bm_id;
-			scalrs[ i ] = scalr;
+			dsclrs[ i ] = dsclr;
+			msclrs[ i ] = msclr;
 		}
 	}
 
@@ -510,12 +525,12 @@ void bli_cntx_set_blkszs( ind_t method, dim_t n_bs, ... )
 		{
 			// Read the current blocksize id, blksz_t* pointer, blocksize
 			// multiple id, and blocksize scalar.
-			const bszid_t  bs_id = bszids[ i ];
-			const bszid_t  bm_id = bmults[ i ];
+			bszid_t  bs_id = bszids[ i ];
+			bszid_t  bm_id = bmults[ i ];
 
-			      blksz_t* blksz = blkszs[ i ];
+			blksz_t* blksz = blkszs[ i ];
 
-			      blksz_t* cntx_blksz = &cntx_blkszs[ bs_id ];
+			blksz_t* cntx_blksz = &cntx_blkszs[ bs_id ];
 
 			// Copy the blksz_t object contents into the appropriate
 			// location within the context's blksz_t array. Do the same
@@ -534,14 +549,15 @@ void bli_cntx_set_blkszs( ind_t method, dim_t n_bs, ... )
 		{
 			// Read the current blocksize id, blksz_t pointer, blocksize
 			// multiple id, and blocksize scalar.
-			const bszid_t  bs_id = bszids[ i ];
-			const bszid_t  bm_id = bmults[ i ];
-			const dim_t    scalr = scalrs[ i ];
+			bszid_t  bs_id = bszids[ i ];
+			bszid_t  bm_id = bmults[ i ];
+			double   dsclr = dsclrs[ i ];
+			double   msclr = msclrs[ i ];
 
-			      blksz_t* blksz = blkszs[ i ];
-			      blksz_t* bmult = blkszs[ i ];
+			blksz_t* blksz = blkszs[ i ];
+			blksz_t* bmult = blkszs[ i ];
 
-			      blksz_t* cntx_blksz = &cntx_blkszs[ bs_id ];
+			blksz_t* cntx_blksz = &cntx_blkszs[ bs_id ];
 
 			// Copy the real domain values of the source blksz_t object into
 			// the context, duplicating into the complex domain fields.
@@ -550,20 +566,50 @@ void bli_cntx_set_blkszs( ind_t method, dim_t n_bs, ... )
 			bli_blksz_copy_dt( BLIS_FLOAT,  blksz, BLIS_SCOMPLEX, cntx_blksz );
 			bli_blksz_copy_dt( BLIS_DOUBLE, blksz, BLIS_DCOMPLEX, cntx_blksz );
 
-			// The next steps apply only to cache blocksizes, and not register
-			// blocksizes (ie: they only apply to blocksizes for which the
-			// blocksize multiple id is different than the blocksize id) and
-			// only when the scalar provided is non-unit.
-			if ( bs_id != bm_id && scalr != 1 ) 
+			// If the default blocksize scalar is non-unit, we need to scale
+			// the complex domain default blocksizes.
+			if ( dsclr != 1.0 )
 			{
-				// Scale the complex domain values in the blocksize object.
-				bli_blksz_scale_dt_by( 1, scalr, BLIS_SCOMPLEX, cntx_blksz );
-				bli_blksz_scale_dt_by( 1, scalr, BLIS_DCOMPLEX, cntx_blksz );
+				// Scale the complex domain default blocksize values in the
+				// blocksize object.
+				bli_blksz_scale_def( 1, ( dim_t )dsclr, BLIS_SCOMPLEX, cntx_blksz );
+				bli_blksz_scale_def( 1, ( dim_t )dsclr, BLIS_DCOMPLEX, cntx_blksz );
 
-				// Finally, round the newly-scaled blocksizes down to their
-				// respective multiples.
-				bli_blksz_reduce_dt_to( BLIS_FLOAT,  bmult, BLIS_SCOMPLEX, cntx_blksz );
-				bli_blksz_reduce_dt_to( BLIS_DOUBLE, bmult, BLIS_DCOMPLEX, cntx_blksz );
+				if ( bs_id != bm_id )
+				{
+					// Round the newly-scaled blocksizes down to their multiple.
+					// (Note that both the default and maximum blocksize values
+					// must be a multiple of the same blocksize multiple.) Also,
+					// note that this is only done when the blocksize id is not
+					// equal to the blocksize multiple id (ie: we don't round
+					// down scaled register blocksizes since they are their own
+					// multiples).
+					bli_blksz_reduce_def_to( BLIS_FLOAT,  bmult, BLIS_SCOMPLEX, cntx_blksz );
+					bli_blksz_reduce_def_to( BLIS_DOUBLE, bmult, BLIS_DCOMPLEX, cntx_blksz );
+				}
+			}
+
+			// Similarly, if the maximum blocksize scalar is non-unit, we need
+			// to scale the complex domain maximum blocksizes.
+			if ( msclr != 1.0 )
+			{
+				// Scale the complex domain maximum blocksize values in the
+				// blocksize object.
+				bli_blksz_scale_max( 1, ( dim_t )msclr, BLIS_SCOMPLEX, cntx_blksz );
+				bli_blksz_scale_max( 1, ( dim_t )msclr, BLIS_DCOMPLEX, cntx_blksz );
+
+				if ( bs_id != bm_id )
+				{
+					// Round the newly-scaled blocksizes down to their multiple.
+					// (Note that both the default and maximum blocksize values
+					// must be a multiple of the same blocksize multiple.) Also,
+					// note that this is only done when the blocksize id is not
+					// equal to the blocksize multiple id (ie: we don't round
+					// down scaled register blocksizes since they are their own
+					// multiples).
+					bli_blksz_reduce_max_to( BLIS_FLOAT,  bmult, BLIS_SCOMPLEX, cntx_blksz );
+					bli_blksz_reduce_max_to( BLIS_DOUBLE, bmult, BLIS_DCOMPLEX, cntx_blksz );
+				}
 			}
 
 			// Copy the blocksize multiple id into the context.
@@ -575,7 +621,8 @@ void bli_cntx_set_blkszs( ind_t method, dim_t n_bs, ... )
 	bli_free_intl( blkszs );
 	bli_free_intl( bszids );
 	bli_free_intl( bmults );
-	bli_free_intl( scalrs );
+	bli_free_intl( dsclrs );
+	bli_free_intl( msclrs );
 }
 #endif
 
@@ -668,31 +715,39 @@ void bli_cntx_set_ind_method( ind_t   method,
 	bli_cntx_set_method( method, cntx );
 }
 
-void bli_cntx_set_pack_schema_ab( pack_t  schema_a,
-                                  pack_t  schema_b,
-                                  cntx_t* cntx )
+void bli_cntx_set_pack_schema_ab_blockpanel( pack_t  schema_a,
+                                             pack_t  schema_b,
+                                             cntx_t* cntx )
 {
-	bli_cntx_set_schema_a( schema_a, cntx );
-	bli_cntx_set_schema_b( schema_b, cntx );
+	bli_cntx_set_schema_a_block( schema_a, cntx );
+	bli_cntx_set_schema_b_panel( schema_b, cntx );
 }
 
-void bli_cntx_set_pack_schema_a( pack_t  schema_a,
-                                 cntx_t* cntx )
+void bli_cntx_set_pack_schema_a_block( pack_t  schema_a,
+                                       cntx_t* cntx )
 {
-	bli_cntx_set_schema_a( schema_a, cntx );
+	bli_cntx_set_schema_a_block( schema_a, cntx );
 }
 
-void bli_cntx_set_pack_schema_b( pack_t  schema_b,
-                                 cntx_t* cntx )
+void bli_cntx_set_pack_schema_b_panel( pack_t  schema_b,
+                                       cntx_t* cntx )
 {
-	bli_cntx_set_schema_b( schema_b, cntx );
+	bli_cntx_set_schema_b_panel( schema_b, cntx );
 }
 
-void bli_cntx_set_pack_schema_c( pack_t  schema_c,
+void bli_cntx_set_pack_schema_c_panel( pack_t  schema_c,
+                                       cntx_t* cntx )
+{
+	bli_cntx_set_schema_c_panel( schema_c, cntx );
+}
+
+#if 0
+void bli_cntx_set_ukr_anti_pref( bool_t  anti_pref,
                                  cntx_t* cntx )
 {
-	bli_cntx_set_schema_c( schema_c, cntx );
+	bli_cntx_set_anti_pref( anti_pref, cntx );
 }
+#endif
 
 void bli_cntx_set_thrloop_from_env( opid_t l3_op, side_t side, cntx_t* cntx,
                                     dim_t m, dim_t n, dim_t k )
@@ -729,12 +784,20 @@ void bli_cntx_set_thrloop_from_env( opid_t l3_op, side_t side, cntx_t* cntx,
         }
     }
 
-	jc = bli_env_read_nway( "BLIS_JC_NT", jc );
-	//pc = bli_env_read_nway( "BLIS_KC_NT", 1 );
-	pc = 1;
-	ic = bli_env_read_nway( "BLIS_IC_NT", ic );
-	jr = bli_env_read_nway( "BLIS_JR_NT", jr );
-	ir = bli_env_read_nway( "BLIS_IR_NT", ir );
+    pc = 1;
+
+    dim_t jc_env = bli_env_read_nway( "BLIS_JC_NT", -1 );
+    dim_t ic_env = bli_env_read_nway( "BLIS_IC_NT", -1 );
+    dim_t jr_env = bli_env_read_nway( "BLIS_JR_NT", -1 );
+    dim_t ir_env = bli_env_read_nway( "BLIS_IR_NT", -1 );
+
+    if (jc_env != -1 || ic_env != -1 || jr_env != -1 || ir_env != -1)
+    {
+        jc = (jc_env == -1 ? 1 : jc_env);
+        ic = (ic_env == -1 ? 1 : ic_env);
+        jr = (jr_env == -1 ? 1 : jr_env);
+        ir = (ir_env == -1 ? 1 : ir_env);
+    }
 
 #else
 
@@ -867,6 +930,32 @@ bool_t bli_cntx_l3_nat_ukr_dislikes_storage_of( obj_t*  obj,
 	return r_val;
 }
 
+bool_t bli_cntx_l3_nat_ukr_eff_prefers_storage_of( obj_t*  obj,
+                                                   l3ukr_t ukr_id,
+                                                   cntx_t* cntx )
+{
+	bool_t r_val = bli_cntx_l3_nat_ukr_prefers_storage_of( obj, ukr_id, cntx );
+
+	// If the anti-preference is set, negate the result.
+	if ( bli_cntx_anti_pref( cntx ) ) r_val = !r_val;
+
+	return r_val;
+}
+
+bool_t bli_cntx_l3_nat_ukr_eff_dislikes_storage_of( obj_t*  obj,
+                                                    l3ukr_t ukr_id,
+                                                    cntx_t* cntx )
+{
+	bool_t r_val = bli_cntx_l3_nat_ukr_dislikes_storage_of( obj, ukr_id, cntx );
+
+	// If the anti-preference is set, negate the result.
+	if ( bli_cntx_anti_pref( cntx ) ) r_val = !r_val;
+
+	return r_val;
+}
+
+// -----------------------------------------------------------------------------
+
 bool_t bli_cntx_l3_ukr_prefers_rows_dt( num_t   dt,
                                         l3ukr_t ukr_id,
                                         cntx_t* cntx )
@@ -912,6 +1001,30 @@ bool_t bli_cntx_l3_ukr_dislikes_storage_of( obj_t*  obj,
 
 	if      ( bli_obj_is_row_stored( *obj ) && ukr_prefers_cols ) r_val = TRUE;
 	else if ( bli_obj_is_col_stored( *obj ) && ukr_prefers_rows ) r_val = TRUE;
+
+	return r_val;
+}
+
+bool_t bli_cntx_l3_ukr_eff_prefers_storage_of( obj_t*  obj,
+                                               l3ukr_t ukr_id,
+                                               cntx_t* cntx )
+{
+	bool_t r_val = bli_cntx_l3_ukr_prefers_storage_of( obj, ukr_id, cntx );
+
+	// If the anti-preference is set, negate the result.
+	if ( bli_cntx_anti_pref( cntx ) ) r_val = !r_val;
+
+	return r_val;
+}
+
+bool_t bli_cntx_l3_ukr_eff_dislikes_storage_of( obj_t*  obj,
+                                                l3ukr_t ukr_id,
+                                                cntx_t* cntx )
+{
+	bool_t r_val = bli_cntx_l3_ukr_dislikes_storage_of( obj, ukr_id, cntx );
+
+	// If the anti-preference is set, negate the result.
+	if ( bli_cntx_anti_pref( cntx ) ) r_val = !r_val;
 
 	return r_val;
 }

@@ -44,6 +44,9 @@
 // level-3 typed APIs
 #include "bli_l3_ind_tapi.h"
 
+// level-3 misc. optimizations
+#include "bli_l3_ind_opt.h"
+
 // level-3 cntx initialization
 #include "bli_gemmind_cntx.h"
 #include "bli_trsmind_cntx.h"

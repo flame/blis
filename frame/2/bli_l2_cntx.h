@@ -40,7 +40,7 @@
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-void PASTEMAC(opname,_cntx_init)( cntx_t* cntx ); \
+void PASTEMAC(opname,_cntx_init)( num_t dt, cntx_t* cntx ); \
 void PASTEMAC(opname,_cntx_finalize)( cntx_t* cntx );
 
 GENPROT( gemv )

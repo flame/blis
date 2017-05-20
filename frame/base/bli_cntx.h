@@ -59,6 +59,8 @@ typedef struct cntx_s
 	pack_t    schema_b;
 	pack_t    schema_c;
 
+	bool_t    anti_pref;
+
 	dim_t*    thrloop;
 
 	membrk_t* membrk;
@@ -113,25 +115,29 @@ typedef struct cntx_s
 \
 	( (cntx)->method )
 
-#define bli_cntx_schema_a( cntx ) \
+#define bli_cntx_schema_a_block( cntx ) \
 \
-	( (cntx)->schema_a )
+	( (cntx)->schema_a_block )
 
-#define bli_cntx_schema_b( cntx ) \
+#define bli_cntx_schema_b_panel( cntx ) \
 \
-	( (cntx)->schema_b )
+	( (cntx)->schema_b_panel )
 
-#define bli_cntx_schema_c( cntx ) \
+#define bli_cntx_schema_c_panel( cntx ) \
 \
-	( (cntx)->schema_c )
+	( (cntx)->schema_c_panel )
 
-#define bli_cntx_membrk( cntx ) \
+#define bli_cntx_anti_pref( cntx ) \
 \
-	( (cntx)->membrk )
+	( (cntx)->anti_pref )
 
 #define bli_cntx_thrloop( cntx ) \
 \
 	( (cntx)->thrloop )
+
+#define bli_cntx_membrk( cntx ) \
+\
+	( (cntx)->membrk )
 
 #if 1
 #define bli_cntx_jc_way( cntx ) \
@@ -211,24 +217,24 @@ typedef struct cntx_s
 	(cntx_p)->method = _method; \
 }
 
-#define bli_cntx_set_schema_a( _schema_a, cntx_p ) \
+#define bli_cntx_set_schema_a_block( _schema_a_block, cntx_p ) \
 { \
-	(cntx_p)->schema_a = _schema_a; \
+	(cntx_p)->schema_a_block = _schema_a_block; \
 }
 
-#define bli_cntx_set_schema_b( _schema_b, cntx_p ) \
+#define bli_cntx_set_schema_b_panel( _schema_b_panel, cntx_p ) \
 { \
-	(cntx_p)->schema_b = _schema_b; \
+	(cntx_p)->schema_b_panel = _schema_b_panel; \
 }
 
-#define bli_cntx_set_schema_c( _schema_c, cntx_p ) \
+#define bli_cntx_set_schema_c_panel( _schema_c_panel, cntx_p ) \
 { \
-	(cntx_p)->schema_c = _schema_c; \
+	(cntx_p)->schema_c_panel = _schema_c_panel; \
 }
 
-#define bli_cntx_set_membrk( _membrk, cntx_p ) \
+#define bli_cntx_set_anti_pref( _anti_pref, cntx_p ) \
 { \
-	(cntx_p)->membrk = _membrk; \
+	(cntx_p)->anti_pref = _anti_pref; \
 }
 
 #define bli_cntx_set_thrloop( jc_, pc_, ic_, jr_, ir_, cntx_p ) \
@@ -239,6 +245,11 @@ typedef struct cntx_s
 	(cntx_p)->thrloop[ BLIS_NR ] = jr_; \
 	(cntx_p)->thrloop[ BLIS_MR ] = ir_; \
 	(cntx_p)->thrloop[ BLIS_KR ] = 1;   \
+}
+
+#define bli_cntx_set_membrk( _membrk, cntx_p ) \
+{ \
+	(cntx_p)->membrk = _membrk; \
 }
 
 // cntx_t query (complex)
@@ -323,13 +334,17 @@ typedef struct cntx_s
 \
 	bli_cntx_method( cntx )
 
-#define bli_cntx_get_pack_schema_a( cntx ) \
+#define bli_cntx_get_pack_schema_a_block( cntx ) \
 \
-	bli_cntx_schema_a( cntx )
+	bli_cntx_schema_a_block( cntx )
 
-#define bli_cntx_get_pack_schema_b( cntx ) \
+#define bli_cntx_get_pack_schema_b_panel( cntx ) \
 \
-	bli_cntx_schema_b( cntx )
+	bli_cntx_schema_b_panel( cntx )
+
+#define bli_cntx_get_pack_schema_c_panel( cntx ) \
+\
+	bli_cntx_schema_c_panel( cntx )
 
 #define bli_cntx_get_membrk( cntx ) \
 \
@@ -395,9 +410,10 @@ func_t*  bli_cntx_get_packm_ukr( cntx_t* cntx );
 //                                  l1vkr_t ker_id,
 //                                  cntx_t* cntx );
 //ind_t    bli_cntx_get_ind_method( cntx_t* cntx );
-//pack_t   bli_cntx_get_pack_schema_a( cntx_t* cntx );
-//pack_t   bli_cntx_get_pack_schema_b( cntx_t* cntx );
-//pack_t   bli_cntx_get_pack_schema_c( cntx_t* cntx );
+//pack_t   bli_cntx_get_pack_schema_a_block( cntx_t* cntx );
+//pack_t   bli_cntx_get_pack_schema_b_panel( cntx_t* cntx );
+//pack_t   bli_cntx_get_pack_schema_c_panel( cntx_t* cntx );
+//bool_t   bli_cntx_get_ukr_anti_pref( cntx_t* cntx );
 dim_t    bli_cntx_get_num_threads( cntx_t* cntx );
 dim_t    bli_cntx_get_num_threads_in( cntx_t* cntx, cntl_t* cntl );
 
@@ -425,15 +441,17 @@ void     bli_cntx_set_packm_ukr( func_t* func,
                                  cntx_t* cntx );
 void     bli_cntx_set_ind_method( ind_t   method,
                                   cntx_t* cntx );
-void     bli_cntx_set_pack_schema_ab( pack_t  schema_a,
-                                      pack_t  schema_b,
-                                      cntx_t* cntx );
-void     bli_cntx_set_pack_schema_a( pack_t  schema_a,
-                                     cntx_t* cntx );
-void     bli_cntx_set_pack_schema_b( pack_t  schema_b,
-                                     cntx_t* cntx );
-void     bli_cntx_set_pack_schema_c( pack_t  schema_c,
-                                     cntx_t* cntx );
+void     bli_cntx_set_pack_schema_ab_blockpanel( pack_t  schema_a,
+                                                 pack_t  schema_b,
+                                                 cntx_t* cntx );
+void     bli_cntx_set_pack_schema_a_block( pack_t  schema_a,
+                                           cntx_t* cntx );
+void     bli_cntx_set_pack_schema_b_panel( pack_t  schema_b,
+                                           cntx_t* cntx );
+void     bli_cntx_set_pack_schema_c_panel( pack_t  schema_c,
+                                           cntx_t* cntx );
+//void     bli_cntx_set_ukr_anti_pref( bool_t  anti_pref,
+//                                     cntx_t* cntx );
 void     bli_cntx_set_thrloop_from_env( opid_t  l3_op,
                                         side_t  side,
                                         cntx_t* cntx,
@@ -455,6 +473,12 @@ bool_t   bli_cntx_l3_nat_ukr_prefers_storage_of( obj_t*  obj,
 bool_t   bli_cntx_l3_nat_ukr_dislikes_storage_of( obj_t*  obj,
                                                   l3ukr_t ukr_id,
                                                   cntx_t* cntx );
+bool_t   bli_cntx_l3_nat_ukr_eff_prefers_storage_of( obj_t*  obj,
+                                                     l3ukr_t ukr_id,
+                                                     cntx_t* cntx );
+bool_t   bli_cntx_l3_nat_ukr_eff_dislikes_storage_of( obj_t*  obj,
+                                                      l3ukr_t ukr_id,
+                                                      cntx_t* cntx );
 bool_t   bli_cntx_l3_ukr_prefers_rows_dt( num_t   dt,
                                           l3ukr_t ukr_id,
                                           cntx_t* cntx );
@@ -467,6 +491,12 @@ bool_t   bli_cntx_l3_ukr_prefers_storage_of( obj_t*  obj,
 bool_t   bli_cntx_l3_ukr_dislikes_storage_of( obj_t*  obj,
                                               l3ukr_t ukr_id,
                                               cntx_t* cntx );
+bool_t   bli_cntx_l3_ukr_eff_prefers_storage_of( obj_t*  obj,
+                                                 l3ukr_t ukr_id,
+                                                 cntx_t* cntx );
+bool_t   bli_cntx_l3_ukr_eff_dislikes_storage_of( obj_t*  obj,
+                                                  l3ukr_t ukr_id,
+                                                  cntx_t* cntx );
 
 // print function
 
@@ -488,13 +518,13 @@ void bli_cntx_print( cntx_t* cntx );
 // pointer is NULL. When initializing, the context address that should
 // be used (local or external) is assigned to cntx_p.
 
-#define bli_cntx_init_local_if( opname, cntx, cntx_p ) \
+#define bli_cntx_init_local_if( opname, dt, cntx, cntx_p ) \
 \
 	cntx_t _cntx_l; \
 \
 	if ( bli_is_null( cntx ) ) \
 	{ \
-		PASTEMAC(opname,_cntx_init)( &_cntx_l ); \
+		PASTEMAC(opname,_cntx_init)( dt, &_cntx_l ); \
 		cntx_p = &_cntx_l; \
 	} \
 	else \
@@ -510,13 +540,13 @@ void bli_cntx_print( cntx_t* cntx );
 	}
 
 
-#define bli_cntx_init_local_if2( opname, suf, cntx, cntx_p ) \
+#define bli_cntx_init_local_if2( opname, suf, dt, cntx, cntx_p ) \
 \
 	cntx_t _cntx_l; \
 \
 	if ( bli_is_null( cntx ) ) \
 	{ \
-		PASTEMAC2(opname,suf,_cntx_init)( &_cntx_l ); \
+		PASTEMAC2(opname,suf,_cntx_init)( dt, &_cntx_l ); \
 		cntx_p = &_cntx_l; \
 	} \
 	else \

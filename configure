@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 #  BLIS    
 #  An object-based framework for developing high-performance BLAS-like
@@ -458,6 +458,9 @@ main()
 	if [ -n "${debug_flag}" ]; then
 		if [ "x${debug_type}" = "xopt" ]; then
 			echo "${script_name}: enabling debug symbols with optimizations."
+                elif [ "x${debug_type}" = "xsde" ]; then
+			debug_type='sde'
+			echo "${script_name}: enabling SDE processor emulation."
 		else
 			debug_type='noopt'
 			echo "${script_name}: enabling debug symbols; optimizations disabled."

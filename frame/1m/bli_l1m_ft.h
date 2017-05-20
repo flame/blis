@@ -91,6 +91,7 @@ typedef void (*PASTECH2(ch,opname,tsuf)) \
      );
 
 INSERT_GENTDEF( packm_cxk_ker )
+INSERT_GENTDEF( packm_cxk_1er_ker )
 
 
 // packm_3mis_ker

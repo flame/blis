@@ -53,7 +53,7 @@ void PASTEMAC(ch,opname) \
 	const num_t dt = PASTEMAC(ch,type); \
 	cntx_t*     cntx_p; \
 \
-	bli_cntx_init_local_if( opname, cntx, cntx_p ); \
+	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
 \
 	PASTECH2(ch,opname,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx_p ); \
 \
@@ -88,7 +88,7 @@ void PASTEMAC(ch,opname) \
 	const num_t dt = PASTEMAC(ch,type); \
 	cntx_t*     cntx_p; \
 \
-	bli_cntx_init_local_if( opname, cntx, cntx_p ); \
+	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
 \
 	PASTECH2(ch,opname,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx_p ); \
 \
@@ -123,7 +123,7 @@ void PASTEMAC(ch,opname) \
 	const num_t dt = PASTEMAC(ch,type); \
 	cntx_t*     cntx_p; \
 \
-	bli_cntx_init_local_if( opname, cntx, cntx_p ); \
+	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
 \
 	PASTECH2(ch,opname,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx_p ); \
 \
@@ -160,7 +160,7 @@ void PASTEMAC(ch,opname) \
 	const num_t dt = PASTEMAC(ch,type); \
 	cntx_t*     cntx_p; \
 \
-	bli_cntx_init_local_if( opname, cntx, cntx_p ); \
+	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
 \
 	PASTECH2(ch,opname,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx_p ); \
 \
@@ -198,7 +198,7 @@ void PASTEMAC(ch,opname) \
 	const num_t dt = PASTEMAC(ch,type); \
 	cntx_t*     cntx_p; \
 \
-	bli_cntx_init_local_if( opname, cntx, cntx_p ); \
+	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
 \
 	PASTECH2(ch,opname,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx_p ); \
 \
@@ -238,7 +238,7 @@ void PASTEMAC(ch,opname) \
 	const num_t dt = PASTEMAC(ch,type); \
 	cntx_t*     cntx_p; \
 \
-	bli_cntx_init_local_if( opname, cntx, cntx_p ); \
+	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
 \
 	PASTECH2(ch,opname,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx_p ); \
 \
@@ -274,7 +274,7 @@ void PASTEMAC(ch,opname) \
 	const num_t dt = PASTEMAC(ch,type); \
 	cntx_t*     cntx_p; \
 \
-	bli_cntx_init_local_if( opname, cntx, cntx_p ); \
+	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
 \
 	PASTECH2(ch,opname,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx_p ); \
 \
@@ -306,7 +306,7 @@ void PASTEMAC(ch,opname) \
 	const num_t dt = PASTEMAC(ch,type); \
 	cntx_t*     cntx_p; \
 \
-	bli_cntx_init_local_if( opname, cntx, cntx_p ); \
+	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
 \
 	PASTECH2(ch,opname,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx_p ); \
 \
@@ -340,7 +340,7 @@ void PASTEMAC(ch,opname) \
 	const num_t dt = PASTEMAC(ch,type); \
 	cntx_t*     cntx_p; \
 \
-	bli_cntx_init_local_if( opname, cntx, cntx_p ); \
+	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
 \
 	PASTECH2(ch,opname,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx_p ); \
 \
@@ -373,7 +373,7 @@ void PASTEMAC(ch,opname) \
 	const num_t dt = PASTEMAC(ch,type); \
 	cntx_t*     cntx_p; \
 \
-	bli_cntx_init_local_if( opname, cntx, cntx_p ); \
+	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
 \
 	PASTECH2(ch,opname,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx_p ); \
 \

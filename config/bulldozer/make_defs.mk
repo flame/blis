@@ -1,4 +1,4 @@
-#!/bin/bash
+#
 #
 #  BLIS    
 #  An object-based framework for developing high-performance BLAS-like
@@ -47,8 +47,12 @@ ifeq ($(CC),)
 CC             := gcc
 CC_VENDOR      := gcc
 endif
-ifneq ($(CC_VENDOR),gcc)
-$(error gcc is required for this configuration.)
+ifeq ($(CC_VENDOR),gcc)
+else
+ifeq ($(CC_VENDOR),clang)
+else
+$(error gcc or clang are required for this configuration.)
+endif
 endif
 # Enable IEEE Standard 1003.1-2004 (POSIX.1d). 
 # NOTE: This is needed to enable posix_memalign().
@@ -77,7 +81,9 @@ ARFLAGS        := cru
 # --- Determine the linker and related flags ---
 LINKER         := $(CC)
 SOFLAGS        := -shared
+ifneq ($(CC_VENDOR),icc)
 LDFLAGS        := -lm
+endif
 
 
 

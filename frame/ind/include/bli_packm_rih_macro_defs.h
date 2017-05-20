@@ -38,9 +38,6 @@
 
 // -- Define default rih-specific kernel names ---------------------------------
 
-//
-// Level-1m
-//
 
 // packm_2xk_rih kernels
 

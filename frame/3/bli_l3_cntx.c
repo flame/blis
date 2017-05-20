@@ -38,7 +38,7 @@
 // Define context initialization functions.
 //
 
-void bli_gemm_cntx_init( cntx_t* cntx )
+void bli_gemm_cntx_init( num_t dt, cntx_t* cntx )
 {
 	// Clear the context fields.
 	bli_cntx_obj_clear( cntx );
@@ -49,7 +49,7 @@ void bli_gemm_cntx_init( cntx_t* cntx )
 	bli_gks_cntx_set_l3_nat_ukr_prefs( BLIS_GEMM_UKR, cntx );
 
 	// Initialize the context with packm-related kernels.
-	bli_packm_cntx_init( cntx );
+	bli_packm_cntx_init( dt, cntx );
 
 	// Initialize the context with the current architecture's register
 	// and cache blocksizes (and multiples), given the execution method.
@@ -63,9 +63,8 @@ void bli_gemm_cntx_init( cntx_t* cntx )
 	                         cntx );
 
 	// Set the pack_t schemas for native execution.
-	bli_cntx_set_pack_schema_ab( BLIS_PACKED_ROW_PANELS,
-	                             BLIS_PACKED_COL_PANELS,
-	                             cntx );
+	bli_cntx_set_pack_schema_a_block( BLIS_PACKED_ROW_PANELS, cntx );
+	bli_cntx_set_pack_schema_b_panel( BLIS_PACKED_COL_PANELS, cntx );
 }
 
 void bli_gemm_cntx_finalize( cntx_t* cntx )
@@ -74,7 +73,7 @@ void bli_gemm_cntx_finalize( cntx_t* cntx )
 
 // -----------------------------------------------------------------------------
 
-void bli_trsm_cntx_init( cntx_t* cntx )
+void bli_trsm_cntx_init( num_t dt, cntx_t* cntx )
 {
 	// Clear the context fields.
 	bli_cntx_obj_clear( cntx );
@@ -92,7 +91,7 @@ void bli_trsm_cntx_init( cntx_t* cntx )
 	bli_gks_cntx_set_l3_nat_ukr( BLIS_TRSM_U_UKR, cntx );
 
 	// Initialize the context with packm-related kernels.
-	bli_packm_cntx_init( cntx );
+	bli_packm_cntx_init( dt, cntx );
 
 	// Initialize the context with the current architecture's register
 	// and cache blocksizes (and multiples), given the execution method.
@@ -106,9 +105,8 @@ void bli_trsm_cntx_init( cntx_t* cntx )
 	                         cntx );
 
 	// Set the pack_t schemas for native execution.
-	bli_cntx_set_pack_schema_ab( BLIS_PACKED_ROW_PANELS,
-	                             BLIS_PACKED_COL_PANELS,
-	                             cntx );
+	bli_cntx_set_pack_schema_a_block( BLIS_PACKED_ROW_PANELS, cntx );
+	bli_cntx_set_pack_schema_b_panel( BLIS_PACKED_COL_PANELS, cntx );
 }
 
 void bli_trsm_cntx_finalize( cntx_t* cntx )

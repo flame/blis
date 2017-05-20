@@ -98,6 +98,16 @@ void bli_cntl_free
        thrinfo_t* thread
      )
 {
+	if ( thread != NULL ) bli_cntl_free_w_thrinfo( cntl, thread );
+	else                  bli_cntl_free_wo_thrinfo( cntl );
+}
+
+void bli_cntl_free_w_thrinfo
+     (
+       cntl_t* cntl,
+       thrinfo_t* thread
+     )
+{
 	// Base case: simply return when asked to free NULL nodes.
 	if ( cntl == NULL ) return;
 
@@ -112,7 +122,7 @@ void bli_cntl_free
 	{
 		// Recursively free all memory associated with the sub-node and its
 		// children.
-		bli_cntl_free( cntl_sub_node, thread_sub_node );
+		bli_cntl_free_w_thrinfo( cntl_sub_node, thread_sub_node );
 	}
 
 	// Free the current node's params field, if it is non-NULL.
@@ -122,9 +132,45 @@ void bli_cntl_free
 	}
 
 	// Release the current node's pack mem_t entry back to the memory
-	// broker from which it originated, but only if the current thread
-	// is chief for its group, and only if the mem_t is allocated.
+	// broker from which it originated, but only if the mem_t entry is
+	// allocated, and only if the current thread is chief for its group.
 	if ( bli_thread_am_ochief( thread ) )
+	if ( bli_mem_is_alloc( cntl_pack_mem ) )
+	{
+		bli_membrk_release( cntl_pack_mem );
+	}
+
+	// Free the current node.
+	bli_cntl_obj_free( cntl );
+}
+
+void bli_cntl_free_wo_thrinfo
+     (
+       cntl_t* cntl
+     )
+{
+	// Base case: simply return when asked to free NULL nodes.
+	if ( cntl == NULL ) return;
+
+	cntl_t*    cntl_sub_node   = bli_cntl_sub_node( cntl );
+	void*      cntl_params     = bli_cntl_params( cntl );
+	mem_t*     cntl_pack_mem   = bli_cntl_pack_mem( cntl );
+
+	{
+		// Recursively free all memory associated with the sub-node and its
+		// children.
+		bli_cntl_free_wo_thrinfo( cntl_sub_node );
+	}
+
+	// Free the current node's params field, if it is non-NULL.
+	if ( cntl_params != NULL )
+	{
+		bli_free_intl( cntl_params );
+	}
+
+	// Release the current node's pack mem_t entry back to the memory
+	// broker from which it originated, but only if the mem_t entry is
+	// allocated.
 	if ( bli_mem_is_alloc( cntl_pack_mem ) )
 	{
 		bli_membrk_release( cntl_pack_mem );

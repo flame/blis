@@ -112,5 +112,6 @@ void bli_gemm_front
 	      cntl
 	    );
     }
+
 }
 

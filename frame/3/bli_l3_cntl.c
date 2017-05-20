@@ -70,8 +70,8 @@ void bli_l3_cntl_create_if
 	else
 	{
 		// If the user provided a control tree, create a copy and use it
-		// instead (so that it can be used to cache things like pack mem_t
-		// entries).
+		// instead (so that threads can use its local tree as a place to
+		// cache things like pack mem_t entries).
 		*cntl_use = bli_cntl_copy( cntl_orig );
 	}
 }
