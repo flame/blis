@@ -176,6 +176,11 @@
 
 // -- packm --
 
+#define BLIS_DPACKM_12XK_KERNEL     bli_dpackm_12xk_avx
+#define BLIS_DPACKM_8XK_KERNEL      bli_dpackm_8xk_avx
+#define BLIS_DPACKM_6XK_KERNEL      bli_dpackm_6xk_avx
+#define BLIS_DPACKM_4XK_KERNEL      bli_dpackm_4xk_avx
+
 // -- unpackm --
 
 

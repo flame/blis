@@ -112,6 +112,17 @@
 
 
 
+// -- LEVEL-1M KERNEL DEFINITIONS ----------------------------------------------
+
+// -- packm --
+
+#define BLIS_DPACKM_4XK_KERNEL      bli_dpackm_4xk_sse2
+
+// -- unpackm --
+
+
+
+
 // -- LEVEL-1F KERNEL DEFINITIONS ----------------------------------------------
 
 // -- axpy2v --
