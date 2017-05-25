@@ -75,6 +75,35 @@
 #endif
 
 
+// -- Max and min --
+
+#define BLIS_MIN(a,b) ((b) < (a) ? (b) : (a))
+#define BLIS_MAX(a,b) ((a) < (b) ? (b) : (a))
+
+
+// -- Data prefetching macros --
+
+#if defined(__GNUC__) || defined(__clang__) || defined(__INTEL_COMPILER)
+
+#define BLIS_PREFETCH_L1(addr)       __builtin_prefetch(addr, 0, 3)
+#define BLIS_PREFETCH_L2(addr)       __builtin_prefetch(addr, 0, 2)
+#define BLIS_PREFETCH_L3(addr)       __builtin_prefetch(addr, 0, 1)
+#define BLIS_PREFETCH_L1_WRITE(addr) __builtin_prefetch(addr, 1, 3)
+#define BLIS_PREFETCH_L2_WRITE(addr) __builtin_prefetch(addr, 1, 2)
+#define BLIS_PREFETCH_L3_WRITE(addr) __builtin_prefetch(addr, 1, 1)
+
+#else
+
+#define BLIS_PREFETCH_L1(addr)
+#define BLIS_PREFETCH_L2(addr)
+#define BLIS_PREFETCH_L3(addr)
+#define BLIS_PREFETCH_L1_WRITE(addr)
+#define BLIS_PREFETCH_L2_WRITE(addr)
+#define BLIS_PREFETCH_L3_WRITE(addr)
+
+#endif
+
+
 // -- Concatenation macros --
 
 #define BLIS_FUNC_PREFIX_STR       "bli"
