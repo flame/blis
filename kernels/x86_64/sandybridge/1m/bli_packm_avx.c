@@ -34,6 +34,16 @@
 
 #include "bli_avx_macros.h"
 
+#define PREFETCH_2_LINES(base, lda) \
+    BLIS_PREFETCH_L1(base + 0*(lda)); \
+    BLIS_PREFETCH_L1(base + 1*(lda));
+
+#define PREFETCH_4_LINES(base, lda) \
+    BLIS_PREFETCH_L1(base + 0*(lda)); \
+    BLIS_PREFETCH_L1(base + 1*(lda)); \
+    BLIS_PREFETCH_L1(base + 2*(lda)); \
+    BLIS_PREFETCH_L1(base + 3*(lda));
+
 void bli_dpackm_12xk_avx
      (
        conj_t         conja,
@@ -45,6 +55,12 @@ void bli_dpackm_12xk_avx
 {
     (void)conja;
 
+    const gint_t L1_PREFETCH_DIST = 2*8;
+
+    dim_t n_unroll = n - (n%8);
+    dim_t n_pre = BLIS_MAX(0, n_unroll - L1_PREFETCH_DIST);
+    dim_t n_rem = n - n_pre;
+
     double* a = (double*)a_;
     double* p = (double*)p_;
     double kappa = *(double*)kappa_;
@@ -54,21 +70,48 @@ void bli_dpackm_12xk_avx
         if (kappa == 1.0)
         {
             /*
-             * Unroll by 4
+             * Unroll by 4 and prefetch later iterations
              */
-            for (dim_t i = 0;i < n/4;i++)
+            double* a_prefetch = a + L1_PREFETCH_DIST*lda;
+            for (dim_t i = 0;i < n_pre/4;i++)
             {
+                PREFETCH_4_LINES(a_prefetch+0, lda);
+                PREFETCH_4_LINES(a_prefetch+8, lda);
+
                 copy_avx_d4x4(a+0, lda, p+0, ldp);
                 copy_avx_d4x4(a+4, lda, p+4, ldp);
                 copy_avx_d4x4(a+8, lda, p+8, ldp);
 
                 a += 4*lda;
+                a_prefetch += 4*lda;
                 p += 4*ldp;
             }
+
+            /*
+             * Unroll by 4 and prefetch next micro-panel
+             */
+            a_prefetch = a + 12;
+            for (dim_t i = 0;i < n_rem/4;i++)
+            {
+                PREFETCH_4_LINES(a_prefetch+0, lda);
+                PREFETCH_4_LINES(a_prefetch+8, lda);
+
+                copy_avx_d4x4(a+0, lda, p+0, ldp);
+                copy_avx_d4x4(a+4, lda, p+4, ldp);
+                copy_avx_d4x4(a+8, lda, p+8, ldp);
+
+                a += 4*lda;
+                a_prefetch += 4*lda;
+                p += 4*ldp;
+            }
+
             /*
              * Remainder loop
              */
-            for (dim_t i = 0;i < n%4;i++)
+            PREFETCH_4_LINES(a_prefetch+0, lda);
+            PREFETCH_4_LINES(a_prefetch+8, lda);
+
+            for (dim_t i = 0;i < n_rem%4;i++)
             {
                 copy_avx_d4x1(a+0, p+0);
                 copy_avx_d4x1(a+4, p+4);
@@ -81,21 +124,48 @@ void bli_dpackm_12xk_avx
         else
         {
             /*
-             * Unroll by 4
+             * Unroll by 4 and prefetch later iterations
              */
-            for (dim_t i = 0;i < n/4;i++)
+            double* a_prefetch = a + L1_PREFETCH_DIST*lda;
+            for (dim_t i = 0;i < n_pre/4;i++)
             {
+                PREFETCH_4_LINES(a_prefetch+0, lda);
+                PREFETCH_4_LINES(a_prefetch+8, lda);
+
                 copy_scale_avx_d4x4(kappa, a+0, lda, p+0, ldp);
                 copy_scale_avx_d4x4(kappa, a+4, lda, p+4, ldp);
                 copy_scale_avx_d4x4(kappa, a+8, lda, p+8, ldp);
 
                 a += 4*lda;
+                a_prefetch += 4*lda;
                 p += 4*ldp;
             }
+
+            /*
+             * Unroll by 4 and prefetch next micro-panel
+             */
+            a_prefetch = a + 12;
+            for (dim_t i = 0;i < n_rem/4;i++)
+            {
+                PREFETCH_4_LINES(a_prefetch+0, lda);
+                PREFETCH_4_LINES(a_prefetch+8, lda);
+
+                copy_scale_avx_d4x4(kappa, a+0, lda, p+0, ldp);
+                copy_scale_avx_d4x4(kappa, a+4, lda, p+4, ldp);
+                copy_scale_avx_d4x4(kappa, a+8, lda, p+8, ldp);
+
+                a += 4*lda;
+                a_prefetch += 4*lda;
+                p += 4*ldp;
+            }
+
             /*
              * Remainder loop
              */
-            for (dim_t i = 0;i < n%4;i++)
+            PREFETCH_4_LINES(a_prefetch+0, lda);
+            PREFETCH_4_LINES(a_prefetch+8, lda);
+
+            for (dim_t i = 0;i < n_rem%4;i++)
             {
                 copy_scale_avx_d4x1(kappa, a+0, p+0);
                 copy_scale_avx_d4x1(kappa, a+4, p+4);
@@ -111,21 +181,65 @@ void bli_dpackm_12xk_avx
         if (kappa == 1.0)
         {
             /*
-             * Unroll by 4
+             * Unroll by 8 and prefetch later iterations
              */
-            for (dim_t i = 0;i < n/4;i++)
+            double* a_prefetch = a + L1_PREFETCH_DIST;
+            for (dim_t i = 0;i < n_pre/8;i++)
             {
-                copy_trans_avx_d4x4(a+0*inca, inca, p+0, ldp);
-                copy_trans_avx_d4x4(a+4*inca, inca, p+4, ldp);
-                copy_trans_avx_d4x4(a+8*inca, inca, p+8, ldp);
+                PREFETCH_4_LINES(a_prefetch + 0*inca, inca);
 
-                a += 4;
-                p += 4*ldp;
+                copy_trans_avx_d4x4(a+0*inca+0, inca, p+0+0*ldp, ldp);
+                copy_trans_avx_d4x4(a+0*inca+4, inca, p+0+4*ldp, ldp);
+
+                PREFETCH_4_LINES(a_prefetch + 4*inca, inca);
+
+                copy_trans_avx_d4x4(a+4*inca+0, inca, p+4+0*ldp, ldp);
+                copy_trans_avx_d4x4(a+4*inca+4, inca, p+4+4*ldp, ldp);
+
+                PREFETCH_4_LINES(a_prefetch + 8*inca, inca);
+
+                copy_trans_avx_d4x4(a+8*inca+0, inca, p+8+0*ldp, ldp);
+                copy_trans_avx_d4x4(a+8*inca+4, inca, p+8+4*ldp, ldp);
+
+                a += 8;
+                a_prefetch += 8;
+                p += 8*ldp;
             }
+
+            /*
+             * Unroll by 8 and prefetch next micro-panel
+             */
+            a_prefetch = a + 12*inca;
+            for (dim_t i = 0;i < n_rem/8;i++)
+            {
+                PREFETCH_4_LINES(a_prefetch + 0*inca, inca);
+
+                copy_trans_avx_d4x4(a+0*inca+0, inca, p+0+0*ldp, ldp);
+                copy_trans_avx_d4x4(a+0*inca+4, inca, p+0+4*ldp, ldp);
+
+                PREFETCH_4_LINES(a_prefetch + 4*inca, inca);
+
+                copy_trans_avx_d4x4(a+4*inca+0, inca, p+4+0*ldp, ldp);
+                copy_trans_avx_d4x4(a+4*inca+4, inca, p+4+4*ldp, ldp);
+
+                PREFETCH_4_LINES(a_prefetch + 8*inca, inca);
+
+                copy_trans_avx_d4x4(a+8*inca+0, inca, p+8+0*ldp, ldp);
+                copy_trans_avx_d4x4(a+8*inca+4, inca, p+8+4*ldp, ldp);
+
+                a += 8;
+                a_prefetch += 8;
+                p += 8*ldp;
+            }
+
             /*
              * Remainder loop
              */
-            for (dim_t i = 0;i < n%4;i++)
+            PREFETCH_4_LINES(a_prefetch + 0*inca, inca);
+            PREFETCH_4_LINES(a_prefetch + 4*inca, inca);
+            PREFETCH_4_LINES(a_prefetch + 8*inca, inca);
+
+            for (dim_t i = 0;i < n_rem%8;i++)
             {
                 p[ 0] = a[ 0*inca];
                 p[ 1] = a[ 1*inca];
@@ -147,21 +261,65 @@ void bli_dpackm_12xk_avx
         else
         {
             /*
-             * Unroll by 4
+             * Unroll by 8 and prefetch later iterations
              */
-            for (dim_t i = 0;i < n/4;i++)
+            double* a_prefetch = a + L1_PREFETCH_DIST;
+            for (dim_t i = 0;i < n_pre/8;i++)
             {
-                copy_scale_trans_avx_d4x4(kappa, a+0*inca, inca, p+0, ldp);
-                copy_scale_trans_avx_d4x4(kappa, a+4*inca, inca, p+4, ldp);
-                copy_scale_trans_avx_d4x4(kappa, a+8*inca, inca, p+8, ldp);
+                PREFETCH_4_LINES(a_prefetch + 0*inca, inca);
 
-                a += 4;
-                p += 4*ldp;
+                copy_scale_trans_avx_d4x4(kappa, a+0*inca+0, inca, p+0+0*ldp, ldp);
+                copy_scale_trans_avx_d4x4(kappa, a+0*inca+4, inca, p+0+4*ldp, ldp);
+
+                PREFETCH_4_LINES(a_prefetch + 4*inca, inca);
+
+                copy_scale_trans_avx_d4x4(kappa, a+4*inca+0, inca, p+4+0*ldp, ldp);
+                copy_scale_trans_avx_d4x4(kappa, a+4*inca+4, inca, p+4+4*ldp, ldp);
+
+                PREFETCH_4_LINES(a_prefetch + 8*inca, inca);
+
+                copy_scale_trans_avx_d4x4(kappa, a+8*inca+0, inca, p+8+0*ldp, ldp);
+                copy_scale_trans_avx_d4x4(kappa, a+8*inca+4, inca, p+8+4*ldp, ldp);
+
+                a += 8;
+                a_prefetch += 8;
+                p += 8*ldp;
             }
+
+            /*
+             * Unroll by 8 and prefetch next micro-panel
+             */
+            a_prefetch = a + 8*inca;
+            for (dim_t i = 0;i < n_rem/8;i++)
+            {
+                PREFETCH_4_LINES(a_prefetch + 0*inca, inca);
+
+                copy_scale_trans_avx_d4x4(kappa, a+0*inca+0, inca, p+0+0*ldp, ldp);
+                copy_scale_trans_avx_d4x4(kappa, a+0*inca+4, inca, p+0+4*ldp, ldp);
+
+                PREFETCH_4_LINES(a_prefetch + 4*inca, inca);
+
+                copy_scale_trans_avx_d4x4(kappa, a+4*inca+0, inca, p+4+0*ldp, ldp);
+                copy_scale_trans_avx_d4x4(kappa, a+4*inca+4, inca, p+4+4*ldp, ldp);
+
+                PREFETCH_4_LINES(a_prefetch + 8*inca, inca);
+
+                copy_scale_trans_avx_d4x4(kappa, a+8*inca+0, inca, p+8+0*ldp, ldp);
+                copy_scale_trans_avx_d4x4(kappa, a+8*inca+4, inca, p+8+4*ldp, ldp);
+
+                a += 8;
+                a_prefetch += 8;
+                p += 8*ldp;
+            }
+
             /*
              * Remainder loop
              */
-            for (dim_t i = 0;i < n%4;i++)
+            PREFETCH_4_LINES(a_prefetch + 0*inca, inca);
+            PREFETCH_4_LINES(a_prefetch + 4*inca, inca);
+            PREFETCH_4_LINES(a_prefetch + 8*inca, inca);
+
+            for (dim_t i = 0;i < n_rem%8;i++)
             {
                 p[ 0] = kappa*a[ 0*inca];
                 p[ 1] = kappa*a[ 1*inca];
@@ -185,18 +343,14 @@ void bli_dpackm_12xk_avx
     {
         while (n --> 0)
         {
-            p[ 0] = kappa*a[ 0*inca];
-            p[ 1] = kappa*a[ 1*inca];
-            p[ 2] = kappa*a[ 2*inca];
-            p[ 3] = kappa*a[ 3*inca];
-            p[ 4] = kappa*a[ 4*inca];
-            p[ 5] = kappa*a[ 5*inca];
-            p[ 6] = kappa*a[ 6*inca];
-            p[ 7] = kappa*a[ 7*inca];
-            p[ 8] = kappa*a[ 8*inca];
-            p[ 9] = kappa*a[ 9*inca];
-            p[10] = kappa*a[10*inca];
-            p[11] = kappa*a[11*inca];
+            p[0] = kappa*a[0*inca];
+            p[1] = kappa*a[1*inca];
+            p[2] = kappa*a[2*inca];
+            p[3] = kappa*a[3*inca];
+            p[4] = kappa*a[4*inca];
+            p[5] = kappa*a[5*inca];
+            p[6] = kappa*a[6*inca];
+            p[7] = kappa*a[7*inca];
 
             a += lda;
             p += ldp;
@@ -215,6 +369,12 @@ void bli_dpackm_8xk_avx
 {
     (void)conja;
 
+    const gint_t L1_PREFETCH_DIST = 2*8;
+
+    dim_t n_unroll = n - (n%8);
+    dim_t n_pre = BLIS_MAX(0, n_unroll - L1_PREFETCH_DIST);
+    dim_t n_rem = n - n_pre;
+
     double* a = (double*)a_;
     double* p = (double*)p_;
     double kappa = *(double*)kappa_;
@@ -224,20 +384,43 @@ void bli_dpackm_8xk_avx
         if (kappa == 1.0)
         {
             /*
-             * Unroll by 4
+             * Unroll by 4 and prefetch later iterations
              */
-            for (dim_t i = 0;i < n/4;i++)
+            double* a_prefetch = a + L1_PREFETCH_DIST*lda;
+            for (dim_t i = 0;i < n_pre/4;i++)
             {
+                PREFETCH_4_LINES(a_prefetch, lda);
+
                 copy_avx_d4x4(a+0, lda, p+0, ldp);
                 copy_avx_d4x4(a+4, lda, p+4, ldp);
 
                 a += 4*lda;
+                a_prefetch += 4*lda;
                 p += 4*ldp;
             }
+
+            /*
+             * Unroll by 4 and prefetch next micro-panel
+             */
+            a_prefetch = a + 8;
+            for (dim_t i = 0;i < n_rem/4;i++)
+            {
+                PREFETCH_4_LINES(a_prefetch, lda);
+
+                copy_avx_d4x4(a+0, lda, p+0, ldp);
+                copy_avx_d4x4(a+4, lda, p+4, ldp);
+
+                a += 4*lda;
+                a_prefetch += 4*lda;
+                p += 4*ldp;
+            }
+
             /*
              * Remainder loop
              */
-            for (dim_t i = 0;i < n%4;i++)
+            PREFETCH_4_LINES(a_prefetch, lda);
+
+            for (dim_t i = 0;i < n_rem%4;i++)
             {
                 copy_avx_d4x1(a+0, p+0);
                 copy_avx_d4x1(a+4, p+4);
@@ -249,20 +432,43 @@ void bli_dpackm_8xk_avx
         else
         {
             /*
-             * Unroll by 4
+             * Unroll by 4 and prefetch later iterations
              */
-            for (dim_t i = 0;i < n/4;i++)
+            double* a_prefetch = a + L1_PREFETCH_DIST*lda;
+            for (dim_t i = 0;i < n_pre/4;i++)
             {
+                PREFETCH_4_LINES(a_prefetch, lda);
+
                 copy_scale_avx_d4x4(kappa, a+0, lda, p+0, ldp);
                 copy_scale_avx_d4x4(kappa, a+4, lda, p+4, ldp);
 
                 a += 4*lda;
+                a_prefetch += 4*lda;
                 p += 4*ldp;
             }
+
+            /*
+             * Unroll by 4 and prefetch next micro-panel
+             */
+            a_prefetch = a + 8;
+            for (dim_t i = 0;i < n_rem/4;i++)
+            {
+                PREFETCH_4_LINES(a_prefetch, lda);
+
+                copy_scale_avx_d4x4(kappa, a+0, lda, p+0, ldp);
+                copy_scale_avx_d4x4(kappa, a+4, lda, p+4, ldp);
+
+                a += 4*lda;
+                a_prefetch += 4*lda;
+                p += 4*ldp;
+            }
+
             /*
              * Remainder loop
              */
-            for (dim_t i = 0;i < n%4;i++)
+            PREFETCH_4_LINES(a_prefetch, lda);
+
+            for (dim_t i = 0;i < n_rem%4;i++)
             {
                 copy_scale_avx_d4x1(kappa, a+0, p+0);
                 copy_scale_avx_d4x1(kappa, a+4, p+4);
@@ -277,20 +483,54 @@ void bli_dpackm_8xk_avx
         if (kappa == 1.0)
         {
             /*
-             * Unroll by 4
+             * Unroll by 8 and prefetch later iterations
              */
-            for (dim_t i = 0;i < n/4;i++)
+            double* a_prefetch = a + L1_PREFETCH_DIST;
+            for (dim_t i = 0;i < n_pre/8;i++)
             {
-                copy_trans_avx_d4x4(a+0*inca, inca, p+0, ldp);
-                copy_trans_avx_d4x4(a+4*inca, inca, p+4, ldp);
+                PREFETCH_4_LINES(a_prefetch + 0*inca, inca);
 
-                a += 4;
-                p += 4*ldp;
+                copy_trans_avx_d4x4(a+0*inca+0, inca, p+0+0*ldp, ldp);
+                copy_trans_avx_d4x4(a+0*inca+4, inca, p+0+4*ldp, ldp);
+
+                PREFETCH_4_LINES(a_prefetch + 4*inca, inca);
+
+                copy_trans_avx_d4x4(a+4*inca+0, inca, p+4+0*ldp, ldp);
+                copy_trans_avx_d4x4(a+4*inca+4, inca, p+4+4*ldp, ldp);
+
+                a += 8;
+                a_prefetch += 8;
+                p += 8*ldp;
             }
+
+            /*
+             * Unroll by 8 and prefetch next micro-panel
+             */
+            a_prefetch = a + 8*inca;
+            for (dim_t i = 0;i < n_rem/8;i++)
+            {
+                PREFETCH_4_LINES(a_prefetch + 0*inca, inca);
+
+                copy_trans_avx_d4x4(a+0*inca+0, inca, p+0+0*ldp, ldp);
+                copy_trans_avx_d4x4(a+0*inca+4, inca, p+0+4*ldp, ldp);
+
+                PREFETCH_4_LINES(a_prefetch + 4*inca, inca);
+
+                copy_trans_avx_d4x4(a+4*inca+0, inca, p+4+0*ldp, ldp);
+                copy_trans_avx_d4x4(a+4*inca+4, inca, p+4+4*ldp, ldp);
+
+                a += 8;
+                a_prefetch += 8;
+                p += 8*ldp;
+            }
+
             /*
              * Remainder loop
              */
-            for (dim_t i = 0;i < n%4;i++)
+            PREFETCH_4_LINES(a_prefetch + 0*inca, inca);
+            PREFETCH_4_LINES(a_prefetch + 4*inca, inca);
+
+            for (dim_t i = 0;i < n_rem%8;i++)
             {
                 p[0] = a[0*inca];
                 p[1] = a[1*inca];
@@ -308,20 +548,54 @@ void bli_dpackm_8xk_avx
         else
         {
             /*
-             * Unroll by 4
+             * Unroll by 8 and prefetch later iterations
              */
-            for (dim_t i = 0;i < n/4;i++)
+            double* a_prefetch = a + L1_PREFETCH_DIST;
+            for (dim_t i = 0;i < n_pre/8;i++)
             {
-                copy_scale_trans_avx_d4x4(kappa, a+0*inca, inca, p+0, ldp);
-                copy_scale_trans_avx_d4x4(kappa, a+4*inca, inca, p+4, ldp);
+                PREFETCH_4_LINES(a_prefetch + 0*inca, inca);
 
-                a += 4;
-                p += 4*ldp;
+                copy_scale_trans_avx_d4x4(kappa, a+0*inca+0, inca, p+0+0*ldp, ldp);
+                copy_scale_trans_avx_d4x4(kappa, a+0*inca+4, inca, p+0+4*ldp, ldp);
+
+                PREFETCH_4_LINES(a_prefetch + 4*inca, inca);
+
+                copy_scale_trans_avx_d4x4(kappa, a+4*inca+0, inca, p+4+0*ldp, ldp);
+                copy_scale_trans_avx_d4x4(kappa, a+4*inca+4, inca, p+4+4*ldp, ldp);
+
+                a += 8;
+                a_prefetch += 8;
+                p += 8*ldp;
             }
+
+            /*
+             * Unroll by 8 and prefetch next micro-panel
+             */
+            a_prefetch = a + 8*inca;
+            for (dim_t i = 0;i < n_rem/8;i++)
+            {
+                PREFETCH_4_LINES(a_prefetch + 0*inca, inca);
+
+                copy_scale_trans_avx_d4x4(kappa, a+0*inca+0, inca, p+0+0*ldp, ldp);
+                copy_scale_trans_avx_d4x4(kappa, a+0*inca+4, inca, p+0+4*ldp, ldp);
+
+                PREFETCH_4_LINES(a_prefetch + 4*inca, inca);
+
+                copy_scale_trans_avx_d4x4(kappa, a+4*inca+0, inca, p+4+0*ldp, ldp);
+                copy_scale_trans_avx_d4x4(kappa, a+4*inca+4, inca, p+4+4*ldp, ldp);
+
+                a += 8;
+                a_prefetch += 8;
+                p += 8*ldp;
+            }
+
             /*
              * Remainder loop
              */
-            for (dim_t i = 0;i < n%4;i++)
+            PREFETCH_4_LINES(a_prefetch + 0*inca, inca);
+            PREFETCH_4_LINES(a_prefetch + 4*inca, inca);
+
+            for (dim_t i = 0;i < n_rem%8;i++)
             {
                 p[0] = kappa*a[0*inca];
                 p[1] = kappa*a[1*inca];
@@ -367,6 +641,12 @@ void bli_dpackm_6xk_avx
 {
     (void)conja;
 
+    const gint_t L1_PREFETCH_DIST = 2*8;
+
+    dim_t n_unroll = n - (n%8);
+    dim_t n_pre = BLIS_MAX(0, n_unroll - L1_PREFETCH_DIST);
+    dim_t n_rem = n - n_pre;
+
     double* a = (double*)a_;
     double* p = (double*)p_;
     double kappa = *(double*)kappa_;
@@ -376,20 +656,43 @@ void bli_dpackm_6xk_avx
         if (kappa == 1.0)
         {
             /*
-             * Unroll by 4
+             * Unroll by 4 and prefetch later iterations
              */
-            for (dim_t i = 0;i < n/4;i++)
+            double* a_prefetch = a + L1_PREFETCH_DIST*lda;
+            for (dim_t i = 0;i < n_pre/4;i++)
             {
+                PREFETCH_4_LINES(a_prefetch, lda);
+
                 copy_avx_d4x4(a+0, lda, p+0, ldp);
                 copy_avx_d2x4(a+4, lda, p+4, ldp);
 
                 a += 4*lda;
+                a_prefetch += 4*lda;
                 p += 4*ldp;
             }
+
+            /*
+             * Unroll by 4 and prefetch next micro-panel
+             */
+            a_prefetch = a + 6;
+            for (dim_t i = 0;i < n_rem/4;i++)
+            {
+                PREFETCH_4_LINES(a_prefetch, lda);
+
+                copy_avx_d4x4(a+0, lda, p+0, ldp);
+                copy_avx_d2x4(a+4, lda, p+4, ldp);
+
+                a += 4*lda;
+                a_prefetch += 4*lda;
+                p += 4*ldp;
+            }
+
             /*
              * Remainder loop
              */
-            for (dim_t i = 0;i < n%4;i++)
+            PREFETCH_4_LINES(a_prefetch, lda);
+
+            for (dim_t i = 0;i < n_rem%4;i++)
             {
                 copy_avx_d4x1(a+0, p+0);
                 copy_avx_d2x1(a+4, p+4);
@@ -401,20 +704,43 @@ void bli_dpackm_6xk_avx
         else
         {
             /*
-             * Unroll by 4
+             * Unroll by 4 and prefetch later iterations
              */
-            for (dim_t i = 0;i < n/4;i++)
+            double* a_prefetch = a + L1_PREFETCH_DIST*lda;
+            for (dim_t i = 0;i < n_pre/4;i++)
             {
+                PREFETCH_4_LINES(a_prefetch, lda);
+
                 copy_scale_avx_d4x4(kappa, a+0, lda, p+0, ldp);
                 copy_scale_avx_d2x4(kappa, a+4, lda, p+4, ldp);
 
                 a += 4*lda;
+                a_prefetch += 4*lda;
                 p += 4*ldp;
             }
+
+            /*
+             * Unroll by 4 and prefetch next micro-panel
+             */
+            a_prefetch = a + 6;
+            for (dim_t i = 0;i < n_rem/4;i++)
+            {
+                PREFETCH_4_LINES(a_prefetch, lda);
+
+                copy_scale_avx_d4x4(kappa, a+0, lda, p+0, ldp);
+                copy_scale_avx_d2x4(kappa, a+4, lda, p+4, ldp);
+
+                a += 4*lda;
+                a_prefetch += 4*lda;
+                p += 4*ldp;
+            }
+
             /*
              * Remainder loop
              */
-            for (dim_t i = 0;i < n%4;i++)
+            PREFETCH_4_LINES(a_prefetch, lda);
+
+            for (dim_t i = 0;i < n_rem%4;i++)
             {
                 copy_scale_avx_d4x1(kappa, a+0, p+0);
                 copy_scale_avx_d2x1(kappa, a+4, p+4);
@@ -429,20 +755,54 @@ void bli_dpackm_6xk_avx
         if (kappa == 1.0)
         {
             /*
-             * Unroll by 4
+             * Unroll by 8 and prefetch later iterations
              */
-            for (dim_t i = 0;i < n/4;i++)
+            double* a_prefetch = a + L1_PREFETCH_DIST;
+            for (dim_t i = 0;i < n_pre/8;i++)
             {
-                copy_trans_avx_d4x4(a+0*inca, inca, p+0, ldp);
-                copy_trans_avx_d4x2(a+4*inca, inca, p+4, ldp);
+                PREFETCH_4_LINES(a_prefetch + 0*inca, inca);
 
-                a += 4;
-                p += 4*ldp;
+                copy_trans_avx_d4x4(a+0*inca+0, inca, p+0+0*ldp, ldp);
+                copy_trans_avx_d4x4(a+0*inca+4, inca, p+0+4*ldp, ldp);
+
+                PREFETCH_2_LINES(a_prefetch + 4*inca, inca);
+
+                copy_trans_avx_d4x2(a+4*inca+0, inca, p+4+0*ldp, ldp);
+                copy_trans_avx_d4x2(a+4*inca+4, inca, p+4+4*ldp, ldp);
+
+                a += 8;
+                a_prefetch += 8;
+                p += 8*ldp;
             }
+
+            /*
+             * Unroll by 8 and prefetch next micro-panel
+             */
+            a_prefetch = a + 6*inca;
+            for (dim_t i = 0;i < n_rem/8;i++)
+            {
+                PREFETCH_4_LINES(a_prefetch + 0*inca, inca);
+
+                copy_trans_avx_d4x4(a+0*inca+0, inca, p+0+0*ldp, ldp);
+                copy_trans_avx_d4x4(a+0*inca+4, inca, p+0+4*ldp, ldp);
+
+                PREFETCH_2_LINES(a_prefetch + 4*inca, inca);
+
+                copy_trans_avx_d4x2(a+4*inca+0, inca, p+4+0*ldp, ldp);
+                copy_trans_avx_d4x2(a+4*inca+4, inca, p+4+4*ldp, ldp);
+
+                a += 8;
+                a_prefetch += 8;
+                p += 8*ldp;
+            }
+
             /*
              * Remainder loop
              */
-            for (dim_t i = 0;i < n%4;i++)
+            PREFETCH_4_LINES(a_prefetch + 0*inca, inca);
+            PREFETCH_2_LINES(a_prefetch + 4*inca, inca);
+
+            for (dim_t i = 0;i < n_rem%8;i++)
             {
                 p[0] = a[0*inca];
                 p[1] = a[1*inca];
@@ -458,20 +818,54 @@ void bli_dpackm_6xk_avx
         else
         {
             /*
-             * Unroll by 4
+             * Unroll by 8 and prefetch later iterations
              */
-            for (dim_t i = 0;i < n/4;i++)
+            double* a_prefetch = a + L1_PREFETCH_DIST;
+            for (dim_t i = 0;i < n_pre/8;i++)
             {
-                copy_scale_trans_avx_d4x4(kappa, a+0*inca, inca, p+0, ldp);
-                copy_scale_trans_avx_d4x2(kappa, a+4*inca, inca, p+4, ldp);
+                PREFETCH_4_LINES(a_prefetch + 0*inca, inca);
 
-                a += 4;
-                p += 4*ldp;
+                copy_scale_trans_avx_d4x4(kappa, a+0*inca+0, inca, p+0+0*ldp, ldp);
+                copy_scale_trans_avx_d4x4(kappa, a+0*inca+4, inca, p+0+4*ldp, ldp);
+
+                PREFETCH_2_LINES(a_prefetch + 4*inca, inca);
+
+                copy_scale_trans_avx_d4x2(kappa, a+4*inca+0, inca, p+4+0*ldp, ldp);
+                copy_scale_trans_avx_d4x2(kappa, a+4*inca+4, inca, p+4+4*ldp, ldp);
+
+                a += 8;
+                a_prefetch += 8;
+                p += 8*ldp;
             }
+
+            /*
+             * Unroll by 8 and prefetch next micro-panel
+             */
+            a_prefetch = a + 6*inca;
+            for (dim_t i = 0;i < n_rem/8;i++)
+            {
+                PREFETCH_4_LINES(a_prefetch + 0*inca, inca);
+
+                copy_scale_trans_avx_d4x4(kappa, a+0*inca+0, inca, p+0+0*ldp, ldp);
+                copy_scale_trans_avx_d4x4(kappa, a+0*inca+4, inca, p+0+4*ldp, ldp);
+
+                PREFETCH_2_LINES(a_prefetch + 4*inca, inca);
+
+                copy_scale_trans_avx_d4x2(kappa, a+4*inca+0, inca, p+4+0*ldp, ldp);
+                copy_scale_trans_avx_d4x2(kappa, a+4*inca+4, inca, p+4+4*ldp, ldp);
+
+                a += 8;
+                a_prefetch += 8;
+                p += 8*ldp;
+            }
+
             /*
              * Remainder loop
              */
-            for (dim_t i = 0;i < n%4;i++)
+            PREFETCH_4_LINES(a_prefetch + 0*inca, inca);
+            PREFETCH_2_LINES(a_prefetch + 4*inca, inca);
+
+            for (dim_t i = 0;i < n_rem%8;i++)
             {
                 p[0] = kappa*a[0*inca];
                 p[1] = kappa*a[1*inca];
@@ -513,6 +907,12 @@ void bli_dpackm_4xk_avx
 {
     (void)conja;
 
+    const gint_t L1_PREFETCH_DIST = 2*8;
+
+    dim_t n_unroll = n - (n%8);
+    dim_t n_pre = BLIS_MAX(0, n_unroll - L1_PREFETCH_DIST);
+    dim_t n_rem = n - n_pre;
+
     double* a = (double*)a_;
     double* p = (double*)p_;
     double kappa = *(double*)kappa_;
@@ -522,21 +922,43 @@ void bli_dpackm_4xk_avx
         if (kappa == 1.0)
         {
             /*
-             * Unroll by 4
+             * Unroll by 4 and prefetch later iterations
              */
-            for (dim_t i = 0;i < n/4;i++)
+            double* a_prefetch = a + L1_PREFETCH_DIST*lda;
+            for (dim_t i = 0;i < n_pre/4;i++)
             {
-                copy_avx_d4x4(a, lda, p, ldp);
+                PREFETCH_4_LINES(a_prefetch, lda);
+
+                copy_avx_d4x4(a+0, lda, p+0, ldp);
 
                 a += 4*lda;
+                a_prefetch += 4*lda;
                 p += 4*ldp;
             }
+
+            /*
+             * Unroll by 4 and prefetch next micro-panel
+             */
+            a_prefetch = a + 4;
+            for (dim_t i = 0;i < n_rem/4;i++)
+            {
+                PREFETCH_4_LINES(a_prefetch, lda);
+
+                copy_avx_d4x4(a+0, lda, p+0, ldp);
+
+                a += 4*lda;
+                a_prefetch += 4*lda;
+                p += 4*ldp;
+            }
+
             /*
              * Remainder loop
              */
-            for (dim_t i = 0;i < n%4;i++)
+            PREFETCH_4_LINES(a_prefetch, lda);
+
+            for (dim_t i = 0;i < n_rem%4;i++)
             {
-                copy_avx_d4x1(a, p);
+                copy_avx_d4x1(a+0, p+0);
 
                 a += lda;
                 p += ldp;
@@ -545,21 +967,43 @@ void bli_dpackm_4xk_avx
         else
         {
             /*
-             * Unroll by 4
+             * Unroll by 4 and prefetch later iterations
              */
-            for (dim_t i = 0;i < n/4;i++)
+            double* a_prefetch = a + L1_PREFETCH_DIST*lda;
+            for (dim_t i = 0;i < n_pre/4;i++)
             {
-                copy_scale_avx_d4x4(kappa, a, lda, p, ldp);
+                PREFETCH_4_LINES(a_prefetch, lda);
+
+                copy_scale_avx_d4x4(kappa, a+0, lda, p+0, ldp);
 
                 a += 4*lda;
+                a_prefetch += 4*lda;
                 p += 4*ldp;
             }
+
+            /*
+             * Unroll by 4 and prefetch next micro-panel
+             */
+            a_prefetch = a + 4;
+            for (dim_t i = 0;i < n_rem/4;i++)
+            {
+                PREFETCH_4_LINES(a_prefetch, lda);
+
+                copy_scale_avx_d4x4(kappa, a+0, lda, p+0, ldp);
+
+                a += 4*lda;
+                a_prefetch += 4*lda;
+                p += 4*ldp;
+            }
+
             /*
              * Remainder loop
              */
-            for (dim_t i = 0;i < n%4;i++)
+            PREFETCH_4_LINES(a_prefetch, lda);
+
+            for (dim_t i = 0;i < n_rem%4;i++)
             {
-                copy_scale_avx_d4x1(kappa, a, p);
+                copy_scale_avx_d4x1(kappa, a+0, p+0);
 
                 a += lda;
                 p += ldp;
@@ -571,19 +1015,43 @@ void bli_dpackm_4xk_avx
         if (kappa == 1.0)
         {
             /*
-             * Unroll by 4
+             * Unroll by 8 and prefetch later iterations
              */
-            for (dim_t i = 0;i < n/4;i++)
+            double* a_prefetch = a + L1_PREFETCH_DIST;
+            for (dim_t i = 0;i < n_pre/8;i++)
             {
-                copy_trans_avx_d4x4(a, inca, p, ldp);
+                PREFETCH_4_LINES(a_prefetch, inca);
 
-                a += 4;
-                p += 4*ldp;
+                copy_trans_avx_d4x4(a+0, inca, p+0*ldp, ldp);
+                copy_trans_avx_d4x4(a+4, inca, p+4*ldp, ldp);
+
+                a += 8;
+                a_prefetch += 8;
+                p += 8*ldp;
             }
+
+            /*
+             * Unroll by 8 and prefetch next micro-panel
+             */
+            a_prefetch = a + 4*inca;
+            for (dim_t i = 0;i < n_rem/8;i++)
+            {
+                PREFETCH_4_LINES(a_prefetch, inca);
+
+                copy_trans_avx_d4x4(a+0, inca, p+0*ldp, ldp);
+                copy_trans_avx_d4x4(a+4, inca, p+4*ldp, ldp);
+
+                a += 8;
+                a_prefetch += 8;
+                p += 8*ldp;
+            }
+
             /*
              * Remainder loop
              */
-            for (dim_t i = 0;i < n%4;i++)
+            PREFETCH_4_LINES(a_prefetch, inca);
+
+            for (dim_t i = 0;i < n_rem%8;i++)
             {
                 p[0] = a[0*inca];
                 p[1] = a[1*inca];
@@ -597,19 +1065,43 @@ void bli_dpackm_4xk_avx
         else
         {
             /*
-             * Unroll by 4
+             * Unroll by 8 and prefetch later iterations
              */
-            for (dim_t i = 0;i < n/4;i++)
+            double* a_prefetch = a + L1_PREFETCH_DIST;
+            for (dim_t i = 0;i < n_pre/8;i++)
             {
-                copy_scale_trans_avx_d4x4(kappa, a, inca, p, ldp);
+                PREFETCH_4_LINES(a_prefetch, inca);
 
-                a += 4;
-                p += 4*ldp;
+                copy_scale_trans_avx_d4x4(kappa, a+0, inca, p+0*ldp, ldp);
+                copy_scale_trans_avx_d4x4(kappa, a+4, inca, p+4*ldp, ldp);
+
+                a += 8;
+                a_prefetch += 8;
+                p += 8*ldp;
             }
+
+            /*
+             * Unroll by 8 and prefetch next micro-panel
+             */
+            a_prefetch = a + 4*inca;
+            for (dim_t i = 0;i < n_rem/8;i++)
+            {
+                PREFETCH_4_LINES(a_prefetch, inca);
+
+                copy_scale_trans_avx_d4x4(kappa, a+0, inca, p+0*ldp, ldp);
+                copy_scale_trans_avx_d4x4(kappa, a+4, inca, p+4*ldp, ldp);
+
+                a += 8;
+                a_prefetch += 8;
+                p += 8*ldp;
+            }
+
             /*
              * Remainder loop
              */
-            for (dim_t i = 0;i < n%4;i++)
+            PREFETCH_4_LINES(a_prefetch + 0*inca, inca);
+
+            for (dim_t i = 0;i < n_rem%8;i++)
             {
                 p[0] = kappa*a[0*inca];
                 p[1] = kappa*a[1*inca];
