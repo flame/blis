@@ -102,6 +102,7 @@
 #define BLIS_DEFAULT_NC_D          4080
 #define BLIS_DEFAULT_MR_D          6
 #define BLIS_DEFAULT_NR_D          8
+#define BLIS_PACKDIM_MR_D          8
 
 #define BLIS_DGEMM_UKERNEL_PREFERS_CONTIG_ROWS
 #endif
