@@ -40,16 +40,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define D_MR (MR >> 1)
 #define NR 3
 
-//The scratch buffer allocated for performing transpose.
-#define F_SCRATCH_DIM 1*1024
 #define BLIS_ENABLE_PREFETCH
-static float temp_scratch_buf[F_SCRATCH_DIM] __attribute__((aligned(64)));
-static float A_pack[BLIS_SMALL_MATRIX_THRES * BLIS_SMALL_MATRIX_THRES]  __attribute__((aligned(64)));
+#define F_SCRATCH_DIM (BLIS_SMALL_MATRIX_THRES * BLIS_SMALL_MATRIX_THRES)
+static float A_pack[F_SCRATCH_DIM]  __attribute__((aligned(64)));
 #define D_BLIS_SMALL_MATRIX_THRES (BLIS_SMALL_MATRIX_THRES / 2 )
 #define D_BLIS_SMALL_M_RECT_MATRIX_THRES (BLIS_SMALL_M_RECT_MATRIX_THRES / 2)
 #define D_BLIS_SMALL_K_RECT_MATRIX_THRES (BLIS_SMALL_K_RECT_MATRIX_THRES / 2)
-static double D_A_pack[D_BLIS_SMALL_MATRIX_THRES * D_BLIS_SMALL_MATRIX_THRES]  __attribute__((aligned(64)));
-
+#define D_SCRATCH_DIM (D_BLIS_SMALL_MATRIX_THRES * D_BLIS_SMALL_MATRIX_THRES)
+static double D_A_pack[D_SCRATCH_DIM]  __attribute__((aligned(64)));
+#define BLIS_ATBN_M_THRES 40 // Threshold value of M for/below which small matrix code is called. 
+#define AT_MR 4 // The kernel dimension of the A transpose GEMM kernel.(AT_MR * NR).
 static gint_t bli_sgemm_small_matrix
 (
     obj_t*  alpha,
@@ -62,6 +62,28 @@ static gint_t bli_sgemm_small_matrix
 );
 
 static gint_t bli_dgemm_small_matrix
+(
+    obj_t*  alpha,
+    obj_t*  a,
+    obj_t*  b,
+    obj_t*  beta,
+    obj_t*  c,
+    cntx_t* cntx,
+    cntl_t* cntl
+);
+
+static gint_t bli_sgemm_small_matrix_atbn
+(
+    obj_t*  alpha,
+    obj_t*  a,
+    obj_t*  b,
+    obj_t*  beta,
+    obj_t*  c,
+    cntx_t* cntx,
+    cntl_t* cntl
+);
+
+static gint_t bli_dgemm_small_matrix_atbn
 (
     obj_t*  alpha,
     obj_t*  a,
@@ -85,16 +107,13 @@ gint_t bli_gemm_small_matrix
     obj_t*  c,
     cntx_t* cntx,
     cntl_t* cntl
-    )
+)
 {
-
+#ifdef BLIS_ENABLE_MULTITHREADING
+    return BLIS_NOT_YET_IMPLEMENTED;
+#endif
     // If alpha is zero, scale by beta and return.
     if (bli_obj_equals(alpha, &BLIS_ZERO))
-    {
-        return BLIS_NOT_YET_IMPLEMENTED;
-    }
-
-    if (bli_obj_has_trans(*a))
     {
         return BLIS_NOT_YET_IMPLEMENTED;
     }
@@ -106,13 +125,29 @@ gint_t bli_gemm_small_matrix
     {
         return BLIS_INVALID_ROW_STRIDE;
     }
-    // The custom kernels are implemented only for float datatype.
+
     num_t dt = ((*c).info & (0x7 << 0));
+
+    if (bli_obj_has_trans(*a))
+    {
+        if (bli_obj_has_notrans(*b))
+        {
+            if (dt == BLIS_FLOAT)
+            {
+                return bli_sgemm_small_matrix_atbn(alpha, a, b, beta, c, cntx, cntl);
+            }
+            else if (dt == BLIS_DOUBLE)
+            {
+                return bli_dgemm_small_matrix_atbn(alpha, a, b, beta, c, cntx, cntl);
+            }
+        }
+
+        return BLIS_NOT_YET_IMPLEMENTED;
+    }
 
     if (dt == BLIS_DOUBLE)
     {
         return bli_dgemm_small_matrix(alpha, a, b, beta, c, cntx, cntl);
-
     }
 
     if (dt == BLIS_FLOAT)
@@ -134,14 +169,14 @@ gint_t bli_sgemm_small_matrix
     obj_t*  c,
     cntx_t* cntx,
     cntl_t* cntl
-    )
+)
 {
 
     int M = bli_obj_length(*c); // number of rows of Matrix C
     int N = bli_obj_width(*c);  // number of columns of Matrix C
     int K = bli_obj_width(*a);  // number of columns of OP(A), will be updated if OP(A) is Transpose(A) .
 
-    //   printf("alpha_cast = %f beta_cast = %f [ Trans = %d %d], [stride = %d %d %d] [m,n,k = %d %d %d]\n",*alpha_cast,*beta_cast, bli_obj_has_trans(*a), bli_obj_has_trans(*b), lda, ldb,ldc, M,N,K);
+                                //   printf("alpha_cast = %f beta_cast = %f [ Trans = %d %d], [stride = %d %d %d] [m,n,k = %d %d %d]\n",*alpha_cast,*beta_cast, bli_obj_has_trans(*a), bli_obj_has_trans(*b), lda, ldb,ldc, M,N,K);
     if (((M * N) < (BLIS_SMALL_MATRIX_THRES * BLIS_SMALL_MATRIX_THRES))
         || ((M  < BLIS_SMALL_M_RECT_MATRIX_THRES) && (K < BLIS_SMALL_K_RECT_MATRIX_THRES)))
     {
@@ -178,41 +213,14 @@ gint_t bli_sgemm_small_matrix
         if (N == 1)
         {
             bli_gemv
-                (
-                    alpha,
-                    a,
-                    b,
-                    beta,
-                    c
-                    );
+            (
+                alpha,
+                a,
+                b,
+                beta,
+                c
+            );
             return BLIS_SUCCESS;
-        }
-
-        // When MAtrix A requires transpose perform it using
-        // scratch buffer also update the K dimension.
-        // This code needs optimization, and probably won't be
-        // used in the future.
-        if (bli_obj_has_trans(*a))
-        {
-            K = bli_obj_length(*a);
-
-            //if the scratch buffer cannot accomodate matrix A, return.
-            if ((M * K) > F_SCRATCH_DIM)
-            {
-                return BLIS_FAILURE;
-            }
-
-            for (row_idx = 0; row_idx < M; row_idx += 1)
-            {
-                for (col_idx = 0; col_idx < K; col_idx += 1)
-                {
-                    temp_scratch_buf[row_idx + col_idx * M] =
-                        A[col_idx + row_idx * lda];
-                }
-            }
-            A = temp_scratch_buf;
-            lda = M;
-
         }
 
         //update the pointer math if matrix B needs to be transposed.
@@ -222,7 +230,7 @@ gint_t bli_sgemm_small_matrix
             tb_inc_row = ldb;
         }
 
-        if (N <= 3)
+        if ((N <= 3) || ((MR * K) > F_SCRATCH_DIM))
         {
             required_packing_A = 0;
         }
@@ -290,7 +298,7 @@ gint_t bli_sgemm_small_matrix
                     //with matrix A columns.
                     ymm3 = _mm256_loadu_ps(tA);
                     _mm256_storeu_ps(tA_packed, ymm3); // the packing of matrix A
-                    //                   ymm4 += ymm0 * ymm3;
+                                                       //                   ymm4 += ymm0 * ymm3;
                     ymm4 = _mm256_fmadd_ps(ymm0, ymm3, ymm4);
                     //                    ymm8 += ymm1 * ymm3;
                     ymm8 = _mm256_fmadd_ps(ymm1, ymm3, ymm8);
@@ -299,7 +307,7 @@ gint_t bli_sgemm_small_matrix
 
                     ymm3 = _mm256_loadu_ps(tA + 8);
                     _mm256_storeu_ps(tA_packed + 8, ymm3); // the packing of matrix A
-                    //                    ymm5 += ymm0 * ymm3;
+                                                           //                    ymm5 += ymm0 * ymm3;
                     ymm5 = _mm256_fmadd_ps(ymm0, ymm3, ymm5);
                     //                    ymm9 += ymm1 * ymm3;
                     ymm9 = _mm256_fmadd_ps(ymm1, ymm3, ymm9);
@@ -308,7 +316,7 @@ gint_t bli_sgemm_small_matrix
 
                     ymm3 = _mm256_loadu_ps(tA + 16);
                     _mm256_storeu_ps(tA_packed + 16, ymm3); // the packing of matrix A
-                    //                   ymm6 += ymm0 * ymm3;
+                                                            //                   ymm6 += ymm0 * ymm3;
                     ymm6 = _mm256_fmadd_ps(ymm0, ymm3, ymm6);
                     //                    ymm10 += ymm1 * ymm3;
                     ymm10 = _mm256_fmadd_ps(ymm1, ymm3, ymm10);
@@ -317,7 +325,7 @@ gint_t bli_sgemm_small_matrix
 
                     ymm3 = _mm256_loadu_ps(tA + 24);
                     _mm256_storeu_ps(tA_packed + 24, ymm3); // the packing of matrix A
-                    //                    ymm7 += ymm0 * ymm3;
+                                                            //                    ymm7 += ymm0 * ymm3;
                     ymm7 = _mm256_fmadd_ps(ymm0, ymm3, ymm7);
                     //                    ymm11 += ymm1 * ymm3;
                     ymm11 = _mm256_fmadd_ps(ymm1, ymm3, ymm11);
@@ -1570,7 +1578,7 @@ static gint_t bli_dgemm_small_matrix
     int K = bli_obj_width(*a);  // number of columns of OP(A), will be updated if OP(A) is Transpose(A) .
 
                                 // If alpha is zero, scale by beta and return.
-    //   printf("alpha_cast = %f beta_cast = %f [ Trans = %d %d], [stride = %d %d %d] [m,n,k = %d %d %d]\n",*alpha_cast,*beta_cast, bli_obj_has_trans(*a), bli_obj_has_trans(*b), lda, ldb,ldc, M,N,K);
+                                //   printf("alpha_cast = %f beta_cast = %f [ Trans = %d %d], [stride = %d %d %d] [m,n,k = %d %d %d]\n",*alpha_cast,*beta_cast, bli_obj_has_trans(*a), bli_obj_has_trans(*b), lda, ldb,ldc, M,N,K);
     if (((M * N) < (D_BLIS_SMALL_MATRIX_THRES * D_BLIS_SMALL_MATRIX_THRES))
         || ((M  < D_BLIS_SMALL_M_RECT_MATRIX_THRES) && (K < D_BLIS_SMALL_K_RECT_MATRIX_THRES)))
     {
@@ -1624,7 +1632,7 @@ static gint_t bli_dgemm_small_matrix
             tb_inc_row = ldb;
         }
 
-        if (N <= 3)
+        if ((N <= 3) || ((D_MR * K) > D_SCRATCH_DIM))
         {
             required_packing_A = 0;
         }
@@ -1692,7 +1700,7 @@ static gint_t bli_dgemm_small_matrix
                     //with matrix A columns.
                     ymm3 = _mm256_loadu_pd(tA);
                     _mm256_storeu_pd(tA_packed, ymm3); // the packing of matrix A
-                    //                   ymm4 += ymm0 * ymm3;
+                                                       //                   ymm4 += ymm0 * ymm3;
                     ymm4 = _mm256_fmadd_pd(ymm0, ymm3, ymm4);
                     //                    ymm8 += ymm1 * ymm3;
                     ymm8 = _mm256_fmadd_pd(ymm1, ymm3, ymm8);
@@ -1701,7 +1709,7 @@ static gint_t bli_dgemm_small_matrix
 
                     ymm3 = _mm256_loadu_pd(tA + 4);
                     _mm256_storeu_pd(tA_packed + 4, ymm3); // the packing of matrix A
-                    //                    ymm5 += ymm0 * ymm3;
+                                                           //                    ymm5 += ymm0 * ymm3;
                     ymm5 = _mm256_fmadd_pd(ymm0, ymm3, ymm5);
                     //                    ymm9 += ymm1 * ymm3;
                     ymm9 = _mm256_fmadd_pd(ymm1, ymm3, ymm9);
@@ -1710,7 +1718,7 @@ static gint_t bli_dgemm_small_matrix
 
                     ymm3 = _mm256_loadu_pd(tA + 8);
                     _mm256_storeu_pd(tA_packed + 8, ymm3); // the packing of matrix A
-                    //                   ymm6 += ymm0 * ymm3;
+                                                           //                   ymm6 += ymm0 * ymm3;
                     ymm6 = _mm256_fmadd_pd(ymm0, ymm3, ymm6);
                     //                    ymm10 += ymm1 * ymm3;
                     ymm10 = _mm256_fmadd_pd(ymm1, ymm3, ymm10);
@@ -1719,7 +1727,7 @@ static gint_t bli_dgemm_small_matrix
 
                     ymm3 = _mm256_loadu_pd(tA + 12);
                     _mm256_storeu_pd(tA_packed + 12, ymm3); // the packing of matrix A
-                    //                    ymm7 += ymm0 * ymm3;
+                                                            //                    ymm7 += ymm0 * ymm3;
                     ymm7 = _mm256_fmadd_pd(ymm0, ymm3, ymm7);
                     //                    ymm11 += ymm1 * ymm3;
                     ymm11 = _mm256_fmadd_pd(ymm1, ymm3, ymm11);
@@ -2955,3 +2963,771 @@ static gint_t bli_dgemm_small_matrix
 
 
 };
+
+gint_t bli_sgemm_small_matrix_atbn
+(
+    obj_t*  alpha,
+    obj_t*  a,
+    obj_t*  b,
+    obj_t*  beta,
+    obj_t*  c,
+    cntx_t* cntx,
+    cntl_t* cntl
+)
+{
+    int M = bli_obj_length(*c); // number of rows of Matrix C
+    int N = bli_obj_width(*c);  // number of columns of Matrix C
+    int K = bli_obj_length(*b); // number of rows of Matrix B
+    int lda = bli_obj_col_stride(*a); // column stride of matrix OP(A), where OP(A) is Transpose(A) if transA enabled.
+    int ldb = bli_obj_col_stride(*b); // column stride of matrix OP(B), where OP(B) is Transpose(B) if transB enabled.
+    int ldc = bli_obj_col_stride(*c); // column stride of matrix C
+    int row_idx = 0, col_idx = 0, k;
+    float *A = a->buffer; // pointer to matrix A elements, stored in row major format
+    float *B = b->buffer; // pointer to matrix B elements, stored in column major format
+    float *C = c->buffer; // pointer to matrix C elements, stored in column major format
+
+    float *tA = A, *tB = B, *tC = C;
+
+    __m256 ymm4, ymm5, ymm6, ymm7;
+    __m256 ymm8, ymm9, ymm10, ymm11;
+    __m256 ymm12, ymm13, ymm14, ymm15;
+    __m256 ymm0, ymm1, ymm2, ymm3;
+
+    float result, scratch[8];
+    float *alpha_cast, *beta_cast; // alpha, beta multiples
+    alpha_cast = (alpha->buffer);
+    beta_cast = (beta->buffer);
+
+    // The non-copy version of the A^T GEMM gives better performance for the small M cases.
+    // The threshold is controlled by BLIS_ATBN_M_THRES
+    if (M <= BLIS_ATBN_M_THRES)
+    {
+        for (col_idx = 0; (col_idx + (NR - 1)) < N; col_idx += NR)
+        {
+            for (row_idx = 0; (row_idx + (AT_MR - 1)) < M; row_idx += AT_MR)
+            {
+                tA = A + row_idx * lda;
+                tB = B + col_idx * ldb;
+                tC = C + col_idx * ldc + row_idx;
+                // clear scratch registers.
+                ymm4 = _mm256_setzero_ps();
+                ymm5 = _mm256_setzero_ps();
+                ymm6 = _mm256_setzero_ps();
+                ymm7 = _mm256_setzero_ps();
+                ymm8 = _mm256_setzero_ps();
+                ymm9 = _mm256_setzero_ps();
+                ymm10 = _mm256_setzero_ps();
+                ymm11 = _mm256_setzero_ps();
+                ymm12 = _mm256_setzero_ps();
+                ymm13 = _mm256_setzero_ps();
+                ymm14 = _mm256_setzero_ps();
+                ymm15 = _mm256_setzero_ps();
+
+                //The inner loop computes the 4x3 values of the matrix.
+                //The computation pattern is:
+                // ymm4  ymm5  ymm6
+                // ymm7  ymm8  ymm9
+                // ymm10 ymm11 ymm12
+                // ymm13 ymm14 ymm15
+
+                //The Dot operation is performed in the inner loop, 8 float elements fit
+                //in the YMM register hence loop count incremented by 8
+                for (k = 0; (k + 7) < K; k += 8)
+                {
+                    ymm0 = _mm256_loadu_ps(tB + 0);
+                    ymm1 = _mm256_loadu_ps(tB + ldb);
+                    ymm2 = _mm256_loadu_ps(tB + 2 * ldb);
+
+                    ymm3 = _mm256_loadu_ps(tA);
+                    ymm4 = _mm256_fmadd_ps(ymm0, ymm3, ymm4);
+                    ymm5 = _mm256_fmadd_ps(ymm1, ymm3, ymm5);
+                    ymm6 = _mm256_fmadd_ps(ymm2, ymm3, ymm6);
+
+                    ymm3 = _mm256_loadu_ps(tA + lda);
+                    ymm7 = _mm256_fmadd_ps(ymm0, ymm3, ymm7);
+                    ymm8 = _mm256_fmadd_ps(ymm1, ymm3, ymm8);
+                    ymm9 = _mm256_fmadd_ps(ymm2, ymm3, ymm9);
+
+                    ymm3 = _mm256_loadu_ps(tA + 2 * lda);
+                    ymm10 = _mm256_fmadd_ps(ymm0, ymm3, ymm10);
+                    ymm11 = _mm256_fmadd_ps(ymm1, ymm3, ymm11);
+                    ymm12 = _mm256_fmadd_ps(ymm2, ymm3, ymm12);
+
+                    ymm3 = _mm256_loadu_ps(tA + 3 * lda);
+                    ymm13 = _mm256_fmadd_ps(ymm0, ymm3, ymm13);
+                    ymm14 = _mm256_fmadd_ps(ymm1, ymm3, ymm14);
+                    ymm15 = _mm256_fmadd_ps(ymm2, ymm3, ymm15);
+
+                    tA += 8;
+                    tB += 8;
+
+                }
+
+                // if K is not a multiple of 8, padding is done before load using temproary array.
+                if (k < K)
+                {
+                    int iter;
+                    float data_feeder[8] = { 0.0 };
+
+                    for (iter = 0; iter < (K - k); iter++) data_feeder[iter] = tB[iter];
+                    ymm0 = _mm256_loadu_ps(data_feeder);
+                    for (iter = 0; iter < (K - k); iter++) data_feeder[iter] = tB[iter + ldb];
+                    ymm1 = _mm256_loadu_ps(data_feeder);
+                    for (iter = 0; iter < (K - k); iter++) data_feeder[iter] = tB[iter + 2 * ldb];
+                    ymm2 = _mm256_loadu_ps(data_feeder);
+
+                    for (iter = 0; iter < (K - k); iter++) data_feeder[iter] = tA[iter];
+                    ymm3 = _mm256_loadu_ps(data_feeder);
+                    ymm4 = _mm256_fmadd_ps(ymm0, ymm3, ymm4);
+                    ymm5 = _mm256_fmadd_ps(ymm1, ymm3, ymm5);
+                    ymm6 = _mm256_fmadd_ps(ymm2, ymm3, ymm6);
+
+                    for (iter = 0; iter < (K - k); iter++) data_feeder[iter] = tA[lda + iter];
+                    ymm3 = _mm256_loadu_ps(data_feeder);
+                    ymm7 = _mm256_fmadd_ps(ymm0, ymm3, ymm7);
+                    ymm8 = _mm256_fmadd_ps(ymm1, ymm3, ymm8);
+                    ymm9 = _mm256_fmadd_ps(ymm2, ymm3, ymm9);
+
+                    for (iter = 0; iter < (K - k); iter++) data_feeder[iter] = tA[2 * lda + iter];
+                    ymm3 = _mm256_loadu_ps(data_feeder);
+                    ymm10 = _mm256_fmadd_ps(ymm0, ymm3, ymm10);
+                    ymm11 = _mm256_fmadd_ps(ymm1, ymm3, ymm11);
+                    ymm12 = _mm256_fmadd_ps(ymm2, ymm3, ymm12);
+
+                    for (iter = 0; iter < (K - k); iter++) data_feeder[iter] = tA[3 * lda + iter];
+                    ymm3 = _mm256_loadu_ps(data_feeder);
+                    ymm13 = _mm256_fmadd_ps(ymm0, ymm3, ymm13);
+                    ymm14 = _mm256_fmadd_ps(ymm1, ymm3, ymm14);
+                    ymm15 = _mm256_fmadd_ps(ymm2, ymm3, ymm15);
+
+                }
+
+                //horizontal addition and storage of the data.
+                //Results for 4x3 blocks of C is stored here
+                ymm4 = _mm256_hadd_ps(ymm4, ymm4);
+                ymm4 = _mm256_hadd_ps(ymm4, ymm4);
+                _mm256_storeu_ps(scratch, ymm4);
+                result = scratch[0] + scratch[4];
+                result *= (*alpha_cast);
+                tC[0] = result + tC[0] * (*beta_cast);
+
+                ymm7 = _mm256_hadd_ps(ymm7, ymm7);
+                ymm7 = _mm256_hadd_ps(ymm7, ymm7);
+                _mm256_storeu_ps(scratch, ymm7);
+                result = scratch[0] + scratch[4];
+                result *= (*alpha_cast);
+                tC[1] = result + tC[1] * (*beta_cast);
+
+                ymm10 = _mm256_hadd_ps(ymm10, ymm10);
+                ymm10 = _mm256_hadd_ps(ymm10, ymm10);
+                _mm256_storeu_ps(scratch, ymm10);
+                result = scratch[0] + scratch[4];
+                result *= (*alpha_cast);
+                tC[2] = result + tC[2] * (*beta_cast);
+
+                ymm13 = _mm256_hadd_ps(ymm13, ymm13);
+                ymm13 = _mm256_hadd_ps(ymm13, ymm13);
+                _mm256_storeu_ps(scratch, ymm13);
+                result = scratch[0] + scratch[4];
+                result *= (*alpha_cast);
+                tC[3] = result + tC[3] * (*beta_cast);
+
+                tC += ldc;
+                ymm5 = _mm256_hadd_ps(ymm5, ymm5);
+                ymm5 = _mm256_hadd_ps(ymm5, ymm5);
+                _mm256_storeu_ps(scratch, ymm5);
+                result = scratch[0] + scratch[4];
+                result *= (*alpha_cast);
+                tC[0] = result + tC[0] * (*beta_cast);
+
+                ymm8 = _mm256_hadd_ps(ymm8, ymm8);
+                ymm8 = _mm256_hadd_ps(ymm8, ymm8);
+                _mm256_storeu_ps(scratch, ymm8);
+                result = scratch[0] + scratch[4];
+                result *= (*alpha_cast);
+                tC[1] = result + tC[1] * (*beta_cast);
+
+                ymm11 = _mm256_hadd_ps(ymm11, ymm11);
+                ymm11 = _mm256_hadd_ps(ymm11, ymm11);
+                _mm256_storeu_ps(scratch, ymm11);
+                result = scratch[0] + scratch[4];
+                result *= (*alpha_cast);
+                tC[2] = result + tC[2] * (*beta_cast);
+
+                ymm14 = _mm256_hadd_ps(ymm14, ymm14);
+                ymm14 = _mm256_hadd_ps(ymm14, ymm14);
+                _mm256_storeu_ps(scratch, ymm14);
+                result = scratch[0] + scratch[4];
+                result *= (*alpha_cast);
+                tC[3] = result + tC[3] * (*beta_cast);
+
+                tC += ldc;
+                ymm6 = _mm256_hadd_ps(ymm6, ymm6);
+                ymm6 = _mm256_hadd_ps(ymm6, ymm6);
+                _mm256_storeu_ps(scratch, ymm6);
+                result = scratch[0] + scratch[4];
+                result *= (*alpha_cast);
+                tC[0] = result + tC[0] * (*beta_cast);
+
+                ymm9 = _mm256_hadd_ps(ymm9, ymm9);
+                ymm9 = _mm256_hadd_ps(ymm9, ymm9);
+                _mm256_storeu_ps(scratch, ymm9);
+                result = scratch[0] + scratch[4];
+                result *= (*alpha_cast);
+                tC[1] = result + tC[1] * (*beta_cast);
+
+                ymm12 = _mm256_hadd_ps(ymm12, ymm12);
+                ymm12 = _mm256_hadd_ps(ymm12, ymm12);
+                _mm256_storeu_ps(scratch, ymm12);
+                result = scratch[0] + scratch[4];
+                result *= (*alpha_cast);
+                tC[2] = result + tC[2] * (*beta_cast);
+
+                ymm15 = _mm256_hadd_ps(ymm15, ymm15);
+                ymm15 = _mm256_hadd_ps(ymm15, ymm15);
+                _mm256_storeu_ps(scratch, ymm15);
+                result = scratch[0] + scratch[4];
+                result *= (*alpha_cast);
+                tC[3] = result + tC[3] * (*beta_cast);
+            }
+        }
+
+        int processed_col = col_idx;
+        int processed_row = row_idx;
+
+        //The edge case handling where N is not a multiple of 3
+        if (processed_col < N)
+        {
+            for (col_idx = processed_col; col_idx < N; col_idx += 1)
+            {
+                for (row_idx = 0; (row_idx + (AT_MR - 1)) < M; row_idx += AT_MR)
+                {
+                    tA = A + row_idx * lda;
+                    tB = B + col_idx * ldb;
+                    tC = C + col_idx * ldc + row_idx;
+                    // clear scratch registers.
+                    ymm4 = _mm256_setzero_ps();
+                    ymm7 = _mm256_setzero_ps();
+                    ymm10 = _mm256_setzero_ps();
+                    ymm13 = _mm256_setzero_ps();
+
+                    //The inner loop computes the 4x1 values of the matrix.
+                    //The computation pattern is:
+                    // ymm4
+                    // ymm7
+                    // ymm10
+                    // ymm13
+
+                    for (k = 0; (k + 7) < K; k += 8)
+                    {
+                        ymm0 = _mm256_loadu_ps(tB + 0);
+
+                        ymm3 = _mm256_loadu_ps(tA);
+                        ymm4 = _mm256_fmadd_ps(ymm0, ymm3, ymm4);
+
+                        ymm3 = _mm256_loadu_ps(tA + lda);
+                        ymm7 = _mm256_fmadd_ps(ymm0, ymm3, ymm7);
+
+                        ymm3 = _mm256_loadu_ps(tA + 2 * lda);
+                        ymm10 = _mm256_fmadd_ps(ymm0, ymm3, ymm10);
+
+                        ymm3 = _mm256_loadu_ps(tA + 3 * lda);
+                        ymm13 = _mm256_fmadd_ps(ymm0, ymm3, ymm13);
+
+                        tA += 8;
+                        tB += 8;
+                    }
+
+                    // if K is not a multiple of 8, padding is done before load using temproary array.
+                    if (k < K)
+                    {
+                        int iter;
+                        float data_feeder[8] = { 0.0 };
+
+                        for (iter = 0; iter < (K - k); iter++) data_feeder[iter] = tB[iter];
+                        ymm0 = _mm256_loadu_ps(data_feeder);
+
+                        for (iter = 0; iter < (K - k); iter++) data_feeder[iter] = tA[iter];
+                        ymm3 = _mm256_loadu_ps(data_feeder);
+                        ymm4 = _mm256_fmadd_ps(ymm0, ymm3, ymm4);
+
+                        for (iter = 0; iter < (K - k); iter++) data_feeder[iter] = tA[lda + iter];
+                        ymm3 = _mm256_loadu_ps(data_feeder);
+                        ymm7 = _mm256_fmadd_ps(ymm0, ymm3, ymm7);
+
+                        for (iter = 0; iter < (K - k); iter++) data_feeder[iter] = tA[2 * lda + iter];
+                        ymm3 = _mm256_loadu_ps(data_feeder);
+                        ymm10 = _mm256_fmadd_ps(ymm0, ymm3, ymm10);
+
+                        for (iter = 0; iter < (K - k); iter++) data_feeder[iter] = tA[3 * lda + iter];
+                        ymm3 = _mm256_loadu_ps(data_feeder);
+                        ymm13 = _mm256_fmadd_ps(ymm0, ymm3, ymm13);
+
+                    }
+
+                    //horizontal addition and storage of the data.
+                    //Results for 4x1 blocks of C is stored here
+                    ymm4 = _mm256_hadd_ps(ymm4, ymm4);
+                    ymm4 = _mm256_hadd_ps(ymm4, ymm4);
+                    _mm256_storeu_ps(scratch, ymm4);
+                    result = scratch[0] + scratch[4];
+                    result *= (*alpha_cast);
+                    tC[0] = result + tC[0] * (*beta_cast);
+
+                    ymm7 = _mm256_hadd_ps(ymm7, ymm7);
+                    ymm7 = _mm256_hadd_ps(ymm7, ymm7);
+                    _mm256_storeu_ps(scratch, ymm7);
+                    result = scratch[0] + scratch[4];
+                    result *= (*alpha_cast);
+                    tC[1] = result + tC[1] * (*beta_cast);
+
+                    ymm10 = _mm256_hadd_ps(ymm10, ymm10);
+                    ymm10 = _mm256_hadd_ps(ymm10, ymm10);
+                    _mm256_storeu_ps(scratch, ymm10);
+                    result = scratch[0] + scratch[4];
+                    result *= (*alpha_cast);
+                    tC[2] = result + tC[2] * (*beta_cast);
+
+                    ymm13 = _mm256_hadd_ps(ymm13, ymm13);
+                    ymm13 = _mm256_hadd_ps(ymm13, ymm13);
+                    _mm256_storeu_ps(scratch, ymm13);
+                    result = scratch[0] + scratch[4];
+                    result *= (*alpha_cast);
+                    tC[3] = result + tC[3] * (*beta_cast);
+
+                }
+            }
+            processed_row = row_idx;
+        }
+
+        //The edge case handling where M is not a multiple of 4
+        if (processed_row < M)
+        {
+            for (row_idx = processed_row; row_idx < M; row_idx += 1)
+            {
+                for (col_idx = 0; col_idx < N; col_idx += 1)
+                {
+                    tA = A + row_idx * lda;
+                    tB = B + col_idx * ldb;
+                    tC = C + col_idx * ldc + row_idx;
+                    // clear scratch registers.
+                    ymm4 = _mm256_setzero_ps();
+
+                    for (k = 0; (k + 7) < K; k += 8)
+                    {
+                        ymm0 = _mm256_loadu_ps(tB + 0);
+                        ymm3 = _mm256_loadu_ps(tA);
+                        ymm4 = _mm256_fmadd_ps(ymm0, ymm3, ymm4);
+
+                        tA += 8;
+                        tB += 8;
+                    }
+
+                    // if K is not a multiple of 8, padding is done before load using temproary array.
+                    if (k < K)
+                    {
+                        int iter;
+                        float data_feeder[8] = { 0.0 };
+
+                        for (iter = 0; iter < (K - k); iter++) data_feeder[iter] = tB[iter];
+                        ymm0 = _mm256_loadu_ps(data_feeder);
+
+                        for (iter = 0; iter < (K - k); iter++) data_feeder[iter] = tA[iter];
+                        ymm3 = _mm256_loadu_ps(data_feeder);
+                        ymm4 = _mm256_fmadd_ps(ymm0, ymm3, ymm4);
+
+                    }
+
+                    //horizontal addition and storage of the data.
+                    ymm4 = _mm256_hadd_ps(ymm4, ymm4);
+                    ymm4 = _mm256_hadd_ps(ymm4, ymm4);
+                    _mm256_storeu_ps(scratch, ymm4);
+                    result = scratch[0] + scratch[4];
+                    result *= (*alpha_cast);
+                    tC[0] = result + tC[0] * (*beta_cast);
+
+                }
+            }
+        }
+
+        return BLIS_SUCCESS;
+    }
+    else
+        return BLIS_NONCONFORMAL_DIMENSIONS;
+}
+
+gint_t bli_dgemm_small_matrix_atbn
+(
+    obj_t*  alpha,
+    obj_t*  a,
+    obj_t*  b,
+    obj_t*  beta,
+    obj_t*  c,
+    cntx_t* cntx,
+    cntl_t* cntl
+)
+{
+    int M = bli_obj_length(*c); // number of rows of Matrix C
+    int N = bli_obj_width(*c);  // number of columns of Matrix C
+    int K = bli_obj_length(*b); // number of rows of Matrix B
+    int lda = bli_obj_col_stride(*a); // column stride of matrix OP(A), where OP(A) is Transpose(A) if transA enabled.
+    int ldb = bli_obj_col_stride(*b); // column stride of matrix OP(B), where OP(B) is Transpose(B) if transB enabled.
+    int ldc = bli_obj_col_stride(*c); // column stride of matrix C
+    int row_idx = 0, col_idx = 0, k;
+    double *A = a->buffer; // pointer to matrix A elements, stored in row major format
+    double *B = b->buffer; // pointer to matrix B elements, stored in column major format
+    double *C = c->buffer; // pointer to matrix C elements, stored in column major format
+
+    double *tA = A, *tB = B, *tC = C;
+
+    __m256d ymm4, ymm5, ymm6, ymm7;
+    __m256d ymm8, ymm9, ymm10, ymm11;
+    __m256d ymm12, ymm13, ymm14, ymm15;
+    __m256d ymm0, ymm1, ymm2, ymm3;
+
+    double result, scratch[8];
+    double *alpha_cast, *beta_cast; // alpha, beta multiples
+    alpha_cast = (alpha->buffer);
+    beta_cast = (beta->buffer);
+
+    // The non-copy version of the A^T GEMM gives better performance for the small M cases.
+    // The threshold is controlled by BLIS_ATBN_M_THRES
+    if (M <= BLIS_ATBN_M_THRES)
+    {
+        for (col_idx = 0; (col_idx + (NR - 1)) < N; col_idx += NR)
+        {
+            for (row_idx = 0; (row_idx + (AT_MR - 1)) < M; row_idx += AT_MR)
+            {
+                tA = A + row_idx * lda;
+                tB = B + col_idx * ldb;
+                tC = C + col_idx * ldc + row_idx;
+                // clear scratch registers.
+                ymm4 = _mm256_setzero_pd();
+                ymm5 = _mm256_setzero_pd();
+                ymm6 = _mm256_setzero_pd();
+                ymm7 = _mm256_setzero_pd();
+                ymm8 = _mm256_setzero_pd();
+                ymm9 = _mm256_setzero_pd();
+                ymm10 = _mm256_setzero_pd();
+                ymm11 = _mm256_setzero_pd();
+                ymm12 = _mm256_setzero_pd();
+                ymm13 = _mm256_setzero_pd();
+                ymm14 = _mm256_setzero_pd();
+                ymm15 = _mm256_setzero_pd();
+
+                //The inner loop computes the 4x3 values of the matrix.
+                //The computation pattern is:
+                // ymm4  ymm5  ymm6
+                // ymm7  ymm8  ymm9
+                // ymm10 ymm11 ymm12
+                // ymm13 ymm14 ymm15
+
+                //The Dot operation is performed in the inner loop, 4 double elements fit
+                //in the YMM register hence loop count incremented by 4
+                for (k = 0; (k + 3) < K; k += 4)
+                {
+                    ymm0 = _mm256_loadu_pd(tB + 0);
+                    ymm1 = _mm256_loadu_pd(tB + ldb);
+                    ymm2 = _mm256_loadu_pd(tB + 2 * ldb);
+
+                    ymm3 = _mm256_loadu_pd(tA);
+                    ymm4 = _mm256_fmadd_pd(ymm0, ymm3, ymm4);
+                    ymm5 = _mm256_fmadd_pd(ymm1, ymm3, ymm5);
+                    ymm6 = _mm256_fmadd_pd(ymm2, ymm3, ymm6);
+
+                    ymm3 = _mm256_loadu_pd(tA + lda);
+                    ymm7 = _mm256_fmadd_pd(ymm0, ymm3, ymm7);
+                    ymm8 = _mm256_fmadd_pd(ymm1, ymm3, ymm8);
+                    ymm9 = _mm256_fmadd_pd(ymm2, ymm3, ymm9);
+
+                    ymm3 = _mm256_loadu_pd(tA + 2 * lda);
+                    ymm10 = _mm256_fmadd_pd(ymm0, ymm3, ymm10);
+                    ymm11 = _mm256_fmadd_pd(ymm1, ymm3, ymm11);
+                    ymm12 = _mm256_fmadd_pd(ymm2, ymm3, ymm12);
+
+                    ymm3 = _mm256_loadu_pd(tA + 3 * lda);
+                    ymm13 = _mm256_fmadd_pd(ymm0, ymm3, ymm13);
+                    ymm14 = _mm256_fmadd_pd(ymm1, ymm3, ymm14);
+                    ymm15 = _mm256_fmadd_pd(ymm2, ymm3, ymm15);
+
+                    tA += 4;
+                    tB += 4;
+
+                }
+
+                // if K is not a multiple of 4, padding is done before load using temproary array.
+                if (k < K)
+                {
+                    int iter;
+                    double data_feeder[4] = { 0.0 };
+
+                    for (iter = 0; iter < (K - k); iter++) data_feeder[iter] = tB[iter];
+                    ymm0 = _mm256_loadu_pd(data_feeder);
+                    for (iter = 0; iter < (K - k); iter++) data_feeder[iter] = tB[iter + ldb];
+                    ymm1 = _mm256_loadu_pd(data_feeder);
+                    for (iter = 0; iter < (K - k); iter++) data_feeder[iter] = tB[iter + 2 * ldb];
+                    ymm2 = _mm256_loadu_pd(data_feeder);
+
+                    for (iter = 0; iter < (K - k); iter++) data_feeder[iter] = tA[iter];
+                    ymm3 = _mm256_loadu_pd(data_feeder);
+                    ymm4 = _mm256_fmadd_pd(ymm0, ymm3, ymm4);
+                    ymm5 = _mm256_fmadd_pd(ymm1, ymm3, ymm5);
+                    ymm6 = _mm256_fmadd_pd(ymm2, ymm3, ymm6);
+
+                    for (iter = 0; iter < (K - k); iter++) data_feeder[iter] = tA[lda + iter];
+                    ymm3 = _mm256_loadu_pd(data_feeder);
+                    ymm7 = _mm256_fmadd_pd(ymm0, ymm3, ymm7);
+                    ymm8 = _mm256_fmadd_pd(ymm1, ymm3, ymm8);
+                    ymm9 = _mm256_fmadd_pd(ymm2, ymm3, ymm9);
+
+                    for (iter = 0; iter < (K - k); iter++) data_feeder[iter] = tA[2 * lda + iter];
+                    ymm3 = _mm256_loadu_pd(data_feeder);
+                    ymm10 = _mm256_fmadd_pd(ymm0, ymm3, ymm10);
+                    ymm11 = _mm256_fmadd_pd(ymm1, ymm3, ymm11);
+                    ymm12 = _mm256_fmadd_pd(ymm2, ymm3, ymm12);
+
+                    for (iter = 0; iter < (K - k); iter++) data_feeder[iter] = tA[3 * lda + iter];
+                    ymm3 = _mm256_loadu_pd(data_feeder);
+                    ymm13 = _mm256_fmadd_pd(ymm0, ymm3, ymm13);
+                    ymm14 = _mm256_fmadd_pd(ymm1, ymm3, ymm14);
+                    ymm15 = _mm256_fmadd_pd(ymm2, ymm3, ymm15);
+
+                }
+
+                //horizontal addition and storage of the data.
+                //Results for 4x3 blocks of C is stored here
+                ymm4 = _mm256_hadd_pd(ymm4, ymm4);
+                _mm256_storeu_pd(scratch, ymm4);
+                result = scratch[0] + scratch[2];
+                result *= (*alpha_cast);
+                tC[0] = result + tC[0] * (*beta_cast);
+
+                ymm7 = _mm256_hadd_pd(ymm7, ymm7);
+                _mm256_storeu_pd(scratch, ymm7);
+                result = scratch[0] + scratch[2];
+                result *= (*alpha_cast);
+                tC[1] = result + tC[1] * (*beta_cast);
+
+                ymm10 = _mm256_hadd_pd(ymm10, ymm10);
+                _mm256_storeu_pd(scratch, ymm10);
+                result = scratch[0] + scratch[2];
+                result *= (*alpha_cast);
+                tC[2] = result + tC[2] * (*beta_cast);
+
+                ymm13 = _mm256_hadd_pd(ymm13, ymm13);
+                _mm256_storeu_pd(scratch, ymm13);
+                result = scratch[0] + scratch[2];
+                result *= (*alpha_cast);
+                tC[3] = result + tC[3] * (*beta_cast);
+
+
+                tC += ldc;
+                ymm5 = _mm256_hadd_pd(ymm5, ymm5);
+                _mm256_storeu_pd(scratch, ymm5);
+                result = scratch[0] + scratch[2];
+                result *= (*alpha_cast);
+                tC[0] = result + tC[0] * (*beta_cast);
+
+                ymm8 = _mm256_hadd_pd(ymm8, ymm8);
+                _mm256_storeu_pd(scratch, ymm8);
+                result = scratch[0] + scratch[2];
+                result *= (*alpha_cast);
+                tC[1] = result + tC[1] * (*beta_cast);
+
+                ymm11 = _mm256_hadd_pd(ymm11, ymm11);
+                _mm256_storeu_pd(scratch, ymm11);
+                result = scratch[0] + scratch[2];
+                result *= (*alpha_cast);
+                tC[2] = result + tC[2] * (*beta_cast);
+
+                ymm14 = _mm256_hadd_pd(ymm14, ymm14);
+                _mm256_storeu_pd(scratch, ymm14);
+                result = scratch[0] + scratch[2];
+                result *= (*alpha_cast);
+                tC[3] = result + tC[3] * (*beta_cast);
+
+      
+                tC += ldc;
+                ymm6 = _mm256_hadd_pd(ymm6, ymm6);
+                _mm256_storeu_pd(scratch, ymm6);
+                result = scratch[0] + scratch[2];
+                result *= (*alpha_cast);
+                tC[0] = result + tC[0] * (*beta_cast);
+
+                ymm9 = _mm256_hadd_pd(ymm9, ymm9);
+                _mm256_storeu_pd(scratch, ymm9);
+                result = scratch[0] + scratch[2];
+                result *= (*alpha_cast);
+                tC[1] = result + tC[1] * (*beta_cast);
+
+                ymm12 = _mm256_hadd_pd(ymm12, ymm12);
+                _mm256_storeu_pd(scratch, ymm12);
+                result = scratch[0] + scratch[2];
+                result *= (*alpha_cast);
+                tC[2] = result + tC[2] * (*beta_cast);
+
+                ymm15 = _mm256_hadd_pd(ymm15, ymm15);
+                _mm256_storeu_pd(scratch, ymm15);
+                result = scratch[0] + scratch[2];
+                result *= (*alpha_cast);
+                tC[3] = result + tC[3] * (*beta_cast);
+            }
+        }
+
+        int processed_col = col_idx;
+        int processed_row = row_idx;
+
+        //The edge case handling where N is not a multiple of 3
+        if (processed_col < N)
+        {
+            for (col_idx = processed_col; col_idx < N; col_idx += 1)
+            {
+                for (row_idx = 0; (row_idx + (AT_MR - 1)) < M; row_idx += AT_MR)
+                {
+                    tA = A + row_idx * lda;
+                    tB = B + col_idx * ldb;
+                    tC = C + col_idx * ldc + row_idx;
+                    // clear scratch registers.
+                    ymm4 = _mm256_setzero_pd();
+                    ymm7 = _mm256_setzero_pd();
+                    ymm10 = _mm256_setzero_pd();
+                    ymm13 = _mm256_setzero_pd();
+
+                    //The inner loop computes the 4x1 values of the matrix.
+                    //The computation pattern is:
+                    // ymm4
+                    // ymm7
+                    // ymm10
+                    // ymm13
+
+                    for (k = 0; (k + 3) < K; k += 4)
+                    {
+                        ymm0 = _mm256_loadu_pd(tB + 0);
+
+                        ymm3 = _mm256_loadu_pd(tA);
+                        ymm4 = _mm256_fmadd_pd(ymm0, ymm3, ymm4);
+
+                        ymm3 = _mm256_loadu_pd(tA + lda);
+                        ymm7 = _mm256_fmadd_pd(ymm0, ymm3, ymm7);
+
+                        ymm3 = _mm256_loadu_pd(tA + 2 * lda);
+                        ymm10 = _mm256_fmadd_pd(ymm0, ymm3, ymm10);
+
+                        ymm3 = _mm256_loadu_pd(tA + 3 * lda);
+                        ymm13 = _mm256_fmadd_pd(ymm0, ymm3, ymm13);
+
+                        tA += 4;
+                        tB += 4;
+                    }
+                    // if K is not a multiple of 4, padding is done before load using temproary array.
+                    if (k < K)
+                    {
+                        int iter;
+                        double data_feeder[4] = { 0.0 };
+
+                        for (iter = 0; iter < (K - k); iter++) data_feeder[iter] = tB[iter];
+                        ymm0 = _mm256_loadu_pd(data_feeder);
+
+                        for (iter = 0; iter < (K - k); iter++) data_feeder[iter] = tA[iter];
+                        ymm3 = _mm256_loadu_pd(data_feeder);
+                        ymm4 = _mm256_fmadd_pd(ymm0, ymm3, ymm4);
+
+                        for (iter = 0; iter < (K - k); iter++) data_feeder[iter] = tA[lda + iter];
+                        ymm3 = _mm256_loadu_pd(data_feeder);
+                        ymm7 = _mm256_fmadd_pd(ymm0, ymm3, ymm7);
+
+                        for (iter = 0; iter < (K - k); iter++) data_feeder[iter] = tA[2 * lda + iter];
+                        ymm3 = _mm256_loadu_pd(data_feeder);
+                        ymm10 = _mm256_fmadd_pd(ymm0, ymm3, ymm10);
+
+                        for (iter = 0; iter < (K - k); iter++) data_feeder[iter] = tA[3 * lda + iter];
+                        ymm3 = _mm256_loadu_pd(data_feeder);
+                        ymm13 = _mm256_fmadd_pd(ymm0, ymm3, ymm13);
+
+                    }
+
+                    //horizontal addition and storage of the data.
+                    //Results for 4x1 blocks of C is stored here
+                    ymm4 = _mm256_hadd_pd(ymm4, ymm4);
+                    _mm256_storeu_pd(scratch, ymm4);
+                    result = scratch[0] + scratch[2];
+                    result *= (*alpha_cast);
+                    tC[0] = result + tC[0] * (*beta_cast);
+
+                    ymm7 = _mm256_hadd_pd(ymm7, ymm7);
+                    _mm256_storeu_pd(scratch, ymm7);
+                    result = scratch[0] + scratch[2];
+                    result *= (*alpha_cast);
+                    tC[1] = result + tC[1] * (*beta_cast);
+
+                    ymm10 = _mm256_hadd_pd(ymm10, ymm10);
+                    _mm256_storeu_pd(scratch, ymm10);
+                    result = scratch[0] + scratch[2];
+                    result *= (*alpha_cast);
+                    tC[2] = result + tC[2] * (*beta_cast);
+
+                    ymm13 = _mm256_hadd_pd(ymm13, ymm13);
+                    _mm256_storeu_pd(scratch, ymm13);
+                    result = scratch[0] + scratch[2];
+                    result *= (*alpha_cast);
+                    tC[3] = result + tC[3] * (*beta_cast);
+
+                }
+            }
+            processed_row = row_idx;
+        }
+
+        // The edge case handling where M is not a multiple of 4
+        if (processed_row < M)
+        {
+            for (row_idx = processed_row; row_idx < M; row_idx += 1)
+            {
+                for (col_idx = 0; col_idx < N; col_idx += 1)
+                {
+                    tA = A + row_idx * lda;
+                    tB = B + col_idx * ldb;
+                    tC = C + col_idx * ldc + row_idx;
+                    // clear scratch registers.
+                    ymm4 = _mm256_setzero_pd();
+
+                    for (k = 0; (k + 3) < K; k += 4)
+                    {
+                        ymm0 = _mm256_loadu_pd(tB + 0);
+                        ymm3 = _mm256_loadu_pd(tA);
+                        ymm4 = _mm256_fmadd_pd(ymm0, ymm3, ymm4);
+
+                        tA += 4;
+                        tB += 4;
+                    }
+
+                    // if K is not a multiple of 4, padding is done before load using temproary array.
+                    if (k < K)
+                    {
+                        int iter;
+                        double data_feeder[4] = { 0.0 };
+
+                        for (iter = 0; iter < (K - k); iter++) data_feeder[iter] = tB[iter];
+                        ymm0 = _mm256_loadu_pd(data_feeder);
+
+                        for (iter = 0; iter < (K - k); iter++) data_feeder[iter] = tA[iter];
+                        ymm3 = _mm256_loadu_pd(data_feeder);
+                        ymm4 = _mm256_fmadd_pd(ymm0, ymm3, ymm4);
+
+                    }
+
+                    //horizontal addition and storage of the data.
+                    ymm4 = _mm256_hadd_pd(ymm4, ymm4);
+                    _mm256_storeu_pd(scratch, ymm4);
+                    result = scratch[0] + scratch[2];
+                    result *= (*alpha_cast);
+                    tC[0] = result + tC[0] * (*beta_cast);
+
+                }
+            }
+        }
+
+        return BLIS_SUCCESS;
+    }
+    else
+        return BLIS_NONCONFORMAL_DIMENSIONS;
+}
