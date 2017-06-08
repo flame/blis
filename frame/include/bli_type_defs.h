@@ -41,6 +41,8 @@
 // -- BLIS basic types ---------------------------------------------------------
 //
 
+#include <stddef.h>
+
 #ifdef __cplusplus
   // For C++, include stdint.h.
   #include <stdint.h>
@@ -69,8 +71,8 @@ typedef          uint32_t guint_t;
 typedef           int64_t  gint_t;
 typedef          uint64_t guint_t;
 #else
-typedef   signed long int  gint_t;
-typedef unsigned long int guint_t;
+typedef         ptrdiff_t  gint_t;
+typedef            size_t guint_t;
 #endif
 
 // -- Boolean type --
@@ -164,7 +166,7 @@ typedef int32_t   f77_int;
 #elif BLIS_BLAS2BLIS_INT_TYPE_SIZE == 64
 typedef int64_t   f77_int;
 #else
-typedef long int  f77_int;
+typedef      int  f77_int;
 #endif
 
 typedef char      f77_char;
