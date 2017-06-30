@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2017, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -98,7 +99,10 @@ void PASTEMAC(ch,varname) \
 	PASTECH(ch,axpyv_ft) kfp_av; \
 \
 	/* Query the context for the kernel function pointer. */ \
-	kfp_av = bli_cntx_get_l1v_ker_dt( dt, BLIS_AXPYV_KER, cntx ); \
+	func_t func;\
+	bli_gks_get_l1v_ker(BLIS_AXPYV_KER,&func);\
+	kfp_av = func.ptr[dt];\
+	/*kfp_av = bli_cntx_get_l1v_ker_dt( dt, BLIS_AXPYV_KER, cntx );*/ \
 \
 	for ( i = 0; i < n_iter; ++i ) \
 	{ \

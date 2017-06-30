@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2017, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -98,8 +99,14 @@ void PASTEMAC(ch,varname) \
 	PASTECH(ch,axpyf_ft) kfp_af; \
 \
 	/* Query the context for the kernel function pointer and fusing factor. */ \
-	kfp_af = bli_cntx_get_l1f_ker_dt( dt, BLIS_AXPYF_KER, cntx ); \
-	b_fuse = bli_cntx_get_blksz_def_dt( dt, BLIS_AF, cntx ); \
+	func_t func;\
+	bli_gks_get_l1f_ker(BLIS_AXPYF_KER,&func);\
+	kfp_af = func.ptr[dt];\
+	blksz_t blksz;\
+	bli_gks_get_blksz( BLIS_AF, &blksz );\
+	b_fuse = blksz.v[dt];\
+	/*kfp_af = bli_cntx_get_l1f_ker_dt( dt, BLIS_AXPYF_KER, cntx ); */\
+	/*b_fuse = bli_cntx_get_blksz_def_dt( dt, BLIS_AF, cntx );*/ \
 \
 	for ( i = 0; i < n_iter; i += f ) \
 	{ \
