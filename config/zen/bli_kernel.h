@@ -105,8 +105,8 @@
 
 #if 1
 #define BLIS_DGEMM_UKERNEL         bli_dgemm_asm_6x8
-#define BLIS_DEFAULT_MC_D          72
-#define BLIS_DEFAULT_KC_D          256
+#define BLIS_DEFAULT_MC_D         510  // 72 /* Improves performance for large Matrices */
+#define BLIS_DEFAULT_KC_D         1024 // 256
 #define BLIS_DEFAULT_NC_D          4080
 #define BLIS_DEFAULT_MR_D          6
 #define BLIS_DEFAULT_NR_D          8
