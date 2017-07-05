@@ -115,7 +115,7 @@ void bli_saxpyf_int_var1
 
     bool_t            use_ref = FALSE;
 
-    if ( ( b_n != fusefac) || inca != 1 || incx != 1 || incy != 1 )
+    if ( ( b_n != fusefac) || inca != 1 || incy != 1 )
         use_ref = TRUE;
     // Call the reference implementation if needed.
     if ( use_ref == TRUE )
@@ -307,7 +307,7 @@ void bli_daxpyf_int_var1
 
     bool_t            use_ref = FALSE;
 
-    if ( ( b_n < fusefac) || inca != 1 || incx != 1 || incy != 1 )
+    if ( ( b_n < fusefac) || inca != 1 || incy != 1 )
         use_ref = TRUE;
     // Call the reference implementation if needed.
     //use_ref = TRUE;
