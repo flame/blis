@@ -44,6 +44,7 @@ void bli_membrk_init
 	bli_mutex_init( bli_membrk_mutex( membrk ) );
 	bli_membrk_init_pools( cntx, membrk );
 	bli_membrk_set_malloc_fp( bli_malloc_pool, membrk );
+	bli_membrk_set_free_fp( bli_free_pool, membrk );
 }
 
 void bli_membrk_finalize
