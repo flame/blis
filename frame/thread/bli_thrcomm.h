@@ -49,11 +49,13 @@
 
 // Thread communicator prototypes.
 thrcomm_t* bli_thrcomm_create( dim_t n_threads );
-void       bli_thrcomm_free( thrcomm_t* communicator );
-void       bli_thrcomm_init( thrcomm_t* communicator, dim_t n_threads );
-void       bli_thrcomm_cleanup( thrcomm_t* communicator );
-void       bli_thrcomm_barrier( thrcomm_t* communicator, dim_t thread_id );
-void*      bli_thrcomm_bcast( thrcomm_t* communicator, dim_t inside_id, void* to_send );
+void       bli_thrcomm_free( thrcomm_t* comm );
+void       bli_thrcomm_init( thrcomm_t* comm, dim_t n_threads );
+void       bli_thrcomm_cleanup( thrcomm_t* comm );
+void       bli_thrcomm_barrier( thrcomm_t* comm, dim_t thread_id );
+void*      bli_thrcomm_bcast( thrcomm_t* comm, dim_t inside_id, void* to_send );
+
+void       bli_thrcomm_barrier_atomic( thrcomm_t* comm, dim_t t_id );
 
 #endif
 
