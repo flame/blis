@@ -36,19 +36,63 @@
 
 void* bli_thrcomm_bcast
      (
-       thrcomm_t* communicator,
+       thrcomm_t* comm,
        dim_t      id,
        void*      to_send
      )
 {   
-	if ( communicator == NULL || communicator->n_threads == 1 ) return to_send;
+	if ( comm == NULL || comm->n_threads == 1 ) return to_send;
 
-	if ( id == 0 ) communicator->sent_object = to_send;
+	if ( id == 0 ) comm->sent_object = to_send;
 
-	bli_thrcomm_barrier( communicator, id );
-	void* object = communicator->sent_object;
-	bli_thrcomm_barrier( communicator, id );
+	bli_thrcomm_barrier( comm, id );
+	void* object = comm->sent_object;
+	bli_thrcomm_barrier( comm, id );
 
 	return object;
+}
+
+void bli_thrcomm_barrier_atomic( thrcomm_t* comm, dim_t t_id )
+{
+	// Return early if the comm is NULL or if there is only one
+	// thread participating.
+	if ( comm == NULL || comm->n_threads == 1 ) return;
+
+	// Read the "sense" variable. This variable is akin to a unique ID for
+	// the current barrier. The first n-1 threads will spin on this variable
+	// until it changes. The sense variable gets incremented by the last
+	// thread to enter the barrier, just before it exits. But it turns out
+	// that you don't need many unique IDs before you can wrap around. In 
+	// fact, if everything else is working, a binary variable is sufficient,
+	// which is what we do here (i.e., 0 is incremented to 1, which is then
+	// decremented back to 0, and so forth).
+	bool_t orig_sense = __atomic_load_n( &comm->barrier_sense, __ATOMIC_RELAXED );
+
+	// Register ourselves (the current thread) as having arrived by
+	// incrementing the barrier_threads_arrived variable. We must perform
+	// this increment (and a subsequent read) atomically.
+	dim_t my_threads_arrived =
+	__atomic_add_fetch( &comm->barrier_threads_arrived, 1, __ATOMIC_ACQ_REL );
+
+	// If the current thread was the last thread to have arrived, then
+	// it will take actions that effectively ends and resets the barrier.
+	if ( my_threads_arrived == comm->n_threads )
+	{
+		// Reset the variable tracking the number of threads that have arrived
+		// to zero (which returns the barrier to the "empty" state. Then
+		// atomically toggle the barrier sense variable. This will signal to
+		// the other threads (which are spinning in the branch elow) that it
+		// is now safe to exit the barrier.
+		comm->barrier_threads_arrived = 0;
+		__atomic_fetch_xor( &comm->barrier_sense, 1, __ATOMIC_RELEASE );
+	}
+	else
+	{
+		// If the current thread is NOT the last thread to have arrived, then
+		// it spins on the sense variable until that sense variable changes at
+		// which time these threads will exit the barrier.
+		while ( __atomic_load_n( &comm->barrier_sense, __ATOMIC_ACQUIRE ) == orig_sense )
+			; // Empty loop body.
+	}
 }
 

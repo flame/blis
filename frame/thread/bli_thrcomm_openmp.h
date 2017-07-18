@@ -60,11 +60,12 @@ struct thrcomm_s
 #else
 struct thrcomm_s
 {
-	void*            sent_object;
-	dim_t            n_threads;
+	void*  sent_object;
+	dim_t  n_threads;
 
-	volatile bool_t  barrier_sense;
-	dim_t            barrier_threads_arrived;
+	//volatile bool_t  barrier_sense;
+	bool_t barrier_sense;
+	dim_t  barrier_threads_arrived;
 };
 #endif
 
