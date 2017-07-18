@@ -756,10 +756,10 @@ void bli_cntx_set_thrloop_from_env( opid_t l3_op, side_t side, cntx_t* cntx,
 
 #ifdef BLIS_ENABLE_MULTITHREADING
 
-	int nthread = bli_env_read_nway( "BLIS_NUM_THREADS", -1 );
+	int nthread = bli_thread_get_env( "BLIS_NUM_THREADS", -1 );
 
 	if ( nthread == -1 )
-	    nthread = bli_env_read_nway( "OMP_NUM_THREADS", -1 );
+	    nthread = bli_thread_get_env( "OMP_NUM_THREADS", -1 );
 
 	if ( nthread < 1 ) nthread = 1;
 
@@ -786,10 +786,10 @@ void bli_cntx_set_thrloop_from_env( opid_t l3_op, side_t side, cntx_t* cntx,
 
     pc = 1;
 
-    dim_t jc_env = bli_env_read_nway( "BLIS_JC_NT", -1 );
-    dim_t ic_env = bli_env_read_nway( "BLIS_IC_NT", -1 );
-    dim_t jr_env = bli_env_read_nway( "BLIS_JR_NT", -1 );
-    dim_t ir_env = bli_env_read_nway( "BLIS_IR_NT", -1 );
+    dim_t jc_env = bli_thread_get_env( "BLIS_JC_NT", -1 );
+    dim_t ic_env = bli_thread_get_env( "BLIS_IC_NT", -1 );
+    dim_t jr_env = bli_thread_get_env( "BLIS_JR_NT", -1 );
+    dim_t ir_env = bli_thread_get_env( "BLIS_IR_NT", -1 );
 
     if (jc_env != -1 || ic_env != -1 || jr_env != -1 || ir_env != -1)
     {
