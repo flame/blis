@@ -123,6 +123,12 @@ print_usage()
 	echo "                 compatibility layer. This automatically enables the"
 	echo "                 BLAS compatibility layer as well."
 	echo " "
+	echo "   --force-version=STRING"
+	echo " "
+	echo "                 Force configure to use an arbitrary version string"
+	echo "                 STRING. This option may be useful when repackaging"
+	echo "                 custom versions of BLIS by outside organizations."
+	echo " "
 	echo "   -h, --help    Output this information and quit."
 	echo " "
 	echo " Environment Variables:"
@@ -232,6 +238,7 @@ main()
 	blas2blis_int_type_size=32
 	enable_blas2blis='yes'
 	enable_cblas='no'
+	force_version='no'
 
 	# The path to the auto-detection script.
 	auto_detect_sh="${build_dirpath}/auto-detect/auto-detect.sh"
@@ -245,14 +252,6 @@ main()
 	# Dummy file. Used to check whether the cwd is the same as the top-level
 	# source distribution directory.
 	dummy_file='_blis_dir_detect.tmp'
-
-
-	# Check whether we need to update the version file.
-	${update_version_file_sh} -o "${script_name}" "${version_filepath}"
-
-
-	# Query which version of BLIS this is.
-	version=$(cat ${version_filepath})
 
 
 	# Process our command line options.
@@ -323,6 +322,9 @@ main()
 					disable-cblas)
 						enable_cblas='no'
 						;;
+					force-version=*)
+						force_version=${OPTARG#*=}
+						;;
 					*)
 						print_usage
 						;;
@@ -375,8 +377,25 @@ main()
 	done
 
 
+	# Check whether we need to update the version file.
+	${update_version_file_sh} -o "${script_name}" "${version_filepath}"
+
+
+	# Query which version of BLIS this is.
+	version=$(cat ${version_filepath})
+
+
 	# Initial message.
 	echo "${script_name}: starting configuration of BLIS ${version}."
+
+
+	# Check if the user requested a custom version string.
+	if [ "x${force_version}" = "xno" ]; then
+		echo "${script_name}: configuring with official version string."
+	else
+		echo "${script_name}: configuring with custom version string '${force_version}'."
+		version="${force_version}"
+	fi
 
 
 	# Set config_name based on the number of arguments leftover (after command
@@ -574,6 +593,7 @@ main()
 	# to config_mk_out.
 	echo "${script_name}: creating ${config_mk_out_path} from ${config_mk_in_path}"
 	cat "${config_mk_in_path}" \
+		| sed "s/@version@/${version}/g" \
 		| sed "s/@config_name@/${config_name}/g" \
 		| sed "s/@dist_path@/${dist_path_esc}/g" \
 		| sed "s/@CC@/${cc_esc}/g" \
