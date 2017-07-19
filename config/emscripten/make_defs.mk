@@ -58,7 +58,7 @@ CVECFLAGS      :=
 
 # --- Determine the archiver and related flags ---
 AR             := emar
-ARFLAGS        := cru
+ARFLAGS        := cr
 
 # --- Determine the linker and related flags ---
 LINKER         := $(CC)
