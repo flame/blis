@@ -52,6 +52,10 @@ void* bli_thrcomm_bcast
 	return object;
 }
 
+#ifndef __has_extension
+#define __has_extension(x) 0
+#endif
+
 // Swap out __atomic_* builtins for __sync_* builtins for:
 //  - BG/Q
 //  - gcc <4.7 (including icc through gcc compatibility layer)
