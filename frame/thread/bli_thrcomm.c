@@ -52,18 +52,8 @@ void* bli_thrcomm_bcast
 	return object;
 }
 
-#ifndef __has_extension
-#define __has_extension(x) 0
-#endif
-
-// Swap out __atomic_* builtins for __sync_* builtins for:
-//  - BG/Q
-//  - gcc <4.7 (including icc through gcc compatibility layer)
-//  - clang without c11 atomic builtins
-#if defined(__bgq__) || \
-    (defined(__GNUC__) && (__GNUC__ < 4 || \
-                          (__GNUC__ == 4 && __GNUC_MINOR__ < 7))) || \
-    (defined(__clang__) && !__has_extension(c_atomic))
+// Use __sync_* builtins (assumed available) if __atomic_* ones are not present.
+#ifndef __ATOMIC_RELAXED
 
 #define __ATOMIC_RELAXED
 #define __ATOMIC_ACQUIRE
@@ -78,21 +68,6 @@ void* bli_thrcomm_bcast
     __sync_fetch_and_add(ptr, value)
 #define __atomic_fetch_xor(ptr, value, constraint) \
     __sync_fetch_and_xor(ptr, value)
-
-#endif
-
-// Swap out __atomic_* builtins for _c11_atomic_* builtins for
-//  - clang with c11 atomic builtins
-#if defined(__clang__) && __has_extension(c_atomic)
-
-#define __atomic_load_n(ptr, constraint) \
-    __c11_atomic_load(ptr, constraint)
-#define __atomic_add_fetch(ptr, value, constraint) \
-    (__c11_fetch_add(ptr, value, constraint) + value)
-#define __atomic_fetch_add(ptr, value, constraint) \
-    __c11_fetch_add(ptr, value, constraint)
-#define __atomic_fetch_xor(ptr, value, constraint) \
-    __c11_fetch_xor(ptr, value, constraint)
 
 #endif
 
