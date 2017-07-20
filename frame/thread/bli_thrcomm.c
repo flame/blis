@@ -52,6 +52,46 @@ void* bli_thrcomm_bcast
 	return object;
 }
 
+// Swap out __atomic_* builtins for __sync_* builtins for:
+//  - BG/Q
+//  - gcc <4.7 (including icc through gcc compatibility layer)
+//  - clang without c11 atomic builtins
+#if defined(__bgq__) || \
+    (defined(__GNUC__) && (__GNUC__ < 4 || \
+                          (__GNUC__ == 4 && __GNUC_MINOR__ < 7))) || \
+    (defined(__clang__) && !__has_extension(c_atomic))
+
+#define __ATOMIC_RELAXED
+#define __ATOMIC_ACQUIRE
+#define __ATOMIC_RELEASE
+#define __ATOMIC_ACQ_REL
+
+#define __atomic_load_n(ptr, constraint) \
+    __sync_fetch_and_add(ptr, 0)
+#define __atomic_add_fetch(ptr, value, constraint) \
+    __sync_add_and_fetch(ptr, value)
+#define __atomic_fetch_add(ptr, value, constraint) \
+    __sync_fetch_and_add(ptr, value)
+#define __atomic_fetch_xor(ptr, value, constraint) \
+    __sync_fetch_and_xor(ptr, value)
+
+#endif
+
+// Swap out __atomic_* builtins for _c11_atomic_* builtins for
+//  - clang with c11 atomic builtins
+#if defined(__clang__) && __has_extension(c_atomic)
+
+#define __atomic_load_n(ptr, constraint) \
+    __c11_atomic_load(ptr, constraint)
+#define __atomic_add_fetch(ptr, value, constraint) \
+    (__c11_fetch_add(ptr, value, constraint) + value)
+#define __atomic_fetch_add(ptr, value, constraint) \
+    __c11_fetch_add(ptr, value, constraint)
+#define __atomic_fetch_xor(ptr, value, constraint) \
+    __c11_fetch_xor(ptr, value, constraint)
+
+#endif
+
 void bli_thrcomm_barrier_atomic( thrcomm_t* comm, dim_t t_id )
 {
 	// Return early if the comm is NULL or if there is only one
