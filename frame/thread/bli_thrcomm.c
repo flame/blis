@@ -52,6 +52,25 @@ void* bli_thrcomm_bcast
 	return object;
 }
 
+// Use __sync_* builtins (assumed available) if __atomic_* ones are not present.
+#ifndef __ATOMIC_RELAXED
+
+#define __ATOMIC_RELAXED
+#define __ATOMIC_ACQUIRE
+#define __ATOMIC_RELEASE
+#define __ATOMIC_ACQ_REL
+
+#define __atomic_load_n(ptr, constraint) \
+    __sync_fetch_and_add(ptr, 0)
+#define __atomic_add_fetch(ptr, value, constraint) \
+    __sync_add_and_fetch(ptr, value)
+#define __atomic_fetch_add(ptr, value, constraint) \
+    __sync_fetch_and_add(ptr, value)
+#define __atomic_fetch_xor(ptr, value, constraint) \
+    __sync_fetch_and_xor(ptr, value)
+
+#endif
+
 void bli_thrcomm_barrier_atomic( thrcomm_t* comm, dim_t t_id )
 {
 	// Return early if the comm is NULL or if there is only one
