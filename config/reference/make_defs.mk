@@ -81,7 +81,7 @@ endif
 
 # --- Determine the archiver and related flags ---
 AR             := ar
-ARFLAGS        := cru
+ARFLAGS        := cr
 
 # --- Determine the linker and related flags ---
 LINKER         := $(CC)

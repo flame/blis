@@ -54,12 +54,13 @@ struct thrcomm_s
 	void*  sent_object;
 	dim_t  n_threads;
 
-#ifdef BLIS_USE_PTHREAD_MUTEX
-	pthread_mutex_t mutex;
-#endif
+//#ifdef BLIS_USE_PTHREAD_MUTEX
+//	pthread_mutex_t mutex;
+//#endif
 
-	volatile bool_t  sense;
-	volatile dim_t   threads_arrived;
+	//volatile bool_t  barrier_sense;
+	bool_t barrier_sense;
+	dim_t  barrier_threads_arrived;
 };
 #endif
 
