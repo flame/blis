@@ -67,6 +67,8 @@
 #elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || \
       defined(__bsdi__) || defined(__DragonFly__)
 #define BLIS_OS_BSD 1
+#elif defined(EMSCRIPTEN)
+#define BLIS_OS_EMSCRIPTEN
 #else
 #error "Cannot determine operating system"
 #endif
