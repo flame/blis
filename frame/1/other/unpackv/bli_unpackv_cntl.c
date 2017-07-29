@@ -44,7 +44,7 @@ void bli_unpackv_cntl_init()
 
 void bli_unpackv_cntl_finalize()
 {
-	bli_cntl_obj_free( unpackv_cntl );
+	bli_cntl_free_node( unpackv_cntl );
 }
 
 unpackv_t* bli_unpackv_cntl_obj_create( impl_t     impl_type,

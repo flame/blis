@@ -35,7 +35,7 @@
 #include "blis.h"
 
 
-blksz_t* bli_blksz_obj_create
+blksz_t* bli_blksz_create_ed
      (
        dim_t b_s, dim_t be_s,
        dim_t b_d, dim_t be_d,
@@ -47,16 +47,39 @@ blksz_t* bli_blksz_obj_create
 
 	b = ( blksz_t* ) bli_malloc_intl( sizeof(blksz_t) );
 
-	bli_blksz_obj_init( b,
-	                    b_s, be_s,
-	                    b_d, be_d,
-	                    b_c, be_c,
-	                    b_z, be_z );
+	bli_blksz_init_ed
+	(
+	  b,
+	  b_s, be_s,
+	  b_d, be_d,
+	  b_c, be_c,
+	  b_z, be_z
+	);
 
 	return b;
 }
 
-void bli_blksz_obj_init
+blksz_t* bli_blksz_create
+     (
+       dim_t b_s,  dim_t b_d,  dim_t b_c,  dim_t b_z,
+       dim_t be_s, dim_t be_d, dim_t be_c, dim_t be_z
+     )
+{
+	blksz_t* b;
+
+	b = ( blksz_t* ) bli_malloc_intl( sizeof(blksz_t) );
+
+	bli_blksz_init
+	(
+	  b,
+	  b_s,  b_d,  b_c,  b_z,
+	  be_s, be_d, be_c, be_z
+	);
+
+	return b;
+}
+
+void bli_blksz_init_ed
      (
        blksz_t* b,
        dim_t b_s, dim_t be_s,
@@ -75,7 +98,45 @@ void bli_blksz_obj_init
 	b->e[BLIS_DCOMPLEX] = be_z;
 }
 
-void bli_blksz_obj_free
+void bli_blksz_init
+     (
+       blksz_t* b,
+       dim_t b_s,  dim_t b_d,  dim_t b_c,  dim_t b_z,
+       dim_t be_s, dim_t be_d, dim_t be_c, dim_t be_z
+     )
+{
+	b->v[BLIS_FLOAT]    = b_s;
+	b->v[BLIS_DOUBLE]   = b_d;
+	b->v[BLIS_SCOMPLEX] = b_c;
+	b->v[BLIS_DCOMPLEX] = b_z;
+
+	// Interpret a zero as a request for the default value.
+	b->e[BLIS_FLOAT]    = ( be_s == 0 ? b_s : be_s );
+	b->e[BLIS_DOUBLE]   = ( be_d == 0 ? b_d : be_d );
+	b->e[BLIS_SCOMPLEX] = ( be_c == 0 ? b_c : be_c );
+	b->e[BLIS_DCOMPLEX] = ( be_z == 0 ? b_z : be_z );
+}
+
+void bli_blksz_init_easy
+     (
+       blksz_t* b,
+       dim_t b_s,  dim_t b_d,  dim_t b_c,  dim_t b_z
+     )
+{
+	b->v[BLIS_FLOAT]    = b_s;
+	b->v[BLIS_DOUBLE]   = b_d;
+	b->v[BLIS_SCOMPLEX] = b_c;
+	b->v[BLIS_DCOMPLEX] = b_z;
+
+	// Here we assume the maximum blocksize values can be the same as the
+	// default values.
+	b->e[BLIS_FLOAT]    = b_s;
+	b->e[BLIS_DOUBLE]   = b_d;
+	b->e[BLIS_SCOMPLEX] = b_c;
+	b->e[BLIS_DCOMPLEX] = b_z;
+}
+
+void bli_blksz_free
      (
        blksz_t* b
      )

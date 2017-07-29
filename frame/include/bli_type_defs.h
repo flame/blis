@@ -633,6 +633,80 @@ typedef enum
 
 typedef enum
 {
+	BLIS_PACKM_0XK_KER  = 0,
+	BLIS_PACKM_1XK_KER  = 1,
+	BLIS_PACKM_2XK_KER  = 2,
+	BLIS_PACKM_3XK_KER  = 3,
+	BLIS_PACKM_4XK_KER  = 4,
+	BLIS_PACKM_5XK_KER  = 5,
+	BLIS_PACKM_6XK_KER  = 6,
+	BLIS_PACKM_7XK_KER  = 7,
+	BLIS_PACKM_8XK_KER  = 8,
+	BLIS_PACKM_9XK_KER  = 9,
+	BLIS_PACKM_10XK_KER = 10,
+	BLIS_PACKM_11XK_KER = 11,
+	BLIS_PACKM_12XK_KER = 12,
+	BLIS_PACKM_13XK_KER = 13,
+	BLIS_PACKM_14XK_KER = 14,
+	BLIS_PACKM_15XK_KER = 15,
+	BLIS_PACKM_16XK_KER = 16,
+	BLIS_PACKM_17XK_KER = 17,
+	BLIS_PACKM_18XK_KER = 18,
+	BLIS_PACKM_19XK_KER = 19,
+	BLIS_PACKM_20XK_KER = 20,
+	BLIS_PACKM_21XK_KER = 21,
+	BLIS_PACKM_22XK_KER = 22,
+	BLIS_PACKM_23XK_KER = 23,
+	BLIS_PACKM_24XK_KER = 24,
+	BLIS_PACKM_25XK_KER = 25,
+	BLIS_PACKM_26XK_KER = 26,
+	BLIS_PACKM_27XK_KER = 27,
+	BLIS_PACKM_28XK_KER = 28,
+	BLIS_PACKM_29XK_KER = 29,
+	BLIS_PACKM_30XK_KER = 30,
+	BLIS_PACKM_31XK_KER = 31,
+
+	BLIS_UNPACKM_0XK_KER  = 0,
+	BLIS_UNPACKM_1XK_KER  = 1,
+	BLIS_UNPACKM_2XK_KER  = 2,
+	BLIS_UNPACKM_3XK_KER  = 3,
+	BLIS_UNPACKM_4XK_KER  = 4,
+	BLIS_UNPACKM_5XK_KER  = 5,
+	BLIS_UNPACKM_6XK_KER  = 6,
+	BLIS_UNPACKM_7XK_KER  = 7,
+	BLIS_UNPACKM_8XK_KER  = 8,
+	BLIS_UNPACKM_9XK_KER  = 9,
+	BLIS_UNPACKM_10XK_KER = 10,
+	BLIS_UNPACKM_11XK_KER = 11,
+	BLIS_UNPACKM_12XK_KER = 12,
+	BLIS_UNPACKM_13XK_KER = 13,
+	BLIS_UNPACKM_14XK_KER = 14,
+	BLIS_UNPACKM_15XK_KER = 15,
+	BLIS_UNPACKM_16XK_KER = 16,
+	BLIS_UNPACKM_17XK_KER = 17,
+	BLIS_UNPACKM_18XK_KER = 18,
+	BLIS_UNPACKM_19XK_KER = 19,
+	BLIS_UNPACKM_20XK_KER = 20,
+	BLIS_UNPACKM_21XK_KER = 21,
+	BLIS_UNPACKM_22XK_KER = 22,
+	BLIS_UNPACKM_23XK_KER = 23,
+	BLIS_UNPACKM_24XK_KER = 24,
+	BLIS_UNPACKM_25XK_KER = 25,
+	BLIS_UNPACKM_26XK_KER = 26,
+	BLIS_UNPACKM_27XK_KER = 27,
+	BLIS_UNPACKM_28XK_KER = 28,
+	BLIS_UNPACKM_29XK_KER = 29,
+	BLIS_UNPACKM_30XK_KER = 30,
+	BLIS_UNPACKM_31XK_KER = 31,
+
+} l1mkr_t;
+
+#define BLIS_NUM_PACKM_KERS   32
+#define BLIS_NUM_UNPACKM_KERS 32
+
+
+typedef enum
+{
 	BLIS_GEMM_UKR = 0,
 	BLIS_GEMMTRSM_L_UKR,
 	BLIS_GEMMTRSM_U_UKR,
@@ -683,7 +757,7 @@ typedef enum
 //   value that can be subtracted from the opid_t value to map it
 //   to a zero-based range.
 // This is needed because these level-3 opid_t values are used in
-// bli_ind_query.c to index into arrays.
+// bli_l3_ind.c to index into arrays.
 //
 	BLIS_GEMM = 0,
 	BLIS_HEMM,
@@ -714,16 +788,14 @@ typedef enum
 	BLIS_NC,
 	BLIS_M2, // level-2 blocksize in m dimension
 	BLIS_N2, // level-2 blocksize in n dimension
-	BLIS_1F, // level-1f global fusing factor
 	BLIS_AF, // level-1f axpyf fusing factor
 	BLIS_DF, // level-1f dotxf fusing factor
 	BLIS_XF, // level-1f dotxaxpyf fusing factor
-	BLIS_VF, // level-1v vector fusing factor
 
 	BLIS_NO_PART, // used as a placeholder when blocksizes are not applicable.
 } bszid_t;
 
-#define BLIS_NUM_BLKSZS 13
+#define BLIS_NUM_BLKSZS 11
 
 
 //
@@ -784,6 +856,7 @@ typedef struct mem_s
 struct cntl_s
 {
 	// Basic fields (usually required).
+	opid_t         family;
 	bszid_t        bszid;
 	void*          var_func;
 	struct cntl_s* sub_node;
@@ -971,9 +1044,9 @@ typedef struct cntx_s
 	func_t    l1f_kers[ BLIS_NUM_LEVEL1F_KERS ];
 	func_t    l1v_kers[ BLIS_NUM_LEVEL1V_KERS ];
 
-	func_t    packm_ukrs;
+	func_t    packm_kers[ BLIS_NUM_PACKM_KERS ];
+	func_t    unpackm_kers[ BLIS_NUM_UNPACKM_KERS ];
 
-	opid_t    family;
 	ind_t     method;
 	pack_t    schema_a_block;
 	pack_t    schema_b_panel;

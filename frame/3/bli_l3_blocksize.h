@@ -32,6 +32,18 @@
 
 */
 
+dim_t bli_l3_determine_kc
+      (
+        dir_t   direct,
+        dim_t   i,
+        dim_t   dim,
+        obj_t*  a,
+        obj_t*  b,
+        bszid_t bszid,
+        cntx_t* cntx,
+        cntl_t* cntl
+      );
+
 
 #undef  GENPROT
 #define GENPROT( opname ) \
@@ -46,8 +58,6 @@ dim_t PASTEMAC0(opname) \
          bszid_t bszid, \
          cntx_t* cntx  \
       );
-
-GENPROT( l3_determine_kc )
 
 GENPROT( gemm_determine_kc )
 GENPROT( herk_determine_kc )

@@ -108,10 +108,10 @@ void bli_hemv_cntl_init()
 
 void bli_hemv_cntl_finalize()
 {
-	bli_cntl_obj_free( hemv_cntl_bs_ke_lrow_ucol );
-	bli_cntl_obj_free( hemv_cntl_bs_ke_lcol_urow );
-	bli_cntl_obj_free( hemv_cntl_ge_lrow_ucol );
-	bli_cntl_obj_free( hemv_cntl_ge_lcol_urow );
+	bli_cntl_free_node( hemv_cntl_bs_ke_lrow_ucol );
+	bli_cntl_free_node( hemv_cntl_bs_ke_lcol_urow );
+	bli_cntl_free_node( hemv_cntl_ge_lrow_ucol );
+	bli_cntl_free_node( hemv_cntl_ge_lcol_urow );
 }
 
 

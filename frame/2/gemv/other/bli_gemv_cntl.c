@@ -152,17 +152,17 @@ void bli_gemv_cntl_init()
 
 void bli_gemv_cntl_finalize()
 {
-	bli_cntl_obj_free( gemv_cntl_bs_ke_dot );
-	bli_cntl_obj_free( gemv_cntl_bs_ke_axpy );
+	bli_cntl_free_node( gemv_cntl_bs_ke_dot );
+	bli_cntl_free_node( gemv_cntl_bs_ke_axpy );
 
-	bli_cntl_obj_free( gemv_cntl_rp_bs_dot );
-	bli_cntl_obj_free( gemv_cntl_rp_bs_axpy );
+	bli_cntl_free_node( gemv_cntl_rp_bs_dot );
+	bli_cntl_free_node( gemv_cntl_rp_bs_axpy );
 
-	bli_cntl_obj_free( gemv_cntl_cp_bs_dot );
-	bli_cntl_obj_free( gemv_cntl_cp_bs_axpy );
+	bli_cntl_free_node( gemv_cntl_cp_bs_dot );
+	bli_cntl_free_node( gemv_cntl_cp_bs_axpy );
 
-	bli_cntl_obj_free( gemv_cntl_ge_dot );
-	bli_cntl_obj_free( gemv_cntl_ge_axpy );
+	bli_cntl_free_node( gemv_cntl_ge_dot );
+	bli_cntl_free_node( gemv_cntl_ge_axpy );
 }
 
 

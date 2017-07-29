@@ -39,6 +39,7 @@
 struct cntl_s
 {
 	// Basic fields (usually required).
+	opid_t         family;
 	bszid_t        bszid;
 	void*          var_func;
 	struct cntl_s* sub_node;
@@ -57,20 +58,21 @@ typedef struct cntl_s cntl_t;
 
 // -- Control tree prototypes --
 
-cntl_t* bli_cntl_obj_create
+cntl_t* bli_cntl_create_node
      (
+       opid_t  family,
        bszid_t bszid,
        void*   var_func,
        void*   params,
        cntl_t* sub_node
      );
 
-void bli_cntl_obj_free
+void bli_cntl_free_node
      (
        cntl_t* cntl
      );
 
-void bli_cntl_obj_clear
+void bli_cntl_clear_node
      (
        cntl_t* cntl
      );
@@ -99,9 +101,19 @@ cntl_t* bli_cntl_copy
        cntl_t* cntl
      );
 
+void bli_cntl_mark_family
+     (
+       opid_t  family,
+       cntl_t* cntl
+     );
+
 // -----------------------------------------------------------------------------
 
 // cntl_t query (fields only)
+
+#define bli_cntl_family( cntl ) \
+\
+	( cntl->family )
 
 #define bli_cntl_bszid( cntl ) \
 \
@@ -138,6 +150,11 @@ cntl_t* bli_cntl_copy
 	( bli_cntl_bszid( cntl ) != BLIS_NO_PART )
 
 // cntl_t modification
+
+#define bli_cntl_set_family( family0, cntl ) \
+{ \
+	cntl->family = family0; \
+}
 
 #define bli_cntl_set_bszid( bszid0, cntl ) \
 { \

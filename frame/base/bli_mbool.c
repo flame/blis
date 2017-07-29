@@ -35,29 +35,38 @@
 #include "blis.h"
 
 
-mbool_t* bli_mbool_obj_create( bool_t b_s,
-                               bool_t b_d,
-                               bool_t b_c,
-                               bool_t b_z )
+mbool_t* bli_mbool_create
+     (
+       bool_t b_s,
+       bool_t b_d,
+       bool_t b_c,
+       bool_t b_z
+     )
 {
 	mbool_t* b;
 
 	b = ( mbool_t* ) bli_malloc_intl( sizeof(mbool_t) );
 
-	bli_mbool_obj_init( b,
-	                    b_s,
-	                    b_d,
-	                    b_c,
-	                    b_z );
+	bli_mbool_init
+	(
+	  b,
+	  b_s,
+	  b_d,
+	  b_c,
+	  b_z
+	);
 
 	return b;
 }
 
-void bli_mbool_obj_init( mbool_t* b,
-                         bool_t   b_s,
-                         bool_t   b_d,
-                         bool_t   b_c,
-                         bool_t   b_z )
+void bli_mbool_init
+     (
+       mbool_t* b,
+       bool_t   b_s,
+       bool_t   b_d,
+       bool_t   b_c,
+       bool_t   b_z
+     )
 {
 	bli_mbool_set_dt( b_s, BLIS_FLOAT,    b );
 	bli_mbool_set_dt( b_d, BLIS_DOUBLE,   b );
@@ -65,7 +74,7 @@ void bli_mbool_obj_init( mbool_t* b,
 	bli_mbool_set_dt( b_z, BLIS_DCOMPLEX, b );
 }
 
-void bli_mbool_obj_free( mbool_t* b )
+void bli_mbool_free( mbool_t* b )
 {
 	bli_free_intl( b );
 }

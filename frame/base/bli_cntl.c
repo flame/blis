@@ -34,8 +34,9 @@
 
 #include "blis.h"
 
-cntl_t* bli_cntl_obj_create
+cntl_t* bli_cntl_create_node
      (
+       opid_t  family,
        bszid_t bszid,
        void*   var_func,
        void*   params,
@@ -48,6 +49,7 @@ cntl_t* bli_cntl_obj_create
 	// Allocate the cntl_t struct.
 	cntl = bli_malloc_intl( sizeof( cntl_t ) );
 
+	bli_cntl_set_family( family, cntl );
 	bli_cntl_set_bszid( bszid, cntl );
 	bli_cntl_set_var_func( var_func, cntl );
 	bli_cntl_set_params( params, cntl );
@@ -63,7 +65,7 @@ cntl_t* bli_cntl_obj_create
 	return cntl;
 }
 
-void bli_cntl_obj_free
+void bli_cntl_free_node
      (
        cntl_t* cntl
      )
@@ -71,7 +73,7 @@ void bli_cntl_obj_free
 	bli_free_intl( cntl );
 }
 
-void bli_cntl_obj_clear
+void bli_cntl_clear_node
      (
        cntl_t* cntl
      )
@@ -141,7 +143,7 @@ void bli_cntl_free_w_thrinfo
 	}
 
 	// Free the current node.
-	bli_cntl_obj_free( cntl );
+	bli_cntl_free_node( cntl );
 }
 
 void bli_cntl_free_wo_thrinfo
@@ -177,7 +179,7 @@ void bli_cntl_free_wo_thrinfo
 	}
 
 	// Free the current node.
-	bli_cntl_obj_free( cntl );
+	bli_cntl_free_node( cntl );
 }
 
 // -----------------------------------------------------------------------------
@@ -189,10 +191,11 @@ cntl_t* bli_cntl_copy
 {
 	// Make a copy of the current node. Notice that the source node
 	// should NOT have any allocated/cached mem_t entries, and that
-	// bli_cntl_obj_create() creates a node with a cleared mem_t
+	// bli_cntl_create_node() creates a node with a cleared mem_t
 	// field.
-	cntl_t* cntl_copy = bli_cntl_obj_create
+	cntl_t* cntl_copy = bli_cntl_create_node
 	(
+	  bli_cntl_family( cntl ),
 	  bli_cntl_bszid( cntl ),
 	  bli_cntl_var_func( cntl ),
 	  NULL, NULL
@@ -232,5 +235,25 @@ cntl_t* bli_cntl_copy
 
 	// Return the address of the newly created node.
 	return cntl_copy;
+}
+
+void bli_cntl_mark_family
+     (
+       opid_t  family,
+       cntl_t* cntl
+     )
+{
+	// Set the family of the root node.
+	bli_cntl_set_family( family, cntl );
+
+	// Continue as long as the current node has a valid child.
+	while ( bli_cntl_sub_node( cntl ) != NULL )
+	{
+		// Move down the tree to the child node.
+		cntl = bli_cntl_sub_node( cntl );
+
+		// Set the family of the current node.
+		bli_cntl_set_family( family, cntl );
+	}
 }
 

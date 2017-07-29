@@ -55,8 +55,9 @@ void bli_trsm_cntl_free
 
 // -----------------------------------------------------------------------------
 
-cntl_t* bli_trsm_cntl_obj_create
+cntl_t* bli_trsm_cntl_create_node
      (
+       opid_t  family,
        bszid_t bszid,
        void*   var_func, 
        cntl_t* sub_node

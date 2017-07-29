@@ -155,6 +155,7 @@ typedef void (*l3int_t)
 void bli_l3_thread_decorator
      (
        l3int_t func,
+       opid_t  family,
        obj_t*  alpha,
        obj_t*  a,
        obj_t*  b,

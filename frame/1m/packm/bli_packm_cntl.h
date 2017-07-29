@@ -80,7 +80,7 @@ typedef struct packm_params_s packm_params_t;
 
 // -----------------------------------------------------------------------------
 
-cntl_t* bli_packm_cntl_obj_create
+cntl_t* bli_packm_cntl_create_node
      (
        void*     var_func,
        void*     packm_var_func,
