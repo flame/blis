@@ -64,7 +64,7 @@ void bli_trsm_cntl_init()
 	// Create control tree objects for packm operations (left side).
 	trsm_l_packa_cntl
 	=
-	bli_packm_cntl_obj_create( BLIS_BLOCKED,
+	bli_packm_cntl_create_node( BLIS_BLOCKED,
 	                           BLIS_VARIANT1,
 	                           // IMPORTANT: n dim multiple must be mr to
 	                           // support right and bottom-right edge cases
@@ -78,7 +78,7 @@ void bli_trsm_cntl_init()
 
 	trsm_l_packb_cntl
 	=
-	bli_packm_cntl_obj_create( BLIS_BLOCKED,
+	bli_packm_cntl_create_node( BLIS_BLOCKED,
 	                           BLIS_VARIANT1,
 	                           // IMPORTANT: m dim multiple must be mr since
 	                           // B_pack is updated (ie: serves as C) in trsm
@@ -93,7 +93,7 @@ void bli_trsm_cntl_init()
 	// Create control tree objects for packm operations (right side).
 	trsm_r_packa_cntl
 	=
-	bli_packm_cntl_obj_create( BLIS_BLOCKED,
+	bli_packm_cntl_create_node( BLIS_BLOCKED,
 	                           BLIS_VARIANT1,
 	                           BLIS_NR,
 	                           BLIS_MR,
@@ -105,7 +105,7 @@ void bli_trsm_cntl_init()
 
 	trsm_r_packb_cntl
 	=
-	bli_packm_cntl_obj_create( BLIS_BLOCKED,
+	bli_packm_cntl_create_node( BLIS_BLOCKED,
 	                           BLIS_VARIANT1, // pack panels of B compactly
 	                           BLIS_MR,
 	                           BLIS_MR,
@@ -119,7 +119,7 @@ void bli_trsm_cntl_init()
 	// Create control tree object for lowest-level block-panel kernel.
 	trsm_cntl_bp_ke
 	=
-	bli_trsm_cntl_obj_create( BLIS_UNB_OPT,
+	bli_trsm_cntl_create_node( BLIS_UNB_OPT,
 	                          BLIS_VARIANT2,
 	                          0, // bszid_t not used by macro-kernel
 	                          NULL, NULL, NULL, NULL,
@@ -129,7 +129,7 @@ void bli_trsm_cntl_init()
 	// problem (left side).
 	trsm_l_cntl_op_bp
 	=
-	bli_trsm_cntl_obj_create( BLIS_BLOCKED,
+	bli_trsm_cntl_create_node( BLIS_BLOCKED,
 	                          BLIS_VARIANT1,
 	                          BLIS_MC,
 	                          NULL,
@@ -144,7 +144,7 @@ void bli_trsm_cntl_init()
 	// rank-k (outer panel) updates (left side).
 	trsm_l_cntl_mm_op
 	=
-	bli_trsm_cntl_obj_create( BLIS_BLOCKED,
+	bli_trsm_cntl_create_node( BLIS_BLOCKED,
 	                          BLIS_VARIANT3,
 	                          BLIS_KC,
 	                          NULL,
@@ -159,7 +159,7 @@ void bli_trsm_cntl_init()
 	// general problems (left side).
 	trsm_l_cntl_vl_mm
 	=
-	bli_trsm_cntl_obj_create( BLIS_BLOCKED,
+	bli_trsm_cntl_create_node( BLIS_BLOCKED,
 	                          BLIS_VARIANT2,
 	                          BLIS_NC,
 	                          NULL,
@@ -174,7 +174,7 @@ void bli_trsm_cntl_init()
 	// problem (right side).
 	trsm_r_cntl_op_bp
 	=
-	bli_trsm_cntl_obj_create( BLIS_BLOCKED,
+	bli_trsm_cntl_create_node( BLIS_BLOCKED,
 	                          BLIS_VARIANT1,
 	                          BLIS_MC,
 	                          NULL,
@@ -189,7 +189,7 @@ void bli_trsm_cntl_init()
 	// rank-k (outer panel) updates (right side).
 	trsm_r_cntl_mm_op
 	=
-	bli_trsm_cntl_obj_create( BLIS_BLOCKED,
+	bli_trsm_cntl_create_node( BLIS_BLOCKED,
 	                          BLIS_VARIANT3,
 	                          BLIS_KC,
 	                          NULL,
@@ -204,7 +204,7 @@ void bli_trsm_cntl_init()
 	// general problems (right side).
 	trsm_r_cntl_vl_mm
 	=
-	bli_trsm_cntl_obj_create( BLIS_BLOCKED,
+	bli_trsm_cntl_create_node( BLIS_BLOCKED,
 	                          BLIS_VARIANT2,
 	                          BLIS_NC,
 	                          NULL,
@@ -222,22 +222,22 @@ void bli_trsm_cntl_init()
 
 void bli_trsm_cntl_finalize()
 {
-	bli_cntl_obj_free( trsm_l_packa_cntl );
-	bli_cntl_obj_free( trsm_l_packb_cntl );
-	bli_cntl_obj_free( trsm_r_packa_cntl );
-	bli_cntl_obj_free( trsm_r_packb_cntl );
+	bli_cntl_free_node( trsm_l_packa_cntl );
+	bli_cntl_free_node( trsm_l_packb_cntl );
+	bli_cntl_free_node( trsm_r_packa_cntl );
+	bli_cntl_free_node( trsm_r_packb_cntl );
 
-	bli_cntl_obj_free( trsm_cntl_bp_ke );
+	bli_cntl_free_node( trsm_cntl_bp_ke );
 
-	bli_cntl_obj_free( trsm_l_cntl_op_bp );
-	bli_cntl_obj_free( trsm_l_cntl_mm_op );
-	bli_cntl_obj_free( trsm_l_cntl_vl_mm );
-	bli_cntl_obj_free( trsm_r_cntl_op_bp );
-	bli_cntl_obj_free( trsm_r_cntl_mm_op );
-	bli_cntl_obj_free( trsm_r_cntl_vl_mm );
+	bli_cntl_free_node( trsm_l_cntl_op_bp );
+	bli_cntl_free_node( trsm_l_cntl_mm_op );
+	bli_cntl_free_node( trsm_l_cntl_vl_mm );
+	bli_cntl_free_node( trsm_r_cntl_op_bp );
+	bli_cntl_free_node( trsm_r_cntl_mm_op );
+	bli_cntl_free_node( trsm_r_cntl_vl_mm );
 }
 
-trsm_t* bli_trsm_cntl_obj_create( impl_t     impl_type,
+trsm_t* bli_trsm_cntl_create_node( impl_t     impl_type,
                                   varnum_t   var_num,
                                   bszid_t    bszid,
                                   scalm_t*   sub_scalm,

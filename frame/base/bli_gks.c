@@ -74,12 +74,6 @@ static blksz_t bli_gks_blkszs[BLIS_NUM_BLKSZS] =
 /* df */ { { BLIS_DEFAULT_DF_S, BLIS_DEFAULT_DF_C, BLIS_DEFAULT_DF_D, BLIS_DEFAULT_DF_Z, },
            { BLIS_DEFAULT_DF_S, BLIS_DEFAULT_DF_C, BLIS_DEFAULT_DF_D, BLIS_DEFAULT_DF_Z, }
          },
-/* xf */ { { BLIS_DEFAULT_XF_S, BLIS_DEFAULT_XF_C, BLIS_DEFAULT_XF_D, BLIS_DEFAULT_XF_Z, },
-           { BLIS_DEFAULT_XF_S, BLIS_DEFAULT_XF_C, BLIS_DEFAULT_XF_D, BLIS_DEFAULT_XF_Z, }
-         },
-/* vf */ { { BLIS_DEFAULT_VF_S, BLIS_DEFAULT_VF_C, BLIS_DEFAULT_VF_D, BLIS_DEFAULT_VF_Z, },
-           { BLIS_DEFAULT_VF_S, BLIS_DEFAULT_VF_C, BLIS_DEFAULT_VF_D, BLIS_DEFAULT_VF_Z, }
-         },
 };
 
 // -----------------------------------------------------------------------------

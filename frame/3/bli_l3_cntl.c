@@ -37,10 +37,10 @@
 
 void bli_l3_cntl_create_if
      (
+       opid_t   family,
        obj_t*   a,
        obj_t*   b,
        obj_t*   c,
-       cntx_t*  cntx,
        cntl_t*  cntl_orig,
        cntl_t** cntl_use
      )
@@ -49,8 +49,6 @@ void bli_l3_cntl_create_if
 	// tree as a function of the operation family.
 	if ( cntl_orig == NULL )
 	{
-		opid_t family = bli_cntx_get_family( cntx );
-
 		if ( family == BLIS_GEMM ||
 		     family == BLIS_HERK ||
 		     family == BLIS_TRMM )
@@ -73,6 +71,10 @@ void bli_l3_cntl_create_if
 		// instead (so that threads can use its local tree as a place to
 		// cache things like pack mem_t entries).
 		*cntl_use = bli_cntl_copy( cntl_orig );
+
+		// Recursively set the family fields of the newly copied control tree
+		// nodes.
+		bli_cntl_mark_family( family, *cntl_use );
 	}
 }
 
@@ -81,7 +83,6 @@ void bli_l3_cntl_free_if
        obj_t*  a,
        obj_t*  b,
        obj_t*  c,
-       cntx_t* cntx,
        cntl_t* cntl_orig,
        cntl_t* cntl_use,
        thrinfo_t* thread
@@ -91,7 +92,7 @@ void bli_l3_cntl_free_if
 	// been created, so we now must free it.
 	if ( cntl_orig == NULL )
 	{
-		opid_t family = bli_cntx_get_family( cntx );
+		opid_t family = bli_cntl_family( cntl_use );
 
 		if ( family == BLIS_GEMM ||
 		     family == BLIS_HERK ||

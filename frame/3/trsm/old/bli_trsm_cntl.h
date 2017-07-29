@@ -51,7 +51,7 @@ typedef struct trsm_s trsm_t;
 
 void    bli_trsm_cntl_init( void );
 void    bli_trsm_cntl_finalize( void );
-trsm_t* bli_trsm_cntl_obj_create( impl_t       impl_type,
+trsm_t* bli_trsm_cntl_create_node( impl_t       impl_type,
                                   varnum_t     var_num,
                                   bszid_t      bszid,
                                   scalm_t*     sub_scalm,

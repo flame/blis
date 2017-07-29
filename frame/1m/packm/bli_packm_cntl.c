@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-cntl_t* bli_packm_cntl_obj_create
+cntl_t* bli_packm_cntl_create_node
      (
        void*     var_func,
        void*     packm_var_func,
@@ -69,8 +69,9 @@ cntl_t* bli_packm_cntl_obj_create
 	// that no blocksize partitioning is performed. bli_cntl_free() will rely
 	// on this information to know how to step through the thrinfo_t tree in
 	// sync with the cntl_t tree.
-	cntl = bli_cntl_obj_create
+	cntl = bli_cntl_create_node
 	(
+	  BLIS_NOID,
 	  BLIS_NO_PART,
 	  var_func,
 	  params,

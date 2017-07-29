@@ -98,10 +98,10 @@ void bli_trmv_cntl_init()
 
 void bli_trmv_cntl_finalize()
 {
-	bli_cntl_obj_free( trmv_cntl_bs_ke_nrow_tcol );
-	bli_cntl_obj_free( trmv_cntl_bs_ke_ncol_trow );
-	bli_cntl_obj_free( trmv_cntl_ge_nrow_tcol );
-	bli_cntl_obj_free( trmv_cntl_ge_ncol_trow );
+	bli_cntl_free_node( trmv_cntl_bs_ke_nrow_tcol );
+	bli_cntl_free_node( trmv_cntl_bs_ke_ncol_trow );
+	bli_cntl_free_node( trmv_cntl_ge_nrow_tcol );
+	bli_cntl_free_node( trmv_cntl_ge_ncol_trow );
 }
 
 

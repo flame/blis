@@ -43,10 +43,11 @@ dim_t bli_l3_determine_kc
         obj_t*  a,
         obj_t*  b,
         bszid_t bszid,
-        cntx_t* cntx
+        cntx_t* cntx,
+        cntl_t* cntl
       )
 {
-	opid_t family = bli_cntx_family( cntx );
+	opid_t family = bli_cntl_family( cntl );
 
 	if      ( family == BLIS_GEMM )
 		return bli_gemm_determine_kc( direct, i, dim, a, b, bszid, cntx );

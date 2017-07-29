@@ -36,6 +36,9 @@
 #ifndef BLIS_CNTX_H
 #define BLIS_CNTX_H
 
+//#include "bli_cntx_init.h"
+
+
 // Context object type (defined in bli_type_defs.h)
 
 /*
@@ -51,9 +54,9 @@ typedef struct cntx_s
 	func_t*   l1f_kers;
 	func_t*   l1v_kers;
 
-	func_t    packm_ukrs;
+	func_t*   packm_kers;
+	func_t*   unpackm_kers;
 
-	opid_t    family;
 	ind_t     method;
 	pack_t    schema_a;
 	pack_t    schema_b;
@@ -99,17 +102,13 @@ typedef struct cntx_s
 \
 	( (cntx)->l1v_kers )
 
-#define bli_cntx_packm_ukrs_buf( cntx ) \
+#define bli_cntx_packm_kers_buf( cntx ) \
 \
-	(&((cntx)->packm_ukrs) )
+	( (cntx)->packm_kers )
 
-#define bli_cntx_packm_ukrs( cntx ) \
+#define bli_cntx_unpackm_kers_buf( cntx ) \
 \
-	(&((cntx)->packm_ukrs) )
-
-#define bli_cntx_family( cntx ) \
-\
-	( (cntx)->family )
+	( (cntx)->unpackm_kers )
 
 #define bli_cntx_method( cntx ) \
 \
@@ -202,16 +201,6 @@ typedef struct cntx_s
 	(cntx_p)->l1v_kers = _l1v_kers; \
 }
 
-#define bli_cntx_set_packm_ukrs( _packm_ukrs, cntx_p ) \
-{ \
-	(cntx_p)->packm_ukrs = _packm_ukrs; \
-}
-
-#define bli_cntx_set_family( _family, cntx_p ) \
-{ \
-	(cntx_p)->family = _family; \
-}
-
 #define bli_cntx_set_method( _method, cntx_p ) \
 { \
 	(cntx_p)->method = _method; \
@@ -285,7 +274,8 @@ typedef struct cntx_s
 	( \
 	  (dt), \
 	  &(( \
-	    bli_cntx_method( (cntx) ) != BLIS_NAT \
+	    bli_cntx_method( (cntx) ) != BLIS_NAT && \
+	    bli_is_complex( dt ) \
 		  ? bli_cntx_l3_vir_ukrs_buf( (cntx) ) \
 	      : bli_cntx_l3_nat_ukrs_buf( (cntx) ) \
 	  )[ ukr_id ]) \
@@ -326,10 +316,6 @@ typedef struct cntx_s
 	  (dt), (&(bli_cntx_l3_nat_ukrs_prefs_buf( (cntx) ))[ ukr_id ]) \
 	)
 
-#define bli_cntx_get_family( cntx ) \
-\
-	bli_cntx_family( cntx )
-
 #define bli_cntx_get_ind_method( cntx ) \
 \
 	bli_cntx_method( cntx )
@@ -357,9 +343,9 @@ typedef struct cntx_s
 
 // create/free
 
-//void     bli_cntx_obj_create( cntx_t* cntx );
-//void     bli_cntx_obj_free( cntx_t* cntx );
-void     bli_cntx_obj_clear( cntx_t* cntx );
+//void     bli_cntx_create( cntx_t* cntx );
+//void     bli_cntx_free( cntx_t* cntx );
+void     bli_cntx_clear( cntx_t* cntx );
 void     bli_cntx_init( cntx_t* cntx );
 
 // get functions
@@ -380,7 +366,7 @@ func_t*  bli_cntx_get_l1f_ker( l1fkr_t ker_id,
                                cntx_t* cntx );
 func_t*  bli_cntx_get_l1v_ker( l1vkr_t ker_id,
                                cntx_t* cntx );
-func_t*  bli_cntx_get_packm_ukr( cntx_t* cntx );
+//func_t*  bli_cntx_get_packm_ukr( cntx_t* cntx );
 
 //dim_t    bli_cntx_get_blksz_def_dt( num_t   dt,
 //                                    bszid_t bs_id,
@@ -409,6 +395,10 @@ func_t*  bli_cntx_get_packm_ukr( cntx_t* cntx );
 //void*    bli_cntx_get_l1v_ker_dt( num_t   dt,
 //                                  l1vkr_t ker_id,
 //                                  cntx_t* cntx );
+func_t*  bli_cntx_get_packm_ker( l1mkr_t ker_id,
+                                 cntx_t* cntx );
+func_t*  bli_cntx_get_unpackm_ker( l1mkr_t ker_id,
+                                   cntx_t* cntx );
 //ind_t    bli_cntx_get_ind_method( cntx_t* cntx );
 //pack_t   bli_cntx_get_pack_schema_a_block( cntx_t* cntx );
 //pack_t   bli_cntx_get_pack_schema_b_panel( cntx_t* cntx );
@@ -425,18 +415,34 @@ void     bli_cntx_set_blksz( bszid_t  bs_id,
                              blksz_t* blksz,
                              bszid_t  mult_id,
                              cntx_t*  cntx );
-void     bli_cntx_set_l3_vir_ukr( l3ukr_t ukr_id,
-                                  func_t* func,
-                                  cntx_t* cntx );
+
+void     bli_cntx_set_l3_nat_ukrs( dim_t n_ukrs, ... );
+
 void     bli_cntx_set_l3_nat_ukr( l3ukr_t ukr_id,
                                   func_t* func,
                                   cntx_t* cntx );
+void     bli_cntx_set_l3_nat_ukr_prefs( l3ukr_t  ukr_id,
+                                        mbool_t* prefs,
+                                        cntx_t*  cntx );
+
+void     bli_cntx_set_l3_vir_ukr( l3ukr_t ukr_id,
+                                  func_t* func,
+                                  cntx_t* cntx );
+
 void     bli_cntx_set_l1f_ker( l1fkr_t ker_id,
                                func_t* func,
                                cntx_t* cntx );
+
 void     bli_cntx_set_l1v_ker( l1vkr_t ker_id,
                                func_t* func,
                                cntx_t* cntx );
+
+void     bli_cntx_set_packm_kers( dim_t n_kers, ... );
+
+void     bli_cntx_set_packm_ker( l1mkr_t ker_id,
+                                 func_t* func,
+                                 cntx_t* cntx );
+
 void     bli_cntx_set_packm_ukr( func_t* func, 
                                  cntx_t* cntx );
 void     bli_cntx_set_ind_method( ind_t   method,
@@ -507,11 +513,11 @@ void bli_cntx_print( cntx_t* cntx );
 // Preprocess out these calls entirely, since they are currently just empty
 // functions that do nothing.
 #if 0
-  #define bli_cntx_obj_create( cntx ) { bli_cntx_obj_clear( cntx ); }
-  #define bli_cntx_obj_free( cntx )   { bli_cntx_obj_clear( cntx ); }
+  #define bli_cntx_create( cntx ) { bli_cntx_clear( cntx ); }
+  #define bli_cntx_free( cntx )   { bli_cntx_clear( cntx ); }
 #else
-  #define bli_cntx_obj_create( cntx ) { ; }
-  #define bli_cntx_obj_free( cntx )   { ; }
+  #define bli_cntx_create( cntx ) { ; }
+  #define bli_cntx_free( cntx )   { ; }
 #endif
 
 // These macros initialize/finalize a local context if the given context

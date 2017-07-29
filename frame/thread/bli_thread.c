@@ -218,9 +218,10 @@ siz_t bli_thread_get_range_l2r
        dim_t*     end
      )
 {
+	num_t dt = bli_obj_datatype( *a );
 	dim_t m  = bli_obj_length_after_trans( *a );
 	dim_t n  = bli_obj_width_after_trans( *a );
-	dim_t bf = bli_blksz_get_def_for_obj( a, bmult );
+	dim_t bf = bli_blksz_get_def( dt, bmult );
 
 	bli_thread_get_range_sub( thr, n, bf,
 	                          FALSE, start, end );
@@ -237,9 +238,10 @@ siz_t bli_thread_get_range_r2l
        dim_t*     end
      )
 {
+	num_t dt = bli_obj_datatype( *a );
 	dim_t m  = bli_obj_length_after_trans( *a );
 	dim_t n  = bli_obj_width_after_trans( *a );
-	dim_t bf = bli_blksz_get_def_for_obj( a, bmult );
+	dim_t bf = bli_blksz_get_def( dt, bmult );
 
 	bli_thread_get_range_sub( thr, n, bf,
 	                          TRUE, start, end );
@@ -256,9 +258,10 @@ siz_t bli_thread_get_range_t2b
        dim_t*     end
      )
 {
+	num_t dt = bli_obj_datatype( *a );
 	dim_t m  = bli_obj_length_after_trans( *a );
 	dim_t n  = bli_obj_width_after_trans( *a );
-	dim_t bf = bli_blksz_get_def_for_obj( a, bmult );
+	dim_t bf = bli_blksz_get_def( dt, bmult );
 
 	bli_thread_get_range_sub( thr, m, bf,
 	                          FALSE, start, end );
@@ -275,9 +278,10 @@ siz_t bli_thread_get_range_b2t
        dim_t*     end
      )
 {
+	num_t dt = bli_obj_datatype( *a );
 	dim_t m  = bli_obj_length_after_trans( *a );
 	dim_t n  = bli_obj_width_after_trans( *a );
-	dim_t bf = bli_blksz_get_def_for_obj( a, bmult );
+	dim_t bf = bli_blksz_get_def( dt, bmult );
 
 	bli_thread_get_range_sub( thr, m, bf,
 	                          TRUE, start, end );
@@ -649,7 +653,7 @@ siz_t bli_thread_get_range_mdim
      )
 {
 	bszid_t  bszid  = bli_cntl_bszid( cntl );
-	opid_t   family = bli_cntx_get_family( cntx );
+	opid_t   family = bli_cntl_family( cntl );
 
 	// This is part of trsm's current implementation, whereby right side
 	// cases are implemented in left-side micro-kernels, which requires
@@ -708,7 +712,7 @@ siz_t bli_thread_get_range_ndim
      )
 {
 	bszid_t  bszid  = bli_cntl_bszid( cntl );
-	opid_t   family = bli_cntx_get_family( cntx );
+	opid_t   family = bli_cntl_family( cntl );
 
 	// This is part of trsm's current implementation, whereby right side
 	// cases are implemented in left-side micro-kernels, which requires
@@ -771,11 +775,12 @@ siz_t bli_thread_get_range_weighted_l2r
 	if ( bli_obj_intersects_diag( *a ) &&
 	     bli_obj_is_upper_or_lower( *a ) )
 	{
+		num_t  dt      = bli_obj_datatype( *a );
 		doff_t diagoff = bli_obj_diag_offset( *a );
 		uplo_t uplo    = bli_obj_uplo( *a );
 		dim_t  m       = bli_obj_length( *a );
 		dim_t  n       = bli_obj_width( *a );
-		dim_t  bf      = bli_blksz_get_def_for_obj( a, bmult );
+		dim_t  bf      = bli_blksz_get_def( dt, bmult );
 
 		// Support implicit transposition.
 		if ( bli_obj_has_trans( *a ) )
@@ -820,11 +825,12 @@ siz_t bli_thread_get_range_weighted_r2l
 	if ( bli_obj_intersects_diag( *a ) &&
 	     bli_obj_is_upper_or_lower( *a ) )
 	{
+		num_t  dt      = bli_obj_datatype( *a );
 		doff_t diagoff = bli_obj_diag_offset( *a );
 		uplo_t uplo    = bli_obj_uplo( *a );
 		dim_t  m       = bli_obj_length( *a );
 		dim_t  n       = bli_obj_width( *a );
-		dim_t  bf      = bli_blksz_get_def_for_obj( a, bmult );
+		dim_t  bf      = bli_blksz_get_def( dt, bmult );
 
 		// Support implicit transposition.
 		if ( bli_obj_has_trans( *a ) )
@@ -871,11 +877,12 @@ siz_t bli_thread_get_range_weighted_t2b
 	if ( bli_obj_intersects_diag( *a ) &&
 	     bli_obj_is_upper_or_lower( *a ) )
 	{
+		num_t  dt      = bli_obj_datatype( *a );
 		doff_t diagoff = bli_obj_diag_offset( *a );
 		uplo_t uplo    = bli_obj_uplo( *a );
 		dim_t  m       = bli_obj_length( *a );
 		dim_t  n       = bli_obj_width( *a );
-		dim_t  bf      = bli_blksz_get_def_for_obj( a, bmult );
+		dim_t  bf      = bli_blksz_get_def( dt, bmult );
 
 		// Support implicit transposition.
 		if ( bli_obj_has_trans( *a ) )
@@ -922,11 +929,12 @@ siz_t bli_thread_get_range_weighted_b2t
 	if ( bli_obj_intersects_diag( *a ) &&
 	     bli_obj_is_upper_or_lower( *a ) )
 	{
+		num_t  dt      = bli_obj_datatype( *a );
 		doff_t diagoff = bli_obj_diag_offset( *a );
 		uplo_t uplo    = bli_obj_uplo( *a );
 		dim_t  m       = bli_obj_length( *a );
 		dim_t  n       = bli_obj_width( *a );
-		dim_t  bf      = bli_blksz_get_def_for_obj( a, bmult );
+		dim_t  bf      = bli_blksz_get_def( dt, bmult );
 
 		// Support implicit transposition.
 		if ( bli_obj_has_trans( *a ) )

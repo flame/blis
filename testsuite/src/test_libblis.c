@@ -1903,7 +1903,7 @@ cntl_t* libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, invdia
 	else                                   does_inv_diag = TRUE;
 
 	// Create a control tree node for the packing operation.
-	cntl_t* cntl = bli_packm_cntl_obj_create
+	cntl_t* cntl = bli_packm_cntl_create_node
 	(
 	  NULL, // func ptr is not referenced b/c we don't call via l3 _int().
 	  bli_packm_blk_var1,

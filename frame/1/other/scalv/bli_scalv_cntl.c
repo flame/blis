@@ -44,7 +44,7 @@ void bli_scalv_cntl_init()
 
 void bli_scalv_cntl_finalize()
 {
-	bli_cntl_obj_free( scalv_cntl );
+	bli_cntl_free_node( scalv_cntl );
 }
 
 

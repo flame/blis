@@ -81,9 +81,6 @@ void bli_syrk_front
 		bli_obj_induce_trans( c_local );
 	}
 
-	// Set the operation family id in the context.
-	bli_cntx_set_family( BLIS_HERK, cntx );
-
 	// Record the threading for each level within the context.
 	bli_cntx_set_thrloop_from_env( BLIS_SYRK, BLIS_LEFT, cntx,
                                    bli_obj_length( c_local ),
@@ -94,6 +91,7 @@ void bli_syrk_front
 	bli_l3_thread_decorator
 	(
 	  bli_gemm_int,
+	  BLIS_HERK, // operation family id
 	  alpha,
 	  &a_local,
 	  &at_local,

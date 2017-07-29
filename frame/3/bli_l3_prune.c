@@ -40,11 +40,11 @@ void bli_l3_prune_unref_mparts_m
        obj_t*  a,
        obj_t*  b,
        obj_t*  c,
-       cntx_t* cntx
+       cntl_t* cntl
      )
 {
 	// Query the operation family.
-	opid_t family = bli_cntx_family( cntx );
+	opid_t family = bli_cntl_family( cntl );
 
 	if      ( family == BLIS_GEMM ) return; // No pruning is necessary for gemm.
 	else if ( family == BLIS_HERK ) bli_herk_prune_unref_mparts_m( a, b, c );
@@ -61,11 +61,11 @@ void PASTEMAC(l3_prune_unref_mparts_,dim) \
        obj_t*  a, \
        obj_t*  b, \
        obj_t*  c, \
-       cntx_t* cntx  \
+       cntl_t* cntl  \
      ) \
 { \
 	/* Query the operation family. */ \
-	opid_t family = bli_cntx_family( cntx ); \
+	opid_t family = bli_cntl_family( cntl ); \
 \
 	if      ( family == BLIS_GEMM ) return; /* No pruning is necessary for gemm. */ \
 	else if ( family == BLIS_HERK ) PASTEMAC(herk_prune_unref_mparts_,dim)( a, b, c ); \

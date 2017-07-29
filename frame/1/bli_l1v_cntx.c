@@ -43,7 +43,7 @@
 \
 void PASTEMAC(opname,_cntx_init)( num_t dt, cntx_t* cntx ) \
 { \
-	bli_cntx_obj_create( cntx ); \
+	bli_cntx_create( cntx ); \
 \
 	/* Initialize the context with the kernel associated with the current
 	   operation. */ \
@@ -51,7 +51,7 @@ void PASTEMAC(opname,_cntx_init)( num_t dt, cntx_t* cntx ) \
 } \
 void PASTEMAC(opname,_cntx_finalize)( cntx_t* cntx ) \
 { \
-	bli_cntx_obj_free( cntx ); \
+	bli_cntx_free( cntx ); \
 }
 
 GENFRONT( addv,    BLIS_ADDV_KER )
@@ -70,7 +70,7 @@ GENFRONT( swapv,   BLIS_SWAPV_KER )
 \
 void PASTEMAC(opname,_cntx_init)( num_t dt, cntx_t* cntx ) \
 { \
-	bli_cntx_obj_create( cntx ); \
+	bli_cntx_create( cntx ); \
 \
 	/* Initialize the context with kernel dependencies. */ \
 	PASTEMAC(dep1,_cntx_init)( dt, cntx ); \
@@ -84,7 +84,7 @@ void PASTEMAC(opname,_cntx_init)( num_t dt, cntx_t* cntx ) \
 } \
 void PASTEMAC(opname,_cntx_finalize)( cntx_t* cntx ) \
 { \
-	bli_cntx_obj_free( cntx ); \
+	bli_cntx_free( cntx ); \
 }
 
 GENFRONT( axpbyv, BLIS_AXPBYV_KER, axpyv, xpbyv, scal2v, scalv )
@@ -95,7 +95,7 @@ GENFRONT( axpbyv, BLIS_AXPBYV_KER, axpyv, xpbyv, scal2v, scalv )
 \
 void PASTEMAC(opname,_cntx_init)( num_t dt, cntx_t* cntx ) \
 { \
-	bli_cntx_obj_create( cntx ); \
+	bli_cntx_create( cntx ); \
 \
 	/* Initialize the context with kernel dependencies. */ \
 	PASTEMAC(depname,_cntx_init)( dt, cntx ); \
@@ -106,7 +106,7 @@ void PASTEMAC(opname,_cntx_init)( num_t dt, cntx_t* cntx ) \
 } \
 void PASTEMAC(opname,_cntx_finalize)( cntx_t* cntx ) \
 { \
-	bli_cntx_obj_free( cntx ); \
+	bli_cntx_free( cntx ); \
 }
 
 GENFRONT( axpyv,  BLIS_AXPYV_KER,  addv )
@@ -118,7 +118,7 @@ GENFRONT( scalv,  BLIS_SCALV_KER,  setv )
 \
 void PASTEMAC(opname,_cntx_init)( num_t dt, cntx_t* cntx ) \
 { \
-	bli_cntx_obj_create( cntx ); \
+	bli_cntx_create( cntx ); \
 \
 	/* Initialize the context with kernel dependencies. */ \
 	PASTEMAC(dep1,_cntx_init)( dt, cntx ); \
@@ -130,7 +130,7 @@ void PASTEMAC(opname,_cntx_init)( num_t dt, cntx_t* cntx ) \
 } \
 void PASTEMAC(opname,_cntx_finalize)( cntx_t* cntx ) \
 { \
-	bli_cntx_obj_free( cntx ); \
+	bli_cntx_free( cntx ); \
 }
 
 GENFRONT( scal2v, BLIS_SCAL2V_KER, setv, copyv )

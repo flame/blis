@@ -41,7 +41,7 @@ void bli_trsm3m1_cntx_init( num_t dt, cntx_t* cntx )
 	const ind_t method = BLIS_3M1;
 
 	// Clear the context fields.
-	bli_cntx_obj_clear( cntx );
+	bli_cntx_clear( cntx );
 
 	// Initialize the context with the current architecture's native
 	// level-3 gemm micro-kernel, and its output preferences.
@@ -89,7 +89,7 @@ void bli_trsm4m1_cntx_init( num_t dt, cntx_t* cntx )
 	const ind_t method = BLIS_4M1A;
 
 	// Clear the context fields.
-	bli_cntx_obj_clear( cntx );
+	bli_cntx_clear( cntx );
 
 	// Initialize the context with the current architecture's native
 	// level-3 gemm micro-kernel, and its output preferences.
@@ -137,7 +137,7 @@ void bli_trsm1m_cntx_init( num_t dt, cntx_t* cntx )
 	const ind_t method = BLIS_1M;
 
 	// Clear the context fields.
-	bli_cntx_obj_clear( cntx );
+	bli_cntx_clear( cntx );
 
 	// Initialize the context with the current architecture's native
 	// level-3 gemm micro-kernel, and its output preferences.

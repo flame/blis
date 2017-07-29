@@ -45,7 +45,7 @@
 void PASTEMAC(opname,_cntx_init)( num_t dt, cntx_t* cntx ) \
 { \
 	/* Perform basic setup on the context. */ \
-	bli_cntx_obj_create( cntx ); \
+	bli_cntx_create( cntx ); \
 \
 	/* Initialize the context with kernels employed by the current
 	   operation. */ \
@@ -127,7 +127,7 @@ void PASTEMAC(opname,_cntx_init)( num_t dt, cntx_t* cntx ) \
 void PASTEMAC(opname,_cntx_finalize)( cntx_t* cntx ) \
 { \
 	/* Free the context and all memory allocated to it. */ \
-	bli_cntx_obj_free( cntx ); \
+	bli_cntx_free( cntx ); \
 }
 GENFRONT( trmv )
 GENFRONT( trsv )
@@ -139,7 +139,7 @@ GENFRONT( trsv )
 void PASTEMAC(opname,_cntx_init)( num_t dt, cntx_t* cntx ) \
 { \
 	/* Perform basic setup on the context. */ \
-	bli_cntx_obj_create( cntx ); \
+	bli_cntx_create( cntx ); \
 \
 	/* Initialize the context with kernels employed by the current
 	   operation. */ \
@@ -159,7 +159,7 @@ void PASTEMAC(opname,_cntx_init)( num_t dt, cntx_t* cntx ) \
 void PASTEMAC(opname,_cntx_finalize)( cntx_t* cntx ) \
 { \
 	/* Free the context and all memory allocated to it. */ \
-	bli_cntx_obj_free( cntx ); \
+	bli_cntx_free( cntx ); \
 }
 
 GENFRONT( ger )
@@ -173,7 +173,7 @@ GENFRONT( syr )
 void PASTEMAC(opname,_cntx_init)( num_t dt, cntx_t* cntx ) \
 { \
 	/* Perform basic setup on the context. */ \
-	bli_cntx_obj_create( cntx ); \
+	bli_cntx_create( cntx ); \
 \
 	/* Initialize the context with kernels employed by the current
 	   operation. */ \
@@ -211,7 +211,7 @@ void PASTEMAC(opname,_cntx_init)( num_t dt, cntx_t* cntx ) \
 void PASTEMAC(opname,_cntx_finalize)( cntx_t* cntx ) \
 { \
 	/* Free the context and all memory allocated to it. */ \
-	bli_cntx_obj_free( cntx ); \
+	bli_cntx_free( cntx ); \
 }
 
 GENFRONT( hemv )
@@ -224,7 +224,7 @@ GENFRONT( symv )
 void PASTEMAC(opname,_cntx_init)( num_t dt, cntx_t* cntx ) \
 { \
 	/* Perform basic setup on the context. */ \
-	bli_cntx_obj_create( cntx ); \
+	bli_cntx_create( cntx ); \
 \
 	/* Initialize the context with kernels employed by the current
 	   operation. */ \
@@ -246,7 +246,7 @@ void PASTEMAC(opname,_cntx_init)( num_t dt, cntx_t* cntx ) \
 void PASTEMAC(opname,_cntx_finalize)( cntx_t* cntx ) \
 { \
 	/* Free the context and all memory allocated to it. */ \
-	bli_cntx_obj_free( cntx ); \
+	bli_cntx_free( cntx ); \
 }
 
 GENFRONT( her2 )

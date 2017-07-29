@@ -132,6 +132,7 @@ void* bli_l3_thread_entry( void* data_void );
 typedef struct thread_data
 {
 	l3int_t    func;
+	opid_t     family;
 	obj_t*     alpha;
 	obj_t*     a;
 	obj_t*     b;
@@ -148,6 +149,7 @@ void* bli_l3_thread_entry( void* data_void )
 {
 	thread_data_t* data     = data_void;
 
+	opid_t         family   = data->family;
 	obj_t*         alpha    = data->alpha;
 	obj_t*         a        = data->a;
 	obj_t*         b        = data->b;
@@ -162,13 +164,14 @@ void* bli_l3_thread_entry( void* data_void )
 	thrinfo_t*     thread;
 
 	// Create a default control tree for the operation, if needed.
-	bli_l3_cntl_create_if( a, b, c, cntx, cntl, &cntl_use );
+	bli_l3_cntl_create_if( family, a, b, c, cntl, &cntl_use );
 
 	// Create the root node of the current thread's thrinfo_t structure.
 	bli_l3_thrinfo_create_root( id, gl_comm, cntx, cntl_use, &thread );
 
 	data->func
 	(
+	  family,
 	  alpha,
 	  a,
 	  b,
@@ -180,7 +183,7 @@ void* bli_l3_thread_entry( void* data_void )
 	);
 
 	// Free the control tree, if one was created locally.
-	bli_l3_cntl_free_if( a, b, c, cntx, cntl, cntl_use, thread );
+	bli_l3_cntl_free_if( a, b, c, cntl, cntl_use, thread );
 
 	// Free the current thread's thrinfo_t structure.
 	bli_l3_thrinfo_free( thread );
@@ -191,6 +194,7 @@ void* bli_l3_thread_entry( void* data_void )
 void bli_l3_thread_decorator
      (
        l3int_t     func,
+       opid_t      family,
        obj_t*      alpha,
        obj_t*      a,
        obj_t*      b,
@@ -217,6 +221,7 @@ void bli_l3_thread_decorator
 	{
 		// Set up thread data for additional threads (beyond thread 0).
 		datas[id].func    = func;
+		datas[id].family  = family;
 		datas[id].alpha   = alpha;
 		datas[id].a       = a;
 		datas[id].b       = b;

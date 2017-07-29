@@ -207,6 +207,7 @@ void bli_thrcomm_tree_barrier( barrier_t* barack )
 void bli_l3_thread_decorator
      (
        l3int_t     func,
+       opid_t      family,
        obj_t*      alpha,
        obj_t*      a,
        obj_t*      b,
@@ -234,7 +235,7 @@ void bli_l3_thread_decorator
 		thrinfo_t* thread;
 
 		// Create a default control tree for the operation, if needed.
-		bli_l3_cntl_create_if( a, b, c, cntx, cntl, &cntl_use );
+		bli_l3_cntl_create_if( family, a, b, c, cntl, &cntl_use );
 
 		// Create the root node of the current thread's thrinfo_t structure.
 		bli_l3_thrinfo_create_root( id, gl_comm, cntx, cntl_use, &thread );
@@ -252,7 +253,7 @@ void bli_l3_thread_decorator
 		);
 
 		// Free the control tree, if one was created locally.
-		bli_l3_cntl_free_if( a, b, c, cntx, cntl, cntl_use, thread );
+		bli_l3_cntl_free_if( a, b, c, cntl, cntl_use, thread );
 
 #ifdef PRINT_THRINFO
 		threads[id] = thread;
