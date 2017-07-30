@@ -171,7 +171,6 @@ void* bli_l3_thread_entry( void* data_void )
 
 	data->func
 	(
-	  family,
 	  alpha,
 	  a,
 	  b,
