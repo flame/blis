@@ -41,7 +41,12 @@
 	-lf2c -lm   (in that order)
 */
 
-bla_logical PASTEF770(lsame)(const bla_character *ca, const bla_character *cb, ftnlen ca_len, ftnlen cb_len)
+
+#ifdef LAPACK_ILP64
+long PASTEF770(lsame)(char *ca, char *cb, long ca_len, long cb_len)
+#else
+int PASTEF770(lsame)(char *ca, char *cb, int ca_len, int cb_len)
+#endif
 {
     /* System generated locals */
     bla_logical ret_val;
@@ -115,11 +120,11 @@ bla_logical PASTEF770(lsame)(const bla_character *ca, const bla_character *cb, f
 /*        EBCDIC is assumed - ZCODE is the EBCDIC code of either lower or */
 /*        upper case 'Z'. */
 
-	if ((inta >= 129 && inta <= 137) || (inta >= 145 && inta <= 153) || (inta 
+	if ((inta >= 129 && inta <= 137) || (inta >= 145 && inta <= 153) || (inta
 		>= 162 && inta <= 169)) {
 	    inta += 64;
 	}
-	if ((intb >= 129 && intb <= 137) || (intb >= 145 && intb <= 153) || (intb 
+	if ((intb >= 129 && intb <= 137) || (intb >= 145 && intb <= 153) || (intb
 		>= 162 && intb <= 169)) {
 	    intb += 64;
 	}
