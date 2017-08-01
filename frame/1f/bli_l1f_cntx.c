@@ -43,7 +43,7 @@
 \
 void PASTEMAC(opname,_cntx_init)( num_t dt, cntx_t* cntx ) \
 { \
-	bli_cntx_obj_create( cntx ); \
+	bli_cntx_create( cntx ); \
 \
 	/* Initialize the context with kernel dependencies. */ \
 	PASTEMAC(depname,_cntx_init)( dt, cntx ); \
@@ -54,7 +54,7 @@ void PASTEMAC(opname,_cntx_init)( num_t dt, cntx_t* cntx ) \
 } \
 void PASTEMAC(opname,_cntx_finalize)( cntx_t* cntx ) \
 { \
-	bli_cntx_obj_free( cntx ); \
+	bli_cntx_free( cntx ); \
 }
 
 GENFRONT( axpy2v, BLIS_AXPY2V_KER, axpyv )
@@ -65,7 +65,7 @@ GENFRONT( axpy2v, BLIS_AXPY2V_KER, axpyv )
 \
 void PASTEMAC(opname,_cntx_init)( num_t dt, cntx_t* cntx ) \
 { \
-	bli_cntx_obj_create( cntx ); \
+	bli_cntx_create( cntx ); \
 \
 	/* Initialize the context with kernel dependencies. */ \
 	PASTEMAC(depname1,_cntx_init)( dt, cntx ); \
@@ -77,7 +77,7 @@ void PASTEMAC(opname,_cntx_init)( num_t dt, cntx_t* cntx ) \
 } \
 void PASTEMAC(opname,_cntx_finalize)( cntx_t* cntx ) \
 { \
-	bli_cntx_obj_free( cntx ); \
+	bli_cntx_free( cntx ); \
 }
 
 GENFRONT( dotaxpyv, BLIS_DOTAXPYV_KER, dotxv, axpyv )
@@ -88,7 +88,7 @@ GENFRONT( dotaxpyv, BLIS_DOTAXPYV_KER, dotxv, axpyv )
 \
 void PASTEMAC(opname,_cntx_init)( num_t dt, cntx_t* cntx ) \
 { \
-	bli_cntx_obj_create( cntx ); \
+	bli_cntx_create( cntx ); \
 \
 	/* Initialize the context with kernel dependencies. */ \
 	PASTEMAC(depname,_cntx_init)( dt, cntx ); \
@@ -105,7 +105,7 @@ void PASTEMAC(opname,_cntx_init)( num_t dt, cntx_t* cntx ) \
 } \
 void PASTEMAC(opname,_cntx_finalize)( cntx_t* cntx ) \
 { \
-	bli_cntx_obj_free( cntx ); \
+	bli_cntx_free( cntx ); \
 }
 
 GENFRONT( axpyf, BLIS_AXPYF_KER, axpyv )
@@ -116,7 +116,7 @@ GENFRONT( axpyf, BLIS_AXPYF_KER, axpyv )
 \
 void PASTEMAC(opname,_cntx_init)( num_t dt, cntx_t* cntx ) \
 { \
-	bli_cntx_obj_create( cntx ); \
+	bli_cntx_create( cntx ); \
 \
 	/* Initialize the context with kernel dependencies. */ \
 	PASTEMAC(depname1,_cntx_init)( dt, cntx ); \
@@ -135,7 +135,7 @@ void PASTEMAC(opname,_cntx_init)( num_t dt, cntx_t* cntx ) \
 } \
 void PASTEMAC(opname,_cntx_finalize)( cntx_t* cntx ) \
 { \
-	bli_cntx_obj_free( cntx ); \
+	bli_cntx_free( cntx ); \
 }
 
 GENFRONT( dotxf,     BLIS_DOTXF_KER,     dotv,  dotxv )

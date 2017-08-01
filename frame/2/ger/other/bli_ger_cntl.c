@@ -145,17 +145,17 @@ void bli_ger_cntl_init()
 
 void bli_ger_cntl_finalize()
 {
-	bli_cntl_obj_free( ger_cntl_bs_ke_row );
-	bli_cntl_obj_free( ger_cntl_bs_ke_col );
+	bli_cntl_free_node( ger_cntl_bs_ke_row );
+	bli_cntl_free_node( ger_cntl_bs_ke_col );
 
-	bli_cntl_obj_free( ger_cntl_rp_bs_row );
-	bli_cntl_obj_free( ger_cntl_rp_bs_col );
+	bli_cntl_free_node( ger_cntl_rp_bs_row );
+	bli_cntl_free_node( ger_cntl_rp_bs_col );
 
-	bli_cntl_obj_free( ger_cntl_cp_bs_row );
-	bli_cntl_obj_free( ger_cntl_cp_bs_col );
+	bli_cntl_free_node( ger_cntl_cp_bs_row );
+	bli_cntl_free_node( ger_cntl_cp_bs_col );
 
-	bli_cntl_obj_free( ger_cntl_ge_row );
-	bli_cntl_obj_free( ger_cntl_ge_col );
+	bli_cntl_free_node( ger_cntl_ge_row );
+	bli_cntl_free_node( ger_cntl_ge_col );
 }
 
 

@@ -1,4 +1,4 @@
-#!/bin/bash
+#
 #
 #  BLIS    
 #  An object-based framework for developing high-performance BLAS-like
@@ -58,7 +58,8 @@ CVECFLAGS      :=
 
 # --- Determine the archiver and related flags ---
 AR             := emar
-ARFLAGS        := cru
+RANLIB         := emranlib
+ARFLAGS        := cr
 
 # --- Determine the linker and related flags ---
 LINKER         := $(CC)

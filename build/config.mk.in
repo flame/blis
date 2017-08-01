@@ -1,4 +1,4 @@
-#!/bin/bash
+#
 #
 #  BLIS
 #  An object-based framework for developing high-performance BLAS-like
@@ -35,6 +35,10 @@
 # Only include this block of code once
 ifndef CONFIG_MK_INCLUDED
 CONFIG_MK_INCLUDED := yes
+
+# The version string. This could be the official string or a custom
+# string forced at configure-time.
+VERSION         := @version@
 
 # The name of the configuration sub-directory.
 CONFIG_NAME     := @config_name@

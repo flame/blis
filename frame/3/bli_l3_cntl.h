@@ -39,10 +39,10 @@
 
 void bli_l3_cntl_create_if
      (
+       opid_t   family,
        obj_t*   a,
        obj_t*   b,
        obj_t*   c,
-       cntx_t*  cntx,
        cntl_t*  cntl_orig,
        cntl_t** cntl_use
      );
@@ -52,7 +52,6 @@ void bli_l3_cntl_free_if
        obj_t*  a,
        obj_t*  b,
        obj_t*  c,
-       cntx_t* cntx,
        cntl_t* cntl_orig,
        cntl_t* cntl_use,
        thrinfo_t* thread

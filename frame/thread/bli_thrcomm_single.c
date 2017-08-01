@@ -44,29 +44,29 @@ thrcomm_t* bli_thrcomm_create( dim_t n_threads )
 	return comm;
 }
 
-void bli_thrcomm_free( thrcomm_t* communicator )
+void bli_thrcomm_free( thrcomm_t* comm )
 {
-	if ( communicator == NULL ) return;
-	bli_thrcomm_cleanup( communicator );
-	bli_free_intl( communicator );
+	if ( comm == NULL ) return;
+	bli_thrcomm_cleanup( comm );
+	bli_free_intl( comm );
 }
 
-void bli_thrcomm_init( thrcomm_t* communicator, dim_t n_threads )
+void bli_thrcomm_init( thrcomm_t* comm, dim_t n_threads )
 {
-	if ( communicator == NULL ) return;
+	if ( comm == NULL ) return;
 
-	communicator->sent_object             = NULL;
-	communicator->n_threads               = n_threads;
-	communicator->barrier_sense           = 0;
-	communicator->barrier_threads_arrived = 0;
+	comm->sent_object             = NULL;
+	comm->n_threads               = n_threads;
+	comm->barrier_sense           = 0;
+	comm->barrier_threads_arrived = 0;
 }
 
-void bli_thrcomm_cleanup( thrcomm_t* communicator )
+void bli_thrcomm_cleanup( thrcomm_t* comm )
 {
-	if ( communicator == NULL ) return;
+	if ( comm == NULL ) return;
 }
 
-void bli_thrcomm_barrier( thrcomm_t* communicator, dim_t t_id )
+void bli_thrcomm_barrier( thrcomm_t* comm, dim_t t_id )
 {
 	return;
 }
@@ -74,6 +74,7 @@ void bli_thrcomm_barrier( thrcomm_t* communicator, dim_t t_id )
 void bli_l3_thread_decorator
      (
        l3int_t     func,
+       opid_t      family,
        obj_t*      alpha,
        obj_t*      a,
        obj_t*      b,
@@ -94,7 +95,7 @@ void bli_l3_thread_decorator
 	thrinfo_t* thread;
 
 	// Create a default control tree for the operation, if needed.
-	bli_l3_cntl_create_if( a, b, c, cntx, cntl, &cntl_use );
+	bli_l3_cntl_create_if( family, a, b, c, cntl, &cntl_use );
 
 	// Create the root node of the thread's thrinfo_t structure.
 	bli_l3_thrinfo_create_root( id, gl_comm, cntx, cntl_use, &thread );
@@ -112,7 +113,7 @@ void bli_l3_thread_decorator
 	);
 
 	// Free the control tree, if one was created locally.
-	bli_l3_cntl_free_if( a, b, c, cntx, cntl, cntl_use, thread );
+	bli_l3_cntl_free_if( a, b, c, cntl, cntl_use, thread );
 
 	// Free the current thread's thrinfo_t structure.
 	bli_l3_thrinfo_free( thread );

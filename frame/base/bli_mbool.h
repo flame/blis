@@ -49,16 +49,22 @@
 
 // -----------------------------------------------------------------------------
 
-mbool_t* bli_mbool_obj_create( bool_t b_s,
-                               bool_t b_d,
-                               bool_t b_c,
-                               bool_t b_z );
+mbool_t* bli_mbool_create
+     (
+       bool_t b_s,
+       bool_t b_d,
+       bool_t b_c,
+       bool_t b_z
+     );
 
-void bli_mbool_obj_init( mbool_t* b,
-                         bool_t   b_s,
-                         bool_t   b_d,
-                         bool_t   b_c,
-                         bool_t   b_z );
+void bli_mbool_init
+     (
+       mbool_t* b,
+       bool_t   b_s,
+       bool_t   b_d,
+       bool_t   b_c,
+       bool_t   b_z
+     );
 
-void bli_mbool_obj_free( mbool_t* b );
+void bli_mbool_free( mbool_t* b );
 

@@ -155,6 +155,7 @@ typedef void (*l3int_t)
 void bli_l3_thread_decorator
      (
        l3int_t func,
+       opid_t  family,
        obj_t*  alpha,
        obj_t*  a,
        obj_t*  b,
@@ -163,6 +164,8 @@ void bli_l3_thread_decorator
        cntx_t* cntx,
        cntl_t* cntl
      );
+
+// -----------------------------------------------------------------------------
 
 // Factorization and partitioning prototypes
 typedef struct
@@ -178,8 +181,26 @@ dim_t bli_next_prime_factor(bli_prime_factors_t* factors);
 
 void bli_partition_2x2(dim_t nthread, dim_t work1, dim_t work2, dim_t* nt1, dim_t* nt2);
 
-// Miscellaneous prototypes
-dim_t bli_env_read_nway( const char* env, dim_t fallback );
+// -----------------------------------------------------------------------------
+
+dim_t bli_thread_get_env( const char* env, dim_t fallback );
+
+dim_t bli_thread_get_jc_nt( void );
+dim_t bli_thread_get_ic_nt( void );
+dim_t bli_thread_get_jr_nt( void );
+dim_t bli_thread_get_ir_nt( void );
+dim_t bli_thread_get_num_threads( void );
+
+void  bli_thread_set_env( const char* env, dim_t value );
+
+void  bli_thread_set_jc_nt( dim_t value );
+void  bli_thread_set_ic_nt( dim_t value );
+void  bli_thread_set_jr_nt( dim_t value );
+void  bli_thread_set_ir_nt( dim_t value );
+void  bli_thread_set_num_threads( dim_t value );
+
+// -----------------------------------------------------------------------------
+
 dim_t bli_gcd( dim_t x, dim_t y );
 dim_t bli_lcm( dim_t x, dim_t y );
 dim_t bli_ipow( dim_t base, dim_t power );

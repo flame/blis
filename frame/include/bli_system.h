@@ -41,6 +41,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <float.h>
+#include <errno.h>
 
 // Determine if we are on a 64-bit or 32-bit architecture
 #if defined(_M_X64) || defined(__x86_64) || defined(__aarch64__) || \
@@ -66,6 +67,8 @@
 #elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || \
       defined(__bsdi__) || defined(__DragonFly__)
 #define BLIS_OS_BSD 1
+#elif defined(EMSCRIPTEN)
+#define BLIS_OS_EMSCRIPTEN
 #else
 #error "Cannot determine operating system"
 #endif

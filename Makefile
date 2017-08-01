@@ -1,4 +1,4 @@
-#!/bin/bash
+#
 #
 #  BLIS    
 #  An object-based framework for developing high-performance BLAS-like
@@ -85,9 +85,6 @@ TESTSUITE_CONF_GEN := input.general
 TESTSUITE_CONF_OPS := input.operations
 TESTSUITE_OUT_FILE := output.testsuite
 
-# The name of the file where the version string is stored.
-VERSION_FILE       := version
-
 # The name of the "special" directories, which contain source code that
 # use non-standard compiler flags.
 NOOPT_DIR          := noopt
@@ -141,7 +138,6 @@ BASE_LIB_PATH           := ./$(LIB_DIR)/$(CONFIG_NAME)
 
 # Construct the architecture-version string, which will be used to name the
 # library upon installation.
-VERSION                := $(shell cat $(DIST_PATH)/$(VERSION_FILE))
 VERS_CONF              := $(VERSION)-$(CONFIG_NAME)
 
 # --- Library names ---

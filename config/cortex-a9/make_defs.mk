@@ -1,4 +1,4 @@
-#!/bin/bash
+#
 #
 #  BLIS    
 #  An object-based framework for developing high-performance BLAS-like
@@ -72,7 +72,7 @@ CKOPTFLAGS     := $(COPTFLAGS)
 
 # --- Determine the archiver and related flags ---
 AR             := ar
-ARFLAGS        := cru
+ARFLAGS        := cr
 
 # --- Determine the linker and related flags ---
 LINKER         := $(CC)

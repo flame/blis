@@ -41,7 +41,7 @@
 
 void bli_packm_cntx_init( num_t dt, cntx_t* cntx )
 {
-	bli_cntx_obj_create( cntx );
+	bli_cntx_create( cntx );
 
 	// Initialize the context with kernels that may be needed for the
 	// current operation.
@@ -57,5 +57,5 @@ void bli_packm_cntx_init( num_t dt, cntx_t* cntx )
 
 void bli_packm_cntx_finalize( cntx_t* cntx )
 {
-	bli_cntx_obj_free( cntx );
+	bli_cntx_free( cntx );
 }

@@ -41,27 +41,27 @@
 // - The first char encodes the type of x.
 // - The second char encodes the type of a.
 
-#define bli_ssabsq2s( x, a )  bli_sabsq2ris( bli_sreal(x), bli_simag(x), bli_sreal(a), bli_simag(a) )
-#define bli_dsabsq2s( x, a )  bli_sabsq2ris( bli_dreal(x), bli_dimag(x), bli_sreal(a), bli_simag(a) )
-#define bli_csabsq2s( x, a )  bli_sabsq2ris( bli_creal(x), bli_cimag(x), bli_sreal(a), bli_simag(a) )
-#define bli_zsabsq2s( x, a )  bli_sabsq2ris( bli_zreal(x), bli_zimag(x), bli_sreal(a), bli_simag(a) )
+#define bli_ssabsq2s( x, a )              bli_sabsq2ris( bli_sreal(x), bli_simag(x), bli_sreal(a), 0.0F         )
+#define bli_dsabsq2s( x, a )              bli_dabsq2ris( bli_dreal(x), bli_dimag(x), bli_sreal(a), 0.0F         )
+#define bli_csabsq2s( x, a ) { float ti;  bli_cabsq2ris( bli_creal(x), bli_cimag(x), bli_sreal(a), ti           ); ( void )ti; }
+#define bli_zsabsq2s( x, a ) { float ti;  bli_zabsq2ris( bli_zreal(x), bli_zimag(x), bli_sreal(a), ti           ); ( void )ti; }
 
-#define bli_sdabsq2s( x, a )  bli_dabsq2ris( bli_sreal(x), bli_simag(x), bli_dreal(a), bli_dimag(a) )
-#define bli_ddabsq2s( x, a )  bli_dabsq2ris( bli_dreal(x), bli_dimag(x), bli_dreal(a), bli_dimag(a) )
-#define bli_cdabsq2s( x, a )  bli_dabsq2ris( bli_creal(x), bli_cimag(x), bli_dreal(a), bli_dimag(a) )
-#define bli_zdabsq2s( x, a )  bli_dabsq2ris( bli_zreal(x), bli_zimag(x), bli_dreal(a), bli_dimag(a) )
+#define bli_sdabsq2s( x, a )              bli_sabsq2ris( bli_sreal(x), bli_simag(x), bli_dreal(a), 0.0          )
+#define bli_ddabsq2s( x, a )              bli_dabsq2ris( bli_dreal(x), bli_dimag(x), bli_dreal(a), 0.0          )
+#define bli_cdabsq2s( x, a ) { double ti; bli_cabsq2ris( bli_creal(x), bli_cimag(x), bli_dreal(a), ti           ); ( void )ti; }
+#define bli_zdabsq2s( x, a ) { double ti; bli_zabsq2ris( bli_zreal(x), bli_zimag(x), bli_dreal(a), ti           ); ( void )ti; }
 
 #ifndef BLIS_ENABLE_C99_COMPLEX
 
-#define bli_scabsq2s( x, a )  bli_cabsq2ris( bli_sreal(x), bli_simag(x), bli_creal(a), bli_cimag(a) )
-#define bli_dcabsq2s( x, a )  bli_cabsq2ris( bli_dreal(x), bli_dimag(x), bli_creal(a), bli_cimag(a) )
-#define bli_ccabsq2s( x, a )  bli_cabsq2ris( bli_creal(x), bli_cimag(x), bli_creal(a), bli_cimag(a) )
-#define bli_zcabsq2s( x, a )  bli_cabsq2ris( bli_zreal(x), bli_zimag(x), bli_creal(a), bli_cimag(a) )
+#define bli_scabsq2s( x, a )              bli_sabsq2ris( bli_sreal(x), bli_simag(x), bli_creal(a), bli_cimag(a) )
+#define bli_dcabsq2s( x, a )              bli_dabsq2ris( bli_dreal(x), bli_dimag(x), bli_creal(a), bli_cimag(a) )
+#define bli_ccabsq2s( x, a )              bli_cabsq2ris( bli_creal(x), bli_cimag(x), bli_creal(a), bli_cimag(a) )
+#define bli_zcabsq2s( x, a )              bli_zabsq2ris( bli_zreal(x), bli_zimag(x), bli_creal(a), bli_cimag(a) )
 
-#define bli_szabsq2s( x, a )  bli_zabsq2ris( bli_sreal(x), bli_simag(x), bli_zreal(a), bli_zimag(a) )
-#define bli_dzabsq2s( x, a )  bli_zabsq2ris( bli_dreal(x), bli_dimag(x), bli_zreal(a), bli_zimag(a) )
-#define bli_czabsq2s( x, a )  bli_zabsq2ris( bli_creal(x), bli_cimag(x), bli_zreal(a), bli_zimag(a) )
-#define bli_zzabsq2s( x, a )  bli_zabsq2ris( bli_zreal(x), bli_zimag(x), bli_zreal(a), bli_zimag(a) )
+#define bli_szabsq2s( x, a )              bli_sabsq2ris( bli_sreal(x), bli_simag(x), bli_zreal(a), bli_zimag(a) )
+#define bli_dzabsq2s( x, a )              bli_dabsq2ris( bli_dreal(x), bli_dimag(x), bli_zreal(a), bli_zimag(a) )
+#define bli_czabsq2s( x, a )              bli_cabsq2ris( bli_creal(x), bli_cimag(x), bli_zreal(a), bli_zimag(a) )
+#define bli_zzabsq2s( x, a )              bli_zabsq2ris( bli_zreal(x), bli_zimag(x), bli_zreal(a), bli_zimag(a) )
 
 #else // ifdef BLIS_ENABLE_C99_COMPLEX
 

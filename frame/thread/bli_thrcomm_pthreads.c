@@ -43,81 +43,84 @@ thrcomm_t* bli_thrcomm_create( dim_t n_threads )
 	return comm;
 }
 
-void bli_thrcomm_free( thrcomm_t* communicator )
+void bli_thrcomm_free( thrcomm_t* comm )
 {
-	if ( communicator == NULL ) return;
-	bli_thrcomm_cleanup( communicator );
-	bli_free_intl( communicator );
+	if ( comm == NULL ) return;
+	bli_thrcomm_cleanup( comm );
+	bli_free_intl( comm );
 }
 
 #ifdef BLIS_USE_PTHREAD_BARRIER
 
-void bli_thrcomm_init( thrcomm_t* communicator, dim_t n_threads)
+void bli_thrcomm_init( thrcomm_t* comm, dim_t n_threads)
 {
-	if ( communicator == NULL ) return;
-	communicator->sent_object = NULL;
-	communicator->n_threads = n_threads;
-	pthread_barrier_init( &communicator->barrier, NULL, n_threads );
+	if ( comm == NULL ) return;
+	comm->sent_object = NULL;
+	comm->n_threads = n_threads;
+	pthread_barrier_init( &comm->barrier, NULL, n_threads );
 }
 
-void bli_thrcomm_cleanup( thrcomm_t* communicator )
+void bli_thrcomm_cleanup( thrcomm_t* comm )
 {
-	if ( communicator == NULL ) return;
-	pthread_barrier_destroy( &communicator->barrier );
+	if ( comm == NULL ) return;
+	pthread_barrier_destroy( &comm->barrier );
 }
 
-void bli_thrcomm_barrier( thrcomm_t* communicator, dim_t t_id )
+void bli_thrcomm_barrier( thrcomm_t* comm, dim_t t_id )
 {
-	pthread_barrier_wait( &communicator->barrier );
+	pthread_barrier_wait( &comm->barrier );
 }
 
 #else
 
-void bli_thrcomm_init( thrcomm_t* communicator, dim_t n_threads)
+void bli_thrcomm_init( thrcomm_t* comm, dim_t n_threads)
 {
-	if ( communicator == NULL ) return;
-	communicator->sent_object = NULL;
-	communicator->n_threads = n_threads;
-	communicator->sense = 0;
-	communicator->threads_arrived = 0;
+	if ( comm == NULL ) return;
+	comm->sent_object = NULL;
+	comm->n_threads = n_threads;
+	comm->barrier_sense = 0;
+	comm->barrier_threads_arrived = 0;
 
-#ifdef BLIS_USE_PTHREAD_MUTEX
-	pthread_mutex_init( &communicator->mutex, NULL );
-#endif
+//#ifdef BLIS_USE_PTHREAD_MUTEX
+//	pthread_mutex_init( &comm->mutex, NULL );
+//#endif
 }
 
-void bli_thrcomm_cleanup( thrcomm_t* communicator )
+void bli_thrcomm_cleanup( thrcomm_t* comm )
 {
-#ifdef BLIS_USE_PTHREAD_MUTEX
-	if ( communicator == NULL ) return;
-	pthread_mutex_destroy( &communicator->mutex );
-#endif
+//#ifdef BLIS_USE_PTHREAD_MUTEX
+//	if ( comm == NULL ) return;
+//	pthread_mutex_destroy( &comm->mutex );
+//#endif
 }
 
-void bli_thrcomm_barrier( thrcomm_t* communicator, dim_t t_id )
+void bli_thrcomm_barrier( thrcomm_t* comm, dim_t t_id )
 {
-	if ( communicator == NULL || communicator->n_threads == 1 ) return;
-	bool_t my_sense = communicator->sense;
+#if 0
+	if ( comm == NULL || comm->n_threads == 1 ) return;
+	bool_t my_sense = comm->sense;
 	dim_t my_threads_arrived;
 
 #ifdef BLIS_USE_PTHREAD_MUTEX
-	pthread_mutex_lock( &communicator->mutex );
-	my_threads_arrived = ++(communicator->threads_arrived);
-	pthread_mutex_unlock( &communicator->mutex );
+	pthread_mutex_lock( &comm->mutex );
+	my_threads_arrived = ++(comm->threads_arrived);
+	pthread_mutex_unlock( &comm->mutex );
 #else
-	my_threads_arrived = __sync_add_and_fetch(&(communicator->threads_arrived), 1);
+	my_threads_arrived = __sync_add_and_fetch(&(comm->threads_arrived), 1);
 #endif
 
-	if ( my_threads_arrived == communicator->n_threads )
+	if ( my_threads_arrived == comm->n_threads )
 	{
-		communicator->threads_arrived = 0;
-		communicator->sense = !communicator->sense;
+		comm->threads_arrived = 0;
+		comm->sense = !comm->sense;
 	}
 	else
 	{
-		volatile bool_t* listener = &communicator->sense;
+		volatile bool_t* listener = &comm->sense;
 		while( *listener == my_sense ) {}
 	}
+#endif
+	bli_thrcomm_barrier_atomic( comm, t_id );
 }
 
 #endif
@@ -129,6 +132,7 @@ void* bli_l3_thread_entry( void* data_void );
 typedef struct thread_data
 {
 	l3int_t    func;
+	opid_t     family;
 	obj_t*     alpha;
 	obj_t*     a;
 	obj_t*     b;
@@ -145,6 +149,7 @@ void* bli_l3_thread_entry( void* data_void )
 {
 	thread_data_t* data     = data_void;
 
+	opid_t         family   = data->family;
 	obj_t*         alpha    = data->alpha;
 	obj_t*         a        = data->a;
 	obj_t*         b        = data->b;
@@ -159,7 +164,7 @@ void* bli_l3_thread_entry( void* data_void )
 	thrinfo_t*     thread;
 
 	// Create a default control tree for the operation, if needed.
-	bli_l3_cntl_create_if( a, b, c, cntx, cntl, &cntl_use );
+	bli_l3_cntl_create_if( family, a, b, c, cntl, &cntl_use );
 
 	// Create the root node of the current thread's thrinfo_t structure.
 	bli_l3_thrinfo_create_root( id, gl_comm, cntx, cntl_use, &thread );
@@ -177,7 +182,7 @@ void* bli_l3_thread_entry( void* data_void )
 	);
 
 	// Free the control tree, if one was created locally.
-	bli_l3_cntl_free_if( a, b, c, cntx, cntl, cntl_use, thread );
+	bli_l3_cntl_free_if( a, b, c, cntl, cntl_use, thread );
 
 	// Free the current thread's thrinfo_t structure.
 	bli_l3_thrinfo_free( thread );
@@ -188,6 +193,7 @@ void* bli_l3_thread_entry( void* data_void )
 void bli_l3_thread_decorator
      (
        l3int_t     func,
+       opid_t      family,
        obj_t*      alpha,
        obj_t*      a,
        obj_t*      b,
@@ -214,6 +220,7 @@ void bli_l3_thread_decorator
 	{
 		// Set up thread data for additional threads (beyond thread 0).
 		datas[id].func    = func;
+		datas[id].family  = family;
 		datas[id].alpha   = alpha;
 		datas[id].a       = a;
 		datas[id].b       = b;

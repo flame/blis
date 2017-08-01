@@ -53,10 +53,10 @@ void bli_gemm_blk_var2
 	dim_t my_start, my_end;
 
 	// Determine the direction in which to partition (forwards or backwards).
-	direct = bli_l3_direct( a, b, c, cntx );
+	direct = bli_l3_direct( a, b, c, cntl );
 
 	// Prune any zero region that exists along the partitioning dimension.
-	bli_l3_prune_unref_mparts_n( a, b, c, cntx );
+	bli_l3_prune_unref_mparts_n( a, b, c, cntl );
 
 	// Determine the current thread's subpartition range.
 	bli_thread_get_range_ndim
