@@ -34,6 +34,10 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-bla_logical PASTEF770(lsame)(const bla_character *ca, const bla_character *cb, ftnlen ca_len, ftnlen cb_len);
+#ifdef LAPACK_ILP64
+long PASTEF770(lsame)(char *ca, char *cb, long ca_len, long cb_len);
+#else
+int PASTEF770(lsame)(char *ca, char *cb, int ca_len, int cb_len);
+#endif
 
 #endif
