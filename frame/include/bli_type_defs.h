@@ -438,7 +438,7 @@ typedef enum
 	BLIS_INT               = BLIS_BITVAL_INT_TYPE,
 	BLIS_CONSTANT          = BLIS_BITVAL_CONST_TYPE,
 	BLIS_DT_LO             = BLIS_FLOAT,
-	BLIS_DT_HI             = BLIS_DCOMPLEX,
+	BLIS_DT_HI             = BLIS_DCOMPLEX
 } num_t;
 
 typedef enum
@@ -482,7 +482,7 @@ typedef enum
 	BLIS_PACKED_ROW_PANELS_1E  = BLIS_BITVAL_PACKED_ROW_PANELS_1E,
 	BLIS_PACKED_COL_PANELS_1E  = BLIS_BITVAL_PACKED_COL_PANELS_1E,
 	BLIS_PACKED_ROW_PANELS_1R  = BLIS_BITVAL_PACKED_ROW_PANELS_1R,
-	BLIS_PACKED_COL_PANELS_1R  = BLIS_BITVAL_PACKED_COL_PANELS_1R,
+	BLIS_PACKED_COL_PANELS_1R  = BLIS_BITVAL_PACKED_COL_PANELS_1R
 } pack_t;
 
 // We combine row and column packing into one "type", and we start
@@ -511,7 +511,7 @@ typedef enum
 	BLIS_BUFFER_FOR_A_BLOCK = BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
 	BLIS_BUFFER_FOR_B_PANEL = BLIS_BITVAL_BUFFER_FOR_B_PANEL,
 	BLIS_BUFFER_FOR_C_PANEL = BLIS_BITVAL_BUFFER_FOR_C_PANEL,
-	BLIS_BUFFER_FOR_GEN_USE = BLIS_BITVAL_BUFFER_FOR_GEN_USE,
+	BLIS_BUFFER_FOR_GEN_USE = BLIS_BITVAL_BUFFER_FOR_GEN_USE
 } packbuf_t;
 
 
@@ -590,7 +590,7 @@ typedef enum
 	BLIS_4M1B,
 	BLIS_4M1A,
 	BLIS_1M,
-	BLIS_NAT,
+	BLIS_NAT
 } ind_t;
 
 #define BLIS_NUM_IND_METHODS (BLIS_NAT+1)
@@ -613,7 +613,7 @@ typedef enum
 	BLIS_SETV_KER,
 	BLIS_SUBV_KER,
 	BLIS_SWAPV_KER,
-	BLIS_XPBYV_KER,
+	BLIS_XPBYV_KER
 } l1vkr_t;
 
 #define BLIS_NUM_LEVEL1V_KERS 14
@@ -625,7 +625,7 @@ typedef enum
 	BLIS_DOTAXPYV_KER,
 	BLIS_AXPYF_KER,
 	BLIS_DOTXF_KER,
-	BLIS_DOTXAXPYF_KER,
+	BLIS_DOTXAXPYF_KER
 } l1fkr_t;
 
 #define BLIS_NUM_LEVEL1F_KERS 5
@@ -697,7 +697,7 @@ typedef enum
 	BLIS_UNPACKM_28XK_KER = 28,
 	BLIS_UNPACKM_29XK_KER = 29,
 	BLIS_UNPACKM_30XK_KER = 30,
-	BLIS_UNPACKM_31XK_KER = 31,
+	BLIS_UNPACKM_31XK_KER = 31
 
 } l1mkr_t;
 
@@ -711,7 +711,7 @@ typedef enum
 	BLIS_GEMMTRSM_L_UKR,
 	BLIS_GEMMTRSM_U_UKR,
 	BLIS_TRSM_L_UKR,
-	BLIS_TRSM_U_UKR,
+	BLIS_TRSM_U_UKR
 } l3ukr_t;
 
 #define BLIS_NUM_LEVEL3_UKRS 5
@@ -722,7 +722,7 @@ typedef enum
 	BLIS_REFERENCE_UKERNEL = 0,
 	BLIS_VIRTUAL_UKERNEL,
 	BLIS_OPTIMIZED_UKERNEL,
-	BLIS_NOTAPPLIC_UKERNEL,
+	BLIS_NOTAPPLIC_UKERNEL
 } kimpl_t;
 
 #define BLIS_NUM_UKR_IMPL_TYPES 4
@@ -736,7 +736,7 @@ typedef enum
 	BLIS_IC_IDX,
 	BLIS_JR_IDX,
 	BLIS_IR_IDX,
-	BLIS_PR_IDX,
+	BLIS_PR_IDX
 } thridx_t;
 #endif
 
@@ -770,7 +770,7 @@ typedef enum
 	BLIS_TRMM,
 	BLIS_TRSM,
 
-	BLIS_NOID,
+	BLIS_NOID
 } opid_t;
 
 #define BLIS_NUM_LEVEL3_OPS 10
@@ -792,7 +792,7 @@ typedef enum
 	BLIS_DF, // level-1f dotxf fusing factor
 	BLIS_XF, // level-1f dotxaxpyf fusing factor
 
-	BLIS_NO_PART, // used as a placeholder when blocksizes are not applicable.
+	BLIS_NO_PART  // used as a placeholder when blocksizes are not applicable.
 } bszid_t;
 
 #define BLIS_NUM_BLKSZS 11
@@ -1065,7 +1065,7 @@ typedef struct cntx_s
 typedef enum
 {
 	BLIS_NO_ERROR_CHECKING = 0,
-	BLIS_FULL_ERROR_CHECKING,
+	BLIS_FULL_ERROR_CHECKING
 } errlev_t;
 
 typedef enum
