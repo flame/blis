@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -47,6 +47,7 @@
 #define CPUNAME_KNC          5
 #define CPUNAME_BULLDOZER    6
 #define CPUNAME_PILEDRIVER   7
+#define CPUNAME_SKX          8
 
 static char *cpuname[] = {
   "reference",
@@ -57,6 +58,7 @@ static char *cpuname[] = {
   "mic",
   "bulldozer",
   "piledriver",
+  "skx"
 };
 
 #define BITMASK(a, b, c) ((((a) >> (b)) & (c)))
@@ -184,8 +186,11 @@ int cpu_detect()
         case 0x4F: //Broadwell
         case 0x56: //Broadwell
         case 0x4E: //Skylake
+        case 0x55: //Skylake
         case 0x5E: //Skylake
-          if(support_avx()) {
+          if(support_avx512()) {
+            return CPUNAME_SKX;
+          }else if(support_avx()) {
             return CPUNAME_HASWELL;
           }else{
             return CPUNAME_REFERENCE; //OS doesn't support AVX
