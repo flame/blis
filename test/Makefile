@@ -171,7 +171,9 @@ LDFLAGS        += -lgfortran -lm -lpthread -fopenmp
 #all: blis openblas atlas mkl
 all: blis openblas mkl
 
-blis: test_gemv_blis.x \
+blis: test_dot_blis.x \
+      test_axpy_blis.x \
+      test_gemv_blis.x \
       test_ger_blis.x \
       test_hemv_blis.x \
       test_her_blis.x \
@@ -186,7 +188,9 @@ blis: test_gemv_blis.x \
       test_trmm_blis.x \
       test_trsm_blis.x
 
-openblas: test_gemv_openblas.x \
+openblas: test_dot_openblas.x \
+      test_axpy_openblas.x \
+      test_gemv_openblas.x \
       test_ger_openblas.x \
       test_hemv_openblas.x \
       test_her_openblas.x \
@@ -201,7 +205,9 @@ openblas: test_gemv_openblas.x \
       test_trmm_openblas.x \
       test_trsm_openblas.x
 
-atlas: test_gemv_atlas.x \
+atlas:  test_dot_atlas.x \
+      test_axpy_atlas.x \
+      test_gemv_atlas.x \
       test_ger_atlas.x \
       test_hemv_atlas.x \
       test_her_atlas.x \
@@ -216,7 +222,9 @@ atlas: test_gemv_atlas.x \
       test_trmm_atlas.x \
       test_trsm_atlas.x
 
-mkl:  test_gemv_mkl.x \
+mkl:  test_dot_mkl.x \
+      test_axpy_mkl.x \
+      test_gemv_mkl.x \
       test_ger_mkl.x \
       test_hemv_mkl.x \
       test_her_mkl.x \
@@ -231,7 +239,9 @@ mkl:  test_gemv_mkl.x \
       test_trmm_mkl.x \
       test_trsm_mkl.x
 
-essl: test_gemv_essl.x \
+essl: test_dot_essl.x \
+      test_axpy_essl.x \
+      test_gemv_essl.x \
       test_ger_essl.x \
       test_hemv_essl.x \
       test_her_essl.x \
@@ -246,7 +256,9 @@ essl: test_gemv_essl.x \
       test_trmm_essl.x \
       test_trsm_essl.x
 
-mac:  test_gemv_mac.x \
+mac:  test_dot_mac.x \
+      test_axpy_mac.x \
+      test_gemv_mac.x \
       test_ger_mac.x \
       test_hemv_mac.x \
       test_her_mac.x \

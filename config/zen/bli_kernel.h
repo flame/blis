@@ -4,8 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2016, Advanced Micro Devices, Inc
+   Copyright (C) 2017, Advanced Micro Devices, Inc
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -50,28 +49,16 @@
 //     (b) MR (for zero-padding purposes when MR and NR are "swapped")
 //
 
-// -- sgemm micro-kernel --
+// sgemm micro-kernel
 
 #if 0
-#define BLIS_SGEMM_UKERNEL         bli_sgemm_asm_4x24
-#define BLIS_DEFAULT_MC_S          256
-#define BLIS_DEFAULT_KC_S          256
+
+#define BLIS_SGEMM_UKERNEL         bli_sgemm_asm_24x4
+#define BLIS_DEFAULT_MC_S          264
+#define BLIS_DEFAULT_KC_S          128
 #define BLIS_DEFAULT_NC_S          4080
-#define BLIS_DEFAULT_MR_S          4
-#define BLIS_DEFAULT_NR_S          24
-
-#define BLIS_SGEMM_UKERNEL_PREFERS_CONTIG_ROWS
-#endif
-
-#if 1
-#define BLIS_SGEMM_UKERNEL         bli_sgemm_asm_6x16
-#define BLIS_DEFAULT_MC_S          144
-#define BLIS_DEFAULT_KC_S          256
-#define BLIS_DEFAULT_NC_S          4080
-#define BLIS_DEFAULT_MR_S          6
-#define BLIS_DEFAULT_NR_S          16
-
-#define BLIS_SGEMM_UKERNEL_PREFERS_CONTIG_ROWS
+#define BLIS_DEFAULT_MR_S          24
+#define BLIS_DEFAULT_NR_S          4
 #endif
 
 #if 0
@@ -83,17 +70,37 @@
 #define BLIS_DEFAULT_NR_S          6
 #endif
 
-// -- dgemm micro-kernel --
+#if 1
+#define BLIS_SGEMM_UKERNEL         bli_sgemm_asm_6x16
+#define BLIS_DEFAULT_MC_S          144
+#define BLIS_DEFAULT_KC_S          256
+#define BLIS_DEFAULT_NC_S          4080
+#define BLIS_DEFAULT_MR_S          6
+#define BLIS_DEFAULT_NR_S          16
+
+#define BLIS_SGEMM_UKERNEL_PREFERS_CONTIG_ROWS
+
+#endif
+
+// dgemm micro-kernel
 
 #if 0
-#define BLIS_DGEMM_UKERNEL         bli_dgemm_asm_4x12
-#define BLIS_DEFAULT_MC_D          152
-#define BLIS_DEFAULT_KC_D          160
-#define BLIS_DEFAULT_NC_D          4080
-#define BLIS_DEFAULT_MR_D          4
-#define BLIS_DEFAULT_NR_D          12
 
-#define BLIS_DGEMM_UKERNEL_PREFERS_CONTIG_ROWS
+#define BLIS_DGEMM_UKERNEL         bli_dgemm_asm_12x4
+#define BLIS_DEFAULT_MC_D          96
+#define BLIS_DEFAULT_KC_D          192
+#define BLIS_DEFAULT_NC_D          4080
+#define BLIS_DEFAULT_MR_D          12
+#define BLIS_DEFAULT_NR_D          4
+#endif
+
+#if 0
+#define BLIS_DGEMM_UKERNEL         bli_dgemm_asm_8x6
+#define BLIS_DEFAULT_MC_D          72
+#define BLIS_DEFAULT_KC_D          256
+#define BLIS_DEFAULT_NC_D          4080
+#define BLIS_DEFAULT_MR_D          8
+#define BLIS_DEFAULT_NR_D          6
 #endif
 
 #if 1
@@ -107,16 +114,7 @@
 #define BLIS_DGEMM_UKERNEL_PREFERS_CONTIG_ROWS
 #endif
 
-#if 0
-#define BLIS_DGEMM_UKERNEL         bli_dgemm_asm_8x6
-#define BLIS_DEFAULT_MC_D          72
-#define BLIS_DEFAULT_KC_D          256
-#define BLIS_DEFAULT_NC_D          4080
-#define BLIS_DEFAULT_MR_D          8
-#define BLIS_DEFAULT_NR_D          6
-#endif
-
-// -- cgemm micro-kernel --
+// cgemm micro-kernel
 
 #if 1
 #define BLIS_CGEMM_UKERNEL         bli_cgemm_asm_3x8
@@ -129,16 +127,7 @@
 #define BLIS_CGEMM_UKERNEL_PREFERS_CONTIG_ROWS
 #endif
 
-#if 0
-#define BLIS_CGEMM_UKERNEL         bli_cgemm_asm_8x3
-#define BLIS_DEFAULT_MC_C          144
-#define BLIS_DEFAULT_KC_C          256
-#define BLIS_DEFAULT_NC_C          4080
-#define BLIS_DEFAULT_MR_C          8
-#define BLIS_DEFAULT_NR_C          3
-#endif
-
-//  -- zgemm micro-kernel --
+// zgemm micro-kernel
 
 #if 1
 #define BLIS_ZGEMM_UKERNEL         bli_zgemm_asm_3x4
@@ -152,18 +141,44 @@
 #endif
 
 
-#if 0
-#define BLIS_ZGEMM_UKERNEL         bli_zgemm_asm_4x3
+// zgemm micro-kernel
+
+#if 1
+#define BLIS_ZGEMM_UKERNEL         bli_zgemm_asm_3x4
 #define BLIS_DEFAULT_MC_Z          72
 #define BLIS_DEFAULT_KC_Z          256
 #define BLIS_DEFAULT_NC_Z          4080
-#define BLIS_DEFAULT_MR_Z          4
-#define BLIS_DEFAULT_NR_Z          3
->>>>>>> origin/master
+#define BLIS_DEFAULT_MR_Z          3
+#define BLIS_DEFAULT_NR_Z          4
+
+#define BLIS_ZGEMM_UKERNEL_PREFERS_CONTIG_ROWS
 #endif
 
+// -- trsm-related --
 
+#define BLIS_STRSM_L_UKERNEL   bli_strsm_l_int_6x16
+#define BLIS_DTRSM_L_UKERNEL   bli_dtrsm_l_int_6x8
 
+// --gemmtrsm-related --
+#define BLIS_SGEMMTRSM_L_UKERNEL bli_sgemmtrsm_l_6x16
+#define BLIS_DGEMMTRSM_L_UKERNEL bli_dgemmtrsm_l_6x8
+
+#define BLIS_SMALL_MATRIX_ENABLE
+//This will select the threshold below which small matrix code will be called.
+#define BLIS_SMALL_MATRIX_THRES 700
+#define BLIS_SMALL_M_RECT_MATRIX_THRES 160
+#define BLIS_SMALL_K_RECT_MATRIX_THRES 128
+
+gint_t bli_gemm_small_matrix
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       cntl_t* cntl
+     );
 
 // -- LEVEL-2 KERNEL CONSTANTS -------------------------------------------------
 
@@ -181,6 +196,9 @@
 
 // -- unpackm --
 
+#define BLIS_DEFAULT_1F_S    8
+#define BLIS_DEFAULT_1F_D    4
+
 
 // -- LEVEL-1F KERNEL DEFINITIONS ----------------------------------------------
 
@@ -189,32 +207,53 @@
 // -- dotaxpyv --
 
 // -- axpyf --
+#define BLIS_SAXPYF_KERNEL           bli_saxpyf_int_var1
+#define BLIS_DAXPYF_KERNEL           bli_daxpyf_int_var1
 
 // -- dotxf --
+#define BLIS_SDOTXF_KERNEL           bli_sdotxf_int_var1
+#define BLIS_DDOTXF_KERNEL           bli_ddotxf_int_var1
 
 // -- dotxaxpyf --
+
+
+// -- LEVEL-1M KERNEL DEFINITIONS ----------------------------------------------
+
+// -- packm --
+
+// -- unpackm --
 
 
 
 
 // -- LEVEL-1V KERNEL DEFINITIONS ----------------------------------------------
 // -- amax --
-
+#define BLIS_SAMAXV_KERNEL         bli_samaxv_opt_var1
+#define BLIS_DAMAXV_KERNEL         bli_damaxv_opt_var1
 // -- addv --
 
 // -- axpyv --
+#define BLIS_DAXPYV_KERNEL         bli_daxpyv_opt_var10
+#define BLIS_SAXPYV_KERNEL         bli_saxpyv_opt_var10
+
 
 // -- copyv --
 
 // -- dotv --
+#define BLIS_DDOTV_KERNEL          bli_ddotv_opt_var1
+#define BLIS_SDOTV_KERNEL          bli_sdotv_opt_var1
 
 // -- dotxv --
+#define BLIS_SDOTXV_KERNEL         bli_sdotxv_unb_var1
+#define BLIS_DDOTXV_KERNEL         bli_ddotxv_unb_var1
 
 // -- invertv --
 
 // -- scal2v --
 
 // -- scalv --
+#define BLIS_SSCALV_KERNEL   bli_sscalv_opt_var2
+#define BLIS_DSCALV_KERNEL   bli_dscalv_opt_var2
 
 // -- setv --
 
