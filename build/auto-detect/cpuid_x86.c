@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2015, The University of Texas at Austin
+   Copyright (C) 2017, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -47,6 +48,7 @@
 #define CPUNAME_KNC          5
 #define CPUNAME_BULLDOZER    6
 #define CPUNAME_PILEDRIVER   7
+#define CPUNAME_ZEN          8
 
 static char *cpuname[] = {
   "reference",
@@ -57,6 +59,7 @@ static char *cpuname[] = {
   "mic",
   "bulldozer",
   "piledriver",
+  "zen",
 };
 
 #define BITMASK(a, b, c) ((((a) >> (b)) & (c)))
@@ -227,6 +230,14 @@ int cpu_detect()
           else
             return CPUNAME_REFERENCE; //OS don't support AVX.
         }
+      case 8:
+	switch (model){
+	case 1:
+          if(support_avx())
+	    return CPUNAME_ZEN;
+          else
+            return CPUNAME_REFERENCE; //OS don't support AVX.
+	}
       }
       break;
     }
