@@ -115,12 +115,13 @@ void bli_l3_packm
 		// buffer, then a block has already been acquired from the memory
 		// broker and cached in the control tree.
 
-		// BUT, we need to make sure that the mem_t object is not associated
-		// with a block that is too small given the size of the packed matrix
-		// that we need, according to the return value from packm_init().
+		// As a sanity check, we should make sure that the mem_t object isn't
+		// associated with a block that is too small compared to the size of
+		// the packed matrix buffer that is needed, according to the return
+		// value from packm_init().
 		siz_t cntl_mem_size = bli_mem_size( cntl_mem_p );
 
-		if ( size_needed < cntl_mem_size )
+		if ( cntl_mem_size < size_needed )
 		{
 			if ( bli_thread_am_ochief( thread ) )
 			{

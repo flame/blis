@@ -56,22 +56,24 @@ cntl_t* bli_gemmbp_cntl_create
 	else if ( family == BLIS_TRMM ) macro_kernel_p = bli_trmm_xx_ker_var2;
 
 	// Create two nodes for the macro-kernel.
-	cntl_t* gemm_cntl_bu_ke = bli_gemm_cntl_obj_create
+	cntl_t* gemm_cntl_bu_ke = bli_gemm_cntl_create_node
 	(
+	  family,  // the operation family
 	  BLIS_MR, // needed for bli_thrinfo_rgrow()
 	  NULL,    // variant function pointer not used
 	  NULL     // no sub-node; this is the leaf of the tree.
 	);
 
-	cntl_t* gemm_cntl_bp_bu = bli_gemm_cntl_obj_create
+	cntl_t* gemm_cntl_bp_bu = bli_gemm_cntl_create_node
 	(
+	  family,
 	  BLIS_NR, // not used by macro-kernel, but needed for bli_thrinfo_rgrow()
 	  macro_kernel_p,
 	  gemm_cntl_bu_ke
 	);
 
 	// Create a node for packing matrix A.
-	cntl_t* gemm_cntl_packa = bli_packm_cntl_obj_create
+	cntl_t* gemm_cntl_packa = bli_packm_cntl_create_node
 	(
 	  bli_gemm_packa,  // pack the left-hand operand
 	  bli_packm_blk_var1,
@@ -86,15 +88,16 @@ cntl_t* bli_gemmbp_cntl_create
 	);
 
 	// Create a node for partitioning the m dimension by MC.
-	cntl_t* gemm_cntl_op_bp = bli_gemm_cntl_obj_create
+	cntl_t* gemm_cntl_op_bp = bli_gemm_cntl_create_node
 	(
+	  family,
 	  BLIS_MC,
 	  bli_gemm_blk_var1,
 	  gemm_cntl_packa
 	);
 
 	// Create a node for packing matrix B.
-	cntl_t* gemm_cntl_packb = bli_packm_cntl_obj_create
+	cntl_t* gemm_cntl_packb = bli_packm_cntl_create_node
 	(
 	  bli_gemm_packb,  // pack the right-hand operand
 	  bli_packm_blk_var1,
@@ -109,16 +112,18 @@ cntl_t* bli_gemmbp_cntl_create
 	);
 
 	// Create a node for partitioning the k dimension by KC.
-	cntl_t* gemm_cntl_mm_op = bli_gemm_cntl_obj_create
+	cntl_t* gemm_cntl_mm_op = bli_gemm_cntl_create_node
 	(
+	  family,
 	  BLIS_KC,
 	  bli_gemm_blk_var3,
 	  gemm_cntl_packb
 	);
 
 	// Create a node for partitioning the n dimension by NC.
-	cntl_t* gemm_cntl_vl_mm = bli_gemm_cntl_obj_create
+	cntl_t* gemm_cntl_vl_mm = bli_gemm_cntl_create_node
 	(
+	  family,
 	  BLIS_NC,
 	  bli_gemm_blk_var2,
 	  gemm_cntl_mm_op
@@ -141,15 +146,17 @@ cntl_t* bli_gemmpb_cntl_create
 	//else if ( family == BLIS_TRMM ) macro_kernel_p = bli_trmm_xx_ker_var2;
 
 	// Create two nodes for the macro-kernel.
-	cntl_t* gemm_cntl_ub_ke = bli_gemm_cntl_obj_create
+	cntl_t* gemm_cntl_ub_ke = bli_gemm_cntl_create_node
 	(
+	  family,  // the operation family
 	  BLIS_MR, // needed for bli_thrinfo_rgrow()
 	  NULL,    // variant function pointer not used
 	  NULL     // no sub-node; this is the leaf of the tree.
 	);
 
-	cntl_t* gemm_cntl_pb_ub = bli_gemm_cntl_obj_create
+	cntl_t* gemm_cntl_pb_ub = bli_gemm_cntl_create_node
 	(
+	  family,
 	  BLIS_NR, // not used by macro-kernel, but needed for bli_thrinfo_rgrow()
 	  macro_kernel_p,
 	  gemm_cntl_ub_ke
@@ -157,7 +164,7 @@ cntl_t* bli_gemmpb_cntl_create
 
 	// Create a node for packing matrix A (which is really the right-hand
 	// operand "B").
-	cntl_t* gemm_cntl_packb = bli_packm_cntl_obj_create
+	cntl_t* gemm_cntl_packb = bli_packm_cntl_create_node
 	(
 	  bli_gemm_packb,  // pack the right-hand operand
 	  bli_packm_blk_var1,
@@ -172,8 +179,9 @@ cntl_t* bli_gemmpb_cntl_create
 	);
 
 	// Create a node for partitioning the n dimension by MC.
-	cntl_t* gemm_cntl_op_pb = bli_gemm_cntl_obj_create
+	cntl_t* gemm_cntl_op_pb = bli_gemm_cntl_create_node
 	(
+	  family,
 	  BLIS_MC,
 	  bli_gemm_blk_var2,
 	  gemm_cntl_packb
@@ -181,7 +189,7 @@ cntl_t* bli_gemmpb_cntl_create
 
 	// Create a node for packing matrix B (which is really the left-hand
 	// operand "A").
-	cntl_t* gemm_cntl_packa = bli_packm_cntl_obj_create
+	cntl_t* gemm_cntl_packa = bli_packm_cntl_create_node
 	(
 	  bli_gemm_packa,  // pack the left-hand operand
 	  bli_packm_blk_var1,
@@ -196,16 +204,18 @@ cntl_t* bli_gemmpb_cntl_create
 	);
 
 	// Create a node for partitioning the k dimension by KC.
-	cntl_t* gemm_cntl_mm_op = bli_gemm_cntl_obj_create
+	cntl_t* gemm_cntl_mm_op = bli_gemm_cntl_create_node
 	(
+	  family,
 	  BLIS_KC,
 	  bli_gemm_blk_var3,
 	  gemm_cntl_packa
 	);
 
 	// Create a node for partitioning the m dimension by NC.
-	cntl_t* gemm_cntl_vl_mm = bli_gemm_cntl_obj_create
+	cntl_t* gemm_cntl_vl_mm = bli_gemm_cntl_create_node
 	(
+	  family,
 	  BLIS_NC,
 	  bli_gemm_blk_var1,
 	  gemm_cntl_mm_op
@@ -227,13 +237,14 @@ void bli_gemm_cntl_free
 
 // -----------------------------------------------------------------------------
 
-cntl_t* bli_gemm_cntl_obj_create
+cntl_t* bli_gemm_cntl_create_node
      (
+       opid_t  family,
        bszid_t bszid,
        void*   var_func,
        cntl_t* sub_node
      )
 {
-	return bli_cntl_obj_create( bszid, var_func, NULL, sub_node );
+	return bli_cntl_create_node( family, bszid, var_func, NULL, sub_node );
 }
 

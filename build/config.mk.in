@@ -36,6 +36,10 @@
 ifndef CONFIG_MK_INCLUDED
 CONFIG_MK_INCLUDED := yes
 
+# The version string. This could be the official string or a custom
+# string forced at configure-time.
+VERSION         := @version@
+
 # The name of the configuration sub-directory.
 CONFIG_NAME     := @config_name@
 

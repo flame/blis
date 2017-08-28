@@ -49,18 +49,29 @@
 
 // -----------------------------------------------------------------------------
 
-func_t* bli_func_obj_create( void* ptr_s,
-                             void* ptr_d,
-                             void* ptr_c,
-                             void* ptr_z );
+func_t* bli_func_create
+     (
+       void* ptr_s,
+       void* ptr_d,
+       void* ptr_c,
+       void* ptr_z
+     );
 
-void bli_func_obj_init( func_t* f,
-                        void*   ptr_s,
-                        void*   ptr_d,
-                        void*   ptr_c,
-                        void*   ptr_z );
+void bli_func_init
+     (
+       func_t* f,
+       void*   ptr_s,
+       void*   ptr_d,
+       void*   ptr_c,
+       void*   ptr_z
+     );
 
-void bli_func_obj_free( func_t* f );
+void bli_func_init_null
+     (
+       func_t* f
+     );
+
+void bli_func_free( func_t* f );
 
 // -----------------------------------------------------------------------------
 

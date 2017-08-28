@@ -44,63 +44,66 @@ thrcomm_t* bli_thrcomm_create( dim_t n_threads )
 	return comm;
 }
 
-void bli_thrcomm_free( thrcomm_t* communicator )
+void bli_thrcomm_free( thrcomm_t* comm )
 {
-	if ( communicator == NULL ) return;
-	bli_thrcomm_cleanup( communicator );
-	bli_free_intl( communicator );
+	if ( comm == NULL ) return;
+	bli_thrcomm_cleanup( comm );
+	bli_free_intl( comm );
 }
 
 #ifndef BLIS_TREE_BARRIER
 
-void bli_thrcomm_init( thrcomm_t* communicator, dim_t n_threads)
+void bli_thrcomm_init( thrcomm_t* comm, dim_t n_threads)
 {
-	if ( communicator == NULL ) return;
-	communicator->sent_object = NULL;
-	communicator->n_threads = n_threads;
-	communicator->barrier_sense = 0;
-	communicator->barrier_threads_arrived = 0;
+	if ( comm == NULL ) return;
+	comm->sent_object = NULL;
+	comm->n_threads = n_threads;
+	comm->barrier_sense = 0;
+	comm->barrier_threads_arrived = 0;
 }
 
 
-void bli_thrcomm_cleanup( thrcomm_t* communicator )
+void bli_thrcomm_cleanup( thrcomm_t* comm )
 {
-	if ( communicator == NULL ) return;
+	if ( comm == NULL ) return;
 }
 
 //'Normal' barrier for openmp
 //barrier routine taken from art of multicore programming
-void bli_thrcomm_barrier( thrcomm_t* communicator, dim_t t_id )
+void bli_thrcomm_barrier( thrcomm_t* comm, dim_t t_id )
 {
-	if( communicator == NULL || communicator->n_threads == 1 )
+#if 0
+	if ( comm == NULL || comm->n_threads == 1 )
 		return;
-	bool_t my_sense = communicator->barrier_sense;
+	bool_t my_sense = comm->barrier_sense;
 	dim_t my_threads_arrived;
 
 	_Pragma( "omp atomic capture" )
-		my_threads_arrived = ++(communicator->barrier_threads_arrived);
+		my_threads_arrived = ++(comm->barrier_threads_arrived);
 
-	if ( my_threads_arrived == communicator->n_threads )
+	if ( my_threads_arrived == comm->n_threads )
 	{
-		communicator->barrier_threads_arrived = 0;
-		communicator->barrier_sense = !communicator->barrier_sense;
+		comm->barrier_threads_arrived = 0;
+		comm->barrier_sense = !comm->barrier_sense;
 	}
 	else
 	{
-		volatile bool_t* listener = &communicator->barrier_sense;
+		volatile bool_t* listener = &comm->barrier_sense;
 		while ( *listener == my_sense ) {}
 	}
+#endif
+	bli_thrcomm_barrier_atomic( comm, t_id );
 }
 
 #else
 
-void bli_thrcomm_init( thrcomm_t* communicator, dim_t n_threads)
+void bli_thrcomm_init( thrcomm_t* comm, dim_t n_threads)
 {
-	if ( communicator == NULL ) return;
-	communicator->sent_object = NULL;
-	communicator->n_threads = n_threads;
-	communicator->barriers = bli_malloc_intl( sizeof( barrier_t* ) * n_threads );
-	bli_thrcomm_tree_barrier_create( n_threads, BLIS_TREE_BARRIER_ARITY, communicator->barriers, 0 );
+	if ( comm == NULL ) return;
+	comm->sent_object = NULL;
+	comm->n_threads = n_threads;
+	comm->barriers = bli_malloc_intl( sizeof( barrier_t* ) * n_threads );
+	bli_thrcomm_tree_barrier_create( n_threads, BLIS_TREE_BARRIER_ARITY, comm->barriers, 0 );
 }
 
 //Tree barrier used for Intel Xeon Phi
@@ -145,14 +148,14 @@ barrier_t* bli_thrcomm_tree_barrier_create( int num_threads, int arity, barrier_
 	return me;
 }
 
-void bli_thrcomm_cleanup( thrcomm_t* communicator )
+void bli_thrcomm_cleanup( thrcomm_t* comm )
 {
-	if ( communicator == NULL ) return;
-	for ( dim_t i = 0; i < communicator->n_threads; i++ )
+	if ( comm == NULL ) return;
+	for ( dim_t i = 0; i < comm->n_threads; i++ )
 	{
-	   bli_thrcomm_tree_barrier_free( communicator->barriers[i] );
+	   bli_thrcomm_tree_barrier_free( comm->barriers[i] );
 	}
-	bli_free_intl( communicator->barriers );
+	bli_free_intl( comm->barriers );
 }
 
 void bli_thrcomm_tree_barrier_free( barrier_t* barrier )
@@ -204,6 +207,7 @@ void bli_thrcomm_tree_barrier( barrier_t* barack )
 void bli_l3_thread_decorator
      (
        l3int_t     func,
+       opid_t      family,
        obj_t*      alpha,
        obj_t*      a,
        obj_t*      b,
@@ -231,7 +235,7 @@ void bli_l3_thread_decorator
 		thrinfo_t* thread;
 
 		// Create a default control tree for the operation, if needed.
-		bli_l3_cntl_create_if( a, b, c, cntx, cntl, &cntl_use );
+		bli_l3_cntl_create_if( family, a, b, c, cntl, &cntl_use );
 
 		// Create the root node of the current thread's thrinfo_t structure.
 		bli_l3_thrinfo_create_root( id, gl_comm, cntx, cntl_use, &thread );
@@ -249,7 +253,7 @@ void bli_l3_thread_decorator
 		);
 
 		// Free the control tree, if one was created locally.
-		bli_l3_cntl_free_if( a, b, c, cntx, cntl, cntl_use, thread );
+		bli_l3_cntl_free_if( a, b, c, cntl, cntl_use, thread );
 
 #ifdef PRINT_THRINFO
 		threads[id] = thread;

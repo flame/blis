@@ -50,15 +50,6 @@
 	*(max) = bli_blksz_get_max( dt, b ); \
 }
 
-#define bli_blksz_get_def_for_obj( obj, b ) \
-\
-	bli_blksz_get_def( bli_obj_datatype( *(obj) ), b )
-
-#define bli_blksz_get_max_for_obj( obj, b ) \
-\
-	bli_blksz_get_max( bli_obj_datatype( *(obj) ), b )
-
-
 // blksz_t modification
 
 #define bli_blksz_set_def( val, dt, b ) \
@@ -85,8 +76,11 @@
 #define bli_blksz_copy_dt( dt_src, b_src, \
                            dt_dst, b_dst ) \
 { \
-	(b_dst)->v[ dt_dst ] = (b_src)->v[ dt_src ]; \
-	(b_dst)->e[ dt_dst ] = (b_src)->e[ dt_src ]; \
+	const dim_t v_src = bli_blksz_get_def( dt_src, b_src ); \
+	const dim_t e_src = bli_blksz_get_max( dt_src, b_src ); \
+\
+	bli_blksz_set_def( v_src, dt_dst, b_dst ); \
+	bli_blksz_set_max( e_src, dt_dst, b_dst ); \
 }
 
 #define bli_blksz_scale_def( num, den, dt, b ) \
@@ -109,7 +103,7 @@
 
 // -----------------------------------------------------------------------------
 
-blksz_t* bli_blksz_obj_create
+blksz_t* bli_blksz_create_ed
      (
        dim_t b_s, dim_t be_s,
        dim_t b_d, dim_t be_d,
@@ -117,7 +111,13 @@ blksz_t* bli_blksz_obj_create
        dim_t b_z, dim_t be_z
      );
 
-void bli_blksz_obj_init
+blksz_t* bli_blksz_create
+     (
+       dim_t b_s,  dim_t b_d,  dim_t b_c,  dim_t b_z,
+       dim_t be_s, dim_t be_d, dim_t be_c, dim_t be_z
+     );
+
+void bli_blksz_init_ed
      (
        blksz_t* b,
        dim_t    b_s, dim_t be_s,
@@ -126,7 +126,20 @@ void bli_blksz_obj_init
        dim_t    b_z, dim_t be_z
      );
 
-void bli_blksz_obj_free
+void bli_blksz_init
+     (
+       blksz_t* b,
+       dim_t b_s,  dim_t b_d,  dim_t b_c,  dim_t b_z,
+       dim_t be_s, dim_t be_d, dim_t be_c, dim_t be_z
+     );
+
+void bli_blksz_init_easy
+     (
+       blksz_t* b,
+       dim_t b_s,  dim_t b_d,  dim_t b_c,  dim_t b_z
+     );
+
+void bli_blksz_free
      (
        blksz_t* b
      );

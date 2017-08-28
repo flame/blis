@@ -35,37 +35,57 @@
 #include "blis.h"
 
 
-func_t* bli_func_obj_create( void* ptr_s,
-                             void* ptr_d,
-                             void* ptr_c,
-                             void* ptr_z )
+func_t* bli_func_create
+     (
+       void* ptr_s,
+       void* ptr_d,
+       void* ptr_c,
+       void* ptr_z
+     )
 {
 	func_t* f;
 
 	f = ( func_t* ) bli_malloc_intl( sizeof(func_t) );
 
-	bli_func_obj_init( f,
-	                   ptr_s,
-	                   ptr_d,
-	                   ptr_c,
-	                   ptr_z );
+	bli_func_init
+	(
+	  f,
+	  ptr_s,
+	  ptr_d,
+	  ptr_c,
+	  ptr_z
+	);
 
 	return f;
 }
 
-void bli_func_obj_init( func_t* f,
-                        void*   ptr_s,
-                        void*   ptr_d,
-                        void*   ptr_c,
-                        void*   ptr_z )
+void bli_func_init
+     (
+       func_t* f,
+       void*   ptr_s,
+       void*   ptr_d,
+       void*   ptr_c,
+       void*   ptr_z
+     )
 {
-	f->ptr[BLIS_BITVAL_FLOAT_TYPE]    = ptr_s;
-	f->ptr[BLIS_BITVAL_DOUBLE_TYPE]   = ptr_d;
-	f->ptr[BLIS_BITVAL_SCOMPLEX_TYPE] = ptr_c;
-	f->ptr[BLIS_BITVAL_DCOMPLEX_TYPE] = ptr_z;
+	bli_func_set_dt( ptr_s, BLIS_FLOAT,    f );
+	bli_func_set_dt( ptr_d, BLIS_DOUBLE,   f );
+	bli_func_set_dt( ptr_c, BLIS_SCOMPLEX, f );
+	bli_func_set_dt( ptr_z, BLIS_DCOMPLEX, f );
 }
 
-void bli_func_obj_free( func_t* f )
+void bli_func_init_null
+     (
+       func_t* f
+     )
+{
+	bli_func_set_dt( NULL, BLIS_FLOAT,    f );
+	bli_func_set_dt( NULL, BLIS_DOUBLE,   f );
+	bli_func_set_dt( NULL, BLIS_SCOMPLEX, f );
+	bli_func_set_dt( NULL, BLIS_DCOMPLEX, f );
+}
+
+void bli_func_free( func_t* f )
 {
 	bli_free_intl( f );
 }
@@ -75,7 +95,7 @@ void bli_func_obj_free( func_t* f )
 bool_t bli_func_is_null_dt( num_t   dt,
                             func_t* f )
 {
-	return ( f->ptr[ dt ] == NULL );
+	return ( bli_func_get_dt( dt, f ) == NULL );
 }
 
 bool_t bli_func_is_null( func_t* f )
@@ -87,7 +107,7 @@ bool_t bli_func_is_null( func_t* f )
 	// return FALSE. Otherwise, if they are all null, return TRUE.
 	for ( dt = BLIS_DT_LO; dt <= BLIS_DT_HI; ++dt )
 	{
-		if ( f->ptr[ dt ] != NULL )
+		if ( bli_func_get_dt( dt, f ) != NULL )
 		{
 			r_val = FALSE;
 			break;

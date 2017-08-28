@@ -53,10 +53,10 @@ void bli_gemm_blk_var3
 	dim_t k_trans;
 
 	// Determine the direction in which to partition (forwards or backwards).
-	direct = bli_l3_direct( a, b, c, cntx );
+	direct = bli_l3_direct( a, b, c, cntl );
 
 	// Prune any zero region that exists along the partitioning dimension.
-	bli_l3_prune_unref_mparts_k( a, b, c, cntx );
+	bli_l3_prune_unref_mparts_k( a, b, c, cntl );
 
 	// Query dimension in partitioning direction.
 	k_trans = bli_obj_width_after_trans( *a );
@@ -66,7 +66,7 @@ void bli_gemm_blk_var3
 	{
 		// Determine the current algorithmic blocksize.
 		b_alg = bli_l3_determine_kc( direct, i, k_trans, a, b,
-		                             bli_cntl_bszid( cntl ), cntx );
+		                             bli_cntl_bszid( cntl ), cntx, cntl );
 
 		// Acquire partitions for A1 and B1.
 		bli_acquire_mpart_ndim( direct, BLIS_SUBPART1,
@@ -109,7 +109,7 @@ void bli_gemm_blk_var3
 		// row-panel of C, and thus beta is applied to all of C exactly once.
 		// Thus, for neither trmm nor trmm3 should we reset the scalar on C
 		// after the first iteration.
-		if ( bli_cntx_get_family( cntx ) != BLIS_TRMM )
+		if ( bli_cntl_family( cntl ) != BLIS_TRMM )
 		if ( i == 0 ) bli_obj_scalar_reset( c );
 	}
 }

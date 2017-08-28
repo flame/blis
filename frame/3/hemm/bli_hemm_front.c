@@ -89,9 +89,6 @@ void bli_hemm_front
 		bli_obj_swap( a_local, b_local );
 	}
 
-	// Set the operation family id in the context.
-	bli_cntx_set_family( BLIS_GEMM, cntx );
-
 	// Record the threading for each level within the context.
 	bli_cntx_set_thrloop_from_env( BLIS_HEMM, BLIS_LEFT, cntx,
                                    bli_obj_length( c_local ),
@@ -102,6 +99,7 @@ void bli_hemm_front
 	bli_l3_thread_decorator
 	(
 	  bli_gemm_int,
+	  BLIS_GEMM, // operation family id
 	  alpha,
 	  &a_local,
 	  &b_local,

@@ -97,10 +97,10 @@ void bli_her_cntl_init()
 
 void bli_her_cntl_finalize()
 {
-	bli_cntl_obj_free( her_cntl_bs_ke_lrow_ucol );
-	bli_cntl_obj_free( her_cntl_bs_ke_lcol_urow );
-	bli_cntl_obj_free( her_cntl_ge_lrow_ucol );
-	bli_cntl_obj_free( her_cntl_ge_lcol_urow );
+	bli_cntl_free_node( her_cntl_bs_ke_lrow_ucol );
+	bli_cntl_free_node( her_cntl_bs_ke_lcol_urow );
+	bli_cntl_free_node( her_cntl_ge_lrow_ucol );
+	bli_cntl_free_node( her_cntl_ge_lcol_urow );
 }
 
 

@@ -595,6 +595,8 @@ void bli_sgemm_asm_6x16
 	"                                            \n\t"
 	"                                            \n\t"
 	".SDONE:                                     \n\t"
+    "                                            \n\t"
+    "vzeroupper                                  \n\t"
 	"                                            \n\t"
 
 	: // output operands (none)
@@ -734,6 +736,8 @@ void bli_dgemm_asm_6x8
 	"vmovaps           -1 * 32(%%rbx), %%ymm1    \n\t"
 	"                                            \n\t"
 	"                                            \n\t" // iteration 1
+	"prefetcht0   72 * 8(%%rax)                  \n\t"
+	"                                            \n\t"
 	"vbroadcastsd       6 *  8(%%rax), %%ymm2    \n\t"
 	"vbroadcastsd       7 *  8(%%rax), %%ymm3    \n\t"
 	"vfmadd231pd       %%ymm0, %%ymm2, %%ymm4    \n\t"
@@ -759,7 +763,7 @@ void bli_dgemm_asm_6x8
 	"vmovaps            1 * 32(%%rbx), %%ymm1    \n\t"
 	"                                            \n\t"
 	"                                            \n\t" // iteration 2
-	"prefetcht0   76 * 8(%%rax)                  \n\t"
+	"prefetcht0   80 * 8(%%rax)                  \n\t"
 	"                                            \n\t"
 	"vbroadcastsd      12 *  8(%%rax), %%ymm2    \n\t"
 	"vbroadcastsd      13 *  8(%%rax), %%ymm3    \n\t"
@@ -1173,6 +1177,8 @@ void bli_dgemm_asm_6x8
 	"                                            \n\t"
 	"                                            \n\t"
 	".DDONE:                                     \n\t"
+    "                                            \n\t"
+    "vzeroupper                                  \n\t"
 	"                                            \n\t"
 
 	: // output operands (none)
@@ -1700,6 +1706,8 @@ void bli_cgemm_asm_3x8
 	"                                            \n\t"
 	"                                            \n\t"
 	".CDONE:                                     \n\t"
+    "                                            \n\t"
+    "vzeroupper                                  \n\t"
 	"                                            \n\t"
 
 	: // output operands (none)
@@ -2226,6 +2234,8 @@ void bli_zgemm_asm_3x4
 	"                                            \n\t"
 	"                                            \n\t"
 	".ZDONE:                                     \n\t"
+    "                                            \n\t"
+    "vzeroupper                                  \n\t"
 	"                                            \n\t"
 
 	: // output operands (none)

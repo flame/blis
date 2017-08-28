@@ -39,14 +39,14 @@
 // NOTE: Since these functions currently do nothing, they are defined
 // as empty macros in bli_cntx.
 //
-void bli_cntx_obj_create( cntx_t* cntx )
+void bli_cntx_create( cntx_t* cntx )
 {
 	// Since cntx_t objects contain statically-allocated arrays,
 	// we don't need to do anything in order to create the cntx_t
 	// instance.
 }
 
-void bli_cntx_obj_free( cntx_t* cntx )
+void bli_cntx_free( cntx_t* cntx )
 {
 	// Just as we don't need to do anything in order to create a
 	// cntx_t instance, we don't need to do anything to destory
@@ -54,7 +54,7 @@ void bli_cntx_obj_free( cntx_t* cntx )
 }
 #endif
 
-void bli_cntx_obj_clear( cntx_t* cntx )
+void bli_cntx_clear( cntx_t* cntx )
 {
 	// Fill the entire cntx_t structure with zeros.
 	memset( ( void* )cntx, 0, sizeof( cntx ) );
@@ -108,8 +108,11 @@ void bli_cntx_init( cntx_t* cntx )
 
 // -----------------------------------------------------------------------------
 
-blksz_t* bli_cntx_get_blksz( bszid_t bs_id,
-                             cntx_t* cntx )
+blksz_t* bli_cntx_get_blksz
+     (
+       bszid_t bs_id,
+       cntx_t* cntx
+     )
 {
 	blksz_t* blkszs = bli_cntx_blkszs_buf( cntx );
 	blksz_t* blksz  = &blkszs[ bs_id ];
@@ -142,8 +145,11 @@ dim_t bli_cntx_get_blksz_max_dt( num_t   dt,
 }
 #endif
 
-blksz_t* bli_cntx_get_bmult( bszid_t bs_id,
-                             cntx_t* cntx )
+blksz_t* bli_cntx_get_bmult
+     (
+       bszid_t bs_id,
+       cntx_t* cntx
+     )
 {
 	blksz_t* blkszs = bli_cntx_blkszs_buf( cntx );
 	bszid_t* bmults = bli_cntx_bmults_buf( cntx );
@@ -166,8 +172,11 @@ dim_t bli_cntx_get_bmult_dt( num_t   dt,
 }
 #endif
 
-func_t* bli_cntx_get_l3_ukr( l3ukr_t ukr_id,
-                             cntx_t* cntx )
+func_t* bli_cntx_get_l3_ukr
+     (
+       l3ukr_t ukr_id,
+       cntx_t* cntx
+     )
 {
 	func_t* l3_vir_ukrs = bli_cntx_l3_vir_ukrs_buf( cntx );
 	func_t* l3_nat_ukrs = bli_cntx_l3_nat_ukrs_buf( cntx );
@@ -210,8 +219,11 @@ void* bli_cntx_get_l3_ukr_dt( num_t   dt,
 }
 #endif
 
-func_t* bli_cntx_get_l3_vir_ukr( l3ukr_t ukr_id,
-                                 cntx_t* cntx )
+func_t* bli_cntx_get_l3_vir_ukr
+     (
+       l3ukr_t ukr_id,
+       cntx_t* cntx
+     )
 {
 	func_t* l3_vir_ukrs = bli_cntx_l3_vir_ukrs_buf( cntx );
 	func_t* l3_vir_ukr  = &l3_vir_ukrs[ ukr_id ];
@@ -235,8 +247,11 @@ void* bli_cntx_get_l3_vir_ukr_dt( num_t   dt,
 }
 #endif
 
-func_t* bli_cntx_get_l3_nat_ukr( l3ukr_t ukr_id,
-                                 cntx_t* cntx )
+func_t* bli_cntx_get_l3_nat_ukr
+     (
+       l3ukr_t ukr_id,
+       cntx_t* cntx
+     )
 {
 	func_t* l3_nat_ukrs = bli_cntx_l3_nat_ukrs_buf( cntx );
 	func_t* l3_nat_ukr  = &l3_nat_ukrs[ ukr_id ];
@@ -260,8 +275,11 @@ void* bli_cntx_get_l3_nat_ukr_dt( num_t   dt,
 }
 #endif
 
-func_t* bli_cntx_get_l1f_ker( l1fkr_t ker_id,
-                              cntx_t* cntx )
+func_t* bli_cntx_get_l1f_ker
+     (
+       l1fkr_t ker_id,
+       cntx_t* cntx
+     )
 {
 	func_t* l1f_kers = bli_cntx_l1f_kers_buf( cntx );
 	func_t* l1f_ker  = &l1f_kers[ ker_id ];
@@ -283,8 +301,11 @@ void* bli_cntx_get_l1f_ker_dt( num_t   dt,
 }
 #endif
 
-func_t* bli_cntx_get_l1v_ker( l1vkr_t ker_id,
-                              cntx_t* cntx )
+func_t* bli_cntx_get_l1v_ker
+     (
+       l1vkr_t ker_id,
+       cntx_t* cntx
+     )
 {
 	func_t* l1v_kers = bli_cntx_l1v_kers_buf( cntx );
 	func_t* l1v_ker  = &l1v_kers[ ker_id ];
@@ -306,8 +327,11 @@ void* bli_cntx_get_l1v_ker_dt( num_t   dt,
 }
 #endif
 
-mbool_t* bli_cntx_get_l3_nat_ukr_prefs( l3ukr_t ukr_id,
-                                        cntx_t* cntx )
+mbool_t* bli_cntx_get_l3_nat_ukr_prefs
+     (
+       l3ukr_t ukr_id,
+       cntx_t* cntx
+     )
 {
 	mbool_t* l3_nat_ukrs_prefs = bli_cntx_l3_nat_ukrs_prefs_buf( cntx );
 	mbool_t* l3_nat_ukrs_pref  = &l3_nat_ukrs_prefs[ ukr_id ];
@@ -316,12 +340,30 @@ mbool_t* bli_cntx_get_l3_nat_ukr_prefs( l3ukr_t ukr_id,
 	return l3_nat_ukrs_pref;
 }
 
-func_t* bli_cntx_get_packm_ukr( cntx_t* cntx )
+func_t* bli_cntx_get_packm_ker
+     (
+       l1mkr_t ker_id,
+       cntx_t* cntx
+     )
 {
-	func_t* packm_ukrs = bli_cntx_packm_ukrs( cntx );
+	func_t* packm_kers = bli_cntx_packm_kers_buf( cntx );
+	func_t* packm_ker  = &packm_kers[ ker_id ];
 
 	// Return the address of the func_t that contains the packm ukernels.
-	return packm_ukrs;
+	return packm_ker;
+}
+
+func_t* bli_cntx_get_unpackm_ker
+     (
+       l1mkr_t ker_id,
+       cntx_t* cntx
+     )
+{
+	func_t* unpackm_kers = bli_cntx_unpackm_kers_buf( cntx );
+	func_t* unpackm_ker  = &unpackm_kers[ ker_id ];
+
+	// Return the address of the func_t that contains the unpackm ukernels.
+	return unpackm_ker;
 }
 
 #if 0
@@ -360,7 +402,11 @@ dim_t bli_cntx_get_num_threads( cntx_t* cntx )
 	       bli_cntx_ir_way( cntx );
 }
 
-dim_t bli_cntx_get_num_threads_in( cntx_t* cntx, cntl_t* cntl )
+dim_t bli_cntx_get_num_threads_in
+     (
+       cntx_t* cntx,
+       cntl_t* cntl
+     )
 {
 	dim_t n_threads_in = 1;
 
@@ -384,14 +430,6 @@ dim_t bli_cntx_get_num_threads_in( cntx_t* cntx, cntl_t* cntl )
 
 // -----------------------------------------------------------------------------
 
-#if 1
-//
-// NOTE: This function is disabled because:
-// - we currently do not have any need to set a context direclty with
-//   blksz_t objects
-// - it may be broken; it needs to be synced up with the corresponding
-//   function in bli_gks.c.
-//
 void bli_cntx_set_blkszs( ind_t method, dim_t n_bs, ... )
 {
 	/* Example prototypes:
@@ -454,8 +492,8 @@ void bli_cntx_set_blkszs( ind_t method, dim_t n_bs, ... )
 			// Here, we query the variable argument list for:
 			// - the bszid_t of the blocksize we're about to process,
 			// - the address of the blksz_t object, and
-			// - the bszid_t of the multiple we need to associate with
-			//   the blksz_t object.
+			// - the bszid_t of the multiple
+			// that we need to associate with the blksz_t object.
 			bszid_t  bs_id = va_arg( args, bszid_t  );
 			blksz_t* blksz = va_arg( args, blksz_t* );
 			bszid_t  bm_id = va_arg( args, bszid_t  );
@@ -473,9 +511,8 @@ void bli_cntx_set_blkszs( ind_t method, dim_t n_bs, ... )
 		{
 			// Here, we query the variable argument list for:
 			// - the bszid_t of the blocksize we're about to process,
-			// - the address of the blksz_t object, and
-			// - the bszid_t of the multiple we need to associate with
-			//   the blksz_t object.
+			// - the address of the blksz_t object,
+			// - the bszid_t of the multiple, and
 			// - the scalars we wish to apply to the real blocksizes to
 			//   come up with the induced complex blocksizes (for default
 			//   and maximum blocksizes).
@@ -536,6 +573,7 @@ void bli_cntx_set_blkszs( ind_t method, dim_t n_bs, ... )
 			// location within the context's blksz_t array. Do the same
 			// for the blocksize multiple id.
 			//cntx_blkszs[ bs_id ] = *blksz;
+			//bli_blksz_copy_smart( blksz, cntx_blksz );
 			bli_blksz_copy( blksz, cntx_blksz );
 
 			// Copy the blocksize multiple id into the context.
@@ -624,14 +662,16 @@ void bli_cntx_set_blkszs( ind_t method, dim_t n_bs, ... )
 	bli_free_intl( dsclrs );
 	bli_free_intl( msclrs );
 }
-#endif
 
 // -----------------------------------------------------------------------------
 
-void bli_cntx_set_blksz( bszid_t  bs_id,
-                         blksz_t* blksz,
-                         bszid_t  mult_id,
-                         cntx_t*  cntx )
+void bli_cntx_set_blksz
+     (
+       bszid_t  bs_id,
+       blksz_t* blksz,
+       bszid_t  mult_id,
+       cntx_t*  cntx
+     )
 {
 	blksz_t* blkszs = bli_cntx_blkszs_buf( cntx );
 	bszid_t* bmults = bli_cntx_bmults_buf( cntx );
@@ -645,20 +685,111 @@ void bli_cntx_set_blksz( bszid_t  bs_id,
 	bmults[ bs_id ] = mult_id;
 }
 
-void bli_cntx_set_l3_vir_ukr( l3ukr_t ukr_id,
-                              func_t* func,
-                              cntx_t* cntx )
-{
-	func_t* l3_vir_ukrs = bli_cntx_l3_vir_ukrs_buf( cntx );
+// -----------------------------------------------------------------------------
 
-	// Copy the function object into the specified location within
-	// the context's virtual level-3 ukernel array.
-	l3_vir_ukrs[ ukr_id ] = *func;
+void bli_cntx_set_l3_nat_ukrs( dim_t n_ukrs, ... )
+{
+	/* Example prototypes:
+
+	   void bli_cntx_set_l3_nat_ukrs
+	   (
+	     dim_t   n_ukrs,
+	     l3ukr_t ukr0_id, num_t dt0, void* ukr0_fp, bool_t pref0,
+	     l3ukr_t ukr1_id, num_t dt1, void* ukr1_fp, bool_t pref1,
+	     l3ukr_t ukr2_id, num_t dt2, void* ukr2_fp, bool_t pref2,
+	     ...
+	     cntx_t* cntx
+	   );
+	*/
+	va_list   args;
+	dim_t     i;
+
+	// Allocate some temporary local arrays.
+	l3ukr_t* ukr_ids   = bli_malloc_intl( n_ukrs * sizeof( l3ukr_t ) );
+	num_t*   ukr_dts   = bli_malloc_intl( n_ukrs * sizeof( num_t   ) );
+	void**   ukr_fps   = bli_malloc_intl( n_ukrs * sizeof( void*   ) );
+	bool_t*  ukr_prefs = bli_malloc_intl( n_ukrs * sizeof( bool_t  ) );
+
+	// -- Begin variable argument section --
+
+	// Initialize variable argument environment.
+	va_start( args, n_ukrs );
+
+	// Process n_ukrs tuples.
+	for ( i = 0; i < n_ukrs; ++i )
+	{
+		// Here, we query the variable argument list for:
+		// - the l3ukr_t of the kernel we're about to process,
+		// - the datatype of the kernel,
+		// - the kernel function pointer, and
+		// - the kernel function storage preference
+		// that we need to store to the context.
+		const l3ukr_t  ukr_id   = va_arg( args, l3ukr_t );
+		const num_t    ukr_dt   = va_arg( args, num_t   );
+		      void*    ukr_fp   = va_arg( args, void*   );
+		const bool_t   ukr_pref = va_arg( args, bool_t  );
+
+		// Store the values in our temporary arrays.
+		ukr_ids[ i ]   = ukr_id;
+		ukr_dts[ i ]   = ukr_dt;
+		ukr_fps[ i ]   = ukr_fp;
+		ukr_prefs[ i ] = ukr_pref;
+	}
+
+	// The last argument should be the context pointer.
+	cntx_t* cntx = va_arg( args, cntx_t* );
+
+	// Shutdown variable argument environment and clean up stack.
+	va_end( args );
+
+	// -- End variable argument section --
+
+	// Query the context for the addresses of:
+	// - the l3 native ukernel func_t array
+	// - the l3 native ukernel preferences array
+	func_t*  cntx_l3_nat_ukrs       = bli_cntx_l3_nat_ukrs_buf( cntx );
+	mbool_t* cntx_l3_nat_ukrs_prefs = bli_cntx_l3_nat_ukrs_prefs_buf( cntx );
+
+	// Now that we have the context address, we want to copy the values
+	// from the temporary buffers into the corresponding buffers in the
+	// context.
+
+	// Process each blocksize id tuple provided.
+	for ( i = 0; i < n_ukrs; ++i )
+	{
+		// Read the current blocksize id, blksz_t* pointer, blocksize
+		// multiple id, and blocksize scalar.
+		const l3ukr_t ukr_id   = ukr_ids[ i ];
+		const num_t   ukr_dt   = ukr_dts[ i ];
+		      void*   ukr_fp   = ukr_fps[ i ];
+		const bool_t  ukr_pref = ukr_prefs[ i ];
+
+		// Index into the func_t and mbool_t for the current kernel id
+		// being processed.
+		func_t*       ukrs   = &cntx_l3_nat_ukrs[ ukr_id ];
+		mbool_t*      prefs  = &cntx_l3_nat_ukrs_prefs[ ukr_id ];
+
+		// Store the ukernel function pointer and preference values into
+		// the context.
+		bli_func_set_dt( ukr_fp, ukr_dt, ukrs );
+		bli_mbool_set_dt( ukr_pref, ukr_dt, prefs );
+	}
+
+	// Free the temporary local arrays.
+	bli_free_intl( ukr_ids );
+	bli_free_intl( ukr_dts );
+	bli_free_intl( ukr_fps );
+	bli_free_intl( ukr_prefs );
 }
 
-void bli_cntx_set_l3_nat_ukr( l3ukr_t ukr_id,
-                              func_t* func,
-                              cntx_t* cntx )
+// -----------------------------------------------------------------------------
+
+void bli_cntx_set_l3_nat_ukr
+     (
+       l3ukr_t ukr_id,
+       func_t* func,
+       cntx_t* cntx
+     )
 {
 	func_t* l3_nat_ukrs = bli_cntx_l3_nat_ukrs_buf( cntx );
 
@@ -667,9 +798,12 @@ void bli_cntx_set_l3_nat_ukr( l3ukr_t ukr_id,
 	l3_nat_ukrs[ ukr_id ] = *func;
 }
 
-void bli_cntx_set_l3_nat_ukr_prefs( l3ukr_t  ukr_id,
-                                    mbool_t* prefs,
-                                    cntx_t*  cntx )
+void bli_cntx_set_l3_nat_ukr_prefs
+     (
+       l3ukr_t  ukr_id,
+       mbool_t* prefs,
+       cntx_t*  cntx
+     )
 {
 	mbool_t* l3_nat_ukrs_prefs = bli_cntx_l3_nat_ukrs_prefs_buf( cntx );
 
@@ -678,9 +812,26 @@ void bli_cntx_set_l3_nat_ukr_prefs( l3ukr_t  ukr_id,
 	l3_nat_ukrs_prefs[ ukr_id ] = *prefs;
 }
 
-void bli_cntx_set_l1f_ker( l1fkr_t ker_id,
-                           func_t* func,
-                           cntx_t* cntx )
+void bli_cntx_set_l3_vir_ukr
+     (
+       l3ukr_t ukr_id,
+       func_t* func,
+       cntx_t* cntx
+     )
+{
+	func_t* l3_vir_ukrs = bli_cntx_l3_vir_ukrs_buf( cntx );
+
+	// Copy the function object into the specified location within
+	// the context's virtual level-3 ukernel array.
+	l3_vir_ukrs[ ukr_id ] = *func;
+}
+
+void bli_cntx_set_l1f_ker
+     (
+       l1fkr_t ker_id,
+       func_t* func,
+       cntx_t* cntx
+     )
 {
 	func_t* l1f_kers = bli_cntx_l1f_kers_buf( cntx );
 
@@ -689,9 +840,12 @@ void bli_cntx_set_l1f_ker( l1fkr_t ker_id,
 	l1f_kers[ ker_id ] = *func;
 }
 
-void bli_cntx_set_l1v_ker( l1vkr_t ker_id,
-                           func_t* func,
-                           cntx_t* cntx )
+void bli_cntx_set_l1v_ker
+     (
+       l1vkr_t ker_id,
+       func_t* func,
+       cntx_t* cntx
+     )
 {
 	func_t* l1v_kers = bli_cntx_l1v_kers_buf( cntx );
 
@@ -700,43 +854,154 @@ void bli_cntx_set_l1v_ker( l1vkr_t ker_id,
 	l1v_kers[ ker_id ] = *func;
 }
 
-void bli_cntx_set_packm_ukr( func_t* func,
-                             cntx_t* cntx )
-{
-	func_t* packm_ukrs = bli_cntx_packm_ukrs( cntx );
+// -----------------------------------------------------------------------------
 
-	// Copy the function object into the context's packm ukernel object.
-	*packm_ukrs = *func;
+void bli_cntx_set_packm_kers( dim_t n_kers, ... )
+{
+	/* Example prototypes:
+
+	   void bli_cntx_set_packm_kers
+	   (
+	     dim_t   n_ukrs,
+	     l1mkr_t ker0_id, num_t ker0_dt, void* ker0_fp,
+	     l1mkr_t ker1_id, num_t ker1_dt, void* ker1_fp,
+	     l1mkr_t ker2_id, num_t ker2_dt, void* ker2_fp,
+	     ...
+	     cntx_t* cntx
+	   );
+	*/
+	va_list   args;
+	dim_t     i;
+
+	// Allocate some temporary local arrays.
+	l1mkr_t* ker_ids   = bli_malloc_intl( n_kers * sizeof( l1mkr_t ) );
+	num_t*   ker_dts   = bli_malloc_intl( n_kers * sizeof( num_t   ) );
+	void**   ker_fps   = bli_malloc_intl( n_kers * sizeof( void*   ) );
+
+	// -- Begin variable argument section --
+
+	// Initialize variable argument environment.
+	va_start( args, n_kers );
+
+	// Process n_kers tuples.
+	for ( i = 0; i < n_kers; ++i )
+	{
+		// Here, we query the variable argument list for:
+		// - the l1mkr_t of the kernel we're about to process,
+		// - the datatype of the kernel, and
+		// - the kernel function pointer
+		// that we need to store to the context.
+		const l1mkr_t  ker_id   = va_arg( args, l1mkr_t );
+		const num_t    ker_dt   = va_arg( args, num_t   );
+		      void*    ker_fp   = va_arg( args, void*   );
+
+		// Store the values in our temporary arrays.
+		ker_ids[ i ]   = ker_id;
+		ker_dts[ i ]   = ker_dt;
+		ker_fps[ i ]   = ker_fp;
+	}
+
+	// The last argument should be the context pointer.
+	cntx_t* cntx = va_arg( args, cntx_t* );
+
+	// Shutdown variable argument environment and clean up stack.
+	va_end( args );
+
+	// -- End variable argument section --
+
+	// Query the context for the address of:
+	// - the packm kernels func_t array
+	func_t* cntx_packm_kers = bli_cntx_packm_kers_buf( cntx );
+
+	// Now that we have the context address, we want to copy the values
+	// from the temporary buffers into the corresponding buffers in the
+	// context.
+
+	// Process each blocksize id tuple provided.
+	for ( i = 0; i < n_kers; ++i )
+	{
+		// Read the current blocksize id, blksz_t* pointer, blocksize
+		// multiple id, and blocksize scalar.
+		const l1mkr_t ker_id   = ker_ids[ i ];
+		const num_t   ker_dt   = ker_dts[ i ];
+		      void*   ker_fp   = ker_fps[ i ];
+
+		// Index into the func_t and mbool_t for the current kernel id
+		// being processed.
+		func_t*       kers     = &cntx_packm_kers[ ker_id ];
+
+		// Store the ukernel function pointer and preference values into
+		// the context.
+		bli_func_set_dt( ker_fp, ker_dt, kers );
+	}
+
+	// Free the temporary local arrays.
+	bli_free_intl( ker_ids );
+	bli_free_intl( ker_dts );
+	bli_free_intl( ker_fps );
 }
 
-void bli_cntx_set_ind_method( ind_t   method,
-                              cntx_t* cntx )
+// -----------------------------------------------------------------------------
+
+void bli_cntx_set_packm_ker
+     (
+       l1mkr_t ker_id,
+       func_t* func,
+       cntx_t* cntx
+     )
+{
+	func_t* packm_kers = bli_cntx_packm_kers_buf( cntx );
+
+	// Copy the function object into the specified location within
+	// the context's packm kernel array.
+	packm_kers[ ker_id ] = *func;
+}
+
+// -----------------------------------------------------------------------------
+
+void bli_cntx_set_ind_method
+     (
+       ind_t   method,
+       cntx_t* cntx
+     )
 {
 	bli_cntx_set_method( method, cntx );
 }
 
-void bli_cntx_set_pack_schema_ab_blockpanel( pack_t  schema_a,
-                                             pack_t  schema_b,
-                                             cntx_t* cntx )
+void bli_cntx_set_pack_schema_ab_blockpanel
+     (
+       pack_t  schema_a,
+       pack_t  schema_b,
+       cntx_t* cntx
+     )
 {
 	bli_cntx_set_schema_a_block( schema_a, cntx );
 	bli_cntx_set_schema_b_panel( schema_b, cntx );
 }
 
-void bli_cntx_set_pack_schema_a_block( pack_t  schema_a,
-                                       cntx_t* cntx )
+void bli_cntx_set_pack_schema_a_block
+     (
+       pack_t  schema_a,
+       cntx_t* cntx
+     )
 {
 	bli_cntx_set_schema_a_block( schema_a, cntx );
 }
 
-void bli_cntx_set_pack_schema_b_panel( pack_t  schema_b,
-                                       cntx_t* cntx )
+void bli_cntx_set_pack_schema_b_panel
+     (
+       pack_t  schema_b,
+       cntx_t* cntx
+     )
 {
 	bli_cntx_set_schema_b_panel( schema_b, cntx );
 }
 
-void bli_cntx_set_pack_schema_c_panel( pack_t  schema_c,
-                                       cntx_t* cntx )
+void bli_cntx_set_pack_schema_c_panel
+     (
+       pack_t  schema_c,
+       cntx_t* cntx
+     )
 {
 	bli_cntx_set_schema_c_panel( schema_c, cntx );
 }
@@ -749,17 +1014,24 @@ void bli_cntx_set_ukr_anti_pref( bool_t  anti_pref,
 }
 #endif
 
-void bli_cntx_set_thrloop_from_env( opid_t l3_op, side_t side, cntx_t* cntx,
-                                    dim_t m, dim_t n, dim_t k )
+void bli_cntx_set_thrloop_from_env
+     (
+       opid_t  l3_op,
+       side_t  side,
+       cntx_t* cntx,
+       dim_t   m,
+       dim_t   n,
+       dim_t   k
+     )
 {
 	dim_t jc, pc, ic, jr, ir;
 
 #ifdef BLIS_ENABLE_MULTITHREADING
 
-	int nthread = bli_env_read_nway( "BLIS_NUM_THREADS", -1 );
+	int nthread = bli_thread_get_env( "BLIS_NUM_THREADS", -1 );
 
 	if ( nthread == -1 )
-	    nthread = bli_env_read_nway( "OMP_NUM_THREADS", -1 );
+	    nthread = bli_thread_get_env( "OMP_NUM_THREADS", -1 );
 
 	if ( nthread < 1 ) nthread = 1;
 
@@ -786,10 +1058,10 @@ void bli_cntx_set_thrloop_from_env( opid_t l3_op, side_t side, cntx_t* cntx,
 
     pc = 1;
 
-    dim_t jc_env = bli_env_read_nway( "BLIS_JC_NT", -1 );
-    dim_t ic_env = bli_env_read_nway( "BLIS_IC_NT", -1 );
-    dim_t jr_env = bli_env_read_nway( "BLIS_JR_NT", -1 );
-    dim_t ir_env = bli_env_read_nway( "BLIS_IR_NT", -1 );
+    dim_t jc_env = bli_thread_get_env( "BLIS_JC_NT", -1 );
+    dim_t ic_env = bli_thread_get_env( "BLIS_IC_NT", -1 );
+    dim_t jr_env = bli_thread_get_env( "BLIS_JR_NT", -1 );
+    dim_t ir_env = bli_thread_get_env( "BLIS_IR_NT", -1 );
 
     if (jc_env != -1 || ic_env != -1 || jr_env != -1 || ir_env != -1)
     {
@@ -882,9 +1154,12 @@ void bli_cntx_set_thrloop_from_env( opid_t l3_op, side_t side, cntx_t* cntx,
 
 // -----------------------------------------------------------------------------
 
-bool_t bli_cntx_l3_nat_ukr_prefers_rows_dt( num_t   dt,
-                                            l3ukr_t ukr_id,
-                                            cntx_t* cntx )
+bool_t bli_cntx_l3_nat_ukr_prefers_rows_dt
+     (
+       num_t   dt,
+       l3ukr_t ukr_id,
+       cntx_t* cntx
+     )
 {
 	mbool_t* ukrs_prefs = bli_cntx_get_l3_nat_ukr_prefs( ukr_id, cntx );
 	bool_t   ukr_prefs  = bli_mbool_get_dt( dt, ukrs_prefs );
@@ -894,9 +1169,12 @@ bool_t bli_cntx_l3_nat_ukr_prefers_rows_dt( num_t   dt,
 	return ukr_prefs == TRUE;
 }
 
-bool_t bli_cntx_l3_nat_ukr_prefers_cols_dt( num_t   dt,
-                                            l3ukr_t ukr_id,
-                                            cntx_t* cntx )
+bool_t bli_cntx_l3_nat_ukr_prefers_cols_dt
+     (
+       num_t   dt,
+       l3ukr_t ukr_id,
+       cntx_t* cntx
+     )
 {
 	mbool_t* ukrs_prefs = bli_cntx_get_l3_nat_ukr_prefs( ukr_id, cntx );
 	bool_t   ukr_prefs  = bli_mbool_get_dt( dt, ukrs_prefs );
@@ -906,16 +1184,22 @@ bool_t bli_cntx_l3_nat_ukr_prefers_cols_dt( num_t   dt,
 	return ukr_prefs == FALSE;
 }
 
-bool_t bli_cntx_l3_nat_ukr_prefers_storage_of( obj_t*  obj,
-                                               l3ukr_t ukr_id,
-                                               cntx_t* cntx )
+bool_t bli_cntx_l3_nat_ukr_prefers_storage_of
+     (
+       obj_t*  obj,
+       l3ukr_t ukr_id,
+       cntx_t* cntx
+     )
 {
 	return !bli_cntx_l3_nat_ukr_dislikes_storage_of( obj, ukr_id, cntx );
 }
 
-bool_t bli_cntx_l3_nat_ukr_dislikes_storage_of( obj_t*  obj,
-                                                l3ukr_t ukr_id,
-                                                cntx_t* cntx )
+bool_t bli_cntx_l3_nat_ukr_dislikes_storage_of
+     (
+       obj_t*  obj,
+       l3ukr_t ukr_id,
+       cntx_t* cntx
+     )
 {
 	const num_t  dt    = bli_obj_datatype( *obj );
 	const bool_t ukr_prefers_rows
@@ -930,9 +1214,12 @@ bool_t bli_cntx_l3_nat_ukr_dislikes_storage_of( obj_t*  obj,
 	return r_val;
 }
 
-bool_t bli_cntx_l3_nat_ukr_eff_prefers_storage_of( obj_t*  obj,
-                                                   l3ukr_t ukr_id,
-                                                   cntx_t* cntx )
+bool_t bli_cntx_l3_nat_ukr_eff_prefers_storage_of
+     (
+       obj_t*  obj,
+       l3ukr_t ukr_id,
+       cntx_t* cntx
+     )
 {
 	bool_t r_val = bli_cntx_l3_nat_ukr_prefers_storage_of( obj, ukr_id, cntx );
 
@@ -942,9 +1229,12 @@ bool_t bli_cntx_l3_nat_ukr_eff_prefers_storage_of( obj_t*  obj,
 	return r_val;
 }
 
-bool_t bli_cntx_l3_nat_ukr_eff_dislikes_storage_of( obj_t*  obj,
-                                                    l3ukr_t ukr_id,
-                                                    cntx_t* cntx )
+bool_t bli_cntx_l3_nat_ukr_eff_dislikes_storage_of
+     (
+       obj_t*  obj,
+       l3ukr_t ukr_id,
+       cntx_t* cntx
+     )
 {
 	bool_t r_val = bli_cntx_l3_nat_ukr_dislikes_storage_of( obj, ukr_id, cntx );
 
@@ -956,9 +1246,12 @@ bool_t bli_cntx_l3_nat_ukr_eff_dislikes_storage_of( obj_t*  obj,
 
 // -----------------------------------------------------------------------------
 
-bool_t bli_cntx_l3_ukr_prefers_rows_dt( num_t   dt,
-                                        l3ukr_t ukr_id,
-                                        cntx_t* cntx )
+bool_t bli_cntx_l3_ukr_prefers_rows_dt
+     (
+       num_t   dt,
+       l3ukr_t ukr_id,
+       cntx_t* cntx
+     )
 {
 	// Reference the ukr storage preferences of the corresponding real
 	// micro-kernel for induced methods.
@@ -968,9 +1261,12 @@ bool_t bli_cntx_l3_ukr_prefers_rows_dt( num_t   dt,
 	return bli_cntx_l3_nat_ukr_prefers_rows_dt( dt, ukr_id, cntx );
 }
 
-bool_t bli_cntx_l3_ukr_prefers_cols_dt( num_t   dt,
-                                        l3ukr_t ukr_id,
-                                        cntx_t* cntx )
+bool_t bli_cntx_l3_ukr_prefers_cols_dt
+     (
+       num_t   dt,
+       l3ukr_t ukr_id,
+       cntx_t* cntx
+     )
 {
 	// Reference the ukr storage preferences of the corresponding real
 	// micro-kernel for induced methods.
@@ -980,16 +1276,22 @@ bool_t bli_cntx_l3_ukr_prefers_cols_dt( num_t   dt,
 	return bli_cntx_l3_nat_ukr_prefers_cols_dt( dt, ukr_id, cntx );
 }
 
-bool_t bli_cntx_l3_ukr_prefers_storage_of( obj_t*  obj,
-                                           l3ukr_t ukr_id,
-                                           cntx_t* cntx )
+bool_t bli_cntx_l3_ukr_prefers_storage_of
+     (
+       obj_t*  obj,
+       l3ukr_t ukr_id,
+       cntx_t* cntx
+     )
 {
 	return !bli_cntx_l3_ukr_dislikes_storage_of( obj, ukr_id, cntx );
 }
 
-bool_t bli_cntx_l3_ukr_dislikes_storage_of( obj_t*  obj,
-                                            l3ukr_t ukr_id,
-                                            cntx_t* cntx )
+bool_t bli_cntx_l3_ukr_dislikes_storage_of
+     (
+       obj_t*  obj,
+       l3ukr_t ukr_id,
+       cntx_t* cntx
+     )
 {
 	num_t dt = bli_obj_datatype( *obj );
 
@@ -1005,9 +1307,12 @@ bool_t bli_cntx_l3_ukr_dislikes_storage_of( obj_t*  obj,
 	return r_val;
 }
 
-bool_t bli_cntx_l3_ukr_eff_prefers_storage_of( obj_t*  obj,
-                                               l3ukr_t ukr_id,
-                                               cntx_t* cntx )
+bool_t bli_cntx_l3_ukr_eff_prefers_storage_of
+     (
+       obj_t*  obj,
+       l3ukr_t ukr_id,
+       cntx_t* cntx
+     )
 {
 	bool_t r_val = bli_cntx_l3_ukr_prefers_storage_of( obj, ukr_id, cntx );
 
@@ -1017,9 +1322,12 @@ bool_t bli_cntx_l3_ukr_eff_prefers_storage_of( obj_t*  obj,
 	return r_val;
 }
 
-bool_t bli_cntx_l3_ukr_eff_dislikes_storage_of( obj_t*  obj,
-                                                l3ukr_t ukr_id,
-                                                cntx_t* cntx )
+bool_t bli_cntx_l3_ukr_eff_dislikes_storage_of
+     (
+       obj_t*  obj,
+       l3ukr_t ukr_id,
+       cntx_t* cntx
+     )
 {
 	bool_t r_val = bli_cntx_l3_ukr_dislikes_storage_of( obj, ukr_id, cntx );
 
@@ -1106,23 +1414,6 @@ void bli_cntx_print( cntx_t* cntx )
 		        bli_func_get_dt( BLIS_SCOMPLEX, ker ),
 		        bli_func_get_dt( BLIS_DCOMPLEX, ker )
 		      );
-	}
-
-	{
-		func_t* ukr = bli_cntx_get_packm_ukr( cntx );
-
-		printf( "packm ker    :  %16p %16p %16p %16p\n",
-		        bli_func_get_dt( BLIS_FLOAT,    ukr ),
-		        bli_func_get_dt( BLIS_DOUBLE,   ukr ),
-		        bli_func_get_dt( BLIS_SCOMPLEX, ukr ),
-		        bli_func_get_dt( BLIS_DCOMPLEX, ukr )
-		      );
-	}
-
-	{
-		ind_t family = bli_cntx_get_family( cntx );
-
-		printf( "oper family  : %lu\n", ( guint_t )family );
 	}
 
 	{

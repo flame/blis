@@ -47,7 +47,7 @@ void bli_packv_cntl_init( void )
 
 void bli_packv_cntl_finalize( void )
 {
-	bli_cntl_obj_free( packv_cntl );
+	bli_cntl_free_node( packv_cntl );
 }
 
 packv_t* bli_packv_cntl_obj_create( impl_t   impl_type,
@@ -105,7 +105,7 @@ cntl_t* bli_packv_cntl_obj_create
 	// that no blocksize partitioning is performed. bli_cntl_free() will rely
 	// on this information to know how to step through the thrinfo_t tree in
 	// sync with the cntl_t tree.
-	cntl = bli_cntl_obj_create
+	cntl = bli_cntl_create_node
 	(
 	  BLIS_NO_PART,
 	  var_func,

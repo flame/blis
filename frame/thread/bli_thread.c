@@ -218,9 +218,10 @@ siz_t bli_thread_get_range_l2r
        dim_t*     end
      )
 {
+	num_t dt = bli_obj_datatype( *a );
 	dim_t m  = bli_obj_length_after_trans( *a );
 	dim_t n  = bli_obj_width_after_trans( *a );
-	dim_t bf = bli_blksz_get_def_for_obj( a, bmult );
+	dim_t bf = bli_blksz_get_def( dt, bmult );
 
 	bli_thread_get_range_sub( thr, n, bf,
 	                          FALSE, start, end );
@@ -237,9 +238,10 @@ siz_t bli_thread_get_range_r2l
        dim_t*     end
      )
 {
+	num_t dt = bli_obj_datatype( *a );
 	dim_t m  = bli_obj_length_after_trans( *a );
 	dim_t n  = bli_obj_width_after_trans( *a );
-	dim_t bf = bli_blksz_get_def_for_obj( a, bmult );
+	dim_t bf = bli_blksz_get_def( dt, bmult );
 
 	bli_thread_get_range_sub( thr, n, bf,
 	                          TRUE, start, end );
@@ -256,9 +258,10 @@ siz_t bli_thread_get_range_t2b
        dim_t*     end
      )
 {
+	num_t dt = bli_obj_datatype( *a );
 	dim_t m  = bli_obj_length_after_trans( *a );
 	dim_t n  = bli_obj_width_after_trans( *a );
-	dim_t bf = bli_blksz_get_def_for_obj( a, bmult );
+	dim_t bf = bli_blksz_get_def( dt, bmult );
 
 	bli_thread_get_range_sub( thr, m, bf,
 	                          FALSE, start, end );
@@ -275,9 +278,10 @@ siz_t bli_thread_get_range_b2t
        dim_t*     end
      )
 {
+	num_t dt = bli_obj_datatype( *a );
 	dim_t m  = bli_obj_length_after_trans( *a );
 	dim_t n  = bli_obj_width_after_trans( *a );
-	dim_t bf = bli_blksz_get_def_for_obj( a, bmult );
+	dim_t bf = bli_blksz_get_def( dt, bmult );
 
 	bli_thread_get_range_sub( thr, m, bf,
 	                          TRUE, start, end );
@@ -649,7 +653,7 @@ siz_t bli_thread_get_range_mdim
      )
 {
 	bszid_t  bszid  = bli_cntl_bszid( cntl );
-	opid_t   family = bli_cntx_get_family( cntx );
+	opid_t   family = bli_cntl_family( cntl );
 
 	// This is part of trsm's current implementation, whereby right side
 	// cases are implemented in left-side micro-kernels, which requires
@@ -708,7 +712,7 @@ siz_t bli_thread_get_range_ndim
      )
 {
 	bszid_t  bszid  = bli_cntl_bszid( cntl );
-	opid_t   family = bli_cntx_get_family( cntx );
+	opid_t   family = bli_cntl_family( cntl );
 
 	// This is part of trsm's current implementation, whereby right side
 	// cases are implemented in left-side micro-kernels, which requires
@@ -771,11 +775,12 @@ siz_t bli_thread_get_range_weighted_l2r
 	if ( bli_obj_intersects_diag( *a ) &&
 	     bli_obj_is_upper_or_lower( *a ) )
 	{
+		num_t  dt      = bli_obj_datatype( *a );
 		doff_t diagoff = bli_obj_diag_offset( *a );
 		uplo_t uplo    = bli_obj_uplo( *a );
 		dim_t  m       = bli_obj_length( *a );
 		dim_t  n       = bli_obj_width( *a );
-		dim_t  bf      = bli_blksz_get_def_for_obj( a, bmult );
+		dim_t  bf      = bli_blksz_get_def( dt, bmult );
 
 		// Support implicit transposition.
 		if ( bli_obj_has_trans( *a ) )
@@ -820,11 +825,12 @@ siz_t bli_thread_get_range_weighted_r2l
 	if ( bli_obj_intersects_diag( *a ) &&
 	     bli_obj_is_upper_or_lower( *a ) )
 	{
+		num_t  dt      = bli_obj_datatype( *a );
 		doff_t diagoff = bli_obj_diag_offset( *a );
 		uplo_t uplo    = bli_obj_uplo( *a );
 		dim_t  m       = bli_obj_length( *a );
 		dim_t  n       = bli_obj_width( *a );
-		dim_t  bf      = bli_blksz_get_def_for_obj( a, bmult );
+		dim_t  bf      = bli_blksz_get_def( dt, bmult );
 
 		// Support implicit transposition.
 		if ( bli_obj_has_trans( *a ) )
@@ -871,11 +877,12 @@ siz_t bli_thread_get_range_weighted_t2b
 	if ( bli_obj_intersects_diag( *a ) &&
 	     bli_obj_is_upper_or_lower( *a ) )
 	{
+		num_t  dt      = bli_obj_datatype( *a );
 		doff_t diagoff = bli_obj_diag_offset( *a );
 		uplo_t uplo    = bli_obj_uplo( *a );
 		dim_t  m       = bli_obj_length( *a );
 		dim_t  n       = bli_obj_width( *a );
-		dim_t  bf      = bli_blksz_get_def_for_obj( a, bmult );
+		dim_t  bf      = bli_blksz_get_def( dt, bmult );
 
 		// Support implicit transposition.
 		if ( bli_obj_has_trans( *a ) )
@@ -922,11 +929,12 @@ siz_t bli_thread_get_range_weighted_b2t
 	if ( bli_obj_intersects_diag( *a ) &&
 	     bli_obj_is_upper_or_lower( *a ) )
 	{
+		num_t  dt      = bli_obj_datatype( *a );
 		doff_t diagoff = bli_obj_diag_offset( *a );
 		uplo_t uplo    = bli_obj_uplo( *a );
 		dim_t  m       = bli_obj_length( *a );
 		dim_t  n       = bli_obj_width( *a );
-		dim_t  bf      = bli_blksz_get_def_for_obj( a, bmult );
+		dim_t  bf      = bli_blksz_get_def( dt, bmult );
 
 		// Support implicit transposition.
 		if ( bli_obj_has_trans( *a ) )
@@ -1156,18 +1164,111 @@ void bli_partition_2x2( dim_t nthread, dim_t work1, dim_t work2,
 
 // -----------------------------------------------------------------------------
 
-// Some utilities
-dim_t bli_env_read_nway( const char* env, dim_t fallback )
+dim_t bli_thread_get_env( const char* env, dim_t fallback )
 {
-	dim_t num = fallback;
-	char* str = getenv( env );
+	dim_t r_val;
+	char* str;
 
+	// Query the environment variable and store the result in str.
+	str = getenv( env );
+
+	// Set the return value based on the string obtained from getenv().
 	if ( str != NULL )
-	{   
-		num = strtol( str, NULL, 10 );
-	}   
-	return num;
+	{
+		// If there was no error, convert the string to an integer and
+		// prepare to return that integer.
+		r_val = strtol( str, NULL, 10 );
+	}
+	else
+	{
+		// If there was an error, use the "fallback" as the return value.
+		r_val = fallback;
+	}
+
+	return r_val;
 }
+
+dim_t bli_thread_get_jc_nt( void )
+{
+	return bli_thread_get_env( "BLIS_JC_NT", 1 );
+}
+
+dim_t bli_thread_get_ic_nt( void )
+{
+	return bli_thread_get_env( "BLIS_IC_NT", 1 );
+}
+
+dim_t bli_thread_get_jr_nt( void )
+{
+	return bli_thread_get_env( "BLIS_JR_NT", 1 );
+}
+
+dim_t bli_thread_get_ir_nt( void )
+{
+	return bli_thread_get_env( "BLIS_IR_NT", 1 );
+}
+
+dim_t bli_thread_get_num_threads( void )
+{
+	return bli_thread_get_env( "BLIS_NUM_THREADS", 1 );
+}
+
+void bli_thread_set_env( const char* env, dim_t value )
+{
+	dim_t       r_val;
+	char        value_str[32];
+	const char* fs_32 = "%u";
+	const char* fs_64 = "%lu";
+
+	// Convert the string to an integer, but vary the format specifier
+	// depending on the integer type size.
+	if ( bli_info_get_int_type_size() == 32 ) sprintf( value_str, fs_32, value );
+	else                                      sprintf( value_str, fs_64, value );
+
+	// Set the environment variable using the string we just wrote to via
+	// sprintf(). (The 'TRUE' argument means we want to overwrite the current
+	// value if the environment variable already exists.)
+	r_val = setenv( env, value_str, TRUE );
+
+	// Check the return value in case something went horribly wrong.
+	if ( r_val == -1 )
+	{
+		char err_str[128];
+
+		// Query the human-readable error string corresponding to errno.
+		strerror_r( errno, err_str, 128 );
+
+		// Print the error message.
+		bli_print_msg( err_str, __FILE__, __LINE__ );
+	}
+}
+
+void bli_thread_set_jc_nt( dim_t value )
+{
+	bli_thread_set_env( "BLIS_JC_NT", value );
+}
+
+void bli_thread_set_ic_nt( dim_t value )
+{
+	bli_thread_set_env( "BLIS_IC_NT", value );
+}
+
+void bli_thread_set_jr_nt( dim_t value )
+{
+	bli_thread_set_env( "BLIS_JR_NT", value );
+}
+
+void bli_thread_set_ir_nt( dim_t value )
+{
+	bli_thread_set_env( "BLIS_IR_NT", value );
+}
+
+void bli_thread_set_num_threads( dim_t value )
+{
+	bli_thread_set_env( "BLIS_NUM_THREADS", value );
+}
+
+// -----------------------------------------------------------------------------
 
 dim_t bli_gcd( dim_t x, dim_t y )
 {
