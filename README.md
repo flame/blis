@@ -286,10 +286,15 @@ A fifth paper, submitted to ACM TOMS, begins the study of so-called
 ```
 @article{BLIS5,
    author      = {Field G. {V}an~{Z}ee and Tyler Smith},
-   title       = {Implementing high-performance complex matrix multiplication via the 3m and 4m methods},
+   title       = {Implementing High-performance Complex Matrix Multiplication via the 3m and 4m Methods},
    journal     = {ACM Transactions on Mathematical Software},
+   volume      = {44},
+   number      = {1},
+   pages       = {7:1--7:36},
+   month       = jul,
    year        = {2017},
-   note        = {accepted}
+   issue_date  = {July 2017},
+   url         = {http://doi.acm.org/10.1145/3086466},
 }
 ``` 
 
@@ -299,7 +304,7 @@ article and derives a [superior induced method](http://www.cs.utexas.edu/users/f
 ```
 @article{BLIS6,
    author      = {Field G. {V}an~{Z}ee},
-   title       = {Implementing high-performance complex matrix multiplication via the 1m method},
+   title       = {Implementing High-Performance Complex Matrix Multiplication via the 1m Method},
    journal     = {ACM Transactions on Mathematical Software},
    note        = {submitted}
 }
