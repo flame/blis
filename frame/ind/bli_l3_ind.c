@@ -200,6 +200,10 @@ void bli_l3_ind_oper_set_enable_all( opid_t oper, num_t dt, bool_t status )
 
 // -----------------------------------------------------------------------------
 
+#ifdef BLIS_ENABLE_PTHREADS
+static pthread_mutex_t l3_ind_mutex = PTHREAD_MUTEX_INITIALIZER;
+#endif
+
 void bli_l3_ind_oper_set_enable( opid_t oper, ind_t method, num_t dt, bool_t status )
 {
 	num_t idt;
@@ -212,14 +216,47 @@ void bli_l3_ind_oper_set_enable( opid_t oper, ind_t method, num_t dt, bool_t sta
 
 	idt = bli_ind_map_cdt_to_index( dt );
 
-	bli_l3_ind_oper_st[ method ][ oper ][ idt ] = status;
+#ifdef BLIS_ENABLE_OPENMP
+	_Pragma( "omp critical (l3_ind)" )
+#endif
+#ifdef BLIS_ENABLE_PTHREADS
+	pthread_mutex_lock( &l3_ind_mutex );
+#endif
+
+	// BEGIN CRITICAL SECTION
+	{
+		bli_l3_ind_oper_st[ method ][ oper ][ idt ] = status;
+	}
+	// END CRITICAL SECTION
+
+#ifdef BLIS_ENABLE_PTHREADS
+	pthread_mutex_unlock( &l3_ind_mutex );
+#endif
 }
 
 bool_t bli_l3_ind_oper_get_enable( opid_t oper, ind_t method, num_t dt )
 {
-	num_t idt = bli_ind_map_cdt_to_index( dt );
+	num_t  idt = bli_ind_map_cdt_to_index( dt );
+	bool_t r_val;
 
-	return bli_l3_ind_oper_st[ method ][ oper ][ idt ];
+#ifdef BLIS_ENABLE_OPENMP
+	_Pragma( "omp critical (l3_ind)" )
+#endif
+#ifdef BLIS_ENABLE_PTHREADS
+	pthread_mutex_lock( &l3_ind_mutex );
+#endif
+
+	// BEGIN CRITICAL SECTION
+	{
+		r_val = bli_l3_ind_oper_st[ method ][ oper ][ idt ];
+	}
+	// END CRITICAL SECTION
+
+#ifdef BLIS_ENABLE_PTHREADS
+	pthread_mutex_unlock( &l3_ind_mutex );
+#endif
+
+	return r_val;
 }
 
 // -----------------------------------------------------------------------------
