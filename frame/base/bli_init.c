@@ -35,7 +35,7 @@
 #include "blis.h"
 
 #ifdef BLIS_ENABLE_PTHREADS
-pthread_mutex_t initialize_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t initialize_mutex = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
 static bool_t bli_is_init = FALSE;
