@@ -363,6 +363,11 @@ dim_t bli_determine_blocksize_b_sub
 	// chunk that will correspond to the blocksize we are computing now.
 	dim_left_now = dim - i;
 
+	// Sanity check: if dim_left_now is zero, then we can return zero
+	// without going any further.
+	if ( dim_left_now == 0 )
+		return 0;
+
 	dim_at_edge = dim_left_now % b_alg;
 
 	// If dim_left_now is a multiple of b_alg, we can safely return b_alg

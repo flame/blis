@@ -634,6 +634,8 @@ void bli_sgemm_asm_24x4
 	"                                            \n\t"
 	"                                            \n\t"
 	".SDONE:                                     \n\t"
+    "                                            \n\t"
+    "vzeroupper                                  \n\t"
 	"                                            \n\t"
 
 	: // output operands (none)
@@ -1253,6 +1255,8 @@ void bli_dgemm_asm_12x4
 	"                                            \n\t"
 	"                                            \n\t"
 	".DDONE:                                     \n\t"
+    "                                            \n\t"
+    "vzeroupper                                  \n\t"
 	"                                            \n\t"
 
 	: // output operands (none)
