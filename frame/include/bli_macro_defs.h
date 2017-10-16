@@ -64,6 +64,20 @@
 #endif
 
 
+// -- BLIS Thread Local Storage Keyword --
+
+// __thread for TLS is supported by GCC, CLANG, ICC, and IBMC.
+// There is a small risk here as __GNUC__ can also be defined by some other
+// compiler (other than ICC and CLANG which we know define it) that
+// doesn't support __thread, as __GNUC__ is not quite unique to GCC.
+// But the possibility of someone using such non-main-stream compiler
+// for building BLIS is low.
+#if defined(__GNUC__) || defined(__clang__) || defined(__ICC) || defined(__IBMC__)
+  #define BLIS_THREAD_LOCAL __thread
+#else
+  #define BLIS_THREAD_LOCAL
+#endif
+
 // -- Boolean values --
 
 #ifndef TRUE
