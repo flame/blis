@@ -78,6 +78,34 @@
   #define BLIS_THREAD_LOCAL
 #endif
 
+
+// -- BLIS constructor/destructor function attribute --
+
+// __attribute__((constructor/destructor)) is supported by GCC only.
+// There is a small risk here as __GNUC__ can also be defined by some other
+// compiler (other than ICC and CLANG which we know define it) that
+// doesn't support this, as __GNUC__ is not quite unique to GCC.
+// But the possibility of someone using such non-main-stream compiler
+// for building BLIS is low.
+
+#if defined(__ICC) || defined(__INTEL_COMPILER)
+  // ICC defines __GNUC__ but doesn't support this
+  #define BLIS_ATTRIB_CTOR
+  #define BLIS_ATTRIB_DTOR
+#elif defined(__clang__)
+  // CLANG supports __attribute__, but doesn't mention support for
+  // constructor/destructor. If we can confirm that CLANG supports
+  // this attribute, modify it to proper definition
+  #define BLIS_ATTRIB_CTOR
+  #define BLIS_ATTRIB_DTOR
+#elif defined(__GNUC__)
+  #define BLIS_ATTRIB_CTOR __attribute__((constructor))
+  #define BLIS_ATTRIB_DTOR __attribute__((destructor))
+#else
+  #define BLIS_ATTRIB_CTOR
+  #define BLIS_ATTRIB_DTOR
+#endif
+
 // -- Boolean values --
 
 #ifndef TRUE
