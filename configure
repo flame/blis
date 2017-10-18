@@ -498,13 +498,6 @@ main()
 	# in kernel_list.
 	kconfig_map=''
 
-	# Whether the chosen configuration is registered (or custom).
-	# We track both predicates for readability (i.e., testing
-	# config_is_registered = yes is easier to understand than testing
-	# config_is_unregistered = no).
-	config_is_unregistered=''
-	config_is_registered=''
-
 	# Dummy file. Used to check whether the cwd is the same as the top-level
 	# source distribution directory.
 	dummy_file='_blis_dir_detect.tmp'
@@ -698,266 +691,207 @@ main()
 			echo "${script_name}:   $k (${config_registry[$k]})"
 		done
 		echo "${script_name}: "
-		#for conf in ${configs_avail}; do
-		#	echo "${script_name}:   ${conf}"
-		#done
-		#echo "${script_name}: "
-		#echo "${script_name}: or, alternatively, first create a new configuration (placing"
-		#echo "${script_name}: it in the '${config_dir}' directory) and then run '${script_name}' with"
-		#echo "${script_name}: that configuration. To build a reference implementation of"
-		#echo "${script_name}: BLIS, use the '${config_name_ref}' configuration:"
-		#echo "${script_name}: "
-		#echo "${script_name}:   ./${script_name} ${config_name_ref}"
-		#echo "${script_name}: "
-		#echo "${script_name}: For a full description of how to run ${script_name}, please refer"
-		#echo "${script_name}: to the output of:"
-		#echo "${script_name}: "
-		#echo "${script_name}:   ./${script_name} -h"
-		#echo "${script_name}: "
 
 		exit 1
 
-	elif [ $# = "1" ]; then   # one configuration argument given.
+	elif [ $# != "1" ]; then   # more than one configuration argument given.
 
-		if [ $1 = "auto" ]; then
+		print_usage
 
-			echo "${script_name}: automatic configuration requested."
+	fi
 
-			# Run the auto-detect script and save the result in config_name.
-			config_name=`${build_dirpath}/auto-detect/auto-detect.sh`
+	if [ $1 = "auto" ]; then
 
-			echo "${script_name}: auto-detect script returned '${config_name}'."
+		echo "${script_name}: automatic configuration requested."
 
-		else
+		# Run the auto-detect script and save the result in config_name.
+		config_name=`${build_dirpath}/auto-detect/auto-detect.sh`
 
-			# Use the command line argument as the configuration name.
-			config_name=$1
+		echo "${script_name}: auto-detect script returned '${config_name}'."
 
-			#echo "${script_name}: manual configuration requested."
-			echo "${script_name}: manual configuration requested; configuring with '${config_name}'."
+	else
 
-		fi
+		# Use the command line argument as the configuration name.
+		config_name=$1
 
-		# Use the selected config name to look up the list of configurations
-		# and kernels associated with that name.
-		config_list=${config_registry[${config_name}]}
-		kernel_list=${kernel_registry[${config_name}]}
+		#echo "${script_name}: manual configuration requested."
+		echo "${script_name}: manual configuration requested; configuring with '${config_name}'."
 
-		# Use the config_registry and kernel_registry to build a kconfig_registry
-		# for the selected config_name.
-		build_kconfig_registry "${config_name}"
+	fi
 
-		# Print the configuration list and kernel list, if requested.
-		if [ "${show_config_list}" == "1" ]; then
+	# Use the selected config name to look up the list of configurations
+	# and kernels associated with that name.
+	config_list=${config_registry[${config_name}]}
+	kernel_list=${kernel_registry[${config_name}]}
 
-			echo "${script_name}: configuration list:"
-			for k in "${!config_registry[@]}"; do
-				echo "${script_name}:   $k: ${config_registry[$k]}"
-			done
+	# Use the config_registry and kernel_registry to build a kconfig_registry
+	# for the selected config_name.
+	build_kconfig_registry "${config_name}"
 
-			echo "${script_name}: kernel list:"
-			for k in "${!kernel_registry[@]}"; do
-				echo "${script_name}:   $k: ${kernel_registry[$k]}"
-			done
+	# Print the configuration list and kernel list, if requested.
+	if [ "${show_config_list}" == "1" ]; then
 
-			echo "${script_name}: kconfig registry:"
-			for k in "${!kconfig_registry[@]}"; do
-				echo "${script_name}:   $k: ${kconfig_registry[$k]}"
-			done
-		fi
-
-		# For each kernel in the kernel list, reduce the list of associated
-		# sub-configurations (in the kconfig_registry) to a singleton using
-		# the following rules:
-		# 1. If the list is a singleton, use that name.
-		# 2. If the list contains a sub-configuration name that matches the
-		#    kernel name, use that name.
-		# 3. Otherwise, use the first name in the list.
-		# We use the chosen singleton to ceate a "kernel:subconfig" pair, which
-		# we accumulate into a list. This list is the kernel-to-config map, or
-		# kconfig_map.
-
-		kconfig_map=""
-		for kernel in ${kernel_list}; do
-
-			configs="${kconfig_registry[$kernel]}"
-
-			has_one_kernel=$(is_singleton "${configs}")
-			contains_kernel=$(is_word_in_list "${kernel}" "${configs}")
-
-			# Check if the list is a singleton.
-			if [ "${has_one_kernel}" == "true" ]; then
-
-				reducedclist="${configs}"
-
-			# Check if the list contains a sub-config name that matches the kernel.
-			elif [ "${contains_kernel}" == "true" ]; then
-
-				reducedclist="${kernel}"
-
-			# Otherwise, use the first name.
-			else
-
-				first_config=${configs%% *}
-				reducedclist="${first_config}"
-			fi
-
-			# Create a new "kernel:subconfig" pair and add it to the kconfig_map
-			# list, removing whitespace.
-			new_pair="${kernel}:${reducedclist}"
-			kconfig_map=$(canonicalize_ws "${kconfig_map} ${new_pair}")
+		echo "${script_name}: configuration list:"
+		for k in "${!config_registry[@]}"; do
+			echo "${script_name}:   $k: ${config_registry[$k]}"
 		done
 
-		if [ "${show_config_list}" == "1" ]; then
+		echo "${script_name}: kernel list:"
+		for k in "${!kernel_registry[@]}"; do
+			echo "${script_name}:   $k: ${kernel_registry[$k]}"
+		done
 
-			echo "${script_name}: kernel-to-config map:"
-			for k in ${kconfig_map}; do
-				echo "${script_name}:   $k"
-			done
-		fi
+		echo "${script_name}: kconfig list:"
+		for k in "${!kconfig_registry[@]}"; do
+			echo "${script_name}:   $k: ${kconfig_registry[$k]}"
+		done
+	fi
 
-#list="zen/haswell/piledriver"
-#config=${list%%/*}
-#kernels=${list#*/}
-#kernels=$(echo -e ${kernels} | sed -e "s/\// /g")
-#echo "config:  $config"
-#echo "kernels: $kernels"
+	# For each kernel in the kernel list, reduce the list of associated
+	# sub-configurations (in the kconfig_registry) to a singleton using
+	# the following rules:
+	# 1. If the list is a singleton, use that name.
+	# 2. If the list contains a sub-configuration name that matches the
+	#    kernel name, use that name.
+	# 3. Otherwise, use the first name in the list.
+	# We use the chosen singleton to ceate a "kernel:subconfig" pair, which
+	# we accumulate into a list. This list is the kernel-to-config map, or
+	# kconfig_map.
 
-#string="haswell piledriver haswell piledriver bulldozer"
-#echo "w/ dups: ${string}"
-#string=$(rm_duplicate_words "${string}")
-#echo "no dups: ${string}"
+	kconfig_map=""
+	for kernel in ${kernel_list}; do
 
-#exit
+		configs="${kconfig_registry[$kernel]}"
 
-#${string#substring}
-#    Deletes shortest match of $substring from front of $string.
-#${string%substring}
-#    Deletes shortest match of $substring from back of $string.
-#${string##substring}
-#    Deletes longest match of $substring from front of $string.
-#${string%%substring}
-#    Deletes longest match of $substring from back of $string.
+		has_one_kernel=$(is_singleton "${configs}")
+		contains_kernel=$(is_word_in_list "${kernel}" "${configs}")
 
+		# Check if the list is a singleton.
+		if [ "${has_one_kernel}" == "true" ]; then
 
-		echo "${script_name}: checking configuration against contents of '${config_registry_file}'."
+			reducedclist="${configs}"
 
-		# First, ensure that the config name was valid (ie: it is present
-		# in the config_registry file). If it is not registered, then we
-		# assume the user has created it as a custom configuration.
-		if [ -z "${config_list}" ]; then
+		# Check if the list contains a sub-config name that matches the kernel.
+		elif [ "${contains_kernel}" == "true" ]; then
 
-			# NOTE: This branch should never execute when using the
-			# auto-detect script, but we have it here just in case.
-			if [ $1 = "auto" ]; then
+			reducedclist="${kernel}"
 
-				echo "${script_name}: 'auto-detected configuration '${conf}' is NOT registered!"
-				echo "${script_name}: "
-				echo "${script_name}: *** Cannot continue with unregistered configuration '${conf}'. ***"
-				echo "${script_name}: "
-				exit 1;
-			fi
-
-			echo "${script_name}: '${config_name}' is NOT registered; assuming custom configuration."
-
-			config_is_unregistered='yes'
-			config_is_registered='no'
-
-			# Now that we've recorded that the configuration is unregistered,
-			# set config_list to contain config_name, as if the config_registry
-			# contained the following line:
-			#
-			#   ${config_name}: ${config_name}
-			#
-			# This will facilitate configure in performing the remainder of the
-			# build system setup.
-			config_list=${config_name}
-
-			# Set the kernel list to empty.
-			kernel_list=""
-
+		# Otherwise, use the first name.
 		else
 
-			# This branch executes when the configuration is found to be present
-			# in the config_registry file.
-
-			echo "${script_name}: configuration '${config_name}' is registered."
-			echo "${script_name}: '${config_name}' is defined as having the following sub-configurations:"
-			echo "${script_name}:    ${config_list}"
-			echo "${script_name}: which collectively require the following kernels:"
-			echo "${script_name}:    ${kernel_list}"
-
-			config_is_unregistered='no'
-			config_is_registered='yes'
+			first_config=${configs%% *}
+			reducedclist="${first_config}"
 		fi
 
-		if [ "x${config_is_registered}" = "xyes" ]; then
+		# Create a new "kernel:subconfig" pair and add it to the kconfig_map
+		# list, removing whitespace.
+		new_pair="${kernel}:${reducedclist}"
+		kconfig_map=$(canonicalize_ws "${kconfig_map} ${new_pair}")
+	done
 
-			echo "${script_name}: checking sub-configurations:"
+	if [ "${show_config_list}" == "1" ]; then
 
-			# Now, verify that the constituent configurations associated with the
-			# config name are all valid.
-			for conf in ${config_list}; do
+		echo "${script_name}: kernel-to-config map:"
+		for k in ${kconfig_map}; do
+			echo "${script_name}:   $k"
+		done
+	fi
 
-				# First confirm that the current configuration is registered.
-				this_clist=${config_registry[${conf}]}
 
-				# If the config_list associated with conf is empty, then it was
-				# never entered into the config_registry to begin with. Thus,
-				# conf must be unregistered.
-				if [ -z "${this_clist}" ]; then
-					echo "${script_name}: '${conf}' is NOT registered!"
-					echo "${script_name}: "
-					echo "${script_name}: *** Cannot continue with unregistered configuration '${conf}'. ***"
-					echo "${script_name}: "
-					exit 1;
-				else
-					echo -n "${script_name}:   '${conf}' is registered."
-				fi
+	echo "${script_name}: checking configuration against contents of '${config_registry_file}'."
 
-				# Then confirm that the current configuration exists.
-				if [ ! -d "${config_dirpath}/${conf}" ]; then
-					echo "..but does NOT exist!"
-					echo "${script_name}: "
-					echo "${script_name}: *** Cannot continue with nonexistent configuration '${conf}'. ***"
-					echo "${script_name}: "
-					exit 1;
-				else
-					echo "..and exists."
-				fi
-			done
+	# First, ensure that the config name is registered (ie: it is present
+	# in the config_registry file).
+	if [ -z "${config_list}" ]; then
 
-			echo "${script_name}: checking sub-configurations' requisite kernels:"
+		# NOTE: This branch should never execute when using the
+		# auto-detect script, but we have it here just in case.
+		if [ $1 = "auto" ]; then
 
-			# Also, let's verify that the requisite kernels associated with
-			# the config name are all valid.
-			for kernel in ${kernel_list}; do
-
-				echo -n "${script_name}:   '${kernel}' kernels..."
-
-				# Confirm that the current kernel sub-directory exists.
-				if [ ! -d "${kernels_dirpath}/${kernel}" ]; then
-					echo "do NOT exist!"
-					echo "${script_name}: "
-					echo "${script_name}: *** Cannot continue with nonexistent kernel '${kernel}'. ***"
-					echo "${script_name}: "
-					exit 1;
-				else
-					echo "exist."
-				fi
-			done
-		else
-
-			#echo "${script_name}: skipping check of sub-configurations for unregistered config."
+			echo "${script_name}: 'auto-detected configuration '${conf}' is NOT registered!"
 			echo "${script_name}: "
 			echo "${script_name}: *** Cannot continue with unregistered configuration '${conf}'. ***"
 			echo "${script_name}: "
 			exit 1;
+
+		else
+
+			echo "${script_name}: 'user-specified configuration '${conf}' is NOT registered!"
+			echo "${script_name}: "
+			echo "${script_name}: *** Cannot continue with unregistered configuration '${conf}'. ***"
+			echo "${script_name}: "
+			exit 1;
+
 		fi
+
 	else
 
-		print_usage
+		# This branch executes when the configuration is found to be present
+		# (i.e. registered) in the config_registry file.
+
+		echo "${script_name}: configuration '${config_name}' is registered."
+		echo "${script_name}: '${config_name}' is defined as having the following sub-configurations:"
+		echo "${script_name}:    ${config_list}"
+		echo "${script_name}: which collectively require the following kernels:"
+		echo "${script_name}:    ${kernel_list}"
+
 	fi
+
+
+	echo "${script_name}: checking sub-configurations:"
+
+	# Now, verify that the constituent configurations associated with the
+	# config name are all valid.
+	for conf in ${config_list}; do
+
+		# First confirm that the current configuration is registered.
+		this_clist=${config_registry[${conf}]}
+
+		# If the config_list associated with conf is empty, then it was
+		# never entered into the config_registry to begin with. Thus,
+		# conf must be unregistered.
+		if [ -z "${this_clist}" ]; then
+			echo "${script_name}: '${conf}' is NOT registered!"
+			echo "${script_name}: "
+			echo "${script_name}: *** Cannot continue with unregistered configuration '${conf}'. ***"
+			echo "${script_name}: "
+			exit 1;
+		else
+			echo -n "${script_name}:   '${conf}' is registered."
+		fi
+
+		# Then confirm that the current sub-configuration directory exists.
+		if [ ! -d "${config_dirpath}/${conf}" ]; then
+			echo "..but does NOT exist!"
+			echo "${script_name}: "
+			echo "${script_name}: *** Cannot continue with nonexistent configuration '${conf}'. ***"
+			echo "${script_name}: "
+			exit 1;
+		else
+			echo "..and exists."
+		fi
+	done
+
+
+	echo "${script_name}: checking sub-configurations' requisite kernels:"
+
+	# Also, let's verify that the requisite kernel sets associated with
+	# the config name all correspond to directories that exist.
+	for kernel in ${kernel_list}; do
+
+		echo -n "${script_name}:   '${kernel}' kernels..."
+
+		# Confirm that the current kernel sub-directory exists.
+		if [ ! -d "${kernels_dirpath}/${kernel}" ]; then
+			echo "do NOT exist!"
+			echo "${script_name}: "
+			echo "${script_name}: *** Cannot continue with nonexistent kernel '${kernel}'. ***"
+			echo "${script_name}: "
+			exit 1;
+		else
+			echo "exist."
+		fi
+	done
 
 
 	# -- Prepare variables for subsitution into template files -----------------
