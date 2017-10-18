@@ -286,7 +286,7 @@ void PASTEMAC(ch,opname) \
        cntx_t*         cntx  \
      ); \
 
-INSERT_GENTPROT_BASIC( amaxv_test )
+INSERT_GENTPROT_BASIC0( amaxv_test )
 
 //
 // Define object-based interface for a local amaxv test operation.

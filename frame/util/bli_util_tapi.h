@@ -48,7 +48,7 @@ void PASTEMAC(ch,opname) \
        cntx_t*  cntx  \
      );
 
-INSERT_GENTPROTR_BASIC( asumv )
+INSERT_GENTPROTR_BASIC0( asumv )
 
 
 #undef  GENTPROT
@@ -62,9 +62,9 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      );
 
-INSERT_GENTPROT_BASIC( mkherm )
-INSERT_GENTPROT_BASIC( mksymm )
-INSERT_GENTPROT_BASIC( mktrim )
+INSERT_GENTPROT_BASIC0( mkherm )
+INSERT_GENTPROT_BASIC0( mksymm )
+INSERT_GENTPROT_BASIC0( mktrim )
 
 
 #undef  GENTPROTR
@@ -78,9 +78,9 @@ void PASTEMAC(ch,opname) \
        cntx_t*  cntx  \
      );
 
-INSERT_GENTPROTR_BASIC( norm1v )
-INSERT_GENTPROTR_BASIC( normfv )
-INSERT_GENTPROTR_BASIC( normiv )
+INSERT_GENTPROTR_BASIC0( norm1v )
+INSERT_GENTPROTR_BASIC0( normfv )
+INSERT_GENTPROTR_BASIC0( normiv )
 
 
 #undef  GENTPROTR
@@ -98,9 +98,9 @@ void PASTEMAC(ch,opname) \
        cntx_t*  cntx  \
      );
 
-INSERT_GENTPROTR_BASIC( norm1m )
-INSERT_GENTPROTR_BASIC( normfm )
-INSERT_GENTPROTR_BASIC( normim )
+INSERT_GENTPROTR_BASIC0( norm1m )
+INSERT_GENTPROTR_BASIC0( normfm )
+INSERT_GENTPROTR_BASIC0( normim )
 
 
 #undef  GENTPROT
@@ -115,7 +115,7 @@ void PASTEMAC(ch,opname) \
        char*  s2  \
      );
 
-INSERT_GENTPROT_BASIC_I( printv )
+INSERT_GENTPROT_BASIC0_I( printv )
 
 
 #undef  GENTPROT
@@ -131,7 +131,7 @@ void PASTEMAC(ch,opname) \
        char*  s2  \
      );
 
-INSERT_GENTPROT_BASIC_I( printm )
+INSERT_GENTPROT_BASIC0_I( printm )
 
 
 #undef  GENTPROT
@@ -144,8 +144,8 @@ void PASTEMAC(ch,opname) \
        cntx_t*  cntx  \
      );
 
-INSERT_GENTPROT_BASIC( randv )
-INSERT_GENTPROT_BASIC( randnv )
+INSERT_GENTPROT_BASIC0( randv )
+INSERT_GENTPROT_BASIC0( randnv )
 
 
 #undef  GENTPROT
@@ -161,8 +161,8 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      );
 
-INSERT_GENTPROT_BASIC( randm )
-INSERT_GENTPROT_BASIC( randnm )
+INSERT_GENTPROT_BASIC0( randm )
+INSERT_GENTPROT_BASIC0( randnm )
 
 
 #undef  GENTPROTR
@@ -177,6 +177,6 @@ void PASTEMAC(ch,opname) \
        cntx_t*  cntx  \
      );
 
-INSERT_GENTPROTR_BASIC( sumsqv )
+INSERT_GENTPROTR_BASIC0( sumsqv )
 
 

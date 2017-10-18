@@ -403,7 +403,7 @@ void bli_membrk_compute_pool_block_sizes
        cntx_t* cntx
      )
 {
-	const ind_t im = bli_cntx_get_ind_method( cntx );
+	const ind_t im = bli_cntx_method( cntx );
 
 	siz_t bs_cand_a = 0;
 	siz_t bs_cand_b = 0;

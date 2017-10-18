@@ -34,52 +34,6 @@
 
 #include "blis.h"
 
-#if 0
-packv_t* packv_cntl = NULL;
-
-void bli_packv_cntl_init( void )
-{
-	packv_cntl = bli_packv_cntl_obj_create( BLIS_UNBLOCKED,
-	                                        BLIS_VARIANT1,
-	                                        BLIS_VF,
-	                                        BLIS_PACKED_VECTOR );
-}
-
-void bli_packv_cntl_finalize( void )
-{
-	bli_cntl_free_node( packv_cntl );
-}
-
-packv_t* bli_packv_cntl_obj_create( impl_t   impl_type,
-                                    varnum_t var_num,
-                                    bszid_t  bmid,
-                                    pack_t   pack_schema )
-{
-	packv_t* cntl;
-
-	cntl = ( packv_t* ) bli_malloc_intl( sizeof(packv_t) );
-
-	cntl->impl_type        = impl_type;
-	cntl->var_num          = var_num;
-	cntl->bmid             = bmid;
-	cntl->pack_schema      = pack_schema;
-
-	return cntl;
-}
-
-void bli_packv_cntl_obj_init( packv_t*   cntl,
-                              impl_t     impl_type,
-                              varnum_t   var_num,
-                              bszid_t    bmid,
-                              pack_t     pack_schema )
-{
-	cntl->impl_type        = impl_type;
-	cntl->var_num          = var_num;
-	cntl->bmid             = bmid;
-	cntl->pack_schema      = pack_schema;
-}
-#endif
-
 cntl_t* bli_packv_cntl_obj_create
      (
        void*     var_func,

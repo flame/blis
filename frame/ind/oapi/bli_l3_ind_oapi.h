@@ -75,8 +75,6 @@ void PASTEMAC(syr2k,imeth)(              obj_t* alpha, obj_t* a, obj_t* b, obj_t
 void PASTEMAC(trmm3,imeth)( side_t side, obj_t* alpha, obj_t* a, obj_t* b, obj_t* beta, obj_t* c, cntx_t* cntx );
 
 GENPROT_NO2OP( 3mh )
-GENPROT_NO2OP( 3m3 )
-GENPROT_NO2OP( 3m2 )
 GENPROT_NO2OP( 4mh )
 GENPROT_NO2OP( 4mb )
 
@@ -86,11 +84,13 @@ GENPROT_NO2OP( 4mb )
 // (e.g., block-panel or panel-block).
 //
 
+/*
 #undef  GENPROT
 #define GENPROT( imeth, alg ) \
 \
 void PASTEMAC2(gemm,imeth,alg) (              obj_t* alpha, obj_t* a, obj_t* b, obj_t* beta, obj_t* c ); \
+*/
 
-GENPROT( 1m, bp )
-GENPROT( 1m, pb )
+//GENPROT( 1m, bp )
+//GENPROT( 1m, pb )
 

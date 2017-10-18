@@ -6,7 +6,7 @@
 #include <math.h>           /* fabs */
 
 #include "blis_utest.h"
-#include "bli_gemm_opt_8x4.h"
+#include "bli_gemm_power7_opt_8x4.h"
 
 #define COLMAJ_INDEX(row,col,ld) ((col*ld)+row)
 #define ROWMAJ_INDEX(row,col,ld) ((row*ld)+col)

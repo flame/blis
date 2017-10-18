@@ -149,6 +149,7 @@ void* bli_l3_thread_entry( void* data_void )
 {
 	thread_data_t* data     = data_void;
 
+	l3int_t        func     = data->func;
 	opid_t         family   = data->family;
 	obj_t*         alpha    = data->alpha;
 	obj_t*         a        = data->a;
@@ -169,7 +170,7 @@ void* bli_l3_thread_entry( void* data_void )
 	// Create the root node of the current thread's thrinfo_t structure.
 	bli_l3_thrinfo_create_root( id, gl_comm, cntx, cntl_use, &thread );
 
-	data->func
+	func
 	(
 	  alpha,
 	  a,

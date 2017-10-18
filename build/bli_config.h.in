@@ -35,12 +35,21 @@
 #ifndef BLIS_CONFIG_H
 #define BLIS_CONFIG_H
 
-#if @enable_pthreads@
-#define BLIS_ENABLE_PTHREADS
-#endif
+// Enabled configuration "family" (config_name)
+@config_name_define@
+
+// Enabled sub-configurations (config_list)
+@config_list_defines@
+
+// Enabled kernel sets (kernel_list)
+@kernel_list_defines@
 
 #if @enable_openmp@
 #define BLIS_ENABLE_OPENMP
+#endif
+
+#if @enable_pthreads@
+#define BLIS_ENABLE_PTHREADS
 #endif
 
 #if @int_type_size@ == 64

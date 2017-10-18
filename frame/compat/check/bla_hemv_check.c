@@ -50,10 +50,8 @@ void bla_hemv_check
 	f77_int info = 0;
 	f77_int lower, upper;
 
-	lower = PASTEF770(lsame)( uploa, "L", (ftnlen)1, (ftnlen)1
-     );
-	upper = PASTEF770(lsame)( uploa, "U", (ftnlen)1, (ftnlen)1
-     );
+	lower = PASTEF770(lsame)( uploa, "L", (ftnlen)1, (ftnlen)1 );
+	upper = PASTEF770(lsame)( uploa, "U", (ftnlen)1, (ftnlen)1 );
 
 	if      ( !lower && !upper
      )

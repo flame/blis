@@ -73,6 +73,15 @@ void* bli_malloc_intl( size_t size )
 	return bli_malloc_noalign( malloc_fp, size );
 }
 
+void* bli_calloc_intl( size_t size )
+{
+	void* p = bli_malloc_intl( size );
+
+	memset( p, 0, size );
+
+	return p;
+}
+
 void bli_free_intl( void* p )
 {
 	bli_free_noalign( BLIS_FREE_INTL, p );

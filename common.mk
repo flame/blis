@@ -60,18 +60,14 @@ else
 CONFIG_MK_PRESENT := no
 endif
 
-# Locations of important files.
+# Construct a path to the top-level 'config' directory.
 CONFIG_DIR         := config
-
-# Now we have access to CONFIG_NAME, which tells us which sub-directory of the
-# config directory to use as our configuration. Also using CONFIG_NAME, we
-# construct the path to the general framework source tree.
-CONFIG_PATH       := $(DIST_PATH)/$(CONFIG_DIR)/$(CONFIG_NAME)
+CONFIG_PATH        := $(DIST_PATH)/$(CONFIG_DIR)
 
 # If CONFIG_PATH is not an absolute path (does not begin with /) then prepend
 # RELPATH to it.
 ifeq ($(strip $(filter /%,$(CONFIG_PATH))),)
-CONFIG_PATH := $(RELPATH)/$(CONFIG_PATH)
+CONFIG_PATH := $(RELPATH)/$(CONFIG_DIR)
 endif
 
 
@@ -92,6 +88,10 @@ EGREP      := grep -E
 XARGS      := xargs
 RANLIB     := ranlib
 INSTALL    := install -c
+
+# Default archiver flags
+AR         := ar
+ARFLAGS    := cr
 
 # Used to refresh CHANGELOG.
 GIT        := git
@@ -130,20 +130,54 @@ endif
 # makefile definitions.
 MAKE_DEFS_FILE     := make_defs.mk
 
-# Construct the path to the makefile definitions file residing inside of
-# the configuration sub-directory.
-MAKE_DEFS_MK_PATH := $(CONFIG_PATH)/$(MAKE_DEFS_FILE)
+# Construct the paths to the makefile definitions files, each of which resides
+# in a separate configuration sub-directory. We include CONFIG_NAME in this
+# list since we might need
+ALL_CONFIGS        := $(sort $(strip $(CONFIG_LIST) $(CONFIG_NAME)))
+CONFIG_PATHS       := $(addprefix $(CONFIG_PATH)/, $(ALL_CONFIGS))
+MAKE_DEFS_MK_PATHS := $(addsuffix /$(MAKE_DEFS_FILE), $(CONFIG_PATHS))
 
-# Include the makefile definitions file.
--include $(MAKE_DEFS_MK_PATH)
+# Initialize the list of included (found) configurations to empty.
+CONFIGS_INCL       :=
 
-# Detect whether we actually got the make definitios file. If we didn't, then
-# it is likely that the configuration is invalid (or incomplete).
-ifeq ($(strip $(MAKE_DEFS_MK_INCLUDED)),yes)
-MAKE_DEFS_MK_PRESENT := yes
+# Include the makefile definitions files implied by the list of configurations.
+-include $(MAKE_DEFS_MK_PATHS)
+
+# Detect whether we actually got all of the make definitions files. If
+# we didn't, then maybe a configuration is mislabeled or missing. The
+# check-env-make-defs target checks ALL_MAKE_DEFS_MK_PRESENT and outputs
+# an error message if it is set to 'no'.
+# NOTE: We combine the CONFIG_NAME and CONFIG_LIST for situations where
+# the CONFIG_NAME is absent from the CONFIG_LIST (e.g., 'intel64' is a
+# configuration family name with its own configuration directory and its
+# own make_defs.mk file, but not a sub-configuration itself). If
+# CONFIG_NAME is present in CONFIG_LIST, as with singleton configuration
+# families, then the sort() function will remove duplicates from both
+# strings being compared.
+CONFIGS_EXPECTED := $(CONFIG_LIST) $(CONFIG_NAME)
+ifeq ($(sort $(strip $(CONFIGS_INCL))), \
+      $(sort $(strip $(CONFIGS_EXPECTED))))
+ALL_MAKE_DEFS_MK_PRESENT := yes
 else
-MAKE_DEFS_MK_PRESENT := no
+ALL_MAKE_DEFS_MK_PRESENT := no
 endif
+
+
+
+#
+# --- Default linker definitions -----------------------------------------------
+#
+
+# Default linker, flags.
+LINKER     := $(CC)
+LDFLAGS    :=
+
+# Never use libm with Intel compilers.
+ifneq ($(CC_VENDOR),icc)
+LDFLAGS    += -lm
+endif
+
+SOFLAGS    := -shared
 
 
 
@@ -192,13 +226,6 @@ CTHREADFLAGS := -pthread
 LDFLAGS      += -lpthread
 endif
 endif
-
-# Aggregate all of the flags into multiple groups: one for standard compilation,
-# and one for each of the supported "special" compilation modes.
-
-CFLAGS_NOOPT   := $(CDBGFLAGS) $(CWARNFLAGS) $(CPICFLAGS) $(CTHREADFLAGS) $(CMISCFLAGS) $(CPPROCFLAGS)
-CFLAGS         := $(COPTFLAGS)  $(CVECFLAGS) $(CFLAGS_NOOPT)
-CFLAGS_KERNELS := $(CKOPTFLAGS) $(CVECFLAGS) $(CFLAGS_NOOPT)
 
 
 

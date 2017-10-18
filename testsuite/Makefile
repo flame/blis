@@ -54,6 +54,8 @@
 # --- Makefile initialization --------------------------------------------------
 #
 
+# Set the relative location to the top-level distribution path $(DIST_PATH).
+RELPATH            := ..
 
 # Define the name of the common makefile fragment.
 COMMON_MK_FILE     := common.mk
@@ -62,9 +64,10 @@ COMMON_MK_FILE     := common.mk
 FRAGMENT_MK        := .fragment.mk
 
 # Important locations and directory names.
-RELPATH            := ..
 CONFIG_DIR         := config
 FRAME_DIR          := frame
+REFKERN_DIR        := ref_kernels
+KERNELS_DIR        := kernels
 LIB_DIR            := lib
 
 
@@ -92,10 +95,13 @@ endif
 # to the build directory.
 DIST_PATH         := ..
 
-# Now we have access to CONFIG_NAME, which tells us which sub-directory of the
-# config directory to use as our configuration.
-CONFIG_PATH       := $(DIST_PATH)/$(CONFIG_DIR)/$(CONFIG_NAME)
+# Construct paths to the three primary directories of source code:
+# general framework code, reference kernel code, and optimized kernel
+# code.
+CONFIG_PATH       := $(DIST_PATH)/$(CONFIG_DIR)
 FRAME_PATH        := $(DIST_PATH)/$(FRAME_DIR)
+REFKERN_PATH      := $(DIST_PATH)/$(REFKERN_DIR)
+KERNELS_PATH      := $(DIST_PATH)/$(KERNELS_DIR)
 
 
 
@@ -108,21 +114,43 @@ FRAME_PATH        := $(DIST_PATH)/$(FRAME_DIR)
 # makefile fragments reside.
 FRAGMENT_DIR_PATHS :=
 
+# Construct paths to each of the sub-configurations specified in the
+# configuration list.
+CONFIG_PATHS       := $(addprefix $(CONFIG_PATH)/, $(CONFIG_LIST))
+
 # This variable is used by the include statements as they recursively include
-# one another. For the framework source tree ('frame' directory), we initialize
-# it to the top-level directory since that is its parent.
-PARENT_PATH        := $(DIST_PATH)
-
-# Recursively include all the makefile fragments in the framework itself.
--include $(addsuffix /$(FRAGMENT_MK), $(FRAME_PATH))
-
-# Now set PARENT_PATH to $(DIST_PATH)/config in preparation to include the
-# fragments in the configuration sub-directory.
+# one another. For the 'config' directory, we initialize it to that directory
+# in preparation to include the fragments in the configuration sub-directory.
 PARENT_PATH        := $(DIST_PATH)/$(CONFIG_DIR)
 
-# Recursively include all the makefile fragments in the configuration
-# sub-directory.
--include $(addsuffix /$(FRAGMENT_MK), $(CONFIG_PATH))
+# Recursively include the makefile fragments in each of the sub-configuration
+# directories.
+-include $(addsuffix /$(FRAGMENT_MK), $(CONFIG_PATHS))
+
+# Construct paths to each of the kernel sets required by the sub-configurations
+# in the configuration list.
+KERNEL_PATHS       := $(addprefix $(KERNELS_PATH)/, $(KERNEL_LIST))
+
+# This variable is used by the include statements as they recursively include
+# one another. For the 'kernels' directory, we initialize it to that directory
+# in preparation to include the fragments in the configuration sub-directory.
+PARENT_PATH        := $(DIST_PATH)/$(KERNELS_DIR)
+
+# Recursively include the makefile fragments in each of the kernels sub-
+# directories.
+-include $(addsuffix /$(FRAGMENT_MK), $(KERNEL_PATHS))
+
+# This variable is used by the include statements as they recursively include
+# one another. For the framework and reference kernel source trees (ie: the
+# 'frame' and 'ref_kernels' directories), we initialize it to the top-level
+# directory since that is its parent. Same for the kernels directory, since it
+# resides in the same top-level directory.
+PARENT_PATH        := $(DIST_PATH)
+
+# Recursively include all the makefile fragments in the directories for the
+# reference kernels and portable framework.
+-include $(addsuffix /$(FRAGMENT_MK), $(REFKERN_PATH))
+-include $(addsuffix /$(FRAGMENT_MK), $(FRAME_PATH))
 
 # Create a list of the makefile fragments.
 MAKEFILE_FRAGMENTS := $(addsuffix /$(FRAGMENT_MK), $(FRAGMENT_DIR_PATHS))
@@ -215,9 +243,9 @@ TEST_SRC_PATH  := src
 TEST_OBJ_PATH  := obj
 
 # Gather all local object files.
-TEST_OBJS      := $(patsubst $(TEST_SRC_PATH)/%.c, \
-                             $(TEST_OBJ_PATH)/%.o, \
-                             $(wildcard $(TEST_SRC_PATH)/*.c))
+TEST_OBJS      := $(sort $(patsubst $(TEST_SRC_PATH)/%.c, \
+                                    $(TEST_OBJ_PATH)/%.o, \
+                                    $(wildcard $(TEST_SRC_PATH)/*.c)))
 
 ifeq ($(CONFIG_NAME),pnacl)
 # Linked executable

@@ -56,18 +56,12 @@ void bla_gemm_check
 	f77_int ta,    tb;
 	f77_int nrowa, nrowb;
 
-	nota  = PASTEF770(lsame)( transa, "N", (ftnlen)1, (ftnlen)1
-     );
-	notb  = PASTEF770(lsame)( transb, "N", (ftnlen)1, (ftnlen)1
-     );
-	conja = PASTEF770(lsame)( transa, "C", (ftnlen)1, (ftnlen)1
-     );
-	conjb = PASTEF770(lsame)( transb, "C", (ftnlen)1, (ftnlen)1
-     );
-	ta    = PASTEF770(lsame)( transa, "T", (ftnlen)1, (ftnlen)1
-     );
-	tb    = PASTEF770(lsame)( transb, "T", (ftnlen)1, (ftnlen)1
-     );
+	nota  = PASTEF770(lsame)( transa, "N", (ftnlen)1, (ftnlen)1 );
+	notb  = PASTEF770(lsame)( transb, "N", (ftnlen)1, (ftnlen)1 );
+	conja = PASTEF770(lsame)( transa, "C", (ftnlen)1, (ftnlen)1 );
+	conjb = PASTEF770(lsame)( transb, "C", (ftnlen)1, (ftnlen)1 );
+	ta    = PASTEF770(lsame)( transa, "T", (ftnlen)1, (ftnlen)1 );
+	tb    = PASTEF770(lsame)( transb, "T", (ftnlen)1, (ftnlen)1 );
 
 	if ( nota ) { nrowa = *m; }
 	else        { nrowa = *k; }

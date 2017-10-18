@@ -79,17 +79,17 @@ extern "C" {
 #include "bli_extern_defs.h"
 
 
-// -- BLIS kernel definitions --
+// -- BLIS config/kernel definitions --
 
-#include "bli_kernel.h"
+#include "bli_l1v_ker_prot.h"
+#include "bli_l1f_ker_prot.h"
+#include "bli_l1m_ker_prot.h"
+#include "bli_l3_ukr_prot.h"
 
-#include "bli_kernel_pre_macro_defs.h"
-#include "bli_kernel_ind_pre_macro_defs.h"
+#include "bli_arch_pre_macro_defs.h"
+#include "bli_arch.h"
 
 #include "bli_kernel_macro_defs.h"
-#include "bli_kernel_ind_macro_defs.h"
-
-#include "bli_kernel_prototypes.h"
 
 
 // -- Base operation prototypes --
@@ -98,6 +98,9 @@ extern "C" {
 #include "bli_const.h"
 #include "bli_obj.h"
 #include "bli_obj_scalar.h"
+#include "bli_blksz.h"
+#include "bli_func.h"
+#include "bli_mbool.h"
 #include "bli_cntx.h"
 #include "bli_gks.h"
 #include "bli_ind.h"
@@ -108,9 +111,6 @@ extern "C" {
 #include "bli_part.h"
 #include "bli_prune.h"
 #include "bli_query.h"
-#include "bli_blksz.h"
-#include "bli_func.h"
-#include "bli_mbool.h"
 #include "bli_auxinfo.h"
 #include "bli_param_map.h"
 #include "bli_clock.h"

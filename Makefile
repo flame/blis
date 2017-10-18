@@ -56,6 +56,56 @@
         uninstall-old
 
 
+#
+# --- Helper functions ---------------------------------------------------------
+#
+
+# Define a function to declare pattern-specific CFLAGS variables. This
+# function is called from within each make_defs.mk file.
+#define pattern-spec-cflags
+#$(BASE_OBJ_PATH)/%-$(1).o: CFLAGS := $(CKOPTFLAGS) $(CVECFLAGS) \
+#                                     $(CDBGFLAGS) $(CWARNFLAGS) $(CPICFLAGS) \
+#                                     $(CTHREADFLAGS) $(CMISCFLAGS) $(CPPROCFLAGS) \
+#                                     $(INCLUDE_PATHS) $(VERS_DEF)
+#endef
+
+# Define functions that filters a list of filepaths $(1) that contain (or
+# omit) an arbitrary substring $(2).
+files-that-contain      = $(strip $(foreach f, $(1), $(if $(findstring $(2),$(f)),$(f),)))
+files-that-dont-contain = $(strip $(foreach f, $(1), $(if $(findstring $(2),$(f)),,$(f))))
+
+# Define a function that stores the value of a variable to a different
+# variable containing a specified suffix (corresponding to a configuration).
+define store-var-for
+$(strip $(1)).$(strip $(2)) := $($(strip $(1)))
+endef
+
+# Define a function that stores the value of all of the variables in a
+# make_defs.mk file to other variables with the configuration (the
+# argument $(1)) added as a suffix. This function is called once from
+# each make_defs.mk. Also, add the configuration to CONFIGS_INCL.
+define store-make-defs
+$(eval $(call store-var-for,CC,         $(1)))
+$(eval $(call store-var-for,CC_VENDOR,  $(1)))
+$(eval $(call store-var-for,CPPROCFLAGS,$(1)))
+$(eval $(call store-var-for,CMISCFLAGS, $(1)))
+$(eval $(call store-var-for,CPICFLAGS,  $(1)))
+$(eval $(call store-var-for,CWARNFLAGS, $(1)))
+$(eval $(call store-var-for,CDBGFLAGS,  $(1)))
+$(eval $(call store-var-for,COPTFLAGS,  $(1)))
+$(eval $(call store-var-for,CKOPTFLAGS, $(1)))
+$(eval $(call store-var-for,CVECFLAGS,  $(1)))
+CONFIGS_INCL += $(1)
+endef
+
+# Define a function that retreives the value of a variable for a
+# given configuration.
+define load-var-for
+$($(strip $(1)).$(strip $(2)))
+endef
+
+
+
 
 #
 # --- Makefile initialization --------------------------------------------------
@@ -73,10 +123,17 @@ FRAGMENT_MK        := .fragment.mk
 # Locations of important files.
 CONFIG_DIR         := config
 FRAME_DIR          := frame
+REFKERN_DIR        := ref_kernels
+KERNELS_DIR        := kernels
 BUILD_DIR          := build
 OBJ_DIR            := obj
 LIB_DIR            := lib
 TESTSUITE_DIR      := testsuite
+
+# Other kernel-related definitions.
+KERNEL_SUFS        := c s S
+KERNELS_STR        := kernels
+REF_SUF            := ref
 
 # The names of the testsuite binary executable and related default names
 # of its input/configuration files.
@@ -84,16 +141,6 @@ TESTSUITE_NAME     := test_$(BLIS_LIB_BASE_NAME)
 TESTSUITE_CONF_GEN := input.general
 TESTSUITE_CONF_OPS := input.operations
 TESTSUITE_OUT_FILE := output.testsuite
-
-# The name of the "special" directories, which contain source code that
-# use non-standard compiler flags.
-NOOPT_DIR          := noopt
-KERNELS_DIR        := kernels
-
-# Text strings that alert the user to the fact that special source code is
-# being compiled.
-NOOPT_TEXT         := "(NOTE: using flags for no optimization)"
-KERNELS_TEXT       := "(NOTE: using flags for kernels)"
 
 # CHANGELOG file.
 CHANGELOG          := CHANGELOG
@@ -115,19 +162,26 @@ else
 COMMON_MK_PRESENT := no
 endif
 
-# Now we have access to CONFIG_NAME, which tells us which sub-directory of the
-# config directory to use as our configuration. Also using CONFIG_NAME, we
-# construct the path to the general framework source tree.
-CONFIG_PATH       := $(DIST_PATH)/$(CONFIG_DIR)/$(CONFIG_NAME)
-FRAME_PATH        := $(DIST_PATH)/$(FRAME_DIR)
+# Construct paths to the three primary directories of source code:
+# general framework code, reference kernel code, and optimized kernel
+# code.
+CONFIG_PATH            := $(DIST_PATH)/$(CONFIG_DIR)
+FRAME_PATH             := $(DIST_PATH)/$(FRAME_DIR)
+REFKERN_PATH           := $(DIST_PATH)/$(REFKERN_DIR)
+KERNELS_PATH           := $(DIST_PATH)/$(KERNELS_DIR)
 
-# Construct base paths for the object file tree.
-BASE_OBJ_PATH           := ./$(OBJ_DIR)/$(CONFIG_NAME)
-BASE_OBJ_CONFIG_PATH    := $(BASE_OBJ_PATH)/$(CONFIG_DIR)
-BASE_OBJ_FRAME_PATH     := $(BASE_OBJ_PATH)/$(FRAME_DIR)
+# Construct the base object file path for the current configuration.
+BASE_OBJ_PATH          := ./$(OBJ_DIR)/$(CONFIG_NAME)
 
-# Construct base path for the library.
-BASE_LIB_PATH           := ./$(LIB_DIR)/$(CONFIG_NAME)
+# Construct base object file paths corresponding to the four locations
+# of source code.
+BASE_OBJ_CONFIG_PATH   := $(BASE_OBJ_PATH)/$(CONFIG_DIR)
+BASE_OBJ_FRAME_PATH    := $(BASE_OBJ_PATH)/$(FRAME_DIR)
+BASE_OBJ_REFKERN_PATH  := $(BASE_OBJ_PATH)/$(REFKERN_DIR)
+BASE_OBJ_KERNELS_PATH  := $(BASE_OBJ_PATH)/$(KERNELS_DIR)
+
+# Construct the base path for the library.
+BASE_LIB_PATH          := ./$(LIB_DIR)/$(CONFIG_NAME)
 
 
 
@@ -144,27 +198,30 @@ VERS_CONF              := $(VERSION)-$(CONFIG_NAME)
 
 # Note: These names will be modified later to include the configuration and
 # version strings.
-BLIS_LIB_NAME      := $(BLIS_LIB_BASE_NAME).a
-BLIS_DLL_NAME      := $(BLIS_LIB_BASE_NAME).so
+BLIS_LIB_NAME          := $(BLIS_LIB_BASE_NAME).a
+BLIS_DLL_NAME          := $(BLIS_LIB_BASE_NAME).so
+
+# Append the base library path to the library names.
+BLIS_LIB_PATH          := $(BASE_LIB_PATH)/$(BLIS_LIB_NAME)
+BLIS_DLL_PATH          := $(BASE_LIB_PATH)/$(BLIS_DLL_NAME)
 
 # --- BLIS framework source and object variable names ---
 
 # These are the makefile variables that source code files will be accumulated
 # into by the makefile fragments.
-MK_FRAME_SRC           :=
 MK_CONFIG_SRC          :=
+MK_FRAME_SRC           :=
+MK_REFKERN_SRC         :=
+MK_KERNELS_SRC         :=
 
 # These hold object filenames corresponding to above.
 MK_FRAME_OBJS          :=
-MK_CONFIG_OBJS         :=
-
-# Append the base library path to the library names.
-MK_ALL_BLIS_LIB        := $(BASE_LIB_PATH)/$(BLIS_LIB_NAME)
-MK_ALL_BLIS_DLL        := $(BASE_LIB_PATH)/$(BLIS_DLL_NAME)
+MK_REFKERN_OBJS        :=
+MK_KERNELS_OBJS        :=
 
 # --- Define install target names for static libraries ---
 
-MK_BLIS_LIB                  := $(MK_ALL_BLIS_LIB)
+MK_BLIS_LIB                  := $(BLIS_LIB_PATH)
 MK_BLIS_LIB_INST             := $(patsubst $(BASE_LIB_PATH)/%.a, \
                                            $(INSTALL_PREFIX)/lib/%.a, \
                                            $(MK_BLIS_LIB))
@@ -174,7 +231,7 @@ MK_BLIS_LIB_INST_W_VERS_CONF := $(patsubst $(BASE_LIB_PATH)/%.a, \
 
 # --- Define install target names for shared libraries ---
 
-MK_BLIS_DLL                  := $(MK_ALL_BLIS_DLL)
+MK_BLIS_DLL                  := $(BLIS_DLL_PATH)
 MK_BLIS_DLL_INST             := $(patsubst $(BASE_LIB_PATH)/%.so, \
                                            $(INSTALL_PREFIX)/lib/%.so, \
                                            $(MK_BLIS_DLL))
@@ -218,21 +275,52 @@ MK_INCL_DIR_INST                  := $(INSTALL_PREFIX)/include/blis
 # makefile fragments reside.
 FRAGMENT_DIR_PATHS :=
 
+
+# Construct paths to each of the sub-configurations specified in the
+# configuration list. If CONFIG_NAME is not in CONFIG_LIST, include it in
+# CONFIG_PATHS since we'll need access to its header files.
+ifeq ($(findstring $(CONFIG_NAME),$(CONFIG_LIST)),)
+CONFIG_PATHS       := $(addprefix $(CONFIG_PATH)/, $(CONFIG_NAME) $(CONFIG_LIST))
+else
+CONFIG_PATHS       := $(addprefix $(CONFIG_PATH)/, $(CONFIG_LIST))
+endif
+
 # This variable is used by the include statements as they recursively include
-# one another. For the framework source tree ('frame' directory), we initialize
-# it to the top-level directory since that is its parent.
-PARENT_PATH        := $(DIST_PATH)
-
-# Recursively include all the makefile fragments in the framework itself.
--include $(addsuffix /$(FRAGMENT_MK), $(FRAME_PATH))
-
-# Now set PARENT_PATH to $(DIST_PATH)/config in preparation to include the
-# fragments in the configuration sub-directory.
+# one another. For the 'config' directory, we initialize it to that directory
+# in preparation to include the fragments in the configuration sub-directory.
 PARENT_PATH        := $(DIST_PATH)/$(CONFIG_DIR)
 
-# Recursively include all the makefile fragments in the configuration
-# sub-directory.
--include $(addsuffix /$(FRAGMENT_MK), $(CONFIG_PATH))
+# Recursively include the makefile fragments in each of the sub-configuration
+# directories.
+-include $(addsuffix /$(FRAGMENT_MK), $(CONFIG_PATHS))
+
+
+# Construct paths to each of the kernel sets required by the sub-configurations
+# in the configuration list.
+KERNEL_PATHS       := $(addprefix $(KERNELS_PATH)/, $(KERNEL_LIST))
+
+# This variable is used by the include statements as they recursively include
+# one another. For the 'kernels' directory, we initialize it to that directory
+# in preparation to include the fragments in the configuration sub-directory.
+PARENT_PATH        := $(DIST_PATH)/$(KERNELS_DIR)
+
+# Recursively include the makefile fragments in each of the kernels sub-
+# directories.
+-include $(addsuffix /$(FRAGMENT_MK), $(KERNEL_PATHS))
+
+
+# This variable is used by the include statements as they recursively include
+# one another. For the framework and reference kernel source trees (ie: the
+# 'frame' and 'ref_kernels' directories), we initialize it to the top-level
+# directory since that is its parent. Same for the kernels directory, since it
+# resides in the same top-level directory.
+PARENT_PATH        := $(DIST_PATH)
+
+# Recursively include all the makefile fragments in the directories for the
+# reference kernels and portable framework.
+-include $(addsuffix /$(FRAGMENT_MK), $(REFKERN_PATH))
+-include $(addsuffix /$(FRAGMENT_MK), $(FRAME_PATH))
+
 
 # Create a list of the makefile fragments.
 MAKEFILE_FRAGMENTS := $(addsuffix /$(FRAGMENT_MK), $(FRAGMENT_DIR_PATHS))
@@ -262,17 +350,13 @@ MK_HEADER_FILES := $(strip $(MK_HEADER_FILES))
 
 # Expand the fragment paths that contain .h files, and take the first
 # expansion. Then, strip the header filename to leave the path to each header
-# location. Notice this process even weeds out duplicates! Add the config
-# directory manually since it contains FLA_config.h.
+# location. Notice this process even weeds out duplicates!
 MK_HEADER_DIR_PATHS := $(dir $(foreach frag_path, . $(FRAGMENT_DIR_PATHS), \
                                        $(firstword $(wildcard $(frag_path)/*.h))))
 
 # Add -I to each header path so we can specify our include search paths to the
 # C compiler.
 INCLUDE_PATHS   := $(strip $(patsubst %, -I%, $(MK_HEADER_DIR_PATHS)))
-CFLAGS          := $(CFLAGS) $(INCLUDE_PATHS)
-CFLAGS_NOOPT    := $(CFLAGS_NOOPT) $(INCLUDE_PATHS)
-CFLAGS_KERNELS  := $(CFLAGS_KERNELS) $(INCLUDE_PATHS)
 
 
 
@@ -283,9 +367,6 @@ CFLAGS_KERNELS  := $(CFLAGS_KERNELS) $(INCLUDE_PATHS)
 # Define a C preprocessor macro to communicate the current version so that it
 # can be embedded into the library and queried later.
 VERS_DEF       := -DBLIS_VERSION_STRING=\"$(VERSION)\"
-CFLAGS         := $(CFLAGS) $(VERS_DEF)
-CFLAGS_NOOPT   := $(CFLAGS_NOOPT) $(VERS_DEF)
-CFLAGS_KERNELS := $(CFLAGS_KERNELS) $(VERS_DEF)
 
 
 
@@ -293,20 +374,91 @@ CFLAGS_KERNELS := $(CFLAGS_KERNELS) $(VERS_DEF)
 # --- Library object definitions -----------------------------------------------
 #
 
-# Convert source file paths to object file paths by replacing the base source
-# directories with the base object directories, and also replacing the source
-# file suffix (eg: '.c') with '.o'.
-MK_BLIS_FRAME_OBJS   := $(patsubst $(FRAME_PATH)/%.c, $(BASE_OBJ_FRAME_PATH)/%.o, \
-                                        $(filter %.c, $(MK_FRAME_SRC)))
+# In this section, we will isolate the relevant source code filepaths and
+# convert them to lists of object filepaths. Relevant source code falls into
+# four categories: configuration source; architecture-specific kernel source;
+# reference kernel source; and general framework source.
 
-MK_BLIS_CONFIG_OBJS  := $(patsubst $(CONFIG_PATH)/%.S, $(BASE_OBJ_CONFIG_PATH)/%.o, \
-                                         $(filter %.S, $(MK_CONFIG_SRC)))
-MK_BLIS_CONFIG_OBJS  += $(patsubst $(CONFIG_PATH)/%.c, $(BASE_OBJ_CONFIG_PATH)/%.o, \
-                                         $(filter %.c, $(MK_CONFIG_SRC)))
+# $(call gen-obj-paths-from-src file_exts, src_files, base_src_path, base_obj_path)
+#gen-obj-paths-from-src = $(foreach ch, $(1), \
+#                             $(patsubst $(3)/%.$(ch), \
+#                                        $(4)/%.o, \
+#                                        $(2) \
+#                              ) \
+#                          )
+
+# First, identify the source code found in the configuration sub-directories.
+MK_CONFIG_C          := $(filter %.c, $(MK_CONFIG_SRC))
+MK_CONFIG_S          := $(filter %.s, $(MK_CONFIG_SRC))
+MK_CONFIG_SS         := $(filter %.S, $(MK_CONFIG_SRC))
+MK_CONFIG_C_OBJS     := $(patsubst $(CONFIG_PATH)/%.c, $(BASE_OBJ_CONFIG_PATH)/%.o, \
+                                   $(MK_CONFIG_C) \
+                         )
+MK_CONFIG_S_OBJS     := $(patsubst $(CONFIG_PATH)/%.s, $(BASE_OBJ_CONFIG_PATH)/%.o, \
+                                   $(MK_CONFIG_S) \
+                         )
+MK_CONFIG_SS_OBJS    := $(patsubst $(CONFIG_PATH)/%.S, $(BASE_OBJ_CONFIG_PATH)/%.o, \
+                                   $(MK_CONFIG_SS) \
+                         )
+MK_CONFIG_OBJS       := $(MK_CONFIG_C_OBJS) \
+                        $(MK_CONFIG_S_OBJS) \
+                        $(MK_CONFIG_SS_OBJS)
+
+# A more concise but obfuscated way of encoding the above lines.
+#MK_CONFIG_OBJS       := $(call gen-obj-paths-from-src c s S,
+#                                                      $(MK_CONFIG_SRC),
+#                                                      $(CONFIG_PATH),
+#                                                      $(BASE_OBJ_CONFIG_PATH)
+#                         )
+
+# Now, identify all of the architecture-specific kernel source code. We
+# start by filtering only .c and .[sS] files (ignoring any .h files, though
+# there shouldn't be any), and then instantiating object file paths from the
+# source file paths. Note that MK_KERNELS_SRC is already limited to the
+# kernel source corresponding to the kernel sets in KERNEL_LIST. This
+# is because the configure script only propogated makefile fragments into
+# those specific kernel subdirectories.
+MK_KERNELS_C       := $(filter %.c, $(MK_KERNELS_SRC))
+MK_KERNELS_S       := $(filter %.s, $(MK_KERNELS_SRC))
+MK_KERNELS_SS      := $(filter %.S, $(MK_KERNELS_SRC))
+MK_KERNELS_C_OBJS  := $(patsubst $(KERNELS_PATH)/%.c, $(BASE_OBJ_KERNELS_PATH)/%.o, \
+                                 $(MK_KERNELS_C) \
+                       )
+MK_KERNELS_S_OBJS  := $(patsubst $(KERNELS_PATH)/%.s, $(BASE_OBJ_KERNELS_PATH)/%.o, \
+                                 $(MK_KERNELS_S) \
+                       )
+MK_KERNELS_SS_OBJS := $(patsubst $(KERNELS_PATH)/%.S, $(BASE_OBJ_KERNELS_PATH)/%.o, \
+                                 $(MK_KERNELS_SS) \
+                       )
+MK_KERNELS_OBJS    := $(MK_KERNELS_C_OBJS) \
+                      $(MK_KERNELS_S_OBJS) \
+                      $(MK_KERNELS_SS_OBJS)
+
+# Next, identify all of the reference kernel source code, then filter only
+# .c files (ignoring .h files), and finally instantiate object file paths
+# from the source files paths once for each sub-configuration in CONFIG_LIST,
+# appending the name of the sub-config to the object filename.
+MK_REFKERN_C       := $(filter %.c, $(MK_REFKERN_SRC))
+MK_REFKERN_OBJS    := $(foreach arch, $(CONFIG_LIST), \
+                          $(patsubst $(REFKERN_PATH)/%_$(REF_SUF).c, \
+                                     $(BASE_OBJ_REFKERN_PATH)/$(arch)/%_$(arch)_$(REF_SUF).o, \
+                                     $(MK_REFKERN_C) \
+                           ) \
+                       )
+
+# And now, identify all of the portable framework source code, then filter
+# only .c files (ignoring .h files), and finally instantiate object file
+# paths from the source file paths.
+MK_FRAME_C         := $(filter %.c, $(MK_FRAME_SRC))
+MK_FRAME_OBJS      := $(patsubst $(FRAME_PATH)/%.c, $(BASE_OBJ_FRAME_PATH)/%.o, \
+                                 $(MK_FRAME_C) \
+                       )
 
 # Combine all of the object files into some readily-accessible variables.
-MK_ALL_BLIS_OBJS     := $(MK_BLIS_CONFIG_OBJS) \
-                        $(MK_BLIS_FRAME_OBJS)
+MK_BLIS_OBJS         := $(MK_CONFIG_OBJS) \
+                        $(MK_KERNELS_OBJS) \
+                        $(MK_REFKERN_OBJS) \
+                        $(MK_FRAME_OBJS)
 
 # Optionally filter out the BLAS and CBLAS compatibility layer object files.
 # This is not actually necessary, since each affected file is guarded by C
@@ -315,10 +467,10 @@ MK_ALL_BLIS_OBJS     := $(MK_BLIS_CONFIG_OBJS) \
 BASE_OBJ_BLAS_PATH   := $(BASE_OBJ_FRAME_PATH)/compat
 BASE_OBJ_CBLAS_PATH  := $(BASE_OBJ_FRAME_PATH)/compat/cblas
 ifeq ($(BLIS_ENABLE_CBLAS),no)
-MK_ALL_BLIS_OBJS     := $(filter-out $(BASE_OBJ_CBLAS_PATH)/%.o, $(MK_ALL_BLIS_OBJS) )
+MK_BLIS_OBJS         := $(filter-out $(BASE_OBJ_CBLAS_PATH)/%.o, $(MK_BLIS_OBJS) )
 endif
 ifeq ($(BLIS_ENABLE_BLAS2BLIS),no)
-MK_ALL_BLIS_OBJS     := $(filter-out $(BASE_OBJ_BLAS_PATH)/%.o,  $(MK_ALL_BLIS_OBJS) )
+MK_BLIS_OBJS         := $(filter-out $(BASE_OBJ_BLAS_PATH)/%.o,  $(MK_BLIS_OBJS) )
 endif
 
 
@@ -398,41 +550,125 @@ clean: cleanlib cleantest
 
 # --- General source code / object code rules ---
 
-# Define two functions, each of which takes one argument (an object file
-# path). The functions determine which CFLAGS and text string are needed to
-# compile the object file. Note that we match without a preceding forward slash,
-# so the directory name may have 'kernels' as a substring (e.g. 'ukernels' or
-# 'kernels_opt').
-get_cflags_for_obj = $(if $(findstring $(NOOPT_DIR),$1),$(CFLAGS_NOOPT),\
-                     $(if $(findstring $(KERNELS_DIR),$1),$(CFLAGS_KERNELS),\
-                     $(CFLAGS)))
+# Define some functions that return the appropriate CFLAGS for a given
+# configuration. This assumes that the make_defs.mk files have already been
+# included, which results in those values having been stored to
+# configuration-qualified variables.
 
-get_ctext_for_obj = $(if $(findstring $(NOOPT_DIR),$1),$(NOOPT_TEXT),\
-                    $(if $(findstring $(KERNELS_DIR),$1),$(KERNELS_TEXT),))
+get-noopt-cflags-for   = $(call load-var-for,CDBGFLAGS,$(1)) \
+                         $(call load-var-for,CWARNFLAGS,$(1)) \
+                         $(call load-var-for,CPICFLAGS,$(1)) \
+                         $(call load-var-for,CMISCFLAGS,$(1)) \
+                         $(call load-var-for,CPPROCFLAGS,$(1)) \
+                         $(CTHREADFLAGS) \
+                         $(INCLUDE_PATHS) $(VERS_DEF)
 
-$(BASE_OBJ_FRAME_PATH)/%.o: $(FRAME_PATH)/%.c $(MK_HEADER_FILES) $(MAKE_DEFS_MK_PATH)
+get-kernel-cflags-for  = $(call load-var-for,CKOPTFLAGS,$(1)) \
+                         $(call load-var-for,CVECFLAGS,$(1)) \
+                         $(call get-noopt-cflags-for,$(1))
+
+get-refkern-cflags-for = $(call get-kernel-cflags-for,$(1)) \
+                         -DBLIS_CNAME=$(1)
+
+get-frame-cflags-for   = $(call load-var-for,COPTFLAGS,$(1)) \
+                         $(call load-var-for,CVECFLAGS,$(1)) \
+                         $(call get-noopt-cflags-for,$(1))
+
+get-config-cflags-for  = $(call get-kernel-cflags-for,$(1))
+
+get-noopt-text       = "(CFLAGS for no optimization)"
+get-kernel-text-for  = "('$(1)' CFLAGS for kernels)"
+get-refkern-text-for = "('$(1)' CFLAGS for ref. kernels)"
+get-frame-text-for   = "('$(1)' CFLAGS for framework code)"
+get-config-text-for  = "('$(1)' CFLAGS for config code)"
+
+
+# FGVZ: Add support for compiling .s and .S files in 'config'/'kernels'
+# directories.
+#  - May want to add an extra foreach loop around function eval/call.
+
+# first argument: a configuration name from config_list, used to look up the
+# CFLAGS to use during compilation.
+define make-config-rule
+$(BASE_OBJ_CONFIG_PATH)/$(1)/%.o: $(CONFIG_PATH)/$(1)/%.c $(MK_HEADER_FILES) $(MAKE_DEFS_MK_PATHS)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	$(CC) $(call get_cflags_for_obj,$@) -c $< -o $@
+	$(CC) $(call get-config-cflags-for,$(1)) -c $$< -o $$@
 else
-	@echo "Compiling $<" $(call get_ctext_for_obj,$@)
-	@$(CC) $(call get_cflags_for_obj,$@) -c $< -o $@
+	@echo "Compiling $$@" $(call get-config-text-for,$(1))
+	@$(CC) $(call get-config-cflags-for,$(1)) -c $$< -o $$@
 endif
+endef
 
-$(BASE_OBJ_CONFIG_PATH)/%.o: $(CONFIG_PATH)/%.c $(MK_HEADER_FILES) $(MAKE_DEFS_MK_PATH)
+# first argument: a configuration name from the union of config_list and
+# config_name, used to look up the CFLAGS to use during compilation.
+define make-frame-rule
+$(BASE_OBJ_FRAME_PATH)/%.o: $(FRAME_PATH)/%.c $(MK_HEADER_FILES) $(MAKE_DEFS_MK_PATHS)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	$(CC) $(call get_cflags_for_obj,$@) -c $< -o $@
+	$(CC) $(call get-frame-cflags-for,$(1)) -c $$< -o $$@
 else
-	@echo "Compiling $<" $(call get_ctext_for_obj,$@)
-	@$(CC) $(call get_cflags_for_obj,$@) -c $< -o $@
+	@echo "Compiling $$@" $(call get-frame-text-for,$(1))
+	@$(CC) $(call get-frame-cflags-for,$(1)) -c $$< -o $$@
 endif
+endef
 
-$(BASE_OBJ_CONFIG_PATH)/%.o: $(CONFIG_PATH)/%.S $(MK_HEADER_FILES) $(MAKE_DEFS_MK_PATH)
+# first argument: a kernel set (name) being targeted (e.g. haswell).
+define make-refkern-rule
+$(BASE_OBJ_REFKERN_PATH)/$(1)/%_$(1)_ref.o: $(REFKERN_PATH)/%_ref.c $(MK_HEADER_FILES) $(MAKE_DEFS_MK_PATHS)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	$(CC) $(call get_cflags_for_obj,$@) -c $< -o $@
+	$(CC) $(call get-refkern-cflags-for,$(1)) -c $$< -o $$@
 else
-	@echo "Compiling $<" $(call get_ctext_for_obj,$@)
-	@$(CC) $(call get_cflags_for_obj,$@) -c $< -o $@
+	@echo "Compiling $$@" $(call get-refkern-text-for,$(1))
+	@$(CC) $(call get-refkern-cflags-for,$(1)) -c $$< -o $$@
 endif
+endef
+
+# first argument: a kernel set (name) being targeted (e.g. haswell).
+# second argument: the configuration whose CFLAGS we should use in compilation.
+# third argument: the kernel file suffix being considered.
+#$(BASE_OBJ_KERNELS_PATH)/$(1)/%.o: $(KERNELS_PATH)/$(1)/%.$(3) $(MK_HEADER_FILES) $(MAKE_DEFS_MK_PATHS)
+define make-kernels-rule
+$(BASE_OBJ_KERNELS_PATH)/$(1)/%.o: $(KERNELS_PATH)/$(1)/%.c $(MK_HEADER_FILES) $(MAKE_DEFS_MK_PATHS)
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	$(CC) $(call get-kernel-cflags-for,$(2)) -c $$< -o $$@
+else
+	@echo "Compiling $$@" $(call get-kernel-text-for,$(1))
+	@$(CC) $(call get-kernel-cflags-for,$(2)) -c $$< -o $$@
+endif
+endef
+
+# Define functions to choose the correct sub-configuration name for the
+# given kernel set. This function is called when instantiating the
+# make-kernels-rule.
+get-config-for-kset = $(lastword $(subst :, ,$(filter $(1):%,$(KCONFIG_MAP))))
+
+# Instantiate the build rule for files in the configuration directory for
+# each of the sub-configurations in CONFIG_LIST with the CFLAGS designated
+# for that sub-configuration.
+$(foreach conf, $(CONFIG_LIST), $(eval $(call make-config-rule,$(conf))))
+
+# Instantiate the build rule for non-kernel framework files. Use the CFLAGS for
+# the configuration family, which exists in the directory whose name is equal to
+# CONFIG_NAME. (BTW: If it is a singleton family, then CONFIG_NAME is equal to
+# CONFIG_LIST.)
+#$(eval $(call make-frame-rule,$(firstword $(CONFIG_NAME))))
+$(foreach conf, $(CONFIG_NAME), $(eval $(call make-frame-rule,$(conf))))
+
+# Instantiate the build rule for reference kernels for each of the sub-
+# configurations in CONFIG_LIST with the CFLAGS designated for that sub-
+# configuration.
+$(foreach conf, $(CONFIG_LIST), $(eval $(call make-refkern-rule,$(conf))))
+
+$(info kernel list: $(KERNEL_LIST))
+$(info getconfig:   $(call get-config-for-kset,haswell))
+# Instantiate the build rule for optimized kernels for each of the kernel
+# sets in KERNEL_LIST with the CFLAGS designated for the sub-configuration
+# specified by the KCONFIG_MAP.
+$(foreach kset, $(KERNEL_LIST), $(eval $(call make-kernels-rule,$(kset),$(call get-config-for-kset,$(kset)))))
+
+# FGVZ: for later, to compile multiple kernel source suffixes.
+#$(foreach suf,  $(KERNEL_SUFS), \
+#$(foreach kset, $(KERNEL_LIST), $(eval $(call make-kernels-rule,$(kset),$(suf)))))
+
 
 
 # --- Environment check rules ---
@@ -450,8 +686,8 @@ ifeq ($(MAKEFILE_FRAGMENTS_PRESENT),no)
 endif
 
 check-env-make-defs: check-env-fragments
-ifeq ($(MAKE_DEFS_MK_PRESENT),no)
-	$(error Cannot proceed: make_defs.mk not detected! Invalid configuration)
+ifeq ($(ALL_MAKE_DEFS_MK_PRESENT),no)
+	$(error Cannot proceed: Some make_defs.mk files not found or mislabeled!)
 endif
 
 
@@ -462,7 +698,7 @@ blis-lib: check-env $(MK_LIBS)
 
 # --- Static library archiver rules ---
 
-$(MK_ALL_BLIS_LIB): $(MK_ALL_BLIS_OBJS)
+$(MK_BLIS_LIB): $(MK_BLIS_OBJS)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	$(AR) $(ARFLAGS) $@ $?
 	$(RANLIB) $@
@@ -475,7 +711,7 @@ endif
 
 # --- Dynamic library linker rules ---
 
-$(MK_ALL_BLIS_DLL): $(MK_ALL_BLIS_OBJS)
+$(MK_BLIS_DLL): $(MK_BLIS_OBJS)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	$(LINKER) $(SOFLAGS) $(LDFLAGS) -o $@ $?
 else 
@@ -579,7 +815,7 @@ else
 	@echo "Running $(TESTSUITE_BIN)"
 	@$(JSINT) $(TESTSUITE_BIN)
 endif
-else
+else # non-pnacl, non-emscripten case
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	./$(TESTSUITE_BIN) -g $(TESTSUITE_CONF_GEN_PATH) \
 	                   -o $(TESTSUITE_CONF_OPS_PATH) \
@@ -663,22 +899,21 @@ endif
 # --- Query current configuration ---
 
 showconfig: check-env
-	@echo "Current configuration is '$(CONFIG_NAME)', located in '$(CONFIG_PATH)'"
+	@echo "Current configuration family ($(CONFIG_NAME)) supports the following"
+	@echo "sub-configurations: $(CONFIG_LIST)"
+	@echo "requisite kernels:  $(KERNEL_LIST)"
 
 
 # --- Clean rules ---
 
 cleanlib: check-env
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	- $(FIND) $(BASE_OBJ_CONFIG_PATH) -name "*.o" | $(XARGS) $(RM_F)
-	- $(FIND) $(BASE_OBJ_FRAME_PATH) -name "*.o" | $(XARGS) $(RM_F)
+	- $(FIND) $(BASE_OBJ_PATH) -name "*.o" | $(XARGS) $(RM_F)
 	- $(FIND) $(BASE_LIB_PATH) -name "*.a" | $(XARGS) $(RM_F)
 	- $(FIND) $(BASE_LIB_PATH) -name "*.so" | $(XARGS) $(RM_F)
 else
-	@echo "Removing .o files from $(BASE_OBJ_CONFIG_PATH)."
-	@- $(FIND) $(BASE_OBJ_CONFIG_PATH) -name "*.o" | $(XARGS) $(RM_F)
-	@echo "Removing .o files from $(BASE_OBJ_FRAME_PATH)."
-	@- $(FIND) $(BASE_OBJ_FRAME_PATH) -name "*.o" | $(XARGS) $(RM_F)
+	@echo "Removing .o files from $(BASE_OBJ_PATH)."
+	@- $(FIND) $(BASE_OBJ_PATH) -name "*.o" | $(XARGS) $(RM_F)
 	@echo "Removing .a files from $(BASE_LIB_PATH)."
 	@- $(FIND) $(BASE_LIB_PATH) -name "*.a" | $(XARGS) $(RM_F)
 	@echo "Removing .so files from $(BASE_LIB_PATH)."
@@ -700,11 +935,17 @@ cleanmk: check-env
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	- $(FIND) $(CONFIG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 	- $(FIND) $(FRAME_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
+	- $(FIND) $(REFKERN_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
+	- $(FIND) $(KERNELS_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 else
 	@echo "Removing makefile fragments from $(CONFIG_PATH)."
 	@- $(FIND) $(CONFIG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 	@echo "Removing makefile fragments from $(FRAME_PATH)."
 	@- $(FIND) $(FRAME_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
+	@echo "Removing makefile fragments from $(REFKERN_PATH)."
+	@- $(FIND) $(REFERKN_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
+	@echo "Removing makefile fragments from $(KERNELS_PATH)."
+	@- $(FIND) $(KERNELS_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 endif
 
 distclean: check-env cleanmk cleanlib cleantest

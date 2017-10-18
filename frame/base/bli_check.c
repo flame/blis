@@ -837,3 +837,68 @@ err_t bli_check_object_alias_of( obj_t* a, obj_t* b )
 	return e_val;
 }
 
+// -- Architecture-related errors ----------------------------------------------
+
+err_t bli_check_valid_arch_id( arch_t id )
+{
+	err_t e_val = BLIS_SUCCESS;
+
+	if ( id < 0 || BLIS_NUM_ARCHS-1 < id )
+		e_val = BLIS_INVALID_ARCH_ID;
+
+	return e_val;
+}
+
+// -- Architecture-related errors ----------------------------------------------
+
+err_t bli_check_valid_mc_mod_mult( blksz_t* mc, blksz_t* mr )
+{
+	num_t dt;
+
+	for ( dt = BLIS_DT_LO; dt <= BLIS_DT_HI; ++dt )
+	{
+		dim_t mc_def_dt = bli_blksz_get_def( dt, mc );
+		dim_t mc_max_dt = bli_blksz_get_max( dt, mc );
+		dim_t mr_dt  = bli_blksz_get_def( dt, mr );
+
+		if      ( mc_def_dt % mr_dt != 0 ) return BLIS_MC_DEF_NONMULTIPLE_OF_MR;
+		else if ( mc_max_dt % mr_dt != 0 ) return BLIS_MC_MAX_NONMULTIPLE_OF_MR;
+	}
+
+	return BLIS_SUCCESS;
+}
+
+err_t bli_check_valid_nc_mod_mult( blksz_t* nc, blksz_t* nr )
+{
+	num_t dt;
+
+	for ( dt = BLIS_DT_LO; dt <= BLIS_DT_HI; ++dt )
+	{
+		dim_t nc_def_dt = bli_blksz_get_def( dt, nc );
+		dim_t nc_max_dt = bli_blksz_get_max( dt, nc );
+		dim_t nr_dt     = bli_blksz_get_def( dt, nr );
+
+		if      ( nc_def_dt % nr_dt != 0 ) return BLIS_NC_DEF_NONMULTIPLE_OF_NR;
+		else if ( nc_max_dt % nr_dt != 0 ) return BLIS_NC_MAX_NONMULTIPLE_OF_NR;
+	}
+
+	return BLIS_SUCCESS;
+}
+
+err_t bli_check_valid_kc_mod_mult( blksz_t* kc, blksz_t* kr )
+{
+	num_t dt;
+
+	for ( dt = BLIS_DT_LO; dt <= BLIS_DT_HI; ++dt )
+	{
+		dim_t kc_def_dt = bli_blksz_get_def( dt, kc );
+		dim_t kc_max_dt = bli_blksz_get_max( dt, kc );
+		dim_t kr_dt     = bli_blksz_get_def( dt, kr );
+
+		if      ( kc_def_dt % kr_dt != 0 ) return BLIS_KC_DEF_NONMULTIPLE_OF_KR;
+		else if ( kc_max_dt % kr_dt != 0 ) return BLIS_KC_MAX_NONMULTIPLE_OF_KR;
+	}
+
+	return BLIS_SUCCESS;
+}
+

@@ -37,55 +37,21 @@
 //
 
 #undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname) \
-     ( \
-       dim_t               k, \
-       ctype*     restrict alpha, \
-       ctype*     restrict a, \
-       ctype*     restrict b, \
-       ctype*     restrict beta, \
-       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t* restrict data, \
-       cntx_t*    restrict cntx  \
-     );
+#define GENTPROT GEMM_UKR_PROT
 
-INSERT_GENTPROT_BASIC( gemm_ukr_name )
+INSERT_GENTPROT_BASIC0( gemm_ukr_name )
 
 
 #undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname) \
-     ( \
-       dim_t               k, \
-       ctype*     restrict alpha, \
-       ctype*     restrict a1x, \
-       ctype*     restrict a11, \
-       ctype*     restrict bx1, \
-       ctype*     restrict b11, \
-       ctype*     restrict c11, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t* restrict data, \
-       cntx_t*    restrict cntx  \
-     );
+#define GENTPROT GEMMTRSM_UKR_PROT
 
-INSERT_GENTPROT_BASIC( gemmtrsm_l_ukr_name )
-INSERT_GENTPROT_BASIC( gemmtrsm_u_ukr_name )
+INSERT_GENTPROT_BASIC0( gemmtrsm_l_ukr_name )
+INSERT_GENTPROT_BASIC0( gemmtrsm_u_ukr_name )
 
 
 #undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname) \
-     ( \
-       ctype*     restrict a, \
-       ctype*     restrict b, \
-       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t* restrict data, \
-       cntx_t*    restrict cntx  \
-     );
+#define GENTPROT TRSM_UKR_PROT
 
-INSERT_GENTPROT_BASIC( trsm_l_ukr_name )
-INSERT_GENTPROT_BASIC( trsm_u_ukr_name )
+INSERT_GENTPROT_BASIC0( trsm_l_ukr_name )
+INSERT_GENTPROT_BASIC0( trsm_u_ukr_name )
 

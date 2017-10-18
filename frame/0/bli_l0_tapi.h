@@ -47,10 +47,10 @@ void PASTEMAC(ch,opname) \
        ctype*  psi  \
      );
 
-INSERT_GENTPROT_BASIC( addsc )
-INSERT_GENTPROT_BASIC( divsc )
-INSERT_GENTPROT_BASIC( mulsc )
-INSERT_GENTPROT_BASIC( subsc )
+INSERT_GENTPROT_BASIC0( addsc )
+INSERT_GENTPROT_BASIC0( divsc )
+INSERT_GENTPROT_BASIC0( mulsc )
+INSERT_GENTPROT_BASIC0( subsc )
 
 
 #undef  GENTPROT
@@ -62,7 +62,7 @@ void PASTEMAC(ch,opname) \
        ctype*  chi  \
      );
 
-INSERT_GENTPROT_BASIC( invertsc )
+INSERT_GENTPROT_BASIC0( invertsc )
 
 
 #undef  GENTPROTR
@@ -74,8 +74,8 @@ void PASTEMAC(ch,opname) \
        ctype_r* absq  \
      );
 
-INSERT_GENTPROTR_BASIC( absqsc )
-INSERT_GENTPROTR_BASIC( normfsc )
+INSERT_GENTPROTR_BASIC0( absqsc )
+INSERT_GENTPROTR_BASIC0( normfsc )
 
 
 #undef  GENTPROT
@@ -87,7 +87,7 @@ void PASTEMAC(ch,opname) \
        ctype*  psi  \
      );
 
-INSERT_GENTPROT_BASIC( sqrtsc )
+INSERT_GENTPROT_BASIC0( sqrtsc )
 
 
 #undef  GENTPROT
@@ -100,7 +100,7 @@ void PASTEMAC(ch,opname) \
        double* zeta_i  \
      );
 
-INSERT_GENTPROT_BASIC( getsc )
+INSERT_GENTPROT_BASIC0( getsc )
 
 
 #undef  GENTPROT
@@ -113,7 +113,7 @@ void PASTEMAC(ch,opname) \
        ctype*  chi  \
      );
 
-INSERT_GENTPROT_BASIC( setsc )
+INSERT_GENTPROT_BASIC0( setsc )
 
 
 #undef  GENTPROTR
@@ -126,7 +126,7 @@ void PASTEMAC(ch,opname) \
        ctype_r* zeta_i  \
      );
 
-INSERT_GENTPROTR_BASIC( unzipsc )
+INSERT_GENTPROTR_BASIC0( unzipsc )
 
 
 #undef  GENTPROTR
@@ -139,7 +139,7 @@ void PASTEMAC(ch,opname) \
        ctype*   chi  \
      );
 
-INSERT_GENTPROTR_BASIC( zipsc )
+INSERT_GENTPROTR_BASIC0( zipsc )
 
 // -----------------------------------------------------------------------------
 

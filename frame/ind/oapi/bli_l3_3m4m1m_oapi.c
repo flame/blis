@@ -49,10 +49,10 @@ void PASTEMAC(opname,imeth) \
        cntx_t* cntx  \
      ) \
 { \
+	ind_t   ind      = PASTEMAC0(imeth); \
 	num_t   dt       = bli_obj_datatype( *c ); \
 	obj_t*  beta_use = beta; \
 \
-	cntx_t* cntx_p; \
 	dim_t   i; \
 \
 	/* If the objects are in the real domain, execute the native
@@ -78,14 +78,18 @@ void PASTEMAC(opname,imeth) \
 	} \
 */ \
 \
-	/* Initialize a local context if the one provided is NULL. */ \
-	bli_cntx_init_local_if2( cname, imeth, dt, cntx, cntx_p ); \
+	/* Query a context for the current induced method. This context is
+	   managed and cached by the gks and should not be freed by the caller.
+	   Note that we pass in the datatype because it will be needed when
+	   bli_gks_query_ind_cntx() eventually calls the bli_ind_cntx_init()
+	   family of functions. */ \
+	cntx = bli_gks_query_ind_cntx( ind, dt ); \
 \
 	/* Some induced methods execute in multiple "stages". */ \
 	for ( i = 0; i < nstage; ++i ) \
 	{ \
 		/* Prepare the context for the ith stage of computation. */ \
-		PASTEMAC2(cname,imeth,_cntx_stage)( i, cntx_p ); \
+		bli_cntx_ind_stage( ind, i, cntx ); \
 \
 		/* For multi-stage methods, use BLIS_ONE as beta after the first
 		   stage. */ \
@@ -93,17 +97,12 @@ void PASTEMAC(opname,imeth) \
 \
 		/* Invoke the operation's front end and request the default control
 		   tree. */ \
-		PASTEMAC(opname,_front)( alpha, a, b, beta_use, c, cntx_p, NULL ); \
+		PASTEMAC(opname,_front)( alpha, a, b, beta_use, c, cntx, NULL ); \
 	} \
-\
-	/* Finalize the local context if it was initialized here. */ \
-	bli_cntx_finalize_local_if2( cname, imeth, cntx ); \
 }
 
 // gemm
 GENFRONT( gemm, gemm, 3mh, 3 )
-GENFRONT( gemm, gemm, 3m3, 1 )
-GENFRONT( gemm, gemm, 3m2, 1 )
 GENFRONT( gemm, gemm, 3m1, 1 )
 GENFRONT( gemm, gemm, 4mh, 4 )
 GENFRONT( gemm, gemm, 4mb, 1 )
@@ -112,8 +111,6 @@ GENFRONT( gemm, gemm, 1m,  1 )
 
 // her2k
 GENFRONT( her2k, gemm, 3mh, 3 )
-//GENFRONT( her2k, gemm, 3m3, 1 ) // Not implemented.
-//GENFRONT( her2k, gemm, 3m2, 1 ) // Not implemented.
 GENFRONT( her2k, gemm, 3m1, 1 )
 GENFRONT( her2k, gemm, 4mh, 4 )
 //GENFRONT( her2k, gemm, 4mb, 1 ) // Not implemented.
@@ -122,8 +119,6 @@ GENFRONT( her2k, gemm, 1m,  1 )
 
 // syr2k
 GENFRONT( syr2k, gemm, 3mh, 3 )
-//GENFRONT( syr2k, gemm, 3m3, 1 ) // Not implemented.
-//GENFRONT( syr2k, gemm, 3m2, 1 ) // Not implemented.
 GENFRONT( syr2k, gemm, 3m1, 1 )
 GENFRONT( syr2k, gemm, 4mh, 4 )
 //GENFRONT( syr2k, gemm, 4mb, 1 ) // Not implemented.
@@ -147,10 +142,10 @@ void PASTEMAC(opname,imeth) \
        cntx_t* cntx  \
      ) \
 { \
+	ind_t   ind      = PASTEMAC0(imeth); \
 	num_t   dt       = bli_obj_datatype( *c ); \
 	obj_t*  beta_use = beta; \
 \
-	cntx_t* cntx_p; \
 	dim_t   i; \
 \
 	/* If the objects are in the real domain, execute the native
@@ -161,14 +156,18 @@ void PASTEMAC(opname,imeth) \
 		return; \
 	} \
 \
-	/* Initialize a local context if the one provided is NULL. */ \
-	bli_cntx_init_local_if2( cname, imeth, dt, cntx, cntx_p ); \
+	/* Query a context for the current induced method. This context is
+	   managed and cached by the gks and should not be freed by the caller.
+	   Note that we pass in the datatype because it will be needed when
+	   bli_gks_query_ind_cntx() eventually calls the bli_ind_cntx_init()
+	   family of functions. */ \
+	cntx = bli_gks_query_ind_cntx( ind, dt ); \
 \
 	/* Some induced methods execute in multiple "stages". */ \
 	for ( i = 0; i < nstage; ++i ) \
 	{ \
 		/* Prepare the context for the ith stage of computation. */ \
-		PASTEMAC2(cname,imeth,_cntx_stage)( i, cntx_p ); \
+		bli_cntx_ind_stage( ind, i, cntx ); \
 \
 		/* For multi-stage methods, use BLIS_ONE as beta after the first
 		   stage. */ \
@@ -176,17 +175,12 @@ void PASTEMAC(opname,imeth) \
 \
 		/* Invoke the operation's front end and request the default control
 		   tree. */ \
-		PASTEMAC(opname,_front)( side, alpha, a, b, beta_use, c, cntx_p, NULL ); \
+		PASTEMAC(opname,_front)( side, alpha, a, b, beta_use, c, cntx, NULL ); \
 	} \
-\
-	/* Finalize the local context if it was initialized here. */ \
-	bli_cntx_finalize_local_if2( cname, imeth, cntx ); \
 }
 
 // hemm
 GENFRONT( hemm, gemm, 3mh, 3 )
-//GENFRONT( hemm, gemm, 3m3, 1 ) // Not implemented.
-//GENFRONT( hemm, gemm, 3m2, 1 ) // Not implemented.
 GENFRONT( hemm, gemm, 3m1, 1 )
 GENFRONT( hemm, gemm, 4mh, 4 )
 //GENFRONT( hemm, gemm, 4mb, 1 ) // Not implemented.
@@ -195,8 +189,6 @@ GENFRONT( hemm, gemm, 1m,  1 )
 
 // symm
 GENFRONT( symm, gemm, 3mh, 3 )
-//GENFRONT( symm, gemm, 3m3, 1 ) // Not implemented.
-//GENFRONT( symm, gemm, 3m2, 1 ) // Not implemented.
 GENFRONT( symm, gemm, 3m1, 1 )
 GENFRONT( symm, gemm, 4mh, 4 )
 //GENFRONT( symm, gemm, 4mb, 1 ) // Not implemented.
@@ -205,8 +197,6 @@ GENFRONT( symm, gemm, 1m,  1 )
 
 // trmm3
 GENFRONT( trmm3, gemm, 3mh, 3 )
-//GENFRONT( trmm3, gemm, 3m3, 1 ) // Not implemented.
-//GENFRONT( trmm3, gemm, 3m2, 1 ) // Not implemented.
 GENFRONT( trmm3, gemm, 3m1, 1 )
 GENFRONT( trmm3, gemm, 4mh, 4 )
 //GENFRONT( trmm3, gemm, 4mb, 1 ) // Not implemented.
@@ -228,10 +218,10 @@ void PASTEMAC(opname,imeth) \
        cntx_t* cntx  \
      ) \
 { \
+	ind_t   ind      = PASTEMAC0(imeth); \
 	num_t   dt       = bli_obj_datatype( *c ); \
 	obj_t*  beta_use = beta; \
 \
-	cntx_t* cntx_p; \
 	dim_t   i; \
 \
 	/* If the objects are in the real domain, execute the native
@@ -242,14 +232,18 @@ void PASTEMAC(opname,imeth) \
 		return; \
 	} \
 \
-	/* Initialize a local context if the one provided is NULL. */ \
-	bli_cntx_init_local_if2( cname, imeth, dt, cntx, cntx_p ); \
+	/* Query a context for the current induced method. This context is
+	   managed and cached by the gks and should not be freed by the caller.
+	   Note that we pass in the datatype because it will be needed when
+	   bli_gks_query_ind_cntx() eventually calls the bli_ind_cntx_init()
+	   family of functions. */ \
+	cntx = bli_gks_query_ind_cntx( ind, dt ); \
 \
 	/* Some induced methods execute in multiple "stages". */ \
 	for ( i = 0; i < nstage; ++i ) \
 	{ \
 		/* Prepare the context for the ith stage of computation. */ \
-		PASTEMAC2(cname,imeth,_cntx_stage)( i, cntx_p ); \
+		bli_cntx_ind_stage( ind, i, cntx ); \
 \
 		/* For multi-stage methods, use BLIS_ONE as beta after the first
 		   stage. */ \
@@ -257,17 +251,12 @@ void PASTEMAC(opname,imeth) \
 \
 		/* Invoke the operation's front end and request the default control
 		   tree. */ \
-		PASTEMAC(opname,_front)( alpha, a, beta_use, c, cntx_p, NULL ); \
+		PASTEMAC(opname,_front)( alpha, a, beta_use, c, cntx, NULL ); \
 	} \
-\
-	/* Finalize the local context if it was initialized here. */ \
-	bli_cntx_finalize_local_if2( cname, imeth, cntx ); \
 }
 
 // herk
 GENFRONT( herk, gemm, 3mh, 3 )
-//GENFRONT( herk, gemm, 3m3, 1 ) // Not implemented.
-//GENFRONT( herk, gemm, 3m2, 1 ) // Not implemented.
 GENFRONT( herk, gemm, 3m1, 1 )
 GENFRONT( herk, gemm, 4mh, 4 )
 //GENFRONT( herk, gemm, 4mb, 1 ) // Not implemented.
@@ -276,8 +265,6 @@ GENFRONT( herk, gemm, 1m,  1 )
 
 // syrk
 GENFRONT( syrk, gemm, 3mh, 3 )
-//GENFRONT( syrk, gemm, 3m3, 1 ) // Not implemented.
-//GENFRONT( syrk, gemm, 3m2, 1 ) // Not implemented.
 GENFRONT( syrk, gemm, 3m1, 1 )
 GENFRONT( syrk, gemm, 4mh, 4 )
 //GENFRONT( syrk, gemm, 4mb, 1 ) // Not implemented.
@@ -299,9 +286,9 @@ void PASTEMAC(opname,imeth) \
        cntx_t* cntx  \
      ) \
 { \
+	ind_t   ind      = PASTEMAC0(imeth); \
 	num_t   dt       = bli_obj_datatype( *b ); \
 \
-	cntx_t* cntx_p; \
 	dim_t   i; \
 \
 	/* If the objects are in the real domain, execute the native
@@ -312,28 +299,27 @@ void PASTEMAC(opname,imeth) \
 		return; \
 	} \
 \
-	/* Initialize a local context if the one provided is NULL. */ \
-	bli_cntx_init_local_if2( cname, imeth, dt, cntx, cntx_p ); \
+	/* Query a context for the current induced method. This context is
+	   managed and cached by the gks and should not be freed by the caller.
+	   Note that we pass in the datatype because it will be needed when
+	   bli_gks_query_ind_cntx() eventually calls the bli_ind_cntx_init()
+	   family of functions. */ \
+	cntx = bli_gks_query_ind_cntx( ind, dt ); \
 \
 	/* Some induced methods execute in multiple "stages". */ \
 	for ( i = 0; i < nstage; ++i ) \
 	{ \
 		/* Prepare the context for the ith stage of computation. */ \
-		PASTEMAC2(cname,imeth,_cntx_stage)( i, cntx_p ); \
+		bli_cntx_ind_stage( ind, i, cntx ); \
 \
 		/* Invoke the operation's front end and request the default control
 		   tree. */ \
-		PASTEMAC(opname,_front)( side, alpha, a, b, cntx_p, NULL ); \
+		PASTEMAC(opname,_front)( side, alpha, a, b, cntx, NULL ); \
 	} \
-\
-	/* Finalize the local context if it was initialized here. */ \
-	bli_cntx_finalize_local_if2( cname, imeth, cntx ); \
 }
 
 // trmm
 //GENFRONT( trmm, gemm, 3mh, 3 ) // Unimplementable.
-//GENFRONT( trmm, gemm, 3m3, 1 ) // Unimplementable.
-//GENFRONT( trmm, gemm, 3m2, 1 ) // Unimplementable.
 GENFRONT( trmm, gemm, 3m1, 1 )
 //GENFRONT( trmm, gemm, 4mh, 4 ) // Unimplementable.
 //GENFRONT( trmm, gemm, 4mb, 1 ) // Unimplementable.
@@ -355,9 +341,8 @@ void PASTEMAC(opname,imeth) \
        cntx_t* cntx  \
      ) \
 { \
+	ind_t   ind      = PASTEMAC0(imeth); \
 	num_t   dt       = bli_obj_datatype( *b ); \
-\
-	cntx_t* cntx_p; \
 \
 	/* If the objects are in the real domain, execute the native
 	   implementation. */ \
@@ -367,8 +352,12 @@ void PASTEMAC(opname,imeth) \
 		return; \
 	} \
 \
-	/* Initialize a local context if the one provided is NULL. */ \
-	bli_cntx_init_local_if2( cname, imeth, dt, cntx, cntx_p ); \
+	/* Query a context for the current induced method. This context is
+	   managed and cached by the gks and should not be freed by the caller.
+	   Note that we pass in the datatype because it will be needed when
+	   bli_gks_query_ind_cntx() eventually calls the bli_ind_cntx_init()
+	   family of functions. */ \
+	cntx = bli_gks_query_ind_cntx( ind, dt ); \
 \
 	{ \
 		/* NOTE: trsm cannot be implemented via any induced method that
@@ -376,17 +365,12 @@ void PASTEMAC(opname,imeth) \
 \
 		/* Invoke the operation's front end and request the default control
 		   tree. */ \
-		PASTEMAC(opname,_front)( side, alpha, a, b, cntx_p, NULL ); \
+		PASTEMAC(opname,_front)( side, alpha, a, b, cntx, NULL ); \
 	} \
-\
-	/* Finalize the local context if it was initialized here. */ \
-	bli_cntx_finalize_local_if2( cname, imeth, cntx ); \
 }
 
 // trsm
 //GENFRONT( trmm, trsm, 3mh, 3 ) // Unimplementable.
-//GENFRONT( trmm, trsm, 3m3, 1 ) // Unimplementable.
-//GENFRONT( trmm, trsm, 3m2, 1 ) // Unimplementable.
 GENFRONT( trsm, trsm, 3m1, 1 )
 //GENFRONT( trmm, trsm, 4mh, 4 ) // Unimplementable.
 //GENFRONT( trmm, trsm, 4mb, 1 ) // Unimplementable.

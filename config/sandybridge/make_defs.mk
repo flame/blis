@@ -32,17 +32,16 @@
 #
 #
 
-# Only include this block of code once.
-ifndef MAKE_DEFS_MK_INCLUDED
-MAKE_DEFS_MK_INCLUDED := yes
 
-
+# Declare the name of the current configuration and add it to the
+# running list of configurations included by common.mk.
+THIS_CONFIG    := sandybridge
+#CONFIGS_INCL   += $(THIS_CONFIG)
 
 #
-# --- Development tools definitions --------------------------------------------
-#
-
 # --- Determine the C compiler and related flags ---
+#
+
 ifeq ($(CC),)
 CC             := gcc
 CC_VENDOR      := gcc
@@ -53,7 +52,7 @@ endif
 CPPROCFLAGS    := -D_POSIX_C_SOURCE=200112L
 CMISCFLAGS     := -std=c99 -m64
 CPICFLAGS      := -fPIC
-CWARNFLAGS     := -Wall
+CWARNFLAGS     := -Wall -Wno-unused-function
 
 ifneq ($(DEBUG_TYPE),off)
 CDBGFLAGS      := -g
@@ -81,18 +80,7 @@ endif
 endif
 endif
 
-# --- Determine the archiver and related flags ---
-AR             := ar
-ARFLAGS        := cr
+# Store all of the variables here to new variables containing the
+# configuration name.
+$(eval $(call store-make-defs,$(THIS_CONFIG)))
 
-# --- Determine the linker and related flags ---
-LINKER         := $(CC)
-SOFLAGS        := -shared
-ifneq ($(CC_VENDOR),icc)
-LDFLAGS        := -lm
-endif
-
-
-
-# end of ifndef MAKE_DEFS_MK_INCLUDED conditional block
-endif

@@ -50,16 +50,16 @@ void bla_symm_check
      )
 {
 	bla_hemm_check
-     (
-       dt_str,
-	                op_str,
-	                sidea,
-	                uploa,
-	                m,
-	                n,
-	                lda,
-	                ldb,
-	                ldc
+	 (
+	   dt_str,
+	   op_str,
+	   sidea,
+	   uploa,
+	   m,
+	   n,
+	   lda,
+	   ldb,
+	   ldc
      );
 }
 

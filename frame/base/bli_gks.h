@@ -35,7 +35,31 @@
 #ifndef BLIS_GKS_H
 #define BLIS_GKS_H
 
+arch_t  bli_arch_query_id( void );
 
+// -----------------------------------------------------------------------------
+
+void    bli_gks_init( void );
+void    bli_gks_finalize( void );
+
+void    bli_gks_init_index( void );
+
+cntx_t* bli_gks_lookup_nat_cntx( arch_t id );
+cntx_t* bli_gks_lookup_ind_cntx( arch_t id, ind_t ind );
+void    bli_gks_register_cntx( arch_t id, void* nat_fp, void* ref_fp, void* ind_fp );
+
+cntx_t* bli_gks_query_cntx( void );
+cntx_t* bli_gks_query_nat_cntx( void );
+cntx_t* bli_gks_query_ind_cntx( ind_t ind, num_t dt );
+
+bool_t  bli_gks_cntx_l3_nat_ukr_is_ref( num_t dt, l3ukr_t ukr_id, cntx_t* cntx );
+
+char*   bli_gks_l3_ukr_impl_string( l3ukr_t ukr, ind_t method, num_t dt );
+kimpl_t bli_gks_l3_ukr_impl_type( l3ukr_t ukr, ind_t method, num_t dt );
+
+//char*   bli_gks_l3_ukr_avail_impl_string( l3ukr_t ukr, num_t dt );
+
+#if 0
 // -----------------------------------------------------------------------------
 
 void bli_gks_get_blksz( bszid_t  bs_id,
@@ -70,6 +94,28 @@ void bli_gks_cntx_set_l3_nat_ukr_prefs( l3ukr_t ukr,
 
 // -----------------------------------------------------------------------------
 
+void bli_gks_get_packm_ker( l1mkr_t ker,
+                            func_t* func );
+void bli_gks_get_packm_ref_ker( l1mkr_t ker,
+                                func_t* func );
+void bli_gks_cntx_set_packm_ker( l1mkr_t ker,
+                                 cntx_t* cntx );
+
+void bli_gks_cntx_set_packm_kers( dim_t n_kr, ... );
+
+// -----------------------------------------------------------------------------
+
+void bli_gks_get_unpackm_ker( l1mkr_t ker,
+                              func_t* func );
+void bli_gks_get_unpackm_ref_ker( l1mkr_t ker,
+                                  func_t* func );
+void bli_gks_cntx_set_unpackm_ker( l1mkr_t ker,
+                                   cntx_t* cntx );
+
+void bli_gks_cntx_set_unpackm_kers( dim_t n_kr, ... );
+
+// -----------------------------------------------------------------------------
+
 void bli_gks_get_l1f_ker( l1fkr_t ker,
                           func_t* func );
 void bli_gks_get_l1f_ref_ker( l1fkr_t ker,
@@ -89,13 +135,10 @@ void bli_gks_cntx_set_l1v_ker( l1vkr_t ker,
                                cntx_t* cntx );
 
 void bli_gks_cntx_set_l1v_kers( dim_t n_kr, ... );
+#endif
 
 // -----------------------------------------------------------------------------
 
-char*   bli_gks_l3_ukr_impl_string( l3ukr_t ukr, ind_t method, num_t dt );
-kimpl_t bli_gks_l3_ukr_impl_type( l3ukr_t ukr, ind_t method, num_t dt );
-
-// -----------------------------------------------------------------------------
 
 #endif
 

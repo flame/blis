@@ -32,30 +32,27 @@
 #
 #
 
-# Only include this block of code once.
-ifndef MAKE_DEFS_MK_INCLUDED
-MAKE_DEFS_MK_INCLUDED := yes
 
-
+# Declare the name of the current configuration and add it to the
+# running list of configurations included by common.mk.
+THIS_CONFIG    := power7
+#CONFIGS_INCL   += $(THIS_CONFIG)
 
 #
-# --- Development tools definitions --------------------------------------------
-#
-
 # --- Determine the C compiler and related flags ---
+#
+
 ifeq ($(CC),)
 CC             := gcc
 CC_VENDOR      := gcc
 endif
-ifneq ($(CC_VENDOR),gcc)
-$(error gcc is required for this configuration.)
-endif
+
 # Enable IEEE Standard 1003.1-2004 (POSIX.1d). 
 # NOTE: This is needed to enable posix_memalign().
 CPPROCFLAGS    := -D_POSIX_C_SOURCE=200112L
 CMISCFLAGS     := -std=c99 -m64 -mcpu=power7
 CPICFLAGS      := -fPIC
-CWARNFLAGS     := -Wall
+CWARNFLAGS     := -Wall -Wno-unused-function
 
 ifneq ($(DEBUG_TYPE),off)
 CDBGFLAGS      := -g
@@ -67,21 +64,15 @@ else
 COPTFLAGS      := -O3 -mtune=power7
 endif
 
-CVECFLAGS      := -mvsx
 CKOPTFLAGS     := $(COPTFLAGS)
 
-# --- Determine the archiver and related flags ---
-AR             := ar
-ARFLAGS        := cr
-
-# --- Determine the linker and related flags ---
-LINKER         := $(CC)
-SOFLAGS        := -shared
-ifneq ($(CC_VENDOR),icc)
-LDFLAGS        := -lm
+ifeq ($(CC_VENDOR),gcc)
+CVECFLAGS      := -mvsx
+else
+$(error gcc is required for this configuration.)
 endif
 
+# Store all of the variables here to new variables containing the
+# configuration name.
+$(eval $(call store-make-defs,$(THIS_CONFIG)))
 
-
-# end of ifndef MAKE_DEFS_MK_INCLUDED conditional block
-endif

@@ -51,11 +51,11 @@ void PASTEMAC(ch,opname) \
      ) \
 { \
 	const num_t dt = PASTEMAC(ch,type); \
-	cntx_t*     cntx_p; \
 \
-	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
+	/* Obtain a valid context from the gks if necessary. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
-	PASTECH2(ch,opname,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx_p ); \
+	PASTECH2(ch,opname,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
 \
 	f \
 	( \
@@ -63,10 +63,8 @@ void PASTEMAC(ch,opname) \
 	   n, \
 	   x, incx, \
 	   y, incy, \
-	   cntx_p  \
+	   cntx  \
 	); \
-\
-	bli_cntx_finalize_local_if( opname, cntx ); \
 }
 
 INSERT_GENTFUNC_BASIC( addv,  BLIS_ADDV_KER )
@@ -86,21 +84,19 @@ void PASTEMAC(ch,opname) \
      ) \
 { \
 	const num_t dt = PASTEMAC(ch,type); \
-	cntx_t*     cntx_p; \
 \
-	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
+	/* Obtain a valid context from the gks if necessary. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
-	PASTECH2(ch,opname,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx_p ); \
+	PASTECH2(ch,opname,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
 \
 	f \
 	( \
 	   n, \
 	   x, incx, \
 	   index, \
-	   cntx_p  \
+	   cntx  \
 	); \
-\
-	bli_cntx_finalize_local_if( opname, cntx ); \
 }
 
 INSERT_GENTFUNC_BASIC( amaxv, BLIS_AMAXV_KER )
@@ -121,11 +117,11 @@ void PASTEMAC(ch,opname) \
      ) \
 { \
 	const num_t dt = PASTEMAC(ch,type); \
-	cntx_t*     cntx_p; \
 \
-	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
+	/* Obtain a valid context from the gks if necessary. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
-	PASTECH2(ch,opname,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx_p ); \
+	PASTECH2(ch,opname,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
 \
 	f \
 	( \
@@ -135,10 +131,8 @@ void PASTEMAC(ch,opname) \
 	   x, incx, \
 	   beta, \
 	   y, incy, \
-	   cntx_p  \
+	   cntx  \
 	); \
-\
-	bli_cntx_finalize_local_if( opname, cntx ); \
 }
 
 INSERT_GENTFUNC_BASIC( axpbyv,  BLIS_AXPBYV_KER )
@@ -158,11 +152,12 @@ void PASTEMAC(ch,opname) \
      ) \
 { \
 	const num_t dt = PASTEMAC(ch,type); \
-	cntx_t*     cntx_p; \
 \
-	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
+	/* Obtain a valid context from the gks if necessary. */ \
+	if ( cntx == NULL ) \
+		cntx = bli_gks_query_cntx(); \
 \
-	PASTECH2(ch,opname,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx_p ); \
+	PASTECH2(ch,opname,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
 \
 	f \
 	( \
@@ -171,10 +166,8 @@ void PASTEMAC(ch,opname) \
 	   alpha, \
 	   x, incx, \
 	   y, incy, \
-	   cntx_p  \
+	   cntx  \
 	); \
-\
-	bli_cntx_finalize_local_if( opname, cntx ); \
 }
 
 INSERT_GENTFUNC_BASIC( axpyv,  BLIS_AXPYV_KER )
@@ -196,11 +189,11 @@ void PASTEMAC(ch,opname) \
      ) \
 { \
 	const num_t dt = PASTEMAC(ch,type); \
-	cntx_t*     cntx_p; \
 \
-	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
+	/* Obtain a valid context from the gks if necessary. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
-	PASTECH2(ch,opname,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx_p ); \
+	PASTECH2(ch,opname,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
 \
 	f \
 	( \
@@ -210,10 +203,8 @@ void PASTEMAC(ch,opname) \
 	   x, incx, \
 	   y, incy, \
 	   rho, \
-	   cntx_p  \
+	   cntx  \
 	); \
-\
-	bli_cntx_finalize_local_if( opname, cntx ); \
 }
 
 INSERT_GENTFUNC_BASIC( dotv, BLIS_DOTV_KER )
@@ -236,11 +227,11 @@ void PASTEMAC(ch,opname) \
      ) \
 { \
 	const num_t dt = PASTEMAC(ch,type); \
-	cntx_t*     cntx_p; \
 \
-	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
+	/* Obtain a valid context from the gks if necessary. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
-	PASTECH2(ch,opname,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx_p ); \
+	PASTECH2(ch,opname,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
 \
 	f \
 	( \
@@ -252,10 +243,8 @@ void PASTEMAC(ch,opname) \
 	   y, incy, \
 	   beta, \
 	   rho, \
-	   cntx_p  \
+	   cntx  \
 	); \
-\
-	bli_cntx_finalize_local_if( opname, cntx ); \
 }
 
 INSERT_GENTFUNC_BASIC( dotxv, BLIS_DOTXV_KER )
@@ -272,20 +261,18 @@ void PASTEMAC(ch,opname) \
      ) \
 { \
 	const num_t dt = PASTEMAC(ch,type); \
-	cntx_t*     cntx_p; \
 \
-	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
+	/* Obtain a valid context from the gks if necessary. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
-	PASTECH2(ch,opname,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx_p ); \
+	PASTECH2(ch,opname,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
 \
 	f \
 	( \
 	   n, \
 	   x, incx, \
-	   cntx_p  \
+	   cntx  \
 	); \
-\
-	bli_cntx_finalize_local_if( opname, cntx ); \
 }
 
 INSERT_GENTFUNC_BASIC( invertv, BLIS_INVERTV_KER )
@@ -304,11 +291,11 @@ void PASTEMAC(ch,opname) \
      ) \
 { \
 	const num_t dt = PASTEMAC(ch,type); \
-	cntx_t*     cntx_p; \
 \
-	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
+	/* Obtain a valid context from the gks if necessary. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
-	PASTECH2(ch,opname,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx_p ); \
+	PASTECH2(ch,opname,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
 \
 	f \
 	( \
@@ -316,10 +303,8 @@ void PASTEMAC(ch,opname) \
 	   n, \
 	   alpha, \
 	   x, incx, \
-	   cntx_p  \
+	   cntx  \
 	); \
-\
-	bli_cntx_finalize_local_if( opname, cntx ); \
 }
 
 INSERT_GENTFUNC_BASIC( scalv,  BLIS_SCALV_KER )
@@ -338,21 +323,19 @@ void PASTEMAC(ch,opname) \
      ) \
 { \
 	const num_t dt = PASTEMAC(ch,type); \
-	cntx_t*     cntx_p; \
 \
-	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
+	/* Obtain a valid context from the gks if necessary. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
-	PASTECH2(ch,opname,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx_p ); \
+	PASTECH2(ch,opname,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
 \
 	f \
 	( \
 	   n, \
 	   x, incx, \
 	   y, incy, \
-	   cntx_p  \
+	   cntx  \
 	); \
-\
-	bli_cntx_finalize_local_if( opname, cntx ); \
 }
 
 INSERT_GENTFUNC_BASIC( swapv, BLIS_SWAPV_KER )
@@ -371,11 +354,11 @@ void PASTEMAC(ch,opname) \
      ) \
 { \
 	const num_t dt = PASTEMAC(ch,type); \
-	cntx_t*     cntx_p; \
 \
-	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
+	/* Obtain a valid context from the gks if necessary. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
-	PASTECH2(ch,opname,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx_p ); \
+	PASTECH2(ch,opname,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
 \
 	f \
 	( \
@@ -384,10 +367,8 @@ void PASTEMAC(ch,opname) \
 	   x, incx, \
 	   beta, \
 	   y, incy, \
-	   cntx_p  \
+	   cntx  \
 	); \
-\
-	bli_cntx_finalize_local_if( opname, cntx ); \
 }
 
 INSERT_GENTFUNC_BASIC( xpbyv,  BLIS_XPBYV_KER )

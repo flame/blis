@@ -447,8 +447,8 @@ void PASTEMAC(ch,varname) \
 		  p10_dim, \
 		  p10_len, \
 		  kappa, \
-		  c10, incc10, ldc10, \
-		  p10, is_p,   ldp, \
+		            c10, incc10, ldc10, \
+		  ( ctype* )p10, is_p,   ldp, \
 		  cntx  \
 		); \
 \
@@ -460,8 +460,8 @@ void PASTEMAC(ch,varname) \
 		  p12_dim, \
 		  p12_len, \
 		  kappa, \
-		  c12, incc12, ldc12, \
-		  p12, is_p,   ldp, \
+		            c12, incc12, ldc12, \
+		  ( ctype* )p12, is_p,   ldp, \
 		  cntx  \
 		); \
 \

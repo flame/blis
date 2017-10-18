@@ -34,181 +34,30 @@
 
 #include "blis.h"
 
-#define FUNCPTR_T packm_cxk_rih_ker_vft
-
-#undef  FUNCPTR_ARRAY_LENGTH
-#define FUNCPTR_ARRAY_LENGTH 32
-
-static FUNCPTR_T ftypes_rih[FUNCPTR_ARRAY_LENGTH][BLIS_NUM_FP_TYPES] =
-{
-	/* micro-panel width = 0 */
-	{
-		NULL, NULL, NULL, NULL,
-	},
-	/* micro-panel width = 1 */
-	{
-		NULL, NULL, NULL, NULL,
-	},
-	/* micro-panel width = 2 */
-	{
-		NULL, BLIS_CPACKM_2XK_RIH_KERNEL,
-		NULL, BLIS_ZPACKM_2XK_RIH_KERNEL,
-	},
-	/* micro-panel width = 3 */
-	{
-		NULL, NULL, NULL, NULL,
-	},
-	/* micro-panel width = 4 */
-	{
-		NULL, BLIS_CPACKM_4XK_RIH_KERNEL,
-		NULL, BLIS_ZPACKM_4XK_RIH_KERNEL,
-	},
-	/* micro-panel width = 5 */
-	{
-		NULL, NULL, NULL, NULL,
-	},
-	/* micro-panel width = 6 */
-	{
-		NULL, BLIS_CPACKM_6XK_RIH_KERNEL,
-		NULL, BLIS_ZPACKM_6XK_RIH_KERNEL,
-	},
-	/* micro-panel width = 7 */
-	{
-		NULL, NULL, NULL, NULL,
-	},
-	/* micro-panel width = 8 */
-	{
-		NULL, BLIS_CPACKM_8XK_RIH_KERNEL,
-		NULL, BLIS_ZPACKM_8XK_RIH_KERNEL,
-	},
-	/* micro-panel width = 9 */
-	{
-		NULL, NULL, NULL, NULL,
-	},
-	/* micro-panel width = 10 */
-	{
-		NULL, BLIS_CPACKM_10XK_RIH_KERNEL,
-		NULL, BLIS_ZPACKM_10XK_RIH_KERNEL,
-	},
-	/* micro-panel width = 11 */
-	{
-		NULL, NULL, NULL, NULL,
-	},
-	/* micro-panel width = 12 */
-	{
-		NULL, BLIS_CPACKM_12XK_RIH_KERNEL,
-		NULL, BLIS_ZPACKM_12XK_RIH_KERNEL,
-	},
-	/* micro-panel width = 13 */
-	{
-		NULL, NULL, NULL, NULL,
-	},
-	/* micro-panel width = 14 */
-	{
-		NULL, BLIS_CPACKM_14XK_RIH_KERNEL,
-		NULL, BLIS_ZPACKM_14XK_RIH_KERNEL,
-	},
-	/* micro-panel width = 15 */
-	{
-		NULL, NULL, NULL, NULL,
-	},
-	/* micro-panel width = 16 */
-	{
-		NULL, BLIS_CPACKM_16XK_RIH_KERNEL,
-		NULL, BLIS_ZPACKM_16XK_RIH_KERNEL,
-	},
-	/* micro-panel width = 17 */
-	{
-		NULL, NULL, NULL, NULL,
-	},
-	/* micro-panel width = 18 */
-	{
-		NULL, NULL, NULL, NULL,
-	},
-	/* micro-panel width = 19 */
-	{
-		NULL, NULL, NULL, NULL,
-	},
-	/* micro-panel width = 20 */
-	{
-		NULL, NULL, NULL, NULL,
-	},
-	/* micro-panel width = 21 */
-	{
-		NULL, NULL, NULL, NULL,
-	},
-	/* micro-panel width = 22 */
-	{
-		NULL, NULL, NULL, NULL,
-	},
-	/* micro-panel width = 23 */
-	{
-		NULL, NULL, NULL, NULL,
-	},
-	/* micro-panel width = 24 */
-	{
-		NULL, NULL, NULL, NULL,
-	},
-	/* micro-panel width = 25 */
-	{
-		NULL, NULL, NULL, NULL,
-	},
-	/* micro-panel width = 26 */
-	{
-		NULL, NULL, NULL, NULL,
-	},
-	/* micro-panel width = 27 */
-	{
-		NULL, NULL, NULL, NULL,
-	},
-	/* micro-panel width = 28 */
-	{
-		NULL, NULL, NULL, NULL,
-	},
-	/* micro-panel width = 29 */
-	{
-		NULL, NULL, NULL, NULL,
-	},
-	/* micro-panel width = 30 */
-	{
-		NULL, BLIS_CPACKM_30XK_RIH_KERNEL,
-		NULL, BLIS_ZPACKM_30XK_RIH_KERNEL,
-	},
-	/* micro-panel width = 31 */
-	{
-		NULL, NULL, NULL, NULL,
-	},
-};
-
-
-
 #undef  GENTFUNCCO
-#define GENTFUNCCO( ctype, ctype_r, ch, chr, varname ) \
+#define GENTFUNCCO( ctype, ctype_r, ch, chr, opname ) \
 \
-void PASTEMAC(ch,varname) \
+void PASTEMAC(ch,opname) \
      ( \
        conj_t  conja, \
        pack_t  schema, \
        dim_t   panel_dim, \
        dim_t   panel_len, \
-       void*   kappa, \
-       void*   a, inc_t inca, inc_t lda, \
-       void*   p,             inc_t ldp, \
+       ctype*  kappa, \
+       ctype*  a, inc_t inca, inc_t lda, \
+       ctype*  p,             inc_t ldp, \
        cntx_t* cntx  \
      ) \
 { \
-	num_t     dt; \
-	FUNCPTR_T f; \
+	num_t     dt     = PASTEMAC(ch,type); \
+	l1mkr_t   ker_id = panel_dim; \
 \
-	/* Acquire the datatype for the current function. */ \
-	dt = PASTEMAC(ch,type); \
+	PASTECH2(ch,opname,_ker_ft) f; \
 \
-	/* Index into the array to extract the correct function pointer.
-	   If the micro-panel dimension is too big to be within the array of
-	   explicitly handled kernels, then we treat that kernel the same
-	   as if it were in range but unimplemented. */ \
-	if ( panel_dim < FUNCPTR_ARRAY_LENGTH ) f = ftypes_rih[panel_dim][dt]; \
-	else                                    f = NULL; \
+	/* Query the context for the packm kernel corresponding to the current
+	   panel dimension, or kernel id. If the id is invalid, the function will
+	   return NULL. */ \
+	f = bli_cntx_get_packm_ker_dt( dt, ker_id, cntx ); \
 \
 	/* If there exists a kernel implementation for the micro-panel dimension
 	   provided, we invoke the implementation. Otherwise, we use scal2m. */ \
@@ -221,7 +70,8 @@ void PASTEMAC(ch,varname) \
 		  panel_len, \
 		  kappa, \
 		  a, inca, lda, \
-		  p,       ldp  \
+		  p,       ldp, \
+		  cntx  \
 		); \
 	} \
 	else \

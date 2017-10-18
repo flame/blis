@@ -32,7 +32,6 @@
 
 */
 
-#include "bli_l1d_cntx.h"
 #include "bli_l1d_check.h"
 
 // Prototype object APIs with and without contexts.

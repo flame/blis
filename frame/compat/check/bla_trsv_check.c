@@ -49,16 +49,16 @@ void bla_trsv_check
      )
 {
 	bla_trmv_check
-     (
-       dt_str,
-	                op_str,
-	                uploa,
-	                transa,
-	                diaga,
-	                m,
-	                lda,
-	                incx
-     );
+	(
+	  dt_str,
+	  op_str,
+	  uploa,
+	  transa,
+	  diaga,
+	  m,
+	  lda,
+	  incx
+	);
 }
 
 #endif

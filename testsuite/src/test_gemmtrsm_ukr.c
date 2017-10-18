@@ -196,22 +196,22 @@ void libblis_test_gemmtrsm_ukr_experiment
 	obj_t        a1xp, a11p, bx1p, b11p;
 	obj_t        c11_save;
 
-	cntx_t       cntx;
+	cntx_t*      cntx;
 
-	// Initialize a context.
-	bli_trsm_cntx_init( datatype, &cntx );
+	// Query a context.
+	cntx = bli_gks_query_cntx();
 
 	// Map the dimension specifier to actual dimensions.
 	k = libblis_test_get_dim_from_prob_size( op->dim_spec[0], p_cur );
 
 	// Fix m and n to MR and NR, respectively.
-	m = bli_cntx_get_blksz_def_dt( datatype, BLIS_MR, &cntx );
-	n = bli_cntx_get_blksz_def_dt( datatype, BLIS_NR, &cntx );
+	m = bli_cntx_get_blksz_def_dt( datatype, BLIS_MR, cntx );
+	n = bli_cntx_get_blksz_def_dt( datatype, BLIS_NR, cntx );
 
 	// Also query PACKMR and PACKNR as the leading dimensions to ap and bp,
 	// respectively.
-	ldap = bli_cntx_get_blksz_max_dt( datatype, BLIS_MR, &cntx );
-	ldbp = bli_cntx_get_blksz_max_dt( datatype, BLIS_NR, &cntx );
+	ldap = bli_cntx_get_blksz_max_dt( datatype, BLIS_MR, cntx );
+	ldbp = bli_cntx_get_blksz_max_dt( datatype, BLIS_NR, cntx );
 
 	// Store the register blocksizes so that the driver can retrieve the
 	// values later when printing results.
@@ -311,10 +311,10 @@ void libblis_test_gemmtrsm_ukr_experiment
 	void* buf_bp = bli_obj_buffer( bp );
 	bli_packm_init_pack( BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS,
 	                     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER,
-	                     BLIS_MR, BLIS_KR, &a, &ap, &cntx );
+	                     BLIS_MR, BLIS_KR, &a, &ap, cntx );
 	bli_packm_init_pack( BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS,
 	                     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER,
-	                     BLIS_KR, BLIS_NR, &b, &bp, &cntx );
+	                     BLIS_KR, BLIS_NR, &b, &bp, cntx );
 	bli_obj_set_buffer( buf_ap, ap );
 	bli_obj_set_buffer( buf_bp, bp );
 
@@ -328,8 +328,8 @@ void libblis_test_gemmtrsm_ukr_experiment
 	bli_obj_set_uplo( uploa, ap );
 
 	// Pack the data from the source objects.
-	bli_packm_blk_var1( &a, &ap, &cntx, NULL, &BLIS_PACKM_SINGLE_THREADED );
-	bli_packm_blk_var1( &b, &bp, &cntx, NULL, &BLIS_PACKM_SINGLE_THREADED );
+	bli_packm_blk_var1( &a, &ap, cntx, NULL, &BLIS_PACKM_SINGLE_THREADED );
+	bli_packm_blk_var1( &b, &bp, cntx, NULL, &BLIS_PACKM_SINGLE_THREADED );
 
 	// Create subpartitions from the a and b panels.
 	bli_gemmtrsm_ukr_make_subparts( k, &ap, &bp,
@@ -350,13 +350,13 @@ void libblis_test_gemmtrsm_ukr_experiment
 
 		// Re-pack (restore) the contents of b to bp.
 		//bli_packm_blk_var1( &b, &bp, &cntx, cntl_b, &BLIS_PACKM_SINGLE_THREADED );
-		bli_packm_blk_var1( &b, &bp, &cntx, NULL, &BLIS_PACKM_SINGLE_THREADED );
+		bli_packm_blk_var1( &b, &bp, cntx, NULL, &BLIS_PACKM_SINGLE_THREADED );
 
 		time = bli_clock();
 
 		libblis_test_gemmtrsm_ukr_impl( iface, side, &alpha,
 		                                &a1xp, &a11p, &bx1p, &b11p, &c11,
-		                                &cntx );
+		                                cntx );
 
 		time_min = bli_clock_min_diff( time_min, time );
 	}
@@ -384,9 +384,6 @@ void libblis_test_gemmtrsm_ukr_experiment
 	bli_obj_free( &b );
 	bli_obj_free( &c11 );
 	bli_obj_free( &c11_save );
-
-	// Finalize the context.
-	bli_trsm_cntx_finalize( &cntx );
 }
 
 

@@ -55,7 +55,7 @@ void PASTEMAC(ch,varname) \
        cntx_t*         cntx  \
      );
 
-INSERT_GENTPROT_BASIC( packm_struc_cxk )
+INSERT_GENTPROT_BASIC0( packm_struc_cxk )
 
 
 
@@ -83,7 +83,7 @@ void PASTEMAC(ch,varname) \
        cntx_t*         cntx  \
      );
 
-INSERT_GENTPROT_BASIC( packm_herm_cxk )
+INSERT_GENTPROT_BASIC0( packm_herm_cxk )
 
 
 
@@ -113,5 +113,5 @@ void PASTEMAC(ch,varname) \
        cntx_t*         cntx  \
      );
 
-INSERT_GENTPROT_BASIC( packm_tri_cxk )
+INSERT_GENTPROT_BASIC0( packm_tri_cxk )
 

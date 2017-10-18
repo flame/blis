@@ -42,6 +42,7 @@ void* bli_malloc_pool( size_t size );
 void  bli_free_pool( void* p );
 
 void* bli_malloc_intl( size_t size );
+void* bli_calloc_intl( size_t size );
 void  bli_free_intl( void* p );
 
 void* bli_malloc_user( size_t size );

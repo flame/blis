@@ -1,0 +1,29 @@
+#
+# config_registry
+#
+# Please refer to the ... wiki for information on the syntax and semantics
+# of this file.
+#
+
+# Processor families.
+intel64:     haswell sandybridge penryn
+amd64:       zen excavator steamroller piledriver bulldozer
+arm32:       cortexa9 cortexa15
+
+# Intel architectures.
+haswell:     haswell
+sandybridge: sandybridge
+penryn:      penryn
+knl:         knl
+
+# AMD architectures.
+zen:         zen/haswell
+excavator:   excavator/piledriver
+steamroller: steamroller/piledriver
+piledriver:  piledriver
+bulldozer:   bulldozer
+
+# ARM architectures.
+cortexa9:    cortexa9/armv7a
+cortexa15:   cortexa15/armv7a
+cortexa57:   cortexa57/armv8a

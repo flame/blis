@@ -177,6 +177,22 @@ void bli_error_init_msgs( void )
 
 	sprintf( bli_error_string_for_code(BLIS_EXPECTED_OBJECT_ALIAS),
 	         "Expected object to be alias." );
+
+	sprintf( bli_error_string_for_code(BLIS_INVALID_ARCH_ID),
+	         "Invalid architecture id value." );
+
+	sprintf( bli_error_string_for_code(BLIS_MC_DEF_NONMULTIPLE_OF_MR),
+	         "Default MC is non-multiple of MR for one or more datatypes." );
+	sprintf( bli_error_string_for_code(BLIS_MC_DEF_NONMULTIPLE_OF_MR),
+	         "Maximum MC is non-multiple of MR for one or more datatypes." );
+	sprintf( bli_error_string_for_code(BLIS_NC_DEF_NONMULTIPLE_OF_NR),
+	         "Default NC is non-multiple of NR for one or more datatypes." );
+	sprintf( bli_error_string_for_code(BLIS_NC_DEF_NONMULTIPLE_OF_NR),
+	         "Maximum NC is non-multiple of NR for one or more datatypes." );
+	sprintf( bli_error_string_for_code(BLIS_KC_DEF_NONMULTIPLE_OF_KR),
+	         "Default KC is non-multiple of KR for one or more datatypes." );
+	sprintf( bli_error_string_for_code(BLIS_KC_DEF_NONMULTIPLE_OF_KR),
+	         "Maximum KC is non-multiple of KR for one or more datatypes." );
 }
 
 void bli_print_msg( char* str, char* file, guint_t line )

@@ -38,103 +38,31 @@
 //
 
 #undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname) \
-     ( \
-       conj_t          conjx, \
-       conj_t          conjy, \
-       dim_t           n, \
-       ctype* restrict alphax, \
-       ctype* restrict alphay, \
-       ctype* restrict x, inc_t incx, \
-       ctype* restrict y, inc_t incy, \
-       ctype* restrict z, inc_t incz, \
-       cntx_t*         cntx  \
-     );
+#define GENTPROT AXPY2V_KER_PROT
 
-INSERT_GENTPROT_BASIC( axpy2v_ker_name )
+INSERT_GENTPROT_BASIC0( axpy2v_ker_name )
 
 
 #undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname) \
-     ( \
-       conj_t          conja, \
-       conj_t          conjx, \
-       dim_t           m, \
-       dim_t           b_n, \
-       ctype* restrict alpha, \
-       ctype* restrict a, inc_t inca, inc_t lda, \
-       ctype* restrict x, inc_t incx, \
-       ctype* restrict y, inc_t incy, \
-       cntx_t*         cntx  \
-     );
+#define GENTPROT AXPYF_KER_PROT
 
-INSERT_GENTPROT_BASIC( axpyf_ker_name )
+INSERT_GENTPROT_BASIC0( axpyf_ker_name )
 
 
 #undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname) \
-     ( \
-       conj_t          conjxt, \
-       conj_t          conjx, \
-       conj_t          conjy, \
-       dim_t           n, \
-       ctype* restrict alpha, \
-       ctype* restrict x, inc_t incx, \
-       ctype* restrict y, inc_t incy, \
-       ctype* restrict rho, \
-       ctype* restrict z, inc_t incz, \
-       cntx_t*         cntx  \
-     );
+#define GENTPROT DOTAXPYV_KER_PROT
 
-INSERT_GENTPROT_BASIC( dotaxpyv_ker_name )
+INSERT_GENTPROT_BASIC0( dotaxpyv_ker_name )
 
 
 #undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname) \
-     ( \
-       conj_t          conjat, \
-       conj_t          conja, \
-       conj_t          conjw, \
-       conj_t          conjx, \
-       dim_t           m, \
-       dim_t           b_n, \
-       ctype* restrict alpha, \
-       ctype* restrict a, inc_t inca, inc_t lda, \
-       ctype* restrict w, inc_t incw, \
-       ctype* restrict x, inc_t incx, \
-       ctype* restrict beta, \
-       ctype* restrict y, inc_t incy, \
-       ctype* restrict z, inc_t incz, \
-       cntx_t*         cntx  \
-     );
+#define GENTPROT DOTXAXPYF_KER_PROT
 
-INSERT_GENTPROT_BASIC( dotxaxpyf_ker_name )
+INSERT_GENTPROT_BASIC0( dotxaxpyf_ker_name )
 
 
 #undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname) \
-     ( \
-       conj_t          conjat, \
-       conj_t          conjx, \
-       dim_t           m, \
-       dim_t           b_n, \
-       ctype* restrict alpha, \
-       ctype* restrict a, inc_t inca, inc_t lda, \
-       ctype* restrict x, inc_t incx, \
-       ctype* restrict beta, \
-       ctype* restrict y, inc_t incy, \
-       cntx_t*         cntx  \
-     );
+#define GENTPROT DOTXF_KER_PROT
 
-INSERT_GENTPROT_BASIC( dotxf_ker_name )
+INSERT_GENTPROT_BASIC0( dotxf_ker_name )
 

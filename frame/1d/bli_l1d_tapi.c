@@ -54,7 +54,6 @@ void PASTEMAC(ch,opname) \
      ) \
 { \
 	const num_t dt = PASTEMAC(ch,type); \
-	cntx_t*     cntx_p; \
 \
 	ctype*      x1; \
 	ctype*      y1; \
@@ -89,11 +88,11 @@ void PASTEMAC(ch,opname) \
 	    y1   = y + offy; \
 	} \
 \
-	/* Initialize a local context if the given context is NULL. */ \
-	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
+	/* Obtain a valid context from the gks if necessary. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* Query the context for the operation's kernel address. */ \
-	PASTECH2(ch,kername,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx_p ); \
+	PASTECH2(ch,kername,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
 \
 	/* Invoke the kernel with the appropriate parameters. */ \
 	f( \
@@ -101,11 +100,8 @@ void PASTEMAC(ch,opname) \
 	   n_elem, \
 	   x1, incx, \
 	   y1, incy, \
-	   cntx_p  \
+	   cntx  \
 	 ); \
-\
-	/* Finalize the context if it was initialized locally. */ \
-	bli_cntx_finalize_local_if( opname, cntx ); \
 }
 
 INSERT_GENTFUNC_BASIC2( addd,  addv,  BLIS_ADDV_KER )
@@ -130,7 +126,6 @@ void PASTEMAC(ch,opname) \
      ) \
 { \
 	const num_t dt = PASTEMAC(ch,type); \
-	cntx_t*     cntx_p; \
 \
 	ctype*      x1; \
 	ctype*      y1; \
@@ -165,11 +160,11 @@ void PASTEMAC(ch,opname) \
 	    y1   = y + offy; \
 	} \
 \
-	/* Initialize a local context if the given context is NULL. */ \
-	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
+	/* Obtain a valid context from the gks if necessary. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* Query the context for the operation's kernel address. */ \
-	PASTECH2(ch,kername,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx_p ); \
+	PASTECH2(ch,kername,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
 \
 	/* Invoke the kernel with the appropriate parameters. */ \
 	f( \
@@ -178,11 +173,8 @@ void PASTEMAC(ch,opname) \
 	   alpha, \
 	   x1, incx, \
 	   y1, incy, \
-	   cntx_p  \
+	   cntx  \
 	 ); \
-\
-	/* Finalize the context if it was initialized locally. */ \
-	bli_cntx_finalize_local_if( opname, cntx ); \
 }
 
 INSERT_GENTFUNC_BASIC2( axpyd,  axpyv,  BLIS_AXPYV_KER )
@@ -202,7 +194,6 @@ void PASTEMAC(ch,opname) \
      ) \
 { \
 	const num_t dt = PASTEMAC(ch,type); \
-	cntx_t*     cntx_p; \
 \
 	ctype*      x1; \
 	dim_t       n_elem; \
@@ -221,21 +212,18 @@ void PASTEMAC(ch,opname) \
 \
     x1 = x + offx; \
 \
-	/* Initialize a local context if the given context is NULL. */ \
-	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
+	/* Obtain a valid context from the gks if necessary. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* Query the context for the operation's kernel address. */ \
-	PASTECH2(ch,kername,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx_p ); \
+	PASTECH2(ch,kername,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
 \
 	/* Invoke the kernel with the appropriate parameters. */ \
 	f( \
 	   n_elem, \
 	   x1, incx, \
-	   cntx_p  \
+	   cntx  \
 	 ); \
-\
-	/* Finalize the context if it was initialized locally. */ \
-	bli_cntx_finalize_local_if( opname, cntx ); \
 }
 
 INSERT_GENTFUNC_BASIC2( invertd, invertv, BLIS_INVERTV_KER )
@@ -256,7 +244,6 @@ void PASTEMAC(ch,opname) \
      ) \
 { \
 	const num_t dt = PASTEMAC(ch,type); \
-	cntx_t*     cntx_p; \
 \
 	ctype*      x1; \
 	dim_t       n_elem; \
@@ -275,11 +262,11 @@ void PASTEMAC(ch,opname) \
 \
     x1 = x + offx; \
 \
-	/* Initialize a local context if the given context is NULL. */ \
-	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
+	/* Obtain a valid context from the gks if necessary. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* Query the context for the operation's kernel address. */ \
-	PASTECH2(ch,kername,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx_p ); \
+	PASTECH2(ch,kername,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
 \
 	/* Invoke the kernel with the appropriate parameters. */ \
 	f( \
@@ -287,11 +274,8 @@ void PASTEMAC(ch,opname) \
 	   n_elem, \
 	   alpha, \
 	   x1, incx, \
-	   cntx_p  \
+	   cntx  \
 	 ); \
-\
-	/* Finalize the context if it was initialized locally. */ \
-	bli_cntx_finalize_local_if( opname, cntx ); \
 }
 
 INSERT_GENTFUNC_BASIC2( scald, scalv, BLIS_SCALV_KER )
@@ -313,7 +297,6 @@ void PASTEMAC(ch,opname) \
 { \
 	const num_t dt   = PASTEMAC(ch,type); \
 	const num_t dt_r = PASTEMAC(chr,type); \
-	cntx_t*     cntx_p; \
 \
 	ctype_r*    x1; \
 	dim_t       n_elem; \
@@ -348,11 +331,11 @@ void PASTEMAC(ch,opname) \
     x1   = ( ctype_r* )( x + offx ) + 1; \
 	incx = 2*incx; \
 \
-	/* Initialize a local context if the given context is NULL. */ \
-	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
+	/* Obtain a valid context from the gks if necessary. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* Query the context for the operation's kernel address. */ \
-	PASTECH2(chr,kername,_ft) f = bli_cntx_get_l1v_ker_dt( dt_r, kerid, cntx_p ); \
+	PASTECH2(chr,kername,_ft) f = bli_cntx_get_l1v_ker_dt( dt_r, kerid, cntx ); \
 \
 	/* Invoke the kernel with the appropriate parameters. */ \
 	f( \
@@ -360,11 +343,8 @@ void PASTEMAC(ch,opname) \
 	   n_elem, \
 	   alpha, \
 	   x1, incx, \
-	   cntx_p  \
+	   cntx  \
 	 ); \
-\
-	/* Finalize the context if it was initialized locally. */ \
-	bli_cntx_finalize_local_if( opname, cntx ); \
 }
 
 INSERT_GENTFUNCR_BASIC2( setid, setv, BLIS_SETV_KER )

@@ -35,7 +35,7 @@
 #include "blis.h"
 
 #ifdef BLIS_ENABLE_PTHREADS
-static pthread_mutex_t initialize_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t init_mutex = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
 static bool_t bli_is_init = FALSE;
@@ -67,7 +67,7 @@ err_t bli_init( void )
 	_Pragma( "omp critical (init)" )
 #endif
 #ifdef BLIS_ENABLE_PTHREADS
-	pthread_mutex_lock( &initialize_mutex );
+	pthread_mutex_lock( &init_mutex );
 #endif
 
 	// BEGIN CRITICAL SECTION
@@ -84,9 +84,10 @@ err_t bli_init( void )
 			// Initialize various sub-APIs.
 			bli_const_init();
 			bli_error_init();
-			bli_memsys_init();
+			bli_gks_init();
 			bli_ind_init();
 			bli_thread_init();
+			bli_memsys_init();
 
 			// After initialization is complete, mark BLIS as initialized.
 			bli_is_init = TRUE;
@@ -99,7 +100,7 @@ err_t bli_init( void )
 	// END CRITICAL SECTION
 
 #ifdef BLIS_ENABLE_PTHREADS
-	pthread_mutex_unlock( &initialize_mutex );
+	pthread_mutex_unlock( &init_mutex );
 #endif
 
 	return r_val;
@@ -131,7 +132,7 @@ err_t bli_finalize( void )
 	_Pragma( "omp critical (init)" )
 #endif
 #ifdef BLIS_ENABLE_PTHREADS
-	pthread_mutex_lock( &initialize_mutex );
+	pthread_mutex_lock( &init_mutex );
 #endif
 
 	// BEGIN CRITICAL SECTION
@@ -149,8 +150,9 @@ err_t bli_finalize( void )
 			bli_const_finalize();
 			bli_error_finalize();
 			bli_memsys_finalize();
-			bli_ind_finalize();
 			bli_thread_finalize();
+			bli_gks_finalize();
+			bli_ind_finalize();
 
 			// After finalization is complete, mark BLIS as uninitialized.
 			bli_is_init = FALSE;
@@ -163,11 +165,11 @@ err_t bli_finalize( void )
 	// END CRITICAL SECTION
 
 #ifdef BLIS_ENABLE_PTHREADS
-	pthread_mutex_unlock( &initialize_mutex );
+	pthread_mutex_unlock( &init_mutex );
 #endif
 
 #ifdef BLIS_ENABLE_PTHREADS
-	pthread_mutex_destroy( &initialize_mutex );
+	pthread_mutex_destroy( &init_mutex );
 #endif
 
 	return r_val;

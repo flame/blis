@@ -32,7 +32,6 @@
 
 */
 
-#include "bli_l1f_cntx.h"
 #include "bli_l1f_check.h"
 
 #include "bli_l1f_ft.h"
@@ -46,5 +45,5 @@
 #include "bli_l1f_tapi.h"
 
 // Reference kernel headers
-#include "bli_l1f_ref.h"
+//#include "bli_l1f_ref.h"
 

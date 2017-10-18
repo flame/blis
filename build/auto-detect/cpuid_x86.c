@@ -40,7 +40,7 @@
 #define VENDOR_AMD           2
 
 #define CPUNAME_REFERENCE    0
-#define CPUNAME_DUNNINGTON   1
+#define CPUNAME_PENRYN       1
 #define CPUNAME_SANDYBRIDGE  2
 #define CPUNAME_HASWELL      3
 #define CPUNAME_KNL          4
@@ -50,7 +50,7 @@
 
 static char *cpuname[] = {
   "reference",
-  "dunnington",
+  "penryn",
   "sandybridge",
   "haswell",
   "knl",
@@ -167,7 +167,7 @@ int cpu_detect()
         case 0x25: //Westmere
         case 0x2C: //Westmere
         case 0x2F: //Westmere
-          return CPUNAME_DUNNINGTON;
+          return CPUNAME_PENRYN;
         case 0x2A: //Sandy Bridge
         case 0x2D: //Sandy Bridge
         case 0x3A: //Ivy Bridge

@@ -175,14 +175,14 @@ void libblis_test_trsm_ukr_experiment
 	obj_t        ap, bp;
 	obj_t        c_save;
 
-	cntx_t       cntx;
+	cntx_t*      cntx;
 
-	// Initialize a context.
-	bli_trsm_cntx_init( datatype, &cntx );
+	// Query a context.
+	cntx = bli_gks_query_cntx();
 
 	// Fix m and n to MR and NR, respectively.
-	m = bli_cntx_get_blksz_def_dt( datatype, BLIS_MR, &cntx );
-	n = bli_cntx_get_blksz_def_dt( datatype, BLIS_NR, &cntx );
+	m = bli_cntx_get_blksz_def_dt( datatype, BLIS_MR, cntx );
+	n = bli_cntx_get_blksz_def_dt( datatype, BLIS_NR, cntx );
 
 	// Store the register blocksizes so that the driver can retrieve the
 	// values later when printing results.
@@ -231,7 +231,7 @@ void libblis_test_trsm_ukr_experiment
 	  BLIS_PACKED_ROW_PANELS,
 	  BLIS_BUFFER_FOR_A_BLOCK,
 	  &a, &ap,
-	  &cntx
+	  cntx
 	);
 	cntl_t* cntl_b = libblis_test_pobj_create
 	(
@@ -241,7 +241,7 @@ void libblis_test_trsm_ukr_experiment
 	  BLIS_PACKED_COL_PANELS,
 	  BLIS_BUFFER_FOR_B_PANEL,
 	  &b, &bp,
-	  &cntx
+	  cntx
 	);
 
 	// Set the uplo field of ap since the default for packed objects is
@@ -253,7 +253,7 @@ void libblis_test_trsm_ukr_experiment
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		// Re-pack the contents of b to bp.
-		bli_packm_blk_var1( &b, &bp, &cntx, cntl_b, &BLIS_PACKM_SINGLE_THREADED );
+		bli_packm_blk_var1( &b, &bp, cntx, cntl_b, &BLIS_PACKM_SINGLE_THREADED );
 
 		bli_copym( &c_save, &c );
 
@@ -261,7 +261,7 @@ void libblis_test_trsm_ukr_experiment
 
 		libblis_test_trsm_ukr_impl( iface, side,
 		                            &ap, &bp, &c,
-		                            &cntx );
+		                            cntx );
 
 		time_min = bli_clock_min_diff( time_min, time );
 	}
@@ -286,9 +286,6 @@ void libblis_test_trsm_ukr_experiment
 	bli_obj_free( &b );
 	bli_obj_free( &c );
 	bli_obj_free( &c_save );
-
-	// Finalize the context.
-	bli_trsm_cntx_finalize( &cntx );
 }
 
 

@@ -47,14 +47,14 @@ void bla_syr_check
      )
 {
 	bla_her_check
-     (
-       dt_str,
-	               op_str,
-	               uploc,
-	               m,
-	               incx,
-	               lda
-     );
+	(
+	  dt_str,
+	  op_str,
+	  uploc,
+	  m,
+	  incx,
+	  lda
+	);
 }
 
 #endif

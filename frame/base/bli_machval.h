@@ -54,5 +54,5 @@ void PASTEMAC(chv,opname)( \
                            void*     v \
                          );
 
-INSERT_GENTPROTR_BASIC( machval )
+INSERT_GENTPROTR_BASIC0( machval )
 

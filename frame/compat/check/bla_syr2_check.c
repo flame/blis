@@ -48,15 +48,15 @@ void bla_syr2_check
      )
 {
 	bla_her2_check
-     (
-       dt_str,
-	                op_str,
-	                uploc,
-	                m,
-	                incx,
-	                incy,
-	                lda
-     );
+	(
+	  dt_str,
+	  op_str,
+	  uploc,
+	  m,
+	  incx,
+	  incy,
+	  lda
+	);
 }
 
 #endif

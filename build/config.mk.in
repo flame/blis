@@ -40,10 +40,29 @@ CONFIG_MK_INCLUDED := yes
 # string forced at configure-time.
 VERSION         := @version@
 
-# The name of the configuration sub-directory.
+# The name of the configuration family.
 CONFIG_NAME     := @config_name@
 
-# The operatin g system name, which should be either 'Linux' or 'Darwin'.
+# The list of sub-configurations associated with CONFIG_NAME. Each
+# sub-configuration in CONFIG_LIST corresponds to a configuration
+# sub-directory in the 'config' directory. See the 'config_registry'
+# file for the full list of registered configurations.
+CONFIG_LIST     := @config_list@
+
+# This list of kernels needed for the configurations in CONFIG_LIST.
+# Each item in this list corresponds to a sub-directory in the top-level
+# 'kernels' directory. Oftentimes, this list is identical to CONFIG_LIST,
+# but not always. For example, if configuration X and Y use the same
+# kernel set X, and configuration W uses kernel set Q, and the CONFIG_LIST
+# might contained "X Y Z W", then the KERNEL_LIST would contain "X Z Q".
+KERNEL_LIST     := @kernel_list@
+
+# This list contains some number of "kernel:config" pairs, where "config"
+# specifies which configuration's compilation flags (CFLAGS) should be
+# used to compile the source code for the kernel set named "kernel".
+KCONFIG_MAP     := @kconfig_map@
+
+# The operating system name, which should be either 'Linux' or 'Darwin'.
 OS_NAME         := $(shell uname -s)
 
 # The directory path to the top level of the source distribution.

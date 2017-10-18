@@ -32,7 +32,6 @@
 
 */
 
-#include "bli_l2_cntx.h"
 #include "bli_l2_check.h"
 
 #include "bli_l2_ft.h"
