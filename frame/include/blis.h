@@ -79,15 +79,15 @@ extern "C" {
 #include "bli_extern_defs.h"
 
 
-// -- BLIS config/kernel definitions --
+// -- BLIS architecture/kernel definitions --
 
 #include "bli_l1v_ker_prot.h"
 #include "bli_l1f_ker_prot.h"
 #include "bli_l1m_ker_prot.h"
 #include "bli_l3_ukr_prot.h"
 
-#include "bli_arch_pre_macro_defs.h"
-#include "bli_arch.h"
+#include "bli_arch_config_pre.h"
+#include "bli_arch_config.h"
 
 #include "bli_kernel_macro_defs.h"
 

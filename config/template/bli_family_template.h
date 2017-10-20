@@ -32,43 +32,11 @@
 
 */
 
-#ifndef BLIS_ARCH_PRE_MACRO_DEFS_H
-#define BLIS_ARCH_PRE_MACRO_DEFS_H
+//#ifndef BLIS_FAMILY_H
+//#define BLIS_FAMILY_H
 
 
-// -- Naming-related kernel definitions ----------------------------------------
-
-// The default suffix appended to reference kernels.
-#define BLIS_REF_SUFFIX  _ref
-
-// A suffix used for labeling certain induced method aware functions.
-#define BLIS_IND_SUFFIX  _ind
-
-// Add an underscore to the BLIS kernel set string, if it was defined.
-#ifdef  BLIS_CNAME
-#define BLIS_CNAME_INFIX  PASTECH(_,BLIS_CNAME)
-#endif
-
-// -- Prototype-generating macro definitions -----------------------------------
-
-// Prototype-generating macro for bli_cntx_init_<arch>*() functions.
-#define CNTX_INIT_PROTS( archname ) \
-\
-void PASTEMAC(cntx_init_,archname) \
-     ( \
-       cntx_t* cntx \
-     ); \
-void PASTEMAC2(cntx_init_,archname,BLIS_REF_SUFFIX) \
-     ( \
-       cntx_t* cntx \
-     ); \
-void PASTEMAC2(cntx_init_,archname,BLIS_IND_SUFFIX) \
-     ( \
-       ind_t   method, \
-       num_t   dt, \
-       cntx_t* cntx \
-     );
 
 
-#endif
+//#endif
 

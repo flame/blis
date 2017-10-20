@@ -32,59 +32,14 @@
 
 */
 
-//#ifndef BLIS_ARCH_H
-//#define BLIS_ARCH_H
-
-
-// -- THREADING PARAMTERS ------------------------------------------------------
-
-#define BLIS_TREE_BARRIER
-#define BLIS_TREE_BARRIER_ARITY        4
+//#ifndef BLIS_FAMILY_H
+//#define BLIS_FAMILY_H
 
 
 // -- MEMORY ALLOCATION --------------------------------------------------------
 
-#define BLIS_SIMD_ALIGN_SIZE           64
+#define BLIS_SIMD_ALIGN_SIZE 16
 
-#define BLIS_SIMD_SIZE                 64
-#define BLIS_SIMD_NUM_REGISTERS        32
-
-
-#if 0
-// -- LEVEL-3 MICRO-KERNEL CONSTANTS -------------------------------------------
-
-#define BLIS_SGEMM_UKERNEL             bli_sgemm_asm_30x16
-#define BLIS_DEFAULT_MR_S              30
-#define BLIS_DEFAULT_NR_S              16
-#define BLIS_DEFAULT_MC_S              240
-#define BLIS_DEFAULT_KC_S              240
-#define BLIS_DEFAULT_NC_S              14400
-
-#define BLIS_DGEMM_UKERNEL_PREFERS_CONTIG_ROWS
-#define BLIS_DGEMM_UKERNEL             bli_dgemm_asm_30x8
-#define BLIS_DEFAULT_MR_D              30
-#define BLIS_DEFAULT_NR_D              8
-#define BLIS_DEFAULT_MC_D              120
-#define BLIS_DEFAULT_KC_D              240
-#define BLIS_DEFAULT_NC_D              14400
-
-
-#define BLIS_MAXIMUM_MC_S              (BLIS_DEFAULT_MC_S + BLIS_DEFAULT_MC_S/4)
-#define BLIS_MAXIMUM_KC_S              (BLIS_DEFAULT_KC_S + BLIS_DEFAULT_KC_S/4)
-#define BLIS_MAXIMUM_NC_S              (BLIS_DEFAULT_NC_S +                   0) 
-
-#define BLIS_MAXIMUM_MC_D              (BLIS_DEFAULT_MC_D + BLIS_DEFAULT_MC_D/4)
-#define BLIS_MAXIMUM_KC_D              (BLIS_DEFAULT_KC_D + BLIS_DEFAULT_KC_D/4)
-#define BLIS_MAXIMUM_NC_D              (BLIS_DEFAULT_NC_D +                   0)
-
-#define BLIS_PACKDIM_MR_S              (BLIS_DEFAULT_MR_S + 2)
-//#define BLIS_PACKDIM_NR_S              (BLIS_DEFAULT_NR_S + ...)
-
-#define BLIS_PACKDIM_MR_D              (BLIS_DEFAULT_MR_D + 2)
-//#define BLIS_PACKDIM_NR_D              (BLIS_DEFAULT_NR_D + ...)
-
-
-#endif
 
 
 //#endif

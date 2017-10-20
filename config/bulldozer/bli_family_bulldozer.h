@@ -32,20 +32,47 @@
 
 */
 
-//#ifndef BLIS_ARCH_H
-//#define BLIS_ARCH_H
+//#ifndef BLIS_FAMILY_H
+//#define BLIS_FAMILY_H
+
+
+// -- MEMORY ALLOCATION --------------------------------------------------------
+
+#define BLIS_SIMD_ALIGN_SIZE       16
 
 
 #if 0
 // -- LEVEL-3 MICRO-KERNEL CONSTANTS -------------------------------------------
 
-#define BLIS_DGEMM_UKERNEL             bli_dgemm_opt_8x4
-#define BLIS_DEFAULT_MR_D              8
-#define BLIS_DEFAULT_NR_D              4
-#define BLIS_DEFAULT_MC_D              64
-#define BLIS_DEFAULT_KC_D              256
-#define BLIS_DEFAULT_NC_D              4096
+#define BLIS_SGEMM_UKERNEL         bli_sgemm_asm_8x8_fma4
+#define BLIS_DEFAULT_MC_S          128
+#define BLIS_DEFAULT_KC_S          384
+#define BLIS_DEFAULT_NC_S          4096
+#define BLIS_DEFAULT_MR_S          8
+#define BLIS_DEFAULT_NR_S          8
+
+#define BLIS_DGEMM_UKERNEL         bli_dgemm_asm_4x6_fma4
+#define BLIS_DEFAULT_MC_D          1080
+#define BLIS_DEFAULT_KC_D          120
+#define BLIS_DEFAULT_NC_D          8400
+#define BLIS_DEFAULT_MR_D          4
+#define BLIS_DEFAULT_NR_D          6
+
+#define BLIS_CGEMM_UKERNEL         bli_cgemm_asm_8x4_fma4
+#define BLIS_DEFAULT_MC_C          96
+#define BLIS_DEFAULT_KC_C          256
+#define BLIS_DEFAULT_NC_C          4096
+#define BLIS_DEFAULT_MR_C          8
+#define BLIS_DEFAULT_NR_C          4
+
+#define BLIS_ZGEMM_UKERNEL         bli_zgemm_asm_4x4_fma4
+#define BLIS_DEFAULT_MC_Z          64 
+#define BLIS_DEFAULT_KC_Z          192
+#define BLIS_DEFAULT_NC_Z          4096
+#define BLIS_DEFAULT_MR_Z          4
+#define BLIS_DEFAULT_NR_Z          4
 #endif
+
 
 
 //#endif

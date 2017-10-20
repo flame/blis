@@ -32,49 +32,21 @@
 
 */
 
-#ifndef BLIS_ARCH_H
-#define BLIS_ARCH_H
-
-
-// -- ARCHITECTURE-SPECIFIC PROTOTYPES -----------------------------------------
-
-// Define the current architecture's name.
-#define archname armv7a
-
-// Include the context initialization function API template.
-#include "bli_cntx_init_arch.h"
+//#ifndef BLIS_FAMILY_H
+//#define BLIS_FAMILY_H
 
 
 #if 0
-#define BLIS_SGEMM_UKERNEL             bli_sgemm_opt_4x4
-#define BLIS_DEFAULT_MR_S              4
-#define BLIS_DEFAULT_NR_S              4
-#define BLIS_DEFAULT_MC_S              432
-#define BLIS_DEFAULT_KC_S              352
-#define BLIS_DEFAULT_NC_S              4096
+// -- LEVEL-3 MICRO-KERNEL CONSTANTS -------------------------------------------
 
-#define BLIS_DGEMM_UKERNEL             bli_dgemm_opt_4x4
-#define BLIS_DEFAULT_MR_D              4
+#define BLIS_DGEMM_UKERNEL             bli_dgemm_opt_8x4
+#define BLIS_DEFAULT_MR_D              8
 #define BLIS_DEFAULT_NR_D              4
-#define BLIS_DEFAULT_MC_D              192
+#define BLIS_DEFAULT_MC_D              64
 #define BLIS_DEFAULT_KC_D              256
 #define BLIS_DEFAULT_NC_D              4096
-
-#define BLIS_CGEMM_UKERNEL             bli_cgemm_opt_4x4
-#define BLIS_DEFAULT_MR_C              2
-#define BLIS_DEFAULT_NR_C              2
-#define BLIS_DEFAULT_MC_C              64
-#define BLIS_DEFAULT_KC_C              128
-#define BLIS_DEFAULT_NC_C              4096
-
-#define BLIS_ZGEMM_UKERNEL             bli_zgemm_opt_4x4
-#define BLIS_DEFAULT_MR_Z              2
-#define BLIS_DEFAULT_NR_Z              2
-#define BLIS_DEFAULT_MC_Z              64
-#define BLIS_DEFAULT_KC_Z              128
-#define BLIS_DEFAULT_NC_Z              4096
 #endif
 
 
-#endif
+//#endif
 

@@ -32,13 +32,10 @@
 
 */
 
-//#ifndef BLIS_ARCH_H
-//#define BLIS_ARCH_H
+//#ifndef BLIS_FAMILY_H
+//#define BLIS_FAMILY_H
 
 
-// -- MEMORY ALLOCATION --------------------------------------------------------
-
-#define BLIS_SIMD_ALIGN_SIZE             16
 
 
 //#endif

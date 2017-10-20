@@ -32,54 +32,45 @@
 
 */
 
-//#ifndef BLIS_ARCH_H
-//#define BLIS_ARCH_H
+//#ifndef BLIS_FAMILY_H
+//#define BLIS_FAMILY_H
 
 
-#undef restrict
+// -- MEMORY ALLOCATION --------------------------------------------------------
+
+#define BLIS_SIMD_ALIGN_SIZE           16
 
 
 #if 0
 // -- LEVEL-3 MICRO-KERNEL CONSTANTS -------------------------------------------
 
-#define BLIS_DEFAULT_MR_S              8
-#define BLIS_DEFAULT_NR_S              4
-#define BLIS_DEFAULT_MC_S              1024
-#define BLIS_DEFAULT_KC_S              2048
-#define BLIS_DEFAULT_NC_S              8192
+#define BLIS_SGEMM_UKERNEL             bli_sgemm_asm_16x3
+#define BLIS_DEFAULT_MR_S              16
+#define BLIS_DEFAULT_NR_S              3
+#define BLIS_DEFAULT_MC_S              528
+#define BLIS_DEFAULT_KC_S              256
+#define BLIS_DEFAULT_NC_S              8400
 
-// 1 MPI RANK CASE:
-#define BLIS_DGEMM_UKERNEL             bli_dgemm_int_8x8
+#define BLIS_DGEMM_UKERNEL             bli_dgemm_asm_8x3
 #define BLIS_DEFAULT_MR_D              8
-#define BLIS_DEFAULT_NR_D              8
-#define BLIS_DEFAULT_MC_D              1024
-#define BLIS_DEFAULT_KC_D              2048
-#define BLIS_DEFAULT_NC_D              10240
+#define BLIS_DEFAULT_NR_D              3
+#define BLIS_DEFAULT_MC_D              264
+#define BLIS_DEFAULT_KC_D              256
+#define BLIS_DEFAULT_NC_D              8400
 
-#define BLIS_DEFAULT_MR_C              8
-#define BLIS_DEFAULT_NR_C              4
-#define BLIS_DEFAULT_MC_C              1024
-#define BLIS_DEFAULT_KC_C              2048
-#define BLIS_DEFAULT_NC_C              8192
+#define BLIS_CGEMM_UKERNEL             bli_cgemm_asm_4x2
+#define BLIS_DEFAULT_MR_C              4
+#define BLIS_DEFAULT_NR_C              2
+#define BLIS_DEFAULT_MC_C              264
+#define BLIS_DEFAULT_KC_C              256
+#define BLIS_DEFAULT_NC_C              8400
 
-#define BLIS_ZGEMM_UKERNEL             bli_zgemm_int_8x8
-#define BLIS_DEFAULT_MR_Z              4
-#define BLIS_DEFAULT_NR_Z              4
-#define BLIS_DEFAULT_MC_Z              768
-#define BLIS_DEFAULT_KC_Z              1536
-#define BLIS_DEFAULT_NC_Z              10240
-
-
-// -- LEVEL-1F KERNEL CONSTANTS ------------------------------------------------
-
-#define BLIS_DEFAULT_AF_D          8
-#define BLIS_DAXPYF_KERNEL         bli_daxpyf_opt_var1
-
-
-// -- LEVEL-1V KERNEL DEFINITIONS ----------------------------------------------
-
-#define BLIS_DAXPYV_KERNEL         bli_daxpyv_opt_var1
-#define BLIS_DDOTV_KERNEL          bli_ddotv_opt_var1
+#define BLIS_ZGEMM_UKERNEL             bli_zgemm_asm_2x2
+#define BLIS_DEFAULT_MR_Z              2
+#define BLIS_DEFAULT_NR_Z              2
+#define BLIS_DEFAULT_MC_Z              100
+#define BLIS_DEFAULT_KC_Z              320
+#define BLIS_DEFAULT_NC_Z              8400
 #endif
 
 

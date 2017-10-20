@@ -33,8 +33,8 @@
 
 */
 
-#ifndef BLIS_ARCH_H
-#define BLIS_ARCH_H
+#ifndef BLIS_ARCH_CONFIG_H
+#define BLIS_ARCH_CONFIG_H
 
 //
 // -- Context initialization prototypes ----------------------------------------
@@ -106,67 +106,67 @@ CNTX_INIT_PROTS( bgq )
 // -- Intel64 architectures --
 
 #ifdef BLIS_FAMILY_INTEL64
-#include "bli_arch_intel64.h"
+#include "bli_family_intel64.h"
 #endif
 
 #ifdef BLIS_FAMILY_HASWELL
-#include "bli_arch_haswell.h"
+#include "bli_family_haswell.h"
 #endif
 #ifdef BLIS_FAMILY_SANDYBRIDGE
-#include "bli_arch_sandybridge.h"
+#include "bli_family_sandybridge.h"
 #endif
 #ifdef BLIS_FAMILY_PENRYN
-#include "bli_arch_penryn.h"
+#include "bli_family_penryn.h"
 #endif
 
 #ifdef BLIS_FAMILY_KNL
-#include "bli_arch_knl.h"
+#include "bli_family_knl.h"
 #endif
 #ifdef BLIS_FAMILY_KNC
-#include "bli_arch_knc.h"
+#include "bli_family_knc.h"
 #endif
 
 // -- AMD64 architectures --
 
 #ifdef BLIS_FAMILY_AMD64
-#include "bli_arch_amd64.h"
+#include "bli_family_amd64.h"
 #endif
 
 #ifdef BLIS_FAMILY_ZEN
-#include "bli_arch_zen.h"
+#include "bli_family_zen.h"
 #endif
 #ifdef BLIS_FAMILY_EXCAVATOR
-#include "bli_arch_excavator.h"
+#include "bli_family_excavator.h"
 #endif
 #ifdef BLIS_FAMILY_STEAMROLLER
-#include "bli_arch_steamroller.h"
+#include "bli_family_steamroller.h"
 #endif
 #ifdef BLIS_FAMILY_PILEDRIVER
-#include "bli_arch_piledriver.h"
+#include "bli_family_piledriver.h"
 #endif
 #ifdef BLIS_FAMILY_BULLDOZER
-#include "bli_arch_bulldozer.h"
+#include "bli_family_bulldozer.h"
 #endif
 
 // -- ARM architectures --
 
 #ifdef BLIS_FAMILY_CORTEXA57
-#include "bli_arch_cortexa57.h"
+#include "bli_family_cortexa57.h"
 #endif
 #ifdef BLIS_FAMILY_CORTEXA15
-#include "bli_arch_cortexa15.h"
+#include "bli_family_cortexa15.h"
 #endif
 #ifdef BLIS_FAMILY_CORTEXA9
-#include "bli_arch_cortexa9.h"
+#include "bli_family_cortexa9.h"
 #endif
 
 // -- IBM BG/Q --
 
 #ifdef BLIS_FAMILY_POWER7
-#include "bli_arch_power7.h"
+#include "bli_family_power7.h"
 #endif
 #ifdef BLIS_FAMILY_BGQ
-#include "bli_arch_bgq.h"
+#include "bli_family_bgq.h"
 #endif
 
 
