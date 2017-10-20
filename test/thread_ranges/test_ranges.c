@@ -112,7 +112,8 @@ int main( int argc, char** argv )
 	bool_t go_fwd;
 	char   out_ch;
 
-	obj_t  a;
+	obj_t   a;
+	blksz_t bfs;
 
 	thrinfo_t thrinfo;
 	dim_t  m, n;
@@ -279,6 +280,8 @@ int main( int argc, char** argv )
 
 		bli_randm( &a );
 
+		bli_blksz_init_easy( &bfs, bf, bf, bf, bf );
+
 		printf( "%4lu x %4lu  ", m, n );
 
 		for ( t = t_begin; t != t_stop; t += t_inc )
@@ -287,13 +290,13 @@ int main( int argc, char** argv )
 			thrinfo.work_id = t;
 
 			if      ( part_n_dim && go_fwd )
-				area = bli_thread_get_range_weighted_l2r( &thrinfo, &a, bf, &start, &end );
+				area = bli_thread_get_range_weighted_l2r( &thrinfo, &a, &bfs, &start, &end );
 			else if ( part_n_dim && go_bwd )
-				area = bli_thread_get_range_weighted_r2l( &thrinfo, &a, bf, &start, &end );
+				area = bli_thread_get_range_weighted_r2l( &thrinfo, &a, &bfs, &start, &end );
 			else if ( part_m_dim && go_fwd )
-				area = bli_thread_get_range_weighted_t2b( &thrinfo, &a, bf, &start, &end );
+				area = bli_thread_get_range_weighted_t2b( &thrinfo, &a, &bfs, &start, &end );
 			else // ( part_m_dim && go_bwd )
-				area = bli_thread_get_range_weighted_b2t( &thrinfo, &a, bf, &start, &end );
+				area = bli_thread_get_range_weighted_b2t( &thrinfo, &a, &bfs, &start, &end );
 
 			width = end - start;
 
