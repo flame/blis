@@ -492,10 +492,10 @@ testsuite-bin: check-env $(TESTSUITE_BIN)
 
 $(BASE_OBJ_TESTSUITE_PATH)/%.o: $(TESTSUITE_SRC_PATH)/%.c
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(call get-frame-cflags-for,$(CONFIG_NAME)) -c $< -o $@
 else
 	@echo "Compiling $<"
-	@$(CC) $(CFLAGS) -c $< -o $@
+	@$(CC) $(call get-frame-cflags-for,$(CONFIG_NAME)) -c $< -o $@
 endif
 
 ifeq ($(CONFIG_NAME),pnacl)
