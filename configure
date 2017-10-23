@@ -58,8 +58,8 @@ print_usage()
 	echo "   confname      The name of the sub-directory inside of the 'config'"
 	echo "                 directory containing the desired BLIS configuration."
 	echo "                 Note that confname MUST be specified; if it is not,"
-	echo "                 configure will complain. To build a reference"
-	echo "                 implementation, use the 'reference' configuration"
+	echo "                 configure will complain. To build a completely generic"
+	echo "                 implementation, use the 'generic' configuration"
 	echo " "
 	echo " Options:"
 	echo " "
@@ -480,9 +480,6 @@ main()
 
 	# The path to the auto-detection script.
 	auto_detect_sh="${build_dirpath}/auto-detect/auto-detect.sh"
-
-	# The name of the reference configuration sub-directory.
-	#config_name_ref='reference'
 
 	# The name of the chosen configuration (the configuration "family").
 	config_name=''

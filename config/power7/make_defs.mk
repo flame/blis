@@ -47,7 +47,7 @@ CC             := gcc
 CC_VENDOR      := gcc
 endif
 
-# Enable IEEE Standard 1003.1-2004 (POSIX.1d). 
+# Enable IEEE Standard 1003.1-2004 (POSIX.1d).
 # NOTE: This is needed to enable posix_memalign().
 CPPROCFLAGS    := -D_POSIX_C_SOURCE=200112L
 CMISCFLAGS     := -std=c99 -m64 -mcpu=power7

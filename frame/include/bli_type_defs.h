@@ -837,12 +837,12 @@ typedef enum
 	BLIS_ARCH_POWER7,
 	BLIS_ARCH_BGQ,
 
-	// Custom configuration
-	//BLIS_ARCH_CUSTOM
+	// Generic architecture/configuration
+	BLIS_ARCH_GENERIC
 
 } arch_t;
 
-#define BLIS_NUM_ARCHS 15
+#define BLIS_NUM_ARCHS 16
 
 
 //

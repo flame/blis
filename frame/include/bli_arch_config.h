@@ -98,6 +98,12 @@ CNTX_INIT_PROTS( power7 )
 CNTX_INIT_PROTS( bgq )
 #endif
 
+// -- Generic --
+
+#ifdef BLIS_CONFIG_GENERIC
+CNTX_INIT_PROTS( generic )
+#endif
+
 
 //
 // -- Architecture family-specific headers -------------------------------------
@@ -167,6 +173,12 @@ CNTX_INIT_PROTS( bgq )
 #endif
 #ifdef BLIS_FAMILY_BGQ
 #include "bli_family_bgq.h"
+#endif
+
+// -- Generic --
+
+#ifdef BLIS_FAMILY_GENERIC
+#include "bli_family_generic.h"
 #endif
 
 

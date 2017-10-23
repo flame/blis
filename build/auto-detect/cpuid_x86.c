@@ -39,7 +39,7 @@
 #define VENDOR_INTEL         1
 #define VENDOR_AMD           2
 
-#define CPUNAME_REFERENCE    0
+#define CPUNAME_GENERIC      0
 #define CPUNAME_PENRYN       1
 #define CPUNAME_SANDYBRIDGE  2
 #define CPUNAME_HASWELL      3
@@ -47,16 +47,18 @@
 #define CPUNAME_KNC          5
 #define CPUNAME_BULLDOZER    6
 #define CPUNAME_PILEDRIVER   7
+#define CPUNAME_STEAMROLLER  8
 
 static char *cpuname[] = {
-  "reference",
+  "generic",
   "penryn",
   "sandybridge",
   "haswell",
   "knl",
-  "mic",
+  "knc",
   "bulldozer",
   "piledriver",
+  "steamroller",
 };
 
 #define BITMASK(a, b, c) ((((a) >> (b)) & (c)))
@@ -141,7 +143,7 @@ int cpu_detect()
   int eax, ebx, ecx, edx;
   int vendor, family, extend_family, model, extend_model;
 
-  if ( !have_cpuid() ) return CPUNAME_REFERENCE;
+  if ( !have_cpuid() ) return CPUNAME_GENERIC;
 
   vendor = get_vendor();
 
@@ -175,7 +177,7 @@ int cpu_detect()
           if(support_avx()) {
             return CPUNAME_SANDYBRIDGE;
           }else{
-            return CPUNAME_REFERENCE; //OS doesn't support AVX
+            return CPUNAME_GENERIC; //OS doesn't support AVX
           }
         case 0x3C: //Haswell
         case 0x3F: //Haswell
@@ -188,13 +190,13 @@ int cpu_detect()
           if(support_avx()) {
             return CPUNAME_HASWELL;
           }else{
-            return CPUNAME_REFERENCE; //OS doesn't support AVX
+            return CPUNAME_GENERIC; //OS doesn't support AVX
           }
-	case 0x57: //KNL
+        case 0x57: //KNL
           if(support_avx512()) {
             return CPUNAME_KNL;
           }else{
-            return CPUNAME_REFERENCE; //OS doesn't support AVX
+            return CPUNAME_GENERIC; //OS doesn't support AVX
           }
       }
       break;
@@ -214,25 +216,25 @@ int cpu_detect()
           if(support_avx())
             return CPUNAME_BULLDOZER;
           else
-            return CPUNAME_REFERENCE; //OS don't support AVX.
+            return CPUNAME_GENERIC; //OS don't support AVX.
         case 2:
           if(support_avx())
             return CPUNAME_PILEDRIVER;
           else
-            return CPUNAME_REFERENCE; //OS don't support AVX.
+            return CPUNAME_GENERIC; //OS don't support AVX.
         case 0:
-          //Steamroller. Temp use Piledriver.
+          // Steamroller. Temp use Piledriver.
           if(support_avx())
-            return CPUNAME_PILEDRIVER;
+            return CPUNAME_STEAMROLLER;
           else
-            return CPUNAME_REFERENCE; //OS don't support AVX.
+            return CPUNAME_GENERIC; //OS don't support AVX.
         }
       }
       break;
     }
   }
 
-  return CPUNAME_REFERENCE;
+  return CPUNAME_GENERIC;
 }
 
 

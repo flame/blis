@@ -57,81 +57,6 @@ typedef void (*ind_cntx_init_ft)( ind_t method, num_t dt, cntx_t* cntx );
 
 // -----------------------------------------------------------------------------
 
-arch_t bli_arch_query_id( void )
-{
-	arch_t id;
-
-	// Architecture families
-#ifdef BLIS_FAMILY_INTEL64
-	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
-#endif
-#ifdef BLIS_FAMILY_AMD64
-	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
-#endif
-
-	// Intel architectures
-#ifdef BLIS_FAMILY_HASWELL
-	id = BLIS_ARCH_HASWELL;
-#endif
-#ifdef BLIS_FAMILY_SANDYBRIDGE
-	id = BLIS_ARCH_SANDYBRIDGE;
-#endif
-#ifdef BLIS_FAMILY_PENRYN
-	id = BLIS_ARCH_PENRYN;
-#endif
-#ifdef BLIS_FAMILY_KNL
-	id = BLIS_ARCH_KNL;
-#endif
-#ifdef BLIS_FAMILY_KNC
-	id = BLIS_ARCH_KNC;
-#endif
-
-	// AMD architectures
-#ifdef BLIS_FAMILY_ZEN
-	id = BLIS_ARCH_ZEN;
-#endif
-#ifdef BLIS_FAMILY_EXCAVATOR
-	id = BLIS_ARCH_EXCAVATOR;
-#endif
-#ifdef BLIS_FAMILY_STEAMROLLER
-	id = BLIS_ARCH_STEAMROLLER;
-#endif
-#ifdef BLIS_FAMILY_PILEDRIVER
-	id = BLIS_ARCH_PILEDRIVER;
-#endif
-#ifdef BLIS_FAMILY_BULLDOZER
-	id = BLIS_ARCH_BULLDOZER;
-#endif
-
-	// ARM architectures
-#ifdef BLIS_FAMILY_CORTEXA57
-	id = BLIS_ARCH_CORTEXA57;
-#endif
-#ifdef BLIS_FAMILY_CORTEXA15
-	id = BLIS_ARCH_CORTEXA15;
-#endif
-#ifdef BLIS_FAMILY_CORTEXA9
-	id = BLIS_ARCH_CORTEXA9;
-#endif
-
-	// IBM architectures
-#ifdef BLIS_FAMILY_POWER7
-	id = BLIS_ARCH_POWER7;
-#endif
-#ifdef BLIS_FAMILY_BGQ
-	id = BLIS_ARCH_BGQ;
-#endif
-
-	// Custom architecture
-//#ifdef BLIS_FAMILY_CUSTOM
-//	id = BLIS_ARCH_CUSTOM;
-//#endif
-
-	return id;
-}
-
-// -----------------------------------------------------------------------------
-
 void bli_gks_init( void )
 {
 	// BEGIN CRITICAL SECTION
@@ -228,12 +153,12 @@ void bli_gks_init( void )
 		                                              bli_cntx_init_bgq_ind );
 #endif
 
-		// custom architectures
-//#ifdef BLIS_CONFIG_CUSTOM
-//		bli_gks_register_cntx( BLIS_ARCH_CUSTOM,      bli_cntx_init_custom,
-//		                                              bli_cntx_init_custom_ref,
-//		                                              bli_cntx_init_custom_ind );
-//#endif
+		// Generic architectures
+#ifdef BLIS_CONFIG_GENERIC
+		bli_gks_register_cntx( BLIS_ARCH_GENERIC,     bli_cntx_init_generic,
+		                                              bli_cntx_init_generic_ref,
+		                                              bli_cntx_init_generic_ind );
+#endif
 	}
 	// END CRITICAL SECTION
 }

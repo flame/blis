@@ -1,10 +1,10 @@
-#!/bin/sh
+#
 #
 #  BLIS    
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
-#  Copyright (C) 2015, The University of Texas at Austin
+#  Copyright (C) 2014, The University of Texas at Austin
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,72 +32,55 @@
 #
 #
 
+
+# Declare the name of the current configuration and add it to the
+# running list of configurations included by common.mk.
+THIS_CONFIG    := generic
+#CONFIGS_INCL   += $(THIS_CONFIG)
+
 #
-# auto-detect.sh
-#
-# Zhang Xianyi
+# --- Determine the C compiler and related flags ---
 #
 
+ifeq ($(CC),)
+CC             := gcc
+CC_VENDOR      := gcc
+endif
 
-main()
-{
-	if [ clang -v > /dev/null 2>&1 ]; then
-	    CC=clang
-	else
-	    CC=gcc
-    fi
-	CPUID_SRC=cpuid_x86.c
-	CPUID_BIN=blis_cpu_detect
-	ARCH=generic
+# Enable IEEE Standard 1003.1-2004 (POSIX.1d).
+# NOTE: This is needed to enable posix_memalign().
+CPPROCFLAGS    := -D_POSIX_C_SOURCE=200112L
+CMISCFLAGS     := -std=c99 -m64
+CPICFLAGS      := -fPIC
+CWARNFLAGS     := -Wall -Wno-unused-function -Wfatal-errors
 
-	# The name of the script, stripped of any preceeding path.
-	script_name=${0##*/}
+ifneq ($(DEBUG_TYPE),off)
+CDBGFLAGS      := -g
+endif
 
-	# The path to the script. We need this to find the top-level directory
-	# of the source distribution in the event that the user has chosen to
-	# build elsewhere.
-	dist_path=${0%/${script_name}}
+ifeq ($(DEBUG_TYPE),noopt)
+COPTFLAGS      := -O0
+else
+COPTFLAGS      := -O3
+endif
 
-	# The path to the directory in which we are building. We do this to
-	# make explicit that we distinguish between the top-level directory
-	# of the distribution and the directory in which we are building.
-	cur_dirpath="."
+CKOPTFLAGS     := $(COPTFLAGS)
 
-	#
-	# Detect architecture by predefined macros
-	#
+ifeq ($(CC_VENDOR),gcc)
+CVECFLAGS      :=
+else
+ifeq ($(CC_VENDOR),icc)
+CVECFLAGS      :=
+else
+ifeq ($(CC_VENDOR),clang)
+CVECFLAGS      :=
+else
+$(error gcc, icc, or clang is required for this configuration.)
+endif
+endif
+endif
 
-	out1=`$CC -E ${dist_path}/arch_detect.c`
+# Store all of the variables here to new variables containing the
+# configuration name.
+$(eval $(call store-make-defs,$(THIS_CONFIG)))
 
-	ARCH=`echo $out1 | grep -o "ARCH_[a-zA-Z0-9_]*" | head -n1`
-
-	if [ $ARCH = "ARCH_X86_64" ]; then
-		CPUID_SRC=cpuid_x86.c
-	elif [ $ARCH = "ARCH_X86" ]; then
-		CPUID_SRC=cpuid_x86.c
-	elif [ $ARCH = "ARCH_ARM" ]; then
-		CPUID_SRC=cpuid_arm.c
-	elif [ $ARCH = "ARCH_AARCH64" ]; then
-		# Only support armv8 now
-		echo "armv8a"
-		return 0
-	else
-		echo "generic"
-		return 0
-	fi
-
-	#
-	# Detect CPU cores
-	#
-
-	$CC -o ${cur_dirpath}/$CPUID_BIN ${dist_path}/$CPUID_SRC
-	${cur_dirpath}/$CPUID_BIN
-	rm -rf ${cur_dirpath}/$CPUID_BIN
-
-	# Exit peacefully.
-	return 0
-}
-
-
-# The script's main entry point, passing all parameters given.
-main "$@"

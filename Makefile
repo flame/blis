@@ -291,9 +291,11 @@ BASE_OBJ_TESTSUITE_PATH := $(BASE_OBJ_PATH)/$(TESTSUITE_DIR)
 # Convert source file paths to object file paths by replacing the base source
 # directories with the base object directories, and also replacing the source
 # file suffix (eg: '.c') with '.o'.
-MK_TESTSUITE_OBJS       := $(patsubst $(TESTSUITE_SRC_PATH)/%.c, \
+MK_TESTSUITE_OBJS       := $(strip \
+                           $(patsubst $(TESTSUITE_SRC_PATH)/%.c, \
                                       $(BASE_OBJ_TESTSUITE_PATH)/%.o, \
-                                      $(wildcard $(TESTSUITE_SRC_PATH)/*.c))
+                                      $(wildcard $(TESTSUITE_SRC_PATH)/*.c)) \
+                            )
 
 # The test suite binary executable filename.
 ifeq ($(CONFIG_NAME),pnacl)

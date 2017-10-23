@@ -27,3 +27,6 @@ bulldozer:   bulldozer
 cortexa9:    cortexa9/armv7a
 cortexa15:   cortexa15/armv7a
 cortexa57:   cortexa57/armv8a
+
+# Generic architectures.
+generic:     generic

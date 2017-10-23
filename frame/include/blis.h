@@ -122,6 +122,7 @@ extern "C" {
 #include "bli_opid.h"
 #include "bli_cntl.h"
 #include "bli_info.h"
+#include "bli_arch.h"
 
 
 // -- Level-0 operations --
