@@ -19,6 +19,7 @@ env:
   - RUN_TEST=0 THREADING="none" BUILD_CONFIG="piledriver"
   - RUN_TEST=0 THREADING="none" BUILD_CONFIG="steamroller"
   - RUN_TEST=0 THREADING="none" BUILD_CONFIG="excavator"
+  - RUN_TEST=0 THREADING="none" BUILD_CONFIG="zen"
   - RUN_TEST=0 THREADING="openmp" BUILD_CONFIG="auto"
   - RUN_TEST=0 THREADING="pthreads" BUILD_CONFIG="auto"
   
@@ -35,15 +36,17 @@ matrix:
     - os: osx
       env: RUN_TEST=0 THREADING="none" BUILD_CONFIG="sandybridge"
     - os: osx
-      env: RUN_TEST=0 THREADING="none" BUILD_CONFIG="knl"
-    - os: osx
       env: RUN_TEST=0 THREADING="none" BUILD_CONFIG="haswell"
+    - os: osx
+      env: RUN_TEST=0 THREADING="none" BUILD_CONFIG="knl"
     - os: osx
       env: RUN_TEST=0 THREADING="none" BUILD_CONFIG="bulldozer"
     - os: osx
       env: RUN_TEST=0 THREADING="none" BUILD_CONFIG="piledriver"
     - os: osx
-      env: RUN_TEST=0 THREADING="none" BUILD_CONFIG="carrizo"
+      env: RUN_TEST=0 THREADING="none" BUILD_CONFIG="steamroller"
+    - os: osx
+      env: RUN_TEST=0 THREADING="none" BUILD_CONFIG="excavator"
     - os: osx
       env: RUN_TEST=0 THREADING="none" BUILD_CONFIG="zen"
     - os: osx
