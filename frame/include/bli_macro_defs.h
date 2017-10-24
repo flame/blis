@@ -93,11 +93,11 @@
   #define BLIS_ATTRIB_CTOR
   #define BLIS_ATTRIB_DTOR
 #elif defined(__clang__)
-  // CLANG supports __attribute__, but doesn't mention support for
-  // constructor/destructor. If we can confirm that CLANG supports
-  // this attribute, modify it to proper definition
-  #define BLIS_ATTRIB_CTOR
-  #define BLIS_ATTRIB_DTOR
+  // CLANG supports __attribute__, but its documentation doesn't 
+  // mention support for constructor/destructor. Compiling with 
+  // clang and testing shows that it does support.
+  #define BLIS_ATTRIB_CTOR __attribute__((constructor))
+  #define BLIS_ATTRIB_DTOR __attribute__((destructor))
 #elif defined(__GNUC__)
   #define BLIS_ATTRIB_CTOR __attribute__((constructor))
   #define BLIS_ATTRIB_DTOR __attribute__((destructor))
