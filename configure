@@ -160,7 +160,17 @@ print_usage()
 	exit 1
 }
 
-read_config_registry_file()
+query_array()
+{
+	array_name=$1
+	key_name=$2
+
+	var_name="${array_name}_${key_name}"
+
+	echo "${!var_name}"
+}
+
+read_registry_file()
 {
 	local cname clist
 
@@ -227,25 +237,27 @@ read_config_registry_file()
 
 		# Store the config and kernel lists to the entry in the associative
 		# arrays that corresponds to the config name.
-		config_registry[${cname}]=${clist}
-		kernel_registry[${cname}]=${klist}
+		#config_registry[${cname}]=${clist}
+		#kernel_registry[${cname}]=${klist}
+		printf -v "config_registry_${cname}" %s "${clist}"
+		printf -v "kernel_registry_${cname}" %s "${klist}"
+		
 
 	done < "${filename}"
 
 	# Now go back through the kernel registry and substitute any remaining
 	# configuration names occurring in the kernel list (right side of ':')
 	# with its registered kernel set.
-	for config in "${!kernel_registry[@]}"; do
+	#for config in "${!kernel_registry[@]}"; do
+	for kr_var in ${!kernel_registry_*}; do
 
-		#echo "$config"
+		config=${kr_var##kernel_registry_}
 
-		for ker in ${kernel_registry[$config]}; do
+		#for ker in ${kernel_registry[$config]}; do
+		for ker in ${!kr_var}; do
 
-			#echo "  considering $ker"
-
-			kers_ker="${kernel_registry[${ker}]}"
-
-			#echo "  ${ker} ?= ${kers_ker}"
+			#kers_ker="${kernel_registry[${ker}]}"
+			kers_ker=$(query_array "kernel_registry" ${ker})
 
 			# If kers_ker is empty string, then ker was not found as a key
 			# in the kernel list associative array. In that case, we continue
@@ -262,7 +274,8 @@ read_config_registry_file()
 			# set it needs.
 			if [ "${ker}" != "${kers_ker}" ]; then
 
-				klist="${kernel_registry[$config]}"
+				#klist="${kernel_registry[$config]}"
+				klist=$(query_array "kernel_registry" ${config})
 
 				# Replace the current config with its requisite kernels,
 				# canonicalize whitespace, and then remove duplicate kernel
@@ -271,7 +284,9 @@ read_config_registry_file()
 				newklist=$(echo -e "${klist}" | sed -e "s/${ker}/${kers_ker}/g")
 				newklist=$(canonicalize_ws "${newklist}")
 				newklist=$(rm_duplicate_words "${newklist}")
-				kernel_registry[${config}]=${newklist}
+
+				#kernel_registry[${config}]=${newklist}
+				printf -v "kernel_registry_${config}" %s "${newklist}"
 			fi
 
 		done
@@ -283,14 +298,16 @@ build_kconfig_registry()
 {
 	familyname="$1"
 
-	clist="${config_registry[$familyname]}"
+	#clist="${config_registry[${familyname}]}"
+	clist=$(query_array "config_registry" ${familyname})
 
 	for config in ${clist}; do
 
 		#echo "${config}"
 
 		# Look up the kernel for the current sub-configuration.
-		kernels="${kernel_registry[${config}]}"
+		#kernels="${kernel_registry[${config}]}"
+		kernels=$(query_array "kernel_registry" ${config})
 
 		for kernel in ${kernels}; do
 
@@ -298,10 +315,19 @@ build_kconfig_registry()
 
 			# Add the sub-configuration to the list associated with the
 			# kernel.
-			#echo "    oldvalue: ($kernel) ${kconfig_registry[${kernel}]}"
-			newvalue=$(canonicalize_ws "${kconfig_registry[${kernel}]} ${config}")
-			#echo "    newvalue: ($kernel) ${newvalue}"
-			kconfig_registry[${kernel}]="${newvalue}"
+
+			# Query the current sub-configs for the current ${kernel}.
+			#cur_configs="${kconfig_registry[${kernel}]}"
+			cur_configs=$(query_array "kconfig_registry" ${kernel})
+
+			# Add the current sub-configuration to the list of sub-configs
+			# we just queried.
+			newvalue=$(canonicalize_ws "${cur_configs} ${config}")
+
+			# Update the array.
+			#kconfig_registry[${kernel}]="${newvalue}"
+			printf -v "kconfig_registry_${kernel}" %s "${newvalue}"
+
 		done
 		
 	done
@@ -371,9 +397,9 @@ rm_duplicate_words()
 
 main()
 {
-	declare -A config_registry
-	declare -A kernel_registry
-	declare -A kconfig_registry
+	#declare -A config_registry
+	#declare -A kernel_registry
+	#declare -A kconfig_registry
 
 	# The name of the script, stripped of any preceeding path.
 	script_name=${0##*/}
@@ -398,8 +424,8 @@ main()
 	build_dirpath="${dist_path}/${build_dir}"
 
 	# The name/path to the registry (master list) of supported configurations.
-	config_registry_file="config_registry"
-	config_registry_filepath=${dist_path}/${config_registry_file}
+	registry_file="config_registry"
+	registry_filepath=${dist_path}/${registry_file}
 
 	# The names/paths for the template config.mk.in and its instantiated
 	# counterpart.
@@ -633,9 +659,9 @@ main()
 	# -- Read the configuration registry ---------------------------------------
 
 	# Make sure the config registry file exists and can be opened.
-	if [ ! -f "${config_registry_filepath}" ]; then
+	if [ ! -f "${registry_filepath}" ]; then
 
-		echo "${script_name}: could not open '${config_registry_file}' file; cannot continue."
+		echo "${script_name}: could not open '${registry_file}' file; cannot continue."
 		echo "${script_name}: BLIS distribution appears to be incomplete."
 
 		exit 1
@@ -644,7 +670,7 @@ main()
 	# Read the registered configuration names and lists into an associative
 	# array.
 	echo -n "${script_name}: reading configuration registry..."
-	read_config_registry_file ${config_registry_filepath}
+	read_registry_file ${registry_filepath}
 	echo "done."
 
 
@@ -682,10 +708,15 @@ main()
 		echo "${script_name}: Default configuration behavior is not implemented (for your"
 		echo "${script_name}: own safety). Please re-run '${script_name}' and specify one"
 		echo "${script_name}: of the existing configurations in the source distribution's"
-		echo "${script_name}  '${config_registry_file}' file:"
+		echo "${script_name}  '${registry_file}' file:"
 		echo "${script_name}: "
-		for k in "${!config_registry[@]}"; do
-			echo "${script_name}:   $k (${config_registry[$k]})"
+		#for k in "${!config_registry[@]}"; do
+		for cr_var in "${!config_registry_*}"; do
+
+			#v=${config_registry[$k]}
+			k=${cr_var##config_registry_}; v=${!cr_var}
+
+			echo "${script_name}:   $k (${v})"
 		done
 		echo "${script_name}: "
 
@@ -718,8 +749,10 @@ main()
 
 	# Use the selected config name to look up the list of configurations
 	# and kernels associated with that name.
-	config_list=${config_registry[${config_name}]}
-	kernel_list=${kernel_registry[${config_name}]}
+	#config_list=${config_registry[${config_name}]}
+	#kernel_list=${kernel_registry[${config_name}]}
+	config_list=$(query_array "config_registry" ${config_name})
+	kernel_list=$(query_array "kernel_registry" ${config_name})
 
 	# Use the config_registry and kernel_registry to build a kconfig_registry
 	# for the selected config_name.
@@ -729,18 +762,33 @@ main()
 	if [ "${show_config_list}" == "1" ]; then
 
 		echo "${script_name}: configuration list:"
-		for k in "${!config_registry[@]}"; do
-			echo "${script_name}:   $k: ${config_registry[$k]}"
+		#for k in "${!config_registry[@]}"; do
+		for cr_var in ${!config_registry_*}; do
+
+			#v=${config_registry[$k]}
+			k=${cr_var##config_registry_}; v=${!cr_var}
+
+			echo "${script_name}:   $k: ${v}"
 		done
 
 		echo "${script_name}: kernel list:"
-		for k in "${!kernel_registry[@]}"; do
-			echo "${script_name}:   $k: ${kernel_registry[$k]}"
+		#for k in "${!kernel_registry[@]}"; do
+		for kr_var in ${!kernel_registry_*}; do
+
+			#v=${kernel_registry[$k]}
+			k=${kr_var##kernel_registry_}; v=${!kr_var}
+
+			echo "${script_name}:   $k: ${v}"
 		done
 
 		echo "${script_name}: kconfig list:"
-		for k in "${!kconfig_registry[@]}"; do
-			echo "${script_name}:   $k: ${kconfig_registry[$k]}"
+		#for k in "${!kconfig_registry[@]}"; do
+		for kc_var in ${!kconfig_registry_*}; do
+
+			#v=${kconfig_registry[$k]}
+			k=${kc_var##kconfig_registry_}; v=${!kc_var}
+
+			echo "${script_name}:   $k: ${v}"
 		done
 	fi
 
@@ -758,7 +806,8 @@ main()
 	kconfig_map=""
 	for kernel in ${kernel_list}; do
 
-		configs="${kconfig_registry[$kernel]}"
+		#configs="${kconfig_registry[$kernel]}"
+		configs=$(query_array "kconfig_registry" ${kernel})
 
 		has_one_kernel=$(is_singleton "${configs}")
 		contains_kernel=$(is_word_in_list "${kernel}" "${configs}")
@@ -795,7 +844,7 @@ main()
 	fi
 
 
-	echo "${script_name}: checking configuration against contents of '${config_registry_file}'."
+	echo "${script_name}: checking configuration against contents of '${registry_file}'."
 
 	# First, ensure that the config name is registered (ie: it is present
 	# in the config_registry file).
@@ -842,7 +891,8 @@ main()
 	for conf in ${config_list}; do
 
 		# First confirm that the current configuration is registered.
-		this_clist=${config_registry[${conf}]}
+		#this_clist=${config_registry[${conf}]}
+		this_clist=$(query_array "config_registry" ${conf})
 
 		# If the config_list associated with conf is empty, then it was
 		# never entered into the config_registry to begin with. Thus,
