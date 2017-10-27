@@ -343,7 +343,7 @@ static func_t* bli_cntx_get_packm_kers( l1mkr_t ker_id, cntx_t* cntx )
 	func_t* funcs = bli_cntx_packm_kers_buf( cntx );
 
 	// If the kernel id is beyond the bounds of the l1mkr_t enum, return NULL.
-	if ( ker_id >= BLIS_NUM_PACKM_KERS ) return NULL;
+	if ( ( guint_t )ker_id >= ( guint_t )BLIS_NUM_PACKM_KERS ) return NULL;
 
 	func_t* func  = &funcs[ ker_id ];
 
@@ -362,7 +362,7 @@ static func_t* bli_cntx_get_unpackm_kers( l1mkr_t ker_id, cntx_t* cntx )
 	func_t* funcs = bli_cntx_unpackm_kers_buf( cntx );
 
 	// If the kernel id is beyond the bounds of the l1mkr_t enum, return NULL.
-	if ( ker_id >= BLIS_NUM_PACKM_KERS ) return NULL;
+	if ( ( guint_t )ker_id >= ( guint_t )BLIS_NUM_UNPACKM_KERS ) return NULL;
 
 	func_t* func  = &funcs[ ker_id ];
 
