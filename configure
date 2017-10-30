@@ -991,14 +991,6 @@ main()
 		exit 1
 	fi
 
-	# Check whether the user is requesting that we configure with an
-	# unregistered (custom) configuration.
-	if [ "x${config_is_unregistered}" = "xyes" ]; then
-		enable_unregistered_config_01=1
-	else
-		enable_unregistered_config_01=0
-	fi
-	
 	# Check the threading model flag and standardize its value, if needed.
 	# NOTE: 'omp' is deprecated but still supported; 'openmp' is preferred.
 	enable_openmp='no'
@@ -1030,20 +1022,20 @@ main()
 	
 	# Convert 'yes' and 'no' flags to booleans.
 	if [ "x${enable_cblas}" = "xyes" ]; then
-	   echo "${script_name}: the CBLAS compatibility layer is enabled."
-	   enable_cblas_01=1
-	   # Force BLAS layer when CBLAS is enabled
-	   enable_blas2blis='yes'
+		echo "${script_name}: the CBLAS compatibility layer is enabled."
+		enable_cblas_01=1
+		# Force BLAS layer when CBLAS is enabled
+		enable_blas2blis='yes'
 	else
-	   echo "${script_name}: the CBLAS compatibility layer is disabled."
-	   enable_cblas_01=0
+		echo "${script_name}: the CBLAS compatibility layer is disabled."
+		enable_cblas_01=0
 	fi
 	if [ "x${enable_blas2blis}" = "xyes" ]; then
-	   echo "${script_name}: the BLAS compatibility layer is enabled."
-	   enable_blas2blis_01=1
+		echo "${script_name}: the BLAS compatibility layer is enabled."
+		enable_blas2blis_01=1
 	else
-	   echo "${script_name}: the BLAS compatibility layer is disabled."
-	   enable_blas2blis_01=0
+		echo "${script_name}: the BLAS compatibility layer is disabled."
+		enable_blas2blis_01=0
 	fi
 	
 	# Report integer sizes
@@ -1062,12 +1054,13 @@ main()
 		echo "${script_name}: the BLAS/CBLAS interface integer size is automatically determined."
 	fi
 
-	# Insert escape characters into the paths used in the sed command below.
+
+	# Variables that contain forward slashes, such as paths, need extra
+	# escaping when used in sed commands. We insert those extra escape
+	# characters here so that the sed commands below do the right thing.
 	install_prefix_esc=$(echo "${install_prefix}" | sed 's/\//\\\//g')
 	dist_path_esc=$(echo "${dist_path}"           | sed 's/\//\\\//g')
 	cc_esc=$(echo "${CC}" | sed 's/\//\\\//g')
-	#echo "${install_prefix_esc}"
-	#exit 1
 
 	# Create a #define for the configuration family (config_name).
 	uconf=$(echo ${config_name} | tr '[:lower:]' '[:upper:]')
@@ -1104,39 +1097,40 @@ main()
 	# to config_mk_out.
 	echo "${script_name}: creating ${config_mk_out_path} from ${config_mk_in_path}"
 	cat "${config_mk_in_path}" \
-		| sed "s/@version@/${version}/g" \
-		| sed "s/@config_name@/${config_name}/g" \
-		| sed "s/@config_list@/${config_list}/g" \
-		| sed "s/@kernel_list@/${kernel_list}/g" \
-		| sed "s/@kconfig_map@/${kconfig_map}/g" \
-		| sed "s/@config_is_unregistered@/${config_is_unregistered}/g" \
-		| sed "s/@dist_path@/${dist_path_esc}/g" \
-		| sed "s/@CC@/${cc_esc}/g" \
-		| sed "s/@debug_type@/${debug_type}/g" \
-		| sed "s/@install_prefix@/${install_prefix_esc}/g" \
-		| sed "s/@enable_verbose@/${enable_verbose}/g" \
-		| sed "s/@enable_static@/${enable_static}/g" \
-		| sed "s/@enable_dynamic@/${enable_shared}/g" \
-		| sed "s/@threading_model@/${threading_model}/g" \
-		| sed "s/@enable_blas2blis@/${enable_blas2blis}/g" \
-		| sed "s/@enable_cblas@/${enable_cblas}/g" \
+		| sed -e "s/@version@/${version}/g" \
+		| sed -e "s/@config_name@/${config_name}/g" \
+		| sed -e "s/@config_list@/${config_list}/g" \
+		| sed -e "s/@kernel_list@/${kernel_list}/g" \
+		| sed -e "s/@kconfig_map@/${kconfig_map}/g" \
+		| sed -e "s/@dist_path@/${dist_path_esc}/g" \
+		| sed -e "s/@CC@/${cc_esc}/g" \
+		| sed -e "s/@debug_type@/${debug_type}/g" \
+		| sed -e "s/@install_prefix@/${install_prefix_esc}/g" \
+		| sed -e "s/@enable_verbose@/${enable_verbose}/g" \
+		| sed -e "s/@enable_static@/${enable_static}/g" \
+		| sed -e "s/@enable_dynamic@/${enable_shared}/g" \
+		| sed -e "s/@threading_model@/${threading_model}/g" \
+		| sed -e "s/@enable_blas2blis@/${enable_blas2blis}/g" \
+		| sed -e "s/@enable_cblas@/${enable_cblas}/g" \
 		> "${config_mk_out_path}"
 		
 
 	# Begin substituting information into the bli_config_h_in file, outputting
-	# to bli_config_h_out.
+	# to bli_config_h_out. NOTE: We use perl instead of sed because the version
+	# of sed used on OS X is old and does not handle the '\n' character
+	# intuitively, which was used when constructing ${config_name_define},
+	# ${config_list_defines}, and ${kernel_list_defines}.
 	echo "${script_name}: creating ${bli_config_h_out_path} from ${bli_config_h_in_path}"
 	cat "${bli_config_h_in_path}" \
-		| sed "s/@enable_unregistered_config@/${enable_unregistered_config_01}/g" \
-		| sed "s/@config_name_define@/${config_name_define}/g" \
-		| sed "s/@config_list_defines@/${config_list_defines}/g" \
-		| sed "s/@kernel_list_defines@/${kernel_list_defines}/g" \
-		| sed "s/@enable_openmp@/${enable_openmp_01}/g" \
-		| sed "s/@enable_pthreads@/${enable_pthreads_01}/g" \
-		| sed "s/@int_type_size@/${int_type_size}/g" \
-		| sed "s/@blas2blis_int_type_size@/${blas2blis_int_type_size}/g" \
-		| sed "s/@enable_blas2blis@/${enable_blas2blis_01}/g" \
-		| sed "s/@enable_cblas@/${enable_cblas_01}/g" \
+		| perl -pe "s/\@config_name_define\@/${config_name_define}/g" \
+		| perl -pe "s/\@config_list_defines\@/${config_list_defines}/g" \
+		| perl -pe "s/\@kernel_list_defines\@/${kernel_list_defines}/g" \
+		| sed   -e "s/@enable_openmp@/${enable_openmp_01}/g" \
+		| sed   -e "s/@enable_pthreads@/${enable_pthreads_01}/g" \
+		| sed   -e "s/@int_type_size@/${int_type_size}/g" \
+		| sed   -e "s/@blas2blis_int_type_size@/${blas2blis_int_type_size}/g" \
+		| sed   -e "s/@enable_blas2blis@/${enable_blas2blis_01}/g" \
+		| sed   -e "s/@enable_cblas@/${enable_cblas_01}/g" \
 		> "${bli_config_h_out_path}"
 
 
