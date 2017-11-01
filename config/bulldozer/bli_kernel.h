@@ -38,8 +38,6 @@
 
 // -- LEVEL-3 MICRO-KERNEL CONSTANTS -------------------------------------------
 
-#define BLIS_SIMD_ALIGN_SIZE 16
-
 // -- Cache blocksizes --
 
 //
