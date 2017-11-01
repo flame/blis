@@ -36,10 +36,6 @@
 //#define BLIS_FAMILY_H
 
 
-// -- MEMORY ALLOCATION --------------------------------------------------------
-
-#define BLIS_SIMD_ALIGN_SIZE       16
-
 
 #if 0
 // -- LEVEL-3 MICRO-KERNEL CONSTANTS -------------------------------------------
