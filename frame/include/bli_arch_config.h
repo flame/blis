@@ -42,6 +42,12 @@
 
 // -- Intel64 architectures --
 
+#ifdef BLIS_CONFIG_KNL
+CNTX_INIT_PROTS( knl )
+#endif
+#ifdef BLIS_CONFIG_KNC
+CNTX_INIT_PROTS( knc )
+#endif
 #ifdef BLIS_CONFIG_HASWELL
 CNTX_INIT_PROTS( haswell )
 #endif
@@ -50,13 +56,6 @@ CNTX_INIT_PROTS( sandybridge )
 #endif
 #ifdef BLIS_CONFIG_PENRYN
 CNTX_INIT_PROTS( penryn )
-#endif
-
-#ifdef BLIS_CONFIG_KNL
-CNTX_INIT_PROTS( knl )
-#endif
-#ifdef BLIS_CONFIG_KNC
-CNTX_INIT_PROTS( knc )
 #endif
 
 // -- AMD64 architectures --
@@ -109,12 +108,23 @@ CNTX_INIT_PROTS( generic )
 // -- Architecture family-specific headers -------------------------------------
 //
 
-// -- Intel64 architectures --
+// -- x86_64 families --
 
 #ifdef BLIS_FAMILY_INTEL64
 #include "bli_family_intel64.h"
 #endif
+#ifdef BLIS_FAMILY_AMD64
+#include "bli_family_amd64.h"
+#endif
 
+// -- Intel64 architectures --
+
+#ifdef BLIS_FAMILY_KNL
+#include "bli_family_knl.h"
+#endif
+#ifdef BLIS_FAMILY_KNC
+#include "bli_family_knc.h"
+#endif
 #ifdef BLIS_FAMILY_HASWELL
 #include "bli_family_haswell.h"
 #endif
@@ -125,18 +135,7 @@ CNTX_INIT_PROTS( generic )
 #include "bli_family_penryn.h"
 #endif
 
-#ifdef BLIS_FAMILY_KNL
-#include "bli_family_knl.h"
-#endif
-#ifdef BLIS_FAMILY_KNC
-#include "bli_family_knc.h"
-#endif
-
 // -- AMD64 architectures --
-
-#ifdef BLIS_FAMILY_AMD64
-#include "bli_family_amd64.h"
-#endif
 
 #ifdef BLIS_FAMILY_ZEN
 #include "bli_family_zen.h"
@@ -188,6 +187,12 @@ CNTX_INIT_PROTS( generic )
 
 // -- Intel64 architectures --
 
+#ifdef BLIS_KERNELS_KNL
+#include "bli_kernels_knl.h"
+#endif
+#ifdef BLIS_KERNELS_KNC
+#include "bli_kernels_knc.h"
+#endif
 #ifdef BLIS_KERNELS_HASWELL
 #include "bli_kernels_haswell.h"
 #endif
@@ -196,13 +201,6 @@ CNTX_INIT_PROTS( generic )
 #endif
 #ifdef BLIS_KERNELS_PENRYN
 #include "bli_kernels_penryn.h"
-#endif
-
-#ifdef BLIS_KERNELS_KNL
-#include "bli_kernels_knl.h"
-#endif
-#ifdef BLIS_KERNELS_KNC
-#include "bli_kernels_knc.h"
 #endif
 
 // -- AMD64 architectures --

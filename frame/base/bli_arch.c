@@ -40,15 +40,21 @@ arch_t bli_arch_query_id( void )
 {
 	arch_t id = -1;
 
-	// Architecture families
+	// Architecture families.
 #ifdef BLIS_FAMILY_INTEL64
-	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
+	id = bli_cpuid_query_id();
 #endif
 #ifdef BLIS_FAMILY_AMD64
-	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
+	id = bli_cpuid_query_id();
 #endif
 
-	// Intel architectures
+	// Intel microarchitectures.
+#ifdef BLIS_FAMILY_KNL
+	id = BLIS_ARCH_KNL;
+#endif
+#ifdef BLIS_FAMILY_KNC
+	id = BLIS_ARCH_KNC;
+#endif
 #ifdef BLIS_FAMILY_HASWELL
 	id = BLIS_ARCH_HASWELL;
 #endif
@@ -58,14 +64,8 @@ arch_t bli_arch_query_id( void )
 #ifdef BLIS_FAMILY_PENRYN
 	id = BLIS_ARCH_PENRYN;
 #endif
-#ifdef BLIS_FAMILY_KNL
-	id = BLIS_ARCH_KNL;
-#endif
-#ifdef BLIS_FAMILY_KNC
-	id = BLIS_ARCH_KNC;
-#endif
 
-	// AMD architectures
+	// AMD microarchitectures.
 #ifdef BLIS_FAMILY_ZEN
 	id = BLIS_ARCH_ZEN;
 #endif
@@ -82,7 +82,7 @@ arch_t bli_arch_query_id( void )
 	id = BLIS_ARCH_BULLDOZER;
 #endif
 
-	// ARM architectures
+	// ARM microarchitectures.
 #ifdef BLIS_FAMILY_CORTEXA57
 	id = BLIS_ARCH_CORTEXA57;
 #endif
@@ -93,7 +93,7 @@ arch_t bli_arch_query_id( void )
 	id = BLIS_ARCH_CORTEXA9;
 #endif
 
-	// IBM architectures
+	// IBM microarchitectures.
 #ifdef BLIS_FAMILY_POWER7
 	id = BLIS_ARCH_POWER7;
 #endif
@@ -101,10 +101,13 @@ arch_t bli_arch_query_id( void )
 	id = BLIS_ARCH_BGQ;
 #endif
 
-	// Generic architecture
+	// Generic microarchitecture.
 #ifdef BLIS_FAMILY_GENERIC
 	id = BLIS_ARCH_GENERIC;
 #endif
+
+	//printf( "blis_arch_query_id(): id = %u\n", id );
+	//exit(1);
 
 	return id;
 }

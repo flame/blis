@@ -123,6 +123,7 @@ extern "C" {
 #include "bli_cntl.h"
 #include "bli_info.h"
 #include "bli_arch.h"
+#include "bli_cpuid.h"
 
 
 // -- Level-0 operations --
