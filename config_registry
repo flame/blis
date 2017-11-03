@@ -9,6 +9,8 @@
 intel64:     haswell sandybridge penryn
 amd64:       zen excavator steamroller piledriver bulldozer
 arm32:       cortexa9 cortexa15
+x86:         reference
+x86_64:      haswell sandybridge penryn zen excavator steamroller piledriver bulldozer reference
 
 # Intel architectures.
 haswell:     haswell
