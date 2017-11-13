@@ -665,9 +665,19 @@ endif
 # --- Query current configuration ---
 
 showconfig: check-env
-	@echo "Current configuration family ($(CONFIG_NAME)) supports the following"
-	@echo "sub-configurations: $(CONFIG_LIST)"
-	@echo "requisite kernels:  $(KERNEL_LIST)"
+	@echo "configuration family:  $(CONFIG_NAME)"
+	@echo "sub-configurations:    $(CONFIG_LIST)"
+	@echo "requisite kernels:     $(KERNEL_LIST)"
+	@echo "kernel-to-config map:  $(KCONFIG_MAP)"
+	@echo "-----------------------"
+	@echo "BLIS version string:   $(VERSION)"
+	@echo "install prefix:        $(INSTALL_PREFIX)"
+	@echo "debugging status:      $(DEBUG_TYPE)"
+	@echo "multithreading status: $(THREADING_MODEL)"
+	@echo "enable BLAS API?       $(BLIS_ENABLE_BLAS2BLIS)"
+	@echo "enable CBLAS API?      $(BLIS_ENABLE_CBLAS)"
+	@echo "build static library?  $(BLIS_ENABLE_STATIC_BUILD)"
+	@echo "build shared library?  $(BLIS_ENABLE_DYNAMIC_BUILD)"
 
 
 # --- Clean rules ---

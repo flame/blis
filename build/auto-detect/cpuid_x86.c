@@ -43,22 +43,26 @@
 #define CPUNAME_PENRYN       1
 #define CPUNAME_SANDYBRIDGE  2
 #define CPUNAME_HASWELL      3
-#define CPUNAME_KNL          4
-#define CPUNAME_KNC          5
+#define CPUNAME_KNC          4
+#define CPUNAME_KNL          5
 #define CPUNAME_BULLDOZER    6
 #define CPUNAME_PILEDRIVER   7
 #define CPUNAME_STEAMROLLER  8
+#define CPUNAME_EXCAVATOR    9
+#define CPUNAME_ZEN         10
 
 static char *cpuname[] = {
   "generic",
   "penryn",
   "sandybridge",
   "haswell",
-  "knl",
   "knc",
+  "knl",
   "bulldozer",
   "piledriver",
   "steamroller",
+  "excavator",
+  "zen",
 };
 
 #define BITMASK(a, b, c) ((((a) >> (b)) & (c)))

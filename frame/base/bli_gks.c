@@ -71,6 +71,16 @@ void bli_gks_init( void )
 		// bli_config.h.
 
 		// Intel architectures
+#ifdef BLIS_CONFIG_KNL
+		bli_gks_register_cntx( BLIS_ARCH_KNL,         bli_cntx_init_knl,
+		                                              bli_cntx_init_knl_ref,
+		                                              bli_cntx_init_knl_ind );
+#endif
+#ifdef BLIS_CONFIG_KNC
+		bli_gks_register_cntx( BLIS_ARCH_KNC,         bli_cntx_init_knc,
+		                                              bli_cntx_init_knc_ref,
+		                                              bli_cntx_init_knc_ind );
+#endif
 #ifdef BLIS_CONFIG_HASWELL
 		bli_gks_register_cntx( BLIS_ARCH_HASWELL,     bli_cntx_init_haswell,
 		                                              bli_cntx_init_haswell_ref,
@@ -85,16 +95,6 @@ void bli_gks_init( void )
 		bli_gks_register_cntx( BLIS_ARCH_PENRYN,      bli_cntx_init_penryn,
 		                                              bli_cntx_init_penryn_ref,
 		                                              bli_cntx_init_penryn_ind );
-#endif
-#ifdef BLIS_CONFIG_KNL
-		bli_gks_register_cntx( BLIS_ARCH_KNL,         bli_cntx_init_knl,
-		                                              bli_cntx_init_knl_ref,
-		                                              bli_cntx_init_knl_ind );
-#endif
-#ifdef BLIS_CONFIG_KNC
-		bli_gks_register_cntx( BLIS_ARCH_KNC,         bli_cntx_init_knc,
-		                                              bli_cntx_init_knc_ref,
-		                                              bli_cntx_init_knc_ind );
 #endif
 
 		// AMD architectures

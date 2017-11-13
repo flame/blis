@@ -133,7 +133,7 @@ print_usage()
 	echo "                 STRING. This option may be useful when repackaging"
 	echo "                 custom versions of BLIS by outside organizations."
 	echo " "
-	echo "   -c, --show-config-list"
+	echo "   -c, --show-config-lists"
 	echo " "
 	echo "                 Print the config and kernel lists, and kernel-to-config"
 	echo "                 map after they are read from file. This can be useful"
@@ -711,7 +711,7 @@ main()
 		echo "${script_name}  '${registry_file}' file:"
 		echo "${script_name}: "
 		#for k in "${!config_registry[@]}"; do
-		for cr_var in "${!config_registry_*}"; do
+		for cr_var in ${!config_registry_*}; do
 
 			#v=${config_registry[$k]}
 			k=${cr_var##config_registry_}; v=${!cr_var}
@@ -781,7 +781,7 @@ main()
 			echo "${script_name}:   $k: ${v}"
 		done
 
-		echo "${script_name}: kconfig list:"
+		echo "${script_name}: kernel-to-config map:"
 		#for k in "${!kconfig_registry[@]}"; do
 		for kc_var in ${!kconfig_registry_*}; do
 
@@ -803,8 +803,12 @@ main()
 	# we accumulate into a list. This list is the kernel-to-config map, or
 	# kconfig_map.
 
+	# We use a sorted version of kernel_list so that it ends up matching the
+	# display order of the kconfig_registry above.
+	kernel_list_sort=$(echo ${kernel_list} | xargs -n1 | sort -u)
+
 	kconfig_map=""
-	for kernel in ${kernel_list}; do
+	for kernel in ${kernel_list_sort}; do
 
 		#configs="${kconfig_registry[$kernel]}"
 		configs=$(query_array "kconfig_registry" ${kernel})
@@ -837,7 +841,7 @@ main()
 
 	if [ "${show_config_list}" == "1" ]; then
 
-		echo "${script_name}: kernel-to-config map:"
+		echo "${script_name}: kernel-to-config map (chosen pairs):"
 		for k in ${kconfig_map}; do
 			echo "${script_name}:   $k"
 		done
