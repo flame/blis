@@ -63,6 +63,9 @@ arch_t bli_cpuid_query_id( void )
 		if ( bli_cpuid_is_penryn( family, model, features ) )
 			return BLIS_ARCH_PENRYN;
 #endif
+		// If none of the other sub-configurations were detected, return
+		// the 'generic' arch_t id value.
+		return BLIS_ARCH_GENERIC;
 	}
 	else if ( vendor == VENDOR_AMD )
 	{
@@ -89,6 +92,9 @@ arch_t bli_cpuid_query_id( void )
 		if ( bli_cpuid_is_bulldozer( family, model, features ) )
 			return BLIS_ARCH_BULLDOZER;
 #endif
+		// If none of the other sub-configurations were detected, return
+		// the 'generic' arch_t id value.
+		return BLIS_ARCH_GENERIC;
 	}
 	else if ( vendor == VENDOR_UNKNOWN )
 	{

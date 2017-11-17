@@ -484,6 +484,24 @@ cntx_t* bli_gks_query_ind_cntx
 
 // -----------------------------------------------------------------------------
 
+void bli_gks_init_ref_cntx
+    (
+      cntx_t* cntx
+    )
+{
+	// Query the architecture id.
+	arch_t id = bli_arch_query_id();
+
+	// Obtain the function pointer to the context initialization function for
+	// reference kernels.
+	ref_cntx_init_ft f = cntx_ref_init[ id ];
+
+	// Initialize the caller's context with reference kernels and related values.
+	f( cntx );
+}
+
+// -----------------------------------------------------------------------------
+
 bool_t bli_gks_cntx_l3_nat_ukr_is_ref
      (
        num_t   dt,
@@ -493,15 +511,9 @@ bool_t bli_gks_cntx_l3_nat_ukr_is_ref
 {
 	cntx_t ref_cntx;
 
-	// Query the architecture id.
-	arch_t id = bli_arch_query_id();
-
-	// Obtain the function pointer to the context initialization function for
-	// reference kernels.
-	ref_cntx_init_ft f = cntx_ref_init[ id ];
-
-	// Initialize a local context with reference kernels and related values.
-	f( &ref_cntx );
+	// Initialize a context with reference kernels for the arch_t id queried
+	// via bli_arch_query_id().
+	bli_gks_init_ref_cntx( &ref_cntx );
 
 	// Query each context for the micro-kernel function pointer for the
 	// specified datatype.

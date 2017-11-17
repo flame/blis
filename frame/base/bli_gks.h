@@ -52,6 +52,8 @@ cntx_t* bli_gks_query_cntx( void );
 cntx_t* bli_gks_query_nat_cntx( void );
 cntx_t* bli_gks_query_ind_cntx( ind_t ind, num_t dt );
 
+void    bli_gks_init_ref_cntx( cntx_t* cntx );
+
 bool_t  bli_gks_cntx_l3_nat_ukr_is_ref( num_t dt, l3ukr_t ukr_id, cntx_t* cntx );
 
 char*   bli_gks_l3_ukr_impl_string( l3ukr_t ukr, ind_t method, num_t dt );
