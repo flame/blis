@@ -32,8 +32,6 @@
 
 */
 
-#include "blis.h"
-
 void  bli_cntx_ind_stage( ind_t method, dim_t stage, cntx_t* cntx );
 
 void  bli_cntx_3mh_stage( dim_t stage, cntx_t* cntx );
