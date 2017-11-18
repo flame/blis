@@ -6,11 +6,10 @@
 #
 
 # Processor families.
-intel64:     haswell sandybridge penryn
-amd64:       zen excavator steamroller piledriver bulldozer
-arm32:       cortexa9 cortexa15
-x86:         reference
-x86_64:      haswell sandybridge penryn zen excavator steamroller piledriver bulldozer reference
+intel64:     haswell sandybridge penryn generic
+amd64:       zen excavator steamroller piledriver bulldozer generic
+arm32:       cortexa9 cortexa15 generic
+x86_64:      haswell sandybridge penryn zen excavator steamroller piledriver bulldozer generic
 
 # Intel architectures.
 haswell:     haswell
