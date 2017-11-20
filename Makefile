@@ -298,22 +298,7 @@ MK_TESTSUITE_OBJS       := $(strip \
                             )
 
 # The test suite binary executable filename.
-ifeq ($(CONFIG_NAME),pnacl)
-# Linked executable
-MK_TESTSUITE_BIN_UNSTABLE := $(BASE_OBJ_TESTSUITE_PATH)/test_libblis.unstable.pexe
-# Finalized executable
-MK_TESTSUITE_BIN_PNACL    := $(BASE_OBJ_TESTSUITE_PATH)/test_libblis.pexe
-# Translated executable (for x86-64)
-TESTSUITE_BIN             := test_libblis.x86-64.nexe
-else
-ifeq ($(CONFIG_NAME),emscripten)
-# JS script name.
-TESTSUITE_BIN             := test_libblis.js
-else
-# Binary executable name.
-TESTSUITE_BIN             := test_libblis.x
-endif # emscripten
-endif # pnacl
+TESTSUITE_BIN           := test_libblis.x
 
 
 
@@ -500,52 +485,6 @@ else
 	@$(CC) $(call get-frame-cflags-for,$(CONFIG_NAME)) -c $< -o $@
 endif
 
-ifeq ($(CONFIG_NAME),pnacl)
-
-# Link executable (produces unstable LLVM bitcode)
-$(MK_TESTSUITE_BIN_UNSTABLE): $(MK_TESTSUITE_OBJS) $(MK_BLIS_LIB)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	$(LINKER) $(MK_TESTSUITE_OBJS) $(MK_BLIS_LIB) $(LDFLAGS) -o $@
-else
-	@echo "Linking $@ against '$(MK_BLIS_LIB) $(LDFLAGS)'"
-	@$(LINKER) $(MK_TESTSUITE_OBJS) $(MK_BLIS_LIB) $(LDFLAGS) -o $@
-endif
-
-# Finalize PNaCl executable (i.e. convert from LLVM bitcode to PNaCl bitcode)
-$(MK_TESTSUITE_BIN_PNACL): $(MK_TESTSUITE_BIN_UNSTABLE)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	$(FINALIZER) $(FINFLAGS) -o $@ $<
-else
-	@echo "Finalizing $@"
-	@$(FINALIZER) $(FINFLAGS) -o $@ $<
-endif
-
-# Translate PNaCl executable to x86-64 NaCl executable
-$(TESTSUITE_BIN): $(MK_TESTSUITE_BIN_PNACL)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	$(TRANSLATOR) $(TRNSFLAGS) $(TRNSAMD64FLAGS) $< -o $@
-else
-	@echo "Translating $< -> $@"
-	@$(TRANSLATOR) $(TRNSFLAGS) $(TRNSAMD64FLAGS) $< -o $@
-endif
-
-else # Non-PNaCl case
-
-ifeq ($(CONFIG_NAME),emscripten)
-# Generate JavaScript and embed testsuite resources normally
-$(TESTSUITE_BIN): $(MK_TESTSUITE_OBJS) $(MK_BLIS_LIB) $(TESTSUITE_CONF_GEN_PATH) $(TESTSUITE_CONF_OPS_PATH)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	$(LINKER) $(MK_TESTSUITE_OBJS) $(MK_BLIS_LIB) $(LDFLAGS) -o $@ \
-		--embed-file $(TESTSUITE_CONF_GEN_PATH)@input.general \
-		--embed-file $(TESTSUITE_CONF_OPS_PATH)@input.operations
-else
-	@echo "Linking $@ against '$(MK_BLIS_LIB) $(LDFLAGS)'"
-	@$(LINKER) $(MK_TESTSUITE_OBJS) $(MK_BLIS_LIB) $(LDFLAGS) -o $@ \
-		--embed-file $(TESTSUITE_CONF_GEN_PATH)@input.general \
-		--embed-file $(TESTSUITE_CONF_OPS_PATH)@input.operations
-endif
-else
-# Link executable normally
 $(TESTSUITE_BIN): $(MK_TESTSUITE_OBJS) $(MK_BLIS_LIB)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	$(LINKER) $(MK_TESTSUITE_OBJS) $(MK_BLIS_LIB) $(LDFLAGS) -o $@
@@ -553,52 +492,20 @@ else
 	@echo "Linking $@ against '$(MK_BLIS_LIB) $(LDFLAGS)'"
 	@$(LINKER) $(MK_TESTSUITE_OBJS) $(MK_BLIS_LIB) $(LDFLAGS) -o $@
 endif
-endif
 
-endif
 
 testsuite-run: testsuite-bin
-ifeq ($(CONFIG_NAME),pnacl)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	$(NACL_SDK_ROOT)/tools/sel_ldr_x86_64 -a -c -q \
-	    -B $(NACL_SDK_ROOT)/tools/irt_core_x86_64.nexe -- \
-	    $(TESTSUITE_BIN) -g $(TESTSUITE_CONF_GEN_PATH) \
-	                     -o $(TESTSUITE_CONF_OPS_PATH) \
-                         > $(TESTSUITE_OUT_FILE)
-else
-	@echo "Running $(TESTSUITE_BIN) with output redirected to '$(TESTSUITE_OUT_FILE)'"
-	@$(NACL_SDK_ROOT)/tools/sel_ldr_x86_64 -a -c -q \
-	    -B $(NACL_SDK_ROOT)/tools/irt_core_x86_64.nexe -- \
-	    $(TESTSUITE_BIN) -g $(TESTSUITE_CONF_GEN_PATH) \
-	                     -o $(TESTSUITE_CONF_OPS_PATH) \
-                         > $(TESTSUITE_OUT_FILE)
-endif
-else
-ifeq ($(CONFIG_NAME),emscripten)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	$(JSINT) $(TESTSUITE_BIN)
-else
-	@echo "Running $(TESTSUITE_BIN)"
-	@$(JSINT) $(TESTSUITE_BIN)
-endif
-else # non-pnacl, non-emscripten case
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	./$(TESTSUITE_BIN) -g $(TESTSUITE_CONF_GEN_PATH) \
 	                   -o $(TESTSUITE_CONF_OPS_PATH) \
                         > $(TESTSUITE_OUT_FILE)
 
-else ifeq ($(BLIS_ENABLE_TEST_OUTPUT), yes)
-	./$(TESTSUITE_BIN) -g $(TESTSUITE_CONF_GEN_PATH) \
-	                   -o $(TESTSUITE_CONF_OPS_PATH) | \
-                        tee $(TESTSUITE_OUT_FILE)
 else
 	@echo "Running $(TESTSUITE_BIN) with output redirected to '$(TESTSUITE_OUT_FILE)'"
 	@./$(TESTSUITE_BIN) -g $(TESTSUITE_CONF_GEN_PATH) \
 	                    -o $(TESTSUITE_CONF_OPS_PATH) \
                          > $(TESTSUITE_OUT_FILE)
 endif
-endif # emscripten
-endif # pnacl
 
 # --- Install rules ---
 
