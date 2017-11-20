@@ -72,5 +72,5 @@ script:
   - export BLIS_IR_NT=1
   - export BLIS_JR_NT=1
   - if [ $RUN_TEST -eq 1 ]; then make BLIS_ENABLE_TEST_OUTPUT=yes test; fi
-  - if [ $RUN_TEST -eq 1 ]; then ./build/check-test.sh ./output.testsuite; fi
+  - if [ $RUN_TEST -eq 1 ]; then travis_wait 30 ./build/check-test.sh ./output.testsuite; fi
 
