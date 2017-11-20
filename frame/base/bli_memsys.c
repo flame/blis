@@ -36,7 +36,7 @@
 #include "blis.h"
 
 #ifdef BLIS_ENABLE_PTHREADS
-pthread_mutex_t mem_manager_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t mem_manager_mutex = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
 static membrk_t global_membrk;

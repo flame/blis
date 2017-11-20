@@ -71,7 +71,7 @@ else
 COPTFLAGS      := -O2 -malign-double -funroll-all-loops
 endif
 
-CVECFLAGS      := -mavx -mfma -march=bdver2 -mfpmath=sse
+CVECFLAGS      := -mavx -mfma4 -march=bdver1 -mfpmath=sse
 CKOPTFLAGS     := $(COPTFLAGS)
 
 # --- Determine the archiver and related flags ---
