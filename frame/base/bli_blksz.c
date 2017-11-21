@@ -43,9 +43,7 @@ blksz_t* bli_blksz_create_ed
        dim_t b_z, dim_t be_z
      )
 {
-	blksz_t* b;
-
-	b = ( blksz_t* ) bli_malloc_intl( sizeof(blksz_t) );
+	blksz_t* b = bli_malloc_intl( sizeof( blksz_t ) );
 
 	bli_blksz_init_ed
 	(
@@ -65,9 +63,7 @@ blksz_t* bli_blksz_create
        dim_t be_s, dim_t be_d, dim_t be_c, dim_t be_z
      )
 {
-	blksz_t* b;
-
-	b = ( blksz_t* ) bli_malloc_intl( sizeof(blksz_t) );
+	blksz_t* b = bli_malloc_intl( sizeof( blksz_t ) );
 
 	bli_blksz_init
 	(
@@ -88,14 +84,20 @@ void bli_blksz_init_ed
        dim_t b_z, dim_t be_z
      )
 {
-	b->v[BLIS_FLOAT]    = b_s;
-	b->v[BLIS_DOUBLE]   = b_d;
-	b->v[BLIS_SCOMPLEX] = b_c;
-	b->v[BLIS_DCOMPLEX] = b_z;
-	b->e[BLIS_FLOAT]    = be_s;
-	b->e[BLIS_DOUBLE]   = be_d;
-	b->e[BLIS_SCOMPLEX] = be_c;
-	b->e[BLIS_DCOMPLEX] = be_z;
+	// Set the default and maximum values to the values specified
+	// in the function arguments, but only for those values that
+	// are positive. (Non-positive values indicate that we should
+	// leave the value untouched.)
+
+	if ( b_s > 0 ) b->v[BLIS_FLOAT]    = b_s;
+	if ( b_d > 0 ) b->v[BLIS_DOUBLE]   = b_d;
+	if ( b_c > 0 ) b->v[BLIS_SCOMPLEX] = b_c;
+	if ( b_z > 0 ) b->v[BLIS_DCOMPLEX] = b_z;
+
+	if ( be_s > 0 ) b->e[BLIS_FLOAT]    = be_s;
+	if ( be_d > 0 ) b->e[BLIS_DOUBLE]   = be_d;
+	if ( be_c > 0 ) b->e[BLIS_SCOMPLEX] = be_c;
+	if ( be_z > 0 ) b->e[BLIS_DCOMPLEX] = be_z;
 }
 
 void bli_blksz_init
@@ -105,16 +107,20 @@ void bli_blksz_init
        dim_t be_s, dim_t be_d, dim_t be_c, dim_t be_z
      )
 {
-	b->v[BLIS_FLOAT]    = b_s;
-	b->v[BLIS_DOUBLE]   = b_d;
-	b->v[BLIS_SCOMPLEX] = b_c;
-	b->v[BLIS_DCOMPLEX] = b_z;
+	// Set the default and maximum values to the values specified
+	// in the function arguments, but only for those values that
+	// are positive. (Non-positive values indicate that we should
+	// leave the value untouched.)
 
-	// Interpret a zero as a request for the default value.
-	b->e[BLIS_FLOAT]    = ( be_s == 0 ? b_s : be_s );
-	b->e[BLIS_DOUBLE]   = ( be_d == 0 ? b_d : be_d );
-	b->e[BLIS_SCOMPLEX] = ( be_c == 0 ? b_c : be_c );
-	b->e[BLIS_DCOMPLEX] = ( be_z == 0 ? b_z : be_z );
+	if ( b_s > 0 ) b->v[BLIS_FLOAT]    = b_s;
+	if ( b_d > 0 ) b->v[BLIS_DOUBLE]   = b_d;
+	if ( b_c > 0 ) b->v[BLIS_SCOMPLEX] = b_c;
+	if ( b_z > 0 ) b->v[BLIS_DCOMPLEX] = b_z;
+
+	if ( be_s > 0 ) b->e[BLIS_FLOAT]    = be_s;
+	if ( be_d > 0 ) b->e[BLIS_DOUBLE]   = be_d;
+	if ( be_c > 0 ) b->e[BLIS_SCOMPLEX] = be_c;
+	if ( be_z > 0 ) b->e[BLIS_DCOMPLEX] = be_z;
 }
 
 void bli_blksz_init_easy
@@ -123,17 +129,15 @@ void bli_blksz_init_easy
        dim_t b_s,  dim_t b_d,  dim_t b_c,  dim_t b_z
      )
 {
-	b->v[BLIS_FLOAT]    = b_s;
-	b->v[BLIS_DOUBLE]   = b_d;
-	b->v[BLIS_SCOMPLEX] = b_c;
-	b->v[BLIS_DCOMPLEX] = b_z;
+	// Set the default and maximum values to the values specified
+	// in the function arguments, but only for those values that
+	// are positive. (Non-positive values indicate that we should
+	// leave the value untouched.)
 
-	// Here we assume the maximum blocksize values can be the same as the
-	// default values.
-	b->e[BLIS_FLOAT]    = b_s;
-	b->e[BLIS_DOUBLE]   = b_d;
-	b->e[BLIS_SCOMPLEX] = b_c;
-	b->e[BLIS_DCOMPLEX] = b_z;
+	if ( b_s > 0 ) b->v[BLIS_FLOAT]    = b->e[BLIS_FLOAT]    = b_s;
+	if ( b_d > 0 ) b->v[BLIS_DOUBLE]   = b->e[BLIS_DOUBLE]   = b_d;
+	if ( b_c > 0 ) b->v[BLIS_SCOMPLEX] = b->e[BLIS_SCOMPLEX] = b_c;
+	if ( b_z > 0 ) b->v[BLIS_DCOMPLEX] = b->e[BLIS_DCOMPLEX] = b_z;
 }
 
 void bli_blksz_free
