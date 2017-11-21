@@ -32,8 +32,6 @@
 
 */
 
-#include "blis.h"
-
 void bli_l3_packm
      (
        obj_t*  x,

@@ -82,8 +82,10 @@ print_usage()
 	echo " "
 	echo "   -c          strip C-style comments"
 	echo "                 Strip comments enclosed in /* */ delimiters from the"
-	echo "                 output, including multi-line comments. By default, these"
-	echo "                 comments are not stripped."
+	echo "                 output, including multi-line comments. (This only applies"
+	echo "                 to #included headers; C-style comments in the top-level"
+	echo "                 'header' are never stripped.) By default, C-style comments"
+	echo "                 are not stripped."
 	echo " "
 	echo "   -o SCRIPT   output script name"
 	echo "                 Use SCRIPT as a prefix when outputting messages instead"
@@ -248,8 +250,6 @@ replace_pass()
 	filename="$1"
 	dirpaths="$2"
 
-	headerlist=""
-
 	# This string is inserted after #include directives after having
 	# determined that they are not present in the directory tree and should
 	# be ignored when assessing whether there are still #include directives
@@ -265,6 +265,8 @@ replace_pass()
 	# so that the line can be deleted with a subsequent sed command.
 	commstr="DeLeTeDCsTyLeCoMmEnT"
 
+	headerlist=""
+
 	# Iterate through each line of the header file, accumulating the names of
 	# header files referenced in #include directives.
 	while read -r curline
@@ -277,8 +279,9 @@ replace_pass()
 		# If the #include directive was found...
 		if [ -n "${result}" ]; then
 
-			# Isolate the header filename.
-			header=$(echo ${curline} | sed -e "s/#include [\"<]\([a-zA-Z0-9\._\-]*\)[\">]/\1/g")
+			# Isolate the header filename. We must take care to include all
+			# characters that might appear between the "" or <>.
+			header=$(echo ${curline} | sed -e "s/#include [\"<]\([a-zA-Z0-9\_\.\/\-]*\)[\">].*/\1/g")
 
 			# Add the header file to a list.
 			headerlist=$(canonicalize_ws "${headerlist} ${header}")
@@ -297,6 +300,10 @@ replace_pass()
 		# Find the path to the header.
 		header_filepath=$(get_header_path ${header} "${dirpaths}")
 
+		# If the header has a slash, escape it so that sed doesn't get confused
+		# (since we use '/' as our search-and-replace delimiter).
+		header_esc=$(echo "${header}" | sed -e 's/\//\\\//g')
+
 		# If the header file was not found, get_header_path() returns an
 		# empty string. This probably means that the header file is a
 		# system header and thus we skip it since we don't want to inline
@@ -308,12 +315,9 @@ replace_pass()
 			# Insert a comment after the #include so we know to ignore it
 			# later. Notice that we mimic the quotes or angle brackets
 			# around the header name, whichever pair was used in the input.
-			# We also reduce pairs of skip strings to singletons, as repeated
-			# passes can sometimes result in the same #include directive
-			# being skipped over and over.
+
 			cat ${filename} \
-			    | sed -e "s/^[[:space:]]*#include \([\"<]\)\(${header}\)\([\">]\)/#include \1\2\3 ${skipstr}/" \
-			    | sed -e "s/${skipstr} ${skipstr}/${skipstr}/g" \
+			    | sed -e "s/^[[:space:]]*#include \([\"<]\)\(${header_esc}\)\([\">]\).*/#include \1\2\3 ${skipstr}/" \
 			    > "${filename}.tmp"
 
 			# Overwrite the original file with the updated copy.
@@ -345,7 +349,7 @@ replace_pass()
 			# contents of that header file, saving the result to a temporary file.
 			# We also insert begin and end markers to allow for more readability.
 			cat ${filename} \
-			    | sed -e "/^[[:space:]]*#include \"${header}\"/ {" \
+			    | sed -e "/^[[:space:]]*#include \"${header_esc}\"/ {" \
 			          -e "i // begin ${header}" \
 			          -e "r ${header_to_insert}" \
 			          -e "a // end ${header}" \
@@ -439,6 +443,9 @@ main()
 	dir_list2=""
 	for item in ${dir_list}; do
 
+		# Strip a trailing slash from the path, if it has one.
+		item=${item%/}
+
 		echoninfo "checking ${item} "
 
 		if [ -d ${item} ]; then
@@ -458,6 +465,9 @@ main()
 	echoinfo "  accessible directories:"
 	echoinfo "  ${dir_list}"
 
+	# Generate a list of directories (dirpaths) which will be searched whenever
+	# a #include directive is encountered. The method by which dirpaths is
+	# compiled will depend on whether the recursive flag was given.
 	if [ -n "${recursive_flag}" ]; then
 
 		# If the recursive flag was given, we need to recursively scan each
@@ -480,7 +490,7 @@ main()
 
 		dirpaths=""
 		for item in ${dir_list}; do
-			
+
 			echoninfo "scanning ${item}"
 
 			# Acquire a list of the directory's contents.
