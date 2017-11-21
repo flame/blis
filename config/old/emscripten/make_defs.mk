@@ -51,7 +51,7 @@ CPPROCFLAGS    := -D_POSIX_C_SOURCE=200112L
 CMISCFLAGS     := -std=c99
 CPICFLAGS      := -fPIC
 CDBGFLAGS      := #-g4
-CWARNFLAGS     := -Wall -Wno-unused-function
+CWARNFLAGS     := -Wall -Wno-unused-function -Wfatal-errors
 COPTFLAGS      := -O2
 CKOPTFLAGS     := -O3
 CVECFLAGS      :=

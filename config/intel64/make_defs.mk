@@ -52,7 +52,7 @@ endif
 CPPROCFLAGS    := -D_POSIX_C_SOURCE=200112L
 CMISCFLAGS     := -std=c99 -m64
 CPICFLAGS      := -fPIC
-CWARNFLAGS     := -Wall -Wno-unused-function
+CWARNFLAGS     := -Wall -Wno-unused-function -Wfatal-errors
 
 ifneq ($(DEBUG_TYPE),off)
 CDBGFLAGS      := -g
@@ -67,13 +67,13 @@ endif
 CKOPTFLAGS     := $(COPTFLAGS)
 
 ifeq ($(CC_VENDOR),gcc)
-CVECFLAGS      := -msse4.2 -mfpmath=sse -march=corei7
+CVECFLAGS      := -mssse3 -mfpmath=sse -march=core2
 else
 ifeq ($(CC_VENDOR),icc)
-CVECFLAGS      := -xSSE4.2
+CVECFLAGS      := -xSSSE3
 else
 ifeq ($(CC_VENDOR),clang)
-CVECFLAGS      := -msse4.2 -mfpmath=sse -march=corei7
+CVECFLAGS      := -mssse3 -mfpmath=sse -march=core2
 else
 $(error gcc, icc, or clang is required for this configuration.)
 endif

@@ -51,7 +51,7 @@ CPPROCFLAGS    := -D_POSIX_C_SOURCE=200112L
 CMISCFLAGS     := -std=gnu11 -I$(NACL_SDK_ROOT)/include
 CPICFLAGS      := 
 CDBGFLAGS      := -g
-CWARNFLAGS     := -Wall -Wno-unused-function
+CWARNFLAGS     := -Wall -Wno-unused-function -Wfatal-errors
 COPTFLAGS      := -O3
 CKOPTFLAGS     := $(COPTFLAGS) -ffast-math
 CVECFLAGS      :=
