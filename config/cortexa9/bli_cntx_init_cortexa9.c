@@ -55,11 +55,11 @@ void bli_cntx_init_cortexa9( cntx_t* cntx )
 
 	// Initialize level-3 blocksize objects with architecture-specific values.
 	//                                           s      d      c      z
-	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     4,     4,     2,     2 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ],     4,     4,     2,     2 );
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   432,   176,    64,    64 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   352,   368,   128,   128 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4096,  4096,  4096,  4096 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     4,     4,     0,     0 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],     4,     4,     0,     0 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   432,   176,     0,     0 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   352,   368,     0,     0 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4096,  4096,     0,     0 );
 
 	// Update the context with the current architecture's register and cache
 	// blocksizes (and multiples) for native execution.

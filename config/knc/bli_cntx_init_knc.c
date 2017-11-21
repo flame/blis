@@ -54,13 +54,13 @@ void bli_cntx_init_knc( cntx_t* cntx )
 
 	// Initialize level-3 blocksize objects with architecture-specific values.
 	//                                           s      d      c      z
-	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    30,    30,     8,     4 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    16,     8,     4,     4 );
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   240,   120,   128,   128,
-	                                           300,   160,   128,   128 );
-	bli_blksz_init     ( &blkszs[ BLIS_KC ],   240,   240,   256,   256,  
-	                                           300,   300,   256,   256 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ], 14400, 14400,  4096,  4096 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     0,    30,     0,     0 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],     0,     8,     0,     0 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],     0,   120,     0,     0,
+	                                             0,   160,     0,     0 );
+	bli_blksz_init     ( &blkszs[ BLIS_KC ],     0,   240,     0,     0,  
+	                                             0,   300,     0,     0 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],     0, 14400,     0,     0 );
 
 	// Update the context with the current architecture's register and cache
 	// blocksizes (and multiples) for native execution.
