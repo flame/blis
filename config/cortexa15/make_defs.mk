@@ -52,7 +52,7 @@ endif
 CPPROCFLAGS    := -D_POSIX_C_SOURCE=200112L
 CMISCFLAGS     := -std=c99 -mfloat-abi=hard -mfpu=neon
 CPICFLAGS      := -fPIC
-CWARNFLAGS     := -Wall -Wno-unused-function
+CWARNFLAGS     := -Wall -Wno-unused-function -Wfatal-errors
 
 ifneq ($(DEBUG_TYPE),off)
 CDBGFLAGS      := -g

@@ -35,7 +35,7 @@
 
 # Declare the name of the current configuration and add it to the
 # running list of configurations included by common.mk.
-THIS_CONFIG    := zen
+THIS_CONFIG    := x86_64
 #CONFIGS_INCL   += $(THIS_CONFIG)
 
 #
@@ -50,7 +50,7 @@ endif
 # Enable IEEE Standard 1003.1-2004 (POSIX.1d).
 # NOTE: This is needed to enable posix_memalign().
 CPPROCFLAGS    := -D_POSIX_C_SOURCE=200112L
-CMISCFLAGS     := -std=c99
+CMISCFLAGS     := -std=c99 -m64
 CPICFLAGS      := -fPIC
 CWARNFLAGS     := -Wall -Wno-unused-function -Wfatal-errors
 
@@ -61,18 +61,22 @@ endif
 ifeq ($(DEBUG_TYPE),noopt)
 COPTFLAGS      := -O0
 else
-COPTFLAGS      := -O2 -fomit-frame-pointer
+COPTFLAGS      := -O3
 endif
 
 CKOPTFLAGS     := $(COPTFLAGS)
 
 ifeq ($(CC_VENDOR),gcc)
-CVECFLAGS      := -mavx2 -mfpmath=sse -mfma -march=bdver4
+CVECFLAGS      := -mssse3 -mfpmath=sse -march=core2
+else
+ifeq ($(CC_VENDOR),icc)
+CVECFLAGS      := -xSSE3
 else
 ifeq ($(CC_VENDOR),clang)
-CVECFLAGS      := -mavx2 -mfpmath=sse -mfma -march=bdver4
+CVECFLAGS      := -mssse3 -mfpmath=sse -march=core2
 else
-$(error gcc or clang are required for this configuration.)
+$(error gcc, icc, or clang is required for this configuration.)
+endif
 endif
 endif
 
