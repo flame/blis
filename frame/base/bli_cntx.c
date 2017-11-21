@@ -214,8 +214,8 @@ void bli_cntx_set_blkszs( ind_t method, dim_t n_bs, ... )
 			// location within the context's blksz_t array. Do the same
 			// for the blocksize multiple id.
 			//cntx_blkszs[ bs_id ] = *blksz;
-			//bli_blksz_copy_smart( blksz, cntx_blksz );
-			bli_blksz_copy( blksz, cntx_blksz );
+			//bli_blksz_copy( blksz, cntx_blksz );
+			bli_blksz_copy_if_pos( blksz, cntx_blksz );
 
 			// Copy the blocksize multiple id into the context.
 			cntx_bmults[ bs_id ] = bm_id;
@@ -997,9 +997,8 @@ void bli_cntx_print( cntx_t* cntx )
 
 	// Print the values stored in the blksz_t objects.
 	printf( "                               s                d                c                z\n" );
-#if 0
-	//for ( i = 0; i < BLIS_NUM_BLKSZS; ++i )
-	for ( i = 0; i < 6; ++i )
+
+	for ( i = 0; i < BLIS_NUM_BLKSZS; ++i )
 	{
 		printf( "blksz/mult %2lu:  %13lu/%2lu %13lu/%2lu %13lu/%2lu %13lu/%2lu\n",
 		         i,
@@ -1013,8 +1012,6 @@ void bli_cntx_print( cntx_t* cntx )
 		         bli_cntx_get_bmult_dt    ( BLIS_DCOMPLEX, i, cntx )
 		      );
 	}
-#endif
-
 
 	for ( i = 0; i < BLIS_NUM_LEVEL3_UKRS; ++i )
 	{

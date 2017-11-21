@@ -84,6 +84,36 @@ static void bli_blksz_copy
 	*b_dst = *b_src;
 }
 
+static void bli_blksz_copy_if_pos
+     (
+       blksz_t* b_src,
+       blksz_t* b_dst
+     )
+{
+	// Copy the blocksize values over to b_dst one-by-one so that
+	// we can skip the ones that are non-positive.
+
+	const dim_t v_s = bli_blksz_get_def( BLIS_FLOAT,    b_src );
+	const dim_t v_d = bli_blksz_get_def( BLIS_DOUBLE,   b_src );
+	const dim_t v_c = bli_blksz_get_def( BLIS_SCOMPLEX, b_src );
+	const dim_t v_z = bli_blksz_get_def( BLIS_DCOMPLEX, b_src );
+
+	const dim_t e_s = bli_blksz_get_max( BLIS_FLOAT,    b_src );
+	const dim_t e_d = bli_blksz_get_max( BLIS_DOUBLE,   b_src );
+	const dim_t e_c = bli_blksz_get_max( BLIS_SCOMPLEX, b_src );
+	const dim_t e_z = bli_blksz_get_max( BLIS_DCOMPLEX, b_src );
+
+	if ( v_s > 0 ) bli_blksz_set_def( v_s, BLIS_FLOAT,    b_dst );
+	if ( v_d > 0 ) bli_blksz_set_def( v_d, BLIS_DOUBLE,   b_dst );
+	if ( v_c > 0 ) bli_blksz_set_def( v_c, BLIS_SCOMPLEX, b_dst );
+	if ( v_z > 0 ) bli_blksz_set_def( v_z, BLIS_DCOMPLEX, b_dst );
+
+	if ( e_s > 0 ) bli_blksz_set_max( e_s, BLIS_FLOAT,    b_dst );
+	if ( e_d > 0 ) bli_blksz_set_max( e_d, BLIS_DOUBLE,   b_dst );
+	if ( e_c > 0 ) bli_blksz_set_max( e_c, BLIS_SCOMPLEX, b_dst );
+	if ( e_z > 0 ) bli_blksz_set_max( e_z, BLIS_DCOMPLEX, b_dst );
+}
+
 static void bli_blksz_copy_def_dt
      (
        num_t dt_src, blksz_t* b_src,
