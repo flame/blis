@@ -47,6 +47,10 @@ arch_t bli_arch_query_id( void )
 	id = bli_cpuid_query_id();
 #endif
 
+#ifdef BLIS_FAMILY_X86_64
+        id = bli_cpuid_query_id();
+#endif
+
 	// Intel microarchitectures.
 #ifdef BLIS_FAMILY_KNL
 	id = BLIS_ARCH_KNL;
