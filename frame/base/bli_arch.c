@@ -41,10 +41,9 @@ arch_t bli_arch_query_id( void )
 	arch_t id = -1;
 
 	// Architecture families.
-#ifdef BLIS_FAMILY_INTEL64
-	id = bli_cpuid_query_id();
-#endif
-#ifdef BLIS_FAMILY_AMD64
+#if defined BLIS_FAMILY_INTEL64 || \
+    defined BLIS_FAMILY_AMD64 || \
+    defined BLIS_FAMILY_X86_64
 	id = bli_cpuid_query_id();
 #endif
 

@@ -116,6 +116,9 @@ CNTX_INIT_PROTS( generic )
 #ifdef BLIS_FAMILY_AMD64
 #include "bli_family_amd64.h"
 #endif
+#ifdef BLIS_FAMILY_X86_64
+#include "bli_family_x86_64.h"
+#endif
 
 // -- Intel64 architectures --
 

@@ -106,14 +106,19 @@
 #define BLIS_PAGE_SIZE                   4096
 #endif
 
-// Number of named SIMD vector registers available for use.
+// The maximum number of named SIMD vector registers available for use.
+// When configuring with umbrella configuration families, this should be
+// set to the maximum number of registers across all sub-configurations in
+// the family.
 #ifndef BLIS_SIMD_NUM_REGISTERS
-#define BLIS_SIMD_NUM_REGISTERS          16
+#define BLIS_SIMD_NUM_REGISTERS          32
 #endif
 
-// Size (in bytes) of each SIMD vector.
+// The maximum size (in bytes) of each SIMD vector.
+// When configuring with umbrella configuration families, this should be
+// set to the maximum SIMD size across all sub-configurations in the family.
 #ifndef BLIS_SIMD_SIZE
-#define BLIS_SIMD_SIZE                   32
+#define BLIS_SIMD_SIZE                   64
 #endif
 
 // Alignment size (in bytes) needed by the instruction set for aligned
