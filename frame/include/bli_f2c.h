@@ -17,9 +17,9 @@ typedef f77_int bla_logical;
 //typedef short int shortlogical;
 //typedef char logical1;
 //typedef char integer1;
-#ifdef INTEGER_STAR_8	/* Adjust for integer*8. */
-typedef long long longint;		/* system-dependent */
-typedef unsigned long long ulongint;	/* system-dependent */
+#ifdef INTEGER_STAR_8                // Adjust for integer*8.
+typedef long long longint;           // system-dependent
+typedef unsigned long long ulongint; // system-dependent
 #define qbit_clear(a,b)	((a) & ~((ulongint)1 << (b)))
 #define qbit_set(a,b)	((a) |  ((ulongint)1 << (b)))
 #endif
@@ -32,15 +32,15 @@ typedef unsigned long long ulongint;	/* system-dependent */
 #define FALSE_ (0)
 #endif
 
-/* Extern is for use with -E */
+// Extern is for use with -E
 #ifndef Extern
 #define Extern extern
 #endif
 
-/* I/O stuff */
+// I/O stuff
 
 #ifdef f2c_i2
-/* for -i2 */
+// for -i2
 typedef short flag;
 typedef short ftnlen;
 typedef short ftnint;
@@ -85,7 +85,7 @@ typedef long int ftnint;
   #define bit_set(a,b)   ((a) |  ((uinteger)1 << (b)))
 #endif
 
-/* undef any lower-case symbols that your C compiler predefines, e.g.: */
+// undef any lower-case symbols that your C compiler predefines, e.g.:
 
 #ifndef Skip_f2c_Undefs
 #undef cray

@@ -47,12 +47,13 @@
 
 .PHONY: all libs test install uninstall clean \
         check-env check-env-mk check-env-fragments check-env-make-defs \
-        testsuite testsuite-run testsuite-bin \
-        install-libs install-headers install-lib-symlinks \
+        testsuite testsuite-bin testsuite-run \
+        flat-header \
+        install-libs install-header install-lib-symlinks \
         showconfig \
-        cleanlib distclean cleanmk cleanleaves \
+        cleanlib cleanh cleantest cleanmk distclean \
         changelog \
-        uninstall-libs uninstall-headers uninstall-lib-symlinks \
+        uninstall-libs uninstall-header uninstall-lib-symlinks \
         uninstall-old
 
 
@@ -275,6 +276,12 @@ endif
 
 
 #
+# --- Monolithic header definitions --------------------------------------------
+#
+
+
+
+#
 # --- Test suite definitions ---------------------------------------------------
 #
 
@@ -327,11 +334,25 @@ libs: blis-lib
 
 test: testsuite
 
-install: libs install-libs install-headers install-lib-symlinks
+install: libs install-libs install-header install-lib-symlinks
 
-uninstall: uninstall-libs uninstall-lib-symlinks uninstall-headers
+uninstall: uninstall-libs uninstall-header uninstall-lib-symlinks
 
 clean: cleanlib cleantest
+
+
+# --- Consolidated blis.h header creation ---
+
+flat-header: check-env $(BLIS_H_FLAT)
+
+$(BLIS_H_FLAT): $(MK_HEADER_FILES)
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	$(FLATTEN_H) -c -v1 $(BLIS_H_SRC_PATH) $@ "$(MK_HEADER_DIR_PATHS)"
+else
+	@echo -n "Generating monolithic blis.h"
+	@$(FLATTEN_H) -c -v1 $(BLIS_H_SRC_PATH) $@ "$(MK_HEADER_DIR_PATHS)"
+	@echo "Generated $@"
+endif
 
 
 # --- General source code / object code rules ---
@@ -343,7 +364,7 @@ clean: cleanlib cleantest
 # first argument: a configuration name from config_list, used to look up the
 # CFLAGS to use during compilation.
 define make-config-rule
-$(BASE_OBJ_CONFIG_PATH)/$(1)/%.o: $(CONFIG_PATH)/$(1)/%.c $(MK_HEADER_FILES) $(MAKE_DEFS_MK_PATHS)
+$(BASE_OBJ_CONFIG_PATH)/$(1)/%.o: $(CONFIG_PATH)/$(1)/%.c $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	$(CC) $(call get-config-cflags-for,$(1)) -c $$< -o $$@
 else
@@ -355,7 +376,7 @@ endef
 # first argument: a configuration name from the union of config_list and
 # config_name, used to look up the CFLAGS to use during compilation.
 define make-frame-rule
-$(BASE_OBJ_FRAME_PATH)/%.o: $(FRAME_PATH)/%.c $(MK_HEADER_FILES) $(MAKE_DEFS_MK_PATHS)
+$(BASE_OBJ_FRAME_PATH)/%.o: $(FRAME_PATH)/%.c $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	$(CC) $(call get-frame-cflags-for,$(1)) -c $$< -o $$@
 else
@@ -366,7 +387,7 @@ endef
 
 # first argument: a kernel set (name) being targeted (e.g. haswell).
 define make-refkern-rule
-$(BASE_OBJ_REFKERN_PATH)/$(1)/%_$(1)_ref.o: $(REFKERN_PATH)/%_ref.c $(MK_HEADER_FILES) $(MAKE_DEFS_MK_PATHS)
+$(BASE_OBJ_REFKERN_PATH)/$(1)/%_$(1)_ref.o: $(REFKERN_PATH)/%_ref.c $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	$(CC) $(call get-refkern-cflags-for,$(1)) -c $$< -o $$@
 else
@@ -380,7 +401,7 @@ endef
 # third argument: the kernel file suffix being considered.
 #$(BASE_OBJ_KERNELS_PATH)/$(1)/%.o: $(KERNELS_PATH)/$(1)/%.$(3) $(MK_HEADER_FILES) $(MAKE_DEFS_MK_PATHS)
 define make-kernels-rule
-$(BASE_OBJ_KERNELS_PATH)/$(1)/%.o: $(KERNELS_PATH)/$(1)/%.c $(MK_HEADER_FILES) $(MAKE_DEFS_MK_PATHS)
+$(BASE_OBJ_KERNELS_PATH)/$(1)/%.o: $(KERNELS_PATH)/$(1)/%.c $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	$(CC) $(call get-kernel-cflags-for,$(2)) -c $$< -o $$@
 else
@@ -419,7 +440,6 @@ $(foreach kset, $(KERNEL_LIST), $(eval $(call make-kernels-rule,$(kset),$(call g
 # FGVZ: for later, to compile multiple kernel source suffixes.
 #$(foreach suf,  $(KERNEL_SUFS), \
 #$(foreach kset, $(KERNEL_LIST), $(eval $(call make-kernels-rule,$(kset),$(suf)))))
-
 
 
 # --- Environment check rules ---
@@ -511,16 +531,16 @@ endif
 
 install-libs: check-env $(MK_LIBS_INST_W_VERS_CONF)
 
-install-headers: check-env $(MK_INCL_DIR_INST)
+install-header: check-env $(MK_INCL_DIR_INST)
 
-$(MK_INCL_DIR_INST): $(MK_HEADER_FILES) $(CONFIG_MK_FILE)
+$(MK_INCL_DIR_INST): $(BLIS_H_FLAT) $(CONFIG_MK_FILE)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	$(MKDIR) $(@)
-	$(INSTALL) -m 0644 $(MK_HEADER_FILES) $(@)
+	$(INSTALL) -m 0644 $(BLIS_H_FLAT) $(@)
 else
 	@$(MKDIR) $(@)
-	@echo "Installing C header files into $(@)/"
-	@$(INSTALL) -m 0644 $(MK_HEADER_FILES) $(@)
+	@echo "Installing $(BLIS_H) into $(@)/"
+	@$(INSTALL) -m 0644 $(BLIS_H_FLAT) $(@)
 endif
 
 $(INSTALL_PREFIX)/lib/%-$(VERS_CONF).a: $(BASE_LIB_PATH)/%.a $(CONFIG_MK_FILE)
@@ -603,6 +623,14 @@ else
 	@- $(FIND) $(BASE_LIB_PATH) -name "*.so" | $(XARGS) $(RM_F)
 endif
 
+cleanh: check-env
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	$(RM_F) $(BLIS_H_FLAT)
+else
+	@echo "Removing blis.h file from $(BASE_INC_PATH)."
+	@$(RM_F) $(BLIS_H_FLAT)
+endif
+
 cleantest: check-env
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	- $(FIND) $(BASE_OBJ_TESTSUITE_PATH) \( -name "*.o" -o -name "*.pexe" \) | $(XARGS) $(RM_F)
@@ -631,12 +659,13 @@ else
 	@- $(FIND) $(KERNELS_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 endif
 
-distclean: check-env cleanmk cleanlib cleantest
+distclean: check-env cleanmk cleanlib cleanh cleantest
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	- $(RM_F) $(CONFIG_MK_FILE)
 	- $(RM_RF) $(TESTSUITE_OUT_FILE)
 	- $(RM_RF) $(OBJ_DIR)
 	- $(RM_RF) $(LIB_DIR)
+	- $(RM_RF) $(INCLUDE_DIR)
 else
 	@echo "Removing $(CONFIG_MK_FILE)."
 	@- $(RM_F) $(CONFIG_MK_FILE)
@@ -646,6 +675,8 @@ else
 	@- $(RM_RF) $(OBJ_DIR)
 	@echo "Removing $(LIB_DIR)."
 	@- $(RM_RF) $(LIB_DIR)
+	@echo "Removing $(INCLUDE_DIR)."
+	@- $(RM_RF) $(INCLUDE_DIR)
 endif
 
 
@@ -676,7 +707,7 @@ else
 	@- $(RM_F) $(MK_LIBS_INST)
 endif
 
-uninstall-headers: check-env
+uninstall-header: check-env
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	- $(RM_RF) $(MK_INCL_DIR_INST)
 else

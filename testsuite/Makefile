@@ -137,21 +137,8 @@ TEST_OBJS      := $(sort $(patsubst $(TEST_SRC_PATH)/%.c, \
                                     $(TEST_OBJ_PATH)/%.o, \
                                     $(wildcard $(TEST_SRC_PATH)/*.c)))
 
-ifeq ($(CONFIG_NAME),pnacl)
-# Linked executable
-TEST_BIN       := test_libblis.unstable.pexe
-# Finalized executable
-TEST_BIN_PNACL := test_libblis.pexe
-# Translated executable for x86-64
-TEST_BIN_AMD64 := test_libblis.x86-64.nexe
-# Translated executable for x86
-TEST_BIN_X86   := test_libblis.x86.nexe
-# Translated executable for ARM
-TEST_BIN_ARM   := test_libblis.arm.nexe
-else
 # Binary executable name.
 TEST_BIN       := test_libblis.x
-endif
 
 # Use the CFLAGS for the configuration family.
 CFLAGS          := $(call get-frame-cflags-for,$(CONFIG_NAME))
@@ -170,11 +157,7 @@ CFLAGS          += -I$(TEST_SRC_PATH)
 
 all: check-env bin
 
-ifeq ($(CONFIG_NAME),pnacl)
-bin: check-env $(TEST_BIN) $(TEST_BIN_PNACL) $(TEST_BIN_AMD64) $(TEST_BIN_X86) $(TEST_BIN_ARM)
-else
 bin: check-env $(TEST_BIN)
-endif
 
 
 # --- Environment check rules ---
@@ -218,68 +201,13 @@ else
 	@$(LINKER) $(TEST_OBJS) $(BLIS_LIB) $(LDFLAGS) -o $@
 endif
 
-ifeq ($(CONFIG_NAME),pnacl)
-
-# Finalize PNaCl executable (i.e. convert from LLVM bitcode to PNaCl bitcode)
-$(TEST_BIN_PNACL): $(TEST_BIN)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	$(FINALIZER) $(FINFLAGS) -o $@ $(TEST_BIN)
-else
-	@echo "Finalizing $@"
-	@$(FINALIZER) $(FINFLAGS) -o $@ $(TEST_BIN)
-endif
-
-# Translate PNaCl executable to x86-64 NaCl executable
-$(TEST_BIN_AMD64): $(TEST_BIN_PNACL)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	$(TRANSLATOR) $(TRNSFLAGS) $(TRNSAMD64FLAGS) $< -o $@
-else
-	@echo "Translating $< -> $@"
-	@$(TRANSLATOR) $(TRNSFLAGS) $(TRNSAMD64FLAGS) $< -o $@
-endif
-
-
-# Translate PNaCl executable to x86 NaCl executable
-$(TEST_BIN_X86): $(TEST_BIN_PNACL)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	$(TRANSLATOR) $(TRNSFLAGS) $(TRNSX86FLAGS) $< -o $@
-else
-	@echo "Translating $< -> $@"
-	@$(TRANSLATOR) $(TRNSFLAGS) $(TRNSX86FLAGS) $< -o $@
-endif
-
-# Translate PNaCl executable to ARMv7 NaCl executable
-$(TEST_BIN_ARM): $(TEST_BIN_PNACL)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	$(TRANSLATOR) $(TRNSFLAGS) $(TRNSARMFLAGS) $< -o $@
-else
-	@echo "Translating $< -> $@"
-	@$(TRANSLATOR) $(TRNSFLAGS) $(TRNSARMFLAGS) $< -o $@
-endif
-
-endif
-
 # -- Test run rules --
 
-ifeq ($(CONFIG_NAME),pnacl)
-run-amd64: $(TEST_BIN_AMD64)
-	$(NACL_SDK_ROOT)/tools/sel_ldr_x86_64 -a -c -q -B $(NACL_SDK_ROOT)/tools/irt_core_x86_64.nexe -- $(TEST_BIN_AMD64)
-run-x86: $(TEST_BIN_X86)
-	$(NACL_SDK_ROOT)/tools/sel_ldr_x86_32 -a -c -q -B $(NACL_SDK_ROOT)/tools/irt_core_x86_32.nexe -- $(TEST_BIN_X86)
-run-arm: $(TEST_BIN_ARM)
-	$(NACL_SDK_ROOT)/tools/sel_ldr_arm -a -c -q -B $(NACL_SDK_ROOT)/tools/irt_core_arm.nexe -- $(TEST_BIN_ARM)
-else
 run: $(TEST_BIN)
 	./$(TEST_BIN)
-endif
 
 # -- Clean rules --
 
-ifeq ($(CONFIG_NAME),pnacl)
-clean:
-	- $(RM_F) $(TEST_OBJS) $(TEST_BIN) $(TEST_BIN_PNACL) $(TEST_BIN_AMD64) $(TEST_BIN_X86) $(TEST_BIN_ARM)
-else
 clean:
 	- $(RM_F) $(TEST_OBJS) $(TEST_BIN)
-endif
 

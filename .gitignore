@@ -31,6 +31,10 @@
 config.mk
 bli_config.h
 
+# -- monolithic headers --
+
+include/*/*.h
+
 # -- makefile fragments --
 
 .fragment.mk

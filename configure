@@ -475,6 +475,10 @@ main()
 	lib_dir='lib'
 	lib_dirpath="${cur_dirpath}/${lib_dir}"
 
+	# The name of the directory in which headers will be kept.
+	include_dir='include'
+	include_dirpath="${cur_dirpath}/${include_dir}"
+
 	# The name of the directory in which the test suite is kept.
 	testsuite_dir='testsuite'
 
@@ -1194,6 +1198,12 @@ main()
 
 	echo "${script_name}: creating ${base_lib_dirpath}"
 	mkdir -p ${base_lib_dirpath}
+
+	# Create include directory (if it does not already exist).
+	base_include_dirpath="${include_dirpath}/${config_name}"
+
+	echo "${script_name}: creating ${base_include_dirpath}"
+	mkdir -p ${base_include_dirpath}
 
 
 	# -- Mirror source directory hierarchies to object directories -------------

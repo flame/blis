@@ -172,6 +172,7 @@ KERNELS_DIR        := kernels
 BUILD_DIR          := build
 OBJ_DIR            := obj
 LIB_DIR            := lib
+INCLUDE_DIR        := include
 TESTSUITE_DIR      := testsuite
 
 # Other kernel-related definitions.
@@ -216,7 +217,10 @@ XARGS      := xargs
 RANLIB     := ranlib
 INSTALL    := install -c
 
-# Default archiver flags
+# Script for creating a monolithic header file.
+FLATTEN_H  := build/flatten-headers.sh
+
+# Default archiver flags.
 AR         := ar
 ARFLAGS    := cr
 
@@ -240,9 +244,9 @@ ifeq ($(VENDOR_STRING),)
 $(error Unable to determine compiler vendor.)
 endif
 
-CC_VENDOR := $(firstword $(shell echo '$(VENDOR_STRING)' | $(EGREP) -o 'icc|gcc|clang|emcc|pnacl|IBM'))
+CC_VENDOR := $(firstword $(shell echo '$(VENDOR_STRING)' | $(EGREP) -o 'icc|gcc|clang|IBM'))
 ifeq ($(CC_VENDOR),)
-$(error Unable to determine compiler vendor.)
+$(error Unable to determine compiler vendor. Have you run './configure' yet?)
 endif
 
 endif
@@ -465,13 +469,10 @@ endif
 #
 
 # Expand the fragment paths that contain .h files to attain the set of header
-# files present in all fragment paths.
-MK_HEADER_FILES := $(foreach frag_path, . $(FRAGMENT_DIR_PATHS), \
-                                        $(wildcard $(frag_path)/*.h))
-
-# Strip the leading, internal, and trailing whitespace from our list of header
-# files. This makes the "make install-headers" much more readable.
-MK_HEADER_FILES := $(strip $(MK_HEADER_FILES))
+# files present in all fragment paths. Then strip all leading, internal, and
+# trailing whitespace from the list.
+MK_HEADER_FILES := $(strip $(foreach frag_path, . $(FRAGMENT_DIR_PATHS), \
+                                                $(wildcard $(frag_path)/*.h)))
 
 # Expand the fragment paths that contain .h files, and take the first
 # expansion. Then, strip the header filename to leave the path to each header
@@ -484,7 +485,33 @@ MK_HEADER_DIR_PATHS := $(dir $(foreach frag_path, \
 # C compiler.
 INCLUDE_PATHS   := $(strip $(patsubst %, -I%, $(MK_HEADER_DIR_PATHS)))
 
+# Isolate the path to blis.h by filtering the file from the list of headers.
+BLIS_H          := blis.h
+BLIS_H_SRC_PATH := $(filter %/$(BLIS_H), $(MK_HEADER_FILES))
 
+# Construct the path to the intermediate flattened/monolithic blis.h file.
+BASE_INC_PATH   := $(DIST_PATH)/$(INCLUDE_DIR)/$(CONFIG_NAME)
+BLIS_H_FLAT     := $(BASE_INC_PATH)/$(BLIS_H)
+
+# Obtain a list of header files #included inside of the bli_cntx_ref.c file.
+# Paths to these files will be needed when compiling with the monolithic
+# header.
+REF_KER_SRC     := $(DIST_PATH)/$(REFKERN_DIR)/bli_cntx_ref.c
+REF_KER_HEADERS := $(shell grep "\#include" $(REF_KER_SRC) | sed -e "s/\#include [\"<]\([a-zA-Z0-9\_\.\/\-]*\)[\">].*/\1/g" | grep -v blis.h)
+
+# Match each header found above with the path to that header, and then strip
+# leading, trailing, and internal whitespace.
+REF_KER_H_PATHS := $(strip $(foreach header, $(REF_KER_HEADERS), \
+                               $(dir $(filter %/$(header), \
+                                              $(MK_HEADER_FILES)))))
+
+# Add -I to each header path so we can specify our include search paths to the
+# C compiler. Then add frame/include since it's needed for bli_oapi_w[o]_cntx.h.
+REF_KER_I_PATHS := $(strip $(patsubst %, -I%, $(REF_KER_H_PATHS)))
+REF_KER_I_PATHS += -I$(DIST_PATH)/frame/include
+
+# Finally, prefix the paths above with the base include path.
+INCLUDE_PATHS   := -I$(BASE_INC_PATH) $(REF_KER_I_PATHS)
 
 #
 # --- Special preprocessor macro definitions -----------------------------------
