@@ -391,11 +391,15 @@ replace_pass()
 			# Replace the #include directive for the current header file with the
 			# contents of that header file, saving the result to a temporary file.
 			# We also insert begin and end markers to allow for more readability.
+			# NOTE: We use the 'i\...' and 'a\...' notation with '$', which causes
+			# bash to interpret '\n' as a newline, as needed for the 'a\' and 'i\'
+			# commands in POSIX (e.g. OS X) sed. (GNU sed allows a much more
+			# natural usage that does not require the backslash or newline.)
 			cat ${intermfile} \
 			    | sed -e "/^[[:space:]]*#include \"${header_esc}\"/ {" \
-			          -e "i // begin ${header}" \
+			          -e 'i\'$'\n'"// begin ${header}"$'\n' \
 			          -e "r ${subintermfile}" \
-			          -e "a // end ${header}" \
+			          -e 'a\'$'\n'"// end ${header}"$'\n' \
 			          -e "d" \
 			          -e "}" \
 			    > "${intermfile}.tmp"
