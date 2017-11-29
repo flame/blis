@@ -340,40 +340,72 @@ static void* bli_cntx_get_l1v_ker_dt( num_t dt, l1vkr_t ker_id, cntx_t* cntx )
 
 static func_t* bli_cntx_get_packm_kers( l1mkr_t ker_id, cntx_t* cntx )
 {
-	func_t* funcs = bli_cntx_packm_kers_buf( cntx );
+	func_t* func = NULL;
 
-	// If the kernel id is beyond the bounds of the l1mkr_t enum, return NULL.
-	if ( ( guint_t )ker_id >= ( guint_t )BLIS_NUM_PACKM_KERS ) return NULL;
+	// Only index to the requested packm func_t if the packm kernel being
+	// requested is one that is explicitly supported.
+	if ( 0 <= ( guint_t )ker_id &&
+	          ( guint_t )ker_id < BLIS_NUM_PACKM_KERS )
+	{
+		func_t* funcs = bli_cntx_packm_kers_buf( cntx );
 
-	func_t* func  = &funcs[ ker_id ];
+		func = &funcs[ ker_id ];
+	}
 
 	return func;
 }
 
 static void* bli_cntx_get_packm_ker_dt( num_t dt, l1mkr_t ker_id, cntx_t* cntx )
 {
-	func_t* func = bli_cntx_get_packm_kers( ker_id, cntx );
+	void* fp = NULL;
 
-	return bli_func_get_dt( dt, func );
+	// Only query the context for the packm func_t (and then extract the
+	// datatype-specific function pointer) if the packm kernel being
+	// requested is one that is explicitly supported.
+	if ( 0 <= ( guint_t )ker_id &&
+	          ( guint_t )ker_id < BLIS_NUM_PACKM_KERS )
+	{
+		func_t* func = bli_cntx_get_packm_kers( ker_id, cntx );
+
+		fp = bli_func_get_dt( dt, func );
+	}
+
+	return fp;
 }
 
 static func_t* bli_cntx_get_unpackm_kers( l1mkr_t ker_id, cntx_t* cntx )
 {
-	func_t* funcs = bli_cntx_unpackm_kers_buf( cntx );
+	func_t* func = NULL;
 
-	// If the kernel id is beyond the bounds of the l1mkr_t enum, return NULL.
-	if ( ( guint_t )ker_id >= ( guint_t )BLIS_NUM_UNPACKM_KERS ) return NULL;
+	// Only index to the requested unpackm func_t if the unpackm kernel being
+	// requested is one that is explicitly supported.
+	if ( 0 <= ( guint_t )ker_id &&
+	          ( guint_t )ker_id < BLIS_NUM_UNPACKM_KERS )
+	{
+		func_t* funcs = bli_cntx_unpackm_kers_buf( cntx );
 
-	func_t* func  = &funcs[ ker_id ];
+		func = &funcs[ ker_id ];
+	}
 
 	return func;
 }
 
 static void* bli_cntx_get_unpackm_ker_dt( num_t dt, l1mkr_t ker_id, cntx_t* cntx )
 {
-	func_t* func = bli_cntx_get_unpackm_kers( ker_id, cntx );
+	void* fp = NULL;
 
-	return bli_func_get_dt( dt, func );
+	// Only query the context for the unpackm func_t (and then extract the
+	// datatype-specific function pointer) if the unpackm kernel being
+	// requested is one that is explicitly supported.
+	if ( 0 <= ( guint_t )ker_id &&
+	          ( guint_t )ker_id < BLIS_NUM_UNPACKM_KERS )
+	{
+		func_t* func = bli_cntx_get_unpackm_kers( ker_id, cntx );
+
+		fp = bli_func_get_dt( dt, func );
+	}
+
+	return fp;
 }
 
 // -----------------------------------------------------------------------------
