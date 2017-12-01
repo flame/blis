@@ -40,103 +40,96 @@
 // native packm kernels
 
 #undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTEMAC(ch,varname) \
-     ( \
-       conj_t         conja, \
-       dim_t          n, \
-       void* restrict kappa, \
-       void* restrict a, inc_t inca, inc_t lda, \
-       void* restrict p,             inc_t ldp  \
-     );
+#define GENTPROT PACKM_KER_PROT
 
-INSERT_GENTPROT_BASIC( packm_2xk_ker_name )
-INSERT_GENTPROT_BASIC( packm_3xk_ker_name )
-INSERT_GENTPROT_BASIC( packm_4xk_ker_name )
-INSERT_GENTPROT_BASIC( packm_6xk_ker_name )
-INSERT_GENTPROT_BASIC( packm_8xk_ker_name )
-INSERT_GENTPROT_BASIC( packm_10xk_ker_name )
-INSERT_GENTPROT_BASIC( packm_12xk_ker_name )
-INSERT_GENTPROT_BASIC( packm_14xk_ker_name )
-INSERT_GENTPROT_BASIC( packm_16xk_ker_name )
-INSERT_GENTPROT_BASIC( packm_24xk_ker_name )
-INSERT_GENTPROT_BASIC( packm_30xk_ker_name )
+INSERT_GENTPROT_BASIC0( packm_2xk_ker_name )
+INSERT_GENTPROT_BASIC0( packm_3xk_ker_name )
+INSERT_GENTPROT_BASIC0( packm_4xk_ker_name )
+INSERT_GENTPROT_BASIC0( packm_6xk_ker_name )
+INSERT_GENTPROT_BASIC0( packm_8xk_ker_name )
+INSERT_GENTPROT_BASIC0( packm_10xk_ker_name )
+INSERT_GENTPROT_BASIC0( packm_12xk_ker_name )
+INSERT_GENTPROT_BASIC0( packm_14xk_ker_name )
+INSERT_GENTPROT_BASIC0( packm_16xk_ker_name )
+INSERT_GENTPROT_BASIC0( packm_24xk_ker_name )
+INSERT_GENTPROT_BASIC0( packm_30xk_ker_name )
+
+
+// native unpackm kernels
+
+#undef  GENTPROT
+#define GENTPROT UNPACKM_KER_PROT
+
+INSERT_GENTPROT_BASIC0( unpackm_2xk_ker_name )
+INSERT_GENTPROT_BASIC0( unpackm_4xk_ker_name )
+INSERT_GENTPROT_BASIC0( unpackm_6xk_ker_name )
+INSERT_GENTPROT_BASIC0( unpackm_8xk_ker_name )
+INSERT_GENTPROT_BASIC0( unpackm_10xk_ker_name )
+INSERT_GENTPROT_BASIC0( unpackm_12xk_ker_name )
+INSERT_GENTPROT_BASIC0( unpackm_14xk_ker_name )
+INSERT_GENTPROT_BASIC0( unpackm_16xk_ker_name )
 
 
 // 3mis packm kernels
 
 #undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTEMAC(ch,varname) \
-     ( \
-       conj_t         conja, \
-       dim_t          n, \
-       void* restrict kappa, \
-       void* restrict a, inc_t inca, inc_t lda, \
-       void* restrict p, inc_t is_p, inc_t ldp  \
-     );
+#define GENTPROT PACKM_3MIS_KER_PROT
 
-INSERT_GENTPROT_BASIC( packm_2xk_3mis_ker_name )
-INSERT_GENTPROT_BASIC( packm_4xk_3mis_ker_name )
-INSERT_GENTPROT_BASIC( packm_6xk_3mis_ker_name )
-INSERT_GENTPROT_BASIC( packm_8xk_3mis_ker_name )
-INSERT_GENTPROT_BASIC( packm_10xk_3mis_ker_name )
-INSERT_GENTPROT_BASIC( packm_12xk_3mis_ker_name )
-INSERT_GENTPROT_BASIC( packm_14xk_3mis_ker_name )
-INSERT_GENTPROT_BASIC( packm_16xk_3mis_ker_name )
-INSERT_GENTPROT_BASIC( packm_30xk_3mis_ker_name )
+INSERT_GENTPROT_BASIC0( packm_2xk_3mis_ker_name )
+INSERT_GENTPROT_BASIC0( packm_4xk_3mis_ker_name )
+INSERT_GENTPROT_BASIC0( packm_6xk_3mis_ker_name )
+INSERT_GENTPROT_BASIC0( packm_8xk_3mis_ker_name )
+INSERT_GENTPROT_BASIC0( packm_10xk_3mis_ker_name )
+INSERT_GENTPROT_BASIC0( packm_12xk_3mis_ker_name )
+INSERT_GENTPROT_BASIC0( packm_14xk_3mis_ker_name )
+INSERT_GENTPROT_BASIC0( packm_16xk_3mis_ker_name )
+INSERT_GENTPROT_BASIC0( packm_30xk_3mis_ker_name )
 
 
 // 4mi packm kernels
 
 #undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTEMAC(ch,varname) \
-     ( \
-       conj_t         conja, \
-       dim_t          n, \
-       void* restrict kappa, \
-       void* restrict a, inc_t inca, inc_t lda, \
-       void* restrict p, inc_t is_p, inc_t ldp  \
-     );
+#define GENTPROT PACKM_4MI_KER_PROT
 
-INSERT_GENTPROT_BASIC( packm_2xk_4mi_ker_name )
-INSERT_GENTPROT_BASIC( packm_4xk_4mi_ker_name )
-INSERT_GENTPROT_BASIC( packm_6xk_4mi_ker_name )
-INSERT_GENTPROT_BASIC( packm_8xk_4mi_ker_name )
-INSERT_GENTPROT_BASIC( packm_10xk_4mi_ker_name )
-INSERT_GENTPROT_BASIC( packm_12xk_4mi_ker_name )
-INSERT_GENTPROT_BASIC( packm_14xk_4mi_ker_name )
-INSERT_GENTPROT_BASIC( packm_16xk_4mi_ker_name )
-INSERT_GENTPROT_BASIC( packm_30xk_4mi_ker_name )
+INSERT_GENTPROT_BASIC0( packm_2xk_4mi_ker_name )
+INSERT_GENTPROT_BASIC0( packm_4xk_4mi_ker_name )
+INSERT_GENTPROT_BASIC0( packm_6xk_4mi_ker_name )
+INSERT_GENTPROT_BASIC0( packm_8xk_4mi_ker_name )
+INSERT_GENTPROT_BASIC0( packm_10xk_4mi_ker_name )
+INSERT_GENTPROT_BASIC0( packm_12xk_4mi_ker_name )
+INSERT_GENTPROT_BASIC0( packm_14xk_4mi_ker_name )
+INSERT_GENTPROT_BASIC0( packm_16xk_4mi_ker_name )
+INSERT_GENTPROT_BASIC0( packm_30xk_4mi_ker_name )
 
 
 // rih packm kernels
 
 #undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTEMAC(ch,varname) \
-     ( \
-       conj_t         conja, \
-       pack_t         schema, \
-       dim_t          n, \
-       void* restrict kappa, \
-       void* restrict a, inc_t inca, inc_t lda, \
-       void* restrict p,             inc_t ldp  \
-     );
+#define GENTPROT PACKM_RIH_KER_PROT
 
-INSERT_GENTPROT_BASIC( packm_2xk_rih_ker_name )
-INSERT_GENTPROT_BASIC( packm_3xk_rih_ker_name )
-INSERT_GENTPROT_BASIC( packm_4xk_rih_ker_name )
-INSERT_GENTPROT_BASIC( packm_6xk_rih_ker_name )
-INSERT_GENTPROT_BASIC( packm_8xk_rih_ker_name )
-INSERT_GENTPROT_BASIC( packm_10xk_rih_ker_name )
-INSERT_GENTPROT_BASIC( packm_12xk_rih_ker_name )
-INSERT_GENTPROT_BASIC( packm_14xk_rih_ker_name )
-INSERT_GENTPROT_BASIC( packm_16xk_rih_ker_name )
-INSERT_GENTPROT_BASIC( packm_30xk_rih_ker_name )
+INSERT_GENTPROT_BASIC0( packm_2xk_rih_ker_name )
+INSERT_GENTPROT_BASIC0( packm_4xk_rih_ker_name )
+INSERT_GENTPROT_BASIC0( packm_6xk_rih_ker_name )
+INSERT_GENTPROT_BASIC0( packm_8xk_rih_ker_name )
+INSERT_GENTPROT_BASIC0( packm_10xk_rih_ker_name )
+INSERT_GENTPROT_BASIC0( packm_12xk_rih_ker_name )
+INSERT_GENTPROT_BASIC0( packm_14xk_rih_ker_name )
+INSERT_GENTPROT_BASIC0( packm_16xk_rih_ker_name )
+INSERT_GENTPROT_BASIC0( packm_30xk_rih_ker_name )
+
+
+// 1e/1r packm kernels
+
+#undef  GENTPROT
+#define GENTPROT PACKM_1ER_KER_PROT
+
+INSERT_GENTPROT_BASIC0( packm_2xk_1er_ker_name )
+INSERT_GENTPROT_BASIC0( packm_4xk_1er_ker_name )
+INSERT_GENTPROT_BASIC0( packm_6xk_1er_ker_name )
+INSERT_GENTPROT_BASIC0( packm_8xk_1er_ker_name )
+INSERT_GENTPROT_BASIC0( packm_10xk_1er_ker_name )
+INSERT_GENTPROT_BASIC0( packm_12xk_1er_ker_name )
+INSERT_GENTPROT_BASIC0( packm_14xk_1er_ker_name )
+INSERT_GENTPROT_BASIC0( packm_16xk_1er_ker_name )
+INSERT_GENTPROT_BASIC0( packm_30xk_1er_ker_name )
 

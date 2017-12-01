@@ -53,9 +53,9 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      );
 
-INSERT_GENTPROT_BASIC( addm )
-INSERT_GENTPROT_BASIC( copym )
-INSERT_GENTPROT_BASIC( subm )
+INSERT_GENTPROT_BASIC0( addm )
+INSERT_GENTPROT_BASIC0( copym )
+INSERT_GENTPROT_BASIC0( subm )
 
 
 #undef  GENTPROT
@@ -75,8 +75,8 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      );
 
-INSERT_GENTPROT_BASIC( axpym )
-INSERT_GENTPROT_BASIC( scal2m )
+INSERT_GENTPROT_BASIC0( axpym )
+INSERT_GENTPROT_BASIC0( scal2m )
 
 
 #undef  GENTPROT
@@ -95,6 +95,6 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      );
 
-INSERT_GENTPROT_BASIC( scalm )
-INSERT_GENTPROT_BASIC( setm )
+INSERT_GENTPROT_BASIC0( scalm )
+INSERT_GENTPROT_BASIC0( setm )
 

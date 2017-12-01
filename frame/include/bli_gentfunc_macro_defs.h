@@ -248,6 +248,13 @@ GENTFUNCCO( dcomplex, double, z, d, tfuncname, varname )
 GENTFUNCCO( scomplex, float,  c, s, tfuncname, varname1, varname2 ) \
 GENTFUNCCO( dcomplex, double, z, d, tfuncname, varname1, varname2 )
 
+// -- (three auxiliary arguments) --
+
+#define INSERT_GENTFUNCCO_BASIC3( tfuncname, varname1, varname2, varname3 ) \
+\
+GENTFUNCCO( scomplex, float,  c, s, tfuncname, varname1, varname2, varname3 ) \
+GENTFUNCCO( dcomplex, double, z, d, tfuncname, varname1, varname2, varname3 )
+
 
 
 // -- Basic one-operand macro with integer instance --
@@ -392,88 +399,6 @@ GENTFUNC2( scomplex, dcomplex, c, z, tfuncname, varname ) \
 \
 GENTFUNC2( dcomplex, float,    z, s, tfuncname, varname ) \
 GENTFUNC2( dcomplex, scomplex, z, c, tfuncname, varname ) \
-
-
-
-// -- Basic two-operand with union of operands --
-
-// -- (no auxiliary arguments) --
-
-#define INSERT_GENTFUNC2U_BASIC0( tfuncname ) \
-\
-GENTFUNC2U( float,    float,    float,    s, s, s, tfuncname ) \
-GENTFUNC2U( double,   double,   double,   d, d, d, tfuncname ) \
-GENTFUNC2U( scomplex, scomplex, scomplex, c, c, c, tfuncname ) \
-GENTFUNC2U( dcomplex, dcomplex, dcomplex, z, z, z, tfuncname )
-
-// -- (one auxiliary argument) --
-
-#define INSERT_GENTFUNC2U_BASIC( tfuncname, varname ) \
-\
-GENTFUNC2U( float,    float,    float,    s, s, s, tfuncname, varname ) \
-GENTFUNC2U( double,   double,   double,   d, d, d, tfuncname, varname ) \
-GENTFUNC2U( scomplex, scomplex, scomplex, c, c, c, tfuncname, varname ) \
-GENTFUNC2U( dcomplex, dcomplex, dcomplex, z, z, z, tfuncname, varname )
-
-
-
-// -- Mixed domain two-operand with union of operands --
-
-// -- (no auxiliary arguments) --
-
-#define INSERT_GENTFUNC2U_MIX_D0( tfuncname ) \
-\
-GENTFUNC2U( float,    scomplex, scomplex, s, c, c, tfuncname ) \
-GENTFUNC2U( scomplex, float,    scomplex, c, s, c, tfuncname ) \
-\
-GENTFUNC2U( double,   dcomplex, dcomplex, d, z, z, tfuncname ) \
-GENTFUNC2U( dcomplex, double,   dcomplex, z, d, z, tfuncname )
-
-// -- (one auxiliary argument) --
-
-#define INSERT_GENTFUNC2U_MIX_D( tfuncname, varname ) \
-\
-GENTFUNC2U( float,    scomplex, scomplex, s, c, c, tfuncname, varname ) \
-GENTFUNC2U( scomplex, float,    scomplex, c, s, c, tfuncname, varname ) \
-\
-GENTFUNC2U( double,   dcomplex, dcomplex, d, z, z, tfuncname, varname ) \
-GENTFUNC2U( dcomplex, double,   dcomplex, z, d, z, tfuncname, varname )
-
-
-
-// -- Mixed precision two-operand with union of operands --
-
-// -- (no auxiliary arguments) --
-
-#define INSERT_GENTFUNC2U_MIX_P0( tfuncname ) \
-\
-GENTFUNC2U( float,    double,   double,   s, d, d, tfuncname ) \
-GENTFUNC2U( float,    dcomplex, dcomplex, s, z, z, tfuncname ) \
-\
-GENTFUNC2U( double,   float,    double,   d, s, d, tfuncname ) \
-GENTFUNC2U( double,   scomplex, dcomplex, d, c, z, tfuncname ) \
-\
-GENTFUNC2U( scomplex, double,   dcomplex, c, d, z, tfuncname ) \
-GENTFUNC2U( scomplex, dcomplex, dcomplex, c, z, z, tfuncname ) \
-\
-GENTFUNC2U( dcomplex, float,    dcomplex, z, s, z, tfuncname ) \
-GENTFUNC2U( dcomplex, scomplex, dcomplex, z, c, z, tfuncname )
-
-// -- (one auxiliary argument) --
-
-#define INSERT_GENTFUNC2U_MIX_P( tfuncname, varname ) \
-\
-GENTFUNC2U( float,    double,   double,   s, d, d, tfuncname, varname ) \
-GENTFUNC2U( float,    dcomplex, dcomplex, s, z, z, tfuncname, varname ) \
-\
-GENTFUNC2U( double,   float,    double,   d, s, d, tfuncname, varname ) \
-GENTFUNC2U( double,   scomplex, dcomplex, d, c, z, tfuncname, varname ) \
-\
-GENTFUNC2U( scomplex, double,   dcomplex, c, d, z, tfuncname, varname ) \
-GENTFUNC2U( scomplex, dcomplex, dcomplex, c, z, z, tfuncname, varname ) \
-\
-GENTFUNC2U( dcomplex, float,    dcomplex, z, s, z, tfuncname, varname ) \
-GENTFUNC2U( dcomplex, scomplex, dcomplex, z, c, z, tfuncname, varname )
 
 
 

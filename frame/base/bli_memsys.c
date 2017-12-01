@@ -54,17 +54,17 @@ static bool_t bli_memsys_is_init = FALSE;
 
 void bli_memsys_init( void )
 {
-	cntx_t cntx;
+	cntx_t* cntx_p;
 
 	// If the initialization flag is TRUE, we know the API is already
 	// initialized, so we can return early.
 	if ( bli_memsys_is_init == TRUE ) return;
 
-	// Create and initialize a context for gemm so we have something
-	// to pass into bli_membrk_init_pools(). We use BLIS_DOUBLE for
-	// the datatype, but the dt argument is actually only used when
-	// initializing contexts for induced methods.
-	bli_gemm_cntx_init( BLIS_DOUBLE, &cntx );
+	// Query a native context so we have something to pass into
+	// bli_membrk_init_pools(). We use BLIS_DOUBLE for the datatype,
+	// but the dt argument is actually only used when initializing
+	// contexts for induced methods.
+	cntx_p = bli_gks_query_cntx();
 
 #ifdef BLIS_ENABLE_OPENMP
 	_Pragma( "omp critical (mem)" )
@@ -83,7 +83,7 @@ void bli_memsys_init( void )
 		if ( bli_memsys_is_init == FALSE )
 		{
 			// Initialize the global membrk_t object and its memory pools.
-			bli_membrk_init( &cntx, &global_membrk );
+			bli_membrk_init( cntx_p, &global_membrk );
 
 			// After initialization, mark the API as initialized.
 			bli_memsys_is_init = TRUE;
@@ -94,9 +94,6 @@ void bli_memsys_init( void )
 #ifdef BLIS_ENABLE_PTHREADS
 	pthread_mutex_unlock( &mem_manager_mutex );
 #endif
-
-	// Finalize the temporary gemm context.
-	bli_gemm_cntx_finalize( &cntx );
 }
 
 void bli_memsys_reinit( cntx_t* cntx )

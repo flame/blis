@@ -55,4 +55,4 @@ void PASTEMAC(ch,varname)( \
                            void*  sum_x  \
                          );
 
-INSERT_GENTPROTR_BASIC( absumm )
+INSERT_GENTPROTR_BASIC0( absumm )

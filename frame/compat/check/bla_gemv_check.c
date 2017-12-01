@@ -51,12 +51,9 @@ void bla_gemv_check
 	f77_int info = 0;
 	f77_int nota, ta, conja;
 
-	nota  = PASTEF770(lsame)( transa, "N", (ftnlen)1, (ftnlen)1
-     );
-	ta    = PASTEF770(lsame)( transa, "T", (ftnlen)1, (ftnlen)1
-     );
-	conja = PASTEF770(lsame)( transa, "C", (ftnlen)1, (ftnlen)1
-     );
+	nota  = PASTEF770(lsame)( transa, "N", (ftnlen)1, (ftnlen)1 );
+	ta    = PASTEF770(lsame)( transa, "T", (ftnlen)1, (ftnlen)1 );
+	conja = PASTEF770(lsame)( transa, "C", (ftnlen)1, (ftnlen)1 );
 
 	if      ( !nota && !ta && !conja
      )

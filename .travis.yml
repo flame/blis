@@ -11,14 +11,15 @@ compiler:
 
 env:
   - RUN_TEST=1 THREADING="none" BUILD_CONFIG="auto"
-  - RUN_TEST=1 THREADING="none" BUILD_CONFIG="reference"
-  - RUN_TEST=1 THREADING="none" BUILD_CONFIG="dunnington"
+  - RUN_TEST=1 THREADING="none" BUILD_CONFIG="penryn"
   - RUN_TEST=0 THREADING="none" BUILD_CONFIG="sandybridge"
-  - RUN_TEST=0 THREADING="none" BUILD_CONFIG="knl"
   - RUN_TEST=0 THREADING="none" BUILD_CONFIG="haswell"
+  - RUN_TEST=0 THREADING="none" BUILD_CONFIG="knl"
   - RUN_TEST=0 THREADING="none" BUILD_CONFIG="bulldozer"
   - RUN_TEST=0 THREADING="none" BUILD_CONFIG="piledriver"
-  - RUN_TEST=0 THREADING="none" BUILD_CONFIG="carrizo"
+  - RUN_TEST=0 THREADING="none" BUILD_CONFIG="steamroller"
+  - RUN_TEST=0 THREADING="none" BUILD_CONFIG="excavator"
+  - RUN_TEST=0 THREADING="none" BUILD_CONFIG="zen"
   - RUN_TEST=0 THREADING="openmp" BUILD_CONFIG="auto"
   - RUN_TEST=0 THREADING="pthreads" BUILD_CONFIG="auto"
   
@@ -31,21 +32,23 @@ matrix:
     - os: osx
       compiler: gcc
     - os: osx
-      env: RUN_TEST=1 THREADING="none" BUILD_CONFIG="reference"
-    - os: osx
-      env: RUN_TEST=1 THREADING="none" BUILD_CONFIG="dunnington"
+      env: RUN_TEST=1 THREADING="none" BUILD_CONFIG="penryn"
     - os: osx
       env: RUN_TEST=0 THREADING="none" BUILD_CONFIG="sandybridge"
     - os: osx
-      env: RUN_TEST=0 THREADING="none" BUILD_CONFIG="knl"
-    - os: osx
       env: RUN_TEST=0 THREADING="none" BUILD_CONFIG="haswell"
+    - os: osx
+      env: RUN_TEST=0 THREADING="none" BUILD_CONFIG="knl"
     - os: osx
       env: RUN_TEST=0 THREADING="none" BUILD_CONFIG="bulldozer"
     - os: osx
       env: RUN_TEST=0 THREADING="none" BUILD_CONFIG="piledriver"
     - os: osx
-      env: RUN_TEST=0 THREADING="none" BUILD_CONFIG="carrizo"
+      env: RUN_TEST=0 THREADING="none" BUILD_CONFIG="steamroller"
+    - os: osx
+      env: RUN_TEST=0 THREADING="none" BUILD_CONFIG="excavator"
+    - os: osx
+      env: RUN_TEST=0 THREADING="none" BUILD_CONFIG="zen"
     - os: osx
       env: RUN_TEST=0 THREADING="openmp" BUILD_CONFIG="auto"
 
@@ -68,6 +71,6 @@ script:
   - export BLIS_JC_NT=1
   - export BLIS_IR_NT=1
   - export BLIS_JR_NT=1
-  - if [ $RUN_TEST -eq 1 ]; then make BLIS_ENABLE_TEST_OUTPUT=yes test; fi
+  - if [ $RUN_TEST -eq 1 ]; then travis_wait 30 make BLIS_ENABLE_TEST_OUTPUT=yes test; fi
   - if [ $RUN_TEST -eq 1 ]; then ./build/check-test.sh ./output.testsuite; fi
 

@@ -70,5 +70,5 @@ void PASTEMAC(ch,varname) \
        thrinfo_t* thread  \
      );
 
-INSERT_GENTPROT_BASIC( packm_blk_var1 )
+INSERT_GENTPROT_BASIC0( packm_blk_var1 )
 

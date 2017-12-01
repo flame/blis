@@ -39,8 +39,6 @@ static bool_t bli_ind_is_init = FALSE;
 static char* bli_ind_impl_str[BLIS_NUM_IND_METHODS] =
 {
 /* 3mh  */ "3mh",
-/* 3m2  */ "3m3",
-/* 3m2  */ "3m2",
 /* 3m1  */ "3m1",
 /* 4mh  */ "4mh",
 /* 4m1b */ "4m1b",
@@ -56,14 +54,16 @@ void bli_ind_init( void )
 	// If the API is already initialized, return early.
 	if ( bli_ind_is_initialized() ) return;
 
-#ifdef BLIS_ENABLE_INDUCED_SCOMPLEX
-	//bli_ind_enable_dt( BLIS_4M1A, BLIS_SCOMPLEX );
-	bli_ind_enable_dt( BLIS_1M, BLIS_SCOMPLEX );
-#endif
-#ifdef BLIS_ENABLE_INDUCED_DCOMPLEX
-	//bli_ind_enable_dt( BLIS_4M1A, BLIS_DCOMPLEX );
-	bli_ind_enable_dt( BLIS_1M, BLIS_DCOMPLEX );
-#endif
+	// Enable the default induced method (1m) if one or both complex domain
+	// gemm micro-kernels are unoptimized in the native context.
+	cntx_t* cntx     = bli_gks_query_cntx();
+	bool_t  c_is_ref = bli_gks_cntx_l3_nat_ukr_is_ref
+	                   ( BLIS_SCOMPLEX, BLIS_GEMM_UKR, cntx );
+	bool_t  z_is_ref = bli_gks_cntx_l3_nat_ukr_is_ref
+	                   ( BLIS_DCOMPLEX, BLIS_GEMM_UKR, cntx );
+
+	if ( c_is_ref ) bli_ind_enable_dt( BLIS_1M, BLIS_SCOMPLEX );
+	if ( z_is_ref ) bli_ind_enable_dt( BLIS_1M, BLIS_DCOMPLEX );
 
 	// Mark API as initialized.
 	bli_ind_is_init = TRUE;

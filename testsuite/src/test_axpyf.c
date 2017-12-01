@@ -163,16 +163,16 @@ void libblis_test_axpyf_experiment
 	obj_t        alpha, a, x, y;
 	obj_t        y_save;
 
-	cntx_t       cntx;
+	cntx_t*      cntx;
 
-	// Initialize a context.
-	bli_axpyf_cntx_init( datatype, &cntx );
+	// Query a context.
+	cntx = bli_gks_query_cntx();
 
 	// Map the dimension specifier to an actual dimension.
 	m = libblis_test_get_dim_from_prob_size( op->dim_spec[0], p_cur );
 
 	// Query the operation's fusing factor for the current datatype.
-	b_n = bli_cntx_get_blksz_def_dt( datatype, BLIS_AF, &cntx );
+	b_n = bli_cntx_get_blksz_def_dt( datatype, BLIS_AF, cntx );
 
 	// Store the fusing factor so that the driver can retrieve the value
 	// later when printing results.
@@ -221,7 +221,7 @@ void libblis_test_axpyf_experiment
 
 		libblis_test_axpyf_impl( iface,
 		                         &alpha, &a, &x, &y,
-		                         &cntx );
+		                         cntx );
 
 		time_min = bli_clock_min_diff( time_min, time );
 	}
@@ -241,9 +241,6 @@ void libblis_test_axpyf_experiment
 	bli_obj_free( &x );
 	bli_obj_free( &y );
 	bli_obj_free( &y_save );
-
-	// Finalize the context.
-	bli_axpyf_cntx_finalize( &cntx );
 }
 
 

@@ -53,16 +53,11 @@ void bla_syrk_check
 	f77_int lower, upper;
 	f77_int nrowa;
 
-	nota  = PASTEF770(lsame)( transa, "N", (ftnlen)1, (ftnlen)1
-     );
-	ta    = PASTEF770(lsame)( transa, "T", (ftnlen)1, (ftnlen)1
-     );
-	cta   = PASTEF770(lsame)( transa, "C", (ftnlen)1, (ftnlen)1
-     );
-	lower = PASTEF770(lsame)( uploc,  "L", (ftnlen)1, (ftnlen)1
-     );
-	upper = PASTEF770(lsame)( uploc,  "U", (ftnlen)1, (ftnlen)1
-     );
+	nota  = PASTEF770(lsame)( transa, "N", (ftnlen)1, (ftnlen)1 );
+	ta    = PASTEF770(lsame)( transa, "T", (ftnlen)1, (ftnlen)1 );
+	cta   = PASTEF770(lsame)( transa, "C", (ftnlen)1, (ftnlen)1 );
+	lower = PASTEF770(lsame)( uploc,  "L", (ftnlen)1, (ftnlen)1 );
+	upper = PASTEF770(lsame)( uploc,  "U", (ftnlen)1, (ftnlen)1 );
 
 	if ( nota ) { nrowa = *m; }
 	else        { nrowa = *k; }

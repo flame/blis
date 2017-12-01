@@ -583,8 +583,6 @@ typedef enum
 typedef enum
 {
 	BLIS_3MH = 0,
-	BLIS_3M3,
-	BLIS_3M2,
 	BLIS_3M1,
 	BLIS_4MH,
 	BLIS_4M1B,
@@ -594,6 +592,16 @@ typedef enum
 } ind_t;
 
 #define BLIS_NUM_IND_METHODS (BLIS_NAT+1)
+
+// These are used in bli_*_oapi.c to construct the ind_t values from
+// the induced method substrings that go into function names.
+#define bli_3mh  BLIS_3MH
+#define bli_3m1  BLIS_3M1
+#define bli_4mh  BLIS_4MH
+#define bli_4mb  BLIS_4M1B
+#define bli_4m1  BLIS_4M1A
+#define bli_1m   BLIS_1M
+#define bli_nat  BLIS_NAT
 
 
 // -- Kernel ID types --
@@ -780,6 +788,10 @@ typedef enum
 
 typedef enum
 {
+	// NOTE: the level-3 blocksizes MUST be indexed starting at zero.
+	// At one point, we made this assumption in bli_cntx_set_blkszs()
+	// and friends.
+
 	BLIS_KR = 0,
 	BLIS_MR,
 	BLIS_NR,
@@ -796,6 +808,41 @@ typedef enum
 } bszid_t;
 
 #define BLIS_NUM_BLKSZS 11
+
+
+// -- Architecture ID type --
+
+typedef enum
+{
+	// Intel
+	BLIS_ARCH_KNL     = 0,
+	BLIS_ARCH_KNC,
+	BLIS_ARCH_HASWELL,
+	BLIS_ARCH_SANDYBRIDGE,
+	BLIS_ARCH_PENRYN,
+
+	// AMD
+	BLIS_ARCH_ZEN,
+	BLIS_ARCH_EXCAVATOR,
+	BLIS_ARCH_STEAMROLLER,
+	BLIS_ARCH_PILEDRIVER,
+	BLIS_ARCH_BULLDOZER,
+
+	// ARM
+	BLIS_ARCH_CORTEXA57,
+	BLIS_ARCH_CORTEXA15,
+	BLIS_ARCH_CORTEXA9,
+
+	// IBM/Power
+	BLIS_ARCH_POWER7,
+	BLIS_ARCH_BGQ,
+
+	// Generic architecture/configuration
+	BLIS_ARCH_GENERIC
+
+} arch_t;
+
+#define BLIS_NUM_ARCHS 16
 
 
 //
@@ -1153,7 +1200,18 @@ typedef enum
 	// Object-related errors
 	BLIS_EXPECTED_OBJECT_ALIAS                 = (-130),
 
-	BLIS_ERROR_CODE_MAX                        = (-140)
+	// Architecture-related errors
+	BLIS_INVALID_ARCH_ID                       = (-140),
+
+	// Blocksize-related errors
+	BLIS_MC_DEF_NONMULTIPLE_OF_MR              = (-150),
+	BLIS_MC_MAX_NONMULTIPLE_OF_MR              = (-151),
+	BLIS_NC_DEF_NONMULTIPLE_OF_NR              = (-152),
+	BLIS_NC_MAX_NONMULTIPLE_OF_NR              = (-153),
+	BLIS_KC_DEF_NONMULTIPLE_OF_KR              = (-154),
+	BLIS_KC_MAX_NONMULTIPLE_OF_KR              = (-155),
+
+	BLIS_ERROR_CODE_MAX                        = (-160)
 } err_t;
 
 #endif

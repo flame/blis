@@ -32,74 +32,145 @@
 
 */
 
-// -----------------------------------------------------------------------------
-
 // blksz_t query
 
-#define bli_blksz_get_def( dt, b ) \
-\
-	( (b)->v[ dt ] )
-
-#define bli_blksz_get_max( dt, b ) \
-\
-	( (b)->e[ dt ] )
-
-#define bli_blksz_get_def_max( def, max, dt, b ) \
-{ \
-	*(def) = bli_blksz_get_def( dt, b ); \
-	*(max) = bli_blksz_get_max( dt, b ); \
+static dim_t bli_blksz_get_def
+     (
+       num_t    dt,
+       blksz_t* b
+     )
+{
+	return b->v[ dt ];
 }
+
+static dim_t bli_blksz_get_max
+     (
+       num_t    dt,
+       blksz_t* b
+     )
+{
+	return b->e[ dt ];
+}
+
 
 // blksz_t modification
 
-#define bli_blksz_set_def( val, dt, b ) \
-{ \
-	(b)->v[ dt ] = val; \
+static void bli_blksz_set_def
+     (
+       dim_t    val,
+       num_t    dt,
+       blksz_t* b
+     )
+{
+	b->v[ dt ] = val;
 }
 
-#define bli_blksz_set_max( val, dt, b ) \
-{ \
-	(b)->e[ dt ] = val; \
+static void bli_blksz_set_max
+     (
+       dim_t    val,
+       num_t    dt,
+       blksz_t* b
+     )
+{
+	b->e[ dt ] = val;
 }
 
-#define bli_blksz_set_def_max( def, max, dt, b ) \
-{ \
-	bli_blksz_set_def( def, dt, b ); \
-	bli_blksz_set_max( max, dt, b ); \
+static void bli_blksz_copy
+     (
+       blksz_t* b_src,
+       blksz_t* b_dst
+     )
+{
+	*b_dst = *b_src;
 }
 
-#define bli_blksz_copy( b_src, b_dst ) \
-{ \
-	*(b_dst) = *(b_src); \
+static void bli_blksz_copy_if_pos
+     (
+       blksz_t* b_src,
+       blksz_t* b_dst
+     )
+{
+	// Copy the blocksize values over to b_dst one-by-one so that
+	// we can skip the ones that are non-positive.
+
+	const dim_t v_s = bli_blksz_get_def( BLIS_FLOAT,    b_src );
+	const dim_t v_d = bli_blksz_get_def( BLIS_DOUBLE,   b_src );
+	const dim_t v_c = bli_blksz_get_def( BLIS_SCOMPLEX, b_src );
+	const dim_t v_z = bli_blksz_get_def( BLIS_DCOMPLEX, b_src );
+
+	const dim_t e_s = bli_blksz_get_max( BLIS_FLOAT,    b_src );
+	const dim_t e_d = bli_blksz_get_max( BLIS_DOUBLE,   b_src );
+	const dim_t e_c = bli_blksz_get_max( BLIS_SCOMPLEX, b_src );
+	const dim_t e_z = bli_blksz_get_max( BLIS_DCOMPLEX, b_src );
+
+	if ( v_s > 0 ) bli_blksz_set_def( v_s, BLIS_FLOAT,    b_dst );
+	if ( v_d > 0 ) bli_blksz_set_def( v_d, BLIS_DOUBLE,   b_dst );
+	if ( v_c > 0 ) bli_blksz_set_def( v_c, BLIS_SCOMPLEX, b_dst );
+	if ( v_z > 0 ) bli_blksz_set_def( v_z, BLIS_DCOMPLEX, b_dst );
+
+	if ( e_s > 0 ) bli_blksz_set_max( e_s, BLIS_FLOAT,    b_dst );
+	if ( e_d > 0 ) bli_blksz_set_max( e_d, BLIS_DOUBLE,   b_dst );
+	if ( e_c > 0 ) bli_blksz_set_max( e_c, BLIS_SCOMPLEX, b_dst );
+	if ( e_z > 0 ) bli_blksz_set_max( e_z, BLIS_DCOMPLEX, b_dst );
 }
 
-#define bli_blksz_copy_dt( dt_src, b_src, \
-                           dt_dst, b_dst ) \
-{ \
-	const dim_t v_src = bli_blksz_get_def( dt_src, b_src ); \
-	const dim_t e_src = bli_blksz_get_max( dt_src, b_src ); \
-\
-	bli_blksz_set_def( v_src, dt_dst, b_dst ); \
-	bli_blksz_set_max( e_src, dt_dst, b_dst ); \
+static void bli_blksz_copy_def_dt
+     (
+       num_t dt_src, blksz_t* b_src,
+       num_t dt_dst, blksz_t* b_dst
+     )
+{
+	const dim_t val = bli_blksz_get_def( dt_src, b_src );
+
+	bli_blksz_set_def( val, dt_dst, b_dst );
 }
 
-#define bli_blksz_scale_def( num, den, dt, b ) \
-{ \
-	(b)->v[ dt ] = ( (b)->v[ dt ] * num ) / den; \
+static void bli_blksz_copy_max_dt
+     (
+       num_t dt_src, blksz_t* b_src,
+       num_t dt_dst, blksz_t* b_dst
+     )
+{
+	const dim_t val = bli_blksz_get_max( dt_src, b_src );
+
+	bli_blksz_set_max( val, dt_dst, b_dst );
 }
 
-#define bli_blksz_scale_max( num, den, dt, b ) \
-{ \
-	(b)->e[ dt ] = ( (b)->e[ dt ] * num ) / den; \
+static void bli_blksz_copy_dt
+     (
+       num_t dt_src, blksz_t* b_src,
+       num_t dt_dst, blksz_t* b_dst
+     )
+{
+	bli_blksz_copy_def_dt( dt_src, b_src, dt_dst, b_dst );
+	bli_blksz_copy_max_dt( dt_src, b_src, dt_dst, b_dst );
 }
 
-#if 0
-#define bli_blksz_scale_dt_by( num, den, dt, b ) \
-{ \
-	(b)->v[ dt ] = ( (b)->v[ dt ] * num ) / den; \
-	(b)->e[ dt ] = ( (b)->e[ dt ] * num ) / den; \
+static void bli_blksz_scale_def
+     (
+       dim_t    num,
+       dim_t    den,
+       num_t    dt,
+       blksz_t* b
+     )
+{
+	const dim_t val = bli_blksz_get_def( dt, b );
+
+	bli_blksz_set_def( ( val * num ) / den, dt, b );
 }
-#endif
+
+static void bli_blksz_scale_max
+     (
+       dim_t    num,
+       dim_t    den,
+       num_t    dt,
+       blksz_t* b
+     )
+{
+	const dim_t val = bli_blksz_get_max( dt, b );
+
+	bli_blksz_set_max( ( val * num ) / den, dt, b );
+}
 
 // -----------------------------------------------------------------------------
 

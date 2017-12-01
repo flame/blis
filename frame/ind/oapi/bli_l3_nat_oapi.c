@@ -55,21 +55,15 @@ void PASTEMAC(opname,imeth) \
        cntx_t* cntx  \
      ) \
 { \
-	num_t   dt       = bli_obj_datatype( *c ); \
-	cntx_t* cntx_p; \
-\
-	/* Initialize a local context if the one provided is NULL. */ \
-	bli_cntx_init_local_if2( cname, imeth, dt, cntx, cntx_p ); \
+	/* Obtain a valid (native) context from the gks if necessary. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* Invoke the operation's front end with the appropriate control
 	   tree. */ \
 	PASTEMAC(opname,_front) \
 	( \
-	  alpha, a, b, beta, c, cntx_p, NULL \
+	  alpha, a, b, beta, c, cntx, NULL \
 	); \
-\
-	/* Finalize the local context if it was initialized here. */ \
-	bli_cntx_finalize_local_if2( cname, imeth, cntx ); \
 }
 
 GENFRONT( gemm, gemm, nat )
@@ -93,21 +87,15 @@ void PASTEMAC(opname,imeth) \
        cntx_t* cntx  \
      ) \
 { \
-	num_t   dt       = bli_obj_datatype( *c ); \
-	cntx_t* cntx_p; \
-\
-	/* Initialize a local context if the one provided is NULL. */ \
-	bli_cntx_init_local_if2( cname, imeth, dt, cntx, cntx_p ); \
+	/* Obtain a valid (native) context from the gks if necessary. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* Invoke the operation's front end with the appropriate control
 	   tree. */ \
 	PASTEMAC(opname,_front) \
 	( \
-	  side, alpha, a, b, beta, c, cntx_p, NULL \
+	  side, alpha, a, b, beta, c, cntx, NULL \
 	); \
-\
-	/* Finalize the local context if it was initialized here. */ \
-	bli_cntx_finalize_local_if2( cname, imeth, cntx ); \
 }
 
 GENFRONT( hemm, gemm, nat )
@@ -129,21 +117,15 @@ void PASTEMAC(opname,imeth) \
        cntx_t* cntx  \
      ) \
 { \
-	num_t   dt       = bli_obj_datatype( *c ); \
-	cntx_t* cntx_p; \
-\
-	/* Initialize a local context if the one provided is NULL. */ \
-	bli_cntx_init_local_if2( cname, imeth, dt, cntx, cntx_p ); \
+	/* Obtain a valid (native) context from the gks if necessary. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* Invoke the operation's front end with the appropriate control
 	   tree. */ \
 	PASTEMAC(opname,_front) \
 	( \
-	  alpha, a, beta, c, cntx_p, NULL \
+	  alpha, a, beta, c, cntx, NULL \
 	); \
-\
-	/* Finalize the local context if it was initialized here. */ \
-	bli_cntx_finalize_local_if2( cname, imeth, cntx ); \
 }
 
 GENFRONT( herk, gemm, nat )
@@ -164,21 +146,15 @@ void PASTEMAC(opname,imeth) \
        cntx_t* cntx  \
      ) \
 { \
-	num_t   dt       = bli_obj_datatype( *b ); \
-	cntx_t* cntx_p; \
-\
-	/* Initialize a local context if the one provided is NULL. */ \
-	bli_cntx_init_local_if2( cname, imeth, dt, cntx, cntx_p ); \
+	/* Obtain a valid (native) context from the gks if necessary. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* Invoke the operation's front end with the appropriate control
 	   tree. */ \
 	PASTEMAC(opname,_front) \
 	( \
-	  side, alpha, a, b, cntx_p, NULL \
+	  side, alpha, a, b, cntx, NULL \
 	); \
-\
-	/* Finalize the local context if it was initialized here. */ \
-	bli_cntx_finalize_local_if2( cname, imeth, cntx ); \
 }
 
 GENFRONT( trmm, gemm, nat )
@@ -198,21 +174,15 @@ void PASTEMAC(opname,imeth) \
        cntx_t* cntx  \
      ) \
 { \
-	num_t   dt       = bli_obj_datatype( *b ); \
-	cntx_t* cntx_p; \
-\
-	/* Initialize a local context if the one provided is NULL. */ \
-	bli_cntx_init_local_if2( cname, imeth, dt, cntx, cntx_p ); \
+	/* Obtain a valid (native) context from the gks if necessary. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* Invoke the operation's front end with the appropriate control
 	   tree. */ \
 	PASTEMAC(opname,_front) \
 	( \
-	  side, alpha, a, b, cntx_p, NULL \
+	  side, alpha, a, b, cntx, NULL \
 	); \
-\
-	/* Finalize the local context if it was initialized here. */ \
-	bli_cntx_finalize_local_if2( cname, imeth, cntx ); \
 }
 
 GENFRONT( trsm, trsm, nat )

@@ -1,0 +1,35 @@
+#
+# config_registry
+#
+# Please refer to the BLIS wiki on configurations for information on the
+# syntax and semantics of this file [1].
+#
+# [1] https://github.com/flame/blis/wiki/ConfigurationHowTo
+#
+
+# Processor families.
+intel64:     haswell sandybridge penryn generic
+amd64:       zen excavator steamroller piledriver bulldozer generic
+arm32:       cortexa9 cortexa15 generic
+x86_64:      haswell sandybridge penryn zen excavator steamroller piledriver bulldozer generic
+
+# Intel architectures.
+haswell:     haswell
+sandybridge: sandybridge
+penryn:      penryn
+knl:         knl
+
+# AMD architectures.
+zen:         zen/haswell
+excavator:   excavator/piledriver
+steamroller: steamroller/piledriver
+piledriver:  piledriver
+bulldozer:   bulldozer
+
+# ARM architectures.
+cortexa9:    cortexa9/armv7a
+cortexa15:   cortexa15/armv7a
+cortexa57:   cortexa57/armv8a
+
+# Generic architectures.
+generic:     generic

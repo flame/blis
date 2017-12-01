@@ -48,7 +48,7 @@ main()
     fi
 	CPUID_SRC=cpuid_x86.c
 	CPUID_BIN=blis_cpu_detect
-	ARCH=reference
+	ARCH=generic
 
 	# The name of the script, stripped of any preceeding path.
 	script_name=${0##*/}
@@ -78,12 +78,12 @@ main()
 	elif [ $ARCH = "ARCH_ARM" ]; then
 		CPUID_SRC=cpuid_arm.c
 	elif [ $ARCH = "ARCH_AARCH64" ]; then
-	        #Only support armv8 now
-	        echo "armv8a"
+		# Only support armv8 now
+		echo "armv8a"
 		return 0
 	else
-	        echo "reference"
-	        return 0
+		echo "generic"
+		return 0
 	fi
 
 	#

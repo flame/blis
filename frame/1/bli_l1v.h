@@ -32,7 +32,6 @@
 
 */
 
-#include "bli_l1v_cntx.h"
 #include "bli_l1v_check.h"
 
 #include "bli_l1v_ft.h"
@@ -56,5 +55,5 @@
 //#include "bli_scalv_int.h"
 
 // Reference kernel headers
-#include "bli_l1v_ref.h"
+//#include "bli_l1v_ref.h"
 

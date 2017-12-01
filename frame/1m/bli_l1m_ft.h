@@ -42,6 +42,8 @@
 
 // packm
 
+// NOTE: This is the function type for the structure-aware "kernel".
+
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
@@ -83,29 +85,47 @@ INSERT_GENTDEF( packm )
 \
 typedef void (*PASTECH2(ch,opname,tsuf)) \
      ( \
-       conj_t          conja, \
-       dim_t           n, \
-       ctype* restrict kappa, \
-       ctype* restrict a, inc_t inca, inc_t lda, \
-       ctype* restrict p,             inc_t ldp  \
+       conj_t           conja, \
+       dim_t            n, \
+       ctype*  restrict kappa, \
+       ctype*  restrict a, inc_t inca, inc_t lda, \
+       ctype*  restrict p,             inc_t ldp, \
+       cntx_t* restrict cntx  \
      );
 
 INSERT_GENTDEF( packm_cxk_ker )
-INSERT_GENTDEF( packm_cxk_1er_ker )
 
-
-// packm_3mis_ker
+// unpackm_ker
 
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
 typedef void (*PASTECH2(ch,opname,tsuf)) \
      ( \
-       conj_t          conja, \
-       dim_t           n, \
-       ctype* restrict kappa, \
-       ctype* restrict a, inc_t inca, inc_t lda, \
-       ctype* restrict p, inc_t is_p, inc_t ldp  \
+       conj_t           conjp, \
+       dim_t            n, \
+       ctype*  restrict kappa, \
+       ctype*  restrict p,             inc_t ldp, \
+       ctype*  restrict a, inc_t inca, inc_t lda, \
+       cntx_t* restrict cntx  \
+     );
+
+INSERT_GENTDEF( unpackm_cxk_ker )
+
+// packm_3mis_ker
+// packm_4mi_ker
+
+#undef  GENTDEF
+#define GENTDEF( ctype, ch, opname, tsuf ) \
+\
+typedef void (*PASTECH2(ch,opname,tsuf)) \
+     ( \
+       conj_t           conja, \
+       dim_t            n, \
+       ctype*  restrict kappa, \
+       ctype*  restrict a, inc_t inca, inc_t lda, \
+       ctype*  restrict p, inc_t is_p, inc_t ldp, \
+       cntx_t* restrict cntx  \
      );
 
 INSERT_GENTDEF( packm_cxk_3mis_ker )
@@ -113,21 +133,26 @@ INSERT_GENTDEF( packm_cxk_4mi_ker )
 
 
 // packm_rih_ker
+// packm_1er_ker
 
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
 typedef void (*PASTECH2(ch,opname,tsuf)) \
      ( \
-       conj_t          conja, \
-       pack_t          schema, \
-       dim_t           n, \
-       ctype* restrict kappa, \
-       ctype* restrict a, inc_t inca, inc_t lda, \
-       ctype* restrict p,             inc_t ldp  \
+       conj_t           conja, \
+       pack_t           schema, \
+       dim_t            n, \
+       ctype*  restrict kappa, \
+       ctype*  restrict a, inc_t inca, inc_t lda, \
+       ctype*  restrict p,             inc_t ldp, \
+       cntx_t* restrict cntx  \
      );
 
 INSERT_GENTDEF( packm_cxk_rih_ker )
+INSERT_GENTDEF( packm_cxk_1er_ker )
+
+
 
 
 

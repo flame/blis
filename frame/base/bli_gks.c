@@ -34,945 +34,495 @@
 
 #include "blis.h"
 
-//
-// -- blksz_t structure --------------------------------------------------------
-//
-
-static blksz_t bli_gks_blkszs[BLIS_NUM_BLKSZS] =
-{
-         /*           float (0)       scomplex (1)         double (2)       dcomplex (3) */
-/* kr */ { { BLIS_DEFAULT_KR_S, BLIS_DEFAULT_KR_C, BLIS_DEFAULT_KR_D, BLIS_DEFAULT_KR_Z, },
-           { BLIS_PACKDIM_KR_S, BLIS_PACKDIM_KR_C, BLIS_PACKDIM_KR_D, BLIS_PACKDIM_KR_Z, }
-         },
-/* mr */ { { BLIS_DEFAULT_MR_S, BLIS_DEFAULT_MR_C, BLIS_DEFAULT_MR_D, BLIS_DEFAULT_MR_Z, },
-           { BLIS_PACKDIM_MR_S, BLIS_PACKDIM_MR_C, BLIS_PACKDIM_MR_D, BLIS_PACKDIM_MR_Z, }
-         },
-/* nr */ { { BLIS_DEFAULT_NR_S, BLIS_DEFAULT_NR_C, BLIS_DEFAULT_NR_D, BLIS_DEFAULT_NR_Z, },
-           { BLIS_PACKDIM_NR_S, BLIS_PACKDIM_NR_C, BLIS_PACKDIM_NR_D, BLIS_PACKDIM_NR_Z, }
-         },
-/* mc */ { { BLIS_DEFAULT_MC_S, BLIS_DEFAULT_MC_C, BLIS_DEFAULT_MC_D, BLIS_DEFAULT_MC_Z, },
-           { BLIS_MAXIMUM_MC_S, BLIS_MAXIMUM_MC_C, BLIS_MAXIMUM_MC_D, BLIS_MAXIMUM_MC_Z, }
-         },
-/* kc */ { { BLIS_DEFAULT_KC_S, BLIS_DEFAULT_KC_C, BLIS_DEFAULT_KC_D, BLIS_DEFAULT_KC_Z, },
-           { BLIS_MAXIMUM_KC_S, BLIS_MAXIMUM_KC_C, BLIS_MAXIMUM_KC_D, BLIS_MAXIMUM_KC_Z, }
-         },
-/* nc */ { { BLIS_DEFAULT_NC_S, BLIS_DEFAULT_NC_C, BLIS_DEFAULT_NC_D, BLIS_DEFAULT_NC_Z, },
-           { BLIS_MAXIMUM_NC_S, BLIS_MAXIMUM_NC_C, BLIS_MAXIMUM_NC_D, BLIS_MAXIMUM_NC_Z, }
-         },
-/* m2 */ { { BLIS_DEFAULT_M2_S, BLIS_DEFAULT_M2_C, BLIS_DEFAULT_M2_D, BLIS_DEFAULT_M2_Z, },
-           { BLIS_DEFAULT_M2_S, BLIS_DEFAULT_M2_C, BLIS_DEFAULT_M2_D, BLIS_DEFAULT_M2_Z, }
-         },
-/* n2 */ { { BLIS_DEFAULT_N2_S, BLIS_DEFAULT_N2_C, BLIS_DEFAULT_N2_D, BLIS_DEFAULT_N2_Z, },
-           { BLIS_DEFAULT_N2_S, BLIS_DEFAULT_N2_C, BLIS_DEFAULT_N2_D, BLIS_DEFAULT_N2_Z, }
-         },
-/* 1f */ { { BLIS_DEFAULT_1F_S, BLIS_DEFAULT_1F_C, BLIS_DEFAULT_1F_D, BLIS_DEFAULT_1F_Z, },
-           { BLIS_DEFAULT_1F_S, BLIS_DEFAULT_1F_C, BLIS_DEFAULT_1F_D, BLIS_DEFAULT_1F_Z, }
-         },
-/* af */ { { BLIS_DEFAULT_AF_S, BLIS_DEFAULT_AF_C, BLIS_DEFAULT_AF_D, BLIS_DEFAULT_AF_Z, },
-           { BLIS_DEFAULT_AF_S, BLIS_DEFAULT_AF_C, BLIS_DEFAULT_AF_D, BLIS_DEFAULT_AF_Z, }
-         },
-/* df */ { { BLIS_DEFAULT_DF_S, BLIS_DEFAULT_DF_C, BLIS_DEFAULT_DF_D, BLIS_DEFAULT_DF_Z, },
-           { BLIS_DEFAULT_DF_S, BLIS_DEFAULT_DF_C, BLIS_DEFAULT_DF_D, BLIS_DEFAULT_DF_Z, }
-         },
-};
-
-// -----------------------------------------------------------------------------
-
-void bli_gks_get_blksz( bszid_t  bs_id,
-                        blksz_t* blksz )
-{
-	*blksz = bli_gks_blkszs[ bs_id ];
-}
-
-void bli_gks_cntx_set_blkszs( ind_t method, dim_t n_bs, ... )
-{
-	/* Example prototypes:
-
-	   void bli_gks_cntx_set_blkszs
-	   (
-	     ind_t   method = BLIS_NAT,
-	     dim_t   n_bs,
-	     bszid_t bs0_id, bszid_t bm0_id,
-	     bszid_t bs1_id, bszid_t bm1_id,
-	     bszid_t bs2_id, bszid_t bm2_id,
-	     ...
-	     cntx_t* cntx
-	   );
-
-	   void bli_gks_cntx_set_blkszs
-	   (
-	     ind_t   method != BLIS_NAT,
-	     dim_t   n_bs,
-	     bszid_t bs0_id, bszid_t bm0_id, dim_t def_scalr0, dim_t max_scalr0,
-	     bszid_t bs1_id, bszid_t bm1_id, dim_t def_scalr1, dim_t max_scalr1,
-	     bszid_t bs2_id, bszid_t bm2_id, dim_t def_scalr2, dim_t max_scalr2,
-	     ...
-	     cntx_t* cntx
-	   );
-	*/
-	va_list   args;
-	dim_t     i;
-
-	bszid_t*  bszids;
-	bszid_t*  bmults;
-	double*   dsclrs;
-	double*   msclrs;
-
-	cntx_t*   cntx;
-
-	blksz_t*  cntx_blkszs;
-	bszid_t*  cntx_bmults;
-
-
-	// Allocate some temporary local arrays.
-	bszids = bli_malloc_intl( n_bs * sizeof( bszid_t  ) );
-	bmults = bli_malloc_intl( n_bs * sizeof( bszid_t  ) );
-	dsclrs = bli_malloc_intl( n_bs * sizeof( double   ) );
-	msclrs = bli_malloc_intl( n_bs * sizeof( double   ) );
-
-	// -- Begin variable argument section --
-
-	// Initialize variable argument environment.
-	va_start( args, n_bs );
-
-	// Handle native and induced method cases separately.
-	if ( method == BLIS_NAT )
-	{
-		// Process n_bs tuples.
-		for ( i = 0; i < n_bs; ++i )
-		{
-			// Here, we query the variable argument list for:
-			// - the bszid_t of the blocksize we're about to process,
-			// - the bszid_t of the multiple we need to associate with
-			//   the blksz_t object.
-			bszid_t  bs_id = va_arg( args, bszid_t  );
-			bszid_t  bm_id = va_arg( args, bszid_t  );
-
-			// Store the values in our temporary arrays.
-			bszids[ i ] = bs_id;
-			bmults[ i ] = bm_id;
-		}
-	}
-	else // if induced method execution was indicated
-	{
-		// Process n_bs tuples.
-		for ( i = 0; i < n_bs; ++i )
-		{
-			// Here, we query the variable argument list for:
-			// - the bszid_t of the blocksize we're about to process,
-			// - the bszid_t of the multiple we need to associate with
-			//   the blksz_t object.
-			// - the scalars we wish to apply to the real blocksizes to
-			//   come up with the induced complex blocksizes (for default
-			//   and maximum blocksizes).
-			bszid_t  bs_id = va_arg( args, bszid_t  );
-			bszid_t  bm_id = va_arg( args, bszid_t  );
-			double   dsclr = va_arg( args, double   );
-			double   msclr = va_arg( args, double   );
-
-			// Store the values in our temporary arrays.
-			bszids[ i ] = bs_id;
-			bmults[ i ] = bm_id;
-			dsclrs[ i ] = dsclr;
-			msclrs[ i ] = msclr;
-		}
-	}
-
-	// The last argument should be the context pointer.
-	cntx = va_arg( args, cntx_t* );
-
-	// Shutdown variable argument environment and clean up stack.
-	va_end( args );
-
-	// -- End variable argument section --
-
-	// Save the execution type into the context.
-	bli_cntx_set_method( method, cntx );
-
-	// Query the context for the addresses of:
-	// - the blocksize object array
-	// - the blocksize multiple array
-	cntx_blkszs = bli_cntx_blkszs_buf( cntx );
-	cntx_bmults = bli_cntx_bmults_buf( cntx );
-
-	// Now that we have the context address, we want to copy the values
-	// from the temporary buffers into the corresponding buffers in the
-	// context.
-
-	// Handle native and induced method cases separately.
-	if ( method == BLIS_NAT )
-	{
-		// Process each blocksize id tuple provided.
-		for ( i = 0; i < n_bs; ++i )
-		{
-			// Read the current blocksize id, blocksize multiple id.
-			bszid_t  bs_id = bszids[ i ];
-			bszid_t  bm_id = bmults[ i ];
-
-			blksz_t* cntx_blksz = &cntx_blkszs[ bs_id ];
-
-			// Query the blocksizes (blksz_t) associated with bs_id and save
-			// them directly into the appropriate location in the context's
-			// blksz_t array.
-			bli_gks_get_blksz( bs_id, cntx_blksz );
-
-			// Copy the blocksize multiple id into the context.
-			cntx_bmults[ bs_id ] = bm_id;
-		}
-	}
-	else
-	{
-		// Process each blocksize id tuple provided.
-		for ( i = 0; i < n_bs; ++i )
-		{
-			// Read the current blocksize id, blocksize multiple id,
-			// and blocksize scalar.
-			bszid_t  bs_id = bszids[ i ];
-			bszid_t  bm_id = bmults[ i ];
-			double   dsclr = dsclrs[ i ];
-			double   msclr = msclrs[ i ];
-
-			blksz_t  blksz_l;
-			blksz_t  bmult_l;
-
-			blksz_t* blksz = &blksz_l;
-			blksz_t* bmult = &bmult_l;
-
-			blksz_t* cntx_blksz = &cntx_blkszs[ bs_id ];
-
-			// Query the blocksizes (blksz_t) associated with bs_id and bm_id
-			// and use them to populate a pair of local blksz_t objects.
-			bli_gks_get_blksz( bs_id, blksz );
-			bli_gks_get_blksz( bm_id, bmult );
-
-			// Copy the real domain values of the source blksz_t object into
-			// the context, duplicating into the complex domain fields.
-			bli_blksz_copy_dt( BLIS_FLOAT,  blksz, BLIS_FLOAT,    cntx_blksz );
-			bli_blksz_copy_dt( BLIS_DOUBLE, blksz, BLIS_DOUBLE,   cntx_blksz );
-			bli_blksz_copy_dt( BLIS_FLOAT,  blksz, BLIS_SCOMPLEX, cntx_blksz );
-			bli_blksz_copy_dt( BLIS_DOUBLE, blksz, BLIS_DCOMPLEX, cntx_blksz );
-
-			// If the default blocksize scalar is non-unit, we need to scale
-			// the complex domain default blocksizes.
-			if ( dsclr != 1.0 )
-			{
-				// Scale the complex domain default blocksize values in the
-				// blocksize object.
-				bli_blksz_scale_def( 1, ( dim_t )dsclr, BLIS_SCOMPLEX, cntx_blksz );
-				bli_blksz_scale_def( 1, ( dim_t )dsclr, BLIS_DCOMPLEX, cntx_blksz );
-
-				if ( bs_id != bm_id )
-				{
-					// Round the newly-scaled blocksizes down to their multiple.
-					// (Note that both the default and maximum blocksize values
-					// must be a multiple of the same blocksize multiple.) Also,
-					// note that this is only done when the blocksize id is not
-					// equal to the blocksize multiple id (ie: we don't round
-					// down scaled register blocksizes since they are their own
-					// multiples).
-					bli_blksz_reduce_def_to( BLIS_FLOAT,  bmult, BLIS_SCOMPLEX, cntx_blksz );
-					bli_blksz_reduce_def_to( BLIS_DOUBLE, bmult, BLIS_DCOMPLEX, cntx_blksz );
-				}
-			}
-
-			// Similarly, if the maximum blocksize scalar is non-unit, we need
-			// to scale the complex domain maximum blocksizes.
-			if ( msclr != 1.0 )
-			{
-				// Scale the complex domain maximum blocksize values in the
-				// blocksize object.
-				bli_blksz_scale_max( 1, ( dim_t )msclr, BLIS_SCOMPLEX, cntx_blksz );
-				bli_blksz_scale_max( 1, ( dim_t )msclr, BLIS_DCOMPLEX, cntx_blksz );
-
-				if ( bs_id != bm_id )
-				{
-					// Round the newly-scaled blocksizes down to their multiple.
-					// (Note that both the default and maximum blocksize values
-					// must be a multiple of the same blocksize multiple.) Also,
-					// note that this is only done when the blocksize id is not
-					// equal to the blocksize multiple id (ie: we don't round
-					// down scaled register blocksizes since they are their own
-					// multiples).
-					bli_blksz_reduce_max_to( BLIS_FLOAT,  bmult, BLIS_SCOMPLEX, cntx_blksz );
-					bli_blksz_reduce_max_to( BLIS_DOUBLE, bmult, BLIS_DCOMPLEX, cntx_blksz );
-				}
-			}
-
-			// Copy the blocksize multiple id into the context.
-			cntx_bmults[ bs_id ] = bm_id;
-		}
-	}
-
-	// Free the temporary local arrays.
-	bli_free_intl( bszids );
-	bli_free_intl( bmults );
-	bli_free_intl( dsclrs );
-	bli_free_intl( msclrs );
-}
-
-
-//
-// -- level-3 micro-kernel structure -------------------------------------------
-//
-
-static func_t bli_gks_l3_ind_ukrs[BLIS_NUM_IND_METHODS]
-                                 [BLIS_NUM_LEVEL3_UKRS] =
-{
-              /*      s(0)  c(1)                         d(2)  z(3)                        */
-/* 3mh        */  {
-/* gemm       */  { { NULL, BLIS_CGEMM3MH_UKERNEL,       NULL, BLIS_ZGEMM3MH_UKERNEL,       } },
-/* gemmtrsm_l */  { { NULL, NULL,                        NULL, NULL,                        } },
-/* gemmtrsm_u */  { { NULL, NULL,                        NULL, NULL,                        } },
-/* trsm_l     */  { { NULL, NULL,                        NULL, NULL,                        } },
-/* trsm_u     */  { { NULL, NULL,                        NULL, NULL,                        } },
-                  },
-/* 3m3        */  {
-/* gemm       */  { { NULL, BLIS_CGEMM3M3_UKERNEL,       NULL, BLIS_ZGEMM3M3_UKERNEL,       } },
-/* gemmtrsm_l */  { { NULL, NULL,                        NULL, NULL,                        } },
-/* gemmtrsm_u */  { { NULL, NULL,                        NULL, NULL,                        } },
-/* trsm_l     */  { { NULL, NULL,                        NULL, NULL,                        } },
-/* trsm_u     */  { { NULL, NULL,                        NULL, NULL,                        } },
-                  },
-/* 3m2        */  {
-/* gemm       */  { { NULL, BLIS_CGEMM3M2_UKERNEL,       NULL, BLIS_ZGEMM3M2_UKERNEL,       } },
-/* gemmtrsm_l */  { { NULL, NULL,                        NULL, NULL,                        } },
-/* gemmtrsm_u */  { { NULL, NULL,                        NULL, NULL,                        } },
-/* trsm_l     */  { { NULL, NULL,                        NULL, NULL,                        } },
-/* trsm_u     */  { { NULL, NULL,                        NULL, NULL,                        } },
-                  },
-/* 3m1        */  {
-/* gemm       */  { { NULL, BLIS_CGEMM3M1_UKERNEL,       NULL, BLIS_ZGEMM3M1_UKERNEL,       } },
-/* gemmtrsm_l */  { { NULL, BLIS_CGEMMTRSM3M1_L_UKERNEL, NULL, BLIS_ZGEMMTRSM3M1_L_UKERNEL, } },
-/* gemmtrsm_u */  { { NULL, BLIS_CGEMMTRSM3M1_U_UKERNEL, NULL, BLIS_ZGEMMTRSM3M1_U_UKERNEL, } },
-/* trsm_l     */  { { NULL, BLIS_CTRSM3M1_L_UKERNEL,     NULL, BLIS_ZTRSM3M1_L_UKERNEL,     } },
-/* trsm_u     */  { { NULL, BLIS_CTRSM3M1_U_UKERNEL,     NULL, BLIS_ZTRSM3M1_U_UKERNEL,     } },
-                  },
-/* 4mh        */  {
-/* gemm       */  { { NULL, BLIS_CGEMM4MH_UKERNEL,       NULL, BLIS_ZGEMM4MH_UKERNEL,       } },
-/* gemmtrsm_l */  { { NULL, NULL,                        NULL, NULL,                        } },
-/* gemmtrsm_u */  { { NULL, NULL,                        NULL, NULL,                        } },
-/* trsm_l     */  { { NULL, NULL,                        NULL, NULL,                        } },
-/* trsm_u     */  { { NULL, NULL,                        NULL, NULL,                        } },
-                  },
-/* 4m1b       */  {
-/* gemm       */  { { NULL, BLIS_CGEMM4MB_UKERNEL,       NULL, BLIS_ZGEMM4MB_UKERNEL,       } },
-/* gemmtrsm_l */  { { NULL, NULL,                        NULL, NULL,                        } },
-/* gemmtrsm_u */  { { NULL, NULL,                        NULL, NULL,                        } },
-/* trsm_l     */  { { NULL, NULL,                        NULL, NULL,                        } },
-/* trsm_u     */  { { NULL, NULL,                        NULL, NULL,                        } },
-                  },
-/* 4m1a       */  {
-/* gemm       */  { { NULL, BLIS_CGEMM4M1_UKERNEL,       NULL, BLIS_ZGEMM4M1_UKERNEL,       } },
-/* gemmtrsm_l */  { { NULL, BLIS_CGEMMTRSM4M1_L_UKERNEL, NULL, BLIS_ZGEMMTRSM4M1_L_UKERNEL, } },
-/* gemmtrsm_u */  { { NULL, BLIS_CGEMMTRSM4M1_U_UKERNEL, NULL, BLIS_ZGEMMTRSM4M1_U_UKERNEL, } },
-/* trsm_l     */  { { NULL, BLIS_CTRSM4M1_L_UKERNEL,     NULL, BLIS_ZTRSM4M1_L_UKERNEL,     } },
-/* trsm_u     */  { { NULL, BLIS_CTRSM4M1_U_UKERNEL,     NULL, BLIS_ZTRSM4M1_U_UKERNEL,     } },
-                  },
-/* 1m         */  {
-/* gemm       */  { { BLIS_SGEMM_UKERNEL,       BLIS_CGEMM1M_UKERNEL,
-                      BLIS_DGEMM_UKERNEL,       BLIS_ZGEMM1M_UKERNEL,       } },
-/* gemmtrsm_l */  { { NULL,                     BLIS_CGEMMTRSM1M_L_UKERNEL,
-                      NULL,                     BLIS_ZGEMMTRSM1M_L_UKERNEL, } },
-/* gemmtrsm_u */  { { NULL,                     BLIS_CGEMMTRSM1M_U_UKERNEL,
-                      NULL,                     BLIS_ZGEMMTRSM1M_U_UKERNEL, } },
-/* trsm_l     */  { { NULL,                     BLIS_CTRSM1M_L_UKERNEL,
-                      NULL,                     BLIS_ZTRSM1M_L_UKERNEL,     } },
-/* trsm_u     */  { { NULL,                     BLIS_CTRSM1M_U_UKERNEL,
-                      NULL,                     BLIS_ZTRSM1M_U_UKERNEL,     } },
-                  },
-/* nat        */  {
-/* gemm       */  { { BLIS_SGEMM_UKERNEL,       BLIS_CGEMM_UKERNEL,
-                      BLIS_DGEMM_UKERNEL,       BLIS_ZGEMM_UKERNEL,       } },
-/* gemmtrsm_l */  { { BLIS_SGEMMTRSM_L_UKERNEL, BLIS_CGEMMTRSM_L_UKERNEL,
-                      BLIS_DGEMMTRSM_L_UKERNEL, BLIS_ZGEMMTRSM_L_UKERNEL, } },
-/* gemmtrsm_u */  { { BLIS_SGEMMTRSM_U_UKERNEL, BLIS_CGEMMTRSM_U_UKERNEL,
-                      BLIS_DGEMMTRSM_U_UKERNEL, BLIS_ZGEMMTRSM_U_UKERNEL, } },
-/* trsm_l     */  { { BLIS_STRSM_L_UKERNEL,     BLIS_CTRSM_L_UKERNEL,
-                      BLIS_DTRSM_L_UKERNEL,     BLIS_ZTRSM_L_UKERNEL,     } },
-/* trsm_u     */  { { BLIS_STRSM_U_UKERNEL,     BLIS_CTRSM_U_UKERNEL,
-                      BLIS_DTRSM_U_UKERNEL,     BLIS_ZTRSM_U_UKERNEL,     } },
-                  },
-};
-
-static func_t bli_gks_l3_ref_ukrs[BLIS_NUM_LEVEL3_UKRS] =
-{
-                /* float (0)  scomplex (1)  double (2)  dcomplex (3) */
-/* gemm       */  { { BLIS_SGEMM_UKERNEL_REF,       BLIS_CGEMM_UKERNEL_REF,
-                      BLIS_DGEMM_UKERNEL_REF,       BLIS_ZGEMM_UKERNEL_REF,       } },
-/* gemmtrsm_l */  { { BLIS_SGEMMTRSM_L_UKERNEL_REF, BLIS_CGEMMTRSM_L_UKERNEL_REF,
-                      BLIS_DGEMMTRSM_L_UKERNEL_REF, BLIS_ZGEMMTRSM_L_UKERNEL_REF, } },
-/* gemmtrsm_u */  { { BLIS_SGEMMTRSM_U_UKERNEL_REF, BLIS_CGEMMTRSM_U_UKERNEL_REF,
-                      BLIS_DGEMMTRSM_U_UKERNEL_REF, BLIS_ZGEMMTRSM_U_UKERNEL_REF, } },
-/* trsm_l     */  { { BLIS_STRSM_L_UKERNEL_REF,     BLIS_CTRSM_L_UKERNEL_REF,
-                      BLIS_DTRSM_L_UKERNEL_REF,     BLIS_ZTRSM_L_UKERNEL_REF,     } },
-/* trsm_u     */  { { BLIS_STRSM_U_UKERNEL_REF,     BLIS_CTRSM_U_UKERNEL_REF,
-                      BLIS_DTRSM_U_UKERNEL_REF,     BLIS_ZTRSM_U_UKERNEL_REF,     } },
-};
-
-// -----------------------------------------------------------------------------
-
-void bli_gks_get_l3_nat_ukr( l3ukr_t ukr,
-                             func_t* func )
-{
-	*func = bli_gks_l3_ind_ukrs[ BLIS_NAT ][ ukr ];
-}
-
-void bli_gks_get_l3_vir_ukr( ind_t   method,
-                             l3ukr_t ukr,
-                             func_t* func )
-{
-	*func = bli_gks_l3_ind_ukrs[ method ][ ukr ];
-}
-
-void bli_gks_get_l3_ref_ukr( l3ukr_t ukr,
-                             func_t* func )
-{
-	*func = bli_gks_l3_ref_ukrs[ ukr ];
-}
-
-void bli_gks_cntx_set_l3_nat_ukr( l3ukr_t ukr,
-                                  cntx_t* cntx )
-{
-	func_t* cntx_l3_nat_ukrs = bli_cntx_l3_nat_ukrs_buf( cntx );
-	func_t* cntx_l3_nat_ukr  = &cntx_l3_nat_ukrs[ ukr ];
-
-	bli_gks_get_l3_nat_ukr( ukr, cntx_l3_nat_ukr );
-}
-
-void bli_gks_cntx_set_l3_nat_ukrs( dim_t n_uk, ... )
-{
-	/* Example prototype:
-
-	   void
-	   bli_gks_cntx_set_l3_nat_ukrs( dim_t   n_uk,
-	                                 l3ukr_t ukr0_id,
-	                                 l3ukr_t ukr1_id,
-	                                 l3ukr_t ukr2_id,
-	                                 ...
-	                                 cntx_t* cntx );
-	*/
-
-	va_list   args;
-	dim_t     i;
-	l3ukr_t*  l3_ukrs;
-	cntx_t*   cntx;
-
-	// Allocate some temporary local arrays.
-	l3_ukrs = bli_malloc_intl( n_uk * sizeof( l3ukr_t ) );
-
-	// -- Begin variable argument section --
-
-	// Initialize variable argument environment.
-	va_start( args, n_uk );
-
-	// Process n_uk kernel ids.
-	for ( i = 0; i < n_uk; ++i )
-	{
-		// Here, we query the variable argument list for the kernel id.
-		const l3ukr_t uk_id = va_arg( args, l3ukr_t  );
-
-		// Store the value in our temporary array.
-		l3_ukrs[ i ] = uk_id;
-	}
-
-	// The last argument should be the context pointer.
-	cntx = va_arg( args, cntx_t* );
-
-	// Shutdown variable argument environment and clean up stack.
-	va_end( args );
-
-	// -- End variable argument section --
-
-	// Process each kernel id provided.
-	for ( i = 0; i < n_uk; ++i )
-	{
-		// Read the current kernel id.
-		const l3ukr_t uk_id = l3_ukrs[ i ];
-
-		// Query the func_t associated with uk_id and save it directly into
-		// the context.
-		bli_gks_cntx_set_l3_nat_ukr( uk_id, cntx );
-	}
-
-	// Free the temporary local array.
-	bli_free_intl( l3_ukrs );
-}
-
-void bli_gks_cntx_set_l3_vir_ukr( ind_t   method,
-                                  l3ukr_t ukr,
-                                  cntx_t* cntx )
-{
-	func_t* cntx_l3_vir_ukrs = bli_cntx_l3_vir_ukrs_buf( cntx );
-	func_t* cntx_l3_vir_ukr  = &cntx_l3_vir_ukrs[ ukr ];
-
-	bli_gks_get_l3_vir_ukr( method, ukr, cntx_l3_vir_ukr );
-}
-
-void bli_gks_cntx_set_l3_vir_ukrs( ind_t method, dim_t n_uk, ... )
-{
-	/* Example prototype:
-
-	   void
-	   bli_gks_cntx_set_l3_vir_ukrs( ind_t   method,
-                                     dim_t   n_uk,
-	                                 l3ukr_t ukr0_id,
-	                                 l3ukr_t ukr1_id,
-	                                 l3ukr_t ukr2_id,
-	                                 ...
-	                                 cntx_t* cntx );
-	*/
-
-	va_list   args;
-	dim_t     i;
-	l3ukr_t*  l3_ukrs;
-	cntx_t*   cntx;
-
-	// Allocate some temporary local arrays.
-	l3_ukrs = bli_malloc_intl( n_uk * sizeof( l3ukr_t ) );
-
-	// -- Begin variable argument section --
-
-	// Initialize variable argument environment.
-	va_start( args, n_uk );
-
-	// Process n_uk kernel ids.
-	for ( i = 0; i < n_uk; ++i )
-	{
-		// Here, we query the variable argument list for the kernel id.
-		const l3ukr_t uk_id = va_arg( args, l3ukr_t  );
-
-		// Store the value in our temporary array.
-		l3_ukrs[ i ] = uk_id;
-	}
-
-	// The last argument should be the context pointer.
-	cntx = va_arg( args, cntx_t* );
-
-	// Shutdown variable argument environment and clean up stack.
-	va_end( args );
-
-	// -- End variable argument section --
-
-	// Process each kernel id provided.
-	for ( i = 0; i < n_uk; ++i )
-	{
-		// Read the current kernel id.
-		const l3ukr_t uk_id = l3_ukrs[ i ];
-
-		// Query the func_t associated with uk_id and save it directly into
-		// the context.
-		bli_gks_cntx_set_l3_vir_ukr( method, uk_id, cntx );
-	}
-
-	// Free the temporary local array.
-	bli_free_intl( l3_ukrs );
-}
-
-
-//
-// -- level-3 micro-kernel preferences -----------------------------------------
-//
-
-static mbool_t bli_gks_l3_ukrs_prefs[BLIS_NUM_LEVEL3_UKRS] =
-{
-/* gemm       */  { { BLIS_SGEMM_UKERNEL_PREFERS_CONTIG_ROWS,
-                      BLIS_CGEMM_UKERNEL_PREFERS_CONTIG_ROWS,
-                      BLIS_DGEMM_UKERNEL_PREFERS_CONTIG_ROWS,
-                      BLIS_ZGEMM_UKERNEL_PREFERS_CONTIG_ROWS, } },
-/* gemmtrsm_l */  { { FALSE, FALSE, FALSE, FALSE, } },
-/* gemmtrsm_u */  { { FALSE, FALSE, FALSE, FALSE, } },
-/* trsm_l     */  { { FALSE, FALSE, FALSE, FALSE, } },
-/* trsm_u     */  { { FALSE, FALSE, FALSE, FALSE, } },
-};
-
-// -----------------------------------------------------------------------------
-
-void bli_gks_get_l3_nat_ukr_prefs( l3ukr_t  ukr,
-                                   mbool_t* mbool )
-{
-	*mbool = bli_gks_l3_ukrs_prefs[ ukr ];
-}
-
-void bli_gks_cntx_set_l3_nat_ukr_prefs( l3ukr_t ukr,
-                                        cntx_t* cntx )
-{
-	mbool_t* cntx_l3_nat_ukr_prefs = bli_cntx_l3_nat_ukrs_prefs_buf( cntx );
-	mbool_t* cntx_l3_nat_ukr_pref  = &cntx_l3_nat_ukr_prefs[ ukr ];
-
-	bli_gks_get_l3_nat_ukr_prefs( ukr, cntx_l3_nat_ukr_pref );
-
-	// Explicitly set the anti-preference to FALSE.
-	bli_cntx_set_anti_pref( FALSE, cntx );
-}
-
-
-#if 0
-//
-// -- packm structure-aware kernel structure -----------------------------------
-//
-
-// IF ENABLED: NEEDS UPDATING FOR 1M.
-
-static func_t bli_gks_packm_struc_kers[BLIS_NUM_PACK_SCHEMA_TYPES] =
-{
-                /* float (0)  scomplex (1)  double (2)  dcomplex (3) */
-// row/col vectors
-                 { NULL,                      NULL,                
-                   NULL,                      NULL,                      },
-// row/col panels
-                 { bli_spackm_struc_cxk,      bli_cpackm_struc_cxk,
-                   bli_dpackm_struc_cxk,      bli_zpackm_struc_cxk,      },
-// row/col panels: 4m interleaved
-                 { NULL,                      bli_cpackm_struc_cxk_4mi,
-                   NULL,                      bli_zpackm_struc_cxk_4mi,  },
-// row/col panels: 4m separated (NOT IMPLEMENTED)
-                 { NULL,                      NULL,                    
-                   NULL,                      NULL,                      },
-// row/col panels: 3m interleaved
-                 { NULL,                      bli_cpackm_struc_cxk_3mis,
-                   NULL,                      bli_zpackm_struc_cxk_3mis, },
-// row/col panels: 3m separated
-                 { NULL,                      bli_cpackm_struc_cxk_3mis,
-                   NULL,                      bli_zpackm_struc_cxk_3mis, },
-// row/col panels: real only
-                 { NULL,                      bli_cpackm_struc_cxk_rih,
-                   NULL,                      bli_zpackm_struc_cxk_rih,  },
-// row/col panels: imaginary only
-                 { NULL,                      bli_cpackm_struc_cxk_rih,
-                   NULL,                      bli_zpackm_struc_cxk_rih,  },
-// row/col panels: real+imaginary only
-                 { NULL,                      bli_cpackm_struc_cxk_rih,
-                   NULL,                      bli_zpackm_struc_cxk_rih,  },
-};
-
-// -----------------------------------------------------------------------------
-
-void bli_gks_get_packm_struc_ker( pack_t  schema,
-                                  func_t* func )
-{
-	const dim_t i = bli_pack_schema_index( schema );
-
-	*func = bli_gks_packm_struc_kers[ i ];
-}
-
-void bli_gks_cntx_set_packm_struc_ker( pack_t  schema,
-                                       cntx_t* cntx )
-{
-	func_t* cntx_packm_ukr = bli_cntx_packm_ukrs( cntx );
-
-	bli_gks_get_packm_struc_kers( schema, cntx_packm_ukr );
-}
+// The array of cntx_t* pointers to cache modified contexts used by
+// induced methods.
+static cntx_t** gks[ BLIS_NUM_ARCHS ];
+
+// The array of function pointers holding the registered context initialization
+// functions for induced methods.
+static void*    cntx_ind_init[ BLIS_NUM_ARCHS ];
+
+// The array of function pointers holding the registered context initialization
+// functions for reference kernels.
+static void*    cntx_ref_init[ BLIS_NUM_ARCHS ];
+
+#ifdef BLIS_ENABLE_PTHREADS
+pthread_mutex_t gks_mutex = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
-
-//
-// -- level-1f kernel structure ------------------------------------------------
-//
-
-static func_t bli_gks_l1f_kers[BLIS_NUM_LEVEL1F_KERS] =
-{
-                /* float (0)  scomplex (1)  double (2)  dcomplex (3) */
-/* axpy2v     */ { { BLIS_SAXPY2V_KERNEL, BLIS_CAXPY2V_KERNEL,
-                     BLIS_DAXPY2V_KERNEL, BLIS_ZAXPY2V_KERNEL, }
-                 },
-/* dotaxpyv   */ { { BLIS_SDOTAXPYV_KERNEL, BLIS_CDOTAXPYV_KERNEL,
-                     BLIS_DDOTAXPYV_KERNEL, BLIS_ZDOTAXPYV_KERNEL, }
-                 },
-/* axpyf      */ { { BLIS_SAXPYF_KERNEL, BLIS_CAXPYF_KERNEL,
-                     BLIS_DAXPYF_KERNEL, BLIS_ZAXPYF_KERNEL, }
-                 },
-/* dotxf      */ { { BLIS_SDOTXF_KERNEL, BLIS_CDOTXF_KERNEL,
-                     BLIS_DDOTXF_KERNEL, BLIS_ZDOTXF_KERNEL, }
-                 },
-/* dotxaxpyf  */ { { BLIS_SDOTXAXPYF_KERNEL, BLIS_CDOTXAXPYF_KERNEL,
-                     BLIS_DDOTXAXPYF_KERNEL, BLIS_ZDOTXAXPYF_KERNEL, }
-                 },
-};
-
-static func_t bli_gks_l1f_ref_kers[BLIS_NUM_LEVEL1F_KERS] =
-{
-                /* float (0)  scomplex (1)  double (2)  dcomplex (3) */
-/* axpy2v     */ { { BLIS_SAXPY2V_KERNEL_REF, BLIS_CAXPY2V_KERNEL_REF,
-                     BLIS_DAXPY2V_KERNEL_REF, BLIS_ZAXPY2V_KERNEL_REF, }
-                 },
-/* dotaxpyv   */ { { BLIS_SDOTAXPYV_KERNEL_REF, BLIS_CDOTAXPYV_KERNEL_REF,
-                     BLIS_DDOTAXPYV_KERNEL_REF, BLIS_ZDOTAXPYV_KERNEL_REF, }
-                 },
-/* axpyf      */ { { BLIS_SAXPYF_KERNEL_REF, BLIS_CAXPYF_KERNEL_REF,
-                     BLIS_DAXPYF_KERNEL_REF, BLIS_ZAXPYF_KERNEL_REF, }
-                 },
-/* dotxf      */ { { BLIS_SDOTXF_KERNEL_REF, BLIS_CDOTXF_KERNEL_REF,
-                     BLIS_DDOTXF_KERNEL_REF, BLIS_ZDOTXF_KERNEL_REF, }
-                 },
-/* dotxaxpyf  */ { { BLIS_SDOTXAXPYF_KERNEL_REF, BLIS_CDOTXAXPYF_KERNEL_REF,
-                     BLIS_DDOTXAXPYF_KERNEL_REF, BLIS_ZDOTXAXPYF_KERNEL_REF, }
-                 },
-};
+// Define a function pointer type for context initialization functions.
+typedef void (*nat_cntx_init_ft)( cntx_t* cntx );
+typedef void (*ref_cntx_init_ft)( cntx_t* cntx );
+typedef void (*ind_cntx_init_ft)( ind_t method, num_t dt, cntx_t* cntx );
 
 // -----------------------------------------------------------------------------
 
-void bli_gks_get_l1f_ker( l1fkr_t ker,
-                          func_t* func )
+void bli_gks_init( void )
 {
-	*func = bli_gks_l1f_kers[ ker ];
-}
-
-void bli_gks_get_l1f_ref_ker( l1fkr_t ker,
-                              func_t* func )
-{
-	*func = bli_gks_l1f_ref_kers[ ker ];
-}
-
-void bli_gks_cntx_set_l1f_ker( l1fkr_t ker,
-                               cntx_t* cntx )
-{
-	func_t* cntx_l1f_kers = bli_cntx_l1f_kers_buf( cntx );
-	func_t* cntx_l1f_ker  = &cntx_l1f_kers[ ker ];
-
-	bli_gks_get_l1f_ker( ker, cntx_l1f_ker );
-}
-
-void bli_gks_cntx_set_l1f_kers( dim_t n_kr, ... )
-{
-	/* Example prototype:
-
-	   void
-	   bli_gks_cntx_set_l1f_kers( dim_t   n_kr,
-	                              l1fkr_t ker0_id,
-	                              l1fkr_t ker1_id,
-	                              l1fkr_t ker2_id,
-	                              ...
-	                              cntx_t* cntx );
-	*/
-
-	va_list   args;
-	dim_t     i;
-	l1fkr_t*  l1f_kers;
-	cntx_t*   cntx;
-
-	// Allocate some temporary local arrays.
-	l1f_kers = bli_malloc_intl( n_kr * sizeof( l1fkr_t ) );
-
-	// -- Begin variable argument section --
-
-	// Initialize variable argument environment.
-	va_start( args, n_kr );
-
-	// Process n_kr kernel ids.
-	for ( i = 0; i < n_kr; ++i )
+	// BEGIN CRITICAL SECTION
+	// NOTE: This critical section is implicit. We assume this function is only
+	// called from within the critical section within bli_init().
 	{
-		// Here, we query the variable argument list for the kernel id.
-		const l1fkr_t kr_id = va_arg( args, l1fkr_t  );
+		// Initialize the internal data structure we use to track registered
+		// contexts.
+		bli_gks_init_index();
 
-		// Store the value in our temporary array.
-		l1f_kers[ i ] = kr_id;
+		// Register a context for each architecture that was #define'd in
+		// bli_config.h.
+
+		// Intel architectures
+#ifdef BLIS_CONFIG_KNL
+		bli_gks_register_cntx( BLIS_ARCH_KNL,         bli_cntx_init_knl,
+		                                              bli_cntx_init_knl_ref,
+		                                              bli_cntx_init_knl_ind );
+#endif
+#ifdef BLIS_CONFIG_KNC
+		bli_gks_register_cntx( BLIS_ARCH_KNC,         bli_cntx_init_knc,
+		                                              bli_cntx_init_knc_ref,
+		                                              bli_cntx_init_knc_ind );
+#endif
+#ifdef BLIS_CONFIG_HASWELL
+		bli_gks_register_cntx( BLIS_ARCH_HASWELL,     bli_cntx_init_haswell,
+		                                              bli_cntx_init_haswell_ref,
+		                                              bli_cntx_init_haswell_ind );
+#endif
+#ifdef BLIS_CONFIG_SANDYBRIDGE
+		bli_gks_register_cntx( BLIS_ARCH_SANDYBRIDGE, bli_cntx_init_sandybridge,
+		                                              bli_cntx_init_sandybridge_ref,
+		                                              bli_cntx_init_sandybridge_ind );
+#endif
+#ifdef BLIS_CONFIG_PENRYN
+		bli_gks_register_cntx( BLIS_ARCH_PENRYN,      bli_cntx_init_penryn,
+		                                              bli_cntx_init_penryn_ref,
+		                                              bli_cntx_init_penryn_ind );
+#endif
+
+		// AMD architectures
+#ifdef BLIS_CONFIG_ZEN
+		bli_gks_register_cntx( BLIS_ARCH_ZEN,         bli_cntx_init_zen,
+		                                              bli_cntx_init_zen_ref,
+		                                              bli_cntx_init_zen_ind );
+#endif
+#ifdef BLIS_CONFIG_EXCAVATOR
+		bli_gks_register_cntx( BLIS_ARCH_EXCAVATOR,   bli_cntx_init_excavator,
+		                                              bli_cntx_init_excavator_ref,
+		                                              bli_cntx_init_excavator_ind );
+#endif
+#ifdef BLIS_CONFIG_STEAMROLLER
+		bli_gks_register_cntx( BLIS_ARCH_STEAMROLLER, bli_cntx_init_steamroller,
+		                                              bli_cntx_init_steamroller_ref,
+		                                              bli_cntx_init_steamroller_ind );
+#endif
+#ifdef BLIS_CONFIG_PILEDRIVER
+		bli_gks_register_cntx( BLIS_ARCH_PILEDRIVER,  bli_cntx_init_piledriver,
+		                                              bli_cntx_init_piledriver_ref,
+		                                              bli_cntx_init_piledriver_ind );
+#endif
+#ifdef BLIS_CONFIG_BULLDOZER
+		bli_gks_register_cntx( BLIS_ARCH_BULLDOZER,   bli_cntx_init_bulldozer,
+		                                              bli_cntx_init_bulldozer_ref,
+		                                              bli_cntx_init_bulldozer_ind );
+#endif
+
+		// ARM architectures
+#ifdef BLIS_CONFIG_CORTEXA57
+		bli_gks_register_cntx( BLIS_ARCH_CORTEXA57,   bli_cntx_init_cortexa57,
+		                                              bli_cntx_init_cortexa57_ref,
+		                                              bli_cntx_init_cortexa57_ind );
+#endif
+#ifdef BLIS_CONFIG_CORTEXA15
+		bli_gks_register_cntx( BLIS_ARCH_CORTEXA15,   bli_cntx_init_cortexa15,
+		                                              bli_cntx_init_cortexa15_ref,
+		                                              bli_cntx_init_cortexa15_ind );
+#endif
+#ifdef BLIS_CONFIG_CORTEXA9
+		bli_gks_register_cntx( BLIS_ARCH_CORTEXA9,    bli_cntx_init_cortexa9,
+		                                              bli_cntx_init_cortexa9_ref,
+		                                              bli_cntx_init_cortexa9_ind );
+#endif
+
+		// IBM architectures
+#ifdef BLIS_CONFIG_POWER7
+		bli_gks_register_cntx( BLIS_ARCH_POWER7,      bli_cntx_init_power7,
+		                                              bli_cntx_init_power7_ref,
+		                                              bli_cntx_init_power7_ind );
+#endif
+#ifdef BLIS_CONFIG_BGQ
+		bli_gks_register_cntx( BLIS_ARCH_BGQ,         bli_cntx_init_bgq,
+		                                              bli_cntx_init_bgq_ref,
+		                                              bli_cntx_init_bgq_ind );
+#endif
+
+		// Generic architectures
+#ifdef BLIS_CONFIG_GENERIC
+		bli_gks_register_cntx( BLIS_ARCH_GENERIC,     bli_cntx_init_generic,
+		                                              bli_cntx_init_generic_ref,
+		                                              bli_cntx_init_generic_ind );
+#endif
 	}
-
-	// The last argument should be the context pointer.
-	cntx = va_arg( args, cntx_t* );
-
-	// Shutdown variable argument environment and clean up stack.
-	va_end( args );
-
-	// -- End variable argument section --
-
-	// Process each kernel id provided.
-	for ( i = 0; i < n_kr; ++i )
-	{
-		// Read the current kernel id.
-		const l1fkr_t kr_id = l1f_kers[ i ];
-
-		// Query the func_t associated with kr_id and save it directly into
-		// the context.
-		bli_gks_cntx_set_l1f_ker( kr_id, cntx );
-	}
-
-	// Free the temporary local array.
-	bli_free_intl( l1f_kers );
+	// END CRITICAL SECTION
 }
-
-
-//
-// -- level-1v kernel structure ------------------------------------------------
-//
-
-static func_t bli_gks_l1v_kers[BLIS_NUM_LEVEL1V_KERS] =
-{
-                /* float (0)  scomplex (1)  double (2)  dcomplex (3) */
-/* addv       */ { { BLIS_SADDV_KERNEL, BLIS_CADDV_KERNEL,
-                     BLIS_DADDV_KERNEL, BLIS_ZADDV_KERNEL, }
-                 },
-/* amaxv      */ { { BLIS_SAMAXV_KERNEL, BLIS_CAMAXV_KERNEL,
-                     BLIS_DAMAXV_KERNEL, BLIS_ZAMAXV_KERNEL, }
-                 },
-/* axpbyv     */ { { BLIS_SAXPBYV_KERNEL, BLIS_CAXPBYV_KERNEL,
-                     BLIS_DAXPBYV_KERNEL, BLIS_ZAXPBYV_KERNEL, }
-                 },
-/* axpyv      */ { { BLIS_SAXPYV_KERNEL, BLIS_CAXPYV_KERNEL,
-                     BLIS_DAXPYV_KERNEL, BLIS_ZAXPYV_KERNEL, }
-                 },
-/* copyv      */ { { BLIS_SCOPYV_KERNEL, BLIS_CCOPYV_KERNEL,
-                     BLIS_DCOPYV_KERNEL, BLIS_ZCOPYV_KERNEL, }
-                 },
-/* dotv       */ { { BLIS_SDOTV_KERNEL, BLIS_CDOTV_KERNEL,
-                     BLIS_DDOTV_KERNEL, BLIS_ZDOTV_KERNEL, }
-                 },
-/* dotxv      */ { { BLIS_SDOTXV_KERNEL, BLIS_CDOTXV_KERNEL,
-                     BLIS_DDOTXV_KERNEL, BLIS_ZDOTXV_KERNEL, }
-                 },
-/* invertv    */ { { BLIS_SINVERTV_KERNEL, BLIS_CINVERTV_KERNEL,
-                     BLIS_DINVERTV_KERNEL, BLIS_ZINVERTV_KERNEL, }
-                 },
-/* scalv      */ { { BLIS_SSCALV_KERNEL, BLIS_CSCALV_KERNEL,
-                     BLIS_DSCALV_KERNEL, BLIS_ZSCALV_KERNEL, }
-                 },
-/* scal2v     */ { { BLIS_SSCAL2V_KERNEL, BLIS_CSCAL2V_KERNEL,
-                     BLIS_DSCAL2V_KERNEL, BLIS_ZSCAL2V_KERNEL, }
-                 },
-/* setv       */ { { BLIS_SSETV_KERNEL, BLIS_CSETV_KERNEL,
-                     BLIS_DSETV_KERNEL, BLIS_ZSETV_KERNEL, }
-                 },
-/* subv       */ { { BLIS_SSUBV_KERNEL, BLIS_CSUBV_KERNEL,
-                     BLIS_DSUBV_KERNEL, BLIS_ZSUBV_KERNEL, }
-                 },
-/* swapv      */ { { BLIS_SSWAPV_KERNEL, BLIS_CSWAPV_KERNEL,
-                     BLIS_DSWAPV_KERNEL, BLIS_ZSWAPV_KERNEL, }
-                 },
-/* xpbyv      */ { { BLIS_SXPBYV_KERNEL, BLIS_CXPBYV_KERNEL,
-                     BLIS_DXPBYV_KERNEL, BLIS_ZXPBYV_KERNEL, }
-                 },
-};
-
-static func_t bli_gks_l1v_ref_kers[BLIS_NUM_LEVEL1V_KERS] =
-{
-                /* float (0)  scomplex (1)  double (2)  dcomplex (3) */
-/* addv       */ { { BLIS_SADDV_KERNEL_REF, BLIS_CADDV_KERNEL_REF,
-                     BLIS_DADDV_KERNEL_REF, BLIS_ZADDV_KERNEL_REF, }
-                 },
-/* amaxv      */ { { BLIS_SAMAXV_KERNEL_REF, BLIS_CAMAXV_KERNEL_REF,
-                     BLIS_DAMAXV_KERNEL_REF, BLIS_ZAMAXV_KERNEL_REF, }
-                 },
-/* axpbyv     */ { { BLIS_SAXPBYV_KERNEL_REF, BLIS_CAXPBYV_KERNEL_REF,
-                     BLIS_DAXPBYV_KERNEL_REF, BLIS_ZAXPBYV_KERNEL_REF, }
-                 },
-/* axpyv      */ { { BLIS_SAXPYV_KERNEL_REF, BLIS_CAXPYV_KERNEL_REF,
-                     BLIS_DAXPYV_KERNEL_REF, BLIS_ZAXPYV_KERNEL_REF, }
-                 },
-/* copyv      */ { { BLIS_SCOPYV_KERNEL_REF, BLIS_CCOPYV_KERNEL_REF,
-                     BLIS_DCOPYV_KERNEL_REF, BLIS_ZCOPYV_KERNEL_REF, }
-                 },
-/* dotv       */ { { BLIS_SDOTV_KERNEL_REF, BLIS_CDOTV_KERNEL_REF,
-                     BLIS_DDOTV_KERNEL_REF, BLIS_ZDOTV_KERNEL_REF, }
-                 },
-/* dotxv      */ { { BLIS_SDOTXV_KERNEL_REF, BLIS_CDOTXV_KERNEL_REF,
-                     BLIS_DDOTXV_KERNEL_REF, BLIS_ZDOTXV_KERNEL_REF, }
-                 },
-/* invertv    */ { { BLIS_SINVERTV_KERNEL_REF, BLIS_CINVERTV_KERNEL_REF,
-                     BLIS_DINVERTV_KERNEL_REF, BLIS_ZINVERTV_KERNEL_REF, }
-                 },
-/* scalv      */ { { BLIS_SSCALV_KERNEL_REF, BLIS_CSCALV_KERNEL_REF,
-                     BLIS_DSCALV_KERNEL_REF, BLIS_ZSCALV_KERNEL_REF, }
-                 },
-/* scal2v     */ { { BLIS_SSCAL2V_KERNEL_REF, BLIS_CSCAL2V_KERNEL_REF,
-                     BLIS_DSCAL2V_KERNEL_REF, BLIS_ZSCAL2V_KERNEL_REF, }
-                 },
-/* setv       */ { { BLIS_SSETV_KERNEL_REF, BLIS_CSETV_KERNEL_REF,
-                     BLIS_DSETV_KERNEL_REF, BLIS_ZSETV_KERNEL_REF, }
-                 },
-/* subv       */ { { BLIS_SSUBV_KERNEL_REF, BLIS_CSUBV_KERNEL_REF,
-                     BLIS_DSUBV_KERNEL_REF, BLIS_ZSUBV_KERNEL_REF, }
-                 },
-/* swapv      */ { { BLIS_SSWAPV_KERNEL_REF, BLIS_CSWAPV_KERNEL_REF,
-                     BLIS_DSWAPV_KERNEL_REF, BLIS_ZSWAPV_KERNEL_REF, }
-                 },
-/* xpbyv      */ { { BLIS_SXPBYV_KERNEL_REF, BLIS_CXPBYV_KERNEL_REF,
-                     BLIS_DXPBYV_KERNEL_REF, BLIS_ZXPBYV_KERNEL_REF, }
-                 },
-};
 
 // -----------------------------------------------------------------------------
 
-void bli_gks_get_l1v_ker( l1vkr_t ker,
-                          func_t* func )
+void bli_gks_finalize( void )
 {
-	*func = bli_gks_l1v_kers[ ker ];
-}
+	arch_t id;
+	ind_t  ind;
 
-void bli_gks_get_l1v_ref_ker( l1vkr_t ker,
-                              func_t* func )
-{
-	*func = bli_gks_l1v_ref_kers[ ker ];
-}
-
-void bli_gks_cntx_set_l1v_ker( l1vkr_t ker,
-                               cntx_t* cntx )
-{
-	func_t* cntx_l1v_kers = bli_cntx_l1v_kers_buf( cntx );
-	func_t* cntx_l1v_ker  = &cntx_l1v_kers[ ker ];
-
-	bli_gks_get_l1v_ker( ker, cntx_l1v_ker );
-}
-
-
-void bli_gks_cntx_set_l1v_kers( dim_t n_kr, ... )
-{
-	/* Example prototype:
-
-	   void
-	   bli_gks_cntx_set_l1v_kers( dim_t   n_kr,
-	                              l1vkr_t ker0_id,
-	                              l1vkr_t ker1_id,
-	                              l1vkr_t ker2_id,
-	                              ...
-	                              cntx_t* cntx );
-	*/
-
-	va_list   args;
-	dim_t     i;
-	l1vkr_t*  l1v_kers;
-	cntx_t*   cntx;
-
-	// Allocate some temporary local arrays.
-	l1v_kers = bli_malloc_intl( n_kr * sizeof( l1vkr_t ) );
-
-	// -- Begin variable argument section --
-
-	// Initialize variable argument environment.
-	va_start( args, n_kr );
-
-	// Process n_kr kernel ids.
-	for ( i = 0; i < n_kr; ++i )
+	// BEGIN CRITICAL SECTION
+	// NOTE: This critical section is implicit. We assume this function is only
+	// called from within the critical section within bli_finalize().
 	{
-		// Here, we query the variable argument list for the kernel id.
-		const l1vkr_t kr_id = va_arg( args, l1vkr_t  );
 
-		// Store the value in our temporary array.
-		l1v_kers[ i ] = kr_id;
+		// Iterate over the architectures in the gks array.
+		for ( id = 0; id < BLIS_NUM_ARCHS; ++id )
+		{
+			cntx_t** restrict gks_id = gks[ id ];
+
+			// Only consider context arrays for architectures that were allocated
+			// in the first place.
+			if ( gks_id != NULL )
+			{
+				// Iterate over the induced methods in the current sub-array
+				// referenced by cntx_pp.
+				for ( ind = 0; ind < BLIS_NUM_IND_METHODS; ++ind )
+				{
+					cntx_t* restrict gks_id_ind = gks_id[ ind ];
+
+					// If the current context was allocated, free it.
+					if ( gks_id_ind != NULL )
+					{
+						bli_free_intl( gks_id_ind );
+					}
+				}
+			}
+		}
+
+	}
+	// END CRITICAL SECTION
+}
+
+// -----------------------------------------------------------------------------
+
+void bli_gks_init_index( void )
+{
+	// This function is called by bli_gks_init(). It simply initializes all
+	// architecture id elements of the internal arrays to NULL. 
+
+	const size_t gks_size = sizeof( cntx_t* ) * BLIS_NUM_ARCHS;
+	const size_t fpa_size = sizeof( void*   ) * BLIS_NUM_ARCHS;
+
+	// Set every entry in gks and context init function pointer arrays to
+	// zero/NULL. This is done so that later on we know which ones were
+	// allocated.
+	memset( gks,           0, gks_size );
+	memset( cntx_ref_init, 0, fpa_size );
+	memset( cntx_ind_init, 0, fpa_size );
+}
+
+// -----------------------------------------------------------------------------
+
+cntx_t* bli_gks_lookup_nat_cntx
+     (
+       arch_t id
+     )
+{
+	// Return the address of the (native) context for a given architecture id.
+	// This function assumes the architecture has already been registered.
+
+	return bli_gks_lookup_ind_cntx( id, BLIS_NAT );
+}
+
+// -----------------------------------------------------------------------------
+
+cntx_t* bli_gks_lookup_ind_cntx
+     (
+       arch_t id,
+       ind_t  ind
+     )
+{
+	// Return the address of the context for a given architecture id and
+	// induced method. This function assumes the architecture has already
+	// been registered. Note that this function returns NULL if the induced
+	// method hasn't yet been called (and thus its context pointer is still
+	// NULL).
+
+	if ( bli_error_checking_is_enabled() )
+	{
+		err_t e_val;
+
+		// Confirm that the architecture id is valid.
+		e_val = bli_check_valid_arch_id( id );
+		bli_check_error_code( e_val );
 	}
 
-	// The last argument should be the context pointer.
-	cntx = va_arg( args, cntx_t* );
+	// Index into the array of context pointers for the given architecture id,
+	// and then index into the subarray for the given induced method.
+	cntx_t** restrict gks_id     = gks[ id ];
+	cntx_t*  restrict gks_id_ind = gks_id[ ind ];
 
-	// Shutdown variable argument environment and clean up stack.
-	va_end( args );
-
-	// -- End variable argument section --
-
-	// Process each kernel id provided.
-	for ( i = 0; i < n_kr; ++i )
-	{
-		// Read the current kernel id.
-		const l1vkr_t kr_id = l1v_kers[ i ];
-
-		// Query the func_t associated with kr_id and save it directly into
-		// the context.
-		bli_gks_cntx_set_l1v_ker( kr_id, cntx );
-	}
-
-	// Free the temporary local array.
-	bli_free_intl( l1v_kers );
+	// Return the context pointer at gks_id_ind.
+	return gks_id_ind;
 }
 
+// -----------------------------------------------------------------------------
+
+void bli_gks_register_cntx
+     (
+       arch_t id,
+       void*  nat_fp,
+       void*  ref_fp,
+       void*  ind_fp
+     )
+{
+	// This function is called by bli_gks_init() for each architecture that
+	// will be supported by BLIS. It takes an architecture id and three
+	// function pointers, one to a function that initializes a native context
+	// (supplied by the kernel developer), one to a function that initializes
+	// a reference context (with function pointers specific to the architecture
+	// associated with id), and one to a function that initializes a
+	// context for use with induced methods (again, with function pointers
+	// to the architecture). The latter two functions are automatically
+	// generated by the framework. Unlike with native contexts, we don't
+	// actually store the induced contexts until that induced method is
+	// called, and we don't ever store reference contexts. For this reason, we
+	// can get away with only storing the pointers to the initialization
+	// functions for those latter two types of contexts, which we can then
+	// call at a later time when those contexts are needed.
+
+	nat_cntx_init_ft f = nat_fp;
+
+	// First, store the function pointers to the context initialization
+	// functions for reference kernels and induced method execution. The
+	// former will be used whenever we need to obtain reference kernels and
+	// latter will be used later on if the user calls a level-3 function
+	// with induced execution enabled. 
+	cntx_ref_init[ id ] = ref_fp;
+	cntx_ind_init[ id ] = ind_fp;
+
+	// If the the context array pointer isn't NULL, then it means the given
+	// architecture id has already registered (and the underlying memory
+	// allocations and context initializations have already been performed).
+	// This is really just a safety feature to prevent memory leaks; this
+	// early return should never occur, because the caller should never try
+	// to register with an architecture id that has already been registered.
+	if ( gks[ id ] != NULL ) return;
+
+	// At this point, we know the pointer to the array of cntx_t* is NULL and
+	// needs to be allocated. Allocate the memory and initialize it to
+	// zeros/NULL, storing the address of the alloacted memory at the element
+	// for the current architecture id.
+	gks[ id ] = bli_calloc_intl( sizeof( cntx_t* ) * BLIS_NUM_IND_METHODS );
+
+	// Alias the allocated array for readability.
+	cntx_t** restrict gks_id = gks[ id ];
+
+	// Allocate memory for a single context and store the address at
+	// the element in the gks[ id ] array that is reserved for native
+	// execution.
+	gks_id[ BLIS_NAT ] = bli_calloc_intl( sizeof( cntx_t ) );
+
+	// Alias the allocated context address for readability.
+	cntx_t* restrict gks_id_nat = gks_id[ BLIS_NAT ];
+
+	// Call the context initialization function on the element of the newly
+	// allocated array corresponding to native execution.
+	f( gks_id_nat );
+
+	// Verify that cache blocksizes are whole multiples of register blocksizes.
+	// Specifically, verify that:
+	//   - MC is a whole multiple of MR.
+	//   - NC is a whole multiple of NR.
+	//   - KC is a whole multiple of KR.
+	// These constraints are enforced because it makes it easier to handle diagonals
+	// in the macro-kernel implementations. Additionally, we optionally verify that:
+	//   - MC is a whole multiple of NR.
+	//   - NC is a whole multiple of MR.
+	// These latter constraints, guarded by #ifndef BLIS_RELAX_MCNR_NCMR_CONSTRAINTS
+	// below, are only enforced when we wish to be able to handle the trsm right-
+	// side case handling that swaps A and B, so that B is the triangular matrix,
+	// with NR blocking used to pack A and MR blocking used to pack B, with the
+	// arguments to the gemmtrsm microkernel swapped at the last minute, as the
+	// kernel is called.
+	err_t e_val;
+
+	blksz_t* restrict mc = bli_cntx_get_blksz( BLIS_MC, gks_id_nat );
+	blksz_t* restrict nc = bli_cntx_get_blksz( BLIS_NC, gks_id_nat );
+	blksz_t* restrict kc = bli_cntx_get_blksz( BLIS_KC, gks_id_nat );
+	blksz_t* restrict mr = bli_cntx_get_blksz( BLIS_MR, gks_id_nat );
+	blksz_t* restrict nr = bli_cntx_get_blksz( BLIS_NR, gks_id_nat );
+	blksz_t* restrict kr = bli_cntx_get_blksz( BLIS_KR, gks_id_nat );
+
+	e_val = bli_check_valid_mc_mod_mult( mc, mr ); bli_check_error_code( e_val );
+	e_val = bli_check_valid_nc_mod_mult( nc, nr ); bli_check_error_code( e_val );
+	e_val = bli_check_valid_kc_mod_mult( kc, kr ); bli_check_error_code( e_val );
+#ifndef BLIS_RELAX_MCNR_NCMR_CONSTRAINTS
+	e_val = bli_check_valid_mc_mod_mult( mc, nr ); bli_check_error_code( e_val );
+	e_val = bli_check_valid_nc_mod_mult( nc, mr ); bli_check_error_code( e_val );
+#endif
+}
+
+// -----------------------------------------------------------------------------
+
+cntx_t* bli_gks_query_cntx( void )
+{
+	return bli_gks_query_nat_cntx();
+}
+
+// -----------------------------------------------------------------------------
+
+cntx_t* bli_gks_query_nat_cntx( void )
+{
+	// Return the address of the native context for the architecture id
+	// corresponding to the current hardware, as determined by
+	// bli_arch_query_id().
+
+	// Query the architecture id.
+	arch_t id = bli_arch_query_id();
+
+	// Use the architecture id to look up a pointer to its context.
+	cntx_t* cntx = bli_gks_lookup_nat_cntx( id );
+
+	return cntx;
+}
+
+// -----------------------------------------------------------------------------
+
+cntx_t* bli_gks_query_ind_cntx
+     (
+       ind_t ind,
+       num_t dt
+     )
+{
+	cntx_t* gks_id_ind;
+
+	// Return the address of a context that will be suited for executing a
+	// level-3 operation via the requested induced method (and datatype) for
+	// the architecture id corresponding to the current hardware, as
+	// determined by bli_arch_query_id().
+
+	// This function is called when a level-3 operation via induced method is
+	// called, e.g. bli_gemm1m(). If this is the first time that induced method
+	// is being executed since bli_gks_init(), the necessary context structure
+	// is allocated and initialized. If this is not the first time, then the
+	// address of a previously-allocated and initialized (cached) context is
+	// returned. Note that much of this must be done with mutual exclusion to
+	// ensure thread safety and deterministic behavior.
+
+	// Query the architecture id.
+	arch_t id = bli_arch_query_id();
+
+	// NOTE: These initial statements can reside outside of the critical section
+	// because gks[ id ] should have already been allocated, and the native
+	// context in that array should have already been allocated/initialized.
+
+	// Query the gks for the array of context pointers corresponding to the
+	// given architecture id.
+	cntx_t** restrict gks_id     = gks[ id ];
+	cntx_t*  restrict gks_id_nat = gks_id[ BLIS_NAT ];
+
+	// If for some reason the native context was requested, we can return
+	// its address early.
+	if ( ind == BLIS_NAT ) return gks_id_nat;
+
+	// This function assumes that the architecture idenified by id has
+	// already been registered with the gks (which guarantees that
+	// gks[ id ] is non-NULL and gks[ id ][ BLIS_NAT ] is also non-NULL
+	// and refers to a context initialized with valid data).
+
+#ifdef BLIS_ENABLE_OPENMP
+	_Pragma( "omp critical (gks)" )
+#endif
+#ifdef BLIS_ENABLE_PTHREADS
+	pthread_mutex_lock( &gks_mutex );
+#endif
+
+	// BEGIN CRITICAL SECTION
+	{
+		// Alias for readability the element of gks_id associated with the
+		// requested induced method.
+		gks_id_ind = gks_id[ ind ];
+
+		// If the context pointer is NULL, then we know we must allocate and
+		// then initialize the context before returning its address.
+		if ( gks_id_ind == NULL )
+		{
+			// If gks_id_ind is NULL, then we know we must allocate and then
+			// initialize the context, storing its address back to
+			// gks_id[ ind ].
+			gks_id_ind    = bli_calloc_intl( sizeof( cntx_t ) );
+			gks_id[ ind ] = gks_id_ind;
+
+			// Before we can call the induced method context initialization
+			// function on the newly allocated structure, we must first copy
+			// over the contents of the native context.
+			*gks_id_ind = *gks_id_nat;
+			
+			// Use the architecture id to look up the function pointer to the
+			// context initialization function for induced methods.
+			ind_cntx_init_ft f = cntx_ind_init[ id ];
+
+			// Now we modify the context (so that it contains the proper values
+			// for its induced method) by calling the context initialization
+			// function for the current induced method. (That function assumes
+			// that the context is pre- initialized with values for native
+			// execution.)
+			f( ind, dt, gks_id_ind );
+		}
+	}
+	// END CRITICAL SECTION
+
+#ifdef BLIS_ENABLE_PTHREADS
+	pthread_mutex_unlock( &gks_mutex );
+#endif
+
+	// Return the address of the newly-allocated/initialized context.
+	return gks_id_ind;
+
+}
+
+// -----------------------------------------------------------------------------
+
+void bli_gks_init_ref_cntx
+    (
+      cntx_t* cntx
+    )
+{
+	// Query the architecture id.
+	arch_t id = bli_arch_query_id();
+
+	// Obtain the function pointer to the context initialization function for
+	// reference kernels.
+	ref_cntx_init_ft f = cntx_ref_init[ id ];
+
+	// Initialize the caller's context with reference kernels and related values.
+	f( cntx );
+}
+
+// -----------------------------------------------------------------------------
+
+bool_t bli_gks_cntx_l3_nat_ukr_is_ref
+     (
+       num_t   dt,
+       l3ukr_t ukr_id,
+       cntx_t* cntx
+     )
+{
+	cntx_t ref_cntx;
+
+	// Initialize a context with reference kernels for the arch_t id queried
+	// via bli_arch_query_id().
+	bli_gks_init_ref_cntx( &ref_cntx );
+
+	// Query each context for the micro-kernel function pointer for the
+	// specified datatype.
+	void* ref_fp = bli_cntx_get_l3_nat_ukr_dt( dt, ukr_id, &ref_cntx );
+	void* fp     = bli_cntx_get_l3_nat_ukr_dt( dt, ukr_id, cntx );
+
+	// Return the result.
+	return fp == ref_fp;
+}
 
 //
 // -- level-3 micro-kernel implementation strings ------------------------------
@@ -990,17 +540,19 @@ static char* bli_gks_l3_ukr_impl_str[BLIS_NUM_UKR_IMPL_TYPES] =
 
 char* bli_gks_l3_ukr_impl_string( l3ukr_t ukr, ind_t method, num_t dt )
 {
-	func_t  p;
 	kimpl_t ki;
 
-	// Query the func_t for the given ukr type and method.
-	bli_gks_get_l3_vir_ukr( method, ukr, &p );
+	// Query the context for the current induced method and datatype, and
+	// then query the ukernel function pointer for the given datatype from
+	// that context.
+	cntx_t* cntx  = bli_gks_query_ind_cntx( method, dt );
+	void*   fp    = bli_cntx_get_l3_ukr_dt( dt, ukr, cntx );
 
-	// Check whether the ukrs func_t is NULL for the given ukr type and
-	// datatype. If the queried ukr func_t is NULL, return the string
-	// for not applicable. Otherwise, query the ukernel implementation
-	// type using the method provided and return the associated string.
-	if ( bli_func_is_null_dt( dt, &p ) )
+	// Check whether the ukernel function pointer is NULL for the given
+	// datatype. If it is NULL, return the string for not applicable.
+	// Otherwise, query the ukernel implementation type using the method
+	// provided and return the associated string.
+	if ( fp == NULL )
 		ki = BLIS_NOTAPPLIC_UKERNEL;
 	else
 		ki = bli_gks_l3_ukr_impl_type( ukr, method, dt );
@@ -1049,19 +601,28 @@ kimpl_t bli_gks_l3_ukr_impl_type( l3ukr_t ukr, ind_t method, num_t dt )
 		// method to the typed function pointer within the known
 		// reference ukrs object.
 
-		func_t  funcs;
-		func_t  ref_funcs;
-		void*   p;
-		void*   ref_p;
+		cntx_t ref_cntx_l;
 
-		bli_gks_get_l3_vir_ukr( method, ukr, &funcs );
-		bli_gks_get_l3_ref_ukr( ukr, &ref_funcs );
+		// Query the architecture id.
+		arch_t id = bli_arch_query_id();
 
-		p     = bli_func_get_dt( dt, &funcs );
-		ref_p = bli_func_get_dt( dt, &ref_funcs );
-	
-		if ( p == ref_p ) return BLIS_REFERENCE_UKERNEL;
-		else              return BLIS_OPTIMIZED_UKERNEL;
+		// Obtain the function pointer to the context initialization function
+		// for reference kernels.
+		ref_cntx_init_ft f = cntx_ref_init[ id ];
+
+		// Initialize a local context with reference kernels and related values.
+		f( &ref_cntx_l );
+
+		// Query the native context from the gks.
+		cntx_t* nat_cntx = bli_gks_lookup_nat_cntx( id );
+
+		// Query the native ukernel func_t from both the native and reference
+		// contexts.
+		void* nat_fp = bli_cntx_get_l3_nat_ukr_dt( dt, ukr, nat_cntx );
+		void* ref_fp = bli_cntx_get_l3_nat_ukr_dt( dt, ukr, &ref_cntx_l );
+
+		if ( nat_fp == ref_fp ) return BLIS_REFERENCE_UKERNEL;
+		else                    return BLIS_OPTIMIZED_UKERNEL;
 	}
 }
 

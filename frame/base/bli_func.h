@@ -36,15 +36,36 @@
 
 // func_t query
 
-#define bli_func_get_dt( dt, f ) \
-\
-    ( (f)->ptr[ dt ] )
+static void* bli_func_get_dt
+     (
+       num_t   dt,
+       func_t* func
+     )
+{
+    return func->ptr[ dt ];
+}
 
 // func_t modification
 
-#define bli_func_set_dt( fp, dt, f ) \
-{ \
-    (f)->ptr[ dt ] = fp; \
+static void bli_func_set_dt
+     (
+       void*   fp,
+       num_t   dt,
+       func_t* func
+     )
+{
+    func->ptr[ dt ] = fp;
+}
+
+static void bli_func_copy_dt
+     (
+       num_t dt_src, func_t* func_src,
+       num_t dt_dst, func_t* func_dst
+     )
+{
+	void* fp = bli_func_get_dt( dt_src, func_src );
+
+	bli_func_set_dt( fp, dt_dst, func_dst );
 }
 
 // -----------------------------------------------------------------------------

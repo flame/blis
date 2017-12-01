@@ -56,7 +56,7 @@ print_usage()
 	echo " tree. "
 	echo " "
 	echo " Usage:"
-	echo "   ${script_name} [options] root_dir templ.mk suff_list ign_list spec_list"
+	echo "   ${script_name} [options] root_dir templ.mk suff_list ign_list"
 	echo " "
 	echo " Arguments (mandatory):"
 	echo " "
@@ -72,12 +72,6 @@ print_usage()
 	echo " "
 	echo "   ign_list    File containing a newline-separated list of directory names"
 	echo "               to ignore when descending recursively into "
-	echo " "
-	echo "   spec_list   File containing a newline-separated list of directories"
-	echo "               considered to be special in some way; source files found"
-	echo "               in these directories will be accumulated into a different"
-	echo "               makefile sub-variables based on the name of the special"
-	echo "               directory names."
 	echo " "
 	echo " The following options are accepted:"
 	echo " "
@@ -380,14 +374,10 @@ read_mkfile_config()
 	# Read the file listing the directories to ignore.
 	ignore_dirs=$(cat "${ignore_file}")
 
-	# Read the file listing the special directories.
-	special_dirs=$(cat "${special_file}")
-
 	# Change newlines into spaces. This is optional, but helps when
 	# printing these values out (so they appear on one line).
 	src_file_suffixes=$(echo ${src_file_suffixes} | sed "s/\n/ /g")
 	ignore_dirs=$(echo ${ignore_dirs} | sed "s/\n/ /g")
-	special_dirs=$(echo ${special_dirs} | sed "s/\n/ /g")
 
 }	
 
@@ -417,9 +407,8 @@ main()
 	# The list of source file suffixes to add to the makefile variables.
 	src_file_suffixes=''
 
-	# The lists of directories to ignore and that are special.
+	# The lists of directories to ignore.
 	ignore_dirs=''
-	special_dirs=''
 	
 	# The arguments to this function. They'll get assigned meaningful
 	# values after getopts.
@@ -427,7 +416,6 @@ main()
 	root_dir=""
 	suffix_file=""
 	ignore_file=""
-	special_file=""
 	
 	# Flags set by getopts.
 	dry_run_flag=""	
@@ -467,7 +455,7 @@ main()
 	fi
 	
 	# Check the number of arguments after command line option processing.
-	if [ $# != "5" ]; then
+	if [ $# != "4" ]; then
 		print_usage
 	fi
 
@@ -482,7 +470,6 @@ main()
 	mkfile_frag_tmpl_path=$2
 	suffix_file=$3
 	ignore_file=$4
-	special_file=$5
 	
 	
 	# Read the makefile config files to be used in the makefile fragment

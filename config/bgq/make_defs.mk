@@ -32,40 +32,50 @@
 #
 #
 
-# Only include this block of code once.
-ifndef MAKE_DEFS_MK_INCLUDED
-MAKE_DEFS_MK_INCLUDED := yes
 
-
+# Declare the name of the current configuration and add it to the
+# running list of configurations included by common.mk.
+THIS_CONFIG    := bgq
+#CONFIGS_INCL   += $(THIS_CONFIG)
 
 #
-# --- Development tools definitions --------------------------------------------
-#
-
 # --- Determine the C compiler and related flags ---
+#
+
+ifeq ($(CC),)
 CC             := /bgsys/drivers/ppcfloor/comm/gcc.legacy/bin/mpixlc_r
-CC_VENDOR      := IBM
-# Enable IEEE Standard 1003.1-2004 (POSIX.1d). 
+CC_VENDOR      := ibm
+endif
+
+# Enable IEEE Standard 1003.1-2004 (POSIX.1d).
 # NOTE: This is needed to enable posix_memalign().
-CPPROCFLAGS    := -D_POSIX_C_SOURCE=200112L \
-                  -I/bgsys/drivers/ppcfloor -I/bgsys/drivers/ppcfloor/spi/include/kernel/cnk
+CPPROCFLAGS    := -D_POSIX_C_SOURCE=200112L -I/bgsys/drivers/ppcfloor -I/bgsys/drivers/ppcfloor/spi/include/kernel/cnk
 CMISCFLAGS     := -qthreaded -qsmp=omp -qasm=gcc -qkeyword=asm # -qreport -qsource -qlistopt -qlist
-CPICFLAGS      := 
-CDBGFLAGS      :=
+CPICFLAGS      := -fPIC
 CWARNFLAGS     := -w
+
+ifneq ($(DEBUG_TYPE),off)
+CDBGFLAGS      := -g
+endif
+
+ifeq ($(DEBUG_TYPE),noopt)
+COPTFLAGS      := -O0
+else
 COPTFLAGS      := -O3
+endif
+
 CKOPTFLAGS     := $(COPTFLAGS)
+
+ifeq ($(CC_VENDOR),ibm)
 CVECFLAGS      := -qarch=qp -qtune=qp -qsimd=auto -qhot=level=1 -qprefetch -qunroll=yes -qnoipa
+else
+$(error xlc is required for this configuration.)
+endif
 
-# --- Determine the archiver and related flags ---
-AR             := ar
-ARFLAGS        := cr
-
-# --- Determine the linker and related flags ---
-LINKER         := $(CC)
+# Override the default value for LDFLAGS.
 LDFLAGS        := -L/bgsys/drivers/ppcfloor/spi/lib -lSPI -lSPI_cnk -qthreaded -qsmp=omp
 
+# Store all of the variables here to new variables containing the
+# configuration name.
+$(eval $(call store-make-defs,$(THIS_CONFIG)))
 
-
-# end of ifndef MAKE_DEFS_MK_INCLUDED conditional block
-endif

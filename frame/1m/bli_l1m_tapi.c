@@ -54,13 +54,10 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
-	const num_t dt = PASTEMAC(ch,type); \
-	cntx_t*     cntx_p; \
-\
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
-	/* Initialize a local context if the given context is NULL. */ \
-	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
+	/* Obtain a valid context from the gks if necessary. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* Invoke the helper variant, which loops over the appropriate kernel
 	   to implement the current operation. */ \
@@ -74,7 +71,7 @@ void PASTEMAC(ch,opname) \
 	  n, \
 	  x, rs_x, cs_x, \
 	  y, rs_y, cs_y, \
-	  cntx_p  \
+	  cntx  \
 	); \
 \
 	/* When the diagonal of an upper- or lower-stored matrix is unit,
@@ -91,12 +88,9 @@ void PASTEMAC(ch,opname) \
 		  n, \
 		  x, rs_x, cs_x, \
 		  y, rs_y, cs_y, \
-		  cntx_p  \
+		  cntx  \
 		); \
 	} \
-\
-	/* Finalize the context if it was initialized locally. */ \
-	bli_cntx_finalize_local_if( opname, cntx ); \
 }
 
 INSERT_GENTFUNC_BASIC( addm, addd )
@@ -119,13 +113,10 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
-	const num_t dt = PASTEMAC(ch,type); \
-	cntx_t*     cntx_p; \
-\
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
-	/* Initialize a local context if the given context is NULL. */ \
-	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
+	/* Obtain a valid context from the gks if necessary. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* Invoke the helper variant, which loops over the appropriate kernel
 	   to implement the current operation. */ \
@@ -139,7 +130,7 @@ void PASTEMAC(ch,opname) \
 	  n, \
 	  x, rs_x, cs_x, \
 	  y, rs_y, cs_y, \
-	  cntx_p  \
+	  cntx  \
 	); \
 \
 	/* When the diagonal of an upper- or lower-stored matrix is unit,
@@ -161,12 +152,9 @@ void PASTEMAC(ch,opname) \
 		  n, \
 		  one, \
 		  y, rs_y, cs_y, \
-		  cntx_p  \
+		  cntx  \
 		); \
 	} \
-\
-	/* Finalize the context if it was initialized locally. */ \
-	bli_cntx_finalize_local_if( opname, cntx ); \
 }
 
 INSERT_GENTFUNC_BASIC0( copym )
@@ -189,16 +177,13 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
-	const num_t dt = PASTEMAC(ch,type); \
-	cntx_t*     cntx_p; \
-\
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
 	/* If alpha is zero, then the entire operation is a no-op. */ \
 	if ( PASTEMAC(ch,eq0)( *alpha ) ) return; \
 \
-	/* Initialize a local context if the given context is NULL. */ \
-	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
+	/* Obtain a valid context from the gks if necessary. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* Invoke the helper variant, which loops over the appropriate kernel
 	   to implement the current operation. */ \
@@ -213,7 +198,7 @@ void PASTEMAC(ch,opname) \
 	  alpha, \
 	  x, rs_x, cs_x, \
 	  y, rs_y, cs_y, \
-	  cntx_p  \
+	  cntx  \
 	); \
 \
 	/* When the diagonal of an upper- or lower-stored matrix is unit,
@@ -231,12 +216,9 @@ void PASTEMAC(ch,opname) \
 		  alpha, \
 		  x, rs_x, cs_x, \
 		  y, rs_y, cs_y, \
-		  cntx_p  \
+		  cntx  \
 		); \
 	} \
-\
-	/* Finalize the context if it was initialized locally. */ \
-	bli_cntx_finalize_local_if( opname, cntx ); \
 }
 
 INSERT_GENTFUNC_BASIC0( axpym )
@@ -259,19 +241,17 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
-	const num_t dt = PASTEMAC(ch,type); \
-	cntx_t*     cntx_p; \
-\
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
-	/* Initialize a local context if the given context is NULL. */ \
-	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
+	/* Obtain a valid context from the gks if necessary. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* If alpha is zero, then we set the output matrix to zero. This
 	   seemingly minor optimization is important because it will clear
 	   any NaNs and Infs in x that would otherwise propogate. */ \
 	if ( PASTEMAC(ch,eq0)( *alpha ) ) \
 	{ \
+\
 		PASTEMAC(ch,setm) \
 		( \
 		  BLIS_NO_CONJUGATE, \
@@ -282,7 +262,7 @@ void PASTEMAC(ch,opname) \
 		  n, \
 		  alpha, \
 		  y, rs_y, cs_y, \
-		  cntx_p  \
+		  cntx  \
 		); \
 		return; \
 	} \
@@ -300,7 +280,7 @@ void PASTEMAC(ch,opname) \
 	  alpha, \
 	  x, rs_x, cs_x, \
 	  y, rs_y, cs_y, \
-	  cntx_p  \
+	  cntx  \
 	); \
 \
 	/* When the diagonal of an upper- or lower-stored matrix is unit,
@@ -321,12 +301,9 @@ void PASTEMAC(ch,opname) \
 		  n, \
 		  alpha, \
 		  y, rs_y, cs_y, \
-		  cntx_p  \
+		  cntx  \
 		); \
 	} \
-\
-	/* Finalize the context if it was initialized locally. */ \
-	bli_cntx_finalize_local_if( opname, cntx ); \
 }
 
 INSERT_GENTFUNC_BASIC0( scal2m )
@@ -348,13 +325,10 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
-	const num_t dt = PASTEMAC(ch,type); \
-	cntx_t*     cntx_p; \
-\
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
-	/* Initialize a local context if the given context is NULL. */ \
-	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
+	/* Obtain a valid context from the gks if necessary. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* Invoke the helper variant, which loops over the appropriate kernel
 	   to implement the current operation. */ \
@@ -368,11 +342,8 @@ void PASTEMAC(ch,opname) \
 	  n, \
 	  alpha, \
 	  x, rs_x, cs_x, \
-	  cntx_p  \
+	  cntx  \
 	); \
-\
-	/* Finalize the context if it was initialized locally. */ \
-	bli_cntx_finalize_local_if( opname, cntx ); \
 }
 
 INSERT_GENTFUNC_BASIC0( scalm )

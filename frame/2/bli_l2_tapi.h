@@ -54,7 +54,7 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      );
 
-INSERT_GENTPROT_BASIC( gemv )
+INSERT_GENTPROT_BASIC0( gemv )
 
 
 #undef  GENTPROT
@@ -73,7 +73,7 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      );
 
-INSERT_GENTPROT_BASIC( ger )
+INSERT_GENTPROT_BASIC0( ger )
 
 
 #undef  GENTPROT
@@ -93,8 +93,8 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      );
 
-INSERT_GENTPROT_BASIC( hemv )
-INSERT_GENTPROT_BASIC( symv )
+INSERT_GENTPROT_BASIC0( hemv )
+INSERT_GENTPROT_BASIC0( symv )
 
 
 #undef  GENTPROTR
@@ -111,7 +111,7 @@ void PASTEMAC(ch,opname) \
        cntx_t*  cntx  \
      );
 
-INSERT_GENTPROTR_BASIC( her )
+INSERT_GENTPROTR_BASIC0( her )
 
 
 #undef  GENTPROT
@@ -128,7 +128,7 @@ void PASTEMAC(ch,opname) \
        cntx_t*  cntx  \
      );
 
-INSERT_GENTPROT_BASIC( syr )
+INSERT_GENTPROT_BASIC0( syr )
 
 
 #undef  GENTPROT
@@ -147,8 +147,8 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      );
 
-INSERT_GENTPROT_BASIC( her2 )
-INSERT_GENTPROT_BASIC( syr2 )
+INSERT_GENTPROT_BASIC0( her2 )
+INSERT_GENTPROT_BASIC0( syr2 )
 
 
 #undef  GENTPROT
@@ -166,5 +166,5 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      );
 
-INSERT_GENTPROT_BASIC( trmv )
-INSERT_GENTPROT_BASIC( trsv )
+INSERT_GENTPROT_BASIC0( trmv )
+INSERT_GENTPROT_BASIC0( trsv )

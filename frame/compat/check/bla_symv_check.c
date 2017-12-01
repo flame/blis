@@ -48,15 +48,15 @@ void bla_symv_check
      )
 {
 	bla_hemv_check
-     (
-       dt_str,
-	                op_str,
-	                uploa,
-	                m,
-	                lda,
-	                incx,
-	                incy
-     );
+	(
+	  dt_str,
+	  op_str,
+	  uploa,
+	  m,
+	  lda,
+	  incx,
+	  incy
+	);
 }
 
 #endif

@@ -55,9 +55,7 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
-	const num_t dt = PASTEMAC(ch,type); \
-	cntx_t*     cntx_p; \
-	dim_t       m_y, n_x; \
+	dim_t m_y, n_x; \
 \
 	/* Determine the dimensions of y and x. */ \
 	bli_set_dims_with_trans( transa, m, n, m_y, n_x ); \
@@ -65,8 +63,8 @@ void PASTEMAC(ch,opname) \
 	/* If y has zero elements, return early. */ \
 	if ( bli_zero_dim1( m_y ) ) return; \
 \
-	/* Initialize a local context if the given context is NULL. */ \
-	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
+	/* Obtain a valid context from the gks if necessary. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* If x has zero elements, or if alpha is zero, scale y by beta and
 	   return early. */ \
@@ -78,7 +76,7 @@ void PASTEMAC(ch,opname) \
 		  m_y, \
 		  beta, \
 		  y, incy, \
-		  cntx_p  \
+		  cntx  \
 		); \
 		return; \
 	} \
@@ -110,11 +108,8 @@ void PASTEMAC(ch,opname) \
 	   x, incx, \
 	   beta, \
 	   y, incy, \
-	   cntx_p \
+	   cntx \
 	 ); \
-\
-	/* Finalize the context if it was initialized locally. */ \
-	bli_cntx_finalize_local_if( opname, cntx ); \
 }
 
 INSERT_GENTFUNC_BASIC3( gemv, gemv, gemv_unf_var1, gemv_unf_var2 )
@@ -136,14 +131,11 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
-	const num_t dt = PASTEMAC(ch,type); \
-	cntx_t*     cntx_p; \
-\
 	/* If x or y has zero elements, or if alpha is zero, return early. */ \
 	if ( bli_zero_dim2( m, n ) || PASTEMAC(ch,eq0)( *alpha ) ) return; \
 \
-	/* Initialize a local context if the given context is NULL. */ \
-	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
+	/* Obtain a valid context from the gks if necessary. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* Declare a void function pointer for the current operation. */ \
 	PASTECH2(ch,ftname,_ft) f; \
@@ -163,11 +155,8 @@ void PASTEMAC(ch,opname) \
 	   x, incx, \
 	   y, incy, \
 	   a, rs_a, cs_a, \
-	   cntx_p \
+	   cntx \
 	 ); \
-\
-	/* Finalize the context if it was initialized locally. */ \
-	bli_cntx_finalize_local_if( opname, cntx ); \
 }
 
 INSERT_GENTFUNC_BASIC3( ger, ger, ger_unb_var1, ger_unb_var2 )
@@ -190,11 +179,8 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
-	const num_t dt = PASTEMAC(ch,type); \
-	cntx_t*     cntx_p; \
-\
-	/* Initialize a local context if the given context is NULL. */ \
-	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
+	/* Obtain a valid context from the gks if necessary. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* If x has zero elements, or if alpha is zero, scale y by beta and
 	   return early. */ \
@@ -206,7 +192,7 @@ void PASTEMAC(ch,opname) \
 		  m, \
 		  beta, \
 		  y, incy, \
-		  cntx_p  \
+		  cntx  \
 		); \
 		return; \
 	} \
@@ -239,11 +225,8 @@ void PASTEMAC(ch,opname) \
 	   x, incx, \
 	   beta, \
 	   y, incy, \
-	   cntx_p \
+	   cntx \
 	 ); \
-\
-	/* Finalize the context if it was initialized locally. */ \
-	bli_cntx_finalize_local_if( opname, cntx ); \
 }
 
 INSERT_GENTFUNC_BASIC4( hemv, hemv, BLIS_CONJUGATE,    hemv_unf_var1, hemv_unf_var3 )
@@ -264,9 +247,7 @@ void PASTEMAC(ch,opname) \
        cntx_t*  cntx  \
      ) \
 { \
-	const num_t dt = PASTEMAC(ch,type); \
-	cntx_t*     cntx_p; \
-	ctype       alpha_local; \
+	ctype alpha_local; \
 \
 	/* If x has zero elements, or if alpha is zero, return early. */ \
 	if ( bli_zero_dim1( m ) || PASTEMAC(chr,eq0)( *alpha ) ) return; \
@@ -276,8 +257,8 @@ void PASTEMAC(ch,opname) \
 	   both her and syr operations. */ \
 	PASTEMAC2(chr,ch,copys)( *alpha, alpha_local ); \
 \
-	/* Initialize a local context if the given context is NULL. */ \
-	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
+	/* Obtain a valid context from the gks if necessary. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* Declare a void function pointer for the current operation. */ \
 	PASTECH2(ch,ftname,_ft) f; \
@@ -304,11 +285,8 @@ void PASTEMAC(ch,opname) \
 	   &alpha_local, \
 	   x, incx, \
 	   a, rs_a, cs_a, \
-	   cntx_p \
+	   cntx \
 	 ); \
-\
-	/* Finalize the context if it was initialized locally. */ \
-	bli_cntx_finalize_local_if( opname, cntx ); \
 }
 
 INSERT_GENTFUNCR_BASIC4( her, her, BLIS_CONJUGATE, her_unb_var1, her_unb_var2 )
@@ -328,14 +306,11 @@ void PASTEMAC(ch,opname) \
        cntx_t*  cntx  \
      ) \
 { \
-	const num_t dt = PASTEMAC(ch,type); \
-	cntx_t*     cntx_p; \
-\
 	/* If x has zero elements, or if alpha is zero, return early. */ \
 	if ( bli_zero_dim1( m ) || PASTEMAC(ch,eq0)( *alpha ) ) return; \
 \
-	/* Initialize a local context if the given context is NULL. */ \
-	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
+	/* Obtain a valid context from the gks if necessary. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* Declare a void function pointer for the current operation. */ \
 	PASTECH2(ch,ftname,_ft) f; \
@@ -362,11 +337,8 @@ void PASTEMAC(ch,opname) \
 	   alpha, \
 	   x, incx, \
 	   a, rs_a, cs_a, \
-	   cntx_p \
+	   cntx \
 	 ); \
-\
-	/* Finalize the context if it was initialized locally. */ \
-	bli_cntx_finalize_local_if( opname, cntx ); \
 }
 
 INSERT_GENTFUNC_BASIC4( syr, her, BLIS_NO_CONJUGATE, her_unb_var1, her_unb_var2 )
@@ -388,14 +360,11 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
-	const num_t dt = PASTEMAC(ch,type); \
-	cntx_t*     cntx_p; \
-\
 	/* If x has zero elements, or if alpha is zero, return early. */ \
 	if ( bli_zero_dim1( m ) || PASTEMAC(ch,eq0)( *alpha ) ) return; \
 \
-	/* Initialize a local context if the given context is NULL. */ \
-	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
+	/* Obtain a valid context from the gks if necessary. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* Declare a void function pointer for the current operation. */ \
 	PASTECH2(ch,ftname,_ft) f; \
@@ -424,11 +393,8 @@ void PASTEMAC(ch,opname) \
 	   x, incx, \
 	   y, incy, \
 	   a, rs_a, cs_a, \
-	   cntx_p \
+	   cntx \
 	 ); \
-\
-	/* Finalize the context if it was initialized locally. */ \
-	bli_cntx_finalize_local_if( opname, cntx ); \
 }
 
 INSERT_GENTFUNC_BASIC4( her2, her2, BLIS_CONJUGATE,    her2_unf_var1, her2_unf_var4 )
@@ -450,14 +416,11 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
-	const num_t dt = PASTEMAC(ch,type); \
-	cntx_t*     cntx_p; \
-\
-	/* Initialize a local context if the given context is NULL. */ \
-	bli_cntx_init_local_if( opname, dt, cntx, cntx_p ); \
-\
 	/* If x has zero elements, return early. */ \
 	if ( bli_zero_dim1( m ) ) return; \
+\
+	/* Obtain a valid context from the gks if necessary. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* If alpha is zero, set x to zero and return early. */ \
 	if ( PASTEMAC(ch,eq0)( *alpha ) ) \
@@ -468,7 +431,7 @@ void PASTEMAC(ch,opname) \
 		  m, \
 		  alpha, \
 		  x, incx, \
-		  cntx_p  \
+		  cntx  \
 		); \
 		return; \
 	} \
@@ -498,11 +461,8 @@ void PASTEMAC(ch,opname) \
 	   alpha, \
 	   a, rs_a, cs_a, \
 	   x, incx, \
-	   cntx_p \
+	   cntx \
 	 ); \
-\
-	/* Finalize the context if it was initialized locally. */ \
-	bli_cntx_finalize_local_if( opname, cntx ); \
 }
 
 INSERT_GENTFUNC_BASIC3( trmv, trmv, trmv_unf_var1, trmv_unf_var2 )

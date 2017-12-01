@@ -39,10 +39,6 @@ static void* bli_l3_ind_oper_fp[BLIS_NUM_IND_METHODS][BLIS_NUM_LEVEL3_OPS] =
         /*   gemm   hemm   herk   her2k  symm   syrk,  syr2k  trmm3  trmm   trsm  */
 /* 3mh  */ { bli_gemm3mh,  bli_hemm3mh,  bli_herk3mh,  bli_her2k3mh, bli_symm3mh,
              bli_syrk3mh,  bli_syr2k3mh, bli_trmm33mh, NULL,         NULL         },
-/* 3m3  */ { bli_gemm3m3,  NULL,         NULL,         NULL,         NULL,         
-             NULL,         NULL,         NULL,         NULL,         NULL         },
-/* 3m2  */ { bli_gemm3m2,  NULL,         NULL,         NULL,         NULL,         
-             NULL,         NULL,         NULL,         NULL,         NULL         },
 /* 3m1  */ { bli_gemm3m1,  bli_hemm3m1,  bli_herk3m1,  bli_her2k3m1, bli_symm3m1,
              bli_syrk3m1,  bli_syr2k3m1, bli_trmm33m1, bli_trmm3m1,  bli_trsm3m1  },
 /* 4mh  */ { bli_gemm4mh,  bli_hemm4mh,  bli_herk4mh,  bli_her2k4mh, bli_symm4mh,
@@ -65,10 +61,6 @@ static bool_t bli_l3_ind_oper_st[BLIS_NUM_IND_METHODS][BLIS_NUM_LEVEL3_OPS][2] =
         /*   gemm   hemm   herk   her2k  symm   syrk,  syr2k  trmm3  trmm   trsm  */
         /*    c     z    */
 /* 3mh  */ { {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE},
-             {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}  },
-/* 3m3  */ { {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE},
-             {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}  },
-/* 3m2  */ { {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE},
              {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}  },
 /* 3m1  */ { {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE},
              {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}  },

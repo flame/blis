@@ -121,11 +121,11 @@ siz_t bli_packm_init
 
 	if ( pack_buf_type == BLIS_BUFFER_FOR_A_BLOCK )
 	{
-		schema = bli_cntx_get_pack_schema_a_block( cntx );
+		schema = bli_cntx_schema_a_block( cntx );
 	}
 	else if ( pack_buf_type == BLIS_BUFFER_FOR_B_PANEL )
 	{
-		schema = bli_cntx_get_pack_schema_b_panel( cntx );
+		schema = bli_cntx_schema_b_panel( cntx );
 	}
 	else // if ( pack_buf_type == BLIS_BUFFER_FOR_C_PANEL )
 	{

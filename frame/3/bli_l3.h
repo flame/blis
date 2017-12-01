@@ -32,7 +32,6 @@
 
 */
 
-#include "bli_l3_cntx.h"
 #include "bli_l3_cntl.h"
 #include "bli_l3_check.h"
 
@@ -57,7 +56,7 @@
 #include "bli_l3_ukr_tapi.h"
 
 // Prototype reference micro-kernels.
-#include "bli_l3_ukr_ref.h"
+//#include "bli_l3_ref.h"
 
 // Operation-specific headers
 #include "bli_gemm.h"

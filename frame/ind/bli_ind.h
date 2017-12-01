@@ -48,13 +48,7 @@
 #include "bli_l3_ind_opt.h"
 
 // level-3 cntx initialization
-#include "bli_gemmind_cntx.h"
-#include "bli_trsmind_cntx.h"
-
-// level-3 ukernels
-#include "bli_gemmind_ukr_ref.h"
-#include "bli_gemmtrsmind_x_ukr_ref.h"
-#include "bli_trsmind_x_ukr_ref.h"
+#include "bli_cntx_ind_stage.h"
 
 
 void   bli_ind_init( void );

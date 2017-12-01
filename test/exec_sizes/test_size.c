@@ -89,7 +89,7 @@ int main( int argc, char** argv )
 		bli_randm( &c );
 
 		bli_setsc(  (2.0/1.0), 0.0, &alpha );
-		bli_setsc( -(1.0/1.0), 0.0, &beta );
+		bli_setsc(  (1.0/1.0), 0.0, &beta );
 
 #endif
 
@@ -99,18 +99,18 @@ int main( int argc, char** argv )
 
 		alpha.buffer = malloc( 1 * sizeof( double ) );
 		beta.buffer  = malloc( 1 * sizeof( double ) );
+
 		a.buffer     = malloc( m * m * sizeof( double ) );
-		a.m          = m;
-		a.n          = m;
-		a.cs         = m;
+		bli_obj_set_dims( m, m, a );
+		bli_obj_set_strides( m, 1, a );
+
 		b.buffer     = malloc( m * m * sizeof( double ) );
-		b.m          = m;
-		b.n          = m;
-		b.cs         = m;
+		bli_obj_set_dims( m, m, b );
+		bli_obj_set_strides( m, 1, b );
+
 		c.buffer     = malloc( m * m * sizeof( double ) );
-		c.m          = m;
-		c.n          = m;
-		c.cs         = m;
+		bli_obj_set_dims( m, m, c );
+		bli_obj_set_strides( m, 1, c );
 
 		*((double*)alpha.buffer) =  2.0;
 		*((double*)beta.buffer)  = -1.0;

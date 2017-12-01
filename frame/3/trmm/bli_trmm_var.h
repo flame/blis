@@ -87,8 +87,8 @@ void PASTEMAC(ch,varname) \
        thrinfo_t* thread  \
      );
 
-INSERT_GENTPROT_BASIC( trmm_ll_ker_var2 )
-INSERT_GENTPROT_BASIC( trmm_lu_ker_var2 )
-INSERT_GENTPROT_BASIC( trmm_rl_ker_var2 )
-INSERT_GENTPROT_BASIC( trmm_ru_ker_var2 )
+INSERT_GENTPROT_BASIC0( trmm_ll_ker_var2 )
+INSERT_GENTPROT_BASIC0( trmm_lu_ker_var2 )
+INSERT_GENTPROT_BASIC0( trmm_rl_ker_var2 )
+INSERT_GENTPROT_BASIC0( trmm_ru_ker_var2 )
 

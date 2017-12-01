@@ -51,18 +51,18 @@ void bla_trsm_check
      )
 {
 	bla_trmm_check
-     (
-       dt_str,
-	                op_str,
-	                sidea,
-	                uploa,
-	                transa,
-	                diaga,
-	                m,
-	                n,
-	                lda,
-	                ldb
-     );
+	(
+	  dt_str,
+	  op_str,
+	  sidea,
+	  uploa,
+	  transa,
+	  diaga,
+	  m,
+	  n,
+	  lda,
+	  ldb
+	);
 }
 
 #endif
