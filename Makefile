@@ -45,7 +45,7 @@
 # --- Makefile PHONY target definitions ----------------------------------------
 #
 
-.PHONY: all libs test install uninstall clean \
+.PHONY: all libs test install uninstall uninstall-old clean \
         check-env check-env-mk check-env-fragments check-env-make-defs \
         testsuite testsuite-bin testsuite-run \
         flat-header flat-cblas-header \
@@ -54,7 +54,7 @@
         cleanlib cleanh cleantest cleanmk distclean \
         changelog \
         uninstall-libs uninstall-headers uninstall-lib-symlinks \
-        uninstall-old
+        uninstall-old-libs uninstall-old-headers
 
 
 
@@ -325,10 +325,16 @@ TESTSUITE_BIN           := test_libblis.x
 
 # This shell command grabs all files named "libblis-*.a" or "libblis-*.so" in
 # the installation directory and then filters out the name of the library
-# archive for the current version/configuration. We consider this remaining set
-# of libraries to be "old" and eligible for removal upon running of the
-# uninstall-old target.
-UNINSTALL_LIBS   := $(shell $(FIND) $(INSTALL_PREFIX)/lib/ -name "$(BLIS_LIB_BASE_NAME)-*.[a|so]" 2> /dev/null | $(GREP) -v "$(BLIS_LIB_BASE_NAME)-$(VERS_CONF).[a|so]" | $(GREP) -v $(BLIS_LIB_NAME))
+# archive for the current version/configuration and its symlink. We consider
+# this remaining set of libraries to be "old" and eligible for removal upon
+# running of the uninstall-old target.
+UNINSTALL_LIBS    := $(shell $(FIND) $(INSTALL_PREFIX)/lib/ -name "$(BLIS_LIB_BASE_NAME)-*.a" 2> /dev/null | $(GREP) -v "$(BLIS_LIB_BASE_NAME)-$(VERS_CONF).a" | $(GREP) -v $(BLIS_LIB_NAME))
+UNINSTALL_LIBS    += $(shell $(FIND) $(INSTALL_PREFIX)/lib/ -name "$(BLIS_LIB_BASE_NAME)-*.so" 2> /dev/null | $(GREP) -v "$(BLIS_LIB_BASE_NAME)-$(VERS_CONF).so" | $(GREP) -v $(BLIS_LIB_NAME))
+
+# This shell command grabs all files named "*.h" that are not blis.h or cblas.h
+# in the installation directory. We consider this set of headers to be "old" and
+# eligible for removal upon running of the uninstall-old-headers target.
+UNINSTALL_HEADERS := $(shell $(FIND) $(INSTALL_PREFIX)/include/blis/ -name "*.h" 2> /dev/null | $(GREP) -v "$(BLIS_H)" | $(GREP) -v "$(CBLAS_H)")
 
 
 
@@ -347,6 +353,8 @@ test: testsuite
 install: libs install-libs install-headers install-lib-symlinks
 
 uninstall: uninstall-libs uninstall-headers uninstall-lib-symlinks
+
+uninstall-old: uninstall-old-libs uninstall-old-headers
 
 clean: cleanlib cleantest
 
@@ -716,7 +724,10 @@ changelog: check-env
 
 # --- Uninstall rules ---
 
-uninstall-old: $(UNINSTALL_LIBS)
+# NOTE: We can't write these uninstall rules directly in terms of targets
+# $(MK_LIBS_INST_W_VERS_CONF), $(MK_LIBS_INST), and $(MK_INCL_DIR_INST)
+# because those targets are already defined in terms of rules that *build*
+# those products.
 
 uninstall-libs: check-env
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
@@ -742,6 +753,12 @@ else
 	@- $(RM_RF) $(MK_INCL_DIR_INST)
 endif
 
+# --- Uninstall old rules ---
+
+uninstall-old-libs: $(UNINSTALL_LIBS) check-env
+
+uninstall-old-headers: $(UNINSTALL_HEADERS) check-env
+
 $(UNINSTALL_LIBS): check-env
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	- $(RM_F) $@
@@ -750,4 +767,11 @@ else
 	@- $(RM_F) $@
 endif
 
+$(UNINSTALL_HEADERS): check-env
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	- $(RM_F) $@
+else
+	@echo "Removing $(@F) from $(@D)/."
+	@- $(RM_F) $@
+endif
 
