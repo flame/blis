@@ -485,12 +485,14 @@ MK_HEADER_DIR_PATHS := $(dir $(foreach frag_path, \
 # C compiler.
 INCLUDE_PATHS   := $(strip $(patsubst %, -I%, $(MK_HEADER_DIR_PATHS)))
 
+# Construct the base path for the intermediate include directory.
+BASE_INC_PATH   := $(DIST_PATH)/$(INCLUDE_DIR)/$(CONFIG_NAME)
+
 # Isolate the path to blis.h by filtering the file from the list of headers.
 BLIS_H          := blis.h
 BLIS_H_SRC_PATH := $(filter %/$(BLIS_H), $(MK_HEADER_FILES))
 
 # Construct the path to the intermediate flattened/monolithic blis.h file.
-BASE_INC_PATH   := $(DIST_PATH)/$(INCLUDE_DIR)/$(CONFIG_NAME)
 BLIS_H_FLAT     := $(BASE_INC_PATH)/$(BLIS_H)
 
 # Obtain a list of header files #included inside of the bli_cntx_ref.c file.
@@ -512,6 +514,18 @@ REF_KER_I_PATHS += -I$(DIST_PATH)/frame/include
 
 # Finally, prefix the paths above with the base include path.
 INCLUDE_PATHS   := -I$(BASE_INC_PATH) $(REF_KER_I_PATHS)
+
+
+#
+# --- CBLAS header definitions -------------------------------------------------
+#
+
+CBLAS_H          := cblas.h
+CBLAS_H_SRC_PATH := $(filter %/$(CBLAS_H), $(MK_HEADER_FILES))
+
+# Construct the path to the intermediate flattened/monolithic cblas.h file.
+CBLAS_H_FLAT    := $(BASE_INC_PATH)/$(CBLAS_H)
+
 
 #
 # --- Special preprocessor macro definitions -----------------------------------

@@ -1029,6 +1029,13 @@ main()
 	fi
 	
 	# Convert 'yes' and 'no' flags to booleans.
+	if [ "x${enable_blas2blis}" = "xyes" ]; then
+		echo "${script_name}: the BLAS compatibility layer is enabled."
+		enable_blas2blis_01=1
+	else
+		echo "${script_name}: the BLAS compatibility layer is disabled."
+		enable_blas2blis_01=0
+	fi
 	if [ "x${enable_cblas}" = "xyes" ]; then
 		echo "${script_name}: the CBLAS compatibility layer is enabled."
 		enable_cblas_01=1
@@ -1037,13 +1044,6 @@ main()
 	else
 		echo "${script_name}: the CBLAS compatibility layer is disabled."
 		enable_cblas_01=0
-	fi
-	if [ "x${enable_blas2blis}" = "xyes" ]; then
-		echo "${script_name}: the BLAS compatibility layer is enabled."
-		enable_blas2blis_01=1
-	else
-		echo "${script_name}: the BLAS compatibility layer is disabled."
-		enable_blas2blis_01=0
 	fi
 	
 	# Report integer sizes

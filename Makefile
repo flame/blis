@@ -48,12 +48,12 @@
 .PHONY: all libs test install uninstall clean \
         check-env check-env-mk check-env-fragments check-env-make-defs \
         testsuite testsuite-bin testsuite-run \
-        flat-header \
-        install-libs install-header install-lib-symlinks \
+        flat-header flat-cblas-header \
+        install-libs install-headers install-lib-symlinks \
         showconfig \
         cleanlib cleanh cleantest cleanmk distclean \
         changelog \
-        uninstall-libs uninstall-header uninstall-lib-symlinks \
+        uninstall-libs uninstall-headers uninstall-lib-symlinks \
         uninstall-old
 
 
@@ -279,6 +279,16 @@ endif
 # --- Monolithic header definitions --------------------------------------------
 #
 
+# Define a list of headers to install. The default is to only install blis.h.
+HEADERS_TO_INSTALL := $(BLIS_H_FLAT)
+
+# If CBLAS is enabled, we also install cblas.h so the user does not need to
+# change their source code to #include "blis.h" in order to access the CBLAS
+# function prototypes and enums.
+ifeq ($(BLIS_ENABLE_CBLAS),yes)
+HEADERS_TO_INSTALL += $(CBLAS_H_FLAT)
+endif
+
 
 
 #
@@ -334,9 +344,9 @@ libs: blis-lib
 
 test: testsuite
 
-install: libs install-libs install-header install-lib-symlinks
+install: libs install-libs install-headers install-lib-symlinks
 
-uninstall: uninstall-libs uninstall-header uninstall-lib-symlinks
+uninstall: uninstall-libs uninstall-headers uninstall-lib-symlinks
 
 clean: cleanlib cleantest
 
@@ -351,6 +361,19 @@ ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 else
 	@echo -n "Generating monolithic blis.h"
 	@$(FLATTEN_H) -c -v1 $(BLIS_H_SRC_PATH) $@ "$(MK_HEADER_DIR_PATHS)"
+	@echo "Generated $@"
+endif
+
+# --- Consolidated cblas.h header creation ---
+
+flat-cblas-header: check-env $(CBLAS_H_FLAT)
+
+$(CBLAS_H_FLAT): $(MK_HEADER_FILES)
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	$(FLATTEN_H) -c -v1 $(CBLAS_H_SRC_PATH) $@ "$(MK_HEADER_DIR_PATHS)"
+else
+	@echo -n "Generating monolithic cblas.h"
+	@$(FLATTEN_H) -c -v1 $(CBLAS_H_SRC_PATH) $@ "$(MK_HEADER_DIR_PATHS)"
 	@echo "Generated $@"
 endif
 
@@ -527,21 +550,25 @@ else
                          > $(TESTSUITE_OUT_FILE)
 endif
 
-# --- Install rules ---
 
-install-libs: check-env $(MK_LIBS_INST_W_VERS_CONF)
+# --- Install header rules ---
 
-install-header: check-env $(MK_INCL_DIR_INST)
+install-headers: check-env $(MK_INCL_DIR_INST)
 
-$(MK_INCL_DIR_INST): $(BLIS_H_FLAT) $(CONFIG_MK_FILE)
+$(MK_INCL_DIR_INST): $(HEADERS_TO_INSTALL) $(CONFIG_MK_FILE)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	$(MKDIR) $(@)
-	$(INSTALL) -m 0644 $(BLIS_H_FLAT) $(@)
+	$(INSTALL) -m 0644 $(HEADERS_TO_INSTALL) $(@)
 else
 	@$(MKDIR) $(@)
-	@echo "Installing $(BLIS_H) into $(@)/"
-	@$(INSTALL) -m 0644 $(BLIS_H_FLAT) $(@)
+	@echo "Installing $(notdir $(HEADERS_TO_INSTALL)) into $(@)/"
+	@$(INSTALL) -m 0644 $(HEADERS_TO_INSTALL) $(@)
 endif
+
+
+# --- Install library rules ---
+
+install-libs: check-env $(MK_LIBS_INST_W_VERS_CONF)
 
 $(INSTALL_PREFIX)/lib/%-$(VERS_CONF).a: $(BASE_LIB_PATH)/%.a $(CONFIG_MK_FILE)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
@@ -707,7 +734,7 @@ else
 	@- $(RM_F) $(MK_LIBS_INST)
 endif
 
-uninstall-header: check-env
+uninstall-headers: check-env
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	- $(RM_RF) $(MK_INCL_DIR_INST)
 else
