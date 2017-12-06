@@ -37,6 +37,7 @@
 
 arch_t   bli_cpuid_query_id( void );
 
+bool_t   bli_cpuid_is_skx( uint32_t family, uint32_t model, uint32_t features );
 bool_t   bli_cpuid_is_knl( uint32_t family, uint32_t model, uint32_t features );
 bool_t   bli_cpuid_is_haswell( uint32_t family, uint32_t model, uint32_t features );
 bool_t   bli_cpuid_is_sandybridge( uint32_t family, uint32_t model, uint32_t features );
@@ -99,6 +100,10 @@ static bool_t bli_cpuid_has_features( uint32_t have, uint32_t want )
 #if defined(__x86_64__) || defined(_M_X64) || defined(__i386) || defined(_M_IX86)
 
 #include "cpuid.h"
+
+void get_cpu_name(char *cpu_name);
+int vpu_count();
+
 
 enum
 {

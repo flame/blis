@@ -47,6 +47,10 @@ arch_t bli_cpuid_query_id( void )
 	{
 		// Check for each Intel configuration that is enabled, check for that
 		// microarchitecture. We check from most recent to most dated.
+#ifdef BLIS_CONFIG_SKX
+		if ( bli_cpuid_is_skx( family, model, features ) )
+			return BLIS_ARCH_SKX;
+#endif
 #ifdef BLIS_CONFIG_KNL
 		if ( bli_cpuid_is_knl( family, model, features ) )
 			return BLIS_ARCH_KNL;
@@ -65,6 +69,8 @@ arch_t bli_cpuid_query_id( void )
 #endif
 		// If none of the other sub-configurations were detected, return
 		// the 'generic' arch_t id value.
+		printf("generic\n");
+
 		return BLIS_ARCH_GENERIC;
 	}
 	else if ( vendor == VENDOR_AMD )
@@ -105,6 +111,31 @@ arch_t bli_cpuid_query_id( void )
 }
 
 // -----------------------------------------------------------------------------
+bool_t bli_cpuid_is_skx
+     (
+       uint32_t family,
+       uint32_t model,
+       uint32_t features
+     )
+{
+	// Check for expected CPU features.
+	const uint32_t expected = FEATURE_AVX      |
+	                          FEATURE_FMA3     |
+	                          FEATURE_AVX2     |
+	                          FEATURE_AVX512F  |
+	                          FEATURE_AVX512DQ |
+	                          FEATURE_AVX512BW |
+	                          FEATURE_AVX512VL ;
+
+
+	int nvpu = vpu_count();
+
+	if ( !bli_cpuid_has_features( features, expected ) || nvpu != 2 ) {
+		return FALSE;
+	}
+
+	return TRUE;
+}
 
 bool_t bli_cpuid_is_knl
      (
@@ -627,6 +658,95 @@ uint32_t bli_cpuid_query
 		return VENDOR_INTEL;
 	else
 		return VENDOR_UNKNOWN;
+}
+
+void get_cpu_name(char *cpu_name)
+{
+    uint32_t eax, ebx, ecx, edx;
+
+    __cpuid(0x80000002u, eax, ebx, ecx, edx);
+    //printf("%x %x %x %x\n", eax, ebx, ecx, edx);
+
+    *(uint32_t *)&cpu_name[0]  = eax;
+    *(uint32_t *)&cpu_name[4]  = ebx;
+    *(uint32_t *)&cpu_name[8]  = ecx;
+    *(uint32_t *)&cpu_name[12] = edx;
+
+    __cpuid(0x80000003u, eax, ebx, ecx, edx);
+    //printf("%x %x %x %x\n", eax, ebx, ecx, edx);
+
+    *(uint32_t *)&cpu_name[16+0]  = eax;
+    *(uint32_t *)&cpu_name[16+4]  = ebx;
+    *(uint32_t *)&cpu_name[16+8]  = ecx;
+    *(uint32_t *)&cpu_name[16+12] = edx;
+
+    __cpuid(0x80000004u, eax, ebx, ecx, edx);
+    //printf("%x %x %x %x\n", eax, ebx, ecx, edx);
+
+    *(uint32_t *)&cpu_name[32+0]  = eax;
+    *(uint32_t *)&cpu_name[32+4]  = ebx;
+    *(uint32_t *)&cpu_name[32+8]  = ecx;
+    *(uint32_t *)&cpu_name[32+12] = edx;
+
+}
+
+int vpu_count()
+{
+	char cpu_name[48] = {};
+	char *loc;
+	char model_num[5];
+	int  sku;
+
+	get_cpu_name(cpu_name);
+
+	if (strstr(cpu_name, "Intel(R) Xeon(R)") != NULL)
+	{
+		loc = strstr(cpu_name, "Platinum");
+		if (loc == NULL)
+			loc = strstr(cpu_name, "Gold");
+		if (loc == NULL)
+			loc = strstr(cpu_name, "Silver");
+		if (loc == NULL)
+			loc = strstr(cpu_name, "Bronze");
+		if (loc == NULL)
+			loc = strstr(cpu_name, "W");
+		if (loc == NULL)
+			return -1;
+
+		loc = strstr(loc+1," ");
+		if(loc == NULL)
+			return -1;
+
+		strncpy(model_num, loc+1, 4);
+		model_num[5] = '\0';
+
+		sku = atoi(model_num);
+
+		if      (8199 >= sku && sku >= 8100) return 2;
+		else if (6199 >= sku && sku >= 6100) return 2;
+		else if (sku == 5122)                return 2;
+		else if (5199 >= sku && sku >= 5100) return 1;
+		else if (4199 >= sku && sku >= 4100) return 1;
+		else if (3199 >= sku && sku >= 3100) return 1;
+		else if (2199 >= sku && sku >= 2120) return 2;
+		else if (2119 >= sku && sku >= 2100) return 1;
+		else return -1;
+	}
+	else if (strstr(cpu_name, "Intel(R) Core(TM) i9") != NULL)
+	{
+		return 1;
+	}
+	else if (strstr(cpu_name, "Intel(R) Core(TM) i7") != NULL)
+	{
+		if (strstr(cpu_name, "7800X") != NULL ||
+				strstr(cpu_name, "7820X") != NULL)
+			return 1;
+		else return -1;
+	}
+	else
+	{
+		return -1;
+	}
 }
 
 #elif defined(__aarch64__) || defined(__arm__) || defined(_M_ARM)
