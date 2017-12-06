@@ -248,12 +248,10 @@ cntx_t* bli_gks_lookup_ind_cntx
 	// method hasn't yet been called (and thus its context pointer is still
 	// NULL).
 
+	// Sanity check: verify that the arch_t id is valid.
 	if ( bli_error_checking_is_enabled() )
 	{
-		err_t e_val;
-
-		// Confirm that the architecture id is valid.
-		e_val = bli_check_valid_arch_id( id );
+		err_t e_val = bli_check_valid_arch_id( id );
 		bli_check_error_code( e_val );
 	}
 
@@ -290,6 +288,13 @@ void bli_gks_register_cntx
 	// can get away with only storing the pointers to the initialization
 	// functions for those latter two types of contexts, which we can then
 	// call at a later time when those contexts are needed.
+
+	// Sanity check: verify that the arch_t id is valid.
+	if ( bli_error_checking_is_enabled() )
+	{
+		err_t e_val = bli_check_valid_arch_id( id );
+		bli_check_error_code( e_val );
+	}
 
 	nat_cntx_init_ft f = nat_fp;
 
@@ -413,6 +418,13 @@ cntx_t* bli_gks_query_ind_cntx
 	// Query the architecture id.
 	arch_t id = bli_arch_query_id();
 
+	// Sanity check: verify that the arch_t id is valid.
+	if ( bli_error_checking_is_enabled() )
+	{
+		err_t e_val = bli_check_valid_arch_id( id );
+		bli_check_error_code( e_val );
+	}
+
 	// NOTE: These initial statements can reside outside of the critical section
 	// because gks[ id ] should have already been allocated, and the native
 	// context in that array should have already been allocated/initialized.
@@ -491,6 +503,13 @@ void bli_gks_init_ref_cntx
 {
 	// Query the architecture id.
 	arch_t id = bli_arch_query_id();
+
+	// Sanity check: verify that the arch_t id is valid.
+	if ( bli_error_checking_is_enabled() )
+	{
+		err_t e_val = bli_check_valid_arch_id( id );
+		bli_check_error_code( e_val );
+	}
 
 	// Obtain the function pointer to the context initialization function for
 	// reference kernels.
@@ -605,6 +624,13 @@ kimpl_t bli_gks_l3_ukr_impl_type( l3ukr_t ukr, ind_t method, num_t dt )
 
 		// Query the architecture id.
 		arch_t id = bli_arch_query_id();
+
+		// Sanity check: verify that the arch_t id is valid.
+		if ( bli_error_checking_is_enabled() )
+		{
+			err_t e_val = bli_check_valid_arch_id( id );
+			bli_check_error_code( e_val );
+		}
 
 		// Obtain the function pointer to the context initialization function
 		// for reference kernels.
