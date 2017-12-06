@@ -71,6 +71,11 @@ void bli_gks_init( void )
 		// bli_config.h.
 
 		// Intel architectures
+#ifdef BLIS_CONFIG_SKX
+		bli_gks_register_cntx( BLIS_ARCH_SKX,         bli_cntx_init_skx,
+		                                              bli_cntx_init_skx_ref,
+		                                              bli_cntx_init_skx_ind );
+#endif
 #ifdef BLIS_CONFIG_KNL
 		bli_gks_register_cntx( BLIS_ARCH_KNL,         bli_cntx_init_knl,
 		                                              bli_cntx_init_knl_ref,

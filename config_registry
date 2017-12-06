@@ -18,6 +18,7 @@ haswell:     haswell
 sandybridge: sandybridge
 penryn:      penryn
 knl:         knl
+skx:         skx
 
 # AMD architectures.
 zen:         zen/haswell

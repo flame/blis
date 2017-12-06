@@ -41,7 +41,9 @@
 //
 
 // -- Intel64 architectures --
-
+#ifdef BLIS_CONFIG_SKX
+CNTX_INIT_PROTS( skx )
+#endif
 #ifdef BLIS_CONFIG_KNL
 CNTX_INIT_PROTS( knl )
 #endif
@@ -121,7 +123,9 @@ CNTX_INIT_PROTS( generic )
 #endif
 
 // -- Intel64 architectures --
-
+#ifdef BLIS_FAMILY_SKX
+#include "bli_family_skx.h"
+#endif
 #ifdef BLIS_FAMILY_KNL
 #include "bli_family_knl.h"
 #endif
@@ -189,7 +193,9 @@ CNTX_INIT_PROTS( generic )
 //
 
 // -- Intel64 architectures --
-
+#ifdef BLIS_KERNELS_SKX
+#include "bli_kernels_skx.h"
+#endif
 #ifdef BLIS_KERNELS_KNL
 #include "bli_kernels_knl.h"
 #endif

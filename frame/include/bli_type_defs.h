@@ -815,7 +815,8 @@ typedef enum
 typedef enum
 {
 	// Intel
-	BLIS_ARCH_KNL     = 0,
+	BLIS_ARCH_SKX     =0,
+	BLIS_ARCH_KNL,
 	BLIS_ARCH_KNC,
 	BLIS_ARCH_HASWELL,
 	BLIS_ARCH_SANDYBRIDGE,
@@ -842,7 +843,7 @@ typedef enum
 
 } arch_t;
 
-#define BLIS_NUM_ARCHS 16
+#define BLIS_NUM_ARCHS 17
 
 
 //
