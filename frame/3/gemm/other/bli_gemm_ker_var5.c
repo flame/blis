@@ -223,8 +223,8 @@ void PASTEMAC(ch,varname)( \
 	cstep_c = cs_c * NR; \
 \
 	/* Save the panel strides of A and B to the auxinfo_t object. */ \
-	bli_auxinfo_set_ps_a( ps_a, aux ); \
-	bli_auxinfo_set_ps_b( ps_b, aux ); \
+	bli_auxinfo_set_ps_a( ps_a, &aux ); \
+	bli_auxinfo_set_ps_b( ps_b, &aux ); \
 \
 	b1 = b_cast; \
 	c1 = c_cast; \
@@ -234,7 +234,7 @@ void PASTEMAC(ch,varname)( \
 	b2 = bp; \
 \
 	/* Save address of next panel of B to the auxinfo_t object. */ \
-	bli_auxinfo_set_next_b( b2, aux ); \
+	bli_auxinfo_set_next_b( b2, &aux ); \
 \
 	/* Loop over the n dimension (NR columns at a time). */ \
 	for ( j = 0; j < n_iter; ++j ) \
@@ -270,7 +270,7 @@ void PASTEMAC(ch,varname)( \
 			} \
 \
 			/* Save address of next panel of A to the auxinfo_t object. */ \
-			bli_auxinfo_set_next_a( a2, aux ); \
+			bli_auxinfo_set_next_a( a2, &aux ); \
 \
 			/* Handle interior and edge cases separately. */ \
 			if ( m_cur == MR && n_cur == NR ) \

@@ -61,10 +61,10 @@ void PASTEMAC0(opname) \
 	auxinfo_t data; \
 \
 	/* Fill the auxinfo_t struct in case the micro-kernel uses it. */ \
-	bli_auxinfo_set_next_a( buf_a, data ); \
-	bli_auxinfo_set_next_b( buf_b, data ); \
-	bli_auxinfo_set_is_a( 1, data ); \
-	bli_auxinfo_set_is_b( 1, data ); \
+	bli_auxinfo_set_next_a( buf_a, &data ); \
+	bli_auxinfo_set_next_b( buf_b, &data ); \
+	bli_auxinfo_set_is_a( 1, &data ); \
+	bli_auxinfo_set_is_b( 1, &data ); \
 \
 	/* Invoke the void pointer-based function for the given datatype. */ \
 	bli_call_ft_10 \
@@ -107,10 +107,10 @@ void PASTEMAC0(opname) \
 	auxinfo_t data; \
 \
 	/* Fill the auxinfo_t struct in case the micro-kernel uses it. */ \
-	bli_auxinfo_set_next_a( buf_a, data ); \
-	bli_auxinfo_set_next_b( buf_b, data ); \
-	bli_auxinfo_set_is_a( 1, data ); \
-	bli_auxinfo_set_is_b( 1, data ); \
+	bli_auxinfo_set_next_a( buf_a, &data ); \
+	bli_auxinfo_set_next_b( buf_b, &data ); \
+	bli_auxinfo_set_is_a( 1, &data ); \
+	bli_auxinfo_set_is_b( 1, &data ); \
 \
 	/* Invoke the void pointer-based function for the given datatype. */ \
 	if ( bli_obj_is_lower( *a ) ) \
@@ -174,10 +174,10 @@ void PASTEMAC0(opname) \
 \
 	/* Fill the auxinfo_t struct in case the micro-kernel uses it. */ \
 	if ( bli_obj_is_lower( *a11 ) ) \
-	{ bli_auxinfo_set_next_a( buf_a1x, data ); } \
+	{ bli_auxinfo_set_next_a( buf_a1x, &data ); } \
 	else /* if ( bli_obj_is_upper( *a11 ) ) */ \
-	{ bli_auxinfo_set_next_a( buf_a11, data ); } \
-	bli_auxinfo_set_next_b( buf_bx1, data ); \
+	{ bli_auxinfo_set_next_a( buf_a11, &data ); } \
+	bli_auxinfo_set_next_b( buf_bx1, &data ); \
 \
 	/* Invoke the void pointer-based function for the given datatype. */ \
 	if ( bli_obj_is_lower( *a11 ) ) \

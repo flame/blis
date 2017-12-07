@@ -38,33 +38,67 @@
 
 // auxinfo_t field query
 
-#define bli_auxinfo_schema_a( auxinfo )  ( (auxinfo)->schema_a )
-#define bli_auxinfo_schema_b( auxinfo )  ( (auxinfo)->schema_b )
+static pack_t bli_auxinfo_schema_a( auxinfo_t* ai )
+{
+	return ai->schema_a;
+}
+static pack_t bli_auxinfo_schema_b( auxinfo_t* ai )
+{
+	return ai->schema_b;
+}
 
-#define bli_auxinfo_next_a( auxinfo )    ( (auxinfo)->a_next )
-#define bli_auxinfo_next_b( auxinfo )    ( (auxinfo)->b_next )
+static void* bli_auxinfo_next_a( auxinfo_t* ai )
+{
+	return ai->a_next;
+}
+static void* bli_auxinfo_next_b( auxinfo_t* ai )
+{
+	return ai->a_next;
+}
 
-#define bli_auxinfo_is_a( auxinfo )      ( (auxinfo)->is_a )
-#define bli_auxinfo_is_b( auxinfo )      ( (auxinfo)->is_b )
+static inc_t bli_auxinfo_is_a( auxinfo_t* ai )
+{
+	return ai->is_a;
+}
+static inc_t bli_auxinfo_is_b( auxinfo_t* ai )
+{
+	return ai->is_b;
+}
 
 
 // auxinfo_t field modification
 
-#define bli_auxinfo_set_schema_a( schema, auxinfo )   { (auxinfo).schema_a = schema; }
-#define bli_auxinfo_set_schema_b( schema, auxinfo )   { (auxinfo).schema_b = schema; }
-
-#define bli_auxinfo_set_next_a( a_p, auxinfo ) { (auxinfo).a_next = a_p; }
-#define bli_auxinfo_set_next_b( b_p, auxinfo ) { (auxinfo).b_next = b_p; }
-
-#define bli_auxinfo_set_next_ab( a_p, b_p, auxinfo ) \
-{ \
-	bli_auxinfo_set_next_a( a_p, auxinfo ); \
-	bli_auxinfo_set_next_b( b_p, auxinfo ); \
+static void bli_auxinfo_set_schema_a( pack_t schema, auxinfo_t* ai )
+{
+	ai->schema_a = schema;
+}
+static void bli_auxinfo_set_schema_b( pack_t schema, auxinfo_t* ai )
+{
+	ai->schema_b = schema;
 }
 
-#define bli_auxinfo_set_is_a( is, auxinfo )   { (auxinfo).is_a = is; }
-#define bli_auxinfo_set_is_b( is, auxinfo )   { (auxinfo).is_b = is; }
+static void bli_auxinfo_set_next_a( void* p, auxinfo_t* ai )
+{
+	ai->a_next = p;
+}
+static void bli_auxinfo_set_next_b( void* p, auxinfo_t* ai )
+{
+	ai->b_next = p;
+}
+static void bli_auxinfo_set_next_ab( void* ap, void* bp, auxinfo_t* ai )
+{
+	ai->a_next = ap;
+	ai->b_next = bp;
+}
 
+static void bli_auxinfo_set_is_a( inc_t is, auxinfo_t* ai )
+{
+	ai->is_a = is;
+}
+static void bli_auxinfo_set_is_b( inc_t is, auxinfo_t* ai )
+{
+	ai->is_b = is;
+}
 
 #endif 
 

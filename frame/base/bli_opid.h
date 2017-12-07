@@ -32,5 +32,8 @@
 
 */
 
-bool_t bli_opid_is_level3( opid_t opid );
+static bool_t bli_opid_is_level3( opid_t opid )
+{
+	return ( BLIS_GEMM <= opid && opid <= BLIS_TRSM );
+}
 

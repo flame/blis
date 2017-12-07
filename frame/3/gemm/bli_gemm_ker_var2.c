@@ -256,12 +256,12 @@ void PASTEMAC(ch,varname) \
 	cstep_c = cs_c * NR; \
 \
 	/* Save the pack schemas of A and B to the auxinfo_t object. */ \
-	bli_auxinfo_set_schema_a( schema_a, aux ); \
-	bli_auxinfo_set_schema_b( schema_b, aux ); \
+	bli_auxinfo_set_schema_a( schema_a, &aux ); \
+	bli_auxinfo_set_schema_b( schema_b, &aux ); \
 \
 	/* Save the imaginary stride of A and B to the auxinfo_t object. */ \
-	bli_auxinfo_set_is_a( is_a, aux ); \
-	bli_auxinfo_set_is_b( is_b, aux ); \
+	bli_auxinfo_set_is_a( is_a, &aux ); \
+	bli_auxinfo_set_is_b( is_b, &aux ); \
 \
 	thrinfo_t* caucus    = bli_thrinfo_sub_node( thread ); \
 	dim_t jr_num_threads = bli_thread_n_way( thread ); \
@@ -306,8 +306,8 @@ void PASTEMAC(ch,varname) \
 \
 			/* Save addresses of next panels of A and B to the auxinfo_t
 			   object. */ \
-			bli_auxinfo_set_next_a( a2, aux ); \
-			bli_auxinfo_set_next_b( b2, aux ); \
+			bli_auxinfo_set_next_a( a2, &aux ); \
+			bli_auxinfo_set_next_b( b2, &aux ); \
 \
 			/* Handle interior and edge cases separately. */ \
 			if ( m_cur == MR && n_cur == NR ) \

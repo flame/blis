@@ -351,13 +351,13 @@ void PASTEMAC(ch,varname) \
 	/* Save the pack schemas of A and B to the auxinfo_t object.
 	   NOTE: We swap the values for A and B since the triangular
 	   "A" matrix is actually contained within B. */ \
-	bli_auxinfo_set_schema_a( schema_b, aux ); \
-	bli_auxinfo_set_schema_b( schema_a, aux ); \
+	bli_auxinfo_set_schema_a( schema_b, &aux ); \
+	bli_auxinfo_set_schema_b( schema_a, &aux ); \
 \
 	/* Save the imaginary stride of A to the auxinfo_t object.
 	   NOTE: We swap the values for A and B since the triangular
 	   "A" matrix is actually contained within B. */ \
-	bli_auxinfo_set_is_b( istep_a, aux ); \
+	bli_auxinfo_set_is_b( istep_a, &aux ); \
 \
 	b1 = b_cast; \
 	c1 = c_cast; \
@@ -410,7 +410,7 @@ void PASTEMAC(ch,varname) \
 			   object.
 			   NOTE: We swap the values for A and B since the triangular
 			   "A" matrix is actually contained within B. */ \
-			bli_auxinfo_set_is_a( is_b_cur, aux ); \
+			bli_auxinfo_set_is_a( is_b_cur, &aux ); \
 \
 			/* Loop over the m dimension (MR rows at a time). */ \
 			for ( i = 0; i < m_iter; ++i ) \
@@ -441,8 +441,8 @@ void PASTEMAC(ch,varname) \
 				/* Save addresses of next panels of A and B to the auxinfo_t
 				   object. NOTE: We swap the values for A and B since the
 				   triangular "A" matrix is actually contained within B. */ \
-				bli_auxinfo_set_next_a( b2, aux ); \
-				bli_auxinfo_set_next_b( a2, aux ); \
+				bli_auxinfo_set_next_a( b2, &aux ); \
+				bli_auxinfo_set_next_b( a2, &aux ); \
 \
 				/* Handle interior and edge cases separately. */ \
 				if ( m_cur == MR && n_cur == NR ) \
@@ -496,7 +496,7 @@ void PASTEMAC(ch,varname) \
 			   object.
 			   NOTE: We swap the values for A and B since the triangular
 			   "A" matrix is actually contained within B. */ \
-			bli_auxinfo_set_is_a( istep_b, aux ); \
+			bli_auxinfo_set_is_a( istep_b, &aux ); \
 \
 			/* Loop over the m dimension (MR rows at a time). */ \
 			for ( i = 0; i < m_iter; ++i ) \
@@ -521,8 +521,8 @@ void PASTEMAC(ch,varname) \
 				/* Save addresses of next panels of A and B to the auxinfo_t
 				   object. NOTE: We swap the values for A and B since the
 				   triangular "A" matrix is actually contained within B. */ \
-				bli_auxinfo_set_next_a( b2, aux ); \
-				bli_auxinfo_set_next_b( a2, aux ); \
+				bli_auxinfo_set_next_a( b2, &aux ); \
+				bli_auxinfo_set_next_b( a2, &aux ); \
 \
 				/* Handle interior and edge cases separately. */ \
 				if ( m_cur == MR && n_cur == NR ) \

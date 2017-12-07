@@ -141,7 +141,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	   below. */ \
 \
 \
-	bli_auxinfo_set_next_ab( a_i, b_i, *data ); \
+	bli_auxinfo_set_next_ab( a_i, b_i, data ); \
 \
 	/* ab_r = alpha_r * a_r * b_r; */ \
 	rgemm_ukr \
@@ -156,7 +156,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	  cntx  \
 	); \
 \
-	bli_auxinfo_set_next_ab( a_rpi, b_rpi, *data ); \
+	bli_auxinfo_set_next_ab( a_rpi, b_rpi, data ); \
 \
 	/* ab_i = alpha_r * a_i * b_i; */ \
 	rgemm_ukr \
@@ -171,7 +171,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	  cntx  \
 	); \
 \
-	bli_auxinfo_set_next_ab( a_next, b_next, *data ); \
+	bli_auxinfo_set_next_ab( a_next, b_next, data ); \
 \
 	/* ct_i = alpha_r * a_ri * b_ri; */ \
 	rgemm_ukr \

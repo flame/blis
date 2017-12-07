@@ -133,7 +133,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	   b11.r = alpha.r * b11.r - (                 + a12.r * b21.r - a12.i * b21.i );
 	   b11.i = alpha.r * b11.i - ( a12.ri * b21.ri - a12.r * b21.r - a12.i * b21.i ); */ \
 \
-	bli_auxinfo_set_next_ab( a1x_i, bx1_i, *data ); \
+	bli_auxinfo_set_next_ab( a1x_i, bx1_i, data ); \
 \
 	/* lower: ab.r = a10.r * b01.r;
 	   upper: ab.r = a12.r * b21.r; */ \
@@ -149,7 +149,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	  cntx  \
 	); \
 \
-	bli_auxinfo_set_next_ab( a1x_ri, bx1_ri, *data ); \
+	bli_auxinfo_set_next_ab( a1x_ri, bx1_ri, data ); \
 \
 	/* lower: ab.i = a10.i * b01.i;
 	   upper: ab.i = a12.i * b21.i; */ \
@@ -165,7 +165,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	  cntx  \
 	); \
 \
-	bli_auxinfo_set_next_ab( a_next, b_next, *data ); \
+	bli_auxinfo_set_next_ab( a_next, b_next, data ); \
 \
 	/* lower: b11.i = alpha.r * b11.i - a12.ri * b21.ri;
 	   upper: b11.i = alpha.r * b11.i - a12.ri * b21.ri; */ \

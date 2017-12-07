@@ -151,7 +151,7 @@ PASTEMAC(chr,fprintm)( stdout, "gemm4m1_ukr: bp_i", k, n, \
 	   below. */ \
 \
 \
-	bli_auxinfo_set_next_ab( a_r, b_i, *data ); \
+	bli_auxinfo_set_next_ab( a_r, b_i, data ); \
 \
 	/* ct_r = alpha_r * a_r * b_r; */ \
 	rgemm_ukr \
@@ -166,7 +166,7 @@ PASTEMAC(chr,fprintm)( stdout, "gemm4m1_ukr: bp_i", k, n, \
 	  cntx  \
 	); \
 \
-	bli_auxinfo_set_next_ab( a_i, b_r, *data ); \
+	bli_auxinfo_set_next_ab( a_i, b_r, data ); \
 \
 	/* ct_i = alpha_r * a_r * b_i; */ \
 	rgemm_ukr \
@@ -181,7 +181,7 @@ PASTEMAC(chr,fprintm)( stdout, "gemm4m1_ukr: bp_i", k, n, \
 	  cntx  \
 	); \
 \
-	bli_auxinfo_set_next_ab( a_i, b_i, *data ); \
+	bli_auxinfo_set_next_ab( a_i, b_i, data ); \
 \
 	/* ct_i += alpha_r * a_i * b_r; */ \
 	rgemm_ukr \
@@ -196,7 +196,7 @@ PASTEMAC(chr,fprintm)( stdout, "gemm4m1_ukr: bp_i", k, n, \
 	  cntx  \
 	); \
 \
-	bli_auxinfo_set_next_ab( a_next, b_next, *data ); \
+	bli_auxinfo_set_next_ab( a_next, b_next, data ); \
 \
 	/* ct_r += -alpha_r * a_i * b_i; */ \
 	rgemm_ukr \

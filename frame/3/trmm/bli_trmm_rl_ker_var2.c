@@ -313,11 +313,11 @@ void PASTEMAC(ch,varname) \
 	if ( bli_is_odd( istep_b ) ) istep_b += 1; \
 \
 	/* Save the pack schemas of A and B to the auxinfo_t object. */ \
-	bli_auxinfo_set_schema_a( schema_a, aux ); \
-	bli_auxinfo_set_schema_b( schema_b, aux ); \
+	bli_auxinfo_set_schema_a( schema_a, &aux ); \
+	bli_auxinfo_set_schema_b( schema_b, &aux ); \
 \
 	/* Save the imaginary stride of A to the auxinfo_t object. */ \
-	bli_auxinfo_set_is_a( istep_a, aux ); \
+	bli_auxinfo_set_is_a( istep_a, &aux ); \
 \
 	b1 = b_cast; \
 	c1 = c_cast; \
@@ -365,7 +365,7 @@ void PASTEMAC(ch,varname) \
 \
 			/* Save the 4m1/3m1 imaginary stride of B to the auxinfo_t
 			   object. */ \
-			bli_auxinfo_set_is_b( is_b_cur, aux ); \
+			bli_auxinfo_set_is_b( is_b_cur, &aux ); \
 \
 			/* Loop over the m dimension (MR rows at a time). */ \
 			for ( i = 0; i < m_iter; ++i ) \
@@ -391,8 +391,8 @@ void PASTEMAC(ch,varname) \
 \
 				/* Save addresses of next panels of A and B to the auxinfo_t
 				   object. */ \
-				bli_auxinfo_set_next_a( a2, aux ); \
-				bli_auxinfo_set_next_b( b2, aux ); \
+				bli_auxinfo_set_next_a( a2, &aux ); \
+				bli_auxinfo_set_next_b( b2, &aux ); \
 \
 				/* Handle interior and edge cases separately. */ \
 				if ( m_cur == MR && n_cur == NR ) \
@@ -450,7 +450,7 @@ void PASTEMAC(ch,varname) \
 \
 			/* Save the 4m1/3m1 imaginary stride of B to the auxinfo_t
 			   object. */ \
-			bli_auxinfo_set_is_b( istep_b, aux ); \
+			bli_auxinfo_set_is_b( istep_b, &aux ); \
 \
 			/* Loop over the m dimension (MR rows at a time). */ \
 			for ( i = 0; i < m_iter; ++i ) \
@@ -473,8 +473,8 @@ void PASTEMAC(ch,varname) \
 \
 				/* Save addresses of next panels of A and B to the auxinfo_t
 				   object. */ \
-				bli_auxinfo_set_next_a( a2, aux ); \
-				bli_auxinfo_set_next_b( b2, aux ); \
+				bli_auxinfo_set_next_a( a2, &aux ); \
+				bli_auxinfo_set_next_b( b2, &aux ); \
 \
 				/* Handle interior and edge cases separately. */ \
 				if ( m_cur == MR && n_cur == NR ) \

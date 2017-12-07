@@ -62,41 +62,73 @@ struct thrinfo_s
 typedef struct thrinfo_s thrinfo_t;
 
 //
-// thrinfo_t macros
+// thrinfo_t functions
 // NOTE: The naming of these should be made consistent at some point.
 // (ie: bli_thrinfo_ vs. bli_thread_)
 //
 
 // thrinfo_t query (field only)
 
-#define bli_thread_num_threads( t )        ( (t)->ocomm->n_threads )
+static dim_t bli_thread_num_threads( thrinfo_t* t )
+{
+	return (t->ocomm)->n_threads;
+}
 
-#define bli_thread_n_way( t )              ( (t)->n_way )
-#define bli_thread_work_id( t )            ( (t)->work_id )
-#define bli_thread_ocomm_id( t )           ( (t)->ocomm_id )
+static dim_t bli_thread_ocomm_id( thrinfo_t* t )
+{
+	return t->ocomm_id;
+}
 
-#define bli_thrinfo_ocomm( t )             ( (t)->ocomm )
-#define bli_thrinfo_needs_free_comm( t )   ( (t)->free_comm )
+static dim_t bli_thread_n_way( thrinfo_t* t )
+{
+	return t->n_way;
+}
 
-#define bli_thrinfo_sub_node( t )          ( (t)->sub_node )
+static dim_t bli_thread_work_id( thrinfo_t* t )
+{
+	return t->work_id;
+}
+
+static thrcomm_t* bli_thrinfo_ocomm( thrinfo_t* t )
+{
+	return t->ocomm;
+}
+
+static bool_t bli_thrinfo_needs_free_comm( thrinfo_t* t )
+{
+	return t->free_comm;
+}
+
+static thrinfo_t* bli_thrinfo_sub_node( thrinfo_t* t )
+{
+	return t->sub_node;
+}
 
 // thrinfo_t query (complex)
 
-#define bli_thread_am_ochief( t )          ( (t)->ocomm_id == 0 )
+static bool_t bli_thread_am_ochief( thrinfo_t* t )
+{
+	return t->ocomm_id == 0;
+}
 
 // thrinfo_t modification
 
-#define bli_thrinfo_set_sub_node( _sub_node, thread ) \
-{ \
-	(thread)->sub_node = _sub_node; \
+static void bli_thrinfo_set_sub_node( thrinfo_t* sub_node, thrinfo_t* t )
+{
+	t->sub_node = sub_node;
 }
 
-// other thrinfo_t-related macros
+// other thrinfo_t-related functions
 
-#define bli_thread_obroadcast( t, p ) bli_thrcomm_bcast( (t)->ocomm, \
-                                                         (t)->ocomm_id, p )
-#define bli_thread_obarrier( t )      bli_thrcomm_barrier( (t)->ocomm, \
-                                                           (t)->ocomm_id )
+static void* bli_thread_obroadcast( thrinfo_t* t, void* p )
+{
+	return bli_thrcomm_bcast( t->ocomm, t->ocomm_id, p );
+}
+
+static void bli_thread_obarrier( thrinfo_t* t )
+{
+	bli_thrcomm_barrier( t->ocomm, t->ocomm_id );
+}
 
 
 //

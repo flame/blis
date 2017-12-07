@@ -111,73 +111,83 @@ void bli_cntl_mark_family
 
 // cntl_t query (fields only)
 
-#define bli_cntl_family( cntl ) \
-\
-	( cntl->family )
+static opid_t bli_cntl_family( cntl_t* cntl )
+{
+	return cntl->family;
+}
 
-#define bli_cntl_bszid( cntl ) \
-\
-	( cntl->bszid )
+static bszid_t bli_cntl_bszid( cntl_t* cntl )
+{
+	return cntl->bszid;
+}
 
-#define bli_cntl_var_func( cntl ) \
-\
-	( cntl->var_func )
+static void* bli_cntl_var_func( cntl_t* cntl )
+{
+	return cntl->var_func;
+}
 
-#define bli_cntl_sub_node( cntl ) \
-\
-	( cntl->sub_node )
+static cntl_t* bli_cntl_sub_node( cntl_t* cntl )
+{
+	return cntl->sub_node;
+}
 
-#define bli_cntl_params( cntl ) \
-\
-	( cntl->params )
+static void* bli_cntl_params( cntl_t* cntl )
+{
+	return cntl->params;
+}
 
-#define bli_cntl_params_size( cntl ) \
-\
-	( *( ( uint64_t* )(cntl->params) ) )
+static uint64_t bli_cntl_params_size( cntl_t* cntl )
+{
+	// The first 64 bytes is always the size of the params structure.
+	return *( ( uint64_t* )(cntl->params) );
+}
 
-#define bli_cntl_pack_mem( cntl ) \
-\
-	( &(cntl->pack_mem) )
+static mem_t* bli_cntl_pack_mem( cntl_t* cntl )
+{
+	return &(cntl->pack_mem);
+}
 
 // cntl_t query (complex)
 
-#define bli_cntl_is_leaf( cntl ) \
-\
-	( bli_cntl_sub_node( cntl ) == NULL )
+static bool_t bli_cntl_is_leaf( cntl_t* cntl )
+{
+	return bli_cntl_sub_node( cntl ) == NULL;
+}
 
-#define bli_cntl_does_part( cntl ) \
-\
-	( bli_cntl_bszid( cntl ) != BLIS_NO_PART )
+static bool_t bli_cntl_does_part( cntl_t* cntl )
+{
+	return bli_cntl_bszid( cntl ) != BLIS_NO_PART;
+}
 
 // cntl_t modification
 
-#define bli_cntl_set_family( family0, cntl ) \
-{ \
-	cntl->family = family0; \
+static void bli_cntl_set_family( opid_t family, cntl_t* cntl )
+{
+	cntl->family = family;
 }
 
-#define bli_cntl_set_bszid( bszid0, cntl ) \
-{ \
-	cntl->bszid = bszid0; \
+static void bli_cntl_set_bszid( bszid_t bszid, cntl_t* cntl )
+{
+	cntl->bszid = bszid;
 }
 
-#define bli_cntl_set_var_func( var_func0, cntl ) \
-{ \
-	cntl->var_func = var_func0; \
+static void bli_cntl_set_var_func( void* var_func, cntl_t* cntl )
+{
+	cntl->var_func = var_func;
 }
 
-#define bli_cntl_set_sub_node( sub_node0, cntl ) \
-{ \
-	cntl->sub_node = sub_node0; \
+static void bli_cntl_set_sub_node( cntl_t* sub_node, cntl_t* cntl )
+{
+	cntl->sub_node = sub_node;
 }
 
-#define bli_cntl_set_params( params0, cntl ) \
-{ \
-	cntl->params = params0; \
+static void bli_cntl_set_params( void* params, cntl_t* cntl )
+{
+	cntl->params = params;
 }
 
-#define bli_cntl_set_pack_mem( pack_mem0, cntl ) \
-{ \
-	cntl->pack_mem = *(pack_mem0); \
+static void bli_cntl_set_pack_mem( mem_t* pack_mem, cntl_t* cntl )
+{
+	cntl->pack_mem = *pack_mem;
 }
 

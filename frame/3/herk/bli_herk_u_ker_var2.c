@@ -267,12 +267,12 @@ void PASTEMAC(ch,varname) \
 	cstep_c = cs_c * NR; \
 \
 	/* Save the pack schemas of A and B to the auxinfo_t object. */ \
-	bli_auxinfo_set_schema_a( schema_a, aux ); \
-	bli_auxinfo_set_schema_b( schema_b, aux ); \
+	bli_auxinfo_set_schema_a( schema_a, &aux ); \
+	bli_auxinfo_set_schema_b( schema_b, &aux ); \
 \
 	/* Save the imaginary stride of A and B to the auxinfo_t object. */ \
-	bli_auxinfo_set_is_a( is_a, aux ); \
-	bli_auxinfo_set_is_b( is_b, aux ); \
+	bli_auxinfo_set_is_a( is_a, &aux ); \
+	bli_auxinfo_set_is_b( is_b, &aux ); \
 \
 	b1 = b_cast; \
 	c1 = c_cast; \
@@ -323,8 +323,8 @@ void PASTEMAC(ch,varname) \
 \
 			/* Save addresses of next panels of A and B to the auxinfo_t
 			   object. */ \
-			bli_auxinfo_set_next_a( a2, aux ); \
-			bli_auxinfo_set_next_b( b2, aux ); \
+			bli_auxinfo_set_next_a( a2, &aux ); \
+			bli_auxinfo_set_next_b( b2, &aux ); \
 \
 			/* If the diagonal intersects the current MR x NR submatrix, we
 			   compute it the temporary buffer and then add in the elements

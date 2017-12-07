@@ -36,15 +36,16 @@
 
 // mbool_t query
 
-#define bli_mbool_get_dt( dt, mb ) \
-\
-	( (mb)->v[ dt ] )
+static bool_t bli_mbool_get_dt( num_t dt, mbool_t* mb )
+{
+	return mb->v[ dt ];
+}
 
 // mbool_t modification
 
-#define bli_mbool_set_dt( val, dt, mb ) \
-{ \
-    (mb)->v[ dt ] = val; \
+static void bli_mbool_set_dt( bool_t val, num_t dt, mbool_t* mb )
+{
+	mb->v[ dt ] = val;
 }
 
 // -----------------------------------------------------------------------------

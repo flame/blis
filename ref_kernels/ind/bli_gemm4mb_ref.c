@@ -142,7 +142,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		   NOTE: Scaling by alpha_r is not shown above, but is implemented
 		   below. */ \
 \
-		bli_auxinfo_set_next_ab( a_i, b_r, *data ); \
+		bli_auxinfo_set_next_ab( a_i, b_r, data ); \
 \
 		rgemm_ukr \
 		( \
@@ -156,7 +156,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		  cntx  \
 		); \
 \
-		bli_auxinfo_set_next_ab( a_next, b_next, *data ); \
+		bli_auxinfo_set_next_ab( a_next, b_next, data ); \
 \
 		rgemm_ukr \
 		( \
@@ -181,7 +181,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		   NOTE: Scaling by alpha_r is not shown above, but is implemented
 		   below. */ \
 \
-		bli_auxinfo_set_next_ab( a_i, b_i, *data ); \
+		bli_auxinfo_set_next_ab( a_i, b_i, data ); \
 \
 		rgemm_ukr \
 		( \
@@ -195,7 +195,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		  cntx  \
 		); \
 \
-		bli_auxinfo_set_next_ab( a_next, b_next, *data ); \
+		bli_auxinfo_set_next_ab( a_next, b_next, data ); \
 \
 		rgemm_ukr \
 		( \
