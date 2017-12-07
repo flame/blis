@@ -32,85 +32,9 @@
 
 */
 
-#include "blis.h"
+GEMM_UKR_PROT( float ,   s, gemm_skx_asm_32x12_l2 )
+GEMM_UKR_PROT( float ,   s, gemm_skx_asm_12x32_l2 )
 
-// -----------------------------------------------------------------------------
+GEMM_UKR_PROT( double,   d, gemm_skx_asm_16x12_l2 )
 
-arch_t bli_arch_query_id( void )
-{
-	arch_t id = -1;
-
-	// Architecture families.
-#if defined BLIS_FAMILY_INTEL64 || \
-    defined BLIS_FAMILY_AMD64 || \
-    defined BLIS_FAMILY_X86_64
-	id = bli_cpuid_query_id();
-#endif
-
-	// Intel microarchitectures.
-#ifdef BLIS_FAMILY_SKX
-	id = BLIS_ARCH_SKX;
-#endif
-#ifdef BLIS_FAMILY_KNL
-	id = BLIS_ARCH_KNL;
-#endif
-#ifdef BLIS_FAMILY_KNC
-	id = BLIS_ARCH_KNC;
-#endif
-#ifdef BLIS_FAMILY_HASWELL
-	id = BLIS_ARCH_HASWELL;
-#endif
-#ifdef BLIS_FAMILY_SANDYBRIDGE
-	id = BLIS_ARCH_SANDYBRIDGE;
-#endif
-#ifdef BLIS_FAMILY_PENRYN
-	id = BLIS_ARCH_PENRYN;
-#endif
-
-	// AMD microarchitectures.
-#ifdef BLIS_FAMILY_ZEN
-	id = BLIS_ARCH_ZEN;
-#endif
-#ifdef BLIS_FAMILY_EXCAVATOR
-	id = BLIS_ARCH_EXCAVATOR;
-#endif
-#ifdef BLIS_FAMILY_STEAMROLLER
-	id = BLIS_ARCH_STEAMROLLER;
-#endif
-#ifdef BLIS_FAMILY_PILEDRIVER
-	id = BLIS_ARCH_PILEDRIVER;
-#endif
-#ifdef BLIS_FAMILY_BULLDOZER
-	id = BLIS_ARCH_BULLDOZER;
-#endif
-
-	// ARM microarchitectures.
-#ifdef BLIS_FAMILY_CORTEXA57
-	id = BLIS_ARCH_CORTEXA57;
-#endif
-#ifdef BLIS_FAMILY_CORTEXA15
-	id = BLIS_ARCH_CORTEXA15;
-#endif
-#ifdef BLIS_FAMILY_CORTEXA9
-	id = BLIS_ARCH_CORTEXA9;
-#endif
-
-	// IBM microarchitectures.
-#ifdef BLIS_FAMILY_POWER7
-	id = BLIS_ARCH_POWER7;
-#endif
-#ifdef BLIS_FAMILY_BGQ
-	id = BLIS_ARCH_BGQ;
-#endif
-
-	// Generic microarchitecture.
-#ifdef BLIS_FAMILY_GENERIC
-	id = BLIS_ARCH_GENERIC;
-#endif
-
-	//printf( "blis_arch_query_id(): id = %u\n", id );
-	//exit(1);
-
-	return id;
-}
 

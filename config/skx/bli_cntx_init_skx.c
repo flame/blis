@@ -34,83 +34,45 @@
 
 #include "blis.h"
 
-// -----------------------------------------------------------------------------
-
-arch_t bli_arch_query_id( void )
+void bli_cntx_init_skx( cntx_t* cntx )
 {
-	arch_t id = -1;
+	blksz_t blkszs[ BLIS_NUM_BLKSZS ];
 
-	// Architecture families.
-#if defined BLIS_FAMILY_INTEL64 || \
-    defined BLIS_FAMILY_AMD64 || \
-    defined BLIS_FAMILY_X86_64
-	id = bli_cpuid_query_id();
-#endif
+	// Set default kernel blocksizes and functions.
+	bli_cntx_init_skx_ref( cntx );
 
-	// Intel microarchitectures.
-#ifdef BLIS_FAMILY_SKX
-	id = BLIS_ARCH_SKX;
-#endif
-#ifdef BLIS_FAMILY_KNL
-	id = BLIS_ARCH_KNL;
-#endif
-#ifdef BLIS_FAMILY_KNC
-	id = BLIS_ARCH_KNC;
-#endif
-#ifdef BLIS_FAMILY_HASWELL
-	id = BLIS_ARCH_HASWELL;
-#endif
-#ifdef BLIS_FAMILY_SANDYBRIDGE
-	id = BLIS_ARCH_SANDYBRIDGE;
-#endif
-#ifdef BLIS_FAMILY_PENRYN
-	id = BLIS_ARCH_PENRYN;
-#endif
+	// -------------------------------------------------------------------------
 
-	// AMD microarchitectures.
-#ifdef BLIS_FAMILY_ZEN
-	id = BLIS_ARCH_ZEN;
-#endif
-#ifdef BLIS_FAMILY_EXCAVATOR
-	id = BLIS_ARCH_EXCAVATOR;
-#endif
-#ifdef BLIS_FAMILY_STEAMROLLER
-	id = BLIS_ARCH_STEAMROLLER;
-#endif
-#ifdef BLIS_FAMILY_PILEDRIVER
-	id = BLIS_ARCH_PILEDRIVER;
-#endif
-#ifdef BLIS_FAMILY_BULLDOZER
-	id = BLIS_ARCH_BULLDOZER;
-#endif
+	// Update the context with optimized native gemm micro-kernels and
+	// their storage preferences.
+	bli_cntx_set_l3_nat_ukrs
+	(
+	  2,
+	  BLIS_GEMM_UKR, BLIS_FLOAT ,    bli_sgemm_skx_asm_32x12_l2, FALSE,
+	  BLIS_GEMM_UKR, BLIS_DOUBLE,    bli_dgemm_skx_asm_16x12_l2, FALSE,
+	  cntx
+	);
 
-	// ARM microarchitectures.
-#ifdef BLIS_FAMILY_CORTEXA57
-	id = BLIS_ARCH_CORTEXA57;
-#endif
-#ifdef BLIS_FAMILY_CORTEXA15
-	id = BLIS_ARCH_CORTEXA15;
-#endif
-#ifdef BLIS_FAMILY_CORTEXA9
-	id = BLIS_ARCH_CORTEXA9;
-#endif
+	// Initialize level-3 blocksize objects with architecture-specific values.
+	//                                           s      d      c      z
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    32,    16,     3,     3 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,    12,     8,     4 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   480,   240,   144,    72 );
+	bli_blksz_init     ( &blkszs[ BLIS_KC ],   384,   384,   256,   256,
+                                               480,   480,   256,   256 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  3072,  3072,  4080,  4080 );
 
-	// IBM microarchitectures.
-#ifdef BLIS_FAMILY_POWER7
-	id = BLIS_ARCH_POWER7;
-#endif
-#ifdef BLIS_FAMILY_BGQ
-	id = BLIS_ARCH_BGQ;
-#endif
-
-	// Generic microarchitecture.
-#ifdef BLIS_FAMILY_GENERIC
-	id = BLIS_ARCH_GENERIC;
-#endif
-
-	//printf( "blis_arch_query_id(): id = %u\n", id );
-	//exit(1);
-
-	return id;
+	// Update the context with the current architecture's register and cache
+	// blocksizes (and multiples) for native execution.
+	bli_cntx_set_blkszs
+	(
+	  BLIS_NAT, 5,
+	  BLIS_NC, &blkszs[ BLIS_NC ], BLIS_NR,
+	  BLIS_KC, &blkszs[ BLIS_KC ], BLIS_KR,
+	  BLIS_MC, &blkszs[ BLIS_MC ], BLIS_MR,
+	  BLIS_NR, &blkszs[ BLIS_NR ], BLIS_NR,
+	  BLIS_MR, &blkszs[ BLIS_MR ], BLIS_MR,
+	  cntx
+	);
 }
 
