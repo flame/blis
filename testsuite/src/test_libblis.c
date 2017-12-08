@@ -2328,16 +2328,21 @@ void libblis_test_parse_message( FILE* output_stream, char* message, va_list arg
 
 void libblis_test_parse_command_line( int argc, char** argv )
 {
-	bool_t gave_option_g = FALSE;
-	bool_t gave_option_o = FALSE;
-	int    opt;
-	char   opt_ch;
+	bool_t   gave_option_g = FALSE;
+	bool_t   gave_option_o = FALSE;
+	int      opt;
+	char     opt_ch;
+	getopt_t state;
 
 	// Copy the binary name to a global string so we can use it later.
 	strncpy( libblis_test_binary_name, argv[0], MAX_BINARY_NAME_LENGTH );
 
+	// Initialize the state for running bli_getopt(). Here, 0 is the
+	// initial value for opterr, which suppresses error messages.
+	bli_getopt_init_state( 0, &state );
+
 	// Process all option arguments until we get a -1, which means we're done.
-	while( (opt = bli_getopt( argc, argv, "g:o:" )) != -1 )
+	while( (opt = bli_getopt( argc, argv, "g:o:", &state )) != -1 )
 	{
 		// Explicitly typecast opt, which is an int, to a char. (Failing to
 		// typecast resulted in at least one user-reported problem whereby
@@ -2347,21 +2352,21 @@ void libblis_test_parse_command_line( int argc, char** argv )
 		switch( opt_ch )
 		{
 			case 'g':
-			libblis_test_printf_infoc( "detected -g option; using \"%s\" for parameters filename.\n", bli_optarg );
+			libblis_test_printf_infoc( "detected -g option; using \"%s\" for parameters filename.\n", state.optarg );
 			strncpy( libblis_test_parameters_filename,
-			         bli_optarg, MAX_FILENAME_LENGTH );
+			         state.optarg, MAX_FILENAME_LENGTH );
 			gave_option_g = TRUE;
 			break;
 
 			case 'o':
-			libblis_test_printf_infoc( "detected -o option; using \"%s\" for operations filename.\n", bli_optarg );
+			libblis_test_printf_infoc( "detected -o option; using \"%s\" for operations filename.\n", state.optarg );
 			strncpy( libblis_test_operations_filename,
-			         bli_optarg, MAX_FILENAME_LENGTH );
+			         state.optarg, MAX_FILENAME_LENGTH );
 			gave_option_o = TRUE;
 			break;
 
 			case '?':
-			libblis_test_printf_error( "unexpected option '%c' given or missing option argument\n", bli_optopt );
+			libblis_test_printf_error( "unexpected option '%c' given or missing option argument\n", state.optopt );
 			break;
 
 			default:
@@ -2389,9 +2394,9 @@ void libblis_test_parse_command_line( int argc, char** argv )
 
 	// If there are still arguments remaining after getopt() processing is
 	// complete, print an error.
-	if ( bli_optind < argc )
+	if ( state.optind < argc )
 	{
-		libblis_test_printf_error( "Encountered unexpected non-option argument: %s\n", argv[ bli_optind ] );
+		libblis_test_printf_error( "Encountered unexpected non-option argument: %s\n", argv[ state.optind ] );
 	}
 }
 
