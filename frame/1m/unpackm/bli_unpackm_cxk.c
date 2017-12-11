@@ -74,6 +74,8 @@ void PASTEMAC(ch,opname) \
 	} \
 	else \
 	{ \
+		trans_t transp = ( trans_t )conjp; \
+\
 		/* Treat the micro-panel as panel_dim x panel_len and column-stored
 		   (unit row stride). */ \
 		PASTEMAC(ch,scal2m) \
@@ -81,7 +83,7 @@ void PASTEMAC(ch,opname) \
 		  0, \
 		  BLIS_NONUNIT_DIAG, \
 		  BLIS_DENSE, \
-		  conjp, \
+		  transp, \
 		  panel_dim, \
 		  panel_len, \
 		  kappa, \

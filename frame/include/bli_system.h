@@ -88,7 +88,7 @@
 
 #endif
 
-// gettimeofday() needs this.
+// time.h provides clock_gettime().
 #if BLIS_OS_WINDOWS
   #include <time.h>
 #elif BLIS_OS_OSX

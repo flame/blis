@@ -189,11 +189,24 @@ void bli_l3_thrinfo_print_paths
 
 	printf( "            gl   jc   kc   pb   ic   pa   jr   ir\n" );
 	printf( "xx_nt:    %4lu %4lu %4lu %4lu %4lu %4lu %4lu %4lu\n",
-	gl_nt, jc_nt, pc_nt, pb_nt, ic_nt, pa_nt, jr_nt, (dim_t)1 );
+	( unsigned long )gl_nt,
+	( unsigned long )jc_nt,
+	( unsigned long )pc_nt,
+	( unsigned long )pb_nt,
+	( unsigned long )ic_nt,
+	( unsigned long )pa_nt,
+	( unsigned long )jr_nt,
+	( unsigned long )1 );
 	printf( "\n" );
 	printf( "            jc   kc   pb   ic   pa   jr   ir\n" );
 	printf( "xx_way:   %4lu %4lu %4lu %4lu %4lu %4lu %4lu\n",
-    jc_way, pc_way, pb_way, ic_way, pa_way, jr_way, ir_way );
+    ( unsigned long )jc_way,
+	( unsigned long )pc_way,
+	( unsigned long )pb_way,
+	( unsigned long )ic_way,
+	( unsigned long )pa_way,
+	( unsigned long )jr_way,
+	( unsigned long )ir_way );
 	printf( "=================================================\n" );
 
 	for ( gl_comm_id = 0; gl_comm_id < n_threads; ++gl_comm_id )
@@ -222,12 +235,24 @@ void bli_l3_thrinfo_print_paths
 		dim_t jr_work_id = bli_thread_work_id( jr_info );
 		dim_t ir_work_id = bli_thread_work_id( ir_info );
 
-printf( "            gl   jc   pb   kc   pa   ic   jr  \n" );
-printf( "comm ids: %4lu %4lu %4lu %4lu %4lu %4lu %4lu\n",
-gl_comm_id, jc_comm_id, pc_comm_id, pb_comm_id, ic_comm_id, pa_comm_id, jr_comm_id );
-printf( "work ids: %4ld %4ld %4lu %4lu %4ld %4ld %4ld\n",
-jc_work_id, pc_work_id, pb_work_id, ic_work_id, pa_work_id, jr_work_id, ir_work_id );
-printf( "---------------------------------------\n" );
+		printf( "            gl   jc   pb   kc   pa   ic   jr  \n" );
+		printf( "comm ids: %4lu %4lu %4lu %4lu %4lu %4lu %4lu\n",
+		( unsigned long )gl_comm_id,
+		( unsigned long )jc_comm_id,
+		( unsigned long )pc_comm_id,
+		( unsigned long )pb_comm_id,
+		( unsigned long )ic_comm_id,
+		( unsigned long )pa_comm_id,
+		( unsigned long )jr_comm_id );
+		printf( "work ids: %4ld %4ld %4lu %4lu %4ld %4ld %4ld\n",
+		( unsigned long )jc_work_id,
+		( unsigned long )pc_work_id,
+		( unsigned long )pb_work_id,
+		( unsigned long )ic_work_id,
+		( unsigned long )pa_work_id,
+		( unsigned long )jr_work_id,
+		( unsigned long )ir_work_id );
+		printf( "---------------------------------------\n" );
 	}
 
 }

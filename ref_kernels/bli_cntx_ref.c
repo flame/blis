@@ -552,8 +552,8 @@ void GENBAINAME(cntx_init)
 	// the virtual gemm ukernel func_t.
 	if ( method == BLIS_1M )
 	{
-		func_t* gemm_nat_ukrs = bli_cntx_get_l3_nat_ukrs( BLIS_GEMM, cntx );
-		func_t* gemm_vir_ukrs = bli_cntx_get_l3_vir_ukrs( BLIS_GEMM, cntx );
+		func_t* gemm_nat_ukrs = bli_cntx_get_l3_nat_ukrs( BLIS_GEMM_UKR, cntx );
+		func_t* gemm_vir_ukrs = bli_cntx_get_l3_vir_ukrs( BLIS_GEMM_UKR, cntx );
 
 		bli_func_copy_dt( BLIS_FLOAT,  gemm_nat_ukrs, BLIS_FLOAT,  gemm_vir_ukrs );
 		bli_func_copy_dt( BLIS_DOUBLE, gemm_nat_ukrs, BLIS_DOUBLE, gemm_vir_ukrs );

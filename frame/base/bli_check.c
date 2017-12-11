@@ -843,7 +843,7 @@ err_t bli_check_valid_arch_id( arch_t id )
 {
 	err_t e_val = BLIS_SUCCESS;
 
-	if ( id < 0 || BLIS_NUM_ARCHS-1 < id )
+	if ( ( gint_t )id < 0 || BLIS_NUM_ARCHS <= ( gint_t )id )
 		e_val = BLIS_INVALID_ARCH_ID;
 
 	return e_val;

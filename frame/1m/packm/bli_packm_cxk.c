@@ -34,8 +34,6 @@
 
 #include "blis.h"
 
-#define FUNCPTR_T packm_cxk_ker_ft
-
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
@@ -76,6 +74,8 @@ void PASTEMAC(ch,opname) \
 	} \
 	else \
 	{ \
+		trans_t transa = ( trans_t )conja; \
+\
 		/* Treat the micro-panel as panel_dim x panel_len and column-stored
 		   (unit row stride). */ \
 		PASTEMAC(ch,scal2m) \
@@ -83,7 +83,7 @@ void PASTEMAC(ch,opname) \
 		  0, \
 		  BLIS_NONUNIT_DIAG, \
 		  BLIS_DENSE, \
-		  conja, \
+		  transa, \
 		  panel_dim, \
 		  panel_len, \
 		  kappa, \

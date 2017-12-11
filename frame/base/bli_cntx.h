@@ -344,8 +344,8 @@ static func_t* bli_cntx_get_packm_kers( l1mkr_t ker_id, cntx_t* cntx )
 
 	// Only index to the requested packm func_t if the packm kernel being
 	// requested is one that is explicitly supported.
-	if ( 0 <= ( guint_t )ker_id &&
-	          ( guint_t )ker_id < BLIS_NUM_PACKM_KERS )
+	if ( 0 <= ( gint_t )ker_id &&
+	          ( gint_t )ker_id < BLIS_NUM_PACKM_KERS )
 	{
 		func_t* funcs = bli_cntx_packm_kers_buf( cntx );
 
@@ -362,8 +362,8 @@ static void* bli_cntx_get_packm_ker_dt( num_t dt, l1mkr_t ker_id, cntx_t* cntx )
 	// Only query the context for the packm func_t (and then extract the
 	// datatype-specific function pointer) if the packm kernel being
 	// requested is one that is explicitly supported.
-	if ( 0 <= ( guint_t )ker_id &&
-	          ( guint_t )ker_id < BLIS_NUM_PACKM_KERS )
+	if ( 0 <= ( gint_t )ker_id &&
+	          ( gint_t )ker_id < BLIS_NUM_PACKM_KERS )
 	{
 		func_t* func = bli_cntx_get_packm_kers( ker_id, cntx );
 
@@ -379,8 +379,8 @@ static func_t* bli_cntx_get_unpackm_kers( l1mkr_t ker_id, cntx_t* cntx )
 
 	// Only index to the requested unpackm func_t if the unpackm kernel being
 	// requested is one that is explicitly supported.
-	if ( 0 <= ( guint_t )ker_id &&
-	          ( guint_t )ker_id < BLIS_NUM_UNPACKM_KERS )
+	if ( 0 <= ( gint_t )ker_id &&
+	          ( gint_t )ker_id < BLIS_NUM_UNPACKM_KERS )
 	{
 		func_t* funcs = bli_cntx_unpackm_kers_buf( cntx );
 
@@ -397,8 +397,8 @@ static void* bli_cntx_get_unpackm_ker_dt( num_t dt, l1mkr_t ker_id, cntx_t* cntx
 	// Only query the context for the unpackm func_t (and then extract the
 	// datatype-specific function pointer) if the unpackm kernel being
 	// requested is one that is explicitly supported.
-	if ( 0 <= ( guint_t )ker_id &&
-	          ( guint_t )ker_id < BLIS_NUM_UNPACKM_KERS )
+	if ( 0 <= ( gint_t )ker_id &&
+	          ( gint_t )ker_id < BLIS_NUM_UNPACKM_KERS )
 	{
 		func_t* func = bli_cntx_get_unpackm_kers( ker_id, cntx );
 

@@ -433,18 +433,19 @@ void PASTEMAC(ch,varname) \
 \
 		/* Pack the stored triangle of c11 to p11. */ \
 		{ \
-			dim_t           p11_m = panel_dim; \
-			dim_t           p11_n = panel_dim; \
-			dim_t           j2    = diagoffc_abs; \
-			ctype* restrict c11   = c + (j2 )*ldc; \
-			ctype* restrict p11   = p + (j2 )*ldp; \
+			dim_t           p11_m  = panel_dim; \
+			dim_t           p11_n  = panel_dim; \
+			dim_t           j2     = diagoffc_abs; \
+			ctype* restrict c11    = c + (j2 )*ldc; \
+			ctype* restrict p11    = p + (j2 )*ldp; \
+			trans_t         transc = ( trans_t )conjc; \
 \
 			PASTEMAC(ch,copym) \
 			( \
 			  0, \
 			  BLIS_NONUNIT_DIAG, \
 			  uploc, \
-			  conjc, \
+			  transc, \
 			  p11_m, \
 			  p11_n, \
 			  c11, rs_c, cs_c, \

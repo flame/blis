@@ -583,9 +583,9 @@ void bli_cntx_set_l1f_kers( dim_t n_kers, ... )
 	   void bli_cntx_set_l1f_kers
 	   (
 	     dim_t   n_ukrs,
-	     l1mkr_t ker0_id, num_t ker0_dt, void* ker0_fp,
-	     l1mkr_t ker1_id, num_t ker1_dt, void* ker1_fp,
-	     l1mkr_t ker2_id, num_t ker2_dt, void* ker2_fp,
+	     l1fkr_t ker0_id, num_t ker0_dt, void* ker0_fp,
+	     l1fkr_t ker1_id, num_t ker1_dt, void* ker1_fp,
+	     l1fkr_t ker2_id, num_t ker2_dt, void* ker2_fp,
 	     ...
 	     cntx_t* cntx
 	   );
@@ -594,7 +594,7 @@ void bli_cntx_set_l1f_kers( dim_t n_kers, ... )
 	dim_t     i;
 
 	// Allocate some temporary local arrays.
-	l1mkr_t* ker_ids   = bli_malloc_intl( n_kers * sizeof( l1mkr_t ) );
+	l1fkr_t* ker_ids   = bli_malloc_intl( n_kers * sizeof( l1fkr_t ) );
 	num_t*   ker_dts   = bli_malloc_intl( n_kers * sizeof( num_t   ) );
 	void**   ker_fps   = bli_malloc_intl( n_kers * sizeof( void*   ) );
 
@@ -677,9 +677,9 @@ void bli_cntx_set_l1v_kers( dim_t n_kers, ... )
 	   void bli_cntx_set_l1v_kers
 	   (
 	     dim_t   n_ukrs,
-	     l1mkr_t ker0_id, num_t ker0_dt, void* ker0_fp,
-	     l1mkr_t ker1_id, num_t ker1_dt, void* ker1_fp,
-	     l1mkr_t ker2_id, num_t ker2_dt, void* ker2_fp,
+	     l1vkr_t ker0_id, num_t ker0_dt, void* ker0_fp,
+	     l1vkr_t ker1_id, num_t ker1_dt, void* ker1_fp,
+	     l1vkr_t ker2_id, num_t ker2_dt, void* ker2_fp,
 	     ...
 	     cntx_t* cntx
 	   );
@@ -688,7 +688,7 @@ void bli_cntx_set_l1v_kers( dim_t n_kers, ... )
 	dim_t     i;
 
 	// Allocate some temporary local arrays.
-	l1mkr_t* ker_ids   = bli_malloc_intl( n_kers * sizeof( l1mkr_t ) );
+	l1vkr_t* ker_ids   = bli_malloc_intl( n_kers * sizeof( l1vkr_t ) );
 	num_t*   ker_dts   = bli_malloc_intl( n_kers * sizeof( num_t   ) );
 	void**   ker_fps   = bli_malloc_intl( n_kers * sizeof( void*   ) );
 
@@ -1001,15 +1001,15 @@ void bli_cntx_print( cntx_t* cntx )
 	for ( i = 0; i < BLIS_NUM_BLKSZS; ++i )
 	{
 		printf( "blksz/mult %2lu:  %13lu/%2lu %13lu/%2lu %13lu/%2lu %13lu/%2lu\n",
-		         i,
-		         bli_cntx_get_blksz_def_dt( BLIS_FLOAT,    i, cntx ),
-		         bli_cntx_get_bmult_dt    ( BLIS_FLOAT,    i, cntx ),
-		         bli_cntx_get_blksz_def_dt( BLIS_DOUBLE,   i, cntx ),
-		         bli_cntx_get_bmult_dt    ( BLIS_DOUBLE,   i, cntx ),
-		         bli_cntx_get_blksz_def_dt( BLIS_SCOMPLEX, i, cntx ),
-		         bli_cntx_get_bmult_dt    ( BLIS_SCOMPLEX, i, cntx ),
-		         bli_cntx_get_blksz_def_dt( BLIS_DCOMPLEX, i, cntx ),
-		         bli_cntx_get_bmult_dt    ( BLIS_DCOMPLEX, i, cntx )
+		         ( unsigned long )i,
+		         ( unsigned long )bli_cntx_get_blksz_def_dt( BLIS_FLOAT,    i, cntx ),
+		         ( unsigned long )bli_cntx_get_bmult_dt    ( BLIS_FLOAT,    i, cntx ),
+		         ( unsigned long )bli_cntx_get_blksz_def_dt( BLIS_DOUBLE,   i, cntx ),
+		         ( unsigned long )bli_cntx_get_bmult_dt    ( BLIS_DOUBLE,   i, cntx ),
+		         ( unsigned long )bli_cntx_get_blksz_def_dt( BLIS_SCOMPLEX, i, cntx ),
+		         ( unsigned long )bli_cntx_get_bmult_dt    ( BLIS_SCOMPLEX, i, cntx ),
+		         ( unsigned long )bli_cntx_get_blksz_def_dt( BLIS_DCOMPLEX, i, cntx ),
+		         ( unsigned long )bli_cntx_get_bmult_dt    ( BLIS_DCOMPLEX, i, cntx )
 		      );
 	}
 
@@ -1018,7 +1018,7 @@ void bli_cntx_print( cntx_t* cntx )
 		func_t* ukr = bli_cntx_get_l3_vir_ukrs( i, cntx );
 
 		printf( "l3 vir ukr %2lu:  %16p %16p %16p %16p\n",
-		        i,
+		        ( unsigned long )i,
 		        bli_func_get_dt( BLIS_FLOAT,    ukr ),
 		        bli_func_get_dt( BLIS_DOUBLE,   ukr ),
 		        bli_func_get_dt( BLIS_SCOMPLEX, ukr ),
@@ -1031,7 +1031,7 @@ void bli_cntx_print( cntx_t* cntx )
 		func_t* ukr = bli_cntx_get_l3_nat_ukrs( i, cntx );
 
 		printf( "l3 nat ukr %2lu:  %16p %16p %16p %16p\n",
-		        i,
+		        ( unsigned long )i,
 		        bli_func_get_dt( BLIS_FLOAT,    ukr ),
 		        bli_func_get_dt( BLIS_DOUBLE,   ukr ),
 		        bli_func_get_dt( BLIS_SCOMPLEX, ukr ),
@@ -1044,7 +1044,7 @@ void bli_cntx_print( cntx_t* cntx )
 		func_t* ker = bli_cntx_get_l1f_kers( i, cntx );
 
 		printf( "l1f ker    %2lu:  %16p %16p %16p %16p\n",
-		        i,
+		        ( unsigned long )i,
 		        bli_func_get_dt( BLIS_FLOAT,    ker ),
 		        bli_func_get_dt( BLIS_DOUBLE,   ker ),
 		        bli_func_get_dt( BLIS_SCOMPLEX, ker ),
@@ -1057,7 +1057,7 @@ void bli_cntx_print( cntx_t* cntx )
 		func_t* ker = bli_cntx_get_l1v_kers( i, cntx );
 
 		printf( "l1v ker    %2lu:  %16p %16p %16p %16p\n",
-		        i,
+		        ( unsigned long )i,
 		        bli_func_get_dt( BLIS_FLOAT,    ker ),
 		        bli_func_get_dt( BLIS_DOUBLE,   ker ),
 		        bli_func_get_dt( BLIS_SCOMPLEX, ker ),
@@ -1068,7 +1068,7 @@ void bli_cntx_print( cntx_t* cntx )
 	{
 		ind_t method = bli_cntx_method( cntx );
 
-		printf( "ind method   : %lu\n", ( guint_t )method );
+		printf( "ind method   : %lu\n", ( unsigned long )method );
 	}
 }
 

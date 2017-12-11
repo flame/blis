@@ -299,7 +299,7 @@ void PASTEMAC(opname,EX_SUF) \
 		                                              bli_cimag( *cp ) ); \
 		fprintf( file, " dcomplex:  %9.2e + %9.2e\n", bli_zreal( *zp ), \
 		                                              bli_zimag( *zp ) ); \
-		fprintf( file, " int:       %ld\n",           *ip ); \
+		fprintf( file, " int:       %ld\n",           ( long )(*ip) ); \
 		fprintf( file, "\n" ); \
 		return; \
 	} \

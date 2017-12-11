@@ -393,16 +393,17 @@ void bli_pool_print( pool_t* pool )
 
 	printf( "pool struct ---------------\n" );
 	printf( "  block_ptrs:      %p\n", block_ptrs );
-	printf( "  block_ptrs_len:  %ld\n", block_ptrs_len );
-	printf( "  top_index:       %ld\n", top_index );
-	printf( "  num_blocks:      %ld\n", num_blocks );
-	printf( "  block_size:      %ld\n", block_size );
-	printf( "  align_size:      %ld\n", align_size );
+	printf( "  block_ptrs_len:  %ld\n", ( long )block_ptrs_len );
+	printf( "  top_index:       %ld\n", ( long )top_index );
+	printf( "  num_blocks:      %ld\n", ( long )num_blocks );
+	printf( "  block_size:      %ld\n", ( long )block_size );
+	printf( "  align_size:      %ld\n", ( long )align_size );
 	printf( "  pblks   sys    align\n" );
 	for ( i = 0; i < num_blocks; ++i )
 	{
-	printf( "  %ld: %p %p\n", i, bli_pblk_buf_sys(   &block_ptrs[i] ),
-	                             bli_pblk_buf_align( &block_ptrs[i] ) );
+		printf( "  %ld: %p %p\n", ( long )i,
+		                          bli_pblk_buf_sys(   &block_ptrs[i] ),
+	                              bli_pblk_buf_align( &block_ptrs[i] ) );
 	}
 }
 
