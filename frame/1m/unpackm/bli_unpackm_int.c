@@ -43,6 +43,8 @@ void bli_unpackm_int
        thrinfo_t* thread
      )
 {
+	bli_init_once();
+
 	unpackm_voft f;
 
 	// Check parameters.

@@ -34,28 +34,13 @@
 
 #include "blis.h"
 
-static bool_t bli_error_is_init = FALSE;
-
 void bli_error_init( void )
 {
-	// If the API is already initialized, return early.
-	if ( bli_error_is_initialized() ) return;
-
 	bli_error_init_msgs();
-
-	// Mark API as initialized.
-	bli_error_is_init = TRUE;
 }
 
 void bli_error_finalize( void )
 {
-	// Mark API as uninitialized.
-	bli_error_is_init = FALSE;
-}
-
-bool_t bli_error_is_initialized( void )
-{
-	return bli_error_is_init;
 }
 
 // -----------------------------------------------------------------------------
@@ -212,32 +197,46 @@ void bli_abort( void )
 
 // -----------------------------------------------------------------------------
 
+#ifdef BLIS_ENABLE_PTHREADS
+static pthread_mutex_t err_mutex = PTHREAD_MUTEX_INITIALIZER;
+#endif
+
 // Current error checking level.
 static errlev_t bli_err_chk_level = BLIS_FULL_ERROR_CHECKING;
 
 errlev_t bli_error_checking_level( void )
 {
-    return bli_err_chk_level;
+	return bli_err_chk_level;
 }
 
-errlev_t bli_error_checking_level_set( errlev_t new_level )
+void bli_error_checking_level_set( errlev_t new_level )
 {
-    err_t    e_val;
-    errlev_t old_level;
+	err_t e_val;
 
-    e_val = bli_check_valid_error_level( new_level );
-    bli_check_error_code( e_val );
+	e_val = bli_check_valid_error_level( new_level );
+	bli_check_error_code( e_val );
 
-    old_level = bli_err_chk_level;
+#ifdef BLIS_ENABLE_OPENMP
+	_Pragma( "omp critical (err)" )
+#endif
+#ifdef BLIS_ENABLE_PTHREADS
+	pthread_mutex_lock( &err_mutex );
+#endif
 
-    bli_err_chk_level = new_level;
+	// BEGIN CRITICAL SECTION
+	{
+		bli_err_chk_level = new_level;
+	}
+	// END CRITICAL SECTION
 
-    return old_level;
+#ifdef BLIS_ENABLE_PTHREADS
+	pthread_mutex_unlock( &err_mutex );
+#endif
 }
 
 bool_t bli_error_checking_is_enabled( void )
 {
-    return bli_error_checking_level() != BLIS_NO_ERROR_CHECKING;
+	return bli_error_checking_level() != BLIS_NO_ERROR_CHECKING;
 }
 
 char* bli_error_string_for_code( gint_t code )

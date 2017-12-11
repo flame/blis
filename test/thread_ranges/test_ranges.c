@@ -40,7 +40,7 @@
 
 int main( int argc, char** argv )
 {
-	bli_init();
+	//bli_init();
 
 #if 0
 	obj_t a, b, c;
@@ -309,7 +309,7 @@ int main( int argc, char** argv )
 		bli_obj_free( &a );
 	}
 
-	bli_finalize();
+	//bli_finalize();
 
 	return 0;
 }

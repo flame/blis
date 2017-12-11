@@ -43,6 +43,8 @@ siz_t bli_packm_init
        cntl_t* cntl
      )
 {
+	bli_init_once();
+
 	// The purpose of packm_init() is to initialize an object P so that
 	// a source object A can be packed into P via one of the packm
 	// implementations. This initialization precedes the acquisition of a
@@ -185,6 +187,8 @@ siz_t bli_packm_init_pack
        cntx_t*   cntx
      )
 {
+	bli_init_once();
+
 	num_t     dt           = bli_obj_datatype( *a );
 	trans_t   transa       = bli_obj_onlytrans_status( *a );
 	dim_t     m_a          = bli_obj_length( *a );

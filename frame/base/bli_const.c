@@ -42,13 +42,8 @@ obj_t BLIS_MINUS_ONE_HALF = {};
 obj_t BLIS_MINUS_ONE = {};
 obj_t BLIS_MINUS_TWO = {};
 
-static bool_t bli_const_is_init = FALSE;
-
 void bli_const_init( void )
 {
-	// If the API is already initialized, return early.
-	if ( bli_const_is_initialized() ) return;
-
 	bli_obj_create_const(  2.0, &BLIS_TWO );
 	bli_obj_create_const(  1.0, &BLIS_ONE );
 	bli_obj_create_const(  0.5, &BLIS_ONE_HALF );
@@ -56,9 +51,6 @@ void bli_const_init( void )
 	bli_obj_create_const( -0.5, &BLIS_MINUS_ONE_HALF );
 	bli_obj_create_const( -1.0, &BLIS_MINUS_ONE );
 	bli_obj_create_const( -2.0, &BLIS_MINUS_TWO );
-
-	// Mark API as initialized.
-	bli_const_is_init = TRUE;
 }
 
 void bli_const_finalize( void )
@@ -70,13 +62,5 @@ void bli_const_finalize( void )
 	bli_obj_free( &BLIS_MINUS_ONE_HALF );
 	bli_obj_free( &BLIS_MINUS_ONE );
 	bli_obj_free( &BLIS_MINUS_TWO );
-
-	// Mark API as uninitialized.
-	bli_const_is_init = FALSE;
-}
-
-bool_t bli_const_is_initialized( void )
-{
-	return bli_const_is_init;
 }
 

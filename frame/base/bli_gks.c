@@ -59,9 +59,6 @@ typedef void (*ind_cntx_init_ft)( ind_t method, num_t dt, cntx_t* cntx );
 
 void bli_gks_init( void )
 {
-	// BEGIN CRITICAL SECTION
-	// NOTE: This critical section is implicit. We assume this function is only
-	// called from within the critical section within bli_init().
 	{
 		// Initialize the internal data structure we use to track registered
 		// contexts.
@@ -165,7 +162,6 @@ void bli_gks_init( void )
 		                                              bli_cntx_init_generic_ind );
 #endif
 	}
-	// END CRITICAL SECTION
 }
 
 // -----------------------------------------------------------------------------
@@ -384,6 +380,8 @@ cntx_t* bli_gks_query_cntx( void )
 
 cntx_t* bli_gks_query_nat_cntx( void )
 {
+	bli_init_once();
+
 	// Return the address of the native context for the architecture id
 	// corresponding to the current hardware, as determined by
 	// bli_arch_query_id().
@@ -405,6 +403,8 @@ cntx_t* bli_gks_query_ind_cntx
        num_t dt
      )
 {
+	bli_init_once();
+
 	cntx_t* gks_id_ind;
 
 	// Return the address of a context that will be suited for executing a

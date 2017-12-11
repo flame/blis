@@ -48,6 +48,8 @@ void PASTEMAC(ch,opname) \
        ctype*  psi  \
      ) \
 { \
+	bli_init_once(); \
+\
 	ctype chi_conj; \
 \
 	PASTEMAC(ch,copycjs)( conjchi, *chi, chi_conj ); \
@@ -68,6 +70,8 @@ void PASTEMAC(ch,opname) \
        ctype*  chi  \
      ) \
 { \
+	bli_init_once(); \
+\
 	ctype chi_conj; \
 \
 	PASTEMAC(ch,copycjs)( conjchi, *chi, chi_conj ); \
@@ -88,6 +92,8 @@ void PASTEMAC(ch,opname) \
        ctype*  psi  \
      ) \
 { \
+	bli_init_once(); \
+\
 	if ( PASTEMAC(ch,eq0)( *chi ) ) \
 	{ \
 		/* Overwrite potential Infs and NaNs. */ \
@@ -114,15 +120,17 @@ void PASTEMAC(ch,opname) \
        ctype_r* absq  \
      ) \
 { \
-    ctype_r chi_r; \
-    ctype_r chi_i; \
-    ctype_r absq_i; \
+	bli_init_once(); \
+\
+	ctype_r chi_r; \
+	ctype_r chi_i; \
+	ctype_r absq_i; \
 \
 	( void )absq_i; \
 \
-    PASTEMAC2(ch,chr,gets)( *chi, chi_r, chi_i ); \
+	PASTEMAC2(ch,chr,gets)( *chi, chi_r, chi_i ); \
 \
-    /* absq   = chi_r * chi_r + chi_i * chi_i; \
+	/* absq   = chi_r * chi_r + chi_i * chi_i; \
 	   absq_r = 0.0; (thrown away) */ \
 	PASTEMAC(ch,absq2ris)( chi_r, chi_i, *absq, absq_i ); \
 \
@@ -141,8 +149,10 @@ void PASTEMAC(ch,opname) \
        ctype_r* norm  \
      ) \
 { \
-    /* norm = sqrt( chi_r * chi_r + chi_i * chi_i ); */ \
-    PASTEMAC2(ch,chr,abval2s)( *chi, *norm ); \
+	bli_init_once(); \
+\
+	/* norm = sqrt( chi_r * chi_r + chi_i * chi_i ); */ \
+	PASTEMAC2(ch,chr,abval2s)( *chi, *norm ); \
 }
 
 INSERT_GENTFUNCR_BASIC0( normfsc )
@@ -157,6 +167,8 @@ void PASTEMAC(ch,opname) \
        ctype*  psi  \
      ) \
 { \
+	bli_init_once(); \
+\
 	/* NOTE: sqrtsc/sqrt2s differs from normfsc/abval2s in the complex domain. */ \
 	PASTEMAC(ch,sqrt2s)( *chi, *psi ); \
 }
@@ -174,6 +186,8 @@ void PASTEMAC(ch,opname) \
        double* zeta_i  \
      ) \
 { \
+	bli_init_once(); \
+\
 	PASTEMAC2(ch,d,gets)( *chi, *zeta_r, *zeta_i ); \
 }
 
@@ -190,6 +204,8 @@ void PASTEMAC(ch,opname) \
        ctype*  chi  \
      ) \
 { \
+	bli_init_once(); \
+\
 	PASTEMAC2(d,ch,sets)( zeta_r, zeta_i, *chi ); \
 }
 
@@ -206,6 +222,8 @@ void PASTEMAC(ch,opname) \
        ctype_r* zeta_i  \
      ) \
 { \
+	bli_init_once(); \
+\
 	PASTEMAC2(ch,chr,gets)( *chi, *zeta_r, *zeta_i ); \
 }
 
@@ -222,6 +240,8 @@ void PASTEMAC(ch,opname) \
        ctype*   chi  \
      ) \
 { \
+	bli_init_once(); \
+\
 	PASTEMAC2(chr,ch,sets)( *zeta_r, *zeta_i, *chi ); \
 }
 
@@ -236,6 +256,8 @@ void bli_igetsc
        double* zeta_i
      )
 {
+	bli_init_once();
+
 	PASTEMAC2(i,d,gets)( *chi, *zeta_r, *zeta_i );
 }
 
@@ -246,6 +268,8 @@ void bli_isetsc
        dim_t*  chi
      )
 {
+	bli_init_once();
+
 	PASTEMAC2(d,i,sets)( zeta_r, zeta_i, *chi );
 }
 

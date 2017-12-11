@@ -42,10 +42,9 @@ membrk_t* bli_memsys_global_membrk( void );
 
 // -----------------------------------------------------------------------------
 
-void   bli_memsys_init( void );
-void   bli_memsys_reinit( cntx_t* cntx );
-void   bli_memsys_finalize( void );
-bool_t bli_memsys_is_initialized( void );
+void bli_memsys_init( void );
+void bli_memsys_reinit( cntx_t* cntx );
+void bli_memsys_finalize( void );
 
 
 #endif

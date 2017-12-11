@@ -47,6 +47,8 @@ void PASTEMAC0(opname) \
        cntl_t* cntl \
      ) \
 { \
+	bli_init_once(); \
+\
 	num_t     dt        = bli_obj_datatype( *a ); \
 \
 	conj_t    conjx     = bli_obj_conj_status( *x ); \

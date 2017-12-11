@@ -71,13 +71,6 @@ char* bli_info_get_trsm_l_ukr_impl_string( ind_t method, num_t dt );
 char* bli_info_get_trsm_u_ukr_impl_string( ind_t method, num_t dt );
 
 
-// -- Memory pool-related ------------------------------------------------------
-
-gint_t bli_info_get_mk_pool_size( void );
-gint_t bli_info_get_kn_pool_size( void );
-gint_t bli_info_get_mn_pool_size( void );
-
-
 // -- BLIS implementation query (level-3) --------------------------------------
 
 char* bli_info_get_gemm_impl_string( num_t dt );

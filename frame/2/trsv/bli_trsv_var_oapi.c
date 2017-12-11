@@ -46,6 +46,8 @@ void PASTEMAC0(opname) \
        cntl_t* cntl \
      ) \
 { \
+	bli_init_once(); \
+\
 	num_t     dt        = bli_obj_datatype( *a ); \
 \
 	uplo_t    uploa     = bli_obj_uplo( *a ); \

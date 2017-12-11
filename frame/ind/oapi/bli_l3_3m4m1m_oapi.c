@@ -49,6 +49,8 @@ void PASTEMAC(opname,imeth) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	ind_t   ind      = PASTEMAC0(imeth); \
 	num_t   dt       = bli_obj_datatype( *c ); \
 	obj_t*  beta_use = beta; \
@@ -142,6 +144,8 @@ void PASTEMAC(opname,imeth) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	ind_t   ind      = PASTEMAC0(imeth); \
 	num_t   dt       = bli_obj_datatype( *c ); \
 	obj_t*  beta_use = beta; \
@@ -218,6 +222,8 @@ void PASTEMAC(opname,imeth) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	ind_t   ind      = PASTEMAC0(imeth); \
 	num_t   dt       = bli_obj_datatype( *c ); \
 	obj_t*  beta_use = beta; \
@@ -286,6 +292,8 @@ void PASTEMAC(opname,imeth) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	ind_t   ind      = PASTEMAC0(imeth); \
 	num_t   dt       = bli_obj_datatype( *b ); \
 \
@@ -341,6 +349,8 @@ void PASTEMAC(opname,imeth) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	ind_t   ind      = PASTEMAC0(imeth); \
 	num_t   dt       = bli_obj_datatype( *b ); \
 \

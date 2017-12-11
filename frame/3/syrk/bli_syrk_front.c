@@ -44,6 +44,8 @@ void bli_syrk_front
        cntl_t* cntl
      )
 {
+	bli_init_once();
+
 	obj_t   a_local;
 	obj_t   at_local;
 	obj_t   c_local;

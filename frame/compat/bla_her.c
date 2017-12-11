@@ -55,10 +55,9 @@ void PASTEF77(ch,blasname) \
 	ftype*  x0; \
 	inc_t   incx0; \
 	inc_t   rs_a, cs_a; \
-	err_t   init_result; \
 \
-	/* Initialize BLIS (if it is not already initialized). */ \
-	bli_init_auto( &init_result ); \
+	/* Initialize BLIS. */ \
+	bli_init_auto(); \
 \
 	/* Perform BLAS parameter checking. */ \
 	PASTEBLACHK(blasname) \
@@ -97,8 +96,8 @@ void PASTEF77(ch,blasname) \
 	  NULL  \
 	); \
 \
-	/* Finalize BLIS (if it was initialized above). */ \
-	bli_finalize_auto( init_result ); \
+	/* Finalize BLIS. */ \
+	bli_finalize_auto(); \
 }
 
 #ifdef BLIS_ENABLE_BLAS2BLIS

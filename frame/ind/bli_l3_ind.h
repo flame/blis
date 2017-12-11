@@ -40,8 +40,8 @@
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-bool_t PASTEMAC(opname,ind_has_avail)( num_t dt ); \
 void*  PASTEMAC(opname,ind_get_avail)( num_t dt );
+/*bool_t PASTEMAC(opname,ind_has_avail)( num_t dt ); */
 
 GENPROT( gemm )
 GENPROT( hemm )

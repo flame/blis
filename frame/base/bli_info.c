@@ -35,11 +35,6 @@
 #include "blis.h"
 
 
-// NOTE: The values handled here may be queried even before bli_init()
-// is called!
-
-
-
 // -- General library information ----------------------------------------------
 
 // This string gets defined via -D on the command line when BLIS is compiled.
@@ -100,23 +95,15 @@ gint_t bli_info_get_blas2blis_int_type_size( void ) { return BLIS_BLAS2BLIS_INT_
 // -- Level-3 kernel definitions --
 
 char* bli_info_get_gemm_ukr_impl_string( ind_t method, num_t dt )
-      { return bli_gks_l3_ukr_impl_string( BLIS_GEMM_UKR,       method, dt ); }
+{ bli_init_once(); return bli_gks_l3_ukr_impl_string( BLIS_GEMM_UKR,       method, dt ); }
 char* bli_info_get_gemmtrsm_l_ukr_impl_string( ind_t method, num_t dt )
-      { return bli_gks_l3_ukr_impl_string( BLIS_GEMMTRSM_L_UKR, method, dt ); }
+{ bli_init_once(); return bli_gks_l3_ukr_impl_string( BLIS_GEMMTRSM_L_UKR, method, dt ); }
 char* bli_info_get_gemmtrsm_u_ukr_impl_string( ind_t method, num_t dt )
-      { return bli_gks_l3_ukr_impl_string( BLIS_GEMMTRSM_U_UKR, method, dt ); }
+{ bli_init_once(); return bli_gks_l3_ukr_impl_string( BLIS_GEMMTRSM_U_UKR, method, dt ); }
 char* bli_info_get_trsm_l_ukr_impl_string( ind_t method, num_t dt )
-      { return bli_gks_l3_ukr_impl_string( BLIS_TRSM_L_UKR,     method, dt ); }
+{ bli_init_once(); return bli_gks_l3_ukr_impl_string( BLIS_TRSM_L_UKR,     method, dt ); }
 char* bli_info_get_trsm_u_ukr_impl_string( ind_t method, num_t dt )
-      { return bli_gks_l3_ukr_impl_string( BLIS_TRSM_U_UKR,     method, dt ); }
-
-
-
-// -- Memory pool-related ------------------------------------------------------
-
-gint_t bli_info_get_mk_pool_size( void ) { return bli_membrk_pool_size( bli_memsys_global_membrk(), BLIS_BUFFER_FOR_A_BLOCK ); }
-gint_t bli_info_get_kn_pool_size( void ) { return bli_membrk_pool_size( bli_memsys_global_membrk(), BLIS_BUFFER_FOR_B_PANEL ); }
-gint_t bli_info_get_mn_pool_size( void ) { return bli_membrk_pool_size( bli_memsys_global_membrk(), BLIS_BUFFER_FOR_C_PANEL ); }
+{ bli_init_once(); return bli_gks_l3_ukr_impl_string( BLIS_TRSM_U_UKR,     method, dt ); }
 
 
 

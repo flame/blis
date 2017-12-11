@@ -41,6 +41,8 @@ void bli_obj_create( num_t  dt,
                      inc_t  cs,
                      obj_t* obj )
 {
+	bli_init_once();
+
 	bli_obj_create_without_buffer( dt, m, n, obj );
 
 	bli_obj_alloc_buffer( rs, cs, 1, obj );
@@ -54,6 +56,8 @@ void bli_obj_create_with_attached_buffer( num_t  dt,
                                           inc_t  cs,
                                           obj_t* obj )
 {
+	bli_init_once();
+
 	bli_obj_create_without_buffer( dt, m, n, obj );
 
 	bli_obj_attach_buffer( p, rs, cs, 1, obj );
@@ -240,8 +244,6 @@ void bli_obj_create_const( double value, obj_t* obj )
 	temp_z = bli_obj_buffer_for_const( BLIS_DCOMPLEX, *obj );
 	temp_i = bli_obj_buffer_for_const( BLIS_INT,      *obj );
 
-	// Use the bli_??sets() macros to set the temp variables in order to
-	// properly support BLIS_ENABLE_C99_COMPLEX.
 	bli_dssets( value, 0.0, *temp_s );
 	bli_ddsets( value, 0.0, *temp_d );
 	bli_dcsets( value, 0.0, *temp_c );
@@ -250,6 +252,7 @@ void bli_obj_create_const( double value, obj_t* obj )
 	*temp_i = ( gint_t ) value;
 }
 
+#if 0
 void bli_obj_create_const_copy_of( obj_t* a, obj_t* b )
 {
 	gint_t*   temp_i;
@@ -303,6 +306,7 @@ void bli_obj_create_const_copy_of( obj_t* a, obj_t* b )
 
 	*temp_i = ( gint_t ) bli_zreal( value );
 }
+#endif
 
 void bli_adjust_strides( dim_t  m,
                          dim_t  n,
@@ -462,6 +466,8 @@ num_t bli_datatype_union( num_t dt1, num_t dt2 )
 
 void bli_obj_print( char* label, obj_t* obj )
 {
+	bli_init_once();
+
 	FILE*  file     = stdout;
 
 	if ( bli_error_checking_is_enabled() )

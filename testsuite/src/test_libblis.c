@@ -58,7 +58,7 @@ int main( int argc, char** argv )
 	test_ops_t    ops;
 
 	// Initialize libblis.
-	bli_init();
+	//bli_init();
 
 	// Initialize some strings.
 	libblis_test_init_strings();
@@ -94,7 +94,7 @@ int main( int argc, char** argv )
 	libblis_test_level3_ops( &params, &ops );
 
 	// Finalize libblis.
-	bli_finalize();
+	//bli_finalize();
 
 	// Return peacefully.
 	return 0;

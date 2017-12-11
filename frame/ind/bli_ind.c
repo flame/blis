@@ -34,8 +34,6 @@
 
 #include "blis.h"
 
-static bool_t bli_ind_is_init = FALSE;
-
 static char* bli_ind_impl_str[BLIS_NUM_IND_METHODS] =
 {
 /* 3mh  */ "3mh",
@@ -51,9 +49,6 @@ static char* bli_ind_impl_str[BLIS_NUM_IND_METHODS] =
 
 void bli_ind_init( void )
 {
-	// If the API is already initialized, return early.
-	if ( bli_ind_is_initialized() ) return;
-
 	// Enable the default induced method (1m) if one or both complex domain
 	// gemm micro-kernels are unoptimized in the native context.
 	cntx_t* cntx     = bli_gks_query_cntx();
@@ -64,20 +59,10 @@ void bli_ind_init( void )
 
 	if ( c_is_ref ) bli_ind_enable_dt( BLIS_1M, BLIS_SCOMPLEX );
 	if ( z_is_ref ) bli_ind_enable_dt( BLIS_1M, BLIS_DCOMPLEX );
-
-	// Mark API as initialized.
-	bli_ind_is_init = TRUE;
 }
 
 void bli_ind_finalize( void )
 {
-	// Mark API as uninitialized.
-	bli_ind_is_init = FALSE;
-}
-
-bool_t bli_ind_is_initialized( void )
-{
-	return bli_ind_is_init;
 }
 
 // -----------------------------------------------------------------------------
@@ -169,6 +154,7 @@ bool_t bli_ind_oper_is_impl( opid_t oper, ind_t method )
 	return is_impl;
 }
 
+#if 0
 bool_t bli_ind_oper_has_avail( opid_t oper, num_t dt )
 {
 	ind_t method = bli_ind_oper_find_avail( oper, dt );
@@ -176,14 +162,16 @@ bool_t bli_ind_oper_has_avail( opid_t oper, num_t dt )
 	if ( method == BLIS_NAT ) return FALSE;
 	else                      return TRUE;
 }
+#endif
 
 void* bli_ind_oper_get_avail( opid_t oper, num_t dt )
 {
-	ind_t method = bli_ind_oper_find_avail( oper, dt );
 	void* func_p;
 
 	if ( bli_opid_is_level3( oper ) )
 	{
+		ind_t method = bli_ind_oper_find_avail( oper, dt );
+
 		func_p = bli_l3_ind_oper_get_func( oper, method );
 	}
 	else

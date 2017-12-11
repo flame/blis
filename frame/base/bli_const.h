@@ -32,7 +32,6 @@
 
 */
 
-void   bli_const_init( void );
-void   bli_const_finalize( void );
-bool_t bli_const_is_initialized( void );
+void bli_const_init( void );
+void bli_const_finalize( void );
 

@@ -45,6 +45,8 @@ void bli_her2k_front
        cntl_t* cntl
      )
 {
+	bli_init_once();
+
 	obj_t    alpha_conj;
 	obj_t    c_local;
 	obj_t    a_local;

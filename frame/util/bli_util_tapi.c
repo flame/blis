@@ -49,6 +49,8 @@ void PASTEMAC(ch,opname) \
        cntx_t*  cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	cntx_t*  cntx_p = cntx; \
 \
 	/* If the vector length is zero, set the absolute sum return value to
@@ -90,6 +92,8 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	cntx_t*  cntx_p = cntx; \
 \
 	/* If either dimension is zero, return early. */ \
@@ -128,6 +132,8 @@ void PASTEMAC(ch,opname) \
        cntx_t*  cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	cntx_t*  cntx_p = cntx; \
 \
 	/* If the vector length is zero, set the norm to zero and return
@@ -175,6 +181,8 @@ void PASTEMAC(ch,opname) \
        cntx_t*  cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	cntx_t*  cntx_p = cntx; \
 \
 	/* If either dimension is zero, set the norm to zero and return
@@ -223,6 +231,8 @@ void PASTEMAC(ch,opname) \
        char*  s2  \
      ) \
 { \
+	bli_init_once(); \
+\
 	PASTEMAC(ch,varname) \
 	( \
 	  stdout, \
@@ -250,6 +260,8 @@ void PASTEMAC(ch,opname) \
        char*  s2  \
      ) \
 { \
+	bli_init_once(); \
+\
 	PASTEMAC(ch,varname) \
 	( \
 	  stdout, \
@@ -275,6 +287,8 @@ void PASTEMAC(ch,opname) \
        cntx_t*  cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	cntx_t*  cntx_p = cntx; \
 \
 	/* If the vector length is zero, return early. */ \
@@ -313,6 +327,8 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	cntx_t*  cntx_p = cntx; \
 \
 	/* If either dimension is zero, return early. */ \
@@ -353,6 +369,8 @@ void PASTEMAC(ch,opname) \
        cntx_t*  cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	cntx_t*  cntx_p = cntx; \
 \
 	/* If x is zero length, return with scale and sumsq unchanged. */ \

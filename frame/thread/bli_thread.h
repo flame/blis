@@ -48,9 +48,8 @@
 #include "bli_l3_thrinfo.h"
 
 // Initialization-related prototypes.
-void    bli_thread_init( void );
-void    bli_thread_finalize( void );
-bool_t  bli_thread_is_initialized( void );
+void bli_thread_init( void );
+void bli_thread_finalize( void );
 
 // Thread range-related prototypes.
 void bli_thread_get_range_sub

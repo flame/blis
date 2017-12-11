@@ -300,8 +300,10 @@ endif
 #
 
 # Default linker, flags.
+# NOTE: -lpthread is needed unconditionally because BLIS uses pthread_once()
+# to initialize itself in a thread-safe manner.
 LINKER     := $(CC)
-LDFLAGS    :=
+LDFLAGS    := -lpthread
 
 # Never use libm with Intel compilers.
 ifneq ($(CC_VENDOR),icc)
@@ -359,7 +361,6 @@ endif
 endif
 
 
-
 #
 # --- Adjust verbosity level manually using make V=[0,1] -----------------------
 #
@@ -383,6 +384,9 @@ endif
 ifeq ($(OS_NAME),Linux)
 LDFLAGS += -lrt
 endif
+
+# Remove duplicate flags/options in LDFLAGS (such as -lpthread) by sorting.
+LDFLAGS := $(sort $(LDFLAGS))
 
 
 

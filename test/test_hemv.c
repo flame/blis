@@ -58,7 +58,7 @@ int main( int argc, char** argv )
 	double dtime_save;
 	double gflops;
 
-	bli_init();
+	//bli_init();
 
 	n_repeats = 3;
 
@@ -190,7 +190,7 @@ int main( int argc, char** argv )
 		bli_obj_free( &y_save );
 	}
 
-	bli_finalize();
+	//bli_finalize();
 
 	return 0;
 }

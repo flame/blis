@@ -50,6 +50,8 @@ void PASTEMAC(opname,EX_SUF) \
        BLIS_OAPI_CNTX_PARAM  \
      ) \
 { \
+	bli_init_once(); \
+\
 	BLIS_OAPI_CNTX_DECL \
 \
 	num_t     dt        = bli_obj_datatype( *x ); \
@@ -87,6 +89,8 @@ void PASTEMAC(opname,EX_SUF) \
        BLIS_OAPI_CNTX_PARAM  \
      ) \
 { \
+	bli_init_once(); \
+\
 	BLIS_OAPI_CNTX_DECL \
 \
 	num_t     dt        = bli_obj_datatype( *a ); \
@@ -127,6 +131,8 @@ void PASTEMAC(opname,EX_SUF) \
        BLIS_OAPI_CNTX_PARAM  \
      ) \
 { \
+	bli_init_once(); \
+\
 	BLIS_OAPI_CNTX_DECL \
 \
 	num_t     dt        = bli_obj_datatype( *x ); \
@@ -166,6 +172,8 @@ void PASTEMAC(opname,EX_SUF) \
        BLIS_OAPI_CNTX_PARAM  \
      ) \
 { \
+	bli_init_once(); \
+\
 	BLIS_OAPI_CNTX_DECL \
 \
 	num_t     dt        = bli_obj_datatype( *x ); \
@@ -217,6 +225,8 @@ void PASTEMAC(opname,EX_SUF) \
        BLIS_OAPI_CNTX_PARAM  \
      ) \
 { \
+	bli_init_once(); \
+\
 	BLIS_OAPI_CNTX_DECL \
 \
 	num_t     dt        = bli_obj_datatype( *x ); \
@@ -267,6 +277,8 @@ void PASTEMAC(opname,EX_SUF) \
        BLIS_OAPI_CNTX_PARAM  \
      ) \
 { \
+	bli_init_once(); \
+\
 	BLIS_OAPI_CNTX_DECL \
 \
 	num_t     dt        = bli_obj_datatype( *x ); \
@@ -334,6 +346,8 @@ void PASTEMAC(opname,EX_SUF) \
        BLIS_OAPI_CNTX_PARAM  \
      ) \
 { \
+	bli_init_once(); \
+\
 	BLIS_OAPI_CNTX_DECL \
 \
 	/* Suppress compiler warning about unused variables. */ \
@@ -363,6 +377,8 @@ void PASTEMAC(opname,EX_SUF) \
        BLIS_OAPI_CNTX_PARAM  \
      ) \
 { \
+	bli_init_once(); \
+\
 	BLIS_OAPI_CNTX_DECL \
 \
 	num_t     dt        = bli_obj_datatype( *x ); \
@@ -398,6 +414,8 @@ void PASTEMAC(opname,EX_SUF) \
        BLIS_OAPI_CNTX_PARAM  \
      ) \
 { \
+	bli_init_once(); \
+\
 	BLIS_OAPI_CNTX_DECL \
 \
 	num_t     dt        = bli_obj_datatype( *x ); \
@@ -442,6 +460,8 @@ void PASTEMAC(opname,EX_SUF) \
        BLIS_OAPI_CNTX_PARAM  \
      ) \
 { \
+	bli_init_once(); \
+\
 	BLIS_OAPI_CNTX_DECL \
 \
 	num_t     dt        = bli_obj_datatype( *x ); \

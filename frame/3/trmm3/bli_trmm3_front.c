@@ -46,6 +46,8 @@ void bli_trmm3_front
        cntl_t* cntl
      )
 {
+	bli_init_once();
+
 	obj_t   a_local;
 	obj_t   b_local;
 	obj_t   c_local;

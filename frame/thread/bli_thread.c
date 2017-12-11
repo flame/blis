@@ -34,36 +34,21 @@
 
 #include "blis.h"
 
-static bool_t bli_thread_is_init         = FALSE;
-
-thrinfo_t     BLIS_PACKM_SINGLE_THREADED = {};
-thrinfo_t     BLIS_GEMM_SINGLE_THREADED  = {};
-thrcomm_t     BLIS_SINGLE_COMM           = {};
+thrinfo_t BLIS_PACKM_SINGLE_THREADED = {};
+thrinfo_t BLIS_GEMM_SINGLE_THREADED  = {};
+thrcomm_t BLIS_SINGLE_COMM           = {};
 
 // -----------------------------------------------------------------------------
 
 void bli_thread_init( void )
 {
-	// If the API is already initialized, return early.
-	if ( bli_thread_is_initialized() ) return;
-
 	bli_thrcomm_init( &BLIS_SINGLE_COMM, 1 );
 	bli_packm_thrinfo_init_single( &BLIS_PACKM_SINGLE_THREADED );
 	bli_l3_thrinfo_init_single( &BLIS_GEMM_SINGLE_THREADED );
-
-	// Mark API as initialized.
-	bli_thread_is_init = TRUE;
 }
 
 void bli_thread_finalize( void )
 {
-	// Mark API as uninitialized.
-	bli_thread_is_init = FALSE;
-}
-
-bool_t bli_thread_is_initialized( void )
-{
-	return bli_thread_is_init;
 }
 
 // -----------------------------------------------------------------------------

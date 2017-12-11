@@ -47,6 +47,8 @@ void PASTEMAC0(opname) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	num_t     dt        = bli_obj_datatype( *c ); \
 \
 	dim_t     k         = bli_obj_width( *a ); \
@@ -96,6 +98,8 @@ void PASTEMAC0(opname) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	num_t     dt        = bli_obj_datatype( *c ); \
 \
 	void*     buf_a     = bli_obj_buffer_at_off( *a ); \
@@ -158,6 +162,8 @@ void PASTEMAC0(opname) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	num_t     dt        = bli_obj_datatype( *c11 ); \
 \
 	dim_t     k         = bli_obj_width( *a1x ); \

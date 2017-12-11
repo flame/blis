@@ -54,6 +54,8 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	const num_t dt = PASTEMAC(ch,type); \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
@@ -94,6 +96,8 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	const num_t dt = PASTEMAC(ch,type); \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
@@ -135,6 +139,8 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	const num_t dt = PASTEMAC(ch,type); \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
@@ -181,6 +187,8 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	const num_t dt = PASTEMAC(ch,type); \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
@@ -227,6 +235,8 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	const num_t dt = PASTEMAC(ch,type); \
 \
 	/* Obtain a valid context from the gks if necessary. */ \

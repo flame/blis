@@ -50,6 +50,8 @@ void PASTEMAC(opname,EX_SUF) \
        BLIS_OAPI_CNTX_PARAM  \
      ) \
 { \
+	bli_init_once(); \
+\
 	BLIS_OAPI_CNTX_DECL \
 \
 	num_t     dt        = bli_obj_datatype( *x ); \
@@ -92,6 +94,8 @@ void PASTEMAC(opname,EX_SUF) \
        BLIS_OAPI_CNTX_PARAM  \
      ) \
 { \
+	bli_init_once(); \
+\
 	BLIS_OAPI_CNTX_DECL \
 \
 	num_t     dt        = bli_obj_datatype( *x ); \
@@ -132,6 +136,8 @@ void PASTEMAC(opname,EX_SUF) \
        BLIS_OAPI_CNTX_PARAM  \
      ) \
 { \
+	bli_init_once(); \
+\
 	BLIS_OAPI_CNTX_DECL \
 \
 	num_t     dt        = bli_obj_datatype( *x ); \
@@ -190,6 +196,8 @@ void PASTEMAC(opname,EX_SUF) \
        BLIS_OAPI_CNTX_PARAM  \
      ) \
 { \
+	bli_init_once(); \
+\
 	BLIS_OAPI_CNTX_DECL \
 \
 	num_t     dt        = bli_obj_datatype( *x ); \
@@ -243,6 +251,8 @@ void PASTEMAC(opname,EX_SUF) \
        BLIS_OAPI_CNTX_PARAM  \
      ) \
 { \
+	bli_init_once(); \
+\
 	BLIS_OAPI_CNTX_DECL \
 \
 	num_t     dt        = bli_obj_datatype( *x ); \
@@ -290,6 +300,8 @@ void PASTEMAC(opname,EX_SUF) \
        BLIS_OAPI_CNTX_PARAM  \
      ) \
 { \
+	bli_init_once(); \
+\
 	BLIS_OAPI_CNTX_DECL \
 \
 	num_t     dt        = bli_obj_datatype( *x ); \
@@ -350,6 +362,8 @@ void PASTEMAC(opname,EX_SUF) \
        BLIS_OAPI_CNTX_PARAM  \
      ) \
 { \
+	bli_init_once(); \
+\
 	BLIS_OAPI_CNTX_DECL \
 \
 	num_t     dt        = bli_obj_datatype( *x ); \
@@ -385,6 +399,8 @@ void PASTEMAC(opname,EX_SUF) \
        BLIS_OAPI_CNTX_PARAM  \
      ) \
 { \
+	bli_init_once(); \
+\
 	BLIS_OAPI_CNTX_DECL \
 \
 	num_t     dt        = bli_obj_datatype( *x ); \
@@ -434,6 +450,8 @@ void PASTEMAC(opname,EX_SUF) \
        BLIS_OAPI_CNTX_PARAM  \
      ) \
 { \
+	bli_init_once(); \
+\
 	BLIS_OAPI_CNTX_DECL \
 \
 	num_t     dt        = bli_obj_datatype( *x ); \
@@ -473,6 +491,8 @@ void PASTEMAC(opname,EX_SUF) \
        BLIS_OAPI_CNTX_PARAM  \
      ) \
 { \
+	bli_init_once(); \
+\
 	BLIS_OAPI_CNTX_DECL \
 \
 	num_t     dt        = bli_obj_datatype( *x ); \

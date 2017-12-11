@@ -34,7 +34,6 @@
 
 #include "blis.h"
 
-
 blksz_t* bli_blksz_create_ed
      (
        dim_t b_s, dim_t be_s,

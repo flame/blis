@@ -139,6 +139,7 @@ void bli_obj_create_const_check( double value, obj_t* obj )
 	bli_check_error_code( e_val );
 }
 
+#if 0
 void bli_obj_create_const_copy_of_check( obj_t* a, obj_t* b )
 {
 	err_t e_val;
@@ -155,6 +156,7 @@ void bli_obj_create_const_copy_of_check( obj_t* a, obj_t* b )
 	e_val = bli_check_object_buffer( a );
 	bli_check_error_code( e_val );
 }
+#endif
 
 void bli_datatype_size_check( num_t dt )
 {

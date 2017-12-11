@@ -55,6 +55,8 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	dim_t m_y, n_x; \
 \
 	/* Determine the dimensions of y and x. */ \
@@ -131,6 +133,8 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	/* If x or y has zero elements, or if alpha is zero, return early. */ \
 	if ( bli_zero_dim2( m, n ) || PASTEMAC(ch,eq0)( *alpha ) ) return; \
 \
@@ -179,6 +183,8 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	/* Obtain a valid context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
@@ -247,6 +253,8 @@ void PASTEMAC(ch,opname) \
        cntx_t*  cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	ctype alpha_local; \
 \
 	/* If x has zero elements, or if alpha is zero, return early. */ \
@@ -306,6 +314,8 @@ void PASTEMAC(ch,opname) \
        cntx_t*  cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	/* If x has zero elements, or if alpha is zero, return early. */ \
 	if ( bli_zero_dim1( m ) || PASTEMAC(ch,eq0)( *alpha ) ) return; \
 \
@@ -360,6 +370,8 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	/* If x has zero elements, or if alpha is zero, return early. */ \
 	if ( bli_zero_dim1( m ) || PASTEMAC(ch,eq0)( *alpha ) ) return; \
 \
@@ -416,6 +428,8 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	/* If x has zero elements, return early. */ \
 	if ( bli_zero_dim1( m ) ) return; \
 \

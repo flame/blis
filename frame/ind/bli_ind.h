@@ -53,7 +53,6 @@
 
 void   bli_ind_init( void );
 void   bli_ind_finalize( void );
-bool_t bli_ind_is_initialized( void );
 
 void   bli_ind_enable( ind_t method );
 void   bli_ind_disable( ind_t method );
@@ -66,7 +65,7 @@ void   bli_ind_disable_all_dt( num_t dt );
 void   bli_ind_oper_enable_only( opid_t oper, ind_t method, num_t dt );
 
 bool_t bli_ind_oper_is_impl( opid_t oper, ind_t method );
-bool_t bli_ind_oper_has_avail( opid_t oper, num_t dt );
+//bool_t bli_ind_oper_has_avail( opid_t oper, num_t dt );
 void*  bli_ind_oper_get_avail( opid_t oper, num_t dt );
 ind_t  bli_ind_oper_find_avail( opid_t oper, num_t dt );
 char*  bli_ind_oper_get_avail_impl_string( opid_t oper, num_t dt );

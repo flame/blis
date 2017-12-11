@@ -53,6 +53,8 @@ void PASTEMAC(opname,EX_SUF) \
        BLIS_OAPI_CNTX_PARAM  \
      ) \
 { \
+	bli_init_once(); \
+\
 	BLIS_OAPI_CNTX_DECL \
 \
 	/* Invoke the operation's "ind" function--its induced method front-end.
@@ -90,6 +92,8 @@ void PASTEMAC(opname,EX_SUF) \
        BLIS_OAPI_CNTX_PARAM  \
      ) \
 { \
+	bli_init_once(); \
+\
 	BLIS_OAPI_CNTX_DECL \
 \
 	PASTEMAC(opname,ind) \
@@ -121,6 +125,8 @@ void PASTEMAC(opname,EX_SUF) \
        BLIS_OAPI_CNTX_PARAM  \
      ) \
 { \
+	bli_init_once(); \
+\
 	BLIS_OAPI_CNTX_DECL \
 \
 	PASTEMAC(opname,ind) \
@@ -149,6 +155,8 @@ void PASTEMAC(opname,EX_SUF) \
        BLIS_OAPI_CNTX_PARAM  \
      ) \
 { \
+	bli_init_once(); \
+\
 	BLIS_OAPI_CNTX_DECL \
 \
 	PASTEMAC(opname,ind) \

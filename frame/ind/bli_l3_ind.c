@@ -53,9 +53,6 @@ static void* bli_l3_ind_oper_fp[BLIS_NUM_IND_METHODS][BLIS_NUM_LEVEL3_OPS] =
              bli_syrknat,  bli_syr2knat, bli_trmm3nat, bli_trmmnat,  bli_trsmnat  },
 };
 
-//
-// NOTE: "2" is used instead of BLIS_NUM_FP_TYPES/2.
-//
 static bool_t bli_l3_ind_oper_st[BLIS_NUM_IND_METHODS][BLIS_NUM_LEVEL3_OPS][2] = 
 {
         /*   gemm   hemm   herk   her2k  symm   syrk,  syr2k  trmm3  trmm   trsm  */
@@ -81,14 +78,16 @@ static bool_t bli_l3_ind_oper_st[BLIS_NUM_IND_METHODS][BLIS_NUM_LEVEL3_OPS][2] =
 #undef  GENFUNC
 #define GENFUNC( opname, optype ) \
 \
-bool_t PASTEMAC(opname,ind_has_avail)( num_t dt ) \
-{ \
-	return bli_ind_oper_has_avail( optype, dt ); \
-} \
 void*  PASTEMAC(opname,ind_get_avail)( num_t dt ) \
 { \
 	return bli_ind_oper_get_avail( optype, dt ); \
 }
+/*
+bool_t PASTEMAC(opname,ind_has_avail)( num_t dt )
+{
+	return bli_ind_oper_has_avail( optype, dt );
+}
+*/
 
 GENFUNC( gemm, BLIS_GEMM )
 GENFUNC( hemm, BLIS_HEMM )
@@ -123,6 +122,8 @@ bool_t bli_l3_ind_oper_is_avail( opid_t oper, ind_t method, num_t dt )
 
 ind_t bli_l3_ind_oper_find_avail( opid_t oper, num_t dt )
 {
+	bli_init_once();
+
 	ind_t im;
 
 	// If the datatype is real, return native execution.
@@ -231,22 +232,9 @@ bool_t bli_l3_ind_oper_get_enable( opid_t oper, ind_t method, num_t dt )
 	num_t  idt = bli_ind_map_cdt_to_index( dt );
 	bool_t r_val;
 
-#ifdef BLIS_ENABLE_OPENMP
-	_Pragma( "omp critical (l3_ind)" )
-#endif
-#ifdef BLIS_ENABLE_PTHREADS
-	pthread_mutex_lock( &l3_ind_mutex );
-#endif
-
-	// BEGIN CRITICAL SECTION
 	{
 		r_val = bli_l3_ind_oper_st[ method ][ oper ][ idt ];
 	}
-	// END CRITICAL SECTION
-
-#ifdef BLIS_ENABLE_PTHREADS
-	pthread_mutex_unlock( &l3_ind_mutex );
-#endif
 
 	return r_val;
 }

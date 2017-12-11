@@ -60,6 +60,8 @@ void PASTEMAC0(opname) \
        obj_t*  psi  \
      ) \
 { \
+	bli_init_once(); \
+\
 	conj_t    conjchi   = bli_obj_conj_status( *chi ); \
 \
 	num_t     dt_psi    = bli_obj_datatype( *psi ); \
@@ -107,6 +109,8 @@ void PASTEMAC2(chx,chy,varname) \
        void*  psi \
      ) \
 { \
+	bli_init_once(); \
+\
 	ctype_x* chi_cast = chi; \
 	ctype_y* psi_cast = psi; \
 \

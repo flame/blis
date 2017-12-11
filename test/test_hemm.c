@@ -58,7 +58,7 @@ int main( int argc, char** argv )
 	double dtime_save;
 	double gflops;
 
-	bli_init();
+	//bli_init();
 
 	//bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
 
@@ -299,7 +299,7 @@ int main( int argc, char** argv )
 		bli_obj_free( &c_save );
 	}
 
-	bli_finalize();
+	//bli_finalize();
 
 	return 0;
 }

@@ -54,6 +54,8 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
@@ -113,6 +115,8 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
@@ -177,6 +181,8 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
 	/* If alpha is zero, then the entire operation is a no-op. */ \
@@ -241,6 +247,8 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
@@ -325,6 +333,8 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
 	/* Obtain a valid context from the gks if necessary. */ \

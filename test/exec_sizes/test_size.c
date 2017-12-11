@@ -58,7 +58,7 @@ int main( int argc, char** argv )
 	int   ii;
 
 #ifdef NBLIS
-	bli_init();
+	//bli_init();
 #endif
 
 
@@ -533,7 +533,7 @@ int main( int argc, char** argv )
 	}
 
 #ifdef NBLIS
-	bli_finalize();
+	//bli_finalize();
 #endif
 
 	return 0;

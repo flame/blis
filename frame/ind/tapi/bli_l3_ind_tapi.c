@@ -55,6 +55,8 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	const num_t dt = PASTEMAC(ch,type); \
 \
 	obj_t       alphao, ao, bo, betao, co; \
@@ -112,6 +114,8 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	const num_t dt = PASTEMAC(ch,type); \
 \
 	obj_t       alphao, ao, bo, betao, co; \
@@ -169,6 +173,8 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	const num_t dt_r = PASTEMAC(chr,type); \
 	const num_t dt   = PASTEMAC(ch,type); \
 \
@@ -223,6 +229,8 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	const num_t dt_r = PASTEMAC(chr,type); \
 	const num_t dt   = PASTEMAC(ch,type); \
 \
@@ -283,6 +291,8 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	const num_t dt = PASTEMAC(ch,type); \
 \
 	obj_t       alphao, ao, bo, betao, co; \
@@ -340,6 +350,8 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	const num_t dt = PASTEMAC(ch,type); \
 \
 	obj_t       alphao, ao, betao, co; \
@@ -393,6 +405,8 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	const num_t dt = PASTEMAC(ch,type); \
 \
 	obj_t       alphao, ao, bo, betao, co; \
@@ -453,6 +467,8 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	const num_t dt = PASTEMAC(ch,type); \
 \
 	obj_t       alphao, ao, bo, betao, co; \
@@ -512,6 +528,8 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	const num_t dt = PASTEMAC(ch,type); \
 \
 	obj_t       alphao, ao, bo; \
@@ -562,6 +580,8 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	const num_t dt = PASTEMAC(ch,type); \
 \
 	obj_t       alphao, ao, bo; \

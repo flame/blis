@@ -36,7 +36,7 @@
 #include "blis.h"
 
 #ifdef BLIS_ENABLE_PTHREADS
-static pthread_mutex_t mem_manager_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t memsys_mutex = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
 static membrk_t global_membrk;
@@ -50,15 +50,9 @@ membrk_t* bli_memsys_global_membrk( void )
 
 // -----------------------------------------------------------------------------
 
-static bool_t bli_memsys_is_init = FALSE;
-
 void bli_memsys_init( void )
 {
 	cntx_t* cntx_p;
-
-	// If the initialization flag is TRUE, we know the API is already
-	// initialized, so we can return early.
-	if ( bli_memsys_is_init == TRUE ) return;
 
 	// Query a native context so we have something to pass into
 	// bli_membrk_init_pools(). We use BLIS_DOUBLE for the datatype,
@@ -70,29 +64,18 @@ void bli_memsys_init( void )
 	_Pragma( "omp critical (mem)" )
 #endif
 #ifdef BLIS_ENABLE_PTHREADS
-	pthread_mutex_lock( &mem_manager_mutex );
+	pthread_mutex_lock( &memsys_mutex );
 #endif
 
 	// BEGIN CRITICAL SECTION
 	{
-		// Here, we test the initialization flag again. NOTE: THIS IS NOT
-		// REDUNDANT. This additional test is needed so that other threads
-		// that may be waiting to acquire the lock do not perform any
-		// initialization actions once they are finally allowed into this
-		// critical section.
-		if ( bli_memsys_is_init == FALSE )
-		{
-			// Initialize the global membrk_t object and its memory pools.
-			bli_membrk_init( cntx_p, &global_membrk );
-
-			// After initialization, mark the API as initialized.
-			bli_memsys_is_init = TRUE;
-		}
+		// Initialize the global membrk_t object and its memory pools.
+		bli_membrk_init( cntx_p, &global_membrk );
 	}
 	// END CRITICAL SECTION
 
 #ifdef BLIS_ENABLE_PTHREADS
-	pthread_mutex_unlock( &mem_manager_mutex );
+	pthread_mutex_unlock( &memsys_mutex );
 #endif
 }
 
@@ -102,72 +85,39 @@ void bli_memsys_reinit( cntx_t* cntx )
 	_Pragma( "omp critical (mem)" )
 #endif
 #ifdef BLIS_ENABLE_PTHREADS
-	pthread_mutex_lock( &mem_manager_mutex );
+	pthread_mutex_lock( &memsys_mutex );
 #endif
 
 	// BEGIN CRITICAL SECTION
 	{
-		// If for some reason the memory pools have not yet been
-		// initialized (unlikely), we emulate the body of bli_memsys_init().
-		if ( bli_memsys_is_init == FALSE )
-		{
-			// Initialize the global membrk_t object and its memory pools.
-			bli_membrk_init( cntx, &global_membrk );
-
-			// After initialization, mark the API as initialized.
-			bli_memsys_is_init = TRUE;
-		}
-		else
-		{
-			// Reinitialize the global membrk_t object's memory pools.
-			bli_membrk_reinit_pools( cntx, &global_membrk );
-		}
+		// Reinitialize the global membrk_t object's memory pools.
+		bli_membrk_reinit_pools( cntx, &global_membrk );
 	}
 	// END CRITICAL SECTION
 
 #ifdef BLIS_ENABLE_PTHREADS
-	pthread_mutex_unlock( &mem_manager_mutex );
+	pthread_mutex_unlock( &memsys_mutex );
 #endif
 }
 
 void bli_memsys_finalize( void )
 {
-	// If the initialization flag is FALSE, we know the API is already
-	// uninitialized, so we can return early.
-	if ( bli_memsys_is_init == FALSE ) return;
-
 #ifdef BLIS_ENABLE_OPENMP
 	_Pragma( "omp critical (mem)" )
 #endif
 #ifdef BLIS_ENABLE_PTHREADS
-	pthread_mutex_lock( &mem_manager_mutex );
+	pthread_mutex_lock( &memsys_mutex );
 #endif
 
 	// BEGIN CRITICAL SECTION
 	{
-		// Here, we test the initialization flag again. NOTE: THIS IS NOT
-		// REDUNDANT. This additional test is needed so that other threads
-		// that may be waiting to acquire the lock do not perform any
-		// finalization actions once they are finally allowed into this
-		// critical section.
-		if ( bli_memsys_is_init == TRUE )
-		{
-			// Finalize the global membrk_t object and its memory pools.
-			bli_membrk_finalize( &global_membrk );
-
-			// After finalization, mark the API as uninitialized.
-			bli_memsys_is_init = FALSE;
-		}
+		// Finalize the global membrk_t object and its memory pools.
+		bli_membrk_finalize( &global_membrk );
 	}
 	// END CRITICAL SECTION
 
 #ifdef BLIS_ENABLE_PTHREADS
-	pthread_mutex_unlock( &mem_manager_mutex );
+	pthread_mutex_unlock( &memsys_mutex );
 #endif
-}
-
-bool_t bli_memsys_is_initialized( void )
-{
-	return bli_memsys_is_init;
 }
 

@@ -72,6 +72,13 @@ dim_t bli_cntx_get_num_threads_in
 
 void bli_cntx_set_blkszs( ind_t method, dim_t n_bs, ... )
 {
+	// This function can be called from the bli_cntx_init_*() function for
+	// a particular architecture if the kernel developer wishes to use
+	// non-default blocksizes. It should be called after
+	// bli_cntx_init_defaults() so that default blocksizes remain
+	// for any datatypes / register blocksizes that were not targed for
+	// optimization.
+
 	/* Example prototypes:
 
 	   void bli_cntx_set_blkszs
@@ -474,6 +481,13 @@ void bli_cntx_set_ind_blkszs( ind_t method, dim_t n_bs, ... )
 
 void bli_cntx_set_l3_nat_ukrs( dim_t n_ukrs, ... )
 {
+	// This function can be called from the bli_cntx_init_*() function for
+	// a particular architecture if the kernel developer wishes to use
+	// non-default level-3 microkernels. It should be called after
+	// bli_cntx_init_defaults() so that default functions are still called
+	// for any datatypes / register blocksizes that were not targed for
+	// optimization.
+
 	/* Example prototypes:
 
 	   void bli_cntx_set_l3_nat_ukrs

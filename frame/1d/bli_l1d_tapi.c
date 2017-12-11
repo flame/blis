@@ -53,6 +53,8 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	const num_t dt = PASTEMAC(ch,type); \
 \
 	ctype*      x1; \
@@ -125,6 +127,8 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	const num_t dt = PASTEMAC(ch,type); \
 \
 	ctype*      x1; \
@@ -193,6 +197,8 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	const num_t dt = PASTEMAC(ch,type); \
 \
 	ctype*      x1; \
@@ -243,6 +249,8 @@ void PASTEMAC(ch,opname) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	const num_t dt = PASTEMAC(ch,type); \
 \
 	ctype*      x1; \
@@ -295,6 +303,8 @@ void PASTEMAC(ch,opname) \
        cntx_t*  cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	const num_t dt   = PASTEMAC(ch,type); \
 	const num_t dt_r = PASTEMAC(chr,type); \
 \

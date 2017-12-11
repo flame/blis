@@ -55,6 +55,8 @@ void PASTEMAC(opname,imeth) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	/* Obtain a valid (native) context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
@@ -87,6 +89,8 @@ void PASTEMAC(opname,imeth) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	/* Obtain a valid (native) context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
@@ -117,6 +121,8 @@ void PASTEMAC(opname,imeth) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	/* Obtain a valid (native) context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
@@ -146,6 +152,8 @@ void PASTEMAC(opname,imeth) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	/* Obtain a valid (native) context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
@@ -174,6 +182,8 @@ void PASTEMAC(opname,imeth) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	/* Obtain a valid (native) context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \

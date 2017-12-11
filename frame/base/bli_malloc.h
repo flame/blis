@@ -56,5 +56,5 @@ void  bli_free_align( free_ft f, void* p );
 void* bli_malloc_noalign( malloc_ft f, size_t size );
 void  bli_free_noalign( free_ft f, void* p );
 
-void bli_malloc_align_check( malloc_ft f, size_t size, size_t align_size );
+void  bli_malloc_align_check( malloc_ft f, size_t size, size_t align_size );
 

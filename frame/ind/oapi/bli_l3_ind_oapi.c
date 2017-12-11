@@ -50,6 +50,8 @@ void PASTEMAC(opname,imeth) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	num_t                dt   = bli_obj_datatype( *c ); \
 	PASTECH(opname,_oft) func = PASTEMAC(opname,ind_get_avail)( dt ); \
 \
@@ -77,6 +79,8 @@ void PASTEMAC(opname,imeth) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	num_t                dt   = bli_obj_datatype( *c ); \
 	PASTECH(opname,_oft) func = PASTEMAC(opname,ind_get_avail)( dt ); \
 \
@@ -102,6 +106,8 @@ void PASTEMAC(opname,imeth) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	num_t                dt   = bli_obj_datatype( *c ); \
 	PASTECH(opname,_oft) func = PASTEMAC(opname,ind_get_avail)( dt ); \
 \
@@ -126,6 +132,8 @@ void PASTEMAC(opname,imeth) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
 	num_t                dt   = bli_obj_datatype( *b ); \
 	PASTECH(opname,_oft) func = PASTEMAC(opname,ind_get_avail)( dt ); \
 \
