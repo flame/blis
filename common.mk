@@ -218,7 +218,7 @@ RANLIB     := ranlib
 INSTALL    := install -c
 
 # Script for creating a monolithic header file.
-FLATTEN_H  := build/flatten-headers.sh
+FLATTEN_H  := $(DIST_PATH)/build/flatten-headers.sh
 
 # Default archiver flags.
 AR         := ar
