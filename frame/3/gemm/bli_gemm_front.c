@@ -46,7 +46,7 @@ void bli_gemm_front
        cntl_t* cntl
      )
 {
-
+	
 #ifdef BLIS_SMALL_MATRIX_ENABLE
     gint_t status = bli_gemm_small_matrix(alpha, a, b, beta, c, cntx, cntl);
     if(BLIS_SUCCESS != status)
