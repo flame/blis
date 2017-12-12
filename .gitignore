@@ -34,6 +34,7 @@ bli_config.h
 # -- monolithic headers --
 
 include/*/*.h
+frame/include/blis.h.interm
 
 # -- makefile fragments --
 
