@@ -50,7 +50,7 @@ print_usage()
 	echo " "
 	echo " Usage:"
 	echo " "
-	echo "   ${script_name} header header_out dir_list"
+	echo "   ${script_name} header header_out temp_dir dir_list"
 	echo " "
 	echo " Arguments:"
 	echo " "
@@ -60,6 +60,8 @@ print_usage()
 	echo " "
 	echo "   header_out    The filepath of the file into which the script will output"
 	echo "                 the monolithic header."
+	echo " "
+	echo "   temp_dir      A directory in which temporary files may be created."
 	echo " "
 	echo "   dir_list      The list of directory paths in which to search for the"
 	echo "                 headers that are #included by 'header'. By default, these"
@@ -282,8 +284,11 @@ replace_pass()
 	dirpaths="$2"
 	cursp="$3"
 
-	# Set the output filename, which we will return to the caller.
-	intermfile="${inputfile}.interm"
+	# Set the output filename, which we will return to the caller. Starting
+	# with the input filepath, we strip it down to just the filename and
+	# reconstruct it with the .interm suffix in temp_dir.
+	intermfile="${inputfile##*/}"
+	intermfile="${temp_dir}/${intermfile}.interm"
 
 	# This string is inserted after #include directives after having
 	# determined that they are not present in the directory tree and should
@@ -480,18 +485,20 @@ main()
 	fi
 
 	# Print usage if we don't have exactly two arguments.
-	if [ $# != "3" ]; then
+	if [ $# != "4" ]; then
 
 		print_usage
 	fi
 
-	# Acquire the two required arguments:
+	# Acquire the four required arguments:
 	# - the input header file,
 	# - the output header file,
+	# - the temporary directory in which we can write intermediate files,
 	# - the list of directories in which to search for the headers
 	inputfile="$1"
 	outputfile="$2"
-	dir_list="$3"
+	temp_dir="$3"
+	dir_list="$4"
 
 	# First, confirm that the directories in dir_list are valid.
 	dir_list2=""

@@ -365,10 +365,10 @@ flat-header: check-env $(BLIS_H_FLAT)
 
 $(BLIS_H_FLAT): $(MK_HEADER_FILES)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	$(FLATTEN_H) -c -v1 $(BLIS_H_SRC_PATH) $@ "$(MK_HEADER_DIR_PATHS)"
+	$(FLATTEN_H) -c -v1 $(BLIS_H_SRC_PATH) $@ "./$(INCLUDE_DIR)" "$(MK_HEADER_DIR_PATHS)"
 else
 	@echo -n "Generating monolithic blis.h"
-	@$(FLATTEN_H) -c -v1 $(BLIS_H_SRC_PATH) $@ "$(MK_HEADER_DIR_PATHS)"
+	@$(FLATTEN_H) -c -v1 $(BLIS_H_SRC_PATH) $@ "./$(INCLUDE_DIR)" "$(MK_HEADER_DIR_PATHS)"
 	@echo "Generated $@"
 endif
 
@@ -378,10 +378,10 @@ flat-cblas-header: check-env $(CBLAS_H_FLAT)
 
 $(CBLAS_H_FLAT): $(MK_HEADER_FILES)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	$(FLATTEN_H) -c -v1 $(CBLAS_H_SRC_PATH) $@ "$(MK_HEADER_DIR_PATHS)"
+	$(FLATTEN_H) -c -v1 $(CBLAS_H_SRC_PATH) $@ "./$(INCLUDE_DIR)" "$(MK_HEADER_DIR_PATHS)"
 else
 	@echo -n "Generating monolithic cblas.h"
-	@$(FLATTEN_H) -c -v1 $(CBLAS_H_SRC_PATH) $@ "$(MK_HEADER_DIR_PATHS)"
+	@$(FLATTEN_H) -c -v1 $(CBLAS_H_SRC_PATH) $@ "./$(INCLUDE_DIR)" "$(MK_HEADER_DIR_PATHS)"
 	@echo "Generated $@"
 endif
 
