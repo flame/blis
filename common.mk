@@ -471,14 +471,15 @@ endif
 # Expand the fragment paths that contain .h files to attain the set of header
 # files present in all fragment paths. Then strip all leading, internal, and
 # trailing whitespace from the list.
-MK_HEADER_FILES := $(strip $(foreach frag_path, . $(FRAGMENT_DIR_PATHS), \
-                                                $(wildcard $(frag_path)/*.h)))
+MK_HEADER_FILES := $(strip $(foreach frag_path, \
+                                     . $(FRAGMENT_DIR_PATHS), \
+                                     $(wildcard $(frag_path)/*.h)))
 
 # Expand the fragment paths that contain .h files, and take the first
 # expansion. Then, strip the header filename to leave the path to each header
 # location. Notice this process even weeds out duplicates!
 MK_HEADER_DIR_PATHS := $(dir $(foreach frag_path, \
-                                       $(DIST_PATH) $(FRAGMENT_DIR_PATHS), \
+                                       . $(FRAGMENT_DIR_PATHS), \
                                        $(firstword $(wildcard $(frag_path)/*.h))))
 
 # Add -I to each header path so we can specify our include search paths to the
@@ -486,7 +487,7 @@ MK_HEADER_DIR_PATHS := $(dir $(foreach frag_path, \
 INCLUDE_PATHS   := $(strip $(patsubst %, -I%, $(MK_HEADER_DIR_PATHS)))
 
 # Construct the base path for the intermediate include directory.
-BASE_INC_PATH   := $(DIST_PATH)/$(INCLUDE_DIR)/$(CONFIG_NAME)
+BASE_INC_PATH   := ./$(INCLUDE_DIR)/$(CONFIG_NAME)
 
 # Isolate the path to blis.h by filtering the file from the list of headers.
 BLIS_H          := blis.h
