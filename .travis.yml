@@ -10,48 +10,48 @@ compiler:
   - clang
 
 env:
-  - OOT=1 TEST=0 THR="none" CONFIG="auto"
-  - OOT=0 TEST=1 THR="none" CONFIG="auto"
-  - OOT=0 TEST=1 THR="none" CONFIG="penryn"
-  - OOT=0 TEST=0 THR="none" CONFIG="sandybridge"
-  - OOT=0 TEST=0 THR="none" CONFIG="haswell"
-  - OOT=0 TEST=0 THR="none" CONFIG="knl"
-  - OOT=0 TEST=0 THR="none" CONFIG="bulldozer"
-  - OOT=0 TEST=0 THR="none" CONFIG="piledriver"
-  - OOT=0 TEST=0 THR="none" CONFIG="steamroller"
-  - OOT=0 TEST=0 THR="none" CONFIG="excavator"
-  - OOT=0 TEST=0 THR="none" CONFIG="zen"
-  - OOT=0 TEST=0 THR="openmp" CONFIG="auto"
-  - OOT=0 TEST=0 THR="pthreads" CONFIG="auto"
+  - OOT=1 TEST=0 THR="none" CONF="auto"
+  - OOT=0 TEST=1 THR="none" CONF="auto"
+  - OOT=0 TEST=1 THR="none" CONF="penryn"
+  - OOT=0 TEST=0 THR="none" CONF="sandybridge"
+  - OOT=0 TEST=0 THR="none" CONF="haswell"
+  - OOT=0 TEST=0 THR="none" CONF="knl"
+  - OOT=0 TEST=0 THR="none" CONF="bulldozer"
+  - OOT=0 TEST=0 THR="none" CONF="piledriver"
+  - OOT=0 TEST=0 THR="none" CONF="steamroller"
+  - OOT=0 TEST=0 THR="none" CONF="excavator"
+  - OOT=0 TEST=0 THR="none" CONF="zen"
+  - OOT=0 TEST=0 THR="openmp" CONF="auto"
+  - OOT=0 TEST=0 THR="pthreads" CONF="auto"
   
 matrix:
   allow_failures:
-    - env: OOT=0 TEST=0 THR="none" CONFIG="knl"
+    - env: OOT=0 TEST=0 THR="none" CONF="knl"
   exclude:
     - os: linux
       compiler: clang
     - os: osx
       compiler: gcc
     - os: osx
-      env: OOT=0 TEST=1 THR="none" CONFIG="penryn"
+      env: OOT=0 TEST=1 THR="none" CONF="penryn"
     - os: osx
-      env: OOT=0 TEST=0 THR="none" CONFIG="sandybridge"
+      env: OOT=0 TEST=0 THR="none" CONF="sandybridge"
     - os: osx
-      env: OOT=0 TEST=0 THR="none" CONFIG="haswell"
+      env: OOT=0 TEST=0 THR="none" CONF="haswell"
     - os: osx
-      env: OOT=0 TEST=0 THR="none" CONFIG="knl"
+      env: OOT=0 TEST=0 THR="none" CONF="knl"
     - os: osx
-      env: OOT=0 TEST=0 THR="none" CONFIG="bulldozer"
+      env: OOT=0 TEST=0 THR="none" CONF="bulldozer"
     - os: osx
-      env: OOT=0 TEST=0 THR="none" CONFIG="piledriver"
+      env: OOT=0 TEST=0 THR="none" CONF="piledriver"
     - os: osx
-      env: OOT=0 TEST=0 THR="none" CONFIG="steamroller"
+      env: OOT=0 TEST=0 THR="none" CONF="steamroller"
     - os: osx
-      env: OOT=0 TEST=0 THR="none" CONFIG="excavator"
+      env: OOT=0 TEST=0 THR="none" CONF="excavator"
     - os: osx
-      env: OOT=0 TEST=0 THR="none" CONFIG="zen"
+      env: OOT=0 TEST=0 THR="none" CONF="zen"
     - os: osx
-      env: OOT=0 TEST=0 THR="openmp" CONFIG="auto"
+      env: OOT=0 TEST=0 THR="openmp" CONF="auto"
 
 install:
   - if [ "$CC" = "gcc" ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then export CC="gcc-5"; fi
@@ -69,10 +69,10 @@ script:
   - pwd
   - if [ $OOT -eq 1 ]; then mkdir oot; cd oot; export DIST_PATH=..; fi
   - pwd
-  - $DIST_PATH/configure -t $THR CC=$CC $CONFIG
+  - $DIST_PATH/configure -t $THR CC=$CC $CONF
   - pwd
+  - ls -l
   - $CC --version
-  - pwd
   - make -j 2
   - export BLIS_IC_NT=2
   - export BLIS_JC_NT=1
