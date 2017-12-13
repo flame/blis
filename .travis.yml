@@ -33,6 +33,8 @@ matrix:
     - os: osx
       compiler: gcc
     - os: osx
+      env: OOT=1 TEST=0 THR="none" CONF="auto"
+    - os: osx
       env: OOT=0 TEST=1 THR="none" CONF="penryn"
     - os: osx
       env: OOT=0 TEST=0 THR="none" CONF="sandybridge"
