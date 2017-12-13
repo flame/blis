@@ -10,48 +10,48 @@ compiler:
   - clang
 
 env:
-  - OUT_OF_TREE=1 RUN_TEST=0 THREADING="none" BUILD_CONFIG="auto"
-  - OUT_OF_TREE=0 RUN_TEST=1 THREADING="none" BUILD_CONFIG="auto"
-  - OUT_OF_TREE=0 RUN_TEST=1 THREADING="none" BUILD_CONFIG="penryn"
-  - OUT_OF_TREE=0 RUN_TEST=0 THREADING="none" BUILD_CONFIG="sandybridge"
-  - OUT_OF_TREE=0 RUN_TEST=0 THREADING="none" BUILD_CONFIG="haswell"
-  - OUT_OF_TREE=0 RUN_TEST=0 THREADING="none" BUILD_CONFIG="knl"
-  - OUT_OF_TREE=0 RUN_TEST=0 THREADING="none" BUILD_CONFIG="bulldozer"
-  - OUT_OF_TREE=0 RUN_TEST=0 THREADING="none" BUILD_CONFIG="piledriver"
-  - OUT_OF_TREE=0 RUN_TEST=0 THREADING="none" BUILD_CONFIG="steamroller"
-  - OUT_OF_TREE=0 RUN_TEST=0 THREADING="none" BUILD_CONFIG="excavator"
-  - OUT_OF_TREE=0 RUN_TEST=0 THREADING="none" BUILD_CONFIG="zen"
-  - OUT_OF_TREE=0 RUN_TEST=0 THREADING="openmp" BUILD_CONFIG="auto"
-  - OUT_OF_TREE=0 RUN_TEST=0 THREADING="pthreads" BUILD_CONFIG="auto"
+  - OOT=1 TEST=0 THR="none" CONFIG="auto"
+  - OOT=0 TEST=1 THR="none" CONFIG="auto"
+  - OOT=0 TEST=1 THR="none" CONFIG="penryn"
+  - OOT=0 TEST=0 THR="none" CONFIG="sandybridge"
+  - OOT=0 TEST=0 THR="none" CONFIG="haswell"
+  - OOT=0 TEST=0 THR="none" CONFIG="knl"
+  - OOT=0 TEST=0 THR="none" CONFIG="bulldozer"
+  - OOT=0 TEST=0 THR="none" CONFIG="piledriver"
+  - OOT=0 TEST=0 THR="none" CONFIG="steamroller"
+  - OOT=0 TEST=0 THR="none" CONFIG="excavator"
+  - OOT=0 TEST=0 THR="none" CONFIG="zen"
+  - OOT=0 TEST=0 THR="openmp" CONFIG="auto"
+  - OOT=0 TEST=0 THR="pthreads" CONFIG="auto"
   
 matrix:
   allow_failures:
-    - env: RUN_TEST=0 THREADING="none" BUILD_CONFIG="knl"
+    - env: OOT=0 TEST=0 THR="none" CONFIG="knl"
   exclude:
     - os: linux
       compiler: clang
     - os: osx
       compiler: gcc
     - os: osx
-      env: RUN_TEST=1 THREADING="none" BUILD_CONFIG="penryn"
+      env: OOT=0 TEST=1 THR="none" CONFIG="penryn"
     - os: osx
-      env: RUN_TEST=0 THREADING="none" BUILD_CONFIG="sandybridge"
+      env: OOT=0 TEST=0 THR="none" CONFIG="sandybridge"
     - os: osx
-      env: RUN_TEST=0 THREADING="none" BUILD_CONFIG="haswell"
+      env: OOT=0 TEST=0 THR="none" CONFIG="haswell"
     - os: osx
-      env: RUN_TEST=0 THREADING="none" BUILD_CONFIG="knl"
+      env: OOT=0 TEST=0 THR="none" CONFIG="knl"
     - os: osx
-      env: RUN_TEST=0 THREADING="none" BUILD_CONFIG="bulldozer"
+      env: OOT=0 TEST=0 THR="none" CONFIG="bulldozer"
     - os: osx
-      env: RUN_TEST=0 THREADING="none" BUILD_CONFIG="piledriver"
+      env: OOT=0 TEST=0 THR="none" CONFIG="piledriver"
     - os: osx
-      env: RUN_TEST=0 THREADING="none" BUILD_CONFIG="steamroller"
+      env: OOT=0 TEST=0 THR="none" CONFIG="steamroller"
     - os: osx
-      env: RUN_TEST=0 THREADING="none" BUILD_CONFIG="excavator"
+      env: OOT=0 TEST=0 THR="none" CONFIG="excavator"
     - os: osx
-      env: RUN_TEST=0 THREADING="none" BUILD_CONFIG="zen"
+      env: OOT=0 TEST=0 THR="none" CONFIG="zen"
     - os: osx
-      env: RUN_TEST=0 THREADING="openmp" BUILD_CONFIG="auto"
+      env: OOT=0 TEST=0 THR="openmp" CONFIG="auto"
 
 install:
   - if [ "$CC" = "gcc" ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then export CC="gcc-5"; fi
@@ -67,9 +67,9 @@ addons:
 script:
   - export DIST_PATH=.
   - pwd
-  - if [ $OUT_OF_TREE -eq 1 ]; then mkdir oot; cd oot; export DIST_PATH=..; fi
+  - if [ $OOT -eq 1 ]; then mkdir oot; cd oot; export DIST_PATH=..; fi
   - pwd
-  - $DIST_PATH/configure -t $THREADING CC=$CC $BUILD_CONFIG
+  - $DIST_PATH/configure -t $THR CC=$CC $CONFIG
   - pwd
   - $CC --version
   - pwd
@@ -78,6 +78,6 @@ script:
   - export BLIS_JC_NT=1
   - export BLIS_IR_NT=1
   - export BLIS_JR_NT=1
-  - if [ $RUN_TEST -eq 1 ]; then travis_wait 30 make BLIS_ENABLE_TEST_OUTPUT=yes test; fi
-  - if [ $RUN_TEST -eq 1 ]; then $DIST_PATH/build/check-test.sh ./output.testsuite; fi
+  - if [ $TEST -eq 1 ]; then travis_wait 30 make BLIS_ENABLE_TEST_OUTPUT=yes test; fi
+  - if [ $TEST -eq 1 ]; then $DIST_PATH/build/check-test.sh ./output.testsuite; fi
 
