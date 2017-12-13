@@ -137,14 +137,20 @@ CONFIG_MK_FILE     := config.mk
 
 # Include the configuration file.
 #-include $(RELPATH)/$(CONFIG_MK_FILE)
+$(info DIST_PATH is '$(DIST_PATH)')
+$(info DIST_PATH stripped is '$(strip $(DIST_PATH))')
 ifneq ($(strip $(DIST_PATH)),)
+$(info including $(DIST_PATH)/$(CONFIG_MK_FILE))
 -include $(DIST_PATH)/$(CONFIG_MK_FILE)
 else
+$(info including ./$(CONFIG_MK_FILE))
 -include            ./$(CONFIG_MK_FILE)
 endif
 
 # Detect whether we actually got the configuration file. If we didn't, then
 # it is likely that the user has not yet generated it (via configure).
+$(info CONFIG_MK_INCLUDED is '$(CONFIG_MK_INCLUDED)')
+$(info CONFIG_MK_INCLUDED stripped is '$(strip $(CONFIG_MK_INCLUDED))')
 ifeq ($(strip $(CONFIG_MK_INCLUDED)),yes)
 CONFIG_MK_PRESENT := yes
 else
