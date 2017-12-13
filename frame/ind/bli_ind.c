@@ -51,7 +51,11 @@ void bli_ind_init( void )
 {
 	// Enable the default induced method (1m) if one or both complex domain
 	// gemm micro-kernels are unoptimized in the native context.
-	cntx_t* cntx     = bli_gks_query_cntx();
+
+	// NOTE: Instead of calling bli_gks_query_cntx(), we call
+	// bli_gks_query_cntx_noinit() to avoid the call to bli_init_once().
+	cntx_t* cntx     = bli_gks_query_cntx_noinit();
+
 	bool_t  c_is_ref = bli_gks_cntx_l3_nat_ukr_is_ref
 	                   ( BLIS_SCOMPLEX, BLIS_GEMM_UKR, cntx );
 	bool_t  z_is_ref = bli_gks_cntx_l3_nat_ukr_is_ref

@@ -74,7 +74,7 @@ void bli_obj_create_1x1_with_attached_buffer( num_t  dt,
 
 void bli_obj_free( obj_t* obj );
 
-void bli_obj_create_const( double value, obj_t* obj );
+//void bli_obj_create_const( double value, obj_t* obj );
 
 //void bli_obj_create_const_copy_of( obj_t* a, obj_t* b );
 

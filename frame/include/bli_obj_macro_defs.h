@@ -936,9 +936,39 @@ bli_obj_width_stored( obj )
 	(obj).info = (obj).info | BLIS_BITVAL_DENSE | BLIS_BITVAL_GENERAL; \
 }
 
+// Initializor for global scalar constants
+
+#define bli_obj_init_const( buffer0 ) \
+{ \
+	.root      = NULL, \
+\
+	.off       = { 0, 0 }, \
+	.dim       = { 1, 1 }, \
+	.diag_off  = 0, \
+\
+	.info      = 0x0 | BLIS_BITVAL_CONST_TYPE | \
+	                   BLIS_BITVAL_DENSE      | \
+	                   BLIS_BITVAL_GENERAL, \
+	.elem_size = sizeof( constdata_t ), \
+\
+	.buffer    = buffer0, \
+	.rs        = 1, \
+	.cs        = 1, \
+	.is        = 1  \
+}
+
+#define bli_obj_init_constdata( val ) \
+{ \
+	.s =           ( float  )val, \
+	.d =           ( double )val, \
+	.c = { .real = ( float  )val, .imag = 0.0f }, \
+	.z = { .real = ( double )val, .imag = 0.0 }, \
+	.i =           ( gint_t )val, \
+}
 
 // Submatrix/scalar buffer acquisition
 
+#if 0
 #define BLIS_CONSTANT_SLOT_SIZE  BLIS_MAX_TYPE_SIZE
 #define BLIS_CONSTANT_SIZE       ( 5 * BLIS_CONSTANT_SLOT_SIZE )
 
@@ -948,6 +978,18 @@ bli_obj_width_stored( obj )
 	           ( ( char* )( bli_obj_buffer( obj ) ) ) + \
                  ( dim_t )( dt * BLIS_CONSTANT_SLOT_SIZE ) \
 	         )
+#endif
+#define bli_obj_buffer_for_const( dt, obj ) \
+\
+	( dt == BLIS_FLOAT    ? ( void * )&((( constdata_t* )bli_obj_buffer( obj ))->s) : \
+	  ( dt == BLIS_DOUBLE   ? ( void * )&((( constdata_t* )bli_obj_buffer( obj ))->d) : \
+	    ( dt == BLIS_SCOMPLEX ? ( void * )&((( constdata_t* )bli_obj_buffer( obj ))->c) : \
+	      ( dt == BLIS_DCOMPLEX ? ( void * )&((( constdata_t* )bli_obj_buffer( obj ))->z) : \
+	                                ( void * )&((( constdata_t* )bli_obj_buffer( obj ))->i)   \
+	      ) \
+	    ) \
+	  ) \
+	)
 
 #define bli_obj_buffer_at_off( obj ) \
 \

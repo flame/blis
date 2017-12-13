@@ -52,13 +52,14 @@ membrk_t* bli_memsys_global_membrk( void )
 
 void bli_memsys_init( void )
 {
-	cntx_t* cntx_p;
-
 	// Query a native context so we have something to pass into
 	// bli_membrk_init_pools(). We use BLIS_DOUBLE for the datatype,
 	// but the dt argument is actually only used when initializing
 	// contexts for induced methods.
-	cntx_p = bli_gks_query_cntx();
+
+	// NOTE: Instead of calling bli_gks_query_cntx(), we call
+	// bli_gks_query_cntx_noinit() to avoid the call to bli_init_once().
+	cntx_t* cntx_p = bli_gks_query_cntx_noinit();
 
 #ifdef BLIS_ENABLE_OPENMP
 	_Pragma( "omp critical (mem)" )

@@ -50,6 +50,7 @@ void    bli_gks_register_cntx( arch_t id, void* nat_fp, void* ref_fp, void* ind_
 
 cntx_t* bli_gks_query_cntx( void );
 cntx_t* bli_gks_query_nat_cntx( void );
+cntx_t* bli_gks_query_cntx_noinit( void );
 cntx_t* bli_gks_query_ind_cntx( ind_t ind, num_t dt );
 
 void    bli_gks_init_ref_cntx( cntx_t* cntx );

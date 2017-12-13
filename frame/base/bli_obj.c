@@ -225,7 +225,8 @@ void bli_obj_free( obj_t* obj )
 	}
 }
 
-void bli_obj_create_const( double value, obj_t* obj )
+#if 0
+//void bli_obj_create_const( double value, obj_t* obj )
 {
 	gint_t*   temp_i;
 	float*    temp_s;
@@ -238,11 +239,11 @@ void bli_obj_create_const( double value, obj_t* obj )
 
 	bli_obj_create( BLIS_CONSTANT, 1, 1, 1, 1, obj );
 
-	temp_s = bli_obj_buffer_for_const( BLIS_FLOAT,    *obj );
-	temp_d = bli_obj_buffer_for_const( BLIS_DOUBLE,   *obj );
-	temp_c = bli_obj_buffer_for_const( BLIS_SCOMPLEX, *obj );
-	temp_z = bli_obj_buffer_for_const( BLIS_DCOMPLEX, *obj );
-	temp_i = bli_obj_buffer_for_const( BLIS_INT,      *obj );
+	//temp_s = bli_obj_buffer_for_const( BLIS_FLOAT,    *obj );
+	//temp_d = bli_obj_buffer_for_const( BLIS_DOUBLE,   *obj );
+	//temp_c = bli_obj_buffer_for_const( BLIS_SCOMPLEX, *obj );
+	//temp_z = bli_obj_buffer_for_const( BLIS_DCOMPLEX, *obj );
+	//temp_i = bli_obj_buffer_for_const( BLIS_INT,      *obj );
 
 	bli_dssets( value, 0.0, *temp_s );
 	bli_ddsets( value, 0.0, *temp_d );
@@ -252,8 +253,7 @@ void bli_obj_create_const( double value, obj_t* obj )
 	*temp_i = ( gint_t ) value;
 }
 
-#if 0
-void bli_obj_create_const_copy_of( obj_t* a, obj_t* b )
+//void bli_obj_create_const_copy_of( obj_t* a, obj_t* b )
 {
 	gint_t*   temp_i;
 	float*    temp_s;
@@ -268,11 +268,11 @@ void bli_obj_create_const_copy_of( obj_t* a, obj_t* b )
 
 	bli_obj_create( BLIS_CONSTANT, 1, 1, 1, 1, b );
 
-	temp_s = bli_obj_buffer_for_const( BLIS_FLOAT,    *b );
-	temp_d = bli_obj_buffer_for_const( BLIS_DOUBLE,   *b );
-	temp_c = bli_obj_buffer_for_const( BLIS_SCOMPLEX, *b );
-	temp_z = bli_obj_buffer_for_const( BLIS_DCOMPLEX, *b );
-	temp_i = bli_obj_buffer_for_const( BLIS_INT,      *b );
+	//temp_s = bli_obj_buffer_for_const( BLIS_FLOAT,    *b );
+	//temp_d = bli_obj_buffer_for_const( BLIS_DOUBLE,   *b );
+	//temp_c = bli_obj_buffer_for_const( BLIS_SCOMPLEX, *b );
+	//temp_z = bli_obj_buffer_for_const( BLIS_DCOMPLEX, *b );
+	//temp_i = bli_obj_buffer_for_const( BLIS_INT,      *b );
 
 	buf_a = bli_obj_buffer_at_off( *a );
 
@@ -399,7 +399,7 @@ static siz_t dt_sizes[6] =
 	sizeof( double ),
 	sizeof( dcomplex ),
 	sizeof( gint_t ),
-	BLIS_CONSTANT_SIZE
+	sizeof( constdata_t )
 };
 
 siz_t bli_datatype_size( num_t dt )

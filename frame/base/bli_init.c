@@ -71,17 +71,9 @@ void bli_finalize_auto( void )
 
 // -----------------------------------------------------------------------------
 
-static bool_t bli_is_init = FALSE;
-
 void bli_init_apis( void )
 {
-	// Mark that initialization has begun so recursive calls to
-	// bli_init_once() do not result in an infinite loop and/or
-	// pthread_once() hanging.
-	bli_is_init = TRUE;
-
 	// Initialize various sub-APIs.
-	bli_const_init();
 	bli_error_init();
 	bli_gks_init();
 	bli_ind_init();
@@ -91,15 +83,12 @@ void bli_init_apis( void )
 
 void bli_finalize_apis( void )
 {
-	bli_is_init = FALSE;
-
 	// Finalize various sub-APIs.
 	bli_memsys_finalize();
 	bli_thread_finalize();
 	bli_gks_finalize();
 	bli_ind_finalize();
 	bli_error_finalize();
-	bli_const_finalize();
 }
 
 // -----------------------------------------------------------------------------
@@ -112,23 +101,11 @@ static pthread_once_t once_control = PTHREAD_ONCE_INIT;
 
 void bli_init_once( void )
 {
-	// If initialization has already occurred (or is already in progress),
-	// return early.
-	// NOTE: This early return is important because some implementations of
-	// pthread_once() will hang if called recursively (i.e., called from
-	// within a user function which, in addition to being called from
-	// pthread_once() also calls pthread_once()).
-	if ( bli_is_init ) return;
-
 	pthread_once( &once_control, bli_init_apis );
 }
 
 void bli_finalize_once( void )
 {
-	// If finalization has already occurred (or is already in progress),
-	// return early.
-	if ( !bli_is_init ) return;
-
 	pthread_once( &once_control, bli_finalize_apis );
 }
 

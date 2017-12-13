@@ -37,9 +37,9 @@
 
 extern obj_t BLIS_TWO;
 extern obj_t BLIS_ONE;
-extern obj_t BLIS_ONE_HALF;
+//extern obj_t BLIS_ONE_HALF;
 extern obj_t BLIS_ZERO;
-extern obj_t BLIS_MINUS_ONE_HALF;
+//extern obj_t BLIS_MINUS_ONE_HALF;
 extern obj_t BLIS_MINUS_ONE;
 extern obj_t BLIS_MINUS_TWO;
 

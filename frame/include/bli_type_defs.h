@@ -976,6 +976,21 @@ typedef struct
 } auxinfo_t;
 
 
+// -- Global scalar constant data struct --
+
+// Note: This struct is used only when statically initializing the
+// global scalar constants in bli_const.c.
+typedef struct constdata_s
+{
+	float    s;
+	double   d;
+	scomplex c;
+	dcomplex z;
+	gint_t   i;
+
+} constdata_t;
+
+
 //
 // -- BLIS object type definitions ---------------------------------------------
 //
@@ -1009,7 +1024,6 @@ typedef struct obj_s
 	dim_t         m_panel;  // m dimension of a "full" panel
 	dim_t         n_panel;  // n dimension of a "full" panel
 } obj_t;
-
 
 // Define these macros here since they must be updated if contents of
 // obj_t changes.

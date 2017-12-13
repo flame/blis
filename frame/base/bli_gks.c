@@ -376,8 +376,6 @@ cntx_t* bli_gks_query_cntx( void )
 	return bli_gks_query_nat_cntx();
 }
 
-// -----------------------------------------------------------------------------
-
 cntx_t* bli_gks_query_nat_cntx( void )
 {
 	bli_init_once();
@@ -385,6 +383,22 @@ cntx_t* bli_gks_query_nat_cntx( void )
 	// Return the address of the native context for the architecture id
 	// corresponding to the current hardware, as determined by
 	// bli_arch_query_id().
+
+	// Query the architecture id.
+	arch_t id = bli_arch_query_id();
+
+	// Use the architecture id to look up a pointer to its context.
+	cntx_t* cntx = bli_gks_lookup_nat_cntx( id );
+
+	return cntx;
+}
+
+// -----------------------------------------------------------------------------
+
+cntx_t* bli_gks_query_cntx_noinit( void )
+{
+	// This function is identical to bli_gks_query_cntx(), except that it
+	// does not call bli_init_once().
 
 	// Query the architecture id.
 	arch_t id = bli_arch_query_id();
