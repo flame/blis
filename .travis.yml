@@ -66,9 +66,13 @@ addons:
     
 script:
   - export DIST_PATH=.
+  - pwd
   - if [ $OUT_OF_TREE -eq 1 ]; then mkdir oot; cd oot; export DIST_PATH=..; fi
+  - pwd
   - $DIST_PATH/configure -t $THREADING CC=$CC $BUILD_CONFIG
+  - pwd
   - $CC --version
+  - pwd
   - make -j 2
   - export BLIS_IC_NT=2
   - export BLIS_JC_NT=1
