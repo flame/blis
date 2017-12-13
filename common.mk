@@ -191,7 +191,7 @@ TESTSUITE_OUT_FILE := output.testsuite
 CHANGELOG          := CHANGELOG
 
 # Something for OS X so that echo -n works as expected.
-SHELL              := /bin/bash
+SHELL              := bash
 
 # Construct paths to the four primary directories of source code:
 # the config directory, general framework code, reference kernel code,
