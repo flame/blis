@@ -478,7 +478,6 @@ $(foreach kset, $(KERNEL_LIST), $(eval $(call make-kernels-rule,$(kset),$(call g
 check-env: check-env-make-defs check-env-fragments check-env-mk
 
 check-env-mk:
-$(info CONFIG_MK_PRESENT is '$(CONFIG_MK_PRESENT)')
 ifeq ($(CONFIG_MK_PRESENT),no)
 	$(error Cannot proceed: config.mk not detected! Run configure first)
 endif

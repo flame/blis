@@ -128,29 +128,14 @@ files-that-dont-contain = $(strip $(foreach f, $(1), $(if $(findstring $(2),$(f)
 # --- Include makefile configuration file --------------------------------------
 #
 
-#ifeq ($(strip $(RELPATH)),)
-#RELPATH := .
-#endif
-
 # Define the name of the configuration file.
 CONFIG_MK_FILE     := config.mk
 
 # Include the configuration file.
-#-include $(RELPATH)/$(CONFIG_MK_FILE)
-$(info DIST_PATH is '$(DIST_PATH)')
-$(info DIST_PATH stripped is '$(strip $(DIST_PATH))')
-#ifneq ($(strip $(DIST_PATH)),)
-#$(info including $(DIST_PATH)/$(CONFIG_MK_FILE))
-#-include $(DIST_PATH)/$(CONFIG_MK_FILE)
-#else
-$(info including ./$(CONFIG_MK_FILE))
--include            ./$(CONFIG_MK_FILE)
-#endif
+-include ./$(CONFIG_MK_FILE)
 
 # Detect whether we actually got the configuration file. If we didn't, then
 # it is likely that the user has not yet generated it (via configure).
-$(info CONFIG_MK_INCLUDED is '$(CONFIG_MK_INCLUDED)')
-$(info CONFIG_MK_INCLUDED stripped is '$(strip $(CONFIG_MK_INCLUDED))')
 ifeq ($(strip $(CONFIG_MK_INCLUDED)),yes)
 CONFIG_MK_PRESENT := yes
 else
@@ -227,7 +212,7 @@ RANLIB     := ranlib
 INSTALL    := install -c
 
 # Script for creating a monolithic header file.
-FLATTEN_H  := $(DIST_PATH)/build/flatten-headers.sh
+FLATTEN_H  := $(DIST_PATH)/$(BUILD_DIR)/flatten-headers.sh
 
 # Default archiver flags.
 AR         := ar
