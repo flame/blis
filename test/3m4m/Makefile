@@ -55,9 +55,10 @@
 # --- Distribution path override -----------------------------------------------
 #
 
-# Override the DIST_PATH value obtained from config.mk (via common.mk) by
-# defining it here (prior to including the common.mk).
+# Override the default DIST_PATH and BUILD_PATH values so that make can find
+# the source distribution and build location.
 DIST_PATH         := ../..
+BUILD_PATH        := ../..
 
 
 

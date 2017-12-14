@@ -54,9 +54,11 @@
 # --- Distribution path override -----------------------------------------------
 #
 
-# Override the DIST_PATH value obtained from config.mk (via common.mk) by
-# defining it here (prior to including the common.mk).
+# Override the default DIST_PATH and BUILD_PATH values so that make can find
+# the source distribution and build location.
 DIST_PATH         := ..
+BUILD_PATH        := ..
+
 
 
 #
@@ -107,7 +109,7 @@ endif
 #BLIS_INC_PATH  := $(INSTALL_PREFIX)/include/blis
 
 # BLIS library.
-BLIS_LIB_PATH  := $(DIST_PATH)/$(LIB_DIR)/$(CONFIG_NAME)
+BLIS_LIB_PATH  := $(BUILD_PATH)/$(LIB_DIR)/$(CONFIG_NAME)
 BLIS_LIB       := $(BLIS_LIB_PATH)/libblis.a
 
 # BLAS library path(s). This is where the BLAS libraries reside.

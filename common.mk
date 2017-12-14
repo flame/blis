@@ -128,11 +128,16 @@ files-that-dont-contain = $(strip $(foreach f, $(1), $(if $(findstring $(2),$(f)
 # --- Include makefile configuration file --------------------------------------
 #
 
+# The path to the directory in which BLIS was built.
+ifeq ($(strip $(BUILD_PATH)),)
+BUILD_PATH        := .
+endif
+
 # Define the name of the configuration file.
 CONFIG_MK_FILE     := config.mk
 
 # Include the configuration file.
--include ./$(CONFIG_MK_FILE)
+-include $(BUILD_PATH)/$(CONFIG_MK_FILE)
 
 # Detect whether we actually got the configuration file. If we didn't, then
 # it is likely that the user has not yet generated it (via configure).
@@ -160,7 +165,6 @@ CONFIG_DIR         := config
 FRAME_DIR          := frame
 REFKERN_DIR        := ref_kernels
 KERNELS_DIR        := kernels
-BUILD_DIR          := build
 OBJ_DIR            := obj
 LIB_DIR            := lib
 INCLUDE_DIR        := include
@@ -212,7 +216,7 @@ RANLIB     := ranlib
 INSTALL    := install -c
 
 # Script for creating a monolithic header file.
-FLATTEN_H  := $(DIST_PATH)/$(BUILD_DIR)/flatten-headers.sh
+FLATTEN_H  := $(DIST_PATH)/build/flatten-headers.sh
 
 # Default archiver flags.
 AR         := ar
@@ -485,7 +489,7 @@ MK_HEADER_DIR_PATHS := $(dir $(foreach frag_path, \
 INCLUDE_PATHS   := $(strip $(patsubst %, -I%, $(MK_HEADER_DIR_PATHS)))
 
 # Construct the base path for the intermediate include directory.
-BASE_INC_PATH   := ./$(INCLUDE_DIR)/$(CONFIG_NAME)
+BASE_INC_PATH   := $(BUILD_PATH)/$(INCLUDE_DIR)/$(CONFIG_NAME)
 
 # Isolate the path to blis.h by filtering the file from the list of headers.
 BLIS_H          := blis.h
