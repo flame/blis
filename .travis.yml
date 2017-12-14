@@ -27,6 +27,8 @@ env:
 matrix:
   allow_failures:
     - env: OOT=0 TEST=0 THR="none" CONF="knl"
+    - os: osx
+      env: OOT=0 TEST=1 THR="none" CONF="auto"
   exclude:
     - os: linux
       compiler: clang
