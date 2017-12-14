@@ -128,20 +128,11 @@ files-that-dont-contain = $(strip $(foreach f, $(1), $(if $(findstring $(2),$(f)
 # --- Include makefile configuration file --------------------------------------
 #
 
-#ifeq ($(strip $(RELPATH)),)
-#RELPATH := .
-#endif
-
 # Define the name of the configuration file.
 CONFIG_MK_FILE     := config.mk
 
 # Include the configuration file.
-#-include $(RELPATH)/$(CONFIG_MK_FILE)
-ifneq ($(strip $(DIST_PATH)),)
--include $(DIST_PATH)/$(CONFIG_MK_FILE)
-else
--include            ./$(CONFIG_MK_FILE)
-endif
+-include ./$(CONFIG_MK_FILE)
 
 # Detect whether we actually got the configuration file. If we didn't, then
 # it is likely that the user has not yet generated it (via configure).
@@ -190,6 +181,9 @@ TESTSUITE_OUT_FILE := output.testsuite
 # CHANGELOG file.
 CHANGELOG          := CHANGELOG
 
+# Something for OS X so that echo -n works as expected.
+SHELL              := bash
+
 # Construct paths to the four primary directories of source code:
 # the config directory, general framework code, reference kernel code,
 # and optimized kernel code. NOTE: We declare these as recursively
@@ -218,7 +212,7 @@ RANLIB     := ranlib
 INSTALL    := install -c
 
 # Script for creating a monolithic header file.
-FLATTEN_H  := $(DIST_PATH)/build/flatten-headers.sh
+FLATTEN_H  := $(DIST_PATH)/$(BUILD_DIR)/flatten-headers.sh
 
 # Default archiver flags.
 AR         := ar
@@ -475,14 +469,15 @@ endif
 # Expand the fragment paths that contain .h files to attain the set of header
 # files present in all fragment paths. Then strip all leading, internal, and
 # trailing whitespace from the list.
-MK_HEADER_FILES := $(strip $(foreach frag_path, . $(FRAGMENT_DIR_PATHS), \
-                                                $(wildcard $(frag_path)/*.h)))
+MK_HEADER_FILES := $(strip $(foreach frag_path, \
+                                     . $(FRAGMENT_DIR_PATHS), \
+                                     $(wildcard $(frag_path)/*.h)))
 
 # Expand the fragment paths that contain .h files, and take the first
 # expansion. Then, strip the header filename to leave the path to each header
 # location. Notice this process even weeds out duplicates!
 MK_HEADER_DIR_PATHS := $(dir $(foreach frag_path, \
-                                       $(DIST_PATH) $(FRAGMENT_DIR_PATHS), \
+                                       . $(FRAGMENT_DIR_PATHS), \
                                        $(firstword $(wildcard $(frag_path)/*.h))))
 
 # Add -I to each header path so we can specify our include search paths to the
@@ -490,7 +485,7 @@ MK_HEADER_DIR_PATHS := $(dir $(foreach frag_path, \
 INCLUDE_PATHS   := $(strip $(patsubst %, -I%, $(MK_HEADER_DIR_PATHS)))
 
 # Construct the base path for the intermediate include directory.
-BASE_INC_PATH   := $(DIST_PATH)/$(INCLUDE_DIR)/$(CONFIG_NAME)
+BASE_INC_PATH   := ./$(INCLUDE_DIR)/$(CONFIG_NAME)
 
 # Isolate the path to blis.h by filtering the file from the list of headers.
 BLIS_H          := blis.h
