@@ -84,10 +84,8 @@ print_usage()
 	echo " "
 	echo "   -c          strip C-style comments"
 	echo "                 Strip comments enclosed in /* */ delimiters from the"
-	echo "                 output, including multi-line comments. (This only applies"
-	echo "                 to #included headers; C-style comments in the top-level"
-	echo "                 'header' are never stripped.) By default, C-style comments"
-	echo "                 are not stripped."
+	echo "                 output, including multi-line comments. By default, C-style"
+	echo "                 comments are not stripped."
 	echo " "
 	echo "   -o SCRIPT   output script name"
 	echo "                 Use SCRIPT as a prefix when outputting messages instead"
@@ -291,12 +289,8 @@ replace_pass()
 	intermfile="${temp_dir}/${intermfile}.interm"
 
 	# This string is inserted after #include directives after having
-	# determined that they are not present in the directory tree and should
-	# be ignored when assessing whether there are still #include directives
-	# that need to be expanded. Note that it is formatted as a comment and
-	# thus will be ignored when the monolithic header is eventually read C
-	# preprocessor and/or compiler.
-	skipstr="\/\/skipped"
+	# determined that they are not present in the directory tree.
+	skipstr="\/\/ skipped"
 
 	# Initialize the list of headers referenced in #include directives
 	# found in the current header file.
@@ -316,7 +310,7 @@ replace_pass()
 
 			# Check whether the line begins with a #include directive, but ignore
 			# the line if it contains the skip string.
-			result=$(echo ${curline} | grep '^[[:space:]]*#include ' | grep -v "${skipstr}")
+			result=$(echo ${curline} | grep '^[[:space:]]*#include ')
 
 			# If the #include directive was found...
 			if [ -n "${result}" ]; then
@@ -344,7 +338,7 @@ replace_pass()
 
 		# Make a copy of inputfile stripped of its C-style comments and
 		# save it to intermfile. This substitution leaves behind a single
-		# blank line, which is deleted.
+		# blank line.
 		cat ${inputfile} \
 		    | perl -0777 -pe "s/\/\*.*?\*\///gs" \
 		    > "${intermfile}"
@@ -443,13 +437,13 @@ replace_pass()
 
 main()
 {
-	# The name of the script, stripped of any preceeding path.
+	# The name of the script, stripped of any preceding path.
 	script_name=${0##*/}
 
 	# The script name to use in informational output. Defaults to ${script_name}.
 	output_name=${script_name}
 
-	# Whether or not we should strip C-style comments from the outout. (Default
+	# Whether or not we should strip C-style comments from the output. (Default
 	# is to not strip C-style comments.)
 	strip_comments=""
 

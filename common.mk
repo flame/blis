@@ -212,7 +212,8 @@ RANLIB     := ranlib
 INSTALL    := install -c
 
 # Script for creating a monolithic header file.
-FLATTEN_H  := $(DIST_PATH)/$(BUILD_DIR)/flatten-headers.sh
+#FLATTEN_H  := $(DIST_PATH)/$(BUILD_DIR)/flatten-headers.sh
+FLATTEN_H  := $(DIST_PATH)/$(BUILD_DIR)/flatten-headers.py
 
 # Default archiver flags.
 AR         := ar
