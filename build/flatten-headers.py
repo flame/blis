@@ -194,7 +194,7 @@ def strip_cstyle_comments( string ):
 
 # ------------------------------------------------------------------------------
 
-def replace_pass( inputfile, header_dirpaths, cursp ):
+def flatten_header( inputfile, header_dirpaths, cursp ):
 
 	# This string is inserted after #include directives after having
 	# determined that they are not present in the directory tree.
@@ -218,8 +218,8 @@ def replace_pass( inputfile, header_dirpaths, cursp ):
 
 		# Check for the #include directive and isolate the header name within
 		# a group (parentheses).
-		#result = re.match( '^[\s]*#include', line )
-		result = re.search( '^[\s]*#include (["<])([\w\.\-/]*)([">])', line )
+		#result = re.search( '^[\s]*#include (["<])([\w\.\-/]*)([">])', line )
+		result = regex.search( line )
 
 		# If the line contained a #include directive, we must try to replace
 		# it with the contents of the header referenced by the directive.
@@ -248,7 +248,7 @@ def replace_pass( inputfile, header_dirpaths, cursp ):
 				ostring += "%s%s%c" % ( beginstr, header, '\n' )
 
 				# Recurse on the header, accumulating the string.
-				ostring += replace_pass( header_path, header_dirpaths, cursp + "  " )
+				ostring += flatten_header( header_path, header_dirpaths, cursp + "  " )
 
 				# Mark the end of the header being inserted.
 				ostring += "%s%s%c" % ( endstr, header, '\n' )
@@ -318,7 +318,7 @@ output_name    = None
 strip_comments = None
 recursive_flag = None
 verbose_flag   = None
-
+regex          = None
 
 def main():
 
@@ -327,6 +327,7 @@ def main():
 	global strip_comments
 	global recursive_flag
 	global verbose_flag
+	global regex
 
 	# Obtain the script name.
 	path, script_name = os.path.split(sys.argv[0])
@@ -480,8 +481,13 @@ def main():
 	# Open the output file.
 	ofile = open( outputfile, "w" )
 
+	# Precompile the main regular expression used to isolate #include
+	# directives and the headers they reference. This regex object will
+	# get reused over and over again in flatten_header().
+	regex = re.compile( '^[\s]*#include (["<])([\w\.\-/]*)([">])' )
+
 	# Recursively substitute headers for occurrences of #include directives.
-	final_string = replace_pass( inputfile, header_dirpaths, nestsp )
+	final_string = flatten_header( inputfile, header_dirpaths, nestsp )
 
 	# Strip C-style comments from the final output, if requested.
 	if strip_comments:
