@@ -40,71 +40,71 @@ import re
 
 def print_usage():
 
-	print " "
-	print "", script_name
-	print " "
-	print " Field G. Van Zee"
-	print " "
-	print " Generate a monolithic header by recursively replacing all #include"
-	print " directives in a selected file with the contents of the header files"
-	print " they reference."
-	print " "
-	print " Usage:"
-	print " "
-	print "  ", script_name, "header header_out temp_dir dir_list"
-	print " "
-	print " Arguments:"
-	print " "
-	print "   header        The filepath to the top-level header, which is file that"
-	print "                 will #include all other header files. NOTE: It is okay if"
-	print "                 this file resides somewhere in root_dir, described below."
-	print " "
-	print "   header_out    The filepath of the file into which the script will output"
-	print "                 the monolithic header."
-	print " "
-	print "   temp_dir      A directory in which temporary files may be created."
-	print "                 NOTE: No temporary files are created in the current"
-	print "                 implementation, but this argument must still be specified."
-	print " "
-	print "   dir_list      The list of directory paths in which to search for the"
-	print "                 headers that are #included by 'header'. By default, these"
-	print "                 directories are scanned for .h files, but sub-directories"
-	print "                 within the various directories are not inspected. If the"
-	print "                 -r option is given, these directories are recursively"
-	print "                 scanned. In either case, the subset of directories scanned"
-	print "                 that actually contains .h files is then searched whenever"
-	print "                 a #include directive is encountered in 'header' (or any"
-	print "                 file subsequently #included). If a referenced header file"
-	print "                 is not found, the #include directive is left untouched and"
-	print "                 translated directly into 'header_out'."
-	print " "
-	print " The following options are accepted:"
-	print " "
-	print "   -r          recursive"
-	print "                 Scan the directories listed in 'dir_list' recursively when"
-	print "                 searching for .h header files. By default, the directories"
-	print "                 are not searched recursively."
-	print " "
-	print "   -c          strip C-style comments"
-	print "                 Strip comments enclosed in /* */ delimiters from the"
-	print "                 output, including multi-line comments. By default, C-style"
-	print "                 comments are not stripped."
-	print " "
-	print "   -o SCRIPT   output script name"
-	print "                 Use SCRIPT as a prefix when outputting messages instead"
-	print "                 the script's actual name. Useful when the current script"
-	print "                 is going to be called from within another, higher-level"
-	print "                 driver script and seeing the current script's name might"
-	print "                 unnecessarily confuse the user."
-	print " "
-	print "   -v [0|1|2]  verboseness level"
-	print "                 level 0: silent  (no output)"
-	print "                 level 1: default (single character '.' per header)"
-	print "                 level 2: verbose (several lines per header)."
-	print " "
-	print "   -h          help"
-	print "                 Output this information and exit."
-	print " "
+	my_print( " " )
+	my_print( " %s" % script_name )
+	my_print( " " )
+	my_print( " Field G. Van Zee" )
+	my_print( " " )
+	my_print( " Generate a monolithic header by recursively replacing all #include" )
+	my_print( " directives in a selected file with the contents of the header files" )
+	my_print( " they reference." )
+	my_print( " " )
+	my_print( " Usage:" )
+	my_print( " " )
+	my_print( "   %s header header_out temp_dir dir_list" % script_name )
+	my_print( " " )
+	my_print( " Arguments:" )
+	my_print( " " )
+	my_print( "   header        The filepath to the top-level header, which is file that" )
+	my_print( "                 will #include all other header files. NOTE: It is okay if" )
+	my_print( "                 this file resides somewhere in root_dir, described below." )
+	my_print( " " )
+	my_print( "   header_out    The filepath of the file into which the script will output" )
+	my_print( "                 the monolithic header." )
+	my_print( " " )
+	my_print( "   temp_dir      A directory in which temporary files may be created." )
+	my_print( "                 NOTE: No temporary files are created in the current" )
+	my_print( "                 implementation, but this argument must still be specified." )
+	my_print( " " )
+	my_print( "   dir_list      The list of directory paths in which to search for the" )
+	my_print( "                 headers that are #included by 'header'. By default, these" )
+	my_print( "                 directories are scanned for .h files, but sub-directories" )
+	my_print( "                 within the various directories are not inspected. If the" )
+	my_print( "                 -r option is given, these directories are recursively" )
+	my_print( "                 scanned. In either case, the subset of directories scanned" )
+	my_print( "                 that actually contains .h files is then searched whenever" )
+	my_print( "                 a #include directive is encountered in 'header' (or any" )
+	my_print( "                 file subsequently #included). If a referenced header file" )
+	my_print( "                 is not found, the #include directive is left untouched and" )
+	my_print( "                 translated directly into 'header_out'." )
+	my_print( " " )
+	my_print( " The following options are accepted:" )
+	my_print( " " )
+	my_print( "   -r          recursive" )
+	my_print( "                 Scan the directories listed in 'dir_list' recursively when" )
+	my_print( "                 searching for .h header files. By default, the directories" )
+	my_print( "                 are not searched recursively." )
+	my_print( " " )
+	my_print( "   -c          strip C-style comments" )
+	my_print( "                 Strip comments enclosed in /* */ delimiters from the" )
+	my_print( "                 output, including multi-line comments. By default, C-style" )
+	my_print( "                 comments are not stripped." )
+	my_print( " " )
+	my_print( "   -o SCRIPT   output script name" )
+	my_print( "                 Use SCRIPT as a prefix when outputting messages instead" )
+	my_print( "                 the script's actual name. Useful when the current script" )
+	my_print( "                 is going to be called from within another, higher-level" )
+	my_print( "                 driver script and seeing the current script's name might" )
+	my_print( "                 unnecessarily confuse the user." )
+	my_print( " " )
+	my_print( "   -v [0|1|2]  verboseness level" )
+	my_print( "                 level 0: silent  (no output)" )
+	my_print( "                 level 1: default (single character '.' per header)" )
+	my_print( "                 level 2: verbose (several lines per header)." )
+	my_print( " " )
+	my_print( "   -h          help" )
+	my_print( "                 Output this information and exit." )
+	my_print( " " )
 
 
 # ------------------------------------------------------------------------------
@@ -112,6 +112,12 @@ def print_usage():
 def canonicalize_ws( s ):
 
 	return re.sub( '\s+', ' ', s ).strip()
+
+# ---
+
+def my_print( s ):
+
+	sys.stdout.write( "%s\n" % s )
 
 # ---
 
@@ -129,14 +135,16 @@ def echov1_n( s ):
 def echov1_n2( s ):
 
 	if verbose_flag == "1":
-		print "%s" % s
+		sys.stdout.write( "%s\n" % s )
+		sys.stdout.flush()
 
 # ---
 
 def echov2( s ):
 
 	if verbose_flag == "2":
-		print "%s: %s" % ( output_name, s )
+		sys.stdout.write( "%s: %s\n" % ( output_name, s ) )
+		sys.stdout.flush()
 
 def echov2_n( s ):
 
@@ -149,7 +157,8 @@ def echov2_n( s ):
 def echov2_n2( s ):
 
 	if verbose_flag == "2":
-		print "%s" % s
+		sys.stdout.write( "%s\n" % s )
+		sys.stdout.flush()
 
 # ------------------------------------------------------------------------------
 
@@ -346,7 +355,7 @@ def main():
 
 	except getopt.GetoptError as err:
 		# print help information and exit:
-		print str(err)  # will print something like "option -a not recognized"
+		my_print( str(err) ) # will print something like "option -a not recognized"
 		print_usage()
 		sys.exit(2)
 
@@ -370,16 +379,13 @@ def main():
 	if ( verbose_flag != "0" and
 	     verbose_flag != "1" and
 	     verbose_flag != "2" ):
-		print "%s: %s: %s" % ( output_name, "Invalid verboseness argument", verbose_flag )
+		my_print( "%s Invalid verboseness argument: %s" \
+		                  % output_name, verbose_flag )
 		sys.exit()
 
 	# Print usage if we don't have exactly four arguments.
 	if len( args ) != 4:
 		print_usage()
-		print "Wrong number of arguments!"
-		print "n_args:         ", len( args )
-		print "opts:           ", opts
-		print "rem arguments:  ", args
 		sys.exit()
 
 	# Acquire the four required arguments:
@@ -424,9 +430,6 @@ def main():
 	# header_dirpaths is compiled will depend on whether the recursive flag
 	# was given.
 	if recursive_flag:
-
-		#print "recursive flag not yet implemented!"
-		#sys.exit(1)
 
 		header_dirpaths = []
 		for d in dir_list:
