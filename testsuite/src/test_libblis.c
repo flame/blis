@@ -629,6 +629,9 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "Max stack buffer size (bytes)  %d\n", ( int )bli_info_get_stack_buf_max_size() );
 	libblis_test_fprintf_c( os, "Page size (bytes)              %d\n", ( int )bli_info_get_page_size() );
 	libblis_test_fprintf_c( os, "\n" );
+	libblis_test_fprintf_c( os, "memory pools for pack buffers\n" );
+	libblis_test_fprintf_c( os, "  enabled?                     %d\n", ( int )bli_info_get_enable_packbuf_pools() );
+	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "memory alignment (bytes)         \n" );
 	libblis_test_fprintf_c( os, "  stack address                %d\n", ( int )bli_info_get_stack_buf_align_size() );
 	libblis_test_fprintf_c( os, "  obj_t address                %d\n", ( int )bli_info_get_heap_addr_align_size() );

@@ -90,6 +90,9 @@ void bli_pool_finalize( pool_t* pool )
 	// Free the block_ptrs array.
 	bli_free_intl( block_ptrs );
 
+	// This explicit clearing of the pool_t struct is not strictly
+	// necessary and so it has been commented out.
+#if 0
 	// Clear the contents of the pool_t struct.
 	bli_pool_set_block_ptrs( NULL, pool );
 	bli_pool_set_block_ptrs_len( 0, pool );
@@ -97,6 +100,7 @@ void bli_pool_finalize( pool_t* pool )
 	bli_pool_set_top_index( 0, pool );
 	bli_pool_set_block_size( 0, pool );
 	bli_pool_set_align_size( 0, pool );
+#endif
 }
 
 void bli_pool_reinit( dim_t   num_blocks_new,
@@ -116,42 +120,24 @@ void bli_pool_reinit( dim_t   num_blocks_new,
 	bli_pool_init( num_blocks_new, block_size_new, align_size_new, pool );
 }
 
-void bli_pool_reinit_if( dim_t   num_blocks_new,
-                         siz_t   block_size_new,
-                         siz_t   align_size_new,
-                         pool_t* pool )
-{
-	const dim_t num_blocks = bli_pool_num_blocks( pool );
-	const dim_t block_size = bli_pool_block_size( pool );
-	const dim_t align_size = bli_pool_align_size( pool );
-
-	// Reinitialize the pool, but only if one or more of new pool
-	// parameters would require it. Otherwise, if only the number
-	// of blocks has increased, we can skip a full reinit and just
-	// grow the pool.
-	if ( block_size_new >  block_size ||
-	     align_size_new != align_size )
-	{
-		// Reinitialize the pool with the new parameters, in particular,
-		// the new block size.
-		bli_pool_reinit( num_blocks_new,
-		                 block_size_new,
-		                 align_size_new,
-		                 pool );
-	}
-	else if ( num_blocks_new > num_blocks )
-	{
-		const dim_t num_blocks_add = num_blocks_new -
-		                             num_blocks;
-
-		bli_pool_grow( num_blocks_add, pool );
-	}
-}
-
-void bli_pool_checkout_block( pblk_t* block, pool_t* pool )
+void bli_pool_checkout_block( siz_t req_size, pblk_t* block, pool_t* pool )
 {
 	pblk_t* block_ptrs;
 	dim_t   top_index;
+
+	if ( bli_pool_block_size( pool ) < req_size )
+	{
+		const dim_t num_blocks_new = bli_pool_num_blocks( pool );
+		const siz_t align_size_new = bli_pool_align_size( pool );
+
+		// If the requested block size is smaller than what the pool
+		// was initialized with, reinitialize the pool to contain blocks
+		// of the requested size.
+		bli_pool_reinit( num_blocks_new,
+		                 req_size,
+		                 align_size_new,
+		                 pool );
+	}
 
 	// If the pool is exhausted, add a block.
 	if ( bli_pool_is_exhausted( pool ) )

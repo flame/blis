@@ -63,10 +63,6 @@ void bli_trmm3_front
 		return;
 	}
 
-	// Reinitialize the memory allocator to accommodate the blocksizes
-	// in the current context.
-	bli_memsys_reinit( cntx );
-
 	// Alias A, B, and C so we can tweak the objects if necessary.
 	bli_obj_alias_to( *a, a_local );
 	bli_obj_alias_to( *b, b_local );

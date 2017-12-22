@@ -149,8 +149,6 @@ void bli_error_init_msgs( void )
 
 	sprintf( bli_error_string_for_code(BLIS_INVALID_PACKBUF),
 	         "Invalid packbuf_t value." );
-	sprintf( bli_error_string_for_code(BLIS_REQUESTED_CONTIG_BLOCK_TOO_BIG ),
-	         "Attempted to allocate contiguous memory block that is too big for implementation." );
 	sprintf( bli_error_string_for_code(BLIS_EXHAUSTED_CONTIG_MEMORY_POOL),
 	         "Attempted to allocate more memory from contiguous pool than is available." );
 	sprintf( bli_error_string_for_code(BLIS_INSUFFICIENT_STACK_BUF_SIZE),

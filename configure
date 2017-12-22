@@ -99,6 +99,21 @@ print_usage()
 	echo "                 --disable-threading is specified, threading will be"
 	echo "                 disabled. The default is 'no'."
 	echo " "
+	echo "   --disable-packbuf-pools, --enable-packbuf-pools"
+	echo " "
+	echo "                 Disable (enabled by default) use of internal memory"
+	echo "                 pools for managing packing buffers. When disabled,"
+	echo "                 the function specified by BLIS_MALLOC_POOL is called"
+	echo "                 on-demand, whenever a packing buffer is needed, and"
+	echo "                 the buffer is released via the function specified by"
+	echo "                 BLIS_FREE_POOL() when the loop in which it was"
+	echo "                 allocated terminates. When enabled, the memory pools"
+	echo "                 minimize calls to both BLIS_MALLOC_POOL() and"
+	echo "                 BLIS_FREE_POOL(), especially in a multithreaded"
+	echo "                 environment, but does so through a mechanism that may"
+	echo "                 incur additional overhead in some (but not all)"
+	echo "                 situations."
+	echo " "
 	echo "   -q, --quiet   Suppress informational output. By default, configure"
 	echo "                 is verbose. (NOTE: -q is not yet implemented)"
 	echo " "
@@ -502,6 +517,7 @@ main()
 	enable_verbose='no'
 	enable_static='yes'
 	enable_shared='no'
+	enable_packbuf_pools='yes'
 	int_type_size=0
 	blas2blis_int_type_size=32
 	enable_blas2blis='yes'
@@ -581,6 +597,12 @@ main()
 						;;
 					disable-threading)
 						threading_model='no'
+						;;
+					enable-packbuf-pools)
+						enable_packbuf_pools='yes'
+						;;
+					disable-packbuf-pools)
+						enable_packbuf_pools='no'
 						;;
 					int-size=*)
 						int_type_size=${OPTARG#*=}
@@ -1029,6 +1051,13 @@ main()
 	fi
 	
 	# Convert 'yes' and 'no' flags to booleans.
+	if [ "x${enable_packbuf_pools}" = "xyes" ]; then
+		echo "${script_name}: internal memory pools for packing buffers are enabled."
+		enable_packbuf_pools_01=1
+	else
+		echo "${script_name}: internal memory pools for packing buffers are disabled."
+		enable_packbuf_pools_01=0
+	fi
 	if [ "x${enable_blas2blis}" = "xyes" ]; then
 		echo "${script_name}: the BLAS compatibility layer is enabled."
 		enable_blas2blis_01=1
@@ -1135,6 +1164,7 @@ main()
 		| perl -pe "s/\@kernel_list_defines\@/${kernel_list_defines}/g" \
 		| sed   -e "s/@enable_openmp@/${enable_openmp_01}/g" \
 		| sed   -e "s/@enable_pthreads@/${enable_pthreads_01}/g" \
+		| sed   -e "s/@enable_packbuf_pools@/${enable_packbuf_pools_01}/g" \
 		| sed   -e "s/@int_type_size@/${int_type_size}/g" \
 		| sed   -e "s/@blas2blis_int_type_size@/${blas2blis_int_type_size}/g" \
 		| sed   -e "s/@enable_blas2blis@/${enable_blas2blis_01}/g" \

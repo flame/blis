@@ -80,27 +80,6 @@ void bli_memsys_init( void )
 #endif
 }
 
-void bli_memsys_reinit( cntx_t* cntx )
-{
-#ifdef BLIS_ENABLE_OPENMP
-	_Pragma( "omp critical (mem)" )
-#endif
-#ifdef BLIS_ENABLE_PTHREADS
-	pthread_mutex_lock( &memsys_mutex );
-#endif
-
-	// BEGIN CRITICAL SECTION
-	{
-		// Reinitialize the global membrk_t object's memory pools.
-		bli_membrk_reinit_pools( cntx, &global_membrk );
-	}
-	// END CRITICAL SECTION
-
-#ifdef BLIS_ENABLE_PTHREADS
-	pthread_mutex_unlock( &memsys_mutex );
-#endif
-}
-
 void bli_memsys_finalize( void )
 {
 #ifdef BLIS_ENABLE_OPENMP

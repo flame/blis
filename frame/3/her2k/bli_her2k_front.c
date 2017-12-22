@@ -67,10 +67,6 @@ void bli_her2k_front
 		return;
 	}
 
-	// Reinitialize the memory allocator to accommodate the blocksizes
-	// in the current context.
-	bli_memsys_reinit( cntx );
-
 	// Alias A, B, and C in case we need to apply transformations.
 	bli_obj_alias_to( *a, a_local );
 	bli_obj_alias_to( *b, b_local );

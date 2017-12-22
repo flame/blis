@@ -52,6 +52,10 @@
 #define BLIS_ENABLE_PTHREADS
 #endif
 
+#if @enable_packbuf_pools@
+#define BLIS_ENABLE_PACKBUF_POOLS
+#endif
+
 #if @int_type_size@ == 64
 #define BLIS_INT_TYPE_SIZE 64
 #elif @int_type_size@ == 32

@@ -757,16 +757,6 @@ err_t bli_check_valid_packbuf( packbuf_t buf_type )
 	return e_val;
 }
 
-err_t bli_check_requested_block_size_for_pool( siz_t req_size, pool_t* pool )
-{
-	err_t e_val = BLIS_SUCCESS;
-
-	if ( bli_pool_block_size( pool ) < req_size )
-		e_val = BLIS_REQUESTED_CONTIG_BLOCK_TOO_BIG;
-
-	return e_val;
-}
-
 err_t bli_check_if_exhausted_pool( pool_t* pool )
 {
 	err_t e_val = BLIS_SUCCESS;

@@ -140,11 +140,6 @@ void bli_membrk_init_pools
        cntx_t*   cntx,
        membrk_t* membrk
      );
-void bli_membrk_reinit_pools
-     (
-       cntx_t*   cntx,
-       membrk_t* membrk
-     );
 void bli_membrk_finalize_pools
      (
        membrk_t* membrk

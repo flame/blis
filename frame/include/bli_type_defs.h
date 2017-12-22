@@ -1206,7 +1206,6 @@ typedef enum
 
 	// Memory allocator errors
 	BLIS_INVALID_PACKBUF                       = (-120),
-	BLIS_REQUESTED_CONTIG_BLOCK_TOO_BIG        = (-121),
 	BLIS_EXHAUSTED_CONTIG_MEMORY_POOL          = (-122),
 	BLIS_INSUFFICIENT_STACK_BUF_SIZE           = (-123),
 	BLIS_ALIGNMENT_NOT_POWER_OF_TWO            = (-124),

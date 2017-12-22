@@ -57,6 +57,7 @@ gint_t bli_info_get_enable_stay_auto_init( void );
 gint_t bli_info_get_enable_blas2blis( void );
 gint_t bli_info_get_enable_cblas( void );
 gint_t bli_info_get_blas2blis_int_type_size( void );
+gint_t bli_info_get_enable_packbuf_pools( void );
 
 
 // -- Kernel implementation-related --------------------------------------------

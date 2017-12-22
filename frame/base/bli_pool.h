@@ -173,12 +173,8 @@ void bli_pool_reinit( dim_t   num_blocks_new,
                       siz_t   block_size_new,
                       siz_t   align_size_new,
                       pool_t* pool );
-void bli_pool_reinit_if( dim_t   num_blocks_new,
-                         siz_t   block_size_new,
-                         siz_t   align_size_new,
-                         pool_t* pool );
 
-void bli_pool_checkout_block( pblk_t* block, pool_t* pool );
+void bli_pool_checkout_block( siz_t req_size, pblk_t* block, pool_t* pool );
 void bli_pool_checkin_block( pblk_t* block, pool_t* pool );
 
 void bli_pool_grow( dim_t num_blocks_add, pool_t* pool );
