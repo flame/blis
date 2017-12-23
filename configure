@@ -406,6 +406,82 @@ rm_duplicate_words()
 	echo "${str}"
 }
 
+auto_detect()
+{
+	local autocc config_defines
+
+	# Choose the compiler we'll use to compile the auto-detection
+	# executable.
+	if [ clang -v > /dev/null 2>&1 ]; then
+		autocc=clang
+	else
+		autocc=gcc
+	fi
+
+	# Locate our source files.
+	bli_arch_c="bli_arch.c"
+	bli_cpuid_c="bli_cpuid.c"
+	main_c="auto_detect.c"
+
+	bli_arch_c_filepath=$(find ${dist_path}/frame -name "${bli_arch_c}")
+	bli_cpuid_c_filepath=$(find ${dist_path}/frame -name "${bli_cpuid_c}")
+	main_c_filepath=$(find ${dist_path}/build -name "${main_c}")
+
+	# Locate headers needed directly by the above files.
+	bli_arch_h="bli_arch.h"
+	bli_cpuid_h="bli_cpuid.h"
+	bli_typed_h="bli_type_defs.h"
+
+	bli_arch_h_filepath=$(find ${dist_path}/frame -name "${bli_arch_h}")
+	bli_cpuid_h_filepath=$(find ${dist_path}/frame -name "${bli_cpuid_h}")
+	bli_typed_h_filepath=$(find ${dist_path}/frame -name "${bli_typed_h}")
+
+	bli_arch_h_path=${bli_arch_h_filepath%/${bli_arch_h}}
+	bli_cpuid_h_path=${bli_cpuid_h_filepath%/${bli_cpuid_h}}
+	bli_typed_h_path=${bli_typed_h_filepath%/${bli_typed_h}}
+
+	# Locate other headers needed by bli_type_defs.h.
+	bli_mutex_h="bli_mutex.h"
+	bli_malloc_h="bli_malloc.h"
+
+	bli_mutex_h_filepath=$(find ${dist_path}/frame -name "${bli_mutex_h}")
+	bli_malloc_h_filepath=$(find ${dist_path}/frame -name "${bli_malloc_h}")
+
+	bli_mutex_h_path=${bli_mutex_h_filepath%/${bli_mutex_h}}
+	bli_malloc_h_path=${bli_malloc_h_filepath%/${bli_malloc_h}}
+
+	# Define the executable name.
+	autodetect_x="auto-detect.x"
+
+	# Create #defines for all of the BLIS_CONFIG_ macros in bli_cpuid.c.
+	config_defines=$(grep BLIS_CONFIG_ ${bli_cpuid_c_filepath} \
+	                 | sed -e 's/#ifdef /-D/g')
+
+	# Compile the auto-detect program using source code inside the
+	# framework.
+	$autocc ${config_defines} \
+	        -DBLIS_CONFIGURETIME_CPUID \
+	        -I${bli_cpuid_h_path} \
+	        -I${bli_arch_h_path} \
+	        -I${bli_typed_h_path} \
+	        -I${bli_mutex_h_path} \
+	        -I${bli_malloc_h_path} \
+	        ${bli_arch_c_filepath} \
+	        ${bli_cpuid_c_filepath} \
+	        ${main_c_filepath} \
+	     -o ${autodetect_x}
+
+	# Run the auto-detect program.
+	#detected_config=`./${autodetect_x}`
+	detected_config=$(./${autodetect_x})
+
+	# Remove the executable file.
+	rm -f ./${autodetect_x}
+
+	# Return the detected sub-configuration name.
+	echo "${detected_config}"
+}
+
 #
 # -- main function -------------------------------------------------------------
 #
@@ -523,9 +599,6 @@ main()
 	enable_blas2blis='yes'
 	enable_cblas='no'
 	force_version='no'
-
-	# The path to the auto-detection script.
-	auto_detect_sh="${build_dirpath}/auto-detect/auto-detect.sh"
 
 	# The name of the chosen configuration (the configuration "family").
 	config_name=''
@@ -758,11 +831,11 @@ main()
 
 		echo "${script_name}: automatic configuration requested."
 
-		# Run the auto-detect script and save the result in config_name.
-		config_name=`${build_dirpath}/auto-detect/auto-detect.sh`
+		# Call the auto_detect() function and save the returned string in
+		# config_name.
+		config_name=$(auto_detect)
 
-		echo "${script_name}: auto-detect script returned '${config_name}'."
-
+		echo "${script_name}: hardware detection driver returned '${config_name}'."
 	else
 
 		# Use the command line argument as the configuration name.
@@ -880,8 +953,8 @@ main()
 	# in the config_registry file).
 	if [ -z "${config_list}" ]; then
 
-		# NOTE: This branch should never execute when using the
-		# auto-detect script, but we have it here just in case.
+		# NOTE: This branch should never execute when using auto-detection,
+		# but we have it here just in case.
 		if [ $1 = "auto" ]; then
 
 			echo "${script_name}: 'auto-detected configuration '${conf}' is NOT registered!"
@@ -1000,9 +1073,9 @@ main()
 
 	# Check if the verbose make flag was specified.
 	if [ "x${enable_verbose}" = "xyes" ]; then
-		echo "${script_name}: enabling verbose make output, disable with 'make V=0'."
+		echo "${script_name}: enabling verbose make output. (disable with 'make V=0'.)"
 	else
-		echo "${script_name}: disabling verbose make output, enable with 'make V=1'."
+		echo "${script_name}: disabling verbose make output. (enable with 'make V=1'.)"
 	fi
 
 	# Check if the static lib flag was specified.

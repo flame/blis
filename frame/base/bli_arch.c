@@ -32,7 +32,15 @@
 
 */
 
-#include "blis.h"
+#ifndef BLIS_CONFIGURETIME_CPUID
+  #include "blis.h"
+#else
+  #include <stdlib.h>
+  #include <string.h>
+  #include "bli_type_defs.h"
+  #include "bli_arch.h"
+  #include "bli_cpuid.h"
+#endif
 
 // -----------------------------------------------------------------------------
 
@@ -112,5 +120,41 @@ arch_t bli_arch_query_id( void )
 	//exit(1);
 
 	return id;
+}
+
+// -----------------------------------------------------------------------------
+
+// NOTE: This string array must be kept up-to-date with the arch_t
+// enumeration that is typedef'ed in bli_type_defs.h. That is, the
+// index order of each string should correspond to the implied/assigned
+// enum value given to the corresponding BLIS_ARCH_ value.
+static char* config_name[ BLIS_NUM_ARCHS ] =
+{
+    "skx",
+    "knl",
+    "knc",
+    "haswell",
+    "sandybridge",
+    "penryn",
+
+    "zen",
+    "excavator",
+    "steamroller",
+    "piledriver",
+    "bulldozer",
+
+    "cortexa57",
+    "cortexa15",
+    "cortexa9",
+
+    "power7",
+    "bgq",
+
+    "generic"
+};
+
+char* bli_arch_string( arch_t id )
+{
+	return config_name[ id ];
 }
 

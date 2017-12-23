@@ -32,7 +32,14 @@
 
 */
 
-#include "blis.h"
+#ifndef BLIS_CONFIGURETIME_CPUID
+  #include "blis.h"
+#else
+  #include <stdlib.h>
+  #include <string.h>
+  #include "bli_type_defs.h"
+  #include "bli_cpuid.h"
+#endif
 
 arch_t bli_cpuid_query_id( void )
 {
@@ -69,8 +76,6 @@ arch_t bli_cpuid_query_id( void )
 #endif
 		// If none of the other sub-configurations were detected, return
 		// the 'generic' arch_t id value.
-		printf("generic\n");
-
 		return BLIS_ARCH_GENERIC;
 	}
 	else if ( vendor == VENDOR_AMD )
@@ -111,6 +116,7 @@ arch_t bli_cpuid_query_id( void )
 }
 
 // -----------------------------------------------------------------------------
+
 bool_t bli_cpuid_is_skx
      (
        uint32_t family,
@@ -130,9 +136,8 @@ bool_t bli_cpuid_is_skx
 
 	int nvpu = vpu_count();
 
-	if ( !bli_cpuid_has_features( features, expected ) || nvpu != 2 ) {
+	if ( !bli_cpuid_has_features( features, expected ) || nvpu != 2 )
 		return FALSE;
-	}
 
 	return TRUE;
 }
@@ -667,34 +672,34 @@ void get_cpu_name( char *cpu_name )
 	__cpuid( 0x80000002u, eax, ebx, ecx, edx );
 	//printf("%x %x %x %x\n", eax, ebx, ecx, edx);
 
-	*(uint32_t *)&cpu_name[0 ] = eax;
-	*(uint32_t *)&cpu_name[4 ] = ebx;
-	*(uint32_t *)&cpu_name[8 ] = ecx;
-	*(uint32_t *)&cpu_name[12] = edx;
+	*( uint32_t* )&cpu_name[0 + 0] = eax;
+	*( uint32_t* )&cpu_name[0 + 4] = ebx;
+	*( uint32_t* )&cpu_name[0 + 8] = ecx;
+	*( uint32_t* )&cpu_name[0 +12] = edx;
 
 	__cpuid( 0x80000003u, eax, ebx, ecx, edx );
 	//printf("%x %x %x %x\n", eax, ebx, ecx, edx);
 
-	*(uint32_t *)&cpu_name[16+ 0] = eax;
-	*(uint32_t *)&cpu_name[16+ 4] = ebx;
-	*(uint32_t *)&cpu_name[16+ 8] = ecx;
-	*(uint32_t *)&cpu_name[16+12] = edx;
+	*( uint32_t* )&cpu_name[16+ 0] = eax;
+	*( uint32_t* )&cpu_name[16+ 4] = ebx;
+	*( uint32_t* )&cpu_name[16+ 8] = ecx;
+	*( uint32_t* )&cpu_name[16+12] = edx;
 
 	__cpuid( 0x80000004u, eax, ebx, ecx, edx );
 	//printf("%x %x %x %x\n", eax, ebx, ecx, edx);
 
-	*(uint32_t *)&cpu_name[32+ 0] = eax;
-	*(uint32_t *)&cpu_name[32+ 4] = ebx;
-	*(uint32_t *)&cpu_name[32+ 8] = ecx;
-	*(uint32_t *)&cpu_name[32+12] = edx;
+	*( uint32_t* )&cpu_name[32+ 0] = eax;
+	*( uint32_t* )&cpu_name[32+ 4] = ebx;
+	*( uint32_t* )&cpu_name[32+ 8] = ecx;
+	*( uint32_t* )&cpu_name[32+12] = edx;
 }
 
 int vpu_count( void )
 {
-	char cpu_name[48] = {};
-	char *loc;
-	char model_num[5];
-	int  sku;
+	char  cpu_name[48] = {};
+	char* loc;
+	char  model_num[5];
+	int   sku;
 
 	get_cpu_name( cpu_name );
 

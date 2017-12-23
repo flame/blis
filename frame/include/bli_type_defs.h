@@ -77,6 +77,18 @@ typedef unsigned long int guint_t;
 
 typedef  gint_t  bool_t;
 
+
+// -- Boolean values --
+
+#ifndef TRUE
+  #define TRUE  1
+#endif
+
+#ifndef FALSE
+  #define FALSE 0
+#endif
+
+
 // -- Special-purpose integers --
 
 // This cpp guard provides a temporary hack to allow libflame

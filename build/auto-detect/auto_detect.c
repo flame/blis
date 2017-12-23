@@ -32,12 +32,20 @@
 
 */
 
-#ifndef BLIS_ARCH_H
-#define BLIS_ARCH_H
+#include <stdio.h>
+#include <stdlib.h>
 
-arch_t  bli_arch_query_id( void );
-char*   bli_arch_string( arch_t id );
+#include "bli_type_defs.h"
+#include "bli_arch.h"
+#include "bli_cpuid.h"
 
+int main( int argc, char** argv )
+{
+	arch_t id = bli_cpuid_query_id();
+	char*  s  = bli_arch_string( id );
 
-#endif
+	printf( "%s\n", s );
+
+	return 0;
+}
 

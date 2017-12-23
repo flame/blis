@@ -64,17 +64,6 @@
 #endif
 
 
-// -- Boolean values --
-
-#ifndef TRUE
-  #define TRUE  1
-#endif
-
-#ifndef FALSE
-  #define FALSE 0
-#endif
-
-
 // -- Concatenation macros --
 
 #define BLIS_FUNC_PREFIX_STR       "bli"
