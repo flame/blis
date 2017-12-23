@@ -466,6 +466,7 @@ auto_detect()
 	        -I${bli_typed_h_path} \
 	        -I${bli_mutex_h_path} \
 	        -I${bli_malloc_h_path} \
+	        -std=c99 \
 	        ${bli_arch_c_filepath} \
 	        ${bli_cpuid_c_filepath} \
 	        ${main_c_filepath} \

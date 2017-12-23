@@ -37,6 +37,7 @@
 #else
   #include <stdlib.h>
   #include <string.h>
+  #include <stdint.h>
   #include "bli_type_defs.h"
   #include "bli_cpuid.h"
 #endif
