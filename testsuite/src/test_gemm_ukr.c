@@ -162,6 +162,7 @@ void libblis_test_gemm_ukr_experiment
 	double       time;
 
 	dim_t        m, n, k;
+	inc_t        ldap, ldbp;
 
 	char         sc_a = 'c';
 	char         sc_b = 'r';
@@ -181,6 +182,11 @@ void libblis_test_gemm_ukr_experiment
 	// Fix m and n to MR and NR, respectively.
 	m = bli_cntx_get_blksz_def_dt( datatype, BLIS_MR, &cntx );
 	n = bli_cntx_get_blksz_def_dt( datatype, BLIS_NR, &cntx );
+
+	// Also query PACKMR and PACKNR as the leading dimensions to ap and bp,
+	// respectively.
+	ldap = bli_cntx_get_blksz_max_dt( datatype, BLIS_MR, &cntx );
+	ldbp = bli_cntx_get_blksz_max_dt( datatype, BLIS_NR, &cntx );
 
 	// Store the register blocksizes so that the driver can retrieve the
 	// values later when printing results.
@@ -220,6 +226,7 @@ void libblis_test_gemm_ukr_experiment
 	libblis_test_mobj_randomize( params, TRUE, &c );
 	bli_copym( &c, &c_save );
 
+#if 0
 	// Create pack objects for a and b, and pack them to ap and bp,
 	// respectively.
 	cntl_t* cntl_a = libblis_test_pobj_create
@@ -242,6 +249,32 @@ void libblis_test_gemm_ukr_experiment
 	  &b, &bp,
 	  &cntx
 	);
+#endif
+
+	// Create the packed objects. Use packmr and packnr as the leading
+	// dimensions of ap and bp, respectively.
+	bli_obj_create( datatype, m, k, 1, ldap, &ap );
+	bli_obj_create( datatype, k, n, ldbp, 1, &bp );
+
+	// Set up the objects for packing. Calling packm_init_pack() does everything
+	// except checkout a memory pool block and save its address to the obj_t's.
+	// However, it does overwrite the buffer field of packed object with that of
+	// the source object. So, we have to save the buffer address that was
+	// allocated.
+	void* buf_ap = bli_obj_buffer( ap );
+	void* buf_bp = bli_obj_buffer( bp );
+	bli_packm_init_pack( BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS,
+	                     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER,
+	                     BLIS_MR, BLIS_KR, &a, &ap, &cntx );
+	bli_packm_init_pack( BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS,
+	                     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER,
+	                     BLIS_KR, BLIS_NR, &b, &bp, &cntx );
+	bli_obj_set_buffer( buf_ap, ap );
+	bli_obj_set_buffer( buf_bp, bp );
+
+	// Pack the data from the source objects.
+	bli_packm_blk_var1( &a, &ap, &cntx, NULL, &BLIS_PACKM_SINGLE_THREADED );
+	bli_packm_blk_var1( &b, &bp, &cntx, NULL, &BLIS_PACKM_SINGLE_THREADED );
 
 	// Repeat the experiment n_repeats times and record results. 
 	for ( i = 0; i < n_repeats; ++i )
@@ -267,10 +300,12 @@ void libblis_test_gemm_ukr_experiment
 	// Zero out performance and residual if output matrix is empty.
 	libblis_test_check_empty_problem( &c, perf, resid );
 
+#if 0
 	// Free the control tree nodes and release their cached mem_t entries
 	// back to the memory broker.
 	bli_cntl_free( cntl_a, &BLIS_PACKM_SINGLE_THREADED );
 	bli_cntl_free( cntl_b, &BLIS_PACKM_SINGLE_THREADED );
+#endif
 
 	// Free the test objects.
 	bli_obj_free( &a );

@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2017, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -35,13 +36,15 @@
 #include "blis.h"
 
 #ifdef BLIS_ENABLE_PTHREADS
-pthread_mutex_t initialize_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t initialize_mutex = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
 static bool_t bli_is_init = FALSE;
 
-
-err_t bli_init( void )
+// If BLIS is built using a compiler that supports __attribute__((constructor)),
+// then bli_init() will be executed before the application enters main().
+// In that case there is no need to call bli_init() in the application code.
+BLIS_ATTRIB_CTOR err_t bli_init( void )
 {
 	err_t r_val = BLIS_FAILURE;
 
@@ -105,7 +108,10 @@ err_t bli_init( void )
 	return r_val;
 }
 
-err_t bli_finalize( void )
+// If BLIS is built using a compiler that supports __attribute__((destrutor)),
+// then bli_finalize() will be executed after the application exits main().
+// In that case there is no need to call bli_finalize() in the application code.
+BLIS_ATTRIB_DTOR err_t bli_finalize( void )
 {
 	err_t r_val = BLIS_FAILURE;
 

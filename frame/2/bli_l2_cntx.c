@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2017, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -50,6 +51,54 @@ void PASTEMAC(opname,_cntx_init)( num_t dt, cntx_t* cntx ) \
 	   operation. */ \
 	/*bli_gks_cntx_set_l1f_ker( BLIS_AXPYF_KER, cntx );*/ \
 	/*bli_gks_cntx_set_l1f_ker( BLIS_DOTXF_KER, cntx );*/ \
+	/* function pointers for fused kernels are queried from global context \
+	   hence it is not required to initialize in local context*/ \
+	/*bli_axpyf_cntx_init( dt, cntx ); \
+	bli_dotxf_cntx_init( dt, cntx ); */\
+\
+	/*bli_gks_cntx_set_l1v_ker( BLIS_AXPYV_KER, cntx );*/ \
+	/*bli_gks_cntx_set_l1v_ker( BLIS_DOTXV_KER, cntx );*/ \
+	/*bli_gks_cntx_set_l1v_ker( BLIS_SCALV_KER, cntx );*/ \
+	/*bli_gks_cntx_set_l1v_ker( BLIS_SETV_KER, cntx );*/ \
+	bli_axpyv_cntx_init( dt, cntx ); \
+	bli_dotxv_cntx_init( dt, cntx ); \
+	bli_scalv_cntx_init( dt, cntx ); \
+	bli_setv_cntx_init( dt, cntx ); \
+\
+	/* packm-related kernels are not required for GEMV. */ \
+	/* Initialize the context with packm-related kernels. */ \
+	/*bli_packm_cntx_init( dt, cntx ); */\
+\
+	/* block params for fused kernels are queried from global context \
+	   hence it is not required to initialize in local context*/ \
+	/* Set the register and cache blocksizes and multiples, as well
+	   as the execution method. */ \
+	/*bli_gks_cntx_set_blkszs( BLIS_NAT, 4, \
+	                         BLIS_N2, BLIS_N2, \
+	                         BLIS_M2, BLIS_M2, \
+	                         BLIS_AF, BLIS_AF, \
+	                         BLIS_DF, BLIS_DF, \
+	                         cntx ); */\
+} \
+void PASTEMAC(opname,_cntx_finalize)( cntx_t* cntx ) \
+{ \
+	/* Free the context and all memory allocated to it. */ \
+	bli_cntx_free( cntx ); \
+}
+GENFRONT( gemv )
+
+#undef  GENFRONT
+#define GENFRONT( opname ) \
+\
+void PASTEMAC(opname,_cntx_init)( num_t dt, cntx_t* cntx ) \
+{ \
+	/* Perform basic setup on the context. */ \
+	bli_cntx_create( cntx ); \
+\
+	/* Initialize the context with kernels employed by the current
+	   operation. */ \
+	/*bli_gks_cntx_set_l1f_ker( BLIS_AXPYF_KER, cntx );*/ \
+	/*bli_gks_cntx_set_l1f_ker( BLIS_DOTXF_KER, cntx );*/ \
 	bli_axpyf_cntx_init( dt, cntx ); \
 	bli_dotxf_cntx_init( dt, cntx ); \
 \
@@ -79,8 +128,6 @@ void PASTEMAC(opname,_cntx_finalize)( cntx_t* cntx ) \
 	/* Free the context and all memory allocated to it. */ \
 	bli_cntx_free( cntx ); \
 }
-
-GENFRONT( gemv )
 GENFRONT( trmv )
 GENFRONT( trsv )
 

@@ -595,6 +595,8 @@ void bli_sgemm_asm_6x16
 	"                                            \n\t"
 	"                                            \n\t"
 	".SDONE:                                     \n\t"
+    "                                            \n\t"
+    "vzeroupper                                  \n\t"
 	"                                            \n\t"
 
 	: // output operands (none)
@@ -1175,6 +1177,8 @@ void bli_dgemm_asm_6x8
 	"                                            \n\t"
 	"                                            \n\t"
 	".DDONE:                                     \n\t"
+    "                                            \n\t"
+    "vzeroupper                                  \n\t"
 	"                                            \n\t"
 
 	: // output operands (none)
@@ -1702,6 +1706,8 @@ void bli_cgemm_asm_3x8
 	"                                            \n\t"
 	"                                            \n\t"
 	".CDONE:                                     \n\t"
+    "                                            \n\t"
+    "vzeroupper                                  \n\t"
 	"                                            \n\t"
 
 	: // output operands (none)
@@ -2228,6 +2234,8 @@ void bli_zgemm_asm_3x4
 	"                                            \n\t"
 	"                                            \n\t"
 	".ZDONE:                                     \n\t"
+    "                                            \n\t"
+    "vzeroupper                                  \n\t"
 	"                                            \n\t"
 
 	: // output operands (none)

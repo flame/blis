@@ -47,10 +47,8 @@ void bli_gemm_front
      )
 {
 #ifdef BLIS_SMALL_MATRIX_ENABLE
-#ifndef BLIS_ENABLE_MULTITHREADING
     gint_t status = bli_gemm_small_matrix(alpha, a, b, beta, c, cntx, cntl);
     if(BLIS_SUCCESS != status)
-#endif
 #endif
     {
 	    obj_t   a_local;
