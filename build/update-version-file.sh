@@ -147,22 +147,44 @@ main()
 
 		echo "${script_name}: executing: git describe --tags."
 
+		gd_se="git_describe_se.txt"
+
 		# Query git for the version string, which is simply the current tag,
 		# followed by a number signifying how many commits have transpired
-		# since the tag, followed by a 'g' and a shortened hash tab.
-		git_describe_str=$(git describe --tags)
+		# since the tag, followed by a 'g' and a shortened hash tab. Capture
+		# stderr to a file.
+		git_describe_str=$(git describe --tags 2> ${gd_se})
 
-		echo "${script_name}: got back ${git_describe_str}."
+		# Pull in whatever error message was generated, if any, and delete
+		# the file.
+		git_error=$(cat ${gd_se})
 
-		# Strip off the commit hash label.
-		new_version_str=$(echo ${git_describe_str} | cut -d- -f-2)
+		# Remove the stderr file.
+		rm -f ${gd_se}
 
-		echo "${script_name}: truncating to ${new_version_str}."
-		echo "${script_name}: updating version file '${version_file}'."
+		# If git returned an error, don't do anything.
+		if [ -n "${git_error}" ]; then
 
-		# Write the new version string to the version file.
-		echo "${new_version_str}" > ${version_file}
+			echo "${script_name}: git returned an error: '${git_error}'."
+			echo "${script_name}: leaving version file unchanged."
 
+		else
+
+			echo "${script_name}: got back ${git_describe_str}."
+
+			# Strip off the commit hash label.
+			new_version_str=$(echo ${git_describe_str} | cut -d- -f-2)
+
+			echo "${script_name}: truncating to ${new_version_str}."
+			echo "${script_name}: updating version file '${version_file}'."
+
+			# Write the new version string to the version file.
+			echo "${new_version_str}" > ${version_file}
+		fi
+
+	else
+
+		echo "${script_name}: could not find '${gitdir}' directory; leaving version file unchanged."
 	fi
 
 
