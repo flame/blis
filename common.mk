@@ -48,6 +48,12 @@ define store-var-for
 $(strip $(1)).$(strip $(2)) := $($(strip $(1)))
 endef
 
+# Define a function similar to store-var-for, except that appends instead
+# of overwriting.
+define append-var-for
+$(strip $(1)).$(strip $(2)) += $($(strip $(1)))
+endef
+
 # Define a function that stores the value of all of the variables in a
 # make_defs.mk file to other variables with the configuration (the
 # argument $(1)) added as a suffix. This function is called once from
@@ -243,7 +249,7 @@ ifeq ($(VENDOR_STRING),)
 $(error Unable to determine compiler vendor.)
 endif
 
-CC_VENDOR := $(firstword $(shell echo '$(VENDOR_STRING)' | $(EGREP) -o 'icc|gcc|clang|IBM'))
+CC_VENDOR := $(firstword $(shell echo '$(VENDOR_STRING)' | $(EGREP) -o 'icc|gcc|clang|ibm'))
 ifeq ($(CC_VENDOR),)
 $(error Unable to determine compiler vendor. Have you run './configure' yet?)
 endif
@@ -316,6 +322,41 @@ SOFLAGS    := -shared
 #
 # --- Configuration-agnostic flags ---------------------------------------------
 #
+
+# --- C Preprocessor flags ---
+
+# Enable clock_gettime() in time.h.
+CPPROCFLAGS := -D_POSIX_C_SOURCE=200112L
+$(foreach conf, $(CONFIG_LIST), $(eval $(call append-var-for,CPPROCFLAGS,$(conf))))
+
+# --- Shared library (position-independent code) flags ---
+
+# Emit position-independent code for dynamic linking.
+CPICFLAGS := -fPIC
+$(foreach conf, $(CONFIG_LIST), $(eval $(call append-var-for,CPICFLAGS,$(conf))))
+
+# --- Miscellaneous flags ---
+
+# Enable C99.
+CMISCFLAGS := -std=c99
+$(foreach conf, $(CONFIG_LIST), $(eval $(call append-var-for,CMISCFLAGS,$(conf))))
+
+# Disable tautological comparision warnings in clang.
+ifeq ($(CC_VENDOR),clang)
+CMISCFLAGS := -Wno-tautological-compare
+$(foreach conf, $(CONFIG_LIST), $(eval $(call append-var-for,CMISCFLAGS,$(conf))))
+endif
+
+# --- Warning flags ---
+
+# Disable unused function warnings and stop compiling on first error for
+# all compilers that accept such options: gcc, clang, and icc.
+ifneq ($(CC_VENDOR),ibm)
+CWARNFLAGS := -Wall -Wno-unused-function -Wfatal-errors
+$(foreach conf, $(CONFIG_LIST), $(eval $(call append-var-for,CWARNFLAGS,$(conf))))
+endif
+
+# --- Threading flags ---
 
 ifeq ($(CC_VENDOR),gcc)
 ifeq ($(THREADING_MODEL),auto)

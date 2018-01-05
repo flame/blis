@@ -215,7 +215,7 @@ read_registry_file()
 
 		# If we encounter a slash, it means the name of the configuration
 		# and the kernel set needed by that configuration are different.
-		if [[ ${list} == *[/]* ]]; then
+		if [[ "${list}" == *[/]* ]]; then
 
 			#echo "Slash found."
 			klist=""
@@ -376,7 +376,7 @@ is_singleton()
 		count_str="${count_str}x"
 	done
 
-	if [ ${count_str} == "x" ]; then
+	if [ "${count_str}" == "x" ]; then
 		rval="true"
 	fi
 
@@ -406,16 +406,88 @@ rm_duplicate_words()
 	echo "${str}"
 }
 
+select_cc()
+{
+	local rval found_cc
+
+	se_suf="stderr.txt"
+
+	# Initialize our selected compiler to empty.
+	found_cc=""
+
+	# If CC was specified on the configure command line, see if it works.
+	if [ -n "${CC}" ]; then
+
+		se_file="cc_${se_suf}"
+
+		# See if CC works and/or is present.
+		rval=$(${CC} --version 2> ${se_file})
+
+		if [ -z "$(cat ${se_file})" ]; then
+			found_cc=${CC}
+		fi
+
+		rm ${se_file}
+	fi
+
+	# Now check if gcc works.
+	if [ -z "${found_cc}" ]; then
+
+		se_file="gcc_${se_suf}"
+
+		# See if CC works and/or is present.
+		rval=$(gcc --version 2> ${se_file})
+
+		if [ -z "$(cat ${se_file})" ]; then
+			found_cc=gcc
+		fi
+
+		rm ${se_file}
+	fi
+
+	# Now check if clang works.
+	if [ -z "${found_cc}" ]; then
+
+		se_file="clang_${se_suf}"
+
+		# See if CC works and/or is present.
+		rval=$(clang --version 2> ${se_file})
+
+		if [ -z "$(cat ${se_file})" ]; then
+			found_cc=clang
+		fi
+
+		rm ${se_file}
+	fi
+
+	# If neither $CC, nor gcc, nor clang work, then we're probably all dead,
+	# so this fallback selection won't matter.
+	if [ -z "${found_cc}" ]; then
+
+		found_cc=cc
+	fi
+
+	# Return the selected compiler.
+	echo "${found_cc}"
+}
+
 auto_detect()
 {
-	local autocc config_defines
+	local rval autocc config_defines
 
-	# Choose the compiler we'll use to compile the auto-detection
-	# executable.
-	if [ clang -v > /dev/null 2>&1 ]; then
-		autocc=clang
+	# Find a compiler that works.
+	autocc=$(select_cc)
+
+	# For debugging: reveal what compiler was chosen for auto-detection.
+	#touch "${autocc}.txt"
+
+	# Tweak the flags we use based on the compiler. This is mostly just
+	# an opportunity to turn off annoying warnings that some compilers
+	# may throw off.
+	if [ "${autocc}" == "clang" ]; then
+		autoccflags="-Wno-tautological-compare"
 	else
-		autocc=gcc
+		autoccflags=
 	fi
 
 	# Locate our source files.
@@ -467,6 +539,7 @@ auto_detect()
 	        -I${bli_mutex_h_path} \
 	        -I${bli_malloc_h_path} \
 	        -std=c99 \
+	        ${autoccflags} \
 	        ${bli_arch_c_filepath} \
 	        ${bli_cpuid_c_filepath} \
 	        ${main_c_filepath} \

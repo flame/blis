@@ -453,8 +453,10 @@ $(foreach conf, $(CONFIG_LIST), $(eval $(call make-config-rule,$(conf))))
 
 # Instantiate the build rule for non-kernel framework files. Use the CFLAGS for
 # the configuration family, which exists in the directory whose name is equal to
-# CONFIG_NAME. (BTW: If it is a singleton family, then CONFIG_NAME is equal to
-# CONFIG_LIST.)
+# CONFIG_NAME. Note that this doesn't need to be in a loop since we expect
+# CONFIG_NAME to only ever contain a single name. (BTW: If CONFIG_NAME refers
+# to a singleton family, then CONFIG_LIST contains CONFIG_NAME as its only
+# item.)
 #$(eval $(call make-frame-rule,$(firstword $(CONFIG_NAME))))
 $(foreach conf, $(CONFIG_NAME), $(eval $(call make-frame-rule,$(conf))))
 

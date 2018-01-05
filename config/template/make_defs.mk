@@ -47,12 +47,13 @@ CC             := gcc
 CC_VENDOR      := gcc
 endif
 
-# Enable IEEE Standard 1003.1-2004 (POSIX.1d).
-# NOTE: This is needed to enable posix_memalign().
-CPPROCFLAGS    := -D_POSIX_C_SOURCE=200112L
-CMISCFLAGS     := -std=c99
-CPICFLAGS      := -fPIC
-CWARNFLAGS     := -Wall -Wno-unused-function -Wfatal-errors
+# NOTE: The build system will append these variables with various
+# general-purpose/configuration-agnostic flags in common.mk. You
+# may specify additional flags here as needed.
+CPPROCFLAGS    :=
+CMISCFLAGS     :=
+CPICFLAGS      :=
+CWARNFLAGS     :=
 
 ifneq ($(DEBUG_TYPE),off)
 CDBGFLAGS      := -g

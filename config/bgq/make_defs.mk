@@ -47,11 +47,12 @@ CC             := /bgsys/drivers/ppcfloor/comm/gcc.legacy/bin/mpixlc_r
 CC_VENDOR      := ibm
 endif
 
-# Enable IEEE Standard 1003.1-2004 (POSIX.1d).
-# NOTE: This is needed to enable posix_memalign().
-CPPROCFLAGS    := -D_POSIX_C_SOURCE=200112L -I/bgsys/drivers/ppcfloor -I/bgsys/drivers/ppcfloor/spi/include/kernel/cnk
+# NOTE: The build system will append these variables with various
+# general-purpose/configuration-agnostic flags in common.mk. You
+# may specify additional flags here as needed.
+CPPROCFLAGS    := -I/bgsys/drivers/ppcfloor -I/bgsys/drivers/ppcfloor/spi/include/kernel/cnk
 CMISCFLAGS     := -qthreaded -qsmp=omp -qasm=gcc -qkeyword=asm # -qreport -qsource -qlistopt -qlist
-CPICFLAGS      := -fPIC
+CPICFLAGS      :=
 CWARNFLAGS     := -w
 
 ifneq ($(DEBUG_TYPE),off)

@@ -47,10 +47,13 @@ CC             := gcc
 CC_VENDOR      := gcc
 endif
 
+# NOTE: The build system will append these variables with various
+# general-purpose/configuration-agnostic flags in common.mk. You
+# may specify additional flags here as needed.
 CPPROCFLAGS    :=
-CMISCFLAGS     := -std=c99
-CPICFLAGS      := -fPIC
-CWARNFLAGS     := -Wall -Wno-unused-function -Wfatal-errors
+CMISCFLAGS     :=
+CPICFLAGS      :=
+CWARNFLAGS     :=
 
 ifneq ($(DEBUG_TYPE),off)
 CDBGFLAGS      := -g
