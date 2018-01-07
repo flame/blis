@@ -60,13 +60,9 @@ CDBGFLAGS      := -g
 endif
 
 ifeq ($(DEBUG_TYPE),noopt)
-COPTFLAGS      := -O0 -DBLIS_NO_HBWMALLOC
+COPTFLAGS      := -O0
 else
 COPTFLAGS      := -O3
-endif
-
-ifeq ($(DEBUG_TYPE),sde)
-CPPROCFLAGS    += -DBLIS_NO_HBWMALLOC
 endif
 
 CKOPTFLAGS     := $(COPTFLAGS)
@@ -100,11 +96,7 @@ ARFLAGS        := cr
 LINKER         := $(CC)
 SOFLAGS        := -shared
 
-ifneq ($(DEBUG_TYPE),sde)
-LDFLAGS        := -lmemkind
-else
 LDFLAGS        :=
-endif
 
 ifneq ($(CC_VENDOR),icc)
 LDFLAGS        += -lm
