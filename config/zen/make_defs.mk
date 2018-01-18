@@ -68,10 +68,13 @@ endif
 CKOPTFLAGS     := $(COPTFLAGS)
 
 ifeq ($(CC_VENDOR),gcc)
-CVECFLAGS      := -mavx2 -mfpmath=sse -mfma -march=bdver4
+# gcc 6.3 or later:
+#CVECFLAGS      := -mavx2 -mfpmath=sse -mfma -march=bdver4
+# gcc 5.4:
+CVECFLAGS      := -mavx2 -mfpmath=sse -mfma -march=bdver4 -mno-fma4 -mno-tbm -mno-xop -mno-lwp
 else
 ifeq ($(CC_VENDOR),clang)
-CVECFLAGS      := -mavx2 -mfpmath=sse -mfma -march=bdver4
+CVECFLAGS      := -mavx2 -mfpmath=sse -mfma -march=bdver4 -mno-fma4 -mno-tbm -mno-xop -mno-lwp
 else
 $(error gcc or clang are required for this configuration.)
 endif
