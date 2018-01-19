@@ -71,6 +71,7 @@ ifeq ($(CC_VENDOR),gcc)
 # gcc 6.3 or later:
 #CVECFLAGS      := -mavx2 -mfpmath=sse -mfma -march=bdver4
 # gcc 5.4:
+# possibly add zen-specific instructions: -mclzero -madx -mrdseed -mmwaitx -msha -mxsavec -mxsaves -mclflushopt -mpopcnt
 CVECFLAGS      := -mavx2 -mfpmath=sse -mfma -march=bdver4 -mno-fma4 -mno-tbm -mno-xop -mno-lwp
 else
 ifeq ($(CC_VENDOR),clang)
