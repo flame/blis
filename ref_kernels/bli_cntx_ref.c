@@ -712,6 +712,18 @@ void GENBAINAME(cntx_init)
 	{
 		const bool_t is_pb = FALSE;
 
+		// We MUST set the induced method in the context prior to calling
+		// bli_cntx_l3_ukr_prefers_cols_dt() because that function queries
+		// the induced method. It needs the induced method value in order
+		// to determine whether to evaluate the "prefers column storage"
+		// predicate using the storage preference of the kernel for dt, or
+		// the storage preference of the kernel for the real projection of
+		// dt. Failing to set the induced method here can lead to strange
+		// undefined behavior at runtime if the native complex kernel's
+		// storage preference happens to not equal that of the native real
+		// kernel.
+		bli_cntx_set_method( method, cntx );
+
 		// Initialize the blocksizes according to the micro-kernel preference as
 		// well as the algorithm.
 		if ( bli_cntx_l3_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ) )

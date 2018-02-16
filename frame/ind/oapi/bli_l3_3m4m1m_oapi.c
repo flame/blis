@@ -82,9 +82,9 @@ void PASTEMAC(opname,imeth) \
 \
 	/* Query a context for the current induced method. This context is
 	   managed and cached by the gks and should not be freed by the caller.
-	   Note that we pass in the datatype because it will be needed when
-	   bli_gks_query_ind_cntx() eventually calls the bli_ind_cntx_init()
-	   family of functions. */ \
+	   Note that the datatype argument is needed because it will be passed
+	   in when bli_gks_query_ind_cntx() eventually calls the induced method's
+	   _cntx_init() function. */ \
 	cntx = bli_gks_query_ind_cntx( ind, dt ); \
 \
 	/* Some induced methods execute in multiple "stages". */ \
@@ -162,9 +162,9 @@ void PASTEMAC(opname,imeth) \
 \
 	/* Query a context for the current induced method. This context is
 	   managed and cached by the gks and should not be freed by the caller.
-	   Note that we pass in the datatype because it will be needed when
-	   bli_gks_query_ind_cntx() eventually calls the bli_ind_cntx_init()
-	   family of functions. */ \
+	   Note that the datatype argument is needed because it will be passed
+	   in when bli_gks_query_ind_cntx() eventually calls the induced method's
+	   _cntx_init() function. */ \
 	cntx = bli_gks_query_ind_cntx( ind, dt ); \
 \
 	/* Some induced methods execute in multiple "stages". */ \
@@ -240,9 +240,9 @@ void PASTEMAC(opname,imeth) \
 \
 	/* Query a context for the current induced method. This context is
 	   managed and cached by the gks and should not be freed by the caller.
-	   Note that we pass in the datatype because it will be needed when
-	   bli_gks_query_ind_cntx() eventually calls the bli_ind_cntx_init()
-	   family of functions. */ \
+	   Note that the datatype argument is needed because it will be passed
+	   in when bli_gks_query_ind_cntx() eventually calls the induced method's
+	   _cntx_init() function. */ \
 	cntx = bli_gks_query_ind_cntx( ind, dt ); \
 \
 	/* Some induced methods execute in multiple "stages". */ \
@@ -309,9 +309,9 @@ void PASTEMAC(opname,imeth) \
 \
 	/* Query a context for the current induced method. This context is
 	   managed and cached by the gks and should not be freed by the caller.
-	   Note that we pass in the datatype because it will be needed when
-	   bli_gks_query_ind_cntx() eventually calls the bli_ind_cntx_init()
-	   family of functions. */ \
+	   Note that the datatype argument is needed because it will be passed
+	   in when bli_gks_query_ind_cntx() eventually calls the induced method's
+	   _cntx_init() function. */ \
 	cntx = bli_gks_query_ind_cntx( ind, dt ); \
 \
 	/* Some induced methods execute in multiple "stages". */ \
@@ -364,9 +364,9 @@ void PASTEMAC(opname,imeth) \
 \
 	/* Query a context for the current induced method. This context is
 	   managed and cached by the gks and should not be freed by the caller.
-	   Note that we pass in the datatype because it will be needed when
-	   bli_gks_query_ind_cntx() eventually calls the bli_ind_cntx_init()
-	   family of functions. */ \
+	   Note that the datatype argument is needed because it will be passed
+	   in when bli_gks_query_ind_cntx() eventually calls the induced method's
+	   _cntx_init() function. */ \
 	cntx = bli_gks_query_ind_cntx( ind, dt ); \
 \
 	{ \
