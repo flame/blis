@@ -32,7 +32,7 @@
 
 */
 
-#include "bli_avx512_macros.h"
+#include "../3/bli_avx512_macros.h"
 #include "blis.h"
 
 #define LOADMUL8x8(a,o,s1,s3,s5,s7, \
