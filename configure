@@ -954,7 +954,7 @@ main()
 			echo "${script_name}:   $k: ${v}"
 		done
 
-		echo "${script_name}: kernel-to-config map:"
+		echo "${script_name}: kernel-to-config map for '${config_name}':"
 		#for k in "${!kconfig_registry[@]}"; do
 		for kc_var in ${!kconfig_registry_*}; do
 
@@ -1014,7 +1014,7 @@ main()
 
 	if [ "${show_config_list}" == "1" ]; then
 
-		echo "${script_name}: kernel-to-config map (chosen pairs):"
+		echo "${script_name}: kernel-to-config map for '${config_name}' (chosen pairs):"
 		for k in ${kconfig_map}; do
 			echo "${script_name}:   $k"
 		done
