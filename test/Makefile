@@ -5,6 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
+#  Copyright (C) 2017, Advanced Micro Devices, Inc.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -164,7 +165,9 @@ LDFLAGS        += -lgfortran -lm -lpthread -fopenmp
 #all: blis openblas atlas mkl
 all: blis openblas mkl
 
-blis: test_gemv_blis.x \
+blis: test_dotv_blis.x \
+      test_axpyv_blis.x \
+      test_gemv_blis.x \
       test_ger_blis.x \
       test_hemv_blis.x \
       test_her_blis.x \
@@ -179,7 +182,10 @@ blis: test_gemv_blis.x \
       test_trmm_blis.x \
       test_trsm_blis.x
 
-openblas: test_gemv_openblas.x \
+openblas: \
+      test_dotv_openblas.x \
+      test_axpyv_openblas.x \
+      test_gemv_openblas.x \
       test_ger_openblas.x \
       test_hemv_openblas.x \
       test_her_openblas.x \
@@ -194,7 +200,10 @@ openblas: test_gemv_openblas.x \
       test_trmm_openblas.x \
       test_trsm_openblas.x
 
-atlas: test_gemv_atlas.x \
+atlas: \
+      test_dotv_atlas.x \
+      test_axpyv_atlas.x \
+      test_gemv_atlas.x \
       test_ger_atlas.x \
       test_hemv_atlas.x \
       test_her_atlas.x \
@@ -209,7 +218,9 @@ atlas: test_gemv_atlas.x \
       test_trmm_atlas.x \
       test_trsm_atlas.x
 
-mkl:  test_gemv_mkl.x \
+mkl:  test_dotv_mkl.x \
+      test_axpyv_mkl.x \
+      test_gemv_mkl.x \
       test_ger_mkl.x \
       test_hemv_mkl.x \
       test_her_mkl.x \
@@ -224,7 +235,9 @@ mkl:  test_gemv_mkl.x \
       test_trmm_mkl.x \
       test_trsm_mkl.x
 
-essl: test_gemv_essl.x \
+essl: test_dotv_essl.x \
+      test_axpyv_essl.x \
+      test_gemv_essl.x \
       test_ger_essl.x \
       test_hemv_essl.x \
       test_her_essl.x \
@@ -239,7 +252,9 @@ essl: test_gemv_essl.x \
       test_trmm_essl.x \
       test_trsm_essl.x
 
-mac:  test_gemv_mac.x \
+mac:  test_dotv_mac.x \
+      test_axpyv_mac.x \
+      test_gemv_mac.x \
       test_ger_mac.x \
       test_hemv_mac.x \
       test_her_mac.x \

@@ -62,16 +62,20 @@ endif
 ifeq ($(DEBUG_TYPE),noopt)
 COPTFLAGS      := -O0
 else
-COPTFLAGS      := -O2 -fomit-frame-pointer
+COPTFLAGS      := -O3 -fomit-frame-pointer
 endif
 
 CKOPTFLAGS     := $(COPTFLAGS)
 
 ifeq ($(CC_VENDOR),gcc)
-CVECFLAGS      := -mavx2 -mfpmath=sse -mfma -march=bdver4
+# gcc 6.3 or later:
+#CVECFLAGS      := -mavx2 -mfpmath=sse -mfma -march=znver1
+# gcc 5.4:
+# possibly add zen-specific instructions: -mclzero -madx -mrdseed -mmwaitx -msha -mxsavec -mxsaves -mclflushopt -mpopcnt
+CVECFLAGS      := -mavx2 -mfpmath=sse -mfma -march=bdver4 -mno-fma4 -mno-tbm -mno-xop -mno-lwp
 else
 ifeq ($(CC_VENDOR),clang)
-CVECFLAGS      := -mavx2 -mfpmath=sse -mfma -march=bdver4
+CVECFLAGS      := -mavx2 -mfpmath=sse -mfma -march=bdver4 -mno-fma4 -mno-tbm -mno-xop -mno-lwp
 else
 $(error gcc or clang are required for this configuration.)
 endif

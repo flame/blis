@@ -1,3 +1,18 @@
+NOTE: Portions of this project's code are copyrighted by
+
+  The University of Texas at Austin
+
+while other portions are copyrighted by
+
+  Advanced Micro Devices, Inc.
+
+with some overlap. Please see file-level license headers for file-specific
+copyright info. All parties provide their portions of the code under the
+3-clause BSD license, found below.
+
+---
+
+Copyright (C) 2017, Advanced Micro Devices, Inc.
 Copyright (C) 2014, The University of Texas at Austin
 
 Redistribution and use in source and binary forms, with or without
@@ -8,9 +23,9 @@ met:
  - Redistributions in binary form must reproduce the above copyright
    notice, this list of conditions and the following disclaimer in the
    documentation and/or other materials provided with the distribution.
- - Neither the name of The University of Texas at Austin nor the names
-   of its contributors may be used to endorse or promote products
-   derived from this software without specific prior written permission.
+ - Neither the name of the copyright holder nor the names of its
+   contributors may be used to endorse or promote products derived from
+   this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT

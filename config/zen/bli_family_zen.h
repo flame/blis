@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2016, Advanced Micro Devices, Inc
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -35,6 +36,19 @@
 //#ifndef BLIS_FAMILY_H
 //#define BLIS_FAMILY_H
 
+// By default, it is effective to parallelize the outer loops.
+// Setting these macros to 1 will force JR and IR inner loops
+// to be not paralleized.
+#define BLIS_DEFAULT_MR_THREAD_MAX 1
+#define BLIS_DEFAULT_NR_THREAD_MAX 1
+
+
+//#define BLIS_ENABLE_SMALL_MATRIX
+
+// This will select the threshold below which small matrix code will be called.
+//#define BLIS_SMALL_MATRIX_THRES        700
+//#define BLIS_SMALL_M_RECT_MATRIX_THRES 160
+//#define BLIS_SMALL_K_RECT_MATRIX_THRES 128
 
 
 

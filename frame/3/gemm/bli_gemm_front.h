@@ -42,3 +42,14 @@ void bli_gemm_front
        cntx_t* cntx,
        cntl_t* cntl
      );
+
+err_t bli_gemm_small
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       cntl_t* cntl
+     );

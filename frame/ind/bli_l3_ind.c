@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2017, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -53,7 +54,15 @@ static void* bli_l3_ind_oper_fp[BLIS_NUM_IND_METHODS][BLIS_NUM_LEVEL3_OPS] =
              bli_syrknat,  bli_syr2knat, bli_trmm3nat, bli_trmmnat,  bli_trsmnat  },
 };
 
-static bool_t bli_l3_ind_oper_st[BLIS_NUM_IND_METHODS][BLIS_NUM_LEVEL3_OPS][2] = 
+//
+// NOTE: "2" is used instead of BLIS_NUM_FP_TYPES/2.
+//
+// BLIS provides APIs to modify this state during runtime. So, one application thread
+// can modify the state, before another starts the corresponding BLIS operation.
+// This is solved by making the induced method status array local to threads.
+
+static BLIS_THREAD_LOCAL
+bool_t bli_l3_ind_oper_st[BLIS_NUM_IND_METHODS][BLIS_NUM_LEVEL3_OPS][2] =
 {
         /*   gemm   hemm   herk   her2k  symm   syrk,  syr2k  trmm3  trmm   trsm  */
         /*    c     z    */

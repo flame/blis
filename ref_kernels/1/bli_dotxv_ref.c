@@ -66,7 +66,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		PASTEMAC(ch,scals)( *beta, *rho ); \
 	} \
 \
-	if ( bli_zero_dim1( n ) ) return; \
+	/* If the vectors are empty or if alpha is zero, return early. */ \
+	if ( bli_zero_dim1( n ) || PASTEMAC(ch,eq0)( *alpha ) ) return; \
 \
 	PASTEMAC(ch,set0s)( dotxy ); \
 \

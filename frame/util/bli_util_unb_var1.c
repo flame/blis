@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2017, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,6 +34,7 @@
 */
 
 #include "blis.h"
+#include <fenv.h>
 
 //
 // Define BLAS-like interfaces with typed operands.
@@ -293,7 +295,129 @@ void PASTEMAC(ch,varname) \
 	PASTEMAC(chr,copys)( sqrt_sumsq, *norm ); \
 }
 
-INSERT_GENTFUNCR_BASIC( normfv_unb_var1, sumsqv_unb_var1 )
+//INSERT_GENTFUNCR_BASIC( normfv_unb_var1, sumsqv_unb_var1 )
+GENTFUNCR( scomplex, float,  c, s, normfv_unb_var1, sumsqv_unb_var1 )
+GENTFUNCR( dcomplex, double, z, d, normfv_unb_var1, sumsqv_unb_var1 )
+
+#undef  GENTFUNCR
+#ifdef FE_OVERFLOW
+#define GENTFUNCR( ctype, ctype_r, ch, chr, varname, kername ) \
+\
+void PASTEMAC(ch,varname) \
+     ( \
+       dim_t    n, \
+       ctype*   x, inc_t incx, \
+       ctype_r* norm, \
+       cntx_t*  cntx  \
+     ) \
+{ \
+	ctype_r* zero       = PASTEMAC(chr,0); \
+	ctype_r* one        = PASTEMAC(chr,1); \
+	ctype_r  scale; \
+	ctype_r  sumsq; \
+	ctype_r  sqrt_sumsq; \
+\
+	/* Initialize scale and sumsq to begin the summation. */ \
+	PASTEMAC(chr,copys)( *zero, scale ); \
+	PASTEMAC(chr,copys)( *one,  sumsq ); \
+\
+	/* An optimization: first try to use dotv to compute the sum of
+	   the squares of the vector. If no floating-point exceptions
+	   (specifically, overflow and invalid exceptions) were produced,
+	   then we accept the computed value and returne early. The cost
+	   of this optimization is the "sunk" cost of the initial dotv
+	   when sumsqv must be used instead. However, we expect that the
+	   vast majority of use cases will not produce exceptions, and
+	   therefore only one pass through the data, via dotv, will be
+	   required. */ \
+	if ( TRUE ) \
+	{ \
+		int      f_exp_raised;\
+		ctype    sumsqc; \
+\
+		feclearexcept( FE_ALL_EXCEPT );\
+\
+		PASTEMAC(ch,dotv)\
+		( \
+		  BLIS_NO_CONJUGATE, \
+		  BLIS_NO_CONJUGATE, \
+		  n,\
+		  x, incx, \
+		  x, incx, \
+		  &sumsqc, \
+		  cntx  \
+		); \
+\
+		PASTEMAC2(ch,chr,copys)( sumsqc, sumsq ); \
+\
+		f_exp_raised = fetestexcept( FE_OVERFLOW | FE_INVALID );\
+\
+		if ( !f_exp_raised ) \
+		{ \
+		    PASTEMAC(chr,sqrt2s)( sumsq, *norm ); \
+		    return; \
+		} \
+	} \
+\
+	/* Compute the sum of the squares of the vector. */ \
+	PASTEMAC(ch,kername) \
+	( \
+	  n, \
+	  x, incx, \
+	  &scale, \
+	  &sumsq, \
+	  cntx  \
+	); \
+\
+	/* Compute: norm = scale * sqrt( sumsq ) */ \
+	PASTEMAC(chr,sqrt2s)( sumsq, sqrt_sumsq ); \
+	PASTEMAC(chr,scals)( scale, sqrt_sumsq ); \
+\
+	/* Store the final value to the output variable. */ \
+	PASTEMAC(chr,copys)( sqrt_sumsq, *norm ); \
+}
+#else
+#define GENTFUNCR( ctype, ctype_r, ch, chr, varname, kername ) \
+\
+void PASTEMAC(ch,varname) \
+     ( \
+       dim_t    n, \
+       ctype*   x, inc_t incx, \
+       ctype_r* norm, \
+       cntx_t*  cntx  \
+     ) \
+{ \
+	ctype_r* zero       = PASTEMAC(chr,0); \
+	ctype_r* one        = PASTEMAC(chr,1); \
+	ctype_r  scale; \
+	ctype_r  sumsq; \
+	ctype_r  sqrt_sumsq; \
+\
+	/* Initialize scale and sumsq to begin the summation. */ \
+	PASTEMAC(chr,copys)( *zero, scale ); \
+	PASTEMAC(chr,copys)( *one,  sumsq ); \
+\
+	/* Compute the sum of the squares of the vector. */ \
+\
+	PASTEMAC(ch,kername) \
+	( \
+	  n, \
+	  x, incx, \
+	  &scale, \
+	  &sumsq, \
+	  cntx  \
+	); \
+\
+	/* Compute: norm = scale * sqrt( sumsq ) */ \
+	PASTEMAC(chr,sqrt2s)( sumsq, sqrt_sumsq ); \
+	PASTEMAC(chr,scals)( scale, sqrt_sumsq ); \
+\
+	/* Store the final value to the output variable. */ \
+	PASTEMAC(chr,copys)( sqrt_sumsq, *norm ); \
+}
+#endif
+GENTFUNCR( float,   float,  s, s, normfv_unb_var1, sumsqv_unb_var1 )
+GENTFUNCR( double,  double, d, d, normfv_unb_var1, sumsqv_unb_var1 )
 
 
 #undef  GENTFUNCR
@@ -898,7 +1022,7 @@ void PASTEMAC(ch,varname) \
 				  n_elem - 1, \
 				  &beta, \
 				  x0, incx, \
-                  cntx  \
+				  cntx  \
 				); \
 */ \
 			} \
@@ -937,7 +1061,7 @@ void PASTEMAC(ch,varname) \
 				  n_elem - 1, \
 				  &beta, \
 				  x2, incx, \
-                  cntx  \
+				  cntx  \
 				); \
 */ \
 			} \
