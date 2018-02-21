@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2017, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -65,7 +66,7 @@
 	"vpermilps  $0x39, %%xmm2,  %%xmm1           \n\t" \
 	"vmovss            %%xmm1, (%%rcx,%%r10  )   \n\t"
 
-void bli_sgemm_haswell_asm_6x16
+void bli_sgemm_zen_asm_6x16
      (
        dim_t               k,
        float*     restrict alpha,
@@ -316,6 +317,7 @@ void bli_sgemm_haswell_asm_6x16
 	"leaq        (,%%rsi,4), %%rsi               \n\t" // rsi = cs_c * sizeof(float)
 	"                                            \n\t"
 	"leaq   (%%rcx,%%rsi,8), %%rdx               \n\t" // load address of c +  8*cs_c;
+	"leaq   (%%rcx,%%rdi,4), %%r14               \n\t" // load address of c +  4*rs_c;
 	"                                            \n\t"
 	"leaq   (%%rsi,%%rsi,2), %%r13               \n\t" // r13 = 3*cs_c;
 	"leaq   (%%rsi,%%rsi,4), %%r15               \n\t" // r15 = 5*cs_c;
@@ -331,6 +333,10 @@ void bli_sgemm_haswell_asm_6x16
 	"                                            \n\t"
 	"cmpq       $4, %%rsi                        \n\t" // set ZF if (4*cs_c) == 4.
 	"jz      .SROWSTORED                         \n\t" // jump to row storage case
+	"                                            \n\t"
+	"                                            \n\t"
+	"cmpq       $4, %%rdi                        \n\t" // set ZF if (4*cs_c) == 4.
+	"jz      .SCOLSTORED                         \n\t" // jump to column storage case
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
@@ -473,10 +479,160 @@ void bli_sgemm_haswell_asm_6x16
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
+	".SCOLSTORED:                                \n\t"
+	"                                            \n\t"
+	"                                            \n\t"
+	"vbroadcastss      (%%rbx), %%ymm3           \n\t"
+	"                                            \n\t"
+	"vunpcklps         %%ymm6,  %%ymm4,  %%ymm0  \n\t"
+	"vunpcklps         %%ymm10, %%ymm8,  %%ymm1  \n\t"
+	"vshufps    $0x4e, %%ymm1,  %%ymm0,  %%ymm2  \n\t"
+	"vblendps   $0xcc, %%ymm2,  %%ymm0,  %%ymm0  \n\t"
+	"vblendps   $0x33, %%ymm2,  %%ymm1,  %%ymm1  \n\t"
+	"                                            \n\t"
+	"vextractf128 $0x1, %%ymm0, %%xmm2           \n\t"
+	"vfmadd231ps (%%rcx        ),%%xmm3, %%xmm0  \n\t"
+	"vfmadd231ps (%%rcx,%%rsi,4),%%xmm3, %%xmm2  \n\t"
+	"vmovups           %%xmm0, (%%rcx        )   \n\t" // store ( gamma00..gamma30 )
+	"vmovups           %%xmm2, (%%rcx,%%rsi,4)   \n\t" // store ( gamma04..gamma34 )
+	"                                            \n\t"
+	"vextractf128 $0x1, %%ymm1, %%xmm2           \n\t"
+	"vfmadd231ps (%%rcx,%%rsi,1),%%xmm3, %%xmm1  \n\t"
+	"vfmadd231ps (%%rcx,%%r15  ),%%xmm3, %%xmm2  \n\t"
+	"vmovups           %%xmm1, (%%rcx,%%rsi,1)   \n\t" // store ( gamma01..gamma31 )
+	"vmovups           %%xmm2, (%%rcx,%%r15  )   \n\t" // store ( gamma05..gamma35 )
+	"                                            \n\t"
+	"                                            \n\t"
+	"vunpckhps         %%ymm6,  %%ymm4,  %%ymm0  \n\t"
+	"vunpckhps         %%ymm10, %%ymm8,  %%ymm1  \n\t"
+	"vshufps    $0x4e, %%ymm1,  %%ymm0,  %%ymm2  \n\t"
+	"vblendps   $0xcc, %%ymm2,  %%ymm0,  %%ymm0  \n\t"
+	"vblendps   $0x33, %%ymm2,  %%ymm1,  %%ymm1  \n\t"
+	"                                            \n\t"
+	"vextractf128 $0x1, %%ymm0, %%xmm2           \n\t"
+	"vfmadd231ps (%%rcx,%%rsi,2),%%xmm3, %%xmm0  \n\t"
+	"vfmadd231ps (%%rcx,%%r13,2),%%xmm3, %%xmm2  \n\t"
+	"vmovups           %%xmm0, (%%rcx,%%rsi,2)   \n\t" // store ( gamma02..gamma32 )
+	"vmovups           %%xmm2, (%%rcx,%%r13,2)   \n\t" // store ( gamma06..gamma36 )
+	"                                            \n\t"
+	"vextractf128 $0x1, %%ymm1, %%xmm2           \n\t"
+	"vfmadd231ps (%%rcx,%%r13  ),%%xmm3, %%xmm1  \n\t"
+	"vfmadd231ps (%%rcx,%%r10  ),%%xmm3, %%xmm2  \n\t"
+	"vmovups           %%xmm1, (%%rcx,%%r13  )   \n\t" // store ( gamma03..gamma33 )
+	"vmovups           %%xmm2, (%%rcx,%%r10  )   \n\t" // store ( gamma07..gamma37 )
+	"                                            \n\t"
+	"leaq   (%%rcx,%%rsi,8), %%rcx               \n\t" // rcx += 8*cs_c
+	"                                            \n\t"
+	"vunpcklps         %%ymm14, %%ymm12, %%ymm0  \n\t"
+	"vextractf128 $0x1, %%ymm0, %%xmm2           \n\t"
+	"vmovlpd   (%%r14        ), %%xmm1,  %%xmm1  \n\t"
+	"vmovhpd   (%%r14,%%rsi,1), %%xmm1,  %%xmm1  \n\t"
+	"vfmadd231ps       %%xmm1,  %%xmm3,  %%xmm0  \n\t"
+	"vmovlpd           %%xmm0, (%%r14        )   \n\t" // store ( gamma40..gamma50 )
+	"vmovhpd           %%xmm0, (%%r14,%%rsi,1)   \n\t" // store ( gamma41..gamma51 )
+	"vmovlpd   (%%r14,%%rsi,4), %%xmm1,  %%xmm1  \n\t"
+	"vmovhpd   (%%r14,%%r15  ), %%xmm1,  %%xmm1  \n\t"
+	"vfmadd231ps       %%xmm1,  %%xmm3,  %%xmm2  \n\t"
+	"vmovlpd           %%xmm2, (%%r14,%%rsi,4)   \n\t" // store ( gamma44..gamma54 )
+	"vmovhpd           %%xmm2, (%%r14,%%r15  )   \n\t" // store ( gamma45..gamma55 )
+	"                                            \n\t"
+	"vunpckhps         %%ymm14, %%ymm12, %%ymm0  \n\t"
+	"vextractf128 $0x1, %%ymm0, %%xmm2           \n\t"
+	"vmovlpd   (%%r14,%%rsi,2), %%xmm1,  %%xmm1  \n\t"
+	"vmovhpd   (%%r14,%%r13  ), %%xmm1,  %%xmm1  \n\t"
+	"vfmadd231ps       %%xmm1,  %%xmm3,  %%xmm0  \n\t"
+	"vmovlpd           %%xmm0, (%%r14,%%rsi,2)   \n\t" // store ( gamma42..gamma52 )
+	"vmovhpd           %%xmm0, (%%r14,%%r13  )   \n\t" // store ( gamma43..gamma53 )
+	"vmovlpd   (%%r14,%%r13,2), %%xmm1,  %%xmm1  \n\t"
+	"vmovhpd   (%%r14,%%r10  ), %%xmm1,  %%xmm1  \n\t"
+	"vfmadd231ps       %%xmm1,  %%xmm3,  %%xmm2  \n\t"
+	"vmovlpd           %%xmm2, (%%r14,%%r13,2)   \n\t" // store ( gamma46..gamma56 )
+	"vmovhpd           %%xmm2, (%%r14,%%r10  )   \n\t" // store ( gamma47..gamma57 )
+	"                                            \n\t"
+	"leaq   (%%r14,%%rsi,8), %%r14               \n\t" // r14 += 8*cs_c
+	"                                            \n\t"
+	"                                            \n\t"
+	"                                            \n\t"
+	"vunpcklps         %%ymm7,  %%ymm5,  %%ymm0  \n\t"
+	"vunpcklps         %%ymm11, %%ymm9,  %%ymm1  \n\t"
+	"vshufps    $0x4e, %%ymm1,  %%ymm0,  %%ymm2  \n\t"
+	"vblendps   $0xcc, %%ymm2,  %%ymm0,  %%ymm0  \n\t"
+	"vblendps   $0x33, %%ymm2,  %%ymm1,  %%ymm1  \n\t"
+	"                                            \n\t"
+	"vextractf128 $0x1, %%ymm0, %%xmm2           \n\t"
+	"vfmadd231ps (%%rcx        ),%%xmm3, %%xmm0  \n\t"
+	"vfmadd231ps (%%rcx,%%rsi,4),%%xmm3, %%xmm2  \n\t"
+	"vmovups           %%xmm0, (%%rcx        )   \n\t" // store ( gamma00..gamma30 )
+	"vmovups           %%xmm2, (%%rcx,%%rsi,4)   \n\t" // store ( gamma04..gamma34 )
+	"                                            \n\t"
+	"vextractf128 $0x1, %%ymm1, %%xmm2           \n\t"
+	"vfmadd231ps (%%rcx,%%rsi,1),%%xmm3, %%xmm1  \n\t"
+	"vfmadd231ps (%%rcx,%%r15  ),%%xmm3, %%xmm2  \n\t"
+	"vmovups           %%xmm1, (%%rcx,%%rsi,1)   \n\t" // store ( gamma01..gamma31 )
+	"vmovups           %%xmm2, (%%rcx,%%r15  )   \n\t" // store ( gamma05..gamma35 )
+	"                                            \n\t"
+	"                                            \n\t"
+	"vunpckhps         %%ymm7,  %%ymm5,  %%ymm0  \n\t"
+	"vunpckhps         %%ymm11, %%ymm9,  %%ymm1  \n\t"
+	"vshufps    $0x4e, %%ymm1,  %%ymm0,  %%ymm2  \n\t"
+	"vblendps   $0xcc, %%ymm2,  %%ymm0,  %%ymm0  \n\t"
+	"vblendps   $0x33, %%ymm2,  %%ymm1,  %%ymm1  \n\t"
+	"                                            \n\t"
+	"vextractf128 $0x1, %%ymm0, %%xmm2           \n\t"
+	"vfmadd231ps (%%rcx,%%rsi,2),%%xmm3, %%xmm0  \n\t"
+	"vfmadd231ps (%%rcx,%%r13,2),%%xmm3, %%xmm2  \n\t"
+	"vmovups           %%xmm0, (%%rcx,%%rsi,2)   \n\t" // store ( gamma02..gamma32 )
+	"vmovups           %%xmm2, (%%rcx,%%r13,2)   \n\t" // store ( gamma06..gamma36 )
+	"                                            \n\t"
+	"vextractf128 $0x1, %%ymm1, %%xmm2           \n\t"
+	"vfmadd231ps (%%rcx,%%r13  ),%%xmm3, %%xmm1  \n\t"
+	"vfmadd231ps (%%rcx,%%r10  ),%%xmm3, %%xmm2  \n\t"
+	"vmovups           %%xmm1, (%%rcx,%%r13  )   \n\t" // store ( gamma03..gamma33 )
+	"vmovups           %%xmm2, (%%rcx,%%r10  )   \n\t" // store ( gamma07..gamma37 )
+	"                                            \n\t"
+	//"leaq   (%%rcx,%%rsi,8), %%rcx               \n\t" // rcx += 8*cs_c
+	"                                            \n\t"
+	"vunpcklps         %%ymm15, %%ymm13, %%ymm0  \n\t"
+	"vextractf128 $0x1, %%ymm0, %%xmm2           \n\t"
+	"vmovlpd   (%%r14        ), %%xmm1,  %%xmm1  \n\t"
+	"vmovhpd   (%%r14,%%rsi,1), %%xmm1,  %%xmm1  \n\t"
+	"vfmadd231ps       %%xmm1,  %%xmm3,  %%xmm0  \n\t"
+	"vmovlpd           %%xmm0, (%%r14        )   \n\t" // store ( gamma40..gamma50 )
+	"vmovhpd           %%xmm0, (%%r14,%%rsi,1)   \n\t" // store ( gamma41..gamma51 )
+	"vmovlpd   (%%r14,%%rsi,4), %%xmm1,  %%xmm1  \n\t"
+	"vmovhpd   (%%r14,%%r15  ), %%xmm1,  %%xmm1  \n\t"
+	"vfmadd231ps       %%xmm1,  %%xmm3,  %%xmm2  \n\t"
+	"vmovlpd           %%xmm2, (%%r14,%%rsi,4)   \n\t" // store ( gamma44..gamma54 )
+	"vmovhpd           %%xmm2, (%%r14,%%r15  )   \n\t" // store ( gamma45..gamma55 )
+	"                                            \n\t"
+	"vunpckhps         %%ymm15, %%ymm13, %%ymm0  \n\t"
+	"vextractf128 $0x1, %%ymm0, %%xmm2           \n\t"
+	"vmovlpd   (%%r14,%%rsi,2), %%xmm1,  %%xmm1  \n\t"
+	"vmovhpd   (%%r14,%%r13  ), %%xmm1,  %%xmm1  \n\t"
+	"vfmadd231ps       %%xmm1,  %%xmm3,  %%xmm0  \n\t"
+	"vmovlpd           %%xmm0, (%%r14,%%rsi,2)   \n\t" // store ( gamma42..gamma52 )
+	"vmovhpd           %%xmm0, (%%r14,%%r13  )   \n\t" // store ( gamma43..gamma53 )
+	"vmovlpd   (%%r14,%%r13,2), %%xmm1,  %%xmm1  \n\t"
+	"vmovhpd   (%%r14,%%r10  ), %%xmm1,  %%xmm1  \n\t"
+	"vfmadd231ps       %%xmm1,  %%xmm3,  %%xmm2  \n\t"
+	"vmovlpd           %%xmm2, (%%r14,%%r13,2)   \n\t" // store ( gamma46..gamma56 )
+	"vmovhpd           %%xmm2, (%%r14,%%r10  )   \n\t" // store ( gamma47..gamma57 )
+	"                                            \n\t"
+	//"leaq   (%%r14,%%rsi,8), %%r14               \n\t" // r14 += 8*cs_c
+	"                                            \n\t"
+	"                                            \n\t"
+	"                                            \n\t"
+	"jmp    .SDONE                               \n\t" // jump to end.
+	"                                            \n\t"
+	"                                            \n\t"
+	"                                            \n\t"
 	".SBETAZERO:                                 \n\t"
 	"                                            \n\t"
 	"cmpq       $4, %%rsi                        \n\t" // set ZF if (4*cs_c) == 4.
 	"jz      .SROWSTORBZ                         \n\t" // jump to row storage case
+	"                                            \n\t"
+	"cmpq       $4, %%rdi                        \n\t" // set ZF if (4*cs_c) == 4.
+	"jz      .SCOLSTORBZ                         \n\t" // jump to column storage case
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
@@ -590,13 +746,115 @@ void bli_sgemm_haswell_asm_6x16
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
+	"jmp    .SDONE                               \n\t" // jump to end.
+	"                                            \n\t"
+	"                                            \n\t"
+	"                                            \n\t"
+	".SCOLSTORBZ:                                \n\t"
+	"                                            \n\t"
+	"                                            \n\t"
+	"vunpcklps         %%ymm6,  %%ymm4,  %%ymm0  \n\t"
+	"vunpcklps         %%ymm10, %%ymm8,  %%ymm1  \n\t"
+	"vshufps    $0x4e, %%ymm1,  %%ymm0,  %%ymm2  \n\t"
+	"vblendps   $0xcc, %%ymm2,  %%ymm0,  %%ymm0  \n\t"
+	"vblendps   $0x33, %%ymm2,  %%ymm1,  %%ymm1  \n\t"
+	"                                            \n\t"
+	"vextractf128 $0x1, %%ymm0, %%xmm2           \n\t"
+	"vmovups           %%xmm0, (%%rcx        )   \n\t" // store ( gamma00..gamma30 )
+	"vmovups           %%xmm2, (%%rcx,%%rsi,4)   \n\t" // store ( gamma04..gamma34 )
+	"                                            \n\t"
+	"vextractf128 $0x1, %%ymm1, %%xmm2           \n\t"
+	"vmovups           %%xmm1, (%%rcx,%%rsi,1)   \n\t" // store ( gamma01..gamma31 )
+	"vmovups           %%xmm2, (%%rcx,%%r15  )   \n\t" // store ( gamma05..gamma35 )
+	"                                            \n\t"
+	"                                            \n\t"
+	"vunpckhps         %%ymm6,  %%ymm4,  %%ymm0  \n\t"
+	"vunpckhps         %%ymm10, %%ymm8,  %%ymm1  \n\t"
+	"vshufps    $0x4e, %%ymm1,  %%ymm0,  %%ymm2  \n\t"
+	"vblendps   $0xcc, %%ymm2,  %%ymm0,  %%ymm0  \n\t"
+	"vblendps   $0x33, %%ymm2,  %%ymm1,  %%ymm1  \n\t"
+	"                                            \n\t"
+	"vextractf128 $0x1, %%ymm0, %%xmm2           \n\t"
+	"vmovups           %%xmm0, (%%rcx,%%rsi,2)   \n\t" // store ( gamma02..gamma32 )
+	"vmovups           %%xmm2, (%%rcx,%%r13,2)   \n\t" // store ( gamma06..gamma36 )
+	"                                            \n\t"
+	"vextractf128 $0x1, %%ymm1, %%xmm2           \n\t"
+	"vmovups           %%xmm1, (%%rcx,%%r13  )   \n\t" // store ( gamma03..gamma33 )
+	"vmovups           %%xmm2, (%%rcx,%%r10  )   \n\t" // store ( gamma07..gamma37 )
+	"                                            \n\t"
+	"leaq   (%%rcx,%%rsi,8), %%rcx               \n\t" // rcx += 8*cs_c
+	"                                            \n\t"
+	"vunpcklps         %%ymm14, %%ymm12, %%ymm0  \n\t"
+	"vextractf128 $0x1, %%ymm0, %%xmm2           \n\t"
+	"vmovlpd           %%xmm0, (%%r14        )   \n\t" // store ( gamma40..gamma50 )
+	"vmovhpd           %%xmm0, (%%r14,%%rsi,1)   \n\t" // store ( gamma41..gamma51 )
+	"vmovlpd           %%xmm2, (%%r14,%%rsi,4)   \n\t" // store ( gamma44..gamma54 )
+	"vmovhpd           %%xmm2, (%%r14,%%r15  )   \n\t" // store ( gamma45..gamma55 )
+	"                                            \n\t"
+	"vunpckhps         %%ymm14, %%ymm12, %%ymm0  \n\t"
+	"vextractf128 $0x1, %%ymm0, %%xmm2           \n\t"
+	"vmovlpd           %%xmm0, (%%r14,%%rsi,2)   \n\t" // store ( gamma42..gamma52 )
+	"vmovhpd           %%xmm0, (%%r14,%%r13  )   \n\t" // store ( gamma43..gamma53 )
+	"vmovlpd           %%xmm2, (%%r14,%%r13,2)   \n\t" // store ( gamma46..gamma56 )
+	"vmovhpd           %%xmm2, (%%r14,%%r10  )   \n\t" // store ( gamma47..gamma57 )
+	"                                            \n\t"
+	"leaq   (%%r14,%%rsi,8), %%r14               \n\t" // r14 += 8*cs_c
+	"                                            \n\t"
+	"                                            \n\t"
+	"                                            \n\t"
+	"vunpcklps         %%ymm7,  %%ymm5,  %%ymm0  \n\t"
+	"vunpcklps         %%ymm11, %%ymm9,  %%ymm1  \n\t"
+	"vshufps    $0x4e, %%ymm1,  %%ymm0,  %%ymm2  \n\t"
+	"vblendps   $0xcc, %%ymm2,  %%ymm0,  %%ymm0  \n\t"
+	"vblendps   $0x33, %%ymm2,  %%ymm1,  %%ymm1  \n\t"
+	"                                            \n\t"
+	"vextractf128 $0x1, %%ymm0, %%xmm2           \n\t"
+	"vmovups           %%xmm0, (%%rcx        )   \n\t" // store ( gamma00..gamma30 )
+	"vmovups           %%xmm2, (%%rcx,%%rsi,4)   \n\t" // store ( gamma04..gamma34 )
+	"                                            \n\t"
+	"vextractf128 $0x1, %%ymm1, %%xmm2           \n\t"
+	"vmovups           %%xmm1, (%%rcx,%%rsi,1)   \n\t" // store ( gamma01..gamma31 )
+	"vmovups           %%xmm2, (%%rcx,%%r15  )   \n\t" // store ( gamma05..gamma35 )
+	"                                            \n\t"
+	"                                            \n\t"
+	"vunpckhps         %%ymm7,  %%ymm5,  %%ymm0  \n\t"
+	"vunpckhps         %%ymm11, %%ymm9,  %%ymm1  \n\t"
+	"vshufps    $0x4e, %%ymm1,  %%ymm0,  %%ymm2  \n\t"
+	"vblendps   $0xcc, %%ymm2,  %%ymm0,  %%ymm0  \n\t"
+	"vblendps   $0x33, %%ymm2,  %%ymm1,  %%ymm1  \n\t"
+	"                                            \n\t"
+	"vextractf128 $0x1, %%ymm0, %%xmm2           \n\t"
+	"vmovups           %%xmm0, (%%rcx,%%rsi,2)   \n\t" // store ( gamma02..gamma32 )
+	"vmovups           %%xmm2, (%%rcx,%%r13,2)   \n\t" // store ( gamma06..gamma36 )
+	"                                            \n\t"
+	"vextractf128 $0x1, %%ymm1, %%xmm2           \n\t"
+	"vmovups           %%xmm1, (%%rcx,%%r13  )   \n\t" // store ( gamma03..gamma33 )
+	"vmovups           %%xmm2, (%%rcx,%%r10  )   \n\t" // store ( gamma07..gamma37 )
+	"                                            \n\t"
+	//"leaq   (%%rcx,%%rsi,8), %%rcx               \n\t" // rcx += 8*cs_c
+	"                                            \n\t"
+	"vunpcklps         %%ymm15, %%ymm13, %%ymm0  \n\t"
+	"vextractf128 $0x1, %%ymm0, %%xmm2           \n\t"
+	"vmovlpd           %%xmm0, (%%r14        )   \n\t" // store ( gamma40..gamma50 )
+	"vmovhpd           %%xmm0, (%%r14,%%rsi,1)   \n\t" // store ( gamma41..gamma51 )
+	"vmovlpd           %%xmm2, (%%r14,%%rsi,4)   \n\t" // store ( gamma44..gamma54 )
+	"vmovhpd           %%xmm2, (%%r14,%%r15  )   \n\t" // store ( gamma45..gamma55 )
+	"                                            \n\t"
+	"vunpckhps         %%ymm15, %%ymm13, %%ymm0  \n\t"
+	"vextractf128 $0x1, %%ymm0, %%xmm2           \n\t"
+	"vmovlpd           %%xmm0, (%%r14,%%rsi,2)   \n\t" // store ( gamma42..gamma52 )
+	"vmovhpd           %%xmm0, (%%r14,%%r13  )   \n\t" // store ( gamma43..gamma53 )
+	"vmovlpd           %%xmm2, (%%r14,%%r13,2)   \n\t" // store ( gamma46..gamma56 )
+	"vmovhpd           %%xmm2, (%%r14,%%r10  )   \n\t" // store ( gamma47..gamma57 )
+	"                                            \n\t"
+	//"leaq   (%%r14,%%rsi,8), %%r14               \n\t" // r14 += 8*cs_c
+	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
 	".SDONE:                                     \n\t"
 	"                                            \n\t"
-	"vzeroupper                                  \n\t"
 	"                                            \n\t"
 
 	: // output operands (none)
@@ -650,7 +908,7 @@ void bli_sgemm_haswell_asm_6x16
 	"vmovlpd           %%xmm1,  (%%rcx,%%r13,2)  \n\t" \
 	"vmovhpd           %%xmm1,  (%%rcx,%%r10  )  \n\t"*/
 
-void bli_dgemm_haswell_asm_6x8
+void bli_dgemm_zen_asm_6x8
      (
        dim_t               k,
        double*    restrict alpha,
@@ -901,6 +1159,7 @@ void bli_dgemm_haswell_asm_6x8
 	"leaq        (,%%rsi,8), %%rsi               \n\t" // rsi = cs_c * sizeof(double)
 	"                                            \n\t"
 	"leaq   (%%rcx,%%rsi,4), %%rdx               \n\t" // load address of c +  4*cs_c;
+	"leaq   (%%rcx,%%rdi,4), %%r14               \n\t" // load address of c +  4*rs_c;
 	"                                            \n\t"
 	"leaq   (%%rsi,%%rsi,2), %%r13               \n\t" // r13 = 3*cs_c;
 	//"leaq   (%%rsi,%%rsi,4), %%r15               \n\t" // r15 = 5*cs_c;
@@ -916,6 +1175,10 @@ void bli_dgemm_haswell_asm_6x8
 	"                                            \n\t"
 	"cmpq       $8, %%rsi                        \n\t" // set ZF if (8*cs_c) == 8.
 	"jz      .DROWSTORED                         \n\t" // jump to row storage case
+	"                                            \n\t"
+	"                                            \n\t"
+	"cmpq       $8, %%rdi                        \n\t" // set ZF if (8*rs_c) == 8.
+	"jz      .DCOLSTORED                         \n\t" // jump to column storage case
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
@@ -1056,10 +1319,99 @@ void bli_dgemm_haswell_asm_6x8
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
+	".DCOLSTORED:                                \n\t"
+	"                                            \n\t"
+	"                                            \n\t"
+	"vunpcklpd         %%ymm6,  %%ymm4,  %%ymm0  \n\t"
+	"vunpckhpd         %%ymm6,  %%ymm4,  %%ymm1  \n\t"
+	"vunpcklpd         %%ymm10, %%ymm8,  %%ymm2  \n\t"
+	"vunpckhpd         %%ymm10, %%ymm8,  %%ymm3  \n\t"
+	"vinsertf128 $0x1, %%xmm2,  %%ymm0,  %%ymm4  \n\t"
+	"vinsertf128 $0x1, %%xmm3,  %%ymm1,  %%ymm6  \n\t"
+	"vperm2f128 $0x31, %%ymm2,  %%ymm0,  %%ymm8  \n\t"
+	"vperm2f128 $0x31, %%ymm3,  %%ymm1,  %%ymm10 \n\t"
+	"                                            \n\t"
+	"vbroadcastsd    (%%rbx), %%ymm3             \n\t"
+	"                                            \n\t"
+	"vfmadd231pd (%%rcx        ),%%ymm3, %%ymm4  \n\t"
+	"vfmadd231pd (%%rcx,%%rsi  ),%%ymm3, %%ymm6  \n\t"
+	"vfmadd231pd (%%rcx,%%rsi,2),%%ymm3, %%ymm8  \n\t"
+	"vfmadd231pd (%%rcx,%%r13  ),%%ymm3, %%ymm10 \n\t"
+	"vmovupd          %%ymm4,  (%%rcx        )   \n\t"
+	"vmovupd          %%ymm6,  (%%rcx,%%rsi  )   \n\t"
+	"vmovupd          %%ymm8,  (%%rcx,%%rsi,2)   \n\t"
+	"vmovupd          %%ymm10, (%%rcx,%%r13  )   \n\t"
+	"                                            \n\t"
+	"leaq   (%%rcx,%%rsi,4), %%rcx               \n\t"
+	"                                            \n\t"
+	"vunpcklpd         %%ymm14, %%ymm12, %%ymm0  \n\t"
+	"vunpckhpd         %%ymm14, %%ymm12, %%ymm1  \n\t"
+	"vextractf128         $0x1, %%ymm0,  %%xmm2  \n\t"
+	"vextractf128         $0x1, %%ymm1,  %%xmm4  \n\t"
+	"                                            \n\t"
+	"vfmadd231pd (%%r14        ),%%xmm3, %%xmm0  \n\t"
+	"vfmadd231pd (%%r14,%%rsi  ),%%xmm3, %%xmm1  \n\t"
+	"vfmadd231pd (%%r14,%%rsi,2),%%xmm3, %%xmm2  \n\t"
+	"vfmadd231pd (%%r14,%%r13  ),%%xmm3, %%xmm4  \n\t"
+	"vmovupd          %%xmm0,  (%%r14        )   \n\t"
+	"vmovupd          %%xmm1,  (%%r14,%%rsi  )   \n\t"
+	"vmovupd          %%xmm2,  (%%r14,%%rsi,2)   \n\t"
+	"vmovupd          %%xmm4,  (%%r14,%%r13  )   \n\t"
+	"                                            \n\t"
+	"leaq   (%%r14,%%rsi,4), %%r14               \n\t"
+	"                                            \n\t"
+	"                                            \n\t"
+	"vunpcklpd         %%ymm7,  %%ymm5,  %%ymm0  \n\t"
+	"vunpckhpd         %%ymm7,  %%ymm5,  %%ymm1  \n\t"
+	"vunpcklpd         %%ymm11, %%ymm9,  %%ymm2  \n\t"
+	"vunpckhpd         %%ymm11, %%ymm9,  %%ymm3  \n\t"
+	"vinsertf128 $0x1, %%xmm2,  %%ymm0,  %%ymm5  \n\t"
+	"vinsertf128 $0x1, %%xmm3,  %%ymm1,  %%ymm7  \n\t"
+	"vperm2f128 $0x31, %%ymm2,  %%ymm0,  %%ymm9  \n\t"
+	"vperm2f128 $0x31, %%ymm3,  %%ymm1,  %%ymm11 \n\t"
+	"                                            \n\t"
+	"vbroadcastsd    (%%rbx), %%ymm3             \n\t"
+	"                                            \n\t"
+	"vfmadd231pd (%%rcx        ),%%ymm3, %%ymm5  \n\t"
+	"vfmadd231pd (%%rcx,%%rsi  ),%%ymm3, %%ymm7  \n\t"
+	"vfmadd231pd (%%rcx,%%rsi,2),%%ymm3, %%ymm9  \n\t"
+	"vfmadd231pd (%%rcx,%%r13  ),%%ymm3, %%ymm11 \n\t"
+	"vmovupd          %%ymm5,  (%%rcx        )   \n\t"
+	"vmovupd          %%ymm7,  (%%rcx,%%rsi  )   \n\t"
+	"vmovupd          %%ymm9,  (%%rcx,%%rsi,2)   \n\t"
+	"vmovupd          %%ymm11, (%%rcx,%%r13  )   \n\t"
+	"                                            \n\t"
+	//"leaq   (%%rcx,%%rsi,4), %%rcx               \n\t"
+	"                                            \n\t"
+	"vunpcklpd         %%ymm15, %%ymm13, %%ymm0  \n\t"
+	"vunpckhpd         %%ymm15, %%ymm13, %%ymm1  \n\t"
+	"vextractf128         $0x1, %%ymm0,  %%xmm2  \n\t"
+	"vextractf128         $0x1, %%ymm1,  %%xmm4  \n\t"
+	"                                            \n\t"
+	"vfmadd231pd (%%r14        ),%%xmm3, %%xmm0  \n\t"
+	"vfmadd231pd (%%r14,%%rsi  ),%%xmm3, %%xmm1  \n\t"
+	"vfmadd231pd (%%r14,%%rsi,2),%%xmm3, %%xmm2  \n\t"
+	"vfmadd231pd (%%r14,%%r13  ),%%xmm3, %%xmm4  \n\t"
+	"vmovupd          %%xmm0,  (%%r14        )   \n\t"
+	"vmovupd          %%xmm1,  (%%r14,%%rsi  )   \n\t"
+	"vmovupd          %%xmm2,  (%%r14,%%rsi,2)   \n\t"
+	"vmovupd          %%xmm4,  (%%r14,%%r13  )   \n\t"
+	"                                            \n\t"
+	//"leaq   (%%r14,%%rsi,4), %%r14               \n\t"
+	"                                            \n\t"
+	"                                            \n\t"
+	"                                            \n\t"
+	"jmp    .DDONE                               \n\t" // jump to end.
+	"                                            \n\t"
+	"                                            \n\t"
+	"                                            \n\t"
 	".DBETAZERO:                                 \n\t"
 	"                                            \n\t"
 	"cmpq       $8, %%rsi                        \n\t" // set ZF if (8*cs_c) == 8.
 	"jz      .DROWSTORBZ                         \n\t" // jump to row storage case
+	"                                            \n\t"
+	"cmpq       $8, %%rdi                        \n\t" // set ZF if (8*rs_c) == 8.
+	"jz      .DCOLSTORBZ                         \n\t" // jump to column storage case
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
@@ -1170,13 +1522,74 @@ void bli_dgemm_haswell_asm_6x8
 	//"addq      %%rdi, %%rdx                      \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
+	"jmp    .DDONE                               \n\t" // jump to end.
 	"                                            \n\t"
+	"                                            \n\t"
+	"                                            \n\t"
+	".DCOLSTORBZ:                                \n\t"
+	"                                            \n\t"
+	"                                            \n\t"
+	"vunpcklpd         %%ymm6,  %%ymm4,  %%ymm0  \n\t"
+	"vunpckhpd         %%ymm6,  %%ymm4,  %%ymm1  \n\t"
+	"vunpcklpd         %%ymm10, %%ymm8,  %%ymm2  \n\t"
+	"vunpckhpd         %%ymm10, %%ymm8,  %%ymm3  \n\t"
+	"vinsertf128 $0x1, %%xmm2,  %%ymm0,  %%ymm4  \n\t"
+	"vinsertf128 $0x1, %%xmm3,  %%ymm1,  %%ymm6  \n\t"
+	"vperm2f128 $0x31, %%ymm2,  %%ymm0,  %%ymm8  \n\t"
+	"vperm2f128 $0x31, %%ymm3,  %%ymm1,  %%ymm10 \n\t"
+	"                                            \n\t"
+	"vmovupd          %%ymm4,  (%%rcx        )   \n\t"
+	"vmovupd          %%ymm6,  (%%rcx,%%rsi  )   \n\t"
+	"vmovupd          %%ymm8,  (%%rcx,%%rsi,2)   \n\t"
+	"vmovupd          %%ymm10, (%%rcx,%%r13  )   \n\t"
+	"                                            \n\t"
+	"leaq   (%%rcx,%%rsi,4), %%rcx               \n\t"
+	"                                            \n\t"
+	"vunpcklpd         %%ymm14, %%ymm12, %%ymm0  \n\t"
+	"vunpckhpd         %%ymm14, %%ymm12, %%ymm1  \n\t"
+	"vextractf128         $0x1, %%ymm0,  %%xmm2  \n\t"
+	"vextractf128         $0x1, %%ymm1,  %%xmm4  \n\t"
+	"                                            \n\t"
+	"vmovupd          %%xmm0,  (%%r14        )   \n\t"
+	"vmovupd          %%xmm1,  (%%r14,%%rsi  )   \n\t"
+	"vmovupd          %%xmm2,  (%%r14,%%rsi,2)   \n\t"
+	"vmovupd          %%xmm4,  (%%r14,%%r13  )   \n\t"
+	"                                            \n\t"
+	"leaq   (%%r14,%%rsi,4), %%r14               \n\t"
+	"                                            \n\t"
+	"                                            \n\t"
+	"vunpcklpd         %%ymm7,  %%ymm5,  %%ymm0  \n\t"
+	"vunpckhpd         %%ymm7,  %%ymm5,  %%ymm1  \n\t"
+	"vunpcklpd         %%ymm11, %%ymm9,  %%ymm2  \n\t"
+	"vunpckhpd         %%ymm11, %%ymm9,  %%ymm3  \n\t"
+	"vinsertf128 $0x1, %%xmm2,  %%ymm0,  %%ymm5  \n\t"
+	"vinsertf128 $0x1, %%xmm3,  %%ymm1,  %%ymm7  \n\t"
+	"vperm2f128 $0x31, %%ymm2,  %%ymm0,  %%ymm9  \n\t"
+	"vperm2f128 $0x31, %%ymm3,  %%ymm1,  %%ymm11 \n\t"
+	"                                            \n\t"
+	"vmovupd          %%ymm5,  (%%rcx        )   \n\t"
+	"vmovupd          %%ymm7,  (%%rcx,%%rsi  )   \n\t"
+	"vmovupd          %%ymm9,  (%%rcx,%%rsi,2)   \n\t"
+	"vmovupd          %%ymm11, (%%rcx,%%r13  )   \n\t"
+	"                                            \n\t"
+	//"leaq   (%%rcx,%%rsi,4), %%rcx               \n\t"
+	"                                            \n\t"
+	"vunpcklpd         %%ymm15, %%ymm13, %%ymm0  \n\t"
+	"vunpckhpd         %%ymm15, %%ymm13, %%ymm1  \n\t"
+	"vextractf128         $0x1, %%ymm0,  %%xmm2  \n\t"
+	"vextractf128         $0x1, %%ymm1,  %%xmm4  \n\t"
+	"                                            \n\t"
+	"vmovupd          %%xmm0,  (%%r14        )   \n\t"
+	"vmovupd          %%xmm1,  (%%r14,%%rsi  )   \n\t"
+	"vmovupd          %%xmm2,  (%%r14,%%rsi,2)   \n\t"
+	"vmovupd          %%xmm4,  (%%r14,%%r13  )   \n\t"
+	"                                            \n\t"
+	//"leaq   (%%r14,%%rsi,4), %%r14               \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
 	"                                            \n\t"
 	".DDONE:                                     \n\t"
 	"                                            \n\t"
-	"vzeroupper                                  \n\t"
 	"                                            \n\t"
 
 	: // output operands (none)
@@ -1237,7 +1650,7 @@ void bli_dgemm_haswell_asm_6x8
 #define CGEMM_OUTPUT_RS \
 	"vmovups           %%ymm0,  (%%rcx)          \n\t" \
 
-void bli_cgemm_haswell_asm_3x8
+void bli_cgemm_zen_asm_3x8
      (
        dim_t               k,
        scomplex*  restrict alpha,
@@ -1705,7 +2118,6 @@ void bli_cgemm_haswell_asm_3x8
 	"                                            \n\t"
 	".CDONE:                                     \n\t"
 	"                                            \n\t"
-	"vzeroupper                                  \n\t"
 	"                                            \n\t"
 
 	: // output operands (none)
@@ -1762,7 +2174,7 @@ void bli_cgemm_haswell_asm_3x8
 #define ZGEMM_OUTPUT_RS \
 	"vmovupd           %%ymm0,  (%%rcx)          \n\t" \
 
-void bli_zgemm_haswell_asm_3x4
+void bli_zgemm_zen_asm_3x4
      (
        dim_t               k,
        dcomplex*  restrict alpha,
@@ -2233,7 +2645,6 @@ void bli_zgemm_haswell_asm_3x4
 	"                                            \n\t"
 	".ZDONE:                                     \n\t"
 	"                                            \n\t"
-	"vzeroupper                                  \n\t"
 	"                                            \n\t"
 
 	: // output operands (none)

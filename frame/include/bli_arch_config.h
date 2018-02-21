@@ -214,9 +214,9 @@ CNTX_INIT_PROTS( generic )
 
 // -- AMD64 architectures --
 
-//#ifdef BLIS_KERNELS_ZEN
-//#include "bli_kernels_zen.h"
-//#endif
+#ifdef BLIS_KERNELS_ZEN
+#include "bli_kernels_zen.h"
+#endif
 //#ifdef BLIS_KERNELS_EXCAVATOR
 //#include "bli_kernels_excavator.h"
 //#endif

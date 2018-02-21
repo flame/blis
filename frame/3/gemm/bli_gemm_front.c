@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2017, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -51,6 +52,11 @@ void bli_gemm_front
 	obj_t   b_local;
 	obj_t   c_local;
 
+#ifdef BLIS_ENABLE_SMALL_MATRIX
+	gint_t status = bli_gemm_small( alpha, a, b, beta, c, cntx, cntl );
+	if ( status == BLIS_SUCCESS ) return;
+#endif
+
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
 		bli_gemm_check( alpha, a, b, beta, c, cntx );
@@ -82,9 +88,9 @@ void bli_gemm_front
 
 	// Record the threading for each level within the context.
 	bli_cntx_set_thrloop_from_env( BLIS_GEMM, BLIS_LEFT, cntx,
-                                   bli_obj_length( c_local ),
-                                   bli_obj_width( c_local ),
-                                   bli_obj_width( a_local ) );
+	                               bli_obj_length( c_local ),
+	                               bli_obj_width( c_local ),
+	                               bli_obj_width( a_local ) );
 
 	// Invoke the internal back-end via the thread handler.
 	bli_l3_thread_decorator

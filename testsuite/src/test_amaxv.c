@@ -351,14 +351,19 @@ void PASTEMAC(ch,varname) \
 	ctype_r  chi1_i; \
 	ctype_r  abs_chi1; \
 	ctype_r  abs_chi1_max; \
+	dim_t    i_max_l; \
 	dim_t    i; \
-\
-	/* Initialize the index of the maximum absolute value to zero. */ \
-	PASTEMAC(i,copys)( zero_i, *i_max ); \
 \
 	/* If the vector length is zero, return early. This directly emulates
 	   the behavior of netlib BLAS's i?amax() routines. */ \
-	if ( bli_zero_dim1( n ) ) return; \
+	if ( bli_zero_dim1( n ) ) \
+	{ \
+		PASTEMAC(i,copys)( *zero_i, *i_max ); \
+		return; \
+	} \
+\
+	/* Initialize the index of the maximum absolute value to zero. */ \
+	PASTEMAC(i,copys)( *zero_i, i_max_l ); \
 \
 	/* Initialize the maximum absolute value search candidate with
 	   -1, which is guaranteed to be less than all values we will
@@ -390,10 +395,13 @@ void PASTEMAC(ch,varname) \
 			if ( abs_chi1_max < abs_chi1 || bli_isnan( abs_chi1 ) ) \
 			{ \
 				abs_chi1_max = abs_chi1; \
-				*i_max       = i; \
+				i_max_l       = i; \
 			} \
 		} \
 	} \
+\
+	/* Store the final index to the output variable. */ \
+	PASTEMAC(i,copys)( i_max_l, *i_max ); \
 }
 
 INSERT_GENTFUNCR_BASIC0( amaxv_test )

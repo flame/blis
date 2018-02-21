@@ -62,7 +62,7 @@ endif
 ifeq ($(DEBUG_TYPE),noopt)
 COPTFLAGS      := -O0
 else
-COPTFLAGS      := -O2 -fomit-frame-pointer
+COPTFLAGS      := -O3 -fomit-frame-pointer
 endif
 
 CKOPTFLAGS     := $(COPTFLAGS)

@@ -21,7 +21,7 @@ knl:         knl
 skx:         skx
 
 # AMD architectures.
-zen:         zen/haswell
+zen:         zen
 excavator:   excavator/piledriver
 steamroller: steamroller/piledriver
 piledriver:  piledriver

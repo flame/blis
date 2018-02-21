@@ -56,14 +56,19 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	ctype_r  chi1_i; \
 	ctype_r  abs_chi1; \
 	ctype_r  abs_chi1_max; \
+	dim_t    i_max_l; \
 	dim_t    i; \
-\
-	/* Initialize the index of the maximum absolute value to zero. */ \
-	PASTEMAC(i,copys)( zero_i, *i_max ); \
 \
 	/* If the vector length is zero, return early. This directly emulates
 	   the behavior of netlib BLAS's i?amax() routines. */ \
-	if ( bli_zero_dim1( n ) ) return; \
+	if ( bli_zero_dim1( n ) ) \
+	{ \
+		PASTEMAC(i,copys)( *zero_i, *i_max ); \
+		return; \
+	} \
+\
+	/* Initialize the index of the maximum absolute value to zero. */ \
+	PASTEMAC(i,copys)( *zero_i, i_max_l ); \
 \
 	/* Initialize the maximum absolute value search candidate with
 	   -1, which is guaranteed to be less than all values we will
@@ -72,10 +77,12 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 	if ( incx == 1 ) \
 	{ \
+		ctype* chi1 = x; \
+\
 		for ( i = 0; i < n; ++i ) \
 		{ \
 			/* Get the real and imaginary components of chi1. */ \
-			PASTEMAC2(ch,chr,gets)( x[i], chi1_r, chi1_i ); \
+			PASTEMAC2(ch,chr,gets)( *chi1, chi1_r, chi1_i ); \
 \
 			/* Replace chi1_r and chi1_i with their absolute values. */ \
 			PASTEMAC(chr,abval2s)( chi1_r, chi1_r ); \
@@ -94,8 +101,10 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			if ( abs_chi1_max < abs_chi1 || bli_isnan( abs_chi1 ) ) \
 			{ \
 				abs_chi1_max = abs_chi1; \
-				*i_max       = i; \
+				i_max_l      = i; \
 			} \
+\
+			chi1 += 1; \
 		} \
 	} \
 	else \
@@ -124,10 +133,13 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			if ( abs_chi1_max < abs_chi1 || bli_isnan( abs_chi1 ) ) \
 			{ \
 				abs_chi1_max = abs_chi1; \
-				*i_max       = i; \
+				i_max_l      = i; \
 			} \
 		} \
 	} \
+\
+	/* Store the final index to the output variable. */ \
+	PASTEMAC(i,copys)( i_max_l, *i_max ); \
 }
 
 INSERT_GENTFUNCR_BASIC2( amaxv, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )

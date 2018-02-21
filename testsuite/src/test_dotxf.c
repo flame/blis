@@ -40,10 +40,10 @@
 static char*     op_str                    = "dotxf";
 static char*     o_types                   = "mvv";  // A x y
 static char*     p_types                   = "cc";   // conjat conjx
-static thresh_t  thresh[BLIS_NUM_FP_TYPES] = { { 1e-04, 1e-05 },   // warn, pass for s
+static thresh_t  thresh[BLIS_NUM_FP_TYPES] = { { 5e-04, 5e-05 },   // warn, pass for s
                                                { 1e-04, 1e-05 },   // warn, pass for c
-                                               { 1e-13, 1e-14 },   // warn, pass for d
-                                               { 1e-13, 1e-14 } }; // warn, pass for z
+                                               { 1e-12, 1e-13 },   // warn, pass for d
+                                               { 1e-12, 1e-13 } }; // warn, pass for z
 
 // Local prototypes.
 void libblis_test_dotxf_deps

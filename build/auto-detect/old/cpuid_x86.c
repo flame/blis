@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2015, The University of Texas at Austin
+   Copyright (C) 2017, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -233,6 +234,14 @@ int cpu_detect()
           else
             return CPUNAME_GENERIC; //OS don't support AVX.
         }
+      case 8:
+	switch (model){
+	case 1:
+          if(support_avx())
+	    return CPUNAME_ZEN;
+          else
+            return CPUNAME_REFERENCE; //OS don't support AVX.
+	}
       }
       break;
     }
