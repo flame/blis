@@ -7446,7 +7446,7 @@ Date:   Fri Feb 23 17:42:48 2018 -0600
 
     Version file update (0.3.0)
 
-commit 3defc7265c12cf85e9de2d7a1f243c5e090a6f9d
+commit 3defc7265c12cf85e9de2d7a1f243c5e090a6f9d (origin/master, origin/HEAD)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Fri Feb 23 17:38:19 2018 -0600
 
@@ -7482,7 +7482,7 @@ Date:   Fri Feb 23 16:33:32 2018 -0600
       contained. To remedy this situation, we now selectively use movss to
       load any element that could be the last element in the matrix.
 
-commit 5112e1859e7f8888f5555eb7bc02bd9fab9b4442 (origin/rt)
+commit 5112e1859e7f8888f5555eb7bc02bd9fab9b4442 (origin/rt, rt)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Fri Feb 23 14:31:26 2018 -0600
 
@@ -7714,7 +7714,7 @@ Date:   Thu Jan 4 20:51:35 2018 -0600
       time hardware detection (when clang is selected).
     - Added some missing (but mostly-optional) quotes to configure script.
 
-commit 5a7005dd44ed3174abbe360981e367fd41c99b4b
+commit 5a7005dd44ed3174abbe360981e367fd41c99b4b (origin/amd, amd)
 Merge: 7be88705 3bc99a96
 Author: Nisanth M P <nisanth.padinharepatt@amd.com>
 Date:   Wed Jan 3 12:05:12 2018 +0530
@@ -7763,7 +7763,7 @@ Date:   Sat Dec 23 15:32:03 2017 -0600
       is used by the auto-detection script to printf() the name of the
       sub-configuration corresponding to the detected hardware.
 
-commit 9804adfd405056ec332bb8e13d68c7b52bd3a6c1 (origin/selfinit)
+commit 9804adfd405056ec332bb8e13d68c7b52bd3a6c1 (origin/selfinit, selfinit)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Thu Dec 21 19:22:57 2017 -0600
 
