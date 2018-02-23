@@ -44,8 +44,17 @@
 	"vshufps    $0x88,   %%xmm1,  %%xmm0,  %%xmm0  \n\t" \
 	"vmovlps    (%%rcx,%%rsi,4),  %%xmm2,  %%xmm2  \n\t" \
 	"vmovhps    (%%rcx,%%r15  ),  %%xmm2,  %%xmm2  \n\t" \
+	/* We can't use vmovhps for loading the last element becauase that
+	   might result in reading beyond valid memory. (vmov[lh]psd load
+	   pairs of adjacent floats at a time.) So we need to use vmovss
+	   instead. But since we're limited to using ymm0 through ymm2
+	   (ymm3 contains beta and ymm4 through ymm15 contain the microtile)
+	   and due to the way vmovss zeros out all bits above 31, we have to
+	   load element 7 before element 6. */ \
+	"vmovss     (%%rcx,%%r10  ),  %%xmm1           \n\t" \
+	"vpermilps  $0xcf,   %%xmm1,  %%xmm1           \n\t" \
 	"vmovlps    (%%rcx,%%r13,2),  %%xmm1,  %%xmm1  \n\t" \
-	"vmovhps    (%%rcx,%%r10  ),  %%xmm1,  %%xmm1  \n\t" \
+	/*"vmovhps    (%%rcx,%%r10  ),  %%xmm1,  %%xmm1  \n\t"*/ \
 	"vshufps    $0x88,   %%xmm1,  %%xmm2,  %%xmm2  \n\t" \
 	"vperm2f128 $0x20,   %%ymm2,  %%ymm0,  %%ymm0  \n\t"
 
