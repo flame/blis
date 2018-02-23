@@ -1,10 +1,2863 @@
-commit 940a707ac78de975110e17c95765e65b89aa5e10 (HEAD -> master, tag: 0.2.2)
+commit 709f8361ebc90b96b02ebe5c5ffb6fc3b1b25e58 (HEAD -> master, tag: 0.3.0)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Feb 23 17:42:48 2018 -0600
+
+    Version file update (0.3.0)
+
+commit 3defc7265c12cf85e9de2d7a1f243c5e090a6f9d (origin/master, origin/HEAD)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Feb 23 17:38:19 2018 -0600
+
+    Applied 34b72a3 to non-active/unused microkernels.
+    
+    Details:
+    - Applied the read-beyond-bounds bugfix in 34b72a3 to other haswell and
+      zen kernels (ie: other microtile shapes) which are not used by default.
+      This was done mostly in case someone decided to pick up these kernels
+      and start using them, not because it affects BLIS's behavior
+      out-of-the-box.
+
+commit 34b72a351745aa0d47bb0b74ebcd0f0a616d613d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Feb 23 16:33:32 2018 -0600
+
+    Fixed obscure read-beyond-bounds bug in sgemm ukrs.
+    
+    Details:
+    - Fixed an obscure bug in the bli_sgemm_haswell_asm_6x16 and
+      bli_sgemm_zen_asm_6x16 microkernels when the input/output matrix C
+      is stored with general stride (ie: both rs and cs are non-unit). The
+      bug was rooted in the way those microkernels read from matrix C--
+      namely, they used vmovlps/vmovhps instead of movss. By loading two
+      floats at a time, even if one of them was treated as junk, the
+      assembly code could be written in a more concise manner. However,
+      under certain conditions--if m % mr == 0 and n % nr == 0 and the
+      underlying matrix is not an internal "view" into a larger matrix--
+      this could result in the very last vmovhps of the last (bottom-right)
+      microkernel invocation reading beyond valid memory. Specifically, the
+      low 32 bits read would always be valid, but the high 32 bits could
+      reside beyond the bounds of the array in which the output C matrix is
+      contained. To remedy this situation, we now selectively use movss to
+      load any element that could be the last element in the matrix.
+
+commit 5112e1859e7f8888f5555eb7bc02bd9fab9b4442 (origin/rt, rt)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Feb 23 14:31:26 2018 -0600
+
+    Added missing 'restrict' to some kernels' cntx_t*.
+    
+    Details:
+    - Added missing 'restrict' keyword to cntx_t* argument of function
+      signatures corresponding to level-1v, level-1f, and level-1m kernels.
+      This affected bli_l1v_ker_prot.h, bli_l1f_ker_prot.h, and
+      bli_l1m_ker_prot.h. (The 'restrict' was already being used to
+      qualify cntx_t* arguments for kernels defined in bli_l3_ker_prot.h.)
+    - Added comments to bli_l1v_ker.h, bli_l1f_ker.h, bli_l1m_ker.h, and
+      bli_l3_ukr.h that help explain how those headers function to produce
+      kernel prototypes using the prototype macros defined in the files
+      mentioned above.
+
+commit 1fa8af95d807168e0849adb668492601e7009be0
+Merge: c084b03b 16813335
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Feb 21 17:54:02 2018 -0600
+
+    Merge branch 'rt'
+
+commit c084b03b31d84427a120e391963db5419f1911ee
+Merge: 5d03b6e6 fa74af4e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Feb 21 17:52:17 2018 -0600
+
+    Merge branch 'rt'
+
+commit 16813335bdb5978bc9a26cd00a32bd5a130130c4
+Merge: fa74af4e 5a7005dd
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Feb 21 17:43:32 2018 -0600
+
+    Merge branch 'amd' into rt
+    
+    Details:
+    - Merged contributions made by AMD via 'amd' branch (see summary below).
+      Special thanks to AMD for their contributions to-date, especially with
+      regard to intrinsic- and assembly-based kernels.
+    - Added column storage output cases to microkernels in
+      bli_gemm_zen_asm_d6x8.c and bli_gemmtrsm_l_zen_asm_d6x8.c. Even with
+      the extra cost of transposing the microtile in registers, this is
+      much faster than using the general storage case when the underlying
+      matrix is column-stored.
+    - Added s and d assembly-based zen gemmtrsm_u microkernel (including
+      column storage optimization mentioned above).
+    - Updated zen sub-configuration to reflect presence of new native
+      kernels.
+    - Temporarily reverted zen sub-configuration's level-3 cache blocksizes
+      to smaller haswell values.
+    - Temporarily disabled small matrix handling for zen configuration
+      family in config/zen/bli_family_zen.h.
+    - Updated zen CFLAGS according to changes in 1e4365b.
+    - Updated haswell microkernels such that:
+      - only one vzeroupper instruction is called prior to returning
+      - movapd/movupd are used in leiu of movaps/movups for double-real
+        microkernels. (Note that single-real microkernels still use
+        movaps/movups.)
+    - Added kernel prototypes to kernels/zen/bli_kernels_zen.h, which is
+      now included via frame/include/bli_arch_config.h.
+    - Minor updates to bli_amaxv_ref.c (and to inlined "test" implementation
+      in testsuite/src/test_amaxv.c).
+    - Added early return for alpha == 0 in bli_dotxv_ref.c.
+    - Integrated changes from f07b176, including a fix for undefined
+      behavior when executing the 1m method under certain conditions.
+    - Updated config_registry; no longer need haswell kernels for zen
+      sub-configuration.
+    - Tweaked marginal and pass thresholds for dotxf.
+    - Reformatted level-1v, -1f, and -3 amd kernels and inserted additional
+      comments.
+    - Updated LICENSE file to explicitly mention that parts are copyright
+      UT-Austin and AMD.
+    - Added AMD copyright to header templates in build/templates.
+    
+    Summary of previous changes from 'amd' branch.
+    - Added s and d assembly-based zen gemm microkernels (d6x8 and d8x6) and
+      s and d assembly-based zen gemmtrsm_l microkernels (d6x8).
+    - Added s and d intrinsics-based zen kernels for amaxv, axpyv, dotv, dotxv,
+      and scalv, with extra-unrolling variants for axpyv and scalv.
+    - Added a small matrix handler to bli_gemm_front(), with the handler
+      implemented in kernels/zen/3/bli_gemm_small_matrix.c.
+    - Added additional logic to sumsqv that first attempts to compute the
+      sum of the squares via dotv(). If there is a floating-point exception
+      (FE_OVERFLOW), then the previous (numerically conservative) code is
+      used; otherwise, the result of dotv() is square-rooted and stored as
+      the result. This new implementation is only enabled when FE_OVERFLOW
+      is #defined. If the macro is not #defined, then the previous
+      implementation is used.
+    - Added axpyv and dotv standalone test drivers to test directory.
+    - Added zen support to old cpuid_x86.c driver in build/auto-detect/old.
+    - Added thread-local and __attribute__-related macros to bli_macro_defs.h.
+
+commit 5d03b6e6e19d5a07f0cccf1a158f02fbd62dfd99
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Mon Feb 19 11:31:30 2018 -0600
+
+    Fix asm macro include line for KNL. Fixes #167.
+
+commit f07b176c84dc9ca38fb0d68805c28b69287c938a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Feb 15 18:36:54 2018 -0600
+
+    Fixed an obscure bug in the 1m implementation.
+    
+    Details:
+    - Fixed a bug in the way the bli_gemm1m_cntx_ref() function (defined in
+      ref_kernels/bli_cntx_ref.c) initializes its context for 1m execution.
+      Previously, the function probed the context that was in the process of
+      being updated for use with 1m--this context being previously
+      initialized/copied from a native context--for its storage preference
+      to determine which "variant" (row- or column-oriented) of 1m would be
+      needed. However, the _cntx_ref() function was not updating the method
+      field of the context until AFTER this query, and the conditional which
+      depended on it, had taken place, meaning the storage preference query
+      function would mistakenly think the context was for native execution,
+      since the context's method field would still be set to BLIS_NAT. This
+      would lead it to incorrectly grab the storage preference of the complex
+      domain microkernel rather than the corresponding real domain
+      microkernel, which could cause the storage preference predicate to
+      evaluate to the wrong value, which would lead to the _cntx_ref()
+      function choosing the wrong variant. This could lead to undefined
+      behavior at runtime. The method is now explicitly set within the
+      context prior to calling the storage preference query function.
+    - Updated comments in frame/ind/oapi/bli_l3_3m4m1m_oapi.c.
+    - Fixed a typo in the commented-out CFLAGS in config/zen/make_defs.mk,
+      which are appropriate for gcc 6.x and newer. (Mistakenly used
+      -march=bdver4 instead of -march=znver1.)
+
+commit 1f94bb7b96eb2b67257e6c4df89e29c73e9ab386
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jan 19 12:46:53 2018 -0600
+
+    Document how to enable zen-specific instructions.
+    
+    Details:
+    - Added as a comment in config/zen/make_defs.mk the list of compiler flags
+      that could be added to manually enable the instructions provided by the
+      Zen microarchitecture that are not already implied by -march=bdver4.
+      This information, along with the previous commit's flags to selectively
+      disable Bulldozer instructions no longer present in Zen, was gathered
+      from [1]. I hesitate to enable use of these instructions since I don't
+      have any Zen hardware to test on yet.
+      [1] https://wiki.gentoo.org/wiki/Ryzen
+
+commit 1e4365b21bafa02bd108c5ac4705a25671fb9441
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jan 18 12:03:51 2018 -0600
+
+    Augment zen CFLAGS to prevent illegal instruction.
+    
+    Details:
+    - Added various compiler flags (-mno-fma4 -mno-tbm -mno-xop -mno-lwp) so
+      that compiling with -march=bdver4 on zen-based architectures does not
+      result in an illegal instruction error at runtime. Note: This fix is
+      only needed for gcc 5.4; gcc 6.3 or later supports the use of
+      -march=znver1, which can be used in lieu of the augmented set of flags
+      based on bdver4. Thanks to Nisanth Padinharepatt for reporting this
+      error.
+
+commit fa74af4e1fa7385ac3f3089fe1ea7bb88c906029
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jan 9 13:43:15 2018 -0600
+
+    Minor labeling update for './configure -c' output.
+    
+    Details:
+    - Print the name of the configuration in the output of the
+      kernel-to-config map (and chosen pairs list) as a subtle way to remind
+      the user that these only apply to the targeted configuration (whereas
+      the config list and kernel list are printed without regard to which
+      configuration was actually targeted).
+
+commit 5cdea756c7391e2c6cbfb38436ef9a205f860237
+Merge: 9d8858b5 1e7a4896
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Jan 7 19:45:20 2018 -0600
+
+    Merge branch 'rt'
+
+commit 9d8858b5cff4a4b078b87872847a5710073fff0a
+Merge: 0b3ca3cf f7df64da
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Sun Jan 7 10:03:25 2018 -0600
+
+    Merge pull request #164 from devinamatthews/master
+    
+    Don't use memkind for skx configuration.
+
+commit f7df64daf6bbe6431effada6e13d8d1fab5aa221
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Sun Jan 7 09:37:25 2018 -0600
+
+    Don't use memkind for skx configuration. Fixes #163.
+
+commit 1e7a4896e0cbe73c4685fa956278e3f28273cdf9
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jan 5 12:33:48 2018 -0600
+
+    Minor error handling in update-version-file.sh.
+    
+    Details:
+    - Added explicit handling of situations when 'git describe --tags'
+      returns an error. This command is used by update-version-file.sh
+      when deciding whether or not to update the version file prior to
+      configuration.
+    - Removed bli_packm.c and bli_unpackm.c, as they contained no source
+      code.
+
+commit 0b3ca3cfb682715a3686fd93ebb10d4a695d1162
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jan 4 20:51:35 2018 -0600
+
+    Intelligently select compiler for auto-detection.
+    
+    Details:
+    - Rewrote code that selects the compiler for the purposes of compiling
+      the auto-detection executable. CC (if specified) is tried first. Then
+      gcc. Then clang. The absolute fallback is cc. The previous code was
+      sort of broken, and seemed to unintentionally always use gcc.
+    - Moved various configuration-agnostic flags from config/*/make_defs.mk
+      files to common.mk. The new mechanism appends the configuration-
+      agnostic flags to the various compiler flag variables initialized in
+      make_defs.mk. Flags specific to the sub-configuration are still set
+      in make_defs.mk.
+    - Added -Wno-tautological-compare to CMISCFLAGS when clang is in use.
+      Also added the flag to the compiler instantiation during configure-
+      time hardware detection (when clang is selected).
+    - Added some missing (but mostly-optional) quotes to configure script.
+
+commit 5a7005dd44ed3174abbe360981e367fd41c99b4b (origin/amd, amd)
+Merge: 7be88705 3bc99a96
+Author: Nisanth M P <nisanth.padinharepatt@amd.com>
+Date:   Wed Jan 3 12:05:12 2018 +0530
+
+    Merge changes in AMD beta release 0.95 into amd branch
+
+commit 0b9c5127e91508c115228ca604ee2dac8de8f477
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Dec 23 15:53:44 2017 -0600
+
+    Enabled C99, added stdint.h to auto-detect build.
+    
+    Details:
+    - Added "-std=c99" to compiler arguments when building auto-detection
+      driver in configure script.
+    - Added #include <stdint.h> to all three source files needed by auto-
+      detection program.
+
+commit 0ce5e19c318e04909d3e664d69accb3a0fc6b988
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Dec 23 15:32:03 2017 -0600
+
+    Reimplemented configure-time hardware detection.
+    
+    Details:
+    - Reimplemented the hardware detection functionality invoked when running
+      "./configure auto". Previously, a standalone script in build/auto-detect
+      that used CPUID was used. However, the script attempted to enumerate all
+      models for each microarchitecture supported. The new approach recycles
+      the same code used for runtime hardware detection introduced in 2c51356.
+      This has two immediate benefits. First, it reduces and consolidates the
+      code required to detect microarchitectures via the CPUID instruction.
+      Second, it provides an indirect way of testing at configure-time the
+      code that is used to detect hardware at runtime. This code is (a) only
+      activated when targeting a configuration family (such as intel64 or
+      amd64) at configure-time and (b) somewhat difficult to test in
+      practice, since it relies on having access to older microarchitectures.
+    - The above change required placing conditional cpp macro blocks in
+      bli_arch.c and bli_cpuid.c which either #include "blis.h" or #include
+      a bare-bones set of headers that does not rely on the presence of a
+      bli_config.h header. This is needed because bli_config.h has not been
+      created yet when configure-time auto-detection takes places.
+    - Defined a new function in bli_arch.c, bli_arch_string(), which takes
+      an arch_t id and returns a pointer to a string that contains the
+      lowercase name of the corresponding microarchitecture. This function
+      is used by the auto-detection script to printf() the name of the
+      sub-configuration corresponding to the detected hardware.
+
+commit 9804adfd405056ec332bb8e13d68c7b52bd3a6c1 (origin/selfinit, selfinit)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Dec 21 19:22:57 2017 -0600
+
+    Added option to disable pack buffer memory pools.
+    
+    Details:
+    - Added a new configure option, --[en|dis]able-packbuf-pools, which will
+      enable or disable the use of internal memory pools for managing buffers
+      used for packing. When disabled, the function specified by the cpp
+      macro BLIS_MALLOC_POOL is called whenever a packing buffer is needed
+      (and BLIS_FREE_POOL is called when the buffer is ready to be released,
+      usually at the end of a loop). When enabled, which was the status quo
+      prior to this commit, a memory pool data structure is created and
+      managed to provide threads with packing buffers. The memory pool
+      minimizes calls to bli_malloc_pool() (i.e., the wrapper that calls
+      BLIS_MALLOC_POOL), but does so through a somewhat more complex
+      mechanism that may incur additional overhead in some (but not all)
+      situations. The new option defaults to --enable-packbuf-pools.
+    - Removed the reinitialization of the memory pools from the level-3
+      front-ends and replaced it with automatic reinitialization within the
+      pool API's implementation. This required an extra argument to
+      bli_pool_checkout_block() in the form of a requested size, but hides
+      the complexity entirely from BLIS. And since bli_pool_checkout_block()
+      is only ever called within a critical section, this change fixes a
+      potential race condition in which threads using contexts with different
+      cache blocksizes--most likely a heterogeneous environment--can check
+      out pool blocks that are too small for the submatrices it wishes to
+      pack. Thanks to Nisanth Padinharepatt for reporting this potential
+      issue.
+    - Removed several functions in light of the relocation of pool reinit,
+      including bli_membrk_reinit_pools(), bli_memsys_reinit(),
+      bli_pool_reinit_if(), and bli_check_requested_block_size_for_pool().
+    - Updated the testsuite to print whether the memory pools are enabled or
+      disabled.
+
+commit 107801aaae180c00022f1b990bc59038c14949d2
+Merge: d9c05745 0084531d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Dec 18 16:29:28 2017 -0600
+
+    Merge branch 'master' into selfinit
+
+commit 0084531d3eea730a319ecd7018428148c81bbba7
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Dec 17 18:58:25 2017 -0600
+
+    Updated flatten-headers.py for python3.
+    
+    Details:
+    - Modifed flatten-headers.py to work with python 3.x. This mostly
+      amounted to removing print statements (which I replaced with calls
+      to my_print(), a wrapper to sys.stdout.write()). Thanks to Stefan
+      Husmann for pointing out the script's incompatibility with python 3.
+    - Other minor changes/cleanups.
+
+commit 90b11b79c302f208791bdfb1ed754873103c7ce5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Dec 17 17:34:32 2017 -0600
+
+    Modest performance boost to flatten-headers.py.
+    
+    Details:
+    - Updated flatten-headers.py to pre-compile the main regular expression
+      used to isolate #include directives and the header filenames they
+      reference. The compiled regex object is then used over and over on
+      each header file in the tree of referenced headers. This appears to
+      have provided a 1.7-2x performance increase in the best case.
+    - Other minor tweaks, such as renaming the main recursive function from
+      replace_pass() to flatten_header().
+
+commit 99dee87f30b4d437fa6b5e4ba862526d07b9f08b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Dec 17 16:47:27 2017 -0600
+
+    Reimplemented flatten-headers.sh in python.
+    
+    Details:
+    - Added flatten-headers.py, a python implementation of the bash script
+      flatten-headers.sh. The new script appears to be 25-100x faster,
+      depending on the operating system, filesystem, etc. The python script
+      abides by the same command line interface as its predecessor and
+      targets python 2.7 or later. (Thanks to Devin Matthews for suggesting
+      that I look into a python replacement for higher performance.)
+    - Activated use of flatten-headers.py in common.mk via the FLATTEN_H
+      variable.
+    - Made minor tweaks to flatten-headers.sh such as spelling corrections
+      in comments.
+
+commit d9c0574599c3f97c0f9b6c334a077bab9452e1f4
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Dec 14 17:13:42 2017 -0600
+
+    Allow travis failures of OS X builds that run testsuite.
+    
+    Details:
+    - Added an allowance for OS X builds that run the testsuite to fail.
+      There seems to be an issue with 1m when running in Travis CI under
+      OS X and clang, but only in double-precision. Haven't been able to
+      reproduce the error on my own, and thus, I can't debug it. (Hopefully
+      it is simply a version-specific compiler bug.)
+
+commit 86cd23b7379b00a42b4ecc04fa668f1e3f9b54ee
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Dec 14 15:47:41 2017 -0600
+
+    Fixed testsuite Makefile brokenness from 9091a207.
+    
+    Details:
+    - Fixed a makefile error encountered when building the testsuite directly
+      in its directory (as opposed to indirectly via 'make test'). The fix
+      involves introducing a new variable, BUILD_PATH, alongside the existing
+      DIST_PATH variable. By default, BUILD_PATH is set to the current
+      directory, and is overridden by other Makefiles used by, for example,
+      the testsuite and standalone test drivers in testsuite or test,
+      respectively.
+    - Some files/directories in common.mk were redefined in terms of
+      BUILD_DIR, such as the locations of config.mk file and the intermediate
+      include directory.
+
+commit 6a3a8924c04d25507fc4aa593df30c56c7dc12f7
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Dec 14 13:20:02 2017 -0600
+
+    Temporarily show Makefile's testsuite output.
+    
+    Details:
+    - Disabled redirection of testsuite output for 'test' target. This is
+      part of an attempt to debug a segmentation fault on OS X via Travis.
+
+commit 9a01080dd426915bed18229f70401bfa639dc283
+Merge: 83316485 a32e8a47
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Dec 14 11:27:19 2017 -0600
+
+    Merge branch 'master' into selfinit
+
+commit a32e8a47c022b6071302b2956af5728976c83ca9 (origin/travis)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Dec 13 16:31:36 2017 -0600
+
+    Added an exclusion to .travis.yml.
+    
+    Details:
+    - Added exclusion for out-of-tree builds on OS X (clang).
+
+commit b9f7d987df548965c86e16e0ba94d5cad0d9b399
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Dec 13 16:22:09 2017 -0600
+
+    Cleaned up after previous travis oot debugging.
+    
+    Details:
+    - Removed debugging output from common.mk related to Travis CI
+      out-of-tree builds.
+    - Other minor cleanups to common.mk.
+
+commit 9091a207aa8c49e279676ea02be533480b3b0d5a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Dec 13 16:12:34 2017 -0600
+
+    Attempted fix to travis oot build failure.
+    
+    Details:
+    - Found the likely cause of the Travis CI out-of-tree build failures:
+      config.mk was being read from DIST_PATH, rather than the current
+      directory.
+
+commit c01c71c33e236e6c91f5ddd3ec1e3faec89368c1
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Dec 13 15:58:50 2017 -0600
+
+    Added debugging output to Makefile.
+    
+    Details:
+    - Added $(info ...) statements in key locations in an attempt to reveal
+      why Travis CI doesn't like building BLIS out-of-tree.
+
+commit 784289d69dd6b3692444d3b3e290f6a014465b72
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Dec 13 15:31:27 2017 -0600
+
+    Updated SHELL in common.mk from /bin/bash to bash.
+
+commit d9bb1d1d4ebc89ea75d9d927d09882162a914f77
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Dec 13 15:27:54 2017 -0600
+
+    Defined SHELL in common.mk so "echo -n" works.
+    
+    Details:
+    - Defined the SHELL variable in common.mk as "/bin/bash" so that the
+      -n option can be used with echo in the Makefile rule for flattening
+      blis.h. Thanks to Devin Matthews for suggesting this fix.
+
+commit 9289a08667df2044f3a37af54d893efe2b56d555
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Dec 13 15:14:27 2017 -0600
+
+    Attempt 3 on .travis.yml.
+
+commit 720bfcf0ef54fdc41df0dcaa94503edb0d5c8972
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Dec 13 14:52:28 2017 -0600
+
+    More fixes to .travis.yml.
+    
+    Details:
+    - Fixed a mistake (hopefully) in d0c4dd0 that resulted in many more
+      osx/clang sub-tests than intended.
+    - Shortened the variable names in an effort to make them more readable
+      via the Travis CI web interface.
+
+commit 8717c9c97fe9b1ecd3b3192049a73976f8390ca7
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Dec 13 14:36:37 2017 -0600
+
+    Added 'pwd' commands to .travis.yml for debugging.
+    
+    Details:
+    - Added 'pwd' commands to the script portion of the .travis.yml file in
+      an attempt to uncover the problem with the recent out-of-tree build
+      testing changes made in d0c4dd0.
+
+commit 83316485ce10f6fcafe92a1c146282de0dd8068a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Dec 13 14:14:50 2017 -0600
+
+    Simplified/fixed self-initialization.
+    
+    Details:
+    - Fixed a race condition in self-initialization whereby the bli_is_init
+      static variable could be erroneously read as TRUE by thread 1 while
+      thread 0 is still executing bli_init_apis(), thus allowing thread 1 to
+      use the library before it is actually ready. Thanks to to Minh Quan Ho
+      and Devin Matthews for pointing out this issue.
+    - Part of the solution to the aforementioned race condition was involved
+      replacing the runtime initialization of the global scalar constants
+      (e.g., BLIS_ONE, BLIS_ZERO, etc.) in bli_const.c with a static
+      initialization of those same constants. This eliminates the need for
+      bli_const_init() altogether. (The static initialization is made concise
+      via preprocess macros.)
+    - Defined bli_gks_query_cntx_noinit(), which behaves just like
+      bli_gks_query_cntx(), except that it does not call bli_init_once(). This
+      function is called in lieu of bli_gks_query_cntx() in bli_ind_init() and
+      bli_memsys_init() so as to not result in any recursion into
+      bli_init_once().
+    - Removed BLIS_ONE_HALF, BLIS_MINUS_ONE_HALF global scalar constants.
+      They have no use in BLIS or its test products, and we have little reason
+      to believe they are used by others.
+    - Removed testsuite/out file, which was accidentally committed as part
+      of 70640a3.
+
+commit 6526d1d4ae6dbfa854ca8d1e5f224cd6ab3fa958
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Dec 12 13:50:43 2017 -0600
+
+    Added temp_dir argument to flatten-headers.sh.
+    
+    Details:
+    - Added "temp_dir" argument to flatten-headers.sh so that the caller can
+      specify where intermediate files should be created as the script runs.
+    - Updated flatten-headers.sh to create intermediate files in temp_dir
+      instead of alongside the corresponding source files. This should now
+      (once again) allow out-of-tree builds where the BLIS distribution is
+      read-only, or where the out-of-tree build is running concurrently with
+      another out-of-tree build. (Thanks to Devin Matthews for pointing out
+      the possibility of simultaneous out-of-tree builds.)
+
+commit 94755017c967630daf2e31c1f63ed5e88ab0d6ab
+Merge: d0c4dd00 5cf7b0c4
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Dec 12 12:50:41 2017 -0600
+
+    Merge branch 'master' of github.com:flame/blis
+
+commit d0c4dd000ff38acc249e8acf7e0655a523991695
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Dec 12 12:47:53 2017 -0600
+
+    Added out-of-tree build test to .travis.yml file.
+    
+    Details:
+    - Modified .travis.yml file to include an out-of-tree build test (using
+      the "auto" configure target). Thanks to Devin Matthews for this
+      suggestion.
+
+commit 5cf7b0c4e52922069183a87dc2aa177419644e04
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Tue Dec 12 12:38:48 2017 -0600
+
+    Ignore blis.h.interm [ci skip]
+
+commit 8d8ff74d15b4a584929cec36034ba6d3c53f7d27
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Dec 12 12:32:50 2017 -0600
+
+    Further attempt to fix out-of-tree builds.
+    
+    Details:
+    - Fix applied in 87978f6 was necessary but not sufficient to fix
+      out-of-tree builds. It turns out that using a source tree that had
+      already built the target erroneously gave the impression that
+      out-of-tree builds were working again, when in fact they were still
+      broken. The additional changes in this commit should complete the
+      fix that was started in the aforementioned commit. Thanks to Devin
+      Matthews and Shaden Smith for their help in isolating this issue.
+
+commit 70640a37109290b57c344083c00624e13c496e30
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Dec 11 17:18:43 2017 -0600
+
+    Implemented library self-initialization.
+    
+    Details:
+    - Defined two new functions in bli_init.c: bli_init_once() and
+      bli_finalize_once(). Each is implemented with pthread_once(), which
+      guarantees that, among the threads that pass in the same pthread_once_t
+      data structure, exactly one thread will execute a user-defined function.
+      (Thus, there is now a runtime dependency against libpthread even when
+      multithreading is not enabled at configure-time.)
+    - Added calls to bli_init_once() to top-level user APIs for all
+      computational operations as well as many other functions in BLIS to
+      all but guarantee that BLIS will self-initialize through the normal
+      use of its functions.
+    - Rewrote and simplified bli_init() and bli_finalize() and related
+      functions.
+    - Added -lpthread to LDFLAGS in common.mk.
+    - Modified the bli_init_auto()/_finalize_auto() functions used by the
+      BLAS compatibility layer to take and return no arguments. (The
+      previous API that tracked whether BLIS was initialized, and then
+      only finalized if it was initialized in the same function, was too
+      cute by half and borderline useless because by default BLIS stays
+      initialized when auto-initialized via the compatibility layer.)
+    - Removed static variables that track initialization of the sub-APIs in
+      bli_const.c, bli_error.c, bli_init.c, bli_memsys.c, bli_thread, and
+      bli_ind.c. We don't need to track initialization at the sub-API level,
+      especially now that BLIS can self-initialize.
+    - Added a critical section around the changing of the error checking
+      level in bli_error.c.
+    - Deprecated bli_ind_oper_has_avail() as well as all functions
+      bli_<opname>_ind_get_avail(), where <opname> is a level-3 operation
+      name. These functions had no use cases within BLIS and likely none
+      outside of BLIS.
+    - Commented out calls to bli_init() and bli_finalize() in testsuite's
+      main() function, and likewise for standalone test drivers in 'test'
+      directory, so that self-initialization is exercised by default.
+
+commit 70a64432ee5a7adbee10fb7ff6d7b608c1940a7a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Dec 11 13:14:20 2017 -0600
+
+    Fixed off-by-one indexing in bli_cpuid.c.
+    
+    Details:
+    - In bli_cpuid.c, fixed an off-by-one indexing statement in vpu_count()
+      whereby a string-terminating NULL character, '\0', is written beyond
+      the bounds of the model_num string.
+    - Minor whitespace and formatting edits to bli_cpuid.c.
+
+commit 87978f6261a080d261d01f9acf4e9cc18855c833
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Dec 11 12:49:03 2017 -0600
+
+    Fixed broken out-of-tree builds since 52f9e6f.
+    
+    Details:
+    - Added missing $(DIST_PATH)/ prefix to relative path to flatten-headers.sh
+      script in common.mk so that the script could be found during out-of-tree
+      builds. Thanks to Devin Matthews for reporting this bug.
+
+commit 513ef4d040f89a18dda5154e8c4cf1aaf7463999
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Dec 11 12:35:59 2017 -0600
+
+    Various typecasting fixes, mis-typed enums, etc.
+    
+    Details:
+    - Fixed implicit typecasting of conj_t to trans_t in bli_[un]packm_cxk.c.
+    - Properly typecast integer arguments to match format specifier in various
+      calls to printf() in bli_l3_thrinfo.c, bli_cntx.c, bli_pool.c, and
+      bli_util_oapi.c.
+    - Fixed "unsigned less-than-comparison with zero" checks in bli_check.c,
+      bli_cntx.h.
+    - Fixed mis-typed enums in bli_cntx.c (e.g., l1mkr_t that should have been
+      l1fkr_t or l1vkr_t).
+    - Fixed instances of opid_t value BLIS_GEMM that should have been l3ukr_t
+      value BLIS_GEMM_UKR in bli_cntx_ref.c.
+    - NOTE: These issues were identified via compiler warnings when building
+      BLIS with clang on a rather old installation of OS X:
+        $ clang --version
+        Apple LLVM version 5.0 (clang-500.2.79) (based on LLVM 3.3svn)
+        Target: x86_64-apple-darwin15.2.0
+        Thread model: posix
+
+commit 3bc99a96a3648f51b9acdc8a8c7e1cf4eb815459
+Merge: 3a441183 78199c53
+Author: prangana <pradeep.rao@amd.com>
+Date:   Mon Dec 11 12:53:03 2017 +0530
+
+    Fix merge conflicts after rebase with release branch
+    
+    Change-Id: I581b26c6d515f717ff0dce91c7c0c92553aa2630
+
+commit 3a44118398955d6f872e01f73ae5bb4a4f8500f7
+Author: Nisanth M P <nisanth.padinharepatt@amd.com>
+Date:   Wed Nov 15 11:11:17 2017 +0530
+
+    Added AMD copyright line to the changed files in last 3 commits
+    
+    Change-Id: I37d5dbbbe1b199e07529610a5e9cc9e49d067c66
+
+commit 268a56c06e94d1c388766dbfe81d54efbe432809
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Nov 1 11:51:41 2017 -0500
+
+    Revert to default SIMD alignment for bulldozer.
+    
+    Details:
+    - Removed the default-overriding #define of BLIS_SIMD_ALIGN_SIZE set in
+      config/bulldozer/bli_kernel.h. Not sure where this value came from, but
+      it would seem to allow for insufficient starting address alignment for
+      any matrices created via bli_malloc_user(), such as via
+      bli_obj_create(). Thanks to Rene Sitt for reporting the behavior that
+      led us to this bug.
+    - This commit is a manual patch of the same fix made to the 'rt' branch
+      in 8f150f2.
+
+commit 510a6863e28277f9446abfb77f1aea9f01d37e7a
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Mon Oct 30 10:04:42 2017 -0500
+
+    Fix CVECFLAGS for bulldozer config.
+
+commit c669716790bdda5d2b11ea0a026cbc121b228842
+Author: Nisanth M P <nisanth.padinharepatt@amd.com>
+Date:   Tue Oct 24 16:36:36 2017 +0530
+
+    Adding __attribute__((constructor/destructor)) for CLANG case.
+    
+    CLANG supports __attribute__, but its documentation doesn't
+    mention support for constructor/destructor. Compiling with
+    clang and testing shows that it does support this.
+    
+    Change-Id: Ie115b20634c26bda475cc09c20960d687fb7050b
+
+commit 24e64a9d0877d788357fc63d4b947e977f8697f7
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Oct 18 13:41:25 2017 -0500
+
+    Removed a duplicate bli_avx512_macros.h header.
+    
+    Details:
+    - Removed a duplicate header file that was causing problems during
+      installation for the 'knl' configuration. Thanks to Victor Eijkhout
+      for reporting this issue.
+
+commit 9c0a3c4c0260cbfefb9f11532f46508b4fd19ec2
+Author: Nisanth M P <nisanth.padinharepatt@amd.com>
+Date:   Mon Oct 16 22:06:57 2017 +0530
+
+    Thread Safety: Move bli_init() before and bli_finalize() after main()
+    
+    BLIS provides APIs to initialize and finalize its global context.
+    One application thread can finalize BLIS, while other threads
+    in the application are stil using BLIS.
+    
+    This issue can be solved by removing bli_finalize() from API.
+    One way to do this is by getting bli_finalize() to execute by default
+    after application exits from main().
+    
+    GCC supports this behaviour with the help of __attribute__((destructor))
+    added to the function that need to be executed after main exits.
+    
+    Similarly bli_init() can be made to run before application enters main()
+    so that application need not call it.
+    
+    Change-Id: I7ce6cfa28b384e92c0bdf772f3baea373fd9feac
+
+commit 83f31253eb21c5ecd8a5907835e57720daae0b8b
+Author: Nisanth M P <nisanth.padinharepatt@amd.com>
+Date:   Mon Oct 16 21:07:50 2017 +0530
+
+    Thread safety: Make the global induced method status array local to thread
+    
+    BLIS retains a global status array for induced methods, and provides
+    APIs to modify this state during runtime. So, one application thread
+    can modify the state, before another starts the corresponding
+    BLIS operation.
+    
+    This patch solves this issue by making the induced method status array
+    local to threads.
+    
+    Change-Id: Iff59b6f473771344054c010b4eda51b7aa4317fe
+
+commit e923402e68029be379a4297de3ac6fb155ffd928
+Author: sthangar <Santanu.Thangaraj@amd.com>
+Date:   Thu Sep 28 12:15:36 2017 +0530
+
+    The inner loop paralleization is turned off by default, the JR and IR loop parameters are set to 1 by default
+    
+    Change-Id: I8c3c2ecbbd636259f6ffb92768ec04148205c3e5
+
+commit a64c15de19327c7595376d699be676c7003e850e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Sep 26 19:02:53 2017 -0500
+
+    Fixed a pthread typo in previous commit.
+    
+    Details:
+    - Misnamed 'pthread_mutex_t' type in bli_memsys.c as 'thread_mutex_t'.
+
+commit 42dcd589c37e1a2473ab2e1539207da97aebc07f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Sep 26 17:00:04 2017 -0500
+
+    Fixed bugs in gemm/gemmtrsm ukr tests in testsuite.
+    
+    Details:
+    - Fixed a bug in gemmtrsm test module that was due to improper partitioning
+      into a k x k triangular matrix for the purposes of obtaining an mr x k
+      micropanel of A with which to test.
+    - Fixed a bug in gemm and gemmtrsm test modules that would only manifest for
+      very large k (depending on the product of mr x kc on that architecture).
+      The bug arose from the fact that the test module was triggering the
+      allocation of blocks from the internal memory pools, which are limited in
+      size. This allocation imposes an implicit assumption that the micro-
+      panel being tested with will fit inside, and this assumption is violated
+      for large values of k. Arbitrarily large k may now be tested for both
+      operation tests.
+    - Added OpenMP/pthread critical sections around the setting or getting of
+      statuses from the induced method operation lookup table in bli_l3_ind.c.
+    - Added the 'static' keyword to all pthread_mutex_t global variables in BLIS.
+    - Thanks to Nisanth Padinharepatt of AMD for reporting the first and third
+      issues.
+
+commit 206beb68ff73b75f5c382413967aacbb8a0aac3a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Sep 9 14:10:15 2017 -0500
+
+    Updated bibtex info for BLIS5 (3m4m) article.
+
+commit 0c8c0363aeb1f4aa88f7ec2d02403dab05a6e014
+Author: sthangar <Santanu.Thangaraj@amd.com>
+Date:   Mon Aug 28 16:44:42 2017 +0530
+
+    Bug fix for the testsuite build failing
+    
+    Change-Id: I7cd8c9d187387c48b2564e45cbfb8df985e93d77
+
+commit 63d1c84465b50f64787808dd3e8494e683c16821
+Author: sthangar <Santanu.Thangaraj@amd.com>
+Date:   Wed Aug 23 13:01:14 2017 +0530
+
+    Adding auto hardware detection for Zen
+    
+    Change-Id: I40ce6705dd66b35000c4ccddffad1c5b65998caf
+
+commit 537fb2a895b09be94b11947696fd2da629be24dd
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Tue Aug 15 10:02:25 2017 -0500
+
+    Add vzeroupper to Intel AVX kernels.
+
+commit 7628de3f76f78a44788807605a4601ddda445854
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Aug 10 16:24:28 2017 -0500
+
+    Removed trailing enum commas from bli_type_defs.h.
+    
+    Details:
+    - Removed trailing commas from enums in bli_type_defs.h. Thanks to
+      Erling Andersen for pointing out this inconsistency and suggesting
+      the change.
+
+commit a666fd4e267ffae3d4b21f38d569c61ff56adc9e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Aug 5 13:04:31 2017 -0500
+
+    Added edge handling to _determine_blocksize_b().
+    
+    Details:
+    - Added explicit handling of situations where i == dim to
+      bli_determine_blocksize_b_sub(). This isn't actually needed by any
+      current use case within BLIS, but handling the situation is nonetheless
+      prudent. Thanks to Minh Quan for reporting this issue and requesting
+      the fix.
+
+commit 0c8afa546d7f33760415519ba328d7c49eb7aa06
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Aug 4 14:17:44 2017 -0500
+
+    Fixed a minor bug in level-3 packm management.
+    
+    Details:
+    - Fixed a bug in bli_l3_packm() that caused cntl_t-cached packed mem_t
+      entries to be released and then re-acquired unnecessarily. (In essence,
+      the "<" operands in the conditional that guards the
+      release-and-reacquire code block simply needed to be swapped.) The bug
+      should have only affected performance (rather than the computed result).
+      Thanks to Minh Quan for identifying and reporting the bug.
+
+commit 6cf68a185d83fa46d438fcef65258ace78e24b13
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Mon Jul 31 15:19:51 2017 -0500
+
+    Change lsame_ signature to match lapacke.
+
+commit 6a9bd97295cc4fb1cbcd28f69824a43c073c9a76
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Jul 29 20:17:05 2017 -0500
+
+    Fixed pthreads compile bug with previous commit.
+    
+    Details:
+    - Erroneously passed family parameter into l3int_t function despite
+      that function not taking the parameter. Oops.
+
+commit 95adc43d800431dc0a02ca83a51426dbef641ad6
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Jul 29 14:53:39 2017 -0500
+
+    Moved 'family' field from cntx_t to cntl_t.
+    
+    Details:
+    - Removed the family field inside the cntx_t struct and re-added it to the
+      cntl_t struct. Updated all accessor functions/macros accordingly, as well
+      as all consumers and intermediaries of the family parameter (such as
+      bli_l3_thread_decorator(), bli_l3_direct(), and bli_l3_prune_*()). This
+      change was motivated by the desire to keep the context limited, as much
+      as possible, to information about the computing environment. (The family
+      field, by contrast, is a descriptor about the operation being executed.)
+    - Added additional functions to bli_blksz_*() API.
+    - Added additional functions to bli_cntx_*() API.
+    - Minor updates to bli_func.c, bli_mbool.c.
+    - Removed 'obj' from bli_blksz_*() API names.
+    - Removed 'obj' from bli_cntx_*() API names.
+    - Removed 'obj' from bli_cntl_*(), bli_*_cntl_*() API names. Renamed routines
+      that operate only on a single struct to contain the "_node" suffix to
+      differentiate with those routines that operate on the entire tree.
+    - Added enums for packm and unpackm kernels to bli_type_defs.h.
+    - Removed BLIS_1F and BLIS_VF from bszid_t definition in bli_type_defs.h.
+      They weren't being used and probably never will be.
+
+commit a98e4aa547f61ab09dd91d11478c2a2ef9882e11
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Thu Jul 20 14:50:13 2017 -0500
+
+    Clang can't make up it's mind what to support.
+
+commit 32eb36c3e8c2add2528514272044de16faed0c8f
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Thu Jul 20 12:54:58 2017 -0500
+
+    Add default #define for __has_extension.
+
+commit 2a9aa134f7c29d3d4fdc160022ff257e61885a95
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Thu Jul 20 10:04:34 2017 -0500
+
+    Add fallbacks to __sync_* or __c11_atomic_* builtins when __atomic_* is not supported. Fixes #143.
+
+commit 6f07a034d575e1e9e30bb6417b8fcb77cf301297
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jul 19 15:40:48 2017 -0500
+
+    Updated ar option list used by all configurations.
+    
+    Details:
+    - Dropped 'u' from the list of modifiers passed into the library archiver
+      ar. Previously, "cru" was used, while now we employ only "cr". This
+      change was prompted by a warning observed on Ubuntu 16.04:
+    
+        ar: `u' modifier ignored since `D' is the default (see `U')
+    
+      This caused me to realize that the default mode causes timestamps to be
+      zero, and thus the 'u' option, which causes only changed object files to
+      be inserted, is not applicable.
+
+commit 32bc03f9eed8795cfd2f2615d1c9f8673e039c57
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jul 19 13:51:53 2017 -0500
+
+    Added --force-version=STRING option to configure.
+    
+    Details:
+    - Added an option to configure that allows the user to force an arbitrary
+      version string at configure-time. The help text also now describes the
+      usage information.
+    - Changed the way the version string is communicated to the Makefile.
+      Previously, it was read into the VERSION variable from the 'version' file
+      via $(shell cat ...). Now, the VERSION variable is instead set in
+      config.mk (via a configure-substituted anchor from config.mk.in).
+
+commit befaee6dd8b2a72de9e0461fe2ec1f36e9f88f3c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jul 18 17:56:00 2017 -0500
+
+    Updated openmp/pthread barriers with GNU atomics.
+    
+    Details:
+    - Updated the non-tree openmp and pthreads barriers defined in
+      bli_thrcomm_openmp.c and bli_thrcomm_pthreads.c to instead call a common
+      implementation in bli_thrcomm.c, bli_thrcomm_barrier_atomic(). This new
+      implementation goes through the same motions as the previous codes, but
+      protects its loads and increments with GNU atomic built-ins. These atomic
+      statements take memory ordering parameters that allow us to specify just
+      enough constraints for the barrier to work as intended on weakly-ordered
+      hardware. The prior implementation was only guaranteed to work on systems
+      with strongly- ordered memory. (Thanks to Devin Matthews for suggesting
+      this change and his crash-course in atomics and memory ordering.)
+    - Removed 'volatile' from structs' barrier field declarations in
+      bli_thrcomm_*.h.
+    - Updated bli_thrcomm_pthread.? files to use renamed struct barrier fields
+      consistent with that of the _openmp.? files.
+    - Updated other bli_thrcomm_* files to rename "communicator" variables to
+      simply "comm".
+
+commit 8f739cc847fcff2ddeeb336f8b2b9d080eb16f6c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jul 17 19:03:22 2017 -0500
+
+    Added API to set mt environment variables.
+    
+    Details:
+    - Renamed bli_env_get_nway() -> bli_thread_get_env().
+    - Added bli_thread_set_env() to allow setting environment variables
+      pertaining to multithreading, such as BLIS_JC_NT or BLIS_NUM_THREADS.
+    - Added the following convenience wrapper routines:
+        bli_thread_get_jc_nt()
+        bli_thread_get_ic_nt()
+        bli_thread_get_jr_nt()
+        bli_thread_get_ir_nt()
+        bli_thread_get_num_threads()
+        bli_thread_set_jc_nt()
+        bli_thread_set_ic_nt()
+        bli_thread_set_jr_nt()
+        bli_thread_set_ir_nt()
+        bli_thread_set_num_threads()
+    - Added #include "errno.h" to bli_system.h.
+    - This commit addresses issue #140.
+    - Thanks to Chris Goodyer for inspiring these updates.
+
+commit 10163833075fd42be5b5b503acc855f91a484cfd
+Author: Marat Dukhan <marat@fb.com>
+Date:   Thu Jul 13 21:39:24 2017 -0700
+
+    Fix Emscripten builds
+
+commit c09b30d115eade72f44f37bf90aa848c9c0e79af
+Author: Minh Quan HO <mqho@kalray.eu>
+Date:   Fri Jul 7 10:52:05 2017 +0200
+
+    set missing free_fp in bli_membrk_init for free-ing GEN_USE buffers
+    
+    The membrk's free_fp is called when releasing GEN_USE buffers, but this free_fp is
+    not set in bli_membrk_init
+
+commit 997628ed9793c72e9ef576dd8d715cfec27c4862
+Author: sthangar <Santanu.Thangaraj@amd.com>
+Date:   Fri Jun 30 12:23:19 2017 +0530
+
+    Reducing the framework overhead of GEMV routines
+    
+    Change-Id: I83607ad767bff74e305e915b54b0ea34ec3e5684
+
+commit ee869066168239b710ad9938bb0e1ae454883f3a
+Author: Kiran Varaganti <Kiran.Varaganti@amd.com>
+Date:   Tue Jul 4 12:57:32 2017 +0530
+
+    Improved efficiency of dGEMM for large matrices by reducing TLB load misses and majorly L3 cache misses. This is achieved by changing the packed block sizes of matrix A & B. Now the optimum values are MC_D = 510 and KC_D = 1024.
+    
+    Change-Id: I2d8bdd5f62f2d1f8782ae2997f3d7a26587d1ca4
+
+commit 7b933b90b1859c96de49a402d48de82909bc73e5
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Tue Jun 6 20:23:17 2017 -0500
+
+    Add new SSI acknowledgment
+
+commit 3485abba4b426fbf42b146a9611a0841f6d236c6
+Author: sthangar <Santanu.Thangaraj@amd.com>
+Date:   Wed May 24 11:48:16 2017 +0530
+
+    Checked in the small matrix code to compute GEMM called with A transpose case
+    
+    Change-Id: I29f40046d43d7a4b037c1cb322503ee26495f462
+
+commit de16beb83b29b4b9748f70db985b0fe04db85f7d
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Fri May 26 14:49:31 2017 -0400
+
+    PACKDIM_MR=8 didn't work out, but messing with the prefetching helps 2%.
+
+commit 25d0e618544b6eea7d3f13c7aec513ac0139801d
+Author: Devin Matthews <dmatthews@gator3.ufhpc>
+Date:   Fri May 26 14:47:36 2017 -0400
+
+    Revert "Change PACKDIM_MR (double) for haswell to 8."
+    
+    This reverts commit 681eec913d7c2ebcff637cec5c1627ced9a92b99.
+
+commit c5bdd84b35bc2a8ebf55b7763fb56c0c945be0cb
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Fri May 26 12:28:09 2017 -0500
+
+    Change PACKDIM_MR (double) for haswell to 8.
+
+commit 172789d562001293b973bbdd8015bd27d37292e8
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed May 17 13:03:52 2017 -0500
+
+    Restored deleted lines from makefile fragments.
+
+commit 3ea9bd2c8e90dbd35655fa6a5b953dfea1f308fe
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Wed May 17 12:29:44 2017 -0500
+
+    Change to /bin/sh.
+    
+    All scripts checked with Debian's checkbashisms. Also check for clang first in auto-detect.sh.
+
+commit 49438409eedb98d3f0ebf00b8d1eee0ae45f4f8c
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Wed May 17 12:27:14 2017 -0500
+
+    Remove shebangs from makefiles.
+
+commit 497e2640474c016d576dce3530fa6a66891642a0
+Author: J M Dieterich <dieterich@ogolem.org>
+Date:   Tue May 16 23:11:22 2017 -0400
+
+    Fix if/else structure. Thanks to TravisCI.
+
+commit 835035c56a8de36ad25bb8d1375db170d489ef57
+Author: J M Dieterich <dieterich@ogolem.org>
+Date:   Tue May 16 22:23:27 2017 -0400
+
+    Mark piledriver compilable w/ clang.
+
+commit 6cdb533472ee61af297c1f948307abbf45828887
+Author: J M Dieterich <dieterich@ogolem.org>
+Date:   Tue May 16 22:12:12 2017 -0400
+
+    Mark bulldozer compilable w/ clang.
+
+commit a85697d62272da06d28cd1c947f6cf1098df6467
+Author: J M Dieterich <dieterich@ogolem.org>
+Date:   Tue May 16 22:06:59 2017 -0400
+
+    Correct error message.
+
+commit e0c64cad271058688a2b999caf8c2767dc3aef7e
+Author: J M Dieterich <dieterich@ogolem.org>
+Date:   Tue May 16 22:03:23 2017 -0400
+
+    Indeed once can compile for carrizo also using clang.
+
+commit 4aafe0505d3f0954d095ded5459a76976e5093b4
+Author: J M Dieterich <dieterich@ogolem.org>
+Date:   Tue May 16 21:50:49 2017 -0400
+
+    A bunch of shebang fixes from unportable /bin/bash to portable /usr/bin/env bash
+
+commit abaeaa68ea11e84be1810f564d6f38d506cbeb6a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri May 5 15:06:56 2017 -0500
+
+    Fixed a bug in norm1v, norm1m.
+    
+    Details:
+    - Fixed a bug that manifested as improperly-computed 1-norm for vectors
+      and matrices. This is one of the few operations in BLIS that does not
+      have its own test module within the testsuite, hence why it went
+      undetected for so long. The bad 1-norms were being used to normalize
+      matrices in the testsuite after initialization, which led to some
+      matrices containing a combination of "large" and "small" values. This
+      tended to push the residuals computed after each test away from zero.
+      In some cases, they were off *just* enough to the testsuite to label
+      it a "failure". Many thanks to Jeff Hammond for reporting this bug.
+      (Wonky details: the bug was due to improperly-defined level-0 scalar
+      macros for abval2, an operation that computes the absolute square,
+      or complex magnitude/modulus. Certain complex domain instances of
+      abval2 were being incorrectly defined in terms of real-only solutions,
+      leading to bad results. This level-0 operation forms the basis of
+      norm1v/norm1m. absq2 was also affected, but almost nothing uses
+      this operation.)
+
+commit cc3107ae1c2074f72b724aa748d2e5b4cb290ed5
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Thu May 4 10:35:22 2017 -0500
+
+    Setting any one of BLIS_NT_[IJ][CR] overrides BLIS_NUM_THEADS. Missing BLIS_NT_XX's are defaulted to 1. Fixes #123.
+
+commit c8ab91f70d399ee14edd30a3a5c46b24c5d2f910
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed May 3 15:04:51 2017 -0500
+
+    Disable complex 3m/4m in testsuite by default.
+    
+    Details:
+    - Disabled testsuite tests of all level-3 implementations based on 3m
+      and 4m. This will improve testing runtime on Travis CI as well as for
+      anyone manually running the testsuite using default test parameters.
+      Thanks to Devin Matthews for suggesting this change.
+
+commit 9700f0e5785007ddafb72a5ca83800dee61fd35c
+Author: Jeff Hammond <jeff.science@gmail.com>
+Date:   Tue May 2 19:25:21 2017 -0700
+
+    allow KNL build without hbwmalloc.h (i.e. emulated)
+    
+    we want to be able to run BLIS KNL binaries on non-KNL machines via SDE.
+    although it is possible to install hbwmalloc implementation on such
+    systems, it is easier not to, since obviously the performance of SDE
+    execution is not representative so there is no reason to emulate HBW
+    allocation.
+
+commit 17dcd5a33ff91967f67e7c0ba09b4f18754609a4
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue May 2 16:48:43 2017 -0500
+
+    Fixed stray parentheses in README citations.
+
+commit 2910d44ff9e1d951d3249313f4ab39d18ea1b48d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue May 2 16:38:43 2017 -0500
+
+    CHANGELOG update (0.2.2)
+
+commit 5ca3863220e07972fcefc6682ddd3f6e54fe4a94
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue May 2 15:48:30 2017 -0500
+
+    Fixed a trsm1m bug that affected right-side cases.
+    
+    Details:
+    - Fixed a bug introduced in 1c732d3 that affected trsm1m_r. The result
+      was nondeterministic behavior (usually segmentation faults) for certain
+      problem sizes beyond the 1m instance of kc (e.g. 128 on haswell). The
+      cause of the bug was my commenting out lines in bli_gemm1m_ukr_ref.c
+      which explicitly directed the virtual gemm micro-kernel to use temporary
+      space if the storage preference of the [real domain] gemm ukernel did
+      not match the storage of the output matrix C. In the context of gemm,
+      this handling is not needed because agreement between the storage pref
+      and the matrix is guaranteed by a high-level optimization in BLIS.
+      However, this optimization is not applied to trsm because the storage
+      of C is not necessarily the same as the storage of the micro-panels of
+      B--both of which are updated by the micro-kernel during a trsm
+      operation. Thus, the guarantee of storage/preference agreement is not
+      in place for trsm, which means we must handle that case within the
+      virtual gemm micro-kernel.
+    - Comment updates and a minor macro change to bli_trsm*_cntx_init() for
+      3m1, 4m1a, and 1m.
+
+commit 1af0b09f5c275ee7bac896cc6f36f42af721d9b5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue May 2 12:09:39 2017 -0500
+
+    README.md update.
+    
+    Details:
+    - Updated bibtex entries for 4th BLIS paper, and adds entries for 5th
+      and 6th BLIS papers.
+
+commit db4a0bb8ba7cd697d68be8e5632371ee3e59fd63
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Mar 17 12:07:27 2017 -0500
+
+    Whitespace reformatting to armv8a kernels file.
+    
+    Details:
+    - Updated formatting of function signature/header in
+      kernels/armv8a/3/bli_gemm_opt_4x4.c.
+
+commit e3eb01f6b990e205b15edcbaffd3d54b3ddd1ca4
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Feb 21 15:33:39 2017 -0600
+
+    Disabled experiment-related 1m code.
+    
+    Details:
+    - Commented out code in frame/ind/oapi/bli_l3_3m4m1m_oapi.c that was
+      specifically inserted to facilitate the benchmarking of 1m block-panel
+      and panel-block algorithms.
+    - Updates to test/3m4m/Makefile, runme.sh script, and test_gemm.c to
+      reflect changes used/needed during benchmarking.
+
+commit 4f61528d56eed6a139eeac9db0c44e56f2d2d136
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jan 25 16:25:46 2017 -0600
+
+    Added 1m-specific APIs for bp, pb gemm algorithms.
+    
+    Details:
+    - Defined bli_gemmbp_cntl_create(), bli_gemmpb_cntl_create(), with the
+      body of bli_gemm_cntl_create() replaced with a call to the former.
+    - Defined bli_cntl_free_w_thrinfo(), bli_cntl_free_wo_thrinfo(). Now,
+      bli_cntl_free() can check if the thread parameter is NULL, and if so,
+      call the latter, and otherwise call the former.
+    - Defined bli_gemm1mbp_cntx_init(), bli_gemm1mpb_cntx_init(), both in
+      terms of bli_gemm1mxx_cntx_init(), which behaves the same as
+      bli_gemm1m_cntx_init() did before, except that an extra bool parameter
+      (is_pb) is used to support both bp and pb algorithms (including to
+      support the anti-preference field described below).
+    - Added support for "anti-preference" in context. The anti_pref field,
+      when true, will toggle the boolean return value of routines such as
+      bli_cntx_l3_ukr_eff_prefers_storage_of(), which has the net effect of
+      causing BLIS to transpose the operation to achieve disagreement (rather
+      than agreement) between the storage of C and the micro-kernel output
+      preference. This disagreement is needed for panel-block implementations,
+      since they induce a transposition of the suboperation immediately before
+      the macro-kernel is called, which changes the apparent storage of C. For
+      now, anti-preference is used only with the pb algorithm for 1m (and not
+      with any other non-1m implementation).
+    - Defined new functions,
+        bli_cntx_l3_ukr_eff_prefers_storage_of()
+        bli_cntx_l3_ukr_eff_dislikes_storage_of()
+        bli_cntx_l3_nat_ukr_eff_prefers_storage_of()
+        bli_cntx_l3_nat_ukr_eff_dislikes_storage_of()
+      which are identical to their non-"eff" (effectively) counterparts except
+      that they take the anti-preference field of the context into account.
+    - Explicitly initialize the anti-pref field to FALSE in
+      bli_gks_cntx_set_l3_nat_ukr_prefs().
+    - Added bli_gemm_ker_var1.c, which implements a panel-block macro-kernel
+      in terms of the existing block-panel macro-kernel _ker_var2(). This
+      technique requires inducing transposes on all operands and swapping
+      the A and B.
+    - Changed bli_obj_induce_trans() macro so that pack-related fields are
+      also changed to reflect the induced transposition.
+    - Added a temporary hack to bli_l3_3m4m1m_oapi.c that allows us to easily
+      specify the 1m algorithm (block-panel or panel-block).
+    - Renamed the following cntx_t-related macros:
+        bli_cntx_get_pack_schema_a() -> bli_cntx_get_pack_schema_a_block()
+        bli_cntx_get_pack_schema_b() -> bli_cntx_get_pack_schema_b_panel()
+        bli_cntx_get_pack_schema_c() -> bli_cntx_get_pack_schema_c_panel()
+      and updated all instantiations. Also updated the field names in the
+      cntx_t struct.
+    - Comment updates.
+
+commit 1d728ccb2394e77365e7c42683db6579c5fba014
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Nov 25 18:29:49 2016 -0600
+
+    Implemented the 1m method.
+    
+    Details:
+    - Implemented the 1m method for inducing complex domain matrix
+      multiplication. 1m support has been added to all level-3 operations,
+      including trsm, and is now the default induced method when native
+      complex domain gemm microkernels are omitted from the configuration.
+    - Updated _cntx_init() operations to take a datatype parameter. This was
+      needed for the corresponding function for 1m (because 1m requires us
+      to choose between column-oriented or row-oriented execution, which
+      requires us to query the context for the storage preference of the
+      gemm microkernel, which requires knowing the datatype) but I decided
+      that it made sense for consistency to add the parameter to all other
+      cntx initialization functions as well, even though those functions
+      don't use the parameter.
+    - Updated bli_cntx_set_blkszs() and bli_gks_cntx_set_blkszs() to take
+      a second scalar for each blocksize entry. The semantic meaning of the
+      two scalars now is that the first will scale the default blocksize
+      while the second will scale the maximum blocksize. This allows scaling
+      the two independently, and was needed to support 1m, which requires
+      scaling for a register blocksize but not the register storage
+      blocksize (ie: "packdim") analogue.
+    - Deprecated bli_blksz_reduce_dt_to() and defined two new functions,
+      bli_blksz_reduce_def_to() and bli_blksz_reduce_max_to(), for reducing
+      default and maximum blocksizes to some desired blocksize multiple.
+      These functions are needed in the updated definitions of
+      bli_cntx_set_blkszs() and bli_gks_cntx_set_blkszs().
+    - Added support for the 1e and 1r packing schemas to packm, including
+      1e/1r packing kernels.
+    - Added a minor optimization to bli_gemm_ker_var2() that allows, under
+      certain circumstances (specifically, real domain beta and row- or
+      column-stored matrix C), the real domain macrokernel and microkernel
+      to be called directly, rather than using the virtual microkernel
+      via the complex domain macrokernel, which carries a slight additional
+      amount of overhead.
+    - Added 1m support to the testsuite.
+    - Added 1m support to Makefile and runme.sh in test/3m4m. Also simplified
+      some code in test_gemm.c driver.
+
+commit 0d1b90286e29aa8b768e280b5286d92c02ad87a1
+Author: Jeff Hammond <jeff.science@gmail.com>
+Date:   Tue Oct 25 21:15:26 2016 -0700
+
+    never use libm with Intel compilers
+    
+    Intel compilers include a highly optimized math library (libimf) that
+    should be used instead of GNU libm.
+    
+    yes, this change is for ALL targets, including those that are not
+    supported by the Intel compiler.  there is no harm in doing this, and it
+    is future-proof in the event that the Intel compilers support other
+    architectures.
+
+commit b150870397e7aee558e61d1bd72a0c0d1d99bee8
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Dec 8 16:08:41 2017 -0600
+
+    Removed most "old" directories.
+    
+    Details:
+    - Removed the vast majority of directories named "old", which contained
+      deprecated code that I wasn't quite ready to jettison from the source
+      tree.
+
+commit 270c65985df849297ba1951aa3b56c03948d7775
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Dec 8 15:21:18 2017 -0600
+
+    Modified bli_getopt() for thread-safety.
+    
+    Details:
+    - Changed the interface of bli_getopt() to take a new argument, a getopt_t
+      struct, that stores the values of optarg, optind, opterr, and optopt,
+      and updated the implementation accordingly. (Previously,  these
+      variables were assumed to be global.)
+    - Added a function for initializing a getopt_t struct.
+    - Changed test_libblis.c--currently the only consumer of bli_getopt()--to
+      utilize the new getopt_t state object.
+
+commit ce4d8fabc2e39371f89c12192fb707be82ae021a
+Merge: 39be59f2 e05a8dfa
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Dec 7 17:36:44 2017 -0600
+
+    Merge branch 'master' of github.com:flame/blis
+
+commit 39be59f2a8470f40475907d9dd52639b8a911a92
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Dec 7 17:35:20 2017 -0600
+
+    Replaced several macros with static function APIs.
+    
+    Details:
+    - Reimplemented several sets of get/set-style preprocessor macros with
+      static functions, including those in the following frame/base headers:
+      auxinfo, cntl, mbool, mem, membrk, opid, and pool. A few headers in
+      frame/thread were touched as well: mutex_*, thrcomm, and thrinfo.
+
+commit e05a8dfa7cc7df41e966c1ad04e51c482b308b23
+Merge: 79507337 4423e33d
+Author: dnp <devangiparikh@gmail.com>
+Date:   Wed Dec 6 16:45:24 2017 -0600
+
+    Merge branch 'rt'
+
+commit 4423e33dc593115cda92c5763d756d7ad1298aa9
+Author: dnp <devangiparikh@gmail.com>
+Date:   Wed Dec 6 16:35:03 2017 -0600
+
+    Adding SKX kernels and configuration.
+
+commit 79507337e140daec7639f6eb3ed9cfe6e123d342
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Dec 6 16:21:35 2017 -0600
+
+    Various checks to ensure that arch_t id is in range.
+    
+    Details:
+    - Expanded checking of the arch_t id in bli_gks.c--either passed in from
+      the caller or as returned from bli_arch_query_id()--against the expected
+      range of id values. Thanks to Devangi Parikh for suggesting these
+      additional sanity checks.
+
+commit fde7c1126c58373ecde83471890b257399144876
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Dec 4 16:11:01 2017 -0600
+
+    Added 'uninstall-old-headers' target to Makefile.
+    
+    Details:
+    - Defined a new 'uninstall-old-headers' target that allows users of BLIS to
+      uninstall no-longer-needed headers left over from previous installations.
+    - Fixed the 'uninstall-old' target so that it will install both .a and .so
+      libraries.
+    - Renamed 'uninstall-old' to 'uninstall-old-libs'.
+    - Added 'uninstall-old' target (different from previous 'uninstall-old'
+      target) that combines 'uninstall-old-libs' and 'uninstall-old-headers'.
+
+commit d4ee770bde213a87aa6049245145318324dc6b51
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Dec 4 14:53:43 2017 -0600
+
+    Create/install monolithic cblas.h.
+    
+    Details:
+    - When CBLAS is enabled at configure-time, BLIS now creates a monolithic
+      cblas.h using the same flatten-header.sh script that was recently
+      introduced for creating monolithic blis.h header files. The top-level
+      Makefile will also install this cblas.h file into the install prefix
+      alongside blis.h when the 'install' target is invoked. The two header
+      files are compatible with one another. Regardless whether the user's
+      source #includes cblas.h, both blis.h and cblas.h, or just blis.h,
+      the user will get the CBLAS function prototypes and enums, as expected.
+
+commit 52f9e6f1b6468785af8947317656445d4729fc8b
+Merge: ab57b979 21360dd8
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Dec 1 12:28:09 2017 -0600
+
+    Merge branch 'rt'
+
+commit 21360dd8e2c7287100645e109acaabcc6ba1140c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Nov 29 14:11:34 2017 -0600
+
+    Fixed cntx_t packm query when ker_id > _NUM_PACKM_KERS.
+    
+    Details:
+    - Fixed a subtle bug in bli_cntx_get_[un]packm_ker_dt() in which the
+      function fails to return NULL when passed a kernel id argument that is
+      equal to or beyond BLIS_NUM_[UN]PACKM_KERS. Instead, the function was
+      attempting to index into the cntx_t's packm kernel array, which resulted
+      in undefined behvaior. Thanks to Devangi Parikh for finding this bug.
+
+commit 244a6f4e66e8ff091e995f8090ce779c1928aa8b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Nov 28 17:48:48 2017 -0600
+
+    Fixed POSIX sed non-compliance in flatten-header.sh.
+    
+    Details:
+    - Changed GNU usage of 'i' and 'a' sed commands used in flatten-header.sh
+      to POSIX-compliant usage that will work on OS X's sed.
+
+commit 45078621676833e53a2878af8f89479c4f93b8ab
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Nov 28 15:16:22 2017 -0600
+
+    Generate/compile with/install monolithic blis.h.
+    
+    Details:
+    - Rewrote monolithify-header.sh (and renamed to flatten-header.sh) so that
+      headers are inserted recursively. This improves performance by a factor
+      of 3-4x.
+    - Modified configure to create an 'include/<configname>' directory in which
+      make can create a monolithic header.
+    - Modified the top-level Makefile so that a monolithic header is generated
+      unconditionally prior to compilation (stored in include/<configname>) and
+      so that the single header is installed instead of the 450 or so header
+      files that reside throughout the framework source tree.
+    - Added "include/*/*.h" to .gitignore file.
+    - Removed some pnacl/emscripten leftovers that I intended to include in
+      a1caeba (mostly in testsuite/Makefile).
+    - Trivial comment changes to frame/include/bli_f2c.h.
+
+commit 1f30b1301bf6d6047ec29e57a5fde8eb1072a0ee
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Nov 25 16:54:26 2017 -0600
+
+    Added missing framework support for x86_64 family.
+    
+    Details:
+    - Added support for the x86_64 configuration family to bli_arch.c and
+      bli_arch_config.h. Thanks to Johannes Dieterich for reporting this
+      issue.
+    - Bumped the default value for BLIS_SIMD_NUM_REGISTERS from 16 to 32 and
+      the default value for BLIS_SIMD_SIZE from 32 to 64. This will support
+      configuration families that include Skylake and newer processors without
+      any supported needed in the bli_family_*.h file. The semantics of these
+      values have always been "maximum" and not exact values; comments in
+      bli_kernel_macro_defs.h and the github wiki have been adjusted
+      accordingly.
+
+commit 9f39806c4ed484c9ed13edf96005838d977722a9
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Nov 21 16:03:56 2017 -0600
+
+    Fixed a bug in e31f0b3/b131b9a.
+    
+    Details:
+    - Erroneously placed the "don't overwrite existing blocksize" logic in
+      bli_blksz_init*() rather than in bli_cntx_set_blkszs(). It belongs in
+      the latter because that function copies blocksizes as-is from the
+      blksz_t function argument to the appropriate field in the cntx_t. If
+      the blksz_t was previously initialized selectively, based on the sign
+      of the blocksize value passed into bli_blksz_init*(), that just leaves
+      some fields possibly uninitialized (with garbage values), which
+      definitely will not work.
+    - The aforementioned logic has been moved to bli_cntx_set_blkszs() via
+      a new function bli_blksz_copy_if_pos(), which selectively copies only
+      the blocksizes that are greater than zero.
+
+commit b131b9a025c15f548d4c2952a9ec85eee3d139b1
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Nov 21 14:30:26 2017 -0600
+
+    Updated configs to omit setting some blocksizes.
+    
+    Details:
+    - Employ the new semantics of bli_blksz_init*() in e31f0b3 in various
+      sub-configurations' bli_cntx_init_*() functions by passing in 0 for
+      register and cache blocksizes that correpond to gemm microkernel
+      datatypes that were not registered, allowing the default values
+      set by the bli_cntx_init_*_ref() function call to remain.
+
+commit 499a4c002f895744ecaf81ef7f62d2d6d0d7d594
+Merge: e31f0b3e 6c3ba502
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Nov 21 14:25:08 2017 -0600
+
+    Merge branch 'rt' of github.com:flame/blis into rt
+
+commit e31f0b3e2dba19ca8a2946bc21beb136a42d0f57
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Nov 21 14:21:25 2017 -0600
+
+    Subtle update to bli_blksz_init*() API.
+    
+    Details:
+    - Updated the semantics of bli_blksz_init() and bli_blksz_init_ed() so
+      that non-positive blocksize values are ignored entirely. This provides
+      an easy way to indicate that certain existing values should not be
+      touched by the update. Thanks to Devangi Parikh for feedback that led
+      to these changes.
+
+commit 6c3ba502a11f87bc67555d26154cfd39d0af1bac
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Nov 21 13:50:53 2017 -0600
+
+    Added 'x86_64' sub-config directory.
+    
+    Details:
+    - Added missing x86_64 configuration directory, which was intended to be
+      part of b7ca580.
+    - Added -Wfatal-errors compiler warning flag to all configurations so that
+      compilation stops after the first error.
+    - Changed the vectorization flags for intel64 configuration to be compatible
+      with 'penryn', the oldest sub-config included in that family.
+    - Changed the vectorization flags for penryn to target the 'core2'
+      microarchitecture and ssse3.
+
+commit 25eee3cc49b0631812485d4d5ceef0c23ed1b6dd
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Nov 21 12:34:20 2017 -0600
+
+    Added a dummy file to kernels/generic.
+    
+    Details:
+    - Added a dummy file to kernels/generic, which was previously empty, so
+      that git would begin tracking the otherwise-empty directory. This
+      directory's existence is necessary for proper execution of configure
+      for any configuration family that contains the 'generic'
+      sub-configuration. Thanks to Johannes Dieterich for reporting the
+      issue that led to this fix.
+
+commit ef024ce4cafa217669eaabb31ff8ab6df93cca05
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Nov 20 18:08:29 2017 -0600
+
+    More tweaks to monolithify-header.sh
+    
+    Details:
+    - Further fixes monolithify-header.sh script.
+    - Removed unnecessary #include "blis.h" from frame/3/bli_l3_packm.h.
+
+commit 5028e7dec269b62895511453272585da36e591b5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Nov 20 17:00:37 2017 -0600
+
+    Second attempt to implement travis_wait.
+    
+    Details:
+    - Corrected accidental misplacement of the travis_wait prefix (on the
+      wrong line of the .travis.yml file) in commit 13e5d91.
+
+commit 13e5d9107b3763cba46fb1bae87476852601b47c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Nov 20 15:57:06 2017 -0600
+
+    Added travis_wait prefix to testsuite via Travis.
+    
+    Details:
+    - It appears that Travis CL has implemented a new policy that results in
+      a test failing if it does not produce any output for more than 10
+      minutes. (Two test instances are now failing in Travis despite the most
+      recent commit not affecting the library or testsuite.) This issue can
+      be worked around by executing the test run via travis_wait, which takes
+      an optional time parameter. This commit attempts to use 'travis_wait 30'
+      in the .travis.yml file to prevent the early failure at 10 minutes.
+
+commit a1caeba0ea79c8fecb1abadca1f91c6367ab3afb
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Nov 20 13:31:20 2017 -0600
+
+    Removed pnacl, emscripten support from Makefile.
+
+commit 78199c539beaa50f37893add220261ce0dcb921a
+Merge: b3d8ab2e ab57b979
+Author: praveeng <praveen.g@amd.com>
+Date:   Mon Nov 20 15:51:20 2017 +0530
+
+    Merge master code till 01-Nov-2017 to amd-staging
+    
+    Change-Id: I40b53f876db84c8b947b3f2385c9b882245c6603
+
+commit 9df6dda9ec51a0d40166169d2d8a2f84b42266e6
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Nov 18 19:03:26 2017 -0600
+
+    Improvements, bugfixes to monolithify-header.sh.
+
+commit 21d26201f90b884eb8d5de279ed74bbd244ffcb5
+Merge: 43baa3b3 b7ca5806
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Nov 18 14:16:53 2017 -0600
+
+    Merge branch 'rt' of github.com:flame/blis into rt
+
+commit 43baa3b327d5ae1e2ba619432687b4dd849b05e3
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Nov 18 14:14:44 2017 -0600
+
+    Removed unnecessary flags for generic config.
+    
+    Details:
+    - Removed -D_POSIX_C_SOURCE=200112L and -m64 flags from make_defs.mk file
+      of generic sub-configuration. These flags are generally not necessary,
+      and particularly not desirable for the generic configuration since they
+      unnecessarily restrict the environments in which the configuration can
+      be built.
+
+commit b7ca580618f9382b7982168fd035ed058f83e4c2
+Author: iotamudelta <dieterich@ogolem.org>
+Date:   Sat Nov 18 14:56:05 2017 -0500
+
+    [WIP] Add x86 and x86_64 processor families. (#154)
+    
+    * Add x86 and x86_64 processor families.
+    * Use generic config as fallback for more families.
+    
+    After discussion with fgvanzee, a) it's "generic" and 2) use it for all the families as a fallback. Goal is that if a specific CPU is not yet supported by a family (say a new Intel microarchitecture on x86_64), it'll fall through to still work with the slower "generic" kernels
+
+commit 870597d1663aaba1b74d7654b1d4946280aa0d3f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Nov 17 17:06:42 2017 -0600
+
+    Added bash script for creating monolithic headers.
+    
+    Details:
+    - Added a new script, monolithify-header.sh, to the 'build' directory.
+      This script recursively replaces all #include directives in a selected
+      file with the contents of the header files referenced by each directive.
+      The idea is to "flatten" a tree of .h files into a single file, with
+      the script acting as a C preprocessor that only processes #include
+      directives.
+
+commit c76f77f4cc1e71988251c5e63cf6ef137477bf9c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Nov 17 15:10:52 2017 -0600
+
+    Removed unnecessary #include "blis.h" from header.
+    
+    Details:
+    - Removed an errant #include "blis.h directive from bli_cntx_ind_stage.h.
+      The generaly policy is that no header file in BLIS should include
+      blis.h. This will be important in the near future when using a tool to
+      recursively create a monolithic blis.h file from its consitutent
+      headers.
+
+commit 2bb9bc6e9536fa239fbc19a7efaaf151116e15b4
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Nov 17 13:50:14 2017 -0600
+
+    Miscellaneous tweaks to gks, rt functionality.
+    
+    Details:
+    - Updated bli_cpuid_query_id() so that BLIS_ARCH_GENERIC is always returned
+      if the hardware fails to test positive for any supported sub-configuration.
+    - Defined bli_gks_init_ref_cntx(), which will call the context initialization
+      function bli_cntx_init_configname() for the sub-configuration 'configname'
+      associated with the arch_t id returned by bli_arch_query_id(). This makes
+      initializing a reference context easy for experts who wish to construct
+      those contexts.
+
+commit b3d8ab2ea02c127ab241532abc214624f35bfaab
+Merge: 189ffbb0 fe71c06e
+Author: Santanu Thangaraj <Santanu.Thangaraj@amd.com>
+Date:   Wed Nov 15 01:33:12 2017 -0500
+
+    Merge "Added AMD copyright line to the changed files in last 3 commits" into amd-staging
+
+commit fe71c06e42b072407c83112779055b0afb67173d
+Author: Nisanth M P <nisanth.padinharepatt@amd.com>
+Date:   Wed Nov 15 11:11:17 2017 +0530
+
+    Added AMD copyright line to the changed files in last 3 commits
+    
+    Change-Id: I37d5dbbbe1b199e07529610a5e9cc9e49d067c66
+
+commit d5bf79e50bf97072bbe7117c86b7c45e6e707ea0
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Nov 13 14:24:29 2017 -0600
+
+    Miscellaneous tweaks and fixes.
+    
+    Details:
+    - Fixed incorrect calling sequence in bli_cntx_init_knl.c--an instance of
+      bli_blksz_init_easy() that should have been bli_blksz_init().
+    - Fixed a bug in code that is supposed to output the list of sub-directories
+      in the 'config' directory when configure script is run with no arguments.
+    - Expanded the output of "make showconfig" to include more info from config.mk.
+    - Minor changes to build/auto-detect/cpuid_x86.c, mostly in preparation for
+      someone to add excavator and zen support.
+    - Added a link to the ConfigurationHowTo wiki to config_registry.
+    - Other minor tweaks to configure.
+
+commit 673e5184030532c4ebd9fdeecbaa6442bb3ad54f
+Merge: 2c51356a 8f150f28
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Nov 1 17:37:42 2017 -0500
+
+    Merge branch 'rt' of github.com:flame/blis into rt
+
+commit 2c51356a8b2699c99f9507c80d69c08a35d45fe3
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Nov 1 17:37:02 2017 -0500
+
+    Implemented runtime hardware detection via cpuid.
+    
+    Details:
+    - Added runtime support for selecting an appropriate arch_t value based
+      on the results of the cpuid instruction (for x86_64). This allows
+      deferral of choosing a context (kernels, blocksizes, etc.) until
+      runtime, which allows BLIS to be built with support for multiple
+      microarchitectures. Currently, only amd64 and intel64 configurations
+      are registered in the config_registry; however, one could create
+      custom configuration families to support arbitrary sets of x86_64
+      microarchitectures.
+    - Current Intel microarchitectures supported via cpuid are knl, haswell,
+      sandybridge, and penryn.
+    - Current AMD microarchitectures supported via cpuid are: zen, excavator,
+      steamroller, piledriver, and bulldozer.
+
+commit ab57b979046479bcda7f83165838a80117c2ad95
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Nov 1 11:51:41 2017 -0500
+
+    Revert to default SIMD alignment for bulldozer.
+    
+    Details:
+    - Removed the default-overriding #define of BLIS_SIMD_ALIGN_SIZE set in
+      config/bulldozer/bli_kernel.h. Not sure where this value came from, but
+      it would seem to allow for insufficient starting address alignment for
+      any matrices created via bli_malloc_user(), such as via
+      bli_obj_create(). Thanks to Rene Sitt for reporting the behavior that
+      led us to this bug.
+    - This commit is a manual patch of the same fix made to the 'rt' branch
+      in 8f150f2.
+
+commit 8f150f28a678c4a0c1591400177ad7cca81fcaec
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Nov 1 11:41:45 2017 -0500
+
+    Revert to default SIMD alignment for bulldozer.
+    
+    Details:
+    - Removed the default-overriding #define of BLIS_SIMD_ALIGN_SIZE set in
+      bli_family_bulldozer.h. Not sure where this value came from, but it
+      would seem to allow for insufficient starting address alignment for
+      any matrices created via bli_malloc_user(), such as via
+      bli_obj_create(). Thanks to Rene Sitt for reporting the behavior that
+      led us to this bug.
+
+commit e3f10557caf114441fbfff990e3ce3576c177bdc
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Oct 30 13:37:54 2017 -0500
+
+    Use perl for some substitution for OS X compatibility.
+    
+    Details:
+    - Discovered that sed commands where the replacement string contains '\n'
+      are problematic with the version of sed present in OS X. For these cases
+      cases in the configure script, we instead use 'perl -pe' for
+      search-and-replace functionality.
+    - Various other minor comment/whitespace tweaks to configure.
+    - Removed remaining lines of code related to setting/checking variables to
+      track "unregistered" configurations.
+
+commit dd45cfdfc3d8f9acf4cf7f69138d9b83dafc8842
+Merge: 3e4f42a4 f60c827b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Oct 30 12:23:05 2017 -0500
+
+    Merge branch 'master' into rt
+
+commit f60c827ba95f452c8454fb914f5564f4895bf644
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Mon Oct 30 10:04:42 2017 -0500
+
+    Fix CVECFLAGS for bulldozer config.
+
+commit 3e4f42a4d2ebb37b95988933d92e561c5b2cc201
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Oct 27 11:41:37 2017 -0500
+
+    Typecast l1mkr_t enum value prior to comparison.
+    
+    Details:
+    - Typecast l1mkr_t enum value in bli_cntx.h to guint_t before testing for
+      out-of-range value. This is an attempt to pacify a strange warning from
+      clang on OS X that is seemingly the result of the following compiler
+      warning flag:
+        -Wtautological-constant-out-of-range-compare
+
+commit aec6e038d942d35b81bbd723a640cce2c054fb8e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Oct 26 16:12:36 2017 -0500
+
+    Removed associative arrays from configure.
+    
+    Details:
+    - Implemented a replacement for associative arrays in the configure script
+      that does not utilize arrays, and therefore works in pre-4.0 versions of
+      bash. (It appears that Mac OS X will be stuck with version 3.2 indefinitely
+      due to bash switching to the GPL 3.0 license starting with version 4.0.)
+
+commit 189ffbb0d37262b21acddc0d35b4a22f2cbbca94
+Merge: 06e0e635 3eb44f67
+Author: Santanu Thangaraj <Santanu.Thangaraj@amd.com>
+Date:   Wed Oct 25 02:00:30 2017 -0400
+
+    Merge changes Ie115b206,I7ce6cfa2,Iff59b6f4 into amd-staging
+    
+    * changes:
+      Adding __attribute__((constructor/destructor)) for CLANG case.
+      Thread Safety: Move bli_init() before and bli_finalize() after main()
+      Thread safety: Make the global induced method status array local to thread
+
+commit 3eb44f67618b91ae5f5f0aaaba67e38f16042ee4
+Author: Nisanth M P <nisanth.padinharepatt@amd.com>
+Date:   Tue Oct 24 16:36:36 2017 +0530
+
+    Adding __attribute__((constructor/destructor)) for CLANG case.
+    
+    CLANG supports __attribute__, but its documentation doesn't
+    mention support for constructor/destructor. Compiling with
+    clang and testing shows that it does support this.
+    
+    Change-Id: Ie115b20634c26bda475cc09c20960d687fb7050b
+
+commit 07c352188bf5265af242255f8e6fcb97050d973d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Oct 23 16:59:22 2017 -0500
+
+    Added "generic" configuration.
+    
+    Details:
+    - Added a "generic" configuration that leaves the default blocksizes and
+      kernels unchanged. This replaces the older "reference" configuration.
+      Updated auto-detect script and code accordingly.
+    - Added support for generic configuration to arch_t (bli_type_defs.h),
+      bli_gks_init() (bli_gks.c), and bli_arch_config.h
+    - Moved bli_arch_query_id() to bli_arch.c (and prototype to bli_arch.h).
+    - Whitespace changes to configurations' make_defs.mk files.
+
+commit c1a98d6f70608b02a1e6bcad6ba020a60773dace
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Oct 23 14:24:41 2017 -0500
+
+    Minor update to .travis.yml file.
+
+commit 75b9383f01caa8b83f8be0117e15085b0d807ba6
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Oct 20 16:41:22 2017 -0500
+
+    Minor header renaming ahead of bli_arch.c.
+    
+    Details:
+    - Renamed the various configurations' "bli_arch_<configname>.h" header files
+      (replacing "arch" with "family") to free up the 'bli_arch' namespace for a
+      different purpose (hardware detection).
+    - Renamed "bli_arch.h" and "bli_arch_pre_macro_defs.h" in frame/include to
+      "bli_arch_config.h" and "bli_arch_config_pre.h", respectively.
+
+commit 482af51add26d5ed103c3e3f167657f273b32c7a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Oct 20 15:44:26 2017 -0500
+
+    Fixed 'make test' target from top-level Makefile.
+    
+    Details:
+    - Updated the top-level Makefile's build rule for testsuite object files to
+      properly obtain CFLAGS via get-frame-cflags-for() function instead of
+      simply using the $(CFLAGS) variable (which is empty). This means that
+      'make test' should now work as expected.
+
+commit 3c269f700d207efe6c04193f09d519c88c1d4045
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Oct 20 13:57:21 2017 -0500
+
+    Makefile updates for test drivers, testsuite.
+    
+    Details:
+    - Fixed semi-broken testsuite Makefile and very-broken test driver Makefiles,
+      as well as those for test/3m4m, test/thread_ranges, and test/exec_sizes
+      sub-directories.
+    - Factored out much of the top-level Makefile into common.mk. A Makefile
+      needs only set DIST_PATH to the relative path to the top level of the
+      BLIS source distribution before including common.mk in order to acquire
+      all of the definitions typically needed in a Makefile that tests BLIS.
+
+commit 0557189d463446b4c32077cdcf0467fa71ca68dc
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Oct 18 15:05:27 2017 -0500
+
+    Minor updates to .travis.yml, configure script.
+
+commit 2553734d1d62043793f4e783a027349ef6d4d563
+Merge: 453deb29 37534279
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Oct 18 13:46:50 2017 -0500
+
+    Merge branch 'master' into rt
+
+commit 375342799cbae981c28d831793af588d7951f3f6
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Oct 18 13:41:25 2017 -0500
+
+    Removed a duplicate bli_avx512_macros.h header.
+    
+    Details:
+    - Removed a duplicate header file that was causing problems during
+      installation for the 'knl' configuration. Thanks to Victor Eijkhout
+      for reporting this issue.
+
+commit 453deb29068889698e274f269c9aa90eea99b527
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Oct 18 13:29:32 2017 -0500
+
+    Implemented runtime kernel management.
+    
+    Details:
+    - Reworked the build system around a configuration registry file, named
+      config_registry', that identifies valid configuration targets, their
+      constituent sub-configurations, and the kernel sets that are needed by
+      those sub-configurations. The build system now facilitates the building
+      of a single library that can contains kernels and cache/register
+      blocksizes for multiple configurations (microarchitectures). Reference
+      kernels are also built on a per-configuration basis.
+    - Updated the Makefile to use new variables set by configure via the
+      config.mk.in template, such as CONFIG_LIST, KERNEL_LIST, and KCONFIG_MAP,
+      in determining which sub-configurations (CONFIG_LIST) and kernel sets
+      (KERNEL_LIST) are included in the library, and which make_defs.mk files'
+      CFLAGS (KCONFIG_MAP) are used when compiling kernels.
+    - Reorganized 'kernels' directory into a "flat" structure. Renamed kernel
+      functions into a standard format that includes the kernel set name
+      (e.g. 'haswell'). Created a "bli_kernels_<kernelset>.h" file in each
+      kernels sub-directory. These files exist to provide prototypes for the
+      kernels present in those directories.
+    - Reorganized reference kernels into a top-level 'ref_kernels' directory.
+      This directory includes a new source file, bli_cntx_ref.c (compiled on
+      a per-configuration basis), that defines the code needed to initialize
+      a reference context and a context for induced methods for the
+      microarchitecture in question.
+    - Rewrote make_defs.mk files in each configuration so that the compiler
+      variables (e.g. CFLAGS) are "stored" (renamed) on a per-configuration
+      basis.
+    - Modified bli_config.h.in template so that bli_config.h is generated with
+      #defines for the config (family) name, the sub-configurations that are
+      associated with the family, and the kernel sets needed by those
+      sub-configurations.
+    - Deprecated all kernel-related information in bli_kernel.h and transferred
+      what remains to new header files named "bli_arch_<configname>.h", which
+      are conditionally #included from a new header bli_arch.h. These files
+      are still needed to set library-wide parameters such as custom
+      malloc()/free() functions or SIMD alignment values.
+    - Added bli_cntx_init_<configname>.c files to each configuration directory.
+      The files contain a function, named the same as the file, that initializes
+      a "native" context for a particular configuration (microarchitecture). The
+      idea is that optimized kernels, if available, will be initialized into
+      these contexts. Other fields will retain pointers to reference functions,
+      which will be compiled on a per-configuration basis. These bli_cntx_init_*()
+      functions will be called during the initialization of the global kernel
+      structure. They are thought of as initializing for "native" execution, but
+      they also form the basis for contexts that use induced methods. These
+      functions are prototyped, along with their _ref() and _ind() brethren, by
+      prototype-generating macros in bli_arch.h.
+    - Added a new typedef enum in bli_type_defs.h to define an arch_t, which
+      identifies the various sub-configurations.
+    - Redesigned the global kernel structure (gks) around a 2D array of cntx_t
+      structures (pointers to cntx_t, actually). The first dimension is indexed
+      over arch_t and the inner dimension is the ind_t (induced method) for
+      each microarchitecture. When a microarchitecture (configuration) is
+      "registered" at init-time, the inner array for that configuration in the
+      2D array is initialized (and allocated, if it hasn't been already). The
+      cntx_t slot for BLIS_NAT is initialized immediately and those for other
+      induced method types are initialized and cached on-demand, as needed. At
+      cntx_t registration, we also store function pointers to cntx_init functions
+      that will initialize (a) "reference" contexts and (b) contexts for use with
+      induced methods. We don't cache the full contexts for reference contexts
+      since they are rarely needed. The functions that initialize these two kinds
+      of contexts are generated automatically for each targeted sub-configuration
+      from cpp-templatized code at compile-time. Induced method contexts that
+      need "stage" adjustments can still obtain them via functions in
+      bli_cntx_ind_stage.c.
+    - Added new functions and functionality to bli_cntx.c, such as for setting
+      the level-1f, level-1v, and packm kernels, and for converting a native
+      context into one for executing an induced method.
+    - Moved the checking of register/cache blocksize consistency from being cpp
+      macros in bli_kernel_macro_defs.h to being runtime checks defined in
+      bli_check.c and called from bli_gks_register_cntx() at the time that the
+      global kernel structure's internal context is initialized for a given
+      microarchitecture/configuration.
+    - Deprecated all of the old per-operation bli_*_cntx.c files and removed
+      the previous operation-level cntx_t_init()/_finalize() invocations.
+      Instead, we now query the gks for a suitable context, usually via
+      bli_gks_query_cntx().
+    - Deprecated support for the 3m2 and 3m3 induced methods. (They required
+      hackery that I was no longer willing to support.)
+    - Consolidated the 1e and 1r packm kernels for any given register blocksize
+      into a single kernel that will branch on the schema and support packing
+      to both formats.
+    - Added the cntx_t* argument to all packm kernel signatures.
+    - Deprecated the local function pointer array in all bli_packm_cxk*.c files
+      and instead obtain the packm kernel from the cntx_t.
+    - Added bli_calloc_intl(), which serves as the calloc-equivalent to to
+      bli_malloc_intl(). Useful when we wish to allocate and initialize to
+      zero/NULL.
+    - Converted existing cpp macro functions defined in bli_blksz.h, bli_func.h,
+      bli_cntx.h into static functions.
+
+commit 4607aac297e55ad540cbe5fffbe02e6b1889c181
+Author: Nisanth M P <nisanth.padinharepatt@amd.com>
+Date:   Mon Oct 16 22:06:57 2017 +0530
+
+    Thread Safety: Move bli_init() before and bli_finalize() after main()
+    
+    BLIS provides APIs to initialize and finalize its global context.
+    One application thread can finalize BLIS, while other threads
+    in the application are stil using BLIS.
+    
+    This issue can be solved by removing bli_finalize() from API.
+    One way to do this is by getting bli_finalize() to execute by default
+    after application exits from main().
+    
+    GCC supports this behaviour with the help of __attribute__((destructor))
+    added to the function that need to be executed after main exits.
+    
+    Similarly bli_init() can be made to run before application enters main()
+    so that application need not call it.
+    
+    Change-Id: I7ce6cfa28b384e92c0bdf772f3baea373fd9feac
+
+commit 0f5ce26fc597cda6e8ae93a7526f52eb8cba01e9
+Author: Nisanth M P <nisanth.padinharepatt@amd.com>
+Date:   Mon Oct 16 21:07:50 2017 +0530
+
+    Thread safety: Make the global induced method status array local to thread
+    
+    BLIS retains a global status array for induced methods, and provides
+    APIs to modify this state during runtime. So, one application thread
+    can modify the state, before another starts the corresponding
+    BLIS operation.
+    
+    This patch solves this issue by making the induced method status array
+    local to threads.
+    
+    Change-Id: Iff59b6f473771344054c010b4eda51b7aa4317fe
+
+commit b882648af87deb1b365fc6b3e94151e69c5ccfa4
+Merge: 8b379069 e02d3cb8
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Oct 11 16:32:21 2017 -0500
+
+    Merge branch 'master' into rt
+
+commit 06e0e6351acb9481225975ad9a4e0b8925336621
+Author: sthangar <Santanu.Thangaraj@amd.com>
+Date:   Thu Sep 28 12:15:36 2017 +0530
+
+    The inner loop paralleization is turned off by default, the JR and IR loop parameters are set to 1 by default
+    
+    Change-Id: I8c3c2ecbbd636259f6ffb92768ec04148205c3e5
+
+commit e02d3cb84190a345ebe9b32f53db03a1838976b1
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Sep 26 19:02:53 2017 -0500
+
+    Fixed a pthread typo in previous commit.
+    
+    Details:
+    - Misnamed 'pthread_mutex_t' type in bli_memsys.c as 'thread_mutex_t'.
+
+commit f5962a1aae0fb3c9be104d0035c0d73210e7f670
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Sep 26 17:00:04 2017 -0500
+
+    Fixed bugs in gemm/gemmtrsm ukr tests in testsuite.
+    
+    Details:
+    - Fixed a bug in gemmtrsm test module that was due to improper partitioning
+      into a k x k triangular matrix for the purposes of obtaining an mr x k
+      micropanel of A with which to test.
+    - Fixed a bug in gemm and gemmtrsm test modules that would only manifest for
+      very large k (depending on the product of mr x kc on that architecture).
+      The bug arose from the fact that the test module was triggering the
+      allocation of blocks from the internal memory pools, which are limited in
+      size. This allocation imposes an implicit assumption that the micro-
+      panel being tested with will fit inside, and this assumption is violated
+      for large values of k. Arbitrarily large k may now be tested for both
+      operation tests.
+    - Added OpenMP/pthread critical sections around the setting or getting of
+      statuses from the induced method operation lookup table in bli_l3_ind.c.
+    - Added the 'static' keyword to all pthread_mutex_t global variables in BLIS.
+    - Thanks to Nisanth Padinharepatt of AMD for reporting the first and third
+      issues.
+
+commit 8e917b256ca2d4bcdc059fe98d86be8775c69561
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Sep 9 14:10:15 2017 -0500
+
+    Updated bibtex info for BLIS5 (3m4m) article.
+
+commit 7be887057358df4978a4833eeae0c17e15acd9d1
+Author: Nisanth M P <nisanth.padinharepatt@amd.com>
+Date:   Mon Aug 28 17:38:22 2017 +0530
+
+    Merging "Adding auto hardware detection for Zen"
+    
+    Change-Id: Id450fb0c4f91a5cd5cbdc06970f4f9ed28dd8520
+
+commit e056d810d16621891ead032603de0c2105cfc0f7
+Author: sthangar <Santanu.Thangaraj@amd.com>
+Date:   Mon Aug 28 16:44:42 2017 +0530
+
+    Bug fix for the testsuite build failing
+    
+    Change-Id: I7cd8c9d187387c48b2564e45cbfb8df985e93d77
+
+commit 83796b7caf745fafc263e9e5e1bfcf5eff00c025
+Merge: 8176f4e4 d1ee7762
+Author: Kiran Varaganti <Kiran.Varaganti@amd.com>
+Date:   Mon Aug 28 05:23:28 2017 -0400
+
+    Merge "Adding auto hardware detection for Zen" into amd-staging
+
+commit d1ee776202b26874333af7a91b6d2686342c4c81
+Author: sthangar <Santanu.Thangaraj@amd.com>
+Date:   Wed Aug 23 13:01:14 2017 +0530
+
+    Adding auto hardware detection for Zen
+    
+    Change-Id: I40ce6705dd66b35000c4ccddffad1c5b65998caf
+
+commit 8176f4e43872714b997f1a5f83056daadb0ff1a5
+Merge: 12413018 adafe974
+Author: praveeng <praveen.g@amd.com>
+Date:   Mon Aug 28 12:21:16 2017 +0530
+
+    resolving conflicts bli_gemm_front.c and LICENCE
+    
+    Change-Id: Id24ce53896d4c1c7ceccc3e004014a0ecceb5474
+
+commit 57e1e5cd51e7ffe8612c96a20b6a041b55426ddb
+Merge: f86ce54d d6ef56c6
+Author: Nisanth M P <nisanth.padinharepatt@amd.com>
+Date:   Tue Aug 22 17:07:44 2017 +0530
+
+    Merge AMD authored changes
+
+commit adafe974b4bc3fc0663bc2f6f4ce2fde71a97988
+Merge: f86ce54d 7dc78b49
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Tue Aug 15 15:17:21 2017 -0500
+
+    Merge pull request #150 from devinamatthews/vzeroupper
+    
+    Add vzeroupper to Intel AVX kernels.
+
+commit 7dc78b49f97e6b3cd6d72fcdc588ace534d0e700
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Tue Aug 15 10:02:25 2017 -0500
+
+    Add vzeroupper to Intel AVX kernels.
+
+commit f86ce54d6f315006984534fe29e47a2deaacc9f5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Aug 10 16:24:28 2017 -0500
+
+    Removed trailing enum commas from bli_type_defs.h.
+    
+    Details:
+    - Removed trailing commas from enums in bli_type_defs.h. Thanks to
+      Erling Andersen for pointing out this inconsistency and suggesting
+      the change.
+
+commit 60a1eeb2317939d732b9eb6ff1e0d6d668c9a1e5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Aug 5 13:04:31 2017 -0500
+
+    Added edge handling to _determine_blocksize_b().
+    
+    Details:
+    - Added explicit handling of situations where i == dim to
+      bli_determine_blocksize_b_sub(). This isn't actually needed by any
+      current use case within BLIS, but handling the situation is nonetheless
+      prudent. Thanks to Minh Quan for reporting this issue and requesting
+      the fix.
+
+commit b01c80829907d50ec79977fba8e7b53cfe7db80a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Aug 4 14:17:44 2017 -0500
+
+    Fixed a minor bug in level-3 packm management.
+    
+    Details:
+    - Fixed a bug in bli_l3_packm() that caused cntl_t-cached packed mem_t
+      entries to be released and then re-acquired unnecessarily. (In essence,
+      the "<" operands in the conditional that guards the
+      release-and-reacquire code block simply needed to be swapped.) The bug
+      should have only affected performance (rather than the computed result).
+      Thanks to Minh Quan for identifying and reporting the bug.
+
+commit 8b379069fcd4811669855b1248ece831f190dff6
+Merge: 1f3a5819 05925dd5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Aug 1 15:30:40 2017 -0500
+
+    Merge branch 'master' into rt
+
+commit 05925dd5d30e8f403bb671ce33029170d65ce7c0
+Merge: 803bbef0 cecdc05d
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Tue Aug 1 09:31:02 2017 -0500
+
+    Merge pull request #146 from devinamatthews/master
+    
+    Change lsame_ signature to match lapacke.
+
+commit cecdc05d2834786a84ff85775d3f99a958c0765a
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Mon Jul 31 15:19:51 2017 -0500
+
+    Change lsame_ signature to match lapacke.
+
+commit 803bbef0a386dd0571ad389f69d55154dbfe3c50
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Jul 29 20:17:05 2017 -0500
+
+    Fixed pthreads compile bug with previous commit.
+    
+    Details:
+    - Erroneously passed family parameter into l3int_t function despite
+      that function not taking the parameter. Oops.
+
+commit c63980f4ca750618f359031d0691289b1abf5146
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Jul 29 14:53:39 2017 -0500
+
+    Moved 'family' field from cntx_t to cntl_t.
+    
+    Details:
+    - Removed the family field inside the cntx_t struct and re-added it to the
+      cntl_t struct. Updated all accessor functions/macros accordingly, as well
+      as all consumers and intermediaries of the family parameter (such as
+      bli_l3_thread_decorator(), bli_l3_direct(), and bli_l3_prune_*()). This
+      change was motivated by the desire to keep the context limited, as much
+      as possible, to information about the computing environment. (The family
+      field, by contrast, is a descriptor about the operation being executed.)
+    - Added additional functions to bli_blksz_*() API.
+    - Added additional functions to bli_cntx_*() API.
+    - Minor updates to bli_func.c, bli_mbool.c.
+    - Removed 'obj' from bli_blksz_*() API names.
+    - Removed 'obj' from bli_cntx_*() API names.
+    - Removed 'obj' from bli_cntl_*(), bli_*_cntl_*() API names. Renamed routines
+      that operate only on a single struct to contain the "_node" suffix to
+      differentiate with those routines that operate on the entire tree.
+    - Added enums for packm and unpackm kernels to bli_type_defs.h.
+    - Removed BLIS_1F and BLIS_VF from bszid_t definition in bli_type_defs.h.
+      They weren't being used and probably never will be.
+
+commit 07837395560d413a1ba828163b41186e21a7bcfe
+Merge: ca1d1d85 ad8610b4
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jul 21 16:49:48 2017 -0500
+
+    Merge pull request #139 from Maratyszcza/emscripten
+    
+    Fix Emscripten builds
+
+commit ad8610b4415cc7982804d74f9aba29875e9e2b6c
+Merge: 8772a0b3 ca1d1d85
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jul 21 15:18:33 2017 -0500
+
+    Merge branch 'master' into emscripten
+
+commit ca1d1d8560c9ab1a7e3b0ac43ac70d08075bf904
+Merge: b537b5bb 733faf84
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Fri Jul 21 09:49:50 2017 -0500
+
+    Merge pull request #144 from devinamatthews/fix_atomics_on_bgq
+    
+    Add fallbacks to __sync_* or __c11_atomic_* builtins...
+
+commit 733faf848dcc54834fcdfbb0185dc644978d8864
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Thu Jul 20 14:50:13 2017 -0500
+
+    Clang can't make up it's mind what to support.
+
+commit 7425d0744d9e9cd29a887120e57c2b43ba287040
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Thu Jul 20 12:54:58 2017 -0500
+
+    Add default #define for __has_extension.
+
+commit b537b5bbe8cbee459a85bac11458498ae2bce4de
+Merge: 1f1ec0db 7f41bb0a
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Thu Jul 20 10:58:39 2017 -0500
+
+    Merge pull request #133 from devinamatthews/haswell-packdim
+    
+    Fix prefetching in haswell ukernel
+
+commit 8823f91a14638ce6f4e45e67df03212bb61609d6
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Thu Jul 20 10:04:34 2017 -0500
+
+    Add fallbacks to __sync_* or __c11_atomic_* builtins when __atomic_* is not supported. Fixes #143.
+
+commit 1f1ec0db9380b87679d5c771c4594daa1cfc5f0d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jul 19 15:40:48 2017 -0500
+
+    Updated ar option list used by all configurations.
+    
+    Details:
+    - Dropped 'u' from the list of modifiers passed into the library archiver
+      ar. Previously, "cru" was used, while now we employ only "cr". This
+      change was prompted by a warning observed on Ubuntu 16.04:
+    
+        ar: `u' modifier ignored since `D' is the default (see `U')
+    
+      This caused me to realize that the default mode causes timestamps to be
+      zero, and thus the 'u' option, which causes only changed object files to
+      be inserted, is not applicable.
+
+commit 5caaba2d61cbbc36d63102a0786ece28ff797f72
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jul 19 13:51:53 2017 -0500
+
+    Added --force-version=STRING option to configure.
+    
+    Details:
+    - Added an option to configure that allows the user to force an arbitrary
+      version string at configure-time. The help text also now describes the
+      usage information.
+    - Changed the way the version string is communicated to the Makefile.
+      Previously, it was read into the VERSION variable from the 'version' file
+      via $(shell cat ...). Now, the VERSION variable is instead set in
+      config.mk (via a configure-substituted anchor from config.mk.in).
+
+commit 13175c5fb70fb6a378d5fff6ecede62e5ea6a1f6
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jul 18 17:56:00 2017 -0500
+
+    Updated openmp/pthread barriers with GNU atomics.
+    
+    Details:
+    - Updated the non-tree openmp and pthreads barriers defined in
+      bli_thrcomm_openmp.c and bli_thrcomm_pthreads.c to instead call a common
+      implementation in bli_thrcomm.c, bli_thrcomm_barrier_atomic(). This new
+      implementation goes through the same motions as the previous codes, but
+      protects its loads and increments with GNU atomic built-ins. These atomic
+      statements take memory ordering parameters that allow us to specify just
+      enough constraints for the barrier to work as intended on weakly-ordered
+      hardware. The prior implementation was only guaranteed to work on systems
+      with strongly- ordered memory. (Thanks to Devin Matthews for suggesting
+      this change and his crash-course in atomics and memory ordering.)
+    - Removed 'volatile' from structs' barrier field declarations in
+      bli_thrcomm_*.h.
+    - Updated bli_thrcomm_pthread.? files to use renamed struct barrier fields
+      consistent with that of the _openmp.? files.
+    - Updated other bli_thrcomm_* files to rename "communicator" variables to
+      simply "comm".
+
+commit 0e58ba1b3aa84700ca51a96f1c0eed6067562fba
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jul 17 19:03:22 2017 -0500
+
+    Added API to set mt environment variables.
+    
+    Details:
+    - Renamed bli_env_get_nway() -> bli_thread_get_env().
+    - Added bli_thread_set_env() to allow setting environment variables
+      pertaining to multithreading, such as BLIS_JC_NT or BLIS_NUM_THREADS.
+    - Added the following convenience wrapper routines:
+        bli_thread_get_jc_nt()
+        bli_thread_get_ic_nt()
+        bli_thread_get_jr_nt()
+        bli_thread_get_ir_nt()
+        bli_thread_get_num_threads()
+        bli_thread_set_jc_nt()
+        bli_thread_set_ic_nt()
+        bli_thread_set_jr_nt()
+        bli_thread_set_ir_nt()
+        bli_thread_set_num_threads()
+    - Added #include "errno.h" to bli_system.h.
+    - This commit addresses issue #140.
+    - Thanks to Chris Goodyer for inspiring these updates.
+
+commit 8772a0b33a90154c80d88b381dcdd66f824e041f
+Author: Marat Dukhan <marat@fb.com>
+Date:   Thu Jul 13 21:39:24 2017 -0700
+
+    Fix Emscripten builds
+
+commit 72c8b49bb8d3b9370b2cc37718da22f065de9c57
+Merge: 70cc825b ba7cada5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jul 12 14:58:12 2017 -0500
+
+    Merge pull request #138 from hominhquan/membrk_set_free_fp
+    
+    Set missing free_fp in bli_membrk_init for free-ing GEN_USE buffers
+
+commit ba7cada51a238d320528e3504ed0f0a17a6b022a
+Author: Minh Quan HO <mqho@kalray.eu>
+Date:   Fri Jul 7 10:52:05 2017 +0200
+
+    set missing free_fp in bli_membrk_init for free-ing GEN_USE buffers
+    
+    The membrk's free_fp is called when releasing GEN_USE buffers, but this free_fp is
+    not set in bli_membrk_init
+
+commit 1241301869957c96f16a2c6567e3ad70afa547de
+Merge: 969b67e8 25ead66f
+Author: Kiran Varaganti <Kiran.Varaganti@amd.com>
+Date:   Wed Jul 5 02:24:00 2017 -0400
+
+    Merge "Reducing the framework overhead of GEMV routines" into amd-staging
+
+commit 25ead66fb78557f73af48bac305724d5d8aa3309
+Author: sthangar <Santanu.Thangaraj@amd.com>
+Date:   Fri Jun 30 12:23:19 2017 +0530
+
+    Reducing the framework overhead of GEMV routines
+    
+    Change-Id: I83607ad767bff74e305e915b54b0ea34ec3e5684
+
+commit 969b67e8800fbd5d14a086606f3b5afbf66ed093
+Author: Kiran Varaganti <Kiran.Varaganti@amd.com>
+Date:   Tue Jul 4 12:57:32 2017 +0530
+
+    Improved efficiency of dGEMM for large matrices by reducing TLB load misses and majorly L3 cache misses. This is achieved by changing the packed block sizes of matrix A & B. Now the optimum values are MC_D = 510 and KC_D = 1024.
+    
+    Change-Id: I2d8bdd5f62f2d1f8782ae2997f3d7a26587d1ca4
+
+commit 70cc825b552dec05165b9d70f9e6eb33d8abb118
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Tue Jun 6 21:58:21 2017 -0500
+
+    Update LICENSE
+    
+    Remove totally unnecessary first 9 lines and hopefully get Github to recognize it as 3BSD [ci skip].
+
+commit cf54c77bc79a0f33a514be72c80a654c4e6e6f63
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Tue Jun 6 20:23:17 2017 -0500
+
+    Add new SSI acknowledgment
+
+commit d6ef56c6dbaf6df8ee1af1ca6a0f0792a811396a
+Author: prangana <pradeep.rao@amd.com>
+Date:   Thu Jun 1 16:11:09 2017 +0530
+
+    Update version number
+    
+    Change-Id: Ib6e52d1d34c0791367ab9152dfab31f94deedeb4
+
+commit 897bfa0e92082c30bbb74229562d7d7327cbbac8
+Author: prangana <pradeep.rao@amd.com>
+Date:   Thu Jun 1 16:11:09 2017 +0530
+
+    Update version number
+    
+    Change-Id: Ib6e52d1d34c0791367ab9152dfab31f94deedeb4
+
+commit 99d0ba5606d4b63e6a9c639aa78d4defc2455f79
+Merge: be2c7eb8 6d17e012
+Author: Santanu Thangaraj <Santanu.Thangaraj@amd.com>
+Date:   Thu Jun 1 02:19:02 2017 -0400
+
+    Merge "Checked in the small matrix code to compute GEMM called with A transpose case" into amd-staging
+
+commit 6d17e0120fe5c127b941136ad2c0c08e91439535
+Author: sthangar <Santanu.Thangaraj@amd.com>
+Date:   Wed May 24 11:48:16 2017 +0530
+
+    Checked in the small matrix code to compute GEMM called with A transpose case
+    
+    Change-Id: I29f40046d43d7a4b037c1cb322503ee26495f462
+
+commit 9d93f8481a1404695f7b78a3ced8ca47e890b649
+Author: prangana <pradeep.rao@amd.com>
+Date:   Tue May 30 09:58:10 2017 +0530
+
+    Update Licence File
+    
+    Change-Id: I4c5cf1690d0cef92a68400f9a89e454ab6856ad2
+
+commit be2c7eb85168937bd4318f4d05ded37620119310
+Author: prangana <pradeep.rao@amd.com>
+Date:   Tue May 30 09:58:10 2017 +0530
+
+    Update Licence File
+    
+    Change-Id: I4c5cf1690d0cef92a68400f9a89e454ab6856ad2
+
+commit 7f41bb0a0becde6a7de7df0f99668d7b4686c3b0
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Fri May 26 14:49:31 2017 -0400
+
+    PACKDIM_MR=8 didn't work out, but messing with the prefetching helps 2%.
+
+commit d87614af3f3d9187be94d6e77984b282bf890928
+Author: Devin Matthews <dmatthews@gator3.ufhpc>
+Date:   Fri May 26 14:47:36 2017 -0400
+
+    Revert "Change PACKDIM_MR (double) for haswell to 8."
+    
+    This reverts commit 681eec913d7c2ebcff637cec5c1627ced9a92b99.
+
+commit 681eec913d7c2ebcff637cec5c1627ced9a92b99
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Fri May 26 12:28:09 2017 -0500
+
+    Change PACKDIM_MR (double) for haswell to 8.
+
+commit 0a3ae0ecaa0ddcb5887005d7051fa234499f1120
+Merge: 0f4e6652 6e04f9df
+Author: praveeng <praveen.g@amd.com>
+Date:   Sat May 20 16:53:50 2017 +0530
+
+    frame/3/gemm/bli_gemm_front.c
+    
+    Change-Id: I52a0fbc1d33bb948d430942323bbc5fe44e3ca13
+
+commit 6e04f9df01d79c1b0e673943ca0d5d0a6095eb2e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed May 17 13:03:52 2017 -0500
+
+    Restored deleted lines from makefile fragments.
+
+commit ec5c0c0448275280dca0991f6f33afeb73650450
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Wed May 17 12:29:44 2017 -0500
+
+    Change to /bin/sh.
+    
+    All scripts checked with Debian's checkbashisms. Also check for clang first in auto-detect.sh.
+
+commit 555ddc30d4c7e44f3f335e436c98606f56e1598b
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Wed May 17 12:27:14 2017 -0500
+
+    Remove shebangs from makefiles.
+
+commit f26bd7f42e0c2a47fe321b2c452644990b689654
+Merge: cbf8710a 169fb05f
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Wed May 17 11:58:41 2017 -0500
+
+    Merge pull request #128 from iotamudelta/master
+    
+    Portability and clang
+
+commit 169fb05f225c2f060265bcaa872f7f80dc638b70
+Author: J M Dieterich <dieterich@ogolem.org>
+Date:   Tue May 16 23:11:22 2017 -0400
+
+    Fix if/else structure. Thanks to TravisCI.
+
+commit 0579dfea0bcfbb90ebc073fcf78b92a5cf7238e1
+Author: J M Dieterich <dieterich@ogolem.org>
+Date:   Tue May 16 22:58:07 2017 -0400
+
+    Restore version.
+
+commit a75b05c23dc786a1fdc45dc1627a5ce2299f1a7b
+Author: J M Dieterich <dieterich@ogolem.org>
+Date:   Tue May 16 22:23:27 2017 -0400
+
+    Mark piledriver compilable w/ clang.
+
+commit 7541d46e2ba8659bb2e36b444edef112fefa1345
+Author: J M Dieterich <dieterich@ogolem.org>
+Date:   Tue May 16 22:12:12 2017 -0400
+
+    Mark bulldozer compilable w/ clang.
+
+commit 91f897073ec0df3330ede449c4d6af8158266ae3
+Author: J M Dieterich <dieterich@ogolem.org>
+Date:   Tue May 16 22:06:59 2017 -0400
+
+    Correct error message.
+
+commit f5131e1e49167f948bddd714bb1af1761829c212
+Author: J M Dieterich <dieterich@ogolem.org>
+Date:   Tue May 16 22:03:23 2017 -0400
+
+    Indeed once can compile for carrizo also using clang.
+
+commit 5fa4e9439c04f35f89dd7d26ff742cb2dadc3180
+Author: J M Dieterich <dieterich@ogolem.org>
+Date:   Tue May 16 21:50:49 2017 -0400
+
+    A bunch of shebang fixes from unportable /bin/bash to portable /usr/bin/env bash
+
+commit 1f3a58197e5d5f9ac862bda91e7527cbfbab5d76
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon May 8 16:10:03 2017 -0500
+
+    Housekeeping, induced method file/function renames.
+    
+    Details:
+    - Renamed all level-3 induced method files to use the "_vir.c" suffix
+      instead of "_ref.c". Also renamed functions within these files
+      accordingly.
+    - Renamed cpp macro definitions in frame/ind/include according to the
+      above changes.
+    - Removed frame/3/old.
+
+commit cbf8710a1ba63e25aadaa6fc5da51ea81b3d596d
+Merge: cf39d3ef fdc66f12
+Author: Tyler Michael Smith <tms@cs.utexas.edu>
+Date:   Mon May 8 11:21:20 2017 -0500
+
+    Merge pull request #127 from devinamatthews/fix_blis_nt_xx
+    
+    Setting any one of BLIS_NT_[IJ][CR] overrides BLIS_NUM_THEADS
+
+commit cf39d3ef3b29b8058c39fb4638c1a734fe64aaed
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri May 5 15:06:56 2017 -0500
+
+    Fixed a bug in norm1v, norm1m.
+    
+    Details:
+    - Fixed a bug that manifested as improperly-computed 1-norm for vectors
+      and matrices. This is one of the few operations in BLIS that does not
+      have its own test module within the testsuite, hence why it went
+      undetected for so long. The bad 1-norms were being used to normalize
+      matrices in the testsuite after initialization, which led to some
+      matrices containing a combination of "large" and "small" values. This
+      tended to push the residuals computed after each test away from zero.
+      In some cases, they were off *just* enough to the testsuite to label
+      it a "failure". Many thanks to Jeff Hammond for reporting this bug.
+      (Wonky details: the bug was due to improperly-defined level-0 scalar
+      macros for abval2, an operation that computes the absolute square,
+      or complex magnitude/modulus. Certain complex domain instances of
+      abval2 were being incorrectly defined in terms of real-only solutions,
+      leading to bad results. This level-0 operation forms the basis of
+      norm1v/norm1m. absq2 was also affected, but almost nothing uses
+      this operation.)
+
+commit 799485124f4d823e908d2e5d38b0c3a1e6172ade
+Merge: 773a24ef 0df3541f
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Thu May 4 10:52:09 2017 -0500
+
+    Merge pull request #121 from jeffhammond/not-real-knl
+    
+    allow KNL build without hbwmalloc (i.e. emulated)
+
+commit fdc66f12d40754ff46179804bff592fddafbca02
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Thu May 4 10:35:22 2017 -0500
+
+    Setting any one of BLIS_NT_[IJ][CR] overrides BLIS_NUM_THEADS. Missing BLIS_NT_XX's are defaulted to 1. Fixes #123.
+
+commit 773a24efb2fa1c3a220bf0ce1dd621a3176196da
+Merge: dd58c954 b8854259
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed May 3 15:07:59 2017 -0500
+
+    Merge branch 'master' of github.com:flame/blis
+
+commit dd58c9545c877c3f7553eaebca7b5e9720a66f5d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed May 3 15:04:51 2017 -0500
+
+    Disable complex 3m/4m in testsuite by default.
+    
+    Details:
+    - Disabled testsuite tests of all level-3 implementations based on 3m
+      and 4m. This will improve testing runtime on Travis CI as well as for
+      anyone manually running the testsuite using default test parameters.
+      Thanks to Devin Matthews for suggesting this change.
+
+commit 0df3541f54b7fe0c604ab2ec47ba814f12391798
+Author: Jeff Hammond <jeff.science@gmail.com>
+Date:   Tue May 2 19:25:21 2017 -0700
+
+    allow KNL build without hbwmalloc.h (i.e. emulated)
+    
+    we want to be able to run BLIS KNL binaries on non-KNL machines via SDE.
+    although it is possible to install hbwmalloc implementation on such
+    systems, it is easier not to, since obviously the performance of SDE
+    execution is not representative so there is no reason to emulate HBW
+    allocation.
+
+commit b88542591d4dd0cde366e5ae35afd3205cb81bdc
+Merge: 43007f7b c2c91e09
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue May 2 19:22:41 2017 -0500
+
+    Merge pull request #107 from jeffhammond/intel-compilers-no-use-libm
+    
+    never use libm with Intel compilers
+
+commit 43007f7b65ec7926cbbfc39965ff733fa251c15f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue May 2 16:48:43 2017 -0500
+
+    Fixed stray parentheses in README citations.
+
+commit a4f1d0b8801c114e9ef8be39df01e1b8d27ebcb3
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue May 2 16:38:43 2017 -0500
+
+    CHANGELOG update (0.2.2)
+
+commit 940a707ac78de975110e17c95765e65b89aa5e10 (tag: 0.2.2)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Tue May 2 16:38:42 2017 -0500
 
     Version file update (0.2.2)
 
-commit d5a5e003ea9b24bb6abf12e88862e8eb61ffb03d (origin/master, origin/HEAD, origin/1m, 1m)
+commit d5a5e003ea9b24bb6abf12e88862e8eb61ffb03d
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Tue May 2 15:48:30 2017 -0500
 
@@ -46,6 +2899,32 @@ Date:   Tue May 2 12:09:39 2017 -0500
     - Updated bibtex entries for 4th BLIS paper, and adds entries for 5th
       and 6th BLIS papers.
 
+commit 0f4e6652dfe9b30105d3bab328ac26d9d5c11182
+Merge: 42e7f6fb 6e7de6ef
+Author: praveeng <praveen.g@amd.com>
+Date:   Wed Apr 19 17:54:10 2017 +0530
+
+    Merge master code till 2017_04_19 to amd-staging
+    
+    Change-Id: Ibebe83c8ea2e7eb15798c2bcf214b7228a1c9518
+
+commit 42e7f6fb2a531429ee600b2fe0293b67371c7ccb
+Author: sthangar <Santanu.Thangaraj@amd.com>
+Date:   Tue Mar 28 18:10:03 2017 +0530
+
+    fixed license attribute issues in AMD added files
+    
+    Change-Id: I303f870a777c7cd1c1af29ea0b93f3e0a27948e4
+
+commit 5600001e973c6cea048bd3fdb28117f1d7c98b9d
+Merge: 0b190293 b3ed4933
+Author: prangana <pradeep.rao@amd.com>
+Date:   Mon Mar 20 13:56:33 2017 +0530
+
+    Fix merge conflicts after sync with release branch
+    
+    Change-Id: Icf14a09f728befb69a73fff9fa79c4128e728310
+
 commit 6e7de6ef84babb273dc5528a9b9d01f0febe394b
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Fri Mar 17 12:10:24 2017 -0500
@@ -65,6 +2944,55 @@ Date:   Fri Mar 17 12:07:27 2017 -0500
     Details:
     - Updated formatting of function signature/header in
       kernels/armv8a/3/bli_gemm_opt_4x4.c.
+
+commit 0b19029342ffc530fa22ef20398a26221cb8f6ec
+Author: Kiran Varaganti <Kiran.Varaganti@amd.com>
+Date:   Tue Mar 14 14:51:31 2017 +0530
+
+    Code cleanup, removed warnings from trsm, removed unused routines in axpyv & scalv
+    
+    Change-Id: I02867f394c5f416194c4b1769a6c75f39243ec81
+
+commit 825363bd2a5a60a923d4a6d9691dc143845a9cab
+Merge: 093bdb80 513944e4
+Author: praveeng <praveen.g@amd.com>
+Date:   Wed Mar 8 15:42:49 2017 +0530
+
+    Merge code from master to amd-staging as on 2017_03_08 by praveeng
+    
+    Change-Id: I80740081b2cb54c9b77a3e78b9fe540e170be23d
+
+commit 093bdb80c86b06367e595aa17487139ae983822f
+Author: sthangar <Santanu.Thangaraj@amd.com>
+Date:   Tue Mar 7 13:35:50 2017 +0530
+
+    Checked in Unpacked DGEMM code
+    
+    Change-Id: I39dcc7b238b328f73ee2675d21a5e521d0488723
+
+commit 33923da9a108854590d386e74b6ee66b971e7796
+Author: Kiran Varaganti <Kiran.Varaganti@amd.com>
+Date:   Mon Mar 6 14:31:31 2017 +0530
+
+     Added variant 10 for double precision axpyv microkernel
+    
+    Change-Id: I7a20cc113a422603250bc450825c965136354974
+
+commit bc828f7f8e3ddb9f58af07edc0b935b21759fb0f
+Author: Kiran Varaganti <Kiran.Varaganti@amd.com>
+Date:   Fri Mar 3 14:45:35 2017 +0530
+
+    Added new axpyv (single precision) microkernel where it performs 10 FMAs per loop- This gives better performance than all other implementations of axpyv
+    
+    Change-Id: Ic4f0e4c67e367d67d0b24febcf34f81a70a39972
+
+commit c9949f4603419267c10973adf1d63ec38497475d
+Author: sthangar <Santanu.Thangaraj@amd.com>
+Date:   Fri Feb 17 14:16:33 2017 +0530
+
+    Checked in DGEMMTRSM and edge case handling routine in DDOTXF
+    
+    Change-Id: I65f00661af6c09b2507294fd43e0a10641c0597e
 
 commit a509fbd5ac04fafd4e51b43d2f59ca56432dc212
 Merge: 69b4846a 513944e4
@@ -116,6 +3044,14 @@ Date:   Sun Feb 19 21:10:55 2017 -0500
 
     Cast dim_t and inc_t parameters to 64-bit in KNL microkernels.
 
+commit 04245c9ff7f8b3c70d61003029c964bb9a4320ee
+Author: Kiran Varaganti <Kiran.Varaganti@amd.com>
+Date:   Fri Feb 10 14:24:30 2017 +0530
+
+    Reoptimized scalv routines - two vector multiplies are done per iteration, and these routines are enabled in bli_kernel.h
+    
+    Change-Id: Ic5654508573d1f6bde2edef06aefe117e581feb5
+
 commit c362afc525bab4050581d1b0fcea2fe4d582c608
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Thu Feb 9 11:54:59 2017 -0600
@@ -139,6 +3075,60 @@ Date:   Wed Feb 8 11:20:52 2017 -0600
       which threading model was chosen. Thanks to heroxbd for reporting this
       issue.
 
+commit 58b5b77e5fdb179ea465e398e416e6a00d917e05
+Author: Kiran Varaganti <Kiran.Varaganti@amd.com>
+Date:   Wed Feb 8 21:43:34 2017 +0530
+
+    Fixed a bug in axpyv, the arguments passed to intrinsic fmad instruction are corrected
+    
+    Change-Id: If12f24c6bc74b22ac9e4acd6b9378e06d79f2f5e
+
+commit 85de4ebf74d0a5587d5a12724eb5489d51674db3
+Author: Kiran Varaganti <Kiran.Varaganti@amd.com>
+Date:   Wed Feb 8 14:41:04 2017 +0530
+
+    variant 4 axpyv single precision modified: explicitly used FMA intrinsics, replaced vector multiply and add operations
+    
+    Change-Id: I975feef56696d479d2b9e9441b0660021cf4f6ff
+
+commit 3fa53e8af31d634779f40258c51483ae8af494fa
+Merge: b5291a44 95be7b04
+Author: Kiran Varaganti <Kiran.Varaganti@amd.com>
+Date:   Wed Feb 8 11:46:34 2017 +0530
+
+    Merged axpyv and gemm small in bli_kernel.h
+    Merge branch 'amd-staging' of ssh://git.amd.com:29418/cpulibraries/er/blis into amd-staging
+    
+            modified:   config/zen/bli_kernel.h
+            modified:   frame/3/gemm/bli_gemm_front.c
+            modified:   kernels/x86_64/zen/3/bli_gemm_small_matrix.c
+    
+    Change-Id: If181cf9345178c448b3530beb8bef453917fe295
+
+commit 95be7b04709e688a4cb01fba680081e30f4258ef
+Author: sthangar <Santanu.Thangaraj@amd.com>
+Date:   Tue Feb 7 14:01:27 2017 +0530
+
+    Added logic for packing matrix A and prefetching matrix C in Unpacked SGEMM code
+    
+    Change-Id: I99efeca9eb5b4449286ec0ec133fd554ef1bb4f0
+
+commit b5291a445b1313e01f1e0e8102c5f3660ab07f69
+Author: Kiran Varaganti <Kiran.Varaganti@amd.com>
+Date:   Tue Feb 7 12:39:31 2017 +0530
+
+    Added optimization variant 4 for axpyv single precision - this performs 5 FMA per loop, keeping the IPC always full
+    
+    Change-Id: Ie77ed22584271136a257e673bcd3b1ba71136bc9
+
+commit f4bfc1662af82aa4b98185334c44835e51f1cbec
+Author: Kiran Varaganti <Kiran.Varaganti@amd.com>
+Date:   Mon Feb 6 15:04:27 2017 +0530
+
+    New routines implemented for axpyv to improve performance for small vector sizes, vectorization is done for vectors as small as 8 (single precision) 4(double precision), since this operation has low compute to memory ratio, higher matrix sizes memory operations are dominating and hence not much gain - This still needs some work- added saxpyv and daxpyv var 3 routines in the file bli_axpyv_opt_var1.c
+    
+    Change-Id: Ic1b33bd5516e10113b00e44ab41b97eb19d46072
+
 commit ddf45e71770c55ea4a58ca24ea4913fe5d8beb9b
 Merge: a6ab91bc 78e1b16e
 Author: Devin Matthews <dmatthews@utexas.edu>
@@ -153,6 +3143,14 @@ Author: Devin Matthews <dmatthews@utexas.edu>
 Date:   Fri Jan 27 14:22:20 2017 -0600
 
     Change default threading parameters for KNL.
+
+commit 574472ba5a89924eca7dbd10055d0e1dcd7f4c71
+Author: sthangar <Santanu.Thangaraj@amd.com>
+Date:   Tue Jan 10 14:51:46 2017 +0530
+
+    checked in unpacked SGEMM optimization
+    
+    Change-Id: I8e4ea374415c0c402c660b656fb076af15354181
 
 commit 1c732d3ddc4ac0861d3b0e0dd15eb7e071615502
 Author: Field G. Van Zee <field@cs.utexas.edu>
@@ -205,6 +3203,23 @@ Date:   Wed Jan 25 16:25:46 2017 -0600
       and updated all instantiations. Also updated the field names in the
       cntx_t struct.
     - Comment updates.
+
+commit 41595e98eedaf3f1f93802c14dcae490402f933f
+Merge: d625c49e a6ab91bc
+Author: praveeng <praveen.g@amd.com>
+Date:   Wed Dec 7 15:13:21 2016 +0530
+
+    Merge master code as on 2016_12_07 to amd-staging
+    
+    Change-Id: I5d9ecef9bff960aeb9b51ca4e4b21714e789e44f
+
+commit d625c49e20bd3c50d6d44e330e34076cced114a3
+Author: sthangar <Santanu.Thangaraj@amd.com>
+Date:   Tue Nov 29 15:05:19 2016 +0530
+
+    checked-in SGEMMTRSM microkernel for Zen
+    
+    Change-Id: Ib61936418dea911b2154aa99f703b66e9669f94f
 
 commit a6ab91bc61432490fadf18d596de4589645f37dd
 Merge: 145a551d 7f31a630
@@ -264,6 +3279,22 @@ Date:   Fri Nov 25 18:29:49 2016 -0600
     - Added 1m support to Makefile and runme.sh in test/3m4m. Also simplified
       some code in test_gemm.c driver.
 
+commit d8f13beeea90338e0ecb0a3aeaa2d59d8ebd6c36
+Merge: c25a9205 145a551d
+Author: praveeng <praveen.g@amd.com>
+Date:   Fri Nov 25 17:31:08 2016 +0530
+
+    Merge master code till  2016_11_25 to amd-staging
+
+commit c25a9205fd8c8d8de7fd81b1e5621e7ac79f4e87
+Merge: 65298762 bdc0a264
+Author: praveeng <praveen.g@amd.com>
+Date:   Fri Nov 25 17:06:36 2016 +0530
+
+    Merge master code till Switched to simpler trsm_r 2016_11_25 to amd-staging
+    
+    Change-Id: Ibf71d224d8fb6cf0bc497f84d50c27d276512cc1
+
 commit 145a551d524ae5492667a05fc248923d922df850
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Wed Nov 23 17:59:06 2016 -0600
@@ -294,6 +3325,22 @@ Date:   Wed Nov 23 17:58:26 2016 -0600
       defines 4x24 single real and 4x12 double real gemm microkernels, with
       broadcast-based implementations. (The previous microkernel file has been
       moved to an 'old' subdirectory.)
+
+commit 65298762ff15c45e8588e0c279a9feaa98c927a0
+Author: sthangar <Santanu.Thangaraj@amd.com>
+Date:   Tue Nov 22 12:15:33 2016 +0530
+
+    removed a redundant copy operation in DNRM2
+    
+    Change-Id: I673b08efde4480e871779716f7715566740ad9ce
+
+commit d6863e851adeef037e4d1476fe63bb293fb9d987
+Author: sthangar <Santanu.Thangaraj@amd.com>
+Date:   Mon Nov 21 11:30:30 2016 +0530
+
+    checked-in DNRM2 optimizations
+    
+    Change-Id: I3b31d768bd7f4fbf43042aa5a0762995c73c4522
 
 commit bdc0a264d2fb5940bfd09298b1de823674a39053
 Author: Field G. Van Zee <field@cs.utexas.edu>
@@ -336,6 +3383,30 @@ Date:   Wed Nov 16 14:04:33 2016 -0600
       incorrectly at first. I've now fixed its location and changed its
       consequence to a compile-time #error message.
 
+commit 9772218cae57d55c252595b01e3669d8bed84944
+Author: sthangar <Santanu.Thangaraj@amd.com>
+Date:   Wed Nov 16 15:19:19 2016 +0530
+
+    Added optimized DAMAX routines for Zen
+    
+    Change-Id: I499c0c8f0f4ce6c19235c47b86d5608db6ba50f8
+
+commit 9c448e30174e5eb76a94b43b30819704a5dfcb3f
+Merge: 998d8240 e35d3c23
+Author: Santanu Thangaraj <Santanu.Thangaraj@amd.com>
+Date:   Wed Nov 16 04:18:57 2016 -0500
+
+    Merge "Added new optimized micro-kernel for dotxv routine" into amd-staging
+
+commit 998d824044adac0d54c921dcd44fb58f3d54aad2
+Merge: 0d13e9a4 6b5a4032
+Author: praveeng <praveen.g@amd.com>
+Date:   Wed Nov 16 14:22:42 2016 +0530
+
+    Merge master code till devinamatthews/omp_num_thrds 2016_11_16 to amd-staging
+    
+    Change-Id: I601ff1d3ec8a680e1be039ffc7b299744e8a27c5
+
 commit 6b5a4032d2e3ed29a272c7f738b7e3ed6657e556
 Merge: 3b524a08 a8220e3a
 Author: Field G. Van Zee <field@cs.utexas.edu>
@@ -351,6 +3422,23 @@ Date:   Thu Nov 10 14:19:34 2016 -0600
 
     - Fix typo in bli_cntx.c
     - Bump BLIS_DEFAULT_NR_THREAD_MAX to 4
+
+commit e35d3c23f28784e50ee13d2e77a69d60e0c24c1f
+Author: Kiran Varaganti <Kiran.Varaganti@amd.com>
+Date:   Thu Nov 10 14:30:53 2016 +0530
+
+    Added new optimized micro-kernel for dotxv routine
+    
+    Change-Id: I2c544e9b25a454d971ad690353502a55cd668391
+
+commit 0d13e9a4f6f2fcda08f205215240cdf86442d6c6
+Merge: e044fa62 3b524a08
+Author: praveeng <praveen.g@amd.com>
+Date:   Mon Nov 7 14:40:41 2016 +0530
+
+    bli_kernel.h
+    
+    Change-Id: I425d089f79497a0de7d1622e829c3ca9edf7f091
 
 commit c05b3862f6241486442b313eff0c8bee7b5e1274
 Author: Devin Matthews <dmatthews@utexas.edu>
@@ -485,6 +3573,20 @@ Date:   Mon Oct 31 14:40:51 2016 -0500
       subproblems (not ideal). This commit fixes this issue. Thanks to Devin
       for his suggestion.
 
+commit c2c91e09b4893cb81314774557f728a95080f81e
+Author: Jeff Hammond <jeff.science@gmail.com>
+Date:   Tue Oct 25 21:15:26 2016 -0700
+
+    never use libm with Intel compilers
+    
+    Intel compilers include a highly optimized math library (libimf) that
+    should be used instead of GNU libm.
+    
+    yes, this change is for ALL targets, including those that are not
+    supported by the Intel compiler.  there is no harm in doing this, and it
+    is future-proof in the event that the Intel compilers support other
+    architectures.
+
 commit 630391002325a589063aec2ab0a7d89ef2e178c0
 Merge: 956b3edf 216206c1
 Author: Field G. Van Zee <field@cs.utexas.edu>
@@ -531,6 +3633,22 @@ Date:   Tue Oct 25 12:42:44 2016 -0500
 
     Add flexible options for thread model (pthread/posix for pthreads etc.).
 
+commit e044fa624008c161de32a39d734cddf1dd22dd41
+Author: Kiran Varaganti <Kiran.Varaganti@amd.com>
+Date:   Tue Oct 25 13:03:05 2016 +0530
+
+    Changed double precision trsm kernel macro definition to bli_dtrsm_l_int_6x8 from 6x16 : it fixes the seg fault
+    
+    Change-Id: Ia8c1de5fe13a370d691570a50136d55ffb18908a
+
+commit b3ed4933aa0da72ad771fb0fdf1727e5ba9ad7b4
+Author: Kiran Varaganti <Kiran.Varaganti@amd.com>
+Date:   Tue Oct 25 13:03:05 2016 +0530
+
+    Changed double precision trsm kernel macro definition to bli_dtrsm_l_int_6x8 from 6x16 : it fixes the seg fault
+    
+    Change-Id: Ia8c1de5fe13a370d691570a50136d55ffb18908a
+
 commit b7e41d71b07d2af6d22d632c70e0c5f7ce46852c
 Merge: 4bd905bd 5117d444
 Author: Field G. Van Zee <field@cs.utexas.edu>
@@ -568,6 +3686,14 @@ Date:   Fri Oct 21 14:34:27 2016 -0500
       from bli_thread.h to bli_config_macro_defs.h. Also moved the
       sanity check that OpenMP and POSIX threads are not both enabled.
     - Thanks to Krzysztof Drewniak for reporting this bug.
+
+commit d250e6a3af3af8beedcda28f508ac03e94efb3c8
+Author: Kiran Varaganti <Kiran.Varaganti@amd.com>
+Date:   Thu Oct 20 14:34:39 2016 +0530
+
+    Merged TRSM and scalv routines into zen folder
+    
+    Change-Id: Ice897bc83e8fb70b90f23cc3ce892c39883aceb9
 
 commit 8feb0f85a674e84bec2417486e3bcea584b14c04
 Author: Field G. Van Zee <field@cs.utexas.edu>
@@ -612,6 +3738,23 @@ Date:   Wed Oct 19 15:58:03 2016 -0500
     - The redundant typedefs of membrk_t and mtx_t caused a warning on some C
       compilers. Thanks to Tyler Smith for reporting this issue.
 
+commit 1c2f7b57d557c05f5ef6148cccafaf0f70d910da
+Author: sthangar <Santanu.Thangaraj@amd.com>
+Date:   Tue Oct 18 15:06:35 2016 +0530
+
+    Removed symlinks to zen kernels from haswell kernel folder and also modified the bli_kernel.h file accordingly
+    
+    Change-Id: Ib3736af48e851c8243bbe10d937fb942c49ad048
+
+commit d864ea9f4f039fe2b2dc395d0015bd9e8902bc8e
+Merge: 7045fcbf 28b2af8a
+Author: praveeng <praveen.g@amd.com>
+Date:   Fri Oct 14 17:00:57 2016 +0530
+
+    Merge master code 2016_10_14 till Added disabled code thrinfo_t structures
+    
+    Change-Id: If7db98d286c1471fcd30f00757abee9b253ef987
+
 commit 28b2af8a71133ce68774e153b6e05afb05affba8
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Thu Oct 13 14:50:08 2016 -0500
@@ -638,6 +3781,23 @@ Date:   Thu Oct 13 14:23:23 2016 -0500
     - Forgot to update certain occurrences of "omp" in common.mk during
       commit fd04869, which changed the preferred configure option string
       for enabling OpenMP from "omp" to "openmp".
+
+commit 7045fcbf0bd349ebe6cb9ac4508c6a387bb05966
+Merge: 7e044900 9cda6057
+Author: praveeng <praveen.g@amd.com>
+Date:   Thu Oct 13 12:02:28 2016 +0530
+
+    Merge master code 2016_10_13 Removed previously renamed/old files
+    
+    Change-Id: I8106d371afaa0af474a8967388d44481b05de923
+
+commit 7e04490002206d3557fcfb7dd893838a7f36916f
+Author: sthangar <Santanu.Thangaraj@amd.com>
+Date:   Wed Oct 12 16:43:02 2016 +0530
+
+    Checked in the SAMAX optimizations
+    
+    Change-Id: I7faf8c3adf52ff01432188ad3b9866ee4b9a9dfd
 
 commit 9cda6057eaa16a24ac8785a9fa167df6c9edba44
 Author: Field G. Van Zee <field@cs.utexas.edu>
@@ -680,6 +3840,31 @@ Date:   Thu Oct 6 14:48:15 2016 -0500
       order to free the address immediately before the pointer. Thanks to Devin
       Matthews for reporting this bug.
 
+commit cd84fb95182514601d72c78ee0e36a394d0284d7
+Author: praveeng <praveen.g@amd.com>
+Date:   Thu Oct 6 15:08:21 2016 +0530
+
+    syntax erros in configure file
+    
+    Change-Id: Ibe8a6071aad97df550df64c009fec33a9d8f43a1
+
+commit f2e7ea113aa93b74f1d42408d5db2c5a7b00a653
+Merge: 133983c3 86969873
+Author: praveeng <praveen.g@amd.com>
+Date:   Thu Oct 6 12:35:30 2016 +0530
+
+    conflicts merge for bli_kernel.h
+    
+    Change-Id: I15d846bd34e11f86ebfd7ed091ff671a1f3366a0
+
+commit 133983c36fa01c7acb6d666b3744f77f216314a5
+Author: sthangar <Santanu.Thangaraj@amd.com>
+Date:   Thu Oct 6 11:26:22 2016 +0530
+
+    code clean up in bli_kernel.h
+    
+    Change-Id: I11d9cdf2af8e8199209eb084f6c3a7c910b83d5d
+
 commit 4fb9b4ef2e4cf2626a6e000a41628fb823f16da8
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Wed Oct 5 14:41:35 2016 -0500
@@ -699,7 +3884,7 @@ Date:   Wed Oct 5 13:35:01 2016 -0500
 
     Merge branch 'compose'
 
-commit 6f71cd344951854e4cff9ea21bbdfe536e72611d (origin/compose, compose)
+commit 6f71cd344951854e4cff9ea21bbdfe536e72611d (origin/compose)
 Merge: c0630c40 8d55033c
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Tue Oct 4 15:53:46 2016 -0500
@@ -735,7 +3920,7 @@ Date:   Tue Oct 4 14:24:59 2016 -0500
       of the complex domain).
     - Removed the directory frame/include/old/.
 
-commit 8d55033c966feed99fcca2a58017c3ab5b1646dc (origin/distcomm)
+commit 8d55033c966feed99fcca2a58017c3ab5b1646dc
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Tue Sep 27 15:20:58 2016 -0500
 
@@ -807,6 +3992,47 @@ Date:   Fri Sep 16 09:29:28 2016 -0500
 
     Fixes broken URL in README.md
 
+commit b922d7563422e14c49a4677bc6ae088a408861ed
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Aug 23 13:38:36 2016 -0500
+
+    Avoid compiling BLAS/CBLAS files when disabled.
+    
+    Details:
+    - Updated the top-level Makefile, build/config.mk.in template, and
+      configure script so that object files corresponding to source files
+      belonging to the BLAS compatibility layer are not compiled (or archived)
+      when the compatibility layer is disabled. (Same for CBLAS.) Thanks
+      to Devin Matthews for suggesting this optimization.
+    - Slight change to the way configure handles internal variables. Instead
+      of converting (overwriting) some, such as enable_blas2blis and
+      enable_cblas, from a "yes" or "no" to a "1" or "0" value, the latter are
+      now stored in new variables that live alongside the originals (with the
+      suffix "_01").  This is convenient since some values need to be
+      sed-substituted into the config.mk.in template, which requires "yes" or
+      "no", while some need to be written to the bli_config.h.in template,
+      which requires "0" or "1".
+    
+    Updated BLIS4 TOMS citation in README.md.
+    
+    Added complex gemm micro-kernels for haswell.
+    
+    Details:
+    - Defined cgemm (3x8) and zgemm (3x4) micro-kernels for haswell-based
+      architectures. As with their real domain brethren, these kernels perfer
+      row storage, (though this doesn't affect most users due to high-level
+      optimizations in most level-3 operations that induce a transpose to
+      whatever storage preference the kernel may have).
+    
+    Change-Id: I512ab90784ecbb7cdaee24928d2ccebb544ba5c1
+
+commit 69826110bab2a064ec76457c24843d28f2581281
+Merge: 64598ee4 a58dd35e
+Author: Pradeep Rao <Pradeep.Rao@amd.com>
+Date:   Wed Sep 14 03:26:25 2016 -0400
+
+    Merge "Implemented trsm single precision for lower triangular matrices, files added bli_trsm_l_int_6x16.cfiles modified bli_kernel.h to enable optimized trsm microkernel and test_trsm.c is modified to test trsm single precision" into amd-staging
+
 commit c0630c4024b08750043a2942a3e8a037aa6b6259
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Mon Sep 12 13:59:02 2016 -0500
@@ -854,11 +4080,35 @@ Date:   Wed Aug 31 17:34:15 2016 -0500
       in bli_gemm3m3_packa() on the bli_obj_scalar_reset() on C.
     - Thanks to Tyler Smith for help with these changes.
 
+commit 64598ee4cfb86f64abbd4bcef5a82ba0d5565b67
+Author: sthangar <Santanu.Thangaraj@amd.com>
+Date:   Wed Aug 31 12:54:50 2016 +0530
+
+    fixed the symlink issue
+    
+    Change-Id: I2186d529f295c576597c189e1ae219bc1a83f955
+
 commit abd61f9fa75d77a96d1491b3e035451ee73238fe
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Tue Aug 30 12:34:19 2016 -0500
 
     Updated BLIS4 TOMS citation in README.md.
+
+commit 8a2373f26ba8fcd5b2d7b2cc72cb8b2e1f841a03
+Author: sthangar <Santanu.Thangaraj@amd.com>
+Date:   Mon Aug 29 14:10:45 2016 +0530
+
+    Norm 2 optimization
+    
+    Change-Id: Ide9decaccd20bf0ccc32c9abb6556e038dceed2b
+
+commit fdc663902347aa252ea88cf09ce24ab748958dff
+Author: sthangar <Santanu.Thangaraj@amd.com>
+Date:   Mon Aug 29 10:43:38 2016 +0530
+
+    Placed 1 and 1f AMD optimized AVX routines under zen folder
+    
+    Change-Id: I26795211ef11d232ed794ce36dd0a9c1f8706328
 
 commit 701b9aa3ff028decbf90efac0dca5bd64fe26269
 Author: Field G. Van Zee <field@cs.utexas.edu>
@@ -980,6 +4230,14 @@ Date:   Fri Aug 26 19:04:45 2016 -0500
       reference micro-kernels for complex datatypes, and testing these
       implementations can slow down the testsuite considerably.
 
+commit a58dd35ed7b5b77a6b272655d2edd7a822b8fa87
+Author: Kiran Varaganti <Kiran.Varaganti@amd.com>
+Date:   Fri Aug 26 14:55:12 2016 +0530
+
+    Implemented trsm single precision for lower triangular matrices, files added bli_trsm_l_int_6x16.cfiles modified bli_kernel.h to enable optimized trsm microkernel and test_trsm.c is modified to test trsm single precision
+    
+    Change-Id: Ibddf989f4aad577e89558673e1038cf6ece654d9
+
 commit 73517f522b69de429dd7f3df60a70c068149ab28
 Merge: c6f5c215 50293da3
 Author: Field G. Van Zee <field@cs.utexas.edu>
@@ -1008,12 +4266,144 @@ Date:   Tue Aug 23 13:38:36 2016 -0500
       "no", while some need to be written to the bli_config.h.in template,
       which requires "0" or "1".
 
+commit 22dd6a353ddb56614309c01533b1a94c9fd32bca
+Merge: cdfb3c3f f20ed388
+Author: praveeng <praveen.g@amd.com>
+Date:   Tue Aug 23 15:15:35 2016 +0530
+
+    Merge master code as on 2016_08_23 to amd-staging branch by praveeng
+    
+     Changes to be committed:
+            modified:   frame/thread/bli_mutex_openmp.h
+            modified:   frame/thread/bli_mutex_pthreads.h
+    
+    Change-Id: Ica522edbb1d0173f53f38d5057b1f7aef73666be
+
 commit c6f5c215ee793d03ea834469fc2adc53feaffc42
 Merge: d52cb767 16a4c7a8
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Mon Aug 22 17:33:02 2016 -0500
 
     Merge branch 'master' into compose
+
+commit f20ed3885d628992fab88690f629a5a2bab3eb88
+Merge: 02ac597e 4bc842ca
+Author: praveeng <praveen.g@amd.com>
+Date:   Mon Aug 22 15:27:33 2016 +0530
+
+    Merge branch 'master' of https://github.com/clMathLibraries/blis-amd for "Fixed bugs in bli_mutex_init() and friends."
+
+commit 02ac597e4b9be2670d9fff65d28552f8e1ec81b3
+Author: praveeng <praveen.g@amd.com>
+Date:   Thu Jul 28 15:11:08 2016 +0530
+
+    Revert commits 357c990bdd7bd5667aac5adf1bab3712973e7414
+    
+    Change-Id: I12a34456d7eed93fda4369e76bcddb42ba7ccb99
+
+commit 84e41cc73c9c87ce64582acd4264b8e1b5316482
+Author: praveeng <praveen.g@amd.com>
+Date:   Thu Jul 28 15:01:36 2016 +0530
+
+    Revert commits 8aee306
+    
+    Change-Id: I3dd999c77c6779332a40dbb84371ca487216f189
+
+commit 30ccfcee82db93d0109d1571242e2db925e95d0a
+Author: praveeng <praveen.g@amd.com>
+Date:   Mon Jul 25 14:14:00 2016 +0530
+
+    removed changes from readme file which are giving confilcts
+    
+    Change-Id: Ic71ad1313e1404fed444e899466043704d875af6
+
+commit aeca25cd63fc8971f8fe7809599c57853f976548
+Author: praveeng <praveen.g@amd.com>
+Date:   Tue Jul 5 16:51:23 2016 +0530
+
+    first commit
+    
+    Change-Id: Ib50c81acda3b2c1583da3d421efc0ca547ef68e2
+
+commit 6b2274864b36fd1019d97bcc4ca6dd7a57ef16d9
+Author: praveeng <praveen.g@amd.com>
+Date:   Tue Jul 5 15:00:31 2016 +0530
+
+    small modification to readme for  git push test
+    
+    Change-Id: I68506a49586b07eaa907f3f85304ee40d4c92d0a
+
+commit daa7a9ecb25982f2551adbd95e65f8ba97cfe944
+Author: praveeng <praveen.g@amd.com>
+Date:   Tue Jul 5 16:51:23 2016 +0530
+
+    first commit
+    
+    Change-Id: Ib50c81acda3b2c1583da3d421efc0ca547ef68e2
+
+commit 5f66a4aa05aeffcb6eb587851d78d9527319466c
+Author: praveeng <praveen.g@amd.com>
+Date:   Tue Jul 5 15:00:31 2016 +0530
+
+    small modification to readme for  git push test
+    
+    Change-Id: I68506a49586b07eaa907f3f85304ee40d4c92d0a
+
+commit c6cbd78d2388c08824822b91a1c36ac4349bb67f
+Author: praveeng <praveen.g@amd.com>
+Date:   Thu Jul 28 15:11:08 2016 +0530
+
+    Revert commits 357c990bdd7bd5667aac5adf1bab3712973e7414
+    
+    Change-Id: I12a34456d7eed93fda4369e76bcddb42ba7ccb99
+
+commit 9219a9060762525f87ebbf556d78fe8621858513
+Author: praveeng <praveen.g@amd.com>
+Date:   Thu Jul 28 15:01:36 2016 +0530
+
+    Revert commits 8aee306
+    
+    Change-Id: I3dd999c77c6779332a40dbb84371ca487216f189
+
+commit 728573296efa7cf14d2381570e116509dfe2a240
+Author: praveeng <praveen.g@amd.com>
+Date:   Mon Jul 25 14:14:00 2016 +0530
+
+    removed changes from readme file which are giving confilcts
+    
+    Change-Id: Ic71ad1313e1404fed444e899466043704d875af6
+
+commit ad7862e291c240505c733a41d231b1a126ade73c
+Author: praveeng <praveen.g@amd.com>
+Date:   Tue Jul 5 16:51:23 2016 +0530
+
+    first commit
+    
+    Change-Id: Ib50c81acda3b2c1583da3d421efc0ca547ef68e2
+
+commit ad4b471a25ce77867295e5529dfc787e7c18b03f
+Author: praveeng <praveen.g@amd.com>
+Date:   Tue Jul 5 15:00:31 2016 +0530
+
+    small modification to readme for  git push test
+    
+    Change-Id: I68506a49586b07eaa907f3f85304ee40d4c92d0a
+
+commit 55d641363fcd8bdfdabbd7c22822fa2d0b7f3fa6
+Author: praveeng <praveen.g@amd.com>
+Date:   Tue Jul 5 16:51:23 2016 +0530
+
+    first commit
+    
+    Change-Id: Ib50c81acda3b2c1583da3d421efc0ca547ef68e2
+
+commit f3b6b15f6d591d323802bd6c81c522a02056506d
+Author: praveeng <praveen.g@amd.com>
+Date:   Tue Jul 5 15:00:31 2016 +0530
+
+    small modification to readme for  git push test
+    
+    Change-Id: I68506a49586b07eaa907f3f85304ee40d4c92d0a
 
 commit 16a4c7a823d60707ed9272f5d36e5c5d54c0ba4b
 Author: Field G. Van Zee <field@cs.utexas.edu>
@@ -1060,6 +4450,94 @@ Author: Devin Matthews <dmatthews@utexas.edu>
 Date:   Wed Aug 3 11:28:24 2016 -0500
 
     This version gets ~1550 GFLOPs on KNL wuth 16x4.
+
+commit cdfb3c3f29d321033fca106aa58ab67ead90a95d
+Merge: 50a2f2ef 4bc842ca
+Author: praveeng <praveen.g@amd.com>
+Date:   Fri Jul 29 12:45:04 2016 +0530
+
+    Merge master code as on 2016_07_29 to amd-staging branch by praveeng
+    
+    Change-Id: Ic78b84d8b8d10158fb2a612f9a64bbc7b1f9b486
+
+commit 4bc842ca3a64e658c0808bfe4c5693a5ace97923
+Merge: 117f8838 b0d510bf
+Author: praveeng <praveen.g@amd.com>
+Date:   Thu Jul 28 17:32:12 2016 +0530
+
+    Merge branch 'master' of  publicrepo
+
+commit 117f8838511a478aa16137e770d27dd21f4227c5
+Author: praveeng <praveen.g@amd.com>
+Date:   Thu Jul 28 15:11:08 2016 +0530
+
+    Revert commits 357c990bdd7bd5667aac5adf1bab3712973e7414
+    
+    Change-Id: I12a34456d7eed93fda4369e76bcddb42ba7ccb99
+
+commit 2fcdc28f1055d385b2e662aa920fb97c472394d7
+Author: praveeng <praveen.g@amd.com>
+Date:   Thu Jul 28 15:01:36 2016 +0530
+
+    Revert commits 8aee306
+    
+    Change-Id: I3dd999c77c6779332a40dbb84371ca487216f189
+
+commit 1b5d104afe0628b8b6c0650f1e58cfb08be67004
+Author: praveeng <praveen.g@amd.com>
+Date:   Mon Jul 25 14:14:00 2016 +0530
+
+    removed changes from readme file which are giving confilcts
+    
+    Change-Id: Ic71ad1313e1404fed444e899466043704d875af6
+
+commit d81273047bff56501e9413a90991d3d1f8b56a06
+Author: praveeng <praveen.g@amd.com>
+Date:   Tue Jul 5 16:51:23 2016 +0530
+
+    first commit
+    
+    Change-Id: Ib50c81acda3b2c1583da3d421efc0ca547ef68e2
+
+commit 65905c3011a11cda95761681d4ae84337e46bdb5
+Author: praveeng <praveen.g@amd.com>
+Date:   Tue Jul 5 15:00:31 2016 +0530
+
+    small modification to readme for  git push test
+    
+    Change-Id: I68506a49586b07eaa907f3f85304ee40d4c92d0a
+
+commit 23cca231be10fe1797aed451bcbc69d38c78bc0c
+Author: praveeng <praveen.g@amd.com>
+Date:   Tue Jul 5 16:51:23 2016 +0530
+
+    first commit
+    
+    Change-Id: Ib50c81acda3b2c1583da3d421efc0ca547ef68e2
+
+commit 922e3091702f25e3287b417719a33adbd5bbf138
+Author: praveeng <praveen.g@amd.com>
+Date:   Tue Jul 5 15:00:31 2016 +0530
+
+    small modification to readme for  git push test
+    
+    Change-Id: I68506a49586b07eaa907f3f85304ee40d4c92d0a
+
+commit b0d510bf0e4dfd177f9e4ae0069f41921e2ecdc1
+Author: praveeng <praveen.g@amd.com>
+Date:   Thu Jul 28 15:11:08 2016 +0530
+
+    Revert commits 357c990bdd7bd5667aac5adf1bab3712973e7414
+    
+    Change-Id: I12a34456d7eed93fda4369e76bcddb42ba7ccb99
+
+commit 5ebeece5b4a8df81d59ca7558b278a4263d15128
+Author: praveeng <praveen.g@amd.com>
+Date:   Thu Jul 28 15:01:36 2016 +0530
+
+    Revert commits 8aee306
+    
+    Change-Id: I3dd999c77c6779332a40dbb84371ca487216f189
 
 commit 6ce4c022ebdea00c2b951090e3c2e9e88735b9ce
 Author: Devin Matthews <dmatthews@utexas.edu>
@@ -1157,6 +4635,30 @@ Author: Devin Matthews <dmatthews@utexas.edu>
 Date:   Mon Jul 25 10:02:25 2016 -0500
 
     Minor fixes for 8x24 KNL kernel.
+
+commit 50a2f2efcbeb46537f1deaa8e44dc579a4e49eb8
+Merge: 1aa77dfc cfd46c88
+Author: praveeng <praveen.g@amd.com>
+Date:   Mon Jul 25 17:01:20 2016 +0530
+
+    Merge master code as on 2016_07_25 to amd-staging branch by praveeng
+    
+    Change-Id: I84886ae241db2aac0bef6b7ef399f04aa8bca16d
+
+commit cfd46c88d59c8f61d5e7cf768d606e4c44623584
+Merge: f493bf4d a017062f
+Author: praveeng <praveen.g@amd.com>
+Date:   Mon Jul 25 15:38:13 2016 +0530
+
+    Merge remote-tracking branch 'publicrepo/master'
+
+commit f493bf4d704fe0e967783cd6e6877d3302c056a1
+Author: praveeng <praveen.g@amd.com>
+Date:   Mon Jul 25 14:14:00 2016 +0530
+
+    removed changes from readme file which are giving confilcts
+    
+    Change-Id: Ic71ad1313e1404fed444e899466043704d875af6
 
 commit 65735bbedf75784c48bd11e05b3fdc98fc66b4bc
 Author: Devin Matthews <dmatthews@utexas.edu>
@@ -1310,6 +4812,15 @@ Date:   Fri Jul 22 10:23:31 2016 -0500
 
     Add 8x24 KNL kernel.
 
+commit 1aa77dfc1dc183d16e0b6a1196d9c263f021e83d
+Merge: 9101a9c8 ec9f5983
+Author: praveeng <praveen.g@amd.com>
+Date:   Thu Jul 21 14:22:40 2016 +0530
+
+    Merge master code as on 2016_07_21 to amd-staging branch by praveeng
+    
+    Change-Id: Ic7d0a21101358f08147736e7f1884e7409937344
+
 commit b58cda9eba0c1e175460aae109baf792d29ba5bf
 Merge: 318f063d 413d62ac
 Author: Devin Matthews <dmatthews@utexas.edu>
@@ -1322,12 +4833,50 @@ Date:   Tue Jul 19 14:09:09 2016 -0500
     #       frame/include/blis.h
     #       frame/thread/bli_thread.c
 
+commit ec9f59836b32260c29ff1cd24e629c7d8de14992
+Merge: 197e182f 763babe4
+Author: praveeng <praveen.g@amd.com>
+Date:   Mon Jul 18 12:56:25 2016 +0530
+
+    Merge branch 'master' of https://github.com/clMathLibraries/blis-amd
+
+commit 197e182fcbf1340fd4a202fac58bea6cfcfa9e2f
+Author: praveeng <praveen.g@amd.com>
+Date:   Tue Jul 5 16:51:23 2016 +0530
+
+    first commit
+    
+    Change-Id: Ib50c81acda3b2c1583da3d421efc0ca547ef68e2
+
+commit 41fb32711031e7ec86b062aa7f53255d1f5905e2
+Author: praveeng <praveen.g@amd.com>
+Date:   Tue Jul 5 15:00:31 2016 +0530
+
+    small modification to readme for  git push test
+    
+    Change-Id: I68506a49586b07eaa907f3f85304ee40d4c92d0a
+
 commit d0dfe5b5372cc7558ee9c4104b29f82eecc7ed61
 Merge: 31def12e 413d62ac
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Thu Jul 14 11:01:06 2016 -0500
 
     Merge branch 'master' into compose
+
+commit 9101a9c880e3934f8a63ffc7fe15f5fc1077a73d
+Author: sthangar <Santanu.Thangaraj@amd.com>
+Date:   Wed Jul 13 16:51:14 2016 +0530
+
+    Checked in optimized 1V kernels along with benchmark codes. Also incorporated review comments for 1F kernels
+    
+    Change-Id: I035c0d39e6b0bed28e6e2041242186c49f6ed55b
+
+commit 763babe488880b42c86c7fc207aa7665bd0ff9f7
+Merge: 357c990b 413d62ac
+Author: praveeng <praveen.g@amd.com>
+Date:   Wed Jul 13 11:57:19 2016 +0530
+
+    Merge remote-tracking branch 'publirepo/master'
 
 commit 413d62aca28edabba56605a9f87d5b715831e1db
 Author: Field G. Van Zee <field@cs.utexas.edu>
@@ -1340,6 +4889,22 @@ Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Tue Jul 12 14:21:19 2016 -0500
 
     README update (BLIS2 TOMS article now in-print).
+
+commit 357c990bdd7bd5667aac5adf1bab3712973e7414
+Author: praveeng <praveen.g@amd.com>
+Date:   Tue Jul 5 16:51:23 2016 +0530
+
+    first commit
+    
+    Change-Id: Ib50c81acda3b2c1583da3d421efc0ca547ef68e2
+
+commit 8aee306300adb099b66036f2c2f7f3996433cf49
+Author: praveeng <praveen.g@amd.com>
+Date:   Tue Jul 5 15:00:31 2016 +0530
+
+    small modification to readme for  git push test
+    
+    Change-Id: I68506a49586b07eaa907f3f85304ee40d4c92d0a
 
 commit 31def12e2629f187e40f93f6bae9e26a6c2660e2
 Author: Field G. Van Zee <field@cs.utexas.edu>
@@ -1371,6 +4936,14 @@ Date:   Thu Jun 30 15:19:20 2016 -0500
       consolidation and dir_t querying mentioned above.
     - Function signature (whitespace) reformatting for various functions.
     - Removed old code in various 'old' directories.
+
+commit 405c9d46344d93c3eab5572b233900b50ca50d68
+Author: sthangar <Santanu.Thangaraj@amd.com>
+Date:   Wed Jun 22 12:18:54 2016 +0530
+
+    Check-in the fused kernels optimized for Zen
+    
+    Change-Id: I7b2f467b960e7b9a285f06e47be87de122e5fa24
 
 commit 232754feecf29452987666b9f5ebba2619bfd0b0
 Author: Field G. Van Zee <field@cs.utexas.edu>
