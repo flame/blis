@@ -45,7 +45,7 @@ void bli_daxpyf_bgq_int
        double* restrict a, inc_t inca, inc_t lda,
        double* restrict x, inc_t incx,
        double* restrict y, inc_t incy,
-       cntx_t*          cntx
+       cntx_t* restrict cntx
      )
 {
 	const dim_t fusefac = 8;

@@ -41,7 +41,7 @@ void bli_daxpyv_bgq_int
        double* restrict alpha,
        double* restrict x, inc_t incx,
        double* restrict y, inc_t incy,
-       cntx_t*          cntx
+       cntx_t* restrict cntx
      )
 {
 	if ( bli_zero_dim1( n ) ) return;

@@ -39,13 +39,13 @@
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-       conj_t          conjx, \
-       dim_t           n, \
-       ctype* restrict alpha, \
-       ctype* restrict x, inc_t incx, \
-       ctype* restrict beta, \
-       ctype* restrict y, inc_t incy, \
-       cntx_t*         cntx  \
+       conj_t           conjx, \
+       dim_t            n, \
+       ctype*  restrict alpha, \
+       ctype*  restrict x, inc_t incx, \
+       ctype*  restrict beta, \
+       ctype*  restrict y, inc_t incy, \
+       cntx_t* restrict cntx  \
      ) \
 { \
 	ctype* restrict chi1; \

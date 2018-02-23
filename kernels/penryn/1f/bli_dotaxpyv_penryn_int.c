@@ -54,7 +54,7 @@ void bli_ddotaxpyv_penryn_int
        double* restrict y, inc_t incy,
        double* restrict rho,
        double* restrict z, inc_t incz,
-       cntx_t*          cntx
+       cntx_t* restrict cntx
      )
 {
 	double*  restrict alpha_cast = alpha;

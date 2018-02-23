@@ -51,7 +51,7 @@ void bli_ddotv_penryn_int
        double* restrict x, inc_t incx,
        double* restrict y, inc_t incy,
        double* restrict rho,
-       cntx_t*          cntx
+       cntx_t* restrict cntx
      )
 { 
 	double*  restrict x_cast   = x; 

@@ -63,7 +63,7 @@ void bli_sdotxv_zen_int
        float*  restrict y, inc_t incy,
        float*  restrict beta,
        float*  restrict rho,
-       cntx_t*          cntx
+       cntx_t* restrict cntx
      )
 {
 	const dim_t      n_elem_per_reg = 8;
@@ -191,7 +191,7 @@ void bli_ddotxv_zen_int
        double* restrict y, inc_t incy,
        double* restrict beta,
        double* restrict rho,
-       cntx_t*          cntx
+       cntx_t* restrict cntx
      )
 {
 	const dim_t      n_elem_per_reg = 4;

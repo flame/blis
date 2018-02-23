@@ -61,7 +61,7 @@ void bli_saxpyv_zen_int10
        float*  restrict alpha,
        float*  restrict x, inc_t incx,
        float*  restrict y, inc_t incy,
-       cntx_t*          cntx
+       cntx_t* restrict cntx
      )
 {
 	const dim_t      n_elem_per_reg = 8;
@@ -267,7 +267,7 @@ void bli_daxpyv_zen_int10
        double* restrict alpha,
        double* restrict x, inc_t incx,
        double* restrict y, inc_t incy,
-       cntx_t*          cntx
+       cntx_t* restrict cntx
      )
 {
 	const dim_t      n_elem_per_reg = 4;

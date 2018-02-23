@@ -68,10 +68,10 @@ typedef union
 
 void bli_samaxv_zen_int
      (
-       dim_t   n,
-       float*  x, inc_t incx,
-       dim_t*  i_max,
-       cntx_t* cntx
+       dim_t            n,
+       float*  restrict x, inc_t incx,
+       dim_t*  restrict i_max,
+       cntx_t* restrict cntx
      )
 {
 	float*  minus_one = PASTEMAC(s,m1);
@@ -232,10 +232,10 @@ void bli_samaxv_zen_int
 
 void bli_damaxv_zen_int
      (
-       dim_t    n,
-       double*  x, inc_t incx,
-       dim_t*   i_max,
-       cntx_t*  cntx
+       dim_t            n,
+       double* restrict x, inc_t incx,
+       dim_t*  restrict i_max,
+       cntx_t* restrict cntx
      )
 {
 	double* minus_one = PASTEMAC(d,m1);

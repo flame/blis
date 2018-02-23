@@ -36,6 +36,11 @@
 // Define template prototypes for level-3 micro-kernels.
 //
 
+// Note: Instead of defining function prototype macro templates and then
+// instantiating those macros to define the individual function prototypes,
+// we simply alias the official operations' prototypes as defined in
+// bli_l3_ukr_prot.h.
+
 #undef  GENTPROT
 #define GENTPROT GEMM_UKR_PROT
 

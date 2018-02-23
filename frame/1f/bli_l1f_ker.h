@@ -37,6 +37,11 @@
 // Define template prototypes for level-1f kernels.
 //
 
+// Note: Instead of defining function prototype macro templates and then
+// instantiating those macros to define the individual function prototypes,
+// we simply alias the official operations' prototypes as defined in
+// bli_l1f_ker_prot.h.
+
 #undef  GENTPROT
 #define GENTPROT AXPY2V_KER_PROT
 

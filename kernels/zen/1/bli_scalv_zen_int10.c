@@ -60,7 +60,7 @@ void bli_sscalv_zen_int10
        dim_t            n,
        float*  restrict alpha,
        float*  restrict x, inc_t incx,
-       cntx_t*          cntx
+       cntx_t* restrict cntx
      )
 {
 	const dim_t      n_elem_per_reg = 8;
@@ -257,7 +257,7 @@ void bli_dscalv_zen_int10
        dim_t            n,
        double* restrict alpha,
        double* restrict x, inc_t incx,
-       cntx_t*          cntx
+       cntx_t* restrict cntx
      )
 {
 	const dim_t      n_elem_per_reg = 4;

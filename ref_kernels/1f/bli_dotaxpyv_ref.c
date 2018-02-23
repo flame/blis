@@ -40,16 +40,16 @@
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-       conj_t          conjxt, \
-       conj_t          conjx, \
-       conj_t          conjy, \
-       dim_t           m, \
-       ctype* restrict alpha, \
-       ctype* restrict x, inc_t incx, \
-       ctype* restrict y, inc_t incy, \
-       ctype* restrict rho, \
-       ctype* restrict z, inc_t incz, \
-       cntx_t*         cntx  \
+       conj_t           conjxt, \
+       conj_t           conjx, \
+       conj_t           conjy, \
+       dim_t            m, \
+       ctype*  restrict alpha, \
+       ctype*  restrict x, inc_t incx, \
+       ctype*  restrict y, inc_t incy, \
+       ctype*  restrict rho, \
+       ctype*  restrict z, inc_t incz, \
+       cntx_t* restrict cntx  \
      ) \
 { \
 	ctype* one  = PASTEMAC(ch,1); \

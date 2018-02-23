@@ -42,7 +42,7 @@ void bli_ddotv_bgq_int
        double* restrict x, inc_t incx,
        double* restrict y, inc_t incy,
        double* restrict rho,
-       cntx_t*          cntx
+       cntx_t* restrict cntx
      )
 { 
 	bool_t use_ref = FALSE;

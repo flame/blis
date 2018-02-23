@@ -58,7 +58,7 @@ void bli_ddotxaxpyf_penryn_int
        double* restrict beta,
        double* restrict y, inc_t incy,
        double* restrict z, inc_t incz,
-       cntx_t*          cntx
+       cntx_t* restrict cntx
      )
 { 
 	double*  restrict alpha_cast = alpha; 
