@@ -90,6 +90,7 @@
 #define SPECIFY                      1
 #define DISABLE                      0
 #define ENABLE                       1
+#define ENABLE_ONLY                  2
 
 
 #define MAX_PARAM_VALS_PER_TYPE      4
@@ -200,6 +201,9 @@ typedef struct
 
 typedef struct test_ops_s
 {
+	// individual override
+	int       indiv_over;
+
 	// section overrides
 	int       util_over;
 	int       l1v_over;
@@ -424,6 +428,7 @@ void libblis_test_parse_command_line( int argc, char** argv );
 // --- Miscellaneous ---
 
 void libblis_test_check_empty_problem( obj_t* c, double* perf, double* resid );
+int  libblis_test_op_is_disabled( test_op_t* op );
 
 
 //

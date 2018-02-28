@@ -28,6 +28,19 @@
 #    multithreaded execution, even though multithreading is supported.
 #    So, these should be left set to 1.
 #
+#  ENABLING ONLY SELECT OPERATIONS
+#    If you would like to enable just a few (or even just one) operation
+#    without adjusting any section overrides (or individual operation
+#    switches) change the desired operation switch(es) to 2. This will
+#    cause any operation that is not set to 2 to be disabled, regardless
+#    of section override values. For example, setting the axpyv and gemv
+#    operation switches to 2 will cause the test suite to test ONLY axpyv
+#    and gemv, even if all other sections and operations are set to 1.
+#    NOTE: As long as there is at least on operation switch set to 2, no
+#    other operations will be tested. When you are done testing your
+#    select operations, you should revert the operation switch(es) back
+#    to 1.
+#
 #  CHANGING PROBLEM SIZE/SHAPES TESTED
 #    The problem sizes tested by an operation are determined by the
 #    dimension specifiers on the line marked "dimensions: <spec_labels>".

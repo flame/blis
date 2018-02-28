@@ -107,7 +107,7 @@ void libblis_test_scalm
 	if ( op->test_done == TRUE ) return;
 
 	// Return early if operation is disabled.
-	if ( op->op_switch == DISABLE_ALL ||
+	if ( libblis_test_op_is_disabled( op ) ||
 	     op->ops->l1m_over == DISABLE_ALL ) return;
 
 	// Call dependencies first.
