@@ -14,7 +14,7 @@ arm32:       cortexa9 cortexa15 generic
 x86_64:      haswell sandybridge penryn zen excavator steamroller piledriver bulldozer generic
 
 # Intel architectures.
-haswell:     haswell
+haswell:     haswell/haswell/zen
 sandybridge: sandybridge
 penryn:      penryn
 knl:         knl
