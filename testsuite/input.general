@@ -12,7 +12,7 @@
 rc      # Matrix storage scheme(s) to test:
         #   'c' = col-major storage; 'g' = general stride storage;
         #   'r' = row-major storage
-c       # Vector storage scheme(s) to test:
+cj      # Vector storage scheme(s) to test:
         #   'c' = colvec / unit stride; 'j' = colvec / non-unit stride;
         #   'r' = rowvec / unit stride; 'i' = rowvec / non-unit stride
 0       # Test all combinations of storage schemes?

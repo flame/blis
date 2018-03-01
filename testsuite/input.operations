@@ -17,21 +17,21 @@
 #
 #  ENABLING/DISABLING INDIVIDUAL OPERATION TESTS
 #    Given that an operation's section override switch is set to 1
-#    (enabled, whether or not that operation will get tested is determined
-#    by its local switch. For example, if the level-1v section override is
-#    set to 1, and there is a 1 on the line marked "addv", then the addv
-#    operation will be tested. Similarly, a 0 would cause addv to not be
-#    tested. NOTE: You may ignore the lines marked "test sequential
-#    front-end." These lines are for future use, to distinguish tests of
-#    the sequential implementation from tests of the multithreaded
-#    implementation. For now, BLIS does not contain separate APIs for
-#    multithreaded execution, even though multithreading is supported.
-#    So, these should be left set to 1.
+#    (enabled), whether or not that operation will get tested is
+#    determined by its local switch. For example, if the level-1v section
+#    override is set to 1, and there is a 1 on the line marked "addv",
+#    then the addv operation will be tested. Similarly, a 0 would cause
+#    addv to not be tested. NOTE: You may ignore the lines marked "test
+#    sequential front-end." These lines are for future use, to
+#    distinguish tests of the sequential implementation from tests of
+#    the multithreaded implementation. For now, BLIS does not contain
+#    separate APIs for multithreaded execution, even though
+#    multithreading is supported. So, these should be left set to 1.
 #
 #  ENABLING ONLY SELECT OPERATIONS
 #    If you would like to enable just a few (or even just one) operation
 #    without adjusting any section overrides (or individual operation
-#    switches) change the desired operation switch(es) to 2. This will
+#    switches), change the desired operation switch(es) to 2. This will
 #    cause any operation that is not set to 2 to be disabled, regardless
 #    of section override values. For example, setting the axpyv and gemv
 #    operation switches to 2 will cause the test suite to test ONLY axpyv
