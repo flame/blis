@@ -66,7 +66,7 @@ void bli_cntx_init_knl( cntx_t* cntx )
 	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    -1,    24,    -1,    -1 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    -1,     8,    -1,    -1 );
 	bli_blksz_init     ( &blkszs[ BLIS_MC ],    -1,   120,    -1,    -1,
-	                                            -1,   148,    -1,    -1 );
+	                                            -1,   144,    -1,    -1 );
 	bli_blksz_init     ( &blkszs[ BLIS_KC ],    -1,   336,    -1,    -1,  
 	                                            -1,   420,    -1,    -1 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NC ],    -1, 14400,    -1,    -1 );
