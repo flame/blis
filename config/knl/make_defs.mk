@@ -92,17 +92,9 @@ CVECFLAGS      += -Wa,-march=knl
 endif
 endif
 
-# Override the default value for LDFLAGS.
-LDFLAGS        :=
-
 # Never use libmemkind with Intel SDE.
 ifneq ($(DEBUG_TYPE),sde)
 LDFLAGS        += -lmemkind
-endif
-
-# Never use libm with Intel compilers.
-ifneq ($(CC_VENDOR),icc)
-LDFLAGS        += -lm
 endif
 
 # Store all of the variables here to new variables containing the

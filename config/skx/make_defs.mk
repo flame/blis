@@ -88,20 +88,6 @@ CVECFLAGS      += -Wa,-march=skylake-avx512
 endif
 endif
 
-# --- Determine the archiver and related flags ---
-AR             := ar
-ARFLAGS        := cr
-
-# --- Determine the linker and related flags ---
-LINKER         := $(CC)
-SOFLAGS        := -shared
-
-LDFLAGS        :=
-
-ifneq ($(CC_VENDOR),icc)
-LDFLAGS        += -lm
-endif 
-
 # Store all of the variables here to new variables containing the
 # configuration name.
 $(eval $(call store-make-defs,$(THIS_CONFIG)))

@@ -556,8 +556,8 @@ ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 else
 	@echo "Running $(TESTSUITE_BIN) with output redirected to '$(TESTSUITE_OUT_FILE)'"
 	@./$(TESTSUITE_BIN) -g $(TESTSUITE_CONF_GEN_PATH) \
-	                    -o $(TESTSUITE_CONF_OPS_PATH)
-#                         > $(TESTSUITE_OUT_FILE)
+	                    -o $(TESTSUITE_CONF_OPS_PATH) \
+                         > $(TESTSUITE_OUT_FILE)
 endif
 
 

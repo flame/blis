@@ -259,6 +259,31 @@ endif
 
 
 #
+# --- Default linker definitions -----------------------------------------------
+#
+
+# NOTE: This section needs to reside before the inclusion of make_defs.mk
+# files (just below), as most configurations' make_defs.mk don't tinker
+# with things like LDFLAGS, but some do (or may), in which case they can
+# manually override whatever they need.
+
+# Default linker flags.
+# NOTE: -lpthread is needed unconditionally because BLIS uses pthread_once()
+# to initialize itself in a thread-safe manner.
+LDFLAGS    := -lm -lpthread
+
+# Never use libm with Intel compilers.
+ifeq ($(CC_VENDOR),icc)
+LIBM       := -lm
+LDFLAGS    := $(filter-out $(LIBM),$(LDFLAGS))
+endif
+
+# Default flag for creating shared objects.
+SOFLAGS    := -shared
+
+
+
+#
 # --- Include makefile definitions file ----------------------------------------
 #
 
@@ -304,27 +329,13 @@ endif
 
 
 #
-# --- Default linker definitions -----------------------------------------------
-#
-
-# Default linker, flags.
-# NOTE: -lpthread is needed unconditionally because BLIS uses pthread_once()
-# to initialize itself in a thread-safe manner.
-LINKER     := $(CC)
-LDFLAGS    := -lpthread
-
-# Never use libm with Intel compilers.
-ifneq ($(CC_VENDOR),icc)
-LDFLAGS    += -lm
-endif
-
-SOFLAGS    := -shared
-
-
-
-#
 # --- Configuration-agnostic flags ---------------------------------------------
 #
+
+# --- Linker program ---
+
+# Use whatever compiler was chosen.
+LINKER     := $(CC)
 
 # --- Warning flags ---
 
@@ -409,6 +420,7 @@ endif
 endif
 
 
+
 #
 # --- Adjust verbosity level manually using make V=[0,1] -----------------------
 #
@@ -432,6 +444,12 @@ endif
 ifeq ($(OS_NAME),Linux)
 LDFLAGS += -lrt
 endif
+
+
+
+#
+# --- LDFLAGS cleanup ----------------------------------------------------------
+#
 
 # Remove duplicate flags/options in LDFLAGS (such as -lpthread) by sorting.
 LDFLAGS := $(sort $(LDFLAGS))
