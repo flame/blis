@@ -132,11 +132,12 @@ extern int32_t offsets[32];
 // NOTE: assumes packdim_mr == 32
 void bli_dpackm_knl_asm_30xk
      (
-       conj_t         conja,
-       dim_t          n_,
-       void* restrict kappa_,
-       void* restrict a_, inc_t inca_, inc_t lda_,
-       void* restrict p_,              inc_t ldp_
+       conj_t           conja,
+       dim_t            n_,
+       void*   restrict kappa_,
+       void*   restrict a_, inc_t inca_, inc_t lda_,
+       void*   restrict p_,              inc_t ldp_,
+       cntx_t* restrict cntx
      )
 {
     (void)conja;

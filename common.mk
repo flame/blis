@@ -78,16 +78,16 @@ define load-var-for
 $($(strip $(1)).$(strip $(2)))
 endef
 
-# Define some functions that return the appropriate CFLAGS for a given
-# configuration. This assumes that the make_defs.mk files have already been
-# included, which results in those values having been stored to
-# configuration-qualified variables.
-
 
 
 #
 # --- CFLAGS query functions ---------------------------------------------------
 #
+
+# Define some functions that return the appropriate CFLAGS for a given
+# configuration. This assumes that the make_defs.mk files have already been
+# included, which results in those values having been stored to
+# configuration-qualified variables.
 
 get-noopt-cflags-for   = $(strip $(call load-var-for,CDBGFLAGS,$(1)) \
                                  $(call load-var-for,CWARNFLAGS,$(1)) \
@@ -266,11 +266,17 @@ endif
 # makefile definitions.
 MAKE_DEFS_FILE     := make_defs.mk
 
-# Construct the paths to the makefile definitions files, each of which resides
-# in a separate configuration sub-directory. We include CONFIG_NAME in this
-# list since we might need
-ALL_CONFIGS        := $(sort $(strip $(CONFIG_LIST) $(CONFIG_NAME)))
-CONFIG_PATHS       := $(addprefix $(CONFIG_PATH)/, $(ALL_CONFIGS))
+# Assembly a list of all configuration family members, including the
+# configuration family name itself. Note that sort() will remove duplicates
+# for situations where CONFIG_NAME is present in CONFIG_LIST, such as would
+# be the case for singleton families.
+CONFIG_LIST_FAM    := $(sort $(strip $(CONFIG_LIST) $(CONFIG_NAME)))
+
+# Construct the paths to the makefile definitions files, each of which
+# resides in a separate configuration sub-directory. We use CONFIG_LIST_FAM
+# since we might need the makefile definitions associated with the
+# configuration family (if it is an umbrella family).
+CONFIG_PATHS       := $(addprefix $(CONFIG_PATH)/, $(CONFIG_LIST_FAM))
 MAKE_DEFS_MK_PATHS := $(addsuffix /$(MAKE_DEFS_FILE), $(CONFIG_PATHS))
 
 # Initialize the list of included (found) configurations to empty.
@@ -283,14 +289,11 @@ CONFIGS_INCL       :=
 # we didn't, then maybe a configuration is mislabeled or missing. The
 # check-env-make-defs target checks ALL_MAKE_DEFS_MK_PRESENT and outputs
 # an error message if it is set to 'no'.
-# NOTE: We combine the CONFIG_NAME and CONFIG_LIST for situations where
-# the CONFIG_NAME is absent from the CONFIG_LIST (e.g., 'intel64' is a
-# configuration family name with its own configuration directory and its
-# own make_defs.mk file, but not a sub-configuration itself). If
-# CONFIG_NAME is present in CONFIG_LIST, as with singleton configuration
-# families, then the sort() function will remove duplicates from both
-# strings being compared.
-CONFIGS_EXPECTED := $(CONFIG_LIST) $(CONFIG_NAME)
+# NOTE: We use CONFIG_LIST_FAM as the expected list of configurations.
+# This combines CONFIG_NAME with CONFIG_LIST. The inclusion of CONFIG_NAME
+# is needed for situations where the configuration family is an umbrella
+# family (e.g. 'intel64'), since families have separate make_def.mk files.
+CONFIGS_EXPECTED := $(CONFIG_LIST_FAM)
 ifeq ($(sort $(strip $(CONFIGS_INCL))), \
       $(sort $(strip $(CONFIGS_EXPECTED))))
 ALL_MAKE_DEFS_MK_PRESENT := yes
@@ -323,38 +326,43 @@ SOFLAGS    := -shared
 # --- Configuration-agnostic flags ---------------------------------------------
 #
 
-# --- C Preprocessor flags ---
-
-# Enable clock_gettime() in time.h.
-CPPROCFLAGS := -D_POSIX_C_SOURCE=200112L
-$(foreach conf, $(CONFIG_LIST), $(eval $(call append-var-for,CPPROCFLAGS,$(conf))))
-
-# --- Shared library (position-independent code) flags ---
-
-# Emit position-independent code for dynamic linking.
-CPICFLAGS := -fPIC
-$(foreach conf, $(CONFIG_LIST), $(eval $(call append-var-for,CPICFLAGS,$(conf))))
-
-# --- Miscellaneous flags ---
-
-# Enable C99.
-CMISCFLAGS := -std=c99
-$(foreach conf, $(CONFIG_LIST), $(eval $(call append-var-for,CMISCFLAGS,$(conf))))
-
-# Disable tautological comparision warnings in clang.
-ifeq ($(CC_VENDOR),clang)
-CMISCFLAGS := -Wno-tautological-compare
-$(foreach conf, $(CONFIG_LIST), $(eval $(call append-var-for,CMISCFLAGS,$(conf))))
-endif
-
 # --- Warning flags ---
 
 # Disable unused function warnings and stop compiling on first error for
 # all compilers that accept such options: gcc, clang, and icc.
 ifneq ($(CC_VENDOR),ibm)
 CWARNFLAGS := -Wall -Wno-unused-function -Wfatal-errors
-$(foreach conf, $(CONFIG_LIST), $(eval $(call append-var-for,CWARNFLAGS,$(conf))))
+else
+CWARNFLAGS :=
 endif
+$(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CWARNFLAGS,$(c))))
+
+# --- Shared library (position-independent code) flags ---
+
+# Emit position-independent code for dynamic linking.
+CPICFLAGS := -fPIC
+$(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CPICFLAGS,$(c))))
+
+# --- Miscellaneous flags ---
+
+# Enable C99.
+CMISCFLAGS := -std=c99
+$(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CMISCFLAGS,$(c))))
+
+# --- C Preprocessor flags ---
+
+# Enable clock_gettime() in time.h.
+CPPROCFLAGS := -D_POSIX_C_SOURCE=200112L
+$(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CPPROCFLAGS,$(c))))
+
+# Disable tautological comparision warnings in clang.
+ifeq ($(CC_VENDOR),clang)
+CMISCFLAGS := -Wno-tautological-compare
+else
+CMISCFLAGS :=
+endif
+$(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CMISCFLAGS,$(c))))
+
 
 # --- Threading flags ---
 
@@ -450,13 +458,9 @@ MK_KERNELS_SRC         :=
 
 
 # Construct paths to each of the sub-configurations specified in the
-# configuration list. If CONFIG_NAME is not in CONFIG_LIST, include it in
-# CONFIG_PATHS since we'll need access to its header files.
-ifeq ($(findstring $(CONFIG_NAME),$(CONFIG_LIST)),)
-CONFIG_PATHS       := $(addprefix $(CONFIG_PATH)/, $(CONFIG_NAME) $(CONFIG_LIST))
-else
-CONFIG_PATHS       := $(addprefix $(CONFIG_PATH)/, $(CONFIG_LIST))
-endif
+# configuration list. Note that we use CONFIG_LIST_FAM, which already
+# has CONFIG_NAME included (with duplicates removed).
+CONFIG_PATHS       := $(addprefix $(CONFIG_PATH)/, $(CONFIG_LIST_FAM))
 
 # This variable is used by the include statements as they recursively include
 # one another. For the 'config' directory, we initialize it to that directory

@@ -166,15 +166,15 @@ void bli_error_init_msgs( void )
 
 	sprintf( bli_error_string_for_code(BLIS_MC_DEF_NONMULTIPLE_OF_MR),
 	         "Default MC is non-multiple of MR for one or more datatypes." );
-	sprintf( bli_error_string_for_code(BLIS_MC_DEF_NONMULTIPLE_OF_MR),
+	sprintf( bli_error_string_for_code(BLIS_MC_MAX_NONMULTIPLE_OF_MR),
 	         "Maximum MC is non-multiple of MR for one or more datatypes." );
 	sprintf( bli_error_string_for_code(BLIS_NC_DEF_NONMULTIPLE_OF_NR),
 	         "Default NC is non-multiple of NR for one or more datatypes." );
-	sprintf( bli_error_string_for_code(BLIS_NC_DEF_NONMULTIPLE_OF_NR),
+	sprintf( bli_error_string_for_code(BLIS_NC_MAX_NONMULTIPLE_OF_NR),
 	         "Maximum NC is non-multiple of NR for one or more datatypes." );
 	sprintf( bli_error_string_for_code(BLIS_KC_DEF_NONMULTIPLE_OF_KR),
 	         "Default KC is non-multiple of KR for one or more datatypes." );
-	sprintf( bli_error_string_for_code(BLIS_KC_DEF_NONMULTIPLE_OF_KR),
+	sprintf( bli_error_string_for_code(BLIS_KC_MAX_NONMULTIPLE_OF_KR),
 	         "Maximum KC is non-multiple of KR for one or more datatypes." );
 }
 

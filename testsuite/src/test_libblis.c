@@ -204,9 +204,10 @@ void libblis_test_read_ops_file( char* input_filename, test_ops_t* ops )
 	input_stream = fopen( input_filename, "rb" );
 	libblis_test_fopen_check_stream( input_filename, input_stream );
 
-	// Begin reading operations input file.
+	// Initialize the individual override field to FALSE.
+	ops->indiv_over = FALSE;
 
-	//                                            dimensions          n_param   operation
+	// Begin reading operations input file.
 
 	// Section overrides
 	libblis_test_read_section_override( ops, input_stream, &(ops->util_over) );
@@ -216,6 +217,8 @@ void libblis_test_read_ops_file( char* input_filename, test_ops_t* ops )
 	libblis_test_read_section_override( ops, input_stream, &(ops->l2_over) );
 	libblis_test_read_section_override( ops, input_stream, &(ops->l3ukr_over) );
 	libblis_test_read_section_override( ops, input_stream, &(ops->l3_over) );
+
+	//                                            dimensions          n_param   operation
 
 	// Utility operations
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   0, &(ops->randv) );
@@ -488,6 +491,12 @@ void libblis_test_read_op_info( test_ops_t*  ops,
 	// Read the line for the overall operation switch.
 	libblis_test_read_next_line( buffer, input_stream );
 	sscanf( buffer, "%d ", &(op->op_switch) );
+
+	// Check the op_switch for the individual override value.
+	if ( op->op_switch == ENABLE_ONLY )
+	{
+		ops->indiv_over = TRUE;
+	}
 
 	// Read the line for the sequential front-end/micro-kernel interface.
 	libblis_test_read_next_line( buffer, input_stream );
@@ -2414,3 +2423,26 @@ void libblis_test_check_empty_problem( obj_t* c, double* perf, double* resid )
 	}
 }
 
+
+
+int libblis_test_op_is_disabled( test_op_t* op )
+{
+	int r_val;
+
+	// If there was at least one individual override, then an op test is
+	// disabled if it is NOT equal to ENABLE_ONLY. If there were no
+	// individual overrides, then an op test is disabled if it is equal
+	// to DISABLE_ALL.
+	if ( op->ops->indiv_over == TRUE )
+	{
+		if ( op->op_switch != ENABLE_ONLY ) r_val = TRUE;
+		else                                r_val = FALSE;
+	}
+	else // if ( op->ops->indiv_over == FALSE )
+	{
+		if ( op->op_switch == DISABLE_ALL ) r_val = TRUE;
+		else                                r_val = FALSE;
+	}
+
+	return r_val;
+}
