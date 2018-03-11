@@ -48,18 +48,18 @@ void bli_cntx_init_cortexa57( cntx_t* cntx )
 	bli_cntx_set_l3_nat_ukrs
 	(
 	  2,
-	  BLIS_GEMM_UKR, BLIS_FLOAT,    bli_sgemm_cortexa57_asm_8x12, FALSE,
-	  BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_cortexa57_asm_6x8,  FALSE,
+	  BLIS_GEMM_UKR, BLIS_FLOAT,    bli_sgemm_armv8a_asm_8x12, FALSE,
+	  BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_armv8a_asm_6x8,  FALSE,
 	  cntx
 	);
 
 	// Initialize level-3 blocksize objects with architecture-specific values.
 	//                                           s      d      c      z
-	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     8,     6,     0,     0 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,     8,     0,     0 );
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   120,   120,     0,     0 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   640,   240,     0,     0 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  3072,  3072,     0,     0 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     8,     6,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,     8,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   120,   120,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   640,   240,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  3072,  3072,    -1,    -1 );
 
 	// Update the context with the current architecture's register and cache
 	// blocksizes (and multiples) for native execution.
