@@ -824,10 +824,15 @@ typedef enum
 
 // -- Architecture ID type --
 
+// NOTE: This typedef enum must be kept up-to-date with the arch_t
+// string array in bli_arch.c. Whenever values are added/inserted
+// OR if values are rearranged, be sure to update the string array
+// in bli_arch.c.
+
 typedef enum
 {
 	// Intel
-	BLIS_ARCH_SKX     =0,
+	BLIS_ARCH_SKX = 0,
 	BLIS_ARCH_KNL,
 	BLIS_ARCH_KNC,
 	BLIS_ARCH_HASWELL,

@@ -32,6 +32,21 @@
 
 */
 
+#if 0
+  // Used only during standalone testing of ARM support.
+  #include <stdio.h>
+  #include <stdlib.h>
+  #include <string.h>
+  #include <stdint.h>
+  #include "bli_type_defs.h"
+  #include "bli_cpuid.h"
+  #undef __x86_64__
+  #undef _M_X64
+  #undef __i386
+  #undef _M_IX86
+  #define __arm__
+#endif
+
 #ifndef BLIS_CONFIGURETIME_CPUID
   #include "blis.h"
 #else
@@ -41,6 +56,10 @@
   #include "bli_type_defs.h"
   #include "bli_cpuid.h"
 #endif
+
+// -----------------------------------------------------------------------------
+
+#if defined(__x86_64__) || defined(_M_X64) || defined(__i386) || defined(_M_IX86)
 
 arch_t bli_cpuid_query_id( void )
 {
@@ -210,7 +229,6 @@ bool_t bli_cpuid_is_penryn
 	return TRUE;
 }
 
-
 // -----------------------------------------------------------------------------
 
 bool_t bli_cpuid_is_zen
@@ -353,6 +371,108 @@ bool_t bli_cpuid_is_bulldozer
 
 	return TRUE;
 }
+
+#elif defined(__aarch64__) || defined(__arm__) || defined(_M_ARM)
+
+arch_t bli_cpuid_query_id( void )
+{
+	uint32_t vendor, model, part, features;
+
+	// Call the CPUID instruction and parse its results into a model id,
+	// part id, and a feature bit field. The return value encodes the
+	// vendor.
+	vendor = bli_cpuid_query( &model, &part, &features );
+
+	//printf( "vendor   = %u\n", vendor );
+	//printf( "model    = %u\n", model );
+	//printf( "part     = 0x%x\n", part );
+	//printf( "features = %u\n", features );
+
+	if ( vendor == VENDOR_ARM )
+	{
+		if ( model == MODEL_ARMV8 )
+		{
+			// Check for each ARMv8 configuration that is enabled, check for that
+			// microarchitecture. We check from most recent to most dated.
+#ifdef BLIS_CONFIG_CORTEXA57
+			if ( bli_cpuid_is_cortexa57( model, part, features ) )
+				return BLIS_ARCH_CORTEXA57;
+#endif
+			// If none of the other sub-configurations were detected, return
+			// the 'generic' arch_t id value.
+			return BLIS_ARCH_GENERIC;
+		}
+		else if ( model == MODEL_ARMV7 )
+		{
+			// Check for each ARMv7 configuration that is enabled, check for that
+			// microarchitecture. We check from most recent to most dated.
+#ifdef BLIS_CONFIG_CORTEXA15
+			if ( bli_cpuid_is_cortexa15( model, part, features ) )
+				return BLIS_ARCH_CORTEXA15;
+#endif
+#ifdef BLIS_CONFIG_CORTEXA9
+			if ( bli_cpuid_is_cortexa9( model, part, features ) )
+				return BLIS_ARCH_CORTEXA9;
+#endif
+			// If none of the other sub-configurations were detected, return
+			// the 'generic' arch_t id value.
+			return BLIS_ARCH_GENERIC;
+		}
+	}
+	else if ( vendor == VENDOR_UNKNOWN )
+	{
+		return BLIS_ARCH_GENERIC;
+	}
+
+	return BLIS_ARCH_GENERIC;
+}
+
+bool_t bli_cpuid_is_cortexa57
+     (
+       uint32_t family,
+       uint32_t model,
+       uint32_t features
+     )
+{
+	// Check for expected CPU features.
+	const uint32_t expected = FEATURE_NEON;
+
+	if ( !bli_cpuid_has_features( features, expected ) ) return FALSE;
+
+	return TRUE;
+}
+
+bool_t bli_cpuid_is_cortexa15
+     (
+       uint32_t family,
+       uint32_t model,
+       uint32_t features
+     )
+{
+	// Check for expected CPU features.
+	const uint32_t expected = FEATURE_NEON;
+
+	if ( !bli_cpuid_has_features( features, expected ) ) return FALSE;
+
+	return TRUE;
+}
+
+bool_t bli_cpuid_is_cortexa9
+     (
+       uint32_t family,
+       uint32_t model,
+       uint32_t features
+     )
+{
+	// Check for expected CPU features.
+	const uint32_t expected = FEATURE_NEON;
+
+	if ( !bli_cpuid_has_features( features, expected ) ) return FALSE;
+
+	return TRUE;
+}
+
+#endif
 
 // -----------------------------------------------------------------------------
 
@@ -757,20 +877,38 @@ int vpu_count( void )
 
 #elif defined(__aarch64__) || defined(__arm__) || defined(_M_ARM)
 
-int get_cpu_type( int* model, int* part, int* features )
+uint32_t bli_cpuid_query
+     (
+       uint32_t* model,
+       uint32_t* part,
+       uint32_t* features
+     )
 {
-	model = MODEL_UNKNOWN;
-	features = 0;
+	*model    = MODEL_UNKNOWN;
+	*features = 0;
 
-	FILE *fd1 = popen("grep -m 1 Processor /proc/cpuinfo", "r");
-	if (!fd1) return VENDOR_ARM;
-	FILE *fd2 = popen("grep -m 1 'CPU part' /proc/cpuinfo", "r");
+#if 1
+	const char* grep_str1 = "grep -m 1 Processor /proc/cpuinfo";
+	const char* grep_str2 = "grep -m 1 'CPU part' /proc/cpuinfo";
+	const char* grep_str3 = "grep -m 1 Features /proc/cpuinfo";
+#else
+	const char* grep_str1 = "grep -m 1 Processor ~/proc_cpuinfo";
+	const char* grep_str2 = "grep -m 1 'CPU part' ~/proc_cpuinfo";
+	const char* grep_str3 = "grep -m 1 Features ~/proc_cpuinfo";
+#endif
+
+	FILE *fd1 = popen( grep_str1, "r");
+	if ( !fd1 )
+	{
+		return VENDOR_ARM;
+	}
+	FILE *fd2 = popen( grep_str2, "r");
 	if (!fd2)
 	{
 		pclose(fd1);
 		return VENDOR_ARM;
 	}
-	FILE *fd3 = popen("grep -m 1 Features /proc/cpuinfo", "r");
+	FILE *fd3 = popen( grep_str3, "r");
 	if (!fd3)
 	{
 		pclose(fd1);
@@ -778,31 +916,74 @@ int get_cpu_type( int* model, int* part, int* features )
 		return VENDOR_ARM;
 	}
 
-	char c;
-	std::string proc, ptno, feat;
-	while ((c = fgetc(fd1)) != EOF) proc.push_back(c);
-	while ((c = fgetc(fd2)) != EOF) ptno.push_back(c);
-	while ((c = fgetc(fd3)) != EOF) feat.push_back(c);
+	uint32_t n1, n2, n3;
+	char     c;
 
-	pclose(fd1);
-	pclose(fd2);
-	pclose(fd3);
+	// First, discover how many chars are in each stream.
+	for ( n1 = 0; (c = fgetc(fd1)) != EOF; ++n1 ) ;
+	for ( n2 = 0; (c = fgetc(fd2)) != EOF; ++n2 ) ;
+	for ( n3 = 0; (c = fgetc(fd3)) != EOF; ++n3 ) ;
 
-	if (feat.find("neon") != std::string::npos ||
-		feat.find("asimd") != std::string::npos)
-		features |= FEATURE_NEON;
+	//printf( "n1, n2, n3 = %u %u %u\n", n1, n2, n3 );
 
-	if (proc.find("ARMv7") != std::string::npos)
-		model = MODEL_ARMV7;
-	else if (proc.find("AArch64") != std::string::npos)
-		model = MODEL_ARMV8;
+	// Close the streams.
+	pclose( fd1 );
+	pclose( fd2 );
+	pclose( fd3 );
 
-	auto pos = ptno.find("0x");
-	TBLIS_ASSERT(pos != std::string::npos);
-	part = strtoi(ptno, pos, 16);
+	// Allocate the correct amount of memory for each stream.
+	char* proc_str = malloc( ( size_t )( n1 + 1 ) );
+	char* ptno_str = malloc( ( size_t )( n2 + 1 ) );
+	char* feat_str = malloc( ( size_t )( n3 + 1 ) );
+
+	// Re-open the streams. Note that there is no need to check for errors
+	// this time since we're assumign that the contents of /proc/cpuinfo
+	// will be the same as before.
+	fd1 = popen( grep_str1, "r");
+	fd2 = popen( grep_str2, "r");
+	fd3 = popen( grep_str3, "r");
+
+	char* r_val;
+
+	// Now read each stream in its entirety. Nothing should go wrong, but
+	// if it does, bail out.
+	r_val = fgets( proc_str, n1, fd1 );
+	if ( r_val == NULL ) bli_abort();
+
+	r_val = fgets( ptno_str, n2, fd2 );
+	if ( r_val == NULL ) bli_abort();
+
+	r_val = fgets( feat_str, n3, fd3 );
+	if ( r_val == NULL ) bli_abort();
+
+	//printf( "proc_str: %s\n", proc_str );
+	//printf( "ptno_str: %s\n", ptno_str );
+	//printf( "feat_str: %s\n", feat_str );
+
+	// Close the streams.
+	pclose( fd1 );
+	pclose( fd2 );
+	pclose( fd3 );
+
+	// Parse the feature string to check for SIMD features.
+	if ( strstr( feat_str, "neon"  ) != NULL ||
+	     strstr( feat_str, "asimd" ) != NULL )
+		*features |= FEATURE_NEON;
+	//printf( "features var: %u\n", *features );
+
+	// Parse the processor string to uncover the model.
+	if      ( strstr( proc_str, "ARMv7"   ) != NULL )
+		*model = MODEL_ARMV7;
+	else if ( strstr( proc_str, "AArch64" ) != NULL )
+		*model = MODEL_ARMV8;
+	//printf( "model: %u\n", *model );
+
+	// Parse the part number string.
+	r_val = strstr( ptno_str, "0x" );
+	*part = strtol( r_val, NULL, 16 );
+	//printf( "part#: %x\n", *part );
 
 	return VENDOR_ARM;
 }
-
 
 #endif
