@@ -885,44 +885,48 @@ uint32_t bli_cpuid_query
      )
 {
 	*model    = MODEL_UNKNOWN;
+    *part     = 0;
 	*features = 0;
-
+    
 #if 1
 	const char* grep_str1 = "grep -m 1 Processor /proc/cpuinfo";
 	const char* grep_str2 = "grep -m 1 'CPU part' /proc/cpuinfo";
 	const char* grep_str3 = "grep -m 1 Features /proc/cpuinfo";
 #else
-	const char* grep_str1 = "grep -m 1 Processor ~/proc_cpuinfo";
-	const char* grep_str2 = "grep -m 1 'CPU part' ~/proc_cpuinfo";
-	const char* grep_str3 = "grep -m 1 Features ~/proc_cpuinfo";
+	const char* grep_str1 = "grep -m 1 Processor ./proc_cpuinfo";
+	const char* grep_str2 = "grep -m 1 'CPU part' ./proc_cpuinfo";
+	const char* grep_str3 = "grep -m 1 Features ./proc_cpuinfo";
 #endif
 
 	FILE *fd1 = popen( grep_str1, "r");
 	if ( !fd1 )
 	{
+        //printf("popen 1 failed\n");
 		return VENDOR_ARM;
 	}
 	FILE *fd2 = popen( grep_str2, "r");
 	if (!fd2)
 	{
+        //printf("popen 2 failed\n");
 		pclose(fd1);
 		return VENDOR_ARM;
 	}
 	FILE *fd3 = popen( grep_str3, "r");
 	if (!fd3)
 	{
+        //printf("popen 3 failed\n");
 		pclose(fd1);
 		pclose(fd2);
 		return VENDOR_ARM;
 	}
 
 	uint32_t n1, n2, n3;
-	char     c;
+	int      c;
 
 	// First, discover how many chars are in each stream.
-	for ( n1 = 0; (c = fgetc(fd1)) != EOF; ++n1 ) ;
-	for ( n2 = 0; (c = fgetc(fd2)) != EOF; ++n2 ) ;
-	for ( n3 = 0; (c = fgetc(fd3)) != EOF; ++n3 ) ;
+	for ( n1 = 0; (c = fgetc(fd1)) != EOF; ++n1 ) continue;
+	for ( n2 = 0; (c = fgetc(fd2)) != EOF; ++n2 ) continue;
+	for ( n3 = 0; (c = fgetc(fd3)) != EOF; ++n3 ) continue;
 
 	//printf( "n1, n2, n3 = %u %u %u\n", n1, n2, n3 );
 
@@ -935,6 +939,9 @@ uint32_t bli_cpuid_query
 	char* proc_str = malloc( ( size_t )( n1 + 1 ) );
 	char* ptno_str = malloc( ( size_t )( n2 + 1 ) );
 	char* feat_str = malloc( ( size_t )( n3 + 1 ) );
+    *proc_str = 0;
+    *ptno_str = 0;
+    *feat_str = 0;
 
 	// Re-open the streams. Note that there is no need to check for errors
 	// this time since we're assumign that the contents of /proc/cpuinfo
@@ -948,15 +955,15 @@ uint32_t bli_cpuid_query
 	// Now read each stream in its entirety. Nothing should go wrong, but
 	// if it does, bail out.
 	r_val = fgets( proc_str, n1, fd1 );
-	if ( r_val == NULL ) bli_abort();
+	if ( n1 && r_val == NULL ) bli_abort();
 
 	r_val = fgets( ptno_str, n2, fd2 );
-	if ( r_val == NULL ) bli_abort();
+	if ( n2 && r_val == NULL ) bli_abort();
 
 	r_val = fgets( feat_str, n3, fd3 );
-	if ( r_val == NULL ) bli_abort();
+	if ( n3 && r_val == NULL ) bli_abort();
 
-	//printf( "proc_str: %s\n", proc_str );
+    //printf( "proc_str: %s\n", proc_str );
 	//printf( "ptno_str: %s\n", ptno_str );
 	//printf( "feat_str: %s\n", feat_str );
 
@@ -974,13 +981,17 @@ uint32_t bli_cpuid_query
 	// Parse the processor string to uncover the model.
 	if      ( strstr( proc_str, "ARMv7"   ) != NULL )
 		*model = MODEL_ARMV7;
-	else if ( strstr( proc_str, "AArch64" ) != NULL )
+	else if ( strstr( proc_str, "AArch64" ) != NULL ||
+              strstr( proc_str, "ARMv8"   ) )
 		*model = MODEL_ARMV8;
 	//printf( "model: %u\n", *model );
 
 	// Parse the part number string.
 	r_val = strstr( ptno_str, "0x" );
-	*part = strtol( r_val, NULL, 16 );
+    if ( r_val != NULL)
+    {
+	    *part = strtol( r_val, NULL, 16 );
+    }
 	//printf( "part#: %x\n", *part );
 
 	return VENDOR_ARM;
