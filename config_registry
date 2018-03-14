@@ -8,9 +8,9 @@
 #
 
 # Processor families.
+x86_64:      intel64 amd64
 intel64:     haswell sandybridge penryn generic
 amd64:       zen excavator steamroller piledriver bulldozer generic
-x86_64:      haswell sandybridge penryn zen excavator steamroller piledriver bulldozer generic
 arm64:       cortexa57 generic
 arm32:       cortexa15 cortexa9 generic
 

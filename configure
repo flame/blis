@@ -260,52 +260,132 @@ read_registry_file()
 
 	done < "${filename}"
 
-	# Now go back through the kernel registry and substitute any remaining
-	# configuration names occurring in the kernel list (right side of ':')
-	# with its registered kernel set.
-	#for config in "${!kernel_registry[@]}"; do
-	for kr_var in ${!kernel_registry_*}; do
 
-		config=${kr_var##kernel_registry_}
+	# Now we must go back through the config_registry and subsitute any
+	# configuration families with their constituents' members. Each time
+	# one of these substitutions occurs, we set a flag that causes us to
+	# make one more pass. (Subsituting a singleton definition does not
+	# prompt additional iterations.) This process stops when a full pass
+	# does not result in any subsitution. 
 
-		#for ker in ${kernel_registry[$config]}; do
-		for ker in ${!kr_var}; do
+	iterate_again="1"
+	while [ "${iterate_again}" == "1" ]; do
 
-			#kers_ker="${kernel_registry[${ker}]}"
-			kers_ker=$(query_array "kernel_registry" ${ker})
+		iterate_again="0"
 
-			# If kers_ker is empty string, then ker was not found as a key
-			# in the kernel list associative array. In that case, we continue
-			# and will echo an error later in the script.
-			if [ "${kers_ker}" == "" ]; then
-				#echo "  kernel for ${ker} is empty string! no entry in kernel list."
-				continue;
-			fi
+		#for config in "${!config_registry[@]}"; do
+		for cr_var in ${!config_registry_*}; do
 
-			# If the current config/kernel (ker) differs from its singleton kernel
-			# entry (kers_ker), then that singleton entry was specified to use
-			# a different configuration's kernel set. Thus, we need to replace the
-			# occurrence in the current config/kernel name with that of the kernel
-			# set it needs.
-			if [ "${ker}" != "${kers_ker}" ]; then
+			config=${cr_var##config_registry_}
 
-				#klist="${kernel_registry[$config]}"
-				klist=$(query_array "kernel_registry" ${config})
+			#for mem in ${config_registry[$config]}; do
+			for mem in ${!cr_var}; do
 
-				# Replace the current config with its requisite kernels,
-				# canonicalize whitespace, and then remove duplicate kernel
-				# set names, if they exist. Finally, update the kernel registry
-				# with the new kernel list.
-				newklist=$(echo -e "${klist}" | sed -e "s/${ker}/${kers_ker}/g")
-				newklist=$(canonicalize_ws "${newklist}")
-				newklist=$(rm_duplicate_words "${newklist}")
+				#mems_mem="${config_registry[${mem}]}"
+				mems_mem=$(query_array "config_registry" ${mem})
 
-				#kernel_registry[${config}]=${newklist}
-				printf -v "kernel_registry_${config}" %s "${newklist}"
-			fi
+				# If mems_mem is empty string, then mem was not found as a key
+				# in the config list associative array. In that case, we continue
+				# and will echo an error later in the script.
+				if [ "${mems_mem}" == "" ]; then
+					#echo "  config for ${mem} is empty string! no entry in config list."
+					continue;
+				fi
 
+				if [ "${mem}" != "${mems_mem}" ]; then
+
+					#clist="${config_registry[$config]}"
+					clist=$(query_array "config_registry" ${config})
+
+					# Replace the current config with its constituent config set,
+					# canonicalize whitespace, and then remove duplicate config
+					# set names, if they exist. Finally, update the config registry
+					# with the new config list.
+					newclist=$(echo -e "${clist}" | sed -e "s/${mem}/${mems_mem}/g")
+					newclist=$(canonicalize_ws "${newclist}")
+					newclist=$(rm_duplicate_words "${newclist}")
+
+					#config_registry[${config}]=${newclist}
+					printf -v "config_registry_${config}" %s "${newclist}"
+
+					# Since we performed a substitution and changed the config
+					# list, mark the iteration flag to continue another round,
+					# but only if the config (mem) value is NOT present
+					# in the list of sub-configs. If it is present, then further
+					# substitution may not necessarily be needed this round.
+					is_singleton=$(is_word_in_list "${mem}" "${mems_mem}")
+					if [ ${is_singleton} == "false" ]; then
+						iterate_again="1"
+					fi
+				fi
+			done
 		done
+	done
 
+	# Similar to what we just did for the config_registry, we now iterate
+	# through the kernel_registry and substitute any configuration families
+	# in the kernel list (right side of ':') with the members of that
+	# family's kernel set. This process continues iteratively, as before,
+	# until all families have been replaced with singleton configurations'
+	# kernel sets.
+
+	iterate_again="1"
+	while [ "${iterate_again}" == "1" ]; do
+
+		iterate_again="0"
+
+		#for config in "${!kernel_registry[@]}"; do
+		for kr_var in ${!kernel_registry_*}; do
+
+			config=${kr_var##kernel_registry_}
+
+			#for ker in ${kernel_registry[$config]}; do
+			for ker in ${!kr_var}; do
+
+				#kers_ker="${kernel_registry[${ker}]}"
+				kers_ker=$(query_array "kernel_registry" ${ker})
+
+				# If kers_ker is empty string, then ker was not found as a key
+				# in the kernel list associative array. In that case, we continue
+				# and will echo an error later in the script.
+				if [ "${kers_ker}" == "" ]; then
+					#echo "  kernel for ${ker} is empty string! no entry in kernel list."
+					continue;
+				fi
+
+				# If the current config/kernel (ker) differs from its singleton kernel
+				# entry (kers_ker), then that singleton entry was specified to use
+				# a different configuration's kernel set. Thus, we need to replace the
+				# occurrence in the current config/kernel name with that of the kernel
+				# set it needs.
+				if [ "${ker}" != "${kers_ker}" ]; then
+
+					#klist="${kernel_registry[$config]}"
+					klist=$(query_array "kernel_registry" ${config})
+
+					# Replace the current config with its requisite kernels,
+					# canonicalize whitespace, and then remove duplicate kernel
+					# set names, if they exist. Finally, update the kernel registry
+					# with the new kernel list.
+					newklist=$(echo -e "${klist}" | sed -e "s/${ker}/${kers_ker}/g")
+					newklist=$(canonicalize_ws "${newklist}")
+					newklist=$(rm_duplicate_words "${newklist}")
+
+					#kernel_registry[${config}]=${newklist}
+					printf -v "kernel_registry_${config}" %s "${newklist}"
+
+					# Since we performed a substitution and changed the kernel
+					# list, mark the iteration flag to continue another round,
+					# but only if the config/kernel (ker) value is NOT present
+					# in the list of kernels. If it is present, then further
+					# substitution may not necessarily be needed this round.
+					is_singleton=$(is_word_in_list "${ker}" "${kers_ker}")
+					if [ ${is_singleton} == "false" ]; then
+						iterate_again="1"
+					fi
+				fi
+			done
+		done
 	done
 }
 
@@ -401,9 +481,16 @@ rm_duplicate_words()
 {
 	str="$1"
 
-	str=$(echo "${str}" | awk '{for (i=1;i<=NF;i++) if (!a[$i]++) printf("%s%s",$i,FS)}{printf("\n")}')
+	# We reverse the initial string, THEN remove duplicates, then reverse
+	# the de-duplicated result so that only the last instance is kept after
+	# removing duplicates (rather than keeping only the first). This is
+	# totally unnecessary but works well for the kinds of duplicates that
+	# show up in certain use cases of the config and kernel registries.
+	revstr=$(echo "${str}" | awk '{ for (i=NF; i>1; i--) printf("%s ",$i); print $1; }')
+	revres=$(echo "${revstr}" | awk '{for (i=1;i<=NF;i++) if (!a[$i]++) printf("%s%s",$i,FS)}{printf("\n")}')
+	res=$(echo "${revres}" | awk '{ for (i=NF; i>1; i--) printf("%s ",$i); print $1; }')
 
-	echo "${str}"
+	echo "${res}"
 }
 
 select_cc()
@@ -840,8 +927,8 @@ main()
 		exit 1
 	fi
 
-	# Read the registered configuration names and lists into an associative
-	# array.
+	# Read the registered configuration names and lists into associative
+	# arrays.
 	echo -n "${script_name}: reading configuration registry..."
 	read_registry_file ${registry_filepath}
 	echo "done."
