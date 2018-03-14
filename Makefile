@@ -432,7 +432,7 @@ endef
 # third argument: the kernel file suffix being considered.
 #$(BASE_OBJ_KERNELS_PATH)/$(1)/%.o: $(KERNELS_PATH)/$(1)/%.c $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
 define make-kernels-rule
-$(BASE_OBJ_KERNELS_PATH)/$(1)/%.o: $(KERNELS_PATH)/$(1)/%.$(3) $(MK_HEADER_FILES) $(MAKE_DEFS_MK_PATHS)
+$(BASE_OBJ_KERNELS_PATH)/$(1)/%.o: $(KERNELS_PATH)/$(1)/%.$(3) $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	$(CC) $(call get-kernel-cflags-for,$(2)) -c $$< -o $$@
 else
