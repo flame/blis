@@ -430,9 +430,9 @@ endef
 # first argument: a kernel set (name) being targeted (e.g. haswell).
 # second argument: the configuration whose CFLAGS we should use in compilation.
 # third argument: the kernel file suffix being considered.
-#$(BASE_OBJ_KERNELS_PATH)/$(1)/%.o: $(KERNELS_PATH)/$(1)/%.$(3) $(MK_HEADER_FILES) $(MAKE_DEFS_MK_PATHS)
+#$(BASE_OBJ_KERNELS_PATH)/$(1)/%.o: $(KERNELS_PATH)/$(1)/%.c $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
 define make-kernels-rule
-$(BASE_OBJ_KERNELS_PATH)/$(1)/%.o: $(KERNELS_PATH)/$(1)/%.c $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
+$(BASE_OBJ_KERNELS_PATH)/$(1)/%.o: $(KERNELS_PATH)/$(1)/%.$(3) $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	$(CC) $(call get-kernel-cflags-for,$(2)) -c $$< -o $$@
 else
@@ -468,7 +468,9 @@ $(foreach conf, $(CONFIG_LIST), $(eval $(call make-refkern-rule,$(conf))))
 # Instantiate the build rule for optimized kernels for each of the kernel
 # sets in KERNEL_LIST with the CFLAGS designated for the sub-configuration
 # specified by the KCONFIG_MAP.
-$(foreach kset, $(KERNEL_LIST), $(eval $(call make-kernels-rule,$(kset),$(call get-config-for-kset,$(kset)))))
+$(foreach kset, $(KERNEL_LIST), $(eval $(call make-kernels-rule,$(kset),$(call get-config-for-kset,$(kset)),c)))
+$(foreach kset, $(KERNEL_LIST), $(eval $(call make-kernels-rule,$(kset),$(call get-config-for-kset,$(kset)),s)))
+$(foreach kset, $(KERNEL_LIST), $(eval $(call make-kernels-rule,$(kset),$(call get-config-for-kset,$(kset)),S)))
 
 # FGVZ: for later, to compile multiple kernel source suffixes.
 #$(foreach suf,  $(KERNEL_SUFS), \

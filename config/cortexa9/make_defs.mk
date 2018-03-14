@@ -67,7 +67,7 @@ endif
 
 CKOPTFLAGS     := $(COPTFLAGS)
 
-ifneq ($(CC_VENDOR),gcc)
+ifeq ($(CC_VENDOR),gcc)
 CVECFLAGS      := -march=armv7-a
 else
 $(error gcc is required for this configuration.)
