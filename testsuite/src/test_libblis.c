@@ -630,7 +630,7 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "--- BLIS configuration info ---\n" );
 	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "active sub-configuration       %s\n", bli_arch_string( bli_cpuid_query_id() ) );
+	libblis_test_fprintf_c( os, "active sub-configuration       %s\n", bli_arch_string( bli_arch_query_id() ) );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "integer type size (bits)       %d\n", ( int )int_type_size );
 	libblis_test_fprintf_c( os, "\n" );
