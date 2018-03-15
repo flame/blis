@@ -34,15 +34,6 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-void bla_syr2_check
-     (
-       const char*     dt_str,
-       const char*     op_str,
-       const f77_char* uploa,
-       const f77_int*  m,
-       const f77_int*  incx,
-       const f77_int*  incy,
-       const f77_int*  lda
-     );
+#define bla_syr2_check bla_her2_check
 
 #endif

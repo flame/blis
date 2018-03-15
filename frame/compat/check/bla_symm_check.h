@@ -34,17 +34,6 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-void bla_symm_check
-     (
-       const char*     dt_str,
-       const char*     op_str,
-       const f77_char* sidea,
-       const f77_char* uploa,
-       const f77_int*  m,
-       const f77_int*  n,
-       const f77_int*  lda,
-       const f77_int*  ldb,
-       const f77_int*  ldc
-     );
+#define bla_symm_check bla_hemm_check
 
 #endif

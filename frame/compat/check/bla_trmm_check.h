@@ -34,18 +34,55 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-void bla_trmm_check
-     (
-       const char*     dt_str,
-       const char*     op_str,
-       const f77_char* sidea,
-       const f77_char* uploa,
-       const f77_char* transa,
-       const f77_char* diaga,
-       const f77_int*  m,
-       const f77_int*  n,
-       const f77_int*  lda,
-       const f77_int*  ldb
-     );
+#define bla_trmm_check( dt_str, op_str, sidea, uploa, transa, diaga, m, n, lda, ldb ) \
+{ \
+	f77_int info = 0; \
+	f77_int left, right; \
+	f77_int lower, upper; \
+	f77_int nota, ta, conja; \
+	f77_int unita, nonua; \
+	f77_int nrowa; \
+\
+	left  = PASTEF770(lsame)( sidea,  "L", (ftnlen)1, (ftnlen)1 ); \
+	right = PASTEF770(lsame)( sidea,  "R", (ftnlen)1, (ftnlen)1 ); \
+	lower = PASTEF770(lsame)( uploa,  "L", (ftnlen)1, (ftnlen)1 ); \
+	upper = PASTEF770(lsame)( uploa,  "U", (ftnlen)1, (ftnlen)1 ); \
+	nota  = PASTEF770(lsame)( transa, "N", (ftnlen)1, (ftnlen)1 ); \
+	ta    = PASTEF770(lsame)( transa, "T", (ftnlen)1, (ftnlen)1 ); \
+	conja = PASTEF770(lsame)( transa, "C", (ftnlen)1, (ftnlen)1 ); \
+	unita = PASTEF770(lsame)( diaga,  "U", (ftnlen)1, (ftnlen)1 ); \
+	nonua = PASTEF770(lsame)( diaga,  "N", (ftnlen)1, (ftnlen)1 ); \
+\
+	if ( left ) { nrowa = *m; } \
+	else        { nrowa = *n; } \
+\
+	if      ( !left && !right ) \
+		info = 1; \
+	else if ( !lower && !upper ) \
+		info = 2; \
+	else if ( !nota && !ta && !conja ) \
+		info = 3; \
+	else if ( !unita && !nonua ) \
+		info = 4; \
+	else if ( *m < 0 ) \
+		info = 5; \
+	else if ( *n < 0 ) \
+		info = 6; \
+	else if ( *lda < bli_max( 1, nrowa ) ) \
+		info = 9; \
+	else if ( *ldb < bli_max( 1, *m    ) ) \
+		info = 11; \
+\
+	if ( info != 0 ) \
+	{ \
+		char func_str[ BLIS_MAX_BLAS_FUNC_STR_LENGTH ]; \
+\
+		sprintf( func_str, "%s%-5s", dt_str, op_str ); \
+\
+		PASTEF770(xerbla)( func_str, &info, (ftnlen)6 ); \
+\
+		return; \
+	} \
+}
 
 #endif

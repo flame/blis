@@ -34,15 +34,35 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-void bla_her2_check
-     (
-       const char*     dt_str,
-       const char*     op_str,
-       const f77_char* uploa,
-       const f77_int*  m,
-       const f77_int*  incx,
-       const f77_int*  incy,
-       const f77_int*  lda
-     );
+#define bla_her2_check( dt_str, op_str, uploa, m, incx, incy, lda ) \
+{ \
+	f77_int info = 0; \
+	f77_int lower, upper; \
+\
+	lower = PASTEF770(lsame)( uploa, "L", (ftnlen)1, (ftnlen)1 ); \
+	upper = PASTEF770(lsame)( uploa, "U", (ftnlen)1, (ftnlen)1 ); \
+\
+	if      ( !lower && !upper ) \
+		info = 1; \
+	else if ( *m < 0 ) \
+		info = 2; \
+	else if ( *incx == 0 ) \
+		info = 5; \
+	else if ( *incy == 0 ) \
+		info = 7; \
+	else if ( *lda < bli_max( 1, *m ) ) \
+		info = 9; \
+\
+	if ( info != 0 ) \
+	{ \
+		char func_str[ BLIS_MAX_BLAS_FUNC_STR_LENGTH ]; \
+\
+		sprintf( func_str, "%s%-5s", dt_str, op_str ); \
+\
+		PASTEF770(xerbla)( func_str, &info, (ftnlen)6 ); \
+\
+		return; \
+	} \
+}
 
 #endif

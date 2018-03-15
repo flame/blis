@@ -80,7 +80,7 @@
     printf("** On entry to %6s, parameter number %2i had an illegal value\n",
         srname, (int)*info);
 
-    bli_abort();
+    //bli_abort();
 
 /*     End of XERBLA */
 
