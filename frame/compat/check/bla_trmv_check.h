@@ -68,6 +68,8 @@
 \
 		sprintf( func_str, "%s%-5s", dt_str, op_str ); \
 \
+		bli_string_mkupper( func_str ); \
+\
 		PASTEF770(xerbla)( func_str, &info, (ftnlen)6 ); \
 \
 		return; \
