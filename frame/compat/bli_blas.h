@@ -52,7 +52,7 @@
 
 // -- Constants --
 
-#define BLIS_MAX_BLAS_FUNC_STR_LENGTH (6+1)
+#define BLIS_MAX_BLAS_FUNC_STR_LENGTH (7+1)
 
 
 // -- Utility macros --
