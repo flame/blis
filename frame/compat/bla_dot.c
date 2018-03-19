@@ -95,13 +95,15 @@ INSERT_GENTFUNCDOT_BLAS( dot, dotv )
 float PASTEF77(sd,sdot)
      (
        const f77_int* n,
+       const float*   sb,
        const float*   x, const f77_int* incx,
        const float*   y, const f77_int* incy
      )
 {
-	return ( float )PASTEF77(d,sdot)( n,
-	                                  x, incx,
-	                                  y, incy );
+	float r = ( float )PASTEF77(d,sdot)( n,
+	                                     x, incx,
+	                                     y, incy );
+	return r + *sb;
 }
 
 // Input vectors stored in single precision, computed in double precision,

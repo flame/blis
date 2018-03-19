@@ -34,7 +34,7 @@
 
 #ifdef BLIS_ENABLE_BLAS2BLIS
 
-#define bla_ger_check( dt_str, op_str, m, n, incx, incy, lda ) \
+#define bla_ger_check( dt_str, op_str, conj_str, m, n, incx, incy, lda ) \
 { \
 	f77_int info = 0; \
 \
@@ -53,7 +53,9 @@
 	{ \
 		char func_str[ BLIS_MAX_BLAS_FUNC_STR_LENGTH ]; \
 \
-		sprintf( func_str, "%s%-5s", dt_str, op_str ); \
+		/* We have to append an extra character to denote whether we
+		   are testing geru or gerc. */ \
+		sprintf( func_str, "%s%s%-2s", dt_str, op_str, conj_str ); \
 \
 		bli_string_mkupper( func_str ); \
 \

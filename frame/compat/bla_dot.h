@@ -55,6 +55,7 @@ INSERT_GENTPROTDOT_BLAS( dot )
 float PASTEF77(sd,sdot)
      (
        const f77_int* n,
+       const float*   sb,
        const float*   x, const f77_int* incx,
        const float*   y, const f77_int* incy
      );

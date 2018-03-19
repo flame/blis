@@ -66,6 +66,7 @@ void PASTEF772(ch,blasname,chc) \
 	( \
 	  MKSTR(ch), \
 	  MKSTR(blasname), \
+	  MKSTR(chc), \
 	  m, \
 	  n, \
 	  incx, \
