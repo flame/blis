@@ -39,9 +39,9 @@
 // Define BLAS-to-BLIS interfaces.
 //
 #undef  GENTFUNCDOT
-#define GENTFUNCDOT( ftype, chxy, chc, blis_conjx, blasname, blisname ) \
+#define GENTFUNCDOT( ftype, ch, chc, blis_conjx, blasname, blisname ) \
 \
-ftype PASTEF772(chxy,blasname,chc) \
+ftype PASTEF772(ch,blasname,chc) \
      ( \
        const f77_int* n, \
        const ftype*   x, const f77_int* incx, \
@@ -67,7 +67,7 @@ ftype PASTEF772(chxy,blasname,chc) \
 	bli_convert_blas_incv( n0, (ftype*)y, *incy, y0, incy0 ); \
 \
 	/* Call BLIS interface. */ \
-	PASTEMAC(chxy,blisname) \
+	PASTEMAC(ch,blisname) \
 	( \
 	  blis_conjx, \
 	  BLIS_NO_CONJUGATE, \

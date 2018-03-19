@@ -37,9 +37,9 @@
 // Prototype BLAS-to-BLIS interfaces.
 //
 #undef  GENTPROTDOT
-#define GENTPROTDOT( ftype, chxy, chc, blasname ) \
+#define GENTPROTDOT( ftype, ch, chc, blasname ) \
 \
-ftype PASTEF772(chxy,blasname,chc) \
+ftype PASTEF772(ch,blasname,chc) \
      ( \
        const f77_int* n, \
        const ftype*   x, const f77_int* incx, \

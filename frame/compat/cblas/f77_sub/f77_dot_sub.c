@@ -40,18 +40,22 @@
 // Define CBLAS subrotine wrapper interfaces.
 //
 #undef  GENTFUNCDOT
-#define GENTFUNCDOT( ftype, chxy, chc, blis_conjx, blasname, blisname ) \
+#define GENTFUNCDOT( ftype, ch, chc, blis_conjx, blasname, blisname ) \
 \
-void PASTEF773(chxy,blasname,chc,sub)( \
-                                       const f77_int* n, \
-                                       const ftype*   x, const f77_int* incx, \
-                                       const ftype*   y, const f77_int* incy, \
-                                       ftype*   rval  \
-                                     ) \
+void PASTEF773(ch,blasname,chc,sub) \
+     ( \
+       const f77_int* n, \
+       const ftype*   x, const f77_int* incx, \
+       const ftype*   y, const f77_int* incy, \
+             ftype*   rval  \
+     ) \
 { \
-	*rval = PASTEF772(chxy,blasname,chc)( n, \
-	                                      x, incx, \
-	                                      y, incy ); \
+	*rval = PASTEF772(ch,blasname,chc) \
+	( \
+	  n, \
+	  x, incx, \
+	  y, incy \
+	); \
 }
 
 #ifdef BLIS_ENABLE_CBLAS
@@ -62,29 +66,40 @@ INSERT_GENTFUNCDOT_BLAS( dot, NULL )
 
 // Input vectors stored in single precision, computed in double precision,
 // with result returned in single precision.
-void PASTEF772(sds,dot,sub)( const f77_int* n,
-                             const float*  sb,
-                             const float*   x, const f77_int* incx,
-                             const float*   y, const f77_int* incy,
-                             float*   rval
-                           )
+void PASTEF772(sds,dot,sub)
+     (
+       const f77_int* n,
+       const float*  sb,
+       const float*   x, const f77_int* incx,
+       const float*   y, const f77_int* incy,
+             float*   rval
+     )
 {
-	*rval = *sb + PASTEF77(sds,dot)( n,
-	                                 x, incx,
-	                                 y, incy );
+	*rval = *sb + PASTEF77(sds,dot)
+	(
+	  n,
+	  sb,
+	  x, incx,
+	  y, incy
+	);
 }
 
 // Input vectors stored in single precision, computed in double precision,
 // with result returned in double precision.
-void PASTEF772(ds,dot,sub)( const f77_int* n,
-                            const float*   x, const f77_int* incx,
-                            const float*   y, const f77_int* incy,
-                            double*  rval
-                          )
+void PASTEF772(ds,dot,sub)
+     (
+       const f77_int* n,
+       const float*   x, const f77_int* incx,
+       const float*   y, const f77_int* incy,
+             double*  rval
+     )
 {
-	*rval = PASTEF77(ds,dot)( n,
-	                          x, incx,
-	                          y, incy );
+	*rval = PASTEF77(ds,dot)
+	(
+	  n,
+	  x, incx,
+	  y, incy
+	);
 }
 
 #endif

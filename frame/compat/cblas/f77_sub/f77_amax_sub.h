@@ -39,11 +39,12 @@
 #undef  GENTPROT
 #define GENTPROT( ftype_x, chx, blasname ) \
 \
-void PASTEF773(i,chx,blasname,sub)( \
-                                    const f77_int* n, \
-                                    const ftype_x* x, const f77_int* incx, \
-                                    f77_int* rval  \
-                                  );
+void PASTEF773(i,chx,blasname,sub) \
+     ( \
+       const f77_int* n, \
+       const ftype_x* x, const f77_int* incx, \
+             f77_int* rval  \
+     );
 
 #ifdef BLIS_ENABLE_CBLAS
 INSERT_GENTPROT_BLAS( amax )
