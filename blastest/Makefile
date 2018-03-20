@@ -214,7 +214,7 @@ $(TEST_OBJ_PATH)/%.o: $(F2C_PATH)/%.c
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	$(CC) $(CFLAGS) -c $< -o $@
 else
-	@echo "Compiling $<"
+	@echo "Compiling $@"
 	@$(CC) $(CFLAGS) -c $< -o $@
 endif
 
@@ -222,7 +222,7 @@ $(TEST_OBJ_PATH)/%.o: $(DRIVER_PATH)/%.c
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	$(CC) $(CFLAGS) -c $< -o $@
 else
-	@echo "Compiling $<"
+	@echo "Compiling $@"
 	@$(CC) $(CFLAGS) -c $< -o $@
 endif
 

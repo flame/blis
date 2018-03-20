@@ -167,18 +167,22 @@ to many users and developers:
 This wiki provides step-by-step instructions for building a BLIS library.
 (Reminder: While BLIS supports configure-time hardware detection for certain
 architectures, you may need to manually specify a configuration to use.)
- * [Configuration](https://github.com/flame/blis/wiki/ConfigurationHowTo).
-This wiki describes how to create a BLIS "configuration", which captures all of
-the details necessary to build BLIS for a specific hardware architecture.
-Configurations specify things like blocksizes, kernel names, and various
-optional configuration settings. 
+ * [Configurations](https://github.com/flame/blis/wiki/ConfigurationHowTo).
+This wiki describes how the configuration system works in BLIS, and also
+provides step-by-step instructions for creating a new configuration.
+(In BLIS, a "configuration" captures all of the details necessary to build
+BLIS for a specific hardware architecture. Configurations specify things
+like cache blocksizes and kernel functions, as well as various optional
+configuration settings. 
  * [Kernels](https://github.com/flame/blis/wiki/KernelsHowTo).
 This wiki describes each of the BLIS kernel operations in detail and should
 provide developers with most of the information needed to get started with
 writing and optimizing their own kernels. 
  * [Test suite](https://github.com/flame/blis/wiki/Testsuite).
 This wiki contains detailed instructions on running the BLIS test suite,
-located in the top-level directory testsuite. 
+located in the top-level directory testsuite. Also included: a walkthrough
+of the BLAS test drivers, which exercise the BLAS compatibility layer that
+is, by default, included in BLIS.
 
 Discussion
 ----------
@@ -189,16 +193,17 @@ one of the following mailing lists:
  * [blis-discuss](http://groups.google.com/group/blis-discuss): Please join and
 post to this mailing list if you have general questions or feedback regarding
 BLIS. Application developers (end users) should probably post here, unless they
-have bug reports, in which case they should post to
-[blis-devel](http://groups.google.com/group/blis-devel).
+have bug reports, in which case they should open a
+[new issue](http://github.com/flame/blis/issues) on github.
 
  * [blis-devel](http://groups.google.com/group/blis-devel): Please join and
 post to this mailing list if you are a BLIS developer (i.e., you are trying to
 use BLIS to create libraries, you want to write kernels for the framework, or
-you are trying to modify or extend the framework itself). Also, if you would
-like to submit a bug report, or discuss a possible bug, please use this list.
+you are trying to modify or extend the framework itself).
 **Note:** Most of the interesting discussions happen here; don't be afraid to
-join! 
+join! If you would like to submit a bug report, or discuss a possible bug,
+please consider opening a [new issue](http://github.com/flame/blis/issues) on
+github.
 
 Citations
 ---------
