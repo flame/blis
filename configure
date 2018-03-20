@@ -731,7 +731,10 @@ main()
 	include_dir='include'
 	include_dirpath="${cur_dirpath}/${include_dir}"
 
-	# The name of the directory in which the test suite is kept.
+	# The name of the directory in which the BLAS test suite is kept.
+	blastest_dir='blastest'
+
+	# The name of the directory in which the BLIS test suite is kept.
 	testsuite_dir='testsuite'
 
 	# The install prefix flag.
@@ -1449,6 +1452,12 @@ main()
 
 	echo "${script_name}: creating ${obj_frame_dirpath}"
 	mkdir -p ${obj_frame_dirpath}
+
+
+	obj_blastest_dirpath="${base_obj_dirpath}/${blastest_dir}"
+
+	echo "${script_name}: creating ${obj_blastest_dirpath}"
+	mkdir -p ${obj_blastest_dirpath}
 
 
 	obj_testsuite_dirpath="${base_obj_dirpath}/${testsuite_dir}"

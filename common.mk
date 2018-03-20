@@ -167,6 +167,7 @@ BLIS_LIB_BASE_NAME := libblis
 FRAGMENT_MK        := .fragment.mk
 
 # Locations of important files.
+BUILD_DIR          := build
 CONFIG_DIR         := config
 FRAME_DIR          := frame
 REFKERN_DIR        := ref_kernels
@@ -174,6 +175,7 @@ KERNELS_DIR        := kernels
 OBJ_DIR            := obj
 LIB_DIR            := lib
 INCLUDE_DIR        := include
+BLASTEST_DIR       := blastest
 TESTSUITE_DIR      := testsuite
 
 # Other kernel-related definitions.
@@ -185,6 +187,7 @@ REF_SUF            := ref
 # of its input/configuration files.
 TESTSUITE_NAME     := test_$(BLIS_LIB_BASE_NAME)
 TESTSUITE_CONF_GEN := input.general
+TESTSUITE_FAST_GEN := input.general.fast
 TESTSUITE_CONF_OPS := input.operations
 TESTSUITE_OUT_FILE := output.testsuite
 

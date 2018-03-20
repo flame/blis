@@ -44,9 +44,10 @@
 # --- Makefile PHONY target definitions ----------------------------------------
 #
 
-.PHONY: all bin clean \
+.PHONY: all bin \
+        clean cleanf2c cleanobj cleanbin cleanout \
         check-env check-env-mk check-env-fragments check-env-make-defs \
-        run run-amd64 run-x86 run-arm
+        run
 
 
 
@@ -131,23 +132,46 @@ BLIS_LIB       := $(BLIS_LIB_PATH)/libblis.a
 # --- General build definitions ------------------------------------------------
 #
 
-TEST_SRC_PATH  := src
 TEST_OBJ_PATH  := obj
 
-# Gather all local object files.
-TEST_OBJS      := $(sort $(patsubst $(TEST_SRC_PATH)/%.c, \
-                                    $(TEST_OBJ_PATH)/%.o, \
-                                    $(wildcard $(TEST_SRC_PATH)/*.c)))
+F2C_LIB        := libf2c.a
+F2C_PATH       := f2c
 
-# Binary executable name.
-TEST_BIN       := test_libblis.x
+DRIVER_PATH    := src
+
+INPUT_DIR      := input
+
+# Gather all local object files.
+F2C_OBJS       := $(sort $(patsubst $(F2C_PATH)/%.c, \
+                                    $(TEST_OBJ_PATH)/%.o, \
+                                    $(wildcard $(F2C_PATH)/*.c)))
+
+DRIVER_OBJS    := $(sort $(patsubst $(DRIVER_PATH)/%.c, \
+                                    $(TEST_OBJ_PATH)/%.o, \
+                                    $(wildcard $(DRIVER_PATH)/*.c)))
+
+# Extract base names for each test driver file.
+DRIVER_BASES   := $(basename $(notdir $(DRIVER_OBJS)))
+
+# Binary executable names.
+DRIVER_BINS    := $(addsuffix .x,$(DRIVER_BASES))
+
+# Binary run-rule names
+DRIVER_BINS_R  := $(addprefix run-,$(DRIVER_BASES))
+
+# Filter level-1, level-2, and level-3 names to different variables.
+DRIVER1_BASES  := $(filter %1,$(DRIVER_BASES))
+DRIVER2_BASES  := $(filter %2,$(DRIVER_BASES))
+DRIVER3_BASES  := $(filter %3,$(DRIVER_BASES))
 
 # Use the CFLAGS for the configuration family.
 CFLAGS          := $(call get-frame-cflags-for,$(CONFIG_NAME))
 
 # Add local header paths to CFLAGS
-#CFLAGS          += -I$(BLIS_INC_PATH) -I$(TEST_SRC_PATH)
-CFLAGS          += -I$(TEST_SRC_PATH)
+CFLAGS          += -I$(F2C_PATH)
+
+# Suppress warnings about uninitialized functions.
+CFLAGS          += -Wno-maybe-uninitialized -Wno-parentheses
 
 
 
@@ -157,9 +181,11 @@ CFLAGS          += -I$(TEST_SRC_PATH)
 
 # --- Primary targets ---
 
-all: check-env bin
+all: check-env f2c bin
 
-bin: check-env $(TEST_BIN)
+f2c: check-env $(F2C_LIB)
+
+bin: check-env $(DRIVER_BINS)
 
 
 # --- Environment check rules ---
@@ -184,32 +210,101 @@ endif
 
 # --Object file rules --
 
-$(TEST_OBJ_PATH)/%.o: $(TEST_SRC_PATH)/%.c $(BLIS_LIB)
+$(TEST_OBJ_PATH)/%.o: $(F2C_PATH)/%.c
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	$(CC) $(CFLAGS) -c $< -o $@
 else
-	@echo "Compiling $@"
+	@echo "Compiling $<"
 	@$(CC) $(CFLAGS) -c $< -o $@
+endif
+
+$(TEST_OBJ_PATH)/%.o: $(DRIVER_PATH)/%.c
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	$(CC) $(CFLAGS) -c $< -o $@
+else
+	@echo "Compiling $<"
+	@$(CC) $(CFLAGS) -c $< -o $@
+endif
+
+
+# -- libf2c library archive rule --
+
+$(F2C_LIB): $(F2C_OBJS)
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	$(AR) $(ARFLAGS) $@ $?
+	$(RANLIB) $@
+else
+	@echo "Archiving $@"
+	@$(AR) $(ARFLAGS) $@ $?
+	@$(RANLIB) $@
 endif
 
 
 # -- Executable file rules --
 
-$(TEST_BIN): $(TEST_OBJS) $(BLIS_LIB)
+# first argument: the base name of the BLAS test driver.
+define make-blat-rule
+$(1).x: $(TEST_OBJ_PATH)/$(1).o $(F2C_LIB) $(BLIS_LIB)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	$(LINKER) $(TEST_OBJS) $(BLIS_LIB) $(LDFLAGS) -o $@
+	$(LINKER) $(TEST_OBJ_PATH)/$(1).o $(F2C_OBJS) $(BLIS_LIB) $(LDFLAGS) -o $$@
 else
-	@echo "Linking $@ against '$(BLIS_LIB) $(LDFLAGS)'"
-	@$(LINKER) $(TEST_OBJS) $(BLIS_LIB) $(LDFLAGS) -o $@
+	@echo "Linking $$@ against '$(F2C_LIB) $(BLIS_LIB) $(LDFLAGS)'"
+	@$(LINKER) $(TEST_OBJ_PATH)/$(1).o $(F2C_LIB) $(BLIS_LIB) $(LDFLAGS) -o $$@
 endif
+endef
+
+# Instantiate the rule above for each driver file.
+$(foreach name, $(DRIVER_BASES), $(eval $(call make-blat-rule,$(name))))
+
 
 # -- Test run rules --
 
-run: $(TEST_BIN)
-	./$(TEST_BIN)
+run: $(DRIVER_BINS_R)
+
+# A rule to run ?blat1.x driver files.
+define make-run-blat1-rule
+run-$(1): $(1).x
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	./$(1).x > out.$(1)
+else
+	@echo "Running $(1).x > 'out.$(1)'"
+	@./$(1).x > out.$(1)
+endif
+endef
+
+# Instantiate the rule above for each level-1 driver file.
+$(foreach name, $(DRIVER1_BASES), $(eval $(call make-run-blat1-rule,$(name))))
+
+# A rule to run ?blat2.x and ?blat3.x driver files.
+define make-run-blat23-rule
+run-$(1): $(1).x
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	./$(1).x < $(INPUT_DIR)/$(1).in
+else
+	@echo "Running $(1).x < '$(INPUT_DIR)/$(1).in' (output to 'out.$(1)')"
+	@./$(1).x < $(INPUT_DIR)/$(1).in
+endif
+endef
+
+# Instantiate the rule above for each level-2 driver file.
+$(foreach name, $(DRIVER2_BASES), $(eval $(call make-run-blat23-rule,$(name))))
+
+# Instantiate the rule above for each level-3 driver file.
+$(foreach name, $(DRIVER3_BASES), $(eval $(call make-run-blat23-rule,$(name))))
 
 # -- Clean rules --
 
-clean:
-	- $(RM_F) $(TEST_OBJS) $(TEST_BIN)
+cleanf2c:
+	- $(RM_F) $(F2C_OBJS) $(F2C_LIB)
+
+cleanobj:
+	- $(RM_F) $(DRIVER_OBJS)
+
+cleanbin:
+	- $(RM_F) $(DRIVER_BINS)
+
+cleanout:
+	- $(RM_F) $(addprefix out.,$(DRIVER_BASES))
+
+clean: cleanf2c cleanobj cleanbin cleanout
 

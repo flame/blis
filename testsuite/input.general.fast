@@ -1,6 +1,6 @@
 # ----------------------------------------------------------------------
 #
-#  input.general
+#  input.general.fast
 #  BLIS test suite
 #
 #  This file contains input values that control how BLIS operations are
@@ -25,8 +25,8 @@ cj      # Vector storage scheme(s) to test:
 sdcz    # Datatype(s) to test:
         #   's' = single real; 'c' = single complex;
         #   'd' = double real; 'z' = double complex
-100     # Problem size: first to test
-500     # Problem size: maximum to test
+200     # Problem size: first to test
+200     # Problem size: maximum to test
 100     # Problem size: increment between experiments
         # Complex level-3 implementations to test
 0       #   3mh  ('1' = enable; '0' = disable)

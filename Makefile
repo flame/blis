@@ -45,14 +45,21 @@
 # --- Makefile PHONY target definitions ----------------------------------------
 #
 
-.PHONY: all libs test install uninstall uninstall-old clean \
+.PHONY: all \
+        libs libblis \
         check-env check-env-mk check-env-fragments check-env-make-defs \
-        testsuite testsuite-bin testsuite-run \
         flat-header flat-cblas-header \
-        install-libs install-headers install-lib-symlinks \
+        test \
+        testblas blastest-f2c blastest-bin blastest-run \
+        testblis testsuite testsuite-bin testsuite-run \
+        testblis-fast testsuite-run-fast \
+        check checkblas checkblis checkblis-fast \
+        install-headers install-libs install-lib-symlinks \
         showconfig \
-        cleanlib cleanh cleantest cleanmk distclean \
+        clean cleanmk cleanh cleanlib distclean \
+        cleantest cleanblastest cleanblistest \
         changelog \
+        install uninstall uninstall-old \
         uninstall-libs uninstall-headers uninstall-lib-symlinks \
         uninstall-old-libs uninstall-old-headers
 
@@ -292,12 +299,68 @@ endif
 
 
 #
+# --- BLAS test suite definitions ----------------------------------------------
+#
+
+# The location of the BLAS test suite's input files.
+BLASTEST_INPUT_PATH    := $(DIST_PATH)/$(BLASTEST_DIR)/input
+
+# The location of the BLAS test suite object directory.
+BASE_OBJ_BLASTEST_PATH := $(BASE_OBJ_PATH)/$(BLASTEST_DIR)
+
+# The locations of the BLAS test suite source code (f2c and drivers).
+BLASTEST_F2C_SRC_PATH  := $(DIST_PATH)/$(BLASTEST_DIR)/f2c
+BLASTEST_DRV_SRC_PATH  := $(DIST_PATH)/$(BLASTEST_DIR)/src
+
+# The paths to object files we will create (f2c and drivers).
+BLASTEST_F2C_OBJS      := $(sort \
+                          $(patsubst $(BLASTEST_F2C_SRC_PATH)/%.c, \
+                                     $(BASE_OBJ_BLASTEST_PATH)/%.o, \
+                                     $(wildcard $(BLASTEST_F2C_SRC_PATH)/*.c)) \
+                           )
+
+BLASTEST_DRV_OBJS      := $(sort \
+                          $(patsubst $(BLASTEST_DRV_SRC_PATH)/%.c, \
+                                     $(BASE_OBJ_BLASTEST_PATH)/%.o, \
+                                     $(wildcard $(BLASTEST_DRV_SRC_PATH)/*.c)) \
+                           )
+
+# libf2c name and location.
+BLASTEST_F2C_LIB_NAME  := libf2c.a
+BLASTEST_F2C_LIB       := $(BASE_OBJ_BLASTEST_PATH)/$(BLASTEST_F2C_LIB_NAME)
+
+# The base names of each driver source file (ie: filename minus suffix).
+BLASTEST_DRV_BASES     := $(basename $(notdir $(BLASTEST_DRV_OBJS)))
+
+# The binary executable driver names.
+BLASTEST_DRV_BINS      := $(addsuffix .x,$(BLASTEST_DRV_BASES))
+BLASTEST_DRV_BIN_PATHS := $(addprefix $(BASE_OBJ_BLASTEST_PATH)/,$(BLASTEST_DRV_BINS))
+
+# Binary executable driver "run-" names
+BLASTEST_DRV_BINS_R    := $(addprefix run-,$(BLASTEST_DRV_BASES))
+
+# Filter level-1, level-2, and level-3 names to different variables.
+BLASTEST_DRV1_BASES    := $(filter %1,$(BLASTEST_DRV_BASES))
+BLASTEST_DRV2_BASES    := $(filter %2,$(BLASTEST_DRV_BASES))
+BLASTEST_DRV3_BASES    := $(filter %3,$(BLASTEST_DRV_BASES))
+
+# Define some CFLAGS that we'll only use when compiling BLAS test suite
+# files.
+BLAT_CFLAGS            := -Wno-maybe-uninitialized -Wno-parentheses \
+                          -I$(BLASTEST_F2C_SRC_PATH)
+
+# The location of the script that checks the BLAS test output.
+BLASTEST_CHECK         := $(DIST_PATH)/$(BUILD_DIR)/check-blastest.sh
+
+
+#
 # --- Test suite definitions ---------------------------------------------------
 #
 
 # The location of the test suite's general and operations-specific
 # input/configuration files.
 TESTSUITE_CONF_GEN_PATH := $(DIST_PATH)/$(TESTSUITE_DIR)/$(TESTSUITE_CONF_GEN)
+TESTSUITE_FAST_GEN_PATH := $(DIST_PATH)/$(TESTSUITE_DIR)/$(TESTSUITE_FAST_GEN)
 TESTSUITE_CONF_OPS_PATH := $(DIST_PATH)/$(TESTSUITE_DIR)/$(TESTSUITE_CONF_OPS)
 
 # The locations of the test suite source directory and the local object
@@ -308,7 +371,7 @@ BASE_OBJ_TESTSUITE_PATH := $(BASE_OBJ_PATH)/$(TESTSUITE_DIR)
 # Convert source file paths to object file paths by replacing the base source
 # directories with the base object directories, and also replacing the source
 # file suffix (eg: '.c') with '.o'.
-MK_TESTSUITE_OBJS       := $(strip \
+MK_TESTSUITE_OBJS       := $(sort \
                            $(patsubst $(TESTSUITE_SRC_PATH)/%.c, \
                                       $(BASE_OBJ_TESTSUITE_PATH)/%.o, \
                                       $(wildcard $(TESTSUITE_SRC_PATH)/*.c)) \
@@ -316,6 +379,9 @@ MK_TESTSUITE_OBJS       := $(strip \
 
 # The test suite binary executable filename.
 TESTSUITE_BIN           := test_libblis.x
+
+# The location of the script that checks the BLIS testsuite output.
+TESTSUITE_CHECK         := $(DIST_PATH)/$(BUILD_DIR)/check-blistest.sh
 
 
 
@@ -346,9 +412,11 @@ UNINSTALL_HEADERS := $(shell $(FIND) $(INSTALL_PREFIX)/include/blis/ -name "*.h"
 
 all: libs
 
-libs: blis-lib
+libs: libblis
 
-test: testsuite
+test: testblis testblas
+
+check: checkblis-fast checkblas
 
 install: libs install-libs install-headers install-lib-symlinks
 
@@ -357,6 +425,26 @@ uninstall: uninstall-libs uninstall-headers uninstall-lib-symlinks
 uninstall-old: uninstall-old-libs uninstall-old-headers
 
 clean: cleanlib cleantest
+
+
+# --- Environment check rules ---
+
+check-env: check-env-make-defs check-env-fragments check-env-mk
+
+check-env-mk:
+ifeq ($(CONFIG_MK_PRESENT),no)
+	$(error Cannot proceed: config.mk not detected! Run configure first)
+endif
+
+check-env-fragments: check-env-mk
+ifeq ($(MAKEFILE_FRAGMENTS_PRESENT),no)
+	$(error Cannot proceed: makefile fragments not detected! Run configure first)
+endif
+
+check-env-make-defs: check-env-fragments
+ifeq ($(ALL_MAKE_DEFS_MK_PRESENT),no)
+	$(error Cannot proceed: Some make_defs.mk files not found or mislabeled!)
+endif
 
 
 # --- Consolidated blis.h header creation ---
@@ -472,34 +560,14 @@ $(foreach kset, $(KERNEL_LIST), $(eval $(call make-kernels-rule,$(kset),$(call g
 $(foreach kset, $(KERNEL_LIST), $(eval $(call make-kernels-rule,$(kset),$(call get-config-for-kset,$(kset)),s)))
 $(foreach kset, $(KERNEL_LIST), $(eval $(call make-kernels-rule,$(kset),$(call get-config-for-kset,$(kset)),S)))
 
-# FGVZ: for later, to compile multiple kernel source suffixes.
+# FGVZ: Alternate way of expressing the above:
 #$(foreach suf,  $(KERNEL_SUFS), \
 #$(foreach kset, $(KERNEL_LIST), $(eval $(call make-kernels-rule,$(kset),$(suf)))))
 
 
-# --- Environment check rules ---
-
-check-env: check-env-make-defs check-env-fragments check-env-mk
-
-check-env-mk:
-ifeq ($(CONFIG_MK_PRESENT),no)
-	$(error Cannot proceed: config.mk not detected! Run configure first)
-endif
-
-check-env-fragments: check-env-mk
-ifeq ($(MAKEFILE_FRAGMENTS_PRESENT),no)
-	$(error Cannot proceed: makefile fragments not detected! Run configure first)
-endif
-
-check-env-make-defs: check-env-fragments
-ifeq ($(ALL_MAKE_DEFS_MK_PRESENT),no)
-	$(error Cannot proceed: Some make_defs.mk files not found or mislabeled!)
-endif
-
-
 # --- All-purpose library rule (static and shared) ---
 
-blis-lib: check-env $(MK_LIBS)
+libblis: check-env $(MK_LIBS)
 
 
 # --- Static library archiver rules ---
@@ -526,20 +594,118 @@ else
 endif
 
 
-# --- Test suite rules ---
+# --- BLAS test suite rules ---
+
+testblas: blastest-run 
+
+blastest-f2c: check-env $(BLASTEST_F2C_LIB)
+
+blastest-bin: check-env blastest-f2c $(BLASTEST_DRV_BIN_PATHS)
+
+blastest-run: $(BLASTEST_DRV_BINS_R)
+
+# f2c object file rule.
+$(BASE_OBJ_BLASTEST_PATH)/%.o: $(BLASTEST_F2C_SRC_PATH)/%.c
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	$(CC) $(CFLAGS) $(BLAT_CFLAGS) -c $< -o $@
+else
+	@echo "Compiling $@"
+	@$(CC) $(CFLAGS) $(BLAT_CFLAGS) -c $< -o $@
+endif
+
+# driver object file rule.
+$(BASE_OBJ_BLASTEST_PATH)/%.o: $(BLASTEST_DRV_SRC_PATH)/%.c
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	$(CC) $(CFLAGS) $(BLAT_CFLAGS) -c $< -o $@
+else
+	@echo "Compiling $@"
+	@$(CC) $(CFLAGS) $(BLAT_CFLAGS) -c $< -o $@
+endif
+
+# libf2c library archive rule.
+$(BLASTEST_F2C_LIB): $(BLASTEST_F2C_OBJS)
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	$(AR) $(ARFLAGS) $@ $?
+	$(RANLIB) $@
+else
+	@echo "Archiving $@"
+	@$(AR) $(ARFLAGS) $@ $?
+	@$(RANLIB) $@
+endif
+
+# first argument: the base name of the BLAS test driver.
+define make-blat-rule
+$(BASE_OBJ_BLASTEST_PATH)/$(1).x: $(BASE_OBJ_BLASTEST_PATH)/$(1).o $(BLASTEST_F2C_LIB) $(MK_BLIS_LIB)
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	$(LINKER) $(BASE_OBJ_BLASTEST_PATH)/$(1).o $(BLASTEST_F2C_LIB) $(MK_BLIS_LIB) $(LDFLAGS) -o $$@
+else
+	@echo "Linking $$(@F) against '$(notdir $(BLASTEST_F2C_LIB)) $(MK_BLIS_LIB) $(LDFLAGS)'"
+	@$(LINKER) $(BASE_OBJ_BLASTEST_PATH)/$(1).o $(BLASTEST_F2C_LIB) $(MK_BLIS_LIB) $(LDFLAGS) -o $$@
+endif
+endef
+
+# Instantiate the rule above for each driver file.
+$(foreach name, $(BLASTEST_DRV_BASES), $(eval $(call make-blat-rule,$(name))))
+
+# A rule to run ?blat1.x driver files.
+define make-run-blat1-rule
+run-$(1): $(BASE_OBJ_BLASTEST_PATH)/$(1).x
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	$(BASE_OBJ_BLASTEST_PATH)/$(1).x > out.$(1)
+else
+	@echo "Running $(1).x > 'out.$(1)'"
+	@$(BASE_OBJ_BLASTEST_PATH)/$(1).x > out.$(1)
+endif
+endef
+
+# Instantiate the rule above for each level-1 driver file.
+$(foreach name, $(BLASTEST_DRV1_BASES), $(eval $(call make-run-blat1-rule,$(name))))
+
+# A rule to run ?blat2.x and ?blat3.x driver files.
+define make-run-blat23-rule
+run-$(1): $(BASE_OBJ_BLASTEST_PATH)/$(1).x
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	$(BASE_OBJ_BLASTEST_PATH)/$(1).x < $(BLASTEST_INPUT_PATH)/$(1).in
+else
+	@echo "Running $(1).x < '$(BLASTEST_INPUT_PATH)/$(1).in' (output to 'out.$(1)')"
+	@$(BASE_OBJ_BLASTEST_PATH)/$(1).x < $(BLASTEST_INPUT_PATH)/$(1).in
+endif
+endef
+
+# Instantiate the rule above for each level-2 driver file.
+$(foreach name, $(BLASTEST_DRV2_BASES), $(eval $(call make-run-blat23-rule,$(name))))
+
+# Instantiate the rule above for each level-3 driver file.
+$(foreach name, $(BLASTEST_DRV3_BASES), $(eval $(call make-run-blat23-rule,$(name))))
+
+# Check the results of the BLAS test suite drivers.
+checkblas: blastest-run
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	$(BLASTEST_CHECK)
+else
+	@$(BLASTEST_CHECK)
+endif
+
+# --- BLIS test suite rules ---
+
+testblis: testsuite
+
+testblis-fast: testsuite-run-fast
 
 testsuite: testsuite-run
 
 testsuite-bin: check-env $(TESTSUITE_BIN)
 
+# Object file rule.
 $(BASE_OBJ_TESTSUITE_PATH)/%.o: $(TESTSUITE_SRC_PATH)/%.c
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	$(CC) $(call get-frame-cflags-for,$(CONFIG_NAME)) -c $< -o $@
 else
-	@echo "Compiling $<"
+	@echo "Compiling $@"
 	@$(CC) $(call get-frame-cflags-for,$(CONFIG_NAME)) -c $< -o $@
 endif
 
+# Testsuite binary rule.
 $(TESTSUITE_BIN): $(MK_TESTSUITE_OBJS) $(MK_BLIS_LIB)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	$(LINKER) $(MK_TESTSUITE_OBJS) $(MK_BLIS_LIB) $(LDFLAGS) -o $@
@@ -548,20 +714,50 @@ else
 	@$(LINKER) $(MK_TESTSUITE_OBJS) $(MK_BLIS_LIB) $(LDFLAGS) -o $@
 endif
 
-
+# A rule to run the testsuite using the normal input.general file.
 testsuite-run: testsuite-bin
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	./$(TESTSUITE_BIN) -g $(TESTSUITE_CONF_GEN_PATH) \
 	                   -o $(TESTSUITE_CONF_OPS_PATH) \
-                        > $(TESTSUITE_OUT_FILE)
+	                    > $(TESTSUITE_OUT_FILE)
 
 else
 	@echo "Running $(TESTSUITE_BIN) with output redirected to '$(TESTSUITE_OUT_FILE)'"
 	@./$(TESTSUITE_BIN) -g $(TESTSUITE_CONF_GEN_PATH) \
 	                    -o $(TESTSUITE_CONF_OPS_PATH) \
-                         > $(TESTSUITE_OUT_FILE)
+	                     > $(TESTSUITE_OUT_FILE)
 endif
 
+# A rule to run the testsuite using the input.general.fast file, which
+# runs with smaller problem sizes but finishes quickly.
+testsuite-run-fast: testsuite-bin
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	./$(TESTSUITE_BIN) -g $(TESTSUITE_FAST_GEN_PATH) \
+	                   -o $(TESTSUITE_CONF_OPS_PATH) \
+	                    > $(TESTSUITE_OUT_FILE)
+
+else
+	@echo "Running $(TESTSUITE_BIN) (fast) with output redirected to '$(TESTSUITE_OUT_FILE)'"
+	@./$(TESTSUITE_BIN) -g $(TESTSUITE_FAST_GEN_PATH) \
+	                    -o $(TESTSUITE_CONF_OPS_PATH) \
+	                     > $(TESTSUITE_OUT_FILE)
+endif
+
+# Check the results of the BLIS testsuite.
+checkblis: testsuite-run
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	$(TESTSUITE_CHECK) $(TESTSUITE_OUT_FILE)
+else
+	@$(TESTSUITE_CHECK) $(TESTSUITE_OUT_FILE)
+endif
+
+# Check the results of the BLIS testsuite (fast).
+checkblis-fast: testsuite-run-fast
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	$(TESTSUITE_CHECK) $(TESTSUITE_OUT_FILE)
+else
+	@$(TESTSUITE_CHECK) $(TESTSUITE_OUT_FILE)
+endif
 
 # --- Install header rules ---
 
@@ -648,39 +844,6 @@ showconfig: check-env
 
 # --- Clean rules ---
 
-cleanlib: check-env
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	- $(FIND) $(BASE_OBJ_PATH) -name "*.o" | $(XARGS) $(RM_F)
-	- $(FIND) $(BASE_LIB_PATH) -name "*.a" | $(XARGS) $(RM_F)
-	- $(FIND) $(BASE_LIB_PATH) -name "*.so" | $(XARGS) $(RM_F)
-else
-	@echo "Removing .o files from $(BASE_OBJ_PATH)."
-	@- $(FIND) $(BASE_OBJ_PATH) -name "*.o" | $(XARGS) $(RM_F)
-	@echo "Removing .a files from $(BASE_LIB_PATH)."
-	@- $(FIND) $(BASE_LIB_PATH) -name "*.a" | $(XARGS) $(RM_F)
-	@echo "Removing .so files from $(BASE_LIB_PATH)."
-	@- $(FIND) $(BASE_LIB_PATH) -name "*.so" | $(XARGS) $(RM_F)
-endif
-
-cleanh: check-env
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	$(RM_F) $(BLIS_H_FLAT)
-else
-	@echo "Removing blis.h file from $(BASE_INC_PATH)."
-	@$(RM_F) $(BLIS_H_FLAT)
-endif
-
-cleantest: check-env
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	- $(FIND) $(BASE_OBJ_TESTSUITE_PATH) \( -name "*.o" -o -name "*.pexe" \) | $(XARGS) $(RM_F)
-	- $(RM_RF) $(TESTSUITE_BIN)
-else
-	@echo "Removing object files from $(BASE_OBJ_TESTSUITE_PATH)."
-	@- $(FIND) $(BASE_OBJ_TESTSUITE_PATH) \( -name "*.o" -o -name "*.pexe" \) | $(XARGS) $(RM_F)
-	@echo "Removing $(TESTSUITE_BIN) binary."
-	@- $(RM_RF) $(TESTSUITE_BIN)
-endif
-
 cleanmk: check-env
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	- $(FIND) $(CONFIG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
@@ -698,7 +861,59 @@ else
 	@- $(FIND) $(KERNELS_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 endif
 
-distclean: check-env cleanmk cleanlib cleanh cleantest
+cleanh: check-env
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	$(RM_F) $(BLIS_H_FLAT)
+else
+	@echo "Removing blis.h file from $(BASE_INC_PATH)."
+	@$(RM_F) $(BLIS_H_FLAT)
+endif
+
+cleanlib: check-env
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	- $(FIND) $(BASE_OBJ_PATH) -name "*.o" | $(XARGS) $(RM_F)
+	- $(FIND) $(BASE_LIB_PATH) -name "*.a" | $(XARGS) $(RM_F)
+	- $(FIND) $(BASE_LIB_PATH) -name "*.so" | $(XARGS) $(RM_F)
+else
+	@echo "Removing .o files from $(BASE_OBJ_PATH)."
+	@- $(FIND) $(BASE_OBJ_PATH) -name "*.o" | $(XARGS) $(RM_F)
+	@echo "Removing .a files from $(BASE_LIB_PATH)."
+	@- $(FIND) $(BASE_LIB_PATH) -name "*.a" | $(XARGS) $(RM_F)
+	@echo "Removing .so files from $(BASE_LIB_PATH)."
+	@- $(FIND) $(BASE_LIB_PATH) -name "*.so" | $(XARGS) $(RM_F)
+endif
+
+cleantest: cleanblastest cleanblistest
+
+cleanblastest: check-env
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	- $(RM_F) $(BLASTEST_F2C_OBJS) $(BLASTEST_DRV_OBJS)
+	- $(RM_F) $(BLASTEST_DRV_BIN_PATHS)
+	- $(RM_F) $(BLASTEST_F2C_LIB)
+	- $(RM_F) $(addprefix out.,$(BLASTEST_DRV_BASES))
+else
+	@echo "Removing object files from $(BASE_OBJ_BLASTEST_PATH)."
+	@- $(RM_F) $(BLASTEST_F2C_OBJS) $(BLASTEST_DRV_OBJS)
+	@echo "Removing binaries from $(BASE_OBJ_BLASTEST_PATH)."
+	@- $(RM_F) $(BLASTEST_DRV_BIN_PATHS)
+	@echo "Removing libf2c.a from $(BASE_OBJ_BLASTEST_PATH)."
+	@- $(RM_F) $(BLASTEST_F2C_LIB)
+	@echo "Removing driver output files 'out.*'."
+	@- $(RM_F) $(addprefix out.,$(BLASTEST_DRV_BASES))
+endif
+
+cleanblistest: check-env
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	- $(FIND) $(BASE_OBJ_TESTSUITE_PATH) -name "*.o" | $(XARGS) $(RM_F)
+	- $(RM_RF) $(TESTSUITE_BIN)
+else
+	@echo "Removing object files from $(BASE_OBJ_TESTSUITE_PATH)."
+	@- $(FIND) $(BASE_OBJ_TESTSUITE_PATH) -name "*.o" | $(XARGS) $(RM_F)
+	@echo "Removing $(TESTSUITE_BIN) binary."
+	@- $(RM_RF) $(TESTSUITE_BIN)
+endif
+
+distclean: check-env cleanmk cleanh cleanlib cleantest
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	- $(RM_F) $(CONFIG_MK_FILE)
 	- $(RM_RF) $(TESTSUITE_OUT_FILE)

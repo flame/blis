@@ -32,19 +32,13 @@
 #
 #
 
-#
-# check-test.sh
-#
-# Zhang Xianyi
-#
-
-
-grep -q FAILURE $1
+grep -q '\*\*\*\*' ./out.*
 
 if [ $? -eq 0 ]; then
-  echo "Test Failure"
+  echo "At least one BLAS test failed. Please see out.* files for details."
   exit 1
 else
-  echo "Test Pass"
+  echo "All BLAS tests passed!"
+  sleep 1.5
   exit 0
 fi

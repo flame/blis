@@ -82,6 +82,8 @@ script:
   - export BLIS_JC_NT=1
   - export BLIS_IR_NT=1
   - export BLIS_JR_NT=1
-  - if [ $TEST -eq 1 ]; then travis_wait 30 make BLIS_ENABLE_TEST_OUTPUT=yes test; fi
-  - if [ $TEST -eq 1 ]; then $DIST_PATH/build/check-test.sh ./output.testsuite; fi
+  - if [ $TEST -eq 1 ]; then travis_wait 30 make BLIS_ENABLE_TEST_OUTPUT=yes blistest-fast; fi
+  - if [ $TEST -eq 1 ]; then $DIST_PATH/build/check-blistest.sh ./output.testsuite; fi
+  - if [ $TEST -eq 1 ]; then make BLIS_ENABLE_TEST_OUTPUT=yes blastest; fi
+  - if [ $TEST -eq 1 ]; then $DIST_PATH/build/check-blastest.sh fi
 
