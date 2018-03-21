@@ -360,8 +360,9 @@ BLASTEST_CHECK         := $(DIST_PATH)/$(BUILD_DIR)/check-blastest.sh
 # The location of the test suite's general and operations-specific
 # input/configuration files.
 TESTSUITE_CONF_GEN_PATH := $(DIST_PATH)/$(TESTSUITE_DIR)/$(TESTSUITE_CONF_GEN)
-TESTSUITE_FAST_GEN_PATH := $(DIST_PATH)/$(TESTSUITE_DIR)/$(TESTSUITE_FAST_GEN)
 TESTSUITE_CONF_OPS_PATH := $(DIST_PATH)/$(TESTSUITE_DIR)/$(TESTSUITE_CONF_OPS)
+TESTSUITE_FAST_GEN_PATH := $(DIST_PATH)/$(TESTSUITE_DIR)/$(TESTSUITE_FAST_GEN)
+TESTSUITE_FAST_OPS_PATH := $(DIST_PATH)/$(TESTSUITE_DIR)/$(TESTSUITE_FAST_OPS)
 
 # The locations of the test suite source directory and the local object
 # directory.
@@ -714,7 +715,7 @@ else
 	@$(LINKER) $(MK_TESTSUITE_OBJS) $(MK_BLIS_LIB) $(LDFLAGS) -o $@
 endif
 
-# A rule to run the testsuite using the normal input.general file.
+# A rule to run the testsuite using the normal input.* files.
 testsuite-run: testsuite-bin
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	./$(TESTSUITE_BIN) -g $(TESTSUITE_CONF_GEN_PATH) \
@@ -728,18 +729,18 @@ else
 	                     > $(TESTSUITE_OUT_FILE)
 endif
 
-# A rule to run the testsuite using the input.general.fast file, which
-# runs with smaller problem sizes but finishes quickly.
+# A rule to run the testsuite using the input.*.fast files, which
+# run a set of tests designed to finish much more quickly.
 testsuite-run-fast: testsuite-bin
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	./$(TESTSUITE_BIN) -g $(TESTSUITE_FAST_GEN_PATH) \
-	                   -o $(TESTSUITE_CONF_OPS_PATH) \
+	                   -o $(TESTSUITE_FAST_OPS_PATH) \
 	                    > $(TESTSUITE_OUT_FILE)
 
 else
 	@echo "Running $(TESTSUITE_BIN) (fast) with output redirected to '$(TESTSUITE_OUT_FILE)'"
 	@./$(TESTSUITE_BIN) -g $(TESTSUITE_FAST_GEN_PATH) \
-	                    -o $(TESTSUITE_CONF_OPS_PATH) \
+	                    -o $(TESTSUITE_FAST_OPS_PATH) \
 	                     > $(TESTSUITE_OUT_FILE)
 endif
 

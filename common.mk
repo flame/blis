@@ -187,8 +187,9 @@ REF_SUF            := ref
 # of its input/configuration files.
 TESTSUITE_NAME     := test_$(BLIS_LIB_BASE_NAME)
 TESTSUITE_CONF_GEN := input.general
-TESTSUITE_FAST_GEN := input.general.fast
 TESTSUITE_CONF_OPS := input.operations
+TESTSUITE_FAST_GEN := input.general.fast
+TESTSUITE_FAST_OPS := input.operations.fast
 TESTSUITE_OUT_FILE := output.testsuite
 
 # CHANGELOG file.
