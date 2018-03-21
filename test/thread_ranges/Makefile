@@ -90,11 +90,11 @@ endif
 #
 
 # BLIS library and header path. This is simply wherever it was installed.
-BLIS_LIB_PATH  := $(INSTALL_PREFIX)/lib
+#BLIS_LIB_PATH  := $(INSTALL_PREFIX)/lib
 BLIS_INC_PATH  := $(INSTALL_PREFIX)/include/blis
 
 # BLIS library.
-BLIS_LIB       := $(BLIS_LIB_PATH)/libblis.a
+#BLIS_LIB       := $(BLIS_LIB_PATH)/libblis.a
 
 
 
@@ -119,6 +119,9 @@ CFLAGS         += -I$(BLIS_INC_PATH) -I$(TEST_SRC_PATH) #-I$(ACML_INC_PATH)
 LINKER         := $(CC)
 LDFLAGS        := #-L/home/00146/field/gnu/gcc-4.8.2/lib64
 LDFLAGS        += -lgfortran -lm -lpthread -fopenmp
+
+# Locate the libblis library to which we will link.
+LIBBLIS_LINK    := $(BUILD_PATH)/$(LIBBLIS_LINK)
 
 
 # Datatype
@@ -162,8 +165,8 @@ test_%.o: test_%.c
 # compatibility layer. This prevents BLIS from inadvertently getting called
 # for the BLAS routines we are trying to test with.
 
-test_ranges.x: test_ranges.o $(BLIS_LIB)
-	$(LINKER) $< $(BLIS_LIB) $(LDFLAGS) -o $@
+test_ranges.x: test_ranges.o $(LIBBLIS_LINK)
+	$(LINKER) $< $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 
 
 # -- Clean rules --

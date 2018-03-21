@@ -155,13 +155,13 @@ endif
 
 
 
-
 #
 # --- Primary makefile variable definitions ------------------------------------
 #
 
-# The base name of the BLIS library that we will build.
-BLIS_LIB_BASE_NAME := libblis
+# Construct the architecture-version string, which will be used to name the
+# library upon installation.
+VERS_CONF          := $(VERSION)-$(CONFIG_NAME)
 
 # All makefile fragments in the tree will have this name.
 FRAGMENT_MK        := .fragment.mk
@@ -183,9 +183,7 @@ KERNEL_SUFS        := c s S
 KERNELS_STR        := kernels
 REF_SUF            := ref
 
-# The names of the testsuite binary executable and related default names
-# of its input/configuration files.
-TESTSUITE_NAME     := test_$(BLIS_LIB_BASE_NAME)
+# The names of the testsuite input/configuration files.
 TESTSUITE_CONF_GEN := input.general
 TESTSUITE_CONF_OPS := input.operations
 TESTSUITE_FAST_GEN := input.general.fast
@@ -206,6 +204,30 @@ CONFIG_PATH        := $(DIST_PATH)/$(CONFIG_DIR)
 FRAME_PATH         := $(DIST_PATH)/$(FRAME_DIR)
 REFKERN_PATH       := $(DIST_PATH)/$(REFKERN_DIR)
 KERNELS_PATH       := $(DIST_PATH)/$(KERNELS_DIR)
+
+
+
+#
+# --- Library paths ------------------------------------------------------------
+#
+
+# The base name of the BLIS library that we will build.
+LIBBLIS_NAME       := libblis
+
+# Construct the base path for the library.
+BASE_LIB_PATH      := ./$(LIB_DIR)/$(CONFIG_NAME)
+
+# Note: These names will be modified later to include the configuration and
+# version strings.
+LIBBLIS_A          := $(LIBBLIS_NAME).a
+LIBBLIS_SO         := $(LIBBLIS_NAME).so
+
+# Append the base library path to the library names.
+#BLIS_LIB_PATH      := $(BASE_LIB_PATH)/$(LIBBLIS_A)
+#BLIS_DLL_PATH      := $(BASE_LIB_PATH)/$(LIBBLIS_SO)
+LIBBLIS_A_PATH      := $(BASE_LIB_PATH)/$(LIBBLIS_A)
+LIBBLIS_SO_PATH     := $(BASE_LIB_PATH)/$(LIBBLIS_SO)
+
 
 
 #
@@ -285,6 +307,15 @@ endif
 # Default flag for creating shared objects.
 SOFLAGS    := -shared
 
+# Decide which library to link to for things like the testsuite. Default
+# to the static library, unless only the shared library was enabled, in
+# which case we use the shared library.
+LIBBLIS_LINK   := $(LIBBLIS_A_PATH)
+ifeq ($(BLIS_ENABLE_SHARED_BUILD),yes)
+ifeq ($(BLIS_ENABLE_STATIC_BUILD),no)
+LIBBLIS_LINK   := $(LIBBLIS_SO_PATH)
+endif
+endif
 
 
 #

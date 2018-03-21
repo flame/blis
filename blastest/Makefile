@@ -110,8 +110,8 @@ endif
 #BLIS_INC_PATH  := $(INSTALL_PREFIX)/include/blis
 
 # BLIS library.
-BLIS_LIB_PATH  := $(BUILD_PATH)/$(LIB_DIR)/$(CONFIG_NAME)
-BLIS_LIB       := $(BLIS_LIB_PATH)/libblis.a
+#BLIS_LIB_PATH  := $(BUILD_PATH)/$(LIB_DIR)/$(CONFIG_NAME)
+#BLIS_LIB       := $(BLIS_LIB_PATH)/libblis.a
 
 # BLAS library path(s). This is where the BLAS libraries reside.
 #BLAS_LIB_PATH  := $(HOME)/flame/lib
@@ -172,6 +172,9 @@ CFLAGS          += -I$(F2C_PATH)
 
 # Suppress warnings about uninitialized functions.
 CFLAGS          += -Wno-maybe-uninitialized -Wno-parentheses
+
+# Locate the libblis library to which we will link.
+LIBBLIS_LINK    := $(BUILD_PATH)/$(LIBBLIS_LINK)
 
 
 
@@ -244,12 +247,12 @@ endif
 
 # first argument: the base name of the BLAS test driver.
 define make-blat-rule
-$(1).x: $(TEST_OBJ_PATH)/$(1).o $(F2C_LIB) $(BLIS_LIB)
+$(1).x: $(TEST_OBJ_PATH)/$(1).o $(F2C_LIB) $(LIBBLIS_LINK)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	$(LINKER) $(TEST_OBJ_PATH)/$(1).o $(F2C_OBJS) $(BLIS_LIB) $(LDFLAGS) -o $$@
+	$(LINKER) $(TEST_OBJ_PATH)/$(1).o $(F2C_OBJS) $(LIBBLIS_LINK) $(LDFLAGS) -o $$@
 else
-	@echo "Linking $$@ against '$(F2C_LIB) $(BLIS_LIB) $(LDFLAGS)'"
-	@$(LINKER) $(TEST_OBJ_PATH)/$(1).o $(F2C_LIB) $(BLIS_LIB) $(LDFLAGS) -o $$@
+	@echo "Linking $$@ against '$(F2C_LIB) $(LIBBLIS_LINK) $(LDFLAGS)'"
+	@$(LINKER) $(TEST_OBJ_PATH)/$(1).o $(F2C_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $$@
 endif
 endef
 

@@ -1382,7 +1382,7 @@ main()
 		| sed -e "s/@install_prefix@/${install_prefix_esc}/g" \
 		| sed -e "s/@enable_verbose@/${enable_verbose}/g" \
 		| sed -e "s/@enable_static@/${enable_static}/g" \
-		| sed -e "s/@enable_dynamic@/${enable_shared}/g" \
+		| sed -e "s/@enable_shared@/${enable_shared}/g" \
 		| sed -e "s/@threading_model@/${threading_model}/g" \
 		| sed -e "s/@enable_blas2blis@/${enable_blas2blis}/g" \
 		| sed -e "s/@enable_cblas@/${enable_cblas}/g" \

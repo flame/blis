@@ -93,7 +93,7 @@ endif
 # --- Main target variable definitions -----------------------------------------
 #
 
-# --- Object/library paths ---
+# --- Object file paths ---
 
 # Construct the base object file path for the current configuration.
 BASE_OBJ_PATH          := ./$(OBJ_DIR)/$(CONFIG_NAME)
@@ -106,22 +106,22 @@ BASE_OBJ_REFKERN_PATH  := $(BASE_OBJ_PATH)/$(REFKERN_DIR)
 BASE_OBJ_KERNELS_PATH  := $(BASE_OBJ_PATH)/$(KERNELS_DIR)
 
 # Construct the base path for the library.
-BASE_LIB_PATH          := ./$(LIB_DIR)/$(CONFIG_NAME)
+#BASE_LIB_PATH          := ./$(LIB_DIR)/$(CONFIG_NAME)
 
 # Construct the architecture-version string, which will be used to name the
 # library upon installation.
-VERS_CONF              := $(VERSION)-$(CONFIG_NAME)
+#VERS_CONF              := $(VERSION)-$(CONFIG_NAME)
 
 # --- Library names ---
 
 # Note: These names will be modified later to include the configuration and
 # version strings.
-BLIS_LIB_NAME          := $(BLIS_LIB_BASE_NAME).a
-BLIS_DLL_NAME          := $(BLIS_LIB_BASE_NAME).so
+#BLIS_LIB_NAME          := $(LIBBLIS_NAME).a
+#BLIS_DLL_NAME          := $(LIBBLIS_NAME).so
 
 # Append the base library path to the library names.
-BLIS_LIB_PATH          := $(BASE_LIB_PATH)/$(BLIS_LIB_NAME)
-BLIS_DLL_PATH          := $(BASE_LIB_PATH)/$(BLIS_DLL_NAME)
+#BLIS_LIB_PATH          := $(BASE_LIB_PATH)/$(BLIS_LIB_NAME)
+#BLIS_DLL_PATH          := $(BASE_LIB_PATH)/$(BLIS_DLL_NAME)
 
 # --- BLIS framework object variable names ---
 
@@ -132,23 +132,23 @@ MK_KERNELS_OBJS        :=
 
 # --- Define install target names for static libraries ---
 
-MK_BLIS_LIB                  := $(BLIS_LIB_PATH)
-MK_BLIS_LIB_INST             := $(patsubst $(BASE_LIB_PATH)/%.a, \
-                                           $(INSTALL_PREFIX)/lib/%.a, \
-                                           $(MK_BLIS_LIB))
-MK_BLIS_LIB_INST_W_VERS_CONF := $(patsubst $(BASE_LIB_PATH)/%.a, \
-                                           $(INSTALL_PREFIX)/lib/%-$(VERS_CONF).a, \
-                                           $(MK_BLIS_LIB))
+#MK_BLIS_LIB                  := $(LIBBLIS_A_PATH)
+LIBBLIS_A_INST              := $(patsubst $(BASE_LIB_PATH)/%.a, \
+                                          $(INSTALL_PREFIX)/lib/%.a, \
+                                          $(LIBBLIS_A_PATH))
+LIBBLIS_A_INST_W_VERS_CONF  := $(patsubst $(BASE_LIB_PATH)/%.a, \
+                                          $(INSTALL_PREFIX)/lib/%-$(VERS_CONF).a, \
+                                          $(LIBBLIS_A_PATH))
 
 # --- Define install target names for shared libraries ---
 
-MK_BLIS_DLL                  := $(BLIS_DLL_PATH)
-MK_BLIS_DLL_INST             := $(patsubst $(BASE_LIB_PATH)/%.so, \
-                                           $(INSTALL_PREFIX)/lib/%.so, \
-                                           $(MK_BLIS_DLL))
-MK_BLIS_DLL_INST_W_VERS_CONF := $(patsubst $(BASE_LIB_PATH)/%.so, \
-                                           $(INSTALL_PREFIX)/lib/%-$(VERS_CONF).so, \
-                                           $(MK_BLIS_DLL))
+#MK_BLIS_DLL                  := $(LIBBLIS_SO_PATH)
+LIBBLIS_SO_INST             := $(patsubst $(BASE_LIB_PATH)/%.so, \
+                                          $(INSTALL_PREFIX)/lib/%.so, \
+                                          $(LIBBLIS_SO_PATH))
+LIBBLIS_SO_INST_W_VERS_CONF := $(patsubst $(BASE_LIB_PATH)/%.so, \
+                                          $(INSTALL_PREFIX)/lib/%-$(VERS_CONF).so, \
+                                          $(LIBBLIS_SO_PATH))
 
 # --- Determine which libraries to build ---
 
@@ -157,15 +157,15 @@ MK_LIBS_INST                      :=
 MK_LIBS_INST_W_VERS_CONF          :=
 
 ifeq ($(BLIS_ENABLE_STATIC_BUILD),yes)
-MK_LIBS                           += $(MK_BLIS_LIB)
-MK_LIBS_INST                      += $(MK_BLIS_LIB_INST)
-MK_LIBS_INST_W_VERS_CONF          += $(MK_BLIS_LIB_INST_W_VERS_CONF)
+MK_LIBS                           += $(LIBBLIS_A_PATH)
+MK_LIBS_INST                      += $(LIBBLIS_A_INST)
+MK_LIBS_INST_W_VERS_CONF          += $(LIBBLIS_A_INST_W_VERS_CONF)
 endif
 
-ifeq ($(BLIS_ENABLE_DYNAMIC_BUILD),yes)
-MK_LIBS                           += $(MK_BLIS_DLL)
-MK_LIBS_INST                      += $(MK_BLIS_DLL_INST)
-MK_LIBS_INST_W_VERS_CONF          += $(MK_BLIS_DLL_INST_W_VERS_CONF)
+ifeq ($(BLIS_ENABLE_SHARED_BUILD),yes)
+MK_LIBS                           += $(LIBBLIS_SO_PATH)
+MK_LIBS_INST                      += $(LIBBLIS_SO_INST)
+MK_LIBS_INST_W_VERS_CONF          += $(LIBBLIS_SO_INST_W_VERS_CONF)
 endif
 
 # Strip leading, internal, and trailing whitespace.
@@ -379,7 +379,7 @@ MK_TESTSUITE_OBJS       := $(sort \
                             )
 
 # The test suite binary executable filename.
-TESTSUITE_BIN           := test_libblis.x
+TESTSUITE_BIN           := test_$(LIBBLIS_NAME).x
 
 # The location of the script that checks the BLIS testsuite output.
 TESTSUITE_CHECK         := $(DIST_PATH)/$(BUILD_DIR)/check-blistest.sh
@@ -395,8 +395,8 @@ TESTSUITE_CHECK         := $(DIST_PATH)/$(BUILD_DIR)/check-blistest.sh
 # archive for the current version/configuration and its symlink. We consider
 # this remaining set of libraries to be "old" and eligible for removal upon
 # running of the uninstall-old target.
-UNINSTALL_LIBS    := $(shell $(FIND) $(INSTALL_PREFIX)/lib/ -name "$(BLIS_LIB_BASE_NAME)-*.a" 2> /dev/null | $(GREP) -v "$(BLIS_LIB_BASE_NAME)-$(VERS_CONF).a" | $(GREP) -v $(BLIS_LIB_NAME))
-UNINSTALL_LIBS    += $(shell $(FIND) $(INSTALL_PREFIX)/lib/ -name "$(BLIS_LIB_BASE_NAME)-*.so" 2> /dev/null | $(GREP) -v "$(BLIS_LIB_BASE_NAME)-$(VERS_CONF).so" | $(GREP) -v $(BLIS_LIB_NAME))
+UNINSTALL_LIBS    := $(shell $(FIND) $(INSTALL_PREFIX)/lib/ -name "$(LIBBLIS_NAME)-*.a" 2> /dev/null | $(GREP) -v "$(LIBBLIS_NAME)-$(VERS_CONF).a" | $(GREP) -v $(LIBBLIS_A))
+UNINSTALL_LIBS    += $(shell $(FIND) $(INSTALL_PREFIX)/lib/ -name "$(LIBBLIS_NAME)-*.so" 2> /dev/null | $(GREP) -v "$(LIBBLIS_NAME)-$(VERS_CONF).so" | $(GREP) -v $(LIBBLIS_SO))
 
 # This shell command grabs all files named "*.h" that are not blis.h or cblas.h
 # in the installation directory. We consider this set of headers to be "old" and
@@ -562,6 +562,7 @@ $(foreach kset, $(KERNEL_LIST), $(eval $(call make-kernels-rule,$(kset),$(call g
 $(foreach kset, $(KERNEL_LIST), $(eval $(call make-kernels-rule,$(kset),$(call get-config-for-kset,$(kset)),S)))
 
 # FGVZ: Alternate way of expressing the above:
+# NOTE: KERNEL_SUFS is already defined in common.mk as "c s S".
 #$(foreach suf,  $(KERNEL_SUFS), \
 #$(foreach kset, $(KERNEL_LIST), $(eval $(call make-kernels-rule,$(kset),$(suf)))))
 
@@ -573,7 +574,7 @@ libblis: check-env $(MK_LIBS)
 
 # --- Static library archiver rules ---
 
-$(MK_BLIS_LIB): $(MK_BLIS_OBJS)
+$(LIBBLIS_A_PATH): $(MK_BLIS_OBJS)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	$(AR) $(ARFLAGS) $@ $?
 	$(RANLIB) $@
@@ -586,7 +587,7 @@ endif
 
 # --- Dynamic library linker rules ---
 
-$(MK_BLIS_DLL): $(MK_BLIS_OBJS)
+$(LIBBLIS_SO_PATH): $(MK_BLIS_OBJS)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	$(LINKER) $(SOFLAGS) $(LDFLAGS) -o $@ $?
 else 
@@ -636,12 +637,12 @@ endif
 
 # first argument: the base name of the BLAS test driver.
 define make-blat-rule
-$(BASE_OBJ_BLASTEST_PATH)/$(1).x: $(BASE_OBJ_BLASTEST_PATH)/$(1).o $(BLASTEST_F2C_LIB) $(MK_BLIS_LIB)
+$(BASE_OBJ_BLASTEST_PATH)/$(1).x: $(BASE_OBJ_BLASTEST_PATH)/$(1).o $(BLASTEST_F2C_LIB) $(LIBBLIS_LINK)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	$(LINKER) $(BASE_OBJ_BLASTEST_PATH)/$(1).o $(BLASTEST_F2C_LIB) $(MK_BLIS_LIB) $(LDFLAGS) -o $$@
+	$(LINKER) $(BASE_OBJ_BLASTEST_PATH)/$(1).o $(BLASTEST_F2C_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $$@
 else
-	@echo "Linking $$(@F) against '$(notdir $(BLASTEST_F2C_LIB)) $(MK_BLIS_LIB) $(LDFLAGS)'"
-	@$(LINKER) $(BASE_OBJ_BLASTEST_PATH)/$(1).o $(BLASTEST_F2C_LIB) $(MK_BLIS_LIB) $(LDFLAGS) -o $$@
+	@echo "Linking $$(@F) against '$(notdir $(BLASTEST_F2C_LIB)) $(LIBBLIS_LINK) $(LDFLAGS)'"
+	@$(LINKER) $(BASE_OBJ_BLASTEST_PATH)/$(1).o $(BLASTEST_F2C_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $$@
 endif
 endef
 
@@ -707,12 +708,12 @@ else
 endif
 
 # Testsuite binary rule.
-$(TESTSUITE_BIN): $(MK_TESTSUITE_OBJS) $(MK_BLIS_LIB)
+$(TESTSUITE_BIN): $(MK_TESTSUITE_OBJS) $(LIBBLIS_LINK)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	$(LINKER) $(MK_TESTSUITE_OBJS) $(MK_BLIS_LIB) $(LDFLAGS) -o $@
+	$(LINKER) $(MK_TESTSUITE_OBJS) $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 else
-	@echo "Linking $@ against '$(MK_BLIS_LIB) $(LDFLAGS)'"
-	@$(LINKER) $(MK_TESTSUITE_OBJS) $(MK_BLIS_LIB) $(LDFLAGS) -o $@
+	@echo "Linking $@ against '$(LIBBLIS_LINK) $(LDFLAGS)'"
+	@$(LINKER) $(MK_TESTSUITE_OBJS) $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 endif
 
 # A rule to run the testsuite using the normal input.* files.
@@ -840,7 +841,7 @@ showconfig: check-env
 	@echo "enable BLAS API?       $(BLIS_ENABLE_BLAS2BLIS)"
 	@echo "enable CBLAS API?      $(BLIS_ENABLE_CBLAS)"
 	@echo "build static library?  $(BLIS_ENABLE_STATIC_BUILD)"
-	@echo "build shared library?  $(BLIS_ENABLE_DYNAMIC_BUILD)"
+	@echo "build shared library?  $(BLIS_ENABLE_SHARED_BUILD)"
 
 
 # --- Clean rules ---
@@ -873,15 +874,15 @@ endif
 cleanlib: check-env
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	- $(FIND) $(BASE_OBJ_PATH) -name "*.o" | $(XARGS) $(RM_F)
-	- $(FIND) $(BASE_LIB_PATH) -name "*.a" | $(XARGS) $(RM_F)
-	- $(FIND) $(BASE_LIB_PATH) -name "*.so" | $(XARGS) $(RM_F)
+	- $(RM_F) $(LIBBLIS_A_PATH)
+	- $(RM_F) $(LIBBLIS_SO_PATH)
 else
 	@echo "Removing .o files from $(BASE_OBJ_PATH)."
 	@- $(FIND) $(BASE_OBJ_PATH) -name "*.o" | $(XARGS) $(RM_F)
-	@echo "Removing .a files from $(BASE_LIB_PATH)."
-	@- $(FIND) $(BASE_LIB_PATH) -name "*.a" | $(XARGS) $(RM_F)
-	@echo "Removing .so files from $(BASE_LIB_PATH)."
-	@- $(FIND) $(BASE_LIB_PATH) -name "*.so" | $(XARGS) $(RM_F)
+	@echo "Removing $(LIBBLIS_A_PATH)."
+	@- $(RM_F) $(LIBBLIS_A_PATH)
+	@echo "Removing $(LIBBLIS_SO_PATH)."
+	@- $(RM_F) $(LIBBLIS_SO_PATH)
 endif
 
 cleantest: cleanblastest cleanblistest

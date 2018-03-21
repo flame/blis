@@ -90,11 +90,11 @@ endif
 #
 
 # BLIS library and header path. This is simply wherever it was installed.
-BLIS_LIB_PATH  := $(INSTALL_PREFIX)/lib
+#BLIS_LIB_PATH  := $(INSTALL_PREFIX)/lib
 BLIS_INC_PATH  := $(INSTALL_PREFIX)/include/blis
 
 # BLIS library.
-BLIS_LIB       := $(BLIS_LIB_PATH)/libblis.a
+#BLIS_LIB       := $(BLIS_LIB_PATH)/libblis.a
 
 # BLAS library path(s). This is where the BLAS libraries reside.
 BLAS_LIB_PATH  := $(HOME)/flame/lib
@@ -148,6 +148,11 @@ CFLAGS         += -I$(BLIS_INC_PATH) -I$(TEST_SRC_PATH)
 LINKER         := $(CC)
 LDFLAGS        := -L/home/00146/field/gnu/gcc-4.8.2/lib64
 LDFLAGS        += -lgfortran -lm -lpthread
+
+# Locate the libblis library to which we will link.
+LIBBLIS_LINK    := $(BUILD_PATH)/$(LIBBLIS_LINK)
+
+
 
 #
 # --- Targets/rules ------------------------------------------------------------
@@ -231,107 +236,107 @@ $(TEST_OBJ_PATH)/%.o: $(TEST_SRC_PATH)/%.c
 
 # BLIS rules
 test_blis01:
-	$(CC) $(CFLAGS) -DNBLIS=1  $(TEST_SIZES_SRC)              $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLIS=1  $(TEST_SIZES_SRC)              $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_blis02:
-	$(CC) $(CFLAGS) -DNBLIS=2  $(TEST_SIZES_SRC)              $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLIS=2  $(TEST_SIZES_SRC)              $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_blis03:
-	$(CC) $(CFLAGS) -DNBLIS=3  $(TEST_SIZES_SRC)              $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLIS=3  $(TEST_SIZES_SRC)              $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_blis04:
-	$(CC) $(CFLAGS) -DNBLIS=4  $(TEST_SIZES_SRC)              $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLIS=4  $(TEST_SIZES_SRC)              $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_blis05:
-	$(CC) $(CFLAGS) -DNBLIS=5  $(TEST_SIZES_SRC)              $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLIS=5  $(TEST_SIZES_SRC)              $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_blis06:
-	$(CC) $(CFLAGS) -DNBLIS=6  $(TEST_SIZES_SRC)              $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLIS=6  $(TEST_SIZES_SRC)              $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_blis07:
-	$(CC) $(CFLAGS) -DNBLIS=7  $(TEST_SIZES_SRC)              $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLIS=7  $(TEST_SIZES_SRC)              $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_blis08:
-	$(CC) $(CFLAGS) -DNBLIS=8  $(TEST_SIZES_SRC)              $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLIS=8  $(TEST_SIZES_SRC)              $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_blis09:
-	$(CC) $(CFLAGS) -DNBLIS=9  $(TEST_SIZES_SRC)              $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLIS=9  $(TEST_SIZES_SRC)              $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_blis10:
-	$(CC) $(CFLAGS) -DNBLIS=10 $(TEST_SIZES_SRC)              $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLIS=10 $(TEST_SIZES_SRC)              $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_blis11:
-	$(CC) $(CFLAGS) -DNBLIS=11 $(TEST_SIZES_SRC)              $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLIS=11 $(TEST_SIZES_SRC)              $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_blis12:
-	$(CC) $(CFLAGS) -DNBLIS=12 $(TEST_SIZES_SRC)              $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLIS=12 $(TEST_SIZES_SRC)              $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 
 # OpenBLAS rules
 test_oblas01:
-	$(CC) $(CFLAGS) -DNBLAS=1  $(TEST_SIZES_SRC) $(OBLAS_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLAS=1  $(TEST_SIZES_SRC) $(OBLAS_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_oblas02:
-	$(CC) $(CFLAGS) -DNBLAS=2  $(TEST_SIZES_SRC) $(OBLAS_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLAS=2  $(TEST_SIZES_SRC) $(OBLAS_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_oblas03:
-	$(CC) $(CFLAGS) -DNBLAS=3  $(TEST_SIZES_SRC) $(OBLAS_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLAS=3  $(TEST_SIZES_SRC) $(OBLAS_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_oblas04:
-	$(CC) $(CFLAGS) -DNBLAS=4  $(TEST_SIZES_SRC) $(OBLAS_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLAS=4  $(TEST_SIZES_SRC) $(OBLAS_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_oblas05:
-	$(CC) $(CFLAGS) -DNBLAS=5  $(TEST_SIZES_SRC) $(OBLAS_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLAS=5  $(TEST_SIZES_SRC) $(OBLAS_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_oblas06:
-	$(CC) $(CFLAGS) -DNBLAS=6  $(TEST_SIZES_SRC) $(OBLAS_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLAS=6  $(TEST_SIZES_SRC) $(OBLAS_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_oblas07:
-	$(CC) $(CFLAGS) -DNBLAS=7  $(TEST_SIZES_SRC) $(OBLAS_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLAS=7  $(TEST_SIZES_SRC) $(OBLAS_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_oblas08:
-	$(CC) $(CFLAGS) -DNBLAS=8  $(TEST_SIZES_SRC) $(OBLAS_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLAS=8  $(TEST_SIZES_SRC) $(OBLAS_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_oblas09:
-	$(CC) $(CFLAGS) -DNBLAS=9  $(TEST_SIZES_SRC) $(OBLAS_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLAS=9  $(TEST_SIZES_SRC) $(OBLAS_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_oblas10:
-	$(CC) $(CFLAGS) -DNBLAS=10 $(TEST_SIZES_SRC) $(OBLAS_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLAS=10 $(TEST_SIZES_SRC) $(OBLAS_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_oblas11:
-	$(CC) $(CFLAGS) -DNBLAS=11 $(TEST_SIZES_SRC) $(OBLAS_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLAS=11 $(TEST_SIZES_SRC) $(OBLAS_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_oblas12:
-	$(CC) $(CFLAGS) -DNBLAS=12 $(TEST_SIZES_SRC) $(OBLAS_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLAS=12 $(TEST_SIZES_SRC) $(OBLAS_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 
 # ATLAS BLAS rules
 test_ablas01:
-	$(CC) $(CFLAGS) -DNBLAS=1  $(TEST_SIZES_SRC) $(ABLAS_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLAS=1  $(TEST_SIZES_SRC) $(ABLAS_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_ablas02:
-	$(CC) $(CFLAGS) -DNBLAS=2  $(TEST_SIZES_SRC) $(ABLAS_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLAS=2  $(TEST_SIZES_SRC) $(ABLAS_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_ablas03:
-	$(CC) $(CFLAGS) -DNBLAS=3  $(TEST_SIZES_SRC) $(ABLAS_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLAS=3  $(TEST_SIZES_SRC) $(ABLAS_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_ablas04:
-	$(CC) $(CFLAGS) -DNBLAS=4  $(TEST_SIZES_SRC) $(ABLAS_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLAS=4  $(TEST_SIZES_SRC) $(ABLAS_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_ablas05:
-	$(CC) $(CFLAGS) -DNBLAS=5  $(TEST_SIZES_SRC) $(ABLAS_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLAS=5  $(TEST_SIZES_SRC) $(ABLAS_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_ablas06:
-	$(CC) $(CFLAGS) -DNBLAS=6  $(TEST_SIZES_SRC) $(ABLAS_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLAS=6  $(TEST_SIZES_SRC) $(ABLAS_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_ablas07:
-	$(CC) $(CFLAGS) -DNBLAS=7  $(TEST_SIZES_SRC) $(ABLAS_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLAS=7  $(TEST_SIZES_SRC) $(ABLAS_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_ablas08:
-	$(CC) $(CFLAGS) -DNBLAS=8  $(TEST_SIZES_SRC) $(ABLAS_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLAS=8  $(TEST_SIZES_SRC) $(ABLAS_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_ablas09:
-	$(CC) $(CFLAGS) -DNBLAS=9  $(TEST_SIZES_SRC) $(ABLAS_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLAS=9  $(TEST_SIZES_SRC) $(ABLAS_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_ablas10:
-	$(CC) $(CFLAGS) -DNBLAS=10 $(TEST_SIZES_SRC) $(ABLAS_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLAS=10 $(TEST_SIZES_SRC) $(ABLAS_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_ablas11:
-	$(CC) $(CFLAGS) -DNBLAS=11 $(TEST_SIZES_SRC) $(ABLAS_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLAS=11 $(TEST_SIZES_SRC) $(ABLAS_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_ablas12:
-	$(CC) $(CFLAGS) -DNBLAS=12 $(TEST_SIZES_SRC) $(ABLAS_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLAS=12 $(TEST_SIZES_SRC) $(ABLAS_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 
 # MKL BLAS rules
 test_mblas01:
-	$(CC) $(CFLAGS) -DNBLAS=1  $(TEST_SIZES_SRC) $(MBLAS_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLAS=1  $(TEST_SIZES_SRC) $(MBLAS_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_mblas02:
-	$(CC) $(CFLAGS) -DNBLAS=2  $(TEST_SIZES_SRC) $(MBLAS_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLAS=2  $(TEST_SIZES_SRC) $(MBLAS_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_mblas03:
-	$(CC) $(CFLAGS) -DNBLAS=3  $(TEST_SIZES_SRC) $(MBLAS_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLAS=3  $(TEST_SIZES_SRC) $(MBLAS_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_mblas04:
-	$(CC) $(CFLAGS) -DNBLAS=4  $(TEST_SIZES_SRC) $(MBLAS_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLAS=4  $(TEST_SIZES_SRC) $(MBLAS_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_mblas05:
-	$(CC) $(CFLAGS) -DNBLAS=5  $(TEST_SIZES_SRC) $(MBLAS_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLAS=5  $(TEST_SIZES_SRC) $(MBLAS_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_mblas06:
-	$(CC) $(CFLAGS) -DNBLAS=6  $(TEST_SIZES_SRC) $(MBLAS_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLAS=6  $(TEST_SIZES_SRC) $(MBLAS_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_mblas07:
-	$(CC) $(CFLAGS) -DNBLAS=7  $(TEST_SIZES_SRC) $(MBLAS_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLAS=7  $(TEST_SIZES_SRC) $(MBLAS_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_mblas08:
-	$(CC) $(CFLAGS) -DNBLAS=8  $(TEST_SIZES_SRC) $(MBLAS_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLAS=8  $(TEST_SIZES_SRC) $(MBLAS_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_mblas09:
-	$(CC) $(CFLAGS) -DNBLAS=9  $(TEST_SIZES_SRC) $(MBLAS_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLAS=9  $(TEST_SIZES_SRC) $(MBLAS_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_mblas10:
-	$(CC) $(CFLAGS) -DNBLAS=10 $(TEST_SIZES_SRC) $(MBLAS_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLAS=10 $(TEST_SIZES_SRC) $(MBLAS_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_mblas11:
-	$(CC) $(CFLAGS) -DNBLAS=11 $(TEST_SIZES_SRC) $(MBLAS_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLAS=11 $(TEST_SIZES_SRC) $(MBLAS_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 test_mblas12:
-	$(CC) $(CFLAGS) -DNBLAS=12 $(TEST_SIZES_SRC) $(MBLAS_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@.x
+	$(CC) $(CFLAGS) -DNBLAS=12 $(TEST_SIZES_SRC) $(MBLAS_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@.x
 
 
 # -- Clean rules --

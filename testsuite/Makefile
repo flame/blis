@@ -109,8 +109,8 @@ endif
 #BLIS_INC_PATH  := $(INSTALL_PREFIX)/include/blis
 
 # BLIS library.
-BLIS_LIB_PATH  := $(BUILD_PATH)/$(LIB_DIR)/$(CONFIG_NAME)
-BLIS_LIB       := $(BLIS_LIB_PATH)/libblis.a
+#BLIS_LIB_PATH  := $(BUILD_PATH)/$(LIB_DIR)/$(CONFIG_NAME)
+#BLIS_LIB       := $(BLIS_LIB_PATH)/libblis.a
 
 # BLAS library path(s). This is where the BLAS libraries reside.
 #BLAS_LIB_PATH  := $(HOME)/flame/lib
@@ -149,6 +149,8 @@ CFLAGS          := $(call get-frame-cflags-for,$(CONFIG_NAME))
 #CFLAGS          += -I$(BLIS_INC_PATH) -I$(TEST_SRC_PATH)
 CFLAGS          += -I$(TEST_SRC_PATH)
 
+# Locate the libblis library to which we will link.
+LIBBLIS_LINK    := $(BUILD_PATH)/$(LIBBLIS_LINK)
 
 
 #
@@ -184,7 +186,7 @@ endif
 
 # --Object file rules --
 
-$(TEST_OBJ_PATH)/%.o: $(TEST_SRC_PATH)/%.c $(BLIS_LIB)
+$(TEST_OBJ_PATH)/%.o: $(TEST_SRC_PATH)/%.c $(LIBBLIS_LINK)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	$(CC) $(CFLAGS) -c $< -o $@
 else
@@ -195,12 +197,12 @@ endif
 
 # -- Executable file rules --
 
-$(TEST_BIN): $(TEST_OBJS) $(BLIS_LIB)
+$(TEST_BIN): $(TEST_OBJS) $(LIBBLIS_LINK)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	$(LINKER) $(TEST_OBJS) $(BLIS_LIB) $(LDFLAGS) -o $@
+	$(LINKER) $(TEST_OBJS) $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 else
-	@echo "Linking $@ against '$(BLIS_LIB) $(LDFLAGS)'"
-	@$(LINKER) $(TEST_OBJS) $(BLIS_LIB) $(LDFLAGS) -o $@
+	@echo "Linking $@ against '$(LIBBLIS_LINK) $(LDFLAGS)'"
+	@$(LINKER) $(TEST_OBJS) $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 endif
 
 # -- Test run rules --

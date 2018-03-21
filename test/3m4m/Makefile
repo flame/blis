@@ -91,11 +91,11 @@ endif
 #
 
 # BLIS library and header path. This is simply wherever it was installed.
-BLIS_LIB_PATH  := $(INSTALL_PREFIX)/lib
+#BLIS_LIB_PATH  := $(INSTALL_PREFIX)/lib
 BLIS_INC_PATH  := $(INSTALL_PREFIX)/include/blis
 
 # BLIS library.
-BLIS_LIB       := $(BLIS_LIB_PATH)/libblis.a
+#BLIS_LIB       := $(BLIS_LIB_PATH)/libblis.a
 
 # BLAS library path(s). This is where the BLAS libraries reside.
 HOME_LIB_PATH  := $(HOME)/flame/lib
@@ -163,6 +163,9 @@ CFLAGS         += -I$(BLIS_INC_PATH) -I$(TEST_SRC_PATH) #-I$(ACML_INC_PATH)
 LINKER         := $(CC)
 LDFLAGS        := #-L/home/00146/field/gnu/gcc-4.8.2/lib64
 LDFLAGS        += -lgfortran -lm -lrt -lpthread -fopenmp
+
+# Locate the libblis library to which we will link.
+LIBBLIS_LINK    := $(BUILD_PATH)/$(LIBBLIS_LINK)
 
 
 # Datatype
@@ -500,29 +503,29 @@ test_c%_acml_mt.o: test_%.c
 # compatibility layer. This prevents BLIS from inadvertently getting called
 # for the BLAS routines we are trying to test with.
 
-test_%_openblas_st.x: test_%_openblas_st.o $(BLIS_LIB)
-	$(LINKER) $<  $(OPENBLAS_LIB)  $(BLIS_LIB) $(LDFLAGS) -o $@
+test_%_openblas_st.x: test_%_openblas_st.o $(LIBBLIS_LINK)
+	$(LINKER) $<  $(OPENBLAS_LIB)  $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 
-test_%_openblas_mt.x: test_%_openblas_mt.o $(BLIS_LIB)
-	$(LINKER) $<  $(OPENBLASP_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@
+test_%_openblas_mt.x: test_%_openblas_mt.o $(LIBBLIS_LINK)
+	$(LINKER) $<  $(OPENBLASP_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 
-test_%_mkl_st.x: test_%_mkl_st.o $(BLIS_LIB)
-	$(LINKER) $<  $(MKL_LIB)       $(BLIS_LIB) $(LDFLAGS) -o $@
+test_%_mkl_st.x: test_%_mkl_st.o $(LIBBLIS_LINK)
+	$(LINKER) $<  $(MKL_LIB)       $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 
-test_%_mkl_mt.x: test_%_mkl_mt.o $(BLIS_LIB)
-	$(LINKER) $<  $(MKLP_LIB)      $(BLIS_LIB) $(LDFLAGS) -o $@
+test_%_mkl_mt.x: test_%_mkl_mt.o $(LIBBLIS_LINK)
+	$(LINKER) $<  $(MKLP_LIB)      $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 
-test_%_acml_st.x: test_%_acml_st.o $(BLIS_LIB)
-	$(LINKER) $<  $(ACML_LIB)      $(BLIS_LIB) $(LDFLAGS) -o $@
+test_%_acml_st.x: test_%_acml_st.o $(LIBBLIS_LINK)
+	$(LINKER) $<  $(ACML_LIB)      $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 
-test_%_acml_mt.x: test_%_acml_mt.o $(BLIS_LIB)
-	$(LINKER) $<  $(ACMLP_LIB)     $(BLIS_LIB) $(LDFLAGS) -o $@
+test_%_acml_mt.x: test_%_acml_mt.o $(LIBBLIS_LINK)
+	$(LINKER) $<  $(ACMLP_LIB)     $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 
-test_%_blis_st.x: test_%_blis_st.o $(BLIS_LIB)
-	$(LINKER) $<                   $(BLIS_LIB) $(LDFLAGS) -o $@
+test_%_blis_st.x: test_%_blis_st.o $(LIBBLIS_LINK)
+	$(LINKER) $<                   $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 
-test_%_blis_mt.x: test_%_blis_mt.o $(BLIS_LIB)
-	$(LINKER) $<                   $(BLIS_LIB) $(LDFLAGS) -o $@
+test_%_blis_mt.x: test_%_blis_mt.o $(LIBBLIS_LINK)
+	$(LINKER) $<                   $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 
 
 # -- Clean rules --

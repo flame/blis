@@ -91,11 +91,11 @@ endif
 #
 
 # BLIS library and header path. This is simply wherever it was installed.
-BLIS_LIB_PATH  := $(INSTALL_PREFIX)/lib
+#BLIS_LIB_PATH  := $(INSTALL_PREFIX)/lib
 BLIS_INC_PATH  := $(INSTALL_PREFIX)/include/blis
 
 # BLIS library.
-BLIS_LIB       := $(BLIS_LIB_PATH)/libblis.a
+#BLIS_LIB       := $(BLIS_LIB_PATH)/libblis.a
 
 # BLAS library path(s). This is where the BLAS libraries reside.
 BLAS_LIB_PATH  := $(HOME)/flame/lib
@@ -151,6 +151,9 @@ CFLAGS         += -I$(BLIS_INC_PATH) -I$(TEST_SRC_PATH)
 LINKER         := $(CC)
 LDFLAGS        := #-L/home/00146/field/gnu/gcc-4.8.2/lib64
 LDFLAGS        += -lgfortran -lm -lpthread -fopenmp
+
+# Locate the libblis library to which we will link.
+LIBBLIS_LINK    := $(BUILD_PATH)/$(LIBBLIS_LINK)
 
 
 
@@ -302,23 +305,23 @@ test_%_blis.o: test_%.c
 # compatibility layer. This prevents BLIS from inadvertently getting called
 # for the BLAS routines we are trying to test with.
 
-test_%_openblas.x: test_%_openblas.o $(BLIS_LIB)
-	$(LINKER) $<             $(OPENBLAS_LIB) $(BLIS_LIB) $(LDFLAGS) -o $@
+test_%_openblas.x: test_%_openblas.o $(LIBBLIS_LINK)
+	$(LINKER) $<             $(OPENBLAS_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 
-test_%_atlas.x: test_%_atlas.o $(BLIS_LIB)
-	$(LINKER) $<             $(ATLAS_LIB)    $(BLIS_LIB) $(LDFLAGS) -o $@
+test_%_atlas.x: test_%_atlas.o $(LIBBLIS_LINK)
+	$(LINKER) $<             $(ATLAS_LIB)    $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 
-test_%_mkl.x: test_%_mkl.o $(BLIS_LIB)
-	$(LINKER) $<             $(MKL_LIB)      $(BLIS_LIB) $(LDFLAGS) -o $@
+test_%_mkl.x: test_%_mkl.o $(LIBBLIS_LINK)
+	$(LINKER) $<             $(MKL_LIB)      $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 
-test_%_essl.x: test_%_essl.o $(BLIS_LIB)
-	$(LINKER) $<             $(ESSL_LIB)     $(BLIS_LIB) $(LDFLAGS) -o $@
+test_%_essl.x: test_%_essl.o $(LIBBLIS_LINK)
+	$(LINKER) $<             $(ESSL_LIB)     $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 
-test_%_mac.x: test_%_mac.o $(BLIS_LIB)
-	$(LINKER) $<             $(MAC_LIB)      $(BLIS_LIB) $(LDFLAGS) -o $@
+test_%_mac.x: test_%_mac.o $(LIBBLIS_LINK)
+	$(LINKER) $<             $(MAC_LIB)      $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 
-test_%_blis.x: test_%_blis.o $(BLIS_LIB)
-	$(LINKER) $<                             $(BLIS_LIB) $(LDFLAGS) -o $@
+test_%_blis.x: test_%_blis.o $(LIBBLIS_LINK)
+	$(LINKER) $<                             $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 
 
 # -- Clean rules --
