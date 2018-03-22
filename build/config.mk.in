@@ -95,5 +95,8 @@ BLIS_ENABLE_SHARED_BUILD        := @enable_shared@
 BLIS_ENABLE_BLAS2BLIS := @enable_blas2blis@
 BLIS_ENABLE_CBLAS     := @enable_cblas@
 
+# Whether libblis will depend on libmemkind for certain memory allocations.
+BLIS_ENABLE_MEMKIND   := @enable_memkind@
+
 # end of ifndef CONFIG_MK_INCLUDED conditional block
 endif

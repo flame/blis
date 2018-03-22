@@ -142,6 +142,17 @@ print_usage()
 	echo "                 compatibility layer. This automatically enables the"
 	echo "                 BLAS compatibility layer as well."
 	echo " "
+	echo "   --with-memkind, --without-memkind"
+	echo " "
+	echo "                 Forcibly enable or disable the use of libmemkind's"
+	echo "                 hbw_malloc() and hbw_free() as substitutes for malloc()"
+	echo "                 and free(), respectively, when allocating memory for"
+	echo "                 BLIS's memory pools, which are used to manage buffers"
+	echo "                 into which matrices are packed. The default behavior"
+	echo "                 for this option is environment-dependent; if configure"
+	echo "                 detects the presence of libmemkind, libmemkind is used"
+	echo "                 by default, and otherwise it is not used by default."
+	echo " "
 	echo "   --force-version=STRING"
 	echo " "
 	echo "                 Force configure to use an arbitrary version string"
@@ -562,8 +573,8 @@ auto_detect()
 {
 	local rval autocc config_defines
 
-	# Find a compiler that works.
-	autocc=$(select_cc)
+	# The first and only argument: the compiler to use.
+	autocc="$1"
 
 	# For debugging: reveal what compiler was chosen for auto-detection.
 	#touch "${autocc}.txt"
@@ -643,6 +654,35 @@ auto_detect()
 	echo "${detected_config}"
 }
 
+has_libmemkind()
+{
+	local found_cc LDFLAGS_mk libmemkind_bin rval
+
+	found_cc="$1"
+
+	# Temporarily add libmemkind to LDFLAGS.
+	LDFLAGS_mk="${LDFLAGS} -lmemkind"
+
+	libmemkind_bin="libmemkind-detect.x"
+
+	# Attempt to compile a simple main() program that contains a call
+	# to hbw_malloc() and that links to libmemkind.
+	${found_cc} -o ${libmemkind_bin} ${libmemkind_detect_c} ${LDFLAGS_mk} 2> /dev/null
+
+	# Depending on the return code from the compile step above, we set
+	# enable_memkind accordingly.
+	if [ "$?" == 0 ]; then
+	    rval='yes'
+	else
+	    rval='no'
+	fi
+
+	# Remove the executable generated above.
+	rm -f ${libmemkind_bin}
+
+	echo "${rval}"
+}
+
 #
 # -- main function -------------------------------------------------------------
 #
@@ -702,6 +742,9 @@ main()
 	# Path to 'gen-make-frags.sh' script and directory.
 	gen_make_frags_dirpath="${build_dirpath}/gen-make-frags"
 	gen_make_frags_sh="${gen_make_frags_dirpath}/gen-make-frag.sh"
+
+	# Path to libmemkind-detect.c file.
+	libmemkind_detect_c="${build_dirpath}/memkind/libmemkind_detect.c"
 
 	# The name of the (top-level) configuration directory.
 	config_dir='config'
@@ -782,6 +825,16 @@ main()
 	# source distribution directory.
 	dummy_file='_blis_dir_detect.tmp'
 
+	# Find a working C compiler.
+	found_cc=$(select_cc)
+
+	# In order to determine the default behavior of the --with[out]-memkind
+	# option, we try to detect whether libmemkind is available. If it is,
+	# the default implied option is --with-memkind; otherwise, it is
+	# --without-memkind.
+	has_memkind=$(has_libmemkind "${found_cc}")
+	enable_memkind=${has_memkind}
+
 
 	# -- Command line option/argument parsing ----------------------------------
 
@@ -858,6 +911,12 @@ main()
 						;;
 					disable-cblas)
 						enable_cblas='no'
+						;;
+					with-memkind)
+						enable_memkind='yes'
+						;;
+					without-memkind)
+						enable_memkind='no'
 						;;
 					force-version=*)
 						force_version=${OPTARG#*=}
@@ -997,7 +1056,7 @@ main()
 
 		# Call the auto_detect() function and save the returned string in
 		# config_name.
-		config_name=$(auto_detect)
+		config_name=$(auto_detect "${found_cc}")
 
 		echo "${script_name}: hardware detection driver returned '${config_name}'."
 	else
@@ -1295,6 +1354,22 @@ main()
 		echo "${script_name}: internal memory pools for packing buffers are disabled."
 		enable_packbuf_pools_01=0
 	fi
+	if [ "x${has_memkind}" = "xyes" ]; then
+		echo "${script_name}: libmemkind found; default is to enable use."
+		if [ "x${enable_memkind}" = "xyes" ]; then
+			echo "${script_name}: explicit request to enable libmemkind granted."
+			enable_memkind_01=1
+		else
+			echo "${script_name}: explicit request to disable libmemkind granted."
+			enable_memkind_01=0
+		fi
+	else
+		echo "${script_name}: libmemkind not found; disabling."
+		if [ "x${enable_memkind}" = "xyes" ]; then
+			echo "${script_name}: cannot honor explicit request to enable libmemkind."
+		fi
+		enable_memkind_01=0
+	fi
 	if [ "x${enable_blas2blis}" = "xyes" ]; then
 		echo "${script_name}: the BLAS compatibility layer is enabled."
 		enable_blas2blis_01=1
@@ -1386,6 +1461,7 @@ main()
 		| sed -e "s/@threading_model@/${threading_model}/g" \
 		| sed -e "s/@enable_blas2blis@/${enable_blas2blis}/g" \
 		| sed -e "s/@enable_cblas@/${enable_cblas}/g" \
+		| sed -e "s/@enable_memkind@/${enable_memkind}/g" \
 		> "${config_mk_out_path}"
 		
 
@@ -1406,6 +1482,7 @@ main()
 		| sed   -e "s/@blas2blis_int_type_size@/${blas2blis_int_type_size}/g" \
 		| sed   -e "s/@enable_blas2blis@/${enable_blas2blis_01}/g" \
 		| sed   -e "s/@enable_cblas@/${enable_cblas_01}/g" \
+		| sed   -e "s/@enable_memkind@/${enable_memkind_01}/g" \
 		> "${bli_config_h_out_path}"
 
 

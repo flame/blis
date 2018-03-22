@@ -71,11 +71,25 @@
 // This allocation function is called to allocate memory for blocks within
 // BLIS's internal memory pools.
 #ifndef BLIS_MALLOC_POOL
-#define BLIS_MALLOC_POOL                 malloc
+  // If use of libmemkind was enabled at configure-time, the default
+  // memory allocation function for memory pools should be hbw_malloc()
+  // instead of malloc().
+  #ifdef  BLIS_ENABLE_MEMKIND
+  #define BLIS_MALLOC_POOL               hbw_malloc
+  #else
+  #define BLIS_MALLOC_POOL               malloc
+  #endif
 #endif
 
 #ifndef BLIS_FREE_POOL
-#define BLIS_FREE_POOL                   free
+  // If use of libmemkind was enabled at configure-time, the default
+  // memory deallocation function for memory pools should be hbw_free()
+  // instead of free().
+  #ifdef  BLIS_ENABLE_MEMKIND
+  #define BLIS_FREE_POOL                 hbw_free
+  #else
+  #define BLIS_FREE_POOL                 free
+  #endif
 #endif
 
 // This allocation function is called to allocate memory for internally-

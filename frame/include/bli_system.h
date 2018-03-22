@@ -73,6 +73,7 @@
 #error "Cannot determine operating system"
 #endif
 
+// A few changes that may be necessary in Windows environments.
 #if BLIS_OS_WINDOWS
 
   // Include Windows header file.
@@ -97,5 +98,16 @@
   #include <sys/time.h>
   #include <time.h>
 #endif
+
+// hbwmalloc.h provides hbw_malloc() and hbw_free() on systems with
+// libmemkind. But disable use of libmemkind if BLIS_DISABLE_MEMKIND
+// was explicitly defined.
+#ifdef BLIS_DISABLE_MEMKIND
+  #undef BLIS_ENABLE_MEMKIND
+#endif
+#ifdef BLIS_ENABLE_MEMKIND
+  #include <hbwmalloc.h>
+#endif
+
 
 #endif

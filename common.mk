@@ -298,6 +298,11 @@ endif
 # to initialize itself in a thread-safe manner.
 LDFLAGS    := -lm -lpthread
 
+# Add libmemkind to the link-time flags, if it was enabled at configure-time.
+ifeq ($(BLIS_ENABLE_MEMKIND),yes)
+LDFLAGS    += -lmemkind
+endif
+
 # Never use libm with Intel compilers.
 ifeq ($(CC_VENDOR),icc)
 LIBM       := -lm

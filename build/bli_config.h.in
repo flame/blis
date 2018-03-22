@@ -92,4 +92,10 @@
 #endif
 #endif
 
+#if @enable_memkind@
+#define BLIS_ENABLE_MEMKIND
+#else
+#define BLIS_DISABLE_MEMKIND
+#endif
+
 #endif

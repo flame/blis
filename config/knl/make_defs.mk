@@ -66,7 +66,11 @@ COPTFLAGS      := -O3
 endif
 
 ifeq ($(DEBUG_TYPE),sde)
-CPPROCFLAGS    += -DBLIS_NO_HBWMALLOC
+# Unconditionally disable use of libmemkind in Intel SDE.
+# Note: The BLIS_DISABLE_MEMKIND macro definition will override
+# (undefine) the BLIS_ENABLE_MEMKIND macro definition.
+CPPROCFLAGS    += -DBLIS_DISABLE_MEMKIND
+BLIS_ENABLE_MEMKIND := no
 endif
 
 CKOPTFLAGS     := $(COPTFLAGS)
