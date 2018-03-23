@@ -94,7 +94,6 @@ void bli_sdotxf_zen_int_8
 	// operation as a loop over dotxv.
 	if ( b_n != fuse_fac )
 	{
-	    printf("n != 8\n");
 		sdotxv_ft f = bli_cntx_get_l1v_ker_dt( BLIS_FLOAT, BLIS_DOTXV_KER, cntx );
 
 		for ( dim_t i = 0; i < b_n; ++i )
