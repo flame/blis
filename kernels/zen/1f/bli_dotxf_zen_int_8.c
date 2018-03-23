@@ -264,13 +264,6 @@ void bli_sdotxf_zen_int_8
 	rho6v.v = _mm256_dp_ps( rho6v.v, onev.v, 0xf1 );
 	rho7v.v = _mm256_dp_ps( rho7v.v, onev.v, 0xf1 );
 
-	// Issue vzeroupper instruction to clear upper lanes of ymm registers.
-	// This avoids a performance penalty caused by false dependencies when
-	// transitioning from from AVX to SSE instructions (which may occur
-	// as soon as the m_left cleanup loop below if BLIS is compiled with
-	// -mfpmath=sse).
-	_mm256_zeroupper();
-
 	// Manually add the results from above to finish the sum.
 	rho0    = rho0v.f[0] + rho0v.f[4];
 	rho1    = rho1v.f[0] + rho1v.f[4];
@@ -374,11 +367,6 @@ void bli_sdotxf_zen_int_8
 		*(y + 4*incy) = y0v.f[4]; *(y + 5*incy) = y0v.f[5];
 		*(y + 6*incy) = y0v.f[6]; *(y + 7*incy) = y0v.f[7];
 	}
-
-	// Issue vzeroupper instruction to clear upper lanes of ymm registers.
-	// This avoids a performance penalty caused by false dependencies when
-	// transitioning from from AVX to SSE instructions.
-	_mm256_zeroupper();
 }
 
 // -----------------------------------------------------------------------------
@@ -577,13 +565,6 @@ void bli_ddotxf_zen_int_8
 	rho6v.v = _mm256_hadd_pd( rho6v.v, rho6v.v );
 	rho7v.v = _mm256_hadd_pd( rho7v.v, rho7v.v );
 
-	// Issue vzeroupper instruction to clear upper lanes of ymm registers.
-	// This avoids a performance penalty caused by false dependencies when
-	// transitioning from from AVX to SSE instructions (which may occur
-	// as soon as the m_left cleanup loop below if BLIS is compiled with
-	// -mfpmath=sse).
-	_mm256_zeroupper();
-
 	// Manually add the results from above to finish the sum.
 	rho0 = rho0v.d[0] + rho0v.d[2];
 	rho1 = rho1v.d[0] + rho1v.d[2];
@@ -692,11 +673,5 @@ void bli_ddotxf_zen_int_8
 		*(y + 4*incy) = y1v.d[0]; *(y + 5*incy) = y1v.d[1];
 		*(y + 6*incy) = y1v.d[2]; *(y + 7*incy) = y1v.d[3];
 	}
-
-
-	// Issue vzeroupper instruction to clear upper lanes of ymm registers.
-	// This avoids a performance penalty caused by false dependencies when
-	// transitioning from from AVX to SSE instructions.
-	_mm256_zeroupper();
 }
 

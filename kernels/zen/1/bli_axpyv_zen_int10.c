@@ -227,13 +227,6 @@ void bli_saxpyv_zen_int10
 			y0 += 1*n_elem_per_reg;
 		}
 
-		// Issue vzeroupper instruction to clear upper lanes of ymm registers.
-		// This avoids a performance penalty caused by false dependencies when
-		// transitioning from from AVX to SSE instructions (which may occur
-		// as soon as the n_left cleanup loop below if BLIS is compiled with
-		// -mfpmath=sse).
-		_mm256_zeroupper();
-
 		for ( ; (i + 0) < n; i += 1 )
 		{
 			*y0 += (*alpha) * (*x0);
@@ -432,13 +425,6 @@ void bli_daxpyv_zen_int10
 			x0 += 1*n_elem_per_reg;
 			y0 += 1*n_elem_per_reg;
 		}
-
-		// Issue vzeroupper instruction to clear upper lanes of ymm registers.
-		// This avoids a performance penalty caused by false dependencies when
-		// transitioning from from AVX to SSE instructions (which may occur
-		// as soon as the n_left cleanup loop below if BLIS is compiled with
-		// -mfpmath=sse).
-		_mm256_zeroupper();
 
 		for ( ; i < n; i += 1 )
 		{

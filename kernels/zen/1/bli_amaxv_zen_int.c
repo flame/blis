@@ -218,12 +218,6 @@ void bli_samaxv_zen_int
 		}
 	}
 
-	// Issue vzeroupper instruction to clear upper lanes of ymm registers.
-	// This avoids a performance penalty caused by false dependencies when
-	// transitioning from from AVX to SSE instructions (which may occur
-	// later, especially if BLIS is compiled with -mfpmath=sse).
-	_mm256_zeroupper();
-
 	/* Store final index to output variable. */
 	*i_max = i_max_l;
 }
@@ -374,12 +368,6 @@ void bli_damaxv_zen_int
 			x += 1;
 		}
 	}
-
-	// Issue vzeroupper instruction to clear upper lanes of ymm registers.
-	// This avoids a performance penalty caused by false dependencies when
-	// transitioning from from AVX to SSE instructions (which may occur
-	// later, especially if BLIS is compiled with -mfpmath=sse).
-	_mm256_zeroupper();
 
 	/* Store final index to output variable. */
 	*i_max = i_max_l;

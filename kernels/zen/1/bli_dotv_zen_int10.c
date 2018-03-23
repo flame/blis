@@ -223,13 +223,6 @@ void bli_sdotv_zen_int10
 		// Manually add the results from above to finish the sum.
 		rho0   += rhov[0].f[0] + rhov[0].f[4];
 		rho0   += rhov[1].f[0] + rhov[1].f[4];
-
-		// Issue vzeroupper instruction to clear upper lanes of ymm registers.
-		// This avoids a performance penalty caused by false dependencies when
-		// transitioning from from AVX to SSE instructions (which may occur
-		// later, especially if BLIS is compiled with -mfpmath=sse).
-		_mm256_zeroupper();
-
 	}
 	else
 	{
@@ -413,12 +406,6 @@ void bli_ddotv_zen_int10
 		// Manually add the results from above to finish the sum.
 		rho0   += rhov[0].d[0] + rhov[0].d[1] + rhov[0].d[2] + rhov[0].d[3];
 		rho0   += rhov[1].d[0] + rhov[1].d[1] + rhov[1].d[2] + rhov[1].d[3];
-
-		// Issue vzeroupper instruction to clear upper lanes of ymm registers.
-		// This avoids a performance penalty caused by false dependencies when
-		// transitioning from from AVX to SSE instructions (which may occur
-		// later, especially if BLIS is compiled with -mfpmath=sse).
-		_mm256_zeroupper();
 	}
 	else
 	{

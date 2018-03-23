@@ -62,7 +62,7 @@ endif
 ifeq ($(DEBUG_TYPE),noopt)
 COPTFLAGS      := -O0
 else
-COPTFLAGS      := -O2 -malign-double -funroll-all-loops
+COPTFLAGS      := -O2 -funroll-all-loops
 endif
 
 CKOPTFLAGS     := $(COPTFLAGS)

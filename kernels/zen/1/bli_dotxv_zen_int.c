@@ -156,13 +156,6 @@ void bli_sdotxv_zen_int
 	rho0 = rho0v.f[0] + rho0v.f[1] + rho0v.f[2] + rho0v.f[3] +
 	       rho0v.f[4] + rho0v.f[5] + rho0v.f[6] + rho0v.f[7];
 
-	// Issue vzeroupper instruction to clear upper lanes of ymm registers.
-	// This avoids a performance penalty caused by false dependencies when
-	// transitioning from from AVX to SSE instructions (which may occur
-	// as soon as the n_left cleanup loop below if BLIS is compiled with
-	// -mfpmath=sse).
-	_mm256_zeroupper();
-
 	// If there are leftover iterations, perform them with scalar code.
 	for ( i = 0; i < n_left; ++i )
 	{
@@ -282,13 +275,6 @@ void bli_ddotxv_zen_int
 
 	// Accumulate the final rho vector into a single scalar result.
 	rho0 = rho0v.d[0] + rho0v.d[1] + rho0v.d[2] + rho0v.d[3];
-
-	// Issue vzeroupper instruction to clear upper lanes of ymm registers.
-	// This avoids a performance penalty caused by false dependencies when
-	// transitioning from from AVX to SSE instructions (which may occur
-	// as soon as the n_left cleanup loop below if BLIS is compiled with
-	// -mfpmath=sse).
-	_mm256_zeroupper();
 
 	// If there are leftover iterations, perform them with scalar code.
 	for ( i = 0; i < n_left; ++i )
