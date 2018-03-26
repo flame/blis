@@ -97,8 +97,8 @@ void bli_sgemm_bulldozer_asm_8x8_fma4
        cntx_t*    restrict cntx
      )
 {
-    uint64_t   k_iter = k / 4;
-	uint64_t   k_left = k % 4;
+	uint64_t k_iter = k / 4;
+	uint64_t k_left = k % 4;
 
 	__asm__ volatile
 	(
@@ -865,8 +865,8 @@ void bli_dgemm_bulldozer_asm_4x6_fma4
        cntx_t*    restrict cntx
      )
 {
-	dim_t k_iter  = k / 12;
-	dim_t k_left  = k % 12;
+	uint64_t k_iter = k / 12;
+	uint64_t k_left = k % 12;
 
 	__asm__ 
 	(
@@ -1076,8 +1076,8 @@ void bli_cgemm_bulldozer_asm_8x4_fma4
 	//void*   a_next = bli_auxinfo_next_a( data );
 	void*   b_next = bli_auxinfo_next_b( data );
 
-	dim_t   k_iter = k / 4;
-	dim_t   k_left = k % 4;
+	uint64_t k_iter = k / 4;
+	uint64_t k_left = k % 4;
 
 	__asm__ volatile
 	(
@@ -1883,8 +1883,8 @@ void bli_zgemm_bulldozer_asm_4x4_fma4
 	//void*   a_next = bli_auxinfo_next_a( data );
 	//void*   b_next = bli_auxinfo_next_b( data );
 
-	dim_t   k_iter = k / 4;
-	dim_t   k_left = k % 4;
+	uint64_t k_iter = k / 4;
+	uint64_t k_left = k % 4;
 
 	__asm__ volatile
 	(
