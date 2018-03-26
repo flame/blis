@@ -45,11 +45,6 @@ extern "C" {
 #endif
 
 
-// -- System headers --
-
-#include "bli_system.h"
-
-
 // -- BLIS configuration definition --
 
 // NOTE: We include bli_config.h first because there might be something
@@ -61,6 +56,11 @@ extern "C" {
 
 #include "bli_config.h"
 #include "bli_config_macro_defs.h"
+
+
+// -- System headers --
+
+#include "bli_system.h"
 
 
 // -- Common BLIS definitions --

@@ -1357,10 +1357,10 @@ main()
 	if [ "x${has_memkind}" = "xyes" ]; then
 		echo "${script_name}: libmemkind found; default is to enable use."
 		if [ "x${enable_memkind}" = "xyes" ]; then
-			echo "${script_name}: explicit request to enable libmemkind granted."
+			echo "${script_name}: received explicit request to enable libmemkind."
 			enable_memkind_01=1
 		else
-			echo "${script_name}: explicit request to disable libmemkind granted."
+			echo "${script_name}: received explicit request to disable libmemkind."
 			enable_memkind_01=0
 		fi
 	else
