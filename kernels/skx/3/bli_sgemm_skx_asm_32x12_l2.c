@@ -265,22 +265,22 @@ ahead*/
 \
     PREFETCH_A_L1(n, 0) \
     \
-    VBROADCASTSS(ZMM(3), MEM(RBX,(12*n+ 0)*8)) \
-    VBROADCASTSS(ZMM(4), MEM(RBX,(12*n+ 1)*8)) \
+    VBROADCASTSS(ZMM(3), MEM(RBX,(12*n+ 0)*4)) \
+    VBROADCASTSS(ZMM(4), MEM(RBX,(12*n+ 1)*4)) \
     VFMADD231PS(ZMM( 8), ZMM(0), ZMM(3)) \
     VFMADD231PS(ZMM( 9), ZMM(1), ZMM(3)) \
     VFMADD231PS(ZMM(10), ZMM(0), ZMM(4)) \
     VFMADD231PS(ZMM(11), ZMM(1), ZMM(4)) \
     \
-    VBROADCASTSS(ZMM(3), MEM(RBX,(12*n+ 2)*8)) \
-    VBROADCASTSS(ZMM(4), MEM(RBX,(12*n+ 3)*8)) \
+    VBROADCASTSS(ZMM(3), MEM(RBX,(12*n+ 2)*4)) \
+    VBROADCASTSS(ZMM(4), MEM(RBX,(12*n+ 3)*4)) \
     VFMADD231PS(ZMM(12), ZMM(0), ZMM(3)) \
     VFMADD231PS(ZMM(13), ZMM(1), ZMM(3)) \
     VFMADD231PS(ZMM(14), ZMM(0), ZMM(4)) \
     VFMADD231PS(ZMM(15), ZMM(1), ZMM(4)) \
     \
-    VBROADCASTSS(ZMM(3), MEM(RBX,(12*n+ 4)*8)) \
-    VBROADCASTSS(ZMM(4), MEM(RBX,(12*n+ 5)*8)) \
+    VBROADCASTSS(ZMM(3), MEM(RBX,(12*n+ 4)*4)) \
+    VBROADCASTSS(ZMM(4), MEM(RBX,(12*n+ 5)*4)) \
     VFMADD231PS(ZMM(16), ZMM(0), ZMM(3)) \
     VFMADD231PS(ZMM(17), ZMM(1), ZMM(3)) \
     VFMADD231PS(ZMM(18), ZMM(0), ZMM(4)) \
@@ -288,29 +288,29 @@ ahead*/
     \
     PREFETCH_A_L1(n, 1) \
     \
-    VBROADCASTSS(ZMM(3), MEM(RBX,(12*n+ 6)*8)) \
-    VBROADCASTSS(ZMM(4), MEM(RBX,(12*n+ 7)*8)) \
+    VBROADCASTSS(ZMM(3), MEM(RBX,(12*n+ 6)*4)) \
+    VBROADCASTSS(ZMM(4), MEM(RBX,(12*n+ 7)*4)) \
     VFMADD231PS(ZMM(20), ZMM(0), ZMM(3)) \
     VFMADD231PS(ZMM(21), ZMM(1), ZMM(3)) \
     VFMADD231PS(ZMM(22), ZMM(0), ZMM(4)) \
     VFMADD231PS(ZMM(23), ZMM(1), ZMM(4)) \
     \
-    VBROADCASTSS(ZMM(3), MEM(RBX,(12*n+ 8)*8)) \
-    VBROADCASTSS(ZMM(4), MEM(RBX,(12*n+ 9)*8)) \
+    VBROADCASTSS(ZMM(3), MEM(RBX,(12*n+ 8)*4)) \
+    VBROADCASTSS(ZMM(4), MEM(RBX,(12*n+ 9)*4)) \
     VFMADD231PS(ZMM(24), ZMM(0), ZMM(3)) \
     VFMADD231PS(ZMM(25), ZMM(1), ZMM(3)) \
     VFMADD231PS(ZMM(26), ZMM(0), ZMM(4)) \
     VFMADD231PS(ZMM(27), ZMM(1), ZMM(4)) \
     \
-    VBROADCASTSS(ZMM(3), MEM(RBX,(12*n+10)*8)) \
-    VBROADCASTSS(ZMM(4), MEM(RBX,(12*n+11)*8)) \
+    VBROADCASTSS(ZMM(3), MEM(RBX,(12*n+10)*4)) \
+    VBROADCASTSS(ZMM(4), MEM(RBX,(12*n+11)*4)) \
     VFMADD231PS(ZMM(28), ZMM(0), ZMM(3)) \
     VFMADD231PS(ZMM(29), ZMM(1), ZMM(3)) \
     VFMADD231PS(ZMM(30), ZMM(0), ZMM(4)) \
     VFMADD231PS(ZMM(31), ZMM(1), ZMM(4)) \
     \
-    VMOVAPD(ZMM(0), MEM(RAX,(16*n+0)*8)) \
-    VMOVAPD(ZMM(1), MEM(RAX,(16*n+8)*8))
+    VMOVAPD(ZMM(0), MEM(RAX,(32*n+0)*4)) \
+    VMOVAPD(ZMM(1), MEM(RAX,(32*n+16)*4))
 
 //This is an array used for the scatter/gather instructions.
 static int64_t offsets[16] __attribute__((aligned(64))) =
