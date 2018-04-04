@@ -188,28 +188,104 @@ print_usage()
 
 query_array()
 {
-	array_name=$1
-	key_name=$2
+	local arr key var_name
 
-	var_name="${array_name}_${key_name}"
+	arr="$1"
+	key="$2"
+
+	var_name="${arr}_${key}"
 
 	echo "${!var_name}"
 }
 
-read_registry_file()
+assign_key_value()
 {
-	local cname clist
+	local arr key val
 
+	arr="$1"
+	key="$2"
+	val="$3"
+
+	printf -v "${arr}_${key}" %s "${val}"
+}
+
+#
+# FGVZ: This commented-out function is being kept as an example how how
+# to effectively "pass by reference" in bash. That is, pass the name of
+# a variable, instead of its conents, and then let the function use the
+# variable by prepending a $, at which time it can evaluate the string
+# as if it were a literal variable occurance.
+#
+#filteradd_to_list()
+#{
+#	local dlist ditem list_c item_c is_blacklisted
+#
+#	# Add $1 to the list identified by $2, but only if $1 is not
+#	# found in a blacklist.
+#
+#	# Note: $2 can actually be a list of items.
+#	dlist=\$"$1"
+#	ditem=\$"$2"
+#
+#	# Acquire the contents of $list and $item and store them in list_c
+#	# and item_c, respectively.
+#	list_c=$(eval "expr \"$dlist\" ")
+#	item_c=$(eval "expr \"$ditem\" ")
+#
+#	# Iterate over $item_c in case it is actually multiple items.
+#	for cur_item in $item_c; do
+#
+#		is_blacklisted=$(is_in_list "${cur_item}" "${config_blist}")
+#		if [ ${is_blacklisted} == "false" ]; then
+#
+#			# If cur_item is not blacklisted, add it to list_c.
+#			list_c="${list_c} ${cur_item}"
+#		fi
+#	done
+#
+#	# Update the argument.
+#	eval "$1=\"${list_c}\""
+#}
+
+pass_config_kernel_registries()
+{
+	local filename passnum
+	local all_blist
+	local curline list item config kernels
+	local cname clist klist
+
+	# Read function arguments:
+	# first argument: the file containing the configuration registry.
+	# second argument: the pass number: 0 or 1. Pass 0 builds the
+	# indirect config blacklist (indirect_blist) ONLY. Pass 1 actually
+	# begins populating the config and kernel registries, and assumes
+	# the indirect_blist has already been created.
 	filename="$1"
+	passnum="$2"
+
+	# Initialize a list of indirect blacklisted configurations for the
+	# current iteration. These are configurations that are invalidated
+	# by the removal of blacklisted configurations. For example, if
+	# haswell is registered as needing the 'haswell' and 'zen' kernel
+	# sets:
+	#
+	#    haswell: haswell/haswell/zen
+	#
+	# and 'zen' was blacklisted because of the compiler version, then
+	# the 'haswell' configuration must be omitted from the registry,
+	# as it no longer has all of the kernel sets it was expecting.
+	if [ "${passnum}" == "0" ]; then
+		indirect_blist=""
+	fi
+
+	# For convenience, merge the original and indirect blacklists.
+	# NOTE: During pass 0, all_blist is equal to config_blist, since
+	# indirect_blist is still empty.
+	all_blist="${config_blist} ${indirect_blist}"
+
 	while read -r line
 	do
 		curline="${line}"
-
-		#echo "curline: ${curline}"
-
-		# Remove leading whitespace from the current line.
-		# NOTE: read -r already prunes leading whitespace
-		#curline=$(echo "${curline}" | sed "s/^[ \t]*//")
 
 		# Remove everything after comment character '#'.
 		curline=${curline%%#*}
@@ -250,6 +326,7 @@ read_registry_file()
 				klist="${klist} ${kernels}"
 			done
 		else
+
 			#echo "Slash not found."
 			clist=${list}
 			klist=${list}
@@ -261,23 +338,123 @@ read_registry_file()
 		clist=$(canonicalize_ws "${clist}")
 		klist=$(canonicalize_ws "${klist}")
 
-		# Store the config and kernel lists to the entry in the associative
-		# arrays that corresponds to the config name.
-		#config_registry[${cname}]=${clist}
-		#kernel_registry[${cname}]=${klist}
-		printf -v "config_registry_${cname}" %s "${clist}"
-		printf -v "kernel_registry_${cname}" %s "${klist}"
-		
+		# Next, we prepare to:
+		# - pass 0: inspect klist for blacklisted configurations, which may
+		#   reveal configurations as needing to be indirectly blacklisted.
+		# - pass 1: compare cname to the blacklists and commit clist/klist
+		#   to their respective registries, as appropriate.
+
+		# Handle singleton and umbrella configuration entries separately.
+		if [ $(is_singleton_family "${cname}" "${clist}") == "true" ]; then
+
+			# Singleton configurations/families.
+			# Note: for singleton families, clist contains one item, which
+			# always equals cname, but klist could contain more than one
+			# item.
+
+			# Only consider updating the indirect blacklist (pass 0) or
+			# committing clist and klist to the registries (pass 1) if the
+			# configuration name (cname) is not blacklisted.
+			if [ $(is_in_list "${cname}" "${all_blist}") == "false" ]; then
+
+				if [ "${passnum}" == "0" ]; then
+					# Even if the cname isn't blacklisted, one of the requisite
+					# kernels might be, so we need to check klist for blacklisted
+					# items. If we find one, we must assume that the entire entry
+					# must be thrown out. (Ideally, we would simply fall back to
+					# reference code for the blacklisted kernels, but that is not
+					# at all straightforward under the current configuration
+					# system architecture.) Thus, we add cname to the indirect
+					# blacklist.
+					for item in ${klist}; do
+						if [ $(is_in_list "${item}" "${config_blist}") == "true" ]; then
+							indirect_blist="${indirect_blist} ${cname}"
+							break
+						fi
+					done
+				fi
+
+				if [ "${passnum}" == "1" ]; then
+					# Store the clist to the cname key of the config registry.
+					#config_registry[${cname}]=${clist}
+					#printf -v "config_registry_${cname}" %s "${clist}"
+					assign_key_value "config_registry" "${cname}" "${clist}"
+				fi
+			fi
+
+			if [ "${passnum}" == "1" ]; then
+				# Store the klist to the cname key of the kernel registry.
+				#kernel_registry[${cname}]=${klist}
+				#printf -v "kernel_registry_${cname}" %s "${klist}"
+				assign_key_value "kernel_registry" "${cname}" "${klist}"
+			fi
+
+		else
+			# Umbrella configurations/families.
+
+			# First we check cname, which should generally not be blacklisted
+			# for umbrella families, but we check anyway just to be safe.
+			if [ $(is_in_list "${cname}" "${all_blist}") == "false" ]; then
+
+				if [ "${passnum}" == "1" ]; then
+
+					# Check each item in the clist and klist. (At this point,
+					# clist == klist.) If any sub-config is blacklisted, we
+					# omit it from clist and klist.
+					for item in ${clist}; do
+
+						if [ $(is_in_list "${item}" "${all_blist}") == "true" ]; then
+							clist=$(remove_from_list "${item}" "${clist}")
+							klist=$(remove_from_list "${item}" "${klist}")
+						fi
+					done
+
+					# Store the config and kernel lists to entries that
+					# corresponds to the config name.
+					#config_registry[${cname}]=${clist}
+					#kernel_registry[${cname}]=${klist}
+					#printf -v "config_registry_${cname}" %s "${clist}"
+					#printf -v "kernel_registry_${cname}" %s "${klist}"
+					assign_key_value "config_registry" "${cname}" "${clist}"
+					assign_key_value "kernel_registry" "${cname}" "${klist}"
+				fi
+			fi
+		fi
 
 	done < "${filename}"
 
+	if [ "${passnum}" == "0" ]; then
+		# Assign the final indirect blacklist (with whitespace removed).
+		indirect_blist="$(canonicalize_ws ${indirect_blist})"
+	fi
+}
+
+read_registry_file()
+{
+	local filename
+	local clist klist
+	local iterate_again config
+	local cr_var mem mems_mem newclist
+	local kr_var ker kers_ker newklist
+
+	filename="$1"
+
+	# Execute an initial pass through the config_registry file so that
+	# we can accumulate a list of indirectly blacklisted configurations,
+	# if any.
+	pass_config_kernel_registries "${filename}" "0"
+
+	# Now that the indirect_blist has been created, make a second pass
+	# through the 'config_registry' file, this time creating the actual
+	# config and kernel registry data structures.
+	pass_config_kernel_registries "${filename}" "1"
 
 	# Now we must go back through the config_registry and subsitute any
 	# configuration families with their constituents' members. Each time
 	# one of these substitutions occurs, we set a flag that causes us to
 	# make one more pass. (Subsituting a singleton definition does not
 	# prompt additional iterations.) This process stops when a full pass
-	# does not result in any subsitution. 
+	# does not result in any subsitution.
 
 	iterate_again="1"
 	while [ "${iterate_again}" == "1" ]; do
@@ -289,8 +466,17 @@ read_registry_file()
 
 			config=${cr_var##config_registry_}
 
+			clist=$(query_array "config_registry" ${config})
+
+			# The entries that define singleton families should never need
+			# any substitution.
+			if [ $(is_singleton_family "${config}" "${clist}") == "true" ]; then
+				continue
+			fi
+
 			#for mem in ${config_registry[$config]}; do
-			for mem in ${!cr_var}; do
+			#for mem in ${!cr_var}; do
+			for mem in ${clist}; do
 
 				#mems_mem="${config_registry[${mem}]}"
 				mems_mem=$(query_array "config_registry" ${mem})
@@ -317,15 +503,15 @@ read_registry_file()
 					newclist=$(rm_duplicate_words "${newclist}")
 
 					#config_registry[${config}]=${newclist}
-					printf -v "config_registry_${config}" %s "${newclist}"
+					#printf -v "config_registry_${config}" %s "${newclist}"
+					assign_key_value "config_registry" "${config}" "${newclist}"
 
 					# Since we performed a substitution and changed the config
 					# list, mark the iteration flag to continue another round,
 					# but only if the config (mem) value is NOT present
 					# in the list of sub-configs. If it is present, then further
 					# substitution may not necessarily be needed this round.
-					is_singleton=$(is_word_in_list "${mem}" "${mems_mem}")
-					if [ ${is_singleton} == "false" ]; then
+					if [ $(is_in_list "${mem}" "${mems_mem}") == "false" ]; then
 						iterate_again="1"
 					fi
 				fi
@@ -350,18 +536,35 @@ read_registry_file()
 
 			config=${kr_var##kernel_registry_}
 
+			klist=$(query_array "kernel_registry" ${config})
+
+			# The entries that define singleton families should never need
+			# any substitution. In the kernel registry, we know it's a
+			# singleton entry when the cname occurs somewhere in the klist.
+			# (This is slightly different than the same test in the config
+			# registry, where we test that clist is one word and that
+			# clist == cname.)
+			if [ $(is_in_list "${config}" "${klist}") == "true" ]; then
+				#echo "debug: '${config}' not found in '${klist}'; skipping."
+				continue
+			fi
+
 			#for ker in ${kernel_registry[$config]}; do
-			for ker in ${!kr_var}; do
+			#for ker in ${!kr_var}; do
+			for ker in ${klist}; do
 
 				#kers_ker="${kernel_registry[${ker}]}"
 				kers_ker=$(query_array "kernel_registry" ${ker})
 
 				# If kers_ker is empty string, then ker was not found as a key
-				# in the kernel list associative array. In that case, we continue
-				# and will echo an error later in the script.
+				# in the kernel registry. While not common, this can happen
+				# when ker identifies a kernel set that does not correspond to
+				# any configuration. (Example: armv7a and armv8a kernel sets are
+				# used by cortexa* configurations, but do not corresond to their
+				# own configurations.)
 				if [ "${kers_ker}" == "" ]; then
-					#echo "  kernel for ${ker} is empty string! no entry in kernel list."
-					continue;
+					#echo "debug: ${ker} not found in kernel registry."
+					continue
 				fi
 
 				# If the current config/kernel (ker) differs from its singleton kernel
@@ -371,27 +574,27 @@ read_registry_file()
 				# set it needs.
 				if [ "${ker}" != "${kers_ker}" ]; then
 
-					#klist="${kernel_registry[$config]}"
-					klist=$(query_array "kernel_registry" ${config})
+					#klisttmp="${kernel_registry[$config]}"
+					klisttmp=$(query_array "kernel_registry" ${config})
 
 					# Replace the current config with its requisite kernels,
 					# canonicalize whitespace, and then remove duplicate kernel
 					# set names, if they exist. Finally, update the kernel registry
 					# with the new kernel list.
-					newklist=$(echo -e "${klist}" | sed -e "s/${ker}/${kers_ker}/g")
+					newklist=$(echo -e "${klisttmp}" | sed -e "s/${ker}/${kers_ker}/g")
 					newklist=$(canonicalize_ws "${newklist}")
 					newklist=$(rm_duplicate_words "${newklist}")
 
 					#kernel_registry[${config}]=${newklist}
-					printf -v "kernel_registry_${config}" %s "${newklist}"
+					#printf -v "kernel_registry_${config}" %s "${newklist}"
+					assign_key_value "kernel_registry" "${config}" "${newklist}"
 
 					# Since we performed a substitution and changed the kernel
 					# list, mark the iteration flag to continue another round,
-					# but only if the config/kernel (ker) value is NOT present
-					# in the list of kernels. If it is present, then further
-					# substitution may not necessarily be needed this round.
-					is_singleton=$(is_word_in_list "${ker}" "${kers_ker}")
-					if [ ${is_singleton} == "false" ]; then
+					# unless we just substituted using a singleton family
+					# definition, in which case we don't necessarily need to
+					# iterate further this round.
+					if [ $(is_in_list "${ker}" "${kers_ker}") == "false" ]; then
 						iterate_again="1"
 					fi
 				fi
@@ -402,6 +605,8 @@ read_registry_file()
 
 build_kconfig_registry()
 {
+	local familyname clist config kernels kernel cur_configs newvalue
+
 	familyname="$1"
 
 	#clist="${config_registry[${familyname}]}"
@@ -409,15 +614,11 @@ build_kconfig_registry()
 
 	for config in ${clist}; do
 
-		#echo "${config}"
-
 		# Look up the kernel for the current sub-configuration.
 		#kernels="${kernel_registry[${config}]}"
 		kernels=$(query_array "kernel_registry" ${config})
 
 		for kernel in ${kernels}; do
-
-			#echo "  ${kernel}"
 
 			# Add the sub-configuration to the list associated with the
 			# kernel.
@@ -432,15 +633,18 @@ build_kconfig_registry()
 
 			# Update the array.
 			#kconfig_registry[${kernel}]="${newvalue}"
-			printf -v "kconfig_registry_${kernel}" %s "${newvalue}"
+			#printf -v "kconfig_registry_${kernel}" %s "${newvalue}"
+			assign_key_value "kconfig_registry" "${kernel}" "${newvalue}"
 
 		done
 		
 	done
 }
 
-is_word_in_list()
+is_in_list()
 {
+	local word list rval item
+
 	word="$1"
 	list="$2"
 	rval="false"
@@ -458,6 +662,8 @@ is_word_in_list()
 
 is_singleton()
 {
+	local list rval count_str item
+
 	list="$1"
 	rval="false"
 
@@ -474,9 +680,52 @@ is_singleton()
 	echo "${rval}"
 }
 
+is_singleton_family()
+{
+	local familyname memberlist rval
+
+	familyname="$1"
+	memberlist="$2"
+
+	rval="false"
+
+	if [ $(is_singleton "${memberlist}") ]; then
+
+		if [ "${memberlist}" == "${familyname}" ]; then
+			rval="true"
+		fi
+	fi
+
+	echo "${rval}"
+}
+
+remove_from_list()
+{
+	local strike_list list flist item
+
+	strike_words="$1"
+	list="$2"
+	flist=""
+
+	for item in ${list}; do
+
+		# Filter out any list item that matches any of the strike words.
+		if [ $(is_in_list "${item}" "${strike_words}") == "false" ]; then
+			flist="${flist} ${item}"
+		fi
+	done
+
+	flist=$(canonicalize_ws "${flist}")
+
+	# Return the filtered list.
+	echo "${flist}"
+}
+
 canonicalize_ws()
 {
-	local str="$1"
+	local str
+
+	str="$1"
 
 	# Remove leading and trailing whitespace.
 	str=$(echo -e "${str}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
@@ -490,6 +739,8 @@ canonicalize_ws()
 
 rm_duplicate_words()
 {
+	local str revstr revres res
+
 	str="$1"
 
 	# We reverse the initial string, THEN remove duplicates, then reverse
@@ -497,6 +748,9 @@ rm_duplicate_words()
 	# removing duplicates (rather than keeping only the first). This is
 	# totally unnecessary but works well for the kinds of duplicates that
 	# show up in certain use cases of the config and kernel registries.
+	# For example, these gymnastics allow us to keep only the last instance
+	# of the 'generic' configuration in a configuration family that
+	# includes it twice or more.
 	revstr=$(echo "${str}" | awk '{ for (i=NF; i>1; i--) printf("%s ",$i); print $1; }')
 	revres=$(echo "${revstr}" | awk '{for (i=1;i<=NF;i++) if (!a[$i]++) printf("%s%s",$i,FS)}{printf("\n")}')
 	res=$(echo "${revres}" | awk '{ for (i=NF; i>1; i--) printf("%s ",$i); print $1; }')
@@ -506,7 +760,7 @@ rm_duplicate_words()
 
 select_cc()
 {
-	local rval found_cc
+	local se_suf found_cc se_file rval
 
 	se_suf="stderr.txt"
 
@@ -571,7 +825,7 @@ select_cc()
 
 auto_detect()
 {
-	local rval autocc config_defines
+	local rval autocc config_defines detected_config
 
 	# The first and only argument: the compiler to use.
 	autocc="$1"
@@ -681,6 +935,166 @@ has_libmemkind()
 	rm -f ${libmemkind_bin}
 
 	echo "${rval}"
+}
+
+echoerr()
+{
+	printf "${script_name}: error: %s\n" "$*" #>&2;
+}
+
+echowarn()
+{
+	printf "${script_name}: warning: %s\n" "$*" #>&2;
+}
+
+blacklist_add()
+{
+	echowarn "${cc_vendor} ${cc_version} does not support '$1'; adding to blacklist."
+	config_blist="${config_blist} $1"
+}
+
+blacklist_init()
+{
+	config_blist=""
+}
+
+echoerr_unsupported()
+{
+	echoerr "*** Unsupported compiler version: ${cc_vendor} ${cc_version}."
+	exit 1
+}
+
+check_compiler_version()
+{
+	local found_cc vendor_string
+
+	found_cc="$1"
+
+	# Query the full vendor version string output. This includes the
+	# version number along with (potentially) a bunch of other textual
+	# clutter.
+	vendor_string="$(${found_cc} --version 2>/dev/null)"
+
+	# Query the compiler "vendor" (ie: the compiler's simple name) and
+	# isolate the version number.
+	# The last part ({ read first rest ; echo $first ; }) is a workaround
+	# to OS X's egrep only returning the first match.
+	cc_vendor=$(echo $vendor_string | egrep -o 'icc|gcc|clang|emcc|pnacl|IBM' | { read first rest ; echo $first ; })
+	cc_version=$(echo ${vendor_string} | egrep -o '[0-9]+\.[0-9]+\.?[0-9]*' | { read first rest ; echo ${first} ; })
+
+	# Parse the version number into its major, minor, and revision
+	# components.
+	cc_major=$(echo "${cc_version}" | cut -d. -f1)
+	cc_minor=$(echo "${cc_version}" | cut -d. -f2)
+	cc_revision=$(echo "${cc_version}" | cut -d. -f3)
+
+	echo "${script_name}: found ${found_cc} version ${cc_version} (maj: ${cc_major}, min: ${cc_minor}, rev: ${cc_revision})."
+
+	#
+	# Compiler requirements
+	#
+	# General:
+	#
+	#   icc 15+, gcc 4.7+, clang 3.3+
+	#
+	# Specific:
+	#
+	#   skx: icc 15.0.1+, gcc 6.0+, clang 3.9+
+	#   knl: icc 14.0.1+, gcc 5.0+, clang 3.5+
+	#   haswell: any
+	#   sandybridge: any
+	#   penryn: any
+	#
+	#   zen: gcc 6.0+, clang 4.0+
+	#   excavator: gcc 4.9+, clang 3.5+
+	#   steamroller: any
+	#   piledriver: any
+	#   bulldozer: any
+	#
+	#   cortexa57: any
+	#   cortexa15: any
+	#   cortexa9: any
+	#
+	#   generic: any
+	#
+	# Note: These compiler requirements were originally modeled after similar
+	# requirements encoded into TBLIS's configure.ac [1].
+	#
+	# [1] https://github.com/devinamatthews/tblis/
+	#
+
+	echo "${script_name}: checking for blacklisted configurations for ${found_cc} ${cc_version}."
+
+	# Initialize the blacklist to empty.
+	blacklist_init
+
+	# gcc
+	if [ "x${cc_vendor}" = "xgcc" ]; then
+
+		if [ ${cc_major} -lt 4 ]; then
+			echoerr_unsupported
+		fi
+		if [ ${cc_major} -eq 4 ]; then
+			blacklist_add "knl"
+			if [ ${cc_minor} -lt 7 ]; then
+				echoerr_unsupported
+			fi
+			if [ ${cc_minor} -lt 9 ]; then
+				blacklist_add "excavator"
+				blacklist_add "zen"
+			fi
+		fi
+		if [ ${cc_major} -lt 6 ]; then
+			# Normally, zen would be blacklisted for gcc prior to 6.0.
+			# However, we have a workaround in place in the zen
+			# configuration's make_defs.mk file that starts with bdver4
+			# and disables the instructions that were removed in znver1.
+			# Thus, this "blacklist_add" statement has been moved above.
+			#blacklist_add "zen"
+			blacklist_add "skx"
+		fi
+	fi
+
+	# icc
+	if [ "x${cc_vendor}" = "xicc" ]; then
+
+		if [ ${cc_major} -lt 15 ]; then
+			echoerr_unsupported
+		fi
+		if [ ${cc_major} -eq 15 ]; then
+			if [ ${cc_revision} -lt 1 ]; then
+				blacklist_add "skx"
+			fi
+		fi
+	fi
+
+	# clang
+	if [ "x${cc_vendor}" = "xclang" ]; then
+
+		if [ ${cc_major} -lt 3 ]; then
+			echoerr_unsupported
+		fi
+		if [ ${cc_major} -eq 3 ]; then
+			if [ ${cc_minor} -lt 3 ]; then
+				echoerr_unsupported
+			fi
+			if [ ${cc_minor} -lt 5 ]; then
+				blacklist_add "excavator"
+				blacklist_add "zen"
+				blacklist_add "knl"
+			fi
+			if [ ${cc_minor} -lt 9 ]; then
+				blacklist_add "skx"
+			fi
+		fi
+		if [ ${cc_major} -lt 4 ]; then
+			# See comment above regarding zen support.
+			#blacklist_add "zen"
+			: # explicit no-op since bash can't handle empty loop bodies.
+		fi
+	fi
+
+	config_blist=$(canonicalize_ws "${config_blist}")
 }
 
 #
@@ -827,6 +1241,7 @@ main()
 
 	# Find a working C compiler.
 	found_cc=$(select_cc)
+	echo "${script_name}: using '${found_cc}' compiler."
 
 	# In order to determine the default behavior of the --with[out]-memkind
 	# option, we try to detect whether libmemkind is available. If it is,
@@ -977,6 +1392,19 @@ main()
 		esac
 	done
 
+	# -- Check the compiler version --------------------------------------------
+
+	# Check the found compiler's version. Certain versions of certain
+	# compilers will preclude building certain sub-configurations, which
+	# are added to a blacklist.
+	check_compiler_version "${found_cc}"
+
+	if [ -n "${config_blist}" ]; then
+
+		echo "${script_name}: configuration blacklist:"
+		echo "${script_name}:   ${config_blist}"
+	fi
+
 
 	# -- Read the configuration registry ---------------------------------------
 
@@ -994,6 +1422,12 @@ main()
 	echo -n "${script_name}: reading configuration registry..."
 	read_registry_file ${registry_filepath}
 	echo "done."
+
+	# Report if additional configurations needed to be blacklisted.
+	if [ -n "${indirect_blist}" ]; then
+		echo "${script_name}: needed to indirectly blacklist additional configurations:"
+		echo "${script_name}:   ${indirect_blist}"
+	fi
 
 
 	# -- Acquire the BLIS version ----------------------------------------------
@@ -1136,7 +1570,7 @@ main()
 		configs=$(query_array "kconfig_registry" ${kernel})
 
 		has_one_kernel=$(is_singleton "${configs}")
-		contains_kernel=$(is_word_in_list "${kernel}" "${configs}")
+		contains_kernel=$(is_in_list "${kernel}" "${configs}")
 
 		# Check if the list is a singleton.
 		if [ "${has_one_kernel}" == "true" ]; then
@@ -1265,7 +1699,6 @@ main()
 			echo "exist."
 		fi
 	done
-
 
 	# -- Prepare variables for subsitution into template files -----------------
 
@@ -1599,7 +2032,7 @@ main()
 
 	# -- Generate makefile fragements ------------------------------------------
 
-	clist_contains_cname=$(is_word_in_list "${config_name}" "${config_list}")
+	clist_contains_cname=$(is_in_list "${config_name}" "${config_list}")
 
 	# If the config_list does not already contain the config_name, generate
 	# makefiles in that directory.
@@ -1711,7 +2144,7 @@ main()
 			echo "${script_name}: configured to build outside of source distribution."
 		else
 
-			# Echo what is happening. 
+			# Echo what is happening.
 			echo "${script_name}: configured to build within top-level directory of source distribution."
 		fi
 

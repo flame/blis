@@ -9,17 +9,17 @@
 
 # Processor families.
 x86_64:      intel64 amd64
-intel64:     haswell sandybridge penryn generic
+intel64:     skx knl haswell sandybridge penryn generic
 amd64:       zen excavator steamroller piledriver bulldozer generic
 arm64:       cortexa57 generic
 arm32:       cortexa15 cortexa9 generic
 
 # Intel architectures.
+skx:         skx
+knl:         knl
 haswell:     haswell/haswell/zen
 sandybridge: sandybridge
 penryn:      penryn
-knl:         knl
-skx:         skx
 
 # AMD architectures.
 zen:         zen
