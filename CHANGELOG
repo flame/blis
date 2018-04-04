@@ -1,10 +1,622 @@
-commit 709f8361ebc90b96b02ebe5c5ffb6fc3b1b25e58 (HEAD -> master, tag: 0.3.0)
+commit 1f28d7c86e17730f05bd239c8e8d67e3e7510a4f (HEAD -> master, tag: 0.3.1)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Apr 4 17:13:15 2018 -0500
+
+    Version file update (0.3.1)
+
+commit e6cc9ee26bcf0450f1120d5d12985b04d9fb8516 (origin/master, origin/dev, origin/amd, origin/HEAD, dev, amd)
+Merge: 786d15c5 3c91c7ae
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Apr 4 16:08:18 2018 -0500
+
+    Merge branch 'dev' of github.com:flame/blis into dev
+
+commit 786d15c5ef09f1f647b126b63d57e76d5810c58e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Apr 4 16:06:47 2018 -0500
+
+    Added skx, knl to x86_64 configuration family.
+    
+    Details:
+    - Added 'skx' and 'knl' sub-configurations to the 'x86_64' configuration
+      family in the config_registry file.
+    - Added logic to configure that avoids committing certain sub-configs to
+      the configuration/kernel registries if those sub-configs cannot be
+      handled properly by the chosen compiler. (This was modeled after
+      similar logic in TBLIS's configure; thanks to Devin Matthews for
+      pointing this out.) First, the compiler and its version are inspected
+      and, based on the results, certain configurations are added to a
+      "blacklist". Then, as the configuration registries are being created,
+      configurations and/or kernels that match items in the blacklist are
+      skipped over and not commited to the registries. Under certain
+      circumstances, omitting a blacklisted configuration will indirectly
+      invalidate other configurations due to the loss of availability of
+      the original blacklisted configuration's kernel set. This additional
+      indirect blacklist is also accounted for.
+    - Added output to the beginning of configure that echos information
+      about the chosen compiler as well as the configurations that are
+      blacklisted and must be stripped from the registries.
+    - Various other cleanups in configure, especially with respect to
+      explicitly declaring local variables in functions.
+    - Comment updates to config/zen/make_defs.mk regarding choice of -march
+      flags based on compiler version.
+
+commit 3c91c7aebafb446a2582267beb3b22c8bb475b3b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Apr 2 12:40:25 2018 -0500
+
+    Fixed 64b type mismatch warning in cblas_xerbla.c.
+    
+    Details:
+    - Fixed a compiler warning concerning a type mismatch between the
+      format specifier of the printf() call in cblas_xerbla.c and its
+      corresponding (info) argument. The warning manifested when the CBLAS
+      layer was enabled and the BLAS/CBLAS integer type siwas is set to 64
+      (the default is 32). The warning was fixed by changing the specifier
+      from %d to %jd and typecasting the argument to intmax_t. Thanks to
+      Dave Love for reporting this issue and submitting the patch.
+
+commit 71eaf449a812fe2bd640d21513ec83974b2edb45
+Merge: 6a628184 ae9a5be5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Mar 27 17:21:43 2018 -0500
+
+    Merge branch 'dev'
+
+commit ae9a5be56d6f9b87278d6032154d2dcf3fb7d54f
+Author: dnp <devangiparikh@gmail.com>
+Date:   Tue Mar 27 17:01:23 2018 -0500
+
+    Fixed bug in skx sgemm microkernel
+
+commit 3f02af0905b1e2e2e065862f8afe5e9a52f282b2
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Mar 26 17:40:04 2018 -0500
+
+    Row storage optimizations to zen dotxf kernels.
+    
+    Details:
+    - Split the main loop bodies of zen's [sd]dotxf kernels into two cases:
+      one to handle a column-stored matrix A and one to handle a row-stored
+      matrix A. This allows vector instructions to be employed even if A is
+      stored by rows (and A^T appears stored as columns). Both storage cases
+      use a common edge case loop. Thanks to Devin Matthews for this idea
+      and for prototyping the change needed for sdotxf kernel.
+
+commit 679dcc331dd870ec680e135a3fb65ffa6e3a91c2
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Mar 26 15:35:17 2018 -0500
+
+    Make k_iter/k_left uint64_t in bulldozer fma ukrs.
+    
+    Details:
+    - Changed the declaration of k_iter and k_left for d, c, z microkernels
+      from dim_t to uint64_t. This is needed to ensure compatibility with
+      the movq instruction used to load the value into registers. This
+      change should have been made a long time ago, but for some reason
+      only recently began showing up via Travis CI.
+
+commit 6a628184f6938673440e4cdd4fed0208c51fd1f9
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Mar 26 14:48:16 2018 -0500
+
+    Fixed a memkind-related compile-time bug on knl.
+    
+    Details:
+    - Fixed a compile-time error that occurred due to the fact that
+      BLIS_ENABLE_MEMKIND, defined in bli_config.h, was not being defined
+      soon enough to be used in bli_system.h where it is needed to determine
+      whether hbwmalloc.h should be #included. bli_system.h is now included
+      after bli_config.h (and bli_config_macro_defs.h). Thanks to Dave Love
+      for reporting this issue.
+    - Tweaked the language used by configure to echo the status of the
+      --with[out]-memkind option.
+
+commit e2192a8fd58ec3657434ddd407033e097edad8f4
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Mar 23 12:53:48 2018 -0500
+
+    Removed vzeroupper intrinsics from zen kenels.
+    
+    Details:
+    - Fixed a bug in the zen (also used by haswell) dotxf kernels whereby a
+      vzeroupper instruction destoryed part of the intermediate result
+      stored by the vdpps instructions that came right before. (The
+      vzeroupper instrinsic was removed.)
+    - Removed remaining vzeroupper instrinsics from other zen kernels.
+      Previously, the vzeroupper instructions were included because BLIS is
+      typically compiled with -mfpmath=sse. But it was brought to my
+      attention that inserting these vzeroupper instructions is unnecessary
+      for our purposes, since (a) -mfpmath=sse results in VEX-encoded scalar
+      code rather than literal SSE instructions, and (b) compilers already
+      (likely) insert vzeroupper instructions where necessary. Thanks to
+      Devin Matthews for zeroing in on the dotxf bug.
+    - Removed -malign-double from bulldozer make_defs.mk. This alignment
+      was already happening by default since bulldozer is an x86_64 system.
+
+commit 22289ad23cd10b81451ce82f60d84b5f97e7fd85
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Mar 22 18:21:30 2018 -0500
+
+    Added build system support for libmemkind.
+    
+    Details:
+    - Added support for libmemkind to configure. configure attempts to
+      detect the presence of libmemkind by compiling a small program
+      containing #include <hbwmalloc.h> and a call to hbw_malloc(). If
+      successful, it is assumed that libmemkind is present and available.
+      If present, use of libmemkind is enabled by default, and otherwise
+      use is disabled by default. If libmemkind is present, the user may
+      explicitly disable use of the library by running configure with the
+      --without-memkind option. Furthermore, a configuration may disable
+      libmemkind, perhaps conditional on some aspect of the build system,
+      by including -DBLIS_DISABLE_MEMKIND in the configuration's CPPROCFLAGS
+      make variable and setting the BLIS_ENABLE_MEMKIND makefile variable,
+      set in config.mk, to 'no'. (The knl configuration makes use of this
+      latter feature; see below.)
+    - If enabled at configure-time, bli_system.h will #include <hbwmalloc.h>
+      and bli_kernel_macro_defs.h will define BLIS_MALLOC_POOL and
+      BLIS_FREE_POOL to use hbw_malloc() and hbw_free(), respectively.
+    - Deprecated explicit use of BLIS_NO_HBWMALLOC in
+      config/knl/bli_family.knl.h and replaced use of -DBLIS_NO_HBWMALLOC in
+      config/knl/make_defs.mk with -DBLIS_DISABLE_MEMKIND, which overrides
+      (#undefs) the definition of BLIS_ENABLE_MEMKIND in bli_system.h, if it
+      would otherwise be defined. Also, set the BLIS_ENABLE_MEMKIND makefile
+      variable to 'no'.
+    - common.mk now adds libmemkind to LDFLAGS if libmemkind is enabled.
+
+commit 7dc40eafdd9af3e8c4519a8d1b04d25830b4ca7a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Mar 21 18:39:16 2018 -0500
+
+    Updates to top-level and test driver Makefiles.
+    
+    Details:
+    - Added logic to common.mk that will choose a BLIS library against which
+      to link (LIBBLIS_LINK). The default choice is the static (.a) library;
+      the shared (.so) library is chosen only if the shared library build was
+      enabled and the static one was disabled.
+    - Updated the various test driver Makefiles to reference this common,
+      pre-chosen library against which to link. (Previously, these drivers
+      unconditionally linked against the static library and would have
+      failed if the static library build was disabled at configure-time.)
+    - Renamed many of the variables in common.mk and the top-level Makefile
+      so that variables relating to the libblis.[a|so] files, including
+      paths to those files, begin with "LIBBLIS".
+    - Shuffled around some of the library definitions from the top-level
+      Makefile to common.mk.
+    - Renamed BLIS_ENABLE_DYNAMIC_BUILD to BLIS_ENABLE_SHARED_BUILD, and
+      the @enable_dynamic@ anchor to @enable_shared@ in build/config.mk.in
+      and in configure.
+    - A few other cleanups in the top-level Makefile.
+
+commit 97e1eeade3c51df1bae574a9bc1da34b05bf2bd3
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Mar 21 15:47:11 2018 -0500
+
+    Added input.operations.fast file for 'make check'.
+    
+    Details:
+    - Added an 'input.operations.fast' file to testsuite directory to go
+      along with the 'input.general.fast' file used by the 'make check'
+      target in the top-level Makefile. This will allow the "fast" check
+      to prune operations and/or parameter combinations from the test
+      space in order to save time.
+    - Currently, input.operations.fast prunes trmm3 and all transposition
+      and conjugation parameters from the level-3 test space.
+    - Reduced problem size tested in input.general.fast to 100 and disabled
+      testing of 1m method.
+
+commit c441caa95aabe69f54e2160eb67bf4ca76a66c34
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Mar 20 17:56:02 2018 -0500
+
+    README update.
+    
+    Details:
+    - Minor updates to README.md.
+    - Minor change to blastest/Makefile.
+
+commit 6fe018eb4ac8c16f2edc916c24f5994848017b7f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Mar 20 15:35:45 2018 -0500
+
+    Added .gitkeep file to blastest/obj.
+    
+    Details:
+    - Added an empty file named '.gitkeep' to blastest/obj/ so that git will
+      track the otherwise empty directory. (This is already done for the BLIS
+      testsuite in testsuite/obj.)
+
+commit 0e6d000db9291342913dc5f8590a28c67bbcbc95
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Mar 20 15:08:43 2018 -0500
+
+    Updated .gitignore to ignore BLAS test out.* files.
+
+commit 40c040a31d96fbadff11f761d0cad1ef03ef2cc5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Mar 20 14:33:50 2018 -0500
+
+    Fixes to .travis.yml.
+    
+    Details:
+    - Invoke the full BLIS testsuite via 'make testblis' instead of the fast
+      version via 'blistest-fast' (which was wrong anyway, since the correct
+      fast traget is 'testblis-fast').
+    - Invoke the BLAS tests via 'make testblas' instead of 'blastest'.
+
+commit 664ec4813d8b53121cce7a68bef47da656ece9cb
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Mar 20 13:54:58 2018 -0500
+
+    Integrated f2c'ed netlib BLAS test suite.
+    
+    Details:
+    - Created a new test suite that exercises only the BLAS compatibility
+      found in BLIS. The test suite is a straightforward port of code
+      obtained from netlib LAPACK, run through f2c and linked to a stripped-
+      down version of libf2c that is compiled along with the test drivers
+      (to prevent any obvious ABI issues). The new BLAS test suite can be
+      run from within its new local directory, 'blastest' (through its local
+      'make ; make run' targets) or from the top-level Makefile (via the
+      'make testblas' target). Output files are created in whatever directory
+      the test drivers are run, whether it be the 'blastest' directory, the
+      top-level source distribution directory, or the out-of-tree directory
+      in which 'configure' was run. Also, the results of the BLAS test suite
+      can be checked via 'make checkblas', which summarizes the presence or
+      absence of test failures in a single line printed to stdout.
+    - Updated the 'test' target to run both 'testblis' and 'testblas'.
+    - Added a new 'testblis-fast' target that runs the BLIS testsuite with
+      smaller problem sizes, allowing it to finish more quickly.
+    - Added a 'make check' target, which runs 'checkblis-fast' and
+      'checkblas'.
+    - Changed .travis.yml so that Travis CI runs 'testblis-fast' instead of
+      'testblis' before (calling the check-blistest.sh script to check the
+      result manually).
+    - Renamed some targets in the top-level Makefile to be consistent between
+      BLAS and BLIS.
+
+commit 40fa10396c0a3f9601cf49f6b6cd9922185c932e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Mar 19 18:19:43 2018 -0500
+
+    Fixed a few obscure bugs in the BLAS API.
+    
+    Details:
+    - Fixed a missing parameter in the definition of sdsdot_(). The 'sb'
+      argument was missing. Strangely, the argument is omitted from dsdot_()
+      in the BLAS API.
+    - Fixed the missing 'c' or 'u' in the "?gerc" or "?geru" operation string
+      passed to xerbla_() by the bla_ger_check() macro.
+    - For bla_syrk_check() and bla_syr2k_check() macros, only allow
+      conjugate-transpose (trans='c') as a valid argument for the real
+      domain functions [sd]syrk_() and [sd]syr2k_(). (Previously, the
+      argument was allowed even for the complex domain equivalents, which
+      was inconsistent with the BLAS API.)
+
+commit fe7d7f1e43e4c26249eed83d4188beee1ba96202
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Mar 18 19:43:06 2018 -0500
+
+    Fixed cpp macro parameter "ch" typo in bla_ger.c.
+    
+    Details:
+    - Previously, the BLAS routine-generating macro in bla_ger.c was
+      incorrectly passing MKSTR(ch) into the _check() macro when it
+      should have been passing in the char that was available, chxy.
+      I've instead changed the name of the macro parameter from chxy
+      to ch. Similar change as made to bla_ger.h for consistency.
+      Thanks to Dave Love in helping track this down. (NOTE: This is
+      actually the root cause of the bug that was first patched by
+      increasing the length of the operation name strings passed into
+      xerbla_(), as defined by the constant BLIS_MAX_BLAS_FUNC_STR_LENGTH,
+      in 3d1a5a7. In theory, that change could be backed out now.)
+    - Applied aforementioned chxy->ch change to bla_dot.[ch], as well as
+      frame/compat/cblas/f77_sub/f77_dot_sub.[ch] (not because it needed
+      to happen, but for naming consistency).
+    - Reformatted function signatures/prototypes of CBLAS functions and
+      function calls to BLAS in frame/compat/cblas/f77_sub/*.c.
+
+commit cb7ed90752d1ddbac11368c4510641ca4f3a02eb
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Mar 16 13:05:56 2018 -0500
+
+    Convert op names to uppercase before calling xerbla_().
+    
+    Details:
+    - Defined a new function, bli_string_mkupper(), that calls toupper() on
+      every non-NULL character in a string.
+    - Call bli_string_mkupper() prior to calling xerbla_() in the level-2/-3
+      BLAS _check() macros. This prevents the BLAS testsuite from complaining
+      that the operation name (e.g. "dgemm") does not match the expected
+      value (e.g. "DGEMM"). Thanks to Dave Love for reporting this issue.
+
+commit 3d1a5a7c08fed3ba29f060fe1db2b0dc42dde223
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Mar 16 12:24:07 2018 -0500
+
+    Fixed printf() format overflow.
+    
+    Details:
+    - Increased the length of operation name strings passed to xerbla_() in
+      the level-2 and level-3 operation _check() functions, found in
+      frame/compat/check. This avoids a format specifier overflow warning by
+      gcc 7. Thanks to Dave Love for reporting this issue and suggesting the
+      fix.
+
+commit c73055f028684d998e03b2392093c393782bbfe7
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Mar 15 16:08:21 2018 -0500
+
+    Return after non-zero info in BLAS checks.
+    
+    Details:
+    - Previously, when calling the BLAS compatibility layer, discovering a
+      parameter check failure would result in the proper setting of the
+      info parameter (printed by xerbla_()), but would also come with an
+      immediate abort() rather than a return. This was incorrect behavior
+      for two overlapping reasons.
+      (1) BLAS should return gracefully to the caller in the event of a
+          bad set of parameters, not abort().
+      (2) When BLIS was being tested via the BLAS testsuite, BLIS's
+          xerbla_() would correctly get preempted/overridden by the
+          xerbla_() in the BLAS testsuite, but execution would then
+          erroneously continue on to the BLIS implementation with bad
+          parameter values.
+    - The previous issue was addressed by disabling the abort() in BLIS's
+      xerbla_(), changing all of the BLAS _check() functions to cpp macros,
+      and adding a return statement to the end of each _check() macro's
+      "if ( info != 0 )" conditional.
+      Thanks to Dave Love for reporting this issue.
+
+commit c4f1d18b97a6a8c3ea0366aa759db597a664062a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Mar 14 19:10:09 2018 -0500
+
+    Minor typo fix to printing arch in testsuite.
+    
+    Details:
+    - Mistakenly was calling bli_cpuid_query_id() instead of
+      bli_arch_query_id() in the recent addition to the testsuite output
+      that prints the active sub-configuration. The former function is
+      only used for multi-architecture builds, whereas the latter is the
+      more general option that also works for single configuration
+      (including 'configure auto') builds.
+
+commit 8f2fabec800a720b3e94b33c0048cc8c4ead436d
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Wed Mar 14 17:43:42 2018 -0500
+
+    Make arm32 and arm64 families work. (#176)
+
+commit fc6a1842518a0820c6708c285611346d5a1419da
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Mar 14 15:31:17 2018 -0500
+
+    Print sub-configuration name in testsuite output.
+    
+    Details:
+    - Added a line to the testsuite output that prints the name of the
+      current/active sub-configuration. This is useful when linking the
+      testsuite against multi-configuration builds because it confirms
+      the sub-configuration that is actually being employed at runtime.
+      Thanks to Devin Matthews for suggesting this feature.
+
+commit 9943a899d64bf7ec4a24106f6f4c70629bbe1f6e
+Merge: 290dd4a9 b1a15ae6
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Wed Mar 14 13:27:44 2018 -0500
+
+    Merge pull request #173 from devinamatthews/dev
+    
+    Fix Cortex-A9 and Cortex-A15 configs.
+
+commit b1a15ae6ee0f46c9a95cf59f9555925e0e8e21ff
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Wed Mar 14 13:26:44 2018 -0500
+
+    Use BLIS_H_FLAT
+
+commit 290dd4a9feee447e69b40ad108954af78e196f7e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Mar 14 13:15:37 2018 -0500
+
+    Allow arbitrarily deep configuration families.
+    
+    Details:
+    - Updated configure so that configuration families specified in the
+      config_registry are no longer constrained as being only one level
+      deep. For example, previously the x86_64 family could not be defined
+      concisely in terms of, say, intel64 and amd64 families, and instead
+      had to be defined as containing "haswell, sandybridge, penryn, zen,
+      etc." In other words, families were constrained to only having
+      singleton configurations as their members. That constraint is now
+      lifted.
+    - Redefined x86_64 family in config_registry in terms of intel64 and
+      amd64.
+
+commit 9cee78e006d56543ac02fc9c488905c0434e60ae
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Wed Mar 14 13:09:48 2018 -0500
+
+    Fix Cortex-A9 and Cortex-A15 configs.
+    
+    Tested with QEMU.
+
+commit 1a3031740f7fcbbcc2c99d5c4cb50d0413407455
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Mar 13 16:04:40 2018 -0500
+
+    Updates to ARM hardware detection support.
+    
+    Details:
+    - Updated/clarified the ARM preprocessor macro branch of bli_cpuid.c.
+      Going forward, cortexa57 (64-bit), cortexa15, and cortexa9 (32-bit)
+      sub-configurations are supported. However, the functions that detect
+      features specific to a15 and a9 are identical, and since a15 is tested
+      first, it will always be chosen for arm32 hardware (even if both
+      sub-configurations were enabled at configure-time and the library is
+      linked and run on an a9). Thus, more work needs to be done to
+      distinguish these two.
+    - Added cpp guard around x86_64 portions of bli_cpuid.c. Now, either
+      the x86_64 or ARM code will be compiled (or neither, if neither
+      environment is detected).
+    - In bli_arch_query_id(), call bli_cpuid_query_id() when the
+      BLIS_FAMILY_ARM64 or BLIS_FAMILY_ARM32 macros are defined.
+    - Added arm64 and arm32 configuration families to config_registry.
+    - Added a note to the arch_t typedef enum in bli_type_defs.h reminding
+      the developer to update the string array in bli_arch.c whenever new
+      enum values are added or existing values are reordered.
+
+commit 1442d06886ebdc34d8f1cb620229ddc6062c2ce8
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Mar 11 16:59:50 2018 -0500
+
+    Fixed misnamed kernels in _cntx_init_cortexa57.c.
+    
+    Details:
+    - Changed incorrect kernel function names in bli_cntx_init_cortexa57.c:
+        bli_sgemm_cortexa57_asm_8x12 -> bli_sgemm_armv8a_asm_8x12
+        bli_dgemm_cortexa57_asm_6x8  -> bli_dgemm_armv8a_asm_6x8
+      Thanks to Jacob Gorm Hansen for reporting this issue.
+
+commit 48da9f5805f0a49f6ad181ae2bf57b4fde8e1b0a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Mar 7 12:54:06 2018 -0600
+
+    Tweaked common.mk, Makefile, skx/knl make_defs.mk.
+    
+    Details:
+    - Reorganized linker-related section of common.mk so that LDFLAGS set
+      in a sub-configuration's make_defs.mk file will not be immediately
+      (and erroneously) overridden by the default values.
+    - Re-enabled redirected (to file) output of the testsuite when run from
+      the top-level Makefile via 'make test'. (For some reason, it was
+      commented-out for the non-verbose case.)
+    - Removed old/unnecessary code from the make_defs.mk files of skx and
+      knl sub-configurations.
+
+commit 8b0475a87daa177916e2caac0e530c6a57fa07cf
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Mar 6 06:39:44 2018 -0600
+
+    Fixed typo in attempted fix in 1a8350f7.
+    
+    Details:
+    - Mistakenly entered 148 as knl mc blocksize for double real when the
+      value should have been 144. Thanks to Dave Love for reporting this.
+
+commit 8912e6886b97eabb4ce0c35a3609a0fd994d347b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Mar 5 18:00:45 2018 -0600
+
+    Fixed missing flags during shared object build.
+    
+    Details:
+    - Fixed a bug in common.mk that caused warning, position-independent
+      code, miscellaneous, and general preprocessor flags to be omitted
+      from the configuration family-specific variables that hold those
+      values, as registered by the family's make_defs.mk file. This would
+      most obviously manifest when targeting a configuration family such as
+      'intel64' while simultaneously configuring for a shared object build,
+      as the key '-fPIC' flag would be omitted at compile-time and prevent
+      successful linking. Thanks to Dave Love for reporting this bug.
+    - Other cleanups to common.mk for readability and clarity.
+
+commit 1a8350f70557fc53ca0c2eadf2076710dd0d9bc9
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Mar 5 13:32:00 2018 -0600
+
+    Fixed cache blocksize bug in knl configuration.
+    
+    Details:
+    - Changed the mc blocksize for double real execution in the knl sub-
+      configuration from 160 to 148. The old value was not a multiple of
+      mr (which is 24), and thus the safeguards in bli_gks_register_cntx()
+      were tripping. Thanks for Dave Love for reporting this issue.
+    - Switch knl sub-configuration to use default blocksizes for datatypes
+      not supported by native kernels.
+    - Fixed typos in bli_error.c that prevented certain error strings
+      (which report maximum cache blocksizes not being multiples of their
+      corresponding register blocksize) from properly initializing.
+
+commit c09fffa827fe6241dc20193a1c404496664220de
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Mar 3 13:13:39 2018 -0600
+
+    Added missing cntx_t* arg in knl packm kernels.
+    
+    Details:
+    - Added the missing cntx_t* argument to the function signature of packm
+      kernels in kernels/knl/1m/. Thanks to Dave Love for reporting this
+      issue.
+
+commit 1ef9360b1fd0209fbeb5766f7a35402fbd080fcb
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Mar 1 14:36:39 2018 -0600
+
+    Enable non-unit vector stride tests by default.
+    
+    Details:
+    - Change "vector storage schemes to test" parameter in testsuite's
+      input.general file to "cj". This means that both unit stride column
+      vectors and non-unit stride column vectors will be tested in
+      operations with vector operands (e.g. level-1v, level-1f, level-2).
+    - Very minor comment (typo) changes to input.operations.
+
+commit 8c4e55a1a1ead9a5e970200fee027ffd2c7e8454
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Feb 28 17:01:47 2018 -0600
+
+    Added individual operation overrides in testsuite.
+    
+    Details:
+    - Updated the testsuite driver so that setting one or more individual
+      operation test switches to "2" in input.operations will enable ONLY
+      those operations and disable all others, regardless of the values of
+      the section overrides and other operation switches. This makes it
+      every easy to quickly test only one or two operations, and equally
+      easy to revert back to the previous combination of operation tests.
+    - Added more comments to input.operations describing the use of
+      individual "enable only" overrides.
+
+commit 34862aed89e5d5a8f35aeecd49f3052ada1f337b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Feb 28 15:30:14 2018 -0600
+
+    Use zen kernels in haswell sub-configuration.
+    
+    Details:
+    - Register use of level-1v zen intrinsic kernels for amaxv, axpyv, dotv,
+      dotxv, and scalv, as well asl level-1f zen intrinsic kernels for axpyf
+      and dotxf. This works because these kernels simply target AVX/AVX2,
+      and therefore work without modification on haswell hardware.
+    - Switch to use of zen microkernels in bli_cntx_init_haswell.c. The zen
+      kernels are essentially identical to those used by haswell, except that
+      now zen kernels are a bit more up-to-date. In the future, I may
+      continue to maintain duplicates, or I may keep the kernels named after
+      one architecture (zen or haswell) but used by both sub-configurations.
+    - In config_registry, enable use of both haswell and zen kernels for the
+      haswell sub-configuration. This is necessary in order to make zen
+      kernels visible when registering kernels in bli_cntx_init_haswell.c.
+    - Enable use of assembly-based complex gemm microkernels for zen,
+      bli_cgemm_zen_asm_3x8() and bli_zgemm_zen_asm_3x4(), in
+      bli_cntx_init_zen.c. This was actually intended for 1681333.
+
+commit d9079655c9cbb903c6761d79194a21b7c0a322bc
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Feb 23 17:42:48 2018 -0600
+
+    CHANGELOG update (0.3.0)
+
+commit 709f8361ebc90b96b02ebe5c5ffb6fc3b1b25e58 (tag: 0.3.0)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Fri Feb 23 17:42:48 2018 -0600
 
     Version file update (0.3.0)
 
-commit 3defc7265c12cf85e9de2d7a1f243c5e090a6f9d (origin/master, origin/HEAD)
+commit 3defc7265c12cf85e9de2d7a1f243c5e090a6f9d
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Fri Feb 23 17:38:19 2018 -0600
 
@@ -40,7 +652,7 @@ Date:   Fri Feb 23 16:33:32 2018 -0600
       contained. To remedy this situation, we now selectively use movss to
       load any element that could be the last element in the matrix.
 
-commit 5112e1859e7f8888f5555eb7bc02bd9fab9b4442 (origin/rt, rt)
+commit 5112e1859e7f8888f5555eb7bc02bd9fab9b4442 (origin/rt)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Fri Feb 23 14:31:26 2018 -0600
 
@@ -272,7 +884,7 @@ Date:   Thu Jan 4 20:51:35 2018 -0600
       time hardware detection (when clang is selected).
     - Added some missing (but mostly-optional) quotes to configure script.
 
-commit 5a7005dd44ed3174abbe360981e367fd41c99b4b (origin/amd, amd)
+commit 5a7005dd44ed3174abbe360981e367fd41c99b4b
 Merge: 7be88705 3bc99a96
 Author: Nisanth M P <nisanth.padinharepatt@amd.com>
 Date:   Wed Jan 3 12:05:12 2018 +0530
@@ -321,7 +933,7 @@ Date:   Sat Dec 23 15:32:03 2017 -0600
       is used by the auto-detection script to printf() the name of the
       sub-configuration corresponding to the detected hardware.
 
-commit 9804adfd405056ec332bb8e13d68c7b52bd3a6c1 (origin/selfinit, selfinit)
+commit 9804adfd405056ec332bb8e13d68c7b52bd3a6c1 (origin/selfinit)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Thu Dec 21 19:22:57 2017 -0600
 
