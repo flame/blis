@@ -32,13 +32,24 @@
 #
 #
 
+script_name=${0##*/}
+
+ansi_red="\033[0;31m"
+ansi_green="\033[0;32m"
+ansi_normal="\033[0m"
+
+passmsg="All BLAS tests passed!"
+failmsg0="At least one BLAS test failed. :("
+failmsg1="Please see out.* files for details."
+
 grep -q '\*\*\*\*' ./out.*
 
 if [ $? -eq 0 ]; then
-  echo "At least one BLAS test failed. Please see out.* files for details."
-  exit 1
+	printf "${ansi_red}""${script_name}: ${failmsg0}""${ansi_normal}\n"
+	printf "${ansi_red}""${script_name}: ${failmsg1}""${ansi_normal}\n"
+	exit 1
 else
-  echo "All BLAS tests passed!"
-  sleep 1.5
-  exit 0
+	printf "${ansi_green}""${script_name}: ${passmsg}""${ansi_normal}\n"
+	exit 0
 fi
+

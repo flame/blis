@@ -683,9 +683,9 @@ $(foreach name, $(BLASTEST_DRV3_BASES), $(eval $(call make-run-blat23-rule,$(nam
 # Check the results of the BLAS test suite drivers.
 checkblas: blastest-run
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	$(BLASTEST_CHECK)
+	- $(BLASTEST_CHECK)
 else
-	@$(BLASTEST_CHECK)
+	@- $(BLASTEST_CHECK)
 endif
 
 # --- BLIS test suite rules ---
@@ -748,17 +748,17 @@ endif
 # Check the results of the BLIS testsuite.
 checkblis: testsuite-run
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	$(TESTSUITE_CHECK) $(TESTSUITE_OUT_FILE)
+	- $(TESTSUITE_CHECK) $(TESTSUITE_OUT_FILE)
 else
-	@$(TESTSUITE_CHECK) $(TESTSUITE_OUT_FILE)
+	@- $(TESTSUITE_CHECK) $(TESTSUITE_OUT_FILE)
 endif
 
 # Check the results of the BLIS testsuite (fast).
 checkblis-fast: testsuite-run-fast
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	$(TESTSUITE_CHECK) $(TESTSUITE_OUT_FILE)
+	- $(TESTSUITE_CHECK) $(TESTSUITE_OUT_FILE)
 else
-	@$(TESTSUITE_CHECK) $(TESTSUITE_OUT_FILE)
+	@- $(TESTSUITE_CHECK) $(TESTSUITE_OUT_FILE)
 endif
 
 # --- Install header rules ---
