@@ -506,6 +506,17 @@ endif
 endef
 
 # first argument: a kernel set (name) being targeted (e.g. haswell).
+define make-refinit-rule
+$(BASE_OBJ_REFKERN_PATH)/$(1)/bli_cntx_$(1)_ref.o: $(REFKERN_PATH)/bli_cntx_ref.c $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	$(CC) $(call get-refinit-cflags-for,$(1)) -c $$< -o $$@
+else
+	@echo "Compiling $$@" $(call get-refinit-text-for,$(1))
+	@$(CC) $(call get-refinit-cflags-for,$(1)) -c $$< -o $$@
+endif
+endef
+
+# first argument: a kernel set (name) being targeted (e.g. haswell).
 define make-refkern-rule
 $(BASE_OBJ_REFKERN_PATH)/$(1)/%_$(1)_ref.o: $(REFKERN_PATH)/%_ref.c $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
@@ -549,9 +560,10 @@ $(foreach conf, $(CONFIG_LIST), $(eval $(call make-config-rule,$(conf))))
 #$(eval $(call make-frame-rule,$(firstword $(CONFIG_NAME))))
 $(foreach conf, $(CONFIG_NAME), $(eval $(call make-frame-rule,$(conf))))
 
-# Instantiate the build rule for reference kernels for each of the sub-
-# configurations in CONFIG_LIST with the CFLAGS designated for that sub-
-# configuration.
+# Instantiate the build rule for reference kernel initialization and
+# reference kernels for each of the sub-configurations in CONFIG_LIST with
+# the CFLAGS designated for that sub-configuration.
+$(foreach conf, $(CONFIG_LIST), $(eval $(call make-refinit-rule,$(conf))))
 $(foreach conf, $(CONFIG_LIST), $(eval $(call make-refkern-rule,$(conf))))
 
 # Instantiate the build rule for optimized kernels for each of the kernel

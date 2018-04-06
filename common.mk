@@ -98,24 +98,31 @@ get-noopt-cflags-for   = $(strip $(call load-var-for,CDBGFLAGS,$(1)) \
                                  $(INCLUDE_PATHS) $(VERS_DEF) \
                           )
 
+get-refinit-cflags-for = $(call load-var-for,COPTFLAGS,$(1)) \
+                         $(call get-noopt-cflags-for,$(1)) \
+                         -DBLIS_CNAME=$(1)
+
+get-refkern-cflags-for = $(call load-var-for,CKOPTFLAGS,$(1)) \
+                         $(call load-var-for,CVECFLAGS,$(1)) \
+                         $(call get-noopt-cflags-for,$(1)) \
+                         -DBLIS_CNAME=$(1)
+
+get-config-cflags-for  = $(call load-var-for,COPTFLAGS,$(1)) \
+                         $(call get-noopt-cflags-for,$(1))
+
+get-frame-cflags-for   = $(call load-var-for,COPTFLAGS,$(1)) \
+                         $(call get-noopt-cflags-for,$(1))
+
 get-kernel-cflags-for  = $(call load-var-for,CKOPTFLAGS,$(1)) \
                          $(call load-var-for,CVECFLAGS,$(1)) \
                          $(call get-noopt-cflags-for,$(1))
 
-get-refkern-cflags-for = $(call get-kernel-cflags-for,$(1)) \
-                         -DBLIS_CNAME=$(1)
-
-get-frame-cflags-for   = $(call load-var-for,COPTFLAGS,$(1)) \
-                         $(call load-var-for,CVECFLAGS,$(1)) \
-                         $(call get-noopt-cflags-for,$(1))
-
-get-config-cflags-for  = $(call get-kernel-cflags-for,$(1))
-
 get-noopt-text       = "(CFLAGS for no optimization)"
-get-kernel-text-for  = "('$(1)' CFLAGS for kernels)"
+get-refinit-text-for = "('$(1)' CFLAGS for ref. kernel init)"
 get-refkern-text-for = "('$(1)' CFLAGS for ref. kernels)"
-get-frame-text-for   = "('$(1)' CFLAGS for framework code)"
 get-config-text-for  = "('$(1)' CFLAGS for config code)"
+get-frame-text-for   = "('$(1)' CFLAGS for framework code)"
+get-kernel-text-for  = "('$(1)' CFLAGS for kernels)"
 
 
 
