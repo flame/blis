@@ -2034,12 +2034,15 @@ main()
 
 	clist_contains_cname=$(is_in_list "${config_name}" "${config_list}")
 
-	# If the config_list does not already contain the config_name, generate
-	# makefiles in that directory.
+	# If the config_list does not already contain the config_name (i.e.,
+	# if config_name is an umbrella family), generate makefiles in that
+	# directory. (In the next step, we will loop over the actual sub-
+	# configurations and create fragments there as well.)
 	if [ "${clist_contains_cname}" == "false" ]; then
 
+		echo "${script_name}: creating makefile fragments in ${config_dirpath}/${config_name}"
 		${gen_make_frags_sh} \
-				 -h -r -v1 \
+				 -h -r -v0 \
 				 -o ${script_name} \
 				 -p 'CONFIG' \
 				 ${config_dirpath}/${config_name} \
@@ -2052,8 +2055,9 @@ main()
 	# in the configuration list.
 	for conf in ${config_list}; do
 
+		echo "${script_name}: creating makefile fragments in ${config_dirpath}/${conf}"
 		${gen_make_frags_sh} \
-				 -h -r -v1 \
+				 -h -r -v0 \
 				 -o ${script_name} \
 				 -p 'CONFIG' \
 				 ${config_dirpath}/${conf} \
@@ -2066,8 +2070,9 @@ main()
 	# the configuration list (in the kernel list).
 	for kern in ${kernel_list}; do
 
+		echo "${script_name}: creating makefile fragments in ${kernels_dirpath}/${kern}"
 		${gen_make_frags_sh} \
-				 -h -r -v1 \
+				 -h -r -v0 \
 				 -o ${script_name} \
 				 -p 'KERNELS' \
 				 ${kernels_dirpath}/${kern} \
@@ -2077,8 +2082,9 @@ main()
 	done
 
 	# Generate makefile fragments in the reference kernels directory.
+	echo "${script_name}: creating makefile fragments in ${refkern_dirpath}"
 	${gen_make_frags_sh} \
-			 -h -r -v1 \
+			 -h -r -v0 \
 			 -o ${script_name} \
 			 -p 'REFKERN' \
 			 ${refkern_dirpath} \
@@ -2087,8 +2093,9 @@ main()
 			 ${gen_make_frags_dirpath}/ignore_list
 
 	# Generate makefile fragments in the framework directory.
+	echo "${script_name}: creating makefile fragments in ${frame_dirpath}"
 	${gen_make_frags_sh} \
-			 -h -r -v1 \
+			 -h -r -v0 \
 			 -o ${script_name} \
 			 -p 'FRAME' \
 			 ${frame_dirpath} \
