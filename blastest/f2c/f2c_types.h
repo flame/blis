@@ -32,6 +32,11 @@ use or performance of this software.
 #ifndef F2C_TYPES_H
 #define F2C_TYPES_H
 
+#ifdef HAVE_BLIS_H
+  #include <stdint.h>
+  #include "bli_config.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -45,8 +50,17 @@ extern "C" {
 /* Define to the number of bits in a long long integer, if it exists */
 #define F2C_LONG_LONG_BITS 64
 
-typedef int integer;
+#ifdef HAVE_BLIS_H
+  #if   BLIS_BLAS2BLIS_INT_TYPE_SIZE == 32
+    typedef int32_t   integer;
+  #elif BLIS_BLAS2BLIS_INT_TYPE_SIZE == 64
+    typedef int64_t   integer;
+  #else
+    typedef long int  integer;
+  #endif
+//typedef int integer;
 typedef unsigned int uinteger;
+#endif
 #if F2C_INT_BITS == 32
 # if F2C_LONG_BITS == 64
 typedef long int longint;

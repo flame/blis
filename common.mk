@@ -597,7 +597,10 @@ MK_HEADER_DIR_PATHS := $(dir $(foreach frag_path, \
 
 # Add -I to each header path so we can specify our include search paths to the
 # C compiler.
-INCLUDE_PATHS   := $(strip $(patsubst %, -I%, $(MK_HEADER_DIR_PATHS)))
+# NOTE: We no longer need every header path in the source tree since we
+# now #include the monolithic/flattened blis.h instead, and thus this
+# line is commented out.
+#INCLUDE_PATHS   := $(strip $(patsubst %, -I%, $(MK_HEADER_DIR_PATHS)))
 
 # Construct the base path for the intermediate include directory.
 BASE_INC_PATH   := $(BUILD_PATH)/$(INCLUDE_DIR)/$(CONFIG_NAME)

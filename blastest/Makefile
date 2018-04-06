@@ -44,10 +44,10 @@
 # --- Makefile PHONY target definitions ----------------------------------------
 #
 
-.PHONY: all bin \
+.PHONY: all f2c bin \
         clean cleanf2c cleanobj cleanbin cleanout \
         check-env check-env-mk check-env-fragments check-env-make-defs \
-        run
+        run check
 
 
 
@@ -135,9 +135,10 @@ endif
 TEST_OBJ_PATH  := obj
 
 F2C_LIB        := libf2c.a
-F2C_PATH       := f2c
 
+F2C_PATH       := f2c
 DRIVER_PATH    := src
+BLIS_H_PATH    := $(BUILD_PATH)/$(BASE_INC_PATH)
 
 INPUT_DIR      := input
 
@@ -164,17 +165,20 @@ DRIVER1_BASES  := $(filter %1,$(DRIVER_BASES))
 DRIVER2_BASES  := $(filter %2,$(DRIVER_BASES))
 DRIVER3_BASES  := $(filter %3,$(DRIVER_BASES))
 
+# The location of the script that checks the BLAS test output.
+BLASTEST_CHECK := $(DIST_PATH)/$(BUILD_DIR)/check-blastest.sh
+
 # Use the CFLAGS for the configuration family.
-CFLAGS          := $(call get-frame-cflags-for,$(CONFIG_NAME))
+CFLAGS         := $(call get-frame-cflags-for,$(CONFIG_NAME))
 
-# Add local header paths to CFLAGS
-CFLAGS          += -I$(F2C_PATH)
-
-# Suppress warnings about uninitialized functions.
-CFLAGS          += -Wno-maybe-uninitialized -Wno-parentheses
+# Suppress warnings about uninitialized functions, add local header
+# paths and the path to blis.h to CFLAGS.
+CFLAGS         += -Wno-maybe-uninitialized -Wno-parentheses \
+                  -I$(F2C_PATH) \
+                  -I$(BUILD_PATH) -DHAVE_BLIS_H
 
 # Locate the libblis library to which we will link.
-LIBBLIS_LINK    := $(BUILD_PATH)/$(LIBBLIS_LINK)
+LIBBLIS_LINK   := $(BUILD_PATH)/$(LIBBLIS_LINK)
 
 
 
@@ -294,6 +298,14 @@ $(foreach name, $(DRIVER2_BASES), $(eval $(call make-run-blat23-rule,$(name))))
 
 # Instantiate the rule above for each level-3 driver file.
 $(foreach name, $(DRIVER3_BASES), $(eval $(call make-run-blat23-rule,$(name))))
+
+check: run
+ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+	- $(BLASTEST_CHECK)
+else
+	@- $(BLASTEST_CHECK)
+endif
+
 
 # -- Clean rules --
 
