@@ -68,7 +68,9 @@ $(eval $(call store-var-for,CWARNFLAGS, $(1)))
 $(eval $(call store-var-for,CDBGFLAGS,  $(1)))
 $(eval $(call store-var-for,COPTFLAGS,  $(1)))
 $(eval $(call store-var-for,CKOPTFLAGS, $(1)))
-$(eval $(call store-var-for,CVECFLAGS,  $(1)))
+$(eval $(call store-var-for,CKVECFLAGS, $(1)))
+$(eval $(call store-var-for,CROPTFLAGS, $(1)))
+$(eval $(call store-var-for,CRVECFLAGS, $(1)))
 CONFIGS_INCL += $(1)
 endef
 
@@ -102,8 +104,8 @@ get-refinit-cflags-for = $(call load-var-for,COPTFLAGS,$(1)) \
                          $(call get-noopt-cflags-for,$(1)) \
                          -DBLIS_CNAME=$(1)
 
-get-refkern-cflags-for = $(call load-var-for,CKOPTFLAGS,$(1)) \
-                         $(call load-var-for,CVECFLAGS,$(1)) \
+get-refkern-cflags-for = $(call load-var-for,CROPTFLAGS,$(1)) \
+                         $(call load-var-for,CRVECFLAGS,$(1)) \
                          $(call get-noopt-cflags-for,$(1)) \
                          -DBLIS_CNAME=$(1)
 
@@ -114,7 +116,7 @@ get-frame-cflags-for   = $(call load-var-for,COPTFLAGS,$(1)) \
                          $(call get-noopt-cflags-for,$(1))
 
 get-kernel-cflags-for  = $(call load-var-for,CKOPTFLAGS,$(1)) \
-                         $(call load-var-for,CVECFLAGS,$(1)) \
+                         $(call load-var-for,CKVECFLAGS,$(1)) \
                          $(call get-noopt-cflags-for,$(1))
 
 get-noopt-text       = "(CFLAGS for no optimization)"

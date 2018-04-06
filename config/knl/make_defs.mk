@@ -70,19 +70,23 @@ ifeq ($(DEBUG_TYPE),sde)
 # Note: The BLIS_DISABLE_MEMKIND macro definition will override
 # (undefine) the BLIS_ENABLE_MEMKIND macro definition.
 CPPROCFLAGS    += -DBLIS_DISABLE_MEMKIND
+# This value is normally set by configure and communicated to make via
+# config.mk, however, the make_defs.mk files (this file) get included
+# after config.mk, so this definition will override that earlier
+# definition.
 BLIS_ENABLE_MEMKIND := no
 endif
 
 CKOPTFLAGS     := $(COPTFLAGS)
 
 ifeq ($(CC_VENDOR),gcc)
-CVECFLAGS      := -mavx512f -mavx512pf -mfpmath=sse -march=knl
+CKVECFLAGS     := -mavx512f -mavx512pf -mfpmath=sse -march=knl
 else
 ifeq ($(CC_VENDOR),icc)
-CVECFLAGS      := -xMIC-AVX512
+CKVECFLAGS     := -xMIC-AVX512
 else
 ifeq ($(CC_VENDOR),clang)
-CVECFLAGS      := -mavx512f -mavx512pf -mfpmath=sse -march=knl
+CKVECFLAGS     := -mavx512f -mavx512pf -mfpmath=sse -march=knl
 else
 $(error gcc, icc, or clang is required for this configuration.)
 endif
@@ -92,9 +96,14 @@ endif
 # The assembler on OS X won't recognize AVX512 without help.
 ifneq ($(CC_VENDOR),icc)
 ifeq ($(OS_NAME),Darwin)
-CVECFLAGS      += -Wa,-march=knl
+CKVECFLAGS     += -Wa,-march=knl
 endif
 endif
+
+# Flags specific to reference kernels.
+# Note: We use AVX2 for reference kernels instead of AVX-512.
+CROPTFLAGS     := $(CKOPTFLAGS)
+CRVECFLAGS     := -mavx2 -mfma -mfpmath=sse -march=knl
 
 # Never use libmemkind with Intel SDE.
 ifneq ($(DEBUG_TYPE),sde)

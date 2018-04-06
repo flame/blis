@@ -68,10 +68,14 @@ endif
 CKOPTFLAGS     := $(COPTFLAGS)
 
 ifeq ($(CC_VENDOR),icc)
-CVECFLAGS      := 
+CKVECFLAGS     := 
 else
 $(error icc is required for this configuration.)
 endif
+
+# Flags specific to reference kernels.
+CROPTFLAGS     := $(CKOPTFLAGS)
+CRVECFLAGS     := $(CKVECFLAGS)
 
 # Override the default value for LDFLAGS.
 LDFLAGS        := -mmic

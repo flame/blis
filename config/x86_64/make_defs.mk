@@ -68,18 +68,22 @@ endif
 CKOPTFLAGS     := $(COPTFLAGS)
 
 ifeq ($(CC_VENDOR),gcc)
-CVECFLAGS      := -mssse3 -mfpmath=sse -march=core2
+CKVECFLAGS     := -mssse3 -mfpmath=sse -march=core2
 else
 ifeq ($(CC_VENDOR),icc)
-CVECFLAGS      := -xSSE3
+CKVECFLAGS     := -xSSE3
 else
 ifeq ($(CC_VENDOR),clang)
-CVECFLAGS      := -mssse3 -mfpmath=sse -march=core2
+CKVECFLAGS     := -mssse3 -mfpmath=sse -march=core2
 else
 $(error gcc, icc, or clang is required for this configuration.)
 endif
 endif
 endif
+
+# Flags specific to reference kernels.
+CROPTFLAGS     := $(CKOPTFLAGS)
+CRVECFLAGS     := $(CKVECFLAGS)
 
 # Store all of the variables here to new variables containing the
 # configuration name.
