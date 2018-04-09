@@ -67,7 +67,6 @@ endif
 
 # Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS)
-
 ifeq ($(CC_VENDOR),gcc)
 CKVECFLAGS     := -mfpmath=sse -mavx -mfma -march=bdver2
 else

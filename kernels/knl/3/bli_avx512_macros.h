@@ -12,9 +12,9 @@
 #define ASM(...) STRINGIFY(__VA_ARGS__) "\n\t"
 #define LABEL(label) STRINGIFY(label) ":\n\t"
 
-#define XMM(x) %% xmm##x
-#define YMM(x) %% ymm##x
-#define ZMM(x) %% zmm##x
+#define XMM(x) %%xmm##x
+#define YMM(x) %%ymm##x
+#define ZMM(x) %%zmm##x
 #define EAX %%eax
 #define EBX %%ebx
 #define ECX %%ecx
@@ -29,8 +29,8 @@
 #define RBP %%rbp
 #define RDI %%rdi
 #define RSI %%rsi
-#define K(x) %% k##x
-#define R(x) %% r##x
+#define K(x) %%k##x
+#define R(x) %%r##x
 #define R8 %%r8
 #define R9 %%r9
 #define R10 %%r10
@@ -39,7 +39,7 @@
 #define R13 %%r13
 #define R14 %%r14
 #define R15 %%r15
-#define RD(x) %% r##x##d
+#define RD(x) %%r##x##d
 #define R8D %%r8d
 #define R9D %%r9d
 #define R10D %%r10d
@@ -71,8 +71,8 @@
 #define MEM_1TO8(...) GET_MACRO(__VA_ARGS__,MEM_1TO8_4,MEM_1TO8_3,MEM_1TO8_2,MEM_1TO8_1)(__VA_ARGS__)
 #define MEM_1TO16(...) GET_MACRO(__VA_ARGS__,MEM_1TO16_4,MEM_1TO16_3,MEM_1TO16_2,MEM_1TO16_1)(__VA_ARGS__)
 
-#define MASK_K(n) %{%% k##n %}
-#define MASK_KZ(n) %{%% k##n %} %{z%}
+#define MASK_K(n) %{%%k##n%}
+#define MASK_KZ(n) %{%%k##n%}%{z%}
 #define KMOV(to,from) ASM(kmovw from, to)
 #define JKNZD(kreg,label) \
     ASM(kortestw kreg, kreg) \
@@ -100,9 +100,9 @@
 #define SAR1(_0) ASM(sar _0)
 #define LEA(_0, _1) ASM(lea _1, _0)
 #define TEST(_0, _1) ASM(test _1, _0)
-//#define DEC(_0) ASM(dec _0)
-#define DEC(_0) SUB(_0, IMM(1))
+#define DEC(_0) ASM(dec _0)
 #define JLE(_0) ASM(jle _0)
+#define JL(_0) ASM(jl _0)
 #define JNZ(_0) ASM(jnz _0)
 #define JZ(_0) ASM(jz _0)
 #define JNE(_0) ASM(jne _0)
@@ -110,22 +110,37 @@
 #define JNC(_0) ASM(jnc _0)
 #define JC(_0) ASM(jc _0)
 #define JMP(_0) ASM(jmp _0)
+#define VCOMISS(_0, _1) ASM(vcomiss _1, _0)
+#define VCOMISD(_0, _1) ASM(vcomisd _1, _0)
 #define VGATHERDPS(_0, _1) ASM(vgatherdps _1, _0)
 #define VSCATTERDPS(_0, _1) ASM(vscatterdps _1, _0)
 #define VGATHERDPD(_0, _1) ASM(vgatherdpd _1, _0)
 #define VSCATTERDPD(_0, _1) ASM(vscatterdpd _1, _0)
+#define VGATHERQPS(_0, _1) ASM(vgatherqps _1, _0)
+#define VSCATTERQPS(_0, _1) ASM(vscatterqps _1, _0)
+#define VGATHERQPD(_0, _1) ASM(vgatherqpd _1, _0)
+#define VSCATTERQPD(_0, _1) ASM(vscatterqpd _1, _0)
+#define VMULSS(_0, _1, _2) ASM(vmulss _2, _1, _0)
+#define VMULSD(_0, _1, _2) ASM(vmulsd _2, _1, _0)
 #define VMULPS(_0, _1, _2) ASM(vmulps _2, _1, _0)
 #define VMULPD(_0, _1, _2) ASM(vmulpd _2, _1, _0)
 #define VPMULLD(_0, _1, _2) ASM(vpmulld _2, _1, _0)
+#define VPMULLQ(_0, _1, _2) ASM(vpmullq _2, _1, _0)
 #define VPADDD(_0, _1, _2) ASM(vpaddd _2, _1, _0)
 #define VPSLLD(_0, _1, _2) ASM(vpslld _2, _1, _0)
 #define VPXORD(_0, _1, _2) ASM(vpxord _2, _1, _0)
+#define VXORPD(_0, _1, _2) ASM(vxorpd _2, _1, _0)
 #define VFMADD132PS(_0, _1, _2) ASM(vfmadd132ps _2, _1, _0)
 #define VFMADD213PS(_0, _1, _2) ASM(vfmadd213ps _2, _1, _0)
 #define VFMADD231PS(_0, _1, _2) ASM(vfmadd231ps _2, _1, _0)
 #define VFMADD132PD(_0, _1, _2) ASM(vfmadd132pd _2, _1, _0)
 #define VFMADD213PD(_0, _1, _2) ASM(vfmadd213pd _2, _1, _0)
 #define VFMADD231PD(_0, _1, _2) ASM(vfmadd231pd _2, _1, _0)
+#define VMOVDQA(_0, _1) ASM(vmovdqa _1, _0)
+#define VMOVDQA32(_0, _1) ASM(vmovdqa32 _1, _0)
+#define VMOVDQA64(_0, _1) ASM(vmovdqa64 _1, _0)
+#define VMOVSS(_0, _1) ASM(vmovss _1, _0)
+#define VMOVSD(_0, _1) ASM(vmovsd _1, _0)
 #define VMOVAPS(_0, _1) ASM(vmovaps _1, _0)
 #define VMOVUPS(_0, _1) ASM(vmovups _1, _0)
 #define VMOVAPD(_0, _1) ASM(vmovapd _1, _0)
@@ -136,9 +151,16 @@
 #define VPBROADCASTQ(_0, _1) ASM(vpbroadcastq _1, _0)
 #define VBROADCASTF64X4(_0, _1) ASM(vbroadcastf64x4 _1, _0)
 #define VINSERTF64X4(_0, _1, _2, _3) ASM(vinsertf64x4 _3, _2, _1, _0)
+#define VEXTRACTF64X4(_0, _1, _2) ASM(vextractf64x4 _2, _1, _0)
+#define VINSERTF128(_0, _1, _2) ASM(vinsertf128 _2, _1, _0)
+#define VEXTRACTF128(_0, _1, _2) ASM(vextractf128 _2, _1, _0)
 #define VUNPCKLPD(_0, _1, _2) ASM(vunpcklpd _2, _1, _0)
 #define VUNPCKHPD(_0, _1, _2) ASM(vunpckhpd _2, _1, _0)
 #define VSHUFF64X2(_0, _1, _2, _3) ASM(vshuff64x2 _3, _2, _1, _0)
+#define VUNPCKLPS(_0, _1, _2) ASM(vunpcklps _2, _1, _0)
+#define VUNPCKHPS(_0, _1, _2) ASM(vunpckhps _2, _1, _0)
+#define VSHUFPS(_0, _1, _2, _3) ASM(vshufps _3, _2, _1, _0)
+#define VPERM2F128(_0, _1, _2, _3) ASM(vperm2f128 _3, _2, _1, _0)
 #define PREFETCH(LEVEL,ADDRESS) ASM(prefetcht##LEVEL ADDRESS)
 #define PREFETCHW0(ADDRESS) ASM(prefetchw ADDRESS)
 #define PREFETCHW1(ADDRESS) ASM(prefetchwt1 ADDRESS)
@@ -146,5 +168,6 @@
 #define VSCATTERPFDPS(LEVEL,ADDRESS) ASM(vscatterpf##LEVEL##dps ADDRESS)
 #define VGATHERPFDPD(LEVEL,ADDRESS) ASM(vgatherpf##LEVEL##dpd ADDRESS)
 #define VSCATTERPFDPD(LEVEL,ADDRESS) ASM(vscatterpf##LEVEL##dpd ADDRESS)
+#define VZEROUPPER() ASM(vzeroupper)
 
 #endif

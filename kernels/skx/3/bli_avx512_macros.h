@@ -152,6 +152,8 @@
 #define VBROADCASTF64X4(_0, _1) ASM(vbroadcastf64x4 _1, _0)
 #define VINSERTF64X4(_0, _1, _2, _3) ASM(vinsertf64x4 _3, _2, _1, _0)
 #define VEXTRACTF64X4(_0, _1, _2) ASM(vextractf64x4 _2, _1, _0)
+#define VINSERTF128(_0, _1, _2) ASM(vinsertf128 _2, _1, _0)
+#define VEXTRACTF128(_0, _1, _2) ASM(vextractf128 _2, _1, _0)
 #define VUNPCKLPD(_0, _1, _2) ASM(vunpcklpd _2, _1, _0)
 #define VUNPCKHPD(_0, _1, _2) ASM(vunpckhpd _2, _1, _0)
 #define VSHUFF64X2(_0, _1, _2, _3) ASM(vshuff64x2 _3, _2, _1, _0)
