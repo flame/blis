@@ -77,8 +77,8 @@ CPPROCFLAGS    += -DBLIS_DISABLE_MEMKIND
 BLIS_ENABLE_MEMKIND := no
 endif
 
+# Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS)
-
 ifeq ($(CC_VENDOR),gcc)
 CKVECFLAGS     := -mavx512f -mavx512pf -mfpmath=sse -march=knl
 else
@@ -103,11 +103,18 @@ endif
 # Flags specific to reference kernels.
 # Note: We use AVX2 for reference kernels instead of AVX-512.
 CROPTFLAGS     := $(CKOPTFLAGS)
-CRVECFLAGS     := -mavx2 -mfma -mfpmath=sse -march=knl
-
-# Never use libmemkind with Intel SDE.
-ifneq ($(DEBUG_TYPE),sde)
-LDFLAGS        += -lmemkind
+ifeq ($(CC_VENDOR),gcc)
+CRVECFLAGS     := -march=knl -mno-avx512f -mno-avx512pf -mno-avx512er -mno-avx512cd
+else
+ifeq ($(CC_VENDOR),icc)
+CRVECFLAGS     := -xMIC-AVX512
+else
+ifeq ($(CC_VENDOR),clang)
+CRVECFLAGS     := -march=knl -mno-avx512f -mno-avx512pf -mno-avx512er -mno-avx512cd
+else
+$(error gcc, icc, or clang is required for this configuration.)
+endif
+endif
 endif
 
 # Store all of the variables here to new variables containing the

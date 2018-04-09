@@ -65,6 +65,7 @@ else
 COPTFLAGS      := -O2 -fomit-frame-pointer
 endif
 
+# Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS)
 
 ifeq ($(CC_VENDOR),gcc)

@@ -65,8 +65,8 @@ else
 COPTFLAGS      := -O3 -ftree-vectorize -mtune=cortex-a57.cortex-a53
 endif
 
+# Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS)
-
 ifeq ($(CC_VENDOR),gcc)
 CKVECFLAGS     := -march=armv8-a+fp+simd -mcpu=cortex-a57.cortex-a53
 else

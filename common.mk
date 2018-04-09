@@ -302,20 +302,29 @@ endif
 # with things like LDFLAGS, but some do (or may), in which case they can
 # manually override whatever they need.
 
+# Define the external libraries we may potentially need at link-time.
+LIBM       := -lm
+LIBMEMKIND := -lmemkind
+LIBPTHREAD := -lpthread
+
 # Default linker flags.
 # NOTE: -lpthread is needed unconditionally because BLIS uses pthread_once()
 # to initialize itself in a thread-safe manner.
-LDFLAGS    := -lm -lpthread
+LDFLAGS    := $(LIBM) $(LIBPTHREAD)
 
 # Add libmemkind to the link-time flags, if it was enabled at configure-time.
 ifeq ($(BLIS_ENABLE_MEMKIND),yes)
-LDFLAGS    += -lmemkind
+LDFLAGS    += $(LIBMEMKIND)
 endif
 
 # Never use libm with Intel compilers.
 ifeq ($(CC_VENDOR),icc)
-LIBM       := -lm
 LDFLAGS    := $(filter-out $(LIBM),$(LDFLAGS))
+endif
+
+# Never use libmemkind with Intel SDE.
+ifeq ($(DEBUG_TYPE),sde)
+LDFLAGS    := $(filter-out $(LIBMEMKIND),$(LDFLAGS))
 endif
 
 # Default flag for creating shared objects.

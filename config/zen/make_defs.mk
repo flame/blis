@@ -65,8 +65,8 @@ else
 COPTFLAGS      := -O3 -fomit-frame-pointer
 endif
 
+# Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS)
-
 ifeq ($(CC_VENDOR),gcc)
 # gcc 6.0 (clang 4.0) or later:
 #CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma -march=znver1

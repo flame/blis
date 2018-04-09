@@ -65,8 +65,8 @@ else
 COPTFLAGS      := -O2 -funroll-all-loops
 endif
 
+# Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS)
-
 ifeq ($(CC_VENDOR),gcc)
 CKVECFLAGS     := -mfpmath=sse -mavx -mfma4 -march=bdver1
 else

@@ -65,8 +65,8 @@ else
 COPTFLAGS      := -O3
 endif
 
+# Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS)
-
 ifeq ($(CC_VENDOR),gcc)
 CKVECFLAGS     := -mavx512f -mavx512dq -mavx512bw -mavx512vl -mfpmath=sse -march=skylake-avx512
 else
@@ -93,7 +93,19 @@ endif
 # reference kernel code "is not going to achieve high enough SIMD utilization
 # to overcome the AVX-512 frequency drop". (Issue #187)
 CROPTFLAGS     := $(CKOPTFLAGS)
-CRVECFLAGS     := -mavx2 -mfma -mfpmath=sse -march=skylake-avx512
+ifeq ($(CC_VENDOR),gcc)
+CRVECFLAGS     := -march=skylake-avx512 -mno-avx512f -mno-avx512vl -mno-avx512bw -mno-avx512dq -mno-avx512cd
+else
+ifeq ($(CC_VENDOR),icc)
+CRVECFLAGS     := -xCORE-AVX2
+else
+ifeq ($(CC_VENDOR),clang)
+CRVECFLAGS     := -march=skylake-avx512 -mno-avx512f -mno-avx512vl -mno-avx512bw -mno-avx512dq -mno-avx512cd
+else
+$(error gcc, icc, or clang is required for this configuration.)
+endif
+endif
+endif
 
 # Store all of the variables here to new variables containing the
 # configuration name.

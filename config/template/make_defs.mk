@@ -65,7 +65,9 @@ else
 COPTFLAGS      := -O2
 endif
 
+# Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS)
+CKVECFLAGS     :=
 
 # Flags specific to reference kernels.
 CROPTFLAGS     := $(CKOPTFLAGS)

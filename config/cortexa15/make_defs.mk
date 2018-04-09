@@ -65,8 +65,8 @@ else
 COPTFLAGS      := -O2
 endif
 
+# Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS)
-
 ifeq ($(CC_VENDOR),gcc)
 CKVECFLAGS     := -march=armv7-a
 else
