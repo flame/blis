@@ -1219,6 +1219,7 @@ main()
 	blas2blis_int_type_size=32
 	enable_blas2blis='yes'
 	enable_cblas='no'
+	enable_memkind='' # The default memkind value is determined later on.
 	force_version='no'
 
 	# The name of the chosen configuration (the configuration "family").
@@ -1238,17 +1239,6 @@ main()
 	# Dummy file. Used to check whether the cwd is the same as the top-level
 	# source distribution directory.
 	dummy_file='_blis_dir_detect.tmp'
-
-	# Find a working C compiler.
-	found_cc=$(select_cc)
-	echo "${script_name}: using '${found_cc}' compiler."
-
-	# In order to determine the default behavior of the --with[out]-memkind
-	# option, we try to detect whether libmemkind is available. If it is,
-	# the default implied option is --with-memkind; otherwise, it is
-	# --without-memkind.
-	has_memkind=$(has_libmemkind "${found_cc}")
-	enable_memkind=${has_memkind}
 
 
 	# -- Command line option/argument parsing ----------------------------------
@@ -1392,7 +1382,12 @@ main()
 		esac
 	done
 
+
 	# -- Check the compiler version --------------------------------------------
+
+	# Find a working C compiler.
+	found_cc=$(select_cc)
+	echo "${script_name}: using '${found_cc}' compiler."
 
 	# Check the found compiler's version. Certain versions of certain
 	# compilers will preclude building certain sub-configurations, which
@@ -1700,6 +1695,13 @@ main()
 		fi
 	done
 
+	# In order to determine the default behavior of the --with[out]-memkind
+	# option, we try to detect whether libmemkind is available. If it is,
+	# the default implied option will be --with-memkind; otherwise, will be
+	# --without-memkind.
+	has_memkind=$(has_libmemkind "${found_cc}")
+
+
 	# -- Prepare variables for subsitution into template files -----------------
 
 	# Set the install prefix if it was not already set when parsing the install
@@ -1788,6 +1790,11 @@ main()
 		enable_packbuf_pools_01=0
 	fi
 	if [ "x${has_memkind}" = "xyes" ]; then
+		# If no explicit option was given for libmemkind one way or the other,
+		# default to the value previously returned by has_libmemkind().
+		if [ "x${enable_memkind}" = "x" ]; then
+			enable_memkind=${has_memkind}
+		fi
 		echo "${script_name}: libmemkind found; default is to enable use."
 		if [ "x${enable_memkind}" = "xyes" ]; then
 			echo "${script_name}: received explicit request to enable libmemkind."
