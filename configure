@@ -825,27 +825,27 @@ select_cc()
 
 auto_detect()
 {
-	local rval autocc config_defines detected_config
+	local cc cflags config_defines detected_config rval
 
-	# The first and only argument: the compiler to use.
-	autocc="$1"
+	# Use the same compiler that was found earlier.
+	cc="${found_cc}"
 
 	# For debugging: reveal what compiler was chosen for auto-detection.
-	#touch "${autocc}.txt"
+	#touch "${cc}.txt"
 
 	# Tweak the flags we use based on the compiler. This is mostly just
 	# an opportunity to turn off annoying warnings that some compilers
 	# may throw off.
-	if [ "${autocc}" == "clang" ]; then
-		autoccflags="-Wno-tautological-compare"
+	if [ "${cc}" == "clang" ]; then
+		cflags="-Wno-tautological-compare"
 	else
-		autoccflags=
+		cflags=
 	fi
 
 	# Locate our source files.
 	bli_arch_c="bli_arch.c"
 	bli_cpuid_c="bli_cpuid.c"
-	main_c="auto_detect.c"
+	main_c="config_detect.c"
 
 	bli_arch_c_filepath=$(find ${dist_path}/frame -name "${bli_arch_c}")
 	bli_cpuid_c_filepath=$(find ${dist_path}/frame -name "${bli_cpuid_c}")
@@ -883,22 +883,21 @@ auto_detect()
 
 	# Compile the auto-detect program using source code inside the
 	# framework.
-	$autocc ${config_defines} \
-	        -DBLIS_CONFIGURETIME_CPUID \
-	        -I${bli_cpuid_h_path} \
-	        -I${bli_arch_h_path} \
-	        -I${bli_typed_h_path} \
-	        -I${bli_mutex_h_path} \
-	        -I${bli_malloc_h_path} \
-	        -std=c99 \
-	        ${autoccflags} \
-	        ${bli_arch_c_filepath} \
-	        ${bli_cpuid_c_filepath} \
-	        ${main_c_filepath} \
-	     -o ${autodetect_x}
+	${cc} ${config_defines} \
+	      -DBLIS_CONFIGURETIME_CPUID \
+	      -I${bli_cpuid_h_path} \
+	      -I${bli_arch_h_path} \
+	      -I${bli_typed_h_path} \
+	      -I${bli_mutex_h_path} \
+	      -I${bli_malloc_h_path} \
+	      -std=c99 \
+	      ${cflags} \
+	      ${bli_arch_c_filepath} \
+	      ${bli_cpuid_c_filepath} \
+	      ${main_c_filepath} \
+	   -o ${autodetect_x}
 
 	# Run the auto-detect program.
-	#detected_config=`./${autodetect_x}`
 	detected_config=$(./${autodetect_x})
 
 	# Remove the executable file.
@@ -910,18 +909,23 @@ auto_detect()
 
 has_libmemkind()
 {
-	local found_cc LDFLAGS_mk libmemkind_bin rval
+	local found_cc main_c main_c_filepath LDFLAGS_mk binname rval
 
 	found_cc="$1"
 
-	# Temporarily add libmemkind to LDFLAGS.
+	# Path to libmemkind detection source file.
+	main_c="libmemkind_detect.c"
+	main_c_filepath=$(find ${dist_path}/build -name "${main_c}")
+
+	# Add libmemkind to LDFLAGS.
 	LDFLAGS_mk="${LDFLAGS} -lmemkind"
 
-	libmemkind_bin="libmemkind-detect.x"
+	# Binary executable filename.
+	binname="libmemkind-detect.x"
 
 	# Attempt to compile a simple main() program that contains a call
 	# to hbw_malloc() and that links to libmemkind.
-	${found_cc} -o ${libmemkind_bin} ${libmemkind_detect_c} ${LDFLAGS_mk} 2> /dev/null
+	${found_cc} -o ${binname} ${main_c_filepath} ${LDFLAGS_mk} 2> /dev/null
 
 	# Depending on the return code from the compile step above, we set
 	# enable_memkind accordingly.
@@ -932,7 +936,7 @@ has_libmemkind()
 	fi
 
 	# Remove the executable generated above.
-	rm -f ${libmemkind_bin}
+	rm -f ./${binname}
 
 	echo "${rval}"
 }
@@ -947,9 +951,15 @@ echowarn()
 	printf "${script_name}: warning: %s\n" "$*" #>&2;
 }
 
-blacklist_add()
+blacklistcc_add()
 {
 	echowarn "${cc_vendor} ${cc_version} does not support '$1'; adding to blacklist."
+	config_blist="${config_blist} $1"
+}
+
+blacklistbu_add()
+{
+	echowarn "binutils ${bu_version} does not support '$1'; adding to blacklist."
 	config_blist="${config_blist} $1"
 }
 
@@ -958,22 +968,52 @@ blacklist_init()
 	config_blist=""
 }
 
-echoerr_unsupported()
+blacklist_cleanup()
+{
+	# Remove duplicates and whitespace from the blacklist.
+	config_blist=$(rm_duplicate_words "${config_blist}")
+	config_blist=$(canonicalize_ws "${config_blist}")
+}
+
+echoerr_unsupportedcc()
 {
 	echoerr "*** Unsupported compiler version: ${cc_vendor} ${cc_version}."
 	exit 1
 }
 
-check_compiler_version()
+get_binutils_version()
 {
-	local found_cc vendor_string
+	binutil="objdump"
 
-	found_cc="$1"
+	# Query the full binutils version string output. This includes the
+	# version string along with (potentially) a bunch of other textual
+    # clutter.
+	bu_string="$(${binutil} --version 2>/dev/null)"
+
+	# Query the binutils version number.
+	# The last part ({ read first rest ; echo $first ; }) is a workaround
+	# to OS X's egrep only returning the first match.
+	bu_version=$(echo ${bu_string} | egrep -o '[0-9]+\.[0-9]+\.?[0-9]*' | { read first rest ; echo ${first} ; })
+
+	# Parse the version number into its major, minor, and revision
+	# components.
+	bu_major=$(echo "${bu_version}" | cut -d. -f1)
+	bu_minor=$(echo "${bu_version}" | cut -d. -f2)
+	bu_revision=$(echo "${bu_version}" | cut -d. -f3)
+
+	echo "${script_name}: found binutils version ${bu_version} (maj: ${bu_major}, min: ${bu_minor}, rev: ${bu_revision})."
+}
+
+get_compiler_version()
+{
+	local cc vendor_string
+
+	cc="${found_cc}"
 
 	# Query the full vendor version string output. This includes the
 	# version number along with (potentially) a bunch of other textual
 	# clutter.
-	vendor_string="$(${found_cc} --version 2>/dev/null)"
+	vendor_string="$(${cc} --version 2>/dev/null)"
 
 	# Query the compiler "vendor" (ie: the compiler's simple name) and
 	# isolate the version number.
@@ -988,7 +1028,14 @@ check_compiler_version()
 	cc_minor=$(echo "${cc_version}" | cut -d. -f2)
 	cc_revision=$(echo "${cc_version}" | cut -d. -f3)
 
-	echo "${script_name}: found ${found_cc} version ${cc_version} (maj: ${cc_major}, min: ${cc_minor}, rev: ${cc_revision})."
+	echo "${script_name}: found ${cc} version ${cc_version} (maj: ${cc_major}, min: ${cc_minor}, rev: ${cc_revision})."
+}
+
+check_compiler()
+{
+	local cc
+
+	cc="${found_cc}"
 
 	#
 	# Compiler requirements
@@ -1023,25 +1070,22 @@ check_compiler_version()
 	# [1] https://github.com/devinamatthews/tblis/
 	#
 
-	echo "${script_name}: checking for blacklisted configurations for ${found_cc} ${cc_version}."
-
-	# Initialize the blacklist to empty.
-	blacklist_init
+	echo "${script_name}: checking for blacklisted configurations for ${cc} ${cc_version}."
 
 	# gcc
 	if [ "x${cc_vendor}" = "xgcc" ]; then
 
 		if [ ${cc_major} -lt 4 ]; then
-			echoerr_unsupported
+			echoerr_unsupportedcc
 		fi
 		if [ ${cc_major} -eq 4 ]; then
-			blacklist_add "knl"
+			blacklistcc_add "knl"
 			if [ ${cc_minor} -lt 7 ]; then
-				echoerr_unsupported
+				echoerr_unsupportedcc
 			fi
 			if [ ${cc_minor} -lt 9 ]; then
-				blacklist_add "excavator"
-				blacklist_add "zen"
+				blacklistcc_add "excavator"
+				blacklistcc_add "zen"
 			fi
 		fi
 		if [ ${cc_major} -lt 6 ]; then
@@ -1049,9 +1093,9 @@ check_compiler_version()
 			# However, we have a workaround in place in the zen
 			# configuration's make_defs.mk file that starts with bdver4
 			# and disables the instructions that were removed in znver1.
-			# Thus, this "blacklist_add" statement has been moved above.
-			#blacklist_add "zen"
-			blacklist_add "skx"
+			# Thus, this "blacklistcc_add" statement has been moved above.
+			#blacklistcc_add "zen"
+			blacklistcc_add "skx"
 		fi
 	fi
 
@@ -1059,11 +1103,11 @@ check_compiler_version()
 	if [ "x${cc_vendor}" = "xicc" ]; then
 
 		if [ ${cc_major} -lt 15 ]; then
-			echoerr_unsupported
+			echoerr_unsupportedcc
 		fi
 		if [ ${cc_major} -eq 15 ]; then
 			if [ ${cc_revision} -lt 1 ]; then
-				blacklist_add "skx"
+				blacklistcc_add "skx"
 			fi
 		fi
 	fi
@@ -1072,29 +1116,139 @@ check_compiler_version()
 	if [ "x${cc_vendor}" = "xclang" ]; then
 
 		if [ ${cc_major} -lt 3 ]; then
-			echoerr_unsupported
+			echoerr_unsupportedcc
 		fi
 		if [ ${cc_major} -eq 3 ]; then
 			if [ ${cc_minor} -lt 3 ]; then
-				echoerr_unsupported
+				echoerr_unsupportedcc
 			fi
 			if [ ${cc_minor} -lt 5 ]; then
-				blacklist_add "excavator"
-				blacklist_add "zen"
-				blacklist_add "knl"
+				blacklistcc_add "excavator"
+				blacklistcc_add "zen"
+				blacklistcc_add "knl"
 			fi
 			if [ ${cc_minor} -lt 9 ]; then
-				blacklist_add "skx"
+				blacklistcc_add "skx"
 			fi
 		fi
 		if [ ${cc_major} -lt 4 ]; then
 			# See comment above regarding zen support.
-			#blacklist_add "zen"
+			#blacklistcc_add "zen"
 			: # explicit no-op since bash can't handle empty loop bodies.
 		fi
 	fi
+}
 
-	config_blist=$(canonicalize_ws "${config_blist}")
+check_assembler()
+{
+	local cc asm_dir cflags asm_fp
+
+	cc="${found_cc}"
+
+	# The directory where the assembly files will be.
+	asm_dir="${dist_path}/build"
+
+	# Most of the time, we won't need any additional compiler flags.
+	cflags=""
+
+	echo "${script_name}: checking for blacklisted configurations for binutils ${bu_version}."
+
+	#
+	# Check support for FMA4 (amd: bulldozer).
+	#
+	asm_fp=$(find ${asm_dir} -name "fma4.s")
+	knows_fma4=$(try_assemble "${cc}" "${cflags}" "${asm_fp}")
+
+	if [ "x${knows_fma4}" == "xno" ]; then
+		blacklistbu_add "bulldozer"
+	fi
+
+	#
+	# Check support for AVX (intel: sandybridge+, amd: piledriver+).
+	#
+	asm_fp=$(find ${asm_dir} -name "avx.s")
+	knows_avx=$(try_assemble "${cc}" "${cflags}" "${asm_fp}")
+
+	if [ "x${knows_avx}" == "xno" ]; then
+		blacklistbu_add "sandybridge"
+	fi
+
+	#
+	# Check support for FMA3 (intel: haswell+, amd: piledriver+).
+	#
+	asm_fp=$(find ${asm_dir} -name "fma3.s")
+	knows_fma3=$(try_assemble "${cc}" "${cflags}" "${asm_fp}")
+
+	if [ "x${knows_fma3}" == "xno" ]; then
+		blacklistbu_add "haswell"
+		blacklistbu_add "piledriver"
+		blacklistbu_add "steamroller"
+		blacklistbu_add "excavator"
+		blacklistbu_add "skx"
+	fi
+
+	#
+	# Check support for AVX-512f (knl, skx).
+	#
+
+	# The assembler on OS X won't recognize AVX-512 without help.
+	if [ "$(uname -s)" == "Darwin" ]; then
+		cflags="-Wa,-march=knl"
+	fi
+
+	asm_fp=$(find ${asm_dir} -name "avx512f.s")
+	knows_avx512f=$(try_assemble "${cc}" "${cflags}" "${asm_fp}")
+
+	if [ "x${knows_avx512f}" == "xno" ]; then
+		blacklistbu_add "knl"
+		blacklistbu_add "skx"
+	fi
+
+	#
+	# Check support for AVX-512dq (skx).
+	#
+
+	# The assembler on OS X won't recognize AVX-512 without help.
+	if [ "$(uname -s)" == "Darwin" ]; then
+		cflags="-Wa,-march=skylake-avx512"
+	fi
+
+	asm_fp=$(find ${asm_dir} -name "avx512dq.s")
+	knows_avx512dq=$(try_assemble "${cc}" "${cflags}" "${asm_fp}")
+
+	if [ "x${knows_avx512dq}" == "xno" ]; then
+		blacklistbu_add "skx"
+	fi
+}
+
+try_assemble()
+{
+	local cc cflags asm_src asm_base asm_bin rval
+
+	cc="$1"
+	cflags="$2"
+	asm_src="$3"
+
+	# Construct the filename to the .o file corresponding to asm_src.
+	# (Strip the filepath, then the file extension, and then add ".o".)
+	asm_base=${asm_src##*/}
+	asm_base=${asm_base%.*}
+	asm_bin="${asm_base}.o"
+
+	# Try to assemble the file.
+	${cc} ${cflags} -c ${asm_src} -o ${asm_bin} > /dev/null 2>&1
+
+	if [ "$?" == 0 ]; then
+	    rval='yes'
+	else
+	    rval='no'
+	fi
+
+	# Remove the object file.
+	rm -f "${asm_bin}"
+
+	# Return the result.
+	echo "${rval}"
 }
 
 #
@@ -1156,9 +1310,6 @@ main()
 	# Path to 'gen-make-frags.sh' script and directory.
 	gen_make_frags_dirpath="${build_dirpath}/gen-make-frags"
 	gen_make_frags_sh="${gen_make_frags_dirpath}/gen-make-frag.sh"
-
-	# Path to libmemkind-detect.c file.
-	libmemkind_detect_c="${build_dirpath}/memkind/libmemkind_detect.c"
 
 	# The name of the (top-level) configuration directory.
 	config_dir='config'
@@ -1389,10 +1540,24 @@ main()
 	found_cc=$(select_cc)
 	echo "${script_name}: using '${found_cc}' compiler."
 
-	# Check the found compiler's version. Certain versions of certain
-	# compilers will preclude building certain sub-configurations, which
-	# are added to a blacklist.
-	check_compiler_version "${found_cc}"
+	# Initialize the blacklist to empty.
+	blacklist_init
+
+	# Check the compiler's version. Certain versions of certain compilers
+	# will preclude building certain sub-configurations, which are added
+	# to a blacklist.
+	get_compiler_version
+	check_compiler
+
+	# Now check the assembler's ability to assemble code. Older versions
+	# of binutils may not be aware of certain instruction sets. Those
+	# sub-configurations employing kernels that use such instruction sets
+	# will also be blacklisted.
+	get_binutils_version
+	check_assembler
+
+	# Remove duplicates and whitespace from the blacklist.
+	blacklist_cleanup
 
 	if [ -n "${config_blist}" ]; then
 
@@ -1485,7 +1650,7 @@ main()
 
 		# Call the auto_detect() function and save the returned string in
 		# config_name.
-		config_name=$(auto_detect "${found_cc}")
+		config_name=$(auto_detect)
 
 		echo "${script_name}: hardware detection driver returned '${config_name}'."
 	else
