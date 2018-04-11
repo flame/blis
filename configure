@@ -953,14 +953,24 @@ echowarn()
 
 blacklistcc_add()
 {
-	echowarn "${cc_vendor} ${cc_version} does not support '$1'; adding to blacklist."
-	config_blist="${config_blist} $1"
+	# Check whether we've already blacklisted the given sub-config so
+	# we don't output redundant messages.
+	if [ $(is_in_list "$1" "${config_blist}") == "false" ]; then
+
+		echowarn "${cc_vendor} ${cc_version} does not support '$1'; adding to blacklist."
+		config_blist="${config_blist} $1"
+	fi
 }
 
 blacklistbu_add()
 {
-	echowarn "binutils ${bu_version} does not support '$1'; adding to blacklist."
-	config_blist="${config_blist} $1"
+	# Check whether we've already blacklisted the given sub-config so
+	# we don't output redundant messages.
+	if [ $(is_in_list "$1" "${config_blist}") == "false" ]; then
+
+		echowarn "assembler does not support '$1'; adding to blacklist."
+		config_blist="${config_blist} $1"
+	fi
 }
 
 blacklist_init()
@@ -983,17 +993,26 @@ echoerr_unsupportedcc()
 
 get_binutils_version()
 {
-	binutil="objdump"
+	binutil="as"
 
 	# Query the full binutils version string output. This includes the
 	# version string along with (potentially) a bunch of other textual
     # clutter.
-	bu_string="$(${binutil} --version 2>/dev/null)"
+	if [ "$(uname -s)" == "Darwin" ]; then
+		# The default OS X assembler uses a trifecta of brain-dead
+		# conventions: responding only to '-v', hanging indefinitely if
+		# not given an argument, and outputing the result to stderr.
+		# (And if you still weren't convinced, it creates an 'a.out'
+		# by default. So yeah.)
+		bu_string=$(${binutil} -v /dev/null -o /dev/null 2>&1)
+	else
+		bu_string=$(${binutil} --version 2>/dev/null)
+	fi
 
 	# Query the binutils version number.
 	# The last part ({ read first rest ; echo $first ; }) is a workaround
 	# to OS X's egrep only returning the first match.
-	bu_version=$(echo ${bu_string} | egrep -o '[0-9]+\.[0-9]+\.?[0-9]*' | { read first rest ; echo ${first} ; })
+	bu_version=$(echo "${bu_string}" | egrep -o '[0-9]+\.[0-9]+\.?[0-9]*' | { read first rest ; echo ${first} ; })
 
 	# Parse the version number into its major, minor, and revision
 	# components.
@@ -1001,7 +1020,7 @@ get_binutils_version()
 	bu_minor=$(echo "${bu_version}" | cut -d. -f2)
 	bu_revision=$(echo "${bu_version}" | cut -d. -f3)
 
-	echo "${script_name}: found binutils version ${bu_version} (maj: ${bu_major}, min: ${bu_minor}, rev: ${bu_revision})."
+	echo "${script_name}: found assembler version ${bu_version} (maj: ${bu_major}, min: ${bu_minor}, rev: ${bu_revision})."
 }
 
 get_compiler_version()
@@ -1019,8 +1038,8 @@ get_compiler_version()
 	# isolate the version number.
 	# The last part ({ read first rest ; echo $first ; }) is a workaround
 	# to OS X's egrep only returning the first match.
-	cc_vendor=$(echo $vendor_string | egrep -o 'icc|gcc|clang|emcc|pnacl|IBM' | { read first rest ; echo $first ; })
-	cc_version=$(echo ${vendor_string} | egrep -o '[0-9]+\.[0-9]+\.?[0-9]*' | { read first rest ; echo ${first} ; })
+	cc_vendor=$(echo "${vendor_string}" | egrep -o 'icc|gcc|clang|emcc|pnacl|IBM' | { read first rest ; echo $first ; })
+	cc_version=$(echo "${vendor_string}" | egrep -o '[0-9]+\.[0-9]+\.?[0-9]*' | { read first rest ; echo ${first} ; })
 
 	# Parse the version number into its major, minor, and revision
 	# components.
