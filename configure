@@ -968,7 +968,7 @@ blacklistbu_add()
 	# we don't output redundant messages.
 	if [ $(is_in_list "$1" "${config_blist}") == "false" ]; then
 
-		echowarn "assembler does not support '$1'; adding to blacklist."
+		echowarn "assembler ('as' ${bu_version}) does not support '$1'; adding to blacklist."
 		config_blist="${config_blist} $1"
 	fi
 }
@@ -1020,7 +1020,7 @@ get_binutils_version()
 	bu_minor=$(echo "${bu_version}" | cut -d. -f2)
 	bu_revision=$(echo "${bu_version}" | cut -d. -f3)
 
-	echo "${script_name}: found assembler version ${bu_version} (maj: ${bu_major}, min: ${bu_minor}, rev: ${bu_revision})."
+	echo "${script_name}: found assembler ('as') version ${bu_version} (maj: ${bu_major}, min: ${bu_minor}, rev: ${bu_revision})."
 }
 
 get_compiler_version()
@@ -1089,7 +1089,7 @@ check_compiler()
 	# [1] https://github.com/devinamatthews/tblis/
 	#
 
-	echo "${script_name}: checking for blacklisted configurations for ${cc} ${cc_version}."
+	echo "${script_name}: checking for blacklisted configurations due to ${cc} ${cc_version}."
 
 	# gcc
 	if [ "x${cc_vendor}" = "xgcc" ]; then
@@ -1170,7 +1170,7 @@ check_assembler()
 	# Most of the time, we won't need any additional compiler flags.
 	cflags=""
 
-	echo "${script_name}: checking for blacklisted configurations for binutils ${bu_version}."
+	echo "${script_name}: checking for blacklisted configurations due to as ${bu_version}."
 
 	#
 	# Check support for FMA4 (amd: bulldozer).
