@@ -100,8 +100,9 @@ BLIS_INC_PATH  := $(INSTALL_PREFIX)/include/blis
 # BLAS library path(s). This is where the BLAS libraries reside.
 BLAS_LIB_PATH  := $(HOME)/flame/lib
 #MKL_LIB_PATH   := /opt/apps/intel/13/composer_xe_2013.2.146/mkl/lib/intel64
-MKL_LIB_PATH   := $(HOME)/intel/mkl/lib/intel64
-ESSL_LIB_PATH  := $(HOME)/path/to/essl/changeme
+#MKL_LIB_PATH   := $(HOME)/intel/mkl/lib/intel64
+MKL_LIB_PATH   := ${MKLROOT}/lib/intel64
+#ESSL_LIB_PATH  := $(HOME)/path/to/essl/changeme
 
 # OpenBLAS
 OPENBLAS_LIB   := $(BLAS_LIB_PATH)/libopenblas.a
@@ -142,18 +143,14 @@ TEST_OBJS      := $(patsubst $(TEST_SRC_PATH)/%.c, \
                              $(TEST_OBJ_PATH)/%.o, \
                              $(wildcard $(TEST_SRC_PATH)/*.c))
 
-# Override CFLAGS from make_defs.mk here, if desired.
-#CFLAGS         := -g -O2 -march=native
+# Use the CFLAGS for the configuration family.
+CFLAGS         := $(call get-frame-cflags-for,$(CONFIG_NAME))
 
-# Add installed and local header paths to CFLAGS
-CFLAGS         += -I$(BLIS_INC_PATH) -I$(TEST_SRC_PATH)
-
-LINKER         := $(CC)
-LDFLAGS        := #-L/home/00146/field/gnu/gcc-4.8.2/lib64
-LDFLAGS        += -lgfortran -lm -lpthread -fopenmp
+# Add local header paths to CFLAGS
+CFLAGS         += -I$(TEST_SRC_PATH)
 
 # Locate the libblis library to which we will link.
-LIBBLIS_LINK    := $(BUILD_PATH)/$(LIBBLIS_LINK)
+LIBBLIS_LINK   := $(BUILD_PATH)/$(LIBBLIS_LINK)
 
 
 

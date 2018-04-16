@@ -98,7 +98,8 @@ BLIS_INC_PATH  := $(INSTALL_PREFIX)/include/blis
 
 # BLAS library path(s). This is where the BLAS libraries reside.
 BLAS_LIB_PATH  := $(HOME)/flame/lib
-MKL_LIB_PATH   := $(HOME)/intel/mkl/lib/intel64/
+#MKL_LIB_PATH   := $(HOME)/intel/mkl/lib/intel64/
+MKL_LIB_PATH   := ${MKLROOT}/lib/intel64
 
 # OpenBLAS, ATLAS, and MKL libraries.
 #BLAS_LIB       := $(LIB_PATH)/libblas.a
@@ -111,12 +112,17 @@ ABLAS_LIB       := $(BLAS_LIB_PATH)/libf77blas.a \
 #                   -lmkl_sequential \
 #                   -lmkl_core \
 #                   -lmkl_intel_lp64
-MBLAS_LIB      := -Wl,--start-group \
-                  $(MKL_LIB_PATH)/libmkl_sequential.a \
-                  $(MKL_LIB_PATH)/libmkl_core.a \
-                  $(MKL_LIB_PATH)/libmkl_intel_ilp64.a \
-                  -Wl,--end-group \
-                  -lpthread -lm
+#MBLAS_LIB      := -Wl,--start-group \
+#                  $(MKL_LIB_PATH)/libmkl_sequential.a \
+#                  $(MKL_LIB_PATH)/libmkl_core.a \
+#                  $(MKL_LIB_PATH)/libmkl_intel_ilp64.a \
+#                  -Wl,--end-group \
+#                  -lpthread -lm
+MBLAS_LIB       := -L$(MKL_LIB_PATH) \
+                   -lmkl_intel_lp64 \
+                   -lmkl_core \
+                   -lmkl_sequential \
+                   -lpthread -lm -ldl
 
 
 
@@ -124,39 +130,32 @@ MBLAS_LIB      := -Wl,--start-group \
 # --- General build definitions ------------------------------------------------
 #
 
-MAKE_BLIS      := yes
-MAKE_OPENBLAS  := yes
-MAKE_ATLAS     := yes
-MAKE_MKL       := yes
-MAKE_DCOMPLEX  := yes
-
 TEST_SRC_PATH  := .
 TEST_OBJ_PATH  := .
 
-## Gather all local object files.
-#TEST_OBJS      := $(patsubst $(TEST_SRC_PATH)/%.c, \
-#                             $(TEST_OBJ_PATH)/%.o, \
-#                             $(wildcard $(TEST_SRC_PATH)/*.c))
+## Gather all local source files.
 TEST_SIZES_SRC := test_size.c
 
-# Override CFLAGS from make_defs.mk here, if desired.
-#CFLAGS         := -g -O2 -march=native
+# Use the CFLAGS for the configuration family.
+CFLAGS         := $(call get-frame-cflags-for,$(CONFIG_NAME))
 
-# Add installed and local header paths to CFLAGS
-CFLAGS         += -I$(BLIS_INC_PATH) -I$(TEST_SRC_PATH)
-
-LINKER         := $(CC)
-LDFLAGS        := -L/home/00146/field/gnu/gcc-4.8.2/lib64
-LDFLAGS        += -lgfortran -lm -lpthread
+# Add local header paths to CFLAGS
+CFLAGS         += -I$(TEST_SRC_PATH)
 
 # Locate the libblis library to which we will link.
-LIBBLIS_LINK    := $(BUILD_PATH)/$(LIBBLIS_LINK)
+LIBBLIS_LINK   := $(BUILD_PATH)/$(LIBBLIS_LINK)
 
 
 
 #
 # --- Targets/rules ------------------------------------------------------------
 #
+
+MAKE_BLIS      := yes
+MAKE_OPENBLAS  := yes
+MAKE_MKL       := yes
+MAKE_ATLAS     := no
+MAKE_DCOMPLEX  := yes
 
 ifeq ($(MAKE_BLIS),yes)
 TEST_BINS += test_blis01 \
