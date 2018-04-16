@@ -62,6 +62,7 @@ void bli_cntx_init_zen( cntx_t* cntx )
 	  cntx
 	);
 
+	// Update the context with optimized level-1f kernels.
 	bli_cntx_set_l1f_kers
 	(
 	  4,
@@ -115,8 +116,8 @@ void bli_cntx_init_zen( cntx_t* cntx )
 	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,    72,   144,    72 );
 	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   256,   256,   256 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  4080,  4080,  4080 );
-	bli_blksz_init_easy( &blkszs[ BLIS_AF ],     8,     8,     8,     8 );
-	bli_blksz_init_easy( &blkszs[ BLIS_DF ],     8,     8,     8,     8 );
+	bli_blksz_init_easy( &blkszs[ BLIS_AF ],     8,     8,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_DF ],     8,     8,    -1,    -1 );
 
 	// Update the context with the current architecture's register and cache
 	// blocksizes (and multiples) for native execution.

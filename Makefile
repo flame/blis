@@ -537,7 +537,7 @@ $(BASE_OBJ_KERNELS_PATH)/$(1)/%.o: $(KERNELS_PATH)/$(1)/%.$(3) $(BLIS_H_FLAT) $(
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	$(CC) $(call get-kernel-cflags-for,$(2)) -c $$< -o $$@
 else
-	@echo "Compiling $$@" $(call get-kernel-text-for,$(1))
+	@echo "Compiling $$@" $(call get-kernel-text-for,$(2))
 	@$(CC) $(call get-kernel-cflags-for,$(2)) -c $$< -o $$@
 endif
 endef

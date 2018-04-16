@@ -614,7 +614,7 @@ build_kconfig_registry()
 
 	for config in ${clist}; do
 
-		# Look up the kernel for the current sub-configuration.
+		# Look up the kernels for the current sub-configuration.
 		#kernels="${kernel_registry[${config}]}"
 		kernels=$(query_array "kernel_registry" ${config})
 

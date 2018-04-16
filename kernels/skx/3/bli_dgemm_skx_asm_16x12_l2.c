@@ -33,7 +33,6 @@
 */
 
 #include "blis.h"
-#include <assert.h>
 
 #include "bli_avx512_macros.h"
 

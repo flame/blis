@@ -15,8 +15,8 @@ arm64:       cortexa57 generic
 arm32:       cortexa15 cortexa9 generic
 
 # Intel architectures.
-skx:         skx
-knl:         knl
+skx:         skx/skx/zen
+knl:         knl/knl/zen
 haswell:     haswell/haswell/zen
 sandybridge: sandybridge
 penryn:      penryn

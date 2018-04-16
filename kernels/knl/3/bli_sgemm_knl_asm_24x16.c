@@ -45,80 +45,78 @@
 #define PREFETCH_B_L2 0
 #define L2_PREFETCH_DIST 64
 
-#define A_L1_PREFETCH_DIST 18
+#define A_L1_PREFETCH_DIST 36
 #define B_L1_PREFETCH_DIST 18
 
 #define LOOP_ALIGN ALIGN16
 
 #define UPDATE_C_FOUR_ROWS(R1,R2,R3,R4) \
 \
-    VMULPD(ZMM(R1), ZMM(R1), ZMM(0)) \
-    VMULPD(ZMM(R2), ZMM(R2), ZMM(0)) \
-    VMULPD(ZMM(R3), ZMM(R3), ZMM(0)) \
-    VMULPD(ZMM(R4), ZMM(R4), ZMM(0)) \
-    VFMADD231PD(ZMM(R1), ZMM(1), MEM(RCX      )) \
-    VFMADD231PD(ZMM(R2), ZMM(1), MEM(RCX,RAX,1)) \
-    VFMADD231PD(ZMM(R3), ZMM(1), MEM(RCX,RAX,2)) \
-    VFMADD231PD(ZMM(R4), ZMM(1), MEM(RCX,RDI,1)) \
-    VMOVUPD(MEM(RCX      ), ZMM(R1)) \
-    VMOVUPD(MEM(RCX,RAX,1), ZMM(R2)) \
-    VMOVUPD(MEM(RCX,RAX,2), ZMM(R3)) \
-    VMOVUPD(MEM(RCX,RDI,1), ZMM(R4)) \
+    VMULPS(ZMM(R1), ZMM(R1), ZMM(0)) \
+    VMULPS(ZMM(R2), ZMM(R2), ZMM(0)) \
+    VMULPS(ZMM(R3), ZMM(R3), ZMM(0)) \
+    VMULPS(ZMM(R4), ZMM(R4), ZMM(0)) \
+    VFMADD231PS(ZMM(R1), ZMM(1), MEM(RCX      )) \
+    VFMADD231PS(ZMM(R2), ZMM(1), MEM(RCX,RAX,1)) \
+    VFMADD231PS(ZMM(R3), ZMM(1), MEM(RCX,RAX,2)) \
+    VFMADD231PS(ZMM(R4), ZMM(1), MEM(RCX,RDI,1)) \
+    VMOVUPS(MEM(RCX      ), ZMM(R1)) \
+    VMOVUPS(MEM(RCX,RAX,1), ZMM(R2)) \
+    VMOVUPS(MEM(RCX,RAX,2), ZMM(R3)) \
+    VMOVUPS(MEM(RCX,RDI,1), ZMM(R4)) \
     LEA(RCX, MEM(RCX,RAX,4))
 
 #define UPDATE_C_BZ_FOUR_ROWS(R1,R2,R3,R4) \
 \
-    VMULPD(ZMM(R1), ZMM(R1), ZMM(0)) \
-    VMULPD(ZMM(R2), ZMM(R2), ZMM(0)) \
-    VMULPD(ZMM(R3), ZMM(R3), ZMM(0)) \
-    VMULPD(ZMM(R4), ZMM(R4), ZMM(0)) \
-    VMOVUPD(MEM(RCX      ), ZMM(R1)) \
-    VMOVUPD(MEM(RCX,RAX,1), ZMM(R2)) \
-    VMOVUPD(MEM(RCX,RAX,2), ZMM(R3)) \
-    VMOVUPD(MEM(RCX,RDI,1), ZMM(R4)) \
+    VMULPS(ZMM(R1), ZMM(R1), ZMM(0)) \
+    VMULPS(ZMM(R2), ZMM(R2), ZMM(0)) \
+    VMULPS(ZMM(R3), ZMM(R3), ZMM(0)) \
+    VMULPS(ZMM(R4), ZMM(R4), ZMM(0)) \
+    VMOVUPS(MEM(RCX      ), ZMM(R1)) \
+    VMOVUPS(MEM(RCX,RAX,1), ZMM(R2)) \
+    VMOVUPS(MEM(RCX,RAX,2), ZMM(R3)) \
+    VMOVUPS(MEM(RCX,RDI,1), ZMM(R4)) \
     LEA(RCX, MEM(RCX,RAX,4))
 
 #define UPDATE_C_ROW_SCATTERED(NUM) \
 \
     KXNORW(K(1), K(0), K(0)) \
     KXNORW(K(2), K(0), K(0)) \
-    VMULPD(ZMM(NUM), ZMM(NUM), ZMM(0)) \
-    VGATHERDPD(ZMM(3) MASK_K(1), MEM(RCX,YMM(2),8)) \
-    VFMADD231PD(ZMM(NUM), ZMM(3), ZMM(1)) \
-    VSCATTERDPD(MEM(RCX,YMM(2),8) MASK_K(2), ZMM(NUM)) \
+    VMULPS(ZMM(NUM), ZMM(NUM), ZMM(0)) \
+    VGATHERDPS(ZMM(3) MASK_K(1), MEM(RCX,ZMM(2),4)) \
+    VFMADD231PS(ZMM(NUM), ZMM(3), ZMM(1)) \
+    VSCATTERDPS(MEM(RCX,ZMM(2),4) MASK_K(2), ZMM(NUM)) \
     ADD(RCX, RAX)
 
 #define UPDATE_C_BZ_ROW_SCATTERED(NUM) \
 \
     KXNORW(K(1), K(0), K(0)) \
-    VMULPD(ZMM(NUM), ZMM(NUM), ZMM(0)) \
-    VSCATTERDPD(MEM(RCX,YMM(2),8) MASK_K(1), ZMM(NUM)) \
+    VMULPS(ZMM(NUM), ZMM(NUM), ZMM(0)) \
+    VSCATTERDPS(MEM(RCX,ZMM(2),4) MASK_K(1), ZMM(NUM)) \
     ADD(RCX, RAX)
 
-#define PREFETCH_A_L1_1(n) PREFETCH(0, MEM(RAX,(A_L1_PREFETCH_DIST+n)*24*8))
-#define PREFETCH_A_L1_2(n) PREFETCH(0, MEM(RAX,(A_L1_PREFETCH_DIST+n)*24*8+64))
-#define PREFETCH_A_L1_3(n) PREFETCH(0, MEM(RAX,(A_L1_PREFETCH_DIST+n)*24*8+128))
+#define PREFETCH_A_L1_1(n) PREFETCH(0, MEM(RAX,(A_L1_PREFETCH_DIST+n)*24*4))
+#define PREFETCH_A_L1_2(n) PREFETCH(0, MEM(RAX,(A_L1_PREFETCH_DIST+n)*24*4+64))
 
 #if PREFETCH_A_L2
 #undef PREFETCH_A_L2
 
 #define PREFETCH_A_L2(n) \
 \
-    PREFETCH(1, MEM(RAX,(L2_PREFETCH_DIST+n)*24*8)) \
-    PREFETCH(1, MEM(RAX,(L2_PREFETCH_DIST+n)*24*8+64)) \
-    PREFETCH(1, MEM(RAX,(L2_PREFETCH_DIST+n)*24*8+128))
+    PREFETCH(1, MEM(RAX,(L2_PREFETCH_DIST+n)*24*4)) \
+    PREFETCH(1, MEM(RAX,(L2_PREFETCH_DIST+n)*24*4+64))
 
 #else
 #undef PREFETCH_A_L2
 #define PREFETCH_A_L2(...)
 #endif
 
-#define PREFETCH_B_L1(n) PREFETCH(0, MEM(RBX,(B_L1_PREFETCH_DIST+n)*8*8))
+#define PREFETCH_B_L1(n) PREFETCH(0, MEM(RBX,(B_L1_PREFETCH_DIST+n)*16*4))
 
 #if PREFETCH_B_L2
 #undef PREFETCH_B_L2
 
-#define PREFETCH_B_L2(n) PREFETCH(1, MEM(RBX,(L2_PREFETCH_DIST+n)*8*8))
+#define PREFETCH_B_L2(n) PREFETCH(1, MEM(RBX,(L2_PREFETCH_DIST+n)*16*4))
 
 #else
 #undef PREFETCH_B_L2
@@ -141,39 +139,38 @@
 \
         PREFETCH_A_L2(n) \
 \
-        VMOVAPD(ZMM(a), MEM(RBX,(n+1)*64)) \
-        VFMADD231PD(ZMM( 8), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+ 0)*8)) \
-        VFMADD231PD(ZMM( 9), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+ 1)*8)) \
-        VFMADD231PD(ZMM(10), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+ 2)*8)) \
+        VMOVAPS(ZMM(a), MEM(RBX,(n+1)*64)) \
+        VFMADD231PS(ZMM( 8), ZMM(b), MEM_1TO16(__VA_ARGS__,((n%%4)*24+ 0)*4)) \
+        VFMADD231PS(ZMM( 9), ZMM(b), MEM_1TO16(__VA_ARGS__,((n%%4)*24+ 1)*4)) \
+        VFMADD231PS(ZMM(10), ZMM(b), MEM_1TO16(__VA_ARGS__,((n%%4)*24+ 2)*4)) \
         PREFETCH_A_L1_1(n) \
-        VFMADD231PD(ZMM(11), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+ 3)*8)) \
-        VFMADD231PD(ZMM(12), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+ 4)*8)) \
-        VFMADD231PD(ZMM(13), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+ 5)*8)) \
+        VFMADD231PS(ZMM(11), ZMM(b), MEM_1TO16(__VA_ARGS__,((n%%4)*24+ 3)*4)) \
+        VFMADD231PS(ZMM(12), ZMM(b), MEM_1TO16(__VA_ARGS__,((n%%4)*24+ 4)*4)) \
+        VFMADD231PS(ZMM(13), ZMM(b), MEM_1TO16(__VA_ARGS__,((n%%4)*24+ 5)*4)) \
         PREFETCH_C_L1_1 \
-        VFMADD231PD(ZMM(14), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+ 6)*8)) \
-        VFMADD231PD(ZMM(15), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+ 7)*8)) \
-        VFMADD231PD(ZMM(16), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+ 8)*8)) \
+        VFMADD231PS(ZMM(14), ZMM(b), MEM_1TO16(__VA_ARGS__,((n%%4)*24+ 6)*4)) \
+        VFMADD231PS(ZMM(15), ZMM(b), MEM_1TO16(__VA_ARGS__,((n%%4)*24+ 7)*4)) \
+        VFMADD231PS(ZMM(16), ZMM(b), MEM_1TO16(__VA_ARGS__,((n%%4)*24+ 8)*4)) \
         PREFETCH_A_L1_2(n) \
-        VFMADD231PD(ZMM(17), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+ 9)*8)) \
-        VFMADD231PD(ZMM(18), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+10)*8)) \
-        VFMADD231PD(ZMM(19), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+11)*8)) \
+        VFMADD231PS(ZMM(17), ZMM(b), MEM_1TO16(__VA_ARGS__,((n%%4)*24+ 9)*4)) \
+        VFMADD231PS(ZMM(18), ZMM(b), MEM_1TO16(__VA_ARGS__,((n%%4)*24+10)*4)) \
+        VFMADD231PS(ZMM(19), ZMM(b), MEM_1TO16(__VA_ARGS__,((n%%4)*24+11)*4)) \
         PREFETCH_C_L1_2 \
-        VFMADD231PD(ZMM(20), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+12)*8)) \
-        VFMADD231PD(ZMM(21), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+13)*8)) \
-        VFMADD231PD(ZMM(22), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+14)*8)) \
-        PREFETCH_A_L1_3(n) \
-        VFMADD231PD(ZMM(23), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+15)*8)) \
-        VFMADD231PD(ZMM(24), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+16)*8)) \
-        VFMADD231PD(ZMM(25), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+17)*8)) \
+        VFMADD231PS(ZMM(20), ZMM(b), MEM_1TO16(__VA_ARGS__,((n%%4)*24+12)*4)) \
+        VFMADD231PS(ZMM(21), ZMM(b), MEM_1TO16(__VA_ARGS__,((n%%4)*24+13)*4)) \
+        VFMADD231PS(ZMM(22), ZMM(b), MEM_1TO16(__VA_ARGS__,((n%%4)*24+14)*4)) \
         PREFETCH_C_L1_3 \
-        VFMADD231PD(ZMM(26), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+18)*8)) \
-        VFMADD231PD(ZMM(27), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+19)*8)) \
-        VFMADD231PD(ZMM(28), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+20)*8)) \
+        VFMADD231PS(ZMM(23), ZMM(b), MEM_1TO16(__VA_ARGS__,((n%%4)*24+15)*4)) \
+        VFMADD231PS(ZMM(24), ZMM(b), MEM_1TO16(__VA_ARGS__,((n%%4)*24+16)*4)) \
+        VFMADD231PS(ZMM(25), ZMM(b), MEM_1TO16(__VA_ARGS__,((n%%4)*24+17)*4)) \
         PREFETCH_B_L1(n) \
-        VFMADD231PD(ZMM(29), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+21)*8)) \
-        VFMADD231PD(ZMM(30), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+22)*8)) \
-        VFMADD231PD(ZMM(31), ZMM(b), MEM_1TO8(__VA_ARGS__,((n%%4)*24+23)*8)) \
-        PREFETCH_B_L2(n)
+        VFMADD231PS(ZMM(26), ZMM(b), MEM_1TO16(__VA_ARGS__,((n%%4)*24+18)*4)) \
+        VFMADD231PS(ZMM(27), ZMM(b), MEM_1TO16(__VA_ARGS__,((n%%4)*24+19)*4)) \
+        VFMADD231PS(ZMM(28), ZMM(b), MEM_1TO16(__VA_ARGS__,((n%%4)*24+20)*4)) \
+        PREFETCH_B_L2(n) \
+        VFMADD231PS(ZMM(29), ZMM(b), MEM_1TO16(__VA_ARGS__,((n%%4)*24+21)*4)) \
+        VFMADD231PS(ZMM(30), ZMM(b), MEM_1TO16(__VA_ARGS__,((n%%4)*24+22)*4)) \
+        VFMADD231PS(ZMM(31), ZMM(b), MEM_1TO16(__VA_ARGS__,((n%%4)*24+23)*4))
 
 //This is an array used for the scatter/gather instructions.
 static int32_t offsets[32] __attribute__((aligned(64))) =
@@ -182,7 +179,7 @@ static int32_t offsets[32] __attribute__((aligned(64))) =
 
 //#define MONITORS
 //#define LOOPMON
-void bli_dgemm_knl_asm_24x8
+void bli_sgemm_knl_asm_24x16
      (
        dim_t               k_,
        double*    restrict alpha,
@@ -190,7 +187,7 @@ void bli_dgemm_knl_asm_24x8
        double*    restrict b,
        double*    restrict beta,
        double*    restrict c, inc_t rs_c_, inc_t cs_c_,
-       auxinfo_t* restrict data,
+       auxinfo_t*          data,
        cntx_t*    restrict cntx
      )
 {
@@ -246,8 +243,8 @@ void bli_dgemm_knl_asm_24x8
     VMOVAPS(ZMM(22), ZMM(8))
     VMOVAPS(ZMM(23), ZMM(8))
 #endif
-    VMOVAPS(ZMM(24), ZMM(8))   VPSLLD(ZMM(4), ZMM(4), IMM(3))
-    VMOVAPS(ZMM(25), ZMM(8))   MOV(R8, IMM(4*24*8))     //offset for 4 iterations
+    VMOVAPS(ZMM(24), ZMM(8))   VPSLLD(ZMM(4), ZMM(4), IMM(2))
+    VMOVAPS(ZMM(25), ZMM(8))   MOV(R8, IMM(4*24*4))     //offset for 4 iterations
     VMOVAPS(ZMM(26), ZMM(8))   LEA(R9, MEM(R8,R8,2))    //*3
     VMOVAPS(ZMM(27), ZMM(8))   LEA(R10, MEM(R8,R8,4))   //*5
     VMOVAPS(ZMM(28), ZMM(8))   LEA(R11, MEM(R9,R8,4))   //*7
@@ -327,8 +324,8 @@ void bli_dgemm_knl_asm_24x8
     PREFETCHW1(MEM(RDI,R15,1))
     SUBITER(23,0,1,RAX,R10,1)
 
-    ADD(RAX, IMM(24*24*8))
-    ADD(RBX, IMM(24* 8*8))
+    ADD(RAX, IMM(24*24*4))
+    ADD(RBX, IMM(24*16*4))
 #endif
 
     MOV(RDI, RSI)
@@ -372,8 +369,8 @@ void bli_dgemm_knl_asm_24x8
         SUBITER(30,1,0,RAX,R11,1)
         SUBITER(31,0,1,RAX,R11,1)
 
-        ADD(RAX, IMM(32*24*8))
-        ADD(RBX, IMM(32* 8*8))
+        ADD(RAX, IMM(32*24*4))
+        ADD(RBX, IMM(32*16*4))
 
         SUB(RSI, IMM(1))
 
@@ -385,8 +382,8 @@ void bli_dgemm_knl_asm_24x8
 
     SUBITER(0,1,0,RAX)
     VMOVAPD(ZMM(0), ZMM(1))
-    ADD(RAX, IMM(24*8))
-    ADD(RBX, IMM( 8*8))
+    ADD(RAX, IMM(24*4))
+    ADD(RBX, IMM(16*4))
 
     LABEL(REM_2)
     SAR1(RDI)
@@ -394,8 +391,8 @@ void bli_dgemm_knl_asm_24x8
 
     SUBITER(0,1,0,RAX)
     SUBITER(1,0,1,RAX)
-    ADD(RAX, IMM(2*24*8))
-    ADD(RBX, IMM(2* 8*8))
+    ADD(RAX, IMM(2*24*4))
+    ADD(RBX, IMM(2*16*4))
 
     LABEL(REM_4)
     SAR1(RDI)
@@ -405,8 +402,8 @@ void bli_dgemm_knl_asm_24x8
     SUBITER(1,0,1,RAX)
     SUBITER(2,1,0,RAX)
     SUBITER(3,0,1,RAX)
-    ADD(RAX, IMM(4*24*8))
-    ADD(RBX, IMM(4* 8*8))
+    ADD(RAX, IMM(4*24*4))
+    ADD(RBX, IMM(4*16*4))
 
     LABEL(REM_8)
     SAR1(RDI)
@@ -420,8 +417,8 @@ void bli_dgemm_knl_asm_24x8
     SUBITER(5,0,1,RAX,R8,1)
     SUBITER(6,1,0,RAX,R8,1)
     SUBITER(7,0,1,RAX,R8,1)
-    ADD(RAX, IMM(8*24*8))
-    ADD(RBX, IMM(8* 8*8))
+    ADD(RAX, IMM(8*24*4))
+    ADD(RBX, IMM(8*16*4))
 
     LABEL(REM_16)
     SAR1(RDI)
@@ -443,8 +440,8 @@ void bli_dgemm_knl_asm_24x8
     SUBITER(13,0,1,RAX,R9, 1)
     SUBITER(14,1,0,RAX,R9, 1)
     SUBITER(15,0,1,RAX,R9, 1)
-    ADD(RAX, IMM(16*24*8))
-    ADD(RBX, IMM(16* 8*8))
+    ADD(RAX, IMM(16*24*4))
+    ADD(RBX, IMM(16*16*4))
 
     LABEL(AFTER_LOOP)
 
@@ -541,8 +538,8 @@ void bli_dgemm_knl_asm_24x8
 
         SUBITER(0,1,0,RAX)
         VMOVAPD(ZMM(0), ZMM(1))
-        ADD(RAX, IMM(24*8))
-        ADD(RBX, IMM( 8*8))
+        ADD(RAX, IMM(24*4))
+        ADD(RBX, IMM(16*4))
 
         SUB(RSI, IMM(1))
 
@@ -558,19 +555,19 @@ void bli_dgemm_knl_asm_24x8
 
     MOV(RAX, VAR(alpha))
     MOV(RBX, VAR(beta))
-    VBROADCASTSD(ZMM(0), MEM(RAX))
-    VBROADCASTSD(ZMM(1), MEM(RBX))
+    VBROADCASTSS(ZMM(0), MEM(RAX))
+    VBROADCASTSS(ZMM(1), MEM(RBX))
 
     // Check if C is row stride. If not, jump to the slow scattered update
     MOV(RAX, VAR(rs_c))
-    LEA(RAX, MEM(,RAX,8))
+    LEA(RAX, MEM(,RAX,4))
     MOV(RBX, VAR(cs_c))
     LEA(RDI, MEM(RAX,RAX,2))
     CMP(RBX, IMM(1))
     JNE(SCATTEREDUPDATE)
 
-    VMOVQ(RDX, XMM(1))
-    SAL1(RDX) //shift out sign bit
+    VMOVD(EDX, XMM(1))
+    SAL1(EDX) //shift out sign bit
     JZ(COLSTORBZ)
 
     UPDATE_C_FOUR_ROWS( 8, 9,10,11)
@@ -601,8 +598,8 @@ void bli_dgemm_knl_asm_24x8
     VPBROADCASTD(ZMM(3), EBX)
     VPMULLD(ZMM(2), ZMM(3), ZMM(2))
 
-    VMOVQ(RDX, XMM(1))
-    SAL1(RDX) //shift out sign bit
+    VMOVD(EDX, XMM(1))
+    SAL1(EDX) //shift out sign bit
     JZ(SCATTERBZ)
 
     UPDATE_C_ROW_SCATTERED( 8)

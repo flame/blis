@@ -214,23 +214,17 @@ PDEF_MT  := -DP_BEGIN=200 \
 # --- Targets/rules ------------------------------------------------------------
 #
 
-all: blis-all openblas-all
+all-st:      blis-st openblas-st mkl-st
+all-mt:      blis-mt openblas-mt mkl-mt
 
-intel: blis-all openblas-all mkl-all
+blis-st:     blis-gemm-st
+blis-mt:     blis-gemm-mt
 
-amd: blis-all openblas-all acml-all
+openblas-st: openblas-gemm-st
+openblas-mt: openblas-gemm-mt
 
-blis-all: blis-gemm-st \
-          blis-gemm-mt
-
-openblas-all: openblas-gemm-st \
-              openblas-gemm-mt
-
-mkl-all: mkl-gemm-st \
-         mkl-gemm-mt
-
-acml-all: acml-gemm-st \
-          acml-gemm-mt
+mkl-st:      mkl-gemm-st
+mkl-mt:      mkl-gemm-mt
 
 blis-gemm-st: \
       test_sgemm_asm_blis_st.x \
@@ -293,18 +287,6 @@ mkl-gemm-mt: \
       test_dgemm_mkl_mt.x \
       test_cgemm_mkl_mt.x \
       test_zgemm_mkl_mt.x
-
-acml-gemm-st: \
-      test_sgemm_acml_st.x \
-      test_dgemm_acml_st.x \
-      test_cgemm_acml_st.x \
-      test_zgemm_acml_st.x
-
-acml-gemm-mt: \
-      test_sgemm_acml_mt.x \
-      test_dgemm_acml_mt.x \
-      test_cgemm_acml_mt.x \
-      test_zgemm_acml_mt.x
 
 
 
@@ -466,31 +448,6 @@ test_z%_mkl_mt.o: test_%.c
 test_c%_mkl_mt.o: test_%.c
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLA_DEF) $(DNAT)  $(STR_MKL)  $(STR_MT) -c $< -o $@
 
-# acml
-test_d%_acml_st.o: test_%.c
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_D) $(BLA_DEF) $(DNAT)  $(STR_ACML) $(STR_ST) -c $< -o $@
-
-test_s%_acml_st.o: test_%.c
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_S) $(BLA_DEF) $(DNAT)  $(STR_ACML) $(STR_ST) -c $< -o $@
-
-test_z%_acml_st.o: test_%.c
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLA_DEF) $(DNAT)  $(STR_ACML) $(STR_ST) -c $< -o $@
-
-test_c%_acml_st.o: test_%.c
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLA_DEF) $(DNAT)  $(STR_ACML) $(STR_ST) -c $< -o $@
-
-test_d%_acml_mt.o: test_%.c
-	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_D) $(BLA_DEF) $(DNAT)  $(STR_ACML) $(STR_MT) -c $< -o $@
-
-test_s%_acml_mt.o: test_%.c
-	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_S) $(BLA_DEF) $(DNAT)  $(STR_ACML) $(STR_MT) -c $< -o $@
-
-test_z%_acml_mt.o: test_%.c
-	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_Z) $(BLA_DEF) $(DNAT)  $(STR_ACML) $(STR_MT) -c $< -o $@
-
-test_c%_acml_mt.o: test_%.c
-	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLA_DEF) $(DNAT)  $(STR_ACML) $(STR_MT) -c $< -o $@
-
 
 # -- Executable file rules --
 
@@ -510,12 +467,6 @@ test_%_mkl_st.x: test_%_mkl_st.o $(LIBBLIS_LINK)
 
 test_%_mkl_mt.x: test_%_mkl_mt.o $(LIBBLIS_LINK)
 	$(LINKER) $<  $(MKLP_LIB)      $(LIBBLIS_LINK) $(LDFLAGS) -o $@
-
-test_%_acml_st.x: test_%_acml_st.o $(LIBBLIS_LINK)
-	$(LINKER) $<  $(ACML_LIB)      $(LIBBLIS_LINK) $(LDFLAGS) -o $@
-
-test_%_acml_mt.x: test_%_acml_mt.o $(LIBBLIS_LINK)
-	$(LINKER) $<  $(ACMLP_LIB)     $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 
 test_%_blis_st.x: test_%_blis_st.o $(LIBBLIS_LINK)
 	$(LINKER) $<                   $(LIBBLIS_LINK) $(LDFLAGS) -o $@
