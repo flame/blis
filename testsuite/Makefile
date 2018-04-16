@@ -36,7 +36,7 @@
 # Makefile
 #
 # Field G. Van Zee
-# 
+#
 # Makefile for BLIS testsuite.
 #
 
@@ -86,48 +86,6 @@ endif
 
 
 #
-# --- Optional overrides -------------------------------------------------------
-#
-
-# Uncomment and modify these definitions if you wish to override the values
-# present in the current BLIS configuration's makefile definitions file
-# (ie: config/<configname>/make_defs.mk).
-# CC             := gcc
-# LINKER         := $(CC)
-# CFLAGS         := -g -O2 -Wall -Wno-comment
-# LDFLAGS        := 
-# INSTALL_PREFIX := $(HOME)/blis
-
-
-
-#
-# --- BLAS and LAPACK implementations ------------------------------------------
-#
-
-# BLIS library and header path. This is simply wherever it was installed.
-#BLIS_LIB_PATH  := $(INSTALL_PREFIX)/lib
-#BLIS_INC_PATH  := $(INSTALL_PREFIX)/include/blis
-
-# BLIS library.
-#BLIS_LIB_PATH  := $(BUILD_PATH)/$(LIB_DIR)/$(CONFIG_NAME)
-#BLIS_LIB       := $(BLIS_LIB_PATH)/libblis.a
-
-# BLAS library path(s). This is where the BLAS libraries reside.
-#BLAS_LIB_PATH  := $(HOME)/flame/lib
-
-# OpenBLAS, ATLAS, and MKL libraries.
-#BLAS_LIB       := $(LIB_PATH)/libblas.a
-#BLAS_LIB       := $(LIB_PATH)/libgoto.a
-#BLAS_LIB       := $(LIB_PATH)/libgoto2.a
-#OPENBLAS_LIB   := $(BLAS_LIB_PATH)/libopenblas.a
-#ATLAS_LIB      := $(BLAS_LIB_PATH)/libf77blas.a \
-#                  $(BLAS_LIB_PATH)/libatlas.a
-#MKL_LIB        := -L/opt/intel/mkl/10.2.2.025/lib/em64t/ \
-#                  -lmkl_sequential -lmkl_core -lmkl_intel_lp64
-
-
-
-#
 # --- General build definitions ------------------------------------------------
 #
 
@@ -139,18 +97,18 @@ TEST_OBJS      := $(sort $(patsubst $(TEST_SRC_PATH)/%.c, \
                                     $(TEST_OBJ_PATH)/%.o, \
                                     $(wildcard $(TEST_SRC_PATH)/*.c)))
 
+# Use the "framework" CFLAGS for the configuration family.
+CFLAGS         := $(call get-frame-cflags-for,$(CONFIG_NAME))
+
+# Add local header paths to CFLAGS
+CFLAGS         += -I$(TEST_SRC_PATH)
+
+# Locate the libblis library to which we will link.
+LIBBLIS_LINK   := $(BUILD_PATH)/$(LIBBLIS_LINK)
+
 # Binary executable name.
 TEST_BIN       := test_libblis.x
 
-# Use the CFLAGS for the configuration family.
-CFLAGS          := $(call get-frame-cflags-for,$(CONFIG_NAME))
-
-# Add local header paths to CFLAGS
-#CFLAGS          += -I$(BLIS_INC_PATH) -I$(TEST_SRC_PATH)
-CFLAGS          += -I$(TEST_SRC_PATH)
-
-# Locate the libblis library to which we will link.
-LIBBLIS_LINK    := $(BUILD_PATH)/$(LIBBLIS_LINK)
 
 
 #

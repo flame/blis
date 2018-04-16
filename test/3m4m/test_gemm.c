@@ -84,7 +84,7 @@ int main( int argc, char** argv )
 	// Supress compiler warnings about unused variable 'ind'.
 	( void )ind;
 
-#if 1
+#if 0
 
 	cntx_t* cntx;
 
@@ -99,9 +99,9 @@ int main( int argc, char** argv )
 	// Set k to the kc blocksize for the current datatype.
 	k_input = bli_cntx_get_blksz_def_dt( dt, BLIS_KC, cntx );
 
-#elif 0
+#elif 1
 
-	k_input = 256;
+	//k_input = 256;
 
 #endif
 

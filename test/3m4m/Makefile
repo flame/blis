@@ -130,7 +130,7 @@ MKLP_LIB       := -L$(MKL_LIB_PATH) \
                   -lmkl_intel_lp64 \
                   -lmkl_core \
                   -lmkl_gnu_thread \
-                  -lpthread -lm -ldl
+                  -lpthread -lm -ldl -fopenmp
                   #-L$(ICC_LIB_PATH) \
                   #-lgomp
 
@@ -150,22 +150,18 @@ TEST_SRC_PATH  := .
 TEST_OBJ_PATH  := .
 
 # Gather all local object files.
-TEST_OBJS      := $(patsubst $(TEST_SRC_PATH)/%.c, \
-                             $(TEST_OBJ_PATH)/%.o, \
-                             $(wildcard $(TEST_SRC_PATH)/*.c))
+TEST_OBJS      := $(sort $(patsubst $(TEST_SRC_PATH)/%.c, \
+                                    $(TEST_OBJ_PATH)/%.o, \
+                                    $(wildcard $(TEST_SRC_PATH)/*.c)))
 
-# Override CFLAGS from make_defs.mk here, if desired.
-#CFLAGS         := -g -O2 -march=native
+# Use the "framework" CFLAGS for the configuration family.
+CFLAGS         := $(call get-frame-cflags-for,$(CONFIG_NAME))
 
-# Add installed and local header paths to CFLAGS
-CFLAGS         += -I$(BLIS_INC_PATH) -I$(TEST_SRC_PATH) #-I$(ACML_INC_PATH)
-
-LINKER         := $(CC)
-LDFLAGS        := #-L/home/00146/field/gnu/gcc-4.8.2/lib64
-LDFLAGS        += -lgfortran -lm -lrt -lpthread -fopenmp
+# Add local header paths to CFLAGS.
+CFLAGS         += -I$(TEST_SRC_PATH)
 
 # Locate the libblis library to which we will link.
-LIBBLIS_LINK    := $(BUILD_PATH)/$(LIBBLIS_LINK)
+LIBBLIS_LINK   := $(BUILD_PATH)/$(LIBBLIS_LINK)
 
 
 # Datatype
