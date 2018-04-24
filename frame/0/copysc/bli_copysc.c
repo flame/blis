@@ -39,11 +39,12 @@
 // an operation that can be used to typecast (copy-cast) a scalar
 // of one datatype to a scalar of another datatype.
 
-typedef void (*FUNCPTR_T)(
-                           conj_t conjchi,
-                           void*  chi,
-                           void*  psi
-                         );
+typedef void (*FUNCPTR_T)
+     (
+       conj_t conjchi,
+       void*  chi,
+       void*  psi
+     );
 
 static FUNCPTR_T GENARRAY2_ALL(ftypes,copysc);
 

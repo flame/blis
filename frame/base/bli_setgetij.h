@@ -32,28 +32,51 @@
 
 */
 
-#include "bli_lsame.h"
-#include "bli_slamch.h"
-#include "bli_dlamch.h"
-
-//
-// Prototype object-based interface.
-//
-void bli_machval( machval_t mval,
-                  obj_t*    v );
-
-
-//
-// Prototype BLAS-like interfaces.
-//
-#undef  GENTPROTR
-#define GENTPROTR( ctype_v, ctype_vr, chv, chvr, opname ) \
-\
-void PASTEMAC(chv,opname) \
-     ( \
-       machval_t mval, \
-       void*     v     \
+err_t bli_setijm
+     (
+       double  ar,
+       double  ai,
+       dim_t   i,
+       dim_t   j,
+       obj_t*  b
      );
 
-INSERT_GENTPROTR_BASIC0( machval )
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       double         ar, \
+       double         ai, \
+       dim_t          i, \
+       dim_t          j, \
+       void* restrict b, inc_t rs, inc_t cs  \
+     );
+
+INSERT_GENTPROT_BASIC0( setijm )
+
+// -----------------------------------------------------------------------------
+
+err_t bli_getijm
+      (
+        dim_t   i,
+        dim_t   j,
+        obj_t*  b,
+        double* ar,
+        double* ai
+      );
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       dim_t          i, \
+       dim_t          j, \
+       void* restrict b, inc_t rs, inc_t cs, \
+       double*        ar, \
+       double*        ai  \
+     );
+
+INSERT_GENTPROT_BASIC0( getijm )
 

@@ -166,6 +166,14 @@ void bli_datatype_size_check( num_t dt )
 	bli_check_error_code( e_val );
 }
 
+void bli_datatype_string_check( num_t dt )
+{
+	err_t e_val;
+
+	e_val = bli_check_nonconstant_datatype( dt );
+	bli_check_error_code( e_val );
+}
+
 void bli_datatype_union_check( num_t dt1, num_t dt2 )
 {
 	err_t e_val;

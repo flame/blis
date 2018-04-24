@@ -72,10 +72,11 @@ void bli_machval( machval_t mval,
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype_v, ctype_vr, chv, chvr, opname, varname ) \
 \
-void PASTEMAC(chv,opname)( \
-                           machval_t mval, \
-                           void*     v     \
-                         ) \
+void PASTEMAC(chv,opname) \
+     ( \
+       machval_t mval, \
+       void*     v     \
+     ) \
 { \
 	static ctype_vr pvals[ BLIS_NUM_MACH_PARAMS ]; \
 \

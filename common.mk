@@ -224,7 +224,7 @@ KERNELS_PATH       := $(DIST_PATH)/$(KERNELS_DIR)
 LIBBLIS_NAME       := libblis
 
 # Construct the base path for the library.
-BASE_LIB_PATH      := ./$(LIB_DIR)/$(CONFIG_NAME)
+BASE_LIB_PATH      := $(LIB_DIR)/$(CONFIG_NAME)
 
 # Note: These names will be modified later to include the configuration and
 # version strings.

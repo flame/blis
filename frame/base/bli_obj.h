@@ -72,6 +72,8 @@ void bli_obj_create_1x1_with_attached_buffer( num_t  dt,
                                               void*  p,
                                               obj_t* obj );
 
+void bli_obj_create_conf_to( obj_t* s, obj_t* d );
+
 void bli_obj_free( obj_t* obj );
 
 //void bli_obj_create_const( double value, obj_t* obj );
@@ -86,6 +88,7 @@ void bli_adjust_strides( dim_t  m,
                          inc_t* is );
 
 siz_t bli_datatype_size( num_t dt );
+char* bli_datatype_string( num_t dt );
 
 dim_t bli_align_dim_to_mult( dim_t dim, dim_t dim_mult );
 dim_t bli_align_dim_to_size( dim_t dim, siz_t elem_size, siz_t align_size );

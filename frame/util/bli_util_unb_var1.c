@@ -851,7 +851,6 @@ void PASTEMAC(ch,opname) \
 		chi1 += incx; \
 	} \
 \
-	fprintf( file, "\n" ); \
 	fprintf( file, "%s\n", s2 ); \
 }
 

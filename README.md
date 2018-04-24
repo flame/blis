@@ -188,7 +188,7 @@ This wiki contains detailed instructions on running the BLIS test suite,
 located in the top-level directory testsuite. Also included: a walkthrough
 of the BLAS test drivers, which exercise the BLAS compatibility layer that
 is, by default, included in BLIS.
- * [Release Notes](https://github.com/flame/blis/wiki/ReleaseNotes).
+ * [Release notes](https://github.com/flame/blis/wiki/ReleaseNotes).
 This wiki contains a summary of new features provided by each new tagged
 version (release) of BLIS, along with the date the release.
 

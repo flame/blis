@@ -71,6 +71,8 @@ void bli_obj_create_without_buffer( num_t  dt,
 	siz_t  elem_size;
 	void*  s;
 
+	bli_init_once();
+
 	if ( bli_error_checking_is_enabled() )
 		bli_obj_create_without_buffer_check( dt, m, n, obj );
 
@@ -120,6 +122,8 @@ void bli_obj_alloc_buffer( inc_t  rs,
 	siz_t  elem_size;
 	siz_t  buffer_size;
 	void*  p;
+
+	bli_init_once();
 
 	// Query the dimensions of the object we are allocating.
 	m = bli_obj_length( *obj );
@@ -180,6 +184,11 @@ void bli_obj_attach_buffer( void*  p,
                             inc_t  is,
                             obj_t* obj )
 {
+	bli_init_once();
+
+	// Interpret is = 0 as a request for the default, which is is = 1;
+	if ( is == 0 ) is = 1;
+
 	// Check that the strides and lengths are compatible. Note that the
 	// user *must* specify valid row and column strides when attaching an
 	// external buffer.
@@ -207,6 +216,17 @@ void bli_obj_create_1x1_with_attached_buffer( num_t  dt,
 	bli_obj_create_without_buffer( dt, 1, 1, obj );
 
 	bli_obj_attach_buffer( p, 1, 1, 1, obj );
+}
+
+void bli_obj_create_conf_to( obj_t* s, obj_t* d )
+{
+	const num_t dt = bli_obj_datatype( *s );
+	const dim_t m  = bli_obj_length( *s );
+	const dim_t n  = bli_obj_width( *s );
+	const inc_t rs = bli_obj_row_stride( *s );
+	const inc_t cs = bli_obj_col_stride( *s );
+
+	bli_obj_create( dt, m, n, rs, cs, d );
 }
 
 void bli_obj_free( obj_t* obj )
@@ -408,6 +428,23 @@ siz_t bli_datatype_size( num_t dt )
 		bli_datatype_size_check( dt );
 
 	return dt_sizes[dt];
+}
+
+static char* dt_names[ BLIS_NUM_FP_TYPES+1 ] =
+{
+	"float",
+	"scomplex",
+	"double",
+	"dcomplex",
+	"int"
+};
+
+char* bli_datatype_string( num_t dt )
+{
+	if ( bli_error_checking_is_enabled() )
+		bli_datatype_string_check( dt );
+
+	return dt_names[dt];
 }
 
 dim_t bli_align_dim_to_mult( dim_t dim, dim_t dim_mult )
