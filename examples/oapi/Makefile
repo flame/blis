@@ -113,7 +113,8 @@ TEST_BINS      := 0obj_basic.x \
                   5level1m.x \
                   6level1m_diag.x \
                   7level2.x \
-                  8level3.x
+                  8level3.x \
+                  9util.x
 
 
 

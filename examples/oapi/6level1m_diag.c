@@ -53,7 +53,7 @@ int main( int argc, char** argv )
 
 	obj_t a;
 
-	// Let's create a matrix to work with.
+	// Create a matrix to work with.
 	dt = BLIS_DOUBLE;
 	m = 5; n = 5; rs = 0; cs = 0;
 	bli_obj_create( dt, m, n, rs, cs, &a );
@@ -83,7 +83,7 @@ int main( int argc, char** argv )
 
 	obj_t b, bl;
 
-	// Let's create a matrix to work with.
+	// Create a matrix to work with.
 	dt = BLIS_DOUBLE;
 	m = 5; n = 5; rs = 0; cs = 0;
 	bli_obj_create( dt, m, n, rs, cs, &b );
@@ -142,7 +142,7 @@ int main( int argc, char** argv )
 
 	obj_t c;
 
-	// Let's create a matrix to work with.
+	// Create a matrix to work with.
 	dt = BLIS_DOUBLE;
 	m = 5; n = 5; rs = 0; cs = 0;
 	bli_obj_create( dt, m, n, rs, cs, &c );
@@ -188,7 +188,7 @@ int main( int argc, char** argv )
 
 	obj_t d;
 
-	// Let's create a matrix to work with.
+	// Create a matrix to work with.
 	dt = BLIS_DOUBLE;
 	m = 5; n = 5; rs = 0; cs = 0;
 	bli_obj_create( dt, m, n, rs, cs, &d );
@@ -246,7 +246,7 @@ int main( int argc, char** argv )
 
 	obj_t e, el;
 
-	// Let's create a matrix to work with.
+	// Create a matrix to work with.
 	dt = BLIS_DOUBLE;
 	m = 6; n = 4; rs = 0; cs = 0;
 	bli_obj_create( dt, m, n, rs, cs, &e );
@@ -291,7 +291,7 @@ int main( int argc, char** argv )
 
 	obj_t h, hl;
 
-	// Let's create a matrix to work with.
+	// Create a matrix to work with.
 	dt = BLIS_DOUBLE;
 	m = 5; n = 5; rs = 0; cs = 0;
 	bli_obj_create( dt, m, n, rs, cs, &h );

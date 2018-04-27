@@ -113,8 +113,8 @@ int main( int argc, char** argv )
 
 	printf( "\n#\n#  -- Example 3 --\n#\n\n" );
 
-	// Let's create one more scalar, this time a complex scalar, to show
-	// how it can be used.
+	// Create one more scalar, this time a complex scalar, to show how it
+	// can be used.
 	bli_obj_create_1x1( BLIS_DCOMPLEX, &zeta );
 	bli_setsc( 3.3, -4.4, &zeta );
 	bli_printm( "zeta (complex):", &zeta, "%4.1f", "" );

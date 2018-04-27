@@ -138,7 +138,7 @@ int main( int argc, char** argv )
 
 	printf( "\n#\n#  -- Example 3 --\n#\n\n" );
 
-	// Let's create and initialize a complex object.
+	// Create and initialize a complex object.
 	dt = BLIS_DCOMPLEX;
 	bli_obj_create( dt, m, n, rs, cs, &a3 );
 

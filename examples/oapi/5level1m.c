@@ -55,8 +55,8 @@ int main( int argc, char** argv )
 
 	printf( "\n#\n#  -- Example 1 --\n#\n\n" );
 
-	// Let's create a few matrices to work with. We make them all of
-	// the same dimensions so that we can perform operations between them.
+	// Create a few matrices to work with. We make them all of the same
+	// dimensions so that we can perform operations between them.
 	dt = BLIS_DOUBLE;
 	m = 2; n = 3; rs = 0; cs = 0;
 	bli_obj_create( dt, m, n, rs, cs, &a );

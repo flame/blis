@@ -55,8 +55,8 @@ int main( int argc, char** argv )
 
 	printf( "\n#\n#  -- Example 1 --\n#\n\n" );
 
-	// Let's create a few vectors to work with. We make them all of the
-	// same length so that we can perform operations between them.
+	// Create a few vectors to work with. We make them all of the same length
+	// so that we can perform operations between them.
 	// NOTE: We've chosen to use row vectors here (1x4) instead of column
 	// vectors (4x1) to allow for easier reading of standard output (less
 	// scrolling).
