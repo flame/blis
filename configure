@@ -1071,7 +1071,7 @@ check_compiler()
 	#   sandybridge: any
 	#   penryn: any
 	#
-	#   zen: gcc 6.0+, clang 4.0+
+	#   zen: gcc 6.0+[1], clang 4.0+
 	#   excavator: gcc 4.9+, clang 3.5+
 	#   steamroller: any
 	#   piledriver: any
@@ -1084,9 +1084,13 @@ check_compiler()
 	#   generic: any
 	#
 	# Note: These compiler requirements were originally modeled after similar
-	# requirements encoded into TBLIS's configure.ac [1].
+	# requirements encoded into TBLIS's configure.ac [2].
 	#
-	# [1] https://github.com/devinamatthews/tblis/
+	# [1] While gcc 6.0 or newer is needed for zen support (-march=znver1),
+	#     we relax this compiler version constraint a bit by targeting bdver4
+	#     and then disabling the instruction sets that were removed in the
+	#     transition from bdver4 to znver1.
+	# [2] https://github.com/devinamatthews/tblis/
 	#
 
 	echo "${script_name}: checking for blacklisted configurations due to ${cc} ${cc_version}."
@@ -1106,6 +1110,9 @@ check_compiler()
 				blacklistcc_add "excavator"
 				blacklistcc_add "zen"
 			fi
+		fi
+		if [ ${cc_major} -lt 5 ]; then
+			blacklistcc_add "knl"
 		fi
 		if [ ${cc_major} -lt 6 ]; then
 			# Normally, zen would be blacklisted for gcc prior to 6.0.
