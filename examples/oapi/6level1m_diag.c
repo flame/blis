@@ -211,23 +211,8 @@ int main( int argc, char** argv )
 	bli_printm( "bl: lower triangular bl is aliased to b", &bl, "%4.1f", "" );
 
 	// We want to pluck out the lower triangle and transpose it into the upper
-	// triangle of 'd'. Transposition can be indicated by setting a bit in
-	// the object. Since it always starts out as "no transpose", we can
-	// simply toggle the bit.
+	// triangle of 'd'.
 	bli_obj_toggle_trans( bl );
-
-	// Another way to mark and object for transposition is to set it directly.
-	//bli_obj_set_onlytrans( BLIS_TRANSPOSE, &bl );
-
-	// A third way is to "apply" a transposition. This is equivalent to toggling
-	// the transposition when the value being applied is BLIS_TRANSPOSE. If
-	// the value applied is BLIS_NO_TRANSPOSE, the transposition bit in the
-	// targeted object is unaffected. (Applying transposes is more useful in
-	// practice when the 'trans' argument is a variable and not a constant
-	// literal.)
-	//bli_obj_apply_trans( BLIS_TRANSPOSE, &bl );
-	//bli_obj_apply_trans( BLIS_NO_TRANSPOSE, &bl );
-	//bli_obj_apply_trans( trans, &bl );
 
 	// Now we copy the transpose of the lower part of 'bl' into the upper
 	// part of 'd'. (Again, notice that we haven't modified any properties of

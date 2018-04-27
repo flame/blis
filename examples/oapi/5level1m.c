@@ -38,7 +38,7 @@
 int main( int argc, char** argv )
 {
 	obj_t alpha, beta, gamma;
-	obj_t a, b, c, d, e;
+	obj_t a, b, c, d, e, f, g, h;
 	num_t dt;
 	dim_t m, n;
 	inc_t rs, cs;
@@ -97,7 +97,7 @@ int main( int argc, char** argv )
 	// Set a matrix to random values.
 	bli_randm( &e );
 
-	bli_printm( "e := randm()", &e, "%4.1f", "" );
+	bli_printm( "e (randomized):", &e, "%4.1f", "" );
 
 	//
 	// Example 3: Perform element-wise operations on matrices.
@@ -128,6 +128,80 @@ int main( int argc, char** argv )
 	bli_axpym( &alpha, &a, &c );
 	bli_printm( "c := c + alpha * a", &c, "%4.1f", "" );
 
+	//
+	// Example 4: Copy and transpose a matrix.
+	//
+
+	printf( "\n#\n#  -- Example 4 --\n#\n\n" );
+
+	// Create an n-by-m matrix into which we can copy-transpose an m-by-n
+	// matrix.
+	bli_obj_create( dt, n, m, rs, cs, &f );
+
+	// Initialize all of 'f' to -1.0 to simulate junk values.
+	bli_setm( &BLIS_MINUS_ONE, &f );
+
+	bli_printm( "e:", &e, "%4.1f", "" );
+	bli_printm( "f (initial value):", &f, "%4.1f", "" );
+
+	// Since we are going to copy 'e' to 'f', we need to indicate a transpose
+	// on 'e', the input operand. Transposition can be indicated by setting a
+	// bit in the object. Since it always starts out as "no transpose", we can
+	// simply toggle the bit.
+	bli_obj_toggle_trans( e );
+
+	// Another way to mark and object for transposition is to set it directly.
+	//bli_obj_set_onlytrans( BLIS_TRANSPOSE, &e );
+
+	// A third way is to "apply" a transposition. This is equivalent to toggling
+	// the transposition when the value being applied is BLIS_TRANSPOSE. If
+	// the value applied is BLIS_NO_TRANSPOSE, the transposition bit in the
+	// targeted object is unaffected. (Applying transposes is more useful in
+	// practice when the 'trans' argument is a variable and not a constant
+	// literal.)
+	//bli_obj_apply_trans( BLIS_TRANSPOSE, &e );
+	//bli_obj_apply_trans( BLIS_NO_TRANSPOSE, &e );
+	//bli_obj_apply_trans( trans, &e );
+
+	// Copy 'e' to 'f', transposing 'e' in the process. Notice that we haven't
+	// modified any properties of 'd'. It's the source operand that matters
+	// when marking an operand for transposition, not the destination.
+	bli_copym( &e, &f );
+
+	bli_printm( "f (copied value):", &f, "%4.1f", "" );
+
+	//
+	// Example 5: Copy and Hermitian-transpose a matrix.
+	//
+
+	printf( "\n#\n#  -- Example 5 --\n#\n\n" );
+
+	// Create an n-by-m complex matrix into which we can Hermitian-transpose
+	// (or, conjugate-transpose) another complex (m-by-n) matrix.
+	dt = BLIS_DCOMPLEX;
+	bli_obj_create( dt, m, n, rs, cs, &g );
+	bli_obj_create( dt, n, m, rs, cs, &h );
+
+	// Randomize 'g', the input operand.
+	bli_randm( &g );
+
+	// Initialize all of 'h' to -1.0 to simulate junk values.
+	bli_setm( &BLIS_MINUS_ONE, &h );
+
+	bli_printm( "g:", &g, "%4.1f", "" );
+	bli_printm( "h (initial value):", &h, "%4.1f", "" );
+
+	// Set both the transpose and conjugation bits.
+	bli_obj_toggle_trans( g );
+	bli_obj_toggle_conj( g );
+
+	// Copy 'g' to 'h', conjugating and transposing 'g' in the process.
+	// Once again, notice that it's the source operand that we've marked for
+	// conjugation.
+	bli_copym( &g, &h );
+
+	bli_printm( "h (copied value):", &h, "%4.1f", "" );
+
 
 	// Free the objects.
 	bli_obj_free( &alpha );
@@ -138,6 +212,9 @@ int main( int argc, char** argv )
 	bli_obj_free( &c );
 	bli_obj_free( &d );
 	bli_obj_free( &e );
+	bli_obj_free( &f );
+	bli_obj_free( &g );
+	bli_obj_free( &h );
 
 	return 0;
 }
