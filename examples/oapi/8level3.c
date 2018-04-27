@@ -43,6 +43,7 @@ int main( int argc, char** argv )
 	side_t side;
 
 	obj_t a, b, c, d;
+	obj_t aa, bb, cc;
 	obj_t* alpha;
 	obj_t* beta;
 
@@ -85,6 +86,46 @@ int main( int argc, char** argv )
 	bli_obj_free( &a );
 	bli_obj_free( &b );
 	bli_obj_free( &c );
+
+	//
+	// Example 1b: Perform a general matrix-matrix multiply (gemm) operation
+	//             with the left input operand (matrix A) transposed.
+	//
+
+	printf( "\n#\n#  -- Example 1b --\n#\n\n" );
+
+	// Create some matrix operands to work with.
+	dt = BLIS_DOUBLE;
+	m = 4; n = 5; k = 3; rs = 0; cs = 0;
+	bli_obj_create( dt, m, n, rs, cs, &cc );
+	bli_obj_create( dt, k, m, rs, cs, &aa );
+	bli_obj_create( dt, k, n, rs, cs, &bb );
+
+	// Set the scalars to use.
+	alpha = &BLIS_ONE;
+	beta  = &BLIS_ONE;
+
+	// Initialize the matrix operands.
+	bli_randm( &aa );
+	bli_setm( &BLIS_ONE, &bb );
+	bli_setm( &BLIS_ZERO, &cc );
+
+	// Set the transpose bit in 'aa'.
+	bli_obj_toggle_trans( aa );
+
+	bli_printm( "a: randomized", &aa, "%4.1f", "" );
+	bli_printm( "b: set to 1.0", &bb, "%4.1f", "" );
+	bli_printm( "c: initial value", &cc, "%4.1f", "" );
+
+	// c := beta * c + alpha * a^T * b, where 'a', 'b', and 'c' are general.
+	bli_gemm( alpha, &aa, &bb, beta, &cc );
+
+	bli_printm( "c: after gemm", &cc, "%4.1f", "" );
+
+	// Free the objects.
+	bli_obj_free( &aa );
+	bli_obj_free( &bb );
+	bli_obj_free( &cc );
 
 	//
 	// Example 2: Perform a symmetric rank-k update (syrk) operation.
