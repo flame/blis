@@ -92,8 +92,8 @@ main()
 	# The name of the script, stripped of any preceeding path.
 	script_name=${0##*/}
 
-	# The name of the common.mk file.
-	commonmk_file='common.mk'
+	# The name of the config.mk file.
+	configmk_file='config.mk'
 
 	# The name of the CHANGELOG file.
 	changelog_file='CHANGELOG'
@@ -186,7 +186,7 @@ main()
 
 			# If 'make distclean' was run recently, we need to re-run
 			# configure in order for 'make changelog' to work properly.
-			if [ ! -f "${commonmk_file}" ]; then
+			if [ ! -f "${configmk_file}" ]; then
 				./configure auto
 			fi
 			make changelog
