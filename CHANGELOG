@@ -1,10 +1,424 @@
-commit 1f28d7c86e17730f05bd239c8e8d67e3e7510a4f (HEAD -> master, tag: 0.3.1)
+commit 2fb440876690bdcec0c11a30e2b33ad100bab529 (HEAD -> master, tag: 0.3.2)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Apr 28 14:07:31 2018 -0500
+
+    Version file update (0.3.2)
+
+commit cdf041ddadd8725e578e2f59f37ae341f26655af (origin/master, origin/HEAD)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Apr 28 14:05:00 2018 -0500
+
+    Use config.mk instead of common.mk in bump-version.sh.
+    
+    Details:
+    - Fixed inadvertent targeting of common.mk when testing whether configure
+      had already been run, rather than config.mk.
+
+commit 6ded8f9f0364b3c07255e2532ada3eeb2ed2a715
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Apr 28 14:01:29 2018 -0500
+
+    Account for recent 'make distclean' in bump-version.sh.
+    
+    Details:
+    - Added logic to build/bump-version.sh that will run './configure auto'
+      if 'common.mk' is not present (usually because 'make distclean' was run
+      recently).
+
+commit 7c16fdce433f5dea0e83d5047553c955d8e46fd2
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Apr 28 13:50:55 2018 -0500
+
+    Fixed typo in RELEASING file.
+
+commit 5e5ca4984fcf6d72d3036c338bb9cdc64520a325
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Apr 28 13:48:01 2018 -0500
+
+    README updates.
+    
+    Details:
+    - Updates to the top-level README files in the top-level directory as
+      well as the 'examples/oapi' directory.
+
+commit 627b045e301defea6770dc5b64e1110cbec25153 (origin/dev, origin/amd, dev, amd)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Apr 27 18:11:19 2018 -0500
+
+    Added an example of using transposition with gemm.
+    
+    Details:
+    - Added an example to examples/oapi/8level3.c to show how to indicate
+      transposition when performing a gemm operation.
+
+commit 13a0eadc69d72933e322901f5b44944834e3c787
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Apr 27 18:00:07 2018 -0500
+
+    Added more transposition/conjugation examples.
+    
+    Details:
+    - Added code to examples/oapi/5level1m.c that demonstrates transposing
+      (and conjugate-transposing) unstructured matrices.
+    - Comment updates to 6level1m_diag.c to maintain consistency with new
+      examples in 5level1m.c.
+
+commit 5606cd8881e75264a96af45dc8ea1905bab054f5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Apr 27 17:13:10 2018 -0500
+
+    Added utility module to examples/oapi.
+    
+    Details:
+    - Added a new code example file to examples/oapi demonstrating how to use
+      various utility operations.
+    - Comment updates to other example files.
+    - README updates.
+
+commit ff26c94c6486374c709f93c6965ea18903bd6a18
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Apr 27 12:31:34 2018 -0500
+
+    Added missing gcc version constraint for knl.
+    
+    Details:
+    - Previously forgot to add explicit enforcement of a minimum gcc version
+      in configure script when 'knl' sub-configuration is requested.
+    - Comment updates to configure.
+
+commit 4d97574e477b3e55ddbb6044b0542a92cd9bab30
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Apr 24 18:48:09 2018 -0500
+
+    Added object API example code.
+    
+    Details:
+    - Added an 'examples' directory at the top level.
+    - Added an 'oapi' subdirectory in 'examples' that contains a tutorial-like
+      sequence of example code demostrating the core functionality of BLIS's
+      object-based API, along with a Makefile and README. Thanks to Victor
+      Eijkhout for being the first to suggest including such code in BLIS.
+
+commit d6ab25a3232aa52b9b855088fb4b0b46ff2c00c8
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Apr 24 18:43:03 2018 -0500
+
+    Add setijm, getijm operations.
+    
+    Details:
+    - Added bli_setgetijm.c, which defines bli_setijm(), bli_getijm(), and
+      related functions that can be used to read and write individual
+      elements of an obj_t.
+    - Defined a new function, bli_obj_create_conf_to(), in bli_obj.c that will
+      create a new object with dimensions conformal to an existing object.
+      Transposition and conjugation states on the existing object are ignored,
+      as are structure and uplo fields.
+    - Defined a new function, bli_datatype_string(), in bli_obj.c that returns
+      a char* to a string representation of the name of each num_t datatype.
+      For example, BLIS_DOUBLE is "double" and BLIS_DCOMPLEX is "dcomplex".
+      BLIS_INT is included (as "int"), but BLIS_CONSTANT is not, and thus is
+      not a valid input argument to bli_datatype_string().
+    - Added calls to bli_init_once() to various functions in bli_obj.c, the
+      most important of which was bli_obj_create_without_buffer().
+    - Removed unintended/extra newline from the end of printv output.
+    - Whitespace changes to
+      - frame/base/bli_machval.c
+      - frame/base/bli_machval.h
+      - frame/0/copysc/bli_copysc.c
+    - Trivial changes to README.md and common.mk.
+
+commit a731a428f7fc02fd6ab4f953ead828c1d06fb5a1
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Apr 17 16:44:55 2018 -0500
+
+    Another README.md update.
+
+commit c734ee928a824b27d280a9a67b1b4bc8423d5795
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Apr 17 16:40:05 2018 -0500
+
+    README.md update.
+
+commit 03ecad372d8eb603ee905a7b944d0544a813460a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Apr 17 14:16:59 2018 -0500
+
+    Added RELEASING file.
+    
+    Details:
+    - Added a file named 'RELEASING' that contains basic notes on how to
+      create a new version/release of BLIS. This is mostly just a reminder
+      to myself, but also may become useful if/when others take over
+      development and administration of the project.
+
+commit 24b3c3149ce66546b9a1afc2cc794a637a86aa60
+Merge: 60366a3f 817b67c0
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Apr 16 18:49:38 2018 -0500
+
+    Merge branch 'dev' of github.com:flame/blis into dev
+
+commit 60366a3faba4e60cee85c3b87a3f69625f4b9026
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Apr 16 18:46:21 2018 -0500
+
+    Updates to knl kernels and related code.
+    
+    Details:
+    - Imported the 24x16 knl sgemm microkernel (and its corresonding spackm
+      kernel) from TBLIS and enabled its use in the knl sub-config. Also
+      Added sgemm microkernel prototype to bli_kernels_knl.h.
+    - Updated dgemm and dpackm microkernels from TBLIS, which included an
+      important change regarding the offsets array (changed from extern
+      declaration to static declaration/definition).
+    - Activated use of level-1v and -1f zen kernels in skx and knl
+      sub-configs.
+    - Removed some old macros no longer needed in bli_family_skx.h now that
+      libmemkind support exists in configure.
+    - Moved bli_avx512_macros.h to frame/include and adjusted #includes in
+      skx and knl kernels accordingly.
+    - Moved unused kernels in kernels/knl/3 to kernels/knl/3/other
+      directory.
+    - Fixed a minor bug in the 'make' output per compile when verboseness
+      is not turned on. The rule-generating function 'make-kernel-rule' was
+      previously passing in the name of the config, rather than the name of
+      the kernel set returned by get-config-for-kset, which could give
+      misleading information to the user when the kconfig_map mapped a
+      kernel set to a sub-configuration that did not share the same name.
+      (This didn't affect the CFLAGS that were actually used.)
+    - Updated test/3m4m/Makefile, removing acml targets and renaming the
+      remaining targets.
+
+commit 817b67c01752e0ca8fe230bb8ad23afc7bd0f64e
+Merge: 67c9c2f8 2b7108a8
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Apr 16 14:06:26 2018 -0500
+
+    Merge branch 'dev' of github.com:flame/blis into dev
+
+commit 67c9c2f86d5ef2accc439b21581d73d82754a2e3
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Apr 16 14:03:12 2018 -0500
+
+    Retired haswell gemm microkernels.
+    
+    Details:
+    - Moved microkernels in kernels/haswell/3 to kernels/haswell/3/old. These
+      microkernels were no longer being used and only sowed confusion to
+      anyone inspecting the repository without being fully cognizant of the
+      build system and how it works (and sometimes even to those who wrote
+      the build system). Note that the haswell configuration currently
+      employs the zen microkernels.
+
+commit 2b7108a8ef8ce958b3acad028ff07c85ff97fd63
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Apr 16 12:35:53 2018 -0500
+
+    Minor updates to test driver makefiles.
+    
+    Details:
+    - Cleaned up and homogenized the various test driver Makefiles in
+      testsuite and test directories.
+    - Very minor updates to test driver code.
+
+commit 9f56df95570a24587b910b169f342bd356ccbfb6
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Apr 11 14:51:36 2018 -0500
+
+    Trivial tweaks to configure blacklisting output.
+    
+    Details:
+    - Updated output of information vis-a-vis configuration blacklisting.
+
+commit f56481efebd9a7785c0618f3a12c0bec36f46333
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Apr 10 19:02:21 2018 -0500
+
+    Cleaned up assembler version query on OS X.
+    
+    Details:
+    - Swiched from querying version of 'objdump' to 'as' (e.g. the
+      assembler).
+    - Fixed the outputting of the version of 'as' on OS X, which required
+      this beauty:
+        ...=$(as -v /dev/null -o /dev/null 2>&1)
+    - Only add sub-configs to blacklist if the sub-config hasn't already
+      been added.
+
+commit 088c474e629535affbe111f141f895af50d109be
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Apr 10 18:09:56 2018 -0500
+
+    Added support for blacklisting via the assembler.
+    
+    Details:
+    - Added logic to configure that attempts to assemble various small files
+      containing select instructions designed to reveal whether binutils
+      (specifically, the assembler) supports emitting those instruction sets.
+      This information provides additional opportunities to blacklist sub-
+      configurations that are unsupported by the environment. Thanks to Devin
+      Matthews for pointing me towards a similar solution in TBLIS as an
+      example.
+    - Various other cleanups in configure.
+    - Reorganized the detection code in the 'build' directory, bringing the
+      "auto-detect" configuration detection, libmemkind detection, and new
+      instruction set detection codes into a single new subdirectory named
+      'detect'.
+
+commit 78a24e7dada52a3582f8488795bd1a44993989d9
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Apr 9 17:02:13 2018 -0500
+
+    Updated bli_avx512_macros.h in knl and skx configs.
+    
+    Details:
+    - Downloaded updated version of bli_avx512_macros.h from TBLIS [1] in
+      attempt to address issue #192.
+      [1] https://github.com/devinamatthews/tblis/
+
+commit 388f64d6ade14caa4a6c286845ad2d565378b2bb
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Apr 9 15:33:10 2018 -0500
+
+    Fixed failure to honor CC= argument to configure.
+    
+    Details:
+    - Fixed a failure to observe the value of CC when selecting the compiler
+      in configure. Thanks to Devangi Parikh for reporting this bug.
+    - The semantics now also work for the CC environment variable. That is,
+      if CC is set prior to running configure, that value is used, but will
+      be overridden by specifying the CC= argument to configure. If the CC
+      environment variable is not set, the CC= value is used. If neither the
+      environment variable nor CC= are specified, then the choice is made
+      internally to configure: first attempting to find gcc, then clang, and
+      then cc.
+
+commit 45fbe66b3e2ab92f0b4fdf437d57c5d06603803d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Apr 9 14:01:08 2018 -0500
+
+    Fixed libmemkind dependency for x86_64.
+    
+    Details:
+    - Removed some old conditional code in config/knl/make_defs.mk that
+      added -lmemkind to LDFLAGS if DEBUG_TYPE was not 'sde' and inserted
+      code into common.mk that affirmatively filters out -lmemkind from
+      LDFLAGS if DEBUG_TYPE is 'sde'. (Thanks to Dave Love for reporting
+      this issue.) Other minor cleanups to neighboring code in common.mk.
+    - Updated CRVECFLAGS in knl/make_defs.mk to be based on -march=knl,
+      and then AVX-512 functionality is manually removed via various
+      -mno-avx512* flags. Also, make the setting of CRVECFLAGS conditional
+      on CC_VENDOR. Similar change to skx/make_defs.mk.
+    - Comment/whitespace updates.
+
+commit ca982148b3b419db063cad2fa74376ec383a5c80
+Author: dnp <devangiparikh@gmail.com>
+Date:   Sun Apr 8 21:27:10 2018 -0500
+
+    Fixed bug in SKX sgemm microkernel. Modified SKX dgemm mircokernel to be consistent with the sgemm microkernel
+
+commit bd0276752ccdd56ff897b1a5ae022f2ffe6e0b38
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Apr 6 18:51:43 2018 -0500
+
+    Track separate ref kernel flags for each sub-config.
+    
+    Details:
+    - Renamed CVECFLAGS variables in sub-configurations' make_defs.mk files
+      to CKVECFLAGS.
+    - Added default defintions of two new make variables to most sub-
+      configurations' make_defs.mk files--CROPTFLAGS and CRVECFLAGS--
+      which correspond to reference kernel analogues of the CKOPTFLAGS
+      and CKVECFLAGS, which track optimization and vectorization flags for
+      optimized kernels. Currently, two sub-configurations (knl and skx)
+      explicitly set CRVECFLAGS to non-default values (using AVX2 instead of
+      AVX-512 for reference kernels. Thanks to Jeff Hammond, whose feedback
+      prompted me to make this change (issue #187).
+    - Changed common.mk so that the get-refkern-cflags-for function returns
+      the flags associated with the given sub-configuration's CROPTFLAGS
+      and CRVECFLAGS (instead of CKOPTFLAGS and CKVECFLAGS).
+
+commit b9aebce19480448817373e2df2b36bd090eae41a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Apr 6 18:37:33 2018 -0500
+
+    De-verbosify makefile fragment generation.
+    
+    Details:
+    - Changed from -v1 to -v0 when calling gen-make-frag.sh from configure.
+      The directory-by-directory recursive output didn't add much value to
+      the user, so now we just echo a line for each top-level directory into
+      which we will recurse (e.g. 'config', 'ref_kernels', 'frame', etc.).
+      This also helps keep more interesting information (from earlier in the
+      execution of configure) from scrolling out of the terminal window.
+
+commit b549b91f26948991e13364f1f26a878da0f43aa0
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Apr 6 16:31:33 2018 -0500
+
+    Added 64-bit integer support to BLAS test drivers.
+    
+    Details:
+    - Updated the build system and BLAS test drivers to use 64-bit integers
+      when BLIS is configured for 64-bit integers in the BLAS layer. Also
+      updated blastest/Makefile accordingly. Thanks to Dave Love for
+      reporting the need for this feature.
+    - Added a 'check' target to blastest/Makefile so that the user can see
+      a summary of the tests.
+    - Commented out the initial definition of INCLUDE_PATHS in common.mk,
+      which was used pre-monolithic header, back when BLIS needed paths to
+      *all* headers, rather than just a select few. This line is no longer
+      needed since the value of INCLUDE_PATHS is overwritten by a later
+      definition limited to only the header paths that are needed now.
+
+commit d39fa1c04265869bdf8b6f453076359eec2f3c59
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Apr 5 19:38:35 2018 -0500
+
+    Adjusted CFLAGS used to compile bli_cntx_ref.c.
+    
+    Details:
+    - Removed CKOPTFLAGS and CVECFLAGS from the set of CFLAGS used to
+      compile bli_cntx_ref.c for each configuration. This is necessary
+      because the file defines functions like bli_cntx_init_skx_ref(),
+      which are called during BLIS's initialization of the global kernel
+      structure, potentially being executed by an architecture that lacks
+      the instruction set used to compile the kernels for, in this example,
+      skx, which would lead to an illegal instruction error. Thanks to
+      Dave Love for reporting this issue.
+    - Further adjusted CFLAGS used when compiling code in the 'config'
+      directory (e.g. bli_cntx_init_skx.c) as well as code in 'frame' so
+      as to avoid the aforementioned issue.
+
+commit 08b123084d35680beab379012f8f5a5a8b44a443
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Apr 5 14:25:39 2018 -0500
+
+    Added color-coding to 'make check' output.
+    
+    Details:
+    - Added color coding to output of check-blistest.sh, check-blastest.sh
+      scripts. Success messages are coded green and failure are coded red.
+      This helps draw the eye toward those messages as the 'make checkblis',
+      'make checkblis-fast', and 'make checkblas' targets are executed.
+    - Changed top-level Makefile so that execution will not halt if
+      'checkblis', 'checkblis-fast', or 'checkblas' targets fail, which
+      means that the second of the two tests (BLIS and BLAS) run by
+      'make check' will run even if the first test fails.
+
+commit c9e4d7db7410b03c1ffe8c9727e9f1b2ba7fecfe
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Apr 4 17:13:15 2018 -0500
+
+    CHANGELOG update (0.3.1)
+
+commit 1f28d7c86e17730f05bd239c8e8d67e3e7510a4f (tag: 0.3.1)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Wed Apr 4 17:13:15 2018 -0500
 
     Version file update (0.3.1)
 
-commit e6cc9ee26bcf0450f1120d5d12985b04d9fb8516 (origin/master, origin/dev, origin/amd, origin/HEAD, dev, amd)
+commit e6cc9ee26bcf0450f1120d5d12985b04d9fb8516
 Merge: 786d15c5 3c91c7ae
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Wed Apr 4 16:08:18 2018 -0500
