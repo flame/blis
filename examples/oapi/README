@@ -12,14 +12,16 @@ You can build all of the examples by simply running 'make' from this
 directory. (You can also run 'make clean'.) The makefile assumes that
 you've already configured and built (but not necessarily installed) BLIS
 two directories up, in "../..". Once the executable files have been built,
-we reading the code in one terminal window alongside the executable output
-in another. This way, you can see the effects of each section of code.
+we recommend reading the code in one terminal window alongside the
+executable output in another. This will help you see the effects of each
+section of code.
 
 This tutorial is not exhaustive or complete; several object API functions
 were omitted (mostly for brevity's sake) and thus more examples could be
 written. If you've found object functionality in BLIS and are unsure how to
 use it, or if you are unsure of what additional functionality is present in
-BLIS, please contact the blis-devel mailing list [1] for guidance.
+BLIS, please feel free to join and then start a discussion on the blis-devel
+mailing list [1].
 
 Thanks for your interest in BLIS!
 

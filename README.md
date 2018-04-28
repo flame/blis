@@ -163,6 +163,9 @@ reference](https://github.com/flame/blis/wiki/BLISAPIQuickReference).
 There you will find a brief description of each operation as well as some more
 general information needed when developing an application with BLIS.
 
+If you want to begin using the more advanced object-based API in BLIS,
+please step through the example code tutorial in the [examples/oapi](https://github.com/flame/blis/tree/master/examples/oapi) directory.
+
 Have a quick question? You may find the answer in our list of [frequently asked
 questions](https://github.com/flame/blis/wiki/FAQ). 
 
