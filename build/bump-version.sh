@@ -92,6 +92,9 @@ main()
 	# The name of the script, stripped of any preceeding path.
 	script_name=${0##*/}
 
+	# The name of the common.mk file.
+	commonmk_file='common.mk'
+
 	# The name of the CHANGELOG file.
 	changelog_file='CHANGELOG'
 
@@ -180,6 +183,12 @@ main()
 
 		echo "${script_name}: updating ${changelog_file}."
 		if [ -z "$dry_run_flag" ]; then
+
+			# If 'make distclean' was run recently, we need to re-run
+			# configure in order for 'make changelog' to work properly.
+			if [ ! -f "${commonmk_file}" ]; then
+				./configure auto
+			fi
 			make changelog
 		fi
 
