@@ -17,7 +17,7 @@ Here are the steps to follow to create a new release (version) of BLIS:
 
 4. Bump the version number:
 
-   $ ./build/bump-version "0.3.2"
+   $ ./build/bump-version.sh "0.3.2"
 
 5. Push the new commits and new tag associated with the new version:
 
