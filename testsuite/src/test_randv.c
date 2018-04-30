@@ -218,7 +218,7 @@ void libblis_test_randv_check
        double*        resid
      )
 {
-	num_t  dt_real = bli_obj_datatype_proj_to_real( *x );
+	num_t  dt_real = bli_obj_dt_proj_to_real( *x );
 	dim_t  m_x     = bli_obj_vector_dim( *x );
 	obj_t  sum;
 

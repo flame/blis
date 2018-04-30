@@ -163,8 +163,8 @@ int main( int argc, char** argv )
 			obj_t ar, ai;
 			bli_obj_alias_to( a, ar );
 			bli_obj_alias_to( a, ai );
-			bli_obj_set_datatype( BLIS_DOUBLE, ar ); ar.rs *= 2; ar.cs *= 2;
-			bli_obj_set_datatype( BLIS_DOUBLE, ai ); ai.rs *= 2; ai.cs *= 2; ai.buffer = ( double* )ai.buffer + 1;
+			bli_obj_set_dt( BLIS_DOUBLE, ar ); ar.rs *= 2; ar.cs *= 2;
+			bli_obj_set_dt( BLIS_DOUBLE, ai ); ai.rs *= 2; ai.cs *= 2; ai.buffer = ( double* )ai.buffer + 1;
 			bli_printm( "ar", &ar, "%4.1f", "" );
 			bli_printm( "ai", &ai, "%4.1f", "" );
 */

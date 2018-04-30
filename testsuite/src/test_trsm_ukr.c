@@ -323,8 +323,8 @@ void libblis_test_trsm_ukr_check
        double*        resid
      )
 {
-	num_t  dt      = bli_obj_datatype( *b );
-	num_t  dt_real = bli_obj_datatype_proj_to_real( *b );
+	num_t  dt      = bli_obj_dt( *b );
+	num_t  dt_real = bli_obj_dt_proj_to_real( *b );
 
 	dim_t  m       = bli_obj_length( *b );
 	dim_t  n       = bli_obj_width( *b );

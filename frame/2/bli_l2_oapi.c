@@ -57,7 +57,7 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	BLIS_OAPI_CNTX_DECL \
 \
-	num_t     dt        = bli_obj_datatype( *a ); \
+	num_t     dt        = bli_obj_dt( *a ); \
 \
     trans_t   transa    = bli_obj_conjtrans_status( *a ); \
     conj_t    conjx     = bli_obj_conj_status( *x ); \
@@ -126,7 +126,7 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	BLIS_OAPI_CNTX_DECL \
 \
-	num_t     dt        = bli_obj_datatype( *a ); \
+	num_t     dt        = bli_obj_dt( *a ); \
 \
     conj_t    conjx     = bli_obj_conj_status( *x ); \
     conj_t    conjy     = bli_obj_conj_status( *y ); \
@@ -190,7 +190,7 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	BLIS_OAPI_CNTX_DECL \
 \
-	num_t     dt        = bli_obj_datatype( *a ); \
+	num_t     dt        = bli_obj_dt( *a ); \
 \
     uplo_t    uploa     = bli_obj_uplo( *a ); \
     conj_t    conja     = bli_obj_conj_status( *a ); \
@@ -259,7 +259,7 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	BLIS_OAPI_CNTX_DECL \
 \
-	num_t     dt        = bli_obj_datatype( *a ); \
+	num_t     dt        = bli_obj_dt( *a ); \
 \
     uplo_t    uploa     = bli_obj_uplo( *a ); \
     conj_t    conjx     = bli_obj_conj_status( *x ); \
@@ -318,7 +318,7 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	BLIS_OAPI_CNTX_DECL \
 \
-	num_t     dt        = bli_obj_datatype( *a ); \
+	num_t     dt        = bli_obj_dt( *a ); \
 \
     uplo_t    uploa     = bli_obj_uplo( *a ); \
     conj_t    conjx     = bli_obj_conj_status( *x ); \
@@ -381,7 +381,7 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	BLIS_OAPI_CNTX_DECL \
 \
-	num_t     dt        = bli_obj_datatype( *a ); \
+	num_t     dt        = bli_obj_dt( *a ); \
 \
     uplo_t    uploa     = bli_obj_uplo( *a ); \
     trans_t   transa    = bli_obj_conjtrans_status( *a ); \

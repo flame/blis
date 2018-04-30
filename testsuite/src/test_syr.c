@@ -267,8 +267,8 @@ void libblis_test_syr_check
        double*        resid
      )
 {
-	num_t  dt      = bli_obj_datatype( *a );
-	num_t  dt_real = bli_obj_datatype_proj_to_real( *a );
+	num_t  dt      = bli_obj_dt( *a );
+	num_t  dt_real = bli_obj_dt_proj_to_real( *a );
 
 	dim_t  m_a     = bli_obj_length( *a );
 

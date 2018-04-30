@@ -301,7 +301,7 @@ void PASTEMAC0(opname) \
        obj_t*  index  \
      ) \
 { \
-    num_t     dt        = bli_obj_datatype( *x ); \
+    num_t     dt        = bli_obj_dt( *x ); \
 \
     dim_t     n         = bli_obj_vector_dim( *x ); \
     void*     buf_x     = bli_obj_buffer_at_off( *x ); \

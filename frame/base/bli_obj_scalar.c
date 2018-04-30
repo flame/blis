@@ -74,7 +74,7 @@ void bli_obj_scalar_init_detached_copy_of( num_t  dt,
 void bli_obj_scalar_detach( obj_t* a,
                             obj_t* alpha )
 {
-	num_t dt_a = bli_obj_datatype( *a );
+	num_t dt_a = bli_obj_dt( *a );
 
 	// Initialize alpha to be a bufferless internal scalar of the same
 	// datatype as A.
@@ -92,7 +92,7 @@ void bli_obj_scalar_attach( conj_t conj,
 
 	// Make a copy-cast of alpha of the same datatype as A. This step
 	// gives us the opportunity to conjugate and/or typecast alpha.
-	bli_obj_scalar_init_detached_copy_of( bli_obj_datatype( *a ),
+	bli_obj_scalar_init_detached_copy_of( bli_obj_dt( *a ),
 	                                      conj,
 	                                      alpha,
 	                                      &alpha_cast );
@@ -109,7 +109,7 @@ void bli_obj_scalar_apply_scalar( obj_t* alpha,
 
 	// Make a copy-cast of alpha of the same datatype as A. This step
 	// gives us the opportunity to typecast alpha.
-	bli_obj_scalar_init_detached_copy_of( bli_obj_datatype( *a ),
+	bli_obj_scalar_init_detached_copy_of( bli_obj_dt( *a ),
 	                                      BLIS_NO_CONJUGATE,
 	                                      alpha,
 	                                      &alpha_cast );
@@ -125,7 +125,7 @@ void bli_obj_scalar_apply_scalar( obj_t* alpha,
 
 void bli_obj_scalar_reset( obj_t* a )
 {
-	num_t dt       = bli_obj_datatype( *a );
+	num_t dt       = bli_obj_dt( *a );
 	void* scalar_a = bli_obj_internal_scalar_buffer( *a );
 	void* one      = bli_obj_buffer_for_const( dt, BLIS_ONE );
 
@@ -141,7 +141,7 @@ void bli_obj_scalar_reset( obj_t* a )
 bool_t bli_obj_scalar_has_nonzero_imag( obj_t* a )
 {
 	bool_t r_val     = FALSE;
-	num_t  dt        = bli_obj_datatype( *a );
+	num_t  dt        = bli_obj_dt( *a );
 	void*  scalar_a  = bli_obj_internal_scalar_buffer( *a );
 
 	if      ( bli_is_real( dt ) )

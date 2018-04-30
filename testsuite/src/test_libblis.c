@@ -1832,7 +1832,7 @@ void libblis_test_mobj_create( test_params_t* params, num_t dt, trans_t trans, c
 {
 	dim_t  gs        = params->gs_spacing;
 	bool_t alignment = params->alignment;
-	siz_t  elem_size = bli_datatype_size( dt );
+	siz_t  elem_size = bli_dt_size( dt );
 	dim_t  m_trans   = m;
 	dim_t  n_trans   = n;
 	dim_t  rs        = 1; // Initialization avoids a compiler warning.
@@ -1945,8 +1945,8 @@ void libblis_test_vobj_randomize( test_params_t* params, bool_t normalize, obj_t
 
 	if ( normalize )
 	{
-		num_t dt   = bli_obj_datatype( *x );
-		num_t dt_r = bli_obj_datatype_proj_to_real( *x );
+		num_t dt   = bli_obj_dt( *x );
+		num_t dt_r = bli_obj_dt_proj_to_real( *x );
 		obj_t kappa;
 		obj_t kappa_r;
 
@@ -1975,7 +1975,7 @@ void libblis_test_mobj_randomize( test_params_t* params, bool_t normalize, obj_t
 	if ( normalize )
 	{
 #if 0
-		num_t dt      = bli_obj_datatype( *a );
+		num_t dt      = bli_obj_dt( *a );
 		dim_t max_m_n = bli_obj_max_dim( *a );
 		obj_t kappa;
 
@@ -1985,8 +1985,8 @@ void libblis_test_mobj_randomize( test_params_t* params, bool_t normalize, obj_t
 		bli_setsc( 1.0/( double )max_m_n, 0.0, &kappa );
 		bli_scalm( &kappa, a );
 #endif
-		num_t dt   = bli_obj_datatype( *a );
-		num_t dt_r = bli_obj_datatype_proj_to_real( *a );
+		num_t dt   = bli_obj_dt( *a );
+		num_t dt_r = bli_obj_dt_proj_to_real( *a );
 		obj_t kappa;
 		obj_t kappa_r;
 
@@ -2020,7 +2020,7 @@ void libblis_test_ceil_pow2( obj_t* alpha )
 
 void libblis_test_mobj_load_diag( test_params_t* params, obj_t* a )
 {
-	num_t dt = bli_obj_datatype( *a );
+	num_t dt = bli_obj_dt( *a );
 	dim_t m  = bli_obj_length( *a );
 	dim_t n  = bli_obj_width( *a );
 

@@ -58,7 +58,7 @@ void bli_gemm_ker_var5( obj_t*  a,
                         gemm_t* cntl,
                         gemm_thrinfo_t* thread )
 {
-	num_t     dt_exec   = bli_obj_execution_datatype( *c );
+	num_t     dt_exec   = bli_obj_exec_dt( *c );
 
 	dim_t     m         = bli_obj_length( *c );
 	dim_t     n         = bli_obj_width( *c );

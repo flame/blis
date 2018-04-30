@@ -218,7 +218,7 @@ void libblis_test_randm_check
        double*        resid
      )
 {
-	num_t  dt_real = bli_obj_datatype_proj_to_real( *x );
+	num_t  dt_real = bli_obj_dt_proj_to_real( *x );
 	dim_t  m_x     = bli_obj_length( *x );
 	dim_t  n_x     = bli_obj_width( *x );
 	obj_t  sum;
@@ -273,7 +273,7 @@ void bli_absumm
        obj_t* sum_x
      )
 {
-	num_t     dt        = bli_obj_datatype( *x );
+	num_t     dt        = bli_obj_dt( *x );
 
 	dim_t     m         = bli_obj_length( *x );
 	dim_t     n         = bli_obj_width( *x );

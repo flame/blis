@@ -61,8 +61,8 @@ void bli_her_front
 
 
 	// Query the target datatypes of each object.
-	dt_targ_x = bli_obj_target_datatype( *x );
-	//dt_targ_c = bli_obj_target_datatype( *c );
+	dt_targ_x = bli_obj_target_dt( *x );
+	//dt_targ_c = bli_obj_target_dt( *c );
 
 	// Determine whether each operand with unit stride.
 	x_has_unit_inc = ( bli_obj_vector_inc( *x ) == 1 );

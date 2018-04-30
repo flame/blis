@@ -300,8 +300,8 @@ void libblis_test_dotaxpyv_check
        double*        resid
      )
 {
-	num_t  dt      = bli_obj_datatype( *z );
-	num_t  dt_real = bli_obj_datatype_proj_to_real( *z );
+	num_t  dt      = bli_obj_dt( *z );
+	num_t  dt_real = bli_obj_dt_proj_to_real( *z );
 
 	dim_t  m       = bli_obj_vector_dim( *z );
 

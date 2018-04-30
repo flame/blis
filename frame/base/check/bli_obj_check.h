@@ -64,11 +64,11 @@ void bli_obj_create_const_check( double value, obj_t* obj );
 
 void bli_obj_create_const_copy_of_check( obj_t* a, obj_t* b );
 
-void bli_datatype_size_check( num_t dt );
+void bli_dt_size_check( num_t dt );
 
-void bli_datatype_string_check( num_t dt );
+void bli_dt_string_check( num_t dt );
 
-void bli_datatype_union_check( num_t dt1, num_t dt2 );
+void bli_dt_union_check( num_t dt1, num_t dt2 );
 
 void bli_obj_print_check( char* label, obj_t* obj );
 

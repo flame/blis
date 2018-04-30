@@ -66,7 +66,7 @@ void bli_gemm3m2_ker_var2
        thrinfo_t* thread
      )
 {
-	num_t     dt_exec   = bli_obj_execution_datatype( *c );
+	num_t     dt_exec   = bli_obj_exec_dt( *c );
 
 	pack_t    schema_a  = bli_obj_pack_schema( *a );
 	pack_t    schema_b  = bli_obj_pack_schema( *b );

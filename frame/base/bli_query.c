@@ -47,8 +47,8 @@ bool_t bli_obj_equals( obj_t* a,
 	     !bli_obj_is_1x1( *b ) )
 		bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 
-	dt_a = bli_obj_datatype( *a );
-	dt_b = bli_obj_datatype( *b );
+	dt_a = bli_obj_dt( *a );
+	dt_b = bli_obj_dt( *b );
 
 	// If B is BLIS_CONSTANT, then we need to test equality based on the
 	// datatype of A--this works even if A is also BLIS_CONSTANT. If B
@@ -90,8 +90,8 @@ bool_t bli_obj_imag_equals( obj_t* a,
 	num_t  dt_a;
 	num_t  dt_b;
 
-	dt_a = bli_obj_datatype( *a );
-	dt_b = bli_obj_datatype( *b );
+	dt_a = bli_obj_dt( *a );
+	dt_b = bli_obj_dt( *b );
 
 	// The function is not yet implemented for vectors and matrices.
 	if ( !bli_obj_is_1x1( *a ) ||
@@ -108,7 +108,7 @@ bool_t bli_obj_imag_equals( obj_t* a,
 	}
 	else // if ( bli_is_complex( dt_a ) )
 	{
-		num_t dt_a_real = bli_datatype_proj_to_real( dt_a );
+		num_t dt_a_real = bli_dt_proj_to_real( dt_a );
 
 		// Now we compare the imaginary part of a to b. Notice that since
 		// we are using bli_obj_buffer_for_1x1() to acquire the buffer for

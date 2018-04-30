@@ -64,7 +64,7 @@ void bli_packm_unb_var1
        thrinfo_t* thread
      )
 {
-	num_t     dt_cp     = bli_obj_datatype( *c );
+	num_t     dt_cp     = bli_obj_dt( *c );
 
 	struc_t   strucc    = bli_obj_struc( *c );
 	doff_t    diagoffc  = bli_obj_diag_offset( *c );

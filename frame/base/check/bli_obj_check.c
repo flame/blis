@@ -158,7 +158,7 @@ void bli_obj_create_const_copy_of_check( obj_t* a, obj_t* b )
 }
 #endif
 
-void bli_datatype_size_check( num_t dt )
+void bli_dt_size_check( num_t dt )
 {
 	err_t e_val;
 
@@ -166,7 +166,7 @@ void bli_datatype_size_check( num_t dt )
 	bli_check_error_code( e_val );
 }
 
-void bli_datatype_string_check( num_t dt )
+void bli_dt_string_check( num_t dt )
 {
 	err_t e_val;
 
@@ -174,7 +174,7 @@ void bli_datatype_string_check( num_t dt )
 	bli_check_error_code( e_val );
 }
 
-void bli_datatype_union_check( num_t dt1, num_t dt2 )
+void bli_dt_union_check( num_t dt1, num_t dt2 )
 {
 	err_t e_val;
 

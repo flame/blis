@@ -51,7 +51,7 @@ void PASTEMAC0(opname) \
        gemv_t* cntl \
      ) \
 { \
-	num_t     dt        = bli_obj_datatype( *a ); \
+	num_t     dt        = bli_obj_dt( *a ); \
 \
 	trans_t   transa    = bli_obj_conjtrans_status( *a ); \
 	conj_t    conjx     = bli_obj_conj_status( *x ); \

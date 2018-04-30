@@ -64,7 +64,7 @@ void bli_unpackm_blk_var1
        thrinfo_t* thread
      )
 {
-	num_t     dt_cp     = bli_obj_datatype( *c );
+	num_t     dt_cp     = bli_obj_dt( *c );
 
 	// Normally we take the parameters from the source argument. But here,
 	// the packm/unpackm framework is not yet solidified enough for us to

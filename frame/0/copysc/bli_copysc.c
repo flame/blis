@@ -65,7 +65,7 @@ void PASTEMAC0(opname) \
 \
 	conj_t    conjchi   = bli_obj_conj_status( *chi ); \
 \
-	num_t     dt_psi    = bli_obj_datatype( *psi ); \
+	num_t     dt_psi    = bli_obj_dt( *psi ); \
     void*     buf_psi   = bli_obj_buffer_at_off( *psi ); \
 \
 	num_t     dt_chi; \

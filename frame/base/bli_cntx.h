@@ -469,7 +469,7 @@ static bool_t bli_cntx_l3_nat_ukr_prefers_cols_dt( num_t dt, l3ukr_t ukr_id, cnt
 
 static bool_t bli_cntx_l3_nat_ukr_prefers_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
 {
-	const num_t  dt    = bli_obj_datatype( *obj );
+	const num_t  dt    = bli_obj_dt( *obj );
 	const bool_t ukr_prefers_rows
 	                   = bli_cntx_l3_nat_ukr_prefers_rows_dt( dt, ukr_id, cntx );
 	const bool_t ukr_prefers_cols
@@ -514,7 +514,7 @@ static bool_t bli_cntx_l3_ukr_prefers_rows_dt( num_t dt, l3ukr_t ukr_id, cntx_t*
 	// For induced methods, return the ukernel storage preferences of the
 	// corresponding real micro-kernel.
 	if ( bli_cntx_method( cntx ) != BLIS_NAT )
-	    dt = bli_datatype_proj_to_real( dt );
+	    dt = bli_dt_proj_to_real( dt );
 
 	return bli_cntx_l3_nat_ukr_prefers_rows_dt( dt, ukr_id, cntx );
 }
@@ -524,14 +524,14 @@ static bool_t bli_cntx_l3_ukr_prefers_cols_dt( num_t dt, l3ukr_t ukr_id, cntx_t*
 	// For induced methods, return the ukernel storage preferences of the
 	// corresponding real micro-kernel.
 	if ( bli_cntx_method( cntx ) != BLIS_NAT )
-	    dt = bli_datatype_proj_to_real( dt );
+	    dt = bli_dt_proj_to_real( dt );
 
 	return bli_cntx_l3_nat_ukr_prefers_cols_dt( dt, ukr_id, cntx );
 }
 
 static bool_t bli_cntx_l3_ukr_prefers_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
 {
-	const num_t  dt    = bli_obj_datatype( *obj );
+	const num_t  dt    = bli_obj_dt( *obj );
 	const bool_t ukr_prefers_rows
 	                   = bli_cntx_l3_ukr_prefers_rows_dt( dt, ukr_id, cntx );
 	const bool_t ukr_prefers_cols

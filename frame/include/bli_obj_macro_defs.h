@@ -85,23 +85,23 @@
 \
 	( ( (obj).info & BLIS_PRECISION_BIT ) == BLIS_BITVAL_DOUBLE_PREC )
 
-#define bli_obj_datatype( obj ) \
+#define bli_obj_dt( obj ) \
 \
 	(   (obj).info & BLIS_DATATYPE_BITS )
 
-#define bli_obj_datatype_proj_to_real( obj ) \
+#define bli_obj_dt_proj_to_real( obj ) \
 \
 	( ( (obj).info & BLIS_DATATYPE_BITS ) & ~BLIS_BITVAL_COMPLEX )
 
-#define bli_obj_datatype_proj_to_complex( obj ) \
+#define bli_obj_dt_proj_to_complex( obj ) \
 \
 	( ( (obj).info & BLIS_DATATYPE_BITS ) &  BLIS_BITVAL_COMPLEX )
 
-#define bli_obj_target_datatype( obj ) \
+#define bli_obj_target_dt( obj ) \
 \
 	( ( (obj).info & BLIS_TARGET_DT_BITS ) >> BLIS_TARGET_DT_SHIFT )
 
-#define bli_obj_execution_datatype( obj ) \
+#define bli_obj_exec_dt( obj ) \
 \
 	( ( (obj).info & BLIS_EXECUTION_DT_BITS ) >> BLIS_EXECUTION_DT_SHIFT )
 
@@ -277,17 +277,17 @@
 	(obj).info = ( (obj).info & ~BLIS_INVERT_DIAG_BIT ) | (inv_diag); \
 }
 
-#define bli_obj_set_datatype( dt, obj ) \
+#define bli_obj_set_dt( dt, obj ) \
 { \
 	(obj).info = ( (obj).info & ~BLIS_DATATYPE_BITS ) | (dt); \
 }
 
-#define bli_obj_set_target_datatype( dt, obj ) \
+#define bli_obj_set_target_dt( dt, obj ) \
 { \
 	(obj).info = ( (obj).info & ~BLIS_TARGET_DT_BITS ) | ( dt << BLIS_TARGET_DT_SHIFT ); \
 }
 
-#define bli_obj_set_execution_datatype( dt, obj ) \
+#define bli_obj_set_exec_dt( dt, obj ) \
 { \
 	(obj).info = ( (obj).info & ~BLIS_EXECUTION_DT_BITS ) | ( dt << BLIS_EXECUTION_DT_SHIFT ); \
 }

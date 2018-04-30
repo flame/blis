@@ -94,10 +94,10 @@ void bli_unpackv_int( obj_t*     p,
 
 	// Now, if we are not skipping the unpack operation, then the only
 	// question left is whether we are to typecast vector a after unpacking.
-	if ( bli_obj_datatype( *p ) != bli_obj_datatype( *a ) )
+	if ( bli_obj_dt( *p ) != bli_obj_dt( *a ) )
 		bli_abort();
 /*
-	if ( bli_obj_datatype( *p ) != bli_obj_datatype( *a ) )
+	if ( bli_obj_dt( *p ) != bli_obj_dt( *a ) )
 	{
 		// Initialize an object c for the intermediate typecast vector.
 		bli_unpackv_init_cast( p,
@@ -132,7 +132,7 @@ void bli_unpackv_int( obj_t*     p,
 	// was not necessary, then we are done because the call to the unpackv
 	// implementation would have unpacked directly to vector a.
 /*
-	if ( bli_obj_datatype( *p ) != bli_obj_datatype( *a ) )
+	if ( bli_obj_dt( *p ) != bli_obj_dt( *a ) )
 	{
 		// Copy/typecast vector c to vector a.
 		// NOTE: Here, we use copynzv instead of copym because, in the cases
@@ -179,15 +179,15 @@ void bli_unpackv_init_cast( obj_t*  p,
 	//      already available. (After acquring a mem entry from the memory
 	//      manager, it is cached within p for quick access later on.)
 
-	num_t dt_targ_a    = bli_obj_target_datatype( *a );
+	num_t dt_targ_a    = bli_obj_target_dt( *a );
 	dim_t dim_a        = bli_obj_vector_dim( *a );
-	siz_t elem_size_c  = bli_datatype_size( dt_targ_a );
+	siz_t elem_size_c  = bli_dt_size( dt_targ_a );
 
 	// We begin by copying the basic fields of a.
 	bli_obj_alias_to( *a, *c );
 
 	// Update datatype and element size fields.
-	bli_obj_set_datatype( dt_targ_a, *c );
+	bli_obj_set_dt( dt_targ_a, *c );
 	bli_obj_set_elem_size( elem_size_c, *c );
 
 	// Update the strides and dimensions. We set the increments to reflect a

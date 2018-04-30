@@ -50,7 +50,7 @@ void PASTEMAC0(opname) \
 	bli_init_once(); \
 \
 	num_t     dt_chi; \
-	num_t     dt_absq_c  = bli_obj_datatype_proj_to_complex( *absq ); \
+	num_t     dt_absq_c  = bli_obj_dt_proj_to_complex( *absq ); \
 \
     void*     buf_chi; \
     void*     buf_absq   = bli_obj_buffer_at_off( *absq ); \
@@ -88,7 +88,7 @@ void PASTEMAC0(opname) \
 { \
 	bli_init_once(); \
 \
-	num_t     dt        = bli_obj_datatype( *psi ); \
+	num_t     dt        = bli_obj_dt( *psi ); \
 \
 	conj_t    conjchi   = bli_obj_conj_status( *chi ); \
 \
@@ -125,7 +125,7 @@ void PASTEMAC0(opname) \
 { \
 	bli_init_once(); \
 \
-	num_t     dt        = bli_obj_datatype( *chi ); \
+	num_t     dt        = bli_obj_dt( *chi ); \
 \
 	conj_t    conjchi   = bli_obj_conj_status( *chi ); \
 \
@@ -158,7 +158,7 @@ void PASTEMAC0(opname) \
 { \
 	bli_init_once(); \
 \
-	num_t     dt        = bli_obj_datatype( *psi ); \
+	num_t     dt        = bli_obj_dt( *psi ); \
 \
     void*     buf_chi   = bli_obj_buffer_for_1x1( dt, *chi ); \
 	void*     buf_psi   = bli_obj_buffer_at_off( *psi ); \
@@ -191,7 +191,7 @@ void PASTEMAC0(opname) \
 { \
 	bli_init_once(); \
 \
-	num_t     dt_chi    = bli_obj_datatype( *chi ); \
+	num_t     dt_chi    = bli_obj_dt( *chi ); \
 	num_t     dt_def    = BLIS_DCOMPLEX; \
 	num_t     dt_use; \
 \
@@ -234,7 +234,7 @@ void PASTEMAC0(opname) \
 { \
 	bli_init_once(); \
 \
-	num_t     dt_chi    = bli_obj_datatype( *chi ); \
+	num_t     dt_chi    = bli_obj_dt( *chi ); \
 \
 	void*     buf_chi   = bli_obj_buffer_at_off( *chi ); \
 \
@@ -268,7 +268,7 @@ void PASTEMAC0(opname) \
 	bli_init_once(); \
 \
 	num_t     dt_chi; \
-	num_t     dt_zeta_c   = bli_obj_datatype_proj_to_complex( *zeta_r ); \
+	num_t     dt_zeta_c   = bli_obj_dt_proj_to_complex( *zeta_r ); \
 \
     void*     buf_chi; \
 \
@@ -309,7 +309,7 @@ void PASTEMAC0(opname) \
 { \
 	bli_init_once(); \
 \
-	num_t     dt_chi      = bli_obj_datatype( *chi ); \
+	num_t     dt_chi      = bli_obj_dt( *chi ); \
 \
     void*     buf_zeta_r  = bli_obj_buffer_for_1x1( dt_chi, *zeta_r ); \
     void*     buf_zeta_i  = bli_obj_buffer_for_1x1( dt_chi, *zeta_i ); \

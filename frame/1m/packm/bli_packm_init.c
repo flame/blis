@@ -189,7 +189,7 @@ siz_t bli_packm_init_pack
 {
 	bli_init_once();
 
-	num_t     dt           = bli_obj_datatype( *a );
+	num_t     dt           = bli_obj_dt( *a );
 	trans_t   transa       = bli_obj_onlytrans_status( *a );
 	dim_t     m_a          = bli_obj_length( *a );
 	dim_t     n_a          = bli_obj_width( *a );

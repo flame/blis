@@ -83,7 +83,7 @@ void bli_her2k_front
 	bli_obj_toggle_conj( ah_local );
 
 	// Initialize a conjugated copy of alpha.
-	bli_obj_scalar_init_detached_copy_of( bli_obj_datatype( *a ),
+	bli_obj_scalar_init_detached_copy_of( bli_obj_dt( *a ),
 	                                      BLIS_CONJUGATE,
 	                                      alpha,
 	                                      &alpha_conj );

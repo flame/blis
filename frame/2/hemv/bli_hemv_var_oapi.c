@@ -51,7 +51,7 @@ void PASTEMAC0(opname) \
 { \
 	bli_init_once(); \
 \
-	num_t     dt        = bli_obj_datatype( *a ); \
+	num_t     dt        = bli_obj_dt( *a ); \
 \
 	uplo_t    uplo      = bli_obj_uplo( *a ); \
 	conj_t    conja     = bli_obj_conj_status( *a ); \

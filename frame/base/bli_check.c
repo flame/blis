@@ -159,7 +159,7 @@ err_t bli_check_object_valid_datatype( obj_t* a )
 	err_t e_val;
 	num_t dt;
 
-	dt = bli_obj_datatype( *a );
+	dt = bli_obj_dt( *a );
 	e_val = bli_check_valid_datatype( dt );
 
 	return e_val;
@@ -180,7 +180,7 @@ err_t bli_check_noninteger_object( obj_t* a )
 	err_t e_val;
 	num_t dt;
 
-	dt = bli_obj_datatype( *a );
+	dt = bli_obj_dt( *a );
 	e_val = bli_check_noninteger_datatype( dt );
 
 	return e_val;
@@ -201,7 +201,7 @@ err_t bli_check_nonconstant_object( obj_t* a )
 	err_t e_val;
 	num_t dt;
 
-	dt = bli_obj_datatype( *a );
+	dt = bli_obj_dt( *a );
 	e_val = bli_check_nonconstant_datatype( dt );
 
 	return e_val;
@@ -225,7 +225,7 @@ err_t bli_check_floating_object( obj_t* a )
 	err_t e_val;
 	num_t dt;
 
-	dt = bli_obj_datatype( *a );
+	dt = bli_obj_dt( *a );
 	e_val = bli_check_floating_datatype( dt );
 
 	return e_val;
@@ -247,7 +247,7 @@ err_t bli_check_real_object( obj_t* a )
 	err_t e_val;
 	num_t dt;
 
-	dt = bli_obj_datatype( *a );
+	dt = bli_obj_dt( *a );
 	e_val = bli_check_real_datatype( dt );
 
 	return e_val;
@@ -268,7 +268,7 @@ err_t bli_check_integer_object( obj_t* a )
 	err_t e_val;
 	num_t dt;
 
-	dt = bli_obj_datatype( *a );
+	dt = bli_obj_dt( *a );
 	e_val = bli_check_integer_datatype( dt );
 
 	return e_val;
@@ -292,8 +292,8 @@ err_t bli_check_consistent_object_datatypes( obj_t* a, obj_t* b )
 	num_t dt_a;
 	num_t dt_b;
 
-	dt_a = bli_obj_datatype( *a );
-	dt_b = bli_obj_datatype( *b );
+	dt_a = bli_obj_dt( *a );
+	dt_b = bli_obj_dt( *b );
 
 	e_val = bli_check_consistent_datatypes( dt_a, dt_b );
 
@@ -320,8 +320,8 @@ err_t bli_check_object_real_proj_of( obj_t* c, obj_t* r )
 	num_t dt_c;
 	num_t dt_r;
 
-	dt_c = bli_obj_datatype( *c );
-	dt_r = bli_obj_datatype( *r );
+	dt_c = bli_obj_dt( *c );
+	dt_r = bli_obj_dt( *r );
 
 	e_val = bli_check_datatype_real_proj_of( dt_c, dt_r );
 
@@ -773,7 +773,7 @@ err_t bli_check_sufficient_stack_buf_size( num_t dt, cntx_t* cntx )
 
 	dim_t mr      = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx );
 	dim_t nr      = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx );
-	siz_t dt_size = bli_datatype_size( dt );
+	siz_t dt_size = bli_dt_size( dt );
 
 	// NOTE: For induced methods, we use the size of the complex datatypes
 	// (rather than the size of the native micro-kernels' datatype) because

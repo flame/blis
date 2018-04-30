@@ -81,7 +81,7 @@ void bli_packv_init
 
 	// Now, if we are not skipping the pack operation, then the only question
 	// left is whether we are to typecast vector a before packing.
-	if ( bli_obj_datatype( *a ) != bli_obj_target_datatype( *a ) )
+	if ( bli_obj_dt( *a ) != bli_obj_target_dt( *a ) )
 		bli_abort();
 
 	// Extract various fields from the control tree and pass them in
@@ -113,7 +113,7 @@ siz_t bli_packv_init_pack
        cntx_t* cntx
      )
 {
-	num_t     dt     = bli_obj_datatype( *a );
+	num_t     dt     = bli_obj_dt( *a );
 	dim_t     dim_a  = bli_obj_vector_dim( *a );
 	dim_t     bmult  = bli_cntx_get_blksz_def_dt( dt, bmult_id, cntx );
 

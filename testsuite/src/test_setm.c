@@ -225,7 +225,7 @@ void libblis_test_setm_check
        double*        resid
      )
 {
-	num_t dt_x     = bli_obj_datatype( *x );
+	num_t dt_x     = bli_obj_dt( *x );
 	dim_t m_x      = bli_obj_length( *x );
 	dim_t n_x      = bli_obj_width( *x );
 	inc_t rs_x     = bli_obj_row_stride( *x );

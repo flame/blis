@@ -64,9 +64,9 @@ void bli_syr2_front
 
 
 	// Query the target datatypes of each object.
-	dt_targ_x = bli_obj_target_datatype( *x );
-	dt_targ_y = bli_obj_target_datatype( *y );
-	//dt_targ_c = bli_obj_target_datatype( *c );
+	dt_targ_x = bli_obj_target_dt( *x );
+	dt_targ_y = bli_obj_target_dt( *y );
+	//dt_targ_c = bli_obj_target_dt( *c );
 
 	// Determine whether each operand with unit stride.
 	x_has_unit_inc = ( bli_obj_vector_inc( *x ) == 1 );
@@ -77,7 +77,7 @@ void bli_syr2_front
 
 	// Create an object to hold a copy-cast of alpha. Notice that we use
 	// the type union of the datatypes of x and y.
-	dt_alpha = bli_datatype_union( dt_targ_x, dt_targ_y );
+	dt_alpha = bli_dt_union( dt_targ_x, dt_targ_y );
 	bli_obj_scalar_init_detached_copy_of( dt_alpha,
 	                                      BLIS_NO_CONJUGATE,
 	                                      alpha,

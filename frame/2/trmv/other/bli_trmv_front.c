@@ -61,8 +61,8 @@ void bli_trmv_front
 
 
 	// Query the target datatypes of each object.
-	dt_targ_a = bli_obj_target_datatype( *a );
-	dt_targ_x = bli_obj_target_datatype( *x );
+	dt_targ_a = bli_obj_target_dt( *a );
+	dt_targ_x = bli_obj_target_dt( *x );
 
 	// Determine whether each operand with unit stride.
 	a_has_unit_inc = ( bli_obj_is_row_stored( *a ) ||
@@ -73,7 +73,7 @@ void bli_trmv_front
 	// Create an object to hold a copy-cast of alpha. Notice that we use
 	// the type union of the target datatypes of a and x to prevent any
 	// unnecessary loss of information during the computation.
-	dt_alpha = bli_datatype_union( dt_targ_a, dt_targ_x );
+	dt_alpha = bli_dt_union( dt_targ_a, dt_targ_x );
 	bli_obj_scalar_init_detached_copy_of( dt_alpha,
 	                                      BLIS_NO_CONJUGATE,
 	                                      alpha,

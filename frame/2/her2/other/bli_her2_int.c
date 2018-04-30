@@ -98,11 +98,11 @@ void bli_her2_int( conj_t  conjh,
 		bli_obj_toggle_conj( x_local );
 		bli_obj_toggle_conj( y_local );
 
-		bli_obj_scalar_init_detached_copy_of( bli_obj_datatype( *alpha ),
+		bli_obj_scalar_init_detached_copy_of( bli_obj_dt( *alpha ),
 		                                      BLIS_CONJUGATE,
 		                                      alpha,
 		                                      &alpha_local );
-		bli_obj_scalar_init_detached_copy_of( bli_obj_datatype( *alpha_conj ),
+		bli_obj_scalar_init_detached_copy_of( bli_obj_dt( *alpha_conj ),
 		                                      BLIS_CONJUGATE,
 		                                      alpha_conj,
 		                                      &alpha_conj_local );

@@ -238,8 +238,8 @@ void libblis_test_addm_check
        double*        resid
      )
 {
-	num_t  dt      = bli_obj_datatype( *y );
-	num_t  dt_real = bli_obj_datatype_proj_to_real( *y );
+	num_t  dt      = bli_obj_dt( *y );
+	num_t  dt_real = bli_obj_dt_proj_to_real( *y );
 	dim_t  m       = bli_obj_length( *y );
 	dim_t  n       = bli_obj_width( *y );
 

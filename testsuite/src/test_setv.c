@@ -223,7 +223,7 @@ void libblis_test_setv_check
        double*        resid
      )
 {
-	num_t dt_x     = bli_obj_datatype( *x );
+	num_t dt_x     = bli_obj_dt( *x );
 	dim_t m_x      = bli_obj_vector_dim( *x );
 	inc_t inc_x    = bli_obj_vector_inc( *x );
 	void* buf_x    = bli_obj_buffer_at_off( *x );

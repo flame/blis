@@ -59,7 +59,7 @@ void bli_unpackm_unb_var1
        thrinfo_t* thread
      )
 {
-	num_t     dt_pc     = bli_obj_datatype( *p );
+	num_t     dt_pc     = bli_obj_dt( *p );
 
 	doff_t    diagoffp  = bli_obj_diag_offset( *p );
 	uplo_t    uplop     = bli_obj_uplo( *p );

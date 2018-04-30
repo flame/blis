@@ -479,7 +479,7 @@ void bli_l3_basic_check
 
 	// Check for sufficiently sized stack buffers
 
-	e_val = bli_check_sufficient_stack_buf_size( bli_obj_datatype( *a ), cntx );
+	e_val = bli_check_sufficient_stack_buf_size( bli_obj_dt( *a ), cntx );
 	bli_check_error_code( e_val );
 }
 

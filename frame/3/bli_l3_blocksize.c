@@ -130,7 +130,7 @@ dim_t PASTEMAC0(opname) \
 \
 	/* Extract the execution datatype and use it to query the corresponding
 	   blocksize and blocksize maximum values from the blksz_t object. */ \
-	dt    = bli_obj_execution_datatype( *a ); \
+	dt    = bli_obj_exec_dt( *a ); \
 	bsize = bli_cntx_get_blksz( bszid, cntx ); \
 	b_alg = bli_blksz_get_def( dt, bsize ); \
 	b_max = bli_blksz_get_max( dt, bsize ); \
@@ -196,7 +196,7 @@ dim_t PASTEMAC0(opname) \
 \
 	/* Extract the execution datatype and use it to query the corresponding
 	   blocksize and blocksize maximum values from the blksz_t object. */ \
-	dt    = bli_obj_execution_datatype( *a ); \
+	dt    = bli_obj_exec_dt( *a ); \
 	bsize = bli_cntx_get_blksz( bszid, cntx ); \
 	b_alg = bli_blksz_get_def( dt, bsize ); \
 	b_max = bli_blksz_get_max( dt, bsize ); \
@@ -249,7 +249,7 @@ dim_t PASTEMAC0(opname) \
 \
 	/* Extract the execution datatype and use it to query the corresponding
 	   blocksize and blocksize maximum values from the blksz_t object. */ \
-	dt    = bli_obj_execution_datatype( *a ); \
+	dt    = bli_obj_exec_dt( *a ); \
 	bsize = bli_cntx_get_blksz( bszid, cntx ); \
 	b_alg = bli_blksz_get_def( dt, bsize ); \
 	b_max = bli_blksz_get_max( dt, bsize ); \
@@ -310,7 +310,7 @@ dim_t PASTEMAC0(opname) \
 \
 	/* Extract the execution datatype and use it to query the corresponding
 	   blocksize and blocksize maximum values from the blksz_t object. */ \
-	dt    = bli_obj_execution_datatype( *a ); \
+	dt    = bli_obj_exec_dt( *a ); \
 	bsize = bli_cntx_get_blksz( bszid, cntx ); \
 	b_alg = bli_blksz_get_def( dt, bsize ); \
 	b_max = bli_blksz_get_max( dt, bsize ); \

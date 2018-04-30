@@ -249,7 +249,7 @@ void libblis_test_dotv_check
        double*        resid
      )
 {
-	num_t  dt_real = bli_obj_datatype_proj_to_real( *y );
+	num_t  dt_real = bli_obj_dt_proj_to_real( *y );
 
 	obj_t  rho_r, rho_i;
 	obj_t  norm_x, norm_xy;

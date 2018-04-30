@@ -99,11 +99,11 @@
     ( bli_is_double( dt ) || \
 	  bli_is_dcomplex( dt ) )
 
-#define bli_datatype_proj_to_real( dt ) \
+#define bli_dt_proj_to_real( dt ) \
 \
 	( dt & ~BLIS_BITVAL_COMPLEX )
 
-#define bli_datatype_proj_to_complex( dt ) \
+#define bli_dt_proj_to_complex( dt ) \
 \
 	( dt &  BLIS_BITVAL_COMPLEX )
 
@@ -753,7 +753,7 @@
 	} \
 	else \
 	{ \
-		dt_scalar  = bli_obj_datatype( *(obj_scalar) ); \
+		dt_scalar  = bli_obj_dt( *(obj_scalar) ); \
 		buf_scalar = bli_obj_buffer_at_off( *(obj_scalar) ); \
 	} \
 }

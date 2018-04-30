@@ -288,8 +288,8 @@ void libblis_test_syrk_check
        double*        resid
      )
 {
-	num_t  dt      = bli_obj_datatype( *c );
-	num_t  dt_real = bli_obj_datatype_proj_to_real( *c );
+	num_t  dt      = bli_obj_dt( *c );
+	num_t  dt_real = bli_obj_dt_proj_to_real( *c );
 
 	dim_t  m       = bli_obj_length( *c );
 	dim_t  k       = bli_obj_width_after_trans( *a );

@@ -49,7 +49,7 @@ void PASTEMAC0(opname) \
 { \
 	bli_init_once(); \
 \
-	num_t     dt        = bli_obj_datatype( *a ); \
+	num_t     dt        = bli_obj_dt( *a ); \
 \
 	conj_t    conjx     = bli_obj_conj_status( *x ); \
 	conj_t    conjy     = bli_obj_conj_status( *y ); \

@@ -54,7 +54,7 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	BLIS_OAPI_CNTX_DECL \
 \
-	num_t     dt        = bli_obj_datatype( *x ); \
+	num_t     dt        = bli_obj_dt( *x ); \
 \
     doff_t    diagoffx  = bli_obj_diag_offset( *x ); \
     diag_t    diagx     = bli_obj_diag( *x ); \
@@ -107,7 +107,7 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	BLIS_OAPI_CNTX_DECL \
 \
-	num_t     dt        = bli_obj_datatype( *x ); \
+	num_t     dt        = bli_obj_dt( *x ); \
 \
     doff_t    diagoffx  = bli_obj_diag_offset( *x ); \
     diag_t    diagx     = bli_obj_diag( *x ); \
@@ -168,7 +168,7 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	BLIS_OAPI_CNTX_DECL \
 \
-	num_t     dt        = bli_obj_datatype( *x ); \
+	num_t     dt        = bli_obj_dt( *x ); \
 \
     doff_t    diagoffx  = bli_obj_diag_offset( *x ); \
 	dim_t     m         = bli_obj_length( *x ); \
@@ -210,7 +210,7 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	BLIS_OAPI_CNTX_DECL \
 \
-	num_t     dt        = bli_obj_datatype( *x ); \
+	num_t     dt        = bli_obj_dt( *x ); \
 \
     /* conj_t    conjalpha = bli_obj_conj_status( *alpha ); */ \
     doff_t    diagoffx  = bli_obj_diag_offset( *x ); \
@@ -266,7 +266,7 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	BLIS_OAPI_CNTX_DECL \
 \
-	num_t     dt        = bli_obj_datatype( *x ); \
+	num_t     dt        = bli_obj_dt( *x ); \
 \
     doff_t    diagoffx  = bli_obj_diag_offset( *x ); \
 	dim_t     m         = bli_obj_length( *x ); \

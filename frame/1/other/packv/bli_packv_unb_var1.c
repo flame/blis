@@ -51,7 +51,7 @@ void bli_packv_unb_var1( obj_t*   c,
                          cntx_t*  cntx,
                          packv_t* cntl )
 {
-	num_t     dt_cp     = bli_obj_datatype( *c );
+	num_t     dt_cp     = bli_obj_dt( *c );
 
 	dim_t     dim_p     = bli_obj_vector_dim( *p );
 

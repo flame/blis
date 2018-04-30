@@ -143,7 +143,7 @@ void libblis_test_normfm_experiment
 	unsigned int n_repeats = params->n_repeats;
 	unsigned int i;
 
-	num_t        dt_real   = bli_datatype_proj_to_real( datatype );
+	num_t        dt_real   = bli_dt_proj_to_real( datatype );
 
 	double       time_min  = DBL_MAX;
 	double       time;
@@ -230,7 +230,7 @@ void libblis_test_normfm_check
        double*        resid
      )
 {
-	num_t  dt_real = bli_obj_datatype_proj_to_real( *x );
+	num_t  dt_real = bli_obj_dt_proj_to_real( *x );
 	dim_t  m       = bli_obj_length( *x );
 	dim_t  n       = bli_obj_width( *x );
 

@@ -428,8 +428,8 @@ void libblis_test_gemmtrsm_ukr_check
        double*        resid
      )
 {
-	num_t  dt      = bli_obj_datatype( *b11 );
-	num_t  dt_real = bli_obj_datatype_proj_to_real( *b11 );
+	num_t  dt      = bli_obj_dt( *b11 );
+	num_t  dt_real = bli_obj_dt_proj_to_real( *b11 );
 
 	dim_t  m       = bli_obj_length( *b11 );
 	dim_t  n       = bli_obj_width( *b11 );

@@ -412,7 +412,7 @@ void bli_membrk_compute_pool_block_sizes_dt
        cntx_t* cntx
      )
 {
-	siz_t    size_dt = bli_datatype_size( dt );
+	siz_t    size_dt = bli_dt_size( dt );
 
 	blksz_t* mr;
 	blksz_t* nr;

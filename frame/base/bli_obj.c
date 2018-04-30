@@ -77,7 +77,7 @@ void bli_obj_create_without_buffer( num_t  dt,
 		bli_obj_create_without_buffer_check( dt, m, n, obj );
 
 	// Query the size of one element of the object's pre-set datatype.
-	elem_size = bli_datatype_size( dt );
+	elem_size = bli_dt_size( dt );
 
 	// Set any default properties that are appropriate.
 	bli_obj_set_defaults( *obj );
@@ -95,10 +95,10 @@ void bli_obj_create_without_buffer( num_t  dt,
 
 	// Set individual fields.
 	bli_obj_set_buffer( NULL, *obj );
-	bli_obj_set_datatype( dt, *obj );
+	bli_obj_set_dt( dt, *obj );
 	bli_obj_set_elem_size( elem_size, *obj );
-	bli_obj_set_target_datatype( dt, *obj );
-	bli_obj_set_execution_datatype( dt, *obj );
+	bli_obj_set_target_dt( dt, *obj );
+	bli_obj_set_exec_dt( dt, *obj );
 	bli_obj_set_dims( m, n, *obj );
 	bli_obj_set_offs( 0, 0, *obj );
 	bli_obj_set_diag_offset( 0, *obj );
@@ -220,7 +220,7 @@ void bli_obj_create_1x1_with_attached_buffer( num_t  dt,
 
 void bli_obj_create_conf_to( obj_t* s, obj_t* d )
 {
-	const num_t dt = bli_obj_datatype( *s );
+	const num_t dt = bli_obj_dt( *s );
 	const dim_t m  = bli_obj_length( *s );
 	const dim_t n  = bli_obj_width( *s );
 	const inc_t rs = bli_obj_row_stride( *s );
@@ -422,10 +422,10 @@ static siz_t dt_sizes[6] =
 	sizeof( constdata_t )
 };
 
-siz_t bli_datatype_size( num_t dt )
+siz_t bli_dt_size( num_t dt )
 {
 	if ( bli_error_checking_is_enabled() )
-		bli_datatype_size_check( dt );
+		bli_dt_size_check( dt );
 
 	return dt_sizes[dt];
 }
@@ -439,10 +439,10 @@ static char* dt_names[ BLIS_NUM_FP_TYPES+1 ] =
 	"int"
 };
 
-char* bli_datatype_string( num_t dt )
+char* bli_dt_string( num_t dt )
 {
 	if ( bli_error_checking_is_enabled() )
-		bli_datatype_string_check( dt );
+		bli_dt_string_check( dt );
 
 	return dt_names[dt];
 }
@@ -493,10 +493,10 @@ static num_t type_union[BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES] =
 	/* z */ { BLIS_DCOMPLEX, BLIS_DCOMPLEX, BLIS_DCOMPLEX, BLIS_DCOMPLEX }
 };
 
-num_t bli_datatype_union( num_t dt1, num_t dt2 )
+num_t bli_dt_union( num_t dt1, num_t dt2 )
 {
 	if ( bli_error_checking_is_enabled() )
-		bli_datatype_union_check( dt1, dt2 );
+		bli_dt_union_check( dt1, dt2 );
 
 	return type_union[dt1][dt2];
 }
@@ -536,9 +536,9 @@ void bli_obj_print( char* label, obj_t* obj )
 	fprintf( file, " info            %lX\n", ( unsigned long int )(*obj).info );
 	fprintf( file, " - is complex    %lu\n", ( unsigned long int )bli_obj_is_complex( *obj ) );
 	fprintf( file, " - is d. prec    %lu\n", ( unsigned long int )bli_obj_is_double_precision( *obj ) );
-	fprintf( file, " - datatype      %lu\n", ( unsigned long int )bli_obj_datatype( *obj ) );
-	fprintf( file, " - target dt     %lu\n", ( unsigned long int )bli_obj_target_datatype( *obj ) );
-	fprintf( file, " - exec dt       %lu\n", ( unsigned long int )bli_obj_execution_datatype( *obj ) );
+	fprintf( file, " - datatype      %lu\n", ( unsigned long int )bli_obj_dt( *obj ) );
+	fprintf( file, " - target dt     %lu\n", ( unsigned long int )bli_obj_target_dt( *obj ) );
+	fprintf( file, " - exec dt       %lu\n", ( unsigned long int )bli_obj_exec_dt( *obj ) );
 	fprintf( file, " - has trans     %lu\n", ( unsigned long int )bli_obj_has_trans( *obj ) );
 	fprintf( file, " - has conj      %lu\n", ( unsigned long int )bli_obj_has_conj( *obj ) );
 	fprintf( file, " - unit diag?    %lu\n", ( unsigned long int )bli_obj_has_unit_diag( *obj ) );

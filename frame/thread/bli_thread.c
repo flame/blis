@@ -203,7 +203,7 @@ siz_t bli_thread_get_range_l2r
        dim_t*     end
      )
 {
-	num_t dt = bli_obj_datatype( *a );
+	num_t dt = bli_obj_dt( *a );
 	dim_t m  = bli_obj_length_after_trans( *a );
 	dim_t n  = bli_obj_width_after_trans( *a );
 	dim_t bf = bli_blksz_get_def( dt, bmult );
@@ -223,7 +223,7 @@ siz_t bli_thread_get_range_r2l
        dim_t*     end
      )
 {
-	num_t dt = bli_obj_datatype( *a );
+	num_t dt = bli_obj_dt( *a );
 	dim_t m  = bli_obj_length_after_trans( *a );
 	dim_t n  = bli_obj_width_after_trans( *a );
 	dim_t bf = bli_blksz_get_def( dt, bmult );
@@ -243,7 +243,7 @@ siz_t bli_thread_get_range_t2b
        dim_t*     end
      )
 {
-	num_t dt = bli_obj_datatype( *a );
+	num_t dt = bli_obj_dt( *a );
 	dim_t m  = bli_obj_length_after_trans( *a );
 	dim_t n  = bli_obj_width_after_trans( *a );
 	dim_t bf = bli_blksz_get_def( dt, bmult );
@@ -263,7 +263,7 @@ siz_t bli_thread_get_range_b2t
        dim_t*     end
      )
 {
-	num_t dt = bli_obj_datatype( *a );
+	num_t dt = bli_obj_dt( *a );
 	dim_t m  = bli_obj_length_after_trans( *a );
 	dim_t n  = bli_obj_width_after_trans( *a );
 	dim_t bf = bli_blksz_get_def( dt, bmult );
@@ -760,7 +760,7 @@ siz_t bli_thread_get_range_weighted_l2r
 	if ( bli_obj_intersects_diag( *a ) &&
 	     bli_obj_is_upper_or_lower( *a ) )
 	{
-		num_t  dt      = bli_obj_datatype( *a );
+		num_t  dt      = bli_obj_dt( *a );
 		doff_t diagoff = bli_obj_diag_offset( *a );
 		uplo_t uplo    = bli_obj_uplo( *a );
 		dim_t  m       = bli_obj_length( *a );
@@ -810,7 +810,7 @@ siz_t bli_thread_get_range_weighted_r2l
 	if ( bli_obj_intersects_diag( *a ) &&
 	     bli_obj_is_upper_or_lower( *a ) )
 	{
-		num_t  dt      = bli_obj_datatype( *a );
+		num_t  dt      = bli_obj_dt( *a );
 		doff_t diagoff = bli_obj_diag_offset( *a );
 		uplo_t uplo    = bli_obj_uplo( *a );
 		dim_t  m       = bli_obj_length( *a );
@@ -862,7 +862,7 @@ siz_t bli_thread_get_range_weighted_t2b
 	if ( bli_obj_intersects_diag( *a ) &&
 	     bli_obj_is_upper_or_lower( *a ) )
 	{
-		num_t  dt      = bli_obj_datatype( *a );
+		num_t  dt      = bli_obj_dt( *a );
 		doff_t diagoff = bli_obj_diag_offset( *a );
 		uplo_t uplo    = bli_obj_uplo( *a );
 		dim_t  m       = bli_obj_length( *a );
@@ -914,7 +914,7 @@ siz_t bli_thread_get_range_weighted_b2t
 	if ( bli_obj_intersects_diag( *a ) &&
 	     bli_obj_is_upper_or_lower( *a ) )
 	{
-		num_t  dt      = bli_obj_datatype( *a );
+		num_t  dt      = bli_obj_dt( *a );
 		doff_t diagoff = bli_obj_diag_offset( *a );
 		uplo_t uplo    = bli_obj_uplo( *a );
 		dim_t  m       = bli_obj_length( *a );

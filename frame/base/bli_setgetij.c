@@ -57,7 +57,7 @@ err_t bli_setijm
 	dim_t n  = bli_obj_width( *b );
 	dim_t rs = bli_obj_row_stride( *b );
 	dim_t cs = bli_obj_col_stride( *b );
-	num_t dt = bli_obj_datatype( *b );
+	num_t dt = bli_obj_dt( *b );
 
 	// Return error if i or j is beyond bounds of matrix/vector.
 	if ( m <= i ) return BLIS_FAILURE;
@@ -131,7 +131,7 @@ err_t bli_getijm
 	dim_t n  = bli_obj_width( *b );
 	dim_t rs = bli_obj_row_stride( *b );
 	dim_t cs = bli_obj_col_stride( *b );
-	num_t dt = bli_obj_datatype( *b );
+	num_t dt = bli_obj_dt( *b );
 
 	// Return error if i or j is beyond bounds of matrix/vector.
 	if ( m <= i ) return BLIS_FAILURE;

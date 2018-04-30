@@ -65,7 +65,7 @@ void bli_trsm_ru_ker_var2
        thrinfo_t* thread
      )
 {
-	num_t     dt_exec   = bli_obj_execution_datatype( *c );
+	num_t     dt_exec   = bli_obj_exec_dt( *c );
 
 	doff_t    diagoffb  = bli_obj_diag_offset( *b );
 
