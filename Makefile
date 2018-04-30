@@ -426,7 +426,7 @@ uninstall: uninstall-libs uninstall-headers uninstall-lib-symlinks
 
 uninstall-old: uninstall-old-libs uninstall-old-headers
 
-clean: cleanlib cleantest
+clean: cleanh cleanlib cleantest
 
 
 # --- Environment check rules ---
@@ -879,9 +879,11 @@ endif
 cleanh: check-env
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	$(RM_F) $(BLIS_H_FLAT)
+	$(RM_F) $(CBLAS_H_FLAT)
 else
-	@echo "Removing blis.h file from $(BASE_INC_PATH)."
+	@echo "Removing flattened header files from $(BASE_INC_PATH)."
 	@$(RM_F) $(BLIS_H_FLAT)
+	@$(RM_F) $(CBLAS_H_FLAT)
 endif
 
 cleanlib: check-env
@@ -890,11 +892,10 @@ ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
 	- $(RM_F) $(LIBBLIS_A_PATH)
 	- $(RM_F) $(LIBBLIS_SO_PATH)
 else
-	@echo "Removing .o files from $(BASE_OBJ_PATH)."
+	@echo "Removing object files from $(BASE_OBJ_PATH)."
 	@- $(FIND) $(BASE_OBJ_PATH) -name "*.o" | $(XARGS) $(RM_F)
-	@echo "Removing $(LIBBLIS_A_PATH)."
+	@echo "Removing libraries from $(BASE_LIB_PATH)."
 	@- $(RM_F) $(LIBBLIS_A_PATH)
-	@echo "Removing $(LIBBLIS_SO_PATH)."
 	@- $(RM_F) $(LIBBLIS_SO_PATH)
 endif
 
