@@ -173,6 +173,8 @@ Does BLIS contain kernels optimized for your favorite architecture? Please see
 our [Hardware Support wiki](https://github.com/flame/blis/wiki/HardwareSupport)
 for a full list of optimized kernels. 
 
+Generally speaking, we **highly recommend** using the latest git clone whenever possible and building from source. However, if despite this you still prefer (or need) binary RPMs, please check out Dave Love's packages at [Fedora Copr](https://copr.fedorainfracloud.org/coprs/loveshack/blis/).
+
 We also provide wikis on the following topics, which will likely be of interest
 to more advanced users and developers:
  * [Configurations](https://github.com/flame/blis/wiki/ConfigurationHowTo).
