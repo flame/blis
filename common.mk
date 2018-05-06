@@ -253,7 +253,6 @@ FIND       := find
 GREP       := grep
 EGREP      := grep -E
 XARGS      := xargs
-RANLIB     := ranlib
 INSTALL    := install -c
 
 # Script for creating a monolithic header file.

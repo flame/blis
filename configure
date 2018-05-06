@@ -172,6 +172,7 @@ print_usage()
 	echo " Environment Variables:"
 	echo " "
 	echo "   CC            Specifies the C compiler to use."
+	echo "   RANLIB        Specifies the ranlib executable to use."
 	echo " "
 	echo "   Environment variables may also be specified as command line"
 	echo "   options, e.g.:"
@@ -1039,7 +1040,12 @@ get_compiler_version()
 	# The last part ({ read first rest ; echo $first ; }) is a workaround
 	# to OS X's egrep only returning the first match.
 	cc_vendor=$(echo "${vendor_string}" | egrep -o 'icc|gcc|clang|emcc|pnacl|IBM' | { read first rest ; echo $first ; })
-	cc_version=$(echo "${vendor_string}" | egrep -o '[0-9]+\.[0-9]+\.?[0-9]*' | { read first rest ; echo ${first} ; })
+	if [ "$cc_vendor" = "icc" -o "$cc_vendor" = "gcc" -o "$cc_vendor" = "clang" ]
+	then
+		cc_version=$(${cc} -dumpversion)
+	else
+		cc_version=$(echo "${vendor_string}" | egrep -o '[0-9]+\.[0-9]+\.?[0-9]*' | { read first rest ; echo ${first} ; })
+	fi
 
 	# Parse the version number into its major, minor, and revision
 	# components.
@@ -1550,6 +1556,10 @@ main()
 				CC=${1#*=}
 				shift
 				;;
+			RANLIB=*)
+				RANLIB=${1#*=}
+				shift
+				;;
 			*=*)
 				print_usage
 				;;
@@ -2041,6 +2051,7 @@ main()
 	install_prefix_esc=$(echo "${install_prefix}" | sed 's/\//\\\//g')
 	dist_path_esc=$(echo "${dist_path}"           | sed 's/\//\\\//g')
 	cc_esc=$(echo "${CC}" | sed 's/\//\\\//g')
+	ranlib_esc=$(echo "${RANLIB:-ranlib}" | sed 's/\//\\\//g')
 
 	# Create a #define for the configuration family (config_name).
 	uconf=$(echo ${config_name} | tr '[:lower:]' '[:upper:]')
@@ -2084,6 +2095,7 @@ main()
 		| sed -e "s/@kconfig_map@/${kconfig_map}/g" \
 		| sed -e "s/@dist_path@/${dist_path_esc}/g" \
 		| sed -e "s/@CC@/${cc_esc}/g" \
+		| sed -e "s/@RANLIB@/${ranlib_esc}/g" \
 		| sed -e "s/@debug_type@/${debug_type}/g" \
 		| sed -e "s/@install_prefix@/${install_prefix_esc}/g" \
 		| sed -e "s/@enable_verbose@/${enable_verbose}/g" \

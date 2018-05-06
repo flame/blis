@@ -77,6 +77,7 @@ DEBUG_TYPE      := @debug_type@
 
 # The C compiler.
 CC              := @CC@
+RANLIB          := @RANLIB@
 
 # The requested threading model.
 THREADING_MODEL := @threading_model@
