@@ -1040,12 +1040,12 @@ get_compiler_version()
 	# The last part ({ read first rest ; echo $first ; }) is a workaround
 	# to OS X's egrep only returning the first match.
 	cc_vendor=$(echo "${vendor_string}" | egrep -o 'icc|gcc|clang|emcc|pnacl|IBM' | { read first rest ; echo $first ; })
-    if [ "$cc_vendor" = "icc" -o "$cc_vendor" = "gcc" -o "$cc_vendor" = "clang" ]
-    then
-        cc_version=$(${cc} -dumpversion)
-    else
-        cc_version=$(echo "${vendor_string}" | egrep -o '[0-9]+\.[0-9]+\.?[0-9]*' | { read first rest ; echo ${first} ; })
-    fi
+	if [ "$cc_vendor" = "icc" -o "$cc_vendor" = "gcc" -o "$cc_vendor" = "clang" ]
+	then
+		cc_version=$(${cc} -dumpversion)
+	else
+		cc_version=$(echo "${vendor_string}" | egrep -o '[0-9]+\.[0-9]+\.?[0-9]*' | { read first rest ; echo ${first} ; })
+	fi
 
 	# Parse the version number into its major, minor, and revision
 	# components.
