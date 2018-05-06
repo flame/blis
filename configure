@@ -172,6 +172,7 @@ print_usage()
 	echo " Environment Variables:"
 	echo " "
 	echo "   CC            Specifies the C compiler to use."
+	echo "   RANLIB        Specifies the ranlib executable to use."
 	echo " "
 	echo "   Environment variables may also be specified as command line"
 	echo "   options, e.g.:"
