@@ -67,7 +67,10 @@ OS_NAME         := $(shell uname -s)
 
 # The directory path to the top level of the source distribution.
 # NOTE: We allow the includer to override this value by setting DIST_PATH
-# prior to including this file.
+# prior to including this file. This is employed, for example, when
+# common.mk (and therefore config.mk) is included by the Makefile local
+# to the 'testsuite' directory, or the 'test' directory containing
+# individual test drivers.
 ifeq ($(strip $(DIST_PATH)),)
 DIST_PATH       := @dist_path@
 endif

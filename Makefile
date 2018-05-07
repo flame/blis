@@ -859,13 +859,16 @@ showconfig: check-env
 
 # --- Clean rules ---
 
-cleanmk: check-env
+cleanmk:
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(IS_CONFIGURED),yes)
 	- $(FIND) $(CONFIG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 	- $(FIND) $(FRAME_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 	- $(FIND) $(REFKERN_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 	- $(FIND) $(KERNELS_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
+endif
 else
+ifeq ($(IS_CONFIGURED),yes)
 	@echo "Removing makefile fragments from $(CONFIG_PATH)."
 	@- $(FIND) $(CONFIG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 	@echo "Removing makefile fragments from $(FRAME_PATH)."
@@ -875,72 +878,110 @@ else
 	@echo "Removing makefile fragments from $(KERNELS_PATH)."
 	@- $(FIND) $(KERNELS_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 endif
+endif
 
-cleanh: check-env
+cleanh:
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(IS_CONFIGURED),yes)
 	$(RM_F) $(BLIS_H_FLAT)
 	$(RM_F) $(CBLAS_H_FLAT)
+endif
 else
+ifeq ($(IS_CONFIGURED),yes)
 	@echo "Removing flattened header files from $(BASE_INC_PATH)."
 	@$(RM_F) $(BLIS_H_FLAT)
 	@$(RM_F) $(CBLAS_H_FLAT)
 endif
+endif
 
-cleanlib: check-env
+cleanlib:
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(IS_CONFIGURED),yes)
 	- $(FIND) $(BASE_OBJ_PATH) -name "*.o" | $(XARGS) $(RM_F)
 	- $(RM_F) $(LIBBLIS_A_PATH)
 	- $(RM_F) $(LIBBLIS_SO_PATH)
+endif
 else
+ifeq ($(IS_CONFIGURED),yes)
 	@echo "Removing object files from $(BASE_OBJ_PATH)."
 	@- $(FIND) $(BASE_OBJ_PATH) -name "*.o" | $(XARGS) $(RM_F)
 	@echo "Removing libraries from $(BASE_LIB_PATH)."
 	@- $(RM_F) $(LIBBLIS_A_PATH)
 	@- $(RM_F) $(LIBBLIS_SO_PATH)
 endif
+endif
 
 cleantest: cleanblastest cleanblistest
 
-cleanblastest: check-env
+cleanblastest:
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(IS_CONFIGURED),yes)
 	- $(RM_F) $(BLASTEST_F2C_OBJS) $(BLASTEST_DRV_OBJS)
-	- $(RM_F) $(BLASTEST_DRV_BIN_PATHS)
 	- $(RM_F) $(BLASTEST_F2C_LIB)
+	- $(RM_F) $(BLASTEST_DRV_BIN_PATHS)
 	- $(RM_F) $(addprefix out.,$(BLASTEST_DRV_BASES))
+	- $(FIND) $(BLASTEST_DIR)/$(OBJ_DIR) -name "*.o" | $(XARGS) $(RM_F)
+	- $(FIND) $(BLASTEST_DIR) -name "*.x" | $(XARGS) $(RM_F)
+	- $(RM_F) $(BLASTEST_DIR)/$(BLASTEST_F2C_LIB_NAME)
+	- $(RM_F) $(addprefix $(BLASTEST_DIR)/out.,$(BLASTEST_DRV_BASES))
+endif
 else
+ifeq ($(IS_CONFIGURED),yes)
 	@echo "Removing object files from $(BASE_OBJ_BLASTEST_PATH)."
 	@- $(RM_F) $(BLASTEST_F2C_OBJS) $(BLASTEST_DRV_OBJS)
-	@echo "Removing binaries from $(BASE_OBJ_BLASTEST_PATH)."
-	@- $(RM_F) $(BLASTEST_DRV_BIN_PATHS)
 	@echo "Removing libf2c.a from $(BASE_OBJ_BLASTEST_PATH)."
 	@- $(RM_F) $(BLASTEST_F2C_LIB)
+	@echo "Removing binaries from $(BASE_OBJ_BLASTEST_PATH)."
+	@- $(RM_F) $(BLASTEST_DRV_BIN_PATHS)
 	@echo "Removing driver output files 'out.*'."
 	@- $(RM_F) $(addprefix out.,$(BLASTEST_DRV_BASES))
+	@echo "Removing object files from ./$(BLASTEST_DIR)/$(OBJ_DIR)."
+	@- $(FIND) $(BLASTEST_DIR)/$(OBJ_DIR) -name "*.o" | $(XARGS) $(RM_F)
+	@echo "Removing libf2c.a from ./$(BLASTEST_DIR)."
+	@- $(RM_F) $(BLASTEST_DIR)/$(BLASTEST_F2C_LIB_NAME)
+	@echo "Removing binaries from ./$(BLASTEST_DIR)."
+	@- $(FIND) $(BLASTEST_DIR) -name "*.x" | $(XARGS) $(RM_F)
+	@echo "Removing driver output files 'out.*' from ./$(BLASTEST_DIR)."
+	@- $(RM_F) $(addprefix $(BLASTEST_DIR)/out.,$(BLASTEST_DRV_BASES))
+endif
 endif
 
-cleanblistest: check-env
+cleanblistest:
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	- $(FIND) $(BASE_OBJ_TESTSUITE_PATH) -name "*.o" | $(XARGS) $(RM_F)
-	- $(RM_RF) $(TESTSUITE_BIN)
+ifeq ($(IS_CONFIGURED),yes)
+	- $(RM_F) $(MK_TESTSUITE_OBJS)
+	- $(RM_F) $(TESTSUITE_BIN)
+	- $(FIND) $(TESTSUITE_DIR)/$(OBJ_DIR) -name "*.o" | $(XARGS) $(RM_F)
+	- $(RM_F) $(TESTSUITE_DIR)/$(TESTSUITE_BIN)
+	- $(RM_F) $(TESTSUITE_OUT_FILE)
+endif
 else
+ifeq ($(IS_CONFIGURED),yes)
 	@echo "Removing object files from $(BASE_OBJ_TESTSUITE_PATH)."
-	@- $(FIND) $(BASE_OBJ_TESTSUITE_PATH) -name "*.o" | $(XARGS) $(RM_F)
-	@echo "Removing $(TESTSUITE_BIN) binary."
-	@- $(RM_RF) $(TESTSUITE_BIN)
+	@- $(RM_F) $(MK_TESTSUITE_OBJS)
+	@echo "Removing binary $(TESTSUITE_BIN)."
+	@- $(RM_F) $(TESTSUITE_BIN)
+	@echo "Removing object files from $(TESTSUITE_DIR)/$(OBJ_DIR)."
+	@- $(FIND) $(TESTSUITE_DIR)/$(OBJ_DIR) -name "*.o" | $(XARGS) $(RM_F)
+	@echo "Removing binary $(TESTSUITE_DIR)/$(TESTSUITE_BIN)."
+	@- $(RM_F) $(TESTSUITE_DIR)/$(TESTSUITE_BIN)
+	@echo "Removing $(TESTSUITE_OUT_FILE)."
+	@- $(RM_F) $(TESTSUITE_OUT_FILE)
+endif
 endif
 
-distclean: check-env cleanmk cleanh cleanlib cleantest
+distclean: cleanmk cleanh cleanlib cleantest
 ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(IS_CONFIGURED),yes)
 	- $(RM_F) $(CONFIG_MK_FILE)
-	- $(RM_RF) $(TESTSUITE_OUT_FILE)
 	- $(RM_RF) $(OBJ_DIR)
 	- $(RM_RF) $(LIB_DIR)
 	- $(RM_RF) $(INCLUDE_DIR)
+endif
 else
+ifeq ($(IS_CONFIGURED),yes)
 	@echo "Removing $(CONFIG_MK_FILE)."
 	@- $(RM_F) $(CONFIG_MK_FILE)
-	@echo "Removing $(TESTSUITE_OUT_FILE)."
-	@- $(RM_F) $(TESTSUITE_OUT_FILE)
 	@echo "Removing $(OBJ_DIR)."
 	@- $(RM_RF) $(OBJ_DIR)
 	@echo "Removing $(LIB_DIR)."
@@ -948,11 +989,13 @@ else
 	@echo "Removing $(INCLUDE_DIR)."
 	@- $(RM_RF) $(INCLUDE_DIR)
 endif
+endif
 
 
 # --- CHANGELOG rules ---
 
-changelog: check-env
+#changelog: check-env
+changelog:
 	@echo "Updating '$(DIST_PATH)/$(CHANGELOG)' via '$(GIT_LOG)'."
 	@$(GIT_LOG) > $(DIST_PATH)/$(CHANGELOG) 
 

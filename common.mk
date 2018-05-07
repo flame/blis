@@ -158,10 +158,21 @@ CONFIG_MK_FILE     := config.mk
 # it is likely that the user has not yet generated it (via configure).
 ifeq ($(strip $(CONFIG_MK_INCLUDED)),yes)
 CONFIG_MK_PRESENT := yes
+IS_CONFIGURED     := yes
 else
 CONFIG_MK_PRESENT := no
+IS_CONFIGURED     := no
 endif
 
+# If we didn't get config.mk, then we need to set some basic variables so
+# that make will function without error for things like 'make clean'.
+ifeq ($(IS_CONFIGURED),no)
+
+# If this makefile fragment is being run and there is no config.mk present,
+# then it's probably safe to assume that the user is currently located in the
+# source distribution.
+DIST_PATH := .
+endif
 
 
 #
@@ -283,7 +294,7 @@ ifeq ($(VENDOR_STRING),)
 $(error Unable to determine compiler vendor.)
 endif
 
-CC_VENDOR := $(firstword $(shell echo '$(VENDOR_STRING)' | $(EGREP) -o 'icc|gcc|clang|ibm'))
+CC_VENDOR := $(firstword $(shell echo '$(VENDOR_STRING)' | $(EGREP) -o 'icc|gcc|clang|ibm|cc'))
 ifeq ($(CC_VENDOR),)
 $(error Unable to determine compiler vendor. Have you run './configure' yet?)
 endif
