@@ -172,6 +172,15 @@ ifeq ($(IS_CONFIGURED),no)
 # then it's probably safe to assume that the user is currently located in the
 # source distribution.
 DIST_PATH := .
+
+# Even though they won't be used explicitly, it appears that setting these
+# INSTALL_* variables to something sane (that is, not allowing them default
+# to the empty string) is necessary to prevent make from hanging, likely
+# because the statements that define UNINSTALL_LIBS and UNINSTALL_HEADERS,
+# when evaluated, result in running 'find' on the root directory--definitely
+# something we would like to avoid.
+INSTALL_LIBDIR := $(HOME)/blis/lib
+INSTALL_INCDIR := $(HOME)/blis/include
 endif
 
 
@@ -637,7 +646,7 @@ BLIS_H_FLAT     := $(BASE_INC_PATH)/$(BLIS_H)
 # Paths to these files will be needed when compiling with the monolithic
 # header.
 REF_KER_SRC     := $(DIST_PATH)/$(REFKERN_DIR)/bli_cntx_ref.c
-REF_KER_HEADERS := $(shell grep "\#include" $(REF_KER_SRC) | sed -e "s/\#include [\"<]\([a-zA-Z0-9\_\.\/\-]*\)[\">].*/\1/g" | grep -v blis.h)
+REF_KER_HEADERS := $(shell $(GREP) "\#include" $(REF_KER_SRC) | sed -e "s/\#include [\"<]\([a-zA-Z0-9\_\.\/\-]*\)[\">].*/\1/g" | $(GREP) -v blis.h)
 
 # Match each header found above with the path to that header, and then strip
 # leading, trailing, and internal whitespace.

@@ -38,6 +38,12 @@
 
 print_usage()
 {
+	# Use the version string in the 'version' file since we don't have
+	# the patched version string yet.
+	if [ -z "${version}" ]; then
+		version=$(cat "${version_filepath}")
+	fi
+
 	# Echo usage info.
 	echo " "
 	echo " ${script_name} (BLIS ${version})"
@@ -65,10 +71,28 @@ print_usage()
 	echo " "
 	echo "   -p PREFIX, --prefix=PREFIX"
 	echo " "
-	echo "                 The path to which make will install buid products."
-	echo "                 If not given, PREFIX defaults to \$(HOME)/blis. If"
-	echo "                 the path refers to a directory that does not exist,"
-	echo "                 it will be created."
+	echo "                 The path to which make will install all build products."
+	echo "                 If given, this option implicitly sets LIBDIR to"
+	echo "                 PREFIX/lib and INCDIR to PREFIX/include (see below); if"
+	echo "                 not given, PREFIX defaults to \$(HOME)/blis. If PREFIX"
+	echo "                 refers to a directory that does not exist, it will be"
+	echo "                 created."
+	echo " "
+	echo "   --libdir=LIBDIR"
+	echo " "
+	echo "                 The path to which make will install libraries. If given,"
+	echo "                 LIBDIR will override the corresponding directory implied"
+	echo "                 by --prefix; if not not given, LIBDIR defaults to"
+	echo "                 PREFIX/lib. If LIBDIR refers to a directory that does not"
+	echo "                 exist, it will be created."
+	echo " "
+	echo "   --includedir=INCDIR"
+	echo " "
+	echo "                 The path to which make will install development header"
+	echo "                 files. If given, INCDIR will override the corresponding"
+	echo "                 directory implied by --prefix; if not given, INCDIR"
+	echo "                 defaults to PREFIX/include. If INCDIR refers to a"
+	echo "                 directory that does not exist, it will be created."
 	echo " "
 	echo "   -d DEBUG, --enable-debug[=DEBUG]"
 	echo " "
@@ -79,8 +103,8 @@ print_usage()
 	echo " "
 	echo "   --enable-verbose-make, --disable-verbose-make"
 	echo " "
-	echo "                 Enable (disabled by default) verbose compilation"
-	echo "                 output during make."
+	echo "                 Enable (disabled by default) verbose compilation output"
+	echo "                 during make."
 	echo " "
 	echo "   --disable-static, --enable-static"
 	echo " "
@@ -1295,7 +1319,7 @@ set_default_version()
 	echo "${script_name}: determining default version string."
 
 	# Check if the .git dir exists; if it does not, we do nothing.
-	if [ -d "${gitdir}" ]; then
+	if [ -d "${dist_path}/${gitdir}" ]; then
 
 		echo "${script_name}: found '${gitdir}' directory; assuming git clone."
 
@@ -1307,7 +1331,7 @@ set_default_version()
 		# followed by a number signifying how many commits have transpired
 		# since the tag, followed by a 'g' and a shortened hash tab. Capture
 		# stderr to a file.
-		git_describe_str=$(git describe --tags 2> ${gd_stderr})
+		git_describe_str=$(git -C ${dist_path} describe --tags 2> ${gd_stderr})
 
 		# Pull in whatever error message was generated, if any, and delete
 		# the file.
@@ -1441,12 +1465,20 @@ main()
 	# The name of the directory in which the BLIS test suite is kept.
 	testsuite_dir='testsuite'
 
-	# The install prefix flag.
-	install_prefix_def="${HOME}/blis"
-	install_prefix=''
+	# The user-given install prefix and a flag indicating it was given.
+	#install_prefix_def="${HOME}/blis"
+	install_prefix_user=${HOME}/blis  # default to this directory.
 	prefix_flag=''
 
-	# The debug flag.
+	# The user-given install libdir and a flag indicating it was given.
+	install_libdir_user=''
+	libdir_flag=''
+
+	# The user-given install includedir and a flag indicating it was given.
+	install_incdir_user=''
+	incdir_flag=''
+
+	# The user-given debug type and a flag indicating it was given.
 	debug_type=''
 	debug_flag=''
 
@@ -1468,6 +1500,9 @@ main()
 	enable_cblas='no'
 	enable_memkind='' # The default memkind value is determined later on.
 	force_version='no'
+
+	# Whether we are building out-of-tree.
+	configured_oot="no"
 
 	# The name of the chosen configuration (the configuration "family").
 	config_name=''
@@ -1503,7 +1538,15 @@ main()
 						;;
 					prefix=*)
 						prefix_flag=1
-						install_prefix=${OPTARG#*=}
+						install_prefix_user=${OPTARG#*=}
+						;;
+					libdir=*)
+						libdir_flag=1
+						install_libdir_user=${OPTARG#*=}
+						;;
+					includedir=*)
+						incdir_flag=1
+						install_incdir_user=${OPTARG#*=}
 						;;
 					enable-debug)
 						debug_flag=1
@@ -1968,14 +2011,42 @@ main()
 
 	# -- Prepare variables for subsitution into template files -----------------
 
-	# Set the install prefix if it was not already set when parsing the install
-	# prefix flag.
+	# Parse the status of the install prefix and echo feedback.
 	if [ -n "${prefix_flag}" ]; then
-		echo "${script_name}: using install prefix '${install_prefix}'."
+		echo "${script_name}: detected --prefix='${install_prefix_user}'."
 	else
-		install_prefix="${install_prefix_def}"
-		echo "${script_name}: no install prefix given; defaulting to '${install_prefix}'."
+		echo "${script_name}: no install prefix option given; defaulting to '${install_prefix_user}'."
 	fi
+
+	# Set initial (candidate) values for the libdir and includedir using the
+	# install prefix that was determined above.
+	install_libdir=${install_prefix_user}/lib
+	install_incdir=${install_prefix_user}/include
+
+	# Set the install libdir, if it was specified. Note that this will override
+	# the default libdir implied by the install prefix, even if both options
+	# were given.
+	if [ -n "${libdir_flag}" ]; then
+		echo "${script_name}: detected --libdir='${install_libdir_user}'."
+		install_libdir=${install_libdir_user}
+	else
+		echo "${script_name}: no install libdir option given; defaulting to PREFIX/lib."
+	fi
+
+	# Set the install includedir, if it was specified. Note that this will
+	# override the default includedir implied by the install prefix, even if
+	# both options were given.
+	if [ -n "${incdir_flag}" ]; then
+		echo "${script_name}: detected --includedir='${install_incdir}'."
+		install_incdir=${install_incdir_user}
+	else
+		echo "${script_name}: no install includedir option given; defaulting to PREFIX/include."
+	fi
+
+	# Echo the installation directories that we settled on.
+	echo "${script_name}: final installation directories:"
+	echo "${script_name}:   libdir:     ${install_libdir}"
+	echo "${script_name}:   includedir: ${install_incdir}"
 
 	# Check if the debug flag was specified.
 	if [ -n "${debug_flag}" ]; then
@@ -2111,7 +2182,8 @@ main()
 	# Variables that contain forward slashes, such as paths, need extra
 	# escaping when used in sed commands. We insert those extra escape
 	# characters here so that the sed commands below do the right thing.
-	install_prefix_esc=$(echo "${install_prefix}" | sed 's/\//\\\//g')
+	install_libdir_esc=$(echo "${install_libdir}" | sed 's/\//\\\//g')
+	install_incdir_esc=$(echo "${install_incdir}" | sed 's/\//\\\//g')
 	dist_path_esc=$(echo "${dist_path}"           | sed 's/\//\\\//g')
 	cc_esc=$(echo "${CC}" | sed 's/\//\\\//g')
 	ranlib_esc=$(echo "${RANLIB:-ranlib}" | sed 's/\//\\\//g')
@@ -2145,6 +2217,30 @@ main()
 	done
 
 
+	# -- Determine whether we are performing an out-of-tree build --------------
+
+	if [ ${dist_path} != "./" ]; then
+
+		# At this point, we know the user did not run "./configure". But we
+		# have not yet ruled out "<fullpath>/configure" or some # equivalent
+		# that uses relative paths. To further rule out these possibilities,
+		# we create a dummy file in the current build directory.
+		touch ./${dummy_file}
+
+		# If the dummy file we just created in the current directory does not
+		# appear in the source distribution path, then we are in a different
+		# directory and thus we must create a symbolic link.
+		if [ ! -f "${dist_path}/${dummy_file}" ]; then
+			configured_oot="yes"
+		else
+			configured_oot="no"
+		fi
+
+		# Remove the dummy file.
+		rm -f "./${dummy_file}"
+	fi
+
+
 	# -- Instantiate config.mk, bli_config.h files from templates --------------
 
 	# Begin substituting information into the config_mk_in file, outputting
@@ -2160,7 +2256,8 @@ main()
 		| sed -e "s/@CC@/${cc_esc}/g" \
 		| sed -e "s/@RANLIB@/${ranlib_esc}/g" \
 		| sed -e "s/@debug_type@/${debug_type}/g" \
-		| sed -e "s/@install_prefix@/${install_prefix_esc}/g" \
+		| sed -e "s/@install_libdir@/${install_libdir_esc}/g" \
+		| sed -e "s/@install_incdir@/${install_incdir_esc}/g" \
 		| sed -e "s/@enable_verbose@/${enable_verbose}/g" \
 		| sed -e "s/@enable_static@/${enable_static}/g" \
 		| sed -e "s/@enable_shared@/${enable_shared}/g" \
@@ -2168,6 +2265,7 @@ main()
 		| sed -e "s/@enable_blas2blis@/${enable_blas2blis}/g" \
 		| sed -e "s/@enable_cblas@/${enable_cblas}/g" \
 		| sed -e "s/@enable_memkind@/${enable_memkind}/g" \
+		| sed -e "s/@configured_oot@/${configured_oot}/g" \
 		> "${config_mk_out_path}"
 		
 
@@ -2379,57 +2477,40 @@ main()
 
 	# -- Handle out-of-tree builds ---------------------------------------------
 
-	# Under some circumstances, we need to create a symbolic link to the
-	# Makefile. We only proceed with this if configure was run with a path
-	# other than "./".
-	if [ ${dist_path} != "./" ]; then
+	# Under some circumstances, we need to create some symbolic links to
+	# properly handle out-of-tree builds.
+	if [ "${configured_oot}" = "yes" ]; then
 
-		# At this point, we know the user did not run "./configure". But we
-		# have not yet ruled out "<fullpath>/configure" or some # equivalent
-		# that uses relative paths. To further rule out these possibilities,
-		# we create a dummy file in the current build directory.
-		touch "./${dummy_file}"
+		# If 'Makefile' does not already exist in the current directory,
+		# create a symbolic link to it. If one does exist, we us -f to
+		# force creation of a new link.
+		if [ ! -e "./Makefile" ]; then
 
-		# If the dummy file we just created in the current directory does not
-		# appear in the source distribution path, then we are in a different
-		# directory and thus we must create a symbolic link.
-		if [ ! -f "${dist_path}/${dummy_file}" ]; then
+			echo "${script_name}: creating symbolic link to Makefile."
+			ln -s "${dist_path}/Makefile"
 
-			# If 'Makefile' does not already exist in the current directory,
-			# create a symbolic link to it. If one does exist, we us -f to
-			# force creation of a new link.
-			if [ ! -e "./Makefile" ]; then
-
-				echo "${script_name}: creating symbolic link to Makefile."
-				ln -s "${dist_path}/Makefile"
-
-			else
-				echo "${script_name}: symbolic link to Makefile already exists; forcing creation of new link."
-				ln -sf "${dist_path}/Makefile"
-			fi
-
-			# If 'common.mk' does not already exist in the current directory,
-			# create a symbolic link to it. If one does exist, we us -f to
-			# force creation of a new link.
-			if [ ! -e "./common.mk" ]; then
-
-				echo "${script_name}: creating symbolic link to common.mk."
-				ln -s "${dist_path}/common.mk"
-
-			else
-				echo "${script_name}: symbolic link to common.mk already exists; forcing creation of new link."
-				ln -sf "${dist_path}/common.mk"
-			fi
-
-			echo "${script_name}: configured to build outside of source distribution."
 		else
-
-			# Echo what is happening.
-			echo "${script_name}: configured to build within top-level directory of source distribution."
+			echo "${script_name}: symbolic link to Makefile already exists; forcing creation of new link."
+			ln -sf "${dist_path}/Makefile"
 		fi
 
-		# Remove the dummy file.
-		rm -f "./${dummy_file}"
+		# If 'common.mk' does not already exist in the current directory,
+		# create a symbolic link to it. If one does exist, we us -f to
+		# force creation of a new link.
+		if [ ! -e "./common.mk" ]; then
+
+			echo "${script_name}: creating symbolic link to common.mk."
+			ln -s "${dist_path}/common.mk"
+
+		else
+			echo "${script_name}: symbolic link to common.mk already exists; forcing creation of new link."
+			ln -sf "${dist_path}/common.mk"
+		fi
+
+		echo "${script_name}: configured to build outside of source distribution."
+	else
+
+		echo "${script_name}: configured to build within top-level directory of source distribution."
 	fi
 
 

@@ -85,10 +85,12 @@ RANLIB          := @RANLIB@
 # The requested threading model.
 THREADING_MODEL := @threading_model@
 
-# The install prefix tell us where to install the libraries and header file
-# directory. Notice that we support the use of DESTDIR so that advanced users
-# may install to a temporary location.
-INSTALL_PREFIX := $(DESTDIR)@install_prefix@
+# The install libdir and includedir values from configure tell us where to
+# install the libraries and header files, respectively. Notice that we
+# support the use of DESTDIR so that advanced users may install to a
+# temporary location.
+INSTALL_LIBDIR := $(DESTDIR)@install_libdir@
+INSTALL_INCDIR := $(DESTDIR)@install_incdir@
 
 # Variables corresponding to other configure-time options.
 BLIS_ENABLE_VERBOSE_MAKE_OUTPUT := @enable_verbose@
@@ -101,6 +103,9 @@ BLIS_ENABLE_CBLAS     := @enable_cblas@
 
 # Whether libblis will depend on libmemkind for certain memory allocations.
 BLIS_ENABLE_MEMKIND   := @enable_memkind@
+
+# Whether we are building out-of-tree
+BUILDING_OOT          := @configured_oot@
 
 # end of ifndef CONFIG_MK_INCLUDED conditional block
 endif
