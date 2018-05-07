@@ -1283,6 +1283,73 @@ try_assemble()
 	echo "${rval}"
 }
 
+set_default_version()
+{
+	local gitdir version_file gd_stderr git_describe_str git_error new_version_str
+
+	gitdir='.git'
+
+	# The path to the version file.
+	version_file=$1
+
+	echo "${script_name}: determining default version string."
+
+	# Check if the .git dir exists; if it does not, we do nothing.
+	if [ -d "${gitdir}" ]; then
+
+		echo "${script_name}: found '${gitdir}' directory; assuming git clone."
+
+		echo "${script_name}: executing: git describe --tags."
+
+		gd_stderr="git_describe_stderr.txt"
+
+		# Query git for the version string, which is simply the current tag,
+		# followed by a number signifying how many commits have transpired
+		# since the tag, followed by a 'g' and a shortened hash tab. Capture
+		# stderr to a file.
+		git_describe_str=$(git describe --tags 2> ${gd_stderr})
+
+		# Pull in whatever error message was generated, if any, and delete
+		# the file.
+		git_error=$(cat ${gd_stderr})
+
+		# Remove the stderr file.
+		rm -f ${gd_stderr}
+
+		# If git returned an error, don't do anything.
+		if [ -n "${git_error}" ]; then
+
+			echo "${script_name}: git returned an error: '${git_error}'."
+			echo "${script_name}: using string from unmodified version file."
+
+			# Use what's in the version file as-is.
+			version=$(cat "${version_file}")
+		else
+
+			echo "${script_name}: got back ${git_describe_str}."
+
+			# Strip off the commit hash label.
+			new_version_str=$(echo ${git_describe_str} | cut -d- -f-2)
+
+			echo "${script_name}: truncating to ${new_version_str}."
+
+			# Write the new version string to the version file.
+			#echo "${new_version_str}" > ${version_file}
+
+			# Set the version variable.
+			version="${new_version_str}"
+		fi
+	else
+
+		echo "${script_name}: could not find '${gitdir}' directory; using unmodified version file."
+
+		# Use what's in the version file as-is.
+		version=$(cat "${version_file}")
+	fi
+}
+
+
+
 #
 # -- main function -------------------------------------------------------------
 #
@@ -1332,9 +1399,6 @@ main()
 	bli_config_h_out='bli_config.h'
 	bli_config_h_in_path="${build_dirpath}/${bli_config_h_in}"
 	bli_config_h_out_path="${cur_dirpath}/${bli_config_h_out}"
-
-	# Path to 'update-version-file.sh' script.
-	update_version_file_sh="${build_dirpath}/update-version-file.sh"
 
 	# Path to 'mirror-tree.sh' script.
 	mirror_tree_sh="${build_dirpath}/mirror-tree.sh"
@@ -1628,11 +1692,10 @@ main()
 
 	# -- Acquire the BLIS version ----------------------------------------------
 
-	# Check whether we need to update the version file.
-	${update_version_file_sh} -o "${script_name}" "${version_filepath}"
-
-	# Query which version of BLIS this is.
-	version=$(cat ${version_filepath})
+	# Set the 'version' variable to the default value (the 'git describe' augmented
+	# instance of whatever is in the 'version' file if this is a git clone, or
+	# whatever is in the 'version' file unmodified if it is a bare source release).
+	set_default_version "${version_filepath}"
 
 	# Initial message.
 	echo "${script_name}: starting configuration of BLIS ${version}."
