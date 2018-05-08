@@ -166,7 +166,7 @@ void libblis_test_copyv_experiment
 	bli_setv( &BLIS_ONE, &y );
 
 	// Apply the parameters.
-	bli_obj_set_conj( conjx, x );
+	bli_obj_set_conj( conjx, &x );
 
 	// Disable repeats since bli_copyv() is not yet tested. 
 	//for ( i = 0; i < n_repeats; ++i )
@@ -180,7 +180,7 @@ void libblis_test_copyv_experiment
 
 	// Estimate the performance of the best experiment repeat.
 	*perf = ( 1.0 * m ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bli_obj_is_complex( x ) ) *perf *= 2.0;
+	if ( bli_obj_is_complex( &x ) ) *perf *= 2.0;
 
 	// Perform checks.
 	libblis_test_copyv_check( params, &x, &y, resid );
@@ -223,7 +223,7 @@ void libblis_test_copyv_check
        double*        resid
      )
 {
-	num_t  dt_real = bli_obj_dt_proj_to_real( *x );
+	num_t  dt_real = bli_obj_dt_proj_to_real( x );
 
 	obj_t  norm_y_r;
 

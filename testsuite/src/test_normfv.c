@@ -185,7 +185,7 @@ void libblis_test_normfv_experiment
 
 	// Estimate the performance of the best experiment repeat.
 	*perf = ( 2.0 * m ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bli_obj_is_complex( x ) ) *perf *= 2.0;
+	if ( bli_obj_is_complex( &x ) ) *perf *= 2.0;
 
 	// Perform checks.
 	libblis_test_normfv_check( params, &beta, &x, &norm, resid );
@@ -228,8 +228,8 @@ void libblis_test_normfv_check
        double*        resid
      )
 {
-	num_t  dt_real = bli_obj_dt_proj_to_real( *x );
-	dim_t  m       = bli_obj_vector_dim( *x );
+	num_t  dt_real = bli_obj_dt_proj_to_real( x );
+	dim_t  m       = bli_obj_vector_dim( x );
 
 	obj_t  m_r, temp_r;
 

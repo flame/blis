@@ -102,9 +102,9 @@ int main( int argc, char** argv )
 		bli_randm( &y );
 		bli_randm( &a );
 
-		bli_obj_set_struc( BLIS_HERMITIAN, a );
-		//bli_obj_set_struc( BLIS_SYMMETRIC, a );
-		bli_obj_set_uplo( uplo, a );
+		bli_obj_set_struc( BLIS_HERMITIAN, &a );
+		//bli_obj_set_struc( BLIS_SYMMETRIC, &a );
+		bli_obj_set_uplo( uplo, &a );
 
 
 		bli_setsc(  (2.0/1.0), 0.0, &alpha );
@@ -129,8 +129,8 @@ int main( int argc, char** argv )
 
 #ifdef BLIS
 
-			//bli_obj_toggle_conj( x );
-			//bli_obj_toggle_conj( y );
+			//bli_obj_toggle_conj( &x );
+			//bli_obj_toggle_conj( &y );
 
 			//bli_syr2( &alpha,
 			bli_her2( &alpha,
@@ -141,14 +141,14 @@ int main( int argc, char** argv )
 #else
 
 			f77_char uplo   = 'L';
-			f77_int  mm     = bli_obj_length( a );
-			f77_int  incx   = bli_obj_vector_inc( x );
-			f77_int  incy   = bli_obj_vector_inc( y );
-			f77_int  lda    = bli_obj_col_stride( a );
-			double*  alphap = bli_obj_buffer( alpha );
-			double*  xp     = bli_obj_buffer( x );
-			double*  yp     = bli_obj_buffer( y );
-			double*  ap     = bli_obj_buffer( a );
+			f77_int  mm     = bli_obj_length( &a );
+			f77_int  incx   = bli_obj_vector_inc( &x );
+			f77_int  incy   = bli_obj_vector_inc( &y );
+			f77_int  lda    = bli_obj_col_stride( &a );
+			double*  alphap = bli_obj_buffer( &alpha );
+			double*  xp     = bli_obj_buffer( &x );
+			double*  yp     = bli_obj_buffer( &y );
+			double*  ap     = bli_obj_buffer( &a );
 
 			dsyr2_( &uplo,
 			        &mm,

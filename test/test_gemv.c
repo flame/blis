@@ -132,16 +132,16 @@ int main( int argc, char** argv )
 #else
 
 			f77_char transa = 'N';
-			f77_int  mm     = bli_obj_length( a );
-			f77_int  nn     = bli_obj_width( a );
-			f77_int  lda    = bli_obj_col_stride( a );
-			f77_int  incx   = bli_obj_vector_inc( x );
-			f77_int  incy   = bli_obj_vector_inc( y );
-			double*  alphap = bli_obj_buffer( alpha );
-			double*  ap     = bli_obj_buffer( a );
-			double*  xp     = bli_obj_buffer( x );
-			double*  betap  = bli_obj_buffer( beta );
-			double*  yp     = bli_obj_buffer( y );
+			f77_int  mm     = bli_obj_length( &a );
+			f77_int  nn     = bli_obj_width( &a );
+			f77_int  lda    = bli_obj_col_stride( &a );
+			f77_int  incx   = bli_obj_vector_inc( &x );
+			f77_int  incy   = bli_obj_vector_inc( &y );
+			double*  alphap = bli_obj_buffer( &alpha );
+			double*  ap     = bli_obj_buffer( &a );
+			double*  xp     = bli_obj_buffer( &x );
+			double*  betap  = bli_obj_buffer( &beta );
+			double*  yp     = bli_obj_buffer( &y );
 
 			dgemv_( &transa,
 			        &mm,

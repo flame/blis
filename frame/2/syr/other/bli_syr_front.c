@@ -61,13 +61,13 @@ void bli_syr_front
 
 
 	// Query the target datatypes of each object.
-	dt_targ_x = bli_obj_target_dt( *x );
-	dt_targ_c = bli_obj_target_dt( *c );
+	dt_targ_x = bli_obj_target_dt( x );
+	dt_targ_c = bli_obj_target_dt( c );
 
 	// Determine whether each operand with unit stride.
-	x_has_unit_inc = ( bli_obj_vector_inc( *x ) == 1 );
-	c_has_unit_inc = ( bli_obj_is_row_stored( *c ) ||
-	                   bli_obj_is_col_stored( *c ) );
+	x_has_unit_inc = ( bli_obj_vector_inc( x ) == 1 );
+	c_has_unit_inc = ( bli_obj_is_row_stored( c ) ||
+	                   bli_obj_is_col_stored( c ) );
 
 
 	// Create an object to hold a copy-cast of alpha. Notice that we use
@@ -89,14 +89,14 @@ void bli_syr_front
 		// combinations of upper/lower triangular storage and row/column-storage.
 		// The row-stored lower triangular and column-stored upper triangular
 		// trees are identical. Same for the remaining two trees.
-		if ( bli_obj_is_lower( *c ) )
+		if ( bli_obj_is_lower( c ) )
 		{
-			if ( bli_obj_is_row_stored( *c ) ) her_cntl = her_cntl_bs_ke_lrow_ucol;
+			if ( bli_obj_is_row_stored( c ) ) her_cntl = her_cntl_bs_ke_lrow_ucol;
 			else                               her_cntl = her_cntl_bs_ke_lcol_urow;
 		}
-		else // if ( bli_obj_is_upper( *c ) )
+		else // if ( bli_obj_is_upper( c ) )
 		{
-			if ( bli_obj_is_row_stored( *c ) ) her_cntl = her_cntl_bs_ke_lcol_urow;
+			if ( bli_obj_is_row_stored( c ) ) her_cntl = her_cntl_bs_ke_lcol_urow;
 			else                               her_cntl = her_cntl_bs_ke_lrow_ucol;
 		}
 	}
@@ -104,19 +104,19 @@ void bli_syr_front
 	{
 		// Mark objects with unit stride as already being packed. This prevents
 		// unnecessary packing from happening within the blocked algorithm.
-		if ( x_has_unit_inc ) bli_obj_set_pack_schema( BLIS_PACKED_VECTOR, *x );
-		if ( c_has_unit_inc ) bli_obj_set_pack_schema( BLIS_PACKED_UNSPEC, *c );
+		if ( x_has_unit_inc ) bli_obj_set_pack_schema( BLIS_PACKED_VECTOR, x );
+		if ( c_has_unit_inc ) bli_obj_set_pack_schema( BLIS_PACKED_UNSPEC, c );
 
 		// Here, we make a similar choice as above, except that (1) we look
 		// at storage tilt, and (2) we choose a tree that performs blocking.
-		if ( bli_obj_is_lower( *c ) )
+		if ( bli_obj_is_lower( c ) )
 		{
-			if ( bli_obj_is_row_stored( *c ) ) her_cntl = her_cntl_ge_lrow_ucol;
+			if ( bli_obj_is_row_stored( c ) ) her_cntl = her_cntl_ge_lrow_ucol;
 			else                               her_cntl = her_cntl_ge_lcol_urow;
 		}
-		else // if ( bli_obj_is_upper( *c ) )
+		else // if ( bli_obj_is_upper( c ) )
 		{
-			if ( bli_obj_is_row_stored( *c ) ) her_cntl = her_cntl_ge_lcol_urow;
+			if ( bli_obj_is_row_stored( c ) ) her_cntl = her_cntl_ge_lcol_urow;
 			else                               her_cntl = her_cntl_ge_lrow_ucol;
 		}
 	}
@@ -163,10 +163,10 @@ void PASTEMAC(ch,opname) \
 	bli_obj_create_with_attached_buffer( dt, m, 1, x, rs_x, cs_x, &xo ); \
 	bli_obj_create_with_attached_buffer( dt, m, m, c, rs_c, cs_c, &co ); \
 \
-	bli_obj_set_conj( conjx, xo ); \
-	bli_obj_set_uplo( uploc, co ); \
+	bli_obj_set_conj( conjx, &xo ); \
+	bli_obj_set_uplo( uploc, &co ); \
 \
-	bli_obj_set_struc( BLIS_SYMMETRIC, co ); \
+	bli_obj_set_struc( BLIS_SYMMETRIC, &co ); \
 \
 	PASTEMAC0(opname)( &alphao, \
 	                   &xo, \

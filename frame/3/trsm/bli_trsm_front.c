@@ -62,9 +62,9 @@ void bli_trsm_front
 	}
 
 	// Alias A and B so we can tweak the objects if necessary.
-	bli_obj_alias_to( *a, a_local );
-	bli_obj_alias_to( *b, b_local );
-	bli_obj_alias_to( *b, c_local );
+	bli_obj_alias_to( a, &a_local );
+	bli_obj_alias_to( b, &b_local );
+	bli_obj_alias_to( b, &c_local );
 
 	// We do not explicitly implement the cases where A is transposed.
 	// However, we can still handle them. Specifically, if A is marked as
@@ -77,10 +77,10 @@ void bli_trsm_front
 	// matrix now appears to be upper triangular, so the upper triangular
 	// algorithm will grab the correct partitions, as if it were upper
 	// triangular (with no transpose) all along.
-	if ( bli_obj_has_trans( a_local ) )
+	if ( bli_obj_has_trans( &a_local ) )
 	{
-		bli_obj_induce_trans( a_local );
-		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, a_local );
+		bli_obj_induce_trans( &a_local );
+		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, &a_local );
 	}
 
 #if 1
@@ -90,10 +90,10 @@ void bli_trsm_front
 	// from the left.
 	if ( bli_is_right( side ) )
 	{
-		bli_toggle_side( side );
-		bli_obj_induce_trans( a_local );
-		bli_obj_induce_trans( b_local );
-		bli_obj_induce_trans( c_local );
+		bli_toggle_side( &side );
+		bli_obj_induce_trans( &a_local );
+		bli_obj_induce_trans( &b_local );
+		bli_obj_induce_trans( &c_local );
 	}
 
 #else
@@ -108,7 +108,7 @@ void bli_trsm_front
 	// the triangular matrix will actually be on the right.
 	if ( bli_is_right( side ) )
 	{
-		bli_obj_swap( a_local, b_local );
+		bli_obj_swap( &a_local, &b_local );
 	}
 
 #endif
@@ -116,15 +116,15 @@ void bli_trsm_front
 	// Set each alias as the root object.
 	// NOTE: We MUST wait until we are done potentially swapping the objects
 	// before setting the root fields!
-	bli_obj_set_as_root( a_local );
-	bli_obj_set_as_root( b_local );
-	bli_obj_set_as_root( c_local );
+	bli_obj_set_as_root( &a_local );
+	bli_obj_set_as_root( &b_local );
+	bli_obj_set_as_root( &c_local );
 
 	// Record the threading for each level within the context.
 	bli_cntx_set_thrloop_from_env( BLIS_TRSM, side, cntx,
-                                   bli_obj_length( c_local ),
-                                   bli_obj_width( c_local ),
-                                   bli_obj_width( a_local ) );
+                                   bli_obj_length( &c_local ),
+                                   bli_obj_width( &c_local ),
+                                   bli_obj_width( &a_local ) );
 
 	// Invoke the internal back-end.
 	bli_l3_thread_decorator

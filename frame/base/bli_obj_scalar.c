@@ -44,12 +44,12 @@ void bli_obj_scalar_init_detached( num_t  dt,
 	bli_obj_create_without_buffer( dt, 1, 1, beta );
 
 	// Query the address of the object's internal scalar buffer.
-	p = bli_obj_internal_scalar_buffer( *beta );
+	p = bli_obj_internal_scalar_buffer( beta );
 
 	// Update the object.
-	bli_obj_set_buffer( p, *beta );
-	bli_obj_set_strides( 1, 1, *beta );
-	bli_obj_set_imag_stride( 1, *beta );
+	bli_obj_set_buffer( p, beta );
+	bli_obj_set_strides( 1, 1, beta );
+	bli_obj_set_imag_stride( 1, beta );
 }
 
 void bli_obj_scalar_init_detached_copy_of( num_t  dt,
@@ -60,8 +60,8 @@ void bli_obj_scalar_init_detached_copy_of( num_t  dt,
 	obj_t alpha_local;
 
 	// Make a local copy of alpha so we can apply the conj parameter.
-	bli_obj_alias_to( *alpha, alpha_local );
-	bli_obj_apply_conj( conj, alpha_local );
+	bli_obj_alias_to( alpha, &alpha_local );
+	bli_obj_apply_conj( conj, &alpha_local );
 
 	// Initialize beta without a buffer and then attach its internal buffer.
 	bli_obj_scalar_init_detached( dt, beta );
@@ -74,14 +74,14 @@ void bli_obj_scalar_init_detached_copy_of( num_t  dt,
 void bli_obj_scalar_detach( obj_t* a,
                             obj_t* alpha )
 {
-	num_t dt_a = bli_obj_dt( *a );
+	num_t dt_a = bli_obj_dt( a );
 
 	// Initialize alpha to be a bufferless internal scalar of the same
 	// datatype as A.
 	bli_obj_scalar_init_detached( dt_a, alpha );
 
 	// Copy the internal scalar in A to alpha.
-	bli_obj_copy_internal_scalar( *a, *alpha );
+	bli_obj_copy_internal_scalar( a, alpha );
 }
 
 void bli_obj_scalar_attach( conj_t conj,
@@ -92,13 +92,13 @@ void bli_obj_scalar_attach( conj_t conj,
 
 	// Make a copy-cast of alpha of the same datatype as A. This step
 	// gives us the opportunity to conjugate and/or typecast alpha.
-	bli_obj_scalar_init_detached_copy_of( bli_obj_dt( *a ),
+	bli_obj_scalar_init_detached_copy_of( bli_obj_dt( a ),
 	                                      conj,
 	                                      alpha,
 	                                      &alpha_cast );
 
 	// Copy the internal scalar in alpha_cast to A.
-	bli_obj_copy_internal_scalar( alpha_cast, *a );
+	bli_obj_copy_internal_scalar( &alpha_cast, a );
 }
 
 void bli_obj_scalar_apply_scalar( obj_t* alpha,
@@ -109,7 +109,7 @@ void bli_obj_scalar_apply_scalar( obj_t* alpha,
 
 	// Make a copy-cast of alpha of the same datatype as A. This step
 	// gives us the opportunity to typecast alpha.
-	bli_obj_scalar_init_detached_copy_of( bli_obj_dt( *a ),
+	bli_obj_scalar_init_detached_copy_of( bli_obj_dt( a ),
 	                                      BLIS_NO_CONJUGATE,
 	                                      alpha,
 	                                      &alpha_cast );
@@ -120,14 +120,14 @@ void bli_obj_scalar_apply_scalar( obj_t* alpha,
 	bli_mulsc( &alpha_cast, &scalar_a );
 
 	// Copy the internal scalar in scalar_a to A.
-	bli_obj_copy_internal_scalar( scalar_a, *a );
+	bli_obj_copy_internal_scalar( &scalar_a, a );
 }
 
 void bli_obj_scalar_reset( obj_t* a )
 {
-	num_t dt       = bli_obj_dt( *a );
-	void* scalar_a = bli_obj_internal_scalar_buffer( *a );
-	void* one      = bli_obj_buffer_for_const( dt, BLIS_ONE );
+	num_t dt       = bli_obj_dt( a );
+	void* scalar_a = bli_obj_internal_scalar_buffer( a );
+	void* one      = bli_obj_buffer_for_const( dt, &BLIS_ONE );
 
 	if      ( bli_is_float( dt )    ) *(( float*    )scalar_a) = *(( float*    )one);
 	else if ( bli_is_double( dt )   ) *(( double*   )scalar_a) = *(( double*   )one);
@@ -141,8 +141,8 @@ void bli_obj_scalar_reset( obj_t* a )
 bool_t bli_obj_scalar_has_nonzero_imag( obj_t* a )
 {
 	bool_t r_val     = FALSE;
-	num_t  dt        = bli_obj_dt( *a );
-	void*  scalar_a  = bli_obj_internal_scalar_buffer( *a );
+	num_t  dt        = bli_obj_dt( a );
+	void*  scalar_a  = bli_obj_internal_scalar_buffer( a );
 
 	if      ( bli_is_real( dt ) )
 	{

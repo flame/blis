@@ -54,7 +54,7 @@ void bli_gemv_blk_var2( obj_t*  alpha,
 	bli_obj_init_pack( &x1_pack );
 
 	// Query dimension in partitioning direction.
-	n_trans = bli_obj_width_after_trans( *a );
+	n_trans = bli_obj_width_after_trans( a );
 
 	// y = beta * y;
 	bli_scalv_int( beta,

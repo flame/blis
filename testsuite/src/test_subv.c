@@ -176,7 +176,7 @@ void libblis_test_subv_experiment
 	bli_setv( &beta,  &y );
 
 	// Apply the parameters.
-	bli_obj_set_conj( conjx, x );
+	bli_obj_set_conj( conjx, &x );
 
 	// Disable repeats since bli_copyv() is not yet tested. 
 	//for ( i = 0; i < n_repeats; ++i )
@@ -190,7 +190,7 @@ void libblis_test_subv_experiment
 
 	// Estimate the performance of the best experiment repeat.
 	*perf = ( 1.0 * m ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bli_obj_is_complex( x ) ) *perf *= 2.0;
+	if ( bli_obj_is_complex( &x ) ) *perf *= 2.0;
 
 	// Perform checks.
 	libblis_test_subv_check( params, &alpha, &beta, &x, &y, resid );
@@ -235,11 +235,11 @@ void libblis_test_subv_check
        double*        resid
      )
 {
-	num_t  dt      = bli_obj_dt( *x );
-	num_t  dt_real = bli_obj_dt_proj_to_real( *x );
-	dim_t  m       = bli_obj_vector_dim( *x );
+	num_t  dt      = bli_obj_dt( x );
+	num_t  dt_real = bli_obj_dt_proj_to_real( x );
+	dim_t  m       = bli_obj_vector_dim( x );
 
-	conj_t conjx   = bli_obj_conj_status( *x );
+	conj_t conjx   = bli_obj_conj_status( x );
 
 	obj_t  aminusb;
 	obj_t  alpha_conj;

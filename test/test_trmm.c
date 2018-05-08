@@ -127,10 +127,10 @@ int main( int argc, char** argv )
 		bli_randm( &a );
 		bli_randm( &c );
 
-		bli_obj_set_struc( BLIS_TRIANGULAR, a );
-		bli_obj_set_uplo( uploa, a );
-		bli_obj_set_conjtrans( transa, a );
-		bli_obj_set_diag( diaga, a );
+		bli_obj_set_struc( BLIS_TRIANGULAR, &a );
+		bli_obj_set_uplo( uploa, &a );
+		bli_obj_set_conjtrans( transa, &a );
+		bli_obj_set_diag( diaga, &a );
 
 		// Randomize A, make it densely Hermitian, and zero the unstored
 		// triangle to ensure the implementation reads only from the stored
@@ -169,13 +169,13 @@ int main( int argc, char** argv )
 
 		if ( bli_is_float( dt ) )
 		{
-			f77_int  mm     = bli_obj_length( c );
-			f77_int  nn     = bli_obj_width( c );
-			f77_int  lda    = bli_obj_col_stride( a );
-			f77_int  ldc    = bli_obj_col_stride( c );
-			float*   alphap = bli_obj_buffer( alpha );
-			float*   ap     = bli_obj_buffer( a );
-			float*   cp     = bli_obj_buffer( c );
+			f77_int  mm     = bli_obj_length( &c );
+			f77_int  nn     = bli_obj_width( &c );
+			f77_int  lda    = bli_obj_col_stride( &a );
+			f77_int  ldc    = bli_obj_col_stride( &c );
+			float*   alphap = bli_obj_buffer( &alpha );
+			float*   ap     = bli_obj_buffer( &a );
+			float*   cp     = bli_obj_buffer( &c );
 
 			strmm_( &f77_side,
 			        &f77_uploa,
@@ -189,13 +189,13 @@ int main( int argc, char** argv )
 		}
 		else if ( bli_is_double( dt ) )
 		{
-			f77_int  mm     = bli_obj_length( c );
-			f77_int  nn     = bli_obj_width( c );
-			f77_int  lda    = bli_obj_col_stride( a );
-			f77_int  ldc    = bli_obj_col_stride( c );
-			double*  alphap = bli_obj_buffer( alpha );
-			double*  ap     = bli_obj_buffer( a );
-			double*  cp     = bli_obj_buffer( c );
+			f77_int  mm     = bli_obj_length( &c );
+			f77_int  nn     = bli_obj_width( &c );
+			f77_int  lda    = bli_obj_col_stride( &a );
+			f77_int  ldc    = bli_obj_col_stride( &c );
+			double*  alphap = bli_obj_buffer( &alpha );
+			double*  ap     = bli_obj_buffer( &a );
+			double*  cp     = bli_obj_buffer( &c );
 
 			dtrmm_( &f77_side,
 			        &f77_uploa,
@@ -209,13 +209,13 @@ int main( int argc, char** argv )
 		}
 		else if ( bli_is_scomplex( dt ) )
 		{
-			f77_int  mm     = bli_obj_length( c );
-			f77_int  nn     = bli_obj_width( c );
-			f77_int  lda    = bli_obj_col_stride( a );
-			f77_int  ldc    = bli_obj_col_stride( c );
-			scomplex*  alphap = bli_obj_buffer( alpha );
-			scomplex*  ap     = bli_obj_buffer( a );
-			scomplex*  cp     = bli_obj_buffer( c );
+			f77_int  mm     = bli_obj_length( &c );
+			f77_int  nn     = bli_obj_width( &c );
+			f77_int  lda    = bli_obj_col_stride( &a );
+			f77_int  ldc    = bli_obj_col_stride( &c );
+			scomplex*  alphap = bli_obj_buffer( &alpha );
+			scomplex*  ap     = bli_obj_buffer( &a );
+			scomplex*  cp     = bli_obj_buffer( &c );
 
 			ctrmm_( &f77_side,
 			        &f77_uploa,
@@ -229,13 +229,13 @@ int main( int argc, char** argv )
 		}
 		else if ( bli_is_dcomplex( dt ) )
 		{
-			f77_int  mm     = bli_obj_length( c );
-			f77_int  nn     = bli_obj_width( c );
-			f77_int  lda    = bli_obj_col_stride( a );
-			f77_int  ldc    = bli_obj_col_stride( c );
-			dcomplex*  alphap = bli_obj_buffer( alpha );
-			dcomplex*  ap     = bli_obj_buffer( a );
-			dcomplex*  cp     = bli_obj_buffer( c );
+			f77_int  mm     = bli_obj_length( &c );
+			f77_int  nn     = bli_obj_width( &c );
+			f77_int  lda    = bli_obj_col_stride( &a );
+			f77_int  ldc    = bli_obj_col_stride( &c );
+			dcomplex*  alphap = bli_obj_buffer( &alpha );
+			dcomplex*  ap     = bli_obj_buffer( &a );
+			dcomplex*  cp     = bli_obj_buffer( &c );
 
 			ztrmm_( &f77_side,
 			        &f77_uploa,

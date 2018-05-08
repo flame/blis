@@ -469,15 +469,15 @@ static bool_t bli_cntx_l3_nat_ukr_prefers_cols_dt( num_t dt, l3ukr_t ukr_id, cnt
 
 static bool_t bli_cntx_l3_nat_ukr_prefers_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
 {
-	const num_t  dt    = bli_obj_dt( *obj );
+	const num_t  dt    = bli_obj_dt( obj );
 	const bool_t ukr_prefers_rows
 	                   = bli_cntx_l3_nat_ukr_prefers_rows_dt( dt, ukr_id, cntx );
 	const bool_t ukr_prefers_cols
 	                   = bli_cntx_l3_nat_ukr_prefers_cols_dt( dt, ukr_id, cntx );
 	bool_t       r_val = FALSE;
 
-	if      ( bli_obj_is_row_stored( *obj ) && ukr_prefers_rows ) r_val = TRUE;
-	else if ( bli_obj_is_col_stored( *obj ) && ukr_prefers_cols ) r_val = TRUE;
+	if      ( bli_obj_is_row_stored( obj ) && ukr_prefers_rows ) r_val = TRUE;
+	else if ( bli_obj_is_col_stored( obj ) && ukr_prefers_cols ) r_val = TRUE;
 
 	return r_val;
 }
@@ -531,15 +531,15 @@ static bool_t bli_cntx_l3_ukr_prefers_cols_dt( num_t dt, l3ukr_t ukr_id, cntx_t*
 
 static bool_t bli_cntx_l3_ukr_prefers_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
 {
-	const num_t  dt    = bli_obj_dt( *obj );
+	const num_t  dt    = bli_obj_dt( obj );
 	const bool_t ukr_prefers_rows
 	                   = bli_cntx_l3_ukr_prefers_rows_dt( dt, ukr_id, cntx );
 	const bool_t ukr_prefers_cols
 	                   = bli_cntx_l3_ukr_prefers_cols_dt( dt, ukr_id, cntx );
 	bool_t       r_val = FALSE;
 
-	if      ( bli_obj_is_row_stored( *obj ) && ukr_prefers_rows ) r_val = TRUE;
-	else if ( bli_obj_is_col_stored( *obj ) && ukr_prefers_cols ) r_val = TRUE;
+	if      ( bli_obj_is_row_stored( obj ) && ukr_prefers_rows ) r_val = TRUE;
+	else if ( bli_obj_is_col_stored( obj ) && ukr_prefers_cols ) r_val = TRUE;
 
 	return r_val;
 }

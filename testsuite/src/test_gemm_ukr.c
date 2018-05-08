@@ -208,7 +208,7 @@ void libblis_test_gemm_ukr_experiment
 	                          sc_str[0], m, n, &c_save );
 
 	// Set alpha and beta.
-	if ( bli_obj_is_real( c ) )
+	if ( bli_obj_is_real( &c ) )
 	{
 		bli_setsc(  1.2,  0.0, &alpha );
 		bli_setsc( -1.0,  0.0, &beta );
@@ -261,16 +261,16 @@ void libblis_test_gemm_ukr_experiment
 	// However, it does overwrite the buffer field of packed object with that of
 	// the source object. So, we have to save the buffer address that was
 	// allocated.
-	void* buf_ap = bli_obj_buffer( ap );
-	void* buf_bp = bli_obj_buffer( bp );
+	void* buf_ap = bli_obj_buffer( &ap );
+	void* buf_bp = bli_obj_buffer( &bp );
 	bli_packm_init_pack( BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS,
 	                     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER,
 	                     BLIS_MR, BLIS_KR, &a, &ap, cntx );
 	bli_packm_init_pack( BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS,
 	                     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER,
 	                     BLIS_KR, BLIS_NR, &b, &bp, cntx );
-	bli_obj_set_buffer( buf_ap, ap );
-	bli_obj_set_buffer( buf_bp, bp );
+	bli_obj_set_buffer( buf_ap, &ap );
+	bli_obj_set_buffer( buf_bp, &bp );
 
 	// Pack the data from the source objects.
 	bli_packm_blk_var1( &a, &ap, cntx, NULL, &BLIS_PACKM_SINGLE_THREADED );
@@ -292,7 +292,7 @@ void libblis_test_gemm_ukr_experiment
 
 	// Estimate the performance of the best experiment repeat.
 	*perf = ( 2.0 * m * n * k ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bli_obj_is_complex( c ) ) *perf *= 4.0;
+	if ( bli_obj_is_complex( &c ) ) *perf *= 4.0;
 
 	// Perform checks.
 	libblis_test_gemm_ukr_check( params, &alpha, &a, &b, &beta, &c, &c_save, resid );
@@ -352,12 +352,12 @@ void libblis_test_gemm_ukr_check
        double*        resid
      )
 {
-	num_t  dt      = bli_obj_dt( *c );
-	num_t  dt_real = bli_obj_dt_proj_to_real( *c );
+	num_t  dt      = bli_obj_dt( c );
+	num_t  dt_real = bli_obj_dt_proj_to_real( c );
 
-	dim_t  m       = bli_obj_length( *c );
-	dim_t  n       = bli_obj_width( *c );
-	dim_t  k       = bli_obj_width( *a );
+	dim_t  m       = bli_obj_length( c );
+	dim_t  n       = bli_obj_width( c );
+	dim_t  k       = bli_obj_width( a );
 
 	obj_t  norm;
 	obj_t  t, v, w, z;

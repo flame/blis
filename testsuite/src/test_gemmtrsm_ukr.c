@@ -235,7 +235,7 @@ void libblis_test_gemmtrsm_ukr_experiment
 	                          sc_str[0], m,   n,   &c11_save );
 
 	// Set alpha.
-	if ( bli_obj_is_real( b ) )
+	if ( bli_obj_is_real( &b ) )
 	{
 		bli_setsc(  2.0,  0.0, &alpha );
 	}
@@ -245,8 +245,8 @@ void libblis_test_gemmtrsm_ukr_experiment
 	}
 
 	// Set the structure, uplo, and diagonal offset properties of A.
-	bli_obj_set_struc( BLIS_TRIANGULAR, a_big );
-	bli_obj_set_uplo( uploa, a_big );
+	bli_obj_set_struc( BLIS_TRIANGULAR, &a_big );
+	bli_obj_set_uplo( uploa, &a_big );
 
 	// Randomize A and make it densely triangular.
 	libblis_test_mobj_randomize( params, TRUE, &a_big );
@@ -257,7 +257,7 @@ void libblis_test_gemmtrsm_ukr_experiment
 
 	// Locate A1x/A11 (lower) or Ax1/A11 (upper), and then locate the
 	// corresponding B11 block of B.
-	if ( bli_obj_is_lower( a_big ) )
+	if ( bli_obj_is_lower( &a_big ) )
 	{
 		bli_acquire_mpart_t2b( BLIS_SUBPART1, k, m, &a_big, &a );
 		bli_acquire_mpart_t2b( BLIS_SUBPART1, k, m, &b, &b11 );
@@ -307,25 +307,25 @@ void libblis_test_gemmtrsm_ukr_experiment
 	// However, it does overwrite the buffer field of packed object with that of
 	// the source object. So, we have to save the buffer address that was
 	// allocated.
-	void* buf_ap = bli_obj_buffer( ap );
-	void* buf_bp = bli_obj_buffer( bp );
+	void* buf_ap = bli_obj_buffer( &ap );
+	void* buf_bp = bli_obj_buffer( &bp );
 	bli_packm_init_pack( BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS,
 	                     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER,
 	                     BLIS_MR, BLIS_KR, &a, &ap, cntx );
 	bli_packm_init_pack( BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS,
 	                     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER,
 	                     BLIS_KR, BLIS_NR, &b, &bp, cntx );
-	bli_obj_set_buffer( buf_ap, ap );
-	bli_obj_set_buffer( buf_bp, bp );
+	bli_obj_set_buffer( buf_ap, &ap );
+	bli_obj_set_buffer( buf_bp, &bp );
 
 	// Set the diagonal offset of ap.
-	if ( bli_is_lower( uploa ) ) { bli_obj_set_diag_offset( k, ap ); }
-	else                         { bli_obj_set_diag_offset( 0, ap ); }
+	if ( bli_is_lower( uploa ) ) { bli_obj_set_diag_offset( k, &ap ); }
+	else                         { bli_obj_set_diag_offset( 0, &ap ); }
 
 	// Set the uplo field of ap since the default for packed objects is
 	// BLIS_DENSE, and the _make_subparts() routine needs this information
 	// to know how to initialize the subpartitions.
-	bli_obj_set_uplo( uploa, ap );
+	bli_obj_set_uplo( uploa, &ap );
 
 	// Pack the data from the source objects.
 	bli_packm_blk_var1( &a, &ap, cntx, NULL, &BLIS_PACKM_SINGLE_THREADED );
@@ -338,7 +338,7 @@ void libblis_test_gemmtrsm_ukr_experiment
 	// Set the uplo field of a11p since the default for packed objects is
 	// BLIS_DENSE, and the _ukernel() wrapper needs this information to
 	// know which set of micro-kernels (lower or upper) to choose from.
-	bli_obj_set_uplo( uploa, a11p );
+	bli_obj_set_uplo( uploa, &a11p );
 
 //bli_printm( "a", &a, "%4.1f", "" );
 //bli_printm( "ap", &ap, "%4.1f", "" );
@@ -363,7 +363,7 @@ void libblis_test_gemmtrsm_ukr_experiment
 
 	// Estimate the performance of the best experiment repeat.
 	*perf = ( 2.0 * m * n * k + 1.0 * m * m * n ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bli_obj_is_complex( b ) ) *perf *= 4.0;
+	if ( bli_obj_is_complex( &b ) ) *perf *= 4.0;
 
 	// Perform checks.
 	libblis_test_gemmtrsm_ukr_check( params, side, &alpha,
@@ -428,12 +428,12 @@ void libblis_test_gemmtrsm_ukr_check
        double*        resid
      )
 {
-	num_t  dt      = bli_obj_dt( *b11 );
-	num_t  dt_real = bli_obj_dt_proj_to_real( *b11 );
+	num_t  dt      = bli_obj_dt( b11 );
+	num_t  dt_real = bli_obj_dt_proj_to_real( b11 );
 
-	dim_t  m       = bli_obj_length( *b11 );
-	dim_t  n       = bli_obj_width( *b11 );
-	dim_t  k       = bli_obj_width( *a1x );
+	dim_t  m       = bli_obj_length( b11 );
+	dim_t  n       = bli_obj_width( b11 );
+	dim_t  k       = bli_obj_width( a1x );
 
 	obj_t  norm;
 	obj_t  t, v, w, z;
@@ -522,13 +522,13 @@ void bli_gemmtrsm_ukr_make_subparts
        obj_t* b11
      )
 {
-	dim_t mr = bli_obj_length( *a );
-	dim_t nr = bli_obj_width( *b );
+	dim_t mr = bli_obj_length( a );
+	dim_t nr = bli_obj_width( b );
 
 	dim_t off_a1x, off_a11;
 	dim_t off_bx1, off_b11;
 
-	if ( bli_obj_is_lower( *a ) )
+	if ( bli_obj_is_lower( a ) )
 	{
 		off_a1x = 0;
 		off_a11 = k;
@@ -543,28 +543,28 @@ void bli_gemmtrsm_ukr_make_subparts
 		off_b11 = 0;
 	}
 
-	bli_obj_init_subpart_from( *a, *a1x );
-	bli_obj_set_dims( mr, k, *a1x );
-	bli_obj_inc_offs( 0, off_a1x, *a1x );
+	bli_obj_init_subpart_from( a, a1x );
+	bli_obj_set_dims( mr, k, a1x );
+	bli_obj_inc_offs( 0, off_a1x, a1x );
 
-	bli_obj_init_subpart_from( *a, *a11 );
-	bli_obj_set_dims( mr, mr, *a11 );
-	bli_obj_inc_offs( 0, off_a11, *a11 );
+	bli_obj_init_subpart_from( a, a11 );
+	bli_obj_set_dims( mr, mr, a11 );
+	bli_obj_inc_offs( 0, off_a11, a11 );
 
-	bli_obj_init_subpart_from( *b, *bx1 );
-	bli_obj_set_dims( k, nr, *bx1 );
-	bli_obj_inc_offs( off_bx1, 0, *bx1 );
+	bli_obj_init_subpart_from( b, bx1 );
+	bli_obj_set_dims( k, nr, bx1 );
+	bli_obj_inc_offs( off_bx1, 0, bx1 );
 
-	bli_obj_init_subpart_from( *b, *b11 );
-	bli_obj_set_dims( mr, nr, *b11 );
-	bli_obj_inc_offs( off_b11, 0, *b11 );
+	bli_obj_init_subpart_from( b, b11 );
+	bli_obj_set_dims( mr, nr, b11 );
+	bli_obj_inc_offs( off_b11, 0, b11 );
 
 	// Mark a1x as having general structure (which overwrites the triangular
 	// property it inherited from a).
-	bli_obj_set_struc( BLIS_GENERAL, *a1x );
+	bli_obj_set_struc( BLIS_GENERAL, a1x );
 
 	// Set the diagonal offset of a11 to 0 (which overwrites the diagonal
 	// offset value it inherited from a).
-	bli_obj_set_diag_offset( 0, *a11 );
+	bli_obj_set_diag_offset( 0, a11 );
 }
 

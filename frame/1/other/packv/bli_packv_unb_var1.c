@@ -51,15 +51,15 @@ void bli_packv_unb_var1( obj_t*   c,
                          cntx_t*  cntx,
                          packv_t* cntl )
 {
-	num_t     dt_cp     = bli_obj_dt( *c );
+	num_t     dt_cp     = bli_obj_dt( c );
 
-	dim_t     dim_p     = bli_obj_vector_dim( *p );
+	dim_t     dim_p     = bli_obj_vector_dim( p );
 
-	void*     buf_c     = bli_obj_buffer_at_off( *c );
-	inc_t     incc      = bli_obj_vector_inc( *c );
+	void*     buf_c     = bli_obj_buffer_at_off( c );
+	inc_t     incc      = bli_obj_vector_inc( c );
 
-	void*     buf_p     = bli_obj_buffer_at_off( *p );
-	inc_t     incp      = bli_obj_vector_inc( *p );
+	void*     buf_p     = bli_obj_buffer_at_off( p );
+	inc_t     incp      = bli_obj_vector_inc( p );
 
 	FUNCPTR_T f;
 

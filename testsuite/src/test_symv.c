@@ -191,7 +191,7 @@ void libblis_test_symv_experiment
 	                          sc_str[2], m,    &y_save );
 
 	// Set alpha and beta.
-	if ( bli_obj_is_real( y ) )
+	if ( bli_obj_is_real( &y ) )
 	{
 		bli_setsc(  1.0,  0.0, &alpha );
 		bli_setsc( -1.0,  0.0, &beta );
@@ -203,8 +203,8 @@ void libblis_test_symv_experiment
 	}
 
 	// Set the structure and uplo properties of A.
-	bli_obj_set_struc( BLIS_SYMMETRIC, a );
-	bli_obj_set_uplo( uploa, a );
+	bli_obj_set_struc( BLIS_SYMMETRIC, &a );
+	bli_obj_set_uplo( uploa, &a );
 
 	// Randomize A, make it densely symmetric, and zero the unstored triangle
 	// to ensure the implementation reads only from the stored region.
@@ -218,8 +218,8 @@ void libblis_test_symv_experiment
 	bli_copyv( &y, &y_save );
 
 	// Apply the remaining parameters.
-	bli_obj_set_conj( conja, a );
-	bli_obj_set_conj( conjx, x );
+	bli_obj_set_conj( conja, &a );
+	bli_obj_set_conj( conjx, &x );
 
 	// Repeat the experiment n_repeats times and record results. 
 	for ( i = 0; i < n_repeats; ++i )
@@ -235,7 +235,7 @@ void libblis_test_symv_experiment
 
 	// Estimate the performance of the best experiment repeat.
 	*perf = ( 1.0 * m * m ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bli_obj_is_complex( y ) ) *perf *= 4.0;
+	if ( bli_obj_is_complex( &y ) ) *perf *= 4.0;
 
 	// Perform checks.
 	libblis_test_symv_check( params, &alpha, &a, &x, &beta, &y, &y_save, resid );
@@ -287,10 +287,10 @@ void libblis_test_symv_check
        double*        resid
      )
 {
-	num_t  dt      = bli_obj_dt( *y );
-	num_t  dt_real = bli_obj_dt_proj_to_real( *y );
+	num_t  dt      = bli_obj_dt( y );
+	num_t  dt_real = bli_obj_dt_proj_to_real( y );
 
-	dim_t  m       = bli_obj_vector_dim( *y );
+	dim_t  m       = bli_obj_vector_dim( y );
 
 	obj_t  v;
 	obj_t  norm;
@@ -326,8 +326,8 @@ void libblis_test_symv_check
 	bli_copyv( y_orig, &v );
 
 	bli_mksymm( a );
-	bli_obj_set_struc( BLIS_GENERAL, *a );
-	bli_obj_set_uplo( BLIS_DENSE, *a );
+	bli_obj_set_struc( BLIS_GENERAL, a );
+	bli_obj_set_uplo( BLIS_DENSE, a );
 
 	bli_gemv( alpha, a, x, beta, &v );
 

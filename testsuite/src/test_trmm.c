@@ -185,7 +185,7 @@ void libblis_test_trmm_experiment
 	bli_obj_scalar_init_detached( datatype, &alpha );
 
 	// Create test operands (vectors and/or matrices).
-	bli_set_dim_with_side( side, m, n, mn_side );
+	bli_set_dim_with_side( side, m, n, &mn_side );
 	libblis_test_mobj_create( params, datatype, transa,
 	                          sc_str[0], mn_side, mn_side, &a );
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
@@ -194,7 +194,7 @@ void libblis_test_trmm_experiment
 	                          sc_str[1], m,       n,       &b_save );
 
 	// Set alpha and beta.
-	if ( bli_obj_is_real( b ) )
+	if ( bli_obj_is_real( &b ) )
 	{
 		bli_setsc(  0.8,  0.0, &alpha );
 	}
@@ -204,8 +204,8 @@ void libblis_test_trmm_experiment
 	}
 
 	// Set the structure and uplo properties of A.
-	bli_obj_set_struc( BLIS_TRIANGULAR, a );
-	bli_obj_set_uplo( uploa, a );
+	bli_obj_set_struc( BLIS_TRIANGULAR, &a );
+	bli_obj_set_uplo( uploa, &a );
 
 	// Randomize A, make it densely triangular.
 	libblis_test_mobj_randomize( params, TRUE, &a );
@@ -216,8 +216,8 @@ void libblis_test_trmm_experiment
 	bli_copym( &b, &b_save );
 
 	// Apply the remaining parameters.
-	bli_obj_set_conjtrans( transa, a );
-	bli_obj_set_diag( diaga, a );
+	bli_obj_set_conjtrans( transa, &a );
+	bli_obj_set_diag( diaga, &a );
 
 	// Repeat the experiment n_repeats times and record results. 
 	for ( i = 0; i < n_repeats; ++i )
@@ -233,7 +233,7 @@ void libblis_test_trmm_experiment
 
 	// Estimate the performance of the best experiment repeat.
 	*perf = ( 1.0 * mn_side * m * n ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bli_obj_is_complex( b ) ) *perf *= 4.0;
+	if ( bli_obj_is_complex( &b ) ) *perf *= 4.0;
 
 	// Perform checks.
 	libblis_test_trmm_check( params, side, &alpha, &a, &b, &b_save, resid );
@@ -284,11 +284,11 @@ void libblis_test_trmm_check
        double*        resid
      )
 {
-	num_t  dt      = bli_obj_dt( *b );
-	num_t  dt_real = bli_obj_dt_proj_to_real( *b );
+	num_t  dt      = bli_obj_dt( b );
+	num_t  dt_real = bli_obj_dt_proj_to_real( b );
 
-	dim_t  m       = bli_obj_length( *b );
-	dim_t  n       = bli_obj_width( *b );
+	dim_t  m       = bli_obj_length( b );
+	dim_t  n       = bli_obj_width( b );
 
 	obj_t  norm;
 	obj_t  t, v, w, z;

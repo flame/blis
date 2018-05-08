@@ -118,20 +118,20 @@ int main( int argc, char** argv )
 		bli_obj_create( dt_c, m, n, 0, 0, &c );
 		bli_obj_create( dt_c, m, n, 0, 0, &c_save );
 
-		bli_obj_set_struc( BLIS_TRIANGULAR, a );
-		bli_obj_set_uplo( uplo, a );
+		bli_obj_set_struc( BLIS_TRIANGULAR, &a );
+		bli_obj_set_uplo( uplo, &a );
 
 		bli_randm( &a );
 		bli_randm( &c );
 		bli_randm( &b );
 
 /*
-		bli_obj_toggle_uplo( a );
-		bli_obj_inc_diag_off( -1, a );
+		bli_obj_toggle_uplo( &a );
+		bli_obj_inc_diag_offset( -1, &a );
 		bli_setm( &BLIS_ZERO, &a );
-		bli_obj_inc_diag_off( 1, a );
-		bli_obj_toggle_uplo( a );
-		bli_obj_set_diag( BLIS_NONUNIT_DIAG, a );
+		bli_obj_inc_diag_offset( 1, &a );
+		bli_obj_toggle_uplo( &a );
+		bli_obj_set_diag( BLIS_NONUNIT_DIAG, &a );
 		bli_scalm( &BLIS_TWO, &a );
 		//bli_scalm( &BLIS_TWO, &a );
 */
@@ -157,10 +157,10 @@ int main( int argc, char** argv )
 
 /*
 			obj_t ar, ai;
-			bli_obj_alias_to( a, ar );
-			bli_obj_alias_to( a, ai );
-			bli_obj_set_dt( BLIS_DOUBLE, ar ); ar.rs *= 2; ar.cs *= 2;
-			bli_obj_set_dt( BLIS_DOUBLE, ai ); ai.rs *= 2; ai.cs *= 2; ai.buffer = ( double* )ai.buffer + 1;
+			bli_obj_alias_to( &a, &ar );
+			bli_obj_alias_to( &a, &ai );
+			bli_obj_set_dt( BLIS_DOUBLE, &ar ); ar.rs *= 2; ar.cs *= 2;
+			bli_obj_set_dt( BLIS_DOUBLE, &ai ); ai.rs *= 2; ai.cs *= 2; ai.buffer = ( double* )ai.buffer + 1;
 			bli_printm( "ar", &ar, "%4.1f", "" );
 			bli_printm( "ai", &ai, "%4.1f", "" );
 */
@@ -183,13 +183,13 @@ int main( int argc, char** argv )
 			f77_char uplo   = 'L';
 			f77_char transa = 'N';
 			f77_char diag   = 'N';
-			f77_int  mm     = bli_obj_length( c );
-			f77_int  nn     = bli_obj_width( c );
-			f77_int  lda    = bli_obj_col_stride( a );
-			f77_int  ldc    = bli_obj_col_stride( c );
-			double*  alphap = bli_obj_buffer( alpha );
-			double*  ap     = bli_obj_buffer( a );
-			double*  cp     = bli_obj_buffer( c );
+			f77_int  mm     = bli_obj_length( &c );
+			f77_int  nn     = bli_obj_width( &c );
+			f77_int  lda    = bli_obj_col_stride( &a );
+			f77_int  ldc    = bli_obj_col_stride( &c );
+			double*  alphap = bli_obj_buffer( &alpha );
+			double*  ap     = bli_obj_buffer( &a );
+			double*  cp     = bli_obj_buffer( &c );
 
 			dtrmm_( &side,
 			        &uplo,

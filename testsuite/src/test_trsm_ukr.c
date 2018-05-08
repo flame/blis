@@ -205,9 +205,9 @@ void libblis_test_trsm_ukr_experiment
 	                          sc_str[0], m, n, &c_save );
 
 	// Set the structure, uplo, and diagonal offset properties of A.
-	bli_obj_set_struc( BLIS_TRIANGULAR, a );
-	bli_obj_set_uplo( uploa, a );
-	bli_obj_set_diag_offset( 0, a );
+	bli_obj_set_struc( BLIS_TRIANGULAR, &a );
+	bli_obj_set_uplo( uploa, &a );
+	bli_obj_set_diag_offset( 0, &a );
 
 	// Randomize A, make it densely triangular.
 	libblis_test_mobj_randomize( params, TRUE, &a );
@@ -247,7 +247,7 @@ void libblis_test_trsm_ukr_experiment
 	// Set the uplo field of ap since the default for packed objects is
 	// BLIS_DENSE, and the _ukernel() wrapper needs this information to
 	// know which set of micro-kernels (lower or upper) to choose from.
-	bli_obj_set_uplo( uploa, ap );
+	bli_obj_set_uplo( uploa, &ap );
 
 	// Repeat the experiment n_repeats times and record results. 
 	for ( i = 0; i < n_repeats; ++i )
@@ -268,7 +268,7 @@ void libblis_test_trsm_ukr_experiment
 
 	// Estimate the performance of the best experiment repeat.
 	*perf = ( 1.0 * m * m * n ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bli_obj_is_complex( b ) ) *perf *= 4.0;
+	if ( bli_obj_is_complex( &b ) ) *perf *= 4.0;
 
 	// Perform checks.
 	libblis_test_trsm_ukr_check( params, side, &a, &c, &b, resid );
@@ -323,11 +323,11 @@ void libblis_test_trsm_ukr_check
        double*        resid
      )
 {
-	num_t  dt      = bli_obj_dt( *b );
-	num_t  dt_real = bli_obj_dt_proj_to_real( *b );
+	num_t  dt      = bli_obj_dt( b );
+	num_t  dt_real = bli_obj_dt_proj_to_real( b );
 
-	dim_t  m       = bli_obj_length( *b );
-	dim_t  n       = bli_obj_width( *b );
+	dim_t  m       = bli_obj_length( b );
+	dim_t  n       = bli_obj_width( b );
 
 	obj_t  norm;
 	obj_t  t, v, w, z;

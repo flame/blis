@@ -184,7 +184,7 @@ void libblis_test_amaxv_experiment
 
 	// Estimate the performance of the best experiment repeat.
 	*perf = ( 1.0 * m ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bli_obj_is_complex( x ) ) *perf *= 2.0;
+	if ( bli_obj_is_complex( &x ) ) *perf *= 2.0;
 
 	// Perform checks.
 	libblis_test_amaxv_check( params, &x, &index, resid );
@@ -301,13 +301,13 @@ void PASTEMAC0(opname) \
        obj_t*  index  \
      ) \
 { \
-    num_t     dt        = bli_obj_dt( *x ); \
+    num_t     dt        = bli_obj_dt( x ); \
 \
-    dim_t     n         = bli_obj_vector_dim( *x ); \
-    void*     buf_x     = bli_obj_buffer_at_off( *x ); \
-    inc_t     incx      = bli_obj_vector_inc( *x ); \
+    dim_t     n         = bli_obj_vector_dim( x ); \
+    void*     buf_x     = bli_obj_buffer_at_off( x ); \
+    inc_t     incx      = bli_obj_vector_inc( x ); \
 \
-    void*     buf_index = bli_obj_buffer_at_off( *index ); \
+    void*     buf_index = bli_obj_buffer_at_off( index ); \
 \
     if ( bli_error_checking_is_enabled() ) \
         bli_amaxv_check( x, index ); \

@@ -70,7 +70,7 @@ void bli_hemv_blk_var2( conj_t  conjh,
 	bli_obj_init_pack( &y1_pack );
 
 	// Query dimension.
-	mn = bli_obj_length( *a );
+	mn = bli_obj_length( a );
 
 	// y = beta * y;
 	bli_scalv_int( beta,

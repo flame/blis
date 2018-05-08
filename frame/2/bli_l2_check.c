@@ -330,10 +330,10 @@ void bli_xxmv_check
 	e_val = bli_check_vector_object( y );
 	bli_check_error_code( e_val );
 
-	e_val = bli_check_vector_dim_equals( x, bli_obj_width_after_trans( *a ) );
+	e_val = bli_check_vector_dim_equals( x, bli_obj_width_after_trans( a ) );
 	bli_check_error_code( e_val );
 
-	e_val = bli_check_vector_dim_equals( y, bli_obj_length_after_trans( *a ) );
+	e_val = bli_check_vector_dim_equals( y, bli_obj_length_after_trans( a ) );
 	bli_check_error_code( e_val );
 
 	// Check object buffers (for non-NULLness).
@@ -392,10 +392,10 @@ void bli_xxr_check
 	e_val = bli_check_matrix_object( a );
 	bli_check_error_code( e_val );
 
-	e_val = bli_check_vector_dim_equals( x, bli_obj_length_after_trans( *a ) );
+	e_val = bli_check_vector_dim_equals( x, bli_obj_length_after_trans( a ) );
 	bli_check_error_code( e_val );
 
-	e_val = bli_check_vector_dim_equals( y, bli_obj_width_after_trans( *a ) );
+	e_val = bli_check_vector_dim_equals( y, bli_obj_width_after_trans( a ) );
 	bli_check_error_code( e_val );
 
 	// Check object buffers (for non-NULLness).

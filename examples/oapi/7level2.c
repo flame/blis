@@ -157,8 +157,8 @@ int main( int argc, char** argv )
 
 	// Mark matrix 'a' as symmetric and stored in the lower triangle, and
 	// then randomize that lower triangle.
-	bli_obj_set_struc( BLIS_SYMMETRIC, a )
-	bli_obj_set_uplo( BLIS_LOWER, a );
+	bli_obj_set_struc( BLIS_SYMMETRIC, &a )
+	bli_obj_set_uplo( BLIS_LOWER, &a );
 	bli_randm( &a );
 
 	bli_printm( "x: set to random values", &x, "%4.1f", "" );
@@ -200,8 +200,8 @@ int main( int argc, char** argv )
 
 	// Mark matrix 'a' as symmetric and stored in the upper triangle, and
 	// then randomize that upper triangle.
-	bli_obj_set_struc( BLIS_SYMMETRIC, a )
-	bli_obj_set_uplo( BLIS_UPPER, a );
+	bli_obj_set_struc( BLIS_SYMMETRIC, &a )
+	bli_obj_set_uplo( BLIS_UPPER, &a );
 	bli_randm( &a );
 
 	bli_printm( "a: randomized (zeros in lower triangle)", &a, "%4.1f", "" );
@@ -242,8 +242,8 @@ int main( int argc, char** argv )
 
 	// Mark matrix 'a' as triangular and stored in the lower triangle, and
 	// then randomize that lower triangle.
-	bli_obj_set_struc( BLIS_TRIANGULAR, a )
-	bli_obj_set_uplo( BLIS_LOWER, a );
+	bli_obj_set_struc( BLIS_TRIANGULAR, &a )
+	bli_obj_set_uplo( BLIS_LOWER, &a );
 	bli_randm( &a );
 
 	bli_printm( "a: randomized (zeros in upper triangle)", &a, "%4.1f", "" );
@@ -283,8 +283,8 @@ int main( int argc, char** argv )
 
 	// Mark matrix 'a' as triangular and stored in the lower triangle, and
 	// then randomize that lower triangle.
-	bli_obj_set_struc( BLIS_TRIANGULAR, a )
-	bli_obj_set_uplo( BLIS_LOWER, a );
+	bli_obj_set_struc( BLIS_TRIANGULAR, &a )
+	bli_obj_set_uplo( BLIS_LOWER, &a );
 	bli_randm( &a );
 
 	// Load the diagonal. By setting the diagonal to something of greater

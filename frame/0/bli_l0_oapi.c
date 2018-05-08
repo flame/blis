@@ -50,10 +50,10 @@ void PASTEMAC0(opname) \
 	bli_init_once(); \
 \
 	num_t     dt_chi; \
-	num_t     dt_absq_c  = bli_obj_dt_proj_to_complex( *absq ); \
+	num_t     dt_absq_c  = bli_obj_dt_proj_to_complex( absq ); \
 \
-    void*     buf_chi; \
-    void*     buf_absq   = bli_obj_buffer_at_off( *absq ); \
+	void*     buf_chi; \
+	void*     buf_absq   = bli_obj_buffer_at_off( absq ); \
 \
 	if ( bli_error_checking_is_enabled() ) \
 	    PASTEMAC(opname,_check)( chi, absq ); \
@@ -61,7 +61,7 @@ void PASTEMAC0(opname) \
 	/* If chi is a scalar constant, use dt_absq_c to extract the address of the
 	   corresponding constant value; otherwise, use the datatype encoded
 	   within the chi object and extract the buffer at the chi offset. */ \
-	bli_set_scalar_dt_buffer( chi, dt_absq_c, dt_chi, buf_chi ); \
+	bli_obj_scalar_set_dt_buffer( chi, dt_absq_c, &dt_chi, &buf_chi ); \
 \
 	/* Invoke the typed function. */ \
 	bli_call_ft_2 \
@@ -88,12 +88,12 @@ void PASTEMAC0(opname) \
 { \
 	bli_init_once(); \
 \
-	num_t     dt        = bli_obj_dt( *psi ); \
+	num_t     dt        = bli_obj_dt( psi ); \
 \
-	conj_t    conjchi   = bli_obj_conj_status( *chi ); \
+	conj_t    conjchi   = bli_obj_conj_status( chi ); \
 \
-    void*     buf_chi   = bli_obj_buffer_for_1x1( dt, *chi ); \
-    void*     buf_psi   = bli_obj_buffer_at_off( *psi ); \
+	void*     buf_chi   = bli_obj_buffer_for_1x1( dt, chi ); \
+	void*     buf_psi   = bli_obj_buffer_at_off( psi ); \
 \
 	if ( bli_error_checking_is_enabled() ) \
 	    PASTEMAC(opname,_check)( chi, psi ); \
@@ -125,11 +125,11 @@ void PASTEMAC0(opname) \
 { \
 	bli_init_once(); \
 \
-	num_t     dt        = bli_obj_dt( *chi ); \
+	num_t     dt        = bli_obj_dt( chi ); \
 \
-	conj_t    conjchi   = bli_obj_conj_status( *chi ); \
+	conj_t    conjchi   = bli_obj_conj_status( chi ); \
 \
-    void*     buf_chi   = bli_obj_buffer_for_1x1( dt, *chi ); \
+	void*     buf_chi   = bli_obj_buffer_for_1x1( dt, chi ); \
 \
 	if ( bli_error_checking_is_enabled() ) \
 	    PASTEMAC(opname,_check)( chi ); \
@@ -158,10 +158,10 @@ void PASTEMAC0(opname) \
 { \
 	bli_init_once(); \
 \
-	num_t     dt        = bli_obj_dt( *psi ); \
+	num_t     dt        = bli_obj_dt( psi ); \
 \
-    void*     buf_chi   = bli_obj_buffer_for_1x1( dt, *chi ); \
-	void*     buf_psi   = bli_obj_buffer_at_off( *psi ); \
+	void*     buf_chi   = bli_obj_buffer_for_1x1( dt, chi ); \
+	void*     buf_psi   = bli_obj_buffer_at_off( psi ); \
 \
 	if ( bli_error_checking_is_enabled() ) \
 	    PASTEMAC(opname,_check)( chi, psi ); \
@@ -191,14 +191,14 @@ void PASTEMAC0(opname) \
 { \
 	bli_init_once(); \
 \
-	num_t     dt_chi    = bli_obj_dt( *chi ); \
+	num_t     dt_chi    = bli_obj_dt( chi ); \
 	num_t     dt_def    = BLIS_DCOMPLEX; \
 	num_t     dt_use; \
 \
 	/* If chi is a constant object, default to using the dcomplex
 	   value to maximize precision, and since we don't know if the
 	   caller needs just the real or the real and imaginary parts. */ \
-	void*     buf_chi   = bli_obj_buffer_for_1x1( dt_def, *chi ); \
+	void*     buf_chi   = bli_obj_buffer_for_1x1( dt_def, chi ); \
 \
 	if ( bli_error_checking_is_enabled() ) \
 	    PASTEMAC(opname,_check)( chi, zeta_r, zeta_i ); \
@@ -234,9 +234,9 @@ void PASTEMAC0(opname) \
 { \
 	bli_init_once(); \
 \
-	num_t     dt_chi    = bli_obj_dt( *chi ); \
+	num_t     dt_chi    = bli_obj_dt( chi ); \
 \
-	void*     buf_chi   = bli_obj_buffer_at_off( *chi ); \
+	void*     buf_chi   = bli_obj_buffer_at_off( chi ); \
 \
 	if ( bli_error_checking_is_enabled() ) \
 	    PASTEMAC(opname,_check)( zeta_r, zeta_i, chi ); \
@@ -268,12 +268,12 @@ void PASTEMAC0(opname) \
 	bli_init_once(); \
 \
 	num_t     dt_chi; \
-	num_t     dt_zeta_c   = bli_obj_dt_proj_to_complex( *zeta_r ); \
+	num_t     dt_zeta_c   = bli_obj_dt_proj_to_complex( zeta_r ); \
 \
-    void*     buf_chi; \
+	void*     buf_chi; \
 \
-    void*     buf_zeta_r  = bli_obj_buffer_at_off( *zeta_r ); \
-    void*     buf_zeta_i  = bli_obj_buffer_at_off( *zeta_i ); \
+	void*     buf_zeta_r  = bli_obj_buffer_at_off( zeta_r ); \
+	void*     buf_zeta_i  = bli_obj_buffer_at_off( zeta_i ); \
 \
 	if ( bli_error_checking_is_enabled() ) \
 	    PASTEMAC(opname,_check)( chi, zeta_r, zeta_i ); \
@@ -281,7 +281,7 @@ void PASTEMAC0(opname) \
 	/* If chi is a scalar constant, use dt_zeta_c to extract the address of the
 	   corresponding constant value; otherwise, use the datatype encoded
 	   within the chi object and extract the buffer at the chi offset. */ \
-	bli_set_scalar_dt_buffer( chi, dt_zeta_c, dt_chi, buf_chi ); \
+	bli_obj_scalar_set_dt_buffer( chi, dt_zeta_c, &dt_chi, &buf_chi ); \
 \
 	/* Invoke the typed function. */ \
 	bli_call_ft_3 \
@@ -309,12 +309,12 @@ void PASTEMAC0(opname) \
 { \
 	bli_init_once(); \
 \
-	num_t     dt_chi      = bli_obj_dt( *chi ); \
+	num_t     dt_chi      = bli_obj_dt( chi ); \
 \
-    void*     buf_zeta_r  = bli_obj_buffer_for_1x1( dt_chi, *zeta_r ); \
-    void*     buf_zeta_i  = bli_obj_buffer_for_1x1( dt_chi, *zeta_i ); \
+	void*     buf_zeta_r  = bli_obj_buffer_for_1x1( dt_chi, zeta_r ); \
+	void*     buf_zeta_i  = bli_obj_buffer_for_1x1( dt_chi, zeta_i ); \
 \
-    void*     buf_chi     = bli_obj_buffer_at_off( *chi ); \
+	void*     buf_chi     = bli_obj_buffer_at_off( chi ); \
 \
 	if ( bli_error_checking_is_enabled() ) \
 	    PASTEMAC(opname,_check)( chi, zeta_r, zeta_i ); \

@@ -53,11 +53,11 @@ err_t bli_setijm
        obj_t*  b
      )
 {
-	dim_t m  = bli_obj_length( *b );
-	dim_t n  = bli_obj_width( *b );
-	dim_t rs = bli_obj_row_stride( *b );
-	dim_t cs = bli_obj_col_stride( *b );
-	num_t dt = bli_obj_dt( *b );
+	dim_t m  = bli_obj_length( b );
+	dim_t n  = bli_obj_width( b );
+	dim_t rs = bli_obj_row_stride( b );
+	dim_t cs = bli_obj_col_stride( b );
+	num_t dt = bli_obj_dt( b );
 
 	// Return error if i or j is beyond bounds of matrix/vector.
 	if ( m <= i ) return BLIS_FAILURE;
@@ -67,7 +67,7 @@ err_t bli_setijm
 	if ( dt == BLIS_CONSTANT ) return BLIS_FAILURE;
 
 	// Query the pointer to the buffer at the adjusted offsets.
-	void* b_p = bli_obj_buffer_at_off( *b );
+	void* b_p = bli_obj_buffer_at_off( b );
 
 	// Index into the function pointer array.
 	setijm_fp f = ftypes_setijm[ dt ];
@@ -127,11 +127,11 @@ err_t bli_getijm
         double* ai
       )
 {
-	dim_t m  = bli_obj_length( *b );
-	dim_t n  = bli_obj_width( *b );
-	dim_t rs = bli_obj_row_stride( *b );
-	dim_t cs = bli_obj_col_stride( *b );
-	num_t dt = bli_obj_dt( *b );
+	dim_t m  = bli_obj_length( b );
+	dim_t n  = bli_obj_width( b );
+	dim_t rs = bli_obj_row_stride( b );
+	dim_t cs = bli_obj_col_stride( b );
+	num_t dt = bli_obj_dt( b );
 
 	// Return error if i or j is beyond bounds of matrix/vector.
 	if ( m <= i ) return BLIS_FAILURE;
@@ -146,21 +146,21 @@ err_t bli_getijm
 		if ( i == 0 && j == 0 )
 		{
 			dt  = BLIS_DCOMPLEX;
-			b_p = bli_obj_buffer_for_const( dt, *b )
+			b_p = bli_obj_buffer_for_const( dt, b )
 		}
 		else return BLIS_FAILURE;
 	}
 	else
 	{
 		// Query the pointer to the buffer at the adjusted offsets.
-		b_p = bli_obj_buffer_at_off( *b );
+		b_p = bli_obj_buffer_at_off( b );
 	}
 #else
 	// Disallow access into scalar constants.
 	if ( dt == BLIS_CONSTANT ) return BLIS_FAILURE;
 
 	// Query the pointer to the buffer at the adjusted offsets.
-	b_p = bli_obj_buffer_at_off( *b );
+	b_p = bli_obj_buffer_at_off( b );
 #endif
 
 	// Index into the function pointer array.

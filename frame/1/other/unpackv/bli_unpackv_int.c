@@ -75,7 +75,7 @@ void bli_unpackv_int( obj_t*     p,
 
 	// Sanity check; A should never have a zero dimension. If we must support
 	// it, then we should fold it into the next alias-and-early-exit block.
-	if ( bli_obj_has_zero_dim( *a ) ) bli_abort();
+	if ( bli_obj_has_zero_dim( a ) ) bli_abort();
 
 	// First check if we are to skip this operation because the control tree
 	// is NULL, and if so, simply return.
@@ -87,17 +87,17 @@ void bli_unpackv_int( obj_t*     p,
 	// If p was aliased to a during the pack stage (because it was already
 	// in an acceptable packed/contiguous format), then no unpack is actually
 	// necessary, so we return.
-	if ( bli_obj_is_alias_of( *p, *a ) )
+	if ( bli_obj_is_alias_of( p, a ) )
 	{
 		return;
 	}
 
 	// Now, if we are not skipping the unpack operation, then the only
 	// question left is whether we are to typecast vector a after unpacking.
-	if ( bli_obj_dt( *p ) != bli_obj_dt( *a ) )
+	if ( bli_obj_dt( p ) != bli_obj_dt( a ) )
 		bli_abort();
 /*
-	if ( bli_obj_dt( *p ) != bli_obj_dt( *a ) )
+	if ( bli_obj_dt( p ) != bli_obj_dt( a ) )
 	{
 		// Initialize an object c for the intermediate typecast vector.
 		bli_unpackv_init_cast( p,
@@ -110,7 +110,7 @@ void bli_unpackv_int( obj_t*     p,
 		// If no cast is needed, then aliasing object c to the original
 		// vector serves as a minor optimization. This causes the unpackv
 		// implementation to unpack directly into vector a.
-		bli_obj_alias_to( *a, c );
+		bli_obj_alias_to( a, &c );
 	}
 
 	// Now we are ready to proceed with the unpacking.
@@ -132,7 +132,7 @@ void bli_unpackv_int( obj_t*     p,
 	// was not necessary, then we are done because the call to the unpackv
 	// implementation would have unpacked directly to vector a.
 /*
-	if ( bli_obj_dt( *p ) != bli_obj_dt( *a ) )
+	if ( bli_obj_dt( p ) != bli_obj_dt( a ) )
 	{
 		// Copy/typecast vector c to vector a.
 		// NOTE: Here, we use copynzv instead of copym because, in the cases
@@ -179,26 +179,26 @@ void bli_unpackv_init_cast( obj_t*  p,
 	//      already available. (After acquring a mem entry from the memory
 	//      manager, it is cached within p for quick access later on.)
 
-	num_t dt_targ_a    = bli_obj_target_dt( *a );
-	dim_t dim_a        = bli_obj_vector_dim( *a );
+	num_t dt_targ_a    = bli_obj_target_dt( a );
+	dim_t dim_a        = bli_obj_vector_dim( a );
 	siz_t elem_size_c  = bli_dt_size( dt_targ_a );
 
 	// We begin by copying the basic fields of a.
-	bli_obj_alias_to( *a, *c );
+	bli_obj_alias_to( a, c );
 
 	// Update datatype and element size fields.
-	bli_obj_set_dt( dt_targ_a, *c );
-	bli_obj_set_elem_size( elem_size_c, *c );
+	bli_obj_set_dt( dt_targ_a, c );
+	bli_obj_set_elem_size( elem_size_c, c );
 
 	// Update the strides and dimensions. We set the increments to reflect a
 	// column-stored vector. Note that the column stride is set to dim(a),
 	// though it should never be used because there is no second column to
 	// index into (and therefore it also does not need to be aligned).
-	bli_obj_set_dims( dim_a, 1, *c );
-	bli_obj_set_strides( 1, dim_a, *c );
+	bli_obj_set_dims( dim_a, 1, c );
+	bli_obj_set_strides( 1, dim_a, c );
 
 	// Reset the view offsets to (0,0).
-	bli_obj_set_offs( 0, 0, *c );
+	bli_obj_set_offs( 0, 0, c );
 
 	// Check the mem_t entry of p associated with the cast buffer. If it is
 	// NULL, then acquire memory sufficient to hold the object data and cache

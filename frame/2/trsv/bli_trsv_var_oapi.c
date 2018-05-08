@@ -48,22 +48,22 @@ void PASTEMAC0(opname) \
 { \
 	bli_init_once(); \
 \
-	num_t     dt        = bli_obj_dt( *a ); \
+	num_t     dt        = bli_obj_dt( a ); \
 \
-	uplo_t    uploa     = bli_obj_uplo( *a ); \
-	trans_t   transa    = bli_obj_conjtrans_status( *a ); \
-	diag_t    diaga     = bli_obj_diag( *a ); \
+	uplo_t    uploa     = bli_obj_uplo( a ); \
+	trans_t   transa    = bli_obj_conjtrans_status( a ); \
+	diag_t    diaga     = bli_obj_diag( a ); \
 \
-	dim_t     m         = bli_obj_length( *a ); \
+	dim_t     m         = bli_obj_length( a ); \
 \
-	void*     buf_a     = bli_obj_buffer_at_off( *a ); \
-	inc_t     rs_a      = bli_obj_row_stride( *a ); \
-	inc_t     cs_a      = bli_obj_col_stride( *a ); \
+	void*     buf_a     = bli_obj_buffer_at_off( a ); \
+	inc_t     rs_a      = bli_obj_row_stride( a ); \
+	inc_t     cs_a      = bli_obj_col_stride( a ); \
 \
-	void*     buf_x     = bli_obj_buffer_at_off( *x ); \
-	inc_t     incx      = bli_obj_vector_inc( *x ); \
+	void*     buf_x     = bli_obj_buffer_at_off( x ); \
+	inc_t     incx      = bli_obj_vector_inc( x ); \
 \
-	void*     buf_alpha = bli_obj_buffer_for_1x1( dt, *alpha ); \
+	void*     buf_alpha = bli_obj_buffer_for_1x1( dt, alpha ); \
 \
 	/* Invoke the void pointer-based function for the given datatype. */ \
 	bli_call_ft_11 \

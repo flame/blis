@@ -146,10 +146,10 @@ void bli_axpyf_check
 	e_val = bli_check_vector_object( y );
 	bli_check_error_code( e_val );
 
-	e_val = bli_check_vector_dim_equals( x, bli_obj_width_after_trans( *a ) );
+	e_val = bli_check_vector_dim_equals( x, bli_obj_width_after_trans( a ) );
 	bli_check_error_code( e_val );
 
-	e_val = bli_check_vector_dim_equals( y, bli_obj_length_after_trans( *a ) );
+	e_val = bli_check_vector_dim_equals( y, bli_obj_length_after_trans( a ) );
 	bli_check_error_code( e_val );
 
 	// Check object buffers (for non-NULLness).
@@ -334,16 +334,16 @@ void bli_dotxaxpyf_check
 	e_val = bli_check_conformal_dims( at, a );
 	bli_check_error_code( e_val );
 
-	e_val = bli_check_object_length_equals( at, bli_obj_vector_dim( *w ) );
+	e_val = bli_check_object_length_equals( at, bli_obj_vector_dim( w ) );
 	bli_check_error_code( e_val );
 
-	e_val = bli_check_object_width_equals( at, bli_obj_vector_dim( *y ) );
+	e_val = bli_check_object_width_equals( at, bli_obj_vector_dim( y ) );
 	bli_check_error_code( e_val );
 
-	e_val = bli_check_object_length_equals( a, bli_obj_vector_dim( *z ) );
+	e_val = bli_check_object_length_equals( a, bli_obj_vector_dim( z ) );
 	bli_check_error_code( e_val );
 
-	e_val = bli_check_object_width_equals( a, bli_obj_vector_dim( *x ) );
+	e_val = bli_check_object_width_equals( a, bli_obj_vector_dim( x ) );
 	bli_check_error_code( e_val );
 
 	// Check object aliases.
@@ -424,10 +424,10 @@ void bli_dotxf_check
 	e_val = bli_check_vector_object( y );
 	bli_check_error_code( e_val );
 
-	e_val = bli_check_vector_dim_equals( x, bli_obj_length_after_trans( *a ) );
+	e_val = bli_check_vector_dim_equals( x, bli_obj_length_after_trans( a ) );
 	bli_check_error_code( e_val );
 
-	e_val = bli_check_vector_dim_equals( y, bli_obj_width_after_trans( *a ) );
+	e_val = bli_check_vector_dim_equals( y, bli_obj_width_after_trans( a ) );
 	bli_check_error_code( e_val );
 
 	// Check object buffers (for non-NULLness).

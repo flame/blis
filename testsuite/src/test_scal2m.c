@@ -179,7 +179,7 @@ void libblis_test_scal2m_experiment
 	                          sc_str[0], m, n, &y_save );
 
 	// Set alpha.
-	if ( bli_obj_is_real( y ) )
+	if ( bli_obj_is_real( &y ) )
 		bli_setsc( -2.0,  0.0, &alpha );
 	else
 		bli_setsc(  0.0, -2.0, &alpha );
@@ -190,7 +190,7 @@ void libblis_test_scal2m_experiment
 	bli_copym( &y, &y_save );
 
 	// Apply the parameters.
-	bli_obj_set_conjtrans( transx, x );
+	bli_obj_set_conjtrans( transx, &x );
 
 	// Repeat the experiment n_repeats times and record results. 
 	for ( i = 0; i < n_repeats; ++i )
@@ -206,7 +206,7 @@ void libblis_test_scal2m_experiment
 
 	// Estimate the performance of the best experiment repeat.
 	*perf = ( 1.0 * m * n ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bli_obj_is_complex( y ) ) *perf *= 4.0;
+	if ( bli_obj_is_complex( &y ) ) *perf *= 4.0;
 
 	// Perform checks.
 	libblis_test_scal2m_check( params, &alpha, &x, &y, &y_save, resid );
@@ -253,11 +253,11 @@ void libblis_test_scal2m_check
        double*        resid
      )
 {
-	num_t  dt      = bli_obj_dt( *y );
-	num_t  dt_real = bli_obj_dt_proj_to_real( *y );
+	num_t  dt      = bli_obj_dt( y );
+	num_t  dt_real = bli_obj_dt_proj_to_real( y );
 
-	dim_t  m       = bli_obj_length( *y );
-	dim_t  n       = bli_obj_width( *y );
+	dim_t  m       = bli_obj_length( y );
+	dim_t  n       = bli_obj_width( y );
 
 	obj_t  x_temp;
 	obj_t  norm;

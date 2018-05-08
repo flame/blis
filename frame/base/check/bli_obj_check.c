@@ -74,8 +74,8 @@ void bli_obj_alloc_buffer_check( inc_t  rs,
 {
 	err_t e_val;
 
-	e_val = bli_check_matrix_strides( bli_obj_length( *obj ),
-	                                  bli_obj_width( *obj ),
+	e_val = bli_check_matrix_strides( bli_obj_length( obj ),
+	                                  bli_obj_width( obj ),
 	                                  rs, cs, is );
 	bli_check_error_code( e_val );
 
@@ -100,8 +100,8 @@ void bli_obj_attach_buffer_check( void*  p,
 	//e_val = bli_check_null_pointer( p );
 	//bli_check_error_code( e_val );
 
-	e_val = bli_check_matrix_strides( bli_obj_length( *obj ),
-	                                  bli_obj_width( *obj ),
+	e_val = bli_check_matrix_strides( bli_obj_length( obj ),
+	                                  bli_obj_width( obj ),
 	                                  rs, cs, is );
 	bli_check_error_code( e_val );
 

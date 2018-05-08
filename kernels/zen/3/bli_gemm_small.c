@@ -121,18 +121,18 @@ err_t bli_gemm_small
     }
 
     // if row major format return.
-    if ((bli_obj_row_stride(*a) != 1) ||
-        (bli_obj_row_stride(*b) != 1) ||
-        (bli_obj_row_stride(*c) != 1))
+    if ((bli_obj_row_stride( a ) != 1) ||
+        (bli_obj_row_stride( b ) != 1) ||
+        (bli_obj_row_stride( c ) != 1))
     {
         return BLIS_INVALID_ROW_STRIDE;
     }
 
     num_t dt = ((*c).info & (0x7 << 0));
 
-    if (bli_obj_has_trans(*a))
+    if (bli_obj_has_trans( a ))
     {
-        if (bli_obj_has_notrans(*b))
+        if (bli_obj_has_notrans( b ))
         {
             if (dt == BLIS_FLOAT)
             {
@@ -173,18 +173,18 @@ static err_t bli_sgemm_small
      )
 {
 
-    int M = bli_obj_length(*c); // number of rows of Matrix C
-    int N = bli_obj_width(*c);  // number of columns of Matrix C
-    int K = bli_obj_width(*a);  // number of columns of OP(A), will be updated if OP(A) is Transpose(A) .
+    int M = bli_obj_length( c ); // number of rows of Matrix C
+    int N = bli_obj_width( c );  // number of columns of Matrix C
+    int K = bli_obj_width( a );  // number of columns of OP(A), will be updated if OP(A) is Transpose(A) .
 
-                                //   printf("alpha_cast = %f beta_cast = %f [ Trans = %d %d], [stride = %d %d %d] [m,n,k = %d %d %d]\n",*alpha_cast,*beta_cast, bli_obj_has_trans(*a), bli_obj_has_trans(*b), lda, ldb,ldc, M,N,K);
+                                //   printf("alpha_cast = %f beta_cast = %f [ Trans = %d %d], [stride = %d %d %d] [m,n,k = %d %d %d]\n",*alpha_cast,*beta_cast, bli_obj_has_trans( a ), bli_obj_has_trans( b ), lda, ldb,ldc, M,N,K);
     if (((M * N) < (BLIS_SMALL_MATRIX_THRES * BLIS_SMALL_MATRIX_THRES))
         || ((M  < BLIS_SMALL_M_RECT_MATRIX_THRES) && (K < BLIS_SMALL_K_RECT_MATRIX_THRES)))
     {
 
-        int lda = bli_obj_col_stride(*a); // column stride of matrix OP(A), where OP(A) is Transpose(A) if transA enabled.
-        int ldb = bli_obj_col_stride(*b); // column stride of matrix OP(B), where OP(B) is Transpose(B) if transB enabled.
-        int ldc = bli_obj_col_stride(*c); // column stride of matrix C
+        int lda = bli_obj_col_stride( a ); // column stride of matrix OP(A), where OP(A) is Transpose(A) if transA enabled.
+        int ldb = bli_obj_col_stride( b ); // column stride of matrix OP(B), where OP(B) is Transpose(B) if transB enabled.
+        int ldc = bli_obj_col_stride( c ); // column stride of matrix C
         int row_idx, col_idx, k;
         float *A = a->buffer; // pointer to elements of Matrix A
         float *B = b->buffer; // pointer to elements of Matrix B
@@ -225,7 +225,7 @@ static err_t bli_sgemm_small
         }
 
         //update the pointer math if matrix B needs to be transposed.
-        if (bli_obj_has_trans(*b))
+        if (bli_obj_has_trans( b ))
         {
             tb_inc_col = 1; //switch row and column strides
             tb_inc_row = ldb;
@@ -1574,19 +1574,19 @@ static err_t bli_dgemm_small
      )
 {
 
-    int M = bli_obj_length(*c); // number of rows of Matrix C
-    int N = bli_obj_width(*c);  // number of columns of Matrix C
-    int K = bli_obj_width(*a);  // number of columns of OP(A), will be updated if OP(A) is Transpose(A) .
+    int M = bli_obj_length( c ); // number of rows of Matrix C
+    int N = bli_obj_width( c );  // number of columns of Matrix C
+    int K = bli_obj_width( a );  // number of columns of OP(A), will be updated if OP(A) is Transpose(A) .
 
                                 // If alpha is zero, scale by beta and return.
-                                //   printf("alpha_cast = %f beta_cast = %f [ Trans = %d %d], [stride = %d %d %d] [m,n,k = %d %d %d]\n",*alpha_cast,*beta_cast, bli_obj_has_trans(*a), bli_obj_has_trans(*b), lda, ldb,ldc, M,N,K);
+                                //   printf("alpha_cast = %f beta_cast = %f [ Trans = %d %d], [stride = %d %d %d] [m,n,k = %d %d %d]\n",*alpha_cast,*beta_cast, bli_obj_has_trans( a ), bli_obj_has_trans( b ), lda, ldb,ldc, M,N,K);
     if (((M * N) < (D_BLIS_SMALL_MATRIX_THRES * D_BLIS_SMALL_MATRIX_THRES))
         || ((M  < D_BLIS_SMALL_M_RECT_MATRIX_THRES) && (K < D_BLIS_SMALL_K_RECT_MATRIX_THRES)))
     {
 
-        int lda = bli_obj_col_stride(*a); // column stride of matrix OP(A), where OP(A) is Transpose(A) if transA enabled.
-        int ldb = bli_obj_col_stride(*b); // column stride of matrix OP(B), where OP(B) is Transpose(B) if transB enabled.
-        int ldc = bli_obj_col_stride(*c); // column stride of matrix C
+        int lda = bli_obj_col_stride( a ); // column stride of matrix OP(A), where OP(A) is Transpose(A) if transA enabled.
+        int ldb = bli_obj_col_stride( b ); // column stride of matrix OP(B), where OP(B) is Transpose(B) if transB enabled.
+        int ldc = bli_obj_col_stride( c ); // column stride of matrix C
         int row_idx, col_idx, k;
         double *A = a->buffer; // pointer to elements of Matrix A
         double *B = b->buffer; // pointer to elements of Matrix B
@@ -1627,7 +1627,7 @@ static err_t bli_dgemm_small
         }
 
         //update the pointer math if matrix B needs to be transposed.
-        if (bli_obj_has_trans(*b))
+        if (bli_obj_has_trans( b ))
         {
             tb_inc_col = 1; //switch row and column strides
             tb_inc_row = ldb;
@@ -2976,12 +2976,12 @@ static err_t bli_sgemm_small_atbn
        cntl_t* cntl
      )
 {
-    int M = bli_obj_length(*c); // number of rows of Matrix C
-    int N = bli_obj_width(*c);  // number of columns of Matrix C
-    int K = bli_obj_length(*b); // number of rows of Matrix B
-    int lda = bli_obj_col_stride(*a); // column stride of matrix OP(A), where OP(A) is Transpose(A) if transA enabled.
-    int ldb = bli_obj_col_stride(*b); // column stride of matrix OP(B), where OP(B) is Transpose(B) if transB enabled.
-    int ldc = bli_obj_col_stride(*c); // column stride of matrix C
+    int M = bli_obj_length( c ); // number of rows of Matrix C
+    int N = bli_obj_width( c );  // number of columns of Matrix C
+    int K = bli_obj_length( b ); // number of rows of Matrix B
+    int lda = bli_obj_col_stride( a ); // column stride of matrix OP(A), where OP(A) is Transpose(A) if transA enabled.
+    int ldb = bli_obj_col_stride( b ); // column stride of matrix OP(B), where OP(B) is Transpose(B) if transB enabled.
+    int ldc = bli_obj_col_stride( c ); // column stride of matrix C
     int row_idx = 0, col_idx = 0, k;
     float *A = a->buffer; // pointer to matrix A elements, stored in row major format
     float *B = b->buffer; // pointer to matrix B elements, stored in column major format
@@ -3368,12 +3368,12 @@ static err_t bli_dgemm_small_atbn
        cntl_t* cntl
      )
 {
-    int M = bli_obj_length(*c); // number of rows of Matrix C
-    int N = bli_obj_width(*c);  // number of columns of Matrix C
-    int K = bli_obj_length(*b); // number of rows of Matrix B
-    int lda = bli_obj_col_stride(*a); // column stride of matrix OP(A), where OP(A) is Transpose(A) if transA enabled.
-    int ldb = bli_obj_col_stride(*b); // column stride of matrix OP(B), where OP(B) is Transpose(B) if transB enabled.
-    int ldc = bli_obj_col_stride(*c); // column stride of matrix C
+    int M = bli_obj_length( c ); // number of rows of Matrix C
+    int N = bli_obj_width( c );  // number of columns of Matrix C
+    int K = bli_obj_length( b ); // number of rows of Matrix B
+    int lda = bli_obj_col_stride( a ); // column stride of matrix OP(A), where OP(A) is Transpose(A) if transA enabled.
+    int ldb = bli_obj_col_stride( b ); // column stride of matrix OP(B), where OP(B) is Transpose(B) if transB enabled.
+    int ldc = bli_obj_col_stride( c ); // column stride of matrix C
     int row_idx = 0, col_idx = 0, k;
     double *A = a->buffer; // pointer to matrix A elements, stored in row major format
     double *B = b->buffer; // pointer to matrix B elements, stored in column major format

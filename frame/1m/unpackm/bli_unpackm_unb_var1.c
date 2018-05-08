@@ -59,22 +59,22 @@ void bli_unpackm_unb_var1
        thrinfo_t* thread
      )
 {
-	num_t     dt_pc     = bli_obj_dt( *p );
+	num_t     dt_pc     = bli_obj_dt( p );
 
-	doff_t    diagoffp  = bli_obj_diag_offset( *p );
-	uplo_t    uplop     = bli_obj_uplo( *p );
-	trans_t   transc    = bli_obj_onlytrans_status( *c );
+	doff_t    diagoffp  = bli_obj_diag_offset( p );
+	uplo_t    uplop     = bli_obj_uplo( p );
+	trans_t   transc    = bli_obj_onlytrans_status( c );
 
-	dim_t     m_c       = bli_obj_length( *c );
-	dim_t     n_c       = bli_obj_width( *c );
+	dim_t     m_c       = bli_obj_length( c );
+	dim_t     n_c       = bli_obj_width( c );
 
-	void*     buf_p     = bli_obj_buffer_at_off( *p );
-	inc_t     rs_p      = bli_obj_row_stride( *p );
-	inc_t     cs_p      = bli_obj_col_stride( *p );
+	void*     buf_p     = bli_obj_buffer_at_off( p );
+	inc_t     rs_p      = bli_obj_row_stride( p );
+	inc_t     cs_p      = bli_obj_col_stride( p );
 
-	void*     buf_c     = bli_obj_buffer_at_off( *c );
-	inc_t     rs_c      = bli_obj_row_stride( *c );
-	inc_t     cs_c      = bli_obj_col_stride( *c );
+	void*     buf_c     = bli_obj_buffer_at_off( c );
+	inc_t     rs_c      = bli_obj_row_stride( c );
+	inc_t     cs_c      = bli_obj_col_stride( c );
 
 	FUNCPTR_T f;
 

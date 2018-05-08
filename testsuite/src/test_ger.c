@@ -185,7 +185,7 @@ void libblis_test_ger_experiment
 	                          sc_str[2], m, n, &a_save );
 
 	// Set alpha.
-	if ( bli_obj_is_real( a ) )
+	if ( bli_obj_is_real( &a ) )
 		bli_setsc( -1.0,  1.0, &alpha );
 	else
 		bli_setsc( -1.0,  1.0, &alpha );
@@ -200,8 +200,8 @@ void libblis_test_ger_experiment
 	bli_copym( &a, &a_save );
 
 	// Apply the parameters.
-	bli_obj_set_conj( conjx, x );
-	bli_obj_set_conj( conjy, y );
+	bli_obj_set_conj( conjx, &x );
+	bli_obj_set_conj( conjy, &y );
 
 	// Repeat the experiment n_repeats times and record results. 
 	for ( i = 0; i < n_repeats; ++i )
@@ -217,7 +217,7 @@ void libblis_test_ger_experiment
 
 	// Estimate the performance of the best experiment repeat.
 	*perf = ( 2.0 * m * n ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bli_obj_is_complex( a ) ) *perf *= 4.0;
+	if ( bli_obj_is_complex( &a ) ) *perf *= 4.0;
 
 	// Perform checks.
 	libblis_test_ger_check( params, &alpha, &x, &y, &a, &a_save, resid );
@@ -267,11 +267,11 @@ void libblis_test_ger_check
        double*        resid
      )
 {
-	num_t  dt      = bli_obj_dt( *a );
-	num_t  dt_real = bli_obj_dt_proj_to_real( *a );
+	num_t  dt      = bli_obj_dt( a );
+	num_t  dt_real = bli_obj_dt_proj_to_real( a );
 
-	dim_t  m_a     = bli_obj_length( *a );
-	dim_t  n_a     = bli_obj_width( *a );
+	dim_t  m_a     = bli_obj_length( a );
+	dim_t  n_a     = bli_obj_width( a );
 
 	obj_t  t, v, w;
 	obj_t  rho, norm;

@@ -192,7 +192,7 @@ void libblis_test_dotaxpyv_experiment
 	libblis_test_vobj_create( params, datatype, sc_str[2], m, &z_save );
 
 	// Set alpha.
-	if ( bli_obj_is_real( z ) )
+	if ( bli_obj_is_real( &z ) )
 	{
 		bli_setsc( -0.8,  0.0, &alpha );
 	}
@@ -208,7 +208,7 @@ void libblis_test_dotaxpyv_experiment
 
 	// Create an alias to x for xt. (Note that it doesn't actually need to be
 	// transposed.)
-	bli_obj_alias_to( x, xt );
+	bli_obj_alias_to( &x, &xt );
 
 	// Determine whether to make a copy of x with or without conjugation.
 	// 
@@ -220,13 +220,13 @@ void libblis_test_dotaxpyv_experiment
 	//
 	conjconjxty = bli_apply_conj( conjxt, conjy );
 	conjconjxty = bli_conj_toggled( conjconjxty );
-	bli_obj_set_conj( conjconjxty, xt );
+	bli_obj_set_conj( conjconjxty, &xt );
 	bli_copyv( &xt, &y );
 
 	// Apply the parameters.
-	bli_obj_set_conj( conjxt, xt );
-	bli_obj_set_conj( conjx,  x );
-	bli_obj_set_conj( conjy,  y );
+	bli_obj_set_conj( conjxt, &xt );
+	bli_obj_set_conj( conjx,  &x );
+	bli_obj_set_conj( conjy,  &y );
 
 	// Repeat the experiment n_repeats times and record results. 
 	for ( i = 0; i < n_repeats; ++i )
@@ -245,7 +245,7 @@ void libblis_test_dotaxpyv_experiment
 
 	// Estimate the performance of the best experiment repeat.
 	*perf = ( 2.0 * m + 2.0 * m ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bli_obj_is_complex( z ) ) *perf *= 4.0;
+	if ( bli_obj_is_complex( &z ) ) *perf *= 4.0;
 
 	// Perform checks.
 	libblis_test_dotaxpyv_check( params, &alpha, &xt, &x, &y, &rho, &z, &z_save, resid );
@@ -300,10 +300,10 @@ void libblis_test_dotaxpyv_check
        double*        resid
      )
 {
-	num_t  dt      = bli_obj_dt( *z );
-	num_t  dt_real = bli_obj_dt_proj_to_real( *z );
+	num_t  dt      = bli_obj_dt( z );
+	num_t  dt_real = bli_obj_dt_proj_to_real( z );
 
-	dim_t  m       = bli_obj_vector_dim( *z );
+	dim_t  m       = bli_obj_vector_dim( z );
 
 	obj_t  rho_temp;
 

@@ -76,17 +76,17 @@ void bli_hemv_int( conj_t  conjh,
 	}
 
 	// If y has a zero dimension, return early.
-	if ( bli_obj_has_zero_dim( *y ) ) return;
+	if ( bli_obj_has_zero_dim( y ) ) return;
 
 	// If x has a zero dimension, scale y by beta and return early.
-	if ( bli_obj_has_zero_dim( *x ) )
+	if ( bli_obj_has_zero_dim( x ) )
 	{
 		bli_scalm( beta, y );
 		return;
 	}
 
 	// Alias A in case we need to induce the upper triangular case.
-	bli_obj_alias_to( *a, a_local );
+	bli_obj_alias_to( a, &a_local );
 
 /*
 	// Our blocked algorithms only [explicitly] implement the lower triangular
@@ -96,10 +96,10 @@ void bli_hemv_int( conj_t  conjh,
 	// triangular case. But we only need to do this for blocked algorithms,
 	// since unblocked algorithms are responsible for handling the upper case
 	// explicitly (and they should not be inspecting the transposition bit anyway).
-	if ( bli_cntl_is_blocked( cntl ) && bli_obj_is_upper( *a ) )
+	if ( bli_cntl_is_blocked( cntl ) && bli_obj_is_upper( a ) )
 	{
-		bli_obj_toggle_conj( a_local );
-		bli_obj_toggle_trans( a_local );
+		bli_obj_toggle_conj( &a_local );
+		bli_obj_toggle_trans( &a_local );
 	}
 */
 

@@ -181,7 +181,7 @@ void libblis_test_setv_experiment
 
 	// Estimate the performance of the best experiment repeat.
 	*perf = ( 1.0 * m ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bli_obj_is_complex( x ) ) *perf *= 2.0;
+	if ( bli_obj_is_complex( &x ) ) *perf *= 2.0;
 
 	// Perform checks.
 	libblis_test_setv_check( params, &beta, &x, resid );
@@ -223,11 +223,11 @@ void libblis_test_setv_check
        double*        resid
      )
 {
-	num_t dt_x     = bli_obj_dt( *x );
-	dim_t m_x      = bli_obj_vector_dim( *x );
-	inc_t inc_x    = bli_obj_vector_inc( *x );
-	void* buf_x    = bli_obj_buffer_at_off( *x );
-	void* buf_beta = bli_obj_buffer_for_1x1( dt_x, *beta );
+	num_t dt_x     = bli_obj_dt( x );
+	dim_t m_x      = bli_obj_vector_dim( x );
+	inc_t inc_x    = bli_obj_vector_inc( x );
+	void* buf_x    = bli_obj_buffer_at_off( x );
+	void* buf_beta = bli_obj_buffer_for_1x1( dt_x, beta );
 	dim_t i;
 
 	*resid = 0.0;
@@ -237,7 +237,7 @@ void libblis_test_setv_check
 	// that each element of x is equal to beta.
 	//
 
-	if      ( bli_obj_is_float( *x ) )
+	if      ( bli_obj_is_float( x ) )
 	{
 		float*    chi1      = buf_x;
 		float*    beta_cast = buf_beta;
@@ -249,7 +249,7 @@ void libblis_test_setv_check
 			chi1 += inc_x;
 		}
 	}
-	else if ( bli_obj_is_double( *x ) )
+	else if ( bli_obj_is_double( x ) )
 	{
 		double*   chi1      = buf_x;
 		double*   beta_cast = buf_beta;
@@ -261,7 +261,7 @@ void libblis_test_setv_check
 			chi1 += inc_x;
 		}
 	}
-	else if ( bli_obj_is_scomplex( *x ) )
+	else if ( bli_obj_is_scomplex( x ) )
 	{
 		scomplex* chi1      = buf_x;
 		scomplex* beta_cast = buf_beta;
@@ -273,7 +273,7 @@ void libblis_test_setv_check
 			chi1 += inc_x;
 		}
 	}
-	else // if ( bli_obj_is_dcomplex( *x ) )
+	else // if ( bli_obj_is_dcomplex( x ) )
 	{
 		dcomplex* chi1      = buf_x;
 		dcomplex* beta_cast = buf_beta;

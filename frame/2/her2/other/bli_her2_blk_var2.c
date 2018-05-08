@@ -70,7 +70,7 @@ void bli_her2_blk_var2( conj_t  conjh,
 	bli_obj_init_pack( &y1_pack );
 
 	// Query dimension.
-	mn = bli_obj_length( *c );
+	mn = bli_obj_length( c );
 
 	// Partition diagonally.
 	for ( ij = 0; ij < mn; ij += b_alg )

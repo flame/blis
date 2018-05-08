@@ -65,30 +65,30 @@ void bli_trmm_ll_ker_var2
        thrinfo_t* thread
      )
 {
-	num_t     dt_exec   = bli_obj_exec_dt( *c );
+	num_t     dt_exec   = bli_obj_exec_dt( c );
 
-	doff_t    diagoffa  = bli_obj_diag_offset( *a );
+	doff_t    diagoffa  = bli_obj_diag_offset( a );
 
-	pack_t    schema_a  = bli_obj_pack_schema( *a );
-	pack_t    schema_b  = bli_obj_pack_schema( *b );
+	pack_t    schema_a  = bli_obj_pack_schema( a );
+	pack_t    schema_b  = bli_obj_pack_schema( b );
 
-	dim_t     m         = bli_obj_length( *c );
-	dim_t     n         = bli_obj_width( *c );
-	dim_t     k         = bli_obj_width( *a );
+	dim_t     m         = bli_obj_length( c );
+	dim_t     n         = bli_obj_width( c );
+	dim_t     k         = bli_obj_width( a );
 
-	void*     buf_a     = bli_obj_buffer_at_off( *a );
-	inc_t     cs_a      = bli_obj_col_stride( *a );
-	dim_t     pd_a      = bli_obj_panel_dim( *a );
-	inc_t     ps_a      = bli_obj_panel_stride( *a );
+	void*     buf_a     = bli_obj_buffer_at_off( a );
+	inc_t     cs_a      = bli_obj_col_stride( a );
+	dim_t     pd_a      = bli_obj_panel_dim( a );
+	inc_t     ps_a      = bli_obj_panel_stride( a );
 
-	void*     buf_b     = bli_obj_buffer_at_off( *b );
-	inc_t     rs_b      = bli_obj_row_stride( *b );
-	dim_t     pd_b      = bli_obj_panel_dim( *b );
-	inc_t     ps_b      = bli_obj_panel_stride( *b );
+	void*     buf_b     = bli_obj_buffer_at_off( b );
+	inc_t     rs_b      = bli_obj_row_stride( b );
+	dim_t     pd_b      = bli_obj_panel_dim( b );
+	inc_t     ps_b      = bli_obj_panel_stride( b );
 
-	void*     buf_c     = bli_obj_buffer_at_off( *c );
-	inc_t     rs_c      = bli_obj_row_stride( *c );
-	inc_t     cs_c      = bli_obj_col_stride( *c );
+	void*     buf_c     = bli_obj_buffer_at_off( c );
+	inc_t     rs_c      = bli_obj_row_stride( c );
+	inc_t     cs_c      = bli_obj_col_stride( c );
 
 	obj_t     scalar_a;
 	obj_t     scalar_b;
@@ -105,8 +105,8 @@ void bli_trmm_ll_ker_var2
 
 	// Grab the addresses of the internal scalar buffers for the scalar
 	// merged above and the scalar attached to C.
-	buf_alpha = bli_obj_internal_scalar_buffer( scalar_b );
-	buf_beta  = bli_obj_internal_scalar_buffer( *c );
+	buf_alpha = bli_obj_internal_scalar_buffer( &scalar_b );
+	buf_beta  = bli_obj_internal_scalar_buffer( c );
 
 	// Index into the type combination array to extract the correct
 	// function pointer.

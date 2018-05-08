@@ -54,13 +54,13 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	BLIS_OAPI_CNTX_DECL \
 \
-	num_t     dt        = bli_obj_dt( *x ); \
+	num_t     dt        = bli_obj_dt( x ); \
 \
-	dim_t     n         = bli_obj_vector_dim( *x ); \
-	void*     buf_x     = bli_obj_buffer_at_off( *x ); \
-	inc_t     incx      = bli_obj_vector_inc( *x ); \
+	dim_t     n         = bli_obj_vector_dim( x ); \
+	void*     buf_x     = bli_obj_buffer_at_off( x ); \
+	inc_t     incx      = bli_obj_vector_inc( x ); \
 \
-	void*     buf_asum  = bli_obj_buffer_at_off( *asum ); \
+	void*     buf_asum  = bli_obj_buffer_at_off( asum ); \
 \
 	if ( bli_error_checking_is_enabled() ) \
 	    PASTEMAC(opname,_check)( x, asum ); \
@@ -93,13 +93,13 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	BLIS_OAPI_CNTX_DECL \
 \
-	num_t     dt        = bli_obj_dt( *a ); \
+	num_t     dt        = bli_obj_dt( a ); \
 \
-	uplo_t    uploa     = bli_obj_uplo( *a ); \
-	dim_t     m         = bli_obj_length( *a ); \
-	void*     buf_a     = bli_obj_buffer_at_off( *a ); \
-	inc_t     rs_a      = bli_obj_row_stride( *a ); \
-	inc_t     cs_a      = bli_obj_col_stride( *a ); \
+	uplo_t    uploa     = bli_obj_uplo( a ); \
+	dim_t     m         = bli_obj_length( a ); \
+	void*     buf_a     = bli_obj_buffer_at_off( a ); \
+	inc_t     rs_a      = bli_obj_row_stride( a ); \
+	inc_t     cs_a      = bli_obj_col_stride( a ); \
 \
 	if ( bli_error_checking_is_enabled() ) \
 	    PASTEMAC(opname,_check)( a ); \
@@ -135,12 +135,12 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	BLIS_OAPI_CNTX_DECL \
 \
-	num_t     dt        = bli_obj_dt( *x ); \
+	num_t     dt        = bli_obj_dt( x ); \
 \
-	dim_t     n         = bli_obj_vector_dim( *x ); \
-	void*     buf_x     = bli_obj_buffer_at_off( *x ); \
-	inc_t     incx      = bli_obj_vector_inc( *x ); \
-	void*     buf_norm  = bli_obj_buffer_at_off( *norm ); \
+	dim_t     n         = bli_obj_vector_dim( x ); \
+	void*     buf_x     = bli_obj_buffer_at_off( x ); \
+	inc_t     incx      = bli_obj_vector_inc( x ); \
+	void*     buf_norm  = bli_obj_buffer_at_off( norm ); \
 \
 	if ( bli_error_checking_is_enabled() ) \
 	    PASTEMAC(opname,_check)( x, norm ); \
@@ -176,17 +176,17 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	BLIS_OAPI_CNTX_DECL \
 \
-	num_t     dt        = bli_obj_dt( *x ); \
+	num_t     dt        = bli_obj_dt( x ); \
 \
-	doff_t    diagoffx  = bli_obj_diag_offset( *x ); \
-	diag_t    diagx     = bli_obj_diag( *x ); \
-	uplo_t    uplox     = bli_obj_uplo( *x ); \
-	dim_t     m         = bli_obj_length( *x ); \
-	dim_t     n         = bli_obj_width( *x ); \
-	void*     buf_x     = bli_obj_buffer_at_off( *x ); \
-	inc_t     rs_x      = bli_obj_row_stride( *x ); \
-	inc_t     cs_x      = bli_obj_col_stride( *x ); \
-	void*     buf_norm  = bli_obj_buffer_at_off( *norm ); \
+	doff_t    diagoffx  = bli_obj_diag_offset( x ); \
+	diag_t    diagx     = bli_obj_diag( x ); \
+	uplo_t    uplox     = bli_obj_uplo( x ); \
+	dim_t     m         = bli_obj_length( x ); \
+	dim_t     n         = bli_obj_width( x ); \
+	void*     buf_x     = bli_obj_buffer_at_off( x ); \
+	inc_t     rs_x      = bli_obj_row_stride( x ); \
+	inc_t     cs_x      = bli_obj_col_stride( x ); \
+	void*     buf_norm  = bli_obj_buffer_at_off( norm ); \
 \
 	if ( bli_error_checking_is_enabled() ) \
 	    PASTEMAC(opname,_check)( x, norm ); \
@@ -229,11 +229,11 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	BLIS_OAPI_CNTX_DECL \
 \
-	num_t     dt        = bli_obj_dt( *x ); \
+	num_t     dt        = bli_obj_dt( x ); \
 \
-	dim_t     n         = bli_obj_vector_dim( *x ); \
-	void*     buf_x     = bli_obj_buffer_at_off( *x ); \
-	inc_t     incx      = bli_obj_vector_inc( *x ); \
+	dim_t     n         = bli_obj_vector_dim( x ); \
+	void*     buf_x     = bli_obj_buffer_at_off( x ); \
+	inc_t     incx      = bli_obj_vector_inc( x ); \
 \
 	/* Suppress compiler warning about unused variables. */ \
 	( void )cntx; \
@@ -281,13 +281,13 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	BLIS_OAPI_CNTX_DECL \
 \
-	num_t     dt        = bli_obj_dt( *x ); \
+	num_t     dt        = bli_obj_dt( x ); \
 \
-	dim_t     m         = bli_obj_length( *x ); \
-	dim_t     n         = bli_obj_width( *x ); \
-	void*     buf_x     = bli_obj_buffer_at_off( *x ); \
-	inc_t     rs_x      = bli_obj_row_stride( *x ); \
-	inc_t     cs_x      = bli_obj_col_stride( *x ); \
+	dim_t     m         = bli_obj_length( x ); \
+	dim_t     n         = bli_obj_width( x ); \
+	void*     buf_x     = bli_obj_buffer_at_off( x ); \
+	inc_t     rs_x      = bli_obj_row_stride( x ); \
+	inc_t     cs_x      = bli_obj_col_stride( x ); \
 \
 	/* Suppress compiler warning about unused variables. */ \
 	( void )cntx; \
@@ -298,11 +298,11 @@ void PASTEMAC(opname,EX_SUF) \
 	/* Handle constants up front. */ \
 	if ( dt == BLIS_CONSTANT ) \
 	{ \
-		float*    sp = bli_obj_buffer_for_const( BLIS_FLOAT,    *x ); \
-		double*   dp = bli_obj_buffer_for_const( BLIS_DOUBLE,   *x ); \
-		scomplex* cp = bli_obj_buffer_for_const( BLIS_SCOMPLEX, *x ); \
-		dcomplex* zp = bli_obj_buffer_for_const( BLIS_DCOMPLEX, *x ); \
-		gint_t*   ip = bli_obj_buffer_for_const( BLIS_INT,      *x ); \
+		float*    sp = bli_obj_buffer_for_const( BLIS_FLOAT,    x ); \
+		double*   dp = bli_obj_buffer_for_const( BLIS_DOUBLE,   x ); \
+		scomplex* cp = bli_obj_buffer_for_const( BLIS_SCOMPLEX, x ); \
+		dcomplex* zp = bli_obj_buffer_for_const( BLIS_DCOMPLEX, x ); \
+		gint_t*   ip = bli_obj_buffer_for_const( BLIS_INT,      x ); \
 \
 		fprintf( file, "%s\n", s1 ); \
 		fprintf( file, " float:     %9.2e\n",         bli_sreal( *sp ) ); \
@@ -381,11 +381,11 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	BLIS_OAPI_CNTX_DECL \
 \
-	num_t     dt        = bli_obj_dt( *x ); \
+	num_t     dt        = bli_obj_dt( x ); \
 \
-	dim_t     n         = bli_obj_vector_dim( *x ); \
-	void*     buf_x     = bli_obj_buffer_at_off( *x ); \
-	inc_t     incx      = bli_obj_vector_inc( *x ); \
+	dim_t     n         = bli_obj_vector_dim( x ); \
+	void*     buf_x     = bli_obj_buffer_at_off( x ); \
+	inc_t     incx      = bli_obj_vector_inc( x ); \
 \
 	if ( bli_error_checking_is_enabled() ) \
 	    PASTEMAC(opname,_check)( x ); \
@@ -418,15 +418,15 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	BLIS_OAPI_CNTX_DECL \
 \
-	num_t     dt        = bli_obj_dt( *x ); \
+	num_t     dt        = bli_obj_dt( x ); \
 \
-	doff_t    diagoffx  = bli_obj_diag_offset( *x ); \
-	uplo_t    uplox     = bli_obj_uplo( *x ); \
-	dim_t     m         = bli_obj_length( *x ); \
-	dim_t     n         = bli_obj_width( *x ); \
-	void*     buf_x     = bli_obj_buffer_at_off( *x ); \
-	inc_t     rs_x      = bli_obj_row_stride( *x ); \
-	inc_t     cs_x      = bli_obj_col_stride( *x ); \
+	doff_t    diagoffx  = bli_obj_diag_offset( x ); \
+	uplo_t    uplox     = bli_obj_uplo( x ); \
+	dim_t     m         = bli_obj_length( x ); \
+	dim_t     n         = bli_obj_width( x ); \
+	void*     buf_x     = bli_obj_buffer_at_off( x ); \
+	inc_t     rs_x      = bli_obj_row_stride( x ); \
+	inc_t     cs_x      = bli_obj_col_stride( x ); \
 \
 	if ( bli_error_checking_is_enabled() ) \
 	    PASTEMAC(opname,_check)( x ); \
@@ -464,13 +464,13 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	BLIS_OAPI_CNTX_DECL \
 \
-	num_t     dt        = bli_obj_dt( *x ); \
+	num_t     dt        = bli_obj_dt( x ); \
 \
-	dim_t     n         = bli_obj_vector_dim( *x ); \
-	void*     buf_x     = bli_obj_buffer_at_off( *x ); \
-	inc_t     incx      = bli_obj_vector_inc( *x ); \
-	void*     buf_scale = bli_obj_buffer_at_off( *scale ); \
-	void*     buf_sumsq = bli_obj_buffer_at_off( *sumsq ); \
+	dim_t     n         = bli_obj_vector_dim( x ); \
+	void*     buf_x     = bli_obj_buffer_at_off( x ); \
+	inc_t     incx      = bli_obj_vector_inc( x ); \
+	void*     buf_scale = bli_obj_buffer_at_off( scale ); \
+	void*     buf_sumsq = bli_obj_buffer_at_off( sumsq ); \
 \
 	if ( bli_error_checking_is_enabled() ) \
 	    PASTEMAC(opname,_check)( x, scale, sumsq ); \

@@ -157,8 +157,8 @@ int main( int argc, char** argv )
 		bli_randm( &b );
 		bli_randm( &c );
 
-		bli_obj_set_conjtrans( transa, a );
-		bli_obj_set_conjtrans( transb, b );
+		bli_obj_set_conjtrans( transa, &a );
+		bli_obj_set_conjtrans( transb, &b );
 
 		bli_setsc(  (2.0/1.0), 0.0, &alpha );
 		bli_setsc(  (1.0/1.0), 0.0, &beta );
@@ -199,17 +199,17 @@ int main( int argc, char** argv )
 
 		if ( bli_is_float( dt ) )
 		{
-			f77_int  mm     = bli_obj_length( c );
-			f77_int  kk     = bli_obj_width_after_trans( a );
-			f77_int  nn     = bli_obj_width( c );
-			f77_int  lda    = bli_obj_col_stride( a );
-			f77_int  ldb    = bli_obj_col_stride( b );
-			f77_int  ldc    = bli_obj_col_stride( c );
-			float*   alphap = bli_obj_buffer( alpha );
-			float*   ap     = bli_obj_buffer( a );
-			float*   bp     = bli_obj_buffer( b );
-			float*   betap  = bli_obj_buffer( beta );
-			float*   cp     = bli_obj_buffer( c );
+			f77_int  mm     = bli_obj_length( &c );
+			f77_int  kk     = bli_obj_width_after_trans( &a );
+			f77_int  nn     = bli_obj_width( &c );
+			f77_int  lda    = bli_obj_col_stride( &a );
+			f77_int  ldb    = bli_obj_col_stride( &b );
+			f77_int  ldc    = bli_obj_col_stride( &c );
+			float*   alphap = bli_obj_buffer( &alpha );
+			float*   ap     = bli_obj_buffer( &a );
+			float*   bp     = bli_obj_buffer( &b );
+			float*   betap  = bli_obj_buffer( &beta );
+			float*   cp     = bli_obj_buffer( &c );
 
 			sgemm_( &f77_transa,
 			        &f77_transb,
@@ -224,17 +224,17 @@ int main( int argc, char** argv )
 		}
 		else if ( bli_is_double( dt ) )
 		{
-			f77_int  mm     = bli_obj_length( c );
-			f77_int  kk     = bli_obj_width_after_trans( a );
-			f77_int  nn     = bli_obj_width( c );
-			f77_int  lda    = bli_obj_col_stride( a );
-			f77_int  ldb    = bli_obj_col_stride( b );
-			f77_int  ldc    = bli_obj_col_stride( c );
-			double*  alphap = bli_obj_buffer( alpha );
-			double*  ap     = bli_obj_buffer( a );
-			double*  bp     = bli_obj_buffer( b );
-			double*  betap  = bli_obj_buffer( beta );
-			double*  cp     = bli_obj_buffer( c );
+			f77_int  mm     = bli_obj_length( &c );
+			f77_int  kk     = bli_obj_width_after_trans( &a );
+			f77_int  nn     = bli_obj_width( &c );
+			f77_int  lda    = bli_obj_col_stride( &a );
+			f77_int  ldb    = bli_obj_col_stride( &b );
+			f77_int  ldc    = bli_obj_col_stride( &c );
+			double*  alphap = bli_obj_buffer( &alpha );
+			double*  ap     = bli_obj_buffer( &a );
+			double*  bp     = bli_obj_buffer( &b );
+			double*  betap  = bli_obj_buffer( &beta );
+			double*  cp     = bli_obj_buffer( &c );
 
 			dgemm_( &f77_transa,
 			        &f77_transb,
@@ -249,17 +249,17 @@ int main( int argc, char** argv )
 		}
 		else if ( bli_is_scomplex( dt ) )
 		{
-			f77_int  mm     = bli_obj_length( c );
-			f77_int  kk     = bli_obj_width_after_trans( a );
-			f77_int  nn     = bli_obj_width( c );
-			f77_int  lda    = bli_obj_col_stride( a );
-			f77_int  ldb    = bli_obj_col_stride( b );
-			f77_int  ldc    = bli_obj_col_stride( c );
-			scomplex*  alphap = bli_obj_buffer( alpha );
-			scomplex*  ap     = bli_obj_buffer( a );
-			scomplex*  bp     = bli_obj_buffer( b );
-			scomplex*  betap  = bli_obj_buffer( beta );
-			scomplex*  cp     = bli_obj_buffer( c );
+			f77_int  mm     = bli_obj_length( &c );
+			f77_int  kk     = bli_obj_width_after_trans( &a );
+			f77_int  nn     = bli_obj_width( &c );
+			f77_int  lda    = bli_obj_col_stride( &a );
+			f77_int  ldb    = bli_obj_col_stride( &b );
+			f77_int  ldc    = bli_obj_col_stride( &c );
+			scomplex*  alphap = bli_obj_buffer( &alpha );
+			scomplex*  ap     = bli_obj_buffer( &a );
+			scomplex*  bp     = bli_obj_buffer( &b );
+			scomplex*  betap  = bli_obj_buffer( &beta );
+			scomplex*  cp     = bli_obj_buffer( &c );
 
 			cgemm_( &f77_transa,
 			        &f77_transb,
@@ -274,17 +274,17 @@ int main( int argc, char** argv )
 		}
 		else if ( bli_is_dcomplex( dt ) )
 		{
-			f77_int  mm     = bli_obj_length( c );
-			f77_int  kk     = bli_obj_width_after_trans( a );
-			f77_int  nn     = bli_obj_width( c );
-			f77_int  lda    = bli_obj_col_stride( a );
-			f77_int  ldb    = bli_obj_col_stride( b );
-			f77_int  ldc    = bli_obj_col_stride( c );
-			dcomplex*  alphap = bli_obj_buffer( alpha );
-			dcomplex*  ap     = bli_obj_buffer( a );
-			dcomplex*  bp     = bli_obj_buffer( b );
-			dcomplex*  betap  = bli_obj_buffer( beta );
-			dcomplex*  cp     = bli_obj_buffer( c );
+			f77_int  mm     = bli_obj_length( &c );
+			f77_int  kk     = bli_obj_width_after_trans( &a );
+			f77_int  nn     = bli_obj_width( &c );
+			f77_int  lda    = bli_obj_col_stride( &a );
+			f77_int  ldb    = bli_obj_col_stride( &b );
+			f77_int  ldc    = bli_obj_col_stride( &c );
+			dcomplex*  alphap = bli_obj_buffer( &alpha );
+			dcomplex*  ap     = bli_obj_buffer( &a );
+			dcomplex*  bp     = bli_obj_buffer( &b );
+			dcomplex*  betap  = bli_obj_buffer( &beta );
+			dcomplex*  cp     = bli_obj_buffer( &c );
 
 			zgemm_( &f77_transa,
 			//zgemm3m_( &f77_transa,

@@ -193,7 +193,7 @@ void libblis_test_axpyf_experiment
 	libblis_test_vobj_create( params, datatype, sc_str[2], m, &y_save );
 
 	// Set alpha.
-	if ( bli_obj_is_real( y ) )
+	if ( bli_obj_is_real( &y ) )
 	{
 		bli_setsc( -1.0,  0.0, &alpha );
 	}
@@ -209,8 +209,8 @@ void libblis_test_axpyf_experiment
 	bli_copyv( &y, &y_save );
 
 	// Apply the parameters.
-	bli_obj_set_conj( conja, a );
-	bli_obj_set_conj( conjx, x );
+	bli_obj_set_conj( conja, &a );
+	bli_obj_set_conj( conjx, &x );
 
 	// Repeat the experiment n_repeats times and record results. 
 	for ( i = 0; i < n_repeats; ++i )
@@ -228,7 +228,7 @@ void libblis_test_axpyf_experiment
 
 	// Estimate the performance of the best experiment repeat.
 	*perf = ( 2.0 * m * b_n ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bli_obj_is_complex( y ) ) *perf *= 4.0;
+	if ( bli_obj_is_complex( &y ) ) *perf *= 4.0;
 
 	// Perform checks.
 	libblis_test_axpyf_check( params, &alpha, &a, &x, &y, &y_save, resid );
@@ -279,11 +279,11 @@ void libblis_test_axpyf_check
        double*        resid
      )
 {
-	num_t  dt      = bli_obj_dt( *y );
-	num_t  dt_real = bli_obj_dt_proj_to_real( *y );
+	num_t  dt      = bli_obj_dt( y );
+	num_t  dt_real = bli_obj_dt_proj_to_real( y );
 
-	dim_t  m       = bli_obj_vector_dim( *y );
-	dim_t  b_n     = bli_obj_width( *a );
+	dim_t  m       = bli_obj_vector_dim( y );
+	dim_t  b_n     = bli_obj_width( a );
 
 	dim_t  i;
 

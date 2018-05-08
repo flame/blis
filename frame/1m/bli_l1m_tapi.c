@@ -146,7 +146,7 @@ void PASTEMAC(ch,opname) \
 		ctype* one      = PASTEMAC(ch,1); \
 \
 		if ( bli_does_trans( transx ) ) \
-			bli_negate_diag_offset( diagoffy ); \
+			bli_negate_diag_offset( &diagoffy ); \
 \
 		PASTEMAC(ch,setd) \
 		( \
@@ -299,7 +299,7 @@ void PASTEMAC(ch,opname) \
 		doff_t diagoffy = diagoffx; \
 \
 		if ( bli_does_trans( transx ) ) \
-			bli_negate_diag_offset( diagoffy ); \
+			bli_negate_diag_offset( &diagoffy ); \
 \
 		PASTEMAC(ch,setd) \
 		( \

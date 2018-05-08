@@ -131,7 +131,7 @@ err_t bli_check_nonunit_diag( obj_t* a )
 {
 	err_t e_val = BLIS_SUCCESS;
 
-	if ( !bli_obj_has_nonunit_diag( *a ) )
+	if ( !bli_obj_has_nonunit_diag( a ) )
 		e_val = BLIS_EXPECTED_NONUNIT_DIAG;
 
 	return e_val;
@@ -159,7 +159,7 @@ err_t bli_check_object_valid_datatype( obj_t* a )
 	err_t e_val;
 	num_t dt;
 
-	dt = bli_obj_dt( *a );
+	dt = bli_obj_dt( a );
 	e_val = bli_check_valid_datatype( dt );
 
 	return e_val;
@@ -180,7 +180,7 @@ err_t bli_check_noninteger_object( obj_t* a )
 	err_t e_val;
 	num_t dt;
 
-	dt = bli_obj_dt( *a );
+	dt = bli_obj_dt( a );
 	e_val = bli_check_noninteger_datatype( dt );
 
 	return e_val;
@@ -201,7 +201,7 @@ err_t bli_check_nonconstant_object( obj_t* a )
 	err_t e_val;
 	num_t dt;
 
-	dt = bli_obj_dt( *a );
+	dt = bli_obj_dt( a );
 	e_val = bli_check_nonconstant_datatype( dt );
 
 	return e_val;
@@ -225,7 +225,7 @@ err_t bli_check_floating_object( obj_t* a )
 	err_t e_val;
 	num_t dt;
 
-	dt = bli_obj_dt( *a );
+	dt = bli_obj_dt( a );
 	e_val = bli_check_floating_datatype( dt );
 
 	return e_val;
@@ -247,7 +247,7 @@ err_t bli_check_real_object( obj_t* a )
 	err_t e_val;
 	num_t dt;
 
-	dt = bli_obj_dt( *a );
+	dt = bli_obj_dt( a );
 	e_val = bli_check_real_datatype( dt );
 
 	return e_val;
@@ -268,7 +268,7 @@ err_t bli_check_integer_object( obj_t* a )
 	err_t e_val;
 	num_t dt;
 
-	dt = bli_obj_dt( *a );
+	dt = bli_obj_dt( a );
 	e_val = bli_check_integer_datatype( dt );
 
 	return e_val;
@@ -292,8 +292,8 @@ err_t bli_check_consistent_object_datatypes( obj_t* a, obj_t* b )
 	num_t dt_a;
 	num_t dt_b;
 
-	dt_a = bli_obj_dt( *a );
-	dt_b = bli_obj_dt( *b );
+	dt_a = bli_obj_dt( a );
+	dt_b = bli_obj_dt( b );
 
 	e_val = bli_check_consistent_datatypes( dt_a, dt_b );
 
@@ -320,8 +320,8 @@ err_t bli_check_object_real_proj_of( obj_t* c, obj_t* r )
 	num_t dt_c;
 	num_t dt_r;
 
-	dt_c = bli_obj_dt( *c );
-	dt_r = bli_obj_dt( *r );
+	dt_c = bli_obj_dt( c );
+	dt_r = bli_obj_dt( r );
 
 	e_val = bli_check_datatype_real_proj_of( dt_c, dt_r );
 
@@ -350,10 +350,10 @@ err_t bli_check_conformal_dims( obj_t* a, obj_t* b )
 	dim_t m_a, n_a;
 	dim_t m_b, n_b;
 
-	m_a = bli_obj_length_after_trans( *a );
-	n_a = bli_obj_width_after_trans( *a );
-	m_b = bli_obj_length_after_trans( *b );
-	n_b = bli_obj_width_after_trans( *b );
+	m_a = bli_obj_length_after_trans( a );
+	n_a = bli_obj_width_after_trans( a );
+	m_b = bli_obj_length_after_trans( b );
+	n_b = bli_obj_width_after_trans( b );
 
 	if ( m_a != m_b || n_a != n_b )
 		e_val = BLIS_NONCONFORMAL_DIMENSIONS;
@@ -368,14 +368,14 @@ err_t bli_check_level3_dims( obj_t* a, obj_t* b, obj_t* c )
 	dim_t m_a, k_a;
 	dim_t k_b, n_b;
 
-	m_c = bli_obj_length_after_trans( *c );
-	n_c = bli_obj_width_after_trans( *c );
+	m_c = bli_obj_length_after_trans( c );
+	n_c = bli_obj_width_after_trans( c );
 
-	m_a = bli_obj_length_after_trans( *a );
-	k_a = bli_obj_width_after_trans( *a );
+	m_a = bli_obj_length_after_trans( a );
+	k_a = bli_obj_width_after_trans( a );
 
-	k_b = bli_obj_length_after_trans( *b );
-	n_b = bli_obj_width_after_trans( *b );
+	k_b = bli_obj_length_after_trans( b );
+	n_b = bli_obj_width_after_trans( b );
 
 	if ( m_c != m_a ||
 	     n_c != n_b ||
@@ -389,12 +389,12 @@ err_t bli_check_scalar_object( obj_t* a )
 {
 	err_t e_val = BLIS_SUCCESS;
 
-	if ( bli_obj_length( *a ) < 0 ||
-		 bli_obj_width( *a )  < 0 )
+	if ( bli_obj_length( a ) < 0 ||
+		 bli_obj_width( a )  < 0 )
 		return BLIS_NEGATIVE_DIMENSION;
 
-	if ( bli_obj_length( *a ) != 1 ||
-	     bli_obj_width( *a )  != 1 )
+	if ( bli_obj_length( a ) != 1 ||
+	     bli_obj_width( a )  != 1 )
 		return BLIS_EXPECTED_SCALAR_OBJECT;
 
 	return e_val;
@@ -404,11 +404,11 @@ err_t bli_check_vector_object( obj_t* a )
 {
 	err_t e_val = BLIS_SUCCESS;
 
-	if ( bli_obj_length( *a ) < 0 ||
-		 bli_obj_width( *a )  < 0 )
+	if ( bli_obj_length( a ) < 0 ||
+		 bli_obj_width( a )  < 0 )
 		return BLIS_NEGATIVE_DIMENSION;
 
-	if ( !bli_obj_is_vector( *a ) )
+	if ( !bli_obj_is_vector( a ) )
 		return BLIS_EXPECTED_VECTOR_OBJECT;
 
 	return e_val;
@@ -418,8 +418,8 @@ err_t bli_check_matrix_object( obj_t* a )
 {
 	err_t e_val = BLIS_SUCCESS;
 
-	if ( bli_obj_length( *a ) < 0 ||
-		 bli_obj_width( *a )  < 0 )
+	if ( bli_obj_length( a ) < 0 ||
+		 bli_obj_width( a )  < 0 )
 		e_val = BLIS_NEGATIVE_DIMENSION;
 
 	return e_val;
@@ -431,8 +431,8 @@ err_t bli_check_equal_vector_lengths( obj_t* x, obj_t* y )
 	dim_t dim_x;
 	dim_t dim_y;
 
-	dim_x = bli_obj_vector_dim( *x );
-	dim_y = bli_obj_vector_dim( *y );
+	dim_x = bli_obj_vector_dim( x );
+	dim_y = bli_obj_vector_dim( y );
 
 	if ( dim_x != dim_y )
 		e_val = BLIS_UNEQUAL_VECTOR_LENGTHS;
@@ -444,7 +444,7 @@ err_t bli_check_square_object( obj_t* a )
 {
 	err_t e_val = BLIS_SUCCESS;
 
-	if ( bli_obj_length( *a ) != bli_obj_width( *a ) )
+	if ( bli_obj_length( a ) != bli_obj_width( a ) )
 		e_val = BLIS_EXPECTED_SQUARE_OBJECT;
 
 	return e_val;
@@ -454,7 +454,7 @@ err_t bli_check_object_length_equals( obj_t* a, dim_t m )
 {
 	err_t e_val = BLIS_SUCCESS;
 
-	if ( bli_obj_length( *a ) != m )
+	if ( bli_obj_length( a ) != m )
 		e_val = BLIS_UNEXPECTED_OBJECT_LENGTH;
 
 	return e_val;
@@ -464,7 +464,7 @@ err_t bli_check_object_width_equals( obj_t* a, dim_t n )
 {
 	err_t e_val = BLIS_SUCCESS;
 
-	if ( bli_obj_width( *a ) != n )
+	if ( bli_obj_width( a ) != n )
 		e_val = BLIS_UNEXPECTED_OBJECT_WIDTH;
 
 	return e_val;
@@ -474,7 +474,7 @@ err_t bli_check_vector_dim_equals( obj_t* a, dim_t n )
 {
 	err_t e_val = BLIS_SUCCESS;
 
-	if ( bli_obj_vector_dim( *a ) != n )
+	if ( bli_obj_vector_dim( a ) != n )
 		e_val = BLIS_UNEXPECTED_VECTOR_DIM;
 
 	return e_val;
@@ -484,7 +484,7 @@ err_t bli_check_object_diag_offset_equals( obj_t* a, doff_t offset )
 {
 	err_t e_val = BLIS_SUCCESS;
 
-	if ( offset != bli_obj_diag_offset( *a ) )
+	if ( offset != bli_obj_diag_offset( a ) )
 		e_val = BLIS_UNEXPECTED_DIAG_OFFSET;
 
 	return e_val;
@@ -581,7 +581,7 @@ err_t bli_check_general_object( obj_t* a )
 {
 	err_t e_val = BLIS_SUCCESS;
 
-	if ( !bli_obj_is_general( *a ) )
+	if ( !bli_obj_is_general( a ) )
 		e_val = BLIS_EXPECTED_GENERAL_OBJECT;
 
 	return e_val;
@@ -591,7 +591,7 @@ err_t bli_check_hermitian_object( obj_t* a )
 {
 	err_t e_val = BLIS_SUCCESS;
 
-	if ( !bli_obj_is_hermitian( *a ) )
+	if ( !bli_obj_is_hermitian( a ) )
 		e_val = BLIS_EXPECTED_HERMITIAN_OBJECT;
 
 	return e_val;
@@ -601,7 +601,7 @@ err_t bli_check_symmetric_object( obj_t* a )
 {
 	err_t e_val = BLIS_SUCCESS;
 
-	if ( !bli_obj_is_symmetric( *a ) )
+	if ( !bli_obj_is_symmetric( a ) )
 		e_val = BLIS_EXPECTED_SYMMETRIC_OBJECT;
 
 	return e_val;
@@ -611,7 +611,7 @@ err_t bli_check_triangular_object( obj_t* a )
 {
 	err_t e_val = BLIS_SUCCESS;
 
-	if ( !bli_obj_is_triangular( *a ) )
+	if ( !bli_obj_is_triangular( a ) )
 		e_val = BLIS_EXPECTED_TRIANGULAR_OBJECT;
 
 	return e_val;
@@ -635,8 +635,8 @@ err_t bli_check_upper_or_lower_object( obj_t* a )
 {
 	err_t e_val = BLIS_SUCCESS;
 
-	if ( !bli_obj_is_lower( *a ) &&
-	     !bli_obj_is_upper( *a ) )
+	if ( !bli_obj_is_lower( a ) &&
+	     !bli_obj_is_upper( a ) )
 		e_val = BLIS_EXPECTED_UPPER_OR_LOWER_OBJECT;
 
 	return e_val;
@@ -708,10 +708,10 @@ err_t bli_check_packm_schema_on_unpack( obj_t* a )
 {
 	err_t e_val = BLIS_SUCCESS;
 
-	if ( bli_obj_pack_schema( *a ) != BLIS_PACKED_ROWS &&
-	     bli_obj_pack_schema( *a ) != BLIS_PACKED_COLUMNS &&
-	     bli_obj_pack_schema( *a ) != BLIS_PACKED_ROW_PANELS &&
-	     bli_obj_pack_schema( *a ) != BLIS_PACKED_COL_PANELS )
+	if ( bli_obj_pack_schema( a ) != BLIS_PACKED_ROWS &&
+	     bli_obj_pack_schema( a ) != BLIS_PACKED_COLUMNS &&
+	     bli_obj_pack_schema( a ) != BLIS_PACKED_ROW_PANELS &&
+	     bli_obj_pack_schema( a ) != BLIS_PACKED_COL_PANELS )
 		e_val = BLIS_PACK_SCHEMA_NOT_SUPPORTED_FOR_UNPACK;
 
 	return e_val;
@@ -721,7 +721,7 @@ err_t bli_check_packv_schema_on_unpack( obj_t* a )
 {
 	err_t e_val = BLIS_SUCCESS;
 
-	if ( bli_obj_pack_schema( *a ) != BLIS_PACKED_VECTOR )
+	if ( bli_obj_pack_schema( a ) != BLIS_PACKED_VECTOR )
 		e_val = BLIS_PACK_SCHEMA_NOT_SUPPORTED_FOR_UNPACK;
 
 	return e_val;
@@ -735,8 +735,8 @@ err_t bli_check_object_buffer( obj_t* a )
 
 	// We are only concerned with NULL buffers in objects where BOTH
 	// dimensions are non-zero.
-	if ( bli_obj_buffer( *a ) == NULL )
-	if ( bli_obj_length( *a ) > 0 && bli_obj_width( *a ) > 0 )
+	if ( bli_obj_buffer( a ) == NULL )
+	if ( bli_obj_length( a ) > 0 && bli_obj_width( a ) > 0 )
 		e_val = BLIS_EXPECTED_NONNULL_OBJECT_BUFFER;
 
 	return e_val;
@@ -821,7 +821,7 @@ err_t bli_check_object_alias_of( obj_t* a, obj_t* b )
 {
 	err_t e_val = BLIS_SUCCESS;
 
-	if ( !bli_obj_is_alias_of( *a, *b ) )
+	if ( !bli_obj_is_alias_of( a, b ) )
 		e_val = BLIS_EXPECTED_OBJECT_ALIAS;
 
 	return e_val;

@@ -190,8 +190,8 @@ void libblis_test_her_experiment
 	libblis_test_vobj_randomize( params, TRUE, &x );
 
 	// Set the structure and uplo properties of A.
-	bli_obj_set_struc( BLIS_HERMITIAN, a );
-	bli_obj_set_uplo( uploa, a );
+	bli_obj_set_struc( BLIS_HERMITIAN, &a );
+	bli_obj_set_uplo( uploa, &a );
 
 	// Randomize A, make it densely Hermitian, and zero the unstored triangle
 	// to ensure the implementation is reads only from the stored region.
@@ -200,12 +200,12 @@ void libblis_test_her_experiment
 	bli_mktrim( &a );
 
 	// Save A and set its structure and uplo properties.
-	bli_obj_set_struc( BLIS_HERMITIAN, a_save );
-	bli_obj_set_uplo( uploa, a_save );
+	bli_obj_set_struc( BLIS_HERMITIAN, &a_save );
+	bli_obj_set_uplo( uploa, &a_save );
 	bli_copym( &a, &a_save );
 
 	// Apply the remaining parameters.
-	bli_obj_set_conj( conjx, x );
+	bli_obj_set_conj( conjx, &x );
 
 	// Repeat the experiment n_repeats times and record results. 
 	for ( i = 0; i < n_repeats; ++i )
@@ -221,7 +221,7 @@ void libblis_test_her_experiment
 
 	// Estimate the performance of the best experiment repeat.
 	*perf = ( 1.0 * m * m ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bli_obj_is_complex( a ) ) *perf *= 4.0;
+	if ( bli_obj_is_complex( &a ) ) *perf *= 4.0;
 
 	// Perform checks.
 	libblis_test_her_check( params, &alpha, &x, &a, &a_save, resid );
@@ -268,10 +268,10 @@ void libblis_test_her_check
        double*        resid
      )
 {
-	num_t  dt      = bli_obj_dt( *a );
-	num_t  dt_real = bli_obj_dt_proj_to_real( *a );
+	num_t  dt      = bli_obj_dt( a );
+	num_t  dt_real = bli_obj_dt_proj_to_real( a );
 
-	dim_t  m_a     = bli_obj_length( *a );
+	dim_t  m_a     = bli_obj_length( a );
 
 	obj_t  xh, t, v, w;
 	obj_t  rho, norm;
@@ -304,10 +304,10 @@ void libblis_test_her_check
 
 	bli_mkherm( a );
 	bli_mkherm( a_orig );
-	bli_obj_set_struc( BLIS_GENERAL, *a );
-	bli_obj_set_struc( BLIS_GENERAL, *a_orig );
-	bli_obj_set_uplo( BLIS_DENSE, *a );
-	bli_obj_set_uplo( BLIS_DENSE, *a_orig );
+	bli_obj_set_struc( BLIS_GENERAL, a );
+	bli_obj_set_struc( BLIS_GENERAL, a_orig );
+	bli_obj_set_uplo( BLIS_DENSE, a );
+	bli_obj_set_uplo( BLIS_DENSE, a_orig );
 
 	bli_obj_scalar_init_detached( dt,      &rho );
 	bli_obj_scalar_init_detached( dt_real, &norm );
@@ -316,7 +316,7 @@ void libblis_test_her_check
 	bli_obj_create( dt, m_a, 1, 0, 0, &v );
 	bli_obj_create( dt, m_a, 1, 0, 0, &w );
 
-	bli_obj_alias_with_conj( BLIS_CONJUGATE, *x, xh );
+	bli_obj_alias_with_conj( BLIS_CONJUGATE, x, &xh );
 
 	libblis_test_vobj_randomize( params, TRUE, &t );
 

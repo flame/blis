@@ -51,9 +51,9 @@ static FUNCPTR_T GENARRAY(ftypes,machval);
 void bli_machval( machval_t mval,
                   obj_t*    v )
 {
-	num_t     dt_v  = bli_obj_dt( *v );
+	num_t     dt_v  = bli_obj_dt( v );
 
-	void*     buf_v = bli_obj_buffer_at_off( *v );
+	void*     buf_v = bli_obj_buffer_at_off( v );
 
 	FUNCPTR_T f;
 

@@ -128,15 +128,15 @@ int main( int argc, char** argv )
 			         &a );
 #else
 
-			f77_int  mm     = bli_obj_length( a );
-			f77_int  nn     = bli_obj_width( a );
-			f77_int  incx   = bli_obj_vector_inc( x );
-			f77_int  incy   = bli_obj_vector_inc( y );
-			f77_int  lda    = bli_obj_col_stride( a );
-			double*  alphap = bli_obj_buffer( alpha );
-			double*  xp     = bli_obj_buffer( x );
-			double*  yp     = bli_obj_buffer( y );
-			double*  ap     = bli_obj_buffer( a );
+			f77_int  mm     = bli_obj_length( &a );
+			f77_int  nn     = bli_obj_width( &a );
+			f77_int  incx   = bli_obj_vector_inc( &x );
+			f77_int  incy   = bli_obj_vector_inc( &y );
+			f77_int  lda    = bli_obj_col_stride( &a );
+			double*  alphap = bli_obj_buffer( &alpha );
+			double*  xp     = bli_obj_buffer( &x );
+			double*  yp     = bli_obj_buffer( &y );
+			double*  ap     = bli_obj_buffer( &a );
 
 			dger_( &mm,
 			       &nn,

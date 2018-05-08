@@ -64,17 +64,17 @@ void bli_unpackm_blk_var1
        thrinfo_t* thread
      )
 {
-	num_t     dt_cp     = bli_obj_dt( *c );
+	num_t     dt_cp     = bli_obj_dt( c );
 
 	// Normally we take the parameters from the source argument. But here,
 	// the packm/unpackm framework is not yet solidified enough for us to
 	// assume that at this point struc(P) == struc(C), (ie: since
 	// densification may have marked P's structure as dense when the root
 	// is upper or lower). So, we take the struc field from C, not P.
-	struc_t   strucc    = bli_obj_struc( *c );
-	doff_t    diagoffc  = bli_obj_diag_offset( *c );
-	diag_t    diagc     = bli_obj_diag( *c );
-	uplo_t    uploc     = bli_obj_uplo( *c );
+	struc_t   strucc    = bli_obj_struc( c );
+	doff_t    diagoffc  = bli_obj_diag_offset( c );
+	diag_t    diagc     = bli_obj_diag( c );
+	uplo_t    uploc     = bli_obj_uplo( c );
 
 	// Again, normally the trans argument is on the source matrix. But we
 	// know that the packed matrix is not transposed. If there is to be a
@@ -83,22 +83,22 @@ void bli_unpackm_blk_var1
 	// the trans status (not the conjugation status), since we probably
 	// don't want to un-conjugate if the original matrix was conjugated
 	// when packed.
-	trans_t   transc    = bli_obj_onlytrans_status( *c );
+	trans_t   transc    = bli_obj_onlytrans_status( c );
 
-	dim_t     m_c       = bli_obj_length( *c );
-	dim_t     n_c       = bli_obj_width( *c );
-	dim_t     m_panel   = bli_obj_panel_length( *c );
-	dim_t     n_panel   = bli_obj_panel_width( *c );
+	dim_t     m_c       = bli_obj_length( c );
+	dim_t     n_c       = bli_obj_width( c );
+	dim_t     m_panel   = bli_obj_panel_length( c );
+	dim_t     n_panel   = bli_obj_panel_width( c );
 
-	void*     buf_p     = bli_obj_buffer_at_off( *p );
-	inc_t     rs_p      = bli_obj_row_stride( *p );
-	inc_t     cs_p      = bli_obj_col_stride( *p );
-	dim_t     pd_p      = bli_obj_panel_dim( *p );
-	inc_t     ps_p      = bli_obj_panel_stride( *p );
+	void*     buf_p     = bli_obj_buffer_at_off( p );
+	inc_t     rs_p      = bli_obj_row_stride( p );
+	inc_t     cs_p      = bli_obj_col_stride( p );
+	dim_t     pd_p      = bli_obj_panel_dim( p );
+	inc_t     ps_p      = bli_obj_panel_stride( p );
 
-	void*     buf_c     = bli_obj_buffer_at_off( *c );
-	inc_t     rs_c      = bli_obj_row_stride( *c );
-	inc_t     cs_c      = bli_obj_col_stride( *c );
+	void*     buf_c     = bli_obj_buffer_at_off( c );
+	inc_t     rs_c      = bli_obj_row_stride( c );
+	inc_t     cs_c      = bli_obj_col_stride( c );
 
 	FUNCPTR_T f;
 
@@ -170,10 +170,10 @@ void PASTEMAC(ch,varname) \
 	   express the remaining parameters and code. */ \
 	if ( bli_does_trans( transc ) ) \
 	{ \
-		bli_swap_incs( rs_c, cs_c ); \
-		bli_negate_diag_offset( diagoffc ); \
-		bli_toggle_uplo( uploc ); \
-		bli_toggle_trans( transc ); \
+		bli_swap_incs( &rs_c, &cs_c ); \
+		bli_negate_diag_offset( &diagoffc ); \
+		bli_toggle_uplo( &uploc ); \
+		bli_toggle_trans( &transc ); \
 	} \
 \
 	/* If the strides of p indicate row storage, then we are packing to

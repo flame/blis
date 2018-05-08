@@ -59,8 +59,8 @@ void bli_l3_cntl_create_if
 		{
 			side_t side;
 
-			if ( bli_obj_is_triangular( *a ) ) side = BLIS_LEFT;
-			else                               side = BLIS_RIGHT;
+			if ( bli_obj_is_triangular( a ) ) side = BLIS_LEFT;
+			else                              side = BLIS_RIGHT;
 
 			*cntl_use = bli_trsm_cntl_create( side );
 		}

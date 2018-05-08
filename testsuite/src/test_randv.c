@@ -174,7 +174,7 @@ void libblis_test_randv_experiment
 
 	// Estimate the performance of the best experiment repeat.
 	*perf = ( 2.0 * m ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bli_obj_is_complex( x ) ) *perf *= 2.0;
+	if ( bli_obj_is_complex( &x ) ) *perf *= 2.0;
 
 	// Perform checks.
 	// For randv(), we don't return a meaningful residual/diff, since we can't
@@ -218,8 +218,8 @@ void libblis_test_randv_check
        double*        resid
      )
 {
-	num_t  dt_real = bli_obj_dt_proj_to_real( *x );
-	dim_t  m_x     = bli_obj_vector_dim( *x );
+	num_t  dt_real = bli_obj_dt_proj_to_real( x );
+	dim_t  m_x     = bli_obj_vector_dim( x );
 	obj_t  sum;
 
 	*resid = 0.0;
@@ -237,14 +237,14 @@ void libblis_test_randv_check
 
 	if ( bli_is_float( dt_real ) )
 	{
-		float*  sum_x = bli_obj_buffer_at_off( sum );
+		float*  sum_x = bli_obj_buffer_at_off( &sum );
 
 		if      ( *sum_x == *bli_d0   ) *resid = 1.0;
 		else if ( *sum_x >= 2.0 * m_x ) *resid = 2.0;
 	}
 	else // if ( bli_is_double( dt_real ) )
 	{
-		double* sum_x = bli_obj_buffer_at_off( sum );
+		double* sum_x = bli_obj_buffer_at_off( &sum );
 
 		if      ( *sum_x == *bli_d0   ) *resid = 1.0;
 		else if ( *sum_x >= 2.0 * m_x ) *resid = 2.0;

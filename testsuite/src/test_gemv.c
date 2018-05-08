@@ -191,7 +191,7 @@ void libblis_test_gemv_experiment
 	                          sc_str[2], m,    &y_save );
 
 	// Set alpha and beta.
-	if ( bli_obj_is_real( y ) )
+	if ( bli_obj_is_real( &y ) )
 	{
 		bli_setsc(  2.0,  0.0, &alpha );
 		bli_setsc( -1.0,  0.0, &beta );
@@ -213,8 +213,8 @@ void libblis_test_gemv_experiment
 	bli_copyv( &y, &y_save );
 
 	// Apply the parameters.
-	bli_obj_set_conjtrans( transa, a );
-	bli_obj_set_conj( conjx, x );
+	bli_obj_set_conjtrans( transa, &a );
+	bli_obj_set_conj( conjx, &x );
 
 	// Repeat the experiment n_repeats times and record results. 
 	for ( i = 0; i < n_repeats; ++i )
@@ -230,7 +230,7 @@ void libblis_test_gemv_experiment
 
 	// Estimate the performance of the best experiment repeat.
 	*perf = ( 2.0 * m * n ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bli_obj_is_complex( y ) ) *perf *= 4.0;
+	if ( bli_obj_is_complex( &y ) ) *perf *= 4.0;
 
 	// Perform checks.
 	libblis_test_gemv_check( params, &kappa, &alpha, &a, &x, &beta, &y, &y_save, resid );
@@ -283,13 +283,13 @@ void libblis_test_gemv_check
        double*        resid
      )
 {
-	num_t  dt      = bli_obj_dt( *y );
-	num_t  dt_real = bli_obj_dt_proj_to_real( *y );
+	num_t  dt      = bli_obj_dt( y );
+	num_t  dt_real = bli_obj_dt_proj_to_real( y );
 
-	conj_t conja   = bli_obj_conj_status( *a );
+	conj_t conja   = bli_obj_conj_status( a );
 
-	dim_t  n_x     = bli_obj_vector_dim( *x );
-	dim_t  m_y     = bli_obj_vector_dim( *y );
+	dim_t  n_x     = bli_obj_vector_dim( x );
+	dim_t  m_y     = bli_obj_vector_dim( y );
 
 	dim_t  min_m_n = bli_min( m_y, n_x );
 

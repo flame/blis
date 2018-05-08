@@ -71,7 +71,7 @@ void bli_packv_int
 
 	// Sanity check; A should never have a zero dimension. If we must support
 	// it, then we should fold it into the next alias-and-early-exit block.
-	//if ( bli_obj_has_zero_dim( *a ) ) bli_abort();
+	//if ( bli_obj_has_zero_dim( a ) ) bli_abort();
 
 	// First check if we are to skip this operation because the control tree
 	// is NULL. We return without taking any action because a was already
@@ -91,7 +91,7 @@ void bli_packv_int
 	// not important, as long as its packed into contiguous rows or
 	// contiguous columns. A good example of this is packing for matrix
 	// operands in the level-2 operations.
-	if ( bli_obj_pack_schema( *a ) == BLIS_PACKED_UNSPEC )
+	if ( bli_obj_pack_schema( a ) == BLIS_PACKED_UNSPEC )
 	{
 		return;
 	}
@@ -104,7 +104,7 @@ void bli_packv_int
 	// already taken place, or does not need to take place, and so that will
 	// be indicated by the pack status). Also, not all combinations of
 	// current pack status and desired pack schema are valid.
-	if ( bli_obj_pack_schema( *a ) == cntl_pack_schema( cntl ) )
+	if ( bli_obj_pack_schema( a ) == cntl_pack_schema( cntl ) )
 	{
 		return;
 	}

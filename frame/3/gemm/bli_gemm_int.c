@@ -56,11 +56,11 @@ void bli_gemm_int
 		bli_gemm_basic_check( alpha, a, b, beta, c, cntx );
 
 	// If C has a zero dimension, return early.
-	if ( bli_obj_has_zero_dim( *c ) ) return;
+	if ( bli_obj_has_zero_dim( c ) ) return;
 
 	// If A or B has a zero dimension, scale C by beta and return early.
-	if ( bli_obj_has_zero_dim( *a ) ||
-	     bli_obj_has_zero_dim( *b ) )
+	if ( bli_obj_has_zero_dim( a ) ||
+	     bli_obj_has_zero_dim( b ) )
 	{
         if ( bli_thread_am_ochief( thread ) )
 		    bli_scalm( beta, c );
@@ -70,8 +70,8 @@ void bli_gemm_int
 
 	// If A or B is marked as being filled with zeros, scale C by beta and
 	// return early.
-	if ( bli_obj_is_zeros( *a ) ||
-	     bli_obj_is_zeros( *b ) )
+	if ( bli_obj_is_zeros( a ) ||
+	     bli_obj_is_zeros( b ) )
 	{
 		// This should never execute.
 		bli_abort();
@@ -83,9 +83,9 @@ void bli_gemm_int
 	}
 
 	// Alias A, B, and C in case we need to update attached scalars.
-	bli_obj_alias_to( *a, a_local );
-	bli_obj_alias_to( *b, b_local );
-	bli_obj_alias_to( *c, c_local );
+	bli_obj_alias_to( a, &a_local );
+	bli_obj_alias_to( b, &b_local );
+	bli_obj_alias_to( c, &c_local );
 
 	// If alpha is non-unit, typecast and apply it to the scalar attached
 	// to B.

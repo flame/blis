@@ -57,17 +57,17 @@ void bli_trsm_xx_ker_var2
 	// Set two bools: one based on the implied side parameter (the structure
 	// of the root object) and one based on the uplo field of the triangular
 	// matrix's root object (whether that is matrix A or matrix B).
-	if ( bli_obj_root_is_triangular( *a ) )
+	if ( bli_obj_root_is_triangular( a ) )
 	{
 		side = 0;
-		if ( bli_obj_root_is_lower( *a ) ) uplo = 0;
-		else                               uplo = 1;
+		if ( bli_obj_root_is_lower( a ) ) uplo = 0;
+		else                              uplo = 1;
 	}
-	else // if ( bli_obj_root_is_triangular( *b ) )
+	else // if ( bli_obj_root_is_triangular( b ) )
 	{
 		side = 1;
-		if ( bli_obj_root_is_lower( *b ) ) uplo = 0;
-		else                               uplo = 1;
+		if ( bli_obj_root_is_lower( b ) ) uplo = 0;
+		else                              uplo = 1;
 	}
 
 	// Index into the variant array to extract the correct function pointer.

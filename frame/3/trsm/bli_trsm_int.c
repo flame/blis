@@ -56,11 +56,11 @@ void bli_trsm_int
 		bli_gemm_basic_check( alpha, a, b, beta, c, cntx );
 
 	// If C has a zero dimension, return early.
-	if ( bli_obj_has_zero_dim( *c ) ) return;
+	if ( bli_obj_has_zero_dim( c ) ) return;
 
 	// If A or B has a zero dimension, scale C by beta and return early.
-	if ( bli_obj_has_zero_dim( *a ) ||
-	     bli_obj_has_zero_dim( *b ) )
+	if ( bli_obj_has_zero_dim( a ) ||
+	     bli_obj_has_zero_dim( b ) )
 	{
 		if ( bli_thread_am_ochief( thread ) )
 		    bli_scalm( beta, c );
@@ -69,21 +69,21 @@ void bli_trsm_int
 	}
 
 	// Alias A and B in case we need to update attached scalars.
-	bli_obj_alias_to( *a, a_local );
-	bli_obj_alias_to( *b, b_local );
+	bli_obj_alias_to( a, &a_local );
+	bli_obj_alias_to( b, &b_local );
 
 	// Alias C in case we need to induce a transposition.
-	bli_obj_alias_to( *c, c_local );
+	bli_obj_alias_to( c, &c_local );
 
 	// If we are about to call a leaf-level implementation, and matrix C
 	// still needs a transposition, then we must induce one by swapping the
 	// strides and dimensions. Note that this transposition would normally
 	// be handled explicitly in the packing of C, but if C is not being
 	// packed, this is our last chance to handle the transposition.
-	if ( bli_cntl_is_leaf( cntl ) && bli_obj_has_trans( *c ) )
+	if ( bli_cntl_is_leaf( cntl ) && bli_obj_has_trans( c ) )
 	{
-		bli_obj_induce_trans( c_local );
-		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, c_local );
+		bli_obj_induce_trans( &c_local );
+		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, &c_local );
 	}
 
 	// If beta is non-unit, apply it to the scalar attached to C.
@@ -95,7 +95,7 @@ void bli_trsm_int
 	// Set two bools: one based on the implied side parameter (the structure
 	// of the root object) and one based on the uplo field of the triangular
 	// matrix's root object (whether that is matrix A or matrix B).
-	if ( bli_obj_root_is_triangular( *a ) )
+	if ( bli_obj_root_is_triangular( a ) )
 	{
 		// If alpha is non-unit, typecast and apply it to the scalar
 		// attached to B (the non-triangular matrix).
@@ -104,7 +104,7 @@ void bli_trsm_int
 			bli_obj_scalar_apply_scalar( alpha, &b_local );
 		}
 	}
-	else // if ( bli_obj_root_is_triangular( *b ) )
+	else // if ( bli_obj_root_is_triangular( b ) )
 	{
 		// If alpha is non-unit, typecast and apply it to the scalar
 		// attached to A (the non-triangular matrix).
