@@ -332,7 +332,7 @@ LIBPTHREAD := -lpthread
 LDFLAGS    := $(LIBM) $(LIBPTHREAD)
 
 # Add libmemkind to the link-time flags, if it was enabled at configure-time.
-ifeq ($(BLIS_ENABLE_MEMKIND),yes)
+ifeq ($(MK_ENABLE_MEMKIND),yes)
 LDFLAGS    += $(LIBMEMKIND)
 endif
 
@@ -353,8 +353,8 @@ SOFLAGS    := -shared
 # to the static library, unless only the shared library was enabled, in
 # which case we use the shared library.
 LIBBLIS_LINK   := $(LIBBLIS_A_PATH)
-ifeq ($(BLIS_ENABLE_SHARED_BUILD),yes)
-ifeq ($(BLIS_ENABLE_STATIC_BUILD),no)
+ifeq ($(MK_ENABLE_SHARED),yes)
+ifeq ($(MK_ENABLE_STATIC),no)
 LIBBLIS_LINK   := $(LIBBLIS_SO_PATH)
 endif
 endif
@@ -503,12 +503,12 @@ endif
 #
 
 ifeq ($(V),1)
-BLIS_ENABLE_VERBOSE_MAKE_OUTPUT := yes
+ENABLE_VERBOSE := yes
 BLIS_ENABLE_TEST_OUTPUT := yes
 endif
 
 ifeq ($(V),0)
-BLIS_ENABLE_VERBOSE_MAKE_OUTPUT := no
+ENABLE_VERBOSE := no
 BLIS_ENABLE_TEST_OUTPUT := no
 endif
 
@@ -672,6 +672,15 @@ CBLAS_H_SRC_PATH := $(filter %/$(CBLAS_H), $(MK_HEADER_FILES))
 
 # Construct the path to the intermediate flattened/monolithic cblas.h file.
 CBLAS_H_FLAT    := $(BASE_INC_PATH)/$(CBLAS_H)
+
+
+#
+# --- BLIS configuration header definitions ------------------------------------
+#
+
+# This file was created by configure, but we need to define it here so we can
+# remove it as part of the clean targets.
+BLIS_CONFIG_H   := ./bli_config.h
 
 
 #

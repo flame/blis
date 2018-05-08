@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-#ifdef BLIS_ENABLE_BLAS2BLIS
+#ifdef BLIS_ENABLE_BLAS
 
 void bla_c_div(bla_scomplex *cp, const bla_scomplex *ap, const bla_scomplex *bp)
 {

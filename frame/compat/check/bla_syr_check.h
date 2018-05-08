@@ -32,7 +32,7 @@
 
 */
 
-#ifdef BLIS_ENABLE_BLAS2BLIS
+#ifdef BLIS_ENABLE_BLAS
 
 #define bla_syr_check bla_her_check
 

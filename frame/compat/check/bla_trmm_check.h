@@ -32,7 +32,7 @@
 
 */
 
-#ifdef BLIS_ENABLE_BLAS2BLIS
+#ifdef BLIS_ENABLE_BLAS
 
 #define bla_trmm_check( dt_str, op_str, sidea, uploa, transa, diaga, m, n, lda, ldb ) \
 { \

@@ -107,7 +107,7 @@ void PASTEF77(ch,blasname) \
 	bli_finalize_auto(); \
 }
 
-#ifdef BLIS_ENABLE_BLAS2BLIS
+#ifdef BLIS_ENABLE_BLAS
 INSERT_GENTFUNCCO_BLAS( her2, her2 )
 #endif
 

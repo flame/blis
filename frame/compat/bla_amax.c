@@ -89,7 +89,7 @@ f77_int PASTEF772(i,chx,blasname) \
 	return f77_index; \
 }
 
-#ifdef BLIS_ENABLE_BLAS2BLIS
+#ifdef BLIS_ENABLE_BLAS
 INSERT_GENTFUNC_BLAS( amax, amaxv )
 #endif
 

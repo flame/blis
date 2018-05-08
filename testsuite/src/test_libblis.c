@@ -650,8 +650,8 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "  pool block addr              %d\n", ( int )bli_info_get_pool_addr_align_size() );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "BLAS compatibility layer         \n" );
-	libblis_test_fprintf_c( os, "  enabled?                     %d\n", ( int )bli_info_get_enable_blas2blis() );
-	libblis_test_fprintf_c( os, "  integer type size (bits)     %d\n", ( int )bli_info_get_blas2blis_int_type_size() );
+	libblis_test_fprintf_c( os, "  enabled?                     %d\n", ( int )bli_info_get_enable_blas() );
+	libblis_test_fprintf_c( os, "  integer type size (bits)     %d\n", ( int )bli_info_get_blas_int_type_size() );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "CBLAS compatibility layer        \n" );
 	libblis_test_fprintf_c( os, "  enabled?                     %d\n", ( int )bli_info_get_enable_cblas() );

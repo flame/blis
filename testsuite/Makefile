@@ -145,7 +145,7 @@ endif
 # --Object file rules --
 
 $(TEST_OBJ_PATH)/%.o: $(TEST_SRC_PATH)/%.c $(LIBBLIS_LINK)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(CFLAGS) -c $< -o $@
 else
 	@echo "Compiling $@"
@@ -156,7 +156,7 @@ endif
 # -- Executable file rules --
 
 $(TEST_BIN): $(TEST_OBJS) $(LIBBLIS_LINK)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(LINKER) $(TEST_OBJS) $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 else
 	@echo "Linking $@ against '$(LIBBLIS_LINK) $(LDFLAGS)'"

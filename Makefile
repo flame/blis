@@ -156,13 +156,13 @@ MK_LIBS                           :=
 MK_LIBS_INST                      :=
 MK_LIBS_INST_W_VERS_CONF          :=
 
-ifeq ($(BLIS_ENABLE_STATIC_BUILD),yes)
+ifeq ($(MK_ENABLE_STATIC),yes)
 MK_LIBS                           += $(LIBBLIS_A_PATH)
 MK_LIBS_INST                      += $(LIBBLIS_A_INST)
 MK_LIBS_INST_W_VERS_CONF          += $(LIBBLIS_A_INST_W_VERS_CONF)
 endif
 
-ifeq ($(BLIS_ENABLE_SHARED_BUILD),yes)
+ifeq ($(MK_ENABLE_SHARED),yes)
 MK_LIBS                           += $(LIBBLIS_SO_PATH)
 MK_LIBS_INST                      += $(LIBBLIS_SO_INST)
 MK_LIBS_INST_W_VERS_CONF          += $(LIBBLIS_SO_INST_W_VERS_CONF)
@@ -273,10 +273,10 @@ MK_BLIS_OBJS         := $(MK_CONFIG_OBJS) \
 # added into the library (and reduces compilation time).
 BASE_OBJ_BLAS_PATH   := $(BASE_OBJ_FRAME_PATH)/compat
 BASE_OBJ_CBLAS_PATH  := $(BASE_OBJ_FRAME_PATH)/compat/cblas
-ifeq ($(BLIS_ENABLE_CBLAS),no)
+ifeq ($(MK_ENABLE_CBLAS),no)
 MK_BLIS_OBJS         := $(filter-out $(BASE_OBJ_CBLAS_PATH)/%.o, $(MK_BLIS_OBJS) )
 endif
-ifeq ($(BLIS_ENABLE_BLAS2BLIS),no)
+ifeq ($(MK_ENABLE_BLAS),no)
 MK_BLIS_OBJS         := $(filter-out $(BASE_OBJ_BLAS_PATH)/%.o,  $(MK_BLIS_OBJS) )
 endif
 
@@ -292,7 +292,7 @@ HEADERS_TO_INSTALL := $(BLIS_H_FLAT)
 # If CBLAS is enabled, we also install cblas.h so the user does not need to
 # change their source code to #include "blis.h" in order to access the CBLAS
 # function prototypes and enums.
-ifeq ($(BLIS_ENABLE_CBLAS),yes)
+ifeq ($(MK_ENABLE_CBLAS),yes)
 HEADERS_TO_INSTALL += $(CBLAS_H_FLAT)
 endif
 
@@ -457,7 +457,7 @@ endif
 flat-header: check-env $(BLIS_H_FLAT)
 
 $(BLIS_H_FLAT): $(MK_HEADER_FILES)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(FLATTEN_H) -c -v1 $(BLIS_H_SRC_PATH) $@ "./$(INCLUDE_DIR)" "$(MK_HEADER_DIR_PATHS)"
 else
 	@echo -n "Generating monolithic blis.h"
@@ -470,7 +470,7 @@ endif
 flat-cblas-header: check-env $(CBLAS_H_FLAT)
 
 $(CBLAS_H_FLAT): $(MK_HEADER_FILES)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(FLATTEN_H) -c -v1 $(CBLAS_H_SRC_PATH) $@ "./$(INCLUDE_DIR)" "$(MK_HEADER_DIR_PATHS)"
 else
 	@echo -n "Generating monolithic cblas.h"
@@ -489,7 +489,7 @@ endif
 # CFLAGS to use during compilation.
 define make-config-rule
 $(BASE_OBJ_CONFIG_PATH)/$(1)/%.o: $(CONFIG_PATH)/$(1)/%.c $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(call get-config-cflags-for,$(1)) -c $$< -o $$@
 else
 	@echo "Compiling $$@" $(call get-config-text-for,$(1))
@@ -501,7 +501,7 @@ endef
 # config_name, used to look up the CFLAGS to use during compilation.
 define make-frame-rule
 $(BASE_OBJ_FRAME_PATH)/%.o: $(FRAME_PATH)/%.c $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(call get-frame-cflags-for,$(1)) -c $$< -o $$@
 else
 	@echo "Compiling $$@" $(call get-frame-text-for,$(1))
@@ -512,7 +512,7 @@ endef
 # first argument: a kernel set (name) being targeted (e.g. haswell).
 define make-refinit-rule
 $(BASE_OBJ_REFKERN_PATH)/$(1)/bli_cntx_$(1)_ref.o: $(REFKERN_PATH)/bli_cntx_ref.c $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(call get-refinit-cflags-for,$(1)) -c $$< -o $$@
 else
 	@echo "Compiling $$@" $(call get-refinit-text-for,$(1))
@@ -523,7 +523,7 @@ endef
 # first argument: a kernel set (name) being targeted (e.g. haswell).
 define make-refkern-rule
 $(BASE_OBJ_REFKERN_PATH)/$(1)/%_$(1)_ref.o: $(REFKERN_PATH)/%_ref.c $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(call get-refkern-cflags-for,$(1)) -c $$< -o $$@
 else
 	@echo "Compiling $$@" $(call get-refkern-text-for,$(1))
@@ -537,7 +537,7 @@ endef
 #$(BASE_OBJ_KERNELS_PATH)/$(1)/%.o: $(KERNELS_PATH)/$(1)/%.c $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
 define make-kernels-rule
 $(BASE_OBJ_KERNELS_PATH)/$(1)/%.o: $(KERNELS_PATH)/$(1)/%.$(3) $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(call get-kernel-cflags-for,$(2)) -c $$< -o $$@
 else
 	@echo "Compiling $$@" $(call get-kernel-text-for,$(2))
@@ -591,7 +591,7 @@ libblis: check-env $(MK_LIBS)
 # --- Static library archiver rules ---
 
 $(LIBBLIS_A_PATH): $(MK_BLIS_OBJS)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(AR) $(ARFLAGS) $@ $?
 	$(RANLIB) $@
 else
@@ -604,7 +604,7 @@ endif
 # --- Dynamic library linker rules ---
 
 $(LIBBLIS_SO_PATH): $(MK_BLIS_OBJS)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(LINKER) $(SOFLAGS) $(LDFLAGS) -o $@ $?
 else 
 	@echo "Dynamically linking $@"
@@ -624,7 +624,7 @@ blastest-run: $(BLASTEST_DRV_BINS_R)
 
 # f2c object file rule.
 $(BASE_OBJ_BLASTEST_PATH)/%.o: $(BLASTEST_F2C_SRC_PATH)/%.c
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(CFLAGS) $(BLAT_CFLAGS) -c $< -o $@
 else
 	@echo "Compiling $@"
@@ -633,7 +633,7 @@ endif
 
 # driver object file rule.
 $(BASE_OBJ_BLASTEST_PATH)/%.o: $(BLASTEST_DRV_SRC_PATH)/%.c
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(CFLAGS) $(BLAT_CFLAGS) -c $< -o $@
 else
 	@echo "Compiling $@"
@@ -642,7 +642,7 @@ endif
 
 # libf2c library archive rule.
 $(BLASTEST_F2C_LIB): $(BLASTEST_F2C_OBJS)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(AR) $(ARFLAGS) $@ $?
 	$(RANLIB) $@
 else
@@ -654,7 +654,7 @@ endif
 # first argument: the base name of the BLAS test driver.
 define make-blat-rule
 $(BASE_OBJ_BLASTEST_PATH)/$(1).x: $(BASE_OBJ_BLASTEST_PATH)/$(1).o $(BLASTEST_F2C_LIB) $(LIBBLIS_LINK)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(LINKER) $(BASE_OBJ_BLASTEST_PATH)/$(1).o $(BLASTEST_F2C_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $$@
 else
 	@echo "Linking $$(@F) against '$(notdir $(BLASTEST_F2C_LIB)) $(LIBBLIS_LINK) $(LDFLAGS)'"
@@ -668,7 +668,7 @@ $(foreach name, $(BLASTEST_DRV_BASES), $(eval $(call make-blat-rule,$(name))))
 # A rule to run ?blat1.x driver files.
 define make-run-blat1-rule
 run-$(1): $(BASE_OBJ_BLASTEST_PATH)/$(1).x
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(BASE_OBJ_BLASTEST_PATH)/$(1).x > out.$(1)
 else
 	@echo "Running $(1).x > 'out.$(1)'"
@@ -682,7 +682,7 @@ $(foreach name, $(BLASTEST_DRV1_BASES), $(eval $(call make-run-blat1-rule,$(name
 # A rule to run ?blat2.x and ?blat3.x driver files.
 define make-run-blat23-rule
 run-$(1): $(BASE_OBJ_BLASTEST_PATH)/$(1).x
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(BASE_OBJ_BLASTEST_PATH)/$(1).x < $(BLASTEST_INPUT_PATH)/$(1).in
 else
 	@echo "Running $(1).x < '$(BLASTEST_INPUT_PATH)/$(1).in' (output to 'out.$(1)')"
@@ -698,7 +698,7 @@ $(foreach name, $(BLASTEST_DRV3_BASES), $(eval $(call make-run-blat23-rule,$(nam
 
 # Check the results of the BLAS test suite drivers.
 checkblas: blastest-run
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	- $(BLASTEST_CHECK)
 else
 	@- $(BLASTEST_CHECK)
@@ -716,7 +716,7 @@ testsuite-bin: check-env $(TESTSUITE_BIN)
 
 # Object file rule.
 $(BASE_OBJ_TESTSUITE_PATH)/%.o: $(TESTSUITE_SRC_PATH)/%.c
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(call get-frame-cflags-for,$(CONFIG_NAME)) -c $< -o $@
 else
 	@echo "Compiling $@"
@@ -725,7 +725,7 @@ endif
 
 # Testsuite binary rule.
 $(TESTSUITE_BIN): $(MK_TESTSUITE_OBJS) $(LIBBLIS_LINK)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(LINKER) $(MK_TESTSUITE_OBJS) $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 else
 	@echo "Linking $@ against '$(LIBBLIS_LINK) $(LDFLAGS)'"
@@ -734,7 +734,7 @@ endif
 
 # A rule to run the testsuite using the normal input.* files.
 testsuite-run: testsuite-bin
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	./$(TESTSUITE_BIN) -g $(TESTSUITE_CONF_GEN_PATH) \
 	                   -o $(TESTSUITE_CONF_OPS_PATH) \
 	                    > $(TESTSUITE_OUT_FILE)
@@ -749,7 +749,7 @@ endif
 # A rule to run the testsuite using the input.*.fast files, which
 # run a set of tests designed to finish much more quickly.
 testsuite-run-fast: testsuite-bin
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	./$(TESTSUITE_BIN) -g $(TESTSUITE_FAST_GEN_PATH) \
 	                   -o $(TESTSUITE_FAST_OPS_PATH) \
 	                    > $(TESTSUITE_OUT_FILE)
@@ -763,7 +763,7 @@ endif
 
 # Check the results of the BLIS testsuite.
 checkblis: testsuite-run
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	- $(TESTSUITE_CHECK) $(TESTSUITE_OUT_FILE)
 else
 	@- $(TESTSUITE_CHECK) $(TESTSUITE_OUT_FILE)
@@ -771,7 +771,7 @@ endif
 
 # Check the results of the BLIS testsuite (fast).
 checkblis-fast: testsuite-run-fast
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	- $(TESTSUITE_CHECK) $(TESTSUITE_OUT_FILE)
 else
 	@- $(TESTSUITE_CHECK) $(TESTSUITE_OUT_FILE)
@@ -782,7 +782,7 @@ endif
 install-headers: check-env $(MK_INCL_DIR_INST)
 
 $(MK_INCL_DIR_INST): $(HEADERS_TO_INSTALL) $(CONFIG_MK_FILE)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(MKDIR) $(@)
 	$(INSTALL) -m 0644 $(HEADERS_TO_INSTALL) $(@)
 else
@@ -797,7 +797,7 @@ endif
 install-libs: check-env $(MK_LIBS_INST_W_VERS_CONF)
 
 $(INSTALL_LIBDIR)/%-$(VERS_CONF).a: $(BASE_LIB_PATH)/%.a $(CONFIG_MK_FILE)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(MKDIR) $(@D)
 	$(INSTALL) -m 0644 $< $@
 else
@@ -807,7 +807,7 @@ else
 endif
 
 $(INSTALL_LIBDIR)/%-$(VERS_CONF).so: $(BASE_LIB_PATH)/%.so $(CONFIG_MK_FILE)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(MKDIR) $(@D)
 	$(INSTALL) -m 0644 $< $@
 else
@@ -822,7 +822,7 @@ endif
 install-lib-symlinks: check-env $(MK_LIBS_INST)
 
 $(INSTALL_LIBDIR)/%.a: $(INSTALL_LIBDIR)/%-$(VERS_CONF).a
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(SYMLINK) $(<F) $(@F)
 	$(MV) $(@F) $(INSTALL_LIBDIR)/
 else
@@ -832,7 +832,7 @@ else
 endif
 
 $(INSTALL_LIBDIR)/%.so: $(INSTALL_LIBDIR)/%-$(VERS_CONF).so
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(SYMLINK) $(<F) $(@F)
 	$(MV) $(@F) $(INSTALL_LIBDIR)/
 else
@@ -855,17 +855,17 @@ showconfig: check-env
 	@echo "install includedir:    $(INSTALL_INCDIR)"
 	@echo "debugging status:      $(DEBUG_TYPE)"
 	@echo "multithreading status: $(THREADING_MODEL)"
-	@echo "enable BLAS API?       $(BLIS_ENABLE_BLAS2BLIS)"
-	@echo "enable CBLAS API?      $(BLIS_ENABLE_CBLAS)"
-	@echo "build static library?  $(BLIS_ENABLE_STATIC_BUILD)"
-	@echo "build shared library?  $(BLIS_ENABLE_SHARED_BUILD)"
+	@echo "enable BLAS API?       $(MK_ENABLE_BLAS)"
+	@echo "enable CBLAS API?      $(MK_ENABLE_CBLAS)"
+	@echo "build static library?  $(MK_ENABLE_STATIC)"
+	@echo "build shared library?  $(MK_ENABLE_SHARED)"
 
 
 # --- Clean rules ---
 
 cleanmk:
 ifeq ($(IS_CONFIGURED),yes)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	- $(FIND) $(CONFIG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 	- $(FIND) $(FRAME_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 	- $(FIND) $(REFKERN_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
@@ -884,10 +884,13 @@ endif
 
 cleanh:
 ifeq ($(IS_CONFIGURED),yes)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
+	$(RM_F) $(BLIS_CONFIG_H)
 	$(RM_F) $(BLIS_H_FLAT)
 	$(RM_F) $(CBLAS_H_FLAT)
 else
+	@echo "Removing config header $(BLIS_CONFIG_H)."
+	@$(RM_F) $(BLIS_CONFIG_H)
 	@echo "Removing flattened header files from $(BASE_INC_PATH)."
 	@$(RM_F) $(BLIS_H_FLAT)
 	@$(RM_F) $(CBLAS_H_FLAT)
@@ -896,7 +899,7 @@ endif
 
 cleanlib:
 ifeq ($(IS_CONFIGURED),yes)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	- $(FIND) $(BASE_OBJ_PATH) -name "*.o" | $(XARGS) $(RM_F)
 	- $(RM_F) $(LIBBLIS_A_PATH)
 	- $(RM_F) $(LIBBLIS_SO_PATH)
@@ -919,7 +922,7 @@ endif
 
 cleanblastesttop:
 ifeq ($(IS_CONFIGURED),yes)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	- $(RM_F) $(BLASTEST_F2C_OBJS) $(BLASTEST_DRV_OBJS)
 	- $(RM_F) $(BLASTEST_F2C_LIB)
 	- $(RM_F) $(BLASTEST_DRV_BIN_PATHS)
@@ -933,12 +936,12 @@ else
 	@- $(RM_F) $(BLASTEST_DRV_BIN_PATHS)
 	@echo "Removing driver output files 'out.*'."
 	@- $(RM_F) $(addprefix out.,$(BLASTEST_DRV_BASES))
-endif # BLIS_ENABLE_VERBOSE_MAKE_OUTPUT
+endif # ENABLE_VERBOSE
 endif # IS_CONFIGURED
 
 cleanblastestdir:
 ifeq ($(IS_CONFIGURED),yes)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	- $(FIND) $(BLASTEST_DIR)/$(OBJ_DIR) -name "*.o" | $(XARGS) $(RM_F)
 	- $(FIND) $(BLASTEST_DIR) -name "*.x" | $(XARGS) $(RM_F)
 	- $(RM_F) $(BLASTEST_DIR)/$(BLASTEST_F2C_LIB_NAME)
@@ -952,7 +955,7 @@ else
 	@- $(FIND) $(BLASTEST_DIR) -name "*.x" | $(XARGS) $(RM_F)
 	@echo "Removing driver output files 'out.*' from ./$(BLASTEST_DIR)."
 	@- $(RM_F) $(addprefix $(BLASTEST_DIR)/out.,$(BLASTEST_DRV_BASES))
-endif # BLIS_ENABLE_VERBOSE_MAKE_OUTPUT
+endif # ENABLE_VERBOSE
 endif # IS_CONFIGURED
 
 ifeq ($(BUILDING_OOT),no)
@@ -963,7 +966,7 @@ endif
 
 cleanblistesttop:
 ifeq ($(IS_CONFIGURED),yes)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	- $(RM_F) $(MK_TESTSUITE_OBJS)
 	- $(RM_F) $(TESTSUITE_BIN)
 	- $(RM_F) $(TESTSUITE_OUT_FILE)
@@ -974,12 +977,12 @@ else
 	@- $(RM_F) $(TESTSUITE_BIN)
 	@echo "Removing $(TESTSUITE_OUT_FILE)."
 	@- $(RM_F) $(TESTSUITE_OUT_FILE)
-endif # BLIS_ENABLE_VERBOSE_MAKE_OUTPUT
+endif # ENABLE_VERBOSE
 endif # IS_CONFIGURED
 
 cleanblistestdir:
 ifeq ($(IS_CONFIGURED),yes)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	- $(FIND) $(TESTSUITE_DIR)/$(OBJ_DIR) -name "*.o" | $(XARGS) $(RM_F)
 	- $(RM_F) $(TESTSUITE_DIR)/$(TESTSUITE_BIN)
 else
@@ -987,12 +990,12 @@ else
 	@- $(FIND) $(TESTSUITE_DIR)/$(OBJ_DIR) -name "*.o" | $(XARGS) $(RM_F)
 	@echo "Removing binary $(TESTSUITE_DIR)/$(TESTSUITE_BIN)."
 	@- $(RM_F) $(TESTSUITE_DIR)/$(TESTSUITE_BIN)
-endif # BLIS_ENABLE_VERBOSE_MAKE_OUTPUT
+endif # ENABLE_VERBOSE
 endif # IS_CONFIGURED
 
 distclean: cleanmk cleanh cleanlib cleantest
 ifeq ($(IS_CONFIGURED),yes)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	- $(RM_F) $(CONFIG_MK_FILE)
 	- $(RM_RF) $(OBJ_DIR)
 	- $(RM_RF) $(LIB_DIR)
@@ -1026,7 +1029,7 @@ changelog:
 # those products.
 
 uninstall-libs: check-env
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	- $(RM_F) $(MK_LIBS_INST_W_VERS_CONF)
 else
 	@echo "Removing $(MK_LIBS_INST_W_VERS_CONF)."
@@ -1034,7 +1037,7 @@ else
 endif
 
 uninstall-lib-symlinks: check-env
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	- $(RM_F) $(MK_LIBS_INST)
 else
 	@echo "Removing $(MK_LIBS_INST)."
@@ -1042,7 +1045,7 @@ else
 endif
 
 uninstall-headers: check-env
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	- $(RM_RF) $(MK_INCL_DIR_INST)
 else
 	@echo "Removing $(MK_INCL_DIR_INST)/."
@@ -1056,7 +1059,7 @@ uninstall-old-libs: $(UNINSTALL_LIBS) check-env
 uninstall-old-headers: $(UNINSTALL_HEADERS) check-env
 
 $(UNINSTALL_LIBS): check-env
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	- $(RM_F) $@
 else
 	@echo "Removing $(@F) from $(@D)/."
@@ -1064,7 +1067,7 @@ else
 endif
 
 $(UNINSTALL_HEADERS): check-env
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	- $(RM_F) $@
 else
 	@echo "Removing $(@F) from $(@D)/."

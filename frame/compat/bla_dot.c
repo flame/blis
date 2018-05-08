@@ -84,7 +84,7 @@ ftype PASTEF772(ch,blasname,chc) \
 	return rho; \
 }
 
-#ifdef BLIS_ENABLE_BLAS2BLIS
+#ifdef BLIS_ENABLE_BLAS
 INSERT_GENTFUNCDOT_BLAS( dot, dotv )
 
 

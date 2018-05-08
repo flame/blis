@@ -123,12 +123,12 @@
 // -- BLAS COMPATIBILITY LAYER -------------------------------------------------
 
 // Enable the BLAS compatibility layer?
-#ifdef BLIS_DISABLE_BLAS2BLIS
-  #undef BLIS_ENABLE_BLAS2BLIS
+#ifdef BLIS_DISABLE_BLAS
+  #undef BLIS_ENABLE_BLAS
 #else
   // Default behavior is enabled.
-  #undef  BLIS_ENABLE_BLAS2BLIS // In case user explicitly enabled.
-  #define BLIS_ENABLE_BLAS2BLIS
+  #undef  BLIS_ENABLE_BLAS // In case user explicitly enabled.
+  #define BLIS_ENABLE_BLAS
 #endif
 
 // The bit size of the integer type used to track values such as dimensions and
@@ -137,8 +137,8 @@
 // while 64 results in 64-bit integers. Any other value results in use of the
 // C99 type "long int". Note that this ONLY affects integers used within the
 // BLAS compatibility layer.
-#ifndef BLIS_BLAS2BLIS_INT_TYPE_SIZE
-#define BLIS_BLAS2BLIS_INT_TYPE_SIZE     32
+#ifndef BLIS_BLAS_INT_TYPE_SIZE
+#define BLIS_BLAS_INT_TYPE_SIZE     32
 #endif
 
 

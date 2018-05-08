@@ -32,7 +32,7 @@
 
 */
 
-#ifdef BLIS_ENABLE_BLAS2BLIS
+#ifdef BLIS_ENABLE_BLAS
 
 #define bla_syrk_check( dt_str, op_str, uploa, transa, m, k, lda, ldc ) \
 { \

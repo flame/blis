@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-#ifdef BLIS_ENABLE_BLAS2BLIS
+#ifdef BLIS_ENABLE_BLAS
 
 /* srotm.f -- translated by f2c (version 19991025).
    You must link the resulting object file with the libraries:

@@ -1495,8 +1495,8 @@ main()
 	enable_shared='no'
 	enable_packbuf_pools='yes'
 	int_type_size=0
-	blas2blis_int_type_size=32
-	enable_blas2blis='yes'
+	blas_int_type_size=32
+	enable_blas='yes'
 	enable_cblas='no'
 	enable_memkind='' # The default memkind value is determined later on.
 	force_version='no'
@@ -1593,13 +1593,13 @@ main()
 						int_type_size=${OPTARG#*=}
 						;;
 					blas-int-size=*)
-						blas2blis_int_type_size=${OPTARG#*=}
+						blas_int_type_size=${OPTARG#*=}
 						;;
 					enable-blas)
-						enable_blas2blis='yes'
+						enable_blas='yes'
 						;;
 					disable-blas)
-						enable_blas2blis='no'
+						enable_blas='no'
 						;;
 					enable-cblas)
 						enable_cblas='yes'
@@ -1644,7 +1644,7 @@ main()
 				int_type_size=$OPTARG
 				;;
 			b)
-				blas2blis_int_type_size=$OPTARG
+				blas_int_type_size=$OPTARG
 				;;
 			c)
 				show_config_list=1
@@ -2145,18 +2145,18 @@ main()
 		fi
 		enable_memkind_01=0
 	fi
-	if [ "x${enable_blas2blis}" = "xyes" ]; then
+	if [ "x${enable_blas}" = "xyes" ]; then
 		echo "${script_name}: the BLAS compatibility layer is enabled."
-		enable_blas2blis_01=1
+		enable_blas_01=1
 	else
 		echo "${script_name}: the BLAS compatibility layer is disabled."
-		enable_blas2blis_01=0
+		enable_blas_01=0
 	fi
 	if [ "x${enable_cblas}" = "xyes" ]; then
 		echo "${script_name}: the CBLAS compatibility layer is enabled."
 		enable_cblas_01=1
 		# Force BLAS layer when CBLAS is enabled
-		enable_blas2blis='yes'
+		enable_blas='yes'
 	else
 		echo "${script_name}: the CBLAS compatibility layer is disabled."
 		enable_cblas_01=0
@@ -2170,9 +2170,9 @@ main()
 	else
 		echo "${script_name}: the internal integer size is automatically determined."
 	fi
-	if [ "x${blas2blis_int_type_size}" = "x32" ]; then
+	if [ "x${blas_int_type_size}" = "x32" ]; then
 		echo "${script_name}: the BLAS/CBLAS interface integer size is 32-bit."
-	elif [ "x${blas2blis_int_type_size}" = "x64" ]; then
+	elif [ "x${blas_int_type_size}" = "x64" ]; then
 		echo "${script_name}: the BLAS/CBLAS interface integer size is 64-bit."
 	else
 		echo "${script_name}: the BLAS/CBLAS interface integer size is automatically determined."
@@ -2256,16 +2256,16 @@ main()
 		| sed -e "s/@CC@/${cc_esc}/g" \
 		| sed -e "s/@RANLIB@/${ranlib_esc}/g" \
 		| sed -e "s/@debug_type@/${debug_type}/g" \
+		| sed -e "s/@threading_model@/${threading_model}/g" \
 		| sed -e "s/@install_libdir@/${install_libdir_esc}/g" \
 		| sed -e "s/@install_incdir@/${install_incdir_esc}/g" \
 		| sed -e "s/@enable_verbose@/${enable_verbose}/g" \
+		| sed -e "s/@configured_oot@/${configured_oot}/g" \
 		| sed -e "s/@enable_static@/${enable_static}/g" \
 		| sed -e "s/@enable_shared@/${enable_shared}/g" \
-		| sed -e "s/@threading_model@/${threading_model}/g" \
-		| sed -e "s/@enable_blas2blis@/${enable_blas2blis}/g" \
+		| sed -e "s/@enable_blas@/${enable_blas}/g" \
 		| sed -e "s/@enable_cblas@/${enable_cblas}/g" \
 		| sed -e "s/@enable_memkind@/${enable_memkind}/g" \
-		| sed -e "s/@configured_oot@/${configured_oot}/g" \
 		> "${config_mk_out_path}"
 		
 
@@ -2283,8 +2283,8 @@ main()
 		| sed   -e "s/@enable_pthreads@/${enable_pthreads_01}/g" \
 		| sed   -e "s/@enable_packbuf_pools@/${enable_packbuf_pools_01}/g" \
 		| sed   -e "s/@int_type_size@/${int_type_size}/g" \
-		| sed   -e "s/@blas2blis_int_type_size@/${blas2blis_int_type_size}/g" \
-		| sed   -e "s/@enable_blas2blis@/${enable_blas2blis_01}/g" \
+		| sed   -e "s/@blas_int_type_size@/${blas_int_type_size}/g" \
+		| sed   -e "s/@enable_blas@/${enable_blas_01}/g" \
 		| sed   -e "s/@enable_cblas@/${enable_cblas_01}/g" \
 		| sed   -e "s/@enable_memkind@/${enable_memkind_01}/g" \
 		> "${bli_config_h_out_path}"
