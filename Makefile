@@ -429,7 +429,7 @@ uninstall: uninstall-libs uninstall-headers uninstall-lib-symlinks
 
 uninstall-old: uninstall-old-libs uninstall-old-headers
 
-clean: cleanh cleanlib cleantest
+clean: cleanh cleanlib
 
 
 # --- Environment check rules ---
@@ -885,12 +885,9 @@ endif
 cleanh:
 ifeq ($(IS_CONFIGURED),yes)
 ifeq ($(ENABLE_VERBOSE),yes)
-	$(RM_F) $(BLIS_CONFIG_H)
 	$(RM_F) $(BLIS_H_FLAT)
 	$(RM_F) $(CBLAS_H_FLAT)
 else
-	@echo "Removing config header $(BLIS_CONFIG_H)."
-	@$(RM_F) $(BLIS_CONFIG_H)
 	@echo "Removing flattened header files from $(BASE_INC_PATH)."
 	@$(RM_F) $(BLIS_H_FLAT)
 	@$(RM_F) $(CBLAS_H_FLAT)
@@ -996,11 +993,14 @@ endif # IS_CONFIGURED
 distclean: cleanmk cleanh cleanlib cleantest
 ifeq ($(IS_CONFIGURED),yes)
 ifeq ($(ENABLE_VERBOSE),yes)
+	- $(RM_F) $(BLIS_CONFIG_H)
 	- $(RM_F) $(CONFIG_MK_FILE)
 	- $(RM_RF) $(OBJ_DIR)
 	- $(RM_RF) $(LIB_DIR)
 	- $(RM_RF) $(INCLUDE_DIR)
 else
+	@echo "Removing $(BLIS_CONFIG_H)."
+	@$(RM_F) $(BLIS_CONFIG_H)
 	@echo "Removing $(CONFIG_MK_FILE)."
 	@- $(RM_F) $(CONFIG_MK_FILE)
 	@echo "Removing $(OBJ_DIR)."
