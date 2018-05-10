@@ -409,9 +409,9 @@ test: testblis testblas
 
 check: checkblis-fast checkblas
 
-install: libs install-libs install-headers install-lib-symlinks
+install: libs install-libs install-lib-symlinks install-headers
 
-uninstall: uninstall-libs uninstall-headers uninstall-lib-symlinks
+uninstall: uninstall-libs uninstall-lib-symlinks uninstall-headers
 
 uninstall-old: uninstall-old-libs uninstall-old-symlinks uninstall-old-headers
 

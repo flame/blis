@@ -109,12 +109,14 @@ print_usage()
 	echo "   --disable-static, --enable-static"
 	echo " "
 	echo "                 Disable (enabled by default) building BLIS as a static"
-	echo "                 library. May be combined with --enable-shared."
+	echo "                 library. If the static library build is disabled, the"
+	echo "                 shared library build must remain enabled."
 	echo " "
-	echo "   --enable-shared, --disable-static"
+	echo "   --disable-shared, --enable-shared"
 	echo " "
-	echo "                 Enable (disabled by default) building BLIS as a shared"
-	echo "                 library. May be combined with --enable-static."
+	echo "                 Disable (enabled by default) building BLIS as a shared"
+	echo "                 library. If the shared library build is disabled, the"
+	echo "                 static library build must remain enabled."
 	echo " "
 	echo "   -t MODEL, --enable-threading[=MODEL], --disable-threading"
 	echo " "
@@ -1492,7 +1494,7 @@ main()
 	# Additional flags.
 	enable_verbose='no'
 	enable_static='yes'
-	enable_shared='no'
+	enable_shared='yes'
 	enable_packbuf_pools='yes'
 	int_type_size=0
 	blas_int_type_size=32
@@ -2095,18 +2097,15 @@ main()
 	fi
 
 	# Check if the static lib flag was specified.
-	if [ "x${enable_static}" = "xyes" ]; then
-		echo "${script_name}: building BLIS as a static library."
-	fi
-	
-	# Check if the shared lib flag was specified.
-	if [ "x${enable_shared}" = "xyes" ]; then
-		echo "${script_name}: building BLIS as a shared library."
-	fi
-	
-	# Check if neither flag was specified.
-	if [ "x${enable_static}" = "xno" -a "x${enable_shared}" = "xno" ]; then
-		echo "Neither a shared nor static library build has been requested."
+	if   [ "x${enable_static}" = "xyes" -a "x${enable_shared}" = "xyes" ]; then
+		echo "${script_name}: building BLIS as both static and shared libraries."
+	elif [ "x${enable_static}" = "xyes" -a "x${enable_shared}" = "xno"  ]; then
+		echo "${script_name}: building BLIS as a static library (shared library disabled)."
+	elif [ "x${enable_static}" = "xno"  -a "x${enable_shared}" = "xyes" ]; then
+		echo "${script_name}: building BLIS as a shared library (static library disabled)."
+	else
+		echo "${script_name}: Both static and shared libraries were disabled."
+		echo "${script_name}: Please enable one (or both) to continue."
 		exit 1
 	fi
 
