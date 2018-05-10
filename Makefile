@@ -60,8 +60,8 @@
         cleantest cleanblastest cleanblistest \
         changelog \
         install uninstall uninstall-old \
-        uninstall-libs uninstall-headers uninstall-lib-symlinks \
-        uninstall-old-libs uninstall-old-headers
+        uninstall-libs uninstall-lib-symlinks uninstall-headers \
+        uninstall-old-libs uninstall-lib-symlinks uninstall-old-headers
 
 
 
@@ -105,24 +105,6 @@ BASE_OBJ_FRAME_PATH    := $(BASE_OBJ_PATH)/$(FRAME_DIR)
 BASE_OBJ_REFKERN_PATH  := $(BASE_OBJ_PATH)/$(REFKERN_DIR)
 BASE_OBJ_KERNELS_PATH  := $(BASE_OBJ_PATH)/$(KERNELS_DIR)
 
-# Construct the base path for the library.
-#BASE_LIB_PATH          := ./$(LIB_DIR)/$(CONFIG_NAME)
-
-# Construct the architecture-version string, which will be used to name the
-# library upon installation.
-#VERS_CONF              := $(VERSION)-$(CONFIG_NAME)
-
-# --- Library names ---
-
-# Note: These names will be modified later to include the configuration and
-# version strings.
-#BLIS_LIB_NAME          := $(LIBBLIS_NAME).a
-#BLIS_DLL_NAME          := $(LIBBLIS_NAME).so
-
-# Append the base library path to the library names.
-#BLIS_LIB_PATH          := $(BASE_LIB_PATH)/$(BLIS_LIB_NAME)
-#BLIS_DLL_PATH          := $(BASE_LIB_PATH)/$(BLIS_DLL_NAME)
-
 # --- BLIS framework object variable names ---
 
 # These hold object filenames corresponding to above.
@@ -132,48 +114,40 @@ MK_KERNELS_OBJS        :=
 
 # --- Define install target names for static libraries ---
 
-#MK_BLIS_LIB                  := $(LIBBLIS_A_PATH)
-LIBBLIS_A_INST              := $(patsubst $(BASE_LIB_PATH)/%.a, \
-                                          $(INSTALL_LIBDIR)/%.a, \
-                                          $(LIBBLIS_A_PATH))
-LIBBLIS_A_INST_W_VERS_CONF  := $(patsubst $(BASE_LIB_PATH)/%.a, \
-                                          $(INSTALL_LIBDIR)/%-$(VERS_CONF).a, \
-                                          $(LIBBLIS_A_PATH))
+LIBBLIS_A_VERS_CONF_INST  := $(INSTALL_LIBDIR)/$(LIBBLIS)-$(VERS_CONF).a
+LIBBLIS_A_INST            := $(INSTALL_LIBDIR)/$(LIBBLIS).a
 
 # --- Define install target names for shared libraries ---
 
-#MK_BLIS_DLL                  := $(LIBBLIS_SO_PATH)
-LIBBLIS_SO_INST             := $(patsubst $(BASE_LIB_PATH)/%.so, \
-                                          $(INSTALL_LIBDIR)/%.so, \
-                                          $(LIBBLIS_SO_PATH))
-LIBBLIS_SO_INST_W_VERS_CONF := $(patsubst $(BASE_LIB_PATH)/%.so, \
-                                          $(INSTALL_LIBDIR)/%-$(VERS_CONF).so, \
-                                          $(LIBBLIS_SO_PATH))
+LIBBLIS_SO_VERS_CONF_INST := $(INSTALL_LIBDIR)/$(LIBBLIS)-$(VERS_CONF).so
+LIBBLIS_SO_INST           := $(INSTALL_LIBDIR)/$(LIBBLIS).so
+LIBBLIS_SO_MAJ_INST       := $(INSTALL_LIBDIR)/$(LIBBLIS).so.$(SO_MAJOR)
+LIBBLIS_SO_MMB_INST       := $(INSTALL_LIBDIR)/$(LIBBLIS).so.$(SO_MAJOR).$(SO_MINORB)
 
 # --- Determine which libraries to build ---
 
-MK_LIBS                           :=
-MK_LIBS_INST                      :=
-MK_LIBS_INST_W_VERS_CONF          :=
+MK_LIBS                   :=
+MK_LIBS_INST              :=
+MK_LIBS_SYML              :=
 
 ifeq ($(MK_ENABLE_STATIC),yes)
-MK_LIBS                           += $(LIBBLIS_A_PATH)
-MK_LIBS_INST                      += $(LIBBLIS_A_INST)
-MK_LIBS_INST_W_VERS_CONF          += $(LIBBLIS_A_INST_W_VERS_CONF)
+MK_LIBS                   += $(LIBBLIS_A_PATH)
+MK_LIBS_INST              += $(LIBBLIS_A_INST)
+MK_LIBS_SYML              +=
 endif
-
 ifeq ($(MK_ENABLE_SHARED),yes)
-MK_LIBS                           += $(LIBBLIS_SO_PATH)
-MK_LIBS_INST                      += $(LIBBLIS_SO_INST)
-MK_LIBS_INST_W_VERS_CONF          += $(LIBBLIS_SO_INST_W_VERS_CONF)
+MK_LIBS                   += $(LIBBLIS_SO_PATH)
+MK_LIBS_INST              += $(LIBBLIS_SO_MMB_INST)
+MK_LIBS_SYML              += $(LIBBLIS_SO_INST) \
+                             $(LIBBLIS_SO_MAJ_INST)
 endif
 
 # Strip leading, internal, and trailing whitespace.
-MK_LIBS_INST                      := $(strip $(MK_LIBS_INST))
-MK_LIBS_INST_W_VERS_CONF          := $(strip $(MK_LIBS_INST_W_VERS_CONF))
+MK_LIBS_INST              := $(strip $(MK_LIBS_INST))
+MK_LIBS_SYML              := $(strip $(MK_LIBS_SYML))
 
-# Set the include directory names
-MK_INCL_DIR_INST                  := $(INSTALL_INCDIR)/blis
+# Set the include installation directory subdirectory name.
+MK_INCL_DIR_INST          := $(INSTALL_INCDIR)/blis
 
 
 
@@ -380,7 +354,7 @@ MK_TESTSUITE_OBJS       := $(sort \
                             )
 
 # The test suite binary executable filename.
-TESTSUITE_BIN           := test_$(LIBBLIS_NAME).x
+TESTSUITE_BIN           := test_$(LIBBLIS).x
 
 # The location of the script that checks the BLIS testsuite output.
 TESTSUITE_CHECK         := $(DIST_PATH)/$(BUILD_DIR)/check-blistest.sh
@@ -393,20 +367,32 @@ TESTSUITE_CHECK         := $(DIST_PATH)/$(BUILD_DIR)/check-blistest.sh
 
 ifeq ($(IS_CONFIGURED),yes)
 
-# This shell command grabs all files named "libblis-*.a" or "libblis-*.so" in
-# the installation directory and then filters out the name of the library
-# archive for the current version/configuration and its symlink. We consider
-# this remaining set of libraries to be "old" and eligible for removal upon
-# running of the uninstall-old target.
-UNINSTALL_LIBS    := $(shell $(FIND) $(INSTALL_LIBDIR)/ -name "$(LIBBLIS_NAME)-*.a" 2> /dev/null | $(GREP) -v "$(LIBBLIS_NAME)-$(VERS_CONF).a" | $(GREP) -v $(LIBBLIS_A))
-UNINSTALL_LIBS    += $(shell $(FIND) $(INSTALL_LIBDIR)/ -name "$(LIBBLIS_NAME)-*.so" 2> /dev/null | $(GREP) -v "$(LIBBLIS_NAME)-$(VERS_CONF).so" | $(GREP) -v $(LIBBLIS_SO))
+# These shell commands gather the filepaths to any library in the current
+# LIBDIR that might be left over from an old installation. We start with
+# including nothing for static libraries, since older static libraries are
+# always overwritten by newer ones. Then we add shared libraries, which are
+# named with three .so version numbers.
+UNINSTALL_OLD_LIBS    :=
+
+UNINSTALL_OLD_LIBS    += $(shell $(FIND) $(INSTALL_LIBDIR)/ -name "$(LIBBLIS).so.?.?.?" 2> /dev/null | $(GREP) -v "$(LIBBLIS_SO).$(SO_MMB)")
+
+# These shell commands gather the filepaths to any library symlink in the
+# current LIBDIR that might be left over from an old installation. We start
+# with symlinks named using the .so major version number.
+UNINSTALL_OLD_SYML    := $(shell $(FIND) $(INSTALL_LIBDIR)/ -name "$(LIBBLIS).so.?" 2> /dev/null | $(GREP) -v "$(LIBBLIS_SO).$(SO_MAJOR)")
+
+# We also prepare to uninstall older-style symlinks whose names contain the
+# BLIS version number and configuration family.
+UNINSTALL_OLD_SYML    += $(shell $(FIND) $(INSTALL_LIBDIR)/ -name "$(LIBBLIS)-*.a" 2> /dev/null | $(GREP) -v "$(LIBBLIS)-$(VERS_CONF).a")
+
+UNINSTALL_OLD_SYML    += $(shell $(FIND) $(INSTALL_LIBDIR)/ -name "$(LIBBLIS)-*.so" 2> /dev/null | $(GREP) -v "$(LIBBLIS)-$(VERS_CONF).so")
 
 # This shell command grabs all files named "*.h" that are not blis.h or cblas.h
 # in the installation directory. We consider this set of headers to be "old" and
 # eligible for removal upon running of the uninstall-old-headers target.
-UNINSTALL_HEADERS := $(shell $(FIND) $(INSTALL_INCDIR)/blis/ -name "*.h" 2> /dev/null | $(GREP) -v "$(BLIS_H)" | $(GREP) -v "$(CBLAS_H)")
+UNINSTALL_OLD_HEADERS := $(shell $(FIND) $(INSTALL_INCDIR)/blis/ -name "*.h" 2> /dev/null | $(GREP) -v "$(BLIS_H)" | $(GREP) -v "$(CBLAS_H)")
 
-endif
+endif # IS_CONFIGURED
 
 
 #
@@ -427,7 +413,7 @@ install: libs install-libs install-headers install-lib-symlinks
 
 uninstall: uninstall-libs uninstall-headers uninstall-lib-symlinks
 
-uninstall-old: uninstall-old-libs uninstall-old-headers
+uninstall-old: uninstall-old-libs uninstall-old-symlinks uninstall-old-headers
 
 clean: cleanh cleanlib
 
@@ -794,9 +780,10 @@ endif
 
 # --- Install library rules ---
 
-install-libs: check-env $(MK_LIBS_INST_W_VERS_CONF)
+install-libs: check-env $(MK_LIBS_INST)
 
-$(INSTALL_LIBDIR)/%-$(VERS_CONF).a: $(BASE_LIB_PATH)/%.a $(CONFIG_MK_FILE)
+# Install static library.
+$(INSTALL_LIBDIR)/%.a: $(BASE_LIB_PATH)/%.a $(CONFIG_MK_FILE)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(MKDIR) $(@D)
 	$(INSTALL) -m 0644 $< $@
@@ -806,7 +793,8 @@ else
 	@$(INSTALL) -m 0644 $< $@
 endif
 
-$(INSTALL_LIBDIR)/%-$(VERS_CONF).so: $(BASE_LIB_PATH)/%.so $(CONFIG_MK_FILE)
+# Install shared library containing .so major, minor, and build versions.
+$(INSTALL_LIBDIR)/%.so.$(SO_MMB): $(BASE_LIB_PATH)/%.so $(CONFIG_MK_FILE)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(MKDIR) $(@D)
 	$(INSTALL) -m 0644 $< $@
@@ -819,9 +807,10 @@ endif
 
 # --- Install-symlinks rules ---
 
-install-lib-symlinks: check-env $(MK_LIBS_INST)
+install-lib-symlinks: check-env $(MK_LIBS_SYML)
 
-$(INSTALL_LIBDIR)/%.a: $(INSTALL_LIBDIR)/%-$(VERS_CONF).a
+# Install generic shared library symlink.
+$(INSTALL_LIBDIR)/%.so: $(INSTALL_LIBDIR)/%.so.$(SO_MMB)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(SYMLINK) $(<F) $(@F)
 	$(MV) $(@F) $(INSTALL_LIBDIR)/
@@ -831,7 +820,30 @@ else
 	@$(MV) $(@F) $(INSTALL_LIBDIR)/
 endif
 
-$(INSTALL_LIBDIR)/%.so: $(INSTALL_LIBDIR)/%-$(VERS_CONF).so
+# Install shared library symlink containing only .so major version.
+$(INSTALL_LIBDIR)/%.so.$(SO_MAJOR): $(INSTALL_LIBDIR)/%.so.$(SO_MMB)
+ifeq ($(ENABLE_VERBOSE),yes)
+	$(SYMLINK) $(<F) $(@F)
+	$(MV) $(@F) $(INSTALL_LIBDIR)/
+else
+	@echo "Installing symlink $(@F) into $(INSTALL_LIBDIR)/"
+	@$(SYMLINK) $(<F) $(@F)
+	@$(MV) $(@F) $(INSTALL_LIBDIR)/
+endif
+
+# Install static library symlink containing version and config family.
+$(INSTALL_LIBDIR)/%-$(VERS_CONF).a: $(INSTALL_LIBDIR)/%.a
+ifeq ($(ENABLE_VERBOSE),yes)
+	$(SYMLINK) $(<F) $(@F)
+	$(MV) $(@F) $(INSTALL_LIBDIR)/
+else
+	@echo "Installing symlink $(@F) into $(INSTALL_LIBDIR)/"
+	@$(SYMLINK) $(<F) $(@F)
+	@$(MV) $(@F) $(INSTALL_LIBDIR)/
+endif
+
+# Install shared library symlink containing version and config family.
+$(INSTALL_LIBDIR)/%-$(VERS_CONF).so: $(INSTALL_LIBDIR)/%.so
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(SYMLINK) $(<F) $(@F)
 	$(MV) $(@F) $(INSTALL_LIBDIR)/
@@ -851,6 +863,8 @@ showconfig: check-env
 	@echo "kernel-to-config map:  $(KCONFIG_MAP)"
 	@echo "-----------------------"
 	@echo "BLIS version string:   $(VERSION)"
+	@echo ".so major version:     $(SO_MAJOR)"
+	@echo ".so minor.build vers:  $(SO_MINORB)"
 	@echo "install libdir:        $(INSTALL_LIBDIR)"
 	@echo "install includedir:    $(INSTALL_INCDIR)"
 	@echo "debugging status:      $(DEBUG_TYPE)"
@@ -1015,7 +1029,6 @@ endif
 
 # --- CHANGELOG rules ---
 
-#changelog: check-env
 changelog:
 	@echo "Updating '$(DIST_PATH)/$(CHANGELOG)' via '$(GIT_LOG)'."
 	@$(GIT_LOG) > $(DIST_PATH)/$(CHANGELOG) 
@@ -1024,53 +1037,47 @@ changelog:
 # --- Uninstall rules ---
 
 # NOTE: We can't write these uninstall rules directly in terms of targets
-# $(MK_LIBS_INST_W_VERS_CONF), $(MK_LIBS_INST), and $(MK_INCL_DIR_INST)
+# $(MK_LIBS_VERS_CONF_INST), $(MK_LIBS_INST), and $(MK_INCL_DIR_INST)
 # because those targets are already defined in terms of rules that *build*
 # those products.
 
 uninstall-libs: check-env
 ifeq ($(ENABLE_VERBOSE),yes)
-	- $(RM_F) $(MK_LIBS_INST_W_VERS_CONF)
+	- $(RM_F) $(MK_LIBS_INST)
 else
-	@echo "Removing $(MK_LIBS_INST_W_VERS_CONF)."
-	@- $(RM_F) $(MK_LIBS_INST_W_VERS_CONF)
+	@echo "Uninstalling libraries $(notdir $(MK_LIBS_INST)) from $(dir $(firstword $(MK_LIBS_INST)))."
+	@- $(RM_F) $(MK_LIBS_INST)
 endif
 
 uninstall-lib-symlinks: check-env
 ifeq ($(ENABLE_VERBOSE),yes)
-	- $(RM_F) $(MK_LIBS_INST)
+	- $(RM_F) $(MK_LIBS_SYML)
 else
-	@echo "Removing $(MK_LIBS_INST)."
-	@- $(RM_F) $(MK_LIBS_INST)
+	@echo "Uninstalling symlinks $(notdir $(MK_LIBS_SYML)) from $(dir $(firstword $(MK_LIBS_SYML)))."
+	@- $(RM_F) $(MK_LIBS_SYML)
 endif
 
 uninstall-headers: check-env
 ifeq ($(ENABLE_VERBOSE),yes)
 	- $(RM_RF) $(MK_INCL_DIR_INST)
 else
-	@echo "Removing $(MK_INCL_DIR_INST)/."
+	@echo "Uninstalling directory '$(notdir $(MK_INCL_DIR_INST))' from $(dir $(MK_INCL_DIR_INST))."
 	@- $(RM_RF) $(MK_INCL_DIR_INST)
 endif
 
 # --- Uninstall old rules ---
 
-uninstall-old-libs: $(UNINSTALL_LIBS) check-env
+uninstall-old-libs: $(UNINSTALL_OLD_LIBS) check-env
 
-uninstall-old-headers: $(UNINSTALL_HEADERS) check-env
+uninstall-old-symlinks: $(UNINSTALL_OLD_SYML) check-env
 
-$(UNINSTALL_LIBS): check-env
+uninstall-old-headers: $(UNINSTALL_OLD_HEADERS) check-env
+
+$(UNINSTALL_OLD_LIBS) $(UNINSTALL_OLD_SYML) $(UNINSTALL_OLD_HEADERS): check-env
 ifeq ($(ENABLE_VERBOSE),yes)
 	- $(RM_F) $@
 else
-	@echo "Removing $(@F) from $(@D)/."
-	@- $(RM_F) $@
-endif
-
-$(UNINSTALL_HEADERS): check-env
-ifeq ($(ENABLE_VERBOSE),yes)
-	- $(RM_F) $@
-else
-	@echo "Removing $(@F) from $(@D)/."
+	@echo "Uninstalling $(@F) from $(@D)/."
 	@- $(RM_F) $@
 endif
 

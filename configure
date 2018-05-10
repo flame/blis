@@ -1488,7 +1488,7 @@ main()
 	# Option variables.
 	quiet_flag=''
 	show_config_list=''
-	
+
 	# Additional flags.
 	enable_verbose='no'
 	enable_static='yes'
@@ -1500,6 +1500,14 @@ main()
 	enable_cblas='no'
 	enable_memkind='' # The default memkind value is determined later on.
 	force_version='no'
+
+	# The shared library (.so) version file.
+	so_version_file='so_version'
+	so_version_filepath="${dist_path}/${so_version_file}"
+
+	# The major and minor/build .so version numbers.
+	so_version_major=''
+	so_version_minorbuild=''
 
 	# Whether we are building out-of-tree.
 	configured_oot="no"
@@ -1735,9 +1743,10 @@ main()
 
 	# -- Acquire the BLIS version ----------------------------------------------
 
-	# Set the 'version' variable to the default value (the 'git describe' augmented
-	# instance of whatever is in the 'version' file if this is a git clone, or
-	# whatever is in the 'version' file unmodified if it is a bare source release).
+	# Set the 'version' variable to the default value (the 'git describe'
+	# augmented instance of whatever is in the 'version' file if this is a git
+	# clone, or whatever is in the 'version' file unmodified if it is a bare
+	# source release).
 	set_default_version "${version_filepath}"
 
 	# Initial message.
@@ -1750,6 +1759,20 @@ main()
 		echo "${script_name}: configuring with custom version string '${force_version}'."
 		version="${force_version}"
 	fi
+
+
+	# -- Acquire the shared library (.so) versions -----------------------------
+
+	# The first line of the 'so_version' file contains the .so major version.
+	so_version_major=$(cat ${so_version_filepath} | sed -n "1p")
+
+	# The second line contains the minor and build .so version numbers
+	# (separated by a '.').
+	so_version_minorbuild=$(cat ${so_version_filepath} | sed -n "2p")
+
+	echo "${script_name}: found shared library .so version '${so_version_major}.${so_version_minorbuild}'."
+	echo "${script_name}:   .so major version: ${so_version_major}"
+	echo "${script_name}:   .so minor.build version: ${so_version_minorbuild}"
 
 
 	# -- Various pre-configuration checks --------------------------------------
@@ -2248,6 +2271,8 @@ main()
 	echo "${script_name}: creating ${config_mk_out_path} from ${config_mk_in_path}"
 	cat "${config_mk_in_path}" \
 		| sed -e "s/@version@/${version}/g" \
+		| sed -e "s/@so_version_major@/${so_version_major}/g" \
+		| sed -e "s/@so_version_minorbuild@/${so_version_minorbuild}/g" \
 		| sed -e "s/@config_name@/${config_name}/g" \
 		| sed -e "s/@config_list@/${config_list}/g" \
 		| sed -e "s/@kernel_list@/${kernel_list}/g" \

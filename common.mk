@@ -237,25 +237,23 @@ KERNELS_PATH       := $(DIST_PATH)/$(KERNELS_DIR)
 
 
 #
-# --- Library paths ------------------------------------------------------------
+# --- Library name and local paths ---------------------------------------------
 #
 
 # The base name of the BLIS library that we will build.
-LIBBLIS_NAME       := libblis
+LIBBLIS            := libblis
 
 # Construct the base path for the library.
 BASE_LIB_PATH      := ./$(LIB_DIR)/$(CONFIG_NAME)
 
 # Note: These names will be modified later to include the configuration and
 # version strings.
-LIBBLIS_A          := $(LIBBLIS_NAME).a
-LIBBLIS_SO         := $(LIBBLIS_NAME).so
+LIBBLIS_A          := $(LIBBLIS).a
+LIBBLIS_SO         := $(LIBBLIS).so
 
 # Append the base library path to the library names.
-#BLIS_LIB_PATH      := $(BASE_LIB_PATH)/$(LIBBLIS_A)
-#BLIS_DLL_PATH      := $(BASE_LIB_PATH)/$(LIBBLIS_SO)
-LIBBLIS_A_PATH      := $(BASE_LIB_PATH)/$(LIBBLIS_A)
-LIBBLIS_SO_PATH     := $(BASE_LIB_PATH)/$(LIBBLIS_SO)
+LIBBLIS_A_PATH     := $(BASE_LIB_PATH)/$(LIBBLIS_A)
+LIBBLIS_SO_PATH    := $(BASE_LIB_PATH)/$(LIBBLIS_SO)
 
 
 
@@ -348,6 +346,9 @@ endif
 
 # Default flag for creating shared objects.
 SOFLAGS    := -shared
+
+# Specify the shared library's 'soname' field.
+SOFLAGS    += -Wl,-soname,$(LIBBLIS_SO).$(SO_MAJOR)
 
 # Decide which library to link to for things like the testsuite. Default
 # to the static library, unless only the shared library was enabled, in

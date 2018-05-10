@@ -40,6 +40,11 @@ CONFIG_MK_INCLUDED := yes
 # string forced at configure-time.
 VERSION           := @version@
 
+# The shared library .so major and minor.build version numbers.
+SO_MAJOR          := @so_version_major@
+SO_MINORB         := @so_version_minorbuild@
+SO_MMB            := $(SO_MAJOR).$(SO_MINORB)
+
 # The name of the configuration family.
 CONFIG_NAME       := @config_name@
 
