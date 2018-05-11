@@ -153,6 +153,11 @@ $ ./configure auto
 $ make [-j]
 $ make install
 ```
+You can then verify your build by running BLAS- and BLIS-specific test
+drivers via `make check`:
+```
+$ make check [-j]
+```
 
 A more detailed walkthrough of the build system can be found in our
 [Build system wiki](https://github.com/flame/blis/wiki/BuildSystem).
@@ -203,7 +208,7 @@ Generally speaking, we highly recommend building from source whenever possible u
 If you prefer (or need) binary packages, please check out the following offerings available thanks to generous involvement/contributions from two of our community members.
 
  * Red Hat/Fedora. Dave Love provides rpm packages for x86_64, which he maintains at [Fedora Copr](https://copr.fedorainfracloud.org/coprs/loveshack/blis/).
- * Ubunutu/Debian. Nico Schlömer provides PPA apt packages for x86_64, which he maintains at [launchpad.net](https://launchpad.net/%7Enschloe/+archive/ubuntu/blis-devel).
+ * Ubuntu/Debian. Nico Schlömer provides PPA apt packages for x86_64, which he maintains at [launchpad.net](https://launchpad.net/%7Enschloe/+archive/ubuntu/blis-devel).
 
 Discussion
 ----------
