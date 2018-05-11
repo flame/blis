@@ -1687,6 +1687,13 @@ main()
 	done
 
 
+	# -- Check the operating system --------------------------------------------
+
+	os_name=$(uname -s)
+	os_vers=$(uname -r)
+	echo "${script_name}: detected ${os_name} kernel version ${os_vers}."
+
+
 	# -- Check the compiler version --------------------------------------------
 
 	# Find a working C compiler.
@@ -2276,6 +2283,7 @@ main()
 		| sed -e "s/@config_list@/${config_list}/g" \
 		| sed -e "s/@kernel_list@/${kernel_list}/g" \
 		| sed -e "s/@kconfig_map@/${kconfig_map}/g" \
+		| sed -e "s/@os_name@/${os_name}/g" \
 		| sed -e "s/@dist_path@/${dist_path_esc}/g" \
 		| sed -e "s/@CC@/${cc_esc}/g" \
 		| sed -e "s/@RANLIB@/${ranlib_esc}/g" \

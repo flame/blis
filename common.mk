@@ -246,10 +246,17 @@ LIBBLIS            := libblis
 # Construct the base path for the library.
 BASE_LIB_PATH      := ./$(LIB_DIR)/$(CONFIG_NAME)
 
+# The shared (dynamic) library file suffix is different for Linux and OS X.
+ifeq ($(OS_NAME),Linux)
+SO_SUF             := so
+else
+SO_SUF             := dylib
+endif
+
 # Note: These names will be modified later to include the configuration and
 # version strings.
 LIBBLIS_A          := $(LIBBLIS).a
-LIBBLIS_SO         := $(LIBBLIS).so
+LIBBLIS_SO         := $(LIBBLIS).$(SO_SUF)
 
 # Append the base library path to the library names.
 LIBBLIS_A_PATH     := $(BASE_LIB_PATH)/$(LIBBLIS_A)
@@ -344,11 +351,17 @@ ifeq ($(DEBUG_TYPE),sde)
 LDFLAGS    := $(filter-out $(LIBMEMKIND),$(LDFLAGS))
 endif
 
-# Default flag for creating shared objects.
+# The default flag for creating shared objects is different for Linux and
+# OS X.
+ifeq ($(OS_NAME),Linux)
 SOFLAGS    := -shared
+SOFLAGS    += -Wl,-soname,$(LIBBLIS_SO).$(SO_MAJOR)
+else
+SOFLAGS    := -dynamiclib
+SOFLAGS    += -Wl,-install_name,$(LIBBLIS_SO).$(SO_MAJOR)
+endif
 
 # Specify the shared library's 'soname' field.
-SOFLAGS    += -Wl,-soname,$(LIBBLIS_SO).$(SO_MAJOR)
 
 # Decide which library to link to for things like the testsuite. Default
 # to the static library, unless only the shared library was enabled, in
