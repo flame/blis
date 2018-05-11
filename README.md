@@ -173,8 +173,6 @@ Does BLIS contain kernels optimized for your favorite architecture? Please see
 our [Hardware Support wiki](https://github.com/flame/blis/wiki/HardwareSupport)
 for a full list of optimized kernels. 
 
-Generally speaking, we **highly recommend** building from source whenever possible using the latest git clone. (Tarballs of each tagged release are also available, but are not preferred since they are more difficult to upgrade than using a git clone.) If you prefer (or need) binary RPMs, please check out Dave Love's packages at [Fedora Copr](https://copr.fedorainfracloud.org/coprs/loveshack/blis/).
-
 We also provide wikis on the following topics, which will likely be of interest
 to more advanced users and developers:
  * [Configurations](https://github.com/flame/blis/wiki/ConfigurationHowTo).
@@ -196,6 +194,16 @@ is, by default, included in BLIS.
  * [Release notes](https://github.com/flame/blis/wiki/ReleaseNotes).
 This wiki contains a summary of new features provided by each new tagged
 version (release) of BLIS, along with the date the release.
+
+External Linux packages
+-----------------------
+
+Generally speaking, we highly recommend building from source whenever possible using the latest `git` clone. (Tarballs of each [tagged release](https://github.com/flame/blis/releases) are also available, but are not preferred since they are more difficult to upgrade from than a git clone.)
+
+If you prefer (or need) binary packages, please check out the following offerings available thanks to generous involvement/contributions from two of our community members.
+
+ * Red Hat/Fedora. Dave Love provides rpm packages for x86_64, which he maintains at [Fedora Copr](https://copr.fedorainfracloud.org/coprs/loveshack/blis/).
+ * Ubunutu/Debian. Nico Schlömer provides PPA apt packages for x86_64, which he maintains at [launchpad.net](https://launchpad.net/%7Enschloe/+archive/ubuntu/blis-devel).
 
 Discussion
 ----------
