@@ -49,7 +49,7 @@ void PASTEF77(ch,blasname) \
              ftype*    x, const f77_int* incx  \
      );
 
-#ifdef BLIS_ENABLE_BLAS2BLIS
+#ifdef BLIS_ENABLE_BLAS
 INSERT_GENTPROT_BLAS( trsv )
 #endif
 

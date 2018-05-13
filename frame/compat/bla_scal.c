@@ -83,7 +83,7 @@ void PASTEF772(chx,cha,blasname) \
 	bli_finalize_auto(); \
 }
 
-#ifdef BLIS_ENABLE_BLAS2BLIS
+#ifdef BLIS_ENABLE_BLAS
 INSERT_GENTFUNCSCAL_BLAS( scal, scalv )
 #endif
 

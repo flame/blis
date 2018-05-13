@@ -77,7 +77,7 @@ ftype_r PASTEF772(chr,chx,blasname) \
 	return asum; \
 }
 
-#ifdef BLIS_ENABLE_BLAS2BLIS
+#ifdef BLIS_ENABLE_BLAS
 INSERT_GENTFUNCR2_BLAS( asum, asumv )
 #endif
 

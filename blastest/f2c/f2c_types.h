@@ -51,9 +51,9 @@ extern "C" {
 #define F2C_LONG_LONG_BITS 64
 
 #ifdef HAVE_BLIS_H
-  #if   BLIS_BLAS2BLIS_INT_TYPE_SIZE == 32
+  #if   BLIS_BLAS_INT_TYPE_SIZE == 32
     typedef int32_t   integer;
-  #elif BLIS_BLAS2BLIS_INT_TYPE_SIZE == 64
+  #elif BLIS_BLAS_INT_TYPE_SIZE == 64
     typedef int64_t   integer;
   #else
     typedef long int  integer;

@@ -60,8 +60,8 @@
         cleantest cleanblastest cleanblistest \
         changelog \
         install uninstall uninstall-old \
-        uninstall-libs uninstall-headers uninstall-lib-symlinks \
-        uninstall-old-libs uninstall-old-headers
+        uninstall-libs uninstall-lib-symlinks uninstall-headers \
+        uninstall-old-libs uninstall-lib-symlinks uninstall-old-headers
 
 
 
@@ -105,24 +105,6 @@ BASE_OBJ_FRAME_PATH    := $(BASE_OBJ_PATH)/$(FRAME_DIR)
 BASE_OBJ_REFKERN_PATH  := $(BASE_OBJ_PATH)/$(REFKERN_DIR)
 BASE_OBJ_KERNELS_PATH  := $(BASE_OBJ_PATH)/$(KERNELS_DIR)
 
-# Construct the base path for the library.
-#BASE_LIB_PATH          := ./$(LIB_DIR)/$(CONFIG_NAME)
-
-# Construct the architecture-version string, which will be used to name the
-# library upon installation.
-#VERS_CONF              := $(VERSION)-$(CONFIG_NAME)
-
-# --- Library names ---
-
-# Note: These names will be modified later to include the configuration and
-# version strings.
-#BLIS_LIB_NAME          := $(LIBBLIS_NAME).a
-#BLIS_DLL_NAME          := $(LIBBLIS_NAME).so
-
-# Append the base library path to the library names.
-#BLIS_LIB_PATH          := $(BASE_LIB_PATH)/$(BLIS_LIB_NAME)
-#BLIS_DLL_PATH          := $(BASE_LIB_PATH)/$(BLIS_DLL_NAME)
-
 # --- BLIS framework object variable names ---
 
 # These hold object filenames corresponding to above.
@@ -132,48 +114,40 @@ MK_KERNELS_OBJS        :=
 
 # --- Define install target names for static libraries ---
 
-#MK_BLIS_LIB                  := $(LIBBLIS_A_PATH)
-LIBBLIS_A_INST              := $(patsubst $(BASE_LIB_PATH)/%.a, \
-                                          $(INSTALL_PREFIX)/lib/%.a, \
-                                          $(LIBBLIS_A_PATH))
-LIBBLIS_A_INST_W_VERS_CONF  := $(patsubst $(BASE_LIB_PATH)/%.a, \
-                                          $(INSTALL_PREFIX)/lib/%-$(VERS_CONF).a, \
-                                          $(LIBBLIS_A_PATH))
+LIBBLIS_A_VERS_CONF_INST  := $(INSTALL_LIBDIR)/$(LIBBLIS)-$(VERS_CONF).a
+LIBBLIS_A_INST            := $(INSTALL_LIBDIR)/$(LIBBLIS_A)
 
 # --- Define install target names for shared libraries ---
 
-#MK_BLIS_DLL                  := $(LIBBLIS_SO_PATH)
-LIBBLIS_SO_INST             := $(patsubst $(BASE_LIB_PATH)/%.so, \
-                                          $(INSTALL_PREFIX)/lib/%.so, \
-                                          $(LIBBLIS_SO_PATH))
-LIBBLIS_SO_INST_W_VERS_CONF := $(patsubst $(BASE_LIB_PATH)/%.so, \
-                                          $(INSTALL_PREFIX)/lib/%-$(VERS_CONF).so, \
-                                          $(LIBBLIS_SO_PATH))
+LIBBLIS_SO_VERS_CONF_INST := $(INSTALL_LIBDIR)/$(LIBBLIS)-$(VERS_CONF).$(SO_SUF)
+LIBBLIS_SO_INST           := $(INSTALL_LIBDIR)/$(LIBBLIS_SO)
+LIBBLIS_SO_MAJ_INST       := $(INSTALL_LIBDIR)/$(LIBBLIS_SO).$(SO_MAJOR)
+LIBBLIS_SO_MMB_INST       := $(INSTALL_LIBDIR)/$(LIBBLIS_SO).$(SO_MAJOR).$(SO_MINORB)
 
 # --- Determine which libraries to build ---
 
-MK_LIBS                           :=
-MK_LIBS_INST                      :=
-MK_LIBS_INST_W_VERS_CONF          :=
+MK_LIBS                   :=
+MK_LIBS_INST              :=
+MK_LIBS_SYML              :=
 
-ifeq ($(BLIS_ENABLE_STATIC_BUILD),yes)
-MK_LIBS                           += $(LIBBLIS_A_PATH)
-MK_LIBS_INST                      += $(LIBBLIS_A_INST)
-MK_LIBS_INST_W_VERS_CONF          += $(LIBBLIS_A_INST_W_VERS_CONF)
+ifeq ($(MK_ENABLE_STATIC),yes)
+MK_LIBS                   += $(LIBBLIS_A_PATH)
+MK_LIBS_INST              += $(LIBBLIS_A_INST)
+MK_LIBS_SYML              +=
 endif
-
-ifeq ($(BLIS_ENABLE_SHARED_BUILD),yes)
-MK_LIBS                           += $(LIBBLIS_SO_PATH)
-MK_LIBS_INST                      += $(LIBBLIS_SO_INST)
-MK_LIBS_INST_W_VERS_CONF          += $(LIBBLIS_SO_INST_W_VERS_CONF)
+ifeq ($(MK_ENABLE_SHARED),yes)
+MK_LIBS                   += $(LIBBLIS_SO_PATH)
+MK_LIBS_INST              += $(LIBBLIS_SO_MMB_INST)
+MK_LIBS_SYML              += $(LIBBLIS_SO_INST) \
+                             $(LIBBLIS_SO_MAJ_INST)
 endif
 
 # Strip leading, internal, and trailing whitespace.
-MK_LIBS_INST                      := $(strip $(MK_LIBS_INST))
-MK_LIBS_INST_W_VERS_CONF          := $(strip $(MK_LIBS_INST_W_VERS_CONF))
+MK_LIBS_INST              := $(strip $(MK_LIBS_INST))
+MK_LIBS_SYML              := $(strip $(MK_LIBS_SYML))
 
-# Set the include directory names
-MK_INCL_DIR_INST                  := $(INSTALL_PREFIX)/include/blis
+# Set the include installation directory subdirectory name.
+MK_INCL_DIR_INST          := $(INSTALL_INCDIR)/blis
 
 
 
@@ -273,10 +247,10 @@ MK_BLIS_OBJS         := $(MK_CONFIG_OBJS) \
 # added into the library (and reduces compilation time).
 BASE_OBJ_BLAS_PATH   := $(BASE_OBJ_FRAME_PATH)/compat
 BASE_OBJ_CBLAS_PATH  := $(BASE_OBJ_FRAME_PATH)/compat/cblas
-ifeq ($(BLIS_ENABLE_CBLAS),no)
+ifeq ($(MK_ENABLE_CBLAS),no)
 MK_BLIS_OBJS         := $(filter-out $(BASE_OBJ_CBLAS_PATH)/%.o, $(MK_BLIS_OBJS) )
 endif
-ifeq ($(BLIS_ENABLE_BLAS2BLIS),no)
+ifeq ($(MK_ENABLE_BLAS),no)
 MK_BLIS_OBJS         := $(filter-out $(BASE_OBJ_BLAS_PATH)/%.o,  $(MK_BLIS_OBJS) )
 endif
 
@@ -292,7 +266,7 @@ HEADERS_TO_INSTALL := $(BLIS_H_FLAT)
 # If CBLAS is enabled, we also install cblas.h so the user does not need to
 # change their source code to #include "blis.h" in order to access the CBLAS
 # function prototypes and enums.
-ifeq ($(BLIS_ENABLE_CBLAS),yes)
+ifeq ($(MK_ENABLE_CBLAS),yes)
 HEADERS_TO_INSTALL += $(CBLAS_H_FLAT)
 endif
 
@@ -380,7 +354,7 @@ MK_TESTSUITE_OBJS       := $(sort \
                             )
 
 # The test suite binary executable filename.
-TESTSUITE_BIN           := test_$(LIBBLIS_NAME).x
+TESTSUITE_BIN           := test_$(LIBBLIS).x
 
 # The location of the script that checks the BLIS testsuite output.
 TESTSUITE_CHECK         := $(DIST_PATH)/$(BUILD_DIR)/check-blistest.sh
@@ -391,19 +365,34 @@ TESTSUITE_CHECK         := $(DIST_PATH)/$(BUILD_DIR)/check-blistest.sh
 # --- Uninstall definitions ----------------------------------------------------
 #
 
-# This shell command grabs all files named "libblis-*.a" or "libblis-*.so" in
-# the installation directory and then filters out the name of the library
-# archive for the current version/configuration and its symlink. We consider
-# this remaining set of libraries to be "old" and eligible for removal upon
-# running of the uninstall-old target.
-UNINSTALL_LIBS    := $(shell $(FIND) $(INSTALL_PREFIX)/lib/ -name "$(LIBBLIS_NAME)-*.a" 2> /dev/null | $(GREP) -v "$(LIBBLIS_NAME)-$(VERS_CONF).a" | $(GREP) -v $(LIBBLIS_A))
-UNINSTALL_LIBS    += $(shell $(FIND) $(INSTALL_PREFIX)/lib/ -name "$(LIBBLIS_NAME)-*.so" 2> /dev/null | $(GREP) -v "$(LIBBLIS_NAME)-$(VERS_CONF).so" | $(GREP) -v $(LIBBLIS_SO))
+ifeq ($(IS_CONFIGURED),yes)
+
+# These shell commands gather the filepaths to any library in the current
+# LIBDIR that might be left over from an old installation. We start with
+# including nothing for static libraries, since older static libraries are
+# always overwritten by newer ones. Then we add shared libraries, which are
+# named with three .so version numbers.
+UNINSTALL_OLD_LIBS    :=
+
+UNINSTALL_OLD_LIBS    += $(shell $(FIND) $(INSTALL_LIBDIR)/ -name "$(LIBBLIS_SO).?.?.?" 2> /dev/null | $(GREP) -v "$(LIBBLIS_SO).$(SO_MMB)")
+
+# These shell commands gather the filepaths to any library symlink in the
+# current LIBDIR that might be left over from an old installation. We start
+# with symlinks named using the .so major version number.
+UNINSTALL_OLD_SYML    := $(shell $(FIND) $(INSTALL_LIBDIR)/ -name "$(LIBBLIS_SO).?" 2> /dev/null | $(GREP) -v "$(LIBBLIS_SO).$(SO_MAJOR)")
+
+# We also prepare to uninstall older-style symlinks whose names contain the
+# BLIS version number and configuration family.
+UNINSTALL_OLD_SYML    += $(shell $(FIND) $(INSTALL_LIBDIR)/ -name "$(LIBBLIS)-*.a" 2> /dev/null | $(GREP) -v "$(LIBBLIS)-$(VERS_CONF).a")
+
+UNINSTALL_OLD_SYML    += $(shell $(FIND) $(INSTALL_LIBDIR)/ -name "$(LIBBLIS)-*.$(SO_SUF)" 2> /dev/null | $(GREP) -v "$(LIBBLIS)-$(VERS_CONF).$(SO_SUF)")
 
 # This shell command grabs all files named "*.h" that are not blis.h or cblas.h
 # in the installation directory. We consider this set of headers to be "old" and
 # eligible for removal upon running of the uninstall-old-headers target.
-UNINSTALL_HEADERS := $(shell $(FIND) $(INSTALL_PREFIX)/include/blis/ -name "*.h" 2> /dev/null | $(GREP) -v "$(BLIS_H)" | $(GREP) -v "$(CBLAS_H)")
+UNINSTALL_OLD_HEADERS := $(shell $(FIND) $(INSTALL_INCDIR)/blis/ -name "*.h" 2> /dev/null | $(GREP) -v "$(BLIS_H)" | $(GREP) -v "$(CBLAS_H)")
 
+endif # IS_CONFIGURED
 
 
 #
@@ -420,13 +409,13 @@ test: testblis testblas
 
 check: checkblis-fast checkblas
 
-install: libs install-libs install-headers install-lib-symlinks
+install: libs install-libs install-lib-symlinks install-headers
 
-uninstall: uninstall-libs uninstall-headers uninstall-lib-symlinks
+uninstall: uninstall-libs uninstall-lib-symlinks uninstall-headers
 
-uninstall-old: uninstall-old-libs uninstall-old-headers
+uninstall-old: uninstall-old-libs uninstall-old-symlinks uninstall-old-headers
 
-clean: cleanlib cleantest
+clean: cleanh cleanlib
 
 
 # --- Environment check rules ---
@@ -454,7 +443,7 @@ endif
 flat-header: check-env $(BLIS_H_FLAT)
 
 $(BLIS_H_FLAT): $(MK_HEADER_FILES)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(FLATTEN_H) -c -v1 $(BLIS_H_SRC_PATH) $@ "./$(INCLUDE_DIR)" "$(MK_HEADER_DIR_PATHS)"
 else
 	@echo -n "Generating monolithic blis.h"
@@ -467,7 +456,7 @@ endif
 flat-cblas-header: check-env $(CBLAS_H_FLAT)
 
 $(CBLAS_H_FLAT): $(MK_HEADER_FILES)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(FLATTEN_H) -c -v1 $(CBLAS_H_SRC_PATH) $@ "./$(INCLUDE_DIR)" "$(MK_HEADER_DIR_PATHS)"
 else
 	@echo -n "Generating monolithic cblas.h"
@@ -486,7 +475,7 @@ endif
 # CFLAGS to use during compilation.
 define make-config-rule
 $(BASE_OBJ_CONFIG_PATH)/$(1)/%.o: $(CONFIG_PATH)/$(1)/%.c $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(call get-config-cflags-for,$(1)) -c $$< -o $$@
 else
 	@echo "Compiling $$@" $(call get-config-text-for,$(1))
@@ -498,7 +487,7 @@ endef
 # config_name, used to look up the CFLAGS to use during compilation.
 define make-frame-rule
 $(BASE_OBJ_FRAME_PATH)/%.o: $(FRAME_PATH)/%.c $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(call get-frame-cflags-for,$(1)) -c $$< -o $$@
 else
 	@echo "Compiling $$@" $(call get-frame-text-for,$(1))
@@ -509,7 +498,7 @@ endef
 # first argument: a kernel set (name) being targeted (e.g. haswell).
 define make-refinit-rule
 $(BASE_OBJ_REFKERN_PATH)/$(1)/bli_cntx_$(1)_ref.o: $(REFKERN_PATH)/bli_cntx_ref.c $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(call get-refinit-cflags-for,$(1)) -c $$< -o $$@
 else
 	@echo "Compiling $$@" $(call get-refinit-text-for,$(1))
@@ -520,7 +509,7 @@ endef
 # first argument: a kernel set (name) being targeted (e.g. haswell).
 define make-refkern-rule
 $(BASE_OBJ_REFKERN_PATH)/$(1)/%_$(1)_ref.o: $(REFKERN_PATH)/%_ref.c $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(call get-refkern-cflags-for,$(1)) -c $$< -o $$@
 else
 	@echo "Compiling $$@" $(call get-refkern-text-for,$(1))
@@ -534,7 +523,7 @@ endef
 #$(BASE_OBJ_KERNELS_PATH)/$(1)/%.o: $(KERNELS_PATH)/$(1)/%.c $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
 define make-kernels-rule
 $(BASE_OBJ_KERNELS_PATH)/$(1)/%.o: $(KERNELS_PATH)/$(1)/%.$(3) $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(call get-kernel-cflags-for,$(2)) -c $$< -o $$@
 else
 	@echo "Compiling $$@" $(call get-kernel-text-for,$(2))
@@ -588,7 +577,7 @@ libblis: check-env $(MK_LIBS)
 # --- Static library archiver rules ---
 
 $(LIBBLIS_A_PATH): $(MK_BLIS_OBJS)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(AR) $(ARFLAGS) $@ $?
 	$(RANLIB) $@
 else
@@ -601,7 +590,7 @@ endif
 # --- Dynamic library linker rules ---
 
 $(LIBBLIS_SO_PATH): $(MK_BLIS_OBJS)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(LINKER) $(SOFLAGS) $(LDFLAGS) -o $@ $?
 else 
 	@echo "Dynamically linking $@"
@@ -621,7 +610,7 @@ blastest-run: $(BLASTEST_DRV_BINS_R)
 
 # f2c object file rule.
 $(BASE_OBJ_BLASTEST_PATH)/%.o: $(BLASTEST_F2C_SRC_PATH)/%.c
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(CFLAGS) $(BLAT_CFLAGS) -c $< -o $@
 else
 	@echo "Compiling $@"
@@ -630,7 +619,7 @@ endif
 
 # driver object file rule.
 $(BASE_OBJ_BLASTEST_PATH)/%.o: $(BLASTEST_DRV_SRC_PATH)/%.c
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(CFLAGS) $(BLAT_CFLAGS) -c $< -o $@
 else
 	@echo "Compiling $@"
@@ -639,7 +628,7 @@ endif
 
 # libf2c library archive rule.
 $(BLASTEST_F2C_LIB): $(BLASTEST_F2C_OBJS)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(AR) $(ARFLAGS) $@ $?
 	$(RANLIB) $@
 else
@@ -651,7 +640,7 @@ endif
 # first argument: the base name of the BLAS test driver.
 define make-blat-rule
 $(BASE_OBJ_BLASTEST_PATH)/$(1).x: $(BASE_OBJ_BLASTEST_PATH)/$(1).o $(BLASTEST_F2C_LIB) $(LIBBLIS_LINK)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(LINKER) $(BASE_OBJ_BLASTEST_PATH)/$(1).o $(BLASTEST_F2C_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $$@
 else
 	@echo "Linking $$(@F) against '$(notdir $(BLASTEST_F2C_LIB)) $(LIBBLIS_LINK) $(LDFLAGS)'"
@@ -665,7 +654,7 @@ $(foreach name, $(BLASTEST_DRV_BASES), $(eval $(call make-blat-rule,$(name))))
 # A rule to run ?blat1.x driver files.
 define make-run-blat1-rule
 run-$(1): $(BASE_OBJ_BLASTEST_PATH)/$(1).x
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(BASE_OBJ_BLASTEST_PATH)/$(1).x > out.$(1)
 else
 	@echo "Running $(1).x > 'out.$(1)'"
@@ -679,7 +668,7 @@ $(foreach name, $(BLASTEST_DRV1_BASES), $(eval $(call make-run-blat1-rule,$(name
 # A rule to run ?blat2.x and ?blat3.x driver files.
 define make-run-blat23-rule
 run-$(1): $(BASE_OBJ_BLASTEST_PATH)/$(1).x
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(BASE_OBJ_BLASTEST_PATH)/$(1).x < $(BLASTEST_INPUT_PATH)/$(1).in
 else
 	@echo "Running $(1).x < '$(BLASTEST_INPUT_PATH)/$(1).in' (output to 'out.$(1)')"
@@ -695,7 +684,7 @@ $(foreach name, $(BLASTEST_DRV3_BASES), $(eval $(call make-run-blat23-rule,$(nam
 
 # Check the results of the BLAS test suite drivers.
 checkblas: blastest-run
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	- $(BLASTEST_CHECK)
 else
 	@- $(BLASTEST_CHECK)
@@ -713,7 +702,7 @@ testsuite-bin: check-env $(TESTSUITE_BIN)
 
 # Object file rule.
 $(BASE_OBJ_TESTSUITE_PATH)/%.o: $(TESTSUITE_SRC_PATH)/%.c
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(call get-frame-cflags-for,$(CONFIG_NAME)) -c $< -o $@
 else
 	@echo "Compiling $@"
@@ -722,7 +711,7 @@ endif
 
 # Testsuite binary rule.
 $(TESTSUITE_BIN): $(MK_TESTSUITE_OBJS) $(LIBBLIS_LINK)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(LINKER) $(MK_TESTSUITE_OBJS) $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 else
 	@echo "Linking $@ against '$(LIBBLIS_LINK) $(LDFLAGS)'"
@@ -731,7 +720,7 @@ endif
 
 # A rule to run the testsuite using the normal input.* files.
 testsuite-run: testsuite-bin
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	./$(TESTSUITE_BIN) -g $(TESTSUITE_CONF_GEN_PATH) \
 	                   -o $(TESTSUITE_CONF_OPS_PATH) \
 	                    > $(TESTSUITE_OUT_FILE)
@@ -746,7 +735,7 @@ endif
 # A rule to run the testsuite using the input.*.fast files, which
 # run a set of tests designed to finish much more quickly.
 testsuite-run-fast: testsuite-bin
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	./$(TESTSUITE_BIN) -g $(TESTSUITE_FAST_GEN_PATH) \
 	                   -o $(TESTSUITE_FAST_OPS_PATH) \
 	                    > $(TESTSUITE_OUT_FILE)
@@ -760,7 +749,7 @@ endif
 
 # Check the results of the BLIS testsuite.
 checkblis: testsuite-run
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	- $(TESTSUITE_CHECK) $(TESTSUITE_OUT_FILE)
 else
 	@- $(TESTSUITE_CHECK) $(TESTSUITE_OUT_FILE)
@@ -768,7 +757,7 @@ endif
 
 # Check the results of the BLIS testsuite (fast).
 checkblis-fast: testsuite-run-fast
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	- $(TESTSUITE_CHECK) $(TESTSUITE_OUT_FILE)
 else
 	@- $(TESTSUITE_CHECK) $(TESTSUITE_OUT_FILE)
@@ -779,7 +768,7 @@ endif
 install-headers: check-env $(MK_INCL_DIR_INST)
 
 $(MK_INCL_DIR_INST): $(HEADERS_TO_INSTALL) $(CONFIG_MK_FILE)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(MKDIR) $(@)
 	$(INSTALL) -m 0644 $(HEADERS_TO_INSTALL) $(@)
 else
@@ -791,24 +780,26 @@ endif
 
 # --- Install library rules ---
 
-install-libs: check-env $(MK_LIBS_INST_W_VERS_CONF)
+install-libs: check-env $(MK_LIBS_INST)
 
-$(INSTALL_PREFIX)/lib/%-$(VERS_CONF).a: $(BASE_LIB_PATH)/%.a $(CONFIG_MK_FILE)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+# Install static library.
+$(INSTALL_LIBDIR)/%.a: $(BASE_LIB_PATH)/%.a $(CONFIG_MK_FILE)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(MKDIR) $(@D)
 	$(INSTALL) -m 0644 $< $@
 else
-	@echo "Installing $(@F) into $(INSTALL_PREFIX)/lib/"
+	@echo "Installing $(@F) into $(INSTALL_LIBDIR)/"
 	@$(MKDIR) $(@D)
 	@$(INSTALL) -m 0644 $< $@
 endif
 
-$(INSTALL_PREFIX)/lib/%-$(VERS_CONF).so: $(BASE_LIB_PATH)/%.so $(CONFIG_MK_FILE)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+# Install shared library containing .so major, minor, and build versions.
+$(INSTALL_LIBDIR)/%.$(SO_SUF).$(SO_MMB): $(BASE_LIB_PATH)/%.$(SO_SUF) $(CONFIG_MK_FILE)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(MKDIR) $(@D)
 	$(INSTALL) -m 0644 $< $@
 else
-	@echo "Installing $(@F) into $(INSTALL_PREFIX)/lib/"
+	@echo "Installing $(@F) into $(INSTALL_LIBDIR)/"
 	@$(MKDIR) $(@D)
 	@$(INSTALL) -m 0644 $< $@
 endif
@@ -816,26 +807,50 @@ endif
 
 # --- Install-symlinks rules ---
 
-install-lib-symlinks: check-env $(MK_LIBS_INST)
+install-lib-symlinks: check-env $(MK_LIBS_SYML)
 
-$(INSTALL_PREFIX)/lib/%.a: $(INSTALL_PREFIX)/lib/%-$(VERS_CONF).a
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+# Install generic shared library symlink.
+$(INSTALL_LIBDIR)/%.$(SO_SUF): $(INSTALL_LIBDIR)/%.$(SO_SUF).$(SO_MMB)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(SYMLINK) $(<F) $(@F)
-	$(MV) $(@F) $(INSTALL_PREFIX)/lib/
+	$(MV) $(@F) $(INSTALL_LIBDIR)/
 else
-	@echo "Installing symlink $(@F) into $(INSTALL_PREFIX)/lib/"
+	@echo "Installing symlink $(@F) into $(INSTALL_LIBDIR)/"
 	@$(SYMLINK) $(<F) $(@F)
-	@$(MV) $(@F) $(INSTALL_PREFIX)/lib/
+	@$(MV) $(@F) $(INSTALL_LIBDIR)/
 endif
 
-$(INSTALL_PREFIX)/lib/%.so: $(INSTALL_PREFIX)/lib/%-$(VERS_CONF).so
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+# Install shared library symlink containing only .so major version.
+$(INSTALL_LIBDIR)/%.$(SO_SUF).$(SO_MAJOR): $(INSTALL_LIBDIR)/%.$(SO_SUF).$(SO_MMB)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(SYMLINK) $(<F) $(@F)
-	$(MV) $(@F) $(INSTALL_PREFIX)/lib/
+	$(MV) $(@F) $(INSTALL_LIBDIR)/
 else
-	@echo "Installing symlink $(@F) into $(INSTALL_PREFIX)/lib/"
+	@echo "Installing symlink $(@F) into $(INSTALL_LIBDIR)/"
 	@$(SYMLINK) $(<F) $(@F)
-	@$(MV) $(@F) $(INSTALL_PREFIX)/lib/
+	@$(MV) $(@F) $(INSTALL_LIBDIR)/
+endif
+
+# Install static library symlink containing version and config family.
+$(INSTALL_LIBDIR)/%-$(VERS_CONF).a: $(INSTALL_LIBDIR)/%.a
+ifeq ($(ENABLE_VERBOSE),yes)
+	$(SYMLINK) $(<F) $(@F)
+	$(MV) $(@F) $(INSTALL_LIBDIR)/
+else
+	@echo "Installing symlink $(@F) into $(INSTALL_LIBDIR)/"
+	@$(SYMLINK) $(<F) $(@F)
+	@$(MV) $(@F) $(INSTALL_LIBDIR)/
+endif
+
+# Install shared library symlink containing version and config family.
+$(INSTALL_LIBDIR)/%-$(VERS_CONF).$(SO_SUF): $(INSTALL_LIBDIR)/%.$(SO_SUF)
+ifeq ($(ENABLE_VERBOSE),yes)
+	$(SYMLINK) $(<F) $(@F)
+	$(MV) $(@F) $(INSTALL_LIBDIR)/
+else
+	@echo "Installing symlink $(@F) into $(INSTALL_LIBDIR)/"
+	@$(SYMLINK) $(<F) $(@F)
+	@$(MV) $(@F) $(INSTALL_LIBDIR)/
 endif
 
 
@@ -848,19 +863,23 @@ showconfig: check-env
 	@echo "kernel-to-config map:  $(KCONFIG_MAP)"
 	@echo "-----------------------"
 	@echo "BLIS version string:   $(VERSION)"
-	@echo "install prefix:        $(INSTALL_PREFIX)"
+	@echo ".so major version:     $(SO_MAJOR)"
+	@echo ".so minor.build vers:  $(SO_MINORB)"
+	@echo "install libdir:        $(INSTALL_LIBDIR)"
+	@echo "install includedir:    $(INSTALL_INCDIR)"
 	@echo "debugging status:      $(DEBUG_TYPE)"
 	@echo "multithreading status: $(THREADING_MODEL)"
-	@echo "enable BLAS API?       $(BLIS_ENABLE_BLAS2BLIS)"
-	@echo "enable CBLAS API?      $(BLIS_ENABLE_CBLAS)"
-	@echo "build static library?  $(BLIS_ENABLE_STATIC_BUILD)"
-	@echo "build shared library?  $(BLIS_ENABLE_SHARED_BUILD)"
+	@echo "enable BLAS API?       $(MK_ENABLE_BLAS)"
+	@echo "enable CBLAS API?      $(MK_ENABLE_CBLAS)"
+	@echo "build static library?  $(MK_ENABLE_STATIC)"
+	@echo "build shared library?  $(MK_ENABLE_SHARED)"
 
 
 # --- Clean rules ---
 
-cleanmk: check-env
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+cleanmk:
+ifeq ($(IS_CONFIGURED),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	- $(FIND) $(CONFIG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 	- $(FIND) $(FRAME_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 	- $(FIND) $(REFKERN_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
@@ -875,71 +894,129 @@ else
 	@echo "Removing makefile fragments from $(KERNELS_PATH)."
 	@- $(FIND) $(KERNELS_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 endif
-
-cleanh: check-env
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	$(RM_F) $(BLIS_H_FLAT)
-else
-	@echo "Removing blis.h file from $(BASE_INC_PATH)."
-	@$(RM_F) $(BLIS_H_FLAT)
 endif
 
-cleanlib: check-env
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+cleanh:
+ifeq ($(IS_CONFIGURED),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
+	$(RM_F) $(BLIS_H_FLAT)
+	$(RM_F) $(CBLAS_H_FLAT)
+else
+	@echo "Removing flattened header files from $(BASE_INC_PATH)."
+	@$(RM_F) $(BLIS_H_FLAT)
+	@$(RM_F) $(CBLAS_H_FLAT)
+endif
+endif
+
+cleanlib:
+ifeq ($(IS_CONFIGURED),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	- $(FIND) $(BASE_OBJ_PATH) -name "*.o" | $(XARGS) $(RM_F)
 	- $(RM_F) $(LIBBLIS_A_PATH)
 	- $(RM_F) $(LIBBLIS_SO_PATH)
 else
-	@echo "Removing .o files from $(BASE_OBJ_PATH)."
+	@echo "Removing object files from $(BASE_OBJ_PATH)."
 	@- $(FIND) $(BASE_OBJ_PATH) -name "*.o" | $(XARGS) $(RM_F)
-	@echo "Removing $(LIBBLIS_A_PATH)."
+	@echo "Removing libraries from $(BASE_LIB_PATH)."
 	@- $(RM_F) $(LIBBLIS_A_PATH)
-	@echo "Removing $(LIBBLIS_SO_PATH)."
 	@- $(RM_F) $(LIBBLIS_SO_PATH)
+endif
 endif
 
 cleantest: cleanblastest cleanblistest
 
-cleanblastest: check-env
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(BUILDING_OOT),no)
+cleanblastest: cleanblastesttop cleanblastestdir
+else
+cleanblastest: cleanblastesttop
+endif
+
+cleanblastesttop:
+ifeq ($(IS_CONFIGURED),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	- $(RM_F) $(BLASTEST_F2C_OBJS) $(BLASTEST_DRV_OBJS)
-	- $(RM_F) $(BLASTEST_DRV_BIN_PATHS)
 	- $(RM_F) $(BLASTEST_F2C_LIB)
+	- $(RM_F) $(BLASTEST_DRV_BIN_PATHS)
 	- $(RM_F) $(addprefix out.,$(BLASTEST_DRV_BASES))
 else
 	@echo "Removing object files from $(BASE_OBJ_BLASTEST_PATH)."
 	@- $(RM_F) $(BLASTEST_F2C_OBJS) $(BLASTEST_DRV_OBJS)
-	@echo "Removing binaries from $(BASE_OBJ_BLASTEST_PATH)."
-	@- $(RM_F) $(BLASTEST_DRV_BIN_PATHS)
 	@echo "Removing libf2c.a from $(BASE_OBJ_BLASTEST_PATH)."
 	@- $(RM_F) $(BLASTEST_F2C_LIB)
+	@echo "Removing binaries from $(BASE_OBJ_BLASTEST_PATH)."
+	@- $(RM_F) $(BLASTEST_DRV_BIN_PATHS)
 	@echo "Removing driver output files 'out.*'."
 	@- $(RM_F) $(addprefix out.,$(BLASTEST_DRV_BASES))
+endif # ENABLE_VERBOSE
+endif # IS_CONFIGURED
+
+cleanblastestdir:
+ifeq ($(IS_CONFIGURED),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
+	- $(FIND) $(BLASTEST_DIR)/$(OBJ_DIR) -name "*.o" | $(XARGS) $(RM_F)
+	- $(FIND) $(BLASTEST_DIR) -name "*.x" | $(XARGS) $(RM_F)
+	- $(RM_F) $(BLASTEST_DIR)/$(BLASTEST_F2C_LIB_NAME)
+	- $(RM_F) $(addprefix $(BLASTEST_DIR)/out.,$(BLASTEST_DRV_BASES))
+else
+	@echo "Removing object files from ./$(BLASTEST_DIR)/$(OBJ_DIR)."
+	@- $(FIND) $(BLASTEST_DIR)/$(OBJ_DIR) -name "*.o" | $(XARGS) $(RM_F)
+	@echo "Removing libf2c.a from ./$(BLASTEST_DIR)."
+	@- $(RM_F) $(BLASTEST_DIR)/$(BLASTEST_F2C_LIB_NAME)
+	@echo "Removing binaries from ./$(BLASTEST_DIR)."
+	@- $(FIND) $(BLASTEST_DIR) -name "*.x" | $(XARGS) $(RM_F)
+	@echo "Removing driver output files 'out.*' from ./$(BLASTEST_DIR)."
+	@- $(RM_F) $(addprefix $(BLASTEST_DIR)/out.,$(BLASTEST_DRV_BASES))
+endif # ENABLE_VERBOSE
+endif # IS_CONFIGURED
+
+ifeq ($(BUILDING_OOT),no)
+cleanblistest: cleanblistesttop cleanblistestdir
+else
+cleanblistest: cleanblistesttop
 endif
 
-cleanblistest: check-env
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	- $(FIND) $(BASE_OBJ_TESTSUITE_PATH) -name "*.o" | $(XARGS) $(RM_F)
-	- $(RM_RF) $(TESTSUITE_BIN)
+cleanblistesttop:
+ifeq ($(IS_CONFIGURED),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
+	- $(RM_F) $(MK_TESTSUITE_OBJS)
+	- $(RM_F) $(TESTSUITE_BIN)
+	- $(RM_F) $(TESTSUITE_OUT_FILE)
 else
 	@echo "Removing object files from $(BASE_OBJ_TESTSUITE_PATH)."
-	@- $(FIND) $(BASE_OBJ_TESTSUITE_PATH) -name "*.o" | $(XARGS) $(RM_F)
-	@echo "Removing $(TESTSUITE_BIN) binary."
-	@- $(RM_RF) $(TESTSUITE_BIN)
-endif
+	@- $(RM_F) $(MK_TESTSUITE_OBJS)
+	@echo "Removing binary $(TESTSUITE_BIN)."
+	@- $(RM_F) $(TESTSUITE_BIN)
+	@echo "Removing $(TESTSUITE_OUT_FILE)."
+	@- $(RM_F) $(TESTSUITE_OUT_FILE)
+endif # ENABLE_VERBOSE
+endif # IS_CONFIGURED
 
-distclean: check-env cleanmk cleanh cleanlib cleantest
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+cleanblistestdir:
+ifeq ($(IS_CONFIGURED),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
+	- $(FIND) $(TESTSUITE_DIR)/$(OBJ_DIR) -name "*.o" | $(XARGS) $(RM_F)
+	- $(RM_F) $(TESTSUITE_DIR)/$(TESTSUITE_BIN)
+else
+	@echo "Removing object files from $(TESTSUITE_DIR)/$(OBJ_DIR)."
+	@- $(FIND) $(TESTSUITE_DIR)/$(OBJ_DIR) -name "*.o" | $(XARGS) $(RM_F)
+	@echo "Removing binary $(TESTSUITE_DIR)/$(TESTSUITE_BIN)."
+	@- $(RM_F) $(TESTSUITE_DIR)/$(TESTSUITE_BIN)
+endif # ENABLE_VERBOSE
+endif # IS_CONFIGURED
+
+distclean: cleanmk cleanh cleanlib cleantest
+ifeq ($(IS_CONFIGURED),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
+	- $(RM_F) $(BLIS_CONFIG_H)
 	- $(RM_F) $(CONFIG_MK_FILE)
-	- $(RM_RF) $(TESTSUITE_OUT_FILE)
 	- $(RM_RF) $(OBJ_DIR)
 	- $(RM_RF) $(LIB_DIR)
 	- $(RM_RF) $(INCLUDE_DIR)
 else
+	@echo "Removing $(BLIS_CONFIG_H)."
+	@$(RM_F) $(BLIS_CONFIG_H)
 	@echo "Removing $(CONFIG_MK_FILE)."
 	@- $(RM_F) $(CONFIG_MK_FILE)
-	@echo "Removing $(TESTSUITE_OUT_FILE)."
-	@- $(RM_F) $(TESTSUITE_OUT_FILE)
 	@echo "Removing $(OBJ_DIR)."
 	@- $(RM_RF) $(OBJ_DIR)
 	@echo "Removing $(LIB_DIR)."
@@ -947,11 +1024,12 @@ else
 	@echo "Removing $(INCLUDE_DIR)."
 	@- $(RM_RF) $(INCLUDE_DIR)
 endif
+endif
 
 
 # --- CHANGELOG rules ---
 
-changelog: check-env
+changelog:
 	@echo "Updating '$(DIST_PATH)/$(CHANGELOG)' via '$(GIT_LOG)'."
 	@$(GIT_LOG) > $(DIST_PATH)/$(CHANGELOG) 
 
@@ -959,53 +1037,47 @@ changelog: check-env
 # --- Uninstall rules ---
 
 # NOTE: We can't write these uninstall rules directly in terms of targets
-# $(MK_LIBS_INST_W_VERS_CONF), $(MK_LIBS_INST), and $(MK_INCL_DIR_INST)
+# $(MK_LIBS_VERS_CONF_INST), $(MK_LIBS_INST), and $(MK_INCL_DIR_INST)
 # because those targets are already defined in terms of rules that *build*
 # those products.
 
 uninstall-libs: check-env
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	- $(RM_F) $(MK_LIBS_INST_W_VERS_CONF)
-else
-	@echo "Removing $(MK_LIBS_INST_W_VERS_CONF)."
-	@- $(RM_F) $(MK_LIBS_INST_W_VERS_CONF)
-endif
-
-uninstall-lib-symlinks: check-env
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	- $(RM_F) $(MK_LIBS_INST)
 else
-	@echo "Removing $(MK_LIBS_INST)."
+	@echo "Uninstalling libraries $(notdir $(MK_LIBS_INST)) from $(dir $(firstword $(MK_LIBS_INST)))."
 	@- $(RM_F) $(MK_LIBS_INST)
 endif
 
+uninstall-lib-symlinks: check-env
+ifeq ($(ENABLE_VERBOSE),yes)
+	- $(RM_F) $(MK_LIBS_SYML)
+else
+	@echo "Uninstalling symlinks $(notdir $(MK_LIBS_SYML)) from $(dir $(firstword $(MK_LIBS_SYML)))."
+	@- $(RM_F) $(MK_LIBS_SYML)
+endif
+
 uninstall-headers: check-env
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	- $(RM_RF) $(MK_INCL_DIR_INST)
 else
-	@echo "Removing $(MK_INCL_DIR_INST)/."
+	@echo "Uninstalling directory '$(notdir $(MK_INCL_DIR_INST))' from $(dir $(MK_INCL_DIR_INST))."
 	@- $(RM_RF) $(MK_INCL_DIR_INST)
 endif
 
 # --- Uninstall old rules ---
 
-uninstall-old-libs: $(UNINSTALL_LIBS) check-env
+uninstall-old-libs: $(UNINSTALL_OLD_LIBS) check-env
 
-uninstall-old-headers: $(UNINSTALL_HEADERS) check-env
+uninstall-old-symlinks: $(UNINSTALL_OLD_SYML) check-env
 
-$(UNINSTALL_LIBS): check-env
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+uninstall-old-headers: $(UNINSTALL_OLD_HEADERS) check-env
+
+$(UNINSTALL_OLD_LIBS) $(UNINSTALL_OLD_SYML) $(UNINSTALL_OLD_HEADERS): check-env
+ifeq ($(ENABLE_VERBOSE),yes)
 	- $(RM_F) $@
 else
-	@echo "Removing $(@F) from $(@D)/."
-	@- $(RM_F) $@
-endif
-
-$(UNINSTALL_HEADERS): check-env
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
-	- $(RM_F) $@
-else
-	@echo "Removing $(@F) from $(@D)/."
+	@echo "Uninstalling $(@F) from $(@D)/."
 	@- $(RM_F) $@
 endif
 

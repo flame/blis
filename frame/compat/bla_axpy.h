@@ -47,7 +47,7 @@ void PASTEF77(ch,blasname) \
              ftype*   y, const f77_int* incy \
      );
 
-#ifdef BLIS_ENABLE_BLAS2BLIS
+#ifdef BLIS_ENABLE_BLAS
 INSERT_GENTPROT_BLAS( axpy )
 #endif
 

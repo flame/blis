@@ -36,13 +36,13 @@
 
 // If the BLAS compatibility layer was not explicitly enabled, we must
 // enable it here.
-#ifndef BLIS_ENABLE_BLAS2BLIS
-#define BLIS_ENABLE_BLAS2BLIS
+#ifndef BLIS_ENABLE_BLAS
+#define BLIS_ENABLE_BLAS
 #endif
 
 #endif // BLIS_ENABLE_CBLAS
 
-#ifdef BLIS_ENABLE_BLAS2BLIS
+#ifdef BLIS_ENABLE_BLAS
 
 
 // -- System headers needed by BLAS compatibility layer --
@@ -174,4 +174,4 @@
 #include "bla_trsm_check.h"
 
 
-#endif // BLIS_ENABLE_BLAS2BLIS
+#endif // BLIS_ENABLE_BLAS

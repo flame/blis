@@ -66,7 +66,7 @@ void PASTEF772(chxy,chr,blasname)( \
 	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \
 }
 
-#ifdef BLIS_ENABLE_BLAS2BLIS
+#ifdef BLIS_ENABLE_BLAS
 INSERT_GENTFUNCR2_BLAS( rot, ROT_KERNEL )
 #endif
 

@@ -46,7 +46,7 @@ ftype PASTEF772(ch,blasname,chc) \
        const ftype*   y, const f77_int* incy  \
      );
 
-#ifdef BLIS_ENABLE_BLAS2BLIS
+#ifdef BLIS_ENABLE_BLAS
 INSERT_GENTPROTDOT_BLAS( dot )
 
 

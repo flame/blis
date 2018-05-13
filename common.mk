@@ -158,10 +158,30 @@ CONFIG_MK_FILE     := config.mk
 # it is likely that the user has not yet generated it (via configure).
 ifeq ($(strip $(CONFIG_MK_INCLUDED)),yes)
 CONFIG_MK_PRESENT := yes
+IS_CONFIGURED     := yes
 else
 CONFIG_MK_PRESENT := no
+IS_CONFIGURED     := no
 endif
 
+# If we didn't get config.mk, then we need to set some basic variables so
+# that make will function without error for things like 'make clean'.
+ifeq ($(IS_CONFIGURED),no)
+
+# If this makefile fragment is being run and there is no config.mk present,
+# then it's probably safe to assume that the user is currently located in the
+# source distribution.
+DIST_PATH := .
+
+# Even though they won't be used explicitly, it appears that setting these
+# INSTALL_* variables to something sane (that is, not allowing them default
+# to the empty string) is necessary to prevent make from hanging, likely
+# because the statements that define UNINSTALL_LIBS and UNINSTALL_HEADERS,
+# when evaluated, result in running 'find' on the root directory--definitely
+# something we would like to avoid.
+INSTALL_LIBDIR := $(HOME)/blis/lib
+INSTALL_INCDIR := $(HOME)/blis/include
+endif
 
 
 #
@@ -217,25 +237,30 @@ KERNELS_PATH       := $(DIST_PATH)/$(KERNELS_DIR)
 
 
 #
-# --- Library paths ------------------------------------------------------------
+# --- Library name and local paths ---------------------------------------------
 #
 
 # The base name of the BLIS library that we will build.
-LIBBLIS_NAME       := libblis
+LIBBLIS            := libblis
 
 # Construct the base path for the library.
-BASE_LIB_PATH      := $(LIB_DIR)/$(CONFIG_NAME)
+BASE_LIB_PATH      := ./$(LIB_DIR)/$(CONFIG_NAME)
+
+# The shared (dynamic) library file suffix is different for Linux and OS X.
+ifeq ($(OS_NAME),Linux)
+SO_SUF             := so
+else
+SO_SUF             := dylib
+endif
 
 # Note: These names will be modified later to include the configuration and
 # version strings.
-LIBBLIS_A          := $(LIBBLIS_NAME).a
-LIBBLIS_SO         := $(LIBBLIS_NAME).so
+LIBBLIS_A          := $(LIBBLIS).a
+LIBBLIS_SO         := $(LIBBLIS).$(SO_SUF)
 
 # Append the base library path to the library names.
-#BLIS_LIB_PATH      := $(BASE_LIB_PATH)/$(LIBBLIS_A)
-#BLIS_DLL_PATH      := $(BASE_LIB_PATH)/$(LIBBLIS_SO)
-LIBBLIS_A_PATH      := $(BASE_LIB_PATH)/$(LIBBLIS_A)
-LIBBLIS_SO_PATH     := $(BASE_LIB_PATH)/$(LIBBLIS_SO)
+LIBBLIS_A_PATH     := $(BASE_LIB_PATH)/$(LIBBLIS_A)
+LIBBLIS_SO_PATH    := $(BASE_LIB_PATH)/$(LIBBLIS_SO)
 
 
 
@@ -253,7 +278,6 @@ FIND       := find
 GREP       := grep
 EGREP      := grep -E
 XARGS      := xargs
-RANLIB     := ranlib
 INSTALL    := install -c
 
 # Script for creating a monolithic header file.
@@ -284,7 +308,7 @@ ifeq ($(VENDOR_STRING),)
 $(error Unable to determine compiler vendor.)
 endif
 
-CC_VENDOR := $(firstword $(shell echo '$(VENDOR_STRING)' | $(EGREP) -o 'icc|gcc|clang|ibm'))
+CC_VENDOR := $(firstword $(shell echo '$(VENDOR_STRING)' | $(EGREP) -o 'icc|gcc|clang|ibm|cc'))
 ifeq ($(CC_VENDOR),)
 $(error Unable to determine compiler vendor. Have you run './configure' yet?)
 endif
@@ -313,7 +337,7 @@ LIBPTHREAD := -lpthread
 LDFLAGS    := $(LIBM) $(LIBPTHREAD)
 
 # Add libmemkind to the link-time flags, if it was enabled at configure-time.
-ifeq ($(BLIS_ENABLE_MEMKIND),yes)
+ifeq ($(MK_ENABLE_MEMKIND),yes)
 LDFLAGS    += $(LIBMEMKIND)
 endif
 
@@ -327,15 +351,24 @@ ifeq ($(DEBUG_TYPE),sde)
 LDFLAGS    := $(filter-out $(LIBMEMKIND),$(LDFLAGS))
 endif
 
-# Default flag for creating shared objects.
+# The default flag for creating shared objects is different for Linux and
+# OS X.
+ifeq ($(OS_NAME),Linux)
 SOFLAGS    := -shared
+SOFLAGS    += -Wl,-soname,$(LIBBLIS_SO).$(SO_MAJOR)
+else
+SOFLAGS    := -dynamiclib
+SOFLAGS    += -Wl,-install_name,$(LIBBLIS_SO).$(SO_MAJOR)
+endif
+
+# Specify the shared library's 'soname' field.
 
 # Decide which library to link to for things like the testsuite. Default
 # to the static library, unless only the shared library was enabled, in
 # which case we use the shared library.
 LIBBLIS_LINK   := $(LIBBLIS_A_PATH)
-ifeq ($(BLIS_ENABLE_SHARED_BUILD),yes)
-ifeq ($(BLIS_ENABLE_STATIC_BUILD),no)
+ifeq ($(MK_ENABLE_SHARED),yes)
+ifeq ($(MK_ENABLE_STATIC),no)
 LIBBLIS_LINK   := $(LIBBLIS_SO_PATH)
 endif
 endif
@@ -484,12 +517,12 @@ endif
 #
 
 ifeq ($(V),1)
-BLIS_ENABLE_VERBOSE_MAKE_OUTPUT := yes
+ENABLE_VERBOSE := yes
 BLIS_ENABLE_TEST_OUTPUT := yes
 endif
 
 ifeq ($(V),0)
-BLIS_ENABLE_VERBOSE_MAKE_OUTPUT := no
+ENABLE_VERBOSE := no
 BLIS_ENABLE_TEST_OUTPUT := no
 endif
 
@@ -627,7 +660,7 @@ BLIS_H_FLAT     := $(BASE_INC_PATH)/$(BLIS_H)
 # Paths to these files will be needed when compiling with the monolithic
 # header.
 REF_KER_SRC     := $(DIST_PATH)/$(REFKERN_DIR)/bli_cntx_ref.c
-REF_KER_HEADERS := $(shell grep "\#include" $(REF_KER_SRC) | sed -e "s/\#include [\"<]\([a-zA-Z0-9\_\.\/\-]*\)[\">].*/\1/g" | grep -v blis.h)
+REF_KER_HEADERS := $(shell $(GREP) "\#include" $(REF_KER_SRC) | sed -e "s/\#include [\"<]\([a-zA-Z0-9\_\.\/\-]*\)[\">].*/\1/g" | $(GREP) -v blis.h)
 
 # Match each header found above with the path to that header, and then strip
 # leading, trailing, and internal whitespace.
@@ -653,6 +686,15 @@ CBLAS_H_SRC_PATH := $(filter %/$(CBLAS_H), $(MK_HEADER_FILES))
 
 # Construct the path to the intermediate flattened/monolithic cblas.h file.
 CBLAS_H_FLAT    := $(BASE_INC_PATH)/$(CBLAS_H)
+
+
+#
+# --- BLIS configuration header definitions ------------------------------------
+#
+
+# This file was created by configure, but we need to define it here so we can
+# remove it as part of the clean targets.
+BLIS_CONFIG_H   := ./bli_config.h
 
 
 #

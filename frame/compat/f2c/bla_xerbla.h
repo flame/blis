@@ -32,7 +32,7 @@
 
 */
 
-#ifdef BLIS_ENABLE_BLAS2BLIS
+#ifdef BLIS_ENABLE_BLAS
 
 int PASTEF770(xerbla)(const bla_character *srname, const bla_integer *info, ftnlen srname_len);
 

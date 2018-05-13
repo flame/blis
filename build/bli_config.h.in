@@ -64,20 +64,20 @@
 // determine automatically
 #endif
 
-#if @blas2blis_int_type_size@ == 64
-#define BLIS_BLAS2BLIS_INT_TYPE_SIZE 64
-#elif @blas2blis_int_type_size@ == 32
-#define BLIS_BLAS2BLIS_INT_TYPE_SIZE 32
+#if @blas_int_type_size@ == 64
+#define BLIS_BLAS_INT_TYPE_SIZE 64
+#elif @blas_int_type_size@ == 32
+#define BLIS_BLAS_INT_TYPE_SIZE 32
 #else
 // determine automatically
 #endif
 
-#ifndef BLIS_ENABLE_BLAS2BLIS
-#ifndef BLIS_DISABLE_BLAS2BLIS
-#if @enable_blas2blis@
-#define BLIS_ENABLE_BLAS2BLIS
+#ifndef BLIS_ENABLE_BLAS
+#ifndef BLIS_DISABLE_BLAS
+#if @enable_blas@
+#define BLIS_ENABLE_BLAS
 #else
-#define BLIS_DISABLE_BLAS2BLIS
+#define BLIS_DISABLE_BLAS
 #endif
 #endif
 #endif

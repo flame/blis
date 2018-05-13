@@ -74,7 +74,7 @@ CPPROCFLAGS    += -DBLIS_DISABLE_MEMKIND
 # config.mk, however, the make_defs.mk files (this file) get included
 # after config.mk, so this definition will override that earlier
 # definition.
-BLIS_ENABLE_MEMKIND := no
+MK_ENABLE_MEMKIND := no
 endif
 
 # Flags specific to optimized kernels.

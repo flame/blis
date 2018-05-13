@@ -218,7 +218,7 @@ endif
 # --Object file rules --
 
 $(TEST_OBJ_PATH)/%.o: $(F2C_PATH)/%.c
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(CFLAGS) -c $< -o $@
 else
 	@echo "Compiling $@"
@@ -226,7 +226,7 @@ else
 endif
 
 $(TEST_OBJ_PATH)/%.o: $(DRIVER_PATH)/%.c
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(CFLAGS) -c $< -o $@
 else
 	@echo "Compiling $@"
@@ -237,7 +237,7 @@ endif
 # -- libf2c library archive rule --
 
 $(F2C_LIB): $(F2C_OBJS)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(AR) $(ARFLAGS) $@ $?
 	$(RANLIB) $@
 else
@@ -252,7 +252,7 @@ endif
 # first argument: the base name of the BLAS test driver.
 define make-blat-rule
 $(1).x: $(TEST_OBJ_PATH)/$(1).o $(F2C_LIB) $(LIBBLIS_LINK)
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(LINKER) $(TEST_OBJ_PATH)/$(1).o $(F2C_OBJS) $(LIBBLIS_LINK) $(LDFLAGS) -o $$@
 else
 	@echo "Linking $$@ against '$(F2C_LIB) $(LIBBLIS_LINK) $(LDFLAGS)'"
@@ -271,7 +271,7 @@ run: $(DRIVER_BINS_R)
 # A rule to run ?blat1.x driver files.
 define make-run-blat1-rule
 run-$(1): $(1).x
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	./$(1).x > out.$(1)
 else
 	@echo "Running $(1).x > 'out.$(1)'"
@@ -285,7 +285,7 @@ $(foreach name, $(DRIVER1_BASES), $(eval $(call make-run-blat1-rule,$(name))))
 # A rule to run ?blat2.x and ?blat3.x driver files.
 define make-run-blat23-rule
 run-$(1): $(1).x
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	./$(1).x < $(INPUT_DIR)/$(1).in
 else
 	@echo "Running $(1).x < '$(INPUT_DIR)/$(1).in' (output to 'out.$(1)')"
@@ -300,7 +300,7 @@ $(foreach name, $(DRIVER2_BASES), $(eval $(call make-run-blat23-rule,$(name))))
 $(foreach name, $(DRIVER3_BASES), $(eval $(call make-run-blat23-rule,$(name))))
 
 check: run
-ifeq ($(BLIS_ENABLE_VERBOSE_MAKE_OUTPUT),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
 	- $(BLASTEST_CHECK)
 else
 	@- $(BLASTEST_CHECK)

@@ -171,9 +171,9 @@ typedef dcomplex atom_t;
 // because they also occur in bli_slamch() and bli_dlamch().
 
 // Define f77_int depending on what size of integer was requested.
-#if   BLIS_BLAS2BLIS_INT_TYPE_SIZE == 32
+#if   BLIS_BLAS_INT_TYPE_SIZE == 32
 typedef int32_t   f77_int;
-#elif BLIS_BLAS2BLIS_INT_TYPE_SIZE == 64
+#elif BLIS_BLAS_INT_TYPE_SIZE == 64
 typedef int64_t   f77_int;
 #else
 typedef long int  f77_int;

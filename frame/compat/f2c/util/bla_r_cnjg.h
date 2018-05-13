@@ -32,7 +32,7 @@
 
 */
 
-#ifdef BLIS_ENABLE_BLAS2BLIS
+#ifdef BLIS_ENABLE_BLAS
 
 void bla_r_cnjg(bla_scomplex *dest, const bla_scomplex *src);
 

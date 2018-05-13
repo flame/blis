@@ -48,7 +48,7 @@ void PASTEF77(ch,blasname) \
              ftype*    a, const f77_int* lda  \
      );
 
-#ifdef BLIS_ENABLE_BLAS2BLIS
+#ifdef BLIS_ENABLE_BLAS
 INSERT_GENTPROTRO_BLAS( syr )
 #endif
 

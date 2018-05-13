@@ -32,7 +32,7 @@
 
 */
 
-#ifdef BLIS_ENABLE_BLAS2BLIS
+#ifdef BLIS_ENABLE_BLAS
 
 bla_real   PASTEF77(s,cabs1)(bla_scomplex *z);
 bla_double PASTEF77(d,cabs1)(bla_dcomplex *z);

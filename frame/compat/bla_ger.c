@@ -105,7 +105,7 @@ void PASTEF772(ch,blasname,chc) \
 	bli_finalize_auto(); \
 }
 
-#ifdef BLIS_ENABLE_BLAS2BLIS
+#ifdef BLIS_ENABLE_BLAS
 INSERT_GENTFUNCDOT_BLAS( ger, ger )
 #endif
 

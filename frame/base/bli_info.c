@@ -69,9 +69,9 @@ gint_t bli_info_get_enable_stay_auto_init( void )
 	return 0;
 #endif
 }
-gint_t bli_info_get_enable_blas2blis( void )
+gint_t bli_info_get_enable_blas( void )
 {
-#ifdef BLIS_ENABLE_BLAS2BLIS
+#ifdef BLIS_ENABLE_BLAS
 	return 1;
 #else
 	return 0;
@@ -85,7 +85,7 @@ gint_t bli_info_get_enable_cblas( void )
 	return 0;
 #endif
 }
-gint_t bli_info_get_blas2blis_int_type_size( void ) { return BLIS_BLAS2BLIS_INT_TYPE_SIZE; }
+gint_t bli_info_get_blas_int_type_size( void ) { return BLIS_BLAS_INT_TYPE_SIZE; }
 gint_t bli_info_get_enable_packbuf_pools( void )
 {
 #ifdef BLIS_ENABLE_PACKBUF_POOLS
