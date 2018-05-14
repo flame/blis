@@ -789,12 +789,14 @@ get_cc_search_list()
 {
 	local list
 
-	# For Linux, OS X, and generic OSes, prioritize gcc.
+	# For Linux, Darwin (OS X), and generic OSes, prioritize gcc.
 	list="gcc clang cc"
 
-	# For OpenBSD, prioritize cc over gcc and clang.
-	if [ ${os_name} = "OpenBSD" ]; then
-		list="cc gcc clang"
+	# For OpenBSD and FreeBSD, prioritize cc and clang over gcc.
+	if   [ "${os_name}" = "OpenBSD" ]; then
+		list="cc clang gcc"
+	elif [ "${os_name}" = "FreeBSD" ]; then
+		list="cc clang gcc"
 	fi
 
 	echo "${list}"
