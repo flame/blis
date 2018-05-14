@@ -785,69 +785,59 @@ rm_duplicate_words()
 	echo "${res}"
 }
 
+get_cc_search_list()
+{
+	local list
+
+	# For Linux, OS X, and generic OSes, prioritize gcc.
+	list="gcc clang cc"
+
+	# For OpenBSD, prioritize cc over gcc and clang.
+	if [ ${os_name} = "OpenBSD" ]; then
+		list="cc gcc clang"
+	fi
+
+	echo "${list}"
+}
+
 select_cc()
 {
-	local se_suf found_cc se_file rval
+	local search_list se_suf the_cc cc rval
 
-	se_suf="stderr.txt"
+	# This is the list of compilers to search for, and the order in which
+	# to search for them.
+	search_list=$1
+
+	se_file="cc_stderr.txt"
+
+	# If CC contains something, add it to the beginning of our default
+	# search list.
+	if [ -n "${CC}" ]; then
+		search_list="${CC} ${search_order}"
+	fi
 
 	# Initialize our selected compiler to empty.
-	found_cc=""
+	the_cc=""
 
-	# If CC was specified on the configure command line, see if it works.
-	if [ -n "${CC}" ]; then
-
-		se_file="cc_${se_suf}"
-
-		# See if CC works and/or is present.
-		rval=$(${CC} --version 2> ${se_file})
-
-		if [ -z "$(cat ${se_file})" ]; then
-			found_cc=${CC}
-		fi
-
-		rm ${se_file}
-	fi
-
-	# Now check if gcc works.
-	if [ -z "${found_cc}" ]; then
-
-		se_file="gcc_${se_suf}"
+	# Try each compiler in the list and select the first one we find that
+	# works.
+	for cc in ${search_list}; do
 
 		# See if CC works and/or is present.
-		rval=$(gcc --version 2> ${se_file})
+		rval=$(${cc} --version 2> ${se_file})
 
+		# If the output file is non-empty, we will use this compiler.
 		if [ -z "$(cat ${se_file})" ]; then
-			found_cc=gcc
+			the_cc=${cc}
+			rm ${se_file}
+			break
+		else
+			rm ${se_file}
 		fi
-
-		rm ${se_file}
-	fi
-
-	# Now check if clang works.
-	if [ -z "${found_cc}" ]; then
-
-		se_file="clang_${se_suf}"
-
-		# See if CC works and/or is present.
-		rval=$(clang --version 2> ${se_file})
-
-		if [ -z "$(cat ${se_file})" ]; then
-			found_cc=clang
-		fi
-
-		rm ${se_file}
-	fi
-
-	# If neither $CC, nor gcc, nor clang work, then we're probably all dead,
-	# so this fallback selection won't matter.
-	if [ -z "${found_cc}" ]; then
-
-		found_cc=cc
-	fi
+	done
 
 	# Return the selected compiler.
-	echo "${found_cc}"
+	echo "${the_cc}"
 }
 
 auto_detect()
@@ -936,9 +926,7 @@ auto_detect()
 
 has_libmemkind()
 {
-	local found_cc main_c main_c_filepath LDFLAGS_mk binname rval
-
-	found_cc="$1"
+	local main_c main_c_filepath LDFLAGS_mk binname rval
 
 	# Path to libmemkind detection source file.
 	main_c="libmemkind_detect.c"
@@ -1694,11 +1682,27 @@ main()
 	echo "${script_name}: detected ${os_name} kernel version ${os_vers}."
 
 
-	# -- Check the compiler version --------------------------------------------
+	# -- Find a compiler -------------------------------------------------------
+
+	# Acquire the compiler search order. This will vary based on the os
+	# found above.
+	cc_search_list=$(get_cc_search_list)
+
+	echo "${script_name}: compiler search list is: ${cc_search_list}."
 
 	# Find a working C compiler.
-	found_cc=$(select_cc)
+	found_cc=$(select_cc "${cc_search_list}")
+
+	# If we didn't find any working compilers, we print an error message.
+	if [ -z "${found_cc}" ]; then
+		echo "${script_name}: Could not find working compiler! Cannot continue."
+		exit 1
+	fi
+
 	echo "${script_name}: using '${found_cc}' compiler."
+
+
+	# -- Check the compiler version --------------------------------------------
 
 	# Initialize the blacklist to empty.
 	blacklist_init
@@ -2038,7 +2042,7 @@ main()
 	# option, we try to detect whether libmemkind is available. If it is,
 	# the default implied option will be --with-memkind; otherwise, will be
 	# --without-memkind.
-	has_memkind=$(has_libmemkind "${found_cc}")
+	has_memkind=$(has_libmemkind)
 
 
 	# -- Prepare variables for subsitution into template files -----------------
