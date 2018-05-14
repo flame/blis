@@ -2220,7 +2220,7 @@ main()
 	install_libdir_esc=$(echo "${install_libdir}" | sed 's/\//\\\//g')
 	install_incdir_esc=$(echo "${install_incdir}" | sed 's/\//\\\//g')
 	dist_path_esc=$(echo "${dist_path}"           | sed 's/\//\\\//g')
-	cc_esc=$(echo "${CC}" | sed 's/\//\\\//g')
+	cc_esc=$(echo "${found_cc}" | sed 's/\//\\\//g')
 	ranlib_esc=$(echo "${RANLIB:-ranlib}" | sed 's/\//\\\//g')
 
 	# Create a #define for the configuration family (config_name).
@@ -2292,6 +2292,7 @@ main()
 		| sed -e "s/@os_name@/${os_name}/g" \
 		| sed -e "s/@dist_path@/${dist_path_esc}/g" \
 		| sed -e "s/@CC@/${cc_esc}/g" \
+		| sed -e "s/@CC_VENDOR@/${cc_vendor}/g" \
 		| sed -e "s/@RANLIB@/${ranlib_esc}/g" \
 		| sed -e "s/@debug_type@/${debug_type}/g" \
 		| sed -e "s/@threading_model@/${threading_model}/g" \

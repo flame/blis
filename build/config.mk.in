@@ -82,6 +82,7 @@ endif
 
 # The C compiler.
 CC                := @CC@
+CC_VENDOR         := @CC_VENDOR@
 RANLIB            := @RANLIB@
 
 # The level of debugging info to generate.

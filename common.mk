@@ -298,22 +298,22 @@ GIT_LOG    := $(GIT) log --decorate
 # --- Determine the compiler vendor --------------------------------------------
 #
 
-ifneq ($(CC),)
-
-VENDOR_STRING := $(shell $(CC) --version 2>/dev/null)
-ifeq ($(VENDOR_STRING),)
-VENDOR_STRING := $(shell $(CC) -qversion 2>/dev/null)
-endif
-ifeq ($(VENDOR_STRING),)
-$(error Unable to determine compiler vendor.)
-endif
-
-CC_VENDOR := $(firstword $(shell echo '$(VENDOR_STRING)' | $(EGREP) -o 'icc|gcc|clang|ibm|cc'))
-ifeq ($(CC_VENDOR),)
-$(error Unable to determine compiler vendor. Have you run './configure' yet?)
-endif
-
-endif
+#ifneq ($(CC),)
+#
+#VENDOR_STRING := $(shell $(CC) --version 2>/dev/null)
+#ifeq ($(VENDOR_STRING),)
+#VENDOR_STRING := $(shell $(CC) -qversion 2>/dev/null)
+#endif
+#ifeq ($(VENDOR_STRING),)
+#$(error Unable to determine compiler vendor.)
+#endif
+#
+#CC_VENDOR := $(firstword $(shell echo '$(VENDOR_STRING)' | $(EGREP) -o 'icc|gcc|clang|ibm|cc'))
+#ifeq ($(CC_VENDOR),)
+#$(error Unable to determine compiler vendor. Have you run './configure' yet?)
+#endif
+#
+#endif
 
 
 
