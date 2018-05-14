@@ -1069,7 +1069,7 @@ get_compiler_version()
 	cc_minor=$(echo "${cc_version}" | cut -d. -f2)
 	cc_revision=$(echo "${cc_version}" | cut -d. -f3)
 
-	echo "${script_name}: found ${cc} version ${cc_version} (maj: ${cc_major}, min: ${cc_minor}, rev: ${cc_revision})."
+	echo "${script_name}: found ${cc_vendor} version ${cc_version} (maj: ${cc_major}, min: ${cc_minor}, rev: ${cc_revision})."
 }
 
 check_compiler()
