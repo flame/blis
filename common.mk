@@ -247,16 +247,16 @@ LIBBLIS            := libblis
 BASE_LIB_PATH      := ./$(LIB_DIR)/$(CONFIG_NAME)
 
 # The shared (dynamic) library file suffix is different for Linux and OS X.
-ifeq ($(OS_NAME),Linux)
-SO_SUF             := so
+ifeq ($(OS_NAME),Darwin)
+SHLIB_EXT          := dylib
 else
-SO_SUF             := dylib
+SHLIB_EXT          := so
 endif
 
 # Note: These names will be modified later to include the configuration and
 # version strings.
 LIBBLIS_A          := $(LIBBLIS).a
-LIBBLIS_SO         := $(LIBBLIS).$(SO_SUF)
+LIBBLIS_SO         := $(LIBBLIS).$(SHLIB_EXT)
 
 # Append the base library path to the library names.
 LIBBLIS_A_PATH     := $(BASE_LIB_PATH)/$(LIBBLIS_A)
@@ -353,12 +353,12 @@ endif
 
 # The default flag for creating shared objects is different for Linux and
 # OS X.
-ifeq ($(OS_NAME),Linux)
-SOFLAGS    := -shared
-SOFLAGS    += -Wl,-soname,$(LIBBLIS_SO).$(SO_MAJOR)
-else
+ifeq ($(OS_NAME),Darwin)
 SOFLAGS    := -dynamiclib
 SOFLAGS    += -Wl,-install_name,$(LIBBLIS_SO).$(SO_MAJOR)
+else
+SOFLAGS    := -shared
+SOFLAGS    += -Wl,-soname,$(LIBBLIS_SO).$(SO_MAJOR)
 endif
 
 # Specify the shared library's 'soname' field.
