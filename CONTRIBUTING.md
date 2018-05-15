@@ -10,8 +10,8 @@ First, we want to thank you for your interest in contributing to BLIS! Please re
    * Be sure to include a **meaningful title**. Aim for a title that is neither overly general nor overly specific.
    * Putting some time into writing a **clear description** will help us understand your bug, how you found it, and the conditions under which you discovered it.
    * You are welcome to include the BLIS version number (e.g. 0.3.2-15) if you wish, but please supplement it with the **actual git commit number** corresponding to the code that exhibits your behavior (the first 7-8 hex digits is fine).
-   * Unless you are confident that it's not relevant, it's usually recommended that you tell us how you configured BLIS. Your hardware microarchitecture, OS, compiler, `configure` options, configuration target are all good examples of things to you may wish to include.
-   * If your bug involves behavior observed after linking to BLIS and running an application, please provide a minimally illustrative **code sample** that developers can run to (hopefully) reproduce the error or other concerning behavior).
+   * Unless you are confident that it's not relevant, it's usually recommended that you **tell us how you configured BLIS** and **about your environment in general**. Your hardware microarchitecture, OS, compiler, `configure` options, configuration target are all good examples of things to you may wish to include.
+   * If your bug involves behavior observed after linking to BLIS and running an application, please provide a minimally illustrative **code sample** that developers can run to (hopefully) reproduce the error or other concerning behavior.
 
 #### **Did you write a patch that fixes a bug?**
 
@@ -31,9 +31,9 @@ If you are making a more substantial contribution and in the vicinity (i.e., wit
 
 #### **Do you intend to add a new feature or change an existing one?**
 
-First, thanks for your interest in contributing! 
+That's fine, we are interested to hear your ideas!
 
-* You may wish to run your idea by opening an [issue](https://github.com/flame/blis/issues/new) to describe your new feature. This allows you the chance to open a dialogue with other developers, who may provide you with useful feedback.
+* You may wish to run your idea by opening an [issue](https://github.com/flame/blis/issues/new) to describe your new feature, or how an existing feature is not sufficiently general-purpose. This allows you the chance to open a dialogue with other developers, who may provide you with useful feedback.
 
 * Before submitting new code, please read the [CodingConventions wiki](https://github.com/flame/blis/wiki/CodingConventions) guide to learn more about our preferred coding conventions. (See comments above regarding mismatched coding styles.)
 
