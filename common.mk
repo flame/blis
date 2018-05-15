@@ -248,15 +248,15 @@ BASE_LIB_PATH      := ./$(LIB_DIR)/$(CONFIG_NAME)
 
 # The shared (dynamic) library file suffix is different for Linux and OS X.
 ifeq ($(OS_NAME),Darwin)
-SO_SUF             := dylib
+SHLIB_EXT          := dylib
 else
-SO_SUF             := so
+SHLIB_EXT          := so
 endif
 
 # Note: These names will be modified later to include the configuration and
 # version strings.
 LIBBLIS_A          := $(LIBBLIS).a
-LIBBLIS_SO         := $(LIBBLIS).$(SO_SUF)
+LIBBLIS_SO         := $(LIBBLIS).$(SHLIB_EXT)
 
 # Append the base library path to the library names.
 LIBBLIS_A_PATH     := $(BASE_LIB_PATH)/$(LIBBLIS_A)

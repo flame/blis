@@ -119,7 +119,7 @@ LIBBLIS_A_INST            := $(INSTALL_LIBDIR)/$(LIBBLIS_A)
 
 # --- Define install target names for shared libraries ---
 
-LIBBLIS_SO_VERS_CONF_INST := $(INSTALL_LIBDIR)/$(LIBBLIS)-$(VERS_CONF).$(SO_SUF)
+LIBBLIS_SO_VERS_CONF_INST := $(INSTALL_LIBDIR)/$(LIBBLIS)-$(VERS_CONF).$(SHLIB_EXT)
 LIBBLIS_SO_INST           := $(INSTALL_LIBDIR)/$(LIBBLIS_SO)
 LIBBLIS_SO_MAJ_INST       := $(INSTALL_LIBDIR)/$(LIBBLIS_SO).$(SO_MAJOR)
 LIBBLIS_SO_MMB_INST       := $(INSTALL_LIBDIR)/$(LIBBLIS_SO).$(SO_MAJOR).$(SO_MINORB)
@@ -385,7 +385,7 @@ UNINSTALL_OLD_SYML    := $(shell $(FIND) $(INSTALL_LIBDIR)/ -name "$(LIBBLIS_SO)
 # BLIS version number and configuration family.
 UNINSTALL_OLD_SYML    += $(shell $(FIND) $(INSTALL_LIBDIR)/ -name "$(LIBBLIS)-*.a" 2> /dev/null | $(GREP) -v "$(LIBBLIS)-$(VERS_CONF).a")
 
-UNINSTALL_OLD_SYML    += $(shell $(FIND) $(INSTALL_LIBDIR)/ -name "$(LIBBLIS)-*.$(SO_SUF)" 2> /dev/null | $(GREP) -v "$(LIBBLIS)-$(VERS_CONF).$(SO_SUF)")
+UNINSTALL_OLD_SYML    += $(shell $(FIND) $(INSTALL_LIBDIR)/ -name "$(LIBBLIS)-*.$(SHLIB_EXT)" 2> /dev/null | $(GREP) -v "$(LIBBLIS)-$(VERS_CONF).$(SHLIB_EXT)")
 
 # This shell command grabs all files named "*.h" that are not blis.h or cblas.h
 # in the installation directory. We consider this set of headers to be "old" and
@@ -794,7 +794,7 @@ else
 endif
 
 # Install shared library containing .so major, minor, and build versions.
-$(INSTALL_LIBDIR)/%.$(SO_SUF).$(SO_MMB): $(BASE_LIB_PATH)/%.$(SO_SUF) $(CONFIG_MK_FILE)
+$(INSTALL_LIBDIR)/%.$(SHLIB_EXT).$(SO_MMB): $(BASE_LIB_PATH)/%.$(SHLIB_EXT) $(CONFIG_MK_FILE)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(MKDIR) $(@D)
 	$(INSTALL) -m 0644 $< $@
@@ -810,7 +810,7 @@ endif
 install-lib-symlinks: check-env $(MK_LIBS_SYML)
 
 # Install generic shared library symlink.
-$(INSTALL_LIBDIR)/%.$(SO_SUF): $(INSTALL_LIBDIR)/%.$(SO_SUF).$(SO_MMB)
+$(INSTALL_LIBDIR)/%.$(SHLIB_EXT): $(INSTALL_LIBDIR)/%.$(SHLIB_EXT).$(SO_MMB)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(SYMLINK) $(<F) $(@F)
 	$(MV) $(@F) $(INSTALL_LIBDIR)/
@@ -821,7 +821,7 @@ else
 endif
 
 # Install shared library symlink containing only .so major version.
-$(INSTALL_LIBDIR)/%.$(SO_SUF).$(SO_MAJOR): $(INSTALL_LIBDIR)/%.$(SO_SUF).$(SO_MMB)
+$(INSTALL_LIBDIR)/%.$(SHLIB_EXT).$(SO_MAJOR): $(INSTALL_LIBDIR)/%.$(SHLIB_EXT).$(SO_MMB)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(SYMLINK) $(<F) $(@F)
 	$(MV) $(@F) $(INSTALL_LIBDIR)/
@@ -843,7 +843,7 @@ else
 endif
 
 # Install shared library symlink containing version and config family.
-$(INSTALL_LIBDIR)/%-$(VERS_CONF).$(SO_SUF): $(INSTALL_LIBDIR)/%.$(SO_SUF)
+$(INSTALL_LIBDIR)/%-$(VERS_CONF).$(SHLIB_EXT): $(INSTALL_LIBDIR)/%.$(SHLIB_EXT)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(SYMLINK) $(<F) $(@F)
 	$(MV) $(@F) $(INSTALL_LIBDIR)/
