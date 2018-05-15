@@ -1,0 +1,3 @@
+usr/include
+usr/lib/*/libblis.so
+usr/lib/*/libblis.a
