@@ -37,16 +37,24 @@
 
 void bli_sgemm_armv7a_int_4x4
      (
-       dim_t               k,
+       dim_t               k0,
        float*     restrict alpha,
        float*     restrict a,
        float*     restrict b,
        float*     restrict beta,
-       float*     restrict c, inc_t rs_c, inc_t cs_c,
+       float*     restrict c, inc_t rs_c0, inc_t cs_c0,
        auxinfo_t* restrict data,
        cntx_t*    restrict cntx
      )
 {
+	// Typecast local copies of integers in case dim_t and inc_t are a
+	// different size than is expected by load instructions.
+	uint32_t k_iter = k0 / 4;
+	uint32_t k_left = k0 % 4;
+	uint32_t rs_c   = rs_c0;
+	uint32_t cs_c   = cs_c0;
+	uint32_t i;
+
 	void* a_next = bli_auxinfo_next_a( data );
 	void* b_next = bli_auxinfo_next_b( data );
 
@@ -62,10 +70,6 @@ void bli_sgemm_armv7a_int_4x4
 	float32x4_t bv2;
 	float32x4_t bv3;
 	float32x4_t bv4;
-
-	dim_t  k_iter = k/4;
-	dim_t  k_left = k%4;
-	dim_t  i; 
 
 	// Vector for column 0
 	float32x4_t cv0;
@@ -278,6 +282,14 @@ void bli_dgemm_armv7a_int_4x4
        cntx_t*    restrict cntx
      )
 {
+	// Typecast local copies of integers in case dim_t and inc_t are a
+	// different size than is expected by load instructions.
+	//uint32_t k_iter = k0 / 4;
+	uint32_t k_left = k0 % 4;
+	uint32_t rs_c   = rs_c0;
+	uint32_t cs_c   = cs_c0;
+	uint32_t i;
+
 	//void* a_next = bli_auxinfo_next_a( data );
 	//void* b_next = bli_auxinfo_next_b( data );
 
@@ -309,11 +321,6 @@ void bli_dgemm_armv7a_int_4x4
 
 	double* restrict Ap = a + 4;
         double* restrict Bp = b + 4; 
-
-	dim_t  i; 
-	dim_t  k_left;
-
-	k_left  = k % 4;
 
 	c00 = (c + 0*rs_c + 0*cs_c); 
 	c10 = (c + 1*rs_c + 0*cs_c); 

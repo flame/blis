@@ -52,12 +52,12 @@
 */
 void bli_sgemm_armv8a_asm_8x12
      (
-       dim_t               k,
+       dim_t               k0,
        float*     restrict alpha,
        float*     restrict a,
        float*     restrict b,
        float*     restrict beta,
-       float*     restrict c, inc_t rs_c, inc_t cs_c,
+       float*     restrict c, inc_t rs_c0, inc_t cs_c0,
        auxinfo_t* restrict data,
        cntx_t*    restrict cntx
      )
@@ -65,8 +65,13 @@ void bli_sgemm_armv8a_asm_8x12
 	void* a_next = bli_auxinfo_next_a( data );
 	void* b_next = bli_auxinfo_next_b( data );
 
-	uint64_t k_iter = k / 4;
-	uint64_t k_left = k % 4;
+	// Typecast local copies of integers in case dim_t and inc_t are a
+	// different size than is expected by load instructions.
+	uint64_t k_iter = k0 / 4;
+	uint64_t k_left = k0 % 4;
+	uint64_t rs_c   = rs_c0;
+	uint64_t cs_c   = cs_c0;
+
 
 __asm__ volatile 
 (
@@ -1103,12 +1108,12 @@ __asm__ volatile
 */
 void bli_dgemm_armv8a_asm_6x8
      (
-       dim_t               k,
+       dim_t               k0,
        double*    restrict alpha,
        double*    restrict a,
        double*    restrict b,
        double*    restrict beta,
-       double*    restrict c, inc_t rs_c, inc_t cs_c,
+       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
        auxinfo_t* restrict data,
        cntx_t*    restrict cntx
      )
@@ -1116,8 +1121,12 @@ void bli_dgemm_armv8a_asm_6x8
 	void* a_next = bli_auxinfo_next_a( data );
 	void* b_next = bli_auxinfo_next_b( data );
 
-	uint64_t k_iter = k / 4;
-	uint64_t k_left = k % 4;
+	// Typecast local copies of integers in case dim_t and inc_t are a
+	// different size than is expected by load instructions.
+	uint64_t k_iter = k0 / 4;
+	uint64_t k_left = k0 % 4;
+	uint64_t rs_c   = rs_c0;
+	uint64_t cs_c   = cs_c0;
 
 __asm__ volatile
 (
@@ -2086,18 +2095,6 @@ void bli_cgemm_armv8a_opt_4x4
        cntx_t*    restrict cntx
      )
 {
-	/* Just call the reference implementation. */
-	BLIS_CGEMM_UKERNEL_REF
-	(
-	  k,
-	  alpha,
-	  a,
-	  b,
-	  beta,
-	  c, rs_c, cs_c,
-	  data,
-	  cntx
-	);
 }
 
 void bli_zgemm_armv8a_opt_4x4
@@ -2112,17 +2109,7 @@ void bli_zgemm_armv8a_opt_4x4
        cntx_t*    restrict cntx
      )
 {
-	/* Just call the reference implementation. */
-	BLIS_ZGEMM_UKERNEL_REF
-	(
-	  k,
-	  alpha,
-	  a,
-	  b,
-	  beta,
-	  c, rs_c, cs_c,
-	  data,
-	  cntx
-	);
 }
+
 #endif
+

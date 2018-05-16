@@ -77,12 +77,12 @@
 
 void bli_sgemm_zen_asm_6x16
      (
-       dim_t               k,
+       dim_t               k0,
        float*     restrict alpha,
        float*     restrict a,
        float*     restrict b,
        float*     restrict beta,
-       float*     restrict c, inc_t rs_c, inc_t cs_c,
+       float*     restrict c, inc_t rs_c0, inc_t cs_c0,
        auxinfo_t* restrict data,
        cntx_t*    restrict cntx
      )
@@ -90,8 +90,12 @@ void bli_sgemm_zen_asm_6x16
 	//void*   a_next = bli_auxinfo_next_a( data );
 	//void*   b_next = bli_auxinfo_next_b( data );
 
-	uint64_t   k_iter = k / 4;
-	uint64_t   k_left = k % 4;
+	// Typecast local copies of integers in case dim_t and inc_t are a
+	// different size than is expected by load instructions.
+	uint64_t k_iter = k0 / 4;
+	uint64_t k_left = k0 % 4;
+	uint64_t rs_c   = rs_c0;
+	uint64_t cs_c   = cs_c0;
 
 	__asm__ volatile
 	(
@@ -919,12 +923,12 @@ void bli_sgemm_zen_asm_6x16
 
 void bli_dgemm_zen_asm_6x8
      (
-       dim_t               k,
+       dim_t               k0,
        double*    restrict alpha,
        double*    restrict a,
        double*    restrict b,
        double*    restrict beta,
-       double*    restrict c, inc_t rs_c, inc_t cs_c,
+       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
        auxinfo_t* restrict data,
        cntx_t*    restrict cntx
      )
@@ -932,8 +936,12 @@ void bli_dgemm_zen_asm_6x8
 	//void*   a_next = bli_auxinfo_next_a( data );
 	//void*   b_next = bli_auxinfo_next_b( data );
 
-    uint64_t   k_iter = k / 4;
-    uint64_t   k_left = k % 4;
+	// Typecast local copies of integers in case dim_t and inc_t are a
+	// different size than is expected by load instructions.
+	uint64_t k_iter = k0 / 4;
+	uint64_t k_left = k0 % 4;
+	uint64_t rs_c   = rs_c0;
+	uint64_t cs_c   = cs_c0;
 
 	__asm__ volatile
 	(
@@ -1661,12 +1669,12 @@ void bli_dgemm_zen_asm_6x8
 
 void bli_cgemm_zen_asm_3x8
      (
-       dim_t               k,
+       dim_t               k0,
        scomplex*  restrict alpha,
        scomplex*  restrict a,
        scomplex*  restrict b,
        scomplex*  restrict beta,
-       scomplex*  restrict c, inc_t rs_c, inc_t cs_c,
+       scomplex*  restrict c, inc_t rs_c0, inc_t cs_c0,
        auxinfo_t* restrict data,
        cntx_t*    restrict cntx
      )
@@ -1674,8 +1682,12 @@ void bli_cgemm_zen_asm_3x8
 	//void*   a_next = bli_auxinfo_next_a( data );
 	//void*   b_next = bli_auxinfo_next_b( data );
 
-	uint64_t   k_iter = k / 4;
-	uint64_t   k_left = k % 4;
+	// Typecast local copies of integers in case dim_t and inc_t are a
+	// different size than is expected by load instructions.
+	uint64_t k_iter = k0 / 4;
+	uint64_t k_left = k0 % 4;
+	uint64_t rs_c   = rs_c0;
+	uint64_t cs_c   = cs_c0;
 
 	__asm__ volatile
 	(
@@ -2185,12 +2197,12 @@ void bli_cgemm_zen_asm_3x8
 
 void bli_zgemm_zen_asm_3x4
      (
-       dim_t               k,
+       dim_t               k0,
        dcomplex*  restrict alpha,
        dcomplex*  restrict a,
        dcomplex*  restrict b,
        dcomplex*  restrict beta,
-       dcomplex*  restrict c, inc_t rs_c, inc_t cs_c,
+       dcomplex*  restrict c, inc_t rs_c0, inc_t cs_c0,
        auxinfo_t* restrict data,
        cntx_t*    restrict cntx
      )
@@ -2198,11 +2210,12 @@ void bli_zgemm_zen_asm_3x4
 	//void*   a_next = bli_auxinfo_next_a( data );
 	//void*   b_next = bli_auxinfo_next_b( data );
 
-    uint64_t   k_iter = k / 4;
-    uint64_t   k_left = k % 4;
-
-	//uint64_t   alpha_is_unit = bli_zeq1( *alpha );
-
+	// Typecast local copies of integers in case dim_t and inc_t are a
+	// different size than is expected by load instructions.
+	uint64_t k_iter = k0 / 4;
+	uint64_t k_left = k0 % 4;
+	uint64_t rs_c   = rs_c0;
+	uint64_t cs_c   = cs_c0;
 
 	__asm__ volatile
 	(
