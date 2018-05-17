@@ -233,7 +233,7 @@ have bug reports, in which case they should open a
 Contributing
 ------------
 
-For information on how to contribute to our project, including preferred [coding conventions](https://github.com/flame/blis/wiki/CodingConventions), please refer to the [CONTRIBUTING.md](https://github.com/flame/blis/blob/master/CONTRIBUTING.md) file in the top-level directory of the BLIS distribution.
+For information on how to contribute to our project, including preferred [coding conventions](https://github.com/flame/blis/wiki/CodingConventions), please refer to the [CONTRIBUTING](https://github.com/flame/blis/blob/master/CONTRIBUTING.md) file in the top-level directory of the BLIS distribution.
 
 Citations
 ---------
