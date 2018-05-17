@@ -1064,8 +1064,7 @@ __asm__ volatile
  [rs_c]   "m" (rs_c),   // 7
  [cs_c]   "m" (cs_c),   // 8
  [a_next] "m" (a_next), // 9
- [b_next] "m" (b_next), // 10
- [k]      "m" (k)       // 11
+ [b_next] "m" (b_next) // 10
 :// Register clobber list
  "x0", "x1", "x2","x3","x4",
  "x5", "x6", "x7", "x8",
