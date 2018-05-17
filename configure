@@ -900,6 +900,11 @@ auto_detect()
 	config_defines=$(grep BLIS_CONFIG_ ${bli_cpuid_c_filepath} \
 	                 | sed -e 's/#ifdef /-D/g')
 
+	# Set the linker flags. We need pthreads because it is needed for
+	# parts of bli_arch.c unrelated to bli_arch_string(), which is called
+	# by the main() function in ${main_c}.
+	ldflags="-lpthread"
+
 	# Compile the auto-detect program using source code inside the
 	# framework.
 	${cc} ${config_defines} \
@@ -913,6 +918,7 @@ auto_detect()
 	      ${cflags} \
 	      ${bli_arch_c_filepath} \
 	      ${bli_cpuid_c_filepath} \
+	      ${ldflags} \
 	      ${main_c_filepath} \
 	   -o ${autodetect_x}
 
