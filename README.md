@@ -230,6 +230,11 @@ BLIS. Application developers (end users) may wish to post here, unless they
 have bug reports, in which case they should open a
 [new issue](http://github.com/flame/blis/issues) on github.
 
+Contributing
+------------
+
+For information on how to contribute to our project, including preferred [coding conventions](https://github.com/flame/blis/wiki/CodingConventions), please refer to the [CONTRIBUTING.md](https://github.com/flame/blis/blob/master/CONTRIBUTING.md) file in the top-level directory of the BLIS distribution.
+
 Citations
 ---------
 
