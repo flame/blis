@@ -7,33 +7,58 @@ The BLIS framework was primarily authored by
 
   Field Van Zee               (The University of Texas at Austin)
 
-but many others have contributed input and feedback, including:
+but many others have contributed code and feedback, including:
 
+  Murtaza Ali                 (Texas Instruments)
   Vernon Austel               (IBM, T.J. Watson Research Center)
+  Erling Andersen
   Jed Brown                   (Argonne National Laboratory)
+  Johannes Dieterich
+  Krzysztof Drewniak
+  Victor Eijkhout             (Texas Advanced Computing Center)
+  Roman Gareev
   John Gunnels                (IBM, T.J. Watson Research Center)
   Jeff Hammond                (Intel)
+  Chris Goodyer
+  Jacob Gorm Hansen
+  Jean-Michel Hautbois
+  Minh Quan Ho
+  Stefan Husmann
   Francisco Igual             (Universidad Complutense de Madrid)
+  Tony Kelman
   Lee Killough                (Cray)
   Mike Kistler                (IBM, Austin Research Laboratory)
+  Ricardo Magana              (Hewlett Packard Enterprise)
   Bryan Marker                (The University of Texas at Austin)
   Devin Matthews              (The University of Texas at Austin)
+  Michael Lehn
+  Dave Love
   Tze Meng Low                (The University of Texas at Austin)
+  Nisanth Padinharepatt       (AMD)
+  Devangi Parikh              (The University of Texas at Austin)
+  Elmar Peise                 (RWTH-Aachen)
+  Clément Pernet
+  Jack Poulson                (Stanford)
+  Ilya Polkovnichenko
+  Michael Rader
+  Pradeep Rao                 (AMD)
+  Aleksei Rechinskii
+  Karl Rupp
+  Rene Sitt
+  Martin Schatz               (The University of Texas at Austin)
   Mikhail Smelyanskiy         (Intel, Parallel Computing Lab)
+  Shaden Smith
   Tyler Smith                 (The University of Texas at Austin)
+  Vladimir Sukarev
+  Santanu Thangaraj           (AMD)
   Rhys Ulerich                (The University of Texas at Austin)
   Robert van de Geijn         (The University of Texas at Austin)
+  Kiran Varaganti             (AMD)
+  Natalia Vassilieva          (Hewlett Packard Enterprise)
   Zhang Xianyi                (Chinese Academy of Sciences)
-
-Thanks go the following individuals for porting early versions of
-BLIS to new architectures as proofs-of-concept:
-
-  Francisco Igual             (Universidad Complutense de Madrid)
-  Mike Kistler                (IBM, Austin Research Laboratory)
-  Tyler Smith                 (The University of Texas at Austin)
-  Zhang Xianyi                (Chinese Academy of Sciences)
+  Benda Xu
 
 BLIS's development was partially funded by grants from Microsoft, Intel,
 Texas Instruments, AMD, and the National Science Foundation (NSF Awards
-CCF-0917167, ACI-1148125/1340293, and CCF-1320112).
+CCF-0917167, ACI-1148125/1340293, ACI-1550493, and CCF-1320112).
 
