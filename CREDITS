@@ -7,9 +7,10 @@ The BLIS framework was primarily authored by
 
   Field Van Zee               (The University of Texas at Austin)
 
-but many others have contributed code and feedback, including:
+but many others have contributed code and feedback, including
 
   Murtaza Ali                 (Texas Instruments)
+  Alex Arslan
   Vernon Austel               (IBM, T.J. Watson Research Center)
   Erling Andersen
   Jed Brown                   (Argonne National Laboratory)
@@ -46,9 +47,11 @@ but many others have contributed code and feedback, including:
   Karl Rupp
   Rene Sitt
   Martin Schatz               (The University of Texas at Austin)
+  Nico Schlömer
   Mikhail Smelyanskiy         (Intel, Parallel Computing Lab)
   Shaden Smith
   Tyler Smith                 (The University of Texas at Austin)
+  Paul Springer               (RWTH-Aachen)
   Vladimir Sukarev
   Santanu Thangaraj           (AMD)
   Rhys Ulerich                (The University of Texas at Austin)
@@ -58,7 +61,15 @@ but many others have contributed code and feedback, including:
   Zhang Xianyi                (Chinese Academy of Sciences)
   Benda Xu
 
-BLIS's development was partially funded by grants from Microsoft, Intel,
-Texas Instruments, AMD, and the National Science Foundation (NSF Awards
-CCF-0917167, ACI-1148125/1340293, ACI-1550493, and CCF-1320112).
+BLIS's development was partially funded by grants from industry
+partners, including
+
+  AMD
+  Hewlett Packard Enterprise
+  Intel
+  Microsoft
+  Texas Instruments
+
+as well as the National Science Foundation (NSF Awards CCF-0917167,
+ACI-1148125/1340293, ACI-1550493, and CCF-1320112).
 
