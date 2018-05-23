@@ -1,65 +1,40 @@
 language: c
 sudo: false
-
-os:
-  - linux
-  - osx
-
-compiler:
-  - gcc
-  - clang
-
 env:
-  - OOT=1 TEST=0 THR="none" CONF="auto"
-  - OOT=0 TEST=1 THR="none" CONF="auto"
-  - OOT=0 TEST=1 THR="none" CONF="penryn"
-  - OOT=0 TEST=0 THR="none" CONF="sandybridge"
-  - OOT=0 TEST=0 THR="none" CONF="haswell"
-  - OOT=0 TEST=0 THR="none" CONF="knl"
-  - OOT=0 TEST=0 THR="none" CONF="bulldozer"
-  - OOT=0 TEST=0 THR="none" CONF="piledriver"
-  - OOT=0 TEST=0 THR="none" CONF="steamroller"
-  - OOT=0 TEST=0 THR="none" CONF="excavator"
-  - OOT=0 TEST=0 THR="none" CONF="zen"
-  - OOT=0 TEST=0 THR="openmp" CONF="auto"
-  - OOT=0 TEST=0 THR="pthreads" CONF="auto"
-  
+  global:
+      secure: "SGTth3HNpEzXRqD28M5AcY6Q89irS3Ituw1t0gQFIurhsoRQnmKRTVwtv8lc6oAprQtxrJAYgf4RJ10k7zEuP5I516G4TMTpS63JHhUdagcVn86CaI3/XO6RlX8YSVrJXVJhUVxITSDUxY7BU3YMP1zfiEE1LODgH/jac9Bumlr4KeWtFRHFI90gUJ1dJWgm7skQ83ZpquZSd+xfWOtCUCZRvMIyRflaTmmfYFET2Q3xHUFlRUMMdINSuDH1pA1pUO6xav2MQI3b0Ea6X0NR2sGplbTCDNpn3lOYCO+H2DMP4w3ZUGkDNbn2wdffGESIgslQKED9ZJ+TbUUbBIiKBiMqCH1j1aWQcwzSMZRvq4eviK/iqmC30z57nI7sOPu30zhezJjobtTCVzYXOsVSoYsAH0f555L5Vk1gGjqWsLI/7clbN0DJDSX2cWNmKoYP86eJmr0KyzDhpygquLZIPvdIMIOai3N4o09PwNfkOscO+fePHRXuKXte2CuVQASu40y4K1Boylem6kTupvfvPFqKfIKgHWIsRWoj+XVeTIRVUYj2WerYpKd/egSzsi99FmcEPY1Tne/6JkWMgvp5YgljHmBuw8SFBUirNb3fwG3VrclFuJ2z3zKXcs5SLsKpW+r6/9YwZBdaYey5r2uOZjs7GDIIYg77jKunVAbhTrM="
 matrix:
-  allow_failures:
-    - env: OOT=0 TEST=0 THR="none" CONF="knl"
-    - os: osx
-      env: OOT=0 TEST=1 THR="none" CONF="auto"
-  exclude:
-    - os: linux
-      compiler: clang
-    - os: osx
-      compiler: gcc
-    - os: osx
-      env: OOT=1 TEST=0 THR="none" CONF="auto"
-    - os: osx
-      env: OOT=0 TEST=1 THR="none" CONF="penryn"
-    - os: osx
-      env: OOT=0 TEST=0 THR="none" CONF="sandybridge"
-    - os: osx
-      env: OOT=0 TEST=0 THR="none" CONF="haswell"
-    - os: osx
-      env: OOT=0 TEST=0 THR="none" CONF="knl"
-    - os: osx
-      env: OOT=0 TEST=0 THR="none" CONF="bulldozer"
-    - os: osx
-      env: OOT=0 TEST=0 THR="none" CONF="piledriver"
-    - os: osx
-      env: OOT=0 TEST=0 THR="none" CONF="steamroller"
-    - os: osx
-      env: OOT=0 TEST=0 THR="none" CONF="excavator"
-    - os: osx
-      env: OOT=0 TEST=0 THR="none" CONF="zen"
-    - os: osx
-      env: OOT=0 TEST=0 THR="openmp" CONF="auto"
-
+  include:
+  # full testsuite
+  - os: linux
+    compiler: gcc
+    env: OOT=0 TEST=1 THR="none" CONF="auto"
+  # test x86_64 ukrs with SDE
+  - os: linux
+    compiler: gcc
+    env: OOT=0 TEST=0 SDE=1 THR="none" CONF="x86_64"
+  # openmp build
+  - os: linux
+    compiler: gcc
+    env: OOT=0 TEST=0 SDE=0 THR="openmp" CONF="auto"
+  # pthreads build
+  - os: linux
+    compiler: gcc
+    env: OOT=0 TEST=0 SDE=0 THR="pthreads" CONF="auto"
+  # out-of-tree build
+  - os: linux
+    compiler: clang
+    env: OOT=1 TEST=0 SDE=0 THR="none" CONF="auto"
+  # clang build
+  - os: linux
+    compiler: clang
+    env: OOT=0 TEST=0 SDE=0 THR="none" CONF="auto"
+  # macOS with system compiler (clang)
+  - os: osx
+    compiler: clang
+    env: OOT=0 TEST=0 SDE=0 THR="none" CONF="auto"
 install:
-  - if [ "$CC" = "gcc" ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then export CC="gcc-5"; fi
-
+- if [ "$CC" = "gcc" ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then export CC="gcc-5"; fi
 addons:
   apt:
     sources:
@@ -67,23 +42,15 @@ addons:
     packages:
     - gcc-5
     - clang
-    
 script:
-  - export DIST_PATH=.
-  - pwd
-  - if [ $OOT -eq 1 ]; then mkdir oot; cd oot; export DIST_PATH=..; fi
-  - pwd
-  - $DIST_PATH/configure -t $THR CC=$CC $CONF
-  - pwd
-  - ls -l
-  - $CC --version
-  - make -j 2
-  - export BLIS_IC_NT=2
-  - export BLIS_JC_NT=1
-  - export BLIS_IR_NT=1
-  - export BLIS_JR_NT=1
-  - if [ $TEST -eq 1 ]; then travis_wait 30 make BLIS_ENABLE_TEST_OUTPUT=yes testblis; fi
-  - if [ $TEST -eq 1 ]; then $DIST_PATH/build/check-blistest.sh ./output.testsuite; fi
-  - if [ $TEST -eq 1 ]; then make BLIS_ENABLE_TEST_OUTPUT=yes testblas; fi
-  - if [ $TEST -eq 1 ]; then $DIST_PATH/build/check-blastest.sh; fi
-
+- export DIST_PATH=.
+- pwd
+- if [ $OOT -eq 1 ]; then mkdir oot; cd oot; export DIST_PATH=..; fi
+- pwd
+- $DIST_PATH/configure -t $THR CC=$CC $CONF
+- pwd
+- ls -l
+- $CC --version
+- make -j 2
+- if [ $TEST -eq 1 ]; then $DIST_PATH/travis/do_testsuite.sh; fi
+- if [ $SDE -eq 1 ]; then $DIST_PATH/travis/do_sde.sh; fi
