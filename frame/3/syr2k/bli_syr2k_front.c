@@ -65,17 +65,17 @@ void bli_syr2k_front
 	}
 
 	// Alias A, B, and C in case we need to apply transformations.
-	bli_obj_alias_to( *a, a_local );
-	bli_obj_alias_to( *b, b_local );
-	bli_obj_alias_to( *c, c_local );
-	bli_obj_set_as_root( c_local );
+	bli_obj_alias_to( a, &a_local );
+	bli_obj_alias_to( b, &b_local );
+	bli_obj_alias_to( c, &c_local );
+	bli_obj_set_as_root( &c_local );
 
 	// For syr2k, the first and second right-hand "B" operands are simply B'
 	// and A'.
-	bli_obj_alias_to( *b, bt_local );
-	bli_obj_induce_trans( bt_local );
-	bli_obj_alias_to( *a, at_local );
-	bli_obj_induce_trans( at_local );
+	bli_obj_alias_to( b, &bt_local );
+	bli_obj_induce_trans( &bt_local );
+	bli_obj_alias_to( a, &at_local );
+	bli_obj_induce_trans( &at_local );
 
 	// An optimization: If C is stored by rows and the micro-kernel prefers
 	// contiguous columns, or if C is stored by columns and the micro-kernel
@@ -83,14 +83,14 @@ void bli_syr2k_front
 	// micro-kernel to access elements of C in its preferred manner.
 	if ( bli_cntx_l3_ukr_dislikes_storage_of( &c_local, BLIS_GEMM_UKR, cntx ) )
 	{
-		bli_obj_induce_trans( c_local );
+		bli_obj_induce_trans( &c_local );
 	}
 
 	// Record the threading for each level within the context.
 	bli_cntx_set_thrloop_from_env( BLIS_SYR2K, BLIS_LEFT, cntx,
-                                   bli_obj_length( c_local ),
-                                   bli_obj_width( c_local ),
-                                   bli_obj_width( a_local ) );
+                                   bli_obj_length( &c_local ),
+                                   bli_obj_width( &c_local ),
+                                   bli_obj_width( &a_local ) );
 
 	// Invoke herk twice, using beta only the first time.
 

@@ -42,11 +42,6 @@ THIS_CONFIG    := knc
 # --- Determine the C compiler and related flags ---
 #
 
-ifeq ($(CC),)
-CC             := icc
-CC_VENDOR      := icc
-endif
-
 # NOTE: The build system will append these variables with various
 # general-purpose/configuration-agnostic flags in common.mk. You
 # may specify additional flags here as needed.

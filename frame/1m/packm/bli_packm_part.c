@@ -54,14 +54,14 @@ void bli_packm_acquire_mpart_t2b( subpart_t requested_part,
 
 	// Partitioning top-to-bottom through packed column panels (which are
 	// row-stored) is not yet supported.
-	if ( bli_obj_is_col_packed( *obj ) )
+	if ( bli_obj_is_col_packed( obj ) )
 	{
 		bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 	}
 
 	// Query the dimensions of the parent object.
-	m = bli_obj_length( *obj );
-	n = bli_obj_width( *obj );
+	m = bli_obj_length( obj );
+	n = bli_obj_width( obj );
 
 	// Foolproofing: do not let b exceed what's left of the m dimension at
 	// row offset i.
@@ -71,10 +71,10 @@ void bli_packm_acquire_mpart_t2b( subpart_t requested_part,
 	// stride fields of the parent object. Note that this omits copying view
 	// information because the new partition will have its own dimensions
 	// and offsets.
-	bli_obj_init_subpart_from( *obj, *sub_obj );
+	bli_obj_init_subpart_from( obj, sub_obj );
 
 	// Modify offsets and dimensions of requested partition.
-	bli_obj_set_dims( b, n, *sub_obj );
+	bli_obj_set_dims( b, n, sub_obj );
 
 	// Tweak the padded length of the subpartition to trick the underlying
 	// implementation into only zero-padding for the narrow submatrix of
@@ -86,25 +86,25 @@ void bli_packm_acquire_mpart_t2b( subpart_t requested_part,
 	// b for the edge iteration). In these cases, we arrive at the new
 	// packed length by simply subtracting off i.
 	{
-		dim_t  m_pack_max = bli_obj_padded_length( *sub_obj );
+		dim_t  m_pack_max = bli_obj_padded_length( sub_obj );
 		dim_t  m_pack_cur;
 
 		if ( i + b == m ) m_pack_cur = m_pack_max - i;
 		else              m_pack_cur = b;
 
-		bli_obj_set_padded_length( m_pack_cur, *sub_obj );
+		bli_obj_set_padded_length( m_pack_cur, sub_obj );
 	}
 
 	// Translate the desired offsets to a panel offset and adjust the
 	// buffer pointer of the subpartition object.
 	{
-		char* buf_p        = bli_obj_buffer( *sub_obj );
-		siz_t elem_size    = bli_obj_elem_size( *sub_obj );
+		char* buf_p        = bli_obj_buffer( sub_obj );
+		siz_t elem_size    = bli_obj_elem_size( sub_obj );
 		dim_t off_to_panel = bli_packm_offset_to_panel_for( i, sub_obj );
 
 		buf_p = buf_p + elem_size * off_to_panel;
 
-		bli_obj_set_buffer( ( void* )buf_p, *sub_obj );
+		bli_obj_set_buffer( buf_p, sub_obj );
 	}
 }
 
@@ -130,14 +130,14 @@ void bli_packm_acquire_mpart_l2r( subpart_t requested_part,
 
 	// Partitioning left-to-right through packed row panels (which are
 	// column-stored) is not yet supported.
-	if ( bli_obj_is_row_packed( *obj ) )
+	if ( bli_obj_is_row_packed( obj ) )
 	{
 		bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 	}
 
 	// Query the dimensions of the parent object.
-	m = bli_obj_length( *obj );
-	n = bli_obj_width( *obj );
+	m = bli_obj_length( obj );
+	n = bli_obj_width( obj );
 
 	// Foolproofing: do not let b exceed what's left of the n dimension at
 	// column offset j.
@@ -147,10 +147,10 @@ void bli_packm_acquire_mpart_l2r( subpart_t requested_part,
 	// stride fields of the parent object. Note that this omits copying view
 	// information because the new partition will have its own dimensions
 	// and offsets.
-	bli_obj_init_subpart_from( *obj, *sub_obj );
+	bli_obj_init_subpart_from( obj, sub_obj );
 
 	// Modify offsets and dimensions of requested partition.
-	bli_obj_set_dims( m, b, *sub_obj );
+	bli_obj_set_dims( m, b, sub_obj );
 
 	// Tweak the padded width of the subpartition to trick the underlying
 	// implementation into only zero-padding for the narrow submatrix of
@@ -162,25 +162,25 @@ void bli_packm_acquire_mpart_l2r( subpart_t requested_part,
 	// b for the edge iteration). In these cases, we arrive at the new
 	// packed width by simply subtracting off j.
 	{
-		dim_t  n_pack_max = bli_obj_padded_width( *sub_obj );
+		dim_t  n_pack_max = bli_obj_padded_width( sub_obj );
 		dim_t  n_pack_cur;
 
 		if ( j + b == n ) n_pack_cur = n_pack_max - j;
 		else              n_pack_cur = b;
 
-		bli_obj_set_padded_width( n_pack_cur, *sub_obj );
+		bli_obj_set_padded_width( n_pack_cur, sub_obj );
 	}
 
 	// Translate the desired offsets to a panel offset and adjust the
 	// buffer pointer of the subpartition object.
 	{
-		char* buf_p        = bli_obj_buffer( *sub_obj );
-		siz_t elem_size    = bli_obj_elem_size( *sub_obj );
+		char* buf_p        = bli_obj_buffer( sub_obj );
+		siz_t elem_size    = bli_obj_elem_size( sub_obj );
 		dim_t off_to_panel = bli_packm_offset_to_panel_for( j, sub_obj );
 
 		buf_p = buf_p + elem_size * off_to_panel;
 
-		bli_obj_set_buffer( ( void* )buf_p, *sub_obj );
+		bli_obj_set_buffer( buf_p, sub_obj );
 	}
 }
 
@@ -201,47 +201,47 @@ dim_t bli_packm_offset_to_panel_for( dim_t offmn, obj_t* p )
 {
 	dim_t panel_off;
 
-	if      ( bli_obj_pack_schema( *p ) == BLIS_PACKED_ROWS )
+	if      ( bli_obj_pack_schema( p ) == BLIS_PACKED_ROWS )
 	{
 		// For the "packed rows" schema, a single row is effectively one
 		// row panel, and so we use the row offset as the panel offset.
 		// Then we multiply this offset by the effective panel stride
 		// (ie: the row stride) to arrive at the desired offset.
-		panel_off = offmn * bli_obj_row_stride( *p );
+		panel_off = offmn * bli_obj_row_stride( p );
 	}
-	else if ( bli_obj_pack_schema( *p ) == BLIS_PACKED_COLUMNS )
+	else if ( bli_obj_pack_schema( p ) == BLIS_PACKED_COLUMNS )
 	{
 		// For the "packed columns" schema, a single column is effectively one
 		// column panel, and so we use the column offset as the panel offset.
 		// Then we multiply this offset by the effective panel stride
 		// (ie: the column stride) to arrive at the desired offset.
-		panel_off = offmn * bli_obj_col_stride( *p );
+		panel_off = offmn * bli_obj_col_stride( p );
 	}
-	else if ( bli_obj_pack_schema( *p ) == BLIS_PACKED_ROW_PANELS )
+	else if ( bli_obj_pack_schema( p ) == BLIS_PACKED_ROW_PANELS )
 	{
 		// For the "packed row panels" schema, the column stride is equal to
 		// the panel dimension (length). So we can divide it into offmn
 		// (interpreted as a row offset) to arrive at a panel offset. Then
 		// we multiply this offset by the panel stride to arrive at the total
 		// offset to the panel (in units of elements).
-		panel_off = offmn / bli_obj_col_stride( *p );
-		panel_off = panel_off * bli_obj_panel_stride( *p );
+		panel_off = offmn / bli_obj_col_stride( p );
+		panel_off = panel_off * bli_obj_panel_stride( p );
 
 		// Sanity check.
-		if ( offmn % bli_obj_col_stride( *p ) > 0 ) bli_abort();
+		if ( offmn % bli_obj_col_stride( p ) > 0 ) bli_abort();
 	}
-	else if ( bli_obj_pack_schema( *p ) == BLIS_PACKED_COL_PANELS )
+	else if ( bli_obj_pack_schema( p ) == BLIS_PACKED_COL_PANELS )
 	{
 		// For the "packed column panels" schema, the row stride is equal to
 		// the panel dimension (width). So we can divide it into offmn
 		// (interpreted as a column offset) to arrive at a panel offset. Then
 		// we multiply this offset by the panel stride to arrive at the total
 		// offset to the panel (in units of elements).
-		panel_off = offmn / bli_obj_row_stride( *p );
-		panel_off = panel_off * bli_obj_panel_stride( *p );
+		panel_off = offmn / bli_obj_row_stride( p );
+		panel_off = panel_off * bli_obj_panel_stride( p );
 
 		// Sanity check.
-		if ( offmn % bli_obj_row_stride( *p ) > 0 ) bli_abort();
+		if ( offmn % bli_obj_row_stride( p ) > 0 ) bli_abort();
 	}
 	else
 	{

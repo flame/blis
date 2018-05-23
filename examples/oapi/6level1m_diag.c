@@ -59,14 +59,14 @@ int main( int argc, char** argv )
 	bli_obj_create( dt, m, n, rs, cs, &a );
 
 	// First, we mark the matrix structure as triangular.
-	bli_obj_set_struc( BLIS_TRIANGULAR, a )
+	bli_obj_set_struc( BLIS_TRIANGULAR, &a )
 
 	// Next, we specify whether the lower part or the upper part is to be
 	// recognized as the "stored" region (which we call the uplo field). The
 	// strictly opposite part (in this case, the strictly lower region) will
 	// be *assumed* to be zero during computation. However, when printed out,
 	// the strictly lower part may contain junk values.
-	bli_obj_set_uplo( BLIS_UPPER, a );
+	bli_obj_set_uplo( BLIS_UPPER, &a );
 
 	// Now set the upper triangle to random values.
 	bli_randm( &a );
@@ -89,8 +89,8 @@ int main( int argc, char** argv )
 	bli_obj_create( dt, m, n, rs, cs, &b );
 
 	// Set structure and uplo.
-	bli_obj_set_struc( BLIS_TRIANGULAR, b )
-	bli_obj_set_uplo( BLIS_UPPER, b );
+	bli_obj_set_struc( BLIS_TRIANGULAR, &b )
+	bli_obj_set_uplo( BLIS_UPPER, &b );
 
 	// Create an alias, 'bl', of the original object 'b'. Both objects will
 	// refer to the same underlying matrix elements, but now we will have two
@@ -98,7 +98,7 @@ int main( int argc, char** argv )
 	// of the objects, meaning no additional memory allocation takes place.
 	// Therefore it is up to the API user (you) to make sure that you only
 	// free the original object (or exactly one of the aliases).
-	bli_obj_alias_to( b, bl );
+	bli_obj_alias_to( &b, &bl );
 
 	// Digression: Each object contains a diagonal offset (even vectors),
 	// even if it is never needed. The diagonal offset for a newly-created
@@ -111,10 +111,10 @@ int main( int argc, char** argv )
 	// x-axis value.
 
 	// Set the diagonal offset of 'bl' to -1.
-	bli_obj_set_diag_offset( -1, bl );
+	bli_obj_set_diag_offset( -1, &bl );
 	
 	// Set the uplo field of 'bl' to "lower".
-	bli_obj_set_uplo( BLIS_LOWER, bl );
+	bli_obj_set_uplo( BLIS_LOWER, &bl );
 
 	// Set the upper triangle of 'b' to random values.
 	bli_randm( &b );
@@ -148,7 +148,7 @@ int main( int argc, char** argv )
 	bli_obj_create( dt, m, n, rs, cs, &c );
 
 	// Reset the diagonal offset of 'bl' to 0.
-	bli_obj_set_diag_offset( 0, bl );
+	bli_obj_set_diag_offset( 0, &bl );
 
 	// Copy the lower triangle of matrix 'b' from Example 2 to object 'c'.
 	// This should give us -1.0 in the strictly lower part and some non-zero
@@ -212,7 +212,7 @@ int main( int argc, char** argv )
 
 	// We want to pluck out the lower triangle and transpose it into the upper
 	// triangle of 'd'.
-	bli_obj_toggle_trans( bl );
+	bli_obj_toggle_trans( &bl );
 
 	// Now we copy the transpose of the lower part of 'bl' into the upper
 	// part of 'd'. (Again, notice that we haven't modified any properties of
@@ -242,11 +242,11 @@ int main( int argc, char** argv )
 	bli_printm( "e: initial value (all -1.0)", &e, "%4.1f", "" );
 
 	// Create an alias to work with.
-	bli_obj_alias_to( e, el );
+	bli_obj_alias_to( &e, &el );
 
 	// Set structure and uplo of 'el'.
-	bli_obj_set_struc( BLIS_TRIANGULAR, el )
-	bli_obj_set_uplo( BLIS_LOWER, el );
+	bli_obj_set_struc( BLIS_TRIANGULAR, &el )
+	bli_obj_set_uplo( BLIS_LOWER, &el );
 
 	// Digression: Notice that "triangular" structure does not require that
 	// the matrix be square. Rather, it simply means that either the part above
@@ -259,8 +259,8 @@ int main( int argc, char** argv )
 
 	// Move the diagonal offset of 'el' to 1 and flip the uplo field to
 	// "upper".
-	bli_obj_set_diag_offset( 1, el );
-	bli_obj_set_uplo( BLIS_UPPER, el );
+	bli_obj_set_diag_offset( 1, &el );
+	bli_obj_set_uplo( BLIS_UPPER, &el );
 
 	// Set the upper triangle to zero.
 	bli_setm( &BLIS_ZERO, &el );
@@ -287,11 +287,11 @@ int main( int argc, char** argv )
 	bli_printm( "h: initial value (all -1.0)", &h, "%4.1f", "" );
 
 	// Set the diagonal offset of 'h' to -1.
-	bli_obj_set_diag_offset( -1, h );
+	bli_obj_set_diag_offset( -1, &h );
 
 	// Set the structure and uplo of 'h'.
-	bli_obj_set_struc( BLIS_TRIANGULAR, h )
-	bli_obj_set_uplo( BLIS_UPPER, h );
+	bli_obj_set_struc( BLIS_TRIANGULAR, &h )
+	bli_obj_set_uplo( BLIS_UPPER, &h );
 
 	// Randomize the elements on and above the first subdiagonal.
 	bli_randm( &h );
@@ -299,11 +299,11 @@ int main( int argc, char** argv )
 	bli_printm( "h: after randomizing above first subdiagonal", &h, "%4.1f", "" );
 
 	// Create an alias to work with.
-	bli_obj_alias_to( h, hl );
+	bli_obj_alias_to( &h, &hl );
 
 	// Flip the uplo of 'hl' and move the diagonal down by one.
-	bli_obj_set_uplo( BLIS_LOWER, hl );
-	bli_obj_set_diag_offset( -2, hl );
+	bli_obj_set_uplo( BLIS_LOWER, &hl );
+	bli_obj_set_diag_offset( -2, &hl );
 
 	// Set the region strictly below the first subdiagonal (on or below
 	// the second subdiagonal) to zero.

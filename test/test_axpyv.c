@@ -128,12 +128,12 @@ int main( int argc, char** argv )
 #else
 			if ( bli_is_float( dt ) )
 			{
-				f77_int  nn     = bli_obj_length( x );
-				f77_int  incx   = bli_obj_vector_inc( x );
-				f77_int  incy   = bli_obj_vector_inc( y );
-				float*  alphap = bli_obj_buffer( alpha );
-				float*  xp     = bli_obj_buffer( x );
-				float*  yp     = bli_obj_buffer( y );
+				f77_int nn     = bli_obj_length( &x );
+				f77_int incx   = bli_obj_vector_inc( &x );
+				f77_int incy   = bli_obj_vector_inc( &y );
+				float*  alphap = bli_obj_buffer( &alpha );
+				float*  xp     = bli_obj_buffer( &x );
+				float*  yp     = bli_obj_buffer( &y );
 
 				saxpy_( &nn,
 				        alphap,
@@ -145,12 +145,12 @@ int main( int argc, char** argv )
 			else if ( bli_is_double( dt ) )
 			{
 
-				f77_int  nn     = bli_obj_length( x );
-				f77_int  incx   = bli_obj_vector_inc( x );
-				f77_int  incy   = bli_obj_vector_inc( y );
-				double*  alphap = bli_obj_buffer( alpha );
-				double*  xp     = bli_obj_buffer( x );
-				double*  yp     = bli_obj_buffer( y );
+				f77_int  nn     = bli_obj_length( &x );
+				f77_int  incx   = bli_obj_vector_inc( &x );
+				f77_int  incy   = bli_obj_vector_inc( &y );
+				double*  alphap = bli_obj_buffer( &alpha );
+				double*  xp     = bli_obj_buffer( &x );
+				double*  yp     = bli_obj_buffer( &y );
 
 				daxpy_( &nn,
 				        alphap,

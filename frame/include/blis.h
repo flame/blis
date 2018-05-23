@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2016 Hewlett Packard Enterprise Development LP
+   Copyright (C) 2016, Hewlett Packard Enterprise Development LP
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -44,23 +44,19 @@
 extern "C" {
 #endif
 
+// NOTE: PLEASE DON'T CHANGE THE ORDER IN WHICH HEADERS ARE INCLUDED UNLESS
+// YOU ARE SURE THAT IT DOESN'T BREAK INTER-HEADER MACRO DEPENDENCIES.
 
-// -- BLIS configuration definition --
+// -- System headers --
+// NOTE: This header must be included before bli_config_macro_defs.h.
 
-// NOTE: We include bli_config.h first because there might be something
-// defined there that is needed within one of the system headers. A good
-// example: posix_memalign() needs _GNU_SOURCE on GNU systems (I think).
-// 
-// PLEASE DON'T CHANGE THE ORDER IN WHICH HEADERS ARE INCLUDED UNLESS YOU
-// KNOW WHAT YOU ARE DOING.
+#include "bli_system.h"
+
+
+// -- configure definitions --
 
 #include "bli_config.h"
 #include "bli_config_macro_defs.h"
-
-
-// -- System headers --
-
-#include "bli_system.h"
 
 
 // -- Common BLIS definitions --

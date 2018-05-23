@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2016 Hewlett Packard Enterprise Development LP
+   Copyright (C) 2016, Hewlett Packard Enterprise Development LP
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -61,7 +61,7 @@ void bli_packv_init
 	// is NULL, and if so, simply alias the object to its packed counterpart.
 	if ( bli_cntl_is_noop( cntl ) )
 	{
-		bli_obj_alias_to( *a, *p );
+		bli_obj_alias_to( a, p );
 		return;
 	}
 
@@ -73,15 +73,15 @@ void bli_packv_init
 	// BLIS_NOT_PACKED and thus packing will be called for (but in some
 	// cases packing has already taken place). Also, not all combinations
 	// of current pack status and desired pack schema are valid.
-	if ( bli_obj_pack_schema( *a ) == cntl_pack_schema( cntl ) )
+	if ( bli_obj_pack_schema( a ) == cntl_pack_schema( cntl ) )
 	{
-		bli_obj_alias_to( *a, *p );
+		bli_obj_alias_to( a, p );
 		return;
 	}
 
 	// Now, if we are not skipping the pack operation, then the only question
 	// left is whether we are to typecast vector a before packing.
-	if ( bli_obj_datatype( *a ) != bli_obj_target_datatype( *a ) )
+	if ( bli_obj_dt( a ) != bli_obj_target_dt( a ) )
 		bli_abort();
 
 	// Extract various fields from the control tree and pass them in
@@ -113,8 +113,8 @@ siz_t bli_packv_init_pack
        cntx_t* cntx
      )
 {
-	num_t     dt     = bli_obj_datatype( *a );
-	dim_t     dim_a  = bli_obj_vector_dim( *a );
+	num_t     dt     = bli_obj_dt( a );
+	dim_t     dim_a  = bli_obj_vector_dim( a );
 	dim_t     bmult  = bli_cntx_get_blksz_def_dt( dt, bmult_id, cntx );
 
 	membrk_t* membrk = bli_cntx_membrk( cntx );
@@ -129,23 +129,23 @@ siz_t bli_packv_init_pack
 
 
 	// We begin by copying the basic fields of c.
-	bli_obj_alias_to( *a, *p );
+	bli_obj_alias_to( a, p );
 
 	// Update the dimensions.
-	bli_obj_set_dims( dim_a, 1, *p );
+	bli_obj_set_dims( dim_a, 1, p );
 
 	// Reset the view offsets to (0,0).
-	bli_obj_set_offs( 0, 0, *p );
+	bli_obj_set_offs( 0, 0, p );
 
 	// Set the pack schema in the p object to the value in the control tree
 	// node.
-	bli_obj_set_pack_schema( schema, *p );
+	bli_obj_set_pack_schema( schema, p );
 
 	// Compute the dimensions padded by the dimension multiples.
-	m_p_pad = bli_align_dim_to_mult( bli_obj_vector_dim( *p ), bmult );
+	m_p_pad = bli_align_dim_to_mult( bli_obj_vector_dim( p ), bmult );
 
 	// Compute the size of the packed buffer.
-	size_p = m_p_pad * 1 * bli_obj_elem_size( *p );
+	size_p = m_p_pad * 1 * bli_obj_elem_size( p );
 
 #if 0
 	// Extract the address of the mem_t object within p that will track
@@ -179,11 +179,11 @@ siz_t bli_packv_init_pack
 	// copied when the value is already up-to-date, because it persists
 	// in the main object buffer field across loop iterations.)
 	buf = bli_mem_buffer( mem_p );
-	bli_obj_set_buffer( buf, *p );
+	bli_obj_set_buffer( buf, p );
 #endif
 
 	// Save the padded (packed) dimensions into the packed object.
-	bli_obj_set_padded_dims( m_p_pad, 1, *p );
+	bli_obj_set_padded_dims( m_p_pad, 1, p );
 
 	// Set the row and column strides of p based on the pack schema.
 	if ( schema == BLIS_PACKED_VECTOR )
@@ -193,9 +193,9 @@ siz_t bli_packv_init_pack
 		// how much space beyond the vector would need to be zero-padded, if
 		// zero-padding was needed.
 		rs_p = 1;
-		cs_p = bli_obj_padded_length( *p );
+		cs_p = bli_obj_padded_length( p );
 
-		bli_obj_set_strides( rs_p, cs_p, *p );
+		bli_obj_set_strides( rs_p, cs_p, p );
 	}
 
 	return size_p;

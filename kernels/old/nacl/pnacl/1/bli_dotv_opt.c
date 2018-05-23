@@ -243,7 +243,7 @@ void bli_cdotv_opt(
 	scomplex rho[restrict static 1])
 {
 	if (bli_is_conj(conjy)) {
-		bli_toggle_conj(conjx);
+		bli_toggle_conj(&conjx);
 	}
 
 	if (bli_zero_dim1(n)) {
@@ -521,7 +521,7 @@ void bli_zdotv_opt(
 	dcomplex rho[restrict static 1])
 {
 	if (bli_is_conj(conjy)) {
-		bli_toggle_conj(conjx);
+		bli_toggle_conj(&conjx);
 	}
 
 	if (bli_zero_dim1(n)) {

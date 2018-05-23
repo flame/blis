@@ -70,9 +70,12 @@ void PASTEMAC(ch,opname) \
 \
 	/* Determine the distance to the diagonals, the number of diagonal
 	   elements, and the diagonal increments. */ \
-	bli_set_dims_incs_2d( diagoffx, transx, \
-	                      m, n, rs_x, cs_x, rs_y, cs_y, \
-	                      offx, offy, n_elem, incx, incy ); \
+	bli_set_dims_incs_2d \
+	( \
+	  diagoffx, transx, \
+	  m, n, rs_x, cs_x, rs_y, cs_y, \
+	  &offx, &offy, &n_elem, &incx, &incy \
+	); \
 \
 	conjx = bli_extract_conj( transx ); \
 \
@@ -144,9 +147,12 @@ void PASTEMAC(ch,opname) \
 \
 	/* Determine the distance to the diagonals, the number of diagonal
 	   elements, and the diagonal increments. */ \
-	bli_set_dims_incs_2d( diagoffx, transx, \
-	                      m, n, rs_x, cs_x, rs_y, cs_y, \
-	                      offx, offy, n_elem, incx, incy ); \
+	bli_set_dims_incs_2d \
+	( \
+	  diagoffx, transx, \
+	  m, n, rs_x, cs_x, rs_y, cs_y, \
+	  &offx, &offy, &n_elem, &incx, &incy \
+	); \
 \
 	conjx = bli_extract_conj( transx ); \
 \
@@ -212,9 +218,12 @@ void PASTEMAC(ch,opname) \
 \
 	/* Determine the distance to the diagonals, the number of diagonal
 	   elements, and the diagonal increments. */ \
-	bli_set_dims_incs_1d( diagoffx, \
-	                      m, n, rs_x, cs_x, \
-	                      offx, n_elem, incx ); \
+	bli_set_dims_incs_1d \
+	( \
+	  diagoffx, \
+	  m, n, rs_x, cs_x, \
+	  &offx, &n_elem, &incx \
+	); \
 \
     x1 = x + offx; \
 \
@@ -264,9 +273,12 @@ void PASTEMAC(ch,opname) \
 \
 	/* Determine the distance to the diagonals, the number of diagonal
 	   elements, and the diagonal increments. */ \
-	bli_set_dims_incs_1d( diagoffx, \
-	                      m, n, rs_x, cs_x, \
-	                      offx, n_elem, incx ); \
+	bli_set_dims_incs_1d \
+	( \
+	  diagoffx, \
+	  m, n, rs_x, cs_x, \
+	  &offx, &n_elem, &incx \
+	); \
 \
     x1 = x + offx; \
 \
@@ -322,9 +334,12 @@ void PASTEMAC(ch,opname) \
 \
 	/* Determine the distance to the diagonals, the number of diagonal
 	   elements, and the diagonal increments. */ \
-	bli_set_dims_incs_1d( diagoffx, \
-	                      m, n, rs_x, cs_x, \
-	                      offx, n_elem, incx ); \
+	bli_set_dims_incs_1d \
+	( \
+	  diagoffx, \
+	  m, n, rs_x, cs_x, \
+	  &offx, &n_elem, &incx \
+	); \
 \
 	/* Alternate implementation. (Substitute for remainder of function). */ \
 	/* for ( i = 0; i < n_elem; ++i ) \

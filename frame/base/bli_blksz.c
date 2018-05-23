@@ -261,7 +261,7 @@ dim_t bli_determine_blocksize_f
 
 	// Extract the execution datatype and use it to query the corresponding
 	// blocksize and blocksize maximum values from the blksz_t object.
-	dt    = bli_obj_execution_datatype( *obj );
+	dt    = bli_obj_exec_dt( obj );
 	bsize = bli_cntx_get_blksz( bszid, cntx );
 	b_alg = bli_blksz_get_def( dt, bsize );
 	b_max = bli_blksz_get_max( dt, bsize );
@@ -287,7 +287,7 @@ dim_t bli_determine_blocksize_b
 
 	// Extract the execution datatype and use it to query the corresponding
 	// blocksize and blocksize maximum values from the blksz_t object.
-	dt    = bli_obj_execution_datatype( *obj );
+	dt    = bli_obj_exec_dt( obj );
 	bsize = bli_cntx_get_blksz( bszid, cntx );
 	b_alg = bli_blksz_get_def( dt, bsize );
 	b_max = bli_blksz_get_max( dt, bsize );

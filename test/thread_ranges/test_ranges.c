@@ -62,28 +62,28 @@ int main( int argc, char** argv )
 
 		uploa = BLIS_UPPER;
 		uploa = BLIS_LOWER;
-		bli_obj_set_struc( BLIS_TRIANGULAR, a );
-		bli_obj_set_uplo( uploa, a );
-		bli_obj_set_diag_offset( -2, a );
+		bli_obj_set_struc( BLIS_TRIANGULAR, &a );
+		bli_obj_set_uplo( uploa, &a );
+		bli_obj_set_diag_offset( -2, &a );
 
 		uplob = BLIS_UPPER;
 		uplob = BLIS_LOWER;
-		bli_obj_set_struc( BLIS_TRIANGULAR, b );
-		bli_obj_set_uplo( uplob, b );
-		bli_obj_set_diag_offset( -2, b );
+		bli_obj_set_struc( BLIS_TRIANGULAR, &b );
+		bli_obj_set_uplo( uplob, &b );
+		bli_obj_set_diag_offset( -2, &b );
 
 		uploc = BLIS_UPPER;
 		//uploc = BLIS_LOWER;
 		//uploc = BLIS_ZEROS;
 		//uploc = BLIS_DENSE;
-		bli_obj_set_struc( BLIS_HERMITIAN, c );
-		//bli_obj_set_struc( BLIS_TRIANGULAR, c );
-		bli_obj_set_uplo( uploc, c );
-		bli_obj_set_diag_offset(  1, c );
+		bli_obj_set_struc( BLIS_HERMITIAN, &c );
+		//bli_obj_set_struc( BLIS_TRIANGULAR, &c );
+		bli_obj_set_uplo( uploc, &c );
+		bli_obj_set_diag_offset(  1, &c );
 
-		bli_obj_alias_to( a, aa ); (void)aa;
-		bli_obj_alias_to( b, bb ); (void)bb;
-		bli_obj_alias_to( c, cc ); (void)cc;
+		bli_obj_alias_to( &a, &aa ); (void)aa;
+		bli_obj_alias_to( &b, &bb ); (void)bb;
+		bli_obj_alias_to( &c, &cc ); (void)cc;
 
 		bli_randm( &a );
 		bli_randm( &b );
@@ -274,9 +274,9 @@ int main( int argc, char** argv )
 		
 		bli_obj_create( dt, m, n, 0, 0, &a );
 
-		bli_obj_set_struc( BLIS_TRIANGULAR, a );
-		bli_obj_set_uplo( uploa, a );
-		bli_obj_set_diag_offset( diagoffa, a );
+		bli_obj_set_struc( BLIS_TRIANGULAR, &a );
+		bli_obj_set_uplo( uploa, &a );
+		bli_obj_set_diag_offset( diagoffa, &a );
 
 		bli_randm( &a );
 

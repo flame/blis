@@ -5,6 +5,7 @@ NOTE: Portions of this project's code are copyrighted by
 while other portions are copyrighted by
 
   Advanced Micro Devices, Inc.
+  Hewlett Packard Enterprise Development LP
 
 with some overlap. Please see file-level license headers for file-specific
 copyright info. All parties provide their portions of the code under the
@@ -13,6 +14,7 @@ copyright info. All parties provide their portions of the code under the
 ---
 
 Copyright (C) 2017, Advanced Micro Devices, Inc.
+Copyright (C) 2016, Hewlett Packard Enterprise Development LP
 Copyright (C) 2014, The University of Texas at Austin
 
 Redistribution and use in source and binary forms, with or without

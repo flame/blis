@@ -87,7 +87,7 @@ void PASTEF77(ch,blasname) \
 \
 	/* Determine the dimensions of x and y so we can adjust the increments,
 	   if necessary.*/ \
-	bli_set_dims_with_trans( blis_transa, m0, n0, m_y, n_x ); \
+	bli_set_dims_with_trans( blis_transa, m0, n0, &m_y, &n_x ); \
 \
 	/* BLAS handles cases where trans(A) has no columns, and x has no elements,
 	   in a peculiar way. In these situations, BLAS returns without performing

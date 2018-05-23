@@ -174,7 +174,7 @@ void libblis_test_randm_experiment
 
 	// Estimate the performance of the best experiment repeat.
 	*perf = ( 2.0 * m * n ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bli_obj_is_complex( x ) ) *perf *= 2.0;
+	if ( bli_obj_is_complex( &x ) ) *perf *= 2.0;
 
 	// Perform checks.
 	// For randm(), we don't return a meaningful residual/diff, since we can't
@@ -218,9 +218,9 @@ void libblis_test_randm_check
        double*        resid
      )
 {
-	num_t  dt_real = bli_obj_datatype_proj_to_real( *x );
-	dim_t  m_x     = bli_obj_length( *x );
-	dim_t  n_x     = bli_obj_width( *x );
+	num_t  dt_real = bli_obj_dt_proj_to_real( x );
+	dim_t  m_x     = bli_obj_length( x );
+	dim_t  n_x     = bli_obj_width( x );
 	obj_t  sum;
 
 	//
@@ -238,14 +238,14 @@ void libblis_test_randm_check
 	
 	if ( bli_is_float( dt_real ) )
 	{
-		float*  sum_x = bli_obj_buffer_at_off( sum );
+		float*  sum_x = bli_obj_buffer_at_off( &sum );
 
 		if      ( *sum_x == *bli_d0         ) *resid = 1.0;
 		else if ( *sum_x >= 2.0 * m_x * n_x ) *resid = 2.0;
 	}
 	else // if ( bli_is_double( dt_real ) )
 	{
-		double* sum_x = bli_obj_buffer_at_off( sum );
+		double* sum_x = bli_obj_buffer_at_off( &sum );
 
 		if      ( *sum_x == *bli_d0         ) *resid = 1.0;
 		else if ( *sum_x >= 2.0 * m_x * n_x ) *resid = 2.0;
@@ -273,16 +273,16 @@ void bli_absumm
        obj_t* sum_x
      )
 {
-	num_t     dt        = bli_obj_datatype( *x );
+	num_t     dt        = bli_obj_dt( x );
 
-	dim_t     m         = bli_obj_length( *x );
-	dim_t     n         = bli_obj_width( *x );
+	dim_t     m         = bli_obj_length( x );
+	dim_t     n         = bli_obj_width( x );
 
-	void*     buf_x     = bli_obj_buffer_at_off( *x );
-	inc_t     rs_x      = bli_obj_row_stride( *x );
-	inc_t     cs_x      = bli_obj_col_stride( *x );
+	void*     buf_x     = bli_obj_buffer_at_off( x );
+	inc_t     rs_x      = bli_obj_row_stride( x );
+	inc_t     cs_x      = bli_obj_col_stride( x );
 
-	void*     buf_sum_x = bli_obj_buffer_at_off( *sum_x );
+	void*     buf_sum_x = bli_obj_buffer_at_off( sum_x );
 
 	FUNCPTR_T f;
 

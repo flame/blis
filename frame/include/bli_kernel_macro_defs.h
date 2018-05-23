@@ -57,6 +57,16 @@
 
 // -- Memory allocation --------------------------------------------------------
 
+// hbwmalloc.h provides hbw_malloc() and hbw_free() on systems with
+// libmemkind. But disable use of libmemkind if BLIS_DISABLE_MEMKIND
+// was explicitly defined.
+#ifdef BLIS_DISABLE_MEMKIND
+  #undef BLIS_ENABLE_MEMKIND
+#endif
+#ifdef BLIS_ENABLE_MEMKIND
+  #include <hbwmalloc.h>
+#endif
+
 // Memory allocation functions. These macros define the three types of
 // malloc()-style functions, and their free() counterparts: one for each
 // type of memory to be allocated.

@@ -148,7 +148,7 @@ int main( int argc, char** argv )
 	// on 'e', the input operand. Transposition can be indicated by setting a
 	// bit in the object. Since it always starts out as "no transpose", we can
 	// simply toggle the bit.
-	bli_obj_toggle_trans( e );
+	bli_obj_toggle_trans( &e );
 
 	// Another way to mark and object for transposition is to set it directly.
 	//bli_obj_set_onlytrans( BLIS_TRANSPOSE, &e );
@@ -192,8 +192,8 @@ int main( int argc, char** argv )
 	bli_printm( "h (initial value):", &h, "%4.1f", "" );
 
 	// Set both the transpose and conjugation bits.
-	bli_obj_toggle_trans( g );
-	bli_obj_toggle_conj( g );
+	bli_obj_toggle_trans( &g );
+	bli_obj_toggle_conj( &g );
 
 	// Copy 'g' to 'h', conjugating and transposing 'g' in the process.
 	// Once again, notice that it's the source operand that we've marked for

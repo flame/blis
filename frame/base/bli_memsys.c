@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2016 Hewlett Packard Enterprise Development LP
+   Copyright (C) 2016, Hewlett Packard Enterprise Development LP
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -35,10 +35,6 @@
 
 #include "blis.h"
 
-#ifdef BLIS_ENABLE_PTHREADS
-static pthread_mutex_t memsys_mutex = PTHREAD_MUTEX_INITIALIZER;
-#endif
-
 static membrk_t global_membrk;
 
 // -----------------------------------------------------------------------------
@@ -61,43 +57,13 @@ void bli_memsys_init( void )
 	// bli_gks_query_cntx_noinit() to avoid the call to bli_init_once().
 	cntx_t* cntx_p = bli_gks_query_cntx_noinit();
 
-#ifdef BLIS_ENABLE_OPENMP
-	_Pragma( "omp critical (mem)" )
-#endif
-#ifdef BLIS_ENABLE_PTHREADS
-	pthread_mutex_lock( &memsys_mutex );
-#endif
-
-	// BEGIN CRITICAL SECTION
-	{
-		// Initialize the global membrk_t object and its memory pools.
-		bli_membrk_init( cntx_p, &global_membrk );
-	}
-	// END CRITICAL SECTION
-
-#ifdef BLIS_ENABLE_PTHREADS
-	pthread_mutex_unlock( &memsys_mutex );
-#endif
+	// Initialize the global membrk_t object and its memory pools.
+	bli_membrk_init( cntx_p, &global_membrk );
 }
 
 void bli_memsys_finalize( void )
 {
-#ifdef BLIS_ENABLE_OPENMP
-	_Pragma( "omp critical (mem)" )
-#endif
-#ifdef BLIS_ENABLE_PTHREADS
-	pthread_mutex_lock( &memsys_mutex );
-#endif
-
-	// BEGIN CRITICAL SECTION
-	{
-		// Finalize the global membrk_t object and its memory pools.
-		bli_membrk_finalize( &global_membrk );
-	}
-	// END CRITICAL SECTION
-
-#ifdef BLIS_ENABLE_PTHREADS
-	pthread_mutex_unlock( &memsys_mutex );
-#endif
+	// Finalize the global membrk_t object and its memory pools.
+	bli_membrk_finalize( &global_membrk );
 }
 

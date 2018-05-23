@@ -68,10 +68,13 @@ void PASTEMAC(ch,opname) \
 	dim_t    ij0, n_shift; \
 \
 	/* Set various loop parameters. */ \
-	bli_set_dims_incs_uplo_2m( diagoffx, diagx, transx, \
-	                           uplox, m, n, rs_x, cs_x, rs_y, cs_y, \
-	                           uplox_eff, n_elem_max, n_iter, incx, ldx, incy, ldy, \
-	                           ij0, n_shift ); \
+	bli_set_dims_incs_uplo_2m \
+	( \
+	  diagoffx, diagx, transx, \
+	  uplox, m, n, rs_x, cs_x, rs_y, cs_y, \
+	  &uplox_eff, &n_elem_max, &n_iter, &incx, &ldx, &incy, &ldy, \
+	  &ij0, &n_shift \
+	); \
 \
 	if ( bli_is_zeros( uplox_eff ) ) return; \
 \
@@ -181,10 +184,13 @@ void PASTEMAC(ch,opname) \
 	dim_t    ij0, n_shift; \
 \
 	/* Set various loop parameters. */ \
-	bli_set_dims_incs_uplo_2m( diagoffx, diagx, transx, \
-	                           uplox, m, n, rs_x, cs_x, rs_y, cs_y, \
-	                           uplox_eff, n_elem_max, n_iter, incx, ldx, incy, ldy, \
-	                           ij0, n_shift ); \
+	bli_set_dims_incs_uplo_2m \
+	( \
+	  diagoffx, diagx, transx, \
+	  uplox, m, n, rs_x, cs_x, rs_y, cs_y, \
+	  &uplox_eff, &n_elem_max, &n_iter, &incx, &ldx, &incy, &ldy, \
+	  &ij0, &n_shift \
+	); \
 \
 	if ( bli_is_zeros( uplox_eff ) ) return; \
 \
@@ -292,10 +298,13 @@ void PASTEMAC(ch,opname) \
 	dim_t    ij0, n_shift; \
 \
 	/* Set various loop parameters. */ \
-	bli_set_dims_incs_uplo_1m( diagoffx, diagx, \
-	                           uplox, m, n, rs_x, cs_x, \
-	                           uplox_eff, n_elem_max, n_iter, incx, ldx, \
-	                           ij0, n_shift ); \
+	bli_set_dims_incs_uplo_1m \
+	( \
+	  diagoffx, diagx, \
+	  uplox, m, n, rs_x, cs_x, \
+	  &uplox_eff, &n_elem_max, &n_iter, &incx, &ldx, \
+	  &ij0, &n_shift \
+	); \
 \
 	if ( bli_is_zeros( uplox_eff ) ) return; \
 \

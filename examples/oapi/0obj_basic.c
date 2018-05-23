@@ -121,12 +121,12 @@ int main( int argc, char** argv )
 
 	// Let's inspect the amount of padding inserted for alignment. Note
 	// the difference between the m dimension and the column stride.
-	printf( "datatype            %s\n", bli_datatype_string( bli_obj_datatype( a8 ) ) );
-	printf( "datatype size       %d bytes\n", bli_datatype_size( bli_obj_datatype( a8 ) ) );
-	printf( "m dim (# of rows):  %d\n", ( int )bli_obj_length( a8 ) );
-	printf( "n dim (# of cols):  %d\n", ( int )bli_obj_width( a8 ) );
-	printf( "row stride:         %d\n", ( int )bli_obj_row_stride( a8 ) );
-	printf( "col stride:         %d\n", ( int )bli_obj_col_stride( a8 ) );
+	printf( "datatype            %s\n", bli_dt_string( bli_obj_dt( &a8 ) ) );
+	printf( "datatype size       %d bytes\n", bli_dt_size( bli_obj_dt( &a8 ) ) );
+	printf( "m dim (# of rows):  %d\n", ( int )bli_obj_length( &a8 ) );
+	printf( "n dim (# of cols):  %d\n", ( int )bli_obj_width( &a8 ) );
+	printf( "row stride:         %d\n", ( int )bli_obj_row_stride( &a8 ) );
+	printf( "col stride:         %d\n", ( int )bli_obj_col_stride( &a8 ) );
 
 	//
 	// Example 6: Inspect object fields after creation of other floating-
@@ -139,28 +139,28 @@ int main( int argc, char** argv )
 	bli_obj_create( BLIS_SCOMPLEX, 3, 5, 0, 0, &a10);
 	bli_obj_create( BLIS_DCOMPLEX, 3, 5, 0, 0, &a11 );
 
-	printf( "datatype            %s\n", bli_datatype_string( bli_obj_datatype( a9 ) ) );
-	printf( "datatype size       %d bytes\n", bli_datatype_size( bli_obj_datatype( a9 ) ) );
-	printf( "m dim (# of rows):  %d\n", ( int )bli_obj_length( a9 ) );
-	printf( "n dim (# of cols):  %d\n", ( int )bli_obj_width( a9 ) );
-	printf( "row stride:         %d\n", ( int )bli_obj_row_stride( a9 ) );
-	printf( "col stride:         %d\n", ( int )bli_obj_col_stride( a9 ) );
+	printf( "datatype            %s\n", bli_dt_string( bli_obj_dt( &a9 ) ) );
+	printf( "datatype size       %d bytes\n", bli_dt_size( bli_obj_dt( &a9 ) ) );
+	printf( "m dim (# of rows):  %d\n", ( int )bli_obj_length( &a9 ) );
+	printf( "n dim (# of cols):  %d\n", ( int )bli_obj_width( &a9 ) );
+	printf( "row stride:         %d\n", ( int )bli_obj_row_stride( &a9 ) );
+	printf( "col stride:         %d\n", ( int )bli_obj_col_stride( &a9 ) );
 
 	printf( "\n" );
-	printf( "datatype            %s\n", bli_datatype_string( bli_obj_datatype( a10 ) ) );
-	printf( "datatype size       %d bytes\n", bli_datatype_size( bli_obj_datatype( a10 ) ) );
-	printf( "m dim (# of rows):  %d\n", ( int )bli_obj_length( a10 ) );
-	printf( "n dim (# of cols):  %d\n", ( int )bli_obj_width( a10 ) );
-	printf( "row stride:         %d\n", ( int )bli_obj_row_stride( a10 ) );
-	printf( "col stride:         %d\n", ( int )bli_obj_col_stride( a10 ) );
+	printf( "datatype            %s\n", bli_dt_string( bli_obj_dt( &a10 ) ) );
+	printf( "datatype size       %d bytes\n", bli_dt_size( bli_obj_dt( &a10 ) ) );
+	printf( "m dim (# of rows):  %d\n", ( int )bli_obj_length( &a10 ) );
+	printf( "n dim (# of cols):  %d\n", ( int )bli_obj_width( &a10 ) );
+	printf( "row stride:         %d\n", ( int )bli_obj_row_stride( &a10 ) );
+	printf( "col stride:         %d\n", ( int )bli_obj_col_stride( &a10 ) );
 
 	printf( "\n" );
-	printf( "datatype            %s\n", bli_datatype_string( bli_obj_datatype( a11 ) ) );
-	printf( "datatype size       %d bytes\n", bli_datatype_size( bli_obj_datatype( a11 ) ) );
-	printf( "m dim (# of rows):  %d\n", ( int )bli_obj_length( a11 ) );
-	printf( "n dim (# of cols):  %d\n", ( int )bli_obj_width( a11 ) );
-	printf( "row stride:         %d\n", ( int )bli_obj_row_stride( a11 ) );
-	printf( "col stride:         %d\n", ( int )bli_obj_col_stride( a11 ) );
+	printf( "datatype            %s\n", bli_dt_string( bli_obj_dt( &a11 ) ) );
+	printf( "datatype size       %d bytes\n", bli_dt_size( bli_obj_dt( &a11 ) ) );
+	printf( "m dim (# of rows):  %d\n", ( int )bli_obj_length( &a11 ) );
+	printf( "n dim (# of cols):  %d\n", ( int )bli_obj_width( &a11 ) );
+	printf( "row stride:         %d\n", ( int )bli_obj_row_stride( &a11 ) );
+	printf( "col stride:         %d\n", ( int )bli_obj_col_stride( &a11 ) );
 
 	//
 	// Example 7: Initialize an object's elements to random values and then

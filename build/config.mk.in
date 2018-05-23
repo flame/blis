@@ -68,7 +68,7 @@ KERNEL_LIST       := @kernel_list@
 KCONFIG_MAP       := @kconfig_map@
 
 # The operating system name, which should be either 'Linux' or 'Darwin'.
-OS_NAME           := $(shell uname -s)
+OS_NAME           := @os_name@
 
 # The directory path to the top level of the source distribution.
 # NOTE: We allow the includer to override this value by setting DIST_PATH
@@ -82,6 +82,7 @@ endif
 
 # The C compiler.
 CC                := @CC@
+CC_VENDOR         := @CC_VENDOR@
 RANLIB            := @RANLIB@
 
 # The level of debugging info to generate.

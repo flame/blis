@@ -60,7 +60,7 @@ void PASTEMAC(ch,opname) \
 	dim_t m_y, n_x; \
 \
 	/* Determine the dimensions of y and x. */ \
-	bli_set_dims_with_trans( transa, m, n, m_y, n_x ); \
+	bli_set_dims_with_trans( transa, m, n, &m_y, &n_x ); \
 \
 	/* If y has zero elements, return early. */ \
 	if ( bli_zero_dim1( m_y ) ) return; \

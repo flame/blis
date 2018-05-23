@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2016 Hewlett Packard Enterprise Development LP
+   Copyright (C) 2016, Hewlett Packard Enterprise Development LP
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -469,15 +469,15 @@ static bool_t bli_cntx_l3_nat_ukr_prefers_cols_dt( num_t dt, l3ukr_t ukr_id, cnt
 
 static bool_t bli_cntx_l3_nat_ukr_prefers_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
 {
-	const num_t  dt    = bli_obj_datatype( *obj );
+	const num_t  dt    = bli_obj_dt( obj );
 	const bool_t ukr_prefers_rows
 	                   = bli_cntx_l3_nat_ukr_prefers_rows_dt( dt, ukr_id, cntx );
 	const bool_t ukr_prefers_cols
 	                   = bli_cntx_l3_nat_ukr_prefers_cols_dt( dt, ukr_id, cntx );
 	bool_t       r_val = FALSE;
 
-	if      ( bli_obj_is_row_stored( *obj ) && ukr_prefers_rows ) r_val = TRUE;
-	else if ( bli_obj_is_col_stored( *obj ) && ukr_prefers_cols ) r_val = TRUE;
+	if      ( bli_obj_is_row_stored( obj ) && ukr_prefers_rows ) r_val = TRUE;
+	else if ( bli_obj_is_col_stored( obj ) && ukr_prefers_cols ) r_val = TRUE;
 
 	return r_val;
 }
@@ -514,7 +514,7 @@ static bool_t bli_cntx_l3_ukr_prefers_rows_dt( num_t dt, l3ukr_t ukr_id, cntx_t*
 	// For induced methods, return the ukernel storage preferences of the
 	// corresponding real micro-kernel.
 	if ( bli_cntx_method( cntx ) != BLIS_NAT )
-	    dt = bli_datatype_proj_to_real( dt );
+	    dt = bli_dt_proj_to_real( dt );
 
 	return bli_cntx_l3_nat_ukr_prefers_rows_dt( dt, ukr_id, cntx );
 }
@@ -524,22 +524,22 @@ static bool_t bli_cntx_l3_ukr_prefers_cols_dt( num_t dt, l3ukr_t ukr_id, cntx_t*
 	// For induced methods, return the ukernel storage preferences of the
 	// corresponding real micro-kernel.
 	if ( bli_cntx_method( cntx ) != BLIS_NAT )
-	    dt = bli_datatype_proj_to_real( dt );
+	    dt = bli_dt_proj_to_real( dt );
 
 	return bli_cntx_l3_nat_ukr_prefers_cols_dt( dt, ukr_id, cntx );
 }
 
 static bool_t bli_cntx_l3_ukr_prefers_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
 {
-	const num_t  dt    = bli_obj_datatype( *obj );
+	const num_t  dt    = bli_obj_dt( obj );
 	const bool_t ukr_prefers_rows
 	                   = bli_cntx_l3_ukr_prefers_rows_dt( dt, ukr_id, cntx );
 	const bool_t ukr_prefers_cols
 	                   = bli_cntx_l3_ukr_prefers_cols_dt( dt, ukr_id, cntx );
 	bool_t       r_val = FALSE;
 
-	if      ( bli_obj_is_row_stored( *obj ) && ukr_prefers_rows ) r_val = TRUE;
-	else if ( bli_obj_is_col_stored( *obj ) && ukr_prefers_cols ) r_val = TRUE;
+	if      ( bli_obj_is_row_stored( obj ) && ukr_prefers_rows ) r_val = TRUE;
+	else if ( bli_obj_is_col_stored( obj ) && ukr_prefers_cols ) r_val = TRUE;
 
 	return r_val;
 }

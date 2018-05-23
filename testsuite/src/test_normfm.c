@@ -143,7 +143,7 @@ void libblis_test_normfm_experiment
 	unsigned int n_repeats = params->n_repeats;
 	unsigned int i;
 
-	num_t        dt_real   = bli_datatype_proj_to_real( datatype );
+	num_t        dt_real   = bli_dt_proj_to_real( datatype );
 
 	double       time_min  = DBL_MAX;
 	double       time;
@@ -187,7 +187,7 @@ void libblis_test_normfm_experiment
 
 	// Estimate the performance of the best experiment repeat.
 	*perf = ( 2.0 * m * n ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bli_obj_is_complex( x ) ) *perf *= 2.0;
+	if ( bli_obj_is_complex( &x ) ) *perf *= 2.0;
 
 	// Perform checks.
 	libblis_test_normfm_check( params, &beta, &x, &norm, resid );
@@ -230,9 +230,9 @@ void libblis_test_normfm_check
        double*        resid
      )
 {
-	num_t  dt_real = bli_obj_datatype_proj_to_real( *x );
-	dim_t  m       = bli_obj_length( *x );
-	dim_t  n       = bli_obj_width( *x );
+	num_t  dt_real = bli_obj_dt_proj_to_real( x );
+	dim_t  m       = bli_obj_length( x );
+	dim_t  n       = bli_obj_width( x );
 
 	obj_t  m_r, n_r, temp_r;
 

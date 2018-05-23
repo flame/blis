@@ -55,13 +55,13 @@
 
 void bli_sgemmtrsm_u_zen_asm_6x16
      (
-       dim_t               k,
+       dim_t               k0,
        float*     restrict alpha,
        float*     restrict a10,
        float*     restrict a11,
        float*     restrict b01,
        float*     restrict b11,
-       float*     restrict c11, inc_t rs_c, inc_t cs_c,
+       float*     restrict c11, inc_t rs_c0, inc_t cs_c0,
        auxinfo_t* restrict data,
        cntx_t*    restrict cntx
      )
@@ -69,10 +69,14 @@ void bli_sgemmtrsm_u_zen_asm_6x16
 	//void*   a_next = bli_auxinfo_next_a( data );
 	//void*   b_next = bli_auxinfo_next_b( data );
 
-	uint64_t   k_iter = k / 4;
-	uint64_t   k_left = k % 4;
+	// Typecast local copies of integers in case dim_t and inc_t are a
+	// different size than is expected by load instructions.
+	uint64_t k_iter = k0 / 4;
+	uint64_t k_left = k0 % 4;
+	uint64_t rs_c   = rs_c0;
+	uint64_t cs_c   = cs_c0;
 
-	float*     beta   = bli_sm1;
+	float*   beta   = bli_sm1;
 
 	__asm__ volatile
 	(
@@ -810,13 +814,13 @@ void bli_sgemmtrsm_u_zen_asm_6x16
 
 void bli_dgemmtrsm_u_zen_asm_6x8
 (
-    dim_t               k,
+    dim_t               k0,
     double*    restrict alpha,
     double*    restrict a10,
     double*    restrict a11,
     double*    restrict b01,
     double*    restrict b11,
-    double*    restrict c11, inc_t rs_c, inc_t cs_c,
+    double*    restrict c11, inc_t rs_c0, inc_t cs_c0,
     auxinfo_t* restrict data,
     cntx_t*    restrict cntx
 )
@@ -824,10 +828,14 @@ void bli_dgemmtrsm_u_zen_asm_6x8
 	//void*   a_next = bli_auxinfo_next_a( data );
 	//void*   b_next = bli_auxinfo_next_b( data );
 
-	uint64_t   k_iter = k / 4;
-	uint64_t   k_left = k % 4;
+	// Typecast local copies of integers in case dim_t and inc_t are a
+	// different size than is expected by load instructions.
+	uint64_t k_iter = k0 / 4;
+	uint64_t k_left = k0 % 4;
+	uint64_t rs_c   = rs_c0;
+	uint64_t cs_c   = cs_c0;
 
-	double*    beta   = bli_dm1;
+	double*  beta   = bli_dm1;
 
 	__asm__ volatile
 	(

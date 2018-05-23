@@ -77,19 +77,19 @@ void bli_trsv_int( obj_t*  alpha,
 		bli_trsv_check( alpha, a, x );
 
 	// If A or x has a zero dimension, return early.
-	if ( bli_obj_has_zero_dim( *a ) ) return;
-	if ( bli_obj_has_zero_dim( *x ) ) return;
+	if ( bli_obj_has_zero_dim( a ) ) return;
+	if ( bli_obj_has_zero_dim( x ) ) return;
 
 	// Alias A in case we need to induce a transformation (ie: transposition).
-	bli_obj_alias_to( *a, a_local );
+	bli_obj_alias_to( a, &a_local );
 
 	// NOTE: to support cases where B is complex and A is real, we will
 	// need to have the default side case be BLIS_RIGHT and then express
 	// the left case in terms of it, rather than the other way around.
 
 	// Determine uplo (for indexing to the correct function pointer).
-	if ( bli_obj_is_lower( a_local ) ) uplo = 0;
-	else                               uplo = 1;
+	if ( bli_obj_is_lower( &a_local ) ) uplo = 0;
+	else                                uplo = 1;
 
 	// We do not explicitly implement the cases where A is transposed.
 	// However, we can still handle them. Specifically, if A is marked as
@@ -107,11 +107,12 @@ void bli_trsv_int( obj_t*  alpha,
 	// affect the optimal choice of kernel (ie: a column-major column panel
 	// matrix with transpose times a vector would use the same kernel as a
 	// row-major row panel matrix with no transpose times a vector).
-	if ( bli_obj_has_trans( a_local ) )
+	if ( bli_obj_has_trans( &a_local ) )
 	{
-		//bli_obj_induce_trans( a_local );
-		//bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, a_local );
-		bli_toggle_bool( uplo );
+		//bli_obj_induce_trans( &a_local );
+		//bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, &a_local );
+		if ( uplo == 1 ) uplo = 0;
+		else             uplo = 1;
 	}
 
 	// Extract the variant number and implementation type.

@@ -171,7 +171,7 @@ void libblis_test_scalv_experiment
 	libblis_test_vobj_create( params, datatype, sc_str[0], m, &y_save );
 
 	// Set beta.
-	if ( bli_obj_is_real( y ) )
+	if ( bli_obj_is_real( &y ) )
 		bli_setsc( -2.0,  0.0, &beta );
 	else
 		bli_setsc(  0.0, -2.0, &beta );
@@ -181,7 +181,7 @@ void libblis_test_scalv_experiment
 	bli_copyv( &y, &y_save );
 
 	// Apply the parameters.
-	bli_obj_set_conj( conjbeta, beta );
+	bli_obj_set_conj( conjbeta, &beta );
 
 	// Repeat the experiment n_repeats times and record results. 
 	for ( i = 0; i < n_repeats; ++i )
@@ -197,7 +197,7 @@ void libblis_test_scalv_experiment
 
 	// Estimate the performance of the best experiment repeat.
 	*perf = ( 1.0 * m ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bli_obj_is_complex( y ) ) *perf *= 6.0;
+	if ( bli_obj_is_complex( &y ) ) *perf *= 6.0;
 
 	// Perform checks.
 	libblis_test_scalv_check( params, &beta, &y, &y_save, resid );
@@ -241,10 +241,10 @@ void libblis_test_scalv_check
        double*        resid
      )
 {
-	num_t  dt      = bli_obj_datatype( *y );
-	num_t  dt_real = bli_obj_datatype_proj_to_real( *y );
+	num_t  dt      = bli_obj_dt( y );
+	num_t  dt_real = bli_obj_dt_proj_to_real( y );
 
-	dim_t  m       = bli_obj_vector_dim( *y );
+	dim_t  m       = bli_obj_vector_dim( y );
 
 	obj_t  norm_y_r;
 	obj_t  nbeta;

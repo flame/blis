@@ -193,7 +193,7 @@ void libblis_test_gemm_experiment
 	                          sc_str[2], m, n, &c_save );
 
 	// Set alpha and beta.
-	if ( bli_obj_is_real( c ) )
+	if ( bli_obj_is_real( &c ) )
 	{
 		bli_setsc(  1.2,  0.0, &alpha );
 		bli_setsc(  0.9,  0.0, &beta );
@@ -211,8 +211,8 @@ void libblis_test_gemm_experiment
 	bli_copym( &c, &c_save );
 
 	// Apply the parameters.
-	bli_obj_set_conjtrans( transa, a );
-	bli_obj_set_conjtrans( transb, b );
+	bli_obj_set_conjtrans( transa, &a );
+	bli_obj_set_conjtrans( transb, &b );
 
 	// Repeat the experiment n_repeats times and record results. 
 	for ( i = 0; i < n_repeats; ++i )
@@ -228,7 +228,7 @@ void libblis_test_gemm_experiment
 
 	// Estimate the performance of the best experiment repeat.
 	*perf = ( 2.0 * m * n * k ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bli_obj_is_complex( c ) ) *perf *= 4.0;
+	if ( bli_obj_is_complex( &c ) ) *perf *= 4.0;
 
 	// Perform checks.
 	libblis_test_gemm_check( params, &alpha, &a, &b, &beta, &c, &c_save, resid );
@@ -280,12 +280,12 @@ void libblis_test_gemm_check
        double*        resid
      )
 {
-	num_t  dt      = bli_obj_datatype( *c );
-	num_t  dt_real = bli_obj_datatype_proj_to_real( *c );
+	num_t  dt      = bli_obj_dt( c );
+	num_t  dt_real = bli_obj_dt_proj_to_real( c );
 
-	dim_t  m       = bli_obj_length( *c );
-	dim_t  n       = bli_obj_width( *c );
-	dim_t  k       = bli_obj_width_after_trans( *a );
+	dim_t  m       = bli_obj_length( c );
+	dim_t  n       = bli_obj_width( c );
+	dim_t  k       = bli_obj_width_after_trans( a );
 
 	obj_t  norm;
 	obj_t  t, v, w, z;

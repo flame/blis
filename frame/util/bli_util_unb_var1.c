@@ -194,7 +194,7 @@ void PASTEMAC(ch,varname) \
 	if ( bli_zero_dim1( m ) ) return; \
 \
 	/* Toggle uplo so that it refers to the unstored triangle. */ \
-	bli_toggle_uplo( uploa ); \
+	bli_toggle_uplo( &uploa ); \
 \
 	/* In order to avoid the main diagonal, we must nudge the diagonal either
 	   up or down by one, depending on which triangle is to be zeroed. */ \
@@ -505,10 +505,13 @@ void PASTEMAC(ch,varname) \
 	} \
 \
 	/* Set various loop parameters. */ \
-	bli_set_dims_incs_uplo_1m_noswap( diagoffx, BLIS_NONUNIT_DIAG, \
-	                                  uplox, m, n, rs_x, cs_x, \
-	                                  uplox_eff, n_elem_max, n_iter, incx, ldx, \
-	                                  ij0, n_shift ); \
+	bli_set_dims_incs_uplo_1m_noswap \
+	( \
+	  diagoffx, BLIS_NONUNIT_DIAG, \
+	  uplox, m, n, rs_x, cs_x, \
+	  &uplox_eff, &n_elem_max, &n_iter, &incx, &ldx, \
+	  &ij0, &n_shift \
+	); \
 \
 	/* If the matrix is zeros, return with absum_max equal to zero. */ \
 	if ( bli_is_zeros( uplox_eff ) ) \
@@ -662,10 +665,13 @@ void PASTEMAC(ch,varname) \
 \
 	/* Set various loop parameters. Here, we pretend that diagx is equal to
 	   BLIS_NONUNIT_DIAG because we handle the unit diagonal case manually. */ \
-	bli_set_dims_incs_uplo_1m( diagoffx, BLIS_NONUNIT_DIAG, \
-	                           uplox, m, n, rs_x, cs_x, \
-	                           uplox_eff, n_elem_max, n_iter, incx, ldx, \
-	                           ij0, n_shift ); \
+	bli_set_dims_incs_uplo_1m \
+	( \
+	  diagoffx, BLIS_NONUNIT_DIAG, \
+	  uplox, m, n, rs_x, cs_x, \
+	  &uplox_eff, &n_elem_max, &n_iter, &incx, &ldx, \
+	  &ij0, &n_shift \
+	); \
 \
 	/* Check the effective uplo; if it's zeros, then our norm is zero. */ \
 	if ( bli_is_zeros( uplox_eff ) ) \
@@ -796,10 +802,10 @@ void PASTEMAC(ch,varname) \
      ) \
 { \
 	/* Induce a transposition so that rows become columns. */ \
-	bli_swap_dims( m, n ); \
-	bli_swap_incs( rs_x, cs_x ); \
-	bli_toggle_uplo( uplox ); \
-	bli_negate_diag_offset( diagoffx ); \
+	bli_swap_dims( &m, &n ); \
+	bli_swap_incs( &rs_x, &cs_x ); \
+	bli_toggle_uplo( &uplox ); \
+	bli_negate_diag_offset( &diagoffx ); \
 \
 	/* Now we can simply compute the 1-norm of this transposed matrix,
 	   which will be equivalent to the infinity-norm of the original
@@ -956,10 +962,13 @@ void PASTEMAC(ch,varname) \
 \
 	/* Set various loop parameters. Here, we pretend that diagx is equal to
 	   BLIS_NONUNIT_DIAG because we handle the unit diagonal case manually. */ \
-	bli_set_dims_incs_uplo_1m( diagoffx, BLIS_NONUNIT_DIAG, \
-	                           uplox, m, n, rs_x, cs_x, \
-	                           uplox_eff, n_elem_max, n_iter, incx, ldx, \
-	                           ij0, n_shift ); \
+	bli_set_dims_incs_uplo_1m \
+	( \
+	  diagoffx, BLIS_NONUNIT_DIAG, \
+	  uplox, m, n, rs_x, cs_x, \
+	  &uplox_eff, &n_elem_max, &n_iter, &incx, &ldx, \
+	  &ij0, &n_shift \
+	); \
 \
 	if ( bli_is_zeros( uplox_eff ) ) return; \
 \

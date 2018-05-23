@@ -52,14 +52,14 @@ void PASTEMAC(opname,imeth) \
 	bli_init_once(); \
 \
 	ind_t   ind      = PASTEMAC0(imeth); \
-	num_t   dt       = bli_obj_datatype( *c ); \
+	num_t   dt       = bli_obj_dt( c ); \
 	obj_t*  beta_use = beta; \
 \
 	dim_t   i; \
 \
 	/* If the objects are in the real domain, execute the native
 	   implementation. */ \
-	if ( bli_obj_is_real( *c ) ) \
+	if ( bli_obj_is_real( c ) ) \
 	{ \
 		PASTEMAC(opname,nat)( alpha, a, b, beta, c, cntx ); \
 		return; \
@@ -147,14 +147,14 @@ void PASTEMAC(opname,imeth) \
 	bli_init_once(); \
 \
 	ind_t   ind      = PASTEMAC0(imeth); \
-	num_t   dt       = bli_obj_datatype( *c ); \
+	num_t   dt       = bli_obj_dt( c ); \
 	obj_t*  beta_use = beta; \
 \
 	dim_t   i; \
 \
 	/* If the objects are in the real domain, execute the native
 	   implementation. */ \
-	if ( bli_obj_is_real( *c ) ) \
+	if ( bli_obj_is_real( c ) ) \
 	{ \
 		PASTEMAC(opname,nat)( side, alpha, a, b, beta, c, cntx ); \
 		return; \
@@ -225,14 +225,14 @@ void PASTEMAC(opname,imeth) \
 	bli_init_once(); \
 \
 	ind_t   ind      = PASTEMAC0(imeth); \
-	num_t   dt       = bli_obj_datatype( *c ); \
+	num_t   dt       = bli_obj_dt( c ); \
 	obj_t*  beta_use = beta; \
 \
 	dim_t   i; \
 \
 	/* If the objects are in the real domain, execute the native
 	   implementation. */ \
-	if ( bli_obj_is_real( *c ) ) \
+	if ( bli_obj_is_real( c ) ) \
 	{ \
 		PASTEMAC(opname,nat)( alpha, a, beta, c, cntx ); \
 		return; \
@@ -295,13 +295,13 @@ void PASTEMAC(opname,imeth) \
 	bli_init_once(); \
 \
 	ind_t   ind      = PASTEMAC0(imeth); \
-	num_t   dt       = bli_obj_datatype( *b ); \
+	num_t   dt       = bli_obj_dt( b ); \
 \
 	dim_t   i; \
 \
 	/* If the objects are in the real domain, execute the native
 	   implementation. */ \
-	if ( bli_obj_is_real( *b ) ) \
+	if ( bli_obj_is_real( b ) ) \
 	{ \
 		PASTEMAC(opname,nat)( side, alpha, a, b, cntx ); \
 		return; \
@@ -352,11 +352,11 @@ void PASTEMAC(opname,imeth) \
 	bli_init_once(); \
 \
 	ind_t   ind      = PASTEMAC0(imeth); \
-	num_t   dt       = bli_obj_datatype( *b ); \
+	num_t   dt       = bli_obj_dt( b ); \
 \
 	/* If the objects are in the real domain, execute the native
 	   implementation. */ \
-	if ( bli_obj_is_real( *b ) ) \
+	if ( bli_obj_is_real( b ) ) \
 	{ \
 		PASTEMAC(opname,nat)( side, alpha, a, b, cntx ); \
 		return; \

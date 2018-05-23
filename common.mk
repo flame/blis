@@ -246,10 +246,17 @@ LIBBLIS            := libblis
 # Construct the base path for the library.
 BASE_LIB_PATH      := ./$(LIB_DIR)/$(CONFIG_NAME)
 
+# The shared (dynamic) library file suffix is different for Linux and OS X.
+ifeq ($(OS_NAME),Darwin)
+SHLIB_EXT          := dylib
+else
+SHLIB_EXT          := so
+endif
+
 # Note: These names will be modified later to include the configuration and
 # version strings.
 LIBBLIS_A          := $(LIBBLIS).a
-LIBBLIS_SO         := $(LIBBLIS).so
+LIBBLIS_SO         := $(LIBBLIS).$(SHLIB_EXT)
 
 # Append the base library path to the library names.
 LIBBLIS_A_PATH     := $(BASE_LIB_PATH)/$(LIBBLIS_A)
@@ -291,22 +298,22 @@ GIT_LOG    := $(GIT) log --decorate
 # --- Determine the compiler vendor --------------------------------------------
 #
 
-ifneq ($(CC),)
-
-VENDOR_STRING := $(shell $(CC) --version 2>/dev/null)
-ifeq ($(VENDOR_STRING),)
-VENDOR_STRING := $(shell $(CC) -qversion 2>/dev/null)
-endif
-ifeq ($(VENDOR_STRING),)
-$(error Unable to determine compiler vendor.)
-endif
-
-CC_VENDOR := $(firstword $(shell echo '$(VENDOR_STRING)' | $(EGREP) -o 'icc|gcc|clang|ibm|cc'))
-ifeq ($(CC_VENDOR),)
-$(error Unable to determine compiler vendor. Have you run './configure' yet?)
-endif
-
-endif
+#ifneq ($(CC),)
+#
+#VENDOR_STRING := $(shell $(CC) --version 2>/dev/null)
+#ifeq ($(VENDOR_STRING),)
+#VENDOR_STRING := $(shell $(CC) -qversion 2>/dev/null)
+#endif
+#ifeq ($(VENDOR_STRING),)
+#$(error Unable to determine compiler vendor.)
+#endif
+#
+#CC_VENDOR := $(firstword $(shell echo '$(VENDOR_STRING)' | $(EGREP) -o 'icc|gcc|clang|ibm|cc'))
+#ifeq ($(CC_VENDOR),)
+#$(error Unable to determine compiler vendor. Have you run './configure' yet?)
+#endif
+#
+#endif
 
 
 
@@ -344,11 +351,17 @@ ifeq ($(DEBUG_TYPE),sde)
 LDFLAGS    := $(filter-out $(LIBMEMKIND),$(LDFLAGS))
 endif
 
-# Default flag for creating shared objects.
+# The default flag for creating shared objects is different for Linux and
+# OS X.
+ifeq ($(OS_NAME),Darwin)
+SOFLAGS    := -dynamiclib
+SOFLAGS    += -Wl,-install_name,$(LIBBLIS_SO).$(SO_MAJOR)
+else
 SOFLAGS    := -shared
+SOFLAGS    += -Wl,-soname,$(LIBBLIS_SO).$(SO_MAJOR)
+endif
 
 # Specify the shared library's 'soname' field.
-SOFLAGS    += -Wl,-soname,$(LIBBLIS_SO).$(SO_MAJOR)
 
 # Decide which library to link to for things like the testsuite. Default
 # to the static library, unless only the shared library was enabled, in

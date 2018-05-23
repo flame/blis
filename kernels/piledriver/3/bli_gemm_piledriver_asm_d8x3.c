@@ -39,12 +39,12 @@
 
 void bli_sgemm_piledriver_asm_16x3
      (
-       dim_t               k,
+       dim_t               k0,
        float*     restrict alpha,
        float*     restrict a,
        float*     restrict b,
        float*     restrict beta,
-       float*     restrict c, inc_t rs_c, inc_t cs_c,
+       float*     restrict c, inc_t rs_c0, inc_t cs_c0,
        auxinfo_t* restrict data,
        cntx_t*    restrict cntx
      )
@@ -52,8 +52,12 @@ void bli_sgemm_piledriver_asm_16x3
 	void*   a_next = bli_auxinfo_next_a( data );
 	void*   b_next = bli_auxinfo_next_b( data );
 
-	uint64_t   k_iter = k / 8;
-	uint64_t   k_left = k % 8;
+	// Typecast local copies of integers in case dim_t and inc_t are a
+	// different size than is expected by load instructions.
+	uint64_t k_iter = k0 / 8;
+	uint64_t k_left = k0 % 8;
+	uint64_t rs_c   = rs_c0;
+	uint64_t cs_c   = cs_c0;
 
 	__asm__ volatile
 	(
@@ -906,12 +910,12 @@ void bli_sgemm_piledriver_asm_16x3
 
 void bli_dgemm_piledriver_asm_8x3
      (
-       dim_t               k,
+       dim_t               k0,
        double*    restrict alpha,
        double*    restrict a,
        double*    restrict b,
        double*    restrict beta,
-       double*    restrict c, inc_t rs_c, inc_t cs_c,
+       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
        auxinfo_t* restrict data,
        cntx_t*    restrict cntx
      )
@@ -919,8 +923,12 @@ void bli_dgemm_piledriver_asm_8x3
 	void*   a_next = bli_auxinfo_next_a( data );
 	void*   b_next = bli_auxinfo_next_b( data );
 
-	dim_t   k_iter = k / 8;
-	dim_t   k_left = k % 8;
+	// Typecast local copies of integers in case dim_t and inc_t are a
+	// different size than is expected by load instructions.
+	uint64_t k_iter = k0 / 8;
+	uint64_t k_left = k0 % 8;
+	uint64_t rs_c   = rs_c0;
+	uint64_t cs_c   = cs_c0;
 
 	__asm__ volatile
 	(
@@ -1621,12 +1629,12 @@ void bli_dgemm_piledriver_asm_8x3
 
 void bli_cgemm_piledriver_asm_4x2
      (
-       dim_t               k,
+       dim_t               k0,
        scomplex*  restrict alpha,
        scomplex*  restrict a,
        scomplex*  restrict b,
        scomplex*  restrict beta,
-       scomplex*  restrict c, inc_t rs_c, inc_t cs_c,
+       scomplex*  restrict c, inc_t rs_c0, inc_t cs_c0,
        auxinfo_t* restrict data,
        cntx_t*    restrict cntx
      )
@@ -1634,8 +1642,12 @@ void bli_cgemm_piledriver_asm_4x2
 	void*   a_next = bli_auxinfo_next_a( data );
 	void*   b_next = bli_auxinfo_next_b( data );
 
-	dim_t   k_iter = k / 8;
-	dim_t   k_left = k % 8;
+	// Typecast local copies of integers in case dim_t and inc_t are a
+	// different size than is expected by load instructions.
+	uint64_t k_iter = k0 / 8;
+	uint64_t k_left = k0 % 8;
+	uint64_t rs_c   = rs_c0;
+	uint64_t cs_c   = cs_c0;
 
 	__asm__ volatile
 	(
@@ -2165,12 +2177,12 @@ void bli_cgemm_piledriver_asm_4x2
 
 void bli_zgemm_piledriver_asm_2x2
      (
-       dim_t               k,
+       dim_t               k0,
        dcomplex*  restrict alpha,
        dcomplex*  restrict a,
        dcomplex*  restrict b,
        dcomplex*  restrict beta,
-       dcomplex*  restrict c, inc_t rs_c, inc_t cs_c,
+       dcomplex*  restrict c, inc_t rs_c0, inc_t cs_c0,
        auxinfo_t* restrict data,
        cntx_t*    restrict cntx
      )
@@ -2178,8 +2190,12 @@ void bli_zgemm_piledriver_asm_2x2
 	void*   a_next = bli_auxinfo_next_a( data );
 	void*   b_next = bli_auxinfo_next_b( data );
 
-	dim_t   k_iter = k / 8;
-	dim_t   k_left = k % 8;
+	// Typecast local copies of integers in case dim_t and inc_t are a
+	// different size than is expected by load instructions.
+	uint64_t k_iter = k0 / 8;
+	uint64_t k_left = k0 % 8;
+	uint64_t rs_c   = rs_c0;
+	uint64_t cs_c   = cs_c0;
 
 	__asm__ volatile
 	(

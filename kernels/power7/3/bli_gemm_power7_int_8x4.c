@@ -50,16 +50,22 @@
  */
 void bli_sgemm_power7_int_8x4
      (
-       dim_t               k,
+       dim_t               k0,
        float*     restrict alpha,
        float*     restrict a,
        float*     restrict b,
        float*     restrict beta,
-       float*     restrict c, inc_t rs_c, inc_t cs_c,
+       float*     restrict c, inc_t rs_c0, inc_t cs_c0,
        auxinfo_t* restrict data,
        cntx_t*    restrict cntx
      )
 {
+	// Typecast local copies of integers in case dim_t and inc_t are a
+	// different size than is expected by load instructions.
+	uint64_t k      = k0;
+	uint64_t rs_c   = rs_c0;
+	uint64_t cs_c   = cs_c0;
+
 #if 1 || defined(UTEST)
     const long MR = BLIS_DEFAULT_MR_S, NR = BLIS_DEFAULT_NR_S;
     const long LDA = MR, LDB = NR;
@@ -90,16 +96,22 @@ void bli_sgemm_power7_int_8x4
  */
 void bli_dgemm_power7_int_8x4
      (
-       dim_t               k,
+       dim_t               k0,
        double*    restrict alpha,
        double*    restrict a,
        double*    restrict b,
        double*    restrict beta,
-       double*    restrict c, inc_t rs_c, inc_t cs_c,
+       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
        auxinfo_t* restrict data,
        cntx_t*    restrict cntx
      )
 {
+	// Typecast local copies of integers in case dim_t and inc_t are a
+	// different size than is expected by load instructions.
+	uint64_t k      = k0;
+	uint64_t rs_c   = rs_c0;
+	uint64_t cs_c   = cs_c0;
+
 #if 1
     if (rs_c == 1) {
         // Optimized code for case where C columns are contiguous (column-major C)
@@ -465,16 +477,22 @@ void bli_dgemm_power7_int_8x4
  */
 void bli_cgemm_power7_int_8x4
      (
-       dim_t               k,
+       dim_t               k0,
        scomplex*  restrict alpha,
        scomplex*  restrict a,
        scomplex*  restrict b,
        scomplex*  restrict beta,
-       scomplex*  restrict c, inc_t rs_c, inc_t cs_c,
+       scomplex*  restrict c, inc_t rs_c0, inc_t cs_c0,
        auxinfo_t* restrict data,
        cntx_t*    restrict cntx
      )
 {
+	// Typecast local copies of integers in case dim_t and inc_t are a
+	// different size than is expected by load instructions.
+	uint64_t k      = k0;
+	uint64_t rs_c   = rs_c0;
+	uint64_t cs_c   = cs_c0;
+
 #if 1 || defined(UTEST)
     const long MR = BLIS_DEFAULT_MR_C, NR = BLIS_DEFAULT_NR_C;
     const long LDA = MR, LDB = NR;
@@ -516,16 +534,22 @@ void bli_cgemm_power7_int_8x4
  */
 void bli_zgemm_power7_int_8x4
      (
-       dim_t               k,
+       dim_t               k0,
        scomplex*  restrict alpha,
        scomplex*  restrict a,
        scomplex*  restrict b,
        scomplex*  restrict beta,
-       scomplex*  restrict c, inc_t rs_c, inc_t cs_c,
+       scomplex*  restrict c, inc_t rs_c0, inc_t cs_c0,
        auxinfo_t* restrict data,
        cntx_t*    restrict cntx
      )
 {
+	// Typecast local copies of integers in case dim_t and inc_t are a
+	// different size than is expected by load instructions.
+	uint64_t k      = k0;
+	uint64_t rs_c   = rs_c0;
+	uint64_t cs_c   = cs_c0;
+
 #if 1 || defined(UTEST)
     const long MR = BLIS_DEFAULT_MR_Z, NR = BLIS_DEFAULT_NR_Z;
     const long LDA = MR, LDB = NR;

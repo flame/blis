@@ -42,10 +42,10 @@ THIS_CONFIG    := bgq
 # --- Determine the C compiler and related flags ---
 #
 
-ifeq ($(CC),)
-CC             := /bgsys/drivers/ppcfloor/comm/gcc.legacy/bin/mpixlc_r
-CC_VENDOR      := ibm
-endif
+#ifeq ($(CC),)
+#CC             := /bgsys/drivers/ppcfloor/comm/gcc.legacy/bin/mpixlc_r
+#CC_VENDOR      := ibm
+#endif
 
 # NOTE: The build system will append these variables with various
 # general-purpose/configuration-agnostic flags in common.mk. You

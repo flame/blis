@@ -59,7 +59,7 @@ void bli_gemm_blk_var3
 	bli_l3_prune_unref_mparts_k( a, b, c, cntl );
 
 	// Query dimension in partitioning direction.
-	k_trans = bli_obj_width_after_trans( *a );
+	k_trans = bli_obj_width_after_trans( a );
 
 	// Partition along the k dimension.
 	for ( i = 0; i < k_trans; i += b_alg )

@@ -43,12 +43,12 @@ bool_t bli_obj_equals( obj_t* a,
 	num_t  dt;
 
 	// The function is not yet implemented for vectors and matrices.
-	if ( !bli_obj_is_1x1( *a ) ||
-	     !bli_obj_is_1x1( *b ) )
+	if ( !bli_obj_is_1x1( a ) ||
+	     !bli_obj_is_1x1( b ) )
 		bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 
-	dt_a = bli_obj_datatype( *a );
-	dt_b = bli_obj_datatype( *b );
+	dt_a = bli_obj_dt( a );
+	dt_b = bli_obj_dt( b );
 
 	// If B is BLIS_CONSTANT, then we need to test equality based on the
 	// datatype of A--this works even if A is also BLIS_CONSTANT. If B
@@ -60,8 +60,8 @@ bool_t bli_obj_equals( obj_t* a,
 	// Now test equality based on the chosen datatype.
 	if ( dt == BLIS_CONSTANT )
 	{
-		dcomplex* ap_z = bli_obj_buffer_for_const( BLIS_DCOMPLEX, *a );
-		dcomplex* bp_z = bli_obj_buffer_for_const( BLIS_DCOMPLEX, *b );
+		dcomplex* ap_z = bli_obj_buffer_for_const( BLIS_DCOMPLEX, a );
+		dcomplex* bp_z = bli_obj_buffer_for_const( BLIS_DCOMPLEX, b );
 
 		// We only test equality for one datatype (double complex) since
 		// we expect either all fields within the constant to be equal or
@@ -70,8 +70,8 @@ bool_t bli_obj_equals( obj_t* a,
 	}
 	else
 	{
-		void* buf_a = bli_obj_buffer_for_1x1( dt, *a );
-		void* buf_b = bli_obj_buffer_for_1x1( dt, *b );
+		void* buf_a = bli_obj_buffer_for_1x1( dt, a );
+		void* buf_b = bli_obj_buffer_for_1x1( dt, b );
 
 		if      ( dt == BLIS_FLOAT )    r_val = bli_seqa( buf_a, buf_b );
 		else if ( dt == BLIS_DOUBLE )   r_val = bli_deqa( buf_a, buf_b );
@@ -90,12 +90,12 @@ bool_t bli_obj_imag_equals( obj_t* a,
 	num_t  dt_a;
 	num_t  dt_b;
 
-	dt_a = bli_obj_datatype( *a );
-	dt_b = bli_obj_datatype( *b );
+	dt_a = bli_obj_dt( a );
+	dt_b = bli_obj_dt( b );
 
 	// The function is not yet implemented for vectors and matrices.
-	if ( !bli_obj_is_1x1( *a ) ||
-	     !bli_obj_is_1x1( *b ) ||
+	if ( !bli_obj_is_1x1( a ) ||
+	     !bli_obj_is_1x1( b ) ||
 	     bli_is_constant( dt_a ) ||
 	     bli_is_complex( dt_b ) )
 		bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
@@ -108,22 +108,22 @@ bool_t bli_obj_imag_equals( obj_t* a,
 	}
 	else // if ( bli_is_complex( dt_a ) )
 	{
-		num_t dt_a_real = bli_datatype_proj_to_real( dt_a );
+		num_t dt_a_real = bli_dt_proj_to_real( dt_a );
 
 		// Now we compare the imaginary part of a to b. Notice that since
 		// we are using bli_obj_buffer_for_1x1() to acquire the buffer for
 		// b, this works regardless of whether b is BLIS_CONSTANT.
 		if ( dt_a == BLIS_SCOMPLEX )
 		{
-			scomplex* ap_c = bli_obj_buffer_at_off( *a );
-			float*    bp_c = bli_obj_buffer_for_1x1( dt_a_real, *b );
+			scomplex* ap_c = bli_obj_buffer_at_off( a );
+			float*    bp_c = bli_obj_buffer_for_1x1( dt_a_real, b );
 
 			r_val = bli_seq( bli_cimag( *ap_c ), *bp_c );
 		}
 		else if ( dt_a == BLIS_DCOMPLEX )
 		{
-			dcomplex* ap_z = bli_obj_buffer_at_off( *a );
-			double*   bp_z = bli_obj_buffer_for_1x1( dt_a_real, *b );
+			dcomplex* ap_z = bli_obj_buffer_at_off( a );
+			double*   bp_z = bli_obj_buffer_for_1x1( dt_a_real, b );
 
 			r_val = bli_deq( bli_zimag( *ap_z ), *bp_z );
 		}

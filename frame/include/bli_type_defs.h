@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2016 Hewlett Packard Enterprise Development LP
+   Copyright (C) 2016, Hewlett Packard Enterprise Development LP
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -1045,69 +1045,66 @@ typedef struct obj_s
 // Define these macros here since they must be updated if contents of
 // obj_t changes.
 
-#define bli_obj_init_full_shallow_copy_of( a, b ) \
-{ \
-	(b).root      = (a).root; \
-\
-	(b).off[0]    = (a).off[0]; \
-	(b).off[1]    = (a).off[1]; \
-	(b).dim[0]    = (a).dim[0]; \
-	(b).dim[1]    = (a).dim[1]; \
-	(b).diag_off  = (a).diag_off; \
-\
-	(b).info      = (a).info; \
-	(b).elem_size = (a).elem_size; \
-\
-	(b).buffer    = (a).buffer; \
-	(b).rs        = (a).rs; \
-	(b).cs        = (a).cs; \
-	(b).is        = (a).is; \
-\
-	(b).scalar    = (a).scalar; \
-\
-	/*(b).pack_mem  = (a).pack_mem;*/ \
-	(b).m_padded  = (a).m_padded; \
-	(b).n_padded  = (a).n_padded; \
-	(b).ps        = (a).ps; \
-	(b).pd        = (a).pd; \
-	(b).m_panel   = (a).m_panel; \
-	(b).n_panel   = (a).n_panel; \
+static void bli_obj_init_full_shallow_copy_of( obj_t* a, obj_t* b )
+{
+	b->root      = a->root;
+
+	b->off[0]    = a->off[0];
+	b->off[1]    = a->off[1];
+	b->dim[0]    = a->dim[0];
+	b->dim[1]    = a->dim[1];
+	b->diag_off  = a->diag_off;
+
+	b->info      = a->info;
+	b->elem_size = a->elem_size;
+
+	b->buffer    = a->buffer;
+	b->rs        = a->rs;
+	b->cs        = a->cs;
+	b->is        = a->is;
+
+	b->scalar    = a->scalar;
+
+	//b->pack_mem  = a->pack_mem;
+	b->m_padded  = a->m_padded;
+	b->n_padded  = a->n_padded;
+	b->ps        = a->ps;
+	b->pd        = a->pd;
+	b->m_panel   = a->m_panel;
+	b->n_panel   = a->n_panel;
 }
 
-#define bli_obj_init_subpart_from( a, b ) \
-{ \
-	(b).root      = (a).root; \
-\
-	(b).off[0]    = (a).off[0]; \
-	(b).off[1]    = (a).off[1]; \
-	/* Avoid copying m since it will be overwritten. */ \
-	/* Avoid copying n since it will be overwritten. */ \
-	(b).diag_off  = (a).diag_off; \
-\
-	(b).info      = (a).info; \
-	(b).elem_size = (a).elem_size; \
-\
-	(b).buffer    = (a).buffer; \
-	(b).rs        = (a).rs; \
-	(b).cs        = (a).cs; \
-	(b).is        = (a).is; \
-\
-	(b).scalar    = (a).scalar; \
-\
-	/* We want to copy the pack_mem field here because this macro is used
-	   when creating subpartitions, including those of packed objects. In
-	   those situations, we want the subpartition to inherit the pack_mem
-	   field of its parent, as well as other related fields such as the
-	   padded dimensions. */ \
-	/*(b).pack_mem  = (a).pack_mem;*/ \
-	(b).m_padded  = (a).m_padded; \
-	(b).n_padded  = (a).n_padded; \
-	(b).pd        = (a).pd; \
-	(b).ps        = (a).ps; \
-	(b).m_panel   = (a).m_panel; \
-	(b).n_panel   = (a).n_panel; \
-}
+static void bli_obj_init_subpart_from( obj_t* a, obj_t* b )
+{
+	b->root      = a->root;
 
+	b->off[0]    = a->off[0];
+	b->off[1]    = a->off[1];
+	// Avoid copying m and n since they will be overwritten.
+	//b->dim[0]    = a->dim[0];
+	//b->dim[1]    = a->dim[1];
+	b->diag_off  = a->diag_off;
+
+	b->info      = a->info;
+	b->elem_size = a->elem_size;
+
+	b->buffer    = a->buffer;
+	b->rs        = a->rs;
+	b->cs        = a->cs;
+	b->is        = a->is;
+
+	b->scalar    = a->scalar;
+
+	// Avoid copying pack_mem entry.
+	// FGVZ: You should probably make sure this is right.
+	//b->pack_mem  = a->pack_mem;
+	b->m_padded  = a->m_padded;
+	b->n_padded  = a->n_padded;
+	b->ps        = a->ps;
+	b->pd        = a->pd;
+	b->m_panel   = a->m_panel;
+	b->n_panel   = a->n_panel;
+}
 
 // -- Context type --
 

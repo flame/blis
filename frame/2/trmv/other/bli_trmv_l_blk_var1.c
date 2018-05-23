@@ -54,7 +54,7 @@ void bli_trmv_l_blk_var1( obj_t*  alpha,
 	bli_obj_init_pack( &x1_pack );
 
 	// Query dimension.
-	mn = bli_obj_length( *a );
+	mn = bli_obj_length( a );
 
 	// Partition diagonally.
 	for ( ij = 0; ij < mn; ij += b_alg )

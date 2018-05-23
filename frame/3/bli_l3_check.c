@@ -99,7 +99,7 @@ void bli_herk_check
 	obj_t ah;
 
 	// Alias A to A^H so we can perform dimension checks.
-	bli_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, *a, ah );
+	bli_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, a, &ah );
 
 	// Check basic properties of the operation.
 
@@ -133,8 +133,8 @@ void bli_her2k_check
 	obj_t ah, bh;
 
 	// Alias A and B to A^H and B^H so we can perform dimension checks.
-	bli_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, *a, ah );
-	bli_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, *b, bh );
+	bli_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, a, &ah );
+	bli_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, b, &bh );
 
 	// Check basic properties of the operation.
 
@@ -187,7 +187,7 @@ void bli_syrk_check
 	obj_t at;
 
 	// Alias A to A^T so we can perform dimension checks.
-	bli_obj_alias_with_trans( BLIS_TRANSPOSE, *a, at );
+	bli_obj_alias_with_trans( BLIS_TRANSPOSE, a, &at );
 
 	// Check basic properties of the operation.
 
@@ -213,8 +213,8 @@ void bli_syr2k_check
 	obj_t at, bt;
 
 	// Alias A and B to A^T and B^T so we can perform dimension checks.
-	bli_obj_alias_with_trans( BLIS_TRANSPOSE, *a, at );
-	bli_obj_alias_with_trans( BLIS_TRANSPOSE, *b, bt );
+	bli_obj_alias_with_trans( BLIS_TRANSPOSE, a, &at );
+	bli_obj_alias_with_trans( BLIS_TRANSPOSE, b, &bt );
 
 	// Check basic properties of the operation.
 
@@ -479,7 +479,7 @@ void bli_l3_basic_check
 
 	// Check for sufficiently sized stack buffers
 
-	e_val = bli_check_sufficient_stack_buf_size( bli_obj_datatype( *a ), cntx );
+	e_val = bli_check_sufficient_stack_buf_size( bli_obj_dt( a ), cntx );
 	bli_check_error_code( e_val );
 }
 

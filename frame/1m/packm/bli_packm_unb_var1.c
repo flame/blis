@@ -64,26 +64,26 @@ void bli_packm_unb_var1
        thrinfo_t* thread
      )
 {
-	num_t     dt_cp     = bli_obj_datatype( *c );
+	num_t     dt_cp     = bli_obj_dt( c );
 
-	struc_t   strucc    = bli_obj_struc( *c );
-	doff_t    diagoffc  = bli_obj_diag_offset( *c );
-	diag_t    diagc     = bli_obj_diag( *c );
-	uplo_t    uploc     = bli_obj_uplo( *c );
-	trans_t   transc    = bli_obj_conjtrans_status( *c );
+	struc_t   strucc    = bli_obj_struc( c );
+	doff_t    diagoffc  = bli_obj_diag_offset( c );
+	diag_t    diagc     = bli_obj_diag( c );
+	uplo_t    uploc     = bli_obj_uplo( c );
+	trans_t   transc    = bli_obj_conjtrans_status( c );
 
-	dim_t     m_p       = bli_obj_length( *p );
-	dim_t     n_p       = bli_obj_width( *p );
-	dim_t     m_max_p   = bli_obj_padded_length( *p );
-	dim_t     n_max_p   = bli_obj_padded_width( *p );
+	dim_t     m_p       = bli_obj_length( p );
+	dim_t     n_p       = bli_obj_width( p );
+	dim_t     m_max_p   = bli_obj_padded_length( p );
+	dim_t     n_max_p   = bli_obj_padded_width( p );
 
-	void*     buf_c     = bli_obj_buffer_at_off( *c );
-	inc_t     rs_c      = bli_obj_row_stride( *c );
-	inc_t     cs_c      = bli_obj_col_stride( *c );
+	void*     buf_c     = bli_obj_buffer_at_off( c );
+	inc_t     rs_c      = bli_obj_row_stride( c );
+	inc_t     cs_c      = bli_obj_col_stride( c );
 
-	void*     buf_p     = bli_obj_buffer_at_off( *p );
-	inc_t     rs_p      = bli_obj_row_stride( *p );
-	inc_t     cs_p      = bli_obj_col_stride( *p );
+	void*     buf_p     = bli_obj_buffer_at_off( p );
+	inc_t     rs_p      = bli_obj_row_stride( p );
+	inc_t     cs_p      = bli_obj_col_stride( p );
 
 	void*     buf_kappa;
 
@@ -94,7 +94,7 @@ void bli_packm_unb_var1
 	// the alpha scalar of the higher-level operation. Thus, we use BLIS_ONE
 	// for kappa so that the underlying packm implementation does not scale
 	// during packing.
-	buf_kappa = bli_obj_buffer_for_const( dt_cp, BLIS_ONE );
+	buf_kappa = bli_obj_buffer_for_const( dt_cp, &BLIS_ONE );
 
 	// Index into the type combination array to extract the correct
 	// function pointer.
@@ -180,15 +180,15 @@ void PASTEMAC(ch,varname) \
 			   side of the diagonal. */ \
 			c_cast = c_cast + diagoffc * ( doff_t )cs_c + \
 			                 -diagoffc * ( doff_t )rs_c; \
-			bli_negate_diag_offset( diagoffc ); \
-			bli_toggle_trans( transc ); \
+			bli_negate_diag_offset( &diagoffc ); \
+			bli_toggle_trans( &transc ); \
 			if      ( bli_is_upper( uploc ) ) diagoffc += 1; \
 			else if ( bli_is_lower( uploc ) ) diagoffc -= 1; \
 \
 			/* If c is Hermitian, we need to apply a conjugation when
 			   copying the region opposite the diagonal. */ \
 			if ( bli_is_hermitian( strucc ) ) \
-				bli_toggle_conj( transc ); \
+				transc = bli_trans_toggled_conj( transc ); \
 \
 			/* Copy the data from the region opposite the diagonal of c
 			   (as specified by the original value of diagoffc). Notice
@@ -217,16 +217,16 @@ void PASTEMAC(ch,varname) \
 			   we can derive from the parameters given. */ \
 			if ( bli_does_trans( transc ) ) \
 			{ \
-				bli_negate_diag_offset( diagoffp ); \
-				bli_toggle_uplo( uplop ); \
+				bli_negate_diag_offset( &diagoffp ); \
+				bli_toggle_uplo( &uplop ); \
 			} \
 \
 			/* For triangular matrices, we wish to reference the region
 			   strictly opposite the diagonal of C. This amounts to 
 			   toggling uploc and then shifting the diagonal offset to
 			   shrink the stored region (by one diagonal). */ \
-			bli_toggle_uplo( uplop ); \
-			bli_shift_diag_offset_to_shrink_uplo( uplop, diagoffp ); \
+			bli_toggle_uplo( &uplop ); \
+			bli_shift_diag_offset_to_shrink_uplo( uplop, &diagoffp ); \
 \
 			/* Set the region opposite the diagonal of p to zero. */ \
 			PASTEMAC(ch,setm) \

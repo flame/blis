@@ -122,8 +122,8 @@ int main( int argc, char** argv )
 		bli_randm( &b );
 		bli_randm( &c );
 
-		bli_obj_set_struc( BLIS_HERMITIAN, a );
-		bli_obj_set_uplo( uplo, a );
+		bli_obj_set_struc( BLIS_HERMITIAN, &a );
+		bli_obj_set_uplo( uplo, &a );
 
 		// Randomize A, make it densely Hermitian, and zero the unstored
 		// triangle to ensure the implementation reads only from the stored
@@ -132,12 +132,12 @@ int main( int argc, char** argv )
 		bli_mkherm( &a );
 		bli_mktrim( &a );
 /*
-		bli_obj_toggle_uplo( a );
-		bli_obj_inc_diag_off( 1, a );
+		bli_obj_toggle_uplo( &a );
+		bli_obj_inc_diag_offset( 1, &a );
 		bli_setm( &BLIS_ZERO, &a );
-		bli_obj_inc_diag_off( -1, a );
-		bli_obj_toggle_uplo( a );
-		bli_obj_set_diag( BLIS_NONUNIT_DIAG, a );
+		bli_obj_inc_diag_offset( -1, &a );
+		bli_obj_toggle_uplo( &a );
+		bli_obj_set_diag( BLIS_NONUNIT_DIAG, &a );
 		bli_scalm( &BLIS_TWO, &a );
 		bli_scalm( &BLIS_TWO, &a );
 */
@@ -161,10 +161,10 @@ int main( int argc, char** argv )
 #ifdef PRINT
 /*
 			obj_t ar, ai;
-			bli_obj_alias_to( a, ar );
-			bli_obj_alias_to( a, ai );
-			bli_obj_set_datatype( BLIS_DOUBLE, ar ); ar.rs *= 2; ar.cs *= 2;
-			bli_obj_set_datatype( BLIS_DOUBLE, ai ); ai.rs *= 2; ai.cs *= 2; ai.buffer = ( double* )ai.buffer + 1;
+			bli_obj_alias_to( &a, &ar );
+			bli_obj_alias_to( &a, &ai );
+			bli_obj_set_dt( BLIS_DOUBLE, &ar ); ar.rs *= 2; ar.cs *= 2;
+			bli_obj_set_dt( BLIS_DOUBLE, &ai ); ai.rs *= 2; ai.cs *= 2; ai.buffer = ( double* )ai.buffer + 1;
 			bli_printm( "ar", &ar, "%4.1f", "" );
 			bli_printm( "ai", &ai, "%4.1f", "" );
 */
@@ -189,16 +189,16 @@ int main( int argc, char** argv )
 
 			f77_char side   = 'L';
 			f77_char uplo   = 'L';
-			f77_int  mm     = bli_obj_length( c );
-			f77_int  nn     = bli_obj_width( c );
-			f77_int  lda    = bli_obj_col_stride( a );
-			f77_int  ldb    = bli_obj_col_stride( b );
-			f77_int  ldc    = bli_obj_col_stride( c );
-			double*  alphap = bli_obj_buffer( alpha );
-			double*  ap     = bli_obj_buffer( a );
-			double*  bp     = bli_obj_buffer( b );
-			double*  betap  = bli_obj_buffer( beta );
-			double*  cp     = bli_obj_buffer( c );
+			f77_int  mm     = bli_obj_length( &c );
+			f77_int  nn     = bli_obj_width( &c );
+			f77_int  lda    = bli_obj_col_stride( &a );
+			f77_int  ldb    = bli_obj_col_stride( &b );
+			f77_int  ldc    = bli_obj_col_stride( &c );
+			double*  alphap = bli_obj_buffer( &alpha );
+			double*  ap     = bli_obj_buffer( &a );
+			double*  bp     = bli_obj_buffer( &b );
+			double*  betap  = bli_obj_buffer( &beta );
+			double*  cp     = bli_obj_buffer( &c );
 
 			dsymm_( &side,
 			        &uplo,

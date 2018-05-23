@@ -53,8 +53,8 @@ void bli_herk_x_ker_var2
 	gemm_voft f;
 
 	// Set a bool based on the uplo field of C's root object.
-	if ( bli_obj_root_is_lower( *c ) ) uplo = 0;
-	else                               uplo = 1;
+	if ( bli_obj_root_is_lower( c ) ) uplo = 0;
+	else                              uplo = 1;
 
 	// Index into the variant array to extract the correct function pointer.
 	f = vars[uplo];

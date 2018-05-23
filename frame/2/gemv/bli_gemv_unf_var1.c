@@ -64,7 +64,7 @@ void PASTEMAC(ch,varname) \
 \
 	bli_set_dims_incs_with_trans( transa, \
 	                              m, n, rs_a, cs_a, \
-	                              n_iter, n_elem, rs_at, cs_at ); \
+	                              &n_iter, &n_elem, &rs_at, &cs_at ); \
 \
 	conja = bli_extract_conj( transa ); \
 \

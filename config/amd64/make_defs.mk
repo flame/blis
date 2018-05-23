@@ -42,11 +42,6 @@ THIS_CONFIG    := amd64
 # --- Determine the C compiler and related flags ---
 #
 
-ifeq ($(CC),)
-CC             := gcc
-CC_VENDOR      := gcc
-endif
-
 # NOTE: The build system will append these variables with various
 # general-purpose/configuration-agnostic flags in common.mk. You
 # may specify additional flags here as needed.

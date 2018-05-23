@@ -203,9 +203,9 @@ siz_t bli_thread_get_range_l2r
        dim_t*     end
      )
 {
-	num_t dt = bli_obj_datatype( *a );
-	dim_t m  = bli_obj_length_after_trans( *a );
-	dim_t n  = bli_obj_width_after_trans( *a );
+	num_t dt = bli_obj_dt( a );
+	dim_t m  = bli_obj_length_after_trans( a );
+	dim_t n  = bli_obj_width_after_trans( a );
 	dim_t bf = bli_blksz_get_def( dt, bmult );
 
 	bli_thread_get_range_sub( thr, n, bf,
@@ -223,9 +223,9 @@ siz_t bli_thread_get_range_r2l
        dim_t*     end
      )
 {
-	num_t dt = bli_obj_datatype( *a );
-	dim_t m  = bli_obj_length_after_trans( *a );
-	dim_t n  = bli_obj_width_after_trans( *a );
+	num_t dt = bli_obj_dt( a );
+	dim_t m  = bli_obj_length_after_trans( a );
+	dim_t n  = bli_obj_width_after_trans( a );
 	dim_t bf = bli_blksz_get_def( dt, bmult );
 
 	bli_thread_get_range_sub( thr, n, bf,
@@ -243,9 +243,9 @@ siz_t bli_thread_get_range_t2b
        dim_t*     end
      )
 {
-	num_t dt = bli_obj_datatype( *a );
-	dim_t m  = bli_obj_length_after_trans( *a );
-	dim_t n  = bli_obj_width_after_trans( *a );
+	num_t dt = bli_obj_dt( a );
+	dim_t m  = bli_obj_length_after_trans( a );
+	dim_t n  = bli_obj_width_after_trans( a );
 	dim_t bf = bli_blksz_get_def( dt, bmult );
 
 	bli_thread_get_range_sub( thr, m, bf,
@@ -263,9 +263,9 @@ siz_t bli_thread_get_range_b2t
        dim_t*     end
      )
 {
-	num_t dt = bli_obj_datatype( *a );
-	dim_t m  = bli_obj_length_after_trans( *a );
-	dim_t n  = bli_obj_width_after_trans( *a );
+	num_t dt = bli_obj_dt( a );
+	dim_t m  = bli_obj_length_after_trans( a );
+	dim_t n  = bli_obj_width_after_trans( a );
 	dim_t bf = bli_blksz_get_def( dt, bmult );
 
 	bli_thread_get_range_sub( thr, m, bf,
@@ -385,8 +385,8 @@ dim_t bli_thread_get_range_width_l
 		// we don't need to try to prune the right side. (Also, we discard
 		// the offset deltas since we don't need to actually index into the
 		// subpartition.)
-		bli_prune_unstored_region_top_l( diagoff_j, m, n_j, offm_inc );
-		//bli_prune_unstored_region_right_l( diagoff_j, m, n_j, offn_inc );
+		bli_prune_unstored_region_top_l( &diagoff_j, &m, &n_j, &offm_inc );
+		//bli_prune_unstored_region_right_l( &diagoff_j, &m, &n_j, &offn_inc );
 
 		// We don't need offm_inc, offn_inc here. These statements should
 		// prevent compiler warnings.
@@ -454,14 +454,14 @@ siz_t bli_find_area_trap_l
 
 	// Prune away any rectangular region above where the diagonal
 	// intersects the left edge of the subpartition, if it exists.
-	bli_prune_unstored_region_top_l( diagoff, m, n, offm_inc );
+	bli_prune_unstored_region_top_l( &diagoff, &m, &n, &offm_inc );
 
 	// Prune away any rectangular region to the right of where the
 	// diagonal intersects the bottom edge of the subpartition, if
 	// it exists. (This shouldn't ever be needed, since the caller
 	// would presumably have already performed rightward pruning,
 	// but it's here just in case.)
-	bli_prune_unstored_region_right_l( diagoff, m, n, offn_inc );
+	bli_prune_unstored_region_right_l( &diagoff, &m, &n, &offn_inc );
 
 	( void )offm_inc;
 	( void )offn_inc;
@@ -530,8 +530,8 @@ siz_t bli_thread_get_range_weighted_sub
 		// and then to the right of where the diagonal intersects the bottom,
 		// if it exists. (Also, we discard the offset deltas since we don't
 		// need to actually index into the subpartition.)
-		bli_prune_unstored_region_top_l( diagoff, m, n, offm_inc );
-		bli_prune_unstored_region_right_l( diagoff, m, n, offn_inc );
+		bli_prune_unstored_region_top_l( &diagoff, &m, &n, &offm_inc );
+		bli_prune_unstored_region_right_l( &diagoff, &m, &n, &offn_inc );
 
 		// We don't need offm_inc, offn_inc here. These statements should
 		// prevent compiler warnings.
@@ -598,12 +598,12 @@ siz_t bli_thread_get_range_weighted_sub
 
 		// First, we convert the upper-stored trapezoid to an equivalent
 		// lower-stored trapezoid by rotating it 180 degrees.
-		bli_rotate180_trapezoid( diagoff, uplo );
+		bli_rotate180_trapezoid( &diagoff, &uplo, &m, &n );
 
 		// Now that the trapezoid is "flipped" in the n dimension, negate
 		// the bool that encodes whether to handle the edge case at the
 		// low (or high) end of the index range.
-		bli_toggle_bool( handle_edge_low );
+		bli_toggle_bool( &handle_edge_low );
 
 		// Compute the appropriate range for the rotated trapezoid.
 		area = bli_thread_get_range_weighted_sub
@@ -618,7 +618,7 @@ siz_t bli_thread_get_range_weighted_sub
 		// unrotated upper-stored trapezoid, map to the correct columns
 		// (relative to the diagonal). This amounts to subtracting the
 		// range from n.
-		bli_reverse_index_direction( *j_start_thr, *j_end_thr, n );
+		bli_reverse_index_direction( n, j_start_thr, j_end_thr );
 	}
 
 	return area;
@@ -646,8 +646,8 @@ siz_t bli_thread_get_range_mdim
 	// packing A and B.
 	if ( family == BLIS_TRSM )
 	{
-		if ( bli_obj_root_is_triangular( *a ) ) bszid = BLIS_MR;
-		else                                    bszid = BLIS_NR;
+		if ( bli_obj_root_is_triangular( a ) ) bszid = BLIS_MR;
+		else                                   bszid = BLIS_NR;
 	}
 
 	blksz_t* bmult  = bli_cntx_get_bmult( bszid, cntx );
@@ -705,8 +705,8 @@ siz_t bli_thread_get_range_ndim
 	// packing A and B.
 	if ( family == BLIS_TRSM )
 	{
-		if ( bli_obj_root_is_triangular( *b ) ) bszid = BLIS_MR;
-		else                                    bszid = BLIS_NR;
+		if ( bli_obj_root_is_triangular( b ) ) bszid = BLIS_MR;
+		else                                   bszid = BLIS_NR;
 	}
 
 	blksz_t* bmult  = bli_cntx_get_bmult( bszid, cntx );
@@ -757,20 +757,20 @@ siz_t bli_thread_get_range_weighted_l2r
 	// where the total range spans 0 to n-1 with 0 at the left end and
 	// n-1 at the right end.
 
-	if ( bli_obj_intersects_diag( *a ) &&
-	     bli_obj_is_upper_or_lower( *a ) )
+	if ( bli_obj_intersects_diag( a ) &&
+	     bli_obj_is_upper_or_lower( a ) )
 	{
-		num_t  dt      = bli_obj_datatype( *a );
-		doff_t diagoff = bli_obj_diag_offset( *a );
-		uplo_t uplo    = bli_obj_uplo( *a );
-		dim_t  m       = bli_obj_length( *a );
-		dim_t  n       = bli_obj_width( *a );
+		num_t  dt      = bli_obj_dt( a );
+		doff_t diagoff = bli_obj_diag_offset( a );
+		uplo_t uplo    = bli_obj_uplo( a );
+		dim_t  m       = bli_obj_length( a );
+		dim_t  n       = bli_obj_width( a );
 		dim_t  bf      = bli_blksz_get_def( dt, bmult );
 
 		// Support implicit transposition.
-		if ( bli_obj_has_trans( *a ) )
+		if ( bli_obj_has_trans( a ) )
 		{
-			bli_reflect_about_diag( diagoff, uplo, m, n );
+			bli_reflect_about_diag( &diagoff, &uplo, &m, &n );
 		}
 
 		area =
@@ -807,23 +807,23 @@ siz_t bli_thread_get_range_weighted_r2l
 	// where the total range spans 0 to n-1 with 0 at the right end and
 	// n-1 at the left end.
 
-	if ( bli_obj_intersects_diag( *a ) &&
-	     bli_obj_is_upper_or_lower( *a ) )
+	if ( bli_obj_intersects_diag( a ) &&
+	     bli_obj_is_upper_or_lower( a ) )
 	{
-		num_t  dt      = bli_obj_datatype( *a );
-		doff_t diagoff = bli_obj_diag_offset( *a );
-		uplo_t uplo    = bli_obj_uplo( *a );
-		dim_t  m       = bli_obj_length( *a );
-		dim_t  n       = bli_obj_width( *a );
+		num_t  dt      = bli_obj_dt( a );
+		doff_t diagoff = bli_obj_diag_offset( a );
+		uplo_t uplo    = bli_obj_uplo( a );
+		dim_t  m       = bli_obj_length( a );
+		dim_t  n       = bli_obj_width( a );
 		dim_t  bf      = bli_blksz_get_def( dt, bmult );
 
 		// Support implicit transposition.
-		if ( bli_obj_has_trans( *a ) )
+		if ( bli_obj_has_trans( a ) )
 		{
-			bli_reflect_about_diag( diagoff, uplo, m, n );
+			bli_reflect_about_diag( &diagoff, &uplo, &m, &n );
 		}
 
-		bli_rotate180_trapezoid( diagoff, uplo );
+		bli_rotate180_trapezoid( &diagoff, &uplo, &m, &n );
 
 		area =
 		bli_thread_get_range_weighted_sub
@@ -859,23 +859,23 @@ siz_t bli_thread_get_range_weighted_t2b
 	// where the total range spans 0 to m-1 with 0 at the top end and
 	// m-1 at the bottom end.
 
-	if ( bli_obj_intersects_diag( *a ) &&
-	     bli_obj_is_upper_or_lower( *a ) )
+	if ( bli_obj_intersects_diag( a ) &&
+	     bli_obj_is_upper_or_lower( a ) )
 	{
-		num_t  dt      = bli_obj_datatype( *a );
-		doff_t diagoff = bli_obj_diag_offset( *a );
-		uplo_t uplo    = bli_obj_uplo( *a );
-		dim_t  m       = bli_obj_length( *a );
-		dim_t  n       = bli_obj_width( *a );
+		num_t  dt      = bli_obj_dt( a );
+		doff_t diagoff = bli_obj_diag_offset( a );
+		uplo_t uplo    = bli_obj_uplo( a );
+		dim_t  m       = bli_obj_length( a );
+		dim_t  n       = bli_obj_width( a );
 		dim_t  bf      = bli_blksz_get_def( dt, bmult );
 
 		// Support implicit transposition.
-		if ( bli_obj_has_trans( *a ) )
+		if ( bli_obj_has_trans( a ) )
 		{
-			bli_reflect_about_diag( diagoff, uplo, m, n );
+			bli_reflect_about_diag( &diagoff, &uplo, &m, &n );
 		}
 
-		bli_reflect_about_diag( diagoff, uplo, m, n );
+		bli_reflect_about_diag( &diagoff, &uplo, &m, &n );
 
 		area =
 		bli_thread_get_range_weighted_sub
@@ -911,25 +911,25 @@ siz_t bli_thread_get_range_weighted_b2t
 	// where the total range spans 0 to m-1 with 0 at the bottom end and
 	// m-1 at the top end.
 
-	if ( bli_obj_intersects_diag( *a ) &&
-	     bli_obj_is_upper_or_lower( *a ) )
+	if ( bli_obj_intersects_diag( a ) &&
+	     bli_obj_is_upper_or_lower( a ) )
 	{
-		num_t  dt      = bli_obj_datatype( *a );
-		doff_t diagoff = bli_obj_diag_offset( *a );
-		uplo_t uplo    = bli_obj_uplo( *a );
-		dim_t  m       = bli_obj_length( *a );
-		dim_t  n       = bli_obj_width( *a );
+		num_t  dt      = bli_obj_dt( a );
+		doff_t diagoff = bli_obj_diag_offset( a );
+		uplo_t uplo    = bli_obj_uplo( a );
+		dim_t  m       = bli_obj_length( a );
+		dim_t  n       = bli_obj_width( a );
 		dim_t  bf      = bli_blksz_get_def( dt, bmult );
 
 		// Support implicit transposition.
-		if ( bli_obj_has_trans( *a ) )
+		if ( bli_obj_has_trans( a ) )
 		{
-			bli_reflect_about_diag( diagoff, uplo, m, n );
+			bli_reflect_about_diag( &diagoff, &uplo, &m, &n );
 		}
 
-		bli_reflect_about_diag( diagoff, uplo, m, n );
+		bli_reflect_about_diag( &diagoff, &uplo, &m, &n );
 
-		bli_rotate180_trapezoid( diagoff, uplo );
+		bli_rotate180_trapezoid( &diagoff, &uplo, &m, &n );
 
 		area = bli_thread_get_range_weighted_sub
 		(

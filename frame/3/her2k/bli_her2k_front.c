@@ -68,22 +68,22 @@ void bli_her2k_front
 	}
 
 	// Alias A, B, and C in case we need to apply transformations.
-	bli_obj_alias_to( *a, a_local );
-	bli_obj_alias_to( *b, b_local );
-	bli_obj_alias_to( *c, c_local );
-	bli_obj_set_as_root( c_local );
+	bli_obj_alias_to( a, &a_local );
+	bli_obj_alias_to( b, &b_local );
+	bli_obj_alias_to( c, &c_local );
+	bli_obj_set_as_root( &c_local );
 
 	// For her2k, the first and second right-hand "B" operands are simply B'
 	// and A'.
-	bli_obj_alias_to( *b, bh_local );
-	bli_obj_induce_trans( bh_local );
-	bli_obj_toggle_conj( bh_local );
-	bli_obj_alias_to( *a, ah_local );
-	bli_obj_induce_trans( ah_local );
-	bli_obj_toggle_conj( ah_local );
+	bli_obj_alias_to( b, &bh_local );
+	bli_obj_induce_trans( &bh_local );
+	bli_obj_toggle_conj( &bh_local );
+	bli_obj_alias_to( a, &ah_local );
+	bli_obj_induce_trans( &ah_local );
+	bli_obj_toggle_conj( &ah_local );
 
 	// Initialize a conjugated copy of alpha.
-	bli_obj_scalar_init_detached_copy_of( bli_obj_datatype( *a ),
+	bli_obj_scalar_init_detached_copy_of( bli_obj_dt( a ),
 	                                      BLIS_CONJUGATE,
 	                                      alpha,
 	                                      &alpha_conj );
@@ -94,22 +94,22 @@ void bli_her2k_front
 	// micro-kernel to access elements of C in its preferred manner.
 	if ( bli_cntx_l3_ukr_dislikes_storage_of( &c_local, BLIS_GEMM_UKR, cntx ) )
 	{
-		bli_obj_swap( a_local, bh_local );
-		bli_obj_swap( b_local, ah_local );
+		bli_obj_swap( &a_local, &bh_local );
+		bli_obj_swap( &b_local, &ah_local );
 
-		bli_obj_induce_trans( a_local );
-		bli_obj_induce_trans( bh_local );
-		bli_obj_induce_trans( b_local );
-		bli_obj_induce_trans( ah_local );
+		bli_obj_induce_trans( &a_local );
+		bli_obj_induce_trans( &bh_local );
+		bli_obj_induce_trans( &b_local );
+		bli_obj_induce_trans( &ah_local );
 
-		bli_obj_induce_trans( c_local );
+		bli_obj_induce_trans( &c_local );
 	}
 
 	// Record the threading for each level within the context.
 	bli_cntx_set_thrloop_from_env( BLIS_HER2K, BLIS_LEFT, cntx,
-                                   bli_obj_length( c_local ),
-                                   bli_obj_width( c_local ),
-                                   bli_obj_width( a_local ) );
+                                   bli_obj_length( &c_local ),
+                                   bli_obj_width( &c_local ),
+                                   bli_obj_width( &a_local ) );
 
 	// Invoke herk twice, using beta only the first time.
 

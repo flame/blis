@@ -108,33 +108,33 @@ void bli_packm_blk_var1
        thrinfo_t* t
      )
 {
-	num_t     dt_cp      = bli_obj_datatype( *c );
+	num_t     dt_cp      = bli_obj_dt( c );
 
-	struc_t   strucc     = bli_obj_struc( *c );
-	doff_t    diagoffc   = bli_obj_diag_offset( *c );
-	diag_t    diagc      = bli_obj_diag( *c );
-	uplo_t    uploc      = bli_obj_uplo( *c );
-	trans_t   transc     = bli_obj_conjtrans_status( *c );
-	pack_t    schema     = bli_obj_pack_schema( *p );
-	bool_t    invdiag    = bli_obj_has_inverted_diag( *p );
-	bool_t    revifup    = bli_obj_is_pack_rev_if_upper( *p );
-	bool_t    reviflo    = bli_obj_is_pack_rev_if_lower( *p );
+	struc_t   strucc     = bli_obj_struc( c );
+	doff_t    diagoffc   = bli_obj_diag_offset( c );
+	diag_t    diagc      = bli_obj_diag( c );
+	uplo_t    uploc      = bli_obj_uplo( c );
+	trans_t   transc     = bli_obj_conjtrans_status( c );
+	pack_t    schema     = bli_obj_pack_schema( p );
+	bool_t    invdiag    = bli_obj_has_inverted_diag( p );
+	bool_t    revifup    = bli_obj_is_pack_rev_if_upper( p );
+	bool_t    reviflo    = bli_obj_is_pack_rev_if_lower( p );
 
-	dim_t     m_p        = bli_obj_length( *p );
-	dim_t     n_p        = bli_obj_width( *p );
-	dim_t     m_max_p    = bli_obj_padded_length( *p );
-	dim_t     n_max_p    = bli_obj_padded_width( *p );
+	dim_t     m_p        = bli_obj_length( p );
+	dim_t     n_p        = bli_obj_width( p );
+	dim_t     m_max_p    = bli_obj_padded_length( p );
+	dim_t     n_max_p    = bli_obj_padded_width( p );
 
-	void*     buf_c      = bli_obj_buffer_at_off( *c );
-	inc_t     rs_c       = bli_obj_row_stride( *c );
-	inc_t     cs_c       = bli_obj_col_stride( *c );
+	void*     buf_c      = bli_obj_buffer_at_off( c );
+	inc_t     rs_c       = bli_obj_row_stride( c );
+	inc_t     cs_c       = bli_obj_col_stride( c );
 
-	void*     buf_p      = bli_obj_buffer_at_off( *p );
-	inc_t     rs_p       = bli_obj_row_stride( *p );
-	inc_t     cs_p       = bli_obj_col_stride( *p );
-	inc_t     is_p       = bli_obj_imag_stride( *p );
-	dim_t     pd_p       = bli_obj_panel_dim( *p );
-	inc_t     ps_p       = bli_obj_panel_stride( *p );
+	void*     buf_p      = bli_obj_buffer_at_off( p );
+	inc_t     rs_p       = bli_obj_row_stride( p );
+	inc_t     cs_p       = bli_obj_col_stride( p );
+	inc_t     is_p       = bli_obj_imag_stride( p );
+	dim_t     pd_p       = bli_obj_panel_dim( p );
+	inc_t     ps_p       = bli_obj_panel_stride( p );
 
 	obj_t     kappa;
 	obj_t*    kappa_p;
@@ -155,7 +155,7 @@ void bli_packm_blk_var1
 		// higher-level operation. Thus, we use BLIS_ONE for kappa so
 		// that the underlying packm implementation does not perform
 		// any scaling during packing.
-		buf_kappa = bli_obj_buffer_for_const( dt_cp, BLIS_ONE );
+		buf_kappa = bli_obj_buffer_for_const( dt_cp, &BLIS_ONE );
 	}
 	else // if ( bli_is_ind_packed( schema ) )
 	{
@@ -187,7 +187,7 @@ void bli_packm_blk_var1
 		}
 	
 		// Acquire the buffer to the kappa chosen above.
-		buf_kappa = bli_obj_buffer_for_1x1( dt_cp, *kappa_p );
+		buf_kappa = bli_obj_buffer_for_1x1( dt_cp, kappa_p );
 	}
 
 
@@ -344,10 +344,10 @@ void PASTEMAC(ch,varname) \
 	   express the remaining parameters and code. */ \
 	if ( bli_does_trans( transc ) ) \
 	{ \
-		bli_swap_incs( rs_c, cs_c ); \
-		bli_negate_diag_offset( diagoffc ); \
-		bli_toggle_uplo( uploc ); \
-		bli_toggle_trans( transc ); \
+		bli_swap_incs( &rs_c, &cs_c ); \
+		bli_negate_diag_offset( &diagoffc ); \
+		bli_toggle_uplo( &uploc ); \
+		bli_toggle_trans( &transc ); \
 	} \
 \
 	/* Create flags to incidate row or column storage. Note that the

@@ -80,7 +80,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	conjx_use = conjx; \
 \
 	if ( bli_is_conj( conjy ) ) \
-		bli_toggle_conj( conjx_use ); \
+		bli_toggle_conj( &conjx_use ); \
 \
 	if ( bli_is_conj( conjx_use ) ) \
 	{ \

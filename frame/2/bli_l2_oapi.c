@@ -57,19 +57,19 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	BLIS_OAPI_CNTX_DECL \
 \
-	num_t     dt        = bli_obj_datatype( *a ); \
+	num_t     dt        = bli_obj_dt( a ); \
 \
-    trans_t   transa    = bli_obj_conjtrans_status( *a ); \
-    conj_t    conjx     = bli_obj_conj_status( *x ); \
-	dim_t     m         = bli_obj_length( *a ); \
-	dim_t     n         = bli_obj_width( *a ); \
-    void*     buf_a     = bli_obj_buffer_at_off( *a ); \
-    inc_t     rs_a      = bli_obj_row_stride( *a ); \
-    inc_t     cs_a      = bli_obj_col_stride( *a ); \
-    void*     buf_x     = bli_obj_buffer_at_off( *x ); \
-    inc_t     incx      = bli_obj_vector_inc( *x ); \
-    void*     buf_y     = bli_obj_buffer_at_off( *y ); \
-    inc_t     incy      = bli_obj_vector_inc( *y ); \
+	trans_t   transa    = bli_obj_conjtrans_status( a ); \
+	conj_t    conjx     = bli_obj_conj_status( x ); \
+	dim_t     m         = bli_obj_length( a ); \
+	dim_t     n         = bli_obj_width( a ); \
+	void*     buf_a     = bli_obj_buffer_at_off( a ); \
+	inc_t     rs_a      = bli_obj_row_stride( a ); \
+	inc_t     cs_a      = bli_obj_col_stride( a ); \
+	void*     buf_x     = bli_obj_buffer_at_off( x ); \
+	inc_t     incx      = bli_obj_vector_inc( x ); \
+	void*     buf_y     = bli_obj_buffer_at_off( y ); \
+	inc_t     incy      = bli_obj_vector_inc( y ); \
 \
 	void*     buf_alpha; \
 	void*     buf_beta; \
@@ -86,8 +86,8 @@ void PASTEMAC(opname,EX_SUF) \
 	                                      alpha, &alpha_local ); \
 	bli_obj_scalar_init_detached_copy_of( dt, BLIS_NO_CONJUGATE, \
 	                                      beta, &beta_local ); \
-	buf_alpha = bli_obj_buffer_for_1x1( dt, alpha_local ); \
-	buf_beta  = bli_obj_buffer_for_1x1( dt, beta_local ); \
+	buf_alpha = bli_obj_buffer_for_1x1( dt, &alpha_local ); \
+	buf_beta  = bli_obj_buffer_for_1x1( dt, &beta_local ); \
 \
 	/* Invoke the typed function. */ \
 	bli_call_ft_14 \
@@ -126,19 +126,19 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	BLIS_OAPI_CNTX_DECL \
 \
-	num_t     dt        = bli_obj_datatype( *a ); \
+	num_t     dt        = bli_obj_dt( a ); \
 \
-    conj_t    conjx     = bli_obj_conj_status( *x ); \
-    conj_t    conjy     = bli_obj_conj_status( *y ); \
-	dim_t     m         = bli_obj_length( *a ); \
-	dim_t     n         = bli_obj_width( *a ); \
-    void*     buf_x     = bli_obj_buffer_at_off( *x ); \
-    inc_t     incx      = bli_obj_vector_inc( *x ); \
-    void*     buf_y     = bli_obj_buffer_at_off( *y ); \
-    inc_t     incy      = bli_obj_vector_inc( *y ); \
-    void*     buf_a     = bli_obj_buffer_at_off( *a ); \
-    inc_t     rs_a      = bli_obj_row_stride( *a ); \
-    inc_t     cs_a      = bli_obj_col_stride( *a ); \
+	conj_t    conjx     = bli_obj_conj_status( x ); \
+	conj_t    conjy     = bli_obj_conj_status( y ); \
+	dim_t     m         = bli_obj_length( a ); \
+	dim_t     n         = bli_obj_width( a ); \
+	void*     buf_x     = bli_obj_buffer_at_off( x ); \
+	inc_t     incx      = bli_obj_vector_inc( x ); \
+	void*     buf_y     = bli_obj_buffer_at_off( y ); \
+	inc_t     incy      = bli_obj_vector_inc( y ); \
+	void*     buf_a     = bli_obj_buffer_at_off( a ); \
+	inc_t     rs_a      = bli_obj_row_stride( a ); \
+	inc_t     cs_a      = bli_obj_col_stride( a ); \
 \
 	void*     buf_alpha; \
 \
@@ -151,7 +151,7 @@ void PASTEMAC(opname,EX_SUF) \
 	   as needed). */ \
 	bli_obj_scalar_init_detached_copy_of( dt, BLIS_NO_CONJUGATE, \
 	                                      alpha, &alpha_local ); \
-	buf_alpha = bli_obj_buffer_for_1x1( dt, alpha_local ); \
+	buf_alpha = bli_obj_buffer_for_1x1( dt, &alpha_local ); \
 \
 	/* Invoke the typed function. */ \
 	bli_call_ft_13 \
@@ -190,19 +190,19 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	BLIS_OAPI_CNTX_DECL \
 \
-	num_t     dt        = bli_obj_datatype( *a ); \
+	num_t     dt        = bli_obj_dt( a ); \
 \
-    uplo_t    uploa     = bli_obj_uplo( *a ); \
-    conj_t    conja     = bli_obj_conj_status( *a ); \
-    conj_t    conjx     = bli_obj_conj_status( *x ); \
-	dim_t     m         = bli_obj_length( *a ); \
-    void*     buf_a     = bli_obj_buffer_at_off( *a ); \
-    inc_t     rs_a      = bli_obj_row_stride( *a ); \
-    inc_t     cs_a      = bli_obj_col_stride( *a ); \
-    void*     buf_x     = bli_obj_buffer_at_off( *x ); \
-    inc_t     incx      = bli_obj_vector_inc( *x ); \
-    void*     buf_y     = bli_obj_buffer_at_off( *y ); \
-    inc_t     incy      = bli_obj_vector_inc( *y ); \
+	uplo_t    uploa     = bli_obj_uplo( a ); \
+	conj_t    conja     = bli_obj_conj_status( a ); \
+	conj_t    conjx     = bli_obj_conj_status( x ); \
+	dim_t     m         = bli_obj_length( a ); \
+	void*     buf_a     = bli_obj_buffer_at_off( a ); \
+	inc_t     rs_a      = bli_obj_row_stride( a ); \
+	inc_t     cs_a      = bli_obj_col_stride( a ); \
+	void*     buf_x     = bli_obj_buffer_at_off( x ); \
+	inc_t     incx      = bli_obj_vector_inc( x ); \
+	void*     buf_y     = bli_obj_buffer_at_off( y ); \
+	inc_t     incy      = bli_obj_vector_inc( y ); \
 \
 	void*     buf_alpha; \
 	void*     buf_beta; \
@@ -219,8 +219,8 @@ void PASTEMAC(opname,EX_SUF) \
 	                                      alpha, &alpha_local ); \
 	bli_obj_scalar_init_detached_copy_of( dt, BLIS_NO_CONJUGATE, \
 	                                      beta, &beta_local ); \
-	buf_alpha = bli_obj_buffer_for_1x1( dt, alpha_local ); \
-	buf_beta  = bli_obj_buffer_for_1x1( dt, beta_local ); \
+	buf_alpha = bli_obj_buffer_for_1x1( dt, &alpha_local ); \
+	buf_beta  = bli_obj_buffer_for_1x1( dt, &beta_local ); \
 \
 	/* Invoke the typed function. */ \
 	bli_call_ft_14 \
@@ -259,16 +259,16 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	BLIS_OAPI_CNTX_DECL \
 \
-	num_t     dt        = bli_obj_datatype( *a ); \
+	num_t     dt        = bli_obj_dt( a ); \
 \
-    uplo_t    uploa     = bli_obj_uplo( *a ); \
-    conj_t    conjx     = bli_obj_conj_status( *x ); \
-	dim_t     m         = bli_obj_length( *a ); \
-    void*     buf_x     = bli_obj_buffer_at_off( *x ); \
-    inc_t     incx      = bli_obj_vector_inc( *x ); \
-    void*     buf_a     = bli_obj_buffer_at_off( *a ); \
-    inc_t     rs_a      = bli_obj_row_stride( *a ); \
-    inc_t     cs_a      = bli_obj_col_stride( *a ); \
+    uplo_t    uploa     = bli_obj_uplo( a ); \
+    conj_t    conjx     = bli_obj_conj_status( x ); \
+	dim_t     m         = bli_obj_length( a ); \
+    void*     buf_x     = bli_obj_buffer_at_off( x ); \
+    inc_t     incx      = bli_obj_vector_inc( x ); \
+    void*     buf_a     = bli_obj_buffer_at_off( a ); \
+    inc_t     rs_a      = bli_obj_row_stride( a ); \
+    inc_t     cs_a      = bli_obj_col_stride( a ); \
 \
 	void*     buf_alpha; \
 \
@@ -281,7 +281,7 @@ void PASTEMAC(opname,EX_SUF) \
 	   as needed). */ \
 	bli_obj_scalar_init_detached_copy_of( dt, BLIS_NO_CONJUGATE, \
 	                                      alpha, &alpha_local ); \
-	buf_alpha = bli_obj_buffer_for_1x1( dt, alpha_local ); \
+	buf_alpha = bli_obj_buffer_for_1x1( dt, &alpha_local ); \
 \
 	/* Invoke the typed function. */ \
 	bli_call_ft_10 \
@@ -318,19 +318,19 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	BLIS_OAPI_CNTX_DECL \
 \
-	num_t     dt        = bli_obj_datatype( *a ); \
+	num_t     dt        = bli_obj_dt( a ); \
 \
-    uplo_t    uploa     = bli_obj_uplo( *a ); \
-    conj_t    conjx     = bli_obj_conj_status( *x ); \
-    conj_t    conjy     = bli_obj_conj_status( *y ); \
-	dim_t     m         = bli_obj_length( *a ); \
-    void*     buf_x     = bli_obj_buffer_at_off( *x ); \
-    inc_t     incx      = bli_obj_vector_inc( *x ); \
-    void*     buf_y     = bli_obj_buffer_at_off( *y ); \
-    inc_t     incy      = bli_obj_vector_inc( *y ); \
-    void*     buf_a     = bli_obj_buffer_at_off( *a ); \
-    inc_t     rs_a      = bli_obj_row_stride( *a ); \
-    inc_t     cs_a      = bli_obj_col_stride( *a ); \
+	uplo_t    uploa     = bli_obj_uplo( a ); \
+	conj_t    conjx     = bli_obj_conj_status( x ); \
+	conj_t    conjy     = bli_obj_conj_status( y ); \
+	dim_t     m         = bli_obj_length( a ); \
+	void*     buf_x     = bli_obj_buffer_at_off( x ); \
+	inc_t     incx      = bli_obj_vector_inc( x ); \
+	void*     buf_y     = bli_obj_buffer_at_off( y ); \
+	inc_t     incy      = bli_obj_vector_inc( y ); \
+	void*     buf_a     = bli_obj_buffer_at_off( a ); \
+	inc_t     rs_a      = bli_obj_row_stride( a ); \
+	inc_t     cs_a      = bli_obj_col_stride( a ); \
 \
 	void*     buf_alpha; \
 \
@@ -343,7 +343,7 @@ void PASTEMAC(opname,EX_SUF) \
 	   as needed). */ \
 	bli_obj_scalar_init_detached_copy_of( dt, BLIS_NO_CONJUGATE, \
 	                                      alpha, &alpha_local ); \
-	buf_alpha = bli_obj_buffer_for_1x1( dt, alpha_local ); \
+	buf_alpha = bli_obj_buffer_for_1x1( dt, &alpha_local ); \
 \
 	/* Invoke the typed function. */ \
 	bli_call_ft_13 \
@@ -381,17 +381,17 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	BLIS_OAPI_CNTX_DECL \
 \
-	num_t     dt        = bli_obj_datatype( *a ); \
+	num_t     dt        = bli_obj_dt( a ); \
 \
-    uplo_t    uploa     = bli_obj_uplo( *a ); \
-    trans_t   transa    = bli_obj_conjtrans_status( *a ); \
-    diag_t    diaga     = bli_obj_diag( *a ); \
-	dim_t     m         = bli_obj_length( *a ); \
-    void*     buf_a     = bli_obj_buffer_at_off( *a ); \
-    inc_t     rs_a      = bli_obj_row_stride( *a ); \
-    inc_t     cs_a      = bli_obj_col_stride( *a ); \
-    void*     buf_x     = bli_obj_buffer_at_off( *x ); \
-    inc_t     incx      = bli_obj_vector_inc( *x ); \
+	uplo_t    uploa     = bli_obj_uplo( a ); \
+	trans_t   transa    = bli_obj_conjtrans_status( a ); \
+	diag_t    diaga     = bli_obj_diag( a ); \
+	dim_t     m         = bli_obj_length( a ); \
+	void*     buf_a     = bli_obj_buffer_at_off( a ); \
+	inc_t     rs_a      = bli_obj_row_stride( a ); \
+	inc_t     cs_a      = bli_obj_col_stride( a ); \
+	void*     buf_x     = bli_obj_buffer_at_off( x ); \
+	inc_t     incx      = bli_obj_vector_inc( x ); \
 \
 	void*     buf_alpha; \
 \
@@ -404,7 +404,7 @@ void PASTEMAC(opname,EX_SUF) \
 	   as needed). */ \
 	bli_obj_scalar_init_detached_copy_of( dt, BLIS_NO_CONJUGATE, \
 	                                      alpha, &alpha_local ); \
-	buf_alpha = bli_obj_buffer_for_1x1( dt, alpha_local ); \
+	buf_alpha = bli_obj_buffer_for_1x1( dt, &alpha_local ); \
 \
 	/* Invoke the typed function. */ \
 	bli_call_ft_11 \

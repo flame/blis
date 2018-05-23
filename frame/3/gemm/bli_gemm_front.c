@@ -69,9 +69,9 @@ void bli_gemm_front
 	}
 
 	// Alias A, B, and C in case we need to apply transformations.
-	bli_obj_alias_to( *a, a_local );
-	bli_obj_alias_to( *b, b_local );
-	bli_obj_alias_to( *c, c_local );
+	bli_obj_alias_to( a, &a_local );
+	bli_obj_alias_to( b, &b_local );
+	bli_obj_alias_to( c, &c_local );
 
 	// An optimization: If C is stored by rows and the micro-kernel prefers
 	// contiguous columns, or if C is stored by columns and the micro-kernel
@@ -79,18 +79,18 @@ void bli_gemm_front
 	// micro-kernel to access elements of C in its preferred manner.
 	if ( bli_cntx_l3_ukr_eff_dislikes_storage_of( &c_local, BLIS_GEMM_UKR, cntx ) )
 	{
-		bli_obj_swap( a_local, b_local );
+		bli_obj_swap( &a_local, &b_local );
 
-		bli_obj_induce_trans( a_local );
-		bli_obj_induce_trans( b_local );
-		bli_obj_induce_trans( c_local );
+		bli_obj_induce_trans( &a_local );
+		bli_obj_induce_trans( &b_local );
+		bli_obj_induce_trans( &c_local );
 	}
 
 	// Record the threading for each level within the context.
 	bli_cntx_set_thrloop_from_env( BLIS_GEMM, BLIS_LEFT, cntx,
-	                               bli_obj_length( c_local ),
-	                               bli_obj_width( c_local ),
-	                               bli_obj_width( a_local ) );
+	                               bli_obj_length( &c_local ),
+	                               bli_obj_width( &c_local ),
+	                               bli_obj_width( &a_local ) );
 
 	// Invoke the internal back-end via the thread handler.
 	bli_l3_thread_decorator

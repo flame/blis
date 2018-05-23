@@ -147,8 +147,8 @@ int main( int argc, char** argv )
 	bli_setm( &BLIS_MINUS_ONE, &c );
 
 	// Set the structure and uplo of 'c'.
-	bli_obj_set_struc( BLIS_SYMMETRIC, c )
-	bli_obj_set_uplo( BLIS_LOWER, c );
+	bli_obj_set_struc( BLIS_SYMMETRIC, &c )
+	bli_obj_set_uplo( BLIS_LOWER, &c );
 
 	// Randomize the lower triangle of 'c'.
 	bli_randm( &c );
@@ -170,8 +170,8 @@ int main( int argc, char** argv )
 	// Initialize all of 'd' to -1.0 to simulate junk values.
 	bli_setm( &BLIS_MINUS_ONE, &d );
 
-	bli_obj_set_struc( BLIS_HERMITIAN, d )
-	bli_obj_set_uplo( BLIS_LOWER, d );
+	bli_obj_set_struc( BLIS_HERMITIAN, &d )
+	bli_obj_set_uplo( BLIS_LOWER, &d );
 
 	// Randomize the lower triangle of 'd'.
 	bli_randm( &d );
@@ -185,8 +185,8 @@ int main( int argc, char** argv )
 	bli_printm( "d (after mkherm):", &d, "%4.1f", "" );
 
 	// Set the structure and uplo of 'd'.
-	bli_obj_set_struc( BLIS_HERMITIAN, d )
-	bli_obj_set_uplo( BLIS_LOWER, d );
+	bli_obj_set_struc( BLIS_HERMITIAN, &d )
+	bli_obj_set_uplo( BLIS_LOWER, &d );
 
 	//
 	// Example 4: Make a complex matrix explicitly symmetric or Hermitian.
@@ -203,8 +203,8 @@ int main( int argc, char** argv )
 	bli_setm( &BLIS_MINUS_ONE, &e );
 
 	// Set the structure and uplo of 'e'.
-	bli_obj_set_struc( BLIS_SYMMETRIC, e )
-	bli_obj_set_uplo( BLIS_UPPER, e );
+	bli_obj_set_struc( BLIS_SYMMETRIC, &e )
+	bli_obj_set_uplo( BLIS_UPPER, &e );
 
 	// Randomize the upper triangle of 'e'.
 	bli_randm( &e );
@@ -221,8 +221,8 @@ int main( int argc, char** argv )
 	bli_setm( &BLIS_MINUS_ONE, &f );
 
 	// Set the structure and uplo of 'f'.
-	bli_obj_set_struc( BLIS_HERMITIAN, f )
-	bli_obj_set_uplo( BLIS_UPPER, f );
+	bli_obj_set_struc( BLIS_HERMITIAN, &f )
+	bli_obj_set_uplo( BLIS_UPPER, &f );
 
 	// Randomize the upper triangle of 'f'.
 	bli_randm( &f );
@@ -249,8 +249,8 @@ int main( int argc, char** argv )
 	bli_setm( &BLIS_MINUS_ONE, &g );
 
 	// Set the structure and uplo of 'g'.
-	bli_obj_set_struc( BLIS_TRIANGULAR, g )
-	bli_obj_set_uplo( BLIS_LOWER, g );
+	bli_obj_set_struc( BLIS_TRIANGULAR, &g )
+	bli_obj_set_uplo( BLIS_LOWER, &g );
 
 	// Randomize the lower triangle of 'g'.
 	bli_randm( &g );
