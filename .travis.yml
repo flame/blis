@@ -8,7 +8,7 @@ matrix:
   # full testsuite
   - os: linux
     compiler: gcc
-    env: OOT=0 TEST=1 THR="none" CONF="auto"
+    env: OOT=0 TEST=1 SDE=0 THR="none" CONF="auto"
   # test x86_64 ukrs with SDE
   - os: linux
     compiler: gcc
@@ -23,7 +23,7 @@ matrix:
     env: OOT=0 TEST=0 SDE=0 THR="pthreads" CONF="auto"
   # out-of-tree build
   - os: linux
-    compiler: clang
+    compiler: gcc
     env: OOT=1 TEST=0 SDE=0 THR="none" CONF="auto"
   # clang build
   - os: linux
@@ -52,5 +52,5 @@ script:
 - ls -l
 - $CC --version
 - make -j 2
-- if [ $TEST -eq 1 ]; then $DIST_PATH/travis/do_testsuite.sh; fi
-- if [ $SDE -eq 1 ]; then $DIST_PATH/travis/do_sde.sh; fi
+- if [ $TEST -eq 1 ]; then travis_wait 30 $DIST_PATH/travis/do_testsuite.sh; fi
+- if [ $SDE -eq 1 ]; then travis_wait 30 $DIST_PATH/travis/do_sde.sh; fi
