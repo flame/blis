@@ -16,8 +16,15 @@ make -j2 testsuite-bin
 cp $DIST_PATH/testsuite/input.general.fast input.general
 cp $DIST_PATH/testsuite/input.operations.fast input.operations
 
-for ARCH in penryn sandybridge haswell skx knl piledriver excavator; do
-    $SDE -cpuid_in $DIST_PATH/travis/cpuid/$ARCH.def -- ./test_libblis.x > output.testsuite
+$DIST_PATH/travis/patch-ld-so.py /lib64/ld-linux-x86-64.so.2 ld.so.nohwcap
+chmod a+x ld.so.nohwcap
+
+for ARCH in penryn sandybridge haswell skx knl piledriver steamroller excavator; do
+    if [ "$ARCH" = "knl" ]; then
+        $SDE -knl -- ./ld.so.nohwcap ./test_libblis.x > output.testsuite
+    else
+        $SDE -cpuid_in $DIST_PATH/travis/cpuid/$ARCH.def -- ./ld.so.nohwcap ./test_libblis.x > output.testsuite
+    fi
     $DIST_PATH/build/check-blistest.sh ./output.testsuite
     TMP=`grep "active sub-configuration" output.testsuite`
     CONFIG=${TMP##* }
