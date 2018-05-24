@@ -40,23 +40,19 @@
 
 // buffer
 
-static bool_t bli_is_aligned_to( void* p, siz_t size )
+static bool_t bli_is_aligned_to( siz_t p, siz_t size )
 {
-	return ( ( uintptr_t )(p) %
-	         ( uintptr_t )(size) == 0 );
+	return ( p % size == 0 );
 }
 
-static bool_t bli_is_unaligned_to( void* p, siz_t size )
+static bool_t bli_is_unaligned_to( siz_t p, siz_t size )
 {
-	return ( ( uintptr_t )(p) %
-	         ( uintptr_t )(size) != 0 );
+	return ( p % size != 0 );
 }
 
-static guint_t bli_offset_past_alignment( void* p, siz_t size )
+static siz_t bli_offset_past_alignment( siz_t p, siz_t size )
 {
-	return ( guint_t )
-	       ( ( uintptr_t )(p) %
-	         ( uintptr_t )(size) );
+	return ( siz_t )( p % size );
 }
 
 
