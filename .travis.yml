@@ -16,6 +16,7 @@ env:
   - OOT=0 TEST=0 THR="none" CONF="sandybridge"
   - OOT=0 TEST=0 THR="none" CONF="haswell"
   - OOT=0 TEST=0 THR="none" CONF="knl"
+  - OOT=0 TEST=0 THR="none" CONF="skx"
   - OOT=0 TEST=0 THR="none" CONF="bulldozer"
   - OOT=0 TEST=0 THR="none" CONF="piledriver"
   - OOT=0 TEST=0 THR="none" CONF="steamroller"
@@ -44,6 +45,8 @@ matrix:
       env: OOT=0 TEST=0 THR="none" CONF="haswell"
     - os: osx
       env: OOT=0 TEST=0 THR="none" CONF="knl"
+    - os: osx
+      env: OOT=0 TEST=0 THR="none" CONF="skx"
     - os: osx
       env: OOT=0 TEST=0 THR="none" CONF="bulldozer"
     - os: osx
