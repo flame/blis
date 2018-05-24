@@ -16,7 +16,9 @@ make -j2 testsuite-bin
 cp $DIST_PATH/testsuite/input.general.fast input.general
 cp $DIST_PATH/testsuite/input.operations.fast input.operations
 
-$DIST_PATH/travis/patch-ld-so.py /lib64/ld-linux-x86-64.so.2 ld.so.nohwcap
+TMP=`ldd ./test_libblis.x | grep ld`
+LD_SO=${TMP%% *}
+$DIST_PATH/travis/patch-ld-so.py $LD_SO ld.so.nohwcap
 chmod a+x ld.so.nohwcap
 
 for ARCH in penryn sandybridge haswell skx knl piledriver steamroller excavator; do
