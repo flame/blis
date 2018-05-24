@@ -164,6 +164,11 @@ extern "C" {
 #include "bli_util.h"
 
 
+// -- sandbox implementation --
+
+#include "bli_sbox.h"
+
+
 // -- BLAS compatibility layer --
 
 #include "bli_blas.h"

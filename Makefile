@@ -104,13 +104,7 @@ BASE_OBJ_CONFIG_PATH   := $(BASE_OBJ_PATH)/$(CONFIG_DIR)
 BASE_OBJ_FRAME_PATH    := $(BASE_OBJ_PATH)/$(FRAME_DIR)
 BASE_OBJ_REFKERN_PATH  := $(BASE_OBJ_PATH)/$(REFKERN_DIR)
 BASE_OBJ_KERNELS_PATH  := $(BASE_OBJ_PATH)/$(KERNELS_DIR)
-
-# --- BLIS framework object variable names ---
-
-# These hold object filenames corresponding to above.
-MK_FRAME_OBJS          :=
-MK_REFKERN_OBJS        :=
-MK_KERNELS_OBJS        :=
+BASE_OBJ_SANDBOX_PATH  := $(BASE_OBJ_PATH)/$(SANDBOX_DIR)
 
 # --- Define install target names for static libraries ---
 
@@ -146,6 +140,8 @@ endif
 MK_LIBS_INST              := $(strip $(MK_LIBS_INST))
 MK_LIBS_SYML              := $(strip $(MK_LIBS_SYML))
 
+# --- Define install directory for headers ---
+
 # Set the include installation directory subdirectory name.
 MK_INCL_DIR_INST          := $(INSTALL_INCDIR)/blis
 
@@ -161,97 +157,59 @@ MK_INCL_DIR_INST          := $(INSTALL_INCDIR)/blis
 # reference kernel source; and general framework source.
 
 # $(call gen-obj-paths-from-src file_exts, src_files, base_src_path, base_obj_path)
-#gen-obj-paths-from-src = $(foreach ch, $(1), \
-#                             $(patsubst $(3)/%.$(ch), \
-#                                        $(4)/%.o, \
-#                                        $(2) \
-#                              ) \
-#                          )
+gen-obj-paths-from-src = $(foreach ch, $(1), \
+                             $(patsubst $(3)/%.$(ch), \
+                                        $(4)/%.o, \
+                                        $(filter %.$(ch), $(2)) ) )
 
-# First, identify the source code found in the configuration sub-directories.
-MK_CONFIG_C          := $(filter %.c, $(MK_CONFIG_SRC))
-MK_CONFIG_S          := $(filter %.s, $(MK_CONFIG_SRC))
-MK_CONFIG_SS         := $(filter %.S, $(MK_CONFIG_SRC))
-MK_CONFIG_C_OBJS     := $(patsubst $(CONFIG_PATH)/%.c, $(BASE_OBJ_CONFIG_PATH)/%.o, \
-                                   $(MK_CONFIG_C) \
-                         )
-MK_CONFIG_S_OBJS     := $(patsubst $(CONFIG_PATH)/%.s, $(BASE_OBJ_CONFIG_PATH)/%.o, \
-                                   $(MK_CONFIG_S) \
-                         )
-MK_CONFIG_SS_OBJS    := $(patsubst $(CONFIG_PATH)/%.S, $(BASE_OBJ_CONFIG_PATH)/%.o, \
-                                   $(MK_CONFIG_SS) \
-                         )
-MK_CONFIG_OBJS       := $(MK_CONFIG_C_OBJS) \
-                        $(MK_CONFIG_S_OBJS) \
-                        $(MK_CONFIG_SS_OBJS)
+# Generate object file paths for source code found in the sub-configuration
+# directories.
+MK_CONFIG_OBJS      := $(call gen-obj-paths-from-src,$(CONFIG_SRC_SUFS),$(MK_CONFIG_SRC),$(CONFIG_PATH),$(BASE_OBJ_CONFIG_PATH))
 
-# A more concise but obfuscated way of encoding the above lines.
-#MK_CONFIG_OBJS       := $(call gen-obj-paths-from-src c s S,
-#                                                      $(MK_CONFIG_SRC),
-#                                                      $(CONFIG_PATH),
-#                                                      $(BASE_OBJ_CONFIG_PATH)
-#                         )
+# Generate object file paths for architecture-specific kernel source code.
+# We target only .c, .s, and .S files. Note that MK_KERNELS_SRC is already
+# limited to the kernel source corresponding to the kernel sets in
+# KERNEL_LIST. This is because the configure script only propogated makefile
+# fragments into those specific kernel subdirectories.
+MK_KERNELS_OBJS     := $(call gen-obj-paths-from-src,$(KERNELS_SRC_SUFS),$(MK_KERNELS_SRC),$(KERNELS_PATH),$(BASE_OBJ_KERNELS_PATH))
 
-# Now, identify all of the architecture-specific kernel source code. We
-# start by filtering only .c and .[sS] files (ignoring any .h files, though
-# there shouldn't be any), and then instantiating object file paths from the
-# source file paths. Note that MK_KERNELS_SRC is already limited to the
-# kernel source corresponding to the kernel sets in KERNEL_LIST. This
-# is because the configure script only propogated makefile fragments into
-# those specific kernel subdirectories.
-MK_KERNELS_C       := $(filter %.c, $(MK_KERNELS_SRC))
-MK_KERNELS_S       := $(filter %.s, $(MK_KERNELS_SRC))
-MK_KERNELS_SS      := $(filter %.S, $(MK_KERNELS_SRC))
-MK_KERNELS_C_OBJS  := $(patsubst $(KERNELS_PATH)/%.c, $(BASE_OBJ_KERNELS_PATH)/%.o, \
-                                 $(MK_KERNELS_C) \
-                       )
-MK_KERNELS_S_OBJS  := $(patsubst $(KERNELS_PATH)/%.s, $(BASE_OBJ_KERNELS_PATH)/%.o, \
-                                 $(MK_KERNELS_S) \
-                       )
-MK_KERNELS_SS_OBJS := $(patsubst $(KERNELS_PATH)/%.S, $(BASE_OBJ_KERNELS_PATH)/%.o, \
-                                 $(MK_KERNELS_SS) \
-                       )
-MK_KERNELS_OBJS    := $(MK_KERNELS_C_OBJS) \
-                      $(MK_KERNELS_S_OBJS) \
-                      $(MK_KERNELS_SS_OBJS)
+# Generate object file paths for reference kernels, with one set of object
+# files for each sub-configuration in CONFIG_LIST. Note that due to the
+# nuances of naming the reference kernel files, we can't use the function
+# gen-obj-paths-from-src as we do above and below.
+MK_REFKERN_C        := $(filter %.c, $(MK_REFKERN_SRC))
+MK_REFKERN_OBJS     := $(foreach arch, $(CONFIG_LIST), \
+                           $(patsubst $(REFKERN_PATH)/%_$(REFNM).c, \
+                                 $(BASE_OBJ_REFKERN_PATH)/$(arch)/%_$(arch)_$(REFNM).o, \
+                                 $(MK_REFKERN_C) \
+                            ) \
+                        )
 
-# Next, identify all of the reference kernel source code, then filter only
-# .c files (ignoring .h files), and finally instantiate object file paths
-# from the source files paths once for each sub-configuration in CONFIG_LIST,
-# appending the name of the sub-config to the object filename.
-MK_REFKERN_C       := $(filter %.c, $(MK_REFKERN_SRC))
-MK_REFKERN_OBJS    := $(foreach arch, $(CONFIG_LIST), \
-                          $(patsubst $(REFKERN_PATH)/%_$(REF_SUF).c, \
-                                     $(BASE_OBJ_REFKERN_PATH)/$(arch)/%_$(arch)_$(REF_SUF).o, \
-                                     $(MK_REFKERN_C) \
-                           ) \
-                       )
+# Generate object file paths for all of the portable framework source code.
+MK_FRAME_OBJS       := $(call gen-obj-paths-from-src,$(FRAME_SRC_SUFS),$(MK_FRAME_SRC),$(FRAME_PATH),$(BASE_OBJ_FRAME_PATH))
 
-# And now, identify all of the portable framework source code, then filter
-# only .c files (ignoring .h files), and finally instantiate object file
-# paths from the source file paths.
-MK_FRAME_C         := $(filter %.c, $(MK_FRAME_SRC))
-MK_FRAME_OBJS      := $(patsubst $(FRAME_PATH)/%.c, $(BASE_OBJ_FRAME_PATH)/%.o, \
-                                 $(MK_FRAME_C) \
-                       )
+# Generate object file paths for the sandbox source code. If a sandbox was not
+# enabled a configure-time, this variable will we empty.
+MK_SANDBOX_OBJS     := $(call gen-obj-paths-from-src,$(SANDBOX_SRC_SUFS),$(MK_SANDBOX_SRC),$(SANDBOX_PATH),$(BASE_OBJ_SANDBOX_PATH))
 
 # Combine all of the object files into some readily-accessible variables.
-MK_BLIS_OBJS         := $(MK_CONFIG_OBJS) \
-                        $(MK_KERNELS_OBJS) \
-                        $(MK_REFKERN_OBJS) \
-                        $(MK_FRAME_OBJS)
+MK_BLIS_OBJS        := $(MK_CONFIG_OBJS) \
+                       $(MK_KERNELS_OBJS) \
+                       $(MK_REFKERN_OBJS) \
+                       $(MK_FRAME_OBJS) \
+                       $(MK_SANDBOX_OBJS)
 
 # Optionally filter out the BLAS and CBLAS compatibility layer object files.
 # This is not actually necessary, since each affected file is guarded by C
 # preprocessor macros, but it but prevents "empty" object files from being
 # added into the library (and reduces compilation time).
-BASE_OBJ_BLAS_PATH   := $(BASE_OBJ_FRAME_PATH)/compat
-BASE_OBJ_CBLAS_PATH  := $(BASE_OBJ_FRAME_PATH)/compat/cblas
+BASE_OBJ_BLAS_PATH  := $(BASE_OBJ_FRAME_PATH)/compat
+BASE_OBJ_CBLAS_PATH := $(BASE_OBJ_FRAME_PATH)/compat/cblas
 ifeq ($(MK_ENABLE_CBLAS),no)
-MK_BLIS_OBJS         := $(filter-out $(BASE_OBJ_CBLAS_PATH)/%.o, $(MK_BLIS_OBJS) )
+MK_BLIS_OBJS        := $(filter-out $(BASE_OBJ_CBLAS_PATH)/%.o, $(MK_BLIS_OBJS) )
 endif
 ifeq ($(MK_ENABLE_BLAS),no)
-MK_BLIS_OBJS         := $(filter-out $(BASE_OBJ_BLAS_PATH)/%.o,  $(MK_BLIS_OBJS) )
+MK_BLIS_OBJS        := $(filter-out $(BASE_OBJ_BLAS_PATH)/%.o,  $(MK_BLIS_OBJS) )
 endif
 
 
@@ -273,7 +231,7 @@ endif
 
 
 #
-# --- BLAS test suite definitions ----------------------------------------------
+# --- BLAS test drivers definitions --------------------------------------------
 #
 
 # The location of the BLAS test suite's input files.
@@ -329,7 +287,7 @@ BLASTEST_CHECK         := $(DIST_PATH)/$(BUILD_DIR)/check-blastest.sh
 
 
 #
-# --- Test suite definitions ---------------------------------------------------
+# --- BLIS testsuite definitions -----------------------------------------------
 #
 
 # The location of the test suite's general and operations-specific
@@ -442,12 +400,12 @@ endif
 
 flat-header: check-env $(BLIS_H_FLAT)
 
-$(BLIS_H_FLAT): $(MK_HEADER_FILES)
+$(BLIS_H_FLAT): $(ALL_H99_FILES)
 ifeq ($(ENABLE_VERBOSE),yes)
-	$(FLATTEN_H) -c -v1 $(BLIS_H_SRC_PATH) $@ "./$(INCLUDE_DIR)" "$(MK_HEADER_DIR_PATHS)"
+	$(FLATTEN_H) -c -v1 $(BLIS_H_SRC_PATH) $@ "./$(INCLUDE_DIR)" "$(ALL_H99_DIRPATHS)"
 else
 	@echo -n "Generating monolithic blis.h"
-	@$(FLATTEN_H) -c -v1 $(BLIS_H_SRC_PATH) $@ "./$(INCLUDE_DIR)" "$(MK_HEADER_DIR_PATHS)"
+	@$(FLATTEN_H) -c -v1 $(BLIS_H_SRC_PATH) $@ "./$(INCLUDE_DIR)" "$(ALL_H99_DIRPATHS)"
 	@echo "Generated $@"
 endif
 
@@ -455,12 +413,12 @@ endif
 
 flat-cblas-header: check-env $(CBLAS_H_FLAT)
 
-$(CBLAS_H_FLAT): $(MK_HEADER_FILES)
+$(CBLAS_H_FLAT): $(ALL_H99_FILES)
 ifeq ($(ENABLE_VERBOSE),yes)
-	$(FLATTEN_H) -c -v1 $(CBLAS_H_SRC_PATH) $@ "./$(INCLUDE_DIR)" "$(MK_HEADER_DIR_PATHS)"
+	$(FLATTEN_H) -c -v1 $(CBLAS_H_SRC_PATH) $@ "./$(INCLUDE_DIR)" "$(ALL_H99_DIRPATHS)"
 else
 	@echo -n "Generating monolithic cblas.h"
-	@$(FLATTEN_H) -c -v1 $(CBLAS_H_SRC_PATH) $@ "./$(INCLUDE_DIR)" "$(MK_HEADER_DIR_PATHS)"
+	@$(FLATTEN_H) -c -v1 $(CBLAS_H_SRC_PATH) $@ "./$(INCLUDE_DIR)" "$(ALL_H99_DIRPATHS)"
 	@echo "Generated $@"
 endif
 
@@ -520,7 +478,6 @@ endef
 # first argument: a kernel set (name) being targeted (e.g. haswell).
 # second argument: the configuration whose CFLAGS we should use in compilation.
 # third argument: the kernel file suffix being considered.
-#$(BASE_OBJ_KERNELS_PATH)/$(1)/%.o: $(KERNELS_PATH)/$(1)/%.c $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
 define make-kernels-rule
 $(BASE_OBJ_KERNELS_PATH)/$(1)/%.o: $(KERNELS_PATH)/$(1)/%.$(3) $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
 ifeq ($(ENABLE_VERBOSE),yes)
@@ -528,6 +485,28 @@ ifeq ($(ENABLE_VERBOSE),yes)
 else
 	@echo "Compiling $$@" $(call get-kernel-text-for,$(2))
 	@$(CC) $(call get-kernel-cflags-for,$(2)) -c $$< -o $$@
+endif
+endef
+
+# first argument: a configuration name from the union of config_list and
+# config_name, used to look up the CFLAGS to use during compilation.
+define make-c99-sandbox-rule
+$(BASE_OBJ_SANDBOX_PATH)/%.o: $(SANDBOX_PATH)/%.$(2) $(BLIS_H_FLAT) $(SANDBOX_H99_FILES) $(MAKE_DEFS_MK_PATHS)
+ifeq ($(ENABLE_VERBOSE),yes)
+	$(CC) $(call get-sandbox-c99flags-for,$(1)) -c $$< -o $$@
+else
+	@echo "Compiling $$@" $(call get-sandbox-c99text-for,$(1))
+	@$(CC) $(call get-sandbox-c99flags-for,$(1)) -c $$< -o $$@
+endif
+endef
+
+define make-cxx-sandbox-rule
+$(BASE_OBJ_SANDBOX_PATH)/%.o: $(SANDBOX_PATH)/%.$(2) $(BLIS_H_FLAT) $(SANDBOX_HXX_FILES) $(MAKE_DEFS_MK_PATHS)
+ifeq ($(ENABLE_VERBOSE),yes)
+	$(CXX) $(call get-sandbox-cxxflags-for,$(1)) -c $$< -o $$@
+else
+	@echo "Compiling $$@" $(call get-sandbox-cxxtext-for,$(1))
+	@$(CXX) $(call get-sandbox-cxxflags-for,$(1)) -c $$< -o $$@
 endif
 endef
 
@@ -541,13 +520,12 @@ get-config-for-kset = $(lastword $(subst :, ,$(filter $(1):%,$(KCONFIG_MAP))))
 # for that sub-configuration.
 $(foreach conf, $(CONFIG_LIST), $(eval $(call make-config-rule,$(conf))))
 
-# Instantiate the build rule for non-kernel framework files. Use the CFLAGS for
-# the configuration family, which exists in the directory whose name is equal to
+# Instantiate the build rule for framework files. Use the CFLAGS for the
+# configuration family, which exists in the directory whose name is equal to
 # CONFIG_NAME. Note that this doesn't need to be in a loop since we expect
 # CONFIG_NAME to only ever contain a single name. (BTW: If CONFIG_NAME refers
 # to a singleton family, then CONFIG_LIST contains CONFIG_NAME as its only
 # item.)
-#$(eval $(call make-frame-rule,$(firstword $(CONFIG_NAME))))
 $(foreach conf, $(CONFIG_NAME), $(eval $(call make-frame-rule,$(conf))))
 
 # Instantiate the build rule for reference kernel initialization and
@@ -559,14 +537,18 @@ $(foreach conf, $(CONFIG_LIST), $(eval $(call make-refkern-rule,$(conf))))
 # Instantiate the build rule for optimized kernels for each of the kernel
 # sets in KERNEL_LIST with the CFLAGS designated for the sub-configuration
 # specified by the KCONFIG_MAP.
-$(foreach kset, $(KERNEL_LIST), $(eval $(call make-kernels-rule,$(kset),$(call get-config-for-kset,$(kset)),c)))
-$(foreach kset, $(KERNEL_LIST), $(eval $(call make-kernels-rule,$(kset),$(call get-config-for-kset,$(kset)),s)))
-$(foreach kset, $(KERNEL_LIST), $(eval $(call make-kernels-rule,$(kset),$(call get-config-for-kset,$(kset)),S)))
+$(foreach suf, $(KERNELS_SRC_SUFS), \
+$(foreach kset, $(KERNEL_LIST), $(eval $(call make-kernels-rule,$(kset),$(call get-config-for-kset,$(kset)),$(suf)))))
 
-# FGVZ: Alternate way of expressing the above:
-# NOTE: KERNEL_SUFS is already defined in common.mk as "c s S".
-#$(foreach suf,  $(KERNEL_SUFS), \
-#$(foreach kset, $(KERNEL_LIST), $(eval $(call make-kernels-rule,$(kset),$(suf)))))
+# Instantiate the build rule for C sandbox files. Use the CFLAGS for the
+# configuration family.
+$(foreach suf, $(SANDBOX_C99_SUFS), \
+$(foreach conf, $(CONFIG_NAME), $(eval $(call make-c99-sandbox-rule,$(conf),$(suf)))))
+
+# Instantiate the build rule for C++ sandbox files. Use the CXXFLAGS for the
+# configuration family.
+$(foreach suf, $(SANDBOX_CXX_SUFS), \
+$(foreach conf, $(CONFIG_NAME), $(eval $(call make-cxx-sandbox-rule,$(conf),$(suf)))))
 
 
 # --- All-purpose library rule (static and shared) ---
@@ -884,6 +866,7 @@ ifeq ($(ENABLE_VERBOSE),yes)
 	- $(FIND) $(FRAME_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 	- $(FIND) $(REFKERN_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 	- $(FIND) $(KERNELS_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
+	- $(FIND) $(SANDBOX_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 else
 	@echo "Removing makefile fragments from $(CONFIG_PATH)."
 	@- $(FIND) $(CONFIG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
@@ -893,6 +876,8 @@ else
 	@- $(FIND) $(REFERKN_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 	@echo "Removing makefile fragments from $(KERNELS_PATH)."
 	@- $(FIND) $(KERNELS_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
+	@echo "Removing makefile fragments from $(SANDBOX_PATH)."
+	@- $(FIND) $(SANDBOX_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 endif
 endif
 

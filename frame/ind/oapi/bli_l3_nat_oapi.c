@@ -68,7 +68,11 @@ void PASTEMAC(opname,imeth) \
 	); \
 }
 
+// If a sandbox was enabled, do not define bli_gemmnat() since it will be
+// defined in the sandbox environment.
+#ifndef BLIS_ENABLE_SANDBOX
 GENFRONT( gemm, gemm, nat )
+#endif
 GENFRONT( her2k, gemm, nat )
 GENFRONT( syr2k, gemm, nat )
 

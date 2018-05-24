@@ -32,76 +32,16 @@
 
 */
 
-#ifndef BLIS_CONFIG_H
-#define BLIS_CONFIG_H
+#ifndef BLIS_SBOX_H
+#define BLIS_SBOX_H
 
-// Enabled configuration "family" (config_name)
-@config_name_define@
-
-// Enabled sub-configurations (config_list)
-@config_list_defines@
-
-// Enabled kernel sets (kernel_list)
-@kernel_list_defines@
-
-#if @enable_openmp@
-#define BLIS_ENABLE_OPENMP
-#endif
-
-#if @enable_pthreads@
-#define BLIS_ENABLE_PTHREADS
-#endif
-
-#if @enable_packbuf_pools@
-#define BLIS_ENABLE_PACKBUF_POOLS
-#endif
-
-#if @int_type_size@ == 64
-#define BLIS_INT_TYPE_SIZE 64
-#elif @int_type_size@ == 32
-#define BLIS_INT_TYPE_SIZE 32
-#else
-// determine automatically
-#endif
-
-#if @blas_int_type_size@ == 64
-#define BLIS_BLAS_INT_TYPE_SIZE 64
-#elif @blas_int_type_size@ == 32
-#define BLIS_BLAS_INT_TYPE_SIZE 32
-#else
-// determine automatically
-#endif
-
-#ifndef BLIS_ENABLE_BLAS
-#ifndef BLIS_DISABLE_BLAS
-#if @enable_blas@
-#define BLIS_ENABLE_BLAS
-#else
-#define BLIS_DISABLE_BLAS
-#endif
-#endif
-#endif
-
-#ifndef BLIS_ENABLE_CBLAS
-#ifndef BLIS_DISABLE_CBLAS
-#if @enable_cblas@
-#define BLIS_ENABLE_CBLAS
-#else
-#define BLIS_DISABLE_CBLAS
-#endif
-#endif
-#endif
-
-#if @enable_memkind@
-#define BLIS_ENABLE_MEMKIND
-#else
-#define BLIS_DISABLE_MEMKIND
-#endif
-
-#if @enable_sandbox@
-#define BLIS_ENABLE_SANDBOX
-#else
-#define BLIS_DISABLE_SANDBOX
+// Each sandbox must have a bli_sandbox.h file present somewhere inside.
+// If a sandbox was enabled at configure-time, we need to #include its
+// header file here so that it will get pulled into blis.h when it is
+// flattened into a monolithic header.
+#ifdef BLIS_ENABLE_SANDBOX
+#include "bli_sandbox.h"
 #endif
 
 #endif
+

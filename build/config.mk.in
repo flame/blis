@@ -81,8 +81,9 @@ DIST_PATH         := @dist_path@
 endif
 
 # The C compiler.
-CC                := @CC@
 CC_VENDOR         := @CC_VENDOR@
+CC                := @CC@
+CXX               := @CXX@
 RANLIB            := @RANLIB@
 
 # The level of debugging info to generate.
@@ -116,6 +117,10 @@ MK_ENABLE_CBLAS   := @enable_cblas@
 
 # Whether libblis will depend on libmemkind for certain memory allocations.
 MK_ENABLE_MEMKIND := @enable_memkind@
+
+# Whether an alternative gemm implementation will be compiled and included
+# in BLIS.
+SANDBOX           := @sandbox@
 
 # end of ifndef CONFIG_MK_INCLUDED conditional block
 endif
