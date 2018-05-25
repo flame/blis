@@ -400,7 +400,7 @@ endif
 
 flat-header: check-env $(BLIS_H_FLAT)
 
-$(BLIS_H_FLAT): $(ALL_H99_FILES)
+$(BLIS_H_FLAT): $(FRAME_H99_FILES)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(FLATTEN_H) -c -v1 $(BLIS_H_SRC_PATH) $@ "./$(INCLUDE_DIR)" "$(ALL_H99_DIRPATHS)"
 else
@@ -413,7 +413,7 @@ endif
 
 flat-cblas-header: check-env $(CBLAS_H_FLAT)
 
-$(CBLAS_H_FLAT): $(ALL_H99_FILES)
+$(CBLAS_H_FLAT): $(FRAME_H99_FILES)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(FLATTEN_H) -c -v1 $(CBLAS_H_SRC_PATH) $@ "./$(INCLUDE_DIR)" "$(ALL_H99_DIRPATHS)"
 else

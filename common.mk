@@ -701,10 +701,9 @@ ALLFRAG_DIR_PATHS := . $(FRAGMENT_DIR_PATHS)
 SANDBOX_DIR_PATHS := $(filter $(SANDBOX_PATH)/%,$(ALLFRAG_DIR_PATHS))
 
 ALL_H99_FILES     := $(call get-filepaths,$(ALLFRAG_DIR_PATHS),$(ALL_H99_SUFS))
-#ALL_HDR_FILES     := $(call get-filepaths,$(ALLFRAG_DIR_PATHS),$(ALL_HDR_SUFS))
+FRAME_H99_FILES   := $(filter-out $(SANDBOX_PATH)/%,$(ALL_H99_FILES))
 
 ALL_H99_DIRPATHS  := $(call get-dirpaths,$(ALLFRAG_DIR_PATHS),$(ALL_H99_SUFS))
-#ALL_HDR_DIRPATHS  := $(call get-dirpaths,$(ALLFRAG_DIR_PATHS),$(ALL_HDR_SUFS))
 
 SANDBOX_H99_FILES := $(call get-filepaths,$(SANDBOX_DIR_PATHS),$(SANDBOX_H99_SUFS))
 SANDBOX_HXX_FILES := $(call get-filepaths,$(SANDBOX_DIR_PATHS),$(SANDBOX_HXX_SUFS))
@@ -729,7 +728,7 @@ BASE_INC_PATH   := $(BUILD_PATH)/$(INCLUDE_DIR)/$(CONFIG_NAME)
 # Isolate the path to blis.h by filtering the file from the list of framework
 # header files.
 BLIS_H          := blis.h
-BLIS_H_SRC_PATH := $(filter %/$(BLIS_H), $(ALL_H99_FILES))
+BLIS_H_SRC_PATH := $(filter %/$(BLIS_H), $(FRAME_H99_FILES))
 
 # Construct the path to what will be the intermediate flattened/monolithic
 # blis.h file.
@@ -743,7 +742,7 @@ BLIS_H_FLAT     := $(BASE_INC_PATH)/$(BLIS_H)
 # Isolate the path to cblas.h by filtering the file from the list of framework
 # header files.
 CBLAS_H          := cblas.h
-CBLAS_H_SRC_PATH := $(filter %/$(CBLAS_H), $(ALL_H99_FILES))
+CBLAS_H_SRC_PATH := $(filter %/$(CBLAS_H), $(FRAME_H99_FILES))
 
 # Construct the path to what will be the intermediate flattened/monolithic
 # cblas.h file.
@@ -764,7 +763,7 @@ REF_KER_HEADERS := $(shell $(GREP) "\#include" $(REF_KER_SRC) | sed -e "s/\#incl
 # leading, trailing, and internal whitespace.
 REF_KER_H_PATHS := $(strip $(foreach header, $(REF_KER_HEADERS), \
                                $(dir $(filter %/$(header), \
-                                              $(ALL_H99_FILES)))))
+                                              $(FRAME_H99_FILES)))))
 
 # Add -I to each header path so we can specify our include search paths to the
 # C compiler. Then add frame/include since it's needed for bli_oapi_w[o]_cntx.h.
