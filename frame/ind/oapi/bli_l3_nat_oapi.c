@@ -60,15 +60,18 @@ void PASTEMAC(opname,imeth) \
 	/* Obtain a valid (native) context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
-	/* Invoke the operation's front end with the appropriate control
-	   tree. */ \
+	/* Invoke the operation's front end. */ \
 	PASTEMAC(opname,_front) \
 	( \
 	  alpha, a, b, beta, c, cntx, NULL \
 	); \
 }
 
+// If a sandbox was enabled, do not define bli_gemmnat() since it will be
+// defined in the sandbox environment.
+#ifndef BLIS_ENABLE_SANDBOX
 GENFRONT( gemm, gemm, nat )
+#endif
 GENFRONT( her2k, gemm, nat )
 GENFRONT( syr2k, gemm, nat )
 
@@ -94,8 +97,7 @@ void PASTEMAC(opname,imeth) \
 	/* Obtain a valid (native) context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
-	/* Invoke the operation's front end with the appropriate control
-	   tree. */ \
+	/* Invoke the operation's front end. */ \
 	PASTEMAC(opname,_front) \
 	( \
 	  side, alpha, a, b, beta, c, cntx, NULL \
@@ -126,8 +128,7 @@ void PASTEMAC(opname,imeth) \
 	/* Obtain a valid (native) context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
-	/* Invoke the operation's front end with the appropriate control
-	   tree. */ \
+	/* Invoke the operation's front end. */ \
 	PASTEMAC(opname,_front) \
 	( \
 	  alpha, a, beta, c, cntx, NULL \
@@ -157,8 +158,7 @@ void PASTEMAC(opname,imeth) \
 	/* Obtain a valid (native) context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
-	/* Invoke the operation's front end with the appropriate control
-	   tree. */ \
+	/* Invoke the operation's front end. */ \
 	PASTEMAC(opname,_front) \
 	( \
 	  side, alpha, a, b, cntx, NULL \
@@ -187,8 +187,7 @@ void PASTEMAC(opname,imeth) \
 	/* Obtain a valid (native) context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
-	/* Invoke the operation's front end with the appropriate control
-	   tree. */ \
+	/* Invoke the operation's front end. */ \
 	PASTEMAC(opname,_front) \
 	( \
 	  side, alpha, a, b, cntx, NULL \

@@ -934,8 +934,8 @@ void bli_cntx_set_thrloop_from_env
 
 	if ( l3_op == BLIS_TRMM )
 	{
-		// We reconfigure the paralelism from trmm_r due to a dependency in
-		// the jc loop. (NOTE: This dependency does not exist for trmm3 )
+		// We reconfigure the parallelism from trmm_r due to a dependency in
+		// the jc loop. (NOTE: This dependency does not exist for trmm3.)
 		if ( bli_is_right( side ) )
 		{
 			bli_cntx_set_thrloop
