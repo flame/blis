@@ -35,13 +35,15 @@ matrix:
     compiler: clang
     env: OOT=0 TEST=0 SDE=0 THR="none" CONF="auto"
 install:
-- if [ "$CC" = "gcc" ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then export CC="gcc-5"; fi
+- if [ "$TRAVIS_OS_NAME" = "linux" ]; then export PATH=/usr/lib/binutils-2.26/bin:${PATH}; fi
+- if [ "$CC" = "gcc" ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then export CC="gcc-6"; fi
 addons:
   apt:
     sources:
     - ubuntu-toolchain-r-test
     packages:
-    - gcc-5
+    - gcc-6
+    - binutils-2.26
     - clang
 script:
 - export DIST_PATH=.
