@@ -87,7 +87,6 @@ default in BLIS;
 - try inlining your functions manually;
 - pivot away from using `obj_t` objects at higher algorithmic level (such as
 immediately after calling `bli_gemmnat()`) to try to avoid some overhead;
-- use a locally-defined microkernel that is not registered at configure-time.
 
 You **cannot**, however, do the following kinds of things:
 - define new datatypes (half-precision, quad-precision, short integer, etc.)
@@ -96,7 +95,30 @@ and expect the rest of BLIS to "know" how to handle them;
 rank-k update;
 - define a new BLAS-like operation.
 
-Notwithstanding these limitations, hopefully you find BLIS sandboxes useful!
+Another important limitation is the fact that the build system currently uses
+"framework `CFLAGS`" when compiling the sandbox source files. These are the same
+`CFLAGS` used when compiling general framework source code, which are likely
+more general-purpose than the `CFLAGS` used for, say, optimized kernels or even
+reference kernels. (To see precisely which flags are being employed for any
+given file, enable verbosity at compile-time via `make V=1`.) Compiling
+sandboxes with these more versatile `CFLAGS` compiler options means that we
+only need to compile one instance of each sandbox source file, even when
+targeting multiple configurations (for example, via `./configure x86_64`).
+However, it also means that sandboxes are not ideal for microkernels, as they
+usually need additional compiler flags not included in the set used for
+framework `CFLAGS` in order to yield the highest performance. If you have a
+new microkernel you would like to use within a sandbox, it's best to formally
+register it along with a new configuration, which will allow you to specify
+kernel-specific compiler flags to be used when compiling your microkernel.
+Please see the
+[Configuration wiki](https://github.com/flame/blis/wiki/ConfigurationHowTo)
+for more details, and when in doubt, please don't be shy about seeking
+guidance from BLIS developers by opening a
+[new issue](https://github.com/flame/blis/issues) or sending a message to the
+[blis-devel](http://groups.google.com/d/forum/blis-devel) mailing list.
+
+Notwithstanding these limitations, hopefully you still find BLIS sandboxes
+useful!
 
 ## Questions? Concerns? Feedback?
 
