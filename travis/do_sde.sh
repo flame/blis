@@ -16,11 +16,11 @@ make -j2 testsuite-bin
 cp $DIST_PATH/testsuite/input.general.fast input.general
 cp $DIST_PATH/testsuite/input.operations.fast input.operations
 
-TMP=`ldd ./test_libblis.x | grep ld`
+TMP=`ldd ./test_libblis.x | grep ld | sed 's/^.*=>//'`
 LD_SO=${TMP%% *}
-TMP=`ldd ./test_libblis.x | grep libc`
+TMP=`ldd ./test_libblis.x | grep libc | sed 's/^.*=>//'`
 LIBC_SO=${TMP%% *}
-TMP=`ldd ./test_libblis.x | grep libm`
+TMP=`ldd ./test_libblis.x | grep libm | sed 's/^.*=>//'`
 LIBM_SO=${TMP%% *}
 for LIB in $LD_SO $LIBC_SO $LIBM_SO; do
     $DIST_PATH/travis/patch-ld-so.py $LIB .tmp
