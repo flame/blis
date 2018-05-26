@@ -18,14 +18,21 @@ cp $DIST_PATH/testsuite/input.operations.fast input.operations
 
 TMP=`ldd ./test_libblis.x | grep ld`
 LD_SO=${TMP%% *}
-$DIST_PATH/travis/patch-ld-so.py $LD_SO ld.so.nohwcap
-chmod a+x ld.so.nohwcap
+TMP=`ldd ./test_libblis.x | grep libc`
+LIBC_SO=${TMP%% *}
+TMP=`ldd ./test_libblis.x | grep libm`
+LIBM_SO=${TMP%% *}
+for LIB in $LD_SO $LIBC_SO $LIBM_SO; do
+    $DIST_PATH/travis/patch-ld-so.py $LIB .tmp
+    chmod a+x .tmp
+    sudo mv .tmp $LIB
+done
 
 for ARCH in penryn sandybridge haswell skx knl piledriver steamroller excavator; do
     if [ "$ARCH" = "knl" ]; then
-        $SDE -knl -- ./ld.so.nohwcap ./test_libblis.x > output.testsuite
+        $SDE -knl -- ./test_libblis.x > output.testsuite
     else
-        $SDE -cpuid_in $DIST_PATH/travis/cpuid/$ARCH.def -- ./ld.so.nohwcap ./test_libblis.x > output.testsuite
+        $SDE -cpuid_in $DIST_PATH/travis/cpuid/$ARCH.def -- ./test_libblis.x > output.testsuite
     fi
     $DIST_PATH/build/check-blistest.sh ./output.testsuite
     TMP=`grep "active sub-configuration" output.testsuite`
