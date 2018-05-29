@@ -28,7 +28,7 @@ for LIB in $LD_SO $LIBC_SO $LIBM_SO; do
     sudo mv .tmp $LIB
 done
 
-for ARCH in penryn sandybridge haswell skx knl piledriver steamroller excavator; do
+for ARCH in penryn sandybridge haswell skx knl piledriver steamroller excavator zen; do
     if [ "$ARCH" = "knl" ]; then
         $SDE -knl -- ./test_libblis.x > output.testsuite
     else
