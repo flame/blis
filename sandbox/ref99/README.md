@@ -12,9 +12,9 @@ when you think of implementing the gemm operation: a series of loops around
 an optimized (usually assembly-based) microkernel with some packing functions
 thrown in at various levels.)
 
-Why sandboxes? Sometimes, you just want to experiment with tweaks or changes
-to the gemm operation, but you want to do so in a simple environment rather
-than the somewhat obfuscated and highly macroized and refactored code of the
+Why sandboxes? Sometimes you want to experiment with tweaks or changes to
+the gemm operation, but you want to do so in a simple environment rather than
+the highly macroized and refactored (and somewhat obfuscated) code of the
 core framework (which, I will remind everyone, is highly macroized and
 refactored mostly so that all floating-point datatypes and all level-3
 operations are supported with minimal source code). By building a BLIS sandbox,
@@ -56,16 +56,16 @@ implementation.
 Like any decent sandbox, there are rules for playing here. Please follow these
 guidelines for the best sandbox developer experience.
 
-0. Don't bother worrying about makefiles. We've already taken care of the
+1. Don't bother worrying about makefiles. We've already taken care of the
 boring/annoying/headache-inducing build system stuff for you. :) By configuring
-BLIS with a sandbox enabled, `make` will scan your directory and compile all
-of its source code using similar compilation rules as were used for the rest
+BLIS with a sandbox enabled, `make` will scan your sandbox directory and compile
+all of its source code using similar compilation rules as were used for the rest
 of the framework. In addition, the compilation command line will automatically
 contain one `-I<includepath>` option for every subdirectory in your sandbox,
 so it doesn't matter where in your sandbox you place your header files. They
 will be found!
 
-1. Your sandbox must be written in C99 or C++11. If you write your sandbox in
+2. Your sandbox must be written in C99 or C++11. If you write your sandbox in
 C++11, you must use one of the BLIS-approved file extensions for your source
 files (`.cc`, `.cpp`, `.cxx`) and your header files (`.hh`, `.hpp`, `.hxx`).
 Note that `blis.h`
@@ -73,13 +73,13 @@ already contains all of its definitions inside of an `extern "C"` block, so
 you should be able to `#include "blis.h"` from your C++11 source code without
 any issues.
 
-2. All of your code to replace BLIS's default implementation of `bli_gemmnat()`
+3. All of your code to replace BLIS's default implementation of `bli_gemmnat()`
 should reside in the named sandbox directory, or some directory therein.
 (Obviously.) For example, this `README.md` file is located in the `ref99`
 sandbox, located in `sandbox/ref99`. All of the code associated with this
 sandbox will be contained within `sandbox/ref99`.
 
-3. The *only* header file that is required of your sandbox is `bli_sandbox.h`.
+4. The *only* header file that is required of your sandbox is `bli_sandbox.h`.
 It must be named `bli_sandbox.h` because `blis.h` will `#include` this file
 when the sandbox is enabled at configure-time. That said, you will probably
 want to keep the file empty. Why require a file that is supposed to be empty?
@@ -93,7 +93,7 @@ Usually, neither of these situations will require any of your local definitions
 since those definitions are only needed to define your sandbox implementation
 of `bli_gemmnat()`, and this function is already prototyped by BLIS.
 
-4. Your definition of `bli_gemmnat()` should be the *only* function you define
+5. Your definition of `bli_gemmnat()` should be the *only* function you define
 in your sandbox that begins with `bli_`. If you define other functions that
 begin with `bli_`, you risk a namespace collision with existing framework
 functions. To guarantee safety, please prefix your locally-defined sandbox
@@ -113,32 +113,51 @@ working with the existing BLIS infrastructure.
 For example, with a BLIS sandbox you **can** do the following kinds of things:
 - use a different gemm algorithmic partitioning path than the default Goto-like
 algorithm;
-- experiment with different implementations of `packm` kernels;
+- experiment with different implementations of `packm` (not just `packm`
+kernels, which can already be customized within each sub-configuration);
 - try inlining your functions manually;
 - pivot away from using `obj_t` objects at higher algorithmic level (such as
 immediately after calling `bli_gemmnat()`) to try to avoid some overhead;
+- create experimental implementations of new BLAS-like operations (provided
+that you also provide an implementation of `blis_gemmnat()`).
 
-You **cannot**, however, do the following kinds of things:
+You **cannot**, however, use a sandbox to do the following kinds of things:
 - define new datatypes (half-precision, quad-precision, short integer, etc.)
 and expect the rest of BLIS to "know" how to handle them;
-- use a sandbox to implement a different level-3 operation, such as Hermitian
-rank-k update;
-- define a new BLAS-like operation.
+- use a sandbox to replace the default implementation of a different level-3
+  operation, such as Hermitian rank-k update;
+- change the existing BLIS APIs.
 
 Another important limitation is the fact that the build system currently uses
 "framework `CFLAGS`" when compiling the sandbox source files. These are the same
-`CFLAGS` used when compiling general framework source code, which are likely
-more general-purpose than the `CFLAGS` used for, say, optimized kernels or even
-reference kernels. (To see precisely which flags are being employed for any
-given file, enable verbosity at compile-time via `make V=1`.) Compiling
-sandboxes with these more versatile `CFLAGS` compiler options means that we
-only need to compile one instance of each sandbox source file, even when
-targeting multiple configurations (for example, via `./configure x86_64`).
-However, it also means that sandboxes are not ideal for microkernels, as they
-usually need additional compiler flags not included in the set used for
-framework `CFLAGS` in order to yield the highest performance. If you have a
-new microkernel you would like to use within a sandbox, it's best to formally
-register it along with a new configuration, which will allow you to specify
+`CFLAGS` used when compiling general framework source code,
+```
+# Example framework CFLAGS used by 'haswell' sub-configuration
+-O3 -Wall -Wno-unused-function -Wfatal-errors -fPIC -std=c99
+-D_POSIX_C_SOURCE=200112L -I./include/haswell -I./frame/3/
+-I./frame/ind/ukernels/ -I./frame/1m/ -I./frame/1f/ -I./frame/1/
+-I./frame/include -DBLIS_VERSION_STRING=\"0.3.2-51\"
+```
+which are likely more general-purpose than the `CFLAGS` used for, say,
+optimized kernels or even reference kernels.
+```
+# Example optimized kernel CFLAGS used by 'haswell' sub-configuration
+-O3 -mavx2 -mfma -mfpmath=sse -march=core-avx2 -Wall -Wno-unused-function
+-Wfatal-errors -fPIC -std=c99 -D_POSIX_C_SOURCE=200112L -I./include/haswell
+-I./frame/3/ -I./frame/ind/ukernels/ -I./frame/1m/ -I./frame/1f/ -I./frame/1/
+-I./frame/include -DBLIS_VERSION_STRING=\"0.3.2-51\"
+```
+(To see precisely which flags are being employed for any given file, enable
+verbosity at compile-time via `make V=1`.) Compiling sandboxes with these more
+versatile `CFLAGS` compiler options means that we only need to compile one
+instance of each sandbox source file, even when targeting multiple
+configurations (for example, via `./configure x86_64`). However, it also means
+that sandboxes are not ideal for microkernels, as they sometimes need additional
+compiler flags not included in the set used for framework `CFLAGS` in order to
+yield the highest performance. If you have a new microkernel you would like to
+use within a sandbox, you can always prototype it within a sandbox. However,
+once it is stable and ready for use by others, it's best to formally register
+the kernel(s) along with a new configuration, which will allow you to specify
 kernel-specific compiler flags to be used when compiling your microkernel.
 Please see the
 [Configuration wiki](https://github.com/flame/blis/wiki/ConfigurationHowTo)
