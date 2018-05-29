@@ -35,9 +35,9 @@
 #ifndef BLIX_H
 #define BLIX_H
 
-// This header is #included by every file in the c99 sandbox, and so here
+// This header is #included by every file in the ref99 sandbox, and so here
 // we #include any headers that would define prototypes or types that are
-// needed by the c99 sandbox source code.
+// needed by the ref99 sandbox source code.
 
 #include "blx_gemm.h"
 

@@ -26,24 +26,25 @@ build system, testsuite, and toolbox of utility functions.
 To enable a sandbox at configure-time, you simply specify it as an option to
 `configure`. Either of the following usages are accepted:
 ```
-$ ./configure --enable-sandbox=c99 auto
-$ ./configure -s c99 auto
+$ ./configure --enable-sandbox=ref99 auto
+$ ./configure -s ref99 auto
 ```
-Here, we tell `configure` that we want to use the `c99` sandbox, which
-corresponds to a sub-directory of `sandbox` named `c99`. (Reminder: the `auto`
-is simply the configuration target and thus unrelated to sandboxes.) As
-configure runs, you should get output that includes lines similar to:
+Here, we tell `configure` that we want to use the `ref99` sandbox, which
+corresponds to a sub-directory of `sandbox` named `ref99`. (Reminder: the
+`auto` argument is simply the configuration target and thus unrelated to
+sandboxes.) As configure runs, you should get output that includes lines
+similar to:
 ```
 configure: configuring for alternate gemm implementation:
-configure:   sandbox/c99
+configure:   sandbox/ref99
 ```
 And when you build BLIS, the last files to be compiled will be the source
 code in the specified sandbox:
 ```
-Compiling obj/haswell/sandbox/c99/blx_gemm_front.o ('haswell' CFLAGS for sandboxes)
-Compiling obj/haswell/sandbox/c99/blx_gemm_int.o ('haswell' CFLAGS for sandboxes)
-Compiling obj/haswell/sandbox/c99/base/blx_blksz.o ('haswell' CFLAGS for sandboxes)
-Compiling obj/haswell/sandbox/c99/cntl/blx_gemm_cntl.o ('haswell' CFLAGS for sandboxes)
+Compiling obj/haswell/sandbox/ref99/blx_gemm_front.o ('haswell' CFLAGS for sandboxes)
+Compiling obj/haswell/sandbox/ref99/blx_gemm_int.o ('haswell' CFLAGS for sandboxes)
+Compiling obj/haswell/sandbox/ref99/base/blx_blksz.o ('haswell' CFLAGS for sandboxes)
+Compiling obj/haswell/sandbox/ref99/cntl/blx_gemm_cntl.o ('haswell' CFLAGS for sandboxes)
 ...
 ```
 That's it! After the BLIS library is built, it will contain your chosen
@@ -73,10 +74,10 @@ you should be able to `#include "blis.h"` from your C++11 source code without
 any issues.
 
 2. All of your code to replace BLIS's default implementation of `bli_gemmnat()`
-should reside in the sandbox directory, or some directory therein. (Obviously.)
-For example, this `README.md` file is located in the C99 sandbox located in
-`sandbox/c99`. Thus, all of the code associated with this sandbox will be
-contained within `sandbox/c99`.
+should reside in the named sandbox directory, or some directory therein.
+(Obviously.) For example, this `README.md` file is located in the `ref99`
+sandbox, located in `sandbox/ref99`. All of the code associated with this
+sandbox will be contained within `sandbox/ref99`.
 
 3. The *only* header file that is required of your sandbox is `bli_sandbox.h`.
 It must be named `bli_sandbox.h` because `blis.h` will `#include` this file
@@ -96,7 +97,7 @@ of `bli_gemmnat()`, and this function is already prototyped by BLIS.
 in your sandbox that begins with `bli_`. If you define other functions that
 begin with `bli_`, you risk a namespace collision with existing framework
 functions. To guarantee safety, please prefix your locally-defined sandbox
-functions with another prefix. Here, in the C99 sandbox, we use the prefix
+functions with another prefix. Here, in the `ref99` sandbox, we use the prefix
 `blx_`. (The `x` is for sandbox. Or experimental. Whatever, it doesn't matter.)
 Also, please avoid the prefix `bla_` since that prefix is also used in BLIS for
 BLAS compatibility functions.
