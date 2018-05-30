@@ -415,7 +415,7 @@ void PASTEMAC(ch,varname) \
 			/* Loop over the m dimension (MR rows at a time). */ \
 			for ( i = 0; i < m_iter; ++i ) \
 			{ \
-				if( trsm_my_iter( i, thread ) ){ \
+				if( bli_trsm_my_iter( i, thread ) ){ \
 \
 				ctype* restrict a10; \
 				ctype* restrict a11; \
@@ -501,7 +501,7 @@ void PASTEMAC(ch,varname) \
 			/* Loop over the m dimension (MR rows at a time). */ \
 			for ( i = 0; i < m_iter; ++i ) \
 			{ \
-				if( trsm_my_iter( i, thread ) ){ \
+				if( bli_trsm_my_iter( i, thread ) ){ \
 \
 				ctype* restrict a2; \
 \

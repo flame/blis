@@ -322,7 +322,7 @@ void PASTEMAC(ch,varname) \
 	/* Loop over the n dimension (NR columns at a time). */ \
 	for ( j = 0; j < n_iter; ++j ) \
 	{ \
-		if ( trmm_l_jr_my_iter( j, jr_thread ) ) { \
+		if ( bli_trmm_l_jr_my_iter( j, jr_thread ) ) { \
 \
 		ctype* restrict a1; \
 		ctype* restrict c11; \
@@ -364,7 +364,7 @@ void PASTEMAC(ch,varname) \
 				is_a_cur += ( bli_is_odd( is_a_cur ) ? 1 : 0 ); \
 				ps_a_cur  = ( is_a_cur * ss_a_num ) / ss_a_den; \
 \
-				if ( trmm_l_ir_my_iter( i, ir_thread ) ) { \
+				if ( bli_trmm_l_ir_my_iter( i, ir_thread ) ) { \
 \
 				b1_i = b1 + ( off_a1011 * PACKNR ) / off_scl; \
 \
@@ -434,7 +434,7 @@ void PASTEMAC(ch,varname) \
 			} \
 			else if ( bli_is_strictly_below_diag_n( diagoffa_i, MR, k ) ) \
 			{ \
-				if ( trmm_l_ir_my_iter( i, ir_thread ) ) { \
+				if ( bli_trmm_l_ir_my_iter( i, ir_thread ) ) { \
 \
 				ctype* restrict a2; \
 \

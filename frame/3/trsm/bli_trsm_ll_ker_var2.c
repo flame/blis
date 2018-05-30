@@ -340,7 +340,7 @@ void PASTEMAC(ch,varname) \
 	/* Loop over the n dimension (NR columns at a time). */ \
 	for ( j = 0; j < n_iter; ++j ) \
 	{ \
-		if( trsm_my_iter( j, thread ) ) { \
+		if( bli_trsm_my_iter( j, thread ) ) { \
 \
 		ctype* restrict a1; \
 		ctype* restrict c11; \

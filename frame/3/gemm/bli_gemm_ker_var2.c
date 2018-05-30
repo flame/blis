@@ -295,11 +295,11 @@ void PASTEMAC(ch,varname) \
 			m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left ); \
 \
 			/* Compute the addresses of the next panels of A and B. */ \
-			a2 = gemm_get_next_a_micropanel( caucus, a1, rstep_a ); \
+			a2 = bli_gemm_get_next_a_upanel( caucus, a1, rstep_a ); \
 			if ( bli_is_last_iter( i, m_iter, ir_thread_id, ir_num_threads ) ) \
 			{ \
 				a2 = a_cast; \
-				b2 = gemm_get_next_b_micropanel( thread, b1, cstep_b ); \
+				b2 = bli_gemm_get_next_b_upanel( thread, b1, cstep_b ); \
 				if ( bli_is_last_iter( j, n_iter, jr_thread_id, jr_num_threads ) ) \
 					b2 = b_cast; \
 			} \

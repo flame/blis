@@ -361,7 +361,7 @@ void PASTEMAC(ch,varname) \
 			is_b_cur += ( bli_is_odd( is_b_cur ) ? 1 : 0 ); \
 			ps_b_cur  = ( is_b_cur * ss_b_num ) / ss_b_den; \
 \
-			if ( trmm_r_jr_my_iter( j, jr_thread ) ) { \
+			if ( bli_trmm_r_jr_my_iter( j, jr_thread ) ) { \
 \
 			/* Save the 4m1/3m1 imaginary stride of B to the auxinfo_t
 			   object. */ \
@@ -370,7 +370,7 @@ void PASTEMAC(ch,varname) \
 			/* Loop over the m dimension (MR rows at a time). */ \
 			for ( i = 0; i < m_iter; ++i ) \
 			{ \
-				if ( trmm_r_ir_my_iter( i, ir_thread ) ) { \
+				if ( bli_trmm_r_ir_my_iter( i, ir_thread ) ) { \
 \
 				ctype* restrict a1_i; \
 				ctype* restrict a2; \
@@ -446,7 +446,7 @@ void PASTEMAC(ch,varname) \
 		} \
 		else if ( bli_is_strictly_above_diag_n( diagoffb_j, k, NR ) ) \
 		{ \
-			if ( trmm_r_jr_my_iter( j, jr_thread ) ) { \
+			if ( bli_trmm_r_jr_my_iter( j, jr_thread ) ) { \
 \
 			/* Save the 4m1/3m1 imaginary stride of B to the auxinfo_t
 			   object. */ \
@@ -455,7 +455,7 @@ void PASTEMAC(ch,varname) \
 			/* Loop over the m dimension (MR rows at a time). */ \
 			for ( i = 0; i < m_iter; ++i ) \
 			{ \
-				if ( trmm_r_ir_my_iter( i, ir_thread ) ) { \
+				if ( bli_trmm_r_ir_my_iter( i, ir_thread ) ) { \
 \
 				ctype* restrict a2; \
 \
