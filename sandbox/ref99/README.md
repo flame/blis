@@ -112,21 +112,23 @@ working with the existing BLIS infrastructure.
 
 For example, with a BLIS sandbox you **can** do the following kinds of things:
 - use a different gemm algorithmic partitioning path than the default Goto-like
-algorithm;
+  algorithm;
 - experiment with different implementations of `packm` (not just `packm`
-kernels, which can already be customized within each sub-configuration);
+  kernels, which can already be customized within each sub-configuration);
 - try inlining your functions manually;
 - pivot away from using `obj_t` objects at higher algorithmic level (such as
-immediately after calling `bli_gemmnat()`) to try to avoid some overhead;
+  immediately after calling `bli_gemmnat()`) to try to avoid some overhead;
 - create experimental implementations of new BLAS-like operations (provided
-that you also provide an implementation of `blis_gemmnat()`).
+  that you also provide an implementation of `blis_gemmnat()`).
 
 You **cannot**, however, use a sandbox to do the following kinds of things:
 - define new datatypes (half-precision, quad-precision, short integer, etc.)
-and expect the rest of BLIS to "know" how to handle them;
+  and expect the rest of BLIS to "know" how to handle them;
 - use a sandbox to replace the default implementation of a different level-3
   operation, such as Hermitian rank-k update;
-- change the existing BLIS APIs.
+- change the existing BLIS APIs;
+- remove support for one or more BLIS datatypes (to cut down on library size,
+  for example).
 
 Another important limitation is the fact that the build system currently uses
 "framework `CFLAGS`" when compiling the sandbox source files. These are the same

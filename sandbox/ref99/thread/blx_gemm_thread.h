@@ -32,9 +32,6 @@
 
 */
 
-#ifndef BLIS_GEMM_THREAD_H
-#define BLIS_GEMM_THREAD_H
-
 // gemm internal function type
 typedef void (*gemmint_t)
      (
@@ -57,4 +54,3 @@ void blx_gemm_thread
        cntl_t*   cntl
      );
 
-#endif

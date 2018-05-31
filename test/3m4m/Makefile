@@ -214,22 +214,45 @@ PDEF_MT  := -DP_BEGIN=200 \
 # --- Targets/rules ------------------------------------------------------------
 #
 
-all-st:      blis-st openblas-st mkl-st
-all-mt:      blis-mt openblas-mt mkl-mt
+all:          all-st all-mt
+blis:         blis-st blis-mt
+blis-nat:     blis-nat-st blis-nat-mt
+openblas:     openblas-st openblas-mt
+mkl:          mkl-st mkl-mt
 
-blis-st:     blis-gemm-st
-blis-mt:     blis-gemm-mt
+all-st:       blis-st openblas-st mkl-st
+all-mt:       blis-mt openblas-mt mkl-mt
 
-openblas-st: openblas-gemm-st
-openblas-mt: openblas-gemm-mt
+blis-st:      blis-gemm-st
+blis-mt:      blis-gemm-mt
 
-mkl-st:      mkl-gemm-st
-mkl-mt:      mkl-gemm-mt
+blis-nat-st:  blis-gemm-nat-st
+blis-nat-mt:  blis-gemm-nat-mt
 
-blis-gemm-st: \
+openblas-st:  openblas-gemm-st
+openblas-mt:  openblas-gemm-mt
+
+mkl-st:       mkl-gemm-st
+mkl-mt:       mkl-gemm-mt
+
+blis-gemm-st: blis-gemm-nat-st \
+              blis-gemm-ind-st
+blis-gemm-mt: blis-gemm-nat-mt \
+              blis-gemm-ind-mt
+
+blis-gemm-nat-st: \
       test_sgemm_asm_blis_st.x \
       test_dgemm_asm_blis_st.x \
-      \
+      test_cgemm_asm_blis_st.x \
+      test_zgemm_asm_blis_st.x
+
+blis-gemm-nat-mt: \
+      test_sgemm_asm_blis_mt.x \
+      test_dgemm_asm_blis_mt.x \
+      test_cgemm_asm_blis_mt.x \
+      test_zgemm_asm_blis_mt.x
+
+blis-gemm-ind-st: \
       test_cgemm_3mhw_blis_st.x \
       test_zgemm_3mhw_blis_st.x \
       test_cgemm_3m1_blis_st.x \
@@ -241,14 +264,9 @@ blis-gemm-st: \
       test_cgemm_4m1a_blis_st.x \
       test_zgemm_4m1a_blis_st.x \
       test_cgemm_1m_blis_st.x \
-      test_zgemm_1m_blis_st.x \
-      test_cgemm_asm_blis_st.x \
-      test_zgemm_asm_blis_st.x
+      test_zgemm_1m_blis_st.x
 
-blis-gemm-mt: \
-      test_sgemm_asm_blis_mt.x \
-      test_dgemm_asm_blis_mt.x \
-      \
+blis-gemm-ind-mt: \
       test_cgemm_3mhw_blis_mt.x \
       test_zgemm_3mhw_blis_mt.x \
       test_cgemm_3m1_blis_mt.x \
@@ -260,9 +278,7 @@ blis-gemm-mt: \
       test_cgemm_4m1a_blis_mt.x \
       test_zgemm_4m1a_blis_mt.x \
       test_cgemm_1m_blis_mt.x \
-      test_zgemm_1m_blis_mt.x \
-      test_cgemm_asm_blis_mt.x \
-      test_zgemm_asm_blis_mt.x
+      test_zgemm_1m_blis_mt.x
 
 openblas-gemm-st: \
       test_sgemm_openblas_st.x \
