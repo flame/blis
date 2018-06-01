@@ -988,7 +988,7 @@ void bli_cntx_set_thrloop_from_env
 			);
 		}
 	}
-	else // if ( l3_op == BLIS_TRSM )
+	else // if ( l3_op == BLIS_GEMM || l3_op == BLIS_HERK )
 	{
 		bli_cntx_set_thrloop
 		(
