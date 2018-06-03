@@ -674,12 +674,15 @@ void  bli_cntx_set_l1f_kers( dim_t n_kers, ... );
 void  bli_cntx_set_l1v_kers( dim_t n_kers, ... );
 void  bli_cntx_set_packm_kers( dim_t n_kers, ... );
 
-void  bli_cntx_set_thrloop_from_env( opid_t  l3_op,
-                                     side_t  side,
-                                     cntx_t* cntx,
-                                     dim_t m,
-                                     dim_t n,
-                                     dim_t k );
+void  bli_cntx_set_thrloop_from_env
+     (
+       opid_t  l3_op,
+       side_t  side,
+       dim_t   m,
+       dim_t   n,
+       dim_t   k,
+       cntx_t* cntx
+     );
 
 void  bli_cntx_print( cntx_t* cntx );
 

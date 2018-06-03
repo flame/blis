@@ -869,10 +869,10 @@ void bli_cntx_set_thrloop_from_env
      (
        opid_t  l3_op,
        side_t  side,
-       cntx_t* cntx,
        dim_t   m,
        dim_t   n,
-       dim_t   k
+       dim_t   k,
+       cntx_t* cntx
      )
 {
 	dim_t jc, pc, ic, jr, ir;
@@ -988,7 +988,7 @@ void bli_cntx_set_thrloop_from_env
 			);
 		}
 	}
-	else // if ( l3_op == BLIS_GEMM || l3_op == BLIS_HERK )
+	else // any other level-3 operation besides trmm/trsm
 	{
 		bli_cntx_set_thrloop
 		(

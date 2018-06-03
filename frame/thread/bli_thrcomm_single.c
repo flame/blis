@@ -94,6 +94,12 @@ void bli_l3_thread_decorator
 	cntl_t*    cntl_use;
 	thrinfo_t* thread;
 
+	// NOTE: Unlike with the _openmp.c and _pthreads.c variants, we don't
+	// need to alias objects for A, B, and C since they were already aliased
+	// in bli_*_front(). (We only needed thread-local copies so each could
+	// safely reset their internal (beta) scalars on c after the first
+	// iteration of the pc (kc) loop.)
+
 	// Create a default control tree for the operation, if needed.
 	bli_l3_cntl_create_if( family, a, b, c, cntl, &cntl_use );
 

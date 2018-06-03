@@ -129,10 +129,34 @@ void bli_trmm3_front
 	bli_obj_set_as_root( &c_local );
 
 	// Record the threading for each level within the context.
-	bli_cntx_set_thrloop_from_env( BLIS_TRMM3, side, cntx,
-                                   bli_obj_length( &c_local ),
-                                   bli_obj_width( &c_local ),
-                                   bli_obj_width( &a_local ) );
+	bli_cntx_set_thrloop_from_env
+	(
+	  BLIS_TRMM3,
+	  side,
+	  bli_obj_length( &c_local ),
+	  bli_obj_width( &c_local ),
+	  bli_obj_width( &a_local ),
+	  cntx
+	);
+
+	// A sort of hack for communicating the desired pach schemas for A and B
+	// to bli_gemm_cntl_create() (via bli_l3_thread_decorator() and
+	// bli_l3_cntl_create_if()). This allows us to access the schemas from
+	// the control tree, which hopefully reduces some confusion, particularly
+	// in bli_packm_init().
+	if ( bli_cntx_method( cntx ) == BLIS_NAT )
+	{
+		bli_obj_set_pack_schema( BLIS_PACKED_ROW_PANELS, &a_local );
+		bli_obj_set_pack_schema( BLIS_PACKED_COL_PANELS, &b_local );
+	}
+	else // if ( bli_cntx_method( cntx ) != BLIS_NAT )
+	{
+		pack_t schema_a = bli_cntx_schema_a_block( cntx );
+		pack_t schema_b = bli_cntx_schema_b_panel( cntx );
+
+		bli_obj_set_pack_schema( schema_a, &a_local );
+		bli_obj_set_pack_schema( schema_b, &b_local );
+	}
 
 	// Invoke the internal back-end.
 	bli_l3_thread_decorator
