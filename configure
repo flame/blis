@@ -291,16 +291,15 @@ pass_config_kernel_registries()
 	passnum="$2"
 
 	# Initialize a list of indirect blacklisted configurations for the
-	# current iteration. These are configurations that are invalidated
-	# by the removal of blacklisted configurations. For example, if
-	# haswell is registered as needing the 'haswell' and 'zen' kernel
-	# sets:
+	# current iteration. These are configurations that are invalidated by
+	# the removal of blacklisted configurations. For example, if haswell
+	# is registered as needing the 'haswell' and 'zen' kernel sets:
 	#
 	#    haswell: haswell/haswell/zen
 	#
-	# and 'zen' was blacklisted because of the compiler version, then
-	# the 'haswell' configuration must be omitted from the registry,
-	# as it no longer has all of the kernel sets it was expecting.
+	# and 'zen' was blacklisted because of the compiler version, then the
+	# 'haswell' configuration must be omitted from the registry, as it no
+	# longer has all of the kernel sets it was expecting.
 	if [ "${passnum}" == "0" ]; then
 		indirect_blist=""
 	fi
@@ -309,6 +308,22 @@ pass_config_kernel_registries()
 	# NOTE: During pass 0, all_blist is equal to config_blist, since
 	# indirect_blist is still empty.
 	all_blist="${config_blist} ${indirect_blist}"
+
+	# Disable support for indirect blacklisting by returning early during
+	# pass 0. See issue #214 for details [1]. Basically, I realized that
+	# indirect blacklisting is not needed in the use case that I envisioned
+	# in the real-life example above. If a subconfiguration such as haswell
+	# is defined to require the zen kernel set, it implies that the zen
+	# kernels can be compiled with haswell compiler flags. That is, just
+	# because the zen subconfig (and its compiler flags) is blacklisted
+	# does not mean that the haswell subconfig cannot compile the zen
+	# kernels with haswell-specific flags.
+	#
+	# [1] https://github.com/flame/blis/issues/214
+	#
+	if [ "${passnum}" == "0" ]; then
+		return
+	fi
 
 	while read -r line
 	do
@@ -1117,7 +1132,8 @@ check_compiler()
 	# [1] While gcc 6.0 or newer is needed for zen support (-march=znver1),
 	#     we relax this compiler version constraint a bit by targeting bdver4
 	#     and then disabling the instruction sets that were removed in the
-	#     transition from bdver4 to znver1.
+	#     transition from bdver4 to znver1. (See config/zen/make_defs.mk for
+	#     the specific compiler flags used.)
 	# [2] https://github.com/devinamatthews/tblis/
 	#
 
@@ -1756,6 +1772,9 @@ main()
 	echo "done."
 
 	# Report if additional configurations needed to be blacklisted.
+	# NOTE: This branch should never execute so long as indirect blacklisting
+	# is disabled. See comment regarding issue #214 in the definition of
+	# pass_config_kernel_registries().
 	if [ -n "${indirect_blist}" ]; then
 		echo "${script_name}: needed to indirectly blacklist additional configurations:"
 		echo "${script_name}:   ${indirect_blist}"
