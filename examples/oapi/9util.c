@@ -147,7 +147,7 @@ int main( int argc, char** argv )
 	bli_setm( &BLIS_MINUS_ONE, &c );
 
 	// Set the structure and uplo of 'c'.
-	bli_obj_set_struc( BLIS_SYMMETRIC, &c )
+	bli_obj_set_struc( BLIS_SYMMETRIC, &c );
 	bli_obj_set_uplo( BLIS_LOWER, &c );
 
 	// Randomize the lower triangle of 'c'.
@@ -170,7 +170,7 @@ int main( int argc, char** argv )
 	// Initialize all of 'd' to -1.0 to simulate junk values.
 	bli_setm( &BLIS_MINUS_ONE, &d );
 
-	bli_obj_set_struc( BLIS_HERMITIAN, &d )
+	bli_obj_set_struc( BLIS_HERMITIAN, &d );
 	bli_obj_set_uplo( BLIS_LOWER, &d );
 
 	// Randomize the lower triangle of 'd'.
@@ -185,7 +185,7 @@ int main( int argc, char** argv )
 	bli_printm( "d (after mkherm):", &d, "%4.1f", "" );
 
 	// Set the structure and uplo of 'd'.
-	bli_obj_set_struc( BLIS_HERMITIAN, &d )
+	bli_obj_set_struc( BLIS_HERMITIAN, &d );
 	bli_obj_set_uplo( BLIS_LOWER, &d );
 
 	//
@@ -203,7 +203,7 @@ int main( int argc, char** argv )
 	bli_setm( &BLIS_MINUS_ONE, &e );
 
 	// Set the structure and uplo of 'e'.
-	bli_obj_set_struc( BLIS_SYMMETRIC, &e )
+	bli_obj_set_struc( BLIS_SYMMETRIC, &e );
 	bli_obj_set_uplo( BLIS_UPPER, &e );
 
 	// Randomize the upper triangle of 'e'.
@@ -221,7 +221,7 @@ int main( int argc, char** argv )
 	bli_setm( &BLIS_MINUS_ONE, &f );
 
 	// Set the structure and uplo of 'f'.
-	bli_obj_set_struc( BLIS_HERMITIAN, &f )
+	bli_obj_set_struc( BLIS_HERMITIAN, &f );
 	bli_obj_set_uplo( BLIS_UPPER, &f );
 
 	// Randomize the upper triangle of 'f'.
@@ -249,7 +249,7 @@ int main( int argc, char** argv )
 	bli_setm( &BLIS_MINUS_ONE, &g );
 
 	// Set the structure and uplo of 'g'.
-	bli_obj_set_struc( BLIS_TRIANGULAR, &g )
+	bli_obj_set_struc( BLIS_TRIANGULAR, &g );
 	bli_obj_set_uplo( BLIS_LOWER, &g );
 
 	// Randomize the lower triangle of 'g'.
