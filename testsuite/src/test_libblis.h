@@ -86,8 +86,6 @@
 
 #define SECONDS_TO_SLEEP             3
 
-#define DISABLE_ALL                  0
-#define SPECIFY                      1
 #define DISABLE                      0
 #define ENABLE                       1
 #define ENABLE_ONLY                  2
@@ -187,7 +185,9 @@ typedef struct
 
 	opid_t        opid;
 	int           op_switch;
+#if 0
 	int           front_seq;
+#endif
 	unsigned int  n_dims;
 	dimset_t      dimset;
 	int           dim_spec[ MAX_NUM_DIMENSIONS ];
@@ -430,6 +430,14 @@ void libblis_test_parse_command_line( int argc, char** argv );
 void libblis_test_check_empty_problem( obj_t* c, double* perf, double* resid );
 int  libblis_test_op_is_disabled( test_op_t* op );
 
+int libblis_test_op_is_done( test_op_t* op );
+int libblis_test_util_is_disabled( test_op_t* op );
+int libblis_test_l1v_is_disabled( test_op_t* op );
+int libblis_test_l1m_is_disabled( test_op_t* op );
+int libblis_test_l1f_is_disabled( test_op_t* op );
+int libblis_test_l2_is_disabled( test_op_t* op );
+int libblis_test_l3ukr_is_disabled( test_op_t* op );
+int libblis_test_l3_is_disabled( test_op_t* op );
 
 //
 // --- Test module headers -----------------------------------------------------
