@@ -118,8 +118,9 @@ MK_ENABLE_CBLAS   := @enable_cblas@
 # Whether libblis will depend on libmemkind for certain memory allocations.
 MK_ENABLE_MEMKIND := @enable_memkind@
 
-# Whether an alternative gemm implementation will be compiled and included
-# in BLIS.
+# The name of a sandbox defining an alternative gemm implementation. If empty,
+# no sandbox will be used and the conventional gemm implementation will remain
+# enabled.
 SANDBOX           := @sandbox@
 
 # end of ifndef CONFIG_MK_INCLUDED conditional block

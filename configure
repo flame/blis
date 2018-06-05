@@ -2301,9 +2301,10 @@ main()
 	fi
 	if [ "x${has_memkind}" = "xyes" ]; then
 		# If no explicit option was given for libmemkind one way or the other,
-		# default to the value previously returned by has_libmemkind().
+		# we use the value returned previously by has_libmemkind() to determine
+		# the default.
 		if [ "x${enable_memkind}" = "x" ]; then
-			enable_memkind=${has_memkind}
+			enable_memkind="yes"
 		fi
 		echo "${script_name}: libmemkind found; default is to enable use."
 		if [ "x${enable_memkind}" = "xyes" ]; then
@@ -2318,6 +2319,7 @@ main()
 		if [ "x${enable_memkind}" = "xyes" ]; then
 			echo "${script_name}: cannot honor explicit request to enable libmemkind."
 		fi
+		enable_memkind="no"
 		enable_memkind_01=0
 	fi
 	if [ "x${enable_blas}" = "xyes" ]; then

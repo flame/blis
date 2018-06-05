@@ -648,7 +648,10 @@ PARENT_PATH        := $(DIST_PATH)
 # -- sandbox --
 
 # Construct paths to each sandbox. (At present, there can be only one.)
-SANDBOX_PATHS      := := $(addprefix $(SANDBOX_PATH)/, $(SANDBOX))
+# NOTE: If $(SANDBOX) is empty (because no sandbox was enabled at configure-
+# time) then $(SANDBOX_PATHS) will also be empty, which will cause no
+# fragments to be included.
+SANDBOX_PATHS      := $(addprefix $(SANDBOX_PATH)/, $(SANDBOX))
 
 # This variable is used by the include statements as they recursively include
 # one another. For the 'sandbox' directory, we initialize it to that directory
@@ -657,7 +660,6 @@ PARENT_PATH        := $(DIST_PATH)/$(SANDBOX_DIR)
 
 # Recursively include the makefile fragments in the sandbox sub-directory.
 -include $(addsuffix /$(FRAGMENT_MK), $(SANDBOX_PATHS))
-
 
 # Create a list of the makefile fragments using the variable into which each
 # of the above include statements accumulated their directory paths.
