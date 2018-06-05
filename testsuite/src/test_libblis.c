@@ -498,10 +498,6 @@ void libblis_test_read_op_info( test_ops_t*  ops,
 		ops->indiv_over = TRUE;
 	}
 
-	// Read the line for the sequential front-end/micro-kernel interface.
-	libblis_test_read_next_line( buffer, input_stream );
-	sscanf( buffer, "%d ", &(op->front_seq) );
-
 	op->n_dims = libblis_test_get_n_dims_from_dimset( dimset );
 	op->dimset = dimset;
 
@@ -569,12 +565,6 @@ void libblis_test_read_op_info( test_ops_t*  ops,
 
 	// Initialize the parent pointer.
 	op->ops = ops;
-
-	// Disable operation if requested.
-	if ( op->op_switch == DISABLE_ALL )
-	{
-		op->front_seq = DISABLE;
-	}
 }
 
 
@@ -975,9 +965,7 @@ void libblis_test_output_op_struct( FILE* os, test_op_t* op, char* op_str )
 {
 	dimset_t dimset = op->dimset;
 
-	libblis_test_fprintf_c( os, "test %s seq front-end?    %d\n", op_str, op->front_seq );
-
-	if (      dimset == BLIS_TEST_DIMS_MNK )
+	if      ( dimset == BLIS_TEST_DIMS_MNK )
 	{
 		libblis_test_fprintf_c( os, "%s m n k                  %d %d %d\n", op_str,
 		                                op->dim_spec[0], op->dim_spec[1], op->dim_spec[2] );
@@ -2434,7 +2422,7 @@ int libblis_test_op_is_disabled( test_op_t* op )
 	// If there was at least one individual override, then an op test is
 	// disabled if it is NOT equal to ENABLE_ONLY. If there were no
 	// individual overrides, then an op test is disabled if it is equal
-	// to DISABLE_ALL.
+	// to DISABLE.
 	if ( op->ops->indiv_over == TRUE )
 	{
 		if ( op->op_switch != ENABLE_ONLY ) r_val = TRUE;
@@ -2442,9 +2430,56 @@ int libblis_test_op_is_disabled( test_op_t* op )
 	}
 	else // if ( op->ops->indiv_over == FALSE )
 	{
-		if ( op->op_switch == DISABLE_ALL ) r_val = TRUE;
-		else                                r_val = FALSE;
+		if ( op->op_switch == DISABLE ) r_val = TRUE;
+		else                            r_val = FALSE;
 	}
 
 	return r_val;
+}
+
+int libblis_test_op_is_done( test_op_t* op )
+{
+	return op->test_done;
+}
+
+int libblis_test_util_is_disabled( test_op_t* op )
+{
+	if ( op->ops->util_over == DISABLE ) return TRUE;
+	else                                 return FALSE;
+}
+
+int libblis_test_l1v_is_disabled( test_op_t* op )
+{
+	if ( op->ops->l1v_over == DISABLE ) return TRUE;
+	else                                return FALSE;
+}
+
+int libblis_test_l1m_is_disabled( test_op_t* op )
+{
+	if ( op->ops->l1m_over == DISABLE ) return TRUE;
+	else                                return FALSE;
+}
+
+int libblis_test_l1f_is_disabled( test_op_t* op )
+{
+	if ( op->ops->l1f_over == DISABLE ) return TRUE;
+	else                                return FALSE;
+}
+
+int libblis_test_l2_is_disabled( test_op_t* op )
+{
+	if ( op->ops->l2_over == DISABLE ) return TRUE;
+	else                               return FALSE;
+}
+
+int libblis_test_l3ukr_is_disabled( test_op_t* op )
+{
+	if ( op->ops->l3ukr_over == DISABLE ) return TRUE;
+	else                                  return FALSE;
+}
+
+int libblis_test_l3_is_disabled( test_op_t* op )
+{
+	if ( op->ops->l3_over == DISABLE ) return TRUE;
+	else                               return FALSE;
 }

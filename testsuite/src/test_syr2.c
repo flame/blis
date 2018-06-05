@@ -113,17 +113,17 @@ void libblis_test_syr2
 {
 
 	// Return early if this test has already been done.
-	if ( op->test_done == TRUE ) return;
+	if ( libblis_test_op_is_done( op ) ) return;
 
 	// Return early if operation is disabled.
 	if ( libblis_test_op_is_disabled( op ) ||
-	     op->ops->l2_over == DISABLE_ALL ) return;
+	     libblis_test_l2_is_disabled( op ) ) return;
 
 	// Call dependencies first.
 	if ( TRUE ) libblis_test_syr2_deps( params, op );
 
 	// Execute the test driver for each implementation requested.
-	if ( op->front_seq == ENABLE )
+	//if ( op->front_seq == ENABLE )
 	{
 		libblis_test_op_driver( params,
 		                        op,
