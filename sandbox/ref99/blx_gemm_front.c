@@ -97,10 +97,15 @@ void blx_gemm_front
 	}
 
 	// Record the threading for each level within the context.
-	bli_cntx_set_thrloop_from_env( BLIS_GEMM, BLIS_LEFT, cntx,
-	                               bli_obj_length( &c_local ),
-	                               bli_obj_width( &c_local ),
-	                               bli_obj_width( &a_local ) );
+	bli_cntx_set_thrloop_from_env
+	(
+	  BLIS_GEMM,
+	  BLIS_LEFT, // ignored for gemm
+	  bli_obj_length( &c_local ),
+	  bli_obj_width( &c_local ),
+	  bli_obj_width( &a_local ),
+	  cntx
+	);
 
 	// Invoke the internal back-end via the thread handler.
 	blx_gemm_thread
