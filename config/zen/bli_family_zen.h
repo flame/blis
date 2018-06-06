@@ -44,13 +44,15 @@
 
 #define BLIS_ENABLE_ZEN_BLOCK_SIZES
 #define BLIS_ENABLE_SMALL_MATRIX
+#define BLIS_ENABLE_SMALL_MATRIX_TRSM
 
 // This will select the threshold below which small matrix code will be called.
 #define BLIS_SMALL_MATRIX_THRES        700
 #define BLIS_SMALL_M_RECT_MATRIX_THRES 160
 #define BLIS_SMALL_K_RECT_MATRIX_THRES 128
 
-
+#define BLIS_SMALL_MATRIX_THRES_TRSM   32768 //128(128+128) => m*(m+n)
+#define BLIS_SMALL_MATRIX_A_THRES_TRSM	128
 
 //#endif
 
