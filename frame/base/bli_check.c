@@ -342,6 +342,40 @@ err_t bli_check_real_valued_object( obj_t* a )
 	return e_val;
 }
 
+err_t bli_check_consistent_precisions( num_t dt_a, num_t dt_b )
+{
+	err_t e_val = BLIS_SUCCESS;
+
+	if ( dt_a == BLIS_FLOAT )
+	{
+		if ( dt_b != BLIS_FLOAT &&
+		     dt_b != BLIS_SCOMPLEX )
+			e_val = BLIS_INCONSISTENT_PRECISIONS;
+	}
+	else if ( dt_a == BLIS_DOUBLE )
+	{
+		if ( dt_b != BLIS_DOUBLE &&
+		     dt_b != BLIS_DCOMPLEX )
+			e_val = BLIS_INCONSISTENT_PRECISIONS;
+	}
+
+	return e_val;
+}
+
+err_t bli_check_consistent_object_precisions( obj_t* a, obj_t* b )
+{
+	err_t e_val;
+	num_t dt_a;
+	num_t dt_b;
+
+	dt_a = bli_obj_dt( a );
+	dt_b = bli_obj_dt( b );
+
+	e_val = bli_check_consistent_precisions( dt_a, dt_b );
+
+	return e_val;
+}
+
 // -- Dimension-related checks -------------------------------------------------
 
 err_t bli_check_conformal_dims( obj_t* a, obj_t* b )

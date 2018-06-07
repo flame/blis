@@ -122,6 +122,7 @@ extern "C" {
 #include "bli_cpuid.h"
 #include "bli_string.h"
 #include "bli_setgetij.h"
+#include "bli_proj.h"
 
 
 // -- Level-0 operations --

@@ -90,6 +90,8 @@ void bli_error_init_msgs( void )
 	         "Expected second datatype to be real projection of first." );
 	sprintf( bli_error_string_for_code(BLIS_EXPECTED_REAL_VALUED_OBJECT),
 	         "Expected real-valued object (ie: if complex, imaginary component equals zero)." );
+	sprintf( bli_error_string_for_code(BLIS_INCONSISTENT_PRECISIONS),
+	         "Expected consistent precisions (both single or both double)." );
 
 	sprintf( bli_error_string_for_code(BLIS_NONCONFORMAL_DIMENSIONS),
 	         "Encountered non-conformal dimensions between objects." );

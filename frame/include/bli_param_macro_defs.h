@@ -119,7 +119,7 @@ static num_t bli_dt_proj_to_real( num_t dt )
 
 static num_t bli_dt_proj_to_complex( num_t dt )
 {
-	return ( dt & BLIS_BITVAL_COMPLEX );
+	return ( dt | BLIS_BITVAL_COMPLEX );
 }
 
 
