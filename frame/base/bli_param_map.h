@@ -57,6 +57,7 @@ void bli_param_map_char_to_blis_uplo( char uplo, uplo_t* blis_uplo );
 void bli_param_map_char_to_blis_trans( char trans, trans_t* blis_trans );
 void bli_param_map_char_to_blis_conj( char conj, conj_t* blis_conj );
 void bli_param_map_char_to_blis_diag( char diag, diag_t* blis_diag );
+void bli_param_map_char_to_blis_dt( char dt, num_t* blis_dt );
 
 
 // --- BLIS to BLIS char mappings ----------------------------------------------
@@ -66,4 +67,5 @@ void bli_param_map_blis_to_char_uplo( uplo_t blis_uplo, char* uplo );
 void bli_param_map_blis_to_char_trans( trans_t blis_trans, char* trans );
 void bli_param_map_blis_to_char_conj( conj_t blis_conj, char* conj );
 void bli_param_map_blis_to_char_diag( diag_t blis_diag, char* diag );
+void bli_param_map_blis_to_char_dt( num_t blis_dt, char* dt );
 
