@@ -39,3 +39,9 @@ void bli_projm
        obj_t* a,
        obj_t* b
      );
+
+void bli_projv
+     (
+       obj_t* x,
+       obj_t* y
+     );

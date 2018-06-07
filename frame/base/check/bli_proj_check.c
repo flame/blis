@@ -73,3 +73,42 @@ void bli_projm_check
 	bli_check_error_code( e_val );
 }
 
+void bli_projv_check
+     (
+       obj_t* x,
+       obj_t* y
+     )
+{
+	err_t e_val;
+
+	// Check object datatypes.
+
+	e_val = bli_check_floating_object( x );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_floating_object( y );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_consistent_object_precisions( x, y );
+	bli_check_error_code( e_val );
+
+	// Check object dimensions.
+
+	e_val = bli_check_vector_object( x );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_vector_object( y );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_equal_vector_lengths( x, y );
+	bli_check_error_code( e_val );
+
+	// Check object buffers (for non-NULLness).
+
+	e_val = bli_check_object_buffer( x );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( y );
+	bli_check_error_code( e_val );
+}
+

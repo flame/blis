@@ -40,8 +40,6 @@ void bli_projm
        obj_t* b
      )
 {
-	obj_t* a2;
-
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
 		bli_projm_check( a, b );
@@ -82,6 +80,56 @@ void bli_projm
 			bli_obj_real_part( a, &ar );
 
 			bli_copym( &ar, b );
+		}
+	}
+}
+
+void bli_projv
+     (
+       obj_t* x,
+       obj_t* y
+     )
+{
+	// Check parameters.
+	if ( bli_error_checking_is_enabled() )
+		bli_projv_check( x, y );
+
+	if ( ( bli_obj_is_real( x )    && bli_obj_is_real( y )    ) ||
+	     ( bli_obj_is_complex( x ) && bli_obj_is_complex( y ) ) )
+	{
+		// If x and y are both real or both complex, we can simply use
+		// copyv.
+		bli_copyv( x, y );
+	}
+	else
+	{
+		// This branch handles the case where one operand is real and
+		// the other is complex.
+
+		if ( bli_obj_is_real( x ) /* && bli_obj_is_complex( y ) */ )
+		{
+			// If x is real and y is complex, we must obtain the real part
+			// of y so that we can copy x into the real part (after
+			// initializing all of y, including imaginary components, to
+			// zero).
+
+			obj_t yr;
+
+			bli_obj_real_part( y, &yr );
+
+			bli_setv( &BLIS_ZERO, y );
+			bli_copyv( x, &yr );
+		}
+		else // bli_obj_is_complex( x ) && bli_obj_is_real( y )
+		{
+			// If x is complex and y is real, we can simply copy the
+			// real part of x into y.
+
+			obj_t xr;
+
+			bli_obj_real_part( x, &xr );
+
+			bli_copyv( &xr, y );
 		}
 	}
 }
