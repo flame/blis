@@ -108,7 +108,7 @@ static num_t bli_obj_dt_proj_to_real( obj_t* obj )
 
 static num_t bli_obj_dt_proj_to_complex( obj_t* obj )
 {
-	return ( bli_obj_dt( obj ) & BLIS_BITVAL_COMPLEX );
+	return ( bli_obj_dt( obj ) | BLIS_BITVAL_COMPLEX );
 }
 
 static num_t bli_obj_target_dt( obj_t* obj )
