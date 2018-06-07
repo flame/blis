@@ -123,6 +123,7 @@ extern "C" {
 #include "bli_string.h"
 #include "bli_setgetij.h"
 #include "bli_proj.h"
+#include "bli_setri.h"
 
 
 // -- Level-0 operations --

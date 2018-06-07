@@ -909,58 +909,6 @@ static void bli_obj_toggle_uplo_if_trans( trans_t trans, obj_t* obj )
 	}
 }
 
-// Make a full alias (shallow copy).
-
-static void bli_obj_alias_to( obj_t* a, obj_t* b )
-{
-	bli_obj_init_full_shallow_copy_of( a, b );
-}
-
-// Alias only the real part.
-
-static void bli_obj_real_part( obj_t* c, obj_t* r )
-{
-	bli_obj_alias_to( c, r );
-
-	// Change the datatype.
-	num_t dt_r = bli_obj_dt_proj_to_real( c );
-	bli_obj_set_dt( dt_r, r );
-
-	// Update the element size.
-	siz_t es_c = bli_obj_elem_size( c );
-	bli_obj_set_elem_size( es_c/2, r );
-
-	// Update the strides.
-	inc_t rs_c = bli_obj_row_stride( c );
-	inc_t cs_c = bli_obj_col_stride( c );
-	bli_obj_set_strides( 2*rs_c, 2*cs_c, r );
-}
-
-// Check if two objects are aliases of one another.
-
-static bool_t bli_obj_is_alias_of( obj_t* a, obj_t* b )
-{
-	return ( bli_obj_buffer( a ) == bli_obj_buffer( b ) );
-}
-
-
-// Create an alias with a trans value applied.
-// (Note: trans may include a conj component.)
-
-static void bli_obj_alias_with_trans( trans_t trans, obj_t* a, obj_t* b )
-{
-	bli_obj_alias_to( a, b );
-	bli_obj_apply_trans( trans, b );
-}
-
-// Create an alias with a conj value applied.
-
-static void bli_obj_alias_with_conj( conj_t conja, obj_t* a, obj_t* b )
-{
-	bli_obj_alias_to( a, b );
-	bli_obj_apply_conj( conja, b );
-}
-
 // Initialize object with default properties (info field).
 
 static void bli_obj_set_defaults( obj_t* obj )
@@ -1039,6 +987,91 @@ static void* bli_obj_buffer_for_1x1( num_t dt, obj_t* obj )
 	       ( bli_obj_is_const( obj ) ? bli_obj_buffer_for_const( dt, obj )
 	                                 : bli_obj_buffer_at_off( obj )
 	       );
+}
+
+// Make a full alias (shallow copy).
+
+static void bli_obj_alias_to( obj_t* a, obj_t* b )
+{
+	bli_obj_init_full_shallow_copy_of( a, b );
+}
+
+// Check if two objects are aliases of one another.
+
+static bool_t bli_obj_is_alias_of( obj_t* a, obj_t* b )
+{
+	return ( bli_obj_buffer( a ) == bli_obj_buffer( b ) );
+}
+
+
+// Create an alias with a trans value applied.
+// (Note: trans may include a conj component.)
+
+static void bli_obj_alias_with_trans( trans_t trans, obj_t* a, obj_t* b )
+{
+	bli_obj_alias_to( a, b );
+	bli_obj_apply_trans( trans, b );
+}
+
+// Create an alias with a conj value applied.
+
+static void bli_obj_alias_with_conj( conj_t conja, obj_t* a, obj_t* b )
+{
+	bli_obj_alias_to( a, b );
+	bli_obj_apply_conj( conja, b );
+}
+
+// Alias only the real part.
+
+static void bli_obj_real_part( obj_t* c, obj_t* r )
+{
+	bli_obj_alias_to( c, r );
+
+	if ( bli_obj_is_complex( c ) )
+	{
+		// Change the datatype.
+		num_t dt_r = bli_obj_dt_proj_to_real( c );
+		bli_obj_set_dt( dt_r, r );
+
+		// Update the element size.
+		siz_t es_c = bli_obj_elem_size( c );
+		bli_obj_set_elem_size( es_c/2, r );
+
+		// Update the strides.
+		inc_t rs_c = bli_obj_row_stride( c );
+		inc_t cs_c = bli_obj_col_stride( c );
+		bli_obj_set_strides( 2*rs_c, 2*cs_c, r );
+
+		// Buffer is left unchanged.
+	}
+}
+
+// Alias only the imaginary part.
+
+static void bli_obj_imag_part( obj_t* c, obj_t* i )
+{
+	if ( bli_obj_is_complex( c ) )
+	{
+		bli_obj_alias_to( c, i );
+
+		// Change the datatype.
+		num_t dt_r = bli_obj_dt_proj_to_real( c );
+		bli_obj_set_dt( dt_r, i );
+
+		// Update the element size.
+		siz_t es_c = bli_obj_elem_size( c );
+		bli_obj_set_elem_size( es_c/2, i );
+
+		// Update the strides.
+		inc_t rs_c = bli_obj_row_stride( c );
+		inc_t cs_c = bli_obj_col_stride( c );
+		bli_obj_set_strides( 2*rs_c, 2*cs_c, i );
+
+		// Update the buffer.
+		inc_t is_c = bli_obj_imag_stride( c );
+		char* p    = bli_obj_buffer_at_off( c );
+		bli_obj_set_buffer( p + is_c * es_c/2, i );
+	}
 }
 
 // Given a 1x1 object, acquire an address to the buffer depending on whether
