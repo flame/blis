@@ -66,6 +66,14 @@ void bli_axpy2v_check
 	e_val = bli_check_floating_object( z );
 	bli_check_error_code( e_val );
 
+	// Check for consistent datatypes.
+
+	e_val = bli_check_consistent_object_datatypes( x, y );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_consistent_object_datatypes( x, z );
+	bli_check_error_code( e_val );
+
 	// Check object dimensions.
 
 	e_val = bli_check_scalar_object( alphax );
@@ -130,6 +138,14 @@ void bli_axpyf_check
 	bli_check_error_code( e_val );
 
 	e_val = bli_check_floating_object( y );
+	bli_check_error_code( e_val );
+
+	// Check for consistent datatypes.
+
+	e_val = bli_check_consistent_object_datatypes( a, x );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_consistent_object_datatypes( a, y );
 	bli_check_error_code( e_val );
 
 	// Check object dimensions.
@@ -201,6 +217,17 @@ void bli_dotaxpyv_check
 	bli_check_error_code( e_val );
 
 	e_val = bli_check_floating_object( z );
+	bli_check_error_code( e_val );
+
+	// Check for consistent datatypes.
+
+	e_val = bli_check_consistent_object_datatypes( x, xt );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_consistent_object_datatypes( x, y );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_consistent_object_datatypes( x, z );
 	bli_check_error_code( e_val );
 
 	// Check object dimensions.
@@ -297,6 +324,23 @@ void bli_dotxaxpyf_check
 	bli_check_error_code( e_val );
 
 	e_val = bli_check_floating_object( z );
+	bli_check_error_code( e_val );
+
+	// Check for consistent datatypes.
+
+	e_val = bli_check_consistent_object_datatypes( a, at );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_consistent_object_datatypes( a, w );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_consistent_object_datatypes( a, x );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_consistent_object_datatypes( a, y );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_consistent_object_datatypes( a, z );
 	bli_check_error_code( e_val );
 
 	// Check object dimensions.
@@ -405,6 +449,14 @@ void bli_dotxf_check
 	bli_check_error_code( e_val );
 
 	e_val = bli_check_floating_object( y );
+	bli_check_error_code( e_val );
+
+	// Check for consistent datatypes.
+
+	e_val = bli_check_consistent_object_datatypes( a, x );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_consistent_object_datatypes( a, y );
 	bli_check_error_code( e_val );
 
 	// Check object dimensions.
