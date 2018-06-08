@@ -260,15 +260,12 @@
 # --- Level-3 micro-kernels ------------------------------------------------
 
 1        # gemm
-1        #   test sequential micro-kernel
 -1       #   dimensions: k
 
 1        # trsm
-1        #   test sequential micro-kernel
 ?        #   parameters: uploa
 
 1        # gemmtrsm
-1        #   test sequential micro-kernel
 -1       #   dimensions: k
 ?        #   parameters: uploa
 
