@@ -36,6 +36,16 @@
 
 // -- Matrix partitioning ------------------------------------------------------
 
+void bli_acquire_mpart
+     (
+       dim_t     i,
+       dim_t     j,
+       dim_t     m,
+       dim_t     n,
+       obj_t*    obj,
+       obj_t*    sub_obj
+     );
+
 #undef  GENPROT
 #define GENPROT( opname ) \
 \

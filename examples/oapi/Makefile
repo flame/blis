@@ -105,16 +105,17 @@ CFLAGS         += -I$(TEST_SRC_PATH)
 LIBBLIS_LINK   := $(BUILD_PATH)/$(LIBBLIS_LINK)
 
 # Binary executable name.
-TEST_BINS      := 0obj_basic.x \
-                  1obj_attach.x \
-                  2obj_ij.x \
-                  3level0.x \
-                  4level1v.x \
-                  5level1m.x \
-                  6level1m_diag.x \
-                  7level2.x \
-                  8level3.x \
-                  9util.x
+TEST_BINS      := 00obj_basic.x \
+                  01obj_attach.x \
+                  02obj_ij.x \
+                  03obj_view.x \
+                  04level0.x \
+                  05level1v.x \
+                  06level1m.x \
+                  07level1m_diag.x \
+                  08level2.x \
+                  09level3.x \
+                  10util.x
 
 
 
