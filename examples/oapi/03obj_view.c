@@ -69,7 +69,7 @@ int main( int argc, char** argv )
 	bli_obj_create( dt, m, n, rs, cs, &a1 );
 
  	// Initialize a1 to contain known values.
-	init_dobj_by_cols( &a1 )
+	init_dobj_by_cols( &a1 );
 
 	bli_printm( "matrix 'a1' (initial state)", &a1, "%5.1f", "" );
 
