@@ -39,7 +39,7 @@ void bli_cntx_init_steamroller( cntx_t* cntx )
 	blksz_t blkszs[ BLIS_NUM_BLKSZS ];
 
 	// Set default kernel blocksizes and functions.
-	bli_cntx_init_piledriver_ref( cntx );
+	bli_cntx_init_steamroller_ref( cntx );
 
 	// -------------------------------------------------------------------------
 

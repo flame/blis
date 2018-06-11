@@ -221,23 +221,23 @@
 #define packm_30xk_rih_ker_name GENARNAME(packm_30xk_rih)
 
 #undef  packm_2xk_1er_ker_name
-#define packm_2xk_1er_ker_name  GENARNAME(packm_2xk_1e)
+#define packm_2xk_1er_ker_name  GENARNAME(packm_2xk_1er)
 #undef  packm_4xk_1er_ker_name
-#define packm_4xk_1er_ker_name  GENARNAME(packm_4xk_1e)
+#define packm_4xk_1er_ker_name  GENARNAME(packm_4xk_1er)
 #undef  packm_6xk_1er_ker_name
-#define packm_6xk_1er_ker_name  GENARNAME(packm_6xk_1e)
+#define packm_6xk_1er_ker_name  GENARNAME(packm_6xk_1er)
 #undef  packm_8xk_1er_ker_name
-#define packm_8xk_1er_ker_name  GENARNAME(packm_8xk_1e)
+#define packm_8xk_1er_ker_name  GENARNAME(packm_8xk_1er)
 #undef  packm_10xk_1er_ker_name
-#define packm_10xk_1er_ker_name GENARNAME(packm_10xk_1e)
+#define packm_10xk_1er_ker_name GENARNAME(packm_10xk_1er)
 #undef  packm_12xk_1er_ker_name
-#define packm_12xk_1er_ker_name GENARNAME(packm_12xk_1e)
+#define packm_12xk_1er_ker_name GENARNAME(packm_12xk_1er)
 #undef  packm_14xk_1er_ker_name
-#define packm_14xk_1er_ker_name GENARNAME(packm_14xk_1e)
+#define packm_14xk_1er_ker_name GENARNAME(packm_14xk_1er)
 #undef  packm_16xk_1er_ker_name
-#define packm_16xk_1er_ker_name GENARNAME(packm_16xk_1e)
+#define packm_16xk_1er_ker_name GENARNAME(packm_16xk_1er)
 #undef  packm_30xk_1er_ker_name
-#define packm_30xk_1er_ker_name GENARNAME(packm_30xk_1e)
+#define packm_30xk_1er_ker_name GENARNAME(packm_30xk_1er)
 
 // Include the level-1m kernel API template.
 #include "bli_l1m_ker.h"
