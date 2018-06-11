@@ -664,7 +664,7 @@ static err_t bli_strsm_small_XAltB(
   {
 	return BLIS_NOT_YET_IMPLEMENTED;
   }
-  if ( (m*(m + n)) > BLIS_SMALL_MATRIX_THRES_TRSM )
+  if ( n > 128 || (m*(m + n)) > BLIS_SMALL_MATRIX_THRES_TRSM )
   {
   	return BLIS_NOT_YET_IMPLEMENTED;
   }
