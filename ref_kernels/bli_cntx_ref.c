@@ -363,11 +363,11 @@ void GENBARNAME(cntx_init)
 
 	funcs = bli_cntx_l3_vir_ukrs_buf( cntx );
 
-	gen_func_init_co( &funcs[ BLIS_GEMM_UKR ],       gemm1m_ukr_name       );
-	gen_func_init_co( &funcs[ BLIS_GEMMTRSM_L_UKR ], gemmtrsm1m_l_ukr_name );
-	gen_func_init_co( &funcs[ BLIS_GEMMTRSM_U_UKR ], gemmtrsm1m_u_ukr_name );
-	gen_func_init_co( &funcs[ BLIS_TRSM_L_UKR ],     trsm1m_l_ukr_name     );
-	gen_func_init_co( &funcs[ BLIS_TRSM_U_UKR ],     trsm1m_u_ukr_name     );
+	gen_func_init( &funcs[ BLIS_GEMM_UKR ],       gemm_ukr_name       );
+	gen_func_init( &funcs[ BLIS_GEMMTRSM_L_UKR ], gemmtrsm_l_ukr_name );
+	gen_func_init( &funcs[ BLIS_GEMMTRSM_U_UKR ], gemmtrsm_u_ukr_name );
+	gen_func_init( &funcs[ BLIS_TRSM_L_UKR ],     trsm_l_ukr_name     );
+	gen_func_init( &funcs[ BLIS_TRSM_U_UKR ],     trsm_u_ukr_name     );
 
 
 	// -- Set level-3 native micro-kernels and preferences ---------------------
@@ -467,7 +467,7 @@ void GENBARNAME(cntx_init)
 	bli_cntx_set_schema_b_panel( BLIS_PACKED_COL_PANELS, cntx );
 	bli_cntx_set_schema_c_panel( BLIS_NOT_PACKED,        cntx );
 
-	bli_cntx_set_anti_pref( FALSE, cntx );
+	//bli_cntx_set_anti_pref( FALSE, cntx );
 
 	bli_cntx_set_thrloop( 1, 1, 1, 1, 1, cntx );
 
@@ -726,7 +726,7 @@ void GENBAINAME(cntx_init)
 
 		// Initialize the blocksizes according to the micro-kernel preference as
 		// well as the algorithm.
-		if ( bli_cntx_l3_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ) )
+		if ( bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ) )
 		{
 			// This branch is used for algorithms 1m_c_bp, 1m_r_pb.
 
@@ -754,7 +754,7 @@ void GENBAINAME(cntx_init)
 			  cntx
 			);
 		}
-		else // if ( bli_cntx_l3_ukr_prefers_rows_dt( dt, BLIS_GEMM_UKR, cntx ) )
+		else // if ( bli_cntx_l3_vir_ukr_prefers_rows_dt( dt, BLIS_GEMM_UKR, cntx ) )
 		{
 			// This branch is used for algorithms 1m_r_bp, 1m_c_pb.
 
@@ -811,7 +811,7 @@ void GENBAINAME(cntx_init)
 	}
 	else if ( method == BLIS_1M )
 	{
-		const bool_t is_pb = FALSE;
+		//const bool_t is_pb = FALSE;
 
 		// Set the anti-preference field to TRUE when executing a panel-block
 		// algorithm, and FALSE otherwise. This will cause higher-level generic
@@ -819,7 +819,7 @@ void GENBAINAME(cntx_init)
 		// the micro-kernel output preference so that the two will come back into
 		// agreement in the panel-block macro-kernel (which implemented in terms
 		// of the block-panel macro-kernel with some induced transpositions).
-		bli_cntx_set_anti_pref( is_pb, cntx );
+		//bli_cntx_set_anti_pref( is_pb, cntx );
 	}
 	else // if ( method == BLIS_NAT )
 	{

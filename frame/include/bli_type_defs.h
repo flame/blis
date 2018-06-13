@@ -1128,8 +1128,6 @@ typedef struct cntx_s
 	pack_t    schema_b_panel;
 	pack_t    schema_c_panel;
 
-	bool_t    anti_pref;
-
 	dim_t     thrloop[ BLIS_NUM_LOOPS ];
 
 	membrk_t* membrk;

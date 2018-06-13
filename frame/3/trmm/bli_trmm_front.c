@@ -105,7 +105,7 @@ void bli_trmm_front
 	// NOTE: We disable the optimization for 1x1 matrices since the concept
 	// of row- vs. column storage breaks down.
 	if ( !bli_obj_is_1x1( &c_local ) )
-	if ( bli_cntx_l3_ukr_dislikes_storage_of( &c_local, BLIS_GEMM_UKR, cntx ) )
+	if ( bli_cntx_l3_vir_ukr_dislikes_storage_of( &c_local, BLIS_GEMM_UKR, cntx ) )
 	{
 		bli_toggle_side( &side );
 		bli_obj_induce_trans( &a_local );

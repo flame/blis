@@ -544,8 +544,10 @@ void bli_cntx_set_l3_nat_ukrs( dim_t n_ukrs, ... )
 	// -- End variable argument section --
 
 	// Query the context for the addresses of:
+	// - the l3 virtual ukernel func_t array
 	// - the l3 native ukernel func_t array
 	// - the l3 native ukernel preferences array
+	func_t*  cntx_l3_vir_ukrs       = bli_cntx_l3_vir_ukrs_buf( cntx );
 	func_t*  cntx_l3_nat_ukrs       = bli_cntx_l3_nat_ukrs_buf( cntx );
 	mbool_t* cntx_l3_nat_ukrs_prefs = bli_cntx_l3_nat_ukrs_prefs_buf( cntx );
 
@@ -565,11 +567,18 @@ void bli_cntx_set_l3_nat_ukrs( dim_t n_ukrs, ... )
 
 		// Index into the func_t and mbool_t for the current kernel id
 		// being processed.
+		func_t*       vukrs  = &cntx_l3_vir_ukrs[ ukr_id ];
 		func_t*       ukrs   = &cntx_l3_nat_ukrs[ ukr_id ];
 		mbool_t*      prefs  = &cntx_l3_nat_ukrs_prefs[ ukr_id ];
 
 		// Store the ukernel function pointer and preference values into
-		// the context.
+		// the context. Notice that we redundantly store the native
+		// ukernel address in both the native and virtual ukernel slots
+		// in the context. This is standard practice when creating a
+		// native context. (Induced method contexts will overwrite the
+		// virtual function pointer with the address of the appropriate
+		// virtual ukernel.)
+		bli_func_set_dt( ukr_fp, ukr_dt, vukrs );
 		bli_func_set_dt( ukr_fp, ukr_dt, ukrs );
 		bli_mbool_set_dt( ukr_pref, ukr_dt, prefs );
 	}
