@@ -37,17 +37,21 @@
 
 cntl_t* blx_gemm_cntl_create
      (
-       opid_t family
+       opid_t family,
+       pack_t schema_a,
+       pack_t schema_b
      )
 {
-	return blx_gemmbp_cntl_create( family );
+	return blx_gemmbp_cntl_create( family, schema_a, schema_b );
 }
 
 // -----------------------------------------------------------------------------
 
 cntl_t* blx_gemmbp_cntl_create
      (
-       opid_t family
+       opid_t family,
+       pack_t schema_a,
+       pack_t schema_b
      )
 {
 	void* macro_kernel_p = blx_gemm_ker_var2;
@@ -79,7 +83,7 @@ cntl_t* blx_gemmbp_cntl_create
 	  FALSE,   // do NOT invert diagonal
 	  FALSE,   // reverse iteration if upper?
 	  FALSE,   // reverse iteration if lower?
-	  BLIS_PACKED_ROW_PANELS,
+	  schema_a, // normally BLIS_PACKED_ROW_PANELS
 	  BLIS_BUFFER_FOR_A_BLOCK,
 	  gemm_cntl_bp_bu
 	);
@@ -103,7 +107,7 @@ cntl_t* blx_gemmbp_cntl_create
 	  FALSE,   // do NOT invert diagonal
 	  FALSE,   // reverse iteration if upper?
 	  FALSE,   // reverse iteration if lower?
-	  BLIS_PACKED_COL_PANELS,
+	  schema_b, // normally BLIS_PACKED_COL_PANELS
 	  BLIS_BUFFER_FOR_B_PANEL,
 	  gemm_cntl_op_bp
 	);

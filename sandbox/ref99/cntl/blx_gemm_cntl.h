@@ -34,14 +34,18 @@
 
 cntl_t* blx_gemm_cntl_create
      (
-       opid_t family
+       opid_t family,
+       pack_t schema_a,
+       pack_t schema_b
      );
 
 // -----------------------------------------------------------------------------
 
 cntl_t* blx_gemmbp_cntl_create
      (
-       opid_t family
+       opid_t family,
+       pack_t schema_a,
+       pack_t schema_b
      );
 
 // -----------------------------------------------------------------------------
