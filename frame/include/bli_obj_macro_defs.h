@@ -81,6 +81,21 @@ static objbits_t bli_obj_domain( obj_t* obj )
 	return ( obj->info & BLIS_DOMAIN_BIT );
 }
 
+static objbits_t bli_obj_prec( obj_t* obj )
+{
+	return ( obj->info & BLIS_PRECISION_BIT );
+}
+
+static bool_t bli_obj_is_single_prec( obj_t* obj )
+{
+	return ( bli_obj_prec( obj ) == BLIS_BITVAL_SINGLE_PREC );
+}
+
+static bool_t bli_obj_is_double_prec( obj_t* obj )
+{
+	return ( bli_obj_prec( obj ) == BLIS_BITVAL_DOUBLE_PREC );
+}
+
 static bool_t bli_obj_is_real( obj_t* obj )
 {
 	return ( bli_obj_domain( obj ) == BLIS_BITVAL_REAL );
@@ -89,16 +104,6 @@ static bool_t bli_obj_is_real( obj_t* obj )
 static bool_t bli_obj_is_complex( obj_t* obj )
 {
 	return ( bli_obj_domain( obj ) == BLIS_BITVAL_COMPLEX );
-}
-
-static objbits_t bli_obj_prec( obj_t* obj )
-{
-	return ( obj->info & BLIS_PRECISION_BIT );
-}
-
-static bool_t bli_obj_is_double_prec( obj_t* obj )
-{
-	return ( bli_obj_prec( obj ) == BLIS_BITVAL_DOUBLE_PREC );
 }
 
 static num_t bli_obj_dt_proj_to_real( obj_t* obj )
@@ -118,7 +123,17 @@ static num_t bli_obj_target_dt( obj_t* obj )
 
 static num_t bli_obj_exec_dt( obj_t* obj )
 {
-	return ( ( obj->info & BLIS_EXECUTION_DT_BITS ) >> BLIS_EXECUTION_DT_SHIFT );
+	return ( ( obj->info & BLIS_EXEC_DT_BITS ) >> BLIS_EXEC_DT_SHIFT );
+}
+
+static dom_t bli_obj_exec_domain( obj_t* obj )
+{
+	return ( ( obj->info & BLIS_EXEC_DOMAIN_BIT ) >> BLIS_EXEC_DT_SHIFT );
+}
+
+static prec_t bli_obj_exec_prec( obj_t* obj )
+{
+	return ( ( obj->info & BLIS_EXEC_PREC_BIT ) >> BLIS_EXEC_DT_SHIFT );
 }
 
 static trans_t bli_obj_conjtrans_status( obj_t* obj )
@@ -328,7 +343,17 @@ static void bli_obj_set_target_dt( num_t dt, obj_t* obj )
 
 static void bli_obj_set_exec_dt( num_t dt, obj_t* obj )
 {
-	obj->info = ( obj->info & ~BLIS_EXECUTION_DT_BITS ) | ( dt << BLIS_EXECUTION_DT_SHIFT );
+	obj->info = ( obj->info & ~BLIS_EXEC_DT_BITS ) | ( dt << BLIS_EXEC_DT_SHIFT );
+}
+
+static void bli_obj_set_exec_domain( dom_t dt, obj_t* obj )
+{
+	obj->info = ( obj->info & ~BLIS_EXEC_DOMAIN_BIT ) | ( dt << BLIS_EXEC_DOMAIN_SHIFT );
+}
+
+static void bli_obj_set_exec_prec( prec_t dt, obj_t* obj )
+{
+	obj->info = ( obj->info & ~BLIS_EXEC_PREC_BIT ) | ( dt << BLIS_EXEC_PREC_SHIFT );
 }
 
 static void bli_obj_set_pack_schema( pack_t schema, obj_t* obj )
