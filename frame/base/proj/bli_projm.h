@@ -32,16 +32,15 @@
 
 */
 
-#include "bli_proj_check.h"
-
 void bli_projm
      (
        obj_t* a,
        obj_t* b
      );
 
-void bli_projv
+void bli_projm_check
      (
-       obj_t* x,
-       obj_t* y
+       obj_t* a,
+       obj_t* b
      );
+

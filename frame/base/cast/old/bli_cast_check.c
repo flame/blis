@@ -32,37 +32,87 @@
 
 */
 
+#include "blis.h"
 
-//
-// Prototype object-based interfaces.
-//
+void bli_castm_check
+     (
+       obj_t* a,
+       obj_t* b
+     )
+{
+	err_t e_val;
 
-#undef  GENFRONT
-#define GENFRONT( opname ) \
-\
-void PASTEMAC0(opname) \
-     ( \
-       obj_t*  chi, \
-       obj_t*  psi  \
-     );
-GENFRONT( copysc )
+	// Check object datatypes.
 
+	e_val = bli_check_floating_object( a );
+	bli_check_error_code( e_val );
 
-//
-// Prototype BLAS-like interfaces with heterogeneous-typed operands.
-//
+	e_val = bli_check_floating_object( b );
+	bli_check_error_code( e_val );
 
-#undef  GENTPROT2
-#define GENTPROT2( ctype_x, ctype_y, chx, chy, varname ) \
-\
-void PASTEMAC2(chx,chy,varname) \
-     ( \
-       conj_t conjchi, \
-       void*  chi, \
-       void*  psi \
-     );
+	// Check structure.
+	// NOTE: We enforce general structure for now in order to simplify the
+	// implementation.
 
-INSERT_GENTPROT2_BASIC0( copysc )
-INSERT_GENTPROT2_MIX_D0( copysc )
-INSERT_GENTPROT2_MIX_P0( copysc )
+	bli_check_general_object( a );
+	bli_check_error_code( e_val );
+
+	bli_check_general_object( b );
+	bli_check_error_code( e_val );
+
+	// Check object dimensions.
+
+	e_val = bli_check_matrix_object( a );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_matrix_object( b );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_conformal_dims( a, b );
+	bli_check_error_code( e_val );
+
+	// Check object buffers (for non-NULLness).
+
+	e_val = bli_check_object_buffer( a );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( b );
+	bli_check_error_code( e_val );
+}
+
+void bli_castv_check
+     (
+       obj_t* x,
+       obj_t* y
+     )
+{
+	err_t e_val;
+
+	// Check object datatypes.
+
+	e_val = bli_check_floating_object( x );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_floating_object( y );
+	bli_check_error_code( e_val );
+
+	// Check object dimensions.
+
+	e_val = bli_check_vector_object( x );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_vector_object( y );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_equal_vector_lengths( x, y );
+	bli_check_error_code( e_val );
+
+	// Check object buffers (for non-NULLness).
+
+	e_val = bli_check_object_buffer( x );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( y );
+	bli_check_error_code( e_val );
+}
 

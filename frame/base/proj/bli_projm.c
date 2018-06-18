@@ -84,52 +84,44 @@ void bli_projm
 	}
 }
 
-void bli_projv
+// -----------------------------------------------------------------------------
+
+void bli_projm_check
      (
-       obj_t* x,
-       obj_t* y
+       obj_t* a,
+       obj_t* b
      )
 {
-	// Check parameters.
-	if ( bli_error_checking_is_enabled() )
-		bli_projv_check( x, y );
+	err_t e_val;
 
-	if ( ( bli_obj_is_real( x )    && bli_obj_is_real( y )    ) ||
-	     ( bli_obj_is_complex( x ) && bli_obj_is_complex( y ) ) )
-	{
-		// If x and y are both real or both complex, we can simply use
-		// copyv.
-		bli_copyv( x, y );
-	}
-	else
-	{
-		// This branch handles the case where one operand is real and
-		// the other is complex.
+	// Check object datatypes.
 
-		if ( bli_obj_is_real( x ) /* && bli_obj_is_complex( y ) */ )
-		{
-			// If x is real and y is complex, we must obtain the real part
-			// of y so that we can copy x into the real part (after
-			// initializing all of y, including imaginary components, to
-			// zero).
+	e_val = bli_check_floating_object( a );
+	bli_check_error_code( e_val );
 
-			obj_t yr;
+	e_val = bli_check_floating_object( b );
+	bli_check_error_code( e_val );
 
-			bli_obj_real_part( y, &yr );
+	e_val = bli_check_consistent_object_precisions( a, b );
+	bli_check_error_code( e_val );
 
-			bli_setv( &BLIS_ZERO, y );
-			bli_copyv( x, &yr );
-		}
-		else // bli_obj_is_complex( x ) && bli_obj_is_real( y )
-		{
-			// If x is complex and y is real, we can simply copy the
-			// real part of x into y.
+	// Check object dimensions.
 
-			obj_t xr;
+	e_val = bli_check_matrix_object( a );
+	bli_check_error_code( e_val );
 
-			bli_obj_real_part( x, &xr );
+	e_val = bli_check_matrix_object( b );
+	bli_check_error_code( e_val );
 
-			bli_copyv( &xr, y );
-		}
-	}
+	e_val = bli_check_conformal_dims( a, b );
+	bli_check_error_code( e_val );
+
+	// Check object buffers (for non-NULLness).
+
+	e_val = bli_check_object_buffer( a );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( b );
+	bli_check_error_code( e_val );
 }
+

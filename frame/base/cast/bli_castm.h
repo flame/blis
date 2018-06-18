@@ -32,37 +32,42 @@
 
 */
 
-
 //
-// Prototype object-based interfaces.
+// Prototype object-based interface.
 //
 
-#undef  GENFRONT
-#define GENFRONT( opname ) \
-\
-void PASTEMAC0(opname) \
-     ( \
-       obj_t*  chi, \
-       obj_t*  psi  \
+void bli_castm
+     (
+       obj_t* a,
+       obj_t* b
      );
-GENFRONT( copysc )
-
 
 //
 // Prototype BLAS-like interfaces with heterogeneous-typed operands.
 //
 
 #undef  GENTPROT2
-#define GENTPROT2( ctype_x, ctype_y, chx, chy, varname ) \
+#define GENTPROT2( ctype_a, ctype_b, cha, chb, opname ) \
 \
-void PASTEMAC2(chx,chy,varname) \
+void PASTEMAC2(cha,chb,opname) \
      ( \
-       conj_t conjchi, \
-       void*  chi, \
-       void*  psi \
+       trans_t transa, \
+       dim_t   m, \
+       dim_t   n, \
+       void*   a, inc_t rs_a, inc_t cs_a, \
+       void*   b, inc_t rs_b, inc_t cs_b  \
      );
 
-INSERT_GENTPROT2_BASIC0( copysc )
-INSERT_GENTPROT2_MIX_D0( copysc )
-INSERT_GENTPROT2_MIX_P0( copysc )
+INSERT_GENTPROT2_BASIC0( castm )
+INSERT_GENTPROT2_MIXDP0( castm )
+
+//
+// Prototype object-based _check() function.
+//
+
+void bli_castm_check
+     (
+       obj_t* a,
+       obj_t* b
+     );
 
