@@ -43,7 +43,7 @@
 #define BLIS_DEFAULT_NR_THREAD_MAX 1
 
 #define BLIS_ENABLE_ZEN_BLOCK_SIZES
-#define BLIS_ENABLE_SMALL_MATRIX
+//#define BLIS_ENABLE_SMALL_MATRIX
 
 // This will select the threshold below which small matrix code will be called.
 #define BLIS_SMALL_MATRIX_THRES        700
