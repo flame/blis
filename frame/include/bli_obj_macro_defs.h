@@ -96,6 +96,16 @@ static bool_t bli_obj_is_double_prec( obj_t* obj )
 	return ( bli_obj_prec( obj ) == BLIS_BITVAL_DOUBLE_PREC );
 }
 
+static num_t bli_obj_dt_proj_to_single_prec( obj_t* obj )
+{
+	return ( bli_obj_dt( obj ) & ~BLIS_BITVAL_SINGLE_PREC );
+}
+
+static num_t bli_obj_dt_proj_to_double_prec( obj_t* obj )
+{
+	return ( bli_obj_dt( obj ) | BLIS_BITVAL_DOUBLE_PREC );
+}
+
 static bool_t bli_obj_is_real( obj_t* obj )
 {
 	return ( bli_obj_domain( obj ) == BLIS_BITVAL_REAL );
