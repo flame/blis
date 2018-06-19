@@ -271,6 +271,8 @@ typedef dcomplex  f77_dcomplex;
 #define BLIS_UNIT_DIAG_SHIFT               8
 #define BLIS_INVERT_DIAG_SHIFT             9
 #define BLIS_TARGET_DT_SHIFT               10
+#define   BLIS_TARGET_DOMAIN_SHIFT         10
+#define   BLIS_TARGET_PREC_SHIFT           11
 #define BLIS_EXEC_DT_SHIFT                 13
 #define   BLIS_EXEC_DOMAIN_SHIFT           13
 #define   BLIS_EXEC_PREC_SHIFT             14
@@ -301,6 +303,8 @@ typedef dcomplex  f77_dcomplex;
 #define BLIS_UNIT_DIAG_BIT                 ( 0x1  << BLIS_UNIT_DIAG_SHIFT )
 #define BLIS_INVERT_DIAG_BIT               ( 0x1  << BLIS_INVERT_DIAG_SHIFT )
 #define BLIS_TARGET_DT_BITS                ( 0x7  << BLIS_TARGET_DT_SHIFT )
+#define   BLIS_TARGET_DOMAIN_BIT           ( 0x1  << BLIS_TARGET_DOMAIN_SHIFT )
+#define   BLIS_TARGET_PREC_BIT             ( 0x1  << BLIS_TARGET_PREC_SHIFT )
 #define BLIS_EXEC_DT_BITS                  ( 0x7  << BLIS_EXEC_DT_SHIFT )
 #define   BLIS_EXEC_DOMAIN_BIT             ( 0x1  << BLIS_EXEC_DOMAIN_SHIFT )
 #define   BLIS_EXEC_PREC_BIT               ( 0x1  << BLIS_EXEC_PREC_SHIFT )

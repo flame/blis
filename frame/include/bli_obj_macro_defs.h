@@ -121,6 +121,16 @@ static num_t bli_obj_target_dt( obj_t* obj )
 	return ( ( obj->info & BLIS_TARGET_DT_BITS ) >> BLIS_TARGET_DT_SHIFT );
 }
 
+static dom_t bli_obj_target_domain( obj_t* obj )
+{
+	return ( ( obj->info & BLIS_TARGET_DOMAIN_BIT ) >> BLIS_TARGET_DT_SHIFT );
+}
+
+static prec_t bli_obj_target_prec( obj_t* obj )
+{
+	return ( ( obj->info & BLIS_TARGET_PREC_BIT ) >> BLIS_TARGET_DT_SHIFT );
+}
+
 static num_t bli_obj_exec_dt( obj_t* obj )
 {
 	return ( ( obj->info & BLIS_EXEC_DT_BITS ) >> BLIS_EXEC_DT_SHIFT );
@@ -339,6 +349,16 @@ static void bli_obj_set_dt( num_t dt, obj_t* obj )
 static void bli_obj_set_target_dt( num_t dt, obj_t* obj )
 {
 	obj->info = ( obj->info & ~BLIS_TARGET_DT_BITS ) | ( dt << BLIS_TARGET_DT_SHIFT );
+}
+
+static void bli_obj_set_target_domain( dom_t dt, obj_t* obj )
+{
+	obj->info = ( obj->info & ~BLIS_TARGET_DOMAIN_BIT ) | ( dt << BLIS_TARGET_DOMAIN_SHIFT );
+}
+
+static void bli_obj_set_target_prec( prec_t dt, obj_t* obj )
+{
+	obj->info = ( obj->info & ~BLIS_TARGET_PREC_BIT ) | ( dt << BLIS_TARGET_PREC_SHIFT );
 }
 
 static void bli_obj_set_exec_dt( num_t dt, obj_t* obj )
