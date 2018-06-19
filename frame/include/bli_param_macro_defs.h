@@ -112,6 +112,16 @@ static bool_t bli_is_double_prec( num_t dt )
 	         bli_is_dcomplex( dt ) );
 }
 
+static dom_t bli_dt_domain( num_t dt )
+{
+	return ( dt & BLIS_DOMAIN_BIT );
+}
+
+static prec_t bli_dt_prec( num_t dt )
+{
+	return ( dt & BLIS_PRECISION_BIT );
+}
+
 static num_t bli_dt_proj_to_real( num_t dt )
 {
 	return ( dt & ~BLIS_BITVAL_COMPLEX );

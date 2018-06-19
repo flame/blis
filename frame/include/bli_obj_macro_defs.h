@@ -76,12 +76,12 @@ static bool_t bli_obj_is_const( obj_t* obj )
 	return ( bli_obj_dt( obj ) == BLIS_BITVAL_CONST_TYPE );
 }
 
-static objbits_t bli_obj_domain( obj_t* obj )
+static dom_t bli_obj_domain( obj_t* obj )
 {
 	return ( obj->info & BLIS_DOMAIN_BIT );
 }
 
-static objbits_t bli_obj_prec( obj_t* obj )
+static prec_t bli_obj_prec( obj_t* obj )
 {
 	return ( obj->info & BLIS_PRECISION_BIT );
 }
