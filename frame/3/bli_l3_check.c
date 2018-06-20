@@ -294,6 +294,14 @@ void bli_gemm_basic_check
 
 	e_val = bli_check_level3_dims( a, b, c );
 	bli_check_error_code( e_val );
+
+	// Check for consistent datatypes.
+
+	e_val = bli_check_consistent_object_datatypes( c, a );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_consistent_object_datatypes( c, b );
+	bli_check_error_code( e_val );
 }
 
 void bli_hemm_basic_check
@@ -330,6 +338,14 @@ void bli_hemm_basic_check
 
 	e_val = bli_check_square_object( a );
 	bli_check_error_code( e_val );
+
+	// Check for consistent datatypes.
+
+	e_val = bli_check_consistent_object_datatypes( c, a );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_consistent_object_datatypes( c, b );
+	bli_check_error_code( e_val );
 }
 
 void bli_herk_basic_check
@@ -364,6 +380,14 @@ void bli_herk_basic_check
 	bli_check_error_code( e_val );
 
 	e_val = bli_check_general_object( ah );
+	bli_check_error_code( e_val );
+
+	// Check for consistent datatypes.
+
+	e_val = bli_check_consistent_object_datatypes( c, a );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_consistent_object_datatypes( c, ah );
 	bli_check_error_code( e_val );
 }
 
@@ -411,6 +435,20 @@ void bli_her2k_basic_check
 	bli_check_error_code( e_val );
 
 	e_val = bli_check_general_object( ah );
+	bli_check_error_code( e_val );
+
+	// Check for consistent datatypes.
+
+	e_val = bli_check_consistent_object_datatypes( c, a );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_consistent_object_datatypes( c, ah );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_consistent_object_datatypes( c, b );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_consistent_object_datatypes( c, bh );
 	bli_check_error_code( e_val );
 }
 

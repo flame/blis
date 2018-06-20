@@ -55,7 +55,7 @@ void PASTEMAC(ch,opname) \
 \
 	/* Query the context for the function address of the current
 	   datatype's micro-kernel. */ \
-	PASTECH2(ch,tname,_ft) f = bli_cntx_get_l3_ukr_dt( dt, kerid, cntx ); \
+	PASTECH2(ch,tname,_ft) f = bli_cntx_get_l3_vir_ukr_dt( dt, kerid, cntx ); \
 \
 	/* Invoke the typed function for the given datatype. */ \
 	f( \
@@ -91,7 +91,7 @@ void PASTEMAC(ch,opname) \
 \
 	/* Query the context for the function address of the current
 	   datatype's micro-kernel. */ \
-	PASTECH2(ch,tname,_ft) f = bli_cntx_get_l3_ukr_dt( dt, kerid, cntx ); \
+	PASTECH2(ch,tname,_ft) f = bli_cntx_get_l3_vir_ukr_dt( dt, kerid, cntx ); \
 \
 	/* Invoke the typed function for the given datatype. */ \
 	f( \
@@ -129,7 +129,7 @@ void PASTEMAC(ch,opname) \
 \
 	/* Query the context for the function address of the current
 	   datatype's micro-kernel. */ \
-	PASTECH2(ch,tname,_ft) f = bli_cntx_get_l3_ukr_dt( dt, kerid, cntx ); \
+	PASTECH2(ch,tname,_ft) f = bli_cntx_get_l3_vir_ukr_dt( dt, kerid, cntx ); \
 \
 	/* Invoke the typed function for the given datatype. */ \
 	f( \

@@ -49,7 +49,7 @@ GENFRONT( copysc )
 
 
 //
-// Define BLAS-like interfaces with heterogeneous-typed operands.
+// Prototype BLAS-like interfaces with heterogeneous-typed operands.
 //
 
 #undef  GENTPROT2

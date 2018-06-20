@@ -584,7 +584,7 @@ char* bli_gks_l3_ukr_impl_string( l3ukr_t ukr, ind_t method, num_t dt )
 	// then query the ukernel function pointer for the given datatype from
 	// that context.
 	cntx_t* cntx  = bli_gks_query_ind_cntx( method, dt );
-	void*   fp    = bli_cntx_get_l3_ukr_dt( dt, ukr, cntx );
+	void*   fp    = bli_cntx_get_l3_vir_ukr_dt( dt, ukr, cntx );
 
 	// Check whether the ukernel function pointer is NULL for the given
 	// datatype. If it is NULL, return the string for not applicable.

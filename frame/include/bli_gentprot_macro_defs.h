@@ -395,6 +395,50 @@ GENTPROT2( dcomplex, scomplex, z, c, tfuncname, varname ) \
 
 
 
+// -- Mixed domain/precision (all) two-operand macro --
+
+// -- (no auxiliary arguments) --
+
+#define INSERT_GENTPROT2_MIXDP0( funcname ) \
+\
+GENTPROT2( float,    double,   s, d, funcname ) \
+GENTPROT2( float,    scomplex, s, c, funcname ) \
+GENTPROT2( float,    dcomplex, s, z, funcname ) \
+\
+GENTPROT2( double,   float,    d, s, funcname ) \
+GENTPROT2( double,   scomplex, d, c, funcname ) \
+GENTPROT2( double,   dcomplex, d, z, funcname ) \
+\
+GENTPROT2( scomplex, float,    c, s, funcname ) \
+GENTPROT2( scomplex, double,   c, d, funcname ) \
+GENTPROT2( scomplex, dcomplex, c, z, funcname ) \
+\
+GENTPROT2( dcomplex, float,    z, s, funcname ) \
+GENTPROT2( dcomplex, double,   z, d, funcname ) \
+GENTPROT2( dcomplex, scomplex, z, c, funcname )
+
+// -- (one auxiliary argument) --
+
+#define INSERT_GENTPROT2_MIX_DP( tfuncname, varname ) \
+\
+GENTPROT2( float,    double,   s, d, tfuncname, varname ) \
+GENTPROT2( float,    scomplex, s, c, tfuncname, varname ) \
+GENTPROT2( float,    dcomplex, s, z, tfuncname, varname ) \
+\
+GENTPROT2( double,   float,    d, s, tfuncname, varname ) \
+GENTPROT2( double,   scomplex, d, c, tfuncname, varname ) \
+GENTPROT2( double,   dcomplex, d, z, tfuncname, varname ) \
+\
+GENTPROT2( scomplex, float,    c, s, tfuncname, varname ) \
+GENTPROT2( scomplex, double,   c, d, tfuncname, varname ) \
+GENTPROT2( scomplex, dcomplex, c, z, tfuncname, varname ) \
+\
+GENTPROT2( dcomplex, float,    z, s, tfuncname, varname ) \
+GENTPROT2( dcomplex, double,   z, d, tfuncname, varname ) \
+GENTPROT2( dcomplex, scomplex, z, c, tfuncname, varname )
+
+
+
 // -- Basic two-operand with real projection of first operand --
 
 // -- (no auxiliary arguments) --

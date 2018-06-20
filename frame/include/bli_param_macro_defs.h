@@ -112,6 +112,16 @@ static bool_t bli_is_double_prec( num_t dt )
 	         bli_is_dcomplex( dt ) );
 }
 
+static dom_t bli_dt_domain( num_t dt )
+{
+	return ( dt & BLIS_DOMAIN_BIT );
+}
+
+static prec_t bli_dt_prec( num_t dt )
+{
+	return ( dt & BLIS_PRECISION_BIT );
+}
+
 static num_t bli_dt_proj_to_real( num_t dt )
 {
 	return ( dt & ~BLIS_BITVAL_COMPLEX );
@@ -119,7 +129,17 @@ static num_t bli_dt_proj_to_real( num_t dt )
 
 static num_t bli_dt_proj_to_complex( num_t dt )
 {
-	return ( dt & BLIS_BITVAL_COMPLEX );
+	return ( dt | BLIS_BITVAL_COMPLEX );
+}
+
+static num_t bli_dt_proj_to_single_prec( num_t dt )
+{
+	return ( dt & ~BLIS_BITVAL_SINGLE_PREC );
+}
+
+static num_t bli_dt_proj_to_double_prec( num_t dt )
+{
+	return ( dt | BLIS_BITVAL_DOUBLE_PREC );
 }
 
 
@@ -990,6 +1010,41 @@ void bli_set_dims_incs_uplo_1m_noswap
 	}
 }
 
+// Set dimensions and increments for TWO matrix arguments.
+
+static
+void bli_set_dims_incs_2m
+     (
+       trans_t transa,
+       dim_t  m,      dim_t  n,      inc_t  rs_a, inc_t  cs_a,
+                                     inc_t  rs_b, inc_t  cs_b,
+       dim_t* n_elem, dim_t* n_iter, inc_t* inca, inc_t* lda,
+                                     inc_t* incb, inc_t* ldb
+     )
+{
+	{
+		*n_iter = n;
+		*n_elem = m;
+		*inca   = rs_a;
+		*lda    = cs_a;
+		*incb   = rs_b;
+		*ldb    = cs_b;
+
+		if ( bli_does_trans( transa ) )
+		{
+			bli_swap_incs( inca, lda );
+		}
+
+		if ( bli_is_row_tilted( *n_elem, *n_iter, *incb, *ldb ) &&
+		     bli_is_row_tilted( *n_elem, *n_iter, *inca, *lda ) )
+		{
+			bli_swap_dims( n_iter, n_elem );
+			bli_swap_incs( inca, lda );
+			bli_swap_incs( incb, ldb );
+		}
+	}
+}
+
 // Set dimensions, increments, effective uplo/diagoff, etc for TWO matrix
 // arguments.
 
@@ -1033,7 +1088,7 @@ void bli_set_dims_incs_uplo_2m
 		if ( bli_is_stored_subpart( diagoffa_use_, transa, uploa, m, n ) )
 			uploa = BLIS_DENSE;
 
-		n_iter_max_  = n;
+		n_iter_max_   = n;
 		*n_elem_max   = m;
 		*inca         = rs_a;
 		*lda          = cs_a;

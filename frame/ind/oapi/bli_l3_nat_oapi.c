@@ -60,8 +60,7 @@ void PASTEMAC(opname,imeth) \
 	/* Obtain a valid (native) context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
-	/* Invoke the operation's front end with the appropriate control
-	   tree. */ \
+	/* Invoke the operation's front end. */ \
 	PASTEMAC(opname,_front) \
 	( \
 	  alpha, a, b, beta, c, cntx, NULL \
@@ -98,8 +97,7 @@ void PASTEMAC(opname,imeth) \
 	/* Obtain a valid (native) context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
-	/* Invoke the operation's front end with the appropriate control
-	   tree. */ \
+	/* Invoke the operation's front end. */ \
 	PASTEMAC(opname,_front) \
 	( \
 	  side, alpha, a, b, beta, c, cntx, NULL \
@@ -130,8 +128,7 @@ void PASTEMAC(opname,imeth) \
 	/* Obtain a valid (native) context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
-	/* Invoke the operation's front end with the appropriate control
-	   tree. */ \
+	/* Invoke the operation's front end. */ \
 	PASTEMAC(opname,_front) \
 	( \
 	  alpha, a, beta, c, cntx, NULL \
@@ -161,8 +158,7 @@ void PASTEMAC(opname,imeth) \
 	/* Obtain a valid (native) context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
-	/* Invoke the operation's front end with the appropriate control
-	   tree. */ \
+	/* Invoke the operation's front end. */ \
 	PASTEMAC(opname,_front) \
 	( \
 	  side, alpha, a, b, cntx, NULL \
@@ -191,8 +187,7 @@ void PASTEMAC(opname,imeth) \
 	/* Obtain a valid (native) context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
-	/* Invoke the operation's front end with the appropriate control
-	   tree. */ \
+	/* Invoke the operation's front end. */ \
 	PASTEMAC(opname,_front) \
 	( \
 	  side, alpha, a, b, cntx, NULL \

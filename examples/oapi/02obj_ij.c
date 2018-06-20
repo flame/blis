@@ -83,18 +83,18 @@ int main( int argc, char** argv )
 	bli_getijm( i, j, &a1, &alpha_r, &alpha_i );
 
 	// Here, we print out the element "returned" by bli_getijm().
-	printf( "element (%2d,%2d) of matrix 'a1' (real + imag): %5.1f + %5.1f\n", i, j, alpha_r, alpha_i );
+	printf( "element (%2d,%2d) of matrix 'a1' (real + imag): %5.1f + %5.1f\n", ( int )i, ( int )j, alpha_r, alpha_i );
 
 	// Let's query a few more elements.
 	i = 0; j = 2;
 	bli_getijm( i, j, &a1, &alpha_r, &alpha_i );
 
-	printf( "element (%2d,%2d) of matrix 'a1' (real + imag): %5.1f + %5.1f\n", i, j, alpha_r, alpha_i );
+	printf( "element (%2d,%2d) of matrix 'a1' (real + imag): %5.1f + %5.1f\n", ( int )i, ( int )j, alpha_r, alpha_i );
 
 	i = 3; j = 4;
 	bli_getijm( i, j, &a1, &alpha_r, &alpha_i );
 
-	printf( "element (%2d,%2d) of matrix 'a1' (real + imag): %5.1f + %5.1f\n", i, j, alpha_r, alpha_i );
+	printf( "element (%2d,%2d) of matrix 'a1' (real + imag): %5.1f + %5.1f\n", ( int )i, ( int )j, alpha_r, alpha_i );
 
 	printf( "\n" );
 
@@ -224,8 +224,8 @@ void init_dmatrix_by_cols( dim_t m, dim_t n, double* a, inc_t rs, inc_t cs )
 
 void init_dobj_by_cols( obj_t* a )
 {
-	dim_t m = bli_obj_length( *a );
-	dim_t n = bli_obj_width( *a );
+	dim_t m = bli_obj_length( a );
+	dim_t n = bli_obj_width( a );
 	dim_t i, j;
 
 	double alpha = 0.0;
@@ -245,8 +245,8 @@ void init_dobj_by_cols( obj_t* a )
 
 void init_zobj_by_cols( obj_t* a )
 {
-	dim_t m = bli_obj_length( *a );
-	dim_t n = bli_obj_width( *a );
+	dim_t m = bli_obj_length( a );
+	dim_t n = bli_obj_width( a );
 	dim_t i, j;
 
 	double alpha = 0.0;

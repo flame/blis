@@ -38,6 +38,49 @@
 // -- Matrix partitioning ------------------------------------------------------
 
 
+void bli_acquire_mpart
+     (
+       dim_t     i,
+       dim_t     j,
+       dim_t     bm,
+       dim_t     bn,
+       obj_t*    parent,
+       obj_t*    child
+     )
+{
+	// Query the dimensions of the parent object.
+	const dim_t m_par = bli_obj_length( parent );
+	const dim_t n_par = bli_obj_width( parent );
+
+	// If either i or j is already beyond what exists of the parent matrix,
+	// slide them back to the outer dimensions. (What will happen in this
+	// scenario is that bm and bn and/or will be reduced to zero so that the
+	// child matrix does not refer to anything beyond the bounds of the
+	// parent. (Note: This is a safety measure and generally should never
+	// be needed if the caller is passing in sane arguments.)
+	if ( i > m_par ) i = m_par;
+	if ( j > n_par ) j = n_par;
+
+	// If either bm or bn spills out over the edge of the parent matrix,
+	// reduce them so that the child matrix fits within the bounds of the
+	// parent. (Note: This is a safety measure and generally should never
+	// be needed if the caller is passing in sane arguments, though this
+	// code is somewhat more likely to be needed than the code above.)
+	if ( bm > m_par - i ) bm = m_par - i;
+	if ( bn > n_par - j ) bn = n_par - j;
+
+	// Alias the parent object's contents into the child object.
+	bli_obj_alias_to( parent, child );
+
+	// Set the offsets and dimensions of the child object. Note that we
+	// increment, rather than overwrite, the offsets of the child object
+	// in case the parent object already had non-zero offsets (usually
+	// because the parent was itself a child a larger grandparent object).
+	bli_obj_inc_offs( i, j, child );
+	bli_obj_set_dims( bm, bn, child );
+}
+
+
 void bli_acquire_mpart_mdim
      (
        dir_t     direct,

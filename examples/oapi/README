@@ -6,7 +6,7 @@ This directory contains several files, each containing various pieces of
 example code that demonstrate core functionality of the object API in BLIS.
 These example files should be thought of collectively like a tutorial, and
 therefore it is recommended to start from the beginning (the file that
-starts in '0').
+starts in '00').
 
 You can build all of the examples by simply running 'make' from this
 directory. (You can also run 'make clean'.) The makefile assumes that

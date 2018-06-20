@@ -59,7 +59,7 @@ int main( int argc, char** argv )
 	bli_obj_create( dt, m, n, rs, cs, &a );
 
 	// First, we mark the matrix structure as triangular.
-	bli_obj_set_struc( BLIS_TRIANGULAR, &a )
+	bli_obj_set_struc( BLIS_TRIANGULAR, &a );
 
 	// Next, we specify whether the lower part or the upper part is to be
 	// recognized as the "stored" region (which we call the uplo field). The
@@ -89,7 +89,7 @@ int main( int argc, char** argv )
 	bli_obj_create( dt, m, n, rs, cs, &b );
 
 	// Set structure and uplo.
-	bli_obj_set_struc( BLIS_TRIANGULAR, &b )
+	bli_obj_set_struc( BLIS_TRIANGULAR, &b );
 	bli_obj_set_uplo( BLIS_UPPER, &b );
 
 	// Create an alias, 'bl', of the original object 'b'. Both objects will
@@ -245,7 +245,7 @@ int main( int argc, char** argv )
 	bli_obj_alias_to( &e, &el );
 
 	// Set structure and uplo of 'el'.
-	bli_obj_set_struc( BLIS_TRIANGULAR, &el )
+	bli_obj_set_struc( BLIS_TRIANGULAR, &el );
 	bli_obj_set_uplo( BLIS_LOWER, &el );
 
 	// Digression: Notice that "triangular" structure does not require that
@@ -290,7 +290,7 @@ int main( int argc, char** argv )
 	bli_obj_set_diag_offset( -1, &h );
 
 	// Set the structure and uplo of 'h'.
-	bli_obj_set_struc( BLIS_TRIANGULAR, &h )
+	bli_obj_set_struc( BLIS_TRIANGULAR, &h );
 	bli_obj_set_uplo( BLIS_UPPER, &h );
 
 	// Randomize the elements on and above the first subdiagonal.

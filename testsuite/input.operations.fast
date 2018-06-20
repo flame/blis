@@ -21,12 +21,7 @@
 #    determined by its local switch. For example, if the level-1v section
 #    override is set to 1, and there is a 1 on the line marked "addv",
 #    then the addv operation will be tested. Similarly, a 0 would cause
-#    addv to not be tested. NOTE: You may ignore the lines marked "test
-#    sequential front-end." These lines are for future use, to
-#    distinguish tests of the sequential implementation from tests of
-#    the multithreaded implementation. For now, BLIS does not contain
-#    separate APIs for multithreaded execution, even though
-#    multithreading is supported. So, these should be left set to 1.
+#    addv to not be tested.
 #
 #  ENABLING ONLY SELECT OPERATIONS
 #    If you would like to enable just a few (or even just one) operation
@@ -105,75 +100,60 @@
 # --- Utility --------------------------------------------------------------
 
 1        # randv
-1        #   test sequential front-end
 -1       #   dimensions: m
 
 1        # randm
-1        #   test sequential front-end
 -1 -1    #   dimensions: m n
 
 
 # --- Level-1v -------------------------------------------------------------
 
 1        # addv
-1        #   test sequential front-end
 -1       #   dimensions: m
 ?        #   parameters: conjx
 
 1        # amaxv
-1        #   test sequential front-end
 -1       #   dimensions: m
 
 1        # axpbyv
-1        #   test sequential front-end
 -1       #   dimensions: m
 ?        #   parameters: conjx
 
 1        # axpyv
-1        #   test sequential front-end
 -1       #   dimensions: m
 ?        #   parameters: conjx
 
 1        # copyv
-1        #   test sequential front-end
 -1       #   dimensions: m
 ?        #   parameters: conjx
 
 1        # dotv
-1        #   test sequential front-end
 -1       #   dimensions: m
 ??       #   parameters: conjx conjy
 
 1        # dotxv
-1        #   test sequential front-end
 -1       #   dimensions: m
 ??       #   parameters: conjx conjy
 
 1        # normfv
-1        #   test sequential front-end
 -1       #   dimensions: m
 
 1        # scalv
-1        #   test sequential front-end
 -1       #   dimensions: m
 ?        #   parameters: conjbeta
 
 1        # scal2v
-1        #   test sequential front-end
 -1       #   dimensions: m
 ?        #   parameters: conjx
 
 1        # setv
-1        #   test sequential front-end
 -1       #   dimensions: m
 
 1        # subv
-1        #   test sequential front-end
 -1       #   dimensions: m
 ?        #   parameters: conjx
 
 1        # xpbyv
-1        #   test sequential front-end
 -1       #   dimensions: m
 ?        #   parameters: conjx
 
@@ -181,40 +161,32 @@
 # --- Level-1m -------------------------------------------------------------
 
 1        # addm
-1        #   test sequential front-end
 -1 -2    #   dimensions: m n
 ?        #   parameters: transa
 
 1        # axpym
-1        #   test sequential front-end
 -1 -1    #   dimensions: m n
 ?        #   parameters: transa
 
 1        # copym
-1        #   test sequential front-end
 -1 -2    #   dimensions: m n
 ?        #   parameters: transa
 
 1        # normfm
-1        #   test sequential front-end
 -1 -2    #   dimensions: m n
 
 1        # scalm
-1        #   test sequential front-end
 -1 -2    #   dimensions: m n
 ?        #   parameters: conjbeta
 
 1        # scal2m
-1        #   test sequential front-end
 -1 -2    #   dimensions: m n
 ?        #   parameters: transa
 
 1        # setm
-1        #   test sequential front-end
 -1 -2    #   dimensions: m n
 
 1        # subm
-1        #   test sequential front-end
 -1 -2    #   dimensions: m n
 ?        #   parameters: transa
 
@@ -222,27 +194,22 @@
 # --- Level-1f kernels -----------------------------------------------------
 
 1        # axpy2v
-1        #   test sequential front-end
 -1       #   dimensions: m
 ??       #   parameters: conjx conjy
 
 1        # dotaxpyv
-1        #   test sequential front-end
 -1       #   dimensions: m
 ???      #   parameters: conjxt conjx conjy
 
 1        # axpyf
-1        #   test sequential front-end
 -1       #   dimensions: m
 ??       #   parameters: conja conjx
 
 1        # dotxf
-1        #   test sequential front-end
 -1       #   dimensions: m
 ??       #   parameters: conjat conjx
 
 1        # dotxaxpyf
-1        #   test sequential front-end
 -1       #   dimensions: m
 ????     #   parameters: conjat conja conjw conjx
 
@@ -250,52 +217,42 @@
 # --- Level-2 --------------------------------------------------------------
 
 1        # gemv
-1        #   test sequential front-end
 -1 -2    #   dimensions: m n
 ??       #   parameters: transa conjx
 
 1        # ger
-1        #   test sequential front-end
 -1 -2    #   dimensions: m n
 ??       #   parameters: conjx conjy
 
 1        # hemv
-1        #   test sequential front-end
 -1       #   dimensions: m
 ???      #   parameters: uploa conja conjx
 
 1        # her
-1        #   test sequential front-end
 -1       #   dimensions: m
 ??       #   parameters: uploc conjx
 
 1        # her2
-1        #   test sequential front-end
 -1       #   dimensions: m
 ???      #   parameters: uploc conjx conjy
 
 1        # symv
-1        #   test sequential front-end
 -1       #   dimensions: m
 ???      #   parameters: uploa conja conjx
 
 1        # syr
-1        #   test sequential front-end
 -1       #   dimensions: m
 ??       #   parameters: uploc conjx
 
 1        # syr2
-1        #   test sequential front-end
 -1       #   dimensions: m
 ???      #   parameters: uploc conjx conjy
 
 1        # trmv
-1        #   test sequential front-end
 -1       #   dimensions: m
 ???      #   parameters: uploa transa diaga
 
 1        # trsv
-1        #   test sequential front-end
 -1       #   dimensions: m
 ???      #   parameters: uploa transa diaga
 
@@ -303,15 +260,12 @@
 # --- Level-3 micro-kernels ------------------------------------------------
 
 1        # gemm
-1        #   test sequential micro-kernel
 -1       #   dimensions: k
 
 1        # trsm
-1        #   test sequential micro-kernel
 ?        #   parameters: uploa
 
 1        # gemmtrsm
-1        #   test sequential micro-kernel
 -1       #   dimensions: k
 ?        #   parameters: uploa
 
@@ -319,52 +273,42 @@
 # --- Level-3 --------------------------------------------------------------
 
 1        # gemm
-1        #   test sequential front-end
 -1 -1 -1 #   dimensions: m n k
 nn       #   parameters: transa transb
 
 1        # hemm
-1        #   test sequential front-end
 -1 -1    #   dimensions: m n
 ??nn     #   parameters: side uploa conja transb
 
 1        # herk
-1        #   test sequential front-end
 -1 -1    #   dimensions: m k
 ?n       #   parameters: uploc transa
 
 1        # her2k
-1        #   test sequential front-end
 -1 -1    #   dimensions: m k
 ?nn      #   parameters: uploc transa transb
 
 1        # symm
-1        #   test sequential front-end
 -1 -1    #   dimensions: m n
 ??nn     #   parameters: side uploa conja transb
 
 1        # syrk
-1        #   test sequential front-end
 -1 -1    #   dimensions: m k
 ?n       #   parameters: uploc transa
 
 1        # syr2k
-1        #   test sequential front-end
 -1 -1    #   dimensions: m k
 ?nn      #   parameters: uploc transa transb
 
 1        # trmm
-1        #   test sequential front-end
 -1 -1    #   dimensions: m n
 ??n?     #   parameters: side uploa transa diaga
 
 0        # trmm3
-1        #   test sequential front-end
 -1 -1    #   dimensions: m n
 ??n?n    #   parameters: side uploa transa diaga transb
 
 1        # trsm
-1        #   test sequential front-end
 -1 -1    #   dimensions: m n
 ??n?     #   parameters: side uploa transa diaga
 

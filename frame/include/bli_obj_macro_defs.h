@@ -76,9 +76,34 @@ static bool_t bli_obj_is_const( obj_t* obj )
 	return ( bli_obj_dt( obj ) == BLIS_BITVAL_CONST_TYPE );
 }
 
-static objbits_t bli_obj_domain( obj_t* obj )
+static dom_t bli_obj_domain( obj_t* obj )
 {
 	return ( obj->info & BLIS_DOMAIN_BIT );
+}
+
+static prec_t bli_obj_prec( obj_t* obj )
+{
+	return ( obj->info & BLIS_PRECISION_BIT );
+}
+
+static bool_t bli_obj_is_single_prec( obj_t* obj )
+{
+	return ( bli_obj_prec( obj ) == BLIS_BITVAL_SINGLE_PREC );
+}
+
+static bool_t bli_obj_is_double_prec( obj_t* obj )
+{
+	return ( bli_obj_prec( obj ) == BLIS_BITVAL_DOUBLE_PREC );
+}
+
+static num_t bli_obj_dt_proj_to_single_prec( obj_t* obj )
+{
+	return ( bli_obj_dt( obj ) & ~BLIS_BITVAL_SINGLE_PREC );
+}
+
+static num_t bli_obj_dt_proj_to_double_prec( obj_t* obj )
+{
+	return ( bli_obj_dt( obj ) | BLIS_BITVAL_DOUBLE_PREC );
 }
 
 static bool_t bli_obj_is_real( obj_t* obj )
@@ -91,16 +116,6 @@ static bool_t bli_obj_is_complex( obj_t* obj )
 	return ( bli_obj_domain( obj ) == BLIS_BITVAL_COMPLEX );
 }
 
-static objbits_t bli_obj_prec( obj_t* obj )
-{
-	return ( obj->info & BLIS_PRECISION_BIT );
-}
-
-static bool_t bli_obj_is_double_prec( obj_t* obj )
-{
-	return ( bli_obj_prec( obj ) == BLIS_BITVAL_DOUBLE_PREC );
-}
-
 static num_t bli_obj_dt_proj_to_real( obj_t* obj )
 {
 	return ( bli_obj_dt( obj ) & ~BLIS_BITVAL_COMPLEX );
@@ -108,7 +123,7 @@ static num_t bli_obj_dt_proj_to_real( obj_t* obj )
 
 static num_t bli_obj_dt_proj_to_complex( obj_t* obj )
 {
-	return ( bli_obj_dt( obj ) & BLIS_BITVAL_COMPLEX );
+	return ( bli_obj_dt( obj ) | BLIS_BITVAL_COMPLEX );
 }
 
 static num_t bli_obj_target_dt( obj_t* obj )
@@ -116,9 +131,29 @@ static num_t bli_obj_target_dt( obj_t* obj )
 	return ( ( obj->info & BLIS_TARGET_DT_BITS ) >> BLIS_TARGET_DT_SHIFT );
 }
 
+static dom_t bli_obj_target_domain( obj_t* obj )
+{
+	return ( ( obj->info & BLIS_TARGET_DOMAIN_BIT ) >> BLIS_TARGET_DT_SHIFT );
+}
+
+static prec_t bli_obj_target_prec( obj_t* obj )
+{
+	return ( ( obj->info & BLIS_TARGET_PREC_BIT ) >> BLIS_TARGET_DT_SHIFT );
+}
+
 static num_t bli_obj_exec_dt( obj_t* obj )
 {
-	return ( ( obj->info & BLIS_EXECUTION_DT_BITS ) >> BLIS_EXECUTION_DT_SHIFT );
+	return ( ( obj->info & BLIS_EXEC_DT_BITS ) >> BLIS_EXEC_DT_SHIFT );
+}
+
+static dom_t bli_obj_exec_domain( obj_t* obj )
+{
+	return ( ( obj->info & BLIS_EXEC_DOMAIN_BIT ) >> BLIS_EXEC_DT_SHIFT );
+}
+
+static prec_t bli_obj_exec_prec( obj_t* obj )
+{
+	return ( ( obj->info & BLIS_EXEC_PREC_BIT ) >> BLIS_EXEC_DT_SHIFT );
 }
 
 static trans_t bli_obj_conjtrans_status( obj_t* obj )
@@ -326,9 +361,29 @@ static void bli_obj_set_target_dt( num_t dt, obj_t* obj )
 	obj->info = ( obj->info & ~BLIS_TARGET_DT_BITS ) | ( dt << BLIS_TARGET_DT_SHIFT );
 }
 
+static void bli_obj_set_target_domain( dom_t dt, obj_t* obj )
+{
+	obj->info = ( obj->info & ~BLIS_TARGET_DOMAIN_BIT ) | ( dt << BLIS_TARGET_DOMAIN_SHIFT );
+}
+
+static void bli_obj_set_target_prec( prec_t dt, obj_t* obj )
+{
+	obj->info = ( obj->info & ~BLIS_TARGET_PREC_BIT ) | ( dt << BLIS_TARGET_PREC_SHIFT );
+}
+
 static void bli_obj_set_exec_dt( num_t dt, obj_t* obj )
 {
-	obj->info = ( obj->info & ~BLIS_EXECUTION_DT_BITS ) | ( dt << BLIS_EXECUTION_DT_SHIFT );
+	obj->info = ( obj->info & ~BLIS_EXEC_DT_BITS ) | ( dt << BLIS_EXEC_DT_SHIFT );
+}
+
+static void bli_obj_set_exec_domain( dom_t dt, obj_t* obj )
+{
+	obj->info = ( obj->info & ~BLIS_EXEC_DOMAIN_BIT ) | ( dt << BLIS_EXEC_DOMAIN_SHIFT );
+}
+
+static void bli_obj_set_exec_prec( prec_t dt, obj_t* obj )
+{
+	obj->info = ( obj->info & ~BLIS_EXEC_PREC_BIT ) | ( dt << BLIS_EXEC_PREC_SHIFT );
 }
 
 static void bli_obj_set_pack_schema( pack_t schema, obj_t* obj )
@@ -909,39 +964,7 @@ static void bli_obj_toggle_uplo_if_trans( trans_t trans, obj_t* obj )
 	}
 }
 
-// Make a full alias (shallow copy)
-
-static void bli_obj_alias_to( obj_t* a, obj_t* b )
-{
-	bli_obj_init_full_shallow_copy_of( a, b );
-}
-
-// Check if two objects are aliases of one another
-
-static bool_t bli_obj_is_alias_of( obj_t* a, obj_t* b )
-{
-	return ( bli_obj_buffer( a ) == bli_obj_buffer( b ) );
-}
-
-
-// Create an alias with a trans value applied.
-// (Note: trans may include a conj component.)
-
-static void bli_obj_alias_with_trans( trans_t trans, obj_t* a, obj_t* b )
-{
-	bli_obj_alias_to( a, b );
-	bli_obj_apply_trans( trans, b );
-}
-
-// Create an alias with a conj value applied.
-
-static void bli_obj_alias_with_conj( conj_t conja, obj_t* a, obj_t* b )
-{
-	bli_obj_alias_to( a, b );
-	bli_obj_apply_conj( conja, b );
-}
-
-// Initialize object with default properties (info field)
+// Initialize object with default properties (info field).
 
 static void bli_obj_set_defaults( obj_t* obj )
 {
@@ -1019,6 +1042,91 @@ static void* bli_obj_buffer_for_1x1( num_t dt, obj_t* obj )
 	       ( bli_obj_is_const( obj ) ? bli_obj_buffer_for_const( dt, obj )
 	                                 : bli_obj_buffer_at_off( obj )
 	       );
+}
+
+// Make a full alias (shallow copy).
+
+static void bli_obj_alias_to( obj_t* a, obj_t* b )
+{
+	bli_obj_init_full_shallow_copy_of( a, b );
+}
+
+// Check if two objects are aliases of one another.
+
+static bool_t bli_obj_is_alias_of( obj_t* a, obj_t* b )
+{
+	return ( bli_obj_buffer( a ) == bli_obj_buffer( b ) );
+}
+
+
+// Create an alias with a trans value applied.
+// (Note: trans may include a conj component.)
+
+static void bli_obj_alias_with_trans( trans_t trans, obj_t* a, obj_t* b )
+{
+	bli_obj_alias_to( a, b );
+	bli_obj_apply_trans( trans, b );
+}
+
+// Create an alias with a conj value applied.
+
+static void bli_obj_alias_with_conj( conj_t conja, obj_t* a, obj_t* b )
+{
+	bli_obj_alias_to( a, b );
+	bli_obj_apply_conj( conja, b );
+}
+
+// Alias only the real part.
+
+static void bli_obj_real_part( obj_t* c, obj_t* r )
+{
+	bli_obj_alias_to( c, r );
+
+	if ( bli_obj_is_complex( c ) )
+	{
+		// Change the datatype.
+		num_t dt_r = bli_obj_dt_proj_to_real( c );
+		bli_obj_set_dt( dt_r, r );
+
+		// Update the element size.
+		siz_t es_c = bli_obj_elem_size( c );
+		bli_obj_set_elem_size( es_c/2, r );
+
+		// Update the strides.
+		inc_t rs_c = bli_obj_row_stride( c );
+		inc_t cs_c = bli_obj_col_stride( c );
+		bli_obj_set_strides( 2*rs_c, 2*cs_c, r );
+
+		// Buffer is left unchanged.
+	}
+}
+
+// Alias only the imaginary part.
+
+static void bli_obj_imag_part( obj_t* c, obj_t* i )
+{
+	if ( bli_obj_is_complex( c ) )
+	{
+		bli_obj_alias_to( c, i );
+
+		// Change the datatype.
+		num_t dt_r = bli_obj_dt_proj_to_real( c );
+		bli_obj_set_dt( dt_r, i );
+
+		// Update the element size.
+		siz_t es_c = bli_obj_elem_size( c );
+		bli_obj_set_elem_size( es_c/2, i );
+
+		// Update the strides.
+		inc_t rs_c = bli_obj_row_stride( c );
+		inc_t cs_c = bli_obj_col_stride( c );
+		bli_obj_set_strides( 2*rs_c, 2*cs_c, i );
+
+		// Update the buffer.
+		inc_t is_c = bli_obj_imag_stride( c );
+		char* p    = bli_obj_buffer_at_off( c );
+		bli_obj_set_buffer( p + is_c * es_c/2, i );
+	}
 }
 
 // Given a 1x1 object, acquire an address to the buffer depending on whether

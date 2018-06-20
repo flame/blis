@@ -160,7 +160,7 @@ void PASTEMAC(ch,varname) \
 	/* Query the context for the micro-kernel address and cast it to its
 	   function pointer type. */ \
 	PASTECH(ch,gemm_ukr_ft) \
-	                gemm_ukr   = bli_cntx_get_l3_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
+	                gemm_ukr   = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
 \
 	/* Temporary C buffer for edge cases. Note that the strides of this
 	   temporary buffer are set so that they match the storage of the
@@ -169,7 +169,7 @@ void PASTEMAC(ch,varname) \
 	ctype           ct[ BLIS_STACK_BUF_MAX_SIZE \
 	                    / sizeof( ctype ) ] \
 	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	const bool_t    col_pref    = bli_cntx_l3_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
+	const bool_t    col_pref    = bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
 	const inc_t     rs_ct       = ( col_pref ? 1 : NR ); \
 	const inc_t     cs_ct       = ( col_pref ? MR : 1 ); \
 \
@@ -329,7 +329,7 @@ void PASTEMAC(ch,varname) \
 	/* Loop over the n dimension (NR columns at a time). */ \
 	for ( j = 0; j < n_iter; ++j ) \
 	{ \
-		if ( trmm_l_jr_my_iter( j, jr_thread ) ) { \
+		if ( bli_trmm_l_jr_my_iter( j, jr_thread ) ) { \
 \
 		ctype* restrict a1; \
 		ctype* restrict c11; \
@@ -371,7 +371,7 @@ void PASTEMAC(ch,varname) \
 				is_a_cur += ( bli_is_odd( is_a_cur ) ? 1 : 0 ); \
 				ps_a_cur  = ( is_a_cur * ss_a_num ) / ss_a_den; \
 \
-				if ( trmm_l_ir_my_iter( i, ir_thread ) ) { \
+				if ( bli_trmm_l_ir_my_iter( i, ir_thread ) ) { \
 \
 				b1_i = b1 + ( off_a1112 * PACKNR ) / off_scl; \
 \
@@ -441,7 +441,7 @@ void PASTEMAC(ch,varname) \
 			} \
 			else if ( bli_is_strictly_above_diag_n( diagoffa_i, MR, k ) ) \
 			{ \
-				if ( trmm_l_ir_my_iter( i, ir_thread ) ) { \
+				if ( bli_trmm_l_ir_my_iter( i, ir_thread ) ) { \
 \
 				ctype* restrict a2; \
 \

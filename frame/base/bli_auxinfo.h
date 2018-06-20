@@ -53,7 +53,7 @@ static void* bli_auxinfo_next_a( auxinfo_t* ai )
 }
 static void* bli_auxinfo_next_b( auxinfo_t* ai )
 {
-	return ai->a_next;
+	return ai->b_next;
 }
 
 static inc_t bli_auxinfo_is_a( auxinfo_t* ai )
