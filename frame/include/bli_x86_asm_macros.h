@@ -647,8 +647,8 @@
 #define SAR(...) INSTR_(sar, __VA_ARGS__)
 #define SHLX(_0, _1, _2) INSTR_(shlx, _0, _1, _2)
 #define SHRX(_0, _1, _2) INSTR_(shrx, _0, _1, _2)
-#define DEC(_0) INSTR_(dec _0)
-#define INC(_0) INSTR_(inc _0)
+#define DEC(_0) INSTR_(dec, _0)
+#define INC(_0) INSTR_(inc, _0)
 
 #define and(_0, _1) AND(_0, _1)
 #define or(_0, _1) OR(_0, _1)
