@@ -35,7 +35,8 @@
 #include "blis.h"
 #include <assert.h>
 
-#include "bli_avx512_macros.h"
+#define BLIS_ASM_SYNTAX_INTEL
+#include "bli_x86_asm_macros.h"
 
 #define UNROLL_K 32
 
@@ -377,7 +378,7 @@ void bli_sgemm_knl_asm_24x16
     JNZ(MAIN_LOOP)
 
     LABEL(REM_1)
-    SAR1(RDI)
+    SAR(RDI)
     JNC(REM_2)
 
     SUBITER(0,1,0,RAX)
@@ -386,7 +387,7 @@ void bli_sgemm_knl_asm_24x16
     ADD(RBX, IMM(16*4))
 
     LABEL(REM_2)
-    SAR1(RDI)
+    SAR(RDI)
     JNC(REM_4)
 
     SUBITER(0,1,0,RAX)
@@ -395,7 +396,7 @@ void bli_sgemm_knl_asm_24x16
     ADD(RBX, IMM(2*16*4))
 
     LABEL(REM_4)
-    SAR1(RDI)
+    SAR(RDI)
     JNC(REM_8)
 
     SUBITER(0,1,0,RAX)
@@ -406,7 +407,7 @@ void bli_sgemm_knl_asm_24x16
     ADD(RBX, IMM(4*16*4))
 
     LABEL(REM_8)
-    SAR1(RDI)
+    SAR(RDI)
     JNC(REM_16)
 
     SUBITER(0,1,0,RAX     )
@@ -421,7 +422,7 @@ void bli_sgemm_knl_asm_24x16
     ADD(RBX, IMM(8*16*4))
 
     LABEL(REM_16)
-    SAR1(RDI)
+    SAR(RDI)
     JNC(AFTER_LOOP)
 
     SUBITER( 0,1,0,RAX      )
@@ -567,7 +568,7 @@ void bli_sgemm_knl_asm_24x16
     JNE(SCATTEREDUPDATE)
 
     VMOVD(EDX, XMM(1))
-    SAL1(EDX) //shift out sign bit
+    SAL(EDX) //shift out sign bit
     JZ(COLSTORBZ)
 
     UPDATE_C_FOUR_ROWS( 8, 9,10,11)
@@ -599,7 +600,7 @@ void bli_sgemm_knl_asm_24x16
     VPMULLD(ZMM(2), ZMM(3), ZMM(2))
 
     VMOVD(EDX, XMM(1))
-    SAL1(EDX) //shift out sign bit
+    SAL(EDX) //shift out sign bit
     JZ(SCATTERBZ)
 
     UPDATE_C_ROW_SCATTERED( 8)

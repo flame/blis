@@ -34,6 +34,9 @@
 
 #include "blis.h"
 
+#define BLIS_ASM_SYNTAX_ATT
+#include "bli_x86_asm_macros.h"
+
 #if 0
 void bli_sgemmtrsm_u_penryn_asm_8x4
      (
@@ -75,432 +78,432 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 
 	__asm__ volatile
 	(
-		"                                \n\t"
-		"movq          %2, %%rax         \n\t" // load address of a12.
-		"movq          %4, %%rbx         \n\t" // load address of b21.
-		//"movq         %10, %%r9          \n\t" // load address of b_next.
-		"                                \n\t"
-		"addq     $8 * 16, %%rax         \n\t" // increment pointers to allow byte
-		"addq     $8 * 16, %%rbx         \n\t" // offsets in the unrolled iterations.
-		"                                \n\t"
-		"movaps  -8 * 16(%%rax), %%xmm0  \n\t" // initialize loop by pre-loading elements
-		"movaps  -7 * 16(%%rax), %%xmm1  \n\t" // of a and b.
-		"movaps  -8 * 16(%%rbx), %%xmm2  \n\t"
-		"                                \n\t"
-		"xorpd     %%xmm3,  %%xmm3       \n\t"
-		"xorpd     %%xmm4,  %%xmm4       \n\t"
-		"xorpd     %%xmm5,  %%xmm5       \n\t"
-		"xorpd     %%xmm6,  %%xmm6       \n\t"
-		"                                \n\t"
-		"xorpd     %%xmm8,  %%xmm8       \n\t"
-		"movaps    %%xmm8,  %%xmm9       \n\t"
-		"movaps    %%xmm8, %%xmm10       \n\t"
-		"movaps    %%xmm8, %%xmm11       \n\t"
-		"movaps    %%xmm8, %%xmm12       \n\t"
-		"movaps    %%xmm8, %%xmm13       \n\t"
-		"movaps    %%xmm8, %%xmm14       \n\t"
-		"movaps    %%xmm8, %%xmm15       \n\t"
-		"                                \n\t"
-		"                                \n\t"
-		"                                \n\t"
-		"movq      %0, %%rsi             \n\t" // i = k_iter;
-		"testq  %%rsi, %%rsi             \n\t" // check i via logical AND.
-		"je     .CONSIDERKLEFT           \n\t" // if i == 0, jump to code that
-		"                                \n\t" // contains the k_left loop.
-		"                                \n\t"
-		"                                \n\t"
-		".LOOPKITER:                     \n\t" // MAIN LOOP
-		"                                \n\t"
-		"prefetcht0 1264(%%rax)          \n\t"
-		"                                \n\t"
-		"addpd   %%xmm3, %%xmm11         \n\t" // iteration 0
-		"movaps  -7 * 16(%%rbx), %%xmm3  \n\t"
-		"addpd   %%xmm4, %%xmm15         \n\t"
-		"movaps  %%xmm2, %%xmm4          \n\t"
-		"pshufd   $0x4e, %%xmm2, %%xmm7  \n\t"
-		"mulpd   %%xmm0, %%xmm2          \n\t"
-		"mulpd   %%xmm1, %%xmm4          \n\t"
-		"                                \n\t"
-		"addpd   %%xmm5, %%xmm10         \n\t"
-		"addpd   %%xmm6, %%xmm14         \n\t"
-		"movaps  %%xmm7, %%xmm6          \n\t"
-		"mulpd   %%xmm0, %%xmm7          \n\t"
-		"mulpd   %%xmm1, %%xmm6          \n\t"
-		"                                \n\t"
-		"addpd   %%xmm2, %%xmm9          \n\t"
-		"movaps  -6 * 16(%%rbx), %%xmm2  \n\t"
-		"addpd   %%xmm4, %%xmm13         \n\t"
-		"movaps  %%xmm3, %%xmm4          \n\t"
-		"pshufd   $0x4e, %%xmm3, %%xmm5  \n\t"
-		"mulpd   %%xmm0, %%xmm3          \n\t"
-		"mulpd   %%xmm1, %%xmm4          \n\t"
-		"                                \n\t"
-		"addpd   %%xmm7, %%xmm8          \n\t"
-		"addpd   %%xmm6, %%xmm12         \n\t"
-		"movaps  %%xmm5, %%xmm6          \n\t"
-		"mulpd   %%xmm0, %%xmm5          \n\t"
-		"movaps  -6 * 16(%%rax), %%xmm0  \n\t"
-		"mulpd   %%xmm1, %%xmm6          \n\t"
-		"movaps  -5 * 16(%%rax), %%xmm1  \n\t"
-		"                                \n\t"
-		"                                \n\t"
-		"addpd   %%xmm3, %%xmm11         \n\t" // iteration 1
-		"movaps  -5 * 16(%%rbx), %%xmm3  \n\t"
-		"addpd   %%xmm4, %%xmm15         \n\t"
-		"movaps  %%xmm2, %%xmm4          \n\t"
-		"pshufd   $0x4e, %%xmm2, %%xmm7  \n\t"
-		"mulpd   %%xmm0, %%xmm2          \n\t"
-		"mulpd   %%xmm1, %%xmm4          \n\t"
-		"                                \n\t"
-		"addpd   %%xmm5, %%xmm10         \n\t"
-		"addpd   %%xmm6, %%xmm14         \n\t"
-		"movaps  %%xmm7, %%xmm6          \n\t"
-		"mulpd   %%xmm0, %%xmm7          \n\t"
-		"mulpd   %%xmm1, %%xmm6          \n\t"
-		"                                \n\t"
-		"addpd   %%xmm2, %%xmm9          \n\t"
-		"movaps  -4 * 16(%%rbx), %%xmm2  \n\t"
-		"addpd   %%xmm4, %%xmm13         \n\t"
-		"movaps  %%xmm3, %%xmm4          \n\t"
-		"pshufd   $0x4e, %%xmm3, %%xmm5  \n\t"
-		"mulpd   %%xmm0, %%xmm3          \n\t"
-		"mulpd   %%xmm1, %%xmm4          \n\t"
-		"                                \n\t"
-		"addpd   %%xmm7, %%xmm8          \n\t"
-		"addpd   %%xmm6, %%xmm12         \n\t"
-		"movaps  %%xmm5, %%xmm6          \n\t"
-		"mulpd   %%xmm0, %%xmm5          \n\t"
-		"movaps  -4 * 16(%%rax), %%xmm0  \n\t"
-		"mulpd   %%xmm1, %%xmm6          \n\t"
-		"movaps  -3 * 16(%%rax), %%xmm1  \n\t"
-		"                                \n\t"
-		"prefetcht0 1328(%%rax)          \n\t"
-		"                                \n\t"
-		"addpd   %%xmm3, %%xmm11         \n\t" // iteration 2
-		"movaps  -3 * 16(%%rbx), %%xmm3  \n\t"
-		"addpd   %%xmm4, %%xmm15         \n\t"
-		"movaps  %%xmm2, %%xmm4          \n\t"
-		"pshufd   $0x4e, %%xmm2, %%xmm7  \n\t"
-		"mulpd   %%xmm0, %%xmm2          \n\t"
-		"mulpd   %%xmm1, %%xmm4          \n\t"
-		"                                \n\t"
-		"addpd   %%xmm5, %%xmm10         \n\t"
-		"addpd   %%xmm6, %%xmm14         \n\t"
-		"movaps  %%xmm7, %%xmm6          \n\t"
-		"mulpd   %%xmm0, %%xmm7          \n\t"
-		"mulpd   %%xmm1, %%xmm6          \n\t"
-		"                                \n\t"
-		"addpd   %%xmm2, %%xmm9          \n\t"
-		"movaps  -2 * 16(%%rbx), %%xmm2  \n\t"
-		"addpd   %%xmm4, %%xmm13         \n\t"
-		"movaps  %%xmm3, %%xmm4          \n\t"
-		"pshufd   $0x4e, %%xmm3, %%xmm5  \n\t"
-		"mulpd   %%xmm0, %%xmm3          \n\t"
-		"mulpd   %%xmm1, %%xmm4          \n\t"
-		"                                \n\t"
-		"addpd   %%xmm7, %%xmm8          \n\t"
-		"addpd   %%xmm6, %%xmm12         \n\t"
-		"movaps  %%xmm5, %%xmm6          \n\t"
-		"mulpd   %%xmm0, %%xmm5          \n\t"
-		"movaps  -2 * 16(%%rax), %%xmm0  \n\t"
-		"mulpd   %%xmm1, %%xmm6          \n\t"
-		"movaps  -1 * 16(%%rax), %%xmm1  \n\t"
-		"                                \n\t"
-		"                                \n\t"
-		"addpd   %%xmm3, %%xmm11         \n\t" // iteration 3
-		"movaps  -1 * 16(%%rbx), %%xmm3  \n\t"
-		"addpd   %%xmm4, %%xmm15         \n\t"
-		"movaps  %%xmm2, %%xmm4          \n\t"
-		"pshufd   $0x4e, %%xmm2, %%xmm7  \n\t"
-		"mulpd   %%xmm0, %%xmm2          \n\t"
-		"mulpd   %%xmm1, %%xmm4          \n\t"
-		"                                \n\t"
-		"addpd   %%xmm5, %%xmm10         \n\t"
-		"addpd   %%xmm6, %%xmm14         \n\t"
-		"movaps  %%xmm7, %%xmm6          \n\t"
-		"mulpd   %%xmm0, %%xmm7          \n\t"
-		"mulpd   %%xmm1, %%xmm6          \n\t"
-		"                                \n\t"
-		"addq   $4 * 4 * 8, %%rax        \n\t" // a += 4*4 (unroll x mr)
-		"                                \n\t"
-		"addpd   %%xmm2, %%xmm9          \n\t"
-		"movaps   0 * 16(%%rbx), %%xmm2  \n\t"
-		"addpd   %%xmm4, %%xmm13         \n\t"
-		"movaps  %%xmm3, %%xmm4          \n\t"
-		"pshufd   $0x4e, %%xmm3, %%xmm5  \n\t"
-		"mulpd   %%xmm0, %%xmm3          \n\t"
-		"mulpd   %%xmm1, %%xmm4          \n\t"
-		"                                \n\t"
-		"addq   $4 * 4 * 8, %%rbx        \n\t" // b += 4*4 (unroll x nr)
-		"                                \n\t"
-		"addpd   %%xmm7, %%xmm8          \n\t"
-		"addpd   %%xmm6, %%xmm12         \n\t"
-		"movaps  %%xmm5, %%xmm6          \n\t"
-		"mulpd   %%xmm0, %%xmm5          \n\t"
-		"movaps  -8 * 16(%%rax), %%xmm0  \n\t"
-		"mulpd   %%xmm1, %%xmm6          \n\t"
-		"movaps  -7 * 16(%%rax), %%xmm1  \n\t"
-		"                                \n\t"
-		"                                \n\t"
-		"                                \n\t"
-		"decq   %%rsi                    \n\t" // i -= 1;
-		"jne    .LOOPKITER               \n\t" // iterate again if i != 0.
-		"                                \n\t"
-		"                                \n\t"
-		"                                \n\t"
-		".CONSIDERKLEFT:                 \n\t"
-		"                                \n\t"
-		"movq      %1, %%rsi             \n\t" // i = k_left;
-		"testq  %%rsi, %%rsi             \n\t" // check i via logical AND.
-		"je     .POSTACCUM               \n\t" // if i == 0, we're done; jump to end.
-		"                                \n\t" // else, we prepare to enter k_left loop.
-		"                                \n\t"
-		"                                \n\t"
-		".LOOPKLEFT:                     \n\t" // EDGE LOOP
-		"                                \n\t"
-		"addpd   %%xmm3, %%xmm11         \n\t" // iteration 0
-		"movaps  -7 * 16(%%rbx), %%xmm3  \n\t"
-		"addpd   %%xmm4, %%xmm15         \n\t"
-		"movaps  %%xmm2, %%xmm4          \n\t"
-		"pshufd   $0x4e, %%xmm2, %%xmm7  \n\t"
-		"mulpd   %%xmm0, %%xmm2          \n\t"
-		"mulpd   %%xmm1, %%xmm4          \n\t"
-		"                                \n\t"
-		"addpd   %%xmm5, %%xmm10         \n\t"
-		"addpd   %%xmm6, %%xmm14         \n\t"
-		"movaps  %%xmm7, %%xmm6          \n\t"
-		"mulpd   %%xmm0, %%xmm7          \n\t"
-		"mulpd   %%xmm1, %%xmm6          \n\t"
-		"                                \n\t"
-		"addpd   %%xmm2, %%xmm9          \n\t"
-		"movaps  -6 * 16(%%rbx), %%xmm2  \n\t"
-		"addpd   %%xmm4, %%xmm13         \n\t"
-		"movaps  %%xmm3, %%xmm4          \n\t"
-		"pshufd   $0x4e, %%xmm3, %%xmm5  \n\t"
-		"mulpd   %%xmm0, %%xmm3          \n\t"
-		"mulpd   %%xmm1, %%xmm4          \n\t"
-		"                                \n\t"
-		"addpd   %%xmm7, %%xmm8          \n\t"
-		"addpd   %%xmm6, %%xmm12         \n\t"
-		"movaps  %%xmm5, %%xmm6          \n\t"
-		"mulpd   %%xmm0, %%xmm5          \n\t"
-		"movaps  -6 * 16(%%rax), %%xmm0  \n\t"
-		"mulpd   %%xmm1, %%xmm6          \n\t"
-		"movaps  -5 * 16(%%rax), %%xmm1  \n\t"
-		"                                \n\t"
-		"                                \n\t"
-		"addq   $4 * 1 * 8, %%rax        \n\t" // a += 4 (1 x mr)
-		"addq   $4 * 1 * 8, %%rbx        \n\t" // b += 4 (1 x nr)
-		"                                \n\t"
-		"                                \n\t"
-		"decq   %%rsi                    \n\t" // i -= 1;
-		"jne    .LOOPKLEFT               \n\t" // iterate again if i != 0.
-		"                                \n\t"
-		"                                \n\t"
-		"                                \n\t"
-		".POSTACCUM:                     \n\t"
-		"                                \n\t"
-		"addpd   %%xmm3, %%xmm11         \n\t"
-		"addpd   %%xmm4, %%xmm15         \n\t"
-		"addpd   %%xmm5, %%xmm10         \n\t"
-		"addpd   %%xmm6, %%xmm14         \n\t"
-		"                                \n\t"
-		"                                \n\t"
-		"                                \n\t"
-		"movq      %5, %%rbx             \n\t" // load address of b11.
-		"                                \n\t"
-		"                                \n\t" // xmm8:   xmm9:   xmm10:  xmm11:
-		"                                \n\t" // ( ab01  ( ab00  ( ab03  ( ab02
-		"                                \n\t" //   ab10 )  ab11 )  ab12 )  ab13 )
-		"                                \n\t" //
-		"                                \n\t" // xmm12:  xmm13:  xmm14:  xmm15:
-		"                                \n\t" // ( ab21  ( ab20  ( ab23  ( ab22
-		"                                \n\t" //   ab30 )  ab31 )  ab32 )  ab33 )
-		"movaps   %%xmm9,  %%xmm0        \n\t"
-		"movaps   %%xmm8,  %%xmm1        \n\t"
-		"unpcklpd %%xmm8,  %%xmm0        \n\t"
-		"unpckhpd %%xmm9,  %%xmm1        \n\t"
-		"                                \n\t"
-		"movaps   %%xmm11, %%xmm4        \n\t"
-		"movaps   %%xmm10, %%xmm5        \n\t"
-		"unpcklpd %%xmm10, %%xmm4        \n\t"
-		"unpckhpd %%xmm11, %%xmm5        \n\t"
-		"                                \n\t"
-		"movaps   %%xmm13, %%xmm2        \n\t"
-		"movaps   %%xmm12, %%xmm3        \n\t"
-		"unpcklpd %%xmm12, %%xmm2        \n\t"
-		"unpckhpd %%xmm13, %%xmm3        \n\t"
-		"                                \n\t"
-		"movaps   %%xmm15, %%xmm6        \n\t"
-		"movaps   %%xmm14, %%xmm7        \n\t"
-		"unpcklpd %%xmm14, %%xmm6        \n\t"
-		"unpckhpd %%xmm15, %%xmm7        \n\t"
-		"                                \n\t"
-		"                                \n\t" // xmm0: ( ab00 ab01 ) xmm4: ( ab02 ab03 )
-		"                                \n\t" // xmm1: ( ab10 ab11 ) xmm5: ( ab12 ab13 )
-		"                                \n\t" // xmm2: ( ab20 ab21 ) xmm6: ( ab22 ab23 )
-		"                                \n\t" // xmm3: ( ab30 ab31 ) xmm7: ( ab32 ab33 )
-		"                                \n\t"
-		"movq    %9, %%rax               \n\t" // load address of alpha
-		"movddup (%%rax), %%xmm15        \n\t" // load alpha and duplicate
-		"                                \n\t"
-		"movaps  0 * 16(%%rbx), %%xmm8   \n\t"
-		"movaps  1 * 16(%%rbx), %%xmm12  \n\t"
-		"mulpd    %%xmm15, %%xmm8        \n\t" // xmm8  = alpha * ( beta00 beta01 )
-		"mulpd    %%xmm15, %%xmm12       \n\t" // xmm12 = alpha * ( beta02 beta03 )
-		"movaps  2 * 16(%%rbx), %%xmm9   \n\t"
-		"movaps  3 * 16(%%rbx), %%xmm13  \n\t"
-		"mulpd    %%xmm15, %%xmm9        \n\t" // xmm9  = alpha * ( beta10 beta11 )
-		"mulpd    %%xmm15, %%xmm13       \n\t" // xmm13 = alpha * ( beta12 beta13 )
-		"movaps  4 * 16(%%rbx), %%xmm10  \n\t"
-		"movaps  5 * 16(%%rbx), %%xmm14  \n\t"
-		"mulpd    %%xmm15, %%xmm10       \n\t" // xmm10 = alpha * ( beta20 beta21 )
-		"mulpd    %%xmm15, %%xmm14       \n\t" // xmm14 = alpha * ( beta22 beta23 )
-		"movaps  6 * 16(%%rbx), %%xmm11  \n\t"
-		"mulpd    %%xmm15, %%xmm11       \n\t" // xmm11 = alpha * ( beta30 beta31 )
-		"mulpd   7 * 16(%%rbx), %%xmm15  \n\t" // xmm15 = alpha * ( beta32 beta33 )
-		"                                \n\t"
-		"                                \n\t" // (Now scaled by alpha:)
-		"                                \n\t" // xmm8:  ( beta00 beta01 ) xmm12: ( beta02 beta03 )
-		"                                \n\t" // xmm9:  ( beta10 beta11 ) xmm13: ( beta12 beta13 )
-		"                                \n\t" // xmm10: ( beta20 beta21 ) xmm14: ( beta22 beta23 )
-		"                                \n\t" // xmm11: ( beta30 beta31 ) xmm15: ( beta32 beta33 )
-		"                                \n\t"
-		"subpd    %%xmm0, %%xmm8         \n\t" // xmm8  -= xmm0
-		"subpd    %%xmm1, %%xmm9         \n\t" // xmm9  -= xmm1
-		"subpd    %%xmm2, %%xmm10        \n\t" // xmm10 -= xmm2
-		"subpd    %%xmm3, %%xmm11        \n\t" // xmm11 -= xmm3
-		"subpd    %%xmm4, %%xmm12        \n\t" // xmm12 -= xmm4
-		"subpd    %%xmm5, %%xmm13        \n\t" // xmm13 -= xmm5
-		"subpd    %%xmm6, %%xmm14        \n\t" // xmm14 -= xmm6
-		"subpd    %%xmm7, %%xmm15        \n\t" // xmm15 -= xmm7
-		"                                \n\t"
-		"                                \n\t"
-		"                                \n\t"
-		".TRSM:                          \n\t"
-		"                                \n\t"
-		"                                \n\t"
-		"movq     %3, %%rax                \n\t" // load address of a11
-		"movq     %6, %%rcx                \n\t" // load address of c11
-		"                                  \n\t"
-		"movq     %7, %%rsi                \n\t" // load rs_c
-		"movq     %8, %%rdi                \n\t" // load cs_c
-		"salq     $3, %%rsi                \n\t" // rs_c *= sizeof( double )
-		"salq     $3, %%rdi                \n\t" // cs_c *= sizeof( double )
-		"                                  \n\t"
-		"addq  %%rsi, %%rcx                \n\t" // c11 += (4-1)*rs_c
-		"addq  %%rsi, %%rcx                \n\t"
-		"addq  %%rsi, %%rcx                \n\t"
-		"leaq   (%%rcx,%%rdi,2), %%rdx     \n\t" // c11_2 = c11 + 2*cs_c;
-		"                                  \n\t"
-		"                                  \n\t"
-		"                                  \n\t"
-		"                                  \n\t" // iteration 0
-		"                                  \n\t"
-		"movddup (3+3*4)*8(%%rax), %%xmm3  \n\t" // load xmm3 = (1/alpha33)
-		"                                  \n\t"
-		"mulpd    %%xmm3, %%xmm11          \n\t" // xmm11 *= (1/alpha33);
-		"mulpd    %%xmm3, %%xmm15          \n\t" // xmm15 *= (1/alpha33);
-		"                                  \n\t"
-		"movaps   %%xmm11, 6 * 16(%%rbx)   \n\t" // store ( beta30 beta31 ) = xmm11
-		"movaps   %%xmm15, 7 * 16(%%rbx)   \n\t" // store ( beta32 beta33 ) = xmm15
-		"movlpd   %%xmm11, (%%rcx)         \n\t" // store ( gamma30 ) = xmm11[0]
-		"movhpd   %%xmm11, (%%rcx,%%rdi)   \n\t" // store ( gamma31 ) = xmm11[1]
-		"movlpd   %%xmm15, (%%rdx)         \n\t" // store ( gamma32 ) = xmm15[0]
-		"movhpd   %%xmm15, (%%rdx,%%rdi)   \n\t" // store ( gamma33 ) = xmm15[1]
-		"subq     %%rsi, %%rcx             \n\t" // c11   -= rs_c
-		"subq     %%rsi, %%rdx             \n\t" // c11_2 -= rs_c
-		"                                  \n\t"
-		"                                  \n\t"
-		"                                  \n\t"
-		"                                  \n\t" // iteration 1
-		"                                  \n\t"
-		"movddup (2+2*4)*8(%%rax), %%xmm2  \n\t" // load xmm2 = (1/alpha22)
-		"movddup (2+3*4)*8(%%rax), %%xmm3  \n\t" // load xmm3 = alpha23
-		"                                  \n\t"
-		"movaps   %%xmm3,  %%xmm7          \n\t" // xmm7 = xmm3
-		"mulpd    %%xmm11, %%xmm3          \n\t" // xmm3 = alpha23 * ( beta30 beta31 )
-		"mulpd    %%xmm15, %%xmm7          \n\t" // xmm7 = alpha23 * ( beta32 beta33 )
-		"subpd    %%xmm3,  %%xmm10         \n\t" // xmm10 -= xmm3
-		"subpd    %%xmm7,  %%xmm14         \n\t" // xmm14 -= xmm7
-		"mulpd    %%xmm2,  %%xmm10         \n\t" // xmm10 *= (1/alpha22);
-		"mulpd    %%xmm2,  %%xmm14         \n\t" // xmm14 *= (1/alpha22);
-		"                                  \n\t"
-		"movaps   %%xmm10, 4 * 16(%%rbx)   \n\t" // store ( beta20 beta21 ) = xmm10
-		"movaps   %%xmm14, 5 * 16(%%rbx)   \n\t" // store ( beta22 beta23 ) = xmm14
-		"movlpd   %%xmm10, (%%rcx)         \n\t" // store ( gamma20 ) = xmm10[0]
-		"movhpd   %%xmm10, (%%rcx,%%rdi)   \n\t" // store ( gamma21 ) = xmm10[1]
-		"movlpd   %%xmm14, (%%rdx)         \n\t" // store ( gamma22 ) = xmm14[0]
-		"movhpd   %%xmm14, (%%rdx,%%rdi)   \n\t" // store ( gamma23 ) = xmm14[1]
-		"subq     %%rsi, %%rcx             \n\t" // c11   -= rs_c
-		"subq     %%rsi, %%rdx             \n\t" // c11_2 -= rs_c
-		"                                  \n\t"
-		"                                  \n\t"
-		"                                  \n\t"
-		"                                  \n\t" // iteration 2
-		"                                  \n\t"
-		"movddup (1+1*4)*8(%%rax), %%xmm1  \n\t" // load xmm1 = (1/alpha11)
-		"movddup (1+2*4)*8(%%rax), %%xmm2  \n\t" // load xmm2 = alpha12
-		"movddup (1+3*4)*8(%%rax), %%xmm3  \n\t" // load xmm3 = alpha13
-		"                                  \n\t"
-		"movaps   %%xmm2,  %%xmm6          \n\t" // xmm6 = xmm2
-		"movaps   %%xmm3,  %%xmm7          \n\t" // xmm7 = xmm3
-		"mulpd    %%xmm10, %%xmm2          \n\t" // xmm2 = alpha12 * ( beta20 beta21 )
-		"mulpd    %%xmm14, %%xmm6          \n\t" // xmm6 = alpha12 * ( beta22 beta23 )
-		"mulpd    %%xmm11, %%xmm3          \n\t" // xmm3 = alpha13 * ( beta30 beta31 )
-		"mulpd    %%xmm15, %%xmm7          \n\t" // xmm7 = alpha13 * ( beta32 beta33 )
-		"addpd    %%xmm3,  %%xmm2          \n\t" // xmm2 += xmm3;
-		"addpd    %%xmm7,  %%xmm6          \n\t" // xmm6 += xmm7;
-		"subpd    %%xmm2,  %%xmm9          \n\t" // xmm9  -= xmm2
-		"subpd    %%xmm6,  %%xmm13         \n\t" // xmm13 -= xmm6
-		"mulpd    %%xmm1,  %%xmm9          \n\t" // xmm9  *= (1/alpha11);
-		"mulpd    %%xmm1,  %%xmm13         \n\t" // xmm13 *= (1/alpha11);
-		"                                  \n\t"
-		"movaps   %%xmm9,  2 * 16(%%rbx)   \n\t" // store ( beta10 beta11 ) = xmm9
-		"movaps   %%xmm13, 3 * 16(%%rbx)   \n\t" // store ( beta12 beta13 ) = xmm13
-		"movlpd   %%xmm9,  (%%rcx)         \n\t" // store ( gamma10 ) = xmm9[0]
-		"movhpd   %%xmm9,  (%%rcx,%%rdi)   \n\t" // store ( gamma11 ) = xmm9[1]
-		"movlpd   %%xmm13, (%%rdx)         \n\t" // store ( gamma12 ) = xmm13[0]
-		"movhpd   %%xmm13, (%%rdx,%%rdi)   \n\t" // store ( gamma13 ) = xmm13[1]
-		"subq     %%rsi, %%rcx             \n\t" // c11   -= rs_c
-		"subq     %%rsi, %%rdx             \n\t" // c11_2 -= rs_c
-		"                                  \n\t"
-		"                                  \n\t"
-		"                                  \n\t"
-		"                                  \n\t" // iteration 3
-		"                                  \n\t"
-		"movddup (0+0*4)*8(%%rax), %%xmm0  \n\t" // load xmm0 = (1/alpha00)
-		"movddup (0+1*4)*8(%%rax), %%xmm1  \n\t" // load xmm1 = alpha01
-		"movddup (0+2*4)*8(%%rax), %%xmm2  \n\t" // load xmm2 = alpha02
-		"movddup (0+3*4)*8(%%rax), %%xmm3  \n\t" // load xmm3 = alpha03
-		"                                  \n\t"
-		"movaps   %%xmm1,  %%xmm5          \n\t" // xmm5 = xmm1
-		"movaps   %%xmm2,  %%xmm6          \n\t" // xmm6 = xmm2
-		"movaps   %%xmm3,  %%xmm7          \n\t" // xmm7 = xmm3
-		"mulpd    %%xmm9,  %%xmm1          \n\t" // xmm1 = alpha01 * ( beta10 beta11 )
-		"mulpd    %%xmm13, %%xmm5          \n\t" // xmm5 = alpha01 * ( beta12 beta13 )
-		"mulpd    %%xmm10, %%xmm2          \n\t" // xmm2 = alpha02 * ( beta20 beta21 )
-		"mulpd    %%xmm14, %%xmm6          \n\t" // xmm6 = alpha02 * ( beta22 beta23 )
-		"mulpd    %%xmm11, %%xmm3          \n\t" // xmm3 = alpha03 * ( beta30 beta31 )
-		"mulpd    %%xmm15, %%xmm7          \n\t" // xmm7 = alpha03 * ( beta32 beta33 )
-		"addpd    %%xmm2,  %%xmm1          \n\t" // xmm1 += xmm2;
-		"addpd    %%xmm6,  %%xmm5          \n\t" // xmm5 += xmm6;
-		"addpd    %%xmm3,  %%xmm1          \n\t" // xmm1 += xmm3;
-		"addpd    %%xmm7,  %%xmm5          \n\t" // xmm5 += xmm7;
-		"subpd    %%xmm1,  %%xmm8          \n\t" // xmm8  -= xmm1
-		"subpd    %%xmm5,  %%xmm12         \n\t" // xmm12 -= xmm5
-		"mulpd    %%xmm0,  %%xmm8          \n\t" // xmm8  *= (1/alpha00);
-		"mulpd    %%xmm0,  %%xmm12         \n\t" // xmm12 *= (1/alpha00);
-		"                                  \n\t"
-		"movaps   %%xmm8,  0 * 16(%%rbx)   \n\t" // store ( beta00 beta01 ) = xmm8
-		"movaps   %%xmm12, 1 * 16(%%rbx)   \n\t" // store ( beta02 beta03 ) = xmm12
-		"movlpd   %%xmm8,  (%%rcx)         \n\t" // store ( gamma00 ) = xmm8[0]
-		"movhpd   %%xmm8,  (%%rcx,%%rdi)   \n\t" // store ( gamma01 ) = xmm8[1]
-		"movlpd   %%xmm12, (%%rdx)         \n\t" // store ( gamma02 ) = xmm12[0]
-		"movhpd   %%xmm12, (%%rdx,%%rdi)   \n\t" // store ( gamma03 ) = xmm12[1]
-		"                                  \n\t"
-		"                                  \n\t"
-		"                                  \n\t"
+		
+		mov(%2, rax) // load address of a12.
+		mov(%4, rbx) // load address of b21.
+		//mov(%10, r9) // load address of b_next.
+		
+		add(imm(8*16), rax) // increment pointers to allow byte
+		add(imm(8*16), rbx) // offsets in the unrolled iterations.
+		
+		movaps(mem(rax, -8*16), xmm0) // initialize loop by pre-loading elements
+		movaps(mem(rax, -7*16), xmm1) // of a and b.
+		movaps(mem(rbx, -8*16), xmm2)
+		
+		xorpd(xmm3, xmm3)
+		xorpd(xmm4, xmm4)
+		xorpd(xmm5, xmm5)
+		xorpd(xmm6, xmm6)
+		
+		xorpd(xmm8, xmm8)
+		movaps(xmm8, xmm9)
+		movaps(xmm8, xmm10)
+		movaps(xmm8, xmm11)
+		movaps(xmm8, xmm12)
+		movaps(xmm8, xmm13)
+		movaps(xmm8, xmm14)
+		movaps(xmm8, xmm15)
+		
+		
+		
+		mov(%0, rsi) // i = k_iter;
+		test(rsi, rsi) // check i via logical AND.
+		je(.CONSIDERKLEFT) // if i == 0, jump to code that
+		 // contains the k_left loop.
+		
+		
+		label(.LOOPKITER) // MAIN LOOP
+		
+		prefetch(0, mem(rax, 1264))
+		
+		addpd(xmm3, xmm11) // iteration 0
+		movaps(mem(rbx, -7*16), xmm3)
+		addpd(xmm4, xmm15)
+		movaps(xmm2, xmm4)
+		pshufd(imm(0x4e), xmm2, xmm7)
+		mulpd(xmm0, xmm2)
+		mulpd(xmm1, xmm4)
+		
+		addpd(xmm5, xmm10)
+		addpd(xmm6, xmm14)
+		movaps(xmm7, xmm6)
+		mulpd(xmm0, xmm7)
+		mulpd(xmm1, xmm6)
+		
+		addpd(xmm2, xmm9)
+		movaps(mem(rbx, -6*16), xmm2)
+		addpd(xmm4, xmm13)
+		movaps(xmm3, xmm4)
+		pshufd(imm(0x4e), xmm3, xmm5)
+		mulpd(xmm0, xmm3)
+		mulpd(xmm1, xmm4)
+		
+		addpd(xmm7, xmm8)
+		addpd(xmm6, xmm12)
+		movaps(xmm5, xmm6)
+		mulpd(xmm0, xmm5)
+		movaps(mem(rax, -6*16), xmm0)
+		mulpd(xmm1, xmm6)
+		movaps(mem(rax, -5*16), xmm1)
+		
+		
+		addpd(xmm3, xmm11) // iteration 1
+		movaps(mem(rbx, -5*16), xmm3)
+		addpd(xmm4, xmm15)
+		movaps(xmm2, xmm4)
+		pshufd(imm(0x4e), xmm2, xmm7)
+		mulpd(xmm0, xmm2)
+		mulpd(xmm1, xmm4)
+		
+		addpd(xmm5, xmm10)
+		addpd(xmm6, xmm14)
+		movaps(xmm7, xmm6)
+		mulpd(xmm0, xmm7)
+		mulpd(xmm1, xmm6)
+		
+		addpd(xmm2, xmm9)
+		movaps(mem(rbx, -4*16), xmm2)
+		addpd(xmm4, xmm13)
+		movaps(xmm3, xmm4)
+		pshufd(imm(0x4e), xmm3, xmm5)
+		mulpd(xmm0, xmm3)
+		mulpd(xmm1, xmm4)
+		
+		addpd(xmm7, xmm8)
+		addpd(xmm6, xmm12)
+		movaps(xmm5, xmm6)
+		mulpd(xmm0, xmm5)
+		movaps(mem(rax, -4*16), xmm0)
+		mulpd(xmm1, xmm6)
+		movaps(mem(rax, -3*16), xmm1)
+		
+		prefetch(0, mem(rax, 1328))
+		
+		addpd(xmm3, xmm11) // iteration 2
+		movaps(mem(rbx, -3*16), xmm3)
+		addpd(xmm4, xmm15)
+		movaps(xmm2, xmm4)
+		pshufd(imm(0x4e), xmm2, xmm7)
+		mulpd(xmm0, xmm2)
+		mulpd(xmm1, xmm4)
+		
+		addpd(xmm5, xmm10)
+		addpd(xmm6, xmm14)
+		movaps(xmm7, xmm6)
+		mulpd(xmm0, xmm7)
+		mulpd(xmm1, xmm6)
+		
+		addpd(xmm2, xmm9)
+		movaps(mem(rbx, -2*16), xmm2)
+		addpd(xmm4, xmm13)
+		movaps(xmm3, xmm4)
+		pshufd(imm(0x4e), xmm3, xmm5)
+		mulpd(xmm0, xmm3)
+		mulpd(xmm1, xmm4)
+		
+		addpd(xmm7, xmm8)
+		addpd(xmm6, xmm12)
+		movaps(xmm5, xmm6)
+		mulpd(xmm0, xmm5)
+		movaps(mem(rax, -2*16), xmm0)
+		mulpd(xmm1, xmm6)
+		movaps(mem(rax, -1*16), xmm1)
+		
+		
+		addpd(xmm3, xmm11) // iteration 3
+		movaps(mem(rbx, -1*16), xmm3)
+		addpd(xmm4, xmm15)
+		movaps(xmm2, xmm4)
+		pshufd(imm(0x4e), xmm2, xmm7)
+		mulpd(xmm0, xmm2)
+		mulpd(xmm1, xmm4)
+		
+		addpd(xmm5, xmm10)
+		addpd(xmm6, xmm14)
+		movaps(xmm7, xmm6)
+		mulpd(xmm0, xmm7)
+		mulpd(xmm1, xmm6)
+		
+		add(imm(4*4*8), rax) // a += 4*4 (unroll x mr)
+		
+		addpd(xmm2, xmm9)
+		movaps(mem(rbx, 0*16), xmm2)
+		addpd(xmm4, xmm13)
+		movaps(xmm3, xmm4)
+		pshufd(imm(0x4e), xmm3, xmm5)
+		mulpd(xmm0, xmm3)
+		mulpd(xmm1, xmm4)
+		
+		add(imm(4*4*8), rbx) // b += 4*4 (unroll x nr)
+		
+		addpd(xmm7, xmm8)
+		addpd(xmm6, xmm12)
+		movaps(xmm5, xmm6)
+		mulpd(xmm0, xmm5)
+		movaps(mem(rax, -8*16), xmm0)
+		mulpd(xmm1, xmm6)
+		movaps(mem(rax, -7*16), xmm1)
+		
+		
+		
+		dec(rsi) // i -= 1;
+		jne(.LOOPKITER) // iterate again if i != 0.
+		
+		
+		
+		label(.CONSIDERKLEFT)
+		
+		mov(%1, rsi) // i = k_left;
+		test(rsi, rsi) // check i via logical AND.
+		je(.POSTACCUM) // if i == 0, we're done; jump to end.
+		 // else, we prepare to enter k_left loop.
+		
+		
+		label(.LOOPKLEFT) // EDGE LOOP
+		
+		addpd(xmm3, xmm11) // iteration 0
+		movaps(mem(rbx, -7*16), xmm3)
+		addpd(xmm4, xmm15)
+		movaps(xmm2, xmm4)
+		pshufd(imm(0x4e), xmm2, xmm7)
+		mulpd(xmm0, xmm2)
+		mulpd(xmm1, xmm4)
+		
+		addpd(xmm5, xmm10)
+		addpd(xmm6, xmm14)
+		movaps(xmm7, xmm6)
+		mulpd(xmm0, xmm7)
+		mulpd(xmm1, xmm6)
+		
+		addpd(xmm2, xmm9)
+		movaps(mem(rbx, -6*16), xmm2)
+		addpd(xmm4, xmm13)
+		movaps(xmm3, xmm4)
+		pshufd(imm(0x4e), xmm3, xmm5)
+		mulpd(xmm0, xmm3)
+		mulpd(xmm1, xmm4)
+		
+		addpd(xmm7, xmm8)
+		addpd(xmm6, xmm12)
+		movaps(xmm5, xmm6)
+		mulpd(xmm0, xmm5)
+		movaps(mem(rax, -6*16), xmm0)
+		mulpd(xmm1, xmm6)
+		movaps(mem(rax, -5*16), xmm1)
+		
+		
+		add(imm(4*1*8), rax) // a += 4 (1 x mr)
+		add(imm(4*1*8), rbx) // b += 4 (1 x nr)
+		
+		
+		dec(rsi) // i -= 1;
+		jne(.LOOPKLEFT) // iterate again if i != 0.
+		
+		
+		
+		label(.POSTACCUM)
+		
+		addpd(xmm3, xmm11)
+		addpd(xmm4, xmm15)
+		addpd(xmm5, xmm10)
+		addpd(xmm6, xmm14)
+		
+		
+		
+		mov(%5, rbx) // load address of b11.
+		
+		 // xmm8:   xmm9:   xmm10:  xmm11:
+		 // ( ab01  ( ab00  ( ab03  ( ab02
+		 //   ab10 )  ab11 )  ab12 )  ab13 )
+		 //
+		 // xmm12:  xmm13:  xmm14:  xmm15:
+		 // ( ab21  ( ab20  ( ab23  ( ab22
+		 //   ab30 )  ab31 )  ab32 )  ab33 )
+		movaps(xmm9, xmm0)
+		movaps(xmm8, xmm1)
+		unpcklpd(xmm8, xmm0)
+		unpckhpd(xmm9, xmm1)
+		
+		movaps(xmm11, xmm4)
+		movaps(xmm10, xmm5)
+		unpcklpd(xmm10, xmm4)
+		unpckhpd(xmm11, xmm5)
+		
+		movaps(xmm13, xmm2)
+		movaps(xmm12, xmm3)
+		unpcklpd(xmm12, xmm2)
+		unpckhpd(xmm13, xmm3)
+		
+		movaps(xmm15, xmm6)
+		movaps(xmm14, xmm7)
+		unpcklpd(xmm14, xmm6)
+		unpckhpd(xmm15, xmm7)
+		
+		 // xmm0: ( ab00 ab01 ) xmm4: ( ab02 ab03 )
+		 // xmm1: ( ab10 ab11 ) xmm5: ( ab12 ab13 )
+		 // xmm2: ( ab20 ab21 ) xmm6: ( ab22 ab23 )
+		 // xmm3: ( ab30 ab31 ) xmm7: ( ab32 ab33 )
+		
+		mov(%9, rax) // load address of alpha
+		movddup(mem(rax), xmm15) // load alpha and duplicate
+		
+		movaps(mem(rbx, 0*16), xmm8)
+		movaps(mem(rbx, 1*16), xmm12)
+		mulpd(xmm15, xmm8) // xmm8  = alpha * ( beta00 beta01 )
+		mulpd(xmm15, xmm12) // xmm12 = alpha * ( beta02 beta03 )
+		movaps(mem(rbx, 2*16), xmm9)
+		movaps(mem(rbx, 3*16), xmm13)
+		mulpd(xmm15, xmm9) // xmm9  = alpha * ( beta10 beta11 )
+		mulpd(xmm15, xmm13) // xmm13 = alpha * ( beta12 beta13 )
+		movaps(mem(rbx, 4*16), xmm10)
+		movaps(mem(rbx, 5*16), xmm14)
+		mulpd(xmm15, xmm10) // xmm10 = alpha * ( beta20 beta21 )
+		mulpd(xmm15, xmm14) // xmm14 = alpha * ( beta22 beta23 )
+		movaps(mem(rbx, 6*16), xmm11)
+		mulpd(xmm15, xmm11) // xmm11 = alpha * ( beta30 beta31 )
+		mulpd(mem(rbx, 7*16), xmm15) // xmm15 = alpha * ( beta32 beta33 )
+		
+		 // (Now scaled by alpha:)
+		 // xmm8:  ( beta00 beta01 ) xmm12: ( beta02 beta03 )
+		 // xmm9:  ( beta10 beta11 ) xmm13: ( beta12 beta13 )
+		 // xmm10: ( beta20 beta21 ) xmm14: ( beta22 beta23 )
+		 // xmm11: ( beta30 beta31 ) xmm15: ( beta32 beta33 )
+		
+		subpd(xmm0, xmm8) // xmm8  -= xmm0
+		subpd(xmm1, xmm9) // xmm9  -= xmm1
+		subpd(xmm2, xmm10) // xmm10 -= xmm2
+		subpd(xmm3, xmm11) // xmm11 -= xmm3
+		subpd(xmm4, xmm12) // xmm12 -= xmm4
+		subpd(xmm5, xmm13) // xmm13 -= xmm5
+		subpd(xmm6, xmm14) // xmm14 -= xmm6
+		subpd(xmm7, xmm15) // xmm15 -= xmm7
+		
+		
+		
+		label(.TRSM)
+		
+		
+		mov(%3, rax) // load address of a11
+		mov(%6, rcx) // load address of c11
+		
+		mov(%7, rsi) // load rs_c
+		mov(%8, rdi) // load cs_c
+		sal(imm(3), rsi) // rs_c *= sizeof( double )
+		sal(imm(3), rdi) // cs_c *= sizeof( double )
+		
+		add(rsi, rcx) // c11 += (4-1)*rs_c
+		add(rsi, rcx)
+		add(rsi, rcx)
+		lea(mem(rcx, rdi, 2), rdx) // c11_2 = c11 + 2*cs_c;
+		
+		
+		
+		 // iteration 0
+		
+		movddup(mem(3+3*4)*8(rax), xmm3) // load xmm3 = (1/alpha33)
+		
+		mulpd(xmm3, xmm11) // xmm11 *= (1/alpha33);
+		mulpd(xmm3, xmm15) // xmm15 *= (1/alpha33);
+		
+		movaps(xmm11, mem(rbx, 6*16)) // store ( beta30 beta31 ) = xmm11
+		movaps(xmm15, mem(rbx, 7*16)) // store ( beta32 beta33 ) = xmm15
+		movlpd(xmm11, mem(rcx)) // store ( gamma30 ) = xmm11[0]
+		movhpd(xmm11, mem(rcx, rdi, 1)) // store ( gamma31 ) = xmm11[1]
+		movlpd(xmm15, mem(rdx)) // store ( gamma32 ) = xmm15[0]
+		movhpd(xmm15, mem(rdx, rdi, 1)) // store ( gamma33 ) = xmm15[1]
+		sub(rsi, rcx) // c11   -= rs_c
+		sub(rsi, rdx) // c11_2 -= rs_c
+		
+		
+		
+		 // iteration 1
+		
+		movddup(mem(2+2*4)*8(rax), xmm2) // load xmm2 = (1/alpha22)
+		movddup(mem(2+3*4)*8(rax), xmm3) // load xmm3 = alpha23
+		
+		movaps(xmm3, xmm7) // xmm7 = xmm3
+		mulpd(xmm11, xmm3) // xmm3 = alpha23 * ( beta30 beta31 )
+		mulpd(xmm15, xmm7) // xmm7 = alpha23 * ( beta32 beta33 )
+		subpd(xmm3, xmm10) // xmm10 -= xmm3
+		subpd(xmm7, xmm14) // xmm14 -= xmm7
+		mulpd(xmm2, xmm10) // xmm10 *= (1/alpha22);
+		mulpd(xmm2, xmm14) // xmm14 *= (1/alpha22);
+		
+		movaps(xmm10, mem(rbx, 4*16)) // store ( beta20 beta21 ) = xmm10
+		movaps(xmm14, mem(rbx, 5*16)) // store ( beta22 beta23 ) = xmm14
+		movlpd(xmm10, mem(rcx)) // store ( gamma20 ) = xmm10[0]
+		movhpd(xmm10, mem(rcx, rdi, 1)) // store ( gamma21 ) = xmm10[1]
+		movlpd(xmm14, mem(rdx)) // store ( gamma22 ) = xmm14[0]
+		movhpd(xmm14, mem(rdx, rdi, 1)) // store ( gamma23 ) = xmm14[1]
+		sub(rsi, rcx) // c11   -= rs_c
+		sub(rsi, rdx) // c11_2 -= rs_c
+		
+		
+		
+		 // iteration 2
+		
+		movddup(mem(1+1*4)*8(rax), xmm1) // load xmm1 = (1/alpha11)
+		movddup(mem(1+2*4)*8(rax), xmm2) // load xmm2 = alpha12
+		movddup(mem(1+3*4)*8(rax), xmm3) // load xmm3 = alpha13
+		
+		movaps(xmm2, xmm6) // xmm6 = xmm2
+		movaps(xmm3, xmm7) // xmm7 = xmm3
+		mulpd(xmm10, xmm2) // xmm2 = alpha12 * ( beta20 beta21 )
+		mulpd(xmm14, xmm6) // xmm6 = alpha12 * ( beta22 beta23 )
+		mulpd(xmm11, xmm3) // xmm3 = alpha13 * ( beta30 beta31 )
+		mulpd(xmm15, xmm7) // xmm7 = alpha13 * ( beta32 beta33 )
+		addpd(xmm3, xmm2) // xmm2 += xmm3;
+		addpd(xmm7, xmm6) // xmm6 += xmm7;
+		subpd(xmm2, xmm9) // xmm9  -= xmm2
+		subpd(xmm6, xmm13) // xmm13 -= xmm6
+		mulpd(xmm1, xmm9) // xmm9  *= (1/alpha11);
+		mulpd(xmm1, xmm13) // xmm13 *= (1/alpha11);
+		
+		movaps(xmm9, mem(rbx, 2*16)) // store ( beta10 beta11 ) = xmm9
+		movaps(xmm13, mem(rbx, 3*16)) // store ( beta12 beta13 ) = xmm13
+		movlpd(xmm9, mem(rcx)) // store ( gamma10 ) = xmm9[0]
+		movhpd(xmm9, mem(rcx, rdi, 1)) // store ( gamma11 ) = xmm9[1]
+		movlpd(xmm13, mem(rdx)) // store ( gamma12 ) = xmm13[0]
+		movhpd(xmm13, mem(rdx, rdi, 1)) // store ( gamma13 ) = xmm13[1]
+		sub(rsi, rcx) // c11   -= rs_c
+		sub(rsi, rdx) // c11_2 -= rs_c
+		
+		
+		
+		 // iteration 3
+		
+		movddup(mem(0+0*4)*8(rax), xmm0) // load xmm0 = (1/alpha00)
+		movddup(mem(0+1*4)*8(rax), xmm1) // load xmm1 = alpha01
+		movddup(mem(0+2*4)*8(rax), xmm2) // load xmm2 = alpha02
+		movddup(mem(0+3*4)*8(rax), xmm3) // load xmm3 = alpha03
+		
+		movaps(xmm1, xmm5) // xmm5 = xmm1
+		movaps(xmm2, xmm6) // xmm6 = xmm2
+		movaps(xmm3, xmm7) // xmm7 = xmm3
+		mulpd(xmm9, xmm1) // xmm1 = alpha01 * ( beta10 beta11 )
+		mulpd(xmm13, xmm5) // xmm5 = alpha01 * ( beta12 beta13 )
+		mulpd(xmm10, xmm2) // xmm2 = alpha02 * ( beta20 beta21 )
+		mulpd(xmm14, xmm6) // xmm6 = alpha02 * ( beta22 beta23 )
+		mulpd(xmm11, xmm3) // xmm3 = alpha03 * ( beta30 beta31 )
+		mulpd(xmm15, xmm7) // xmm7 = alpha03 * ( beta32 beta33 )
+		addpd(xmm2, xmm1) // xmm1 += xmm2;
+		addpd(xmm6, xmm5) // xmm5 += xmm6;
+		addpd(xmm3, xmm1) // xmm1 += xmm3;
+		addpd(xmm7, xmm5) // xmm5 += xmm7;
+		subpd(xmm1, xmm8) // xmm8  -= xmm1
+		subpd(xmm5, xmm12) // xmm12 -= xmm5
+		mulpd(xmm0, xmm8) // xmm8  *= (1/alpha00);
+		mulpd(xmm0, xmm12) // xmm12 *= (1/alpha00);
+		
+		movaps(xmm8, mem(rbx, 0*16)) // store ( beta00 beta01 ) = xmm8
+		movaps(xmm12, mem(rbx, 1*16)) // store ( beta02 beta03 ) = xmm12
+		movlpd(xmm8, mem(rcx)) // store ( gamma00 ) = xmm8[0]
+		movhpd(xmm8, mem(rcx, rdi, 1)) // store ( gamma01 ) = xmm8[1]
+		movlpd(xmm12, mem(rdx)) // store ( gamma02 ) = xmm12[0]
+		movhpd(xmm12, mem(rdx, rdi, 1)) // store ( gamma03 ) = xmm12[1]
+		
+		
+		
 
 		: // output operands (none)
 		: // input operands
@@ -525,4 +528,5 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 	);
 
 }
+
 
