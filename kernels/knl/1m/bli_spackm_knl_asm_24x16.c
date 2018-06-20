@@ -32,10 +32,10 @@
 
 */
 
-#include "bli_avx512_macros.h"
 #include "blis.h"
 
-#include <stdio.h>
+#define BLIS_ASM_SYNTAX_INTEL
+#include "bli_x86_asm_macros.h"
 
 #define LOADMUL8x8(a,o,s1,s3,s5,s7, \
                    z0,z1,z2,z3,z4,z5,z6,z7) \
