@@ -91,7 +91,8 @@ endef
 # included, which results in those values having been stored to
 # configuration-qualified variables.
 
-get-noopt-cflags-for   = $(strip $(call load-var-for,CDBGFLAGS,$(1)) \
+get-noopt-cflags-for   = $(strip $(CFLAGS_PRESET) \
+                                 $(call load-var-for,CDBGFLAGS,$(1)) \
                                  $(call load-var-for,CWARNFLAGS,$(1)) \
                                  $(call load-var-for,CPICFLAGS,$(1)) \
                                  $(call load-var-for,CMISCFLAGS,$(1)) \
@@ -100,24 +101,29 @@ get-noopt-cflags-for   = $(strip $(call load-var-for,CDBGFLAGS,$(1)) \
                                  $(INCLUDE_PATHS) $(VERS_DEF) \
                           )
 
-get-refinit-cflags-for = $(call load-var-for,COPTFLAGS,$(1)) \
-                         $(call get-noopt-cflags-for,$(1)) \
-                         -DBLIS_CNAME=$(1)
+get-refinit-cflags-for = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
+                                 $(call get-noopt-cflags-for,$(1)) \
+                                 -DBLIS_CNAME=$(1) \
+                          )
 
-get-refkern-cflags-for = $(call load-var-for,CROPTFLAGS,$(1)) \
-                         $(call load-var-for,CRVECFLAGS,$(1)) \
-                         $(call get-noopt-cflags-for,$(1)) \
-                         -DBLIS_CNAME=$(1)
+get-refkern-cflags-for = $(strip $(call load-var-for,CROPTFLAGS,$(1)) \
+                                 $(call load-var-for,CRVECFLAGS,$(1)) \
+                                 $(call get-noopt-cflags-for,$(1)) \
+                                 -DBLIS_CNAME=$(1) \
+                          )
 
-get-config-cflags-for  = $(call load-var-for,COPTFLAGS,$(1)) \
-                         $(call get-noopt-cflags-for,$(1))
+get-config-cflags-for  = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
+                                 $(call get-noopt-cflags-for,$(1)) \
+                          )
 
-get-frame-cflags-for   = $(call load-var-for,COPTFLAGS,$(1)) \
-                         $(call get-noopt-cflags-for,$(1))
+get-frame-cflags-for   = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
+                                 $(call get-noopt-cflags-for,$(1)) \
+                          )
 
-get-kernel-cflags-for  = $(call load-var-for,CKOPTFLAGS,$(1)) \
-                         $(call load-var-for,CKVECFLAGS,$(1)) \
-                         $(call get-noopt-cflags-for,$(1))
+get-kernel-cflags-for  = $(strip $(call load-var-for,CKOPTFLAGS,$(1)) \
+                                 $(call load-var-for,CKVECFLAGS,$(1)) \
+                                 $(call get-noopt-cflags-for,$(1)) \
+                          )
 
 get-noopt-text       = "(CFLAGS for no optimization)"
 get-refinit-text-for = "('$(1)' CFLAGS for ref. kernel init)"
@@ -334,7 +340,7 @@ LIBPTHREAD := -lpthread
 # Default linker flags.
 # NOTE: -lpthread is needed unconditionally because BLIS uses pthread_once()
 # to initialize itself in a thread-safe manner.
-LDFLAGS    := $(LIBM) $(LIBPTHREAD)
+LDFLAGS    := $(LDFLAGS_PRESET) $(LIBM) $(LIBPTHREAD)
 
 # Add libmemkind to the link-time flags, if it was enabled at configure-time.
 ifeq ($(MK_ENABLE_MEMKIND),yes)

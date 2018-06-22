@@ -1492,6 +1492,11 @@ main()
 	install_incdir_user=''
 	incdir_flag=''
 
+	# The preset value of CFLAGS and LDFLAGS (ie: compiler and linker flags
+	# to use in addition to those determined by the build system).
+	cflags_preset=''
+	ldflags_preset=''
+
 	# The user-given debug type and a flag indicating it was given.
 	debug_type=''
 	debug_flag=''
@@ -2111,6 +2116,26 @@ main()
 	echo "${script_name}:   libdir:     ${install_libdir}"
 	echo "${script_name}:   includedir: ${install_incdir}"
 
+	# Check if CFLAGS is non-empty.
+	if [ -n "${CFLAGS}" ]; then
+		cflags_preset="${CFLAGS}"
+		echo "${script_name}: detected preset CFLAGS; prepending:"
+		echo "${script_name}:   ${cflags_preset}"
+	else
+		cflags_preset=''
+		echo "${script_name}: no preset CFLAGS detected."
+	fi
+
+	# Check if LDFLAGS is non-empty.
+	if [ -n "${LDFLAGS}" ]; then
+		ldflags_preset="${LDFLAGS}"
+		echo "${script_name}: detected preset LDFLAGS; prepending:"
+		echo "${script_name}:   ${ldflags_preset}"
+	else
+		ldflags_preset=''
+		echo "${script_name}: no preset LDFLAGS detected."
+	fi
+
 	# Check if the debug flag was specified.
 	if [ -n "${debug_flag}" ]; then
 		if [ "x${debug_type}" = "xopt" ]; then
@@ -2319,6 +2344,8 @@ main()
 		| sed -e "s/@CC@/${cc_esc}/g" \
 		| sed -e "s/@CC_VENDOR@/${cc_vendor}/g" \
 		| sed -e "s/@RANLIB@/${ranlib_esc}/g" \
+		| sed -e "s/@cflags_preset@/${cflags_preset}/g" \
+		| sed -e "s/@ldflags_preset@/${ldflags_preset}/g" \
 		| sed -e "s/@debug_type@/${debug_type}/g" \
 		| sed -e "s/@threading_model@/${threading_model}/g" \
 		| sed -e "s/@install_libdir@/${install_libdir_esc}/g" \
