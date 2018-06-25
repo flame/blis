@@ -64,10 +64,9 @@ void bli_dtrsm_u_penryn_asm_4x4
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-	__asm__ volatile
-	(
+	begin_asm()
 		
-		mov(%1, rbx) // load address of b11.
+		mov(var(b11), rbx) // load address of b11.
 		
 		movaps(mem(rbx, 0*16), xmm8) // xmm8  = ( beta00 beta01 )
 		movaps(mem(rbx, 1*16), xmm12) // xmm9  = ( beta02 beta03 )
@@ -80,11 +79,11 @@ void bli_dtrsm_u_penryn_asm_4x4
 		
 		
 		
-		mov(%0, rax) // load address of a11
-		mov(%2, rcx) // load address of c11
+		mov(var(a11), rax) // load address of a11
+		mov(var(c11), rcx) // load address of c11
 		
-		mov(%3, rsi) // load rs_c
-		mov(%4, rdi) // load cs_c
+		mov(var(rs_c), rsi) // load rs_c
+		mov(var(cs_c), rdi) // load cs_c
 		sal(imm(3), rsi) // rs_c *= sizeof( double )
 		sal(imm(3), rdi) // cs_c *= sizeof( double )
 		
@@ -202,13 +201,14 @@ void bli_dtrsm_u_penryn_asm_4x4
 		
 		
 
+    end_asm(
 		: // output operands (none)
 		: // input operands
-		  "m" (a11),    // 0
-		  "m" (b11),    // 1
-		  "m" (c11),    // 2
-		  "m" (rs_c),   // 3
-		  "m" (cs_c)    // 4
+		  [a11]  "m" (a11),    // 0
+		  [b11]  "m" (b11),    // 1
+		  [c11]  "m" (c11),    // 2
+		  [rs_c] "m" (rs_c),   // 3
+		  [cs_c] "m" (cs_c)    // 4
 		: // register clobber list
 		  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 		  "xmm0", "xmm1", "xmm2", "xmm3",
@@ -216,7 +216,7 @@ void bli_dtrsm_u_penryn_asm_4x4
 		  "xmm8", "xmm9", "xmm10", "xmm11",
 		  "xmm12", "xmm13", "xmm14", "xmm15",
 		  "memory"
-	);
+	)
 
 }
 

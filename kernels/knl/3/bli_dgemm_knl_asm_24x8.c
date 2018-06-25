@@ -213,7 +213,7 @@ void bli_dgemm_knl_asm_24x8
     int tlooph, tloopl, blooph, bloopl;
 #endif
 
-    BEGIN_ASM
+    BEGIN_ASM()
 
 #ifdef MONITORS
     RDTSC

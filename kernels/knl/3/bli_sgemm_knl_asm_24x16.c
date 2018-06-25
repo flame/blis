@@ -210,8 +210,8 @@ void bli_sgemm_knl_asm_24x16
     int tlooph, tloopl, blooph, bloopl;
 #endif
 
-    __asm__ volatile
-    (
+    BEGIN_ASM()
+
 #ifdef MONITORS
     RDTSC
     MOV(VAR(topl), EAX)
@@ -664,6 +664,8 @@ void bli_sgemm_knl_asm_24x16
     MOV(VAR(botl), EAX)
     MOV(VAR(both), EDX)
 #endif
+
+    END_ASM(
     : // output operands
 #ifdef MONITORS
       [topl]  "=m" (topl),
@@ -694,7 +696,7 @@ void bli_sgemm_knl_asm_24x16
       "zmm14", "zmm15", "zmm16", "zmm17", "zmm18", "zmm19", "zmm20", "zmm21",
       "zmm22", "zmm23", "zmm24", "zmm25", "zmm26", "zmm27", "zmm28", "zmm29",
       "zmm30", "zmm31", "memory"
-    );
+    )
 
 #ifdef LOOPMON
     printf("looptime = \t%d\n", bloopl - tloopl);

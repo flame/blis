@@ -99,14 +99,13 @@ void bli_sgemm_zen_asm_6x16
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-	__asm__ volatile
-	(
+	begin_asm()
 	
 	vzeroall() // zero all xmm/ymm registers.
 	
 	
-	mov(%2, rax) // load address of a.
-	mov(%3, rbx) // load address of b.
+	mov(var(a), rax) // load address of a.
+	mov(var(b), rbx) // load address of b.
 	//mov(%9, r15) // load address of b_next.
 	
 	add(imm(32*4), rbx)
@@ -114,8 +113,8 @@ void bli_sgemm_zen_asm_6x16
 	vmovaps(mem(rbx, -4*32), ymm0)
 	vmovaps(mem(rbx, -3*32), ymm1)
 	
-	mov(%6, rcx) // load address of c
-	mov(%7, rdi) // load rs_c
+	mov(var(c), rcx) // load address of c
+	mov(var(rs_c), rdi) // load rs_c
 	lea(mem(, rdi, 4), rdi) // rs_c *= sizeof(float)
 	
 	lea(mem(rdi, rdi, 2), r13) // r13 = 3*rs_c;
@@ -130,7 +129,7 @@ void bli_sgemm_zen_asm_6x16
 	
 	
 	
-	mov(%0, rsi) // i = k_iter;
+	mov(var(k_iter), rsi) // i = k_iter;
 	test(rsi, rsi) // check i via logical AND.
 	je(.SCONSIDKLEFT) // if i == 0, jump to code that
 	 // contains the k_left loop.
@@ -257,7 +256,7 @@ void bli_sgemm_zen_asm_6x16
 	
 	label(.SCONSIDKLEFT)
 	
-	mov(%1, rsi) // i = k_left;
+	mov(var(k_left), rsi) // i = k_left;
 	test(rsi, rsi) // check i via logical AND.
 	je(.SPOSTACCUM) // if i == 0, we're done; jump to end.
 	 // else, we prepare to enter k_left loop.
@@ -305,8 +304,8 @@ void bli_sgemm_zen_asm_6x16
 	
 	
 	
-	mov(%4, rax) // load address of alpha
-	mov(%5, rbx) // load address of beta 
+	mov(var(alpha), rax) // load address of alpha
+	mov(var(beta), rbx) // load address of beta
 	vbroadcastss(mem(rax), ymm0) // load alpha and duplicate
 	vbroadcastss(mem(rbx), ymm3) // load beta and duplicate
 	
@@ -328,7 +327,7 @@ void bli_sgemm_zen_asm_6x16
 	
 	
 	
-	mov(%8, rsi) // load cs_c
+	mov(var(cs_c), rsi) // load cs_c
 	lea(mem(, rsi, 4), rsi) // rsi = cs_c * sizeof(float)
 	
 	lea(mem(rcx, rsi, 8), rdx) // load address of c +  8*cs_c;
@@ -872,19 +871,20 @@ void bli_sgemm_zen_asm_6x16
 	
 	
 
+    end_asm(
 	: // output operands (none)
 	: // input operands
-	  "m" (k_iter), // 0
-	  "m" (k_left), // 1
-	  "m" (a),      // 2
-	  "m" (b),      // 3
-	  "m" (alpha),  // 4
-	  "m" (beta),   // 5
-	  "m" (c),      // 6
-	  "m" (rs_c),   // 7
-	  "m" (cs_c)/*,   // 8
-	  "m" (b_next), // 9
-	  "m" (a_next)*/  // 10
+      [k_iter] "m" (k_iter), // 0
+      [k_left] "m" (k_left), // 1
+      [a]      "m" (a),      // 2
+      [b]      "m" (b),      // 3
+      [alpha]  "m" (alpha),  // 4
+      [beta]   "m" (beta),   // 5
+      [c]      "m" (c),      // 6
+      [rs_c]   "m" (rs_c),   // 7
+      [cs_c]   "m" (cs_c)/*,   // 8
+      [b_next] "m" (b_next), // 9
+      [a_next] "m" (a_next)*/  // 10
 	: // register clobber list
 	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", 
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
@@ -893,7 +893,7 @@ void bli_sgemm_zen_asm_6x16
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "memory"
-	);
+	)
 }
 
 
@@ -945,14 +945,13 @@ void bli_dgemm_zen_asm_6x8
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-	__asm__ volatile
-	(
+	begin_asm()
 	
 	vzeroall() // zero all xmm/ymm registers.
 	
 	
-	mov(%2, rax) // load address of a.
-	mov(%3, rbx) // load address of b.
+	mov(var(a), rax) // load address of a.
+	mov(var(b), rbx) // load address of b.
 	//mov(%9, r15) // load address of b_next.
 	
 	add(imm(32*4), rbx)
@@ -960,8 +959,8 @@ void bli_dgemm_zen_asm_6x8
 	vmovapd(mem(rbx, -4*32), ymm0)
 	vmovapd(mem(rbx, -3*32), ymm1)
 	
-	mov(%6, rcx) // load address of c
-	mov(%7, rdi) // load rs_c
+	mov(var(c), rcx) // load address of c
+	mov(var(rs_c), rdi) // load rs_c
 	lea(mem(, rdi, 8), rdi) // rs_c *= sizeof(double)
 	
 	lea(mem(rdi, rdi, 2), r13) // r13 = 3*rs_c;
@@ -976,7 +975,7 @@ void bli_dgemm_zen_asm_6x8
 	
 	
 	
-	mov(%0, rsi) // i = k_iter;
+	mov(var(k_iter), rsi) // i = k_iter;
 	test(rsi, rsi) // check i via logical AND.
 	je(.DCONSIDKLEFT) // if i == 0, jump to code that
 	 // contains the k_left loop.
@@ -1103,7 +1102,7 @@ void bli_dgemm_zen_asm_6x8
 	
 	label(.DCONSIDKLEFT)
 	
-	mov(%1, rsi) // i = k_left;
+	mov(var(k_left), rsi) // i = k_left;
 	test(rsi, rsi) // check i via logical AND.
 	je(.DPOSTACCUM) // if i == 0, we're done; jump to end.
 	 // else, we prepare to enter k_left loop.
@@ -1151,8 +1150,8 @@ void bli_dgemm_zen_asm_6x8
 	
 	
 	
-	mov(%4, rax) // load address of alpha
-	mov(%5, rbx) // load address of beta 
+	mov(var(alpha), rax) // load address of alpha
+	mov(var(beta), rbx) // load address of beta
 	vbroadcastsd(mem(rax), ymm0) // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3) // load beta and duplicate
 	
@@ -1174,7 +1173,7 @@ void bli_dgemm_zen_asm_6x8
 	
 	
 	
-	mov(%8, rsi) // load cs_c
+	mov(var(cs_c), rsi) // load cs_c
 	lea(mem(, rsi, 8), rsi) // rsi = cs_c * sizeof(double)
 	
 	lea(mem(rcx, rsi, 4), rdx) // load address of c +  4*cs_c;
@@ -1611,19 +1610,20 @@ void bli_dgemm_zen_asm_6x8
 	
 	
 
+    end_asm(
 	: // output operands (none)
 	: // input operands
-	  "m" (k_iter), // 0
-	  "m" (k_left), // 1
-	  "m" (a),      // 2
-	  "m" (b),      // 3
-	  "m" (alpha),  // 4
-	  "m" (beta),   // 5
-	  "m" (c),      // 6
-	  "m" (rs_c),   // 7
-	  "m" (cs_c)/*,   // 8
-	  "m" (b_next), // 9
-	  "m" (a_next)*/  // 10
+      [k_iter] "m" (k_iter), // 0
+      [k_left] "m" (k_left), // 1
+      [a]      "m" (a),      // 2
+      [b]      "m" (b),      // 3
+      [alpha]  "m" (alpha),  // 4
+      [beta]   "m" (beta),   // 5
+      [c]      "m" (c),      // 6
+      [rs_c]   "m" (rs_c),   // 7
+      [cs_c]   "m" (cs_c)/*,   // 8
+      [b_next] "m" (b_next), // 9
+      [a_next] "m" (a_next)*/  // 10
 	: // register clobber list
 	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", 
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
@@ -1632,7 +1632,7 @@ void bli_dgemm_zen_asm_6x8
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "memory"
-	);
+	)
 }
 
 
@@ -1691,14 +1691,13 @@ void bli_cgemm_zen_asm_3x8
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-	__asm__ volatile
-	(
+	begin_asm()
 	
 	vzeroall() // zero all xmm/ymm registers.
 	
 	
-	mov(%2, rax) // load address of a.
-	mov(%3, rbx) // load address of b.
+	mov(var(a), rax) // load address of a.
+	mov(var(b), rbx) // load address of b.
 	//mov(%9, r15) // load address of b_next.
 	
 	add(imm(32*4), rbx)
@@ -1706,8 +1705,8 @@ void bli_cgemm_zen_asm_3x8
 	vmovaps(mem(rbx, -4*32), ymm0)
 	vmovaps(mem(rbx, -3*32), ymm1)
 	
-	mov(%6, rcx) // load address of c
-	mov(%7, rdi) // load rs_c
+	mov(var(c), rcx) // load address of c
+	mov(var(rs_c), rdi) // load rs_c
 	lea(mem(, rdi, 8), rdi) // rs_c *= sizeof(scomplex)
 	
 	lea(mem(rcx, rdi, 1), r11) // r11 = c + 1*rs_c;
@@ -1720,7 +1719,7 @@ void bli_cgemm_zen_asm_3x8
 	
 	
 	
-	mov(%0, rsi) // i = k_iter;
+	mov(var(k_iter), rsi) // i = k_iter;
 	test(rsi, rsi) // check i via logical AND.
 	je(.CCONSIDKLEFT) // if i == 0, jump to code that
 	 // contains the k_left loop.
@@ -1847,7 +1846,7 @@ void bli_cgemm_zen_asm_3x8
 	
 	label(.CCONSIDKLEFT)
 	
-	mov(%1, rsi) // i = k_left;
+	mov(var(k_left), rsi) // i = k_left;
 	test(rsi, rsi) // check i via logical AND.
 	je(.CPOSTACCUM) // if i == 0, we're done; jump to end.
 	 // else, we prepare to enter k_left loop.
@@ -1916,7 +1915,7 @@ void bli_cgemm_zen_asm_3x8
 	
 	
 	
-	mov(%4, rax) // load address of alpha
+	mov(var(alpha), rax) // load address of alpha
 	vbroadcastss(mem(rax), ymm0) // load alpha_r and duplicate
 	vbroadcastss(mem(rax, 4), ymm1) // load alpha_i and duplicate
 	
@@ -1957,14 +1956,14 @@ void bli_cgemm_zen_asm_3x8
 	
 	
 	
-	mov(%5, rbx) // load address of beta 
+	mov(var(beta), rbx) // load address of beta
 	vbroadcastss(mem(rbx), ymm1) // load beta_r and duplicate
 	vbroadcastss(mem(rbx, 4), ymm2) // load beta_i and duplicate
 	
 	
 	
 	
-	mov(%8, rsi) // load cs_c
+	mov(var(cs_c), rsi) // load cs_c
 	lea(mem(, rsi, 8), rsi) // rsi = cs_c * sizeof(scomplex)
 	lea(mem(, rsi, 4), rdx) // rdx = 4*cs_c;
 	lea(mem(rsi, rsi, 2), r13) // r13 = 3*cs_c;
@@ -2143,19 +2142,20 @@ void bli_cgemm_zen_asm_3x8
 	
 	
 
+    end_asm(
 	: // output operands (none)
 	: // input operands
-	  "m" (k_iter), // 0
-	  "m" (k_left), // 1
-	  "m" (a),      // 2
-	  "m" (b),      // 3
-	  "m" (alpha),  // 4
-	  "m" (beta),   // 5
-	  "m" (c),      // 6
-	  "m" (rs_c),   // 7
-	  "m" (cs_c)/*,   // 8
-	  "m" (b_next), // 9
-	  "m" (a_next)*/  // 10
+      [k_iter] "m" (k_iter), // 0
+      [k_left] "m" (k_left), // 1
+      [a]      "m" (a),      // 2
+      [b]      "m" (b),      // 3
+      [alpha]  "m" (alpha),  // 4
+      [beta]   "m" (beta),   // 5
+      [c]      "m" (c),      // 6
+      [rs_c]   "m" (rs_c),   // 7
+      [cs_c]   "m" (cs_c)/*,   // 8
+      [b_next] "m" (b_next), // 9
+      [a_next] "m" (a_next)*/  // 10
 	: // register clobber list
 	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", 
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
@@ -2164,7 +2164,7 @@ void bli_cgemm_zen_asm_3x8
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "memory"
-	);
+	)
 }
 
 
@@ -2219,14 +2219,13 @@ void bli_zgemm_zen_asm_3x4
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-	__asm__ volatile
-	(
+	begin_asm()
 	
 	vzeroall() // zero all xmm/ymm registers.
 	
 	
-	mov(%2, rax) // load address of a.
-	mov(%3, rbx) // load address of b.
+	mov(var(a), rax) // load address of a.
+	mov(var(b), rbx) // load address of b.
 	//mov(%9, r15) // load address of b_next.
 	
 	add(imm(32*4), rbx)
@@ -2234,8 +2233,8 @@ void bli_zgemm_zen_asm_3x4
 	vmovapd(mem(rbx, -4*32), ymm0)
 	vmovapd(mem(rbx, -3*32), ymm1)
 	
-	mov(%6, rcx) // load address of c
-	mov(%7, rdi) // load rs_c
+	mov(var(c), rcx) // load address of c
+	mov(var(rs_c), rdi) // load rs_c
 	lea(mem(, rdi, 8), rdi) // rs_c *= sizeof(dcomplex)
 	lea(mem(, rdi, 2), rdi)
 	
@@ -2249,7 +2248,7 @@ void bli_zgemm_zen_asm_3x4
 	
 	
 	
-	mov(%0, rsi) // i = k_iter;
+	mov(var(k_iter), rsi) // i = k_iter;
 	test(rsi, rsi) // check i via logical AND.
 	je(.ZCONSIDKLEFT) // if i == 0, jump to code that
 	 // contains the k_left loop.
@@ -2376,7 +2375,7 @@ void bli_zgemm_zen_asm_3x4
 	
 	label(.ZCONSIDKLEFT)
 	
-	mov(%1, rsi) // i = k_left;
+	mov(var(k_left), rsi) // i = k_left;
 	test(rsi, rsi) // check i via logical AND.
 	je(.ZPOSTACCUM) // if i == 0, we're done; jump to end.
 	 // else, we prepare to enter k_left loop.
@@ -2444,7 +2443,7 @@ void bli_zgemm_zen_asm_3x4
 	
 	
 	
-	mov(%4, rax) // load address of alpha
+	mov(var(alpha), rax) // load address of alpha
 	vbroadcastsd(mem(rax), ymm0) // load alpha_r and duplicate
 	vbroadcastsd(mem(rax, 8), ymm1) // load alpha_i and duplicate
 	
@@ -2485,14 +2484,14 @@ void bli_zgemm_zen_asm_3x4
 	
 	
 	
-	mov(%5, rbx) // load address of beta 
+	mov(var(beta), rbx) // load address of beta
 	vbroadcastsd(mem(rbx), ymm1) // load beta_r and duplicate
 	vbroadcastsd(mem(rbx, 8), ymm2) // load beta_i and duplicate
 	
 	
 	
 	
-	mov(%8, rsi) // load cs_c
+	mov(var(cs_c), rsi) // load cs_c
 	lea(mem(, rsi, 8), rsi) // rsi = cs_c * sizeof(dcomplex)
 	lea(mem(, rsi, 2), rsi)
 	lea(mem(, rsi, 2), rdx) // rdx = 2*cs_c;
@@ -2671,19 +2670,20 @@ void bli_zgemm_zen_asm_3x4
 	
 	
 
+    end_asm(
 	: // output operands (none)
 	: // input operands
-	  "m" (k_iter), // 0
-	  "m" (k_left), // 1
-	  "m" (a),      // 2
-	  "m" (b),      // 3
-	  "m" (alpha),  // 4
-	  "m" (beta),   // 5
-	  "m" (c),      // 6
-	  "m" (rs_c),   // 7
-	  "m" (cs_c)/*,   // 8
-	  "m" (b_next), // 9
-	  "m" (a_next)*/  // 10
+      [k_iter] "m" (k_iter), // 0
+      [k_left] "m" (k_left), // 1
+      [a]      "m" (a),      // 2
+      [b]      "m" (b),      // 3
+      [alpha]  "m" (alpha),  // 4
+      [beta]   "m" (beta),   // 5
+      [c]      "m" (c),      // 6
+      [rs_c]   "m" (rs_c),   // 7
+      [cs_c]   "m" (cs_c)/*,   // 8
+      [b_next] "m" (b_next), // 9
+      [a_next] "m" (a_next)*/  // 10
 	: // register clobber list
 	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", 
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
@@ -2692,7 +2692,7 @@ void bli_zgemm_zen_asm_3x4
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "memory"
-	);
+	)
 }
 
 

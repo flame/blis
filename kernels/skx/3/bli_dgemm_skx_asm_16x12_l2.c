@@ -306,7 +306,7 @@ void bli_dgemm_skx_asm_16x12_l2(
     const int64_t rs_c = rs_c_;
     const int64_t cs_c = cs_c_;
 
-    BEGIN_ASM
+    BEGIN_ASM()
 
     VXORPD(YMM(8), YMM(8), YMM(8)) //clear out registers
     VMOVAPD(YMM( 7), YMM(8))
