@@ -209,11 +209,13 @@ print_usage()
 	echo " "
 	echo "   CC            Specifies the C compiler to use."
 	echo "   RANLIB        Specifies the ranlib executable to use."
+	echo "   CFLAGS        Specifies additional compiler flags to use (prepended)."
+	echo "   LDFLAGS       Specifies additional linker flags to use (prepended)."
 	echo " "
 	echo "   Environment variables may also be specified as command line"
 	echo "   options, e.g.:"
 	echo " "
-	echo "     ./configure [options] CC=gcc sandybridge"
+	echo "     ./configure [options] CC=gcc haswell"
 	echo " "
 	echo "   Note that not all compilers are compatible with a given"
 	echo "   configuration."
@@ -846,18 +848,20 @@ get_cxx_search_list()
 
 select_cc()
 {
-	local search_list se_suf the_cc cc rval
+	local search_list CC_env the_cc cc
 
 	# This is the list of compilers to search for, and the order in which
 	# to search for them.
 	search_list=$1
 
-	se_file="cc_stderr.txt"
+	# The environment variable associated with the compiler type we
+	# are searching (e.g. CC, CXX).
+	CC_env=$2
 
 	# If CC contains something, add it to the beginning of our default
 	# search list.
-	if [ -n "${CC}" ]; then
-		search_list="${CC} ${search_order}"
+	if [ -n "${CC_env}" ]; then
+		search_list="${CC_env} ${search_list}"
 	fi
 
 	# Initialize our selected compiler to empty.
@@ -867,56 +871,12 @@ select_cc()
 	# works.
 	for cc in ${search_list}; do
 
-		# See if the compiler works and/or is present.
-		rval=$(${cc} --version 2> ${se_file})
+		# See if the current compiler works and/or is present.
+		${cc} --version > /dev/null 2>&1
 
-		# If the output file is non-empty, we will use this compiler.
-		if [ -z "$(cat ${se_file})" ]; then
+		if [ "$?" == 0 ]; then
 			the_cc=${cc}
-			rm ${se_file}
 			break
-		else
-			rm ${se_file}
-		fi
-	done
-
-	# Return the selected compiler.
-	echo "${the_cc}"
-}
-
-select_cxx()
-{
-	local search_list se_suf the_cc cc rval
-
-	# This is the list of compilers to search for, and the order in which
-	# to search for them.
-	search_list=$1
-
-	se_file="cc_stderr.txt"
-
-	# If CXX contains something, add it to the beginning of our default
-	# search list.
-	if [ -n "${CXX}" ]; then
-		search_list="${CXX} ${search_order}"
-	fi
-
-	# Initialize our selected compiler to empty.
-	the_cc=""
-
-	# Try each compiler in the list and select the first one we find that
-	# works.
-	for cc in ${search_list}; do
-
-		# See if the compiler works and/or is present.
-		rval=$(${cc} --version 2> ${se_file})
-
-		# If the output file is non-empty, we will use this compiler.
-		if [ -z "$(cat ${se_file})" ]; then
-			the_cc=${cc}
-			rm ${se_file}
-			break
-		else
-			rm ${se_file}
 		fi
 	done
 
@@ -1137,6 +1097,8 @@ get_compiler_version()
 	# Query the full vendor version string output. This includes the
 	# version number along with (potentially) a bunch of other textual
 	# clutter.
+	# NOTE: This maybe should use merged stdout/stderr rather than only
+	# stdout. But it works for now.
 	vendor_string="$(${cc} --version 2>/dev/null)"
 
 	# Query the compiler "vendor" (ie: the compiler's simple name) and
@@ -1577,6 +1539,11 @@ main()
 	install_incdir_user=''
 	incdir_flag=''
 
+	# The preset value of CFLAGS and LDFLAGS (ie: compiler and linker flags
+	# to use in addition to those determined by the build system).
+	cflags_preset=''
+	ldflags_preset=''
+
 	# The user-given debug type and a flag indicating it was given.
 	debug_type=''
 	debug_flag=''
@@ -1810,7 +1777,7 @@ main()
 	echo "${script_name}: C compiler search list is: ${cc_search_list}."
 
 	# Find a working C compiler.
-	found_cc=$(select_cc "${cc_search_list}")
+	found_cc=$(select_cc "${cc_search_list}" "${CC}")
 
 	# If we didn't find any working C compilers, we print an error message.
 	if [ -z "${found_cc}" ]; then
@@ -1829,8 +1796,9 @@ main()
 
 	echo "${script_name}: C++ compiler search list is: ${cxx_search_list}."
 
-	# Find a working C++ compiler.
-	found_cxx=$(select_cxx "${cxx_search_list}")
+	# Find a working C++ compiler. NOTE: We can reuse the select_cc()
+	# function since it is written in a way that is general-purpose.
+	found_cxx=$(select_cc "${cxx_search_list}" "${CXX}")
 
 	# If we didn't find any working C++ compilers, we print an error message.
 	if [ -z "${found_cxx}" ]; then
@@ -2226,6 +2194,26 @@ main()
 	echo "${script_name}:   libdir:     ${install_libdir}"
 	echo "${script_name}:   includedir: ${install_incdir}"
 
+	# Check if CFLAGS is non-empty.
+	if [ -n "${CFLAGS}" ]; then
+		cflags_preset="${CFLAGS}"
+		echo "${script_name}: detected preset CFLAGS; prepending:"
+		echo "${script_name}:   ${cflags_preset}"
+	else
+		cflags_preset=''
+		echo "${script_name}: no preset CFLAGS detected."
+	fi
+
+	# Check if LDFLAGS is non-empty.
+	if [ -n "${LDFLAGS}" ]; then
+		ldflags_preset="${LDFLAGS}"
+		echo "${script_name}: detected preset LDFLAGS; prepending:"
+		echo "${script_name}:   ${ldflags_preset}"
+	else
+		ldflags_preset=''
+		echo "${script_name}: no preset LDFLAGS detected."
+	fi
+
 	# Check if the debug flag was specified.
 	if [ -n "${debug_flag}" ]; then
 		if [ "x${debug_type}" = "xopt" ]; then
@@ -2464,6 +2452,8 @@ main()
 		| sed -e "s/@CC@/${cc_esc}/g" \
 		| sed -e "s/@CXX@/${cxx_esc}/g" \
 		| sed -e "s/@RANLIB@/${ranlib_esc}/g" \
+		| sed -e "s/@cflags_preset@/${cflags_preset}/g" \
+		| sed -e "s/@ldflags_preset@/${ldflags_preset}/g" \
 		| sed -e "s/@debug_type@/${debug_type}/g" \
 		| sed -e "s/@threading_model@/${threading_model}/g" \
 		| sed -e "s/@install_libdir@/${install_libdir_esc}/g" \
