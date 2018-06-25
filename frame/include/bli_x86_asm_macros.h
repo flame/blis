@@ -98,7 +98,7 @@
 #define COMMENT_BEGIN "#"
 #define COMMENT_END
 
-#define BEGIN_ASM __asm__ volatile (
+#define BEGIN_ASM() __asm__ volatile (
 #define END_ASM(...) __VA_ARGS__ );
 
 
@@ -149,8 +149,8 @@
 
 #endif
 
-#define begin_asm BEGIN_ASM
-#define end_asm END_ASM
+#define begin_asm() BEGIN_ASM()
+#define end_asm(...) END_ASM(__VA_ARGS__)
 
 #define label(...) LABEL(__VA_ARGS__)
 #define imm(...) IMM(__VA_ARGS__)

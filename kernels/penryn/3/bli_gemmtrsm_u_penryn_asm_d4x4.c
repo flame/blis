@@ -76,12 +76,11 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-	__asm__ volatile
-	(
+	begin_asm()
 		
-		mov(%2, rax) // load address of a12.
-		mov(%4, rbx) // load address of b21.
-		//mov(%10, r9) // load address of b_next.
+		mov(var(a12), rax) // load address of a12.
+		mov(var(b21), rbx) // load address of b21.
+		//mov(var(b_next), r9) // load address of b_next.
 		
 		add(imm(8*16), rax) // increment pointers to allow byte
 		add(imm(8*16), rbx) // offsets in the unrolled iterations.
@@ -106,7 +105,7 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 		
 		
 		
-		mov(%0, rsi) // i = k_iter;
+		mov(var(k_iter), rsi) // i = k_iter;
 		test(rsi, rsi) // check i via logical AND.
 		je(.CONSIDERKLEFT) // if i == 0, jump to code that
 		 // contains the k_left loop.
@@ -253,7 +252,7 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 		
 		label(.CONSIDERKLEFT)
 		
-		mov(%1, rsi) // i = k_left;
+		mov(var(k_left), rsi) // i = k_left;
 		test(rsi, rsi) // check i via logical AND.
 		je(.POSTACCUM) // if i == 0, we're done; jump to end.
 		 // else, we prepare to enter k_left loop.
@@ -310,7 +309,7 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 		
 		
 		
-		mov(%5, rbx) // load address of b11.
+		mov(var(b11), rbx) // load address of b11.
 		
 		 // xmm8:   xmm9:   xmm10:  xmm11:
 		 // ( ab01  ( ab00  ( ab03  ( ab02
@@ -344,7 +343,7 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 		 // xmm2: ( ab20 ab21 ) xmm6: ( ab22 ab23 )
 		 // xmm3: ( ab30 ab31 ) xmm7: ( ab32 ab33 )
 		
-		mov(%9, rax) // load address of alpha
+		mov(var(alpha), rax) // load address of alpha
 		movddup(mem(rax), xmm15) // load alpha and duplicate
 		
 		movaps(mem(rbx, 0*16), xmm8)
@@ -383,11 +382,11 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 		label(.TRSM)
 		
 		
-		mov(%3, rax) // load address of a11
-		mov(%6, rcx) // load address of c11
+		mov(var(a11), rax) // load address of a11
+		mov(var(c11), rcx) // load address of c11
 		
-		mov(%7, rsi) // load rs_c
-		mov(%8, rdi) // load cs_c
+		mov(var(rs_c), rsi) // load rs_c
+		mov(var(cs_c), rdi) // load cs_c
 		sal(imm(3), rsi) // rs_c *= sizeof( double )
 		sal(imm(3), rdi) // cs_c *= sizeof( double )
 		
@@ -504,20 +503,20 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 		
 		
 		
-
+    end_asm(
 		: // output operands (none)
 		: // input operands
-		  "m" (k_iter), // 0
-		  "m" (k_left), // 1
-		  "m" (a12),    // 2
-		  "m" (a11),    // 3
-		  "m" (b21),    // 4
-		  "m" (b11),    // 5
-		  "m" (c11),    // 6
-		  "m" (rs_c),   // 7
-		  "m" (cs_c),   // 8
-		  "m" (alpha),  // 9
-		  "m" (b_next)  // 10
+		  [k_iter] "m" (k_iter), // 0
+		  [k_left] "m" (k_left), // 1
+		  [a12]    "m" (a12),    // 2
+		  [a11]    "m" (a11),    // 3
+		  [b21]    "m" (b21),    // 4
+		  [b11]    "m" (b11),    // 5
+		  [c11]    "m" (c11),    // 6
+		  [rs_c]   "m" (rs_c),   // 7
+		  [cs_c]   "m" (cs_c),   // 8
+		  [alpha]  "m" (alpha),  // 9
+		  [b_next] "m" (b_next)  // 10
 		: // register clobber list
 		  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 		  "xmm0", "xmm1", "xmm2", "xmm3",
@@ -525,7 +524,7 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 		  "xmm8", "xmm9", "xmm10", "xmm11",
 		  "xmm12", "xmm13", "xmm14", "xmm15",
 		  "memory"
-	);
+	)
 
 }
 

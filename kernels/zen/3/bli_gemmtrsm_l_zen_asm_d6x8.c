@@ -81,36 +81,35 @@ void bli_sgemmtrsm_l_zen_asm_6x16
 
 	float*   beta   = bli_sm1;
 
-	__asm__ volatile
-	(
+	begin_asm()
 	
 	vzeroall() // zero all xmm/ymm registers.
 	
 	
-	mov(%2, rax) // load address of a.
-	mov(%3, rbx) // load address of b.
+	mov(var(a10), rax) // load address of a.
+	mov(var(b01), rbx) // load address of b.
 	
 	add(imm(32*4), rbx)
 	 // initialize loop by pre-loading
 	vmovaps(mem(rbx, -4*32), ymm0)
 	vmovaps(mem(rbx, -3*32), ymm1)
 	
-	mov(%7, rcx) // load address of b11
+	mov(var(b11), rcx) // load address of b11
 	mov(imm(16), rdi) // set rs_b = PACKNR = 16
 	lea(mem(, rdi, 4), rdi) // rs_b *= sizeof(float)
 	
 	 // NOTE: c11, rs_c, and cs_c aren't
 	 // needed for a while, but we load
 	 // them now to avoid stalling later.
-	mov(%8, r8) // load address of c11
-	mov(%9, r9) // load rs_c
+	mov(var(c11), r8) // load address of c11
+	mov(var(rs_c), r9) // load rs_c
 	lea(mem(, r9 , 4), r9) // rs_c *= sizeof(float)
-	mov(%10, r10) // load cs_c
+	mov(var(k_left)0, r10) // load cs_c
 	lea(mem(, r10, 4), r10) // cs_c *= sizeof(float)
 	
 	
 	
-	mov(%0, rsi) // i = k_iter;
+	mov(var(k_iter), rsi) // i = k_iter;
 	test(rsi, rsi) // check i via logical AND.
 	je(.SCONSIDKLEFT) // if i == 0, jump to code that
 	 // contains the k_left loop.
@@ -237,7 +236,7 @@ void bli_sgemmtrsm_l_zen_asm_6x16
 	
 	label(.SCONSIDKLEFT)
 	
-	mov(%1, rsi) // i = k_left;
+	mov(var(k_left), rsi) // i = k_left;
 	test(rsi, rsi) // check i via logical AND.
 	je(.SPOSTACCUM) // if i == 0, we're done; jump to end.
 	 // else, we prepare to enter k_left loop.
@@ -286,7 +285,7 @@ void bli_sgemmtrsm_l_zen_asm_6x16
 	
 	
 	
-	mov(%5, rbx) // load address of alpha
+	mov(var(alpha), rbx) // load address of alpha
 	vbroadcastss(mem(rbx), ymm3) // load alpha and duplicate
 	
 	
@@ -365,7 +364,7 @@ void bli_sgemmtrsm_l_zen_asm_6x16
 	 // ymm14 ymm15 = ( beta50..57 ) ( beta58..5F )
 	
 	
-	mov(%6, rax) // load address of a11
+	mov(var(a11), rax) // load address of a11
 	
 	mov(r11, rcx) // recall address of b11
 	mov(r14, rdx) // recall address of b11+8*cs_b
@@ -772,19 +771,20 @@ void bli_sgemmtrsm_l_zen_asm_6x16
 	vzeroupper()
 	
 
+	end_asm(
 	: // output operands (none)
 	: // input operands
-	  "m" (k_iter), // 0
-	  "m" (k_left), // 1
-	  "m" (a10),    // 2
-	  "m" (b01),    // 3
-	  "m" (beta),   // 4
-	  "m" (alpha),  // 5
-	  "m" (a11),    // 6
-	  "m" (b11),    // 7
-	  "m" (c11),    // 8
-	  "m" (rs_c),   // 9
-	  "m" (cs_c)    // 10
+      [k_iter] "m" (k_iter), // 0
+      [k_left] "m" (k_left), // 1
+      [a10]    "m" (a10),    // 2
+      [b01]    "m" (b01),    // 3
+      [beta]   "m" (beta),   // 4
+      [alpha]  "m" (alpha),  // 5
+      [a11]    "m" (a11),    // 6
+      [b11]    "m" (b11),    // 7
+      [c11]    "m" (c11),    // 8
+      [rs_c]   "m" (rs_c),   // 9
+      [cs_c]   "m" (cs_c)    // 10
 	: // register clobber list
 	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", 
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
@@ -793,7 +793,7 @@ void bli_sgemmtrsm_l_zen_asm_6x16
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "memory"
-	);
+	)
 }
 
 
@@ -835,36 +835,35 @@ void bli_dgemmtrsm_l_zen_asm_6x8
 
 	double*  beta   = bli_dm1;
 
-	__asm__ volatile
-	(
+	begin_asm()
 	
 	vzeroall() // zero all xmm/ymm registers.
 	
 	
-	mov(%2, rax) // load address of a.
-	mov(%3, rbx) // load address of b.
+	mov(var(a10), rax) // load address of a.
+	mov(var(b01), rbx) // load address of b.
 	
 	add(imm(32*4), rbx)
 	 // initialize loop by pre-loading
 	vmovapd(mem(rbx, -4*32), ymm0)
 	vmovapd(mem(rbx, -3*32), ymm1)
 	
-	mov(%7, rcx) // load address of b11
+	mov(var(b11), rcx) // load address of b11
 	mov(imm(8), rdi) // set rs_b = PACKNR = 8
 	lea(mem(, rdi, 8), rdi) // rs_b *= sizeof(double)
 	
 	 // NOTE: c11, rs_c, and cs_c aren't
 	 // needed for a while, but we load
 	 // them now to avoid stalling later.
-	mov(%8, r8) // load address of c11
-	mov(%9, r9) // load rs_c
+	mov(var(c11), r8) // load address of c11
+	mov(var(rs_c), r9) // load rs_c
 	lea(mem(, r9 , 8), r9) // rs_c *= sizeof(double)
-	mov(%10, r10) // load cs_c
+	mov(var(k_left)0, r10) // load cs_c
 	lea(mem(, r10, 8), r10) // cs_c *= sizeof(double)
 	
 	
 	
-	mov(%0, rsi) // i = k_iter;
+	mov(var(k_iter), rsi) // i = k_iter;
 	test(rsi, rsi) // check i via logical AND.
 	je(.DCONSIDKLEFT) // if i == 0, jump to code that
 	 // contains the k_left loop.
@@ -991,7 +990,7 @@ void bli_dgemmtrsm_l_zen_asm_6x8
 	
 	label(.DCONSIDKLEFT)
 	
-	mov(%1, rsi) // i = k_left;
+	mov(var(k_left), rsi) // i = k_left;
 	test(rsi, rsi) // check i via logical AND.
 	je(.DPOSTACCUM) // if i == 0, we're done; jump to end.
 	 // else, we prepare to enter k_left loop.
@@ -1041,7 +1040,7 @@ void bli_dgemmtrsm_l_zen_asm_6x8
 	
 	
 	
-	mov(%5, rbx) // load address of alpha
+	mov(var(alpha), rbx) // load address of alpha
 	vbroadcastsd(mem(rbx), ymm3) // load alpha and duplicate
 	
 	
@@ -1120,7 +1119,7 @@ void bli_dgemmtrsm_l_zen_asm_6x8
 	 // ymm14 ymm15 = ( beta50..53 ) ( beta54..57 )
 	
 	
-	mov(%6, rax) // load address of a11
+	mov(var(a11), rax) // load address of a11
 	
 	mov(r11, rcx) // recall address of b11
 	mov(r14, rdx) // recall address of b11+4*cs_b
@@ -1488,19 +1487,20 @@ void bli_dgemmtrsm_l_zen_asm_6x8
 	
 
 
+	end_asm(
 	: // output operands (none)
 	: // input operands
-	  "m" (k_iter), // 0
-	  "m" (k_left), // 1
-	  "m" (a10),    // 2
-	  "m" (b01),    // 3
-	  "m" (beta),   // 4
-	  "m" (alpha),  // 5
-	  "m" (a11),    // 6
-	  "m" (b11),    // 7
-	  "m" (c11),    // 8
-	  "m" (rs_c),   // 9
-	  "m" (cs_c)    // 10
+      [k_iter] "m" (k_iter), // 0
+      [k_left] "m" (k_left), // 1
+      [a10]    "m" (a10),    // 2
+      [b01]    "m" (b01),    // 3
+      [beta]   "m" (beta),   // 4
+      [alpha]  "m" (alpha),  // 5
+      [a11]    "m" (a11),    // 6
+      [b11]    "m" (b11),    // 7
+      [c11]    "m" (c11),    // 8
+      [rs_c]   "m" (rs_c),   // 9
+      [cs_c]   "m" (cs_c)    // 10
 	: // register clobber list
 	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
@@ -1509,7 +1509,7 @@ void bli_dgemmtrsm_l_zen_asm_6x8
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "memory"
-	);
+	)
 }
 
 

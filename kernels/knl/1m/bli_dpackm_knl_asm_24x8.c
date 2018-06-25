@@ -127,7 +127,7 @@ void bli_dpackm_knl_asm_8xk
     const int64_t lda = lda_;
     const int64_t ldp = ldp_;
 
-    BEGIN_ASM
+    BEGIN_ASM()
 
     MOV(RSI, VAR(n))
     MOV(RAX, VAR(a))
@@ -321,8 +321,8 @@ void bli_dpackm_knl_asm_24xk
     const int64_t lda = lda_;
     const int64_t ldp = ldp_;
 
-    __asm__ volatile
-    (
+    BEGIN_ASM()
+
         MOV(RSI, VAR(n))
         MOV(RAX, VAR(a))
         MOV(RBX, VAR(inca))
@@ -524,6 +524,7 @@ void bli_dpackm_knl_asm_24xk
 
         LABEL(PACK24_DONE)
 
+    END_ASM(
         : //output operands
         : //input operands
           [n]         "m" (n),
@@ -543,5 +544,5 @@ void bli_dpackm_knl_asm_24xk
           "zmm30", "zmm31",
           "rax", "rbx", "rcx", "rdi", "rsi",
           "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15", "memory"
-    );
+    )
 }
