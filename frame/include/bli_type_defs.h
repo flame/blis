@@ -998,6 +998,9 @@ typedef struct
 	inc_t  is_a;
 	inc_t  is_b;
 
+	// The type to convert to on output.
+	num_t  dt_on_output;
+
 } auxinfo_t;
 
 
