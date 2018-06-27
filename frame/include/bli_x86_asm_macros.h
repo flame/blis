@@ -1036,6 +1036,28 @@
 #define v4fnmaddss(_0, _1, _2) V4FNMADDSS(_0, _1, _2)
 #define v4fnmaddps(_0, _1, _2) V4FNMADDPS(_0, _1, _2)
 
+// Conversions
+
+#define CVTSS2SD(_0, _1) INSTR_(cvtss2sd, _0, _1)
+#define CVTSD2SS(_0, _1) INSTR_(cvtsd2ss, _0, _1)
+#define CVTPS2PD(_0, _1) INSTR_(cvtps2pd, _0, _1)
+#define CVTPD2PS(_0, _1) INSTR_(cvtpd2ps, _0, _1)
+
+#define cvtss2sd(_0, _1) CVTSS2SD(_0, _1)
+#define cvtsd2ss(_0, _1) CVTSD2SS(_0, _1)
+#define cvtps2pd(_0, _1) CVTPS2PD(_0, _1)
+#define cvtpd2ps(_0, _1) CVTPD2PS(_0, _1)
+
+#define VCVTSS2SD(_0, _1) INSTR_(vcvtss2sd, _0, _1)
+#define VCVTSD2SS(_0, _1) INSTR_(vcvtsd2ss, _0, _1)
+#define VCVTPS2PD(_0, _1) INSTR_(vcvtps2pd, _0, _1)
+#define VCVTPD2PS(_0, _1) INSTR_(vcvtpd2ps, _0, _1)
+
+#define vcvtss2sd(_0, _1) VCVTSS2SD(_0, _1)
+#define vcvtsd2ss(_0, _1) VCVTSD2SS(_0, _1)
+#define vcvtps2pd(_0, _1) VCVTPS2PD(_0, _1)
+#define vcvtpd2ps(_0, _1) VCVTPD2PS(_0, _1)
+
 // Vector shuffles
 
 #define PSHUFD(_0, _1, _2) INSTR_(pshufd, _0, _1, _2)

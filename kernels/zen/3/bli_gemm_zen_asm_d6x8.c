@@ -38,44 +38,220 @@
 #define BLIS_ASM_SYNTAX_ATT
 #include "bli_x86_asm_macros.h"
 
-#define SGEMM_INPUT_GS_BETA_NZ \
-	vmovlps(mem(rcx), xmm0, xmm0) \
-	vmovhps(mem(rcx, rsi, 1), xmm0, xmm0) \
-	vmovlps(mem(rcx, rsi, 2), xmm1, xmm1) \
-	vmovhps(mem(rcx, r13, 1), xmm1, xmm1) \
-	vshufps(imm(0x88), xmm1, xmm0, xmm0) \
-	vmovlps(mem(rcx, rsi, 4), xmm2, xmm2) \
-	vmovhps(mem(rcx, r15, 1), xmm2, xmm2) \
-	/* We can't use vmovhps for loading the last element becauase that
-	   might result in reading beyond valid memory. (vmov[lh]psd load
-	   pairs of adjacent floats at a time.) So we need to use vmovss
-	   instead. But since we're limited to using ymm0 through ymm2
-	   (ymm3 contains beta and ymm4 through ymm15 contain the microtile)
-	   and due to the way vmovss zeros out all bits above 31, we have to
-	   load element 7 before element 6. */ \
-	vmovss(mem(rcx, r10, 1), xmm1) \
-	vpermilps(imm(0xcf), xmm1, xmm1) \
-	vmovlps(mem(rcx, r13, 2), xmm1, xmm1) \
-	/*vmovhps(mem(rcx, r10, 1), xmm1, xmm1)*/ \
-	vshufps(imm(0x88), xmm1, xmm2, xmm2) \
-	vperm2f128(imm(0x20), ymm2, ymm0, ymm0)
+#define SGENSTORED(x) \
+    vmovlps(mem(rcx), xmm0, xmm0) \
+    vmovhps(mem(rcx, rsi, 1), xmm0, xmm0) \
+    vmovlps(mem(rcx, rsi, 2), xmm1, xmm1) \
+    vmovhps(mem(rcx, r13, 1), xmm1, xmm1) \
+    vshufps(imm(0x88), xmm1, xmm0, xmm0) \
+    vmovlps(mem(rcx, rsi, 4), xmm2, xmm2) \
+    vmovhps(mem(rcx, r15, 1), xmm2, xmm2) \
+    /* We can't use vmovhps for loading the last element becauase that
+       might result in reading beyond valid memory. (vmov[lh]psd load
+       pairs of adjacent floats at a time.) So we need to use vmovss
+       instead. But since we're limited to using ymm0 through ymm2
+       (ymm3 contains beta and ymm4 through ymm15 contain the microtile)
+       and due to the way vmovss zeros out all bits above 31, we have to
+       load element 7 before element 6. */ \
+    vmovss(mem(rcx, r10, 1), xmm1) \
+    vpermilps(imm(0xcf), xmm1, xmm1) \
+    vmovlps(mem(rcx, r13, 2), xmm1, xmm1) \
+    /*vmovhps(mem(rcx, r10, 1), xmm1, xmm1)*/ \
+    vshufps(imm(0x88), xmm1, xmm2, xmm2) \
+    vperm2f128(imm(0x20), ymm2, ymm0, ymm0) \
+    \
+    vfmadd213ps(ymm(x), ymm3, ymm0) \
+    \
+    vextractf128(imm(1), ymm0, xmm2) \
+    vmovss(xmm0, mem(rcx)) \
+    vpermilps(imm(0x39), xmm0, xmm1) \
+    vmovss(xmm1, mem(rcx, rsi, 1)) \
+    vpermilps(imm(0x39), xmm1, xmm0) \
+    vmovss(xmm0, mem(rcx, rsi, 2)) \
+    vpermilps(imm(0x39), xmm0, xmm1) \
+    vmovss(xmm1, mem(rcx, r13, 1)) \
+    vmovss(xmm2, mem(rcx, rsi, 4)) \
+    vpermilps(imm(0x39), xmm2, xmm1) \
+    vmovss(xmm1, mem(rcx, r15, 1)) \
+    vpermilps(imm(0x39), xmm1, xmm2) \
+    vmovss(xmm2, mem(rcx, r13, 2)) \
+    vpermilps(imm(0x39), xmm2, xmm1) \
+    vmovss(xmm1, mem(rcx, r10, 1)) \
+    \
+    add(rdi, rcx) // c += rs_c;
 
-#define SGEMM_OUTPUT_GS_BETA_NZ \
-	vextractf128(imm(1), ymm0, xmm2) \
-	vmovss(xmm0, mem(rcx)) \
-	vpermilps(imm(0x39), xmm0, xmm1) \
-	vmovss(xmm1, mem(rcx, rsi, 1)) \
-	vpermilps(imm(0x39), xmm1, xmm0) \
-	vmovss(xmm0, mem(rcx, rsi, 2)) \
-	vpermilps(imm(0x39), xmm0, xmm1) \
-	vmovss(xmm1, mem(rcx, r13, 1)) \
-	vmovss(xmm2, mem(rcx, rsi, 4)) \
-	vpermilps(imm(0x39), xmm2, xmm1) \
-	vmovss(xmm1, mem(rcx, r15, 1)) \
-	vpermilps(imm(0x39), xmm1, xmm2) \
-	vmovss(xmm2, mem(rcx, r13, 2)) \
-	vpermilps(imm(0x39), xmm2, xmm1) \
-	vmovss(xmm1, mem(rcx, r10, 1))
+#define SGENSTORBZ(x) \
+    vextractf128(imm(1), ymm(x), xmm2) \
+    vmovss(xmm(x), mem(rcx)) \
+    vpermilps(imm(0x39), xmm(x), xmm1) \
+    vmovss(xmm1, mem(rcx, rsi, 1)) \
+    vpermilps(imm(0x39), xmm1, xmm0) \
+    vmovss(xmm0, mem(rcx, rsi, 2)) \
+    vpermilps(imm(0x39), xmm0, xmm1) \
+    vmovss(xmm1, mem(rcx, r13, 1)) \
+    vmovss(xmm2, mem(rcx, rsi, 4)) \
+    vpermilps(imm(0x39), xmm2, xmm1) \
+    vmovss(xmm1, mem(rcx, r15, 1)) \
+    vpermilps(imm(0x39), xmm1, xmm2) \
+    vmovss(xmm2, mem(rcx, r13, 2)) \
+    vpermilps(imm(0x39), xmm2, xmm1) \
+    vmovss(xmm1, mem(rcx, r10, 1)) \
+    \
+    add(rdi, rcx) // c += rs_c;
+
+#define SROWSTORED(x, y) \
+    vfmadd231ps(mem(rcx), ymm3, ymm(x)) \
+    vmovups(ymm(x), mem(rcx)) \
+    add(rdi, rcx) \
+    vfmadd231ps(mem(rdx), ymm3, ymm(y)) \
+    vmovups(ymm(y), mem(rdx)) \
+    add(rdi, rdx)
+
+#define SROWSTORBZ(x, y) \
+    vmovups(ymm(x), mem(rcx)) \
+    add(rdi, rcx) \
+    vmovups(ymm(y), mem(rdx)) \
+    add(rdi, rdx)
+
+#define SCOLSTORED(r1, r2, r3, r4, r5, r6) \
+    vunpcklps(ymm(r2), ymm(r1), ymm0) \
+    vunpcklps(ymm(r4), ymm(r3), ymm1) \
+    vshufps(imm(0x4e), ymm1, ymm0, ymm2) \
+    vblendps(imm(0xcc), ymm2, ymm0, ymm0) \
+    vblendps(imm(0x33), ymm2, ymm1, ymm1) \
+     \
+    vextractf128(imm(0x1), ymm0, xmm2) \
+    vfmadd231ps(mem(rcx), xmm3, xmm0) \
+    vfmadd231ps(mem(rcx, rsi, 4), xmm3, xmm2) \
+    vmovups(xmm0, mem(rcx)) \
+    vmovups(xmm2, mem(rcx, rsi, 4)) \
+     \
+    vextractf128(imm(0x1), ymm1, xmm2) \
+    vfmadd231ps(mem(rcx, rsi, 1), xmm3, xmm1) \
+    vfmadd231ps(mem(rcx, r15, 1), xmm3, xmm2) \
+    vmovups(xmm1, mem(rcx, rsi, 1)) \
+    vmovups(xmm2, mem(rcx, r15, 1)) \
+     \
+    vunpckhps(ymm(r2), ymm(r1), ymm0) \
+    vunpckhps(ymm(r4), ymm(r3), ymm1) \
+    vshufps(imm(0x4e), ymm1, ymm0, ymm2) \
+    vblendps(imm(0xcc), ymm2, ymm0, ymm0) \
+    vblendps(imm(0x33), ymm2, ymm1, ymm1) \
+     \
+    vextractf128(imm(0x1), ymm0, xmm2) \
+    vfmadd231ps(mem(rcx, rsi, 2), xmm3, xmm0) \
+    vfmadd231ps(mem(rcx, r13, 2), xmm3, xmm2) \
+    vmovups(xmm0, mem(rcx, rsi, 2)) \
+    vmovups(xmm2, mem(rcx, r13, 2)) \
+     \
+    vextractf128(imm(0x1), ymm1, xmm2) \
+    vfmadd231ps(mem(rcx, r13, 1), xmm3, xmm1) \
+    vfmadd231ps(mem(rcx, r10, 1), xmm3, xmm2) \
+    vmovups(xmm1, mem(rcx, r13, 1)) \
+    vmovups(xmm2, mem(rcx, r10, 1)) \
+     \
+    vunpcklps(ymm(r6), ymm(r5), ymm0) \
+    vextractf128(imm(0x1), ymm0, xmm2) \
+    vmovlpd(mem(r14), xmm1, xmm1) \
+    vmovhpd(mem(r14, rsi, 1), xmm1, xmm1) \
+    vfmadd231ps(xmm1, xmm3, xmm0) \
+    vmovlpd(xmm0, mem(r14)) \
+    vmovhpd(xmm0, mem(r14, rsi, 1)) \
+    vmovlpd(mem(r14, rsi, 4), xmm1, xmm1) \
+    vmovhpd(mem(r14, r15, 1), xmm1, xmm1) \
+    vfmadd231ps(xmm1, xmm3, xmm2) \
+    vmovlpd(xmm2, mem(r14, rsi, 4)) \
+    vmovhpd(xmm2, mem(r14, r15, 1)) \
+     \
+    vunpckhps(ymm(r6), ymm(r5), ymm0) \
+    vextractf128(imm(0x1), ymm0, xmm2) \
+    vmovlpd(mem(r14, rsi, 2), xmm1, xmm1) \
+    vmovhpd(mem(r14, r13, 1), xmm1, xmm1) \
+    vfmadd231ps(xmm1, xmm3, xmm0) \
+    vmovlpd(xmm0, mem(r14, rsi, 2)) \
+    vmovhpd(xmm0, mem(r14, r13, 1)) \
+    vmovlpd(mem(r14, r13, 2), xmm1, xmm1) \
+    vmovhpd(mem(r14, r10, 1), xmm1, xmm1) \
+    vfmadd231ps(xmm1, xmm3, xmm2) \
+    vmovlpd(xmm2, mem(r14, r13, 2)) \
+    vmovhpd(xmm2, mem(r14, r10, 1))
+
+#define SCOLSTORBZ(r1, r2, r3, r4, r5, r6) \
+    vunpcklps(ymm(r2), ymm(r1), ymm0) \
+    vunpcklps(ymm(r4), ymm(r3), ymm1) \
+    vshufps(imm(0x4e), ymm1, ymm0, ymm2) \
+    vblendps(imm(0xcc), ymm2, ymm0, ymm0) \
+    vblendps(imm(0x33), ymm2, ymm1, ymm1) \
+     \
+    vmovups(xmm0, mem(rcx)) \
+    vextractf128(imm(0x1), ymm0, mem(rcx, rsi, 4)) \
+     \
+    vmovups(xmm1, mem(rcx, rsi, 1)) \
+    vextractf128(imm(0x1), ymm1, mem(rcx, r15, 1)) \
+     \
+    vunpckhps(ymm(r2), ymm(r1), ymm0) \
+    vunpckhps(ymm(r4), ymm(r3), ymm1) \
+    vshufps(imm(0x4e), ymm1, ymm0, ymm2) \
+    vblendps(imm(0xcc), ymm2, ymm0, ymm0) \
+    vblendps(imm(0x33), ymm2, ymm1, ymm1) \
+     \
+    vmovups(xmm0, mem(rcx, rsi, 2)) \
+    vextractf128(imm(0x1), ymm0, mem(rcx, r13, 2)) \
+     \
+    vmovups(xmm1, mem(rcx, r13, 1)) \
+    vextractf128(imm(0x1), ymm1, mem(rcx, r10, 1)) \
+     \
+    vunpcklps(ymm(r6), ymm(r5), ymm0) \
+    vextractf128(imm(0x1), ymm0, xmm2) \
+    vmovlpd(xmm0, mem(r14)) \
+    vmovhpd(xmm0, mem(r14, rsi, 1)) \
+    vmovlpd(xmm2, mem(r14, rsi, 4)) \
+    vmovhpd(xmm2, mem(r14, r15, 1)) \
+     \
+    vunpckhps(ymm(r6), ymm(r5), ymm0) \
+    vextractf128(imm(0x1), ymm0, xmm2) \
+    vmovlpd(xmm0, mem(r14, rsi, 2)) \
+    vmovhpd(xmm0, mem(r14, r13, 1)) \
+    vmovlpd(xmm2, mem(r14, r13, 2)) \
+    vmovhpd(xmm2, mem(r14, r10, 1))
+
+#define SCVTROWSTR(x, y) \
+    vextractf128(imm(0x1), ymm(x), xmm0) \
+    vcvtps2pd(xmm(x), ymm(x)) \
+    vcvtps2pd(xmm0, ymm0) \
+    vfmadd231pd(mem(rcx), ymm3, ymm(x)) \
+    vfmadd231pd(mem(rcx,4*8), ymm3, ymm0) \
+    vmovupd(ymm(x), mem(rcx)) \
+    vmovupd(ymm0, mem(rcx,4*8)) \
+    \
+    add(rdi, rcx) \
+    \
+    vextractf128(imm(0x1), ymm(y), xmm0) \
+    vcvtps2pd(xmm(y), ymm(y)) \
+    vcvtps2pd(xmm0, ymm0) \
+    vfmadd231pd(mem(rdx), ymm3, ymm(y)) \
+    vfmadd231pd(mem(rdx,4*8), ymm3, ymm0) \
+    vmovupd(ymm(y), mem(rdx)) \
+    vmovupd(ymm0, mem(rdx,4*8)) \
+    \
+    add(rdi, rdx)
+
+#define SCVTROWBZ(x, y) \
+    vextractf128(imm(0x1), ymm(x), xmm0) \
+    vcvtps2pd(xmm(x), ymm(x)) \
+    vcvtps2pd(xmm0, ymm0) \
+    vmovupd(ymm(x), mem(rcx)) \
+    vmovupd(ymm0, mem(rcx,4*8)) \
+    \
+    add(rdi, rcx) \
+    \
+    vextractf128(imm(0x1), ymm(y), xmm0) \
+    vcvtps2pd(xmm(y), ymm(y)) \
+    vcvtps2pd(xmm0, ymm0) \
+    vmovupd(ymm(y), mem(rdx)) \
+    vmovupd(ymm0, mem(rdx,4*8)) \
+    \
+    add(rdi, rdx)
 
 void bli_sgemm_zen_asm_6x16
      (
@@ -98,6 +274,9 @@ void bli_sgemm_zen_asm_6x16
 	uint64_t k_left = k0 % 4;
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
+
+	num_t dt = bli_auxinfo_dt_on_output(data);
+	uint64_t convert = dt == BLIS_DOUBLE;
 
 	begin_asm()
 	
@@ -307,7 +486,6 @@ void bli_sgemm_zen_asm_6x16
 	mov(var(alpha), rax) // load address of alpha
 	mov(var(beta), rbx) // load address of beta
 	vbroadcastss(mem(rax), ymm0) // load alpha and duplicate
-	vbroadcastss(mem(rbx), ymm3) // load beta and duplicate
 	
 	vmulps(ymm0, ymm4, ymm4) // scale by alpha
 	vmulps(ymm0, ymm5, ymm5)
@@ -325,548 +503,195 @@ void bli_sgemm_zen_asm_6x16
 	
 	
 	
-	
+	mov(var(convert), r8)
 	
 	mov(var(cs_c), rsi) // load cs_c
 	lea(mem(, rsi, 4), rsi) // rsi = cs_c * sizeof(float)
 	
-	lea(mem(rcx, rsi, 8), rdx) // load address of c +  8*cs_c;
 	lea(mem(rcx, rdi, 4), r14) // load address of c +  4*rs_c;
 	
 	lea(mem(rsi, rsi, 2), r13) // r13 = 3*cs_c;
 	lea(mem(rsi, rsi, 4), r15) // r15 = 5*cs_c;
 	lea(mem(r13, rsi, 4), r10) // r10 = 7*cs_c;
 	
-	
-	 // now avoid loading C if beta == 0
-	
-	vxorps(ymm0, ymm0, ymm0) // set ymm0 to zero.
-	vucomiss(xmm0, xmm3) // set ZF if beta == 0.
-	je(.SBETAZERO) // if ZF = 1, jump to beta == 0 case
-	
-	
-	cmp(imm(4), rsi) // set ZF if (4*cs_c) == 4.
-	jz(.SROWSTORED) // jump to row storage case
-	
-	
-	cmp(imm(4), rdi) // set ZF if (4*cs_c) == 4.
-	jz(.SCOLSTORED) // jump to column storage case
-	
-	
-	
-	label(.SGENSTORED)
-	
-	
-	SGEMM_INPUT_GS_BETA_NZ
-	vfmadd213ps(ymm4, ymm3, ymm0)
-	SGEMM_OUTPUT_GS_BETA_NZ
-	add(rdi, rcx) // c += rs_c;
-	
-	
-	SGEMM_INPUT_GS_BETA_NZ
-	vfmadd213ps(ymm6, ymm3, ymm0)
-	SGEMM_OUTPUT_GS_BETA_NZ
-	add(rdi, rcx) // c += rs_c;
-	
-	
-	SGEMM_INPUT_GS_BETA_NZ
-	vfmadd213ps(ymm8, ymm3, ymm0)
-	SGEMM_OUTPUT_GS_BETA_NZ
-	add(rdi, rcx) // c += rs_c;
-	
-	
-	SGEMM_INPUT_GS_BETA_NZ
-	vfmadd213ps(ymm10, ymm3, ymm0)
-	SGEMM_OUTPUT_GS_BETA_NZ
-	add(rdi, rcx) // c += rs_c;
-	
-	
-	SGEMM_INPUT_GS_BETA_NZ
-	vfmadd213ps(ymm12, ymm3, ymm0)
-	SGEMM_OUTPUT_GS_BETA_NZ
-	add(rdi, rcx) // c += rs_c;
-	
-	
-	SGEMM_INPUT_GS_BETA_NZ
-	vfmadd213ps(ymm14, ymm3, ymm0)
-	SGEMM_OUTPUT_GS_BETA_NZ
-	//add(rdi, rcx) // c += rs_c;
-	
-	
-	mov(rdx, rcx) // rcx = c + 8*cs_c
-	
-	
-	SGEMM_INPUT_GS_BETA_NZ
-	vfmadd213ps(ymm5, ymm3, ymm0)
-	SGEMM_OUTPUT_GS_BETA_NZ
-	add(rdi, rcx) // c += rs_c;
-	
-	
-	SGEMM_INPUT_GS_BETA_NZ
-	vfmadd213ps(ymm7, ymm3, ymm0)
-	SGEMM_OUTPUT_GS_BETA_NZ
-	add(rdi, rcx) // c += rs_c;
-	
-	
-	SGEMM_INPUT_GS_BETA_NZ
-	vfmadd213ps(ymm9, ymm3, ymm0)
-	SGEMM_OUTPUT_GS_BETA_NZ
-	add(rdi, rcx) // c += rs_c;
-	
-	
-	SGEMM_INPUT_GS_BETA_NZ
-	vfmadd213ps(ymm11, ymm3, ymm0)
-	SGEMM_OUTPUT_GS_BETA_NZ
-	add(rdi, rcx) // c += rs_c;
-	
-	
-	SGEMM_INPUT_GS_BETA_NZ
-	vfmadd213ps(ymm13, ymm3, ymm0)
-	SGEMM_OUTPUT_GS_BETA_NZ
-	add(rdi, rcx) // c += rs_c;
-	
-	
-	SGEMM_INPUT_GS_BETA_NZ
-	vfmadd213ps(ymm15, ymm3, ymm0)
-	SGEMM_OUTPUT_GS_BETA_NZ
-	//add(rdi, rcx) // c += rs_c;
-	
-	
-	
-	jmp(.SDONE) // jump to end.
-	
-	
-	
-	label(.SROWSTORED)
-	
-	
-	vfmadd231ps(mem(rcx), ymm3, ymm4)
-	vmovups(ymm4, mem(rcx))
-	add(rdi, rcx)
-	vfmadd231ps(mem(rdx), ymm3, ymm5)
-	vmovups(ymm5, mem(rdx))
-	add(rdi, rdx)
-	
-	
-	vfmadd231ps(mem(rcx), ymm3, ymm6)
-	vmovups(ymm6, mem(rcx))
-	add(rdi, rcx)
-	vfmadd231ps(mem(rdx), ymm3, ymm7)
-	vmovups(ymm7, mem(rdx))
-	add(rdi, rdx)
-	
-	
-	vfmadd231ps(mem(rcx), ymm3, ymm8)
-	vmovups(ymm8, mem(rcx))
-	add(rdi, rcx)
-	vfmadd231ps(mem(rdx), ymm3, ymm9)
-	vmovups(ymm9, mem(rdx))
-	add(rdi, rdx)
-	
-	
-	vfmadd231ps(mem(rcx), ymm3, ymm10)
-	vmovups(ymm10, mem(rcx))
-	add(rdi, rcx)
-	vfmadd231ps(mem(rdx), ymm3, ymm11)
-	vmovups(ymm11, mem(rdx))
-	add(rdi, rdx)
-	
-	
-	vfmadd231ps(mem(rcx), ymm3, ymm12)
-	vmovups(ymm12, mem(rcx))
-	add(rdi, rcx)
-	vfmadd231ps(mem(rdx), ymm3, ymm13)
-	vmovups(ymm13, mem(rdx))
-	add(rdi, rdx)
-	
-	
-	vfmadd231ps(mem(rcx), ymm3, ymm14)
-	vmovups(ymm14, mem(rcx))
-	//add(rdi, rcx)
-	vfmadd231ps(mem(rdx), ymm3, ymm15)
-	vmovups(ymm15, mem(rdx))
-	//add(rdi, rdx)
-	
-	
-	
-	jmp(.SDONE) // jump to end.
-	
-	
-	
-	label(.SCOLSTORED)
-	
-	
-	vbroadcastss(mem(rbx), ymm3)
-	
-	vunpcklps(ymm6, ymm4, ymm0)
-	vunpcklps(ymm10, ymm8, ymm1)
-	vshufps(imm(0x4e), ymm1, ymm0, ymm2)
-	vblendps(imm(0xcc), ymm2, ymm0, ymm0)
-	vblendps(imm(0x33), ymm2, ymm1, ymm1)
-	
-	vextractf128(imm(0x1), ymm0, xmm2)
-	vfmadd231ps(mem(rcx), xmm3, xmm0)
-	vfmadd231ps(mem(rcx, rsi, 4), xmm3, xmm2)
-	vmovups(xmm0, mem(rcx)) // store ( gamma00..gamma30 )
-	vmovups(xmm2, mem(rcx, rsi, 4)) // store ( gamma04..gamma34 )
-	
-	vextractf128(imm(0x1), ymm1, xmm2)
-	vfmadd231ps(mem(rcx, rsi, 1), xmm3, xmm1)
-	vfmadd231ps(mem(rcx, r15, 1), xmm3, xmm2)
-	vmovups(xmm1, mem(rcx, rsi, 1)) // store ( gamma01..gamma31 )
-	vmovups(xmm2, mem(rcx, r15, 1)) // store ( gamma05..gamma35 )
-	
-	
-	vunpckhps(ymm6, ymm4, ymm0)
-	vunpckhps(ymm10, ymm8, ymm1)
-	vshufps(imm(0x4e), ymm1, ymm0, ymm2)
-	vblendps(imm(0xcc), ymm2, ymm0, ymm0)
-	vblendps(imm(0x33), ymm2, ymm1, ymm1)
-	
-	vextractf128(imm(0x1), ymm0, xmm2)
-	vfmadd231ps(mem(rcx, rsi, 2), xmm3, xmm0)
-	vfmadd231ps(mem(rcx, r13, 2), xmm3, xmm2)
-	vmovups(xmm0, mem(rcx, rsi, 2)) // store ( gamma02..gamma32 )
-	vmovups(xmm2, mem(rcx, r13, 2)) // store ( gamma06..gamma36 )
-	
-	vextractf128(imm(0x1), ymm1, xmm2)
-	vfmadd231ps(mem(rcx, r13, 1), xmm3, xmm1)
-	vfmadd231ps(mem(rcx, r10, 1), xmm3, xmm2)
-	vmovups(xmm1, mem(rcx, r13, 1)) // store ( gamma03..gamma33 )
-	vmovups(xmm2, mem(rcx, r10, 1)) // store ( gamma07..gamma37 )
-	
-	lea(mem(rcx, rsi, 8), rcx) // rcx += 8*cs_c
-	
-	vunpcklps(ymm14, ymm12, ymm0)
-	vextractf128(imm(0x1), ymm0, xmm2)
-	vmovlpd(mem(r14), xmm1, xmm1)
-	vmovhpd(mem(r14, rsi, 1), xmm1, xmm1)
-	vfmadd231ps(xmm1, xmm3, xmm0)
-	vmovlpd(xmm0, mem(r14)) // store ( gamma40..gamma50 )
-	vmovhpd(xmm0, mem(r14, rsi, 1)) // store ( gamma41..gamma51 )
-	vmovlpd(mem(r14, rsi, 4), xmm1, xmm1)
-	vmovhpd(mem(r14, r15, 1), xmm1, xmm1)
-	vfmadd231ps(xmm1, xmm3, xmm2)
-	vmovlpd(xmm2, mem(r14, rsi, 4)) // store ( gamma44..gamma54 )
-	vmovhpd(xmm2, mem(r14, r15, 1)) // store ( gamma45..gamma55 )
-	
-	vunpckhps(ymm14, ymm12, ymm0)
-	vextractf128(imm(0x1), ymm0, xmm2)
-	vmovlpd(mem(r14, rsi, 2), xmm1, xmm1)
-	vmovhpd(mem(r14, r13, 1), xmm1, xmm1)
-	vfmadd231ps(xmm1, xmm3, xmm0)
-	vmovlpd(xmm0, mem(r14, rsi, 2)) // store ( gamma42..gamma52 )
-	vmovhpd(xmm0, mem(r14, r13, 1)) // store ( gamma43..gamma53 )
-	vmovlpd(mem(r14, r13, 2), xmm1, xmm1)
-	vmovhpd(mem(r14, r10, 1), xmm1, xmm1)
-	vfmadd231ps(xmm1, xmm3, xmm2)
-	vmovlpd(xmm2, mem(r14, r13, 2)) // store ( gamma46..gamma56 )
-	vmovhpd(xmm2, mem(r14, r10, 1)) // store ( gamma47..gamma57 )
-	
-	lea(mem(r14, rsi, 8), r14) // r14 += 8*cs_c
-	
-	
-	
-	vunpcklps(ymm7, ymm5, ymm0)
-	vunpcklps(ymm11, ymm9, ymm1)
-	vshufps(imm(0x4e), ymm1, ymm0, ymm2)
-	vblendps(imm(0xcc), ymm2, ymm0, ymm0)
-	vblendps(imm(0x33), ymm2, ymm1, ymm1)
-	
-	vextractf128(imm(0x1), ymm0, xmm2)
-	vfmadd231ps(mem(rcx), xmm3, xmm0)
-	vfmadd231ps(mem(rcx, rsi, 4), xmm3, xmm2)
-	vmovups(xmm0, mem(rcx)) // store ( gamma00..gamma30 )
-	vmovups(xmm2, mem(rcx, rsi, 4)) // store ( gamma04..gamma34 )
-	
-	vextractf128(imm(0x1), ymm1, xmm2)
-	vfmadd231ps(mem(rcx, rsi, 1), xmm3, xmm1)
-	vfmadd231ps(mem(rcx, r15, 1), xmm3, xmm2)
-	vmovups(xmm1, mem(rcx, rsi, 1)) // store ( gamma01..gamma31 )
-	vmovups(xmm2, mem(rcx, r15, 1)) // store ( gamma05..gamma35 )
-	
-	
-	vunpckhps(ymm7, ymm5, ymm0)
-	vunpckhps(ymm11, ymm9, ymm1)
-	vshufps(imm(0x4e), ymm1, ymm0, ymm2)
-	vblendps(imm(0xcc), ymm2, ymm0, ymm0)
-	vblendps(imm(0x33), ymm2, ymm1, ymm1)
-	
-	vextractf128(imm(0x1), ymm0, xmm2)
-	vfmadd231ps(mem(rcx, rsi, 2), xmm3, xmm0)
-	vfmadd231ps(mem(rcx, r13, 2), xmm3, xmm2)
-	vmovups(xmm0, mem(rcx, rsi, 2)) // store ( gamma02..gamma32 )
-	vmovups(xmm2, mem(rcx, r13, 2)) // store ( gamma06..gamma36 )
-	
-	vextractf128(imm(0x1), ymm1, xmm2)
-	vfmadd231ps(mem(rcx, r13, 1), xmm3, xmm1)
-	vfmadd231ps(mem(rcx, r10, 1), xmm3, xmm2)
-	vmovups(xmm1, mem(rcx, r13, 1)) // store ( gamma03..gamma33 )
-	vmovups(xmm2, mem(rcx, r10, 1)) // store ( gamma07..gamma37 )
-	
-	//lea(mem(rcx, rsi, 8), rcx) // rcx += 8*cs_c
-	
-	vunpcklps(ymm15, ymm13, ymm0)
-	vextractf128(imm(0x1), ymm0, xmm2)
-	vmovlpd(mem(r14), xmm1, xmm1)
-	vmovhpd(mem(r14, rsi, 1), xmm1, xmm1)
-	vfmadd231ps(xmm1, xmm3, xmm0)
-	vmovlpd(xmm0, mem(r14)) // store ( gamma40..gamma50 )
-	vmovhpd(xmm0, mem(r14, rsi, 1)) // store ( gamma41..gamma51 )
-	vmovlpd(mem(r14, rsi, 4), xmm1, xmm1)
-	vmovhpd(mem(r14, r15, 1), xmm1, xmm1)
-	vfmadd231ps(xmm1, xmm3, xmm2)
-	vmovlpd(xmm2, mem(r14, rsi, 4)) // store ( gamma44..gamma54 )
-	vmovhpd(xmm2, mem(r14, r15, 1)) // store ( gamma45..gamma55 )
-	
-	vunpckhps(ymm15, ymm13, ymm0)
-	vextractf128(imm(0x1), ymm0, xmm2)
-	vmovlpd(mem(r14, rsi, 2), xmm1, xmm1)
-	vmovhpd(mem(r14, r13, 1), xmm1, xmm1)
-	vfmadd231ps(xmm1, xmm3, xmm0)
-	vmovlpd(xmm0, mem(r14, rsi, 2)) // store ( gamma42..gamma52 )
-	vmovhpd(xmm0, mem(r14, r13, 1)) // store ( gamma43..gamma53 )
-	vmovlpd(mem(r14, r13, 2), xmm1, xmm1)
-	vmovhpd(mem(r14, r10, 1), xmm1, xmm1)
-	vfmadd231ps(xmm1, xmm3, xmm2)
-	vmovlpd(xmm2, mem(r14, r13, 2)) // store ( gamma46..gamma56 )
-	vmovhpd(xmm2, mem(r14, r10, 1)) // store ( gamma47..gamma57 )
-	
-	//lea(mem(r14, rsi, 8), r14) // r14 += 8*cs_c
-	
-	
-	
-	jmp(.SDONE) // jump to end.
-	
-	
-	
-	label(.SBETAZERO)
-	
-	cmp(imm(4), rsi) // set ZF if (4*cs_c) == 4.
-	jz(.SROWSTORBZ) // jump to row storage case
-	
-	cmp(imm(4), rdi) // set ZF if (4*cs_c) == 4.
-	jz(.SCOLSTORBZ) // jump to column storage case
-	
-	
-	
-	label(.SGENSTORBZ)
-	
-	
-	vmovaps(ymm4, ymm0)
-	SGEMM_OUTPUT_GS_BETA_NZ
-	add(rdi, rcx) // c += rs_c;
-	
-	
-	vmovaps(ymm6, ymm0)
-	SGEMM_OUTPUT_GS_BETA_NZ
-	add(rdi, rcx) // c += rs_c;
-	
-	
-	vmovaps(ymm8, ymm0)
-	SGEMM_OUTPUT_GS_BETA_NZ
-	add(rdi, rcx) // c += rs_c;
-	
-	
-	vmovaps(ymm10, ymm0)
-	SGEMM_OUTPUT_GS_BETA_NZ
-	add(rdi, rcx) // c += rs_c;
-	
-	
-	vmovaps(ymm12, ymm0)
-	SGEMM_OUTPUT_GS_BETA_NZ
-	add(rdi, rcx) // c += rs_c;
-	
-	
-	vmovaps(ymm14, ymm0)
-	SGEMM_OUTPUT_GS_BETA_NZ
-	//add(rdi, rcx) // c += rs_c;
-	
-	
-	mov(rdx, rcx) // rcx = c + 8*cs_c
-	
-	
-	vmovaps(ymm5, ymm0)
-	SGEMM_OUTPUT_GS_BETA_NZ
-	add(rdi, rcx) // c += rs_c;
-	
-	
-	vmovaps(ymm7, ymm0)
-	SGEMM_OUTPUT_GS_BETA_NZ
-	add(rdi, rcx) // c += rs_c;
-	
-	
-	vmovaps(ymm9, ymm0)
-	SGEMM_OUTPUT_GS_BETA_NZ
-	add(rdi, rcx) // c += rs_c;
-	
-	
-	vmovaps(ymm11, ymm0)
-	SGEMM_OUTPUT_GS_BETA_NZ
-	add(rdi, rcx) // c += rs_c;
-	
-	
-	vmovaps(ymm13, ymm0)
-	SGEMM_OUTPUT_GS_BETA_NZ
-	add(rdi, rcx) // c += rs_c;
-	
-	
-	vmovaps(ymm15, ymm0)
-	SGEMM_OUTPUT_GS_BETA_NZ
-	//add(rdi, rcx) // c += rs_c;
-	
-	
-	
-	jmp(.SDONE) // jump to end.
-	
-	
-	
-	label(.SROWSTORBZ)
-	
-	
-	vmovups(ymm4, mem(rcx))
-	add(rdi, rcx)
-	vmovups(ymm5, mem(rdx))
-	add(rdi, rdx)
-	
-	vmovups(ymm6, mem(rcx))
-	add(rdi, rcx)
-	vmovups(ymm7, mem(rdx))
-	add(rdi, rdx)
-	
-	
-	vmovups(ymm8, mem(rcx))
-	add(rdi, rcx)
-	vmovups(ymm9, mem(rdx))
-	add(rdi, rdx)
-	
-	
-	vmovups(ymm10, mem(rcx))
-	add(rdi, rcx)
-	vmovups(ymm11, mem(rdx))
-	add(rdi, rdx)
-	
-	
-	vmovups(ymm12, mem(rcx))
-	add(rdi, rcx)
-	vmovups(ymm13, mem(rdx))
-	add(rdi, rdx)
-	
-	
-	vmovups(ymm14, mem(rcx))
-	//add(rdi, rcx)
-	vmovups(ymm15, mem(rdx))
-	//add(rdi, rdx)
-	
-	
-	
-	jmp(.SDONE) // jump to end.
-	
-	
-	
-	label(.SCOLSTORBZ)
-	
-	
-	vunpcklps(ymm6, ymm4, ymm0)
-	vunpcklps(ymm10, ymm8, ymm1)
-	vshufps(imm(0x4e), ymm1, ymm0, ymm2)
-	vblendps(imm(0xcc), ymm2, ymm0, ymm0)
-	vblendps(imm(0x33), ymm2, ymm1, ymm1)
-	
-	vextractf128(imm(0x1), ymm0, xmm2)
-	vmovups(xmm0, mem(rcx)) // store ( gamma00..gamma30 )
-	vmovups(xmm2, mem(rcx, rsi, 4)) // store ( gamma04..gamma34 )
-	
-	vextractf128(imm(0x1), ymm1, xmm2)
-	vmovups(xmm1, mem(rcx, rsi, 1)) // store ( gamma01..gamma31 )
-	vmovups(xmm2, mem(rcx, r15, 1)) // store ( gamma05..gamma35 )
-	
-	
-	vunpckhps(ymm6, ymm4, ymm0)
-	vunpckhps(ymm10, ymm8, ymm1)
-	vshufps(imm(0x4e), ymm1, ymm0, ymm2)
-	vblendps(imm(0xcc), ymm2, ymm0, ymm0)
-	vblendps(imm(0x33), ymm2, ymm1, ymm1)
-	
-	vextractf128(imm(0x1), ymm0, xmm2)
-	vmovups(xmm0, mem(rcx, rsi, 2)) // store ( gamma02..gamma32 )
-	vmovups(xmm2, mem(rcx, r13, 2)) // store ( gamma06..gamma36 )
-	
-	vextractf128(imm(0x1), ymm1, xmm2)
-	vmovups(xmm1, mem(rcx, r13, 1)) // store ( gamma03..gamma33 )
-	vmovups(xmm2, mem(rcx, r10, 1)) // store ( gamma07..gamma37 )
-	
-	lea(mem(rcx, rsi, 8), rcx) // rcx += 8*cs_c
-	
-	vunpcklps(ymm14, ymm12, ymm0)
-	vextractf128(imm(0x1), ymm0, xmm2)
-	vmovlpd(xmm0, mem(r14)) // store ( gamma40..gamma50 )
-	vmovhpd(xmm0, mem(r14, rsi, 1)) // store ( gamma41..gamma51 )
-	vmovlpd(xmm2, mem(r14, rsi, 4)) // store ( gamma44..gamma54 )
-	vmovhpd(xmm2, mem(r14, r15, 1)) // store ( gamma45..gamma55 )
-	
-	vunpckhps(ymm14, ymm12, ymm0)
-	vextractf128(imm(0x1), ymm0, xmm2)
-	vmovlpd(xmm0, mem(r14, rsi, 2)) // store ( gamma42..gamma52 )
-	vmovhpd(xmm0, mem(r14, r13, 1)) // store ( gamma43..gamma53 )
-	vmovlpd(xmm2, mem(r14, r13, 2)) // store ( gamma46..gamma56 )
-	vmovhpd(xmm2, mem(r14, r10, 1)) // store ( gamma47..gamma57 )
-	
-	lea(mem(r14, rsi, 8), r14) // r14 += 8*cs_c
-	
-	
-	
-	vunpcklps(ymm7, ymm5, ymm0)
-	vunpcklps(ymm11, ymm9, ymm1)
-	vshufps(imm(0x4e), ymm1, ymm0, ymm2)
-	vblendps(imm(0xcc), ymm2, ymm0, ymm0)
-	vblendps(imm(0x33), ymm2, ymm1, ymm1)
-	
-	vextractf128(imm(0x1), ymm0, xmm2)
-	vmovups(xmm0, mem(rcx)) // store ( gamma00..gamma30 )
-	vmovups(xmm2, mem(rcx, rsi, 4)) // store ( gamma04..gamma34 )
-	
-	vextractf128(imm(0x1), ymm1, xmm2)
-	vmovups(xmm1, mem(rcx, rsi, 1)) // store ( gamma01..gamma31 )
-	vmovups(xmm2, mem(rcx, r15, 1)) // store ( gamma05..gamma35 )
-	
-	
-	vunpckhps(ymm7, ymm5, ymm0)
-	vunpckhps(ymm11, ymm9, ymm1)
-	vshufps(imm(0x4e), ymm1, ymm0, ymm2)
-	vblendps(imm(0xcc), ymm2, ymm0, ymm0)
-	vblendps(imm(0x33), ymm2, ymm1, ymm1)
-	
-	vextractf128(imm(0x1), ymm0, xmm2)
-	vmovups(xmm0, mem(rcx, rsi, 2)) // store ( gamma02..gamma32 )
-	vmovups(xmm2, mem(rcx, r13, 2)) // store ( gamma06..gamma36 )
-	
-	vextractf128(imm(0x1), ymm1, xmm2)
-	vmovups(xmm1, mem(rcx, r13, 1)) // store ( gamma03..gamma33 )
-	vmovups(xmm2, mem(rcx, r10, 1)) // store ( gamma07..gamma37 )
-	
-	//lea(mem(rcx, rsi, 8), rcx) // rcx += 8*cs_c
-	
-	vunpcklps(ymm15, ymm13, ymm0)
-	vextractf128(imm(0x1), ymm0, xmm2)
-	vmovlpd(xmm0, mem(r14)) // store ( gamma40..gamma50 )
-	vmovhpd(xmm0, mem(r14, rsi, 1)) // store ( gamma41..gamma51 )
-	vmovlpd(xmm2, mem(r14, rsi, 4)) // store ( gamma44..gamma54 )
-	vmovhpd(xmm2, mem(r14, r15, 1)) // store ( gamma45..gamma55 )
-	
-	vunpckhps(ymm15, ymm13, ymm0)
-	vextractf128(imm(0x1), ymm0, xmm2)
-	vmovlpd(xmm0, mem(r14, rsi, 2)) // store ( gamma42..gamma52 )
-	vmovhpd(xmm0, mem(r14, r13, 1)) // store ( gamma43..gamma53 )
-	vmovlpd(xmm2, mem(r14, r13, 2)) // store ( gamma46..gamma56 )
-	vmovhpd(xmm2, mem(r14, r10, 1)) // store ( gamma47..gamma57 )
-	
-	//lea(mem(r14, rsi, 8), r14) // r14 += 8*cs_c
-	
-	
-	
-	
-	
+	// see if we need to convert to double precision
+	test(r8, r8)
+	jnz(.SCONVERT)
+
+        vbroadcastss(mem(rbx), ymm3) // load beta and duplicate
+        lea(mem(rcx, rsi, 8), rdx) // load address of c +  8*cs_c;
+	
+         // now avoid loading C if beta == 0
+        vxorps(ymm0, ymm0, ymm0) // set ymm0 to zero.
+        vucomiss(xmm0, xmm3) // set ZF if beta == 0.
+        je(.SBETAZERO) // if ZF = 1, jump to beta == 0 case
+
+            cmp(imm(4), rdi) // set ZF if (4*cs_c) == 4.
+            jz(.SCOLSTORED) // jump to column storage case
+
+            cmp(imm(4), rsi) // set ZF if (4*cs_c) == 4.
+            jnz(.SGENSTORED) // jump to row storage case
+
+            label(.SROWSTORED)
+
+                SROWSTORED( 4,  5)
+                SROWSTORED( 6,  7)
+                SROWSTORED( 8,  9)
+                SROWSTORED(10, 11)
+                SROWSTORED(12, 13)
+                SROWSTORED(14, 15)
+
+            jmp(.SDONE) // jump to end.
+            label(.SCOLSTORED)
+
+                SCOLSTORED(4, 6, 8, 10, 12, 14)
+
+                lea(mem(rcx, rsi, 8), rcx) // rcx += 8*cs_c
+                lea(mem(r14, rsi, 8), r14) // r14 += 8*cs_c
+
+                SCOLSTORED(5, 7, 9, 11, 13, 15)
+
+            jmp(.SDONE) // jump to end.
+            label(.SGENSTORED)
+
+                SGENSTORED( 4)
+                SGENSTORED( 6)
+                SGENSTORED( 8)
+                SGENSTORED(10)
+                SGENSTORED(12)
+                SGENSTORED(14)
+
+                mov(rdx, rcx) // rcx = c + 8*cs_c
+
+                SGENSTORED( 5)
+                SGENSTORED( 7)
+                SGENSTORED( 9)
+                SGENSTORED(11)
+                SGENSTORED(13)
+                SGENSTORED(15)
+
+        jmp(.SDONE) // jump to end.
+        label(.SBETAZERO)
+
+            cmp(imm(4), rdi) // set ZF if (4*cs_c) == 4.
+            jz(.SCOLSTORBZ) // jump to column storage case
+
+            cmp(imm(4), rsi) // set ZF if (4*cs_c) == 4.
+            jnz(.SGENSTORBZ) // jump to row storage case
+
+            label(.SROWSTORBZ)
+
+                SROWSTORBZ( 4,  5)
+                SROWSTORBZ( 6,  7)
+                SROWSTORBZ( 8,  9)
+                SROWSTORBZ(10, 11)
+                SROWSTORBZ(12, 13)
+                SROWSTORBZ(14, 15)
+
+            jmp(.SDONE) // jump to end.
+            label(.SCOLSTORBZ)
+
+                SCOLSTORBZ(4, 6, 8, 10, 12, 14)
+
+                lea(mem(rcx, rsi, 8), rcx) // rcx += 8*cs_c
+                lea(mem(r14, rsi, 8), r14) // r14 += 8*cs_c
+
+                SCOLSTORBZ(5, 7, 9, 11, 13, 15)
+
+            jmp(.SDONE) // jump to end.
+            label(.SGENSTORBZ)
+
+                SGENSTORBZ( 4)
+                SGENSTORBZ( 6)
+                SGENSTORBZ( 8)
+                SGENSTORBZ(10)
+                SGENSTORBZ(12)
+                SGENSTORBZ(14)
+
+                mov(rdx, rcx) // rcx = c + 8*cs_c
+
+                SGENSTORBZ( 5)
+                SGENSTORBZ( 7)
+                SGENSTORBZ( 9)
+                SGENSTORBZ(11)
+                SGENSTORBZ(13)
+                SGENSTORBZ(15)
+
+    jmp(.SDONE) // jump to end.
+    label(.SCONVERT)
+
+        sal(rdi)
+        sal(rsi)
+
+        vbroadcastsd(mem(rbx), ymm3) // load beta and duplicate
+        lea(mem(rcx, rsi, 8), rdx) // load address of c +  8*cs_c;
+
+        // now avoid loading C if beta == 0
+        vxorps(ymm0, ymm0, ymm0) // set ymm0 to zero.
+        vucomiss(xmm0, xmm3) // set ZF if beta == 0.
+        je(.SCVTBZERO) // if ZF = 1, jump to beta == 0 case
+
+            cmp(imm(8), rdi) // set ZF if (8*cs_c) == 8.
+            jz(.SCVTCOLSTR) // jump to column storage case
+
+            cmp(imm(8), rsi) // set ZF if (8*cs_c) == 8.
+            jnz(.SCVTGENSTR) // jump to row storage case
+
+            label(.SCVTROWSTR)
+
+                SCVTROWSTR( 4,  5)
+                SCVTROWSTR( 6,  7)
+                SCVTROWSTR( 8,  9)
+                SCVTROWSTR(10, 11)
+                SCVTROWSTR(12, 13)
+                SCVTROWSTR(14, 15)
+
+            jmp(.SDONE) // jump to end.
+            label(.SCVTCOLSTR)
+
+                // not implemented yet
+                mov(imm(0), rax)
+                mov(mem(rax), rax)
+
+            jmp(.SDONE) // jump to end.
+            label(.SCVTGENSTR)
+
+                // not implemented yet
+                mov(imm(0), rax)
+                mov(mem(rax), rax)
+
+        jmp(.SDONE) // jump to end.
+        label(.SCVTBZERO)
+
+            cmp(imm(8), rdi) // set ZF if (8*cs_c) == 8.
+            jz(.SCVTCOLBZ) // jump to column storage case
+
+            cmp(imm(8), rsi) // set ZF if (8*cs_c) == 8.
+            jnz(.SCVTGENBZ) // jump to row storage case
+
+            label(.SCVTROWBZ)
+
+                SCVTROWBZ( 4,  5)
+                SCVTROWBZ( 6,  7)
+                SCVTROWBZ( 8,  9)
+                SCVTROWBZ(10, 11)
+                SCVTROWBZ(12, 13)
+                SCVTROWBZ(14, 15)
+
+            jmp(.SDONE) // jump to end.
+            label(.SCVTCOLBZ)
+
+                // not implemented yet
+                mov(imm(0), rax)
+                mov(mem(rax), rax)
+
+            jmp(.SDONE) // jump to end.
+            label(.SCVTGENBZ)
+
+                // not implemented yet
+                mov(imm(0), rax)
+                mov(mem(rax), rax)
+
 	label(.SDONE)
 	
 	
@@ -882,7 +707,8 @@ void bli_sgemm_zen_asm_6x16
       [beta]   "m" (beta),   // 5
       [c]      "m" (c),      // 6
       [rs_c]   "m" (rs_c),   // 7
-      [cs_c]   "m" (cs_c)/*,   // 8
+      [cs_c]   "m" (cs_c),
+      [convert] "m" (convert)/*,   // 8
       [b_next] "m" (b_next), // 9
       [a_next] "m" (a_next)*/  // 10
 	: // register clobber list
