@@ -125,7 +125,7 @@ void bli_dgemmtrsm_l_penryn_asm_4x4
 		label(.LOOPKITER) // MAIN LOOP
 		
 		//prefetch(0, mem(rax, 1264))
-		prefetch(0, mem(4*35+1)*8(rax))
+		prefetch(0, mem(rax, (4*35+1)*8))
 		
 		addpd(xmm3, xmm11) // iteration 0
 		movaps(mem(rbx, -7*16), xmm3)
@@ -189,7 +189,7 @@ void bli_dgemmtrsm_l_penryn_asm_4x4
 		movaps(mem(rax, -3*16), xmm1)
 		
 		//prefetch(0, mem(rax, 1328))
-		prefetch(0, mem(4*37+1)*8(rax))
+		prefetch(0, mem(rax, (4*37+1)*8))
 		
 		addpd(xmm3, xmm11) // iteration 2
 		movaps(mem(rbx, -3*16), xmm3)

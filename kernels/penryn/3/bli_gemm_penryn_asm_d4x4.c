@@ -109,7 +109,7 @@ void bli_sgemm_penryn_asm_8x4
 		
 		label(.SLOOPKITER) // MAIN LOOP
 		
-		prefetch(0, mem(4*35+1)*8(rax))
+		prefetch(0, mem(rax, (4*35+1)*8))
 		
 		addps(xmm6, xmm10) // iteration 0
 		addps(xmm3, xmm14)
@@ -917,8 +917,8 @@ void bli_dgemm_penryn_asm_4x4
 		
 		label(.DLOOPKITER) // MAIN LOOP
 		
-		prefetch(0, mem(4*35+1)*8(rax))
-		//prefetch(0, mem(8*97+4)*8(rax))
+		prefetch(0, mem(rax, (4*35+1)*8))
+		//prefetch(0, mem(rax, (8*97+4)*8))
 		
 		//prefetch(0, mem(r11, 67*4*8)) // prefetch a_next[0]
 		
@@ -985,8 +985,8 @@ void bli_dgemm_penryn_asm_4x4
 		movaps(mem(rax, -3*16), xmm1)
 		
 		
-		prefetch(0, mem(4*37+1)*8(rax))
-		//prefetch(0, mem(8*97+12)*8(rax))
+		prefetch(0, mem(rax, (4*37+1)*8))
+		//prefetch(0, mem(rax, (8*97+12)*8))
 		
 		//prefetch(0, mem(r11, 69*4*8)) // prefetch a_next[8]
 		//sub(imm(-4*4*8), r11) // a_next += 4*4 (unroll x mr)
