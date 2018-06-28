@@ -253,6 +253,31 @@
     \
     add(rdi, rdx)
 
+#define SGEMM_ITER(n) \
+    vbroadcastss(mem(rax, (6*((n+1)%%4)-6)*4), ymm2) \
+    vbroadcastss(mem(rax, (6*((n+1)%%4)-5)*4), ymm3) \
+    vfmadd231ps(ymm0, ymm2, ymm4) \
+    vfmadd231ps(ymm1, ymm2, ymm5) \
+    vfmadd231ps(ymm0, ymm3, ymm6) \
+    vfmadd231ps(ymm1, ymm3, ymm7) \
+    \
+    vbroadcastss(mem(rax, (6*((n+1)%%4)-4)*4), ymm2) \
+    vbroadcastss(mem(rax, (6*((n+1)%%4)-3)*4), ymm3) \
+    vfmadd231ps(ymm0, ymm2, ymm8) \
+    vfmadd231ps(ymm1, ymm2, ymm9) \
+    vfmadd231ps(ymm0, ymm3, ymm10) \
+    vfmadd231ps(ymm1, ymm3, ymm11) \
+    \
+    vbroadcastss(mem(rax, (6*((n+1)%%4)-2)*4), ymm2) \
+    vbroadcastss(mem(rax, (6*((n+1)%%4)-1)*4), ymm3) \
+    vfmadd231ps(ymm0, ymm2, ymm12) \
+    vfmadd231ps(ymm1, ymm2, ymm13) \
+    vfmadd231ps(ymm0, ymm3, ymm14) \
+    vfmadd231ps(ymm1, ymm3, ymm15) \
+    \
+    vmovaps(mem(rbx, (2*((n+1)%%4)-4)*32), ymm0) \
+    vmovaps(mem(rbx, (2*((n+1)%%4)-3)*32), ymm1)
+
 void bli_sgemm_zen_asm_6x16
      (
        dim_t               k0,
@@ -278,6 +303,12 @@ void bli_sgemm_zen_asm_6x16
 	num_t dt = bli_auxinfo_dt_on_output(data);
 	uint64_t convert = dt == BLIS_DOUBLE;
 
+	if (convert)
+	{
+        rs_c *= 2;
+        cs_c *= 2;
+	}
+
 	begin_asm()
 	
 	vzeroall() // zero all xmm/ymm registers.
@@ -296,150 +327,68 @@ void bli_sgemm_zen_asm_6x16
 	mov(var(rs_c), rdi) // load rs_c
 	lea(mem(, rdi, 4), rdi) // rs_c *= sizeof(float)
 	
-	lea(mem(rdi, rdi, 2), r13) // r13 = 3*rs_c;
-	lea(mem(rcx, r13, 1), rdx) // rdx = c + 3*rs_c;
-
-    prefetch(0, mem(rcx, 63)) // prefetch c + 0*rs_c
-    prefetch(0, mem(rcx, rdi, 1, 63)) // prefetch c + 1*rs_c
-    prefetch(0, mem(rcx, rdi, 2, 63)) // prefetch c + 2*rs_c
-    prefetch(0, mem(rdx, 63)) // prefetch c + 3*rs_c
-    prefetch(0, mem(rdx, rdi, 1, 63)) // prefetch c + 4*rs_c
-    prefetch(0, mem(rdx, rdi, 2, 63)) // prefetch c + 5*rs_c
-
-    prefetch(0, mem(rcx, 127)) // prefetch c + 0*rs_c
-    prefetch(0, mem(rcx, rdi, 1, 127)) // prefetch c + 1*rs_c
-    prefetch(0, mem(rcx, rdi, 2, 127)) // prefetch c + 2*rs_c
-    prefetch(0, mem(rdx, 127)) // prefetch c + 3*rs_c
-    prefetch(0, mem(rdx, rdi, 1, 127)) // prefetch c + 4*rs_c
-    prefetch(0, mem(rdx, rdi, 2, 127)) // prefetch c + 5*rs_c
+	mov(rcx, rdx) // use rdx to prefetch c
 	
-	
-	
-	
+	// for the first min(k_iter, 6) iterations
+    // prefetch c into L1
 	mov(var(k_iter), rsi) // i = k_iter;
+
+    mov(imm(6), r8)
+	cmp(r8, rsi)
+	cmovl(rsi, r8)
+
 	test(rsi, rsi) // check i via logical AND.
 	je(.SCONSIDKLEFT) // if i == 0, jump to code that
 	 // contains the k_left loop.
-	
-	
-	label(.SLOOPKITER) // MAIN LOOP
-	
-	
-	 // iteration 0
-	prefetch(0, mem(rax, 64*4))
-	
-	vbroadcastss(mem(rax, 0*4), ymm2)
-	vbroadcastss(mem(rax, 1*4), ymm3)
-	vfmadd231ps(ymm0, ymm2, ymm4)
-	vfmadd231ps(ymm1, ymm2, ymm5)
-	vfmadd231ps(ymm0, ymm3, ymm6)
-	vfmadd231ps(ymm1, ymm3, ymm7)
-	
-	vbroadcastss(mem(rax, 2*4), ymm2)
-	vbroadcastss(mem(rax, 3*4), ymm3)
-	vfmadd231ps(ymm0, ymm2, ymm8)
-	vfmadd231ps(ymm1, ymm2, ymm9)
-	vfmadd231ps(ymm0, ymm3, ymm10)
-	vfmadd231ps(ymm1, ymm3, ymm11)
-	
-	vbroadcastss(mem(rax, 4*4), ymm2)
-	vbroadcastss(mem(rax, 5*4), ymm3)
-	vfmadd231ps(ymm0, ymm2, ymm12)
-	vfmadd231ps(ymm1, ymm2, ymm13)
-	vfmadd231ps(ymm0, ymm3, ymm14)
-	vfmadd231ps(ymm1, ymm3, ymm15)
-	
-	vmovaps(mem(rbx, -2*32), ymm0)
-	vmovaps(mem(rbx, -1*32), ymm1)
-	
-	 // iteration 1
-	vbroadcastss(mem(rax, 6*4), ymm2)
-	vbroadcastss(mem(rax, 7*4), ymm3)
-	vfmadd231ps(ymm0, ymm2, ymm4)
-	vfmadd231ps(ymm1, ymm2, ymm5)
-	vfmadd231ps(ymm0, ymm3, ymm6)
-	vfmadd231ps(ymm1, ymm3, ymm7)
-	
-	vbroadcastss(mem(rax, 8*4), ymm2)
-	vbroadcastss(mem(rax, 9*4), ymm3)
-	vfmadd231ps(ymm0, ymm2, ymm8)
-	vfmadd231ps(ymm1, ymm2, ymm9)
-	vfmadd231ps(ymm0, ymm3, ymm10)
-	vfmadd231ps(ymm1, ymm3, ymm11)
-	
-	vbroadcastss(mem(rax, 10*4), ymm2)
-	vbroadcastss(mem(rax, 11*4), ymm3)
-	vfmadd231ps(ymm0, ymm2, ymm12)
-	vfmadd231ps(ymm1, ymm2, ymm13)
-	vfmadd231ps(ymm0, ymm3, ymm14)
-	vfmadd231ps(ymm1, ymm3, ymm15)
-	
-	vmovaps(mem(rbx, 0*32), ymm0)
-	vmovaps(mem(rbx, 1*32), ymm1)
-	
-	 // iteration 2
-	prefetch(0, mem(rax, 76*4))
-	
-	vbroadcastss(mem(rax, 12*4), ymm2)
-	vbroadcastss(mem(rax, 13*4), ymm3)
-	vfmadd231ps(ymm0, ymm2, ymm4)
-	vfmadd231ps(ymm1, ymm2, ymm5)
-	vfmadd231ps(ymm0, ymm3, ymm6)
-	vfmadd231ps(ymm1, ymm3, ymm7)
-	
-	vbroadcastss(mem(rax, 14*4), ymm2)
-	vbroadcastss(mem(rax, 15*4), ymm3)
-	vfmadd231ps(ymm0, ymm2, ymm8)
-	vfmadd231ps(ymm1, ymm2, ymm9)
-	vfmadd231ps(ymm0, ymm3, ymm10)
-	vfmadd231ps(ymm1, ymm3, ymm11)
-	
-	vbroadcastss(mem(rax, 16*4), ymm2)
-	vbroadcastss(mem(rax, 17*4), ymm3)
-	vfmadd231ps(ymm0, ymm2, ymm12)
-	vfmadd231ps(ymm1, ymm2, ymm13)
-	vfmadd231ps(ymm0, ymm3, ymm14)
-	vfmadd231ps(ymm1, ymm3, ymm15)
-	
-	vmovaps(mem(rbx, 2*32), ymm0)
-	vmovaps(mem(rbx, 3*32), ymm1)
-	
-	 // iteration 3
-	vbroadcastss(mem(rax, 18*4), ymm2)
-	vbroadcastss(mem(rax, 19*4), ymm3)
-	vfmadd231ps(ymm0, ymm2, ymm4)
-	vfmadd231ps(ymm1, ymm2, ymm5)
-	vfmadd231ps(ymm0, ymm3, ymm6)
-	vfmadd231ps(ymm1, ymm3, ymm7)
-	
-	vbroadcastss(mem(rax, 20*4), ymm2)
-	vbroadcastss(mem(rax, 21*4), ymm3)
-	vfmadd231ps(ymm0, ymm2, ymm8)
-	vfmadd231ps(ymm1, ymm2, ymm9)
-	vfmadd231ps(ymm0, ymm3, ymm10)
-	vfmadd231ps(ymm1, ymm3, ymm11)
-	
-	vbroadcastss(mem(rax, 22*4), ymm2)
-	vbroadcastss(mem(rax, 23*4), ymm3)
-	vfmadd231ps(ymm0, ymm2, ymm12)
-	vfmadd231ps(ymm1, ymm2, ymm13)
-	vfmadd231ps(ymm0, ymm3, ymm14)
-	vfmadd231ps(ymm1, ymm3, ymm15)
-	
-	add(imm(4*6*4), rax) // a += 4*6  (unroll x mr)
-	add(imm(4*16*4), rbx) // b += 4*16 (unroll x nr)
-	
-	vmovaps(mem(rbx, -4*32), ymm0)
-	vmovaps(mem(rbx, -3*32), ymm1)
-	
-	
-	dec(rsi) // i -= 1;
-	jne(.SLOOPKITER) // iterate again if i != 0.
-	
-	
-	
-	
-	
+
+    label(.SLOOPPREFETCH) // MAIN LOOP
+
+        prefetch(0, mem(rax, 64*4))
+
+        SGEMM_ITER(0)
+
+        prefetch(0, mem(rdx, 63))
+
+        SGEMM_ITER(1)
+
+        prefetch(0, mem(rax, 76*4))
+
+        SGEMM_ITER(2)
+
+        prefetch(0, mem(rdx, 127))
+
+        add(imm(4*6*4), rax) // a += 4*6  (unroll x mr)
+        add(imm(4*16*4), rbx) // b += 4*16 (unroll x nr)
+        add(rdi, rdx) // c += rs_c
+
+        SGEMM_ITER(3)
+
+    dec(r8) // i -= 1;
+    jne(.SLOOPPREFETCH) // iterate again if i != 0.
+
+    // if k_iter <= 6, then we did all the unrolled
+    // loop iterations above
+    sub(imm(6), rsi)
+    jle(.SCONSIDKLEFT)
+
+    label(.SLOOPKITER) // MAIN LOOP
+
+        prefetch(0, mem(rax, 64*4))
+
+        SGEMM_ITER(0)
+        SGEMM_ITER(1)
+
+        prefetch(0, mem(rax, 76*4))
+
+        SGEMM_ITER(2)
+
+        add(imm(4*6*4), rax) // a += 4*6  (unroll x mr)
+        add(imm(4*16*4), rbx) // b += 4*16 (unroll x nr)
+
+        SGEMM_ITER(3)
+
+    dec(rsi) // i -= 1;
+    jne(.SLOOPKITER) // iterate again if i != 0.
 	
 	label(.SCONSIDKLEFT)
 	
@@ -448,38 +397,14 @@ void bli_sgemm_zen_asm_6x16
 	je(.SPOSTACCUM) // if i == 0, we're done; jump to end.
 	 // else, we prepare to enter k_left loop.
 	
-	
 	label(.SLOOPKLEFT) // EDGE LOOP
 	
-	prefetch(0, mem(rax, 64*4))
-	
-	vbroadcastss(mem(rax, 0*4), ymm2)
-	vbroadcastss(mem(rax, 1*4), ymm3)
-	vfmadd231ps(ymm0, ymm2, ymm4)
-	vfmadd231ps(ymm1, ymm2, ymm5)
-	vfmadd231ps(ymm0, ymm3, ymm6)
-	vfmadd231ps(ymm1, ymm3, ymm7)
-	
-	vbroadcastss(mem(rax, 2*4), ymm2)
-	vbroadcastss(mem(rax, 3*4), ymm3)
-	vfmadd231ps(ymm0, ymm2, ymm8)
-	vfmadd231ps(ymm1, ymm2, ymm9)
-	vfmadd231ps(ymm0, ymm3, ymm10)
-	vfmadd231ps(ymm1, ymm3, ymm11)
-	
-	vbroadcastss(mem(rax, 4*4), ymm2)
-	vbroadcastss(mem(rax, 5*4), ymm3)
-	vfmadd231ps(ymm0, ymm2, ymm12)
-	vfmadd231ps(ymm1, ymm2, ymm13)
-	vfmadd231ps(ymm0, ymm3, ymm14)
-	vfmadd231ps(ymm1, ymm3, ymm15)
-	
-	add(imm(1*6*4), rax) // a += 1*6  (unroll x mr)
-	add(imm(1*16*4), rbx) // b += 1*16 (unroll x nr)
-	
-	vmovaps(mem(rbx, -4*32), ymm0)
-	vmovaps(mem(rbx, -3*32), ymm1)
-	
+        prefetch(0, mem(rax, 64*4))
+
+        SGEMM_ITER(0)
+
+        add(imm(1*6*4), rax) // a += 1*6  (unroll x mr)
+        add(imm(1*16*4), rbx) // b += 1*16 (unroll x nr)
 	
 	dec(rsi) // i -= 1;
 	jne(.SLOOPKLEFT) // iterate again if i != 0.
@@ -515,7 +440,8 @@ void bli_sgemm_zen_asm_6x16
 	
 	mov(var(cs_c), rsi) // load cs_c
 	lea(mem(, rsi, 4), rsi) // rsi = cs_c * sizeof(float)
-	
+
+    lea(mem(rcx, rsi, 8), rdx) // load address of c +  8*cs_c;
 	lea(mem(rcx, rdi, 4), r14) // load address of c +  4*rs_c;
 	
 	lea(mem(rsi, rsi, 2), r13) // r13 = 3*cs_c;
@@ -527,7 +453,6 @@ void bli_sgemm_zen_asm_6x16
 	jnz(.SCONVERT)
 
         vbroadcastss(mem(rbx), ymm3) // load beta and duplicate
-        lea(mem(rcx, rsi, 8), rdx) // load address of c +  8*cs_c;
 	
          // now avoid loading C if beta == 0
         vxorps(ymm0, ymm0, ymm0) // set ymm0 to zero.
@@ -628,15 +553,11 @@ void bli_sgemm_zen_asm_6x16
     jmp(.SDONE) // jump to end.
     label(.SCONVERT)
 
-        sal(rdi)
-        sal(rsi)
-
         vbroadcastsd(mem(rbx), ymm3) // load beta and duplicate
-        lea(mem(rcx, rsi, 8), rdx) // load address of c +  8*cs_c;
 
         // now avoid loading C if beta == 0
-        vxorps(ymm0, ymm0, ymm0) // set ymm0 to zero.
-        vucomiss(xmm0, xmm3) // set ZF if beta == 0.
+        vxorpd(ymm0, ymm0, ymm0) // set ymm0 to zero.
+        vucomisd(xmm0, xmm3) // set ZF if beta == 0.
         je(.SCVTBZERO) // if ZF = 1, jump to beta == 0 case
 
             cmp(imm(8), rdi) // set ZF if (8*cs_c) == 8.
