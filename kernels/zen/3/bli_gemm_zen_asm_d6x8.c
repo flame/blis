@@ -298,12 +298,20 @@ void bli_sgemm_zen_asm_6x16
 	
 	lea(mem(rdi, rdi, 2), r13) // r13 = 3*rs_c;
 	lea(mem(rcx, r13, 1), rdx) // rdx = c + 3*rs_c;
-	prefetch(0, mem(rcx, 7*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 7*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 7*8)) // prefetch c + 2*rs_c
-	prefetch(0, mem(rdx, 7*8)) // prefetch c + 3*rs_c
-	prefetch(0, mem(rdx, rdi, 1, 7*8)) // prefetch c + 4*rs_c
-	prefetch(0, mem(rdx, rdi, 2, 7*8)) // prefetch c + 5*rs_c
+
+    prefetch(0, mem(rcx, 63)) // prefetch c + 0*rs_c
+    prefetch(0, mem(rcx, rdi, 1, 63)) // prefetch c + 1*rs_c
+    prefetch(0, mem(rcx, rdi, 2, 63)) // prefetch c + 2*rs_c
+    prefetch(0, mem(rdx, 63)) // prefetch c + 3*rs_c
+    prefetch(0, mem(rdx, rdi, 1, 63)) // prefetch c + 4*rs_c
+    prefetch(0, mem(rdx, rdi, 2, 63)) // prefetch c + 5*rs_c
+
+    prefetch(0, mem(rcx, 127)) // prefetch c + 0*rs_c
+    prefetch(0, mem(rcx, rdi, 1, 127)) // prefetch c + 1*rs_c
+    prefetch(0, mem(rcx, rdi, 2, 127)) // prefetch c + 2*rs_c
+    prefetch(0, mem(rdx, 127)) // prefetch c + 3*rs_c
+    prefetch(0, mem(rdx, rdi, 1, 127)) // prefetch c + 4*rs_c
+    prefetch(0, mem(rdx, rdi, 2, 127)) // prefetch c + 5*rs_c
 	
 	
 	
