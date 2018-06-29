@@ -363,12 +363,12 @@ static void bli_obj_set_target_dt( num_t dt, obj_t* obj )
 
 static void bli_obj_set_target_domain( dom_t dt, obj_t* obj )
 {
-	obj->info = ( obj->info & ~BLIS_TARGET_DOMAIN_BIT ) | ( dt << BLIS_TARGET_DOMAIN_SHIFT );
+	obj->info = ( obj->info & ~BLIS_TARGET_DOMAIN_BIT ) | ( dt << BLIS_TARGET_DT_SHIFT );
 }
 
 static void bli_obj_set_target_prec( prec_t dt, obj_t* obj )
 {
-	obj->info = ( obj->info & ~BLIS_TARGET_PREC_BIT ) | ( dt << BLIS_TARGET_PREC_SHIFT );
+	obj->info = ( obj->info & ~BLIS_TARGET_PREC_BIT ) | ( dt << BLIS_TARGET_DT_SHIFT );
 }
 
 static void bli_obj_set_exec_dt( num_t dt, obj_t* obj )
@@ -378,12 +378,12 @@ static void bli_obj_set_exec_dt( num_t dt, obj_t* obj )
 
 static void bli_obj_set_exec_domain( dom_t dt, obj_t* obj )
 {
-	obj->info = ( obj->info & ~BLIS_EXEC_DOMAIN_BIT ) | ( dt << BLIS_EXEC_DOMAIN_SHIFT );
+	obj->info = ( obj->info & ~BLIS_EXEC_DOMAIN_BIT ) | ( dt << BLIS_EXEC_DT_SHIFT );
 }
 
 static void bli_obj_set_exec_prec( prec_t dt, obj_t* obj )
 {
-	obj->info = ( obj->info & ~BLIS_EXEC_PREC_BIT ) | ( dt << BLIS_EXEC_PREC_SHIFT );
+	obj->info = ( obj->info & ~BLIS_EXEC_PREC_BIT ) | ( dt << BLIS_EXEC_DT_SHIFT );
 }
 
 static void bli_obj_set_pack_schema( pack_t schema, obj_t* obj )
@@ -1084,9 +1084,13 @@ static void bli_obj_real_part( obj_t* c, obj_t* r )
 
 	if ( bli_obj_is_complex( c ) )
 	{
-		// Change the datatype.
-		num_t dt_r = bli_obj_dt_proj_to_real( c );
-		bli_obj_set_dt( dt_r, r );
+		// Change the datatypes.
+		const num_t dt_stor_r = bli_dt_proj_to_real( bli_obj_dt( c )        );
+		const num_t dt_targ_r = bli_dt_proj_to_real( bli_obj_target_dt( c ) );
+		const num_t dt_exec_r = bli_dt_proj_to_real( bli_obj_exec_dt( c )   );
+		bli_obj_set_dt(        dt_stor_r, r );
+		bli_obj_set_target_dt( dt_targ_r, r );
+		bli_obj_set_exec_dt(   dt_exec_r, r );
 
 		// Update the element size.
 		siz_t es_c = bli_obj_elem_size( c );
@@ -1110,8 +1114,12 @@ static void bli_obj_imag_part( obj_t* c, obj_t* i )
 		bli_obj_alias_to( c, i );
 
 		// Change the datatype.
-		num_t dt_r = bli_obj_dt_proj_to_real( c );
-		bli_obj_set_dt( dt_r, i );
+		const num_t dt_stor_r = bli_dt_proj_to_real( bli_obj_dt( c )        );
+		const num_t dt_targ_r = bli_dt_proj_to_real( bli_obj_target_dt( c ) );
+		const num_t dt_exec_r = bli_dt_proj_to_real( bli_obj_exec_dt( c )   );
+		bli_obj_set_dt(        dt_stor_r, i );
+		bli_obj_set_target_dt( dt_targ_r, i );
+		bli_obj_set_exec_dt(   dt_exec_r, i );
 
 		// Update the element size.
 		siz_t es_c = bli_obj_elem_size( c );

@@ -134,7 +134,7 @@ static num_t bli_dt_proj_to_complex( num_t dt )
 
 static num_t bli_dt_proj_to_single_prec( num_t dt )
 {
-	return ( dt & ~BLIS_BITVAL_SINGLE_PREC );
+	return ( dt & ~BLIS_BITVAL_DOUBLE_PREC );
 }
 
 static num_t bli_dt_proj_to_double_prec( num_t dt )
