@@ -43,10 +43,12 @@ int main( int argc, char** argv )
 	dim_t m, n;
 	inc_t rs, cs;
 
+
 	//
 	// This file demonstrates the basics of creating objects in BLIS,
 	// inspecting their basic properties, and printing matrix objects.
 	//
+
 
 	//
 	// Example 1: Create an object containing a 4x3 matrix of double-
@@ -69,6 +71,7 @@ int main( int argc, char** argv )
 	                  rs = 1; cs = 6; 
 	bli_obj_create( dt, m, n, rs, cs, &a2 );
 
+
 	//
 	// Example 2: Create an object containing a 4x3 matrix of double-
 	//            precision real elements stored in row-major order.
@@ -87,6 +90,7 @@ int main( int argc, char** argv )
 	                  rs = 8; cs = 1; 
 	bli_obj_create( dt, m, n, rs, cs, &a4 );
 
+
 	//
 	// Example 3: Create objects using other floating-point datatypes.
 	//
@@ -97,6 +101,7 @@ int main( int argc, char** argv )
 	bli_obj_create( BLIS_FLOAT,    m, n, rs, cs, &a5 );
 	bli_obj_create( BLIS_SCOMPLEX, m, n, rs, cs, &a6 );
 	bli_obj_create( BLIS_DCOMPLEX, m, n, rs, cs, &a7 );
+
 
 	//
 	// Example 4: Create objects using default (column) storage so that
@@ -111,6 +116,7 @@ int main( int argc, char** argv )
 	// below may end up having a row stride that is greater than 3. When
 	// in doubt, query the value! 
 	bli_obj_create( BLIS_FLOAT, 3, 5, 0, 0, &a8 );
+
 
 	//
 	// Example 5: Inspect object fields after creation to expose
@@ -127,6 +133,7 @@ int main( int argc, char** argv )
 	printf( "n dim (# of cols):  %d\n", ( int )bli_obj_width( &a8 ) );
 	printf( "row stride:         %d\n", ( int )bli_obj_row_stride( &a8 ) );
 	printf( "col stride:         %d\n", ( int )bli_obj_col_stride( &a8 ) );
+
 
 	//
 	// Example 6: Inspect object fields after creation of other floating-
@@ -162,6 +169,7 @@ int main( int argc, char** argv )
 	printf( "row stride:         %d\n", ( int )bli_obj_row_stride( &a11 ) );
 	printf( "col stride:         %d\n", ( int )bli_obj_col_stride( &a11 ) );
 
+
 	//
 	// Example 7: Initialize an object's elements to random values and then
 	//            print the matrix.
@@ -181,6 +189,7 @@ int main( int argc, char** argv )
 	// elements of type 'float'.
 	bli_printm( "matrix 'a9' contents:", &a9, "%4.1f", "" );
 
+
 	//
 	// Example 8: Randomize and then print from an object containing a complex
 	//            matrix.
@@ -193,13 +202,14 @@ int main( int argc, char** argv )
 	bli_randm( &a11 );
 	bli_printm( "matrix 'a11' contents (complex):", &a11, "%4.1f", "" );
 
+
 	//
 	// Example 9: Create, randomize, and print vector objects.
 	//
 
 	printf( "\n#\n#  -- Example 9 --\n#\n\n" );
 
-	// Now let's create two vector object--a row vector and a column vector.
+	// Now let's create two vector objects--a row vector and a column vector.
 	// (A vector object is like a matrix object, except that it has at least
 	// one unit dimension (equal to one).
 	bli_obj_create( BLIS_DOUBLE, 4, 1, 0, 0, &v1 );

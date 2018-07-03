@@ -43,10 +43,12 @@ int main( int argc, char** argv )
 	dim_t m, n;
 	inc_t rs, cs;
 
+
 	//
 	// This file demonstrates working with vector and matrix objects in the
 	// context of various utility operations.
 	//
+
 
 	//
 	// Example 1: Compute various vector norms.
@@ -73,7 +75,7 @@ int main( int argc, char** argv )
 
 	bli_printm( "x:", &x, "%4.1f", "" );
 
-	// Compute the one-norm of 'x'.
+	// Compute the one, infinity, and frobenius norms of 'x'.
 	bli_norm1v( &x, &norm1 );
 	bli_normiv( &x, &normi );
 	bli_normfv( &x, &normf );
@@ -84,9 +86,9 @@ int main( int argc, char** argv )
 
 	bli_printm( "y:", &y, "%4.1f", "" );
 
-	// Compute the one-norm of 'y'. Note that we can reuse the same scalars
-	// from before for computing norms of dcomplex matrices, since the real
-	// projection of dcomplex is double.
+	// Compute the one, infinity, and frobenius norms of 'y'. Note that we
+	// can reuse the same scalars from before for computing norms of
+	// dcomplex matrices, since the real projection of dcomplex is double.
 	bli_norm1v( &y, &norm1 );
 	bli_normiv( &y, &normi );
 	bli_normfv( &y, &normf );
@@ -94,6 +96,7 @@ int main( int argc, char** argv )
 	bli_printm( "y: 1-norm:", &norm1, "%4.1f", "" );
 	bli_printm( "y: infinity norm:", &normi, "%4.1f", "" );
 	bli_printm( "y: frobenius norm:", &normf, "%4.1f", "" );
+
 
 	//
 	// Example 2: Compute various matrix norms.
@@ -132,6 +135,7 @@ int main( int argc, char** argv )
 	bli_printm( "b: infinity norm:", &normi, "%4.1f", "" );
 	bli_printm( "b: frobenius norm:", &normf, "%4.1f", "" );
 
+
 	//
 	// Example 3: Make a real matrix explicitly symmetric (or Hermitian).
 	//
@@ -159,7 +163,7 @@ int main( int argc, char** argv )
 	// unstored triangle, making the matrix densely symmetric.
 	bli_mksymm( &c );
 
-	bli_printm( "c (after mksymm):", &c, "%4.1f", "" );
+	bli_printm( "c (after mksymm on lower triangle):", &c, "%4.1f", "" );
 
 	// Digression: Most people think only of complex matrices as being able
 	// to be complex. However, in BLIS, we define Hermitian operations on
@@ -182,11 +186,8 @@ int main( int argc, char** argv )
 	// imaginary elements to conjugate.
 	bli_mkherm( &d );
 
-	bli_printm( "d (after mkherm):", &d, "%4.1f", "" );
+	bli_printm( "d (after mkherm on lower triangle):", &d, "%4.1f", "" );
 
-	// Set the structure and uplo of 'd'.
-	bli_obj_set_struc( BLIS_HERMITIAN, &d );
-	bli_obj_set_uplo( BLIS_LOWER, &d );
 
 	//
 	// Example 4: Make a complex matrix explicitly symmetric or Hermitian.
@@ -234,6 +235,7 @@ int main( int argc, char** argv )
 	bli_mkherm( &f );
 
 	bli_printm( "f (after mkherm):", &f, "%4.1f", "" );
+
 
 	//
 	// Example 5: Make a real matrix explicitly triangular.

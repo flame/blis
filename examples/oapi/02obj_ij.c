@@ -49,10 +49,12 @@ int main( int argc, char** argv )
 	inc_t rs, cs;
 	dim_t i, j;
 
+
 	//
 	// This file demonstrates accessing and updating individual matrix elements
 	// through the BLIS object API.
 	//
+
 
 	//
 	// Example 1: Create an object and then individually access/view some of
@@ -98,6 +100,7 @@ int main( int argc, char** argv )
 
 	printf( "\n" );
 
+
 	//
 	// Example 2: Modify individual elements of an existing matrix.
 	//
@@ -131,6 +134,7 @@ int main( int argc, char** argv )
 	// Because we initialized a2 in the same manner as a1 (by columns),
 	// it should contain the same initial state as a1.
 	bli_printm( "matrix 'a2'", &a2, "%5.1f", "" );
+
 
 	//
 	// Example 3: Modify individual elements of an existing complex matrix.

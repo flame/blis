@@ -46,10 +46,12 @@ int main( int argc, char** argv )
 	dim_t m, n;
 	inc_t rs, cs;
 
+
 	//
 	// This file demonstrates interfacing external or existing buffers
 	// with BLIS objects.
 	//
+
 
 	//
 	// Example 1: Create a bufferless object and then attach an external
@@ -85,6 +87,7 @@ int main( int argc, char** argv )
 	// Now let's print the matrix so we can see how the element values were
 	// assigned.
 	bli_printm( "matrix 'a1', initialized by columns:", &a1, "%5.1f", "" );
+
 
 	//
 	// Example 2: Create a bufferless object and then attach an external

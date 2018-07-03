@@ -43,13 +43,14 @@ int main( int argc, char** argv )
 	side_t side;
 
 	obj_t a, b, c, d;
-	obj_t aa, bb, cc;
 	obj_t* alpha;
 	obj_t* beta;
+
 
 	//
 	// This file demonstrates level-3 operations.
 	//
+
 
 	//
 	// Example 1: Perform a general matrix-matrix multiply (gemm) operation.
@@ -87,6 +88,7 @@ int main( int argc, char** argv )
 	bli_obj_free( &b );
 	bli_obj_free( &c );
 
+
 	//
 	// Example 1b: Perform a general matrix-matrix multiply (gemm) operation
 	//             with the left input operand (matrix A) transposed.
@@ -97,35 +99,36 @@ int main( int argc, char** argv )
 	// Create some matrix operands to work with.
 	dt = BLIS_DOUBLE;
 	m = 4; n = 5; k = 3; rs = 0; cs = 0;
-	bli_obj_create( dt, m, n, rs, cs, &cc );
-	bli_obj_create( dt, k, m, rs, cs, &aa );
-	bli_obj_create( dt, k, n, rs, cs, &bb );
+	bli_obj_create( dt, m, n, rs, cs, &c );
+	bli_obj_create( dt, k, m, rs, cs, &a );
+	bli_obj_create( dt, k, n, rs, cs, &b );
 
 	// Set the scalars to use.
 	alpha = &BLIS_ONE;
 	beta  = &BLIS_ONE;
 
 	// Initialize the matrix operands.
-	bli_randm( &aa );
-	bli_setm( &BLIS_ONE, &bb );
-	bli_setm( &BLIS_ZERO, &cc );
+	bli_randm( &a );
+	bli_setm( &BLIS_ONE, &b );
+	bli_setm( &BLIS_ZERO, &c );
 
-	// Set the transpose bit in 'aa'.
-	bli_obj_toggle_trans( &aa );
+	// Set the transpose bit in 'a'.
+	bli_obj_toggle_trans( &a );
 
-	bli_printm( "a: randomized", &aa, "%4.1f", "" );
-	bli_printm( "b: set to 1.0", &bb, "%4.1f", "" );
-	bli_printm( "c: initial value", &cc, "%4.1f", "" );
+	bli_printm( "a: randomized", &a, "%4.1f", "" );
+	bli_printm( "b: set to 1.0", &b, "%4.1f", "" );
+	bli_printm( "c: initial value", &c, "%4.1f", "" );
 
 	// c := beta * c + alpha * a^T * b, where 'a', 'b', and 'c' are general.
-	bli_gemm( alpha, &aa, &bb, beta, &cc );
+	bli_gemm( alpha, &a, &b, beta, &c );
 
-	bli_printm( "c: after gemm", &cc, "%4.1f", "" );
+	bli_printm( "c: after gemm", &c, "%4.1f", "" );
 
 	// Free the objects.
-	bli_obj_free( &aa );
-	bli_obj_free( &bb );
-	bli_obj_free( &cc );
+	bli_obj_free( &a );
+	bli_obj_free( &b );
+	bli_obj_free( &c );
+
 
 	//
 	// Example 2: Perform a symmetric rank-k update (syrk) operation.
@@ -163,6 +166,7 @@ int main( int argc, char** argv )
 	// Free the objects.
 	bli_obj_free( &c );
 	bli_obj_free( &a );
+
 
 	//
 	// Example 3: Perform a symmetric matrix-matrix multiply (symm) operation.
@@ -214,6 +218,7 @@ int main( int argc, char** argv )
 	bli_obj_free( &b );
 	bli_obj_free( &c );
 
+
 	//
 	// Example 4: Perform a triangular matrix-matrix multiply (trmm) operation.
 	//
@@ -251,11 +256,12 @@ int main( int argc, char** argv )
 	// b := alpha * a * b, where 'a' is triangular and lower-stored.
 	bli_trmm( side, alpha, &a, &b );
 
-	bli_printm( "x: after trmv", &b, "%4.1f", "" );
+	bli_printm( "x: after trmm", &b, "%4.1f", "" );
 
 	// Free the objects.
 	bli_obj_free( &a );
 	bli_obj_free( &b );
+
 
 	//
 	// Example 5: Perform a triangular solve with multiple right-hand sides
