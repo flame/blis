@@ -15,7 +15,7 @@ install:
 build_script:
 - set CC=clang
 - set RANLIB=echo
-- bash --login -c "source activate && cd /c/projects/blis && ./configure --disable-shared auto && make CPICFLAGS= -j4"
+- bash --login -c "source activate && cd /c/projects/blis && ./configure --disable-shared x86_64 && make CPICFLAGS= -j4"
 
 test_script:
 - bash --login -c "source activate && cd /c/projects/blis && make CPICFLAGS= check"
