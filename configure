@@ -1,4 +1,3 @@
-
 #!/usr/bin/env bash
 #
 #  BLIS    
@@ -915,7 +914,7 @@ auto_detect()
 	# Set the linker flags. We need pthreads because it is needed for
 	# parts of bli_arch.c unrelated to bli_arch_string(), which is called
 	# by the main() function in ${main_c}.
-	ldflags="${LIBPTHREAD:-lpthread}"
+	ldflags="${LIBPTHREAD:--lpthread}"
 
 	# Compile the auto-detect program using source code inside the
 	# framework.
