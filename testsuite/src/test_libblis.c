@@ -35,7 +35,6 @@
 #include "blis.h"
 #include "test_libblis.h"
 
-
 // Global variables.
 char libblis_test_binary_name[ MAX_BINARY_NAME_LENGTH + 1 ];
 

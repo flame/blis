@@ -173,6 +173,10 @@ extern "C" {
 
 #include "bli_cblas.h"
 
+// -- Windows definitions
+
+#include "bli_winsys.h"
+
 
 // End extern "C" construct block.
 #ifdef __cplusplus

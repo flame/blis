@@ -47,8 +47,9 @@
 #include <ctype.h>
 
 // For sleep().
+#ifndef _MSC_VER
 #include <unistd.h>
-
+#endif
 
 //
 // --- Constants and types -----------------------------------------------------

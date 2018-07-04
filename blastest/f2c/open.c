@@ -27,6 +27,9 @@ use or performance of this software.
 #ifndef NON_UNIX_STDIO
 #include <unistd.h>
 #endif
+#ifdef _MSC_VER
+#define access _access
+#endif
 #include "f2c.h"
 #include "fio.h"
 
