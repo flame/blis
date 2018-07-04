@@ -47,16 +47,9 @@
 #include <ctype.h>
 
 #ifdef _MSC_VER
-#include <windows.h>
-void sleep(int x) {
-    Sleep(x);
-}
-
-int setenv(const char *name, const char *value, int overwrite) {
-    _putenv_s(name, value);
-}
+void sleep(int x);
+int setenv(const char *name, const char *value, int overwrite);
 #define strerror_r(errno,buf,len) strerror_s(buf,len,errno)
-
 #else
 #include <unistd.h>
 #endif
