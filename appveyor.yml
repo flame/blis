@@ -1,15 +1,14 @@
-environment:
-  global:
-    CONDA_INSTALL_LOCN: C:\\Miniconda36-x64
-
 install:
+- set "CONDA_INSTALL_LOCN=C:\\Miniconda36-x64"
 - call %CONDA_INSTALL_LOCN%\Scripts\activate.bat
 - conda update --yes --quiet conda
 - conda config --add channels conda-forge
 - conda install --yes clangdev posix m2-make pthreads-win32
 - copy %CONDA_INSTALL_LOCN%\Library\lib\pthreads.lib %CONDA_INSTALL_LOCN%\Library\lib\pthread.lib
+- copy %CONDA_INSTALL_LOCN%\Library\lib\pthreads.lib %CONDA_INSTALL_LOCN%\Library\lib\m.lib
 - copy %CONDA_INSTALL_LOCN%\Library\bin\llvm-as.exe %CONDA_INSTALL_LOCN%\Library\bin\as.exe
-- call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
+- copy %CONDA_INSTALL_LOCN%\Library\bin\llvm-ar.exe %CONDA_INSTALL_LOCN%\Library\bin\ar.exe
+- call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
 - set "LIB=%CONDA_INSTALL_LOCN%\Library\lib;%LIB%"
 - set "CPATH=%CONDA_INSTALL_LOCN%\Library\include;%CPATH%"
 
