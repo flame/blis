@@ -38,7 +38,7 @@
 #ifdef _MSC_VER
 #include <windows.h>
 void sleep(int x) {
-    Sleep(x);
+    Sleep(x*1000);
 }
 
 int setenv(const char *name, const char *value, int overwrite) {
