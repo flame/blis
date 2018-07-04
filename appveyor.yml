@@ -8,6 +8,7 @@ install:
 - conda config --add channels conda-forge
 - conda install --yes clangdev posix m2-make pthreads-win32
 - copy %CONDA_INSTALL_LOCN%\Library\lib\pthreads.lib %CONDA_INSTALL_LOCN%\Library\lib\pthread.lib
+- copy %CONDA_INSTALL_LOCN%\Library\bin\llvm-as.exe %CONDA_INSTALL_LOCN%\Library\bin\as.exe
 - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
 - set "LIB=%CONDA_INSTALL_LOCN%\Library\lib;%LIB%"
 - set "CPATH=%CONDA_INSTALL_LOCN%\Library\include;%CPATH%"
