@@ -46,9 +46,20 @@
 // For other string manipulation functions (e.g. isspace()).
 #include <ctype.h>
 
-// For sleep().
-#include <unistd.h>
+#ifdef _MSC_VER
+#include <windows.h>
+void sleep(int x) {
+    Sleep(x);
+}
 
+int setenv(const char *name, const char *value, int overwrite) {
+    _putenv_s(name, value);
+}
+#define strerror_r(errno,buf,len) strerror_s(buf,len,errno)
+
+#else
+#include <unistd.h>
+#endif
 
 //
 // --- Constants and types -----------------------------------------------------
