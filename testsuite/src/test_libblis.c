@@ -40,10 +40,6 @@
 void sleep(int x) {
     Sleep(x*1000);
 }
-
-int setenv(const char *name, const char *value, int overwrite) {
-    _putenv_s(name, value);
-}
 #endif
 
 // Global variables.

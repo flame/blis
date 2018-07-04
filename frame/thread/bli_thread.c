@@ -34,6 +34,13 @@
 
 #include "blis.h"
 
+#ifdef _MSC_VER
+#include <windows.h>
+int setenv(const char *name, const char *value, int overwrite) {
+    _putenv_s(name, value);
+}
+#endif
+
 thrinfo_t BLIS_PACKM_SINGLE_THREADED = {};
 thrinfo_t BLIS_GEMM_SINGLE_THREADED  = {};
 thrcomm_t BLIS_SINGLE_COMM           = {};
