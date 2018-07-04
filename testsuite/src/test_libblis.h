@@ -49,7 +49,6 @@
 #ifdef _MSC_VER
 void sleep(int x);
 int setenv(const char *name, const char *value, int overwrite);
-#define strerror_r(errno,buf,len) strerror_s(buf,len,errno)
 #else
 #include <unistd.h>
 #endif
