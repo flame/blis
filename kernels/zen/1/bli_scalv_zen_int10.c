@@ -32,8 +32,8 @@
 
 */
 
-#include "blis.h"
 #include "immintrin.h"
+#include "blis.h"
 
 
 /* Union data structure to access AVX registers
