@@ -32,10 +32,10 @@
 
 */
 
+#include "pmmintrin.h"
 #include "blis.h"
 
 
-#include "pmmintrin.h"
 typedef union
 {
 	__m128d v;
