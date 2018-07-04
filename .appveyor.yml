@@ -14,12 +14,11 @@ install:
 
 build_script:
 - set CC=clang
-- set CXX=clang++
 - set RANLIB=echo
-- bash --login -c "source activate && cd /c/projects/blis && ./configure --disable-shared auto && make -j4"
+- bash --login -c "source activate && cd /c/projects/blis && ./configure --disable-shared auto && make CPICFLAGS= -j4"
 
 test_script:
-- bash --login -c "source activate && cd /c/projects/blis && make check"
+- bash --login -c "source activate && cd /c/projects/blis && make CPICFLAGS= check"
 
 # Enable this to be able to login to the build worker. You can use the
 # `remmina` program in Ubuntu, use the login information that the line below
