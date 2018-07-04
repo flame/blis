@@ -1,0 +1,21 @@
+environment:
+  global:
+    CONDA_INSTALL_LOCN: C:\\Miniconda36-x64
+
+install:
+- call %CONDA_INSTALL_LOCN%\Scripts\activate.bat
+- conda update --yes --quiet conda
+- conda config --add channels conda-forge
+- conda install --yes clangdev posix m2-make pthreads-win32
+
+build_script:
+- echo "hello"
+
+test_script:
+- echo "hello"
+
+# Enable this to be able to login to the build worker. You can use the
+# `remmina` program in Ubuntu, use the login information that the line below
+# prints into the log.
+on_finish:
+- ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
