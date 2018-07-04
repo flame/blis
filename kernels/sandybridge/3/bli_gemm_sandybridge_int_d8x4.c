@@ -32,8 +32,8 @@
 
 */
 
-#include "blis.h"
 #include <immintrin.h> 
+#include "blis.h"
 
 
 #if 0
