@@ -1,3 +1,4 @@
+
 #!/usr/bin/env bash
 #
 #  BLIS    
@@ -2270,6 +2271,8 @@ main()
 	dist_path_esc=$(echo "${dist_path}"           | sed 's/\//\\\//g')
 	cc_esc=$(echo "${found_cc}" | sed 's/\//\\\//g')
 	ranlib_esc=$(echo "${RANLIB:-ranlib}" | sed 's/\//\\\//g')
+	cflags_preset_esc=$(echo "${cflags_preset}" | sed 's/\//\\\//g')
+	ldflags_preset_esc=$(echo "${ldflags_preset}" | sed 's/\//\\\//g')
 
 	# Create a #define for the configuration family (config_name).
 	uconf=$(echo ${config_name} | tr '[:lower:]' '[:upper:]')
@@ -2342,8 +2345,8 @@ main()
 		| sed -e "s/@CC@/${cc_esc}/g" \
 		| sed -e "s/@CC_VENDOR@/${cc_vendor}/g" \
 		| sed -e "s/@RANLIB@/${ranlib_esc}/g" \
-		| sed -e "s/@cflags_preset@/${cflags_preset}/g" \
-		| sed -e "s/@ldflags_preset@/${ldflags_preset}/g" \
+		| sed -e "s/@cflags_preset@/${cflags_preset_esc}/g" \
+		| sed -e "s/@ldflags_preset@/${ldflags_preset_esc}/g" \
 		| sed -e "s/@debug_type@/${debug_type}/g" \
 		| sed -e "s/@threading_model@/${threading_model}/g" \
 		| sed -e "s/@install_libdir@/${install_libdir_esc}/g" \
