@@ -46,10 +46,8 @@
 // For other string manipulation functions (e.g. isspace()).
 #include <ctype.h>
 
-// For sleep()
-#ifdef _MSC_VER
-void sleep(int x);
-#else
+// For sleep().
+#ifndef _MSC_VER
 #include <unistd.h>
 #endif
 
