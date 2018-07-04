@@ -517,7 +517,7 @@ LDFLAGS      += -fopenmp
 endif
 ifeq ($(THREADING_MODEL),pthreads)
 CTHREADFLAGS := -pthread
-LDFLAGS      += -lpthread
+LDFLAGS      += $(LIBPTHREAD)
 endif
 endif
 
@@ -531,7 +531,7 @@ LDFLAGS      += -fopenmp
 endif
 ifeq ($(THREADING_MODEL),pthreads)
 CTHREADFLAGS := -pthread
-LDFLAGS      += -lpthread
+LDFLAGS      += $(LIBPTHREAD)
 endif
 endif
 
@@ -545,7 +545,7 @@ LDFLAGS      += -fopenmp
 endif
 ifeq ($(THREADING_MODEL),pthreads)
 CTHREADFLAGS := -pthread
-LDFLAGS      += -lpthread
+LDFLAGS      += $(LIBPTHREAD)
 endif
 endif
 

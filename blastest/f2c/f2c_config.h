@@ -26,10 +26,14 @@
 #define HAVE_FORK 1
 
 /* Define to 1 if fseeko (and presumably ftello) exists and is declared. */
+#if !defined(_MSC_VER)
 #define HAVE_FSEEKO 1
+#endif
 
 /* Define to 1 if you have the `ftruncate' function. */
+#if !defined(_MSC_VER)
 #define HAVE_FTRUNCATE 1
+#endif
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1
@@ -181,3 +185,7 @@
 
 /* Define as `fork' if `vfork' does not work. */
 /* #undef vfork */
+
+#ifdef _MSC_VER
+#define NON_UNIX_STDIO 1
+#endif

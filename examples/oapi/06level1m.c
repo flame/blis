@@ -43,10 +43,12 @@ int main( int argc, char** argv )
 	dim_t m, n;
 	inc_t rs, cs;
 
+
 	//
 	// This file demonstrates working with matrix objects and the level-1m
 	// operations.
 	//
+
 
 	//
 	// Example 1: Create matrix objects and then broadcast (copy) scalar
@@ -88,6 +90,7 @@ int main( int argc, char** argv )
 	bli_printm( "b := alpha", &b, "%4.1f", "" );
 	bli_printm( "c := 0.0", &c, "%4.1f", "" );
 
+
 	//
 	// Example 2: Randomize a matrix object.
 	//
@@ -98,6 +101,7 @@ int main( int argc, char** argv )
 	bli_randm( &e );
 
 	bli_printm( "e (randomized):", &e, "%4.1f", "" );
+
 
 	//
 	// Example 3: Perform element-wise operations on matrices.
@@ -127,6 +131,7 @@ int main( int argc, char** argv )
 	// Scale and accumulate between matrices.
 	bli_axpym( &alpha, &a, &c );
 	bli_printm( "c := c + alpha * a", &c, "%4.1f", "" );
+
 
 	//
 	// Example 4: Copy and transpose a matrix.
@@ -169,6 +174,7 @@ int main( int argc, char** argv )
 	bli_copym( &e, &f );
 
 	bli_printm( "f (copied value):", &f, "%4.1f", "" );
+
 
 	//
 	// Example 5: Copy and Hermitian-transpose a matrix.

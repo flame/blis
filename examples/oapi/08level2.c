@@ -45,9 +45,11 @@ int main( int argc, char** argv )
 	obj_t* alpha;
 	obj_t* beta;
 
+
 	//
 	// This file demonstrates level-2 operations.
 	//
+
 
 	//
 	// Example 1: Perform a general rank-1 update (ger) operation.
@@ -85,6 +87,7 @@ int main( int argc, char** argv )
 	bli_obj_free( &a );
 	bli_obj_free( &x );
 	bli_obj_free( &y );
+
 
 	//
 	// Example 2: Perform a general matrix-vector multiply (gemv) operation.
@@ -133,6 +136,7 @@ int main( int argc, char** argv )
 	bli_obj_free( &x );
 	bli_obj_free( &y );
 
+
 	//
 	// Example 3: Perform a symmetric rank-1 update (syr) operation.
 	//
@@ -172,6 +176,7 @@ int main( int argc, char** argv )
 	// Free the objects.
 	bli_obj_free( &a );
 	bli_obj_free( &x );
+
 
 	//
 	// Example 4: Perform a symmetric matrix-vector multiply (symv) operation.
@@ -218,6 +223,7 @@ int main( int argc, char** argv )
 	bli_obj_free( &x );
 	bli_obj_free( &y );
 
+
 	//
 	// Example 5: Perform a triangular matrix-vector multiply (trmv) operation.
 	//
@@ -257,6 +263,7 @@ int main( int argc, char** argv )
 	// Free the objects.
 	bli_obj_free( &a );
 	bli_obj_free( &x );
+
 
 	//
 	// Example 6: Perform a triangular solve (trsv) operation.

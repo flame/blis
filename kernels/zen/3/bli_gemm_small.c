@@ -32,9 +32,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#include "blis.h"
 #include "immintrin.h"
 #include "xmmintrin.h"
+#include "blis.h"
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX
 

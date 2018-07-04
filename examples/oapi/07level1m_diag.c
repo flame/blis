@@ -41,9 +41,11 @@ int main( int argc, char** argv )
 	dim_t m, n;
 	inc_t rs, cs;
 
+
 	//
 	// This file demonstrates level-1m operations on structured matrices.
 	//
+
 
 	//
 	// Example 1: Initialize the upper triangle of a matrix to random values.
@@ -221,6 +223,7 @@ int main( int argc, char** argv )
 
 	bli_printm( "d: transpose of lower triangular of bl copied to d", &d, "%4.1f", "" );
 
+
 	//
 	// Example 5: Create a rectangular matrix (m > n) with a lower trapezoid
 	//            containing random values, then set the strictly upper
@@ -266,6 +269,7 @@ int main( int argc, char** argv )
 	bli_setm( &BLIS_ZERO, &el );
 
 	bli_printm( "e: after upper triangle set to zero", &e, "%4.1f", "" );
+
 
 	//
 	// Example 6: Create an upper Hessenberg matrix of random values and then
@@ -318,6 +322,7 @@ int main( int argc, char** argv )
 	bli_obj_free( &c );
 	bli_obj_free( &d );
 	bli_obj_free( &e );
+	bli_obj_free( &h );
 
 	return 0;
 }

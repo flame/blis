@@ -51,9 +51,11 @@ int main( int argc, char** argv )
 	dim_t i, j;
 	dim_t mv, nv;
 
+
 	//
 	// This file demonstrates creating and submatrix views into existing matrices.
 	//
+
 
 	//
 	// Example 1: Create an object and then create a submatrix view.
@@ -85,6 +87,7 @@ int main( int argc, char** argv )
 	// bli_obj_create(). In the above example, that means only object a1
 	// would be passed to bli_obj_free().
 
+
 	//
 	// Example 2: Modify the contents of a submatrix view.
 	//
@@ -104,6 +107,7 @@ int main( int argc, char** argv )
 	// Print the matrix again so we can see the update elements.
 	bli_printm( "submatrix view 'v1' (modified state)", &v1, "%5.1f", "" );
 	bli_printm( "matrix 'a1' (indirectly modified due to changes to 'v1')", &a1, "%5.1f", "" );
+
 
 	//
 	// Example 3: Create a submatrix view that is "too big".
@@ -125,6 +129,7 @@ int main( int argc, char** argv )
 
 	bli_printm( "4x3 submatrix 'v2' at offsets (4,2) -- two rows truncated for safety", &v2, "%5.1f", "" );
 
+
 	//
 	// Example 4: Create a bufferless object, attach an external buffer, and
 	//            then create a submatrix view.
@@ -145,6 +150,7 @@ int main( int argc, char** argv )
 
 	bli_printm( "3x4 submatrix view 'v3' at offsets (2,3)", &v3, "%5.1f", "" );
 
+
 	//
 	// Example 5: Use a submatrix view to set a region of a larger matrix to
 	//            zero.
@@ -159,6 +165,7 @@ int main( int argc, char** argv )
 	bli_printm( "3x4 submatrix view 'v3' (zeroed out)", &v3, "%5.1f", "" );
 
 	bli_printm( "matrix 'a2' (modified state)", &a2, "%5.1f", "" );
+
 
 	//
 	// Example 6: Obtain a submatrix view into a submatrix view.

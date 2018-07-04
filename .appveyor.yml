@@ -1,0 +1,26 @@
+install:
+- set "CONDA_INSTALL_LOCN=C:\\Miniconda36-x64"
+- call %CONDA_INSTALL_LOCN%\Scripts\activate.bat
+- conda update --yes --quiet conda
+- conda config --add channels conda-forge
+- conda install --yes clangdev posix m2-make pthreads-win32
+- call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
+- set "LIB=%CONDA_INSTALL_LOCN%\Library\lib;%LIB%"
+- set "CPATH=%CONDA_INSTALL_LOCN%\Library\include;%CPATH%"
+
+build_script:
+- set CC=clang
+- set RANLIB=echo
+- set AR=llvm-ar
+- set AS=llvm-as
+- set LIBPTHREAD=-lpthreads
+- bash -lc "source activate && cd /c/projects/blis && ./configure --disable-shared intel64 && make AR=llvm-ar CPICFLAGS= LIBM= LIBPTHREAD=-lpthreads -j4"
+
+test_script:
+- bash -lc "source activate && cd /c/projects/blis && make AR=llvm-ar CPICFLAGS= LIBM= LIBPTHREAD=-lpthreads check"
+
+# Enable this to be able to login to the build worker. You can use the
+# `remmina` program in Ubuntu, use the login information that the line below
+# prints into the log.
+#on_finish:
+#- ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))

@@ -77,7 +77,7 @@ LDFLAGS        := -mmic
 
 # Never use libm with Intel compilers.
 ifneq ($(CC_VENDOR),icc)
-LDFLAGS        += -lm
+LDFLAGS        += $(LIBM)
 endif
 
 # Store all of the variables here to new variables containing the

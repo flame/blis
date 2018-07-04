@@ -41,9 +41,11 @@ int main( int argc, char** argv )
 	num_t dt;
 	double gamma_d;
 
+
 	//
 	// This file demonstrates working with scalar objects.
 	//
+
 
 	//
 	// Example 1: Create a scalar (1x1) object.
@@ -85,6 +87,7 @@ int main( int argc, char** argv )
 	// update their values, though you can always perform operations *with*
 	// them--that's the whole point!).
 
+
 	//
 	// Example 2: Set the value of an existing scalar object.
 	//
@@ -107,6 +110,7 @@ int main( int argc, char** argv )
 	bli_printm( "kappa:", &kappa, "%4.1f", "" );
 	bli_printm( "gamma:", &gamma, "%4.1f", "" );
 
+
 	//
 	// Example 3: Create and set the value of a complex scalar object.
 	//
@@ -118,6 +122,7 @@ int main( int argc, char** argv )
 	bli_obj_create_1x1( BLIS_DCOMPLEX, &zeta );
 	bli_setsc( 3.3, -4.4, &zeta );
 	bli_printm( "zeta (complex):", &zeta, "%4.1f", "" );
+
 
 	//
 	// Example 4: Copy scalar objects.
@@ -132,6 +137,7 @@ int main( int argc, char** argv )
 
 	bli_copysc( &BLIS_ONE, &gamma );
 	bli_printm( "gamma (overwritten with BLIS_ONE):", &gamma, "%4.1f", "" );
+
 
 	//
 	// Example 5: Perform other operations on scalar objects.
