@@ -13,6 +13,7 @@ build_script:
 - set RANLIB=echo
 - set AR=llvm-ar
 - set AS=llvm-as
+- set LIBPTHREAD=-lpthreads
 - bash -lc "source activate && cd /c/projects/blis && ./configure --disable-shared x86_64 && make AR=llvm-ar CPICFLAGS= LIBM= LIBPTHREAD=-lpthreads -j4"
 
 test_script:
