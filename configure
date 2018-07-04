@@ -1028,7 +1028,7 @@ echoerr_unsupportedcc()
 
 get_binutils_version()
 {
-	binutil="as"
+	binutil=${AS:-as}
 
 	# Query the full binutils version string output. This includes the
 	# version string along with (potentially) a bunch of other textual

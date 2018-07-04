@@ -4,10 +4,6 @@ install:
 - conda update --yes --quiet conda
 - conda config --add channels conda-forge
 - conda install --yes clangdev posix m2-make pthreads-win32
-- copy %CONDA_INSTALL_LOCN%\Library\lib\pthreads.lib %CONDA_INSTALL_LOCN%\Library\lib\pthread.lib
-- copy %CONDA_INSTALL_LOCN%\Library\lib\pthreads.lib %CONDA_INSTALL_LOCN%\Library\lib\m.lib
-- copy %CONDA_INSTALL_LOCN%\Library\bin\llvm-as.exe %CONDA_INSTALL_LOCN%\Library\bin\as.exe
-- copy %CONDA_INSTALL_LOCN%\Library\bin\llvm-ar.exe %CONDA_INSTALL_LOCN%\Library\bin\ar.exe
 - call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
 - set "LIB=%CONDA_INSTALL_LOCN%\Library\lib;%LIB%"
 - set "CPATH=%CONDA_INSTALL_LOCN%\Library\include;%CPATH%"
@@ -15,10 +11,12 @@ install:
 build_script:
 - set CC=clang
 - set RANLIB=echo
-- bash --login -c "source activate && cd /c/projects/blis && ./configure --disable-shared x86_64 && make CPICFLAGS= -j4"
+- set AR=llvm-ar
+- set AS=llvm-as
+- bash -lc "source activate && cd /c/projects/blis && ./configure --disable-shared x86_64 && make AR=llvm-ar CPICFLAGS= LIBM= LIBPTHREAD=-lpthreads -j4"
 
 test_script:
-- bash --login -c "source activate && cd /c/projects/blis && make CPICFLAGS= check"
+- bash -lc "source activate && cd /c/projects/blis && make AR=llvm-ar CPICFLAGS= LIBM= LIBPTHREAD=-lpthreads check"
 
 # Enable this to be able to login to the build worker. You can use the
 # `remmina` program in Ubuntu, use the login information that the line below
