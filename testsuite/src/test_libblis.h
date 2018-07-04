@@ -46,9 +46,9 @@
 // For other string manipulation functions (e.g. isspace()).
 #include <ctype.h>
 
+// For sleep()
 #ifdef _MSC_VER
 void sleep(int x);
-int setenv(const char *name, const char *value, int overwrite);
 #else
 #include <unistd.h>
 #endif
