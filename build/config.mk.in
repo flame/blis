@@ -118,6 +118,10 @@ ENABLE_VERBOSE    := @enable_verbose@
 # Whether we are building out-of-tree.
 BUILDING_OOT      := @configured_oot@
 
+# Whether we need to employ an alternate method for passing object files to
+# ar and/or the linker to work around a small value of ARG_MAX.
+ARG_MAX_HACK      := @enable_arg_max_hack@
+
 # Whether to build the static and shared libraries.
 # Note the "MK_" prefix, which helps differentiate these variables from
 # their corresonding cpp macros that use the BLIS_ prefix.
