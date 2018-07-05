@@ -33,7 +33,6 @@
 */
 
 #ifdef _MSC_VER
-#include <windows.h>
 int setenv(const char *name, const char *value, int overwrite) {
     _putenv_s(name, value);
 }
