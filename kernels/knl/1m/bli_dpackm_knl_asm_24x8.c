@@ -32,8 +32,10 @@
 
 */
 
-#include "bli_avx512_macros.h"
 #include "blis.h"
+
+#define BLIS_ASM_SYNTAX_INTEL
+#include "bli_x86_asm_macros.h"
 
 #define LOADMUL8x8(a,o,s1,s3,s5,s7, \
                    z0,z1,z2,z3,z4,z5,z6,z7) \
@@ -125,156 +127,157 @@ void bli_dpackm_knl_asm_8xk
     const int64_t lda = lda_;
     const int64_t ldp = ldp_;
 
-    __asm__ volatile
-    (
-        MOV(RSI, VAR(n))
-        MOV(RAX, VAR(a))
-        MOV(RBX, VAR(inca))
-        MOV(RCX, VAR(lda))
-        MOV(R14, VAR(p))
-        MOV(RDI, VAR(ldp))
+    BEGIN_ASM()
 
-        TEST(RSI, RSI)
+    MOV(RSI, VAR(n))
+    MOV(RAX, VAR(a))
+    MOV(RBX, VAR(inca))
+    MOV(RCX, VAR(lda))
+    MOV(R14, VAR(p))
+    MOV(RDI, VAR(ldp))
+
+    TEST(RSI, RSI)
+    JZ(PACK8_DONE)
+
+    LEA(RBX, MEM(,RBX,8))    //inca in bytes
+    LEA(RCX, MEM(,RCX,8))    //lda in bytes
+    LEA(RDI, MEM(,RDI,8))    //ldp in bytes
+    LEA(R11, MEM(RDI,RDI,2)) //ldp*3
+    LEA(R12, MEM(RDI,RDI,4)) //ldp*5
+    LEA(R13, MEM(R11,RDI,4)) //ldp*7
+
+    VBROADCASTSD(ZMM(31), VAR(kappa))
+
+    CMP(RBX, IMM(8))
+    JNE(PACK8_T)
+
+    LABEL(PACK8_N)
+
+        MOV(RDX, RSI)
+        AND(RDX, IMM(7))
+        SAR(RSI, IMM(3))
+        JZ(PACK8_N_TAIL)
+
+        LEA(R8,  MEM(RCX,RCX,2)) //lda*3
+        LEA(R9,  MEM(RCX,RCX,4)) //lda*5
+        LEA(R10, MEM(R8 ,RCX,4)) //lda*7
+
+        LABEL(PACK8_N_LOOP)
+
+            LOADMUL8x8(RAX,0,RCX,R8,R9,R10,0,1,2,3,4,5,6,7)
+            STORE8x8(R14,0,RDI,R11,R12,R13,0,1,2,3,4,5,6,7)
+
+            LEA(RAX, MEM(RAX,RCX,8))
+            LEA(R14, MEM(R14,RDI,8))
+
+            SUB(RSI, IMM(1))
+
+        JNZ(PACK8_N_LOOP)
+
+        TEST(RDX, RDX)
         JZ(PACK8_DONE)
 
-        LEA(RBX, MEM(,RBX,8))    //inca in bytes
-        LEA(RCX, MEM(,RCX,8))    //lda in bytes
-        LEA(RDI, MEM(,RDI,8))    //ldp in bytes
-        LEA(R11, MEM(RDI,RDI,2)) //ldp*3
-        LEA(R12, MEM(RDI,RDI,4)) //ldp*5
-        LEA(R13, MEM(R11,RDI,4)) //ldp*7
+        LABEL(PACK8_N_TAIL)
 
-        VBROADCASTSD(ZMM(31), VAR(kappa))
+            VMULPD(ZMM(0), ZMM(31), MEM(RAX))
+            VMOVUPD(MEM(R14), ZMM(0))
 
-        CMP(RBX, IMM(8))
-        JNE(PACK8_T)
+            LEA(RAX, MEM(RAX,RCX,1))
+            LEA(R14, MEM(R14,RDI,1))
 
-        LABEL(PACK8_N)
+            SUB(RDX, IMM(1))
 
-            MOV(RDX, RSI)
-            AND(RDX, IMM(7))
-            SAR(RSI, IMM(3))
-            JZ(PACK8_N_TAIL)
+        JNZ(PACK8_N_TAIL)
 
-            LEA(R8,  MEM(RCX,RCX,2)) //lda*3
-            LEA(R9,  MEM(RCX,RCX,4)) //lda*5
-            LEA(R10, MEM(R8 ,RCX,4)) //lda*7
+        JMP(PACK8_DONE)
 
-            LABEL(PACK8_N_LOOP)
+    LABEL(PACK8_T)
 
-                LOADMUL8x8(RAX,0,RCX,R8,R9,R10,0,1,2,3,4,5,6,7)
-                STORE8x8(R14,0,RDI,R11,R12,R13,0,1,2,3,4,5,6,7)
+        CMP(RCX, IMM(8))
+        JNE(PACK8_G)
 
-                LEA(RAX, MEM(RAX,RCX,8))
-                LEA(R14, MEM(R14,RDI,8))
+        LEA(R8,  MEM(RBX,RBX,2)) //inca*3
+        LEA(R9,  MEM(RBX,RBX,4)) //inca*5
+        LEA(R10, MEM(R8 ,RBX,4)) //inca*7
 
-                SUB(RSI, IMM(1))
+        MOV(RDX, RSI)
+        AND(RDX, IMM(7))
+        SAR(RSI, IMM(3))
+        JZ(PACK8_T_TAIL)
 
-            JNZ(PACK8_N_LOOP)
+        LABEL(PACK8_T_LOOP)
 
-            TEST(RDX, RDX)
-            JZ(PACK8_DONE)
-
-            LABEL(PACK8_N_TAIL)
-
-                VMULPD(ZMM(0), ZMM(31), MEM(RAX))
-                VMOVUPD(MEM(R14), ZMM(0))
-
-                LEA(RAX, MEM(RAX,RCX,1))
-                LEA(R14, MEM(R14,RDI,1))
-
-                SUB(RDX, IMM(1))
-
-            JNZ(PACK8_N_TAIL)
-
-            JMP(PACK8_DONE)
-
-        LABEL(PACK8_T)
-
-            CMP(RCX, IMM(8))
-            JNE(PACK8_G)
-
-            LEA(R8,  MEM(RBX,RBX,2)) //inca*3
-            LEA(R9,  MEM(RBX,RBX,4)) //inca*5
-            LEA(R10, MEM(R8 ,RBX,4)) //inca*7
-
-            MOV(RDX, RSI)
-            AND(RDX, IMM(7))
-            SAR(RSI, IMM(3))
-            JZ(PACK8_T_TAIL)
-
-            LABEL(PACK8_T_LOOP)
-
-                LOADMUL8x8(RAX,0,RBX,R8,R9,R10,0,1,2,3,4,5,6,7)
-                TRANSPOSE8x8( 0, 1, 2, 3, 4, 5, 6, 7,
-                             16,17,18,19,20,21,22,23)
-                STORE8x8(R14,0,RDI,R11,R12,R13,16,17,18,19,20,21,22,23)
-
-                LEA(RAX, MEM(RAX,RCX,8))
-                LEA(R14, MEM(R14,RDI,8))
-
-                SUB(RSI, IMM(1))
-
-            JNZ(PACK8_T_LOOP)
-
-            TEST(RDX, RDX)
-            JZ(PACK8_DONE)
-
-            LABEL(PACK8_T_TAIL)
-
-            MOV(RSI, IMM(1))
-            SHLX(RSI, RSI, RDX)
-            SUB(RSI, IMM(1))
-            KMOV(K(1), ESI)  //mask for n%8 elements
-
-            LOADMUL8x8_MASK(RAX,0,RBX,R8,R9,R10,0,1,2,3,4,5,6,7,1)
+            LOADMUL8x8(RAX,0,RBX,R8,R9,R10,0,1,2,3,4,5,6,7)
             TRANSPOSE8x8( 0, 1, 2, 3, 4, 5, 6, 7,
-                          8, 9,10,11,12,13,14,15)
+                         16,17,18,19,20,21,22,23)
+            STORE8x8(R14,0,RDI,R11,R12,R13,16,17,18,19,20,21,22,23)
 
-            VMOVUPD(MEM(R14      ), ZMM( 8))
-            SUB(RDX, IMM(1))
-            JZ(PACK8_DONE)
-            VMOVUPD(MEM(R14,RDI,1), ZMM( 9))
-            SUB(RDX, IMM(1))
-            JZ(PACK8_DONE)
-            VMOVUPD(MEM(R14,RDI,2), ZMM(10))
-            SUB(RDX, IMM(1))
-            JZ(PACK8_DONE)
-            VMOVUPD(MEM(R14,R11,1), ZMM(11))
-            SUB(RDX, IMM(1))
-            JZ(PACK8_DONE)
-            VMOVUPD(MEM(R14,RDI,4), ZMM(12))
-            SUB(RDX, IMM(1))
-            JZ(PACK8_DONE)
-            VMOVUPD(MEM(R14,R12,1), ZMM(13))
-            SUB(RDX, IMM(1))
-            JZ(PACK8_DONE)
-            VMOVUPD(MEM(R14,R11,2), ZMM(14))
+            LEA(RAX, MEM(RAX,RCX,8))
+            LEA(R14, MEM(R14,RDI,8))
 
-            JMP(PACK8_DONE)
+            SUB(RSI, IMM(1))
 
-        LABEL(PACK8_G)
+        JNZ(PACK8_T_LOOP)
 
-            VPBROADCASTD(ZMM(3), VAR(inca))
-            MOV(RBX, VAR(offsetPtr))
-            VPMULLD(YMM(0), YMM(3), MEM(RBX))
+        TEST(RDX, RDX)
+        JZ(PACK8_DONE)
 
-            LABEL(PACK8_G_LOOP)
+        LABEL(PACK8_T_TAIL)
 
-                KXNORW(K(1), K(0), K(0))
-                VGATHERDPD(ZMM(3) MASK_K(1), MEM(RAX,YMM(0),8))
-                VMULPD(ZMM(3), ZMM(3), ZMM(31))
-                VMOVUPD(MEM(R14), ZMM(3))
+        MOV(RSI, IMM(1))
+        SHLX(RSI, RSI, RDX)
+        SUB(RSI, IMM(1))
+        KMOVW(K(1), ESI)  //mask for n%8 elements
 
-                LEA(RAX, MEM(RAX,RCX,1))
-                LEA(R14, MEM(R14,RDI,1))
+        LOADMUL8x8_MASK(RAX,0,RBX,R8,R9,R10,0,1,2,3,4,5,6,7,1)
+        TRANSPOSE8x8( 0, 1, 2, 3, 4, 5, 6, 7,
+                      8, 9,10,11,12,13,14,15)
 
-                SUB(RSI, IMM(1))
+        VMOVUPD(MEM(R14      ), ZMM( 8))
+        SUB(RDX, IMM(1))
+        JZ(PACK8_DONE)
+        VMOVUPD(MEM(R14,RDI,1), ZMM( 9))
+        SUB(RDX, IMM(1))
+        JZ(PACK8_DONE)
+        VMOVUPD(MEM(R14,RDI,2), ZMM(10))
+        SUB(RDX, IMM(1))
+        JZ(PACK8_DONE)
+        VMOVUPD(MEM(R14,R11,1), ZMM(11))
+        SUB(RDX, IMM(1))
+        JZ(PACK8_DONE)
+        VMOVUPD(MEM(R14,RDI,4), ZMM(12))
+        SUB(RDX, IMM(1))
+        JZ(PACK8_DONE)
+        VMOVUPD(MEM(R14,R12,1), ZMM(13))
+        SUB(RDX, IMM(1))
+        JZ(PACK8_DONE)
+        VMOVUPD(MEM(R14,R11,2), ZMM(14))
 
-            JNZ(PACK8_G_LOOP)
+        JMP(PACK8_DONE)
 
-        LABEL(PACK8_DONE)
+    LABEL(PACK8_G)
 
+        VPBROADCASTD(ZMM(3), VAR(inca))
+        MOV(RBX, VAR(offsetPtr))
+        VPMULLD(YMM(0), YMM(3), MEM(RBX))
+
+        LABEL(PACK8_G_LOOP)
+
+            KXNORW(K(1), K(0), K(0))
+            VGATHERDPD(ZMM(3) MASK_K(1), MEM(RAX,YMM(0),8))
+            VMULPD(ZMM(3), ZMM(3), ZMM(31))
+            VMOVUPD(MEM(R14), ZMM(3))
+
+            LEA(RAX, MEM(RAX,RCX,1))
+            LEA(R14, MEM(R14,RDI,1))
+
+            SUB(RSI, IMM(1))
+
+        JNZ(PACK8_G_LOOP)
+
+    LABEL(PACK8_DONE)
+
+    END_ASM(
         : //output operands
         : //input operands
           [n]         "m" (n),
@@ -294,7 +297,7 @@ void bli_dpackm_knl_asm_8xk
           "zmm30", "zmm31",
           "rax", "rbx", "rcx", "rdx", "rdi", "rsi",
           "r8", "r9", "r10", "r11", "r12", "r13", "r14", "memory"
-    );
+    )
 }
 
 void bli_dpackm_knl_asm_24xk
@@ -318,8 +321,8 @@ void bli_dpackm_knl_asm_24xk
     const int64_t lda = lda_;
     const int64_t ldp = ldp_;
 
-    __asm__ volatile
-    (
+    BEGIN_ASM()
+
         MOV(RSI, VAR(n))
         MOV(RAX, VAR(a))
         MOV(RBX, VAR(inca))
@@ -441,7 +444,7 @@ void bli_dpackm_knl_asm_24xk
             MOV(R13, IMM(1))
             SHLX(R13, R13, RSI)
             SUB(R13, IMM(1))
-            KMOV(K(1), R13D)  //mask for n%8 elements
+            KMOVW(K(1), R13D)  //mask for n%8 elements
 
             LOADMUL8x8_MASK(RAX,0,RBX,R8,R9,R10, 0, 1, 2, 3, 4, 5, 6, 7,1)
             LOADMUL8x8_MASK(R14,0,RBX,R8,R9,R10, 8, 9,10,11,12,13,14,15,1)
@@ -521,6 +524,7 @@ void bli_dpackm_knl_asm_24xk
 
         LABEL(PACK24_DONE)
 
+    END_ASM(
         : //output operands
         : //input operands
           [n]         "m" (n),
@@ -540,5 +544,5 @@ void bli_dpackm_knl_asm_24xk
           "zmm30", "zmm31",
           "rax", "rbx", "rcx", "rdi", "rsi",
           "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15", "memory"
-    );
+    )
 }

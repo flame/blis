@@ -1,89 +1,62 @@
 language: c
-sudo: false
-
-os:
-  - linux
-  - osx
-
-compiler:
-  - gcc
-  - clang
-
+sudo: required
+dist: trusty
 env:
-  - OOT=1 TEST=0 THR="none" CONF="auto"
-  - OOT=0 TEST=1 THR="none" CONF="auto"
-  - OOT=0 TEST=1 THR="none" CONF="penryn"
-  - OOT=0 TEST=0 THR="none" CONF="sandybridge"
-  - OOT=0 TEST=0 THR="none" CONF="haswell"
-  - OOT=0 TEST=0 THR="none" CONF="knl"
-  - OOT=0 TEST=0 THR="none" CONF="bulldozer"
-  - OOT=0 TEST=0 THR="none" CONF="piledriver"
-  - OOT=0 TEST=0 THR="none" CONF="steamroller"
-  - OOT=0 TEST=0 THR="none" CONF="excavator"
-  - OOT=0 TEST=0 THR="none" CONF="zen"
-  - OOT=0 TEST=0 THR="openmp" CONF="auto"
-  - OOT=0 TEST=0 THR="pthreads" CONF="auto"
-  
+  global:
+      secure: "Ty3PM1xGhXwxfJG6YyY9bUZyXzw98ekHxQEqU9VnrMXTZb28IxfocPCXHjL34r9HTGosO5Pmierhal1Cs3ZKE5ZAJqJhCfck+kwlH21Uay5CNYglDtSmy2qxtbbDG4AxpEZ1UKlIZr1pNh/x+pRemSmnMEnQp/E7QJqdkhm4+aMX2bWKyLPtrdL+B9QXLVT2nT6/Fw3i05aBhpcFJpSPfvYX2KoCZYdJOSKcKci4T8nAfP/c0olkz+jAkBZxZFgO9Ptrt/lvHtVPrkh5o29GvHg2i/4vucbsMltoxlV31/2eYpdr17Ngtt41MMVn2fHV4lVhLmENc04nlm084fBtg73T6b8hNy5JlcA44xI/UrPJsQAJ+0A0ds9BbBQKPxOmaF/O8WGXhwiwdKT6DGS9lj05f3S+yZfeNE3pQhLEcvwXLO5SW3VvKXMj0t/lZyG+XCkvFjD7KEPQV4g+BZc2zzD9TwDx3ydn8Uzd6zZlq1erQUzCnODP24wuwfrNP8nqxFYG0VtI8oZW62IC9U2hcnAF5QNXXW3yDYD65k3BHbigfI28gu9iO9G8RxOglR27J7Whdqkqw3AMRaqyHt2tdbz7tM2dLZ0EatT5m8esjC+LP4EshW9C59jP2U9vJ/94YEgOfwiqk8+e6fL/7dJvOumbwu1RclRI9DS88PPYb3Q="
 matrix:
-  allow_failures:
-    - env: OOT=0 TEST=0 THR="none" CONF="knl"
-    - os: osx
-      env: OOT=0 TEST=1 THR="none" CONF="auto"
-  exclude:
-    - os: linux
-      compiler: clang
-    - os: osx
-      compiler: gcc
-    - os: osx
-      env: OOT=1 TEST=0 THR="none" CONF="auto"
-    - os: osx
-      env: OOT=0 TEST=1 THR="none" CONF="penryn"
-    - os: osx
-      env: OOT=0 TEST=0 THR="none" CONF="sandybridge"
-    - os: osx
-      env: OOT=0 TEST=0 THR="none" CONF="haswell"
-    - os: osx
-      env: OOT=0 TEST=0 THR="none" CONF="knl"
-    - os: osx
-      env: OOT=0 TEST=0 THR="none" CONF="bulldozer"
-    - os: osx
-      env: OOT=0 TEST=0 THR="none" CONF="piledriver"
-    - os: osx
-      env: OOT=0 TEST=0 THR="none" CONF="steamroller"
-    - os: osx
-      env: OOT=0 TEST=0 THR="none" CONF="excavator"
-    - os: osx
-      env: OOT=0 TEST=0 THR="none" CONF="zen"
-    - os: osx
-      env: OOT=0 TEST=0 THR="openmp" CONF="auto"
-
+  include:
+  # full testsuite
+  - os: linux
+    compiler: gcc
+    env: OOT=0 TEST=1 SDE=0 THR="none" CONF="auto"
+  # test x86_64 ukrs with SDE
+  - os: linux
+    compiler: gcc
+    env: OOT=0 TEST=0 SDE=1 THR="none" CONF="x86_64"
+  # openmp build
+  - os: linux
+    compiler: gcc
+    env: OOT=0 TEST=0 SDE=0 THR="openmp" CONF="auto"
+  # pthreads build
+  - os: linux
+    compiler: gcc
+    env: OOT=0 TEST=0 SDE=0 THR="pthreads" CONF="auto"
+  # out-of-tree build
+  - os: linux
+    compiler: gcc
+    env: OOT=1 TEST=0 SDE=0 THR="none" CONF="auto"
+  # clang build
+  - os: linux
+    compiler: clang
+    env: OOT=0 TEST=0 SDE=0 THR="none" CONF="auto"
+  # macOS with system compiler (clang)
+  - os: osx
+    compiler: clang
+    env: OOT=0 TEST=0 SDE=0 THR="none" CONF="auto"
 install:
-  - if [ "$CC" = "gcc" ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then export CC="gcc-5"; fi
-
+- if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo rm -f /usr/bin/as; fi
+- if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo ln -s /usr/lib/binutils-2.26/bin/as /usr/bin/as; fi
+- if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo rm -f /usr/bin/ld; fi
+- if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo ln -s /usr/lib/binutils-2.26/bin/ld /usr/bin/ld; fi
+- if [ "$CC" = "gcc" ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then export CC="gcc-6"; fi
 addons:
   apt:
     sources:
     - ubuntu-toolchain-r-test
     packages:
-    - gcc-5
+    - gcc-6
+    - binutils-2.26
     - clang
-    
 script:
-  - export DIST_PATH=.
-  - pwd
-  - if [ $OOT -eq 1 ]; then mkdir oot; cd oot; export DIST_PATH=..; fi
-  - pwd
-  - $DIST_PATH/configure -t $THR CC=$CC $CONF
-  - pwd
-  - ls -l
-  - $CC --version
-  - make -j 2
-  - export BLIS_IC_NT=2
-  - export BLIS_JC_NT=1
-  - export BLIS_IR_NT=1
-  - export BLIS_JR_NT=1
-  - if [ $TEST -eq 1 ]; then travis_wait 30 make BLIS_ENABLE_TEST_OUTPUT=yes testblis; fi
-  - if [ $TEST -eq 1 ]; then $DIST_PATH/build/check-blistest.sh ./output.testsuite; fi
-  - if [ $TEST -eq 1 ]; then make BLIS_ENABLE_TEST_OUTPUT=yes testblas; fi
-  - if [ $TEST -eq 1 ]; then $DIST_PATH/build/check-blastest.sh; fi
-
+- export DIST_PATH=.
+- pwd
+- if [ $OOT -eq 1 ]; then mkdir oot; cd oot; export DIST_PATH=..; fi
+- pwd
+- $DIST_PATH/configure -t $THR CC=$CC $CONF
+- pwd
+- ls -l
+- $CC --version
+- make -j 2
+- if [ $TEST -eq 1 ]; then travis_wait 30 $DIST_PATH/travis/do_testsuite.sh; fi
+- if [ $SDE -eq 1 ]; then travis_wait 30 $DIST_PATH/travis/do_sde.sh; fi

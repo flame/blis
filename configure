@@ -83,8 +83,8 @@ print_usage()
 	echo "                 The path to which make will install libraries. If given,"
 	echo "                 LIBDIR will override the corresponding directory implied"
 	echo "                 by --prefix; if not not given, LIBDIR defaults to"
-	echo "                 PREFIX/lib. If LIBDIR refers to a directory that does not"
-	echo "                 exist, it will be created."
+	echo "                 PREFIX/lib. If LIBDIR refers to a directory that does"
+	echo "                 not exist, it will be created."
 	echo " "
 	echo "   --includedir=INCDIR"
 	echo " "
@@ -167,6 +167,16 @@ print_usage()
 	echo "                 Enable (disabled by default) building the CBLAS"
 	echo "                 compatibility layer. This automatically enables the"
 	echo "                 BLAS compatibility layer as well."
+	echo " "
+	echo "   -s NAME --enable-sandbox=NAME"
+	echo " "
+	echo "                 Enable a separate sandbox implementation of gemm. This"
+	echo "                 option disables BLIS's conventional gemm implementation"
+	echo "                 (which shares common infrastructure with other level-3"
+	echo "                 operations) and instead compiles and uses the code in"
+	echo "                 the NAME directory, which is expected to be a sub-"
+	echo "                 directory of 'sandbox'. By default, no sandboxes are"
+	echo "                 enabled."
 	echo " "
 	echo "   --with-memkind, --without-memkind"
 	echo " "
@@ -819,18 +829,39 @@ get_cc_search_list()
 	echo "${list}"
 }
 
+get_cxx_search_list()
+{
+	local list
+
+	# For Linux, Darwin (OS X), and generic OSes, prioritize g++.
+	list="g++ clang++ c++"
+
+	# For OpenBSD and FreeBSD, prioritize cc and clang over gcc.
+	if   [ "${os_name}" = "OpenBSD" ]; then
+		list="c++ clang++ g++"
+	elif [ "${os_name}" = "FreeBSD" ]; then
+		list="c++ clang++ g++"
+	fi
+
+	echo "${list}"
+}
+
 select_cc()
 {
-	local search_list the_cc cc
+	local search_list CC_env the_cc cc
 
 	# This is the list of compilers to search for, and the order in which
 	# to search for them.
 	search_list=$1
 
+	# The environment variable associated with the compiler type we
+	# are searching (e.g. CC, CXX).
+	CC_env=$2
+
 	# If CC contains something, add it to the beginning of our default
 	# search list.
-	if [ -n "${CC}" ]; then
-		search_list="${CC} ${search_list}"
+	if [ -n "${CC_env}" ]; then
+		search_list="${CC_env} ${search_list}"
 	fi
 
 	# Initialize our selected compiler to empty.
@@ -1396,6 +1427,8 @@ main()
 	#declare -A kernel_registry
 	#declare -A kconfig_registry
 
+	# -- Basic names and paths --
+
 	# The name of the script, stripped of any preceeding path.
 	script_name=${0##*/}
 
@@ -1459,6 +1492,10 @@ main()
 	frame_dir='frame'
 	frame_dirpath="${dist_path}/${frame_dir}"
 
+	# The name of the sandbox directory.
+	sandbox_dir='sandbox'
+	sandbox_dirpath="${dist_path}/${sandbox_dir}"
+
 	# The name of the directory in which object files will be kept.
 	obj_dir='obj'
 	obj_dirpath="${cur_dirpath}/${obj_dir}"
@@ -1476,6 +1513,18 @@ main()
 
 	# The name of the directory in which the BLIS test suite is kept.
 	testsuite_dir='testsuite'
+
+	# -- Version-related --
+
+	# The shared library (.so) version file.
+	so_version_file='so_version'
+	so_version_filepath="${dist_path}/${so_version_file}"
+
+	# The major and minor/build .so version numbers.
+	so_version_major=''
+	so_version_minorbuild=''
+
+	# -- configure options --
 
 	# The user-given install prefix and a flag indicating it was given.
 	#install_prefix_def="${HOME}/blis"
@@ -1518,16 +1567,11 @@ main()
 	enable_memkind='' # The default memkind value is determined later on.
 	force_version='no'
 
-	# The shared library (.so) version file.
-	so_version_file='so_version'
-	so_version_filepath="${dist_path}/${so_version_file}"
+	# The sandbox flag and name.
+	sandbox_flag=''
+	sandbox=''
 
-	# The major and minor/build .so version numbers.
-	so_version_major=''
-	so_version_minorbuild=''
-
-	# Whether we are building out-of-tree.
-	configured_oot="no"
+	# -- Configuration registry --
 
 	# The name of the chosen configuration (the configuration "family").
 	config_name=''
@@ -1543,6 +1587,11 @@ main()
 	# in kernel_list.
 	kconfig_map=''
 
+	# -- Out-of-tree --
+
+	# Whether we are building out-of-tree.
+	configured_oot="no"
+
 	# Dummy file. Used to check whether the cwd is the same as the top-level
 	# source distribution directory.
 	dummy_file='_blis_dir_detect.tmp'
@@ -1551,7 +1600,7 @@ main()
 	# -- Command line option/argument parsing ----------------------------------
 
 	# Process our command line options.
-	while getopts ":hp:d:t:qci:b:-:" opt; do
+	while getopts ":hp:d:s:t:qci:b:-:" opt; do
 		case $opt in
 			-)
 				case "$OPTARG" in
@@ -1614,6 +1663,13 @@ main()
 					disable-packbuf-pools)
 						enable_packbuf_pools='no'
 						;;
+					enable-sandbox=*)
+						sandbox_flag=1
+						sandbox=${OPTARG#*=}
+						;;
+					disable-sandbox)
+						sandbox_flag=0
+						;;
 					int-size=*)
 						int_type_size=${OPTARG#*=}
 						;;
@@ -1659,6 +1715,10 @@ main()
 				debug_flag=1
 				debug_type=$OPTARG
 				;;
+			s)
+				sandbox_flag=1
+				sandbox=$OPTARG
+				;;
 			q)
 				quiet_flag=1
 				;;
@@ -1701,7 +1761,6 @@ main()
 		esac
 	done
 
-
 	# -- Check the operating system --------------------------------------------
 
 	os_name=$(uname -s)
@@ -1709,24 +1768,45 @@ main()
 	echo "${script_name}: detected ${os_name} kernel version ${os_vers}."
 
 
-	# -- Find a compiler -------------------------------------------------------
+	# -- Find a C compiler -----------------------------------------------------
 
 	# Acquire the compiler search order. This will vary based on the os
 	# found above.
 	cc_search_list=$(get_cc_search_list)
 
-	echo "${script_name}: compiler search list is: ${cc_search_list}."
+	echo "${script_name}: C compiler search list is: ${cc_search_list}."
 
 	# Find a working C compiler.
-	found_cc=$(select_cc "${cc_search_list}")
+	found_cc=$(select_cc "${cc_search_list}" "${CC}")
 
-	# If we didn't find any working compilers, we print an error message.
+	# If we didn't find any working C compilers, we print an error message.
 	if [ -z "${found_cc}" ]; then
-		echo "${script_name}: Could not find working compiler! Cannot continue."
+		echo "${script_name}: Could not find working C compiler! Cannot continue."
 		exit 1
 	fi
 
-	echo "${script_name}: using '${found_cc}' compiler."
+	echo "${script_name}: using '${found_cc}' C compiler."
+
+
+	# -- Find a C++ compiler ---------------------------------------------------
+
+	# Acquire the compiler search order. This will vary based on the os
+	# found above.
+	cxx_search_list=$(get_cxx_search_list)
+
+	echo "${script_name}: C++ compiler search list is: ${cxx_search_list}."
+
+	# Find a working C++ compiler. NOTE: We can reuse the select_cc()
+	# function since it is written in a way that is general-purpose.
+	found_cxx=$(select_cc "${cxx_search_list}" "${CXX}")
+
+	# If we didn't find any working C++ compilers, we print an error message.
+	if [ -z "${found_cxx}" ]; then
+		echo "${script_name}: Could not find working C++ compiler! Cannot continue."
+		exit 1
+	fi
+
+	echo "${script_name}: using '${found_cxx}' C++ compiler."
 
 
 	# -- Check the compiler version --------------------------------------------
@@ -2209,9 +2289,10 @@ main()
 	fi
 	if [ "x${has_memkind}" = "xyes" ]; then
 		# If no explicit option was given for libmemkind one way or the other,
-		# default to the value previously returned by has_libmemkind().
+		# we use the value returned previously by has_libmemkind() to determine
+		# the default.
 		if [ "x${enable_memkind}" = "x" ]; then
-			enable_memkind=${has_memkind}
+			enable_memkind="yes"
 		fi
 		echo "${script_name}: libmemkind found; default is to enable use."
 		if [ "x${enable_memkind}" = "xyes" ]; then
@@ -2226,6 +2307,7 @@ main()
 		if [ "x${enable_memkind}" = "xyes" ]; then
 			echo "${script_name}: cannot honor explicit request to enable libmemkind."
 		fi
+		enable_memkind="no"
 		enable_memkind_01=0
 	fi
 	if [ "x${enable_blas}" = "xyes" ]; then
@@ -2261,6 +2343,28 @@ main()
 		echo "${script_name}: the BLAS/CBLAS interface integer size is automatically determined."
 	fi
 
+	# Check if a sandbox was given.
+	if [ -n "${sandbox_flag}" ]; then
+
+		#sandbox_relpath="${sandbox_dir}/${sandbox}"
+
+		echo "${script_name}: configuring for alternate gemm implementation:"
+		echo "${script_name}:   ${sandbox_dir}/${sandbox}"
+
+		sandbox_fullpath="${sandbox_dirpath}/${sandbox}"
+
+		if [ ! -d "${sandbox_fullpath}" ]; then
+			echo "${script_name}: requested sandbox sub-directory does not exist! Cannot continue."
+			exit 1
+		fi
+
+		enable_sandbox_01=1
+	else
+		echo "${script_name}: configuring for conventional gemm implementation."
+
+		enable_sandbox_01=0
+	fi
+
 
 	# Variables that contain forward slashes, such as paths, need extra
 	# escaping when used in sed commands. We insert those extra escape
@@ -2269,6 +2373,11 @@ main()
 	install_incdir_esc=$(echo "${install_incdir}" | sed 's/\//\\\//g')
 	dist_path_esc=$(echo "${dist_path}"           | sed 's/\//\\\//g')
 	cc_esc=$(echo "${found_cc}" | sed 's/\//\\\//g')
+	cxx_esc=$(echo "${found_cxx}" | sed 's/\//\\\//g')
+	#sandbox_relpath_esc=$(echo "${sandbox_relpath}" | sed 's/\//\\\//g')
+
+	# For RANLIB, if the variable is not set, we use a default value of
+	# 'ranlib'.
 	ranlib_esc=$(echo "${RANLIB:-ranlib}" | sed 's/\//\\\//g')
 	cflags_preset_esc=$(echo "${cflags_preset}" | sed 's/\//\\\//g')
 	ldflags_preset_esc=$(echo "${ldflags_preset}" | sed 's/\//\\\//g')
@@ -2341,8 +2450,9 @@ main()
 		| sed -e "s/@kconfig_map@/${kconfig_map}/g" \
 		| sed -e "s/@os_name@/${os_name}/g" \
 		| sed -e "s/@dist_path@/${dist_path_esc}/g" \
-		| sed -e "s/@CC@/${cc_esc}/g" \
 		| sed -e "s/@CC_VENDOR@/${cc_vendor}/g" \
+		| sed -e "s/@CC@/${cc_esc}/g" \
+		| sed -e "s/@CXX@/${cxx_esc}/g" \
 		| sed -e "s/@RANLIB@/${ranlib_esc}/g" \
 		| sed -e "s/@cflags_preset@/${cflags_preset_esc}/g" \
 		| sed -e "s/@ldflags_preset@/${ldflags_preset_esc}/g" \
@@ -2357,6 +2467,7 @@ main()
 		| sed -e "s/@enable_blas@/${enable_blas}/g" \
 		| sed -e "s/@enable_cblas@/${enable_cblas}/g" \
 		| sed -e "s/@enable_memkind@/${enable_memkind}/g" \
+		| sed -e "s/@sandbox@/${sandbox}/g" \
 		> "${config_mk_out_path}"
 		
 
@@ -2378,6 +2489,7 @@ main()
 		| sed   -e "s/@enable_blas@/${enable_blas_01}/g" \
 		| sed   -e "s/@enable_cblas@/${enable_cblas_01}/g" \
 		| sed   -e "s/@enable_memkind@/${enable_memkind_01}/g" \
+		| sed   -e "s/@enable_sandbox@/${enable_sandbox_01}/g" \
 		> "${bli_config_h_out_path}"
 
 
@@ -2392,7 +2504,7 @@ main()
 
 	obj_config_dirpath="${base_obj_dirpath}/${config_dir}"
 
-	echo "${script_name}: creating ${obj_config_dirpath}"
+	#echo "${script_name}: creating ${obj_config_dirpath}"
 	mkdir -p ${obj_config_dirpath}
 	for conf in ${config_list}; do
 		echo "${script_name}: creating ${obj_config_dirpath}/${conf}"
@@ -2402,7 +2514,7 @@ main()
 
 	obj_kernels_dirpath="${base_obj_dirpath}/${kernels_dir}"
 
-	echo "${script_name}: creating ${obj_kernels_dirpath}"
+	#echo "${script_name}: creating ${obj_kernels_dirpath}"
 	mkdir -p ${obj_kernels_dirpath}
 	for kern in ${kernel_list}; do
 		echo "${script_name}: creating ${obj_kernels_dirpath}/${kern}"
@@ -2412,7 +2524,7 @@ main()
 
 	obj_refkern_dirpath="${base_obj_dirpath}/${refkern_dir}"
 
-	echo "${script_name}: creating ${obj_refkern_dirpath}"
+	#echo "${script_name}: creating ${obj_refkern_dirpath}"
 	mkdir -p ${obj_refkern_dirpath}
 	for conf in ${config_list}; do
 		echo "${script_name}: creating ${obj_refkern_dirpath}/${conf}"
@@ -2424,6 +2536,12 @@ main()
 
 	echo "${script_name}: creating ${obj_frame_dirpath}"
 	mkdir -p ${obj_frame_dirpath}
+
+
+	obj_sandbox_dirpath="${base_obj_dirpath}/${sandbox_dir}"
+
+	echo "${script_name}: creating ${obj_sandbox_dirpath}/${sandbox}"
+	mkdir -p ${obj_sandbox_dirpath}/${sandbox}
 
 
 	obj_blastest_dirpath="${base_obj_dirpath}/${blastest_dir}"
@@ -2490,6 +2608,10 @@ main()
 	# Mirror framework source tree to its object sub-directory.
 	echo "${script_name}: mirroring ${frame_dirpath} to ${obj_frame_dirpath}"
 	${mirror_tree_sh} ${frame_dirpath} ${obj_frame_dirpath}
+
+	# Mirror the chosen sandbox source tree to its object sub-directory.
+	echo "${script_name}: mirroring ${sandbox_dirpath}/${sandbox} to ${obj_sandbox_dirpath}/${sandbox}"
+	${mirror_tree_sh} "${sandbox_dirpath}/${sandbox}" "${obj_sandbox_dirpath}/${sandbox}"
 
 
 	# -- Generate makefile fragements ------------------------------------------
@@ -2561,6 +2683,17 @@ main()
 			 -o ${script_name} \
 			 -p 'FRAME' \
 			 ${frame_dirpath} \
+			 ${gen_make_frags_dirpath}/fragment.mk \
+			 ${gen_make_frags_dirpath}/suffix_list \
+			 ${gen_make_frags_dirpath}/ignore_list
+
+	# Generate makefile fragments in the sandbox sub-directory.
+	echo "${script_name}: creating makefile fragments in ${sandbox_dirpath}/${sandbox}"
+	${gen_make_frags_sh} \
+			 -h -r -v0 \
+			 -o ${script_name} \
+			 -p 'SANDBOX' \
+			 ${sandbox_dirpath}/${sandbox} \
 			 ${gen_make_frags_dirpath}/fragment.mk \
 			 ${gen_make_frags_dirpath}/suffix_list \
 			 ${gen_make_frags_dirpath}/ignore_list

@@ -172,6 +172,18 @@ static void bli_blksz_scale_max
 	bli_blksz_set_max( ( val * num ) / den, dt, b );
 }
 
+static void bli_blksz_scale_def_max
+     (
+       dim_t    num,
+       dim_t    den,
+       num_t    dt,
+       blksz_t* b
+     )
+{
+	bli_blksz_scale_def( num, den, dt, b );
+	bli_blksz_scale_max( num, den, dt, b );
+}
+
 // -----------------------------------------------------------------------------
 
 blksz_t* bli_blksz_create_ed

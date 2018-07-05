@@ -38,24 +38,24 @@
 
 // gemm
 
-#define gemm_get_next_a_micropanel( thread, a1, step ) ( a1 + step * thread->n_way )
-#define gemm_get_next_b_micropanel( thread, b1, step ) ( b1 + step * thread->n_way )
+#define bli_gemm_get_next_a_upanel( thread, a1, step ) ( a1 + step * thread->n_way )
+#define bli_gemm_get_next_b_upanel( thread, b1, step ) ( b1 + step * thread->n_way )
 
 // herk
 
-#define herk_get_next_a_micropanel( thread, a1, step ) ( a1 + step * thread->n_way )
-#define herk_get_next_b_micropanel( thread, b1, step ) ( b1 + step * thread->n_way )
+#define bli_herk_get_next_a_upanel( thread, a1, step ) ( a1 + step * thread->n_way )
+#define bli_herk_get_next_b_upanel( thread, b1, step ) ( b1 + step * thread->n_way )
 
 // trmm
 
-#define trmm_r_ir_my_iter( index, thread ) ( index % thread->n_way == thread->work_id % thread->n_way )
-#define trmm_r_jr_my_iter( index, thread ) ( index % thread->n_way == thread->work_id % thread->n_way )
-#define trmm_l_ir_my_iter( index, thread ) ( index % thread->n_way == thread->work_id % thread->n_way )
-#define trmm_l_jr_my_iter( index, thread ) ( index % thread->n_way == thread->work_id % thread->n_way )
+#define bli_trmm_r_ir_my_iter( index, thread ) ( index % thread->n_way == thread->work_id % thread->n_way )
+#define bli_trmm_r_jr_my_iter( index, thread ) ( index % thread->n_way == thread->work_id % thread->n_way )
+#define bli_trmm_l_ir_my_iter( index, thread ) ( index % thread->n_way == thread->work_id % thread->n_way )
+#define bli_trmm_l_jr_my_iter( index, thread ) ( index % thread->n_way == thread->work_id % thread->n_way )
 
 // trsm
 
-#define trsm_my_iter( index, thread ) ( index % thread->n_way == thread->work_id % thread->n_way )
+#define bli_trsm_my_iter( index, thread ) ( index % thread->n_way == thread->work_id % thread->n_way )
 
 //
 // thrinfo_t APIs specific to level-3 operations.

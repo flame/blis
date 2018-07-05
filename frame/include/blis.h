@@ -122,6 +122,12 @@ extern "C" {
 #include "bli_cpuid.h"
 #include "bli_string.h"
 #include "bli_setgetij.h"
+#include "bli_setri.h"
+
+#include "bli_castm.h"
+#include "bli_castv.h"
+#include "bli_projm.h"
+#include "bli_projv.h"
 
 
 // -- Level-0 operations --
@@ -162,6 +168,11 @@ extern "C" {
 // -- Utility operations --
 
 #include "bli_util.h"
+
+
+// -- sandbox implementation --
+
+#include "bli_sbox.h"
 
 
 // -- BLAS compatibility layer --

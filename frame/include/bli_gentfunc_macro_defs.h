@@ -402,6 +402,51 @@ GENTFUNC2( dcomplex, scomplex, z, c, tfuncname, varname ) \
 
 
 
+// -- Mixed domain/precision (all) two-operand macro --
+
+// -- (no auxiliary arguments) --
+
+#define INSERT_GENTFUNC2_MIXDP0( tfuncname ) \
+\
+GENTFUNC2( float,    double,   s, d, tfuncname ) \
+GENTFUNC2( float,    scomplex, s, c, tfuncname ) \
+GENTFUNC2( float,    dcomplex, s, z, tfuncname ) \
+\
+GENTFUNC2( double,   float,    d, s, tfuncname ) \
+GENTFUNC2( double,   scomplex, d, c, tfuncname ) \
+GENTFUNC2( double,   dcomplex, d, z, tfuncname ) \
+\
+GENTFUNC2( scomplex, float,    c, s, tfuncname ) \
+GENTFUNC2( scomplex, double,   c, d, tfuncname ) \
+GENTFUNC2( scomplex, dcomplex, c, z, tfuncname ) \
+\
+GENTFUNC2( dcomplex, float,    z, s, tfuncname ) \
+GENTFUNC2( dcomplex, double,   z, d, tfuncname ) \
+GENTFUNC2( dcomplex, scomplex, z, c, tfuncname )
+
+
+// -- (one auxiliary argument) --
+
+#define INSERT_GENTFUNC2_MIX_DP( tfuncname, varname ) \
+\
+GENTFUNC2( float,    double,   s, d, tfuncname, varname ) \
+GENTFUNC2( float,    scomplex, s, c, tfuncname, varname ) \
+GENTFUNC2( float,    dcomplex, s, z, tfuncname, varname ) \
+\
+GENTFUNC2( double,   float,    d, s, tfuncname, varname ) \
+GENTFUNC2( double,   scomplex, d, c, tfuncname, varname ) \
+GENTFUNC2( double,   dcomplex, d, z, tfuncname, varname ) \
+\
+GENTFUNC2( scomplex, float,    c, s, tfuncname, varname ) \
+GENTFUNC2( scomplex, double,   c, d, tfuncname, varname ) \
+GENTFUNC2( scomplex, dcomplex, c, z, tfuncname, varname ) \
+\
+GENTFUNC2( dcomplex, float,    z, s, tfuncname, varname ) \
+GENTFUNC2( dcomplex, double,   z, d, tfuncname, varname ) \
+GENTFUNC2( dcomplex, scomplex, z, c, tfuncname, varname )
+
+
+
 // -- Basic two-operand with real projection of first operand --
 
 // -- (no auxiliary arguments) --

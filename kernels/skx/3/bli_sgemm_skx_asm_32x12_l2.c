@@ -34,7 +34,8 @@
 
 #include "blis.h"
 
-#include "bli_avx512_macros.h"
+#define BLIS_ASM_SYNTAX_INTEL
+#include "bli_x86_asm_macros.h"
 
 #define CACHELINE_SIZE 64 //size of cache line in bytes
 
@@ -335,8 +336,7 @@ void bli_sgemm_skx_asm_32x12_l2(
     const int64_t rs_c = rs_c_;
     const int64_t cs_c = cs_c_;
 
-    __asm__ volatile
-    (
+    BEGIN_ASM()
 
     VXORPD(YMM(8), YMM(8), YMM(8)) //clear out registers
     VMOVAPD(YMM( 7), YMM(8))
@@ -550,6 +550,7 @@ void bli_sgemm_skx_asm_32x12_l2(
 
     VZEROUPPER()
 
+    END_ASM(
     : // output operands
     : // input operands
       [k]         "m" (k),
@@ -568,5 +569,5 @@ void bli_sgemm_skx_asm_32x12_l2(
       "zmm14", "zmm15", "zmm16", "zmm17", "zmm18", "zmm19", "zmm20", "zmm21",
       "zmm22", "zmm23", "zmm24", "zmm25", "zmm26", "zmm27", "zmm28", "zmm29",
       "zmm30", "zmm31", "memory"
-    );
+    )
 }

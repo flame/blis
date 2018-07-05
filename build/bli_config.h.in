@@ -98,4 +98,10 @@
 #define BLIS_DISABLE_MEMKIND
 #endif
 
+#if @enable_sandbox@
+#define BLIS_ENABLE_SANDBOX
+#else
+#define BLIS_DISABLE_SANDBOX
+#endif
+
 #endif

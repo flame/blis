@@ -74,16 +74,40 @@ void bli_syrk_front
 	// contiguous columns, or if C is stored by columns and the micro-kernel
 	// prefers contiguous rows, transpose the entire operation to allow the
 	// micro-kernel to access elements of C in its preferred manner.
-	if ( bli_cntx_l3_ukr_dislikes_storage_of( &c_local, BLIS_GEMM_UKR, cntx ) )
+	if ( bli_cntx_l3_vir_ukr_dislikes_storage_of( &c_local, BLIS_GEMM_UKR, cntx ) )
 	{
 		bli_obj_induce_trans( &c_local );
 	}
 
 	// Record the threading for each level within the context.
-	bli_cntx_set_thrloop_from_env( BLIS_SYRK, BLIS_LEFT, cntx,
-                                   bli_obj_length( &c_local ),
-                                   bli_obj_width( &c_local ),
-                                   bli_obj_width( &a_local ) );
+	bli_cntx_set_thrloop_from_env
+	(
+	  BLIS_SYRK,
+	  BLIS_LEFT, // ignored for her[2]k/syr[2]k
+	  bli_obj_length( &c_local ),
+	  bli_obj_width( &c_local ),
+	  bli_obj_width( &a_local ),
+	  cntx
+	);
+
+	// A sort of hack for communicating the desired pach schemas for A and B
+	// to bli_gemm_cntl_create() (via bli_l3_thread_decorator() and
+	// bli_l3_cntl_create_if()). This allows us to access the schemas from
+	// the control tree, which hopefully reduces some confusion, particularly
+	// in bli_packm_init().
+	if ( bli_cntx_method( cntx ) == BLIS_NAT )
+	{
+		bli_obj_set_pack_schema( BLIS_PACKED_ROW_PANELS, &a_local );
+		bli_obj_set_pack_schema( BLIS_PACKED_COL_PANELS, &at_local );
+	}
+	else // if ( bli_cntx_method( cntx ) != BLIS_NAT )
+	{
+		pack_t schema_a = bli_cntx_schema_a_block( cntx );
+		pack_t schema_b = bli_cntx_schema_b_panel( cntx );
+
+		bli_obj_set_pack_schema( schema_a, &a_local );
+		bli_obj_set_pack_schema( schema_b, &at_local );
+	}
 
 	// Invoke the internal back-end.
 	bli_l3_thread_decorator

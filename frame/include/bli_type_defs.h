@@ -210,11 +210,11 @@ typedef dcomplex  f77_dcomplex;
   12 ~ 10  Target numerical datatype
            - 10: domain    (0 == real, 1 == complex)
            - 11: precision (0 == single, 1 == double)
-           - 12: unused
+           - 12: used to encode integer, constant types
   15 ~ 13  Execution numerical datatype
            - 13: domain    (0 == real, 1 == complex)
            - 14: precision (0 == single, 1 == double)
-           - 15: unused
+           - 15: used to encode integer, constant types
   22 ~ 16  Packed type/status
            - 0 0000 00: not packed
            - 1 0000 00: packed (unspecified; by rows, columns, or vector)
@@ -271,7 +271,11 @@ typedef dcomplex  f77_dcomplex;
 #define BLIS_UNIT_DIAG_SHIFT               8
 #define BLIS_INVERT_DIAG_SHIFT             9
 #define BLIS_TARGET_DT_SHIFT               10
-#define BLIS_EXECUTION_DT_SHIFT            13
+#define   BLIS_TARGET_DOMAIN_SHIFT         10
+#define   BLIS_TARGET_PREC_SHIFT           11
+#define BLIS_EXEC_DT_SHIFT                 13
+#define   BLIS_EXEC_DOMAIN_SHIFT           13
+#define   BLIS_EXEC_PREC_SHIFT             14
 #define BLIS_PACK_SCHEMA_SHIFT             16
 #define   BLIS_PACK_RC_SHIFT               16
 #define   BLIS_PACK_PANEL_SHIFT            17
@@ -299,7 +303,11 @@ typedef dcomplex  f77_dcomplex;
 #define BLIS_UNIT_DIAG_BIT                 ( 0x1  << BLIS_UNIT_DIAG_SHIFT )
 #define BLIS_INVERT_DIAG_BIT               ( 0x1  << BLIS_INVERT_DIAG_SHIFT )
 #define BLIS_TARGET_DT_BITS                ( 0x7  << BLIS_TARGET_DT_SHIFT )
-#define BLIS_EXECUTION_DT_BITS             ( 0x7  << BLIS_EXECUTION_DT_SHIFT )
+#define   BLIS_TARGET_DOMAIN_BIT           ( 0x1  << BLIS_TARGET_DOMAIN_SHIFT )
+#define   BLIS_TARGET_PREC_BIT             ( 0x1  << BLIS_TARGET_PREC_SHIFT )
+#define BLIS_EXEC_DT_BITS                  ( 0x7  << BLIS_EXEC_DT_SHIFT )
+#define   BLIS_EXEC_DOMAIN_BIT             ( 0x1  << BLIS_EXEC_DOMAIN_SHIFT )
+#define   BLIS_EXEC_PREC_BIT               ( 0x1  << BLIS_EXEC_PREC_SHIFT )
 #define BLIS_PACK_SCHEMA_BITS              ( 0x7F << BLIS_PACK_SCHEMA_SHIFT )
 #define   BLIS_PACK_RC_BIT                 ( 0x1  << BLIS_PACK_RC_SHIFT )
 #define   BLIS_PACK_PANEL_BIT              ( 0x1  << BLIS_PACK_PANEL_SHIFT )
@@ -990,6 +998,9 @@ typedef struct
 	inc_t  is_a;
 	inc_t  is_b;
 
+	// The type to convert to on output.
+	num_t  dt_on_output;
+
 } auxinfo_t;
 
 
@@ -1128,8 +1139,6 @@ typedef struct cntx_s
 	pack_t    schema_b_panel;
 	pack_t    schema_c_panel;
 
-	bool_t    anti_pref;
-
 	dim_t     thrloop[ BLIS_NUM_LOOPS ];
 
 	membrk_t* membrk;
@@ -1177,6 +1186,7 @@ typedef enum
 	BLIS_INCONSISTENT_DATATYPES                = ( -36),
 	BLIS_EXPECTED_REAL_PROJ_OF                 = ( -37),
 	BLIS_EXPECTED_REAL_VALUED_OBJECT           = ( -38),
+	BLIS_INCONSISTENT_PRECISIONS               = ( -39),
 
 	// Dimension-specific errors
 	BLIS_NONCONFORMAL_DIMENSIONS               = ( -40),

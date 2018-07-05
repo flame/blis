@@ -167,9 +167,9 @@ void PASTEMAC(ch,varname) \
 	   is transposed so that all kernel instances are of the "left"
 	   variety (since those are the only trsm ukernels that exist). */ \
 	PASTECH(ch,gemmtrsm_ukr_ft) \
-	               gemmtrsm_ukr = bli_cntx_get_l3_ukr_dt( dt, BLIS_GEMMTRSM_U_UKR, cntx ); \
+	               gemmtrsm_ukr = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMMTRSM_U_UKR, cntx ); \
 	PASTECH(ch,gemm_ukr_ft) \
-	                   gemm_ukr = bli_cntx_get_l3_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
+	                   gemm_ukr = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
 \
 	/* Temporary C buffer for edge cases. Note that the strides of this
 	   temporary buffer are set so that they match the storage of the
@@ -178,7 +178,7 @@ void PASTEMAC(ch,varname) \
 	ctype           ct[ BLIS_STACK_BUF_MAX_SIZE \
 	                    / sizeof( ctype ) ] \
 	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	const bool_t    col_pref    = bli_cntx_l3_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
+	const bool_t    col_pref    = bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
 	const inc_t     rs_ct       = ( col_pref ? 1 : NR ); \
 	const inc_t     cs_ct       = ( col_pref ? MR : 1 ); \
 \
@@ -422,7 +422,7 @@ void PASTEMAC(ch,varname) \
 			/* Loop over the m dimension (MR rows at a time). */ \
 			for ( i = 0; i < m_iter; ++i ) \
 			{ \
-				if( trsm_my_iter( i, thread ) ){ \
+				if( bli_trsm_my_iter( i, thread ) ){ \
 \
 				ctype* restrict a11; \
 				ctype* restrict a12; \
@@ -508,7 +508,7 @@ void PASTEMAC(ch,varname) \
 			/* Loop over the m dimension (MR rows at a time). */ \
 			for ( i = 0; i < m_iter; ++i ) \
 			{ \
-				if( trsm_my_iter( i, thread ) ){ \
+				if( bli_trsm_my_iter( i, thread ) ){ \
 \
 				ctype* restrict a2; \
 \

@@ -62,6 +62,8 @@ define store-make-defs
 $(eval $(call store-var-for,CC,         $(1)))
 $(eval $(call store-var-for,CC_VENDOR,  $(1)))
 $(eval $(call store-var-for,CPPROCFLAGS,$(1)))
+$(eval $(call store-var-for,CLANGFLAGS, $(1)))
+$(eval $(call store-var-for,CXXLANGFLAGS,$(1)))
 $(eval $(call store-var-for,CMISCFLAGS, $(1)))
 $(eval $(call store-var-for,CPICFLAGS,  $(1)))
 $(eval $(call store-var-for,CWARNFLAGS, $(1)))
@@ -96,6 +98,18 @@ get-noopt-cflags-for   = $(strip $(CFLAGS_PRESET) \
                                  $(call load-var-for,CWARNFLAGS,$(1)) \
                                  $(call load-var-for,CPICFLAGS,$(1)) \
                                  $(call load-var-for,CMISCFLAGS,$(1)) \
+                                 $(call load-var-for,CLANGFLAGS,$(1)) \
+                                 $(call load-var-for,CPPROCFLAGS,$(1)) \
+                                 $(CTHREADFLAGS) \
+                                 $(INCLUDE_PATHS) $(VERS_DEF) \
+                          )
+
+get-noopt-cxxflags-for = $(strip $(CFLAGS_PRESET) \
+                                 $(call load-var-for,CDBGFLAGS,$(1)) \
+                                 $(call load-var-for,CWARNFLAGS,$(1)) \
+                                 $(call load-var-for,CPICFLAGS,$(1)) \
+                                 $(call load-var-for,CMISCFLAGS,$(1)) \
+                                 $(call load-var-for,CXXLANGFLAGS,$(1)) \
                                  $(call load-var-for,CPPROCFLAGS,$(1)) \
                                  $(CTHREADFLAGS) \
                                  $(INCLUDE_PATHS) $(VERS_DEF) \
@@ -125,12 +139,26 @@ get-kernel-cflags-for  = $(strip $(call load-var-for,CKOPTFLAGS,$(1)) \
                                  $(call get-noopt-cflags-for,$(1)) \
                           )
 
-get-noopt-text       = "(CFLAGS for no optimization)"
-get-refinit-text-for = "('$(1)' CFLAGS for ref. kernel init)"
-get-refkern-text-for = "('$(1)' CFLAGS for ref. kernels)"
-get-config-text-for  = "('$(1)' CFLAGS for config code)"
-get-frame-text-for   = "('$(1)' CFLAGS for framework code)"
-get-kernel-text-for  = "('$(1)' CFLAGS for kernels)"
+# When compiling sandboxes, we use flags similar to those of general framework
+# source. This ensures that the same code can be linked and run across various
+# sub-configurations. (If we switch to using refkern/kernel flags, we should
+# prevent enabling sandboxes for umbrella families by verifying that
+# config_list == config_name if --enable-sandbox is given.)
+get-sandbox-c99flags-for = $(call load-var-for,COPTFLAGS,$(1)) \
+                           $(call get-noopt-cflags-for,$(1)) \
+                           $(SANDBOX_INCLUDE_PATHS)
+get-sandbox-cxxflags-for = $(call load-var-for,COPTFLAGS,$(1)) \
+                           $(call get-noopt-cxxflags-for,$(1)) \
+                           $(SANDBOX_INCLUDE_PATHS)
+
+get-noopt-text          = "(CFLAGS for no optimization)"
+get-refinit-text-for    = "('$(1)' CFLAGS for ref. kernel init)"
+get-refkern-text-for    = "('$(1)' CFLAGS for ref. kernels)"
+get-config-text-for     = "('$(1)' CFLAGS for config code)"
+get-frame-text-for      = "('$(1)' CFLAGS for framework code)"
+get-kernel-text-for     = "('$(1)' CFLAGS for kernels)"
+get-sandbox-c99text-for = "('$(1)' CFLAGS for sandboxes)"
+get-sandbox-cxxtext-for = "('$(1)' CXXFLAGS for sandboxes)"
 
 
 
@@ -187,6 +215,7 @@ DIST_PATH := .
 # something we would like to avoid.
 INSTALL_LIBDIR := $(HOME)/blis/lib
 INSTALL_INCDIR := $(HOME)/blis/include
+
 endif
 
 
@@ -207,16 +236,40 @@ CONFIG_DIR         := config
 FRAME_DIR          := frame
 REFKERN_DIR        := ref_kernels
 KERNELS_DIR        := kernels
+SANDBOX_DIR        := sandbox
 OBJ_DIR            := obj
 LIB_DIR            := lib
 INCLUDE_DIR        := include
 BLASTEST_DIR       := blastest
 TESTSUITE_DIR      := testsuite
 
-# Other kernel-related definitions.
-KERNEL_SUFS        := c s S
-KERNELS_STR        := kernels
-REF_SUF            := ref
+# The filename suffix for reference kernels.
+REFNM              := ref
+
+# Source suffixes.
+CONFIG_SRC_SUFS    := c
+
+KERNELS_SRC_SUFS   := c s S
+
+FRAME_SRC_SUFS     := c
+
+SANDBOX_C99_SUFS   := c
+SANDBOX_CXX_SUFS   := cc cpp cxx
+SANDBOX_SRC_SUFS   := $(SANDBOX_C99_SUFS) $(SANDBOX_CXX_SUFS)
+
+# Header suffixes.
+FRAME_HDR_SUFS     := h
+
+SANDBOX_H99_SUFS   := h
+SANDBOX_HXX_SUFS   := hh hpp hxx
+SANDBOX_HDR_SUFS   := $(SANDBOX_H99_SUFS) $(SANDBOX_HXX_SUFS)
+
+# Combine all header suffixes and remove duplicates via sort().
+ALL_HDR_SUFS       := $(sort $(FRAME_HDR_SUFS) \
+                             $(SANDBOX_HDR_SUFS) )
+
+ALL_H99_SUFS       := $(sort $(FRAME_HDR_SUFS) \
+                             $(SANDBOX_H99_SUFS) )
 
 # The names of the testsuite input/configuration files.
 TESTSUITE_CONF_GEN := input.general
@@ -239,6 +292,7 @@ CONFIG_PATH        := $(DIST_PATH)/$(CONFIG_DIR)
 FRAME_PATH         := $(DIST_PATH)/$(FRAME_DIR)
 REFKERN_PATH       := $(DIST_PATH)/$(REFKERN_DIR)
 KERNELS_PATH       := $(DIST_PATH)/$(KERNELS_DIR)
+SANDBOX_PATH       := $(DIST_PATH)/$(SANDBOX_DIR)
 
 
 
@@ -297,29 +351,6 @@ ARFLAGS    := cr
 # Used to refresh CHANGELOG.
 GIT        := git
 GIT_LOG    := $(GIT) log --decorate
-
-
-
-#
-# --- Determine the compiler vendor --------------------------------------------
-#
-
-#ifneq ($(CC),)
-#
-#VENDOR_STRING := $(shell $(CC) --version 2>/dev/null)
-#ifeq ($(VENDOR_STRING),)
-#VENDOR_STRING := $(shell $(CC) -qversion 2>/dev/null)
-#endif
-#ifeq ($(VENDOR_STRING),)
-#$(error Unable to determine compiler vendor.)
-#endif
-#
-#CC_VENDOR := $(firstword $(shell echo '$(VENDOR_STRING)' | $(EGREP) -o 'icc|gcc|clang|ibm|cc'))
-#ifeq ($(CC_VENDOR),)
-#$(error Unable to determine compiler vendor. Have you run './configure' yet?)
-#endif
-#
-#endif
 
 
 
@@ -436,13 +467,19 @@ LINKER     := $(CC)
 
 # --- Warning flags ---
 
+CWARNFLAGS :=
+
 # Disable unused function warnings and stop compiling on first error for
 # all compilers that accept such options: gcc, clang, and icc.
 ifneq ($(CC_VENDOR),ibm)
-CWARNFLAGS := -Wall -Wno-unused-function -Wfatal-errors
-else
-CWARNFLAGS :=
+CWARNFLAGS += -Wall -Wno-unused-function -Wfatal-errors
 endif
+
+# Disable tautological comparision warnings in clang.
+ifeq ($(CC_VENDOR),clang)
+CWARNFLAGS += -Wno-tautological-compare
+endif
+
 $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CWARNFLAGS,$(c))))
 
 # --- Shared library (position-independent code) flags ---
@@ -451,25 +488,21 @@ $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CWARNFLAGS,$(c))))
 CPICFLAGS := -fPIC
 $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CPICFLAGS,$(c))))
 
-# --- Miscellaneous flags ---
+# --- Language flags ---
 
 # Enable C99.
-CMISCFLAGS := -std=c99
-$(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CMISCFLAGS,$(c))))
+CLANGFLAGS := -std=c99
+$(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CLANGFLAGS,$(c))))
+
+# Enable C++11.
+CXXLANGFLAGS := -std=c++11
+$(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CXXLANGFLAGS,$(c))))
 
 # --- C Preprocessor flags ---
 
 # Enable clock_gettime() in time.h.
 CPPROCFLAGS := -D_POSIX_C_SOURCE=200112L
 $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CPPROCFLAGS,$(c))))
-
-# Disable tautological comparision warnings in clang.
-ifeq ($(CC_VENDOR),clang)
-CMISCFLAGS := -Wno-tautological-compare
-else
-CMISCFLAGS :=
-endif
-$(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CMISCFLAGS,$(c))))
 
 
 # --- Threading flags ---
@@ -566,11 +599,13 @@ FRAGMENT_DIR_PATHS :=
 # into by the makefile fragments. This initialization is very important! These
 # variables will end up with weird contents if we don't initialize them to
 # empty prior to recursively including the makefile fragments.
-MK_CONFIG_SRC          :=
-MK_FRAME_SRC           :=
-MK_REFKERN_SRC         :=
-MK_KERNELS_SRC         :=
+MK_CONFIG_SRC      :=
+MK_KERNELS_SRC     :=
+MK_REFKERN_SRC     :=
+MK_FRAME_SRC       :=
+MK_SANDBOX_SRC     :=
 
+# -- config --
 
 # Construct paths to each of the sub-configurations specified in the
 # configuration list. Note that we use CONFIG_LIST_FAM, which already
@@ -586,6 +621,7 @@ PARENT_PATH        := $(DIST_PATH)/$(CONFIG_DIR)
 # directories.
 -include $(addsuffix /$(FRAGMENT_MK), $(CONFIG_PATHS))
 
+# -- kernels --
 
 # Construct paths to each of the kernel sets required by the sub-configurations
 # in the configuration list.
@@ -600,12 +636,13 @@ PARENT_PATH        := $(DIST_PATH)/$(KERNELS_DIR)
 # directories.
 -include $(addsuffix /$(FRAGMENT_MK), $(KERNEL_PATHS))
 
+# -- ref_kernels --
+# -- frame --
 
 # This variable is used by the include statements as they recursively include
 # one another. For the framework and reference kernel source trees (ie: the
 # 'frame' and 'ref_kernels' directories), we initialize it to the top-level
-# directory since that is its parent. Same for the kernels directory, since it
-# resides in the same top-level directory.
+# directory since that is its parent.
 PARENT_PATH        := $(DIST_PATH)
 
 # Recursively include all the makefile fragments in the directories for the
@@ -613,8 +650,24 @@ PARENT_PATH        := $(DIST_PATH)
 -include $(addsuffix /$(FRAGMENT_MK), $(REFKERN_PATH))
 -include $(addsuffix /$(FRAGMENT_MK), $(FRAME_PATH))
 
+# -- sandbox --
 
-# Create a list of the makefile fragments.
+# Construct paths to each sandbox. (At present, there can be only one.)
+# NOTE: If $(SANDBOX) is empty (because no sandbox was enabled at configure-
+# time) then $(SANDBOX_PATHS) will also be empty, which will cause no
+# fragments to be included.
+SANDBOX_PATHS      := $(addprefix $(SANDBOX_PATH)/, $(SANDBOX))
+
+# This variable is used by the include statements as they recursively include
+# one another. For the 'sandbox' directory, we initialize it to that directory
+# in preparation to include the fragments in the configuration sub-directory.
+PARENT_PATH        := $(DIST_PATH)/$(SANDBOX_DIR)
+
+# Recursively include the makefile fragments in the sandbox sub-directory.
+-include $(addsuffix /$(FRAGMENT_MK), $(SANDBOX_PATHS))
+
+# Create a list of the makefile fragments using the variable into which each
+# of the above include statements accumulated their directory paths.
 MAKEFILE_FRAGMENTS := $(addsuffix /$(FRAGMENT_MK), $(FRAGMENT_DIR_PATHS))
 
 # Detect whether we actually got any makefile fragments. If we didn't, then it
@@ -624,74 +677,112 @@ MAKEFILE_FRAGMENTS_PRESENT := no
 else
 MAKEFILE_FRAGMENTS_PRESENT := yes
 endif
-#$(error fragment dir paths: $(FRAGMENT_DIR_PATHS))
 
 
 #
-# --- Compiler include path definitions ----------------------------------------
+# --- Important sets of header files and paths ---------------------------------
 #
 
-# Expand the fragment paths that contain .h files to attain the set of header
-# files present in all fragment paths. Then strip all leading, internal, and
-# trailing whitespace from the list.
-MK_HEADER_FILES := $(strip $(foreach frag_path, \
-                                     . $(FRAGMENT_DIR_PATHS), \
-                                     $(wildcard $(frag_path)/*.h)))
+# Define a function that will expand all of the directory paths given in $(1)
+# to actual filepaths using the list of suffixes provided $(2).
+get-filepaths = $(strip $(foreach path, $(1), \
+                            $(foreach suf, $(2), \
+                                $(wildcard $(path)/*.$(suf)) \
+                 )       )   )
 
-# Expand the fragment paths that contain .h files, and take the first
-# expansion. Then, strip the header filename to leave the path to each header
-# location. Notice this process even weeds out duplicates!
-MK_HEADER_DIR_PATHS := $(dir $(foreach frag_path, \
-                                       . $(FRAGMENT_DIR_PATHS), \
-                                       $(firstword $(wildcard $(frag_path)/*.h))))
+# Define a function that will expand all of the directory paths given in $(1)
+# to actual filepaths using the list of suffixes provided $(2), taking only
+# the first expansion from each directory with at least one file matching
+# the current suffix. Finally, strip the filenames from all resulting files,
+# returning only the directory paths.
+get-dirpaths  = $(dir $(foreach path, $(1), \
+                          $(firstword \
+                              $(foreach suf, $(2), \
+                                  $(wildcard $(path)/*.$(suf)) \
+                 )     )   )   )
+
+# We'll use two directory lists. The first is a list of all of the directories
+# in which makefile fragments were generated (plus the current directory). The
+# second is the subset of the first that begins with the sandbox root path.
+ALLFRAG_DIR_PATHS := . $(FRAGMENT_DIR_PATHS)
+SANDBOX_DIR_PATHS := $(filter $(SANDBOX_PATH)/%,$(ALLFRAG_DIR_PATHS))
+
+ALL_H99_FILES     := $(call get-filepaths,$(ALLFRAG_DIR_PATHS),$(ALL_H99_SUFS))
+FRAME_H99_FILES   := $(filter-out $(SANDBOX_PATH)/%,$(ALL_H99_FILES))
+
+ALL_H99_DIRPATHS  := $(call get-dirpaths,$(ALLFRAG_DIR_PATHS),$(ALL_H99_SUFS))
+
+SANDBOX_H99_FILES := $(call get-filepaths,$(SANDBOX_DIR_PATHS),$(SANDBOX_H99_SUFS))
+SANDBOX_HXX_FILES := $(call get-filepaths,$(SANDBOX_DIR_PATHS),$(SANDBOX_HXX_SUFS))
+
+SANDBOX_HDR_DIRPATHS := $(call get-dirpaths,$(SANDBOX_DIR_PATHS),$(ALL_HDR_SUFS))
 
 # Add -I to each header path so we can specify our include search paths to the
 # C compiler.
 # NOTE: We no longer need every header path in the source tree since we
 # now #include the monolithic/flattened blis.h instead, and thus this
 # line is commented out.
-#INCLUDE_PATHS   := $(strip $(patsubst %, -I%, $(MK_HEADER_DIR_PATHS)))
+#INCLUDE_PATHS   := $(strip $(patsubst %, -I%, $(ALL_HDR_DIRPATHS)))
+
+
+#
+# --- blis.h header definitions ------------------------------------------------
+#
 
 # Construct the base path for the intermediate include directory.
 BASE_INC_PATH   := $(BUILD_PATH)/$(INCLUDE_DIR)/$(CONFIG_NAME)
 
-# Isolate the path to blis.h by filtering the file from the list of headers.
+# Isolate the path to blis.h by filtering the file from the list of framework
+# header files.
 BLIS_H          := blis.h
-BLIS_H_SRC_PATH := $(filter %/$(BLIS_H), $(MK_HEADER_FILES))
+BLIS_H_SRC_PATH := $(filter %/$(BLIS_H), $(FRAME_H99_FILES))
 
-# Construct the path to the intermediate flattened/monolithic blis.h file.
+# Construct the path to what will be the intermediate flattened/monolithic
+# blis.h file.
 BLIS_H_FLAT     := $(BASE_INC_PATH)/$(BLIS_H)
+
+
+#
+# --- cblas.h header definitions -----------------------------------------------
+#
+
+# Isolate the path to cblas.h by filtering the file from the list of framework
+# header files.
+CBLAS_H          := cblas.h
+CBLAS_H_SRC_PATH := $(filter %/$(CBLAS_H), $(FRAME_H99_FILES))
+
+# Construct the path to what will be the intermediate flattened/monolithic
+# cblas.h file.
+CBLAS_H_FLAT    := $(BASE_INC_PATH)/$(CBLAS_H)
+
+
+#
+# --- Compiler include path definitions ----------------------------------------
+#
 
 # Obtain a list of header files #included inside of the bli_cntx_ref.c file.
 # Paths to these files will be needed when compiling with the monolithic
 # header.
 REF_KER_SRC     := $(DIST_PATH)/$(REFKERN_DIR)/bli_cntx_ref.c
-REF_KER_HEADERS := $(shell $(GREP) "\#include" $(REF_KER_SRC) | sed -e "s/\#include [\"<]\([a-zA-Z0-9\_\.\/\-]*\)[\">].*/\1/g" | $(GREP) -v blis.h)
+REF_KER_HEADERS := $(shell $(GREP) "\#include" $(REF_KER_SRC) | sed -e "s/\#include [\"<]\([a-zA-Z0-9\_\.\/\-]*\)[\">].*/\1/g" | $(GREP) -v $(BLIS_H))
 
 # Match each header found above with the path to that header, and then strip
 # leading, trailing, and internal whitespace.
 REF_KER_H_PATHS := $(strip $(foreach header, $(REF_KER_HEADERS), \
                                $(dir $(filter %/$(header), \
-                                              $(MK_HEADER_FILES)))))
+                                              $(FRAME_H99_FILES)))))
 
 # Add -I to each header path so we can specify our include search paths to the
 # C compiler. Then add frame/include since it's needed for bli_oapi_w[o]_cntx.h.
 REF_KER_I_PATHS := $(strip $(patsubst %, -I%, $(REF_KER_H_PATHS)))
 REF_KER_I_PATHS += -I$(DIST_PATH)/frame/include
 
-# Finally, prefix the paths above with the base include path.
+# Prefix the paths above with the base include path.
 INCLUDE_PATHS   := -I$(BASE_INC_PATH) $(REF_KER_I_PATHS)
 
-
-#
-# --- CBLAS header definitions -------------------------------------------------
-#
-
-CBLAS_H          := cblas.h
-CBLAS_H_SRC_PATH := $(filter %/$(CBLAS_H), $(MK_HEADER_FILES))
-
-# Construct the path to the intermediate flattened/monolithic cblas.h file.
-CBLAS_H_FLAT    := $(BASE_INC_PATH)/$(CBLAS_H)
+# Obtain a list of header paths in the configured sandbox. Then add -I to each
+# header path.
+SANDBOX_INCLUDE_PATHS := $(strip $(patsubst %, -I%, $(SANDBOX_HDR_DIRPATHS)))
 
 
 #
