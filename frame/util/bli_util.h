@@ -34,12 +34,17 @@
 
 #include "bli_util_check.h"
 
-// Prototype object APIs with and without contexts.
+// Prototype object APIs (expert and non-expert).
 #include "bli_oapi_w_cntx.h"
 #include "bli_util_oapi.h"
 #include "bli_oapi_wo_cntx.h"
 #include "bli_util_oapi.h"
 
+// Prototype typed APIs (expert and non-expert).
+#include "bli_tapi_w_cntx.h"
 #include "bli_util_tapi.h"
+#include "bli_tapi_wo_cntx.h"
+#include "bli_util_tapi.h"
+
 #include "bli_util_unb_var1.h"
 

@@ -48,7 +48,6 @@ int main( int argc, char** argv )
 
 	// Initialize some basic constants.
 	double zero      =   0.0;
-	double one       =   1.0;
 	double minus_one =  -1.0;
 
 
@@ -68,7 +67,7 @@ int main( int argc, char** argv )
 	a = malloc( m * n * sizeof( double ) );
 
 	// Set the upper triangle to random values.
-	bli_drandm( 0, BLIS_UPPER, m, n, a, rs, cs, NULL );
+	bli_drandm( 0, BLIS_UPPER, m, n, a, rs, cs );
 
 	bli_dprintm( "a: randomize upper part (lower part may contain garbage)",
 	             m, n, a, rs, cs, "%4.1f", "" );
@@ -86,12 +85,12 @@ int main( int argc, char** argv )
 	b = malloc( m * n * sizeof( double ) );
 
 	// Set the upper triangle to random values.
-	bli_drandm( 0, BLIS_UPPER, m, n, b, rs, cs, NULL );
+	bli_drandm( 0, BLIS_UPPER, m, n, b, rs, cs );
 
 	// Set the strictly lower triangle of 'b' to zero (by setting the lower
 	// triangle of 'bl' to zero).
 	bli_dsetm( BLIS_NO_CONJUGATE, -1, BLIS_NONUNIT_DIAG, BLIS_LOWER,
-	           m, n, &zero, b, rs, cs, NULL );
+	           m, n, &zero, b, rs, cs );
 
 	bli_dprintm( "b: randomize upper part; set strictly lower part to 0.0)",
 	             m, n, b, rs, cs, "%4.1f", "" );
@@ -100,7 +99,7 @@ int main( int argc, char** argv )
 	// since those values may already be zero (instead of random junk). So
 	// let's set it to something you'll notice, like -1.0.
 	bli_dsetm( BLIS_NO_CONJUGATE, -1, BLIS_NONUNIT_DIAG, BLIS_LOWER,
-	           m, n, &minus_one, b, rs, cs, NULL );
+	           m, n, &minus_one, b, rs, cs );
 
 	bli_dprintm( "b: randomize upper part; set strictly lower part to -1.0)",
 	             m, n, b, rs, cs, "%4.1f", "" );
@@ -118,13 +117,13 @@ int main( int argc, char** argv )
 	c = malloc( m * n * sizeof( double ) );
 
 	bli_dcopym( 0, BLIS_NONUNIT_DIAG, BLIS_LOWER, BLIS_NO_TRANSPOSE,
-	            m, n, b, rs, cs, c, rs, cs, NULL );
+	            m, n, b, rs, cs, c, rs, cs );
 
 	bli_dprintm( "c: copy lower part of b (upper part may contain garbage)",
 	             m, n, c, rs, cs, "%4.1f", "" );
 
 	bli_dcopym( 0, BLIS_NONUNIT_DIAG, BLIS_LOWER, BLIS_NO_TRANSPOSE,
-	            m, n, b, rs, cs, a, rs, cs, NULL );
+	            m, n, b, rs, cs, a, rs, cs );
 
 	bli_dprintm( "a: copy lower triangle of b to upper triangular a",
 	             m, n, a, rs, cs, "%4.1f", "" );
@@ -143,7 +142,7 @@ int main( int argc, char** argv )
 
 	// Let's start by setting entire destination matrix to zero.
 	bli_dsetm( BLIS_NO_CONJUGATE, 0, BLIS_NONUNIT_DIAG, BLIS_DENSE,
-	           m, n, &zero, d, rs, cs, NULL );
+	           m, n, &zero, d, rs, cs );
 
 	bli_dprintm( "d: initial value (all zeros)",
 	             m, n, d, rs, cs, "%4.1f", "" );
@@ -160,7 +159,7 @@ int main( int argc, char** argv )
 	             m, n, b, rs, cs, "%4.1f", "" );
 
 	bli_dcopym( 0, BLIS_NONUNIT_DIAG, BLIS_LOWER, BLIS_TRANSPOSE,
-	            m, n, b, rs, cs, d, rs, cs, NULL );
+	            m, n, b, rs, cs, d, rs, cs );
 
 	bli_dprintm( "d: transpose of lower triangle of b copied to d",
 	             m, n, d, rs, cs, "%4.1f", "" );
@@ -180,20 +179,20 @@ int main( int argc, char** argv )
 
 	// Initialize the entire matrix to -1.0 to simulate junk values.
 	bli_dsetm( BLIS_NO_CONJUGATE, 0, BLIS_NONUNIT_DIAG, BLIS_DENSE,
-	           m, n, &minus_one, e, rs, cs, NULL );
+	           m, n, &minus_one, e, rs, cs );
 
 	bli_dprintm( "e: initial value (all -1.0)",
 	             m, n, e, rs, cs, "%4.1f", "" );
 
 	// Randomize the lower trapezoid.
-	bli_drandm( 0, BLIS_LOWER, m, n, e, rs, cs, NULL );
+	bli_drandm( 0, BLIS_LOWER, m, n, e, rs, cs );
 
 	bli_dprintm( "e: after lower trapezoid randomized",
 	             m, n, e, rs, cs, "%4.1f", "" );
 
 	// Set the upper triangle to zero.
 	bli_dsetm( BLIS_NO_CONJUGATE, 1, BLIS_NONUNIT_DIAG, BLIS_UPPER,
-	           m, n, &zero, e, rs, cs, NULL );
+	           m, n, &zero, e, rs, cs );
 
 	bli_dprintm( "e: after upper triangle set to zero",
 	             m, n, e, rs, cs, "%4.1f", "" );
@@ -212,13 +211,13 @@ int main( int argc, char** argv )
 
 	// Initialize the entire matrix to -1.0 to simulate junk values.
 	bli_dsetm( BLIS_NO_CONJUGATE, 0, BLIS_NONUNIT_DIAG, BLIS_DENSE,
-	           m, n, &minus_one, h, rs, cs, NULL );
+	           m, n, &minus_one, h, rs, cs );
 
 	bli_dprintm( "h: initial value (all -1.0)",
 	             m, n, h, rs, cs, "%4.1f", "" );
 
 	// Randomize the elements on and above the first subdiagonal.
-	bli_drandm( -1, BLIS_UPPER, m, n, h, rs, cs, NULL );
+	bli_drandm( -1, BLIS_UPPER, m, n, h, rs, cs );
 
 	bli_dprintm( "h: after randomizing above first subdiagonal",
 	             m, n, h, rs, cs, "%4.1f", "" );
@@ -226,7 +225,7 @@ int main( int argc, char** argv )
 	// Set the region strictly below the first subdiagonal (on or below
 	// the second subdiagonal) to zero.
 	bli_dsetm( BLIS_NO_CONJUGATE, -2, BLIS_NONUNIT_DIAG, BLIS_LOWER,
-	           m, n, &zero, h, rs, cs, NULL );
+	           m, n, &zero, h, rs, cs );
 
 	bli_dprintm( "h: after setting elements below first subdiagonal to zero",
 	             m, n, h, rs, cs, "%4.1f", "" );

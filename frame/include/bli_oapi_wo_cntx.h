@@ -35,17 +35,18 @@
 // This file defines macros used to allow the _oapi.c files to
 // produce object APIs that omit context parameters.
 
-// Define the macro to remove the function name suffix.
+// Define the macro to remove the function name suffix (in function
+// definitions).
 #undef  EX_SUF
 #define EX_SUF
 
 // Define the macro to omit cntx_t* arguments from function signatures
 // and prototypes.
-#undef  BLIS_OAPI_CNTX_PARAM
-#define BLIS_OAPI_CNTX_PARAM
+#undef  BLIS_OAPI_EX_PARAMS
+#define BLIS_OAPI_EX_PARAMS
 
 // Define the macro to declare a local cntx_t pointer that is initialized
 // to NULL.
-#undef  BLIS_OAPI_CNTX_DECL
-#define BLIS_OAPI_CNTX_DECL   cntx_t* cntx = NULL;
+#undef  BLIS_OAPI_EX_DECLS
+#define BLIS_OAPI_EX_DECLS   cntx_t* cntx = NULL; ( void )cntx;
 

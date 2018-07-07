@@ -87,9 +87,9 @@ int main( int argc, char** argv )
 	printf( "gamma:\n%4.1f\n\n", gamma );
 	printf( "\n" );
 
-	bli_dsetv( BLIS_NO_CONJUGATE, n, &one, x, 1, NULL );
-	bli_dsetv( BLIS_NO_CONJUGATE, n, &alpha, y, 1, NULL );
-	bli_dsetv( BLIS_NO_CONJUGATE, n, &zero, z, 1, NULL );
+	bli_dsetv( BLIS_NO_CONJUGATE, n, &one, x, 1 );
+	bli_dsetv( BLIS_NO_CONJUGATE, n, &alpha, y, 1 );
+	bli_dsetv( BLIS_NO_CONJUGATE, n, &zero, z, 1 );
 
 	// Note that we can use printv or printm to print vectors since vectors
 	// are also matrices. We choose to use printm because it honors the
@@ -108,7 +108,7 @@ int main( int argc, char** argv )
 	printf( "\n#\n#  -- Example 2 --\n#\n\n" );
 
 	// Set a vector to random values.
-	bli_drandv( n, w, 1, NULL );
+	bli_drandv( n, w, 1 );
 
 	bli_dprintm( "x := randv()", m, n, w, rs, cs, "%4.1f", "" );
 
@@ -120,37 +120,37 @@ int main( int argc, char** argv )
 	printf( "\n#\n#  -- Example 3 --\n#\n\n" );
 
 	// Copy a vector.
-	bli_dcopyv( BLIS_NO_CONJUGATE, n, w, 1, a, 1, NULL );
+	bli_dcopyv( BLIS_NO_CONJUGATE, n, w, 1, a, 1 );
 	bli_dprintm( "a := w", m, n, a, rs, cs, "%4.1f", "" );
 
 	// Add and subtract vectors.
-	bli_daddv( BLIS_NO_CONJUGATE, n, y, 1, a, 1, NULL );
+	bli_daddv( BLIS_NO_CONJUGATE, n, y, 1, a, 1 );
 	bli_dprintm( "a := a + y", m, n, a, rs, cs, "%4.1f", "" );
 
-	bli_dsubv( BLIS_NO_CONJUGATE, n, w, 1, a, 1, NULL );
+	bli_dsubv( BLIS_NO_CONJUGATE, n, w, 1, a, 1 );
 	bli_dprintm( "a := a + w", m, n, a, rs, cs, "%4.1f", "" );
 
 	// Scale a vector (destructive).
-	bli_dscalv( BLIS_NO_CONJUGATE, n, &beta, a, 1, NULL );
+	bli_dscalv( BLIS_NO_CONJUGATE, n, &beta, a, 1 );
 	bli_dprintm( "a := beta * a", m, n, a, rs, cs, "%4.1f", "" );
 
 	// Scale a vector (non-destructive).
-	bli_dscal2v( BLIS_NO_CONJUGATE, n, &gamma, a, 1, z, 1, NULL );
+	bli_dscal2v( BLIS_NO_CONJUGATE, n, &gamma, a, 1, z, 1 );
 	bli_dprintm( "z := gamma * a", m, n, z, rs, cs, "%4.1f", "" );
 
 	// Scale and accumulate between vectors.
-	bli_daxpyv( BLIS_NO_CONJUGATE, n, &alpha, w, 1, x, 1, NULL );
+	bli_daxpyv( BLIS_NO_CONJUGATE, n, &alpha, w, 1, x, 1 );
 	bli_dprintm( "x := x + alpha * w", m, n, x, rs, cs, "%4.1f", "" );
 
-	bli_dxpbyv( BLIS_NO_CONJUGATE, n, w, 1, &minus_one, x, 1, NULL );
+	bli_dxpbyv( BLIS_NO_CONJUGATE, n, w, 1, &minus_one, x, 1 );
 	bli_dprintm( "x := -1.0 * x + w", m, n, x, rs, cs, "%4.1f", "" );
 
 	// Invert a vector element-wise.
-	bli_dinvertv( n, y, 1, NULL );
+	bli_dinvertv( n, y, 1 );
 	bli_dprintm( "y := 1 / y", m, n, y, rs, cs, "%4.1f", "" );
 
 	// Swap two vectors.
-	bli_dswapv( n, x, 1, y, 1, NULL );
+	bli_dswapv( n, x, 1, y, 1 );
 	bli_dprintm( "x (after swapping with y)", m, n, x, rs, cs, "%4.1f", "" );
 	bli_dprintm( "y (after swapping with x)", m, n, y, rs, cs, "%4.1f", "" );
 
@@ -162,11 +162,11 @@ int main( int argc, char** argv )
 	printf( "\n#\n#  -- Example 4 --\n#\n\n" );
 
 	// Perform a dot product.
-	bli_ddotv( BLIS_NO_CONJUGATE, BLIS_NO_CONJUGATE, n, a, 1, z, 1, &gamma, NULL );
+	bli_ddotv( BLIS_NO_CONJUGATE, BLIS_NO_CONJUGATE, n, a, 1, z, 1, &gamma );
 	printf( "gamma := a * z (dot product):\n%5.2f\n\n", gamma );
 
 	// Perform an extended dot product.
-	bli_ddotxv( BLIS_NO_CONJUGATE, BLIS_NO_CONJUGATE, n, &alpha, a, 1, z, 1, &one, &gamma, NULL );
+	bli_ddotxv( BLIS_NO_CONJUGATE, BLIS_NO_CONJUGATE, n, &alpha, a, 1, z, 1, &one, &gamma );
 	printf( "gamma := 1.0 * gamma + alpha * a * z (accumulate scaled dot product):\n%5.2f\n\n", gamma );
 
 

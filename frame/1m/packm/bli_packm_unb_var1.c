@@ -152,7 +152,7 @@ void PASTEMAC(ch,varname) \
 	   because the structure has already been "densified"), this ends
 	   up being the only action we take. Note that if kappa is unit,
 	   the data is simply copied (rather than scaled by one). */ \
-	PASTEMAC(ch,scal2m) \
+	PASTEMAC2(ch,scal2m,BLIS_TAPI_EX_SUF) \
 	( \
 	  diagoffc, \
 	  diagc, \
@@ -194,7 +194,7 @@ void PASTEMAC(ch,varname) \
 			   (as specified by the original value of diagoffc). Notice
 			   that we use a diag parameter of non-unit since we can
 			   assume nothing about the neighboring off-diagonal. */ \
-			PASTEMAC(ch,scal2m) \
+			PASTEMAC2(ch,scal2m,BLIS_TAPI_EX_SUF) \
 			( \
 			  diagoffc, \
 			  BLIS_NONUNIT_DIAG, \
@@ -229,7 +229,7 @@ void PASTEMAC(ch,varname) \
 			bli_shift_diag_offset_to_shrink_uplo( uplop, &diagoffp ); \
 \
 			/* Set the region opposite the diagonal of p to zero. */ \
-			PASTEMAC(ch,setm) \
+			PASTEMAC2(ch,setm,BLIS_TAPI_EX_SUF) \
 			( \
 			  BLIS_NO_CONJUGATE, \
 			  diagoffp, \
@@ -255,7 +255,7 @@ void PASTEMAC(ch,varname) \
 	{ \
 		ctype* p_edge = p_cast + (m  )*rs_p; \
 \
-		PASTEMAC(ch,setm) \
+		PASTEMAC2(ch,setm,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  0, \
@@ -273,7 +273,7 @@ void PASTEMAC(ch,varname) \
 	{ \
 		ctype* p_edge = p_cast + (n  )*cs_p; \
 \
-		PASTEMAC(ch,setm) \
+		PASTEMAC2(ch,setm,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  0, \

@@ -73,17 +73,17 @@ int main( int argc, char** argv )
 	y = malloc( m * n * sizeof( dcomplex ) );
 
 	// Initialize the vectors to random values.
-	bli_drandv( n, x, 1, NULL );
-	bli_zrandv( n, y, 1, NULL );
+	bli_drandv( n, x, 1 );
+	bli_zrandv( n, y, 1 );
 
 	bli_dprintm( "x", m, n, x, rs, cs, "%4.1f", "" );
 
 	// Compute the one, infinity, and frobenius norms of 'x'. Note that when
 	// computing the norm alpha of a vector 'x', the datatype of alpha must be
 	// equal to the real projection of the datatype of 'x'.
-	bli_dnorm1v( n, x, 1, &norm1, NULL );
-	bli_dnormiv( n, x, 1, &normi, NULL );
-	bli_dnormfv( n, x, 1, &normf, NULL );
+	bli_dnorm1v( n, x, 1, &norm1 );
+	bli_dnormiv( n, x, 1, &normi );
+	bli_dnormfv( n, x, 1, &normf );
 
 	bli_dprintm( "x: 1-norm:", 1, 1, &norm1, rs, cs, "%4.1f", "" );
 	bli_dprintm( "x: infinity norm:", 1, 1, &normi, rs, cs, "%4.1f", "" );
@@ -94,9 +94,9 @@ int main( int argc, char** argv )
 	// Compute the one, infinity, and frobenius norms of 'y'. Note that we
 	// can reuse the same scalars from before for computing norms of
 	// dcomplex matrices, since the real projection of dcomplex is double.
-	bli_znorm1v( n, y, 1, &norm1, NULL );
-	bli_znormiv( n, y, 1, &normi, NULL );
-	bli_znormfv( n, y, 1, &normf, NULL );
+	bli_znorm1v( n, y, 1, &norm1 );
+	bli_znormiv( n, y, 1, &normi );
+	bli_znormfv( n, y, 1, &normf );
 
 	bli_dprintm( "y: 1-norm:", 1, 1, &norm1, 1, 1, "%4.1f", "" );
 	bli_dprintm( "y: infinity norm:", 1, 1, &normi, 1, 1, "%4.1f", "" );
@@ -115,18 +115,18 @@ int main( int argc, char** argv )
 	b = malloc( m * n * sizeof( dcomplex ) );
 
 	// Initialize the matrices to random values.
-	bli_drandm( 0, BLIS_DENSE, m, n, a, rs, cs, NULL );
-	bli_zrandm( 0, BLIS_DENSE, m, n, b, rs, cs, NULL );
+	bli_drandm( 0, BLIS_DENSE, m, n, a, rs, cs );
+	bli_zrandm( 0, BLIS_DENSE, m, n, b, rs, cs );
 
 	bli_dprintm( "a:", m, n, a, rs, cs, "%4.1f", "" );
 
 	// Compute the one-norm of 'a'.
 	bli_dnorm1m( 0, BLIS_NONUNIT_DIAG, BLIS_DENSE,
-	             m, n, a, rs, cs, &norm1, NULL );
+	             m, n, a, rs, cs, &norm1 );
 	bli_dnormim( 0, BLIS_NONUNIT_DIAG, BLIS_DENSE,
-	             m, n, a, rs, cs, &normi, NULL );
+	             m, n, a, rs, cs, &normi );
 	bli_dnormfm( 0, BLIS_NONUNIT_DIAG, BLIS_DENSE,
-	             m, n, a, rs, cs, &normf, NULL );
+	             m, n, a, rs, cs, &normf );
 
 	bli_dprintm( "a: 1-norm:", 1, 1, &norm1, 1, 1, "%4.1f", "" );
 	bli_dprintm( "a: infinity norm:", 1, 1, &normi, 1, 1, "%4.1f", "" );
@@ -136,11 +136,11 @@ int main( int argc, char** argv )
 
 	// Compute the one-norm of 'b'.
 	bli_znorm1m( 0, BLIS_NONUNIT_DIAG, BLIS_DENSE,
-	             m, n, b, rs, cs, &norm1, NULL );
+	             m, n, b, rs, cs, &norm1 );
 	bli_znormim( 0, BLIS_NONUNIT_DIAG, BLIS_DENSE,
-	             m, n, b, rs, cs, &normi, NULL );
+	             m, n, b, rs, cs, &normi );
 	bli_znormfm( 0, BLIS_NONUNIT_DIAG, BLIS_DENSE,
-	             m, n, b, rs, cs, &normf, NULL );
+	             m, n, b, rs, cs, &normf );
 
 	bli_dprintm( "a: 1-norm:", 1, 1, &norm1, 1, 1, "%4.1f", "" );
 	bli_dprintm( "a: infinity norm:", 1, 1, &normi, 1, 1, "%4.1f", "" );
@@ -160,16 +160,16 @@ int main( int argc, char** argv )
 
 	// Initialize all of 'c' to -1.0 to simulate junk values.
 	bli_dsetm( BLIS_NO_CONJUGATE, 0, BLIS_NONUNIT_DIAG, BLIS_DENSE,
-	           m, m, &minus_one, c, rs, cs, NULL );
+	           m, m, &minus_one, c, rs, cs );
 
 	// Randomize the lower triangle of 'c'.
-	bli_drandm( 0, BLIS_LOWER, m, m, c, rs, cs, NULL );
+	bli_drandm( 0, BLIS_LOWER, m, m, c, rs, cs );
 
 	bli_dprintm( "c (initial state):", m, m, c, rs, cs, "%4.1f", "" );
 
 	// mksymm on a real matrix transposes the stored triangle into the
 	// unstored triangle, making the matrix densely symmetric.
-	bli_dmksymm( BLIS_LOWER, m, c, rs, cs, NULL );
+	bli_dmksymm( BLIS_LOWER, m, c, rs, cs );
 
 	bli_dprintm( "c (after mksymm on lower triangle):", m, m, c, rs, cs, "%4.1f", "" );
 
@@ -181,16 +181,16 @@ int main( int argc, char** argv )
 
 	// Initialize all of 'd' to -1.0 to simulate junk values.
 	bli_dsetm( BLIS_NO_CONJUGATE, 0, BLIS_NONUNIT_DIAG, BLIS_DENSE,
-	           m, m, &minus_one, d, rs, cs, NULL );
+	           m, m, &minus_one, d, rs, cs );
 
 	// Randomize the lower triangle of 'd'.
-	bli_drandm( 0, BLIS_LOWER, m, m, d, rs, cs, NULL );
+	bli_drandm( 0, BLIS_LOWER, m, m, d, rs, cs );
 
 	bli_dprintm( "d (initial state):", m, m, d, rs, cs, "%4.1f", "" );
 
 	// mkherm on a real matrix behaves the same as mksymm, as there are no
 	// imaginary elements to conjugate.
-	bli_dmkherm( BLIS_LOWER, m, d, rs, cs, NULL );
+	bli_dmkherm( BLIS_LOWER, m, d, rs, cs );
 
 	bli_dprintm( "c (after mkherm on lower triangle):", m, m, d, rs, cs, "%4.1f", "" );
 
@@ -208,31 +208,31 @@ int main( int argc, char** argv )
 
 	// Initialize all of 'e' to -1.0 to simulate junk values.
 	bli_zsetm( BLIS_NO_CONJUGATE, 0, BLIS_NONUNIT_DIAG, BLIS_DENSE,
-	           m, m, &minus_one_z, e, rs, cs, NULL );
+	           m, m, &minus_one_z, e, rs, cs );
 
 	// Randomize the upper triangle of 'e'.
-	bli_zrandm( 0, BLIS_UPPER, m, m, e, rs, cs, NULL );
+	bli_zrandm( 0, BLIS_UPPER, m, m, e, rs, cs );
 
 	bli_zprintm( "e (initial state):", m, m, e, rs, cs, "%4.1f", "" );
 
 	// mksymm on a complex matrix transposes the stored triangle into the
 	// unstored triangle.
-	bli_zmksymm( BLIS_UPPER, m, e, rs, cs, NULL );
+	bli_zmksymm( BLIS_UPPER, m, e, rs, cs );
 
 	bli_zprintm( "e (after mksymm on lower triangle):", m, m, e, rs, cs, "%4.1f", "" );
 
 	// Initialize all of 'f' to -1.0 to simulate junk values.
 	bli_zsetm( BLIS_NO_CONJUGATE, 0, BLIS_NONUNIT_DIAG, BLIS_DENSE,
-	           m, m, &minus_one_z, f, rs, cs, NULL );
+	           m, m, &minus_one_z, f, rs, cs );
 
 	// Randomize the upper triangle of 'd'.
-	bli_zrandm( 0, BLIS_UPPER, m, m, f, rs, cs, NULL );
+	bli_zrandm( 0, BLIS_UPPER, m, m, f, rs, cs );
 
 	bli_zprintm( "f (initial state):", m, m, f, rs, cs, "%4.1f", "" );
 
 	// mkherm on a real matrix behaves the same as mksymm, as there are no
 	// imaginary elements to conjugate.
-	bli_zmkherm( BLIS_UPPER, m, f, rs, cs, NULL );
+	bli_zmkherm( BLIS_UPPER, m, f, rs, cs );
 
 	bli_zprintm( "f (after mkherm on lower triangle):", m, m, f, rs, cs, "%4.1f", "" );
 
@@ -249,17 +249,17 @@ int main( int argc, char** argv )
 
 	// Initialize all of 'g' to -1.0 to simulate junk values.
 	bli_dsetm( BLIS_NO_CONJUGATE, 0, BLIS_NONUNIT_DIAG, BLIS_DENSE,
-	           m, m, &minus_one, g, rs, cs, NULL );
+	           m, m, &minus_one, g, rs, cs );
 
 	// Randomize the lower triangle of 'g'.
-	bli_drandm( 0, BLIS_LOWER, m, m, g, rs, cs, NULL );
+	bli_drandm( 0, BLIS_LOWER, m, m, g, rs, cs );
 
 	bli_dprintm( "g (initial state):", m, m, g, rs, cs, "%4.1f", "" );
 
 	// mktrim does not explicitly copy any data, since presumably the stored
 	// triangle already contains the data of interest. However, mktrim does
 	// explicitly writes zeros to the unstored region.
-	bli_dmktrim( BLIS_LOWER, m, g, rs, cs, NULL );
+	bli_dmktrim( BLIS_LOWER, m, g, rs, cs );
 
 	bli_dprintm( "g (after mktrim):", m, m, g, rs, cs, "%4.1f", "" );
 

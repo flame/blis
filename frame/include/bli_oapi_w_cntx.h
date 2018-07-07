@@ -32,22 +32,21 @@
 
 */
 
-
 // This file defines macros used to allow the _oapi.c files to
 // produce object APIs that contain context parameters.
 
-// Define the macro to add a suffix to the object function names.
-// We use "ex" for "expert".
+// Define the macro to add a suffix to the object API function names
+// (in function definitions).
 #undef  EX_SUF
-#define EX_SUF _ex
+#define EX_SUF BLIS_OAPI_EX_SUF
 
 // Define the macro to add cntx_t* arguments to function signatures
 // and prototypes.
-#undef  BLIS_OAPI_CNTX_PARAM
-#define BLIS_OAPI_CNTX_PARAM   ,cntx_t* cntx
+#undef  BLIS_OAPI_EX_PARAMS
+#define BLIS_OAPI_EX_PARAMS   ,cntx_t* cntx
 
 // Define the macro to omit the cntx_t declaration block, since it is
 // not needed when cntx_t's are passed in through the API.
-#undef  BLIS_OAPI_CNTX_DECL
-#define BLIS_OAPI_CNTX_DECL
+#undef  BLIS_OAPI_EX_DECLS
+#define BLIS_OAPI_EX_DECLS
 

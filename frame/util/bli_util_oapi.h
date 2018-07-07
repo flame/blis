@@ -44,7 +44,7 @@ void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  x, \
        obj_t*  asum  \
-       BLIS_OAPI_CNTX_PARAM  \
+       BLIS_OAPI_EX_PARAMS  \
      );
 
 GENPROT( asumv )
@@ -56,7 +56,7 @@ GENPROT( asumv )
 void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  a  \
-       BLIS_OAPI_CNTX_PARAM  \
+       BLIS_OAPI_EX_PARAMS  \
      );
 
 GENPROT( mkherm )
@@ -71,7 +71,7 @@ void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  x, \
        obj_t*  norm  \
-       BLIS_OAPI_CNTX_PARAM  \
+       BLIS_OAPI_EX_PARAMS  \
      );
 
 GENPROT( norm1v )
@@ -86,7 +86,7 @@ void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  x, \
        obj_t*  norm  \
-       BLIS_OAPI_CNTX_PARAM  \
+       BLIS_OAPI_EX_PARAMS  \
      );
 
 GENPROT( norm1m )
@@ -104,7 +104,7 @@ void PASTEMAC(opname,EX_SUF) \
        obj_t*  x, \
        char*   format, \
        char*   s2  \
-       BLIS_OAPI_CNTX_PARAM  \
+       BLIS_OAPI_EX_PARAMS  \
      );
 
 GENPROT( fprintv )
@@ -120,7 +120,7 @@ void PASTEMAC(opname,EX_SUF) \
        obj_t*  x, \
        char*   format, \
        char*   s2  \
-       BLIS_OAPI_CNTX_PARAM  \
+       BLIS_OAPI_EX_PARAMS  \
      );
 
 GENPROT( printv )
@@ -133,7 +133,7 @@ GENPROT( printm )
 void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  x  \
-       BLIS_OAPI_CNTX_PARAM  \
+       BLIS_OAPI_EX_PARAMS  \
      );
 
 GENPROT( randv )
@@ -146,7 +146,7 @@ GENPROT( randnv )
 void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  x  \
-       BLIS_OAPI_CNTX_PARAM  \
+       BLIS_OAPI_EX_PARAMS  \
      );
 
 GENPROT( randm )
@@ -161,7 +161,7 @@ void PASTEMAC(opname,EX_SUF) \
        obj_t*  x, \
        obj_t*  scale, \
        obj_t*  sumsq  \
-       BLIS_OAPI_CNTX_PARAM  \
+       BLIS_OAPI_EX_PARAMS  \
      );
 
 GENPROT( sumsqv )

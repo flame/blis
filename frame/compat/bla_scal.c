@@ -70,7 +70,7 @@ void PASTEF772(chx,cha,blasname) \
 	PASTEMAC2(cha,chx,cast)( (ftype_a*)alpha, alpha_cast ); \
 \
 	/* Call BLIS interface. */ \
-	PASTEMAC(chx,blisname) \
+	PASTEMAC2(chx,blisname,BLIS_TAPI_EX_SUF) \
 	( \
 	  BLIS_NO_CONJUGATE, \
 	  n0, \

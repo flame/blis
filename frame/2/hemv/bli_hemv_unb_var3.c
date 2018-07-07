@@ -94,7 +94,7 @@ void PASTEMAC(ch,varname) \
 	if ( PASTEMAC(ch,eq0)( *beta ) ) \
 	{ \
 		/* y = 0; */ \
-		PASTEMAC(ch,setv) \
+		PASTEMAC2(ch,setv,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  m, \
@@ -106,7 +106,7 @@ void PASTEMAC(ch,varname) \
 	else \
 	{ \
 		/* y = beta * y; */ \
-		PASTEMAC(ch,scalv) \
+		PASTEMAC2(ch,scalv,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  m, \
