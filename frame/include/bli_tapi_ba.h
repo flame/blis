@@ -32,18 +32,21 @@
 
 */
 
-#include "bli_l1d_check.h"
+// This file defines macros used to allow the _oapi.c files to produce
+// typed APIs that omit expert parameters.
 
-// Prototype object APIs (expert and non-expert).
-#include "bli_oapi_ex.h"
-#include "bli_l1d_oapi.h"
-#include "bli_oapi_ba.h"
-#include "bli_l1d_oapi.h"
+// Define the macro to remove the function name suffix (in function
+// definitions).
+#undef  EX_SUF
+#define EX_SUF
 
-// Prototype typed APIs (expert and non-expert).
-#include "bli_tapi_ex.h"
-#include "bli_l1d_tapi.h"
-#include "bli_tapi_ba.h"
-#include "bli_l1d_tapi.h"
+// Define the macro to omit expert arguments from function signatures
+// and prototypes.
+#undef  BLIS_TAPI_EX_PARAMS
+#define BLIS_TAPI_EX_PARAMS
 
+// Define the macro to declare a local expert variables that are initialized
+// to NULL.
+#undef  BLIS_TAPI_EX_DECLS
+#define BLIS_TAPI_EX_DECLS   cntx_t* cntx = NULL; ( void )cntx;
 

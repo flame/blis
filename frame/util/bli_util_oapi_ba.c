@@ -32,18 +32,15 @@
 
 */
 
-#include "bli_l1d_check.h"
+#include "blis.h"
 
-// Prototype object APIs (expert and non-expert).
-#include "bli_oapi_ex.h"
-#include "bli_l1d_oapi.h"
+// Include cpp macros that instantiate the API definition templates as
+// omitting expert parameters.
 #include "bli_oapi_ba.h"
-#include "bli_l1d_oapi.h"
 
-// Prototype typed APIs (expert and non-expert).
-#include "bli_tapi_ex.h"
-#include "bli_l1d_tapi.h"
-#include "bli_tapi_ba.h"
-#include "bli_l1d_tapi.h"
+// Define the macro protecting the object API definitions.
+#define BLIS_ENABLE_OAPI
 
+// Include the object API definitions here.
+#include "bli_util_oapi.c"
 
