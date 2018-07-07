@@ -59,4 +59,4 @@ script:
 - $CC --version
 - make -j 2
 - if [ $TEST -eq 1 ]; then travis_wait 30 $DIST_PATH/travis/do_testsuite.sh; fi
-- if [ $SDE -eq 1 ]; then travis_wait 30 $DIST_PATH/travis/do_sde.sh; fi
+- if [ $SDE -eq 1 ] && [ "$TRAVIS_PULL_REQUEST" = "false" ] ; then travis_wait 30 $DIST_PATH/travis/do_sde.sh; fi

@@ -171,7 +171,7 @@ void PASTEMAC(ch,varname) \
 		dim_t           n_edge = n_panel_max; \
 		ctype*          p_edge = p + (i  )*rs_p; \
 \
-		PASTEMAC(ch,setm) \
+		PASTEMAC2(ch,setm,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  0, \
@@ -193,7 +193,7 @@ void PASTEMAC(ch,varname) \
 		dim_t           n_edge = n_panel_max - j; \
 		ctype*          p_edge = p + (j  )*cs_p; \
 \
-		PASTEMAC(ch,setm) \
+		PASTEMAC2(ch,setm,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  0, \
@@ -228,7 +228,7 @@ void PASTEMAC(ch,varname) \
 			dim_t           n_br   = n_panel_max - j; \
 			ctype*          p_br   = p + (i  )*rs_p + (j  )*cs_p; \
 \
-			PASTEMAC(ch,setd) \
+			PASTEMAC2(ch,setd,BLIS_TAPI_EX_SUF) \
 			( \
 			  BLIS_NO_CONJUGATE, \
 			  0, \
@@ -440,7 +440,7 @@ void PASTEMAC(ch,varname) \
 			ctype* restrict p11    = p + (j2 )*ldp; \
 			trans_t         transc = ( trans_t )conjc; \
 \
-			PASTEMAC(ch,copym) \
+			PASTEMAC2(ch,copym,BLIS_TAPI_EX_SUF) \
 			( \
 			  0, \
 			  BLIS_NONUNIT_DIAG, \
@@ -471,7 +471,7 @@ void PASTEMAC(ch,varname) \
 			/* Now that the diagonal has been made explicitly Hermitian
 			   (if applicable), we can now safely scale the stored
 			   triangle specified by uploc. */ \
-			PASTEMAC(ch,scalm) \
+			PASTEMAC2(ch,scalm,BLIS_TAPI_EX_SUF) \
 			( \
 			  BLIS_NO_CONJUGATE, \
 			  0, \
@@ -536,7 +536,7 @@ void PASTEMAC(ch,varname) \
 	   the diagonal of the packed panel to kappa. */ \
 	if ( bli_is_unit_diag( diagc ) ) \
 	{ \
-		PASTEMAC(ch,setd) \
+		PASTEMAC2(ch,setd,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  diagoffp, \
@@ -551,7 +551,7 @@ void PASTEMAC(ch,varname) \
 	/* If requested, invert the diagonal of the packed panel. */ \
 	if ( invdiag == TRUE ) \
 	{ \
-		PASTEMAC(ch,invertd) \
+		PASTEMAC2(ch,invertd,BLIS_TAPI_EX_SUF) \
 		( \
 		  diagoffp, \
 		  m_panel, \
@@ -576,7 +576,7 @@ void PASTEMAC(ch,varname) \
 		bli_toggle_uplo( &uplop ); \
 		bli_shift_diag_offset_to_shrink_uplo( uplop, &diagoffp ); \
 \
-		PASTEMAC(ch,setm) \
+		PASTEMAC2(ch,setm,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  diagoffp, \

@@ -108,7 +108,7 @@ void PASTEMAC(ch,varname) \
 	/* We will be reflecting the stored region over the diagonal into the
 	   unstored region, so a transposition is necessary. Furthermore, since
 	   we are creating a Hermitian matrix, we must also conjugate. */ \
-	PASTEMAC(ch,copym) \
+	PASTEMAC2(ch,copym,BLIS_TAPI_EX_SUF) \
 	( \
 	  diagoffa, \
 	  BLIS_NONUNIT_DIAG, \
@@ -122,7 +122,7 @@ void PASTEMAC(ch,varname) \
 	); \
 \
 	/* Set the imaginary parts of the diagonal elements to zero. */ \
-	PASTEMAC(ch,setid) \
+	PASTEMAC2(ch,setid,BLIS_TAPI_EX_SUF) \
 	( \
 	  0, \
 	  m, \
@@ -159,7 +159,7 @@ void PASTEMAC(ch,varname) \
 \
 	/* We will be reflecting the stored region over the diagonal into the
 	   unstored region, so a transposition is necessary. */ \
-	PASTEMAC(ch,copym) \
+	PASTEMAC2(ch,copym,BLIS_TAPI_EX_SUF) \
 	( \
 	  diagoffa, \
 	  BLIS_NONUNIT_DIAG, \
@@ -202,7 +202,7 @@ void PASTEMAC(ch,varname) \
 	else /*if ( bli_is_lower( uploa ) )*/ diagoffa = -1; \
 \
 	/* Set the unstored triangle to zero. */ \
-	PASTEMAC(ch,setm) \
+	PASTEMAC2(ch,setm,BLIS_TAPI_EX_SUF) \
 	( \
 	  BLIS_NO_CONJUGATE, \
 	  diagoffa, \
@@ -337,7 +337,7 @@ void PASTEMAC(ch,varname) \
 \
 		feclearexcept( FE_ALL_EXCEPT );\
 \
-		PASTEMAC(ch,dotv)\
+		PASTEMAC2(ch,dotv,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  BLIS_NO_CONJUGATE, \
@@ -981,7 +981,7 @@ void PASTEMAC(ch,varname) \
 \
 			x1     = x + (j  )*ldx + (0  )*incx; \
 \
-			PASTEMAC(ch,kername) \
+			PASTEMAC2(ch,kername,BLIS_TAPI_EX_SUF) \
 			( \
 			  n_elem, \
 			  x1, incx, \
@@ -1007,7 +1007,7 @@ void PASTEMAC(ch,varname) \
 				x0     = x1; \
 				chi1   = x1 + (n_elem-1)*incx; \
 \
-				PASTEMAC(ch,kername) \
+				PASTEMAC2(ch,kername,BLIS_TAPI_EX_SUF) \
 				( \
 				  n_elem, \
 				  x1, incx, \
@@ -1046,7 +1046,7 @@ void PASTEMAC(ch,varname) \
 				x2     = x1 + incx; \
 				chi1   = x1; \
 \
-				PASTEMAC(ch,kername) \
+				PASTEMAC2(ch,kername,BLIS_TAPI_EX_SUF) \
 				( \
 				  n_elem, \
 				  x1, incx, \

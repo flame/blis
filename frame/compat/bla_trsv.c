@@ -96,7 +96,7 @@ void PASTEF77(ch,blasname) \
 	one_p = PASTEMAC(ch,1); \
 \
 	/* Call BLIS interface. */ \
-	PASTEMAC(ch,blisname) \
+	PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
 	( \
 	  blis_uploa, \
 	  blis_transa, \

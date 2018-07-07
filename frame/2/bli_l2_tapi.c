@@ -32,7 +32,9 @@
 
 */
 
-#include "blis.h"
+// Guard the function definitions so that they are only compiled when
+// #included from files that define the typed API macros.
+#ifdef BLIS_ENABLE_TAPI
 
 //
 // Define BLAS-like interfaces with typed operands.
@@ -41,7 +43,7 @@
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, ftname, rvarname, cvarname ) \
 \
-void PASTEMAC(ch,opname) \
+void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        trans_t transa, \
        conj_t  conjx, \
@@ -51,11 +53,13 @@ void PASTEMAC(ch,opname) \
        ctype*  a, inc_t rs_a, inc_t cs_a, \
        ctype*  x, inc_t incx, \
        ctype*  beta, \
-       ctype*  y, inc_t incy, \
-       cntx_t* cntx  \
+       ctype*  y, inc_t incy  \
+       BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
 	bli_init_once(); \
+\
+	BLIS_TAPI_EX_DECLS \
 \
 	dim_t m_y, n_x; \
 \
@@ -72,7 +76,7 @@ void PASTEMAC(ch,opname) \
 	   return early. */ \
 	if ( bli_zero_dim1( n_x ) || PASTEMAC(ch,eq0)( *alpha ) ) \
 	{ \
-		PASTEMAC(ch,scalv) \
+		PASTEMAC2(ch,scalv,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  m_y, \
@@ -120,7 +124,7 @@ INSERT_GENTFUNC_BASIC3( gemv, gemv, gemv_unf_var1, gemv_unf_var2 )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, ftname, rvarname, cvarname ) \
 \
-void PASTEMAC(ch,opname) \
+void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        conj_t  conjx, \
        conj_t  conjy, \
@@ -129,11 +133,13 @@ void PASTEMAC(ch,opname) \
        ctype*  alpha, \
        ctype*  x, inc_t incx, \
        ctype*  y, inc_t incy, \
-       ctype*  a, inc_t rs_a, inc_t cs_a, \
-       cntx_t* cntx  \
+       ctype*  a, inc_t rs_a, inc_t cs_a  \
+       BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
 	bli_init_once(); \
+\
+	BLIS_TAPI_EX_DECLS \
 \
 	/* If x or y has zero elements, or if alpha is zero, return early. */ \
 	if ( bli_zero_dim2( m, n ) || PASTEMAC(ch,eq0)( *alpha ) ) return; \
@@ -169,7 +175,7 @@ INSERT_GENTFUNC_BASIC3( ger, ger, ger_unb_var1, ger_unb_var2 )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, ftname, conjh, rvarname, cvarname ) \
 \
-void PASTEMAC(ch,opname) \
+void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        uplo_t  uploa, \
        conj_t  conja, \
@@ -179,11 +185,13 @@ void PASTEMAC(ch,opname) \
        ctype*  a, inc_t rs_a, inc_t cs_a, \
        ctype*  x, inc_t incx, \
        ctype*  beta, \
-       ctype*  y, inc_t incy, \
-       cntx_t* cntx  \
+       ctype*  y, inc_t incy  \
+       BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
 	bli_init_once(); \
+\
+	BLIS_TAPI_EX_DECLS \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
@@ -192,7 +200,7 @@ void PASTEMAC(ch,opname) \
 	   return early. */ \
 	if ( bli_zero_dim1( m ) || PASTEMAC(ch,eq0)( *alpha ) ) \
 	{ \
-		PASTEMAC(ch,scalv) \
+		PASTEMAC2(ch,scalv,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  m, \
@@ -242,18 +250,20 @@ INSERT_GENTFUNC_BASIC4( symv, hemv, BLIS_NO_CONJUGATE, hemv_unf_var1, hemv_unf_v
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, opname, ftname, conjh, rvarname, cvarname ) \
 \
-void PASTEMAC(ch,opname) \
+void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        uplo_t   uploa, \
        conj_t   conjx, \
        dim_t    m, \
        ctype_r* alpha, \
        ctype*   x, inc_t incx, \
-       ctype*   a, inc_t rs_a, inc_t cs_a, \
-       cntx_t*  cntx  \
+       ctype*   a, inc_t rs_a, inc_t cs_a  \
+       BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
 	bli_init_once(); \
+\
+	BLIS_TAPI_EX_DECLS \
 \
 	ctype alpha_local; \
 \
@@ -303,18 +313,20 @@ INSERT_GENTFUNCR_BASIC4( her, her, BLIS_CONJUGATE, her_unb_var1, her_unb_var2 )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, ftname, conjh, rvarname, cvarname ) \
 \
-void PASTEMAC(ch,opname) \
+void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        uplo_t   uploa, \
        conj_t   conjx, \
        dim_t    m, \
        ctype*   alpha, \
        ctype*   x, inc_t incx, \
-       ctype*   a, inc_t rs_a, inc_t cs_a, \
-       cntx_t*  cntx  \
+       ctype*   a, inc_t rs_a, inc_t cs_a  \
+       BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
 	bli_init_once(); \
+\
+	BLIS_TAPI_EX_DECLS \
 \
 	/* If x has zero elements, or if alpha is zero, return early. */ \
 	if ( bli_zero_dim1( m ) || PASTEMAC(ch,eq0)( *alpha ) ) return; \
@@ -357,7 +369,7 @@ INSERT_GENTFUNC_BASIC4( syr, her, BLIS_NO_CONJUGATE, her_unb_var1, her_unb_var2 
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, ftname, conjh, rvarname, cvarname ) \
 \
-void PASTEMAC(ch,opname) \
+void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        uplo_t  uploa, \
        conj_t  conjx, \
@@ -366,11 +378,13 @@ void PASTEMAC(ch,opname) \
        ctype*  alpha, \
        ctype*  x, inc_t incx, \
        ctype*  y, inc_t incy, \
-       ctype*  a, inc_t rs_a, inc_t cs_a, \
-       cntx_t* cntx  \
+       ctype*  a, inc_t rs_a, inc_t cs_a  \
+       BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
 	bli_init_once(); \
+\
+	BLIS_TAPI_EX_DECLS \
 \
 	/* If x has zero elements, or if alpha is zero, return early. */ \
 	if ( bli_zero_dim1( m ) || PASTEMAC(ch,eq0)( *alpha ) ) return; \
@@ -416,7 +430,7 @@ INSERT_GENTFUNC_BASIC4( syr2, her2, BLIS_NO_CONJUGATE, her2_unf_var1, her2_unf_v
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, ftname, rvarname, cvarname ) \
 \
-void PASTEMAC(ch,opname) \
+void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        uplo_t  uploa, \
        trans_t transa, \
@@ -424,11 +438,13 @@ void PASTEMAC(ch,opname) \
        dim_t   m, \
        ctype*  alpha, \
        ctype*  a, inc_t rs_a, inc_t cs_a, \
-       ctype*  x, inc_t incx, \
-       cntx_t* cntx  \
+       ctype*  x, inc_t incx  \
+       BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
 	bli_init_once(); \
+\
+	BLIS_TAPI_EX_DECLS \
 \
 	/* If x has zero elements, return early. */ \
 	if ( bli_zero_dim1( m ) ) return; \
@@ -439,7 +455,7 @@ void PASTEMAC(ch,opname) \
 	/* If alpha is zero, set x to zero and return early. */ \
 	if ( PASTEMAC(ch,eq0)( *alpha ) ) \
 	{ \
-		PASTEMAC(ch,setv) \
+		PASTEMAC2(ch,setv,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  m, \
@@ -481,3 +497,7 @@ void PASTEMAC(ch,opname) \
 
 INSERT_GENTFUNC_BASIC3( trmv, trmv, trmv_unf_var1, trmv_unf_var2 )
 INSERT_GENTFUNC_BASIC3( trsv, trmv, trsv_unf_var1, trsv_unf_var2 )
+
+
+#endif
+

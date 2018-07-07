@@ -117,7 +117,7 @@ void PASTEF77(ch,blasname) \
 	cs_a = *lda; \
 \
 	/* Call BLIS interface. */ \
-	PASTEMAC(ch,blisname) \
+	PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
 	( \
 	  blis_transa, \
 	  BLIS_NO_CONJUGATE, \

@@ -47,7 +47,7 @@ void PASTEMAC(opname,EX_SUF) \
        obj_t*  x, \
        obj_t*  y, \
        obj_t*  z  \
-       BLIS_OAPI_CNTX_PARAM  \
+       BLIS_OAPI_EX_PARAMS  \
      );
 
 GENTPROT( axpy2v )
@@ -62,7 +62,7 @@ void PASTEMAC(opname,EX_SUF) \
        obj_t*  a, \
        obj_t*  x, \
        obj_t*  y  \
-       BLIS_OAPI_CNTX_PARAM  \
+       BLIS_OAPI_EX_PARAMS  \
      );
 
 GENTPROT( axpyf )
@@ -79,7 +79,7 @@ void PASTEMAC(opname,EX_SUF) \
        obj_t*  y, \
        obj_t*  rho, \
        obj_t*  z  \
-       BLIS_OAPI_CNTX_PARAM  \
+       BLIS_OAPI_EX_PARAMS  \
      );
 
 GENTPROT( dotaxpyv )
@@ -98,7 +98,7 @@ void PASTEMAC(opname,EX_SUF) \
        obj_t*  beta, \
        obj_t*  y, \
        obj_t*  z  \
-       BLIS_OAPI_CNTX_PARAM  \
+       BLIS_OAPI_EX_PARAMS  \
      );
 
 GENTPROT( dotxaxpyf )
@@ -114,7 +114,7 @@ void PASTEMAC(opname,EX_SUF) \
        obj_t*  x, \
        obj_t*  beta, \
        obj_t*  y  \
-       BLIS_OAPI_CNTX_PARAM  \
+       BLIS_OAPI_EX_PARAMS  \
      );
 
 GENTPROT( dotxf )

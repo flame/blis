@@ -32,20 +32,15 @@
 
 */
 
-// This file defines macros used to allow the _oapi.c files to
-// produce object APIs that omit context parameters.
+#include "blis.h"
 
-// Define the macro to remove the function name suffix.
-#undef  EX_SUF
-#define EX_SUF
+// Include cpp macros that instantiate the API definition templates as
+// having expert parameters.
+#include "bli_tapi_ex.h"
 
-// Define the macro to omit cntx_t* arguments from function signatures
-// and prototypes.
-#undef  BLIS_OAPI_CNTX_PARAM
-#define BLIS_OAPI_CNTX_PARAM
+// Define the macro protecting the typed API definitions.
+#define BLIS_ENABLE_TAPI
 
-// Define the macro to declare a local cntx_t pointer that is initialized
-// to NULL.
-#undef  BLIS_OAPI_CNTX_DECL
-#define BLIS_OAPI_CNTX_DECL   cntx_t* cntx = NULL;
+// Include the typed API definitions here.
+#include "bli_l2_tapi.c"
 

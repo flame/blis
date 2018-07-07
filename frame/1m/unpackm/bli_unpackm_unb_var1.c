@@ -112,7 +112,7 @@ void PASTEMAC(ch,varname)( \
 	ctype* p_cast = p; \
 	ctype* c_cast = c; \
 \
-	PASTEMAC(ch,copym) \
+	PASTEMAC2(ch,copym,BLIS_TAPI_EX_SUF) \
 	( \
 	  diagoffp,\
 	  BLIS_NONUNIT_DIAG, \

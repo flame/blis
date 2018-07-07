@@ -32,15 +32,21 @@
 
 */
 
-#include "blis.h"
+// This file defines macros used to allow the _oapi.c files to produce
+// object APIs that contain context parameters.
 
-// Include cpp macros that instantiate the API definition templates as
-// context-aware.
-#include "bli_oapi_w_cntx.h"
+// Define the macro to add a suffix to the object API function names
+// (in function definitions).
+#undef  EX_SUF
+#define EX_SUF BLIS_OAPI_EX_SUF
 
-// Define the macro protecting the object API definitions.
-#define BLIS_ENABLE_OAPI
+// Define the macro to add expert arguments to function signatures
+// and prototypes.
+#undef  BLIS_OAPI_EX_PARAMS
+#define BLIS_OAPI_EX_PARAMS   ,cntx_t* cntx
 
-// Include the object API definitions here.
-#include "bli_l1v_oapi.c"
+// Define the macro to omit the expert variable declaration block, since
+// it is not needed when expert parameters are passed in through the API.
+#undef  BLIS_OAPI_EX_DECLS
+#define BLIS_OAPI_EX_DECLS
 

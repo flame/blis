@@ -164,5 +164,8 @@
 #include "bli_error_macro_defs.h"
 #include "bli_blas_macro_defs.h"
 
+#include "bli_oapi_macro_defs.h"
+#include "bli_tapi_macro_defs.h"
+
 
 #endif

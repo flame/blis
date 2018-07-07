@@ -175,7 +175,7 @@ void PASTEMAC(ch,varname) \
 		dim_t             n_edge   = n_panel_max; \
 		ctype_r*          p_edge_r = ( ctype_r* )p + (i  )*rs_p; \
 \
-		PASTEMAC(chr,setm) \
+		PASTEMAC2(chr,setm,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  0, \
@@ -197,7 +197,7 @@ void PASTEMAC(ch,varname) \
 		dim_t             n_edge   = n_panel_max - j; \
 		ctype_r*          p_edge_r = ( ctype_r* )p + (j  )*cs_p; \
 \
-		PASTEMAC(chr,setm) \
+		PASTEMAC2(chr,setm,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  0, \
@@ -571,7 +571,7 @@ void PASTEMAC(ch,varname) \
 			bli_toggle_uplo( &uplop ); \
 			bli_shift_diag_offset_to_shrink_uplo( uplop, &diagoffp ); \
 \
-			PASTEMAC(chr,setm) \
+			PASTEMAC2(chr,setm,BLIS_TAPI_EX_SUF) \
 			( \
 			  BLIS_NO_CONJUGATE, \
 			  diagoffp, \

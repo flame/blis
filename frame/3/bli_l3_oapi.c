@@ -50,12 +50,12 @@ void PASTEMAC(opname,EX_SUF) \
        obj_t*  b, \
        obj_t*  beta, \
        obj_t*  c  \
-       BLIS_OAPI_CNTX_PARAM  \
+       BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
 	bli_init_once(); \
 \
-	BLIS_OAPI_CNTX_DECL \
+	BLIS_OAPI_EX_DECLS \
 \
 	/* Only proceed with an induced method if all operands have the same
 	   (complex) datatype. If any datatypes differ, skip the induced method
@@ -94,12 +94,12 @@ void PASTEMAC(opname,EX_SUF) \
        obj_t*  b, \
        obj_t*  beta, \
        obj_t*  c  \
-       BLIS_OAPI_CNTX_PARAM  \
+       BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
 	bli_init_once(); \
 \
-	BLIS_OAPI_CNTX_DECL \
+	BLIS_OAPI_EX_DECLS \
 \
 	/* Only proceed with an induced method if all operands have the same
 	   (complex) datatype. If any datatypes differ, skip the induced method
@@ -136,12 +136,12 @@ void PASTEMAC(opname,EX_SUF) \
        obj_t*  a, \
        obj_t*  beta, \
        obj_t*  c  \
-       BLIS_OAPI_CNTX_PARAM  \
+       BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
 	bli_init_once(); \
 \
-	BLIS_OAPI_CNTX_DECL \
+	BLIS_OAPI_EX_DECLS \
 \
 	/* Only proceed with an induced method if all operands have the same
 	   (complex) datatype. If any datatypes differ, skip the induced method
@@ -176,12 +176,12 @@ void PASTEMAC(opname,EX_SUF) \
        obj_t*  alpha, \
        obj_t*  a, \
        obj_t*  b  \
-       BLIS_OAPI_CNTX_PARAM  \
+       BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
 	bli_init_once(); \
 \
-	BLIS_OAPI_CNTX_DECL \
+	BLIS_OAPI_EX_DECLS \
 \
 	/* Only proceed with an induced method if all operands have the same
 	   (complex) datatype. If any datatypes differ, skip the induced method

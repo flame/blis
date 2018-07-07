@@ -32,7 +32,9 @@
 
 */
 
-#include "blis.h"
+// Guard the function definitions so that they are only compiled when
+// #included from files that define the typed API macros.
+#ifdef BLIS_ENABLE_TAPI
 
 //
 // Define BLAS-like interfaces with typed operands.
@@ -41,7 +43,7 @@
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, auxker ) \
 \
-void PASTEMAC(ch,opname) \
+void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        doff_t  diagoffx, \
        diag_t  diagx, \
@@ -50,11 +52,13 @@ void PASTEMAC(ch,opname) \
        dim_t   m, \
        dim_t   n, \
        ctype*  x, inc_t rs_x, inc_t cs_x, \
-       ctype*  y, inc_t rs_y, inc_t cs_y, \
-       cntx_t* cntx  \
+       ctype*  y, inc_t rs_y, inc_t cs_y  \
+       BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
 	bli_init_once(); \
+\
+	BLIS_TAPI_EX_DECLS \
 \
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
@@ -81,7 +85,7 @@ void PASTEMAC(ch,opname) \
 	if ( bli_is_upper_or_lower( uplox ) && \
 	     bli_is_unit_diag( diagx ) ) \
 	{ \
-		PASTEMAC(ch,auxker) \
+		PASTEMAC2(ch,auxker,BLIS_TAPI_EX_SUF) \
 		( \
 		  diagoffx, \
 		  diagx, \
@@ -102,7 +106,7 @@ INSERT_GENTFUNC_BASIC( subm, subd )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        doff_t  diagoffx, \
        diag_t  diagx, \
@@ -111,11 +115,13 @@ void PASTEMAC(ch,opname) \
        dim_t   m, \
        dim_t   n, \
        ctype*  x, inc_t rs_x, inc_t cs_x, \
-       ctype*  y, inc_t rs_y, inc_t cs_y, \
-       cntx_t* cntx  \
+       ctype*  y, inc_t rs_y, inc_t cs_y  \
+       BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
 	bli_init_once(); \
+\
+	BLIS_TAPI_EX_DECLS \
 \
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
@@ -148,7 +154,7 @@ void PASTEMAC(ch,opname) \
 		if ( bli_does_trans( transx ) ) \
 			bli_negate_diag_offset( &diagoffy ); \
 \
-		PASTEMAC(ch,setd) \
+		PASTEMAC2(ch,setd,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  diagoffy, \
@@ -167,7 +173,7 @@ INSERT_GENTFUNC_BASIC0( copym )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        doff_t  diagoffx, \
        diag_t  diagx, \
@@ -177,11 +183,13 @@ void PASTEMAC(ch,opname) \
        dim_t   n, \
        ctype*  alpha, \
        ctype*  x, inc_t rs_x, inc_t cs_x, \
-       ctype*  y, inc_t rs_y, inc_t cs_y, \
-       cntx_t* cntx  \
+       ctype*  y, inc_t rs_y, inc_t cs_y  \
+       BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
 	bli_init_once(); \
+\
+	BLIS_TAPI_EX_DECLS \
 \
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
@@ -212,7 +220,7 @@ void PASTEMAC(ch,opname) \
 	if ( bli_is_upper_or_lower( uplox ) && \
 	     bli_is_unit_diag( diagx ) ) \
 	{ \
-		PASTEMAC(ch,axpyd) \
+		PASTEMAC2(ch,axpyd,BLIS_TAPI_EX_SUF) \
 		( \
 		  diagoffx, \
 		  diagx, \
@@ -233,7 +241,7 @@ INSERT_GENTFUNC_BASIC0( axpym )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        doff_t  diagoffx, \
        diag_t  diagx, \
@@ -243,11 +251,13 @@ void PASTEMAC(ch,opname) \
        dim_t   n, \
        ctype*  alpha, \
        ctype*  x, inc_t rs_x, inc_t cs_x, \
-       ctype*  y, inc_t rs_y, inc_t cs_y, \
-       cntx_t* cntx  \
+       ctype*  y, inc_t rs_y, inc_t cs_y  \
+       BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
 	bli_init_once(); \
+\
+	BLIS_TAPI_EX_DECLS \
 \
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
@@ -260,7 +270,7 @@ void PASTEMAC(ch,opname) \
 	if ( PASTEMAC(ch,eq0)( *alpha ) ) \
 	{ \
 \
-		PASTEMAC(ch,setm) \
+		PASTEMAC2(ch,setm,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  diagoffx, \
@@ -301,7 +311,7 @@ void PASTEMAC(ch,opname) \
 		if ( bli_does_trans( transx ) ) \
 			bli_negate_diag_offset( &diagoffy ); \
 \
-		PASTEMAC(ch,setd) \
+		PASTEMAC2(ch,setd,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  diagoffy, \
@@ -320,7 +330,7 @@ INSERT_GENTFUNC_BASIC0( scal2m )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        conj_t  conjalpha, \
        doff_t  diagoffx, \
@@ -329,11 +339,13 @@ void PASTEMAC(ch,opname) \
        dim_t   m, \
        dim_t   n, \
        ctype*  alpha, \
-       ctype*  x, inc_t rs_x, inc_t cs_x, \
-       cntx_t* cntx  \
+       ctype*  x, inc_t rs_x, inc_t cs_x  \
+       BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
 	bli_init_once(); \
+\
+	BLIS_TAPI_EX_DECLS \
 \
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
@@ -358,4 +370,7 @@ void PASTEMAC(ch,opname) \
 
 INSERT_GENTFUNC_BASIC0( scalm )
 INSERT_GENTFUNC_BASIC0( setm )
+
+
+#endif
 

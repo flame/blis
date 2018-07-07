@@ -34,25 +34,107 @@
 
 
 //
-// Generate prototypes for level-1f operations.
+// Prototype BLAS-like interfaces with typed operands.
 //
 
-#undef  axpy2v_ker_name
-#define axpy2v_ker_name      axpy2v
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+void PASTEMAC2(ch,opname,EX_SUF) \
+     ( \
+       conj_t  conjx, \
+       conj_t  conjy, \
+       dim_t   n, \
+       ctype*  alphax, \
+       ctype*  alphay, \
+       ctype*  x, inc_t incx, \
+       ctype*  y, inc_t incy, \
+       ctype*  z, inc_t incz  \
+       BLIS_TAPI_EX_PARAMS  \
+     );
 
-#undef  dotaxpyv_ker_name
-#define dotaxpyv_ker_name    dotaxpyv
+INSERT_GENTPROT_BASIC0( axpy2v )
 
-#undef  axpyf_ker_name
-#define axpyf_ker_name       axpyf
 
-#undef  dotxf_ker_name
-#define dotxf_ker_name       dotxf
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+void PASTEMAC2(ch,opname,EX_SUF) \
+     ( \
+       conj_t  conja, \
+       conj_t  conjx, \
+       dim_t   m, \
+       dim_t   b_n, \
+       ctype*  alpha, \
+       ctype*  a, inc_t inca, inc_t lda, \
+       ctype*  x, inc_t incx, \
+       ctype*  y, inc_t incy  \
+       BLIS_TAPI_EX_PARAMS  \
+     );
 
-#undef  dotxaxpyf_ker_name
-#define dotxaxpyf_ker_name   dotxaxpyf
+INSERT_GENTPROT_BASIC0( axpyf )
 
-// Include the level-1f kernel API template.
 
-#include "bli_l1f_ker.h"
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+void PASTEMAC2(ch,opname,EX_SUF) \
+     ( \
+       conj_t  conjxt, \
+       conj_t  conjx, \
+       conj_t  conjy, \
+       dim_t   n, \
+       ctype*  alpha, \
+       ctype*  x, inc_t incx, \
+       ctype*  y, inc_t incy, \
+       ctype*  rho, \
+       ctype*  z, inc_t incz  \
+       BLIS_TAPI_EX_PARAMS  \
+     );
+
+INSERT_GENTPROT_BASIC0( dotaxpyv )
+
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+void PASTEMAC2(ch,opname,EX_SUF) \
+     ( \
+       conj_t  conjat, \
+       conj_t  conja, \
+       conj_t  conjw, \
+       conj_t  conjx, \
+       dim_t   m, \
+       dim_t   b_n, \
+       ctype*  alpha, \
+       ctype*  a, inc_t inca, inc_t lda, \
+       ctype*  w, inc_t incw, \
+       ctype*  x, inc_t incx, \
+       ctype*  beta, \
+       ctype*  y, inc_t incy, \
+       ctype*  z, inc_t incz  \
+       BLIS_TAPI_EX_PARAMS  \
+     );
+
+INSERT_GENTPROT_BASIC0( dotxaxpyf )
+
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+void PASTEMAC2(ch,opname,EX_SUF) \
+     ( \
+       conj_t  conjat, \
+       conj_t  conjx, \
+       dim_t   m, \
+       dim_t   b_n, \
+       ctype*  alpha, \
+       ctype*  a, inc_t inca, inc_t lda, \
+       ctype*  x, inc_t incx, \
+       ctype*  beta, \
+       ctype*  y, inc_t incy  \
+       BLIS_TAPI_EX_PARAMS  \
+     );
+
+INSERT_GENTPROT_BASIC0( dotxf )
 

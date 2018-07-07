@@ -173,7 +173,7 @@ void PASTEMAC(ch,varname) \
 		ctype_r*          p_edge_i   = ( ctype_r* )p +   is_p + (i  )*rs_p; \
 		ctype_r*          p_edge_rpi = ( ctype_r* )p + 2*is_p + (i  )*rs_p; \
 \
-		PASTEMAC(chr,setm) \
+		PASTEMAC2(chr,setm,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  0, \
@@ -185,7 +185,7 @@ void PASTEMAC(ch,varname) \
 		  p_edge_r, rs_p, cs_p, \
 		  cntx  \
 		); \
-		PASTEMAC(chr,setm) \
+		PASTEMAC2(chr,setm,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  0, \
@@ -197,7 +197,7 @@ void PASTEMAC(ch,varname) \
 		  p_edge_i, rs_p, cs_p, \
 		  cntx  \
 		); \
-		PASTEMAC(chr,setm) \
+		PASTEMAC2(chr,setm,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  0, \
@@ -221,7 +221,7 @@ void PASTEMAC(ch,varname) \
 		ctype_r*          p_edge_i   = ( ctype_r* )p +   is_p + (j  )*cs_p; \
 		ctype_r*          p_edge_rpi = ( ctype_r* )p + 2*is_p + (j  )*cs_p; \
 \
-		PASTEMAC(chr,setm) \
+		PASTEMAC2(chr,setm,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  0, \
@@ -233,7 +233,7 @@ void PASTEMAC(ch,varname) \
 		  p_edge_r, rs_p, cs_p, \
 		  cntx  \
 		); \
-		PASTEMAC(chr,setm) \
+		PASTEMAC2(chr,setm,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  0, \
@@ -245,7 +245,7 @@ void PASTEMAC(ch,varname) \
 		  p_edge_i, rs_p, cs_p, \
 		  cntx  \
 		); \
-		PASTEMAC(chr,setm) \
+		PASTEMAC2(chr,setm,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  0, \
@@ -282,7 +282,7 @@ void PASTEMAC(ch,varname) \
 			ctype_r*          p_br_r = ( ctype_r* )p +        (i  )*rs_p + (j  )*cs_p; \
 			ctype_r*          p_br_i = ( ctype_r* )p + is_p + (i  )*rs_p + (j  )*cs_p; \
 \
-			PASTEMAC(chr,setd) \
+			PASTEMAC2(chr,setd,BLIS_TAPI_EX_SUF) \
 			( \
 			  BLIS_NO_CONJUGATE, \
 			  0, \
@@ -292,7 +292,7 @@ void PASTEMAC(ch,varname) \
 			  p_br_r, rs_p, cs_p, \
 			  cntx  \
 			); \
-			PASTEMAC(chr,setd) \
+			PASTEMAC2(chr,setd,BLIS_TAPI_EX_SUF) \
 			( \
 			  BLIS_NO_CONJUGATE, \
 			  0, \
@@ -510,7 +510,7 @@ void PASTEMAC(ch,varname) \
 			ctype_r  kappa_i = PASTEMAC(ch,imag)( *kappa ); \
 \
 			/* Copy the real part of the stored triangle of c11 to p11_r. */ \
-			PASTEMAC(chr,scal2m) \
+			PASTEMAC2(chr,scal2m,BLIS_TAPI_EX_SUF) \
 			( \
 			  0, \
 			  BLIS_NONUNIT_DIAG, \
@@ -526,7 +526,7 @@ void PASTEMAC(ch,varname) \
 \
 			/* Copy the imaginary part of the stored triangle of c11 to p11_i,
 			   scaling by -1 if conjugation on c was requested. */ \
-			PASTEMAC(chr,scal2m) \
+			PASTEMAC2(chr,scal2m,BLIS_TAPI_EX_SUF) \
 			( \
 			  0, \
 			  BLIS_NONUNIT_DIAG, \
@@ -681,7 +681,7 @@ void PASTEMAC(ch,varname) \
 			ctype_r kappa_i = PASTEMAC(ch,imag)( *kappa ); \
 			dim_t   i; \
 \
-			PASTEMAC(chr,setd) \
+			PASTEMAC2(chr,setd,BLIS_TAPI_EX_SUF) \
 			( \
 			  BLIS_NO_CONJUGATE, \
 			  diagoffp, \
@@ -691,7 +691,7 @@ void PASTEMAC(ch,varname) \
 			  p_r, rs_p, cs_p, \
 			  cntx  \
 			); \
-			PASTEMAC(chr,setd) \
+			PASTEMAC2(chr,setd,BLIS_TAPI_EX_SUF) \
 			( \
 			  BLIS_NO_CONJUGATE, \
 			  diagoffp, \
@@ -747,7 +747,7 @@ void PASTEMAC(ch,varname) \
 			bli_toggle_uplo( &uplop ); \
 			bli_shift_diag_offset_to_shrink_uplo( uplop, &diagoffp ); \
 \
-			PASTEMAC(chr,setm) \
+			PASTEMAC2(chr,setm,BLIS_TAPI_EX_SUF) \
 			( \
 			  BLIS_NO_CONJUGATE, \
 			  diagoffp, \
@@ -759,7 +759,7 @@ void PASTEMAC(ch,varname) \
 			  p_r, rs_p, cs_p, \
 			  cntx  \
 			); \
-			PASTEMAC(chr,setm) \
+			PASTEMAC2(chr,setm,BLIS_TAPI_EX_SUF) \
 			( \
 			  BLIS_NO_CONJUGATE, \
 			  diagoffp, \
@@ -771,7 +771,7 @@ void PASTEMAC(ch,varname) \
 			  p_i, rs_p, cs_p, \
 			  cntx  \
 			); \
-			PASTEMAC(chr,setm) \
+			PASTEMAC2(chr,setm,BLIS_TAPI_EX_SUF) \
 			( \
 			  BLIS_NO_CONJUGATE, \
 			  diagoffp, \

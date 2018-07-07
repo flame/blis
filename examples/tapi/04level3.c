@@ -79,11 +79,11 @@ int main( int argc, char** argv )
 	beta  = 1.0;
 
 	// Initialize the matrix operands.
-	bli_drandm( 0, BLIS_DENSE, m, k, a, rsa, csa, NULL );
+	bli_drandm( 0, BLIS_DENSE, m, k, a, rsa, csa );
 	bli_dsetm( BLIS_NO_CONJUGATE, 0, BLIS_NONUNIT_DIAG, BLIS_DENSE,
-               k, n, &one, b, rsb, csb, NULL );
+               k, n, &one, b, rsb, csb );
 	bli_dsetm( BLIS_NO_CONJUGATE, 0, BLIS_NONUNIT_DIAG, BLIS_DENSE,
-               m, n, &zero, c, rsc, csc, NULL );
+               m, n, &zero, c, rsc, csc );
 
 	bli_dprintm( "a: randomized", m, k, a, rsa, csa, "%4.1f", "" );
 	bli_dprintm( "b: set to 1.0", k, n, b, rsb, csb, "%4.1f", "" );
@@ -92,7 +92,7 @@ int main( int argc, char** argv )
 	// c := beta * c + alpha * a * b, where 'a', 'b', and 'c' are general.
 	bli_dgemm( BLIS_NO_TRANSPOSE, BLIS_NO_TRANSPOSE,
 	           m, n, k, &alpha, a, rsa, csa, b, rsb, csb,
-	                     &beta, c, rsc, csc, NULL );
+	                     &beta, c, rsc, csc );
 
 	bli_dprintm( "c: after gemm", m, n, c, rsc, csc, "%4.1f", "" );
 
@@ -123,11 +123,11 @@ int main( int argc, char** argv )
 	beta  = 1.0;
 
 	// Initialize the matrix operands.
-	bli_drandm( 0, BLIS_DENSE, k, m, a, rsa, csa, NULL );
+	bli_drandm( 0, BLIS_DENSE, k, m, a, rsa, csa );
 	bli_dsetm( BLIS_NO_CONJUGATE, 0, BLIS_NONUNIT_DIAG, BLIS_DENSE,
-               k, n, &one, b, rsb, csb, NULL );
+               k, n, &one, b, rsb, csb );
 	bli_dsetm( BLIS_NO_CONJUGATE, 0, BLIS_NONUNIT_DIAG, BLIS_DENSE,
-               m, n, &zero, c, rsc, csc, NULL );
+               m, n, &zero, c, rsc, csc );
 
 	bli_dprintm( "a: randomized", k, m, a, rsa, csa, "%4.1f", "" );
 	bli_dprintm( "b: set to 1.0", k, n, b, rsb, csb, "%4.1f", "" );
@@ -136,7 +136,7 @@ int main( int argc, char** argv )
 	// c := beta * c + alpha * a^T * b, where 'a', 'b', and 'c' are general.
 	bli_dgemm( BLIS_TRANSPOSE, BLIS_NO_TRANSPOSE,
 	           m, n, k, &alpha, a, rsa, csa, b, rsb, csb,
-	                     &beta, c, rsc, csc, NULL );
+	                     &beta, c, rsc, csc );
 
 	bli_dprintm( "c: after gemm", m, n, c, rsc, csc, "%4.1f", "" );
 
@@ -164,11 +164,11 @@ int main( int argc, char** argv )
 
 	// Initialize the matrix operands.
 	bli_dsetm( BLIS_NO_CONJUGATE, 0, BLIS_NONUNIT_DIAG, BLIS_DENSE,
-               m, m, &zero, c, rsc, csc, NULL );
-	bli_drandm( 0, BLIS_DENSE, m, k, a, rsa, csa, NULL );
+               m, m, &zero, c, rsc, csc );
+	bli_drandm( 0, BLIS_DENSE, m, k, a, rsa, csa );
 
 	// Randomize the lower triangle of 'c'.
-	bli_drandm( 0, BLIS_LOWER, m, n, c, rsc, csc, NULL );
+	bli_drandm( 0, BLIS_LOWER, m, n, c, rsc, csc );
 
 	bli_dprintm( "a: set to random values", m, k, a, rsa, csa, "%4.1f", "" );
 	bli_dprintm( "c: initial value (zeros in upper triangle)", m, m, c, rsc, csc, "%4.1f", "" );
@@ -176,7 +176,7 @@ int main( int argc, char** argv )
 	// c := c + alpha * a * a^T, where 'c' is symmetric and lower-stored.
 	bli_dsyrk( BLIS_LOWER, BLIS_NO_TRANSPOSE,
 	           m, k, &alpha, a, rsa, csa,
-	                  &beta, c, rsc, csc, NULL );
+	                  &beta, c, rsc, csc );
 
 	bli_dprintm( "c: after syrk", m, m, c, rsc, csc, "%4.1f", "" );
 
@@ -206,17 +206,17 @@ int main( int argc, char** argv )
 
 	// Initialize matrices 'b' and 'c'.
 	bli_dsetm( BLIS_NO_CONJUGATE, 0, BLIS_NONUNIT_DIAG, BLIS_DENSE,
-               m, n, &one, b, rsb, csb, NULL );
+               m, n, &one, b, rsb, csb );
 	bli_dsetm( BLIS_NO_CONJUGATE, 0, BLIS_NONUNIT_DIAG, BLIS_DENSE,
-               m, n, &zero, c, rsc, csc, NULL );
+               m, n, &zero, c, rsc, csc );
 
 	// Zero out all of matrix 'a'. This is optional, but will avoid possibly
 	// displaying junk values in the unstored triangle.
 	bli_dsetm( BLIS_NO_CONJUGATE, 0, BLIS_NONUNIT_DIAG, BLIS_DENSE,
-               m, m, &zero, a, rsa, csa, NULL );
+               m, m, &zero, a, rsa, csa );
 
 	// Randomize the upper triangle of 'a'.
-	bli_drandm( 0, BLIS_UPPER, m, m, a, rsa, csa, NULL );
+	bli_drandm( 0, BLIS_UPPER, m, m, a, rsa, csa );
 
 	bli_dprintm( "a: randomized (zeros in lower triangle)", m, m, a, rsa, csa, "%4.1f", "" );
 	bli_dprintm( "b: set to 1.0", m, n, b, rsb, csb, "%4.1f", "" );
@@ -225,7 +225,7 @@ int main( int argc, char** argv )
 	// c := beta * c + alpha * a * b, where 'a' is symmetric and upper-stored.
 	bli_dsymm( BLIS_LEFT, BLIS_UPPER, BLIS_NO_CONJUGATE, BLIS_NO_TRANSPOSE,
 	           m, n, &alpha, a, rsa, csa, b, rsb, csb,
-	                  &beta, c, rsc, csc, NULL );
+	                  &beta, c, rsc, csc );
 
 	bli_dprintm( "c: after symm", m, n, c, rsc, csc, "%4.1f", "" );
 
@@ -253,22 +253,22 @@ int main( int argc, char** argv )
 
 	// Initialize matrix 'b'.
 	bli_dsetm( BLIS_NO_CONJUGATE, 0, BLIS_NONUNIT_DIAG, BLIS_DENSE,
-               m, n, &one, b, rsb, csb, NULL );
+               m, n, &one, b, rsb, csb );
 
 	// Zero out all of matrix 'a'. This is optional, but will avoid possibly
 	// displaying junk values in the unstored triangle.
 	bli_dsetm( BLIS_NO_CONJUGATE, 0, BLIS_NONUNIT_DIAG, BLIS_DENSE,
-               m, m, &zero, a, rsa, csa, NULL );
+               m, m, &zero, a, rsa, csa );
 
 	// Randomize the lower triangle of 'a'.
-	bli_drandm( 0, BLIS_LOWER, m, m, a, rsa, csa, NULL );
+	bli_drandm( 0, BLIS_LOWER, m, m, a, rsa, csa );
 
 	bli_dprintm( "a: randomized (zeros in upper triangle)", m, m, a, rsa, csa, "%4.1f", "" );
 	bli_dprintm( "b: initial value", m, n, b, rsb, csb, "%4.1f", "" );
 
 	// b := alpha * a * b, where 'a' is triangular and lower-stored.
 	bli_dtrmm( BLIS_LEFT, BLIS_LOWER, BLIS_NONUNIT_DIAG, BLIS_NO_TRANSPOSE,
-	           m, n, &alpha, a, rsa, csa, b, rsb, csb, NULL );
+	           m, n, &alpha, a, rsa, csa, b, rsb, csb );
 
 	bli_dprintm( "b: after trmm", m, n, b, rsb, csb, "%4.1f", "" );
 
@@ -298,23 +298,23 @@ int main( int argc, char** argv )
 
 	// Initialize matrix 'b'.
 	bli_dsetm( BLIS_NO_CONJUGATE, 0, BLIS_NONUNIT_DIAG, BLIS_DENSE,
-               m, n, &one, b, rsb, csb, NULL );
+               m, n, &one, b, rsb, csb );
 
 	// Zero out all of matrix 'a'. This is optional, but will avoid possibly
 	// displaying junk values in the unstored triangle.
 	bli_dsetm( BLIS_NO_CONJUGATE, 0, BLIS_NONUNIT_DIAG, BLIS_DENSE,
-               m, m, &zero, a, rsa, csa, NULL );
+               m, m, &zero, a, rsa, csa );
 
 	// Randomize the lower triangle of 'a'.
-	bli_drandm( 0, BLIS_LOWER, m, m, a, rsa, csa, NULL );
+	bli_drandm( 0, BLIS_LOWER, m, m, a, rsa, csa );
 
 	// Load the diagonal. By setting the diagonal to something of greater
 	// absolute value than the off-diagonal elements, we increase the odds
 	// that the matrix is not singular (singular matrices have no inverse).
 	d = malloc( m * m * sizeof( double ) );
-	bli_dsetd( BLIS_NO_CONJUGATE, 0, m, m, &two, d, 1, m, NULL );
+	bli_dsetd( BLIS_NO_CONJUGATE, 0, m, m, &two, d, 1, m );
 	bli_daddd( 0, BLIS_NONUNIT_DIAG, BLIS_NO_TRANSPOSE,
-	           m, m, d, 1, m, a, rsa, csa, NULL );
+	           m, m, d, 1, m, a, rsa, csa );
 
 	bli_dprintm( "a: randomized (zeros in upper triangle)", m, m, a, rsa, csa, "%4.1f", "" );
 	bli_dprintm( "b: initial value", m, n, b, rsb, csb, "%4.1f", "" );
@@ -322,16 +322,16 @@ int main( int argc, char** argv )
 	// solve a * x = alpha * b, where 'a' is triangular and lower-stored, and
 	// overwrite b with the solution matrix x.
 	bli_dtrsm( BLIS_LEFT, BLIS_LOWER, BLIS_NONUNIT_DIAG, BLIS_NO_TRANSPOSE,
-	           m, n, &alpha, a, rsa, csa, b, rsb, csb, NULL );
+	           m, n, &alpha, a, rsa, csa, b, rsb, csb );
 
 	bli_dprintm( "b: after trmm", m, n, b, rsb, csb, "%4.1f", "" );
 
 	// We can confirm the solution by comparing the product of a and x to the
 	// original value of b.
 	bli_dcopym( 0, BLIS_NONUNIT_DIAG, BLIS_DENSE, BLIS_NO_TRANSPOSE,
-	            m, n, b, rsb, csb, c, rsc, csc, NULL );
+	            m, n, b, rsb, csb, c, rsc, csc );
 	bli_dtrmm( BLIS_LEFT, BLIS_LOWER, BLIS_NONUNIT_DIAG, BLIS_NO_TRANSPOSE,
-	           m, n, &alpha, a, rsa, csa, c, rsc, csc, NULL );
+	           m, n, &alpha, a, rsa, csa, c, rsc, csc );
 
 	bli_dprintm( "c: should equal initial value of b", m, n, c, rsc, csc, "%4.1f", "" );
 

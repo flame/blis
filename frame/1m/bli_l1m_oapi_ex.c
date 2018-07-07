@@ -35,12 +35,12 @@
 #include "blis.h"
 
 // Include cpp macros that instantiate the API definition templates as
-// context-less.
-#include "bli_oapi_wo_cntx.h"
+// having expert parameters.
+#include "bli_oapi_ex.h"
 
 // Define the macro protecting the object API definitions.
 #define BLIS_ENABLE_OAPI
 
 // Include the object API definitions here.
-#include "bli_util_oapi.c"
+#include "bli_l1m_oapi.c"
 

@@ -47,12 +47,12 @@ void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  x, \
        obj_t*  y  \
-       BLIS_OAPI_CNTX_PARAM  \
+       BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
 	bli_init_once(); \
 \
-	BLIS_OAPI_CNTX_DECL \
+	BLIS_OAPI_EX_DECLS \
 \
 	num_t     dt        = bli_obj_dt( x ); \
 \
@@ -75,7 +75,7 @@ void PASTEMAC(opname,EX_SUF) \
 	bli_call_ft_12 \
 	( \
 	   dt, \
-	   opname, \
+	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
 	   diagoffx, \
 	   diagx, \
 	   transx, \
@@ -100,12 +100,12 @@ void PASTEMAC(opname,EX_SUF) \
        obj_t*  alpha, \
        obj_t*  x, \
        obj_t*  y  \
-       BLIS_OAPI_CNTX_PARAM  \
+       BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
 	bli_init_once(); \
 \
-	BLIS_OAPI_CNTX_DECL \
+	BLIS_OAPI_EX_DECLS \
 \
 	num_t     dt        = bli_obj_dt( x ); \
 \
@@ -138,7 +138,7 @@ void PASTEMAC(opname,EX_SUF) \
 	bli_call_ft_13 \
 	( \
 	   dt, \
-	   opname, \
+	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
 	   diagoffx, \
 	   diagx, \
 	   transx, \
@@ -161,12 +161,12 @@ GENFRONT( scal2d )
 void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  x  \
-       BLIS_OAPI_CNTX_PARAM  \
+       BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
 	bli_init_once(); \
 \
-	BLIS_OAPI_CNTX_DECL \
+	BLIS_OAPI_EX_DECLS \
 \
 	num_t     dt        = bli_obj_dt( x ); \
 \
@@ -184,7 +184,7 @@ void PASTEMAC(opname,EX_SUF) \
 	bli_call_ft_7 \
 	( \
 	   dt, \
-	   opname, \
+	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
 	   diagoffx, \
 	   m, \
 	   n, \
@@ -203,12 +203,12 @@ void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  alpha, \
        obj_t*  x  \
-       BLIS_OAPI_CNTX_PARAM  \
+       BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
 	bli_init_once(); \
 \
-	BLIS_OAPI_CNTX_DECL \
+	BLIS_OAPI_EX_DECLS \
 \
 	num_t     dt        = bli_obj_dt( x ); \
 \
@@ -237,7 +237,7 @@ void PASTEMAC(opname,EX_SUF) \
 	bli_call_ft_9 \
 	( \
 	   dt, \
-	   opname, \
+	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
 	   BLIS_NO_CONJUGATE, /* internal conjugation applied during copy-cast. */ \
 	   diagoffx, \
 	   m, \
@@ -259,12 +259,12 @@ void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  alpha, \
        obj_t*  x  \
-       BLIS_OAPI_CNTX_PARAM  \
+       BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
 	bli_init_once(); \
 \
-	BLIS_OAPI_CNTX_DECL \
+	BLIS_OAPI_EX_DECLS \
 \
 	num_t     dt        = bli_obj_dt( x ); \
 \
@@ -284,7 +284,7 @@ void PASTEMAC(opname,EX_SUF) \
 	bli_call_ft_8 \
 	( \
 	   dt, \
-	   opname, \
+	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
 	   diagoffx, \
 	   m, \
 	   n, \
