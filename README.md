@@ -167,8 +167,11 @@ interfaces, please read the [BLIS Typed API reference](docs/BLISTypedAPI.md).
 There you will find a brief description of each operation as well as some more
 general information needed when developing an application with BLIS.
 
-If you want to begin using the more advanced object-based API in BLIS,
-please step through the example code tutorial in the [examples/oapi](examples/oapi) directory.
+If you want to begin using the more advanced object API in BLIS,
+please step through the example code tutorial in the
+[examples/oapi](examples/oapi) directory.
+We also have the equivalent code examples for the typed API available in
+[examples/tapi](examples/tapi).
 
 Have a quick question? You may find the answer in our list of [frequently asked
 questions](docs/FAQ.md). 
