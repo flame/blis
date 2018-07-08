@@ -1,17 +1,17 @@
 ## Contents
 
-* **[Contents](BuildSystem#contents)**
-* **[Introduction](BuildSystem#introduction)**
-* **[Obtaining BLIS](BuildSystem#obtaining-blis)**
-* **[Step 1: Chose a framework configuration](BuildSystem#step-1-choose-a-framework-configuration)**
-* **[Step 2: Running `configure`](BuildSystem#step-2-running-configure)**
-* **[Step 3: Compilation](BuildSystem#step-3-compilation)**
-* **[Step 3b: Testing (optional)](BuildSystem#step-3b-testing-optional)**
-* **[Step 4: Installation](BuildSystem#step-4-installation)**
-* **[Cleaning out build products](BuildSystem#cleaning-out-build-products)**
-* **[Linking against BLIS](BuildSystem#linking-against-blis)**
-* **[Uninstalling](BuildSystem#uninstalling)**
-* **[Conclusion](BuildSystem#conclusion)**
+* **[Contents](BuildSystem.md#contents)**
+* **[Introduction](BuildSystem.md#introduction)**
+* **[Obtaining BLIS](BuildSystem.md#obtaining-blis)**
+* **[Step 1: Chose a framework configuration](BuildSystem.md#step-1-choose-a-framework-configuration)**
+* **[Step 2: Running `configure`](BuildSystem.md#step-2-running-configure)**
+* **[Step 3: Compilation](BuildSystem.md#step-3-compilation)**
+* **[Step 3b: Testing (optional)](BuildSystem.md#step-3b-testing-optional)**
+* **[Step 4: Installation](BuildSystem.md#step-4-installation)**
+* **[Cleaning out build products](BuildSystem.md#cleaning-out-build-products)**
+* **[Linking against BLIS](BuildSystem.md#linking-against-blis)**
+* **[Uninstalling](BuildSystem.md#uninstalling)**
+* **[Conclusion](BuildSystem.md#conclusion)**
 
 ## Introduction
 
@@ -52,7 +52,7 @@ LICENSE    build         config_registry  lib        test
 
 The first step is to choose how to configure BLIS. Specifically, a user must decide which configuration to use, or whether to allow `configure` to automatically guess the best configuration for your hardware. (Note: This automatic configuration selection only applies to x86_64 systems.)
 
-Configurations are described in detail in the [Configuration Guide](https://github.com/flame/blis/blob/master/docs/ConfigurationHowTo.md).
+Configurations are described in detail in the [Configuration Guide](ConfigurationHowTo.md).
 
 Generally speaking, a configuration consists of several files that reside in a sub-directory of the `config` directory. To see a list of the available configurations, you may inspect this directory, or run `configure` with no arguments. Here are the current (as of this writing) contents of the `config` directory:
 ```
@@ -66,7 +66,7 @@ By targeting the `auto` configuration (i.e., `./configure auto`), the user is re
 
 Another special configuration (one that, unlike `auto`, _is_ present in `config`) is the `generic` configuration. This configuration, like its name suggests, is architecture-agnostic and may be targeted in virtually any environment that supports the minimum build requirements of BLIS. The `generic` configuration uses a set of built-in, portable reference kernels (written in C99) that should work without modification on most, if not all, architectures. These reference kernels, however, should be expected to yield relatively low performance since they do not employ any architecture-specific optimizations beyond those the compiler provides automatically. (Historical note: The `generic` configuration corresponds to the `reference` configuration of previous releases of BLIS.)
 
-If you are a BLIS developer and wish to create your own configuration, either from scratch or using an existing configuration as a starting point, please read the [BLIS configuration guide](ConfigurationHowTo).
+If you are a BLIS developer and wish to create your own configuration, either from scratch or using an existing configuration as a starting point, please read the BLIS [Configuration Guide](ConfigurationHowTo.md).
 
 ## Step 2: Running `configure`
 
@@ -74,7 +74,7 @@ This step should be somewhat familiar to many people who use open source softwar
 ```
 $ ./configure <configname>
 ```
-where `<configname>` is the configuration sub-directory name you chose in [Step 1](BuildSystem#step-1-choose-a-framework-configuration) above. If `<configname>` is not given, a helpful message is printed reminding you to explicit specify a configuration name along with a list of valid configuration families and their implied sub-configurations. For more information on sub-configurations and families, please see the [BLIS configuration guide](ConfigurationHowTo).
+where `<configname>` is the configuration sub-directory name you chose in [Step 1](BuildSystem.md#step-1-choose-a-framework-configuration) above. If `<configname>` is not given, a helpful message is printed reminding you to explicit specify a configuration name along with a list of valid configuration families and their implied sub-configurations. For more information on sub-configurations and families, please see the BLIS [Configuration Guide](ConfigurationHowTo.md).
 
 Alternatively, `configure` can automatically select a configuration based on your hardware:
 ```
@@ -237,7 +237,7 @@ Watch the output near the end. You should see the following messages, though not
 All BLIS tests passed!
 All BLAS tests passed!
 ```
-Please see the [Testsuite](https://github.com/flame/blis/blob/master/docs/Testsuite.md) document for more details on running either the BLIS testsuite or the BLAS test drivers. If you have any trouble, please report your problem to BLIS developers by opening a [new issue](https://github.com/flame/blis/issues/).
+Please see the [Testsuite](Testsuite.md) document for more details on running either the BLIS testsuite or the BLAS test drivers. If you have any trouble, please report your problem to BLIS developers by opening a [new issue](https://github.com/flame/blis/issues/).
 
 
 ## Step 4: Installation

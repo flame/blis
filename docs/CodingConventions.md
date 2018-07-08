@@ -1,17 +1,17 @@
 ## Contents
 
-* **[Contents](CodingConventions#contents)**
-* **[Introduction](CodingConventions#introduction)**
-* **[C99](CodingConventions#c99)**
-  * [Placement of braces](CodingConventions#placement-of-braces)
-  * [Indentation](CodingConventions#indentation)
-  * [Comments](CodingConventions#comments)
-  * [Blank lines](CodingConventions#blank-lines)
-  * [Condensing short code to single lines](CodingConventions#condensing-short-code-to-single-lines)
-  * [Whitespace in function calls](CodingConventions#whitespace-in-function-calls)
-  * [Whitespace in function definitions](CodingConventions#whitespace-in-function-definitions)
-  * [Whitespace in expressions](CodingConventions#whitespace-in-expressions)
-  * [Trailing whitespace](CodingConventions#trailing-whitespace)
+* **[Contents](CodingConventions.md#contents)**
+* **[Introduction](CodingConventions.md#introduction)**
+* **[C99](CodingConventions.md#c99)**
+  * [Placement of braces](CodingConventions.md#placement-of-braces)
+  * [Indentation](CodingConventions.md#indentation)
+  * [Comments](CodingConventions.md#comments)
+  * [Blank lines](CodingConventions.md#blank-lines)
+  * [Condensing short code to single lines](CodingConventions.md#condensing-short-code-to-single-lines)
+  * [Whitespace in function calls](CodingConventions.md#whitespace-in-function-calls)
+  * [Whitespace in function definitions](CodingConventions.md#whitespace-in-function-definitions)
+  * [Whitespace in expressions](CodingConventions.md#whitespace-in-expressions)
+  * [Trailing whitespace](CodingConventions.md#trailing-whitespace)
 
 ## Introduction
 

@@ -44,7 +44,7 @@ April 4, 2018
 
 - Enable use of new zen kernels in haswell sub-configuration.
 - Added row-storage optimizations to zen `dotxf` kernels (now also used by haswell).
-- Integrated an `f2c`ed version of the BLAS test drivers from netlib LAPACK into BLIS build system (e.g. `make testblas`, `make checkblas`). See the [Testsuite](https://github.com/flame/blis/blob/master/docs/Testsuite.md) document for more info. Also scheduled these BLAS drivers to execute regularly via Travis CI.
+- Integrated an `f2c`ed version of the BLAS test drivers from netlib LAPACK into BLIS build system (e.g. `make testblas`, `make checkblas`). See the [Testsuite](Testsuite.md) document for more info. Also scheduled these BLAS drivers to execute regularly via Travis CI.
 - Added a new `make check` target that executes a fast version of the BLIS testsuite as well as the BLAS test drivers (primarily targeting package maintainers).
 - Allow individual operation overriding in the BLIS testsuite. (This makes it easy to quickly test one or two operations of interest.)
 - Added build system support for libmemkind. If present, `hbw_malloc()` is used as the default value for `BLIS_MALLOC_POOL` instead of `malloc()`. It can be disabled via `--disable-memkind`.
@@ -62,12 +62,12 @@ This version contains significant improvements from 0.2.2. Major changes include
 - Real and complex domain (s,d,c,z) assembly-based gemm microkernels for AMD's Zen microarchitecture. (AMD, Field Van Zee)
 - Real domain (s,d) assembly-based `gemmtrsm_l` and `gemmtrsm_u` microkernels for Zen. (AMD, Field Van Zee)
 - Real domain (s,d) intrinsics-based `amaxv`, `axpyv`, `dotv`, `dotxv`, `scalv`, `axpyf`, and `dotxf` kernels for Zen. (AMD, Field Van Zee)
-- Generalized the configuration system to allow multi-configuration builds targeting configuration "families". A single sub-configuration is chosen at runtime via some heuristic, such as querying CPUID (e.g. runtime hardware detection). This change was extensive and required a reorganization of the build system, configuration semantics, reference kernels, a new naming scheme for native kernels, and a rewrite of the global kernel structure (gks). Please see the rewritten [Configuration Guide](https://github.com/flame/blis/blob/master/docs/ConfigurationHowTo.md) for details.
+- Generalized the configuration system to allow multi-configuration builds targeting configuration "families". A single sub-configuration is chosen at runtime via some heuristic, such as querying CPUID (e.g. runtime hardware detection). This change was extensive and required a reorganization of the build system, configuration semantics, reference kernels, a new naming scheme for native kernels, and a rewrite of the global kernel structure (gks). Please see the rewritten [Configuration Guide](ConfigurationHowTo.md) for details.
 - Implemented runtime hardware detection for x86_64 hardware.
 - Reimplemented configure-time hardware detection in terms of new runtime hardware detection code, which queries for CPU features rather than individual models.
 - Implemented library self-initialization by rewriting `bli_init()` in terms of `pthread_once()` and inserting invocations to `bli_init()` in key places throughout BLIS. The expectation is that through normal use of any BLIS API (BLAS, typed BLIS, or object-based BLIS), the user no longer needs to explicitly initialize the library, and that `bli_finalize()` should never be called by the user unless he is absolutely sure he no longer needs BLIS functionality. Related to this: global scalar constants (`BLIS_ONE`, `BLIS_ZERO`, etc.) are now statically initialized and thus ready to use immediately. Collectively, these changes provide improved thread safety at the application level.
 - Compile with and install a single monolithic (flattened) `blis.h` header to (1) speed up compilation and (2) reduce the number of build product files.
-- Added a sub-API for setting multithreading environment variables at runtime. For a few examples, please see the [Multithreading](https://github.com/flame/blis/blob/master/docs/Multithreading.md) guide.
+- Added a sub-API for setting multithreading environment variables at runtime. For a few examples, please see the [Multithreading](Multithreading.md) guide.
 - Reimplemented OpenMP/pthread barriers in terms of GNU atomic built-ins.
 - Other small changes and fixes.
 

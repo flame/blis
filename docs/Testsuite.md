@@ -35,7 +35,7 @@ As you would expect, the test suite's source code lives in `src` and the object 
 
 ## Compiling
 
-Before running the test suite, you must first configure, compile, and install a BLIS library. For directions on how to build and install a BLIS library, please see the [Build System](https://github.com/flame/blis/blob/master/docs/BuildSystem.md) guide.
+Before running the test suite, you must first configure, compile, and install a BLIS library. For directions on how to build and install a BLIS library, please see the [Build System](BuildSystem.md) guide.
 
 Once BLIS is installed, you are ready to compile the test suite.
 
@@ -138,7 +138,7 @@ _**Perform all tests with alignment?**_ Disabling this option causes the leading
 
 _**Randomize vectors and matrices.**_ The default randomization method uses real values on the interval [-1,1]. However, we offer an alternate randomization using powers of two in a narrow precision range, which is more likely to result in test residuals exactly equal to zero. This method is somewhat niche/experimental and most people should use random values on the [-1,1] interval.
 
-_**General stride spacing.**_ This value determines the simulated "inner" stride when testing general stride storage. For simplicity, the test suite always generates and tests general stride storage that is ["column-tilted"](https://github.com/flame/blis/blob/master/docs/FAQ.md#What_does_it_mean_when_a_matrix_with_general_stride_is_column-ti). If general stride storage is not being tested, then this value is ignored.
+_**General stride spacing.**_ This value determines the simulated "inner" stride when testing general stride storage. For simplicity, the test suite always generates and tests general stride storage that is ["column-tilted"](FAQ.md#What_does_it_mean_when_a_matrix_with_general_stride_is_column-ti). If general stride storage is not being tested, then this value is ignored.
 
 _**Datatype(s) to test.**_ This string determines which floating-point datatypes are tested. There are four valid values: `'s'` for single-precision real, `'d'` for double-precision real, `'c'` for single-precision complex, and `'z'` for double-precision complex. You may choose one datatype, or combine more than one. The order of the datatype characters determines the order in which they are tested.
 

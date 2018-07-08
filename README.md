@@ -14,7 +14,7 @@ intensive operations. BLIS is written in [ISO
 C99](http://en.wikipedia.org/wiki/C99) and available under a
 [new/modified/3-clause BSD
 license](http://opensource.org/licenses/BSD-3-Clause). While BLIS exports a
-[new BLAS-like API](https://github.com/flame/blis/wiki/BLISAPIQuickReference),
+[new BLAS-like API](docs/BLISTypedAPI.md),
 it also includes a BLAS compatibility layer which gives application developers
 access to BLIS implementations via traditional [BLAS routine
 calls](http://www.netlib.org/lapack/lug/node145.html). An object-based API

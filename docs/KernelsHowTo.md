@@ -87,17 +87,17 @@ Kernels marked with a "1" for a given level-2 operation are preferred for optimi
 ## BLIS kernels reference
 
 This section seeks to provide developers with a complete reference for each of the following BLIS kernels, including function prototypes, parameter descriptions, implementation notes, and diagrams:
-  * [Level-3 micro-kernels](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#level-3-micro-kernels)
-    * [gemm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#gemm-micro-kernel)
-    * [trsm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#trsm-micro-kernels)
-    * [gemmtrsm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#gemmtrsm-micro-kernels)
-  * [Level-1f kernels](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#level-1f-kernels)
+  * [Level-3 micro-kernels](KernelsHowTo.md#level-3-micro-kernels)
+    * [gemm](KernelsHowTo.md#gemm-micro-kernel)
+    * [trsm](KernelsHowTo.md#trsm-micro-kernels)
+    * [gemmtrsm](KernelsHowTo.md#gemmtrsm-micro-kernels)
+  * [Level-1f kernels](KernelsHowTo.md#level-1f-kernels)
     * axpy2v
     * dotaxpyv
     * axpyf
     * dotxf
     * dotxaxpyf
-  * [Level-1v kernels](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#level-1v-kernels)
+  * [Level-1v kernels](KernelsHowTo.md#level-1v-kernels)
     * axpyv
     * dotv
     * dotxv
@@ -113,9 +113,9 @@ The function prototypes in this section follow the same guidelines as those list
 ### Level-3 micro-kernels
 
 This section describes in detail the various level-3 micro-kernels supported by BLIS:
-  * [gemm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#gemm-micro-kernel)
-  * [trsm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#trsm_micro-kernels)
-  * [gemmtrsm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#gemmtrsm-micro-kernels)
+  * [gemm](KernelsHowTo.md#gemm-micro-kernel)
+  * [trsm](KernelsHowTo.md#trsm_micro-kernels)
+  * [gemmtrsm](KernelsHowTo.md#gemmtrsm-micro-kernels)
 
 
 #### gemm micro-kernel
@@ -164,13 +164,13 @@ Parameters:
 
   * `k`:      The number of columns of `A1` and rows of `B1`.
   * `alpha`:  The address of a scalar to the `A1 * B1` product.
-  * `a1`:     The address of a micro-panel of matrix `A` of dimension _MR x k_, stored by columns with leading dimension _PACKMR_, where typically _PACKMR_ = _MR_. (See [Implementation Notes for gemm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-gemm) for a discussion of _PACKMR_.)
-  * `b1`:     The address of a micro-panel of matrix `B` of dimension _k x NR_, stored by rows with leading dimension _PACKNR_, where typically _PACKNR_ = _NR_. (See [Implementation Notes for gemm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-gemm) for a discussion of _PACKNR_.)
+  * `a1`:     The address of a micro-panel of matrix `A` of dimension _MR x k_, stored by columns with leading dimension _PACKMR_, where typically _PACKMR_ = _MR_. (See [Implementation Notes for gemm](KernelsHowTo.md#implementation-notes-for-gemm) for a discussion of _PACKMR_.)
+  * `b1`:     The address of a micro-panel of matrix `B` of dimension _k x NR_, stored by rows with leading dimension _PACKNR_, where typically _PACKNR_ = _NR_. (See [Implementation Notes for gemm](KernelsHowTo.md#implementation-notes-for-gemm) for a discussion of _PACKNR_.)
   * `beta`:   The address of a scalar to the input value of matrix `C11`.
   * `c11`:    The address of a matrix `C11` of dimension _MR x NR_, stored according to `rsc` and `csc`.
   * `rsc`:    The row stride of matrix `C11` (ie: the distance to the next row, in units of matrix elements).
   * `csc`:    The column stride of matrix `C11` (ie: the distance to the next column, in units of matrix elements).
-  * `data`:   The address of an `auxinfo_t` object that contains auxiliary information that may be useful when optimizing the `gemm` micro-kernel implementation. (See [Using the auxinfo\_t object](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#Using_the_auxinfo_t_object) for a discussion of the kinds of values available via `auxinfo_t`.)
+  * `data`:   The address of an `auxinfo_t` object that contains auxiliary information that may be useful when optimizing the `gemm` micro-kernel implementation. (See [Using the auxinfo\_t object](KernelsHowTo.md#Using_the_auxinfo_t_object) for a discussion of the kinds of values available via `auxinfo_t`.)
   * `cntx`:   The address of the runtime context. The context can be queried for implementation-specific values such as cache and register blocksizes. However, most micro-kernels intrinsically "know" these values already, and thus the `cntx` argument usually can be safely ignored.
 
 #### Diagram for gemm
@@ -206,7 +206,7 @@ The diagram below shows the packed micro-panel operands and how elements of each
 
 #### Using the auxinfo\_t object
 
-Each micro-kernel ([gemm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#gemm-micro-kernel), [trsm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#trsm_micro-kernels), and [gemmtrsm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#gemmtrsm-micro-kernels)) takes as its last argument a pointer of type `auxinfo_t`. This BLIS-defined type is defined as a `struct` whose fields contain auxiliary values that may be useful to some micro-kernel authors, particularly when implementing certain optimization techniques. BLIS provides kernel authors access to the fields of the `auxinfo_t` object via the following function-like preprocessor macros. Each macro takes a single argument, the `auxinfo_t` pointer, and returns one of the values stored within the object.
+Each micro-kernel ([gemm](KernelsHowTo.md#gemm-micro-kernel), [trsm](KernelsHowTo.md#trsm_micro-kernels), and [gemmtrsm](KernelsHowTo.md#gemmtrsm-micro-kernels)) takes as its last argument a pointer of type `auxinfo_t`. This BLIS-defined type is defined as a `struct` whose fields contain auxiliary values that may be useful to some micro-kernel authors, particularly when implementing certain optimization techniques. BLIS provides kernel authors access to the fields of the `auxinfo_t` object via the following function-like preprocessor macros. Each macro takes a single argument, the `auxinfo_t` pointer, and returns one of the values stored within the object.
 
   * `bli_auxinfo_next_a()`. Returns the address (`void*`) of the micro-panel of `A` that will be used the next time the micro-kernel will be called.
   * `bli_auxinfo_next_b()`. Returns the address (`void*`) of the micro-panel of `B` that will be used the next time the micro-kernel will be called.
@@ -288,23 +288,23 @@ _MR_ and _NR_ are the register blocksizes associated with the micro-kernel. They
 
 Parameters:
 
-  * `a11`:    The address of `A11`, which is the _MR x MR_ lower (`trsm_l`) or upper (`trsm_u`) triangular submatrix within the packed micro-panel of matrix `A`. `A11` is stored by columns with leading dimension _PACKMR_, where typically _PACKMR_ = _MR_. (See [Implementation Notes for gemm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-gemm) for a discussion of _PACKMR_.) Note that `A11` contains elements in both triangles, though elements in the unstored triangle are not guaranteed to be zero and thus should not be referenced.
-  * `b11`:    The address of `B11`, which is an _MR x NR_ submatrix of the packed micro-panel of `B`. `B11` is stored by rows with leading dimension _PACKNR_, where typically _PACKNR_ = _NR_. (See [Implementation Notes for gemm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-gemm) for a discussion of _PACKNR_.)
+  * `a11`:    The address of `A11`, which is the _MR x MR_ lower (`trsm_l`) or upper (`trsm_u`) triangular submatrix within the packed micro-panel of matrix `A`. `A11` is stored by columns with leading dimension _PACKMR_, where typically _PACKMR_ = _MR_. (See [Implementation Notes for gemm](KernelsHowTo.md#implementation-notes-for-gemm) for a discussion of _PACKMR_.) Note that `A11` contains elements in both triangles, though elements in the unstored triangle are not guaranteed to be zero and thus should not be referenced.
+  * `b11`:    The address of `B11`, which is an _MR x NR_ submatrix of the packed micro-panel of `B`. `B11` is stored by rows with leading dimension _PACKNR_, where typically _PACKNR_ = _NR_. (See [Implementation Notes for gemm](KernelsHowTo.md#implementation-notes-for-gemm) for a discussion of _PACKNR_.)
   * `c11`:    The address of `C11`, which is an _MR x NR_ submatrix of matrix `C`, stored according to `rsc` and `csc`. `C11` is the submatrix within `C` that corresponds to the elements which were packed into `B11`. Thus, `C` is the original input matrix `B` to the overall `trsm` operation.
   * `rsc`:    The row stride of matrix `C11` (ie: the distance to the next row, in units of matrix elements).
   * `csc`:    The column stride of matrix `C11` (ie: the distance to the next column, in units of matrix elements).
-  * `data`:   The address of an `auxinfo_t` object that contains auxiliary information that may be useful when optimizing the `trsm` micro-kernel implementation. (See [Using the auxinfo\_t object](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#Using_the_auxinfo_t_object) for a discussion of the kinds of values available via `auxinfo_t`, and also [Implementation Notes for trsm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-trsm) for caveats.)
+  * `data`:   The address of an `auxinfo_t` object that contains auxiliary information that may be useful when optimizing the `trsm` micro-kernel implementation. (See [Using the auxinfo\_t object](KernelsHowTo.md#Using_the_auxinfo_t_object) for a discussion of the kinds of values available via `auxinfo_t`, and also [Implementation Notes for trsm](KernelsHowTo.md#implementation-notes-for-trsm) for caveats.)
   * `cntx`:   The address of the runtime context. The context can be queried for implementation-specific values such as cache and register blocksizes. However, most micro-kernels intrinsically "know" these values already, and thus the `cntx` argument usually can be safely ignored.
 
 #### Diagrams for trsm
 
-Please see the diagram for [gemmtrsm\_l](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#diagram-for-gemmtrsm-l) and [gemmtrsm\_u](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#diagram-for-gemmtrsm-u) to see depictions of the `trsm_l` and `trsm_u` micro-kernel operations and where they fit in with their preceding `gemm` subproblems.
+Please see the diagram for [gemmtrsm\_l](KernelsHowTo.md#diagram-for-gemmtrsm-l) and [gemmtrsm\_u](KernelsHowTo.md#diagram-for-gemmtrsm-u) to see depictions of the `trsm_l` and `trsm_u` micro-kernel operations and where they fit in with their preceding `gemm` subproblems.
 
 #### Implementation Notes for trsm
 
-  * **Register blocksizes.** See [Implementation Notes for gemm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-gemm).
-  * **Leading dimensions of `a11` and `b11`: _PACKMR_ and _PACKNR_.** See [Implementation Notes for gemm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-gemm).
-  * **Edge cases in _MR_, _NR_ dimensions.** See [Implementation Notes for gemm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-gemm).
+  * **Register blocksizes.** See [Implementation Notes for gemm](KernelsHowTo.md#implementation-notes-for-gemm).
+  * **Leading dimensions of `a11` and `b11`: _PACKMR_ and _PACKNR_.** See [Implementation Notes for gemm](KernelsHowTo.md#implementation-notes-for-gemm).
+  * **Edge cases in _MR_, _NR_ dimensions.** See [Implementation Notes for gemm](KernelsHowTo.md#implementation-notes-for-gemm).
   * **Alignment of `a11` and `b11`.** The addresses `a11` and `b11` are aligned according to `PACKMR * sizeof(type)` and `PACKNR * sizeof(type)`, respectively.
   * **Unrolling loops.** Most optimized implementations should unroll all three loops within the `trsm` micro-kernel.
   * **Prefetching next micro-panels of `A` and `B`.** We advise against using the `bli_auxinfo_next_a()` and `bli_auxinfo_next_b()` macros from within the `trsm_l` and `trsm_u` micro-kernels, since the values returned usually only make sense in the context of the overall `gemmtrsm` subproblem.
@@ -410,14 +410,14 @@ Parameters:
 
   * `k`:      The number of columns of `A10` and rows of `B01` (`trsm_l`); the number of columns of `A12` and rows of `B21` (`trsm_u`).
   * `alpha`:  The address of a scalar to be applied to `B11`.
-  * `a10`, `a12`:    The address of `A10` or `A12`, which is the _MR x k_ submatrix of the packed micro-panel of `A` that is situated to the left (`trsm_l`) or right (`trsm_u`) of the _MR x MR_ triangular submatrix `A11`. `A10` and `A12` are stored by columns with leading dimension _PACKMR_, where typically _PACKMR_ = _MR_. (See [Implementation Notes for gemm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-gemm) for a discussion of _PACKMR_.)
-  * `a11`:    The address of `A11`, which is the _MR x MR_ lower (`trsm_l`) or upper (`trsm_u`) triangular submatrix within the packed micro-panel of matrix `A` that is situated to the right of `A10` (`trsm_l`) or the left of `A12` (`trsm_u`). `A11` is stored by columns with leading dimension _PACKMR_, where typically _PACKMR_ = _MR_. (See [Implementation Notes for gemm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-gemm) for a discussion of _PACKMR_.) Note that `A11` contains elements in both triangles, though elements in the unstored triangle are not guaranteed to be zero and thus should not be referenced.
-  * `b01`, `b21`:   The address of `B01` and `B21`, which is the _k x NR_ submatrix of the packed micro-panel of `B` that is situated above (`trsm_l`) or below (`trsm_u`) the _MR x NR_ block `B11`. `B01` and `B21` are stored by rows with leading dimension _PACKNR_, where typically _PACKNR_ = _NR_. (See [Implementation Notes for gemm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-gemm) for a discussion of _PACKNR_.)
-  * `b11`:    The address of `B11`, which is the _MR x NR_ submatrix of the packed micro-panel of `B`, situated below `B01` (`trsm_l`) or above `B21` (`trsm_u`). `B11` is stored by rows with leading dimension _PACKNR_, where typically _PACKNR_ = _NR_. (See [Implementation Notes for gemm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-gemm) for a discussion of _PACKNR_.)
+  * `a10`, `a12`:    The address of `A10` or `A12`, which is the _MR x k_ submatrix of the packed micro-panel of `A` that is situated to the left (`trsm_l`) or right (`trsm_u`) of the _MR x MR_ triangular submatrix `A11`. `A10` and `A12` are stored by columns with leading dimension _PACKMR_, where typically _PACKMR_ = _MR_. (See [Implementation Notes for gemm](KernelsHowTo.md#implementation-notes-for-gemm) for a discussion of _PACKMR_.)
+  * `a11`:    The address of `A11`, which is the _MR x MR_ lower (`trsm_l`) or upper (`trsm_u`) triangular submatrix within the packed micro-panel of matrix `A` that is situated to the right of `A10` (`trsm_l`) or the left of `A12` (`trsm_u`). `A11` is stored by columns with leading dimension _PACKMR_, where typically _PACKMR_ = _MR_. (See [Implementation Notes for gemm](KernelsHowTo.md#implementation-notes-for-gemm) for a discussion of _PACKMR_.) Note that `A11` contains elements in both triangles, though elements in the unstored triangle are not guaranteed to be zero and thus should not be referenced.
+  * `b01`, `b21`:   The address of `B01` and `B21`, which is the _k x NR_ submatrix of the packed micro-panel of `B` that is situated above (`trsm_l`) or below (`trsm_u`) the _MR x NR_ block `B11`. `B01` and `B21` are stored by rows with leading dimension _PACKNR_, where typically _PACKNR_ = _NR_. (See [Implementation Notes for gemm](KernelsHowTo.md#implementation-notes-for-gemm) for a discussion of _PACKNR_.)
+  * `b11`:    The address of `B11`, which is the _MR x NR_ submatrix of the packed micro-panel of `B`, situated below `B01` (`trsm_l`) or above `B21` (`trsm_u`). `B11` is stored by rows with leading dimension _PACKNR_, where typically _PACKNR_ = _NR_. (See [Implementation Notes for gemm](KernelsHowTo.md#implementation-notes-for-gemm) for a discussion of _PACKNR_.)
   * `c11`:    The address of `C11`, which is an _MR x NR_ submatrix of matrix `C`, stored according to `rsc` and `csc`. `C11` is the submatrix within `C` that corresponds to the elements which were packed into `B11`. Thus, `C` is the original input matrix `B` to the overall `trsm` operation.
   * `rsc`:    The row stride of matrix `C11` (ie: the distance to the next row, in units of matrix elements).
   * `csc`:    The column stride of matrix `C11` (ie: the distance to the next column, in units of matrix elements).
-  * `data`:   The address of an `auxinfo_t` object that contains auxiliary information that may be useful when optimizing the `gemmtrsm` micro-kernel implementation. (See [Using the auxinfo\_t object](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#Using_the_auxinfo_t_object) for a discussion of the kinds of values available via `auxinfo_t`, and also [Implementation Notes for gemmtrsm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-gemmtrsm) for caveats.)
+  * `data`:   The address of an `auxinfo_t` object that contains auxiliary information that may be useful when optimizing the `gemmtrsm` micro-kernel implementation. (See [Using the auxinfo\_t object](KernelsHowTo.md#Using_the_auxinfo_t_object) for a discussion of the kinds of values available via `auxinfo_t`, and also [Implementation Notes for gemmtrsm](KernelsHowTo.md#implementation-notes-for-gemmtrsm) for caveats.)
   * `cntx`:   The address of the runtime context. The context can be queried for implementation-specific values such as cache and register blocksizes. However, most micro-kernels intrinsically "know" these values already, and thus the `cntx` argument usually can be safely ignored.
 
 #### Diagram for gemmtrsm\_l
@@ -469,18 +469,18 @@ The diagram below shows the packed micro-panel operands for `trsm_u` and how ele
 
 #### Implementation Notes for gemmtrsm
 
-  * **Register blocksizes.** See [Implementation Notes for gemm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-gemm).
-  * **Leading dimensions of `a1` and `b1`: _PACKMR_ and _PACKNR_.** See [Implementation Notes for gemm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-gemm).
-  * **Edge cases in _MR_, _NR_ dimensions.** See [Implementation Notes for gemm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-gemm).
-  * **Alignment of `a1` and `b1`.** See [Implementation Notes for gemm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-gemm).
-  * **Unrolling loops.** Most optimized implementations should unroll all three loops within the `trsm` subproblem of `gemmtrsm`. See [Implementation Notes for gemm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-gemm) for remarks on unrolling the `gemm` subproblem.
+  * **Register blocksizes.** See [Implementation Notes for gemm](KernelsHowTo.md#implementation-notes-for-gemm).
+  * **Leading dimensions of `a1` and `b1`: _PACKMR_ and _PACKNR_.** See [Implementation Notes for gemm](KernelsHowTo.md#implementation-notes-for-gemm).
+  * **Edge cases in _MR_, _NR_ dimensions.** See [Implementation Notes for gemm](KernelsHowTo.md#implementation-notes-for-gemm).
+  * **Alignment of `a1` and `b1`.** See [Implementation Notes for gemm](KernelsHowTo.md#implementation-notes-for-gemm).
+  * **Unrolling loops.** Most optimized implementations should unroll all three loops within the `trsm` subproblem of `gemmtrsm`. See [Implementation Notes for gemm](KernelsHowTo.md#implementation-notes-for-gemm) for remarks on unrolling the `gemm` subproblem.
   * **Prefetching next micro-panels of `A` and `B`.** When invoked from within a `gemmtrsm_l` micro-kernel, the addresses accessible via `bli_auxinfo_next_a()` and `bli_auxinfo_next_b()` refer to the next invocation's `a10` and `b01`, respectively, while in `gemmtrsm_u`, the `_next_a()` and `_next_b()` macros return the addresses of the next invocation's `a11` and `b11` (since those submatrices precede `a12` and `b21`).
   * **Zero `alpha`.** The micro-kernel can safely assume that `alpha` is non-zero; "alpha equals zero" handling is performed at a much higher level, which means that, in such a scenario, the micro-kernel will never get called.
-  * **Diagonal elements of `A11`.** See [Implementation Notes for trsm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-trsm).
-  * **Zero elements of `A11`.** See [Implementation Notes for trsm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-trsm).
-  * **Output.** See [Implementation Notes for trsm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-trsm).
-  * **Optimization.** Let's assume that the [gemm micro-kernel](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#gemm-micro-kernel) has already been optimized. You have two options with regard to optimizing the fused `gemmtrsm` micro-kernels:
-    1. Optimize only the [trsm micro-kernels](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#trsm-micro-kernels). This will result in the `gemm` and `trsm_l` micro-kernels being called in sequence. (Likewise for `gemm` and `trsm_u`.)
+  * **Diagonal elements of `A11`.** See [Implementation Notes for trsm](KernelsHowTo.md#implementation-notes-for-trsm).
+  * **Zero elements of `A11`.** See [Implementation Notes for trsm](KernelsHowTo.md#implementation-notes-for-trsm).
+  * **Output.** See [Implementation Notes for trsm](KernelsHowTo.md#implementation-notes-for-trsm).
+  * **Optimization.** Let's assume that the [gemm micro-kernel](KernelsHowTo.md#gemm-micro-kernel) has already been optimized. You have two options with regard to optimizing the fused `gemmtrsm` micro-kernels:
+    1. Optimize only the [trsm micro-kernels](KernelsHowTo.md#trsm-micro-kernels). This will result in the `gemm` and `trsm_l` micro-kernels being called in sequence. (Likewise for `gemm` and `trsm_u`.)
     1. Fuse the implementation of the `gemm` micro-kernel with that of the `trsm` micro-kernels by inlining both into the `gemmtrsm_l` and `gemmtrsm_u` micro-kernel definitions. This option is more labor-intensive, but also more likely to yield higher performance because it avoids redundant memory operations on the packed _MR x NR_ submatrix `B11`.
 
 

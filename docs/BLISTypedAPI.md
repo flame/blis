@@ -1,29 +1,29 @@
 # Contents
 
-* **[Contents](BLISTypedAPI#contents)**
-* **[Introduction](BLISTypedAPI#introduction)**
-  * [BLIS types](BLISTypedAPI#blis-types)
-    * [Integer-based types](BLISTypedAPI#integer-based-types)
-    * [Floating-point types](BLISTypedAPI#floating-point-types)
-    * [Enumerated parameter types](BLISTypedAPI#enumerated-parameter-types)
-    * [Context type](BLISTypedAPI#context-type)
-  * [BLIS header file](BLISTypedAPI#blis-header-file)
-  * [Initialization and cleanup](BLISTypedAPI#initialization-and-cleanup)
-* **[Computational function reference](BLISTypedAPI#computational-function-reference)**
-  * [Operation index](BLISTypedAPI#operation-index)
-  * [Level-1v operations](BLISTypedAPI#level-1v-operations)
-  * [Level-1d operations](BLISTypedAPI#level-1d-operations)
-  * [Level-1m operations](BLISTypedAPI#level-1m-operations)
-  * [Level-1f operations](BLISTypedAPI#level-1f-operations)
-  * [Level-2 operations](BLISTypedAPI#level-2-operations)
-  * [Level-3 operations](BLISTypedAPI#level-3-operations)
-  * [Utility operations](BLISTypedAPI#utility-operations)
-  * [Level-3 micro-kernels](BLISTypedAPI#level-3-micro-kernels)
-* **[Query function reference](BLISTypedAPI#query-function-reference)**
-  * [General library information](BLISTypedAPI#general-library-information)
-  * [Specific configuration](BLISTypedAPI#specific-configuration)
-  * [General configuration](BLISTypedAPI#general-configuration)
-  * [Kernel information](BLISTypedAPI#kernel-information)
+* **[Contents](BLISTypedAPI.md#contents)**
+* **[Introduction](BLISTypedAPI.md#introduction)**
+  * [BLIS types](BLISTypedAPI.md#blis-types)
+    * [Integer-based types](BLISTypedAPI.md#integer-based-types)
+    * [Floating-point types](BLISTypedAPI.md#floating-point-types)
+    * [Enumerated parameter types](BLISTypedAPI.md#enumerated-parameter-types)
+    * [Context type](BLISTypedAPI.md#context-type)
+  * [BLIS header file](BLISTypedAPI.md#blis-header-file)
+  * [Initialization and cleanup](BLISTypedAPI.md#initialization-and-cleanup)
+* **[Computational function reference](BLISTypedAPI.md#computational-function-reference)**
+  * [Operation index](BLISTypedAPI.md#operation-index)
+  * [Level-1v operations](BLISTypedAPI.md#level-1v-operations)
+  * [Level-1d operations](BLISTypedAPI.md#level-1d-operations)
+  * [Level-1m operations](BLISTypedAPI.md#level-1m-operations)
+  * [Level-1f operations](BLISTypedAPI.md#level-1f-operations)
+  * [Level-2 operations](BLISTypedAPI.md#level-2-operations)
+  * [Level-3 operations](BLISTypedAPI.md#level-3-operations)
+  * [Utility operations](BLISTypedAPI.md#utility-operations)
+  * [Level-3 micro-kernels](BLISTypedAPI.md#level-3-micro-kernels)
+* **[Query function reference](BLISTypedAPI.md#query-function-reference)**
+  * [General library information](BLISTypedAPI.md#general-library-information)
+  * [Specific configuration](BLISTypedAPI.md#specific-configuration)
+  * [General configuration](BLISTypedAPI.md#general-configuration)
+  * [Kernel information](BLISTypedAPI.md#kernel-information)
 
 # Introduction
 
@@ -176,20 +176,20 @@ Notes for interpreting function descriptions:
 
 ## Operation index
 
-  * **[Level-1v](BLISTypedAPI#level-1v-operations)**: Operations on vectors:
-    * [addv](BLISTypedAPI#addv), [amaxv](BLISTypedAPI#amaxv), [axpyv](BLISTypedAPI#axpyv), [copyv](BLISTypedAPI#copyv), [dotv](BLISTypedAPI#dotv), [dotxv](BLISTypedAPI#dotxv), [invertv](BLISTypedAPI#invertv), [scal2v](BLISTypedAPI#scal2v), [scalv](BLISTypedAPI#scalv), [setv](BLISTypedAPI#setv), [subv](BLISTypedAPI#subv), [swapv](BLISTypedAPI#swapv)
-  * **[Level-1d](BLISTypedAPI#level-1d-operations)**: Element-wise operations on matrix diagonals:
-    * [addd](BLISTypedAPI#addd), [axpyd](BLISTypedAPI#axpyd), [copyd](BLISTypedAPI#copyd), [invertd](BLISTypedAPI#invertd), [scald](BLISTypedAPI#scald), [scal2d](BLISTypedAPI#scal2d), [setd](BLISTypedAPI#setd), [setid](BLISTypedAPI#setid), [subd](BLISTypedAPI#subd)
-  * **[Level-1m](BLISTypedAPI#level-1m-operations)**: Element-wise operations on matrices:
-    * [addm](BLISTypedAPI#addm), [axpym](BLISTypedAPI#axpym), [copym](BLISTypedAPI#copym), [scalm](BLISTypedAPI#scalm), [scal2m](BLISTypedAPI#scal2m), [setm](BLISTypedAPI#setm), [subm](BLISTypedAPI#subm)
-  * **[Level-1f](BLISTypedAPI#level-1f-operations)**: Fused operations on multiple vectors:
-    * [axpy2v](BLISTypedAPI#axpy2v), [dotaxpyv](BLISTypedAPI#dotaxpyv), [axpyf](BLISTypedAPI#axpyf), [dotxf](BLISTypedAPI#dotxf), [dotxaxpyf](BLISTypedAPI#dotxaxpyf)
-  * **[Level-2](BLISTypedAPI#level-2-operations)**: Operations with one matrix and (at least) one vector operand:
-    * [gemv](BLISTypedAPI#gemv), [ger](BLISTypedAPI#ger), [hemv](BLISTypedAPI#hemv), [her](BLISTypedAPI#her), [her2](BLISTypedAPI#her2), [symv](BLISTypedAPI#symv), [syr](BLISTypedAPI#syr), [syr2](BLISTypedAPI#syr2), [trmv](BLISTypedAPI#trmv), [trsv](BLISTypedAPI#trsv)
-  * **[Level-3](BLISTypedAPI#level-3-operations)**: Operations with matrices that are multiplication-like:
-    * [gemm](BLISTypedAPI#gemm), [hemm](BLISTypedAPI#hemm), [herk](BLISTypedAPI#herk), [her2k](BLISTypedAPI#her2k), [symm](BLISTypedAPI#symm), [syrk](BLISTypedAPI#syrk), [syr2k](BLISTypedAPI#syr2k), [trmm](BLISTypedAPI#trmm), [trmm3](BLISTypedAPI#trmm3), [trsm](BLISTypedAPI#trsm)
-  * **[Utility](BLISTypedAPI#Utility-operations)**: Miscellaneous operations on matrices and vectors:
-    * [asumv](BLISTypedAPI#asumv), [norm1v](BLISTypedAPI#norm1v), [normfv](BLISTypedAPI#normfv), [normiv](BLISTypedAPI#normiv), [norm1m](BLISTypedAPI#norm1m), [normfm](BLISTypedAPI#normfm), [normim](BLISTypedAPI#normim), [mkherm](BLISTypedAPI#mkherm), [mksymm](BLISTypedAPI#mksymm), [mktrim](BLISTypedAPI#mktrim), [fprintv](BLISTypedAPI#fprintv), [fprintm](BLISTypedAPI#fprintm),[printv](BLISTypedAPI#printv), [printm](BLISTypedAPI#printm), [randv](BLISTypedAPI#randv), [randm](BLISTypedAPI#randm), [sumsqv](BLISTypedAPI#sumsqv)
+  * **[Level-1v](BLISTypedAPI.md#level-1v-operations)**: Operations on vectors:
+    * [addv](BLISTypedAPI.md#addv), [amaxv](BLISTypedAPI.md#amaxv), [axpyv](BLISTypedAPI.md#axpyv), [copyv](BLISTypedAPI.md#copyv), [dotv](BLISTypedAPI.md#dotv), [dotxv](BLISTypedAPI.md#dotxv), [invertv](BLISTypedAPI.md#invertv), [scal2v](BLISTypedAPI.md#scal2v), [scalv](BLISTypedAPI.md#scalv), [setv](BLISTypedAPI.md#setv), [subv](BLISTypedAPI.md#subv), [swapv](BLISTypedAPI.md#swapv)
+  * **[Level-1d](BLISTypedAPI.md#level-1d-operations)**: Element-wise operations on matrix diagonals:
+    * [addd](BLISTypedAPI.md#addd), [axpyd](BLISTypedAPI.md#axpyd), [copyd](BLISTypedAPI.md#copyd), [invertd](BLISTypedAPI.md#invertd), [scald](BLISTypedAPI.md#scald), [scal2d](BLISTypedAPI.md#scal2d), [setd](BLISTypedAPI.md#setd), [setid](BLISTypedAPI.md#setid), [subd](BLISTypedAPI.md#subd)
+  * **[Level-1m](BLISTypedAPI.md#level-1m-operations)**: Element-wise operations on matrices:
+    * [addm](BLISTypedAPI.md#addm), [axpym](BLISTypedAPI.md#axpym), [copym](BLISTypedAPI.md#copym), [scalm](BLISTypedAPI.md#scalm), [scal2m](BLISTypedAPI.md#scal2m), [setm](BLISTypedAPI.md#setm), [subm](BLISTypedAPI.md#subm)
+  * **[Level-1f](BLISTypedAPI.md#level-1f-operations)**: Fused operations on multiple vectors:
+    * [axpy2v](BLISTypedAPI.md#axpy2v), [dotaxpyv](BLISTypedAPI.md#dotaxpyv), [axpyf](BLISTypedAPI.md#axpyf), [dotxf](BLISTypedAPI.md#dotxf), [dotxaxpyf](BLISTypedAPI.md#dotxaxpyf)
+  * **[Level-2](BLISTypedAPI.md#level-2-operations)**: Operations with one matrix and (at least) one vector operand:
+    * [gemv](BLISTypedAPI.md#gemv), [ger](BLISTypedAPI.md#ger), [hemv](BLISTypedAPI.md#hemv), [her](BLISTypedAPI.md#her), [her2](BLISTypedAPI.md#her2), [symv](BLISTypedAPI.md#symv), [syr](BLISTypedAPI.md#syr), [syr2](BLISTypedAPI.md#syr2), [trmv](BLISTypedAPI.md#trmv), [trsv](BLISTypedAPI.md#trsv)
+  * **[Level-3](BLISTypedAPI.md#level-3-operations)**: Operations with matrices that are multiplication-like:
+    * [gemm](BLISTypedAPI.md#gemm), [hemm](BLISTypedAPI.md#hemm), [herk](BLISTypedAPI.md#herk), [her2k](BLISTypedAPI.md#her2k), [symm](BLISTypedAPI.md#symm), [syrk](BLISTypedAPI.md#syrk), [syr2k](BLISTypedAPI.md#syr2k), [trmm](BLISTypedAPI.md#trmm), [trmm3](BLISTypedAPI.md#trmm3), [trsm](BLISTypedAPI.md#trsm)
+  * **[Utility](BLISTypedAPI.md#Utility-operations)**: Miscellaneous operations on matrices and vectors:
+    * [asumv](BLISTypedAPI.md#asumv), [norm1v](BLISTypedAPI.md#norm1v), [normfv](BLISTypedAPI.md#normfv), [normiv](BLISTypedAPI.md#normiv), [norm1m](BLISTypedAPI.md#norm1m), [normfm](BLISTypedAPI.md#normfm), [normim](BLISTypedAPI.md#normim), [mkherm](BLISTypedAPI.md#mkherm), [mksymm](BLISTypedAPI.md#mksymm), [mktrim](BLISTypedAPI.md#mktrim), [fprintv](BLISTypedAPI.md#fprintv), [fprintm](BLISTypedAPI.md#fprintm),[printv](BLISTypedAPI.md#printv), [printm](BLISTypedAPI.md#printm), [randv](BLISTypedAPI.md#randv), [randm](BLISTypedAPI.md#randm), [sumsqv](BLISTypedAPI.md#sumsqv)
 
 ---
 
@@ -765,7 +765,7 @@ Perform
   y := y + alphax * conjx(x) + alphay * conjy(y)
 ```
 
-where `x`, `y`, and `z` are vectors of length _m_. The kernel, if optimized, is implemented as a fused pair of calls to [axpyv](BLISTypedAPI#axpyv).
+where `x`, `y`, and `z` are vectors of length _m_. The kernel, if optimized, is implemented as a fused pair of calls to [axpyv](BLISTypedAPI.md#axpyv).
 
 ---
 
@@ -790,7 +790,7 @@ Perform
   y   := y + alpha * conjx(x)
 ```
 
-where `x`, `y`, and `z` are vectors of length _m_ and `alpha` and `rho` are scalars. The kernel, if optimized, is implemented as a fusion of calls to [dotv](BLISTypedAPI#dotv) and [axpyv](BLISTypedAPI#axpyv).
+where `x`, `y`, and `z` are vectors of length _m_ and `alpha` and `rho` are scalars. The kernel, if optimized, is implemented as a fusion of calls to [dotv](BLISTypedAPI.md#dotv) and [axpyv](BLISTypedAPI.md#axpyv).
 
 ---
 
@@ -813,7 +813,7 @@ Perform
   y := y + alpha * conja(A) * conjx(x)
 ```
 
-where `A` is an _m x nf_ matrix, and `y` and `x` are vectors. The kernel, if optimized, is implemented as a fused series of calls to [axpyv](BLISTypedAPI#axpyv) where _nf_ is less than or equal to an implementation-dependent fusing factor specific to `axpyf`.
+where `A` is an _m x nf_ matrix, and `y` and `x` are vectors. The kernel, if optimized, is implemented as a fused series of calls to [axpyv](BLISTypedAPI.md#axpyv) where _nf_ is less than or equal to an implementation-dependent fusing factor specific to `axpyf`.
 
 ---
 
@@ -837,7 +837,7 @@ Perform
   y := y + alpha * conjat(A^T) * conjx(x)
 ```
 
-where `A` is an _m x nf_ matrix, and `y` and `x` are vectors. The kernel, if optimized, is implemented as a fused series of calls to [dotxv](BLISTypedAPI#dotxv) where _nf_ is less than or equal to an implementation-dependent fusing factor specific to `dotxf`.
+where `A` is an _m x nf_ matrix, and `y` and `x` are vectors. The kernel, if optimized, is implemented as a fused series of calls to [dotxv](BLISTypedAPI.md#dotxv) where _nf_ is less than or equal to an implementation-dependent fusing factor specific to `dotxf`.
 
 ---
 
@@ -866,7 +866,7 @@ Perform
   z :=        z + alpha * conja(A)    * conjx(x)
 ```
 
-where `A` is an _m x nf_ matrix, `w` and `z` are vectors of length _m_, `x` and `y` are vectors of length `nf`, and `alpha` and `beta` are scalars. The kernel, if optimized, is implemented as a fusion of calls to [dotxf](BLISTypedAPI#dotxf) and [axpyf](BLISTypedAPI#axpyf).
+where `A` is an _m x nf_ matrix, `w` and `z` are vectors of length _m_, `x` and `y` are vectors of length `nf`, and `alpha` and `beta` are scalars. The kernel, if optimized, is implemented as a fusion of calls to [dotxf](BLISTypedAPI.md#dotxf) and [axpyf](BLISTypedAPI.md#axpyf).
 
 
 
@@ -1109,7 +1109,7 @@ where `A` is an _m x m_ triangular matrix stored in the lower or upper triangle 
 ## Level-3 operations
 
 Level-3 operations perform various level-3 BLAS-like operations.
-**Note**: Each All level-3 operations are implemented through a handful of level-3 micro-kernels. Please see the [Kernels Guide](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md) for more details.
+**Note**: Each All level-3 operations are implemented through a handful of level-3 micro-kernels. Please see the [Kernels Guide](KernelsHowTo.md) for more details.
 
 
 ---
@@ -1626,7 +1626,7 @@ Perform
 ```
 where `C11` is an _MR x NR_ matrix, `A1` is an _MR x k_ "micro-panel" matrix stored in packed (column-stored) format, `B1` is a _k x NR_ "micro-panel" matrix in packed (row-stored) format, and alpha and beta are scalars. The storage of `C11` is specified by its row and column strides, `rsc` and `csc`.
 
-Please see the [Kernel Guide](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md) for more information on the `gemm` micro-kernel.
+Please see the [Kernel Guide](KernelsHowTo.md) for more information on the `gemm` micro-kernel.
 
 
 ---
@@ -1658,7 +1658,7 @@ Perform
 ```
 where `A11` is an _MR x MR_ lower or upper triangular matrix stored in packed (column-stored) format, `B11` is an _MR x NR_ matrix stored in packed (row-stored) format, and `C11` is an _MR x NR_ matrix stored according to row and column strides `rsc` and `csc`.
 
-Please see the [Kernel Guide](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md) for more information on the `trsm` micro-kernel.
+Please see the [Kernel Guide](KernelsHowTo.md) for more information on the `trsm` micro-kernel.
 
 ---
 
@@ -1704,7 +1704,7 @@ if `A11` is lower triangular, or
 ```
 if `A11` is upper triangular.
 
-Please see the [Kernel Guide](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md) for more information on the `gemmtrsm` micro-kernel.
+Please see the [Kernel Guide](KernelsHowTo.md) for more information on the `gemmtrsm` micro-kernel.
 
 
 
@@ -1795,7 +1795,7 @@ Possible micro-kernel types (ie: the return values for `bli_info_get_*_ukr_impl_
 
 ### Operation implementation type query
 
-The following routines allow the caller to obtain a string that identifies the implementation (`ind_t`) that is currently active (ie: implemented and enabled) for each level-3 operation. Possible implementation types are listed in the section above covering [micro-kernel implemenation query](BLISTypedAPI#micro-kernel-implementation-type-query).
+The following routines allow the caller to obtain a string that identifies the implementation (`ind_t`) that is currently active (ie: implemented and enabled) for each level-3 operation. Possible implementation types are listed in the section above covering [micro-kernel implemenation query](BLISTypedAPI.md#micro-kernel-implementation-type-query).
 ```c
 char* bli_info_get_gemm_impl_string( num_t dt );
 char* bli_info_get_hemm_impl_string( num_t dt );
