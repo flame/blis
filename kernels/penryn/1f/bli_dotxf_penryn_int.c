@@ -90,11 +90,16 @@ void bli_ddotxf_penryn_int
 	// If the vector lengths are zero, scale r by beta and return.
 	if ( bli_zero_dim1( m ) )
 	{
-		bli_dscalv( BLIS_NO_CONJUGATE,
-		            b_n,
-		            beta_cast,
-		            y_cast, incy,
-		            cntx );
+		dscalv_ft f = bli_cntx_get_l1v_ker_dt( BLIS_DOUBLE, BLIS_SCALV_KER, cntx );
+
+		f
+		(
+		  BLIS_NO_CONJUGATE,
+		  b_n,
+		  beta_cast,
+		  y_cast, incy,
+		  cntx
+		);
 		return;
 	}
 
