@@ -5,20 +5,20 @@ This wiki describes the computational kernels used by the BLIS framework.
 One of the primary features of BLIS is that it provides a large set of dense linear algebra functionality while simultaneously minimizing the amount of kernel code that must be optimized for a given architecture. BLIS does this by isolating a handful of kernels which, when implemented, facilitate functionality and performance of several of the higher-level operations.
 
 Presently, BLIS supports several groups of operations:
-  * **[Level-1v](BLISTypedAPI#level-1v-operations)**: Operations on vectors:
-    * [addv](BLISTypedAPI#addv), [amaxv](BLISTypedAPI#amaxv), [axpyv](BLISTypedAPI#axpyv), [copyv](BLISTypedAPI#copyv), [dotv](BLISTypedAPI#dotv), [dotxv](BLISTypedAPI#dotxv), [invertv](BLISTypedAPI#invertv), [scal2v](BLISTypedAPI#scal2v), [scalv](BLISTypedAPI#scalv), [setv](BLISTypedAPI#setv), [subv](BLISTypedAPI#subv), [swapv](BLISTypedAPI#swapv)
-  * **[Level-1d](BLISTypedAPI#level-1d-operations)**: Element-wise operations on matrix diagonals:
-    * [addd](BLISTypedAPI#addd), [axpyd](BLISTypedAPI#axpyd), [copyd](BLISTypedAPI#copyd), [invertd](BLISTypedAPI#invertd), [scald](BLISTypedAPI#scald), [scal2d](BLISTypedAPI#scal2d), [setd](BLISTypedAPI#setd), [setid](BLISTypedAPI#setid), [subd](BLISTypedAPI#subd)
-  * **[Level-1m](BLISTypedAPI#level-1m-operations)**: Element-wise operations on matrices:
-    * [addm](BLISTypedAPI#addm), [axpym](BLISTypedAPI#axpym), [copym](BLISTypedAPI#copym), [scalm](BLISTypedAPI#scalm), [scal2m](BLISTypedAPI#scal2m), [setm](BLISTypedAPI#setm), [subm](BLISTypedAPI#subm)
-  * **[Level-1f](BLISTypedAPI#level-1f-operations)**: Fused operations on multiple vectors:
-    * [axpy2v](BLISTypedAPI#axpy2v), [dotaxpyv](BLISTypedAPI#dotaxpyv), [axpyf](BLISTypedAPI#axpyf), [dotxf](BLISTypedAPI#dotxf), [dotxaxpyf](BLISTypedAPI#dotxaxpyf)
-  * **[Level-2](BLISTypedAPI#level-2-operations)**: Operations with one matrix and (at least) one vector operand:
-    * [gemv](BLISTypedAPI#gemv), [ger](BLISTypedAPI#ger), [hemv](BLISTypedAPI#hemv), [her](BLISTypedAPI#her), [her2](BLISTypedAPI#her2), [symv](BLISTypedAPI#symv), [syr](BLISTypedAPI#syr), [syr2](BLISTypedAPI#syr2), [trmv](BLISTypedAPI#trmv), [trsv](BLISTypedAPI#trsv)
-  * **[Level-3](BLISTypedAPI#level-3-operations)**: Operations with matrices that are multiplication-like:
-    * [gemm](BLISTypedAPI#gemm), [hemm](BLISTypedAPI#hemm), [herk](BLISTypedAPI#herk), [her2k](BLISTypedAPI#her2k), [symm](BLISTypedAPI#symm), [syrk](BLISTypedAPI#syrk), [syr2k](BLISTypedAPI#syr2k), [trmm](BLISTypedAPI#trmm), [trmm3](BLISTypedAPI#trmm3), [trsm](BLISTypedAPI#trsm)
-  * **[Utility](BLISTypedAPI#Utility-operations)**: Miscellaneous operations on matrices and vectors:
-    * [asumv](BLISTypedAPI#asumv), [norm1v](BLISTypedAPI#norm1v), [normfv](BLISTypedAPI#normfv), [normiv](BLISTypedAPI#normiv), [norm1m](BLISTypedAPI#norm1m), [normfm](BLISTypedAPI#normfm), [normim](BLISTypedAPI#normim), [mkherm](BLISTypedAPI#mkherm), [mksymm](BLISTypedAPI#mksymm), [mktrim](BLISTypedAPI#mktrim), [fprintv](BLISTypedAPI#fprintv), [fprintm](BLISTypedAPI#fprintm),[printv](BLISTypedAPI#printv), [printm](BLISTypedAPI#printm), [randv](BLISTypedAPI#randv), [randm](BLISTypedAPI#randm), [sumsqv](BLISTypedAPI#sumsqv)
+  * **[Level-1v](BLISTypedAPI.md#level-1v-operations)**: Operations on vectors:
+    * [addv](BLISTypedAPI.md#addv), [amaxv](BLISTypedAPI.md#amaxv), [axpyv](BLISTypedAPI.md#axpyv), [copyv](BLISTypedAPI.md#copyv), [dotv](BLISTypedAPI.md#dotv), [dotxv](BLISTypedAPI.md#dotxv), [invertv](BLISTypedAPI.md#invertv), [scal2v](BLISTypedAPI.md#scal2v), [scalv](BLISTypedAPI.md#scalv), [setv](BLISTypedAPI.md#setv), [subv](BLISTypedAPI.md#subv), [swapv](BLISTypedAPI.md#swapv)
+  * **[Level-1d](BLISTypedAPI.md#level-1d-operations)**: Element-wise operations on matrix diagonals:
+    * [addd](BLISTypedAPI.md#addd), [axpyd](BLISTypedAPI.md#axpyd), [copyd](BLISTypedAPI.md#copyd), [invertd](BLISTypedAPI.md#invertd), [scald](BLISTypedAPI.md#scald), [scal2d](BLISTypedAPI.md#scal2d), [setd](BLISTypedAPI.md#setd), [setid](BLISTypedAPI.md#setid), [subd](BLISTypedAPI.md#subd)
+  * **[Level-1m](BLISTypedAPI.md#level-1m-operations)**: Element-wise operations on matrices:
+    * [addm](BLISTypedAPI.md#addm), [axpym](BLISTypedAPI.md#axpym), [copym](BLISTypedAPI.md#copym), [scalm](BLISTypedAPI.md#scalm), [scal2m](BLISTypedAPI.md#scal2m), [setm](BLISTypedAPI.md#setm), [subm](BLISTypedAPI.md#subm)
+  * **[Level-1f](BLISTypedAPI.md#level-1f-operations)**: Fused operations on multiple vectors:
+    * [axpy2v](BLISTypedAPI.md#axpy2v), [dotaxpyv](BLISTypedAPI.md#dotaxpyv), [axpyf](BLISTypedAPI.md#axpyf), [dotxf](BLISTypedAPI.md#dotxf), [dotxaxpyf](BLISTypedAPI.md#dotxaxpyf)
+  * **[Level-2](BLISTypedAPI.md#level-2-operations)**: Operations with one matrix and (at least) one vector operand:
+    * [gemv](BLISTypedAPI.md#gemv), [ger](BLISTypedAPI.md#ger), [hemv](BLISTypedAPI.md#hemv), [her](BLISTypedAPI.md#her), [her2](BLISTypedAPI.md#her2), [symv](BLISTypedAPI.md#symv), [syr](BLISTypedAPI.md#syr), [syr2](BLISTypedAPI.md#syr2), [trmv](BLISTypedAPI.md#trmv), [trsv](BLISTypedAPI.md#trsv)
+  * **[Level-3](BLISTypedAPI.md#level-3-operations)**: Operations with matrices that are multiplication-like:
+    * [gemm](BLISTypedAPI.md#gemm), [hemm](BLISTypedAPI.md#hemm), [herk](BLISTypedAPI.md#herk), [her2k](BLISTypedAPI.md#her2k), [symm](BLISTypedAPI.md#symm), [syrk](BLISTypedAPI.md#syrk), [syr2k](BLISTypedAPI.md#syr2k), [trmm](BLISTypedAPI.md#trmm), [trmm3](BLISTypedAPI.md#trmm3), [trsm](BLISTypedAPI.md#trsm)
+  * **[Utility](BLISTypedAPI.md#Utility-operations)**: Miscellaneous operations on matrices and vectors:
+    * [asumv](BLISTypedAPI.md#asumv), [norm1v](BLISTypedAPI.md#norm1v), [normfv](BLISTypedAPI.md#normfv), [normiv](BLISTypedAPI.md#normiv), [norm1m](BLISTypedAPI.md#norm1m), [normfm](BLISTypedAPI.md#normfm), [normim](BLISTypedAPI.md#normim), [mkherm](BLISTypedAPI.md#mkherm), [mksymm](BLISTypedAPI.md#mksymm), [mktrim](BLISTypedAPI.md#mktrim), [fprintv](BLISTypedAPI.md#fprintv), [fprintm](BLISTypedAPI.md#fprintm),[printv](BLISTypedAPI.md#printv), [printm](BLISTypedAPI.md#printm), [randv](BLISTypedAPI.md#randv), [randm](BLISTypedAPI.md#randm), [sumsqv](BLISTypedAPI.md#sumsqv)
 
 Most of the interest with BLAS libraries centers around level-3 operations because they exhibit favorable ratios of floating-point operations (flops) to memory operations (memops), which allows high performance. Some applications also require level-2 computation; however, these operations are at an inherent disadvantage on modern architectures due to their less favorable flop-to-memop ratio. The BLIS framework allows developers to quickly and easily build high performance level-3 operations, as well as relatively well-performing level-2 operations, simply by optimizing a small set of kernels. These kernels, and their relationship to the other higher-level operations supported by BLIS, are the subject of this wiki.
 
@@ -47,21 +47,21 @@ The following shows the steps one would take to optimize, to varying degrees, th
 ### Level-1f
 
 BLIS supports the following five level-1f (fused) kernels. These kernels are used to implement optimized level-2 operations.
-  * **axpy2v**: Performs and fuses two [axpyv](BLISTypedAPI#axpyv) operations, accumulating to the same output vector.
-  * **dotaxpyv**: Performs and fuses a [dotv](BLISTypedAPI#dotv) followed by an [axpyv](BLISTypedAPI#axpyv) operation with x.
-  * **axpyf**: Performs and fuses some implementation-dependent number of [axpyv](BLISTypedAPI#axpyv) operations, accumulating to the same output vector. Can also be expressed as a [gemv](BLISTypedAPI#gemv) operation where matrix A is _m x nf_, where nf is the number of fused operations (fusing factor).
-  * **dotxf**: Performs and fuses some implementation-dependent number of [dotxv](BLISTypedAPI#dotxv) operations, reusing the `y` vector for each [dotxv](BLISTypedAPI#dotxv).
-  * **dotxaxpyf**: Performs and fuses a [dotxf](BLISTypedAPI#dotxf) and [axpyf](BLISTypedAPI#axpyf) in which the matrix operand is reused.
+  * **axpy2v**: Performs and fuses two [axpyv](BLISTypedAPI.md#axpyv) operations, accumulating to the same output vector.
+  * **dotaxpyv**: Performs and fuses a [dotv](BLISTypedAPI.md#dotv) followed by an [axpyv](BLISTypedAPI.md#axpyv) operation with x.
+  * **axpyf**: Performs and fuses some implementation-dependent number of [axpyv](BLISTypedAPI.md#axpyv) operations, accumulating to the same output vector. Can also be expressed as a [gemv](BLISTypedAPI.md#gemv) operation where matrix A is _m x nf_, where nf is the number of fused operations (fusing factor).
+  * **dotxf**: Performs and fuses some implementation-dependent number of [dotxv](BLISTypedAPI.md#dotxv) operations, reusing the `y` vector for each [dotxv](BLISTypedAPI.md#dotxv).
+  * **dotxaxpyf**: Performs and fuses a [dotxf](BLISTypedAPI.md#dotxf) and [axpyf](BLISTypedAPI.md#axpyf) in which the matrix operand is reused.
 
 
 ### Level-1v
 
 BLIS supports kernels for the following level-1 operations. Aside from their self-similar operations (ie: the use of an `axpyv` kernel to implement the `axpyv` operation), these kernels are used only to implement level-2 operations, and only when the developer decides to forgo more optimized approaches that involve level-1f kernels (where applicable).
-  * **axpyv**: Performs a [scale-and-accumulate vector](BLISTypedAPI#axpyv) operation.
-  * **dotv**: Performs a [dot product](BLISTypedAPI#dotv) where the output scalar is overwritten.
-  * **dotxv**: Performs an [extended dot product](BLISTypedAPI#dotxv) operation where the dot product is first scaled and then accumulated into a scaled output scalar.
+  * **axpyv**: Performs a [scale-and-accumulate vector](BLISTypedAPI.md#axpyv) operation.
+  * **dotv**: Performs a [dot product](BLISTypedAPI.md#dotv) where the output scalar is overwritten.
+  * **dotxv**: Performs an [extended dot product](BLISTypedAPI.md#dotxv) operation where the dot product is first scaled and then accumulated into a scaled output scalar.
 
-There are other level-1v kernels that may be optimized, such as [addv](BLISTypedAPI#addv), [subv](BLISTypedAPI#subv), and [scalv](BLISTypedAPI#scalv), but their use is less common and therefore of much less importance to most users and developers.
+There are other level-1v kernels that may be optimized, such as [addv](BLISTypedAPI.md#addv), [subv](BLISTypedAPI.md#subv), and [scalv](BLISTypedAPI.md#scalv), but their use is less common and therefore of much less importance to most users and developers.
 
 
 ### Level-1v/-1f Dependencies for Level-2 operations
@@ -87,22 +87,22 @@ Kernels marked with a "1" for a given level-2 operation are preferred for optimi
 ## BLIS kernels reference
 
 This section seeks to provide developers with a complete reference for each of the following BLIS kernels, including function prototypes, parameter descriptions, implementation notes, and diagrams:
-  * [Level-3 micro-kernels](KernelsHowTo#level-3-micro-kernels)
-    * [gemm](KernelsHowTo#gemm-micro-kernel)
-    * [trsm](KernelsHowTo#trsm-micro-kernels)
-    * [gemmtrsm](KernelsHowTo#gemmtrsm-micro-kernels)
-  * [Level-1f kernels](KernelsHowTo#level-1f-kernels)
+  * [Level-3 micro-kernels](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#level-3-micro-kernels)
+    * [gemm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#gemm-micro-kernel)
+    * [trsm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#trsm-micro-kernels)
+    * [gemmtrsm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#gemmtrsm-micro-kernels)
+  * [Level-1f kernels](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#level-1f-kernels)
     * axpy2v
     * dotaxpyv
     * axpyf
     * dotxf
     * dotxaxpyf
-  * [Level-1v kernels](KernelsHowTo#level-1v-kernels)
+  * [Level-1v kernels](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#level-1v-kernels)
     * axpyv
     * dotv
     * dotxv
 
-The function prototypes in this section follow the same guidelines as those listed in the [BLIS typed API reference](BLISTypedAPI#Notes_for_using_this_reference). Namely:
+The function prototypes in this section follow the same guidelines as those listed in the [BLIS typed API reference](BLISTypedAPI.md#Notes_for_using_this_reference). Namely:
   * Any occurrence of `?` should be replaced with `s`, `d`, `c`, or `z` to form an actual function name.
   * Any occurrence of `ctype` should be replaced with the actual C type corresponding to the datatype instance in question.
   * Some matrix arguments have associated row and column strides arguments that proceed them, typically listed as `rsX` and `csX` for a given matrix `X`. Row strides are always listed first, and column strides are always listed second. The semantic meaning of a row stride is "the distance, in units of elements, from any given element to the corresponding element (within the same column) of the next row," and the meaning of a column stride is "the distance, in units of elements, from any given element to the corresponding element (within the same row) of the next column." Thus, unit row stride implies column-major storage and unit column stride implies row-major storage.
@@ -113,9 +113,9 @@ The function prototypes in this section follow the same guidelines as those list
 ### Level-3 micro-kernels
 
 This section describes in detail the various level-3 micro-kernels supported by BLIS:
-  * [gemm](KernelsHowTo#gemm-micro-kernel)
-  * [trsm](KernelsHowTo#trsm_micro-kernels)
-  * [gemmtrsm](KernelsHowTo#gemmtrsm-micro-kernels)
+  * [gemm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#gemm-micro-kernel)
+  * [trsm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#trsm_micro-kernels)
+  * [gemmtrsm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#gemmtrsm-micro-kernels)
 
 
 #### gemm micro-kernel
@@ -164,13 +164,13 @@ Parameters:
 
   * `k`:      The number of columns of `A1` and rows of `B1`.
   * `alpha`:  The address of a scalar to the `A1 * B1` product.
-  * `a1`:     The address of a micro-panel of matrix `A` of dimension _MR x k_, stored by columns with leading dimension _PACKMR_, where typically _PACKMR_ = _MR_. (See [Implementation Notes for gemm](KernelsHowTo#implementation-notes-for-gemm) for a discussion of _PACKMR_.)
-  * `b1`:     The address of a micro-panel of matrix `B` of dimension _k x NR_, stored by rows with leading dimension _PACKNR_, where typically _PACKNR_ = _NR_. (See [Implementation Notes for gemm](KernelsHowTo#implementation-notes-for-gemm) for a discussion of _PACKNR_.)
+  * `a1`:     The address of a micro-panel of matrix `A` of dimension _MR x k_, stored by columns with leading dimension _PACKMR_, where typically _PACKMR_ = _MR_. (See [Implementation Notes for gemm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-gemm) for a discussion of _PACKMR_.)
+  * `b1`:     The address of a micro-panel of matrix `B` of dimension _k x NR_, stored by rows with leading dimension _PACKNR_, where typically _PACKNR_ = _NR_. (See [Implementation Notes for gemm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-gemm) for a discussion of _PACKNR_.)
   * `beta`:   The address of a scalar to the input value of matrix `C11`.
   * `c11`:    The address of a matrix `C11` of dimension _MR x NR_, stored according to `rsc` and `csc`.
   * `rsc`:    The row stride of matrix `C11` (ie: the distance to the next row, in units of matrix elements).
   * `csc`:    The column stride of matrix `C11` (ie: the distance to the next column, in units of matrix elements).
-  * `data`:   The address of an `auxinfo_t` object that contains auxiliary information that may be useful when optimizing the `gemm` micro-kernel implementation. (See [Using the auxinfo\_t object](KernelsHowTo#Using_the_auxinfo_t_object) for a discussion of the kinds of values available via `auxinfo_t`.)
+  * `data`:   The address of an `auxinfo_t` object that contains auxiliary information that may be useful when optimizing the `gemm` micro-kernel implementation. (See [Using the auxinfo\_t object](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#Using_the_auxinfo_t_object) for a discussion of the kinds of values available via `auxinfo_t`.)
   * `cntx`:   The address of the runtime context. The context can be queried for implementation-specific values such as cache and register blocksizes. However, most micro-kernels intrinsically "know" these values already, and thus the `cntx` argument usually can be safely ignored.
 
 #### Diagram for gemm
@@ -206,7 +206,7 @@ The diagram below shows the packed micro-panel operands and how elements of each
 
 #### Using the auxinfo\_t object
 
-Each micro-kernel ([gemm](KernelsHowTo#gemm-micro-kernel), [trsm](KernelsHowTo#trsm_micro-kernels), and [gemmtrsm](KernelsHowTo#gemmtrsm-micro-kernels)) takes as its last argument a pointer of type `auxinfo_t`. This BLIS-defined type is defined as a `struct` whose fields contain auxiliary values that may be useful to some micro-kernel authors, particularly when implementing certain optimization techniques. BLIS provides kernel authors access to the fields of the `auxinfo_t` object via the following function-like preprocessor macros. Each macro takes a single argument, the `auxinfo_t` pointer, and returns one of the values stored within the object.
+Each micro-kernel ([gemm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#gemm-micro-kernel), [trsm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#trsm_micro-kernels), and [gemmtrsm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#gemmtrsm-micro-kernels)) takes as its last argument a pointer of type `auxinfo_t`. This BLIS-defined type is defined as a `struct` whose fields contain auxiliary values that may be useful to some micro-kernel authors, particularly when implementing certain optimization techniques. BLIS provides kernel authors access to the fields of the `auxinfo_t` object via the following function-like preprocessor macros. Each macro takes a single argument, the `auxinfo_t` pointer, and returns one of the values stored within the object.
 
   * `bli_auxinfo_next_a()`. Returns the address (`void*`) of the micro-panel of `A` that will be used the next time the micro-kernel will be called.
   * `bli_auxinfo_next_b()`. Returns the address (`void*`) of the micro-panel of `B` that will be used the next time the micro-kernel will be called.
@@ -288,23 +288,23 @@ _MR_ and _NR_ are the register blocksizes associated with the micro-kernel. They
 
 Parameters:
 
-  * `a11`:    The address of `A11`, which is the _MR x MR_ lower (`trsm_l`) or upper (`trsm_u`) triangular submatrix within the packed micro-panel of matrix `A`. `A11` is stored by columns with leading dimension _PACKMR_, where typically _PACKMR_ = _MR_. (See [Implementation Notes for gemm](KernelsHowTo#implementation-notes-for-gemm) for a discussion of _PACKMR_.) Note that `A11` contains elements in both triangles, though elements in the unstored triangle are not guaranteed to be zero and thus should not be referenced.
-  * `b11`:    The address of `B11`, which is an _MR x NR_ submatrix of the packed micro-panel of `B`. `B11` is stored by rows with leading dimension _PACKNR_, where typically _PACKNR_ = _NR_. (See [Implementation Notes for gemm](KernelsHowTo#implementation-notes-for-gemm) for a discussion of _PACKNR_.)
+  * `a11`:    The address of `A11`, which is the _MR x MR_ lower (`trsm_l`) or upper (`trsm_u`) triangular submatrix within the packed micro-panel of matrix `A`. `A11` is stored by columns with leading dimension _PACKMR_, where typically _PACKMR_ = _MR_. (See [Implementation Notes for gemm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-gemm) for a discussion of _PACKMR_.) Note that `A11` contains elements in both triangles, though elements in the unstored triangle are not guaranteed to be zero and thus should not be referenced.
+  * `b11`:    The address of `B11`, which is an _MR x NR_ submatrix of the packed micro-panel of `B`. `B11` is stored by rows with leading dimension _PACKNR_, where typically _PACKNR_ = _NR_. (See [Implementation Notes for gemm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-gemm) for a discussion of _PACKNR_.)
   * `c11`:    The address of `C11`, which is an _MR x NR_ submatrix of matrix `C`, stored according to `rsc` and `csc`. `C11` is the submatrix within `C` that corresponds to the elements which were packed into `B11`. Thus, `C` is the original input matrix `B` to the overall `trsm` operation.
   * `rsc`:    The row stride of matrix `C11` (ie: the distance to the next row, in units of matrix elements).
   * `csc`:    The column stride of matrix `C11` (ie: the distance to the next column, in units of matrix elements).
-  * `data`:   The address of an `auxinfo_t` object that contains auxiliary information that may be useful when optimizing the `trsm` micro-kernel implementation. (See [Using the auxinfo\_t object](KernelsHowTo#Using_the_auxinfo_t_object) for a discussion of the kinds of values available via `auxinfo_t`, and also [Implementation Notes for trsm](KernelsHowTo#implementation-notes-for-trsm) for caveats.)
+  * `data`:   The address of an `auxinfo_t` object that contains auxiliary information that may be useful when optimizing the `trsm` micro-kernel implementation. (See [Using the auxinfo\_t object](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#Using_the_auxinfo_t_object) for a discussion of the kinds of values available via `auxinfo_t`, and also [Implementation Notes for trsm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-trsm) for caveats.)
   * `cntx`:   The address of the runtime context. The context can be queried for implementation-specific values such as cache and register blocksizes. However, most micro-kernels intrinsically "know" these values already, and thus the `cntx` argument usually can be safely ignored.
 
 #### Diagrams for trsm
 
-Please see the diagram for [gemmtrsm\_l](KernelsHowTo#diagram-for-gemmtrsm-l) and [gemmtrsm\_u](KernelsHowTo#diagram-for-gemmtrsm-u) to see depictions of the `trsm_l` and `trsm_u` micro-kernel operations and where they fit in with their preceding `gemm` subproblems.
+Please see the diagram for [gemmtrsm\_l](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#diagram-for-gemmtrsm-l) and [gemmtrsm\_u](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#diagram-for-gemmtrsm-u) to see depictions of the `trsm_l` and `trsm_u` micro-kernel operations and where they fit in with their preceding `gemm` subproblems.
 
 #### Implementation Notes for trsm
 
-  * **Register blocksizes.** See [Implementation Notes for gemm](KernelsHowTo#implementation-notes-for-gemm).
-  * **Leading dimensions of `a11` and `b11`: _PACKMR_ and _PACKNR_.** See [Implementation Notes for gemm](KernelsHowTo#implementation-notes-for-gemm).
-  * **Edge cases in _MR_, _NR_ dimensions.** See [Implementation Notes for gemm](KernelsHowTo#implementation-notes-for-gemm).
+  * **Register blocksizes.** See [Implementation Notes for gemm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-gemm).
+  * **Leading dimensions of `a11` and `b11`: _PACKMR_ and _PACKNR_.** See [Implementation Notes for gemm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-gemm).
+  * **Edge cases in _MR_, _NR_ dimensions.** See [Implementation Notes for gemm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-gemm).
   * **Alignment of `a11` and `b11`.** The addresses `a11` and `b11` are aligned according to `PACKMR * sizeof(type)` and `PACKNR * sizeof(type)`, respectively.
   * **Unrolling loops.** Most optimized implementations should unroll all three loops within the `trsm` micro-kernel.
   * **Prefetching next micro-panels of `A` and `B`.** We advise against using the `bli_auxinfo_next_a()` and `bli_auxinfo_next_b()` macros from within the `trsm_l` and `trsm_u` micro-kernels, since the values returned usually only make sense in the context of the overall `gemmtrsm` subproblem.
@@ -410,14 +410,14 @@ Parameters:
 
   * `k`:      The number of columns of `A10` and rows of `B01` (`trsm_l`); the number of columns of `A12` and rows of `B21` (`trsm_u`).
   * `alpha`:  The address of a scalar to be applied to `B11`.
-  * `a10`, `a12`:    The address of `A10` or `A12`, which is the _MR x k_ submatrix of the packed micro-panel of `A` that is situated to the left (`trsm_l`) or right (`trsm_u`) of the _MR x MR_ triangular submatrix `A11`. `A10` and `A12` are stored by columns with leading dimension _PACKMR_, where typically _PACKMR_ = _MR_. (See [Implementation Notes for gemm](KernelsHowTo#implementation-notes-for-gemm) for a discussion of _PACKMR_.)
-  * `a11`:    The address of `A11`, which is the _MR x MR_ lower (`trsm_l`) or upper (`trsm_u`) triangular submatrix within the packed micro-panel of matrix `A` that is situated to the right of `A10` (`trsm_l`) or the left of `A12` (`trsm_u`). `A11` is stored by columns with leading dimension _PACKMR_, where typically _PACKMR_ = _MR_. (See [Implementation Notes for gemm](KernelsHowTo#implementation-notes-for-gemm) for a discussion of _PACKMR_.) Note that `A11` contains elements in both triangles, though elements in the unstored triangle are not guaranteed to be zero and thus should not be referenced.
-  * `b01`, `b21`:   The address of `B01` and `B21`, which is the _k x NR_ submatrix of the packed micro-panel of `B` that is situated above (`trsm_l`) or below (`trsm_u`) the _MR x NR_ block `B11`. `B01` and `B21` are stored by rows with leading dimension _PACKNR_, where typically _PACKNR_ = _NR_. (See [Implementation Notes for gemm](KernelsHowTo#implementation-notes-for-gemm) for a discussion of _PACKNR_.)
-  * `b11`:    The address of `B11`, which is the _MR x NR_ submatrix of the packed micro-panel of `B`, situated below `B01` (`trsm_l`) or above `B21` (`trsm_u`). `B11` is stored by rows with leading dimension _PACKNR_, where typically _PACKNR_ = _NR_. (See [Implementation Notes for gemm](KernelsHowTo#implementation-notes-for-gemm) for a discussion of _PACKNR_.)
+  * `a10`, `a12`:    The address of `A10` or `A12`, which is the _MR x k_ submatrix of the packed micro-panel of `A` that is situated to the left (`trsm_l`) or right (`trsm_u`) of the _MR x MR_ triangular submatrix `A11`. `A10` and `A12` are stored by columns with leading dimension _PACKMR_, where typically _PACKMR_ = _MR_. (See [Implementation Notes for gemm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-gemm) for a discussion of _PACKMR_.)
+  * `a11`:    The address of `A11`, which is the _MR x MR_ lower (`trsm_l`) or upper (`trsm_u`) triangular submatrix within the packed micro-panel of matrix `A` that is situated to the right of `A10` (`trsm_l`) or the left of `A12` (`trsm_u`). `A11` is stored by columns with leading dimension _PACKMR_, where typically _PACKMR_ = _MR_. (See [Implementation Notes for gemm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-gemm) for a discussion of _PACKMR_.) Note that `A11` contains elements in both triangles, though elements in the unstored triangle are not guaranteed to be zero and thus should not be referenced.
+  * `b01`, `b21`:   The address of `B01` and `B21`, which is the _k x NR_ submatrix of the packed micro-panel of `B` that is situated above (`trsm_l`) or below (`trsm_u`) the _MR x NR_ block `B11`. `B01` and `B21` are stored by rows with leading dimension _PACKNR_, where typically _PACKNR_ = _NR_. (See [Implementation Notes for gemm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-gemm) for a discussion of _PACKNR_.)
+  * `b11`:    The address of `B11`, which is the _MR x NR_ submatrix of the packed micro-panel of `B`, situated below `B01` (`trsm_l`) or above `B21` (`trsm_u`). `B11` is stored by rows with leading dimension _PACKNR_, where typically _PACKNR_ = _NR_. (See [Implementation Notes for gemm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-gemm) for a discussion of _PACKNR_.)
   * `c11`:    The address of `C11`, which is an _MR x NR_ submatrix of matrix `C`, stored according to `rsc` and `csc`. `C11` is the submatrix within `C` that corresponds to the elements which were packed into `B11`. Thus, `C` is the original input matrix `B` to the overall `trsm` operation.
   * `rsc`:    The row stride of matrix `C11` (ie: the distance to the next row, in units of matrix elements).
   * `csc`:    The column stride of matrix `C11` (ie: the distance to the next column, in units of matrix elements).
-  * `data`:   The address of an `auxinfo_t` object that contains auxiliary information that may be useful when optimizing the `gemmtrsm` micro-kernel implementation. (See [Using the auxinfo\_t object](KernelsHowTo#Using_the_auxinfo_t_object) for a discussion of the kinds of values available via `auxinfo_t`, and also [Implementation Notes for gemmtrsm](KernelsHowTo#implementation-notes-for-gemmtrsm) for caveats.)
+  * `data`:   The address of an `auxinfo_t` object that contains auxiliary information that may be useful when optimizing the `gemmtrsm` micro-kernel implementation. (See [Using the auxinfo\_t object](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#Using_the_auxinfo_t_object) for a discussion of the kinds of values available via `auxinfo_t`, and also [Implementation Notes for gemmtrsm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-gemmtrsm) for caveats.)
   * `cntx`:   The address of the runtime context. The context can be queried for implementation-specific values such as cache and register blocksizes. However, most micro-kernels intrinsically "know" these values already, and thus the `cntx` argument usually can be safely ignored.
 
 #### Diagram for gemmtrsm\_l
@@ -469,18 +469,18 @@ The diagram below shows the packed micro-panel operands for `trsm_u` and how ele
 
 #### Implementation Notes for gemmtrsm
 
-  * **Register blocksizes.** See [Implementation Notes for gemm](KernelsHowTo#implementation-notes-for-gemm).
-  * **Leading dimensions of `a1` and `b1`: _PACKMR_ and _PACKNR_.** See [Implementation Notes for gemm](KernelsHowTo#implementation-notes-for-gemm).
-  * **Edge cases in _MR_, _NR_ dimensions.** See [Implementation Notes for gemm](KernelsHowTo#implementation-notes-for-gemm).
-  * **Alignment of `a1` and `b1`.** See [Implementation Notes for gemm](KernelsHowTo#implementation-notes-for-gemm).
-  * **Unrolling loops.** Most optimized implementations should unroll all three loops within the `trsm` subproblem of `gemmtrsm`. See [Implementation Notes for gemm](KernelsHowTo#implementation-notes-for-gemm) for remarks on unrolling the `gemm` subproblem.
+  * **Register blocksizes.** See [Implementation Notes for gemm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-gemm).
+  * **Leading dimensions of `a1` and `b1`: _PACKMR_ and _PACKNR_.** See [Implementation Notes for gemm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-gemm).
+  * **Edge cases in _MR_, _NR_ dimensions.** See [Implementation Notes for gemm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-gemm).
+  * **Alignment of `a1` and `b1`.** See [Implementation Notes for gemm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-gemm).
+  * **Unrolling loops.** Most optimized implementations should unroll all three loops within the `trsm` subproblem of `gemmtrsm`. See [Implementation Notes for gemm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-gemm) for remarks on unrolling the `gemm` subproblem.
   * **Prefetching next micro-panels of `A` and `B`.** When invoked from within a `gemmtrsm_l` micro-kernel, the addresses accessible via `bli_auxinfo_next_a()` and `bli_auxinfo_next_b()` refer to the next invocation's `a10` and `b01`, respectively, while in `gemmtrsm_u`, the `_next_a()` and `_next_b()` macros return the addresses of the next invocation's `a11` and `b11` (since those submatrices precede `a12` and `b21`).
   * **Zero `alpha`.** The micro-kernel can safely assume that `alpha` is non-zero; "alpha equals zero" handling is performed at a much higher level, which means that, in such a scenario, the micro-kernel will never get called.
-  * **Diagonal elements of `A11`.** See [Implementation Notes for trsm](KernelsHowTo#implementation-notes-for-trsm).
-  * **Zero elements of `A11`.** See [Implementation Notes for trsm](KernelsHowTo#implementation-notes-for-trsm).
-  * **Output.** See [Implementation Notes for trsm](KernelsHowTo#implementation-notes-for-trsm).
-  * **Optimization.** Let's assume that the [gemm micro-kernel](KernelsHowTo#gemm-micro-kernel) has already been optimized. You have two options with regard to optimizing the fused `gemmtrsm` micro-kernels:
-    1. Optimize only the [trsm micro-kernels](KernelsHowTo#trsm-micro-kernels). This will result in the `gemm` and `trsm_l` micro-kernels being called in sequence. (Likewise for `gemm` and `trsm_u`.)
+  * **Diagonal elements of `A11`.** See [Implementation Notes for trsm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-trsm).
+  * **Zero elements of `A11`.** See [Implementation Notes for trsm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-trsm).
+  * **Output.** See [Implementation Notes for trsm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#implementation-notes-for-trsm).
+  * **Optimization.** Let's assume that the [gemm micro-kernel](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#gemm-micro-kernel) has already been optimized. You have two options with regard to optimizing the fused `gemmtrsm` micro-kernels:
+    1. Optimize only the [trsm micro-kernels](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#trsm-micro-kernels). This will result in the `gemm` and `trsm_l` micro-kernels being called in sequence. (Likewise for `gemm` and `trsm_u`.)
     1. Fuse the implementation of the `gemm` micro-kernel with that of the `trsm` micro-kernels by inlining both into the `gemmtrsm_l` and `gemmtrsm_u` micro-kernel definitions. This option is more labor-intensive, but also more likely to yield higher performance because it avoids redundant memory operations on the packed _MR x NR_ submatrix `B11`.
 
 

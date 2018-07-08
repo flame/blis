@@ -1,11 +1,11 @@
 ## Contents
 
-* **[Contents](Multithreading#contents)**
-* **[Introduction](Multithreading#introduction)**
-* **[Enabling multithreading](Multithreading#enabling-multithreading)**
-* **[Specifying multithreading](Multithreading#specifying-multithreading)**
-  * [The automatic way](Multithreading#the-automatic-way)
-  * [The manual way](Multithreading#the-manual-way)
+* **[Contents](Multithreading.md#contents)**
+* **[Introduction](Multithreading.md#introduction)**
+* **[Enabling multithreading](Multithreading.md#enabling-multithreading)**
+* **[Specifying multithreading](Multithreading.md#specifying-multithreading)**
+  * [The automatic way](Multithreading.md#the-automatic-way)
+  * [The manual way](Multithreading.md#the-manual-way)
 
 ## Introduction
 

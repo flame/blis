@@ -4,30 +4,30 @@ Note: Individual credits, where appropriate, are shown in parentheses.
 
 ## Contents
 
-* [Changes in 0.3.2](ReleaseNotes#changes-in-032)
-* [Changes in 0.3.1](ReleaseNotes#changes-in-031)
-* [Changes in 0.3.0](ReleaseNotes#changes-in-030)
-* [Changes in 0.2.2](ReleaseNotes#changes-in-022)
-* [Changes in 0.2.1](ReleaseNotes#changes-in-021)
-* [Changes in 0.2.0](ReleaseNotes#changes-in-020)
-* [Changes in 0.1.8](ReleaseNotes#changes-in-018)
-* [Changes in 0.1.7](ReleaseNotes#changes-in-017)
-* [Changes in 0.1.6](ReleaseNotes#changes-in-016)
-* [Changes in 0.1.5](ReleaseNotes#changes-in-015)
-* [Changes in 0.1.4](ReleaseNotes#changes-in-014)
-* [Changes in 0.1.3](ReleaseNotes#changes-in-013)
-* [Changes in 0.1.2](ReleaseNotes#changes-in-012)
-* [Changes in 0.1.1](ReleaseNotes#changes-in-011)
-* [Changes in 0.1.0](ReleaseNotes#changes-in-010)
-* [Changes in 0.0.9](ReleaseNotes#changes-in-009)
-* [Changes in 0.0.8](ReleaseNotes#changes-in-008)
-* [Changes in 0.0.7](ReleaseNotes#changes-in-007)
-* [Changes in 0.0.6](ReleaseNotes#changes-in-006)
-* [Changes in 0.0.5](ReleaseNotes#changes-in-005)
-* [Changes in 0.0.4](ReleaseNotes#changes-in-004)
-* [Changes in 0.0.3](ReleaseNotes#changes-in-003)
-* [Changes in 0.0.2](ReleaseNotes#changes-in-002)
-* [Changes in 0.0.1](ReleaseNotes#changes-in-001)
+* [Changes in 0.3.2](ReleaseNotes.md#changes-in-032)
+* [Changes in 0.3.1](ReleaseNotes.md#changes-in-031)
+* [Changes in 0.3.0](ReleaseNotes.md#changes-in-030)
+* [Changes in 0.2.2](ReleaseNotes.md#changes-in-022)
+* [Changes in 0.2.1](ReleaseNotes.md#changes-in-021)
+* [Changes in 0.2.0](ReleaseNotes.md#changes-in-020)
+* [Changes in 0.1.8](ReleaseNotes.md#changes-in-018)
+* [Changes in 0.1.7](ReleaseNotes.md#changes-in-017)
+* [Changes in 0.1.6](ReleaseNotes.md#changes-in-016)
+* [Changes in 0.1.5](ReleaseNotes.md#changes-in-015)
+* [Changes in 0.1.4](ReleaseNotes.md#changes-in-014)
+* [Changes in 0.1.3](ReleaseNotes.md#changes-in-013)
+* [Changes in 0.1.2](ReleaseNotes.md#changes-in-012)
+* [Changes in 0.1.1](ReleaseNotes.md#changes-in-011)
+* [Changes in 0.1.0](ReleaseNotes.md#changes-in-010)
+* [Changes in 0.0.9](ReleaseNotes.md#changes-in-009)
+* [Changes in 0.0.8](ReleaseNotes.md#changes-in-008)
+* [Changes in 0.0.7](ReleaseNotes.md#changes-in-007)
+* [Changes in 0.0.6](ReleaseNotes.md#changes-in-006)
+* [Changes in 0.0.5](ReleaseNotes.md#changes-in-005)
+* [Changes in 0.0.4](ReleaseNotes.md#changes-in-004)
+* [Changes in 0.0.3](ReleaseNotes.md#changes-in-003)
+* [Changes in 0.0.2](ReleaseNotes.md#changes-in-002)
+* [Changes in 0.0.1](ReleaseNotes.md#changes-in-001)
 
 ## Changes in 0.3.2
 April 28, 2018
@@ -44,7 +44,7 @@ April 4, 2018
 
 - Enable use of new zen kernels in haswell sub-configuration.
 - Added row-storage optimizations to zen `dotxf` kernels (now also used by haswell).
-- Integrated an `f2c`ed version of the BLAS test drivers from netlib LAPACK into BLIS build system (e.g. `make testblas`, `make checkblas`). See the [Testsuite](https://github.com/flame/blis/wiki/Testsuite) wiki for more info. Also scheduled these BLAS drivers to execute regularly via Travis CI.
+- Integrated an `f2c`ed version of the BLAS test drivers from netlib LAPACK into BLIS build system (e.g. `make testblas`, `make checkblas`). See the [Testsuite](https://github.com/flame/blis/blob/master/docs/Testsuite.md) document for more info. Also scheduled these BLAS drivers to execute regularly via Travis CI.
 - Added a new `make check` target that executes a fast version of the BLIS testsuite as well as the BLAS test drivers (primarily targeting package maintainers).
 - Allow individual operation overriding in the BLIS testsuite. (This makes it easy to quickly test one or two operations of interest.)
 - Added build system support for libmemkind. If present, `hbw_malloc()` is used as the default value for `BLIS_MALLOC_POOL` instead of `malloc()`. It can be disabled via `--disable-memkind`.
@@ -62,12 +62,12 @@ This version contains significant improvements from 0.2.2. Major changes include
 - Real and complex domain (s,d,c,z) assembly-based gemm microkernels for AMD's Zen microarchitecture. (AMD, Field Van Zee)
 - Real domain (s,d) assembly-based `gemmtrsm_l` and `gemmtrsm_u` microkernels for Zen. (AMD, Field Van Zee)
 - Real domain (s,d) intrinsics-based `amaxv`, `axpyv`, `dotv`, `dotxv`, `scalv`, `axpyf`, and `dotxf` kernels for Zen. (AMD, Field Van Zee)
-- Generalized the configuration system to allow multi-configuration builds targeting configuration "families". A single sub-configuration is chosen at runtime via some heuristic, such as querying CPUID (e.g. runtime hardware detection). This change was extensive and required a reorganization of the build system, configuration semantics, reference kernels, a new naming scheme for native kernels, and a rewrite of the global kernel structure (gks). Please see the rewritten [Configuration wiki](ConfigurationHowTo) for details.
+- Generalized the configuration system to allow multi-configuration builds targeting configuration "families". A single sub-configuration is chosen at runtime via some heuristic, such as querying CPUID (e.g. runtime hardware detection). This change was extensive and required a reorganization of the build system, configuration semantics, reference kernels, a new naming scheme for native kernels, and a rewrite of the global kernel structure (gks). Please see the rewritten [Configuration Guide](https://github.com/flame/blis/blob/master/docs/ConfigurationHowTo.md) for details.
 - Implemented runtime hardware detection for x86_64 hardware.
 - Reimplemented configure-time hardware detection in terms of new runtime hardware detection code, which queries for CPU features rather than individual models.
 - Implemented library self-initialization by rewriting `bli_init()` in terms of `pthread_once()` and inserting invocations to `bli_init()` in key places throughout BLIS. The expectation is that through normal use of any BLIS API (BLAS, typed BLIS, or object-based BLIS), the user no longer needs to explicitly initialize the library, and that `bli_finalize()` should never be called by the user unless he is absolutely sure he no longer needs BLIS functionality. Related to this: global scalar constants (`BLIS_ONE`, `BLIS_ZERO`, etc.) are now statically initialized and thus ready to use immediately. Collectively, these changes provide improved thread safety at the application level.
 - Compile with and install a single monolithic (flattened) `blis.h` header to (1) speed up compilation and (2) reduce the number of build product files.
-- Added a sub-API for setting multithreading environment variables at runtime. For a few examples, please see the [Multithreading](Multithreading wiki).
+- Added a sub-API for setting multithreading environment variables at runtime. For a few examples, please see the [Multithreading](https://github.com/flame/blis/blob/master/docs/Multithreading.md) guide.
 - Reimplemented OpenMP/pthread barriers in terms of GNU atomic built-ins.
 - Other small changes and fixes.
 

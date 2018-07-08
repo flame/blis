@@ -20,9 +20,9 @@
 
 ## Introduction
 
-This wiki describes how to manage, edit, and create BLIS framework configurations. **The target audience is primarily BLIS developers** who wish to add support for new types of hardware, and developers who write (or tinker with) BLIS kernels.
+This document describes how to manage, edit, and create BLIS framework configurations. **The target audience is primarily BLIS developers** who wish to add support for new types of hardware, and developers who write (or tinker with) BLIS kernels.
 
-The [wiki](BuildSystem) for the BLIS build system introduces the concept of a BLIS [configuration](BuildSystem#Step_1:_Choose_a_framework_configuration). There are actually two types of configurations: sub-configuration and configuration families.
+The BLIS [Build System](https://github.com/flame/blis/blob/master/docs/BuildSystem.md) guide introduces the concept of a BLIS [configuration](https://github.com/flame/blis/blob/master/docs/BuildSystem#Step_1:_Choose_a_framework_configuration). There are actually two types of configurations: sub-configuration and configuration families.
 
 A _sub-configuration_ encapsulates all of the information needed to build BLIS for a particular microarchitecture. For example, the `haswell` configuration allows a user or developer to build a BLIS library that targets hardware based on Intel Haswell (or Broadwell or Skylake/Kabylake desktop) microprocessors. Such a sub-configuration typically includes optimized kernels as well as the corresponding cache and register blocksizes that allow those kernels to work well on the target hardware.
 
@@ -170,7 +170,7 @@ Here, we use `bli_blksz_init()` to set different auxiliary (maximum) cache block
 
 Note that we set level-3 blocksizes even for datatypes that retain reference code kernels; however, by passing in `0` for those blocksizes, we indicate to `bli_blksz_init()` and `bli_blksz_init_easy()` that the current value should be left untouched. In the example above, this leaves the blocksizes associated with the reference kernels (set by `bli_cntx_init_fooarch_ref()`) intact for the single real, single complex, and double complex datatypes.
 
-_Digression:_ Auxiliary blocksize values for register blocksizes are interpreted as the "packing" register blocksizes. _PACKMR_ and _PACKNR_ serve as "leading dimensions" of the packed micro-panels that are passed into the micro-kernel. Oftentimes, _PACKMR = MR_ and _PACKNR = NR_, and thus the developer does not typically need to set these values manually. (See the [implementation notes for gemm](KernelsHowTo#Implementation_Notes_for_gemm) in the BLIS Kernel guide for more details on these topics.)
+_Digression:_ Auxiliary blocksize values for register blocksizes are interpreted as the "packing" register blocksizes. _PACKMR_ and _PACKNR_ serve as "leading dimensions" of the packed micro-panels that are passed into the micro-kernel. Oftentimes, _PACKMR = MR_ and _PACKNR = NR_, and thus the developer does not typically need to set these values manually. (See the [implementation notes for gemm](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#Implementation_Notes_for_gemm) in the BLIS Kernel guide for more details on these topics.)
 
 _Digression:_ Auxiliary blocksize values for cache blocksizes are interpreted as the maximum cache blocksizes. The maximum cache blocksizes are a convenient and portable way of smoothing performance of the level-3 operations when computing with a matrix operand that is just slightly larger than a multiple of the preferred cache blocksize in that dimension. In these "edge cases," iterations run with highly sub-optimal blocking. We can address this problem by merging the "edge case" iteration with the second-to-last iteration, such that the cache blocksizes are slightly larger--rather than significantly smaller--than optimal. The maximum cache blocksizes allow the developer to specify the _maximum_ size of this merged iteration; if the edge case causes the merged iteration to exceed this maximum, then the edge case is _not_ merged and instead it is computed upon in separate (final) iteration.
 
@@ -180,7 +180,7 @@ _**Availability of kernels.**_ Note that any kernel made available to the `fooar
 ```
 fooarch: fooarch/fooarch/bararch
 ```
-Interpreting the line left-to-right: the `fooarch` configuration family contains only itself, `fooarch`, but must be able to refer to kernels from its own kernel set (`fooarch`) as well as kernels belonging to the `bararch` kernel set. The configuration registry is described more completely [in a later section](ConfigurationHowTo#configuration-registry).
+Interpreting the line left-to-right: the `fooarch` configuration family contains only itself, `fooarch`, but must be able to refer to kernels from its own kernel set (`fooarch`) as well as kernels belonging to the `bararch` kernel set. The configuration registry is described more completely [in a later section](https://github.com/flame/blis/blob/master/docs/ConfigurationHowTo.md#configuration-registry).
 
 
 
@@ -322,12 +322,12 @@ $ ls config/amd64
 bli_family_amd64.h  make_defs.mk
 ```
 A configuration family contains a subset of the files contained within a sub-configuration: A `bli_family_*.h` header file and a `make_defs.mk` makefile fragment:
-  * `bli_family_amd64.h`. This header file is `#included` only when the configuration family in question, in this case `amd64`, was the target to `./configure`. The file serves a similar purpose as with sub-configurations--a place to define various parameters, such as those relating to memory allocation and alignment. However, in the context of configuration families, the uniqueness of this file makes a bit more sense. Importantly, the definitions in this file will be affect **all** sub-configurations within the family. Thus, it is useful to think of these as "global" parameters. For example, if custom implementations of `malloc()` and `free()` are specified in the `bli_family_amd64.h` file, these implementations will be used for every sub-configuration member of the `amd64` family. (The configuration registry, described in [the next section](ConfigurationHowTo#configuration-registry), specifies each configuration family's membership.) As with sub-configurations, this file may be empty, in which case reasonable defaults are selected by the framework.
+  * `bli_family_amd64.h`. This header file is `#included` only when the configuration family in question, in this case `amd64`, was the target to `./configure`. The file serves a similar purpose as with sub-configurations--a place to define various parameters, such as those relating to memory allocation and alignment. However, in the context of configuration families, the uniqueness of this file makes a bit more sense. Importantly, the definitions in this file will be affect **all** sub-configurations within the family. Thus, it is useful to think of these as "global" parameters. For example, if custom implementations of `malloc()` and `free()` are specified in the `bli_family_amd64.h` file, these implementations will be used for every sub-configuration member of the `amd64` family. (The configuration registry, described in [the next section](https://github.com/flame/blis/blob/master/docs/ConfigurationHowTo.md#configuration-registry), specifies each configuration family's membership.) As with sub-configurations, this file may be empty, in which case reasonable defaults are selected by the framework.
   * `make_defs.mk`. This makefile fragment defines the compiler and compiler flags in a manner identical to that of sub-configurations. However, these configuration flags are used when compiling source code that is not specific to any one particular sub-configuration. (The build system compiles a set of reference kernels and optimized kernels for each sub-configuration, during which it uses flags read from the individual sub-configurations' `make_defs.mk` files. By contrast, the general framework code is compiled once--using the flags read from the family's `make_defs.mk` file--and executed by all sub-configurations.)
 
-For a more detailed walkthrough of these files' expected/allowed contents, please see the descriptions provided in the section on [sub-configurations](ConfigurationHowTo#sub-configurations):
- * [bli_family_*.h](ConfigurationHowTo#bli_family_h)
- * [make_defs.h](ConfigurationHowTo#make_defsmk)
+For a more detailed walkthrough of these files' expected/allowed contents, please see the descriptions provided in the section on [sub-configurations](https://github.com/flame/blis/blob/master/docs/ConfigurationHowTo.md#sub-configurations):
+ * [bli_family_*.h](https://github.com/flame/blis/blob/master/docs/ConfigurationHowTo.md#bli_family_h)
+ * [make_defs.h](https://github.com/flame/blis/blob/master/docs/ConfigurationHowTo.md#make_defsmk)
 
 With these two files defined and present, the configuration family is properly constituted and ready to be registered within the configuration registry.
 
@@ -525,7 +525,7 @@ $ ls kernels
 armv7a  bgq        generic  knc  old     piledriver  sandybridge
 armv8a  bulldozer  haswell  knl  penryn  power7
 ```
-Next, we must write the `knl` kernels and locate them inside `kernels/knl`. (For more information on writing BLIS kernels, please see the [BLIS Kernels guide](KernelsHowTo).) We recommend separating level-1v, level-1f, and level-3 kernels into separate `1`, `1f`, and `3` sub-directories, respectively. The kernel files and functions therein do not need to follow any particular naming convention, though we strongly recommend using the conventions already used by other kernel sets. Take a look at other kernel files, such as those for `haswell`, [for examples](https://github.com/flame/blis/tree/master/kernels). Finally, for the `knl` kernel set, you should insert a file named `bli_kernels_knl.h` into `kernels/knl` that prototypes all of your new kernel set's kernel functions. You are welcome to write your own prototypes, but to make the prototyping of kernels easier we recommend using the prototype-generating macros for level-1v, level-1f, level-1m, and level-3 functions defined in [frame/1/bli_l1v_ker_prot.h](https://github.com/flame/blis/blob/master/frame/1/bli_l1v_ker_prot.h), [frame/1f/bli_l1f_ker_prot.h](https://github.com/flame/blis/blob/master/frame/1f/bli_l1f_ker_prot.h), [frame/1m/bli_l1m_ker_prot.h](https://github.com/flame/blis/blob/master/frame/1m/bli_l1m_ker_prot.h), and [frame/3/bli_l3_ukr_prot.h](https://github.com/flame/blis/blob/master/frame/3/bli_l3_ukr_prot.h), respectively. The following example utilizes how a select subset of these macros can be used to generate kernel function prototypes.
+Next, we must write the `knl` kernels and locate them inside `kernels/knl`. (For more information on writing BLIS kernels, please see the [Kernels Guide](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md).) We recommend separating level-1v, level-1f, and level-3 kernels into separate `1`, `1f`, and `3` sub-directories, respectively. The kernel files and functions therein do not need to follow any particular naming convention, though we strongly recommend using the conventions already used by other kernel sets. Take a look at other kernel files, such as those for `haswell`, [for examples](https://github.com/flame/blis/tree/master/kernels). Finally, for the `knl` kernel set, you should insert a file named `bli_kernels_knl.h` into `kernels/knl` that prototypes all of your new kernel set's kernel functions. You are welcome to write your own prototypes, but to make the prototyping of kernels easier we recommend using the prototype-generating macros for level-1v, level-1f, level-1m, and level-3 functions defined in [frame/1/bli_l1v_ker_prot.h](https://github.com/flame/blis/blob/master/frame/1/bli_l1v_ker_prot.h), [frame/1f/bli_l1f_ker_prot.h](https://github.com/flame/blis/blob/master/frame/1f/bli_l1f_ker_prot.h), [frame/1m/bli_l1m_ker_prot.h](https://github.com/flame/blis/blob/master/frame/1m/bli_l1m_ker_prot.h), and [frame/3/bli_l3_ukr_prot.h](https://github.com/flame/blis/blob/master/frame/3/bli_l3_ukr_prot.h), respectively. The following example utilizes how a select subset of these macros can be used to generate kernel function prototypes.
 ```
 GEMM_UKR_PROT( double, d, gemm_knl_asm_24x8 )
 
@@ -635,7 +635,7 @@ First, we update the configuration name inside of `make_defs.mk`:
 ```
 THIS_CONFIG    := knl
 ```
-and while we're editing the file, we can make any other changes to compiler flags we wish (if any). Similarly, the `bli_family_knl.h` header file should be updated as needed. Since the number of vector registers and the vector register size on `knl` differ from the defaults, we must explicitly set them. (The role of these parameters was explained in a [previous section](ConfigurationHowTo#bli_family_h).) Furthermore, provided that a macro `BLIS_NO_HBWMALLOC` is not set, we use a different implementation of `malloc()` and `free()` and `#include` that implementation's header file. 
+and while we're editing the file, we can make any other changes to compiler flags we wish (if any). Similarly, the `bli_family_knl.h` header file should be updated as needed. Since the number of vector registers and the vector register size on `knl` differ from the defaults, we must explicitly set them. (The role of these parameters was explained in a [previous section](https://github.com/flame/blis/blob/master/docs/ConfigurationHowTo.md#bli_family_h).) Furthermore, provided that a macro `BLIS_NO_HBWMALLOC` is not set, we use a different implementation of `malloc()` and `free()` and `#include` that implementation's header file. 
 ```
 #define BLIS_SIMD_NUM_REGISTERS  32
 #define BLIS_SIMD_SIZE           64
@@ -650,7 +650,7 @@ and while we're editing the file, we can make any other changes to compiler flag
   #define BLIS_FREE_POOL    hbw_free
 #endif
 ```
-Finally, we update `bli_cntx_init_knl.c` to initialize the context with the appropriate kernel function pointers and blocksize values. The functions used to perform this initialization are explained in [an earlier section](ConfigurationHowTo#bli_cntx_init_c).
+Finally, we update `bli_cntx_init_knl.c` to initialize the context with the appropriate kernel function pointers and blocksize values. The functions used to perform this initialization are explained in [an earlier section](https://github.com/flame/blis/blob/master/docs/ConfigurationHowTo.md#bli_cntx_init_c).
 
 
 
@@ -786,7 +786,7 @@ build static library?  yes
 build shared library?  no
 ```
 
-This will tell you the current configuration name, the [configuration registry lists](ConfigurationHowTo#printing-the-configuration-registry-lists), as well as other information stored by `configure` in the `config.mk` file.
+This will tell you the current configuration name, the [configuration registry lists](https://github.com/flame/blis/blob/master/docs/ConfigurationHowTo.md#printing-the-configuration-registry-lists), as well as other information stored by `configure` in the `config.mk` file.
 
 
 

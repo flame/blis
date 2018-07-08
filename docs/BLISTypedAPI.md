@@ -27,7 +27,7 @@
 
 # Introduction
 
-This wiki summarizes the user-level BLIS APIs, including BLIS-specific type definitions, header files, and function prototypes. This document also includes APIs to key [micro-]kernels which are used to accelerate and optimize various level-2 and level-3 operations.
+This document summarizes the user-level BLIS APIs, including BLIS-specific type definitions, header files, and function prototypes. This document also includes APIs to key [micro-]kernels which are used to accelerate and optimize various level-2 and level-3 operations.
 
 There are many functions that BLIS implements that are not listed here, either because they are lower-level functions, or they are considered for use primarily by developers and experts.
 
@@ -1109,7 +1109,7 @@ where `A` is an _m x m_ triangular matrix stored in the lower or upper triangle 
 ## Level-3 operations
 
 Level-3 operations perform various level-3 BLAS-like operations.
-**Note**: Each All level-3 operations are implemented through a handful of level-3 micro-kernels. Please see the [Kernels wiki](KernelsHowTo) for more details.
+**Note**: Each All level-3 operations are implemented through a handful of level-3 micro-kernels. Please see the [Kernels Guide](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md) for more details.
 
 
 ---
@@ -1626,7 +1626,7 @@ Perform
 ```
 where `C11` is an _MR x NR_ matrix, `A1` is an _MR x k_ "micro-panel" matrix stored in packed (column-stored) format, `B1` is a _k x NR_ "micro-panel" matrix in packed (row-stored) format, and alpha and beta are scalars. The storage of `C11` is specified by its row and column strides, `rsc` and `csc`.
 
-Please see the [BLIS Kernel wiki](KernelsHowTo.md) for more information on the `gemm` micro-kernel.
+Please see the [Kernel Guide](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md) for more information on the `gemm` micro-kernel.
 
 
 ---
@@ -1658,7 +1658,7 @@ Perform
 ```
 where `A11` is an _MR x MR_ lower or upper triangular matrix stored in packed (column-stored) format, `B11` is an _MR x NR_ matrix stored in packed (row-stored) format, and `C11` is an _MR x NR_ matrix stored according to row and column strides `rsc` and `csc`.
 
-Please see the [BLIS Kernel wiki](KernelsHowTo.md) for more information on the `trsm` micro-kernel.
+Please see the [Kernel Guide](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md) for more information on the `trsm` micro-kernel.
 
 ---
 
@@ -1704,7 +1704,7 @@ if `A11` is lower triangular, or
 ```
 if `A11` is upper triangular.
 
-Please see the [BLIS Kernel wiki](KernelsHowTo.md) for more information on the `gemmtrsm` micro-kernel.
+Please see the [Kernel Guide](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md) for more information on the `gemmtrsm` micro-kernel.
 
 
 

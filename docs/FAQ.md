@@ -60,24 +60,24 @@ As explained [above](FAQ#why-did-you-create-blis?), BLIS was initially a layer w
 
 ### Does BLIS automatically detect my hardware?
 
-On certain architectures, yes. In order to use auto-detection, you must specify `auto` as your configuration when running `configure` (Please see the [BLIS build system wiki](BuildSystem) for more info.) A runtime detection option is also available. (Please see the [BLIS configuration guide](ConfigurationHowTo) for more info.)
+On certain architectures, yes. In order to use auto-detection, you must specify `auto` as your configuration when running `configure` (Please see the BLIS [Build System](https://github.com/flame/blis/blob/master/docs/BuildSystem.md) guide for more info.) A runtime detection option is also available. (Please see the [Configuration Guide](https://github.com/flame/blis/blob/master/docs/ConfigurationHowTo.md) for a comprehensive walkthrough.)
 
 If automatic hardware detection is requested at configure-time and the build process does not recognize your architecture, the `generic` configuration is selected.
 
 ### I understand that BLIS is mostly a tool for developers?
 
-Yes. In order to achieve high performance, BLIS requires that hand-coded kernels and micro-kernels be written and referenced in a valid [BLIS configuration](ConfigurationHowTo). These components are usually written by developers and then included within BLIS for use by others.
+Yes. In order to achieve high performance, BLIS requires that hand-coded kernels and micro-kernels be written and referenced in a valid [BLIS configuration](https://github.com/flame/blis/blob/master/docs/ConfigurationHowTo.md). These components are usually written by developers and then included within BLIS for use by others.
 
 The good news, however, is that end-users can use BLIS too. Once the aforementioned kernels are integrated into BLIS, they can be used without any developer-level knowledge. Usually, `./configure auto; make; make install` is sufficient for the typical users with typical hardware.
 
 ### How do I link against BLIS?
 
-Linking against BLIS is easy! Most people can link to it as if it were a generic BLAS library. Please see the [Linking against BLIS](BuildSystem#linking-against-blis) section of the [build system wiki](BuildSystem).
+Linking against BLIS is easy! Most people can link to it as if it were a generic BLAS library. Please see the [Linking against BLIS](https://github.com/flame/blis/blob/master/docs/BuildSystem.md#linking-against-blis) section of the [Build System](https://github.com/flame/blis/blob/master/docs/BuildSystem.md) guide.
 
 ### Must I use git? Can I download a tarball?
 
 We **strongly encourage** you to obtain the BLIS source code by cloning a `git` repository (via the [git
-clone](https://github.com/flame/blis/wiki/BuildSystem#obtaining-blis) command). The reason for this is that it will allow you to easily update your local copy of BLIS by executing `git pull`.
+clone](https://github.com/flame/blis/blob/master/docs/BuildSystem.md#obtaining-blis) command). The reason for this is that it will allow you to easily update your local copy of BLIS by executing `git pull`.
 
 Tarballs and zip files may be obtained from the [releases](https://github.com/flame/blis/releases) page.
 
@@ -85,7 +85,7 @@ Tarballs and zip files may be obtained from the [releases](https://github.com/fl
 
 The micro-kernel (usually short for "`gemm` micro-kernel") is the basic unit of level-3 (matrix-matrix) computation within BLIS. It consists of one loop, where each iteration performs a very small outer product to update a very small matrix. The micro-kernel is typically the only piece of code that must be carefully optimized (via vector intrinsics or assembly code) to enable high performance in most of the level-3 operations such as `gemm`, `hemm`, `herk`, and `trmm`.
 
-For a more thorough explanation of the micro-kernel and its role in the overall level-3 computations, please read our [ACM TOMS papers](https://github.com/flame/blis#citations). For API and technical reference, please see the [gemm micro-kernel section](KernelsHowTo#gemm-micro-kernel) of the [BLIS Kernels guide](KernelsHowTo).
+For a more thorough explanation of the micro-kernel and its role in the overall level-3 computations, please read our [ACM TOMS papers](https://github.com/flame/blis#citations). For API and technical reference, please see the [gemm micro-kernel section](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#gemm-micro-kernel) of the BLIS [Kernels Guide](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md).
 
 ### What is a macro-kernel?
 
@@ -115,7 +115,7 @@ When a matrix is stored with general stride, both the row stride and column stri
 
 ### I'm not really interested in all of these newfangled features in BLIS. Can I just use BLIS as a BLAS library?
 
-Absolutely. Just link your application to BLIS the same way you would link to a BLAS library. For a simple linking example, see the [Linking to BLIS](BuildSystem#linking-to-blis) section of the [BLIS Build System wiki](BuildSystem).
+Absolutely. Just link your application to BLIS the same way you would link to a BLAS library. For a simple linking example, see the [Linking to BLIS](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md#linking-to-blis) section of the BLIS [Build System](https://github.com/flame/blis/blob/master/docs/BuildSystem.md) guide.
 
 ### What about CBLAS?
 
@@ -123,19 +123,19 @@ BLIS also contains an optional CBLAS compatibility layer, which leverages the BL
 
 ### Can I call the native BLIS API from Fortran-77/90/95/2000/C++/Python?
 
-In principle, BLIS's [native BLAS-like API](BLISTypedAPI) can be called from Fortran. However, you must ensure that the size of the integer in BLIS is equal to the size of integer used by your Fortran program/compiler/environment. The size of BLIS integers is set in `bli_config.h`. Please see the [bli\_config.h](ConfigurationHowTo#bli_configh) section of the [BLIS Configuration guide](ConfigurationHowTo) for more details.
+In principle, BLIS's native (and BLAS-like) [typed API](BLISTypedAPI) can be called from Fortran. However, you must ensure that the size of the integer in BLIS is equal to the size of integer used by your Fortran program/compiler/environment. The size of BLIS integers is set in `bli_config.h`. Please see the [bli\_config.h](ConfigurationHowTo#bli_configh) section of the BLIS [Configuration Guide](https://github.com/flame/blis/blob/master/docs/ConfigurationHowTo.md) for more details.
 
 As for bindings to other languages, please contact the [blis-devel](http://groups.google.com/group/blis-devel) mailing list.
 
 ### Do I need to call initialization/finalization functions before being able to use BLIS from my application?
 
-Originally, BLIS did indeed require the application to explicitly setup (initialize) various internal data structures via `bli_init()`. Likewise, calling `bli_finalize()` was recommended to cleanup (finalize) the library. However, since commit 9804adf, BLIS has implemented self-initialization. These explicit calls to `bli_init()` and `bli_finalize()` are no longer necessary, though experts may still use them in special cases to control the allocation and freeing of resources. This topic is discussed in the [BLIS typed API reference](BLISTypedAPI#initialization-and-cleanup).
+Originally, BLIS did indeed require the application to explicitly setup (initialize) various internal data structures via `bli_init()`. Likewise, calling `bli_finalize()` was recommended to cleanup (finalize) the library. However, since commit 9804adf, BLIS has implemented self-initialization. These explicit calls to `bli_init()` and `bli_finalize()` are no longer necessary, though experts may still use them in special cases to control the allocation and freeing of resources. This topic is discussed in the BLIS [typed API reference](https://github.com/flame/blis/blob/master/docs/BLISTypedAPI.md#initialization-and-cleanup).
 
 ### Does BLIS support multithreading?
 
-Yes! BLIS supports multithreading (via OpenMP or POSIX threads) for all of its level-3 operations. For more information on enabling and controlling multithreading, please see the wiki on [Multithreading](Multithreading).
+Yes! BLIS supports multithreading (via OpenMP or POSIX threads) for all of its level-3 operations. For more information on enabling and controlling multithreading, please see the [Multithreading](https://github.com/flame/blis/blob/master/docs/Multithreading.md) guide.
 
-BLIS can also very easily be made thread-safe so that you can call BLIS from threads within a multithreaded library or application. For more information on making BLIS thread-safe, see the "Multithreading" subsection of the [bli\_config.h](ConfigurationHowTo#bli_configh) header file section in the [BLIS Configuration guide](ConfigurationHowTo).
+BLIS can also very easily be made thread-safe so that you can call BLIS from threads within a multithreaded library or application. For more information on making BLIS thread-safe, see the "Multithreading" subsection of the [bli\_config.h](ConfigurationHowTo#bli_configh) header file section in the BLIS [Configuration Guide](https://github.com/flame/blis/blob/master/docs/ConfigurationHowTo.md).
 
 ### Does BLIS support NUMA environments?
 
@@ -147,7 +147,7 @@ BLIS does not currently support graphical processing units (GPUs).
 
 ### Does BLIS work on _(some architecture)_?
 
-Please see the [BLIS Hardware Support](HardwareSupport) wiki for a full list of supported architectures. If your favorite hardware is not listed and you have the expertise, please consider developing your own kernels and sharing them with the project! We will, of course, gratefully credit your contribution.
+Please see the BLIS [Hardware Support](https://github.com/flame/blis/blob/master/docs/HardwareSupport.md) guide for a full list of supported architectures. If your favorite hardware is not listed and you have the expertise, please consider developing your own kernels and sharing them with the project! We will, of course, gratefully credit your contribution.
 
 ### What about distributed-memory parallelism?
 
@@ -155,7 +155,7 @@ No. BLIS is a framework for sequential and shared-memory/multicore implementatio
 
 ### Can I build BLIS on Windows / Mac OS X?
 
-BLIS was designed for use in a GNU/Linux environment, however, it should work on other UNIX-like systems as well, such as OS X. System software requirements for UNIX-like systems are discussed in the [BLIS build system guide](BuildSystem).
+BLIS was designed for use in a GNU/Linux environment, however, it should work on other UNIX-like systems as well, such as OS X. System software requirements for UNIX-like systems are discussed in the BLIS [Build System](https://github.com/flame/blis/blob/master/docs/BuildSystem.md) guide.
 
 Support for building in Windows is not directly supported. However, Windows 10 now provides a Linux-like environment. We suspect this is the best route for those trying to build BLIS in Windows. If you have success and would like to share your experiences, please join the [blis-devel](http://groups.google.com/group/blis-devel) mailing list and send us a message!
 

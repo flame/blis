@@ -15,7 +15,7 @@
 
 ## Introduction
 
-This wiki describes how to configure, compile, and install a BLIS library on your local system.
+This document describes how to configure, compile, and install a BLIS library on your local system.
 
 The BLIS build system was designed for use with GNU/Linux (or some other sane UNIX). Other requirements are:
 
@@ -52,7 +52,7 @@ LICENSE    build         config_registry  lib        test
 
 The first step is to choose how to configure BLIS. Specifically, a user must decide which configuration to use, or whether to allow `configure` to automatically guess the best configuration for your hardware. (Note: This automatic configuration selection only applies to x86_64 systems.)
 
-Configurations are described in detail in the [BLIS configuration guide](ConfigurationHowTo) wiki.
+Configurations are described in detail in the [Configuration Guide](https://github.com/flame/blis/blob/master/docs/ConfigurationHowTo.md).
 
 Generally speaking, a configuration consists of several files that reside in a sub-directory of the `config` directory. To see a list of the available configurations, you may inspect this directory, or run `configure` with no arguments. Here are the current (as of this writing) contents of the `config` directory:
 ```
@@ -237,7 +237,7 @@ Watch the output near the end. You should see the following messages, though not
 All BLIS tests passed!
 All BLAS tests passed!
 ```
-Please see the [BLIS testsuite wiki](Testsuite) for more details on running either the BLIS testsuite or the BLAS test drivers. If you have any trouble, please report your problem to BLIS developers by opening a [new issue](https://github.com/flame/blis/issues/).
+Please see the [Testsuite](https://github.com/flame/blis/blob/master/docs/Testsuite.md) document for more details on running either the BLIS testsuite or the BLAS test drivers. If you have any trouble, please report your problem to BLIS developers by opening a [new issue](https://github.com/flame/blis/issues/).
 
 
 ## Step 4: Installation
