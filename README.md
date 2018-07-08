@@ -160,44 +160,46 @@ $ make check [-j]
 ```
 
 A more detailed walkthrough of the build system can be found in our
-[Build system wiki](https://github.com/flame/blis/wiki/BuildSystem).
+[Build System](docs/BuildSystem.md) guide.
 
 If you want to browse a quick-reference guide on user-level BLIS
-interfaces, please read the [BLIS API quick
-reference](https://github.com/flame/blis/wiki/BLISAPIQuickReference).
+interfaces, please read the [BLIS Typed API reference](docs/BLISTypedAPI.md).
 There you will find a brief description of each operation as well as some more
 general information needed when developing an application with BLIS.
 
 If you want to begin using the more advanced object-based API in BLIS,
-please step through the example code tutorial in the [examples/oapi](https://github.com/flame/blis/tree/master/examples/oapi) directory.
+please step through the example code tutorial in the [examples/oapi](examples/oapi) directory.
 
 Have a quick question? You may find the answer in our list of [frequently asked
-questions](https://github.com/flame/blis/wiki/FAQ). 
+questions](docs/FAQ.md). 
 
 Does BLIS contain kernels optimized for your favorite architecture? Please see
-our [Hardware Support wiki](https://github.com/flame/blis/wiki/HardwareSupport)
+our [Hardware Support](docs/HardwareSupport.md) guide
 for a full list of optimized kernels. 
 
 We also provide wikis on the following topics, which will likely be of interest
 to more advanced users and developers:
- * [Configurations](https://github.com/flame/blis/wiki/ConfigurationHowTo).
-This wiki describes how the configuration system works in BLIS, and also
+ * [Configurations](docs/ConfigurationHowTo.md).
+This document describes how the configuration system works in BLIS, and also
 provides step-by-step instructions for creating a new configuration.
 (In BLIS, a "configuration" captures all of the details necessary to build
 BLIS for a specific hardware architecture.) Configurations specify things
 like cache blocksizes and kernel functions, as well as various optional
 configuration settings. 
- * [Kernels](https://github.com/flame/blis/wiki/KernelsHowTo).
-This wiki describes each of the BLIS kernel operations in detail and should
+ * [Kernels](docs/KernelsHowTo.md).
+This document describes each of the BLIS kernel operations in detail and should
 provide developers with most of the information needed to get started with
 writing and optimizing their own kernels. 
- * [Test suite](https://github.com/flame/blis/wiki/Testsuite).
-This wiki contains detailed instructions on running the BLIS test suite,
+ * [Multithreading](docs/Multithreading.md).
+This document describes how to enable and control multithreaded parallelism
+in BLIS.
+ * [Test suite](docs/Testsuite.md).
+This document contains detailed instructions on running the BLIS test suite,
 located in the top-level directory testsuite. Also included: a walkthrough
 of the BLAS test drivers, which exercise the BLAS compatibility layer that
 is, by default, included in BLIS.
- * [Release notes](https://github.com/flame/blis/wiki/ReleaseNotes).
-This wiki contains a summary of new features provided by each new tagged
+ * [Release notes](docs/ReleaseNotes.md).
+This document contains a summary of new features provided by each new tagged
 version (release) of BLIS, along with the date the release.
 
 External Linux packages
@@ -233,7 +235,7 @@ have bug reports, in which case they should open a
 Contributing
 ------------
 
-For information on how to contribute to our project, including preferred [coding conventions](https://github.com/flame/blis/wiki/CodingConventions), please refer to the [CONTRIBUTING](https://github.com/flame/blis/blob/master/CONTRIBUTING.md) file in the top-level directory of the BLIS distribution.
+For information on how to contribute to our project, including preferred [coding conventions](docs/CodingConventions), please refer to the [CONTRIBUTING](CONTRIBUTING.md) file at the top-level of the BLIS source distribution.
 
 Citations
 ---------
