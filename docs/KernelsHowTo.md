@@ -1,3 +1,19 @@
+## Contents
+
+* **[Contents](KernelsHowTo.md#contents)**
+* **[Introduction](KernelsHowTo.md#introduction)**
+* **[BLIS kernels summary](KernelsHowTo.md#blis-kernels-summary)**
+  * **[Level-3](KernelsHowTo.md#level-3)**
+  * **[Level-1f](KernelsHowTo.md#level-1f)**
+  * **[Level-1v](KernelsHowTo.md#level-1v)**
+  * **[Level-1v/-1f Dependencies for Level-2 operations](KernelsHowTo.md#level-1v-1f-dependencies-for-level-2-operations)**
+* **[Calling kernels](KernelsHowTo.md#calling-kernels)**
+* **[BLIS kernels reference](KernelsHowTo.md#blis-kernels-reference)**
+  * **[Level-3 micro-kernels](KernelsHowTo.md#level-3-micro-kernels)**
+  * **[Level-1f kernels](KernelsHowTo.md#level-1f-kernels)**
+  * **[Level-1v kernels](KernelsHowTo.md#level-1v-kernels)**
+
+
 ## Introduction
 
 This wiki describes the computational kernels used by the BLIS framework.

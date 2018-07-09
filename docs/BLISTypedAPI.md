@@ -27,14 +27,15 @@
 
 # Introduction
 
-This document summarizes the user-level BLIS APIs, including BLIS-specific type definitions, header files, and function prototypes. This document also includes APIs to key [micro-]kernels which are used to accelerate and optimize various level-2 and level-3 operations.
+This document summarizes one of the primary native APIs in BLIS--the "typed" API. Here, we also discuss BLIS-specific type definitions, header files, and prototypes to auxiliary functions. This document also includes APIs to key kernels which are used to accelerate and optimize various level-2 and level-3 operations, though the [Kernels Guide](KernelsHowTo.md) goes into more detail, especially for level-3 micro-kernels.
 
 There are many functions that BLIS implements that are not listed here, either because they are lower-level functions, or they are considered for use primarily by developers and experts.
 
+For curious readers, the typed API was given its name (a) because it exposes the floating-point types in the names of its functions, and (b) to contrast it with the other native API in BLIS, the object API, which is [documented here](BLISObjectAPI.md). (The third API supported by BLIS is the BLAS compatibility layer, which mimics conventional Fortran-77 BLAS.)
 
 ## BLIS types
 
-The following tables list various types used throughout the BLIS API.
+The following tables list various types used throughout the BLIS typed API.
 
 ### Integer-based types
 
