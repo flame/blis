@@ -46,7 +46,7 @@ The following shows the steps one would take to optimize, to varying degrees, th
 
 ### Level-1f
 
-BLIS supports the following five level-1f (fused) kernels. These kernels are used to implement optimized level-2 operations.
+BLIS supports the following five level-1f (fused) kernels. These kernels are used to implement optimized level-2 operations (as well as self-similar level-1f operations; that is, the `axpyf` kernel can be invoked indirectly via the `axpyf` operation).
   * **axpy2v**: Performs and fuses two [axpyv](BLISTypedAPI.md#axpyv) operations, accumulating to the same output vector.
   * **dotaxpyv**: Performs and fuses a [dotv](BLISTypedAPI.md#dotv) followed by an [axpyv](BLISTypedAPI.md#axpyv) operation with x.
   * **axpyf**: Performs and fuses some implementation-dependent number of [axpyv](BLISTypedAPI.md#axpyv) operations, accumulating to the same output vector. Can also be expressed as a [gemv](BLISTypedAPI.md#gemv) operation where matrix A is _m x nf_, where nf is the number of fused operations (fusing factor).
@@ -56,12 +56,21 @@ BLIS supports the following five level-1f (fused) kernels. These kernels are use
 
 ### Level-1v
 
-BLIS supports kernels for the following level-1 operations. Aside from their self-similar operations (ie: the use of an `axpyv` kernel to implement the `axpyv` operation), these kernels are used only to implement level-2 operations, and only when the developer decides to forgo more optimized approaches that involve level-1f kernels (where applicable).
-  * **axpyv**: Performs a [scale-and-accumulate vector](BLISTypedAPI.md#axpyv) operation.
+BLIS supports the following 14 level-1v kernels. These kernels are used primarily to implement their self-similar operations. However, they are occasionally used to handle special cases of level-1f kernels or in situations where level-2 operations are partially optimized.
+  * **addv**: Performs a [vector addition](BLISTypedAPI.md#addv) operation.
+  * **amaxv**: Performs a [search for the index of the element with the largest absolute value (or complex modulus)](BLISTypedAPI.md#amaxv).
+  * **axpyv**: Performs a [vector scale-and-accumulate](BLISTypedAPI.md#axpyv) operation.
+  * **axpbyv**: Performs an [extended vector scale-and-accumulate](BLISTypedAPI.md#axpbyv) operation similar to axpyv except that the output vector is scaled by a second scalar.
+  * **copyv**: Performs a [vector copy](BLISTypedAPI.md#copyv) operation
   * **dotv**: Performs a [dot product](BLISTypedAPI.md#dotv) where the output scalar is overwritten.
   * **dotxv**: Performs an [extended dot product](BLISTypedAPI.md#dotxv) operation where the dot product is first scaled and then accumulated into a scaled output scalar.
-
-There are other level-1v kernels that may be optimized, such as [addv](BLISTypedAPI.md#addv), [subv](BLISTypedAPI.md#subv), and [scalv](BLISTypedAPI.md#scalv), but their use is less common and therefore of much less importance to most users and developers.
+  * **invertv**: Performs an [element-wise vector inversion](BLISTypedAPI.md#invertv) operation.
+  * **scalv**: Performs an [in-place (destructive) vector scaling](BLISTypedAPI.md#scalv) operation.
+  * **scal2v**: Performs an [out-of-place (non-destructive) vector scaling](BLISTypedAPI.md#scal2v) operation.
+  * **setv**: Performs a [vector broadcast](BLISTypedAPI.md#setv) operation.
+  * **subv**: Performs a [vector subtraction](BLISTypedAPI.md#subv) operation.
+  * **swapv**: Performs a [vector swap](BLISTypedAPI.md#swapv) operation.
+  * **xpbyv**: Performs a [alternate vector scale-and-accumulate](BLISTypedAPI.md#xpbyv) operation.
 
 
 ### Level-1v/-1f Dependencies for Level-2 operations
@@ -80,6 +89,95 @@ Kernels marked with a "1" for a given level-2 operation are preferred for optimi
 
 **Note:** The "effective storage" column reflects the orientation of the matrix operand **after** transposition via the corresponding `trans_t` parameter (if applicable). For example, calling `gemv` with a column-stored matrix `A` and the `transa` parameter equal to `BLIS_TRANSPOSE` would be effectively equivalent to row-wise storage.
 
+---
+
+## Calling kernels
+
+Note that all kernels, whether they be reference implementations or based on fully optimized assembly code, use names that are architecture- and implementation-specific. (This appears as a `<suffix>` in the [kernel reference](KernelsHowTo.md#blis-kernels-reference) below.) Therefore, the easiest way to call the kernel is by querying a pointer from a valid context.
+
+The first step is to obtain a valid context. Contexts store all of the information
+specific to a particular sub-configuration (usually loosely specific to a
+microarchitecture or group of closely-related microarchitectuers). If a context is
+not already available in your current scope, a default context for the hardware
+for which BLIS was configured (or, in the case of multi-configuration builds, the
+hardware on which BLIS is currently running) may be queried via:
+```c
+cntx_t* bli_gks_query_cntx( void );
+```
+Once this `cntx_t*` pointer is obtained, you may call one of three functions to query any of the computation kernels described in this document:
+```c
+void* bli_cntx_get_l3_nat_ukr_dt
+     (
+       num_t   dt,
+       l3ukr_t ker_id,
+       cntx_t* cntx
+     );
+
+void* bli_cntx_get_l1f_ker_dt
+     (
+       num_t   dt,
+       l1fkr_t ker_id,
+       cntx_t* cntx
+     );
+
+void* bli_cntx_get_l1v_ker_dt
+     (
+       num_t   dt,
+       l1vkr_t ker_id,
+       cntx_t* cntx
+     );
+```
+The `dt` and `ker_id` parameters specify the floating-point datatype and the
+kernel operation you wish to query, respectively.
+Valid values for `dt` are `BLIS_FLOAT`, `BLIS_DOUBLE`, `BLIS_SCOMPLEX`, and
+`BLIS_DCOMPLEX` for single- and double-precision real, and single- and
+double-precision complex, respectively.
+Valid values for `ker_id` are given in the tables below.
+
+Also, note that the return values of `bli_cntx_get_l1v_ker_dt`
+`bli_cntx_get_l1f_ker_dt()`, and `bli_cntx_get_l3_nat_ukr_dt()`,
+will be `void*` and must be typecast to typed function pointers before being called.
+As a convenience, BLIS defines function pointer types appropriate for usage in these
+situations. The function pointer type for each operation is given in the third
+columns of each table, with the `?` taking the place of one of the supported
+datatype characters.
+
+| kernel operation |  l3ukr_t              | function pointer type |
+|:-----------------|:----------------------|:----------------------|
+| gemm             | `BLIS_GEMM`           | `?gemm_ukr_ft`        |
+| trsm_l           | `BLIS_TRSM_L_UKR`     | `?trsm_ukr_ft`        |
+| trsm_u           | `BLIS_TRSM_U_UKR`     | `?trsm_ukr_ft`        |
+| gemmtrsm_l       | `BLIS_GEMMTRSM_L_UKR` | `?gemmtrsm_ukr_ft`    |
+| gemmtrsm_u       | `BLIS_GEMMTRSM_U_UKR` | `?gemmtrsm_ukr_ft`    |
+
+| kernel operation |  l1fkr_t              | function pointer type |
+|:-----------------|:----------------------|:----------------------|
+| axpy2v           | `BLIS_AXPY2V_KER`     | `?axpy2v_ft`          |
+| dotaxpyv         | `BLIS_DOTAXPYV_KER`   | `?dotaxpyv_ft`        |
+| axpyf            | `BLIS_AXPYF_KER`      | `?axpyf_ft`           |
+| dotxf            | `BLIS_DOTXF_KER`      | `?dotxf_ft`           |
+| dotxaxpyf        | `BLIS_DOTXAXPYF_KER`  | `?dotxaxpyf_ft`       |
+
+| kernel operation |  l1vkr_t              | function pointer type |
+|:-----------------|:----------------------|:----------------------|
+| addv             | `BLIS_ADDV_KER`       | `?addv_ft`            |
+| amaxv            | `BLIS_AMAXV_KER`      | `?amaxv_ft`           |
+| axpyv            | `BLIS_AXPYV_KER`      | `?axpyv_ft`           |
+| axpbyv           | `BLIS_AXPBYV_KER`     | `?axpbyv_ft`          |
+| dotaxpyv         | `BLIS_DOTAXPYV_KER`   | `?dotaxpyv_ft`        |
+| copyv            | `BLIS_COPYV_KER`      | `?copyv_ft`           |
+| dotxv            | `BLIS_DOTXV_KER`      | `?dotxv_ft`           |
+| invertv          | `BLIS_INVERTV_KER`    | `?invertv_ft`         |
+| scalv            | `BLIS_SCALV_KER`      | `?scalv_ft`           |
+| scal2v           | `BLIS_SCAL2V_KER`     | `?scal2v_ft`          |
+| setv             | `BLIS_SETV_KER`       | `?setv_ft`            |
+| subv             | `BLIS_SUBV_KER`       | `?subv_ft`            |
+| swapv            | `BLIS_SWAPV_KER`      | `?swapv_ft`           |
+| xpybv            | `BLIS_XPBYV_KER`      | `?xpbyv_ft`           |
+
+The specific information behind a queried function pointer is not typically available.
+However, it is guaranteed that the function pointer will always be valid (usually either an optimized assembly implementation or a reference implementation).
+
 
 ---
 
@@ -92,15 +190,26 @@ This section seeks to provide developers with a complete reference for each of t
     * [trsm](KernelsHowTo.md#trsm-micro-kernels)
     * [gemmtrsm](KernelsHowTo.md#gemmtrsm-micro-kernels)
   * [Level-1f kernels](KernelsHowTo.md#level-1f-kernels)
-    * axpy2v
-    * dotaxpyv
-    * axpyf
-    * dotxf
-    * dotxaxpyf
+    * [axpy2v](KernelsHowTo.md#axpy2v-kernel)
+    * [dotaxpyv](KernelsHowTo.md#dotaxpyv-kernel)
+    * [axpyf](KernelsHowTo.md#axpyf-kernel)
+    * [dotxf](KernelsHowTo.md#dotxf-kernel)
+    * [dotxaxpyf](KernelsHowTo.md#dotxaxpyf-kernel)
   * [Level-1v kernels](KernelsHowTo.md#level-1v-kernels)
-    * axpyv
-    * dotv
-    * dotxv
+    * [addv](KernelsHowTo.md#addv-kernel)
+    * [amaxv](KernelsHowTo.md#amaxv-kernel)
+    * [axpyv](KernelsHowTo.md#axpyv-kernel)
+    * [axpbyv](KernelsHowTo.md#axpbyv-kernel)
+    * [copyv](KernelsHowTo.md#copyv-kernel)
+    * [dotv](KernelsHowTo.md#dotv-kernel)
+    * [dotxv](KernelsHowTo.md#dotxv-kernel)
+    * [invertv](KernelsHowTo.md#invertv-kernel)
+    * [scalv](KernelsHowTo.md#scalv-kernel)
+    * [scal2v](KernelsHowTo.md#scal2v-kernel)
+    * [setv](KernelsHowTo.md#setv-kernel)
+    * [subv](KernelsHowTo.md#subv-kernel)
+    * [swapv](KernelsHowTo.md#swapv-kernel)
+    * [xpbyv](KernelsHowTo.md#xpbyv-kernel)
 
 The function prototypes in this section follow the same guidelines as those listed in the [BLIS typed API reference](BLISTypedAPI.md#Notes_for_using_this_reference). Namely:
   * Any occurrence of `?` should be replaced with `s`, `d`, `c`, or `z` to form an actual function name.
@@ -494,11 +603,372 @@ Note that these implementations are coded in C99 and lack several kinds of optim
 
 
 
-
 ### Level-1f kernels
 
-_This section has yet to be written._
+#### axpy2v kernel
+```
+void bli_?axpy2v_<suffix>
+     (
+       conj_t           conjx,
+       conj_t           conjy,
+       dim_t            n,
+       ctype*  restrict alphax,
+       ctype*  restrict alphay,
+       ctype*  restrict x, inc_t incx,
+       ctype*  restrict y, inc_t incy,
+       ctype*  restrict z, inc_t incz,
+       cntx_t* restrict cntx
+     )
+```
+This kernel performs the following operation:
+```
+  z := z + alphax * conjx(x) + alphay * conjy(y)
+```
+where `x`, `y`, and `z` are vectors of length _n_ stored with strides `incx`, `incy`, and `incz`, respectively. This kernel is typically implemented as the fusion of two `axpyv` operations on different input vectors `x` and `y` and with different scalars `alphax` and `alpay` to update the same output vector `z`.
+
+#### dotaxpyv
+```
+void bli_?dotaxpyv_<suffix>
+     (
+       conj_t           conjxt,
+       conj_t           conjx,
+       conj_t           conjy,
+       dim_t            n,
+       ctype*  restrict alpha,
+       ctype*  restrict x, inc_t incx,
+       ctype*  restrict y, inc_t incy,
+       ctype*  restrict rho,
+       ctype*  restrict z, inc_t incz,
+       cntx_t* restrict cntx
+     )
+```
+This kernel performs the following operation:
+```
+  rho := conjxt(x)^T * conjy(y)
+  z   := z + alpha * conjx(x)
+```
+where `x`, `y`, and `z` are vectors of length _n_ stored with strides `incx`, `incy`, and `incz`, respectively, and `rho` is a scalar. This kernel is typically implemented as a `dotv` operation fused with an `axpyv` operation.
+
+#### axpyf
+```
+void bli_?axpyf_<suffix>
+     (
+       conj_t           conja,
+       conj_t           conjx,
+       dim_t            m,
+       dim_t            b,
+       ctype*  restrict alpha,
+       ctype*  restrict a, inc_t inca, inc_t lda,
+       ctype*  restrict x, inc_t incx,
+       ctype*  restrict y, inc_t incy,
+       cntx_t* restrict cntx
+     )
+```
+This kernel performs the following operation:
+```
+  y := y + alpha * conja(a) * conjy(x)
+```
+where `a` is an _m_ x _b_ matrix, `x` is a vector of length _b_, and `y` is a vector of length _m_. Vectors `x` and `y` are stored with strides `incx` and `incy`, respectively. Matrix `a` is stored with row stride `inca` and column stride `lda`, though `inca` is most often (in practice) unit. This kernel is typically implemented as a fused series of _b_ `axpyv` operations updating the same vector `y` (with the elements of `x` serving as the scalars and the columns of `a` serving as the vectors to be scaled).
+
+#### dotxf
+```
+void bli_?dotxf_<suffix>
+     (
+       conj_t           conjat,
+       conj_t           conjx,
+       dim_t            m,
+       dim_t            b,
+       ctype*  restrict alpha,
+       ctype*  restrict a, inc_t inca, inc_t lda,
+       ctype*  restrict x, inc_t incx,
+       ctype*  restrict beta,
+       ctype*  restrict y, inc_t incy,
+       cntx_t* restrict cntx
+     )
+```
+This kernel performs the following operation:
+```
+  y := beta * y + alpha * conjat(a)^T conjx(x)
+```
+where `a` is an _m_ x _b_ matrix, where `w` is a vector of length _m_, `y` is a vector of length _b_, and `alpha` is a scalar.
+Vectors `x` and `y` are stored with strides `incx` and `incy`, respectively. Matrix `a` is stored with row stride `inca` and column stride `lda`, though `inca` is most often (in practice) unit.
+This kernel is typically implemented as a series of _b_ `dotxv` operations with the same right-hand operand vector `x` (contracted with the rows of `a^T` and accumulating to the corresponding elements of vector `y`).
+
+#### dotxaxpyf
+```
+void bli_?dotxaxpyf_<suffix>
+     (
+       conj_t           conjat,
+       conj_t           conja,
+       conj_t           conjw,
+       conj_t           conjx,
+       dim_t            m,
+       dim_t            b,
+       ctype*  restrict alpha,
+       ctype*  restrict a, inc_t inca, inc_t lda,
+       ctype*  restrict w, inc_t incw,
+       ctype*  restrict x, inc_t incx,
+       ctype*  restrict beta,
+       ctype*  restrict y, inc_t incy,
+       ctype*  restrict z, inc_t incz,
+       cntx_t* restrict cntx
+     )
+```
+This kernel performs the following operation:
+```
+  y := beta * y + alpha * conjat(a)^T conjw(w)
+  z :=        z + alpha *  conja(a)   conjx(x)
+```
+where `a` is an _m_ x _b_ matrix, `w` and `z` are vectors of length _m_, `x` and `y` are vectors of length _b_, and `alpha` and `beta` are scalars.
+Vectors `w`, `z`, `x` and `y` are stored with strides `incw`, `incz`, `incx`, and `incy`, respectively. Matrix `a` is stored with row stride `inca` and column stride `lda`, though `inca` is most often (in practice) unit.
+This kernel is typically implemented as a series of _b_ `dotxv` operations with the same right-hand operand vector `w` fused with a series of _b_ `axpyv` operations updating the same vector `z`.
+
+
 
 ### Level-1v kernels
 
-_This section has yet to be written._
+#### addv
+```
+void bli_?addv_<suffix>
+     (
+       conj_t           conjx,
+       dim_t            n,
+       ctype*  restrict x, inc_t incx,
+       ctype*  restrict y, inc_t incy,
+       cntx_t* restrict cntx
+     )
+```
+This kernel performs the following operation:
+```
+  y := y + conjx(x)
+```
+where `x` and `y` are vectors of length _n_ stored with strides `incx` and `incy`, respectively.
+
+#### amaxv
+```
+void bli_?amaxv_<suffix>
+     (
+       dim_t            n,
+       ctype*  restrict x, inc_t incx,
+       dim_t*  restrict i,
+       cntx_t* restrict cntx
+     )
+```
+Given a vector of length _n_, this kernel returns the zero-based index `i` of the element of vector `x` that contains the largest absolute value (or, in the complex domain, complex modulus).
+If `NaN` is encountered, it is treated as if it were a valid value that was smaller than any other value in the vector.
+If more than one element contains the same maximum value, the index of the latter element is returned via `i`.
+
+#### axpyv
+```
+void bli_?axpyv_<suffix>
+     (
+       conj_t           conjx,
+       dim_t            n,
+       ctype*  restrict alpha,
+       ctype*  restrict x, inc_t incx,
+       ctype*  restrict y, inc_t incy,
+       cntx_t* restrict cntx
+     )
+```
+This kernel performs the following operation:
+```
+  y := y + alpha * conjx(x)
+```
+where `x` and `y` are vectors of length _n_ stored with strides `incx` and `incy`, respectively, and `alpha` is a scalar.
+
+#### axpbyv
+```
+void bli_?axpbyv_<suffix>
+     (
+       conj_t           conjx,
+       dim_t            n,
+       ctype*  restrict alpha,
+       ctype*  restrict x, inc_t incx,
+       ctype*  restrict beta,
+       ctype*  restrict y, inc_t incy,
+       cntx_t* restrict cntx
+     )
+```
+This kernel performs the following operation:
+```
+  y := beta * y + alpha * conjx(x)
+```
+where `x` and `y` are vectors of length _n_ stored with strides `incx` and `incy`, respectively, and `alpha` and `beta` are scalars.
+
+#### copyv
+```
+void bli_?copyv_<suffix>
+     (
+       conj_t           conjx,
+       dim_t            n,
+       ctype*  restrict x, inc_t incx,
+       ctype*  restrict y, inc_t incy,
+       cntx_t* restrict cntx
+     )
+```
+This kernel performs the following operation:
+```
+  y := conjx(x)
+```
+where `x` and `y` are vectors of length _n_ stored with strides `incx` and `incy`, respectively.
+
+#### dotv
+```
+void bli_?dotv_<suffix>
+     (
+       conj_t           conjx,
+       conj_t           conjy,
+       dim_t            n,
+       ctype*  restrict x, inc_t incx,
+       ctype*  restrict y, inc_t incy,
+       ctype*  restrict rho,
+       cntx_t* restrict cntx
+     )
+```
+This kernel performs the following operation:
+```
+  rho := conjxt(x)^T * conjy(y)
+```
+where `x` and `y` are vectors of length _n_ stored with strides `incx` and `incy`, respectively, and `rho` is a scalar.
+
+#### dotxv
+```
+void bli_?dotxv_<suffix>
+     (
+       conj_t           conjx,
+       conj_t           conjy,
+       dim_t            n,
+       ctype*  restrict alpha,
+       ctype*  restrict x, inc_t incx,
+       ctype*  restrict y, inc_t incy,
+       ctype*  restrict beta,
+       ctype*  restrict rho,
+       cntx_t* restrict cntx
+     )
+```
+This kernel performs the following operation:
+```
+  rho := beta * rho + alpha * conjxt(x)^T * conjy(y)
+```
+where `x` and `y` are vectors of length _n_ stored with strides `incx` and `incy`, respectively, and `alpha`, `beta`, and `rho` are scalars.
+
+#### invertv
+```
+void bli_?invertv_<suffix>
+     (
+       dim_t            n,
+       ctype*  restrict x, inc_t incx,
+       cntx_t* restrict cntx
+     )
+```
+This kernel performs the following operation:
+```
+  x := inv(x)
+```
+where inv() denotes element-wise inversion.
+
+#### scalv
+```
+void bli_?scalv_<suffix>
+     (
+       conj_t           conjalpha,
+       dim_t            n,
+       ctype*  restrict alpha,
+       ctype*  restrict x, inc_t incx,
+       cntx_t* restrict cntx
+     )
+```
+This kernel performs the following operation:
+```
+  x := conjalpha(alpha) * x
+```
+where `x` is a vector of length _n_ stored with stride `incx` and `alpha` is a scalar.
+
+#### scal2v
+```
+void bli_?scal2v_<suffix>
+     (
+       conj_t           conjx,
+       dim_t            n,
+       ctype*  restrict alpha,
+       ctype*  restrict x, inc_t incx,
+       ctype*  restrict y, inc_t incy,
+       cntx_t* restrict cntx
+     )
+```
+This kernel performs the following operation:
+```
+  y := alpha * conjx(x)
+```
+where `x` and `y` are vectors of length _n_ stored with strides `incx` and `incy`, respectively, and `alpha` is a scalar.
+
+#### setv
+```
+void bli_?setv_<suffix>
+     (
+       conj_t           conjalpha,
+       dim_t            n,
+       ctype*  restrict alpha,
+       ctype*  restrict x, inc_t incx,
+       cntx_t* restrict cntx
+     )
+```
+This kernel performs the following operation:
+```
+  x := conjalpha(alpha)
+```
+where `x` is a vector of length _n_ stored with stride `incx` and `alpha` is a scalar. Note that here, the `:=` operator represents a broadcast of `conjalpha(alpha)` to every element in `x`.
+
+#### subv
+```
+void bli_?subv_<suffix>
+     (
+       conj_t           conjx,
+       dim_t            n,
+       ctype*  restrict x, inc_t incx,
+       ctype*  restrict y, inc_t incy,
+       cntx_t* restrict cntx
+     )
+```
+This kernel performs the following operation:
+```
+  y := y - conjx(x)
+```
+where `x` and `y` are vectors of length _n_.
+
+#### swapv
+```
+void bli_?swapv_<suffix>
+     (
+       dim_t            n,
+       ctype*  restrict x, inc_t incx,
+       ctype*  restrict y, inc_t incy,
+       cntx_t* restrict cntx
+     )
+```
+This kernel performs the following operation:
+```
+  t := x
+  x := y
+  y := t
+```
+where `x` and `y` are vectors of length _n_ stored with strides `incx` and `incy`, respectively, and `t` represents a temporary vector of length _n_ for illustrative purposes only. (No additional memory is allocated as part of this operation.)
+
+#### xpbyv
+```
+void bli_?xpbyv_<suffix>
+     (
+       conj_t           conjx,
+       dim_t            n,
+       ctype*  restrict x, inc_t incx,
+       ctype*  restrict beta,
+       ctype*  restrict y, inc_t incy,
+       cntx_t* restrict cntx
+     )
+```
+This kernel performs the following operation:
+```
+  y := beta * y + conjx(x)
+```
+where `x` and `y` are vectors of length _n_ stored with strides `incx` and `incy`, respectively, and `beta` is a scalar.
+

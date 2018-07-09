@@ -87,7 +87,6 @@ The following tables list various types used throughout the BLIS API.
 ### Basic vs expert interfaces
 
 The functions listed in this document belong to the basic interface subset of the BLIS typed API. There is a companion "expert" interface that mirrors the basic interface, except that it also contains at least one additional parameter that is only of interest to experts and library developers. The expert interfaces use the same name as the basic function names, except for an additional "_ex" suffix. For example, the basic interface for `gemm` is
-#### gemm
 ```c
 void bli_?gemm
      (
@@ -104,7 +103,6 @@ void bli_?gemm
      );
 ```
 while the expert interface is:
-#### gemm
 ```c
 void bli_?gemm_ex
      (
@@ -123,7 +121,17 @@ void bli_?gemm_ex
 ```
 The expert interface contains an additional `cntx_t*` parameter. Note that calling a function from the expert interface with the `cntx_t*` argument set to `NULL` is equivalent to calling the corresponding basic interface.
 
-The `cntx_t*` argument appears in the interfaces to the `gemm`, `trsm`, and `gemmtrsm` micro-kernels. However, assembly implementations for micro-kernels generally do not make use of the context structure, and therefore `NULL` may be passed in by casual developers.
+### Contexts
+
+In general, it is permissible to pass in `NULL` for a `cntx_t*` parameter when calling an expert interface such as `bli_gemm_ex()`. However, there are cases where `NULL` values are not accepted and may result in a segmentation fault. Specifically, the `cntx_t*` argument appears in the interfaces to the `gemm`, `trsm`, and `gemmtrsm` [level-3 micro-kernels](KernelsHowTo.md#level-3) along with all [level-1v](KernelsHowTo.md#level-1v) and [level-1f](KernelsHowTo.md#level-1f) kernels. There, as a general rule, a valid pointer must be passed in. Whenever a valid context is needed, the developer may query a default context from the global kernel structure (if a context is not already available in the current scope):
+```c
+cntx_t* bli_gks_query_cntx( void );
+```
+When BLIS is configured to target a configuration family (e.g. `intel64`, `x86_64`),
+`bli_gks_query_cntx()` will use `cpuid` or an equivalent heuristic to select and
+and return the appropriate context. When BLIS is configured to target a singleton
+sub-configuration (e.g. `haswell`, `skx`), `bli_gks_query_cntx()` will unconditionally
+return a pointer to the context appropriate for the targeted configuration.
 
 
 ## BLIS header file
