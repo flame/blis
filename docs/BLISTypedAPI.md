@@ -185,7 +185,7 @@ Notes for interpreting function descriptions:
 ## Operation index
 
   * **[Level-1v](BLISTypedAPI.md#level-1v-operations)**: Operations on vectors:
-    * [addv](BLISTypedAPI.md#addv), [amaxv](BLISTypedAPI.md#amaxv), [axpyv](BLISTypedAPI.md#axpyv), [copyv](BLISTypedAPI.md#copyv), [dotv](BLISTypedAPI.md#dotv), [dotxv](BLISTypedAPI.md#dotxv), [invertv](BLISTypedAPI.md#invertv), [scal2v](BLISTypedAPI.md#scal2v), [scalv](BLISTypedAPI.md#scalv), [setv](BLISTypedAPI.md#setv), [subv](BLISTypedAPI.md#subv), [swapv](BLISTypedAPI.md#swapv)
+    * [addv](BLISTypedAPI.md#addv), [amaxv](BLISTypedAPI.md#amaxv), [axpyv](BLISTypedAPI.md#axpyv), [axpbyv](BLISTypedAPI.md#axpbyv), [copyv](BLISTypedAPI.md#copyv), [dotv](BLISTypedAPI.md#dotv), [dotxv](BLISTypedAPI.md#dotxv), [invertv](BLISTypedAPI.md#invertv), [scal2v](BLISTypedAPI.md#scal2v), [scalv](BLISTypedAPI.md#scalv), [setv](BLISTypedAPI.md#setv), [subv](BLISTypedAPI.md#subv), [swapv](BLISTypedAPI.md#swapv), [xpbyv](BLISTypedAPI.md#xpbyv)
   * **[Level-1d](BLISTypedAPI.md#level-1d-operations)**: Element-wise operations on matrix diagonals:
     * [addd](BLISTypedAPI.md#addd), [axpyd](BLISTypedAPI.md#axpyd), [copyd](BLISTypedAPI.md#copyd), [invertd](BLISTypedAPI.md#invertd), [scald](BLISTypedAPI.md#scald), [scal2d](BLISTypedAPI.md#scal2d), [setd](BLISTypedAPI.md#setd), [setid](BLISTypedAPI.md#setid), [subd](BLISTypedAPI.md#subd)
   * **[Level-1m](BLISTypedAPI.md#level-1m-operations)**: Element-wise operations on matrices:
@@ -214,7 +214,7 @@ Level-1v operations perform various level-1 BLAS-like operations on vectors (hen
 void bli_?addv
      (
        conj_t  conjx,
-       dim_t   m,
+       dim_t   n,
        ctype*  x, inc_t incx,
        ctype*  y, inc_t incy
      );
@@ -223,8 +223,7 @@ Perform
 ```
   y := y + conjx(x)
 ```
-
-where `y` and `x` are vectors of length _m_.
+where `x` and `y` are vectors of length _n_.
 
 ---
 
@@ -237,7 +236,9 @@ void bli_?amaxv
        dim_t*  index
      );
 ```
-Find the element of vector `x` which contains the maximum absolute value. The index of the element found is stored to `index`.
+Given a vector of length _n_, return the zero-based index `index` of the element of vector `x` that contains the largest absolute value (or, in the complex domain, the largest complex modulus).
+
+If `NaN` is encountered, it is treated as if it were a valid value that was smaller than any other value in the vector. If more than one element contains the same maximum value, the index of the latter element is returned via `index`.
 
 **Note:** This function attempts to mimic the algorithm for finding the element with the maximum absolute value in the netlib BLAS routines `i?amax()`.
 
@@ -248,7 +249,7 @@ Find the element of vector `x` which contains the maximum absolute value. The in
 void bli_?axpyv
      (
        conj_t  conjx,
-       dim_t   m,
+       dim_t   n,
        ctype*  alpha,
        ctype*  x, inc_t incx,
        ctype*  y, inc_t incy
@@ -258,8 +259,28 @@ Perform
 ```
   y := y + alpha * conjx(x)
 ```
+where `x` and `y` are vectors of length _n_, and `alpha` is a scalar.
 
-where `y` and `x` are vectors of length _m_.
+---
+
+#### axpbyv
+```
+void bli_?axpbyv
+     (
+       conj_t  conjx,
+       dim_t   n,
+       ctype*  alpha,
+       ctype*  x, inc_t incx,
+       ctype*  beta,
+       ctype*  y, inc_t incy,
+       cntx_t* cntx
+     )
+```
+Perform
+```
+  y := beta * y + alpha * conjx(x)
+```
+where `x` and `y` are vectors of length _n_, and `alpha` and `beta` are scalars.
 
 ---
 
@@ -268,7 +289,7 @@ where `y` and `x` are vectors of length _m_.
 void bli_?copyv
      (
        conj_t  conjx,
-       dim_t   m,
+       dim_t   n,
        ctype*  x, inc_t incx,
        ctype*  y, inc_t incy
      );
@@ -277,8 +298,7 @@ Perform
 ```
   y := conjx(x)
 ```
-
-where `y` and `x` are vectors of length _m_.
+where `x` and `y` are vectors of length _n_.
 
 ---
 
@@ -288,7 +308,7 @@ void bli_?dotv
      (
        conj_t  conjx,
        conj_t  conjy,
-       dim_t   m,
+       dim_t   n,
        ctype*  x, inc_t incx,
        ctype*  y, inc_t incy,
        ctype*  rho
@@ -298,8 +318,7 @@ Perform
 ```
   rho := conjx(x)^T * conjy(y)
 ```
-
-where `y` and `x` are vectors of length _m_ and `rho` is a scalar.
+where `x` and `y` are vectors of length _n_, and `rho` is a scalar.
 
 ---
 
@@ -309,7 +328,7 @@ void bli_?dotxv
      (
        conj_t  conjx,
        conj_t  conjy,
-       dim_t   m,
+       dim_t   n,
        ctype*  alpha,
        ctype*  x, inc_t incx,
        ctype*  y, inc_t incy,
@@ -321,8 +340,7 @@ Perform
 ```
   rho := beta * rho + alpha * conjx(x)^T * conjy(y)
 ```
-
-where `y` and `x` are vectors of length _m_ and `rho` is a scalar.
+where `x` and `y` are vectors of length _n_, and `alpha`, `beta`, and `rho` are scalars.
 
 ---
 
@@ -330,11 +348,11 @@ where `y` and `x` are vectors of length _m_ and `rho` is a scalar.
 ```c
 void bli_?invertv
      (
-       dim_t   m,
+       dim_t   n,
        ctype*  x, inc_t incx
      );
 ```
-Invert all elements of an _m_-length vector `x`.
+Invert all elements of an _n_-length vector `x`.
 
 ---
 
@@ -343,7 +361,7 @@ Invert all elements of an _m_-length vector `x`.
 void bli_?scalv
      (
        conj_t  conjalpha,
-       dim_t   m,
+       dim_t   n,
        ctype*  alpha,
        ctype*  x, inc_t incx
      );
@@ -352,8 +370,7 @@ Perform
 ```
   x := conjalpha(alpha) * x
 ```
-
-where `x` is a vector of length _m_.
+where `x` is a vector of length _n_, and `alpha` is a scalar.
 
 ---
 
@@ -362,7 +379,7 @@ where `x` is a vector of length _m_.
 void bli_?scal2v
      (
        conj_t  conjx,
-       dim_t   m,
+       dim_t   n,
        ctype*  alpha,
        ctype*  x, inc_t incx,
        ctype*  y, inc_t incy
@@ -372,8 +389,7 @@ Perform
 ```
   y := alpha * conjx(x)
 ```
-
-where `y` and `x` are vectors of length _m_.
+where `x` and `y` are vectors of length _n_, and `alpha` is a scalar.
 
 ---
 
@@ -382,12 +398,12 @@ where `y` and `x` are vectors of length _m_.
 void bli_?setv
      (
        conj_t  conjalpha,
-       dim_t   m,
+       dim_t   n,
        ctype*  alpha,
        ctype*  x, inc_t incx
      );
 ```
-Set all elements of an _m_-length vector `x` to `conjalpha(alpha)`.
+Set all elements of an _n_-length vector `x` to scalar `conjalpha(alpha)`.
 
 ---
 
@@ -396,7 +412,7 @@ Set all elements of an _m_-length vector `x` to `conjalpha(alpha)`.
 void bli_?subv
      (
        conj_t  conjx,
-       dim_t   m,
+       dim_t   n,
        ctype*  x, inc_t incx,
        ctype*  y, inc_t incy
      );
@@ -405,8 +421,7 @@ Perform
 ```
   y := y - conjx(x)
 ```
-
-where `y` and `x` are vectors of length _m_.
+where `x` and `y` are vectors of length _n_.
 
 ---
 
@@ -414,12 +429,32 @@ where `y` and `x` are vectors of length _m_.
 ```c
 void bli_?swapv
      (
-       dim_t   m,
+       dim_t   n,
        ctype*  x, inc_t incx,
        ctype*  y, inc_t incy
      );
 ```
-Swap corresponding elements of two _m_-length vectors `x` and `y`.
+Swap corresponding elements of two _n_-length vectors `x` and `y`.
+
+---
+
+#### xpbyv
+```
+void bli_?xpbyv
+     (
+       conj_t  conjx,
+       dim_t   n,
+       ctype*  x, inc_t incx,
+       ctype*  beta,
+       ctype*  y, inc_t incy,
+       cntx_t* cntx
+     )
+```
+Perform
+```
+  y := beta * y + conjx(x)
+```
+where `x` and `y` are vectors of length _n_, and `beta` is a scalar.
 
 ---
 
@@ -1557,11 +1592,11 @@ Print an _m x n_ matrix `a` to standard output. This function call is equivalent
 ```c
 void bli_?randv
      (
-       dim_t   m,
+       dim_t   n,
        ctype*  x, inc_t incx
      );
 ```
-Set the elements of a vector `x` of length _m_ to random values on the interval `[-1,1)`.
+Set the elements of a vector `x` of length _n_ to random values on the interval `[-1,1)`.
 
 **Note:** For complex datatypes, the real and imaginary components of each element are randomized individually and independently of one another.
 
@@ -1588,13 +1623,13 @@ Set the elements of an _m x n_ matrix `A` to random values on the interval `[-1,
 ```c
 void bli_?sumsqv
      (
-       dim_t   m,
+       dim_t   n,
        ctype*  x, inc_t incx,
        rtype*  scale,
        rtype*  sumsq
      );
 ```
-Compute the sum of the squares of the elements in a vector `x` of length _m_. The result is computed in scaled form, and in such a way that it may be used repeatedly to accumulate the sum of the squares of several vectors.
+Compute the sum of the squares of the elements in a vector `x` of length _n_. The result is computed in scaled form, and in such a way that it may be used repeatedly to accumulate the sum of the squares of several vectors.
 
 The function computes scale\_new and sumsq\_new such that
 ```

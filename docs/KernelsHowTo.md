@@ -605,6 +605,8 @@ Note that these implementations are coded in C99 and lack several kinds of optim
 
 ### Level-1f kernels
 
+---
+
 #### axpy2v kernel
 ```
 void bli_?axpy2v_<suffix>
@@ -626,7 +628,9 @@ This kernel performs the following operation:
 ```
 where `x`, `y`, and `z` are vectors of length _n_ stored with strides `incx`, `incy`, and `incz`, respectively. This kernel is typically implemented as the fusion of two `axpyv` operations on different input vectors `x` and `y` and with different scalars `alphax` and `alpay` to update the same output vector `z`.
 
-#### dotaxpyv
+---
+
+#### dotaxpyv kernel
 ```
 void bli_?dotaxpyv_<suffix>
      (
@@ -649,7 +653,9 @@ This kernel performs the following operation:
 ```
 where `x`, `y`, and `z` are vectors of length _n_ stored with strides `incx`, `incy`, and `incz`, respectively, and `rho` is a scalar. This kernel is typically implemented as a `dotv` operation fused with an `axpyv` operation.
 
-#### axpyf
+---
+
+#### axpyf kernel
 ```
 void bli_?axpyf_<suffix>
      (
@@ -670,7 +676,9 @@ This kernel performs the following operation:
 ```
 where `a` is an _m_ x _b_ matrix, `x` is a vector of length _b_, and `y` is a vector of length _m_. Vectors `x` and `y` are stored with strides `incx` and `incy`, respectively. Matrix `a` is stored with row stride `inca` and column stride `lda`, though `inca` is most often (in practice) unit. This kernel is typically implemented as a fused series of _b_ `axpyv` operations updating the same vector `y` (with the elements of `x` serving as the scalars and the columns of `a` serving as the vectors to be scaled).
 
-#### dotxf
+---
+
+#### dotxf kernel
 ```
 void bli_?dotxf_<suffix>
      (
@@ -694,7 +702,9 @@ where `a` is an _m_ x _b_ matrix, where `w` is a vector of length _m_, `y` is a 
 Vectors `x` and `y` are stored with strides `incx` and `incy`, respectively. Matrix `a` is stored with row stride `inca` and column stride `lda`, though `inca` is most often (in practice) unit.
 This kernel is typically implemented as a series of _b_ `dotxv` operations with the same right-hand operand vector `x` (contracted with the rows of `a^T` and accumulating to the corresponding elements of vector `y`).
 
-#### dotxaxpyf
+---
+
+#### dotxaxpyf kernel
 ```
 void bli_?dotxaxpyf_<suffix>
      (
@@ -723,11 +733,15 @@ where `a` is an _m_ x _b_ matrix, `w` and `z` are vectors of length _m_, `x` and
 Vectors `w`, `z`, `x` and `y` are stored with strides `incw`, `incz`, `incx`, and `incy`, respectively. Matrix `a` is stored with row stride `inca` and column stride `lda`, though `inca` is most often (in practice) unit.
 This kernel is typically implemented as a series of _b_ `dotxv` operations with the same right-hand operand vector `w` fused with a series of _b_ `axpyv` operations updating the same vector `z`.
 
+---
+
 
 
 ### Level-1v kernels
 
-#### addv
+---
+
+#### addv kernel
 ```
 void bli_?addv_<suffix>
      (
@@ -744,21 +758,25 @@ This kernel performs the following operation:
 ```
 where `x` and `y` are vectors of length _n_ stored with strides `incx` and `incy`, respectively.
 
-#### amaxv
+---
+
+#### amaxv kernel
 ```
 void bli_?amaxv_<suffix>
      (
        dim_t            n,
        ctype*  restrict x, inc_t incx,
-       dim_t*  restrict i,
+       dim_t*  restrict index,
        cntx_t* restrict cntx
      )
 ```
-Given a vector of length _n_, this kernel returns the zero-based index `i` of the element of vector `x` that contains the largest absolute value (or, in the complex domain, complex modulus).
-If `NaN` is encountered, it is treated as if it were a valid value that was smaller than any other value in the vector.
-If more than one element contains the same maximum value, the index of the latter element is returned via `i`.
+Given a vector of length _n_, this kernel returns the zero-based index `index` of the element of vector `x` that contains the largest absolute value (or, in the complex domain, the largest complex modulus).
 
-#### axpyv
+If `NaN` is encountered, it is treated as if it were a valid value that was smaller than any other value in the vector. If more than one element contains the same maximum value, the index of the latter element is returned via `index`.
+
+---
+
+#### axpyv kernel
 ```
 void bli_?axpyv_<suffix>
      (
@@ -776,7 +794,9 @@ This kernel performs the following operation:
 ```
 where `x` and `y` are vectors of length _n_ stored with strides `incx` and `incy`, respectively, and `alpha` is a scalar.
 
-#### axpbyv
+---
+
+#### axpbyv kernel
 ```
 void bli_?axpbyv_<suffix>
      (
@@ -795,7 +815,9 @@ This kernel performs the following operation:
 ```
 where `x` and `y` are vectors of length _n_ stored with strides `incx` and `incy`, respectively, and `alpha` and `beta` are scalars.
 
-#### copyv
+---
+
+#### copyv kernel
 ```
 void bli_?copyv_<suffix>
      (
@@ -812,7 +834,9 @@ This kernel performs the following operation:
 ```
 where `x` and `y` are vectors of length _n_ stored with strides `incx` and `incy`, respectively.
 
-#### dotv
+---
+
+#### dotv kernel
 ```
 void bli_?dotv_<suffix>
      (
@@ -831,7 +855,9 @@ This kernel performs the following operation:
 ```
 where `x` and `y` are vectors of length _n_ stored with strides `incx` and `incy`, respectively, and `rho` is a scalar.
 
-#### dotxv
+---
+
+#### dotxv kernel
 ```
 void bli_?dotxv_<suffix>
      (
@@ -852,7 +878,9 @@ This kernel performs the following operation:
 ```
 where `x` and `y` are vectors of length _n_ stored with strides `incx` and `incy`, respectively, and `alpha`, `beta`, and `rho` are scalars.
 
-#### invertv
+---
+
+#### invertv kernel
 ```
 void bli_?invertv_<suffix>
      (
@@ -861,13 +889,11 @@ void bli_?invertv_<suffix>
        cntx_t* restrict cntx
      )
 ```
-This kernel performs the following operation:
-```
-  x := inv(x)
-```
-where inv() denotes element-wise inversion.
+This kernel inverts all elements of an _n_-length vector `x`.
 
-#### scalv
+---
+
+#### scalv kernel
 ```
 void bli_?scalv_<suffix>
      (
@@ -884,7 +910,9 @@ This kernel performs the following operation:
 ```
 where `x` is a vector of length _n_ stored with stride `incx` and `alpha` is a scalar.
 
-#### scal2v
+---
+
+#### scal2v kernel
 ```
 void bli_?scal2v_<suffix>
      (
@@ -902,7 +930,9 @@ This kernel performs the following operation:
 ```
 where `x` and `y` are vectors of length _n_ stored with strides `incx` and `incy`, respectively, and `alpha` is a scalar.
 
-#### setv
+---
+
+#### setv kernel
 ```
 void bli_?setv_<suffix>
      (
@@ -919,7 +949,9 @@ This kernel performs the following operation:
 ```
 where `x` is a vector of length _n_ stored with stride `incx` and `alpha` is a scalar. Note that here, the `:=` operator represents a broadcast of `conjalpha(alpha)` to every element in `x`.
 
-#### subv
+---
+
+#### subv kernel
 ```
 void bli_?subv_<suffix>
      (
@@ -936,7 +968,9 @@ This kernel performs the following operation:
 ```
 where `x` and `y` are vectors of length _n_.
 
-#### swapv
+---
+
+#### swapv kernel
 ```
 void bli_?swapv_<suffix>
      (
@@ -946,15 +980,11 @@ void bli_?swapv_<suffix>
        cntx_t* restrict cntx
      )
 ```
-This kernel performs the following operation:
-```
-  t := x
-  x := y
-  y := t
-```
-where `x` and `y` are vectors of length _n_ stored with strides `incx` and `incy`, respectively, and `t` represents a temporary vector of length _n_ for illustrative purposes only. (No additional memory is allocated as part of this operation.)
+This kernel swaps corresponding elements of two _n_-length vectors `x` and `y` stored with strides `incx` and `incy`, respectively.
 
-#### xpbyv
+---
+
+#### xpbyv kernel
 ```
 void bli_?xpbyv_<suffix>
      (
