@@ -24,7 +24,9 @@ The BLIS build system was designed for use with GNU/Linux (or some other sane UN
   * GNU `make`
   * a working C compiler
 
-We also require various other shell utilities that are so ubiquitous that they are not worth mentioning (such as `mv`, `mkdir`, `find`, and so forth). If you are missing these utilities, then you have much bigger problems than not being able to build BLIS.
+BLIS also requires a POSIX threads library at link-time (`-lpthread` or `libpthread.so`). This requirement holds even when configuring BLIS with multithreading disabled (the default) or with multithreading via OpenMP (`--enable-multithreading=openmp`).
+
+Finally, we also require various other shell utilities that are so ubiquitous that they are not worth mentioning (such as `mv`, `mkdir`, `find`, and so forth). If you are missing these utilities, then you have much bigger problems than not being able to build BLIS.
 
 
 ## Obtaining BLIS
@@ -337,13 +339,13 @@ Running the `distclean` target is like saying, "Remove anything ever created by 
 
 ## Linking against BLIS
 
-Once you have instantiated (configured, compiled, and installed) a BLIS library, you can link to it in your application's makefile as you would any other library. The following is an abbreviated makefile for a small hypothetical application that has just two external dependencies: BLIS and the standard C math library.
+Once you have instantiated (configured and compiled, and perhaps installed) a BLIS library, you can link to it in your application's makefile as you would any other library. The following is an abbreviated makefile for a small hypothetical application that has just two external dependencies: BLIS and the standard C math library. We also link against libpthread since that library has been a runtime dependency of BLIS since 70640a3 (December 2017).
 ```make
 BLIS_PREFIX = $(HOME)/blis
 BLIS_INC    = $(BLIS_PREFIX)/include/blis
 BLIS_LIB    = $(BLIS_PREFIX)/lib/libblis.a
 
-OTHER_LIBS  = -L/usr/lib -lm
+OTHER_LIBS  = -L/usr/lib -lm -lpthread
 
 CC          = gcc
 CFLAGS      = -O2 -g -I$(BLIS_INC)
