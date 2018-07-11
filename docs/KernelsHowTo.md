@@ -3,15 +3,15 @@
 * **[Contents](KernelsHowTo.md#contents)**
 * **[Introduction](KernelsHowTo.md#introduction)**
 * **[BLIS kernels summary](KernelsHowTo.md#blis-kernels-summary)**
-  * **[Level-3](KernelsHowTo.md#level-3)**
-  * **[Level-1f](KernelsHowTo.md#level-1f)**
-  * **[Level-1v](KernelsHowTo.md#level-1v)**
-  * **[Level-1v/-1f Dependencies for Level-2 operations](KernelsHowTo.md#level-1v-1f-dependencies-for-level-2-operations)**
+  * [Level-3](KernelsHowTo.md#level-3)
+  * [Level-1f](KernelsHowTo.md#level-1f)
+  * [Level-1v](KernelsHowTo.md#level-1v)
+  * [Level-1v/-1f Dependencies for Level-2 operations](KernelsHowTo.md#level-1v-1f-dependencies-for-level-2-operations)
 * **[Calling kernels](KernelsHowTo.md#calling-kernels)**
 * **[BLIS kernels reference](KernelsHowTo.md#blis-kernels-reference)**
-  * **[Level-3 micro-kernels](KernelsHowTo.md#level-3-micro-kernels)**
-  * **[Level-1f kernels](KernelsHowTo.md#level-1f-kernels)**
-  * **[Level-1v kernels](KernelsHowTo.md#level-1v-kernels)**
+  * [Level-3 micro-kernels](KernelsHowTo.md#level-3-micro-kernels)
+  * [Level-1f kernels](KernelsHowTo.md#level-1f-kernels)
+  * [Level-1v kernels](KernelsHowTo.md#level-1v-kernels)
 
 
 ## Introduction
@@ -245,7 +245,7 @@ This section describes in detail the various level-3 micro-kernels supported by 
 
 #### gemm micro-kernel
 
-```
+```c
 void bli_?gemm_<suffix>
      (
        dim_t               k,
@@ -261,7 +261,7 @@ void bli_?gemm_<suffix>
 
 where `<suffix>` is implementation-dependent. The following (more portable) wrapper is also defined:
 
-```
+```c
 void bli_?gemm_ukernel
      (
        dim_t               k,
@@ -359,7 +359,7 @@ Note that this implementation is coded in C99 and lacks several kinds of optimiz
 
 #### trsm micro-kernels
 
-```
+```c
 void bli_?trsm_l_<suffix>
      (
        ctype*     restrict a11,
@@ -381,7 +381,7 @@ void bli_?trsm_u_<suffix>
 
 where `<suffix>` is implementation-dependent. The following (more portable) wrappers are also defined:
 
-```
+```c
 void bli_?trsm_l_ukernel
      (
        ctype*     restrict a11,
@@ -451,7 +451,7 @@ Note that these implementations are coded in C99 and lack several kinds of optim
 
 #### gemmtrsm micro-kernels
 
-```
+```c
 void bli_?gemmtrsm_l_<suffix>
      (
        dim_t               k,
@@ -481,7 +481,7 @@ void bli_?gemmtrsm_u_<suffix>
 
 where `<suffix>` is implementation-dependent. The following (more portable) wrappers are also defined:
 
-```
+```c
 void bli_?gemmtrsm_l_ukernel
      (
        dim_t               k,
@@ -624,7 +624,7 @@ Note that these implementations are coded in C99 and lack several kinds of optim
 ---
 
 #### axpy2v kernel
-```
+```c
 void bli_?axpy2v_<suffix>
      (
        conj_t           conjx,
@@ -647,7 +647,7 @@ where `x`, `y`, and `z` are vectors of length _n_ stored with strides `incx`, `i
 ---
 
 #### dotaxpyv kernel
-```
+```c
 void bli_?dotaxpyv_<suffix>
      (
        conj_t           conjxt,
@@ -672,7 +672,7 @@ where `x`, `y`, and `z` are vectors of length _n_ stored with strides `incx`, `i
 ---
 
 #### axpyf kernel
-```
+```c
 void bli_?axpyf_<suffix>
      (
        conj_t           conja,
@@ -695,7 +695,7 @@ where `a` is an _m_ x _b_ matrix, `x` is a vector of length _b_, and `y` is a ve
 ---
 
 #### dotxf kernel
-```
+```c
 void bli_?dotxf_<suffix>
      (
        conj_t           conjat,
@@ -721,7 +721,7 @@ This kernel is typically implemented as a series of _b_ `dotxv` operations with 
 ---
 
 #### dotxaxpyf kernel
-```
+```c
 void bli_?dotxaxpyf_<suffix>
      (
        conj_t           conjat,
@@ -758,7 +758,7 @@ This kernel is typically implemented as a series of _b_ `dotxv` operations with 
 ---
 
 #### addv kernel
-```
+```c
 void bli_?addv_<suffix>
      (
        conj_t           conjx,
@@ -777,7 +777,7 @@ where `x` and `y` are vectors of length _n_ stored with strides `incx` and `incy
 ---
 
 #### amaxv kernel
-```
+```c
 void bli_?amaxv_<suffix>
      (
        dim_t            n,
@@ -793,7 +793,7 @@ If `NaN` is encountered, it is treated as if it were a valid value that was smal
 ---
 
 #### axpyv kernel
-```
+```c
 void bli_?axpyv_<suffix>
      (
        conj_t           conjx,
@@ -813,7 +813,7 @@ where `x` and `y` are vectors of length _n_ stored with strides `incx` and `incy
 ---
 
 #### axpbyv kernel
-```
+```c
 void bli_?axpbyv_<suffix>
      (
        conj_t           conjx,
@@ -834,7 +834,7 @@ where `x` and `y` are vectors of length _n_ stored with strides `incx` and `incy
 ---
 
 #### copyv kernel
-```
+```c
 void bli_?copyv_<suffix>
      (
        conj_t           conjx,
@@ -853,7 +853,7 @@ where `x` and `y` are vectors of length _n_ stored with strides `incx` and `incy
 ---
 
 #### dotv kernel
-```
+```c
 void bli_?dotv_<suffix>
      (
        conj_t           conjx,
@@ -874,7 +874,7 @@ where `x` and `y` are vectors of length _n_ stored with strides `incx` and `incy
 ---
 
 #### dotxv kernel
-```
+```c
 void bli_?dotxv_<suffix>
      (
        conj_t           conjx,
@@ -897,7 +897,7 @@ where `x` and `y` are vectors of length _n_ stored with strides `incx` and `incy
 ---
 
 #### invertv kernel
-```
+```c
 void bli_?invertv_<suffix>
      (
        dim_t            n,
@@ -910,7 +910,7 @@ This kernel inverts all elements of an _n_-length vector `x`.
 ---
 
 #### scalv kernel
-```
+```c
 void bli_?scalv_<suffix>
      (
        conj_t           conjalpha,
@@ -929,7 +929,7 @@ where `x` is a vector of length _n_ stored with stride `incx` and `alpha` is a s
 ---
 
 #### scal2v kernel
-```
+```c
 void bli_?scal2v_<suffix>
      (
        conj_t           conjx,
@@ -949,7 +949,7 @@ where `x` and `y` are vectors of length _n_ stored with strides `incx` and `incy
 ---
 
 #### setv kernel
-```
+```c
 void bli_?setv_<suffix>
      (
        conj_t           conjalpha,
@@ -968,7 +968,7 @@ where `x` is a vector of length _n_ stored with stride `incx` and `alpha` is a s
 ---
 
 #### subv kernel
-```
+```c
 void bli_?subv_<suffix>
      (
        conj_t           conjx,
@@ -987,7 +987,7 @@ where `x` and `y` are vectors of length _n_.
 ---
 
 #### swapv kernel
-```
+```c
 void bli_?swapv_<suffix>
      (
        dim_t            n,
@@ -1001,7 +1001,7 @@ This kernel swaps corresponding elements of two _n_-length vectors `x` and `y` s
 ---
 
 #### xpbyv kernel
-```
+```c
 void bli_?xpbyv_<suffix>
      (
        conj_t           conjx,

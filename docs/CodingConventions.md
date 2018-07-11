@@ -24,7 +24,7 @@ Most of the code in BLIS is written in C, and specifically in ISO C99. This sect
 ### Placement of braces
 
 Please either use braces to denote the indentation limits of scope, or to enclose multiple statements on a single line. But do not place the open brace on the same line as a conditional if the conditional will be more than one line.
-```
+```c
 {
     // This is fine.
     if ( bli_obj_is_real( x ) )
@@ -45,7 +45,7 @@ Please either use braces to denote the indentation limits of scope, or to enclos
 ### Indentation
 
 If at all possible, **please use tabs to denote changing levels of scope!** If you can't use tabs or doing so would be very inconvenient given your editor and setup, please set your indentation to use exactly four spaces per level of indentation. Below is what it would look like if you used tabs (with a tab width set to four spaces), or four actual spaces per indentation level.
-```
+```c
 bool_t bli_obj_is_real( obj_t* x )
 {
     bool_t r_val;
@@ -58,7 +58,7 @@ bool_t bli_obj_is_real( obj_t* x )
 ```
 Ideally, tabs should be used to indicate changes in levels of scope, but then spaces should be used for multi-line statements within the same scope. In the example below, I've marked the characters that should be spaces with `.` (with tabs used for the first level of indentation):
 
-```
+```c
 bool_t bli_obj_is_complex( obj_t* x )
 {
     bool_t r_val;
@@ -74,7 +74,7 @@ bool_t bli_obj_is_complex( obj_t* x )
 ### Comments
 
 Please use C++-style comments, and line-break your comments somewhere between character (column) 72 and 80.
-```
+```c
 {
     // This is a comment. This comment can span multiple lines, but it should 
     // not extend beyond column 80. (For these purposes, you can count a tab 
@@ -82,7 +82,7 @@ Please use C++-style comments, and line-break your comments somewhere between ch
 }
 ```
 If you are inserting comments in a macro definition, in which case you must use C-style comments:
-```
+```c
 #define bli_some_macro( x ) \
 \
     /* This is a comment in a macro definition. It, too, should not spill
@@ -95,7 +95,7 @@ If you are inserting comments in a macro definition, in which case you must use 
 ### Blank lines
 
 Please use blank lines to separate lines of code from the next line of code. However, if adjacent lines of code are meaningfully related, please skip the blank line.
-```
+```c
 {
     // Set the matrix datatype.
     bli_obj_set_dt( BLIS_DOUBLE, x );
@@ -109,7 +109,7 @@ Please use blank lines to separate lines of code from the next line of code. How
 ### Condensing short code to single lines
 
 Sometimes, to more efficiently display code on the screen, it's helpful to skip certain newlines, such as those in conditional statements. This is fine, just try to line things up in a way that is visually appealing.
-```
+```c
 {
     bool_t r_val;
     dim_t  foo;
@@ -133,7 +133,7 @@ Sometimes, to more efficiently display code on the screen, it's helpful to skip 
 ### Whitespace in function calls
 
 For single-line function calls, please **avoid** a space between the last character in the function/macro name and the open parentheses. Also, please do not insert any spaces before commas that separate arguments to a function/macro invocation.
-```
+```c
 {
     obj_t x;
 
@@ -149,7 +149,7 @@ For single-line function calls, please **avoid** a space between the last charac
 }
 ```
 For multi-line function calls, please use the following template:
-```
+```c
 {
     bli_dgemm
     (
@@ -169,7 +169,7 @@ Notice that here, the parentheses are formatted similar to braces. However, noti
 ### Whitespace in function definitions
 
 When defining a function with few arguments, insert a single space after commas and types, and after the first parentheses and before the last parentheses:
-```
+```c
 void bli_obj_set_length( dim_t m, obj_t* a )
 {
     // Body of function
@@ -178,7 +178,7 @@ void bli_obj_set_length( dim_t m, obj_t* a )
 As with single-line function calls, please do not place a space between the last character of the function name and the open parentheses to the argument list!
 
 When defining a function with many arguments, especially those that would not comfortably fit in a single 80-character line, you can split the type signature into multiple lines:
-```
+```c
 void bli_gemm
      (
        obj_t*  alpha,
@@ -193,7 +193,7 @@ void bli_gemm
 }
 ```
 If you are going to use this style of function definition, please indent the parentheses exactly five spaces (don't use tabs here). Then, indent the arguments with an additional two spaces. Thus, parentheses should be in column 6 (counting from 1) and argument types should begin in column 8. Also notice that the number of spaces after each argument's type specifier varies so that the argument names are aligned. If you insert qualifiers such as `restrict`, please right-justify them:
-```
+```c
 void bli_gemm
      (
        obj_t*  restrict alpha,
@@ -211,7 +211,7 @@ void bli_gemm
 ### Whitespace in expressions
 
 Please insert whitespace into conditional expressions.
-```
+```c
 {
    // Good.
    if ( m == 10 && n > 0 ) return;
@@ -226,7 +226,7 @@ Please insert whitespace into conditional expressions.
 Unlike with the parentheses that surround the argument list of a function call, there should be exactly one space after conditional keywords and the open parentheses for its associated conditional statement: `if (...)`, `else if (...)`, and `while (...)`.
 
 Sometimes, extra spaces for alignment are desired:
-```
+```c
 {
     // This is okay.
     if ( m == 0 ) return 0;

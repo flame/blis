@@ -39,16 +39,16 @@ The following tables list various types used throughout the BLIS typed API.
 
 ### Integer-based types
 
-| BLIS type    | Definition   | Used to represent...             |
-|:-------------|:-------------|:---------------------------------|
-| `gint_t`     | `int32_t` or `int64_t` | general-purpose signed integer; used to define signed integer types. |
-| `dim_t`      | `gint_t`     | matrix and vector dimensions. |
-| `inc_t`      | `gint_t`     | matrix row/column strides and vector increments. |
-| `doff_t`     | `gint_t`     | matrix diagonal offset: if _k_ < 0, diagonal begins at element (-_k_,0); otherwise diagonal begins at element (0,_k_). |
+| BLIS integer type | Type definition        | Used to represent...                                                 |
+|:------------------|:-----------------------|:---------------------------------------------------------------------|
+| `gint_t`          | `int32_t` or `int64_t` | general-purpose signed integer; used to define signed integer types. |
+| `dim_t`           | `gint_t`               | matrix and vector dimensions.                                        |
+| `inc_t`           | `gint_t`               | matrix row/column strides and vector increments.                     |
+| `doff_t`          | `gint_t`               | matrix diagonal offset: if _k_ < 0, diagonal begins at element (-_k_,0); otherwise diagonal begins at element (0,_k_). |
 
 ### Floating-point types
 
-| BLIS type  | BLIS char | Definition                             | Used to represent...                 |
+| BLIS type  | BLIS char | Type definition                        | Used to represent...                 |
 |:-----------|:----------|:---------------------------------------|:-------------------------------------|
 | `float`    | `s`       | _N/A_                                  | single-precision real numbers    |
 | `double`   | `d`       | _N/A_                                  | double-precision real numbers    |
@@ -87,7 +87,7 @@ The following tables list various types used throughout the BLIS typed API.
 
 ### Basic vs expert interfaces
 
-The functions listed in this document belong to the basic interface subset of the BLIS typed API. There is a companion "expert" interface that mirrors the basic interface, except that it also contains at least one additional parameter that is only of interest to experts and library developers. The expert interfaces use the same name as the basic function names, except for an additional "_ex" suffix. For example, the basic interface for `gemm` is
+The functions listed in this document belong to the "basic" interface subset of the BLIS typed API. There is a companion "expert" interface that mirrors the basic interface, except that it also contains at least one additional parameter that is only of interest to experts and library developers. The expert interfaces use the same name as the basic function names, except for an additional "_ex" suffix. For example, the basic interface for `gemm` is
 ```c
 void bli_?gemm
      (
@@ -124,15 +124,11 @@ The expert interface contains an additional `cntx_t*` parameter. Note that calli
 
 ### Contexts
 
-In general, it is permissible to pass in `NULL` for a `cntx_t*` parameter when calling an expert interface such as `bli_gemm_ex()`. However, there are cases where `NULL` values are not accepted and may result in a segmentation fault. Specifically, the `cntx_t*` argument appears in the interfaces to the `gemm`, `trsm`, and `gemmtrsm` [level-3 micro-kernels](KernelsHowTo.md#level-3) along with all [level-1v](KernelsHowTo.md#level-1v) and [level-1f](KernelsHowTo.md#level-1f) kernels. There, as a general rule, a valid pointer must be passed in. Whenever a valid context is needed, the developer may query a default context from the global kernel structure (if a context is not already available in the current scope):
+In general, it is permissible to pass in `NULL` for a `cntx_t*` parameter when calling an expert interface such as `bli_dgemm_ex()`. However, there are cases where `NULL` values are not accepted and may result in a segmentation fault. Specifically, the `cntx_t*` argument appears in the interfaces to the `gemm`, `trsm`, and `gemmtrsm` [level-3 micro-kernels](KernelsHowTo.md#level-3) along with all [level-1v](KernelsHowTo.md#level-1v) and [level-1f](KernelsHowTo.md#level-1f) kernels. There, as a general rule, a valid pointer must be passed in. Whenever a valid context is needed, the developer may query a default context from the global kernel structure (if a context is not already available in the current scope):
 ```c
 cntx_t* bli_gks_query_cntx( void );
 ```
-When BLIS is configured to target a configuration family (e.g. `intel64`, `x86_64`),
-`bli_gks_query_cntx()` will use `cpuid` or an equivalent heuristic to select and
-and return the appropriate context. When BLIS is configured to target a singleton
-sub-configuration (e.g. `haswell`, `skx`), `bli_gks_query_cntx()` will unconditionally
-return a pointer to the context appropriate for the targeted configuration.
+When BLIS is configured to target a configuration family (e.g. `intel64`, `x86_64`), `bli_gks_query_cntx()` will use `cpuid` or an equivalent heuristic to select and and return the appropriate context. When BLIS is configured to target a singleton sub-configuration (e.g. `haswell`, `skx`), `bli_gks_query_cntx()` will unconditionally return a pointer to the context appropriate for the targeted configuration.
 
 
 ## BLIS header file
@@ -153,7 +149,7 @@ Application developers should keep in mind, however, that this new self-initiali
 Similarly, an expert user may call `bli_init()` manually in order to control when the overhead of library initialization is incurred, even though the library would have self-initialized.
 
 The interfaces to `bli_init()` and `bli_finalize()` are quite simple; they require no arguments and return no values:
-```
+```c
 void bli_init( void );
 void bli_finalize( void );
 ```
@@ -166,7 +162,7 @@ Notes for interpreting the following prototypes:
   * Any occurrence of `?` should be replaced with `s`, `d`, `c`, or `z` to form an actual function name.
   * Any occurrence of `ctype` should be replaced with the actual C type corresponding to the datatype instance in question, while `rtype` should be replaced by the real projection of `ctype`. For example:
     * If we consider the prototype for `bli_zaxpyv()` below, `ctype` refers to `dcomplex`.
-    * If we consider the prototype for `bli_zfnormv()` below, `ctype` refers to `dcomplex` while `rtype` refers to `double`.
+    * If we consider the prototype for `bli_znormfv()` below, `ctype` refers to `dcomplex` while `rtype` refers to `double`.
   * Any occurrence of `itype` should be replaced with the general-purpose signed integer type, `gint_t`.
   * All vector arguments have associated increments that proceed them, typically listed as `incX` for a given vector `x`. The semantic meaning of a vector increment is "the distance, in units of elements, between any two adjacent elements in the vector."
   * All matrix arguments have associated row and column strides arguments that proceed them, typically listed as `rsX` and `csX` for a given matrix `X`. Row strides are always listed first, and column strides are always listed second. The semantic meaning of a row stride is "the distance, in units of elements, to the next row (within a column)," and the meaning of a column stride is "the distance, in units of elements, to the next column (within a row)." Thus, unit row stride implies column-major storage and unit column stride implies row-major storage.
@@ -265,7 +261,7 @@ where `x` and `y` are vectors of length _n_, and `alpha` is a scalar.
 ---
 
 #### axpbyv
-```
+```c
 void bli_?axpbyv
      (
        conj_t  conjx,
@@ -273,8 +269,7 @@ void bli_?axpbyv
        ctype*  alpha,
        ctype*  x, inc_t incx,
        ctype*  beta,
-       ctype*  y, inc_t incy,
-       cntx_t* cntx
+       ctype*  y, inc_t incy
      )
 ```
 Perform
@@ -404,7 +399,11 @@ void bli_?setv
        ctype*  x, inc_t incx
      );
 ```
-Set all elements of an _n_-length vector `x` to scalar `conjalpha(alpha)`.
+Perform
+```
+  x := conjalpha(alpha)
+```
+That is, set all elements of an _n_-length vector `x` to scalar `conjalpha(alpha)`.
 
 ---
 
@@ -440,15 +439,14 @@ Swap corresponding elements of two _n_-length vectors `x` and `y`.
 ---
 
 #### xpbyv
-```
+```c
 void bli_?xpbyv
      (
        conj_t  conjx,
        dim_t   n,
        ctype*  x, inc_t incx,
        ctype*  beta,
-       ctype*  y, inc_t incy,
-       cntx_t* cntx
+       ctype*  y, inc_t incy
      )
 ```
 Perform
@@ -467,7 +465,7 @@ where `x` and `y` are vectors of length _n_, and `beta` is a scalar.
 
 Level-1d operations perform various level-1 BLAS-like operations on matrix diagonals (hence the _d_).
 
-These operations are similar to their level-1m counterparts, except they only read and update matrix diagonals. Please see the descriptions for the corresponding level-1m operation for a description of the arguments.
+These operations are similar to their level-1m counterparts, except they only read and update matrix diagonals and therefore do not take any `uplo` arguments. Please see the descriptions for the corresponding level-1m operation for a description of the arguments.
 
 ---
 
@@ -591,7 +589,7 @@ void bli_?setid
        ctype*  a, inc_t rsa, inc_t csa
      );
 ```
-Set the imaginary components of a matrix diagonal.
+Set the imaginary components of a matrix diagonal to a scalar `alpha`.
 
 ---
 
@@ -637,7 +635,6 @@ Perform
 ```
   B := B + transa(A)
 ```
-
 where `B` is an _m x n_ matrix, `A` is stored as a dense matrix, or lower- or upper-triangular/trapezoidal matrix, as specified by `uploa`, with the diagonal offset of `A` specified by `diagoffa` and unit/non-unit nature of the diagonal specified by `diaga`. If `uploa` indicates lower or upper storage, only that part of matrix `A` will be referenced and used to update `B`.
 
 ---
@@ -661,7 +658,6 @@ Perform
 ```
   B := B + alpha * transa(A)
 ```
-
 where `B` is an _m x n_ matrix, `A` is stored as a dense matrix, or lower- or upper-triangular/trapezoidal matrix, as specified by `uploa`, with the diagonal offset of `A` specified by `diagoffa` and unit/non-unit nature of the diagonal specified by `diaga`. If `uploa` indicates lower or upper storage, only that part of matrix `A` will be referenced and used to update `B`.
 
 ---
@@ -684,7 +680,6 @@ Perform
 ```
   B := transa(A)
 ```
-
 where `B` is an _m x n_ matrix, `A` is stored as a dense matrix, or lower- or upper-triangular/trapezoidal matrix, as specified by `uploa`, with the diagonal offset of `A` specified by `diagoffa` and unit/non-unit nature of the diagonal specified by `diaga`. If `uploa` indicates lower or upper storage, only that part of matrix `A` will be referenced and used to update `B`.
 
 ---
@@ -706,7 +701,6 @@ Perform
 ```
   A := conjalpha(alpha) * A
 ```
-
 where `A` is an _m x n_ matrix stored as a dense matrix, or lower- or upper-triangular/trapezoidal matrix, as specified by `uploa`, with the diagonal offset of `A` specified by `diagoffa`. If `uploa` indicates lower or upper storage, only that part of matrix `A` will be updated.
 
 ---
@@ -730,7 +724,6 @@ Perform
 ```
   B := alpha * transa(A)
 ```
-
 where `B` is an _m x n_ matrix, `A` is stored as a dense matrix, or lower- or upper-triangular/trapezoidal matrix, as specified by `uploa`, with the diagonal offset of `A` specified by `diagoffa` and unit/non-unit nature of the diagonal specified by `diaga`. If `uploa` indicates lower or upper storage, only that part of matrix `A` will be referenced and used to update `B`.
 
 ---
@@ -771,7 +764,6 @@ Perform
 ```
   B := B - transa(A)
 ```
-
 where `B` is an _m x n_ matrix, `A` is stored as a dense matrix, or lower- or upper-triangular/trapezoidal matrix, as specified by `uploa`, with the diagonal offset of `A` specified by `diagoffa` and unit/non-unit nature of the diagonal specified by `diaga`. If `uploa` indicates lower or upper storage, only that part of matrix `A` will be referenced and used to update `B`.
 
 ---
@@ -808,7 +800,6 @@ Perform
 ```
   y := y + alphax * conjx(x) + alphay * conjy(y)
 ```
-
 where `x`, `y`, and `z` are vectors of length _m_. The kernel, if optimized, is implemented as a fused pair of calls to [axpyv](BLISTypedAPI.md#axpyv).
 
 ---
@@ -833,7 +824,6 @@ Perform
   rho := conjxt(x^T) * conjy(y)
   y   := y + alpha * conjx(x)
 ```
-
 where `x`, `y`, and `z` are vectors of length _m_ and `alpha` and `rho` are scalars. The kernel, if optimized, is implemented as a fusion of calls to [dotv](BLISTypedAPI.md#dotv) and [axpyv](BLISTypedAPI.md#axpyv).
 
 ---
@@ -856,7 +846,6 @@ Perform
 ```
   y := y + alpha * conja(A) * conjx(x)
 ```
-
 where `A` is an _m x nf_ matrix, and `y` and `x` are vectors. The kernel, if optimized, is implemented as a fused series of calls to [axpyv](BLISTypedAPI.md#axpyv) where _nf_ is less than or equal to an implementation-dependent fusing factor specific to `axpyf`.
 
 ---
@@ -880,7 +869,6 @@ Perform
 ```
   y := y + alpha * conjat(A^T) * conjx(x)
 ```
-
 where `A` is an _m x nf_ matrix, and `y` and `x` are vectors. The kernel, if optimized, is implemented as a fused series of calls to [dotxv](BLISTypedAPI.md#dotxv) where _nf_ is less than or equal to an implementation-dependent fusing factor specific to `dotxf`.
 
 ---
@@ -909,7 +897,6 @@ Perform
   y := beta * y + alpha * conjat(A^T) * conjw(w)
   z :=        z + alpha * conja(A)    * conjx(x)
 ```
-
 where `A` is an _m x nf_ matrix, `w` and `z` are vectors of length _m_, `x` and `y` are vectors of length `nf`, and `alpha` and `beta` are scalars. The kernel, if optimized, is implemented as a fusion of calls to [dotxf](BLISTypedAPI.md#dotxf) and [axpyf](BLISTypedAPI.md#axpyf).
 
 
@@ -940,7 +927,6 @@ Perform
 ```
   y := beta * y + alpha * transa(A) * conjx(x)
 ```
-
 where `transa(A)` is an _m x n_ matrix, and `y` and `x` are vectors.
 
 ---
@@ -963,7 +949,6 @@ Perform
 ```
   A := A + alpha * conjx(x) * conjy(y)^T
 ```
-
 where `A` is an _m x n_ matrix, and `x` and `y` are vectors of length _m_ and _n_, respectively.
 
 ---
@@ -987,7 +972,6 @@ Perform
 ```
   y := beta * y + alpha * conja(A) * conjx(x)
 ```
-
 where `A` is an _m x m_ Hermitian matrix stored in the lower or upper triangle as specified by `uploa`, and `y` and `x` are vectors of length _m_.
 
 ---
@@ -1008,7 +992,6 @@ Perform
 ```
   A := A + alpha * conjx(x) * conjx(x)^H
 ```
-
 where `A` is an _m x m_ Hermitian matrix stored in the lower or upper triangle as specified by `uploa`, and `x` is a vector of length _m_.
 
 **Note:** The floating-point type of `alpha` is always the real projection of the floating-point types of `x` and `A`.
@@ -1032,7 +1015,6 @@ Perform
 ```
   A := A + alpha * conjx(x) * conjy(y)^H + conj(alpha) * conjy(y) * conjx(x)^H
 ```
-
 where `A` is an _m x m_ Hermitian matrix stored in the lower or upper triangle as specified by `uploa`, and `x` and `y` are vectors of length _m_.
 
 ---
@@ -1056,7 +1038,6 @@ Perform
 ```
   y := beta * y + alpha * conja(A) * conjx(x)
 ```
-
 where `A` is an _m x m_ symmetric matrix stored in the lower or upper triangle as specified by `uploa`, and `y` and `x` are vectors of length _m_.
 
 ---
@@ -1077,7 +1058,6 @@ Perform
 ```
   A := A + alpha * conjx(x) * conjx(x)^T
 ```
-
 where `A` is an _m x m_ symmetric matrix stored in the lower or upper triangle as specified by `uploa`, and `x` is a vector of length _m_.
 
 ---
@@ -1099,7 +1079,6 @@ Perform
 ```
   A := A + alpha * conjx(x) * conjy(y)^T + conj(alpha) * conjy(y) * conjx(x)^T
 ```
-
 where `A` is an _m x m_ symmetric matrix stored in the lower or upper triangle as specified by `uploa`, and `x` and `y` are vectors of length _m_.
 
 ---
@@ -1121,7 +1100,6 @@ Perform
 ```
   x := alpha * transa(A) * x
 ```
-
 where `A` is an _m x m_ triangular matrix stored in the lower or upper triangle as specified by `uploa` with unit/non-unit nature specified by `diaga`, and `x` is a vector of length _m_.
 
 ---
@@ -1143,7 +1121,6 @@ Solve the linear system
 ```
   transa(A) * x = alpha * y
 ```
-
 where `A` is an _m x m_ triangular matrix stored in the lower or upper triangle as specified by `uploa` with unit/non-unit nature specified by `diaga`, and `x` and `y` are vectors of length _m_. The right-hand side vector operand `y` is overwritten with the solution vector `x`.
 
 ---
@@ -1178,7 +1155,6 @@ Perform
 ```
   C := beta * C + alpha * transa(A) * transb(B)
 ```
-
 where C is an _m x n_ matrix, `transa(A)` is an _m x k_ matrix, and `transb(B)` is a _k x n_ matrix.
 
 ---
@@ -1230,8 +1206,7 @@ Perform
 ```
   C := beta * C + alpha * transa(A) * transa(A)^H
 ```
-
-where C is an _m x m_ Hermitian matrix stored in the lower or upper triangle as specified by `uploa` and `transa(A)` is an _m x k_ matrix.
+where C is an _m x m_ Hermitian matrix stored in the lower or upper triangle as specified by `uploc` and `transa(A)` is an _m x k_ matrix.
 
 **Note:** The floating-point types of `alpha` and `beta` are always the real projection of the floating-point types of `A` and `C`.
 
@@ -1242,7 +1217,7 @@ where C is an _m x m_ Hermitian matrix stored in the lower or upper triangle as 
 void bli_?her2k
      (
        uplo_t  uploc,
-       trans_t transa,
+       trans_t transab,
        dim_t   m,
        dim_t   k,
        ctype*  alpha,
@@ -1254,10 +1229,9 @@ void bli_?her2k
 ```
 Perform
 ```
-  C := beta * C + alpha * transa(A) * transb(B)^H + conj(alpha) * transb(B) * transa(A)^H
+  C := beta * C + alpha * transab(A) * transab(B)^H + conj(alpha) * transab(B) * transab(A)^H
 ```
-
-where C is an _m x m_ Hermitian matrix stored in the lower or upper triangle as specified by `uploa` and `transa(A)` and `transb(B)` are _m x k_ matrices.
+where C is an _m x m_ Hermitian matrix stored in the lower or upper triangle as specified by `uploc` and `transab(A)` and `transab(B)` are _m x k_ matrices.
 
 **Note:** The floating-point type of `beta` is always the real projection of the floating-point types of `A` and `C`.
 
@@ -1310,7 +1284,6 @@ Perform
 ```
   C := beta * C + alpha * transa(A) * transa(A)^T
 ```
-
 where C is an _m x m_ symmetric matrix stored in the lower or upper triangle as specified by `uploa` and `transa(A)` is an _m x k_ matrix.
 
 ---
@@ -1320,7 +1293,7 @@ where C is an _m x m_ symmetric matrix stored in the lower or upper triangle as 
 void bli_?syr2k
      (
        uplo_t  uploc,
-       trans_t transa,
+       trans_t transab,
        dim_t   m,
        dim_t   k,
        ctype*  alpha,
@@ -1332,10 +1305,9 @@ void bli_?syr2k
 ```
 Perform
 ```
-  C := beta * C + alpha * transa(A) * transb(B)^T + alpha * transb(B) * transa(A)^T
+  C := beta * C + alpha * transab(A) * transab(B)^T + alpha * transab(B) * transab(A)^T
 ```
-
-where C is an _m x m_ symmetric matrix stored in the lower or upper triangle as specified by `uploa` and `transa(A)` and `transb(B)` are _m x k_ matrices.
+where C is an _m x m_ symmetric matrix stored in the lower or upper triangle as specified by `uploa` and `transab(A)` and `transab(B)` are _m x k_ matrices.
 
 ---
 
@@ -1437,7 +1409,7 @@ void bli_?asumv
        rtype*  asum
      );
 ```
-Compute the su of the absolute values of the fundamental elements of vector `x`. The resulting sum is stored to `asum`.
+Compute the sum of the absolute values of the fundamental elements of vector `x`. The resulting sum is stored to `asum`.
 
 **Note:** The floating-point type of `asum` is always the real projection of the floating-point type of `x`.
 **Note:** This function attempts to mimic the algorithm for computing the absolute vector sum in the netlib BLAS routines `*asum()`.
@@ -1459,7 +1431,7 @@ void bli_?norm[1fi]m
        rtype*  norm
      );
 ```
-Compute the one-norm (`norm1m`), Frobenius norm (`normfm`), or infinity norm (`normim`) of the elements in an _m x n_ matrix `A`. If `uploa` is `BLIS_LOWER` or `BLIS_UPPER` then `A` is assumed to be lower or upper triangular, respectively, with the main diagonal located at offset `diagoffa`. The resulting norm is stored to `norm`.
+Compute the one-norm (`bli_?norm1m()`), Frobenius norm (`bli_?normfm()`), or infinity norm (`bli_?normim()`) of the elements in an _m x n_ matrix `A`. If `uploa` is `BLIS_LOWER` or `BLIS_UPPER` then `A` is assumed to be lower or upper triangular, respectively, with the main diagonal located at offset `diagoffa`. The resulting norm is stored to `norm`.
 
 **Note:** The floating-point type of `norm` is always the real projection of the floating-point type of `x`.
 
@@ -1476,7 +1448,7 @@ void bli_?norm[1fi]v
        rtype*  norm
      );
 ```
-Compute the one-norm (`norm1v`), Frobenius norm (`normfv`), or infinity norm (`normiv`) of the elements in a vector `x` of length _n_. The resulting norm is stored to `norm`.
+Compute the one-norm (`bli_?norm1v()`), Frobenius norm (`bli_?normfv()`), or infinity norm (`bli_?normiv()`) of the elements in a vector `x` of length _n_. The resulting norm is stored to `norm`.
 
 **Note:** The floating-point type of `norm` is always the real projection of the floating-point type of `x`.
 
@@ -1636,7 +1608,6 @@ The function computes scale\_new and sumsq\_new such that
 ```
   scale_new^2 * sumsq_new = x[0]^2 + x[1]^2 + ... x[m-1]^2 + scale_old^2 * sumsq_old
 ```
-
 where, on entry, `scale` and `sumsq` contain `scale_old` and `sumsq_old`, respectively, and on exit, `scale` and `sumsq` contain `scale_new` and `sumsq_new`, respectively.
 
 **Note:** This function attempts to mimic the algorithm for computing the Frobenius norm in the netlib LAPACK routine `?lassq()`.
@@ -1833,7 +1804,7 @@ Possible implementation (ie: the `ind_t method` argument) types are:
 Possible micro-kernel types (ie: the return values for `bli_info_get_*_ukr_impl_string()`) are:
  * `BLIS_REFERENCE_UKERNEL` (`"refrnce"`): This value is returned when the queried micro-kernel is provided by the reference implementation.
  * `BLIS_VIRTUAL_UKERNEL` (`"virtual"`): This value is returned when the queried micro-kernel is driven by a the "virtual" micro-kernel provided by an induced method. This happens for any `method` value that is not `BLIS_NAT` (ie: native), but only applies to the complex domain.
- * `BLIS_OPTIMIZED_UKERNEL` (`"optimzd"`): This value is returned when the queried micro-kernel is provided by an implementation that is neither reference nor virtual, and thus we assume the kernel author would deem it to be "optimized". Such a micro-kernel may not be optimal in the literal sense of the word, but nonetheless is _intended_ to be optimized, at least relative to the reference micro-kernels. 
+ * `BLIS_OPTIMIZED_UKERNEL` (`"optimzd"`): This value is returned when the queried micro-kernel is provided by an implementation that is neither reference nor virtual, and thus we assume the kernel author would deem it to be "optimized". Such a micro-kernel may not be optimal in the literal sense of the word, but nonetheless is _intended_ to be optimized, at least relative to the reference micro-kernels.
  * `BLIS_NOTAPPLIC_UKERNEL` (`"notappl"`): This value is returned usually when performing a `gemmtrsm` or `trsm` micro-kernel type query for any `method` value that is not `BLIS_NAT` (ie: native). That is, induced methods cannot be (purely) used on `trsm`-based micro-kernels because these micro-kernels perform more a triangular inversion, which is not matrix multiplication.
 
 
