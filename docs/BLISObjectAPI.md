@@ -134,10 +134,10 @@ These objects are polymorphic; each one contains a `float`, `double`, `scomplex`
  * The object parameter requires unit dimensions (1x1). (In other words, the function expects a scalar for the operand in question.)
  * The object parameter is input-only. (In other words, the function is not trying to update the scalar.)
 The correct representation is chosen by context, usually by inspecting the datatype of one of the other operands involved in an operation. For example, if we create and initialize objects `x` and `y` of `num_t` type `BLIS_DOUBLE`, the following call to `bli_axpyv()`
-```c
-bli_axpyv( &BLIS_TWO, &x, &y );
-```
-will use the `BLIS_DOUBLE` representation of `BLIS_TWO`.
+   ```c
+   bli_axpyv( &BLIS_TWO, &x, &y );
+   ```
+   will use the `BLIS_DOUBLE` representation of `BLIS_TWO`.
 
 
 ## Basic vs expert interfaces
@@ -689,13 +689,6 @@ Observed object properties: `conj?(alpha)`, `diagoff(A)`, `uplo(A)`.
 ```c
 void bli_scal2m
      (
-       doff_t  diagoffa,
-       diag_t  diaga,
-       uplo_t  uploa,
-       trans_t transa,
-       dim_t   m,
-       dim_t   n,
-       obj_t*  alpha,
        obj_t*  a,
        obj_t*  b
      );
@@ -715,12 +708,6 @@ Observed object properties: `conj?(alpha)`, `diagoff(A)`, `diag(A)`, `uplo(A)`, 
 ```c
 void bli_setm
      (
-       conj_t  conjalpha,
-       doff_t  diagoffa,
-       diag_t  diaga,
-       uplo_t  uploa,
-       dim_t   m,
-       dim_t   n,
        obj_t*  alpha,
        obj_t*  a
      );
@@ -739,12 +726,6 @@ Observed object properties: `conj?(alpha)`, `diagoff(A)`, `diag(A)`, `uplo(A)`.
 ```c
 void bli_subm
      (
-       doff_t  diagoffa,
-       diag_t  diaga,
-       uplo_t  uploa,
-       trans_t transa,
-       dim_t   m,
-       dim_t   n,
        obj_t*  a,
        obj_t*  b
      );
@@ -1017,9 +998,6 @@ Observed object properties: `conj?(alpha)`, `conj?(beta)`, `conj?(A)`, `uplo(A)`
 ```c
 void bli_syr
      (
-       uplo_t  uploa,
-       conj_t  conjx,
-       dim_t   m,
        obj_t*  alpha,
        obj_t*  x,
        obj_t*  a
@@ -1039,9 +1017,6 @@ Observed object properties: `conj?(alpha)`, `conj?(x)`.
 ```c
 void bli_syr2
      (
-       uplo_t  uploa,
-       conj_t  conjx,
-       dim_t   m,
        obj_t*  alpha,
        obj_t*  x,
        obj_t*  y,
@@ -1157,10 +1132,6 @@ Observed object properties: `uplo(A)`, `conj?(A)`, `trans?(B)`.
 ```c
 void bli_herk
      (
-       uplo_t  uploc,
-       trans_t transa,
-       dim_t   m,
-       dim_t   k,
        rtype*  alpha,
        obj_t*  a,
        rtype*  beta,
@@ -1324,11 +1295,6 @@ Observed object properties: `uplo(A)`, `trans?(A)`, `diag(A)`, `trans?(B)`.
 void bli_trsm
      (
        side_t  sidea,
-       uplo_t  uploa,
-       trans_t transa,
-       diag_t  diaga,
-       dim_t   m,
-       dim_t   n,
        obj_t*  alpha,
        obj_t*  a,
        obj_t*  b
