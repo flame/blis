@@ -60,7 +60,7 @@ Providing these three components constitutes a complete sub-configuration. A mor
 As mentioned above, the kernels used by a sub-configuration are specified in the `bli_cntx_init_` function. This function is flexible in that the context is typically initialized with a set of "reference" kernels. Then, the kernel developer overwrites the fields in the context that correspond to kernel operations that have optimized counterparts that should be used instead.
 
 Let's use the following hypothetical function definition to guide our walkthrough.
-```
+```c
 #include "blis.h"
 
 void bli_cntx_init_fooarch( cntx_t* cntx )
@@ -156,7 +156,7 @@ _**Level-1v kernels.**_ The fourth function call is to `bli_cntx_set_l1v_kers()`
 For a complete list of kernel IDs, please see the definitions of `l3ukr_t`, `l1mkr_t`, `l1fkr_t`, `l1vkr_t` in [frame/include/bli_type_defs.h](https://github.com/flame/blis/blob/master/frame/include/bli_type_defs.h).
 
 _**Setting blocksizes.**_ The next block of code initializes the `blkszs` array with register and cache blocksize values for each datatype. The values here are used by the level-3 operations that employ the level-3 micro-kernels we registered previously. We use `bli_blksz_init_easy()` when initializing only the primary value. If the auxiliary value needs to be set to a different value that the primary, `bli_blksz_init()` should be used instead, as in:
-```
+```c
     //                                           s      d      c      z
     bli_blksz_init_easy( &blkszs[ BLIS_MR ],     0,     8,     0,     0 );
     bli_blksz_init_easy( &blkszs[ BLIS_NR ],     0,     4,     0,     0 );
@@ -193,7 +193,7 @@ This header file is oftentimes empty. This is because the parameters specified h
 A description of the parameters that may be set in `bli_family_*.h` follows.
 
 _**Memory allocation functions.**_ BLIS allows the developer to customize the functions called for memory allocation for three different categories of memory: user, pool, and internal. The functions for user allocation are called any time the creation of a BLIS matrix or vector `obj_t` requires that a matrix buffer be allocated, such as via `bli_obj_create()`. The functions for pool allocation are called only when allocating blocks to the memory pools used to manage packed matrix buffers. The function for internal allocation are called by BLIS when allocating internal data structures, such as control trees. By default, the three pairs of parameters are defined via preprocessor macros to call the implementation of `malloc()` and `free()` provided by `stdlib.h`:
-```
+```c
 #define BLIS_MALLOC_USER  malloc
 #define BLIS_FREE_USER    free
 
@@ -204,25 +204,25 @@ _**Memory allocation functions.**_ BLIS allows the developer to customize the fu
 #define BLIS_FREE_INTL    free
 ```
 Any substitute for `malloc()` and `free()` defined by customizing these parameters must use the same function prototypes as the original functions. Namely:
-```
+```c
 void* malloc( size_t size );
 void  free( void* p );
 ```
 Furthermore, if a header file needs to be included, such as `my_malloc.h`, it should be `#included` within the `bli_family_*.h` file (before `#defining` any of the `BLIS_MALLOC_` and `BLIS_FREE_` macros).
 
 _**SIMD register file.**_ BLIS allows you to specify the _maximum_ number of SIMD registers available for use by your kernels, as well as the _maximum_ size (in bytes) of those registers. These values default to:
-```
+```c
 #define BLIS_SIMD_NUM_REGISTERS  32
 #define BLIS_SIMD_SIZE           64
 ```
 These macros are used in computing the maximum amount of temporary storage (typically allocated statically, on the function stack) that will be needed to hold a single micro-tile of any datatype (and for any induced method):
-```
+```c
 #define BLIS_STACK_BUF_MAX_SIZE  ( BLIS_SIMD_NUM_REGISTERS * BLIS_SIMD_SIZE * 2 )
 ```
 These temporary buffers are used when handling edge cases (m % _MR_ != 0 || n % _NR_ != 0) within the level-3 macro-kernels, and also in the virtual micro-kernels of various implementations of induced methods for complex matrix multiplication. It is **very important** that these values be set correctly; otherwise, you may experience undefined behavior as stack data is overwritten at run-time. A kernel developer may set `BLIS_SIMD_NUM_REGISTERS` and `BLIS_SIMD_SIZE`, which will indirectly affect `BLIS_STACK_BUF_MAX_SIZE`, or he may set `BLIS_STACK_BUF_MAX_SIZE` directly. Notice that the default values are already set to work with modern x86_64 systems.
 
 _**Memory alignment.**_ BLIS implements memory alignment internally, rather than relying on a function such as `posix_memalign()`, and thus it can provide aligned memory even with functions that adhere to the `malloc()` and `free()` API in the standard C library.
-```
+```c
 #define BLIS_SIMD_ALIGN_SIZE             BLIS_SIMD_SIZE
 #define BLIS_PAGE_SIZE                   4096
 
@@ -246,7 +246,7 @@ The value `BLIS_POOL_ADDR_ALIGN_SIZE` defines the alignment used when allocating
 The `make_defs.mk` file primarily contains compiler and compiler flag definitions used by `make` when building a BLIS library. 
 
 The format of the file is mostly self-explanatory. However, we will expound on the contents here, using the `make_defs.mk` file for the `haswell` configuration as an example:
-```
+```make
 # Declare the name of the current configuration and add it to the
 # running list of configurations included by common.mk.
 THIS_CONFIG    := haswell
@@ -526,7 +526,7 @@ armv7a  bgq        generic  knc  old     piledriver  sandybridge
 armv8a  bulldozer  haswell  knl  penryn  power7
 ```
 Next, we must write the `knl` kernels and locate them inside `kernels/knl`. (For more information on writing BLIS kernels, please see the [Kernels Guide](KernelsHowTo.md).) We recommend separating level-1v, level-1f, and level-3 kernels into separate `1`, `1f`, and `3` sub-directories, respectively. The kernel files and functions therein do not need to follow any particular naming convention, though we strongly recommend using the conventions already used by other kernel sets. Take a look at other kernel files, such as those for `haswell`, [for examples](https://github.com/flame/blis/tree/master/kernels). Finally, for the `knl` kernel set, you should insert a file named `bli_kernels_knl.h` into `kernels/knl` that prototypes all of your new kernel set's kernel functions. You are welcome to write your own prototypes, but to make the prototyping of kernels easier we recommend using the prototype-generating macros for level-1v, level-1f, level-1m, and level-3 functions defined in [frame/1/bli_l1v_ker_prot.h](https://github.com/flame/blis/blob/master/frame/1/bli_l1v_ker_prot.h), [frame/1f/bli_l1f_ker_prot.h](https://github.com/flame/blis/blob/master/frame/1f/bli_l1f_ker_prot.h), [frame/1m/bli_l1m_ker_prot.h](https://github.com/flame/blis/blob/master/frame/1m/bli_l1m_ker_prot.h), and [frame/3/bli_l3_ukr_prot.h](https://github.com/flame/blis/blob/master/frame/3/bli_l3_ukr_prot.h), respectively. The following example utilizes how a select subset of these macros can be used to generate kernel function prototypes.
-```
+```c
 GEMM_UKR_PROT( double, d, gemm_knl_asm_24x8 )
 
 PACKM_KER_PROT( double, d, packm_knl_asm_24xk )
@@ -549,7 +549,7 @@ _**Add support within the framework source code.**_ We also need to make a minor
 
 
 **`frame/include/bli_arch_config.h`**. When adding support for the `knl` kernel set to the framework, we must modify this file to `#include` the `bli_kernels_knl.h` header file: 
-```
+```c
 #ifdef BLIS_KERNELS_KNL
 #include "bli_kernels_knl.h"
 #endif
@@ -587,7 +587,7 @@ and while we're editing the file, we can make any other changes to compiler flag
 _**Add support within the framework source code.**_ Next, we need to update the BLIS framework source code so that the new configuration family is recognized and supported. Configuration families require updates to two files.
 
 **`frame/include/bli_arch_config.h`**. This file must be updated to `#include` the `bli_family_intelavx.h` header file. Notice that the preprocessor directive should be guarded as follows:
-```
+```c
 #ifdef BLIS_FAMILY_INTELAVX
 #include "bli_family_intelavx.h"
 #endif
@@ -595,7 +595,7 @@ _**Add support within the framework source code.**_ Next, we need to update the 
 The `BLIS_FAMILY_INTELAVX` will automatically be defined by the build system whenever the family was targeted by `configure` is `intelavx`. (In general, if the user runs `./configure foobar`, the C preprocessor macro `BLIS_FAMILY_FOOBAR` will be defined.)
 
 **`frame/base/bli_arch.c`**. This file must be updated so that `bli_arch_query_id()` returns the correct `arch_t` microarchitecture ID value to the caller. This function is called when the framework is trying to choose which sub-configuration to use at runtime. For x86_64 architectures, this is supported via the `CPUID` instruction, as implemented via `bli_cpuid_query_id()`. Thus, you can simply mimic what is done for the `intel64` family by inserting lines such as:
-```
+```c
 #ifdef BLIS_FAMILY_INTELAVX
     id = bli_cpuid_query_id();
 #endif
@@ -636,7 +636,7 @@ First, we update the configuration name inside of `make_defs.mk`:
 THIS_CONFIG    := knl
 ```
 and while we're editing the file, we can make any other changes to compiler flags we wish (if any). Similarly, the `bli_family_knl.h` header file should be updated as needed. Since the number of vector registers and the vector register size on `knl` differ from the defaults, we must explicitly set them. (The role of these parameters was explained in a [previous section](ConfigurationHowTo.md#bli_family_h).) Furthermore, provided that a macro `BLIS_NO_HBWMALLOC` is not set, we use a different implementation of `malloc()` and `free()` and `#include` that implementation's header file. 
-```
+```c
 #define BLIS_SIMD_NUM_REGISTERS  32
 #define BLIS_SIMD_SIZE           64
 
@@ -659,7 +659,7 @@ _**Add support within the framework source code.**_ Next, we need to update the 
 
 
 **`frame/include/bli_type_defs.h`**. First, we need to define an ID to associate with the microarchitecture for which we are adding support. All microarchitecture type IDs are defined in [bli_type_defs.h](https://github.com/flame/blis/blob/master/frame/include/bli_type_defs.h) as an enumerated type that we `typedef` to `arch_t`. To support `knl`, we add a new enumerated type value `BLIS_ARCH_KNL`:
-```
+```c
 typedef enum
 {
     BLIS_ARCH_KNL,
@@ -686,13 +686,13 @@ typedef enum
 } arch_t;
 ```
 Additionally, you'll need to update the definition of `BLIS_NUM_ARCHS` to reflect the new total number of enumerated `arch_t` values:
-```
+```c
 #define BLIS_NUM_ARCHS 16
 ```
 
 
 **`frame/base/bli_gks.c`**. We must also update the global kernel structure, or gks, to register the new sub-configuration during library initialization. Sub-configuration registration occurs in `bli_gks_init()`. For `knl`, updating this function amounts to inserting the following lines
-```
+```c
 #ifdef BLIS_CONFIG_KNL
         bli_gks_register_cntx( BLIS_ARCH_KNL, bli_cntx_init_knl,
                                               bli_cntx_init_knl_ref,
@@ -704,13 +704,13 @@ This function submits pointers to various context initialization functions to th
 
 
 **`frame/include/bli_arch_config.h`**. This file must be updated in two places. First, we must modify it to generate prototypes for the `bli_cntx_init_*()` functions, including the developer-provided function `bli_cntx_init_knl()` (defined in `config/knl/bli_cntx_init_knl.c`), by inserting:
-```
+```c
 #ifdef BLIS_CONFIG_KNL
 CNTX_INIT_PROTS( knl )
 #endif
 ```
 Here, the `CNTX_INIT_PROTS` macro generates the appropriate prototypes based on the name of the sub-configuration. Next, we must `#include` the `bli_family_knl.h` header file, just as we would if we were adding support for an umbrella family:
-```
+```c
 #ifdef BLIS_FAMILY_KNL
 #include "bli_family_knl.h"
 #endif
@@ -720,13 +720,13 @@ As before with umbrella families, the `BLIS_FAMILY_KNL` macro is automatically d
 
 
 **`frame/base/bli_arch.c`**. This file must be updated so that `bli_arch_query_id()` returns the correct `arch_t` architecture ID value to the caller. `bli_arch_query_id()` is called when the framework is trying to choose which sub-configuration to use at runtime. When adding support for a sub-configuration as a singleton family, this amounts to adding a block of code such as:
-```
+```c
 #ifdef BLIS_FAMILY_KNL
     id = BLIS_ARCH_KNL;
 #endif
 ```
 The `BLIS_FAMILY_KNL` macro is automatically `#defined` by the build system if the `knl` sub-configuration was targeted directly (as a singleton family) at configure-time. Other ID values are returned only if their respective family macros are defined. (Recall that only one family is ever enabled at time.) If, however, the `knl` sub-configuration was enabled indirectly via an umbrella family, `bli_arch_query_id()` will return the `arch_t` ID value via the lines similar to the following:
-```
+```c
 #ifdef BLIS_FAMILY_INTEL64
     id = bli_cpuid_query_id();
 #endif
@@ -739,7 +739,7 @@ Supporting runtime detection of `knl` microarchitectures requires adding `knl` s
 
 
 **`frame/base/bli_cpuid.c`**. To support the aforementioned runtime microarchitecture detection, the function `bli_cpuid_query_id()`, defined in [bli_cpuid.c](https://github.com/flame/blis/blob/master/frame/base/bli_cpuid.c), will need to be updated. Specifically, we need to insert logic that will detect the presence of the new hardware based on the results of the `CPUID` instruction (assuming the new microarchitecture belongs to the x86_64 architecture family). For example, when support for `knl` was added, this entailed adding the following code block to `bli_cpuid_query_id()`:
-```
+```c
 #ifdef BLIS_CONFIG_KNL
     if ( bli_cpuid_is_knl( family, model, features ) )
         return BLIS_ARCH_KNL;

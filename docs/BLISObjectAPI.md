@@ -1,0 +1,1611 @@
+# Contents
+
+* **[Contents](BLISObjectAPI.md#contents)**
+* **[Introduction](BLISObjectAPI.md#introduction)**
+  * [BLIS types](BLISObjectAPI.md#blis-types)
+    * [Integer-based types](BLISObjectAPI.md#integer-based-types)
+    * [Floating-point types](BLISObjectAPI.md#floating-point-types)
+    * [Enumerated parameter types](BLISObjectAPI.md#enumerated-parameter-types)
+  * [Global scalar constants](BLISObjectAPI.md#global-scalar-constants)
+  * [Basic vs expert interfaces](BLISObjectAPI.md#basic-vs-expert-interfaces)
+  * [Context type](BLISObjectAPI.md#context-type)
+  * [BLIS header file](BLISObjectAPI.md#blis-header-file)
+  * [Initialization and cleanup](BLISObjectAPI.md#initialization-and-cleanup)
+* **[Object management function reference](BLISObjectAPI.md#object-management-function-reference)**
+  * [Object creation](BLISObjectAPI.md#object-creation)
+  * [Object accessors](BLISObjectAPI.md#object-accessors)
+* **[Computational function reference](BLISObjectAPI.md#computational-function-reference)**
+  * [Operation index](BLISObjectAPI.md#operation-index)
+  * [Level-1v operations](BLISObjectAPI.md#level-1v-operations)
+  * [Level-1d operations](BLISObjectAPI.md#level-1d-operations)
+  * [Level-1m operations](BLISObjectAPI.md#level-1m-operations)
+  * [Level-1f operations](BLISObjectAPI.md#level-1f-operations)
+  * [Level-2 operations](BLISObjectAPI.md#level-2-operations)
+  * [Level-3 operations](BLISObjectAPI.md#level-3-operations)
+  * [Utility operations](BLISObjectAPI.md#utility-operations)
+  * [Level-3 micro-kernels](BLISObjectAPI.md#level-3-micro-kernels)
+* **[Query function reference](BLISObjectAPI.md#query-function-reference)**
+  * [General library information](BLISObjectAPI.md#general-library-information)
+  * [Specific configuration](BLISObjectAPI.md#specific-configuration)
+  * [General configuration](BLISObjectAPI.md#general-configuration)
+  * [Kernel information](BLISObjectAPI.md#kernel-information)
+
+# Introduction
+
+This document summarizes one of the primary native APIs in BLIS--the object API. Here, we also discuss BLIS-specific type definitions, header files, and prototypes to auxiliary functions.
+
+There are many functions that BLIS implements that are not listed here, either because they are lower-level functions, or they are considered for use primarily by developers and experts.
+
+The object API was given its name (a) because it abstracts the floating-point types of its operands (along with many other properties) within a `typedef struct {...}` data structure, and (b) to contrast it with the other native API in BLIS, the typed API, which is [documented here](BLISTypedAPI.md). (The third API supported by BLIS is the BLAS compatibility layer, which mimics conventional Fortran-77 BLAS.)
+
+## BLIS types
+
+The following tables list various types used throughout the BLIS object API.
+
+### Integer-based types
+
+| BLIS integer type | Type definition        | Used to represent...                                                 |
+|:------------------|:-----------------------|:---------------------------------------------------------------------|
+| `gint_t`          | `int32_t` or `int64_t` | general-purpose signed integer; used to define signed integer types. |
+| `dim_t`           | `gint_t`               | matrix and vector dimensions.                                        |
+| `inc_t`           | `gint_t`               | matrix row/column strides and vector increments.                     |
+| `doff_t`          | `gint_t`               | matrix diagonal offset: if _k_ < 0, diagonal begins at element (-_k_,0); otherwise diagonal begins at element (0,_k_). |
+| `bool_t`          | `gint_t`               | boolean values: `TRUE` or `FALSE`.                                   |
+
+### Floating-point types
+
+| BLIS fp type      | Type definition                        | Used to represent...                 |
+|:------------------|:---------------------------------------|:-------------------------------------|
+| `float`           | _N/A_                                  | single-precision real numbers        |
+| `double`          | _N/A_                                  | double-precision real numbers        |
+| `scomplex`        | `struct { float real; float imag; }`   | single-precision complex numbers     |
+| `dcomplex`        | `struct { double real; double imag; }` | double-precision complex numbers     |
+
+### Enumerated parameter types
+
+| `num_t`         | Semantic meaning: Matrix/vector operand...              |
+|:----------------|:--------------------------------------------------------|
+| `BLIS_FLOAT`    | contains single-precision real elements.                |
+| `BLIS_DOUBLE`   | contains double-precision real elements.                |
+| `BLIS_SCOMPLEX` | contains single-precision complex elements.             |
+| `BLIS_DCOMPLEX` | contains double-precision complex elements.             |
+| `BLIS_INT`      | contains integer elements of type `gint_t`.             |
+| `BLIS_CONSTANT` | contains polymorphic representation of a constant value |
+
+| `dom_t`         | Semantic meaning: Matrix/vector operand...  |
+|:----------------|:--------------------------------------------|
+| `BLIS_REAL`     | contains real domain elements.              |
+| `BLIS_COMPLEX`  | contains complex domain elements.           |
+
+| `prec_t`           | Semantic meaning: Matrix/vector operand...  |
+|:-------------------|:--------------------------------------------|
+| `BLIS_SINGLE_PREC` | contains single-precision elements.         |
+| `BLIS_DOUBLE_PREC` | contains double-precision elements.         |
+
+| `trans_t`                | Semantic meaning: Matrix operand ...              |
+|:-------------------------|:--------------------------------------------------|
+| `BLIS_NO_TRANSPOSE`      | will be used as given.                            |
+| `BLIS_TRANSPOSE`         | will be implicitly transposed.                    |
+| `BLIS_CONJ_NO_TRANSPOSE` | will be implicitly conjugated.                    |
+| `BLIS_CONJ_TRANSPOSE`    | will be implicitly transposed _and_ conjugated.   |
+
+| `conj_t`             | Semantic meaning: Matrix/vector operand...               |
+|:---------------------|:---------------------------------------------------------|
+| `BLIS_NO_CONJUGATE`  | will be used as given.                                   |
+| `BLIS_CONJUGATE`     | will be implicitly conjugated.                           |
+
+| `side_t`     | Semantic meaning: Matrix operand...                |
+|:-------------|:---------------------------------------------------|
+| `BLIS_LEFT`  | appears on the left.                               |
+| `BLIS_RIGHT` | appears on the right.                              |
+
+| `struc_t`         | Semantic meaning: Matrix operand...                               |
+|:------------------|:------------------------------------------------------------------|
+| `BLIS_GENERAL`    | has no structure.                                                 |
+| `BLIS_HERMITIAN`  | has Hermitian structure.                                          |
+| `BLIS_SYMMETRIC`  | has symmetric structure.                                          |
+| `BLIS_TRIANGULAR` | has triangular structure.                                         |
+
+| `uplo_t`     | Semantic meaning: Matrix operand...                               |
+|:-------------|:------------------------------------------------------------------|
+| `BLIS_LOWER` | is stored in (and will be accessed only from) the lower triangle. |
+| `BLIS_UPPER` | is stored in (and will be accessed only from) the upper triangle. |
+| `BLIS_DENSE` | is stored as a full matrix (ie: in both triangles).               |
+
+| `diag_t`            | Semantic meaning: Matrix operand ...                                       |
+|:--------------------|:---------------------------------------------------------------------------|
+| `BLIS_NONUNIT_DIAG` | has a non-unit diagonal that should be explicitly read from.               |
+| `BLIS_UNIT_DIAG`    | has a unit diagonal that should be implicitly assumed (and not read from). |
+
+
+## Global scalar constants
+
+BLIS defines a handful of scalar objects that conveniently represent various constant values for all defined numerical type values (`num_t`). The following table lists the constants defined by BLIS.
+
+| BLIS constant `obj_t` name | Numerical values |
+|:---------------------------|:-----------------|
+|  `BLIS_MINUS_TWO`          | `-2.0`           |
+|  `BLIS_MINUS_ONE`          | `-1.0`           |
+|  `BLIS_ZERO`               | ` 0.0`           |
+|  `BLIS_ONE`                | ` 1.0`           |
+|  `BLIS_TWO`                | ` 2.0`           |
+
+These objects are polymorphic; each one contains a `float`, `double`, `scomplex`, `dcomplex`, and `gint_t` representation of the constant value in question. They can be used in place of any `obj_t*` operand in any object API function provided that the following criteria are met:
+ * The object parameter requires unit dimensions (1x1). (In other words, the function expects a scalar for the operand in question.)
+ * The object parameter is input-only. (In other words, the function is not trying to update the scalar.)
+The correct representation is chosen by context, usually by inspecting the datatype of one of the other operands involved in an operation. For example, if we create and initialize objects `x` and `y` of `num_t` type `BLIS_DOUBLE`, the following call to `bli_axpyv()`
+   ```c
+   bli_axpyv( &BLIS_TWO, &x, &y );
+   ```
+   will use the `BLIS_DOUBLE` representation of `BLIS_TWO`.
+
+
+## Basic vs expert interfaces
+
+The functions listed in this document belong to the "basic" interface subset of the BLIS object API. There is a companion "expert" interface that mirrors the basic interface, except that it also contains at least one additional parameter that is only of interest to experts and library developers. The expert interfaces use the same name as the basic function names, except for an additional "_ex" suffix. For example, the basic interface for `gemm` is
+```c
+void bli_gemm
+     (
+       obj_t* alpha,
+       obj_t* a,
+       obj_t* b,
+       obj_t* beta,
+       obj_t* c,
+     );
+```
+while the expert interface is:
+```c
+void bli_gemm_ex
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx
+     );
+```
+The expert interface contains an additional `cntx_t*` parameter. Note that calling a function from the expert interface with the `cntx_t*` argument set to `NULL` is equivalent to calling the corresponding basic interface.
+
+## Contexts
+
+In general, it is permissible to pass in `NULL` for a `cntx_t*` parameter when calling an expert interface such as `bli_gemm_ex()`. However, there are cases where `NULL` values are not accepted and may result in a segmentation fault. Specifically, the `cntx_t*` argument appears in the interfaces to the `gemm`, `trsm`, and `gemmtrsm` [level-3 micro-kernels](KernelsHowTo.md#level-3) along with all [level-1v](KernelsHowTo.md#level-1v) and [level-1f](KernelsHowTo.md#level-1f) kernels. There, as a general rule, a valid pointer must be passed in. Whenever a valid context is needed, the developer may query a default context from the global kernel structure (if a context is not already available in the current scope):
+```c
+cntx_t* bli_gks_query_cntx( void );
+```
+When BLIS is configured to target a configuration family (e.g. `intel64`, `x86_64`), `bli_gks_query_cntx()` will use `cpuid` or an equivalent heuristic to select and and return the appropriate context. When BLIS is configured to target a singleton sub-configuration (e.g. `haswell`, `skx`), `bli_gks_query_cntx()` will unconditionally return a pointer to the context appropriate for the targeted configuration.
+
+
+## BLIS header file
+
+All BLIS definitions and prototypes may be included in your C source file by including a single header file:
+
+```c
+#include "blis.h"
+```
+
+
+## Initialization and Cleanup
+
+As of [9804adf](https://github.com/flame/blis/commit/9804adfd405056ec332bb8e13d68c7b52bd3a6c1), BLIS no longer requires explicit initialization and finalization at runtime. In other words, users do not need to call `bli_init()` before the application can make use of the library (and `bli_finalize()` after the application is finished with the library). Instead, all computational operations (and some non-computational functions) in BLIS will initialize the library on behalf of the user if it has not already been initialized. This change was made to simplify the user experience.
+
+Application developers should keep in mind, however, that this new self-initialization regime implies the following: unless the library is *explicitly* finalized via `bli_finalize()`, it will, once initialized, remain initialized for the life of the application. This is likely not a problem in the vast majority of cases. However, a memory-constrained application that performs all of its DLA up-front, for example, may wish to explicitly finalize the library after BLIS is no longer needed in order to free up memory for other purposes.
+
+Similarly, an expert user may call `bli_init()` manually in order to control when the overhead of library initialization is incurred, even though the library would have self-initialized.
+
+The interfaces to `bli_init()` and `bli_finalize()` are quite simple; they require no arguments and return no values:
+```c
+void bli_init( void );
+void bli_finalize( void );
+```
+
+
+## Object creation
+
+Before using the object API, you must first create some objects to encapsulate your vector or matrix data. We provide examples code for creating matrix objects in the [examples/oapi](https://github.com/flame/blis/tree/master/examples/oapi) directory of the BLIS source distribution. However, we will provide API documentation for the most common functions for creating and freeing objects in the next section.
+
+Generally speaking, an object is created when an `obj_t` structure is initialized with a valid data buffer (to hold the elements of the vector or matrix) as well as valid properties describing the object. The valid data buffer can be allocated automatically on your behalf at the same time that the other object fields are initialized, or "attached" in a second step after the object is initialized with preliminary values. The former is useful when using the object API at the setup stage of an application (and if `malloc()` is an acceptable method of allocating memory). Similarly, the latter is useful when interfacing BLIS into the middle of an application after the allocation has already taken place.
+
+Only objects that were created with automatic allocation must be freed via BLIS object API. Objects that were initialized with attached buffers can be freed in whatever manner is appropriate, based on how the application originally allocated the memory in question.
+
+# Object creation function reference
+
+# Object accessor function reference
+
+
+# Computational function reference
+
+Notes for interpreting function descriptions:
+  * `conj?(X)` and `trans?(X)` should be interpreted as predicates that capture the operand `X` with that object's `conj_t` or `trans_t` property applied. For example:
+    * `conj?(x)` refers to a vector `x` that is either conjugated or used as given.
+    * `trans?(A)` refers to a matrix `A` that is either transposed, conjugated _and_ transposed, conjugated only, or used as given.
+  * Any operand marked with `conj()` is unconditionally conjugated.
+  * Any operand marked with `^T` is unconditionally transposed. Similarly, any operand that is marked with `^H` is unconditionally conjugate-transposed.
+  * All occurrences of `alpha`, `beta`, and `rho` parameters are scalars.
+  * In general, unless otherwise noted, all object parameters must be stored using the same `num_t` datatype. In a few cases, one of the object parameters must be stored in the real projection of one of the other objects' types. (The real projection of a `num_t` datatype is the equivalent datatype in the real domain. So `BLIS_DOUBLE` is the real projection of `BLIS_DCOMPLEX`. `BLIS_DOUBLE` is also the real projection of itself.)
+  * Many object API entries list the object properties that are honored/observed by the operation. For example, for `bli_gemv()`, the observed object properties are `trans?(A)` and `conj?(x)`. The former means that matrix `A` may be (optionally) marked for conjugation and/or tranaposition while the latter means that vector `x` may be (optionally) marked for conjugation. A function may also list `diagoff(A)` as an observe property, which means that it will accept general diagonal offsets. Similarly, `diag(A)` refers to recognizing the unit/non-unit structure of the diagonal and and `uplo(A)` refers to reading/updating only the stored triangle/trapezoid/region of `A`.
+
+
+---
+
+
+## Operation index
+
+  * **[Level-1v](BLISTypedAPI.md#level-1v-operations)**: Operations on vectors:
+    * [addv](BLISTypedAPI.md#addv), [amaxv](BLISTypedAPI.md#amaxv), [axpyv](BLISTypedAPI.md#axpyv), [axpbyv](BLISTypedAPI.md#axpbyv), [copyv](BLISTypedAPI.md#copyv), [dotv](BLISTypedAPI.md#dotv), [dotxv](BLISTypedAPI.md#dotxv), [invertv](BLISTypedAPI.md#invertv), [scal2v](BLISTypedAPI.md#scal2v), [scalv](BLISTypedAPI.md#scalv), [setv](BLISTypedAPI.md#setv), [subv](BLISTypedAPI.md#subv), [swapv](BLISTypedAPI.md#swapv), [xpbyv](BLISTypedAPI.md#xpbyv)
+  * **[Level-1d](BLISTypedAPI.md#level-1d-operations)**: Element-wise operations on matrix diagonals:
+    * [addd](BLISTypedAPI.md#addd), [axpyd](BLISTypedAPI.md#axpyd), [copyd](BLISTypedAPI.md#copyd), [invertd](BLISTypedAPI.md#invertd), [scald](BLISTypedAPI.md#scald), [scal2d](BLISTypedAPI.md#scal2d), [setd](BLISTypedAPI.md#setd), [setid](BLISTypedAPI.md#setid), [subd](BLISTypedAPI.md#subd)
+  * **[Level-1m](BLISTypedAPI.md#level-1m-operations)**: Element-wise operations on matrices:
+    * [addm](BLISTypedAPI.md#addm), [axpym](BLISTypedAPI.md#axpym), [copym](BLISTypedAPI.md#copym), [scalm](BLISTypedAPI.md#scalm), [scal2m](BLISTypedAPI.md#scal2m), [setm](BLISTypedAPI.md#setm), [subm](BLISTypedAPI.md#subm)
+  * **[Level-1f](BLISTypedAPI.md#level-1f-operations)**: Fused operations on multiple vectors:
+    * [axpy2v](BLISTypedAPI.md#axpy2v), [dotaxpyv](BLISTypedAPI.md#dotaxpyv), [axpyf](BLISTypedAPI.md#axpyf), [dotxf](BLISTypedAPI.md#dotxf), [dotxaxpyf](BLISTypedAPI.md#dotxaxpyf)
+  * **[Level-2](BLISTypedAPI.md#level-2-operations)**: Operations with one matrix and (at least) one vector operand:
+    * [gemv](BLISTypedAPI.md#gemv), [ger](BLISTypedAPI.md#ger), [hemv](BLISTypedAPI.md#hemv), [her](BLISTypedAPI.md#her), [her2](BLISTypedAPI.md#her2), [symv](BLISTypedAPI.md#symv), [syr](BLISTypedAPI.md#syr), [syr2](BLISTypedAPI.md#syr2), [trmv](BLISTypedAPI.md#trmv), [trsv](BLISTypedAPI.md#trsv)
+  * **[Level-3](BLISTypedAPI.md#level-3-operations)**: Operations with matrices that are multiplication-like:
+    * [gemm](BLISTypedAPI.md#gemm), [hemm](BLISTypedAPI.md#hemm), [herk](BLISTypedAPI.md#herk), [her2k](BLISTypedAPI.md#her2k), [symm](BLISTypedAPI.md#symm), [syrk](BLISTypedAPI.md#syrk), [syr2k](BLISTypedAPI.md#syr2k), [trmm](BLISTypedAPI.md#trmm), [trmm3](BLISTypedAPI.md#trmm3), [trsm](BLISTypedAPI.md#trsm)
+  * **[Utility](BLISTypedAPI.md#Utility-operations)**: Miscellaneous operations on matrices and vectors:
+    * [asumv](BLISTypedAPI.md#asumv), [norm1v](BLISTypedAPI.md#norm1v), [normfv](BLISTypedAPI.md#normfv), [normiv](BLISTypedAPI.md#normiv), [norm1m](BLISTypedAPI.md#norm1m), [normfm](BLISTypedAPI.md#normfm), [normim](BLISTypedAPI.md#normim), [mkherm](BLISTypedAPI.md#mkherm), [mksymm](BLISTypedAPI.md#mksymm), [mktrim](BLISTypedAPI.md#mktrim), [fprintv](BLISTypedAPI.md#fprintv), [fprintm](BLISTypedAPI.md#fprintm),[printv](BLISTypedAPI.md#printv), [printm](BLISTypedAPI.md#printm), [randv](BLISTypedAPI.md#randv), [randm](BLISTypedAPI.md#randm), [sumsqv](BLISTypedAPI.md#sumsqv)
+
+---
+
+
+## Level-1v operations
+
+Level-1v operations perform various level-1 BLAS-like operations on vectors (hence the _v_).
+**Note**: Each level-1v operation has a corresponding level-1v kernel through which it is primarily implemented.
+
+---
+
+#### addv
+```c
+void bli_addv
+     (
+       obj_t*  x,
+       obj_t*  y,
+     );
+```
+Perform
+```
+  y := y + conj?(x)
+```
+where `x` and `y` are vectors of length _n_.
+
+Observed object properties: `conj?(x)`.
+
+---
+
+#### amaxv
+```c
+void bli_amaxv
+     (
+       obj_t*  x,
+       obj_t*  index
+     );
+```
+Given a vector of length _n_, return the zero-based index of the element of vector `x` that contains the largest absolute value (or, in the complex domain, the largest complex modulus). The object `index` must be created of type `BLIS_INT`.
+
+If `NaN` is encountered, it is treated as if it were a valid value that was smaller than any other value in the vector. If more than one element contains the same maximum value, the index of the latter element is returned via `index`.
+
+Observed object properties: none.
+
+**Note:** This function attempts to mimic the algorithm for finding the element with the maximum absolute value in the netlib BLAS routines `i?amax()`.
+
+---
+
+#### axpyv
+```c
+void bli_axpyv
+     (
+       obj_t*  alpha,
+       obj_t*  x,
+       obj_t*  y
+     );
+```
+Perform
+```
+  y := y + conj?(alpha) * conj?(x)
+```
+where `x` and `y` are vectors of length _n_, and `alpha` is a scalar.
+
+Observed object properties: `conj?(alpha)`, `conj?(x)`.
+
+---
+
+#### axpbyv
+```
+void bli_axpbyv
+     (
+       obj_t*  alpha,
+       obj_t*  x,
+       obj_t*  beta,
+       obj_t*  y 
+     )
+```
+Perform
+```
+  y := conj?(beta) * y + conj?(alpha) * conj?(x)
+```
+where `x` and `y` are vectors of length _n_, and `alpha` and `beta` are scalars.
+
+Observed object properties: `conj?(alpha)`, `conj?(x)`.
+
+---
+
+#### copyv
+```c
+void bli_copyv
+     (
+       obj_t*  x,
+       obj_t*  y
+     );
+```
+Perform
+```
+  y := conj?(x)
+```
+where `x` and `y` are vectors of length _n_.
+
+---
+
+#### dotv
+```c
+void bli_dotv
+     (
+       obj_t*  x,
+       obj_t*  y,
+       obj_t*  rho
+     );
+```
+Perform
+```
+  rho := conj?(x)^T * conj?(y)
+```
+where `x` and `y` are vectors of length _n_, and `rho` is a scalar.
+
+---
+
+#### dotxv
+```c
+void bli_dotxv
+     (
+       obj_t*  alpha,
+       obj_t*  x,
+       obj_t*  y,
+       obj_t*  beta,
+       obj_t*  rho
+     );
+```
+Perform
+```
+  rho := conj?(beta) * rho + conj?(alpha) * conj?(x)^T * conj?(y)
+```
+where `x` and `y` are vectors of length _n_, and `alpha`, `beta`, and `rho` are scalars.
+
+---
+
+#### invertv
+```c
+void bli_invertv
+     (
+       obj_t*  x
+     );
+```
+Invert all elements of an _n_-length vector `x`.
+
+---
+
+#### scalv
+```c
+void bli_scalv
+     (
+       obj_t*  alpha,
+       obj_t*  x
+     );
+```
+Perform
+```
+  x := conj?(alpha) * x
+```
+where `x` is a vector of length _n_, and `alpha` is a scalar.
+
+---
+
+#### scal2v
+```c
+void bli_scal2v
+     (
+       obj_t*  alpha,
+       obj_t*  x,
+       obj_t*  y
+     );
+```
+Perform
+```
+  y := conj?(alpha) * conj?(x)
+```
+where `x` and `y` are vectors of length _n_, and `alpha` is a scalar.
+
+---
+
+#### setv
+```c
+void bli_setv
+     (
+       obj_t*  alpha,
+       obj_t*  x
+     );
+```
+Perform
+```
+  x := conj?(alpha)
+```
+That is, set all elements of an _n_-length vector `x` to scalar `conj?(alpha)`.
+
+---
+
+#### subv
+```c
+void bli_subv
+     (
+       obj_t*  x,
+       obj_t*  y
+     );
+```
+Perform
+```
+  y := y - conj?(x)
+```
+where `x` and `y` are vectors of length _n_.
+
+---
+
+#### swapv
+```c
+void bli_swapv
+     (
+       obj_t*  x,
+       obj_t*  y
+     );
+```
+Swap corresponding elements of two _n_-length vectors `x` and `y`.
+
+---
+
+#### xpbyv
+```
+void bli_xpbyv
+     (
+       obj_t*  x,
+       obj_t*  beta,
+       obj_t*  y
+     )
+```
+Perform
+```
+  y := conj?(beta) * y + conj?(x)
+```
+where `x` and `y` are vectors of length _n_, and `beta` is a scalar.
+
+---
+
+
+
+
+
+## Level-1d operations
+
+Level-1d operations perform various level-1 BLAS-like operations on matrix diagonals (hence the _d_).
+
+These operations are similar to their level-1m counterparts, except they only read and update matrix diagonals and therefore ignore the `uplo` property of their applicable input operands. Please see the descriptions for the corresponding level-1m operation for a description of the arguments.
+
+---
+
+#### addd
+```c
+void bli_addd
+     (
+       obj_t*  a,
+       obj_t*  b
+     );
+```
+
+---
+
+#### axpyd
+```c
+void bli_axpyd
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b
+     );
+```
+
+---
+
+#### copyd
+```c
+void bli_copyd
+     (
+       obj_t*  a,
+       obj_t*  b
+     );
+```
+
+---
+
+#### invertd
+```c
+void bli_invertd
+     (
+       obj_t*  a
+     );
+```
+
+---
+
+#### scald
+```c
+void bli_scald
+     (
+       obj_t*  alpha,
+       obj_t*  a
+     );
+```
+
+---
+
+#### scal2d
+```c
+void bli_scal2d
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b
+     );
+```
+
+---
+
+#### setd
+```c
+void bli_setd
+     (
+       obj_t*  alpha,
+       obj_t*  a
+     );
+```
+
+---
+
+#### setid
+```c
+void bli_setid
+     (
+       obj_t*  alpha,
+       obj_t*  a
+     );
+```
+Set the imaginary components of a matrix diagonal to a scalar `alpha`.
+
+---
+
+#### subd
+```c
+void bli_subd
+     (
+       obj_t*  a,
+       obj_t*  b
+     );
+```
+
+---
+
+
+
+## Level-1m operations
+
+Level-1m operations perform various level-1 BLAS-like operations on matrices (hence the _m_).
+
+---
+
+#### addm
+```c
+void bli_addm
+     (
+       obj_t*  a,
+       obj_t*  b
+     );
+```
+Perform
+```
+  B := B + trans?(A)
+```
+where `B` is an _m x n_ matrix, `A` is stored as a dense matrix, or lower- or upper-triangular/trapezoidal matrix with arbitrary diagonal offset and unit or non-unit diagonal.
+If `uplo(A)` indicates lower or upper storage, only that part of matrix `A` will be referenced and used to update `B`.
+
+Observed object properties: `diagoff(A)`, `diag(A)`, `uplo(A)`, `trans?(A)`.
+
+---
+
+#### axpym
+```c
+void bli_axpym
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b
+     );
+```
+Perform
+```
+  B := B + conj?(alpha) * trans?(A)
+```
+where `B` is an _m x n_ matrix, `A` is stored as a dense matrix, or lower- or upper-triangular/trapezoidal matrix with arbitrary diagonal offset and unit or non-unit diagonal.
+If `uplo(A)` indicates lower or upper storage, only that part of matrix `A` will be referenced and used to update `B`.
+
+Observed object properties: `conj?(alpha)`, `diagoff(A)`, `diag(A)`, `uplo(A)`, `trans?(A)`.
+
+---
+
+#### copym
+```c
+void bli_copym
+     (
+       obj_t*  a,
+       obj_t*  b
+     );
+```
+Perform
+```
+  B := trans?(A)
+```
+where `B` is an _m x n_ matrix, `A` is stored as a dense matrix, or lower- or upper-triangular/trapezoidal matrix with arbitrary diagonal offset and unit or non-unit diagonal.
+If `uplo(A)` indicates lower or upper storage, only that part of matrix `A` will be referenced and used to update `B`.
+
+Observed object properties: `diagoff(A)`, `diag(A)`, `uplo(A)`, `trans?(A)`.
+
+---
+
+#### scalm
+```c
+void bli_scalm
+     (
+       obj_t*  alpha,
+       obj_t*  a
+     );
+```
+Perform
+```
+  A := conj?(alpha) * A
+```
+where `A` is an _m x n_ matrix stored as a dense matrix, or lower- or upper-triangular/trapezoidal matrix with arbitrary diagonal offset. If `uplo(A)` indicates lower or upper storage, only that part of matrix `A` will be updated.
+
+Observed object properties: `conj?(alpha)`, `diagoff(A)`, `uplo(A)`.
+
+---
+
+#### scal2m
+```c
+void bli_scal2m
+     (
+       obj_t*  a,
+       obj_t*  b
+     );
+```
+Perform
+```
+  B := conj?(alpha) * trans?(A)
+```
+where `B` is an _m x n_ matrix, `A` is stored as a dense matrix, or lower- or upper-triangular/trapezoidal matrix with arbitrary diagonal offset and unit or non-unit diagonal.
+If `uplo(A)` indicates lower or upper storage, only that part of matrix `A` will be referenced and used to update `B`.
+
+Observed object properties: `conj?(alpha)`, `diagoff(A)`, `diag(A)`, `uplo(A)`, `trans?(A)`.
+
+---
+
+#### setm
+```c
+void bli_setm
+     (
+       obj_t*  alpha,
+       obj_t*  a
+     );
+```
+Perform
+```
+  A := conj?(alpha)
+```
+That is, set all elements of `A` to scalar `conj?(alpha)`, where `A` is an _m x n_ matrix stored as a dense matrix, or lower- or upper-triangular/trapezoidal matrix with arbitrary diagonal offset. If `uplo(A)` indicates lower or upper storage, only that part of matrix `A` will be updated.
+
+Observed object properties: `conj?(alpha)`, `diagoff(A)`, `diag(A)`, `uplo(A)`.
+
+---
+
+#### subm
+```c
+void bli_subm
+     (
+       obj_t*  a,
+       obj_t*  b
+     );
+```
+Perform
+```
+  B := B - trans?(A)
+```
+where `B` is an _m x n_ matrix, `A` is stored as a dense matrix, or lower- or upper-triangular/trapezoidal matrix with arbitrary diagonal offset and unit or non-unit diagonal.
+If `uplo(A)` indicates lower or upper storage, only that part of matrix `A` will be referenced and used to update `B`.
+
+Observed object properties: `diagoff(A)`, `diag(A)`, `uplo(A)`, `trans?(A)`.
+
+---
+
+
+
+
+
+## Level-1f operations
+
+Level-1f operations implement various fused combinations of level-1 operations (hence the _f_).
+**Note**: Each level-1f operation has a corresponding level-1f kernel through which it is primarily implemented.
+
+Level-1f kernels are employed when optimizing level-2 operations.
+
+
+---
+
+#### axpy2v
+```c
+void bli_axpy2v
+     (
+       obj_t*  alphax,
+       obj_t*  alphay,
+       obj_t*  x,
+       obj_t*  y,
+       obj_t*  z
+     );
+```
+Perform
+```
+  y := y + conj?(alphax) * conj?(x) + conj?(alphay) * conj?(y)
+```
+where `x`, `y`, and `z` are vectors of length _m_. The kernel, if optimized, is implemented as a fused pair of calls to [axpyv](BLISTypedAPI.md#axpyv).
+
+Observed object properties: `conj?(alphax)`, `conj?(x)`, `conj?(alphay)`, `conj?(y)`.
+
+---
+
+#### dotaxpyv
+```c
+void bli_dotaxpyv
+     (
+       obj_t*  alpha,
+       obj_t*  x,
+       obj_t*  y,
+       obj_t*  rho,
+       obj_t*  z
+     );
+```
+Perform
+```
+  rho := conj?(x)^T * conj?(y)
+  y   := y + conj?(alpha) * conj?(x)
+```
+where `x`, `y`, and `z` are vectors of length _m_ and `alpha` and `rho` are scalars. The kernel, if optimized, is implemented as a fusion of calls to [dotv](BLISTypedAPI.md#dotv) and [axpyv](BLISTypedAPI.md#axpyv).
+
+Observed object properties: `conj?(x)`, `conj?(y)`, `conj?(alpha)`.
+
+---
+
+#### axpyf
+```c
+void bli_axpyf
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  x,
+       obj_t*  y
+     );
+```
+Perform
+```
+  y := y + alpha * conja(A) * conjx(x)
+```
+where `A` is an _m x nf_ matrix, and `x` and `y` are vectors. The kernel, if optimized, is implemented as a fused series of calls to [axpyv](BLISTypedAPI.md#axpyv) where _nf_ is less than or equal to an implementation-dependent fusing factor specific to `axpyf`.
+
+Observed object properties: `conj?(alpha)`, `conj?(A)`, `conj?(x)`.
+
+---
+
+#### dotxf
+```c
+void bli_dotxf
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  x,
+       obj_t*  beta,
+       obj_t*  y
+     );
+```
+Perform
+```
+  y := conj?(beta) * y + conj?(alpha) * conj?(A)^T * conj?(x)
+```
+where `A` is an _m x nf_ matrix, and `x` and `y` are vectors. The kernel, if optimized, is implemented as a fused series of calls to [dotxv](BLISTypedAPI.md#dotxv) where _nf_ is less than or equal to an implementation-dependent fusing factor specific to `dotxf`.
+
+Observed object properties: `conj?(alpha)`, `conj?(beta)`, `conj?(A)`, `conj?(x)`.
+
+---
+
+#### dotxaxpyf
+```c
+void bli_dotxaxpyf
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  w,
+       obj_t*  x,
+       obj_t*  beta,
+       obj_t*  y,
+       obj_t*  z
+     );
+```
+Perform
+```
+  y := conj?(beta) * y + conj?(alpha) * conj?(A)^T * conj?(w)
+  z :=               z + conj?(alpha) * conj?(A)   * conj?(x)
+```
+where `A` is an _m x nf_ matrix, `w` and `z` are vectors of length _m_, `x` and `y` are vectors of length `nf`, and `alpha` and `beta` are scalars. The kernel, if optimized, is implemented as a fusion of calls to [dotxf](BLISTypedAPI.md#dotxf) and [axpyf](BLISTypedAPI.md#axpyf).
+
+Observed object properties: `conj?(alpha)`, `conj?(beta)`, `conj?(A)`, `conj?(w)`, `conj?(x)`.
+
+
+
+## Level-2 operations
+
+Level-2 operations perform various level-2 BLAS-like operations.
+
+
+---
+
+#### gemv
+```c
+void bli_gemv
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  x,
+       obj_t*  beta,
+       obj_t*  y
+     );
+```
+Perform
+```
+  y := conj?(beta) * y + conj?(alpha) * trans?(A) * conj?(x)
+```
+where `trans?(A)` is an _m x n_ matrix, and `x` and `y` are vectors.
+
+Observed object properties: `conj?(alpha)`, `conj?(beta)`, `trans?(A)`, `conj?(x)`.
+
+---
+
+#### ger
+```c
+void bli_ger
+     (
+       obj_t*  alpha,
+       obj_t*  x,
+       obj_t*  y,
+       obj_t*  a
+     );
+```
+Perform
+```
+  A := A + conj?(alpha) * conj?(x) * conj?(y)^T
+```
+where `A` is an _m x n_ matrix, and `x` and `y` are vectors of length _m_ and _n_, respectively.
+
+Observed object properties: `conj?(alpha)`, `conj?(x)`, `conj?(y)`.
+
+---
+
+#### hemv
+```c
+void bli_hemv
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  x,
+       obj_t*  beta,
+       obj_t*  y
+     );
+```
+Perform
+```
+  y := conj?(beta) * y + conj?(alpha) * conj?(A) * conj?(x)
+```
+where `A` is an _m x m_ Hermitian matrix stored in the lower or upper triangle as specified by `uplo(A)`, and `x` and `y` are vectors of length _m_.
+
+Observed object properties: `conj?(alpha)`, `conj?(beta)`, `conj?(A)`, `uplo(A)`, `conj?(x)`.
+
+---
+
+#### her
+```c
+void bli_her
+     (
+       obj_t*  alpha,
+       obj_t*  x,
+       obj_t*  a
+     );
+```
+Perform
+```
+  A := A + conj?(alpha) * conj?(x) * conj?(x)^H
+```
+where `A` is an _m x m_ Hermitian matrix stored in the lower or upper triangle as specified by `uplo(A)`, and `x` is a vector of length _m_.
+
+Observed object properties: `conj?(alpha)`, `uplo(A)`, `conj?(x)`.
+
+**Note:** The floating-point (`num_t`) type of `alpha` is always the real projection of the floating-point types of `x` and `A`.
+
+---
+
+#### her2
+```c
+void bli_her2
+     (
+       obj_t*  alpha,
+       obj_t*  x,
+       obj_t*  y,
+       obj_t*  a
+     );
+```
+Perform
+```
+  A := A + alpha * conj?(x) * conj?(y)^H + conj(alpha) * conj?(y) * conj?(x)^H
+```
+where `A` is an _m x m_ Hermitian matrix stored in the lower or upper triangle as specified by `uplo(A)`, and `x` and `y` are vectors of length _m_.
+
+Observed object properties: `uplo(A)`, `conj?(x)`, `conj?(y)`.
+
+---
+
+#### symv
+```c
+void bli_symv
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  x,
+       obj_t*  beta,
+       obj_t*  y
+     );
+```
+Perform
+```
+  y := conj?(beta) * y + conj?(alpha) * conj?(A) * conj?(x)
+```
+where `A` is an _m x m_ symmetric matrix stored in the lower or upper triangle as specified by `uplo(A)`, and `x` and `y` are vectors of length _m_.
+
+Observed object properties: `conj?(alpha)`, `conj?(beta)`, `conj?(A)`, `uplo(A)`, `conj?(x)`.
+
+---
+
+#### syr
+```c
+void bli_syr
+     (
+       obj_t*  alpha,
+       obj_t*  x,
+       obj_t*  a
+     );
+```
+Perform
+```
+  A := A + conj?(alpha) * conj?(x) * conj?(x)^T
+```
+where `A` is an _m x m_ symmetric matrix stored in the lower or upper triangle as specified by `uploa`, and `x` is a vector of length _m_.
+
+Observed object properties: `conj?(alpha)`, `conj?(x)`.
+
+---
+
+#### syr2
+```c
+void bli_syr2
+     (
+       obj_t*  alpha,
+       obj_t*  x,
+       obj_t*  y,
+       obj_t*  a
+     );
+```
+Perform
+```
+  A := A + alpha * conj?(x) * conj?(y)^T + conj(alpha) * conj?(y) * conj?(x)^T
+```
+where `A` is an _m x m_ symmetric matrix stored in the lower or upper triangle as specified by `uplo(A)`, and `x` and `y` are vectors of length _m_.
+
+Observed object properties: `uplo(A)`, `conj?(x)`, `conj?(y)`.
+
+---
+
+#### trmv
+```c
+void bli_trmv
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  x
+     );
+```
+Perform
+```
+  x := conj?(alpha) * transa(A) * x
+```
+where `A` is an _m x m_ triangular matrix stored in the lower or upper triangle as specified by `uplo(A)` with unit/non-unit nature specified by `diag(A)`, and `x` is a vector of length _m_.
+
+Observed object properties: `conj?(alpha)`, `uplo(A)`, `trans?(A)`, `diag(A)`.
+
+---
+
+#### trsv
+```c
+void bli_trsv
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  y
+     );
+```
+Solve the linear system
+```
+  transa(A) * x = alpha * y
+```
+where `A` is an _m x m_ triangular matrix stored in the lower or upper triangle as specified by `uplo(A)` with unit/non-unit nature specified by `diag(A)`, and `x` and `y` are vectors of length _m_. The right-hand side vector operand `y` is overwritten with the solution vector `x`.
+
+Observed object properties: `conj?(alpha)`, `uplo(A)`, `trans?(A)`, `diag(A)`.
+
+---
+
+
+
+## Level-3 operations
+
+Level-3 operations perform various level-3 BLAS-like operations.
+**Note**: Each All level-3 operations are implemented through a handful of level-3 micro-kernels. Please see the [Kernels Guide](KernelsHowTo.md) for more details.
+
+
+---
+
+#### gemm
+```c
+void bli_gemm
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c
+     );
+```
+Perform
+```
+  C := beta * C + alpha * trans?(A) * trans?(B)
+```
+where `C` is an _m x n_ matrix, `trans?(A)` is an _m x k_ matrix, and `trans?(B)` is a _k x n_ matrix.
+
+Observed object properties: `trans?(A)`, `trans?(B)`.
+
+---
+
+#### hemm
+```c
+void bli_hemm
+     (
+       side_t  sidea,
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c
+     );
+```
+Perform
+```
+  C := beta * C + alpha * conj?(A) * trans?(B)
+```
+if `sidea` is `BLIS_LEFT`, or
+```
+  C := beta * C + alpha * trans?(B) * conj?(A)
+```
+if `sidea` is `BLIS_RIGHT`, where `C` and `B` are _m x n_ matrices and `A` is a Hermitian matrix stored in the lower or upper triangle as specified by `uplo(A)`. When `sidea` is `BLIS_LEFT`, `A` is _m x m_, and when `sidea` is `BLIS_RIGHT`, `A` is _n x n_.
+
+Observed object properties: `uplo(A)`, `conj?(A)`, `trans?(B)`.
+
+---
+
+#### herk
+```c
+void bli_herk
+     (
+       rtype*  alpha,
+       obj_t*  a,
+       rtype*  beta,
+       obj_t*  c
+     );
+```
+Perform
+```
+  C := beta * C + alpha * trans?(A) * trans?(A)^H
+```
+where `C` is an _m x m_ Hermitian matrix stored in the lower or upper triangle as specified by `uplo(C)` and `trans?(A)` is an _m x k_ matrix.
+
+Observed object properties: `trans?(A)`, `uplo(C)`.
+
+**Note:** The floating-point (`num_t`) types of `alpha` and `beta` are always the real projection of the floating-point types of `A` and `C`.
+
+---
+
+#### her2k
+```c
+void bli_her2k
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       rtype*  beta,
+       obj_t*  c
+     );
+```
+Perform
+```
+  C := beta * C + alpha * trans?(A) * trans?(B)^H + conj(alpha) * trans?(B) * trans?(A)^H
+```
+where `C` is an _m x m_ Hermitian matrix stored in the lower or upper triangle as specified by `uplo(C)` and `trans?(A)` and `trans?(B)` are _m x k_ matrices.
+
+Observed object properties: `trans?(A)`, `trans?(B)`, `uplo(C)`.
+
+**Note:** The floating-point (`num_t`) type of `beta` is always the real projection of the floating-point types of `A` and `C`.
+
+---
+
+#### symm
+```c
+void bli_symm
+     (
+       side_t  sidea,
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c
+     );
+```
+Perform
+```
+  C := beta * C + alpha * conj?(A) * trans?(B)
+```
+if `sidea` is `BLIS_LEFT`, or
+```
+  C := beta * C + alpha * trans?(B) * conj?(A)
+```
+if `sidea` is `BLIS_RIGHT`, where `C` and `B` are _m x n_ matrices and `A` is a symmetric matrix stored in the lower or upper triangle as specified by `uplo(A)`. When `sidea` is `BLIS_LEFT`, `A` is _m x m_, and when `sidea` is `BLIS_RIGHT`, `A` is _n x n_.
+
+Observed object properties: `uplo(A)`, `conj?(A)`, `trans?(B)`.
+
+---
+
+#### syrk
+```c
+void bli_syrk
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  beta,
+       obj_t*  c
+     );
+```
+Perform
+```
+  C := beta * C + alpha * trans?(A) * trans?(A)^T
+```
+where `C` is an _m x m_ symmetric matrix stored in the lower or upper triangle as specified by `uplo(A)` and `trans?(A)` is an _m x k_ matrix.
+
+Observed object properties: `trans?(A)`, `uplo(C)`.
+
+---
+
+#### syr2k
+```c
+void bli_syr2k
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c
+     );
+```
+Perform
+```
+  C := beta * C + alpha * trans?(A) * trans?(B)^T + alpha * trans?(B) * trans?(A)^T
+```
+where `C` is an _m x m_ symmetric matrix stored in the lower or upper triangle as specified by `uplo(A)` and `trans?(A)` and `trans?(B)` are _m x k_ matrices.
+
+Observed object properties: `trans?(A)`, `trans?(B)`, `uplo(C)`.
+
+---
+
+#### trmm
+```c
+void bli_trmm
+     (
+       side_t  sidea,
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b
+     );
+```
+Perform
+```
+  B := alpha * transa(A) * B
+```
+if `sidea` is `BLIS_LEFT`, or
+```
+  B := alpha * B * transa(A)
+```
+if `sidea` is `BLIS_RIGHT`, where `B` is an _m x n_ matrix and `A` is a triangular matrix stored in the lower or upper triangle as specified by `uplo(A)` with unit/non-unit nature specified by `diag(A)`. When `sidea` is `BLIS_LEFT`, `A` is _m x m_, and when `sidea` is `BLIS_RIGHT`, `A` is _n x n_.
+
+Observed object properties: `uplo(A)`, `trans?(A)`, `diag(A)`.
+
+---
+
+#### trmm3
+```c
+void bli_trmm3
+     (
+       side_t  sidea,
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c
+     );
+```
+Perform
+```
+  C := beta * C + alpha * trans?(A) * trans?(B)
+```
+if `sidea` is `BLIS_LEFT`, or
+```
+  C := beta * C + alpha * trans?(B) * trans?(A)
+```
+if `sidea` is `BLIS_RIGHT`, where `C` and `trans?(B)` are _m x n_ matrices and `A` is a triangular matrix stored in the lower or upper triangle as specified by `uplo(A)` with unit/non-unit nature specified by `diag(A)`. When `sidea` is `BLIS_LEFT`, `A` is _m x m_, and when `sidea` is `BLIS_RIGHT`, `A` is _n x n_.
+
+Observed object properties: `uplo(A)`, `trans?(A)`, `diag(A)`, `trans?(B)`.
+
+---
+
+#### trsm
+```c
+void bli_trsm
+     (
+       side_t  sidea,
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b
+     );
+```
+Solve the linear system with multiple right-hand sides
+```
+  transa(A) * X = alpha * B
+```
+if `sidea` is `BLIS_LEFT`, or
+```
+  X * transa(A) = alpha * B
+```
+if `sidea` is `BLIS_RIGHT`, where `X` and `B` are an _m x n_ matrices and `A` is a triangular matrix stored in the lower or upper triangle as specified by `uplo(A)` with unit/non-unit nature specified by `diag(A)`. When `sidea` is `BLIS_LEFT`, `A` is _m x m_, and when `sidea` is `BLIS_RIGHT`, `A` is _n x n_. The right-hand side matrix operand `B` is overwritten with the solution matrix `X`.
+
+Observed object properties: `uplo(A)`, `trans?(A)`, `diag(A)`.
+
+---
+
+
+## Utility operations
+
+---
+
+#### asumv
+```c
+void bli_asumv
+     (
+       obj_t*  x,
+       obj_t*  asum
+     );
+```
+Compute the sum of the absolute values of the fundamental elements of vector `x`. The resulting sum is stored to `asum`.
+
+Observed object properties: none.
+
+**Note:** The floating-point type of `asum` is always the real projection of the floating-point type of `x`.
+**Note:** This function attempts to mimic the algorithm for computing the absolute vector sum in the netlib BLAS routines `*asum()`.
+
+---
+
+#### norm1m
+#### normfm
+#### normim
+```c
+void bli_norm[1fi]m
+     (
+       obj_t*  a,
+       obj_t*  norm
+     );
+```
+Compute the one-norm (`bli_norm1m()`), Frobenius norm (`bli_normfm()`), or infinity norm (`bli_normim()`) of the elements in an _m x n_ matrix `A`. If `uplo(A)` is `BLIS_LOWER` or `BLIS_UPPER` then `A` is assumed to be lower or upper triangular, respectively, with the main diagonal located at offset `diagoff(A)`. The resulting norm is stored to `norm`.
+
+Observed object properties: `diagoff(A)`, `diag(A)`, `uplo(A)`.
+
+**Note:** The floating-point (`num_t`) type of `norm` is always the real projection of the floating-point type of `x`.
+
+---
+
+#### norm1v
+#### normfv
+#### normiv
+```c
+void bli_norm[1fi]v
+     (
+       obj_t*  x,
+       obj_t*  norm
+     );
+```
+Compute the one-norm (`bli_norm1v()`), Frobenius norm (`bli_normfv()`), or infinity norm (`bli_normiv()`) of the elements in a vector `x` of length _n_. The resulting norm is stored to `norm`.
+
+Observed object properties: `diagoff(A)`, `diag(A)`, `uplo(A)`.
+
+**Note:** The floating-point (`num_t`) type of `norm` is always the real projection of the floating-point type of `x`.
+
+---
+
+#### mkherm
+```c
+void bli_mkherm
+     (
+       obj_t*  a
+     );
+```
+Make an _m x m_ matrix `A` explicitly Hermitian by copying the conjugate of the triangle specified by `uplo(A)` to the opposite triangle. Imaginary components of diagonal elements are explicitly set to zero. It is assumed that the diagonal offset of `A` is zero.
+
+Observed object properties: `uplo(A)`.
+
+---
+
+#### mksymm
+```c
+void bli_mksymm
+     (
+       obj_t*  a
+     );
+```
+Make an _m x m_ matrix `A` explicitly symmetric by copying the triangle specified by `uplo(A)` to the opposite triangle. It is assumed that the diagonal offset of `A` is zero.
+
+Observed object properties: `uplo(A)`.
+
+---
+
+#### mktrim
+```c
+void bli_mktrim
+     (
+       obj_t*  a
+     );
+```
+Make an _m x m_ matrix `A` explicitly triangular by preserving the triangle specified by `uplo(A)` and zeroing the elements in the opposite triangle. It is assumed that the diagonal offset of `A` is zero.
+
+Observed object properties: `uplo(A)`.
+
+---
+
+#### fprintv
+```c
+void bli_fprintv
+     (
+       FILE*   file,
+       char*   s1,
+       obj_t*  x,
+       char*   format,
+       char*   s2
+     );
+```
+Print a vector `x` of length _m_ to file stream `file`, where `file` is a file pointer returned by the standard C library function `fopen()`. The caller may also pass in a global file pointer such as `stdout` or `stderr`. The strings `s1` and `s2` are printed immediately before and after the output (respectively), and the format specifier `format` is used to format the individual elements. For valid format specifiers, please see documentation for the standard C library function `printf()`.
+
+**Note:** For complex datatypes, the format specifier is applied to both the real and imaginary components **individually**. Therefore, you should use format specifiers such as `"%5.2f"`, but **not** `"%5.2f + %5.2f"`.
+
+---
+
+#### fprintm
+```c
+void bli_fprintm
+     (
+       FILE*   file,
+       char*   s1,
+       obj_t*  a,
+       char*   format,
+       char*   s2
+     );
+```
+Print an _m x n_ matrix `A` to file stream `file`, where `file` is a file pointer returned by the standard C library function `fopen()`. The caller may also pass in a global file pointer such as `stdout` or `stderr`. The strings `s1` and `s2` are printed immediately before and after the output (respectively), and the format specifier `format` is used to format the individual elements. For valid format specifiers, please see documentation for the standard C library function `printf()`.
+
+**Note:** For complex datatypes, the format specifier is applied to both the real and imaginary components **individually**. Therefore, you should use format specifiers such as `"%5.2f"`, but **not** `"%5.2f + %5.2f"`.
+
+---
+
+#### printv
+```c
+void bli_printv
+     (
+       char*   s1,
+       obj_t*  x,
+       char*   format,
+       char*   s2
+     );
+```
+Print a vector `x` of length _m_ to standard output. This function call is equivalent to calling `bli_fprintv()` with `stdout` as the file pointer.
+
+---
+
+#### printm
+```c
+void bli_printm
+     (
+       char*   s1,
+       obj_t*  a,
+       char*   format,
+       char*   s2
+     );
+```
+Print an _m x n_ matrix `a` to standard output. This function call is equivalent to calling `bli_fprintm()` with `stdout` as the file pointer.
+
+---
+
+#### randv
+```c
+void bli_randv
+     (
+       obj_t*  x
+     );
+```
+Set the elements of a vector `x` of length _n_ to random values on the interval `[-1,1)`.
+
+**Note:** For complex datatypes, the real and imaginary components of each element are randomized individually and independently of one another.
+
+---
+
+#### randm
+```c
+void bli_randm
+     (
+       obj_t*  a
+     );
+```
+Set the elements of an _m x n_ matrix `A` to random values on the interval `[-1,1)`. Off-diagonal elements (in the triangle specified by `uplo(A)`) are scaled by `1.0/max(m,n)`.
+
+Observed object properties: `diagoff(A)`, `uplo(A)`.
+
+**Note:** For complex datatypes, the real and imaginary components of each off-diagonal element are randomized individually and independently of one another.
+**Note:** If `uplo(A)` is `BLIS_LOWER` or `BLIS_UPPER` and you plan to use this matrix to test `trsv` or `trsm`, additional scaling of the diagonal is recommended to ensure that the matrix is invertible. In this case, try using the [addd](BLISTypedAPI.md#addd) operation to increase the magnitude to the diagonal elements.
+
+---
+
+#### sumsqv
+```c
+void bli_sumsqv
+     (
+       obj_t*  x,
+       obj_t*  scale,
+       obj_t*  sumsq
+     );
+```
+Compute the sum of the squares of the elements in a vector `x` of length _n_. The result is computed in scaled form, and in such a way that it may be used repeatedly to accumulate the sum of the squares of several vectors.
+
+The function computes scale\_new and sumsq\_new such that
+```
+  scale_new^2 * sumsq_new = x[0]^2 + x[1]^2 + ... x[m-1]^2 + scale_old^2 * sumsq_old
+```
+where, on entry, `scale` and `sumsq` contain `scale_old` and `sumsq_old`, respectively, and on exit, `scale` and `sumsq` contain `scale_new` and `sumsq_new`, respectively.
+
+**Note:** This function attempts to mimic the algorithm for computing the Frobenius norm in the netlib LAPACK routine `?lassq()`.
+**Note:** The floating-point (`num_t`) types of `scale` and `sumsq` are always the real projection of the floating-point type of `x`.
+
+---
+
+
+
+
+# Query function reference
+
+BLIS allows applications to query information about how BLIS was configured. The `bli_info_` API provides several categories of query routines. Most values are returned as a `gint_t`, which is a signed integer. The size of this integer can be queried through a special routine that returns the size in a character string:
+```c
+char* bli_info_get_int_type_size_str( void );
+```
+**Note:** All of the `bli_info_` functions are **always** thread-safe, no matter how BLIS was configured.
+
+## General library information
+
+The following routine returns the address the full BLIS version string:
+```c
+char* bli_info_get_version_str( void );
+```
+
+## Specific configuration
+
+The following routine returns a unique ID of type `arch_t` that identifies the current current active configuration:
+```c
+arch_t bli_arch_query_id( void );
+```
+This is most useful when BLIS is configured with multiple configurations. (When linking to multi-configuration builds of BLIS, you don't know for sure which configuration will be used until runtime since the configuration-specific parameters are not loaded until after calling a hueristic to detect the hardware--usually based the `CPUID` instruction.)
+
+Once the configuration's ID is known, it can be used to query a string that contains the name of the configuration:
+```c
+char* bli_arch_string( arch_t id );
+```
+
+## General configuration
+
+The following routines return various general-purpose constants that affect the entire framework. All of these settings default to sane values, which can then be overridden by the configuration in [bli\_config.h](ConfigurationHowTo#bli_configh). If they are absent from a particular configuration's `bli_config.h` header file, then the default value is used, as specified in [frame/include/bli_config_macro_defs.h](https://github.com/flame/blis/blob/master/frame/include/bli_config_macro_defs.h).
+
+```c
+gint_t bli_info_get_int_type_size( void );
+gint_t bli_info_get_num_fp_types( void );
+gint_t bli_info_get_max_type_size( void );
+gint_t bli_info_get_page_size( void );
+gint_t bli_info_get_simd_num_registers( void );
+gint_t bli_info_get_simd_size( void );
+gint_t bli_info_get_simd_align_size( void );
+gint_t bli_info_get_stack_buf_max_size( void );
+gint_t bli_info_get_stack_buf_align_size( void );
+gint_t bli_info_get_heap_addr_align_size( void );
+gint_t bli_info_get_heap_stride_align_size( void );
+gint_t bli_info_get_pool_addr_align_size( void );
+gint_t bli_info_get_enable_stay_auto_init( void );
+gint_t bli_info_get_enable_blas( void );
+gint_t bli_info_get_blas_int_type_size( void );
+```
+
+## Kernel information
+
+### Micro-kernel implementation type query
+
+The following routines allow the caller to obtain a string that identifies the implementation type of each micro-kernel that is currently active (ie: part of the current active configuration, as identified bi `bli_arch_query_id()`). 
+
+```c
+char* bli_info_get_gemm_ukr_impl_string( ind_t method, num_t dt )
+char* bli_info_get_gemmtrsm_l_ukr_impl_string( ind_t method, num_t dt )
+char* bli_info_get_gemmtrsm_u_ukr_impl_string( ind_t method, num_t dt )
+char* bli_info_get_trsm_l_ukr_impl_string( ind_t method, num_t dt )
+char* bli_info_get_trsm_u_ukr_impl_string( ind_t method, num_t dt )
+```
+
+Possible implementation (ie: the `ind_t method` argument) types are:
+ * `BLIS_3MH`: Implementation based on the 3m method applied at the highest level, outside the 5th loop around the micro-kernel.
+ * `BLIS_3M1`: Implementation based on the 3m method applied within the 1st loop around the micro-kernel.
+ * `BLIS_4MH`: Implementation based on the 4m method applied at the highest level, outside the 5th loop around the micro-kernel.
+ * `BLIS_4M1B`: Implementation based on the 4m method applied within the 1st loop around the micro-kernel. Computation is ordered such that the 1st loop is fissured into two loops, the first of which multiplies the real part of the current micro-panel of packed matrix B (against all real and imaginary parts of packed matrix A), and the second of which multiplies the imaginary part of the current micro-panel of packed matrix B.
+ * `BLIS_4M1A`: Implementation based on the 4m method applied within the 1st loop around the micro-kernel. Computation is ordered such that real and imaginary components of the current micro-panels are completely used before proceeding to the next virtual micro-kernel invocation.
+ * `BLIS_1M`: Implementation based on the 1m method. (This is the default induced method when real domain kernels are present but complex kernels are missing.)
+ * `BLIS_NAT`: Implementation based on "native" execution (ie: NOT an induced method).
+
+**NOTE**: `BLIS_3M3` and `BLIS_3M2` have been deprecated from the `typedef enum` of `ind_t`, and `BLIS_4M1B` is also effectively no longer available, though the `typedef enum` value still exists. 
+
+Possible micro-kernel types (ie: the return values for `bli_info_get_*_ukr_impl_string()`) are:
+ * `BLIS_REFERENCE_UKERNEL` (`"refrnce"`): This value is returned when the queried micro-kernel is provided by the reference implementation.
+ * `BLIS_VIRTUAL_UKERNEL` (`"virtual"`): This value is returned when the queried micro-kernel is driven by a the "virtual" micro-kernel provided by an induced method. This happens for any `method` value that is not `BLIS_NAT` (ie: native), but only applies to the complex domain.
+ * `BLIS_OPTIMIZED_UKERNEL` (`"optimzd"`): This value is returned when the queried micro-kernel is provided by an implementation that is neither reference nor virtual, and thus we assume the kernel author would deem it to be "optimized". Such a micro-kernel may not be optimal in the literal sense of the word, but nonetheless is _intended_ to be optimized, at least relative to the reference micro-kernels.
+ * `BLIS_NOTAPPLIC_UKERNEL` (`"notappl"`): This value is returned usually when performing a `gemmtrsm` or `trsm` micro-kernel type query for any `method` value that is not `BLIS_NAT` (ie: native). That is, induced methods cannot be (purely) used on `trsm`-based micro-kernels because these micro-kernels perform more a triangular inversion, which is not matrix multiplication.
+
+

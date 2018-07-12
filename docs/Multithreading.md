@@ -82,14 +82,14 @@ Next, which combinations of loops to parallelize depends on which caches are sha
 ![The primary algorithm for level-3 operations in BLIS](http://www.cs.utexas.edu/users/field/mm_algorithm.png)
 
 As with specifying parallelism via `BLIS_NUM_THREADS`, you can set the `BLIS_xx_NT` environment variables in the shell, prior to launching your BLIS-linked executable, or you can set (or update) the environment variables at run-time. Here are some examples of using the run-time API:
-```
+```c
   bli_thread_set_jc_nt( 2 );  // Set BLIS_JC_NT to 2.
   bli_thread_set_jc_nt( 4 );  // Set BLIS_IC_NT to 4.
   bli_thread_set_jr_nt( 3 );  // Set BLIS_JR_NT to 3.
   bli_thread_set_ir_nt( 1 );  // Set BLIS_IR_NT to 1.
 ```
   There are also equivalent "get" functions that allow you to query the current values for the `BLIS_xx_NT` variables:
-```
+```c
   dim_t jc_nt = bli_thread_get_jc_nt();
   dim_t ic_nt = bli_thread_get_ic_nt();
   dim_t jr_nt = bli_thread_get_jr_nt();
