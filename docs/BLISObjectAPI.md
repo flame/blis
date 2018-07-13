@@ -11,9 +11,9 @@
   * [Context type](BLISObjectAPI.md#context-type)
   * [BLIS header file](BLISObjectAPI.md#blis-header-file)
   * [Initialization and cleanup](BLISObjectAPI.md#initialization-and-cleanup)
-* **[Object management function reference](BLISObjectAPI.md#object-management-function-reference)**
-  * [Object creation](BLISObjectAPI.md#object-creation)
-  * [Object accessors](BLISObjectAPI.md#object-accessors)
+* **[Object management](BLISObjectAPI.md#object-management)**
+  * [Object creation function reference](BLISObjectAPI.md#object-creation-function-reference)
+  * [Object accessor function reference](BLISObjectAPI.md#object-accessor-function-reference)
 * **[Computational function reference](BLISObjectAPI.md#computational-function-reference)**
   * [Operation index](BLISObjectAPI.md#operation-index)
   * [Level-1v operations](BLISObjectAPI.md#level-1v-operations)
@@ -29,6 +29,7 @@
   * [Specific configuration](BLISObjectAPI.md#specific-configuration)
   * [General configuration](BLISObjectAPI.md#general-configuration)
   * [Kernel information](BLISObjectAPI.md#kernel-information)
+* **[Example code](BLISObjectAPI.md#example-code)**
 
 # Introduction
 
@@ -44,13 +45,15 @@ The following tables list various types used throughout the BLIS object API.
 
 ### Integer-based types
 
-| BLIS integer type | Type definition        | Used to represent...                                                 |
-|:------------------|:-----------------------|:---------------------------------------------------------------------|
-| `gint_t`          | `int32_t` or `int64_t` | general-purpose signed integer; used to define signed integer types. |
-| `dim_t`           | `gint_t`               | matrix and vector dimensions.                                        |
-| `inc_t`           | `gint_t`               | matrix row/column strides and vector increments.                     |
-| `doff_t`          | `gint_t`               | matrix diagonal offset: if _k_ < 0, diagonal begins at element (-_k_,0); otherwise diagonal begins at element (0,_k_). |
-| `bool_t`          | `gint_t`               | boolean values: `TRUE` or `FALSE`.                                   |
+| BLIS integer type | Type definition          | Used to represent...                                                 |
+|:------------------|:-------------------------|:---------------------------------------------------------------------|
+| `gint_t`          | `int32_t` or `int64_t`   | general-purpose signed integer; used to define signed integer types. |
+| `guint_t`         | `uint32_t` or `uint64_t` | general-purpose signed integer; used to define signed integer types. |
+| `dim_t`           | `gint_t`                 | matrix and vector dimensions.                                        |
+| `inc_t`           | `gint_t`                 | matrix row/column strides and vector increments.                     |
+| `doff_t`          | `gint_t`                 | matrix diagonal offset: if _k_ < 0, diagonal begins at element (-_k_,0); otherwise diagonal begins at element (0,_k_). |
+| `bool_t`          | `gint_t`                 | boolean values: `TRUE` or `FALSE`.                                   |
+| `siz_t`           | `guint_t`                | a byte size or byte offset.                                          |
 
 ### Floating-point types
 
@@ -200,7 +203,9 @@ void bli_finalize( void );
 ```
 
 
-## Object creation
+# Object management
+
+## Introduction
 
 Before using the object API, you must first create some objects to encapsulate your vector or matrix data. We provide examples code for creating matrix objects in the [examples/oapi](https://github.com/flame/blis/tree/master/examples/oapi) directory of the BLIS source distribution. However, we will provide API documentation for the most common functions for creating and freeing objects in the next section.
 
@@ -208,9 +213,195 @@ Generally speaking, an object is created when an `obj_t` structure is initialize
 
 Only objects that were created with automatic allocation must be freed via BLIS object API. Objects that were initialized with attached buffers can be freed in whatever manner is appropriate, based on how the application originally allocated the memory in question.
 
-# Object creation function reference
+## Object creation function reference
 
-# Object accessor function reference
+_Not yet written._
+
+## Object accessor function reference
+
+Notes for interpreting function descriptions:
+  * Object accessor functions allow the caller to query certain properties of objects.
+  * These functions are only guaranteed to return meaningful values when called upon objects that have been fully initialized/created.
+  * Many specialized functions are omitted from this section for brevity. For a full list of accessor functions, please see [frame/include/bli_obj_macro_defs.h](https://github.com/flame/blis/tree/master/frame/include/bli_obj_macro_defs.h).
+
+**Note**: For now, we omit documentation for the corresponding functions used to modify object properties because those functions can easily invalidate the state of an `obj_t` and should be used only in specific instances. If you think you need to manually set the fields of an `obj_t`, please contact BLIS developers so we can give you personalized guidance.
+
+---
+
+```c
+num_t bli_obj_dt( obj_t* obj );
+```
+Return the storage datatype property of `obj`.
+
+---
+
+```c
+dom_t bli_obj_dom( obj_t* obj );
+```
+Return the domain component of the storage datatype property of `obj`.
+
+---
+
+```c
+prec_t bli_obj_prec( obj_t* obj );
+```
+Return the precision component of the storage datatype property of `obj`.
+
+---
+
+```c
+trans_t bli_obj_conjtrans_status( obj_t* obj );
+```
+Return the `trans_t` property of `obj`, which may indicate transposition, conjugation, both, or neither.
+
+---
+
+```c
+trans_t bli_obj_onlytrans_status( obj_t* obj );
+```
+Return the transposition component of the `trans_t` property of `obj`, which may indicate transposition or no transposition.
+Thus, possible return values are `BLIS_NO_TRANSPOSE` or `BLIS_TRANSPOSE`.
+
+---
+
+```c
+conj_t bli_obj_conj_status( obj_t* obj );
+```
+Return the conjugation component of the `trans_t` property of `obj`, which may indicate conjugation or no conjugation.
+Thus, possible return values are `BLIS_NO_CONJUGATE` or `BLIS_CONJUGATE`.
+
+---
+
+```c
+uplo_t bli_obj_uplo( obj_t* obj );
+```
+Return the `uplo_t` property of `obj`.
+
+---
+
+```c
+struc_t bli_obj_struc( obj_t* obj );
+```
+Return the `struc_t` property of `obj`.
+
+---
+
+```c
+diag_t bli_obj_diag( obj_t* obj );
+```
+Return the `diag_t` property of `obj`.
+
+---
+
+```c
+dim_t bli_obj_length( obj_t* obj );
+```
+Return the number of rows (or _m_ dimension) of `obj`. This value is the _m_ dimension **before** taking into account the transposition property as indicated by `bli_obj_onlytrans_status()` or `bli_obj_conjtrans_status()`.
+
+---
+
+```c
+dim_t bli_obj_width( obj_t* obj );
+```
+Return the number of columns (or _n_ dimension) of `obj`. This value is the _n_ dimension **before** taking into account the transposition property as indicated by `bli_obj_onlytrans_status()` or `bli_obj_conjtrans_status()`.
+
+---
+
+```c
+dim_t bli_obj_length_after_trans( obj_t* obj );
+```
+Return the number of rows (or _m_ dimension) of `obj` after taking into account the transposition property as indicated by `bli_obj_onlytrans_status()` or `bli_obj_conjtrans_status()`.
+
+---
+
+```c
+dim_t bli_obj_width_after_trans( obj_t* obj );
+```
+Return the number of columns (or _n_ dimension) of `obj` after taking into account the transposition property as indicated by `bli_obj_onlytrans_status()` or `bli_obj_conjtrans_status()`.
+
+---
+
+```c
+doff_t bli_obj_diag_offset( obj_t* obj );
+```
+Return the diagonal offset of `obj`. Note that the diagonal offset will be negative, `-i`, if the diagonal begins at element `(-i,0)` and positive `j` if the diagonal begins at element `(0,j)`.
+
+---
+
+```c
+inc_t bli_obj_row_stride( obj_t* obj );
+```
+Return the row stride property of `obj`. When storing by columns, the row stride is 1. When storing by rows, the row stride is also sometimes called the _leading dimension_.
+
+---
+
+```c
+inc_t bli_obj_col_stride( obj_t* obj );
+```
+Return the column stride property of `obj`. When storing by rows, the column stride is 1. When storing by columns, the column stride is also sometimes called the _leading dimension_.
+
+---
+
+```c
+dim_t bli_obj_vector_dim( obj_t* obj );
+```
+Return the number of elements in a vector object `obj`.
+This function assumes that at least one dimension of `obj` is unit, and that it therefore represents a vector.
+
+---
+
+```c
+inc_t bli_obj_vector_inc( obj_t* obj );
+```
+Return the storage increment of a vector object `obj`.
+This function assumes that at least one dimension of `obj` is unit, and that it therefore represents a vector.
+
+---
+
+```c
+void* bli_obj_buffer( obj_t* obj );
+```
+Return the address to the data buffer associated with object `obj`.
+**Note**: The address returned by this buffer will not take into account any subpartitioning. However, this will not be a problem for most casual users.
+
+---
+
+```c
+siz_t bli_obj_elem_size( obj_t* obj );
+```
+Return the size, in bytes, of the storage datatype as indicated by `bli_obj_dt()`.
+
+---
+
+```c
+void bli_obj_alias_to( obj_t* a, obj_t* b );
+```
+Initialize `b` to be a shallow copy, or alias, of `a`. For most people's purposes, this is equivalent to
+```
+  b = a;
+```
+However, there is at least one field (one that only developers should be concerned with) that is not copied.
+
+---
+
+```c
+void bli_obj_real_part( obj_t* c, obj_t* r );
+```
+Initialize `r` to be a modified shallow copy of `c` that refers only to the real part of `c`. 
+
+---
+
+```c
+void bli_obj_imag_part( obj_t* c, obj_t* i );
+```
+Initialize `i` to be a modified shallow copy of `c` that refers only to the imaginary part of `c`. 
+
+---
+
+```c
+void bli_obj_induce_trans( obj_t* obj );
+```
+Modify the properties of `obj` to induce a logical transposition. This function operations without regard to whether the transposition property is already set. Therefore, depending on the circumstance, the caller may or may not wish to clear the transposition property after calling this function. (If needed, the user may call `bli_obj_toggle_trans( obj )` to toggle the transposition status.)
 
 
 # Computational function reference
@@ -232,11 +423,11 @@ Notes for interpreting function descriptions:
 ## Operation index
 
   * **[Level-1v](BLISTypedAPI.md#level-1v-operations)**: Operations on vectors:
-    * [addv](BLISTypedAPI.md#addv), [amaxv](BLISTypedAPI.md#amaxv), [axpyv](BLISTypedAPI.md#axpyv), [axpbyv](BLISTypedAPI.md#axpbyv), [copyv](BLISTypedAPI.md#copyv), [dotv](BLISTypedAPI.md#dotv), [dotxv](BLISTypedAPI.md#dotxv), [invertv](BLISTypedAPI.md#invertv), [scal2v](BLISTypedAPI.md#scal2v), [scalv](BLISTypedAPI.md#scalv), [setv](BLISTypedAPI.md#setv), [subv](BLISTypedAPI.md#subv), [swapv](BLISTypedAPI.md#swapv), [xpbyv](BLISTypedAPI.md#xpbyv)
+    * [addv](BLISTypedAPI.md#addv), [amaxv](BLISTypedAPI.md#amaxv), [axpyv](BLISTypedAPI.md#axpyv), [axpbyv](BLISTypedAPI.md#axpbyv), [copyv](BLISTypedAPI.md#copyv), [dotv](BLISTypedAPI.md#dotv), [dotxv](BLISTypedAPI.md#dotxv), [invertv](BLISTypedAPI.md#invertv), [scal2v](BLISTypedAPI.md#scal2v), [scalv](BLISTypedAPI.md#scalv), [setv](BLISTypedAPI.md#setv), [setrv](BLISTypedAPI.md#setrv), [setiv](BLISTypedAPI.md#setiv), [subv](BLISTypedAPI.md#subv), [swapv](BLISTypedAPI.md#swapv), [xpbyv](BLISTypedAPI.md#xpbyv)
   * **[Level-1d](BLISTypedAPI.md#level-1d-operations)**: Element-wise operations on matrix diagonals:
     * [addd](BLISTypedAPI.md#addd), [axpyd](BLISTypedAPI.md#axpyd), [copyd](BLISTypedAPI.md#copyd), [invertd](BLISTypedAPI.md#invertd), [scald](BLISTypedAPI.md#scald), [scal2d](BLISTypedAPI.md#scal2d), [setd](BLISTypedAPI.md#setd), [setid](BLISTypedAPI.md#setid), [subd](BLISTypedAPI.md#subd)
   * **[Level-1m](BLISTypedAPI.md#level-1m-operations)**: Element-wise operations on matrices:
-    * [addm](BLISTypedAPI.md#addm), [axpym](BLISTypedAPI.md#axpym), [copym](BLISTypedAPI.md#copym), [scalm](BLISTypedAPI.md#scalm), [scal2m](BLISTypedAPI.md#scal2m), [setm](BLISTypedAPI.md#setm), [subm](BLISTypedAPI.md#subm)
+    * [addm](BLISTypedAPI.md#addm), [axpym](BLISTypedAPI.md#axpym), [copym](BLISTypedAPI.md#copym), [scalm](BLISTypedAPI.md#scalm), [scal2m](BLISTypedAPI.md#scal2m), [setm](BLISTypedAPI.md#setm), [setrm](BLISTypedAPI.md#setrm), [setim](BLISTypedAPI.md#setim), [subm](BLISTypedAPI.md#subm)
   * **[Level-1f](BLISTypedAPI.md#level-1f-operations)**: Fused operations on multiple vectors:
     * [axpy2v](BLISTypedAPI.md#axpy2v), [dotaxpyv](BLISTypedAPI.md#dotaxpyv), [axpyf](BLISTypedAPI.md#axpyf), [dotxf](BLISTypedAPI.md#dotxf), [dotxaxpyf](BLISTypedAPI.md#dotxaxpyf)
   * **[Level-2](BLISTypedAPI.md#level-2-operations)**: Operations with one matrix and (at least) one vector operand:
@@ -252,7 +443,7 @@ Notes for interpreting function descriptions:
 ## Level-1v operations
 
 Level-1v operations perform various level-1 BLAS-like operations on vectors (hence the _v_).
-**Note**: Each level-1v operation has a corresponding level-1v kernel through which it is primarily implemented.
+**Note**: Most level-1v operations have a corresponding level-1v kernel through which it is primarily implemented.
 
 ---
 
@@ -440,6 +631,40 @@ Perform
   x := conj?(alpha)
 ```
 That is, set all elements of an _n_-length vector `x` to scalar `conj?(alpha)`.
+
+---
+
+#### setrv
+```c
+void bli_setrv
+     (
+       obj_t*  alpha,
+       obj_t*  x
+     );
+```
+Perform
+```
+  real(x) := realproj(alpha)
+```
+That is, given an _n_-length vector `x`, set all elements' real components to the real projection of scalar `alpha`.
+If `x` is real, this operation is equivalent to performing `setv` on `x` with the real projection of scalar `alpha`.
+
+---
+
+#### setiv
+```c
+void bli_setiv
+     (
+       obj_t*  alpha,
+       obj_t*  x
+     );
+```
+Perform
+```
+  imag(x) := realproj(alpha)
+```
+That is, given an _n_-length vector `x`, set all elements' imaginary components to the real projection of scalar `alpha`.
+If `x` is real, this operation is equivalent to a no-op.
 
 ---
 
@@ -719,6 +944,44 @@ Perform
 That is, set all elements of `A` to scalar `conj?(alpha)`, where `A` is an _m x n_ matrix stored as a dense matrix, or lower- or upper-triangular/trapezoidal matrix with arbitrary diagonal offset. If `uplo(A)` indicates lower or upper storage, only that part of matrix `A` will be updated.
 
 Observed object properties: `conj?(alpha)`, `diagoff(A)`, `diag(A)`, `uplo(A)`.
+
+---
+
+#### setrm
+```c
+void bli_setrm
+     (
+       obj_t*  alpha,
+       obj_t*  a
+     );
+```
+Perform
+```
+  real(A) := realproj(alpha)
+```
+That is, given an _m x n_ matrix `A`, set all elements' real components to the real projection of scalar `alpha`.
+If `A` is real, this operation is equivalent to performing `setm` on `A` with the real projection of scalar `alpha`.
+
+Observed object properties: `diagoff(A)`, `diag(A)`, `uplo(A)`.
+
+---
+
+#### setim
+```c
+void bli_setim
+     (
+       obj_t*  alpha,
+       obj_t*  a
+     );
+```
+Perform
+```
+  imag(A) := realproj(alpha)
+```
+That is, given an _m x n_ matrix `A`, set all elements' imaginary components to the real projection of scalar `alpha`.
+If `A` is real, this operation is equivalent to a no-op.
+
+Observed object properties: `diagoff(A)`, `diag(A)`, `uplo(A)`.
 
 ---
 
@@ -1132,9 +1395,9 @@ Observed object properties: `uplo(A)`, `conj?(A)`, `trans?(B)`.
 ```c
 void bli_herk
      (
-       rtype*  alpha,
+       obj_t*  alpha,
        obj_t*  a,
-       rtype*  beta,
+       obj_t*  beta,
        obj_t*  c
      );
 ```
@@ -1157,7 +1420,7 @@ void bli_her2k
        obj_t*  alpha,
        obj_t*  a,
        obj_t*  b,
-       rtype*  beta,
+       obj_t*  beta,
        obj_t*  c
      );
 ```
@@ -1608,4 +1871,7 @@ Possible micro-kernel types (ie: the return values for `bli_info_get_*_ukr_impl_
  * `BLIS_OPTIMIZED_UKERNEL` (`"optimzd"`): This value is returned when the queried micro-kernel is provided by an implementation that is neither reference nor virtual, and thus we assume the kernel author would deem it to be "optimized". Such a micro-kernel may not be optimal in the literal sense of the word, but nonetheless is _intended_ to be optimized, at least relative to the reference micro-kernels.
  * `BLIS_NOTAPPLIC_UKERNEL` (`"notappl"`): This value is returned usually when performing a `gemmtrsm` or `trsm` micro-kernel type query for any `method` value that is not `BLIS_NAT` (ie: native). That is, induced methods cannot be (purely) used on `trsm`-based micro-kernels because these micro-kernels perform more a triangular inversion, which is not matrix multiplication.
 
+# Example code
+
+BLIS provides lots of example code in the [examples/oapi](https://github.com/flame/blis/tree/master/examples/oapi) directory of the BLIS source distribution. The example code in this directory is set up like a tutorial, and so we recommend starting from the beginning. Topics include creating and managing objects, printing vectors and matrices, setting and querying object properties, and calling a representative subset of the computational level-1v, -1m, -2, -3, and utility operations documented above.
 

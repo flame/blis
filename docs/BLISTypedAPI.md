@@ -24,6 +24,7 @@
   * [Specific configuration](BLISTypedAPI.md#specific-configuration)
   * [General configuration](BLISTypedAPI.md#general-configuration)
   * [Kernel information](BLISTypedAPI.md#kernel-information)
+* **[Example code](BLISObjectAPI.md#example-code)**
 
 # Introduction
 
@@ -202,7 +203,7 @@ Notes for interpreting function descriptions:
 ## Level-1v operations
 
 Level-1v operations perform various level-1 BLAS-like operations on vectors (hence the _v_).
-**Note**: Each level-1v operation has a corresponding level-1v kernel through which it is primarily implemented.
+**Note**: Most level-1v operations have a corresponding level-1v kernel through which it is primarily implemented.
 
 ---
 
@@ -1823,3 +1824,8 @@ char* bli_info_get_trmm_impl_string( num_t dt );
 char* bli_info_get_trmm3_impl_string( num_t dt );
 char* bli_info_get_trsm_impl_string( num_t dt );
 ```
+
+# Example code
+
+BLIS provides lots of example code in the [examples/tapi](https://github.com/flame/blis/tree/master/examples/tapi) directory of the BLIS source distribution. The example code in this directory is set up like a tutorial, and so we recommend starting from the beginning. Topics include printing vectors and matrices and calling a representative subset of the computational level-1v, -1m, -2, -3, and utility operations documented above.
+
