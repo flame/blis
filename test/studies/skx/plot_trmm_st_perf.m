@@ -5,11 +5,6 @@ output_st_dtrmm_asm_blis
 output_st_ctrmm_1m_blis
 output_st_ztrmm_1m_blis
 
-output_st_strmm_asm_blis_haswell
-output_st_dtrmm_asm_blis_haswell
-output_st_ctrmm_1m_blis_haswell
-output_st_ztrmm_1m_blis_haswell
-
 output_st_strmm_openblas
 output_st_dtrmm_openblas
 output_st_ctrmm_openblas
@@ -25,7 +20,6 @@ output_st_ztrmm_mkl
 axes1 = subplot(4, 4, 4);
 hold(axes1,'on');
 plot(data_st_strmm_asm_blis(:,1), data_st_strmm_asm_blis(:,4), 'LineWidth', 1.25,'Color', [0 0 1]);
-plot(data_st_strmm_asm_blis_haswell(:,1), data_st_strmm_asm_blis_haswell(:,4), '--', 'LineWidth', 1.25,'Color', [0 0 1]);
 plot(data_st_strmm_openblas(:,1), data_st_strmm_openblas(:,4), 'LineWidth', 1.25,'Color', [0 1 0]);
 plot(data_st_strmm_mkl(:,1), data_st_strmm_mkl(:,4), '--', 'LineWidth', 1.25,'Color', [1 0 0]);
 ylabel( 'GFLOPS', 'FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue');
@@ -42,7 +36,6 @@ axis( [ 0 v(2) 0 speak ] )
 axes1 = subplot(4, 4, 8);
 hold(axes1,'on');
 plot(data_st_dtrmm_asm_blis(:,1), data_st_dtrmm_asm_blis(:,4), 'LineWidth', 1.25,'Color', [0 0 1]);
-plot(data_st_dtrmm_asm_blis_haswell(:,1), data_st_dtrmm_asm_blis_haswell(:,4), '--', 'LineWidth', 1.25,'Color', [0 0 1]);
 plot(data_st_dtrmm_openblas(:,1), data_st_dtrmm_openblas(:,4), 'LineWidth', 1.25,'Color', [0 1 0]);
 plot(data_st_dtrmm_mkl(:,1), data_st_dtrmm_mkl(:,4), '--', 'LineWidth', 1.25,'Color', [1 0 0]);
 ylabel( 'GFLOPS', 'FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue');
@@ -59,7 +52,6 @@ axis( [ 0 v(2) 0 dpeak ] )
 axes1 = subplot(4, 4, 12);
 hold(axes1,'on');
 plot(data_st_ctrmm_1m_blis(:,1), data_st_ctrmm_1m_blis(:,4), 'LineWidth', 1.25,'Color', [0 0 1]);
-plot(data_st_ctrmm_1m_blis_haswell(:,1), data_st_ctrmm_1m_blis_haswell(:,4), '--', 'LineWidth', 1.25,'Color', [0 0 1]);
 plot(data_st_ctrmm_openblas(:,1), data_st_ctrmm_openblas(:,4), 'LineWidth', 1.25,'Color', [0 1 0]);
 plot(data_st_ctrmm_mkl(:,1), data_st_ctrmm_mkl(:,4),'--',  'LineWidth', 1.25,'Color', [1 0 0]);
 ylabel( 'GFLOPS', 'FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue');
@@ -76,7 +68,6 @@ axis( [ 0 v(2) 0 speak ] )
 axes1 = subplot(4, 4, 16);
 hold(axes1,'on');
 plot(data_st_ztrmm_1m_blis(:,1), data_st_ztrmm_1m_blis(:,4), 'LineWidth', 1.25,'Color', [0 0 1]);
-plot(data_st_ztrmm_1m_blis_haswell(:,1), data_st_ztrmm_1m_blis_haswell(:,4), '--', 'LineWidth', 1.25,'Color', [0 0 1]);
 plot(data_st_ztrmm_openblas(:,1), data_st_ztrmm_openblas(:,4), 'LineWidth', 1.25,'Color', [0 1 0]);
 plot(data_st_ztrmm_mkl(:,1), data_st_ztrmm_mkl(:,4), '--', 'LineWidth', 1.25,'Color', [1 0 0]);
 ylabel( 'GFLOPS', 'FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue');

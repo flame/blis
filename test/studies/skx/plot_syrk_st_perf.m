@@ -5,11 +5,6 @@ output_st_dsyrk_asm_blis
 output_st_csyrk_1m_blis
 output_st_zsyrk_1m_blis
 
-output_st_ssyrk_asm_blis_haswell
-output_st_dsyrk_asm_blis_haswell
-output_st_csyrk_1m_blis_haswell
-output_st_zsyrk_1m_blis_haswell
-
 output_st_ssyrk_openblas
 output_st_dsyrk_openblas
 output_st_csyrk_openblas
@@ -28,7 +23,6 @@ plot_lower = 0;
 axes1 = subplot(4, 4, 2);
 hold(axes1,'on');
 plot(data_st_ssyrk_asm_blis(:,1), data_st_ssyrk_asm_blis(:,4), 'LineWidth', 1.25,'Color', [0 0 1]);
-plot(data_st_ssyrk_asm_blis_haswell(:,1), data_st_ssyrk_asm_blis_haswell(:,4), '--', 'LineWidth', 1.25,'Color', [0 0 1]);
 plot(data_st_ssyrk_openblas(:,1), data_st_ssyrk_openblas(:,4), 'LineWidth', 1.25,'Color', [0 1 0]);
 plot(data_st_ssyrk_mkl(:,1), data_st_ssyrk_mkl(:,4), '--', 'LineWidth', 1.25,'Color', [1 0 0]);
 
@@ -52,7 +46,6 @@ axis( [ 0 v(2) 0 speak ] )
 axes1 = subplot(4, 4, 6);
 hold(axes1,'on');
 plot(data_st_dsyrk_asm_blis(:,1), data_st_dsyrk_asm_blis(:,4), 'LineWidth', 1.25,'Color', [0 0 1]);
-plot(data_st_dsyrk_asm_blis_haswell(:,1), data_st_dsyrk_asm_blis_haswell(:,4), '--', 'LineWidth', 1.25,'Color', [0 0 1]);
 plot(data_st_dsyrk_openblas(:,1), data_st_dsyrk_openblas(:,4), 'LineWidth', 1.25,'Color', [0 1 0]);
 plot(data_st_dsyrk_mkl(:,1), data_st_dsyrk_mkl(:,4), '--', 'LineWidth', 1.25,'Color', [1 0 0]);
 
@@ -78,7 +71,6 @@ axis( [ 0 v(2) 0 dpeak ] )
 axes1 = subplot(4, 4, 10);
 hold(axes1,'on');
 plot(data_st_csyrk_1m_blis(:,1), data_st_csyrk_1m_blis(:,4), 'LineWidth', 1.25,'Color', [0 0 1]);
-plot(data_st_csyrk_1m_blis_haswell(:,1), data_st_csyrk_1m_blis_haswell(:,4), '--', 'LineWidth', 1.25,'Color', [0 0 1]);
 plot(data_st_csyrk_openblas(:,1), data_st_csyrk_openblas(:,4), 'LineWidth', 1.25,'Color', [0 1 0]);
 plot(data_st_csyrk_mkl(:,1), data_st_csyrk_mkl(:,4), '--', 'LineWidth', 1.25,'Color', [1 0 0]);
 
@@ -101,7 +93,6 @@ axis( [ 0 v(2) 0 speak ] )
 axes1 = subplot(4, 4, 14);
 hold(axes1,'on');
 plot(data_st_zsyrk_1m_blis(:,1), data_st_zsyrk_1m_blis(:,4), 'LineWidth', 1.25,'Color', [0 0 1]);
-plot(data_st_zsyrk_1m_blis_haswell(:,1), data_st_zsyrk_1m_blis_haswell(:,4), '--', 'LineWidth', 1.25,'Color', [0 0 1]);
 plot(data_st_zsyrk_openblas(:,1), data_st_zsyrk_openblas(:,4), 'LineWidth', 1.25,'Color', [0 1 0]);
 plot(data_st_zsyrk_mkl(:,1), data_st_zsyrk_mkl(:,4), '--',  'LineWidth', 1.25,'Color', [1 0 0]);
 
