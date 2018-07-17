@@ -264,7 +264,7 @@ void libblis_test_dotxf_impl
 	switch ( iface )
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
-		bli_dotxf_ex( alpha, a, x, beta, y, cntx );
+		bli_dotxf_ex( alpha, a, x, beta, y, cntx, NULL );
 		break;
 
 		default:

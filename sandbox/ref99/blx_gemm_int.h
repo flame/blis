@@ -38,6 +38,7 @@ void blx_gemm_int
        obj_t*  b,
        obj_t*  c,
        cntx_t* cntx,
+       rntm_t* rntm,
        cntl_t* cntl,
        thrinfo_t* thread
      );

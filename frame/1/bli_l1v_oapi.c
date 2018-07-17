@@ -67,7 +67,7 @@ void PASTEMAC(opname,EX_SUF) \
 	    PASTEMAC(opname,_check)( x, y ); \
 \
 	/* Invoke the void pointer-based function. */ \
-	bli_call_ft_7 \
+	bli_call_ft_8 \
 	( \
 	   dt, \
 	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
@@ -75,7 +75,8 @@ void PASTEMAC(opname,EX_SUF) \
 	   n, \
 	   buf_x, inc_x, \
 	   buf_y, inc_y, \
-	   cntx  \
+	   cntx, \
+	   rntm  \
 	); \
 }
 
@@ -110,14 +111,15 @@ void PASTEMAC(opname,EX_SUF) \
 	    PASTEMAC(opname,_check)( x, index ); \
 \
 	/* Invoke the typed function. */ \
-	bli_call_ft_5 \
+	bli_call_ft_6 \
 	( \
 	   dt, \
 	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
 	   n, \
 	   buf_x, incx, \
 	   buf_index, \
-	   cntx  \
+	   cntx, \
+	   rntm  \
 	); \
 }
 
@@ -168,7 +170,7 @@ void PASTEMAC(opname,EX_SUF) \
 	buf_beta = bli_obj_buffer_for_1x1( dt, &beta_local ); \
 \
 	/* Invoke the void pointer-based function. */ \
-	bli_call_ft_9 \
+	bli_call_ft_10 \
 	( \
 	   dt, \
 	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
@@ -178,7 +180,8 @@ void PASTEMAC(opname,EX_SUF) \
 	   buf_x, inc_x, \
 	   buf_beta, \
 	   buf_y, inc_y, \
-	   cntx  \
+	   cntx, \
+	   rntm  \
 	); \
 }
 
@@ -223,7 +226,7 @@ void PASTEMAC(opname,EX_SUF) \
 	buf_alpha = bli_obj_buffer_for_1x1( dt, &alpha_local ); \
 \
 	/* Invoke the void pointer-based function. */ \
-	bli_call_ft_8 \
+	bli_call_ft_9 \
 	( \
 	   dt, \
 	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
@@ -232,7 +235,8 @@ void PASTEMAC(opname,EX_SUF) \
 	   buf_alpha, \
 	   buf_x, inc_x, \
 	   buf_y, inc_y, \
-	   cntx  \
+	   cntx, \
+	   rntm  \
 	); \
 }
 
@@ -270,7 +274,7 @@ void PASTEMAC(opname,EX_SUF) \
 	    PASTEMAC(opname,_check)( x, y, rho ); \
 \
 	/* Invoke the void pointer-based function. */ \
-	bli_call_ft_9 \
+	bli_call_ft_10 \
 	( \
 	   dt, \
 	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
@@ -280,7 +284,8 @@ void PASTEMAC(opname,EX_SUF) \
 	   buf_x, inc_x, \
 	   buf_y, inc_y, \
 	   buf_rho, \
-	   cntx  \
+	   cntx, \
+	   rntm  \
 	); \
 }
 
@@ -334,7 +339,7 @@ void PASTEMAC(opname,EX_SUF) \
 	buf_beta  = bli_obj_buffer_for_1x1( dt, &beta_local ); \
 \
 	/* Invoke the void pointer-based function. */ \
-	bli_call_ft_11 \
+	bli_call_ft_12 \
 	( \
 	   dt, \
 	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
@@ -346,7 +351,8 @@ void PASTEMAC(opname,EX_SUF) \
 	   buf_y, inc_y, \
 	   buf_beta, \
 	   buf_rho, \
-	   cntx  \
+	   cntx, \
+	   rntm  \
 	); \
 }
 
@@ -376,13 +382,14 @@ void PASTEMAC(opname,EX_SUF) \
 	    PASTEMAC(opname,_check)( x ); \
 \
 	/* Invoke the void pointer-based function. */ \
-	bli_call_ft_4 \
+	bli_call_ft_5 \
 	( \
 	   dt, \
 	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
 	   n, \
 	   buf_x, inc_x, \
-	   cntx  \
+	   cntx, \
+	   rntm  \
 	); \
 }
 
@@ -424,7 +431,7 @@ void PASTEMAC(opname,EX_SUF) \
 	buf_alpha = bli_obj_buffer_for_1x1( dt, &alpha_local ); \
 \
 	/* Invoke the void pointer-based function. */ \
-	bli_call_ft_6 \
+	bli_call_ft_7 \
 	( \
 	   dt, \
 	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
@@ -432,7 +439,8 @@ void PASTEMAC(opname,EX_SUF) \
 	   n, \
 	   buf_alpha, \
 	   buf_x, inc_x, \
-	   cntx  \
+	   cntx, \
+	   rntm  \
 	); \
 }
 
@@ -466,14 +474,15 @@ void PASTEMAC(opname,EX_SUF) \
 	    PASTEMAC(opname,_check)( x, y ); \
 \
 	/* Invoke the void pointer-based function. */ \
-	bli_call_ft_6 \
+	bli_call_ft_7 \
 	( \
 	   dt, \
 	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
 	   n, \
 	   buf_x, inc_x, \
 	   buf_y, inc_y, \
-	   cntx  \
+	   cntx, \
+	   rntm  \
 	); \
 }
 
@@ -518,7 +527,7 @@ void PASTEMAC(opname,EX_SUF) \
 	buf_beta = bli_obj_buffer_for_1x1( dt, &beta_local ); \
 \
 	/* Invoke the void pointer-based function. */ \
-	bli_call_ft_8 \
+	bli_call_ft_9 \
 	( \
 	   dt, \
 	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
@@ -527,7 +536,8 @@ void PASTEMAC(opname,EX_SUF) \
 	   buf_x, inc_x, \
 	   buf_beta, \
 	   buf_y, inc_y, \
-	   cntx  \
+	   cntx, \
+	   rntm  \
 	); \
 }
 

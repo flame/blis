@@ -68,6 +68,7 @@ ftype_r PASTEF772(chr,chx,blasname) \
 	  n0, \
 	  x0, incx0, \
 	  &asum, \
+	  NULL, \
 	  NULL  \
 	); \
 \

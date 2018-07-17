@@ -75,6 +75,7 @@ f77_int PASTEF772(i,chx,blasname) \
 	  n0, \
 	  x0, incx0, \
 	  &bli_index, \
+	  NULL, \
 	  NULL  \
 	); \
 \

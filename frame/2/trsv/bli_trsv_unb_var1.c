@@ -87,7 +87,8 @@ void PASTEMAC(ch,varname) \
 	  m, \
 	  alpha, \
 	  x, incx, \
-	  cntx  \
+	  cntx, \
+	  NULL  \
 	); \
 \
 	PASTECH(ch,dotv_ft) kfp_tv; \

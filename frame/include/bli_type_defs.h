@@ -883,6 +883,7 @@ typedef struct
 	void* buf_align;
 } pblk_t;
 
+
 // -- Pool type --
 
 typedef struct
@@ -897,10 +898,12 @@ typedef struct
 	siz_t   align_size;
 } pool_t;
 
+
 // -- Mutex object type --
 
 #include "bli_mutex.h"
 #include "bli_malloc.h"
+
 
 // -- Memory broker object type --
 
@@ -913,6 +916,7 @@ typedef struct membrk_s
 	free_ft   free_fp;
 } membrk_t;
 
+
 // -- Memory object type --
 
 typedef struct mem_s
@@ -923,6 +927,7 @@ typedef struct mem_s
 	membrk_t* membrk;
 	siz_t     size;
 } mem_t;
+
 
 // -- Control tree node type --
 
@@ -1117,6 +1122,7 @@ static void bli_obj_init_subpart_from( obj_t* a, obj_t* b )
 	b->n_panel   = a->n_panel;
 }
 
+
 // -- Context type --
 
 typedef struct cntx_s
@@ -1139,10 +1145,18 @@ typedef struct cntx_s
 	pack_t    schema_b_panel;
 	pack_t    schema_c_panel;
 
-	dim_t     thrloop[ BLIS_NUM_LOOPS ];
-
 	membrk_t* membrk;
 } cntx_t;
+
+
+// -- Runtime type --
+
+typedef struct rntm_s
+{
+	dim_t     num_threads;
+	dim_t     thrloop[ BLIS_NUM_LOOPS ];
+
+} rntm_t;
 
 
 // -- Error types --

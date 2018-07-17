@@ -43,6 +43,7 @@ void bli_trmm3_front
        obj_t*  beta,
        obj_t*  c,
        cntx_t* cntx,
+       rntm_t* rntm,
        cntl_t* cntl
      )
 {
@@ -128,15 +129,17 @@ void bli_trmm3_front
 	bli_obj_set_as_root( &b_local );
 	bli_obj_set_as_root( &c_local );
 
-	// Record the threading for each level within the context.
-	bli_cntx_set_thrloop_from_env
+	// Parse and interpret the contents of the rntm_t object to properly
+	// set the ways of parallelism for each loop, and then make any
+	// additional modifications necessary for the current operation.
+	bli_rntm_set_ways_for_op
 	(
 	  BLIS_TRMM3,
 	  side,
 	  bli_obj_length( &c_local ),
 	  bli_obj_width( &c_local ),
 	  bli_obj_width( &a_local ),
-	  cntx
+	  rntm
 	);
 
 	// A sort of hack for communicating the desired pach schemas for A and B
@@ -169,6 +172,7 @@ void bli_trmm3_front
 	  beta,
 	  &c_local,
 	  cntx,
+	  rntm,
 	  cntl
 	);
 }

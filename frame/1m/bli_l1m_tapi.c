@@ -77,7 +77,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  n, \
 	  x, rs_x, cs_x, \
 	  y, rs_y, cs_y, \
-	  cntx  \
+	  cntx, \
+	  rntm  \
 	); \
 \
 	/* When the diagonal of an upper- or lower-stored matrix is unit,
@@ -94,7 +95,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 		  n, \
 		  x, rs_x, cs_x, \
 		  y, rs_y, cs_y, \
-		  cntx  \
+		  cntx, \
+		  rntm  \
 		); \
 	} \
 }
@@ -140,7 +142,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  n, \
 	  x, rs_x, cs_x, \
 	  y, rs_y, cs_y, \
-	  cntx  \
+	  cntx, \
+	  rntm  \
 	); \
 \
 	/* When the diagonal of an upper- or lower-stored matrix is unit,
@@ -162,7 +165,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 		  n, \
 		  one, \
 		  y, rs_y, cs_y, \
-		  cntx  \
+		  cntx, \
+		  rntm  \
 		); \
 	} \
 }
@@ -212,7 +216,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  alpha, \
 	  x, rs_x, cs_x, \
 	  y, rs_y, cs_y, \
-	  cntx  \
+	  cntx, \
+	  rntm  \
 	); \
 \
 	/* When the diagonal of an upper- or lower-stored matrix is unit,
@@ -230,7 +235,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 		  alpha, \
 		  x, rs_x, cs_x, \
 		  y, rs_y, cs_y, \
-		  cntx  \
+		  cntx, \
+		  rntm  \
 		); \
 	} \
 }
@@ -280,7 +286,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 		  n, \
 		  alpha, \
 		  y, rs_y, cs_y, \
-		  cntx  \
+		  cntx, \
+		  rntm  \
 		); \
 		return; \
 	} \
@@ -298,7 +305,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  alpha, \
 	  x, rs_x, cs_x, \
 	  y, rs_y, cs_y, \
-	  cntx  \
+	  cntx, \
+	  rntm  \
 	); \
 \
 	/* When the diagonal of an upper- or lower-stored matrix is unit,
@@ -319,7 +327,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 		  n, \
 		  alpha, \
 		  y, rs_y, cs_y, \
-		  cntx  \
+		  cntx, \
+		  rntm  \
 		); \
 	} \
 }
@@ -364,7 +373,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  n, \
 	  alpha, \
 	  x, rs_x, cs_x, \
-	  cntx  \
+	  cntx, \
+	  rntm  \
 	); \
 }
 

@@ -75,6 +75,7 @@ ftype PASTEF772(ch,blasname,chc) \
 	  x0, incx0, \
 	  y0, incy0, \
 	  &rho, \
+	  NULL, \
 	  NULL  \
 	); \
 \

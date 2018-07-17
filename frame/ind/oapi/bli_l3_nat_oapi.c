@@ -52,7 +52,8 @@ void PASTEMAC(opname,imeth) \
        obj_t*  b, \
        obj_t*  beta, \
        obj_t*  c, \
-       cntx_t* cntx  \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -60,10 +61,14 @@ void PASTEMAC(opname,imeth) \
 	/* Obtain a valid (native) context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
+	/* Initialize a local runtime object if necessary. */ \
+	rntm_t rntm_l; \
+	if ( rntm == NULL ) { rntm = &rntm_l; bli_thread_init_rntm( rntm ); } \
+\
 	/* Invoke the operation's front end. */ \
 	PASTEMAC(opname,_front) \
 	( \
-	  alpha, a, b, beta, c, cntx, NULL \
+	  alpha, a, b, beta, c, cntx, rntm, NULL \
 	); \
 }
 
@@ -89,7 +94,8 @@ void PASTEMAC(opname,imeth) \
        obj_t*  b, \
        obj_t*  beta, \
        obj_t*  c, \
-       cntx_t* cntx  \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -97,10 +103,14 @@ void PASTEMAC(opname,imeth) \
 	/* Obtain a valid (native) context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
+	/* Initialize a local runtime object if necessary. */ \
+	rntm_t rntm_l; \
+	if ( rntm == NULL ) { rntm = &rntm_l; bli_thread_init_rntm( rntm ); } \
+\
 	/* Invoke the operation's front end. */ \
 	PASTEMAC(opname,_front) \
 	( \
-	  side, alpha, a, b, beta, c, cntx, NULL \
+	  side, alpha, a, b, beta, c, cntx, rntm, NULL \
 	); \
 }
 
@@ -120,7 +130,8 @@ void PASTEMAC(opname,imeth) \
        obj_t*  a, \
        obj_t*  beta, \
        obj_t*  c, \
-       cntx_t* cntx  \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -128,10 +139,14 @@ void PASTEMAC(opname,imeth) \
 	/* Obtain a valid (native) context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
+	/* Initialize a local runtime object if necessary. */ \
+	rntm_t rntm_l; \
+	if ( rntm == NULL ) { rntm = &rntm_l; bli_thread_init_rntm( rntm ); } \
+\
 	/* Invoke the operation's front end. */ \
 	PASTEMAC(opname,_front) \
 	( \
-	  alpha, a, beta, c, cntx, NULL \
+	  alpha, a, beta, c, cntx, rntm, NULL \
 	); \
 }
 
@@ -150,7 +165,8 @@ void PASTEMAC(opname,imeth) \
        obj_t*  alpha, \
        obj_t*  a, \
        obj_t*  b, \
-       cntx_t* cntx  \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -158,10 +174,14 @@ void PASTEMAC(opname,imeth) \
 	/* Obtain a valid (native) context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
+	/* Initialize a local runtime object if necessary. */ \
+	rntm_t rntm_l; \
+	if ( rntm == NULL ) { rntm = &rntm_l; bli_thread_init_rntm( rntm ); } \
+\
 	/* Invoke the operation's front end. */ \
 	PASTEMAC(opname,_front) \
 	( \
-	  side, alpha, a, b, cntx, NULL \
+	  side, alpha, a, b, cntx, rntm, NULL \
 	); \
 }
 
@@ -179,7 +199,8 @@ void PASTEMAC(opname,imeth) \
        obj_t*  alpha, \
        obj_t*  a, \
        obj_t*  b, \
-       cntx_t* cntx  \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -187,10 +208,14 @@ void PASTEMAC(opname,imeth) \
 	/* Obtain a valid (native) context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
+	/* Initialize a local runtime object if necessary. */ \
+	rntm_t rntm_l; \
+	if ( rntm == NULL ) { rntm = &rntm_l; bli_thread_init_rntm( rntm ); } \
+\
 	/* Invoke the operation's front end. */ \
 	PASTEMAC(opname,_front) \
 	( \
-	  side, alpha, a, b, cntx, NULL \
+	  side, alpha, a, b, cntx, rntm, NULL \
 	); \
 }
 

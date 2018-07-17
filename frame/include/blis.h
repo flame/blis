@@ -98,6 +98,7 @@ extern "C" {
 #include "bli_func.h"
 #include "bli_mbool.h"
 #include "bli_cntx.h"
+#include "bli_rntm.h"
 #include "bli_gks.h"
 #include "bli_ind.h"
 #include "bli_membrk.h"

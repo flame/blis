@@ -46,11 +46,12 @@ void blx_gemm_thread
        obj_t*    b,
        obj_t*    c,
        cntx_t*   cntx,
+       rntm_t*   rntm,
        cntl_t*   cntl
      )
 {
 	// Query the total number of threads from the context.
-	dim_t       n_threads = bli_cntx_get_num_threads( cntx );
+	dim_t       n_threads = bli_rntm_num_threads( rntm );
 
 	// Allcoate a global communicator for the root thrinfo_t structures.
 	thrcomm_t*  gl_comm   = bli_thrcomm_create( n_threads );
@@ -59,27 +60,38 @@ void blx_gemm_thread
 	{
 		dim_t      id = omp_get_thread_num();
 
+		obj_t      a_t, b_t, c_t;
 		cntl_t*    cntl_use;
 		thrinfo_t* thread;
 
+		// Alias thread-local copies of A, B, and C. These will be the objects
+		// we pass down the algorithmic function stack. Making thread-local
+		// alaises IS ABSOLUTELY IMPORTANT and MUST BE DONE because each thread
+		// will read the schemas from A and B and then reset the schemas to
+		// their expected unpacked state (in blx_l3_cntl_create_if()).
+		bli_obj_alias_to( a, &a_t );
+		bli_obj_alias_to( b, &b_t );
+		bli_obj_alias_to( c, &c_t );
+
 		// Create a default control tree for the operation, if needed.
-		blx_l3_cntl_create_if( family, a, b, c, cntl, &cntl_use );
+		blx_l3_cntl_create_if( family, &a_t, &b_t, &c_t, cntl, &cntl_use );
 
 		// Create the root node of the current thread's thrinfo_t structure.
-		bli_l3_thrinfo_create_root( id, gl_comm, cntx, cntl_use, &thread );
+		bli_l3_thrinfo_create_root( id, gl_comm, rntm, cntl_use, &thread );
 
 		func
 		(
-		  a,
-		  b,
-		  c,
+		  &a_t,
+		  &b_t,
+		  &c_t,
 		  cntx,
+		  rntm,
 		  cntl_use,
 		  thread
 		);
 
 		// Free the control tree, if one was created locally.
-		blx_l3_cntl_free_if( a, b, c, cntl, cntl_use, thread );
+		blx_l3_cntl_free_if( &a_t, &b_t, &c_t, cntl, cntl_use, thread );
 
 		// Free the current thread's thrinfo_t structure.
 		bli_l3_thrinfo_free( thread );
@@ -90,6 +102,10 @@ void blx_gemm_thread
 	// (called above).
 }
 
+#endif
+
+#ifdef BLIS_ENABLE_PTHREADS
+#error "Sandbox does not yet implement pthreads."
 #endif
 
 // This code is enabled only when multithreading is disabled.
@@ -103,6 +119,7 @@ void blx_gemm_thread
        obj_t*    b,
        obj_t*    c,
        cntx_t*   cntx,
+       rntm_t*   rntm,
        cntl_t*   cntl
      )
 {
@@ -120,7 +137,7 @@ void blx_gemm_thread
 	blx_l3_cntl_create_if( family, a, b, c, cntl, &cntl_use );
 
 	// Create the root node of the thread's thrinfo_t structure.
-	bli_l3_thrinfo_create_root( id, gl_comm, cntx, cntl_use, &thread );
+	bli_l3_thrinfo_create_root( id, gl_comm, rntm, cntl_use, &thread );
 
 	func
 	(
@@ -128,6 +145,7 @@ void blx_gemm_thread
 	  b,
 	  c,
 	  cntx,
+	  rntm,
 	  cntl_use,
 	  thread
 	);

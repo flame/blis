@@ -181,7 +181,8 @@ void PASTEMAC(ch,varname) \
 		  n_edge, \
 		  zero, \
 		  p_edge, rs_p, cs_p, \
-		  cntx  \
+		  cntx, \
+		  NULL  \
 		); \
 	} \
 \
@@ -203,7 +204,8 @@ void PASTEMAC(ch,varname) \
 		  n_edge, \
 		  zero, \
 		  p_edge, rs_p, cs_p, \
-		  cntx  \
+		  cntx, \
+		  NULL  \
 		); \
 	} \
 \
@@ -236,7 +238,8 @@ void PASTEMAC(ch,varname) \
 			  n_br, \
 			  one, \
 			  p_br, rs_p, cs_p, \
-			  cntx  \
+			  cntx, \
+			  NULL  \
 			); \
 		} \
 	} \
@@ -450,7 +453,8 @@ void PASTEMAC(ch,varname) \
 			  p11_n, \
 			  c11, rs_c, cs_c, \
 			  p11, rs_p, cs_p, \
-			  cntx  \
+			  cntx, \
+			  NULL  \
 			); \
 \
 			/* If source matrix c is Hermitian, we have to zero out the
@@ -481,7 +485,8 @@ void PASTEMAC(ch,varname) \
 			  p11_n, \
 			  kappa, \
 			  p11, rs_p, cs_p, \
-			  cntx  \
+			  cntx, \
+			  NULL  \
 			); \
 		} \
 	} \
@@ -544,7 +549,8 @@ void PASTEMAC(ch,varname) \
 		  n_panel, \
 		  kappa, \
 		  p, rs_p, cs_p, \
-		  cntx  \
+		  cntx, \
+		  NULL  \
 		); \
 	} \
 \
@@ -557,7 +563,8 @@ void PASTEMAC(ch,varname) \
 		  m_panel, \
 		  n_panel, \
 		  p, rs_p, cs_p, \
-		  cntx  \
+		  cntx, \
+		  NULL  \
 		); \
 	} \
 \
@@ -586,7 +593,8 @@ void PASTEMAC(ch,varname) \
 		  n_panel, \
 		  zero, \
 		  p, rs_p, cs_p, \
-		  cntx  \
+		  cntx, \
+		  NULL  \
 		); \
 	} \
 \

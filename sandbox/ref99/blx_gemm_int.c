@@ -41,6 +41,7 @@ void blx_gemm_int
        obj_t*  b,
        obj_t*  c,
        cntx_t* cntx,
+       rntm_t* rntm,
        cntl_t* cntl,
        thrinfo_t* thread
      )
@@ -56,7 +57,7 @@ void blx_gemm_int
 	bli_obj_alias_to( c, &c_local );
 
 	// Create the next node in the thrinfo_t structure.
-	bli_thrinfo_grow( cntx, cntl, thread );
+	bli_thrinfo_grow( rntm, cntl, thread );
 
 	// Extract the function pointer from the current control tree node.
 	f = bli_cntl_var_func( cntl );
@@ -68,6 +69,7 @@ void blx_gemm_int
 	  &b_local,
 	  &c_local,
 	  cntx,
+	  rntm,
 	  cntl,
       thread
 	);

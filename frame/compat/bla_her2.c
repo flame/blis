@@ -100,6 +100,7 @@ void PASTEF77(ch,blasname) \
 	  x0, incx0, \
 	  y0, incy0, \
 	  (ftype*)a,  rs_a, cs_a, \
+	  NULL, \
 	  NULL  \
 	); \
 \

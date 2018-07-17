@@ -88,7 +88,7 @@ void PASTEMAC(opname,EX_SUF) \
 	buf_alphay = bli_obj_buffer_for_1x1( dt, &alphay_local ); \
 \
 	/* Invoke the void pointer-based function. */ \
-	bli_call_ft_12 \
+	bli_call_ft_13 \
 	( \
 	   dt, \
 	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
@@ -100,7 +100,8 @@ void PASTEMAC(opname,EX_SUF) \
 	   buf_x, inc_x, \
 	   buf_y, inc_y, \
 	   buf_z, inc_z, \
-	   cntx  \
+	   cntx, \
+	   rntm  \
 	); \
 }
 
@@ -154,7 +155,7 @@ void PASTEMAC(opname,EX_SUF) \
     if ( bli_obj_has_trans( a ) ) { bli_swap_incs( &rs_a, &cs_a ); } \
 \
 	/* Invoke the void pointer-based function. */ \
-	bli_call_ft_13 \
+	bli_call_ft_14 \
 	( \
 	   dt, \
 	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
@@ -166,7 +167,8 @@ void PASTEMAC(opname,EX_SUF) \
 	   buf_a, rs_a, cs_a, \
 	   buf_x, inc_x, \
 	   buf_y, inc_y, \
-	   cntx  \
+	   cntx, \
+	   rntm  \
 	); \
 }
 
@@ -219,7 +221,7 @@ void PASTEMAC(opname,EX_SUF) \
 	buf_alpha = bli_obj_buffer_for_1x1( dt, &alpha_local ); \
 \
 	/* Invoke the void pointer-based function. */ \
-	bli_call_ft_13 \
+	bli_call_ft_14 \
 	( \
 	   dt, \
 	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
@@ -232,7 +234,8 @@ void PASTEMAC(opname,EX_SUF) \
 	   buf_y, inc_y, \
 	   buf_rho, \
 	   buf_z, inc_z, \
-	   cntx  \
+	   cntx, \
+	   rntm  \
 	); \
 }
 
@@ -301,7 +304,7 @@ void PASTEMAC(opname,EX_SUF) \
     if ( bli_obj_has_trans( a ) ) { bli_swap_incs( &rs_a, &cs_a ); } \
 \
 	/* Invoke the void pointer-based function. */ \
-	bli_call_ft_20 \
+	bli_call_ft_21 \
 	( \
 	   dt, \
 	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
@@ -318,7 +321,8 @@ void PASTEMAC(opname,EX_SUF) \
 	   buf_beta, \
 	   buf_y, inc_y, \
 	   buf_z, inc_z, \
-	   cntx  \
+	   cntx, \
+	   rntm  \
 	); \
 }
 
@@ -378,7 +382,7 @@ void PASTEMAC(opname,EX_SUF) \
     if ( bli_obj_has_trans( a ) ) { bli_swap_incs( &rs_a, &cs_a ); } \
 \
 	/* Invoke the void pointer-based function. */ \
-	bli_call_ft_14 \
+	bli_call_ft_15 \
 	( \
 	   dt, \
 	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
@@ -391,7 +395,8 @@ void PASTEMAC(opname,EX_SUF) \
 	   buf_x, inc_x, \
 	   buf_beta, \
 	   buf_y, inc_y, \
-	   cntx  \
+	   cntx, \
+	   rntm  \
 	); \
 }
 

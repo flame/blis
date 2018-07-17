@@ -116,6 +116,7 @@ void PASTEF77(ch,blasname) \
 	  (ftype*)b, rs_b, cs_b, \
 	  (ftype*)beta, \
 	  (ftype*)c, rs_c, cs_c, \
+	  NULL, \
 	  NULL  \
 	); \
 \

@@ -150,6 +150,7 @@ typedef void (*l3int_t)
        obj_t*     beta,
        obj_t*     c,
        cntx_t*    cntx,
+       rntm_t*    rntm,
        cntl_t*    cntl,
        thrinfo_t* thread
      );
@@ -165,6 +166,7 @@ void bli_l3_thread_decorator
        obj_t*  beta,
        obj_t*  c,
        cntx_t* cntx,
+       rntm_t* rntm,
        cntl_t* cntl
      );
 
@@ -186,27 +188,32 @@ void bli_partition_2x2(dim_t nthread, dim_t work1, dim_t work2, dim_t* nt1, dim_
 
 // -----------------------------------------------------------------------------
 
+dim_t bli_gcd( dim_t x, dim_t y );
+dim_t bli_lcm( dim_t x, dim_t y );
+dim_t bli_ipow( dim_t base, dim_t power );
+
+// -----------------------------------------------------------------------------
+
 dim_t bli_thread_get_env( const char* env, dim_t fallback );
+//void  bli_thread_set_env( const char* env, dim_t value );
 
 dim_t bli_thread_get_jc_nt( void );
+dim_t bli_thread_get_pc_nt( void );
 dim_t bli_thread_get_ic_nt( void );
 dim_t bli_thread_get_jr_nt( void );
 dim_t bli_thread_get_ir_nt( void );
 dim_t bli_thread_get_num_threads( void );
 
-void  bli_thread_set_env( const char* env, dim_t value );
-
 void  bli_thread_set_jc_nt( dim_t value );
+void  bli_thread_set_pc_nt( dim_t value );
 void  bli_thread_set_ic_nt( dim_t value );
 void  bli_thread_set_jr_nt( dim_t value );
 void  bli_thread_set_ir_nt( dim_t value );
 void  bli_thread_set_num_threads( dim_t value );
 
-// -----------------------------------------------------------------------------
+void  bli_thread_init_rntm( rntm_t* rntm );
 
-dim_t bli_gcd( dim_t x, dim_t y );
-dim_t bli_lcm( dim_t x, dim_t y );
-dim_t bli_ipow( dim_t base, dim_t power );
+void  bli_thread_init_rntm_from_env( rntm_t* rntm );
 
 #endif
 

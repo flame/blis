@@ -185,7 +185,8 @@ void PASTEMAC(ch,varname) \
 		  n_edge, \
 		  zero_r, \
 		  p_edge_r, rs_p, cs_p, \
-		  cntx  \
+		  cntx, \
+		  NULL  \
 		); \
 	} \
 \
@@ -207,7 +208,8 @@ void PASTEMAC(ch,varname) \
 		  n_edge, \
 		  zero_r, \
 		  p_edge_r, rs_p, cs_p, \
-		  cntx  \
+		  cntx, \
+		  NULL  \
 		); \
 	} \
 \
@@ -581,7 +583,8 @@ void PASTEMAC(ch,varname) \
 			  n_panel, \
 			  zero_r, \
 			  p_r, rs_p, cs_p, \
-			  cntx  \
+			  cntx, \
+			  NULL  \
 			); \
 		} \
 	} \

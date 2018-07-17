@@ -53,7 +53,9 @@ void bli_l3_cntl_create_if
 	// values for unpacked objects. Notice that we do this even if the
 	// caller passed in a custom control tree; that's because we still need
 	// to reset the pack schema of a and b, which were modified by the
-	// operation's _front() function.
+	// operation's _front() function. However, in order for this to work,
+	// the level-3 thread entry function (or omp parallel region) must
+	// alias thread-local copies of objects a and b.
 	pack_t schema_a = bli_obj_pack_schema( a );
 	pack_t schema_b = bli_obj_pack_schema( b );
 

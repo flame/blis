@@ -51,7 +51,8 @@ void PASTEMAC(ch,opname) \
        dim_t   n, \
        ctype*  x, inc_t rs_x, inc_t cs_x, \
        ctype*  y, inc_t rs_y, inc_t cs_y, \
-       cntx_t* cntx  \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      ) \
 { \
 	const num_t dt = PASTEMAC(ch,type); \
@@ -167,7 +168,8 @@ void PASTEMAC(ch,opname) \
        ctype*  alpha, \
        ctype*  x, inc_t rs_x, inc_t cs_x, \
        ctype*  y, inc_t rs_y, inc_t cs_y, \
-       cntx_t* cntx  \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      ) \
 { \
 	const num_t dt = PASTEMAC(ch,type); \
@@ -284,7 +286,8 @@ void PASTEMAC(ch,opname) \
        dim_t   n, \
        ctype*  alpha, \
        ctype*  x, inc_t rs_x, inc_t cs_x, \
-       cntx_t* cntx  \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      ) \
 { \
 	const num_t dt = PASTEMAC(ch,type); \

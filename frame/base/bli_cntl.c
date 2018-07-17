@@ -243,6 +243,12 @@ void bli_cntl_mark_family
        cntl_t* cntl
      )
 {
+	// This function sets the family field of all cntl tree nodes that are
+	// children of cntl. It's used by bli_l3_cntl_create_if() after making
+	// a copy of a user-given cntl tree, if the user provided one, to mark
+	// the operation family, which is used to determine appropriate behavior
+	// by various functions when executing the blocked variants.
+
 	// Set the family of the root node.
 	bli_cntl_set_family( family, cntl );
 
@@ -255,5 +261,33 @@ void bli_cntl_mark_family
 		// Set the family of the current node.
 		bli_cntl_set_family( family, cntl );
 	}
+}
+
+// -----------------------------------------------------------------------------
+
+dim_t bli_cntl_calc_num_threads_in
+     (
+       rntm_t* rntm,
+       cntl_t* cntl
+     )
+{
+	dim_t n_threads_in = 1;
+
+	for ( ; cntl != NULL; cntl = bli_cntl_sub_node( cntl ) )
+	{
+		bszid_t bszid = bli_cntl_bszid( cntl );
+		dim_t   cur_way;
+
+		// We assume bszid is in {KR,MR,NR,MC,KC,NR} if it is not
+		// BLIS_NO_PART.
+		if ( bszid != BLIS_NO_PART )
+			cur_way = bli_rntm_ways_for( bszid, rntm );
+		else
+			cur_way = 1;
+
+		n_threads_in *= cur_way;
+	}
+
+	return n_threads_in;
 }
 

@@ -73,7 +73,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  n, \
 	  x, incx, \
 	  asum, \
-	  cntx  \
+	  cntx, \
+	  rntm  \
 	); \
 }
 
@@ -108,7 +109,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  uploa, \
 	  m, \
 	  a, rs_a, cs_a, \
-	  cntx  \
+	  cntx, \
+	  rntm  \
 	); \
 }
 
@@ -150,7 +152,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  n, \
 	  x, incx, \
 	  norm, \
-	  cntx  \
+	  cntx, \
+	  rntm  \
 	); \
 }
 
@@ -200,7 +203,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  n, \
 	  x, rs_x, cs_x, \
 	  norm, \
-	  cntx  \
+	  cntx, \
+	  rntm  \
 	); \
 }
 
@@ -293,7 +297,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	( \
 	  n, \
 	  x, incx, \
-	  cntx  \
+	  cntx, \
+	  rntm  \
 	); \
 }
 
@@ -333,7 +338,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  m, \
 	  n, \
 	  x, rs_x, cs_x, \
-	  cntx  \
+	  cntx, \
+	  rntm  \
 	); \
 }
 
@@ -371,7 +377,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  x, incx, \
 	  scale, \
 	  sumsq, \
-	  cntx  \
+	  cntx, \
+	  rntm  \
 	); \
 }
 

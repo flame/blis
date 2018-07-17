@@ -50,15 +50,20 @@ void bli_gemmnat
        obj_t*  b,
        obj_t*  beta,
        obj_t*  c,
-       cntx_t* cntx 
+       cntx_t* cntx,
+       rntm_t* rntm
      )
 {
     bli_init_once();
 
-    // Obtain a valid native context from the gks, if necessary.
+    // Obtain a valid native context from the gks if necessary.
     if ( cntx == NULL ) cntx = bli_gks_query_cntx();
 
+	// Initialize a local runtime object if necessary.
+	rntm_t rntm_l;
+	if ( rntm == NULL ) { rntm = &rntm_l; bli_thread_init_rntm( rntm ); }
+
     // Invoke the operation's front end.
-    blx_gemm_front( alpha, a, b, beta, c, cntx, NULL );
+    blx_gemm_front( alpha, a, b, beta, c, cntx, rntm, NULL );
 }
 

@@ -49,6 +49,7 @@ typedef void (*PASTECH(opname,_voft)) \
   obj_t*  b, \
   obj_t*  c, \
   cntx_t* cntx, \
+  rntm_t* rntm, \
   cntl_t* cntl, \
   thrinfo_t* thread  \
 );
@@ -64,6 +65,7 @@ typedef void (*PASTECH(opname,_voft)) \
   obj_t*  b, \
   obj_t*  c, \
   cntx_t* cntx, \
+  rntm_t* rntm, \
   cntl_t* cntl, \
   thrinfo_t* thread  \
 );

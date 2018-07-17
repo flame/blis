@@ -74,6 +74,7 @@ void PASTEF77(ch,blasname) \
 	  (ftype*)alpha, \
 	  x0, incx0, \
 	  y0, incy0, \
+	  NULL, \
 	  NULL  \
 	); \
 \

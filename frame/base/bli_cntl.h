@@ -109,6 +109,14 @@ void bli_cntl_mark_family
 
 // -----------------------------------------------------------------------------
 
+dim_t bli_cntl_calc_num_threads_in
+     (
+       rntm_t* rntm,
+       cntl_t* cntl
+     );
+
+// -----------------------------------------------------------------------------
+
 // cntl_t query (fields only)
 
 static opid_t bli_cntl_family( cntl_t* cntl )

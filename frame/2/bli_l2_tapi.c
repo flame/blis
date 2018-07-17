@@ -82,7 +82,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 		  m_y, \
 		  beta, \
 		  y, incy, \
-		  cntx  \
+		  cntx, \
+		  NULL  \
 		); \
 		return; \
 	} \
@@ -206,7 +207,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 		  m, \
 		  beta, \
 		  y, incy, \
-		  cntx  \
+		  cntx, \
+		  NULL  \
 		); \
 		return; \
 	} \
@@ -461,7 +463,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 		  m, \
 		  alpha, \
 		  x, incx, \
-		  cntx  \
+		  cntx, \
+		  NULL  \
 		); \
 		return; \
 	} \

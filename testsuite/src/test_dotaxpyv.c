@@ -277,7 +277,7 @@ void libblis_test_dotaxpyv_impl
 	switch ( iface )
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
-		bli_dotaxpyv_ex( alpha, xt, x, y, rho, z, cntx );
+		bli_dotaxpyv_ex( alpha, xt, x, y, rho, z, cntx, NULL );
 		break;
 
 		default:

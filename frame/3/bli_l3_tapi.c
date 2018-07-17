@@ -89,7 +89,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  &bo, \
 	  &betao, \
 	  &co, \
-	  cntx  \
+	  cntx, \
+	  rntm  \
 	); \
 }
 
@@ -150,7 +151,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  &bo, \
 	  &betao, \
 	  &co, \
-	  cntx  \
+	  cntx, \
+	  rntm  \
 	); \
 }
 
@@ -204,7 +206,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  &ao, \
 	  &betao, \
 	  &co, \
-	  cntx  \
+	  cntx, \
+	  rntm  \
 	); \
 }
 
@@ -264,7 +267,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  &bo, \
 	  &betao, \
 	  &co, \
-	  cntx  \
+	  cntx, \
+	  rntm  \
 	); \
 }
 
@@ -316,7 +320,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  &ao, \
 	  &betao, \
 	  &co, \
-	  cntx  \
+	  cntx, \
+	  rntm  \
 	); \
 }
 
@@ -375,7 +380,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  &bo, \
 	  &betao, \
 	  &co, \
-	  cntx  \
+	  cntx, \
+	  rntm  \
 	); \
 }
 
@@ -438,7 +444,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  &bo, \
 	  &betao, \
 	  &co, \
-	  cntx  \
+	  cntx, \
+	  rntm  \
 	); \
 }
 
@@ -491,7 +498,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  &alphao, \
 	  &ao, \
 	  &bo, \
-	  cntx  \
+	  cntx, \
+	  rntm  \
 	); \
 }
 

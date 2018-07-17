@@ -41,6 +41,7 @@ void blx_gemm_blk_var2
        obj_t*  b,
        obj_t*  c,
        cntx_t* cntx,
+       rntm_t* rntm,
        cntl_t* cntl,
        thrinfo_t* thread
      )
@@ -71,7 +72,7 @@ void blx_gemm_blk_var2
 		// Perform gemm subproblem.
 		blx_gemm_int
 		(
-		  a, &b1, &c1, cntx,
+		  a, &b1, &c1, cntx, rntm,
 		  bli_cntl_sub_node( cntl ),
 		  bli_thrinfo_sub_node( thread )
 		);

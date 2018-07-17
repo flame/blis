@@ -76,6 +76,7 @@ void PASTEF772(chx,cha,blasname) \
 	  n0, \
 	  &alpha_cast, \
 	  x0, incx0, \
+	  NULL, \
 	  NULL  \
 	); \
 \

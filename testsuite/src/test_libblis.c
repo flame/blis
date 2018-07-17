@@ -1874,6 +1874,7 @@ void libblis_test_mobj_create( test_params_t* params, num_t dt, trans_t trans, c
 cntl_t* libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, invdiag_t inv_diag, pack_t pack_schema, packbuf_t pack_buf, obj_t* a, obj_t* p, cntx_t* cntx )
 {
 	bool_t does_inv_diag;
+	rntm_t rntm;
 
 	if ( inv_diag == BLIS_NO_INVERT_DIAG ) does_inv_diag = FALSE;
 	else                                   does_inv_diag = TRUE;
@@ -1893,8 +1894,14 @@ cntl_t* libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, invdia
 	  NULL  // no child node needed
 	);
 
+	// Initialize a local-to-BLIS rntm_t. This is simply so we have something
+	// to pass into bli_l3_packm(). The function doesn't (currently) use the
+	// runtime object, and even if it did, one with default values would work
+	// fine here.
+	bli_rntm_init( &rntm );
+
 	// Pack the contents of A to P.
-	bli_l3_packm( a, p, cntx, cntl, &BLIS_PACKM_SINGLE_THREADED );
+	bli_l3_packm( a, p, cntx, &rntm, cntl, &BLIS_PACKM_SINGLE_THREADED );
 
 	// Return the control tree pointer so the caller can free the cntl_t and its
 	// mem_t entry later on.

@@ -80,7 +80,8 @@ void PASTEMAC(ch,varname) \
 	  m, \
 	  alpha, \
 	  x, incx, \
-	  cntx  \
+	  cntx, \
+	  NULL  \
 	); \
 \
 	if      ( bli_does_notrans( transa ) ) \

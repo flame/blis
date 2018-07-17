@@ -122,7 +122,8 @@ void PASTEMAC(ch,varname)( \
 	  n, \
 	  p_cast, rs_p, cs_p, \
 	  c_cast, rs_c, cs_c, \
-	  cntx  \
+	  cntx, \
+	  NULL  \
 	); \
 }
 

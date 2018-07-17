@@ -52,7 +52,8 @@ void PASTEMAC(ch,opname) \
        ctype*  b, inc_t rs_b, inc_t cs_b, \
        ctype*  beta, \
        ctype*  c, inc_t rs_c, inc_t cs_c, \
-       cntx_t* cntx  \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -77,12 +78,16 @@ void PASTEMAC(ch,opname) \
 	bli_obj_set_conjtrans( transa, &ao ); \
 	bli_obj_set_conjtrans( transb, &bo ); \
 \
-	PASTEMAC0(opname)( &alphao, \
-	                   &ao, \
-	                   &bo, \
-	                   &betao, \
-	                   &co, \
-	                   cntx ); \
+	PASTEMAC0(opname) \
+	( \
+	  &alphao, \
+	  &ao, \
+	  &bo, \
+	  &betao, \
+	  &co, \
+	  cntx, \
+	  rntm  \
+	); \
 }
 
 INSERT_GENTFUNC_BASIC0( gemm3mh )
@@ -111,7 +116,8 @@ void PASTEMAC(ch,opname) \
        ctype*  b, inc_t rs_b, inc_t cs_b, \
        ctype*  beta, \
        ctype*  c, inc_t rs_c, inc_t cs_c, \
-       cntx_t* cntx  \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -139,13 +145,17 @@ void PASTEMAC(ch,opname) \
 \
 	bli_obj_set_struc( BLIS_HERMITIAN, &ao ); \
 \
-	PASTEMAC0(opname)( side, \
-	                   &alphao, \
-	                   &ao, \
-	                   &bo, \
-	                   &betao, \
-	                   &co, \
-	                   cntx ); \
+	PASTEMAC0(opname) \
+	( \
+	  side, \
+	  &alphao, \
+	  &ao, \
+	  &bo, \
+	  &betao, \
+	  &co, \
+	  cntx, \
+	  rntm  \
+	); \
 }
 
 INSERT_GENTFUNC_BASIC0( hemm3mh )
@@ -170,7 +180,8 @@ void PASTEMAC(ch,opname) \
        ctype*    a, inc_t rs_a, inc_t cs_a, \
        ctype_r*  beta, \
        ctype*    c, inc_t rs_c, inc_t cs_c, \
-       cntx_t* cntx  \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -195,11 +206,15 @@ void PASTEMAC(ch,opname) \
 \
 	bli_obj_set_struc( BLIS_HERMITIAN, &co ); \
 \
-	PASTEMAC0(opname)( &alphao, \
-	                   &ao, \
-	                   &betao, \
-	                   &co, \
-	                   cntx ); \
+	PASTEMAC0(opname) \
+	( \
+	  &alphao, \
+	  &ao, \
+	  &betao, \
+	  &co, \
+	  cntx, \
+	  rntm  \
+	); \
 }
 
 INSERT_GENTFUNCR_BASIC0( herk3mh )
@@ -216,17 +231,18 @@ INSERT_GENTFUNCR_BASIC0( herk1m )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       uplo_t    uploc, \
-       trans_t   transa, \
-       trans_t   transb, \
-       dim_t     m, \
-       dim_t     k, \
-       ctype*    alpha, \
-       ctype*    a, inc_t rs_a, inc_t cs_a, \
-       ctype*    b, inc_t rs_b, inc_t cs_b, \
-       ctype_r*  beta, \
-       ctype*    c, inc_t rs_c, inc_t cs_c, \
-       cntx_t* cntx  \
+       uplo_t   uploc, \
+       trans_t  transa, \
+       trans_t  transb, \
+       dim_t    m, \
+       dim_t    k, \
+       ctype*   alpha, \
+       ctype*   a, inc_t rs_a, inc_t cs_a, \
+       ctype*   b, inc_t rs_b, inc_t cs_b, \
+       ctype_r* beta, \
+       ctype*   c, inc_t rs_c, inc_t cs_c, \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -255,12 +271,16 @@ void PASTEMAC(ch,opname) \
 \
 	bli_obj_set_struc( BLIS_HERMITIAN, &co ); \
 \
-	PASTEMAC0(opname)( &alphao, \
-	                   &ao, \
-	                   &bo, \
-	                   &betao, \
-	                   &co, \
-	                   cntx ); \
+	PASTEMAC0(opname) \
+	( \
+	  &alphao, \
+	  &ao, \
+	  &bo, \
+	  &betao, \
+	  &co, \
+	  cntx, \
+	  rntm  \
+	); \
 }
 
 INSERT_GENTFUNCR_BASIC0( her2k3mh )
@@ -288,7 +308,8 @@ void PASTEMAC(ch,opname) \
        ctype*  b, inc_t rs_b, inc_t cs_b, \
        ctype*  beta, \
        ctype*  c, inc_t rs_c, inc_t cs_c, \
-       cntx_t* cntx  \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -316,13 +337,17 @@ void PASTEMAC(ch,opname) \
 \
 	bli_obj_set_struc( BLIS_SYMMETRIC, &ao ); \
 \
-	PASTEMAC0(opname)( side, \
-	                   &alphao, \
-	                   &ao, \
-	                   &bo, \
-	                   &betao, \
-	                   &co, \
-	                   cntx ); \
+	PASTEMAC0(opname) \
+	( \
+	  side, \
+	  &alphao, \
+	  &ao, \
+	  &bo, \
+	  &betao, \
+	  &co, \
+	  cntx, \
+	  rntm  \
+	); \
 }
 
 INSERT_GENTFUNC_BASIC0( symm3mh )
@@ -347,7 +372,8 @@ void PASTEMAC(ch,opname) \
        ctype*  a, inc_t rs_a, inc_t cs_a, \
        ctype*  beta, \
        ctype*  c, inc_t rs_c, inc_t cs_c, \
-       cntx_t* cntx  \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -371,11 +397,15 @@ void PASTEMAC(ch,opname) \
 \
 	bli_obj_set_struc( BLIS_SYMMETRIC, &co ); \
 \
-	PASTEMAC0(opname)( &alphao, \
-	                   &ao, \
-	                   &betao, \
-	                   &co, \
-	                   cntx ); \
+	PASTEMAC0(opname) \
+	( \
+	  &alphao, \
+	  &ao, \
+	  &betao, \
+	  &co, \
+	  cntx, \
+	  rntm  \
+	); \
 }
 
 INSERT_GENTFUNC_BASIC0( syrk3mh )
@@ -402,7 +432,8 @@ void PASTEMAC(ch,opname) \
        ctype*  b, inc_t rs_b, inc_t cs_b, \
        ctype*  beta, \
        ctype*  c, inc_t rs_c, inc_t cs_c, \
-       cntx_t* cntx  \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -430,12 +461,16 @@ void PASTEMAC(ch,opname) \
 \
 	bli_obj_set_struc( BLIS_SYMMETRIC, &co ); \
 \
-	PASTEMAC0(opname)( &alphao, \
-	                   &ao, \
-	                   &bo, \
-	                   &betao, \
-	                   &co, \
-	                   cntx ); \
+	PASTEMAC0(opname) \
+	( \
+	  &alphao, \
+	  &ao, \
+	  &bo, \
+	  &betao, \
+	  &co, \
+	  cntx, \
+	  rntm  \
+	); \
 }
 
 INSERT_GENTFUNC_BASIC0( syr2k3mh )
@@ -464,7 +499,8 @@ void PASTEMAC(ch,opname) \
        ctype*  b, inc_t rs_b, inc_t cs_b, \
        ctype*  beta, \
        ctype*  c, inc_t rs_c, inc_t cs_c, \
-       cntx_t* cntx  \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -493,13 +529,17 @@ void PASTEMAC(ch,opname) \
 \
 	bli_obj_set_struc( BLIS_TRIANGULAR, &ao ); \
 \
-	PASTEMAC0(opname)( side, \
-	                   &alphao, \
-	                   &ao, \
-	                   &bo, \
-	                   &betao, \
-	                   &co, \
-	                   cntx ); \
+	PASTEMAC0(opname) \
+	( \
+	  side, \
+	  &alphao, \
+	  &ao, \
+	  &bo, \
+	  &betao, \
+	  &co, \
+	  cntx, \
+	  rntm  \
+	); \
 }
 
 INSERT_GENTFUNC_BASIC0( trmm33mh )
@@ -525,7 +565,8 @@ void PASTEMAC(ch,opname) \
        ctype*  alpha, \
        ctype*  a, inc_t rs_a, inc_t cs_a, \
        ctype*  b, inc_t rs_b, inc_t cs_b, \
-       cntx_t* cntx  \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -549,11 +590,15 @@ void PASTEMAC(ch,opname) \
 \
 	bli_obj_set_struc( BLIS_TRIANGULAR, &ao ); \
 \
-	PASTEMAC0(opname)( side, \
-	                   &alphao, \
-	                   &ao, \
-	                   &bo, \
-	                   cntx ); \
+	PASTEMAC0(opname) \
+	( \
+	  side, \
+	  &alphao, \
+	  &ao, \
+	  &bo, \
+	  cntx, \
+	  rntm  \
+	); \
 }
 
 INSERT_GENTFUNC_BASIC0( trmm3m1 )
@@ -577,7 +622,8 @@ void PASTEMAC(ch,opname) \
        ctype*  alpha, \
        ctype*  a, inc_t rs_a, inc_t cs_a, \
        ctype*  b, inc_t rs_b, inc_t cs_b, \
-       cntx_t* cntx  \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -601,11 +647,15 @@ void PASTEMAC(ch,opname) \
 \
 	bli_obj_set_struc( BLIS_TRIANGULAR, &ao ); \
 \
-	PASTEMAC0(opname)( side, \
-	                   &alphao, \
-	                   &ao, \
-	                   &bo, \
-	                   cntx ); \
+	PASTEMAC0(opname) \
+	( \
+	  side, \
+	  &alphao, \
+	  &ao, \
+	  &bo, \
+	  cntx, \
+	  rntm  \
+	); \
 }
 
 INSERT_GENTFUNC_BASIC0( trsm3m1 )

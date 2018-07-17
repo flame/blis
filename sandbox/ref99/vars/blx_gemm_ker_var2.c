@@ -51,6 +51,7 @@ typedef void (*gemm_fp)
        void*   beta,
        void*   c, inc_t rs_c, inc_t cs_c,
        cntx_t* cntx,
+       rntm_t* rntm,
        thrinfo_t* thread
      );
 
@@ -70,6 +71,7 @@ void blx_gemm_ker_var2
        obj_t*  b,
        obj_t*  c,
        cntx_t* cntx,
+       rntm_t* rntm,
        cntl_t* cntl,
        thrinfo_t* thread
      )
@@ -135,6 +137,7 @@ void blx_gemm_ker_var2
 	   buf_beta,
 	   buf_c, rs_c, cs_c,
 	   cntx,
+	   rntm,
 	   thread );
 }
 
@@ -157,6 +160,7 @@ void PASTECH2(blx_,ch,varname) \
        void*   beta, \
        void*   c, inc_t rs_c, inc_t cs_c, \
        cntx_t* cntx, \
+       rntm_t* rntm, \
        thrinfo_t* thread  \
      ) \
 { \

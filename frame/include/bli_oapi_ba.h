@@ -45,8 +45,9 @@
 #undef  BLIS_OAPI_EX_PARAMS
 #define BLIS_OAPI_EX_PARAMS
 
-// Define the macro to declare a local expert variables that are initialized
-// to NULL.
+// Define the macro to declare local expert variables that are initialized
+// to NULL. The "( void )" statements are to prevent unused variable
+// warnings by the compiler.
 #undef  BLIS_OAPI_EX_DECLS
-#define BLIS_OAPI_EX_DECLS   cntx_t* cntx = NULL; ( void )cntx;
-
+#define BLIS_OAPI_EX_DECLS   cntx_t* cntx = NULL; ( void )cntx; \
+                             rntm_t* rntm = NULL; ( void )rntm;

@@ -39,6 +39,7 @@ void bli_l3_packm
        obj_t*  x,
        obj_t*  x_pack,
        cntx_t* cntx,
+       rntm_t* rntm,
        cntl_t* cntl,
        thrinfo_t* thread
      )

@@ -256,7 +256,7 @@ void libblis_test_axpy2v_impl
 	switch ( iface )
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
-		bli_axpy2v_ex( alpha1, alpha2, x, y, z, cntx );
+		bli_axpy2v_ex( alpha1, alpha2, x, y, z, cntx, NULL );
 		break;
 
 		default:

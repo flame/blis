@@ -295,7 +295,7 @@ void libblis_test_dotxaxpyf_impl
 	switch ( iface )
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
-		bli_dotxaxpyf_ex( alpha, at, a, w, x, beta, y, z, cntx );
+		bli_dotxaxpyf_ex( alpha, at, a, w, x, beta, y, z, cntx, NULL );
 		break;
 
 		default:

@@ -163,7 +163,8 @@ void PASTEMAC(ch,varname) \
 	  kappa_cast, \
 	  c_cast, rs_c, cs_c, \
 	  p_cast, rs_p, cs_p, \
-	  cntx  \
+	  cntx, \
+	  NULL  \
 	); \
 \
 	/* If uploc is upper or lower, then the structure of c is necessarily
@@ -205,7 +206,8 @@ void PASTEMAC(ch,varname) \
 			  kappa_cast, \
 			  c_cast, rs_c, cs_c, \
 			  p_cast, rs_p, cs_p, \
-			  cntx  \
+			  cntx, \
+			  NULL  \
 			); \
 		} \
 		else /* if ( bli_is_triangular( strucc ) ) */ \
@@ -239,7 +241,8 @@ void PASTEMAC(ch,varname) \
 			  n, \
 			  zero, \
 			  p_cast, rs_p, cs_p, \
-			  cntx  \
+			  cntx, \
+			  NULL  \
 			); \
 		} \
 	} \
@@ -265,7 +268,8 @@ void PASTEMAC(ch,varname) \
 		  n_max, \
 		  zero, \
 		  p_edge, rs_p, cs_p, \
-		  cntx  \
+		  cntx, \
+		  NULL  \
 		); \
 	} \
 \
@@ -283,7 +287,8 @@ void PASTEMAC(ch,varname) \
 		  n_max - n, \
 		  zero, \
 		  p_edge, rs_p, cs_p, \
-		  cntx  \
+		  cntx, \
+		  NULL  \
 		); \
 	} \
 }

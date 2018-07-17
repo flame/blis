@@ -105,6 +105,7 @@ void PASTEF77(ch,blasname) \
 	  one_p, \
 	  (ftype*)a,  rs_a, cs_a, \
 	  x0, incx0, \
+	  NULL, \
 	  NULL  \
 	); \
 \

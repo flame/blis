@@ -163,15 +163,15 @@ configure: configured to build within top-level directory of source distribution
 ```
 The installation prefix can be specified via the `--prefix=PREFIX` option:
 ```
-  $ ./configure --prefix=/usr <configname>
+$ ./configure --prefix=/usr <configname>
 ```
 This will cause libraries to eventually be installed (via `make install`) to `PREFIX/lib` and development headers to be installed to `PREFIX/include`. (The default value of `PREFIX` is `$(HOME)/blis`.) You can also specify the library install directory separately from the development header install directory with the `--libdir=LIBDIR` and `--includedir=INCDIR` options, respectively:
 ```
-  $ ./configure --libdir=/usr/lib --includedir=/usr/include <configname>
+$ ./configure --libdir=/usr/lib --includedir=/usr/include <configname>
 ```
 The `--libdir=LIBDIR` and `--includedir=INCDIR` options will override any `PREFIX` path, whether it was specified explicitly via `--prefix` or implicitly (via the default). That is, `LIBDIR` defaults to `PREFIX/lib` and `INCDIR` defaults to `PREFIX/include`, but each will be overriden by their respective `--libdir`/`--includedir` options. So,
 ```
-  $ ./configure --libdir=/usr/lib <configname>
+$ ./configure --libdir=/usr/lib <configname>
 
 ```
 will configure BLIS to install libraries to `/usr/lib` and header files to the default location (`$HOME/blis/include`).
@@ -179,7 +179,7 @@ Also, note that `configure` will create any installation directories that do not
 
 For a complete list of supported `configure` options and arguments, run `configure` with the `-h` option:
 ```
-  $ ./configure -h
+$ ./configure -h
 ```
 The output from this invocation of `configure` should give you an up-to-date list of options and their descriptions.
 

@@ -66,14 +66,15 @@ void PASTEMAC(opname,EX_SUF) \
 	    PASTEMAC(opname,_check)( x, asum ); \
 \
 	/* Invoke the typed function. */ \
-	bli_call_ft_5 \
+	bli_call_ft_6 \
 	( \
 	   dt, \
 	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
 	   n, \
 	   buf_x, incx, \
 	   buf_asum, \
-	   cntx  \
+	   cntx, \
+	   rntm  \
 	); \
 }
 
@@ -105,14 +106,15 @@ void PASTEMAC(opname,EX_SUF) \
 	    PASTEMAC(opname,_check)( a ); \
 \
 	/* Invoke the typed function. */ \
-	bli_call_ft_6 \
+	bli_call_ft_7 \
 	( \
 	   dt, \
 	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
 	   uploa, \
 	   m, \
 	   buf_a, rs_a, cs_a, \
-	   cntx  \
+	   cntx, \
+	   rntm  \
 	); \
 }
 
@@ -146,14 +148,15 @@ void PASTEMAC(opname,EX_SUF) \
 	    PASTEMAC(opname,_check)( x, norm ); \
 \
 	/* Invoke the typed function. */ \
-	bli_call_ft_5 \
+	bli_call_ft_6 \
 	( \
 	   dt, \
 	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
 	   n, \
 	   buf_x, incx, \
 	   buf_norm, \
-	   cntx  \
+	   cntx, \
+	   rntm  \
 	); \
 }
 
@@ -192,7 +195,7 @@ void PASTEMAC(opname,EX_SUF) \
 	    PASTEMAC(opname,_check)( x, norm ); \
 \
 	/* Invoke the typed function. */ \
-	bli_call_ft_10 \
+	bli_call_ft_11 \
 	( \
 	   dt, \
 	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
@@ -203,7 +206,8 @@ void PASTEMAC(opname,EX_SUF) \
 	   n, \
 	   buf_x, rs_x, cs_x, \
 	   buf_norm, \
-	   cntx  \
+	   cntx, \
+	   rntm  \
 	); \
 }
 
@@ -344,6 +348,9 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	BLIS_OAPI_EX_DECLS \
 \
+	/* Suppress compiler warning about unused variables. */ \
+	( void )cntx; \
+\
 	/* Invoke the typed function. */ \
 	PASTEMAC0(varname) \
 	( \
@@ -382,13 +389,14 @@ void PASTEMAC(opname,EX_SUF) \
 	    PASTEMAC(opname,_check)( x ); \
 \
 	/* Invoke the typed function. */ \
-	bli_call_ft_4 \
+	bli_call_ft_5 \
 	( \
 	   dt, \
 	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
 	   n, \
 	   buf_x, incx, \
-	   cntx  \
+	   cntx, \
+	   rntm  \
 	); \
 }
 
@@ -423,7 +431,7 @@ void PASTEMAC(opname,EX_SUF) \
 	    PASTEMAC(opname,_check)( x ); \
 \
 	/* Invoke the typed function. */ \
-	bli_call_ft_8 \
+	bli_call_ft_9 \
 	( \
 	   dt, \
 	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
@@ -432,7 +440,8 @@ void PASTEMAC(opname,EX_SUF) \
 	   m, \
 	   n, \
 	   buf_x, rs_x, cs_x, \
-	   cntx  \
+	   cntx, \
+	   rntm  \
 	); \
 }
 
@@ -467,7 +476,7 @@ void PASTEMAC(opname,EX_SUF) \
 	    PASTEMAC(opname,_check)( x, scale, sumsq ); \
 \
 	/* Invoke the typed function. */ \
-	bli_call_ft_6 \
+	bli_call_ft_7 \
 	( \
 	   dt, \
 	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
@@ -475,7 +484,8 @@ void PASTEMAC(opname,EX_SUF) \
 	   buf_x, incx, \
 	   buf_scale, \
 	   buf_sumsq, \
-	   cntx  \
+	   cntx, \
+	   rntm  \
 	); \
 }
 

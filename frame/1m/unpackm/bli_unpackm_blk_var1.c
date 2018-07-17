@@ -246,7 +246,8 @@ void PASTEMAC(ch,varname) \
 			  one, \
 			  p_begin, rs_p, cs_p, \
 			  c_begin, rs_c, cs_c, \
-			  cntx  \
+			  cntx, \
+			  NULL  \
 			); \
 		} \
 		else \

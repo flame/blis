@@ -60,8 +60,6 @@ typedef struct cntx_s
 	pack_t    schema_b;
 	pack_t    schema_c;
 
-	dim_t*    thrloop;
-
 	membrk_t* membrk;
 } cntx_t;
 */
@@ -123,10 +121,6 @@ static pack_t bli_cntx_schema_b_panel( cntx_t* cntx )
 static pack_t bli_cntx_schema_c_panel( cntx_t* cntx )
 {
 	return cntx->schema_c_panel;
-}
-static dim_t* bli_cntx_thrloop( cntx_t* cntx )
-{
-	return cntx->thrloop;
 }
 static membrk_t* bli_cntx_get_membrk( cntx_t* cntx )
 {
@@ -379,47 +373,6 @@ static void* bli_cntx_get_unpackm_ker_dt( num_t dt, l1mkr_t ker_id, cntx_t* cntx
 
 // -----------------------------------------------------------------------------
 
-static dim_t bli_cntx_jc_way( cntx_t* cntx )
-{
-	return cntx->thrloop[ BLIS_NC ];
-}
-static dim_t bli_cntx_pc_way( cntx_t* cntx )
-{
-	return cntx->thrloop[ BLIS_KC ];
-}
-static dim_t bli_cntx_ic_way( cntx_t* cntx )
-{
-	return cntx->thrloop[ BLIS_MC ];
-}
-static dim_t bli_cntx_jr_way( cntx_t* cntx )
-{
-	return cntx->thrloop[ BLIS_NR ];
-}
-static dim_t bli_cntx_ir_way( cntx_t* cntx )
-{
-	return cntx->thrloop[ BLIS_MR ];
-}
-static dim_t bli_cntx_pr_way( cntx_t* cntx )
-{
-	return cntx->thrloop[ BLIS_KR ];
-}
-
-static dim_t bli_cntx_way_for_bszid( bszid_t bszid, cntx_t* cntx )
-{
-	return cntx->thrloop[ bszid ];
-}
-
-static dim_t bli_cntx_get_num_threads( cntx_t* cntx )
-{
-	return bli_cntx_jc_way( cntx ) *
-	       bli_cntx_pc_way( cntx ) *
-	       bli_cntx_ic_way( cntx ) *
-	       bli_cntx_jr_way( cntx ) *
-	       bli_cntx_ir_way( cntx );
-}
-
-// -----------------------------------------------------------------------------
-
 static bool_t bli_cntx_l3_nat_ukr_prefers_rows_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
 {
 	bool_t prefs = bli_cntx_get_l3_nat_ukr_prefs_dt( dt, ukr_id, cntx );
@@ -584,23 +537,11 @@ static void bli_cntx_set_unpackm_ker_dt( void* fp, num_t dt, l1mkr_t ker_id, cnt
 	bli_func_set_dt( fp, dt, func );
 }
 
-static void bli_cntx_set_thrloop( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir, cntx_t* cntx )
-{
-	cntx->thrloop[ BLIS_NC ] = jc;
-	cntx->thrloop[ BLIS_KC ] = pc;
-	cntx->thrloop[ BLIS_MC ] = ic;
-	cntx->thrloop[ BLIS_NR ] = jr;
-	cntx->thrloop[ BLIS_MR ] = ir;
-	cntx->thrloop[ BLIS_KR ] = 1;
-}
-
 // -----------------------------------------------------------------------------
 
 // Function prototypes
 
 void  bli_cntx_clear( cntx_t* cntx );
-
-dim_t bli_cntx_get_num_threads_in( cntx_t* cntx, cntl_t* cntl );
 
 void  bli_cntx_set_blkszs( ind_t method, dim_t n_bs, ... );
 
@@ -610,16 +551,6 @@ void  bli_cntx_set_l3_nat_ukrs( dim_t n_ukrs, ... );
 void  bli_cntx_set_l1f_kers( dim_t n_kers, ... );
 void  bli_cntx_set_l1v_kers( dim_t n_kers, ... );
 void  bli_cntx_set_packm_kers( dim_t n_kers, ... );
-
-void  bli_cntx_set_thrloop_from_env
-     (
-       opid_t  l3_op,
-       side_t  side,
-       dim_t   m,
-       dim_t   n,
-       dim_t   k,
-       cntx_t* cntx
-     );
 
 void  bli_cntx_print( cntx_t* cntx );
 

@@ -34,12 +34,15 @@
 
 #include "blis.h"
 
-void bli_obj_create( num_t  dt,
-                     dim_t  m,
-                     dim_t  n,
-                     inc_t  rs,
-                     inc_t  cs,
-                     obj_t* obj )
+void bli_obj_create
+     (
+       num_t  dt,
+       dim_t  m,
+       dim_t  n,
+       inc_t  rs,
+       inc_t  cs,
+       obj_t* obj
+     )
 {
 	bli_init_once();
 
@@ -48,13 +51,16 @@ void bli_obj_create( num_t  dt,
 	bli_obj_alloc_buffer( rs, cs, 1, obj );
 }
 
-void bli_obj_create_with_attached_buffer( num_t  dt,
-                                          dim_t  m,
-                                          dim_t  n,
-                                          void*  p,
-                                          inc_t  rs,
-                                          inc_t  cs,
-                                          obj_t* obj )
+void bli_obj_create_with_attached_buffer
+     (
+       num_t  dt,
+       dim_t  m,
+       dim_t  n,
+       void*  p,
+       inc_t  rs,
+       inc_t  cs,
+       obj_t* obj
+     )
 {
 	bli_init_once();
 
@@ -63,10 +69,13 @@ void bli_obj_create_with_attached_buffer( num_t  dt,
 	bli_obj_attach_buffer( p, rs, cs, 1, obj );
 }
 
-void bli_obj_create_without_buffer( num_t  dt,
-                                    dim_t  m,
-                                    dim_t  n,
-                                    obj_t* obj )
+void bli_obj_create_without_buffer
+     (
+       num_t  dt,
+       dim_t  m,
+       dim_t  n,
+       obj_t* obj
+     )
 {
 	siz_t  elem_size;
 	void*  s;
@@ -112,10 +121,13 @@ void bli_obj_create_without_buffer( num_t  dt,
 	else if ( bli_is_dcomplex( dt ) ) { bli_zset1s( *(( dcomplex* )s) ); }
 }
 
-void bli_obj_alloc_buffer( inc_t  rs,
-                           inc_t  cs,
-                           inc_t  is,
-                           obj_t* obj )
+void bli_obj_alloc_buffer
+     (
+       inc_t  rs,
+       inc_t  cs,
+       inc_t  is,
+       obj_t* obj
+     )
 {
 	dim_t  n_elem = 0;
 	dim_t  m, n;
@@ -178,11 +190,14 @@ void bli_obj_alloc_buffer( inc_t  rs,
 	bli_obj_set_imag_stride( is, obj );
 }
 
-void bli_obj_attach_buffer( void*  p,
-                            inc_t  rs,
-                            inc_t  cs,
-                            inc_t  is,
-                            obj_t* obj )
+void bli_obj_attach_buffer
+     (
+       void*  p,
+       inc_t  rs,
+       inc_t  cs,
+       inc_t  is,
+       obj_t* obj
+     )
 {
 	bli_init_once();
 
@@ -201,24 +216,34 @@ void bli_obj_attach_buffer( void*  p,
 	bli_obj_set_imag_stride( is, obj );
 }
 
-void bli_obj_create_1x1( num_t  dt,
-                         obj_t* obj )
+void bli_obj_create_1x1
+     (
+       num_t  dt,
+       obj_t* obj
+     )
 {
 	bli_obj_create_without_buffer( dt, 1, 1, obj );
 
 	bli_obj_alloc_buffer( 1, 1, 1, obj );
 }
 
-void bli_obj_create_1x1_with_attached_buffer( num_t  dt,
-                                              void*  p,
-                                              obj_t* obj )
+void bli_obj_create_1x1_with_attached_buffer
+     (
+       num_t  dt,
+       void*  p,
+       obj_t* obj
+     )
 {
 	bli_obj_create_without_buffer( dt, 1, 1, obj );
 
 	bli_obj_attach_buffer( p, 1, 1, 1, obj );
 }
 
-void bli_obj_create_conf_to( obj_t* s, obj_t* d )
+void bli_obj_create_conf_to
+     (
+       obj_t* s,
+       obj_t* d
+     )
 {
 	const num_t dt = bli_obj_dt( s );
 	const dim_t m  = bli_obj_length( s );
@@ -229,7 +254,10 @@ void bli_obj_create_conf_to( obj_t* s, obj_t* d )
 	bli_obj_create( dt, m, n, rs, cs, d );
 }
 
-void bli_obj_free( obj_t* obj )
+void bli_obj_free
+     (
+       obj_t* obj
+     )
 {
 	if ( bli_error_checking_is_enabled() )
 		bli_obj_free_check( obj );
@@ -246,7 +274,11 @@ void bli_obj_free( obj_t* obj )
 }
 
 #if 0
-//void bli_obj_create_const( double value, obj_t* obj )
+//void bli_obj_create_const
+     (
+       double value,
+       obj_t* obj
+     )
 {
 	gint_t*   temp_i;
 	float*    temp_s;
@@ -273,7 +305,11 @@ void bli_obj_free( obj_t* obj )
 	*temp_i = ( gint_t ) value;
 }
 
-//void bli_obj_create_const_copy_of( obj_t* a, obj_t* b )
+//void bli_obj_create_const_copy_of
+     (
+       obj_t* a,
+       obj_t* b
+     )
 {
 	gint_t*   temp_i;
 	float*    temp_s;
@@ -328,12 +364,15 @@ void bli_obj_free( obj_t* obj )
 }
 #endif
 
-void bli_adjust_strides( dim_t  m,
-                         dim_t  n,
-                         siz_t  elem_size,
-                         inc_t* rs,
-                         inc_t* cs,
-                         inc_t* is )
+void bli_adjust_strides
+     (
+       dim_t  m,
+       dim_t  n,
+       siz_t  elem_size,
+       inc_t* rs,
+       inc_t* cs,
+       inc_t* is
+     )
 {
 	// Here, we check the strides that were input from the user and modify
 	// them if needed.
@@ -422,7 +461,10 @@ static siz_t dt_sizes[6] =
 	sizeof( constdata_t )
 };
 
-siz_t bli_dt_size( num_t dt )
+siz_t bli_dt_size
+     (
+       num_t dt
+     )
 {
 	if ( bli_error_checking_is_enabled() )
 		bli_dt_size_check( dt );
@@ -439,7 +481,10 @@ static char* dt_names[ BLIS_NUM_FP_TYPES+1 ] =
 	"int"
 };
 
-char* bli_dt_string( num_t dt )
+char* bli_dt_string
+     (
+       num_t dt
+     )
 {
 	if ( bli_error_checking_is_enabled() )
 		bli_dt_string_check( dt );
@@ -447,7 +492,11 @@ char* bli_dt_string( num_t dt )
 	return dt_names[dt];
 }
 
-dim_t bli_align_dim_to_mult( dim_t dim, dim_t dim_mult )
+dim_t bli_align_dim_to_mult
+     (
+       dim_t dim,
+       dim_t dim_mult
+     )
 {
 	// We return the dimension unmodified if the multiple is zero
 	// (to avoid division by zero).
@@ -460,7 +509,12 @@ dim_t bli_align_dim_to_mult( dim_t dim, dim_t dim_mult )
 	return dim;
 }
 
-dim_t bli_align_dim_to_size( dim_t dim, siz_t elem_size, siz_t align_size )
+dim_t bli_align_dim_to_size
+     (
+       dim_t dim,
+       siz_t elem_size,
+       siz_t align_size
+     )
 {
 	dim = ( ( dim * ( dim_t )elem_size +
 	                ( dim_t )align_size - 1
@@ -473,7 +527,11 @@ dim_t bli_align_dim_to_size( dim_t dim, siz_t elem_size, siz_t align_size )
 	return dim;
 }
 
-dim_t bli_align_ptr_to_size( void* p, size_t align_size )
+dim_t bli_align_ptr_to_size
+     (
+       void*  p,
+       size_t align_size
+     )
 {
 	dim_t dim;
 
@@ -484,6 +542,7 @@ dim_t bli_align_ptr_to_size( void* p, size_t align_size )
 	return dim;
 }
 
+#if 0
 static num_t type_union[BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES] =
 {
             // s             c              d              z
@@ -500,8 +559,13 @@ num_t bli_dt_union( num_t dt1, num_t dt2 )
 
 	return type_union[dt1][dt2];
 }
+#endif
 
-void bli_obj_print( char* label, obj_t* obj )
+void bli_obj_print
+     (
+       char*  label,
+       obj_t* obj
+     )
 {
 	bli_init_once();
 

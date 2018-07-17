@@ -79,7 +79,8 @@ void PASTEMAC(ch,varname) \
 		  n_elem, \
 		  zero, \
 		  y, incy, \
-		  cntx  \
+		  cntx, \
+		  NULL  \
 		); \
 	} \
 	else \
@@ -91,7 +92,8 @@ void PASTEMAC(ch,varname) \
 		  n_elem, \
 		  beta, \
 		  y, incy, \
-		  cntx  \
+		  cntx, \
+		  NULL  \
 		); \
 	} \
 \

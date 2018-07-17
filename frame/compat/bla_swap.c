@@ -71,6 +71,7 @@ void PASTEF77(ch,blasname) \
 	  n0, \
 	  x0, incx0, \
 	  y0, incy0, \
+	  NULL, \
 	  NULL  \
 	); \
 \

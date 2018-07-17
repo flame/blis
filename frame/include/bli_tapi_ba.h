@@ -32,7 +32,7 @@
 
 */
 
-// This file defines macros used to allow the _oapi.c files to produce
+// This file defines macros used to allow the _tapi.c files to produce
 // typed APIs that omit expert parameters.
 
 // Define the macro to remove the function name suffix (in function
@@ -45,8 +45,10 @@
 #undef  BLIS_TAPI_EX_PARAMS
 #define BLIS_TAPI_EX_PARAMS
 
-// Define the macro to declare a local expert variables that are initialized
-// to NULL.
+// Define the macro to declare local expert variables that are initialized
+// to NULL. The "( void )" statements are to prevent unused variable
+// warnings by the compiler.
 #undef  BLIS_TAPI_EX_DECLS
-#define BLIS_TAPI_EX_DECLS   cntx_t* cntx = NULL; ( void )cntx;
+#define BLIS_TAPI_EX_DECLS   cntx_t* cntx = NULL; ( void )cntx; \
+                             rntm_t* rntm = NULL; ( void )rntm;
 

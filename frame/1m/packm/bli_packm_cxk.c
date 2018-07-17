@@ -89,7 +89,10 @@ void PASTEMAC(ch,opname) \
 		  kappa, \
 		  a, inca, lda, \
 		  p, 1,    ldp, \
-		  cntx  \
+		  cntx, \
+		  /* The rntm_t* can safely be NULL as long as it's not used by
+		     scal2m_ex(). */ \
+		  NULL  \
 		); \
 	} \
 }

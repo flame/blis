@@ -89,7 +89,8 @@ void PASTEMAC(ch,opname) \
 		  kappa, \
 		  p, 1,    ldp, \
 		  a, inca, lda, \
-		  cntx  \
+		  cntx, \
+		  NULL  \
 		); \
 	} \
 }

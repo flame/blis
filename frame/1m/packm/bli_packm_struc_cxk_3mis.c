@@ -183,7 +183,8 @@ void PASTEMAC(ch,varname) \
 		  n_edge, \
 		  zero_r, \
 		  p_edge_r, rs_p, cs_p, \
-		  cntx  \
+		  cntx, \
+		  NULL  \
 		); \
 		PASTEMAC2(chr,setm,BLIS_TAPI_EX_SUF) \
 		( \
@@ -195,7 +196,8 @@ void PASTEMAC(ch,varname) \
 		  n_edge, \
 		  zero_r, \
 		  p_edge_i, rs_p, cs_p, \
-		  cntx  \
+		  cntx, \
+		  NULL  \
 		); \
 		PASTEMAC2(chr,setm,BLIS_TAPI_EX_SUF) \
 		( \
@@ -207,7 +209,8 @@ void PASTEMAC(ch,varname) \
 		  n_edge, \
 		  zero_r, \
 		  p_edge_rpi, rs_p, cs_p, \
-		  cntx  \
+		  cntx, \
+		  NULL  \
 		); \
 	} \
 \
@@ -231,7 +234,8 @@ void PASTEMAC(ch,varname) \
 		  n_edge, \
 		  zero_r, \
 		  p_edge_r, rs_p, cs_p, \
-		  cntx  \
+		  cntx, \
+		  NULL  \
 		); \
 		PASTEMAC2(chr,setm,BLIS_TAPI_EX_SUF) \
 		( \
@@ -243,7 +247,8 @@ void PASTEMAC(ch,varname) \
 		  n_edge, \
 		  zero_r, \
 		  p_edge_i, rs_p, cs_p, \
-		  cntx  \
+		  cntx, \
+		  NULL  \
 		); \
 		PASTEMAC2(chr,setm,BLIS_TAPI_EX_SUF) \
 		( \
@@ -255,7 +260,8 @@ void PASTEMAC(ch,varname) \
 		  n_edge, \
 		  zero_r, \
 		  p_edge_rpi, rs_p, cs_p, \
-		  cntx  \
+		  cntx, \
+		  NULL  \
 		); \
 	} \
 \
@@ -290,7 +296,8 @@ void PASTEMAC(ch,varname) \
 			  n_br, \
 			  one_r, \
 			  p_br_r, rs_p, cs_p, \
-			  cntx  \
+			  cntx, \
+			  NULL  \
 			); \
 			PASTEMAC2(chr,setd,BLIS_TAPI_EX_SUF) \
 			( \
@@ -300,7 +307,8 @@ void PASTEMAC(ch,varname) \
 			  n_br, \
 			  zero_r, \
 			  p_br_i, rs_p, cs_p, \
-			  cntx  \
+			  cntx, \
+			  NULL  \
 			); \
 		} \
 	} \
@@ -521,7 +529,8 @@ void PASTEMAC(ch,varname) \
 			  alpha_r, \
 			  c11_r, rs_c11, cs_c11, \
 			  p11_r, rs_p,   cs_p, \
-			  cntx  \
+			  cntx, \
+			  NULL  \
 			); \
 \
 			/* Copy the imaginary part of the stored triangle of c11 to p11_i,
@@ -537,7 +546,8 @@ void PASTEMAC(ch,varname) \
 			  alpha_i, \
 			  c11_i, rs_c11, cs_c11, \
 			  p11_i, rs_p,   cs_p, \
-			  cntx  \
+			  cntx, \
+			  NULL  \
 			); \
 \
 			/* If source matrix c is Hermitian, we have to zero out the
@@ -689,7 +699,8 @@ void PASTEMAC(ch,varname) \
 			  n_panel, \
 			  &kappa_r, \
 			  p_r, rs_p, cs_p, \
-			  cntx  \
+			  cntx, \
+			  NULL  \
 			); \
 			PASTEMAC2(chr,setd,BLIS_TAPI_EX_SUF) \
 			( \
@@ -699,7 +710,8 @@ void PASTEMAC(ch,varname) \
 			  n_panel, \
 			  &kappa_i, \
 			  p_i, rs_p, cs_p, \
-			  cntx  \
+			  cntx, \
+			  NULL  \
 			); \
 \
 			/* Update the diagonal of the p11 section of the rpi panel.
@@ -757,7 +769,8 @@ void PASTEMAC(ch,varname) \
 			  n_panel, \
 			  zero_r, \
 			  p_r, rs_p, cs_p, \
-			  cntx  \
+			  cntx, \
+			  NULL  \
 			); \
 			PASTEMAC2(chr,setm,BLIS_TAPI_EX_SUF) \
 			( \
@@ -769,7 +782,8 @@ void PASTEMAC(ch,varname) \
 			  n_panel, \
 			  zero_r, \
 			  p_i, rs_p, cs_p, \
-			  cntx  \
+			  cntx, \
+			  NULL  \
 			); \
 			PASTEMAC2(chr,setm,BLIS_TAPI_EX_SUF) \
 			( \
@@ -781,7 +795,8 @@ void PASTEMAC(ch,varname) \
 			  n_panel, \
 			  zero_r, \
 			  p_rpi, rs_p, cs_p, \
-			  cntx  \
+			  cntx, \
+			  NULL  \
 			); \
 		} \
 	} \

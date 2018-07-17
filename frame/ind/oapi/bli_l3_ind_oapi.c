@@ -47,7 +47,8 @@ void PASTEMAC(opname,imeth) \
        obj_t*  b, \
        obj_t*  beta, \
        obj_t*  c, \
-       cntx_t* cntx  \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -55,7 +56,11 @@ void PASTEMAC(opname,imeth) \
 	num_t                dt   = bli_obj_dt( c ); \
 	PASTECH(opname,_oft) func = PASTEMAC(opname,ind_get_avail)( dt ); \
 \
-	func( alpha, a, b, beta, c, cntx ); \
+	/* Initialize a local runtime object if necessary. */ \
+	rntm_t rntm_l; \
+	if ( rntm == NULL ) { rntm = &rntm_l; bli_thread_init_rntm( rntm ); } \
+\
+	func( alpha, a, b, beta, c, cntx, rntm ); \
 }
 
 GENFRONT( gemm, ind )
@@ -76,7 +81,8 @@ void PASTEMAC(opname,imeth) \
        obj_t*  b, \
        obj_t*  beta, \
        obj_t*  c, \
-       cntx_t* cntx  \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -84,7 +90,11 @@ void PASTEMAC(opname,imeth) \
 	num_t                dt   = bli_obj_dt( c ); \
 	PASTECH(opname,_oft) func = PASTEMAC(opname,ind_get_avail)( dt ); \
 \
-	func( side, alpha, a, b, beta, c, cntx ); \
+	/* Initialize a local runtime object if necessary. */ \
+	rntm_t rntm_l; \
+	if ( rntm == NULL ) { rntm = &rntm_l; bli_thread_init_rntm( rntm ); } \
+\
+	func( side, alpha, a, b, beta, c, cntx, rntm ); \
 }
 
 GENFRONT( hemm, ind )
@@ -103,7 +113,8 @@ void PASTEMAC(opname,imeth) \
        obj_t*  a, \
        obj_t*  beta, \
        obj_t*  c, \
-       cntx_t* cntx  \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -111,7 +122,11 @@ void PASTEMAC(opname,imeth) \
 	num_t                dt   = bli_obj_dt( c ); \
 	PASTECH(opname,_oft) func = PASTEMAC(opname,ind_get_avail)( dt ); \
 \
-	func( alpha, a, beta, c, cntx ); \
+	/* Initialize a local runtime object if necessary. */ \
+	rntm_t rntm_l; \
+	if ( rntm == NULL ) { rntm = &rntm_l; bli_thread_init_rntm( rntm ); } \
+\
+	func( alpha, a, beta, c, cntx, rntm ); \
 }
 
 GENFRONT( herk, ind )
@@ -129,7 +144,8 @@ void PASTEMAC(opname,imeth) \
        obj_t*  alpha, \
        obj_t*  a, \
        obj_t*  b, \
-       cntx_t* cntx  \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -137,7 +153,11 @@ void PASTEMAC(opname,imeth) \
 	num_t                dt   = bli_obj_dt( b ); \
 	PASTECH(opname,_oft) func = PASTEMAC(opname,ind_get_avail)( dt ); \
 \
-	func( side, alpha, a, b, cntx ); \
+	/* Initialize a local runtime object if necessary. */ \
+	rntm_t rntm_l; \
+	if ( rntm == NULL ) { rntm = &rntm_l; bli_thread_init_rntm( rntm ); } \
+\
+	func( side, alpha, a, b, cntx, rntm ); \
 }
 
 GENFRONT( trmm, ind )
