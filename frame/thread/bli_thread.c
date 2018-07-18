@@ -1354,12 +1354,13 @@ void bli_thread_init_rntm_from_env
 	// function is only called from bli_thread_init(), which is only called
 	// by bli_init_once().
 
+	dim_t nt;
 	dim_t jc, pc, ic, jr, ir;
 
 #ifdef BLIS_ENABLE_MULTITHREADING
 
 	// Try to read BLIS_NUM_THREADS first.
-	dim_t nt = bli_thread_get_env( "BLIS_NUM_THREADS", -1 );
+	nt = bli_thread_get_env( "BLIS_NUM_THREADS", -1 );
 
 	// If BLIS_NUM_THREADS was not set, try to read OMP_NUM_THREADS.
 	if ( nt == -1 )

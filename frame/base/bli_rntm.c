@@ -147,10 +147,10 @@ void bli_rntm_set_ways_from_rntm
 	dim_t jr = bli_rntm_jr_ways( rntm );
 	dim_t ir = bli_rntm_ir_ways( rntm );
 
+#ifdef BLIS_ENABLE_MULTITHREADING
+
 	bool_t nt_set   = FALSE;
 	bool_t ways_set = FALSE;
-
-#ifdef BLIS_ENABLE_MULTITHREADING
 
 	// If the rntm was fed in as a copy of the global runtime via
 	// bli_thread_init_rntm(), we know that either the num_threads
