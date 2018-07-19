@@ -127,7 +127,8 @@ static dim_t bli_pool_top_index( pool_t* pool )
 
 static bool_t bli_pool_is_exhausted( pool_t* pool )
 {
-	return bli_pool_top_index( pool ) == bli_pool_num_blocks( pool );
+	return ( bool_t )
+	       ( bli_pool_top_index( pool ) == bli_pool_num_blocks( pool ) );
 }
 
 // Pool entry modification

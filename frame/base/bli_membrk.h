@@ -48,24 +48,24 @@ static mtx_t* bli_membrk_mutex( membrk_t* membrk )
 	return &(membrk->mutex);
 }
 
-static void* bli_membrk_malloc_fp( membrk_t* membrk )
+static malloc_ft bli_membrk_malloc_fp( membrk_t* membrk )
 {
 	return membrk->malloc_fp;
 }
 
-static void* bli_membrk_free_fp( membrk_t* membrk )
+static free_ft bli_membrk_free_fp( membrk_t* membrk )
 {
 	return membrk->free_fp;
 }
 
 // membrk modification
 
-static void bli_membrk_set_malloc_fp( void* malloc_fp, membrk_t* membrk )
+static void bli_membrk_set_malloc_fp( malloc_ft malloc_fp, membrk_t* membrk )
 {
 	membrk->malloc_fp = malloc_fp;
 }
 
-static void bli_membrk_set_free_fp( void* free_fp, membrk_t* membrk )
+static void bli_membrk_set_free_fp( free_ft free_fp, membrk_t* membrk )
 {
 	membrk->free_fp = free_fp;
 }
@@ -85,7 +85,8 @@ static void bli_membrk_unlock( membrk_t* membrk )
 static void* bli_membrk_malloc( size_t size, membrk_t* membrk )
 {
 	// Call the malloc()-style function in membrk.
-	return ((membrk)->malloc_fp)( size );
+	return ( void* )
+	       ( (membrk)->malloc_fp )( size );
 }
 
 static void bli_membrk_free( void* p, membrk_t* membrk )

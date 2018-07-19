@@ -43,362 +43,433 @@
 
 static num_t bli_obj_dt( obj_t* obj )
 {
-	return ( obj->info & BLIS_DATATYPE_BITS );
+	return ( num_t )
+	       ( obj->info & BLIS_DATATYPE_BITS );
 }
 
 static bool_t bli_obj_is_float( obj_t* obj )
 {
-	return ( bli_obj_dt( obj ) == BLIS_BITVAL_FLOAT_TYPE );
+	return ( bool_t )
+	       ( bli_obj_dt( obj ) == BLIS_BITVAL_FLOAT_TYPE );
 }
 
 static bool_t bli_obj_is_double( obj_t* obj )
 {
-	return ( bli_obj_dt( obj ) == BLIS_BITVAL_DOUBLE_TYPE );
+	return ( bool_t )
+	       ( bli_obj_dt( obj ) == BLIS_BITVAL_DOUBLE_TYPE );
 }
 
 static bool_t bli_obj_is_scomplex( obj_t* obj )
 {
-	return ( bli_obj_dt( obj ) == BLIS_BITVAL_SCOMPLEX_TYPE );
+	return ( bool_t )
+	       ( bli_obj_dt( obj ) == BLIS_BITVAL_SCOMPLEX_TYPE );
 }
 
 static bool_t bli_obj_is_dcomplex( obj_t* obj )
 {
-	return ( bli_obj_dt( obj ) == BLIS_BITVAL_DCOMPLEX_TYPE );
+	return ( bool_t )
+	       ( bli_obj_dt( obj ) == BLIS_BITVAL_DCOMPLEX_TYPE );
 }
 
 static bool_t bli_obj_is_int( obj_t* obj )
 {
-	return ( bli_obj_dt( obj ) == BLIS_BITVAL_INT_TYPE );
+	return ( bool_t )
+	       ( bli_obj_dt( obj ) == BLIS_BITVAL_INT_TYPE );
 }
 
 static bool_t bli_obj_is_const( obj_t* obj )
 {
-	return ( bli_obj_dt( obj ) == BLIS_BITVAL_CONST_TYPE );
+	return ( bool_t )
+	       ( bli_obj_dt( obj ) == BLIS_BITVAL_CONST_TYPE );
 }
 
 static dom_t bli_obj_domain( obj_t* obj )
 {
-	return ( obj->info & BLIS_DOMAIN_BIT );
+	return ( dom_t )
+	       ( obj->info & BLIS_DOMAIN_BIT );
 }
 
 static prec_t bli_obj_prec( obj_t* obj )
 {
-	return ( obj->info & BLIS_PRECISION_BIT );
+	return ( prec_t )
+	       ( obj->info & BLIS_PRECISION_BIT );
 }
 
 static bool_t bli_obj_is_single_prec( obj_t* obj )
 {
-	return ( bli_obj_prec( obj ) == BLIS_BITVAL_SINGLE_PREC );
+	return ( bool_t )
+	       ( bli_obj_prec( obj ) == BLIS_BITVAL_SINGLE_PREC );
 }
 
 static bool_t bli_obj_is_double_prec( obj_t* obj )
 {
-	return ( bli_obj_prec( obj ) == BLIS_BITVAL_DOUBLE_PREC );
+	return ( bool_t )
+	       ( bli_obj_prec( obj ) == BLIS_BITVAL_DOUBLE_PREC );
 }
 
 static num_t bli_obj_dt_proj_to_single_prec( obj_t* obj )
 {
-	return ( bli_obj_dt( obj ) & ~BLIS_BITVAL_SINGLE_PREC );
+	return ( num_t )
+	       ( bli_obj_dt( obj ) & ~BLIS_BITVAL_SINGLE_PREC );
 }
 
 static num_t bli_obj_dt_proj_to_double_prec( obj_t* obj )
 {
-	return ( bli_obj_dt( obj ) | BLIS_BITVAL_DOUBLE_PREC );
+	return ( num_t )
+	       ( bli_obj_dt( obj ) | BLIS_BITVAL_DOUBLE_PREC );
 }
 
 static bool_t bli_obj_is_real( obj_t* obj )
 {
-	return ( bli_obj_domain( obj ) == BLIS_BITVAL_REAL );
+	return ( bool_t )
+	       ( bli_obj_domain( obj ) == BLIS_BITVAL_REAL );
 }
 
 static bool_t bli_obj_is_complex( obj_t* obj )
 {
-	return ( bli_obj_domain( obj ) == BLIS_BITVAL_COMPLEX );
+	return ( bool_t )
+	       ( bli_obj_domain( obj ) == BLIS_BITVAL_COMPLEX );
 }
 
 static num_t bli_obj_dt_proj_to_real( obj_t* obj )
 {
-	return ( bli_obj_dt( obj ) & ~BLIS_BITVAL_COMPLEX );
+	return ( num_t )
+	       ( bli_obj_dt( obj ) & ~BLIS_BITVAL_COMPLEX );
 }
 
 static num_t bli_obj_dt_proj_to_complex( obj_t* obj )
 {
-	return ( bli_obj_dt( obj ) | BLIS_BITVAL_COMPLEX );
+	return ( num_t )
+	       ( bli_obj_dt( obj ) | BLIS_BITVAL_COMPLEX );
 }
 
 static num_t bli_obj_target_dt( obj_t* obj )
 {
-	return ( ( obj->info & BLIS_TARGET_DT_BITS ) >> BLIS_TARGET_DT_SHIFT );
+	return ( num_t )
+	       ( ( obj->info & BLIS_TARGET_DT_BITS ) >> BLIS_TARGET_DT_SHIFT );
 }
 
 static dom_t bli_obj_target_domain( obj_t* obj )
 {
-	return ( ( obj->info & BLIS_TARGET_DOMAIN_BIT ) >> BLIS_TARGET_DT_SHIFT );
+	return ( dom_t )
+	       ( ( obj->info & BLIS_TARGET_DOMAIN_BIT ) >> BLIS_TARGET_DT_SHIFT );
 }
 
 static prec_t bli_obj_target_prec( obj_t* obj )
 {
-	return ( ( obj->info & BLIS_TARGET_PREC_BIT ) >> BLIS_TARGET_DT_SHIFT );
+	return ( prec_t )
+	       ( ( obj->info & BLIS_TARGET_PREC_BIT ) >> BLIS_TARGET_DT_SHIFT );
 }
 
 static num_t bli_obj_exec_dt( obj_t* obj )
 {
-	return ( ( obj->info & BLIS_EXEC_DT_BITS ) >> BLIS_EXEC_DT_SHIFT );
+	return ( num_t )
+	       ( ( obj->info & BLIS_EXEC_DT_BITS ) >> BLIS_EXEC_DT_SHIFT );
 }
 
 static dom_t bli_obj_exec_domain( obj_t* obj )
 {
-	return ( ( obj->info & BLIS_EXEC_DOMAIN_BIT ) >> BLIS_EXEC_DT_SHIFT );
+	return ( dom_t )
+	       ( ( obj->info & BLIS_EXEC_DOMAIN_BIT ) >> BLIS_EXEC_DT_SHIFT );
 }
 
 static prec_t bli_obj_exec_prec( obj_t* obj )
 {
-	return ( ( obj->info & BLIS_EXEC_PREC_BIT ) >> BLIS_EXEC_DT_SHIFT );
+	return ( prec_t )
+	       ( ( obj->info & BLIS_EXEC_PREC_BIT ) >> BLIS_EXEC_DT_SHIFT );
 }
 
 static trans_t bli_obj_conjtrans_status( obj_t* obj )
 {
-	return ( obj->info & BLIS_CONJTRANS_BITS );
+	return ( trans_t )
+	       ( obj->info & BLIS_CONJTRANS_BITS );
 }
 
 static trans_t bli_obj_onlytrans_status( obj_t* obj )
 {
-	return ( obj->info & BLIS_TRANS_BIT );
+	return ( trans_t )
+	       ( obj->info & BLIS_TRANS_BIT );
 }
 
 static bool_t bli_obj_has_trans( obj_t* obj )
 {
-	return ( bli_obj_onlytrans_status( obj ) == BLIS_BITVAL_TRANS );
+	return ( bool_t )
+	       ( bli_obj_onlytrans_status( obj ) == BLIS_BITVAL_TRANS );
 }
 
 static bool_t bli_obj_has_notrans( obj_t* obj )
 {
-	return ( bli_obj_onlytrans_status( obj ) == BLIS_BITVAL_NO_TRANS );
+	return ( bool_t )
+	       ( bli_obj_onlytrans_status( obj ) == BLIS_BITVAL_NO_TRANS );
 }
 
 static conj_t bli_obj_conj_status( obj_t* obj )
 {
-	return ( obj->info & BLIS_CONJ_BIT );
+	return ( conj_t )
+	       ( obj->info & BLIS_CONJ_BIT );
 }
 
 static bool_t bli_obj_has_conj( obj_t* obj )
 {
-	return ( bli_obj_conj_status( obj ) == BLIS_BITVAL_CONJ );
+	return ( bool_t )
+	       ( bli_obj_conj_status( obj ) == BLIS_BITVAL_CONJ );
 }
 
 static bool_t bli_obj_has_noconj( obj_t* obj )
 {
-	return ( bli_obj_conj_status( obj ) == BLIS_BITVAL_NO_CONJ );
+	return ( bool_t )
+	       ( bli_obj_conj_status( obj ) == BLIS_BITVAL_NO_CONJ );
 }
 
 static uplo_t bli_obj_uplo( obj_t* obj )
 {
-	return ( obj->info & BLIS_UPLO_BITS );
+	return ( uplo_t )
+	       ( obj->info & BLIS_UPLO_BITS );
 }
 
 static bool_t bli_obj_is_upper( obj_t* obj )
 {
-	return ( bli_obj_uplo( obj ) == BLIS_BITVAL_UPPER );
+	return ( bool_t )
+	       ( bli_obj_uplo( obj ) == BLIS_BITVAL_UPPER );
 }
 
 static bool_t bli_obj_is_lower( obj_t* obj )
 {
-	return ( bli_obj_uplo( obj ) == BLIS_BITVAL_LOWER );
+	return ( bool_t )
+	       ( bli_obj_uplo( obj ) == BLIS_BITVAL_LOWER );
 }
 
 static bool_t bli_obj_is_upper_or_lower( obj_t* obj )
 {
-	return ( bli_obj_is_upper( obj ) ||
+	return ( bool_t )
+	       ( bli_obj_is_upper( obj ) ||
 	         bli_obj_is_lower( obj ) );
 }
 
 static bool_t bli_obj_is_dense( obj_t* obj )
 {
-	return ( bli_obj_uplo( obj ) == BLIS_BITVAL_DENSE );
+	return ( bool_t )
+	       ( bli_obj_uplo( obj ) == BLIS_BITVAL_DENSE );
 }
 
 static bool_t bli_obj_is_zeros( obj_t* obj )
 {
-	return ( bli_obj_uplo( obj ) == BLIS_BITVAL_ZEROS );
+	return ( bool_t )
+	       ( bli_obj_uplo( obj ) == BLIS_BITVAL_ZEROS );
 }
 
 static diag_t bli_obj_diag( obj_t* obj )
 {
-	return ( obj->info & BLIS_UNIT_DIAG_BIT );
+	return ( diag_t )
+	       ( obj->info & BLIS_UNIT_DIAG_BIT );
 }
 
 static bool_t bli_obj_has_nonunit_diag( obj_t* obj )
 {
-	return ( bli_obj_diag( obj ) == BLIS_BITVAL_NONUNIT_DIAG );
+	return ( bool_t )
+	       ( bli_obj_diag( obj ) == BLIS_BITVAL_NONUNIT_DIAG );
 }
 
 static bool_t bli_obj_has_unit_diag( obj_t* obj )
 {
-	return ( bli_obj_diag( obj ) == BLIS_BITVAL_UNIT_DIAG );
+	return ( bool_t )
+	       ( bli_obj_diag( obj ) == BLIS_BITVAL_UNIT_DIAG );
 }
 
 static bool_t bli_obj_has_inverted_diag( obj_t* obj )
 {
-	return ( ( obj->info & BLIS_INVERT_DIAG_BIT ) == BLIS_BITVAL_INVERT_DIAG );
+	return ( bool_t )
+	       ( ( obj->info & BLIS_INVERT_DIAG_BIT ) == BLIS_BITVAL_INVERT_DIAG );
 }
 
 static bool_t bli_obj_is_pack_rev_if_upper( obj_t* obj )
 {
-	return ( ( obj->info & BLIS_PACK_REV_IF_UPPER_BIT ) == BLIS_BITVAL_PACK_REV_IF_UPPER );
+	return ( bool_t )
+	       ( ( obj->info & BLIS_PACK_REV_IF_UPPER_BIT ) == BLIS_BITVAL_PACK_REV_IF_UPPER );
 }
 
 static bool_t bli_obj_is_pack_rev_if_lower( obj_t* obj )
 {
-	return ( ( obj->info & BLIS_PACK_REV_IF_LOWER_BIT ) == BLIS_BITVAL_PACK_REV_IF_LOWER );
+	return ( bool_t )
+	       ( ( obj->info & BLIS_PACK_REV_IF_LOWER_BIT ) == BLIS_BITVAL_PACK_REV_IF_LOWER );
 }
 
 static pack_t bli_obj_pack_schema( obj_t* obj )
 {
-	return ( obj->info & BLIS_PACK_SCHEMA_BITS );
+	return ( pack_t )
+	       ( obj->info & BLIS_PACK_SCHEMA_BITS );
 }
 
 static bool_t bli_obj_is_packed( obj_t* obj )
 {
-	return ( obj->info & BLIS_PACK_BIT );
+	return ( bool_t )
+	       ( obj->info & BLIS_PACK_BIT );
 }
 
 static bool_t bli_obj_is_row_packed( obj_t* obj )
 {
-	return ( obj->info & BLIS_PACK_RC_BIT ) == ( BLIS_BITVAL_PACKED_UNSPEC ^
+	return ( bool_t )
+	       ( obj->info & BLIS_PACK_RC_BIT ) == ( BLIS_BITVAL_PACKED_UNSPEC ^
                                                  BLIS_BITVAL_PACKED_ROWS    );
 }
 
 static bool_t bli_obj_is_col_packed( obj_t* obj )
 {
-	return ( obj->info & BLIS_PACK_RC_BIT ) == ( BLIS_BITVAL_PACKED_UNSPEC ^
+	return ( bool_t )
+	       ( obj->info & BLIS_PACK_RC_BIT ) == ( BLIS_BITVAL_PACKED_UNSPEC ^
                                                  BLIS_BITVAL_PACKED_COLUMNS );
 }
 
 static bool_t bli_obj_is_panel_packed( obj_t* obj )
 {
-	return ( obj->info & BLIS_PACK_PANEL_BIT );
+	return ( bool_t )
+	       ( obj->info & BLIS_PACK_PANEL_BIT );
 }
 
 static packbuf_t bli_obj_pack_buffer_type( obj_t* obj )
 {
-	return ( obj->info & BLIS_PACK_BUFFER_BITS );
+	return ( packbuf_t )
+	       ( obj->info & BLIS_PACK_BUFFER_BITS );
 }
 
 static struc_t bli_obj_struc( obj_t* obj )
 {
-	return ( obj->info & BLIS_STRUC_BITS );
+	return ( struc_t )
+	       ( obj->info & BLIS_STRUC_BITS );
 }
 
 static bool_t bli_obj_is_general( obj_t* obj )
 {
-	return ( bli_obj_struc( obj ) == BLIS_BITVAL_GENERAL );
+	return ( bool_t )
+	       ( bli_obj_struc( obj ) == BLIS_BITVAL_GENERAL );
 }
 
 static bool_t bli_obj_is_hermitian( obj_t* obj )
 {
-	return ( bli_obj_struc( obj ) == BLIS_BITVAL_HERMITIAN );
+	return ( bool_t )
+	       ( bli_obj_struc( obj ) == BLIS_BITVAL_HERMITIAN );
 }
 
 static bool_t bli_obj_is_symmetric( obj_t* obj )
 {
-	return ( bli_obj_struc( obj ) == BLIS_BITVAL_SYMMETRIC );
+	return ( bool_t )
+	       ( bli_obj_struc( obj ) == BLIS_BITVAL_SYMMETRIC );
 }
 
 static bool_t bli_obj_is_triangular( obj_t* obj )
 {
-	return ( bli_obj_struc( obj ) == BLIS_BITVAL_TRIANGULAR );
+	return ( bool_t )
+	       ( bli_obj_struc( obj ) == BLIS_BITVAL_TRIANGULAR );
 }
 
 // Info modification
 
 static void bli_obj_apply_trans( trans_t trans, obj_t* obj )
 {
-	obj->info = obj->info ^ trans;
+	obj->info = ( objbits_t )
+	            ( obj->info ^ trans );
 }
 
 static void bli_obj_apply_conj( conj_t conj, obj_t* obj )
 {
-	obj->info = obj->info ^ conj;
+	obj->info = ( objbits_t )
+	            ( obj->info ^ conj );
 }
 
 static void bli_obj_set_conjtrans( trans_t trans, obj_t* obj )
 {
-	obj->info = ( obj->info & ~BLIS_CONJTRANS_BITS ) | trans;
+	obj->info = ( objbits_t )
+	            ( obj->info & ~BLIS_CONJTRANS_BITS ) | trans;
 }
 
 static void bli_obj_set_onlytrans( trans_t trans, obj_t* obj )
 {
-	obj->info = ( obj->info & ~BLIS_TRANS_BIT ) | trans;
+	obj->info = ( objbits_t )
+	            ( obj->info & ~BLIS_TRANS_BIT ) | trans;
 }
 
 static void bli_obj_set_conj( conj_t conj, obj_t* obj )
 {
-	obj->info = ( obj->info & ~BLIS_CONJ_BIT ) | conj;
+	obj->info = ( objbits_t )
+	            ( obj->info & ~BLIS_CONJ_BIT ) | conj;
 }
 
 static void bli_obj_set_uplo( uplo_t uplo, obj_t* obj )
 {
-	obj->info = ( obj->info & ~BLIS_UPLO_BITS ) | uplo;
+	obj->info = ( objbits_t )
+	            ( obj->info & ~BLIS_UPLO_BITS ) | uplo;
 }
 
 static void bli_obj_set_diag( diag_t diag, obj_t* obj )
 {
-	obj->info = ( obj->info & ~BLIS_UNIT_DIAG_BIT ) | diag;
+	obj->info = ( objbits_t )
+	            ( obj->info & ~BLIS_UNIT_DIAG_BIT ) | diag;
 }
 
 static void bli_obj_set_invert_diag( invdiag_t invdiag, obj_t* obj )
 {
-	obj->info = ( obj->info & ~BLIS_INVERT_DIAG_BIT ) | invdiag;
+	obj->info = ( objbits_t )
+	            ( obj->info & ~BLIS_INVERT_DIAG_BIT ) | invdiag;
 }
 
 static void bli_obj_set_dt( num_t dt, obj_t* obj )
 {
-	obj->info = ( obj->info & ~BLIS_DATATYPE_BITS ) | dt;
+	obj->info = ( objbits_t )
+	            ( obj->info & ~BLIS_DATATYPE_BITS ) | dt;
 }
 
 static void bli_obj_set_target_dt( num_t dt, obj_t* obj )
 {
-	obj->info = ( obj->info & ~BLIS_TARGET_DT_BITS ) | ( dt << BLIS_TARGET_DT_SHIFT );
+	obj->info = ( objbits_t )
+	            ( obj->info & ~BLIS_TARGET_DT_BITS ) | ( dt << BLIS_TARGET_DT_SHIFT );
 }
 
 static void bli_obj_set_target_domain( dom_t dt, obj_t* obj )
 {
-	obj->info = ( obj->info & ~BLIS_TARGET_DOMAIN_BIT ) | ( dt << BLIS_TARGET_DT_SHIFT );
+	obj->info = ( objbits_t )
+	            ( obj->info & ~BLIS_TARGET_DOMAIN_BIT ) | ( dt << BLIS_TARGET_DT_SHIFT );
 }
 
 static void bli_obj_set_target_prec( prec_t dt, obj_t* obj )
 {
-	obj->info = ( obj->info & ~BLIS_TARGET_PREC_BIT ) | ( dt << BLIS_TARGET_DT_SHIFT );
+	obj->info = ( objbits_t )
+	            ( obj->info & ~BLIS_TARGET_PREC_BIT ) | ( dt << BLIS_TARGET_DT_SHIFT );
 }
 
 static void bli_obj_set_exec_dt( num_t dt, obj_t* obj )
 {
-	obj->info = ( obj->info & ~BLIS_EXEC_DT_BITS ) | ( dt << BLIS_EXEC_DT_SHIFT );
+	obj->info = ( objbits_t )
+	            ( obj->info & ~BLIS_EXEC_DT_BITS ) | ( dt << BLIS_EXEC_DT_SHIFT );
 }
 
 static void bli_obj_set_exec_domain( dom_t dt, obj_t* obj )
 {
-	obj->info = ( obj->info & ~BLIS_EXEC_DOMAIN_BIT ) | ( dt << BLIS_EXEC_DT_SHIFT );
+	obj->info = ( objbits_t )
+	            ( obj->info & ~BLIS_EXEC_DOMAIN_BIT ) | ( dt << BLIS_EXEC_DT_SHIFT );
 }
 
 static void bli_obj_set_exec_prec( prec_t dt, obj_t* obj )
 {
-	obj->info = ( obj->info & ~BLIS_EXEC_PREC_BIT ) | ( dt << BLIS_EXEC_DT_SHIFT );
+	obj->info = ( objbits_t )
+	            ( obj->info & ~BLIS_EXEC_PREC_BIT ) | ( dt << BLIS_EXEC_DT_SHIFT );
 }
 
 static void bli_obj_set_pack_schema( pack_t schema, obj_t* obj )
 {
-	obj->info = ( obj->info & ~BLIS_PACK_SCHEMA_BITS ) | schema;
+	obj->info = ( objbits_t )
+	            ( obj->info & ~BLIS_PACK_SCHEMA_BITS ) | schema;
 }
 
 static void bli_obj_set_pack_order_if_upper( packord_t ordif, obj_t* obj )
 {
-	obj->info = ( obj->info & ~BLIS_PACK_REV_IF_UPPER_BIT ) | ordif;
+	obj->info = ( objbits_t )
+	            ( obj->info & ~BLIS_PACK_REV_IF_UPPER_BIT ) | ordif;
 }
 
 static void bli_obj_set_pack_order_if_lower( packord_t ordif, obj_t* obj )
 {
-	obj->info = ( obj->info & ~BLIS_PACK_REV_IF_LOWER_BIT ) | ordif;
+	obj->info = ( objbits_t )
+	            ( obj->info & ~BLIS_PACK_REV_IF_LOWER_BIT ) | ordif;
 }
 
 // NOTE: The packbuf_t bitfield in the obj_t is currently unused. Instead,
@@ -407,12 +478,14 @@ static void bli_obj_set_pack_order_if_lower( packord_t ordif, obj_t* obj )
 // present in the control tree).
 static void bli_obj_set_pack_buffer_type( packbuf_t buf_type, obj_t* obj )
 {
-	obj->info = ( obj->info & ~BLIS_PACK_BUFFER_BITS ) | buf_type;
+	obj->info = ( objbits_t )
+	            ( obj->info & ~BLIS_PACK_BUFFER_BITS ) | buf_type;
 }
 
 static void bli_obj_set_struc( struc_t struc, obj_t* obj )
 {
-	obj->info = ( obj->info & ~BLIS_STRUC_BITS ) | struc;
+	obj->info = ( objbits_t )
+	            ( obj->info & ~BLIS_STRUC_BITS ) | struc;
 }
 
 static void bli_obj_toggle_trans( obj_t* obj )
@@ -427,7 +500,8 @@ static void bli_obj_toggle_conj( obj_t* obj )
 
 static void bli_obj_toggle_uplo( obj_t* obj )
 {
-	obj->info = ( obj->info ^ BLIS_LOWER_BIT ) ^ BLIS_UPPER_BIT;
+	obj->info = ( objbits_t )
+	            ( obj->info ^ BLIS_LOWER_BIT ) ^ BLIS_UPPER_BIT;
 }
 
 // Root matrix query
@@ -484,12 +558,14 @@ static void bli_obj_set_as_root( obj_t* obj )
 
 static doff_t bli_obj_diag_offset( obj_t* obj )
 {
-	return ( obj->diag_off );
+	return ( doff_t )
+	       ( obj->diag_off );
 }
 
 static doff_t bli_obj_diag_offset_after_trans( obj_t* obj )
 {
-	return ( bli_obj_has_trans( obj ) ? -bli_obj_diag_offset( obj )
+	return ( doff_t )
+	       ( bli_obj_has_trans( obj ) ? -bli_obj_diag_offset( obj )
 	                                  :  bli_obj_diag_offset( obj ) );
 }
 
@@ -553,8 +629,9 @@ static dim_t bli_obj_width_after_trans( obj_t* obj )
 
 static bool_t bli_obj_is_1x1( obj_t* x )
 {
-	return ( bli_obj_length( x ) == 1 &&
-	         bli_obj_width(  x ) == 1 );
+	return ( bool_t )
+	       ( bli_obj_length( x ) == 1 &&
+	                   bli_obj_width(  x ) == 1 );
 }
 
 // Stride/increment query
@@ -595,7 +672,8 @@ static inc_t bli_obj_imag_stride_mag( obj_t* obj )
 // the diagonal.
 static dim_t bli_obj_length_stored( obj_t* obj )
 {
-	return ( bli_obj_is_upper( obj )
+	return ( dim_t )
+	       ( bli_obj_is_upper( obj )
 	         ? bli_min( bli_obj_length( obj ),
 	                    bli_obj_width( obj )  - bli_obj_diag_offset( obj ) )
 	         : bli_min( bli_obj_length( obj ),
@@ -605,7 +683,8 @@ static dim_t bli_obj_length_stored( obj_t* obj )
 
 static dim_t bli_obj_width_stored( obj_t* obj )
 {
-	return ( bli_obj_is_lower( obj )
+	return ( dim_t )
+	       ( bli_obj_is_lower( obj )
 	         ? bli_min( bli_obj_width( obj ),
 	                    bli_obj_length( obj ) + bli_obj_diag_offset( obj ) )
 	         : bli_min( bli_obj_width( obj ),
@@ -641,24 +720,28 @@ static inc_t bli_obj_vector_inc( obj_t* x )
 
 static bool_t bli_obj_is_vector( obj_t* x )
 {
-	return ( bli_obj_length( x ) == 1 ||
-	         bli_obj_width(  x ) == 1 );
+	return ( bool_t )
+	       ( bli_obj_length( x ) == 1 ||
+	                   bli_obj_width(  x ) == 1 );
 }
 
 static bool_t bli_obj_is_row_vector( obj_t* x )
 {
-	return ( bli_obj_length( x ) == 1 );
+	return ( bool_t )
+	       ( bli_obj_length( x ) == 1 );
 }
 
 static bool_t bli_obj_is_col_vector( obj_t* x )
 {
-	return ( bli_obj_width( x ) == 1 );
+	return ( bool_t )
+	       ( bli_obj_width( x ) == 1 );
 }
 
 static bool_t bli_obj_has_zero_dim( obj_t* x )
 {
-	return ( bli_obj_length( x ) == 0 ||
-	         bli_obj_width(  x ) == 0 );
+	return ( bool_t )
+	       ( bli_obj_length( x ) == 0 ||
+	                   bli_obj_width(  x ) == 0 );
 }
 
 // Dimension modification
@@ -711,28 +794,33 @@ static void bli_obj_set_dims_with_trans( trans_t trans, dim_t m, dim_t n, obj_t*
 
 static bool_t bli_obj_is_row_stored( obj_t* obj )
 {
-	return ( bli_obj_col_stride_mag( obj ) == 1 );
+	return ( bool_t )
+	       ( bli_obj_col_stride_mag( obj ) == 1 );
 }
 
 static bool_t bli_obj_is_col_stored( obj_t* obj )
 {
-	return ( bli_obj_row_stride_mag( obj ) == 1 );
+	return ( bool_t )
+	       ( bli_obj_row_stride_mag( obj ) == 1 );
 }
 
 static bool_t bli_obj_is_gen_stored( obj_t* obj )
 {
-	return ( bli_obj_row_stride_mag( obj ) != 1 &&
+	return ( bool_t )
+	       ( bli_obj_row_stride_mag( obj ) != 1 &&
 	         bli_obj_col_stride_mag( obj ) != 1 );
 }
 
 static bool_t bli_obj_is_row_tilted( obj_t* obj )
 {
-	return ( bli_obj_col_stride_mag( obj ) < bli_obj_row_stride_mag( obj ) );
+	return ( bool_t )
+	       ( bli_obj_col_stride_mag( obj ) < bli_obj_row_stride_mag( obj ) );
 }
 
 static bool_t bli_obj_is_col_tilted( obj_t* obj )
 {
-	return ( bli_obj_row_stride_mag( obj ) < bli_obj_col_stride_mag( obj ) );
+	return ( bool_t )
+	       ( bli_obj_row_stride_mag( obj ) < bli_obj_col_stride_mag( obj ) );
 }
 
 // Stride/increment modification
@@ -793,29 +881,34 @@ static void bli_obj_inc_offs( dim_t offm, dim_t offn, obj_t* obj )
 
 static bool_t bli_obj_is_strictly_above_diag( obj_t* obj )
 {
-	return ( ( doff_t )bli_obj_length( obj ) <= -bli_obj_diag_offset( obj ) );
+	return ( bool_t )
+	       ( ( doff_t )bli_obj_length( obj ) <= -bli_obj_diag_offset( obj ) );
 }
 
 static bool_t bli_obj_is_strictly_below_diag( obj_t* obj )
 {
-	return ( ( doff_t )bli_obj_width( obj ) <= bli_obj_diag_offset( obj ) );
+	return ( bool_t )
+	       ( ( doff_t )bli_obj_width( obj ) <= bli_obj_diag_offset( obj ) );
 }
 
 static bool_t bli_obj_is_outside_diag( obj_t* obj )
 {
-	return ( bli_obj_is_strictly_above_diag( obj ) ||
+	return ( bool_t )
+	       ( bli_obj_is_strictly_above_diag( obj ) ||
 	         bli_obj_is_strictly_below_diag( obj ) );
 }
 
 static bool_t bli_obj_intersects_diag( obj_t* obj )
 {
-	return ( !bli_obj_is_strictly_above_diag( obj ) &&
+	return ( bool_t )
+	       ( !bli_obj_is_strictly_above_diag( obj ) &&
 	         !bli_obj_is_strictly_below_diag( obj ) );
 }
 
 static bool_t bli_obj_is_unstored_subpart( obj_t* obj )
 {
-	return ( ( bli_obj_root_is_lower( obj ) && bli_obj_is_strictly_above_diag( obj ) ) ||
+	return ( bool_t )
+	       ( ( bli_obj_root_is_lower( obj ) && bli_obj_is_strictly_above_diag( obj ) ) ||
 	         ( bli_obj_root_is_upper( obj ) && bli_obj_is_strictly_below_diag( obj ) ) );
 }
 
@@ -837,7 +930,8 @@ static void bli_obj_set_buffer( void* p, obj_t* obj )
 
 static void* bli_obj_internal_scalar_buffer( obj_t* obj )
 {
-	return ( &( obj->scalar ) );
+	return ( void* )
+	       ( &( obj->scalar ) );
 }
 
 // Bufferless scalar field modification
@@ -1055,7 +1149,8 @@ static void bli_obj_alias_to( obj_t* a, obj_t* b )
 
 static bool_t bli_obj_is_alias_of( obj_t* a, obj_t* b )
 {
-	return ( bli_obj_buffer( a ) == bli_obj_buffer( b ) );
+	return ( bool_t )
+	       ( bli_obj_buffer( a ) == bli_obj_buffer( b ) );
 }
 
 
@@ -1132,7 +1227,7 @@ static void bli_obj_imag_part( obj_t* c, obj_t* i )
 
 		// Update the buffer.
 		inc_t is_c = bli_obj_imag_stride( c );
-		char* p    = bli_obj_buffer_at_off( c );
+		char* p    = ( char* )bli_obj_buffer_at_off( c );
 		bli_obj_set_buffer( p + is_c * es_c/2, i );
 	}
 }

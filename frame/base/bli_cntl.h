@@ -159,12 +159,14 @@ static mem_t* bli_cntl_pack_mem( cntl_t* cntl )
 
 static bool_t bli_cntl_is_leaf( cntl_t* cntl )
 {
-	return bli_cntl_sub_node( cntl ) == NULL;
+	return ( bool_t )
+	       ( bli_cntl_sub_node( cntl ) == NULL );
 }
 
 static bool_t bli_cntl_does_part( cntl_t* cntl )
 {
-	return bli_cntl_bszid( cntl ) != BLIS_NO_PART;
+	return ( bool_t )
+	       ( bli_cntl_bszid( cntl ) != BLIS_NO_PART );
 }
 
 // cntl_t modification

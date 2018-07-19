@@ -42,17 +42,20 @@
 
 static bool_t bli_is_aligned_to( siz_t p, siz_t size )
 {
-	return ( p % size == 0 );
+	return ( bool_t )
+	       ( p % size == 0 );
 }
 
 static bool_t bli_is_unaligned_to( siz_t p, siz_t size )
 {
-	return ( p % size != 0 );
+	return ( bool_t )
+	       ( p % size != 0 );
 }
 
 static siz_t bli_offset_past_alignment( siz_t p, siz_t size )
 {
-	return ( siz_t )( p % size );
+	return ( siz_t )
+	       ( p % size );
 }
 
 
@@ -60,86 +63,102 @@ static siz_t bli_offset_past_alignment( siz_t p, siz_t size )
 
 static bool_t bli_is_float( num_t dt )
 {
-	return ( dt == BLIS_FLOAT );
+	return ( bool_t )
+	       ( dt == BLIS_FLOAT );
 }
 
 static bool_t bli_is_double( num_t dt )
 {
-	return ( dt == BLIS_DOUBLE );
+	return ( bool_t )
+	       ( dt == BLIS_DOUBLE );
 }
 
 static bool_t bli_is_scomplex( num_t dt )
 {
-	return ( dt == BLIS_SCOMPLEX );
+	return ( bool_t )
+	       ( dt == BLIS_SCOMPLEX );
 }
 
 static bool_t bli_is_dcomplex( num_t dt )
 {
-	return ( dt == BLIS_DCOMPLEX );
+	return ( bool_t )
+	       ( dt == BLIS_DCOMPLEX );
 }
 
 static bool_t bli_is_constant( num_t dt )
 {
-	return ( dt == BLIS_CONSTANT );
+	return ( bool_t )
+	       ( dt == BLIS_CONSTANT );
 }
 
 static bool_t bli_is_int( num_t dt )
 {
-	return ( dt == BLIS_INT );
+	return ( bool_t )
+	       ( dt == BLIS_INT );
 }
 
 static bool_t bli_is_real( num_t dt )
 {
-	return ( bli_is_float( dt ) ||
-	         bli_is_double( dt ) );
+	return ( bool_t )
+	       ( bli_is_float( dt ) ||
+	                   bli_is_double( dt ) );
 }
 
 static bool_t bli_is_complex( num_t dt )
 {
-	return ( bli_is_scomplex( dt ) ||
-	         bli_is_dcomplex( dt ) );
+	return ( bool_t )
+	       ( bli_is_scomplex( dt ) ||
+	                   bli_is_dcomplex( dt ) );
 }
 
 static bool_t bli_is_single_prec( num_t dt )
 {
-	return ( bli_is_float( dt ) ||
-	         bli_is_scomplex( dt ) );
+	return ( bool_t )
+	       ( bli_is_float( dt ) ||
+	                   bli_is_scomplex( dt ) );
 }
 
 static bool_t bli_is_double_prec( num_t dt )
 {
-	return ( bli_is_double( dt ) ||
-	         bli_is_dcomplex( dt ) );
+	return ( bool_t )
+	       ( bli_is_double( dt ) ||
+	                   bli_is_dcomplex( dt ) );
 }
 
 static dom_t bli_dt_domain( num_t dt )
 {
-	return ( dt & BLIS_DOMAIN_BIT );
+	return ( dom_t )
+	       ( dt & BLIS_DOMAIN_BIT );
 }
 
 static prec_t bli_dt_prec( num_t dt )
 {
-	return ( dt & BLIS_PRECISION_BIT );
+	return ( prec_t )
+	       ( dt & BLIS_PRECISION_BIT );
 }
 
 static num_t bli_dt_proj_to_real( num_t dt )
 {
-	return ( dt & ~BLIS_BITVAL_COMPLEX );
+	return ( num_t )
+	       ( dt & ~BLIS_BITVAL_COMPLEX );
 }
 
 static num_t bli_dt_proj_to_complex( num_t dt )
 {
-	return ( dt | BLIS_BITVAL_COMPLEX );
+	return ( num_t )
+	       ( dt | BLIS_BITVAL_COMPLEX );
 }
 
 static num_t bli_dt_proj_to_single_prec( num_t dt )
 {
-	return ( dt & ~BLIS_BITVAL_DOUBLE_PREC );
+	return ( num_t )
+	       ( dt & ~BLIS_BITVAL_DOUBLE_PREC );
 }
 
 static num_t bli_dt_proj_to_double_prec( num_t dt )
 {
-	return ( dt | BLIS_BITVAL_DOUBLE_PREC );
+	return ( num_t )
+	       ( dt | BLIS_BITVAL_DOUBLE_PREC );
 }
 
 
@@ -147,62 +166,74 @@ static num_t bli_dt_proj_to_double_prec( num_t dt )
 
 static bool_t bli_is_notrans( trans_t trans )
 {
-	return ( trans == BLIS_NO_TRANSPOSE );
+	return ( bool_t )
+	       ( trans == BLIS_NO_TRANSPOSE );
 }
 
 static bool_t bli_is_trans( trans_t trans )
 {
-	return ( trans == BLIS_TRANSPOSE );
+	return ( bool_t )
+	       ( trans == BLIS_TRANSPOSE );
 }
 
 static bool_t bli_is_conjnotrans( trans_t trans )
 {
-	return ( trans == BLIS_CONJ_NO_TRANSPOSE );
+	return ( bool_t )
+	       ( trans == BLIS_CONJ_NO_TRANSPOSE );
 }
 
 static bool_t bli_is_conjtrans( trans_t trans )
 {
-	return ( trans == BLIS_CONJ_TRANSPOSE );
+	return ( bool_t )
+	       ( trans == BLIS_CONJ_TRANSPOSE );
 }
 
 static bool_t bli_does_notrans( trans_t trans )
 {
-	return ( (~trans & BLIS_TRANS_BIT ) == BLIS_BITVAL_TRANS );
+	return ( bool_t )
+	       ( (~trans & BLIS_TRANS_BIT ) == BLIS_BITVAL_TRANS );
 }
 
 static bool_t bli_does_trans( trans_t trans )
 {
-	return ( ( trans & BLIS_TRANS_BIT ) == BLIS_BITVAL_TRANS );
+	return ( bool_t )
+	       ( ( trans & BLIS_TRANS_BIT ) == BLIS_BITVAL_TRANS );
 }
 
 static bool_t bli_does_noconj( trans_t trans )
 {
-	return ( (~trans & BLIS_CONJ_BIT ) == BLIS_BITVAL_CONJ );
+	return ( bool_t )
+	       ( (~trans & BLIS_CONJ_BIT ) == BLIS_BITVAL_CONJ );
 }
 
 static bool_t bli_does_conj( trans_t trans )
 {
-	return ( ( trans & BLIS_CONJ_BIT ) == BLIS_BITVAL_CONJ );
+	return ( bool_t )
+	       ( ( trans & BLIS_CONJ_BIT ) == BLIS_BITVAL_CONJ );
 }
 
 static trans_t bli_extract_trans( trans_t trans )
 {
-	return ( trans & BLIS_TRANS_BIT );
+	return ( trans_t )
+	       ( trans & BLIS_TRANS_BIT );
 }
 
 static conj_t bli_extract_conj( trans_t trans )
 {
-	return ( trans & BLIS_CONJ_BIT );
+	return ( conj_t )
+	       ( trans & BLIS_CONJ_BIT );
 }
 
 static trans_t bli_trans_toggled( trans_t trans )
 {
-	return ( trans ^ BLIS_TRANS_BIT );
+	return ( trans_t )
+	       ( trans ^ BLIS_TRANS_BIT );
 }
 
 static trans_t bli_trans_toggled_conj( trans_t trans )
 {
-	return ( trans ^ BLIS_CONJ_BIT );
+	return ( trans_t )
+	       ( trans ^ BLIS_CONJ_BIT );
 }
 
 static void bli_toggle_trans( trans_t* trans )
@@ -215,12 +246,14 @@ static void bli_toggle_trans( trans_t* trans )
 
 static bool_t bli_is_left( side_t side )
 {
-	return ( side == BLIS_LEFT );
+	return ( bool_t )
+	       ( side == BLIS_LEFT );
 }
 
 static bool_t bli_is_right( side_t side )
 {
-	return ( side == BLIS_RIGHT );
+	return ( bool_t )
+	       ( side == BLIS_RIGHT );
 }
 
 static side_t bli_side_toggled( side_t side )
@@ -238,33 +271,39 @@ static void bli_toggle_side( side_t* side )
 
 static bool_t bli_is_lower( uplo_t uplo )
 {
-	return ( uplo == BLIS_LOWER );
+	return ( bool_t )
+	       ( uplo == BLIS_LOWER );
 }
 
 static bool_t bli_is_upper( uplo_t uplo )
 {
-	return ( uplo == BLIS_UPPER );
+	return ( bool_t )
+	       ( uplo == BLIS_UPPER );
 }
 
 static bool_t bli_is_upper_or_lower( uplo_t uplo )
 {
-	return ( bli_is_upper( uplo ) ||
-	         bli_is_lower( uplo ) );
+	return ( bool_t )
+	       ( bli_is_upper( uplo ) ||
+	                   bli_is_lower( uplo ) );
 }
 
 static bool_t bli_is_dense( uplo_t uplo )
 {
-	return ( uplo == BLIS_DENSE );
+	return ( bool_t )
+	       ( uplo == BLIS_DENSE );
 }
 
 static bool_t bli_is_zeros( uplo_t uplo )
 {
-	return ( uplo == BLIS_ZEROS );
+	return ( bool_t )
+	       ( uplo == BLIS_ZEROS );
 }
 
 static uplo_t bli_uplo_toggled( uplo_t uplo )
 {
-	return ( bli_is_upper_or_lower( uplo ) ?
+	return ( uplo_t )
+	       ( bli_is_upper_or_lower( uplo ) ?
 	         ( ( uplo ^ BLIS_LOWER_BIT ) ^ BLIS_UPPER_BIT ) : uplo
 	       );
 }
@@ -279,28 +318,33 @@ static void bli_toggle_uplo( uplo_t* uplo )
 
 static bool_t bli_is_general( struc_t struc )
 {
-	return ( struc == BLIS_GENERAL );
+	return ( bool_t )
+	       ( struc == BLIS_GENERAL );
 }
 
 static bool_t bli_is_hermitian( struc_t struc )
 {
-	return ( struc == BLIS_HERMITIAN );
+	return ( bool_t )
+	       ( struc == BLIS_HERMITIAN );
 }
 
 static bool_t bli_is_symmetric( struc_t struc )
 {
-	return ( struc == BLIS_SYMMETRIC );
+	return ( bool_t )
+	       ( struc == BLIS_SYMMETRIC );
 }
 
 static bool_t bli_is_triangular( struc_t struc )
 {
-	return ( struc == BLIS_TRIANGULAR );
+	return ( bool_t )
+	       ( struc == BLIS_TRIANGULAR );
 }
 
 static bool_t bli_is_herm_or_symm( struc_t struc )
 {
-	return ( bli_is_hermitian( struc ) ||
-	         bli_is_symmetric( struc ) );
+	return ( bool_t )
+	       ( bli_is_hermitian( struc ) ||
+	                   bli_is_symmetric( struc ) );
 }
 
 
@@ -308,22 +352,26 @@ static bool_t bli_is_herm_or_symm( struc_t struc )
 
 static bool_t bli_is_noconj( conj_t conj )
 {
-	return ( conj == BLIS_NO_CONJUGATE );
+	return ( bool_t )
+	       ( conj == BLIS_NO_CONJUGATE );
 }
 
 static bool_t bli_is_conj( conj_t conj )
 {
-	return ( conj == BLIS_CONJUGATE );
+	return ( bool_t )
+	       ( conj == BLIS_CONJUGATE );
 }
 
 static conj_t bli_conj_toggled( conj_t conj )
 {
-	return ( conj ^ BLIS_CONJ_BIT );
+	return ( conj_t )
+	       ( conj ^ BLIS_CONJ_BIT );
 }
 
 static conj_t bli_apply_conj( conj_t conjapp, conj_t conj )
 {
-	return ( conj ^ conjapp );
+	return ( conj_t )
+	       ( conj ^ conjapp );
 }
 
 static void bli_toggle_conj( conj_t* conj )
@@ -336,12 +384,14 @@ static void bli_toggle_conj( conj_t* conj )
 
 static bool_t bli_is_nonunit_diag( diag_t diag )
 {
-	return ( diag == BLIS_NONUNIT_DIAG );
+	return ( bool_t )
+	       ( diag == BLIS_NONUNIT_DIAG );
 }
 
 static bool_t bli_is_unit_diag( diag_t diag )
 {
-	return ( diag == BLIS_UNIT_DIAG );
+	return ( bool_t )
+	       ( diag == BLIS_UNIT_DIAG );
 }
 
 
@@ -349,42 +399,50 @@ static bool_t bli_is_unit_diag( diag_t diag )
 
 static bool_t bli_zero_dim1( dim_t m )
 {
-	return ( m == 0 );
+	return ( bool_t )
+	       ( m == 0 );
 }
 
 static bool_t bli_zero_dim2( dim_t m, dim_t n )
 {
-	return ( m == 0 || n == 0 );
+	return ( bool_t )
+	       ( m == 0 || n == 0 );
 }
 
 static bool_t bli_zero_dim3( dim_t m, dim_t n, dim_t k )
 {
-	return ( m == 0 || n == 0 || k == 0 );
+	return ( bool_t )
+	       ( m == 0 || n == 0 || k == 0 );
 }
 
 static bool_t bli_nonzero_dim( dim_t m )
 {
-	return ( m > 0 );
+	return ( bool_t )
+	       ( m > 0 );
 }
 
 static bool_t bli_vector_dim( dim_t m, dim_t n )
 {
-	return ( m == 1 ? n : m );
+	return ( bool_t )
+	       ( m == 1 ? n : m );
 }
 
 static bool_t bli_is_vector( dim_t m, dim_t n )
 {
-	return ( m == 1 || n == 1 );
+	return ( bool_t )
+	       ( m == 1 || n == 1 );
 }
 
 static bool_t bli_is_row_vector( dim_t m, dim_t n )
 {
-	return ( m == 1 );
+	return ( bool_t )
+	       ( m == 1 );
 }
 
 static bool_t bli_is_col_vector( dim_t m, dim_t n )
 {
-	return ( n == 1 );
+	return ( bool_t )
+	       ( n == 1 );
 }
 
 static void bli_set_dim_with_side( side_t side, dim_t m, dim_t n, dim_t* dim )
@@ -412,13 +470,15 @@ static void bli_set_dims_incs_with_trans( trans_t trans,
 
 static dim_t bli_determine_blocksize_dim_f( dim_t i, dim_t dim, dim_t b_alg )
 {
-	return ( bli_min( b_alg, dim - i ) );
+	return ( dim_t )
+	       ( bli_min( b_alg, dim - i ) );
 }
 
 static dim_t bli_determine_blocksize_dim_b( dim_t i, dim_t dim, dim_t b_alg )
 {
-	return ( i == 0 && dim % b_alg != 0 ? dim % b_alg
-	                                    : b_alg );
+	return ( dim_t )
+	       ( i == 0 && dim % b_alg != 0 ? dim % b_alg
+	                                          : b_alg );
 }
 
 
@@ -426,63 +486,74 @@ static dim_t bli_determine_blocksize_dim_b( dim_t i, dim_t dim, dim_t b_alg )
 
 static inc_t bli_vector_inc( trans_t trans, dim_t m, dim_t n, inc_t rs, inc_t cs )
 {
-	return ( bli_does_notrans( trans ) ? ( m == 1 ? cs : rs )
+	return ( inc_t )
+	       ( bli_does_notrans( trans ) ? ( m == 1 ? cs : rs )
 	                                   : ( m == 1 ? rs : cs ) );
 }
 
 static bool_t bli_is_row_stored( inc_t rs, inc_t cs )
 {
-	return ( bli_abs( cs ) == 1 );
+	return ( bool_t )
+	       ( bli_abs( cs ) == 1 );
 }
 
 static bool_t bli_is_col_stored( inc_t rs, inc_t cs )
 {
-	return ( bli_abs( rs ) == 1 );
+	return ( bool_t )
+	       ( bli_abs( rs ) == 1 );
 }
 
 static bool_t bli_is_row_stored_f( dim_t m, dim_t n, inc_t rs, inc_t cs )
 {
-	return ( cs == 1 && ( rs > 1 || n == 1 ) );
+	return ( bool_t )
+	       ( cs == 1 && ( rs > 1 || n == 1 ) );
 }
 
 static bool_t bli_is_col_stored_f( dim_t m, dim_t n, inc_t rs, inc_t cs )
 {
-	return ( rs == 1 && ( cs > 1 || m == 1 ) );
+	return ( bool_t )
+	       ( rs == 1 && ( cs > 1 || m == 1 ) );
 }
 
 static bool_t bli_is_gen_stored( inc_t rs, inc_t cs )
 {
-	return ( bli_abs( rs ) != 1 &&
-	         bli_abs( cs ) != 1 );
+	return ( bool_t )
+	       ( bli_abs( rs ) != 1 &&
+	                   bli_abs( cs ) != 1 );
 }
 
 static bool_t bli_is_row_tilted( dim_t m, dim_t n, inc_t rs, inc_t cs )
 {
-	return ( bli_abs( cs ) == bli_abs( rs )
-	          ? n < m
-	          : bli_abs( cs ) < bli_abs( rs ) );
+	return ( bool_t )
+	       ( bli_abs( cs ) == bli_abs( rs )
+	                   ? n < m
+	                   : bli_abs( cs ) < bli_abs( rs ) );
 }
 
 static bool_t bli_is_col_tilted( dim_t m, dim_t n, inc_t rs, inc_t cs )
 {
-	return ( bli_abs( rs ) == bli_abs( cs )
-	          ? m < n
-	          : bli_abs( rs ) < bli_abs( cs ) );
+	return ( bool_t )
+	       ( bli_abs( rs ) == bli_abs( cs )
+	                   ? m < n
+	                   : bli_abs( rs ) < bli_abs( cs ) );
 }
 
 static bool_t bli_has_nonunit_inc1( inc_t s1 )
 {
-	return ( s1 != 1 );
+	return ( bool_t )
+	       ( s1 != 1 );
 }
 
 static bool_t bli_has_nonunit_inc2( inc_t s1, inc_t s2 )
 {
-	return ( s1 != 1 || s2 != 1 );
+	return ( bool_t )
+	       ( s1 != 1 || s2 != 1 );
 }
 
 static bool_t bli_has_nonunit_inc3( inc_t s1, inc_t s2, inc_t s3 )
 {
-	return ( s1 != 1 || s2 != 1 || s3 != 1 );
+	return ( bool_t )
+	       ( s1 != 1 || s2 != 1 || s3 != 1 );
 }
 
 
@@ -507,69 +578,76 @@ static void bli_shift_diag_offset_to_shrink_uplo( uplo_t uplo, doff_t* diagoff )
 
 static bool_t bli_diag_offset_with_trans( trans_t trans, doff_t diagoff )
 {
-	return ( bli_does_trans( trans ) ? -diagoff : diagoff );
+	return ( bool_t )
+	       ( bli_does_trans( trans ) ? -diagoff : diagoff );
 }
 
 static bool_t bli_is_strictly_above_diag( doff_t diagoff, trans_t trans, dim_t m, dim_t n )
 {
-	return ( bli_does_trans( trans )
-	          ? ( ( doff_t )n <= -diagoff )
-	          : ( ( doff_t )m <= -diagoff ) );
+	return ( bool_t )
+	       ( bli_does_trans( trans )
+	                   ? ( ( doff_t )n <= -diagoff )
+	                   : ( ( doff_t )m <= -diagoff ) );
 }
 
 static bool_t bli_is_strictly_below_diag( doff_t diagoff, trans_t trans, dim_t m, dim_t n )
 {
-	return ( bli_does_trans( trans )
-	          ? ( ( doff_t )m <=  diagoff )
-	          : ( ( doff_t )n <=  diagoff ) );
+	return ( bool_t )
+	       ( bli_does_trans( trans )
+	                 ? ( ( doff_t )m <=  diagoff )
+	                 : ( ( doff_t )n <=  diagoff ) );
 }
 
 static bool_t bli_is_outside_diag( doff_t diagoff, trans_t trans, dim_t m, dim_t n )
 {
-	return ( bli_is_strictly_above_diag( diagoff, trans, m, n ) ||
+	return ( bool_t )
+	       ( bli_is_strictly_above_diag( diagoff, trans, m, n ) ||
 	         bli_is_strictly_below_diag( diagoff, trans, m, n ) );
 }
 
 static bool_t bli_is_stored_subpart( doff_t diagoff, trans_t trans, uplo_t uplo, dim_t m, dim_t n )
 {
-	return
+	return ( bool_t )
 	( ( bli_is_upper( uplo ) && bli_is_strictly_above_diag( diagoff, trans, m, n ) ) ||
 	  ( bli_is_lower( uplo ) && bli_is_strictly_below_diag( diagoff, trans, m, n ) ) );
 }
 
 static bool_t bli_is_unstored_subpart( doff_t diagoff, trans_t trans, uplo_t uplo, dim_t m, dim_t n )
 {
-	return
+	return ( bool_t )
 	( ( bli_is_upper( uplo ) && bli_is_strictly_below_diag( diagoff, trans, m, n ) ) ||
 	  ( bli_is_lower( uplo ) && bli_is_strictly_above_diag( diagoff, trans, m, n ) ) );
 }
 
 static bool_t bli_is_strictly_above_diag_n( doff_t diagoff, dim_t m, dim_t n )
 {
-	return ( ( doff_t )m <= -diagoff );
+	return ( bool_t )
+	       ( ( doff_t )m <= -diagoff );
 }
 
 static bool_t bli_is_strictly_below_diag_n( doff_t diagoff, dim_t m, dim_t n )
 {
-	return ( ( doff_t )n <=  diagoff );
+	return ( bool_t )
+	       ( ( doff_t )n <=  diagoff );
 }
 
 static bool_t bli_intersects_diag_n( doff_t diagoff, dim_t m, dim_t n )
 {
-	return ( !bli_is_strictly_above_diag_n( diagoff, m, n ) &&
+	return ( bool_t )
+	       ( !bli_is_strictly_above_diag_n( diagoff, m, n ) &&
 	         !bli_is_strictly_below_diag_n( diagoff, m, n ) );
 }
 
 static bool_t bli_is_stored_subpart_n( doff_t diagoff, uplo_t uplo, dim_t m, dim_t n )
 {
-	return
+	return ( bool_t )
 	( ( bli_is_upper( uplo ) && bli_is_strictly_above_diag_n( diagoff, m, n ) ) ||
 	  ( bli_is_lower( uplo ) && bli_is_strictly_below_diag_n( diagoff, m, n ) ) );
 }
 
 static bool_t bli_is_unstored_subpart_n( doff_t diagoff, uplo_t uplo, dim_t m, dim_t n )
 {
-	return
+	return ( bool_t )
 	( ( bli_is_upper( uplo ) && bli_is_strictly_below_diag_n( diagoff, m, n ) ) ||
 	  ( bli_is_lower( uplo ) && bli_is_strictly_above_diag_n( diagoff, m, n ) ) );
 }
@@ -658,12 +736,14 @@ static void bli_reverse_index_direction( dim_t n, dim_t* start, dim_t* end )
 
 static bool_t bli_is_m_dim( mdim_t mdim )
 {
-	return ( mdim == BLIS_M );
+	return ( bool_t )
+	       ( mdim == BLIS_M );
 }
 
 static bool_t bli_is_n_dim( mdim_t mdim )
 {
-	return ( mdim == BLIS_N );
+	return ( bool_t )
+	       ( mdim == BLIS_N );
 }
 
 static mdim_t bli_dim_toggled( mdim_t mdim )
@@ -682,27 +762,32 @@ static void bli_toggle_dim( mdim_t* mdim )
 
 static bool_t bli_is_edge_f( dim_t i, dim_t n_iter, dim_t n_left )
 {
-	return ( i == n_iter - 1 && n_left != 0 );
+	return ( bool_t )
+	       ( i == n_iter - 1 && n_left != 0 );
 }
 
 static bool_t bli_is_not_edge_f( dim_t i, dim_t n_iter, dim_t n_left )
 {
-	return ( i != n_iter - 1 || n_left == 0 );
+	return ( bool_t )
+	       ( i != n_iter - 1 || n_left == 0 );
 }
 
 static bool_t bli_is_edge_b( dim_t i, dim_t n_iter, dim_t n_left )
 {
-	return ( i == 0 && n_left != 0 );
+	return ( bool_t )
+	       ( i == 0 && n_left != 0 );
 }
 
 static bool_t bli_is_not_edge_b( dim_t i, dim_t n_iter, dim_t n_left )
 {
-	return ( i != 0 || n_left == 0 );
+	return ( bool_t )
+	       ( i != 0 || n_left == 0 );
 }
 
 static bool_t bli_is_last_iter( dim_t i, dim_t n_iter, dim_t tid, dim_t nth )
 {
-	return ( i == n_iter - 1 - ( ( n_iter - tid - 1 ) % nth ) );
+	return ( bool_t )
+	       ( i == n_iter - 1 - ( ( n_iter - tid - 1 ) % nth ) );
 }
 
 
@@ -710,99 +795,117 @@ static bool_t bli_is_last_iter( dim_t i, dim_t n_iter, dim_t tid, dim_t nth )
 
 static guint_t bli_packbuf_index( packbuf_t buf_type )
 {
-	return ( ( buf_type & BLIS_PACK_BUFFER_BITS ) >> BLIS_PACK_BUFFER_SHIFT );
+	return ( guint_t )
+	       ( ( buf_type & BLIS_PACK_BUFFER_BITS ) >> BLIS_PACK_BUFFER_SHIFT );
 }
 
 // pack_t-related
 
 static bool_t bli_is_packed( pack_t schema )
 {
-	return ( schema & BLIS_PACK_BIT );
+	return ( bool_t )
+	       ( schema & BLIS_PACK_BIT );
 }
 
 static bool_t bli_is_row_packed( pack_t schema )
 {
-	return ( schema & BLIS_PACK_RC_BIT ) == ( BLIS_BITVAL_PACKED_UNSPEC ^
+	return ( bool_t )
+	       ( schema & BLIS_PACK_RC_BIT ) == ( BLIS_BITVAL_PACKED_UNSPEC ^
 	                                          BLIS_BITVAL_PACKED_ROWS );
 }
 
 static bool_t bli_is_col_packed( pack_t schema )
 {
-	return ( schema & BLIS_PACK_RC_BIT ) == ( BLIS_BITVAL_PACKED_UNSPEC ^
+	return ( bool_t )
+	       ( schema & BLIS_PACK_RC_BIT ) == ( BLIS_BITVAL_PACKED_UNSPEC ^
 	                                          BLIS_BITVAL_PACKED_COLUMNS );
 }
 
 static bool_t bli_is_panel_packed( pack_t schema )
 {
-	return ( schema & BLIS_PACK_PANEL_BIT );
+	return ( bool_t )
+	       ( schema & BLIS_PACK_PANEL_BIT );
 }
 
 static bool_t bli_is_4mi_packed( pack_t schema )
 {
-	return ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_4MI;
+	return ( bool_t )
+	       ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_4MI;
 }
 
 static bool_t bli_is_3mi_packed( pack_t schema )
 {
-	return ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_3MI;
+	return ( bool_t )
+	       ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_3MI;
 }
 
 static bool_t bli_is_3ms_packed( pack_t schema )
 {
-	return ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_3MS;
+	return ( bool_t )
+	       ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_3MS;
 }
 
 static bool_t bli_is_ro_packed( pack_t schema )
 {
-	return ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_RO;
+	return ( bool_t )
+	       ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_RO;
 }
 
 static bool_t bli_is_io_packed( pack_t schema )
 {
-	return ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_IO;
+	return ( bool_t )
+	       ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_IO;
 }
 
 static bool_t bli_is_rpi_packed( pack_t schema )
 {
-	return ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_RPI;
+	return ( bool_t )
+	       ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_RPI;
 }
 
 static bool_t bli_is_rih_packed( pack_t schema )
 {
-	return ( bli_is_ro_packed( schema ) ||
+	return ( bool_t )
+	       ( bli_is_ro_packed( schema ) ||
 	         bli_is_io_packed( schema ) ||
 	         bli_is_rpi_packed( schema ) );
 }
 
 static bool_t bli_is_1r_packed( pack_t schema )
 {
-	return ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_1R;
+	return ( bool_t )
+	       ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_1R;
 }
 
 static bool_t bli_is_1e_packed( pack_t schema )
 {
-	return ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_1E;
+	return ( bool_t )
+	       ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_1E;
 }
 
 static bool_t bli_is_1m_packed( pack_t schema )
 {
-	return ( bli_is_1r_packed( schema ) ||
+	return ( bool_t )
+	       ( bli_is_1r_packed( schema ) ||
 	         bli_is_1e_packed( schema ) );
 }
 
 static bool_t bli_is_nat_packed( pack_t schema )
 {
-	return ( schema & BLIS_PACK_FORMAT_BITS ) == 0;
+	return ( bool_t )
+	       ( schema & BLIS_PACK_FORMAT_BITS ) == 0;
 }
 
 static bool_t bli_is_ind_packed( pack_t schema )
 {
-	return ( schema & BLIS_PACK_FORMAT_BITS ) != 0;
+	return ( bool_t )
+	       ( schema & BLIS_PACK_FORMAT_BITS ) != 0;
 }
 
 static guint_t bli_pack_schema_index( pack_t schema )
 {
-	return ( schema & BLIS_PACK_FORMAT_BITS ) >> BLIS_PACK_FORMAT_SHIFT;
+	return ( guint_t )
+	       ( schema & BLIS_PACK_FORMAT_BITS ) >> BLIS_PACK_FORMAT_SHIFT;
 }
 
 
@@ -814,17 +917,20 @@ static guint_t bli_pack_schema_index( pack_t schema )
 // where p0 is a pointer to a datatype of size sizeof_p0.
 static void* bli_ptr_inc_by_frac( void* p0, siz_t sizeof_p0, dim_t num, dim_t den )
 {
-	return ( char* )p0 + ( ( num * sizeof_p0 ) / den );
+	return ( void* )
+	       ( ( char* )p0 + ( ( num * ( dim_t )sizeof_p0 ) / den ) );
 }
 
 static bool_t bli_is_null( void* p )
 {
-	return ( p == NULL );
+	return ( bool_t )
+	       ( p == NULL );
 }
 
 static bool_t bli_is_nonnull( void* p )
 {
-	return ( p != NULL );
+	return ( bool_t )
+	       ( p != NULL );
 }
 
 

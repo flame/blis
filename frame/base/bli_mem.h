@@ -76,12 +76,14 @@ static siz_t bli_mem_size( mem_t* mem )
 
 static bool_t bli_mem_is_alloc( mem_t* mem )
 {
-	return bli_mem_buffer( mem ) != NULL;
+	return ( bool_t )
+	       ( bli_mem_buffer( mem ) != NULL );
 }
 
 static bool_t bli_mem_is_unalloc( mem_t* mem )
 {
-	return bli_mem_buffer( mem ) == NULL;
+	return ( bool_t )
+	       ( bli_mem_buffer( mem ) == NULL );
 }
 
 

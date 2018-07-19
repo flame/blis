@@ -378,7 +378,8 @@ static bool_t bli_cntx_l3_nat_ukr_prefers_rows_dt( num_t dt, l3ukr_t ukr_id, cnt
 	bool_t prefs = bli_cntx_get_l3_nat_ukr_prefs_dt( dt, ukr_id, cntx );
 
 	// A ukernel preference of TRUE means the ukernel prefers row storage.
-	return prefs == TRUE;
+	return ( bool_t )
+	       ( prefs == TRUE );
 }
 
 static bool_t bli_cntx_l3_nat_ukr_prefers_cols_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
@@ -386,7 +387,8 @@ static bool_t bli_cntx_l3_nat_ukr_prefers_cols_dt( num_t dt, l3ukr_t ukr_id, cnt
 	bool_t prefs = bli_cntx_get_l3_nat_ukr_prefs_dt( dt, ukr_id, cntx );
 
 	// A ukernel preference of FALSE means the ukernel prefers column storage.
-	return prefs == FALSE;
+	return ( bool_t )
+	       ( prefs == FALSE );
 }
 
 static bool_t bli_cntx_l3_nat_ukr_prefers_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
@@ -406,7 +408,8 @@ static bool_t bli_cntx_l3_nat_ukr_prefers_storage_of( obj_t* obj, l3ukr_t ukr_id
 
 static bool_t bli_cntx_l3_nat_ukr_dislikes_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
 {
-	return !bli_cntx_l3_nat_ukr_prefers_storage_of( obj, ukr_id, cntx );
+	return ( bool_t )
+	       !bli_cntx_l3_nat_ukr_prefers_storage_of( obj, ukr_id, cntx );
 }
 
 // -----------------------------------------------------------------------------
@@ -456,7 +459,8 @@ static bool_t bli_cntx_l3_vir_ukr_prefers_storage_of( obj_t* obj, l3ukr_t ukr_id
 
 static bool_t bli_cntx_l3_vir_ukr_dislikes_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
 {
-	return !bli_cntx_l3_vir_ukr_prefers_storage_of( obj, ukr_id, cntx );
+	return ( bool_t )
+	       !bli_cntx_l3_vir_ukr_prefers_storage_of( obj, ukr_id, cntx );
 }
 
 // -----------------------------------------------------------------------------
@@ -518,7 +522,7 @@ static void bli_cntx_set_packm_ker( l1mkr_t ker_id, func_t* func, cntx_t* cntx )
 
 static void bli_cntx_set_packm_ker_dt( void* fp, num_t dt, l1mkr_t ker_id, cntx_t* cntx )
 {
-	func_t* func = bli_cntx_get_packm_ker_dt( dt, ker_id, cntx );
+	func_t* func = ( func_t* )bli_cntx_get_packm_ker_dt( dt, ker_id, cntx );
 
 	bli_func_set_dt( fp, dt, func );
 }
@@ -532,7 +536,7 @@ static void bli_cntx_set_unpackm_ker( l1mkr_t ker_id, func_t* func, cntx_t* cntx
 
 static void bli_cntx_set_unpackm_ker_dt( void* fp, num_t dt, l1mkr_t ker_id, cntx_t* cntx )
 {
-	func_t* func = bli_cntx_get_unpackm_ker_dt( dt, ker_id, cntx );
+	func_t* func = ( func_t* )bli_cntx_get_unpackm_ker_dt( dt, ker_id, cntx );
 
 	bli_func_set_dt( fp, dt, func );
 }
