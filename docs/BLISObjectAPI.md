@@ -209,13 +209,176 @@ void bli_finalize( void );
 
 Before using the object API, you must first create some objects to encapsulate your vector or matrix data. We provide examples code for creating matrix objects in the [examples/oapi](https://github.com/flame/blis/tree/master/examples/oapi) directory of the BLIS source distribution. However, we will provide API documentation for the most common functions for creating and freeing objects in the next section.
 
-Generally speaking, an object is created when an `obj_t` structure is initialized with a valid data buffer (to hold the elements of the vector or matrix) as well as valid properties describing the object. The valid data buffer can be allocated automatically on your behalf at the same time that the other object fields are initialized, or "attached" in a second step after the object is initialized with preliminary values. The former is useful when using the object API at the setup stage of an application (and if `malloc()` is an acceptable method of allocating memory). Similarly, the latter is useful when interfacing BLIS into the middle of an application after the allocation has already taken place.
+Generally speaking, an object is created when an `obj_t` structure is initialized with valid properties describing the object as well as a valid data buffer (to hold the elements of the vector or matrix). The valid data buffer can be allocated automatically on your behalf at the same time that the other object fields are initialized, or "attached" in a second step after the object is initialized with preliminary values. The former is useful when using the object API at the setup stage of an application (and if `malloc()` is an acceptable method of allocating memory). Similarly, the latter is useful when interfacing BLIS into the middle of an application after the allocation has already taken place, or when some function other than `malloc()` is desired for allocating the buffer.
 
 Only objects that were created with automatic allocation must be freed via BLIS object API. Objects that were initialized with attached buffers can be freed in whatever manner is appropriate, based on how the application originally allocated the memory in question.
 
 ## Object creation function reference
 
-_Not yet written._
+```c
+void bli_obj_create
+     (
+       num_t  dt,
+       dim_t  m,
+       dim_t  n,
+       inc_t  rs,
+       inc_t  cs,
+       obj_t* obj
+     );
+```
+Initialize an _m x n_ object `obj` and allocate sufficient storage to hold _mn_ elements whose storage type is specified by `dt` and with row and column strides `rs` and `cs`, respectively. This function allocates enough space to enforce alignment of leading dimensions, where the alignment factor is specific to the configuration being used, though the alignment factor is almost always equal to the size of the hardware's SIMD registers.
+The address `obj` must reference valid memory--typically an `obj_t` declared statically or allocated dynamically via `malloc()`.
+After an object created via `bli_obj_create()` is no longer needed, it should be deallocated via `bli_obj_free()`.
+
+---
+
+```c
+void bli_obj_free
+     (
+       obj_t* obj
+     );
+```
+Deallocate (release) an object `obj` that was previously created, typically via `bli_obj_create()`.
+
+---
+
+```c
+void bli_obj_create_without_buffer
+     (
+       num_t  dt,
+       dim_t  m,
+       dim_t  n,
+       obj_t* obj
+     );
+```
+Partially initialize an _m x n_ object `obj` that will eventually contain elements whose storage type is specified by `dt`. This function does not result in any memory allocation. Before `obj` can be used, the object must be fully initialized by attaching a buffer via `bli_obj_attach_buffer()`. This function is useful when the user wishes to encapsulate existing buffers into one or more `obj_t` objects. 
+An object (partially) initialized via this function should generally not be passed to `bli_obj_free()` even after a buffer is attached to it via `bli_obj_attach_buffer()`, unless the user wishes to pass that buffer into `free()`.
+
+---
+
+```c
+void bli_obj_attach_buffer
+     (
+       void*  p,
+       inc_t  rs,
+       inc_t  cs,
+       inc_t  is,
+       obj_t* obj
+     );
+```
+Given a partially initialized object (i.e., one that has already been passed to `bli_obj_create_without_buffer()`), attach the buffer pointed to by `p` to the object referenced by `obj` and initialize `obj` as containing elements with row and column strides `rs` and `cs`, respectively. The function also initializes the imaginary stride as `is`, which is experimental and not consistently used by all parts of BLIS.
+
+---
+
+```c
+void bli_obj_create_with_attached_buffer
+     (
+       num_t  dt,
+       dim_t  m,
+       dim_t  n,
+       void*  p,
+       inc_t  rs,
+       inc_t  cs,
+       obj_t* obj
+     );
+```
+Initialize an _m x n_ object `obj` as containing _mn_ elements whose storage type is specified by `dt` and with row and column strides `rs` and `cs`, respectively. The function does not allocate any memory and instead attaches the buffer pointed to by `p`. Note that calling this function is effectively equivalent to calling
+```c
+bli_obj_create_without_buffer( dt, m, n, obj );
+bli_obj_attach_buffer( p, rs, cs, 1, obj );
+```
+Objects initialized via this function should generally not be passed to `bli_obj_free()`, unless the user wishes to pass `p` into `free()`.
+
+---
+
+```c
+void bli_obj_alloc_buffer
+     (
+       inc_t  rs,
+       inc_t  cs,
+       inc_t  is,
+       obj_t* obj
+     );
+```
+Given a partially initialized _m x n_ object, allocate and attach a buffer large enough to contain _mn_ elements with the row and column strides `rs` and `cs`, respectively. This function allocates enough space to enforce alignment of leading dimensions, where the alignment factor is specific to the configuration being used, though the alignment factor is almost always equal to the size of the hardware's SIMD registers.
+Note that calling `bli_obj_create()` is effectively equivalent to calling
+```c
+bli_obj_create_without_buffer( dt, m, n, obj );
+bli_obj_alloc_buffer( rs, cs, 1, obj );
+```
+Very few users will likely have a need to call this function. We provide documentation for it mostly so that others can manually access the alignment features of `bli_obj_create()` without also needing to initialize an `obj_t`.
+
+---
+
+```c
+void bli_obj_create_1x1
+     (
+       num_t  dt,
+       obj_t* obj
+     );
+```
+Initialize a _1 x 1_ object `obj` and allocate sufficient storage to hold one element whose storage type is specified by `dt`.
+The address `obj` must reference valid memory--typically an `obj_t` declared statically or allocated dynamically via `malloc()`.
+This function is useful any time the user wishes to create a scalar object with an allocated buffer.
+Note that calling `bli_obj_create_1x1()` is effectively equivalent to calling
+```c
+bli_obj_create_without_buffer( dt, 1, 1, obj );
+bli_obj_alloc_buffer( 1, 1, 1, obj );
+```
+After an object created via `bli_obj_create_1x1()` is no longer needed, it should be deallocated via `bli_obj_free()`.
+
+---
+
+```c
+void bli_obj_create_1x1_with_attached_buffer
+     (
+       num_t  dt,
+       void*  p,
+       obj_t* obj
+     );
+```
+Initialize a _1 x 1_ object `obj` as containing one element whose storage type is specified by `dt`. The function does not allocate any memory and instead attaches the buffer pointed to by `p`. Note that calling this function is effectively equivalent to calling
+```c
+bli_obj_create_without_buffer( dt, 1, 1, obj );
+bli_obj_attach_buffer( p, 1, 1, 1, obj );
+```
+Objects initialized via this function should generally not be passed to `bli_obj_free()`, unless the user wishes to pass `p` into `free()`.
+
+---
+
+```c
+void bli_obj_create_conf_to
+     (
+       obj_t* s,
+       obj_t* d
+     );
+```
+Initialize an object `d` with dimensions conformal to those of an existing object `s`. Object `d` is initialized with the same row and column strides as those of `s`. However, the structure, uplo, conjugation, and transposition properties of `s` are **not** inherited by `d`.
+On entry, object `s` must be fully initialized and the address `d` must reference valid memory--typically an `obj_t` declared statically or allocated dynamically via `malloc()`.
+Note that calling this function is effectively equivalent to calling
+```c
+num_t dt = bli_obj_dt( s );
+dim_t m  = bli_obj_length( s );
+dim_t n  = bli_obj_width( s );
+inc_t rs = bli_obj_row_stride( s );
+inc_t cs = bli_obj_col_stride( s );
+
+bli_obj_create( dt, m, n, rs, cs, d );
+```
+After an object created via `bli_obj_create_conf_to()` is no longer needed, it should be deallocated via `bli_obj_free()`.
+
+---
+
+```c
+void bli_obj_scalar_init_detached
+     (
+       num_t  dt,
+       obj_t* obj
+     );
+```
+Initialize a _1 x 1_ object `obj` using internal storage sufficient to hold one element whose storage type is specified by `dt`. (Internal storage is present within every `obj_t` and is capable of holding on element of any supported type.) This function is similar to `bli_obj_create_1x1()`, except that the object does not trigger any dynamic memory allocation.
+Objects initialized via this function should **never** be passed to `bli_obj_free()`.
+
 
 ## Object accessor function reference
 
@@ -224,7 +387,7 @@ Notes for interpreting function descriptions:
   * These functions are only guaranteed to return meaningful values when called upon objects that have been fully initialized/created.
   * Many specialized functions are omitted from this section for brevity. For a full list of accessor functions, please see [frame/include/bli_obj_macro_defs.h](https://github.com/flame/blis/tree/master/frame/include/bli_obj_macro_defs.h).
 
-**Note**: For now, we omit documentation for the corresponding functions used to modify object properties because those functions can easily invalidate the state of an `obj_t` and should be used only in specific instances. If you think you need to manually set the fields of an `obj_t`, please contact BLIS developers so we can give you personalized guidance.
+**Note**: For now, we mostly omit documentation for the corresponding functions used to modify object properties because those functions can easily invalidate the state of an `obj_t` and should be used only in specific instances. If you think you need to manually set the fields of an `obj_t`, please contact BLIS developers so we can give you personalized guidance.
 
 ---
 
@@ -422,20 +585,20 @@ Notes for interpreting function descriptions:
 
 ## Operation index
 
-  * **[Level-1v](BLISTypedAPI.md#level-1v-operations)**: Operations on vectors:
-    * [addv](BLISTypedAPI.md#addv), [amaxv](BLISTypedAPI.md#amaxv), [axpyv](BLISTypedAPI.md#axpyv), [axpbyv](BLISTypedAPI.md#axpbyv), [copyv](BLISTypedAPI.md#copyv), [dotv](BLISTypedAPI.md#dotv), [dotxv](BLISTypedAPI.md#dotxv), [invertv](BLISTypedAPI.md#invertv), [scal2v](BLISTypedAPI.md#scal2v), [scalv](BLISTypedAPI.md#scalv), [setv](BLISTypedAPI.md#setv), [setrv](BLISTypedAPI.md#setrv), [setiv](BLISTypedAPI.md#setiv), [subv](BLISTypedAPI.md#subv), [swapv](BLISTypedAPI.md#swapv), [xpbyv](BLISTypedAPI.md#xpbyv)
-  * **[Level-1d](BLISTypedAPI.md#level-1d-operations)**: Element-wise operations on matrix diagonals:
-    * [addd](BLISTypedAPI.md#addd), [axpyd](BLISTypedAPI.md#axpyd), [copyd](BLISTypedAPI.md#copyd), [invertd](BLISTypedAPI.md#invertd), [scald](BLISTypedAPI.md#scald), [scal2d](BLISTypedAPI.md#scal2d), [setd](BLISTypedAPI.md#setd), [setid](BLISTypedAPI.md#setid), [subd](BLISTypedAPI.md#subd)
-  * **[Level-1m](BLISTypedAPI.md#level-1m-operations)**: Element-wise operations on matrices:
-    * [addm](BLISTypedAPI.md#addm), [axpym](BLISTypedAPI.md#axpym), [copym](BLISTypedAPI.md#copym), [scalm](BLISTypedAPI.md#scalm), [scal2m](BLISTypedAPI.md#scal2m), [setm](BLISTypedAPI.md#setm), [setrm](BLISTypedAPI.md#setrm), [setim](BLISTypedAPI.md#setim), [subm](BLISTypedAPI.md#subm)
-  * **[Level-1f](BLISTypedAPI.md#level-1f-operations)**: Fused operations on multiple vectors:
-    * [axpy2v](BLISTypedAPI.md#axpy2v), [dotaxpyv](BLISTypedAPI.md#dotaxpyv), [axpyf](BLISTypedAPI.md#axpyf), [dotxf](BLISTypedAPI.md#dotxf), [dotxaxpyf](BLISTypedAPI.md#dotxaxpyf)
-  * **[Level-2](BLISTypedAPI.md#level-2-operations)**: Operations with one matrix and (at least) one vector operand:
-    * [gemv](BLISTypedAPI.md#gemv), [ger](BLISTypedAPI.md#ger), [hemv](BLISTypedAPI.md#hemv), [her](BLISTypedAPI.md#her), [her2](BLISTypedAPI.md#her2), [symv](BLISTypedAPI.md#symv), [syr](BLISTypedAPI.md#syr), [syr2](BLISTypedAPI.md#syr2), [trmv](BLISTypedAPI.md#trmv), [trsv](BLISTypedAPI.md#trsv)
-  * **[Level-3](BLISTypedAPI.md#level-3-operations)**: Operations with matrices that are multiplication-like:
-    * [gemm](BLISTypedAPI.md#gemm), [hemm](BLISTypedAPI.md#hemm), [herk](BLISTypedAPI.md#herk), [her2k](BLISTypedAPI.md#her2k), [symm](BLISTypedAPI.md#symm), [syrk](BLISTypedAPI.md#syrk), [syr2k](BLISTypedAPI.md#syr2k), [trmm](BLISTypedAPI.md#trmm), [trmm3](BLISTypedAPI.md#trmm3), [trsm](BLISTypedAPI.md#trsm)
-  * **[Utility](BLISTypedAPI.md#Utility-operations)**: Miscellaneous operations on matrices and vectors:
-    * [asumv](BLISTypedAPI.md#asumv), [norm1v](BLISTypedAPI.md#norm1v), [normfv](BLISTypedAPI.md#normfv), [normiv](BLISTypedAPI.md#normiv), [norm1m](BLISTypedAPI.md#norm1m), [normfm](BLISTypedAPI.md#normfm), [normim](BLISTypedAPI.md#normim), [mkherm](BLISTypedAPI.md#mkherm), [mksymm](BLISTypedAPI.md#mksymm), [mktrim](BLISTypedAPI.md#mktrim), [fprintv](BLISTypedAPI.md#fprintv), [fprintm](BLISTypedAPI.md#fprintm),[printv](BLISTypedAPI.md#printv), [printm](BLISTypedAPI.md#printm), [randv](BLISTypedAPI.md#randv), [randm](BLISTypedAPI.md#randm), [sumsqv](BLISTypedAPI.md#sumsqv)
+  * **[Level-1v](BLISObjectAPI.md#level-1v-operations)**: Operations on vectors:
+    * [addv](BLISObjectAPI.md#addv), [amaxv](BLISObjectAPI.md#amaxv), [axpyv](BLISObjectAPI.md#axpyv), [axpbyv](BLISObjectAPI.md#axpbyv), [copyv](BLISObjectAPI.md#copyv), [dotv](BLISObjectAPI.md#dotv), [dotxv](BLISObjectAPI.md#dotxv), [invertv](BLISObjectAPI.md#invertv), [scal2v](BLISObjectAPI.md#scal2v), [scalv](BLISObjectAPI.md#scalv), [setv](BLISObjectAPI.md#setv), [setrv](BLISObjectAPI.md#setrv), [setiv](BLISObjectAPI.md#setiv), [subv](BLISObjectAPI.md#subv), [swapv](BLISObjectAPI.md#swapv), [xpbyv](BLISObjectAPI.md#xpbyv)
+  * **[Level-1d](BLISObjectAPI.md#level-1d-operations)**: Element-wise operations on matrix diagonals:
+    * [addd](BLISObjectAPI.md#addd), [axpyd](BLISObjectAPI.md#axpyd), [copyd](BLISObjectAPI.md#copyd), [invertd](BLISObjectAPI.md#invertd), [scald](BLISObjectAPI.md#scald), [scal2d](BLISObjectAPI.md#scal2d), [setd](BLISObjectAPI.md#setd), [setid](BLISObjectAPI.md#setid), [subd](BLISObjectAPI.md#subd)
+  * **[Level-1m](BLISObjectAPI.md#level-1m-operations)**: Element-wise operations on matrices:
+    * [addm](BLISObjectAPI.md#addm), [axpym](BLISObjectAPI.md#axpym), [copym](BLISObjectAPI.md#copym), [scalm](BLISObjectAPI.md#scalm), [scal2m](BLISObjectAPI.md#scal2m), [setm](BLISObjectAPI.md#setm), [setrm](BLISObjectAPI.md#setrm), [setim](BLISObjectAPI.md#setim), [subm](BLISObjectAPI.md#subm)
+  * **[Level-1f](BLISObjectAPI.md#level-1f-operations)**: Fused operations on multiple vectors:
+    * [axpy2v](BLISObjectAPI.md#axpy2v), [dotaxpyv](BLISObjectAPI.md#dotaxpyv), [axpyf](BLISObjectAPI.md#axpyf), [dotxf](BLISObjectAPI.md#dotxf), [dotxaxpyf](BLISObjectAPI.md#dotxaxpyf)
+  * **[Level-2](BLISObjectAPI.md#level-2-operations)**: Operations with one matrix and (at least) one vector operand:
+    * [gemv](BLISObjectAPI.md#gemv), [ger](BLISObjectAPI.md#ger), [hemv](BLISObjectAPI.md#hemv), [her](BLISObjectAPI.md#her), [her2](BLISObjectAPI.md#her2), [symv](BLISObjectAPI.md#symv), [syr](BLISObjectAPI.md#syr), [syr2](BLISObjectAPI.md#syr2), [trmv](BLISObjectAPI.md#trmv), [trsv](BLISObjectAPI.md#trsv)
+  * **[Level-3](BLISObjectAPI.md#level-3-operations)**: Operations with matrices that are multiplication-like:
+    * [gemm](BLISObjectAPI.md#gemm), [hemm](BLISObjectAPI.md#hemm), [herk](BLISObjectAPI.md#herk), [her2k](BLISObjectAPI.md#her2k), [symm](BLISObjectAPI.md#symm), [syrk](BLISObjectAPI.md#syrk), [syr2k](BLISObjectAPI.md#syr2k), [trmm](BLISObjectAPI.md#trmm), [trmm3](BLISObjectAPI.md#trmm3), [trsm](BLISObjectAPI.md#trsm)
+  * **[Utility](BLISObjectAPI.md#Utility-operations)**: Miscellaneous operations on matrices and vectors:
+    * [asumv](BLISObjectAPI.md#asumv), [norm1v](BLISObjectAPI.md#norm1v), [normfv](BLISObjectAPI.md#normfv), [normiv](BLISObjectAPI.md#normiv), [norm1m](BLISObjectAPI.md#norm1m), [normfm](BLISObjectAPI.md#normfm), [normim](BLISObjectAPI.md#normim), [mkherm](BLISObjectAPI.md#mkherm), [mksymm](BLISObjectAPI.md#mksymm), [mktrim](BLISObjectAPI.md#mktrim), [fprintv](BLISObjectAPI.md#fprintv), [fprintm](BLISObjectAPI.md#fprintm),[printv](BLISObjectAPI.md#printv), [printm](BLISObjectAPI.md#printm), [randv](BLISObjectAPI.md#randv), [randm](BLISObjectAPI.md#randm), [sumsqv](BLISObjectAPI.md#sumsqv), [getijm](BLISObjectAPI.md#getijm), [setijm](BLISObjectAPI.md#setijm)
 
 ---
 
@@ -1033,7 +1196,7 @@ Perform
 ```
   y := y + conj?(alphax) * conj?(x) + conj?(alphay) * conj?(y)
 ```
-where `x`, `y`, and `z` are vectors of length _m_. The kernel, if optimized, is implemented as a fused pair of calls to [axpyv](BLISTypedAPI.md#axpyv).
+where `x`, `y`, and `z` are vectors of length _m_. The kernel, if optimized, is implemented as a fused pair of calls to [axpyv](BLISObjectAPI.md#axpyv).
 
 Observed object properties: `conj?(alphax)`, `conj?(x)`, `conj?(alphay)`, `conj?(y)`.
 
@@ -1055,7 +1218,7 @@ Perform
   rho := conj?(x)^T * conj?(y)
   y   := y + conj?(alpha) * conj?(x)
 ```
-where `x`, `y`, and `z` are vectors of length _m_ and `alpha` and `rho` are scalars. The kernel, if optimized, is implemented as a fusion of calls to [dotv](BLISTypedAPI.md#dotv) and [axpyv](BLISTypedAPI.md#axpyv).
+where `x`, `y`, and `z` are vectors of length _m_ and `alpha` and `rho` are scalars. The kernel, if optimized, is implemented as a fusion of calls to [dotv](BLISObjectAPI.md#dotv) and [axpyv](BLISObjectAPI.md#axpyv).
 
 Observed object properties: `conj?(x)`, `conj?(y)`, `conj?(alpha)`.
 
@@ -1075,7 +1238,7 @@ Perform
 ```
   y := y + alpha * conja(A) * conjx(x)
 ```
-where `A` is an _m x nf_ matrix, and `x` and `y` are vectors. The kernel, if optimized, is implemented as a fused series of calls to [axpyv](BLISTypedAPI.md#axpyv) where _nf_ is less than or equal to an implementation-dependent fusing factor specific to `axpyf`.
+where `A` is an _m x nf_ matrix, and `x` and `y` are vectors. The kernel, if optimized, is implemented as a fused series of calls to [axpyv](BLISObjectAPI.md#axpyv) where _nf_ is less than or equal to an implementation-dependent fusing factor specific to `axpyf`.
 
 Observed object properties: `conj?(alpha)`, `conj?(A)`, `conj?(x)`.
 
@@ -1096,7 +1259,7 @@ Perform
 ```
   y := conj?(beta) * y + conj?(alpha) * conj?(A)^T * conj?(x)
 ```
-where `A` is an _m x nf_ matrix, and `x` and `y` are vectors. The kernel, if optimized, is implemented as a fused series of calls to [dotxv](BLISTypedAPI.md#dotxv) where _nf_ is less than or equal to an implementation-dependent fusing factor specific to `dotxf`.
+where `A` is an _m x nf_ matrix, and `x` and `y` are vectors. The kernel, if optimized, is implemented as a fused series of calls to [dotxv](BLISObjectAPI.md#dotxv) where _nf_ is less than or equal to an implementation-dependent fusing factor specific to `dotxf`.
 
 Observed object properties: `conj?(alpha)`, `conj?(beta)`, `conj?(A)`, `conj?(x)`.
 
@@ -1120,7 +1283,7 @@ Perform
   y := conj?(beta) * y + conj?(alpha) * conj?(A)^T * conj?(w)
   z :=               z + conj?(alpha) * conj?(A)   * conj?(x)
 ```
-where `A` is an _m x nf_ matrix, `w` and `z` are vectors of length _m_, `x` and `y` are vectors of length `nf`, and `alpha` and `beta` are scalars. The kernel, if optimized, is implemented as a fusion of calls to [dotxf](BLISTypedAPI.md#dotxf) and [axpyf](BLISTypedAPI.md#axpyf).
+where `A` is an _m x nf_ matrix, `w` and `z` are vectors of length _m_, `x` and `y` are vectors of length `nf`, and `alpha` and `beta` are scalars. The kernel, if optimized, is implemented as a fusion of calls to [dotxf](BLISObjectAPI.md#dotxf) and [axpyf](BLISObjectAPI.md#axpyf).
 
 Observed object properties: `conj?(alpha)`, `conj?(beta)`, `conj?(A)`, `conj?(w)`, `conj?(x)`.
 
@@ -1761,7 +1924,7 @@ Set the elements of an _m x n_ matrix `A` to random values on the interval `[-1,
 Observed object properties: `diagoff(A)`, `uplo(A)`.
 
 **Note:** For complex datatypes, the real and imaginary components of each off-diagonal element are randomized individually and independently of one another.
-**Note:** If `uplo(A)` is `BLIS_LOWER` or `BLIS_UPPER` and you plan to use this matrix to test `trsv` or `trsm`, additional scaling of the diagonal is recommended to ensure that the matrix is invertible. In this case, try using the [addd](BLISTypedAPI.md#addd) operation to increase the magnitude to the diagonal elements.
+**Note:** If `uplo(A)` is `BLIS_LOWER` or `BLIS_UPPER` and you plan to use this matrix to test `trsv` or `trsm`, additional scaling of the diagonal is recommended to ensure that the matrix is invertible. In this case, try using the [addd](BLISObjectAPI.md#addd) operation to increase the magnitude to the diagonal elements.
 
 ---
 
@@ -1786,6 +1949,34 @@ where, on entry, `scale` and `sumsq` contain `scale_old` and `sumsq_old`, respec
 **Note:** The floating-point (`num_t`) types of `scale` and `sumsq` are always the real projection of the floating-point type of `x`.
 
 ---
+
+#### getijm
+```c
+err_t bli_getijm
+      (
+        dim_t   i,
+        dim_t   j,
+        obj_t*  b,
+        double* ar,
+        double* ai
+      )
+```
+Copy the real and imaginary values at the _(i,j)_ element of object `b` to `ar` and `ai`. f elements of `b` are stored as real types, then only `ar` is overwritten and `ai` is left unchanged. (If `b` contains elements stored in single precision, the corresponding elements are typecast/promoted during the copy.) 
+If either the row offset _i_ is beyond the _m_ dimension of `b`, or column offset _j_ is beyond the _n_ dimension of `b`, the function does not perform any copy and returns `BLIS_FAILURE`. Similarly, if `b` is a global scalar constant such as `BLIS_ONE`, `BLIS_FAILURE is returned.`
+
+#### setijm
+```c
+err_t bli_setijm
+     (
+       double  ar,
+       double  ai,
+       dim_t   i,
+       dim_t   j,
+       obj_t*  b
+     );
+```
+Copy real and imaginary values `ar` and `ai` to the _(i,j)_ element of object `b`. If elements of `b` are stored as real types, then only `ar` is copied and `ai` is ignored. (If `b` contains elements stored in single precision, the corresponding elements are typecast/demoted during the copy.)
+If either the row offset _i_ is beyond the _m_ dimension of `b`, or column offset _j_ is beyond the _n_ dimension of `b`, the function does not perform any copy and returns `BLIS_FAILURE`. Similarly, if `b` is a global scalar constant such as `BLIS_ONE`, `BLIS_FAILURE is returned.`
 
 
 
