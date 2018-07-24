@@ -1,3 +1,11 @@
+## Contents
+
+* **[Introduction](Sandboxes.md#introduction)**
+* **[Enabling a sandbox](Sandboxes.md#enabling-a-sandbox)**
+* **[Sandbox rules](Sandboxes.md#sandbox-rules)**
+* **[Caveats](Sandboxes.md#caveats)**
+* **[Conclusion](Sandboxes.md#conclusion)**
+
 
 ## Introduction
 
@@ -5,21 +13,23 @@ This file briefly describes the requirements for building a custom BLIS
 *sandbox*.
 
 Simply put, a sandbox in BLIS provides an alternative implementation to the
-function `bli_gemmnat()`, which is the object-based API call for computing
-the gemm operation via native execution. (Native execution simply means that
-an induced method will not be used. It's what you probably already think of
-when you think of implementing the gemm operation: a series of loops around
-an optimized (usually assembly-based) microkernel with some packing functions
-thrown in at various levels.)
+`gemm` operation.
+
+To get a little more specific, a sandbox provides an alternative implementation
+to the function `bli_gemmnat()`, which is the object-based API call for
+computing the `gemm` operation via native execution.
+
+**Note**: Native execution simply means that an induced method will not be used.
+It's what you probably already think of when you think of implementing the
+`gemm` operation: a series of loops around an optimized (usually assembly-based)
+microkernel with some packing functions thrown in at various levels.
 
 Why sandboxes? Sometimes you want to experiment with tweaks or changes to
-the gemm operation, but you want to do so in a simple environment rather than
+the `gemm` operation, but you want to do so in a simple environment rather than
 the highly macroized and refactored (and somewhat obfuscated) code of the
-core framework (which, I will remind everyone, is highly macroized and
-refactored mostly so that all floating-point datatypes and all level-3
-operations are supported with minimal source code). By building a BLIS sandbox,
-you can experiment (within limits) and still benefit from BLIS's existing
-build system, testsuite, and toolbox of utility functions.
+core framework. By building a BLIS sandbox, you can experiment (within limits)
+and still benefit from BLIS's existing build system, testsuite, and toolbox of
+utility functions.
 
 ## Enabling a sandbox
 
@@ -31,8 +41,8 @@ $ ./configure -s ref99 auto
 ```
 Here, we tell `configure` that we want to use the `ref99` sandbox, which
 corresponds to a sub-directory of `sandbox` named `ref99`. (Reminder: the
-`auto` argument is simply the configuration target and thus unrelated to
-sandboxes.) As configure runs, you should get output that includes lines
+`auto` argument is the configuration target and thus unrelated to
+sandboxes.) As `configure` runs, you should get output that includes lines
 similar to:
 ```
 configure: configuring for alternate gemm implementation:
@@ -53,8 +63,8 @@ implementation.
 
 ## Sandbox rules
 
-Like any decent sandbox, there are rules for playing here. Please follow these
-guidelines for the best sandbox developer experience.
+Like any civilized sandbox, there are rules for playing here. Please follow
+these guidelines for the best sandbox developer experience.
 
 1. Don't bother worrying about makefiles. We've already taken care of the
 boring/annoying/headache-inducing build system stuff for you. :) By configuring
@@ -75,9 +85,9 @@ any issues.
 
 3. All of your code to replace BLIS's default implementation of `bli_gemmnat()`
 should reside in the named sandbox directory, or some directory therein.
-(Obviously.) For example, this `README.md` file is located in the `ref99`
-sandbox, located in `sandbox/ref99`. All of the code associated with this
-sandbox will be contained within `sandbox/ref99`.
+(Obviously.) For example, the "reference" sandbox is located in
+`sandbox/ref99`. All of the code associated with this sandbox will be
+contained within `sandbox/ref99`.
 
 4. The *only* header file that is required of your sandbox is `bli_sandbox.h`.
 It must be named `bli_sandbox.h` because `blis.h` will `#include` this file
@@ -90,17 +100,18 @@ you should only place things (e.g. prototypes or type definitions) in
 (a) the BLIS framework itself, or
 (b) an *application* that calls your sandbox-enabled BLIS library.
 Usually, neither of these situations will require any of your local definitions
-since those definitions are only needed to define your sandbox implementation
-of `bli_gemmnat()`, and this function is already prototyped by BLIS.
+since those local definitions are only needed to define your sandbox
+implementation of `bli_gemmnat()`, and this function is already prototyped by
+BLIS.
 
-5. Your definition of `bli_gemmnat()` should be the *only* function you define
+5. Your definition of `bli_gemmnat()` should be the **only function you define**
 in your sandbox that begins with `bli_`. If you define other functions that
 begin with `bli_`, you risk a namespace collision with existing framework
 functions. To guarantee safety, please prefix your locally-defined sandbox
 functions with another prefix. Here, in the `ref99` sandbox, we use the prefix
-`blx_`. (The `x` is for sandbox. Or experimental. Whatever, it doesn't matter.)
-Also, please avoid the prefix `bla_` since that prefix is also used in BLIS for
-BLAS compatibility functions.
+`blx_`. (The `x` is for sandbox. Or experimental.) Also, please avoid the
+prefix `bla_` since that prefix is also used in BLIS for BLAS compatibility
+functions.
 
 If you follow these rules, you will be much more likely to have a pleasant
 experience integrating your BLIS sandbox into the larger framework.
@@ -111,22 +122,22 @@ Notice that the BLIS sandbox is not all-powerful. You are more-or-less stuck
 working with the existing BLIS infrastructure.
 
 For example, with a BLIS sandbox you **can** do the following kinds of things:
-- use a different gemm algorithmic partitioning path than the default Goto-like
-  algorithm;
+- use a different `gemm` algorithmic partitioning path than the default
+  Goto-like algorithm;
 - experiment with different implementations of `packm` (not just `packm`
   kernels, which can already be customized within each sub-configuration);
 - try inlining your functions manually;
 - pivot away from using `obj_t` objects at higher algorithmic level (such as
   immediately after calling `bli_gemmnat()`) to try to avoid some overhead;
 - create experimental implementations of new BLAS-like operations (provided
-  that you also provide an implementation of `blis_gemmnat()`).
+  that you also provide an implementation of `bli_gemmnat()`).
 
 You **cannot**, however, use a sandbox to do the following kinds of things:
 - define new datatypes (half-precision, quad-precision, short integer, etc.)
   and expect the rest of BLIS to "know" how to handle them;
 - use a sandbox to replace the default implementation of a different level-3
   operation, such as Hermitian rank-k update;
-- change the existing BLIS APIs;
+- change the existing BLIS APIs (typed or object);
 - remove support for one or more BLIS datatypes (to cut down on library size,
   for example).
 
@@ -157,12 +168,12 @@ configurations (for example, via `./configure x86_64`). However, it also means
 that sandboxes are not ideal for microkernels, as they sometimes need additional
 compiler flags not included in the set used for framework `CFLAGS` in order to
 yield the highest performance. If you have a new microkernel you would like to
-use within a sandbox, you can always prototype it within a sandbox. However,
+use within a sandbox, you can always develop it within a sandbox. However,
 once it is stable and ready for use by others, it's best to formally register
 the kernel(s) along with a new configuration, which will allow you to specify
 kernel-specific compiler flags to be used when compiling your microkernel.
 Please see the
-[Configuration wiki](https://github.com/flame/blis/wiki/ConfigurationHowTo)
+[Configuration Guide](ConfigurationHowTo)
 for more details, and when in doubt, please don't be shy about seeking
 guidance from BLIS developers by opening a
 [new issue](https://github.com/flame/blis/issues) or sending a message to the
@@ -171,10 +182,11 @@ guidance from BLIS developers by opening a
 Notwithstanding these limitations, hopefully you still find BLIS sandboxes
 useful!
 
-## Questions? Concerns? Feedback?
+## Conclusion
 
-If you encounter any problems, please open a new
-[issue on GitHub](https://github.com/flame/blis/issues).
+If you encounter any problems, or are really bummed-out that `gemm` is the
+only operation for which you can provide a sandbox implementation, please open
+a new [issue on GitHub](https://github.com/flame/blis/issues).
 
 If you are unsure about how something works, you can still open an issue. Or, you
 can send a message to
@@ -182,4 +194,3 @@ can send a message to
 
 Happy sandboxing!
 
-Field
