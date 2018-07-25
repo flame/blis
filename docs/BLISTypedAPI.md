@@ -836,7 +836,7 @@ void bli_?axpyf
        conj_t  conja,
        conj_t  conjx,
        dim_t   m,
-       dim_t   nf,
+       dim_t   b,
        ctype*  alpha,
        ctype*  a, inc_t inca, inc_t lda,
        ctype*  x, inc_t incx,
@@ -847,7 +847,7 @@ Perform
 ```
   y := y + alpha * conja(A) * conjx(x)
 ```
-where `A` is an _m x nf_ matrix, and `y` and `x` are vectors. The kernel, if optimized, is implemented as a fused series of calls to [axpyv](BLISTypedAPI.md#axpyv) where _nf_ is less than or equal to an implementation-dependent fusing factor specific to `axpyf`.
+where `A` is an _m x b_ matrix, and `y` and `x` are vectors. The kernel, if optimized, is implemented as a fused series of calls to [axpyv](BLISTypedAPI.md#axpyv) where _b_ is less than or equal to an implementation-dependent fusing factor specific to `axpyf`.
 
 ---
 
@@ -858,7 +858,7 @@ void bli_?dotxf
        conj_t  conjat,
        conj_t  conjx,
        dim_t   m,
-       dim_t   nf,
+       dim_t   b,
        ctype*  alpha,
        ctype*  a, inc_t inca, inc_t lda,
        ctype*  x, inc_t incx,
@@ -870,7 +870,7 @@ Perform
 ```
   y := y + alpha * conjat(A^T) * conjx(x)
 ```
-where `A` is an _m x nf_ matrix, and `y` and `x` are vectors. The kernel, if optimized, is implemented as a fused series of calls to [dotxv](BLISTypedAPI.md#dotxv) where _nf_ is less than or equal to an implementation-dependent fusing factor specific to `dotxf`.
+where `A` is an _m x b_ matrix, and `y` and `x` are vectors. The kernel, if optimized, is implemented as a fused series of calls to [dotxv](BLISTypedAPI.md#dotxv) where _b_ is less than or equal to an implementation-dependent fusing factor specific to `dotxf`.
 
 ---
 
@@ -883,7 +883,7 @@ void bli_?dotxaxpyf
        conj_t  conjw,
        conj_t  conjx,
        dim_t   m,
-       dim_t   nf,
+       dim_t   b,
        ctype*  alpha,
        ctype*  a, inc_t inca, inc_t lda,
        ctype*  w, inc_t incw,
@@ -898,7 +898,7 @@ Perform
   y := beta * y + alpha * conjat(A^T) * conjw(w)
   z :=        z + alpha * conja(A)    * conjx(x)
 ```
-where `A` is an _m x nf_ matrix, `w` and `z` are vectors of length _m_, `x` and `y` are vectors of length `nf`, and `alpha` and `beta` are scalars. The kernel, if optimized, is implemented as a fusion of calls to [dotxf](BLISTypedAPI.md#dotxf) and [axpyf](BLISTypedAPI.md#axpyf).
+where `A` is an _m x b_ matrix, `w` and `z` are vectors of length _m_, `x` and `y` are vectors of length `b`, and `alpha` and `beta` are scalars. The kernel, if optimized, is implemented as a fusion of calls to [dotxf](BLISTypedAPI.md#dotxf) and [axpyf](BLISTypedAPI.md#axpyf).
 
 
 

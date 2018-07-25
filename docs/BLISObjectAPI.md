@@ -807,10 +807,11 @@ void bli_setrv
 ```
 Perform
 ```
-  real(x) := realproj(alpha)
+  real(x) := real(alpha)
 ```
-That is, given an _n_-length vector `x`, set all elements' real components to the real projection of scalar `alpha`.
-If `x` is real, this operation is equivalent to performing `setv` on `x` with the real projection of scalar `alpha`.
+That is, given an _n_-length vector `x`, set all elements' real components to the real component of scalar `alpha`. (If `alpha` is complex, the imaginary component is ignored.)
+If `x` is real, this operation is equivalent to performing `setv` on `x` with the real component of scalar `alpha`.
+**Note**: This operation is provided for convenience as an object wrapper to `setv`, and thus it has no analogue in the [BLIS typed API](BLISTypedAPI).
 
 ---
 
@@ -824,10 +825,11 @@ void bli_setiv
 ```
 Perform
 ```
-  imag(x) := realproj(alpha)
+  imag(x) := real(alpha)
 ```
-That is, given an _n_-length vector `x`, set all elements' imaginary components to the real projection of scalar `alpha`.
+That is, given an _n_-length vector `x`, set all elements' imaginary components to the real component of scalar `alpha`. (If `alpha` is complex, the imaginary component is ignored.)
 If `x` is real, this operation is equivalent to a no-op.
+**Note**: This operation is provided for convenience as an object wrapper to `setv`, and thus it has no analogue in the [BLIS typed API](BLISTypedAPI).
 
 ---
 
@@ -1120,10 +1122,11 @@ void bli_setrm
 ```
 Perform
 ```
-  real(A) := realproj(alpha)
+  real(A) := real(alpha)
 ```
-That is, given an _m x n_ matrix `A`, set all elements' real components to the real projection of scalar `alpha`.
-If `A` is real, this operation is equivalent to performing `setm` on `A` with the real projection of scalar `alpha`.
+That is, given an _m x n_ matrix `A`, set all elements' real components to the real component of scalar `alpha`. (If `alpha` is complex, the imaginary component is ignored.)
+If `A` is real, this operation is equivalent to performing `setm` on `A` with the real component of scalar `alpha`.
+**Note**: This operation is provided for convenience as an object wrapper to `setm`, and thus it has no analogue in the [BLIS typed API](BLISTypedAPI).
 
 Observed object properties: `diagoff(A)`, `diag(A)`, `uplo(A)`.
 
@@ -1139,10 +1142,11 @@ void bli_setim
 ```
 Perform
 ```
-  imag(A) := realproj(alpha)
+  imag(A) := real(alpha)
 ```
-That is, given an _m x n_ matrix `A`, set all elements' imaginary components to the real projection of scalar `alpha`.
+That is, given an _m x n_ matrix `A`, set all elements' imaginary components to the real component of scalar `alpha`. (If `alpha` is complex, the imaginary component is ignored.)
 If `A` is real, this operation is equivalent to a no-op.
+**Note**: This operation is provided for convenience as an object wrapper to `setm`, and thus it has no analogue in the [BLIS typed API](BLISTypedAPI).
 
 Observed object properties: `diagoff(A)`, `diag(A)`, `uplo(A)`.
 
@@ -1238,7 +1242,7 @@ Perform
 ```
   y := y + alpha * conja(A) * conjx(x)
 ```
-where `A` is an _m x nf_ matrix, and `x` and `y` are vectors. The kernel, if optimized, is implemented as a fused series of calls to [axpyv](BLISObjectAPI.md#axpyv) where _nf_ is less than or equal to an implementation-dependent fusing factor specific to `axpyf`.
+where `A` is an _m x b_ matrix, and `x` and `y` are vectors. The kernel, if optimized, is implemented as a fused series of calls to [axpyv](BLISObjectAPI.md#axpyv) where _b_ is less than or equal to an implementation-dependent fusing factor specific to `axpyf`.
 
 Observed object properties: `conj?(alpha)`, `conj?(A)`, `conj?(x)`.
 
@@ -1259,7 +1263,7 @@ Perform
 ```
   y := conj?(beta) * y + conj?(alpha) * conj?(A)^T * conj?(x)
 ```
-where `A` is an _m x nf_ matrix, and `x` and `y` are vectors. The kernel, if optimized, is implemented as a fused series of calls to [dotxv](BLISObjectAPI.md#dotxv) where _nf_ is less than or equal to an implementation-dependent fusing factor specific to `dotxf`.
+where `A` is an _m x b_ matrix, and `x` and `y` are vectors. The kernel, if optimized, is implemented as a fused series of calls to [dotxv](BLISObjectAPI.md#dotxv) where _b_ is less than or equal to an implementation-dependent fusing factor specific to `dotxf`.
 
 Observed object properties: `conj?(alpha)`, `conj?(beta)`, `conj?(A)`, `conj?(x)`.
 
@@ -1283,7 +1287,7 @@ Perform
   y := conj?(beta) * y + conj?(alpha) * conj?(A)^T * conj?(w)
   z :=               z + conj?(alpha) * conj?(A)   * conj?(x)
 ```
-where `A` is an _m x nf_ matrix, `w` and `z` are vectors of length _m_, `x` and `y` are vectors of length `nf`, and `alpha` and `beta` are scalars. The kernel, if optimized, is implemented as a fusion of calls to [dotxf](BLISObjectAPI.md#dotxf) and [axpyf](BLISObjectAPI.md#axpyf).
+where `A` is an _m x b_ matrix, `w` and `z` are vectors of length _m_, `x` and `y` are vectors of length `b`, and `alpha` and `beta` are scalars. The kernel, if optimized, is implemented as a fusion of calls to [dotxf](BLISObjectAPI.md#dotxf) and [axpyf](BLISObjectAPI.md#axpyf).
 
 Observed object properties: `conj?(alpha)`, `conj?(beta)`, `conj?(A)`, `conj?(w)`, `conj?(x)`.
 
@@ -1961,8 +1965,8 @@ err_t bli_getijm
         double* ai
       )
 ```
-Copy the real and imaginary values at the _(i,j)_ element of object `b` to `ar` and `ai`. f elements of `b` are stored as real types, then only `ar` is overwritten and `ai` is left unchanged. (If `b` contains elements stored in single precision, the corresponding elements are typecast/promoted during the copy.) 
-If either the row offset _i_ is beyond the _m_ dimension of `b`, or column offset _j_ is beyond the _n_ dimension of `b`, the function does not perform any copy and returns `BLIS_FAILURE`. Similarly, if `b` is a global scalar constant such as `BLIS_ONE`, `BLIS_FAILURE is returned.`
+Copy the real and imaginary values at the (`i`,`j`) element of object `b` to `ar` and `ai`. f elements of `b` are stored as real types, then only `ar` is overwritten and `ai` is left unchanged. (If `b` contains elements stored in single precision, the corresponding elements are typecast/promoted during the copy.)
+If either the row offset `i` is beyond the _m_ dimension of `b`, or column offset `j` is beyond the _n_ dimension of `b`, the function does not perform any copy and returns `BLIS_FAILURE`. Similarly, if `b` is a global scalar constant such as `BLIS_ONE`, `BLIS_FAILURE` is returned.
 
 #### setijm
 ```c
@@ -1975,9 +1979,8 @@ err_t bli_setijm
        obj_t*  b
      );
 ```
-Copy real and imaginary values `ar` and `ai` to the _(i,j)_ element of object `b`. If elements of `b` are stored as real types, then only `ar` is copied and `ai` is ignored. (If `b` contains elements stored in single precision, the corresponding elements are typecast/demoted during the copy.)
-If either the row offset _i_ is beyond the _m_ dimension of `b`, or column offset _j_ is beyond the _n_ dimension of `b`, the function does not perform any copy and returns `BLIS_FAILURE`. Similarly, if `b` is a global scalar constant such as `BLIS_ONE`, `BLIS_FAILURE is returned.`
-
+Copy real and imaginary values `ar` and `ai` to the (`i`,`j`) element of object `b`. If elements of `b` are stored as real types, then only `ar` is copied and `ai` is ignored. (If `b` contains elements stored in single precision, the corresponding elements are typecast/demoted during the copy.)
+If either the row offset `i` is beyond the _m_ dimension of `b`, or column offset `j` is beyond the _n_ dimension of `b`, the function does not perform any copy and returns `BLIS_FAILURE`. Similarly, if `b` is a global scalar constant such as `BLIS_ONE`, `BLIS_FAILURE` is returned.
 
 
 
