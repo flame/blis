@@ -584,21 +584,21 @@ Adding support for a new umbrella configuration family in BLIS is fairly straigh
 
 2. _**Add support within the framework source code.**_ Next, we need to update the BLIS framework source code so that the new configuration family is recognized and supported. Configuration families require updates to two files.
 
-   **`frame/include/bli_arch_config.h`**. This file must be updated to `#include` the `bli_family_intelavx.h` header file. Notice that the preprocessor directive should be guarded as follows:
-   ```c
-   #ifdef BLIS_FAMILY_INTELAVX
-   #include "bli_family_intelavx.h"
-   #endif
-   ```
-   The `BLIS_FAMILY_INTELAVX` will automatically be defined by the build system whenever the family was targeted by `configure` is `intelavx`. (In general, if the user runs `./configure foobar`, the C preprocessor macro `BLIS_FAMILY_FOOBAR` will be defined.)
+   * **`frame/include/bli_arch_config.h`**. This file must be updated to `#include` the `bli_family_intelavx.h` header file. Notice that the preprocessor directive should be guarded as follows:
+      ```c
+      #ifdef BLIS_FAMILY_INTELAVX
+      #include "bli_family_intelavx.h"
+      #endif
+      ```
+      The `BLIS_FAMILY_INTELAVX` will automatically be defined by the build system whenever the family was targeted by `configure` is `intelavx`. (In general, if the user runs `./configure foobar`, the C preprocessor macro `BLIS_FAMILY_FOOBAR` will be defined.)
 
-   **`frame/base/bli_arch.c`**. This file must be updated so that `bli_arch_query_id()` returns the correct `arch_t` microarchitecture ID value to the caller. This function is called when the framework is trying to choose which sub-configuration to use at runtime. For x86_64 architectures, this is supported via the `CPUID` instruction, as implemented via `bli_cpuid_query_id()`. Thus, you can simply mimic what is done for the `intel64` family by inserting lines such as:
-   ```c
-   #ifdef BLIS_FAMILY_INTELAVX
-       id = bli_cpuid_query_id();
-   #endif
-   ```
-   This results in `bli_cpuid_query_id()` being called, which will return the `arch_t` ID value corresponding to the hardware detected by `CPUID`. (If your configuration family does not consist of x86_64 architectures, then you'll need some other heuristic to determine how to choose the correct sub-configuration at runtime. When in doubt, please [open an issue](https://github.com/flame/blis/issues) to begin a dialogue with developers.)
+   * **`frame/base/bli_arch.c`**. This file must be updated so that `bli_arch_query_id()` returns the correct `arch_t` microarchitecture ID value to the caller. This function is called when the framework is trying to choose which sub-configuration to use at runtime. For x86_64 architectures, this is supported via the `CPUID` instruction, as implemented via `bli_cpuid_query_id()`. Thus, you can simply mimic what is done for the `intel64` family by inserting lines such as:
+      ```c
+      #ifdef BLIS_FAMILY_INTELAVX
+          id = bli_cpuid_query_id();
+      #endif
+      ```
+      This results in `bli_cpuid_query_id()` being called, which will return the `arch_t` ID value corresponding to the hardware detected by `CPUID`. (If your configuration family does not consist of x86_64 architectures, then you'll need some other heuristic to determine how to choose the correct sub-configuration at runtime. When in doubt, please [open an issue](https://github.com/flame/blis/issues) to begin a dialogue with developers.)
 
 
 
@@ -654,98 +654,98 @@ Adding support for a new-subconfiguration to BLIS is similar to adding support f
 
 2. _**Add support within the framework source code.**_ Next, we need to update the BLIS framework source code so that the new sub-configuration is recognized and supported. Sub-configurations require updates to four files--six if hardware detection logic is added.
 
-   **`frame/include/bli_type_defs.h`**. First, we need to define an ID to associate with the microarchitecture for which we are adding support. All microarchitecture type IDs are defined in [bli_type_defs.h](https://github.com/flame/blis/blob/master/frame/include/bli_type_defs.h) as an enumerated type that we `typedef` to `arch_t`. To support `knl`, we add a new enumerated type value `BLIS_ARCH_KNL`:
-   ```c
-   typedef enum
-   {
-       BLIS_ARCH_KNL,
-       BLIS_ARCH_KNC,
-       BLIS_ARCH_HASWELL,
-       BLIS_ARCH_SANDYBRIDGE,
-       BLIS_ARCH_PENRYN,
+   * **`frame/include/bli_type_defs.h`**. First, we need to define an ID to associate with the microarchitecture for which we are adding support. All microarchitecture type IDs are defined in [bli_type_defs.h](https://github.com/flame/blis/blob/master/frame/include/bli_type_defs.h) as an enumerated type that we `typedef` to `arch_t`. To support `knl`, we add a new enumerated type value `BLIS_ARCH_KNL`:
+      ```c
+      typedef enum
+      {
+          BLIS_ARCH_KNL,
+          BLIS_ARCH_KNC,
+          BLIS_ARCH_HASWELL,
+          BLIS_ARCH_SANDYBRIDGE,
+          BLIS_ARCH_PENRYN,
 
-       BLIS_ARCH_ZEN,
-       BLIS_ARCH_EXCAVATOR,
-       BLIS_ARCH_STEAMROLLER,
-       BLIS_ARCH_PILEDRIVER,
-       BLIS_ARCH_BULLDOZER,
+          BLIS_ARCH_ZEN,
+          BLIS_ARCH_EXCAVATOR,
+          BLIS_ARCH_STEAMROLLER,
+          BLIS_ARCH_PILEDRIVER,
+          BLIS_ARCH_BULLDOZER,
 
-       BLIS_ARCH_CORTEXA57,
-       BLIS_ARCH_CORTEXA15,
-       BLIS_ARCH_CORTEXA9,
+          BLIS_ARCH_CORTEXA57,
+          BLIS_ARCH_CORTEXA15,
+          BLIS_ARCH_CORTEXA9,
 
-       BLIS_ARCH_POWER7,
-       BLIS_ARCH_BGQ,
+          BLIS_ARCH_POWER7,
+          BLIS_ARCH_BGQ,
 
-       BLIS_ARCH_GENERIC
+          BLIS_ARCH_GENERIC
 
-   } arch_t;
-   ```
-   Additionally, you'll need to update the definition of `BLIS_NUM_ARCHS` to reflect the new total number of enumerated `arch_t` values:
-   ```c
-   #define BLIS_NUM_ARCHS 16
-   ```
-
-
-   **`frame/base/bli_gks.c`**. We must also update the global kernel structure, or gks, to register the new sub-configuration during library initialization. Sub-configuration registration occurs in `bli_gks_init()`. For `knl`, updating this function amounts to inserting the following lines
-   ```c
-   #ifdef BLIS_CONFIG_KNL
-           bli_gks_register_cntx( BLIS_ARCH_KNL, bli_cntx_init_knl,
-                                                 bli_cntx_init_knl_ref,
-                                                 bli_cntx_init_knl_ind );
-   #endif
-   ```
-   This function submits pointers to various context initialization functions to the global kernel structure, which are then stored and called at the appropriate time. The functions **must** be named strictly according to the format shown in the example above, with `knl` replaced with the sub-configuration name. Also, note the call to `bli_gks_register_cntx` is guarded by `BLIS_CONFIG_KNL`. This macro is automatically `#defined` by the build system if and when the `knl` sub-configuration is enabled at configure-time, either directly as a singleton family or indirectly via an umbrella family.
+      } arch_t;
+      ```
+      Additionally, you'll need to update the definition of `BLIS_NUM_ARCHS` to reflect the new total number of enumerated `arch_t` values:
+      ```c
+      #define BLIS_NUM_ARCHS 16
+      ```
 
 
-
-   **`frame/include/bli_arch_config.h`**. This file must be updated in two places. First, we must modify it to generate prototypes for the `bli_cntx_init_*()` functions, including the developer-provided function `bli_cntx_init_knl()` (defined in `config/knl/bli_cntx_init_knl.c`), by inserting:
-   ```c
-   #ifdef BLIS_CONFIG_KNL
-   CNTX_INIT_PROTS( knl )
-   #endif
-   ```
-   Here, the `CNTX_INIT_PROTS` macro generates the appropriate prototypes based on the name of the sub-configuration. Next, we must `#include` the `bli_family_knl.h` header file, just as we would if we were adding support for an umbrella family:
-   ```c
-   #ifdef BLIS_FAMILY_KNL
-   #include "bli_family_knl.h"
-   #endif
-   ```
-   As before with umbrella families, the `BLIS_FAMILY_KNL` macro is automatically defined by the build system for whatever family was targeted by `configure`. (That is, if the user runs `./configure foobar`, the C preprocessor macro `BLIS_FAMILY_FOOBAR` will be defined.) 
+   * **`frame/base/bli_gks.c`**. We must also update the global kernel structure, or gks, to register the new sub-configuration during library initialization. Sub-configuration registration occurs in `bli_gks_init()`. For `knl`, updating this function amounts to inserting the following lines
+      ```c
+      #ifdef BLIS_CONFIG_KNL
+              bli_gks_register_cntx( BLIS_ARCH_KNL, bli_cntx_init_knl,
+                                                    bli_cntx_init_knl_ref,
+                                                    bli_cntx_init_knl_ind );
+      #endif
+      ```
+      This function submits pointers to various context initialization functions to the global kernel structure, which are then stored and called at the appropriate time. The functions **must** be named strictly according to the format shown in the example above, with `knl` replaced with the sub-configuration name. Also, note the call to `bli_gks_register_cntx` is guarded by `BLIS_CONFIG_KNL`. This macro is automatically `#defined` by the build system if and when the `knl` sub-configuration is enabled at configure-time, either directly as a singleton family or indirectly via an umbrella family.
 
 
 
-   **`frame/base/bli_arch.c`**. This file must be updated so that `bli_arch_query_id()` returns the correct `arch_t` architecture ID value to the caller. `bli_arch_query_id()` is called when the framework is trying to choose which sub-configuration to use at runtime. When adding support for a sub-configuration as a singleton family, this amounts to adding a block of code such as:
-   ```c
-   #ifdef BLIS_FAMILY_KNL
-       id = BLIS_ARCH_KNL;
-   #endif
-   ```
-   The `BLIS_FAMILY_KNL` macro is automatically `#defined` by the build system if the `knl` sub-configuration was targeted directly (as a singleton family) at configure-time. Other ID values are returned only if their respective family macros are defined. (Recall that only one family is ever enabled at time.) If, however, the `knl` sub-configuration was enabled indirectly via an umbrella family, `bli_arch_query_id()` will return the `arch_t` ID value via the lines similar to the following:
-   ```c
-   #ifdef BLIS_FAMILY_INTEL64
-       id = bli_cpuid_query_id();
-   #endif
-   #ifdef BLIS_FAMILY_AMD64
-       id = bli_cpuid_query_id();
-   #endif
-   ```
-   Supporting runtime detection of `knl` microarchitectures requires adding `knl` support to `bli_cpuid_query_id()`, which is addressed in the next step.
+   * **`frame/include/bli_arch_config.h`**. This file must be updated in two places. First, we must modify it to generate prototypes for the `bli_cntx_init_*()` functions, including the developer-provided function `bli_cntx_init_knl()` (defined in `config/knl/bli_cntx_init_knl.c`), by inserting:
+      ```c
+      #ifdef BLIS_CONFIG_KNL
+      CNTX_INIT_PROTS( knl )
+      #endif
+      ```
+      Here, the `CNTX_INIT_PROTS` macro generates the appropriate prototypes based on the name of the sub-configuration. Next, we must `#include` the `bli_family_knl.h` header file, just as we would if we were adding support for an umbrella family:
+      ```c
+      #ifdef BLIS_FAMILY_KNL
+      #include "bli_family_knl.h"
+      #endif
+      ```
+      As before with umbrella families, the `BLIS_FAMILY_KNL` macro is automatically defined by the build system for whatever family was targeted by `configure`. (That is, if the user runs `./configure foobar`, the C preprocessor macro `BLIS_FAMILY_FOOBAR` will be defined.) 
 
 
 
-   **`frame/base/bli_cpuid.c`**. To support the aforementioned runtime microarchitecture detection, the function `bli_cpuid_query_id()`, defined in [bli_cpuid.c](https://github.com/flame/blis/blob/master/frame/base/bli_cpuid.c), will need to be updated. Specifically, we need to insert logic that will detect the presence of the new hardware based on the results of the `CPUID` instruction (assuming the new microarchitecture belongs to the x86_64 architecture family). For example, when support for `knl` was added, this entailed adding the following code block to `bli_cpuid_query_id()`:
-   ```c
-   #ifdef BLIS_CONFIG_KNL
-       if ( bli_cpuid_is_knl( family, model, features ) )
-           return BLIS_ARCH_KNL;
-   #endif
-   ```
-   Additionally, we had to define the function `bli_cpuid_is_knl()`, which checks for various processor features known to be present on `knl` systems and returns a boolean `TRUE` if all relevant feature checks are satisfied by the hardware. Note that the order in which we check for the sub-configurations is important. We must check for microarchitectural matches from most recent to most dated. This prevents an older sub-configuration from being selected on newer hardware when a newer sub-configuration would have also matched.
+   * **`frame/base/bli_arch.c`**. This file must be updated so that `bli_arch_query_id()` returns the correct `arch_t` architecture ID value to the caller. `bli_arch_query_id()` is called when the framework is trying to choose which sub-configuration to use at runtime. When adding support for a sub-configuration as a singleton family, this amounts to adding a block of code such as:
+      ```c
+      #ifdef BLIS_FAMILY_KNL
+          id = BLIS_ARCH_KNL;
+      #endif
+      ```
+      The `BLIS_FAMILY_KNL` macro is automatically `#defined` by the build system if the `knl` sub-configuration was targeted directly (as a singleton family) at configure-time. Other ID values are returned only if their respective family macros are defined. (Recall that only one family is ever enabled at time.) If, however, the `knl` sub-configuration was enabled indirectly via an umbrella family, `bli_arch_query_id()` will return the `arch_t` ID value via the lines similar to the following:
+      ```c
+      #ifdef BLIS_FAMILY_INTEL64
+          id = bli_cpuid_query_id();
+      #endif
+      #ifdef BLIS_FAMILY_AMD64
+          id = bli_cpuid_query_id();
+      #endif
+      ```
+      Supporting runtime detection of `knl` microarchitectures requires adding `knl` support to `bli_cpuid_query_id()`, which is addressed in the next step.
 
 
 
-   **`frame/base/bli_cpuid.h`**. After defining the function `bli_cpuid_is_knl()`, we must also update [bli_cpuid.h](https://github.com/flame/blis/blob/master/frame/base/bli_cpuid.h) to contain a prototype for the function.
+   * **`frame/base/bli_cpuid.c`**. To support the aforementioned runtime microarchitecture detection, the function `bli_cpuid_query_id()`, defined in [bli_cpuid.c](https://github.com/flame/blis/blob/master/frame/base/bli_cpuid.c), will need to be updated. Specifically, we need to insert logic that will detect the presence of the new hardware based on the results of the `CPUID` instruction (assuming the new microarchitecture belongs to the x86_64 architecture family). For example, when support for `knl` was added, this entailed adding the following code block to `bli_cpuid_query_id()`:
+      ```c
+      #ifdef BLIS_CONFIG_KNL
+          if ( bli_cpuid_is_knl( family, model, features ) )
+              return BLIS_ARCH_KNL;
+      #endif
+      ```
+      Additionally, we had to define the function `bli_cpuid_is_knl()`, which checks for various processor features known to be present on `knl` systems and returns a boolean `TRUE` if all relevant feature checks are satisfied by the hardware. Note that the order in which we check for the sub-configurations is important. We must check for microarchitectural matches from most recent to most dated. This prevents an older sub-configuration from being selected on newer hardware when a newer sub-configuration would have also matched.
+
+
+
+   * **`frame/base/bli_cpuid.h`**. After defining the function `bli_cpuid_is_knl()`, we must also update [bli_cpuid.h](https://github.com/flame/blis/blob/master/frame/base/bli_cpuid.h) to contain a prototype for the function.
 
 
 
