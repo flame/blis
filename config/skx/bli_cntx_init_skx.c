@@ -34,6 +34,8 @@
 
 #include "blis.h"
 
+#define WHICH_DGEMM_UKR 0
+
 void bli_cntx_init_skx( cntx_t* cntx )
 {
 	blksz_t blkszs[ BLIS_NUM_BLKSZS ];
@@ -47,10 +49,21 @@ void bli_cntx_init_skx( cntx_t* cntx )
 	// their storage preferences.
 	bli_cntx_set_l3_nat_ukrs
 	(
-	  2,
+	  1,
 	  // gemm
-	  BLIS_GEMM_UKR,       BLIS_FLOAT ,   bli_sgemm_skx_asm_32x12_l2,   FALSE,
-	  BLIS_GEMM_UKR,       BLIS_DOUBLE,   bli_dgemm_skx_asm_16x12_l2,   FALSE,
+#if WHICH_DGEMM_UKR == 0
+	  BLIS_GEMM_UKR,       BLIS_DOUBLE,   bli_dgemm_skx_asm_32x6,   FALSE,
+#elif WHICH_DGEMM_UKR == 1
+      BLIS_GEMM_UKR,       BLIS_DOUBLE,   bli_dgemm_skx_asm_24x8,   FALSE,
+#elif WHICH_DGEMM_UKR == 2
+      BLIS_GEMM_UKR,       BLIS_DOUBLE,  bli_dgemm_skx_asm_16x14,   FALSE,
+#elif WHICH_DGEMM_UKR == 3
+      BLIS_GEMM_UKR,       BLIS_DOUBLE,  bli_dgemm_skx_asm_14x16,    TRUE,
+#elif WHICH_DGEMM_UKR == 4
+      BLIS_GEMM_UKR,       BLIS_DOUBLE,   bli_dgemm_skx_asm_8x24,    TRUE,
+#elif WHICH_DGEMM_UKR == 5
+      BLIS_GEMM_UKR,       BLIS_DOUBLE,   bli_dgemm_skx_asm_6x32,    TRUE,
+#endif
 	  cntx
 	);
 
@@ -101,12 +114,50 @@ void bli_cntx_init_skx( cntx_t* cntx )
 
 	// Initialize level-3 blocksize objects with architecture-specific values.
 	//                                           s      d      c      z
-	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    32,    16,     3,     3 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,    12,     8,     4 );
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   480,   240,   144,    72 );
+#if WHICH_DGEMM_UKR == 0
+    bli_blksz_init_easy( &blkszs[ BLIS_MR ],    32,    32,     3,     3 );
+    bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,     6,     8,     4 );
+    bli_blksz_init_easy( &blkszs[ BLIS_MC ],   480,   224,   144,    72 );
+    bli_blksz_init     ( &blkszs[ BLIS_KC ],   384,   384,   256,   256,
+                                               480,   480,   256,   256 );
+    bli_blksz_init_easy( &blkszs[ BLIS_NC ],  3072,  3756,  4080,  4080 ); // nc based off of 11MB shared, non-inclusive L3
+#elif WHICH_DGEMM_UKR == 1
+    bli_blksz_init_easy( &blkszs[ BLIS_MR ],    32,    24,     3,     3 );
+    bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,     8,     8,     4 );
+    bli_blksz_init_easy( &blkszs[ BLIS_MC ],   480,   240,   144,    72 );
+    bli_blksz_init     ( &blkszs[ BLIS_KC ],   384,   384,   256,   256,
+                                               480,   480,   256,   256 );
+    bli_blksz_init_easy( &blkszs[ BLIS_NC ],  3072,  3744,  4080,  4080 );
+#elif WHICH_DGEMM_UKR == 2
+    bli_blksz_init_easy( &blkszs[ BLIS_MR ],    32,    16,     3,     3 );
+    bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,    14,     8,     4 );
+    bli_blksz_init_easy( &blkszs[ BLIS_MC ],   480,   240,   144,    72 );
+    bli_blksz_init     ( &blkszs[ BLIS_KC ],   384,   384,   256,   256,
+                                               480,   480,   256,   256 );
+    bli_blksz_init_easy( &blkszs[ BLIS_NC ],  3072,  3752,  4080,  4080 );
+#elif WHICH_DGEMM_UKR == 3
+    bli_blksz_init_easy( &blkszs[ BLIS_MR ],    32,    14,     3,     3 );
+    bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,    16,     8,     4 );
+    bli_blksz_init_easy( &blkszs[ BLIS_MC ],   480,   238,   144,    72 );
+    bli_blksz_init     ( &blkszs[ BLIS_KC ],   384,   384,   256,   256,
+                                               480,   480,   256,   256 );
+    bli_blksz_init_easy( &blkszs[ BLIS_NC ],  3072,  3744,  4080,  4080 );
+#elif WHICH_DGEMM_UKR == 4
+    bli_blksz_init_easy( &blkszs[ BLIS_MR ],    32,     8,     3,     3 );
+    bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,    24,     8,     4 );
+    bli_blksz_init_easy( &blkszs[ BLIS_MC ],   480,   240,   144,    72 );
+    bli_blksz_init     ( &blkszs[ BLIS_KC ],   384,   384,   256,   256,
+                                               480,   480,   256,   256 );
+    bli_blksz_init_easy( &blkszs[ BLIS_NC ],  3072,  3744,  4080,  4080 );
+#elif WHICH_DGEMM_UKR == 5
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    32,     6,     3,     3 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,    32,     8,     4 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   480,   222,   144,    72 );
 	bli_blksz_init     ( &blkszs[ BLIS_KC ],   384,   384,   256,   256,
 	                                           480,   480,   256,   256 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  3072,  3072,  4080,  4080 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  3072,  3744,  4080,  4080 );
+#endif
+
 	bli_blksz_init_easy( &blkszs[ BLIS_AF ],     8,     8,    -1,    -1 );
 	bli_blksz_init_easy( &blkszs[ BLIS_DF ],     8,     8,    -1,    -1 );
 

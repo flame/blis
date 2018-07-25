@@ -647,6 +647,7 @@
 #define SAR(...) INSTR_(sar, __VA_ARGS__)
 #define SHLX(_0, _1, _2) INSTR_(shlx, _0, _1, _2)
 #define SHRX(_0, _1, _2) INSTR_(shrx, _0, _1, _2)
+#define RORX(_0, _1, _2) INSTR_(rorx, _0, _1, _2)
 #define DEC(_0) INSTR_(dec, _0)
 #define INC(_0) INSTR_(inc, _0)
 
@@ -659,6 +660,7 @@
 #define sar(...) SAR(__VA_ARGS__)
 #define shlx(_0, _1, _2) SHLX(_0, _1, _2)
 #define shrx(_0, _1, _2) SHRX(_0, _1, _2)
+#define rorx(_0, _1, _2) RORX(_0, _1, _2)
 #define dec(_0) DEC(_0)
 #define inc(_0) INC(_0)
 
