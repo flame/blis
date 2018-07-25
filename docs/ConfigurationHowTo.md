@@ -174,7 +174,7 @@ _Digression:_ Auxiliary blocksize values for register blocksizes are interpreted
 
 _Digression:_ Auxiliary blocksize values for cache blocksizes are interpreted as the maximum cache blocksizes. The maximum cache blocksizes are a convenient and portable way of smoothing performance of the level-3 operations when computing with a matrix operand that is just slightly larger than a multiple of the preferred cache blocksize in that dimension. In these "edge cases," iterations run with highly sub-optimal blocking. We can address this problem by merging the "edge case" iteration with the second-to-last iteration, such that the cache blocksizes are slightly larger--rather than significantly smaller--than optimal. The maximum cache blocksizes allow the developer to specify the _maximum_ size of this merged iteration; if the edge case causes the merged iteration to exceed this maximum, then the edge case is _not_ merged and instead it is computed upon in separate (final) iteration.
 
-_**Committing blocksizes.**_ Finally, we commit the values in `blkszs` to the context by calling the variable argument function `bli_cntx_set_blkszs`. This function call generally should be considered boilerplate and thus should not changed unless you are altering the matrix multiplication _algorithm_ as specified in the control tree. If this is your goal, please get in contact with BLIS developers via the [blis-devel](http://groups.google.com/group/blis-devel) mailing list for guidance, if you have not done so already.
+_**Committing blocksizes.**_ Finally, we commit the values in `blkszs` to the context by calling the variable argument function `bli_cntx_set_blkszs()`. This function call generally should be considered boilerplate and thus should not changed unless you are altering the matrix multiplication _algorithm_ as specified in the control tree. If this is your goal, please get in contact with BLIS developers via the [blis-devel](http://groups.google.com/group/blis-devel) mailing list for guidance, if you have not done so already.
 
 _**Availability of kernels.**_ Note that any kernel made available to the `fooarch` configuration within `config_registry` may be referenced inside `bli_cntx_init_fooarch()`. In this example, we referenced `fooarch` kernels as well as kernels native to another configuration, `bararch`. Thus, the `config_registry` would contain a line such as:
 ```
@@ -518,43 +518,41 @@ Adding support for a new set of kernels in BLIS is easy and can be done via the 
 
 
 
-_**Create and populate the kernel set directory.**_ First, we must create a directory in `kernels` that corresponds to the new kernel set. Suppose we wanted to add kernels for Intel's Knight's Landing microarchitecture. In BLIS, this corresponds to the `knl` configuration, and so we should name the directory `knl`. This is because we want the `knl` kernel set to be pulled by default into builds that include the `knl` sub-configuration.
-```
-$ mkdir kernels/knl
-$ ls kernels
-armv7a  bgq        generic  knc  old     piledriver  sandybridge
-armv8a  bulldozer  haswell  knl  penryn  power7
-```
-Next, we must write the `knl` kernels and locate them inside `kernels/knl`. (For more information on writing BLIS kernels, please see the [Kernels Guide](KernelsHowTo.md).) We recommend separating level-1v, level-1f, and level-3 kernels into separate `1`, `1f`, and `3` sub-directories, respectively. The kernel files and functions therein do not need to follow any particular naming convention, though we strongly recommend using the conventions already used by other kernel sets. Take a look at other kernel files, such as those for `haswell`, [for examples](https://github.com/flame/blis/tree/master/kernels). Finally, for the `knl` kernel set, you should insert a file named `bli_kernels_knl.h` into `kernels/knl` that prototypes all of your new kernel set's kernel functions. You are welcome to write your own prototypes, but to make the prototyping of kernels easier we recommend using the prototype-generating macros for level-1v, level-1f, level-1m, and level-3 functions defined in [frame/1/bli_l1v_ker_prot.h](https://github.com/flame/blis/blob/master/frame/1/bli_l1v_ker_prot.h), [frame/1f/bli_l1f_ker_prot.h](https://github.com/flame/blis/blob/master/frame/1f/bli_l1f_ker_prot.h), [frame/1m/bli_l1m_ker_prot.h](https://github.com/flame/blis/blob/master/frame/1m/bli_l1m_ker_prot.h), and [frame/3/bli_l3_ukr_prot.h](https://github.com/flame/blis/blob/master/frame/3/bli_l3_ukr_prot.h), respectively. The following example utilizes how a select subset of these macros can be used to generate kernel function prototypes.
-```c
-GEMM_UKR_PROT( double, d, gemm_knl_asm_24x8 )
+1. _**Create and populate the kernel set directory.**_ First, we must create a directory in `kernels` that corresponds to the new kernel set. Suppose we wanted to add kernels for Intel's Knight's Landing microarchitecture. In BLIS, this corresponds to the `knl` configuration, and so we should name the directory `knl`. This is because we want the `knl` kernel set to be pulled by default into builds that include the `knl` sub-configuration.
+   ```
+   $ mkdir kernels/knl
+   $ ls kernels
+   armv7a  bgq        generic  knc  old     piledriver  sandybridge
+   armv8a  bulldozer  haswell  knl  penryn  power7
+   ```
+   Next, we must write the `knl` kernels and locate them inside `kernels/knl`. (For more information on writing BLIS kernels, please see the [Kernels Guide](KernelsHowTo.md).) We recommend separating level-1v, level-1f, and level-3 kernels into separate `1`, `1f`, and `3` sub-directories, respectively. The kernel files and functions therein do not need to follow any particular naming convention, though we strongly recommend using the conventions already used by other kernel sets. Take a look at other kernel files, such as those for `haswell`, [for examples](https://github.com/flame/blis/tree/master/kernels). Finally, for the `knl` kernel set, you should insert a file named `bli_kernels_knl.h` into `kernels/knl` that prototypes all of your new kernel set's kernel functions. You are welcome to write your own prototypes, but to make the prototyping of kernels easier we recommend using the prototype-generating macros for level-1v, level-1f, level-1m, and level-3 functions defined in [frame/1/bli_l1v_ker_prot.h](https://github.com/flame/blis/blob/master/frame/1/bli_l1v_ker_prot.h), [frame/1f/bli_l1f_ker_prot.h](https://github.com/flame/blis/blob/master/frame/1f/bli_l1f_ker_prot.h), [frame/1m/bli_l1m_ker_prot.h](https://github.com/flame/blis/blob/master/frame/1m/bli_l1m_ker_prot.h), and [frame/3/bli_l3_ukr_prot.h](https://github.com/flame/blis/blob/master/frame/3/bli_l3_ukr_prot.h), respectively. The following example utilizes how a select subset of these macros can be used to generate kernel function prototypes.
+   ```c
+   GEMM_UKR_PROT( double, d, gemm_knl_asm_24x8 )
 
-PACKM_KER_PROT( double, d, packm_knl_asm_24xk )
-PACKM_KER_PROT( double, d, packm_knl_asm_8xk )
+   PACKM_KER_PROT( double, d, packm_knl_asm_24xk )
+   PACKM_KER_PROT( double, d, packm_knl_asm_8xk )
 
-AXPYF_KER_PROT( dcomplex, z, axpyf_knl_asm )
-DOTXF_KER_PROT( dcomplex, z, dotxf_knl_asm )
+   AXPYF_KER_PROT( dcomplex, z, axpyf_knl_asm )
+   DOTXF_KER_PROT( dcomplex, z, dotxf_knl_asm )
 
-AXPYV_KER_PROT( float, s, axpyv_knl_asm )
-DOTXV_KER_PROT( float, s, dotxv_knl_asm )
-```
-The first line generates a function prototype for a double-precision real `gemm` micro-kernel named `bli_dgemm_knl_asm_24x8()`. Notice how the macro takes three arguments: the C language datatype, the single character corresponding to the datatype, and the base name of the function, which includes the operation (`gemm`), the kernel set name (`knl`), and a substring specifying its implementation (`asm_24x8`).
+   AXPYV_KER_PROT( float, s, axpyv_knl_asm )
+   DOTXV_KER_PROT( float, s, dotxv_knl_asm )
+   ```
+   The first line generates a function prototype for a double-precision real `gemm` micro-kernel named `bli_dgemm_knl_asm_24x8()`. Notice how the macro takes three arguments: the C language datatype, the single character corresponding to the datatype, and the base name of the function, which includes the operation (`gemm`), the kernel set name (`knl`), and a substring specifying its implementation (`asm_24x8`).
 
-The second and third lines generate prototypes for double-precision real `packm` kernels to go along with the `gemm` micro-kernel above. The fourth and fifth lines generate prototypes for double-precision complex instances of the level-1f kernels `axpyf` and `dotxf`. The last two lines generate prototypes for single-precision real instances of the level-1v kernels `axpyv` and `dotxv`.
-
-
-
-_**Add support within the framework source code.**_ We also need to make a minor update to the framework to support the new kernels--specifically, to pull in the kernels' function prototypes.
+   The second and third lines generate prototypes for double-precision real `packm` kernels to go along with the `gemm` micro-kernel above. The fourth and fifth lines generate prototypes for double-precision complex instances of the level-1f kernels `axpyf` and `dotxf`. The last two lines generate prototypes for single-precision real instances of the level-1v kernels `axpyv` and `dotxv`.
 
 
 
-**`frame/include/bli_arch_config.h`**. When adding support for the `knl` kernel set to the framework, we must modify this file to `#include` the `bli_kernels_knl.h` header file: 
-```c
-#ifdef BLIS_KERNELS_KNL
-#include "bli_kernels_knl.h"
-#endif
-```
-The `BLIS_KERNELS_KNL` macro, which guards the `#include` directive, is automatically defined by the build system when the `knl` kernel set is required by _any_ sub-configuration.
+2. _**Add support within the framework source code.**_ We also need to make a minor update to the framework to support the new kernels--specifically, to pull in the kernels' function prototypes.
+
+   **`frame/include/bli_arch_config.h`**. When adding support for the `knl` kernel set to the framework, we must modify this file to `#include` the `bli_kernels_knl.h` header file: 
+   ```c
+   #ifdef BLIS_KERNELS_KNL
+   #include "bli_kernels_knl.h"
+   #endif
+   ```
+   The `BLIS_KERNELS_KNL` macro, which guards the `#include` directive, is automatically defined by the build system when the `knl` kernel set is required by _any_ sub-configuration.
 
 
 ## Adding a new configuration family
@@ -563,52 +561,52 @@ Adding support for a new umbrella configuration family in BLIS is fairly straigh
 
 
 
-_**Create and populate the family directory.**_ First, we must create a directory in `config` that corresponds to the new family. Since we are adding a new family named `intelavx`, we would name our directory `intelavx`.
-```
-$ mkdir config/intelavx
-$ ls config
-amd64      cortexa15  excavator  intel64   knl     piledriver   steamroller
-bgq        cortexa57  generic    intelavx  old     power7       template
-bulldozer  cortexa9   haswell    knc       penryn  sandybridge  zen
-```
-We also need to create `bli_family_intelavx.h` and `make_defs.mk` files inside our new sub-directory. Since they will be very similar to those of the `intel64` family's files, we can copy those files over and then modify them accordingly:
-```
-$ cp config/intel64/bli_family_intel64.h config/intelavx/bli_family_intelavx.h
-$ cp config/intel64/make_defs.mk config/intelavx/
-```
-First, we update the configuration name inside of `make_defs.mk`:
-```
-THIS_CONFIG    := intelavx
-```
-and while we're editing the file, we can make any other changes to compiler flags we wish (if any). Similarly, the `bli_family_intelavx.h` header file should be updated, though in our case it does not need any changes; the original file is empty and thus the copied file can remain empty as well. Note that other configuration families may have different needs. Remember that all of the parameters set in this file, either explicitly or implicitly (via their defaults), must work for **all** sub-configurations in the family. When creating or modifying a family, it's worth reviewing the parameters' defaults, which are set in [frame/include/bli_kernel_macro_defs.h](https://github.com/flame/blis/blob/master/frame/include/bli_kernel_macro_defs.h) and convincing yourself that each parameter default (or overriding definition in `bli_family_*.h`) will work for each sub-configuration.
+1. _**Create and populate the family directory.**_ First, we must create a directory in `config` that corresponds to the new family. Since we are adding a new family named `intelavx`, we would name our directory `intelavx`.
+   ```
+   $ mkdir config/intelavx
+   $ ls config
+   amd64      cortexa15  excavator  intel64   knl     piledriver   steamroller
+   bgq        cortexa57  generic    intelavx  old     power7       template
+   bulldozer  cortexa9   haswell    knc       penryn  sandybridge  zen
+   ```
+   We also need to create `bli_family_intelavx.h` and `make_defs.mk` files inside our new sub-directory. Since they will be very similar to those of the `intel64` family's files, we can copy those files over and then modify them accordingly:
+   ```
+   $ cp config/intel64/bli_family_intel64.h config/intelavx/bli_family_intelavx.h
+   $ cp config/intel64/make_defs.mk config/intelavx/
+   ```
+   First, we update the configuration name inside of `make_defs.mk`:
+   ```
+   THIS_CONFIG    := intelavx
+   ```
+   and while we're editing the file, we can make any other changes to compiler flags we wish (if any). Similarly, the `bli_family_intelavx.h` header file should be updated, though in our case it does not need any changes; the original file is empty and thus the copied file can remain empty as well. Note that other configuration families may have different needs. Remember that all of the parameters set in this file, either explicitly or implicitly (via their defaults), must work for **all** sub-configurations in the family. When creating or modifying a family, it's worth reviewing the parameters' defaults, which are set in [frame/include/bli_kernel_macro_defs.h](https://github.com/flame/blis/blob/master/frame/include/bli_kernel_macro_defs.h) and convincing yourself that each parameter default (or overriding definition in `bli_family_*.h`) will work for each sub-configuration.
 
 
 
-_**Add support within the framework source code.**_ Next, we need to update the BLIS framework source code so that the new configuration family is recognized and supported. Configuration families require updates to two files.
+2. _**Add support within the framework source code.**_ Next, we need to update the BLIS framework source code so that the new configuration family is recognized and supported. Configuration families require updates to two files.
 
-**`frame/include/bli_arch_config.h`**. This file must be updated to `#include` the `bli_family_intelavx.h` header file. Notice that the preprocessor directive should be guarded as follows:
-```c
-#ifdef BLIS_FAMILY_INTELAVX
-#include "bli_family_intelavx.h"
-#endif
-```
-The `BLIS_FAMILY_INTELAVX` will automatically be defined by the build system whenever the family was targeted by `configure` is `intelavx`. (In general, if the user runs `./configure foobar`, the C preprocessor macro `BLIS_FAMILY_FOOBAR` will be defined.)
+   **`frame/include/bli_arch_config.h`**. This file must be updated to `#include` the `bli_family_intelavx.h` header file. Notice that the preprocessor directive should be guarded as follows:
+   ```c
+   #ifdef BLIS_FAMILY_INTELAVX
+   #include "bli_family_intelavx.h"
+   #endif
+   ```
+   The `BLIS_FAMILY_INTELAVX` will automatically be defined by the build system whenever the family was targeted by `configure` is `intelavx`. (In general, if the user runs `./configure foobar`, the C preprocessor macro `BLIS_FAMILY_FOOBAR` will be defined.)
 
-**`frame/base/bli_arch.c`**. This file must be updated so that `bli_arch_query_id()` returns the correct `arch_t` microarchitecture ID value to the caller. This function is called when the framework is trying to choose which sub-configuration to use at runtime. For x86_64 architectures, this is supported via the `CPUID` instruction, as implemented via `bli_cpuid_query_id()`. Thus, you can simply mimic what is done for the `intel64` family by inserting lines such as:
-```c
-#ifdef BLIS_FAMILY_INTELAVX
-    id = bli_cpuid_query_id();
-#endif
-```
-This results in `bli_cpuid_query_id()` being called, which will return the `arch_t` ID value corresponding to the hardware detected by `CPUID`. (If your configuration family does not consist of x86_64 architectures, then you'll need some other heuristic to determine how to choose the correct sub-configuration at runtime. When in doubt, please [open an issue](https://github.com/flame/blis/issues) to begin a dialogue with developers.)
+   **`frame/base/bli_arch.c`**. This file must be updated so that `bli_arch_query_id()` returns the correct `arch_t` microarchitecture ID value to the caller. This function is called when the framework is trying to choose which sub-configuration to use at runtime. For x86_64 architectures, this is supported via the `CPUID` instruction, as implemented via `bli_cpuid_query_id()`. Thus, you can simply mimic what is done for the `intel64` family by inserting lines such as:
+   ```c
+   #ifdef BLIS_FAMILY_INTELAVX
+       id = bli_cpuid_query_id();
+   #endif
+   ```
+   This results in `bli_cpuid_query_id()` being called, which will return the `arch_t` ID value corresponding to the hardware detected by `CPUID`. (If your configuration family does not consist of x86_64 architectures, then you'll need some other heuristic to determine how to choose the correct sub-configuration at runtime. When in doubt, please [open an issue](https://github.com/flame/blis/issues) to begin a dialogue with developers.)
 
 
 
-_**Update the configuration registry.**_ The last step is to update the `config_registry` file so that it defines the new family. Since we want the family to include only Intel sub-configurations that support AVX, we would add the following line:
-```
-intelavx: haswell sandybridge
-```
-Notice that we left out the Core2-based `penryn` sub-configuration since it targets hardware that only supports SSE vector instructions.
+3. _**Update the configuration registry.**_ The last step is to update the `config_registry` file so that it defines the new family. Since we want the family to include only Intel sub-configurations that support AVX, we would add the following line:
+   ```
+   intelavx: haswell sandybridge
+   ```
+   Notice that we left out the Core2-based `penryn` sub-configuration since it targets hardware that only supports SSE vector instructions.
 
 
 ## Adding a new sub-configuration
@@ -617,150 +615,148 @@ Adding support for a new-subconfiguration to BLIS is similar to adding support f
 
 
 
-_**Create and populate the family directory.**_ First, we must create a directory in `config` that corresponds to the new sub-configuration.
-```
-$ mkdir config/knl
-$ ls config
-amd64      cortexa15  excavator  intel64  old         power7       template
-bgq        cortexa57  generic    knc      penryn      sandybridge  zen
-bulldozer  cortexa9   haswell    knl      piledriver  steamroller
-```
-We also need to create `bli_cntx_init_knl.c`, `bli_family_intelavx.h`, and `make_defs.mk` files inside our new sub-directory. Since they will be very similar to those of the `haswell` sub-configuration's files, we can copy those files over and then modify them accordingly:
-```
-$ cp config/haswell/bli_cntx_init_haswell.c config/knl/bli_cntx_init_knl.c
-$ cp config/haswell/bli_family_haswell.h config/knl/bli_family_knl.h
-$ cp config/haswell/make_defs.mk config/knl/
-```
-First, we update the configuration name inside of `make_defs.mk`:
-```
-THIS_CONFIG    := knl
-```
-and while we're editing the file, we can make any other changes to compiler flags we wish (if any). Similarly, the `bli_family_knl.h` header file should be updated as needed. Since the number of vector registers and the vector register size on `knl` differ from the defaults, we must explicitly set them. (The role of these parameters was explained in a [previous section](ConfigurationHowTo.md#bli_family_h).) Furthermore, provided that a macro `BLIS_NO_HBWMALLOC` is not set, we use a different implementation of `malloc()` and `free()` and `#include` that implementation's header file. 
-```c
-#define BLIS_SIMD_NUM_REGISTERS  32
-#define BLIS_SIMD_SIZE           64
+1. _**Create and populate the family directory.**_ First, we must create a directory in `config` that corresponds to the new sub-configuration.
+   ```
+   $ mkdir config/knl
+   $ ls config
+   amd64      cortexa15  excavator  intel64  old         power7       template
+   bgq        cortexa57  generic    knc      penryn      sandybridge  zen
+   bulldozer  cortexa9   haswell    knl      piledriver  steamroller
+   ```
+   We also need to create `bli_cntx_init_knl.c`, `bli_family_intelavx.h`, and `make_defs.mk` files inside our new sub-directory. Since they will be very similar to those of the `haswell` sub-configuration's files, we can copy those files over and then modify them accordingly:
+   ```
+   $ cp config/haswell/bli_cntx_init_haswell.c config/knl/bli_cntx_init_knl.c
+   $ cp config/haswell/bli_family_haswell.h config/knl/bli_family_knl.h
+   $ cp config/haswell/make_defs.mk config/knl/
+   ```
+   First, we update the configuration name inside of `make_defs.mk`:
+   ```
+   THIS_CONFIG    := knl
+   ```
+   and while we're editing the file, we can make any other changes to compiler flags we wish (if any). Similarly, the `bli_family_knl.h` header file should be updated as needed. Since the number of vector registers and the vector register size on `knl` differ from the defaults, we must explicitly set them. (The role of these parameters was explained in a [previous section](ConfigurationHowTo.md#bli_family_h).) Furthermore, provided that a macro `BLIS_NO_HBWMALLOC` is not set, we use a different implementation of `malloc()` and `free()` and `#include` that implementation's header file. 
+   ```c
+   #define BLIS_SIMD_NUM_REGISTERS  32
+   #define BLIS_SIMD_SIZE           64
 
-#ifdef BLIS_NO_HBWMALLOC
-  #include <stdlib.h>
-  #define BLIS_MALLOC_POOL  malloc
-  #define BLIS_FREE_POOL    free
-#else
-  #include <hbwmalloc.h>
-  #define BLIS_MALLOC_POOL  hbw_malloc
-  #define BLIS_FREE_POOL    hbw_free
-#endif
-```
-Finally, we update `bli_cntx_init_knl.c` to initialize the context with the appropriate kernel function pointers and blocksize values. The functions used to perform this initialization are explained in [an earlier section](ConfigurationHowTo.md#bli_cntx_init_c).
-
-
-
-_**Add support within the framework source code.**_ Next, we need to update the BLIS framework source code so that the new sub-configuration is recognized and supported. Sub-configurations require updates to four files--six if hardware detection logic is added.
+   #ifdef BLIS_NO_HBWMALLOC
+     #include <stdlib.h>
+     #define BLIS_MALLOC_POOL  malloc
+     #define BLIS_FREE_POOL    free
+   #else
+     #include <hbwmalloc.h>
+     #define BLIS_MALLOC_POOL  hbw_malloc
+     #define BLIS_FREE_POOL    hbw_free
+   #endif
+   ```
+   Finally, we update `bli_cntx_init_knl.c` to initialize the context with the appropriate kernel function pointers and blocksize values. The functions used to perform this initialization are explained in [an earlier section](ConfigurationHowTo.md#bli_cntx_init_c).
 
 
 
-**`frame/include/bli_type_defs.h`**. First, we need to define an ID to associate with the microarchitecture for which we are adding support. All microarchitecture type IDs are defined in [bli_type_defs.h](https://github.com/flame/blis/blob/master/frame/include/bli_type_defs.h) as an enumerated type that we `typedef` to `arch_t`. To support `knl`, we add a new enumerated type value `BLIS_ARCH_KNL`:
-```c
-typedef enum
-{
-    BLIS_ARCH_KNL,
-    BLIS_ARCH_KNC,
-    BLIS_ARCH_HASWELL,
-    BLIS_ARCH_SANDYBRIDGE,
-    BLIS_ARCH_PENRYN,
+2. _**Add support within the framework source code.**_ Next, we need to update the BLIS framework source code so that the new sub-configuration is recognized and supported. Sub-configurations require updates to four files--six if hardware detection logic is added.
 
-    BLIS_ARCH_ZEN,
-    BLIS_ARCH_EXCAVATOR,
-    BLIS_ARCH_STEAMROLLER,
-    BLIS_ARCH_PILEDRIVER,
-    BLIS_ARCH_BULLDOZER,
+   **`frame/include/bli_type_defs.h`**. First, we need to define an ID to associate with the microarchitecture for which we are adding support. All microarchitecture type IDs are defined in [bli_type_defs.h](https://github.com/flame/blis/blob/master/frame/include/bli_type_defs.h) as an enumerated type that we `typedef` to `arch_t`. To support `knl`, we add a new enumerated type value `BLIS_ARCH_KNL`:
+   ```c
+   typedef enum
+   {
+       BLIS_ARCH_KNL,
+       BLIS_ARCH_KNC,
+       BLIS_ARCH_HASWELL,
+       BLIS_ARCH_SANDYBRIDGE,
+       BLIS_ARCH_PENRYN,
 
-    BLIS_ARCH_CORTEXA57,
-    BLIS_ARCH_CORTEXA15,
-    BLIS_ARCH_CORTEXA9,
+       BLIS_ARCH_ZEN,
+       BLIS_ARCH_EXCAVATOR,
+       BLIS_ARCH_STEAMROLLER,
+       BLIS_ARCH_PILEDRIVER,
+       BLIS_ARCH_BULLDOZER,
 
-    BLIS_ARCH_POWER7,
-    BLIS_ARCH_BGQ,
+       BLIS_ARCH_CORTEXA57,
+       BLIS_ARCH_CORTEXA15,
+       BLIS_ARCH_CORTEXA9,
 
-    BLIS_ARCH_GENERIC
+       BLIS_ARCH_POWER7,
+       BLIS_ARCH_BGQ,
 
-} arch_t;
-```
-Additionally, you'll need to update the definition of `BLIS_NUM_ARCHS` to reflect the new total number of enumerated `arch_t` values:
-```c
-#define BLIS_NUM_ARCHS 16
-```
+       BLIS_ARCH_GENERIC
 
-
-**`frame/base/bli_gks.c`**. We must also update the global kernel structure, or gks, to register the new sub-configuration during library initialization. Sub-configuration registration occurs in `bli_gks_init()`. For `knl`, updating this function amounts to inserting the following lines
-```c
-#ifdef BLIS_CONFIG_KNL
-        bli_gks_register_cntx( BLIS_ARCH_KNL, bli_cntx_init_knl,
-                                              bli_cntx_init_knl_ref,
-                                              bli_cntx_init_knl_ind );
-#endif
-```
-This function submits pointers to various context initialization functions to the global kernel structure, which are then stored and called at the appropriate time. The functions **must** be named strictly according to the format shown in the example above, with `knl` replaced with the sub-configuration name. Also, note the call to `bli_gks_register_cntx` is guarded by `BLIS_CONFIG_KNL`. This macro is automatically `#defined` by the build system if and when the `knl` sub-configuration is enabled at configure-time, either directly as a singleton family or indirectly via an umbrella family.
+   } arch_t;
+   ```
+   Additionally, you'll need to update the definition of `BLIS_NUM_ARCHS` to reflect the new total number of enumerated `arch_t` values:
+   ```c
+   #define BLIS_NUM_ARCHS 16
+   ```
 
 
-
-**`frame/include/bli_arch_config.h`**. This file must be updated in two places. First, we must modify it to generate prototypes for the `bli_cntx_init_*()` functions, including the developer-provided function `bli_cntx_init_knl()` (defined in `config/knl/bli_cntx_init_knl.c`), by inserting:
-```c
-#ifdef BLIS_CONFIG_KNL
-CNTX_INIT_PROTS( knl )
-#endif
-```
-Here, the `CNTX_INIT_PROTS` macro generates the appropriate prototypes based on the name of the sub-configuration. Next, we must `#include` the `bli_family_knl.h` header file, just as we would if we were adding support for an umbrella family:
-```c
-#ifdef BLIS_FAMILY_KNL
-#include "bli_family_knl.h"
-#endif
-```
-As before with umbrella families, the `BLIS_FAMILY_KNL` macro is automatically defined by the build system for whatever family was targeted by `configure`. (That is, if the user runs `./configure foobar`, the C preprocessor macro `BLIS_FAMILY_FOOBAR` will be defined.) 
+   **`frame/base/bli_gks.c`**. We must also update the global kernel structure, or gks, to register the new sub-configuration during library initialization. Sub-configuration registration occurs in `bli_gks_init()`. For `knl`, updating this function amounts to inserting the following lines
+   ```c
+   #ifdef BLIS_CONFIG_KNL
+           bli_gks_register_cntx( BLIS_ARCH_KNL, bli_cntx_init_knl,
+                                                 bli_cntx_init_knl_ref,
+                                                 bli_cntx_init_knl_ind );
+   #endif
+   ```
+   This function submits pointers to various context initialization functions to the global kernel structure, which are then stored and called at the appropriate time. The functions **must** be named strictly according to the format shown in the example above, with `knl` replaced with the sub-configuration name. Also, note the call to `bli_gks_register_cntx` is guarded by `BLIS_CONFIG_KNL`. This macro is automatically `#defined` by the build system if and when the `knl` sub-configuration is enabled at configure-time, either directly as a singleton family or indirectly via an umbrella family.
 
 
 
-**`frame/base/bli_arch.c`**. This file must be updated so that `bli_arch_query_id()` returns the correct `arch_t` architecture ID value to the caller. `bli_arch_query_id()` is called when the framework is trying to choose which sub-configuration to use at runtime. When adding support for a sub-configuration as a singleton family, this amounts to adding a block of code such as:
-```c
-#ifdef BLIS_FAMILY_KNL
-    id = BLIS_ARCH_KNL;
-#endif
-```
-The `BLIS_FAMILY_KNL` macro is automatically `#defined` by the build system if the `knl` sub-configuration was targeted directly (as a singleton family) at configure-time. Other ID values are returned only if their respective family macros are defined. (Recall that only one family is ever enabled at time.) If, however, the `knl` sub-configuration was enabled indirectly via an umbrella family, `bli_arch_query_id()` will return the `arch_t` ID value via the lines similar to the following:
-```c
-#ifdef BLIS_FAMILY_INTEL64
-    id = bli_cpuid_query_id();
-#endif
-#ifdef BLIS_FAMILY_AMD64
-    id = bli_cpuid_query_id();
-#endif
-```
-Supporting runtime detection of `knl` microarchitectures requires adding `knl` support to `bli_cpuid_query_id()`, which is addressed in the next step.
+   **`frame/include/bli_arch_config.h`**. This file must be updated in two places. First, we must modify it to generate prototypes for the `bli_cntx_init_*()` functions, including the developer-provided function `bli_cntx_init_knl()` (defined in `config/knl/bli_cntx_init_knl.c`), by inserting:
+   ```c
+   #ifdef BLIS_CONFIG_KNL
+   CNTX_INIT_PROTS( knl )
+   #endif
+   ```
+   Here, the `CNTX_INIT_PROTS` macro generates the appropriate prototypes based on the name of the sub-configuration. Next, we must `#include` the `bli_family_knl.h` header file, just as we would if we were adding support for an umbrella family:
+   ```c
+   #ifdef BLIS_FAMILY_KNL
+   #include "bli_family_knl.h"
+   #endif
+   ```
+   As before with umbrella families, the `BLIS_FAMILY_KNL` macro is automatically defined by the build system for whatever family was targeted by `configure`. (That is, if the user runs `./configure foobar`, the C preprocessor macro `BLIS_FAMILY_FOOBAR` will be defined.) 
 
 
 
-**`frame/base/bli_cpuid.c`**. To support the aforementioned runtime microarchitecture detection, the function `bli_cpuid_query_id()`, defined in [bli_cpuid.c](https://github.com/flame/blis/blob/master/frame/base/bli_cpuid.c), will need to be updated. Specifically, we need to insert logic that will detect the presence of the new hardware based on the results of the `CPUID` instruction (assuming the new microarchitecture belongs to the x86_64 architecture family). For example, when support for `knl` was added, this entailed adding the following code block to `bli_cpuid_query_id()`:
-```c
-#ifdef BLIS_CONFIG_KNL
-    if ( bli_cpuid_is_knl( family, model, features ) )
-        return BLIS_ARCH_KNL;
-#endif
-```
-Additionally, we had to define the function `bli_cpuid_is_knl()`, which checks for various processor features known to be present on `knl` systems and returns a boolean `TRUE` if all relevant feature checks are satisfied by the hardware. Note that the order in which we check for the sub-configurations is important. We must check for microarchitectural matches from most recent to most dated. This prevents an older sub-configuration from being selected on newer hardware when a newer sub-configuration would have also matched.
+   **`frame/base/bli_arch.c`**. This file must be updated so that `bli_arch_query_id()` returns the correct `arch_t` architecture ID value to the caller. `bli_arch_query_id()` is called when the framework is trying to choose which sub-configuration to use at runtime. When adding support for a sub-configuration as a singleton family, this amounts to adding a block of code such as:
+   ```c
+   #ifdef BLIS_FAMILY_KNL
+       id = BLIS_ARCH_KNL;
+   #endif
+   ```
+   The `BLIS_FAMILY_KNL` macro is automatically `#defined` by the build system if the `knl` sub-configuration was targeted directly (as a singleton family) at configure-time. Other ID values are returned only if their respective family macros are defined. (Recall that only one family is ever enabled at time.) If, however, the `knl` sub-configuration was enabled indirectly via an umbrella family, `bli_arch_query_id()` will return the `arch_t` ID value via the lines similar to the following:
+   ```c
+   #ifdef BLIS_FAMILY_INTEL64
+       id = bli_cpuid_query_id();
+   #endif
+   #ifdef BLIS_FAMILY_AMD64
+       id = bli_cpuid_query_id();
+   #endif
+   ```
+   Supporting runtime detection of `knl` microarchitectures requires adding `knl` support to `bli_cpuid_query_id()`, which is addressed in the next step.
 
 
 
-**`frame/base/bli_cpuid.h`**. After defining the function `bli_cpuid_is_knl()`, we must also update [bli_cpuid.h](https://github.com/flame/blis/blob/master/frame/base/bli_cpuid.h) to contain a prototype for the function.
+   **`frame/base/bli_cpuid.c`**. To support the aforementioned runtime microarchitecture detection, the function `bli_cpuid_query_id()`, defined in [bli_cpuid.c](https://github.com/flame/blis/blob/master/frame/base/bli_cpuid.c), will need to be updated. Specifically, we need to insert logic that will detect the presence of the new hardware based on the results of the `CPUID` instruction (assuming the new microarchitecture belongs to the x86_64 architecture family). For example, when support for `knl` was added, this entailed adding the following code block to `bli_cpuid_query_id()`:
+   ```c
+   #ifdef BLIS_CONFIG_KNL
+       if ( bli_cpuid_is_knl( family, model, features ) )
+           return BLIS_ARCH_KNL;
+   #endif
+   ```
+   Additionally, we had to define the function `bli_cpuid_is_knl()`, which checks for various processor features known to be present on `knl` systems and returns a boolean `TRUE` if all relevant feature checks are satisfied by the hardware. Note that the order in which we check for the sub-configurations is important. We must check for microarchitectural matches from most recent to most dated. This prevents an older sub-configuration from being selected on newer hardware when a newer sub-configuration would have also matched.
 
 
 
-_**Update the configuration registry.**_ Lastly, we update the `config_registry` file so that it defines the new sub-configuration. For example, if we want to define a sub-configuration called `knl` that used only `knl` kernels, we would add the following line:
-```
-knl: knl
-```
-If, when defining `bli_cntx_init_knl()`, we referenced kernels from a non-native kernel set--say, those of `haswell`--in addition to `knl`-specific kernels, we would need to explicitly pull in both `knl` and `haswell` kernel sets:
-```
-knl: knl/knl/haswell
-```
+   **`frame/base/bli_cpuid.h`**. After defining the function `bli_cpuid_is_knl()`, we must also update [bli_cpuid.h](https://github.com/flame/blis/blob/master/frame/base/bli_cpuid.h) to contain a prototype for the function.
+
+
+
+3. _**Update the configuration registry.**_ Lastly, we update the `config_registry` file so that it defines the new sub-configuration. For example, if we want to define a sub-configuration called `knl` that used only `knl` kernels, we would add the following line:
+   ```
+   knl: knl
+   ```
+   If, when defining `bli_cntx_init_knl()`, we referenced kernels from a non-native kernel set--say, those of `haswell`--in addition to `knl`-specific kernels, we would need to explicitly pull in both `knl` and `haswell` kernel sets:
+   ```
+   knl: knl/knl/haswell
+   ```
 
 
 ## Further Development Topics
