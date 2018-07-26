@@ -129,8 +129,8 @@ elif [ ${sys} = "stampede" ]; then
 
 elif [ ${sys} = "stampede2" ]; then
 
-	test_impls="openblas mkl 1m_blis"
-	#test_impls="1m_blis"
+	#test_impls="openblas mkl 1m_blis"
+	test_impls="1m_blis"
 
 elif [ ${sys} = "lonestar" ]; then
 
@@ -152,8 +152,8 @@ elif [ ${sys} = "arm-softiron" ]; then
 fi
 
 # Real domain implementations to test.
-test_impls_r="openblas mkl asm_blis"
-#test_impls_r="asm_blis"
+#test_impls_r="openblas mkl asm_blis"
+test_impls_r="asm_blis"
 
 # First perform real test cases.
 for th in ${threads_r}; do
