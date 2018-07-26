@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-#define WHICH_DGEMM_UKR 0
+#define WHICH_DGEMM_UKR 2
 
 void bli_cntx_init_skx( cntx_t* cntx )
 {

@@ -105,8 +105,10 @@ threads="st"
 threads_r="st"
 
 # Datatypes to test.
-dts="c z "
-dts_r="s d"
+#dts="c z"
+#dts_r="s d"
+dts="z"
+dts_r="d"
 
 # Operations to test.
 l3_ops="gemm syrk hemm trmm"
