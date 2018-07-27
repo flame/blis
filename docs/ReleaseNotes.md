@@ -1,9 +1,10 @@
 # Release Notes
 
-Note: Individual credits, where appropriate, are shown in parentheses.
+*Note: For some releases, individual credits are shown in parentheses.*
 
 ## Contents
 
+* [Changes in 0.4.0](ReleaseNotes.md#changes-in-040)
 * [Changes in 0.3.2](ReleaseNotes.md#changes-in-032)
 * [Changes in 0.3.1](ReleaseNotes.md#changes-in-031)
 * [Changes in 0.3.0](ReleaseNotes.md#changes-in-030)
@@ -28,6 +29,60 @@ Note: Individual credits, where appropriate, are shown in parentheses.
 * [Changes in 0.0.3](ReleaseNotes.md#changes-in-003)
 * [Changes in 0.0.2](ReleaseNotes.md#changes-in-002)
 * [Changes in 0.0.1](ReleaseNotes.md#changes-in-001)
+
+## Changes in 0.4.0
+July 27, 2018
+
+Framework:
+- Added support for "sandboxes" for employing alternative `gemm` implementations. A ready-to-use reference C99 sandbox provides developers with a starting point for experimentation.
+- Separated expert, non-expert typed APIs (levels 1v, 1d, 1f, 1m, 2, and 3, and utility functions).
+- Defined new `rntm_t` structure and API to provide a uniform way of storing user-level threading information (equivalent of `BLIS_NUM_THREADS` and `BLIS_*_NT` environment variables), and also conveying that information to expert APIs. (Matthew Honnibal, Nathaniel Smith)
+- Renamed various `obj_t` accessor macros, converted to static functions, and inserted explicit typecasting to facilitate #including blis.h from a C++ application. (Jacob Gorm Hansen)
+- Cache and reuse `arch_t` architecture query result at runtime. (Devin Matthews)
+- Implemented object-based functions `bli_projm()`/`_projv()`, which project objects from one domain to another (within the same precision), and `bli_castm()`/`_castv()`, which typecast objects from one datatype to another.
+- Implemented object-based functions `bli_setrm()`/`_setrv()`, `bli_setim()`/`_setiv()`, which allow the caller to broadcast a scalar to all real elements or all imaginary elements within an object.
+- Enforce consistent datatypes in most object APIs.
+- For native execution, initialize a context's virtual microkernel slots to the function pointers of native microkernels. This simplifies query routines and paves the way for more generalized use of virtual microkernels beyond those for induced methods.
+- Various bugfixes. (Devangi Parikh)
+
+Kernels:
+- Re-expressed x86_64 microkernels in terms of assembly language macros, which support lower- and upper-case, AT&T and Intel syntax. (Devin Matthews)
+- Various bugfixes. (Robin Christ, Francisco Igual, Devangi Parikh, qnerd)
+
+Build system:
+- Added support for `--libdir`, `--includedir` configure options. (Nico Schlömer)
+- Adopted Linux-like shared library versioning and enabled building shared libraries by default.
+- Improved shared library handling on OS X. (Alex Arslan)
+- Added configure support for preset `CFLAGS`, `LDFLAGS`. (Dave Love)
+- Improvements to version file handling.
+- Implemented configure option hack for circumventing small/limited values of `ARG_MAX`.
+- Reorganized `cc`, `cc_vendor` detection responsibilities from `Makefile` to `configure`. (Alex Arslan)
+- Cross-compilation fixes.
+- Preliminary Windows ABI suport using `clang`, appveyor. (Isuru Fernando)
+- Better support for typical development environment on OpenBSD, FreeBSD. (Alex Arslan)
+- Bumped shared library `soname` version number to 1.0.0.
+- Various build system fixes and cleanups. (Mathieu Poumeyrol, Nico Schlömer, Tony Skjellum)
+
+Testing:
+- Rewrote Travis CI testing config file and supporting logic to use Intel's SDE emulator. This allows multiple x86_64 microarchitectures to be tested regardless of what hardware Travis happens to be using at the time. (Devin Matthews)
+- Added `docs/studies` hardware-specific test driver directory to track individual performance studies. (Devangi Parikh)
+- Streamlined `testsuite/input.operations` file format.
+
+Documentation:
+- Relocated all wiki documents to a `docs` directory and adjusted all links, and `README.md`, accordingly.
+- Added a `CONTRIBUTING.md` file to top-level directory.
+- Added `docs/CodingConventions.md`.
+- Added `docs/Sandboxes.md`.
+- Added `docs/BLISObjectAPI.md`.
+- Renamed and updated `docs/BLISTypedAPI.md`.
+- Updated `docs/KernelsHowTo.md`.
+- Updated `docs/BuildSystem.md`. (Stefanos Mavros)
+- Updated `docs/Multithreading.md`.
+- Updated indentation in `docs/ConfigurationHowTo.md` for easier reading.
+- Added example code for the BLIS typed API in `examples/tapi`.
+- Expanded existing example code for the object API in `examples/oapi`.
+- Added links to RHEL/Fedora and Debian packages to `README.md`.
+- Various cleanups. (Tony Skjellum, Dave Love, Nico Schlömer)
 
 ## Changes in 0.3.2
 April 28, 2018
