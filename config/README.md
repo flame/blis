@@ -1,6 +1,7 @@
 
 For more information on sub-configurations and configuration families in BLIS,
-please read the [ConfigurationHowTo](https://github.com/flame/blis/wiki/ConfigurationHowTo) wiki.
+please read the Configuration Guide, which can be viewed in markdown-rendered
+form [from the BLIS wiki page](https://github.com/flame/blis/wiki/).
 
 If you don't have time, or are impatient, take a look at the `config_registry`
 file in the top-level directory of the BLIS distribution. It contains a
