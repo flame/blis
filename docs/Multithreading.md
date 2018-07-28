@@ -31,7 +31,7 @@ To enable multithreading via OpenMP, you must provide the `--enable-threading` o
 ```
 $ ./configure --enable-threading=openmp auto
 ```
-In this example, we configure for the `haswell` configuration. Similarly, to enable multithreading via POSIX threads (pthreads), specify the threading model as `pthreads` instead of `openmp`:
+In this example, we target the `auto` configuration, which is like asking `configure` to choose the more appropriate configuration based on some detection heuristic (e.g. `cpuid` on x86_64). Similarly, to enable multithreading via POSIX threads (pthreads), specify the threading model as `pthreads` instead of `openmp`:
 ```
 $ ./configure --enable-threading=pthreads auto
 ```
