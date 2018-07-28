@@ -6,7 +6,9 @@
     * [Integer-based types](BLISTypedAPI.md#integer-based-types)
     * [Floating-point types](BLISTypedAPI.md#floating-point-types)
     * [Enumerated parameter types](BLISTypedAPI.md#enumerated-parameter-types)
+    * [Basic vs expert interfaces](BLISTypedAPI.md#basic-vs-expert-interfaces)
     * [Context type](BLISTypedAPI.md#context-type)
+    * [Runtime type](BLISTypedAPI.md#runtime-type)
   * [BLIS header file](BLISTypedAPI.md#blis-header-file)
   * [Initialization and cleanup](BLISTypedAPI.md#initialization-and-cleanup)
 * **[Computational function reference](BLISTypedAPI.md#computational-function-reference)**
@@ -24,7 +26,7 @@
   * [Specific configuration](BLISTypedAPI.md#specific-configuration)
   * [General configuration](BLISTypedAPI.md#general-configuration)
   * [Kernel information](BLISTypedAPI.md#kernel-information)
-* **[Example code](BLISObjectAPI.md#example-code)**
+* **[Example code](BLISTypedAPI.md#example-code)**
 
 # Introduction
 
