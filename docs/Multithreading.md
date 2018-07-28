@@ -55,7 +55,7 @@ There are three broad methods of specifying multithreading in BLIS:
 Within these three broad methods there are two specific ways of expressing a request for parallelism. First, the user may express a single number--the total number of threads, or ways of parallelism, to use within a single operation such as `gemm`. We call this the "automatic" way. Alternatively, the user may express the number of ways of parallelism to obtain within *each loop* of the level-3 operation. We call this the "manual" way. The latter way is actually what BLIS eventually needs before it can perform its multithreading; the former is viable only because we have a heuristic of determing a reasonable instance of the latter when given the former.
 This pattern--automatic or manual--holds regardless of which of the three methods is used.
 
-Regardless of which method is employed, and which specific way within each method, after setting the number of threads, the application may simply call the desired level-3 operation via either the BLAS, the [typed API](docs/BLISTypedAPI.md), or the [object API](docs/BLISObjectAPI.md), and the operation will execute in a multithreaded manner.
+Regardless of which method is employed, and which specific way within each method, after setting the number of threads, the application may simply call the desired level-3 operation via either the [typed API](docs/BLISTypedAPI.md) or the [object API](docs/BLISObjectAPI.md), and the operation will execute in a multithreaded manner. (When calling BLIS via the BLAS API, only the first two (global) methods are available.)
 
 ## Globally via environment variables
 
@@ -131,7 +131,7 @@ If you want to specify the number of ways of parallelism to obtain for each loop
 ```c
 void bli_thread_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir );
 ```
-This function takes one integer for each loop in the level-3 operations. (**Note**: even though the function takes a `pc` argument, it will be ignored until parallelism is supported in the KC loop.)
+This function takes one integer for each loop in the level-3 operations. (**Note**: even though the function takes a `pc` argument, it will be ignored until parallelism is supported in the `KC` loop.)
 So, for example, if we call
 ```c
 bli_thread_set_ways( 2, 1, 4, 1, 1 );
@@ -141,7 +141,7 @@ Unlike environment variables, which only allow the user to set the parallelizati
 
 ## Locally at runtime
 
-In addition to the global methods based on environment variables and runtime function calls, BLIS also a local, *per-call* method of requesting parallelism at runtime. This method has the benefit of being thread-safe and flexible; your application can spawn two threads, with each thread requesting different degrees of parallelism from their respective calls to level-3 operations.
+In addition to the global methods based on environment variables and runtime function calls, BLIS also offers a local, *per-call* method of requesting parallelism at runtime. This method has the benefit of being thread-safe and flexible; your application can spawn two threads at the application level, with each thread requesting different degrees of parallelism from their respective calls to level-3 BLIS operations.
 
 As with environment variables and the global runtime API, there are two ways to specify parallelism: the automatic way and the manual way. Both ways involve allocating a BLIS-specific object, initializing the object and encoding the desired parallelization, and then passing a pointer to the object into one of the expert interfaces of either the [typed](docs/BLISTypedAPI.md) or [object](docs/BLISObjectAPI) APIs. We provide examples of utilizing this threading object below.
 
@@ -152,7 +152,7 @@ Before specifying the parallelism (automatically or manually), you must first al
 rntm_t rntm;
 ```
 We **strongly recommend** initializing the `rntm_t`. This can be done in either of two ways.
-If you want to also initialize it as part of the declaration, you may do so via the default `BLIS_RNTM_INITIALIZER` macro:
+If you want to initialize it as part of the declaration, you may do so via the default `BLIS_RNTM_INITIALIZER` macro:
 ```c
 rntm_t rntm = BLIS_RNTM_INITIALIZER;
 ```
@@ -198,7 +198,7 @@ Let's assume you wish to call `gemm`. To so do, simply use the expert interface,
 ```c
 bli_gemm_ex( &alpha, &a, &b, &beta, &c, NULL, &rntm );
 ```
-This will cause `gemm` to execute and be parallelized in the manner encoded by `rntm`.
+This will cause `gemm` to execute and parallelize in the manner encoded by `rntm`.
 
 To summarize, using a `rntm_t` involves three steps:
 ```c
@@ -218,7 +218,7 @@ Note that `rntm_t` objects may be reused over and over again once they are initi
 
 # Conclusion
 
-Please send us feedback if you have any concerns or questions, or [open an issue](http://github.com/flame/blis/issues) if you observe any reproducible behavior that you think is erroneous. (You are welcome to use the issue feature to start any non-trivial dialogue; we don't restrict them only to bug reports!
+Please send us feedback if you have any concerns or questions, or [open an issue](http://github.com/flame/blis/issues) if you observe any reproducible behavior that you think is erroneous. (You are welcome to use the issue feature to start any non-trivial dialogue; we don't restrict them only to bug reports!)
 
 Thanks for your interest in BLIS.
 
