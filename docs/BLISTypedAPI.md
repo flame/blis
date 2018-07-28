@@ -138,7 +138,7 @@ When calling one of the expert interfaces, a `rntm_t` (runtime) object can be us
 
 Notice that runtime objects have no analogue in most BLAS libraries, where you are forced to specify parallelism at a global level (usually via environment variables).
 
-For more information on using `rntm_t` objects, please read the [Multithreading](docs/Multithreading.md) documentation.
+For more information on using `rntm_t` objects, please read the [Multithreading](Multithreading.md) documentation.
 
 ## BLIS header file
 
