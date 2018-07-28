@@ -158,16 +158,19 @@ drivers via `make check`:
 ```
 $ make check [-j]
 ```
-
+Please read the output of `./configure --help` for a full list of configure-time
+options.
 A more detailed walkthrough of the build system can be found in our
 [Build System](docs/BuildSystem.md) guide.
 
-If you want to browse a quick-reference guide on user-level BLIS
-interfaces, please read the [BLIS Typed API reference](docs/BLISTypedAPI.md).
-There you will find a brief description of each operation as well as some more
-general information needed when developing an application with BLIS.
+We provide comprehensive documentation on BLIS's two primarily APIs:
+the [BLIS Object API](docs/BLISTypedAPI.md) and
+the [BLIS Typed API](docs/BLISTypedAPI.md).
+These documents provide brief descriptions of each operation interface as
+well as some more general information needed when developing an application
+with BLIS.
 
-If you want to begin using the more advanced object API in BLIS,
+If you want to begin using the object API in BLIS,
 please step through the example code tutorial in the
 [examples/oapi](examples/oapi) directory.
 We also have the equivalent code examples for the typed API available in

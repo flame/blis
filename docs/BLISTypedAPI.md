@@ -118,12 +118,13 @@ void bli_?gemm_ex
        ctype*  b, inc_t rsb, inc_t csb,
        ctype*  beta,
        ctype*  c, inc_t rsc, inc_t csc,
-       cntx_t* cntx
+       cntx_t* cntx,
+       rntm_t* rntm
      );
 ```
-The expert interface contains an additional `cntx_t*` parameter. Note that calling a function from the expert interface with the `cntx_t*` argument set to `NULL` is equivalent to calling the corresponding basic interface.
+The expert interface contains two additional parameters: a `cntx_t*` and `rntm_t*`. Note that calling a function from the expert interface with the `cntx_t*` and `rntm_t*` arguments each set to `NULL` is equivalent to calling the corresponding basic interface.
 
-### Contexts
+## Context type
 
 In general, it is permissible to pass in `NULL` for a `cntx_t*` parameter when calling an expert interface such as `bli_dgemm_ex()`. However, there are cases where `NULL` values are not accepted and may result in a segmentation fault. Specifically, the `cntx_t*` argument appears in the interfaces to the `gemm`, `trsm`, and `gemmtrsm` [level-3 micro-kernels](KernelsHowTo.md#level-3) along with all [level-1v](KernelsHowTo.md#level-1v) and [level-1f](KernelsHowTo.md#level-1f) kernels. There, as a general rule, a valid pointer must be passed in. Whenever a valid context is needed, the developer may query a default context from the global kernel structure (if a context is not already available in the current scope):
 ```c
@@ -131,6 +132,13 @@ cntx_t* bli_gks_query_cntx( void );
 ```
 When BLIS is configured to target a configuration family (e.g. `intel64`, `x86_64`), `bli_gks_query_cntx()` will use `cpuid` or an equivalent heuristic to select and and return the appropriate context. When BLIS is configured to target a singleton sub-configuration (e.g. `haswell`, `skx`), `bli_gks_query_cntx()` will unconditionally return a pointer to the context appropriate for the targeted configuration.
 
+## Runtime type
+
+When calling one of the expert interfaces, a `rntm_t` (runtime) object can be used to convey a thread-local request for parallelism to the underlying implementation. Runtime objects are thread-safe by nature when they are declared statically as a stack variable (or allocated via `malloc()`), initialized, and then passed into the expert interface of interest.
+
+Notice that runtime objects have no analogue in most BLAS libraries, where you are forced to specify parallelism at a global level (usually via environment variables).
+
+For more information on using `rntm_t` objects, please read the [Multithreading](docs/Multithreading.md) documentation.
 
 ## BLIS header file
 
