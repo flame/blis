@@ -164,7 +164,7 @@ A more detailed walkthrough of the build system can be found in our
 [Build System](docs/BuildSystem.md) guide.
 
 We provide comprehensive documentation on BLIS's two primarily APIs:
-the [object API](docs/BLISTypedAPI.md) and
+the [object API](docs/BLISObjectAPI.md) and
 the [typed API](docs/BLISTypedAPI.md).
 These documents provide brief descriptions of each operation interface as
 well as some more general information needed when developing an application
