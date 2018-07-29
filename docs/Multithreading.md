@@ -55,13 +55,13 @@ There are three broad methods of specifying multithreading in BLIS:
 Within these three broad methods there are two specific ways of expressing a request for parallelism. First, the user may express a single number--the total number of threads, or ways of parallelism, to use within a single operation such as `gemm`. We call this the "automatic" way. Alternatively, the user may express the number of ways of parallelism to obtain within *each loop* of the level-3 operation. We call this the "manual" way. The latter way is actually what BLIS eventually needs before it can perform its multithreading; the former is viable only because we have a heuristic of determing a reasonable instance of the latter when given the former.
 This pattern--automatic or manual--holds regardless of which of the three methods is used.
 
-Regardless of which method is employed, and which specific way within each method, after setting the number of threads, the application may simply call the desired level-3 operation via either the [typed API](docs/BLISTypedAPI.md) or the [object API](docs/BLISObjectAPI.md), and the operation will execute in a multithreaded manner. (When calling BLIS via the BLAS API, only the first two (global) methods are available.)
+Regardless of which method is employed, and which specific way within each method, after setting the number of threads, the application may call the desired level-3 operation (via either the [typed API](docs/BLISTypedAPI.md) or the [object API](docs/BLISObjectAPI.md)) and the operation will execute in a multithreaded manner. (When calling BLIS via the BLAS API, only the first two (global) methods are available.)
 
 ## Globally via environment variables
 
 The most common method of specifying multithreading in BLIS is globally via environment variables. With this method, the user sets one or more environment variables in the shell before launching the BLIS-linked executable.
 
-Regardless of whether you end up using the automatic or manual way of expressing a request for multithreading, note that the environment variables are read (via `getenv()`) by BLIS **only once**, when the library is initialized. Subsequent to library initialization, the global settings for parallelization may only be changed via the [global runtime API](Multithreading.md#globally-at-runtime). If this constraint is not a problem, then environment variables may work fine for you.
+Regardless of whether you end up using the automatic or manual way of expressing a request for multithreading, note that the environment variables are read (via `getenv()`) by BLIS **only once**, when the library is initialized. Subsequent to library initialization, the global settings for parallelization may only be changed via the [global runtime API](Multithreading.md#globally-at-runtime). If this constraint is not a problem, then environment variables may work fine for you. Otherwise, please consider [local settings](Multithreading.md#locally-at-runtime). (Local settings may used at any time, regardless of whether global settings were explicitly specified, and local settings always override global settings.)
 
 ### Environment variables: the automatic way
 
@@ -71,7 +71,9 @@ $ export GOMP_CPU_AFFINITY="..."  # optional step when using GNU libgomp.
 $ export BLIS_NUM_THREADS=16
 $ ./my_blis_program
 ```
-This causes BLIS to automatically determine a reasonable threading strategy based on what is known about the operation and problem size. If `BLIS_NUM_THREADS` is not set, then BLIS also looks at the value of `OMP_NUM_THREADS`, if set. If neither variable is set, the default number of threads is 1.
+This causes BLIS to automatically determine a reasonable threading strategy based on what is known about the operation and problem size. If `BLIS_NUM_THREADS` is not set, BLIS will attempt to query the value of `OMP_NUM_THREADS`. If neither variable is set, the default number of threads is 1.
+
+**Note:** We *highly* discourage use of the `OMP_NUM_THREADS` environment variable and may remove support for it in the future. If you wish to set parallelism globally via environment variables, please use `BLIS_NUM_THREADS`.
 
 ### Environment variables: the manual way
 
@@ -215,6 +217,8 @@ bli_rntm_set_ways( 1, 1, 2, 3, 1, &rntm );
 bli_gemm_ex( &alpha, &a, &b, &beta, &c, NULL, &rntm );
 ```
 Note that `rntm_t` objects may be reused over and over again once they are initialized; there is no need to reinitialize them and re-encode their threading values!
+
+Also, you may pass in `NULL` for the `rntm_t*` parameter of an expert interface. This causes the current global settings to be used.
 
 # Conclusion
 

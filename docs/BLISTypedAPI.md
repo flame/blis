@@ -124,7 +124,7 @@ void bli_?gemm_ex
        rntm_t* rntm
      );
 ```
-The expert interface contains two additional parameters: a `cntx_t*` and `rntm_t*`. Note that calling a function from the expert interface with the `cntx_t*` and `rntm_t*` arguments each set to `NULL` is equivalent to calling the corresponding basic interface.
+The expert interface contains two additional parameters: a `cntx_t*` and `rntm_t*`. Note that calling a function from the expert interface with the `cntx_t*` and `rntm_t*` arguments each set to `NULL` is equivalent to calling the corresponding basic interface. Specifically, a `NULL` value passed in for the `cntx_t*` results in a valid context being queried from BLIS, and a `NULL` value passed in for the `rntm_t*` results in the current global settings for multithreading to be used.
 
 ## Context type
 
@@ -140,7 +140,7 @@ When calling one of the expert interfaces, a `rntm_t` (runtime) object can be us
 
 Notice that runtime objects have no analogue in most BLAS libraries, where you are forced to specify parallelism at a global level (usually via environment variables).
 
-For more information on using `rntm_t` objects, please read the [Multithreading](Multithreading.md) documentation.
+For more information on using `rntm_t` objects, please read the [Multithreading](Multithreading.md) documentation, paying close attention to the section on [local setting of parallelism](Multithreading.md#locally-at-runtime).
 
 ## BLIS header file
 
