@@ -17,8 +17,8 @@ license](http://opensource.org/licenses/BSD-3-Clause). While BLIS exports a
 [new BLAS-like API](docs/BLISTypedAPI.md),
 it also includes a BLAS compatibility layer which gives application developers
 access to BLIS implementations via traditional [BLAS routine
-calls](http://www.netlib.org/lapack/lug/node145.html). An object-based API
-is also available for more experienced users.
+calls](http://www.netlib.org/lapack/lug/node145.html).
+An [object-based API](docs/BLISObjectAPI.md) unique to BLIS is also available.
 
 For a thorough presentation of our framework, please read our
 journal article, ["BLIS: A Framework for Rapidly Instantiating BLAS
@@ -102,17 +102,24 @@ write their application to take advantage of new BLIS functionality (such as
 generalized storage formats or additional complex operations) by calling one
 of BLIS's native APIs directly. BLIS's typed API will feel familiar to many
 veterans of BLAS since these interfaces use BLAS-like calling sequences. And
-experts will find BLIS's object-based APIs a delight to use when customizing
+many will find BLIS's object-based APIs a delight to use when customizing
 or writing their own BLIS operations. (Objects are relatively lightweight
 `structs` and passed by address, which helps tame function calling overhead.) 
 
- * **Multilayered API and exposed kernels.** The BLIS framework exposes its
+ * **Multilayered API, exposed kernels, and sandboxes.** The BLIS framework
+exposes its
 implementations in various layers, allowing expert developers to access exactly
 the functionality desired. This layered interface includes that of the
 lowest-level kernels, for those who wish to bypass the bulk of the framework.
 Optimizations can occur at various levels, in part thanks to exposed packing
 and unpacking facilities, which by default are highly parameterized and
-flexible. 
+flexible. And more recently, BLIS introduced sandboxes--a way to provide
+alternative implementations of `gemm` that do not use any more of the BLIS
+infrastructure than is desired. Sandboxes provide a convenient and
+straightforward way of modifying the `gemm` implementation without disrupting
+any other level-3 operation or any other part of the framework. This works
+especially well when the developer wants to experiment with new optimizations
+or try a different algorithm.
 
  * **Functionality that grows with the community's needs.** As its name
 suggests, the BLIS framework is not a single library or static API, but rather
