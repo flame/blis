@@ -522,7 +522,7 @@ static void bli_cntx_set_packm_ker( l1mkr_t ker_id, func_t* func, cntx_t* cntx )
 
 static void bli_cntx_set_packm_ker_dt( void* fp, num_t dt, l1mkr_t ker_id, cntx_t* cntx )
 {
-	func_t* func = ( func_t* )bli_cntx_get_packm_ker_dt( dt, ker_id, cntx );
+	func_t* func = ( func_t* )bli_cntx_get_packm_kers( ker_id, cntx );
 
 	bli_func_set_dt( fp, dt, func );
 }
@@ -536,7 +536,7 @@ static void bli_cntx_set_unpackm_ker( l1mkr_t ker_id, func_t* func, cntx_t* cntx
 
 static void bli_cntx_set_unpackm_ker_dt( void* fp, num_t dt, l1mkr_t ker_id, cntx_t* cntx )
 {
-	func_t* func = ( func_t* )bli_cntx_get_unpackm_ker_dt( dt, ker_id, cntx );
+	func_t* func = ( func_t* )bli_cntx_get_unpackm_kers( ker_id, cntx );
 
 	bli_func_set_dt( fp, dt, func );
 }
