@@ -385,10 +385,10 @@ The BLIS `Makefile` implements many `make` targets. The table below lists most o
 | `make` target   | Description                                        |
 |:----------------|:---------------------------------------------------|
 | `all`           | Execute `libs` target.                             |
-| `libs`          | Compile BLIS as a static and/or shared library (depending on `configure` options.    |
+| `libs`          | Compile BLIS as a static and/or shared library (depending on `configure` options). |
 | `test`          | Execute `testblis` and `testblas` targets.         |
 | `testblis`      | Run the BLIS testsuite with default parameters (runs for 2-8 minutes). |
-| `testblis-fast` | Run the BLIS testsuite with "fast" parameters (runs for a few seconds. |
+| `testblis-fast` | Run the BLIS testsuite with "fast" parameters (runs for a few seconds). |
 | `testsuite`     | Same as `testblis`.                                |
 | `testblas`      | Run the BLAS test drivers with default parameters (runs for a few seconds). |
 | `check`         | Execute `checkblis-fast` and `checkblas` targets.  |
