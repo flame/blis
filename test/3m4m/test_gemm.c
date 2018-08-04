@@ -125,7 +125,7 @@ int main( int argc, char** argv )
 #else
 	printf( "data_%s_%cgemm_%s",      THR_STR, dt_ch, STR );
 #endif
-	printf( "( %2lu, 1:5 ) = [ %4lu %4lu %4lu  %10.3e  %6.3f ];\n",
+	printf( "( %2lu, 1:5 ) = [ %4lu %4lu %4lu  %10.3e %7.2f ];\n",
 	        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
 	        ( unsigned long )0,
 	        ( unsigned long )0,
@@ -318,7 +318,7 @@ int main( int argc, char** argv )
 #else
 		printf( "data_%s_%cgemm_%s",      THR_STR, dt_ch, STR );
 #endif
-		printf( "( %2lu, 1:5 ) = [ %4lu %4lu %4lu  %10.3e  %6.3f ];\n",
+		printf( "( %2lu, 1:5 ) = [ %4lu %4lu %4lu  %10.3e %7.2f ];\n",
 		        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
 		        ( unsigned long )m,
 		        ( unsigned long )k,
