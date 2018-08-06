@@ -81,6 +81,18 @@ int main( int argc, char** argv )
 
 	uplo = BLIS_LOWER;
 
+	// Begin with initializing the last entry to zero so that
+	// matlab allocates space for the entire array once up-front.
+	for ( p = p_begin; p + p_inc <= p_end; p += p_inc ) ;
+#ifdef BLIS
+	printf( "data_trmv_blis" );
+#else
+	printf( "data_trmv_%s", BLAS );
+#endif
+	printf( "( %2lu, 1:2 ) = [ %4lu %7.2f ];\n",
+	        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
+	        ( unsigned long )0, 0.0 );
+
 	for ( p = p_begin; p <= p_end; p += p_inc )
 	{
 
@@ -163,9 +175,9 @@ int main( int argc, char** argv )
 #else
 		printf( "data_trmv_%s", BLAS );
 #endif
-		printf( "( %2lu, 1:3 ) = [ %4lu  %10.3e  %6.3f ];\n",
+		printf( "( %2lu, 1:2 ) = [ %4lu %7.2f ];\n",
 		        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
-		        ( unsigned long )m, dtime_save, gflops );
+		        ( unsigned long )m, gflops );
 
 		bli_obj_free( &alpha );
 
