@@ -45,7 +45,7 @@ void bli_packm_int
 {
 	bli_init_once();
 
-	packm_voft f;
+	packm_var_oft f;
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )

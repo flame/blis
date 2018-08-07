@@ -127,7 +127,7 @@ void PASTEMAC(ch,varname) \
 		); \
 	} \
 \
-	PASTECH(ch,dotxaxpyf_ft) kfp_xf; \
+	PASTECH(ch,dotxaxpyf_ker_ft) kfp_xf; \
 \
 	/* Query the context for the kernel function pointer and fusing factor. */ \
 	kfp_xf = bli_cntx_get_l1f_ker_dt( dt, BLIS_DOTXAXPYF_KER, cntx ); \

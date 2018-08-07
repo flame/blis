@@ -52,3 +52,7 @@
 #define BLIS_TAPI_EX_DECLS   cntx_t* cntx = NULL; ( void )cntx; \
                              rntm_t* rntm = NULL; ( void )rntm;
 
+// Define the macro to pass the local expert variables to another function.
+//#undef  BLIS_TAPI_EX_VARS
+//#define BLIS_TAPI_EX_VARS
+

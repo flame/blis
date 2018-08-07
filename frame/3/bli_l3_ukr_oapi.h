@@ -58,20 +58,6 @@ GENPROT( gemm_ukernel )
 \
 void PASTEMAC0(opname) \
      ( \
-       obj_t*  a, \
-       obj_t*  b, \
-       obj_t*  c, \
-       cntx_t* cntx  \
-     );
-
-GENPROT( trsm_ukernel )
-
-
-#undef  GENPROT
-#define GENPROT( opname ) \
-\
-void PASTEMAC0(opname) \
-     ( \
        obj_t*  alpha, \
        obj_t*  a1x, \
        obj_t*  a11, \
@@ -82,4 +68,18 @@ void PASTEMAC0(opname) \
      );
 
 GENPROT( gemmtrsm_ukernel )
+
+
+#undef  GENPROT
+#define GENPROT( opname ) \
+\
+void PASTEMAC0(opname) \
+     ( \
+       obj_t*  a, \
+       obj_t*  b, \
+       obj_t*  c, \
+       cntx_t* cntx  \
+     );
+
+GENPROT( trsm_ukernel )
 

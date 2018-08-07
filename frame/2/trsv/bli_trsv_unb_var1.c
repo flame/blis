@@ -91,7 +91,7 @@ void PASTEMAC(ch,varname) \
 	  NULL  \
 	); \
 \
-	PASTECH(ch,dotv_ft) kfp_tv; \
+	PASTECH(ch,dotv_ker_ft) kfp_tv; \
 \
 	/* Query the context for the kernel function pointer. */ \
 	kfp_tv = bli_cntx_get_l1v_ker_dt( dt, BLIS_DOTV_KER, cntx ); \

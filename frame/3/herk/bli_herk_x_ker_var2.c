@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-static gemm_voft vars[2] =
+static gemm_var_oft vars[2] =
 {
 	bli_herk_l_ker_var2, bli_herk_u_ker_var2,
 };
@@ -50,8 +50,8 @@ void bli_herk_x_ker_var2
        thrinfo_t* thread
      )
 {
-	bool_t    uplo;
-	gemm_voft f;
+	bool_t       uplo;
+	gemm_var_oft f;
 
 	// Set a bool based on the uplo field of C's root object.
 	if ( bli_obj_root_is_lower( c ) ) uplo = 0;

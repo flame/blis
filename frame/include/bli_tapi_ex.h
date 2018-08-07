@@ -50,3 +50,7 @@
 #undef  BLIS_TAPI_EX_DECLS
 #define BLIS_TAPI_EX_DECLS
 
+// Define the macro to pass the local expert variables to another function.
+//#undef  BLIS_TAPI_EX_VARS
+//#define BLIS_TAPI_EX_VARS ,cntx, rntm
+

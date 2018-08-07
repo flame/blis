@@ -32,46 +32,37 @@
 
 */
 
-#ifndef BLIS_L3_VAR_OFT_H
-#define BLIS_L3_VAR_OFT_H
-
+#include "blis.h"
 
 //
-// -- Level-3 variant function types -------------------------------------------
+// Define function pointer query interfaces.
 //
 
-#undef  GENTDEF
-#define GENTDEF( opname ) \
+#undef  GENFRONT
+#define GENFRONT( opname ) \
 \
-typedef void (*PASTECH(opname,_voft)) \
-( \
-  obj_t*  a, \
-  obj_t*  b, \
-  obj_t*  c, \
-  cntx_t* cntx, \
-  gemm_t* cntl, \
-  thrinfo_t* thread  \
-);
-
-GENTDEF( gemm )
-
-
-#undef  GENTDEF
-#define GENTDEF( opname ) \
+GENARRAY_FPA( PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft), \
+              PASTECH(opname,BLIS_TAPI_EX_SUF) ); \
 \
-typedef void (*PASTECH(opname,_voft)) \
-( \
-  obj_t*  a, \
-  obj_t*  b, \
-  obj_t*  c, \
-  cntx_t* cntx, \
-  trsm_t* cntl, \
-  thrinfo_t* thread  \
-);
+PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) \
+PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( num_t dt ) \
+{ \
+	return PASTECH2(opname,BLIS_TAPI_EX_SUF,_fpa)[ dt ]; \
+}
 
-GENTDEF( trsm )
+GENFRONT( addv )
+GENFRONT( copyv )
+GENFRONT( subv )
+GENFRONT( amaxv )
+GENFRONT( axpbyv )
+GENFRONT( axpyv )
+GENFRONT( scal2v )
+GENFRONT( dotv )
+GENFRONT( dotxv )
+GENFRONT( invertv )
+GENFRONT( scalv )
+GENFRONT( setv )
+GENFRONT( swapv )
+GENFRONT( xpbyv )
 
-
-
-#endif
 

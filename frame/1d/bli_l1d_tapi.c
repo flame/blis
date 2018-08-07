@@ -101,7 +101,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* Query the context for the operation's kernel address. */ \
-	PASTECH2(ch,kername,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
+	PASTECH2(ch,kername,_ker_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
 \
 	/* Invoke the kernel with the appropriate parameters. */ \
 	f( \
@@ -180,7 +180,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* Query the context for the operation's kernel address. */ \
-	PASTECH2(ch,kername,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
+	PASTECH2(ch,kername,_ker_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
 \
 	/* Invoke the kernel with the appropriate parameters. */ \
 	f( \
@@ -239,7 +239,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* Query the context for the operation's kernel address. */ \
-	PASTECH2(ch,kername,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
+	PASTECH2(ch,kername,_ker_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
 \
 	/* Invoke the kernel with the appropriate parameters. */ \
 	f( \
@@ -296,7 +296,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* Query the context for the operation's kernel address. */ \
-	PASTECH2(ch,kername,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
+	PASTECH2(ch,kername,_ker_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
 \
 	/* Invoke the kernel with the appropriate parameters. */ \
 	f( \
@@ -372,7 +372,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* Query the context for the operation's kernel address. */ \
-	PASTECH2(chr,kername,_ft) f = bli_cntx_get_l1v_ker_dt( dt_r, kerid, cntx ); \
+	PASTECH2(chr,kername,_ker_ft) f = bli_cntx_get_l1v_ker_dt( dt_r, kerid, cntx ); \
 \
 	/* Invoke the kernel with the appropriate parameters. */ \
 	f( \

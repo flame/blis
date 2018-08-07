@@ -35,9 +35,11 @@
 #include "bli_l3_cntl.h"
 #include "bli_l3_check.h"
 
-#include "bli_l3_ft.h"
+// Define function types.
+#include "bli_l3_ft_ex.h"
+#include "bli_l3_ft_ukr.h"
 #include "bli_l3_oft.h"
-#include "bli_l3_voft.h"
+#include "bli_l3_oft_var.h"
 
 #include "bli_l3_blocksize.h"
 #include "bli_l3_direct.h"
@@ -47,20 +49,23 @@
 // Prototype object APIs (expert and non-expert).
 #include "bli_oapi_ex.h"
 #include "bli_l3_oapi.h"
+
 #include "bli_oapi_ba.h"
 #include "bli_l3_oapi.h"
 
 // Prototype typed APIs (expert and non-expert).
 #include "bli_tapi_ex.h"
 #include "bli_l3_tapi.h"
+
 #include "bli_tapi_ba.h"
 #include "bli_l3_tapi.h"
 
+// Prototype microkernel wrapper APIs
 #include "bli_l3_ukr_oapi.h"
 #include "bli_l3_ukr_tapi.h"
 
-// Prototype reference micro-kernels.
-//#include "bli_l3_ref.h"
+// Generate function pointer arrays for tapi microkernel functions.
+#include "bli_l3_ukr_fpa.h"
 
 // Operation-specific headers
 #include "bli_gemm.h"

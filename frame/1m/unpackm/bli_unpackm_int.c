@@ -45,7 +45,7 @@ void bli_unpackm_int
 {
 	bli_init_once();
 
-	unpackm_voft f;
+	unpackm_var_oft f;
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )

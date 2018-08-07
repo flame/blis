@@ -35,9 +35,9 @@
 #include "blis.h"
 
 #undef  GENFRONT
-#define GENFRONT( opname ) \
+#define GENFRONT( opname, varname ) \
 \
-void PASTEMAC0(opname) \
+void PASTEMAC0(varname) \
      ( \
        conj_t  conjh, \
        obj_t*  alpha, \
@@ -72,11 +72,13 @@ void PASTEMAC0(opname) \
 	void*     buf_alpha = bli_obj_buffer_for_1x1( dt, alpha ); \
 	void*     buf_beta  = bli_obj_buffer_for_1x1( dt, beta ); \
 \
-	/* Invoke the void pointer-based function for the given datatype. */ \
-	bli_call_ft_15 \
+	/* Query a type-specific function pointer, except one that uses
+	   void* instead of typed pointers. */ \
+	PASTECH2(opname,_unb,_vft) f = \
+	PASTEMAC(varname,_qfp)( dt ); \
+\
+	f \
 	( \
-	  dt, \
-	  opname, \
 	  uplo, \
 	  conja, \
 	  conjx, \
@@ -91,13 +93,13 @@ void PASTEMAC0(opname) \
 	); \
 } \
 
-GENFRONT( hemv_unb_var1 )
-GENFRONT( hemv_unb_var2 )
-GENFRONT( hemv_unb_var3 )
-GENFRONT( hemv_unb_var4 )
+GENFRONT( hemv, hemv_unb_var1 )
+GENFRONT( hemv, hemv_unb_var2 )
+GENFRONT( hemv, hemv_unb_var3 )
+GENFRONT( hemv, hemv_unb_var4 )
 
-GENFRONT( hemv_unf_var1 )
-GENFRONT( hemv_unf_var3 )
-GENFRONT( hemv_unf_var1a )
-GENFRONT( hemv_unf_var3a )
+GENFRONT( hemv, hemv_unf_var1 )
+GENFRONT( hemv, hemv_unf_var3 )
+GENFRONT( hemv, hemv_unf_var1a )
+GENFRONT( hemv, hemv_unf_var3a )
 

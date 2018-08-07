@@ -80,7 +80,7 @@ void PASTEMAC(ch,varname) \
 \
 	conja = bli_extract_conj( transa ); \
 \
-	PASTECH(ch,dotv_ft) kfp_dv; \
+	PASTECH(ch,dotv_ker_ft) kfp_dv; \
 \
 	/* Query the context for the kernel function pointer. */ \
 	kfp_dv = bli_cntx_get_l1v_ker_dt( dt, BLIS_DOTV_KER, cntx ); \

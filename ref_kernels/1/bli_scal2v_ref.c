@@ -59,8 +59,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		ctype* zero = PASTEMAC(ch,0); \
 \
 		/* Query the context for the kernel function pointer. */ \
-		const num_t         dt     = PASTEMAC(ch,type); \
-		PASTECH(ch,setv_ft) setv_p = bli_cntx_get_l1v_ker_dt( dt, BLIS_SETV_KER, cntx ); \
+		const num_t             dt     = PASTEMAC(ch,type); \
+		PASTECH(ch,setv_ker_ft) setv_p = bli_cntx_get_l1v_ker_dt( dt, BLIS_SETV_KER, cntx ); \
 \
 		setv_p \
 		( \
@@ -76,8 +76,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	else if ( PASTEMAC(ch,eq0)( *alpha ) ) \
 	{ \
 		/* Query the context for the kernel function pointer. */ \
-		const num_t          dt      = PASTEMAC(ch,type); \
-		PASTECH(ch,copyv_ft) copyv_p = bli_cntx_get_l1v_ker_dt( dt, BLIS_COPYV_KER, cntx ); \
+		const num_t              dt      = PASTEMAC(ch,type); \
+		PASTECH(ch,copyv_ker_ft) copyv_p = bli_cntx_get_l1v_ker_dt( dt, BLIS_COPYV_KER, cntx ); \
 \
 		copyv_p \
 		( \

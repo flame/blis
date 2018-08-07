@@ -32,44 +32,27 @@
 
 */
 
-#ifndef BLIS_L1M_VAR_OFT_H
-#define BLIS_L1M_VAR_OFT_H
-
+#include "blis.h"
 
 //
-// -- Level-3 variant function types -------------------------------------------
+// Define function pointer query interfaces.
 //
 
-#undef  GENTDEF
-#define GENTDEF( opname ) \
+#undef  GENFRONT
+#define GENFRONT( tname, opname ) \
 \
-typedef void (*PASTECH(opname,_voft)) \
-( \
-  obj_t*  a, \
-  obj_t*  p, \
-  cntx_t* cntx, \
-  cntl_t* cntl, \
-  thrinfo_t* thread  \
-);
-
-GENTDEF( packm )
-
-
-#undef  GENTDEF
-#define GENTDEF( opname ) \
+GENARRAY_FPA( PASTECH2(tname,_ukr,_vft), \
+              opname ); \
 \
-typedef void (*PASTECH(opname,_voft)) \
-( \
-  obj_t*  p, \
-  obj_t*  a, \
-  cntx_t* cntx, \
-  cntl_t* cntl, \
-  thrinfo_t* thread  \
-);
+PASTECH2(tname,_ukr,_vft) \
+PASTEMAC(opname,_qfp)( num_t dt ) \
+{ \
+	return PASTECH(opname,_fpa)[ dt ]; \
+}
 
-GENTDEF( unpackm )
-
-
-
-#endif
+GENFRONT( gemm,     gemm_ukernel )
+GENFRONT( gemmtrsm, gemmtrsm_l_ukernel )
+GENFRONT( gemmtrsm, gemmtrsm_u_ukernel )
+GENFRONT( trsm,     trsm_l_ukernel )
+GENFRONT( trsm,     trsm_u_ukernel )
 

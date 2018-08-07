@@ -111,7 +111,7 @@ void PASTEMAC(ch,varname) \
 	conjh_conjx = bli_apply_conj( conjh, conjx ); \
 	conjh_conjy = bli_apply_conj( conjh, conjy ); \
 \
-	PASTECH(ch,axpy2v_ft) kfp_2v; \
+	PASTECH(ch,axpy2v_ker_ft) kfp_2v; \
 \
 	/* Query the context for the kernel function pointer. */ \
 	kfp_2v = bli_cntx_get_l1f_ker_dt( dt, BLIS_AXPY2V_KER, cntx ); \

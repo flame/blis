@@ -77,7 +77,7 @@ void bli_sdotxf_zen_int_8
 	// simplifies to updating y.
 	if ( bli_zero_dim1( m ) || PASTEMAC(s,eq0)( *alpha ) )
 	{
-		sscalv_ft f = bli_cntx_get_l1v_ker_dt( BLIS_FLOAT, BLIS_SCALV_KER, cntx );
+		sscalv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_FLOAT, BLIS_SCALV_KER, cntx );
 		
 		f
 		(
@@ -94,7 +94,7 @@ void bli_sdotxf_zen_int_8
 	// operation as a loop over dotxv.
 	if ( b_n != fuse_fac )
 	{
-		sdotxv_ft f = bli_cntx_get_l1v_ker_dt( BLIS_FLOAT, BLIS_DOTXV_KER, cntx );
+		sdotxv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_FLOAT, BLIS_DOTXV_KER, cntx );
 
 		for ( dim_t i = 0; i < b_n; ++i )
 		{
@@ -467,7 +467,7 @@ void bli_ddotxf_zen_int_8
 	// simplifies to updating y.
 	if ( bli_zero_dim1( m ) || PASTEMAC(d,eq0)( *alpha ) )
 	{
-		dscalv_ft f = bli_cntx_get_l1v_ker_dt( BLIS_DOUBLE, BLIS_SCALV_KER, cntx );
+		dscalv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_DOUBLE, BLIS_SCALV_KER, cntx );
 		
 		f
 		(
@@ -484,7 +484,7 @@ void bli_ddotxf_zen_int_8
 	// operation as a loop over dotxv.
 	if ( b_n != fuse_fac )
 	{
-		ddotxv_ft f = bli_cntx_get_l1v_ker_dt( BLIS_DOUBLE, BLIS_DOTXV_KER, cntx );
+		ddotxv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_DOUBLE, BLIS_DOTXV_KER, cntx );
 
 		for ( dim_t i = 0; i < b_n; ++i )
 		{

@@ -282,18 +282,50 @@ void PASTEMAC(ch,opname) \
      ( \
        dim_t           n, \
        ctype* restrict x, inc_t incx, \
-       dim_t* restrict index, \
-       cntx_t*         cntx  \
+       dim_t* restrict index  \
      ); \
 
 INSERT_GENTPROT_BASIC0( amaxv_test )
+
+
+//
+// Prototype function pointer query interface.
+//
+
+#undef  GENPROT
+#define GENPROT( tname, opname ) \
+\
+PASTECH(tname,_vft) \
+PASTEMAC(opname,_qfp)( num_t dt );
+
+GENPROT( amaxv, amaxv_test )
+
+
+//
+// Define function pointer query interfaces.
+//
+
+#undef  GENFRONT
+#define GENFRONT( tname, opname ) \
+\
+GENARRAY_FPA( PASTECH(tname,_vft), \
+              opname ); \
+\
+PASTECH(tname,_vft) \
+PASTEMAC(opname,_qfp)( num_t dt ) \
+{ \
+    return PASTECH(opname,_fpa)[ dt ]; \
+}
+
+GENFRONT( amaxv, amaxv_test )
+
 
 //
 // Define object-based interface for a local amaxv test operation.
 //
 
 #undef  GENFRONT
-#define GENFRONT( opname ) \
+#define GENFRONT( tname, opname ) \
 \
 void PASTEMAC0(opname) \
      ( \
@@ -312,19 +344,21 @@ void PASTEMAC0(opname) \
     if ( bli_error_checking_is_enabled() ) \
         bli_amaxv_check( x, index ); \
 \
-    /* Invoke the bli_?amaxv_test() function. */ \
-    bli_call_ft_5 \
-    ( \
-       dt, \
-       amaxv_test, \
+	/* Query a type-specific function pointer, except one that uses
+	   void* instead of typed pointers. */ \
+	PASTECH(tname,_vft) f = \
+	PASTEMAC(opname,_qfp)( dt ); \
+\
+	f \
+	( \
        n, \
        buf_x, incx, \
-       buf_index, \
-       NULL  \
+       buf_index  \
     ); \
 }
 
-GENFRONT( amaxv_test )
+GENFRONT( amaxv, amaxv_test )
+
 
 //
 // Define BLAS-like interfaces with typed operands for a local amaxv test
@@ -340,8 +374,7 @@ void PASTEMAC(ch,varname) \
      ( \
        dim_t    n, \
        ctype*   x, inc_t incx, \
-       dim_t*   i_max, \
-       cntx_t*  cntx  \
+       dim_t*   index  \
      ) \
 { \
 	ctype_r* minus_one = PASTEMAC(chr,m1); \
@@ -351,19 +384,19 @@ void PASTEMAC(ch,varname) \
 	ctype_r  chi1_i; \
 	ctype_r  abs_chi1; \
 	ctype_r  abs_chi1_max; \
-	dim_t    i_max_l; \
+	dim_t    index_l; \
 	dim_t    i; \
 \
 	/* If the vector length is zero, return early. This directly emulates
 	   the behavior of netlib BLAS's i?amax() routines. */ \
 	if ( bli_zero_dim1( n ) ) \
 	{ \
-		PASTEMAC(i,copys)( *zero_i, *i_max ); \
+		PASTEMAC(i,copys)( *zero_i, *index ); \
 		return; \
 	} \
 \
 	/* Initialize the index of the maximum absolute value to zero. */ \
-	PASTEMAC(i,copys)( *zero_i, i_max_l ); \
+	PASTEMAC(i,copys)( *zero_i, index_l ); \
 \
 	/* Initialize the maximum absolute value search candidate with
 	   -1, which is guaranteed to be less than all values we will
@@ -395,13 +428,13 @@ void PASTEMAC(ch,varname) \
 			if ( abs_chi1_max < abs_chi1 || bli_isnan( abs_chi1 ) ) \
 			{ \
 				abs_chi1_max = abs_chi1; \
-				i_max_l       = i; \
+				index_l       = i; \
 			} \
 		} \
 	} \
 \
 	/* Store the final index to the output variable. */ \
-	PASTEMAC(i,copys)( i_max_l, *i_max ); \
+	PASTEMAC(i,copys)( index_l, *index ); \
 }
 
 INSERT_GENTFUNCR_BASIC0( amaxv_test )

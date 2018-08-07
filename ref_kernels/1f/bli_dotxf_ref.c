@@ -58,8 +58,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	dim_t  i; \
 \
 	/* Query the context for the kernel function pointer. */ \
-	const num_t          dt     = PASTEMAC(ch,type); \
-	PASTECH(ch,dotxv_ft) kfp_dv = bli_cntx_get_l1v_ker_dt( dt, BLIS_DOTXV_KER, cntx ); \
+	const num_t              dt     = PASTEMAC(ch,type); \
+	PASTECH(ch,dotxv_ker_ft) kfp_dv = bli_cntx_get_l1v_ker_dt( dt, BLIS_DOTXV_KER, cntx ); \
 \
 	for ( i = 0; i < b_n; ++i ) \
 	{ \

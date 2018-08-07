@@ -32,75 +32,27 @@
 
 */
 
-#ifndef BLIS_L3_FT_H
-#define BLIS_L3_FT_H
-
-
 //
-// -- Level-3 micro-kernel types -----------------------------------------------
+// Prototype function pointer query interface.
 //
 
-// gemm
-
-#undef  GENTDEF
-#define GENTDEF( ctype, ch, opname, tsuf ) \
+#undef  GENPROT
+#define GENPROT( opname ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
-     ( \
-       dim_t               k, \
-       ctype*     restrict alpha, \
-       ctype*     restrict a, \
-       ctype*     restrict b, \
-       ctype*     restrict beta, \
-       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t* restrict data, \
-       cntx_t*    restrict cntx  \
-     );
+PASTECH(opname,_vft) \
+PASTEMAC(opname,_qfp)( num_t dt );
 
-INSERT_GENTDEF( gemm_ukr )
+GENPROT( absqsc )
+GENPROT( normfsc )
+GENPROT( addsc )
+GENPROT( divsc )
+GENPROT( mulsc )
+GENPROT( subsc )
+GENPROT( invertsc )
+GENPROT( sqrtsc )
+GENPROT( unzipsc )
+GENPROT( zipsc )
 
-
-// trsm_[lu]
-
-#undef  GENTDEF
-#define GENTDEF( ctype, ch, opname, tsuf ) \
-\
-typedef void (*PASTECH2(ch,opname,tsuf)) \
-     ( \
-       ctype*     restrict a, \
-       ctype*     restrict b, \
-       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t* restrict data, \
-       cntx_t*    restrict cntx  \
-     );
-
-INSERT_GENTDEF( trsm_ukr )
-
-
-// gemmtrsm_[lu]
-
-#undef  GENTDEF
-#define GENTDEF( ctype, ch, opname, tsuf ) \
-\
-typedef void (*PASTECH2(ch,opname,tsuf)) \
-     ( \
-       dim_t               k, \
-       ctype*     restrict alpha, \
-       ctype*     restrict a1x, \
-       ctype*     restrict a11, \
-       ctype*     restrict bx1, \
-       ctype*     restrict b11, \
-       ctype*     restrict c11, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t* restrict data, \
-       cntx_t*    restrict cntx  \
-     );
-
-INSERT_GENTDEF( gemmtrsm_ukr )
-
-
-
-
-
-
-#endif
+GENPROT( getsc )
+GENPROT( setsc )
 

@@ -40,15 +40,27 @@
 
 // -- "Smart" one-operand macro --
 
-#define GENARRAY_VFP(ftname,opname) \
+#define GENARRAY_FPA(tname,opname) \
 \
-PASTECH(ftname,_vft) \
-PASTECH(opname,_vfp)[BLIS_NUM_FP_TYPES] = \
+static tname PASTECH(opname,_fpa)[BLIS_NUM_FP_TYPES] = \
 { \
-	PASTEMAC(s,opname), \
-	PASTEMAC(c,opname), \
-	PASTEMAC(d,opname), \
-	PASTEMAC(z,opname)  \
+	( tname )PASTEMAC(s,opname), \
+	( tname )PASTEMAC(c,opname), \
+	( tname )PASTEMAC(d,opname), \
+	( tname )PASTEMAC(z,opname)  \
+}
+
+// -- "Smart" one-operand macro (with integer support) --
+
+#define GENARRAY_FPA_I(tname,opname) \
+\
+static tname PASTECH(opname,_fpa)[BLIS_NUM_FP_TYPES+1] = \
+{ \
+	( tname )PASTEMAC(s,opname), \
+	( tname )PASTEMAC(c,opname), \
+	( tname )PASTEMAC(d,opname), \
+	( tname )PASTEMAC(z,opname), \
+	( tname )PASTEMAC(i,opname)  \
 }
 
 // -- "Smart" two-operand macro --

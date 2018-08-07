@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-static trsm_voft vars[2][2] =
+static trsm_var_oft vars[2][2] =
 {
 	{ bli_trsm_ll_ker_var2, bli_trsm_lu_ker_var2 },
 	{ bli_trsm_rl_ker_var2, bli_trsm_ru_ker_var2 }
@@ -51,9 +51,9 @@ void bli_trsm_xx_ker_var2
        thrinfo_t* thread
      )
 {
-	bool_t    side;
-	bool_t    uplo;
-	trsm_voft f;
+	bool_t       side;
+	bool_t       uplo;
+	trsm_var_oft f;
 
 	// Set two bools: one based on the implied side parameter (the structure
 	// of the root object) and one based on the uplo field of the triangular

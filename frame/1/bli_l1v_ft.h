@@ -32,9 +32,6 @@
 
 */
 
-#ifndef BLIS_L1V_FT_H
-#define BLIS_L1V_FT_H
-
 
 //
 // -- Level-1v function types --------------------------------------------------
@@ -45,13 +42,13 @@
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       conj_t          conjx, \
-       dim_t           n, \
-       ctype* restrict x, inc_t incx, \
-       ctype* restrict y, inc_t incy, \
-       cntx_t*         cntx  \
+       conj_t  conjx, \
+       dim_t   n, \
+       ctype*  x, inc_t incx, \
+       ctype*  y, inc_t incy  \
+       BLIS_TAPI_EX_PARAMS  \
      );
 
 INSERT_GENTDEF( addv )
@@ -63,12 +60,12 @@ INSERT_GENTDEF( subv )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       dim_t           n, \
-       ctype* restrict x, inc_t incx, \
-       dim_t* restrict index, \
-       cntx_t*         cntx  \
+       dim_t   n, \
+       ctype*  x, inc_t incx, \
+       dim_t*  index  \
+       BLIS_TAPI_EX_PARAMS  \
      );
 
 INSERT_GENTDEF( amaxv )
@@ -78,15 +75,15 @@ INSERT_GENTDEF( amaxv )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       conj_t          conjx, \
-       dim_t           n, \
-       ctype* restrict alpha, \
-       ctype* restrict x, inc_t incx, \
-       ctype* restrict beta, \
-       ctype* restrict y, inc_t incy, \
-       cntx_t*         cntx  \
+       conj_t  conjx, \
+       dim_t   n, \
+       ctype*  alpha, \
+       ctype*  x, inc_t incx, \
+       ctype*  beta, \
+       ctype*  y, inc_t incy  \
+       BLIS_TAPI_EX_PARAMS  \
      );
 
 INSERT_GENTDEF( axpbyv )
@@ -96,14 +93,14 @@ INSERT_GENTDEF( axpbyv )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       conj_t          conjx, \
-       dim_t           n, \
-       ctype* restrict alpha, \
-       ctype* restrict x, inc_t incx, \
-       ctype* restrict y, inc_t incy, \
-       cntx_t*         cntx  \
+       conj_t  conjx, \
+       dim_t   n, \
+       ctype*  alpha, \
+       ctype*  x, inc_t incx, \
+       ctype*  y, inc_t incy  \
+       BLIS_TAPI_EX_PARAMS  \
      );
 
 INSERT_GENTDEF( axpyv )
@@ -114,15 +111,15 @@ INSERT_GENTDEF( scal2v )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       conj_t          conjx, \
-       conj_t          conjy, \
-       dim_t           n, \
-       ctype* restrict x, inc_t incx, \
-       ctype* restrict y, inc_t incy, \
-       ctype* restrict rho, \
-       cntx_t*         cntx  \
+       conj_t  conjx, \
+       conj_t  conjy, \
+       dim_t   n, \
+       ctype*  x, inc_t incx, \
+       ctype*  y, inc_t incy, \
+       ctype*  rho  \
+       BLIS_TAPI_EX_PARAMS  \
      );
 
 INSERT_GENTDEF( dotv )
@@ -132,17 +129,17 @@ INSERT_GENTDEF( dotv )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       conj_t          conjx, \
-       conj_t          conjy, \
-       dim_t           n, \
-       ctype* restrict alpha, \
-       ctype* restrict x, inc_t incx, \
-       ctype* restrict y, inc_t incy, \
-       ctype* restrict beta, \
-       ctype* restrict rho, \
-       cntx_t*         cntx  \
+       conj_t  conjx, \
+       conj_t  conjy, \
+       dim_t   n, \
+       ctype*  alpha, \
+       ctype*  x, inc_t incx, \
+       ctype*  y, inc_t incy, \
+       ctype*  beta, \
+       ctype*  rho  \
+       BLIS_TAPI_EX_PARAMS  \
      );
 
 INSERT_GENTDEF( dotxv )
@@ -152,11 +149,11 @@ INSERT_GENTDEF( dotxv )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       dim_t           n, \
-       ctype* restrict x, inc_t incx, \
-       cntx_t*         cntx  \
+       dim_t   n, \
+       ctype*  x, inc_t incx  \
+       BLIS_TAPI_EX_PARAMS  \
      );
 
 INSERT_GENTDEF( invertv )
@@ -166,13 +163,13 @@ INSERT_GENTDEF( invertv )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       conj_t          conjalpha, \
-       dim_t           n, \
-       ctype* restrict alpha, \
-       ctype* restrict x, inc_t incx, \
-       cntx_t*         cntx  \
+       conj_t  conjalpha, \
+       dim_t   n, \
+       ctype*  alpha, \
+       ctype*  x, inc_t incx  \
+       BLIS_TAPI_EX_PARAMS  \
      );
 
 INSERT_GENTDEF( scalv )
@@ -183,12 +180,12 @@ INSERT_GENTDEF( setv )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       dim_t           n, \
-       ctype* restrict x, inc_t incx, \
-       ctype* restrict y, inc_t incy, \
-       cntx_t*         cntx  \
+       dim_t   n, \
+       ctype*  x, inc_t incx, \
+       ctype*  y, inc_t incy  \
+       BLIS_TAPI_EX_PARAMS  \
      );
 
 INSERT_GENTDEF( swapv )
@@ -198,18 +195,16 @@ INSERT_GENTDEF( swapv )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       conj_t          conjx, \
-       dim_t           n, \
-       ctype* restrict x, inc_t incx, \
-       ctype* restrict beta, \
-       ctype* restrict y, inc_t incy, \
-       cntx_t*         cntx  \
+       conj_t  conjx, \
+       dim_t   n, \
+       ctype*  x, inc_t incx, \
+       ctype*  beta, \
+       ctype*  y, inc_t incy  \
+       BLIS_TAPI_EX_PARAMS  \
      );
 
 INSERT_GENTDEF( xpbyv )
 
-
-#endif
 

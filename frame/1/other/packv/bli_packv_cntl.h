@@ -35,7 +35,7 @@
 struct packv_params_s
 {
 	uint64_t       size
-	packv_voft*    var_func;
+	packv_var_oft* var_func;
 	bszid_t        bmid;
 	pack_t         pack_schema;
 };

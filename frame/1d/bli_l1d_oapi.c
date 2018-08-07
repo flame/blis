@@ -71,11 +71,13 @@ void PASTEMAC(opname,EX_SUF) \
 	if ( bli_error_checking_is_enabled() ) \
 	    PASTEMAC(opname,_check)( x, y ); \
 \
-	/* Invoke the typed function. */ \
-	bli_call_ft_13 \
+	/* Query a type-specific function pointer, except one that uses
+	   void* instead of typed pointers. */ \
+	PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) f = \
+	PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
+\
+	f \
 	( \
-	   dt, \
-	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
 	   diagoffx, \
 	   diagx, \
 	   transx, \
@@ -135,11 +137,13 @@ void PASTEMAC(opname,EX_SUF) \
 	                                      alpha, &alpha_local ); \
 	buf_alpha = bli_obj_buffer_for_1x1( dt, &alpha_local ); \
 \
-	/* Invoke the typed function. */ \
-	bli_call_ft_14 \
+	/* Query a type-specific function pointer, except one that uses
+	   void* instead of typed pointers. */ \
+	PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) f = \
+	PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
+\
+	f \
 	( \
-	   dt, \
-	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
 	   diagoffx, \
 	   diagx, \
 	   transx, \
@@ -182,11 +186,13 @@ void PASTEMAC(opname,EX_SUF) \
 	if ( bli_error_checking_is_enabled() ) \
 	    PASTEMAC(opname,_check)( x ); \
 \
-	/* Invoke the void pointer-based function. */ \
-	bli_call_ft_8 \
+	/* Query a type-specific function pointer, except one that uses
+	   void* instead of typed pointers. */ \
+	PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) f = \
+	PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
+\
+	f \
 	( \
-	   dt, \
-	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
 	   diagoffx, \
 	   m, \
 	   n, \
@@ -236,11 +242,13 @@ void PASTEMAC(opname,EX_SUF) \
 	                     alpha, &alpha_local ); \
 	buf_alpha = bli_obj_buffer_for_1x1( dt, &alpha_local ); \
 \
-	/* Invoke the typed function. */ \
-	bli_call_ft_10 \
+	/* Query a type-specific function pointer, except one that uses
+	   void* instead of typed pointers. */ \
+	PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) f = \
+	PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
+\
+	f \
 	( \
-	   dt, \
-	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
 	   BLIS_NO_CONJUGATE, /* internal conjugation applied during copy-cast. */ \
 	   diagoffx, \
 	   m, \
@@ -284,11 +292,13 @@ void PASTEMAC(opname,EX_SUF) \
 	if ( bli_error_checking_is_enabled() ) \
 	    PASTEMAC(opname,_check)( alpha, x ); \
 \
-	/* Invoke the typed function. */ \
-	bli_call_ft_9 \
+	/* Query a type-specific function pointer, except one that uses
+	   void* instead of typed pointers. */ \
+	PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) f = \
+	PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
+\
+	f \
 	( \
-	   dt, \
-	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
 	   diagoffx, \
 	   m, \
 	   n, \

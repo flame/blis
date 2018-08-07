@@ -81,8 +81,8 @@ void bli_sscalv_zen_int
 	// If alpha is zero, use setv (in case y contains NaN or Inf).
 	if ( PASTEMAC(s,eq0)( *alpha ) )
 	{
-		float*   zero = bli_s0;
-		ssetv_ft f    = bli_cntx_get_l1v_ker_dt( BLIS_FLOAT, BLIS_SETV_KER, cntx );
+		float*       zero = bli_s0;
+		ssetv_ker_ft f    = bli_cntx_get_l1v_ker_dt( BLIS_FLOAT, BLIS_SETV_KER, cntx );
 
 		f
 		(
@@ -180,8 +180,8 @@ void bli_dscalv_zen_int
 	// If alpha is zero, use setv (in case y contains NaN or Inf).
 	if ( PASTEMAC(d,eq0)( *alpha ) )
 	{
-		double*  zero = bli_d0;
-		dsetv_ft f    = bli_cntx_get_l1v_ker_dt( BLIS_DOUBLE, BLIS_SETV_KER, cntx );
+		double*      zero = bli_d0;
+		dsetv_ker_ft f    = bli_cntx_get_l1v_ker_dt( BLIS_DOUBLE, BLIS_SETV_KER, cntx );
 
 		f
 		(

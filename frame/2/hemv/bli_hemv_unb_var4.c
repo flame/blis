@@ -119,7 +119,7 @@ void PASTEMAC(ch,varname) \
 		); \
 	} \
 \
-	PASTECH(ch,axpyv_ft) kfp_av; \
+	PASTECH(ch,axpyv_ker_ft) kfp_av; \
 \
 	/* Query the context for the kernel function pointers. */ \
 	kfp_av = bli_cntx_get_l1v_ker_dt( dt, BLIS_AXPYV_KER, cntx ); \

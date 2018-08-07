@@ -32,47 +32,19 @@
 
 */
 
-#ifndef BLIS_L3_VAR_OFT_H
-#define BLIS_L3_VAR_OFT_H
-
-
 //
-// -- Level-3 variant function types -------------------------------------------
+// Prototype function pointer query interface.
 //
 
-#undef  GENTDEF
-#define GENTDEF( opname ) \
+#undef  GENPROT
+#define GENPROT( tname, opname ) \
 \
-typedef void (*PASTECH(opname,_voft)) \
-( \
-  obj_t*  a, \
-  obj_t*  b, \
-  obj_t*  c, \
-  cntx_t* cntx, \
-  rntm_t* rntm, \
-  cntl_t* cntl, \
-  thrinfo_t* thread  \
-);
+PASTECH2(tname,_ukr,_vft) \
+PASTEMAC(opname,_qfp)( num_t dt );
 
-GENTDEF( gemm )
-
-
-#define GENTDEF( opname ) \
-\
-typedef void (*PASTECH(opname,_voft)) \
-( \
-  obj_t*  a, \
-  obj_t*  b, \
-  obj_t*  c, \
-  cntx_t* cntx, \
-  rntm_t* rntm, \
-  cntl_t* cntl, \
-  thrinfo_t* thread  \
-);
-
-GENTDEF( trsm )
-
-
-
-#endif
+GENPROT( gemm,     gemm_ukernel )
+GENPROT( gemmtrsm, gemmtrsm_l_ukernel )
+GENPROT( gemmtrsm, gemmtrsm_u_ukernel )
+GENPROT( trsm,     trsm_l_ukernel )
+GENPROT( trsm,     trsm_u_ukernel )
 
