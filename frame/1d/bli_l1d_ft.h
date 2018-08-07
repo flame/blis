@@ -79,24 +79,6 @@ typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
 INSERT_GENTDEF( axpyd )
 INSERT_GENTDEF( scal2d )
 
-// axpyv, scal2v
-
-#undef  GENTDEF
-#define GENTDEF( ctype, ch, opname, tsuf ) \
-\
-typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
-     ( \
-       conj_t  conjx, \
-       dim_t   n, \
-       ctype*  alpha, \
-       ctype*  x, inc_t incx, \
-       ctype*  y, inc_t incy  \
-       BLIS_TAPI_EX_PARAMS  \
-     );
-
-INSERT_GENTDEF( axpyv )
-INSERT_GENTDEF( scal2v )
-
 // invertd
 
 #undef  GENTDEF
