@@ -10,6 +10,7 @@ The BLIS framework was primarily authored by
 but many others have contributed code and feedback, including
 
   Murtaza Ali                               (Texas Instruments)
+  Sajid Ali             @s-sajid-ali        (Northwestern University)
   Erling Andersen       @erling-d-andersen
   Alex Arslan           @ararslan
   Vernon Austel                             (IBM, T.J. Watson Research Center)
@@ -41,7 +42,7 @@ but many others have contributed code and feedback, including
   Dave Love             @loveshack
   Tze Meng Low                              (The University of Texas at Austin)
   Nisanth Padinharepatt                     (AMD)
-  Devangi Parikh                            (The University of Texas at Austin)
+  Devangi Parikh        @dnparikh           (The University of Texas at Austin)
   Elmar Peise           @elmar-peise        (RWTH-Aachen)
   Clément Pernet        @ClementPernet
   Ilya Polkovnichenko

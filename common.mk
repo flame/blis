@@ -322,6 +322,12 @@ LIBBLIS_SO         := $(LIBBLIS).$(SHLIB_EXT)
 LIBBLIS_A_PATH     := $(BASE_LIB_PATH)/$(LIBBLIS_A)
 LIBBLIS_SO_PATH    := $(BASE_LIB_PATH)/$(LIBBLIS_SO)
 
+# Create a filepath to a local symlink to the soname--that is, the same as
+# LIBBLIS_SO_PATH except with the .so major version number. Since the shared
+# library lists its soname as 'libblis.so.n', where n is the .so major version
+# number, a symlink in BASE_LIB_PATH is needed so that ld can find the local
+# shared library when the testsuite is run via 'make test' or 'make check'.
+LIBBLIS_SO_MAJ_PATH := $(BASE_LIB_PATH)/$(LIBBLIS_SO).$(SO_MAJOR)
 
 
 #
@@ -388,8 +394,8 @@ ifeq ($(DEBUG_TYPE),sde)
 LDFLAGS    := $(filter-out $(LIBMEMKIND),$(LDFLAGS))
 endif
 
-# The default flag for creating shared objects is different for Linux and
-# OS X.
+# Specify the shared library's 'soname' field.
+# NOTE: The flag for creating shared objects is different for Linux and OS X.
 ifeq ($(OS_NAME),Darwin)
 SOFLAGS    := -dynamiclib
 SOFLAGS    += -Wl,-install_name,$(LIBBLIS_SO).$(SO_MAJOR)
@@ -398,15 +404,14 @@ SOFLAGS    := -shared
 SOFLAGS    += -Wl,-soname,$(LIBBLIS_SO).$(SO_MAJOR)
 endif
 
-# Specify the shared library's 'soname' field.
-
-# Decide which library to link to for things like the testsuite. Default
-# to the static library, unless only the shared library was enabled, in
-# which case we use the shared library.
+# Decide which library to link to for things like the testsuite and BLIS test
+# drivers. We default to the static library, unless only the shared library was
+# enabled, in which case we use the shared library.
 LIBBLIS_LINK   := $(LIBBLIS_A_PATH)
 ifeq ($(MK_ENABLE_SHARED),yes)
 ifeq ($(MK_ENABLE_STATIC),no)
 LIBBLIS_LINK   := $(LIBBLIS_SO_PATH)
+LDFLAGS        += -Wl,-rpath,$(BASE_LIB_PATH)
 endif
 endif
 
