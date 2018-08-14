@@ -364,7 +364,7 @@ all: libs
 
 libs: libblis
 
-test: testblis testblas
+test: checkblis checkblas
 
 check: checkblis-fast checkblas
 
