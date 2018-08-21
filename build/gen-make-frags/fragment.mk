@@ -48,7 +48,7 @@ CURRENT_SUB_DIRS := _mkfile_fragment_sub_dir_names_
 LOCAL_SRC_FILES  := _mkfile_fragment_local_src_files_
 
 # Add the fragment's local source files to the _global_variable_ variable.
-_mkfile_fragment_src_var_name_ += $(addprefix $(PARENT_PATH)/$(CURRENT_DIR_NAME)/, $(LOCAL_SRC_FILES))
+_mkfile_fragment_src_var_name_ += $(addprefix $(PARENT_SRC_PATH)/$(CURRENT_DIR_NAME)/, $(LOCAL_SRC_FILES))
 
 
 
@@ -59,15 +59,20 @@ _mkfile_fragment_src_var_name_ += $(addprefix $(PARENT_PATH)/$(CURRENT_DIR_NAME)
 
 # Add the current fragment to the global list of fragments so the top-level
 # Makefile knows which directories are participating in the build.
-FRAGMENT_DIR_PATHS  += $(PARENT_PATH)/$(CURRENT_DIR_NAME)
+FRAGMENT_DIR_PATHS  += $(PARENT_SRC_PATH)/$(CURRENT_DIR_NAME)
 
 # Recursively descend into other subfragments' local makefiles and include them.
 ifneq ($(strip $(CURRENT_SUB_DIRS)),)
-key                 := $(key).x
-stack_$(key)        := $(PARENT_PATH)
+key1                := $(key1).x
+key2                := $(key2).y
+stack_$(key1)       := $(PARENT_PATH)
+stack_$(key2)       := $(PARENT_SRC_PATH)
 PARENT_PATH         := $(PARENT_PATH)/$(CURRENT_DIR_NAME)
+PARENT_SRC_PATH     := $(PARENT_SRC_PATH)/$(CURRENT_DIR_NAME)
 FRAGMENT_SUB_DIRS   := $(addprefix $(PARENT_PATH)/, $(CURRENT_SUB_DIRS))
 -include  $(addsuffix /$(FRAGMENT_MK), $(FRAGMENT_SUB_DIRS))
-PARENT_PATH         := $(stack_$(key))
-key                 := $(basename $(key))
+PARENT_PATH         := $(stack_$(key1))
+PARENT_SRC_PATH     := $(stack_$(key2))
+key1                := $(basename $(key1))
+key2                := $(basename $(key2))
 endif
