@@ -2560,10 +2560,13 @@ main()
 	mkdir -p ${obj_frame_dirpath}
 
 
-	obj_sandbox_dirpath="${base_obj_dirpath}/${sandbox_dir}"
+	if [ -n "${sandbox_flag}" ]; then
 
-	echo "${script_name}: creating ${obj_sandbox_dirpath}/${sandbox}"
-	mkdir -p ${obj_sandbox_dirpath}/${sandbox}
+		obj_sandbox_dirpath="${base_obj_dirpath}/${sandbox_dir}"
+
+		echo "${script_name}: creating ${obj_sandbox_dirpath}/${sandbox}"
+		mkdir -p ${obj_sandbox_dirpath}/${sandbox}
+	fi
 
 
 	obj_blastest_dirpath="${base_obj_dirpath}/${blastest_dir}"
@@ -2593,11 +2596,11 @@ main()
 
 	# -- Mirror source directory hierarchies to object directories -------------
 	
-	echo "${script_name}: mirroring ${config_dirpath}/${config_name} to ${obj_config_dirpath}/${config_name}"
-	${mirror_tree_sh} "${config_dirpath}/${config_name}" "${obj_config_dirpath}/${config_name}"
+	# Combine the config_list with the config_name and then remove duplicates.
+	config_list_plus_name=$(rm_duplicate_words "${config_list} ${config_name}")
 
 	# Mirror each of the sub-configuration directories to the object directory.
-	for conf in ${config_list}; do
+	for conf in ${config_list_plus_name}; do
 
 		echo "${script_name}: mirroring ${config_dirpath}/${conf} to ${obj_config_dirpath}/${conf}"
 		${mirror_tree_sh} "${config_dirpath}/${conf}" "${obj_config_dirpath}/${conf}"
@@ -2623,6 +2626,10 @@ main()
 		#fi
 	done
 
+	# Mirror reference kernel source tree to its object sub-directory.
+	echo "${script_name}: mirroring ${refkern_dirpath} to ${obj_refkern_dirpath}"
+	${mirror_tree_sh} ${refkern_dirpath} ${obj_refkern_dirpath}
+
 	# Mirror reference kernels source tree to its object sub-directory.
 	for conf in ${config_list}; do
 
@@ -2634,13 +2641,12 @@ main()
 	echo "${script_name}: mirroring ${frame_dirpath} to ${obj_frame_dirpath}"
 	${mirror_tree_sh} ${frame_dirpath} ${obj_frame_dirpath}
 
-	# Mirror reference kernel source tree to its object sub-directory.
-	echo "${script_name}: mirroring ${refkern_dirpath} to ${obj_refkern_dirpath}"
-	${mirror_tree_sh} ${refkern_dirpath} ${obj_refkern_dirpath}
-
 	# Mirror the chosen sandbox source tree to its object sub-directory.
-	echo "${script_name}: mirroring ${sandbox_dirpath}/${sandbox} to ${obj_sandbox_dirpath}/${sandbox}"
-	${mirror_tree_sh} "${sandbox_dirpath}/${sandbox}" "${obj_sandbox_dirpath}/${sandbox}"
+	if [ -n "${sandbox_flag}" ]; then
+
+		echo "${script_name}: mirroring ${sandbox_dirpath}/${sandbox} to ${obj_sandbox_dirpath}/${sandbox}"
+		${mirror_tree_sh} "${sandbox_dirpath}/${sandbox}" "${obj_sandbox_dirpath}/${sandbox}"
+	fi
 
 
 	# -- Generate makefile fragements ------------------------------------------
@@ -2722,16 +2728,19 @@ main()
 			 ${gen_make_frags_dirpath}/ignore_list
 
 	# Generate makefile fragments in the sandbox sub-directory.
-	echo "${script_name}: creating makefile fragments in ${obj_sandbox_dirpath}/${sandbox}"
-	${gen_make_frags_sh} \
-			 -h -r -v0 \
-			 -o ${script_name} \
-			 -p 'SANDBOX' \
-			 ${sandbox_dirpath}/${sandbox} \
-			 ${obj_sandbox_dirpath}/${sandbox} \
-			 ${gen_make_frags_dirpath}/fragment.mk \
-			 ${gen_make_frags_dirpath}/suffix_list \
-			 ${gen_make_frags_dirpath}/ignore_list
+	if [ -n "${sandbox_flag}" ]; then
+
+		echo "${script_name}: creating makefile fragments in ${obj_sandbox_dirpath}/${sandbox}"
+		${gen_make_frags_sh} \
+				 -h -r -v0 \
+				 -o ${script_name} \
+				 -p 'SANDBOX' \
+				 ${sandbox_dirpath}/${sandbox} \
+				 ${obj_sandbox_dirpath}/${sandbox} \
+				 ${gen_make_frags_dirpath}/fragment.mk \
+				 ${gen_make_frags_dirpath}/suffix_list \
+				 ${gen_make_frags_dirpath}/ignore_list
+	fi
 
 
 	# -- Handle out-of-tree builds ---------------------------------------------
