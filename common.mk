@@ -286,8 +286,7 @@ SHELL              := bash
 
 # Construct paths to the four primary directories of source code:
 # the config directory, general framework code, reference kernel code,
-# and optimized kernel code. NOTE: We declare these as recursively
-# expanded variables since DIST_PATH may be overridden later.
+# and optimized kernel code.
 CONFIG_PATH        := $(DIST_PATH)/$(CONFIG_DIR)
 FRAME_PATH         := $(DIST_PATH)/$(FRAME_DIR)
 REFKERN_PATH       := $(DIST_PATH)/$(REFKERN_DIR)
@@ -296,13 +295,12 @@ SANDBOX_PATH       := $(DIST_PATH)/$(SANDBOX_DIR)
 
 # Construct paths to the makefile fragments for the four primary directories
 # of source code: the config directory, general framework code, reference
-# kernel code, and optimized kernel code. NOTE: We declare these as recursively
-# expanded variables since BUILD_PATH may be overridden later.
-CONFIG_FRAGMENT_PATH        := $(BUILD_PATH)/obj/$(CONFIG_NAME)/$(CONFIG_DIR)
-FRAME_FRAGMENT_PATH         := $(BUILD_PATH)/obj/$(CONFIG_NAME)/$(FRAME_DIR)
-REFKERN_FRAGMENT_PATH       := $(BUILD_PATH)/obj/$(CONFIG_NAME)/$(REFKERN_DIR)
-KERNELS_FRAGMENT_PATH       := $(BUILD_PATH)/obj/$(CONFIG_NAME)/$(KERNELS_DIR)
-SANDBOX_FRAGMENT_PATH       := $(BUILD_PATH)/obj/$(CONFIG_NAME)/$(SANDBOX_DIR)
+# kernel code, and optimized kernel code.
+CONFIG_FRAG_PATH   := $(BUILD_PATH)/obj/$(CONFIG_NAME)/$(CONFIG_DIR)
+FRAME_FRAG_PATH    := $(BUILD_PATH)/obj/$(CONFIG_NAME)/$(FRAME_DIR)
+REFKERN_FRAG_PATH  := $(BUILD_PATH)/obj/$(CONFIG_NAME)/$(REFKERN_DIR)
+KERNELS_FRAG_PATH  := $(BUILD_PATH)/obj/$(CONFIG_NAME)/$(KERNELS_DIR)
+SANDBOX_FRAG_PATH  := $(BUILD_PATH)/obj/$(CONFIG_NAME)/$(SANDBOX_DIR)
 
 
 
@@ -620,12 +618,12 @@ MK_SANDBOX_SRC     :=
 # Construct paths to each of the sub-configurations specified in the
 # configuration list. Note that we use CONFIG_LIST_FAM, which already
 # has CONFIG_NAME included (with duplicates removed).
-CONFIG_PATHS       := $(addprefix $(CONFIG_FRAGMENT_PATH)/, $(CONFIG_LIST_FAM))
+CONFIG_PATHS       := $(addprefix $(CONFIG_FRAG_PATH)/, $(CONFIG_LIST_FAM))
 
 # This variable is used by the include statements as they recursively include
 # one another. For the 'config' directory, we initialize it to that directory
 # in preparation to include the fragments in the configuration sub-directory.
-PARENT_PATH        := $(CONFIG_FRAGMENT_PATH)
+PARENT_PATH        := $(CONFIG_FRAG_PATH)
 PARENT_SRC_PATH    := $(CONFIG_PATH)
 
 # Recursively include the makefile fragments in each of the sub-configuration
@@ -636,12 +634,12 @@ PARENT_SRC_PATH    := $(CONFIG_PATH)
 
 # Construct paths to each of the kernel sets required by the sub-configurations
 # in the configuration list.
-KERNEL_PATHS       := $(addprefix $(KERNELS_FRAGMENT_PATH)/, $(KERNEL_LIST))
+KERNEL_PATHS       := $(addprefix $(KERNELS_FRAG_PATH)/, $(KERNEL_LIST))
 
 # This variable is used by the include statements as they recursively include
 # one another. For the 'kernels' directory, we initialize it to that directory
 # in preparation to include the fragments in the configuration sub-directory.
-PARENT_PATH        := $(KERNELS_FRAGMENT_PATH)
+PARENT_PATH        := $(KERNELS_FRAG_PATH)
 PARENT_SRC_PATH    := $(KERNELS_PATH)
 
 # Recursively include the makefile fragments in each of the kernels sub-
@@ -660,8 +658,8 @@ PARENT_SRC_PATH    := $(DIST_PATH)
 
 # Recursively include all the makefile fragments in the directories for the
 # reference kernels and portable framework.
--include $(addsuffix /$(FRAGMENT_MK), $(REFKERN_FRAGMENT_PATH))
--include $(addsuffix /$(FRAGMENT_MK), $(FRAME_FRAGMENT_PATH))
+-include $(addsuffix /$(FRAGMENT_MK), $(REFKERN_FRAG_PATH))
+-include $(addsuffix /$(FRAGMENT_MK), $(FRAME_FRAG_PATH))
 
 # -- sandbox --
 
@@ -669,12 +667,12 @@ PARENT_SRC_PATH    := $(DIST_PATH)
 # NOTE: If $(SANDBOX) is empty (because no sandbox was enabled at configure-
 # time) then $(SANDBOX_PATHS) will also be empty, which will cause no
 # fragments to be included.
-SANDBOX_PATHS      := $(addprefix $(SANDBOX_FRAGMENT_PATH)/, $(SANDBOX))
+SANDBOX_PATHS      := $(addprefix $(SANDBOX_FRAG_PATH)/, $(SANDBOX))
 
 # This variable is used by the include statements as they recursively include
 # one another. For the 'sandbox' directory, we initialize it to that directory
 # in preparation to include the fragments in the configuration sub-directory.
-PARENT_PATH        := $(SANDBOX_FRAGMENT_PATH)
+PARENT_PATH        := $(SANDBOX_FRAG_PATH)
 PARENT_SRC_PATH    := $(SANDBOX_PATH)
 
 # Recursively include the makefile fragments in the sandbox sub-directory.

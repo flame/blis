@@ -1069,7 +1069,7 @@ get_binutils_version()
 
 	# Query the full binutils version string output. This includes the
 	# version string along with (potentially) a bunch of other textual
-    # clutter.
+	# clutter.
 	if [ "$(uname -s)" == "Darwin" ]; then
 		# The default OS X assembler uses a trifecta of brain-dead
 		# conventions: responding only to '-v', hanging indefinitely if
@@ -2232,7 +2232,7 @@ main()
 	if [ -n "${debug_flag}" ]; then
 		if [ "x${debug_type}" = "xopt" ]; then
 			echo "${script_name}: enabling debug symbols with optimizations."
-                elif [ "x${debug_type}" = "xsde" ]; then
+		elif [ "x${debug_type}" = "xsde" ]; then
 			debug_type='sde'
 			echo "${script_name}: enabling SDE processor emulation."
 		else
@@ -2593,8 +2593,8 @@ main()
 
 	# -- Mirror source directory hierarchies to object directories -------------
 	
-    echo "${script_name}: mirroring ${config_dirpath}/${config_name} to ${obj_config_dirpath}/${config_name}"
-    ${mirror_tree_sh} "${config_dirpath}/${config_name}" "${obj_config_dirpath}/${config_name}"
+	echo "${script_name}: mirroring ${config_dirpath}/${config_name} to ${obj_config_dirpath}/${config_name}"
+	${mirror_tree_sh} "${config_dirpath}/${config_name}" "${obj_config_dirpath}/${config_name}"
 
 	# Mirror each of the sub-configuration directories to the object directory.
 	for conf in ${config_list}; do
@@ -2630,13 +2630,13 @@ main()
 		${mirror_tree_sh} "${refkern_dirpath}" "${obj_refkern_dirpath}/${conf}"
 	done
 
-    # Mirror framework source tree to its object sub-directory.
-    echo "${script_name}: mirroring ${frame_dirpath} to ${obj_frame_dirpath}"
-    ${mirror_tree_sh} ${frame_dirpath} ${obj_frame_dirpath}
+	# Mirror framework source tree to its object sub-directory.
+	echo "${script_name}: mirroring ${frame_dirpath} to ${obj_frame_dirpath}"
+	${mirror_tree_sh} ${frame_dirpath} ${obj_frame_dirpath}
 
-    # Mirror reference kernel source tree to its object sub-directory.
-    echo "${script_name}: mirroring ${refkern_dirpath} to ${obj_refkern_dirpath}"
-    ${mirror_tree_sh} ${refkern_dirpath} ${obj_refkern_dirpath}
+	# Mirror reference kernel source tree to its object sub-directory.
+	echo "${script_name}: mirroring ${refkern_dirpath} to ${obj_refkern_dirpath}"
+	${mirror_tree_sh} ${refkern_dirpath} ${obj_refkern_dirpath}
 
 	# Mirror the chosen sandbox source tree to its object sub-directory.
 	echo "${script_name}: mirroring ${sandbox_dirpath}/${sandbox} to ${obj_sandbox_dirpath}/${sandbox}"
@@ -2658,8 +2658,8 @@ main()
 				 -h -r -v0 \
 				 -o ${script_name} \
 				 -p 'CONFIG' \
-                 ${config_dirpath}/${config_name} \
-                 ${obj_config_dirpath}/${config_name} \
+				 ${config_dirpath}/${config_name} \
+				 ${obj_config_dirpath}/${config_name} \
 				 ${gen_make_frags_dirpath}/fragment.mk \
 				 ${gen_make_frags_dirpath}/suffix_list \
 				 ${gen_make_frags_dirpath}/ignore_list
@@ -2674,8 +2674,8 @@ main()
 				 -h -r -v0 \
 				 -o ${script_name} \
 				 -p 'CONFIG' \
-                 ${config_dirpath}/${conf} \
-                 ${obj_config_dirpath}/${conf} \
+				 ${config_dirpath}/${conf} \
+				 ${obj_config_dirpath}/${conf} \
 				 ${gen_make_frags_dirpath}/fragment.mk \
 				 ${gen_make_frags_dirpath}/suffix_list \
 				 ${gen_make_frags_dirpath}/ignore_list
@@ -2690,8 +2690,8 @@ main()
 				 -h -r -v0 \
 				 -o ${script_name} \
 				 -p 'KERNELS' \
-                 ${kernels_dirpath}/${kern} \
-                 ${obj_kernels_dirpath}/${kern} \
+				 ${kernels_dirpath}/${kern} \
+				 ${obj_kernels_dirpath}/${kern} \
 				 ${gen_make_frags_dirpath}/fragment.mk \
 				 ${gen_make_frags_dirpath}/suffix_list \
 				 ${gen_make_frags_dirpath}/ignore_list
@@ -2703,8 +2703,8 @@ main()
 			 -h -r -v0 \
 			 -o ${script_name} \
 			 -p 'REFKERN' \
-             ${refkern_dirpath} \
-             ${obj_refkern_dirpath} \
+			 ${refkern_dirpath} \
+			 ${obj_refkern_dirpath} \
 			 ${gen_make_frags_dirpath}/fragment.mk \
 			 ${gen_make_frags_dirpath}/suffix_list \
 			 ${gen_make_frags_dirpath}/ignore_list
@@ -2715,8 +2715,8 @@ main()
 			 -h -r -v0 \
 			 -o ${script_name} \
 			 -p 'FRAME' \
-             ${frame_dirpath} \
-             ${obj_frame_dirpath} \
+			 ${frame_dirpath} \
+			 ${obj_frame_dirpath} \
 			 ${gen_make_frags_dirpath}/fragment.mk \
 			 ${gen_make_frags_dirpath}/suffix_list \
 			 ${gen_make_frags_dirpath}/ignore_list
@@ -2727,8 +2727,8 @@ main()
 			 -h -r -v0 \
 			 -o ${script_name} \
 			 -p 'SANDBOX' \
-             ${sandbox_dirpath}/${sandbox} \
-             ${obj_sandbox_dirpath}/${sandbox} \
+			 ${sandbox_dirpath}/${sandbox} \
+			 ${obj_sandbox_dirpath}/${sandbox} \
 			 ${gen_make_frags_dirpath}/fragment.mk \
 			 ${gen_make_frags_dirpath}/suffix_list \
 			 ${gen_make_frags_dirpath}/ignore_list

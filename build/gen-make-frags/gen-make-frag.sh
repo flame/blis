@@ -59,12 +59,12 @@ print_usage()
 	echo "   ${script_name} [options] root_dir frag_dir templ.mk suff_list ign_list"
 	echo " "
 	echo " Arguments (mandatory):"
-    echo " "
-    echo "   root_dir    The root directory to scan when generating makefile"
-    echo "               fragments."
-    echo " "
-    echo "   frag_dir    The root directory in which makefile fragments will be"
-    echo "               generated."
+	echo " "
+	echo "   root_dir    The root directory to scan when generating makefile"
+	echo "               fragments."
+	echo " "
+	echo "   frag_dir    The root directory in which makefile fragments will be"
+	echo "               generated."
 	echo " "
 	echo "   templ.mk    The template makefile fragment used to generate the actual"
 	echo "               fragments."
@@ -121,8 +121,8 @@ gen_mkfile()
 {
 	# Local variable declarations
 	local mkfile_frag_var_name
-    local this_dir
-    local this_frag_dir
+	local this_dir
+	local this_frag_dir
 	local mkfile_frag_tmpl_name 
 	local mkfile_name 
 	local mkfile_frag_path
@@ -137,8 +137,8 @@ gen_mkfile()
 	
 	# Extract our arguments to local variables
 	mkfile_frag_var_name=$1
-    this_dir=$2
-    this_frag_dir=$3
+	this_dir=$2
+	this_frag_dir=$3
 	
 	
 	# Strip the leading path from the template makefile path to get its
@@ -249,8 +249,8 @@ gen_mkfiles()
 	
 	
 	# Extract our argument
-    cur_dir=$1
-    this_frag_dir=$2
+	cur_dir=$1
+	this_frag_dir=$2
 	
 	
 	# Append a relevant suffix to the makefile variable name, if necesary
@@ -471,8 +471,8 @@ main()
 	
 	
 	# Extract our arguments.
-    root_dir=$1
-    frag_dir=$2
+	root_dir=$1
+	frag_dir=$2
 	mkfile_frag_tmpl_path=$3
 	suffix_file=$4
 	ignore_file=$5
@@ -484,8 +484,8 @@ main()
 	
 	
 	# Strip / from end of directory path, if there is one.
-    root_dir=${root_dir%/}
-    frag_dir=${frag_dir%/}
+	root_dir=${root_dir%/}
+	frag_dir=${frag_dir%/}
 	
 
 	# Initialize the name of the makefile source variable.
