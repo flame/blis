@@ -2592,6 +2592,9 @@ main()
 
 
 	# -- Mirror source directory hierarchies to object directories -------------
+	
+    echo "${script_name}: mirroring ${config_dirpath}/${config_name} to ${obj_config_dirpath}/${config_name}"
+    ${mirror_tree_sh} "${config_dirpath}/${config_name}" "${obj_config_dirpath}/${config_name}"
 
 	# Mirror each of the sub-configuration directories to the object directory.
 	for conf in ${config_list}; do
@@ -2627,9 +2630,13 @@ main()
 		${mirror_tree_sh} "${refkern_dirpath}" "${obj_refkern_dirpath}/${conf}"
 	done
 
-	# Mirror framework source tree to its object sub-directory.
-	echo "${script_name}: mirroring ${frame_dirpath} to ${obj_frame_dirpath}"
-	${mirror_tree_sh} ${frame_dirpath} ${obj_frame_dirpath}
+    # Mirror framework source tree to its object sub-directory.
+    echo "${script_name}: mirroring ${frame_dirpath} to ${obj_frame_dirpath}"
+    ${mirror_tree_sh} ${frame_dirpath} ${obj_frame_dirpath}
+
+    # Mirror reference kernel source tree to its object sub-directory.
+    echo "${script_name}: mirroring ${refkern_dirpath} to ${obj_refkern_dirpath}"
+    ${mirror_tree_sh} ${refkern_dirpath} ${obj_refkern_dirpath}
 
 	# Mirror the chosen sandbox source tree to its object sub-directory.
 	echo "${script_name}: mirroring ${sandbox_dirpath}/${sandbox} to ${obj_sandbox_dirpath}/${sandbox}"
@@ -2646,12 +2653,13 @@ main()
 	# configurations and create fragments there as well.)
 	if [ "${clist_contains_cname}" == "false" ]; then
 
-		echo "${script_name}: creating makefile fragments in ${config_dirpath}/${config_name}"
+		echo "${script_name}: creating makefile fragments in ${obj_config_dirpath}/${config_name}"
 		${gen_make_frags_sh} \
 				 -h -r -v0 \
 				 -o ${script_name} \
 				 -p 'CONFIG' \
-				 ${config_dirpath}/${config_name} \
+                 ${config_dirpath}/${config_name} \
+                 ${obj_config_dirpath}/${config_name} \
 				 ${gen_make_frags_dirpath}/fragment.mk \
 				 ${gen_make_frags_dirpath}/suffix_list \
 				 ${gen_make_frags_dirpath}/ignore_list
@@ -2661,12 +2669,13 @@ main()
 	# in the configuration list.
 	for conf in ${config_list}; do
 
-		echo "${script_name}: creating makefile fragments in ${config_dirpath}/${conf}"
+		echo "${script_name}: creating makefile fragments in ${obj_config_dirpath}/${conf}"
 		${gen_make_frags_sh} \
 				 -h -r -v0 \
 				 -o ${script_name} \
 				 -p 'CONFIG' \
-				 ${config_dirpath}/${conf} \
+                 ${config_dirpath}/${conf} \
+                 ${obj_config_dirpath}/${conf} \
 				 ${gen_make_frags_dirpath}/fragment.mk \
 				 ${gen_make_frags_dirpath}/suffix_list \
 				 ${gen_make_frags_dirpath}/ignore_list
@@ -2676,46 +2685,50 @@ main()
 	# the configuration list (in the kernel list).
 	for kern in ${kernel_list}; do
 
-		echo "${script_name}: creating makefile fragments in ${kernels_dirpath}/${kern}"
+		echo "${script_name}: creating makefile fragments in ${obj_kernels_dirpath}/${kern}"
 		${gen_make_frags_sh} \
 				 -h -r -v0 \
 				 -o ${script_name} \
 				 -p 'KERNELS' \
-				 ${kernels_dirpath}/${kern} \
+                 ${kernels_dirpath}/${kern} \
+                 ${obj_kernels_dirpath}/${kern} \
 				 ${gen_make_frags_dirpath}/fragment.mk \
 				 ${gen_make_frags_dirpath}/suffix_list \
 				 ${gen_make_frags_dirpath}/ignore_list
 	done
 
 	# Generate makefile fragments in the reference kernels directory.
-	echo "${script_name}: creating makefile fragments in ${refkern_dirpath}"
+	echo "${script_name}: creating makefile fragments in ${obj_refkern_dirpath}"
 	${gen_make_frags_sh} \
 			 -h -r -v0 \
 			 -o ${script_name} \
 			 -p 'REFKERN' \
-			 ${refkern_dirpath} \
+             ${refkern_dirpath} \
+             ${obj_refkern_dirpath} \
 			 ${gen_make_frags_dirpath}/fragment.mk \
 			 ${gen_make_frags_dirpath}/suffix_list \
 			 ${gen_make_frags_dirpath}/ignore_list
 
 	# Generate makefile fragments in the framework directory.
-	echo "${script_name}: creating makefile fragments in ${frame_dirpath}"
+	echo "${script_name}: creating makefile fragments in ${obj_frame_dirpath}"
 	${gen_make_frags_sh} \
 			 -h -r -v0 \
 			 -o ${script_name} \
 			 -p 'FRAME' \
-			 ${frame_dirpath} \
+             ${frame_dirpath} \
+             ${obj_frame_dirpath} \
 			 ${gen_make_frags_dirpath}/fragment.mk \
 			 ${gen_make_frags_dirpath}/suffix_list \
 			 ${gen_make_frags_dirpath}/ignore_list
 
 	# Generate makefile fragments in the sandbox sub-directory.
-	echo "${script_name}: creating makefile fragments in ${sandbox_dirpath}/${sandbox}"
+	echo "${script_name}: creating makefile fragments in ${obj_sandbox_dirpath}/${sandbox}"
 	${gen_make_frags_sh} \
 			 -h -r -v0 \
 			 -o ${script_name} \
 			 -p 'SANDBOX' \
-			 ${sandbox_dirpath}/${sandbox} \
+             ${sandbox_dirpath}/${sandbox} \
+             ${obj_sandbox_dirpath}/${sandbox} \
 			 ${gen_make_frags_dirpath}/fragment.mk \
 			 ${gen_make_frags_dirpath}/suffix_list \
 			 ${gen_make_frags_dirpath}/ignore_list

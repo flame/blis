@@ -51,7 +51,7 @@ addons:
 script:
 - export DIST_PATH=.
 - pwd
-- if [ $OOT -eq 1 ]; then mkdir oot; cd oot; export DIST_PATH=..; fi
+- if [ $OOT -eq 1 ]; then export DIST_PATH=`pwd`; mkdir ../oot; cd ../oot; chmod -R a-w $DIST_PATH; fi
 - pwd
 - $DIST_PATH/configure -t $THR CC=$CC $CONF
 - pwd
