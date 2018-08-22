@@ -735,7 +735,6 @@ Adding support for a new-subconfiguration to BLIS is similar to adding support f
       ```c
       static char* config_name[ BLIS_NUM_ARCHS ] =
       {
-          "skx",
           "knl",
           "knc",
           "haswell",
