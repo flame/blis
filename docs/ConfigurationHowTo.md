@@ -730,7 +730,35 @@ Adding support for a new-subconfiguration to BLIS is similar to adding support f
           id = bli_cpuid_query_id();
       #endif
       ```
-      Supporting runtime detection of `knl` microarchitectures requires adding `knl` support to `bli_cpuid_query_id()`, which is addressed in the next step.
+      Supporting runtime detection of `knl` microarchitectures requires adding `knl` support to `bli_cpuid_query_id()`, which is addressed in the next step (`bli_cpuid.c`).
+      Before we finish editing the `bli_arch.c` file, we need to add a string label to the static array `config_name`:
+      ```c
+      static char* config_name[ BLIS_NUM_ARCHS ] =
+      {
+          "knl",
+          "knc",
+          "haswell",
+          "sandybridge",
+          "penryn",
+
+          "zen",
+          "excavator",
+          "steamroller",
+          "piledriver",
+          "bulldozer",
+
+          "cortexa57",
+          "cortexa15",
+          "cortexa9",
+
+          "power7",
+          "bgq",
+
+          "generic"
+      };
+
+      ```
+      This array is used by `bli_arch_string()` when mapping `arch_t` values to the strings associated with that architecture ID. Because the `arch_t` value is used as the index of each string, **the relative order of the strings in this array is important**. Be sure to insert the new string (in our case, `"knl"`) at the **same relative location** as the `arch_t` value inserted in `bli_type_defs.h`. This will ensure that each `arch_t` value will map to its corresponding string in the `config_name` array.
 
 
 

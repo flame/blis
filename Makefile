@@ -130,7 +130,8 @@ MK_LIBS_INST              += $(LIBBLIS_A_INST)
 MK_LIBS_SYML              +=
 endif
 ifeq ($(MK_ENABLE_SHARED),yes)
-MK_LIBS                   += $(LIBBLIS_SO_PATH)
+MK_LIBS                   += $(LIBBLIS_SO_PATH) \
+                             $(LIBBLIS_SO_MAJ_PATH)
 MK_LIBS_INST              += $(LIBBLIS_SO_MMB_INST)
 MK_LIBS_SYML              += $(LIBBLIS_SO_INST) \
                              $(LIBBLIS_SO_MAJ_INST)
@@ -363,7 +364,7 @@ all: libs
 
 libs: libblis
 
-test: testblis testblas
+test: checkblis checkblas
 
 check: checkblis-fast checkblas
 
@@ -584,7 +585,7 @@ endif
 endif
 
 
-# --- Dynamic library linker rules ---
+# --- Shared library linker rules ---
 
 $(LIBBLIS_SO_PATH): $(MK_BLIS_OBJS)
 ifeq ($(ENABLE_VERBOSE),yes)
@@ -605,6 +606,20 @@ else
 	@echo "Dynamically linking $@"
 	@$(LINKER) $(SOFLAGS) $(LDFLAGS) -o $@ $?
 endif
+endif
+
+# Local symlink for shared library.
+# NOTE: We use a '.loc' suffix to avoid filename collisions in case this
+# rule is executed concurrently with the install-lib-symlinks rule, which
+# also creates symlinks in the current directory (before installing them).
+$(LIBBLIS_SO_MAJ_PATH): $(LIBBLIS_SO_PATH)
+ifeq ($(ENABLE_VERBOSE),yes)
+	$(SYMLINK) $(<F) $(@F).loc
+	$(MV) $(@F).loc $(BASE_LIB_PATH)/$(@F)
+else # ifeq ($(ENABLE_VERBOSE),no)
+	@echo "Creating symlink $@"
+	@$(SYMLINK) $(<F) $(@F).loc
+	@$(MV) $(@F).loc $(BASE_LIB_PATH)/$(@F)
 endif
 
 

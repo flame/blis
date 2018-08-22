@@ -38,15 +38,15 @@ end
 
 axes1 = subplot(4, 4, 2);
 hold(axes1,'on');
-plot(data_mt_ssyrk_asm_blis(:,1), data_mt_ssyrk_asm_blis(:,4), 'LineWidth', 1.25,'Color', [0 0 1]);
-plot(data_mt_ssyrk_openblas(:,1), data_mt_ssyrk_openblas(:,4), 'LineWidth', 1.25,'Color', [0 1 0]);
-plot(data_mt_ssyrk_mkl(:,1), data_mt_ssyrk_mkl(:,4), '--', 'LineWidth', 1.25,'Color', [1 0 0]);
+plot(data_mt_ssyrk_asm_blis(:,1), data_mt_ssyrk_asm_blis(:,3), 'LineWidth', 1.25,'Color', [0 0 1]);
+plot(data_mt_ssyrk_openblas(:,1), data_mt_ssyrk_openblas(:,3), 'LineWidth', 1.25,'Color', [0 1 0]);
+plot(data_mt_ssyrk_mkl(:,1), data_mt_ssyrk_mkl(:,3), '--', 'LineWidth', 1.25,'Color', [1 0 0]);
 
 if(plot_lower)
     
-    plot(data_mt_ssyrk_l_asm_blis(:,1), data_mt_ssyrk_l_asm_blis(:,4), '-.','LineWidth', 1.25,'Color', [0 0 1]);
-    plot(data_mt_ssyrk_l_openblas(:,1), data_mt_ssyrk_l_openblas(:,4), '-.', 'LineWidth', 1.25,'Color', [0 1 0]);
-    plot(data_mt_ssyrk_l_mkl(:,1), data_mt_ssyrk_l_mkl(:,4), '-.', 'LineWidth', 1.25,'Color', [1 0 0]);
+    plot(data_mt_ssyrk_l_asm_blis(:,1), data_mt_ssyrk_l_asm_blis(:,3), '-.','LineWidth', 1.25,'Color', [0 0 1]);
+    plot(data_mt_ssyrk_l_openblas(:,1), data_mt_ssyrk_l_openblas(:,3), '-.', 'LineWidth', 1.25,'Color', [0 1 0]);
+    plot(data_mt_ssyrk_l_mkl(:,1), data_mt_ssyrk_l_mkl(:,3), '-.', 'LineWidth', 1.25,'Color', [1 0 0]);
 end
 
 ylabel( 'GFLOPS', 'FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue');
@@ -61,15 +61,15 @@ axis( [ 0 xmax_mt 0 speak*numcores ] )
 
 axes1 = subplot(4, 4, 6);
 hold(axes1,'on');
-plot(data_mt_dsyrk_asm_blis(:,1), data_mt_dsyrk_asm_blis(:,4), 'LineWidth', 1.25,'Color', [0 0 1]);
-plot(data_mt_dsyrk_openblas(:,1), data_mt_dsyrk_openblas(:,4), 'LineWidth', 1.25,'Color', [0 1 0]);
-plot(data_mt_dsyrk_mkl(:,1), data_mt_dsyrk_mkl(:,4), '--', 'LineWidth', 1.25,'Color', [1 0 0]);
+plot(data_mt_dsyrk_asm_blis(:,1), data_mt_dsyrk_asm_blis(:,3), 'LineWidth', 1.25,'Color', [0 0 1]);
+plot(data_mt_dsyrk_openblas(:,1), data_mt_dsyrk_openblas(:,3), 'LineWidth', 1.25,'Color', [0 1 0]);
+plot(data_mt_dsyrk_mkl(:,1), data_mt_dsyrk_mkl(:,3), '--', 'LineWidth', 1.25,'Color', [1 0 0]);
 
 if(plot_lower)
     
-    plot(data_mt_dsyrk_l_asm_blis(:,1), data_mt_dsyrk_l_asm_blis(:,4), '-.', 'LineWidth', 1.25,'Color', [0 0 1]);
-    plot(data_mt_dsyrk_l_openblas(:,1), data_mt_dsyrk_l_openblas(:,4), '-.', 'LineWidth', 1.25,'Color', [0 1 0]);
-    plot(data_mt_dsyrk_l_mkl(:,1), data_mt_dsyrk_l_mkl(:,4), '-.', 'LineWidth', 1.25,'Color', [1 0 0]);
+    plot(data_mt_dsyrk_l_asm_blis(:,1), data_mt_dsyrk_l_asm_blis(:,3), '-.', 'LineWidth', 1.25,'Color', [0 0 1]);
+    plot(data_mt_dsyrk_l_openblas(:,1), data_mt_dsyrk_l_openblas(:,3), '-.', 'LineWidth', 1.25,'Color', [0 1 0]);
+    plot(data_mt_dsyrk_l_mkl(:,1), data_mt_dsyrk_l_mkl(:,3), '-.', 'LineWidth', 1.25,'Color', [1 0 0]);
 end
 
 ylabel( 'GFLOPS', 'FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue');
@@ -86,14 +86,14 @@ axis( [ 0 xmax_mt 0 dpeak*numcores ] )
 
 axes1 = subplot(4, 4, 10);
 hold(axes1,'on');
-plot(data_mt_csyrk_1m_blis(:,1), data_mt_csyrk_1m_blis(:,4), 'LineWidth', 1.25,'Color', [0 0 1]);
-plot(data_mt_csyrk_openblas(:,1), data_mt_csyrk_openblas(:,4), 'LineWidth', 1.25,'Color', [0 1 0]);
-plot(data_mt_csyrk_mkl(:,1), data_mt_csyrk_mkl(:,4), '--', 'LineWidth', 1.25,'Color', [1 0 0]);
+plot(data_mt_csyrk_1m_blis(:,1), data_mt_csyrk_1m_blis(:,3), 'LineWidth', 1.25,'Color', [0 0 1]);
+plot(data_mt_csyrk_openblas(:,1), data_mt_csyrk_openblas(:,3), 'LineWidth', 1.25,'Color', [0 1 0]);
+plot(data_mt_csyrk_mkl(:,1), data_mt_csyrk_mkl(:,3), '--', 'LineWidth', 1.25,'Color', [1 0 0]);
 
 if(plot_lower)
-    plot(data_mt_csyrk_l_1m_blis(:,1), data_mt_csyrk_l_1m_blis(:,4),'-.', 'LineWidth', 1.25,'Color', [0 0 1]);
-    plot(data_mt_csyrk_l_openblas(:,1), data_mt_csyrk_l_openblas(:,4), '-.', 'LineWidth', 1.25,'Color', [0 1 0]);
-    plot(data_mt_csyrk_l_mkl(:,1), data_mt_csyrk_l_mkl(:,4), '-.', 'LineWidth', 1.25,'Color', [1 0 0]);
+    plot(data_mt_csyrk_l_1m_blis(:,1), data_mt_csyrk_l_1m_blis(:,3),'-.', 'LineWidth', 1.25,'Color', [0 0 1]);
+    plot(data_mt_csyrk_l_openblas(:,1), data_mt_csyrk_l_openblas(:,3), '-.', 'LineWidth', 1.25,'Color', [0 1 0]);
+    plot(data_mt_csyrk_l_mkl(:,1), data_mt_csyrk_l_mkl(:,3), '-.', 'LineWidth', 1.25,'Color', [1 0 0]);
 end
 
 ylabel( 'GFLOPS', 'FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue');
@@ -108,14 +108,14 @@ axis( [ 0 xmax_mt 0 speak*numcores ] )
 
 axes1 = subplot(4, 4, 14);
 hold(axes1,'on');
-plot(data_mt_zsyrk_1m_blis(:,1), data_mt_zsyrk_1m_blis(:,4), 'LineWidth', 1.25,'Color', [0 0 1]);
-plot(data_mt_zsyrk_openblas(:,1), data_mt_zsyrk_openblas(:,4), 'LineWidth', 1.25,'Color', [0 1 0]);
-plot(data_mt_zsyrk_mkl(:,1), data_mt_zsyrk_mkl(:,4), '--',  'LineWidth', 1.25,'Color', [1 0 0]);
+plot(data_mt_zsyrk_1m_blis(:,1), data_mt_zsyrk_1m_blis(:,3), 'LineWidth', 1.25,'Color', [0 0 1]);
+plot(data_mt_zsyrk_openblas(:,1), data_mt_zsyrk_openblas(:,3), 'LineWidth', 1.25,'Color', [0 1 0]);
+plot(data_mt_zsyrk_mkl(:,1), data_mt_zsyrk_mkl(:,3), '--',  'LineWidth', 1.25,'Color', [1 0 0]);
 
 if(plot_lower)
-    plot(data_mt_zsyrk_l_1m_blis(:,1), data_mt_zsyrk_l_1m_blis(:,4), '-.', 'LineWidth', 1.25,'Color', [0 0 1]);
-    plot(data_mt_zsyrk_l_openblas(:,1), data_mt_zsyrk_l_openblas(:,4), '-.', 'LineWidth', 1.25,'Color', [0 1 0]);
-    plot(data_mt_zsyrk_l_mkl(:,1), data_mt_zsyrk_l_mkl(:,4), '-.', 'LineWidth', 1.25,'Color', [1 0 0]);
+    plot(data_mt_zsyrk_l_1m_blis(:,1), data_mt_zsyrk_l_1m_blis(:,3), '-.', 'LineWidth', 1.25,'Color', [0 0 1]);
+    plot(data_mt_zsyrk_l_openblas(:,1), data_mt_zsyrk_l_openblas(:,3), '-.', 'LineWidth', 1.25,'Color', [0 1 0]);
+    plot(data_mt_zsyrk_l_mkl(:,1), data_mt_zsyrk_l_mkl(:,3), '-.', 'LineWidth', 1.25,'Color', [1 0 0]);
 end
 ylabel( 'GFLOPS', 'FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue');
 xlabel( 'matrix dimension m=n=k', 'FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue' );

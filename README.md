@@ -371,9 +371,15 @@ Funding
 -------
 
 This project and its associated research was partially sponsored by grants from
-[Microsoft](http://www.microsoft.com/), [Intel](http://www.intel.com/), [Texas
-Instruments](http://www.ti.com/), and [AMD](http://www.amd.com/), as well as
-grants from the [National Science Foundation](http://www.nsf.gov/) (Awards
+[Microsoft](http://www.microsoft.com/),
+[Intel](http://www.intel.com/),
+[Texas Instruments](http://www.ti.com/),
+[AMD](http://www.amd.com/),
+[Oracle](http://www.oracle.com/),
+and
+[Huawei](http://www.huawei.com/),
+as well as grants from the
+[National Science Foundation](http://www.nsf.gov/) (Awards
 CCF-0917167, ACI-1148125/1340293, CCF-1320112, and ACI-1550493).
 
 _Any opinions, findings and conclusions or recommendations expressed in this
