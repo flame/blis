@@ -197,6 +197,9 @@ void bli_gks_finalize( void )
 						bli_free_intl( gks_id_ind );
 					}
 				}
+
+				// Free the array of BLIS_NUM_IND_METHODS cntx* elements.
+				bli_free_intl( gks_id );
 			}
 		}
 
