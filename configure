@@ -1816,11 +1816,11 @@ main()
 
 	# If we didn't find any working C++ compilers, we print an error message.
 	if [ -z "${found_cxx}" ]; then
-		echo "${script_name}: Could not find working C++ compiler! Cannot continue."
-		exit 1
+		echo "${script_name}: Could not find working C++ compiler! C++ will not be available in sandbox."
+		found_cxx="c++notfound"
 	fi
 
-	echo "${script_name}: using '${found_cxx}' C++ compiler."
+	echo "${script_name}: using '${found_cxx}' C++ compiler (for sandbox only)."
 
 
 	# -- Check the compiler version --------------------------------------------
