@@ -72,9 +72,11 @@ print_usage()
 	echo "   -p PREFIX, --prefix=PREFIX"
 	echo " "
 	echo "                 The path to which make will install all build products."
-	echo "                 If given, this option implicitly sets LIBDIR to"
-	echo "                 PREFIX/lib and INCDIR to PREFIX/include (see below); if"
-	echo "                 not given, PREFIX defaults to \$(HOME)/blis. If PREFIX"
+	echo "                 If given, this option implies the following options:"
+	echo "                   --libdir=PREFIX/lib"
+	echo "                   --incdir=PREFIX/include"
+	echo "                   --sharedir=PREFIX/share"
+	echo "                 If not given, PREFIX defaults to \$(HOME)/blis. If PREFIX"
 	echo "                 refers to a directory that does not exist, it will be"
 	echo "                 created."
 	echo " "
@@ -93,6 +95,19 @@ print_usage()
 	echo "                 directory implied by --prefix; if not given, INCDIR"
 	echo "                 defaults to PREFIX/include. If INCDIR refers to a"
 	echo "                 directory that does not exist, it will be created."
+	echo " "
+	echo "   --sharedir=SHAREDIR"
+	echo " "
+	echo "                 The path to which make will makefile fragments containing"
+	echo "                 make variables determined by configure (e.g. CC, CFLAGS,"
+	echo "                 and LDFLAGS). These files allow certain BLIS makefiles,"
+	echo "                 such as those in the examples or testsuite directories, to"
+	echo "                 operate on an installed copy of BLIS rather than a local"
+	echo "                 (and likely uninstalled) copy. If given, SHAREDIR will"
+	echo "                 override the corresponding directory implied by --prefix;"
+	echo "                 if not given, SHAREDIR defaults to PREFIX/include. If"
+	echo "                 SHAREDIR refers to a directory that does not exist, it"
+	echo "                 will be created."
 	echo " "
 	echo "   -d DEBUG, --enable-debug[=DEBUG]"
 	echo " "
@@ -1546,6 +1561,10 @@ main()
 	install_incdir_user=''
 	incdir_flag=''
 
+	# The user-given install sharedir and a flag indicating it was given.
+	install_sharedir_user=''
+	sharedir_flag=''
+
 	# The preset value of CFLAGS and LDFLAGS (ie: compiler and linker flags
 	# to use in addition to those determined by the build system).
 	cflags_preset=''
@@ -1629,6 +1648,10 @@ main()
 					includedir=*)
 						incdir_flag=1
 						install_incdir_user=${OPTARG#*=}
+						;;
+					sharedir=*)
+						sharedir_flag=1
+						install_sharedir_user=${OPTARG#*=}
 						;;
 					enable-debug)
 						debug_flag=1
@@ -2182,6 +2205,7 @@ main()
 	# install prefix that was determined above.
 	install_libdir=${install_prefix_user}/lib
 	install_incdir=${install_prefix_user}/include
+	install_sharedir=${install_prefix_user}/share
 
 	# Set the install libdir, if it was specified. Note that this will override
 	# the default libdir implied by the install prefix, even if both options
@@ -2197,16 +2221,27 @@ main()
 	# override the default includedir implied by the install prefix, even if
 	# both options were given.
 	if [ -n "${incdir_flag}" ]; then
-		echo "${script_name}: detected --includedir='${install_incdir}'."
+		echo "${script_name}: detected --includedir='${install_incdir_user}'."
 		install_incdir=${install_incdir_user}
 	else
 		echo "${script_name}: no install includedir option given; defaulting to PREFIX/include."
+	fi
+
+	# Set the install sharedir, if it was specified. Note that this will
+	# override the default sharedir implied by the install prefix, even if
+	# both options were given.
+	if [ -n "${sharedir_flag}" ]; then
+		echo "${script_name}: detected --sharedir='${install_sharedir_user}'."
+		install_sharedir=${install_sharedir_user}
+	else
+		echo "${script_name}: no install sharedir option given; defaulting to PREFIX/share."
 	fi
 
 	# Echo the installation directories that we settled on.
 	echo "${script_name}: final installation directories:"
 	echo "${script_name}:   libdir:     ${install_libdir}"
 	echo "${script_name}:   includedir: ${install_incdir}"
+	echo "${script_name}:   sharedir:   ${install_sharedir}"
 
 	# Check if CFLAGS is non-empty.
 	if [ -n "${CFLAGS}" ]; then
@@ -2392,6 +2427,7 @@ main()
 	# characters here so that the sed commands below do the right thing.
 	install_libdir_esc=$(echo "${install_libdir}" | sed 's/\//\\\//g')
 	install_incdir_esc=$(echo "${install_incdir}" | sed 's/\//\\\//g')
+	install_sharedir_esc=$(echo "${install_sharedir}" | sed 's/\//\\\//g')
 	dist_path_esc=$(echo "${dist_path}"           | sed 's/\//\\\//g')
 	cc_esc=$(echo "${found_cc}" | sed 's/\//\\\//g')
 	cxx_esc=$(echo "${found_cxx}" | sed 's/\//\\\//g')
@@ -2481,6 +2517,7 @@ main()
 		| sed -e "s/@threading_model@/${threading_model}/g" \
 		| sed -e "s/@install_libdir@/${install_libdir_esc}/g" \
 		| sed -e "s/@install_incdir@/${install_incdir_esc}/g" \
+		| sed -e "s/@install_sharedir@/${install_sharedir_esc}/g" \
 		| sed -e "s/@enable_verbose@/${enable_verbose}/g" \
 		| sed -e "s/@configured_oot@/${configured_oot}/g" \
 		| sed -e "s/@enable_arg_max_hack@/${enable_arg_max_hack}/g" \

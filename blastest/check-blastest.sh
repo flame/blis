@@ -4,7 +4,7 @@
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
-#  Copyright (C) 2015, The University of Texas at Austin
+#  Copyright (C) 2018, The University of Texas at Austin
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -38,11 +38,11 @@ ansi_red="\033[0;31m"
 ansi_green="\033[0;32m"
 ansi_normal="\033[0m"
 
-passmsg="All BLIS tests passed!"
-failmsg0="At least one BLIS test failed. :("
-failmsg1="Please see output.testsuite for details."
+passmsg="All BLAS tests passed!"
+failmsg0="At least one BLAS test failed. :("
+failmsg1="Please see out.* files for details."
 
-grep -q FAILURE $1
+grep -q '\*\*\*\*' ./out.*
 
 if [ $? -eq 0 ]; then
 	printf "${ansi_red}""${script_name}: ${failmsg0}""${ansi_normal}\n"

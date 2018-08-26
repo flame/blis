@@ -101,7 +101,7 @@ get-noopt-cflags-for   = $(strip $(CFLAGS_PRESET) \
                                  $(call load-var-for,CLANGFLAGS,$(1)) \
                                  $(call load-var-for,CPPROCFLAGS,$(1)) \
                                  $(CTHREADFLAGS) \
-                                 $(INCLUDE_PATHS) $(VERS_DEF) \
+                                 $(CINCFLAGS) $(VERS_DEF) \
                           )
 
 get-noopt-cxxflags-for = $(strip $(CFLAGS_PRESET) \
@@ -112,7 +112,7 @@ get-noopt-cxxflags-for = $(strip $(CFLAGS_PRESET) \
                                  $(call load-var-for,CXXLANGFLAGS,$(1)) \
                                  $(call load-var-for,CPPROCFLAGS,$(1)) \
                                  $(CTHREADFLAGS) \
-                                 $(INCLUDE_PATHS) $(VERS_DEF) \
+                                 $(CINCFLAGS) $(VERS_DEF) \
                           )
 
 get-refinit-cflags-for = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
@@ -146,10 +146,10 @@ get-kernel-cflags-for  = $(strip $(call load-var-for,CKOPTFLAGS,$(1)) \
 # config_list == config_name if --enable-sandbox is given.)
 get-sandbox-c99flags-for = $(call load-var-for,COPTFLAGS,$(1)) \
                            $(call get-noopt-cflags-for,$(1)) \
-                           $(SANDBOX_INCLUDE_PATHS)
+                           $(CSBOXINCFLAGS)
 get-sandbox-cxxflags-for = $(call load-var-for,COPTFLAGS,$(1)) \
                            $(call get-noopt-cxxflags-for,$(1)) \
-                           $(SANDBOX_INCLUDE_PATHS)
+                           $(CSBOXINCFLAGS)
 
 get-noopt-text          = "(CFLAGS for no optimization)"
 get-refinit-text-for    = "('$(1)' CFLAGS for ref. kernel init)"
@@ -177,16 +177,34 @@ files-that-dont-contain = $(strip $(foreach f, $(1), $(if $(findstring $(2),$(f)
 # --- Include makefile configuration file --------------------------------------
 #
 
-# The path to the directory in which BLIS was built.
-ifeq ($(strip $(BUILD_PATH)),)
-BUILD_PATH        := .
+# Use the current directory as the default path to the root directory for
+# makefile fragments (and the configuration family's make_defs.mk), but
+# allow the includer to override this value if it needs to point to an
+# installation directory.
+ifeq ($(strip $(SHARE_PATH)),)
+SHARE_PATH        := .
 endif
 
 # Define the name of the configuration file.
 CONFIG_MK_FILE     := config.mk
 
+# Identify the base path for the root directory for makefile fragments (and
+# the configuration family's make_defs.mk). We define this path in terms of
+# SHARE_PATH, which gets a default value above (which is what happens for the
+# top-level Makefile). If SHARE_PATH is specified by the Makefile prior to
+# including common.mk, that path is used instead. This allows Makefiles for
+# example code and test drivers to reference an installed prefix directory
+# for situations when the build directory no longer exists.
+BASE_SHARE_PATH    := $(SHARE_PATH)
+
 # Include the configuration file.
--include $(BUILD_PATH)/$(CONFIG_MK_FILE)
+-include $(BASE_SHARE_PATH)/$(CONFIG_MK_FILE)
+
+
+
+#
+# --- Handle 'make clean' and friends without config.mk ------------------------
+#
 
 # Detect whether we actually got the configuration file. If we didn't, then
 # it is likely that the user has not yet generated it (via configure).
@@ -213,10 +231,12 @@ DIST_PATH := .
 # because the statements that define UNINSTALL_LIBS and UNINSTALL_HEADERS,
 # when evaluated, result in running 'find' on the root directory--definitely
 # something we would like to avoid.
-INSTALL_LIBDIR := $(HOME)/blis/lib
-INSTALL_INCDIR := $(HOME)/blis/include
+INSTALL_LIBDIR   := $(HOME)/blis/lib
+INSTALL_INCDIR   := $(HOME)/blis/include
+INSTALL_SHAREDIR := $(HOME)/blis/share
 
 endif
+
 
 
 #
@@ -271,6 +291,11 @@ ALL_HDR_SUFS       := $(sort $(FRAME_HDR_SUFS) \
 ALL_H99_SUFS       := $(sort $(FRAME_HDR_SUFS) \
                              $(SANDBOX_H99_SUFS) )
 
+# The names of scripts that check output from the BLAS test drivers and
+# BLIS test suite.
+BLASTEST_CHECK     := check-blastest.sh
+TESTSUITE_CHECK    := check-blistest.sh
+
 # The names of the testsuite input/configuration files.
 TESTSUITE_CONF_GEN := input.general
 TESTSUITE_CONF_OPS := input.operations
@@ -296,11 +321,11 @@ SANDBOX_PATH       := $(DIST_PATH)/$(SANDBOX_DIR)
 # Construct paths to the makefile fragments for the four primary directories
 # of source code: the config directory, general framework code, reference
 # kernel code, and optimized kernel code.
-CONFIG_FRAG_PATH   := $(BUILD_PATH)/obj/$(CONFIG_NAME)/$(CONFIG_DIR)
-FRAME_FRAG_PATH    := $(BUILD_PATH)/obj/$(CONFIG_NAME)/$(FRAME_DIR)
-REFKERN_FRAG_PATH  := $(BUILD_PATH)/obj/$(CONFIG_NAME)/$(REFKERN_DIR)
-KERNELS_FRAG_PATH  := $(BUILD_PATH)/obj/$(CONFIG_NAME)/$(KERNELS_DIR)
-SANDBOX_FRAG_PATH  := $(BUILD_PATH)/obj/$(CONFIG_NAME)/$(SANDBOX_DIR)
+CONFIG_FRAG_PATH   := ./obj/$(CONFIG_NAME)/$(CONFIG_DIR)
+FRAME_FRAG_PATH    := ./obj/$(CONFIG_NAME)/$(FRAME_DIR)
+REFKERN_FRAG_PATH  := ./obj/$(CONFIG_NAME)/$(REFKERN_DIR)
+KERNELS_FRAG_PATH  := ./obj/$(CONFIG_NAME)/$(KERNELS_DIR)
+SANDBOX_FRAG_PATH  := ./obj/$(CONFIG_NAME)/$(SANDBOX_DIR)
 
 
 
@@ -308,11 +333,23 @@ SANDBOX_FRAG_PATH  := $(BUILD_PATH)/obj/$(CONFIG_NAME)/$(SANDBOX_DIR)
 # --- Library name and local paths ---------------------------------------------
 #
 
+# Use lib/CONFIG_NAME as the default path to the local header files, but
+# allow the includer to override this value if it needs to point to an
+# installation directory.
+ifeq ($(strip $(LIB_PATH)),)
+LIB_PATH           := $(LIB_DIR)/$(CONFIG_NAME)
+endif
+
+# Identify the base path for the intermediate library directory. We define
+# this path in terms of LIB_PATH, which gets a default value above (which is
+# what happens for the top-level Makefile). If LIB_PATH is specified by the
+# Makefile prior to including common.mk, that path is used instead. This
+# allows Makefiles for example code and test drivers to reference an installed
+# prefix directory for situations when the build directory no longer exists.
+BASE_LIB_PATH      := $(LIB_PATH)
+
 # The base name of the BLIS library that we will build.
 LIBBLIS            := libblis
-
-# Construct the base path for the library.
-BASE_LIB_PATH      := ./$(LIB_DIR)/$(CONFIG_NAME)
 
 # The shared (dynamic) library file suffix is different for Linux and OS X.
 ifeq ($(OS_NAME),Darwin)
@@ -415,9 +452,11 @@ endif
 # Decide which library to link to for things like the testsuite and BLIS test
 # drivers. We default to the static library, unless only the shared library was
 # enabled, in which case we use the shared library.
+LIBBLIS_L      := $(LIBBLIS_A)
 LIBBLIS_LINK   := $(LIBBLIS_A_PATH)
 ifeq ($(MK_ENABLE_SHARED),yes)
 ifeq ($(MK_ENABLE_STATIC),no)
+LIBBLIS_L      := $(LIBBLIS_SO)
 LIBBLIS_LINK   := $(LIBBLIS_SO_PATH)
 LDFLAGS        += -Wl,-rpath,$(BASE_LIB_PATH)
 endif
@@ -432,7 +471,7 @@ endif
 # makefile definitions.
 MAKE_DEFS_FILE     := make_defs.mk
 
-# Assembly a list of all configuration family members, including the
+# Assemble a list of all configuration family members, including the
 # configuration family name itself. Note that sort() will remove duplicates
 # for situations where CONFIG_NAME is present in CONFIG_LIST, such as would
 # be the case for singleton families.
@@ -442,7 +481,11 @@ CONFIG_LIST_FAM    := $(sort $(strip $(CONFIG_LIST) $(CONFIG_NAME)))
 # resides in a separate configuration sub-directory. We use CONFIG_LIST_FAM
 # since we might need the makefile definitions associated with the
 # configuration family (if it is an umbrella family).
-CONFIG_PATHS       := $(addprefix $(CONFIG_PATH)/, $(CONFIG_LIST_FAM))
+# NOTE: We use the prefix $(BASE_SHARE_PATH)/$(CONFIG_DIR)/ instead of
+# $(CONFIG_PATH) so that make_defs.mk can be found when it is installed,
+# provided the caller defined SHARE_PATH to that install directory.
+CONFIG_PATHS       := $(addprefix $(BASE_SHARE_PATH)/$(CONFIG_DIR)/, \
+                                  $(CONFIG_LIST_FAM))
 MAKE_DEFS_MK_PATHS := $(addsuffix /$(MAKE_DEFS_FILE), $(CONFIG_PATHS))
 
 # Initialize the list of included (found) configurations to empty.
@@ -628,8 +671,8 @@ CONFIG_PATHS       := $(addprefix $(CONFIG_FRAG_PATH)/, $(CONFIG_LIST_FAM))
 # This variable is used by the include statements as they recursively include
 # one another. For the 'config' directory, we initialize it to that directory
 # in preparation to include the fragments in the configuration sub-directory.
-PARENT_PATH        := $(CONFIG_FRAG_PATH)
 PARENT_SRC_PATH    := $(CONFIG_PATH)
+PARENT_PATH        := $(CONFIG_FRAG_PATH)
 
 # Recursively include the makefile fragments in each of the sub-configuration
 # directories.
@@ -644,8 +687,8 @@ KERNEL_PATHS       := $(addprefix $(KERNELS_FRAG_PATH)/, $(KERNEL_LIST))
 # This variable is used by the include statements as they recursively include
 # one another. For the 'kernels' directory, we initialize it to that directory
 # in preparation to include the fragments in the configuration sub-directory.
-PARENT_PATH        := $(KERNELS_FRAG_PATH)
 PARENT_SRC_PATH    := $(KERNELS_PATH)
+PARENT_PATH        := $(KERNELS_FRAG_PATH)
 
 # Recursively include the makefile fragments in each of the kernels sub-
 # directories.
@@ -658,8 +701,8 @@ PARENT_SRC_PATH    := $(KERNELS_PATH)
 # one another. For the framework and reference kernel source trees (ie: the
 # 'frame' and 'ref_kernels' directories), we initialize it to the top-level
 # directory since that is its parent.
-PARENT_PATH        := $(BUILD_PATH)/obj/$(CONFIG_NAME)
 PARENT_SRC_PATH    := $(DIST_PATH)
+PARENT_PATH        := $(OBJ_DIR)/$(CONFIG_NAME)
 
 # Recursively include all the makefile fragments in the directories for the
 # reference kernels and portable framework.
@@ -677,8 +720,8 @@ SANDBOX_PATHS      := $(addprefix $(SANDBOX_FRAG_PATH)/, $(SANDBOX))
 # This variable is used by the include statements as they recursively include
 # one another. For the 'sandbox' directory, we initialize it to that directory
 # in preparation to include the fragments in the configuration sub-directory.
-PARENT_PATH        := $(SANDBOX_FRAG_PATH)
 PARENT_SRC_PATH    := $(SANDBOX_PATH)
+PARENT_PATH        := $(SANDBOX_FRAG_PATH)
 
 # Recursively include the makefile fragments in the sandbox sub-directory.
 -include $(addsuffix /$(FRAGMENT_MK), $(SANDBOX_PATHS))
@@ -734,20 +777,26 @@ SANDBOX_HXX_FILES := $(call get-filepaths,$(SANDBOX_DIR_PATHS),$(SANDBOX_HXX_SUF
 
 SANDBOX_HDR_DIRPATHS := $(call get-dirpaths,$(SANDBOX_DIR_PATHS),$(ALL_HDR_SUFS))
 
-# Add -I to each header path so we can specify our include search paths to the
-# C compiler.
-# NOTE: We no longer need every header path in the source tree since we
-# now #include the monolithic/flattened blis.h instead, and thus this
-# line is commented out.
-#INCLUDE_PATHS   := $(strip $(patsubst %, -I%, $(ALL_HDR_DIRPATHS)))
 
 
 #
 # --- blis.h header definitions ------------------------------------------------
 #
 
-# Construct the base path for the intermediate include directory.
-BASE_INC_PATH   := $(BUILD_PATH)/$(INCLUDE_DIR)/$(CONFIG_NAME)
+# Use include/CONFIG_NAME as the default path to the local header files, but
+# allow the includer to override this value if it needs to point to an
+# installation directory.
+ifeq ($(strip $(INC_PATH)),)
+INC_PATH        := $(INCLUDE_DIR)/$(CONFIG_NAME)
+endif
+
+# Identify the base path for the intermediate include directory. We define
+# this path in terms of INC_PATH, which gets a default value above (which is
+# what happens for the top-level Makefile). If INC_PATH is specified by the
+# Makefile prior to including common.mk, that path is used instead. This
+# allows Makefiles for example code and test drivers to reference an installed
+# prefix directory for situations when the build directory no longer exists.
+BASE_INC_PATH   := $(INC_PATH)
 
 # Isolate the path to blis.h by filtering the file from the list of framework
 # header files.
@@ -780,8 +829,10 @@ CBLAS_H_FLAT    := $(BASE_INC_PATH)/$(CBLAS_H)
 # Obtain a list of header files #included inside of the bli_cntx_ref.c file.
 # Paths to these files will be needed when compiling with the monolithic
 # header.
+ifeq ($(strip $(SHARE_PATH)),.)
 REF_KER_SRC     := $(DIST_PATH)/$(REFKERN_DIR)/bli_cntx_ref.c
 REF_KER_HEADERS := $(shell $(GREP) "\#include" $(REF_KER_SRC) | sed -e "s/\#include [\"<]\([a-zA-Z0-9\_\.\/\-]*\)[\">].*/\1/g" | $(GREP) -v $(BLIS_H))
+endif
 
 # Match each header found above with the path to that header, and then strip
 # leading, trailing, and internal whitespace.
@@ -795,11 +846,13 @@ REF_KER_I_PATHS := $(strip $(patsubst %, -I%, $(REF_KER_H_PATHS)))
 REF_KER_I_PATHS += -I$(DIST_PATH)/frame/include
 
 # Prefix the paths above with the base include path.
-INCLUDE_PATHS   := -I$(BASE_INC_PATH) $(REF_KER_I_PATHS)
+# NOTE: We no longer need every header path in the source tree since we
+# now #include the monolithic/flattened blis.h instead.
+CINCFLAGS       := -I$(BASE_INC_PATH) $(REF_KER_I_PATHS)
 
 # Obtain a list of header paths in the configured sandbox. Then add -I to each
 # header path.
-SANDBOX_INCLUDE_PATHS := $(strip $(patsubst %, -I%, $(SANDBOX_HDR_DIRPATHS)))
+CSBOXINCFLAGS   := $(strip $(patsubst %, -I%, $(SANDBOX_HDR_DIRPATHS)))
 
 
 #
