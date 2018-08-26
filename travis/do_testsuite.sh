@@ -11,5 +11,5 @@ export BLIS_JR_NT=1
 make testblis
 $DIST_PATH/testsuite/check-blistest.sh ./output.testsuite
 make testblas
-$DIST_PATH/testsuite/check-blastest.sh
+$DIST_PATH/blastest/check-blastest.sh
 
