@@ -1074,7 +1074,7 @@ blacklist_cleanup()
 
 echoerr_unsupportedcc()
 {
-	echoerr "*** Unsupported compiler version: ${cc_vendor} ${cc_version}."
+	echoerr "${script_name}: *** Unsupported compiler version: ${cc_vendor} ${cc_version}."
 	exit 1
 }
 
@@ -1818,7 +1818,7 @@ main()
 
 	# If we didn't find any working C compilers, we print an error message.
 	if [ -z "${found_cc}" ]; then
-		echo "${script_name}: Could not find working C compiler! Cannot continue."
+		echo "${script_name}: *** Could not find working C compiler! Cannot continue."
 		exit 1
 	fi
 
@@ -1881,6 +1881,7 @@ main()
 
 		echo "${script_name}: could not open '${registry_file}' file; cannot continue."
 		echo "${script_name}: BLIS distribution appears to be incomplete."
+		echo "${script_name}: *** Please verify source distribution."
 
 		exit 1
 	fi
@@ -2302,7 +2303,7 @@ main()
 		echo "${script_name}: building BLIS as a shared library (static library disabled)."
 	else
 		echo "${script_name}: Both static and shared libraries were disabled."
-		echo "${script_name}: Please enable one (or both) to continue."
+		echo "${script_name}: *** Please enable one (or both) to continue."
 		exit 1
 	fi
 
@@ -2331,7 +2332,7 @@ main()
 	     [ "x${threading_model}" = "xnone" ]; then
 		echo "${script_name}: threading is disabled."
 	else
-		echo "Unsupported threading model: ${threading_model}."
+		echo "${script_name}: *** Unsupported threading model: ${threading_model}."
 		exit 1
 	fi
 	
@@ -2411,6 +2412,7 @@ main()
 
 		if [ ! -d "${sandbox_fullpath}" ]; then
 			echo "${script_name}: requested sandbox sub-directory does not exist! Cannot continue."
+			echo "${script_name}: *** Please verify sandbox existence and name."
 			exit 1
 		fi
 
@@ -2483,8 +2485,10 @@ main()
 		# directory and thus we must create a symbolic link.
 		if [ ! -f "${dist_path}/${dummy_file}" ]; then
 			configured_oot="yes"
+			#echo "${script_name}: detected out-of-tree build directory."
 		else
 			configured_oot="no"
+			#echo "${script_name}: detected in-tree build directory."
 		fi
 
 		# Remove the dummy file.
@@ -2786,30 +2790,55 @@ main()
 	# properly handle out-of-tree builds.
 	if [ "${configured_oot}" = "yes" ]; then
 
-		# If 'Makefile' does not already exist in the current directory,
-		# create a symbolic link to it. If one does exist, we us -f to
-		# force creation of a new link.
+		# If 'Makefile' symlink does not already exist in the current
+		# directory, create a symbolic link to it. If one does exist, we
+		# use -f to force creation of a new link.
 		if [ ! -e "./Makefile" ]; then
 
 			echo "${script_name}: creating symbolic link to Makefile."
 			ln -s "${dist_path}/Makefile"
 
-		else
+		elif [ -h "./Makefile" ]; then
 			echo "${script_name}: symbolic link to Makefile already exists; forcing creation of new link."
 			ln -sf "${dist_path}/Makefile"
+		else
+			echo "${script_name}: Non-symbolic link file or directory 'Makefile' blocks creation of symlink."
+			echo "${script_name}: *** Please remove this entity and re-run configure."
+			exit 1
 		fi
 
-		# If 'common.mk' does not already exist in the current directory,
-		# create a symbolic link to it. If one does exist, we us -f to
-		# force creation of a new link.
+		# If 'common.mk' symlink does not already exist in the current
+		# directory, create a symbolic link to it. If one does exist, we
+		# use -f to force creation of a new link.
 		if [ ! -e "./common.mk" ]; then
 
 			echo "${script_name}: creating symbolic link to common.mk."
 			ln -s "${dist_path}/common.mk"
 
-		else
+		elif [ -h "./common.mk" ]; then
 			echo "${script_name}: symbolic link to common.mk already exists; forcing creation of new link."
 			ln -sf "${dist_path}/common.mk"
+		else
+			echo "${script_name}: Non-symbolic link file or directory 'common.mk' blocks creation of symlink."
+			echo "${script_name}: *** Please remove this entity and re-run configure."
+			exit 1
+		fi
+
+		# If 'config' symlink does not already exist in the current
+		# directory, create a symbolic link to it. If one does exist, we
+		# use -f to force creation of a new link.
+		if [ ! -e "./config" ]; then
+
+			echo "${script_name}: creating symbolic link to 'config' directory."
+			ln -s "${dist_path}/config"
+
+		elif [ -h "./config" ]; then
+			echo "${script_name}: symbolic link to 'config' directory already exists; forcing creation of new link."
+			ln -sf "${dist_path}/config"
+		else
+			echo "${script_name}: Non-symbolic link file or directory 'config' blocks creation of symlink."
+			echo "${script_name}: *** Please remove this entity and re-run configure."
+			exit 1
 		fi
 
 		echo "${script_name}: configured to build outside of source distribution."

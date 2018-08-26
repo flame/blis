@@ -9,7 +9,7 @@ export BLIS_IR_NT=1
 export BLIS_JR_NT=1
 
 make testblis
-$DIST_PATH/build/check-blistest.sh ./output.testsuite
+$DIST_PATH/testsuite/check-blistest.sh ./output.testsuite
 make testblas
-$DIST_PATH/build/check-blastest.sh
+$DIST_PATH/testsuite/check-blastest.sh
 
