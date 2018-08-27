@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -70,27 +71,10 @@ int main( int argc, char** argv )
 
 	// Read the operations parameter file.
 	libblis_test_read_ops_file( libblis_test_operations_filename, &ops );
-	
-	// Test the utility operations.
-	libblis_test_utility_ops( &params, &ops );
 
-	// Test the level-1v operations.
-	libblis_test_level1v_ops( &params, &ops );
-
-	// Test the level-1m operations.
-	libblis_test_level1m_ops( &params, &ops );
-
-	// Test the level-1f operations.
-	libblis_test_level1f_ops( &params, &ops );
-
-	// Test the level-2 operations.
-	libblis_test_level2_ops( &params, &ops );
-
-	// Test the level-3 micro-kernels.
-	libblis_test_level3_ukrs( &params, &ops );
-
-	// Test the level-3 operations.
-	libblis_test_level3_ops( &params, &ops );
+	// Walk through all test modules.
+	//libblis_test_all_ops( &params, &ops );
+	libblis_test_thread_decorator( &params, &ops );
 
 	// Finalize libblis.
 	//bli_finalize();
@@ -100,96 +84,213 @@ int main( int argc, char** argv )
 }
 
 
-
-void libblis_test_utility_ops( test_params_t* params, test_ops_t* ops )
+#if 0
+typedef struct thread_data
 {
-	libblis_test_randv( params, &(ops->randv) );
-	libblis_test_randm( params, &(ops->randm) );
+	test_params_t*     params;
+	test_ops_t*        ops;
+	unsigned int       nt;
+	unsigned int       id;
+	unsigned int       xc;
+	//pthread_mutex_t*   mutex;
+	pthread_barrier_t* barrier;
+} thread_data_t;
+#endif
+
+void* libblis_test_thread_entry( void* tdata_void )
+{
+	thread_data_t* tdata  = tdata_void;
+
+	test_params_t* params = tdata->params;
+	test_ops_t*    ops    = tdata->ops;
+
+	// Walk through all test modules.
+	libblis_test_all_ops( tdata, params, ops );
+
+	return NULL;
 }
 
 
 
-void libblis_test_level1v_ops( test_params_t* params, test_ops_t* ops )
+void libblis_test_thread_decorator( test_params_t* params, test_ops_t* ops )
 {
-	libblis_test_addv( params, &(ops->addv) );
-	libblis_test_amaxv( params, &(ops->amaxv) );
-	libblis_test_axpbyv( params, &(ops->axpbyv) );
-	libblis_test_axpyv( params, &(ops->axpyv) );
-	libblis_test_copyv( params, &(ops->copyv) );
-	libblis_test_dotv( params, &(ops->dotv) );
-	libblis_test_dotxv( params, &(ops->dotxv) );
-	libblis_test_normfv( params, &(ops->normfv) );
-	libblis_test_scalv( params, &(ops->scalv) );
-	libblis_test_scal2v( params, &(ops->scal2v) );
-	libblis_test_setv( params, &(ops->setv) );
-	libblis_test_subv( params, &(ops->subv) );
-	libblis_test_xpbyv( params, &(ops->xpbyv) );
+	// Query the total number of threads to simulate.
+	size_t nt = ( size_t )params->n_app_threads;
+
+	// Allocate an array of pthread objects and auxiliary data structs to pass
+	// to the thread entry functions.
+	pthread_t*         pthread = bli_malloc_intl( sizeof( pthread_t       ) * nt );
+	thread_data_t*     tdata   = bli_malloc_intl( sizeof( thread_data_t   ) * nt );
+
+	// Allocate a mutex for the threads to share.
+	//pthread_mutex_t*   mutex   = bli_malloc_intl( sizeof( pthread_mutex_t ) );
+
+	// Allocate a barrier for the threads to share.
+	pthread_barrier_t* barrier = bli_malloc_intl( sizeof( pthread_barrier_t ) );
+
+	// Initialize the mutex.
+	//pthread_mutex_init( mutex, NULL );
+
+	// Initialize the barrier for nt threads.
+	pthread_barrier_init( barrier, NULL, nt );
+
+	// NOTE: We must iterate backwards so that the chief thread (thread id 0)
+	// can spawn all other threads before proceeding with its own computation.
+	// ALSO: Since we need to let the counter go negative, id must be a signed
+	// integer here.
+	for ( signed int id = nt - 1; 0 <= id; id-- )
+	{
+		tdata[id].params  = params;
+		tdata[id].ops     = ops;
+		tdata[id].nt      = nt;
+		tdata[id].id      = id;
+		tdata[id].xc      = 0;
+		//tdata[id].mutex   = mutex;
+		tdata[id].barrier = barrier;
+
+		// Spawn additional threads for ids greater than 1.
+		if ( id != 0 )
+			pthread_create( &pthread[id], NULL, libblis_test_thread_entry, &tdata[id] );
+		else
+			libblis_test_thread_entry( ( void* )(&tdata[0]) );
+	}
+
+	// Thread 0 waits for additional threads to finish.
+	for ( unsigned int id = 1; id < nt; id++ )
+	{
+		pthread_join( pthread[id], NULL );
+	}
+
+	// Destroy the mutex.
+	//pthread_mutex_destroy( mutex );
+
+	// Destroy the barrier.
+	pthread_barrier_destroy( barrier );
+
+	// Free the pthread-related memory.
+	bli_free_intl( pthread );
+	bli_free_intl( tdata );
+	//bli_free_intl( mutex );
+	bli_free_intl( barrier );
 }
 
 
 
-void libblis_test_level1m_ops( test_params_t* params, test_ops_t* ops )
+void libblis_test_all_ops( thread_data_t* tdata, test_params_t* params, test_ops_t* ops )
 {
-	libblis_test_addm( params, &(ops->addm) );
-	libblis_test_axpym( params, &(ops->axpym) );
-	libblis_test_copym( params, &(ops->copym) );
-	libblis_test_normfm( params, &(ops->normfm) );
-	libblis_test_scalm( params, &(ops->scalm) );
-	libblis_test_scal2m( params, &(ops->scal2m) );
-	libblis_test_setm( params, &(ops->setm) );
-	libblis_test_subm( params, &(ops->subm) );
+	// Test the utility operations.
+	libblis_test_utility_ops( tdata, params, ops );
+
+	// Test the level-1v operations.
+	libblis_test_level1v_ops( tdata, params, ops );
+
+	// Test the level-1m operations.
+	libblis_test_level1m_ops( tdata, params, ops );
+
+	// Test the level-1f operations.
+	libblis_test_level1f_ops( tdata, params, ops );
+
+	// Test the level-2 operations.
+	libblis_test_level2_ops( tdata, params, ops );
+
+	// Test the level-3 micro-kernels.
+	libblis_test_level3_ukrs( tdata, params, ops );
+
+	// Test the level-3 operations.
+	libblis_test_level3_ops( tdata, params, ops );
 }
 
 
 
-void libblis_test_level1f_ops( test_params_t* params, test_ops_t* ops )
+void libblis_test_utility_ops( thread_data_t* tdata, test_params_t* params, test_ops_t* ops )
 {
-	libblis_test_axpy2v( params, &(ops->axpy2v) );
-	libblis_test_dotaxpyv( params, &(ops->dotaxpyv) );
-	libblis_test_axpyf( params, &(ops->axpyf) );
-	libblis_test_dotxf( params, &(ops->dotxf) );
-	libblis_test_dotxaxpyf( params, &(ops->dotxaxpyf) );
+	libblis_test_randv( tdata, params, &(ops->randv) );
+	libblis_test_randm( tdata, params, &(ops->randm) );
 }
 
 
 
-void libblis_test_level2_ops( test_params_t* params, test_ops_t* ops )
+void libblis_test_level1v_ops( thread_data_t* tdata, test_params_t* params, test_ops_t* ops )
 {
-	libblis_test_gemv( params, &(ops->gemv) );
-	libblis_test_ger( params, &(ops->ger) );
-	libblis_test_hemv( params, &(ops->hemv) );
-	libblis_test_her( params, &(ops->her) );
-	libblis_test_her2( params, &(ops->her2) );
-	libblis_test_symv( params, &(ops->symv) );
-	libblis_test_syr( params, &(ops->syr) );
-	libblis_test_syr2( params, &(ops->syr2) );
-	libblis_test_trmv( params, &(ops->trmv) );
-	libblis_test_trsv( params, &(ops->trsv) );
+	libblis_test_addv( tdata, params, &(ops->addv) );
+	libblis_test_amaxv( tdata, params, &(ops->amaxv) );
+	libblis_test_axpbyv( tdata, params, &(ops->axpbyv) );
+	libblis_test_axpyv( tdata, params, &(ops->axpyv) );
+	libblis_test_copyv( tdata, params, &(ops->copyv) );
+	libblis_test_dotv( tdata, params, &(ops->dotv) );
+	libblis_test_dotxv( tdata, params, &(ops->dotxv) );
+	libblis_test_normfv( tdata, params, &(ops->normfv) );
+	libblis_test_scalv( tdata, params, &(ops->scalv) );
+	libblis_test_scal2v( tdata, params, &(ops->scal2v) );
+	libblis_test_setv( tdata, params, &(ops->setv) );
+	libblis_test_subv( tdata, params, &(ops->subv) );
+	libblis_test_xpbyv( tdata, params, &(ops->xpbyv) );
 }
 
 
 
-void libblis_test_level3_ukrs( test_params_t* params, test_ops_t* ops )
+void libblis_test_level1m_ops( thread_data_t* tdata, test_params_t* params, test_ops_t* ops )
 {
-	libblis_test_gemm_ukr( params, &(ops->gemm_ukr) );
-	libblis_test_trsm_ukr( params, &(ops->trsm_ukr) );
-	libblis_test_gemmtrsm_ukr( params, &(ops->gemmtrsm_ukr) );
+	libblis_test_addm( tdata, params, &(ops->addm) );
+	libblis_test_axpym( tdata, params, &(ops->axpym) );
+	libblis_test_copym( tdata, params, &(ops->copym) );
+	libblis_test_normfm( tdata, params, &(ops->normfm) );
+	libblis_test_scalm( tdata, params, &(ops->scalm) );
+	libblis_test_scal2m( tdata, params, &(ops->scal2m) );
+	libblis_test_setm( tdata, params, &(ops->setm) );
+	libblis_test_subm( tdata, params, &(ops->subm) );
 }
 
 
 
-void libblis_test_level3_ops( test_params_t* params, test_ops_t* ops )
+void libblis_test_level1f_ops( thread_data_t* tdata, test_params_t* params, test_ops_t* ops )
 {
-	libblis_test_gemm( params, &(ops->gemm) );
-	libblis_test_hemm( params, &(ops->hemm) );
-	libblis_test_herk( params, &(ops->herk) );
-	libblis_test_her2k( params, &(ops->her2k) );
-	libblis_test_symm( params, &(ops->symm) );
-	libblis_test_syrk( params, &(ops->syrk) );
-	libblis_test_syr2k( params, &(ops->syr2k) );
-	libblis_test_trmm( params, &(ops->trmm) );
-	libblis_test_trmm3( params, &(ops->trmm3) );
-	libblis_test_trsm( params, &(ops->trsm) );
+	libblis_test_axpy2v( tdata, params, &(ops->axpy2v) );
+	libblis_test_dotaxpyv( tdata, params, &(ops->dotaxpyv) );
+	libblis_test_axpyf( tdata, params, &(ops->axpyf) );
+	libblis_test_dotxf( tdata, params, &(ops->dotxf) );
+	libblis_test_dotxaxpyf( tdata, params, &(ops->dotxaxpyf) );
+}
+
+
+
+void libblis_test_level2_ops( thread_data_t* tdata, test_params_t* params, test_ops_t* ops )
+{
+	libblis_test_gemv( tdata, params, &(ops->gemv) );
+	libblis_test_ger( tdata, params, &(ops->ger) );
+	libblis_test_hemv( tdata, params, &(ops->hemv) );
+	libblis_test_her( tdata, params, &(ops->her) );
+	libblis_test_her2( tdata, params, &(ops->her2) );
+	libblis_test_symv( tdata, params, &(ops->symv) );
+	libblis_test_syr( tdata, params, &(ops->syr) );
+	libblis_test_syr2( tdata, params, &(ops->syr2) );
+	libblis_test_trmv( tdata, params, &(ops->trmv) );
+	libblis_test_trsv( tdata, params, &(ops->trsv) );
+}
+
+
+
+void libblis_test_level3_ukrs( thread_data_t* tdata, test_params_t* params, test_ops_t* ops )
+{
+	libblis_test_gemm_ukr( tdata, params, &(ops->gemm_ukr) );
+	libblis_test_trsm_ukr( tdata, params, &(ops->trsm_ukr) );
+	libblis_test_gemmtrsm_ukr( tdata, params, &(ops->gemmtrsm_ukr) );
+}
+
+
+
+void libblis_test_level3_ops( thread_data_t* tdata, test_params_t* params, test_ops_t* ops )
+{
+	libblis_test_gemm( tdata, params, &(ops->gemm) );
+	libblis_test_hemm( tdata, params, &(ops->hemm) );
+	libblis_test_herk( tdata, params, &(ops->herk) );
+	libblis_test_her2k( tdata, params, &(ops->her2k) );
+	libblis_test_symm( tdata, params, &(ops->symm) );
+	libblis_test_syrk( tdata, params, &(ops->syrk) );
+	libblis_test_syr2k( tdata, params, &(ops->syr2k) );
+	libblis_test_trmm( tdata, params, &(ops->trmm) );
+	libblis_test_trmm3( tdata, params, &(ops->trmm3) );
+	libblis_test_trsm( tdata, params, &(ops->trsm) );
 }
 
 
@@ -428,6 +529,39 @@ void libblis_test_read_params_file( char* input_filename, test_params_t* params 
 	// Read whether to native (complex) execution.
 	libblis_test_read_next_line( buffer, input_stream );
 	sscanf( buffer, "%u ", &(params->ind_enable[ BLIS_NAT ]) );
+
+	// Read whether to simulate application-level threading.
+	libblis_test_read_next_line( buffer, input_stream );
+	sscanf( buffer, "%u ", &(params->n_app_threads) );
+
+	// Silently interpret non-positive numbers the same as 1.
+	if ( params->n_app_threads < 1 ) params->n_app_threads = 1;
+
+	// Disable induced methods when simulating more than one application
+	// threads.
+	if ( params->n_app_threads > 1 )
+	{
+		if ( params->ind_enable[ BLIS_3MH  ] ||
+		     params->ind_enable[ BLIS_3M1  ] ||
+		     params->ind_enable[ BLIS_4MH  ] ||
+		     params->ind_enable[ BLIS_4M1B ] ||
+		     params->ind_enable[ BLIS_4M1A ] ||
+		     params->ind_enable[ BLIS_1M   ]
+		   )
+		{
+			// Due to an inherent race condition in the way induced methods
+			// are enabled and disabled at runtime, all induced methods must be
+			// disabled when simulating multiple application threads.
+			libblis_test_printf_infoc( "simulating multiple application threads; disabling induced methods.\n" );
+
+			params->ind_enable[ BLIS_3MH  ] = 0;
+			params->ind_enable[ BLIS_3M1  ] = 0;
+			params->ind_enable[ BLIS_4MH  ] = 0;
+			params->ind_enable[ BLIS_4M1B ] = 0;
+			params->ind_enable[ BLIS_4M1A ] = 0;
+			params->ind_enable[ BLIS_1M   ] = 0;
+		}
+	}
 
 	// Read the requested error-checking level.
 	libblis_test_read_next_line( buffer, input_stream );
@@ -950,6 +1084,7 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "  4m1a (4m1)?                %u\n", params->ind_enable[ BLIS_4M1A ] );
 	libblis_test_fprintf_c( os, "  1m?                        %u\n", params->ind_enable[ BLIS_1M ] );
 	libblis_test_fprintf_c( os, "  native?                    %u\n", params->ind_enable[ BLIS_NAT ] );
+	libblis_test_fprintf_c( os, "simulated app-level threads  %u\n", params->n_app_threads );
 	libblis_test_fprintf_c( os, "error-checking level         %u\n", params->error_checking_level );
 	libblis_test_fprintf_c( os, "reaction to failure          %c\n", params->reaction_to_failure );
 	libblis_test_fprintf_c( os, "output in matlab format?     %u\n", params->output_matlab_format );
@@ -1219,7 +1354,8 @@ void carryover( unsigned int* c,
 
 
 
-void libblis_test_op_driver( test_params_t* params,
+void libblis_test_op_driver( thread_data_t* tdata,
+                             test_params_t* params,
                              test_op_t*     op,
                              iface_t        iface,
                              char*          op_str,
@@ -1447,23 +1583,27 @@ void libblis_test_op_driver( test_params_t* params,
 
 
 
-	// Output a heading and the contents of the op struct.
-	libblis_test_fprintf_c( stdout, "--- %s ---\n", op_str );
-	libblis_test_fprintf_c( stdout, "\n" );
-	libblis_test_output_op_struct( stdout, op, op_str );
-
-	// Also output to a matlab file if requested (and successfully opened).
-	if ( output_stream )
+	// These statements should only be executed by one thread.
+	if ( tdata->id == 0 )
 	{
-		// For file output, we also include the contents of the global
-		// parameter struct. We do this per operation so that the parameters
-		// are included in each file, whereas we only output it once to
-		// stdout (at the end of libblis_test_read_parameter_file()).
-		libblis_test_output_params_struct( output_stream, params );
+		// Output a heading and the contents of the op struct.
+		libblis_test_fprintf_c( stdout, "--- %s ---\n", op_str );
+		libblis_test_fprintf_c( stdout, "\n" );
+		libblis_test_output_op_struct( stdout, op, op_str );
 
-		libblis_test_fprintf_c( output_stream, "--- %s ---\n", op_str );
-		libblis_test_fprintf_c( output_stream, "\n" );
-		libblis_test_output_op_struct( output_stream, op, op_str );
+		// Also output to a matlab file if requested (and successfully opened).
+		if ( output_stream )
+		{
+			// For file output, we also include the contents of the global
+			// parameter struct. We do this per operation so that the parameters
+			// are included in each file, whereas we only output it once to
+			// stdout (at the end of libblis_test_read_parameter_file()).
+			libblis_test_output_params_struct( output_stream, params );
+
+			libblis_test_fprintf_c( output_stream, "--- %s ---\n", op_str );
+			libblis_test_fprintf_c( output_stream, "\n" );
+			libblis_test_output_op_struct( output_stream, op, op_str );
+		}
 	}
 
 
@@ -1479,13 +1619,17 @@ void libblis_test_op_driver( test_params_t* params,
 			// Build a commented column label string.
 			libblis_test_build_col_labels_string( params, op, label_str );
 
-			// Output the column label string.
-			libblis_test_fprintf( stdout, "%s\n", label_str );
+			// These statements should only be executed by one thread.
+			if ( tdata->id == 0 )
+			{
+				// Output the column label string.
+				libblis_test_fprintf( stdout, "%s\n", label_str );
 
-			// Also output to a matlab file if requested (and successfully
-			// opened).
-			if ( output_stream )
-				libblis_test_fprintf( output_stream, "%s\n", label_str );
+				// Also output to a matlab file if requested (and successfully
+				// opened).
+				if ( output_stream )
+					libblis_test_fprintf( output_stream, "%s\n", label_str );
+			}
 
 			// Start by assuming we will only test native execution.
 			ind_t ind_first = BLIS_NAT;
@@ -1522,6 +1666,17 @@ void libblis_test_op_driver( test_params_t* params,
 					// Loop over the requested problem sizes.
 					for ( p_cur = p_first, pi = 1; p_cur <= p_max; p_cur += p_inc, ++pi )
 					{
+						// Skip this experiment (for this problem size) according to
+						// to the counter, number of threads, and thread id.
+						if ( tdata->xc % tdata->nt != tdata->id )
+						{
+							tdata->xc++;
+							continue;
+						}
+
+						// Call the given experiment function. perf and resid will
+						// contain the resulting performance and residual values,
+						// respectively.
 						f_exp( params,
 						       op,
 						       iface,
@@ -1566,39 +1721,46 @@ void libblis_test_op_driver( test_params_t* params,
 						n_dims_print = libblis_test_get_n_dims_from_string( dims_str );
 
 						// Output the results of the test. Use matlab format if requested.
+						// NOTE: Here we use fprintf() over libblis_test_fprintf() so
+						// that on POSIX systems the output is not intermingled. If we
+						// used libblis_test_fprintf(), we would need to enclose this
+						// conditional with the acquisition of a mutex shared among all
+						// threads to prevent intermingled output.
 						if ( params->output_matlab_format )
 						{
-							libblis_test_fprintf( stdout,
-							                      "%s%s( %3u, 1:%u ) = [%s  %7.2lf  %8.2le ]; %c %s\n",
-							                      funcname_str, blank_str, pi, n_dims_print + 2,
-							                      dims_str, perf, resid,
-							                      OUTPUT_COMMENT_CHAR,
-							                      pass_str );
+							fprintf( stdout,
+							         "%s%s( %3u, 1:%u ) = [%s  %7.2lf  %8.2le ]; %c %s\n",
+							         funcname_str, blank_str, pi, n_dims_print + 2,
+							         dims_str, perf, resid,
+							         OUTPUT_COMMENT_CHAR,
+							         pass_str );
 
-							// Also output to a file if requested (and successfully opened).
+							// Also output to a file if requested (and successfully
+							// opened).
 							if ( output_stream )
-							libblis_test_fprintf( output_stream,
-							                      "%s%s( %3u, 1:%u ) = [%s  %7.2lf  %8.2le ]; %c %s\n",
-							                      funcname_str, blank_str, pi, n_dims_print + 2,
-							                      dims_str, perf, resid,
-							                      OUTPUT_COMMENT_CHAR,
-							                      pass_str );
+							fprintf( output_stream,
+							         "%s%s( %3u, 1:%u ) = [%s  %7.2lf  %8.2le ]; %c %s\n",
+							         funcname_str, blank_str, pi, n_dims_print + 2,
+							         dims_str, perf, resid,
+							         OUTPUT_COMMENT_CHAR,
+							         pass_str );
 						}
 						else
 						{
-							libblis_test_fprintf( stdout,
-							                      "%s%s      %s  %7.2lf   %8.2le   %s\n",
-							                      funcname_str, blank_str,
-							                      dims_str, perf, resid,
-							                      pass_str );
+							fprintf( stdout,
+							         "%s%s      %s  %7.2lf   %8.2le   %s\n",
+							         funcname_str, blank_str,
+							         dims_str, perf, resid,
+							         pass_str );
 
-							// Also output to a file if requested (and successfully opened).
+							// Also output to a file if requested (and successfully
+							// opened).
 							if ( output_stream )
-							libblis_test_fprintf( output_stream,
-							                      "%s%s      %s  %7.2lf   %8.2le   %s\n",
-							                      funcname_str, blank_str,
-							                      dims_str, perf, resid,
-							                      pass_str );
+							fprintf( output_stream,
+							         "%s%s      %s  %7.2lf   %8.2le   %s\n",
+							         funcname_str, blank_str,
+							         dims_str, perf, resid,
+							         pass_str );
 						}
 
 						// If we need to check whether to do something on failure,
@@ -1613,14 +1775,25 @@ void libblis_test_op_driver( test_params_t* params,
 							if ( strstr( pass_str, BLIS_TEST_FAIL_STRING ) == pass_str )
 								libblis_test_abort();
 						}
+
+						// Increment the experiment counter (regardless of whether
+						// the thread executed or skipped the current experiment).
+						tdata->xc += 1;
 					}
 				}
 			}
 	
-			libblis_test_fprintf( stdout, "\n" );
+			// Wait for all other threads so that the output stays organized.
+			pthread_barrier_wait( tdata->barrier );
 
-			if ( output_stream )
-				libblis_test_fprintf( output_stream, "\n" );
+			// These statements should only be executed by one thread.
+			if ( tdata->id == 0 )
+			{
+				libblis_test_fprintf( stdout, "\n" );
+
+				if ( output_stream )
+					libblis_test_fprintf( output_stream, "\n" );
+			}
 		}
 	}
 

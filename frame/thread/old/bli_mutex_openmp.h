@@ -6,6 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,34 +34,41 @@
 
 */
 
-#ifndef BLIS_MUTEX_SINGLE_H
-#define BLIS_MUTEX_SINGLE_H
+#ifndef BLIS_MUTEX_OPENMP_H
+#define BLIS_MUTEX_OPENMP_H
 
-// Define mtx_t for situations when multithreading is disabled.
-#ifndef BLIS_ENABLE_MULTITHREADING
+// Define mutex_t for situations when OpenMP multithreading is enabled.
+#ifdef BLIS_ENABLE_OPENMP
+
+#include <omp.h>
 
 // Define mtx_t.
 
 typedef struct mtx_s
 {
+	omp_lock_t mutex;
 } mtx_t;
 
-// Define macros to operate on pthread-based mtx_t.
+// Define functions to operate on OpenMP-based mtx_t.
 
 static void bli_mutex_init( mtx_t* m )
 {
+	omp_init_lock( &(m->mutex) );
 }
 
 static void bli_mutex_finalize( mtx_t* m )
 {
+	omp_destroy_lock( &(m->mutex) );
 }
 
 static void bli_mutex_lock( mtx_t* m )
 {
+	omp_set_lock( &(m->mutex) );
 }
 
 static void bli_mutex_unlock( mtx_t* m )
 {
+	omp_unset_lock( &(m->mutex) );
 }
 
 #endif

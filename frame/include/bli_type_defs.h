@@ -6,6 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -899,21 +900,18 @@ typedef struct
 } pool_t;
 
 
-// -- Mutex object type --
-
-#include "bli_mutex.h"
-#include "bli_malloc.h"
-
-
 // -- Memory broker object type --
+
+#include <pthread.h>
+#include "bli_malloc.h"
 
 typedef struct membrk_s
 {
-	pool_t    pools[3];
-	mtx_t     mutex;
+	pool_t          pools[3];
+	pthread_mutex_t mutex;
 
-	malloc_ft malloc_fp;
-	free_ft   free_fp;
+	malloc_ft       malloc_fp;
+	free_ft         free_fp;
 } membrk_t;
 
 

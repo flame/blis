@@ -5,6 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
+#  Copyright (C) 2018, Advanced Micro Devices, Inc.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -933,13 +934,8 @@ auto_detect()
 	bli_typed_h_path=${bli_typed_h_filepath%/${bli_typed_h}}
 
 	# Locate other headers needed by bli_type_defs.h.
-	bli_mutex_h="bli_mutex.h"
 	bli_malloc_h="bli_malloc.h"
-
-	bli_mutex_h_filepath=$(find ${dist_path}/frame -name "${bli_mutex_h}")
 	bli_malloc_h_filepath=$(find ${dist_path}/frame -name "${bli_malloc_h}")
-
-	bli_mutex_h_path=${bli_mutex_h_filepath%/${bli_mutex_h}}
 	bli_malloc_h_path=${bli_malloc_h_filepath%/${bli_malloc_h}}
 
 	# Define the executable name.
@@ -961,7 +957,6 @@ auto_detect()
 	      -I${bli_cpuid_h_path} \
 	      -I${bli_arch_h_path} \
 	      -I${bli_typed_h_path} \
-	      -I${bli_mutex_h_path} \
 	      -I${bli_malloc_h_path} \
 	      -std=c99 \
 	      ${cflags} \

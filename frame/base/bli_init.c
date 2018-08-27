@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2017, Advanced Micro Devices, Inc.
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -93,8 +93,6 @@ void bli_finalize_apis( void )
 }
 
 // -----------------------------------------------------------------------------
-
-#include <pthread.h>
 
 // A pthread_once_t variable is a pthread structure used in pthread_once().
 // pthread_once() is guaranteed to execute exactly once among all threads that

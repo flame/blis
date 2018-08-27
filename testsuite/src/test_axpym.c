@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -48,6 +49,7 @@ static thresh_t  thresh[BLIS_NUM_FP_TYPES] = { { 1e-04, 1e-05 },   // warn, pass
 // Local prototypes.
 void libblis_test_axpym_deps
      (
+       thread_data_t* tdata,
        test_params_t* params,
        test_op_t*     op
      );
@@ -87,22 +89,24 @@ void libblis_test_axpym_check
 
 void libblis_test_axpym_deps
      (
+       thread_data_t* tdata,
        test_params_t* params,
        test_op_t*     op
      )
 {
-	libblis_test_randm( params, &(op->ops->randm) );
-	libblis_test_normfm( params, &(op->ops->normfm) );
-	libblis_test_addm( params, &(op->ops->addm) );
-	libblis_test_subm( params, &(op->ops->subm) );
-	libblis_test_copym( params, &(op->ops->copym) );
-	libblis_test_scalm( params, &(op->ops->scalm) );
+	libblis_test_randm( tdata, params, &(op->ops->randm) );
+	libblis_test_normfm( tdata, params, &(op->ops->normfm) );
+	libblis_test_addm( tdata, params, &(op->ops->addm) );
+	libblis_test_subm( tdata, params, &(op->ops->subm) );
+	libblis_test_copym( tdata, params, &(op->ops->copym) );
+	libblis_test_scalm( tdata, params, &(op->ops->scalm) );
 }
 
 
 
 void libblis_test_axpym
      (
+       thread_data_t* tdata,
        test_params_t* params,
        test_op_t*     op
      )
@@ -116,12 +120,13 @@ void libblis_test_axpym
 	     libblis_test_l1m_is_disabled( op ) ) return;
 
 	// Call dependencies first.
-	if ( TRUE ) libblis_test_axpym_deps( params, op );
+	if ( TRUE ) libblis_test_axpym_deps( tdata, params, op );
 
 	// Execute the test driver for each implementation requested.
 	//if ( op->front_seq == ENABLE )
 	{
-		libblis_test_op_driver( params,
+		libblis_test_op_driver( tdata,
+		                        params,
 		                        op,
 		                        BLIS_TEST_SEQ_FRONT_END,
 		                        op_str,

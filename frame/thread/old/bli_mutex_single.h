@@ -6,6 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,41 +34,34 @@
 
 */
 
-#ifndef BLIS_MUTEX_PTHREADS_H
-#define BLIS_MUTEX_PTHREADS_H
+#ifndef BLIS_MUTEX_SINGLE_H
+#define BLIS_MUTEX_SINGLE_H
 
-// Define mutex_t for situations when POSIX multithreading is enabled.
-#ifdef BLIS_ENABLE_PTHREADS
-
-#include <pthread.h>
+// Define mtx_t for situations when multithreading is disabled.
+#ifndef BLIS_ENABLE_MULTITHREADING
 
 // Define mtx_t.
 
 typedef struct mtx_s
 {
-	pthread_mutex_t mutex;
 } mtx_t;
 
 // Define macros to operate on pthread-based mtx_t.
 
 static void bli_mutex_init( mtx_t* m )
 {
-	pthread_mutex_init( &(m->mutex), NULL ); \
 }
 
 static void bli_mutex_finalize( mtx_t* m )
 {
-	pthread_mutex_destroy( &(m->mutex) ); \
 }
 
 static void bli_mutex_lock( mtx_t* m )
 {
-	pthread_mutex_lock( &(m->mutex) ); \
 }
 
 static void bli_mutex_unlock( mtx_t* m )
 {
-	pthread_mutex_unlock( &(m->mutex) ); \
 }
 
 #endif

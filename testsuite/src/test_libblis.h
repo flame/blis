@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -50,6 +51,9 @@
 #ifndef _MSC_VER
 #include <unistd.h>
 #endif
+
+// For pthreads API.
+#include <pthread.h>
 
 //
 // --- Constants and types -----------------------------------------------------
@@ -154,7 +158,6 @@ typedef enum
 
 
 
-
 typedef struct
 {
 	unsigned int  n_repeats;
@@ -172,6 +175,7 @@ typedef struct
 	unsigned int  p_max;
 	unsigned int  p_inc;
 	unsigned int  ind_enable[ BLIS_NUM_IND_METHODS ];
+	unsigned int  n_app_threads;
 	char          reaction_to_failure;
 	unsigned int  output_matlab_format;
 	unsigned int  output_files;
@@ -289,17 +293,33 @@ typedef struct
 } thresh_t;
 
 
+typedef struct thread_data
+{
+	test_params_t*     params;
+	test_ops_t*        ops;
+	unsigned int       nt;
+	unsigned int       id;
+	unsigned int       xc;
+	//pthread_mutex_t*   mutex;
+	pthread_barrier_t* barrier;
+} thread_data_t;
+
+
 //
 // --- Prototypes --------------------------------------------------------------
 //
 
-void libblis_test_utility_ops( test_params_t* params, test_ops_t* ops );
-void libblis_test_level1m_ops( test_params_t* params, test_ops_t* ops );
-void libblis_test_level1v_ops( test_params_t* params, test_ops_t* ops );
-void libblis_test_level1f_ops( test_params_t* params, test_ops_t* ops );
-void libblis_test_level2_ops( test_params_t* params, test_ops_t* ops );
-void libblis_test_level3_ukrs( test_params_t* params, test_ops_t* ops );
-void libblis_test_level3_ops( test_params_t* params, test_ops_t* ops );
+void* libblis_test_thread_entry( void* tdata_void );
+void libblis_test_thread_decorator( test_params_t* params, test_ops_t* ops );
+void libblis_test_all_ops( thread_data_t* tdata, test_params_t* params, test_ops_t* ops );
+
+void libblis_test_utility_ops( thread_data_t* tdata, test_params_t* params, test_ops_t* ops );
+void libblis_test_level1m_ops( thread_data_t* tdata, test_params_t* params, test_ops_t* ops );
+void libblis_test_level1v_ops( thread_data_t* tdata, test_params_t* params, test_ops_t* ops );
+void libblis_test_level1f_ops( thread_data_t* tdata, test_params_t* params, test_ops_t* ops );
+void libblis_test_level2_ops( thread_data_t* tdata, test_params_t* params, test_ops_t* ops );
+void libblis_test_level3_ukrs( thread_data_t* tdata, test_params_t* params, test_ops_t* ops );
+void libblis_test_level3_ops( thread_data_t* tdata, test_params_t* params, test_ops_t* ops );
 
 void libblis_test_read_params_file( char* input_filename, test_params_t* params );
 void libblis_test_read_ops_file( char* input_filename, test_ops_t* ops );
@@ -344,7 +364,8 @@ void carryover( unsigned int* c,
 
 // --- Operation driver ---
 
-void libblis_test_op_driver( test_params_t* params,
+void libblis_test_op_driver( thread_data_t* tdata,
+                             test_params_t* params,
                              test_op_t*     op,
                              iface_t        iface,
                              char*          op_str,
