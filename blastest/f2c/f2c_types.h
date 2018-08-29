@@ -34,7 +34,8 @@ use or performance of this software.
 
 #ifdef HAVE_BLIS_H
   #include <stdint.h>
-  #include "bli_config.h"
+  #define BLIS_VIA_BLASTEST
+  #include "blis.h"
 #endif
 
 #ifdef __cplusplus

@@ -34,7 +34,7 @@ for ARCH in penryn sandybridge haswell skx knl piledriver steamroller excavator 
     else
         $SDE -cpuid_in $DIST_PATH/travis/cpuid/$ARCH.def -- ./test_libblis.x > output.testsuite
     fi
-    $DIST_PATH/build/check-blistest.sh ./output.testsuite
+    $DIST_PATH/testsuite/check-blistest.sh ./output.testsuite
     TMP=`grep "active sub-configuration" output.testsuite`
     CONFIG=${TMP##* }
     if [ "$CONFIG" != "$ARCH" ]; then
