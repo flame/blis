@@ -4,6 +4,7 @@
 
 ## Contents
 
+* [Changes in 0.4.1](ReleaseNotes.md#changes-in-041)
 * [Changes in 0.4.0](ReleaseNotes.md#changes-in-040)
 * [Changes in 0.3.2](ReleaseNotes.md#changes-in-032)
 * [Changes in 0.3.1](ReleaseNotes.md#changes-in-031)
@@ -29,6 +30,39 @@
 * [Changes in 0.0.3](ReleaseNotes.md#changes-in-003)
 * [Changes in 0.0.2](ReleaseNotes.md#changes-in-002)
 * [Changes in 0.0.1](ReleaseNotes.md#changes-in-001)
+
+## Changes in 0.4.1
+August 30, 2018
+
+Improvements present in 0.4.1:
+
+Framework:
+- Improved thread safety by homogenizing all critical sections to unconditionally use pthread mutexes. (AMD)
+- Fixed `bli_finalize()`, which had become uncallable due to sharing `pthread_once_t` objects between the initialization and finalization steps. This manifested as a rather large memory leak (many megabytes) if/when the application manually finalized BLIS in the middle of its execution. (Devangi Parikh, Field Van Zee)
+- Fixed a minor memory leak in the global kernel structure. (Devangi Parikh, Field Van Zee)
+- Replaced extensive use of function "chooser" macros in object API functions with use of a new set of functions using the suffix `_qfp()` ("query function pointer"). These functions can be used to query function pointers for most families of typed functions.
+- Fixed an obscure integer size bug due to improper use of integer literal constants with `va_arg()`. This oddly manifested as LP64 systems using the general stride output case of microkernels even when the output matrix storage matched that of the microkernel output preference. (Devangi Parikh, Field Van Zee)
+
+Kernels:
+- Fixed compilation of `armv7a` kernels. (Mathieu Poumeyrol)
+
+Build system:
+- Generate makefile fragments within the `obj` directory rather than in `config`, `kernels`, `ref_kernels`, and `frame`. This allows a user to perform an out-of-tree build even if the BLIS source distribution is read-only. (Devin Matthews)
+- Allow a dependent sub-project such as example code or the testsuite to compile and link against an installation of BLIS rather than implicitly searching for a local (uninstalled) copy. (Victor Eijkhout, Field Van Zee)
+- Fixed a link error that manifested after building only a shared library (e.g. `--disable-static`) and then trying to build a dependent sub-project such as example code or the testsuite. (Sajid Ali)
+- Changed `test` make target of top-level `Makefile` to behave more like `check` by printing a color-coded characterization of the test results.
+- Fixed the `-p` option to `configure`, which had likely been broken since May 7, 2018. The `--prefix` option was unaffected. (Dave Love)
+- Running `configure` no longer requires a C++ compiler given that a C++ compiler was only ever envisioned for *optional* use in the sandbox. (Devangi Parikh, Field Van Zee)
+
+Testing:
+- Added the ability to "simulate" multiple application-level threads in the testsuite by executing the individual experiments with multiple threads. This should make it easier to test for thread-safety in the future. (AMD)
+- Removed borderline useless wall clock time from test drivers' output.
+
+Documentation:
+- Updated typed and object API documents to include language on `rntm_t` parameters in the expert interfaces.
+- Updates to `README.md`, including language on sandboxes.
+- Added table of make targets to `BuildSystem.md`.
+- Added missing language to `ConfigurationHowTo.md` on updating the architecture string array in `bli_arch.c`. (Devangi Parikh, Field Van Zee)
 
 ## Changes in 0.4.0
 July 27, 2018
