@@ -141,7 +141,7 @@ LIBBLIS_LINK   := $(LIB_PATH)/$(LIBBLIS_L)
 # Override the location of the check-blastest.sh script.
 #BLASTEST_CHECK := ./check-blastest.sh
 
-
+TESTSUITE_WRAPPER       ?=
 
 #
 # --- Targets/rules ------------------------------------------------------------
@@ -213,10 +213,10 @@ run: $(DRIVER_BINS_R)
 define make-run-blat1-rule
 run-$(1): $(1).x
 ifeq ($(ENABLE_VERBOSE),yes)
-	./$(1).x > out.$(1)
+	$(TESTSUITE_WRAPPER) ./$(1).x > out.$(1)
 else
 	@echo "Running $(1).x > 'out.$(1)'"
-	@./$(1).x > out.$(1)
+	@$(TESTSUITE_WRAPPER) ./$(1).x > out.$(1)
 endif
 endef
 
@@ -227,10 +227,10 @@ $(foreach name, $(DRIVER1_BASES), $(eval $(call make-run-blat1-rule,$(name))))
 define make-run-blat23-rule
 run-$(1): $(1).x
 ifeq ($(ENABLE_VERBOSE),yes)
-	./$(1).x < $(INPUT_DIR)/$(1).in
+	$(TESTSUITE_WRAPPER) ./$(1).x < $(INPUT_DIR)/$(1).in
 else
 	@echo "Running $(1).x < '$(INPUT_DIR)/$(1).in' (output to 'out.$(1)')"
-	@./$(1).x < $(INPUT_DIR)/$(1).in
+	@$(TESTSUITE_WRAPPER) ./$(1).x < $(INPUT_DIR)/$(1).in
 endif
 endef
 
