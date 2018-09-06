@@ -14,7 +14,7 @@ build_script:
 - set AR=llvm-ar
 - set AS=llvm-as
 - set LIBPTHREAD=-lpthreads
-- bash -lc "source activate && cd /c/projects/blis && ./configure --disable-shared --enable-cblas --enable-threading=pthreads --enable-arg-max-hack --prefix=/c/blis x86_64"
+- bash -lc "source activate && cd /c/projects/blis && ./configure --enable-shared --disable-static --enable-cblas --enable-threading=pthreads --enable-arg-max-hack --prefix=/c/blis x86_64"
 - bash -lc "source activate && cd /c/projects/blis && make AR=llvm-ar CPICFLAGS= LIBM= LIBPTHREAD=-lpthreads -j4"
 - bash -lc "source activate && cd /c/projects/blis && make install"
 - ps: Compress-Archive -Path C:\blis -DestinationPath C:\blis.zip
