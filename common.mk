@@ -468,7 +468,13 @@ SOFLAGS    := -dynamiclib
 SOFLAGS    += -Wl,-install_name,$(LIBBLIS_SO).$(SO_MAJOR)
 else
 SOFLAGS    := -shared
-ifneq ($(findstring MSYS,$(VARIABLE)),MSYS)
+ifeq ($(findstring MSYS,$(VARIABLE)),MSYS)
+#ifeq ($(CC_VENDOR),clang)
+#SOFLAGS    += windows/build/libblis-symbols.def
+#else
+SOFLAGS    += windows/build/libblis-symbols.def
+#endif
+else
 SOFLAGS    += -Wl,-soname,$(LIBBLIS_SO).$(SO_MAJOR)
 endif
 endif
