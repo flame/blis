@@ -54,6 +54,9 @@
 
 // For pthreads API.
 #include <pthread.h>
+#ifdef __APPLE__
+#include "pthread_barrier.h"
+#endif
 
 //
 // --- Constants and types -----------------------------------------------------
