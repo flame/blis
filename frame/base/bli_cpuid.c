@@ -444,6 +444,21 @@ bool_t bli_cpuid_is_cortexa57
 	return TRUE;
 }
 
+bool_t bli_cpuid_is_cortexa53
+     (
+       uint32_t family,
+       uint32_t model,
+       uint32_t features
+     )
+{
+	// Check for expected CPU features.
+	const uint32_t expected = FEATURE_NEON;
+
+	if ( !bli_cpuid_has_features( features, expected ) ) return FALSE;
+
+	return TRUE;
+}
+
 bool_t bli_cpuid_is_cortexa15
      (
        uint32_t family,

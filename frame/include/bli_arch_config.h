@@ -83,6 +83,9 @@ CNTX_INIT_PROTS( bulldozer )
 #ifdef BLIS_CONFIG_CORTEXA57
 CNTX_INIT_PROTS( cortexa57 )
 #endif
+#ifdef BLIS_CONFIG_CORTEXA53
+CNTX_INIT_PROTS( cortexa53 )
+#endif
 #ifdef BLIS_CONFIG_CORTEXA15
 CNTX_INIT_PROTS( cortexa15 )
 #endif
@@ -164,6 +167,9 @@ CNTX_INIT_PROTS( generic )
 
 #ifdef BLIS_FAMILY_CORTEXA57
 #include "bli_family_cortexa57.h"
+#endif
+#ifdef BLIS_FAMILY_CORTEXA53
+#include "bli_family_cortexa53.h"
 #endif
 #ifdef BLIS_FAMILY_CORTEXA15
 #include "bli_family_cortexa15.h"

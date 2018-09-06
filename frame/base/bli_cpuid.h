@@ -68,6 +68,7 @@ bool_t   bli_cpuid_is_bulldozer( uint32_t family, uint32_t model, uint32_t featu
 
 // ARM
 bool_t   bli_cpuid_is_cortexa57( uint32_t model, uint32_t part, uint32_t features );
+bool_t   bli_cpuid_is_cortexa53( uint32_t model, uint32_t part, uint32_t features );
 bool_t   bli_cpuid_is_cortexa15( uint32_t model, uint32_t part, uint32_t features );
 bool_t   bli_cpuid_is_cortexa9( uint32_t model, uint32_t part, uint32_t features );
 
