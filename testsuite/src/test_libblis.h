@@ -54,7 +54,7 @@
 
 // For pthreads API.
 #include <pthread.h>
-#ifdef __APPLE__
+#if !defined(_POSIX_BARRIERS) || (_POSIX_BARRIERS < 0)
 #include "pthread_barrier.h"
 #endif
 
