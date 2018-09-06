@@ -615,20 +615,20 @@ $(LIBBLIS_SO_PATH): $(MK_BLIS_OBJS)
 ifeq ($(ENABLE_VERBOSE),yes)
 ifeq ($(ARG_MAX_HACK),yes)
 	$(file > $@.in,$^)
-	$(LINKER) $(SOFLAGS) $(LDFLAGS) -o $@ @$@.in
+	$(LINKER) $(SOFLAGS) $(LDFLAGS) -o $(LIBBLIS_SO_OUTPUT_NAME) @$@.in
 	$(RM_F) $@.in
 else
-	$(LINKER) $(SOFLAGS) $(LDFLAGS) -o $@ $?
+	$(LINKER) $(SOFLAGS) $(LDFLAGS) -o $(LIBBLIS_SO_OUTPUT_NAME) $?
 endif
 else # ifeq ($(ENABLE_VERBOSE),no)
 ifeq ($(ARG_MAX_HACK),yes)
-	@echo "Dynamically linking $@"
+	@echo "Dynamically linking $(LIBBLIS_SO_OUTPUT_NAME)"
 	@$(file > $@.in,$^)
-	@$(LINKER) $(SOFLAGS) $(LDFLAGS) -o $@ @$@.in
+	@$(LINKER) $(SOFLAGS) $(LDFLAGS) -o $(LIBBLIS_SO_OUTPUT_NAME) @$@.in
 	@$(RM_F) $@.in
 else
-	@echo "Dynamically linking $@"
-	@$(LINKER) $(SOFLAGS) $(LDFLAGS) -o $@ $?
+	@echo "Dynamically linking $(LIBBLIS_SO_OUTPUT_NAME)"
+	@$(LINKER) $(SOFLAGS) $(LDFLAGS) -o $(LIBBLIS_SO_OUTPUT_NAME) $?
 endif
 endif
 
@@ -637,6 +637,7 @@ endif
 # rule is executed concurrently with the install-lib-symlinks rule, which
 # also creates symlinks in the current directory (before installing them).
 $(LIBBLIS_SO_MAJ_PATH): $(LIBBLIS_SO_PATH)
+ifneq ($(findstring MSYS,$(OS_NAME)),MSYS)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(SYMLINK) $(<F) $(@F).loc
 	$(MV) $(@F).loc $(BASE_LIB_PATH)/$(@F)
@@ -644,6 +645,7 @@ else # ifeq ($(ENABLE_VERBOSE),no)
 	@echo "Creating symlink $@"
 	@$(SYMLINK) $(<F) $(@F).loc
 	@$(MV) $(@F).loc $(BASE_LIB_PATH)/$(@F)
+endif
 endif
 
 

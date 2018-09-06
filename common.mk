@@ -374,7 +374,7 @@ LIBBLIS            := libblis
 # The shared (dynamic) library file suffix is different for Linux and OS X.
 ifeq ($(OS_NAME),Darwin)
 SHLIB_EXT          := dylib
-else ifeq ($(findstring MSYS,$(VARIABLE)),MSYS)
+else ifeq ($(findstring MSYS,$(OS_NAME)),MSYS)
 SHLIB_EXT          := dll
 else
 SHLIB_EXT          := so
@@ -394,8 +394,20 @@ LIBBLIS_SO_PATH    := $(BASE_LIB_PATH)/$(LIBBLIS_SO)
 # library lists its soname as 'libblis.so.n', where n is the .so major version
 # number, a symlink in BASE_LIB_PATH is needed so that ld can find the local
 # shared library when the testsuite is run via 'make test' or 'make check'.
-LIBBLIS_SO_MAJ_PATH := $(BASE_LIB_PATH)/$(LIBBLIS_SO).$(SO_MAJOR)
 
+ifeq ($(OS_NAME),Darwin)
+LIBBLIS_SO_MAJ_PATH := $(BASE_LIB_PATH)/$(LIBBLIS).$(SO_MAJOR).$(SHLIB_EXT)
+else ifeq ($(findstring MSYS,$(OS_NAME)),MSYS)
+LIBBLIS_SO_MAJ_PATH := $(BASE_LIB_PATH)/$(LIBBLIS)-$(SO_MAJOR).$(SHLIB_EXT)
+else
+LIBBLIS_SO_MAJ_PATH := $(BASE_LIB_PATH)/$(LIBBLIS_SO).$(SO_MAJOR)
+endif
+
+ifeq ($(findstring MSYS,$(OS_NAME)),MSYS)
+LIBBLIS_SO_OUTPUT_NAME := $(LIBBLIS_SO_MAJ_PATH)
+else
+LIBBLIS_SO_OUTPUT_NAME := $(LIBBLIS_SO_PATH)
+endif
 
 #
 # --- Utility program definitions ----------------------------------------------
@@ -468,12 +480,12 @@ SOFLAGS    := -dynamiclib
 SOFLAGS    += -Wl,-install_name,$(LIBBLIS_SO).$(SO_MAJOR)
 else
 SOFLAGS    := -shared
-ifeq ($(findstring MSYS,$(VARIABLE)),MSYS)
-#ifeq ($(CC_VENDOR),clang)
-#SOFLAGS    += windows/build/libblis-symbols.def
-#else
-SOFLAGS    += windows/build/libblis-symbols.def
-#endif
+ifeq ($(findstring MSYS,$(OS_NAME)),MSYS)
+ifeq ($(CC_VENDOR),clang)
+SOFLAGS    += -Wl,-def:windows/build/libblis-symbols.def -Wl,-implib:$(BASE_LIB_PATH)/$(LIBBLIS).lib
+else
+SOFLAGS    += windows/build/libblis-symbols.def -Wl,--out-implib,$(LIBBLIS).dll.a
+endif
 else
 SOFLAGS    += -Wl,-soname,$(LIBBLIS_SO).$(SO_MAJOR)
 endif
@@ -488,7 +500,7 @@ ifeq ($(MK_ENABLE_SHARED),yes)
 ifeq ($(MK_ENABLE_STATIC),no)
 LIBBLIS_L      := $(LIBBLIS_SO)
 LIBBLIS_LINK   := $(LIBBLIS_SO_PATH)
-ifneq ($(findstring MSYS,$(VARIABLE)),MSYS)
+ifneq ($(findstring MSYS,$(OS_NAME)),MSYS)
 LDFLAGS        += -Wl,-rpath,$(BASE_LIB_PATH)
 endif
 endif
@@ -912,4 +924,5 @@ BUILD_FLAGS    := -DBLIS_IS_BUILDING_LIBRARY
 
 # end of ifndef COMMON_MK_INCLUDED conditional block
 endif
+
 
