@@ -396,12 +396,13 @@ LIBBLIS_SO_PATH    := $(BASE_LIB_PATH)/$(LIBBLIS_SO)
 # shared library when the testsuite is run via 'make test' or 'make check'.
 
 ifeq ($(OS_NAME),Darwin)
-LIBBLIS_SO_MAJ_PATH := $(BASE_LIB_PATH)/$(LIBBLIS).$(SO_MAJOR).$(SHLIB_EXT)
+LIBBLIS_SONAME := $(LIBBLIS).$(SO_MAJOR).$(SHLIB_EXT)
 else ifeq ($(findstring MSYS,$(OS_NAME)),MSYS)
-LIBBLIS_SO_MAJ_PATH := $(BASE_LIB_PATH)/$(LIBBLIS)-$(SO_MAJOR).$(SHLIB_EXT)
+LIBBLIS_SONAME := $(LIBBLIS)-$(SO_MAJOR).$(SHLIB_EXT)
 else
-LIBBLIS_SO_MAJ_PATH := $(BASE_LIB_PATH)/$(LIBBLIS_SO).$(SO_MAJOR)
+LIBBLIS_SONAME := $(LIBBLIS_SO).$(SO_MAJOR)
 endif
+LIBBLIS_SO_MAJ_PATH := $(BASE_LIB_PATH)/$(LIBBLIS_SONAME)
 
 ifeq ($(findstring MSYS,$(OS_NAME)),MSYS)
 LIBBLIS_SO_OUTPUT_NAME := $(LIBBLIS_SO_MAJ_PATH)
@@ -487,7 +488,7 @@ else
 SOFLAGS    += windows/build/libblis-symbols.def -Wl,--out-implib,$(LIBBLIS).dll.a
 endif
 else
-SOFLAGS    += -Wl,-soname,$(LIBBLIS_SO).$(SO_MAJOR)
+SOFLAGS    += -Wl,-soname,$(LIBBLIS_SONAME)
 endif
 endif
 
