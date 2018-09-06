@@ -33,7 +33,7 @@ matrix:
   # macOS with system compiler (clang)
   - os: osx
     compiler: clang
-    env: OOT=0 TEST=0 SDE=0 THR="none" CONF="auto"
+    env: OOT=0 TEST=1 SDE=0 THR="none" CONF="auto"
 install:
 - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo rm -f /usr/bin/as; fi
 - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo ln -s /usr/lib/binutils-2.26/bin/as /usr/bin/as; fi
