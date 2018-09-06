@@ -857,6 +857,7 @@ typedef enum
 
 	// ARM
 	BLIS_ARCH_CORTEXA57,
+	BLIS_ARCH_CORTEXA53,
 	BLIS_ARCH_CORTEXA15,
 	BLIS_ARCH_CORTEXA9,
 
@@ -869,7 +870,7 @@ typedef enum
 
 } arch_t;
 
-#define BLIS_NUM_ARCHS 17
+#define BLIS_NUM_ARCHS 18
 
 
 //
