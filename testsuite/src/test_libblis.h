@@ -54,6 +54,9 @@
 
 // For pthreads API.
 #include <pthread.h>
+#if !defined(_POSIX_BARRIERS) || (_POSIX_BARRIERS < 0)
+#include "pthread_barrier.h"
+#endif
 
 //
 // --- Constants and types -----------------------------------------------------
