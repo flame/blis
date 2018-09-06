@@ -375,7 +375,7 @@ LIBBLIS            := libblis
 ifeq ($(OS_NAME),Darwin)
 SHLIB_EXT          := dylib
 else ifeq ($(findstring MSYS,$(OS_NAME)),MSYS)
-SHLIB_EXT          := dll
+SHLIB_EXT          := lib
 else
 SHLIB_EXT          := so
 endif
@@ -398,7 +398,7 @@ LIBBLIS_SO_PATH    := $(BASE_LIB_PATH)/$(LIBBLIS_SO)
 ifeq ($(OS_NAME),Darwin)
 LIBBLIS_SONAME := $(LIBBLIS).$(SO_MAJOR).$(SHLIB_EXT)
 else ifeq ($(findstring MSYS,$(OS_NAME)),MSYS)
-LIBBLIS_SONAME := $(LIBBLIS)-$(SO_MAJOR).$(SHLIB_EXT)
+LIBBLIS_SONAME := $(LIBBLIS)-$(SO_MAJOR).dll
 else
 LIBBLIS_SONAME := $(LIBBLIS_SO).$(SO_MAJOR)
 endif
