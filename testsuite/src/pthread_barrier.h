@@ -1,4 +1,4 @@
-#ifdef __APPLE__
+#if !defined(_POSIX_BARRIERS) || (_POSIX_BARRIERS < 0)
 
 #ifndef PTHREAD_BARRIER_H_
 #define PTHREAD_BARRIER_H_
@@ -65,4 +65,4 @@ inline int pthread_barrier_wait(pthread_barrier_t *barrier)
 }
 
 #endif // PTHREAD_BARRIER_H_
-#endif // __APPLE__
+#endif // _POSIX_BARRIERS
