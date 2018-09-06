@@ -337,6 +337,7 @@ MK_TESTSUITE_OBJS       := $(sort \
 
 # The test suite binary executable filename.
 TESTSUITE_BIN           := test_$(LIBBLIS).x
+TESTSUITE_WRAPPER       ?=
 
 # The location of the script that checks the BLIS testsuite output.
 TESTSUITE_CHECK_PATH    := $(DIST_PATH)/$(TESTSUITE_DIR)/$(TESTSUITE_CHECK)
@@ -703,10 +704,10 @@ $(foreach name, $(BLASTEST_DRV_BASES), $(eval $(call make-blat-rule,$(name))))
 define make-run-blat1-rule
 run-$(1): $(BASE_OBJ_BLASTEST_PATH)/$(1).x
 ifeq ($(ENABLE_VERBOSE),yes)
-	$(BASE_OBJ_BLASTEST_PATH)/$(1).x > out.$(1)
+	$(TESTSUITE_WRAPPER) $(BASE_OBJ_BLASTEST_PATH)/$(1).x > out.$(1)
 else
 	@echo "Running $(1).x > 'out.$(1)'"
-	@$(BASE_OBJ_BLASTEST_PATH)/$(1).x > out.$(1)
+	@$(TESTSUITE_WRAPPER) $(BASE_OBJ_BLASTEST_PATH)/$(1).x > out.$(1)
 endif
 endef
 
@@ -717,10 +718,10 @@ $(foreach name, $(BLASTEST_DRV1_BASES), $(eval $(call make-run-blat1-rule,$(name
 define make-run-blat23-rule
 run-$(1): $(BASE_OBJ_BLASTEST_PATH)/$(1).x
 ifeq ($(ENABLE_VERBOSE),yes)
-	$(BASE_OBJ_BLASTEST_PATH)/$(1).x < $(BLASTEST_INPUT_PATH)/$(1).in
+	$(TESTSUITE_WRAPPER) $(BASE_OBJ_BLASTEST_PATH)/$(1).x < $(BLASTEST_INPUT_PATH)/$(1).in
 else
 	@echo "Running $(1).x < '$(BLASTEST_INPUT_PATH)/$(1).in' (output to 'out.$(1)')"
-	@$(BASE_OBJ_BLASTEST_PATH)/$(1).x < $(BLASTEST_INPUT_PATH)/$(1).in
+	@$(TESTSUITE_WRAPPER) $(BASE_OBJ_BLASTEST_PATH)/$(1).x < $(BLASTEST_INPUT_PATH)/$(1).in
 endif
 endef
 
@@ -769,13 +770,13 @@ endif
 # A rule to run the testsuite using the normal input.* files.
 testsuite-run: testsuite-bin
 ifeq ($(ENABLE_VERBOSE),yes)
-	./$(TESTSUITE_BIN) -g $(TESTSUITE_CONF_GEN_PATH) \
+	$(TESTSUITE_WRAPPER) ./$(TESTSUITE_BIN) -g $(TESTSUITE_CONF_GEN_PATH) \
 	                   -o $(TESTSUITE_CONF_OPS_PATH) \
 	                    > $(TESTSUITE_OUT_FILE)
 
 else
 	@echo "Running $(TESTSUITE_BIN) with output redirected to '$(TESTSUITE_OUT_FILE)'"
-	@./$(TESTSUITE_BIN) -g $(TESTSUITE_CONF_GEN_PATH) \
+	@$(TESTSUITE_WRAPPER) ./$(TESTSUITE_BIN) -g $(TESTSUITE_CONF_GEN_PATH) \
 	                    -o $(TESTSUITE_CONF_OPS_PATH) \
 	                     > $(TESTSUITE_OUT_FILE)
 endif
@@ -784,13 +785,13 @@ endif
 # run a set of tests designed to finish much more quickly.
 testsuite-run-fast: testsuite-bin
 ifeq ($(ENABLE_VERBOSE),yes)
-	./$(TESTSUITE_BIN) -g $(TESTSUITE_FAST_GEN_PATH) \
+	$(TESTSUITE_WRAPPER) ./$(TESTSUITE_BIN) -g $(TESTSUITE_FAST_GEN_PATH) \
 	                   -o $(TESTSUITE_FAST_OPS_PATH) \
 	                    > $(TESTSUITE_OUT_FILE)
 
 else
 	@echo "Running $(TESTSUITE_BIN) (fast) with output redirected to '$(TESTSUITE_OUT_FILE)'"
-	@./$(TESTSUITE_BIN) -g $(TESTSUITE_FAST_GEN_PATH) \
+	@$(TESTSUITE_WRAPPER) ./$(TESTSUITE_BIN) -g $(TESTSUITE_FAST_GEN_PATH) \
 	                    -o $(TESTSUITE_FAST_OPS_PATH) \
 	                     > $(TESTSUITE_OUT_FILE)
 endif

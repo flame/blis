@@ -34,12 +34,25 @@ matrix:
   - os: osx
     compiler: clang
     env: OOT=0 TEST=1 SDE=0 THR="none" CONF="auto"
+  # cortexa15 build and test (qemu)
+  - os: linux
+    compiler: arm-linux-gnueabihf-gcc
+    env: OOT=0 TEST=FAST SDE=0 THR="none" CONF="cortexa15" \
+      PACKAGES="gcc-arm-linux-gnueabihf qemu-system-arm qemu-user" \
+      TESTSUITE_WRAPPER="qemu-arm -cpu cortex-a15 -L /usr/arm-linux-gnueabihf/"
+  # cortexa57 build and test (qemu)
+  - os: linux
+    compiler: aarch64-linux-gnu-gcc
+    env: OOT=0 TEST=FAST SDE=0 THR="none" CONF="cortexa57" \
+      PACKAGES="gcc-aarch64-linux-gnu qemu-system-arm qemu-user" \
+      TESTSUITE_WRAPPER="qemu-aarch64 -L /usr/aarch64-linux-gnu/"
 install:
 - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo rm -f /usr/bin/as; fi
 - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo ln -s /usr/lib/binutils-2.26/bin/as /usr/bin/as; fi
 - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo rm -f /usr/bin/ld; fi
 - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo ln -s /usr/lib/binutils-2.26/bin/ld /usr/bin/ld; fi
 - if [ "$CC" = "gcc" ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then export CC="gcc-6"; fi
+- if [ -n "$PACKAGES" ]; then sudo apt-get install -y $PACKAGES; fi
 addons:
   apt:
     sources:
@@ -58,5 +71,5 @@ script:
 - ls -l
 - $CC --version
 - make -j 2
-- if [ $TEST -eq 1 ]; then travis_wait 30 $DIST_PATH/travis/do_testsuite.sh; fi
+- if [ "$TEST" != "0" ]; then travis_wait 30 $DIST_PATH/travis/do_testsuite.sh; fi
 - if [ $SDE -eq 1 ] && [ "$TRAVIS_PULL_REQUEST" = "false" ] ; then travis_wait 30 $DIST_PATH/travis/do_sde.sh; fi
