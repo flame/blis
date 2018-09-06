@@ -374,6 +374,8 @@ LIBBLIS            := libblis
 # The shared (dynamic) library file suffix is different for Linux and OS X.
 ifeq ($(OS_NAME),Darwin)
 SHLIB_EXT          := dylib
+else ifeq ($(findstring MSYS,$(VARIABLE)),MSYS)
+SHLIB_EXT          := dll
 else
 SHLIB_EXT          := so
 endif
@@ -466,7 +468,9 @@ SOFLAGS    := -dynamiclib
 SOFLAGS    += -Wl,-install_name,$(LIBBLIS_SO).$(SO_MAJOR)
 else
 SOFLAGS    := -shared
+ifneq ($(findstring MSYS,$(VARIABLE)),MSYS)
 SOFLAGS    += -Wl,-soname,$(LIBBLIS_SO).$(SO_MAJOR)
+endif
 endif
 
 # Decide which library to link to for things like the testsuite and BLIS test
@@ -478,7 +482,9 @@ ifeq ($(MK_ENABLE_SHARED),yes)
 ifeq ($(MK_ENABLE_STATIC),no)
 LIBBLIS_L      := $(LIBBLIS_SO)
 LIBBLIS_LINK   := $(LIBBLIS_SO_PATH)
+ifneq ($(findstring MSYS,$(VARIABLE)),MSYS)
 LDFLAGS        += -Wl,-rpath,$(BASE_LIB_PATH)
+endif
 endif
 endif
 
