@@ -35,6 +35,8 @@
 
 #ifdef _MSC_VER
 #include <windows.h>
-int setenv(const char *name, const char *value, int overwrite);
-void sleep(int x);
+int blis_setenv(const char *name, const char *value, int overwrite);
+void blis_sleep(int x);
+#define setenv blis_setenv
+#define sleep blis_sleep
 #endif

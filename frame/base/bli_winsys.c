@@ -33,11 +33,11 @@
 */
 
 #ifdef _MSC_VER
-int setenv(const char *name, const char *value, int overwrite) {
+int blis_setenv(const char *name, const char *value, int overwrite) {
     _putenv_s(name, value);
 }
 
-void sleep(int x) {
+void blis_sleep(int x) {
     Sleep(x*1000);
 }
 #endif
