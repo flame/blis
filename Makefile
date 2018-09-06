@@ -123,7 +123,7 @@ LIBBLIS_A_INST            := $(INSTALL_LIBDIR)/$(LIBBLIS_A)
 
 LIBBLIS_SO_VERS_CONF_INST := $(INSTALL_LIBDIR)/$(LIBBLIS)-$(VERS_CONF).$(SHLIB_EXT)
 LIBBLIS_SO_INST           := $(INSTALL_LIBDIR)/$(LIBBLIS_SO)
-LIBBLIS_SO_MAJ_INST       := $(INSTALL_LIBDIR)/$(LIBBLIS_SO).$(SO_MAJOR)
+LIBBLIS_SO_MAJ_INST       := $(INSTALL_LIBDIR)/$(LIBBLIS_SONAME)
 LIBBLIS_SO_MMB_INST       := $(INSTALL_LIBDIR)/$(LIBBLIS_SO).$(SO_MAJOR).$(SO_MINORB)
 
 # --- Determine which libraries to build ---
@@ -889,19 +889,30 @@ ifeq ($(ENABLE_VERBOSE),yes)
 	$(MV) $(@F) $(INSTALL_LIBDIR)/
 else
 	@echo "Installing symlink $(@F) into $(INSTALL_LIBDIR)/"
-	@$(SYMLINK) $(<F) $(@F)
+	@$(SYMLINK) $(INSTALL_LIBDIR)/$(<F) $(@F)
 	@$(MV) $(@F) $(INSTALL_LIBDIR)/
 endif
 
 # Install shared library symlink containing only .so major version.
-$(INSTALL_LIBDIR)/%.$(SHLIB_EXT).$(SO_MAJOR): $(INSTALL_LIBDIR)/%.$(SHLIB_EXT).$(SO_MMB)
+$(INSTALL_LIBDIR)/$(LIBBLIS_SONAME): $(INSTALL_LIBDIR)/$(LIBBLIS}.$(SHLIB_EXT).$(SO_MMB)
+ifneq ($(findstring MSYS,$(OS_NAME)),MSYS)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(SYMLINK) $(<F) $(@F)
 	$(MV) $(@F) $(INSTALL_LIBDIR)/
 else
 	@echo "Installing symlink $(@F) into $(INSTALL_LIBDIR)/"
-	@$(SYMLINK) $(<F) $(@F)
+	@$(SYMLINK) $(INSTALL_LIBDIR)/$(LIBBLIS}.$(SHLIB_EXT).$(SO_MMB) $(@F)
 	@$(MV) $(@F) $(INSTALL_LIBDIR)/
+endif
+else
+ifeq ($(ENABLE_VERBOSE),yes)
+	@$(MKDIR) $(@D)
+	@$(INSTALL) -m 0644 $(LIBBLIS_SO_MAJ_PATH) $(INSTALL_LIBDIR)/
+else
+	@echo "Installing dll $(@F) into $(INSTALL_LIBDIR)"
+	@$(MKDIR) $(@D)
+	@$(INSTALL) -m 0644 $(LIBBLIS_SO_MAJ_PATH) $(INSTALL_LIBDIR)/
+endif
 endif
 
 # Install static library symlink containing version and config family.
