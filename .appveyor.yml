@@ -25,6 +25,7 @@ build_script:
 
 test_script:
 - bash -lc "source activate && cd /c/projects/blis && make AR=llvm-ar CPICFLAGS= LIBM= LIBPTHREAD=-lpthreads CFLAGS_PRESET=-Wno-macro-redefined check"
+- cat out.cblat3
 
 # Enable this to be able to login to the build worker. You can use the
 # `remmina` program in Ubuntu, use the login information that the line below
