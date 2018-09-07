@@ -9,14 +9,15 @@ install:
 - set "CPATH=%CONDA_INSTALL_LOCN%\Library\include;%CPATH%"
 
 build_script:
+- set CONFIG=auto
 - set CC=clang
 - set RANLIB=echo
 - set AR=llvm-ar
 - set AS=llvm-as
 - set LIBPTHREAD=-lpthreads
-- set "PATH=%PATH%;C:\projects\blis\lib\x86_64"
+- set "PATH=%PATH%;C:\projects\blis\lib\%CONFIG%"
 - set CFLAGS="-DBLIS_BUILD_DLL"
-- bash -lc "source activate && cd /c/projects/blis && ./configure --enable-shared --disable-static --enable-cblas --enable-threading=pthreads --enable-arg-max-hack --prefix=/c/blis x86_64"
+- bash -lc "source activate && cd /c/projects/blis && ./configure --enable-shared --disable-static --enable-cblas --enable-threading=pthreads --enable-arg-max-hack --prefix=/c/blis %CONFIG%"
 - bash -lc "source activate && cd /c/projects/blis && make AR=llvm-ar CPICFLAGS= LIBM= LIBPTHREAD=-lpthreads -j4"
 - bash -lc "source activate && cd /c/projects/blis && make install"
 - ps: Compress-Archive -Path C:\blis -DestinationPath C:\blis.zip
