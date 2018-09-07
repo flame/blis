@@ -95,6 +95,9 @@ CXX               := @CXX@
 # Static library indexer.
 RANLIB            := @RANLIB@
 
+# Archiver
+AR                := @AR@
+
 # Preset (required) CFLAGS and LDFLAGS. These variables capture the value
 # of the CFLAGS and LDFLAGS environment variables at configure-time (and/or
 # the value of CFLAGS/LDFLAGS if either was specified on the command line).

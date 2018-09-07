@@ -232,6 +232,7 @@ print_usage()
 	echo " "
 	echo "   CC            Specifies the C compiler to use."
 	echo "   RANLIB        Specifies the ranlib executable to use."
+	echo "   AR            Specifies the archiver to use."
 	echo "   CFLAGS        Specifies additional compiler flags to use (prepended)."
 	echo "   LDFLAGS       Specifies additional linker flags to use (prepended)."
 	echo " "
@@ -1784,6 +1785,10 @@ main()
 				RANLIB=${1#*=}
 				shift
 				;;
+			AR=*)
+				AR=${1#*=}
+				shift
+				;;
 			*=*)
 				print_usage
 				;;
@@ -2440,6 +2445,9 @@ main()
 	# For RANLIB, if the variable is not set, we use a default value of
 	# 'ranlib'.
 	ranlib_esc=$(echo "${RANLIB:-ranlib}" | sed 's/\//\\\//g')
+	# For AR, if the variable is not set, we use a default value of
+	# 'ar'.
+	ar_esc=$(echo "${AR:-ar}" | sed 's/\//\\\//g')
 	cflags_preset_esc=$(echo "${cflags_preset}" | sed 's/\//\\\//g')
 	ldflags_preset_esc=$(echo "${ldflags_preset}" | sed 's/\//\\\//g')
 
@@ -2520,6 +2528,7 @@ main()
 		| sed -e "s/@CC@/${cc_esc}/g" \
 		| sed -e "s/@CXX@/${cxx_esc}/g" \
 		| sed -e "s/@RANLIB@/${ranlib_esc}/g" \
+		| sed -e "s/@AR@/${ar_esc}/g" \
 		| sed -e "s/@cflags_preset@/${cflags_preset_esc}/g" \
 		| sed -e "s/@ldflags_preset@/${ldflags_preset_esc}/g" \
 		| sed -e "s/@debug_type@/${debug_type}/g" \

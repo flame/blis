@@ -431,7 +431,6 @@ INSTALL    := install -c
 FLATTEN_H  := $(DIST_PATH)/build/flatten-headers.py
 
 # Default archiver flags.
-AR         := ar
 ARFLAGS    := cr
 
 # Used to refresh CHANGELOG.
