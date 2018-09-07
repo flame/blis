@@ -70,6 +70,9 @@ KCONFIG_MAP       := @kconfig_map@
 # The operating system name, which should be either 'Linux' or 'Darwin'.
 OS_NAME           := @os_name@
 
+# Check for whether the operating system is windows
+IS_WIN            := @is_win@
+
 # The directory path to the top level of the source distribution. When
 # building in-tree, this path is ".". When building out-of-tree, this path
 # is path used to identify the location of configure. We also allow the

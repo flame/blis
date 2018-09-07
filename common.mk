@@ -586,7 +586,11 @@ $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CWARNFLAGS,$(c))))
 # --- Shared library (position-independent code) flags ---
 
 # Emit position-independent code for dynamic linking.
+ifeq ($(IS_WIN),1)
+CPICFLAGS :=
+else
 CPICFLAGS := -fPIC
+endif
 $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CPICFLAGS,$(c))))
 
 # --- Language flags ---

@@ -1799,6 +1799,11 @@ main()
 	os_vers=$(uname -r)
 	echo "${script_name}: detected ${os_name} kernel version ${os_vers}."
 
+    is_win=0
+    if  [[ $os_name == MSYS* ]] || [[ $os_name == MINGW* ]]  || [[ $os_name == CYGWIN* ]] ;
+    then
+        is_win=1
+    fi
 
 	# -- Find a C compiler -----------------------------------------------------
 
@@ -2507,6 +2512,7 @@ main()
 		| sed -e "s/@kernel_list@/${kernel_list}/g" \
 		| sed -e "s/@kconfig_map@/${kconfig_map}/g" \
 		| sed -e "s/@os_name@/${os_name}/g" \
+		| sed -e "s/@is_win@/${is_win}/g" \
 		| sed -e "s/@dist_path@/${dist_path_esc}/g" \
 		| sed -e "s/@CC_VENDOR@/${cc_vendor}/g" \
 		| sed -e "s/@CC@/${cc_esc}/g" \
