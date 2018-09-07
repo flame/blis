@@ -2289,11 +2289,13 @@ main()
 		echo "${script_name}: disabling ARG_MAX hack."
 	fi
 
+	enable_shared_01=1
 	# Check if the static lib flag was specified.
 	if   [ "x${enable_static}" = "xyes" -a "x${enable_shared}" = "xyes" ]; then
 		echo "${script_name}: building BLIS as both static and shared libraries."
 	elif [ "x${enable_static}" = "xyes" -a "x${enable_shared}" = "xno"  ]; then
 		echo "${script_name}: building BLIS as a static library (shared library disabled)."
+		enable_shared_01=0
 	elif [ "x${enable_static}" = "xno"  -a "x${enable_shared}" = "xyes" ]; then
 		echo "${script_name}: building BLIS as a shared library (static library disabled)."
 	else
@@ -2548,7 +2550,7 @@ main()
 		| sed   -e "s/@enable_cblas@/${enable_cblas_01}/g" \
 		| sed   -e "s/@enable_memkind@/${enable_memkind_01}/g" \
 		| sed   -e "s/@enable_sandbox@/${enable_sandbox_01}/g" \
-		| sed   -e "s/@enable_shared@/${enable_shared}/g" \
+		| sed   -e "s/@enable_shared@/${enable_shared_01}/g" \
 		> "${bli_config_h_out_path}"
 
 
