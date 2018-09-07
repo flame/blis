@@ -38,7 +38,7 @@
 #if !defined(BLIS_ENABLE_SHARED) || !defined(_MSC_VER)
 #define BLIS_EXPORT
 #else
-#ifdef BLIS_BUILD_DLL
+#ifdef BLIS_IS_BUILDING_LIBRARY
 #define BLIS_EXPORT __declspec(dllexport)
 #else
 #define BLIS_EXPORT __declspec(dllimport)

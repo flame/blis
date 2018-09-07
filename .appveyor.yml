@@ -16,7 +16,7 @@ build_script:
 - set AS=llvm-as
 - set LIBPTHREAD=-lpthreads
 - set "PATH=%PATH%;C:\projects\blis\lib\%CONFIG%"
-- set "CFLAGS=-DBLIS_BUILD_DLL -Wno-macro-redefined"
+- set "CFLAGS=-Wno-macro-redefined"
 - bash -lc "source activate && cd /c/projects/blis && ./configure --enable-shared --disable-static --enable-cblas --enable-threading=pthreads --enable-arg-max-hack --prefix=/c/blis %CONFIG%"
 - bash -lc "source activate && cd /c/projects/blis && make AR=llvm-ar CPICFLAGS= LIBM= LIBPTHREAD=-lpthreads -j4"
 - bash -lc "source activate && cd /c/projects/blis && make install"
@@ -24,7 +24,7 @@ build_script:
 - ps: Push-AppveyorArtifact C:\blis.zip
 
 test_script:
-- bash -lc "source activate && cd /c/projects/blis && make AR=llvm-ar CPICFLAGS= LIBM= LIBPTHREAD=-lpthreads CFLAGS_PRESET=-Wno-macro-redefined check"
+- bash -lc "source activate && cd /c/projects/blis && make AR=llvm-ar CPICFLAGS= LIBM= LIBPTHREAD=-lpthreads check"
 - cat out.cblat3
 
 # Enable this to be able to login to the build worker. You can use the
