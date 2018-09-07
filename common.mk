@@ -478,7 +478,7 @@ endif
 # NOTE: The flag for creating shared objects is different for Linux and OS X.
 ifeq ($(OS_NAME),Darwin)
 SOFLAGS    := -dynamiclib
-SOFLAGS    += -Wl,-install_name,$(LIBBLIS_SO).$(SO_MAJOR)
+SOFLAGS    += -Wl,-install_name,$(LIBBLIS_SONAME)
 else
 SOFLAGS    := -shared
 ifeq ($(findstring MSYS,$(OS_NAME)),MSYS)
