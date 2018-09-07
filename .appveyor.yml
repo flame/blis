@@ -9,7 +9,7 @@ install:
 - set "CPATH=%CONDA_INSTALL_LOCN%\Library\include;%CPATH%"
 
 build_script:
-- set CONFIG=auto
+- set CONFIG=haswell
 - set CC=clang
 - set RANLIB=echo
 - set AR=llvm-ar
