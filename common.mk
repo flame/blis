@@ -93,64 +93,84 @@ endef
 # included, which results in those values having been stored to
 # configuration-qualified variables.
 
-get-noopt-cflags-for   = $(strip $(CFLAGS_PRESET) \
-                                 $(call load-var-for,CDBGFLAGS,$(1)) \
-                                 $(call load-var-for,CWARNFLAGS,$(1)) \
-                                 $(call load-var-for,CPICFLAGS,$(1)) \
-                                 $(call load-var-for,CMISCFLAGS,$(1)) \
-                                 $(call load-var-for,CLANGFLAGS,$(1)) \
-                                 $(call load-var-for,CPPROCFLAGS,$(1)) \
-                                 $(CTHREADFLAGS) \
-                                 $(CINCFLAGS) $(VERS_DEF) \
-                          )
+get-noopt-cflags-for     = $(strip $(CFLAGS_PRESET) \
+                                   $(call load-var-for,CDBGFLAGS,$(1)) \
+                                   $(call load-var-for,CWARNFLAGS,$(1)) \
+                                   $(call load-var-for,CPICFLAGS,$(1)) \
+                                   $(call load-var-for,CMISCFLAGS,$(1)) \
+                                   $(call load-var-for,CLANGFLAGS,$(1)) \
+                                   $(call load-var-for,CPPROCFLAGS,$(1)) \
+                                   $(CTHREADFLAGS) \
+                                   $(CINCFLAGS) $(VERS_DEF) \
+                            )
 
-get-noopt-cxxflags-for = $(strip $(CFLAGS_PRESET) \
-                                 $(call load-var-for,CDBGFLAGS,$(1)) \
-                                 $(call load-var-for,CWARNFLAGS,$(1)) \
-                                 $(call load-var-for,CPICFLAGS,$(1)) \
-                                 $(call load-var-for,CMISCFLAGS,$(1)) \
-                                 $(call load-var-for,CXXLANGFLAGS,$(1)) \
-                                 $(call load-var-for,CPPROCFLAGS,$(1)) \
-                                 $(CTHREADFLAGS) \
-                                 $(CINCFLAGS) $(VERS_DEF) \
-                          )
+get-noopt-cxxflags-for   = $(strip $(CFLAGS_PRESET) \
+                                   $(call load-var-for,CDBGFLAGS,$(1)) \
+                                   $(call load-var-for,CWARNFLAGS,$(1)) \
+                                   $(call load-var-for,CPICFLAGS,$(1)) \
+                                   $(call load-var-for,CMISCFLAGS,$(1)) \
+                                   $(call load-var-for,CXXLANGFLAGS,$(1)) \
+                                   $(call load-var-for,CPPROCFLAGS,$(1)) \
+                                   $(CTHREADFLAGS) \
+                                   $(CINCFLAGS) $(VERS_DEF) \
+                            )
 
-get-refinit-cflags-for = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
-                                 $(call get-noopt-cflags-for,$(1)) \
-                                 -DBLIS_CNAME=$(1) \
-                          )
+get-refinit-cflags-for   = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
+                                   $(call get-noopt-cflags-for,$(1)) \
+                                   -DBLIS_CNAME=$(1) \
+                                   $(BUILD_FLAGS) \
+                            )
 
-get-refkern-cflags-for = $(strip $(call load-var-for,CROPTFLAGS,$(1)) \
-                                 $(call load-var-for,CRVECFLAGS,$(1)) \
-                                 $(call get-noopt-cflags-for,$(1)) \
-                                 -DBLIS_CNAME=$(1) \
-                          )
+get-refkern-cflags-for   = $(strip $(call load-var-for,CROPTFLAGS,$(1)) \
+                                   $(call load-var-for,CRVECFLAGS,$(1)) \
+                                   $(call get-noopt-cflags-for,$(1)) \
+                                   -DBLIS_CNAME=$(1) \
+                                   $(BUILD_FLAGS) \
+                            )
 
-get-config-cflags-for  = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
-                                 $(call get-noopt-cflags-for,$(1)) \
-                          )
+get-config-cflags-for    = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
+                                   $(call get-noopt-cflags-for,$(1)) \
+                                   $(BUILD_FLAGS) \
+                            )
 
-get-frame-cflags-for   = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
-                                 $(call get-noopt-cflags-for,$(1)) \
-                          )
+get-frame-cflags-for     = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
+                                   $(call get-noopt-cflags-for,$(1)) \
+                                   $(BUILD_FLAGS) \
+                            )
 
-get-kernel-cflags-for  = $(strip $(call load-var-for,CKOPTFLAGS,$(1)) \
-                                 $(call load-var-for,CKVECFLAGS,$(1)) \
-                                 $(call get-noopt-cflags-for,$(1)) \
-                          )
+get-kernel-cflags-for    = $(strip $(call load-var-for,CKOPTFLAGS,$(1)) \
+                                   $(call load-var-for,CKVECFLAGS,$(1)) \
+                                   $(call get-noopt-cflags-for,$(1)) \
+                                   $(BUILD_FLAGS) \
+                            )
 
 # When compiling sandboxes, we use flags similar to those of general framework
 # source. This ensures that the same code can be linked and run across various
 # sub-configurations. (If we switch to using refkern/kernel flags, we should
 # prevent enabling sandboxes for umbrella families by verifying that
 # config_list == config_name if --enable-sandbox is given.)
-get-sandbox-c99flags-for = $(call load-var-for,COPTFLAGS,$(1)) \
-                           $(call get-noopt-cflags-for,$(1)) \
-                           $(CSBOXINCFLAGS)
-get-sandbox-cxxflags-for = $(call load-var-for,COPTFLAGS,$(1)) \
-                           $(call get-noopt-cxxflags-for,$(1)) \
-                           $(CSBOXINCFLAGS)
+get-sandbox-c99flags-for = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
+                                   $(call get-noopt-cflags-for,$(1)) \
+                                   $(CSBOXINCFLAGS) \
+                                   $(BUILD_FLAGS) \
+                            )
+get-sandbox-cxxflags-for = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
+                                   $(call get-noopt-cxxflags-for,$(1)) \
+                                   $(CSBOXINCFLAGS) \
+                                   $(BUILD_FLAGS) \
+                            )
 
+# Define a separate function that will return appropriate flags for use by
+# applications that want to use the same basic flags as those used when BLIS
+# was compiled. (This is the same as get-frame-cflags-for(), except that it
+# omits the BUILD_FLAGS, which are exclusively for use when BLIS is being
+# compiled.)
+get-user-cflags-for      = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
+                                   $(call get-noopt-cflags-for,$(1)) \
+                            )
+
+# Define functions that return messages appropriate for each non-verbose line
+# of compilation output.
 get-noopt-text          = "(CFLAGS for no optimization)"
 get-refinit-text-for    = "('$(1)' CFLAGS for ref. kernel init)"
 get-refkern-text-for    = "('$(1)' CFLAGS for ref. kernels)"
@@ -871,6 +891,10 @@ BLIS_CONFIG_H   := ./bli_config.h
 # Define a C preprocessor macro to communicate the current version so that it
 # can be embedded into the library and queried later.
 VERS_DEF       := -DBLIS_VERSION_STRING=\"$(VERSION)\"
+
+# Define a C preprocessor flag that is *only* defined when BLIS is being
+# compiled.
+BUILD_FLAGS    := -DBLIS_IS_BUILDING_LIBRARY
 
 
 

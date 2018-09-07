@@ -93,12 +93,12 @@ TEST_OBJS      := $(sort $(patsubst $(TEST_SRC_PATH)/%.c, \
                                     $(wildcard $(TEST_SRC_PATH)/*.c)))
 
 # Override the value of CINCFLAGS so that the value of CFLAGS returned by
-# get-frame-cflags-for() is not cluttered up with include paths needed only
+# get-user-cflags-for() is not cluttered up with include paths needed only
 # while building BLIS.
 CINCFLAGS      := -I$(INC_PATH)
 
 # Use the CFLAGS for the configuration family.
-CFLAGS         := $(call get-frame-cflags-for,$(CONFIG_NAME))
+CFLAGS         := $(call get-user-cflags-for,$(CONFIG_NAME))
 
 # Add installed and local header paths to CFLAGS
 CFLAGS         += -I$(TEST_SRC_PATH)

@@ -122,12 +122,12 @@ DRIVER3_BASES  := $(filter %3,$(DRIVER_BASES))
 #BLASTEST_CHECK := $(DIST_PATH)/$(BUILD_DIR)/check-blastest.sh
 
 # Override the value of CINCFLAGS so that the value of CFLAGS returned by
-# get-frame-cflags-for() is not cluttered up with include paths needed only
+# get-user-cflags-for() is not cluttered up with include paths needed only
 # while building BLIS.
 CINCFLAGS      := -I$(INC_PATH)
 
 # Use the CFLAGS for the configuration family.
-CFLAGS         := $(call get-frame-cflags-for,$(CONFIG_NAME))
+CFLAGS         := $(call get-user-cflags-for,$(CONFIG_NAME))
 
 # Suppress warnings about uninitialized functions, add local header
 # paths and the path to blis.h to CFLAGS.

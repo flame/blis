@@ -132,12 +132,12 @@ TEST_OBJ_PATH  := .
 TEST_SIZES_SRC := test_size.c
 
 # Override the value of CINCFLAGS so that the value of CFLAGS returned by
-# get-frame-cflags-for() is not cluttered up with include paths needed only
+# get-user-cflags-for() is not cluttered up with include paths needed only
 # while building BLIS.
 CINCFLAGS      := -I$(INC_PATH)
 
 # Use the CFLAGS for the configuration family.
-CFLAGS         := $(call get-frame-cflags-for,$(CONFIG_NAME))
+CFLAGS         := $(call get-user-cflags-for,$(CONFIG_NAME))
 
 # Add local header paths to CFLAGS
 CFLAGS         += -I$(TEST_SRC_PATH)
