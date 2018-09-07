@@ -2471,6 +2471,8 @@ main()
 		kernel_list_defines="${kernel_list_defines}#define ${kernel_define}\n"
 	done
 
+    libpthread="${LIBPTHREAD:--lpthread}"
+
 
 	# -- Determine whether we are performing an out-of-tree build --------------
 

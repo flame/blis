@@ -146,5 +146,8 @@ MK_ENABLE_MEMKIND := @enable_memkind@
 # enabled.
 SANDBOX           := @sandbox@
 
+# The name of the pthreads library
+LIBPTHREAD        := @libpthread@
+
 # end of ifndef CONFIG_MK_INCLUDED conditional block
 endif

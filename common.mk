@@ -452,7 +452,6 @@ GIT_LOG    := $(GIT) log --decorate
 # Define the external libraries we may potentially need at link-time.
 LIBM       := -lm
 LIBMEMKIND := -lmemkind
-LIBPTHREAD := -lpthread
 
 # Default linker flags.
 # NOTE: -lpthread is needed unconditionally because BLIS uses pthread_once()
