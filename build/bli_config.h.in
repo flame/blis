@@ -104,4 +104,10 @@
 #define BLIS_DISABLE_SANDBOX
 #endif
 
+#if @enable_shared@
+#define BLIS_ENABLE_SHARED
+#else
+#define BLIS_DISABLE_SHARED
+#endif
+
 #endif
