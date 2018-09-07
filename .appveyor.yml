@@ -15,6 +15,7 @@ build_script:
 - set AS=llvm-as
 - set LIBPTHREAD=-lpthreads
 - set "PATH=%PATH%;C:\projects\blis\lib\x86_64"
+- set CFLAGS="-DBLIS_BUILD_DLL"
 - bash -lc "source activate && cd /c/projects/blis && ./configure --enable-shared --disable-static --enable-cblas --enable-threading=pthreads --enable-arg-max-hack --prefix=/c/blis x86_64"
 - bash -lc "source activate && cd /c/projects/blis && make AR=llvm-ar CPICFLAGS= LIBM= LIBPTHREAD=-lpthreads -j4"
 - bash -lc "source activate && cd /c/projects/blis && make install"
