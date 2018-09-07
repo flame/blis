@@ -450,7 +450,11 @@ GIT_LOG    := $(GIT) log --decorate
 # manually override whatever they need.
 
 # Define the external libraries we may potentially need at link-time.
+ifeq ($(IS_WIN),1)
+LIBM       :=
+else
 LIBM       := -lm
+endif
 LIBMEMKIND := -lmemkind
 
 # Default linker flags.
