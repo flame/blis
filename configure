@@ -2548,6 +2548,7 @@ main()
 		| sed   -e "s/@enable_cblas@/${enable_cblas_01}/g" \
 		| sed   -e "s/@enable_memkind@/${enable_memkind_01}/g" \
 		| sed   -e "s/@enable_sandbox@/${enable_sandbox_01}/g" \
+		| sed   -e "s/@enable_shared@/${enable_shared}/g" \
 		> "${bli_config_h_out_path}"
 
 
