@@ -124,7 +124,12 @@ LIBBLIS_A_INST            := $(INSTALL_LIBDIR)/$(LIBBLIS_A)
 LIBBLIS_SO_VERS_CONF_INST := $(INSTALL_LIBDIR)/$(LIBBLIS)-$(VERS_CONF).$(SHLIB_EXT)
 LIBBLIS_SO_INST           := $(INSTALL_LIBDIR)/$(LIBBLIS_SO)
 LIBBLIS_SO_MAJ_INST       := $(INSTALL_LIBDIR)/$(LIBBLIS_SONAME)
-LIBBLIS_SO_MMB_INST       := $(INSTALL_LIBDIR)/$(LIBBLIS_SO).$(SO_MAJOR).$(SO_MINORB)
+
+ifeq ($(IS_WIN),1)
+LIBBLIS_SO_MMB_INST       :=
+else
+LIBBLIS_SO_MMB_INST       := $(INSTALL_LIBDIR)/$(LIBBLIS)$(LIBBLIS_SO_MMB_EXT)
+endif
 
 # --- Determine which libraries to build ---
 
@@ -361,7 +366,7 @@ ifeq ($(IS_CONFIGURED),yes)
 # named with three .so version numbers.
 UNINSTALL_OLD_LIBS    :=
 
-UNINSTALL_OLD_LIBS    += $(shell $(FIND) $(INSTALL_LIBDIR)/ -name "$(LIBBLIS_SO).?.?.?" 2> /dev/null | $(GREP) -v "$(LIBBLIS_SO).$(SO_MMB)")
+UNINSTALL_OLD_LIBS    += $(shell $(FIND) $(INSTALL_LIBDIR)/ -name "$(LIBBLIS_SO).?.?.?" 2> /dev/null | $(GREP) -v "$(LIBBLIS)$(LIBBLIS_SO_MMB_EXT)")
 
 # These shell commands gather the filepaths to any library symlink in the
 # current LIBDIR that might be left over from an old installation. We start
@@ -626,12 +631,12 @@ else
 endif
 else # ifeq ($(ENABLE_VERBOSE),no)
 ifeq ($(ARG_MAX_HACK),yes)
-	@echo "Dynamically linking $(LIBBLIS_SO_OUTPUT_NAME)"
+	@echo "Dynamically linking $@"
 	@$(file > $@.in,$^)
 	@$(LINKER) $(SOFLAGS) $(LDFLAGS) -o $(LIBBLIS_SO_OUTPUT_NAME) @$@.in
 	@$(RM_F) $@.in
 else
-	@echo "Dynamically linking $(LIBBLIS_SO_OUTPUT_NAME)"
+	@echo "Dynamically linking $@"
 	@$(LINKER) $(SOFLAGS) $(LDFLAGS) -o $(LIBBLIS_SO_OUTPUT_NAME) $?
 endif
 endif
@@ -641,7 +646,7 @@ endif
 # rule is executed concurrently with the install-lib-symlinks rule, which
 # also creates symlinks in the current directory (before installing them).
 $(LIBBLIS_SO_MAJ_PATH): $(LIBBLIS_SO_PATH)
-ifneq ($(findstring MSYS,$(OS_NAME)),MSYS)
+ifeq ($(IS_WIN),0)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(SYMLINK) $(<F) $(@F).loc
 	$(MV) $(@F).loc $(BASE_LIB_PATH)/$(@F)
@@ -871,7 +876,8 @@ else
 endif
 
 # Install shared library containing .so major, minor, and build versions.
-$(INSTALL_LIBDIR)/%.$(SHLIB_EXT).$(SO_MMB): $(BASE_LIB_PATH)/%.$(SHLIB_EXT) $(CONFIG_MK_FILE)
+ifeq ($(IS_WIN),0)
+$(INSTALL_LIBDIR)/%$(LIBBLIS_SO_MMB_EXT): $(BASE_LIB_PATH)/%.$(SHLIB_EXT) $(CONFIG_MK_FILE)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(MKDIR) $(@D)
 	$(INSTALL) -m 0644 $< $@
@@ -880,14 +886,36 @@ else
 	@$(MKDIR) $(@D)
 	@$(INSTALL) -m 0644 $< $@
 endif
-
+endif
 
 # --- Install-symlinks rules ---
 
 install-lib-symlinks: check-env $(MK_LIBS_SYML)
 
+ifeq ($(IS_WIN),1)
+$(INSTALL_LIBDIR)/%.$(SHLIB_EXT):
+ifeq ($(ENABLE_VERBOSE),yes)
+	@$(MKDIR) $(@D)
+	@$(INSTALL) -m 0644 $(BASE_LIB_PATH)/$(@F) $@
+else
+	@echo "Installing $(@F) into $(INSTALL_LIBDIR)/"
+	@$(MKDIR) $(@D)
+	@$(INSTALL) -m 0644 $(BASE_LIB_PATH)/$(@F) $@
+endif
+
+$(INSTALL_LIBDIR)/%$(LIBBLIS_SO_MAJ_EXT):
+ifeq ($(ENABLE_VERBOSE),yes)
+	@$(MKDIR) $(@D)
+	@$(INSTALL) -m 0644 $(BASE_LIB_PATH)/$(@F) $@
+else
+	@echo "Installing $(@F) into $(INSTALL_LIBDIR)/"
+	@$(MKDIR) $(@D)
+	@$(INSTALL) -m 0644 $(BASE_LIB_PATH)/$(@F) $@
+endif
+
+else
 # Install generic shared library symlink.
-$(INSTALL_LIBDIR)/%.$(SHLIB_EXT): $(INSTALL_LIBDIR)/%.$(SHLIB_EXT).$(SO_MMB)
+$(INSTALL_LIBDIR)/%.$(SHLIB_EXT): $(INSTALL_LIBDIR)/%$(LIBBLIS_SO_MMB_EXT)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(SYMLINK) $(<F) $(@F)
 	$(MV) $(@F) $(INSTALL_LIBDIR)/
@@ -898,24 +926,14 @@ else
 endif
 
 # Install shared library symlink containing only .so major version.
-$(INSTALL_LIBDIR)/$(LIBBLIS_SONAME): $(INSTALL_LIBDIR)/$(LIBBLIS}.$(SHLIB_EXT).$(SO_MMB)
-ifneq ($(findstring MSYS,$(OS_NAME)),MSYS)
+$(INSTALL_LIBDIR)/%$(LIBBLIS_SO_MAJ_EXT): $(INSTALL_LIBDIR)/%$(LIBBLIS_SO_MMB_EXT)
 ifeq ($(ENABLE_VERBOSE),yes)
-	$(SYMLINK) $(LIBBLIS).$(SHLIB_EXT).$(SO_MMB) $(@F)
+	$(SYMLINK) $(<F) $(@F)
 	$(MV) $(@F) $(INSTALL_LIBDIR)/
 else
 	@echo "Installing symlink $(@F) into $(INSTALL_LIBDIR)/"
-	@$(SYMLINK) $(LIBBLIS).$(SHLIB_EXT).$(SO_MMB) $(@F)
+	@$(SYMLINK) $(<F) $(@F)
 	@$(MV) $(@F) $(INSTALL_LIBDIR)/
-endif
-else
-ifeq ($(ENABLE_VERBOSE),yes)
-	@$(MKDIR) $(@D)
-	@$(INSTALL) -m 0644 $(LIBBLIS_SO_MAJ_PATH) $(INSTALL_LIBDIR)/
-else
-	@echo "Installing dll $(@F) into $(INSTALL_LIBDIR)"
-	@$(MKDIR) $(@D)
-	@$(INSTALL) -m 0644 $(LIBBLIS_SO_MAJ_PATH) $(INSTALL_LIBDIR)/
 endif
 endif
 
