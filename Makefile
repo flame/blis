@@ -893,7 +893,7 @@ ifeq ($(ENABLE_VERBOSE),yes)
 	$(MV) $(@F) $(INSTALL_LIBDIR)/
 else
 	@echo "Installing symlink $(@F) into $(INSTALL_LIBDIR)/"
-	@$(SYMLINK) $(INSTALL_LIBDIR)/$(<F) $(@F)
+	@$(SYMLINK) $(<F) $(@F)
 	@$(MV) $(@F) $(INSTALL_LIBDIR)/
 endif
 
@@ -901,11 +901,11 @@ endif
 $(INSTALL_LIBDIR)/$(LIBBLIS_SONAME): $(INSTALL_LIBDIR)/$(LIBBLIS}.$(SHLIB_EXT).$(SO_MMB)
 ifneq ($(findstring MSYS,$(OS_NAME)),MSYS)
 ifeq ($(ENABLE_VERBOSE),yes)
-	$(SYMLINK) $(<F) $(@F)
+	$(SYMLINK) $(LIBBLIS).$(SHLIB_EXT).$(SO_MMB) $(@F)
 	$(MV) $(@F) $(INSTALL_LIBDIR)/
 else
 	@echo "Installing symlink $(@F) into $(INSTALL_LIBDIR)/"
-	@$(SYMLINK) $(INSTALL_LIBDIR)/$(LIBBLIS}.$(SHLIB_EXT).$(SO_MMB) $(@F)
+	@$(SYMLINK) $(LIBBLIS).$(SHLIB_EXT).$(SO_MMB) $(@F)
 	@$(MV) $(@F) $(INSTALL_LIBDIR)/
 endif
 else
