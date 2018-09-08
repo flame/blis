@@ -302,9 +302,13 @@ BLASTEST_DRV3_BASES    := $(filter %3,$(BLASTEST_DRV_BASES))
 
 # Define some CFLAGS that we'll only use when compiling BLAS test suite
 # files.
-BLAT_CFLAGS            := -Wno-maybe-uninitialized -Wno-parentheses \
+BLAT_CFLAGS            := -Wno-parentheses \
                           -I$(BLASTEST_F2C_SRC_PATH) \
                           -I. -DHAVE_BLIS_H
+
+ifeq ($(CC_VENDOR),gcc)
+BLAT_CFLAGS            += -Wno-maybe-uninitialized
+endif
 
 # The location of the script that checks the BLAS test output.
 BLASTEST_CHECK_PATH    := $(DIST_PATH)/$(BLASTEST_DIR)/$(BLASTEST_CHECK)
