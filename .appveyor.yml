@@ -1,7 +1,9 @@
 environment:
   matrix:
     - LIB_TYPE: shared
+      CONFIG: x86_64
     - LIB_TYPE: static
+      CONFIG: auto
 
 install:
 - set "CONDA_INSTALL_LOCN=C:\\Miniconda36-x64"
@@ -16,7 +18,6 @@ install:
 build_script:
 - if [%LIB_TYPE%]==[shared] set "CONFIGURE_OPTS=%CONFIGURE_OPTS% --enable-shared --disable-static"
 - if [%LIB_TYPE%]==[static] set "CONFIGURE_OPTS=%CONFIGURE_OPTS% --disable-shared --enable-static"
-- set CONFIG=haswell
 - set CC=clang
 - set RANLIB=echo
 - set AR=llvm-ar
