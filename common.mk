@@ -374,7 +374,7 @@ LIBBLIS            := libblis
 # The shared (dynamic) library file suffix is different for Linux and OS X.
 ifeq ($(OS_NAME),Darwin)
 SHLIB_EXT          := dylib
-else ifeq ($(IS_WIN),1)
+else ifeq ($(IS_WIN),yes)
 SHLIB_EXT          := lib
 else
 SHLIB_EXT          := so
@@ -398,7 +398,7 @@ LIBBLIS_SO_PATH    := $(BASE_LIB_PATH)/$(LIBBLIS_SO)
 ifeq ($(OS_NAME),Darwin)
 LIBBLIS_SO_MAJ_EXT := $(SO_MAJOR).$(SHLIB_EXT)
 LIBBLIS_SO_MMB_EXT := $(SO_MMB).$(SHLIB_EXT)
-else ifeq ($(IS_WIN),1)
+else ifeq ($(IS_WIN),yes)
 LIBBLIS_SO_MAJ_EXT := $(SO_MAJOR).dll
 LIBBLIS_SO_MMB_EXT :=
 else
@@ -408,7 +408,7 @@ endif
 LIBBLIS_SONAME := $(LIBBLIS).$(LIBBLIS_SO_MAJ_EXT)
 LIBBLIS_SO_MAJ_PATH := $(BASE_LIB_PATH)/$(LIBBLIS_SONAME)
 
-ifeq ($(IS_WIN),1)
+ifeq ($(IS_WIN),yes)
 LIBBLIS_SO_OUTPUT_NAME := $(LIBBLIS_SO_MAJ_PATH)
 else
 LIBBLIS_SO_OUTPUT_NAME := $(LIBBLIS_SO_PATH)
@@ -453,7 +453,7 @@ GIT_LOG    := $(GIT) log --decorate
 # manually override whatever they need.
 
 # Define the external libraries we may potentially need at link-time.
-ifeq ($(IS_WIN),1)
+ifeq ($(IS_WIN),yes)
 LIBM       :=
 else
 LIBM       := -lm
@@ -487,7 +487,7 @@ SOFLAGS    := -dynamiclib
 SOFLAGS    += -Wl,-install_name,$(LIBBLIS_SONAME)
 else
 SOFLAGS    := -shared
-ifeq ($(IS_WIN),1)
+ifeq ($(IS_WIN),yes)
 ifeq ($(CC_VENDOR),clang)
 SOFLAGS    += -Wl,-def:windows/build/libblis-symbols.def -Wl,-implib:$(BASE_LIB_PATH)/$(LIBBLIS).lib
 else
@@ -507,7 +507,7 @@ ifeq ($(MK_ENABLE_SHARED),yes)
 ifeq ($(MK_ENABLE_STATIC),no)
 LIBBLIS_L      := $(LIBBLIS_SO)
 LIBBLIS_LINK   := $(LIBBLIS_SO_PATH)
-ifeq ($(IS_WIN),0)
+ifeq ($(IS_WIN),no)
 LDFLAGS        += -Wl,-rpath,$(BASE_LIB_PATH)
 endif
 endif
@@ -592,7 +592,7 @@ $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CWARNFLAGS,$(c))))
 # --- Shared library (position-independent code) flags ---
 
 # Emit position-independent code for dynamic linking.
-ifeq ($(IS_WIN),1)
+ifeq ($(IS_WIN),yes)
 CPICFLAGS :=
 else
 CPICFLAGS := -fPIC

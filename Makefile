@@ -125,7 +125,7 @@ LIBBLIS_SO_VERS_CONF_INST := $(INSTALL_LIBDIR)/$(LIBBLIS)-$(VERS_CONF).$(SHLIB_E
 LIBBLIS_SO_INST           := $(INSTALL_LIBDIR)/$(LIBBLIS_SO)
 LIBBLIS_SO_MAJ_INST       := $(INSTALL_LIBDIR)/$(LIBBLIS_SONAME)
 
-ifeq ($(IS_WIN),1)
+ifeq ($(IS_WIN),yes)
 LIBBLIS_SO_MMB_INST       :=
 else
 LIBBLIS_SO_MMB_INST       := $(INSTALL_LIBDIR)/$(LIBBLIS).$(LIBBLIS_SO_MMB_EXT)
@@ -646,7 +646,7 @@ endif
 # rule is executed concurrently with the install-lib-symlinks rule, which
 # also creates symlinks in the current directory (before installing them).
 $(LIBBLIS_SO_MAJ_PATH): $(LIBBLIS_SO_PATH)
-ifeq ($(IS_WIN),0)
+ifeq ($(IS_WIN),no)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(SYMLINK) $(<F) $(@F).loc
 	$(MV) $(@F).loc $(BASE_LIB_PATH)/$(@F)
@@ -876,7 +876,7 @@ else
 endif
 
 # Install shared library containing .so major, minor, and build versions.
-ifeq ($(IS_WIN),0)
+ifeq ($(IS_WIN),no)
 $(INSTALL_LIBDIR)/%.$(LIBBLIS_SO_MMB_EXT): $(BASE_LIB_PATH)/%.$(SHLIB_EXT) $(CONFIG_MK_FILE)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(MKDIR) $(@D)
@@ -892,7 +892,7 @@ endif
 
 install-lib-symlinks: check-env $(MK_LIBS_SYML)
 
-ifeq ($(IS_WIN),1)
+ifeq ($(IS_WIN),yes)
 $(INSTALL_LIBDIR)/%.$(SHLIB_EXT): $(BASE_LIB_PATH)/%.$(SHLIB_EXT)
 ifeq ($(ENABLE_VERBOSE),yes)
 	@$(MKDIR) $(@D)
