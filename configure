@@ -2448,6 +2448,7 @@ main()
 	# For AR, if the variable is not set, we use a default value of
 	# 'ar'.
 	ar_esc=$(echo "${AR:-ar}" | sed 's/\//\\\//g')
+	libpthread_esc=$(echo "${LIBPTHREAD:--lpthread}" | sed 's/\//\\\//g')
 	cflags_preset_esc=$(echo "${cflags_preset}" | sed 's/\//\\\//g')
 	ldflags_preset_esc=$(echo "${ldflags_preset}" | sed 's/\//\\\//g')
 
@@ -2478,9 +2479,6 @@ main()
 		kernel_define="BLIS_KERNELS_${uconf}"
 		kernel_list_defines="${kernel_list_defines}#define ${kernel_define}\n"
 	done
-
-    libpthread="${LIBPTHREAD:--lpthread}"
-
 
 	# -- Determine whether we are performing an out-of-tree build --------------
 
@@ -2529,6 +2527,7 @@ main()
 		| sed -e "s/@CXX@/${cxx_esc}/g" \
 		| sed -e "s/@RANLIB@/${ranlib_esc}/g" \
 		| sed -e "s/@AR@/${ar_esc}/g" \
+		| sed -e "s/@libpthread@/${libpthread_esc}/g" \
 		| sed -e "s/@cflags_preset@/${cflags_preset_esc}/g" \
 		| sed -e "s/@ldflags_preset@/${ldflags_preset_esc}/g" \
 		| sed -e "s/@debug_type@/${debug_type}/g" \
