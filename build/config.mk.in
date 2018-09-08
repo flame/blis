@@ -70,7 +70,7 @@ KCONFIG_MAP       := @kconfig_map@
 # The operating system name, which should be either 'Linux' or 'Darwin'.
 OS_NAME           := @os_name@
 
-# Check for whether the operating system is windows
+# Check for whether the operating system is windows.
 IS_WIN            := @is_win@
 
 # The directory path to the top level of the source distribution. When
@@ -95,7 +95,7 @@ CXX               := @CXX@
 # Static library indexer.
 RANLIB            := @RANLIB@
 
-# Archiver
+# Archiver.
 AR                := @AR@
 
 # Preset (required) CFLAGS and LDFLAGS. These variables capture the value
@@ -149,7 +149,7 @@ MK_ENABLE_MEMKIND := @enable_memkind@
 # enabled.
 SANDBOX           := @sandbox@
 
-# The name of the pthreads library
+# The name of the pthreads library.
 LIBPTHREAD        := @libpthread@
 
 # end of ifndef CONFIG_MK_INCLUDED conditional block

@@ -128,7 +128,7 @@ LIBBLIS_SO_MAJ_INST       := $(INSTALL_LIBDIR)/$(LIBBLIS_SONAME)
 ifeq ($(IS_WIN),1)
 LIBBLIS_SO_MMB_INST       :=
 else
-LIBBLIS_SO_MMB_INST       := $(INSTALL_LIBDIR)/$(LIBBLIS)$(LIBBLIS_SO_MMB_EXT)
+LIBBLIS_SO_MMB_INST       := $(INSTALL_LIBDIR)/$(LIBBLIS).$(LIBBLIS_SO_MMB_EXT)
 endif
 
 # --- Determine which libraries to build ---
@@ -366,7 +366,7 @@ ifeq ($(IS_CONFIGURED),yes)
 # named with three .so version numbers.
 UNINSTALL_OLD_LIBS    :=
 
-UNINSTALL_OLD_LIBS    += $(shell $(FIND) $(INSTALL_LIBDIR)/ -name "$(LIBBLIS_SO).?.?.?" 2> /dev/null | $(GREP) -v "$(LIBBLIS)$(LIBBLIS_SO_MMB_EXT)")
+UNINSTALL_OLD_LIBS    += $(shell $(FIND) $(INSTALL_LIBDIR)/ -name "$(LIBBLIS_SO).?.?.?" 2> /dev/null | $(GREP) -v "$(LIBBLIS).$(LIBBLIS_SO_MMB_EXT)")
 
 # These shell commands gather the filepaths to any library symlink in the
 # current LIBDIR that might be left over from an old installation. We start
@@ -877,7 +877,7 @@ endif
 
 # Install shared library containing .so major, minor, and build versions.
 ifeq ($(IS_WIN),0)
-$(INSTALL_LIBDIR)/%$(LIBBLIS_SO_MMB_EXT): $(BASE_LIB_PATH)/%.$(SHLIB_EXT) $(CONFIG_MK_FILE)
+$(INSTALL_LIBDIR)/%.$(LIBBLIS_SO_MMB_EXT): $(BASE_LIB_PATH)/%.$(SHLIB_EXT) $(CONFIG_MK_FILE)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(MKDIR) $(@D)
 	$(INSTALL) -m 0644 $< $@
@@ -893,7 +893,7 @@ endif
 install-lib-symlinks: check-env $(MK_LIBS_SYML)
 
 ifeq ($(IS_WIN),1)
-$(INSTALL_LIBDIR)/%.$(SHLIB_EXT):
+$(INSTALL_LIBDIR)/%.$(SHLIB_EXT): $(BASE_LIB_PATH)/%.$(SHLIB_EXT)
 ifeq ($(ENABLE_VERBOSE),yes)
 	@$(MKDIR) $(@D)
 	@$(INSTALL) -m 0644 $(BASE_LIB_PATH)/$(@F) $@
@@ -903,7 +903,7 @@ else
 	@$(INSTALL) -m 0644 $(BASE_LIB_PATH)/$(@F) $@
 endif
 
-$(INSTALL_LIBDIR)/%$(LIBBLIS_SO_MAJ_EXT):
+$(INSTALL_LIBDIR)/%.$(LIBBLIS_SO_MAJ_EXT): $(BASE_LIB_PATH)/%.$(LIBBLIS_SO_MAJ_EXT)
 ifeq ($(ENABLE_VERBOSE),yes)
 	@$(MKDIR) $(@D)
 	@$(INSTALL) -m 0644 $(BASE_LIB_PATH)/$(@F) $@
@@ -915,7 +915,7 @@ endif
 
 else
 # Install generic shared library symlink.
-$(INSTALL_LIBDIR)/%.$(SHLIB_EXT): $(INSTALL_LIBDIR)/%$(LIBBLIS_SO_MMB_EXT)
+$(INSTALL_LIBDIR)/%.$(SHLIB_EXT): $(INSTALL_LIBDIR)/%.$(LIBBLIS_SO_MMB_EXT)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(SYMLINK) $(<F) $(@F)
 	$(MV) $(@F) $(INSTALL_LIBDIR)/
@@ -925,8 +925,9 @@ else
 	@$(MV) $(@F) $(INSTALL_LIBDIR)/
 endif
 
+
 # Install shared library symlink containing only .so major version.
-$(INSTALL_LIBDIR)/%$(LIBBLIS_SO_MAJ_EXT): $(INSTALL_LIBDIR)/%$(LIBBLIS_SO_MMB_EXT)
+$(INSTALL_LIBDIR)/%.$(LIBBLIS_SO_MAJ_EXT): $(INSTALL_LIBDIR)/%.$(LIBBLIS_SO_MMB_EXT)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(SYMLINK) $(<F) $(@F)
 	$(MV) $(@F) $(INSTALL_LIBDIR)/
