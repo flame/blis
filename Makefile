@@ -660,19 +660,19 @@ blastest-run: $(BLASTEST_DRV_BINS_R)
 # f2c object file rule.
 $(BASE_OBJ_BLASTEST_PATH)/%.o: $(BLASTEST_F2C_SRC_PATH)/%.c
 ifeq ($(ENABLE_VERBOSE),yes)
-	$(CC) $(call get-frame-cflags-for,$(CONFIG_NAME)) $(BLAT_CFLAGS) -c $< -o $@
+	$(CC) $(call get-user-cflags-for,$(CONFIG_NAME)) $(BLAT_CFLAGS) -c $< -o $@
 else
 	@echo "Compiling $@"
-	@$(CC) $(call get-frame-cflags-for,$(CONFIG_NAME)) $(BLAT_CFLAGS) -c $< -o $@
+	@$(CC) $(call get-user-cflags-for,$(CONFIG_NAME)) $(BLAT_CFLAGS) -c $< -o $@
 endif
 
 # driver object file rule.
 $(BASE_OBJ_BLASTEST_PATH)/%.o: $(BLASTEST_DRV_SRC_PATH)/%.c
 ifeq ($(ENABLE_VERBOSE),yes)
-	$(CC) $(call get-frame-cflags-for,$(CONFIG_NAME)) $(BLAT_CFLAGS) -c $< -o $@
+	$(CC) $(call get-user-cflags-for,$(CONFIG_NAME)) $(BLAT_CFLAGS) -c $< -o $@
 else
 	@echo "Compiling $@"
-	@$(CC) $(call get-frame-cflags-for,$(CONFIG_NAME)) $(BLAT_CFLAGS) -c $< -o $@
+	@$(CC) $(call get-user-cflags-for,$(CONFIG_NAME)) $(BLAT_CFLAGS) -c $< -o $@
 endif
 
 # libf2c library archive rule.
@@ -752,10 +752,10 @@ testsuite-bin: check-env $(TESTSUITE_BIN)
 # Object file rule.
 $(BASE_OBJ_TESTSUITE_PATH)/%.o: $(TESTSUITE_SRC_PATH)/%.c
 ifeq ($(ENABLE_VERBOSE),yes)
-	$(CC) $(call get-frame-cflags-for,$(CONFIG_NAME)) -c $< -o $@
+	$(CC) $(call get-user-cflags-for,$(CONFIG_NAME)) -c $< -o $@
 else
 	@echo "Compiling $@"
-	@$(CC) $(call get-frame-cflags-for,$(CONFIG_NAME)) -c $< -o $@
+	@$(CC) $(call get-user-cflags-for,$(CONFIG_NAME)) -c $< -o $@
 endif
 
 # Testsuite binary rule.
