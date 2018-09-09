@@ -1804,6 +1804,8 @@ main()
 	os_vers=$(uname -r)
 	echo "${script_name}: detected ${os_name} kernel version ${os_vers}."
 
+    # Define a single variable off of which we can branch to tell if we are
+    # building for Windows.
     is_win=no
     if  [[ $os_name == MSYS* ]] || [[ $os_name == MINGW* ]]  || [[ $os_name == CYGWIN* ]] ;
     then

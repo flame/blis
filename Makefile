@@ -126,6 +126,8 @@ LIBBLIS_SO_INST           := $(INSTALL_LIBDIR)/$(LIBBLIS_SO)
 LIBBLIS_SO_MAJ_INST       := $(INSTALL_LIBDIR)/$(LIBBLIS_SONAME)
 
 ifeq ($(IS_WIN),yes)
+# The 'install' target does not create symlinks for Windows builds, so we don't bother
+# defining LIBBLIS_SO_MMB_INST.
 LIBBLIS_SO_MMB_INST       :=
 else
 LIBBLIS_SO_MMB_INST       := $(INSTALL_LIBDIR)/$(LIBBLIS).$(LIBBLIS_SO_MMB_EXT)
@@ -645,6 +647,7 @@ endif
 # NOTE: We use a '.loc' suffix to avoid filename collisions in case this
 # rule is executed concurrently with the install-lib-symlinks rule, which
 # also creates symlinks in the current directory (before installing them).
+# NOTE: We don't create any symlinks during Windows builds.
 $(LIBBLIS_SO_MAJ_PATH): $(LIBBLIS_SO_PATH)
 ifeq ($(IS_WIN),no)
 ifeq ($(ENABLE_VERBOSE),yes)
@@ -876,7 +879,11 @@ else
 endif
 
 # Install shared library containing .so major, minor, and build versions.
+# Note: Installation rules for Windows does not include major, minor, and
+# build version numbers.
 ifeq ($(IS_WIN),no)
+
+# Linux/OSX library (.so OR .dylib) installation rules.
 $(INSTALL_LIBDIR)/%.$(LIBBLIS_SO_MMB_EXT): $(BASE_LIB_PATH)/%.$(SHLIB_EXT) $(CONFIG_MK_FILE)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(MKDIR) $(@D)

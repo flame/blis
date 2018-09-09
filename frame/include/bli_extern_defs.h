@@ -41,6 +41,8 @@
 #ifdef BLIS_IS_BUILDING_LIBRARY
 #define BLIS_EXPORT __declspec(dllexport)
 #else
+// Windows builds require us to explicitly identify global variable symbols
+// to be imported from the .dll.
 #define BLIS_EXPORT __declspec(dllimport)
 #endif
 #endif

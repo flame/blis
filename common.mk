@@ -396,12 +396,15 @@ LIBBLIS_SO_PATH    := $(BASE_LIB_PATH)/$(LIBBLIS_SO)
 # shared library when the testsuite is run via 'make test' or 'make check'.
 
 ifeq ($(OS_NAME),Darwin)
+# OS X shared library extensions.
 LIBBLIS_SO_MAJ_EXT := $(SO_MAJOR).$(SHLIB_EXT)
 LIBBLIS_SO_MMB_EXT := $(SO_MMB).$(SHLIB_EXT)
 else ifeq ($(IS_WIN),yes)
+# Windows shared library extension.
 LIBBLIS_SO_MAJ_EXT := $(SO_MAJOR).dll
 LIBBLIS_SO_MMB_EXT :=
 else
+# Linux shared library extensions.
 LIBBLIS_SO_MAJ_EXT := $(SHLIB_EXT).$(SO_MAJOR)
 LIBBLIS_SO_MMB_EXT := $(SHLIB_EXT).$(SO_MMB)
 endif
@@ -593,6 +596,7 @@ $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CWARNFLAGS,$(c))))
 
 # Emit position-independent code for dynamic linking.
 ifeq ($(IS_WIN),yes)
+# Note: Don't use any fPIC flags for Windows builds as all code is position independent
 CPICFLAGS :=
 else
 CPICFLAGS := -fPIC
