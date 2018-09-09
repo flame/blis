@@ -893,13 +893,10 @@ else
 	@$(MKDIR) $(@D)
 	@$(INSTALL) -m 0644 $< $@
 endif
-endif
 
-# --- Install-symlinks rules ---
+else
 
-install-lib-symlinks: check-env $(MK_LIBS_SYML)
-
-ifeq ($(IS_WIN),yes)
+# Windows library (.dll and .lib) installation rules.
 $(INSTALL_LIBDIR)/%.$(SHLIB_EXT): $(BASE_LIB_PATH)/%.$(SHLIB_EXT)
 ifeq ($(ENABLE_VERBOSE),yes)
 	@$(MKDIR) $(@D)
@@ -920,7 +917,15 @@ else
 	@$(INSTALL) -m 0644 $(BASE_LIB_PATH)/$(@F) $@
 endif
 
-else
+endif # ifeq ($(IS_WIN),no)
+
+# --- Install-symlinks rules ---
+
+install-lib-symlinks: check-env $(MK_LIBS_SYML)
+
+# Note: Symlinks are not installed on Windows.
+ifeq ($(IS_WIN),no)
+
 # Install generic shared library symlink.
 $(INSTALL_LIBDIR)/%.$(SHLIB_EXT): $(INSTALL_LIBDIR)/%.$(LIBBLIS_SO_MMB_EXT)
 ifeq ($(ENABLE_VERBOSE),yes)
@@ -942,7 +947,6 @@ else
 	@echo "Installing symlink $(@F) into $(INSTALL_LIBDIR)/"
 	@$(SYMLINK) $(<F) $(@F)
 	@$(MV) $(@F) $(INSTALL_LIBDIR)/
-endif
 endif
 
 # Install static library symlink containing version and config family.
@@ -967,6 +971,7 @@ else
 	@$(MV) $(@F) $(INSTALL_LIBDIR)/
 endif
 
+endif # ifeq ($(IS_WIN),no)
 
 # --- Query current configuration ---
 
