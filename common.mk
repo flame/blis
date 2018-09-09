@@ -374,6 +374,8 @@ LIBBLIS            := libblis
 # The shared (dynamic) library file suffix is different for Linux and OS X.
 ifeq ($(OS_NAME),Darwin)
 SHLIB_EXT          := dylib
+else ifeq ($(IS_WIN),yes)
+SHLIB_EXT          := lib
 else
 SHLIB_EXT          := so
 endif
@@ -392,8 +394,28 @@ LIBBLIS_SO_PATH    := $(BASE_LIB_PATH)/$(LIBBLIS_SO)
 # library lists its soname as 'libblis.so.n', where n is the .so major version
 # number, a symlink in BASE_LIB_PATH is needed so that ld can find the local
 # shared library when the testsuite is run via 'make test' or 'make check'.
-LIBBLIS_SO_MAJ_PATH := $(BASE_LIB_PATH)/$(LIBBLIS_SO).$(SO_MAJOR)
 
+ifeq ($(OS_NAME),Darwin)
+# OS X shared library extensions.
+LIBBLIS_SO_MAJ_EXT := $(SO_MAJOR).$(SHLIB_EXT)
+LIBBLIS_SO_MMB_EXT := $(SO_MMB).$(SHLIB_EXT)
+else ifeq ($(IS_WIN),yes)
+# Windows shared library extension.
+LIBBLIS_SO_MAJ_EXT := $(SO_MAJOR).dll
+LIBBLIS_SO_MMB_EXT :=
+else
+# Linux shared library extensions.
+LIBBLIS_SO_MAJ_EXT := $(SHLIB_EXT).$(SO_MAJOR)
+LIBBLIS_SO_MMB_EXT := $(SHLIB_EXT).$(SO_MMB)
+endif
+LIBBLIS_SONAME := $(LIBBLIS).$(LIBBLIS_SO_MAJ_EXT)
+LIBBLIS_SO_MAJ_PATH := $(BASE_LIB_PATH)/$(LIBBLIS_SONAME)
+
+ifeq ($(IS_WIN),yes)
+LIBBLIS_SO_OUTPUT_NAME := $(LIBBLIS_SO_MAJ_PATH)
+else
+LIBBLIS_SO_OUTPUT_NAME := $(LIBBLIS_SO_PATH)
+endif
 
 #
 # --- Utility program definitions ----------------------------------------------
@@ -416,7 +438,6 @@ INSTALL    := install -c
 FLATTEN_H  := $(DIST_PATH)/build/flatten-headers.py
 
 # Default archiver flags.
-AR         := ar
 ARFLAGS    := cr
 
 # Used to refresh CHANGELOG.
@@ -435,9 +456,12 @@ GIT_LOG    := $(GIT) log --decorate
 # manually override whatever they need.
 
 # Define the external libraries we may potentially need at link-time.
+ifeq ($(IS_WIN),yes)
+LIBM       :=
+else
 LIBM       := -lm
+endif
 LIBMEMKIND := -lmemkind
-LIBPTHREAD := -lpthread
 
 # Default linker flags.
 # NOTE: -lpthread is needed unconditionally because BLIS uses pthread_once()
@@ -463,10 +487,18 @@ endif
 # NOTE: The flag for creating shared objects is different for Linux and OS X.
 ifeq ($(OS_NAME),Darwin)
 SOFLAGS    := -dynamiclib
-SOFLAGS    += -Wl,-install_name,$(LIBBLIS_SO).$(SO_MAJOR)
+SOFLAGS    += -Wl,-install_name,$(LIBBLIS_SONAME)
 else
 SOFLAGS    := -shared
-SOFLAGS    += -Wl,-soname,$(LIBBLIS_SO).$(SO_MAJOR)
+ifeq ($(IS_WIN),yes)
+ifeq ($(CC_VENDOR),clang)
+SOFLAGS    += -Wl,-def:windows/build/libblis-symbols.def -Wl,-implib:$(BASE_LIB_PATH)/$(LIBBLIS).lib
+else
+SOFLAGS    += windows/build/libblis-symbols.def -Wl,--out-implib,$(LIBBLIS).dll.a
+endif
+else
+SOFLAGS    += -Wl,-soname,$(LIBBLIS_SONAME)
+endif
 endif
 
 # Decide which library to link to for things like the testsuite and BLIS test
@@ -478,7 +510,9 @@ ifeq ($(MK_ENABLE_SHARED),yes)
 ifeq ($(MK_ENABLE_STATIC),no)
 LIBBLIS_L      := $(LIBBLIS_SO)
 LIBBLIS_LINK   := $(LIBBLIS_SO_PATH)
+ifeq ($(IS_WIN),no)
 LDFLAGS        += -Wl,-rpath,$(BASE_LIB_PATH)
+endif
 endif
 endif
 
@@ -561,7 +595,12 @@ $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CWARNFLAGS,$(c))))
 # --- Shared library (position-independent code) flags ---
 
 # Emit position-independent code for dynamic linking.
+ifeq ($(IS_WIN),yes)
+# Note: Don't use any fPIC flags for Windows builds as all code is position independent
+CPICFLAGS :=
+else
 CPICFLAGS := -fPIC
+endif
 $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CPICFLAGS,$(c))))
 
 # --- Language flags ---
@@ -900,4 +939,5 @@ BUILD_FLAGS    := -DBLIS_IS_BUILDING_LIBRARY
 
 # end of ifndef COMMON_MK_INCLUDED conditional block
 endif
+
 

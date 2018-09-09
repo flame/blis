@@ -1,3 +1,10 @@
+environment:
+  matrix:
+    - LIB_TYPE: shared
+      CONFIG: x86_64
+    - LIB_TYPE: static
+      CONFIG: auto
+
 install:
 - set "CONDA_INSTALL_LOCN=C:\\Miniconda36-x64"
 - call %CONDA_INSTALL_LOCN%\Scripts\activate.bat
@@ -9,19 +16,25 @@ install:
 - set "CPATH=%CONDA_INSTALL_LOCN%\Library\include;%CPATH%"
 
 build_script:
+- if [%LIB_TYPE%]==[shared] set "CONFIGURE_OPTS=%CONFIGURE_OPTS% --enable-shared --disable-static"
+- if [%LIB_TYPE%]==[static] set "CONFIGURE_OPTS=%CONFIGURE_OPTS% --disable-shared --enable-static"
 - set CC=clang
 - set RANLIB=echo
 - set AR=llvm-ar
 - set AS=llvm-as
 - set LIBPTHREAD=-lpthreads
-- bash -lc "source activate && cd /c/projects/blis && ./configure --disable-shared --enable-cblas --enable-threading=pthreads --enable-arg-max-hack --prefix=/c/blis x86_64"
-- bash -lc "source activate && cd /c/projects/blis && make AR=llvm-ar CPICFLAGS= LIBM= LIBPTHREAD=-lpthreads -j4"
+- set "PATH=%PATH%;C:\projects\blis\lib\%CONFIG%"
+- set "CFLAGS=-Wno-macro-redefined"
+- bash -lc "source activate && cd /c/projects/blis && ./configure %CONFIGURE_OPTS% --enable-cblas --enable-threading=pthreads --enable-arg-max-hack --prefix=/c/blis %CONFIG%"
+- bash -lc "source activate && cd /c/projects/blis && make -j4 V=1"
 - bash -lc "source activate && cd /c/projects/blis && make install"
 - ps: Compress-Archive -Path C:\blis -DestinationPath C:\blis.zip
 - ps: Push-AppveyorArtifact C:\blis.zip
 
 test_script:
-- bash -lc "source activate && cd /c/projects/blis && make AR=llvm-ar CPICFLAGS= LIBM= LIBPTHREAD=-lpthreads check"
+- if [%LIB_TYPE%]==[shared] set "TEST_TARGET=checkblis-fast"
+- if [%LIB_TYPE%]==[static] set "TEST_TARGET=check"
+- bash -lc "source activate && cd /c/projects/blis && make %TEST_TARGET% -j4 V=1"
 
 # Enable this to be able to login to the build worker. You can use the
 # `remmina` program in Ubuntu, use the login information that the line below

@@ -123,8 +123,15 @@ LIBBLIS_A_INST            := $(INSTALL_LIBDIR)/$(LIBBLIS_A)
 
 LIBBLIS_SO_VERS_CONF_INST := $(INSTALL_LIBDIR)/$(LIBBLIS)-$(VERS_CONF).$(SHLIB_EXT)
 LIBBLIS_SO_INST           := $(INSTALL_LIBDIR)/$(LIBBLIS_SO)
-LIBBLIS_SO_MAJ_INST       := $(INSTALL_LIBDIR)/$(LIBBLIS_SO).$(SO_MAJOR)
-LIBBLIS_SO_MMB_INST       := $(INSTALL_LIBDIR)/$(LIBBLIS_SO).$(SO_MAJOR).$(SO_MINORB)
+LIBBLIS_SO_MAJ_INST       := $(INSTALL_LIBDIR)/$(LIBBLIS_SONAME)
+
+ifeq ($(IS_WIN),yes)
+# The 'install' target does not create symlinks for Windows builds, so we don't bother
+# defining LIBBLIS_SO_MMB_INST.
+LIBBLIS_SO_MMB_INST       :=
+else
+LIBBLIS_SO_MMB_INST       := $(INSTALL_LIBDIR)/$(LIBBLIS).$(LIBBLIS_SO_MMB_EXT)
+endif
 
 # --- Determine which libraries to build ---
 
@@ -302,9 +309,13 @@ BLASTEST_DRV3_BASES    := $(filter %3,$(BLASTEST_DRV_BASES))
 
 # Define some CFLAGS that we'll only use when compiling BLAS test suite
 # files.
-BLAT_CFLAGS            := -Wno-maybe-uninitialized -Wno-parentheses \
+BLAT_CFLAGS            := -Wno-parentheses \
                           -I$(BLASTEST_F2C_SRC_PATH) \
                           -I. -DHAVE_BLIS_H
+
+ifeq ($(CC_VENDOR),gcc)
+BLAT_CFLAGS            += -Wno-maybe-uninitialized
+endif
 
 # The location of the script that checks the BLAS test output.
 BLASTEST_CHECK_PATH    := $(DIST_PATH)/$(BLASTEST_DIR)/$(BLASTEST_CHECK)
@@ -357,7 +368,7 @@ ifeq ($(IS_CONFIGURED),yes)
 # named with three .so version numbers.
 UNINSTALL_OLD_LIBS    :=
 
-UNINSTALL_OLD_LIBS    += $(shell $(FIND) $(INSTALL_LIBDIR)/ -name "$(LIBBLIS_SO).?.?.?" 2> /dev/null | $(GREP) -v "$(LIBBLIS_SO).$(SO_MMB)")
+UNINSTALL_OLD_LIBS    += $(shell $(FIND) $(INSTALL_LIBDIR)/ -name "$(LIBBLIS_SO).?.?.?" 2> /dev/null | $(GREP) -v "$(LIBBLIS).$(LIBBLIS_SO_MMB_EXT)")
 
 # These shell commands gather the filepaths to any library symlink in the
 # current LIBDIR that might be left over from an old installation. We start
@@ -615,20 +626,20 @@ $(LIBBLIS_SO_PATH): $(MK_BLIS_OBJS)
 ifeq ($(ENABLE_VERBOSE),yes)
 ifeq ($(ARG_MAX_HACK),yes)
 	$(file > $@.in,$^)
-	$(LINKER) $(SOFLAGS) $(LDFLAGS) -o $@ @$@.in
+	$(LINKER) $(SOFLAGS) $(LDFLAGS) -o $(LIBBLIS_SO_OUTPUT_NAME) @$@.in
 	$(RM_F) $@.in
 else
-	$(LINKER) $(SOFLAGS) $(LDFLAGS) -o $@ $?
+	$(LINKER) $(SOFLAGS) $(LDFLAGS) -o $(LIBBLIS_SO_OUTPUT_NAME) $?
 endif
 else # ifeq ($(ENABLE_VERBOSE),no)
 ifeq ($(ARG_MAX_HACK),yes)
 	@echo "Dynamically linking $@"
 	@$(file > $@.in,$^)
-	@$(LINKER) $(SOFLAGS) $(LDFLAGS) -o $@ @$@.in
+	@$(LINKER) $(SOFLAGS) $(LDFLAGS) -o $(LIBBLIS_SO_OUTPUT_NAME) @$@.in
 	@$(RM_F) $@.in
 else
 	@echo "Dynamically linking $@"
-	@$(LINKER) $(SOFLAGS) $(LDFLAGS) -o $@ $?
+	@$(LINKER) $(SOFLAGS) $(LDFLAGS) -o $(LIBBLIS_SO_OUTPUT_NAME) $?
 endif
 endif
 
@@ -636,7 +647,9 @@ endif
 # NOTE: We use a '.loc' suffix to avoid filename collisions in case this
 # rule is executed concurrently with the install-lib-symlinks rule, which
 # also creates symlinks in the current directory (before installing them).
+# NOTE: We don't create any symlinks during Windows builds.
 $(LIBBLIS_SO_MAJ_PATH): $(LIBBLIS_SO_PATH)
+ifeq ($(IS_WIN),no)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(SYMLINK) $(<F) $(@F).loc
 	$(MV) $(@F).loc $(BASE_LIB_PATH)/$(@F)
@@ -644,6 +657,7 @@ else # ifeq ($(ENABLE_VERBOSE),no)
 	@echo "Creating symlink $@"
 	@$(SYMLINK) $(<F) $(@F).loc
 	@$(MV) $(@F).loc $(BASE_LIB_PATH)/$(@F)
+endif
 endif
 
 
@@ -865,7 +879,12 @@ else
 endif
 
 # Install shared library containing .so major, minor, and build versions.
-$(INSTALL_LIBDIR)/%.$(SHLIB_EXT).$(SO_MMB): $(BASE_LIB_PATH)/%.$(SHLIB_EXT) $(CONFIG_MK_FILE)
+# Note: Installation rules for Windows does not include major, minor, and
+# build version numbers.
+ifeq ($(IS_WIN),no)
+
+# Linux/OSX library (.so OR .dylib) installation rules.
+$(INSTALL_LIBDIR)/%.$(LIBBLIS_SO_MMB_EXT): $(BASE_LIB_PATH)/%.$(SHLIB_EXT) $(CONFIG_MK_FILE)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(MKDIR) $(@D)
 	$(INSTALL) -m 0644 $< $@
@@ -875,13 +894,40 @@ else
 	@$(INSTALL) -m 0644 $< $@
 endif
 
+else
+
+# Windows library (.dll and .lib) installation rules.
+$(INSTALL_LIBDIR)/%.$(SHLIB_EXT): $(BASE_LIB_PATH)/%.$(SHLIB_EXT)
+ifeq ($(ENABLE_VERBOSE),yes)
+	@$(MKDIR) $(@D)
+	@$(INSTALL) -m 0644 $(BASE_LIB_PATH)/$(@F) $@
+else
+	@echo "Installing $(@F) into $(INSTALL_LIBDIR)/"
+	@$(MKDIR) $(@D)
+	@$(INSTALL) -m 0644 $(BASE_LIB_PATH)/$(@F) $@
+endif
+
+$(INSTALL_LIBDIR)/%.$(LIBBLIS_SO_MAJ_EXT): $(BASE_LIB_PATH)/%.$(LIBBLIS_SO_MAJ_EXT)
+ifeq ($(ENABLE_VERBOSE),yes)
+	@$(MKDIR) $(@D)
+	@$(INSTALL) -m 0644 $(BASE_LIB_PATH)/$(@F) $@
+else
+	@echo "Installing $(@F) into $(INSTALL_LIBDIR)/"
+	@$(MKDIR) $(@D)
+	@$(INSTALL) -m 0644 $(BASE_LIB_PATH)/$(@F) $@
+endif
+
+endif # ifeq ($(IS_WIN),no)
 
 # --- Install-symlinks rules ---
 
 install-lib-symlinks: check-env $(MK_LIBS_SYML)
 
+# Note: Symlinks are not installed on Windows.
+ifeq ($(IS_WIN),no)
+
 # Install generic shared library symlink.
-$(INSTALL_LIBDIR)/%.$(SHLIB_EXT): $(INSTALL_LIBDIR)/%.$(SHLIB_EXT).$(SO_MMB)
+$(INSTALL_LIBDIR)/%.$(SHLIB_EXT): $(INSTALL_LIBDIR)/%.$(LIBBLIS_SO_MMB_EXT)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(SYMLINK) $(<F) $(@F)
 	$(MV) $(@F) $(INSTALL_LIBDIR)/
@@ -891,8 +937,9 @@ else
 	@$(MV) $(@F) $(INSTALL_LIBDIR)/
 endif
 
+
 # Install shared library symlink containing only .so major version.
-$(INSTALL_LIBDIR)/%.$(SHLIB_EXT).$(SO_MAJOR): $(INSTALL_LIBDIR)/%.$(SHLIB_EXT).$(SO_MMB)
+$(INSTALL_LIBDIR)/%.$(LIBBLIS_SO_MAJ_EXT): $(INSTALL_LIBDIR)/%.$(LIBBLIS_SO_MMB_EXT)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(SYMLINK) $(<F) $(@F)
 	$(MV) $(@F) $(INSTALL_LIBDIR)/
@@ -924,6 +971,7 @@ else
 	@$(MV) $(@F) $(INSTALL_LIBDIR)/
 endif
 
+endif # ifeq ($(IS_WIN),no)
 
 # --- Query current configuration ---
 

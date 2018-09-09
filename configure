@@ -232,6 +232,7 @@ print_usage()
 	echo " "
 	echo "   CC            Specifies the C compiler to use."
 	echo "   RANLIB        Specifies the ranlib executable to use."
+	echo "   AR            Specifies the archiver to use."
 	echo "   CFLAGS        Specifies additional compiler flags to use (prepended)."
 	echo "   LDFLAGS       Specifies additional linker flags to use (prepended)."
 	echo " "
@@ -1784,6 +1785,10 @@ main()
 				RANLIB=${1#*=}
 				shift
 				;;
+			AR=*)
+				AR=${1#*=}
+				shift
+				;;
 			*=*)
 				print_usage
 				;;
@@ -1799,6 +1804,13 @@ main()
 	os_vers=$(uname -r)
 	echo "${script_name}: detected ${os_name} kernel version ${os_vers}."
 
+    # Define a single variable off of which we can branch to tell if we are
+    # building for Windows.
+    is_win=no
+    if  [[ $os_name == MSYS* ]] || [[ $os_name == MINGW* ]]  || [[ $os_name == CYGWIN* ]] ;
+    then
+        is_win=yes
+    fi
 
 	# -- Find a C compiler -----------------------------------------------------
 
@@ -2289,11 +2301,13 @@ main()
 		echo "${script_name}: disabling ARG_MAX hack."
 	fi
 
+	enable_shared_01=1
 	# Check if the static lib flag was specified.
 	if   [ "x${enable_static}" = "xyes" -a "x${enable_shared}" = "xyes" ]; then
 		echo "${script_name}: building BLIS as both static and shared libraries."
 	elif [ "x${enable_static}" = "xyes" -a "x${enable_shared}" = "xno"  ]; then
 		echo "${script_name}: building BLIS as a static library (shared library disabled)."
+		enable_shared_01=0
 	elif [ "x${enable_static}" = "xno"  -a "x${enable_shared}" = "xyes" ]; then
 		echo "${script_name}: building BLIS as a shared library (static library disabled)."
 	else
@@ -2433,6 +2447,10 @@ main()
 	# For RANLIB, if the variable is not set, we use a default value of
 	# 'ranlib'.
 	ranlib_esc=$(echo "${RANLIB:-ranlib}" | sed 's/\//\\\//g')
+	# For AR, if the variable is not set, we use a default value of
+	# 'ar'.
+	ar_esc=$(echo "${AR:-ar}" | sed 's/\//\\\//g')
+	libpthread_esc=$(echo "${LIBPTHREAD:--lpthread}" | sed 's/\//\\\//g')
 	cflags_preset_esc=$(echo "${cflags_preset}" | sed 's/\//\\\//g')
 	ldflags_preset_esc=$(echo "${ldflags_preset}" | sed 's/\//\\\//g')
 
@@ -2463,7 +2481,6 @@ main()
 		kernel_define="BLIS_KERNELS_${uconf}"
 		kernel_list_defines="${kernel_list_defines}#define ${kernel_define}\n"
 	done
-
 
 	# -- Determine whether we are performing an out-of-tree build --------------
 
@@ -2505,11 +2522,14 @@ main()
 		| sed -e "s/@kernel_list@/${kernel_list}/g" \
 		| sed -e "s/@kconfig_map@/${kconfig_map}/g" \
 		| sed -e "s/@os_name@/${os_name}/g" \
+		| sed -e "s/@is_win@/${is_win}/g" \
 		| sed -e "s/@dist_path@/${dist_path_esc}/g" \
 		| sed -e "s/@CC_VENDOR@/${cc_vendor}/g" \
 		| sed -e "s/@CC@/${cc_esc}/g" \
 		| sed -e "s/@CXX@/${cxx_esc}/g" \
 		| sed -e "s/@RANLIB@/${ranlib_esc}/g" \
+		| sed -e "s/@AR@/${ar_esc}/g" \
+		| sed -e "s/@libpthread@/${libpthread_esc}/g" \
 		| sed -e "s/@cflags_preset@/${cflags_preset_esc}/g" \
 		| sed -e "s/@ldflags_preset@/${ldflags_preset_esc}/g" \
 		| sed -e "s/@debug_type@/${debug_type}/g" \
@@ -2548,6 +2568,7 @@ main()
 		| sed   -e "s/@enable_cblas@/${enable_cblas_01}/g" \
 		| sed   -e "s/@enable_memkind@/${enable_memkind_01}/g" \
 		| sed   -e "s/@enable_sandbox@/${enable_sandbox_01}/g" \
+		| sed   -e "s/@enable_shared@/${enable_shared_01}/g" \
 		> "${bli_config_h_out_path}"
 
 

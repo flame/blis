@@ -70,6 +70,9 @@ KCONFIG_MAP       := @kconfig_map@
 # The operating system name, which should be either 'Linux' or 'Darwin'.
 OS_NAME           := @os_name@
 
+# Check for whether the operating system is windows.
+IS_WIN            := @is_win@
+
 # The directory path to the top level of the source distribution. When
 # building in-tree, this path is ".". When building out-of-tree, this path
 # is path used to identify the location of configure. We also allow the
@@ -91,6 +94,9 @@ CXX               := @CXX@
 
 # Static library indexer.
 RANLIB            := @RANLIB@
+
+# Archiver.
+AR                := @AR@
 
 # Preset (required) CFLAGS and LDFLAGS. These variables capture the value
 # of the CFLAGS and LDFLAGS environment variables at configure-time (and/or
@@ -142,6 +148,9 @@ MK_ENABLE_MEMKIND := @enable_memkind@
 # no sandbox will be used and the conventional gemm implementation will remain
 # enabled.
 SANDBOX           := @sandbox@
+
+# The name of the pthreads library.
+LIBPTHREAD        := @libpthread@
 
 # end of ifndef CONFIG_MK_INCLUDED conditional block
 endif
