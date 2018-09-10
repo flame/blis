@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -34,19 +34,28 @@
 
 #include "bli_l1v_check.h"
 
-#include "bli_l1v_ft.h"
+// Define kernel function types.
+//#include "bli_l1v_ft_ex.h"
+#include "bli_l1v_ft_ker.h"
 
 // Prototype object APIs (expert and non-expert).
 #include "bli_oapi_ex.h"
 #include "bli_l1v_oapi.h"
+
 #include "bli_oapi_ba.h"
 #include "bli_l1v_oapi.h"
 
 // Prototype typed APIs (expert and non-expert).
 #include "bli_tapi_ex.h"
 #include "bli_l1v_tapi.h"
+#include "bli_l1v_ft.h"
+
 #include "bli_tapi_ba.h"
 #include "bli_l1v_tapi.h"
+#include "bli_l1v_ft.h"
+
+// Generate function pointer arrays for tapi functions (expert only).
+#include "bli_l1v_fpa.h"
 
 // Pack-related
 // NOTE: packv and unpackv are temporarily disabled.
@@ -57,7 +66,4 @@
 // NOTE: scalv control tree code is temporarily disabled.
 //#include "bli_scalv_cntl.h"
 //#include "bli_scalv_int.h"
-
-// Reference kernel headers
-//#include "bli_l1v_ref.h"
 

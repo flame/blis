@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -65,7 +65,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	/* Obtain a valid context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
-	PASTECH2(ch,opname,_ft) f = bli_cntx_get_l1f_ker_dt( dt, kerid, cntx ); \
+	PASTECH2(ch,opname,_ker_ft) f = bli_cntx_get_l1f_ker_dt( dt, kerid, cntx ); \
 \
 	f \
 	( \
@@ -109,7 +109,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	/* Obtain a valid context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
-	PASTECH2(ch,opname,_ft) f = bli_cntx_get_l1f_ker_dt( dt, kerid, cntx ); \
+	PASTECH2(ch,opname,_ker_ft) f = bli_cntx_get_l1f_ker_dt( dt, kerid, cntx ); \
 \
 	f \
 	( \
@@ -154,7 +154,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	/* Obtain a valid context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
-	PASTECH2(ch,opname,_ft) f = bli_cntx_get_l1f_ker_dt( dt, kerid, cntx ); \
+	PASTECH2(ch,opname,_ker_ft) f = bli_cntx_get_l1f_ker_dt( dt, kerid, cntx ); \
 \
 	f \
 	( \
@@ -204,7 +204,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	/* Obtain a valid context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
-	PASTECH2(ch,opname,_ft) f = bli_cntx_get_l1f_ker_dt( dt, kerid, cntx ); \
+	PASTECH2(ch,opname,_ker_ft) f = bli_cntx_get_l1f_ker_dt( dt, kerid, cntx ); \
 \
 	f \
 	( \
@@ -254,7 +254,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	/* Obtain a valid context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
-	PASTECH2(ch,opname,_ft) f = bli_cntx_get_l1f_ker_dt( dt, kerid, cntx ); \
+	PASTECH2(ch,opname,_ker_ft) f = bli_cntx_get_l1f_ker_dt( dt, kerid, cntx ); \
 \
 	f \
 	( \

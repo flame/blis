@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -35,9 +35,9 @@
 #include "blis.h"
 
 #undef  GENFRONT
-#define GENFRONT( opname ) \
+#define GENFRONT( opname, varname ) \
 \
-void PASTEMAC0(opname) \
+void PASTEMAC0(varname) \
      ( \
        conj_t  conjh, \
        obj_t*  alpha, \
@@ -71,11 +71,13 @@ void PASTEMAC0(opname) \
 \
 	void*     buf_alpha = bli_obj_buffer_for_1x1( dt, alpha ); \
 \
-	/* Invoke the void pointer-based function for the given datatype. */ \
-	bli_call_ft_14 \
+	/* Query a type-specific function pointer, except one that uses
+	   void* instead of typed pointers. */ \
+	PASTECH2(opname,_unb,_vft) f = \
+	PASTEMAC(varname,_qfp)( dt ); \
+\
+	f \
 	( \
-	  dt, \
-	  opname, \
 	  uplo, \
 	  conjx, \
 	  conjy, \
@@ -89,11 +91,11 @@ void PASTEMAC0(opname) \
 	); \
 } \
 
-GENFRONT( her2_unb_var1 )
-GENFRONT( her2_unb_var2 )
-GENFRONT( her2_unb_var3 )
-GENFRONT( her2_unb_var4 )
+GENFRONT( her2, her2_unb_var1 )
+GENFRONT( her2, her2_unb_var2 )
+GENFRONT( her2, her2_unb_var3 )
+GENFRONT( her2, her2_unb_var4 )
 
-GENFRONT( her2_unf_var1 )
-GENFRONT( her2_unf_var4 )
+GENFRONT( her2, her2_unf_var1 )
+GENFRONT( her2, her2_unf_var4 )
 

@@ -6,7 +6,9 @@
     * [Integer-based types](BLISTypedAPI.md#integer-based-types)
     * [Floating-point types](BLISTypedAPI.md#floating-point-types)
     * [Enumerated parameter types](BLISTypedAPI.md#enumerated-parameter-types)
-    * [Context type](BLISTypedAPI.md#context-type)
+  * [Basic vs expert interfaces](BLISTypedAPI.md#basic-vs-expert-interfaces)
+  * [Context type](BLISTypedAPI.md#context-type)
+  * [Runtime type](BLISTypedAPI.md#runtime-type)
   * [BLIS header file](BLISTypedAPI.md#blis-header-file)
   * [Initialization and cleanup](BLISTypedAPI.md#initialization-and-cleanup)
 * **[Computational function reference](BLISTypedAPI.md#computational-function-reference)**
@@ -24,7 +26,7 @@
   * [Specific configuration](BLISTypedAPI.md#specific-configuration)
   * [General configuration](BLISTypedAPI.md#general-configuration)
   * [Kernel information](BLISTypedAPI.md#kernel-information)
-* **[Example code](BLISObjectAPI.md#example-code)**
+* **[Example code](BLISTypedAPI.md#example-code)**
 
 # Introduction
 
@@ -118,12 +120,13 @@ void bli_?gemm_ex
        ctype*  b, inc_t rsb, inc_t csb,
        ctype*  beta,
        ctype*  c, inc_t rsc, inc_t csc,
-       cntx_t* cntx
+       cntx_t* cntx,
+       rntm_t* rntm
      );
 ```
-The expert interface contains an additional `cntx_t*` parameter. Note that calling a function from the expert interface with the `cntx_t*` argument set to `NULL` is equivalent to calling the corresponding basic interface.
+The expert interface contains two additional parameters: a `cntx_t*` and `rntm_t*`. Note that calling a function from the expert interface with the `cntx_t*` and `rntm_t*` arguments each set to `NULL` is equivalent to calling the corresponding basic interface. Specifically, a `NULL` value passed in for the `cntx_t*` results in a valid context being queried from BLIS, and a `NULL` value passed in for the `rntm_t*` results in the current global settings for multithreading to be used.
 
-### Contexts
+## Context type
 
 In general, it is permissible to pass in `NULL` for a `cntx_t*` parameter when calling an expert interface such as `bli_dgemm_ex()`. However, there are cases where `NULL` values are not accepted and may result in a segmentation fault. Specifically, the `cntx_t*` argument appears in the interfaces to the `gemm`, `trsm`, and `gemmtrsm` [level-3 micro-kernels](KernelsHowTo.md#level-3) along with all [level-1v](KernelsHowTo.md#level-1v) and [level-1f](KernelsHowTo.md#level-1f) kernels. There, as a general rule, a valid pointer must be passed in. Whenever a valid context is needed, the developer may query a default context from the global kernel structure (if a context is not already available in the current scope):
 ```c
@@ -131,6 +134,13 @@ cntx_t* bli_gks_query_cntx( void );
 ```
 When BLIS is configured to target a configuration family (e.g. `intel64`, `x86_64`), `bli_gks_query_cntx()` will use `cpuid` or an equivalent heuristic to select and and return the appropriate context. When BLIS is configured to target a singleton sub-configuration (e.g. `haswell`, `skx`), `bli_gks_query_cntx()` will unconditionally return a pointer to the context appropriate for the targeted configuration.
 
+## Runtime type
+
+When calling one of the expert interfaces, a `rntm_t` (runtime) object can be used to convey a thread-local request for parallelism to the underlying implementation. Runtime objects are thread-safe by nature when they are declared statically as a stack variable (or allocated via `malloc()`), initialized, and then passed into the expert interface of interest.
+
+Notice that runtime objects have no analogue in most BLAS libraries, where you are forced to specify parallelism at a global level (usually via environment variables).
+
+For more information on using `rntm_t` objects, please read the [Multithreading](Multithreading.md) documentation, paying close attention to the section on [local setting of parallelism](Multithreading.md#locally-at-runtime).
 
 ## BLIS header file
 
@@ -836,7 +846,7 @@ void bli_?axpyf
        conj_t  conja,
        conj_t  conjx,
        dim_t   m,
-       dim_t   nf,
+       dim_t   b,
        ctype*  alpha,
        ctype*  a, inc_t inca, inc_t lda,
        ctype*  x, inc_t incx,
@@ -847,7 +857,7 @@ Perform
 ```
   y := y + alpha * conja(A) * conjx(x)
 ```
-where `A` is an _m x nf_ matrix, and `y` and `x` are vectors. The kernel, if optimized, is implemented as a fused series of calls to [axpyv](BLISTypedAPI.md#axpyv) where _nf_ is less than or equal to an implementation-dependent fusing factor specific to `axpyf`.
+where `A` is an _m x b_ matrix, and `y` and `x` are vectors. The kernel, if optimized, is implemented as a fused series of calls to [axpyv](BLISTypedAPI.md#axpyv) where _b_ is less than or equal to an implementation-dependent fusing factor specific to `axpyf`.
 
 ---
 
@@ -858,7 +868,7 @@ void bli_?dotxf
        conj_t  conjat,
        conj_t  conjx,
        dim_t   m,
-       dim_t   nf,
+       dim_t   b,
        ctype*  alpha,
        ctype*  a, inc_t inca, inc_t lda,
        ctype*  x, inc_t incx,
@@ -870,7 +880,7 @@ Perform
 ```
   y := y + alpha * conjat(A^T) * conjx(x)
 ```
-where `A` is an _m x nf_ matrix, and `y` and `x` are vectors. The kernel, if optimized, is implemented as a fused series of calls to [dotxv](BLISTypedAPI.md#dotxv) where _nf_ is less than or equal to an implementation-dependent fusing factor specific to `dotxf`.
+where `A` is an _m x b_ matrix, and `y` and `x` are vectors. The kernel, if optimized, is implemented as a fused series of calls to [dotxv](BLISTypedAPI.md#dotxv) where _b_ is less than or equal to an implementation-dependent fusing factor specific to `dotxf`.
 
 ---
 
@@ -883,7 +893,7 @@ void bli_?dotxaxpyf
        conj_t  conjw,
        conj_t  conjx,
        dim_t   m,
-       dim_t   nf,
+       dim_t   b,
        ctype*  alpha,
        ctype*  a, inc_t inca, inc_t lda,
        ctype*  w, inc_t incw,
@@ -898,7 +908,7 @@ Perform
   y := beta * y + alpha * conjat(A^T) * conjw(w)
   z :=        z + alpha * conja(A)    * conjx(x)
 ```
-where `A` is an _m x nf_ matrix, `w` and `z` are vectors of length _m_, `x` and `y` are vectors of length `nf`, and `alpha` and `beta` are scalars. The kernel, if optimized, is implemented as a fusion of calls to [dotxf](BLISTypedAPI.md#dotxf) and [axpyf](BLISTypedAPI.md#axpyf).
+where `A` is an _m x b_ matrix, `w` and `z` are vectors of length _m_, `x` and `y` are vectors of length `b`, and `alpha` and `beta` are scalars. The kernel, if optimized, is implemented as a fusion of calls to [dotxf](BLISTypedAPI.md#dotxf) and [axpyf](BLISTypedAPI.md#axpyf).
 
 
 

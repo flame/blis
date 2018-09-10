@@ -1,11 +1,11 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2017, Advanced Micro Devices, Inc.
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -94,19 +94,20 @@ void bli_finalize_apis( void )
 
 // -----------------------------------------------------------------------------
 
-#include <pthread.h>
-
-// A pthread structure used in pthread_once(). pthread_once() is guaranteed to
-// execute exactly once among all threads that pass in this control object.
-static pthread_once_t once_control = PTHREAD_ONCE_INIT;
+// A pthread_once_t variable is a pthread structure used in pthread_once().
+// pthread_once() is guaranteed to execute exactly once among all threads that
+// pass in this control object. Thus, we need one for initialization and a
+// separate one for finalization.
+static pthread_once_t once_init     = PTHREAD_ONCE_INIT;
+static pthread_once_t once_finalize = PTHREAD_ONCE_INIT;
 
 void bli_init_once( void )
 {
-	pthread_once( &once_control, bli_init_apis );
+	pthread_once( &once_init, bli_init_apis );
 }
 
 void bli_finalize_once( void )
 {
-	pthread_once( &once_control, bli_finalize_apis );
+	pthread_once( &once_finalize, bli_finalize_apis );
 }
 

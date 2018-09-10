@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -35,16 +35,28 @@
 #ifndef BLIS_EXTERN_DEFS_H
 #define BLIS_EXTERN_DEFS_H
 
-extern obj_t BLIS_TWO;
-extern obj_t BLIS_ONE;
-//extern obj_t BLIS_ONE_HALF;
-extern obj_t BLIS_ZERO;
-//extern obj_t BLIS_MINUS_ONE_HALF;
-extern obj_t BLIS_MINUS_ONE;
-extern obj_t BLIS_MINUS_TWO;
+#if !defined(BLIS_ENABLE_SHARED) || !defined(_MSC_VER)
+#define BLIS_EXPORT
+#else
+#ifdef BLIS_IS_BUILDING_LIBRARY
+#define BLIS_EXPORT __declspec(dllexport)
+#else
+// Windows builds require us to explicitly identify global variable symbols
+// to be imported from the .dll.
+#define BLIS_EXPORT __declspec(dllimport)
+#endif
+#endif
 
-extern thrcomm_t BLIS_SINGLE_COMM;
-extern thrinfo_t BLIS_PACKM_SINGLE_THREADED;
-extern thrinfo_t BLIS_GEMM_SINGLE_THREADED;
+BLIS_EXPORT extern obj_t BLIS_TWO;
+BLIS_EXPORT extern obj_t BLIS_ONE;
+//BLIS_EXPORT extern obj_t BLIS_ONE_HALF;
+BLIS_EXPORT extern obj_t BLIS_ZERO;
+//BLIS_EXPORT extern obj_t BLIS_MINUS_ONE_HALF;
+BLIS_EXPORT extern obj_t BLIS_MINUS_ONE;
+BLIS_EXPORT extern obj_t BLIS_MINUS_TWO;
+
+BLIS_EXPORT extern thrcomm_t BLIS_SINGLE_COMM;
+BLIS_EXPORT extern thrinfo_t BLIS_PACKM_SINGLE_THREADED;
+BLIS_EXPORT extern thrinfo_t BLIS_GEMM_SINGLE_THREADED;
 
 #endif

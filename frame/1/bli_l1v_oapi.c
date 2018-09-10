@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -66,17 +66,19 @@ void PASTEMAC(opname,EX_SUF) \
 	if ( bli_error_checking_is_enabled() ) \
 	    PASTEMAC(opname,_check)( x, y ); \
 \
-	/* Invoke the void pointer-based function. */ \
-	bli_call_ft_8 \
+	/* Query a type-specific function pointer, except one that uses
+	   void* instead of typed pointers. */ \
+	PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) f = \
+	PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
+\
+	f \
 	( \
-	   dt, \
-	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
-	   conjx, \
-	   n, \
-	   buf_x, inc_x, \
-	   buf_y, inc_y, \
-	   cntx, \
-	   rntm  \
+	  conjx, \
+	  n, \
+	  buf_x, inc_x, \
+	  buf_y, inc_y, \
+	  cntx, \
+	  rntm  \
 	); \
 }
 
@@ -110,11 +112,13 @@ void PASTEMAC(opname,EX_SUF) \
 	if ( bli_error_checking_is_enabled() ) \
 	    PASTEMAC(opname,_check)( x, index ); \
 \
-	/* Invoke the typed function. */ \
-	bli_call_ft_6 \
+	/* Query a type-specific function pointer, except one that uses
+	   void* instead of typed pointers. */ \
+	PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) f = \
+	PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
+\
+	f \
 	( \
-	   dt, \
-	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
 	   n, \
 	   buf_x, incx, \
 	   buf_index, \
@@ -169,11 +173,13 @@ void PASTEMAC(opname,EX_SUF) \
 	buf_alpha = bli_obj_buffer_for_1x1( dt, &alpha_local ); \
 	buf_beta = bli_obj_buffer_for_1x1( dt, &beta_local ); \
 \
-	/* Invoke the void pointer-based function. */ \
-	bli_call_ft_10 \
+	/* Query a type-specific function pointer, except one that uses
+	   void* instead of typed pointers. */ \
+	PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) f = \
+	PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
+\
+	f \
 	( \
-	   dt, \
-	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
 	   conjx, \
 	   n, \
 	   buf_alpha, \
@@ -225,11 +231,13 @@ void PASTEMAC(opname,EX_SUF) \
 	                                      alpha, &alpha_local ); \
 	buf_alpha = bli_obj_buffer_for_1x1( dt, &alpha_local ); \
 \
-	/* Invoke the void pointer-based function. */ \
-	bli_call_ft_9 \
+	/* Query a type-specific function pointer, except one that uses
+	   void* instead of typed pointers. */ \
+	PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) f = \
+	PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
+\
+	f \
 	( \
-	   dt, \
-	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
 	   conjx, \
 	   n, \
 	   buf_alpha, \
@@ -273,11 +281,13 @@ void PASTEMAC(opname,EX_SUF) \
 	if ( bli_error_checking_is_enabled() ) \
 	    PASTEMAC(opname,_check)( x, y, rho ); \
 \
-	/* Invoke the void pointer-based function. */ \
-	bli_call_ft_10 \
+	/* Query a type-specific function pointer, except one that uses
+	   void* instead of typed pointers. */ \
+	PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) f = \
+	PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
+\
+	f \
 	( \
-	   dt, \
-	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
 	   conjx, \
 	   conjy, \
 	   n, \
@@ -338,11 +348,13 @@ void PASTEMAC(opname,EX_SUF) \
 	buf_alpha = bli_obj_buffer_for_1x1( dt, &alpha_local ); \
 	buf_beta  = bli_obj_buffer_for_1x1( dt, &beta_local ); \
 \
-	/* Invoke the void pointer-based function. */ \
-	bli_call_ft_12 \
+	/* Query a type-specific function pointer, except one that uses
+	   void* instead of typed pointers. */ \
+	PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) f = \
+	PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
+\
+	f \
 	( \
-	   dt, \
-	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
 	   conjx, \
 	   conjy, \
 	   n, \
@@ -381,11 +393,13 @@ void PASTEMAC(opname,EX_SUF) \
 	if ( bli_error_checking_is_enabled() ) \
 	    PASTEMAC(opname,_check)( x ); \
 \
-	/* Invoke the void pointer-based function. */ \
-	bli_call_ft_5 \
+	/* Query a type-specific function pointer, except one that uses
+	   void* instead of typed pointers. */ \
+	PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) f = \
+	PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
+\
+	f \
 	( \
-	   dt, \
-	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
 	   n, \
 	   buf_x, inc_x, \
 	   cntx, \
@@ -430,11 +444,13 @@ void PASTEMAC(opname,EX_SUF) \
 	                                      alpha, &alpha_local ); \
 	buf_alpha = bli_obj_buffer_for_1x1( dt, &alpha_local ); \
 \
-	/* Invoke the void pointer-based function. */ \
-	bli_call_ft_7 \
+	/* Query a type-specific function pointer, except one that uses
+	   void* instead of typed pointers. */ \
+	PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) f = \
+	PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
+\
+	f \
 	( \
-	   dt, \
-	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
 	   BLIS_NO_CONJUGATE, /* internal conjugation applied during copy-cast. */ \
 	   n, \
 	   buf_alpha, \
@@ -473,11 +489,13 @@ void PASTEMAC(opname,EX_SUF) \
 	if ( bli_error_checking_is_enabled() ) \
 	    PASTEMAC(opname,_check)( x, y ); \
 \
-	/* Invoke the void pointer-based function. */ \
-	bli_call_ft_7 \
+	/* Query a type-specific function pointer, except one that uses
+	   void* instead of typed pointers. */ \
+	PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) f = \
+	PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
+\
+	f \
 	( \
-	   dt, \
-	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
 	   n, \
 	   buf_x, inc_x, \
 	   buf_y, inc_y, \
@@ -526,11 +544,13 @@ void PASTEMAC(opname,EX_SUF) \
 	                                      beta, &beta_local ); \
 	buf_beta = bli_obj_buffer_for_1x1( dt, &beta_local ); \
 \
-	/* Invoke the void pointer-based function. */ \
-	bli_call_ft_9 \
+	/* Query a type-specific function pointer, except one that uses
+	   void* instead of typed pointers. */ \
+	PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) f = \
+	PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
+\
+	f \
 	( \
-	   dt, \
-	   PASTECH(opname,BLIS_TAPI_EX_SUF), \
 	   conjx, \
 	   n, \
 	   buf_x, inc_x, \

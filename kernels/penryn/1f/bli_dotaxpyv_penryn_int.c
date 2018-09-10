@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -112,7 +112,7 @@ void bli_ddotaxpyv_penryn_int
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE )
 	{
-		ddotaxpyv_ft f = bli_cntx_get_l1f_ker_dt( BLIS_DOUBLE, BLIS_DOTAXPYV_KER, cntx );
+		ddotaxpyv_ker_ft f = bli_cntx_get_l1f_ker_dt( BLIS_DOUBLE, BLIS_DOTAXPYV_KER, cntx );
 
 		f
 		(

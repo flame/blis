@@ -41,13 +41,15 @@ typedef unsigned long long ulongint; // system-dependent
 
 #ifdef f2c_i2
 // for -i2
-typedef short flag;
-typedef short ftnlen;
-typedef short ftnint;
+//typedef short flag;
+//typedef short ftnlen;
+typedef bla_integer ftnlen;
+//typedef short ftnint;
 #else
-typedef long int flag;
-typedef long int ftnlen;
-typedef long int ftnint;
+//typedef long int flag;
+//typedef long int ftnlen;
+typedef bla_integer ftnlen;
+//typedef long int ftnint;
 #endif
 
 #ifndef VOID

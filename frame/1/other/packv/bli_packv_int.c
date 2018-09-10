@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -59,10 +59,10 @@ void bli_packv_int
 	varnum_t  n;
 	impl_t    i;
 #endif
-	packv_voft f;
+	packv_var_oft f;
 
 // !!!
-// DEFINE packv_voft type.
+// DEFINE packv_var_oft type.
 // !!!
 
 	// Check parameters.

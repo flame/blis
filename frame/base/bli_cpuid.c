@@ -1,10 +1,11 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -53,6 +54,7 @@
   #include <stdlib.h>
   #include <string.h>
   #include <stdint.h>
+  #include <pthread.h>
   #include "bli_type_defs.h"
   #include "bli_cpuid.h"
 #endif
@@ -442,6 +444,21 @@ bool_t bli_cpuid_is_cortexa57
 	return TRUE;
 }
 
+bool_t bli_cpuid_is_cortexa53
+     (
+       uint32_t family,
+       uint32_t model,
+       uint32_t features
+     )
+{
+	// Check for expected CPU features.
+	const uint32_t expected = FEATURE_NEON;
+
+	if ( !bli_cpuid_has_features( features, expected ) ) return FALSE;
+
+	return TRUE;
+}
+
 bool_t bli_cpuid_is_cortexa15
      (
        uint32_t family,
@@ -486,6 +503,7 @@ bool_t bli_cpuid_is_cortexa9
 
    Copyright (C) 2017, The University of Texas at Austin
    Copyright (C) 2017, Devin Matthews
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are

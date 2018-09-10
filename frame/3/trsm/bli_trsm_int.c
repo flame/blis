@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -47,10 +47,10 @@ void bli_trsm_int
        thrinfo_t* thread
      )
 {
-	obj_t     a_local;
-	obj_t     b_local;
-	obj_t     c_local;
-	trsm_voft f;
+	obj_t        a_local;
+	obj_t        b_local;
+	obj_t        c_local;
+	trsm_var_oft f;
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )

@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -78,6 +78,19 @@ int main( int argc, char** argv )
 #endif
 
 	dt_a = dt_x = dt_y = dt_alpha = dt_beta = BLIS_DOUBLE;
+
+	// Begin with initializing the last entry to zero so that
+	// matlab allocates space for the entire array once up-front.
+	for ( p = p_begin; p + p_inc <= p_end; p += p_inc ) ;
+#ifdef BLIS
+	printf( "data_gemv_blis" );
+#else
+	printf( "data_gemv_%s", BLAS );
+#endif
+	printf( "( %2lu, 1:3 ) = [ %4lu %4lu %7.2f ];\n",
+	        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
+	        ( unsigned long )0,
+	        ( unsigned long )0, 0.0 );
 
 	for ( p = p_begin; p <= p_end; p += p_inc )
 	{
@@ -169,10 +182,10 @@ int main( int argc, char** argv )
 #else
 		printf( "data_gemv_%s", BLAS );
 #endif
-		printf( "( %2lu, 1:4 ) = [ %4lu %4lu  %10.3e  %6.3f ];\n",
+		printf( "( %2lu, 1:3 ) = [ %4lu %4lu %7.2f ];\n",
 		        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
 		        ( unsigned long )m,
-		        ( unsigned long )n, dtime_save, gflops );
+		        ( unsigned long )n, gflops );
 
 		bli_obj_free( &alpha );
 		bli_obj_free( &beta );

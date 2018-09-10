@@ -1,10 +1,11 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -38,12 +39,8 @@ thrinfo_t BLIS_PACKM_SINGLE_THREADED = {};
 thrinfo_t BLIS_GEMM_SINGLE_THREADED  = {};
 thrcomm_t BLIS_SINGLE_COMM           = {};
 
-// The global rntm_t structure, which holds the global thread
-// settings.
+// The global rntm_t structure, which holds the global thread settings.
 static rntm_t global_rntm;
-
-// A mutex to allow synchronous access to the global rntm_t structure.
-static mtx_t global_rntm_mutex;
 
 // -----------------------------------------------------------------------------
 
@@ -53,9 +50,6 @@ void bli_thread_init( void )
 	bli_packm_thrinfo_init_single( &BLIS_PACKM_SINGLE_THREADED );
 	bli_l3_thrinfo_init_single( &BLIS_GEMM_SINGLE_THREADED );
 
-	// Initialize the mutex protecting global_rntm.
-	bli_mutex_init( &global_rntm_mutex );
-
 	// Read the environment variables and use them to initialize the
 	// global runtime object.
 	bli_thread_init_rntm_from_env( &global_rntm );
@@ -63,7 +57,6 @@ void bli_thread_init( void )
 
 void bli_thread_finalize( void )
 {
-	bli_mutex_finalize( &global_rntm_mutex );
 }
 
 // -----------------------------------------------------------------------------
@@ -1302,32 +1295,29 @@ dim_t bli_thread_get_num_threads( void )
 
 // ----------------------------------------------------------------------------
 
+// A mutex to allow synchronous access to global_rntm.
+static pthread_mutex_t global_rntm_mutex = PTHREAD_MUTEX_INITIALIZER;
+
 void bli_thread_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir )
 {
-	// We must ensure that global_rntm_mutex has been initialized.
-	bli_init_once();
-
 	// Acquire the mutex protecting global_rntm.
-	bli_mutex_lock( &global_rntm_mutex );
+	pthread_mutex_lock( &global_rntm_mutex );
 
 	bli_rntm_set_ways_only( jc, pc, ic, jr, ir, &global_rntm );
 
 	// Release the mutex protecting global_rntm.
-	bli_mutex_unlock( &global_rntm_mutex );
+	pthread_mutex_unlock( &global_rntm_mutex );
 }
 
 void bli_thread_set_num_threads( dim_t n_threads )
 {
-	// We must ensure that global_rntm_mutex has been initialized.
-	bli_init_once();
-
 	// Acquire the mutex protecting global_rntm.
-	bli_mutex_lock( &global_rntm_mutex );
+	pthread_mutex_lock( &global_rntm_mutex );
 
 	bli_rntm_set_num_threads_only( n_threads, &global_rntm );
 
 	// Release the mutex protecting global_rntm.
-	bli_mutex_unlock( &global_rntm_mutex );
+	pthread_mutex_unlock( &global_rntm_mutex );
 }
 
 // ----------------------------------------------------------------------------
@@ -1335,12 +1325,12 @@ void bli_thread_set_num_threads( dim_t n_threads )
 void bli_thread_init_rntm( rntm_t* rntm )
 {
 	// Acquire the mutex protecting global_rntm.
-	bli_mutex_lock( &global_rntm_mutex );
+	pthread_mutex_lock( &global_rntm_mutex );
 
 	*rntm = global_rntm;
 
 	// Release the mutex protecting global_rntm.
-	bli_mutex_unlock( &global_rntm_mutex );
+	pthread_mutex_unlock( &global_rntm_mutex );
 }
 
 // ----------------------------------------------------------------------------

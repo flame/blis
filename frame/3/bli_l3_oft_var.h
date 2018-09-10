@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -32,8 +32,8 @@
 
 */
 
-#ifndef BLIS_L3_VAR_OFT_H
-#define BLIS_L3_VAR_OFT_H
+#ifndef BLIS_L3_OFT_VAR_H
+#define BLIS_L3_OFT_VAR_H
 
 
 //
@@ -43,7 +43,7 @@
 #undef  GENTDEF
 #define GENTDEF( opname ) \
 \
-typedef void (*PASTECH(opname,_voft)) \
+typedef void (*PASTECH(opname,_var_oft)) \
 ( \
   obj_t*  a, \
   obj_t*  b, \
@@ -57,9 +57,10 @@ typedef void (*PASTECH(opname,_voft)) \
 GENTDEF( gemm )
 
 
+#undef  GENTDEF
 #define GENTDEF( opname ) \
 \
-typedef void (*PASTECH(opname,_voft)) \
+typedef void (*PASTECH(opname,_var_oft)) \
 ( \
   obj_t*  a, \
   obj_t*  b, \

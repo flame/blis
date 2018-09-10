@@ -18,6 +18,7 @@
 # since its only contents are .a files.
 *.a
 *.so
+*.so.*
 # test executables
 *.x
 *.pexe

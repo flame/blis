@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -32,16 +32,17 @@
 
 */
 
+// If the CBLAS compatibility layer was enabled while the BLAS layer
+// was not enabled, we must enable it here.
 #ifdef BLIS_ENABLE_CBLAS
-
-// If the BLAS compatibility layer was not explicitly enabled, we must
-// enable it here.
 #ifndef BLIS_ENABLE_BLAS
 #define BLIS_ENABLE_BLAS
 #endif
-
 #endif // BLIS_ENABLE_CBLAS
 
+// Skip prototyping all of the BLAS if the BLAS test drivers are being
+// compiled.
+#ifndef BLIS_VIA_BLASTEST
 #ifdef BLIS_ENABLE_BLAS
 
 
@@ -175,3 +176,4 @@
 
 
 #endif // BLIS_ENABLE_BLAS
+#endif // BLIS_VIA_BLASTEST

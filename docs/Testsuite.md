@@ -35,18 +35,11 @@ As you would expect, the test suite's source code lives in `src` and the object 
 
 ## Compiling
 
-Before running the test suite, you must first configure, compile, and install a BLIS library. For directions on how to build and install a BLIS library, please see the [Build System](BuildSystem.md) guide.
+Before running the test suite, you must first configure and compile BLIS. (Installing BLIS is not necessary to run the test suite, though it is supported.) For directions on how to build and install a BLIS library, please see the [Build System](BuildSystem.md) guide.
 
 Once BLIS is installed, you are ready to compile the test suite.
 
-**Note:** The `Makefile` includes the same `make_defs.mk` file that was used by the top-level `Makefile` when building BLIS. This is meant to serve as a convenience so you don't have to specify things like the C compiler or compiler flags a second time. If you do wish to tweak these parameters, you may override the values included from `make_defs.mk` by editing the local `Makefile` within the `testsuite` directory. Scroll down to the section labeled "Optional overrides" and uncomment/edit values as needed.
-
-Unless special circumstances apply in your situation (such as the optional overrides mentioned above), the only value you may have to modify in `testsuite/Makefile` (if any) is the linker library flags variable, `LDFLAGS`. You may need to modify it to include the path to your standard C libraries, such as `libm` (oftentimes communicated to the linker via `-lm`):
-```
-LDFLAGS   := -L/path/to/system/libs -lm
-```
-
-When you are ready to compile, simply run `make`. Running `make` will result in output similar to:
+When you are ready to compile, simply run `make` from within the `testsuite` directory. Running `make` will result in output similar to:
 :
 ```
 $ make
@@ -71,6 +64,21 @@ $ ls
 Makefile  input.general  input.operations  obj  src  test_libblis.x
 ```
 
+### Compiling/linking aginst an installed copy of BLIS
+
+By default, the `Makefile` in the `testsuite` directory is programmed to look in
+`../include/<config_name>/` for `blis.h` and `../lib/<config_name>/` for the BLIS library. However, some users may wish to run the testsuite after installing BLIS and deleting the entire source tree. In this situation, it is necessary to point `make` to the location of your BLIS installation (i.e., the installation prefix). If you would like to compile with an installed header and link against an installed library, you have two options:
+1. First, you may set the envrionment variable `BLIS_INSTALL_PATH` to the install prefix used when BLIS was installed, and then run `make`. In this example, we assume that BLIS was installed after running the `configure` script with the `--prefix=/usr/local` option.
+   ```
+   $ export BLIS_INSTALL_PATH=/usr/local
+   $ make
+   ```
+2. Alternatively, you may set the `make` variable `BLIS_INSTALL_PATH` on the command line as you execute `make`:
+   ```
+   $ make BLIS_INSTALL_PATH=/usr/local
+   ```
+Both options result in the same outcome: `make` looks for the BLIS installation in `BLIS_INSTALL_PATH` when building the test suite.
+
 ## Setting test parameters
 
 The BLIS test suite reads two input files, `input.general` and `input.operations`, to determine which tests to run and how those tests are run. Each file is contains comments and thus you may find them intuitive to use without formal instructions. However, for completeness and as a reference-of-last-resort, we describe each file and its contents in detail.
@@ -81,7 +89,7 @@ The `input.general` input file, as its name suggests, contains parameters that c
 ```
 # ----------------------------------------------------------------------
 #
-#  input.general   
+#  input.general
 #  BLIS test suite
 #
 #  This file contains input values that control how BLIS operations are
@@ -130,7 +138,7 @@ _**Number of repeats.**_ This is the number of times an operation is run for eac
 
 _**Matrix storage scheme.**_ This string encodes all of the matrix storage schemes that are tested (for operations that contain matrix operands). There are three valid values: `'c'` for column storage, `'r'` for row storage, and `'g'` for general stride storage. You may choose one storage scheme, or combine more than one. The order of the characters determines the order in which the corresponding storage schemes are tested.
 
-_**Vector storage scheme.**_ Similar to the matrix storage scheme string, this string determines which vector storage schemes are tested (for operations that contain vector operands). There are four valid values: `'c'` for column vectors with unit stride, `'r'` for row vectors with unit stride, `'j'` for column vectors with non-unit stride, and `'i'` for row vectors with non-unit stride. You may choose any one storage scheme, or combine more than one. The ordering behaves similarly to that of the matrix storage scheme string. Using `cj` will test both unit and non-unit vector strides, and since row and column vectors are logically equivalent, this should provide complete test coverage for operations with vector operands. 
+_**Vector storage scheme.**_ Similar to the matrix storage scheme string, this string determines which vector storage schemes are tested (for operations that contain vector operands). There are four valid values: `'c'` for column vectors with unit stride, `'r'` for row vectors with unit stride, `'j'` for column vectors with non-unit stride, and `'i'` for row vectors with non-unit stride. You may choose any one storage scheme, or combine more than one. The ordering behaves similarly to that of the matrix storage scheme string. Using `cj` will test both unit and non-unit vector strides, and since row and column vectors are logically equivalent, this should provide complete test coverage for operations with vector operands.
 
 _**Test all combinations of storage schemes?**_ Enabling this option causes all combinations of storage schemes to be tested. For example, if the option is disabled, a matrix storage scheme string of `cr` would cause the `gemm` test module to test execution where all matrix operands are column-stored, and then where all matrix operands are row-stored. Enabling this option with the same matrix storage string (`cr`) would cause the test suite to test `gemm` under all eight scenarios where the three `gemm` matrix operands are either column-stored or row-stored.
 
@@ -298,7 +306,7 @@ Running zblat3.x < 'input/zblat3.in' (output to 'out.zblat3')
 ```
 The results can quickly be checked via a script in the top-level `build` directory:
 ```
-$ ../build/check-blastest.sh 
+$ ../build/check-blastest.sh
 All BLAS tests passed!
 ```
 This is the message we expect when everything works as expected.

@@ -1,10 +1,11 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2016 - 2017, Advanced Micro Devices, Inc.
+   Copyright (C) 2017, Advanced Micro Devices, Inc.
+   Copyright (C) 2018, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -103,7 +104,7 @@ void bli_saxpyf_zen_int_8
 	// operation as a loop over axpyv.
 	if ( b_n != fuse_fac )
 	{
-		saxpyv_ft f = bli_cntx_get_l1v_ker_dt( BLIS_FLOAT, BLIS_AXPYV_KER, cntx );
+		saxpyv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_FLOAT, BLIS_AXPYV_KER, cntx );
 
 		for ( i = 0; i < b_n; ++i )
 		{
@@ -312,7 +313,7 @@ void bli_daxpyf_zen_int_8
 	// operation as a loop over axpyv.
 	if ( b_n != fuse_fac )
 	{
-		daxpyv_ft f = bli_cntx_get_l1v_ker_dt( BLIS_DOUBLE, BLIS_AXPYV_KER, cntx );
+		daxpyv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_DOUBLE, BLIS_AXPYV_KER, cntx );
 
 		for ( i = 0; i < b_n; ++i )
 		{

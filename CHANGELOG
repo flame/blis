@@ -1,10 +1,2757 @@
-commit 2fb440876690bdcec0c11a30e2b33ad100bab529 (HEAD -> master, tag: 0.3.2)
+commit 10fd614031307c46db3d893528d4e5fc31f490b3 (HEAD -> master, tag: 0.4.1)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Aug 30 15:13:59 2018 -0500
+
+    Version file update (0.4.1)
+
+commit 08dd67c4b21244851f8416bd59159bea7a9c5b3d (origin/master, origin/HEAD)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Aug 30 15:12:13 2018 -0500
+
+    ReleaseNotes.md update in advance of next version.
+
+commit 4fa4cb0734e7de6505b5d6f1aeef3a5d5c89dcbb (origin/dev, origin/amd, dev, amd)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Aug 29 18:06:41 2018 -0500
+
+    Trivial comment header updates.
+    
+    Details:
+    - Removed four trailing spaces after "BLIS" that occurs in most files'
+      commented-out license headers.
+    - Added UT copyright lines to some files. (These files previously had
+      only AMD copyright lines but were contributed to by both UT and AMD.)
+    - In some files' copyright lines, expanded 'The University of Texas' to
+      'The University of Texas at Austin'.
+    - Fixed various typos/misspellings in some license headers.
+
+commit b051ffb815baf6c3ece2b5118b679fd9219d5780
+Merge: 6f33d9de aaa549f4
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Aug 29 17:06:48 2018 -0500
+
+    Merge branch 'dev'
+
+commit 6f33d9de21fbc2f579846b9104fb9d513753f79c
+Author: Mathieu Poumeyrol <kali@users.noreply.github.com>
+Date:   Wed Aug 29 23:48:22 2018 +0200
+
+    fix compilation of armv7a kernels (#242)
+
+commit 8199e339aefdd27019c7f3d8c99818d375d5400b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Aug 27 07:00:12 2018 -0500
+
+    Added testsuite threading to input.general.fast.
+    
+    Details:
+    - Added lines associated with the testsuite's new threading option to
+      input.general.fast. This change was intended for the previous commit
+      (10d0735).
+
+commit 10d07357afbb2d468837aa97369ef9a6d0610817
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Aug 26 20:34:30 2018 -0500
+
+    Better thread safety; added threading to testsuite.
+    
+    Details:
+    - Replaced critical sections that were conditional upon multithreading
+      being enabled (via pthreads or OpenMP) with unconditional use of
+      pthreads mutexes. (Why pthreads? Because BLIS already requires it
+      for its initialization mechanism: pthread_once().) This was done in
+      bli_error.c, bli_gks.c, bli_l3_ind.c. Also, replaced usage of BLIS's
+      mtx_t object and bli_mutex_*() API with pthread mutexes in
+      bli_thread.c. The previous status quo could result in a race condition
+      if the application called BLIS from more than one thread. The new
+      pthread-based code should be completely agnostic to the application's
+      threading configuration. Thanks to AMD for bringing to our attention
+      the need for a thread-safety review.
+    - Added an option to the testsuite to simulate application-level
+      multithreading. Specifically, each thread maintains a counter that is
+      incremented after each experiment. The thread only executes the
+      experiment if: counter % n_threads == thread_id. In other words, the
+      threads simply take turns executing each problem experiment. Also,
+      POSIX guarantees that fprintf() will not intermingle output, so
+      output was switched to fprintf() instead of libblis_test_fprintf().
+    - Changed membrk_t objects to use pthread_mutex_t intead of mtx_t and
+      replaced use of bli_mutex_init()/_finalize() in bli_membrk.c with
+      wrappers to pthread_mutex_init()/_destroy().
+    - Changed the implementation of bli_l3_ind_oper_enable_only() to fix
+      a race condition; specifically, two threads calling the function with
+      the same parameters could lead to a non-deterministic outcome.
+    - Added #include <pthread.h> to bli_cpuid.c and moved the same in
+      bli_arch.c.
+    - Added 'const' to declaration of OPT_MARKER in bli_getopt.c.
+    - Added #include <pthread.h> to bli_system.h.
+    - Added add-copyright.py script to automate adding new copyright lines
+      to (and updating existing lines of) source files.
+
+commit aaa549f4d1e63929fe2bea023ce849253cfbbb42
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Aug 26 20:13:51 2018 -0500
+
+    Minor update to configure --help (--sharedir option).
+    
+    Details:
+    - Fixed/tweaked description for --sharedir=SHAREDIR option.
+
+commit 573b8ac373f821a65cc8afd51cdbe03b8ec01081
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Aug 26 13:51:32 2018 -0500
+
+    Fixed copy-paste typo in previous commit.
+    
+    Details:
+    - Fixed a typo in travis/do_testsuite.sh introduced in 62ea1d3.
+
+commit 62ea1d33d3bc1e890420a1e828b9d0e87e87533b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Aug 26 13:35:53 2018 -0500
+
+    Fixed broken out-of-tree builds.
+    
+    Details:
+    - Fixed stale filepaths to check-blastest.sh and check-blistest.sh in
+      travis/do_testsuite.sh and travis/do_sde.sh.
+    - Create a symbolic link to the 'config' directory so that the top-level
+      Makefile can find the configs' make_defs.mk files during out-of-tree
+      builds.
+    - Added additional case handling to out-of-tree scenario to handle
+      situations where files 'Makefile', 'common.mk', or 'config' exist but
+      are not symbolic links. In such cases, configure warns the user and
+      exits.
+    - Homogenized various error messages throughout configure.
+    - Belated thanks to Victor Eijkhout for requesting the feature added
+      in 0f491e9 whereby lesser Makefiles can compile and link against
+      an existing installation of BLIS.
+
+commit 0f491e994a7e14d4dfce26e6a51dba2bccad29a3
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Aug 25 20:12:36 2018 -0500
+
+    Allow lesser Makefiles to reference installed BLIS.
+    
+    Details:
+    - Updated the build system so that "lesser" Makefiles, such as those in
+      belonging to example code or the testsuite, may be run even if the
+      directory is orphaned from the original build tree. This allows a
+      user to configure, compile, and install BLIS, delete the build tree
+      (that is, the source distribution, or the build directory for out-
+      of-tree builds) and then compile example or testsuite code and link
+      against the installed copy of BLIS (provided the example or testsuite
+      directory was preserved or obtained from another source). The only
+      requirement is that make be invoked while setting the
+      BLIS_INSTALL_PATH variable to the same installation prefix used when
+      BLIS was configured. The easiest syntax is:
+    
+        make BLIS_INSTALL_PATH=/install/prefix
+    
+      though it's also permissible to set BLIS_INSTALL_PATH as an
+      environment variable prior to running 'make'.
+    - Updated all lesser Makefiles to implement the new aforementioned build
+      behavior.
+    - Relocated check-blastest.sh and check-blistest.sh from build to
+      blastest and testsuite, respectively, so that if those directories are
+      copied elsewhere the user can still run 'make check' locally.
+    - Updated docs/Testsuite.md with language that mentions this new option
+      of building/linking against an installed copy of BLIS.
+
+commit 36ff92ce0d3b428b15b6cddc6f5944afe22e43ec
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Aug 24 18:26:09 2018 -0500
+
+    Missing C++ compiler no longer fatal to configure.
+    
+    Details:
+    - Changed configure so that the absence of any C++ compiler from the
+      pre-defined search list does not result in an exit. Instead, in this
+      situation, the found_cxx variable is assigned 'c++notfound' and the
+      error message is changed to remind the user that C++ will not be
+      available in the sandbox. Thanks to Devangi Parikh for reporting this
+      issue.
+    - Also tweaked the message when a C++ compiler *is* found to remind any
+      would-be confused user that BLIS will only use C++ if it is needed by
+      code in the sandbox.
+
+commit 658f0a129bdc565b072696b6ebddce501132091c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Aug 24 17:49:37 2018 -0500
+
+    Fixed obscure integer size bug in va_arg() usage.
+    
+    Details:
+    - Fixed a bug in the way that the variadic bli_cntx_set_l3_nat_ukrs()
+      function was defined. This function is meant to take a microkernel id,
+      microkernel datatype, microkernel address, and microkernel preference
+      as arguments, and is typically called within the bli_cntx_init_*()
+      function defined within a sub-configuration for initializing an
+      appropriate context. The problem is with the final argument: the
+      microkernel preference. These preferences are actually boolean values,
+      0 or 1 (encoded as FALSE or TRUE). Since the variadic function does
+      not give the compiler any type information for any variadic arguments,
+      they are "promoted" in the course of internal (macroized) processing
+      according to default argument promotion rules. Thus, integer literals
+      such as 0 and 1 become int and floating-point literals (such as 0.0 or
+      1.0) become double. Previous to this commit, we indicated to va_arg()
+      that the ukernel preference was a 'bool_t', which is a typedef of
+      int64_t on 64-bit systems. On systems where int is defined as 64 bits,
+      no problems manifest since int is the same size as the type we passed
+      in to va_arg(), but on systems where int is 32 bits, the ukernel
+      preference could be misinterpreted as a garbage value. (This was
+      observed on a modern armv8 system.) The fix was to interpret the
+      bool_t value as int and then immediately typecast it to and store it
+      as a bool_t. Special thanks to Devangi Parikh for helping track down
+      this issue, including deciphering the use of va_arg() and its
+      byzantine treatment of types.
+    - Added explicit typecasts for all invocations of va_arg() in
+      bli_cntx.c.
+
+commit e71dc389120b032e42091e4d1a928515ed6f7275
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Aug 24 15:56:04 2018 -0500
+
+    Fixed a very minor memory leak in gks.
+    
+    Details:
+    - Fixed a memory leak in the global kernel structure that resulted in 56
+      bytes per configured architecture (of which only 18 are presently
+      supported by BLIS). The leak would only manifest if BLIS was
+      initialized and then finalized before the application terminated.
+      Thanks to Devangi Parikh for helping track down this leak.
+
+commit a7e3a5f9753468c8e665e6c5c3b38d22b7c92500
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Aug 24 14:51:11 2018 -0500
+
+    Fixed uncallable bli_finalize().
+    
+    Details:
+    - Previously, bli_finalize_once()--which, like bli_init_once(), was
+      implemented in terms of pthread_once()--was using the same
+      pthread_once_t control object being used by bli_init(), thus
+      guaranteeing that it would never be called as long as BLIS had already
+      been initialized. This could manifest as a rather large memory leak to
+      any application that attempted to finalize BLIS midway through its
+      execution (since BLIS reserves several megabytes of storage for
+      packing buffers per thread used). The fix entailed giving each
+      function its own pthread_once_t object. Thanks to Devangi Parikh for
+      helping track down this very quiet bug.
+
+commit a79c21c7c17fb4854fd24c73b81ec5543f74082d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Aug 23 14:40:46 2018 -0500
+
+    Fixed cleanmk target post-1b0f8d6.
+    
+    Details:
+    - Changed the cleanmk target to delete makefile fragments from their new
+      home in obj/$(CONFIG_NAME). The old definition worked only because of
+      a typo (REFERKN_PATH instead of REFKERN_PATH), and only in the
+      non-verbose (V != 1) case.
+
+commit ffb57242f3eb1175c991fe1b492595fdaa175c27
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Aug 22 18:22:41 2018 -0500
+
+    Cosmetic output changes to configure.
+    
+    Details:
+    - Disable sandbox-related obj directory creation, directory mirroring,
+      and makefile fragment generation when a sandbox is not enabled.
+    - Prevent various duplicate actions by configure (such as those
+      mentioned above for sandboxes above).
+
+commit ac17454aae9ad430f05aa7c156919c6c695c300c
+Merge: a77bec76 7afd095a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Aug 22 15:34:53 2018 -0500
+
+    Merge branch 'master' into dev
+
+commit a77bec766a01e42f13f8cacbec8c4cbde8ecefef
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Aug 22 15:31:29 2018 -0500
+
+    Whitespace changes, minor renames in build system.
+    
+    Details:
+    - Minor whitespace cleanup, mostly in the form of spaces -> tabs.
+    - Shortened certain variables' _FRAGMENT_ infixes to _FRAG_ in
+      common.mk.
+
+commit 1b0f8d60d1132b56485cc202ebf1246898d3a2a4
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Wed Aug 22 13:19:29 2018 -0700
+
+    Generate makefile fragments in build tree (#240)
+    
+    * Make src dir read-only in out-of-tree build test.
+    
+    * Generate makefile fragments in the build tree.
+
+commit 7afd095af33690e0175903852b354c9fe46993f6
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Aug 22 14:58:24 2018 -0500
+
+    Removed skx from code snippet in previous commit.
+    
+    Details:
+    - The docs/ConfigurationHowTo.md document was written with examples that
+      did not yet contain the skx sub-configuration, but the previous commit
+      included bli_arch.c code copied and pasted from a recent commit that
+      does support skx. To keep things consistent, I've removed skx from the
+      recently-added ConfigurationHowTo.md code snippet.
+
+commit 48211a980d78673133076e8eced1007b1980f5e6
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Aug 22 14:55:02 2018 -0500
+
+    Update to docs/ConfigurationHowTo.md.
+    
+    Details:
+    - Added missing language directing the reader to modify the config_name
+      string array in bli_arch.c when adding a new sub-configuration. Thanks
+      to Devangi Parikh for reporting this missing section.
+
+commit 65c9096c6e21f3dc2947fa12be9ea3034f8662dc
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Aug 17 11:44:12 2018 -0500
+
+    Fixed broken -p option to configure.
+    
+    Details:
+    - Fixed some stale code that was preventing the -p option to configure
+      from working as expected (though the --prefix option was unaffected).
+      This bug was was most likely introduced in  7e5648c (May 7 2018).
+      Thanks to Dave Love for reporting this issue.
+
+commit e358d5e497c77b305af462f44266370a596445e2
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Aug 16 12:18:45 2018 -0500
+
+    README.md update (Funding section).
+
+commit a61dd5e7bcf23f7237d407a5e06dd44e1bec9ad0
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Aug 14 17:08:03 2018 -0500
+
+    Changed 'test' target to be more like 'check'.
+    
+    Details:
+    - Redefined the 'test' make target in the top-level Makefile so that the
+      final result ("everything passed" or at "least one failure") is echoed
+      to stdout. Note that 'check' is unchanged, and thus is now effectively
+      a fast version of 'test'.
+    - Updated docs/BuildSystem.md to reflect the above change.
+
+commit ce5c3a198a7ae1ca676c27da4541d51ed19d16e1
+Merge: 4f6745d6 0bbe69d5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Aug 14 16:52:19 2018 -0500
+
+    Merge branch 'master' of github.com:flame/blis
+
+commit 4f6745d68a2c66511695eff0beb00a82ffc6bbbe
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Aug 14 16:50:47 2018 -0500
+
+    Fixed link error when building only shared library.
+    
+    Details:
+    - Fixed a linker error that occurred when attempting to compile and link
+      the testsuite and/or BLAS test drivers after having configured BLIS to
+      only generate a shared library (no static library). The chosen
+      solution involved
+      (1) adding the local library path, $(BASE_LIB_PATH), to the search
+          paths for the shared library via the link option
+          -Wl,-rpath,$(BASE_LIB_PATH).
+      (2) adding a local symlink to $(BASE_LIB_PATH) that uses the .so major
+          version number so that ld would find the shared library at
+          execution time.
+      Thanks to Sajid Ali for reporting this issue, to Devin Matthews for
+      pointing out the need for the -rpath option, and to Devangi Parikh for
+      helping Sajid isolate the problem.
+    - Added #include <ctype.h> to bli_system.h to avoid a compiler warning
+      resulting from using toupper() from bli_string.c without a prototype.
+      Thanks again to Sajid Ali, whose build log revealed this compiler
+      warning.
+    - Added '*.so.*' to .gitignore.
+    - CREDITS file update.
+
+commit 0bbe69d5ed260849297d8f2d35b7668d167482ed
+Author: Devangi N. Parikh <dnp@cs.utexas.edu>
+Date:   Tue Aug 14 14:49:58 2018 -0500
+
+    Updated plotting scripts in test/studies.
+    
+    Details:
+    - Fixed indexing on plots to correspond to the removal of dtime in
+      the test drivers.
+
+commit e93e0e149e087e08eca2885f1a748a4e88ffe55d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Aug 7 15:54:30 2018 -0500
+
+    Removed redefinition of axpyv, scal2v func types.
+    
+    Details:
+    - Removed a stray/accidental redefinition of axpyv and scal2v function
+      types in frame/1d/bli_l1d_ft.h (probably a copy/paste leftover during
+      development).
+
+commit 1deb33bd16349aaa643694d1bd685ff8a9a5f476
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Aug 7 15:02:50 2018 -0500
+
+    Updated penryn kernels to use new _ker_ft type names.
+    
+    Details:
+    - Updated older _ft kernel type suffixes used within penryn level-1v
+      and -1f kernels to use the newer _ker_ft suffix that was introduced
+      in 0175483. (Thank you Travis CI.)
+
+commit 9cb0b023ca91abdc056d726cdc070062e4954611
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Aug 7 14:21:07 2018 -0500
+
+    INSTALL file update.
+
+commit 017548314f3f78f66fbe3264509ac5302bd8d62b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Aug 7 14:13:25 2018 -0500
+
+    Replaced function chooser macros w/ func ptr arrays.
+    
+    Details:
+    - Previously, most object API functions (_oapi.c) used a function
+      chooser macro that would expand out to an if-elseif-elseif-else
+      conditional that used a num_t datatype to call the appropriate
+      type-specific API (_tapi.c). This always felt a little hackish, and
+      would get in the way somewhat of addig support for new num_t datatypes
+      in the future. So, I've replaced that functionality with code that
+      queries a function pointer that is then typecast appropriately. This
+      model of function calling was already pervasive for kernels queried
+      from the cntx_t structure. It was also already in use in various other
+      functions, such as macrokernels, and this commit simply extends that
+      pattern.
+    - The above change required many new files, mostly header files, that
+      define the function types (mostly _ft.h) for the queriable functions
+      as well as some source files to define the function pointer arrays and
+      their corresponding query functions (_fpa.c). Various other function
+      types, mostly for kernel function types, were renamed to reduce the
+      potential for confusion with the function types for expert and basic
+      (non-expert) typed API functions.
+    - Removed definitions for all of the "bli_call_ft_*()" function chooser
+      macros from bli_misc_macro_defs.h.
+
+commit addce089664561f9f63efa6f107e58fc48d29871
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Aug 6 13:18:20 2018 -0500
+
+    Format spec and other updates in test, test/3m4m.
+    
+    Details:
+    - Removed the dtime (delta time, or wallclock time) column from the
+      matlab output of all test drivers in test, test/3m4m, test/studies.
+      This value was rarely (if ever) really needed and usually only served
+      to take up screen space.
+    - Updated format specifier in test/studies/skx to use %7.2f instead of
+      %6.3f.
+    - For the test drivers in 'test' directory, added an initial line of
+      output that sets last entry of matlab matrix to zero in order to
+      induce a pre-allocation of the entire array of performance results.
+
+commit 94d5ef42c833a4d43e50a80d46dddbd7a56d2db6
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Aug 4 15:57:17 2018 -0500
+
+    Adjusted gflops format spec in testsuite, test/3m4m.
+    
+    Details:
+    - Changed the format specifier for the gflops column in the testsuite
+      output from %7.3f to %7.2f. This was done mainly to keep the output
+      aligned properly when the expected perfomance exceeded 1000 gflops.
+      Also, two decimal places still conveys plenty of precision for all
+      practical applications, including just eyeballing performance deltas
+      between two executions (let alone two implementations).
+    - Changed the format specifier for gflops in the test/3m4m drivers
+      from %6.3f to %7.2f (for the same reasons listed above).
+
+commit c7ff06bae92b9b6c6656f2030d13486b95417821
+Merge: 6074082c ebe998d0
+Author: Devangi N. Parikh <dnp@cs.utexas.edu>
+Date:   Wed Aug 1 14:20:41 2018 -0500
+
+    Merge branch 'master' of https://github.com/flame/blis
+
+commit 6074082cd359dd775ef72478f8f3a281c5a6a6f9
+Author: Devangi N. Parikh <dnp@cs.utexas.edu>
+Date:   Wed Aug 1 13:30:51 2018 -0500
+
+    Fixed bug in bli_cntx_set_packm_ker_dt() implementation.
+    
+    Details:
+    - Fixed bug in static function bli_cntx_set_[packm/unpackm]_ker_dt(), which
+       were incorrectly calling bli_cntx_get_[packm/unpackm]_ker_dt to get the
+       corresponding func_t.
+
+commit ebe998d06cc56a9a9d66990b6ebf683d6fd0efdf
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Aug 1 13:24:00 2018 -0500
+
+    Fixed typos in BuildSystem.md from previuos commit.
+
+commit e72a344e94c5ae253f69b60f41d92ca89a5d1d1c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Aug 1 13:00:38 2018 -0500
+
+    Added table of 'make' targets to BuildSystem.md.
+    
+    Details:
+    - Added a new section to BuildSystem.md that describes the most useful
+      make targets defined in the top-level Makefile.
+
+commit 4f60d0288e00586dc921ff57db851f1266ff8e70
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jul 30 19:22:57 2018 -0500
+
+    README.md, comment updates.
+    
+    Details:
+    - Added links, and sandbox language to README.md.
+    - Adjusted some comments in high-level level-3 object functions to make
+      clear what bli_thread_init_rntm() does.
+
+commit 455d3f49e5c8362395be14c79e6adb5123e29623
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Jul 29 18:31:29 2018 -0500
+
+    Edits to object/typed API, multithreading docs.
+
+commit 922a1c05e06f52c97fb369870dce07233e61c4c9
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Jul 28 20:15:55 2018 -0500
+
+    More tweaks to README.md.
+
+commit a7a0cf2b5d9f1dea5061c0f20eeaf371dfd4ea12
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Jul 28 16:59:31 2018 -0500
+
+    More edits to docs/Multithreading.md.
+
+commit be21d0cf68c330fd0d2048465a43ddc59d0b9d6c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Jul 28 16:46:51 2018 -0500
+
+    Fixed typos in docs/Multithreading.md.
+
+commit eac07c7b4f7a41c68d63f1e67141b2b58009609e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Jul 28 16:45:28 2018 -0500
+
+    Edits to docs/Multithreading.md.
+
+commit 5438375a032273b46ae626fee909ffc05f48ab72
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Jul 28 16:34:21 2018 -0500
+
+    Fixed link in README.md.
+
+commit 1f1a237d3f0b24d71ce2d7ee52d8a84f8e6a29ad
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Jul 28 16:33:28 2018 -0500
+
+    Fixed links in BLISTypedAPI.md.
+
+commit 89c8806e3aa49310f36c0314c5f6956c83a627a1
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Jul 28 16:30:56 2018 -0500
+
+    Minor doc fixes to previous commit.
+
+commit b8c7574f84873b9c408f70c29c41ce464df57c2d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Jul 28 16:27:09 2018 -0500
+
+    README.md, typed/object API updates.
+    
+    Details:
+    - Updated the typed and object APIs to include language on the rntm_t
+      parameters in the expert interfaces.
+    - Updated README to include link to object API.
+
+commit 29c34c4adb02d91fb34d1ccc0e821d6cfb7ce5c5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jul 27 16:26:19 2018 -0500
+
+    CREDITS file update.
+
+commit 55a04edf52ac4f16c51b738bc884684adc1f1777
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jul 27 16:10:46 2018 -0500
+
+    CHANGELOG update (0.4.0)
+
+commit 4ad61ce905d250dd3ef197f0d06a69ce6d99d309 (tag: 0.4.0)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jul 27 16:10:43 2018 -0500
+
+    Version file update (0.4.0)
+
+commit b86cf13793b07f35c027a56c9faec8f4b6279d3e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jul 27 16:08:21 2018 -0500
+
+    Release Notes update in advance of next version.
+
+commit a8b4084a0e04e47ac02ceae93a2018f5363e1205
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jul 27 16:07:26 2018 -0500
+
+    CREDITS file update.
+
+commit 8e10cac5f388ac961c3d77b0a465214e7c9dc91a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jul 27 14:45:35 2018 -0500
+
+    Updates to CREDITS, RELEASING, config/README.md.
+    
+    Details:
+    - Added individuals' github handles to CREDITS file.
+    - Updated RELEASING, config/README.md files.
+
+commit 401b69c8f26a86726ac5e1fb4f9fc2d2098ef204
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jul 25 17:55:13 2018 -0500
+
+    More indentation in docs/ConfigurationHowTo.md.
+
+commit 1c6a1b921ef96999bb449d657cca6d9a556f7245
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jul 25 17:14:58 2018 -0500
+
+    Trying new indentation in ConfigurationHowTo.md.
+    
+    Details:
+    - Modified a few sections to take advantage of a feature of markdown
+      that allows a bullet or enumeration to have multiple paragraphs. This
+      is a trial run to make sure the indentation looks good when rendered
+      in a web browser.
+
+commit 71f978719527fcf17617cb234e48bf349a76c12d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jul 25 15:55:36 2018 -0500
+
+    Whitespace changes to macrokernels' func ptr defs.
+
+commit 87d57c31c2bfcf4609dfe31ce915e9345150e613
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jul 25 14:20:18 2018 -0500
+
+    Various minor updates to typed, object API docs.
+
+commit fb6e16268aaafbab2fd78d47cbf821e2152261fd
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jul 25 14:17:28 2018 -0500
+
+    Consolidated prototypes in bli_l1v_tapi.h.
+    
+    Details:
+    - Consolidated typed API function prototypes in bli_l1v_tapi.h by
+      leveraging identical function signatures between operations.
+    - Removed 'restrict' keyword since it is not actually present in the
+      function definitions.
+
+commit af60d738f21340ccb0903e6c87dbf6af4fc44fc0
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jul 24 15:35:52 2018 -0500
+
+    Finished object creation part of BLISObjectAPI.md.
+    
+    Details:
+    - Filled in remaining section on object creation function reference
+      of BLISObjectAPI.md. All object management functions demonstrated as
+      part of the example code in examples/oapi are now documented, as well
+      as some other functions that are not shown in the example code.
+    - Updated variuos links (mostly in function index) to correctly point to
+      the object API reference instead of the typed API reference.
+    - Added documentation to getijm, setijm.
+
+commit 8217a6a3b68382c62f016c658d337e6086112fef
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jul 24 13:13:10 2018 -0500
+
+    Moved sandbox README.md to docs/Sandboxes.md.
+    
+    Details:
+    - Relocated sandbox/ref99/README.md to docs/Sandboxes.md and made minor
+      edits to the document.
+
+commit b7db29332394324ffd1a73c3847a75e9a5b38c8d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jul 19 11:14:30 2018 -0500
+
+    Explicitly typecast return vals in static funcs.
+    
+    Details:
+    - Added explicit typecasting to various functions (mostly static
+      functions), primarily those in bli_param_macro_defs.h,
+      bli_obj_macro_defs.h, bli_cntx.h, bli_cntl.h, and a few other header
+      files.
+    - This change was prompted by feedback from Jacob Gorm Hansen, who
+      reported that #including "blis.h" from his application caused a
+      gcc to output error messages (relating to types being returned
+      mismatching the declared return types) when used via the C++ compiler
+      front-end. This is the first pass of fixes, and we may need to
+      iterate with additional follow-up commits (#233).
+
+commit fa08e5ead95f9d757af6ab5b095a8bf131e3874d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jul 17 19:02:15 2018 -0500
+
+    Fixed minor issues in ecbebe7 with mt disabled.
+    
+    Details:
+    - Fixed an unused variable warning in frame/base/bli_rntm.c when
+      multithreading is disabled.
+    - Fixed a missing variable declaration in bli_thread_init_rntm_from_env()
+      when multithreading is disabled.
+
+commit ecbebe7c2e43950dfa369f71c2b83cabe348a046
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jul 17 18:37:32 2018 -0500
+
+    Defined rntm_t to relocate cntx_t.thrloop (#235).
+    
+    Details:
+    - Defined a new struct datatype, rntm_t (runtime), to house the thrloop
+      field of the cntx_t (context). The thrloop array holds the number of
+      ways of parallelism (thread "splits") to extract per level-3
+      algorithmic loop until those values can be used to create a
+      corresponding node in the thread control tree (thrinfo_t structure),
+      which (for any given level-3 invocation) usually happens by the time
+      the macrokernel is called for the first time.
+    - Relocating the thrloop from the cntx_t remedies a thread-safety issue
+      when invoking level-3 operations from two or more application threads.
+      The race condition existed because the cntx_t, a pointer to which is
+      usually queried from the global kernel structure (gks), is supposed to
+      be a read-only. However, the previous code would write to the cntx_t's
+      thrloop field *after* it had been queried, thus violating its read-only
+      status. In practice, this would not cause a problem when a sequential
+      application made a multithreaded call to BLIS, nor when two or more
+      application threads used the same parallelization scheme when calling
+      BLIS, because in either case all application theads would be using
+      the same ways of parallelism for each loop. The true effects of the
+      race condition were limited to situations where two or more application
+      theads used *different* parallelization schemes for any given level-3
+      call.
+    - In remedying the above race condition, the application or calling
+      library can now specify the parallelization scheme on a per-call basis.
+      All that is required is that the thread encode its request for
+      parallelism into the rntm_t struct prior to passing the address of the
+      rntm_t to one of the expert interfaces of either the typed or object
+      APIs. This allows, for example, one application thread to extract 4-way
+      parallelism from a call to gemm while another application thread
+      requests 2-way parallelism. Or, two threads could each request 4-way
+      parallelism, but from different loops.
+    - A rntm_t* parameter has been added to the function signatures of most
+      of the level-3 implementation stack (with the most notable exception
+      being packm) as well as all level-1v, -1d, -1f, -1m, and -2 expert
+      APIs. (A few internal functions gained the rntm_t* parameter even
+      though they currently have no use for it, such as bli_l3_packm().)
+      This required some internal calls to some of those functions to
+      be updated since BLIS was already using those operations internally
+      via the expert interfaces. For situations where a rntm_t object is
+      not available, such as within packm/unpackm implementations, NULL is
+      passed in to the relevant expert interfaces. This is acceptable for
+      now since parallelism is not obtained for non-level-3 operations.
+    - Revamped how global parallelism is encoded. First, the conventional
+      environment variables such as BLIS_NUM_THREADS and BLIS_*_NT  are only
+      read once, at library initialization. (Thanks to Nathaniel Smith for
+      suggesting this to avoid repeated calls getenv(), which can be slow.)
+      Those values are recorded to a global rntm_t object. Public APIs, in
+      bli_thread.c, are still available to get/set these values from the
+      global rntm_t, though now the "set" functions have additional logic
+      to ensure that the values are set in a synchronous manner via a mutex.
+      If/when NULL is passed into an expert API (meaning the user opted to
+      not provide a custom rntm_t), the values from the global rntm_t are
+      copied to a local rntm_t, which is then passed down the function stack.
+      Calling a basic API is equivalent to calling the expert APIs with NULL
+      for the cntx and rntm parameters, which means the semantic behavior of
+      these basic APIs (vis-a-vis multithreading) is unchanged from before.
+    - Renamed bli_cntx_set_thrloop_from_env() to bli_rntm_set_ways_for_op()
+      and reimplemented, with the function now being able to treat the
+      incoming rntm_t in a manner agnostic to its origin--whether it came
+      from the application or is an internal copy of the global rntm_t.
+    - Removed various global runtime APIs for setting the number of ways of
+      parallelism for individual loops (e.g. bli_thread_set_*_nt()) as well
+      as the corresponding "get" functions. The new model simplifies these
+      interfaces so that one must either set the total number of threads, OR
+      set all of the ways of parallelism for each loop simultaneously (in a
+      single function call).
+    - Updated sandbox/ref99 according to above changes.
+    - Rewrote/augmented docs/Multithreading.md to document the three methods
+      (and two specific ways within each method) of requesting parallelism
+      in BLIS.
+    - Removed old, disabled code from bli_l3_thrinfo.c.
+    - Whitespace changes to code (e.g. bli_obj.c) and docs/BuildSystem.md.
+
+commit 323eaaab99752858b12e81e2eb8e416f009a3028
+Author: Devangi N. Parikh <dnp@cs.utexas.edu>
+Date:   Fri Jul 13 11:40:06 2018 -0500
+
+    Removed left over code from plotting scripts.
+
+commit 60c197736495b47ce974ffb9b43874d1ebcfe78c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jul 12 19:22:14 2018 -0500
+
+    Documented accessor functions in BLISObjectAPI.md.
+    
+    Details:
+    - Added documentation to docs/BLISObjectAPI.md for a handful of
+      commonly-used obj_t accessor functions.
+    - Minor updates to docs/BLISTypedAPI.md.
+
+commit 77327ad796e11ef67df0cc91d45ed663598ba4df
+Merge: 73b0b2a3 9fef8575
+Author: Devangi N. Parikh <dnp@cs.utexas.edu>
+Date:   Thu Jul 12 17:09:33 2018 -0500
+
+    Merge branch 'master' of https://github.com/flame/blis
+
+commit 73b0b2a3ac1be6dfbe85c116886b4e29d98ac945
+Author: Devangi N. Parikh <dnp@cs.utexas.edu>
+Date:   Thu Jul 12 16:53:10 2018 -0500
+
+    Created hardware-specific test driver directory.
+    
+    Details:
+    - Created a 'studies' subdirectory within 'test' to be used to house
+       test drivers, makefiles, run scripts, matlab plot code, and related
+       files that have been customized for collecting performance data on
+       specific host machines or product lines. This new setup will help us
+       catalog, track, and share test driver materials over time, and in a
+       way that facilitates reproducibility.
+    - Created an 'skx' subdirectory within 'test/studies' to house various
+       level-3 test driver files used to measure performance on SkylakeX
+       nodes (specifically, those nodes used by TACC's stampede2 system).
+
+commit 9fef85756d15ee0f977fff6e57acd01c20cba184
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jul 11 18:40:30 2018 -0500
+
+    Cleaned up loose ends in BLISObjectAPI.md.
+    
+    Details:
+    - Deleted some lines from the API function signatures that did not
+      belong (and were only left over from the copy-paste of the typed API).
+    - Fixed some paragraph-in-bullet indentation.
+
+commit 80ddeae4629022b69fdf1f1b053a1fcba643c40c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jul 11 18:31:57 2018 -0500
+
+    Added BLISObjectAPI.md to docs.
+    
+    Details:
+    - Added first draft of BLISObjectAPI.md. (Object management section is
+      still missing.)
+    - Small fixes to BLISTypedAPI.md found while writing BLISObjectAPI.md.
+    - In various .md files, changed ``` verbatim blocks to language
+      attributes (e.g. ```c for C code).
+
+commit 038442add39ce629fee0d960b212ce0c95138d46
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jul 11 12:24:18 2018 -0500
+
+    Added -lpthread to makefile example in BuildSystem.md.
+    
+    Details:
+    - Added missing pthreads library linking to example makefile in
+      docs/BuildSystem.md, as well as similar language to build requirements
+      at the beginning of the document. Thanks to Stefanos Mavros for
+      bringing this to our attention.
+    - Updated CREDITS file.
+
+commit bf10d8624e7b5902c9d9189c7c93f318b8e1b9a5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jul 9 18:40:13 2018 -0500
+
+    Small updates to KernelsHowTo.md, BLISTypedAPI.md.
+    
+    Details:
+    - Minor updates to BLISTypedAPI.md, mostly to bring terminology
+      up-to-date with the new "typed API" classification.
+    - Added contents section to KernelsHowTo.md.
+
+commit 1fd3bce59e43b422e62f9684bca9d1296a29edc3
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jul 9 18:20:11 2018 -0500
+
+    Further updates to KernelsHowTo.md, BLISTypedAPI.md.
+    
+    Details:
+    - Added missing level-1v operations to BLISTypedAPI (e.g. axpbyv,
+      xpbyv).
+    - Updated broken linkes in KernelsHowTo.md based on misnamed anchors.
+    - Other minor changes.
+
+commit c40d30a6c920bd2e5a8353a3cd07a7e2b2265758
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jul 9 17:55:54 2018 -0500
+
+    Updated KernelsHowTo.md, BLISTypedAPI.md.
+    
+    Details;
+    - Added missing (basic) information in KernelsHowTo.md for level-1f and
+      level-1v kernels.
+    - Updated section regarding contexts.
+
+commit f8913c2bf91c0e0fb4e68aedf64a242a19db92a0
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Jul 7 20:35:13 2018 -0500
+
+    Fixed outdated scalv() calls in penryn l1f kernels.
+    
+    Details:
+    - Fixed stale calls to dscalv() from the dotxf and dotxaxpyf penryn
+      kernels that were not updated during the basic/expert API separation
+      in e88aeda.
+
+commit e78e71d549ac17ecd52c7b33008df1cd78f1b59e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Jul 7 20:18:09 2018 -0500
+
+    Added README.md mention/link to examples/tapi.
+    
+    Details:
+    - Added language to README.md to bring the reader's attention to the
+      example code for the typed API (in addition to those for the object
+      API).
+
+commit 419ffb158573a26bfec47bac73e4394e7926a7b8
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Jul 7 20:14:23 2018 -0500
+
+    Updates to README.md.
+    
+    Details:
+    - Updated wiki links according to renamed/relocated files in 'docs'.
+    - Converted links to relative paths.
+    - Added link to docs/Multithreading.md.
+
+commit 7d3e8a7e5f1ec299d009fb6c9071f0c1b089b460
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Jul 7 20:01:29 2018 -0500
+
+    Reverted docs/*.md links to relative paths.
+    
+    Details:
+    - Within the documents in docs/*.md, reverted links to other local
+      documents to relative paths.
+    - Fixed some links/documents that did not yet have the '.md' suffix.
+    - Testing whether we can use relative links ('docs/BLISTypedAPI.md')
+      from within README.md.
+
+commit d97c862c2b9170d774f414e63ae365488fffb4f5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Jul 7 19:40:41 2018 -0500
+
+    Updated links (URLs) in docs/*.md.
+    
+    Details:
+    - Updated most markdown links in the documents/wikis to use absolute
+      paths instead of the relative paths that were in use previously.
+      A few links were not updated, except for adding a ".md" to reflect
+      the documents' new names, in order to test whether relative
+      linking still works.
+
+commit 3a0c12135875e0fb04de9798664e4fae632d994e
+Merge: 2c7960c8 bcacddfa
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Jul 7 16:51:38 2018 -0500
+
+    Merge branch 'dev'
+
+commit bcacddfad75b20969660606751eea6ead6c42ca9
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Jul 7 16:45:29 2018 -0500
+
+    Added 'docs' directory with wiki markdown files.
+    
+    Details:
+    - Exported all github wikis to a new 'docs' directory.
+    - Renamed 'BLISAPIQuickReference' wiki to 'BLISTypedAPI' and removed
+      all cntx_t* arguments from the (now non-expert) APIs (with the
+      exception of the kernel APIs).
+    - Added section to BuildSystem documenting new ARG_MAX hack.
+
+commit 3ee2bc0f7aa3b08da92331d64271bee99eaf8c1d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Jul 7 16:02:16 2018 -0500
+
+    Renamed files that distinguish basic/expert APIs.
+    
+    Details:
+    - Renamed various files that were previously named according to a
+      "with context" or "without context" convention. For example, the
+      following files in frame/3 were renamed:
+    
+        frame/3/bli_l3_oapi_woc.c -> frame/3/bli_l3_oapi_ba.c
+        frame/3/bli_l3_oapi_wc.c  -> frame/3/bli_l3_oapi_ex.c
+        frame/3/bli_l3_tapi_woc.c -> frame/3/bli_l3_tapi_ba.c
+        frame/3/bli_l3_tapi_wc.c  -> frame/3/bli_l3_tapi_ex.c
+    
+      Here, the "ba" is for "basic" and "ex" is for "expert". This new
+      naming scheme will make more sense especially if/when additional
+      expert parameters are added to the expert APIs (typed and object).
+
+commit e88aedae735dfeb6fa5ac28d4527eb3ca58c6510
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jul 6 19:14:02 2018 -0500
+
+    Separated expert, non-expert typed APIs.
+    
+    Details:
+    - Split existing typed APIs into two subsets of interfaces: one for use
+      with expert parameters, such as the cntx_t*, and one without. This
+      separation was already in place for the object APIs, and after this
+      commit the typed and object APIs will have similar expert and non-
+      expert APIs. The expert functions will be suffixed with "_ex" just as
+      is the case for expert interfaces in the object APIs.
+    - Updated internal invocations of typed APIs (functions such as
+      bli_?setm() and bli_?scalv()) throughout BLIS to reflect use of the
+      new explictly expert APIs.
+    - Updated example code in examples/tapi to reflect the existence (and
+      usage) of non-expert APIs.
+    - Bumped the major soname version number in 'so_version'. While code
+      compiled against a previous version/commit will likely still work
+      (since the old typed function symbol names still exist in the new API,
+      just with one less function argument) the semantics of the function
+      have changed if the cntx_t* parameter the application passes in is
+      non-NULL. For example, calling bli_daxpyv() with a non-NULL context
+      does not behave the same way now as it did before; before, the
+      context would be used in the computation, and now the context would
+      be ignored since the interace for that function no longer expects a
+      context argument.
+
+commit 331694e52414c0cd50048daf880a9ace9e29b94a
+Author: Isuru Fernando <isuruf@gmail.com>
+Date:   Fri Jul 6 09:07:38 2018 -0600
+
+    Fix windows build and enable x86_64 on appveyor (#230)
+    
+    * Upload artifacts built on appveyor (#228)
+    
+    * Upload artifacts
+    
+    * Fix install in appveyor
+    
+    * Remove windows.h in bli_winsys.c (#229)
+    
+    Looks like it is unneeded.
+    
+    * Implemented ARG_MAX hack in configure, Makefile.
+    
+    Details:
+    - Added support for --enable-arg-max-hack to configure, which will
+      change the behavior of make when building BLIS so that rather than
+      invoke the archiver/linker with all of the object files as command
+      line arguments, those object files are echoed to a temporary file
+      and then the archiver/linker is fed that temporary file via the @
+      notation. An example of this can be found in the GNU make docs at
+      https://www.gnu.org/software/make/manual/make.html#File-Function
+    - Thanks to Isuru Fernando for prompting this feature.
+    
+    * Enable x86_64 and arg-max-hack on appveyor
+    
+    * Use gas style assembly for clang on windows
+
+commit a64a780d28c99d35f237f59212772e9beff35b3e
+Merge: 89e178ce 3cb396d1
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Fri Jul 6 09:38:42 2018 -0500
+
+    Merge pull request #231 from flame/travis-pr
+    
+    Disable SDE for PRs
+
+commit 3cb396d1ae4ee569f862db201c6a976712fd128e
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Fri Jul 6 09:19:44 2018 -0500
+
+    Disable SDE for PRs
+    
+    Pull requests cannot use Travis secret variables, so SDE needs to be disabled. This PR should suffice as a test.
+
+commit 2c7960c8416ee9b67364be5f2b210fd7a0aec4b5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jul 5 14:38:33 2018 -0500
+
+    Implemented ARG_MAX hack in configure, Makefile.
+    
+    Details:
+    - Added support for --enable-arg-max-hack to configure, which will
+      change the behavior of make when building BLIS so that rather than
+      invoke the archiver/linker with all of the object files as command
+      line arguments, those object files are echoed to a temporary file
+      and then the archiver/linker is fed that temporary file via the @
+      notation. An example of this can be found in the GNU make docs at
+      https://www.gnu.org/software/make/manual/make.html#File-Function
+    - Thanks to Isuru Fernando for prompting this feature.
+
+commit c422a5cd191d47e6aeb9cea6de0e348f46e3e318
+Merge: b6470262 89e178ce
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jul 5 12:33:35 2018 -0500
+
+    Merge branch 'dev'
+
+commit b6470262ea66c0f48a5b4d85ca4bf85c1fb2b3af
+Author: Isuru Fernando <isuruf@gmail.com>
+Date:   Wed Jul 4 19:14:29 2018 -0600
+
+    Remove windows.h in bli_winsys.c (#229)
+    
+    Looks like it is unneeded.
+
+commit eac4bdf98691c5ec784af0dc11d1ad2269840661
+Author: Isuru Fernando <isuruf@gmail.com>
+Date:   Wed Jul 4 18:31:01 2018 -0600
+
+    Upload artifacts built on appveyor (#228)
+    
+    * Upload artifacts
+    
+    * Fix install in appveyor
+
+commit 89e178ce380439dea951925e33703dc4b979e914
+Merge: d868eb3e e32b2ef9
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jul 4 17:51:16 2018 -0500
+
+    Merge branch 'master' into dev
+
+commit e32b2ef983ea1c3521dd3821116c0078690f125e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jul 4 17:49:39 2018 -0500
+
+    Update to CREDITS file.
+
+commit 14648e137696484e0ff04f89b16c6b4183ea42b8
+Author: Isuru Fernando <isuruf@gmail.com>
+Date:   Wed Jul 4 16:48:42 2018 -0600
+
+    Native windows support using clang (#227)
+    
+    * Add appveyor file
+    
+    * Build script
+    
+    * Remove fPIC for now
+    
+    * copy as
+    
+    * set CC and CXX
+    
+    * Change the order of immintrin.h
+    
+    * Fix testsuite header
+    
+    * Move testsuite defs to .c
+    
+    * Fix appveyor file
+    
+    * Remove fPIC again and fix strerror_r missing bug
+    
+    * Remove appveyor script
+    
+    * cd to blis directory
+    
+    * Fix sleep implementation
+    
+    * Add f2c_types_win.h
+    
+    * Fix f2c compilation
+    
+    * Remove rdp and rename appveyor.yml
+    
+    * Remove setenv declaration in test header
+    
+    * set CPICFLAGS to empty
+    
+    * Fix another immintrin.h issue
+    
+    * Escape CFLAGS and LDFLAGS
+    
+    * Fix more ?mmintrin.h issues
+    
+    * Build x86_64 in appveyor
+    
+    * override LIBM LIBPTHREAD AR AS
+    
+    * override pthreads in configure
+    
+    * Move windows definitions to bli_winsys.h
+    
+    * Fix LIBPTHREAD default value
+    
+    * Build intel64 in appveyor for now
+
+commit b45ea92fc6f77f2313b50dbe95922f838cbead07
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jul 3 18:27:29 2018 -0500
+
+    Added typed (BLAS-like) API code examples.
+    
+    Details:
+    - Added new example code to examples/tapi demonstrating how to use the
+      BLIS typed API. These code examples directly mirror the corresponding
+      example code files in examples/oapi. This setup provides a convenient
+      opportunity for newcomers to BLIS to compare and contrast the typed
+      and object APIs when they are used to perform the same tasks.
+    - Minor cleanups to examples/oapi.
+
+commit d868eb3e200f657a1284c4cc933e7a4d25260dce
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jun 29 12:36:04 2018 -0500
+
+    Implemented bli_obj_scalar_cast_to().
+    
+    Details:
+    - Implemented bli_obj_scalar_cast_to(), which will typecast the value in
+      the internal scalar of an obj_t to a specified datatype.
+    - Changed bli_obj_scalar_attach() so that the scalar value being attached
+      is first typecast to the storage datatype of the destination object
+      rather than the target datatype.
+    - Reformatted function type signatures in bli_obj_scalar.c as well as
+      prototypes  in its corresponding header file.
+
+commit 52d80b5f09517d80ac8a7c96983a576c1ec2080b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jun 29 12:30:44 2018 -0500
+
+    Fixed static funcs related to target and exec dts.
+    
+    Details:
+    - Fixed incorrect bit shifts in the following static functions:
+        bli_obj_set_target_domain()
+        bli_obj_set_target_prec()
+        bli_obj_set_exec_domain()
+        bli_obj_set_exec_prec()
+    - Fixed incorrect bitmask in bli_dt_proj_to_single_prec().
+    - Updated bli_obj_real_part() and bli_obj_imag_part() so that it updates
+      the target and exec datatypes (in addition to the storage datatypes).
+
+commit e006f2d0eeb229c1cd05a424496a774c29bdc5d7
+Merge: bd8c55fe dafca7a0
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jun 27 15:54:38 2018 -0500
+
+    Merge branch 'dev' of github.com:flame/blis into dev
+
+commit bd8c55fe268e8e352508341ebd739ef4fc68eb92
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jun 27 15:52:37 2018 -0500
+
+    Added dt_on_output field to auxinfo_t.
+    
+    Details:
+    - Added a new field to the auxinfo_t struct that can be used, in theory,
+      to request type conversion before the microkernel stores/accumulates
+      its microtile back to memory.
+    - Added the appropriate get/set static functions to bli_type_defs.h.
+
+commit dafca7a0c2c72aaf15cb588b2bef6f246abb1905
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Mon Jun 25 16:20:10 2018 -0500
+
+    Fix botched memory addressing in Penryn kernel (no effect for GAS output).
+
+commit de493b0f349efebab98ab17f063d4d3d932c24c3
+Merge: 195480be a7166feb
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Mon Jun 25 14:26:06 2018 -0500
+
+    Merge pull request #226 from devinamatthews/dev
+    
+    Finish macroization of assembly ukernels.
+
+commit 195480beb589db7d582646f556e855c611d4c3a9
+Merge: 07c3d0a9 3f387ca3
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jun 25 13:24:21 2018 -0500
+
+    Merge branch 'master' into dev
+
+commit 3f387ca35e42519f0d6a154814e4c8800fa2acb8
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jun 25 12:32:03 2018 -0500
+
+    Fixed bugs in configure's select_cc() function.
+    
+    Details:
+    - This commit fixes several bugs in configure relating to selecting a C
+      compiler. By dumb luck, two of the two bugs sort of cancelled each
+      other out in most use cases, which manifested as the expected behavior.
+      Thanks to Mathieu Poumeyrol for bringing this issue to our attention,
+      and to Devin Matthews for suggesting the more portable way of
+      capturing both stdout and stderr and suggesting a return code check
+      instead of testing stdout/stderr.
+    - The first bug: As the values of the compiler search list are iterated
+      over, only stderr is captured when querying a compiler with --version
+      rather than both stdout and stderr.
+    - The second bug: After each query, a conditional attempted to test
+      whether the query resulted in anything being output. That conditional
+      erroneously was using "-z" instead of "-n" for non-emptiness. Thus,
+      most of the time, stderr was empty (because the --version info was
+      being output on stdout), and since it was empty, the -z conditional
+      (intended to execute only when a compiler was found to be responsive)
+      executed.
+    - A third bug was also fixed in the way that the merged stdout/stderr
+      output was tested for non-emptiness (moving the 'cat' invocation to
+      another line and testing the contents of a variable instead).
+    - The three bugs above have been fixed as part of a partial rewrite of
+      the select_cc() function in terms of a return code check, which
+      obviated the need to save the output of stdout and stderr.
+    - The fourth bug involved a misnamed variable in the right-hand side
+      of a statement intended to prepend CC to search_list when CC was
+      non-empty. This typically did not manifest as a bug since usually CC
+      (if it was set) was set to a value that was known to work.
+
+commit a7166feb1053814b7dd27f3879ae38acfc9637fc
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Mon Jun 25 12:09:18 2018 -0500
+
+    Finish macroization of assembly ukernels.
+
+commit f986396c2af5de06283b9834112782afd0a8907e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jun 22 18:12:40 2018 -0500
+
+    Added 'configure --help' text for CFLAGS, LDFLAGS.
+    
+    Details:
+    - Added mention of the new support for preset CFLAGS, LDFLAGS to the
+      bottom of the text output by './configure --help'.
+    - Updated usage example to use 'haswell' instead of 'sandybridge'.
+
+commit 884175d9ffb62e49535e6c1f7d58fb3b83e7e78f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jun 22 18:08:43 2018 -0500
+
+    Added configure support for preset CFLAGS, LDFLAGS.
+    
+    Details:
+    - Any preexisting values set to the CFLAGS environment variable (or the
+      CFLAGS variable if given on the command line) are saved by configure
+      for later inclusion (prepending, to be precise) along with the
+      compiler flags automatically determined by the BLIS build system.
+      LDFLAGS is treated in a similar manner.) Thanks to Dave Love for
+      requesting this feature in issue #223 and Mathieu Poumeyrol for his
+      support on this and a previous related issue.
+    - Comment updates to build/config.mk.in.
+    - Strip whitespace from return value of various cflags functions in
+      common.mk.
+
+commit 07c3d0a95190bd23f0cd2ef220deb3384d8378d1
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jun 21 12:35:07 2018 -0500
+
+    Update to CREDITS file.
+
+commit a1ebbbf158c7b34c9032ef45431bc610b6f14858
+Merge: 17928b1c c81c6f23
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Wed Jun 20 15:37:53 2018 -0500
+
+    Merge pull request #224 from devinamatthews/asm-macros
+    
+    Asm macros
+
+commit c81c6f23b9547b5d55ae68fd5a3bbd8a78290b6b
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Wed Jun 20 15:20:44 2018 -0500
+
+    Fix problem with inc and dec macros.
+
+commit 5a63971c822fd452f97ba869625c8e87f6cbeebc
+Merge: b4d94e54 17928b1c
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Wed Jun 20 14:07:49 2018 -0500
+
+    Merge remote-tracking branch 'upstream/dev' into asm-macros
+
+commit b4d94e54d44cf30e4bb452ca5263be3473c0582d
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Wed Jun 20 14:07:24 2018 -0500
+
+    Convert x86 microkernels to assembly macros.
+
+commit 17928b1c9941aa58aef1f122c793e2b14e705267
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jun 19 17:59:03 2018 -0500
+
+    Added static funcs bli_dt_domain(), bli_dt_prec().
+    
+    Details:
+    - Added definitions of static functions bli_dt_domain()/bli_dt_prec(),
+      which extract a dom_t domain or prec_t precision value, respectively,
+      from a num_t datatype.
+    - Changed the return types of bli_obj_domain() and bli_obj_prec() from
+      objbits_t to dom_t and prec_t. (Not sure why they were ever set to
+      return objbits_t.)
+
+commit 5f7fbb7115b1bf532c169dfd9adef84c41a95031
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jun 19 15:38:55 2018 -0500
+
+    Static funcs for projecting dt to single/double.
+    
+    Details:
+    - Added static functions for projecting a datatype to single precision
+      or double precision, both for obj_t's storage datatypes and standalone
+      datatypes.
+
+commit d4a22702c7a90273dc14f271db465c2e11e5b87e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jun 19 14:54:57 2018 -0500
+
+    Set up haswell config for optional col-pref ukrs.
+    
+    Details:
+    - Added two presently-disabled cpp blocks in bli_cntx_init_haswell.c to
+      easily allow one to switch to a set of column-preferential gemm
+      microkernels (in the haswell subconfiguration). The second column-
+      preferring block sets the the register blocksizes to their appropriate
+      values. However, cache blocksizes are left unchanged, and therefore are
+      likely suboptimal. This should be addressed later.
+
+commit f317c2e31bfc329cb6bb4e06005e45b9c8a9d6a7
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jun 19 12:21:23 2018 -0500
+
+    Added get/set static funcs for exec dt/dom/prec.
+    
+    Details:
+    - Added functions to bli_obj_macro_defs.h to get and set the target
+      domain and target precision bits in the obj_t, and also added the
+      appropriate support in bli_type_defs.h.
+
+commit e88a5b8da8c26caebd2b0fb73b30836fb5417c9c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jun 18 15:56:26 2018 -0500
+
+    Implemented castm, castv operations.
+    
+    Details:
+    - Implemented castm and castv operations, which behave like copym and
+      copyv except where the obj_t operands can be of different datatypes.
+      These new operations, however, unlike copym/copyv, do not build upon
+      existing level-1v kernels.
+    - Reorganized projm, projv into a 'proj' subdirectory of frame/base (to
+      match the newly added frame/base/cast directory).
+    - Added new macros to bli_gentfunc_macro_defs.h, _gentprot_macro_defs.h
+      that insert GENTFUNC2/GENTPROT2 macros for all non-homogeneous datatype
+      combinations. Previously, one had to invoke two additional macros--one
+      which mixed domains only and another that included all remaining
+      cases--in order to get full type combination coverage.
+    - Defined a new static function, bli_set_dims_incs_2m(), to aid in the
+      setting of various variables in the implementations of bli_??castm().
+      This static function joins others like it in bli_param_macro_defs.h.
+    - Comment update to bli_copysc.h.
+
+commit 2000cdff59272974438e88e0e82d8e1a32710325
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jun 18 14:17:28 2018 -0500
+
+    Update to CREDITS file.
+
+commit ed2c8aed848ba2dede18df090cf2e0b6e4cc059f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jun 18 11:49:34 2018 -0500
+
+    Temporarily disabled small matrix handling on zen.
+    
+    Details:
+    - Disabled small matrix handling in config/zen/bli_family_zen.h due to
+      what appears to be a bug that manifests as failures in the single and
+      double precision real level-3 BLAS test drivers (visible via
+      out.sblat3 and out.dblat3). Thanks to Robin Christ for reporting this
+      issue.
+
+commit ed20392c500940bfc0947795c1ff7c8c24f8e26f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jun 15 16:31:22 2018 -0500
+
+    Added get/set static funcs for exec dt/dom/prec.
+    
+    Details:
+    - Added functions to bli_obj_macro_defs.h to get and set the execution
+      domain and execution precision bits in the obj_t.
+    - Added/rearranged a few functions in bli_obj_macro_defs.h.
+    - Renamed some macros in bli_type_defs.h: EXECUTION -> EXEC.
+
+commit 22594e8e9ab55f5bc0e69d96a23e128502849999
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jun 14 17:35:23 2018 -0500
+
+    Updated sandbox/ref99 according to f97a86f.
+    
+    Details:
+    - Applied changes to ref99 sandbox analagous to those applied to
+      framework code in f97a86f. This involves setting the pack schemas of
+      A and B objects temporarily to communicate those desired schemas to
+      the control tree creation function in blx_gemm_cntl.c. This allows us
+      to (henceforth) query the schemas from the control tree rather than
+      the context.
+
+commit 1b5d0424d2c7e5eac33e02359c12917ef280949f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jun 13 18:41:32 2018 -0500
+
+    Prototype column-preferential zen gemm ukernels.
+    
+    Details:
+    - Added prototypes to bli_kernels_zen.h for each of the four gemm
+      microkernels that prefer outputting to column storage.
+
+commit f88c2e7a539e383297e846e6d4647058dd3db128
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jun 13 18:27:46 2018 -0500
+
+    Defined static function bli_blksz_scale_def_max().
+    
+    Details:
+    - Added a new static function to bli_blksz.h that scales both the default
+      (regular) blocksize as well as the maximum blocksize in the blksz_t
+      object. Reminder: maximum blocksizes have different meanings in
+      different contexts. For register blocksizes, they refer to the packing
+      register blocksizes (PACKMR or PACKNR) while for cache blocksizes, they
+      refer to the maximum blocksize to use during the final iteration of a
+      loop.
+
+commit 87db5c048e0c7f37351fda486abaf7d19fc5821c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jun 12 19:38:37 2018 -0500
+
+    Changed usage of virtual microkernel slots in cntx.
+    
+    Details:
+    - Changed the way virtual microkernels are handled in the context.
+      Previously, there were query routines such as bli_cntx_get_l3_ukr_dt()
+      which returned the native ukernel for a datatype if the method was
+      equal to BLIS_NAT, or the virtual ukernel for that datatype if the
+      method was some other value. Going forward, the context native and
+      virtual ukernel slots will both be initialized to native ukernel
+      function pointers for native execution, and for non-native execution
+      the virtual ukernel pointer will be something else. This allows us
+      to always query the virtual ukernel slot (from within, say, the
+      macrokernel) without needing any logic in the query routine to decide
+      which function pointer (native or virtual) to return. (Essentially,
+      the logic has been shifted to init-time instead of compute-time.)
+      This scheme will also allow generalized virtual ukernels as a way
+      to insert extra logic in between the macrokernel and the native
+      microkernel.
+    - Initialize native contexts (in bli_cntx_ref.c) with native ukernel
+      function addresses stored to the virtual ukernel slots pursuant to
+      the above policy change.
+    - Renamed all static functions that were native/virtual-ambiguous, such
+      as bli_cntx_get_l3_ukr_dt() or bli_cntx_l3_ukr_prefers_cols_dt()
+      pursuant to the above polilcy change. Those routines now use the
+      substring "get_l3_vir_ukr" in their name instead of "get_l3_ukr". All
+      of these functions were static functions defined in bli_cntx.h, and
+      most uses were in level-3 front-ends and macrokernels.
+    - Deprecated anti_pref bool_t in context, along with related functions
+      such as bli_cntx_l3_ukr_eff_dislikes_storage_of(), now that 1m's
+      panel-block execution is disabled.
+
+commit dbaf440540837b03643190cd685ed889fa7fd212
+Merge: 22aa44eb 2610fff0
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jun 11 12:37:04 2018 -0500
+
+    Merge branch 'master' into dev
+
+commit 2610fff0b07bdb345cb2e334ef6bea0c63c8cead
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jun 11 12:32:54 2018 -0500
+
+    Renamed 1m packm kernels from _1e to _1er.
+    
+    Details:
+    - Renamed the reference packm kernels used by 1m. Previously, they used
+      a _1e suffix, which was confusing since they packed to both 1e and 1r
+      schemas. This was likely an artifact of the time when there were
+      separate kernels for each schema before I decided to combine them into
+      a single function (per datatype and panel dimension), and the 1e
+      functions were the ones to inherit the 1r functionality. The kernels
+      have now been renamed to use a _1er suffix.
+
+commit 712de9b371a8727682352a2f52cd4880de905f0b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Jun 9 14:36:30 2018 -0500
+
+    Added missing semicolon in 03obj_view.c
+    
+    Details:
+    - Thanks to Tony Skjellum for pointing out this typo due to a
+      last-minute change to the source prior to committing.
+
+commit 043d0cd37ef4a27b1901eeb89d40083cfb2a57ba
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Jun 9 13:46:49 2018 -0500
+
+    Implemented bli_acquire_mpart(), added example code.
+    
+    Details:
+    - Implemented bli_acquire_mpart(), a general-purpose submatrix view
+      function that will alias an obj_t to be a submatrix "view" of an
+      existing obj_t.
+    - Renumbered examples in examples/oapi and inserted a new example file,
+      03obj_view.c, which shows how to use bli_acquire_mpart() to obtain
+      submatrix views of existing objects, which can then be used to
+      indirectly modify the parent object.
+
+commit f1908d39767baef56077def69126d96f805ee27e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jun 8 14:22:22 2018 -0500
+
+    Fixed broken input.operations.fast.
+    
+    Details:
+    - Removed three input lines from input.operations.fast (labeled
+      "test sequential micro-kernel") that I intended to remove in bd02c4e.
+      These lines prevented 'make check' (and 'make checkblis-fast') from
+      completing correctly. Note: This bug was fixed in 3df39b3, but that
+      commit has not yet been merged into master, hence this redundant
+      commit. Thanks to Robert van de Geijn for reporting this issue.
+
+commit 262a62e3482c5caa947a89cabb562b5887555bd6
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jun 8 12:10:54 2018 -0500
+
+    Fixed undefined ref in steamroller/excavator configs.
+    
+    Details:
+    - Fixed erroneous calls to bli_cntx_init_piledriver_ref() in
+      bli_cntx_init_steamroller() and bli_cntx_init_excavator(), which
+      should have been to their respectively-named bli_cntx_init_*()
+      functions instead. Thanks to qnerd for bringing these bugs to our
+      attention.
+
+commit 22aa44ebec2c7884bdc944775a1aa7534ab53f0d
+Merge: 65fae950 b65d0b84
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jun 7 17:42:59 2018 -0500
+
+    Merge branch 'dev' of github.com:flame/blis into dev
+
+commit 65fae95074d239354737355bbe6f202d4f8b2871
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jun 7 17:41:09 2018 -0500
+
+    Implemented bli_setrm, _setim, _setrv, _setiv.
+    
+    Details:
+    - Defined new wrappers to setm/setv operations in frame/base/bli_setri.c
+      that will target only the real or only the imaginary parts of a
+      matrix/vector object.
+    - Updated bli_obj_real_part() so that the complex-specific portions of
+      the function are not executed if the object is real.
+    - Defined bli_obj_imag_part().
+      - Caveat: If bli_obj_imag_part() is called on a real object, it does
+        nothing, leaving the destination object untouched. The caller must
+        take care to only call the function on complex objects.
+    - Reordered some of the static functions in bli_obj_macro_defs.h related
+      to aliasing.
+
+commit b65d0b841b7e4357bc2cf743bbb03384a3ab0bfa
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jun 7 14:38:41 2018 -0500
+
+    Fixed bug in bli_dt_proj_to_complex().
+    
+    Details:
+    - Fixed a bug identical to the one fixed in 0a4a27e, except this time in
+      the bli_obj_param_defs.h header file. It looks like the only consumers
+      of this static function were in bli_l0_oapi.c, and so this may not have
+      been manifesting (yet).
+
+commit 55b6abdf7458e31df3ad01796d67c2332c776948
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jun 7 14:08:12 2018 -0500
+
+    Enforce consistent datatypes in most object APIs.
+    
+    Details:
+    - Added logic to level-1v, -1d, -1f, -1m, -2, and -3 operations' _check()
+      functions to ensure that all operands are of the same datatype. There
+      are some exceptions that were left out, such as the _check() function
+      for the various norm operations since they have a different idea of
+      datatype consistency (ie: the norm object must be the real projection
+      of the primary input vector/matrix object).
+
+commit 513138b1a1ecebd015580423c779810cae5c67f2
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jun 7 12:24:47 2018 -0500
+
+    Defined/implemented bli_projv().
+    
+    Details:
+    - Added an implementation for bli_projv() to go along with the
+      implementation of bli_projm() added in 0a4a27e. The only difference
+      between the two is that bli_projv() may only be used on vectors,
+      whereas bli_projm() is general-purpose.
+    - Added a _check() function corresponding to bli_projv().
+
+commit 5f71c1e719eb482b2a4e40daa280c4f7d05b6963
+Merge: b5a641e9 3df39b37
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jun 6 19:06:14 2018 -0500
+
+    Merge branch 'dev' of github.com:flame/blis into dev
+
+commit b5a641e968469805906eb2c971384d12ad1beac5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jun 6 19:05:37 2018 -0500
+
+    Added char-to-dt and dt-to-char mapping functions.
+    
+    Details:
+    - Defined additional functions in bli_param_map.c:
+        bli_param_map_char_to_blis_dt()
+        bli_param_map_blis_to_char_dt()
+      which will map a char to its corresponding num_t, or vice versa.
+
+commit 0a4a27e1a4487480410bc0b1bb034bcf97583214
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jun 6 19:02:29 2018 -0500
+
+    Defined/implemented bli_projm().
+    
+    Details:
+    - Defined a new operation in frame/base/bli_proj.c, bli_projm(), which
+      behaves like bli_copym(), except that operands a and b are allowed to
+      contain data of differing domains (e.g. a is real while b is complex,
+      or vice versa). The file is named bli_proj.c, rather than bli_projm.c,
+      with the intention that a 'v' vector version of the function may be
+      added to the same file (at some point in the future).
+    - Added supporting bli_check_*() functions in bli_check.c to confirm
+      consistent precisions between to datatypes/objects, as well as the
+      appropriate error message in bli_error.c and a new error code in
+      bli_type_defs.h.
+    - Wrote a bli_projm_check() function to go along with bli_projm().
+    - Defined static function bli_obj_real_part() in bli_obj_macro_defs.h,
+      which will initialize an obj_t alias to the real part of the source
+      object.
+    - Fixed a bug in the static function bli_dt_proj_to_complex(), found
+      in bli_param_macro_defs.h. Thankfully, there were no calls to the
+      function to produce buggy behavior.
+
+commit 3df39b37a0134befa34b6b6259db98467c7bc965
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jun 6 15:35:05 2018 -0500
+
+    Fixed recently broken input.operations.fast.
+    
+    Details:
+    - Removed "test sequential front-end" lines from microkernel test
+      entries of input.operations.fast. This change was meant for inclusion
+      in bd02c4e but was missed due to slightly different wording of the
+      comment (I used "sed //d" to remove the lines). This fixes the broken
+      'make checkblis-fast' (and 'make check') targets.
+
+commit 3f48c38164b4135515b5c752c506fdccc4480be2
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jun 5 16:52:35 2018 -0500
+
+    Cosmetic fix to configure output in config.mk.
+    
+    Details:
+    - Fixed configure so that MK_ENABLE_MEMKIND is assigned "no" when the
+      option is disabled due to libmemkind not being present. This wasn't
+      affecting anything since the one use of the variable (in common.mk)
+      was formulated as "ifeq ($(MK_ENABLE_MEMKIND),yes)". That is, the
+      variable being empty was effectively equivalent to it being set to
+      "no".
+    - Comment updates to build/config.mk.in, common.mk.
+
+commit 5df201260f64aa98a365931f6d2da70144d69932
+Merge: 1b9af85e 96d2774b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jun 5 16:14:19 2018 -0500
+
+    Merge branch 'master' into dev
+
+commit 1b9af85ec98d91bb2b27aadaa3df344d18faff35
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jun 5 16:07:13 2018 -0500
+
+    Updated ref99 call to _cntx_set_thrloop_from_env().
+    
+    Details:
+    - Reordered the arguments in the ref99 sandbox's call to
+      bli_cntx_set_thrloop_from_env() to be consistent with the updated
+      function signature from f97a86f. Thanks to Devangi Parikh for
+      reporting this issue.
+
+commit 96d2774b4cb44ff1e8b5798d7cfc83154a607624
+Author: Tyler Michael Smith <tms@cs.utexas.edu>
+Date:   Tue Jun 5 14:17:39 2018 +0200
+
+    Make bli_auxinfo_next_b() return b_next, not a_next (#216)
+
+commit bd02c4e9f7fe07487276e61507335d48c8e05f35
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jun 4 13:42:17 2018 -0500
+
+    Cleanups to testsuite, input.operations format.
+    
+    Details:
+    - Removed the line in each operation entry in input.operations titled
+      "test sequential front-end" and the corresponding support for the lines
+      in the testsuite input parsing code. This line was included in the some
+      of the earliest versions of the testsuite, back when I intended to
+      eventually have separate multithreaded APIs. Specifically, I envisioned
+      that multithreaded and sequential testing could be enabled or disabled
+      on an operation level. However, BLIS evolved in a different direction
+      and still does not have multithreaded-specific APIs (even if it will
+      eventually someday). But even if it did have such APIs, I doubt I would
+      allow the user to enable/disable them on an operation level. Thus, this
+      was a zombie future parameter that was never used and never made sense
+      to begin with. The one instance of the front_seq variable, used in the
+      various libblis_test_<operation>() functions to guard the call to the
+      operation test driver, that remains was commented out instead of
+      deleted so that someday it could be easily changed via sed, if desired.
+    - Various minor cleanups to the testsuite code, including consolidating
+      use of DISABLE and DISABLE_ALL and reexpressing certain conditional
+      expressions in the libblis_test_<operation>() functions in terms of
+      boolean functions.
+
+commit 2c6d99b99e50d70f904da298a0c59be16cc5c180
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Jun 3 18:13:36 2018 -0500
+
+    Fixed names out of alphabetical order in CREDITS.
+
+commit 7a207e8f2c5046f8b295a78e029ff2de765c7409
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Jun 3 18:04:27 2018 -0500
+
+    Disabled indirect blacklisting (issue #214).
+    
+    Details:
+    - Return early from function, pass_config_kernel_registries(), that
+      implements indirect blacklisting of subconfigurations (during pass 0).
+      In short, I realized that indirect blacklisting is not needed in the
+      situations I envisioned, and can actually cause problems under certain
+      circumstances. Thanks to Tony Skjellum for reporting the issue (#214)
+      that led to this commit, and to Devin Matthews for prompting me to
+      realize that indirect blacklisting was unnecessary, at least as
+      originally envisioned.
+
+commit d7fb32682057c7458c8891c0eedafc374fd9beef
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Jun 3 13:20:37 2018 -0500
+
+    Fixed syntax artifacts from 4b36e85 in examples.
+    
+    Details:
+    - Fixed artifacts of malformed recursive sed expressions used when
+      preparing 4b36e85, in which most function-like macros were converted
+      to static functions. The syntactically defective code was contained
+      entirely in examples/oapi. Thanks to Tony Skjellum for reporting this
+      issue.
+    - Update to CREDITS file.
+
+commit ed7dedfd4a07eefeb5a038f9899afb8053b45383
+Merge: f97a86f3 469727d4
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Jun 2 20:29:53 2018 -0500
+
+    Merge branch 'master' into dev
+
+commit f97a86f322a6e3e31f33c89befc66189b0b8c64f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Jun 2 20:28:20 2018 -0500
+
+    Updated setting/querying pack schema (cntx->cntl).
+    
+    - Query pack schemas in level-3 bli_*_front() functions and store those
+      values in the schema bitfields of the correponding obj_t's when the
+      cntx's method is not BLIS_NAT. (When method is BLIS_NAT, the default
+      native schemas are stored to the obj_t's.)
+    - In bli_l3_cntl_create_if(), query the schemas stored to the obj_t's in
+      bli_*_front(), clear the schema bitfields, and pass the queried values
+      into bli_gemm_cntl_create() and bli_trsm_cntl_create().
+    - Updated APIs for bli_gemm_cntl_create() and bli_trsm_cntl_create() to
+      take schemas for A and B, and use these values to initialize the
+      appropriate control tree nodes. (Also cpp-disabled the panel-block cntl
+      tree creation variant, bli_gemmpb_cntl_create(), as it has not been
+      employed by BLIS in quite some time.)
+    - Simplified querying of schema in bli_packm_init() thanks to above
+      changes.
+    - Updated openmp and pthreads definitions of bli_l3_thread_decorator()
+      so that thread-local aliases of matrix operands are guaranteed, even
+      if aliasing is disabled within the internal back-end functions (e.g.
+      bli_gemm_int.c). Also added a comment to bli_thrcomm_single.c
+      explaining why the extra aliasing is not needed there.
+    - Change bli_gemm() and level-3 friends so that the operation's ind()
+      function is called only if all matrix operands have the same datatype,
+      and only if that datatype is complex. The former condition is needed
+      in preparation for work related to mixed domain operands, while the
+      latter helps with readability, especially for those who don't want to
+      venture into frame/ind.
+    - Reshuffled arguments in bli_cntx_set_thrloop_from_env() to be
+      consistent with BLIS calling conventions (modified argument(s) are
+      last), and updated all invocations in the level-3 _front() functions.
+    - Comment updates to bli_cntx_set_thrloop_from_env().
+
+commit 965db85d29977d228ea744581edf2b682eb8e8a8
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jun 1 12:32:15 2018 -0500
+
+    Updated macro invocations in bli_gemm_ker_var2.c.
+    
+    Details:
+    - Updated "get next a/b micropanel" macro invocations in
+      bli_gemm_ker_var2.c according to changes in 9588625.
+    - Comment update in bli_cntx.c.
+
+commit 8749fa0b48a7710f4115023e2c46bc80167bc8f9
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu May 31 12:34:01 2018 -0500
+
+    Cleanups to ref99/README.md, test/3m4m/Makefile.
+    
+    Details:
+    - Minor edits to sandbox/ref99/README.md.
+    - Removed cpp guards in sandbox/ref99/thread/blx_gemm_thread.h to be
+      consistent with other headers in sandbox/ref99.
+    - Additional targets and related cleanups in test/3m4m/Makefile.
+
+commit 9588625c43c86ef1bde8140f620a30f52420e6a6
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed May 30 15:19:53 2018 -0500
+
+    Renamed "next micropanel" macros in _l3_thrinfo.h.
+    
+    Details:
+    - Renamed several macros defined in bli_l3_thrinfo.h designed to compute
+      the values of a_next and b_next to insert into an auxinfo_t struct in
+      level-3 macrokernels. (Previously, the macros did not use a bli_
+      prefix.)
+    - Updated instances of above macro usage within various macrokernels.
+
+commit e4420591225fca2f63ca74ef6a23b962fcd4bec0
+Merge: 34f974d1 850a8a46
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue May 29 17:12:22 2018 -0500
+
+    Merge branch 'dev' of github.com:flame/blis into dev
+
+commit 34f974d1a83a7d29ba09f67e392d361231fdf99c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue May 29 17:11:52 2018 -0500
+
+    More tweaks/updates to sandbox/ref99/README.md.
+
+commit 850a8a46c0a569a2652d8c200e5c53b61bcf988d
+Author: Devin Matthews <dmatthews@utexas.edu>
+Date:   Tue May 29 13:51:21 2018 -0500
+
+    Test all x86_64 configurations*... (#212)
+    
+    * Add custom SDE cpuid files.
+    
+    * Set up testing of all x86_64 architectures (except bulldozer) using SDE.
+    
+    * Update .travis.yml
+    
+    [ci skip]
+    
+    * Update do_testsuite.sh
+    
+    [ci skip]
+    
+    * Updated .travis.yml with my secret token.
+    
+    Details:
+    - Replaced Devin's temporary secret token with my own, which is used by
+      Travis when accessing the Intel SDE via Dropbox.
+    
+    * Work around CPUID dispatch in glibc/libm by patching ld.so.
+    
+    * Detect path of loader at runtime.
+    
+    * Attempt to make SDE run on Travis
+    
+    * Allow unpatched ld.so if we don't know how to patch it.
+    
+    I *think* this only happens for older glibc without the multi-arch stuff (e.g. Ubuntu 14.04 on Travis), but who knows?
+    
+    * Upgrade Travis to gcc-6 and binutils-2.26.
+    
+    * Try to get Travis to use the right assembler.
+    
+    * Apparently you need ld-2.26 too.
+    
+    * Try to also patch ld.so from Ubuntu 14.04.
+    
+    * Take the nuclear option.
+    
+    * Account for non-absolute dependencies in ldd output.
+    
+    * String manipulation fail.
+    
+    * Update patch-ld-so.py
+    
+    * Add Zen to SDE testing.
+    
+    * Removed dead variable from travis/do_testsuite.sh.
+    
+    Details:
+    - Removed 'BLIS_ENABLE_TEST_OUTPUT=yes' from make invocations in
+      travis/do_testsuite.sh. This variable is no longer present in the
+      BLIS build system (if it ever was?), and therefore has no effect.
+
+commit 42ea02a34e5c144893fe239ae55daef895d92677
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue May 29 12:48:14 2018 -0500
+
+    Renamed c99 sandbox to ref99.
+    
+    Details:
+    - Renamed sandbox/c99 to sandbox/ref99. I wanted to name the sandbox so
+      that it would be thought of as a "reference" sandbox. I kept the "99"
+      to differientiate it from future reference sandboxes that may be
+      written in another language (such as C++).
+    - Updates to sandbox/ref99/README.md.
+
+commit 0e7205ccef50dccd4306cf427a63633396472813
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue May 29 12:36:13 2018 -0500
+
+    Remove sandbox/.gitkeep now that dir is non-empty.
+
+commit 3a4603858e3819cbd6ed7dd67d0fc0b3f89ed254
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat May 26 15:51:08 2018 -0500
+
+    More README.md updates to sandbox/c99.
+    
+    Details:
+    - Added a section that walks the reader through how to configure BLIS to
+      use a gemm sandbox.
+
+commit 2bad97f6bdf4642884d60fc03970549902a54d74
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat May 26 15:31:16 2018 -0500
+
+    Updates to CREDITS, sandbox/c99/README.md.
+
+commit 2b4a447526effa3e847a7e5c15c3758573f12318
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri May 25 18:51:23 2018 -0500
+
+    Initial implementation of c99 "reference" sandbox.
+    
+    Details:
+    - Added a c99 sandbox (in sandbox/c99) to serve as a starting point for
+      others looking to experiment with alternative implementations of gemm
+      in BLIS. Note that this sandbox implementation is a first draft and
+      will be refined over time.
+    - Minor updates to Makefile and common.mk to restrict what source files
+      get recompiled when sandbox files are touched.
+    - Added an initial draft of a README.md in sandbox/c99.
+
+commit 469727d4f8a976d8713afb4d0b6235c322498db0
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri May 25 16:17:13 2018 -0500
+
+    Very minor comment updates.
+
+commit 66dbe69a0f9359bf1e39b5672ee365213de2e3ee
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri May 25 15:45:53 2018 -0500
+
+    Converted macros to static funcs in _packm_cntl.h.
+    
+    Details:
+    - Converted various macros in frame/1m/packm/bli_packm_cntl.h (designed
+      to access fields of a packm_params_t struct) to static functions.
+
+commit 22deef2f5463a47e3b3c37fc313d17550f10ee06
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu May 24 14:28:55 2018 -0500
+
+    Support alternative gemm implementation sandboxes.
+    
+    Detail:
+    - configure:
+      - add support for --enable-sandbox=NAME to configure script, where NAME
+        is a subdirectory of a new 'sandbox' directory that contains an
+        alternative implementation of gemm. (For now, only implementations of
+        gemm may be provided via a sandbox.);
+      - add support for C++ compiler. C++ compilers are handled in a manner
+        similar to that of C compilers, in that a default search order is
+        used, and that CXX is searched for first, if the variable is set. In
+        practice, the C++ compiler that is selected should correspond to the
+        selected C compiler. (Example: If gcc is selected for C, g++ should
+        be selected for C++.) The result of the search is output to config.mk
+        via build/config.mk.in. NOTE: The use of C++ in BLIS is still
+        hypothetical, but may eventually move to being experimental. This
+        support was intended only for use of C++ within a gemm sandbox.
+    - build/config.mk.in:
+      - define SANDBOX variable containing sandbox subdirectory name.
+    - build/bli_config.in:
+      - define either of the BLIS_ENABLE_SANDBOX or BLIS_DISABLE_SANDBOX
+        macros in bli_config.h.
+    - common.mk:
+      - include makefile fragments that were propagated into the specified
+        sandbox subdirectory;
+      - generate different CFLAGS for sandboxes, as well as a separate
+        CXXFLAGS variable for sandboxes when C++ source files are compiled;
+      - isolate into a single location lists of file suffixes for various
+        purposes.
+      - reorganized/clean up code related to identifying header files and
+        paths.
+    - Makefile:
+      - generate object filepaths for and compile source code files found in
+        sandbox sub-directory;
+      - remove makefile fragments placed in sandbox sub-directory (cleanmk);
+      - various other cleanups.
+    - Added .cc, .cpp, and .cxx to list of suffixes of files to recognize in
+      makefile fragments (via build/gen-make-frags/suffix_list).
+    - Updated blis.h to conditionally #include bli_sandbox.h (via a new file,
+      bli_sbox.h), which each sandbox is assumed to use for any type
+      definitions and function prototypes it wishes to export out to blis.h.
+    - Conditionally disable bli_gemmnat() implementation in frame/3 when
+      BLIS_ENABLE_SANDBOX is defined.
+
+commit 25e3501ed57a0db7f860c88b7199b36049aec12a
+Merge: 216a4cb9 5140ee34
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu May 24 13:57:16 2018 -0500
+
+    Merge branch 'master' into dev
+
+commit 5140ee3424c744981a3fed3b5a748ebbfc111388
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed May 23 16:56:14 2018 -0500
+
+    Updated types of bli_is_[un]aligned_to() functions.
+    
+    Details:
+    - Changed the void* arguments of the following static functions:
+        bli_is_aligned_to()
+        bli_is_unaligned_to()
+        bli_offset_past_alignment()
+      to siz_t, and the return type of bli_offset_past_alignment() from
+      guint_t to siz_t. This allows for more versatile usage of these
+      functions (e.g. when aligning both pointers and leading dimension).
+    - Updated all invocations of these functions, mostly in kernels/penryn
+      but also in kernels/bgq, to include explicit typecasts to siz_t when
+      pointer arguments are passed in.
+    - Thanks to Devin Matthews for pointing out this potential bug (via issue
+      #211).
+    - Deleted a few trailing spaces in various penryn kernels.
+    - Removed duplicate instances of the words "derived" and "THEORY" from
+      various kernel license headers, likely from a malformed recursive sed
+      performed long ago.
+
+commit 216a4cb9cb87fa4c93f6ceb6ae90602e5018b305
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri May 18 18:47:03 2018 -0500
+
+    Minor update to flatten-headers.[py|sh] help text.
+    
+    Details:
+    - Fixed a typo and removed some outdated language from the help text of
+      flatten-headers.py and flatten-headers.sh.
+
+commit 962a706a6f56ea070ac4683f0af69c7e59af8ecb
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri May 18 18:19:40 2018 -0500
+
+    Updated LICENSE file to mention HP Enterprise.
+    
+    Details:
+    - Added HP Enterprise to the LICENSE file. Previously, only the source
+      files touched by HPE contained the corresponding copyright notices.
+      (This oversight was unintentional.)
+    - Updated file-level copyright notices to include a comma, to match
+      the formatting used for UT and AMD copyrights.
+
+commit efa43e13effe901ad31e734ac90f027e89473bd9
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri May 18 12:20:40 2018 -0500
+
+    More updates to CREDITS and RELEASING files.
+
+commit f94ab97af8e86baf9ee9a9cbaef8bb3712df2e11
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu May 17 17:45:31 2018 -0500
+
+    Update to CREDITS file.
+
+commit 4919b10c005e006a6d818eb8f865f9dbd8aa16df
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu May 17 16:38:49 2018 -0500
+
+    Minor changes to README.md and CONTRIBUTING.md.
+
+commit b89451187e8321b673a1cf7603c8d48028d9d4c8
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu May 17 16:23:06 2018 -0500
+
+    README.md update.
+    
+    Details:
+    - Added "Contributing" section with relevant links.
+
+commit af244194e7d76276a1b90fe59f9307dde0429e1d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu May 17 15:38:02 2018 -0500
+
+    Removed explicit critical sec. from bli_memsys.c.
+    
+    Details:
+    - Removed critical sections protecting the initialization/finalization of
+      bli_memsys.c. These synchronization mechanisms are no longer needed now
+      that BLIS initializes all APIs via pthread_once().
+
+commit 10c9e8f95254d8c6436c4d3cb093fa5544b45c90
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu May 17 15:22:51 2018 -0500
+
+    Cache hardware's arch_t id after querying once.
+    
+    Details:
+    - Added logic to bli_arch.c that will call what was previously the body
+      of bli_arch_query_id() only once and then cache the value in a static
+      variable local to the file. (Previously, the arch_t associated with
+      the hardware/configuration was queried every time bli_arch_query_id()
+      was called, which was at least once per level-3 function call. Thanks
+      to Devin Matthews for suggesting this feature via issue #175.
+    - Added -lpthread to the compile/link command line of the compiler
+      invocation that compiles build/detect/config/config_detect.c, which
+      prints the string identifying the detected configuration, since it
+      is now needed due to new pthread_once() logic in bli_arch.c.
+    - Implementation note: I chose to implement this arch_t caching feature
+      via pthread_once(), using a separate pthread_once_t variable local to
+      the file, rather than calling bli_init_once(). The reason is that I
+      did not want to require bli_init() as a prerequisite to this function.
+      bli_init() already calls several sub-components, some of which make use
+      of bli_arch_query_id(), and therefore it would be easy to fall into a
+      circular self-init situation (which usually causes pthreads to hang
+      indefinitely).
+
+commit f28a15293890ac6fbceac229fd204dbc9fec6e27
+Author: Francisco Igual <figual@ucm.es>
+Date:   Thu May 17 09:26:14 2018 +0000
+
+    Fixed clobber list bug in ARMv8 ukernel
+
+commit 2e31dd7852b4d6a9355899cf9659d4b8130461cb
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed May 16 17:28:33 2018 -0500
+
+    Inserted missing integer typecasting into ukernels.
+    
+    Details:
+    - Inserted missing safeguards into most microkernels to ensure that the
+      integers read by the microkernel's assembly instructions are of the
+      appropriate size. In many cases, this bug was going undetected likely
+      because the compiler was inserting zero padding before the integers
+      in the calling function, allowing the assembly code to read 64-bits
+      in a way that did not corrupt the "lower" 32 integer bits with garbage
+      in the higher bits. Thanks to Francisco Igual and Devangi Parikh for
+      finding this issue.
+
+commit 12dfa9516428b4092554f0ce70b07571d35de222
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed May 16 12:46:57 2018 -0500
+
+    Fixed a bug in determining default integer size.
+    
+    Details:
+    - Fixed a bug that would cause configurations to inadvertantly define
+      their integers to be 32 bits when those environments actually call for
+      64-bit integers. While either BLIS_ARCH_64 or BLIS_ARCH_32 is defined
+      in bli_system.h (based on whether preprocessor macros such as __x86_64
+      or __aarch64__ are defined by the environment), bli_system.h was being
+      #included *after* bli_config_macro_defs.h, in which the BLIS_ARCH_64
+      macro was used to choose an integer type size in the event that
+      BLIS_INT_TYPE_SIZE was not already defined by configure via
+      bli_config.h. And due to the structure of the cpp code in that file,
+      the 32-bit integer case was being chosen. Thanks to Francisco Igual
+      and Devangi Parikh for their help in isolating this bug.
+    - Moved the #include of hbwmalloc.h and related preprocessor code to
+      bli_kernel_macro_defs.h to facilitate the reshuffling of the #include
+      for bli_system.h in blis.h.
+
+commit f930cec0f35824c0f9ebbd218614209217d491cb
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue May 15 17:47:08 2018 -0500
+
+    More tweaks to CONTRIBUTING.md.
+
+commit 173e30ff7d293ba31f3fab8ab0c0a695eda3d4fd
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue May 15 14:48:34 2018 -0500
+
+    Added initial draft of CONTRIBUTING.md file.
+    
+    Details:
+    - Thanks to the Ruby on Rails project for providing a good template off
+      of which to build.
+
+commit 6e25e758b444bf725046674e1e64c6a52421749d
+Author: Nico Schlömer <nico.schloemer@gmail.com>
+Date:   Tue May 15 14:03:20 2018 +0200
+
+    Debian config (#206)
+    
+    * add debian config
+    
+    * correct wording in the README
+
+commit fcf6c6a3c87da08a7cdb92b102489b991ef7a644
+Author: Alex Arslan <ararslan@comcast.net>
+Date:   Mon May 14 18:41:03 2018 -0700
+
+    Fix shared library builds on platforms other than Linux and macOS (#209)
+    
+    * Fix detection of systems other than Linux and macOS
+    
+    The way the logic is currently laid out, any platform that isn't Linux
+    gets assigned the .dylib shared library extension and the macOS-specific
+    compiler flags. This reverses the logic to check for macOS first, and
+    have the fallback use the Linux definitions, which apply to most other
+    systems as well.
+    
+    * Use SHLIB_EXT instead of SO_SUF
+    
+    The former is more standard, as jakirkham pointed out in a comment.
+
+commit 6f7f51048c48f31d691c06451d0fd2cbc453ad03
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon May 14 18:41:56 2018 -0500
+
+    Echo cc_vendor when printing compiler version.
+    
+    Details:
+    - Echo the ${cc_vendor} when informing the user of the compiler's version.
+      Previously, the actual ${cc} (which could be a path to the executable)
+      was being printed, which has already been printed by that point in the
+      configure script.
+
+commit ad67dc4e348b0a381efc057573a6b03cc7e26db0
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon May 14 18:35:28 2018 -0500
+
+    Communicate cc, cc_vendor to make via config.mk.
+    
+    Details:
+    - Historically, the compiler selection has happened statically in the
+      various make_defs.mk and would only be overriden by setting CC (either
+      prior to running configure or as a configure argument). However, in
+      the last couple months, configure has evolved to contain rather
+      sophisticated compiler detection logic for the purposes of blacklisting
+      sub-configurations. It only makes sense that configure now fully take
+      over the responsibility of selecting a compiler from the GNU make side
+      of the build system. Thanks to Alex Arslan for his help exposing this
+      issue.
+    - Substitute found_cc into CC in config.mk via configure.
+    - Set a new variable, CC_VENDOR, in config.mk via substitution from
+      configure, and disable the corresponding CC_VENDOR code in common.mk.
+    - Disabled default compiler selection (usually gcc) in the sub-configs'
+      various make_def.mk files.
+
+commit 20af119fc97ec6120017a7a5ba5f9aaa920c7640
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon May 14 17:44:58 2018 -0500
+
+    Added README.md to 'config' directory.
+    
+    Details:
+    - Added a brief README.md file to the config directory to redirect those
+      who may be exploring the source tree to the ConfigurationHowTo wiki.
+      (Included is a very brief explanation of configurations for those who
+      don't have time to read the wiki.) Thanks to Nico Schlömer for this
+      suggestion.
+
+commit 9dbce16269c3e1f27c7a0d64372cc76aed30dfc1
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon May 14 17:04:54 2018 -0500
+
+    Search for 'cc clang gcc' on OpenBSD, FreeBSD.
+    
+    Details:
+    - Swapped gcc and clang in the compiler search list for OpenBSD.
+    - Use the same search list for FreeBSD as above.
+
+commit 55ebf24d63128b5fd15b10160485667415a02a55
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon May 14 16:19:08 2018 -0500
+
+    Change compiler search order on OpenBSD.
+    
+    Details:
+    - Set a compiler search list (and order) as a function of the OS detected
+      via 'uname -s'. By default, this list and order is 'gcc clang cc' for
+      Linux and Darwin (OS X), and any other OS except OpenBSD). On OpenBSD,
+      we use 'cc gcc clang' because OpenBSD's default installation of gcc
+      (4.2.1) is too old for BLIS. Thanks to Alex Arslan for reporting this
+      issue and suggesting a fix.
+
+commit 4fb353bd90e6642c8aeffd1b1e6329f54eee4bb4
+Merge: 4b36e85b 8a2857b5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun May 13 17:50:51 2018 -0500
+
+    Merge branch 'master' into dev
+
+commit 8a2857b5e3c633b18c24f2275110437a702a71d0
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri May 11 18:42:05 2018 -0500
+
+    Fixed README.md typo; mention 'make check'.
+
+commit 543935c02f9335142d2e485a15f37dbaebe012ed
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri May 11 18:35:32 2018 -0500
+
+    Updated README.md with Ubuntu packages link.
+    
+    Details:
+    - Created a separate section of README.md for external packages, with
+      one bullet each for Dave Love's rpms and Nico Schlömer's Ubuntu apt
+      packages. Thanks to Dave and Nico for their contributions.
+
+commit af1d8470b56d3b2a1c8513d366d788dddcb84baa
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri May 11 17:49:58 2018 -0500
+
+    Better handling of shared libraries on OS X.
+    
+    Details:
+    - Use the .dylib shared library suffix on OS X (instead of .so in Linux).
+    - Link with the -dynamiclib and -install_name options on OS X (instead of
+      -shared and -soname in Linux).
+    - Determine operating system (e.g. Linux, Darwin) during configure and
+      substitute into config.mk.in rather than run 'uname -s' during make.
+    - Echo operating system during configure.
+
+commit 4b72a462d7467cf815422aafac7b05037d2e3b13
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu May 10 18:35:38 2018 -0500
+
+    Enable building shared library by default.
+    
+    Details:
+    - Tweaked configure so that the shared library is generated by default.
+    - Updated --help text and configure's feedback messages reporting the
+      status of the static/shared builds.
+    - Changed the order of build product installation so that headers are
+      installed last, after libraries and symlinks.
+
+commit b699bb1ff03c6e9baaa054805b4939983ae7145b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu May 10 15:54:17 2018 -0500
+
+    Adopt Linux-like .so versioning at install-time.
+    
+    Details:
+    - Changed the naming conventions used for installed libraries and
+      symlinks to more closely mirror patterns used by typical GNU/Linux
+      libraries. Whereas previously static and shared libraries were
+      installed and symlinked as follows:
+    
+        (library) libblis-0.3.2-15-haswell.a
+        (library) libblis-0.3.2-15-haswell.so
+        (symlink) libblis.a -> libblis-0.3.2-15-haswell.a
+        (symlink) libblis.so -> libblis-0.3.2-15-haswell.so
+    
+      we now use the following naming conventions:
+    
+        (library) libblis.a
+        (symlink) libblis.so -> libblis.so.0.1.2
+        (symlink) libblis.so.0 -> libblis.so.0.1.2
+        (library) libblis.so.0.1.2
+    
+      where 0.1.2 indicates shared library major, minor, and build versions
+      of 0, 1, and 2, respectively. The conventional version string can
+      still be queried by linking to the library in question and then calling
+      bli_info_get_version_str(). (The testsuite binary does this
+      automatically at startup.)
+    - Added logic to common.mk to set the soname field in the shared library
+      via the -soname linker flag.
+    - Added a 'so_version' file to the top-level directory containing two
+      lines. The first line specifies the .so major version number, and the
+      second line specifies the minor and build version numbers joined with
+      a '.'. This file is read by configure and those values substituted
+      into build/config.mk.in to define SO_MAJOR, SO_MINORB, and SO_MMB
+      variables.
+
+commit fc2d9ec6bf46f6e5b19d196208415ce433e95b10
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed May 9 15:19:28 2018 -0500
+
+    Tweaks to top-level clean and distclean targets.
+    
+    Details:
+    - Moved the removal of bli_config.h from cleanh to distclean.
+    - Removed cleantest as a dependency of clean.
+
+commit bf0350305971e3991861b5117a13fda31ff97b6d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue May 8 16:49:22 2018 -0500
+
+    Renamed (shortened) a few build system variables.
+    
+    Details:
+    - Renamed the following variables in config.mk (via build/config.mk.in):
+        BLIS_ENABLE_VERBOSE_MAKE_OUTPUT -> ENABLE_VERBOSE
+        BLIS_ENABLE_STATIC_BUILD        -> MK_ENABLE_STATIC
+        BLIS_ENABLE_SHARED_BUILD        -> MK_ENABLE_SHARED
+        BLIS_ENABLE_BLAS2BLIS           -> MK_ENABLE_BLAS
+        BLIS_ENABLE_CBLAS               -> MK_ENABLE_CBLAS
+        BLIS_ENABLE_MEMKIND             -> MK_ENABLE_MEMKIND
+      and also renamed all uses of these variables in makefiles and makefile
+      fragments. Notice that we use the "MK_" prefix so that those variables
+      can be easily differentiated (such as via grep) from their "BLIS_" C
+      preprocessor macro counterparts.
+    - Other whitespace changes to build/config.mk.in.
+    - Renamed the following C preprocessor macros in bli_config.h (via
+      build/bli_config.h.in):
+        BLIS_ENABLE_BLAS2BLIS        -> BLIS_ENABLE_BLAS
+        BLIS_DISABLE_BLAS2BLIS       -> BLIS_DISABLE_BLAS
+        BLIS_BLAS2BLIS_INT_TYPE_SIZE -> BLIS_BLAS_INT_TYPE_SIZE
+      and also renamed all relevant uses of these macros in BLIS source
+      files.
+    - Renamed "blas2blis" variable occurrences in configure to "blas", as
+      was done in build/config.mk.in and build/bli_config.h.in.
+    - Renamed the following functions in frame/base/bli_info.c:
+        bli_info_get_enable_blas2blis() -> bli_info_get_enable_blas()
+        bli_info_get_blas2blis_int_type_size()
+                                        -> bli_info_get_blas_int_type_size()
+    - Remove bli_config.h during 'make cleanh' target of top-level Makefile.
+
+commit 4b36e85be9b516b4089b24768f881dd976668997
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue May 8 14:26:30 2018 -0500
+
+    Converted function-like macros to static functions.
+    
+    Details:
+    - Converted most C preprocessor macros in bli_param_macro_defs.h and
+      bli_obj_macro_defs.h to static functions.
+    - Reshuffled some functions/macros to bli_misc_macro_defs.h and also
+      between bli_param_macro_defs.h and bli_obj_macro_defs.h.
+    - Changed obj_t-initializing macros in bli_type_defs.h to static
+      functions.
+    - Removed some old references to BLIS_TWO and BLIS_MINUS_TWO from
+      bli_constants.h.
+    - Whitespace changes in select files (four spaces to single tab).
+
+commit 7e5648ca150757b874f6823da832f3798c40b9f9
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon May 7 18:59:19 2018 -0500
+
+    Add configure support for --libdir, --includedir.
+    
+    Details:
+    - Added support for two new configure options: --libdir and --includedir.
+      They specify the precise install directories for libraries and header
+      files, respectively, and override any location implied by the --prefix
+      option (including the default install prefix, if --prefix was not
+      given). Thanks to Nico Schlömer for suggesting this via issue #195.
+    - Removed the INSTALL_PREFIX definition/anchor from build/config.mk.in
+      and replaced it with corresponding definitions/anchors for libdir and
+      includedir.
+    - Updated top-level Makefile to use the new variables, INSTALL_LIBDIR
+      and INSTALL_INCDIR, instead of INSTALL_PREFIX (which is now no longer
+      needed by make).
+    - Set default sane values for INSTALL_LIBDIR and INSTALL_INCDIR in
+      common.mk when configure has not been run, as is already done for
+      DIST_PATH. This is to safeguard against statements in the top-level
+      Makefile that use 'find' to locate old libraries and headers for the
+      uninstall targets, which run regardless of make target. Without setting
+      INSTALL_LIBDIR and INSTALL_INCDIR, those variables are empty and the
+      'find' ends up looking at '/', which is obviously not what we want.
+      (Also enclosed those definitions in an IS_CONFIGURED guard so that they
+      won't get evaluated unless configure has been run.)
+    - Rearranged "ifeq ($(IS_CONFIGURED),yes)" conditionals in Makefile to
+      reduce occurrences and separated "local" and top-level components of
+      cleanblastest and cleanblistest targets to improve readability.
+    - Adjusted out-of-tree builds so that they are no longer oblivious to
+      the .git directories, if present, and thus now properly augment version
+      strings with the appropriate patch number.
+    - Include missing version string in 'configure --help' output.
+
+commit b09e4e8852a6c42895910e3bcb9041124dc8bf9f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon May 7 14:37:50 2018 -0500
+
+    Allow 'make clean' and friends without configuring.
+    
+    Details:
+    - Modified top-level Makefile so that a user can run 'make distclean',
+      'make clean', or any of the other clean-related targets prior to
+      running configure (or after a previous 'make distclean'). Thanks to
+      Nico Schlömer for suggesting this via issue #197.
+    - Made the cleanblastest and cleanblistest more comprehensive in that
+      they now clean out build products that would have resulted from local
+      compilation (ie: builds performed within the 'blastest' or 'testsuite'
+      directories).
+    - Added "cc" to list of expected compiler "vendors" since the CC variable
+      seems to automatically be set to "cc" on Ubuntu 16.04 (which is just an
+      alias to gcc).
+    - Comment update to build/config.mk.in.
+
+commit 35c5a1449c3efe0b2ec43cdefcfdf00e71828149
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon May 7 12:04:57 2018 -0500
+
+    No longer update version file during configure.
+    
+    Details:
+    - Recycled the core functionality of build/update-version-file.sh into a
+      function in configure, disabling the updating of the 'version' file in
+      the process. Instead of writing the patched version string back to the
+      version file and then reading it again from within configure, the
+      patched version string is now saved directly to a variable in the main()
+      function in configure. This will prevent developers from accidentally
+      committing configure-induced changes to the version file in between
+      releases.
+
+commit 8adb2f919b62da4a2885ae04a10925e0e6a2e304
+Author: Mathieu Poumeyrol <kali@users.noreply.github.com>
+Date:   Sun May 6 19:58:16 2018 +0200
+
+    Some cross compilations fixes (#198)
+    
+    * cross-compilation fixes
+    * add doc ranlib variable
+    * icc support -dumpversion, posix compatible test, plus one stupid mistake
+    * retab
+    * revert version as requested
+
+commit 89acd9ebe516eeb97006dba344354bfc98826645
+Merge: 4cff432d 0557eba7
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed May 2 12:53:35 2018 -0500
+
+    Merge branch 'amd'
+
+commit 4cff432d707891ada705b039a7e043558bbf3c51
+Author: Nisanth M P <31736542+nisanthmpamd@users.noreply.github.com>
+Date:   Wed May 2 23:20:42 2018 +0530
+
+    AMD specific optimizations for target 'zen' (#194)
+    
+    Re-enabled AMD-specific optimizations for zen.
+    
+    Details:
+    - Re-enabled Zen-specific cache blocksizes for 'zen' sub-configuration.
+    - Re-enabled small matrix gemm optimization for 'zen'.
+    - These were both temporarily disabled during a previous merge simply due to lack of Zen hardware for testing.
+
+commit 8eda5fe7f678b413cb274bd84716995a7d0b87a9
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed May 2 12:20:37 2018 -0500
+
+    Typo fix in README.md.
+
+commit 0557eba78f5fcf28f0f039f28da79498ffde848c
+Author: Nisanth M P <nisanth.padinharepatt@amd.com>
+Date:   Mon Mar 19 12:49:26 2018 +0530
+
+    Re-enabling the small matrix gemm optimization for target zen
+    
+    Change-Id: I13872784586984634d728cd99a00f71c3f904395
+
+commit df78ceb3d6f33a27fe69017854405edaea7c40e5
+Author: Nisanth M P <nisanth.padinharepatt@amd.com>
+Date:   Mon Mar 19 11:34:32 2018 +0530
+
+    Re-enabling Zen optimized cache block sizes for config target zen
+    
+    Change-Id: I8191421b876755b31590323c66156d4a814575f1
+
+commit 5e515f9a76f4aaf43dc21315a34d797726ca8069
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue May 1 13:44:10 2018 -0500
+
+    Tweaked new language in README.md.
+
+commit 1ddd9e316ad5024af8b606dfcebd1e7d587a130f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue May 1 13:36:28 2018 -0500
+
+    Added link to Dave Love's Fedora Copr page.
+    
+    Details:
+    - Added a blurb to README.md advertising Dave Love's Copr homepage,
+      which contains rpm packages for RHEL/Fedora-like distributions.
+
+commit 078a852f738c66c6468bd5e64b06467edc9057fd
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Apr 30 16:15:26 2018 -0500
+
+    Minor tweaks to top-level 'make clean' target.
+    
+    Details:
+    - Execute 'cleanh' target as part of 'clean'
+    - Remove cblas.h file from 'include/<configname>/' as part of 'cleanh'
+      target.
+    - Updated the echoed (non-verbose) text for uniformity.
+
+commit 75d0d1057dda69c655bd1cd8f791cb39b54d99b8
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Apr 30 14:57:33 2018 -0500
+
+    Renamed various datatype-related macros/functions.
+    
+    Details:
+    - Renamed the following macros in bli_obj_macro_defs.h and
+      bli_param_macro_defs.h:
+      - bli_obj_datatype()                 -> bli_obj_dt()
+      - bli_obj_target_datatype()          -> bli_obj_target_dt()
+      - bli_obj_execution_datatype()       -> bli_obj_exec_dt()
+      - bli_obj_set_datatype()             -> bli_obj_set_dt()
+      - bli_obj_set_target_datatype()      -> bli_obj_set_target_dt()
+      - bli_obj_set_execution_datatype()   -> bli_obj_set_exec_dt()
+      - bli_obj_datatype_proj_to_real()    -> bli_obj_dt_proj_to_real()
+      - bli_obj_datatype_proj_to_complex() -> bli_obj_dt_proj_to_complex()
+      - bli_datatype_proj_to_real()        -> bli_dt_proj_to_real()
+      - bli_datatype_proj_to_complex()     -> bli_dt_proj_to_complex()
+    - Renamed the following functions in bli_obj.c:
+      - bli_datatype_size()                -> bli_dt_size()
+      - bli_datatype_string()              -> bli_dt_string()
+      - bli_datatype_union()               -> bli_dt_union()
+    - Removed a pair of old level-1f penryn intrinsics kernels that were no
+      longer in use.
+
+commit 01c4173238baf08e7f6700a3f91a2ea58cca50c1
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Apr 28 14:07:34 2018 -0500
+
+    CHANGELOG update (0.3.2)
+
+commit 2fb440876690bdcec0c11a30e2b33ad100bab529 (tag: 0.3.2)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Sat Apr 28 14:07:31 2018 -0500
 
     Version file update (0.3.2)
 
-commit cdf041ddadd8725e578e2f59f37ae341f26655af (origin/master, origin/HEAD)
+commit cdf041ddadd8725e578e2f59f37ae341f26655af
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Sat Apr 28 14:05:00 2018 -0500
 
@@ -41,7 +2788,7 @@ Date:   Sat Apr 28 13:48:01 2018 -0500
     - Updates to the top-level README files in the top-level directory as
       well as the 'examples/oapi' directory.
 
-commit 627b045e301defea6770dc5b64e1110cbec25153 (origin/dev, origin/amd, dev, amd)
+commit 627b045e301defea6770dc5b64e1110cbec25153
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Fri Apr 27 18:11:19 2018 -0500
 

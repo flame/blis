@@ -19,9 +19,9 @@ output_st_ztrmm_mkl
 
 axes1 = subplot(4, 4, 4);
 hold(axes1,'on');
-plot(data_st_strmm_asm_blis(:,1), data_st_strmm_asm_blis(:,4), 'LineWidth', 1.25,'Color', [0 0 1]);
-plot(data_st_strmm_openblas(:,1), data_st_strmm_openblas(:,4), 'LineWidth', 1.25,'Color', [0 1 0]);
-plot(data_st_strmm_mkl(:,1), data_st_strmm_mkl(:,4), '--', 'LineWidth', 1.25,'Color', [1 0 0]);
+plot(data_st_strmm_asm_blis(:,1), data_st_strmm_asm_blis(:,3), 'LineWidth', 1.25,'Color', [0 0 1]);
+plot(data_st_strmm_openblas(:,1), data_st_strmm_openblas(:,3), 'LineWidth', 1.25,'Color', [0 1 0]);
+plot(data_st_strmm_mkl(:,1), data_st_strmm_mkl(:,3), '--', 'LineWidth', 1.25,'Color', [1 0 0]);
 ylabel( 'GFLOPS', 'FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue');
 %xlabel( 'matrix dimension m=n=k', 'FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue' );
 title('STRMM (single-threaded)','FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue');
@@ -35,9 +35,9 @@ axis( [ 0 v(2) 0 speak ] )
 
 axes1 = subplot(4, 4, 8);
 hold(axes1,'on');
-plot(data_st_dtrmm_asm_blis(:,1), data_st_dtrmm_asm_blis(:,4), 'LineWidth', 1.25,'Color', [0 0 1]);
-plot(data_st_dtrmm_openblas(:,1), data_st_dtrmm_openblas(:,4), 'LineWidth', 1.25,'Color', [0 1 0]);
-plot(data_st_dtrmm_mkl(:,1), data_st_dtrmm_mkl(:,4), '--', 'LineWidth', 1.25,'Color', [1 0 0]);
+plot(data_st_dtrmm_asm_blis(:,1), data_st_dtrmm_asm_blis(:,3), 'LineWidth', 1.25,'Color', [0 0 1]);
+plot(data_st_dtrmm_openblas(:,1), data_st_dtrmm_openblas(:,3), 'LineWidth', 1.25,'Color', [0 1 0]);
+plot(data_st_dtrmm_mkl(:,1), data_st_dtrmm_mkl(:,3), '--', 'LineWidth', 1.25,'Color', [1 0 0]);
 ylabel( 'GFLOPS', 'FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue');
 %xlabel( 'matrix dimension m=n=k', 'FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue' );
 title('DTRMM (single-threaded)','FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue');
@@ -51,9 +51,9 @@ axis( [ 0 v(2) 0 dpeak ] )
 
 axes1 = subplot(4, 4, 12);
 hold(axes1,'on');
-plot(data_st_ctrmm_1m_blis(:,1), data_st_ctrmm_1m_blis(:,4), 'LineWidth', 1.25,'Color', [0 0 1]);
-plot(data_st_ctrmm_openblas(:,1), data_st_ctrmm_openblas(:,4), 'LineWidth', 1.25,'Color', [0 1 0]);
-plot(data_st_ctrmm_mkl(:,1), data_st_ctrmm_mkl(:,4),'--',  'LineWidth', 1.25,'Color', [1 0 0]);
+plot(data_st_ctrmm_1m_blis(:,1), data_st_ctrmm_1m_blis(:,3), 'LineWidth', 1.25,'Color', [0 0 1]);
+plot(data_st_ctrmm_openblas(:,1), data_st_ctrmm_openblas(:,3), 'LineWidth', 1.25,'Color', [0 1 0]);
+plot(data_st_ctrmm_mkl(:,1), data_st_ctrmm_mkl(:,3),'--',  'LineWidth', 1.25,'Color', [1 0 0]);
 ylabel( 'GFLOPS', 'FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue');
 %xlabel( 'matrix dimension m=n=k', 'FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue' );
 title('CTRMM (single-threaded)','FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue');
@@ -67,9 +67,9 @@ axis( [ 0 v(2) 0 speak ] )
 
 axes1 = subplot(4, 4, 16);
 hold(axes1,'on');
-plot(data_st_ztrmm_1m_blis(:,1), data_st_ztrmm_1m_blis(:,4), 'LineWidth', 1.25,'Color', [0 0 1]);
-plot(data_st_ztrmm_openblas(:,1), data_st_ztrmm_openblas(:,4), 'LineWidth', 1.25,'Color', [0 1 0]);
-plot(data_st_ztrmm_mkl(:,1), data_st_ztrmm_mkl(:,4), '--', 'LineWidth', 1.25,'Color', [1 0 0]);
+plot(data_st_ztrmm_1m_blis(:,1), data_st_ztrmm_1m_blis(:,3), 'LineWidth', 1.25,'Color', [0 0 1]);
+plot(data_st_ztrmm_openblas(:,1), data_st_ztrmm_openblas(:,3), 'LineWidth', 1.25,'Color', [0 1 0]);
+plot(data_st_ztrmm_mkl(:,1), data_st_ztrmm_mkl(:,3), '--', 'LineWidth', 1.25,'Color', [1 0 0]);
 ylabel( 'GFLOPS', 'FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue');
 xlabel( 'matrix dimension m=n=k', 'FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue' );
 title('ZTRMM (single-threaded)','FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue');

@@ -1,10 +1,11 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -38,6 +39,7 @@
   #include <stdlib.h>
   #include <string.h>
   #include <stdint.h>
+  #include <pthread.h>
   #include "bli_type_defs.h"
   #include "bli_arch.h"
   #include "bli_cpuid.h"
@@ -58,8 +60,6 @@ arch_t bli_arch_query_id( void )
 }
 
 // -----------------------------------------------------------------------------
-
-#include <pthread.h>
 
 // A pthread structure used in pthread_once(). pthread_once() is guaranteed to
 // execute exactly once among all threads that pass in this control object.
@@ -124,6 +124,9 @@ void bli_arch_set_id( void )
 #ifdef BLIS_FAMILY_CORTEXA57
 	id = BLIS_ARCH_CORTEXA57;
 #endif
+#ifdef BLIS_FAMILY_CORTEXA53
+	id = BLIS_ARCH_CORTEXA53;
+#endif
 #ifdef BLIS_FAMILY_CORTEXA15
 	id = BLIS_ARCH_CORTEXA15;
 #endif
@@ -170,6 +173,7 @@ static char* config_name[ BLIS_NUM_ARCHS ] =
     "bulldozer",
 
     "cortexa57",
+    "cortexa53",
     "cortexa15",
     "cortexa9",
 

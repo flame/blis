@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -118,7 +118,7 @@ void PASTEMAC(ch,varname) \
 		); \
 	} \
 \
-	PASTECH(ch,dotaxpyv_ft) kfp_vf; \
+	PASTECH(ch,dotaxpyv_ker_ft) kfp_vf; \
 \
 	/* Query the context for the kernel function pointer. */ \
 	kfp_vf = bli_cntx_get_l1f_ker_dt( dt, BLIS_DOTAXPYV_KER, cntx ); \

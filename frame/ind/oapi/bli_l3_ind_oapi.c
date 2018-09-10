@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -56,7 +56,7 @@ void PASTEMAC(opname,imeth) \
 	num_t                dt   = bli_obj_dt( c ); \
 	PASTECH(opname,_oft) func = PASTEMAC(opname,ind_get_avail)( dt ); \
 \
-	/* Initialize a local runtime object if necessary. */ \
+	/* Initialize a local runtime with global settings if necessary. */ \
 	rntm_t rntm_l; \
 	if ( rntm == NULL ) { rntm = &rntm_l; bli_thread_init_rntm( rntm ); } \
 \
@@ -90,7 +90,7 @@ void PASTEMAC(opname,imeth) \
 	num_t                dt   = bli_obj_dt( c ); \
 	PASTECH(opname,_oft) func = PASTEMAC(opname,ind_get_avail)( dt ); \
 \
-	/* Initialize a local runtime object if necessary. */ \
+	/* Initialize a local runtime with global settings if necessary. */ \
 	rntm_t rntm_l; \
 	if ( rntm == NULL ) { rntm = &rntm_l; bli_thread_init_rntm( rntm ); } \
 \
@@ -122,7 +122,7 @@ void PASTEMAC(opname,imeth) \
 	num_t                dt   = bli_obj_dt( c ); \
 	PASTECH(opname,_oft) func = PASTEMAC(opname,ind_get_avail)( dt ); \
 \
-	/* Initialize a local runtime object if necessary. */ \
+	/* Initialize a local runtime with global settings if necessary. */ \
 	rntm_t rntm_l; \
 	if ( rntm == NULL ) { rntm = &rntm_l; bli_thread_init_rntm( rntm ); } \
 \
@@ -153,7 +153,7 @@ void PASTEMAC(opname,imeth) \
 	num_t                dt   = bli_obj_dt( b ); \
 	PASTECH(opname,_oft) func = PASTEMAC(opname,ind_get_avail)( dt ); \
 \
-	/* Initialize a local runtime object if necessary. */ \
+	/* Initialize a local runtime with global settings if necessary. */ \
 	rntm_t rntm_l; \
 	if ( rntm == NULL ) { rntm = &rntm_l; bli_thread_init_rntm( rntm ); } \
 \

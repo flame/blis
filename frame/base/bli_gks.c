@@ -1,10 +1,11 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -45,10 +46,6 @@ static void*    cntx_ind_init[ BLIS_NUM_ARCHS ];
 // The array of function pointers holding the registered context initialization
 // functions for reference kernels.
 static void*    cntx_ref_init[ BLIS_NUM_ARCHS ];
-
-#ifdef BLIS_ENABLE_PTHREADS
-pthread_mutex_t gks_mutex = PTHREAD_MUTEX_INITIALIZER;
-#endif
 
 // Define a function pointer type for context initialization functions.
 typedef void (*nat_cntx_init_ft)( cntx_t* cntx );
@@ -132,6 +129,11 @@ void bli_gks_init( void )
 		                                              bli_cntx_init_cortexa57_ref,
 		                                              bli_cntx_init_cortexa57_ind );
 #endif
+#ifdef BLIS_CONFIG_CORTEXA53
+		bli_gks_register_cntx( BLIS_ARCH_CORTEXA57,   bli_cntx_init_cortexa53,
+		                                              bli_cntx_init_cortexa53_ref,
+		                                              bli_cntx_init_cortexa53_ind );
+#endif
 #ifdef BLIS_CONFIG_CORTEXA15
 		bli_gks_register_cntx( BLIS_ARCH_CORTEXA15,   bli_cntx_init_cortexa15,
 		                                              bli_cntx_init_cortexa15_ref,
@@ -197,6 +199,9 @@ void bli_gks_finalize( void )
 						bli_free_intl( gks_id_ind );
 					}
 				}
+
+				// Free the array of BLIS_NUM_IND_METHODS cntx* elements.
+				bli_free_intl( gks_id );
 			}
 		}
 
@@ -411,6 +416,10 @@ cntx_t* bli_gks_query_cntx_noinit( void )
 
 // -----------------------------------------------------------------------------
 
+// A mutex to allow synchronous access to the gks when it needs to be updated
+// with a new entry corresponding to a context for an ind_t value.
+static pthread_mutex_t gks_mutex = PTHREAD_MUTEX_INITIALIZER;
+
 cntx_t* bli_gks_query_ind_cntx
      (
        ind_t ind,
@@ -462,12 +471,8 @@ cntx_t* bli_gks_query_ind_cntx
 	// gks[ id ] is non-NULL and gks[ id ][ BLIS_NAT ] is also non-NULL
 	// and refers to a context initialized with valid data).
 
-#ifdef BLIS_ENABLE_OPENMP
-	_Pragma( "omp critical (gks)" )
-#endif
-#ifdef BLIS_ENABLE_PTHREADS
+	// Acquire the mutex protecting the gks.
 	pthread_mutex_lock( &gks_mutex );
-#endif
 
 	// BEGIN CRITICAL SECTION
 	{
@@ -504,9 +509,8 @@ cntx_t* bli_gks_query_ind_cntx
 	}
 	// END CRITICAL SECTION
 
-#ifdef BLIS_ENABLE_PTHREADS
+	// Release the mutex protecting the gks.
 	pthread_mutex_unlock( &gks_mutex );
-#endif
 
 	// Return the address of the newly-allocated/initialized context.
 	return gks_id_ind;

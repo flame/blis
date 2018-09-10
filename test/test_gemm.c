@@ -1,10 +1,10 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas
+   Copyright (C) 2014, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -96,6 +96,19 @@ int main( int argc, char** argv )
 	bli_param_map_blis_to_netlib_trans( transa, &f77_transa );
 	bli_param_map_blis_to_netlib_trans( transb, &f77_transb );
 
+	// Begin with initializing the last entry to zero so that
+	// matlab allocates space for the entire array once up-front.
+	for ( p = p_begin; p + p_inc <= p_end; p += p_inc ) ;
+#ifdef BLIS
+	printf( "data_gemm_blis" );
+#else
+	printf( "data_gemm_%s", BLAS );
+#endif
+	printf( "( %2lu, 1:4 ) = [ %4lu %4lu %4lu %7.2f ];\n",
+	        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
+	        ( unsigned long )0,
+	        ( unsigned long )0,
+	        ( unsigned long )0, 0.0 );
 
 	for ( p = p_begin; p <= p_end; p += p_inc )
 	{
@@ -273,11 +286,11 @@ int main( int argc, char** argv )
 #else
 		printf( "data_gemm_%s", BLAS );
 #endif
-		printf( "( %2lu, 1:5 ) = [ %4lu %4lu %4lu  %10.3e  %6.3f ];\n",
+		printf( "( %2lu, 1:4 ) = [ %4lu %4lu %4lu %7.2f ];\n",
 		        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
 		        ( unsigned long )m,
 		        ( unsigned long )k,
-		        ( unsigned long )n, dtime_save, gflops );
+		        ( unsigned long )n, gflops );
 
 		bli_obj_free( &alpha );
 		bli_obj_free( &beta );

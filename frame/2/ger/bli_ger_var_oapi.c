@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -35,9 +35,9 @@
 #include "blis.h"
 
 #undef  GENFRONT
-#define GENFRONT( opname ) \
+#define GENFRONT( opname, varname ) \
 \
-void PASTEMAC0(opname) \
+void PASTEMAC0(varname) \
      ( \
        obj_t*  alpha, \
        obj_t*  x, \
@@ -69,11 +69,13 @@ void PASTEMAC0(opname) \
 \
 	void*     buf_alpha = bli_obj_buffer_for_1x1( dt, alpha ); \
 \
-	/* Invoke the void pointer-based function for the given datatype. */ \
-	bli_call_ft_13 \
+	/* Query a type-specific function pointer, except one that uses
+	   void* instead of typed pointers. */ \
+	PASTECH2(opname,_unb,_vft) f = \
+	PASTEMAC(varname,_qfp)( dt ); \
+\
+	f \
 	( \
-	  dt, \
-	  opname, \
 	  conjx, \
 	  conjy, \
 	  m, \
@@ -86,6 +88,6 @@ void PASTEMAC0(opname) \
 	); \
 } \
 
-GENFRONT( ger_unb_var1 )
-GENFRONT( ger_unb_var2 )
+GENFRONT( ger, ger_unb_var1 )
+GENFRONT( ger, ger_unb_var2 )
 

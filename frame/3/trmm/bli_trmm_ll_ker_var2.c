@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -36,22 +36,23 @@
 
 #define FUNCPTR_T gemm_fp
 
-typedef void (*FUNCPTR_T)(
-                           doff_t  diagoffa,
-                           pack_t  schema_a,
-                           pack_t  schema_b,
-                           dim_t   m,
-                           dim_t   n,
-                           dim_t   k,
-                           void*   alpha,
-                           void*   a, inc_t cs_a, dim_t pd_a, inc_t ps_a,
-                           void*   b, inc_t rs_b, dim_t pd_b, inc_t ps_b,
-                           void*   beta,
-                           void*   c, inc_t rs_c, inc_t cs_c,
-                           cntx_t* cntx,
-                           rntm_t* rntm,
-                           thrinfo_t* thread
-                         );
+typedef void (*FUNCPTR_T)
+     (
+       doff_t  diagoffa,
+       pack_t  schema_a,
+       pack_t  schema_b,
+       dim_t   m,
+       dim_t   n,
+       dim_t   k,
+       void*   alpha,
+       void*   a, inc_t cs_a, dim_t pd_a, inc_t ps_a,
+       void*   b, inc_t rs_b, dim_t pd_b, inc_t ps_b,
+       void*   beta,
+       void*   c, inc_t rs_c, inc_t cs_c,
+       cntx_t* cntx,
+       rntm_t* rntm,
+       thrinfo_t* thread
+     );
 
 static FUNCPTR_T GENARRAY(ftypes,trmm_ll_ker_var2);
 

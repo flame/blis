@@ -1,10 +1,10 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas
+   Copyright (C) 2014, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -123,10 +123,10 @@ int main( int argc, char** argv )
 #else
 	printf( "data_%s_%csyrk_%s",      THR_STR, dt_ch, STR );
 #endif
-	printf( "( %2lu, 1:4 ) = [ %4lu %4lu  %10.3e  %6.3f ];\n",
+	printf( "( %2lu, 1:3 ) = [ %4lu %4lu %7.2f ];\n",
 	        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
 	        ( unsigned long )0,
-	        ( unsigned long )0, 0.0, 0.0 );
+	        ( unsigned long )0, 0.0 );
 
 
 	for ( p = p_begin; p <= p_end; p += p_inc )
@@ -290,10 +290,10 @@ int main( int argc, char** argv )
 #else
 		printf( "data_%s_%csyrk_%s",      THR_STR, dt_ch, STR );
 #endif
-		printf( "( %2lu, 1:4 ) = [ %4lu %4lu  %10.3e  %6.3f ];\n",
+		printf( "( %2lu, 1:3 ) = [ %4lu %4lu %7.2f ];\n",
 		        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
 		        ( unsigned long )m,
-		        ( unsigned long )k, dtime_save, gflops );
+		        ( unsigned long )k, gflops );
 
 		bli_obj_free( &alpha );
 		bli_obj_free( &beta );

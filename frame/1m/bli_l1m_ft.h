@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -32,129 +32,112 @@
 
 */
 
-#ifndef BLIS_L1M_FT_H
-#define BLIS_L1M_FT_H
-
 
 //
-// -- Level-1m function types --------------------------------------------------
+// -- Level-1v function types --------------------------------------------------
 //
 
-// packm
-
-// NOTE: This is the function type for the structure-aware "kernel".
+// addm, subm
 
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       struc_t         strucc, \
-       doff_t          diagoffc, \
-       diag_t          diagc, \
-       uplo_t          uploc, \
-       conj_t          conjc, \
-       pack_t          schema, \
-       bool_t          invdiag, \
-       dim_t           m_panel, \
-       dim_t           n_panel, \
-       dim_t           m_panel_max, \
-       dim_t           n_panel_max, \
-       ctype* restrict kappa, \
-       ctype* restrict c, inc_t rs_c, inc_t cs_c, \
-       ctype* restrict p, inc_t rs_p, inc_t cs_p, \
-                          inc_t is_p, \
-       cntx_t*         cntx  \
+       doff_t  diagoffx, \
+       diag_t  diagx, \
+       uplo_t  uplox, \
+       trans_t transx, \
+       dim_t   m, \
+       dim_t   n, \
+       ctype*  x, inc_t rs_x, inc_t cs_x, \
+       ctype*  y, inc_t rs_y, inc_t cs_y  \
+       BLIS_TAPI_EX_PARAMS  \
      );
 
-INSERT_GENTDEF( packm )
+INSERT_GENTDEF( addm )
+INSERT_GENTDEF( subm )
 
-
-// NOTE: the following macros generate packm kernel function type definitions
-// that are "ctyped" and void-typed, for each of the floating-point datatypes.
-// However, we will only make use of the void-typed definitions because the
-// functions such as bli_?packm_cxk() (currently) use arrays of function
-// pointers to store and access the function pointers for various unrolling
-// (register blocksize) values, and therefore they must all be of the same
-// type (hence the use of void* for kappa, a, and p).
-
-// packm_ker
+// copym
 
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       conj_t           conja, \
-       dim_t            n, \
-       ctype*  restrict kappa, \
-       ctype*  restrict a, inc_t inca, inc_t lda, \
-       ctype*  restrict p,             inc_t ldp, \
-       cntx_t* restrict cntx  \
+       doff_t  diagoffx, \
+       diag_t  diagx, \
+       uplo_t  uplox, \
+       trans_t transx, \
+       dim_t   m, \
+       dim_t   n, \
+       ctype*  x, inc_t rs_x, inc_t cs_x, \
+       ctype*  y, inc_t rs_y, inc_t cs_y  \
+       BLIS_TAPI_EX_PARAMS  \
      );
 
-INSERT_GENTDEF( packm_cxk_ker )
+INSERT_GENTDEF( copym )
 
-// unpackm_ker
+// axpym
 
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       conj_t           conjp, \
-       dim_t            n, \
-       ctype*  restrict kappa, \
-       ctype*  restrict p,             inc_t ldp, \
-       ctype*  restrict a, inc_t inca, inc_t lda, \
-       cntx_t* restrict cntx  \
+       doff_t  diagoffx, \
+       diag_t  diagx, \
+       uplo_t  uplox, \
+       trans_t transx, \
+       dim_t   m, \
+       dim_t   n, \
+       ctype*  alpha, \
+       ctype*  x, inc_t rs_x, inc_t cs_x, \
+       ctype*  y, inc_t rs_y, inc_t cs_y  \
+       BLIS_TAPI_EX_PARAMS  \
      );
 
-INSERT_GENTDEF( unpackm_cxk_ker )
+INSERT_GENTDEF( axpym )
 
-// packm_3mis_ker
-// packm_4mi_ker
+// scal2m
 
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       conj_t           conja, \
-       dim_t            n, \
-       ctype*  restrict kappa, \
-       ctype*  restrict a, inc_t inca, inc_t lda, \
-       ctype*  restrict p, inc_t is_p, inc_t ldp, \
-       cntx_t* restrict cntx  \
+       doff_t  diagoffx, \
+       diag_t  diagx, \
+       uplo_t  uplox, \
+       trans_t transx, \
+       dim_t   m, \
+       dim_t   n, \
+       ctype*  alpha, \
+       ctype*  x, inc_t rs_x, inc_t cs_x, \
+       ctype*  y, inc_t rs_y, inc_t cs_y  \
+       BLIS_TAPI_EX_PARAMS  \
      );
 
-INSERT_GENTDEF( packm_cxk_3mis_ker )
-INSERT_GENTDEF( packm_cxk_4mi_ker )
+INSERT_GENTDEF( scal2m )
 
-
-// packm_rih_ker
-// packm_1er_ker
+// scalm, setm
 
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       conj_t           conja, \
-       pack_t           schema, \
-       dim_t            n, \
-       ctype*  restrict kappa, \
-       ctype*  restrict a, inc_t inca, inc_t lda, \
-       ctype*  restrict p,             inc_t ldp, \
-       cntx_t* restrict cntx  \
+       conj_t  conjalpha, \
+       doff_t  diagoffx, \
+       diag_t  diagx, \
+       uplo_t  uplox, \
+       dim_t   m, \
+       dim_t   n, \
+       ctype*  alpha, \
+       ctype*  x, inc_t rs_x, inc_t cs_x  \
+       BLIS_TAPI_EX_PARAMS  \
      );
 
-INSERT_GENTDEF( packm_cxk_rih_ker )
-INSERT_GENTDEF( packm_cxk_1er_ker )
-
-
-
-
-
-#endif
+INSERT_GENTDEF( scalm )
+INSERT_GENTDEF( setm )
 

@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -277,7 +277,7 @@ void bli_dgemm_armv7a_int_4x4
        double*    restrict a,
        double*    restrict b,
        double*    restrict beta,
-       double*    restrict c, inc_t rs_c, inc_t cs_c,
+       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
        auxinfo_t* restrict data,
        cntx_t*    restrict cntx
      )
@@ -285,7 +285,7 @@ void bli_dgemm_armv7a_int_4x4
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
 	//uint32_t k_iter = k0 / 4;
-	uint32_t k_left = k0 % 4;
+	uint32_t k_left = k % 4;
 	uint32_t rs_c   = rs_c0;
 	uint32_t cs_c   = cs_c0;
 	uint32_t i;

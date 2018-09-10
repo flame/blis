@@ -1,11 +1,10 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2016, Hewlett Packard Enterprise Development LP
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,17 +32,27 @@
 
 */
 
-#ifndef BLIS_MUTEX_H
-#define BLIS_MUTEX_H
+#include "blis.h"
 
-// Include definitions (mostly mtx_t) specific to the method of
-// multithreading.
-#include "bli_mutex_single.h"
-#include "bli_mutex_openmp.h"
-#include "bli_mutex_pthreads.h"
+//
+// Define function pointer query interfaces.
+//
 
-// Thread mutex prototypes.
+#undef  GENFRONT
+#define GENFRONT( tname, opname ) \
+\
+GENARRAY_FPA( PASTECH2(tname,_ukr,_vft), \
+              opname ); \
+\
+PASTECH2(tname,_ukr,_vft) \
+PASTEMAC(opname,_qfp)( num_t dt ) \
+{ \
+	return PASTECH(opname,_fpa)[ dt ]; \
+}
 
-
-#endif
+GENFRONT( gemm,     gemm_ukernel )
+GENFRONT( gemmtrsm, gemmtrsm_l_ukernel )
+GENFRONT( gemmtrsm, gemmtrsm_u_ukernel )
+GENFRONT( trsm,     trsm_l_ukernel )
+GENFRONT( trsm,     trsm_u_ukernel )
 

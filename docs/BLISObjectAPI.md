@@ -9,6 +9,7 @@
   * [Global scalar constants](BLISObjectAPI.md#global-scalar-constants)
   * [Basic vs expert interfaces](BLISObjectAPI.md#basic-vs-expert-interfaces)
   * [Context type](BLISObjectAPI.md#context-type)
+  * [Runtime type](BLISObjectAPI.md#runtime-type)
   * [BLIS header file](BLISObjectAPI.md#blis-header-file)
   * [Initialization and cleanup](BLISObjectAPI.md#initialization-and-cleanup)
 * **[Object management](BLISObjectAPI.md#object-management)**
@@ -145,7 +146,7 @@ The correct representation is chosen by context, usually by inspecting the datat
 
 ## Basic vs expert interfaces
 
-The functions listed in this document belong to the "basic" interface subset of the BLIS object API. There is a companion "expert" interface that mirrors the basic interface, except that it also contains at least one additional parameter that is only of interest to experts and library developers. The expert interfaces use the same name as the basic function names, except for an additional "_ex" suffix. For example, the basic interface for `gemm` is
+The functions listed in this document belong to the "basic" interface subset of the BLIS object API. There is a companion "expert" interface that mirrors the basic interface, except that it also contains two additional parameters that are only of interest to experts and library developers. The expert interfaces use the same name as the basic function names, except for an additional "_ex" suffix. For example, the basic interface for `gemm` is
 ```c
 void bli_gemm
      (
@@ -165,12 +166,13 @@ void bli_gemm_ex
        obj_t*  b,
        obj_t*  beta,
        obj_t*  c,
-       cntx_t* cntx
+       cntx_t* cntx,
+       rntm_t* rntm
      );
 ```
-The expert interface contains an additional `cntx_t*` parameter. Note that calling a function from the expert interface with the `cntx_t*` argument set to `NULL` is equivalent to calling the corresponding basic interface.
+The expert interface contains two additional parameters: a `cntx_t*` and `rntm_t*`. Note that calling a function from the expert interface with the `cntx_t*` and `rntm_t*` arguments each set to `NULL` is equivalent to calling the corresponding basic interface. Specifically, a `NULL` value passed in for the `cntx_t*` results in a valid context being queried from BLIS, and a `NULL` value passed in for the `rntm_t*` results in the current global settings for multithreading to be used.
 
-## Contexts
+## Context type
 
 In general, it is permissible to pass in `NULL` for a `cntx_t*` parameter when calling an expert interface such as `bli_gemm_ex()`. However, there are cases where `NULL` values are not accepted and may result in a segmentation fault. Specifically, the `cntx_t*` argument appears in the interfaces to the `gemm`, `trsm`, and `gemmtrsm` [level-3 micro-kernels](KernelsHowTo.md#level-3) along with all [level-1v](KernelsHowTo.md#level-1v) and [level-1f](KernelsHowTo.md#level-1f) kernels. There, as a general rule, a valid pointer must be passed in. Whenever a valid context is needed, the developer may query a default context from the global kernel structure (if a context is not already available in the current scope):
 ```c
@@ -178,6 +180,13 @@ cntx_t* bli_gks_query_cntx( void );
 ```
 When BLIS is configured to target a configuration family (e.g. `intel64`, `x86_64`), `bli_gks_query_cntx()` will use `cpuid` or an equivalent heuristic to select and and return the appropriate context. When BLIS is configured to target a singleton sub-configuration (e.g. `haswell`, `skx`), `bli_gks_query_cntx()` will unconditionally return a pointer to the context appropriate for the targeted configuration.
 
+## Runtime type
+
+When calling one of the expert interfaces, a `rntm_t` (runtime) object can be used to convey a thread-local request for parallelism to the underlying implementation. Runtime objects are thread-safe by nature when they are declared statically as a stack variable (or allocated via `malloc()`), initialized, and then passed into the expert interface of interest.
+
+Notice that runtime objects have no analogue in most BLAS libraries, where you are forced to specify parallelism at a global level (usually via environment variables).
+
+For more information on using `rntm_t` objects, please read the [Multithreading](Multithreading.md) documentation, paying close attention to the section on [local setting of parallelism](Multithreading.md#locally-at-runtime).
 
 ## BLIS header file
 
@@ -807,10 +816,11 @@ void bli_setrv
 ```
 Perform
 ```
-  real(x) := realproj(alpha)
+  real(x) := real(alpha)
 ```
-That is, given an _n_-length vector `x`, set all elements' real components to the real projection of scalar `alpha`.
-If `x` is real, this operation is equivalent to performing `setv` on `x` with the real projection of scalar `alpha`.
+That is, given an _n_-length vector `x`, set all elements' real components to the real component of scalar `alpha`. (If `alpha` is complex, the imaginary component is ignored.)
+If `x` is real, this operation is equivalent to performing `setv` on `x` with the real component of scalar `alpha`.
+**Note**: This operation is provided for convenience as an object wrapper to `setv`, and thus it has no analogue in the [BLIS typed API](BLISTypedAPI).
 
 ---
 
@@ -824,10 +834,11 @@ void bli_setiv
 ```
 Perform
 ```
-  imag(x) := realproj(alpha)
+  imag(x) := real(alpha)
 ```
-That is, given an _n_-length vector `x`, set all elements' imaginary components to the real projection of scalar `alpha`.
+That is, given an _n_-length vector `x`, set all elements' imaginary components to the real component of scalar `alpha`. (If `alpha` is complex, the imaginary component is ignored.)
 If `x` is real, this operation is equivalent to a no-op.
+**Note**: This operation is provided for convenience as an object wrapper to `setv`, and thus it has no analogue in the [BLIS typed API](BLISTypedAPI).
 
 ---
 
@@ -1120,10 +1131,11 @@ void bli_setrm
 ```
 Perform
 ```
-  real(A) := realproj(alpha)
+  real(A) := real(alpha)
 ```
-That is, given an _m x n_ matrix `A`, set all elements' real components to the real projection of scalar `alpha`.
-If `A` is real, this operation is equivalent to performing `setm` on `A` with the real projection of scalar `alpha`.
+That is, given an _m x n_ matrix `A`, set all elements' real components to the real component of scalar `alpha`. (If `alpha` is complex, the imaginary component is ignored.)
+If `A` is real, this operation is equivalent to performing `setm` on `A` with the real component of scalar `alpha`.
+**Note**: This operation is provided for convenience as an object wrapper to `setm`, and thus it has no analogue in the [BLIS typed API](BLISTypedAPI).
 
 Observed object properties: `diagoff(A)`, `diag(A)`, `uplo(A)`.
 
@@ -1139,10 +1151,11 @@ void bli_setim
 ```
 Perform
 ```
-  imag(A) := realproj(alpha)
+  imag(A) := real(alpha)
 ```
-That is, given an _m x n_ matrix `A`, set all elements' imaginary components to the real projection of scalar `alpha`.
+That is, given an _m x n_ matrix `A`, set all elements' imaginary components to the real component of scalar `alpha`. (If `alpha` is complex, the imaginary component is ignored.)
 If `A` is real, this operation is equivalent to a no-op.
+**Note**: This operation is provided for convenience as an object wrapper to `setm`, and thus it has no analogue in the [BLIS typed API](BLISTypedAPI).
 
 Observed object properties: `diagoff(A)`, `diag(A)`, `uplo(A)`.
 
@@ -1238,7 +1251,7 @@ Perform
 ```
   y := y + alpha * conja(A) * conjx(x)
 ```
-where `A` is an _m x nf_ matrix, and `x` and `y` are vectors. The kernel, if optimized, is implemented as a fused series of calls to [axpyv](BLISObjectAPI.md#axpyv) where _nf_ is less than or equal to an implementation-dependent fusing factor specific to `axpyf`.
+where `A` is an _m x b_ matrix, and `x` and `y` are vectors. The kernel, if optimized, is implemented as a fused series of calls to [axpyv](BLISObjectAPI.md#axpyv) where _b_ is less than or equal to an implementation-dependent fusing factor specific to `axpyf`.
 
 Observed object properties: `conj?(alpha)`, `conj?(A)`, `conj?(x)`.
 
@@ -1259,7 +1272,7 @@ Perform
 ```
   y := conj?(beta) * y + conj?(alpha) * conj?(A)^T * conj?(x)
 ```
-where `A` is an _m x nf_ matrix, and `x` and `y` are vectors. The kernel, if optimized, is implemented as a fused series of calls to [dotxv](BLISObjectAPI.md#dotxv) where _nf_ is less than or equal to an implementation-dependent fusing factor specific to `dotxf`.
+where `A` is an _m x b_ matrix, and `x` and `y` are vectors. The kernel, if optimized, is implemented as a fused series of calls to [dotxv](BLISObjectAPI.md#dotxv) where _b_ is less than or equal to an implementation-dependent fusing factor specific to `dotxf`.
 
 Observed object properties: `conj?(alpha)`, `conj?(beta)`, `conj?(A)`, `conj?(x)`.
 
@@ -1283,7 +1296,7 @@ Perform
   y := conj?(beta) * y + conj?(alpha) * conj?(A)^T * conj?(w)
   z :=               z + conj?(alpha) * conj?(A)   * conj?(x)
 ```
-where `A` is an _m x nf_ matrix, `w` and `z` are vectors of length _m_, `x` and `y` are vectors of length `nf`, and `alpha` and `beta` are scalars. The kernel, if optimized, is implemented as a fusion of calls to [dotxf](BLISObjectAPI.md#dotxf) and [axpyf](BLISObjectAPI.md#axpyf).
+where `A` is an _m x b_ matrix, `w` and `z` are vectors of length _m_, `x` and `y` are vectors of length `b`, and `alpha` and `beta` are scalars. The kernel, if optimized, is implemented as a fusion of calls to [dotxf](BLISObjectAPI.md#dotxf) and [axpyf](BLISObjectAPI.md#axpyf).
 
 Observed object properties: `conj?(alpha)`, `conj?(beta)`, `conj?(A)`, `conj?(w)`, `conj?(x)`.
 
@@ -1961,8 +1974,8 @@ err_t bli_getijm
         double* ai
       )
 ```
-Copy the real and imaginary values at the _(i,j)_ element of object `b` to `ar` and `ai`. f elements of `b` are stored as real types, then only `ar` is overwritten and `ai` is left unchanged. (If `b` contains elements stored in single precision, the corresponding elements are typecast/promoted during the copy.) 
-If either the row offset _i_ is beyond the _m_ dimension of `b`, or column offset _j_ is beyond the _n_ dimension of `b`, the function does not perform any copy and returns `BLIS_FAILURE`. Similarly, if `b` is a global scalar constant such as `BLIS_ONE`, `BLIS_FAILURE is returned.`
+Copy the real and imaginary values at the (`i`,`j`) element of object `b` to `ar` and `ai`. f elements of `b` are stored as real types, then only `ar` is overwritten and `ai` is left unchanged. (If `b` contains elements stored in single precision, the corresponding elements are typecast/promoted during the copy.)
+If either the row offset `i` is beyond the _m_ dimension of `b`, or column offset `j` is beyond the _n_ dimension of `b`, the function does not perform any copy and returns `BLIS_FAILURE`. Similarly, if `b` is a global scalar constant such as `BLIS_ONE`, `BLIS_FAILURE` is returned.
 
 #### setijm
 ```c
@@ -1975,9 +1988,8 @@ err_t bli_setijm
        obj_t*  b
      );
 ```
-Copy real and imaginary values `ar` and `ai` to the _(i,j)_ element of object `b`. If elements of `b` are stored as real types, then only `ar` is copied and `ai` is ignored. (If `b` contains elements stored in single precision, the corresponding elements are typecast/demoted during the copy.)
-If either the row offset _i_ is beyond the _m_ dimension of `b`, or column offset _j_ is beyond the _n_ dimension of `b`, the function does not perform any copy and returns `BLIS_FAILURE`. Similarly, if `b` is a global scalar constant such as `BLIS_ONE`, `BLIS_FAILURE is returned.`
-
+Copy real and imaginary values `ar` and `ai` to the (`i`,`j`) element of object `b`. If elements of `b` are stored as real types, then only `ar` is copied and `ai` is ignored. (If `b` contains elements stored in single precision, the corresponding elements are typecast/demoted during the copy.)
+If either the row offset `i` is beyond the _m_ dimension of `b`, or column offset `j` is beyond the _n_ dimension of `b`, the function does not perform any copy and returns `BLIS_FAILURE`. Similarly, if `b` is a global scalar constant such as `BLIS_ONE`, `BLIS_FAILURE` is returned.
 
 
 

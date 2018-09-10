@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -32,46 +32,19 @@
 
 */
 
-#ifndef BLIS_L3_VAR_OFT_H
-#define BLIS_L3_VAR_OFT_H
-
-
 //
-// -- Level-3 variant function types -------------------------------------------
+// Prototype function pointer query interface.
 //
 
-#undef  GENTDEF
-#define GENTDEF( opname ) \
+#undef  GENPROT
+#define GENPROT( opname ) \
 \
-typedef void (*PASTECH(opname,_voft)) \
-( \
-  obj_t*  a, \
-  obj_t*  b, \
-  obj_t*  c, \
-  cntx_t* cntx, \
-  gemm_t* cntl, \
-  thrinfo_t* thread  \
-);
+PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) \
+PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( num_t dt );
 
-GENTDEF( gemm )
-
-
-#undef  GENTDEF
-#define GENTDEF( opname ) \
-\
-typedef void (*PASTECH(opname,_voft)) \
-( \
-  obj_t*  a, \
-  obj_t*  b, \
-  obj_t*  c, \
-  cntx_t* cntx, \
-  trsm_t* cntl, \
-  thrinfo_t* thread  \
-);
-
-GENTDEF( trsm )
-
-
-
-#endif
+GENPROT( axpy2v )
+GENPROT( axpyf )
+GENPROT( dotaxpyv )
+GENPROT( dotxaxpyf )
+GENPROT( dotxf )
 

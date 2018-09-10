@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -34,19 +34,19 @@
 
 struct packm_params_s
 {
-	uint64_t    size; // size field must be present and come first.
-	packm_voft  var_func;
-	bszid_t     bmid_m;
-	bszid_t     bmid_n;
-	bool_t      does_invert_diag;
-	bool_t      rev_iter_if_upper;
-	bool_t      rev_iter_if_lower;
-	pack_t      pack_schema;
-	packbuf_t   pack_buf_type;
+	uint64_t      size; // size field must be present and come first.
+	packm_var_oft var_func;
+	bszid_t       bmid_m;
+	bszid_t       bmid_n;
+	bool_t        does_invert_diag;
+	bool_t        rev_iter_if_upper;
+	bool_t        rev_iter_if_lower;
+	pack_t        pack_schema;
+	packbuf_t     pack_buf_type;
 };
 typedef struct packm_params_s packm_params_t;
 
-static packm_voft bli_cntl_packm_params_var_func( cntl_t* cntl )
+static packm_var_oft bli_cntl_packm_params_var_func( cntl_t* cntl )
 {
 	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->var_func;
 }

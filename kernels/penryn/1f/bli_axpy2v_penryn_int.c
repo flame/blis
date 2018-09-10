@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -110,7 +110,7 @@ void bli_daxpy2v_penryn_int
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE )
 	{
-		daxpy2v_ft f = bli_cntx_get_l1f_ker_dt( BLIS_DOUBLE, BLIS_AXPY2V_KER, cntx );
+		daxpy2v_ker_ft f = bli_cntx_get_l1f_ker_dt( BLIS_DOUBLE, BLIS_AXPY2V_KER, cntx );
 
 		f
 		(

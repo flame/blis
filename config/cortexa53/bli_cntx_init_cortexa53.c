@@ -1,11 +1,10 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2016, Hewlett Packard Enterprise Development LP
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,44 +32,46 @@
 
 */
 
-#ifndef BLIS_MUTEX_PTHREADS_H
-#define BLIS_MUTEX_PTHREADS_H
+#include "blis.h"
 
-// Define mutex_t for situations when POSIX multithreading is enabled.
-#ifdef BLIS_ENABLE_PTHREADS
-
-#include <pthread.h>
-
-// Define mtx_t.
-
-typedef struct mtx_s
+void bli_cntx_init_cortexa53( cntx_t* cntx )
 {
-	pthread_mutex_t mutex;
-} mtx_t;
+	blksz_t blkszs[ BLIS_NUM_BLKSZS ];
 
-// Define macros to operate on pthread-based mtx_t.
+	// Set default kernel blocksizes and functions.
+	bli_cntx_init_cortexa53_ref( cntx );
 
-static void bli_mutex_init( mtx_t* m )
-{
-	pthread_mutex_init( &(m->mutex), NULL ); \
+	// -------------------------------------------------------------------------
+
+	// Update the context with optimized native gemm micro-kernels and
+	// their storage preferences.
+	bli_cntx_set_l3_nat_ukrs
+	(
+	  2,
+	  BLIS_GEMM_UKR, BLIS_FLOAT,    bli_sgemm_armv8a_asm_8x12, FALSE,
+	  BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_armv8a_asm_6x8,  FALSE,
+	  cntx
+	);
+
+	// Initialize level-3 blocksize objects with architecture-specific values.
+	//                                           s      d      c      z
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     8,     6,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,     8,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   120,   120,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   640,   240,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  3072,  3072,    -1,    -1 );
+
+	// Update the context with the current architecture's register and cache
+	// blocksizes (and multiples) for native execution.
+	bli_cntx_set_blkszs
+	(
+	  BLIS_NAT, 5,
+	  BLIS_NC, &blkszs[ BLIS_NC ], BLIS_NR,
+	  BLIS_KC, &blkszs[ BLIS_KC ], BLIS_KR,
+	  BLIS_MC, &blkszs[ BLIS_MC ], BLIS_MR,
+	  BLIS_NR, &blkszs[ BLIS_NR ], BLIS_NR,
+	  BLIS_MR, &blkszs[ BLIS_MR ], BLIS_MR,
+	  cntx
+	);
 }
-
-static void bli_mutex_finalize( mtx_t* m )
-{
-	pthread_mutex_destroy( &(m->mutex) ); \
-}
-
-static void bli_mutex_lock( mtx_t* m )
-{
-	pthread_mutex_lock( &(m->mutex) ); \
-}
-
-static void bli_mutex_unlock( mtx_t* m )
-{
-	pthread_mutex_unlock( &(m->mutex) ); \
-}
-
-#endif
-
-#endif
 

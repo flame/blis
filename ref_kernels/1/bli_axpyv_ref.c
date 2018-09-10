@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -60,8 +60,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	if ( PASTEMAC(ch,eq1)( *alpha ) ) \
 	{ \
 		/* Query the context for the kernel function pointer. */ \
-		const num_t         dt     = PASTEMAC(ch,type); \
-		PASTECH(ch,addv_ft) addv_p = bli_cntx_get_l1v_ker_dt( dt, BLIS_ADDV_KER, cntx ); \
+		const num_t             dt     = PASTEMAC(ch,type); \
+		PASTECH(ch,addv_ker_ft) addv_p = bli_cntx_get_l1v_ker_dt( dt, BLIS_ADDV_KER, cntx ); \
 \
 		addv_p \
 		( \

@@ -1,10 +1,10 @@
-#!/bin/sh
+#
 #
 #  BLIS    
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
-#  Copyright (C) 2015, The University of Texas at Austin
+#  Copyright (C) 2014, The University of Texas at Austin
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,24 +32,47 @@
 #
 #
 
-script_name=${0##*/}
 
-ansi_red="\033[0;31m"
-ansi_green="\033[0;32m"
-ansi_normal="\033[0m"
+# Declare the name of the current configuration and add it to the
+# running list of configurations included by common.mk.
+THIS_CONFIG    := cortexa53
+#CONFIGS_INCL   += $(THIS_CONFIG)
 
-passmsg="All BLAS tests passed!"
-failmsg0="At least one BLAS test failed. :("
-failmsg1="Please see out.* files for details."
+#
+# --- Determine the C compiler and related flags ---
+#
 
-grep -q '\*\*\*\*' ./out.*
+# NOTE: The build system will append these variables with various
+# general-purpose/configuration-agnostic flags in common.mk. You
+# may specify additional flags here as needed.
+CPPROCFLAGS    := -D_GNU_SOURCE
+CMISCFLAGS     :=
+CPICFLAGS      :=
+CWARNFLAGS     :=
 
-if [ $? -eq 0 ]; then
-	printf "${ansi_red}""${script_name}: ${failmsg0}""${ansi_normal}\n"
-	printf "${ansi_red}""${script_name}: ${failmsg1}""${ansi_normal}\n"
-	exit 1
+ifneq ($(DEBUG_TYPE),off)
+CDBGFLAGS      := -g
+endif
+
+ifeq ($(DEBUG_TYPE),noopt)
+COPTFLAGS      := -O0
 else
-	printf "${ansi_green}""${script_name}: ${passmsg}""${ansi_normal}\n"
-	exit 0
-fi
+COPTFLAGS      := -O3 -ftree-vectorize -mtune=cortex-a53
+endif
+
+# Flags specific to optimized kernels.
+CKOPTFLAGS     := $(COPTFLAGS)
+ifeq ($(CC_VENDOR),gcc)
+CKVECFLAGS     := -march=armv8-a+fp+simd -mcpu=cortex-a53
+else
+$(error gcc is required for this configuration.)
+endif
+
+# Flags specific to reference kernels.
+CROPTFLAGS     := $(CKOPTFLAGS)
+CRVECFLAGS     := $(CKVECFLAGS)
+
+# Store all of the variables here to new variables containing the
+# configuration name.
+$(eval $(call store-make-defs,$(THIS_CONFIG)))
 

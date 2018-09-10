@@ -21,9 +21,9 @@ output_st_zhemm_mkl
 
 axes1 = subplot(4, 4, 3);
 hold(axes1,'on');
-plot(data_st_shemm_asm_blis(:,1), data_st_shemm_asm_blis(:,4), 'LineWidth', 1.25,'Color', [0 0 1]);
-plot(data_st_shemm_openblas(:,1), data_st_shemm_openblas(:,4), 'LineWidth', 1.25,'Color', [0 1 0]);
-plot(data_st_shemm_mkl(:,1), data_st_shemm_mkl(:,4), '--',  'LineWidth', 1.25,'Color', [1 0 0]);
+plot(data_st_shemm_asm_blis(:,1), data_st_shemm_asm_blis(:,3), 'LineWidth', 1.25,'Color', [0 0 1]);
+plot(data_st_shemm_openblas(:,1), data_st_shemm_openblas(:,3), 'LineWidth', 1.25,'Color', [0 1 0]);
+plot(data_st_shemm_mkl(:,1), data_st_shemm_mkl(:,3), '--',  'LineWidth', 1.25,'Color', [1 0 0]);
 ylabel( 'GFLOPS', 'FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue');
 %xlabel( 'matrix dimension m=n=k', 'FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue' );
 title('SSYMM (single-threaded)','FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue');
@@ -37,9 +37,9 @@ axis( [ 0 v(2) 0 speak ] )
 
 axes1 = subplot(4, 4, 7);
 hold(axes1,'on');
-plot(data_st_dhemm_asm_blis(:,1), data_st_dhemm_asm_blis(:,4), 'LineWidth', 1.25,'Color', [0 0 1]);
-plot(data_st_dhemm_openblas(:,1), data_st_dhemm_openblas(:,4), 'LineWidth', 1.25,'Color', [0 1 0]);
-plot(data_st_dhemm_mkl(:,1), data_st_dhemm_mkl(:,4), '--', 'LineWidth', 1.25,'Color', [1 0 0]);
+plot(data_st_dhemm_asm_blis(:,1), data_st_dhemm_asm_blis(:,3), 'LineWidth', 1.25,'Color', [0 0 1]);
+plot(data_st_dhemm_openblas(:,1), data_st_dhemm_openblas(:,3), 'LineWidth', 1.25,'Color', [0 1 0]);
+plot(data_st_dhemm_mkl(:,1), data_st_dhemm_mkl(:,3), '--', 'LineWidth', 1.25,'Color', [1 0 0]);
 ylabel( 'GFLOPS', 'FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue');
 %xlabel( 'matrix dimension m=n=k', 'FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue' );
 title('DSYMM (single-threaded)','FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue');
@@ -53,9 +53,9 @@ axis( [ 0 v(2) 0 dpeak ] )
 
 axes1 = subplot(4, 4, 11);
 hold(axes1,'on');
-plot(data_st_chemm_1m_blis(:,1), data_st_chemm_1m_blis(:,4), 'LineWidth', 1.25,'Color', [0 0 1]);
-plot(data_st_chemm_openblas(:,1), data_st_chemm_openblas(:,4), 'LineWidth', 1.25,'Color', [0 1 0]);
-plot(data_st_chemm_mkl(:,1), data_st_chemm_mkl(:,4), '--',  'LineWidth', 1.25,'Color', [1 0 0]);
+plot(data_st_chemm_1m_blis(:,1), data_st_chemm_1m_blis(:,3), 'LineWidth', 1.25,'Color', [0 0 1]);
+plot(data_st_chemm_openblas(:,1), data_st_chemm_openblas(:,3), 'LineWidth', 1.25,'Color', [0 1 0]);
+plot(data_st_chemm_mkl(:,1), data_st_chemm_mkl(:,3), '--',  'LineWidth', 1.25,'Color', [1 0 0]);
 ylabel( 'GFLOPS', 'FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue');
 %xlabel( 'matrix dimension m=n=k', 'FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue' );
 title('CHEMM (single-threaded)','FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue');
@@ -69,9 +69,9 @@ axis( [ 0 v(2) 0 speak ] )
 
 axes1 = subplot(4, 4, 15);
 hold(axes1,'on');
-plot(data_st_zhemm_1m_blis(:,1), data_st_zhemm_1m_blis(:,4), 'LineWidth', 1.25,'Color', [0 0 1]);
-plot(data_st_zhemm_openblas(:,1), data_st_zhemm_openblas(:,4), 'LineWidth', 1.25,'Color', [0 1 0]);
-plot(data_st_zhemm_mkl(:,1), data_st_zhemm_mkl(:,4),'--', 'LineWidth', 1.25,'Color', [1 0 0]);
+plot(data_st_zhemm_1m_blis(:,1), data_st_zhemm_1m_blis(:,3), 'LineWidth', 1.25,'Color', [0 0 1]);
+plot(data_st_zhemm_openblas(:,1), data_st_zhemm_openblas(:,3), 'LineWidth', 1.25,'Color', [0 1 0]);
+plot(data_st_zhemm_mkl(:,1), data_st_zhemm_mkl(:,3),'--', 'LineWidth', 1.25,'Color', [1 0 0]);
 ylabel( 'GFLOPS', 'FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue');
 xlabel( 'matrix dimension m=n=k', 'FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue' );
 title('ZHEMM (single-threaded)','FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue');

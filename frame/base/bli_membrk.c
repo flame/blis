@@ -1,11 +1,12 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -41,7 +42,7 @@ void bli_membrk_init
        membrk_t* membrk
      )
 {
-	bli_mutex_init( bli_membrk_mutex( membrk ) );
+	bli_membrk_init_mutex( membrk );
 #ifdef BLIS_ENABLE_PACKBUF_POOLS
 	bli_membrk_init_pools( cntx, membrk );
 #endif
@@ -59,7 +60,7 @@ void bli_membrk_finalize
 #ifdef BLIS_ENABLE_PACKBUF_POOLS
 	bli_membrk_finalize_pools( membrk );
 #endif
-	bli_mutex_finalize( bli_membrk_mutex( membrk ) );
+	bli_membrk_finalize_mutex( membrk );
 }
 
 void bli_membrk_acquire_m
@@ -121,8 +122,10 @@ void bli_membrk_acquire_m
 		// Extract the address of the pblk_t struct within the mem_t.
 		pblk = bli_mem_pblk( mem );
 
-		// BEGIN CRITICAL SECTION
+		// Acquire the mutex associated with the membrk object.
 		bli_membrk_lock( membrk );
+
+		// BEGIN CRITICAL SECTION
 		{
 
 			// Checkout a block from the pool. If the pool's blocks are too
@@ -143,8 +146,10 @@ void bli_membrk_acquire_m
 			block_size = bli_pool_block_size( pool );
 
 		}
-		bli_membrk_unlock( membrk );
 		// END CRITICAL SECTION
+
+		// Release the mutex associated with the membrk object.
+		bli_membrk_unlock( membrk );
 
 		// Initialize the mem_t object with:
 		// - the buffer type (a packbuf_t value),

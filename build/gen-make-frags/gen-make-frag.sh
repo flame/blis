@@ -56,11 +56,14 @@ print_usage()
 	echo " tree. "
 	echo " "
 	echo " Usage:"
-	echo "   ${script_name} [options] root_dir templ.mk suff_list ign_list"
+	echo "   ${script_name} [options] root_dir frag_dir templ.mk suff_list ign_list"
 	echo " "
 	echo " Arguments (mandatory):"
 	echo " "
-	echo "   root_dir    The root directory in which makefile fragments will be"
+	echo "   root_dir    The root directory to scan when generating makefile"
+	echo "               fragments."
+	echo " "
+	echo "   frag_dir    The root directory in which makefile fragments will be"
 	echo "               generated."
 	echo " "
 	echo "   templ.mk    The template makefile fragment used to generate the actual"
@@ -119,6 +122,7 @@ gen_mkfile()
 	# Local variable declarations
 	local mkfile_frag_var_name
 	local this_dir
+	local this_frag_dir
 	local mkfile_frag_tmpl_name 
 	local mkfile_name 
 	local mkfile_frag_path
@@ -134,6 +138,7 @@ gen_mkfile()
 	# Extract our arguments to local variables
 	mkfile_frag_var_name=$1
 	this_dir=$2
+	this_frag_dir=$3
 	
 	
 	# Strip the leading path from the template makefile path to get its
@@ -141,9 +146,9 @@ gen_mkfile()
 	# requested.
 	mkfile_frag_tmpl_name=${mkfile_frag_tmpl_path##*/}
 	if [ -n "$hide_flag" ]; then
-		mkfile_frag_path=$this_dir/.$mkfile_frag_tmpl_name
+		mkfile_frag_path=$this_frag_dir/.$mkfile_frag_tmpl_name
 	else
-		mkfile_frag_path=$this_dir/$mkfile_frag_tmpl_name
+		mkfile_frag_path=$this_frag_dir/$mkfile_frag_tmpl_name
 	fi
 	
 	
@@ -240,11 +245,12 @@ gen_mkfile()
 gen_mkfiles()
 {
 	# Local variable declarations
-	local item sub_items cur_dir this_dir
+	local item sub_items cur_dir this_frag_dir this_dir
 	
 	
 	# Extract our argument
 	cur_dir=$1
+	this_frag_dir=$2
 	
 	
 	# Append a relevant suffix to the makefile variable name, if necesary
@@ -255,14 +261,14 @@ gen_mkfiles()
 	
 	# Be verbose if level 2 was requested
 	if   [ "$verbose_flag" = "2" ]; then
-		echo ">>>" $script_name ${src_var_name}_$SRC $cur_dir
+		echo ">>>" $script_name ${src_var_name}_$SRC $cur_dir $this_frag_dir
 	elif [ "$verbose_flag" = "1" ]; then
-		echo "$script_name: creating makefile fragment in $cur_dir"
+		echo "$script_name: creating makefile fragment in $this_frag_dir from $cur_dir"
 	fi
 	
 	
 	# Call our function to generate a makefile in the directory given.
-	gen_mkfile "${src_var_name}_$SRC" $cur_dir
+	gen_mkfile "${src_var_name}_$SRC" $cur_dir $this_frag_dir
 	
 	
 	# Get a listing of the directories in $directory
@@ -275,8 +281,7 @@ gen_mkfiles()
 		# If item is a directory, and it's not in the ignore list, descend into it.
 		#if [ -d "$cur_dir/$item" ] && ! should_ignore $item; then
 		if [ -d "$cur_dir/$item" ] && ! is_in_list $item "$ignore_dirs" ; then
-			this_dir=$cur_dir/$item
-			gen_mkfiles $this_dir
+			gen_mkfiles $cur_dir/$item $this_frag_dir/$item
 		fi
 	done
 	
@@ -455,7 +460,7 @@ main()
 	fi
 	
 	# Check the number of arguments after command line option processing.
-	if [ $# != "4" ]; then
+	if [ $# != "5" ]; then
 		print_usage
 	fi
 
@@ -467,9 +472,10 @@ main()
 	
 	# Extract our arguments.
 	root_dir=$1
-	mkfile_frag_tmpl_path=$2
-	suffix_file=$3
-	ignore_file=$4
+	frag_dir=$2
+	mkfile_frag_tmpl_path=$3
+	suffix_file=$4
+	ignore_file=$5
 	
 	
 	# Read the makefile config files to be used in the makefile fragment
@@ -479,6 +485,7 @@ main()
 	
 	# Strip / from end of directory path, if there is one.
 	root_dir=${root_dir%/}
+	frag_dir=${frag_dir%/}
 	
 
 	# Initialize the name of the makefile source variable.
@@ -505,14 +512,14 @@ main()
 	
 	# Be verbose if level 2 was requested.
 	if   [ "$verbose_flag" = "2" ]; then
-		echo ">>>" $script_name ${src_var_name}_$SRC $root_dir
+		echo ">>>" $script_name ${src_var_name}_$SRC $root_dir $frag_dir
 	elif [ "$verbose_flag" = "1" ]; then
-		echo "$script_name: creating makefile fragment in $root_dir"
+		echo "$script_name: creating makefile fragment in $frag_dir from $root_dir"
 	fi
 	
 	
 	# Call our function to generate a makefile in the root directory given.
-	gen_mkfile "${src_var_name}_$SRC" $root_dir
+	gen_mkfile "${src_var_name}_$SRC" $root_dir $frag_dir
 	
 	
 	# If we were asked to act recursively, then continue processing
@@ -530,8 +537,7 @@ main()
 			#if [ -d "$root_dir/$item" ] && ! should_ignore $item ; then
 			if [ -d "$root_dir/$item" ] && ! is_in_list $item "$ignore_dirs" ; then
 				
-				this_dir=$root_dir/$item
-				gen_mkfiles $this_dir
+				gen_mkfiles $root_dir/$item $frag_dir/$item
 			fi
 		done
 	fi

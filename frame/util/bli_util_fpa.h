@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -32,75 +32,44 @@
 
 */
 
-#ifndef BLIS_L3_FT_H
-#define BLIS_L3_FT_H
-
-
 //
-// -- Level-3 micro-kernel types -----------------------------------------------
+// Prototype function pointer query interface.
 //
 
-// gemm
-
-#undef  GENTDEF
-#define GENTDEF( ctype, ch, opname, tsuf ) \
+#undef  GENPROT
+#define GENPROT( opname ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
-     ( \
-       dim_t               k, \
-       ctype*     restrict alpha, \
-       ctype*     restrict a, \
-       ctype*     restrict b, \
-       ctype*     restrict beta, \
-       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t* restrict data, \
-       cntx_t*    restrict cntx  \
-     );
+PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) \
+PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( num_t dt );
 
-INSERT_GENTDEF( gemm_ukr )
+GENPROT( asumv )
+GENPROT( mkherm )
+GENPROT( mksymm )
+GENPROT( mktrim )
+GENPROT( norm1v )
+GENPROT( normfv )
+GENPROT( normiv )
+GENPROT( norm1m )
+GENPROT( normfm )
+GENPROT( normim )
+GENPROT( fprintv )
+GENPROT( fprintm )
+//GENPROT( printv )
+//GENPROT( printm )
+GENPROT( randv )
+GENPROT( randnv )
+GENPROT( randm )
+GENPROT( randnm )
+GENPROT( sumsqv )
 
 
-// trsm_[lu]
-
-#undef  GENTDEF
-#define GENTDEF( ctype, ch, opname, tsuf ) \
+#undef  GENPROT
+#define GENPROT( opname ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
-     ( \
-       ctype*     restrict a, \
-       ctype*     restrict b, \
-       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t* restrict data, \
-       cntx_t*    restrict cntx  \
-     );
+PASTECH(opname,_vft) \
+PASTEMAC(opname,_qfp)( num_t dt );
 
-INSERT_GENTDEF( trsm_ukr )
-
-
-// gemmtrsm_[lu]
-
-#undef  GENTDEF
-#define GENTDEF( ctype, ch, opname, tsuf ) \
-\
-typedef void (*PASTECH2(ch,opname,tsuf)) \
-     ( \
-       dim_t               k, \
-       ctype*     restrict alpha, \
-       ctype*     restrict a1x, \
-       ctype*     restrict a11, \
-       ctype*     restrict bx1, \
-       ctype*     restrict b11, \
-       ctype*     restrict c11, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t* restrict data, \
-       cntx_t*    restrict cntx  \
-     );
-
-INSERT_GENTDEF( gemmtrsm_ukr )
-
-
-
-
-
-
-#endif
-
+GENPROT( fprintv )
+GENPROT( fprintm )
+//GENPROT( printv )
+//GENPROT( printm )

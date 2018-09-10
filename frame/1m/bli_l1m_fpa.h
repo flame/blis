@@ -1,11 +1,10 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2016, Hewlett Packard Enterprise Development LP
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,44 +32,21 @@
 
 */
 
-#ifndef BLIS_MUTEX_OPENMP_H
-#define BLIS_MUTEX_OPENMP_H
+//
+// Prototype function pointer query interface.
+//
 
-// Define mutex_t for situations when OpenMP multithreading is enabled.
-#ifdef BLIS_ENABLE_OPENMP
+#undef  GENPROT
+#define GENPROT( opname ) \
+\
+PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) \
+PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( num_t dt );
 
-#include <omp.h>
-
-// Define mtx_t.
-
-typedef struct mtx_s
-{
-	omp_lock_t mutex;
-} mtx_t;
-
-// Define functions to operate on OpenMP-based mtx_t.
-
-static void bli_mutex_init( mtx_t* m )
-{
-	omp_init_lock( &(m->mutex) );
-}
-
-static void bli_mutex_finalize( mtx_t* m )
-{
-	omp_destroy_lock( &(m->mutex) );
-}
-
-static void bli_mutex_lock( mtx_t* m )
-{
-	omp_set_lock( &(m->mutex) );
-}
-
-static void bli_mutex_unlock( mtx_t* m )
-{
-	omp_unset_lock( &(m->mutex) );
-}
-
-#endif
-
-#endif
+GENPROT( addm )
+GENPROT( copym )
+GENPROT( subm )
+GENPROT( axpym )
+GENPROT( scal2m )
+GENPROT( scalm )
+GENPROT( setm )
 

@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -289,7 +289,7 @@ void PASTEMAC(ch,varname) \
        thrinfo_t* thread  \
      ) \
 { \
-	PASTECH2(ch,opname,_ft) packm_ker_cast = packm_ker; \
+	PASTECH2(ch,opname,_ker_ft) packm_ker_cast = packm_ker; \
 \
 	ctype* restrict kappa_cast = kappa; \
 	ctype* restrict c_cast     = c; \

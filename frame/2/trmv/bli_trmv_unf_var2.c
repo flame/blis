@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -87,7 +87,7 @@ void PASTEMAC(ch,varname) \
 \
 	conja = bli_extract_conj( transa ); \
 \
-	PASTECH(ch,axpyf_ft) kfp_af; \
+	PASTECH(ch,axpyf_ker_ft) kfp_af; \
 \
 	/* Query the context for the kernel function pointer and fusing factor. */ \
 	kfp_af = bli_cntx_get_l1f_ker_dt( dt, BLIS_AXPYF_KER, cntx ); \

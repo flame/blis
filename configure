@@ -5,6 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
+#  Copyright (C) 2018, Advanced Micro Devices, Inc.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -72,9 +73,11 @@ print_usage()
 	echo "   -p PREFIX, --prefix=PREFIX"
 	echo " "
 	echo "                 The path to which make will install all build products."
-	echo "                 If given, this option implicitly sets LIBDIR to"
-	echo "                 PREFIX/lib and INCDIR to PREFIX/include (see below); if"
-	echo "                 not given, PREFIX defaults to \$(HOME)/blis. If PREFIX"
+	echo "                 If given, this option implies the following options:"
+	echo "                   --libdir=PREFIX/lib"
+	echo "                   --incdir=PREFIX/include"
+	echo "                   --sharedir=PREFIX/share"
+	echo "                 If not given, PREFIX defaults to \$(HOME)/blis. If PREFIX"
 	echo "                 refers to a directory that does not exist, it will be"
 	echo "                 created."
 	echo " "
@@ -93,6 +96,19 @@ print_usage()
 	echo "                 directory implied by --prefix; if not given, INCDIR"
 	echo "                 defaults to PREFIX/include. If INCDIR refers to a"
 	echo "                 directory that does not exist, it will be created."
+	echo " "
+	echo "   --sharedir=SHAREDIR"
+	echo " "
+	echo "                 The path to which make will makefile fragments containing"
+	echo "                 make variables determined by configure (e.g. CC, CFLAGS,"
+	echo "                 and LDFLAGS). These files allow certain BLIS makefiles,"
+	echo "                 such as those in the examples or testsuite directories, to"
+	echo "                 operate on an installed copy of BLIS rather than a local"
+	echo "                 (and possibly uninstalled) copy. If given, SHAREDIR will"
+	echo "                 override the corresponding directory implied by --prefix;"
+	echo "                 if not given, SHAREDIR defaults to PREFIX/share. If"
+	echo "                 SHAREDIR refers to a directory that does not exist, it"
+	echo "                 will be created."
 	echo " "
 	echo "   -d DEBUG, --enable-debug[=DEBUG]"
 	echo " "
@@ -216,6 +232,7 @@ print_usage()
 	echo " "
 	echo "   CC            Specifies the C compiler to use."
 	echo "   RANLIB        Specifies the ranlib executable to use."
+	echo "   AR            Specifies the archiver to use."
 	echo "   CFLAGS        Specifies additional compiler flags to use (prepended)."
 	echo "   LDFLAGS       Specifies additional linker flags to use (prepended)."
 	echo " "
@@ -933,13 +950,8 @@ auto_detect()
 	bli_typed_h_path=${bli_typed_h_filepath%/${bli_typed_h}}
 
 	# Locate other headers needed by bli_type_defs.h.
-	bli_mutex_h="bli_mutex.h"
 	bli_malloc_h="bli_malloc.h"
-
-	bli_mutex_h_filepath=$(find ${dist_path}/frame -name "${bli_mutex_h}")
 	bli_malloc_h_filepath=$(find ${dist_path}/frame -name "${bli_malloc_h}")
-
-	bli_mutex_h_path=${bli_mutex_h_filepath%/${bli_mutex_h}}
 	bli_malloc_h_path=${bli_malloc_h_filepath%/${bli_malloc_h}}
 
 	# Define the executable name.
@@ -961,7 +973,6 @@ auto_detect()
 	      -I${bli_cpuid_h_path} \
 	      -I${bli_arch_h_path} \
 	      -I${bli_typed_h_path} \
-	      -I${bli_mutex_h_path} \
 	      -I${bli_malloc_h_path} \
 	      -std=c99 \
 	      ${cflags} \
@@ -1059,7 +1070,7 @@ blacklist_cleanup()
 
 echoerr_unsupportedcc()
 {
-	echoerr "*** Unsupported compiler version: ${cc_vendor} ${cc_version}."
+	echoerr "${script_name}: *** Unsupported compiler version: ${cc_vendor} ${cc_version}."
 	exit 1
 }
 
@@ -1069,7 +1080,7 @@ get_binutils_version()
 
 	# Query the full binutils version string output. This includes the
 	# version string along with (potentially) a bunch of other textual
-    # clutter.
+	# clutter.
 	if [ "$(uname -s)" == "Darwin" ]; then
 		# The default OS X assembler uses a trifecta of brain-dead
 		# conventions: responding only to '-v', hanging indefinitely if
@@ -1546,6 +1557,10 @@ main()
 	install_incdir_user=''
 	incdir_flag=''
 
+	# The user-given install sharedir and a flag indicating it was given.
+	install_sharedir_user=''
+	sharedir_flag=''
+
 	# The preset value of CFLAGS and LDFLAGS (ie: compiler and linker flags
 	# to use in addition to those determined by the build system).
 	cflags_preset=''
@@ -1629,6 +1644,10 @@ main()
 					includedir=*)
 						incdir_flag=1
 						install_incdir_user=${OPTARG#*=}
+						;;
+					sharedir=*)
+						sharedir_flag=1
+						install_sharedir_user=${OPTARG#*=}
 						;;
 					enable-debug)
 						debug_flag=1
@@ -1723,7 +1742,7 @@ main()
 				;;
 			p)
 				prefix_flag=1
-				install_prefix=$OPTARG
+				install_prefix_user=$OPTARG
 				;;
 			d)
 				debug_flag=1
@@ -1766,6 +1785,10 @@ main()
 				RANLIB=${1#*=}
 				shift
 				;;
+			AR=*)
+				AR=${1#*=}
+				shift
+				;;
 			*=*)
 				print_usage
 				;;
@@ -1781,6 +1804,13 @@ main()
 	os_vers=$(uname -r)
 	echo "${script_name}: detected ${os_name} kernel version ${os_vers}."
 
+    # Define a single variable off of which we can branch to tell if we are
+    # building for Windows.
+    is_win=no
+    if  [[ $os_name == MSYS* ]] || [[ $os_name == MINGW* ]]  || [[ $os_name == CYGWIN* ]] ;
+    then
+        is_win=yes
+    fi
 
 	# -- Find a C compiler -----------------------------------------------------
 
@@ -1795,7 +1825,7 @@ main()
 
 	# If we didn't find any working C compilers, we print an error message.
 	if [ -z "${found_cc}" ]; then
-		echo "${script_name}: Could not find working C compiler! Cannot continue."
+		echo "${script_name}: *** Could not find working C compiler! Cannot continue."
 		exit 1
 	fi
 
@@ -1816,11 +1846,11 @@ main()
 
 	# If we didn't find any working C++ compilers, we print an error message.
 	if [ -z "${found_cxx}" ]; then
-		echo "${script_name}: Could not find working C++ compiler! Cannot continue."
-		exit 1
+		echo "${script_name}: Could not find working C++ compiler! C++ will not be available in sandbox."
+		found_cxx="c++notfound"
 	fi
 
-	echo "${script_name}: using '${found_cxx}' C++ compiler."
+	echo "${script_name}: using '${found_cxx}' C++ compiler (for sandbox only)."
 
 
 	# -- Check the compiler version --------------------------------------------
@@ -1858,6 +1888,7 @@ main()
 
 		echo "${script_name}: could not open '${registry_file}' file; cannot continue."
 		echo "${script_name}: BLIS distribution appears to be incomplete."
+		echo "${script_name}: *** Please verify source distribution."
 
 		exit 1
 	fi
@@ -2182,6 +2213,7 @@ main()
 	# install prefix that was determined above.
 	install_libdir=${install_prefix_user}/lib
 	install_incdir=${install_prefix_user}/include
+	install_sharedir=${install_prefix_user}/share
 
 	# Set the install libdir, if it was specified. Note that this will override
 	# the default libdir implied by the install prefix, even if both options
@@ -2197,16 +2229,27 @@ main()
 	# override the default includedir implied by the install prefix, even if
 	# both options were given.
 	if [ -n "${incdir_flag}" ]; then
-		echo "${script_name}: detected --includedir='${install_incdir}'."
+		echo "${script_name}: detected --includedir='${install_incdir_user}'."
 		install_incdir=${install_incdir_user}
 	else
 		echo "${script_name}: no install includedir option given; defaulting to PREFIX/include."
+	fi
+
+	# Set the install sharedir, if it was specified. Note that this will
+	# override the default sharedir implied by the install prefix, even if
+	# both options were given.
+	if [ -n "${sharedir_flag}" ]; then
+		echo "${script_name}: detected --sharedir='${install_sharedir_user}'."
+		install_sharedir=${install_sharedir_user}
+	else
+		echo "${script_name}: no install sharedir option given; defaulting to PREFIX/share."
 	fi
 
 	# Echo the installation directories that we settled on.
 	echo "${script_name}: final installation directories:"
 	echo "${script_name}:   libdir:     ${install_libdir}"
 	echo "${script_name}:   includedir: ${install_incdir}"
+	echo "${script_name}:   sharedir:   ${install_sharedir}"
 
 	# Check if CFLAGS is non-empty.
 	if [ -n "${CFLAGS}" ]; then
@@ -2232,7 +2275,7 @@ main()
 	if [ -n "${debug_flag}" ]; then
 		if [ "x${debug_type}" = "xopt" ]; then
 			echo "${script_name}: enabling debug symbols with optimizations."
-                elif [ "x${debug_type}" = "xsde" ]; then
+		elif [ "x${debug_type}" = "xsde" ]; then
 			debug_type='sde'
 			echo "${script_name}: enabling SDE processor emulation."
 		else
@@ -2258,16 +2301,18 @@ main()
 		echo "${script_name}: disabling ARG_MAX hack."
 	fi
 
+	enable_shared_01=1
 	# Check if the static lib flag was specified.
 	if   [ "x${enable_static}" = "xyes" -a "x${enable_shared}" = "xyes" ]; then
 		echo "${script_name}: building BLIS as both static and shared libraries."
 	elif [ "x${enable_static}" = "xyes" -a "x${enable_shared}" = "xno"  ]; then
 		echo "${script_name}: building BLIS as a static library (shared library disabled)."
+		enable_shared_01=0
 	elif [ "x${enable_static}" = "xno"  -a "x${enable_shared}" = "xyes" ]; then
 		echo "${script_name}: building BLIS as a shared library (static library disabled)."
 	else
 		echo "${script_name}: Both static and shared libraries were disabled."
-		echo "${script_name}: Please enable one (or both) to continue."
+		echo "${script_name}: *** Please enable one (or both) to continue."
 		exit 1
 	fi
 
@@ -2296,7 +2341,7 @@ main()
 	     [ "x${threading_model}" = "xnone" ]; then
 		echo "${script_name}: threading is disabled."
 	else
-		echo "Unsupported threading model: ${threading_model}."
+		echo "${script_name}: *** Unsupported threading model: ${threading_model}."
 		exit 1
 	fi
 	
@@ -2376,6 +2421,7 @@ main()
 
 		if [ ! -d "${sandbox_fullpath}" ]; then
 			echo "${script_name}: requested sandbox sub-directory does not exist! Cannot continue."
+			echo "${script_name}: *** Please verify sandbox existence and name."
 			exit 1
 		fi
 
@@ -2392,6 +2438,7 @@ main()
 	# characters here so that the sed commands below do the right thing.
 	install_libdir_esc=$(echo "${install_libdir}" | sed 's/\//\\\//g')
 	install_incdir_esc=$(echo "${install_incdir}" | sed 's/\//\\\//g')
+	install_sharedir_esc=$(echo "${install_sharedir}" | sed 's/\//\\\//g')
 	dist_path_esc=$(echo "${dist_path}"           | sed 's/\//\\\//g')
 	cc_esc=$(echo "${found_cc}" | sed 's/\//\\\//g')
 	cxx_esc=$(echo "${found_cxx}" | sed 's/\//\\\//g')
@@ -2400,6 +2447,10 @@ main()
 	# For RANLIB, if the variable is not set, we use a default value of
 	# 'ranlib'.
 	ranlib_esc=$(echo "${RANLIB:-ranlib}" | sed 's/\//\\\//g')
+	# For AR, if the variable is not set, we use a default value of
+	# 'ar'.
+	ar_esc=$(echo "${AR:-ar}" | sed 's/\//\\\//g')
+	libpthread_esc=$(echo "${LIBPTHREAD:--lpthread}" | sed 's/\//\\\//g')
 	cflags_preset_esc=$(echo "${cflags_preset}" | sed 's/\//\\\//g')
 	ldflags_preset_esc=$(echo "${ldflags_preset}" | sed 's/\//\\\//g')
 
@@ -2431,7 +2482,6 @@ main()
 		kernel_list_defines="${kernel_list_defines}#define ${kernel_define}\n"
 	done
 
-
 	# -- Determine whether we are performing an out-of-tree build --------------
 
 	if [ ${dist_path} != "./" ]; then
@@ -2447,8 +2497,10 @@ main()
 		# directory and thus we must create a symbolic link.
 		if [ ! -f "${dist_path}/${dummy_file}" ]; then
 			configured_oot="yes"
+			#echo "${script_name}: detected out-of-tree build directory."
 		else
 			configured_oot="no"
+			#echo "${script_name}: detected in-tree build directory."
 		fi
 
 		# Remove the dummy file.
@@ -2470,17 +2522,21 @@ main()
 		| sed -e "s/@kernel_list@/${kernel_list}/g" \
 		| sed -e "s/@kconfig_map@/${kconfig_map}/g" \
 		| sed -e "s/@os_name@/${os_name}/g" \
+		| sed -e "s/@is_win@/${is_win}/g" \
 		| sed -e "s/@dist_path@/${dist_path_esc}/g" \
 		| sed -e "s/@CC_VENDOR@/${cc_vendor}/g" \
 		| sed -e "s/@CC@/${cc_esc}/g" \
 		| sed -e "s/@CXX@/${cxx_esc}/g" \
 		| sed -e "s/@RANLIB@/${ranlib_esc}/g" \
+		| sed -e "s/@AR@/${ar_esc}/g" \
+		| sed -e "s/@libpthread@/${libpthread_esc}/g" \
 		| sed -e "s/@cflags_preset@/${cflags_preset_esc}/g" \
 		| sed -e "s/@ldflags_preset@/${ldflags_preset_esc}/g" \
 		| sed -e "s/@debug_type@/${debug_type}/g" \
 		| sed -e "s/@threading_model@/${threading_model}/g" \
 		| sed -e "s/@install_libdir@/${install_libdir_esc}/g" \
 		| sed -e "s/@install_incdir@/${install_incdir_esc}/g" \
+		| sed -e "s/@install_sharedir@/${install_sharedir_esc}/g" \
 		| sed -e "s/@enable_verbose@/${enable_verbose}/g" \
 		| sed -e "s/@configured_oot@/${configured_oot}/g" \
 		| sed -e "s/@enable_arg_max_hack@/${enable_arg_max_hack}/g" \
@@ -2512,6 +2568,7 @@ main()
 		| sed   -e "s/@enable_cblas@/${enable_cblas_01}/g" \
 		| sed   -e "s/@enable_memkind@/${enable_memkind_01}/g" \
 		| sed   -e "s/@enable_sandbox@/${enable_sandbox_01}/g" \
+		| sed   -e "s/@enable_shared@/${enable_shared_01}/g" \
 		> "${bli_config_h_out_path}"
 
 
@@ -2560,10 +2617,13 @@ main()
 	mkdir -p ${obj_frame_dirpath}
 
 
-	obj_sandbox_dirpath="${base_obj_dirpath}/${sandbox_dir}"
+	if [ -n "${sandbox_flag}" ]; then
 
-	echo "${script_name}: creating ${obj_sandbox_dirpath}/${sandbox}"
-	mkdir -p ${obj_sandbox_dirpath}/${sandbox}
+		obj_sandbox_dirpath="${base_obj_dirpath}/${sandbox_dir}"
+
+		echo "${script_name}: creating ${obj_sandbox_dirpath}/${sandbox}"
+		mkdir -p ${obj_sandbox_dirpath}/${sandbox}
+	fi
 
 
 	obj_blastest_dirpath="${base_obj_dirpath}/${blastest_dir}"
@@ -2592,9 +2652,12 @@ main()
 
 
 	# -- Mirror source directory hierarchies to object directories -------------
+	
+	# Combine the config_list with the config_name and then remove duplicates.
+	config_list_plus_name=$(rm_duplicate_words "${config_list} ${config_name}")
 
 	# Mirror each of the sub-configuration directories to the object directory.
-	for conf in ${config_list}; do
+	for conf in ${config_list_plus_name}; do
 
 		echo "${script_name}: mirroring ${config_dirpath}/${conf} to ${obj_config_dirpath}/${conf}"
 		${mirror_tree_sh} "${config_dirpath}/${conf}" "${obj_config_dirpath}/${conf}"
@@ -2620,6 +2683,10 @@ main()
 		#fi
 	done
 
+	# Mirror reference kernel source tree to its object sub-directory.
+	echo "${script_name}: mirroring ${refkern_dirpath} to ${obj_refkern_dirpath}"
+	${mirror_tree_sh} ${refkern_dirpath} ${obj_refkern_dirpath}
+
 	# Mirror reference kernels source tree to its object sub-directory.
 	for conf in ${config_list}; do
 
@@ -2632,8 +2699,11 @@ main()
 	${mirror_tree_sh} ${frame_dirpath} ${obj_frame_dirpath}
 
 	# Mirror the chosen sandbox source tree to its object sub-directory.
-	echo "${script_name}: mirroring ${sandbox_dirpath}/${sandbox} to ${obj_sandbox_dirpath}/${sandbox}"
-	${mirror_tree_sh} "${sandbox_dirpath}/${sandbox}" "${obj_sandbox_dirpath}/${sandbox}"
+	if [ -n "${sandbox_flag}" ]; then
+
+		echo "${script_name}: mirroring ${sandbox_dirpath}/${sandbox} to ${obj_sandbox_dirpath}/${sandbox}"
+		${mirror_tree_sh} "${sandbox_dirpath}/${sandbox}" "${obj_sandbox_dirpath}/${sandbox}"
+	fi
 
 
 	# -- Generate makefile fragements ------------------------------------------
@@ -2646,12 +2716,13 @@ main()
 	# configurations and create fragments there as well.)
 	if [ "${clist_contains_cname}" == "false" ]; then
 
-		echo "${script_name}: creating makefile fragments in ${config_dirpath}/${config_name}"
+		echo "${script_name}: creating makefile fragments in ${obj_config_dirpath}/${config_name}"
 		${gen_make_frags_sh} \
 				 -h -r -v0 \
 				 -o ${script_name} \
 				 -p 'CONFIG' \
 				 ${config_dirpath}/${config_name} \
+				 ${obj_config_dirpath}/${config_name} \
 				 ${gen_make_frags_dirpath}/fragment.mk \
 				 ${gen_make_frags_dirpath}/suffix_list \
 				 ${gen_make_frags_dirpath}/ignore_list
@@ -2661,12 +2732,13 @@ main()
 	# in the configuration list.
 	for conf in ${config_list}; do
 
-		echo "${script_name}: creating makefile fragments in ${config_dirpath}/${conf}"
+		echo "${script_name}: creating makefile fragments in ${obj_config_dirpath}/${conf}"
 		${gen_make_frags_sh} \
 				 -h -r -v0 \
 				 -o ${script_name} \
 				 -p 'CONFIG' \
 				 ${config_dirpath}/${conf} \
+				 ${obj_config_dirpath}/${conf} \
 				 ${gen_make_frags_dirpath}/fragment.mk \
 				 ${gen_make_frags_dirpath}/suffix_list \
 				 ${gen_make_frags_dirpath}/ignore_list
@@ -2676,49 +2748,56 @@ main()
 	# the configuration list (in the kernel list).
 	for kern in ${kernel_list}; do
 
-		echo "${script_name}: creating makefile fragments in ${kernels_dirpath}/${kern}"
+		echo "${script_name}: creating makefile fragments in ${obj_kernels_dirpath}/${kern}"
 		${gen_make_frags_sh} \
 				 -h -r -v0 \
 				 -o ${script_name} \
 				 -p 'KERNELS' \
 				 ${kernels_dirpath}/${kern} \
+				 ${obj_kernels_dirpath}/${kern} \
 				 ${gen_make_frags_dirpath}/fragment.mk \
 				 ${gen_make_frags_dirpath}/suffix_list \
 				 ${gen_make_frags_dirpath}/ignore_list
 	done
 
 	# Generate makefile fragments in the reference kernels directory.
-	echo "${script_name}: creating makefile fragments in ${refkern_dirpath}"
+	echo "${script_name}: creating makefile fragments in ${obj_refkern_dirpath}"
 	${gen_make_frags_sh} \
 			 -h -r -v0 \
 			 -o ${script_name} \
 			 -p 'REFKERN' \
 			 ${refkern_dirpath} \
+			 ${obj_refkern_dirpath} \
 			 ${gen_make_frags_dirpath}/fragment.mk \
 			 ${gen_make_frags_dirpath}/suffix_list \
 			 ${gen_make_frags_dirpath}/ignore_list
 
 	# Generate makefile fragments in the framework directory.
-	echo "${script_name}: creating makefile fragments in ${frame_dirpath}"
+	echo "${script_name}: creating makefile fragments in ${obj_frame_dirpath}"
 	${gen_make_frags_sh} \
 			 -h -r -v0 \
 			 -o ${script_name} \
 			 -p 'FRAME' \
 			 ${frame_dirpath} \
+			 ${obj_frame_dirpath} \
 			 ${gen_make_frags_dirpath}/fragment.mk \
 			 ${gen_make_frags_dirpath}/suffix_list \
 			 ${gen_make_frags_dirpath}/ignore_list
 
 	# Generate makefile fragments in the sandbox sub-directory.
-	echo "${script_name}: creating makefile fragments in ${sandbox_dirpath}/${sandbox}"
-	${gen_make_frags_sh} \
-			 -h -r -v0 \
-			 -o ${script_name} \
-			 -p 'SANDBOX' \
-			 ${sandbox_dirpath}/${sandbox} \
-			 ${gen_make_frags_dirpath}/fragment.mk \
-			 ${gen_make_frags_dirpath}/suffix_list \
-			 ${gen_make_frags_dirpath}/ignore_list
+	if [ -n "${sandbox_flag}" ]; then
+
+		echo "${script_name}: creating makefile fragments in ${obj_sandbox_dirpath}/${sandbox}"
+		${gen_make_frags_sh} \
+				 -h -r -v0 \
+				 -o ${script_name} \
+				 -p 'SANDBOX' \
+				 ${sandbox_dirpath}/${sandbox} \
+				 ${obj_sandbox_dirpath}/${sandbox} \
+				 ${gen_make_frags_dirpath}/fragment.mk \
+				 ${gen_make_frags_dirpath}/suffix_list \
+				 ${gen_make_frags_dirpath}/ignore_list
+	fi
 
 
 	# -- Handle out-of-tree builds ---------------------------------------------
@@ -2727,30 +2806,55 @@ main()
 	# properly handle out-of-tree builds.
 	if [ "${configured_oot}" = "yes" ]; then
 
-		# If 'Makefile' does not already exist in the current directory,
-		# create a symbolic link to it. If one does exist, we us -f to
-		# force creation of a new link.
+		# If 'Makefile' symlink does not already exist in the current
+		# directory, create a symbolic link to it. If one does exist, we
+		# use -f to force creation of a new link.
 		if [ ! -e "./Makefile" ]; then
 
 			echo "${script_name}: creating symbolic link to Makefile."
 			ln -s "${dist_path}/Makefile"
 
-		else
+		elif [ -h "./Makefile" ]; then
 			echo "${script_name}: symbolic link to Makefile already exists; forcing creation of new link."
 			ln -sf "${dist_path}/Makefile"
+		else
+			echo "${script_name}: Non-symbolic link file or directory 'Makefile' blocks creation of symlink."
+			echo "${script_name}: *** Please remove this entity and re-run configure."
+			exit 1
 		fi
 
-		# If 'common.mk' does not already exist in the current directory,
-		# create a symbolic link to it. If one does exist, we us -f to
-		# force creation of a new link.
+		# If 'common.mk' symlink does not already exist in the current
+		# directory, create a symbolic link to it. If one does exist, we
+		# use -f to force creation of a new link.
 		if [ ! -e "./common.mk" ]; then
 
 			echo "${script_name}: creating symbolic link to common.mk."
 			ln -s "${dist_path}/common.mk"
 
-		else
+		elif [ -h "./common.mk" ]; then
 			echo "${script_name}: symbolic link to common.mk already exists; forcing creation of new link."
 			ln -sf "${dist_path}/common.mk"
+		else
+			echo "${script_name}: Non-symbolic link file or directory 'common.mk' blocks creation of symlink."
+			echo "${script_name}: *** Please remove this entity and re-run configure."
+			exit 1
+		fi
+
+		# If 'config' symlink does not already exist in the current
+		# directory, create a symbolic link to it. If one does exist, we
+		# use -f to force creation of a new link.
+		if [ ! -e "./config" ]; then
+
+			echo "${script_name}: creating symbolic link to 'config' directory."
+			ln -s "${dist_path}/config"
+
+		elif [ -h "./config" ]; then
+			echo "${script_name}: symbolic link to 'config' directory already exists; forcing creation of new link."
+			ln -sf "${dist_path}/config"
+		else
+			echo "${script_name}: Non-symbolic link file or directory 'config' blocks creation of symlink."
+			echo "${script_name}: *** Please remove this entity and re-run configure."
+			exit 1
 		fi
 
 		echo "${script_name}: configured to build outside of source distribution."

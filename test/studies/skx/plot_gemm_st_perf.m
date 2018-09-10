@@ -19,9 +19,9 @@ output_st_zgemm_mkl
 
 axes1 = subplot(4, 4, 1);
 hold(axes1,'on');
-plot(data_st_sgemm_asm_blis(:,1), data_st_sgemm_asm_blis(:,5), 'LineWidth', 1.25,'Color', [0 0 1]);
-plot(data_st_sgemm_openblas(:,1), data_st_sgemm_openblas(:,5), 'LineWidth', 1.25,'Color', [0 1 0]);
-plot(data_st_sgemm_mkl(:,1), data_st_sgemm_mkl(:,5), '--', 'LineWidth', 1.25,'Color', [1 0 0]);
+plot(data_st_sgemm_asm_blis(:,1), data_st_sgemm_asm_blis(:,4), 'LineWidth', 1.25,'Color', [0 0 1]);
+plot(data_st_sgemm_openblas(:,1), data_st_sgemm_openblas(:,4), 'LineWidth', 1.25,'Color', [0 1 0]);
+plot(data_st_sgemm_mkl(:,1), data_st_sgemm_mkl(:,4), '--', 'LineWidth', 1.25,'Color', [1 0 0]);
 ylabel( 'GFLOPS', 'FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue');
 %xlabel( 'matrix dimension m=n=k', 'FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue' );
 title('SGEMM (single-threaded)','FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue');
@@ -35,9 +35,9 @@ axis( [ 0 v(2) 0 speak ] )
 
 axes1 = subplot(4, 4, 5);
 hold(axes1,'on');
-plot(data_st_dgemm_asm_blis(:,1), data_st_dgemm_asm_blis(:,5), 'LineWidth', 1.25,'Color', [0 0 1]);
-plot(data_st_dgemm_openblas(:,1), data_st_dgemm_openblas(:,5), 'LineWidth', 1.25,'Color', [0 1 0]);
-plot(data_st_dgemm_mkl(:,1), data_st_dgemm_mkl(:,5), '--', 'LineWidth', 1.25,'Color', [1 0 0]);
+plot(data_st_dgemm_asm_blis(:,1), data_st_dgemm_asm_blis(:,4), 'LineWidth', 1.25,'Color', [0 0 1]);
+plot(data_st_dgemm_openblas(:,1), data_st_dgemm_openblas(:,4), 'LineWidth', 1.25,'Color', [0 1 0]);
+plot(data_st_dgemm_mkl(:,1), data_st_dgemm_mkl(:,4), '--', 'LineWidth', 1.25,'Color', [1 0 0]);
 ylabel( 'GFLOPS', 'FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue');
 %xlabel( 'matrix dimension m=n=k', 'FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue' );
 title('DGEMM (single-threaded)','FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue');
@@ -51,9 +51,9 @@ axis( [ 0 v(2) 0 dpeak ] )
 
 axes1 = subplot(4, 4, 9);
 hold(axes1,'on');
-plot(data_st_cgemm_1m_blis(:,1), data_st_cgemm_1m_blis(:,5), 'LineWidth', 1.25,'Color', [0 0 1]);
-plot(data_st_cgemm_openblas(:,1), data_st_cgemm_openblas(:,5),'--', 'LineWidth', 1.25,'Color', [0 1 0]);
-plot(data_st_cgemm_mkl(:,1), data_st_cgemm_mkl(:,5), '--', 'LineWidth', 1.25,'Color', [1 0 0]);
+plot(data_st_cgemm_1m_blis(:,1), data_st_cgemm_1m_blis(:,4), 'LineWidth', 1.25,'Color', [0 0 1]);
+plot(data_st_cgemm_openblas(:,1), data_st_cgemm_openblas(:,4),'--', 'LineWidth', 1.25,'Color', [0 1 0]);
+plot(data_st_cgemm_mkl(:,1), data_st_cgemm_mkl(:,4), '--', 'LineWidth', 1.25,'Color', [1 0 0]);
 ylabel( 'GFLOPS', 'FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue');
 %xlabel( 'matrix dimension m=n=k', 'FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue' );
 title('CGEMM (single-threaded)','FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue');
@@ -67,9 +67,9 @@ axis( [ 0 v(2) 0 speak ] )
 
 axes1 = subplot(4, 4, 13);
 hold(axes1,'on');
-plot(data_st_zgemm_1m_blis(:,1), data_st_zgemm_1m_blis(:,5), 'LineWidth', 1.25,'Color', [0 0 1]);
-plot(data_st_zgemm_openblas(:,1), data_st_zgemm_openblas(:,5), 'LineWidth', 1.25,'Color', [0 1 0]);
-plot(data_st_zgemm_mkl(:,1), data_st_zgemm_mkl(:,5), '--', 'LineWidth', 1.25,'Color', [1 0 0]);
+plot(data_st_zgemm_1m_blis(:,1), data_st_zgemm_1m_blis(:,4), 'LineWidth', 1.25,'Color', [0 0 1]);
+plot(data_st_zgemm_openblas(:,1), data_st_zgemm_openblas(:,4), 'LineWidth', 1.25,'Color', [0 1 0]);
+plot(data_st_zgemm_mkl(:,1), data_st_zgemm_mkl(:,4), '--', 'LineWidth', 1.25,'Color', [1 0 0]);
 ylabel( 'GFLOPS', 'FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue');
 xlabel( 'matrix dimension m=n=k', 'FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue' );
 title('ZGEMM (single-threaded)','FontSize', fontsize, 'FontWeight', 'bold', 'FontName', 'Helvetica Neue');

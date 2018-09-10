@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-static gemm_voft vars[2][2] =
+static gemm_var_oft vars[2][2] =
 {
 	{ bli_trmm_ll_ker_var2, bli_trmm_lu_ker_var2 },
 	{ bli_trmm_rl_ker_var2, bli_trmm_ru_ker_var2 }
@@ -51,9 +51,9 @@ void bli_trmm_xx_ker_var2
        thrinfo_t* thread
      )
 {
-	bool_t    side;
-	bool_t    uplo;
-	gemm_voft f;
+	bool_t       side;
+	bool_t       uplo;
+	gemm_var_oft f;
 
 	// Set two bools: one based on the implied side parameter (the structure
 	// of the root object) and one based on the uplo field of the triangular

@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -36,6 +36,10 @@
 
 #include "bli_l0_oapi.h"
 #include "bli_l0_tapi.h"
+#include "bli_l0_ft.h"
+
+// Generate function pointer arrays for tapi functions.
+#include "bli_l0_fpa.h"
 
 // copysc
 #include "bli_copysc.h"

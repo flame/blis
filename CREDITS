@@ -5,67 +5,71 @@ Acknowledgements
 
 The BLIS framework was primarily authored by
 
-  Field Van Zee               (The University of Texas at Austin)
+  Field Van Zee         @fgvanzee           (The University of Texas at Austin)
 
 but many others have contributed code and feedback, including
 
-  Murtaza Ali                 (Texas Instruments)
-  Erling Andersen
-  Alex Arslan
-  Vernon Austel               (IBM, T.J. Watson Research Center)
-  Jed Brown                   (Argonne National Laboratory)
-  Robin Christ
-  Johannes Dieterich
-  Krzysztof Drewniak
-  Victor Eijkhout             (Texas Advanced Computing Center)
-  Isuru Fernando
-  Roman Gareev
-  John Gunnels                (IBM, T.J. Watson Research Center)
-  Jeff Hammond                (Intel)
+  Murtaza Ali                               (Texas Instruments)
+  Sajid Ali             @s-sajid-ali        (Northwestern University)
+  Erling Andersen       @erling-d-andersen
+  Alex Arslan           @ararslan
+  Vernon Austel                             (IBM, T.J. Watson Research Center)
+  Jed Brown             @jedbrown           (Argonne National Laboratory)
+  Robin Christ          @robinchrist
+  Johannes Dieterich    @iotamudelta
+  Krzysztof Drewniak    @krzysz00
+  Victor Eijkhout       @VictorEijkhout     (Texas Advanced Computing Center)
+  Isuru Fernando        @isuruf
+  Roman Gareev          @gareevroman
+  John Gunnels                              (IBM, T.J. Watson Research Center)
+  Jeff Hammond          @jeffhammond        (Intel)
   Chris Goodyer
-  Jacob Gorm Hansen
-  Jean-Michel Hautbois
-  Minh Quan Ho
-  Stefan Husmann
-  Francisco Igual             (Universidad Complutense de Madrid)
-  Tony Kelman
-  Lee Killough                (Cray)
-  Mike Kistler                (IBM, Austin Research Laboratory)
-  Ricardo Magana              (Hewlett Packard Enterprise)
-  Bryan Marker                (The University of Texas at Austin)
-  Devin Matthews              (The University of Texas at Austin)
-  Stefanos Mavros
-  Michael Lehn
-  Dave Love
-  Tze Meng Low                (The University of Texas at Austin)
-  Nisanth Padinharepatt       (AMD)
-  Devangi Parikh              (The University of Texas at Austin)
-  Elmar Peise                 (RWTH-Aachen)
-  Clément Pernet
+  Jacob Gorm Hansen     @jacobgorm
+  Jean-Michel Hautbois  @jhautbois
+  Ian Henriksen         @insertinterestingnamehere
+  Minh Quan Ho          @hominhquan
+  Matthew Honnibal      @honnibal
+  Stefan Husmann        @stefanhusmann
+  Francisco Igual       @figual             (Universidad Complutense de Madrid)
+  Tony Kelman           @tkelman
+  Lee Killough                              (Cray)
+  Mike Kistler                              (IBM, Austin Research Laboratory)
+  Ricardo Magana        @magania            (Hewlett Packard Enterprise)
+  Bryan Marker          @bamarker           (The University of Texas at Austin)
+  Devin Matthews        @devinamatthews     (The University of Texas at Austin)
+  Stefanos Mavros       @smavros
+  Michael Lehn          @michael-lehn
+  Dave Love             @loveshack
+  Tze Meng Low                              (The University of Texas at Austin)
+  Nisanth Padinharepatt                     (AMD)
+  Devangi Parikh        @dnparikh           (The University of Texas at Austin)
+  Elmar Peise           @elmar-peise        (RWTH-Aachen)
+  Clément Pernet        @ClementPernet
   Ilya Polkovnichenko
-  Jack Poulson                (Stanford)
-  Mathieu Poumeyrol
-  Michael Rader
-  Pradeep Rao                 (AMD)
+  Jack Poulson          @poulson            (Stanford)
+  Mathieu Poumeyrol     @kali
+                        @qnerd
+  Michael Rader         @mrader1248
+  Pradeep Rao                               (AMD)
   Aleksei Rechinskii
-  Karl Rupp
-  Martin Schatz               (The University of Texas at Austin)
-  Nico Schlömer
+  Karl Rupp             @karlrupp
+  Martin Schatz                             (The University of Texas at Austin)
+  Nico Schlömer         @nschloe
   Rene Sitt
-  Tony Skjellum               (The University of Tennessee at Chattanooga)
-  Mikhail Smelyanskiy         (Intel, Parallel Computing Lab)
-  Shaden Smith
-  Tyler Smith                 (The University of Texas at Austin)
-  Paul Springer               (RWTH-Aachen)
+  Tony Skjellum         @tonyskjellum       (The University of Tennessee at Chattanooga)
+  Mikhail Smelyanskiy                       (Intel, Parallel Computing Lab)
+  Shaden Smith          @ShadenSmith
+  Tyler Smith           @tlrmchlsmth        (The University of Texas at Austin)
+  Paul Springer         @springer13         (RWTH-Aachen)
   Vladimir Sukarev
-  Santanu Thangaraj           (AMD)
-  Rhys Ulerich                (The University of Texas at Austin)
-  Robert van de Geijn         (The University of Texas at Austin)
-  Kiran Varaganti             (AMD)
-  Natalia Vassilieva          (Hewlett Packard Enterprise)
-  Zhang Xianyi                (Chinese Academy of Sciences)
-  Benda Xu
-  Chenhan Yu                  (The University of Texas at Austin)
+  Santanu Thangaraj                         (AMD)
+  Rhys Ulerich          @RhysU              (The University of Texas at Austin)
+  Robert van de Geijn                       (The University of Texas at Austin)
+  Kiran Varaganti                           (AMD)
+  Natalia Vassilieva                        (Hewlett Packard Enterprise)
+  Zhang Xianyi          @xianyi             (Chinese Academy of Sciences)
+  Benda Xu              @heroxbd
+  Chenhan Yu                                (The University of Texas at Austin)
 
 BLIS's development was partially funded by grants from industry
 partners, including

@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -42,14 +42,16 @@
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
       ( \
-        conj_t           conjx, \
-        dim_t            n, \
-        ctype*  restrict x, inc_t incx, \
-        ctype*  restrict y, inc_t incy  \
+        conj_t  conjx, \
+        dim_t   n, \
+        ctype*  x, inc_t incx, \
+        ctype*  y, inc_t incy  \
         BLIS_TAPI_EX_PARAMS  \
       );
 
 INSERT_GENTPROT_BASIC0( addv )
+INSERT_GENTPROT_BASIC0( copyv )
+INSERT_GENTPROT_BASIC0( subv )
 
 
 #undef  GENTPROT
@@ -57,9 +59,9 @@ INSERT_GENTPROT_BASIC0( addv )
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       dim_t            n, \
-       ctype*  restrict x, inc_t incx, \
-       dim_t*  restrict index  \
+       dim_t   n, \
+       ctype*  x, inc_t incx, \
+       dim_t*  index  \
        BLIS_TAPI_EX_PARAMS  \
      ); \
 
@@ -71,12 +73,12 @@ INSERT_GENTPROT_BASIC0( amaxv )
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       conj_t           conjx, \
-       dim_t            n, \
-       ctype*  restrict alpha, \
-       ctype*  restrict x, inc_t incx, \
-       ctype*  restrict beta, \
-       ctype*  restrict y, inc_t incy  \
+       conj_t  conjx, \
+       dim_t   n, \
+       ctype*  alpha, \
+       ctype*  x, inc_t incx, \
+       ctype*  beta, \
+       ctype*  y, inc_t incy  \
        BLIS_TAPI_EX_PARAMS  \
      ); \
 
@@ -88,30 +90,16 @@ INSERT_GENTPROT_BASIC0( axpbyv )
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       conj_t           conjx, \
-       dim_t            n, \
-       ctype*  restrict alpha, \
-       ctype*  restrict x, inc_t incx, \
-       ctype*  restrict y, inc_t incy  \
+       conj_t  conjx, \
+       dim_t   n, \
+       ctype*  alpha, \
+       ctype*  x, inc_t incx, \
+       ctype*  y, inc_t incy  \
        BLIS_TAPI_EX_PARAMS  \
      ); \
 
 INSERT_GENTPROT_BASIC0( axpyv )
-
-
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-void PASTEMAC2(ch,opname,EX_SUF) \
-      ( \
-        conj_t           conjx, \
-        dim_t            n, \
-        ctype*  restrict x, inc_t incx, \
-        ctype*  restrict y, inc_t incy  \
-        BLIS_TAPI_EX_PARAMS  \
-      );
-
-INSERT_GENTPROT_BASIC0( copyv )
+INSERT_GENTPROT_BASIC0( scal2v )
 
 
 #undef  GENTPROT
@@ -119,12 +107,12 @@ INSERT_GENTPROT_BASIC0( copyv )
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       conj_t           conjx, \
-       conj_t           conjy, \
-       dim_t            n, \
-       ctype*  restrict x, inc_t incx, \
-       ctype*  restrict y, inc_t incy, \
-       ctype*  restrict rho  \
+       conj_t  conjx, \
+       conj_t  conjy, \
+       dim_t   n, \
+       ctype*  x, inc_t incx, \
+       ctype*  y, inc_t incy, \
+       ctype*  rho  \
        BLIS_TAPI_EX_PARAMS  \
      ); \
 
@@ -136,14 +124,14 @@ INSERT_GENTPROT_BASIC0( dotv )
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       conj_t           conjx, \
-       conj_t           conjy, \
-       dim_t            n, \
-       ctype*  restrict alpha, \
-       ctype*  restrict x, inc_t incx, \
-       ctype*  restrict y, inc_t incy, \
-       ctype*  restrict beta, \
-       ctype*  restrict rho  \
+       conj_t  conjx, \
+       conj_t  conjy, \
+       dim_t   n, \
+       ctype*  alpha, \
+       ctype*  x, inc_t incx, \
+       ctype*  y, inc_t incy, \
+       ctype*  beta, \
+       ctype*  rho  \
        BLIS_TAPI_EX_PARAMS  \
      ); \
 
@@ -155,8 +143,8 @@ INSERT_GENTPROT_BASIC0( dotxv )
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       dim_t            n, \
-       ctype*  restrict x, inc_t incx  \
+       dim_t   n, \
+       ctype*  x, inc_t incx  \
        BLIS_TAPI_EX_PARAMS  \
      ); \
 
@@ -168,44 +156,14 @@ INSERT_GENTPROT_BASIC0( invertv )
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       conj_t           conjalpha, \
-       dim_t            n, \
-       ctype*  restrict alpha, \
-       ctype*  restrict x, inc_t incx  \
+       conj_t  conjalpha, \
+       dim_t   n, \
+       ctype*  alpha, \
+       ctype*  x, inc_t incx  \
        BLIS_TAPI_EX_PARAMS  \
      ); \
 
 INSERT_GENTPROT_BASIC0( scalv )
-
-
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-void PASTEMAC2(ch,opname,EX_SUF) \
-     ( \
-       conj_t           conjx, \
-       dim_t            n, \
-       ctype*  restrict alpha, \
-       ctype*  restrict x, inc_t incx, \
-       ctype*  restrict y, inc_t incy  \
-       BLIS_TAPI_EX_PARAMS  \
-     ); \
-
-INSERT_GENTPROT_BASIC0( scal2v )
-
-
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-void PASTEMAC2(ch,opname,EX_SUF) \
-     ( \
-       conj_t           conjalpha, \
-       dim_t            n, \
-       ctype*  restrict alpha, \
-       ctype*  restrict x, inc_t incx  \
-       BLIS_TAPI_EX_PARAMS  \
-     ); \
-
 INSERT_GENTPROT_BASIC0( setv )
 
 
@@ -213,25 +171,10 @@ INSERT_GENTPROT_BASIC0( setv )
 #define GENTPROT( ctype, ch, opname ) \
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
-      ( \
-        conj_t           conjx, \
-        dim_t            n, \
-        ctype*  restrict x, inc_t incx, \
-        ctype*  restrict y, inc_t incy  \
-        BLIS_TAPI_EX_PARAMS  \
-      );
-
-INSERT_GENTPROT_BASIC0( subv )
-
-
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       dim_t            n, \
-       ctype*  restrict x, inc_t incx, \
-       ctype*  restrict y, inc_t incy  \
+       dim_t   n, \
+       ctype*  x, inc_t incx, \
+       ctype*  y, inc_t incy  \
        BLIS_TAPI_EX_PARAMS  \
      ); \
 
@@ -243,11 +186,11 @@ INSERT_GENTPROT_BASIC0( swapv )
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       conj_t           conjx, \
-       dim_t            n, \
-       ctype*  restrict x, inc_t incx, \
-       ctype*  restrict beta, \
-       ctype*  restrict y, inc_t incy  \
+       conj_t  conjx, \
+       dim_t   n, \
+       ctype*  x, inc_t incx, \
+       ctype*  beta, \
+       ctype*  y, inc_t incy  \
        BLIS_TAPI_EX_PARAMS  \
      ); \
 

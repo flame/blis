@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -88,7 +88,7 @@ void PASTEMAC(opname,imeth) \
 	   _cntx_init() function. */ \
 	cntx = bli_gks_query_ind_cntx( ind, dt ); \
 \
-	/* Initialize a local runtime object if necessary. */ \
+	/* Initialize a local runtime with global settings if necessary. */ \
 	rntm_t rntm_l; \
 	if ( rntm == NULL ) { rntm = &rntm_l; bli_thread_init_rntm( rntm ); } \
 \
@@ -173,7 +173,7 @@ void PASTEMAC(opname,imeth) \
 	   _cntx_init() function. */ \
 	cntx = bli_gks_query_ind_cntx( ind, dt ); \
 \
-	/* Initialize a local runtime object if necessary. */ \
+	/* Initialize a local runtime with global settings if necessary. */ \
 	rntm_t rntm_l; \
 	if ( rntm == NULL ) { rntm = &rntm_l; bli_thread_init_rntm( rntm ); } \
 \
@@ -256,7 +256,7 @@ void PASTEMAC(opname,imeth) \
 	   _cntx_init() function. */ \
 	cntx = bli_gks_query_ind_cntx( ind, dt ); \
 \
-	/* Initialize a local runtime object if necessary. */ \
+	/* Initialize a local runtime with global settings if necessary. */ \
 	rntm_t rntm_l; \
 	if ( rntm == NULL ) { rntm = &rntm_l; bli_thread_init_rntm( rntm ); } \
 \
@@ -330,7 +330,7 @@ void PASTEMAC(opname,imeth) \
 	   _cntx_init() function. */ \
 	cntx = bli_gks_query_ind_cntx( ind, dt ); \
 \
-	/* Initialize a local runtime object if necessary. */ \
+	/* Initialize a local runtime with global settings if necessary. */ \
 	rntm_t rntm_l; \
 	if ( rntm == NULL ) { rntm = &rntm_l; bli_thread_init_rntm( rntm ); } \
 \
@@ -390,7 +390,7 @@ void PASTEMAC(opname,imeth) \
 	   _cntx_init() function. */ \
 	cntx = bli_gks_query_ind_cntx( ind, dt ); \
 \
-	/* Initialize a local runtime object if necessary. */ \
+	/* Initialize a local runtime with global settings if necessary. */ \
 	rntm_t rntm_l; \
 	if ( rntm == NULL ) { rntm = &rntm_l; bli_thread_init_rntm( rntm ); } \
 \

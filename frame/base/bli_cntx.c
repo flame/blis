@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -113,9 +113,9 @@ void bli_cntx_set_blkszs( ind_t method, dim_t n_bs, ... )
 			// - the address of the blksz_t object,
 			// - the bszid_t of the multiple we need to associate with
 			//   the blksz_t object.
-			bszid_t  bs_id = va_arg( args, bszid_t  );
-			blksz_t* blksz = va_arg( args, blksz_t* );
-			bszid_t  bm_id = va_arg( args, bszid_t  );
+			bszid_t  bs_id = ( bszid_t  )va_arg( args, bszid_t  );
+			blksz_t* blksz = ( blksz_t* )va_arg( args, blksz_t* );
+			bszid_t  bm_id = ( bszid_t  )va_arg( args, bszid_t  );
 
 			// Store the values in our temporary arrays.
 			bszids[ i ] = bs_id;
@@ -136,11 +136,11 @@ void bli_cntx_set_blkszs( ind_t method, dim_t n_bs, ... )
 			// - the scalars we wish to apply to the real blocksizes to
 			//   come up with the induced complex blocksizes (for default
 			//   and maximum blocksizes).
-			bszid_t  bs_id = va_arg( args, bszid_t  );
-			blksz_t* blksz = va_arg( args, blksz_t* );
-			bszid_t  bm_id = va_arg( args, bszid_t  );
-			double   dsclr = va_arg( args, double   );
-			double   msclr = va_arg( args, double   );
+			bszid_t  bs_id = ( bszid_t  )va_arg( args, bszid_t  );
+			blksz_t* blksz = ( blksz_t* )va_arg( args, blksz_t* );
+			bszid_t  bm_id = ( bszid_t  )va_arg( args, bszid_t  );
+			double   dsclr = ( double   )va_arg( args, double   );
+			double   msclr = ( double   )va_arg( args, double   );
 
 			// Store the values in our temporary arrays.
 			bszids[ i ] = bs_id;
@@ -152,7 +152,7 @@ void bli_cntx_set_blkszs( ind_t method, dim_t n_bs, ... )
 	}
 
 	// The last argument should be the context pointer.
-	cntx = va_arg( args, cntx_t* );
+	cntx = ( cntx_t* )va_arg( args, cntx_t* );
 
 	// Shutdown variable argument environment and clean up stack.
 	va_end( args );
@@ -341,9 +341,9 @@ void bli_cntx_set_ind_blkszs( ind_t method, dim_t n_bs, ... )
 			// - the scalars we wish to apply to the real blocksizes to
 			//   come up with the induced complex blocksizes (for default
 			//   and maximum blocksizes).
-			bszid_t  bs_id = va_arg( args, bszid_t  );
-			double   dsclr = va_arg( args, double   );
-			double   msclr = va_arg( args, double   );
+			bszid_t  bs_id = ( bszid_t )va_arg( args, bszid_t  );
+			double   dsclr = ( double  )va_arg( args, double   );
+			double   msclr = ( double  )va_arg( args, double   );
 
 			// Store the values in our temporary arrays.
 			bszids[ i ] = bs_id;
@@ -353,7 +353,7 @@ void bli_cntx_set_ind_blkszs( ind_t method, dim_t n_bs, ... )
 	}
 
 	// The last argument should be the context pointer.
-	cntx = va_arg( args, cntx_t* );
+	cntx = ( cntx_t* )va_arg( args, cntx_t* );
 
 	// Shutdown variable argument environment and clean up stack.
 	va_end( args );
@@ -495,10 +495,20 @@ void bli_cntx_set_l3_nat_ukrs( dim_t n_ukrs, ... )
 		// - the kernel function pointer, and
 		// - the kernel function storage preference
 		// that we need to store to the context.
-		const l3ukr_t  ukr_id   = va_arg( args, l3ukr_t );
-		const num_t    ukr_dt   = va_arg( args, num_t   );
-		      void*    ukr_fp   = va_arg( args, void*   );
-		const bool_t   ukr_pref = va_arg( args, bool_t  );
+		// NOTE: The type that we pass into the va_arg() macro for the ukr
+		// preference matters. Using 'bool_t' may cause breakage on 64-bit
+		// systems that define int as 32 bits and long int and pointers as
+		// 64 bits. The problem is that TRUE or FALSE are defined as 1 and
+		// 0, respectively, and when "passed" into the variadic function
+		// they come with no contextual typecast. Thus, default rules of
+		// argument promotion kick in to treat these integer literals as
+		// being of type int. Thus, we need to let va_arg() treat the TRUE
+		// or FALSE value as an int, even if we cast it to and store it
+		// within a bool_t afterwards.
+		const l3ukr_t  ukr_id   = ( l3ukr_t )va_arg( args, l3ukr_t );
+		const num_t    ukr_dt   = ( num_t   )va_arg( args, num_t   );
+		      void*    ukr_fp   = ( void*   )va_arg( args, void*   );
+		const bool_t   ukr_pref = ( bool_t  )va_arg( args, int     );
 
 		// Store the values in our temporary arrays.
 		ukr_ids[ i ]   = ukr_id;
@@ -508,7 +518,7 @@ void bli_cntx_set_l3_nat_ukrs( dim_t n_ukrs, ... )
 	}
 
 	// The last argument should be the context pointer.
-	cntx_t* cntx = va_arg( args, cntx_t* );
+	cntx_t* cntx = ( cntx_t* )va_arg( args, cntx_t* );
 
 	// Shutdown variable argument environment and clean up stack.
 	va_end( args );
@@ -606,9 +616,9 @@ void bli_cntx_set_l1f_kers( dim_t n_kers, ... )
 		// - the datatype of the kernel, and
 		// - the kernel function pointer
 		// that we need to store to the context.
-		const l1fkr_t  ker_id   = va_arg( args, l1fkr_t );
-		const num_t    ker_dt   = va_arg( args, num_t   );
-		      void*    ker_fp   = va_arg( args, void*   );
+		const l1fkr_t  ker_id   = ( l1fkr_t )va_arg( args, l1fkr_t );
+		const num_t    ker_dt   = ( num_t   )va_arg( args, num_t   );
+		      void*    ker_fp   = ( void*   )va_arg( args, void*   );
 
 		// Store the values in our temporary arrays.
 		ker_ids[ i ]   = ker_id;
@@ -617,7 +627,7 @@ void bli_cntx_set_l1f_kers( dim_t n_kers, ... )
 	}
 
 	// The last argument should be the context pointer.
-	cntx_t* cntx = va_arg( args, cntx_t* );
+	cntx_t* cntx = ( cntx_t* )va_arg( args, cntx_t* );
 
 	// Shutdown variable argument environment and clean up stack.
 	va_end( args );
@@ -700,9 +710,9 @@ void bli_cntx_set_l1v_kers( dim_t n_kers, ... )
 		// - the datatype of the kernel, and
 		// - the kernel function pointer
 		// that we need to store to the context.
-		const l1vkr_t  ker_id   = va_arg( args, l1vkr_t );
-		const num_t    ker_dt   = va_arg( args, num_t   );
-		      void*    ker_fp   = va_arg( args, void*   );
+		const l1vkr_t  ker_id   = ( l1vkr_t )va_arg( args, l1vkr_t );
+		const num_t    ker_dt   = ( num_t   )va_arg( args, num_t   );
+		      void*    ker_fp   = ( void*   )va_arg( args, void*   );
 
 		// Store the values in our temporary arrays.
 		ker_ids[ i ]   = ker_id;
@@ -711,7 +721,7 @@ void bli_cntx_set_l1v_kers( dim_t n_kers, ... )
 	}
 
 	// The last argument should be the context pointer.
-	cntx_t* cntx = va_arg( args, cntx_t* );
+	cntx_t* cntx = ( cntx_t* )va_arg( args, cntx_t* );
 
 	// Shutdown variable argument environment and clean up stack.
 	va_end( args );
@@ -794,9 +804,9 @@ void bli_cntx_set_packm_kers( dim_t n_kers, ... )
 		// - the datatype of the kernel, and
 		// - the kernel function pointer
 		// that we need to store to the context.
-		const l1mkr_t  ker_id   = va_arg( args, l1mkr_t );
-		const num_t    ker_dt   = va_arg( args, num_t   );
-		      void*    ker_fp   = va_arg( args, void*   );
+		const l1mkr_t  ker_id   = ( l1mkr_t )va_arg( args, l1mkr_t );
+		const num_t    ker_dt   = ( num_t   )va_arg( args, num_t   );
+		      void*    ker_fp   = ( void*   )va_arg( args, void*   );
 
 		// Store the values in our temporary arrays.
 		ker_ids[ i ]   = ker_id;
@@ -805,7 +815,7 @@ void bli_cntx_set_packm_kers( dim_t n_kers, ... )
 	}
 
 	// The last argument should be the context pointer.
-	cntx_t* cntx = va_arg( args, cntx_t* );
+	cntx_t* cntx = ( cntx_t* )va_arg( args, cntx_t* );
 
 	// Shutdown variable argument environment and clean up stack.
 	va_end( args );

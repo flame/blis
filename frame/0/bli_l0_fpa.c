@@ -1,11 +1,10 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2016, Hewlett Packard Enterprise Development LP
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,37 +32,44 @@
 
 */
 
-#ifndef BLIS_MUTEX_SINGLE_H
-#define BLIS_MUTEX_SINGLE_H
+#include "blis.h"
 
-// Define mtx_t for situations when multithreading is disabled.
-#ifndef BLIS_ENABLE_MULTITHREADING
+//
+// Define function pointer query interfaces.
+//
 
-// Define mtx_t.
-
-typedef struct mtx_s
-{
-} mtx_t;
-
-// Define macros to operate on pthread-based mtx_t.
-
-static void bli_mutex_init( mtx_t* m )
-{
+#undef  GENFRONT
+#define GENFRONT( opname ) \
+\
+GENARRAY_FPA( void*, opname ); \
+\
+PASTECH(opname,_vft) PASTEMAC(opname,_qfp)( num_t dt ) \
+{ \
+	return PASTECH(opname,_fpa)[ dt ]; \
 }
 
-static void bli_mutex_finalize( mtx_t* m )
-{
+GENFRONT( absqsc )
+GENFRONT( normfsc )
+GENFRONT( addsc )
+GENFRONT( divsc )
+GENFRONT( mulsc )
+GENFRONT( subsc )
+GENFRONT( invertsc )
+GENFRONT( sqrtsc )
+GENFRONT( unzipsc )
+GENFRONT( zipsc )
+
+
+#undef  GENFRONT
+#define GENFRONT( opname ) \
+\
+GENARRAY_FPA_I( void*, opname ); \
+\
+PASTECH(opname,_vft) PASTEMAC(opname,_qfp)( num_t dt ) \
+{ \
+	return PASTECH(opname,_fpa)[ dt ]; \
 }
 
-static void bli_mutex_lock( mtx_t* m )
-{
-}
-
-static void bli_mutex_unlock( mtx_t* m )
-{
-}
-
-#endif
-
-#endif
+GENFRONT( getsc )
+GENFRONT( setsc )
 

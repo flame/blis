@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -96,6 +96,18 @@ int main( int argc, char** argv )
 	bli_param_map_blis_to_netlib_uplo( uploc, &f77_uploc );
 	bli_param_map_blis_to_netlib_trans( transa, &f77_transa );
 
+	// Begin with initializing the last entry to zero so that
+	// matlab allocates space for the entire array once up-front.
+	for ( p = p_begin; p + p_inc <= p_end; p += p_inc ) ;
+#ifdef BLIS
+	printf( "data_her2k_blis" );
+#else
+	printf( "data_her2k_%s", BLAS );
+#endif
+	printf( "( %2lu, 1:3 ) = [ %4lu %4lu %7.2f ];\n",
+	        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
+	        ( unsigned long )0,
+	        ( unsigned long )0, 0.0 );
 
 	for ( p = p_begin; p <= p_end; p += p_inc )
 	{
@@ -274,10 +286,10 @@ int main( int argc, char** argv )
 #else
 		printf( "data_her2k_%s", BLAS );
 #endif
-		printf( "( %2lu, 1:4 ) = [ %4lu %4lu  %10.3e  %6.3f ];\n",
+		printf( "( %2lu, 1:3 ) = [ %4lu %4lu %7.2f ];\n",
 		        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
 		        ( unsigned long )m,
-		        ( unsigned long )k, dtime_save, gflops );
+		        ( unsigned long )k, gflops );
 
 
 		bli_obj_free( &alpha );

@@ -17,10 +17,10 @@ license](http://opensource.org/licenses/BSD-3-Clause). While BLIS exports a
 [new BLAS-like API](docs/BLISTypedAPI.md),
 it also includes a BLAS compatibility layer which gives application developers
 access to BLIS implementations via traditional [BLAS routine
-calls](http://www.netlib.org/lapack/lug/node145.html). An object-based API
-is also available for more experienced users.
+calls](http://www.netlib.org/lapack/lug/node145.html).
+An [object-based API](docs/BLISObjectAPI.md) unique to BLIS is also available.
 
-For a thorough presentation of our framework, please read our recently accepted
+For a thorough presentation of our framework, please read our
 journal article, ["BLIS: A Framework for Rapidly Instantiating BLAS
 Functionality"](http://www.cs.utexas.edu/users/flame/pubs/blis1_toms_rev3.pdf).
 For those who just want an executive summary, please see the next section.
@@ -90,6 +90,9 @@ allows threads to query and communicate data amongst one another. BLIS also
 employs so-called "quadratic partitioning" when computing dimension sub-ranges
 for each thread, so that arbitrary diagonal offsets of structured matrices with
 unreferenced regions are taken into account to achieve proper load balance.
+More recently, BLIS introduced a runtime abstraction to specify parallelism on
+a per-call basis, which is useful for applications that want to handle most of
+the parallelism.
 
  * **Ease of use.** The BLIS framework, and the library of routines it
 generates, are easy to use for end users, experts, and vendors alike. An
@@ -99,17 +102,24 @@ write their application to take advantage of new BLIS functionality (such as
 generalized storage formats or additional complex operations) by calling one
 of BLIS's native APIs directly. BLIS's typed API will feel familiar to many
 veterans of BLAS since these interfaces use BLAS-like calling sequences. And
-experts will find BLIS's object-based APIs a delight to use when customizing
+many will find BLIS's object-based APIs a delight to use when customizing
 or writing their own BLIS operations. (Objects are relatively lightweight
 `structs` and passed by address, which helps tame function calling overhead.) 
 
- * **Multilayered API and exposed kernels.** The BLIS framework exposes its
+ * **Multilayered API, exposed kernels, and sandboxes.** The BLIS framework
+exposes its
 implementations in various layers, allowing expert developers to access exactly
 the functionality desired. This layered interface includes that of the
 lowest-level kernels, for those who wish to bypass the bulk of the framework.
 Optimizations can occur at various levels, in part thanks to exposed packing
 and unpacking facilities, which by default are highly parameterized and
-flexible. 
+flexible. And more recently, BLIS introduced sandboxes--a way to provide
+alternative implementations of `gemm` that do not use any more of the BLIS
+infrastructure than is desired. Sandboxes provide a convenient and
+straightforward way of modifying the `gemm` implementation without disrupting
+any other level-3 operation or any other part of the framework. This works
+especially well when the developer wants to experiment with new optimizations
+or try a different algorithm.
 
  * **Functionality that grows with the community's needs.** As its name
 suggests, the BLIS framework is not a single library or static API, but rather
@@ -158,20 +168,25 @@ drivers via `make check`:
 ```
 $ make check [-j]
 ```
-
+Please read the output of `./configure --help` for a full list of configure-time
+options.
 A more detailed walkthrough of the build system can be found in our
 [Build System](docs/BuildSystem.md) guide.
 
-If you want to browse a quick-reference guide on user-level BLIS
-interfaces, please read the [BLIS Typed API reference](docs/BLISTypedAPI.md).
-There you will find a brief description of each operation as well as some more
-general information needed when developing an application with BLIS.
+We provide comprehensive documentation on BLIS's two primarily APIs:
+the [object API](docs/BLISObjectAPI.md) and
+the [typed API](docs/BLISTypedAPI.md).
+These documents provide brief descriptions of each operation interface as
+well as some more general information needed when developing an application
+with BLIS.
 
-If you want to begin using the more advanced object API in BLIS,
-please step through the example code tutorial in the
-[examples/oapi](examples/oapi) directory.
+If you want to begin using the object API in BLIS, please step through the
+example code tutorial in the [examples/oapi](examples/oapi) directory.
 We also have the equivalent code examples for the typed API available in
 [examples/tapi](examples/tapi).
+
+Users interested in using BLIS to obtain multithreaded parallelism should
+read the [Multithreading](docs/Multithreading.md) documentation.
 
 Have a quick question? You may find the answer in our list of [frequently asked
 questions](docs/FAQ.md). 
@@ -180,8 +195,12 @@ Does BLIS contain kernels optimized for your favorite architecture? Please see
 our [Hardware Support](docs/HardwareSupport.md) guide
 for a full list of optimized kernels. 
 
-We also provide wikis on the following topics, which will likely be of interest
-to more advanced users and developers:
+The [Release Notes](docs/ReleaseNotes.md) contain a summary of new features
+provided by each new tagged version (release) of BLIS, along with the date
+the release.
+
+We also provide documentation on the following topics, which will likely be of
+interest to more advanced users and developers:
  * [Configurations](docs/ConfigurationHowTo.md).
 This document describes how the configuration system works in BLIS, and also
 provides step-by-step instructions for creating a new configuration.
@@ -193,22 +212,19 @@ configuration settings.
 This document describes each of the BLIS kernel operations in detail and should
 provide developers with most of the information needed to get started with
 writing and optimizing their own kernels. 
- * [Multithreading](docs/Multithreading.md).
-This document describes how to enable and control multithreaded parallelism
-in BLIS.
  * [Test suite](docs/Testsuite.md).
 This document contains detailed instructions on running the BLIS test suite,
 located in the top-level directory testsuite. Also included: a walkthrough
 of the BLAS test drivers, which exercise the BLAS compatibility layer that
 is, by default, included in BLIS.
- * [Release notes](docs/ReleaseNotes.md).
-This document contains a summary of new features provided by each new tagged
-version (release) of BLIS, along with the date the release.
+
+A full listing of all documentation may be found via in the project's
+[wiki](https://github.com/flame/blis/wiki) section.
 
 External Linux packages
 -----------------------
 
-Generally speaking, we highly recommend building from source whenever possible using the latest `git` clone. (Tarballs of each [tagged release](https://github.com/flame/blis/releases) are also available, but are not preferred since they are more difficult to upgrade from than a git clone.)
+Generally speaking, we **highly recommend** building from source whenever possible using the latest `git` clone. (Tarballs of each [tagged release](https://github.com/flame/blis/releases) are also available, but are not preferred since they are more difficult to upgrade from than a git clone.)
 
 If you prefer (or need) binary packages, please check out the following offerings available thanks to generous involvement/contributions from two of our community members.
 
@@ -355,9 +371,15 @@ Funding
 -------
 
 This project and its associated research was partially sponsored by grants from
-[Microsoft](http://www.microsoft.com/), [Intel](http://www.intel.com/), [Texas
-Instruments](http://www.ti.com/), and [AMD](http://www.amd.com/), as well as
-grants from the [National Science Foundation](http://www.nsf.gov/) (Awards
+[Microsoft](http://www.microsoft.com/),
+[Intel](http://www.intel.com/),
+[Texas Instruments](http://www.ti.com/),
+[AMD](http://www.amd.com/),
+[Oracle](http://www.oracle.com/),
+and
+[Huawei](http://www.huawei.com/),
+as well as grants from the
+[National Science Foundation](http://www.nsf.gov/) (Awards
 CCF-0917167, ACI-1148125/1340293, CCF-1320112, and ACI-1550493).
 
 _Any opinions, findings and conclusions or recommendations expressed in this
