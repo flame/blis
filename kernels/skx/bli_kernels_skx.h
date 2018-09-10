@@ -36,5 +36,6 @@ GEMM_UKR_PROT( float ,   s, gemm_skx_asm_32x12_l2 )
 GEMM_UKR_PROT( float ,   s, gemm_skx_asm_12x32_l2 )
 
 GEMM_UKR_PROT( double,   d, gemm_skx_asm_16x12_l2 )
+GEMM_UKR_PROT( double,   d, gemm_skx_asm_16x14 )
 
 
