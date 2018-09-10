@@ -1,4 +1,6 @@
-#if !defined(_POSIX_BARRIERS) || (_POSIX_BARRIERS < 0)
+//#ifdef __APPLE__
+//#if !defined(_POSIX_BARRIERS) || (_POSIX_BARRIERS < 0)
+#if !defined(_POSIX_BARRIERS) || (_POSIX_BARRIERS != 200809L)
 
 #ifndef PTHREAD_BARRIER_H_
 #define PTHREAD_BARRIER_H_

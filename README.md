@@ -36,6 +36,9 @@ Multiplication"](http://www.cs.utexas.edu/users/flame/pubs/blis3_ipdps14.pdf)
 systematically explores the opportunities for parallelism within the five loops
 that BLIS exposes in its matrix multiplication algorithm.
 
+For other papers related to BLIS, please see the
+[Citations section](#citations) below.
+
 It is our belief that BLIS offers substantial benefits in productivity when
 compared to conventional approaches to developing BLAS libraries, as well as a
 much-needed refinement of the BLAS interface, and thus constitutes a major
@@ -69,7 +72,7 @@ different storage formats can be used within the same operation invocation. By
 contrast, BLAS requires column-major storage. And while the CBLAS interface
 supports row-major storage, it does not allow mixing storage formats. 
 
- * **Full support for the complex domain.** BLIS operations are developed and
+ * **Rich support for the complex domain.** BLIS operations are developed and
 expressed in their most general form, which is typically in the complex domain.
 These formulations then simplify elegantly down to the real domain, with
 conjugations becoming no-ops. Unlike the BLAS, all input operands in BLIS that
@@ -77,7 +80,12 @@ allow transposition and conjugate-transposition also support conjugation
 (without transposition), which obviates the need for thread-unsafe workarounds.
 Also, where applicable, both complex symmetric and complex Hermitian forms are
 supported. (BLAS omits some complex symmetric operations, such as `symv`,
-`syr`, and `syr2`.) 
+`syr`, and `syr2`.) Another great example of BLIS serving as a portability
+lever is its implementation of the 1m method for complex matrix multiplication,
+a novel mechanism of providing high-performance complex level-3 operations using
+only real domain microkernels. This new innovation guarantees automatic level-3
+support in the complex domain even when the kernel developers entirely forgo
+writing complex kernels.
 
  * **Advanced multithreading support.** BLIS allows multiple levels of
 symmetric multithreading for nearly all level-3 operations. (Currently, users
@@ -142,7 +150,7 @@ to be a complete framework for implementing basic linear algebra operations,
 but supporting this vast amount of functionality in a manageable way required a
 holistic design that employed careful abstractions, layering, and recycling of
 generic (highly parameterized) codes, subject to the constraint that high
-performance remain attainable. 
+performance remain attainable.
 
  * **A foundation for mixed domain and/or mixed precision operations.** BLIS
 was designed with the hope of one day allowing computation on real and complex
@@ -370,7 +378,7 @@ article and derives a [superior induced method](http://www.cs.utexas.edu/users/f
 Funding
 -------
 
-This project and its associated research was partially sponsored by grants from
+This project and its associated research were partially sponsored by grants from
 [Microsoft](http://www.microsoft.com/),
 [Intel](http://www.intel.com/),
 [Texas Instruments](http://www.ti.com/),

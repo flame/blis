@@ -1227,7 +1227,7 @@ void bli_thread_set_env( const char* env, dim_t value )
 	// Set the environment variable using the string we just wrote to via
 	// sprintf(). (The 'TRUE' argument means we want to overwrite the current
 	// value if the environment variable already exists.)
-	r_val = setenv( env, value_str, TRUE );
+	r_val = bli_setenv( env, value_str, TRUE );
 
 	// Check the return value in case something went horribly wrong.
 	if ( r_val == -1 )
