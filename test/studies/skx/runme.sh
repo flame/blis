@@ -4,12 +4,16 @@
 exec_root="test"
 out_root="output"
 
+out_rootdir=$(date +%Y%m%d)
+mkdir -p $out_rootdir
+
 #sys="blis"
 #sys="stampede"
-sys="stampede2"
+#sys="stampede2"
 #sys="lonestar"
 #sys="wahlberg"
 #sys="arm-softiron"
+sys="skx"
 
 # Bind threads to processors.
 #export OMP_PROC_BIND=true
@@ -20,7 +24,7 @@ sys="stampede2"
 #export GOMP_CPU_AFFINITY="0 4 1 5 2 6 3 7"
 #export GOMP_CPU_AFFINITY="0 1 4 5 8 9 12 13 16 17 20 21 24 25 28 29 32 33 36 37 40 41 44 45"
 #export GOMP_CPU_AFFINITY="0 2 4 6 8 10 12 14 16 18 20 22 1 3 5 7 9 11 13 15 17 19 21 23"
-export GOMP_CPU_AFFINITY="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23"
+export GOMP_CPU_AFFINITY="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39"
 
 # Modify LD_LIBRARY_PATH.
 if [ ${sys} = "blis" ]; then
@@ -90,22 +94,37 @@ elif [ ${sys} = "arm-softiron" ]; then
 
 elif [ ${sys} = "stampede2" ]; then
 
-	#jc_nt=1 # 5th loop
-	#ic_nt=2 # 3rd loop
-	#jr_nt=2 # 2nd loop
-	#ir_nt=1 # 1st loop
-	nt=4
+	jc_nt=2 # 5th loop
+	ic_nt=1 # 3rd loop
+	jr_nt=10 # 2nd loop
+	ir_nt=1 # 1st loop
+	nt=20
+
+elif [ ${sys} = "skx" ]; then
+
+        jc_1_nt=1 # 5th loop
+        ic_1_nt=20 # 3rd loop
+        jr_1_nt=1 # 2nd loop
+        ir_1_nt=1 # 1st loop
+        nt_1=20
+        jc_2_nt=2 # 5th loop
+        ic_2_nt=20 # 3rd loop
+        jr_2_nt=1 # 2nd loop
+        ir_2_nt=1 # 1st loop
+        nt_2=40
 
 fi
 
 # Threadedness to test.
 #threads="mt"
 #threads_r="mt"
-threads="st"
-threads_r="st"
+threads="st mt"
+threads_r="st mt"
 
 # Datatypes to test.
 dts="c z "
+#dts="c z"
+#dts_r="s d"
 dts_r="s d"
 
 # Operations to test.
@@ -145,16 +164,21 @@ elif [ ${sys} = "wahlberg" ]; then
 
 elif [ ${sys} = "arm-softiron" ]; then
 
-	#test_impls="1m_blis mkl"
+	test_impls="openblas 1m_blis mkl"
+
+elif [ ${sys} = "skx" ]; then
+
 	test_impls="openblas 1m_blis mkl"
 fi
 
 # Real domain implementations to test.
 test_impls_r="openblas mkl asm_blis"
-#test_impls_r="asm_blis"
+
+cores_r="20 40"
+cores="20 40"
 
 # First perform real test cases.
-for th in ${threads_r}; do
+for nc in ${cores_r}; do
 
 	for dt in ${dts_r}; do
 
@@ -162,35 +186,47 @@ for th in ${threads_r}; do
 
 			for op in ${test_ops_r}; do
 
-				# Set the number of threads according to th.
-				if [ ${th} = "mt" ]; then
+				if [ ${nc} -gt 1 ]; then
+                                        # Unset GOMP_CPU_AFFINITY for MKL when using mkl_intel_thread.
+                                        if [ ${im} = "openblas" ]; then
+                                                unset GOMP_CPU_AFFINITY
+                                        else
+                                                export GOMP_CPU_AFFINITY="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39"
 
-					#export BLIS_JC_NT=${jc_nt}
-					#export BLIS_IC_NT=${ic_nt}
-					#export BLIS_JR_NT=${jr_nt}
-					#export BLIS_IR_NT=${ir_nt}
-					export BLIS_NUM_THREADS=${nt}
-					export OMP_NUM_THREADS=${nt}
+                                        fi
+                                        if [ ${nc} -eq 20 ]; then
 
-					# Unset GOMP_CPU_AFFINITY for MKL when using mkl_intel_thread.
-					#if [ ${im} = "mkl" ]; then
+                                                export BLIS_JC_NT=${jc_1_nt}
+                                                export BLIS_IC_NT=${ic_1_nt}
+                                                export BLIS_JR_NT=${jr_1_nt}
+                                                export BLIS_IR_NT=${ir_1_nt}
+                                                export OMP_NUM_THREADS=${nt_1}
+                                                out_dir="${out_rootdir}/1socket"
+                                                mkdir -p $out_rootdir/1socket
+                                        elif [ ${nc} -eq 40 ]; then
+                                                export BLIS_JC_NT=${jc_2_nt}
+                                                export BLIS_IC_NT=${ic_2_nt}
+                                                export BLIS_JR_NT=${jr_2_nt}
+                                                export BLIS_IR_NT=${ir_2_nt}
+                                                export OMP_NUM_THREADS=${nt_2}
+                                                out_dir="${out_rootdir}/2sockets"
+                                                mkdir -p $out_rootdir/2sockets
+                                        fi
+                                        th="mt"
+                                else
 
-					#	export GOMP_CPU_AFFINITY=""
-					#	export MKL_NUM_THREADS=${nt}
-					#else
-					#	export GOMP_CPU_AFFINITY="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23"
-					#fi
-				else
-
-					export BLIS_NUM_THREADS=1
-					export OMP_NUM_THREADS=1
-				fi
+                                        export BLIS_NUM_THREADS=1
+                                        export OMP_NUM_THREADS=1
+                                        out_dir="${out_rootdir}/st"
+                                        mkdir -p $out_rootdir/st
+                                        th="st"
+                                fi
 
 				# Construct the name of the test executable.
 				exec_name="${exec_root}_${dt}${op}_${im}_${th}.x"
 
 				# Construct the name of the output file.
-				out_file="${out_root}_${th}_${dt}${op}_${im}.m"
+				out_file="${out_dir}/${out_root}_${th}_${dt}${op}_${im}.m"
 
 				echo "Running (nt = ${OMP_NUM_THREADS}) ./${exec_name} > ${out_file}"
 
@@ -212,37 +248,45 @@ for th in ${threads}; do
 		for im in ${test_impls}; do
 
 			for op in ${test_ops}; do
+				
+				if [ ${nc} -gt 1 ]; then
+                                        # Unset GOMP_CPU_AFFINITY for MKL when using mkl_intel_thread.
+                                        if [ ${im} = "openblas" ]; then
+                                                unset GOMP_CPU_AFFINITY
+                                        else
+                                                export GOMP_CPU_AFFINITY="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39"
 
-				# Set the number of threads according to th.
-				if [ ${th} = "mt" ]; then
+                                        fi
+                                        if [ ${nc} -eq 28 ]; then
 
-					#export BLIS_JC_NT=${jc_nt}
-					#export BLIS_IC_NT=${ic_nt}
-					#export BLIS_JR_NT=${jr_nt}
-					#export BLIS_IR_NT=${ir_nt}
-					export BLIS_NUM_THREADS=${nt}
-					export OMP_NUM_THREADS=${nt}
-					export OPENBLAS_NUM_THREADS=${nt}
+                                                export BLIS_JC_NT=${jc_1_nt}
+                                                export BLIS_IC_NT=${ic_1_nt}
+                                                export BLIS_JR_NT=${jr_1_nt}
+                                                export BLIS_IR_NT=${ir_1_nt}
+                                                export OMP_NUM_THREADS=${nt_1}
+                                                out_dir="${out_rootdir}/1socket"
+                                        elif [ ${nc} -eq 56 ]; then
+                                                export BLIS_JC_NT=${jc_2_nt}
+                                                export BLIS_IC_NT=${ic_2_nt}
+                                                export BLIS_JR_NT=${jr_2_nt}
+                                                export BLIS_IR_NT=${ir_2_nt}
+                                                export OMP_NUM_THREADS=${nt_2}
+                                                out_dir="${out_rootdir}/2sockets"
+                                        fi
+                                        th="mt"
+                                else
 
-
-					# Unset GOMP_CPU_AFFINITY for MKL when using mkl_intel_thread.
-					#if [ ${im} = "mkl" ]; then
-
-					#	export GOMP_CPU_AFFINITY=""
-					#else
-					#	export GOMP_CPU_AFFINITY="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23"
-					#fi
-				else
-
-					export BLIS_NUM_THREADS=1
-					export OMP_NUM_THREADS=1
-				fi
+                                        export BLIS_NUM_THREADS=1
+                                        export OMP_NUM_THREADS=1
+                                        out_dir="${out_rootdir}/st"
+                                        th="st"
+                                fi
 
 				# Construct the name of the test executable.
 				exec_name="${exec_root}_${dt}${op}_${im}_${th}.x"
 
 				# Construct the name of the output file.
-				out_file="${out_root}_${th}_${dt}${op}_${im}.m"
+				out_file="${out_dir}/${out_root}_${th}_${dt}${op}_${im}.m"
 
 				echo "Running (nt = ${OMP_NUM_THREADS}) ./${exec_name} > ${out_file}"
 				# Run executable.
