@@ -241,7 +241,7 @@ for nc in ${cores_r}; do
 done
 
 # Now perform complex test cases.
-for th in ${threads}; do
+for nc in ${cores_r}; do
 
 	for dt in ${dts}; do
 
