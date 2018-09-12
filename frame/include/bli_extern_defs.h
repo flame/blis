@@ -38,11 +38,11 @@
 #if !defined(BLIS_ENABLE_SHARED) || !defined(_MSC_VER)
 #define BLIS_EXPORT
 #else
+// Windows builds require us to explicitly identify global variable symbols
+// to be imported from the .dll.
 #ifdef BLIS_IS_BUILDING_LIBRARY
 #define BLIS_EXPORT __declspec(dllexport)
 #else
-// Windows builds require us to explicitly identify global variable symbols
-// to be imported from the .dll.
 #define BLIS_EXPORT __declspec(dllimport)
 #endif
 #endif

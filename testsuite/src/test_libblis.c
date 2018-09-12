@@ -2233,7 +2233,7 @@ void libblis_test_sleep( void )
 	for ( i = SECONDS_TO_SLEEP; i > 0; --i )
 	{
 		libblis_test_printf_info( "%d ", i );
-		sleep(1);
+		bli_sleep(1);
 	}
 	libblis_test_printf_info( "\n" );
 }

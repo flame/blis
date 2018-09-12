@@ -47,14 +47,16 @@
 // For other string manipulation functions (e.g. isspace()).
 #include <ctype.h>
 
-// For sleep().
+// For POSIX stuff.
 #ifndef _MSC_VER
 #include <unistd.h>
 #endif
 
 // For pthreads API.
 #include <pthread.h>
-#if !defined(_POSIX_BARRIERS) || (_POSIX_BARRIERS < 0)
+//#ifdef __APPLE__
+//#if !defined(_POSIX_BARRIERS) || (_POSIX_BARRIERS < 0)
+#if !defined(_POSIX_BARRIERS) || (_POSIX_BARRIERS != 200809L)
 #include "pthread_barrier.h"
 #endif
 

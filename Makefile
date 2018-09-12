@@ -116,18 +116,16 @@ BASE_OBJ_SANDBOX_PATH  := $(BASE_OBJ_PATH)/$(SANDBOX_DIR)
 
 # --- Define install target names for static libraries ---
 
-LIBBLIS_A_VERS_CONF_INST  := $(INSTALL_LIBDIR)/$(LIBBLIS)-$(VERS_CONF).a
 LIBBLIS_A_INST            := $(INSTALL_LIBDIR)/$(LIBBLIS_A)
 
 # --- Define install target names for shared libraries ---
 
-LIBBLIS_SO_VERS_CONF_INST := $(INSTALL_LIBDIR)/$(LIBBLIS)-$(VERS_CONF).$(SHLIB_EXT)
 LIBBLIS_SO_INST           := $(INSTALL_LIBDIR)/$(LIBBLIS_SO)
 LIBBLIS_SO_MAJ_INST       := $(INSTALL_LIBDIR)/$(LIBBLIS_SONAME)
 
 ifeq ($(IS_WIN),yes)
-# The 'install' target does not create symlinks for Windows builds, so we don't bother
-# defining LIBBLIS_SO_MMB_INST.
+# The 'install' target does not create symlinks for Windows builds, so we don't
+# bother defining LIBBLIS_SO_MMB_INST.
 LIBBLIS_SO_MMB_INST       :=
 else
 LIBBLIS_SO_MMB_INST       := $(INSTALL_LIBDIR)/$(LIBBLIS).$(LIBBLIS_SO_MMB_EXT)
@@ -313,6 +311,9 @@ BLAT_CFLAGS            := -Wno-parentheses \
                           -I$(BLASTEST_F2C_SRC_PATH) \
                           -I. -DHAVE_BLIS_H
 
+# Suppress warnings about possibly uninitialized variables for the BLAS
+# test driver code (as output from f2c), which is riddled with such
+# variables, but only if the option to do so is supported.
 ifeq ($(CC_VENDOR),gcc)
 BLAT_CFLAGS            += -Wno-maybe-uninitialized
 endif
@@ -894,7 +895,7 @@ else
 	@$(INSTALL) -m 0644 $< $@
 endif
 
-else
+else # ifeq ($(IS_WIN),yes)
 
 # Windows library (.dll and .lib) installation rules.
 $(INSTALL_LIBDIR)/%.$(SHLIB_EXT): $(BASE_LIB_PATH)/%.$(SHLIB_EXT)
@@ -937,31 +938,8 @@ else
 	@$(MV) $(@F) $(INSTALL_LIBDIR)/
 endif
 
-
 # Install shared library symlink containing only .so major version.
 $(INSTALL_LIBDIR)/%.$(LIBBLIS_SO_MAJ_EXT): $(INSTALL_LIBDIR)/%.$(LIBBLIS_SO_MMB_EXT)
-ifeq ($(ENABLE_VERBOSE),yes)
-	$(SYMLINK) $(<F) $(@F)
-	$(MV) $(@F) $(INSTALL_LIBDIR)/
-else
-	@echo "Installing symlink $(@F) into $(INSTALL_LIBDIR)/"
-	@$(SYMLINK) $(<F) $(@F)
-	@$(MV) $(@F) $(INSTALL_LIBDIR)/
-endif
-
-# Install static library symlink containing version and config family.
-$(INSTALL_LIBDIR)/%-$(VERS_CONF).a: $(INSTALL_LIBDIR)/%.a
-ifeq ($(ENABLE_VERBOSE),yes)
-	$(SYMLINK) $(<F) $(@F)
-	$(MV) $(@F) $(INSTALL_LIBDIR)/
-else
-	@echo "Installing symlink $(@F) into $(INSTALL_LIBDIR)/"
-	@$(SYMLINK) $(<F) $(@F)
-	@$(MV) $(@F) $(INSTALL_LIBDIR)/
-endif
-
-# Install shared library symlink containing version and config family.
-$(INSTALL_LIBDIR)/%-$(VERS_CONF).$(SHLIB_EXT): $(INSTALL_LIBDIR)/%.$(SHLIB_EXT)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(SYMLINK) $(<F) $(@F)
 	$(MV) $(@F) $(INSTALL_LIBDIR)/

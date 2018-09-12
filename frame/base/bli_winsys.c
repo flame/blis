@@ -32,12 +32,40 @@
 
 */
 
-#ifdef _MSC_VER
-int bli_setenv(const char *name, const char *value, int overwrite) {
-    _putenv_s(name, value);
-}
+#include "blis.h"
 
-void bli_sleep(int x) {
-    Sleep(x*1000);
+#ifdef _MSC_VER
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
+
+#if 0
+// NOTE: This function is no longer needed by BLIS since BLIS no longer
+// makes any attempt to change environment variables; rather, it only
+// reads them. We can keep it here for some time before removing it,
+// though.
+
+int bli_setenv( const char *name, const char *value, int overwrite )
+{
+#ifdef _MSC_VER
+	// Windows.
+	_putenv_s( name, value );
+#else
+	// Everything else: Linux, OS X, etc.
+	setenv( name, value, overwrite );
+#endif
 }
 #endif
+
+void bli_sleep( unsigned int secs )
+{
+#ifdef _MSC_VER
+	// Windows.
+	Sleep( secs * 1000 );
+#else
+	// Everything else: Linux, OS X, etc.
+	sleep( secs );
+#endif
+}
+

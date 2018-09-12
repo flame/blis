@@ -408,9 +408,12 @@ else
 LIBBLIS_SO_MAJ_EXT := $(SHLIB_EXT).$(SO_MAJOR)
 LIBBLIS_SO_MMB_EXT := $(SHLIB_EXT).$(SO_MMB)
 endif
-LIBBLIS_SONAME := $(LIBBLIS).$(LIBBLIS_SO_MAJ_EXT)
-LIBBLIS_SO_MAJ_PATH := $(BASE_LIB_PATH)/$(LIBBLIS_SONAME)
+LIBBLIS_SONAME         := $(LIBBLIS).$(LIBBLIS_SO_MAJ_EXT)
+LIBBLIS_SO_MAJ_PATH    := $(BASE_LIB_PATH)/$(LIBBLIS_SONAME)
 
+# Construct the output path when building a shared library.
+# NOTE: This code and the code immediately above is a little curious and
+# perhaps could be refactored (carefully).
 ifeq ($(IS_WIN),yes)
 LIBBLIS_SO_OUTPUT_NAME := $(LIBBLIS_SO_MAJ_PATH)
 else
@@ -486,17 +489,20 @@ endif
 # Specify the shared library's 'soname' field.
 # NOTE: The flag for creating shared objects is different for Linux and OS X.
 ifeq ($(OS_NAME),Darwin)
+# OS X shared library link flags.
 SOFLAGS    := -dynamiclib
 SOFLAGS    += -Wl,-install_name,$(LIBBLIS_SONAME)
 else
 SOFLAGS    := -shared
 ifeq ($(IS_WIN),yes)
+# Windows shared library link flags.
 ifeq ($(CC_VENDOR),clang)
 SOFLAGS    += -Wl,-def:windows/build/libblis-symbols.def -Wl,-implib:$(BASE_LIB_PATH)/$(LIBBLIS).lib
 else
 SOFLAGS    += windows/build/libblis-symbols.def -Wl,--out-implib,$(LIBBLIS).dll.a
 endif
 else
+# Linux shared library link flags.
 SOFLAGS    += -Wl,-soname,$(LIBBLIS_SONAME)
 endif
 endif
@@ -511,6 +517,7 @@ ifeq ($(MK_ENABLE_STATIC),no)
 LIBBLIS_L      := $(LIBBLIS_SO)
 LIBBLIS_LINK   := $(LIBBLIS_SO_PATH)
 ifeq ($(IS_WIN),no)
+# For Linux and OS X: set rpath property of shared object.
 LDFLAGS        += -Wl,-rpath,$(BASE_LIB_PATH)
 endif
 endif
@@ -596,7 +603,8 @@ $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CWARNFLAGS,$(c))))
 
 # Emit position-independent code for dynamic linking.
 ifeq ($(IS_WIN),yes)
-# Note: Don't use any fPIC flags for Windows builds as all code is position independent
+# Note: Don't use any fPIC flags for Windows builds since all code is position-
+# independent.
 CPICFLAGS :=
 else
 CPICFLAGS := -fPIC
