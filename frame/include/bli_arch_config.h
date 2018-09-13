@@ -92,6 +92,9 @@ CNTX_INIT_PROTS( cortexa15 )
 #ifdef BLIS_CONFIG_CORTEXA9
 CNTX_INIT_PROTS( cortexa9 )
 #endif
+#ifdef BLIS_CONFIG_ARMV6VFP
+CNTX_INIT_PROTS( armv6vfp )
+#endif
 
 // -- IBM BG/Q --
 
@@ -177,6 +180,9 @@ CNTX_INIT_PROTS( generic )
 #ifdef BLIS_FAMILY_CORTEXA9
 #include "bli_family_cortexa9.h"
 #endif
+#ifdef BLIS_FAMILY_ARMV6VFP
+#include "bli_family_armv6vfp.h"
+#endif
 
 // -- IBM BG/Q --
 
@@ -243,6 +249,9 @@ CNTX_INIT_PROTS( generic )
 #endif
 #ifdef BLIS_KERNELS_ARMV7A
 #include "bli_kernels_armv7a.h"
+#endif
+#ifdef BLIS_KERNELS_ARM32VFP
+#include "bli_kernels_arm32vfp.h"
 #endif
 
 // -- IBM BG/Q --

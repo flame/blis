@@ -132,6 +132,9 @@ void bli_arch_set_id( void )
 #ifdef BLIS_FAMILY_CORTEXA9
 	id = BLIS_ARCH_CORTEXA9;
 #endif
+#ifdef BLIS_FAMILY_ARMV6VFP
+	id = BLIS_ARCH_ARMV6VFP;
+#endif
 
 	// IBM microarchitectures.
 #ifdef BLIS_FAMILY_POWER7
@@ -175,6 +178,7 @@ static char* config_name[ BLIS_NUM_ARCHS ] =
     "cortexa53",
     "cortexa15",
     "cortexa9",
+    "armv6vfp",
 
     "power7",
     "bgq",
