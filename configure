@@ -2457,6 +2457,13 @@ main()
 	cflags_preset_esc=$(echo "${cflags_preset}" | sed 's/\//\\\//g')
 	ldflags_preset_esc=$(echo "${ldflags_preset}" | sed 's/\//\\\//g')
 
+	# Typically, there are no slashes in the version variable. However,
+	# downstream maintainers (such as those for Debian) may create custom
+	# tags in their local clones such as "upstream/0.4.1", which obviously
+	# contain slashes. This line, and subsequent use of the escaped variable
+	# for the version string, accommodates those use cases.
+	version_esc=$(echo "${version}" | sed 's/\//\\\//g')
+
 	# Create a #define for the configuration family (config_name).
 	uconf=$(echo ${config_name} | tr '[:lower:]' '[:upper:]')
 	config_name_define="#define BLIS_FAMILY_${uconf}\n"
@@ -2518,7 +2525,7 @@ main()
 	# to config_mk_out.
 	echo "${script_name}: creating ${config_mk_out_path} from ${config_mk_in_path}"
 	cat "${config_mk_in_path}" \
-		| sed -e "s/@version@/${version}/g" \
+		| sed -e "s/@version@/${version_esc}/g" \
 		| sed -e "s/@so_version_major@/${so_version_major}/g" \
 		| sed -e "s/@so_version_minorbuild@/${so_version_minorbuild}/g" \
 		| sed -e "s/@config_name@/${config_name}/g" \
